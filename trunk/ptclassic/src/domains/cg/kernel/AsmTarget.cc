@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J.Pino
 
  Basic assembly language code Target for a single processor.
  Either an SDFScheduler or a LoopScheduler object can be used as
@@ -36,6 +36,7 @@ int AsmTarget::decideBufSize(Galaxy& g) {
 	if (!mem->performAllocation()) return FALSE;
 	return TRUE;
 }
+	
 
 int AsmTarget :: codeGenInit(Galaxy& g) {
 
@@ -50,6 +51,7 @@ int AsmTarget :: codeGenInit(Galaxy& g) {
 		}
 		doInitialization(*s);
 	}
+	if (interruptFlag) enableInterrupts();
 	return TRUE;
 }
 
@@ -134,3 +136,18 @@ int AsmTarget :: genFile (StringList& stuff, char* base, const char* suffix) {
 	return status;
 }
 
+void AsmTarget::disableInterrupts() {
+	outputComment("Disable Interrupts");
+}
+
+void AsmTarget::enableInterrupts() {
+	outputComment("Enable Interrupts");
+}
+
+void AsmTarget::saveProgramCounter() {
+	outputComment("Save program counter");
+}
+
+void AsmTarget::restoreProgramCounter() {
+	outputComment("Restore program counter");
+}

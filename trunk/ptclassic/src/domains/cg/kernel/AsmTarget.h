@@ -7,7 +7,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J.Pino
 
  Basic assembly language code Target for a single processor.
  Either an SDFScheduler or a LoopScheduler object can be used as
@@ -73,6 +73,26 @@ public:
 	void outputLineOrientedComment(const char* prefix,
 				       const char* msg,
 				       int lineLen);
+
+	//Disable interrupts
+	virtual void disableInterrupts();
+
+	//Enable interrupts
+	virtual void enableInterrupts();
+
+	//Flag that is set to true when the target has generated interrupts
+	int	interruptFlag = FALSE;
+
+	//Save program counter
+	virtual void saveProgramCounter();
+
+	//restore program counter
+	virtual void restoreProgramCounter();
+
+	//Derived AsmTargets should call this headercode at the 
+	//beginning to insure that interrupts are turned off
+	//prior to all the header code and init code
+	void headerCode() {disableInterrupts();}
 };
 
 #endif
