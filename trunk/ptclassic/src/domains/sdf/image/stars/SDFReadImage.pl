@@ -10,7 +10,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
-	location	{ SDF image library }
+	location { SDF image library }
 	desc {
 Read a sequence of PGM-format images from different files and
 send them out in Envelopes (containing data of type GrayImage).
@@ -18,7 +18,7 @@ send them out in Envelopes (containing data of type GrayImage).
 If present, the character '#' in the 'fileName' state is replaced with
 the frame number to be read next. For example, if the 'frameId' state is
 set to 2 and if the 'fileName' state is 'dir.#/pic#' then the files that
-are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
+are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
 	explanation {
 .Ir "PGM image format"
@@ -34,7 +34,7 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 	defstate {
 		name	{ fileName }
 		type	{ string }
-		default { "~ptolemy/src/domains/sdf/demo/ptimage" }
+		default { "$PTOLEMY/src/domains/sdf/demo/ptimage" }
 		desc	{ Name of file containing PGM-format image. }
 	}
 	defstate {
