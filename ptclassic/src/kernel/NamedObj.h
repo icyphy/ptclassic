@@ -71,13 +71,6 @@ public:
 	virtual ~NamedObj();
 };
 
-// A macro for generating isA functions in derived classes
-// requires ANSI C preprocessor
-
-#define ISA_FUNC(me,parent)\
-int me :: isA (const char* cname) const {\
-	if (strcmp(cname,#me) == 0) return 1;\
-	else return parent::isA(cname);\
-}
+#include "isa.h"
 
 #endif
