@@ -43,10 +43,10 @@ static const char file_id[] = "MatlabTcl.cc";
 
 #include <string.h>
 #include "tcl.h"
-#include "Error.h"
-#include "MatlabIfc.h"
-#include "MatlabIfcFuns.h"
 #include "StringList.h"
+#include "Error.h"
+#include "MatlabIfcFuns.h"
+#include "MatlabIfc.h"
 #include "MatlabTcl.h"
 
 #define MATLABTCL_CHECK_MATLAB() \
@@ -190,6 +190,7 @@ int MatlabTcl::eval(int argc, char** argv) {
 int MatlabTcl::get(int argc, char** argv) {
     if (argc != 3) return usage("matlab get <matrix_name>");
     MATLABTCL_CHECK_MATLAB();
+
     int numrows = 0, numcols = 0;
     char **realStrings = 0;
     char **imagStrings = 0;
@@ -206,13 +207,15 @@ int MatlabTcl::get(int argc, char** argv) {
         char* realList = Tcl_Merge(numelements, realStrings);
 	Tcl_AppendElement(tclinterp, realList);
 	free(realList);
+	matlabInterface->FreeStringArray(realStrings, numelements);
+	delete [] realStrings;
 	if ( imagStrings ) {
 	    char* imagList = Tcl_Merge(numelements, imagStrings);
 	    Tcl_AppendElement(tclinterp, imagList);
 	    free(imagList);
+	    matlabInterface->FreeStringArray(imagStrings, numelements);
+	    delete [] imagStrings;
 	}
-	matlabInterface->FreeStringArray(realStrings, numelements);
-	matlabInterface->FreeStringArray(imagStrings, numelements);
 	return TCL_OK;
     }
     return TCL_ERROR;
