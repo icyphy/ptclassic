@@ -42,7 +42,7 @@ SRCS=$(LIBSRCS) interpmain.cc
 HDRS=Block.h Command.h Connect.h DataStruct.h FloatState.h Fraction.h \
  Galaxy.h Help.h IntState.h InterpGalaxy.h Interpreter.h KnownBlock.h \
  KnownState.h NamedObj.h Output.h Particle.h Scheduler.h SpaceWalk.h Star.h \
- State.h StringList.h StringState.h Tokenizer.h Topology.h pigiIfc.h \
+ State.h StringList.h StringState.h Tokenizer.h Topology.h \
  type.h SDFConnect.h SDFScheduler.h SDFStar.h SDFUniverse.h
 
 # Library objects
@@ -74,7 +74,7 @@ $(HELPDIR)/interpreter.help:	interpreter.help
 
 # "make clean" removes .o files and other cruft
 clean:
-		rm -f *.o core
+		rm -f *.o core *~ *.bak *#
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(SRCS) $(HDRS) make.template
@@ -85,7 +85,7 @@ depend:
 makefile:	make.template
 		rm -f makefile
 		cp make.template makefile
-		make -f make.template depend # use new SRCS list
+		make -f make.template sources depend # use new SRCS list
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
