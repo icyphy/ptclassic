@@ -330,7 +330,7 @@ static const State* findState(const Block* b, const char* nm) {
 	CBlockStateIter next(*b);
 	const State* s;
 	while ((s = next++)) {
-		if (strcmp(nm,s->name()) == 0) return s;
+		if (strcmp(nm, s->name()) == 0) return s;
 	}
 	return 0;
 }
@@ -1011,11 +1011,10 @@ TclActionListIter :: TclActionListIter(TclActionList& sl) : ListIter (sl) {}
 // Return a pointer to the TclAction with the given name, if it exists.
 // Otherwise, return 0.
 TclAction* TclActionList::objWithName(const char* name) {
-    TclAction *obj;
+    TclAction* obj;
     ListIter next(*this);
     while ((obj = (TclAction*)next++) != 0) {
-	if (strcmp(name,obj->name) == 0)
-	return obj;
+	if (strcmp(name, obj->name) == 0) return obj;
     }
     return 0;
 }
@@ -1038,8 +1037,8 @@ int PTcl::registerAction(int argc,char ** argv) {
 
     // if "pre" is TRUE, then it is a pre-action
     int pre = FALSE;
-    if (strcmp("pre",argv[1]) == 0) pre = TRUE;
-    else if (strcmp("post",argv[1]) == 0) pre = FALSE;
+    if (strcmp("pre", argv[1]) == 0) pre = TRUE;
+    else if (strcmp("post", argv[1]) == 0) pre = FALSE;
     else return usage("registerAction pre|post <command>");
 
     // Define a new Tcl action
@@ -1050,7 +1049,7 @@ int PTcl::registerAction(int argc,char ** argv) {
 
     // Create a unique name for the action
     char buf[32];
-    sprintf(buf,"an%u",(unsigned int)tclAction);
+    sprintf(buf, "an%u", (unsigned int)tclAction);
     tclAction->name = savestring(buf);
 
     // Register the action with the action list
