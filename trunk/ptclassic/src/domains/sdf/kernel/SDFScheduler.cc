@@ -75,12 +75,12 @@ int SDFScheduler :: run (Block& galaxy) {
 		Error::abortRun(galaxy, ": SDF schedule is invalid; can't run");
 		return FALSE;
 	}
-	if (haltRequestFlag) {
+	if (haltRequested()) {
 		Error::abortRun(galaxy,
 				": Can't continue after run-time error");
 		return FALSE;
 	}
-	while (numItersSoFar < numIters && !haltRequestFlag) {
+	while (numItersSoFar < numIters && !haltRequested()) {
 		runOnce();
 		currentTime += schedulePeriod;
 		numItersSoFar++;
@@ -103,7 +103,7 @@ void SDFScheduler :: runOnce () {
 	while ((star = nextStar++) != 0) {
 		// Fire the next star in the list
 		star->fire();
-		if (haltRequestFlag) { invalid = TRUE; return;}
+		if (haltRequested()) { invalid = TRUE; return;}
 	}
 }
 
@@ -118,7 +118,7 @@ int SDFScheduler :: setup (Block& block) {
 	Galaxy& galaxy = block.asGalaxy();
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
-	haltRequestFlag = FALSE;
+	clearHalt();
 	invalid = FALSE;
 
         checkConnectivity(galaxy);
@@ -131,7 +131,7 @@ int SDFScheduler :: setup (Block& block) {
 	if (st) schedulePeriod = float ((double) (*st));
 	currentTime = 0;
 
-	if (haltRequestFlag) {
+	if (haltRequested()) {
 		invalid = TRUE;
 		return FALSE;
 	}
