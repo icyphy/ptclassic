@@ -15,15 +15,15 @@ the font family, size, and style. The <CODE>Screen</CODE> family is a
 psuedo-family that maps to some common X fonts such as <CODE>8x13</CODE> and
  <CODE>9x15</CODE>.
 There is a display of text in the selected font, and, for the
-hackers, the name of the actual X font selected. When you make a
+hackers, the name of the actual font selected. When you make a
 change to the selected font, the displayed text changes to that font.
 
 
  <P>The font dialog (and the class that is doing the real work
 behind the scenes, the <A HREF="../internals/fontmanager.html">font
 manager</A>, hide the arcane font specification
-that is used by the X window system from the user. As part of this,
-the font manager will always choose a valid X font, regardless of the
+that is used by the window system from the user. As part of this,
+the font manager will always choose a valid font, regardless of the
 specification you give it. For example, if you try and select a
 <CODE>Screen</CODE> font in italics, the font manager will display a <CODE>Courier</CODE> font
 since there is no italic <CODE>Screen</CODE> font.
