@@ -40,6 +40,7 @@ Date of last revision:
 #include "SDFScheduler.h"
 #include "CGWormBase.h"
 #include "CGWormStar.h"
+#include <iostream.h>
 
 StringList UniProcessor :: display(int makespan)
 {
