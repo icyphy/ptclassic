@@ -79,6 +79,10 @@ const int MAX_NO_GRAPHS = 64;
 #include <stdlib.h>	// system()
 #include "compat.h"     // PT_FOPEN_WRITE_BINARY
 
+#ifdef PT_NT4VC
+#include <process.h>
+#endif
+
 // constructor initializes streams and filenames
 XGraph :: XGraph () : blockIamIn(0), ng(0), strm(0), tmpFileNames(0), count(0),
  dataToPlot(0)
@@ -243,7 +247,11 @@ void XGraph :: terminate () {
 		fclose(strm[i]);
 		strm[i] = 0;
 	}
+#ifdef PT_NT4VC
+        StringList cmd = "\"";
+#else
         StringList cmd = "( ";
+#endif        
         if (sf && *sf) {
             char* saveFileName = expandPathName(sf);
 
@@ -259,6 +267,7 @@ void XGraph :: terminate () {
 	    else {
                 // File is OK.  Close it, then write to it.
                 close(tempFileDesc);
+#ifndef PT_NT4VC
                 for (i = 0; i < ng; i++) {
                     cmd += "/bin/cat ";
                     cmd += tmpFileNames[i];
@@ -268,6 +277,7 @@ void XGraph :: terminate () {
                     cmd += saveFileName;
                     cmd += "; ";
                 }
+#endif
             }
 
 	    delete [] saveFileName;
@@ -283,12 +293,16 @@ void XGraph :: terminate () {
 
 	    // put title on command line
             if (ttl && *ttl) {
+#ifdef PT_NT4VC
+			cmd << "-t §" << ttl << "§ ";
+#else
 		if (strchr(ttl,'\'')) {
 			cmd << "-t \"" << ttl << "\" ";
 		}
 		else {
 			cmd << "-t '" << ttl << "' ";
 		}
+#endif
             }
 
 	    // put options on the command line
@@ -296,6 +310,10 @@ void XGraph :: terminate () {
             if (opt && *opt) {
                 cmd << opt << " ";
             }
+
+#ifdef PT_NT4VC
+		cmd << "\" \"";
+#endif
 
 	    // put filenames on the command line
             for (i = 0; i < ng; i++) {
@@ -305,6 +323,20 @@ void XGraph :: terminate () {
 	    cmd << "echo \"no data to plot\" ";
 	    Error::warn(*blockIamIn, "No data to plot");
 	}
+
+#ifdef PT_NT4VC
+	cmd += "\"";
+	_spawnlp(_P_NOWAIT, "ptspawn.exe", cmd, NULL);
+
+    for (i = 0; i < ng; i++) {
+		char* name = tmpFileNames[i];
+		// remove the filenames so we won't zap them later.
+		LOG_DEL; delete [] name;
+		tmpFileNames[i] = 0;
+    }
+		ng = 0;	
+
+#else
 
         // issue commands to remove temporary files
         for (i = 0; i < ng; i++) {
@@ -318,6 +350,7 @@ void XGraph :: terminate () {
         cmd += ")";
         cmd += "&";
         if (system(cmd)) {  
+#endif
             Error::abortRun("The pxgraph command:\n", cmd, 
                     "\nfailed.\n The window where you started up Ptolemy might have the error message."  );
         }
