@@ -41,9 +41,9 @@ LIB=libptolemy.a
 LIBCCSRCS=Architecture.cc AutoForkNode.cc \
  Block.cc Code.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  DataStruct.cc Display.cc Domain.cc Error.cc \
- Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc   \
- InterpGalaxy.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
- Packet.cc Particle.cc PriorityQueue.cc Star.cc StringList.cc \
+ Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc InterpGalaxy.cc \
+ InterpUniverse.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
+ Packet.cc Particle.cc PriorityQueue.cc Scheduler.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
  checkConnect.cc expandPath.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
