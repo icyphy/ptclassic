@@ -12,15 +12,27 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC target library }
-	htmldoc {
+    htmldoc {
     }
     output {
 	name {output}
 	type {anytype}
     }
-    setup {
-	output.setResolvedType(sdfPortType);
-	output.setSDFParams(numXfer,maxDelay);
+    method {
+	name { setSDFPortInfo }
+	type { "void" }
+	arglist { "(const char *name, DataType type, int nXfer, int mDelay)" }
+	access { public }
+	code {
+	  sdfPortName = name;
+	  sdfPortType = type ? type : ANYTYPE;
+	  numXfer = nXfer;
+	  maxDelay = mDelay;
+	  // note trickiness: do NOT change the name assigned to "output".
+	  // sdfPortName is the name to be used in the compiled star.
+	  output.setPort(output.name(), this, sdfPortType, numXfer);
+	  output.setSDFParams(numXfer,maxDelay);
+	}
     }
     codeblock(portInit,"") {
 	input {
