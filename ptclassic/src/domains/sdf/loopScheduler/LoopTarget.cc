@@ -32,6 +32,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
  This target runs simulations using Shuvra's loop scheduler.
 
 *******************************************************************/
+#ifdef __GNUG_
+#pragma implementation
+#endif
 
 #include "Target.h"
 #include "KnownTarget.h"
