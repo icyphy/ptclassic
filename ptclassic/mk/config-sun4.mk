@@ -137,12 +137,14 @@ SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 #
 # Directories to use
 #
-X11_INCSPEC =	-I/usr/X11/include
-X11_LIBSPEC =	-L/usr/X11/lib -lX11
+#X11_INCSPEC =	-I/usr/X11/include
+#X11_LIBSPEC =	-L/usr/X11/lib -lX11
+X11_INCSPEC =	-I/usr/openwin/include
+X11_LIBSPEC =	-L/usr/openwin/lib -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
-X11EXT_LIBSPEC=-lXext -lSM -lICE
-#X11EXT_LIBSPEC=-lXext
+#X11EXT_LIBSPEC=-lXext -lSM -lICE
+X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2.2/ld
