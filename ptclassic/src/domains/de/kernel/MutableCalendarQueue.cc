@@ -152,8 +152,6 @@ CqLevelLink* MutableCalendarQueue :: levelput(Pointer a, double v, double fv, St
 		    deStarDestination->addToPendingEventList(newLink);
         }
     }
-    /* FIXME
-    */
 
 
     return newLink;
@@ -317,12 +315,16 @@ CqLevelLink* MutableCalendarQueue :: NextEvent()
             // An event is expiring. Remove the corresponding
             // element within the PendingEventList if the 
 	    // destination star is mutable.
-            // ************************************************ //
+            // ************************************************ // 
 	    if( result->destinationRef != 0 ) {
                 starPendingEventRef = result->destinationRef; 
 		result->destinationRef = 0; 
 		starPtr = (DEStar *)result->dest; 
-		starPtr->removePendingEvent( starPendingEventRef );
+	        CqLevelLink *returnedLink =
+		        starPtr->removePendingEvent( starPendingEventRef );
+		// IMPORTANT!!
+		// Check that correct CqLevelLink/PendingEvent was removed.
+		assert( returnedLink == result );
 	    }
 
             // ************************************************ //
