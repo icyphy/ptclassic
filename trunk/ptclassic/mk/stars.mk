@@ -235,8 +235,8 @@ CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
 		$(CGCT)/main/CGCMacroStar.o $(CGCT)/main/CGCDDFCode.o \
 		$(CGCT)/main/CGCSDFSend.o $(CGCT)/main/CGCSDFReceive.o \
 		$(CGCT)/main/CGCSDFBase.o $(CGCT)/main/CGCTargetWH.o
-CGCTARGETS =
 CGCTARGETS_LIBS =
+CGCTARGETS_LIBSFILES =
 endif
 
 CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
