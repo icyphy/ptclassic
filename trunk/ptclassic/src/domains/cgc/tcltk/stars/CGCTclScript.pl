@@ -59,12 +59,21 @@ set up periodic calls to poll the inputs and set the outputs.
 .pp
 If the procedure "${uniqueSymbol}callTcl" is not defined in the given
 tcl_file, an error message results.
+.pp
+Finally, this star can be used as a based class for other Tcl/Tk CGC
+stars.  In this manner, you can also have tcl/tk code which uses custom
+states.  The states are stored in a array named ${uniqueSymbol}
+indexed by the state name.  For example the tcl command:
+.pp
+set foo [set ${uniqueSymbol}(foo)]
+.pp
+will set the variable "foo" to the value of the state named "foo".
 .EQ
 delim $$
 .EN
 	}
 	version { $Id$ }
-	author { E. A. Lee and D. Niehaus }
+	author { E. A. Lee, D. Niehaus and J. L. Pino }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -112,21 +121,37 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 	    addCode(setup1,"tkSetup");
-	    if(((const char*)tcl_file)[0] == '$') {
-	        addCode(sourceTclwEnv, "tkSetup");
-	    } else {
-	        addCode(sourceTclwoEnv, "tkSetup");
-	    }
+
+            // Export the environment variables
+            BlockStateIter nextState(*this);
+            State* state;
+            while ((state = nextState++) !=NULL ) {
+                char* expandedVal = expandPathName(state->currentValue());
+                addCode(exportState(state->name(),expandedVal),"tkSetup");
+                delete [] expandedVal;
+            }
+
+            // Create setOutputs tcl command
 	    numOutputs = output.numberPorts();
 	    if (numOutputs > 0) {
 		addCode(setup2,"tkSetup");
 		addCode(setOutputsDef, "procedure");
 	    }
+
+            // Create setInputs tcl command
 	    numInputs = input.numberPorts();
 	    if (numInputs > 0) {
 		addCode(setup3,"tkSetup");
 		addCode(grabInputsDef, "procedure");
 	    }
+
+            // Source the specified shell script
+	    if(((const char*)tcl_file)[0] == '$') {
+	        addCode(sourceTclwEnv, "tkSetup");
+	    } else {
+	        addCode(sourceTclwoEnv, "tkSetup");
+	    }
+
 	    StringList out;
 	    if (int(numOutputs) > 0)
 	        out << "\tfloat $starSymbol(outs)[" << int(numOutputs) << "];\n";
@@ -167,6 +192,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock (setup3) {
 	    Tcl_CreateCommand(interp, "$starSymbol(tkScript)grabInputs",
 		$starSymbol(grabInputs), (ClientData) 0, NULL);
+	}
+        codeblock (exportState,"const char* name, const char* value") {
+	    if(Tcl_Eval(interp, 
+                "set $starSymbol(tkScript)(@name) {@value}") != TCL_OK)
+		errorReport("Cannot initialize state @name");
 	}
 	codeblock (sourceTclwEnv) {
 	    if(Tcl_Eval(interp, "source [expandEnvVars \\$val(tcl_file)]")
