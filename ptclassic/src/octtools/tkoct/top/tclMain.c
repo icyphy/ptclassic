@@ -100,8 +100,8 @@ topTclGetAppLibDir( Tcl_Interp *ip, char *appname, char *defpath,
     char	*p, *dir;
 
     for ( i=0; appname[i] != '\0'; i++) {
-	appUpper[i] = TOP_ToUpper(appname[i]);
-	appLower[i] = TOP_ToLower(appname[i]);
+	appUpper[i] = TOP_ToUpper((int)appname[i]);
+	appLower[i] = TOP_ToLower((int)appname[i]);
     }
     appUpper[i] = appLower[i] = '\0';
 

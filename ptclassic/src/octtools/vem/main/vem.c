@@ -1016,12 +1016,12 @@ int inKey;			/* Input key             */
 	if (currentArg->length > 0) {
 	    /* Delete word - eliminate space, alphanum */
 	    while ((currentArg->length > 0) &&
-		   isspace(currentArg->argData.vemTextArg[currentArg->length-1]))
+		   isspace((int) (currentArg->argData.vemTextArg[currentArg->length-1])))
 	      (currentArg->length)--;
 	    if (currentArg->length > 0) (currentArg->length)--;
 	    while ((currentArg->length > 0) &&
 		   (currentArg->argData.vemTextArg[currentArg->length-1] != '/') &&
-		   isalnum(currentArg->argData.vemTextArg[currentArg->length-1]))
+		   isalnum((int) (currentArg->argData.vemTextArg[currentArg->length-1])))
 	      (currentArg->length)--;
 	    echoUpdate(cur_con.commandArgs);
 	} else {
@@ -1181,12 +1181,12 @@ char inKey;			/* Input key          */
 	if (cur_con.typeInLength > 0) {
 	    /* Delete word - eliminate space, alphanum, and more space */
 	    while ((cur_con.typeInLength > 0) &&
-		   isspace(cur_con.typeInCommand[cur_con.typeInLength-1]))
+		   isspace((int)cur_con.typeInCommand[cur_con.typeInLength-1]))
 	      cur_con.typeInLength--;
 	    if (cur_con.typeInLength > 0) cur_con.typeInLength--;
 	    while ((cur_con.typeInLength > 0) &&
 		   (cur_con.typeInCommand[cur_con.typeInLength-1] != '-') &&
-		   isalnum(cur_con.typeInCommand[cur_con.typeInLength-1]))
+		   isalnum((int)cur_con.typeInCommand[cur_con.typeInLength-1]))
 	      cur_con.typeInLength--;
 	    cur_con.typeInCommand[cur_con.typeInLength] = NULL_CHAR;
 	    echoUpdate(cur_con.commandArgs);

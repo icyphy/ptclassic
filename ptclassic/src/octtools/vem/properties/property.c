@@ -972,10 +972,10 @@ int32 **ary;			/* Integer array (returned) */
     loc = 0;
     while (data && *data) {
 	/* Eat space */
-	while (*data && isspace(*data)) data++;
+	while (*data && isspace((int)*data)) data++;
 	num = data;
 	/* Move forward to next space */
-	while (*data && !isspace(*data)) data++;
+	while (*data && !isspace((int)*data)) data++;
 	/* Prepare array */
 	if (loc >= size) {
 	    size *= 2;
@@ -1013,10 +1013,10 @@ double **ary;			/* Real array (returned)    */
     loc = 0;
     while (data && *data) {
 	/* Eat space */
-	while (*data && isspace(*data)) data++;
+	while (*data && isspace((int)*data)) data++;
 	num = data;
 	/* Move forward to next space */
-	while (*data && !isspace(*data)) data++;
+	while (*data && !isspace((int)*data)) data++;
 	/* Prepare array */
 	if (loc >= size) {
 	    size *= 2;

@@ -278,14 +278,14 @@ len_str *ostr;			/* Ouput string */
  * the result (-1 if there are no more words).
  */
 {
-    while ((istr->len > 0) && isspace(*(istr->str))) {
+    while ((istr->len > 0) && isspace((int)*(istr->str))) {
 	istr->str += 1;
 	istr->len -= 1;
     }
     if (istr->len > 0) {
 	ostr->len = 0;
 	ostr->str = istr->str;
-	while ((istr->len > 0) && !isspace(*(istr->str))) {
+	while ((istr->len > 0) && !isspace((int)*(istr->str))) {
 	    istr->str += 1;
 	    istr->len -= 1;
 	    ostr->len += 1;

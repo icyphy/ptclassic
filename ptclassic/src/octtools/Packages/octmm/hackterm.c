@@ -269,7 +269,7 @@ char *match;
     while (*match) {
 	if (*termName++ != *match++) return(OCTMM_TRUE);
     }
-    while (isdigit(*termName)) {
+    while (isdigit((int)*termName)) {
 	termName++;
     }
     match = SUFFIX_CLOSE;
