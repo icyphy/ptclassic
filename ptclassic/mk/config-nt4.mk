@@ -81,7 +81,7 @@ WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual
 # USE_SIGACTION: Used by src/octtools/Xpackages/iv/timer.c
 # HAS_TERMIOS: Used by src/octtools/Packages/iv/ivGetLine.c
 
-LOCALCCFLAGS =	-g -DPTNT -DUSE_DIRENT_H \
+LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER -DUSE_DIRENT_H \
 		-DNO_SYS_SIGLIST -DPT_ERRNO_IS_A_FUNCTION $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
