@@ -337,7 +337,6 @@ ifdef CG
 	endif
 	SDFLIB = 1
 	CGSTARS = $(LIBDIR)/cgstars.o
-	TARGETS += $(SDFT)/CompileTarget.o
 	LIBS += -lcgstars -lcg
 	LIBFILES += $(LIBDIR)/libcgstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcg.$(LIBSUFFIX)
@@ -395,6 +394,9 @@ ifdef SDF
 	endif
 	STARS += $(LIBDIR)/sdfstars.o 
 	TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o 
+	ifdef CG
+		TARGETS += $(SDFT)/CompileTarget.o
+	endif
 	LIBS += -lsdfstars
 	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX)	
 	SDFLIB = 1
