@@ -524,13 +524,76 @@ octObject *facetPtr;
 
 extern char* curDomainName();
 
+/* compile a galaxy instance in context.  If the instance is in a facet,
+   this works like CompileGalStandalone.  Used in Profile.
+ */
+boolean
+CompileGalInst(galInstPtr,parentFacetPtr)
+octObject *galInstPtr, *parentFacetPtr;
+{
+    char* galDomain, *oldDom;
+    octObject galFacet;
+
+    /* get the galaxy domain */
+    if (!GOCDomainProp(galInstPtr, &galDomain, curDomainName())) {
+        PrintErr(ErrGet());
+        return (FALSE);
+    }
+    /* set outer domain */
+    if (IsPalFacet(parentFacetPtr)) KcSetKBDomain(galDomain);
+    else setCurDomainF(parentFacetPtr);
+
+    /* now do the compile */
+    ERR_IF1(!UniqNameInit());
+    ERR_IF1(!MyOpenMaster(&galFacet, galInstPtr, "contents", "r"));
+    return CompileGal(&galFacet);
+}
+
+/* standalone compilation of a galaxy, for icon-making.
+   It makes the galaxy as a plain galaxy on its own domain's knownlist
+   (i.e. not as a wormhole).
+ */
+
+boolean
+CompileGalStandalone(galFacetPtr)
+octObject *galFacetPtr;
+{
+    char* galDomain;
+    /* get the galaxy domain */
+    if (!GOCDomainProp(galFacetPtr, &galDomain, curDomainName())) {
+        PrintErr(ErrGet());
+        return (FALSE);
+    }
+    /* Call Kernel function to set KnownBlock current domain */
+    if (! KcSetKBDomain(galDomain)) {
+        PrintErr("Domain error in galaxy or wormhole.");
+        return (FALSE);
+    }
+    ERR_IF1(!UniqNameInit());
+    return CompileGal(galFacetPtr);
+}
+
+/* compile a galaxy. */
+
 boolean
 CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
     char msg[1000], *name;
     boolean xferedBool;
-    char *oldDomain, *galDomain, *galTarget;
+    char *oldDomain, *galDomain, *galTarget, *desc;
+
+    name = BaseName(galFacetPtr->contents.facet.cell);
+
+    /* quit if the galaxy is on the outer domain's known list
+     * and it is not modified.  Note that we will compile it
+     * again even if it is unmodified if a different type of
+     * wormhole must be generated.
+     */
+
+    if (KcIsKnown(name) && DupSheetIsDup(&traverse, name)) {
+	return(TRUE);
+    }
 
     oldDomain = curDomainName();
 
@@ -552,11 +615,6 @@ octObject *galFacetPtr;
         return (FALSE);
     }
 
-    name = BaseName(galFacetPtr->contents.facet.cell);
-    if (DupSheetIsDup(&traverse, name)) {
-	KcSetKBDomain(oldDomain);
-	return(TRUE);
-    }
     ERR_IF2(!ProcessSubGals(galFacetPtr), msg);
     xferedBool = DupSheetIsDup(&xfered, name);
     if (xferedBool && !IsDirty(galFacetPtr)) {
@@ -576,6 +634,8 @@ octObject *galFacetPtr;
      * The following sets the new domain again.
      */
     ERR_IF1(!KcDefgalaxy(name,galDomain,galTarget));
+    ERR_IF1(!GetCommentProp(galFacetPtr,&desc));
+    KcSetDesc(desc);
     ERR_IF1(!ProcessTargetParams(galTarget,galFacetPtr));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
