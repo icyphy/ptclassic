@@ -54,8 +54,8 @@ extern void renewNumTokens(Block* b, int flag);
 	////////////////////////////
 
 void DDFScheduler :: setup () {
-	// if canDom is already set SDF, do SDFScheduling
-	if (canDom == SDF) {
+	// if candidateDomain is already set SDF, do SDFScheduling
+	if (candidateDomain == SDF) {
 		if (!galaxy()) {
 			Error::abortRun("DDFScheduler: no galaxy!");
 			return;
@@ -69,7 +69,7 @@ void DDFScheduler :: setup () {
 
 void DDFScheduler::initStructures() {
 
-	if (restructured == FALSE) {
+	if (restructure && restructured == FALSE) {
 		// fancy stuff...
 		// auto-creation of SDF wormholes, decide the most efficient
 		// scheduler (Case, For, DoWhile, Recur)
@@ -78,7 +78,7 @@ void DDFScheduler::initStructures() {
 		restructured = TRUE;
 	}
 
-	if (canDom == DDF)
+	if (candidateDomain == DDF)
 		DynDFScheduler::initStructures();
 	Block* gpar = galaxy()->parent();
 	if (gpar && gpar->isItWormhole()) 
@@ -98,7 +98,7 @@ void DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 	detectConstruct(galaxy);
 
 	// set up the right scheduler
-	switch(canDom) {
+	switch(candidateDomain) {
 		// special care for SDF domain.
 	case SDF :
 		LOG_NEW; realSched = new SDFScheduler;
@@ -110,10 +110,10 @@ void DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 	case Unknown :
 	case DDF : break;
 	default :
-		realSched = getScheduler(canDom);
+		realSched = getScheduler(candidateDomain);
 		if (!realSched) {
 			Error::abortRun("Undefined Scheduler for ",
-					nameType(canDom), " construct.");
+				nameType(candidateDomain), " construct.");
 			return;
 		}
 		realSched->setGalaxy(galaxy);
@@ -136,30 +136,32 @@ void DDFScheduler :: detectConstruct(Galaxy& gal) {
 	DFGalStarIter nextStar(gal);
 	DataFlowStar* s;
 
-	if ((canDom == DDF) || (canDom == SDF)) return;
+	if ((candidateDomain == DDF) || (candidateDomain == SDF)) return;
 
 	while ((s = nextStar++) != 0) {
 		if (s->isItWormhole()) {
 			const char* dom = s->scheduler()->domain();
 			if (strcmp(dom , "DF")) {
-				canDom = DDF;
+				candidateDomain = DDF;
 				return;
 			}
 		}
 		else if (!s->isA("DDFStar")) {
-			canDom = DDF;
+			candidateDomain = DDF;
 			return;
 		}
 	}
 
-	canDom = getType(gal);
+	candidateDomain = getType(gal);
 }
 
 // constructor: set default options
-
+// By default, no restructuring is done, and a DDF scheduler is always used.
+// To enable restrucuturing, you must call setParams.
+//
 DDFScheduler::DDFScheduler () {
-	canDom = Unknown;
-	restructured = FALSE;
+	candidateDomain = DDF;
+	restructure = FALSE;
 	realSched = 0;
 }
 
@@ -167,10 +169,7 @@ DDFScheduler::~DDFScheduler() { LOG_DEL; delete realSched; }
 
 int DDFScheduler::isSDFType() {
 	int flag = 1;
-	if (canDom == DDF) flag = 0;
-	else if (canDom == SDF) flag = 2;
+	if (candidateDomain == DDF) flag = 0;
+	else if (candidateDomain == SDF) flag = 2;
 	return flag;
 }
-
-
-
