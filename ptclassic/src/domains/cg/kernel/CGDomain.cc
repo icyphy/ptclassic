@@ -85,14 +85,18 @@ public:
 };
 
 // declare a prototype
+
 static CGDomain proto;
 
-// declare the default Target object
+// declare the default Target objects
+// Purify will complain that the dynamic memory allocated in the
+// constructor is not destroyed by the program, which is true
+// because the instances are static.  Memory is freed on program exit.
 
-static CGTarget defaultCGtarget("default-CG","CGStar","default CG target");
-static KnownTarget entryDefault(defaultCGtarget,"default-CG");
+static CGTarget defaultCGtarget("default-CG", "CGStar", "default CG target");
+static KnownTarget entryDefault(defaultCGtarget, "default-CG");
 
 static AsmTarget defaultAsmTarget("default-Asm", "default Asm target",
-"CGStar");
-static KnownTarget entryAsm(defaultAsmTarget,"default-Asm");
+				  "CGStar");
+static KnownTarget entryAsm(defaultAsmTarget, "default-Asm");
 
