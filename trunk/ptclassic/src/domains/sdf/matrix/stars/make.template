@@ -63,6 +63,7 @@ PL_SRCS= \
   SDFInverse_M.pl \
   SDFMatlab.pl \
   SDFMatlab_M.pl \
+  SDFMatlabCx_M.pl \
   SDFMatrix.pl \
   SDFMatrixCx.pl \
   SDFMatrixFix.pl \
