@@ -83,9 +83,8 @@ Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : gal(g),
 // "input" and "output" are so common
 
 const char* ghostName(const GenericPort& galp) {
-	char buf[80];
-	strcpy (buf, galp.name());
-	strcat (buf, "(ghost)");
+	StringList buf = galp.name();
+	buf << "(ghost)";
 	return hashstring(buf);
 }
 
