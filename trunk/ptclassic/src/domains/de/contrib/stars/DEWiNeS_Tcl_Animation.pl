@@ -63,7 +63,7 @@ defstar {
 	defstate {
             name { tcl_file }
             type { string }
-            default { "/users/voigtje/demo/stars/test.tcl" }
+            default { "$PTOLEMY/src/domains/de/contrib/stars/test.tcl" }
             desc { The file from which to read the Tcl script }
 	}
 	defstate {
