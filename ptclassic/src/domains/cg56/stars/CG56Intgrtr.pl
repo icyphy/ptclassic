@@ -74,13 +74,13 @@ reset.
 	add	y0,a
 	}
 	codeblock (leakageNotReset) {
-	mac	x0,y0,a
+	macr	x0,y0,a
 	}
 	codeblock (noLeakageWithReset) {
 	add	y0,a	#$val(initialValue),y0
 	}
 	codeblock (leakageWithReset) {
-	mac	x0,y0,a	#$val(initialValue),y0
+	macr	x0,y0,a	#$val(initialValue),y0
 	}
 	codeblock (resetWrapUp) {
 ; If the Extension bit is set, replace with initial value
@@ -122,8 +122,8 @@ reset.
 		}
 	}
 	execTime {
-			const char *p = onOverflow;
-			if (p[0]=='r') return 11;
-			else return 9;
+		const char *p = onOverflow;
+		if (p[0]=='r') return 11;
+		else return 9;
 	}
 }
