@@ -87,7 +87,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 	// Matlab interface includes
 	hinclude { "MatlabPtIfc.h", "MatlabIfcFuns.h" }
 
-	header { typedef Matrix* MatrixPtr; }
+	header { typedef mxArray* MatrixPtr; }
 
 	protected {
 		// Matlab (C) structures
@@ -269,7 +269,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 		  int errflag = FALSE;
 		  PortHole *iportp = nexti++;
 		  DataType portType = iportp->resolvedType();
-		  Matrix *matlabMatrix =
+		  mxArray *matlabMatrix =
 		  	matlabInterface->PtolemyToMatlab(
 				(*iportp)%0, portType, &errflag);
 
@@ -320,7 +320,7 @@ During the wrapup procedure, there is no data passing into or out of the star.
 
 		  // create a new Matlab matrix for deallocation and save ref.
 		  // FIXME: Memory leak
-		  Matrix *matlabMatrix =
+		  mxArray *matlabMatrix =
 		  matlabInterface->MatlabEngineGetMatrix(matlabOutputNames[j]);
 
 		  // save the pointer to the new Matlab matrix for deallocation
