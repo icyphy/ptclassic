@@ -179,12 +179,13 @@ int SynthTarget :: compileCode() {
 // Run the code.
 int SynthTarget :: runCode() {
   if (int(analyze)) {
-  // Startup Synopsys design_analyzer with the command script file here.
-  StringList daCommand = "";
-  daCommand << "cd " << (const char*) destDirectory << ";";
-  daCommand << "design_analyzer -f " << filePrefix << ".com" << " &";
-  system(daCommand);
-}  
+    // Startup Synopsys design_analyzer with the command script file here.
+    StringList daCommand = "";
+    daCommand << "design_analyzer -f " << filePrefix << ".com" << " &";
+    StringList error = "";
+    error << "Could not analyze " << filePrefix << ".vhdl";
+    return (systemCall(daCommand, error, targetHost) == 0);
+  }  
   // Return TRUE indicating success.
   return TRUE;
 }

@@ -93,6 +93,7 @@ private:
 //	CodeStream postSynch;
 	CodeStream cli_models;
 	CodeStream cli_comps;
+	CodeStream cli_configs;
 	CodeStream top_uses;
 	CodeStream top_entity;
 	CodeStream top_architecture;
@@ -130,10 +131,6 @@ private:
 	// Method called by V2C star to place important code into structure.
 	void registerV2C(int pairid, int numxfer, const char* dtype);
 
-	int needC2Vinteger;
-	int needV2Cinteger;
-	int needC2Vreal;
-	int needV2Creal;
 	int pairNumber;
 	int writeCom;
 	void configureCommPair(CommPair&);

@@ -109,6 +109,14 @@ component C2Vreal
 end component;
   }
 
+  codeblock (C2VintegerConfig) {
+for all:C2Vinteger use entity work.C2Vinteger(CLI); end for;
+  }
+  
+  codeblock (C2VrealConfig) {
+for all:C2Vreal use entity work.C2Vreal(CLI); end for;
+  }
+  
 // Called only once, after the scheduler is done
   begin {
 //    printf("VHDLCReceive.pl begin method called!!\n");
@@ -118,10 +126,12 @@ end component;
     if (strcmp(output.resolvedType(), "INT") == 0) {
       addCode(C2Vinteger, "cli_models", "c2vint");
       addCode(C2VintegerComp, "cli_comps", "c2vintcomp");
+      addCode(C2VintegerConfig, "cli_configs", "c2vintconfig");
     }
     else if (strcmp(output.resolvedType(), "FLOAT") == 0) {
       addCode(C2Vreal, "cli_models", "c2vreal");
       addCode(C2VrealComp, "cli_comps", "c2vrealcomp");
+      addCode(C2VrealConfig, "cli_configs", "c2vrealconfig");
     }
     else
       Error::abortRun(*this, output.resolvedType(), ": type not supported");
