@@ -67,6 +67,19 @@ $(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
 $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
+PTRIM_LIBFILES=\
+$(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
+$(LIBDIR)/libcgc.$(LIBSUFFIX) \
+$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX) \
+$(LIBDIR)/libddfstars.$(LIBSUFFIX) $(LIBDIR)/libddf.$(LIBSUFFIX) \
+$(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) $(LIBDIR)/libImage.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
+$(LIBDIR)/libbdfstars.$(LIBSUFFIX) $(LIBDIR)/libbdf.$(LIBSUFFIX) \
+$(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
+$(LIBDIR)/libsdf.$(LIBSUFFIX)
+
 STAR_LIBFILES=\
 $(ATM_LIBFILES) \
 $(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
@@ -104,6 +117,15 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 PTINY_STAR_LIBS=\
 -ldestars -lde \
 -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
+$(MATLABLIBDIR) $(MATLABEXT_LIB) \
+
+PTRIM_STAR_LIBS=\
+-lcgcstars -lcgc -lcgctcltk \
+-lcgstars -lcg \
+-lddfstars -lddf \
+-ldestars -lde \
+-lbdfstars -lbdf \
+-lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
 $(MATLABLIBDIR) $(MATLABEXT_LIB) \
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
