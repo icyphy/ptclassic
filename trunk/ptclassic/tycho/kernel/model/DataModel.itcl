@@ -1265,7 +1265,7 @@ body ::tycho::DataModel::_mkparseproc {type} {
             append proc {if { $contents != "" }}
             set t {
                 set saved $_context_
-                set _context_ [concat $_context_ $name]
+                set _context_ $name
             }
             append t "$safeinterp eval @scope $scope \$contents\n"
             append t {
