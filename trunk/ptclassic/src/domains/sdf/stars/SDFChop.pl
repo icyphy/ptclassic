@@ -143,11 +143,6 @@ used for zeros.
 				    "must be positive");
 		    return;
 		}
-		if (int(offset) < 0) {
-		    Error::abortRun(*this, "The sample offset ",
-				    "must be non-negative");
-		    return;
-		}
 
 		if (int(use_past_inputs))
 		    input.setSDFParams(int(nread),int(nread)+int(offset)-1);
@@ -159,15 +154,15 @@ used for zeros.
 		// Compute the range of output indexes that come from inputs
 		// This must be in the go() method to support ChopVarOffset
 		// because ChopVarOffset reset the offset parameter
-		int hiLim = int(nwrite)-int(offset)-1;
-		if (hiLim >= int(nwrite)) hiLim = int(nwrite)-1;
-		else if(int(use_past_inputs)) hiLim = int(nwrite)-1;
+		int hiLim = int(nwrite) - int(offset) - 1;
+		if (hiLim >= int(nwrite)) hiLim = int(nwrite) - 1;
+		else if (int(use_past_inputs)) hiLim = int(nwrite) - 1;
 
 		int loLim = int(nwrite) - int(nread) - int(offset);
-		if(loLim < 0) loLim = 0;
+		if (loLim < 0) loLim = 0;
 
 		int inidx = int(nread) - int(nwrite) + int(offset);
-		if(inidx < 0) inidx = 0;
+		if (inidx < 0) inidx = 0;
 
 		for (int i = 0; i < int(nwrite); i++) {
 		    if (i > hiLim || i < loLim) {
