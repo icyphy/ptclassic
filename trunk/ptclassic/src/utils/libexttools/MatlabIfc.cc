@@ -47,7 +47,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "InfString.h"
 #include "miscFuncs.h"
-#include "Error.h"
 #include "MatlabIfc.h"
 #include "MatlabIfcFuns.h"
 
@@ -60,18 +59,18 @@ static int matlabStarsCount = 0;
 static Engine* matlabEnginePtr = 0;
 
 // default buffer to store return strings from Matlab
-static char defaultMatlabBuffer[MATLAB_BUFFER_LEN];
+static char matlabDefaultBuffer[MATLAB_BUFFER_LEN];
 
 // constructor
 MatlabIfc :: MatlabIfc() {
     matlabStarsCount++;
     scriptDirectory = 0;
     deleteFigures = FALSE;
-    matlabFigureHandle = "PtolemyMatlabIfc";
-    matlabFigureHandle << matlabStarsCount;
-    matlabOutputBuffer = defaultMatlabBuffer;
-    matlabOutputBufferLen = MATLAB_BUFFER_LEN;
-    matlabOutputBuffer[0] = 0;
+    figureHandle = "PtolemyMatlabIfc";
+    figureHandle << matlabStarsCount;
+    outputBuffer = matlabDefaultBuffer;
+    outputBufferLen = MATLAB_BUFFER_LEN;
+    outputBuffer[0] = 0;
 }
 
 // destructor
@@ -102,8 +101,8 @@ const char* MatlabIfc :: SetScriptDirectory(const char* dir) {
 }
 
 const char* MatlabIfc :: SetFigureHandle(const char* handle) {
-    matlabFigureHandle = handle;
-    return matlabFigureHandle;
+    figureHandle = handle;
+    return figureHandle;
 }
 
 const char* MatlabIfc :: SetMatlabCommand(const char* command) {
@@ -112,9 +111,19 @@ const char* MatlabIfc :: SetMatlabCommand(const char* command) {
 }
 
 char* MatlabIfc :: SetOutputBuffer(char *buffer, int bufferlen) {
-    matlabOutputBuffer = buffer;
-    matlabOutputBufferLen = bufferlen;
-    return matlabOutputBuffer;
+    outputBuffer = buffer;
+    outputBufferLen = bufferlen;
+    return outputBuffer;
+}
+
+const char* MatlabIfc :: SetErrorString(const char* command) {
+    errorString = command;
+    return errorString;
+}
+
+const char* MatlabIfc :: SetWarningString(const char* command) {
+    warningString = command;
+    return warningString;
 }
 
 // get data members
@@ -127,7 +136,7 @@ const char* MatlabIfc :: GetScriptDirectory() {
 }
 
 const char* MatlabIfc :: GetFigureHandle() {
-    return (const char*) matlabFigureHandle;
+    return (const char*) figureHandle;
 }
 
 const char* MatlabIfc :: GetMatlabCommand() {
@@ -135,12 +144,22 @@ const char* MatlabIfc :: GetMatlabCommand() {
 }
 
 char* MatlabIfc :: GetOutputBuffer() {
-    return matlabOutputBuffer;
+    return outputBuffer;
 }
 
 int MatlabIfc :: GetOutputBufferLength() {
-    return matlabOutputBufferLen;
+    return outputBufferLen;
 }
+
+char* MatlabIfc :: GetErrorString() {
+    return errorString;
+}
+
+char* MatlabIfc :: GetWarningString() {
+    return warningString;
+}
+
+// get static data
 
 Engine* MatlabIfc :: GetCurrentEngine() {
     return matlabEnginePtr;
@@ -176,7 +195,7 @@ const char* MatlabIfc :: BuildMatlabCommand(
     char* matlabFragment = new char[length + 1];
     strcpy(matlabFragment, matlabFunction);
     for ( int i = 0; i < length; i++ ) {
-        if ( matlabFragment[i] == '#' ) {
+	if ( matlabFragment[i] == '#' ) {
 	    matlabFragment[i] = '_';
 	}
     }
@@ -207,7 +226,7 @@ const char* MatlabIfc :: BuildMatlabCommand(
 	if ( ( strchr(matlabFragment, '(') == 0 ) && ( numInputs > 0 ) ) {
 	    commandString << "(" << matlabInputNames[0];
 	    for ( int i = 1; i < numInputs; i++ ) {
-	      commandString << ", " << matlabInputNames[i];
+	    commandString << ", " << matlabInputNames[i];
 	    }
 	    commandString << ")";
 	}
@@ -257,28 +276,37 @@ int MatlabIfc :: MatlabEngineClose() {
 
 // higher-level interface to the Matlab process
 int MatlabIfc :: EvaluateOneCommand(char* command) {
+    int merror;
     if ( MatlabIsRunning() ) {
 	// assert location of buffer to hold output of Matlab commands
-	MatlabEngineOutputBuffer(matlabOutputBuffer, matlabOutputBufferLen - 1);
+	MatlabEngineOutputBuffer(outputBuffer, outputBufferLen - 1);
 
 	// MatlabEngineSend returns 0 on success and non-zero on failure
-	matlabOutputBuffer[0] = 0;
-	int merror = MatlabEngineSend(command);
-	matlabOutputBuffer[matlabOutputBufferLen - 1] = 0;
+	outputBuffer[0] = 0;
+	merror = MatlabEngineSend(command);
+	outputBuffer[outputBufferLen - 1] = 0;
 
 	// kludge: MatlabEngineSend always returns 0 (success) even if
 	// there is an error.  Therefore, we must determine if there
 	// is an error.  An error occurs if when the output of the
 	// Matlab command contains MATLAB_ERR_STR
 	if ( merror == 0 ) {
-	    merror = ( strstr(matlabOutputBuffer, MATLAB_ERR_STR) != 0 );
+	    merror = ( strstr(outputBuffer, MATLAB_ERR_STR) != 0 );
 	}
-	return merror;
     }
     else {
-	strcpy(matlabOutputBuffer, "Matlab is not running!");
-	return 1;
+	strcpy(outputBuffer, "Matlab is not running!");
+	merror = 1;
     }
+
+    if ( merror ) {
+	errorString = "\nThe Matlab command `";
+	errorString << command;
+	errorString << "'\ngave the following error message:\n";
+	errorString << outputBuffer;
+    }
+
+    return merror;
 }
 
 // highest-level interface to the Matlab process
@@ -289,9 +317,9 @@ int MatlabIfc :: StartMatlab() {
     // start the Matlab engine which starts Matlab
     matlabEnginePtr = MatlabEngineOpen(MATLAB_UNIX_COMMAND);
     if ( ! MatlabIsRunning() ) {
-	Error::abortRun( "Could not start Matlab using ",
-			 MATLAB_UNIX_COMMAND );
-        return FALSE;
+	errorString = "Could not start Matlab using ";
+	errorString << MATLAB_UNIX_COMMAND;
+	return FALSE;
     }
 
     // add the PTOLEMY_MATLAB_DIRECTORY to the Matlab path
@@ -315,18 +343,13 @@ int MatlabIfc :: EvaluateUserCommand() {
 
 int MatlabIfc :: EvaluateUserCommand(char* command) {
 
-     // change directories to one containing the Matlab command
-     ChangeMatlabDirectory();
+    // change directories to one containing the Matlab command
+    ChangeMatlabDirectory();
 
-     // evaluate the passed command and report error if one occurred
-     int merror = EvaluateOneCommand(command);
-     if ( merror ) {
-	  StringList errstr = "\nThe Matlab command `";
-	  errstr << command << "'\ngave the following error message:\n";
-	  Error::warn(errstr, matlabOutputBuffer);
-     }
+    // evaluate the passed command and report error if one occurred
+    int merror = EvaluateOneCommand(command);
 
-     return merror;
+    return merror;
 }
 
 int MatlabIfc :: ChangeMatlabDirectory() {
@@ -338,11 +361,11 @@ int MatlabIfc :: ChangeMatlabDirectory() {
 	struct stat stbuf;
 	if ( stat(scriptDirectory, &stbuf) == -1 ) {
 	    if ( strcmp((char*) lastdirname, scriptDirectory) != 0 ) {
-		Error::warn( "Cannot access the directory ",
-			     scriptDirectory );
+		errorString = "Cannot access the directory ";
+		errorString << scriptDirectory;
 		lastdirname = scriptDirectory;
 	    }
-            retval = 0;
+	    retval = 0;
 	}
 	else {
 	    char* changeDirCommand = new char[strlen(scriptDirectory) + 4];
@@ -352,24 +375,24 @@ int MatlabIfc :: ChangeMatlabDirectory() {
 	    delete [] changeDirCommand;
 	    retval = 1;
 	}
-     }
-     return retval;
+    }
+    return retval;
 }
 
 // establish that all newly created Matlab figures will be
 // associated with the arg handle implemented by the Matlab
 // function defined by MATLAB_SET_FIGURES in PTOLEMY_MATLAB_DIRECTORY
 int MatlabIfc :: AttachMatlabFigureIds() {
-     InfString command = MATLAB_SET_FIGURES;
-     command << "('" << matlabFigureHandle << "');";
-     return EvaluateOneCommand(command);
+    InfString command = MATLAB_SET_FIGURES;
+    command << "('" << figureHandle << "');";
+    return EvaluateOneCommand(command);
 }
 
 // close all figures associated with arg handle implemented by Matlab
 // script defined by MATLAB_CLOSE_FIGURES in PTOLEMY_MATLAB_DIRECTORY
 int MatlabIfc :: CloseMatlabFigures() {
     InfString command = MATLAB_CLOSE_FIGURES;
-    command << "('" << matlabFigureHandle << "');";
+    command << "('" << figureHandle << "');";
     return EvaluateOneCommand(command);
 }
 
@@ -377,8 +400,8 @@ int MatlabIfc :: KillMatlab() {
     int retval = TRUE;
     if ( MatlabIsRunning() ) {
 	if ( MatlabEngineClose() ) {
-	    Error::warn("Error when terminating connection ",
-			"to the Matlab kernel.");
+	    errorString =
+		"Error when terminating connection to the Matlab kernel.";
 	    retval = FALSE;
 	}
     }
@@ -387,7 +410,7 @@ int MatlabIfc :: KillMatlab() {
 }
 
 Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
-				     int *errflag) {
+				     int* errflag) {
     // can't use a switch because enumerated data types
     // are assigned to strings and not to integers
     Real* realp = 0;
@@ -498,11 +521,12 @@ Matrix* MatlabIfc :: PtolemyToMatlab(Particle& particle, DataType portType,
 // Returns 1 for Failure and 0 for Success
 // copy a Matlab output matrix to a Ptolemy matrix
 int MatlabIfc :: MatlabToPtolemy(
-		Particle &particle, DataType portType,
-		Matrix* matlabMatrix, const char* matrixId, int *errflag) {
-    // error flags
+		Particle& particle, DataType portType,
+		Matrix* matlabMatrix, int* warnflag, int* errflag) {
+    // error and warning flags
     *errflag = FALSE;
     int incompatibleOutportPort = FALSE;
+    *warnflag = FALSE;
 
     // allocate a Ptolemy matrix
     int rows = mxGetM(matlabMatrix);
@@ -531,10 +555,9 @@ int MatlabIfc :: MatlabToPtolemy(
 	else if ( portType == FLOAT_MATRIX_ENV ) {
 	    FloatMatrix& Amatrix = *(new FloatMatrix(rows, cols));
 	    if ( mxIsComplex(matlabMatrix) ) {
-		StringList myerrstr;
-		myerrstr = "\nImaginary components ignored for the ";
-		myerrstr << "Matlab matrix " << matrixId;
-		Error::warn(myerrstr);
+		*warnflag = TRUE;
+		warningString =
+		    "\nImaginary components ignored for the Matlab matrix ";
 	    }
 	    for ( int jcol = 0; jcol < cols; jcol++ ) {
 		for ( int jrow = 0; jrow < rows; jrow++ ) {
@@ -594,12 +617,12 @@ Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
     // copy imag part over to new Matlab matrix (if complex)
     // Matlab stores values in column-major order like Fortran
     if ( realOrComplex == MXCOMPLEX ) {
-        Real* imagp = mxGetPi(newMatlabMatrixPtr);
+	Real* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
 	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
 		imagp[jrow * numrows + jcol] = *imagPart++;
 	    }
-        }
+	}
     }
 
     mxSetName(newMatlabMatrixPtr, name);
@@ -630,12 +653,12 @@ Matrix* MatlabIfc :: CreateMatlabMatrix(const char* name,
     // copy imag part over to new Matlab matrix (if complex)
     // Matlab stores values in column-major order like Fortran
     if ( realOrComplex == MXCOMPLEX ) {
-        Real* imagp = mxGetPi(newMatlabMatrixPtr);
+	Real* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
 	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
 		imagp[jrow * numrows + jcol] = atof(*imagPartStrings++);
 	    }
-        }
+	}
     }
 
     mxSetName(newMatlabMatrixPtr, name);

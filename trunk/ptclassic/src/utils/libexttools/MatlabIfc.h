@@ -74,6 +74,8 @@ public:
 	const char* SetFigureHandle(const char* handle);
 	const char* SetMatlabCommand(const char* command);
 	char* SetOutputBuffer(char *buffer, int bufferlen);
+	const char* SetErrorString(const char* string);
+	const char* SetWarningString(const char* string);
 
 	// get protected data members
 	int GetDeleteFigures();
@@ -82,6 +84,8 @@ public:
 	const char* GetMatlabCommand();
 	char* GetOutputBuffer();
 	int GetOutputBufferLength();
+	char* GetErrorString();
+	char* GetWarningString();
 
 	// get static members
 	Engine* GetCurrentEngine();
@@ -133,12 +137,12 @@ public:
 	// B. specific to Ptolemy
 	//    1. convert Ptolemy particles to Matlab matrices
 	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
-				int *errflag);
+				int* errflag);
 
 	//    2. convert Matlab matrices to Ptolemy particles
-	int MatlabToPtolemy(Particle &particle, DataType portType,
-			    Matrix* matlabMatrix, const char* matrixId,
-			    int *errflag);
+	int MatlabToPtolemy(Particle& particle, DataType portType,
+			    Matrix* matlabMatrix, int* warnflag,
+			    int* errflag);
 
 	// Methods for interface to/from another scripting language (e.g. Tcl)
 	Matrix* CreateMatlabMatrix(const char* name,
@@ -165,14 +169,20 @@ private:
 	char* scriptDirectory;
 
 	// place to put the first N output characters from Matlab
-	char* matlabOutputBuffer;
-	int matlabOutputBufferLen;
+	char* outputBuffer;
+	int outputBufferLen;
 
 	// name attached to Matlab figures
-	StringList matlabFigureHandle;
+	StringList figureHandle;
 
 	// Matlab command to execute
 	InfString commandString;
+
+	// Matlab error string
+	InfString errorString;
+
+	// Matlab warning string
+	InfString warningString;
 };
 
 #endif
