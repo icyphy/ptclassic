@@ -686,7 +686,7 @@ body ::tycho::TopLevel::stylesheet {mode args} {
 #
 body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
     if { $exitWithNoConfirmation == 0 && \
-	    [::tycho::stylesheet get interaction confirmOnExit] } {
+	    [::tycho::preference get misc confirmOnExit] } {
 	set response [::tycho::askuser "OK to exit the program?"]
     } else {
 	set response 1
