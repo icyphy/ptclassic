@@ -30,10 +30,12 @@ PL_SRCS= \
  CG56ASin.pl \
  CG56BiQuad.pl \
  CG56BlackHole.pl \
+ CG56BlockReverse.pl \
  CG56CircToLin.pl \
  CG56Comb.pl \
  CG56Commutator.pl \
  CG56Cos.pl \
+ CG56Cut.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
  CG56DSPlayBQ.pl \
@@ -42,7 +44,9 @@ PL_SRCS= \
  CG56FixDiff.pl \
  CG56FixGain.pl \
  CG56FixImpulse.pl \
+ CG56FixPad.pl \
  CG56FixProduct.pl \
+ CG56FixRect.pl \
  CG56FixSum.pl \
  CG56FixTable.pl \
  CG56FixThresh.pl \
@@ -81,6 +85,7 @@ PL_SRCS= \
  CG56QuasarChgPd.pl \
  CG56Reciprocal.pl \
  CG56Repeat.pl \
+ CG56Reverse.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
  CG56Sin.pl \

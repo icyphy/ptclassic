@@ -12,10 +12,12 @@ CG56STARS = \
  $(CG56)/CG56ASin.o \
  $(CG56)/CG56BiQuad.o \
  $(CG56)/CG56BlackHole.o \
+ $(CG56)/CG56BlockReverse.o \
  $(CG56)/CG56CircToLin.o \
  $(CG56)/CG56Comb.o \
  $(CG56)/CG56Commutator.o \
  $(CG56)/CG56Cos.o \
+ $(CG56)/CG56Cut.o \
  $(CG56)/CG56Delay.o \
  $(CG56)/CG56Distributor.o \
  $(CG56)/CG56DownSample.o \
@@ -25,7 +27,9 @@ CG56STARS = \
  $(CG56)/CG56FixDiff.o \
  $(CG56)/CG56FixGain.o \
  $(CG56)/CG56FixImpulse.o \
+ $(CG56)/CG56FixPad.o \
  $(CG56)/CG56FixProduct.o \
+ $(CG56)/CG56FixRect.o \
  $(CG56)/CG56FixSum.o \
  $(CG56)/CG56FixTable.o \
  $(CG56)/CG56FixThresh.o \
@@ -59,6 +63,7 @@ CG56STARS = \
  $(CG56)/CG56ProPortADDA.o \
  $(CG56)/CG56ProPortDA.o \
  $(CG56)/CG56Pulse.o \
+ $(CG56)/CG56Reverse.o \
  $(CG56)/CG56Quantizer.o \
  $(CG56)/CG56QuasarChgPd.o \
  $(CG56)/CG56Reciprocal.o \
