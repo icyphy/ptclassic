@@ -18,7 +18,7 @@
 if [ $# = 0 ]; then
     progname=`basename $0`
 else
-    progname=ptsetup.csh
+    progname=ptsetup.sh
 fi
 
 ptarch=`$PTOLEMY/bin/ptarch`
