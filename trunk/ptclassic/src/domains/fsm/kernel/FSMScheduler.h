@@ -60,9 +60,11 @@ public:
     // Domain identification.
     /*virtual*/ const char* domain() const { return FSMdomainName; }
 
+    // Run (or continue) the simulation.
+    /*virtual*/ int run();
+
     // Initialization.
     /*virtual*/ void setup();
-
 
     // Get the stopping time.
     /*virtual*/ double getStopTime() { return double(0); }
@@ -74,12 +76,8 @@ public:
     /*virtual*/ void resetStopTime(double);
 
     // Internal event name maps.       //--|
-    InfString intlEventNames;          //  |
-    InfString intlEventTypes;          //  |
-    // Evaluation type.                //  |--These will be set by Target.
-    InfString evaluationType;          //  |
-    // One-writer rule checking type.  //  |
-    InfString oneWriterType;           //--|
+    InfString intlEventNames;          //  |--These will be set by Target.
+    InfString intlEventTypes;          //--|
 
      // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
@@ -91,6 +89,12 @@ public:
 protected:
     // Check all stars.
     int checkStars();
+
+    // Receive input data, and feed back internal events.
+    int receiveData();
+
+    // Send output data.
+    int sendData();
 
     // (1) Create a Tcl interpreter 
     // (2) Register inputs, outputs, internal events in the Tcl interp
@@ -113,29 +117,6 @@ protected:
 
     // The domain name outside of this FSM.
     const char* outerDomain;	 
-};
-
-class StrictSched : public FSMScheduler
-{
-public:
-    // Constructor.
-    StrictSched();
-
-    // Destructor
-    ~StrictSched();
-
-    // class identification
-    int isA(const char*) const;
-
-    // Run (or continue) the simulation.
-    /*virtual*/ int run();
-
-protected:
-    // Receive input data, and feed back internal events.
-    int receiveData();
-
-    // Send output data.
-    int sendData();
 
 private:
     // Used for debugging
