@@ -69,7 +69,7 @@ the output is set to its maximum value (or minimum for negative magnitudes).
 	go {
 @	FIX_SetToZero($ref(output));
 
-@	if ($ref(count) < $ref(width) {
+@	if ($ref(count) < $ref(width)) {
 		CGCFix::clearOverflow();
 @		FIX_Assign($ref(output),$ref(height));
 		CGCFix::checkOverflow();
