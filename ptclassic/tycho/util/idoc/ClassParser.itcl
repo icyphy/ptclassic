@@ -34,14 +34,15 @@
 
 #######################################################################
 #### ClassParser
-# ClassParser is the parent of all <a href = 
-# "../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a> generators. 
-# These Classes may be viewed using the <a href = "IDoc.idoc">IDoc Viewer</a>.
+# ClassParser is the superclass of all classes that parse source
+# cpde files to generate class models (of class <a href = 
+# "../../../../kernel/doc/codeDoc/ClassModel.itclclass">::tycho::ClassModel
+# </a>).
 #
-# ClassParser is also the interface to the Class generators. When the proc:
-# ::tycho::ClassParser::generateIDoc is called with a list of filenames, 
-# the ClassParser class examines the extensions, using ClassParser::generator
-# and instantiates the correct child generator to process that file.
+# The procedure <code>::tycho::ClassParser::generateIDoc</code> accepts
+# a list of filenames. It examines their extensions, and uses
+# <code>ClassParser::generator</code> to create an instance of the
+# correct parsing class to process that file.
 # (Currently, <a href = "ItclParser.idoc">[incr Tcl]</a> and 
 # <a href ="JavaParser.idoc">Java</a> are supported). If a subsequent file
 # is of the same type, it uses the same generator.
@@ -129,7 +130,7 @@ class ::tycho::ClassParser {
     # language for the current file
     protected variable _language
 
-    # an array of ::tycho::Class objects for this file
+    # an array of ::tycho::ClassModel objects for this file
     protected variable _classmodels
 
     # true if there is outside class information
@@ -252,7 +253,7 @@ body ::tycho::ClassParser::generateIDoc {debug generateIndex title filelist} {
 
 #####################################################################
 #### generator
-# Return the class name which generates ::tycho::Class models of the
+# Return the class name which generates ::tycho::ClassModel models of the
 # given file. Returns {} if none exists.
 #
 # NOTE: This should not be redefined in it's children, rather when 
