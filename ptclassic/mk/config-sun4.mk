@@ -79,7 +79,7 @@ QUANTIFY =	purelink $(COLLECTOR) quantify
 PURECOV = 	purecov $(COLLECTOR)
 
 # Used to compile xv.  Use -traditional to avoid varargs problems
-XV_CC =		gcc -traditional
+XV_CC =		gcc -traditional -DXLIB_ILLEGAL_ACCESS
 
 # Matlab architecture
 MATARCH = sun4
