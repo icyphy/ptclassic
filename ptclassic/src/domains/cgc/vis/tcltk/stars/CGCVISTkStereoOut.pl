@@ -7,7 +7,7 @@ defstar
 Just like StereoOut, except that a Tk slider is put in the master
 control panel to control the volume and balance.
     }
-    version { @(#)CGCVISTkStereoOut.pl	1.2 08/08/96 }
+    version { $Id$ }
     author { Sunil Bhave }
     location { CGC Tcl/Tk library }
     copyright {
