@@ -35,6 +35,14 @@
 # We don't use the toplevel window called ".", so withdraw it.
 wm withdraw .
 
+if ![regexp Iwidgets [package name]] {
+    # Iwidgets is not present, we use the buttonbox from it.
+    # Load in the packages.  For example, on the mac, we need this.
+    package require Itcl
+    package require Itk
+    package require Iwidgets
+}
+
 # Check for Itcl2.1 first, since Itcl2.0 does not have [file join . . .]
 if {${itcl::version} < 2.1} {
     error "Tycho must be run under Itcl2.1 or later, as Itcl2.0 does
@@ -44,14 +52,6 @@ if {${itcl::version} < 2.1} {
     If you are running tycho with Ptolemy, then you need to install
     Itcl2.1 and recompile tysh."
     exit 3
-}
-
-if ![regexp Iwidgets [package name]] {
-    # Iwidgets is not present, we use the buttonbox from it.
-    # Load in the packages.  For example, on the mac, we need this.
-    package require Itcl
-    package require Itk
-    package require Iwidgets
 }
 
 ########################################################################
