@@ -273,8 +273,8 @@ class ::tycho::Class {
     # Add a parent with attributes to the class
     method parent {name args}
 
-    # Get the parents of the class
-    method parents {}
+    # Get the parents of the class with matching attributes
+    method parents {args}
 
     # Add a top-level variable with attributes to the class
     method variable {name args}
@@ -671,15 +671,27 @@ body ::tycho::Class::parent {name args} {
 ########################################################################
 #### parents
 #
-# Get the parents of the class.
+# Get the parents of the class with attributes that match the given
+# attributes and values. This can be used to get parents that the
+# current class extends (-inheritance implementation) or implements
+# (-inheritance interface)
 #
-body ::tycho::Class::parents {} {
-    set pnts {}
-    set pnt_pnts [_children parent {}]
-    foreach pnt $pnt_pnts {
-        lappend pnts [shortName parent $pnt]
+body ::tycho::Class::parents {args} {
+    set result {}
+    foreach parent [_children parent {}] {
+        array set temp $_attrs($parent)
+        set matching 1
+        foreach {attr val} $args {
+            if {$temp($attr) != $val} {
+                set matching 0
+                break
+            }
+        }
+        if {$matching} {
+            lappend result [shortName parent $parent]
+        }
     }
-    return $pnts
+    return $result
 }
 
 ########################################################################
