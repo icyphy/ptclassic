@@ -253,7 +253,8 @@ extern double trunc();
 
 
 /* Some machines fail to define some functions in stdio.h */
-#if !defined(__STDC__) && !defined(sprite)
+/* Sun CC (SC1.0) defines __cplusplus, but not __STDC__ */
+#if !defined(__STDC__) && !defined(sprite)  && !defined(__cplusplus)
 extern FILE *popen(), *tmpfile();
 extern int pclose();
 #ifndef clearerr	/* is a macro on many machines, but not all */
@@ -325,7 +326,7 @@ extern int sscanf();
 
 
 /* some call it strings.h, some call it string.h; others, also have memory.h */
-#if defined(__STDC__) || defined(sprite) || defined(hpux)
+#if defined(__STDC__) || defined(sprite) || defined(hpux) || defined(__cplusplus)
 #include <string.h>
 #else
 /* ANSI C string.h -- 1/11/88 Draft Standard */
@@ -356,7 +357,8 @@ extern long lrand48();
 #define srandom(a) srand48(a)
 #define bzero(a,b) memset(a, 0, b)
 #else
-#ifndef sgi
+/* Sun CC 2.1 requires the __cplusplus below */
+#if !defined(sgi) && !defined(__cplusplus)
 extern VOID_HACK srandom();
 #endif
 extern long random();
