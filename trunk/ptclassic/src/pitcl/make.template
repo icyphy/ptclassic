@@ -26,7 +26,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 # Date of creation: 3/4/92
-# Authors: J. Buck, Christopher Hylands
+# Authors: J. Buck, Christopher Hylands, Jose Luis Pino
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
@@ -45,60 +45,36 @@ VPATH =		$(ROOT)/src/ptcl
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
-			$(PTCOMPAT_INCSPEC)
+# if you want to create a custom pigiRpc, define a override.mk
+# file that defines the necessary variables to pull in the domains
+# you want.  See $(ROOT)/mk/stars.mk.  This files must at least 
+# define the variable PTCL which defines the name of the ptcl executable.
 
-# config-default.mk sets this to 'yes', but we can't include the ipus domain
-# since the non-tk ipus stars need Blackboard* symbols, which are defined in
-# the tk ipus stars.
-INCLUDE_IPUS_DOMAIN  = no
-
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
-
-# Sources
-SRCS =		PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc ptclGantt.cc \
-		ptclInvokeInterp.cc
-
-# Header files
-HDRS =		PTcl.h ganttChart.h
-
-# Objects
-OBJS =		$(SRCS:.cc=.o)
-
-LIB =		libptcl.$(LIBSUFFIX)
-
-# Set up definitions for ptbin.mk
-BASENAME = 	ptcl
-SPECIAL_LIBS =	-L./ -lptcl -lptolemy
-# We always depend on libptolemy, so there is no need to add it
-SPECIAL_LIBS_DEPEND=
-NEED_PALETTES = no
-NEED_HOF =	no
-NEED_GRAPHICS =	no
-MAIN =		
-MAIN_DEPEND =	$(LIB)
-
-# all rule must be before ptbin.mk
-all:	makefile $(LIB) ptcl
-
-# Include variables and rules common to all binaries
-include $(ROOT)/mk/ptbin.mk
-
-# Allow for user specified overriding definitions.  Do not declare
-# any variables after this command.  GNU make's earlier that 3.71 may
-# print a warning message.
 -include override.mk
 
-# "make install" puts things in the official place
-install:	$(BINDIR)/ptcl $(LIBDIR)/$(LIB)
+# We can't include the ipus domain since the non-tk ipus stars need 
+# Blackboard* symbols, which are defined in the tk ipus stars.
+# Set up definitions for stars.mk
 
-$(BINDIR)/ptcl:	ptcl
-		rm -f $(BINDIR)/ptcl
-		ln ptcl $(BINDIR)
+ifndef PTCL
+	BDF=1
+	CG56=1
+	CG96=1
+	CGCFULL=1
+	CGFULL=1
+	DDF=1
+	DE=1
+	IPUS=1
+	MDSDF=1
+	PN=1
+	SDFFULL=1
+	SILAGE=1
+	THOR=1
+	VHDL=1
+	CGFULL=1
+endif
 
-# include common definitions, rules
-include $(ROOT)/mk/common.mk
+include $(ROOT)/mk/ptcl.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
