@@ -1,4 +1,4 @@
-# Makefile for external tool interface library
+# Makefile for external tool interface library libexttools
 # Version identification:
 # $Id$ 
 # Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -34,9 +34,9 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT=../..
+ROOT=../../..
 # Where we are
-VPATH = ../../src/exttools
+VPATH = ../../../src/utils/libexttools
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
@@ -46,8 +46,8 @@ include $(CONFIG)
 # It would be nice if we built both
 LIB=libexttools.$(LIBSUFFIX)
 
-# Handle kernel interface to Matlab 
-INCL = $(PTCOMPAT_INCSPEC) $(ROOT)/src/kernel
+# Put the Ptolemy kernel directory in the include path
+INCL = -I$(KERNDIR)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
