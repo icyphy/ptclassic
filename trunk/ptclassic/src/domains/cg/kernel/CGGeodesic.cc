@@ -93,11 +93,17 @@ int CGGeodesic :: forkDelay() const {
 // recursive function to compute buffer and forkbuf sizes.  Note that
 // buffers are only actually allocated for types 0 and F_SRC.
 
-// We return 0 if the schedule has not yet been run and there are
-// delays, or old values are needed.
+// We return 0 if the schedule has not yet been run, and also print an
+// error message.
 
 int CGGeodesic :: internalBufSize() const {
 	CGPortHole* dest = (CGPortHole*)destinationPort;
+	if (dest->parentReps() == 0) {
+		Error::abortRun(*dest,
+"Attempt to determine buffer size before schedule has been computed\n"
+"(possibly from calling bufSize() in a star's setup() method)");
+		return 0;
+	}
 	int bsiz = minNeeded();
 	int type = forkType();
 	if ((type & F_SRC) != 0) {
