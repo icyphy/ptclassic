@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "IntArrayState.h"
 #include "IntState.h"
+#include "CGCDDFCode.h"
 
 class EventHorizon;
 class CGCTarget;
@@ -50,8 +51,9 @@ class MachineInfo {
 friend class CGCMultiTarget;
 	const char* inetAddr;	// internet address
 	const char* nm;		// machine name
+	Target* t;
 public:
-	MachineInfo(): inetAddr(0), nm(0) {}
+	MachineInfo(): inetAddr(0), nm(0), t(0) {}
 };
 
 class CGCMultiTarget : public CGSharedBus {
@@ -70,13 +72,14 @@ public:
 	DataFlowStar* createSpread();
 	DataFlowStar* createCollect();
 
+	// macro star
+	CGStar* createMacro(CGStar*, int, int, int);
+
 	// redefine
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 	// get MachineInfo
 	MachineInfo* getMachineInfo() { return machineInfo; }
-	int* getPortNumber() { return currentPort; }
-	void setMachineAddr(CGStar*, CGStar*);
 	
 	// CGDDF support.
 	// In case of code replication into the different set of target,
@@ -86,6 +89,10 @@ public:
 
 	// signal TRUE when replication begins, or FALSE when ends
 	void signalCopy(int flag) { replicateFlag = flag; }
+
+	// redefine
+	/* virtual */ void installDDF();
+	/* virtual */ void prepareChildren();
 
 protected:
 	void setup();
@@ -103,7 +110,7 @@ private:
 	// Starting port_number. Port_number will be increased by one
 	// for each pair of send/receive stars
 	IntState portNumber;
-	int* currentPort;
+	int currentPort;
 
 	// In case, the cody body is replicated as in "For" and "Recur"
 	// construct, save this information to be used in getMachineAddr().
@@ -119,6 +126,9 @@ private:
 
 	// return the machine_id of the given target.
 	int machineId(Target*);
+
+	// set up socket connection
+	void setupSocketConnection(CGCTarget* t, int i);
 };
 
 #endif
