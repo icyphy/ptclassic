@@ -65,6 +65,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <io.h>
 #include <sys/stat.h> /* For creat in Display.cc */
 #include <stdlib.h> /* For system in Display.cc */
+#undef min	      /* Undef min and max for nt4.vc */
+#undef max
 #endif
 
 #include "logNew.h"
