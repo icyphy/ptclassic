@@ -39,6 +39,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include "Error.h"
 
+/*******************************************************************
+
+	class CG56Wormhole methods
+
+********************************************************************/
+
+void CG56Wormhole :: setup() {
+	// main setup routine.
+	CGWormBase :: setup();
+}
+
+void CG56Wormhole :: go() { 
+	downLoadCode(0, 0);
+}
+
+// Constructor
+CG56Wormhole :: CG56Wormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
+	{ buildEventHorizons(); }
+
+CG56Wormhole :: ~CG56Wormhole() { freeContents(); }
+
+// cloner -- clone the inside and make a new wormhole from that.
+Block* CG56Wormhole :: clone() const {
+	LOG_NEW; return new CG56Wormhole(gal.clone()->asGalaxy(), target->cloneTarget());
+}
+
+CGWormBase* CG56Wormhole :: myWormhole() { return selfWorm; }
+
 
 /**************************************************************************
 
