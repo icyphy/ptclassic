@@ -58,7 +58,7 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		tclIndex 
+MISC_FILES =		tclIndex doc
 
 # Sub directories to run make in.
 DIRS =			# doc
