@@ -19,7 +19,7 @@ $Id$
 #include "GalIter.h"
 #include "SDFPortHole.h"
 #include "Geodesic.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 
 //////////////////////
 // Utility routines //
