@@ -58,6 +58,15 @@ endif
 endif
 
 TK=1
+ifdef CODESIGN
+	DMM = 1
+endif
+ifdef DMM
+	OTHER_PIGI = $(ROOT)/obj.$(PTARCH)/pigilib/ptkDMMRegisterCmds.o
+endif
+ifndef DMM
+	OTHER_PIGI = $(ROOT)/obj.$(PTARCH)/pigilib/ptkRegisterCmds.o
+endif
 
 PT_DEPEND +=	pigiMain.o
 
@@ -65,7 +74,8 @@ ADD_OBJS =	palettes.$(PIGI).o
 
 PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
 
-LIBS += 	-L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist \
+LIBS += 	-L$(OCTLIBDIR) $(OTHER_PIGI) -lpigi \
+			-lrpc -loh -lvov -lrpc -llist \
 			-ltr -lutility -lst -lerrtrap -luprintf -lport
 
 LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
