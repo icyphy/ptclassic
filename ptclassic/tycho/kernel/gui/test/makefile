@@ -57,19 +57,21 @@ GRAPHICAL_TESTS = \
 
 ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
-	DirectedAcyclicGraph.itcl
+	DirectedAcyclicGraph.itcl \
+	alltests.itcl all.itcl
 
-EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) chktycho
 
-MISC_FILES =
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
+MISC_FILES = 		chktycho
 
-# Sources that may or may not be present, but if they are present, we don't
-# want make checkjunk to barf on them.
-OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b alltests.itcl \
-		RCS.itcl
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b RCS.itcl
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = Path-5.1a Path-5.1b  RCS.itcl
 
 tests:: test_graphics
 
@@ -79,8 +81,8 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 		$(ITCLSH)
 
 # These tests require a graphics terminal
-test_graphics: alltests.itcl
-	tycho -e alltests.itcl
+test_graphics: alltests.itcl all.itcl
+	tycho -noconsole -e alltests.itcl
 
 FORCE:
 
