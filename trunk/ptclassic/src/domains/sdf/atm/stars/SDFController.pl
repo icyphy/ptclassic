@@ -89,7 +89,6 @@ to the table's data.
 
     go {
         Envelope inEnv, updateEnv;
-        MessageParticle  alpha, beta, gamma;
 
         int vci,ivci,ovci,scpe,dcpe;
 
