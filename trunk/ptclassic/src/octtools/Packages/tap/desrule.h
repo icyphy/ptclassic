@@ -27,6 +27,7 @@
 #ifndef DESRULE_H
 #define DESRULE_H
 #include "ansi.h"
+#include "tap_int.h"
 void tapFreeDesRuleInfo
 	ARGS((struct tapLayer *layerS));
 #endif
