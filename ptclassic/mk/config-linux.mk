@@ -104,6 +104,9 @@ endif
 LINKER	=	$(CPLUSPLUS)
 RANLIB	= 	ranlib
 
+# domains/ipus/islang uses BISONFLEXLIBS
+BISONFLEXLIB =	-fl
+
 # debug version
 LINUXDEF =	-Dlinux #-D_GNU_SOURCE -D_BSD_SOURCE
 #	Don't use -pipe, it makes life worse on small-memory systems.
