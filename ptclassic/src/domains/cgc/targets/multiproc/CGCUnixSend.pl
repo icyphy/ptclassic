@@ -13,7 +13,6 @@ Produce code for inter-process communication (send-side)
 	}
 	private {
 		friend class CGCMultiTarget;
-		CGStar* partner;
 	}
 	input {
 		name {input}
@@ -27,24 +26,10 @@ Produce code for inter-process communication (send-side)
 		attributes { A_NONSETTABLE }
 	}
 	state {
-		name { IPCHandlerName }
+		name { socketId }
 		type { STRING }
-		default { "IPCHandler" }
-		desc { Name od sender's IPC handler function. }
-		attributes { A_NONSETTABLE }
-	}
-	state {
-		name { hostPort }
-		type { int }
-		default { 0 }
-		desc { Host port number }
-		attributes { A_NONSETTABLE }
-	}
-	state {
-		name { hostAddr }
-		type { STRING }
-		default { " " }
-		desc { Host address for server }
+		default { "sId" }
+		desc { socket id }
 		attributes { A_NONSETTABLE }
 	}
 	ccinclude { "StringList.h" }
@@ -53,57 +38,6 @@ Produce code for inter-process communication (send-side)
 	setup {
 		numData = input.numXfer();
 	}
-
-	codeblock (ipcHandler) {
-
-    void $val(IPCHandlerName)() {
-	int timeout, localLoop;
-	struct sockaddr_in addr;
-
-	/* connect to the server */
-	for (timeout = 0; ; timeout++) {
-		/* Open a TCP socket (an Internet stream socket */
-		if (($starSymbol(sId) = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
-			printf("cannot open stream socket in $val(IPCHandlerName).\n");
-			exit(1);
-		}
-
-		/* Fill in the structure addr with the address of the server
-	   	   that we want to connect with */
-		bzero((char*) &addr, sizeof(addr));
-		addr.sin_family = AF_INET;
-		addr.sin_addr.s_addr = inet_addr("$val(hostAddr)");
-		addr.sin_port = htons($val(hostPort));
-
-		if (connect($starSymbol(sId), (struct sockaddr*) &addr, sizeof(addr) ) == 0) 
-			break;
-		sleep(1);
-		if (timeout > 10000) {
-			printf("cannot connect to server on port $val(hostPort).\n");
-			exit(1);
-		}
-		close($starSymbol(sId));
-	}
-    }	
-	}
-	initCode {
-		// obtain the hostAddr state from parent MultiTarget.
-		// Note that this routine should be placed here.
-		CGCMultiTarget* t = (CGCMultiTarget*) cgTarget()->parent();
-		t->setMachineAddr(this, partner);
-		hostAddr.initialize();
-
-		// code generation.
-		StringList IPCproc = processCode(ipcHandler);	
-		addProcedure(IPCproc, IPCHandlerName);
-		addGlobal("int $starSymbol(sId);\n");
-		addInclude("<stdio.h>");
-		addInclude("<sys/types.h>");
-		addInclude("<sys/socket.h>");
-		addInclude("<netinet/in.h>");
-		addInclude("<arpa/inet.h>");
-	}
-		
 	codeblock (block) {
 	int i, pos;
 	union {
@@ -115,7 +49,7 @@ Produce code for inter-process communication (send-side)
 		pos = $val(numData) - 1 + i;
 		myData.f = (float) $ref(input,pos);
 		myData.l = htonl(myData.l);
-		if (write($starSymbol(sId), &myData.l, sizeof(myData)) != sizeof(myData)) {
+		if (write($val(socketId), &myData.l, sizeof(myData)) != sizeof(myData)) {
 			printf("write fails.\n");
 			exit(1);
 		}
@@ -123,9 +57,6 @@ Produce code for inter-process communication (send-side)
 	}
 	go {
 		addCode(block);
-	}
-	wrapup {
-		addCode("\tclose($starSymbol(sId));\n");
 	}
 }
 
