@@ -1,0 +1,101 @@
+.\" $Id$
+.TH PTMAN 1 "2 October 1992"
+.SH NAME
+ptman \- preview or print a Ptolemy star's Almagest entry
+.SH SYNOPSIS
+.B ptman
+[
+.B "-P|-P\fIprinter\fP"
+]
+[
+.B -a
+]
+[
+.B -n
+]
+[
+.B -x
+]
+.I star
+[...]
+.SH DESCRIPTION
+.B Ptman
+previews or prints Almagest entries for Ptolemy stars.
+.I Star
+should be the name of a Ptolemy star, with or without
+its domain prefix, e.g., "SDFLMS" or just "LMS";
+multiple stars can be given on the command line.
+.B Ptman
+will search for an Almagest entry for
+.I star
+in all the standard Ptolemy locations, unless the
+PTMANPATH environment variable is set (see below).
+.LP
+With no options,
+.B ptman
+will format the located entry and display it using the
+X windows troff previewer 
+.I xditview 
+if the DISPLAY environment variable is set.
+Otherwise,
+.B ptman
+will use
+.I nroff
+and
+.IR more .
+The \-P option can be used to actually print the entry on
+a printer.
+.SH OPTIONS
+.TP 10
+.B \-a
+Print or preview all matching entries across all searched domains.
+Normally
+.B ptman
+stops on the first match found.
+This can be used, for example, to see the entries for the LMS
+stars in all domains.
+.TP
+.B \-n
+Use
+.I nroff
+even though the
+DISPLAY environment variable may be set.
+.TP
+.B \-P
+Print the entry on the printer specified
+by the PRINTER environment variable.
+.TP
+.B \-P\fIprinter\fP
+Print the entry on the printer specified by
+\fIprinter\fP.
+.TP
+.B \-x
+Star names must match exactly.
+That is,
+.B ptman
+will not attempt to prepend domain names to the
+star in an effort to get a match, thus speeding
+up the search.
+.SH ENVIRONMENT
+.TP 10
+DISPLAY
+If set, selects use of
+.I xditview
+previewer.
+.TP
+PRINTER
+Selects printer to be used for \-P option.
+.TP
+PTMANPATH
+A space separated list of domains to search for the
+specified star.
+Domains are searched in the order listed, so this can
+be used to speed up or limit the search.
+.SH BUGS
+Index information is printed to the standard error output,
+which is a best useless and at worst confusing.
+.LP
+Thanks to the -me macros, the first page printed or displayed
+of an entry that exceeds one page will be blank.
+.SH AUTHOR
+Phil Lapsley, phil@ohm.Berkeley.EDU.
