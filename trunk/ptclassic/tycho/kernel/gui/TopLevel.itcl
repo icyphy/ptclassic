@@ -269,11 +269,21 @@ body ::tycho::TopLevel::constructor {args} {
         $topLevelWindows insert $prefix
     }
 
-    bind $prefix <Control-x><o> "$this nextWindow 1; break"
+    # Emacs-like bindings.
+    bind $prefix <Control-x><k> \
+            "$this nextWindow; delete object $this; break"
+    bind $prefix <Control-x><Control-f> \
+            {::tycho::File::openWin; break}
+    bind $prefix <Control-x><o> \
+            "$this nextWindow 1; break"
     
-    # To prevent the "o" from appearing in Entry windows,
+    # To prevent handled characters from appearing in Entry windows,
     bind Entry <Control-x><o> { }
-
+    bind Entry <Control-x><k> { }
+    
+    # Window manager interface bindings.
+    bind $prefix <Control-x><0> "$this nextWindow; \
+	    wm iconify $itk_component(hull); break"
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args
     eval preference exclude $this $args
