@@ -75,6 +75,7 @@ namespace ::tycho {
     ::tycho::File::registerEditor {.itcl .itk} ::tycho::EditItcl {Itcl editor}
     ::tycho::File::registerEditor .tcl ::tycho::EditTcl {Tcl editor}
     ::tycho::File::registerEditor .pl ::tycho::EditPtlang {Ptlang editor}
+    ::tycho::File::registerEditor {.pt .ptcl} ::tycho::EditPtcl {Ptcl editor}
     ::tycho::File::registerEditor {} ::tycho::TclConsole {Tcl console}
     ::tycho::File::registerEditor {} ::tycho::ProfileTcl {Tcl profiler}
 
