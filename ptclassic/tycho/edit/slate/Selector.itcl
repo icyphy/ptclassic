@@ -39,18 +39,12 @@
 # a Selector when the simple binding mechanism provided by default
 # in all interactors is not sophisticated enough.
 #
-# When an item is selected, it is given the tag specified by the
-# *-selecttag* option, which is "sel" by default. Client code can use
-# this to process selected items; note, however, that this tag is
-# maintained by the Selector, and must not be added to or removed
-# from items -- use the methods select{} and deselect{} instead. When
-# an item is selected, it is highighted using the Slate's highlight{}
-# method, so the normal procedure for deleting highlighted items
-# apply also to selected items. The options *-selectcommand* and
-# *-deselectcommand*, if specified, will be executed whenever an item
-# is selected or deselected. The options *-highlightcolor*
-# and *-highlightwidth* set the color and width of the highlight
-# outline box and override the Slate defaults.
+# When an item is selected, it is given the tag "sel". Client code
+# can use this to process selected items; note, however, that this tag is
+# maintained by the Selector and the Slate, and must not be added to
+# or removed from items -- use the Slate's select{} method instead.
+# When an item is selected, it is highighted using the Slate's
+# highlight{} method.
 #
 # The Selector is bound to to items and tags with its bind{} method,
 # as usual for interactors. The Selector's method, however, has an
@@ -112,35 +106,6 @@
 # <dd>The color of the box used to mark the current 
 # drag-selection region. The default color is "grey."
 #
-# <dt><b>-deselectcommand</b>
-# <dd>A function-script (see the 
-# <code>apply</code> procedure) that is called (if not null) when an item 
-# is deselected.  It is passed two arguments: this interactor, and the ID 
-# of the newly deselected item. The default is null.
-#
-# <dt><b>-exportselection</b>
-# <dd>If this flag is true, the Slate to which
-# the Selector belongs claims the X selection when an item is
-# selected. True by default.
-#
-# <dt><b>-highlightcolor</b>
-# <dd>The color of the highlight box drawn 
-# around selected items. The default color is "black."
-#
-# <dt><b>-highlightthickness</b>
-# <dd>The thickness in pixels of the highlight  box 
-# drawn around selected items. The default thickness is one pixel.
-#
-# <dt><b>-selectcommand</b>
-# <dd>A function-script that is called (if not 
-# null) when an item is selected.  It is passed two arguments: this 
-# interactor, and the ID of the newly selected item. The default is
-# null.
-#
-# <dt><b>-selecttag</b>
-# <dd>The tag with which selected items are tagged.
-# By default, it is "sel."
-#
 # </dl></dl>
 #
 # <p><b>Bugs</b> (none)
@@ -175,29 +140,20 @@ class ::tycho::Selector {
     ###################################################################
     ####                            options                        ####
 
+    # The prefix used to forward selection clear events
+    public variable clearprefix {}
+
+    # The prefix used to forward deselection events
+    public variable deselectprefix {}
+
+    # The prefix used to forward selection events
+    public variable selectprefix {}
+
     # The drag-select mode: "overlapping," or "enclosed"
     public variable dragmode "overlapping"
 
     # The color of the drag-select box
     public variable dragcolor "grey60"
-
-    # A script executed when one or more items is deselected
-    public variable deselectcommand {}
-
-    # If true, the selection is exported to the clipboard
-    public variable exportselection 1
-
-    # The color of the highlight box
-    public variable highlightcolor "black"
-
-    # The width of the highlight box
-    public variable highlightwidth 1
-
-    # A script executed when one or more items is selected
-    public variable selectcommand {}
-
-    # The tag used to mark selected items.
-    public variable selecttag "sel"
 
     ###################################################################
     ####                         public methods                    ####
@@ -208,9 +164,6 @@ class ::tycho::Selector {
     # Bind the selector to mouse events
     method bind {mode tagOrID args}
 
-    # Deselect all tagged items
-    method clear {}
-
     # Start the drag-select interaction sequence.
     method click {x y args}
 
@@ -220,17 +173,14 @@ class ::tycho::Selector {
     # Specify a delegate interactor to operate on selected items
     method delegate {mode howmany interactor tag args}
 
-    # Remove an item from the set of selected items
-    method deselect {id}
-
-    # Describe the selection
-    method describe {args}
-
     # Continue the drag-select interaction sequence
     method drag {x y}
 
     # Process a click on an item
     method itemclick {tag x y args}
+
+    # Notify that the selection has been changed by someone else
+    method refresh {}
 
     # Terminate the drag-select interaction sequence
     method release {}
@@ -238,26 +188,11 @@ class ::tycho::Selector {
     # Notify that the canvas size has changed
     method resize {}
 
-    # Add an item to the set of selected items
-    method select {id}
-
-    # Test if an item is already selected
-    method selected {id}
-
-    # Return the selected items
-    method selection {}
-
     # Remove a mouse binding
     method unbind {mode tagOrID args}
 
     ###################################################################
     ####                        protected methods                  ####
-
-    # Remove an item from the set of selected items
-    protected method _deselect {id}
-
-    # Add an item to the set of selected items
-    protected method _select {id}
 
     # Activate delegate interactors
     protected method activateDelegates {id x y args}
@@ -265,8 +200,14 @@ class ::tycho::Selector {
     # Bind delegate interactors
     protected method bindDelegates {}
 
-    # Claim the selection if enabled and appropriate
-    protected method claimSelection {}
+    # Clear the selection
+    protected method _clear {}
+
+    # Deselect an item
+    protected method _deselect {id}
+
+    # Select an item
+    protected method _select {id}
 
     ###################################################################
     ####                    private variables                      ####
@@ -286,41 +227,6 @@ class ::tycho::Selector {
     # The origin of the drag box
     private variable xOrigin
     private variable yOrigin
-}
-
-#######################################################################
-#### _deselect
-#
-body ::tycho::Selector::_deselect {id} {
-    # Delete the item's highlight
-    $slate unhighlight $id
-
-    # Remove its selection tags
-    $slate dtag $id $selecttag
-
-    # Execute the deselection command
-    if { $deselectcommand != "" } {
-    	uplevel #0 $deselectcommand
-    }
-}
-
-#######################################################################
-#### _select
-#
-# Internal selection method. Do _not_ call this method if the item
-# is already selected! Use the selected{} method to test if necessary.
-# 
-body ::tycho::Selector::_select {id} {
-    # Tag the item
-    $slate addtag $selecttag withtag $id
-
-    # Highlight it
-    $slate highlight $id -width $highlightwidth -outline $highlightcolor
-
-    # Execute the selection command
-    if { $selectcommand != "" } {
-    	uplevel #0 $selectcommand
-    }
 }
 
 #######################################################################
@@ -358,59 +264,6 @@ body ::tycho::Selector::activate {tag x y args} {
 
     # Start the interaction sequence
     eval click $x $y $args
-}
-
-#######################################################################
-#### activateDelegates
-#
-# Activate delegate interactors when a new item is added to
-# the selection. This method is called whenever a new item
-# is added to the selection by a mouse click.
-#
-body ::tycho::Selector::activateDelegates {id x y args} {
-    set selection [selection]
-    set selcount [llength $selection]
-    
-    # Process interactors that operate on a single item only
-    if { $selcount == 1 } { 
-	foreach index [array names delegates immediate,single,*] {
-	    # Activate the delegate interactor if that item is in the tags
-	    # or if it has a tag that is in the tags
-	    ::tycho::assign interactor tags options $delegates($index)
-	    if { $selcount == 1 } {
-		if { $args == $options } {
-		    if { [::tycho::lmember $tags $id] \
-			    || ! [::tycho::ldisjoint \
-			    $tags [$slate gettags $id]] } {
-			# Activate it; it will deactivate automatically
-			eval $interactor activate $id $options
-		    }
-		}
-	    }
-	}
-    }
-    # Process interactors that operate on the whole selection
-    foreach index [array names delegates immediate,selected,*] {
-	# Activate a delegate interactor on the whole selection if
-	# every item is either in the interactor's tags or if it
-	# has a tag that is.
-	::tycho::assign interactor tags options $delegates($index)
-	if { $args == $options } {
-	    set ok 1
-	    foreach item $selection {
-		if { ! [::tycho::lmember $tags $item] \
-			&& [::tycho::ldisjoint \
-			$tags [$slate gettags $item]] } {
-		    set ok 0
-		    break
-		}
-	    }
-	    if { $ok } {
-		# Activate it; it will deactivate automatically
-		eval $interactor activate $selecttag $x $y $options
-	    }
-	}
-    }
 }
 
 #######################################################################
@@ -473,101 +326,13 @@ body ::tycho::Selector::bind {mode tag args} {
 }
 
 #######################################################################
-#### bindDelegates
-#
-# Bind or unbind delegate interactors in "subsequent" mode. This
-# method is called whenever the selection has changed by means other
-# than direct mouse clicks on an item.
-#
-# FIXME: Binding to a delegate means we have to unbind the selector
-# from that item!
-#
-body ::tycho::Selector::bindDelegates {} {
-    set selection [selection]
-    set selcount [llength $selection]
-
-    # Process interactors that operate on a single item only
-    foreach index [array names delegates subsequent,single,*] {
-	::tycho::assign interactor tags options $delegates($index)
-
-	if { $selcount == 1 } {
-	    set id [lindex $selection 0]
-	    # If there is only one item and it's in that interactor's
-	    # tags or has a tag in that interactor's tags, bind it
-	    if { [::tycho::lmember $tags $id] \
-		    || ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
-		# Bind it
-		eval $interactor bind $id $options
-		continue
-	    }
-	}
-	# Make sure it's not bound
-	set target [$interactor target]
-	if { $target != "" } {
-	    eval $interactor unbind $target $options
-	}
-    }
-
-    # Process interactors that operate on the whole selection
-    foreach index [array names delegates subsequent,selected,*] {
-	# Activate a delegate interactor on the whole selection if
-	# every item is either in the interactor's tags or if it
-	# has a tag that is.
-	::tycho::assign interactor tags options $delegates($index)
-	set ok 1
-	foreach item $selection {
-	    if { ! [::tycho::lmember $tags $item] \
-		    && [::tycho::ldisjoint $tags [$slate gettags $item]] } {
-		set ok 0
-		break
-	    }
-	}
-	if { $ok } {
-	    # Bind it
-	    eval $interactor bind $selecttag $options
-	} else {
-	    # Make sure it's not bound
-	    catch {eval $interactor unbind $selecttag $options}
-	}
-    }
-}
-
-#######################################################################
-#### claimSelection
-#
-# Claim the X selection if *-exportselection* is enabled and the
-# selection is not empty.
-#
-body ::tycho::Selector::claimSelection {} {
-    if { $exportselection && [selection] != "" } {
-	::selection own -command "$this clear" $slate
-    }
-}
-
-#######################################################################
-#### clear
-#
-body ::tycho::Selector::clear {} {
-    # Remove highlights
-    $slate unhighlight $selecttag
-
-    # Remove the selection tag
-    $slate dtag $selecttag
-
-    # Execute the deselection command
-    if { $deselectcommand != "" } {
-    	uplevel #0 $deselectcommand
-    }
-}
-
-#######################################################################
 #### click
 #
 # Start an interaction sequence.
 #
 body ::tycho::Selector::click {x y args} {
     if { $selectmode == "select" } {
-	$this clear
+	_clear
     }
 
     # Rebind delegates to make sure any active ones are made inactive
@@ -617,38 +382,6 @@ body ::tycho::Selector::delegate {mode howmany interactor tag args} {
 }
 
 #######################################################################
-#### deselect
-#
-body ::tycho::Selector::deselect {id} {
-    if { [selected $id] } {
-	# Deselect it
-	_deselect $id
-
-	# Update the delegate bindings
-	$this bindDelegates
-    }
-    # Claim the selection if appropriate
-    claimSelection
-}
-
-#######################################################################
-#### describe
-#
-# Return a string describing the current seleciton. If arguments are
-# given, they are the offset into the description and the maximum
-# number of bytes to return, as required by selection handlers.#
-# (FIXME: Not implemented yet.)
-#
-body ::tycho::Selector::describe {args} {
-    set description ""
-    set selection [selection]
-    foreach item [selection] {
-	append description [$slate describe $item] "\n"
-    }
-    return $description
-}
-
-#######################################################################
 #### drag
 #
 # Continue an interaction sequence with a mouse move. The behaviour
@@ -691,7 +424,7 @@ body ::tycho::Selector::drag {x y} {
 	    if { [::tycho::lmember $bindings $o] \
 		    || ! [::tycho::ldisjoint $bindings $tags] } {
 		# Select it
-		$this _select $o
+		_select $o
 	    }
 	}
     	# Deselect selectable objects that are no longer covered
@@ -699,7 +432,7 @@ body ::tycho::Selector::drag {x y} {
 	    if { [::tycho::lmember $bindings $o] \
 		    || ! [::tycho::ldisjoint $bindings $tags] } {
 		# Deselect it
-		$this _deselect $o
+		_deselect $o
 	    }
     	}
     } else {
@@ -710,12 +443,12 @@ body ::tycho::Selector::drag {x y} {
 	    if { [::tycho::lmember $bindings $o] \
 		    || ! [::tycho::ldisjoint $bindings $tags] } {
 		# Test if already selected or not, and act accordingly
-		if { [selected $o] } {
+		if { [$slate hastag $o "sel"] } {
 		    # Deselect it
-		    $this _deselect $o
+		    _deselect $o
 		} else {
 		    # Select it
-		    $this _select $o
+		    _select $o
 		}
 	    }
 	}
@@ -741,15 +474,12 @@ body ::tycho::Selector::itemclick {tag x y args} {
     ::tycho::getflag toggle args
     if { ! $toggle } {
 	# Select it if it isn't already
-	if { ! [selected $current] } {
+	if { ! [$slate hastag $current "sel"] } {
 	    # Deselect all currently selected objects
-	    $this clear
+	    _clear
 
 	    # Select and highlight the current object
-	    $this _select $current
-
-	    # Claim the selection if appropriate
-	    claimSelection
+	    _select $current
 	}
 
 	# Activate the delegate if there is one
@@ -757,18 +487,16 @@ body ::tycho::Selector::itemclick {tag x y args} {
 
     } else {
 	# Toggle the state of the clicked-on item
-	if { [selected $current] } {
+	if { [$slate hastag $current "sel"] } {
 	    # The item is selected, so deselect it
-	    $this _deselect $current
+	    _deselect $current
 	} else {
 	    # The item is not selected. Select and highlight it
-	    $this _select $current
+	    _select $current
 
 	    # Activate the delegate if there is one
 	    eval $this activateDelegates $current $x $y $args
 	}
-	# Claim the selection if appropriate
-	claimSelection
     }
     # Adjust delegate bindings
     $this bindDelegates
@@ -791,9 +519,6 @@ body ::tycho::Selector::release {} {
     # this is not done in drag{}, since the bindings couldn't be
     # be activated anyway because the mouse is still moving.)
     $this bindDelegates
-
-    # Claim the selection if appropriate
-    claimSelection
 }
 
 #######################################################################
@@ -816,38 +541,6 @@ body ::tycho::Selector::resize {} {
 }
 
 #######################################################################
-#### select
-#
-# Select a picture. The picture will be tagged with the value of
-# the *-selecttag* option.
-# 
-body ::tycho::Selector::select {id} {
-    if { ! [selected $id] } {
-	# Select it
-	_select $id
-
-	# Update the delegate bindings
-	$this bindDelegates
-    }
-    # Claim the selection if appropriate
-    claimSelection
-}
-
-#######################################################################
-#### selected
-#
-body ::tycho::Selector::selected {id} {
-    return [::tycho::lmember [$slate gettags $id] $selecttag]
-}
-
-#######################################################################
-#### selection
-#
-body ::tycho::Selector::selection {} {
-    return [$slate find withtag $selecttag]
-}
-
-#######################################################################
 #### unbind
 #
 # Remove the selector from the given background item or tag.
@@ -863,5 +556,181 @@ body ::tycho::Selector::unbind {mode tag args} {
     	$slate bind $tag $event {}
     } else {
     	$slate bind $tag $event {}
+    }
+}
+
+#######################################################################
+#### refresh
+#
+# The selection has been changed by someone else. Update the
+# delegate bindings.
+#
+body ::tycho::Selector::refresh {} {
+    bindDelegates
+}
+body ::tycho::Slate::selector {args} {
+    # If there's no selector, create one. Note that some options
+    # are given directly to the selector.
+    if { ! [::info exists selector] } {
+	set selector [interactor Selector]
+    }
+
+    # Return the selector or evaluate a command on it
+    if { $args == "" } {
+	return $selector
+    } else {
+    	uplevel #0 $selector $args
+    }
+}
+
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+
+#######################################################################
+#### _clear
+#
+body ::tycho::Selector::_clear {} {
+    if { $clearprefix == "" } {
+	$slate select clear
+    } else {
+	eval $clearprefix
+    }
+}
+
+#######################################################################
+#### _deselect
+#
+body ::tycho::Selector::_deselect {id} {
+    if { $deselectprefix == "" } {
+	$slate select _remove $id
+    } else {
+	eval $deselectprefix $id
+    }
+}
+
+#######################################################################
+#### _select
+#
+body ::tycho::Selector::_select {id} {
+    if { $selectprefix == "" } {
+	$slate select _add $id
+    } else {
+	eval $selectprefix $id
+    }
+}
+
+#######################################################################
+#### activateDelegates
+#
+# Activate delegate interactors when a new item is added to
+# the selection. This method is called whenever a new item
+# is added to the selection by a mouse click.
+#
+body ::tycho::Selector::activateDelegates {id x y args} {
+    set selection [$slate find withtag "sel"]
+    set selcount [llength $selection]
+    
+    # Process interactors that operate on a single item only
+    if { $selcount == 1 } { 
+	foreach index [array names delegates immediate,single,*] {
+	    # Activate the delegate interactor if that item is in the tags
+	    # or if it has a tag that is in the tags
+	    ::tycho::assign interactor tags options $delegates($index)
+	    if { $selcount == 1 } {
+		if { $args == $options } {
+		    if { [::tycho::lmember $tags $id] \
+			    || ! [::tycho::ldisjoint \
+			    $tags [$slate gettags $id]] } {
+			# Activate it; it will deactivate automatically
+			eval $interactor activate $id $options
+		    }
+		}
+	    }
+	}
+    }
+    # Process interactors that operate on the whole selection
+    foreach index [array names delegates immediate,selected,*] {
+	# Activate a delegate interactor on the whole selection if
+	# every item is either in the interactor's tags or if it
+	# has a tag that is.
+	::tycho::assign interactor tags options $delegates($index)
+	if { $args == $options } {
+	    set ok 1
+	    foreach item $selection {
+		if { ! [::tycho::lmember $tags $item] \
+			&& [::tycho::ldisjoint \
+			$tags [$slate gettags $item]] } {
+		    set ok 0
+		    break
+		}
+	    }
+	    if { $ok } {
+		# Activate it; it will deactivate automatically
+		eval $interactor activate "sel" $x $y $options
+	    }
+	}
+    }
+}
+
+#######################################################################
+#### bindDelegates
+#
+# Bind or unbind delegate interactors in "subsequent" mode. This
+# method is called whenever the selection has changed by means other
+# than direct mouse clicks on an item.
+#
+# FIXME: Binding to a delegate means we have to unbind the selector
+# from that item!
+#
+body ::tycho::Selector::bindDelegates {} {
+    set selection [$slate find withtag "sel"]
+    set selcount [llength $selection]
+
+    # Process interactors that operate on a single item only
+    foreach index [array names delegates subsequent,single,*] {
+	::tycho::assign interactor tags options $delegates($index)
+
+	if { $selcount == 1 } {
+	    set id [lindex $selection 0]
+	    # If there is only one item and it's in that interactor's
+	    # tags or has a tag in that interactor's tags, bind it
+	    if { [::tycho::lmember $tags $id] \
+		    || ! [::tycho::ldisjoint $tags [$slate gettags $id]] } {
+		# Bind it
+		eval $interactor bind $id $options
+		continue
+	    }
+	}
+	# Make sure it's not bound
+	set target [$interactor target]
+	if { $target != "" } {
+	    eval $interactor unbind $target $options
+	}
+    }
+
+    # Process interactors that operate on the whole selection
+    foreach index [array names delegates subsequent,selected,*] {
+	# Activate a delegate interactor on the whole selection if
+	# every item is either in the interactor's tags or if it
+	# has a tag that is.
+	::tycho::assign interactor tags options $delegates($index)
+	set ok 1
+	foreach item $selection {
+	    if { ! [::tycho::lmember $tags $item] \
+		    && [::tycho::ldisjoint $tags [$slate gettags $item]] } {
+		set ok 0
+		break
+	    }
+	}
+	if { $ok } {
+	    # Bind it
+	    eval $interactor bind "sel" $options
+	} else {
+	    # Make sure it's not bound
+	    catch {eval $interactor unbind "sel" $options}
+	}
     }
 }
