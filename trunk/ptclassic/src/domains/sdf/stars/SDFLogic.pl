@@ -79,7 +79,7 @@ The other operations are self-explanatory.
 	go {
 	    MPHIter nexti(input);
 	    PortHole *p;
-	    int result;
+	    int result = 0;
 
 	    switch( test ) {
 		case NOTID:
