@@ -306,6 +306,9 @@ class ::tycho::File {
     # Call the saveCrash method for all File objects.
     proc emergencySave {} {}
 
+    # Make a ~/.Tycho directory, if doesn't already exist.
+    proc makeTychoDir {} {}
+
     # Open a new editor of the specified class.
     proc newEditor {editor} {}
 
@@ -1214,7 +1217,35 @@ body ::tycho::File::emergencySave {} {
     foreach obj [array names fileObjects] {
 	$obj saveCrash
     }
-}    
+}
+
+#####################################################################
+#### makeTychoDir
+# If the directory ~/.Tycho does not exist, make it. If there is a file
+# by the name "~/.tycho" (the old name for the Tycho initialization
+# file), and no file named ~/.Tycho/tychorc.tcl, then copy ~/.tycho
+# into ~/.Tycho/tychorc.tcl.
+# NOTE: Unix implementation.
+# 
+body ::tycho::File::makeTychoDir {} {
+    set home [glob ~]
+    if {![file exists "$home/.Tycho"]} {
+        exec mkdir "$home/.Tycho"
+    } {
+        if {![file isdirectory "$home/.Tycho"]} {
+            error "Cannot create ~/.Tycho directory because a file \
+                    exists by that name."
+        }
+    }
+    if {![file exists "$home/.Tycho/tychorc.tcl"] && \
+            [file exists "$home/.tycho"]} {
+        if [::tycho::askuser \
+                {Ok to copy your ~/.tycho file to the new place: \
+                ~/.Tycho/tychorc.tcl?}] {
+            exec cp $home/.tycho $home/.Tycho/tychorc.tcl
+        }
+    }
+}
 
 #####################################################################
 #### newEditor
