@@ -75,10 +75,9 @@ int main (int argc, char *argv[])
   }
 
   while( (count = fread(dataBuf, sizeof(char), BUFSIZ, FIn)) != 0) {
-    ioctl(fDevAudio, AUDIO_GETINFO, &info);
+
     /* Wait for some samples to drain */
-    while ((info.play.samples) > 2000)
-      ioctl(fDevAudio, AUDIO_GETINFO, &info);
+    ioctl(fDevAudio, AUDIO_DRAIN, &info);
 
     /* Write data to file. */
     if (write(fDevAudio, dataBuf, count) != count) {
