@@ -3,7 +3,8 @@ defstar {
 	domain { DDF }
 	desc {
 This star routes an "input" token to one "output" depending on the 
-"control" token.
+"control" token.  The value of the control token should lie between
+zero and N-1, inclusive, where N is the number of outputs.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }

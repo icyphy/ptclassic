@@ -3,7 +3,8 @@ defstar {
 	domain { DDF }
 	desc {
 Depending on the "control" input, route an "input" to
-the "output".
+the "output".  The value of the control token should lie between
+zero and N-1, inclusive, where N is the number of inputs.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
