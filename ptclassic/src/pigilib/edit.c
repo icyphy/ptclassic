@@ -17,6 +17,8 @@ $Id$
 #include "octIfc.h"
 #include "exec.h"
 
+void FindClear();
+
 #define dmWidth 40
 #define dmIncrement 20
 
@@ -32,20 +34,18 @@ octObject *instPtr;
 {
     octObject delayProp;
     static dmTextItem item = {"Number of delays", 1, 10, NULL, NULL};
-    int n;
     char buf[100];
 
     GetOrInitDelayProp(instPtr, &delayProp);
-    item.value = sprintf(buf, "%ld", delayProp.contents.prop.value.integer);
+    StringizeProp(&delayProp, buf, 100);
+    item.value = buf;
     if (dmMultiText("Edit Delay", 1, &item) != VEM_OK) {
 	PrintCon("Aborted entry");
         return(TRUE);
     }
-    if ((n = atoi(item.value)) <= 0) {
-	ErrAdd("Invalid entry: number must be > 0");
-        return(FALSE);
-    }
-    delayProp.contents.prop.value.integer = (long) n;
+    delayProp.contents.prop.type = OCT_STRING;
+    delayProp.contents.prop.value.string = item.value;
+    IntizeProp(&delayProp);
     (void) octModify(&delayProp);
     return(TRUE);
 }
@@ -56,20 +56,18 @@ octObject *instPtr;
 {
     octObject busProp;
     static dmTextItem item = {"Bus Width", 1, 10, NULL, NULL};
-    int n;
     char buf[100];
 
     GetOrInitBusProp(instPtr, &busProp);
-    item.value = sprintf(buf, "%ld", busProp.contents.prop.value.integer);
+    StringizeProp(&busProp, buf, 100);
+    item.value = buf;
     if (dmMultiText("Edit Bus Width", 1, &item) != VEM_OK) {
 	PrintCon("Aborted entry");
         return(TRUE);
     }
-    if ((n = atoi(item.value)) <= 0) {
-	ErrAdd("Invalid entry: number must be > 0");
-        return(FALSE);
-    }
-    busProp.contents.prop.value.integer = (long) n;
+    busProp.contents.prop.type = OCT_STRING;
+    busProp.contents.prop.value.string = item.value;
+    IntizeProp(&busProp);
     (void) octModify(&busProp);
     return(TRUE);
 }
