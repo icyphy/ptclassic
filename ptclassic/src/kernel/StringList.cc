@@ -155,7 +155,11 @@ StringList :: consolidate () {
 	if (size() <= 1) return head();
 	// Allocate new memory
 	char* s = newCopy();
-	initialize();
+
+	int temp = totalSize;
+	initialize();	// initialize reset totalSize = 0;
+	totalSize = temp;
+
 	put(s);
 	return s;
 }
