@@ -250,7 +250,7 @@ body ::tycho::ItclParser::readFile {filename} {
     set fd [open $filename]
     while {![eof $fd]} {
         # Keep interface live
-        tydocUpdate $this
+        idocUpdate $this
 
         gets $fd lineIn
      
@@ -380,11 +380,11 @@ body ::tycho::ItclParser::getClassesInSource {filename} {
 # appropriate sibling for the file extension.
 #
 body ::tycho::ItclParser::modCheck {filename} {
-    global TYCHO
+    global env
 
     # Check to see if the generator itself has been changed.
-    set itclGenTime [file mtime [file join $TYCHO lib tydoc ItclParser.itcl]]
-    set idocGenTime [file mtime [file join $TYCHO lib tydoc ClassParser.itcl]]
+    set itclGenTime [file mtime [file join $env(IDOC_LIBRARY) ItclParser.itcl]]
+    set idocGenTime [file mtime [file join $env(IDOC_LIBRARY) ClassParser.itcl]]
     if {$itclGenTime > $idocGenTime} {
         set genTime $itclGenTime
     } {
@@ -715,7 +715,7 @@ body ::tycho::ItclParser::parseClass {class body} {
     # Parse each item
     foreach construct $body {
         # Keep interface live
-        tydocUpdate $this
+        idocUpdate $this
 
         # Ignore empty lines (is necessary?)
         if {$construct == "\n"} {
@@ -946,7 +946,7 @@ body ::tycho::ItclParser::parseData {data} {
     set lastComment {}
     foreach construct $data {
         # Keep interface live.
-        tydocUpdate $this
+        idocUpdate $this
 
         if {$inComment} {
             # This is a comment. Save it.
