@@ -34,7 +34,7 @@ PacketData::~PacketData() {}
 int PacketData::asInt() const {
 	return errorConvert("int");
 }
-float PacketData::asFloat() const {
+double PacketData::asFloat() const {
 	return errorConvert("float");
 }
 Complex PacketData::asComplex() const {
@@ -119,8 +119,12 @@ PacketSample::operator int () const {
 	return data.asInt();
 }
 
-PacketSample::operator float () const {
+PacketSample::operator double () const {
 	return data.asFloat();
+}
+
+PacketSample::operator float () const {
+	return float(data.asFloat());
 }
 
 PacketSample::operator Complex () const {
@@ -144,8 +148,8 @@ void PacketSample::initialize() { data = dummy;}
 // error and calls Error::abortRun().
 
 void PacketSample::operator << (int) { errorAssign("int");}
-void PacketSample::operator << (float) { errorAssign("float");}
-void PacketSample::operator << (Complex&) { errorAssign("complex");}
+void PacketSample::operator << (double) { errorAssign("double");}
+void PacketSample::operator << (const Complex&) { errorAssign("complex");}
 
 // only loader that works.
 void PacketSample::operator << (const Packet& p) { data = p;}

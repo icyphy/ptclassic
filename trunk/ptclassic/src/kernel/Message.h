@@ -40,7 +40,7 @@ public:
 
 	// functions that may be specified by specific packets.
 	virtual int asInt() const;
-	virtual float asFloat() const;
+	virtual double asFloat() const;
 	virtual Complex asComplex() const;
 
 	// type of the PacketData.  When overriding, be SURE
@@ -112,7 +112,7 @@ public:
 
 	// interfaces to PacketData functions
 	int asInt() const { return d->asInt();}
-	float asFloat() const { return d->asFloat();}
+	double asFloat() const { return d->asFloat();}
 	Complex asComplex() const { return d->asComplex();}
 	StringList print() const { return d->print();}
 
@@ -133,6 +133,7 @@ public:
 
 	operator int () const;
 	operator float () const;
+	operator double () const;
 	operator Complex () const;
 	StringList print() const;
 
@@ -147,8 +148,8 @@ public:
 	// load with data -- these cause errors except for a Packet argument.
 
 	void operator << (int i);
-	void operator << (float f);
-	void operator << (Complex& c);
+	void operator << (double f);
+	void operator << (const Complex& c);
 	void operator << (const Packet& p);
 
 	// particle copy
