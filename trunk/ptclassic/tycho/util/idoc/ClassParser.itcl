@@ -1,0 +1,882 @@
+# Generate an IDoc file (a representation of a ::tycho::Class) from source
+#
+# @Author: Cliff Cordeiro
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### IDocSys
+# Description of class.
+#
+# <p>
+# Here is an example of how to use the IDocSys:
+# <tcl><pre>
+#     ::tycho::IDocSys .x ...
+# </pre></tcl>
+#
+class ::tycho::IDocSys {
+    inherit ::tycho::TyDoc
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # One line description of xxxx option; listed in alphabetical order
+
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Generate the IDocumentation for a single Itcl file.
+    method generateIDoc {filename}
+
+    # One line description of the method
+
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    # One line description procedure; listed in alphabetical order
+
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    # One line description of the method; listed in alphabetical order
+
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+
+    protected variable Author ""
+
+    protected variable Contributor ""
+
+    protected variable Version ""
+
+    protected variable Copyright ""
+
+    # language for the current file
+    protected variable language
+
+    # an array of ::tycho::Class objects for this file
+    protected variable myClass
+
+    protected variable sourceFile
+
+    protected variable relClass
+
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    private method readFile {filename}
+  
+    private method parseData {data}
+
+    private method parseClass {class body}
+
+    private method addClassComment {class expl}
+
+    private method addArgs {class entityName arguments}
+
+    private method addConstructor {class arguments desc}
+
+    private method addDestructor {class desc}
+
+    private method addItk_Option {class switchName desc {default {}}}
+    
+    private method addCommon {class commonName protection desc {default {}}}
+    
+    private method addVariable {class varName protection desc {default {}}}
+
+    private method addInsideProc {class procName arguments protection desc}
+    
+    private method addMethod {class methodName protection arguments desc} 
+
+    private method addBody {bodyName arguments expl}
+
+    private method addConfigBody {configName expl}
+
+    private method addOutsideProc {procName arguments expl}
+
+
+    private method formatDesc {comment}
+
+    private method formatExpl {comment}
+
+    private method getSourceFile {classname}
+
+    private method getDocFile {classname}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # A comment before one or a group of private variables;
+    private variable myFilename
+
+    # Keywords that can appear in a class definition
+    private common keywords "# variable common itk_option method proc constructor destructor public private protected inherit set array"
+
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::IDocSys::constructor {args} {
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#####################################################################
+#### generateIDoc
+# Generate an IDoc (::tycho::Class) representation of the given Itcl
+# file. 
+#
+body ::tycho::IDocSys::generateIDoc {filename} {
+
+    set filename [::tycho::expandPath $filename]
+
+    if {[file type $filename] != "file"} {
+        error "::tycho::IDocSys::generateIDoc processes single files only"
+    }
+
+    # check extension (only itk, itcl supported as yet)
+    set ext [file extension $filename]
+    switch $ext {
+        .itcl {
+            set language Itcl
+        }
+        .itk {
+            set language Itk
+        }
+        default {
+            error "::tycho::IDocSys does not support $ext files"
+        }
+    }
+    
+    set myClass(related) [::tycho::Class [::tycho::autoName class]]
+
+    set data [readFile $filename]
+    parseData $data
+
+    foreach class [array names myClass] {
+        puts $class
+         puts [$myClass($class) describe]
+         if {$class != "related"} {
+             set dis [::tycho::Displayer [::tycho::autoName .displayer]]
+             set id [::tycho::IDoc $dis.idoc]
+             
+             $dis centerOnScreen
+             $dis showView $id
+             $id insertData [$myClass($class) describe]
+         }
+    }
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#####################################################################
+#### readFile 
+# 
+#
+body ::tycho::IDocSys::readFile {filename} {
+    
+    # Read in the file line by line, identify comments, bracket protect 
+    # the comment contents and then append to a variable.
+
+    # NOTE: simplify the filename?
+    set sourceFile $filename
+    set inEscapedComments ""
+    set currentComment {}
+    set currentLongLine {}
+    set fd [open $filename]
+    while {![eof $fd]} {
+        gets $fd lineIn
+     
+        if {[regexp {^[	 ]*$} $lineIn]} {
+            # Remove blank lines
+            continue
+        }
+
+        if {[regexp {\\$} $lineIn]} {
+            # Concatenate lines ending with a \.
+        }
+         
+        if [ regexp {^[	 ]*#(.*)$} $lineIn dummy commentText ] {
+            # It's some sort of comment
+            if {[regexp {^# --+[ 	]*$} $lineIn ]} {
+                # Filter out comment lines like the ones in iwidgets:
+                # -----------------------------------
+                continue
+            }
+            if {[regexp {^[	 ]*##+.*$} $lineIn]} {
+                # Filter out comment lines with multiple #'s
+                continue
+            }
+            # Store adjacent comments
+            append currentComment $commentText "\n"
+        } else {
+            # The text is not a comment line
+            if {$currentComment != {}} {
+                append inEscapedComments "# " [list $currentComment] "\n"
+                set currentComment {}
+            }
+            if {$currentLongLine != {}} {
+                # Currently have a long line
+                if {[regexp {\\$} $lineIn]} {
+                    # Another follows
+                    append currentLongLine " " [string trimleft \
+                            [string trimright $lineIn \\]]
+                } else {
+                    # This is the last
+                    append currentLongLine " " [string trimleft $lineIn]
+                    append inEscapedComments $currentLongLine "\n"
+                    set currentLongLine {}
+                }
+                continue
+            }
+            if {[regexp {\\$} $lineIn]} {
+                # Begin a new long line (ending in "\")
+                append currentLongLine [string trimright $lineIn \\]
+                continue
+            }
+            append inEscapedComments $lineIn "\n"
+        } 
+    }
+    # Make sure all comments are saved
+    if {$currentComment != {}} {
+        append inEscapedComments "# " $currentComment "\n"
+    }
+    close $fd
+
+    return "$inEscapedComments"
+}
+
+# Expects a modified source file, with adjacent comments all on one line,
+# useless comments removed. NOTE: @ tags are only recognized in the class
+# comment, the comment that appears before the class definition.
+body ::tycho::IDocSys::parseData {data} {
+    set inComment 0
+    set inOutsideProc 0
+    set inBody 0
+    set inConfigBody 0
+    set inEnsemble 0
+    set inClass 0
+    set lastComment {}
+    foreach construct $data {
+        if {$construct == "\n"} {
+            # Ignore empty lines 
+            continue
+        }
+        if {$inComment} {
+            # This is a comment. Save it.
+            set lastComment "$construct"
+            set inComment 0
+            continue
+        }
+        if {$inOutsideProc} {
+            # This is an outside proc. proc name args body
+            if {$inOutsideProc == 1} {
+                set procName $construct
+                set inOutsideProc 2
+            } elseif {$inOutsideProc == 2} {
+                set args $construct
+                set inOutsideProc 3
+            } else {
+                # puts "PROC: $procName ARGS: $args BODY: $construct"
+                addOutsideProc $procName $args $lastComment
+                set inOutsideProc 0
+                set lastComment {}
+                set procName {}
+                set args {}
+            }
+            continue
+        }
+        if {$inBody} {
+            # This is part of a body statement. body class::func arglist body
+            if {$inBody == 1} {
+                set bodyName $construct
+                set inBody 2
+            } elseif {$inBody == 2} {
+                set args $construct
+                set inBody 3
+            } else {
+                # puts "BODY: $bodyName ARGS: $args BODY: $construct"
+                addBody $bodyName $args $lastComment
+                set inBody 0
+                set lastComment {}
+                set bodyName {}
+                set args {}
+            }
+            continue
+        }
+        if {$inConfigBody} {
+            # This is part of a configbody statement. 
+            # configbody class::option body
+            if {$inConfigBody == 1} {
+                set optionName $construct
+                set inConfigBody 2
+            } else {
+                # puts "CONFIG: $optionName BODY: $construct"
+                addConfigBody $optionName $lastComment
+                set inConfigBody 0
+                set lastComment {}
+                set optionName {}
+            }
+            continue
+        }
+        if {$inEnsemble} {
+            # This is part of an ensemble statement. ensemble name { commands }
+            if {$inEnsemble == 1} {
+                set ensembleName $construct
+                set inEnsemble 2
+            } else {
+                #puts "ENS: $ensembleName BODY: $construct"
+                set inEnsemble 0
+                # FIXME: ensembles are unsupported
+                # Keep lastComment: probably relates to Class
+                set ensembleName {}
+            }
+            continue
+        }
+        if {$inClass} {
+            # This is part of a class statement. class name { definition }
+            if {$inClass == 1} {
+                set className $construct
+                set inClass 2
+            } else {
+                # puts "CLASS: $className BODY: $construct"
+                parseClass $className $construct
+                addClassComment $className $lastComment
+                set inClass 0
+                set lastComment {}
+                set className {}
+            }
+            continue
+        }
+        if {[string index $construct 0] == "#"} {
+            # A comment follows.
+            set inComment 1
+            continue
+        }
+        if {$construct == "proc"} {
+            # A proc follows.
+            set inOutsideProc 1
+            continue
+        }
+        if {$construct == "body"} {
+            # A body follows.
+            set inBody 1
+            continue
+        }
+        if {$construct == "configbody"} {
+            # A configbody follows.
+            set inConfigBody 1
+            continue
+        }
+        if {$construct == "ensemble"} {
+            # An ensemble follows.
+            set inEnsemble 1
+            continue
+        }
+        if {$construct == "class"} {
+            # A class follows.
+            set inClass 1
+            continue
+        } 
+        # puts "UNCLASSIFIED: $construct"
+    }
+}
+
+body ::tycho::IDocSys::parseClass {class body} {
+    set myClass($class) [::tycho::Class [::tycho::autoName class]]
+    $myClass($class) modelconfigure -language $language
+    $myClass($class) modelconfigure -name $class
+    $myClass($class) modelconfigure -source $sourceFile
+
+    set lastComment {}
+    set lastProtection {}
+    set default {}
+    set inComment 0
+    set inVariable 0
+    set inCommon 0
+    set inItk_Option 0
+    set inMethod 0
+    set inProc 0
+    set inConstructor 0
+    set inDestructor 0
+    set inInherit 0
+
+    # To assure every item is seen
+    lappend body # #
+
+    # Parse each item
+    foreach construct $body {
+        # Ignore empty lines (is necessary?)
+        if {$construct == "\n"} {
+            continue
+        }
+
+        # First, check if last word was a keyword
+        if {$inComment} {
+            # This is a comment. Save it.
+            set lastComment "$construct"
+            set inComment 0
+            continue
+        }
+        if {$inVariable} {
+            if {$inVariable == 1} {
+                set name $construct
+                # Default protection is protected
+                if {$lastProtection == {}} {
+                    set lastProtection protected
+                }
+                set inVariable 2
+                continue
+            }
+            # Check for initial value
+            if {[lsearch -exact $keywords $construct] == -1} {
+                # Must be an initial value, save it.
+                # FIXME: can be broken by having an initial value
+                # that is a keyword, as newlines are not considered
+                # NOTE: variables can have an initialization code
+                # field. This is ignored by the parser and is not
+                # specifically checked.
+                addVariable $class $name $lastProtection \
+                        $lastComment $construct
+                set inVariable 0
+                set lastComment {}
+                set lastProtection {}
+                continue 
+            }
+            # No initial value, parse construct.
+            addVariable $class $name $lastProtection $lastComment
+            set inVariable 0
+            set lastComment {}
+            set lastProtection {}
+        }
+        if {$inCommon} {
+            if {$inCommon == 1} {
+                set name $construct
+                # Default protection is protected
+                if {$lastProtection == {}} {
+                    set lastProtection protected
+                }
+                set inCommon 2
+                continue
+            }
+            # Check for initial value
+            if {[lsearch -exact $keywords $construct] == -1} {
+                # Must be an initial value, save it.
+                # FIXME: can be broken by having an intial value
+                # that is a keyword, as newlines are not considered
+                addCommon $class $name $lastProtection \
+                        $lastComment $construct
+                set inCommon 0
+                set lastComment {}
+                set lastProtection {}
+                continue
+            }
+            # Continue parsing this, there is no initial value
+            addCommon $class $name $lastProtection $lastComment
+            set inCommon 0
+            set lastComment {}
+            set lastProtection {}
+        }
+        if {$inItk_Option} {
+            if {$inItk_Option == 1} {
+                if {$construct != "define"} {
+                    # NOTE: must be itk_option define ...
+                    set inItk_Option 0
+                    continue
+                }
+                set inItk_Option 2
+                continue
+            }
+            if {$inItk_Option == 2} {
+                # save switchname
+                set name $construct
+                set inItk_Option 3
+                continue
+            }
+            if {$inItk_Option != 5} {
+                incr inItk_Option
+                continue
+            }
+            # At init value
+            addItk_Option $class $name $lastComment $construct
+            set inItk_Option 0
+            set lastComment {}
+            continue
+        }
+        if {$inMethod} {
+            if {$inMethod == 1} {
+                set name $construct
+                # Default protection is public
+                if {$lastProtection == {}} {
+                    set lastProtection public
+                }
+                set inMethod 2
+                continue
+            }
+            # Getting args
+            addMethod $class $name $lastProtection $construct $lastComment
+            set inMethod 0
+            set lastComment {}
+            set lastProtection {}
+            continue
+        } 
+        if {$inProc} {
+            if {$inProc == 1} {
+                set name $construct
+                # Default protection is public
+                if {$lastProtection == {}} {
+                    set lastProtection public
+                }
+                set inProc 2
+                continue
+            }
+            # Getting args
+            addInsideProc $class $name $lastProtection $construct $lastComment
+            set inProc 0
+            set lastComment {}
+            set lastProtection {}
+            continue
+        } 
+        if {$inConstructor} {
+            # $construct is args, init and body will be ignored by parser
+            addConstructor $class $construct $lastComment
+            set inConstructor 0
+            set lastComment {}
+            continue
+        }
+        if {$inDestructor} {
+            # No args. $construct is destructor body. Ignore.
+            addDestructor $class $lastComment
+            set inDestructor 0
+            set lastComment {}
+            continue
+        }
+        if {$inInherit} {
+            if {[string range $construct 0 1] == "::"} {
+                $myClass($class) parent $construct \
+                        -sourcefile [getSourceFile $construct] \
+                        -docfile [getDocFile $construct]
+                continue
+            }
+            # No more parents, parse this.
+            set $inInherit 0
+        }
+
+        # Below, parse keywords
+        # NOTE: does not support private {method {}{} variable {} ...}
+        switch $construct {
+            "#" {
+                set inComment 1
+            }
+            "private" {
+                set lastProtection private
+            }
+            "protected" {
+                set lastProtection protected
+            }
+            "public" {
+                set lastProtection public
+            }
+            "variable" {
+                set inVariable 1
+            }
+            "common" {
+                set inCommon 1
+            }
+            "itk_option" {
+                set inItk_Option 1
+            }
+            "method" {
+                set inMethod 1
+            }
+            "proc" {
+                set inProc 1
+            }
+            "constructor" {
+                set inConstructor 1
+            }
+            "destructor" {
+                set inDestructor 1
+            }
+            "inherit" {
+                set inInherit 1
+            }
+            default {
+                # puts "#UNCLASSIFIED: $construct"
+            }
+        }
+    }
+}
+
+body ::tycho::IDocSys::addClassComment {class expl} {
+    set classModel $myClass($class)
+    #FIXME: implement!!
+    # initialize possible tags
+
+    # strip leading spaces
+    set explList [split $expl "\n"]
+    set docTag desc
+    foreach explLine $explList {
+        if [regexp {^ @([A-Za-z]+):*[ 	]+(.*)} \
+		$explLine dummy docTag docValue] {
+	    set explLine $docValue
+	    # puts "ct: $docTag, cl: $docValue"
+	}
+	if {$docTag == "Copyright"} {
+	    if {[set $docTag] == "" } {
+		# We save only the first line of the copyright
+		append $docTag $explLine "\n"
+            } else {
+                if {[regexp {COPYRIGHTENDKEY} $explLine]} {
+                    # ignore until the key
+                    set docTag desc
+                }
+            }
+        } else {
+	    append $docTag $explLine "\n"
+        }
+    }
+    
+    set expl [formatExpl $desc]
+    
+    # setup footer
+    append expl <hr>
+    if {$Author != ""} {
+        append expl "<br>Author: $Author"
+    }
+    if {$Contributor != ""} {
+        if {[llength $Contributor] == 1} {
+            append expl "<br>Contributor: $Contributor"
+        } {
+            append expl "<br>Contributors: $Contributor"
+        }
+    }
+    if {$Version != ""} {
+        append expl "<br>Version: $Version"
+    }
+    if {$Copyright != ""} {
+        append expl "<br>Copyright: $Copyright"
+    }
+    $classModel annotation explanation "$expl"
+}
+
+body ::tycho::IDocSys::addArgs {class entityName arguments} {
+    set classModel $myClass($class)
+    foreach arg $arguments {
+        set default [lindex $arg 1]
+        # check the length in case the default is {}
+        if {[llength $arg] == 2} {
+            $classModel parameter $entityName [lindex $arg 0] \
+                    -optional 1 -default $default
+        } else {
+            $classModel parameter $entityName $arg
+        }
+    }
+}
+
+body ::tycho::IDocSys::addConstructor {class arguments desc} {
+    set classModel $myClass($class)
+    $classModel Constructor constructor
+    set desc [formatDesc $desc]
+    $classModel annotation constructor.description $desc
+    addArgs $class constructor $arguments    
+}
+
+body ::tycho::IDocSys::addDestructor {class desc} {
+    set classModel $myClass($class)
+    $classModel Destructor destructor
+    set desc [formatDesc $desc]
+    $classModel annotation destructor.description $desc
+}
+
+body ::tycho::IDocSys::addItk_Option {class switchName desc {default {}}} {
+    # Itk_options have the modifier flag set to itk_option in Itcl
+    set classModel $myClass($class)
+    $classModel variable $switchName \
+            -protection public -modifiers itk_option -default $default
+    set desc [formatDesc $desc]
+    $classModel annotation $switchName.description $desc
+}
+
+body ::tycho::IDocSys::addCommon {class commonName protection \
+        desc {default {}}} {
+    # Commons are variables of classwide scope in Itcl
+    set classModel $myClass($class)
+    $classModel variable $commonName \
+            -protection $protection -scope class -default $default
+    set desc [formatDesc $desc]
+    $classModel annotation $commonName.description $desc
+}
+
+body ::tycho::IDocSys::addVariable {class varName protection \
+        desc {default {}}} {
+    # Variables are variables of instance scope in Itcl
+    set classModel $myClass($class)
+    $classModel variable $varName \
+            -protection $protection -scope instance -default $default
+    set desc [formatDesc $desc]
+    $classModel annotation $varName.description $desc
+}
+
+body ::tycho::IDocSys::addInsideProc {class procName protection \
+        arguments desc} {
+    # Procs are methods of classwide scope in Itcl
+    set classModel $myClass($class)
+    $classModel method $procName -protection $protection -scope class
+    set desc [formatDesc $desc]
+    $classModel annotation $procName.description $desc
+    addArgs $class $procName $arguments
+}    
+
+body ::tycho::IDocSys::addMethod {class methodName protection arguments desc} {
+    # Methods are methods of instance scope in Itcl
+    set classModel $myClass($class)
+    $classModel method $methodName -protection $protection -scope instance
+    set desc [formatDesc $desc]
+    $classModel annotation $methodName.description $desc
+    addArgs $class $methodName $arguments
+}
+
+body ::tycho::IDocSys::addBody {bodyName arguments expl} {
+    # assumes the method or proc already exists
+    set class [info namespace qualifiers $bodyName]
+    set bodyName [info namespace tail $bodyName]
+    set classModel $myClass($class)
+    # Insert the explanation
+    set expl [formatExpl "$expl"]
+    if {$expl != {}} {
+        $classModel annotation $bodyName.explanation $expl
+    }
+}
+
+body ::tycho::IDocSys::addConfigBody {configName expl} {
+    # assumes the itk_option already exists
+    set class [info namespace qualifiers $configName]
+    set configName [info namespace tail $configName]
+    set classModel $myClass($class) 
+    set expl [formatExpl "$expl"]
+    if {$expl != {}} {
+        $classModel annotation $configName.explanation $expl
+    } 
+}
+
+body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
+    # add to $myClass(related)
+    set class $myClass(related)
+    $classModel method $procName -protection public -scope class
+    set expl [formatExpl "$expl"]
+    if {$expl != {}} {
+        $classModel annotation $procName.explanation $expl
+    }
+}
+
+body ::tycho::IDocSys::formatDesc {comment} {
+    # remove carriage returns
+    set commentList [split $comment "\n"]
+    set comment [join $commentList " "]
+    if {$comment == {}} {
+        # IDoc assumes all entities have a description
+        set comment "No description given."
+    }
+    return $comment
+}
+
+body ::tycho::IDocSys::formatExpl {comment} {
+    if {"$comment" == "\n"} {
+        return {}
+    }
+    
+    # Blank lines are a new paragraph
+    # FIXME: we don't want this inside <pre> ... </pre>!
+    regsub -all "\n\[ \t\]*\n" $comment "\n<p>" comment
+
+    # Underscores delimit italicized text. Because of the way regsub
+    # works, we have to do it twice to catch eg "_x_ _y_." We also
+    # need to be careful to catch the start and end of the string.
+    regsub -all {([^a-zA-Z0-9])_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {\1<i>\2</i>\3} comment
+    regsub -all {([^a-zA-Z0-9])_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {\1<i>\2</i>\3} comment
+    regsub {^_([^_]*)_([^a-zA-Z0-9])} $comment \
+	    {<i>\1</i>\2} comment
+    regsub {([^a-zA-Z0-9])_([^_]*)_$} $comment \
+	    {\1<i>\2</i>} comment
+
+    # Asterisks delimit _single_ program code words
+    regsub -all {([^a-zA-Z0-9])\*([^\* ]*)\*([^a-zA-Z0-9])} $comment \
+	    {\1<code>\2</code>\3} comment
+
+    # A single word followed by {} is a method or proc name
+    regsub -all {([a-zA-Z0-9_-]+)\{\}} $comment \
+           {<code>\1</code>} comment
+
+    # Catch comments that don't have a terminating period (or other
+    # suitable mark)
+    regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
+
+    return "$comment"
+}
+
+
+# Get the source file for a given class
+body ::tycho::IDocSys::getSourceFile {classname} {
+return "genericsource.itcl"
+}
+
+# Get the documentation file for a given class
+body ::tycho::IDocSys::getDocFile {classname} {
+return "genericidoc.idoc"
+}
