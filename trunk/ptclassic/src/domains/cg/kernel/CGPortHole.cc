@@ -92,3 +92,15 @@ int InCGPort :: isItInput () const { return TRUE;}
 int OutCGPort :: isItOutput () const { return TRUE;}
 int MultiInCGPort :: isItInput () const { return TRUE;}
 int MultiOutCGPort :: isItOutput () const { return TRUE;}
+
+PortHole& MultiInCGPort :: newPort () {
+	LOG_NEW; PortHole& p = *new InCGPort;
+	p.numberTokens = numberTokens;
+	return installPort(p);
+}
+
+PortHole& MultiOutCGPort :: newPort () {
+	LOG_NEW; PortHole& p = *new OutCGPort;
+	p.numberTokens = numberTokens;
+	return installPort(p);
+}

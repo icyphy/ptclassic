@@ -142,6 +142,9 @@ public:
 class MultiInCGPort : public MultiCGPort {
 public:
         int isItInput () const; // {return TRUE; }
+
+	// Add a new physical port to the MultiPortHole list
+	PortHole& newPort();
 };
  
  
@@ -154,6 +157,9 @@ public:
 class MultiOutCGPort : public MultiCGPort {     
 public:
         int isItOutput () const; // {return TRUE; }
+
+	// Add a new physical port to the MultiPortHole list
+	PortHole& newPort();
 };
 
 #endif
