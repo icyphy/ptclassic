@@ -28,12 +28,12 @@ and scalars vs vectors (blockSize > 1),
 uniform inputs vs non-uniform inputs (port.bufSize()).
 The current implementation handles only some of these cases.  Use this
 star at your own risk.
-.LP
+.pp
 At compile time the star constructs a table of pointers to each of the
 input blocks.  The \fIcontrol\fP input is used to index this table,
 yielding a pointer to the appropriate input block for the firing.  This
 implementation assumes that all of its input ports reside in X memory.
-.LP
+.pp
 Currently we advance each of the pointers in the table on every firing.
 With some schedule the advancement is a nop; this case is handled.
 In other schedules the adancement is periodic over all inputs; in this
@@ -112,7 +112,16 @@ of performing run-time advancement.  This is not currently handled.
 	}
 	addCode("	org	p:");
     }
-    codeblock(cbCopy) {
+    codeblock(cbCopyScalor) {
+	move	#$addr(ptrvec),r0
+	move	$ref(control),n0
+	nop
+	move	x:(r0+n0),r2
+	nop	
+	move	x:(r2),x0
+	move	x0,$ref(output)
+    }
+    codeblock(cbCopyBlock) {
 	move	#$addr(ptrvec),r0
 	move	$ref(control),n0
 	move	#$addr(output),r3
@@ -139,7 +148,8 @@ of performing run-time advancement.  This is not currently handled.
 	move	r2,x:$addr(ptrvec,curinput)-1
     }
     go {
-	addCode(cbCopy);
+	if ( int(blockSize) == 1 )	addCode(cbCopyScalor);
+	else				addCode(cbCopyBlock);
 	
 	int np = input.numberPorts();
 	MPHIter portiter(input);
