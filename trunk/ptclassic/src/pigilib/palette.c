@@ -48,7 +48,7 @@ GOCPaletteFacet(palName, facetPtr)
 char *palName;
 octObject *facetPtr;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     octStatus status;
 
     facetPtr->type = OCT_FACET;
@@ -89,7 +89,7 @@ octCoord *leftMar, *width, *dx, *dy;
 #define dxDef 200
 #define dyDef 150
 
-    octObject obj;
+    octObject obj = {OCT_UNDEFINED_OBJECT};
 
     if (ohGetByPropName(cursorPtr, &obj, "leftMargin") == OCT_NOT_FOUND) {
 	obj.contents.prop.type = OCT_INTEGER;
@@ -163,7 +163,8 @@ octObject *iconFacetPtr, *palFacetPtr;
 {
     octCoord leftMar, width, dx, dy;
     struct octPoint cursorPt;
-    octObject cursorInst, iconInst;
+    octObject cursorInst = {OCT_UNDEFINED_OBJECT},
+	      iconInst = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF1(!GOCCursor(palFacetPtr, &cursorInst, &leftMar, &width, &dx, &dy));
     cursorPt = cursorInst.contents.instance.transform.translation;
@@ -240,7 +241,9 @@ MkUnivIconInPal(facetPtr, dir, palName)
 octObject *facetPtr;
 char *dir, *palName;
 {
-    octObject iconFacet, iconFullFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT},
+	      iconFullFacet = {OCT_UNDEFINED_OBJECT},
+	      palFacet = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF1(!MkUnivIcon(facetPtr, &iconFacet));
     ERR_IF1(!MkOctFullName(&iconFacet, dir, &iconFullFacet));
@@ -261,7 +264,9 @@ MkGalIconInPal(galFacetPtr, dir, palName)
 octObject *galFacetPtr;
 char *dir, *palName;
 {
-    octObject iconFacet, iconFullFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT},
+	      iconFullFacet = {OCT_UNDEFINED_OBJECT},
+	      palFacet = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF1(!MkGalIcon(galFacetPtr, &iconFacet));
     ERR_IF1(!MkOctFullName(&iconFacet, dir, &iconFullFacet));
@@ -282,7 +287,8 @@ boolean
 MkStarIconInPal(starName, dir, palName)
 char *starName, *dir, *palName;
 {
-    octObject iconFacet, palFacet;
+    octObject iconFacet = {OCT_UNDEFINED_OBJECT},
+	      palFacet = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF1(!MkStarIcon(starName, dir, &iconFacet));
     ERR_IF1(!GOCPaletteFacet(palName, &palFacet));

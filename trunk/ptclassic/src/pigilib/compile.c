@@ -104,15 +104,15 @@ boolean
 EssAddObj(obj)
 octObject *obj;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     if (!essExist) {
 	octGetFacet(obj, &facet);
 	essSelSet = vemNewSelSet(facet.objectId, 65535, 0, 0, 2, 3, 1, 1, "0");
 	essExist = TRUE;
     }
-    FreeOctMembers(&facet);
     ERR_IF2(vemAddSelSet(essSelSet, obj->objectId) != VEM_OK,
 	"EssAddObj: Cannot put object in error select set");
+    FreeOctMembers(&facet);
     return (TRUE);
 }
 /***** End Ess routines (Error Select Set) */
@@ -152,7 +152,8 @@ ProcessSubGals(facetPtr)
 octObject *facetPtr;
 {
     octGenerator genInst;
-    octObject inst, galFacet;
+    octObject inst = {OCT_UNDEFINED_OBJECT},
+	      galFacet = {OCT_UNDEFINED_OBJECT};
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
@@ -163,8 +164,8 @@ octObject *facetPtr;
 	    if (!MyOpenMaster(&galFacet, &inst, "contents", "r")
 	      || !CompileGal(&galFacet)) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&galFacet);
 		FreeOctMembers(&inst);
+		FreeOctMembers(&galFacet);
 		return FALSE;
 	    }
 	} else {
@@ -189,9 +190,9 @@ static void
 DetachDelaysFromNets(facetPtr)
 octObject *facetPtr;
 {
-    octObject net;
+    octObject net = {OCT_UNDEFINED_OBJECT};
     octGenerator netGen;
-    octObject prop;		/* most data members are not dynamic */
+    octObject prop = {OCT_PROP};	/* most data members are not dynamic */
 
     (void) octInitGenContentsSpecial(facetPtr, OCT_NET_MASK, &netGen);
     while (octGenerate(&netGen, &net) == OCT_OK) {
@@ -206,8 +207,8 @@ octObject *facetPtr;
 	}
 	(void) octDetach(&net, &prop);
     }
-    FreeOctMembers(&net);
     octFreeGenerator(&netGen);
+    FreeOctMembers(&net);
 }
 
 /* ProcessMarker  5/28/88
@@ -221,8 +222,10 @@ ProcessMarker(facetPtr, instPtr, propname)
 octObject *facetPtr, *instPtr;
 char *propname;
 {
-    octObject path, dummy, net;
-    octObject prop;			/* some data members are not dynamic */
+    octObject path = {OCT_UNDEFINED_OBJECT},
+	      dummy = {OCT_UNDEFINED_OBJECT},
+	      net = {OCT_UNDEFINED_OBJECT},
+	      prop = {OCT_PROP};	/* some data members are not dynamic */
     struct octBox box;
     regObjGen rGen;
 
@@ -239,6 +242,7 @@ char *propname;
 	FreeOctMembers(&path);
 	return(FALSE);
     }
+
     if (regObjNext(rGen, &dummy) != REG_NOMORE) {
 	ErrAdd("Delay or bus marker intersects more than one path");
 	EssAddObj(instPtr);
@@ -257,7 +261,6 @@ char *propname;
 	return(FALSE);
     }
 
-    prop.type = OCT_PROP;
     prop.contents.prop.name = propname;
     if (octGetByName(&net, &prop) != OCT_NOT_FOUND) {
 	char buf[128];
@@ -285,12 +288,12 @@ char *propname;
         prop.contents.prop.type = OCT_STRING;
         prop.contents.prop.value.string = "0";
     }
-    FreeOctMembers(&net);
     FreeOctMembers(&path);
     FreeOctMembers(&dummy);
     prop.objectId = 0;				/* silence Purify */
     octGetOrCreate (instPtr, &prop);
     ERR_IF2(octAttach(&net, &prop) != OCT_OK, octErrorString());
+    FreeOctMembers(&net);
     return(TRUE);
 }
 
@@ -299,7 +302,7 @@ ProcessInsts(facetPtr)
 octObject *facetPtr;
 {
     octGenerator genInst;
-    octObject inst;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
     char *name, *parentname;
     ParamListType pList;
     char *akoName, *oldInstName;
@@ -379,19 +382,22 @@ IsInputTerm(aTermPtr, result)
 octObject *aTermPtr;
 boolean *result;
 {
-    octObject inst, master, fTerm, prop;
+    octObject inst = {OCT_UNDEFINED_OBJECT},
+	      master = {OCT_UNDEFINED_OBJECT},
+	      fTerm  = {OCT_UNDEFINED_OBJECT},
+	      prop  = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF2(GetById(&inst, aTermPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
     ERR_IF1(!MyOpenMaster(&master, &inst, "interface", "r"));
     ERR_IF2(GetByTermName(&master, &fTerm, aTermPtr->contents.term.name) !=
 	OCT_OK, octErrorString());
-    FreeOctMembers(&master);
     if (GetByPropName(&fTerm, &prop, "input") != OCT_NOT_FOUND) {
 	*result = TRUE;
 	FreeOctMembers(&prop);
 	FreeOctMembers(&fTerm);
 	FreeOctMembers(&inst);
+	FreeOctMembers(&master);
 	return (TRUE);
     }
     if (GetByPropName(&fTerm, &prop, "output") != OCT_NOT_FOUND) {
@@ -399,6 +405,7 @@ boolean *result;
 	FreeOctMembers(&prop);
 	FreeOctMembers(&fTerm);
 	FreeOctMembers(&inst);
+	FreeOctMembers(&master);
 	return (TRUE);
     }
     *result = FALSE;
@@ -409,6 +416,7 @@ boolean *result;
     FreeOctMembers(&prop);
     FreeOctMembers(&fTerm);
     FreeOctMembers(&inst);
+    FreeOctMembers(&master);
     return (FALSE);
 }
 
@@ -420,7 +428,7 @@ CollectTerms(netPtr, in, inN, out, outN)
 octObject *netPtr, *in, *out;
 int *inN, *outN;
 {
-    octObject term;
+    octObject term = {OCT_UNDEFINED_OBJECT};
     octGenerator termGen;
     int i;
     boolean result;
@@ -462,7 +470,9 @@ JoinOrdinary(inTermPtr, outTermPtr, initDelayValues, width)
 octObject *inTermPtr, *outTermPtr;
 char *initDelayValues, *width;
 {
-    octObject inInst, outInst, fTerm;
+    octObject inInst = {OCT_UNDEFINED_OBJECT},
+	      outInst = {OCT_UNDEFINED_OBJECT},
+	      fTerm = {OCT_UNDEFINED_OBJECT};
     boolean inIsGalPort, outIsGalPort;
 
     ERR_IF2(GetById(&inInst, inTermPtr->contents.term.instanceId) != OCT_OK,
@@ -522,7 +532,7 @@ JoinToNode(termPtr, nodename)
 octObject *termPtr;
 char *nodename;
 {
-    octObject inst;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
@@ -550,7 +560,7 @@ static boolean
 ConnectPass(facetPtr)
 octObject *facetPtr;
 {
-    octObject net, in[TERMS_MAX], out[TERMS_MAX];
+    octObject net = {OCT_UNDEFINED_OBJECT}, in[TERMS_MAX], out[TERMS_MAX];
     octGenerator netGen;
     int inN = 0, outN = 0, totalN, i;
     char delay[BLEN], initDelayValues[BLEN], width[BLEN];
@@ -670,7 +680,7 @@ static boolean
 TermIsMulti(termPtr)
 octObject *termPtr;
 {
-    octObject inst;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
 
     ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
@@ -686,7 +696,8 @@ static boolean
 IsDirty(facetPtr)
 octObject *facetPtr;
 {
-    octObject cl, cr;
+    octObject cl = {OCT_UNDEFINED_OBJECT},
+	      cr = {OCT_UNDEFINED_OBJECT};
 
     if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) != OCT_OK) {
 	return (TRUE);
@@ -708,7 +719,8 @@ static boolean
 IsDirtyOrGone(facetPtr)
 octObject *facetPtr;
 {
-    octObject cl, cr;
+    octObject cl = {OCT_UNDEFINED_OBJECT},
+	      cr = {OCT_UNDEFINED_OBJECT};
     char* name;
 
     /* First check to see whether the Ptolemy image exists */
@@ -736,7 +748,7 @@ static boolean
 ClearDirty(facetPtr)
 octObject *facetPtr;
 {
-    octObject cl;
+    octObject cl = {OCT_UNDEFINED_OBJECT};
 
     if (octGenFirstContent(facetPtr, OCT_CHANGE_LIST_MASK, &cl) == OCT_OK) {
 	CK_OCT(octDelete(&cl));
@@ -762,7 +774,7 @@ CompileGalInst(galInstPtr,parentFacetPtr)
 octObject *galInstPtr, *parentFacetPtr;
 {
     char* galDomain;
-    octObject galFacet;
+    octObject galFacet = {OCT_UNDEFINED_OBJECT};
 
     /* get the galaxy domain */
     if (!GOCDomainProp(galInstPtr, &galDomain, curDomainName())) {
@@ -1020,7 +1032,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
 
     ViInit("compile-facet");
     ErrClear();
@@ -1065,7 +1077,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
     char* name;
     char octHandle[16];
 
@@ -1102,10 +1114,10 @@ RunAll(facetPtr)
 octObject *facetPtr;
 {
     octGenerator genInst;
-    octObject inst;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
     octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, &inst) == OCT_OK) {
-	octObject univFacet;
+	octObject univFacet = {OCT_UNDEFINED_OBJECT};
 
 	if (!MyOpenMaster(&univFacet,&inst, "contents", "r")) {
 	    octFreeGenerator(&genInst);

@@ -83,7 +83,7 @@ MyOpenMaster(t, i, f, m)
 octObject *t, *i;
 char *f, *m;
 {
-    octObject rfacet;
+    octObject rfacet = {OCT_UNDEFINED_OBJECT};
 
     octGetFacet(i, &rfacet);
     t->type = OCT_FACET;
@@ -157,7 +157,8 @@ boolean
 IsGal(instPtr)
 octObject *instPtr;
 {
-    octObject master, prop;
+    octObject master = {OCT_UNDEFINED_OBJECT},
+	      prop = {OCT_UNDEFINED_OBJECT};
     int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
@@ -171,7 +172,8 @@ boolean
 IsStar(instPtr)
 octObject *instPtr;
 {
-    octObject master, prop;
+    octObject master = {OCT_UNDEFINED_OBJECT},
+	      prop  = {OCT_UNDEFINED_OBJECT};
     int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
@@ -185,7 +187,8 @@ boolean
 IsUniv(instPtr)
 octObject *instPtr;
 {
-    octObject master, prop;
+    octObject master = {OCT_UNDEFINED_OBJECT},
+	      prop = {OCT_UNDEFINED_OBJECT};
     int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
@@ -199,7 +202,8 @@ boolean
 IsPal(instPtr)
 octObject *instPtr;
 {
-    octObject master, prop;
+    octObject master = {OCT_UNDEFINED_OBJECT},
+	      prop = {OCT_UNDEFINED_OBJECT};
     int status;
 
     ERR_IF1(!MyOpenMaster(&master, instPtr, "interface", "r"));
@@ -227,7 +231,7 @@ FacetHasItem(facetPtr,mask)
 octObject *facetPtr;
 octObjectMask mask;
 {
-    octObject obj;
+    octObject obj = {OCT_UNDEFINED_OBJECT};
     int status;
     obj.objectId = 0;
     status = (octGenFirstContent(facetPtr, mask, &obj) == OCT_OK);
@@ -253,7 +257,7 @@ static boolean
 HasUPC(facetPtr)
 octObject *facetPtr;
 {
-    octObject inst;
+    octObject inst = {OCT_UNDEFINED_OBJECT};
     octGenerator gen;
     int status = FALSE;
 
@@ -314,7 +318,7 @@ octObject *galFacetPtr;
 ParamListType *pListPtr;
 {
     char *pStr;
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     octStatus status;
 
     pStr = PListToPStr(pListPtr);
@@ -337,7 +341,7 @@ GetFormalParams(galFacetPtr, pListPtr)
 octObject *galFacetPtr;
 ParamListType *pListPtr;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     prop.objectId = 0;		/* silence Purify */
     if (GetByPropName(galFacetPtr, &prop, "params") == OCT_NOT_FOUND) {
 	pListPtr->length = 0;
@@ -382,7 +386,7 @@ ParamListType *pListPtr;
 char* propname;
 {
     char *pStr;
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     octStatus status;
     pStr = PListToPStr(pListPtr);
     status = CreateOrModifyPropStr(instPtr, &prop, propname, pStr);
@@ -425,7 +429,7 @@ LoadTheStar(instPtr, permB, linkArgs)
     int		permB;
     char*	linkArgs;
 {
-    octObject mFacet;
+    octObject mFacet = {OCT_UNDEFINED_OBJECT};
     char *fullName;
 
     ERR_IF1(!MyOpenMaster(&mFacet, instPtr, "interface", "r"));
@@ -448,7 +452,7 @@ GetOrInitSogParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     ParamListType tempList;
     void MergeParams();
 
@@ -482,7 +486,7 @@ char* targName;
 octObject *facetPtr;
 ParamListType *pListPtr;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     ParamListType tempList;
     void MergeParams();
 
@@ -544,7 +548,7 @@ octObject *instPtr;
 ParamListType *pListPtr;
 {
     if (IsGal(instPtr)) {
-	octObject galFacet;
+	octObject galFacet = {OCT_UNDEFINED_OBJECT};
 	ERR_IF1(!MyOpenMaster(&galFacet, instPtr, "contents", "r"));
 	ERR_IF1(!GetFormalParams(&galFacet, pListPtr));
 	FreeOctMembers(&galFacet);
@@ -629,7 +633,7 @@ octObject *objPtr;
 char *name, *dest;
 int dlen;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     int status;
 
     if (GetByPropName(objPtr, &prop, name) == OCT_NOT_FOUND) {
@@ -682,7 +686,7 @@ octObject *objPtr;
 char  *propName;
 char **valuePtr;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
 
     if (GetByPropName(objPtr, &prop, propName) == OCT_NOT_FOUND)
 	*valuePtr = NULL;
@@ -707,7 +711,7 @@ octObject *objPtr;
 char  *propName;
 char  *value;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
 
     if (value == NULL || *value == '\0') {
 	/* empty string: delete prop if it exists */
@@ -729,7 +733,7 @@ octObject *facetPtr;
 char **domainPtr;
 char *defaultDomain;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
     *domainPtr = HashString(prop.contents.prop.value.string);
     FreeOctMembers(&prop);
@@ -743,7 +747,7 @@ SetDomainProp(facetPtr, domain)
 octObject *facetPtr;
 char *domain;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     prop.objectId = 0;		/* silence Purify */
     CK_OCT(CreateOrModifyPropStr(facetPtr, &prop, "domain", domain));
     FreeOctMembers(&prop);
@@ -756,7 +760,7 @@ octObject *facetPtr;
 char **targetPtr;
 char *defaultTarget;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
     prop.objectId = 0;
 /* don't use ohGetOrCreatePropStr, so we avoid problems with the user
    changing the domain and needing to do edit-target as well.
@@ -777,7 +781,7 @@ SetTargetProp(facetPtr, target)
 octObject *facetPtr;
 char *target;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
 
     CK_OCT(CreateOrModifyPropStr(facetPtr, &prop, "target", target));
     FreeOctMembers(&prop);
@@ -795,7 +799,7 @@ GetIterateProp(facetPtr, pIterate)
 octObject *facetPtr;
 int *pIterate;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
 
     *pIterate = 1;
     if ( GetByPropName(facetPtr, &prop, "iterate") == OCT_NOT_FOUND )
@@ -810,7 +814,7 @@ SetIterateProp(facetPtr, iterate)
 octObject *facetPtr;
 int iterate;
 {
-    octObject prop;
+    octObject prop = {OCT_UNDEFINED_OBJECT};
 
     CreateOrModifyPropInt(facetPtr, &prop, "iterate", iterate);
     FreeOctMembers(&prop);

@@ -59,7 +59,7 @@ int
 RunUniverse(name)
 char* name;
 {
-	octObject facet;
+	octObject facet = {OCT_UNDEFINED_OBJECT};
         char facetHandle[16];
 
 	ViInit(name);
@@ -128,7 +128,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet;
+    octObject facet = {OCT_UNDEFINED_OBJECT};
 
     ViInit("open run window");
     ErrClear();

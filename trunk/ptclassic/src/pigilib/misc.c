@@ -87,7 +87,9 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject mFacet, inst, facet;
+    octObject mFacet = {OCT_UNDEFINED_OBJECT},
+	      inst = {OCT_UNDEFINED_OBJECT},
+	      facet = {OCT_UNDEFINED_OBJECT};
     vemStatus status;
     char *fullName, codeFile[512], domain[64], *base, *period;
 
@@ -155,7 +157,8 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    octObject facet, inst;
+    octObject facet = {OCT_UNDEFINED_OBJECT},
+	      inst = {OCT_UNDEFINED_OBJECT};
     char FacetName[15], InstanceName[15];
     vemStatus status;
 
