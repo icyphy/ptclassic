@@ -43,6 +43,9 @@ public:
 	// Method available to stars to add to static declarations.
 	void addGlobal(const char* decl);
 
+	// Method available to stars to add to procedures.
+	void addProcedure(const char* decl);
+
 	// Method available to stars to add to main initialization.
 	void addMainInit(const char* decl);
 
@@ -62,6 +65,7 @@ public:
 protected:
 	char *schedFileName;
 	StringList staticDeclarations;
+	StringList procedures;
 	StringList include;
 	StringList mainDeclarations;
 	StringList mainInitialization;
