@@ -14,9 +14,9 @@ Besides the quantized value being output, it will also output the level
 number that it corresponds to for the purpose of converison to an
 integer and then output serially to the Thor domain stars.
 	}
-	author { Asawaree }
+	author { Asawaree Kalavade }
 	copyright { 1991 The Regents of the University of California }
-	version { $Id$G}
+	version { $Id$ }
 	input {
 		name {input}
 		type {float}
