@@ -43,12 +43,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "StringArrayState.h"
 #include "IntArrayState.h"
-#include "Profile.h"
-#include "ParProcessors.h"
-#include "ParNode.h"
 
+class ParNode;
 class ParScheduler;
+class ParProcessors;
 class BooleanMatrix;
+class Profile;
 
 class CGMultiTarget : public MultiTarget {
 public:
@@ -147,6 +147,7 @@ protected:
 	IntState useCluster;
 	IntState overlapComm;
 	IntState ignoreIPC;
+	IntState useMultipleSchedulers;
 
 	IntState ganttChart;
 	StringState logFile;
@@ -190,6 +191,8 @@ protected:
 	ParProcessors* parProcs;
 	IntArray canProcs;
 
+	// Does the child target support the given star?
+	virtual int childSupport(Target*,Star*);
 private:
 	// state list added dynamically
 	StateList addedStates;
