@@ -1,3 +1,4 @@
+static const char file_id[] = "GrayImage.cc";
 // filename:		GrayImage.cc
 // author:			Paul Haskell
 // creation date:	7/1/91
@@ -6,12 +7,12 @@
 #include "GrayImage.h"
 
 const char* GrayImage::dataType() const { return "GrayImage";}
-PacketData* GrayImage::clone() const { return new GrayImage(*this);}
-PacketData* GrayImage::clone(int a) const { return new GrayImage(*this,a);}
+PacketData* GrayImage::clone() const { LOG_NEW; return new GrayImage(*this);}
+PacketData* GrayImage::clone(int a) const { LOG_NEW; return new GrayImage(*this,a);}
 ISA_FUNC(GrayImage,BaseImage);
 
 void GrayImage::init()
-{ grayData = new unsigned char[fullSize]; }
+{ LOG_NEW; grayData = new unsigned char[fullSize]; }
 
 
 GrayImage::GrayImage(int a, int b, int c, int d):
@@ -43,7 +44,7 @@ void GrayImage::setSize(int a)
 	if (size != fullSize) return;
 	if (a == fullSize) return;
 	delete grayData;
-	grayData = new unsigned char[a];
+	LOG_NEW; grayData = new unsigned char[a];
 	size = fullSize = a;
 } // GrayImage::setSize()
 
@@ -65,7 +66,7 @@ BaseImage* GrayImage::fragment(int cellSz, int Num) const
 	retval->startPos = startPos + Num*cellSz;
 	retval->size = min(startPos+size-retval->startPos, cellSz);
 	delete retval->grayData; // some other way to do this?
-	retval->grayData = new unsigned char[retval->size];
+	LOG_NEW; retval->grayData = new unsigned char[retval->size];
 
 	int offset = retval->startPos - startPos;
 	copy(retval->size, retval->grayData, grayData+offset);
@@ -80,7 +81,7 @@ void GrayImage::assemble(const BaseImage* bi)
 
 // Are we set up to merge yet?
 	if (size != fullSize) {
-		unsigned char* tmpPtr = new unsigned char[fullSize];
+		LOG_NEW; unsigned char* tmpPtr = new unsigned char[fullSize];
 		for(int t = 0; t < fullSize; t++) {tmpPtr[t]=(unsigned char) 0;}
 		copy(size, tmpPtr+startPos, grayData);
 		delete grayData;

@@ -1,3 +1,4 @@
+static const char file_id[] = "DCTImage.cc";
 // filename:		DCTImage.cc
 // author:			Sun-Inn Shih
 // creation date:	7/11/91
@@ -6,8 +7,8 @@
 #include "DCTImage.h"
 
 const char* DCTImage::dataType() const { return("DCTImage"); }
-PacketData* DCTImage::clone() const { return new DCTImage(*this); }
-PacketData* DCTImage::clone(int a) const {return new DCTImage(*this,a);}
+PacketData* DCTImage::clone() const { LOG_NEW; return new DCTImage(*this); }
+PacketData* DCTImage::clone(int a) const {LOG_NEW; return new DCTImage(*this,a);}
 ISA_FUNC(DCTImage,BaseImage);
 
 
@@ -23,7 +24,7 @@ void DCTImage::init()
 	}
 	size = fullSize = upWidth*upHeight;
 
-	DCTData = new float[fullSize];
+	LOG_NEW; DCTData = new float[fullSize];
 } // end DCTImage::init()
 
 
@@ -43,7 +44,7 @@ DCTImage::DCTImage(const DCTImage& di, int a):
 		blocksize(di.blocksize), upWidth(di.upWidth),
 		upHeight(di.upHeight), BaseImage(di)
 {
-	DCTData = new float[size];
+	LOG_NEW; DCTData = new float[size];
 	if (!a) { copy(size, DCTData, di.DCTData); }
 } // end DCTImage::DCTImage()
 
@@ -57,7 +58,7 @@ void DCTImage::setSize(const int a)
 	if (size != fullSize) return;
 	if (a == fullSize) return;
 	delete DCTData;
-	DCTData = new float[a];
+	LOG_NEW; DCTData = new float[a];
 	size = fullSize = a;
 } // end DCTImage::setSize()
 
@@ -80,7 +81,7 @@ BaseImage* DCTImage::fragment(int cellSz, int Num) const
 	retval->startPos = startPos + Num*arrSz;
 	retval->size = min(startPos+size-retval->startPos, arrSz);
 	delete retval->DCTData;
-	retval->DCTData = new float[retval->size];
+	LOG_NEW; retval->DCTData = new float[retval->size];
 
 	int offset = retval->startPos - startPos;
 	copy(retval->size, retval->DCTData, DCTData+offset);
@@ -95,7 +96,7 @@ void DCTImage::assemble(const BaseImage* bi)
 
 // Are we set up to merge yet?
 	if (size != fullSize) {
-		float* tmpPtr = new float[fullSize];
+		LOG_NEW; float* tmpPtr = new float[fullSize];
 		for(int t = 0; t < fullSize; t++) { tmpPtr[t] = 0.0; }
 		copy(size, tmpPtr+startPos, DCTData);
 		delete DCTData;

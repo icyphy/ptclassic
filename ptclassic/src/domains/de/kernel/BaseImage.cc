@@ -1,3 +1,4 @@
+static const char file_id[] = "BaseImage.cc";
 // filename:		BaseImage.cc
 // author:			Paul Haskell
 // creation date:	7/1/91
@@ -12,8 +13,8 @@
 BaseImage* BaseImage::fragment(int, int) const { return 0;}
 void BaseImage::assemble(const BaseImage*) {}
 const char* BaseImage::dataType() const { return "BaseImage";}
-PacketData* BaseImage::clone() const { return new BaseImage(*this); }
-PacketData* BaseImage::clone(int a) const { return new BaseImage(*this,a);}
+PacketData* BaseImage::clone() const { LOG_NEW; return new BaseImage(*this); }
+PacketData* BaseImage::clone(int a) const { LOG_NEW; return new BaseImage(*this,a);}
 
 void BaseImage::copy(int len, float* into, const float* from) const
 {
