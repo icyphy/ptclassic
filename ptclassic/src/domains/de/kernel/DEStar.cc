@@ -17,6 +17,7 @@ $Id$
 #endif
 
 #include "DEStar.h"
+#include "DEScheduler.h"
 #include "StringList.h"
 #include "Output.h"
 #include "PriorityQueue.h"
@@ -38,6 +39,35 @@ void DEStar :: fire() {
 	BlockPortIter next(*this);
 	for (int k = numberPorts(); k > 0; k--) 
 		(next++)->sendData();
+}
+
+// Set firing mode
+void DEStar :: setMode(FiringMode m) {
+
+	mode = m;
+	if (mode == PHASE) {
+		BlockPortIter next(*this);
+		PortHole* p;
+		while ((p = next++) != 0) {
+			if (p->isItInput()) {
+				InDEPort* inp = (InDEPort*) p;
+				inp->createQue();
+			}
+		}
+	}
+}
+
+// new phase
+void DEStar :: startNewPhase() {
+
+	BlockPortIter next(*this);
+	PortHole* p;
+	while ((p = next++) != 0) {
+		if (p->isItInput()) {
+			InDEPort* inp = (InDEPort*) p;
+			inp->cleanIt();
+		}
+	}
 }
 
 // The following is defined in DEDomain.cc -- this forces that module
