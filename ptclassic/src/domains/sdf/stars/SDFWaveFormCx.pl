@@ -6,7 +6,7 @@ Output a complex waveform as specified by the array state "value"
 (default "(1,0) (-1,0)").
 The parameters work the same way as in the WaveForm star.
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".
+something of the form "&lt; filename".
 	}
 	htmldoc {
 Since this star can be used to read a complex waveform from a file,
@@ -25,6 +25,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
+	seealso { Waveform }
 	ccinclude { "SimControl.h" }
 	output {
 		name { output }
