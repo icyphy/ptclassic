@@ -97,6 +97,9 @@ set tychoslate [file join $tycho slate]
 global ::tychoeditors
 set tychoeditors [file join $tycho editors]
 
+global ::tychopt
+set tychoeditors [file join $tycho typt]
+
 # Check to see whether the usual exit mechanism (where we exit
 # if there are no more windows) is enabled.
 if {![info exists tychoExitWhenNoMoreWindows]} {
@@ -159,6 +162,8 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychoslate combinators ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib widgets ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib util ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychopt editors ] ]
     source [file join $tychokernel Lib.tcl]
 }
 
