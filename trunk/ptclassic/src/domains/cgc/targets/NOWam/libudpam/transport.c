@@ -66,7 +66,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
           SeenRequest(replyEndpoint, bufID, seqNum, &sender, &replyElem)
 
 #define NO_ERRORS             0x0
-#define MAX_MESSAGES_PER_POLL 5
+#define MAX_MESSAGES_PER_POLL 1
 
 static Bool initialized = FALSE;  /* AM layer initialized? */
 
