@@ -1,7 +1,7 @@
 defstar {
 	name {Cos}
 	domain {SDF}
-	desc { This star computes the cosine of its input, in radians.  }
+	desc { This star computes the cosine of its input, assumed to be an angle in radians.  }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

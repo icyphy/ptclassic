@@ -1,7 +1,7 @@
 defstar {
 	name {AddInt}
 	domain {SDF}
-	desc { Output the sum of the inputs, as an integer.  }
+	desc { Output the sum of the integer inputs as an integer. }
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

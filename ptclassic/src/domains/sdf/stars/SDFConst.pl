@@ -1,7 +1,9 @@
 defstar {
 	name {Const}
 	domain {SDF}
-	desc { Output a constant signal with value level (default 0.0).  }
+	desc {
+Output a constant signal with value given by the "level" parameter (default 0.0).
+	}
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

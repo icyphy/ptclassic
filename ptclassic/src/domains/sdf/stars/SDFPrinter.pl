@@ -2,7 +2,7 @@ defstar {
 	name { Printer }
 	domain { SDF }
 	desc {
-Prints out one sample from each input port per line.  The "fileName"
+Print out one sample from each input port per line.  The "fileName"
 state specifies the file to be written; the special names <stdout>
 and <cout> (specifying the standard output stream), and <stderr> and <cerr>
 specifying the standard error stream, are also supported.

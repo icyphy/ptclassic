@@ -1,7 +1,14 @@
 defstar {
 	name {LevDur}
 	domain {SDF}
-	desc { Levinson-Durbin algorithm. }
+	desc {
+This star uses the Levinson-Durbin algorithm to compute the linear predictor
+coefficients of a random process, given its autocorrelation function as an input.
+These  coefficients are produced both in autoregressive
+form (on the "lp" output) and in lattice filter form (on the "refl" output).
+The "errPower" output is the power of the prediction error as a function
+of the predictor order.
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
@@ -13,9 +20,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 .pp
-This star takes inputs from the
+This star takes as inputs an autocorrelation function, or
+estimates produced by the
 .c Autocor
-star and uses the Levinson-Durbin
+star, and uses the Levinson-Durbin
 algorithm to compute both reflection coefficients and FIR linear
 predictor coefficients.
 .Ir "spectral estimation, maximum entropy"

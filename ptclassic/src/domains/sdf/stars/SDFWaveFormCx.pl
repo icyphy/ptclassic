@@ -4,11 +4,7 @@ defstar {
 	desc {
 Output a complex waveform as specified by the array state "value"
 (default "(1,0) (-1,0)").
-To halt the simulation after exhausting the data, set "haltAtEnd" to YES.
-Otherwise, to get a periodic waveform, set "periodic" to YES.
-Then the value list will be cyclically repeated.
-If "periodic" is not YES, and "haltAtEnd" is NO, then the value list is
-output only once, and (0,0) values are output subsequently.
+The parameters work the same way as in the WaveForm star.
 This star may be used to read a file by simply setting "value" to
 something of the form "< filename".
 	}

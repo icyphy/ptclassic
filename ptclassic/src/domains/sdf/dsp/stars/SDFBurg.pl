@@ -3,9 +3,11 @@ defstar {
 	domain {SDF}
 	version {$Id$}
 	desc {
-Burg's algorithm.  The lp output receives the linear prediction coefficients
-and the refl output receives reflection coefficients.  The errPower output
-gets the power of the prediction error at each stage.
+This star uses Burg's algorithm to estimate the linear predictor coefficients
+of an input random process. These  coefficients are produced both in autoregressive
+form (on the "lp" output) and in lattice filter form (on the "refl" output).
+The "errPower" output is the power of the prediction error as a function
+of the predictor order.
 	}
 	author { E. A. Lee and J. T. Buck }
 	copyright {
@@ -17,8 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 .pp
-This star uses Burg's algorithm to estimate the reflection coefficients
-and AR parameters of an input random process.
 .Id "Burg's algorithm"
 .Ir "linear prediction"
 .Ir "spectral estimation, maximum entropy"
@@ -50,7 +50,7 @@ The \fIerrPower\fR output is the power of the prediction error
 as a function of the model order.  There are $order+1$ output samples,
 where the first corresponds to the prediction error of a zero-th
 order predictor.  This is simply an estimate of the input signal power.
-.UH REFERENCES
+.UH References
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
 \fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.

@@ -2,7 +2,7 @@ defstar {
 	name {RLattice}
 	domain {SDF}
 	desc {
-A Recursive (Backward) (IIR) Lattice filter.  The default coefficient
+A recursive (IIR) lattice filter.  The default coefficients
 implement the synthesis filter for a particular 4th-order AR random process.
 To read reflection coefficients from a file, replace the default
 coefficients with "<fileName", preferably specifying a complete path.
@@ -72,7 +72,7 @@ and to the definition of partial-correlation (PARCOR)
 coefficients in the statistics literature.
 The signs of the coefficients used in this star are appropriate for values
 given by the LevDur and Burg stars.
-.UH REFERENCES
+.UH References
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
 \fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.

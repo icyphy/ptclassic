@@ -2,15 +2,15 @@ defstar {
 	name { Dirichlet }
 	domain { SDF }
 	desc {
-This star computes the normalized Dirichlet kernel (a.k.a. the aliased
+This star computes the normalized Dirichlet kernel (also called the aliased
 sinc function):
-.EQ
-d sub N (x) ~=~ { sin ( { N ~ x } over 2 ) } over { N ~ sin ( x over 2 ) }
-.EN
-The value of the normalized Dirichlet kernel at $x = 0$ is always 1, and the
-normalized Dirichlet kernel oscillates between $-1$ and $+1$.
-The normalized Dirichlet kernel is periodic in $x$ with a period of either
-$2 pi$ when $N$ is odd or $4 pi$ when $N$ is even.
+
+d(x) = sin(Nx/2)/(N sin(x/2))
+
+The value of the normalized Dirichlet kernel at x = 0 is always 1, and the
+normalized Dirichlet kernel oscillates between -1 and +1.
+The normalized Dirichlet kernel is periodic in x with a period of either
+2*pi when N is odd or 4*pi when N is even.
 	}
 	version {$Id$}
 	author { Brian Evans }

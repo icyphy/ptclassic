@@ -1,7 +1,7 @@
 defstar {
 	name {Fork}
 	domain {SDF}
-	desc { Copies input particles to each output. }
+	desc { Copy input particles to each output. }
 	version {$Id$}
 	author { D. G. Messerschmitt }
 	copyright {

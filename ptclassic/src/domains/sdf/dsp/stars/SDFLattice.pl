@@ -2,10 +2,10 @@ defstar {
 	name {Lattice}
 	domain {SDF}
 	desc {
-A Forward Lattice filter.  Default coefficients are the optimal
-predictor for a particular 4th-order AR random process.
-To read reflection coefficients from a file, replace the default
-coefficients with "<fileName", preferably specifying a complete path.
+An FIR Lattice filter.  The default reflection coefficients form
+the optimal predictor for a particular 4th-order AR random process.
+To read other reflection coefficients from a file, replace the default
+coefficients with "< fileName", preferably specifying a complete path.
 	}
 	version {$Id$}
 	author { Alan Kamas}

@@ -1,7 +1,7 @@
 defstar {
 	name {AddCx}
 	domain {SDF}
-	desc {Output the sum of the inputs, as a complex value.  }
+	desc { Output the sum of the complex inputs as a complex value. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

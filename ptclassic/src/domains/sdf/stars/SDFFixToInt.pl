@@ -10,7 +10,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF conversion palette }
-	desc { Converts a fix type input to an integer type output. }
+	desc { Convert a fixed-point input to an integer output. }
 	input {
 		name { input }
 		type { fix }

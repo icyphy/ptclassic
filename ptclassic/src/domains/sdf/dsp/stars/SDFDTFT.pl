@@ -1,7 +1,10 @@
 defstar {
 	name {DTFT}
 	domain {SDF}
-	desc { Discrete-time Fourier transform. }
+	desc {
+Compute the discrete-time Fourier transform (DTFT)
+at frequency points specified on the "omega" input.
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

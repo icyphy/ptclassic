@@ -1,7 +1,7 @@
 defstar {
 	name {Repeat}
 	domain {SDF}
-	desc {  Repeats each input sample the specified number of times. }
+	desc {  Repeat each input sample a specified number of times. }
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

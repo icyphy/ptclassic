@@ -2,9 +2,14 @@ defstar {
 	name { BusToNum }
 	domain { SDF }
 	desc {
-Takes in a bus (with 'bits' number of lines) 
-and outputs a signed integer corresponding to the value of this 
-binary number.
+This star accepts a number of input bit streams, where this number should not
+exceed the wordsize of an integer.  Each bit stream has integer particles with
+values 0, 3, or anything else.  These are interpreted as binary 0, tri-state,
+or 1, respectively.  When the star fires, it reads one input bit from each input.
+If any of the input bits is tri-stated, the output will be the previous output
+(or the initial value of the "previous" parameter if the firing is the first one).
+Otherwise, the bits are assembled into an integer word, assuming two's complement
+encoding, and sign extended.  The resulting signed integer is sent to the output.
 	}
 	author { Asawaree Kalavade }
 	version { $Id$ }

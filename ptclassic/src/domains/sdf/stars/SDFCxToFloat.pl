@@ -10,7 +10,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF conversion palette }
-	desc { Converts a complex input to a float type output. }
+	desc { Convert a complex input to a floating-point output. }
 	input {
 		name { input }
 		type { complex }

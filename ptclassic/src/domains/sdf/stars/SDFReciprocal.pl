@@ -1,7 +1,11 @@
 defstar {
 	name {Reciprocal}
 	domain {SDF}
-	desc { 1/x, with an optional magnitude limit. }
+	desc {
+Output the reciprocal of the input, with an optional magnitude limit.
+If the magnitude limit is greater than zero, and the input value is zero,
+then the output will equal the magnitude limit.
+	}
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

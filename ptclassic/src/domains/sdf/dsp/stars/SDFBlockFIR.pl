@@ -2,7 +2,11 @@ defstar {
 	name { BlockFIR }
 	domain { SDF }
 	version {$Id$}
-	desc { An FIR filter with coefficients externally supplied. }
+	desc {
+This star implements an FIR filter with coefficients that
+are periodically updated from the outside. For each set of
+coefficients, a block of input samples is processed, all in one firing.
+	}
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -13,9 +17,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 .pp
-This star implements an FIR filter with coefficients that
-are periodically updated
-from the outside.
 .Id "filter, FIR, block"
 .Id "FIR filter, block"
 The \fIblockSize\fR parameter tells how often

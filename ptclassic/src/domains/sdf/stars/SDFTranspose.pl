@@ -2,8 +2,9 @@ defstar {
 	name { Transpose }
 	domain { SDF }
 	desc {
-Transposes a rasterized matrix.
-Number of samples produced and consumed equals the product
+Transpose a rasterized matrix (one that is read as a sequence
+of particles, row by row, and written in the same form).
+The number of particles produced and consumed equals the product
 of "samplesInaRow" and "numberOfRows".
 	}
 	version {$Id$}

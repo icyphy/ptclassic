@@ -2,10 +2,11 @@ defstar {
 	name {FFTCx}
 	domain {SDF}
 	desc {
-Complex Fast Fourier transform.
-Parameter "order" (default 8) is the log, base 2, of the transform size.
-Parameter "size" (default 256) is the number of samples read (<= 2^order).
-Parameter "direction" (default 1) is 1 for forward, -1 for inverse FFT.
+Compute the discrete-time Fourier transform of a complex input using the
+fast Fourier transform (FFT) algorithm. The parameter "order" (default 8)
+is the log base 2 of the transform size. The parameter "size" (default 256)
+is the number of samples read (<= 2^order). The parameter "direction"
+(default 1) is 1 for the forward, -1 for the inverse FFT.
 	}
 	version {$Id$}
 	author { J. T. Buck }

@@ -1,7 +1,7 @@
 defstar {
 	name { AddFix }	
 	domain {SDF}
-	desc { Output the sum of the inputs, as a fixed-point value. }
+	desc { Output the sum of the fixed-piont inputs as a fixed-point value. }
 	version { $Id$ }
         author { A. Khazeni }
         location { SDF main library }

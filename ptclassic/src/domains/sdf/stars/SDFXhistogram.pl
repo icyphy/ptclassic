@@ -2,8 +2,8 @@ defstar {
 	name { Xhistogram }
 	domain { SDF }
 	desc {
-Generate a histogram with the xgraph program.  'binWidth' determines the
-bin width.  'options' passes extra options to xgraph.
+Generate a histogram with the xgraph program.  The parameter
+"binWidth" determines the bin width.
 	}
 	version {$Id$}
 	author { E. A. Lee }

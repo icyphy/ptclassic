@@ -3,8 +3,9 @@ defstar {
 	domain {SDF}
 	version {$Id$}
 	desc {
-Outputs a constant complex signal with real part "real"
-(default 0.0) and imaginary part "imag" (default 0.0).
+Outputs a constant complex signal with the real part given by the
+"real" parameter (default 0.0) and imaginary part given by "imag"
+(default 0.0).
 	}
 	author { J. T. Buck }
 	copyright {

@@ -1,7 +1,7 @@
 defstar {
 	name {CxToRect}
 	domain {SDF}
-	desc { Convert complex data to real and imaginary parts. }
+	desc { Convert a complex input to real and imaginary parts. }
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {

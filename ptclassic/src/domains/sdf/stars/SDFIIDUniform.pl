@@ -2,7 +2,7 @@ defstar {
 	name { IIDUniform }
 	domain { SDF }
 	desc {
-Generates an i.i.d. uniformly distributed pseudo-random process.
+Generate an i.i.d. uniformly distributed pseudo-random process.
 Output is uniformly distributed between "lower" (default 0)
 and "upper" (default 1).
 	}

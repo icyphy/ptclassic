@@ -2,7 +2,7 @@ defstar {
 	name { Rect }
 	domain { SDF }
 	desc {
-Generates a rectangular pulse of height "height" (default 1.0).
+Generate a rectangular pulse of height "height" (default 1.0).
 and width "width" (default 8).  If "period" is greater than zero,
 then the pulse is repeated with the given period.
 	}

@@ -15,6 +15,8 @@ NO          NO         anything  Output the waveform once, then zeros
 YES         anything   anything  Stop after outputting the waveform once
 .fi
 The first line of the table gives the default settings.
+This star may be used to read a file by simply setting
+"value" to something of the form "< filename".
 	}
 	explanation {
 This star may be used to read a file by simply setting "value" to

@@ -2,10 +2,9 @@ defstar {
 	name { Unwrap }
 	domain { SDF }
 	desc {
-A very crude phase unwrapper.  It basically assumes that the phase
-never changes by more than PI in one iteration, and that we "catch"
-all phase transitions.  It also assumes that the input is in the
-[-PI,PI]  range.
+Unwraps a phase plot, removing discontinuities of magnitude 2*PI.
+The star assumes that the phase never changes by more than PI in one
+sample period. It also assumes that the input is in the [-PI,PI] range.
 	}
 	version {$Id$}
 	author { J. T. Buck }
@@ -18,6 +17,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 .Id "phase unwrapping"
+This is not a very sophisticated phase unwrapper, but for many applications,
+it does the job.
 	}
 	input {
 		name {input}

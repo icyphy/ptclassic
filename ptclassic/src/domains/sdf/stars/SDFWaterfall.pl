@@ -3,7 +3,7 @@ defstar {
 	derivedFrom { Xgraph }
 	domain { SDF }
 	desc {
-Plots a series of traces in the style of a "waterfall" plot.
+Plot a series of traces in the style of a "waterfall" plot.
 This is three-dimensional plot used to show the evolution
 of signals or spectra.  Optionally, each plot can be made opaque, so
 that lines that would appear behind the plot are eliminated.

@@ -11,22 +11,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image palette }
 	desc {
-This star takes a DCTImage input, inserts "StartOfBlock" markers,
-run-length encodes it using 'StartOfRun' markers, and outputs the
-modified DCTImage.
+This star takes a DCTImage input particle, inserts "start of block" markers,
+run-length encodes it, and outputs the modified DCTImage particle. 
+For the run-length encoding, all values with absolute value less than "Thresh"
+are set to 0.0, to help improve compression.
 
-For the run-length encoding, all values with absolute value less than
-"Thresh" are set to 0.0, to help improve compression.
+Runlengths are coded with a "start of run" symbol and then an (integer) run-length.
+"HiPri" DCT coefficients per block are sent to "hiport", the high-priority output. 
+The remainder of the coefficients are sent to "loport", the low-priority output.
 
-Runlengths are coded with a start symbol of "StartOfRun" (defined below)
-and then an (integer) run-length.
-
-"HiPri" DCT coefficients per block are sent to "hiport", the
-high-priority output. The remainder of the coefficients are sent
-to "loport", the low-priority output.
-
-NOTE!! This differs from the SDFRunLen star in that this block
-processes DCTImages, not GrayImages.
+Note: This differs from the SDFRunLen star in that this block processes DCTImages,
+not GrayImages.
 	}
 
 	input	{	name { inport }	type { message } }

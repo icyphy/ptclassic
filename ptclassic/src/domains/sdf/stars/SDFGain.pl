@@ -1,7 +1,9 @@
 defstar {
 	name { Gain }
 	domain { SDF }
-	desc { Amplifier: output is input times "gain" (default 1.0). }
+	desc {
+This is an amplifier; the output is the input multiplied by the "gain" (default 1.0).
+	}
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

@@ -2,8 +2,10 @@ defstar {
 	name {DB}
 	domain {SDF}
 	desc {
-Converts input to decibels (dB).  Zero and negative values are
-converted to "min" dB (default -100 dB).
+Convert input to a decibels (dB) scale. Zero and negative values
+are assigned the value "min" (default -100). The "inputIsPower"
+parameter should be set to ÒYESÓ if the input signal is a power
+measurement (vs. an amplitude measurement).
 	}
 	version {$Id$}
 	author { J. T. Buck }

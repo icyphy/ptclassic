@@ -2,8 +2,8 @@ defstar {
 	name { GainCx }
 	domain { SDF }
 	desc {
-Amplifier: output is input times "gain" (default 1.0).  Input, output,
-and gain factor are all complex numbers.
+This is an amplifier; the complex output is the complex input
+multiplied by the complex "gain" (default 1.0).
 	}
 	version {$Id$}
 	author { J. T. Buck }

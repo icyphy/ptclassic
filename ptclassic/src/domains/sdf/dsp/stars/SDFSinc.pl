@@ -3,7 +3,7 @@ defstar {
 	domain {SDF}
 	desc {
 This star computes the sinc of its input given in radians.
-The sinc function is defined as ${ sin ( x ) } over { x }$.
+The sinc function is defined as sin(x)/x, with value 1.0 when x = 0.
 	}
         version {$Id$}
 	author { Brian Evans }

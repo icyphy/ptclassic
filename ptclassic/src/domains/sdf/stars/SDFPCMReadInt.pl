@@ -12,9 +12,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF main library }
 
 	desc {
-Read a binary mu-law encoded PCM file.  Return one sample each time.
-The file format that is read is the same as the one written by the Play
-star.
+Read a binary mu-law encoded PCM file.  Return one sample on each firing.
+The file format that is read is the same as the one written by the Play star.
+The simulation can be halted on end-of-file, or the file contents can be
+periodically repeated, or the file contents can be padded with zeros.
 	}
 	hinclude { "streamCompat.h" }
 	ccinclude { "SimControl.h" }

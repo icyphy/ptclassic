@@ -14,28 +14,28 @@ limitation of liability, and disclaimer of warranty provisions.
 Accept a stream of black-and-white images from input GrayImages,
 save the images to files, and display the resulting files as a
 moving video sequence. This star requires that programs from
-the "Utah Raster Toolkit" be in your "path" variable. Although this
-toolkit is not included with Ptolemy it is available for free.
-See this star's long description (with the "look-inside"
-or "manual" commands in the Ptolemy menu) for info on how to get
-the toolkit.
+the "Utah Raster Toolkit" be in your path. Although this
+toolkit is not included with Ptolemy, it is available for free.
+See this star’s long description (with the "look-inside" or
+"manual" commands in the Ptolemy menu) for information on how
+to get the toolkit.
 
-The user can set the root filename of the displayed images (which
-probably will be printed in the display window titlebar) with
-the 'ImageName' state. If no filename is set, a default will
-be chosen.
+The user can set the root filename of the displayed images
+(which probably will be printed in the display window titlebar)
+with the ImageName parameter. If no filename is set, a default
+will be chosen.
 
-The 'Save' state can be set to "YES" or "NO" to choose whether
-the created image files should be saved or deleted.
-Each image's frame number is appended to the root filename
-to form the image's complete filename.
+The Save parameter can be set to "YES" or "NO" to choose whether
+the created image files should be saved or deleted. Each image’s
+frame number is appended to the root filename to form the image’s
+complete filename.
 
-The 'ByFields' state can be set to either "YES" or "NO" to choose
+The ByFields parameter can be set to either "YES" or "NO" to choose
 whether the input images should be treated as interlaced fields
 that make up a frame or as entire frames.
 If the inputs are fields, then the first field should contain
 frame lines 1, 3, 5, etc. and the second field should contain
-lines 0, 2, 4, 6, etc.
+lines 0, 2, 4, 6, etc
 	}
 	explanation {
 .pp

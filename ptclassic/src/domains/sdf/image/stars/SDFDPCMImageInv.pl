@@ -11,9 +11,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
+This star inverts differential pulse code modulation of an image.
 If the "past" input is not a GrayImage or has size 0, pass the "diff"
-directly to the "output". Otherwise, add the "past" to the
-"diff" (with leak factor "alpha") and send the result to "output".
+directly to the "output". Otherwise, add the "past" to the "diff"
+(with leakage factor alpha) and send the result to "output".
 	}
 	explanation {
 .Id "image decompression"

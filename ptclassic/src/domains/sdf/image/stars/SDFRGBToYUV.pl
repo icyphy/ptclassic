@@ -15,7 +15,6 @@ limitation of liability, and disclaimer of warranty provisions.
 Read three GrayImages that describe a color image in RGB format and
 output three GrayImages that describe an image in YUV format.
 No downsampling is done on the U and V signals.
-The inputs and outputs are all GrayImages.
 	}
 	explanation {
 .Id "format conversion, RGB to YUV"

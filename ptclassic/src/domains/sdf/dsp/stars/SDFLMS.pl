@@ -3,12 +3,13 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIR }
 	desc {
-Adaptive filter using LMS adaptation algorithm.
-Initial coefficients are in the "taps" state variable.
-Default initial coefficients give an 8th order, linear phase
-lowpass filter.  To read default coefficients from a file,
-replace the default coefficients with "<fileName".
-Supports decimation, but not interpolation.
+An adaptive filter using the LMS adaptation algorithm.
+The initial coefficients are given by the "taps" parameter.
+The default initial coefficients give an 8th order, linear phase
+lowpass filter.  To read initial coefficients from a file,
+replace the default coefficients with "< fileName",
+preferably specifying a complete path.
+This star supports decimation, but not interpolation.
 	}
 	version {$Id$}
 	author { E. A. Lee }
@@ -43,7 +44,7 @@ If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
 	}
-	seealso {FIR, adaptFilter}
+	seealso {FIR, adaptFilter, LMSCx, LMSPlot, LMSTkPlot, LMSPlotCx}
 	input {
 		name { error }
 		type { float }

@@ -1,7 +1,11 @@
 defstar {
 	name { XMgraph }
 	domain { SDF }
-	desc { Generate a multi-signal plot with the xgraph program. }
+	desc {
+Generate a multi-signal plot with the xgraph program.
+This program has many options; see the User's manual
+of The Almagest.
+	}
 	version {$Id$}
 	author { J. T. Buck and E. A. Lee }
 	copyright {

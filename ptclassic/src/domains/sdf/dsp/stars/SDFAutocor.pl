@@ -2,7 +2,10 @@ defstar {
 	name { Autocor }
 	domain {SDF}
 	version {$Id$}
-	desc { Estimates an autocorrelation by averaging input samples. }
+	desc { 
+Estimate an autocorrelation function by averaging input samples.
+Both biased and unbiased estimates are supported.
+	}
 	author { E. A. Lee }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.

@@ -2,7 +2,7 @@ defstar {
 	name { RectFix }
 	domain { SDF }
 	desc {
-Generates a fixed-point rectangular pulse of height "height" 
+Generate a fixed-point rectangular pulse of height "height" 
 (default 1.0) and width "width" (default 8).  If "period" is 
 greater than zero, then the pulse is repeated with the given period. 
 The precision of "height" can be specified in bits.

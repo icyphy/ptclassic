@@ -2,8 +2,13 @@ defstar {
 	name { BitsToInt }
 	domain { SDF }
 	desc {
-Reads "nBits" bits from the input, packs them into an integer, and outputs
-it.  The first received bit becomes the most significant bit of the output.
+The integer input sequence is interpreted as a bit stream where any nonzero
+is a “one” bit. This star consumes "nBits" successive bits from the input,
+packs them into an integer, and outputs the resulting integer. The first
+received bit becomes the most significant bit of the output. If "nBits"
+is larger than the integer wordsize, then the first bits received will
+be lost. If "nBits" is smaller than the wordsize minus one, then the
+output integer will always be non-negative.
 	}
 	version { $Id$ }
 	author { J. T Buck }

@@ -1,7 +1,7 @@
 defstar {
 	name {Mpy}
 	domain {SDF}
-	desc { Output the product of the inputs, as a float value. }
+	desc { Output the product of the inputs, as a floating-point value. }
 	version {$Id$}
 	author { J. T. Buck }
 	copyright {

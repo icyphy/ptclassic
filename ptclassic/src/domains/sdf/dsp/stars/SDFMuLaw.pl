@@ -1,9 +1,10 @@
 defstar {
 	name {MuLaw}
 	domain {SDF}
-	desc { This star compresses its input as per the Mu law. 
-		using the conversion formula
-	|v2| = log (1+ mu*|v1|) / log( 1+mu)  }
+	desc {
+This star encodes its input into an 8 bit representation
+using the non-linear companding Mu law. 
+	}
 	author { Asawaree Kalavade }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -15,6 +16,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 .Id "Mu law compression"
 .Id "compression, Mu law"
+The conversion formula is
+.EQ
+| v sub 2 | ~=~ log (1+ mu | v sub 1 | ) / log( 1 ~+~ mu ) ~.
+.EN
 	}
 	input {
 		name{input}
