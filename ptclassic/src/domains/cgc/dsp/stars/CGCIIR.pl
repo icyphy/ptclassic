@@ -125,6 +125,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	 */
 	double* v = & $ref(state,3);
 	double* stateEnd = (double *) $ref(state) + $size(state);
+	double s0 = $ref(signalIn);
 	double  s, y;
 
 	s = *v++;
