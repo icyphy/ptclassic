@@ -48,7 +48,6 @@ PL_SRCS= \
  CG56IntegratorR.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
- CG56LocateMax.pl \
  CG56Log.pl \
  CG56LookupTbl.pl \
  CG56Magnavox.pl \
@@ -60,16 +59,12 @@ PL_SRCS= \
  CG56MpyShift.pl \
  CG56Neg.pl \
  CG56Pad.pl \
- CG56Peak.pl \
- CG56Pickmin.pl \
- CG56PickminVal.pl \
  CG56ProPortAD.pl \
  CG56ProPortADDA.pl \
  CG56ProPortDA.pl \
  CG56Pulse.pl \
  CG56Quant.pl \
  CG56QuantInt.pl \
- CG56QuasarChgPd.pl \
  CG56Ramp.pl \
  CG56ReadFile.pl \
  CG56ReadFileInt.pl \
