@@ -138,8 +138,11 @@ body ::tycho::Line::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
-    set ghost 0
-    ::tycho::getopt ghost args
+    # Extract options
+    array set opts [concat {-ghost 0 -aspects {}} $args]
+    if { $opts(-aspects) == "" } {
+        error "Empty aspect list"
+    }
 
     # Remember how I am now.
     set scratch($id.prevX) $x
@@ -157,7 +160,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 
     # Figure out the vertices that will be changed
     set scratch($id.vertices) {}
-    foreach aspect $args {
+    foreach aspect $opts(-aspects) {
 	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "start" {
@@ -182,7 +185,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
     set scratch($id.vertices) [::tycho::lnub $scratch($id.vertices)]
 
     # If the -ghost flag is set, draw the ghost line.
-    if { $ghost } {
+    if { $opts(-ghost) } {
 	$slate ghost $id
 	set scratch($id.ghost) 1
     } else {
