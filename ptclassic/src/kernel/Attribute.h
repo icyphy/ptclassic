@@ -17,6 +17,8 @@ $Id$
 
 typedef unsigned long bitWord;
 
+// Class Attribute is used to specify a set of bits that must be on
+// and a set of bits that must be off in a bitWord.
 class Attribute {
 private:
 	bitWord bitsOn;
@@ -25,10 +27,23 @@ public:
 	// constructor
 	Attribute(bitWord on, bitWord off) : bitsOn(on), bitsOff(off) {}
 
-	// specify the combination of two attributes
+	// Specify the combination of two attributes.
+	// This combination means that requirements of both attributes
+	// must be satisfied.  Hence, it really should be called an "and"
+	// operation.
 	Attribute& operator |= (const Attribute& a) {
 		bitsOn |= a.bitsOn;
 		bitsOff |= a.bitsOff;
+		return *this;
+	}
+
+	// Specify the combination of two attributes.
+	// This combination means that requirements of either attribute
+	// must be satisfied.  Hence, it really should be called an "or"
+	// operation.
+	Attribute& operator &= (const Attribute& a) {
+		bitsOn &= a.bitsOn;
+		bitsOff &= a.bitsOff;
 		return *this;
 	}
 
@@ -50,8 +65,19 @@ public:
 	bitWord off() const { return bitsOff;}
 };
 
+// This combination means that requirements of both attributes
+// must be satisfied.  Hence, it really should be called an "and"
+// operation.
 inline Attribute operator | (const Attribute& a, const Attribute& b) {
 	Attribute t(a);
 	return t |= b;
+}
+
+// This combination means that requirements of either attribute
+// must be satisfied.  Hence, it really should be called an "or"
+// operation.
+inline Attribute operator & (const Attribute& a, const Attribute& b) {
+	Attribute t(a);
+	return t &= b;
 }
 #endif
