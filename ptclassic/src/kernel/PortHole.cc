@@ -3,8 +3,20 @@
 #include "StringList.h"
 #include "Output.h"
  
-// SCCS version identification
-// $Id$
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+Code for functions declared in Connection.h
+
+**************************************************************************/
 
 extern Error errorHandler;
 extern PlasmaList plasmaList;
@@ -185,7 +197,7 @@ MultiPortHole& MultiSDFPort :: setPort (char* s,
         return *this;
 }
  
-PortHole& MultiSDFInPort :: newPort () {
+PortHole& MultiInSDFPort :: newPort () {
         InSDFPort* newport = new InSDFPort;
         ports.put(*newport);
         blockIamIn->
@@ -195,7 +207,7 @@ PortHole& MultiSDFInPort :: newPort () {
 }
  
  
-PortHole& MultiSDFOutPort :: newPort () {
+PortHole& MultiOutSDFPort :: newPort () {
         OutSDFPort* newport = new OutSDFPort;
         ports.put(*newport);
         blockIamIn->

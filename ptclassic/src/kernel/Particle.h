@@ -3,15 +3,19 @@
 
 #include "DataStruct.h"
 
-// $Id$
+/**************************************************************************
+Version identification:
+$Id$
 
-/**************************************************************
-* Particles
-*
-* Particles are the envelope that carry data between Stars
-*
-* Programmer: D.G.Messerschmitt
-* Date: Jan. 15, 1990
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  E. A. Lee and D. G. Messerschmitt
+ Date of creation: 1/17/89
+ Revisions:
+
+
+ Particles are the envelope that carry data between Stars
 ***************************************************************/
 
 	/////////////////////////////////
@@ -19,7 +23,9 @@
 	/////////////////////////////////
 
 // Types of data stored in queues between stars
-enum dataType { INT, FLOAT, STRING };
+// ANYTYPE is provided for the benefit of Stars like Fork
+// and Printer that operate independently of Particle type
+enum dataType { INT, FLOAT, STRING, ANYTYPE };
 
 class Particle
 {
@@ -39,15 +45,11 @@ public:
 	virtual operator << (int) {};
 	virtual operator << (float) {};
 
-	// Clone this Particle -- any past Particles held
-	//  in the OutPortHole are clones of the real Particle
-	//  put into the Geodesic, to avoid subtle interactions
-	//  with the Block receiving the Particles
-	// Argument is Particle to be loaded up with my data;
-	//  clone() does not create the Particle since that is
-	//  the job of Plasma
-	// NOTE: it may be possible to avoid this method
-	//  by just equating two particles -- try this later
+	// Clone this Particle -- this method is required
+	//  where copies of the Particle are needed, as in
+	//  a Fork:Star
+	// NOTE: may be possible to avoid this method later
+	//  by just equating Particles
 	virtual void clone(Particle*) {};
 };
 
