@@ -92,6 +92,9 @@ class ::tycho::StatusBar {
 
     # Execute a command with the entry widget contents -- key callback
     method _entrycommand {command}
+    
+    # Execute a command with the entry widget or return it's name
+    method _entrywidget {args}
 
     # Create an entry field in the status bar
     method entry {label args}
@@ -293,6 +296,27 @@ body ::tycho::StatusBar::_entrycommand {command} {
     # Substitute for %e and evaluate
     regsub -all -- % $command [$itk_component(feedback) get] script
     uplevel #0 $script
+}
+
+#####################################################################
+#### _entrywidget
+# 
+# If no arguments are given, return the entry widget; if there is none,
+# return null. If arguments are given and there is an entry widget, execute
+# ths command on the entry and return the result. If there are args
+# but no entry, do nothing and return null.
+#
+body ::tycho::StatusBar::_entrywidget {args} {
+    # Make sure we're in the right mode and the widget still exists
+    if { $_mode != "entry" \
+	    || ![::info exists itk_component(feedback)] } {
+        return
+    }     
+    if {$args == {}} {
+        return $itk_component(feedback)
+    } else {
+        eval [$itk_component(feedback) $args]
+    }
 }
 
 #######################################################################
