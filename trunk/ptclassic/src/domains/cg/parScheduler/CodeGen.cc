@@ -37,6 +37,7 @@ special routines to generate the sub universes.
 #pragma implementation
 #endif
 
+#include "CGCluster.h"
 #include "UniProcessor.h"
 #include "ParProcessors.h"
 #include "KnownBlock.h"
@@ -50,7 +51,7 @@ static void copyActualStates(const Block& src, Block& dest) {
 	CBlockStateIter nexts(src);
 	BlockStateIter nextd(dest);
 	const State* srcStatePtr;
-	State *destStatePtr;
+	State *destStatePtr = 0;
 	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0) {
 		StringList temp = srcStatePtr->currentValue();
 		destStatePtr->setInitValue(hashstring(temp));
@@ -59,7 +60,8 @@ static void copyActualStates(const Block& src, Block& dest) {
 
 PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
 	ParNode* n = (ParNode*) s->myMaster();
-	DataFlowStar* copyS = n->getCopyStar();
+ 	DataFlowStar* copyS = n->getCopyStar();
+	if (p->asClusterPort()) return &p->asClusterPort()->real();
 	return copyS->portWithName(p->name());
 }
 
@@ -68,31 +70,29 @@ DataFlowStar* UniProcessor :: cloneStar(ParNode* n) {
 	DataFlowStar* org = n->myMaster();
 	DataFlowStar* newS;
 	if (org->isItWormhole()) {
-		int ix = n->profile()->profileIx(n->invocationNumber(),myId());
-		LOG_NEW; newS =  new CGWormStar((CGStar*) org, ix,
-				n->invocationNumber(), 1);
-		return newS;
+	    int ix = n->profile()->profileIx(n->invocationNumber(),myId());
+	    LOG_NEW; newS =  new CGWormStar((CGStar*) org, ix,
+					    n->invocationNumber(), 1);
+	    return newS;
 	}
-		
 	if (!target()->support(org)) {
-		// FIXME: need documentation.  Are we remapping the
-		// star into a different domain here?
-		// FIXME: assumes target()->starType() ends in "Star"
-		// and is preceded by the domain.
-		// This needs to be fixed!
-		const char* foo = target()->starType();
-		// FIXME: assumes 14-letter max starType name!!!
-		char temp[15];
-		strcpy(temp, foo);
-		int len = strlen(foo);
-		temp[len-4] = 0;
-		const char* sname = org->className() + 
-			strlen(org->domain());
-		newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
+	    // FIXME: need documentation.  Are we remapping the
+	    // star into a different domain here?
+	    // FIXME: assumes target()->starType() ends in "Star"
+	    // and is preceded by the domain.
+	    // This needs to be fixed!
+	    const char* foo = target()->starType();
+	    // FIXME: assumes 14-letter max starType name!!!
+	    char temp[15];
+	    strcpy(temp, foo);
+	    int len = strlen(foo);
+	    temp[len-4] = 0;
+	    const char* sname = org->className() + 
+		strlen(org->domain());
+	    newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
 	} else {
-		newS = (DataFlowStar*) org->clone();
+	    newS = (DataFlowStar*) org->clone();
 	}
-
 	copyActualStates(*org, *newS);
 	return newS;
 }
@@ -106,7 +106,8 @@ void UniProcessor :: createSubGal() {
 
 	// create data structure
 	LOG_DEL; delete subGal;
-	LOG_NEW; subGal = new DynamicGalaxy;
+	LOG_NEW; subGal = new Galaxy;
+//	LOG_NEW; subGal = new DynamicGalaxy;
 	subGal->setNameParent(targetPtr->name(), 0);
 
 	// maintain the list of the SDF stars which we have considered
@@ -124,7 +125,7 @@ void UniProcessor :: createSubGal() {
 		// the second condition checks whether it is a wormhole(or
 		// parallel star) node or not.
 		if (n->getType() || (n->getProcId() != myId())) continue;
-
+		
 		// for each node assigned to the processor
 		// we deal with the node of the smallest invocation first.
 		DataFlowStar* org = n->myMaster();
@@ -138,10 +139,31 @@ void UniProcessor :: createSubGal() {
 		while (smallest && (smallest->getProcId() != myId()))
 			smallest = (ParNode*) smallest->getNextInvoc();
 
-		DataFlowStar* copyS = cloneStar(n);
+		DataFlowStar* copyS;
+		// if cluster, we do some magic!
+		
+		if (n->myMaster()->asCluster()) {
+		    copyS = n->myMaster();
+		    Block* master = copyS->asCluster()->masterBlock();/* =
+			((CGCluster*)n->myMaster())->createSubGal();*/
+		    Block* parentBlock = master->parent();
+		    subGal->addBlock(*master, master->name());
+		    // FIXME
+		    // The blocks should still have the same parent
+		    // as before
+		    master->setParent(parentBlock);
+		    master->setTarget(targetPtr);
+		    Scheduler* clusterSched = copyS->asCluster()->innerSched();
+		    if (clusterSched) clusterSched->setTarget(*targetPtr);
+		}
+		else {
+		    copyS = cloneStar(n);
+		    // add to the galaxy
+		    subGal->addBlock(*copyS, org->name());
+		    copyS->setTarget(targetPtr);
+		}
 		if (SimControl::haltRequested()) return;
 
-		copyS->setTarget(targetPtr);
 
 		ParNode* prevN = 0;
 		smallest->setCopyStar(copyS, prevN);
@@ -149,10 +171,6 @@ void UniProcessor :: createSubGal() {
 
 		copyS->setMaster(smallest);
 		assignedFirstInvocs.put(smallest);
-
-		// add to the galaxy
-		subGal->addBlock(*copyS, org->name());
-
 		// Set the pointer of the invocations to the cloned star.
 		while ((smallest = (ParNode*) smallest->getNextInvoc()) != 0) 
 			if (smallest->getProcId() == myId()) {
@@ -197,6 +215,8 @@ void UniProcessor :: createSubGal() {
 			} else {
 				makeGenConnect(p, pn, org, farS, touchedStars);
 			}
+			if (SimControl::haltRequested()) return;
+
 		}
 	}
 }
@@ -208,21 +228,23 @@ void UniProcessor :: createSubGal() {
 void UniProcessor :: makeOSOPConnect(PortHole* p, DataFlowStar* org, 
 	DataFlowStar* farS, SequentialList& touchedStars) {
 
-	if (touchedStars.member(farS)) {
-	 	// make connection if it is output
-		if (p->isItOutput()) {
-			PortHole* destP = clonedPort(farS, p->far());
-			clonedPort(org, p)->connect(*destP, p->numTokens());
-		}
-	} else {
-		ParNode* n = (ParNode*) farS->myMaster();
-		PortHole* cp = clonedPort(org, p);
-		if (p->isItInput()) {
-			makeReceive(n->getProcId(),cp,p->numTokens(),0,p);
-		} else {
-			makeSend(n->getProcId(), cp, 0, p);
-		}
+    if (touchedStars.member(farS)) {
+	// if cluster, already connected - we use original stars!!
+	if (farS->asCluster()) return;
+	// make connection if it is output
+	if (p->isItOutput()) {
+	    PortHole* destP = clonedPort(farS, p->far());
+	    clonedPort(org, p)->connect(*destP, p->numTokens());
 	}
+    } else {
+	ParNode* n = (ParNode*) farS->myMaster();
+	PortHole* cp = clonedPort(org, p);
+	if (p->isItInput()) {
+	    makeReceive(n->getProcId(),cp,p->numTokens(),0,p);
+	} else {
+	    makeSend(n->getProcId(), cp, 0,p);
+	}
+    }
 }
 
 			///////////////////////////////
@@ -577,6 +599,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay,
 void UniProcessor :: makeSend(int pindex, PortHole* sP, 
 			EGGate* g, PortHole* orgP) {
 	int numSample;
+
 	if (orgP != 0) {
 		numSample = orgP->numXfer();
 	}
