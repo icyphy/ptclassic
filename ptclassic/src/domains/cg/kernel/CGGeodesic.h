@@ -50,10 +50,6 @@ const int F_DEST = 2;
 
 class CGGeodesic : public Geodesic {
 public:
-	CGGeodesic () : maxNumParticles(0) {}
-	void initialize();
-	void incCount(int);
-
 	// class identification
 	int isA(const char*) const;
 
@@ -72,9 +68,6 @@ public:
 	// return zero if not associated with a fork buffer.
 	int forkDelay() const;
 
-	// return the maxNumParticles
-	int getMaxNum() { return maxNumParticles; }
-
 protected:
 	CGPortHole* src() {
 		return ((CGPortHole*)originatingPort)->forkSrc;
@@ -83,11 +76,8 @@ protected:
 		return ((const CGPortHole*)originatingPort)->forkSrc;
 	}
 	// minimum size needed considering only local information
-	int minNeeded() const {
-		const CGPortHole* dest = (const CGPortHole*)destinationPort;
-		int nOld = max(dest->maxDelay() + 1 - dest->numXfer(),0);
-		return maxNumParticles + nOld;
-	}
+	int minNeeded() const;
+
 	// this function returns a value giving the maximum fraction of
 	// memory internalBufSize should "waste" to arrange for linear
 	// buffering between stars that do a non-integral rate change
@@ -101,7 +91,6 @@ protected:
 	// returns 0 for all but the source arc.
 	virtual int internalBufSize() const;
 private:
-	int maxNumParticles;
 	SequentialList dests;
 };
 
