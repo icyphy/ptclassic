@@ -75,7 +75,7 @@ class ::tycho::TclShell {
     ####                         public methods                           ####
 
     # Move the insertion cursor to after the prompt if it is before the prompt.
-    method adjustInsertionCursor {}
+    method adjustInsertionCursor {{point {}}}
 
     # Move back one space, but not into the prompt.
     method backChar {}
@@ -233,29 +233,37 @@ body ::tycho::TclShell::constructor {args} {
     # before the prompt.  In all three cases below, the default Text binding
     # is copied into this binding.  It would be better to invoke that
     # binding directly, but I cannot figure out how to do that.
+    #
+    # (To prevent the cursor moving when selecting text in the window,
+    # we have to remember where it is before executing the tk binding
+    # code with a global variable. This is very ugly...
+    #
     bind $itk_component(text) <Button-1> {
+	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	tkTextButton1 %W %x %y
 	%W tag remove sel 0.0 end
 	# Adjust the insertion cursor so that it is not before the prompt
-	%Q adjustInsertionCursor
+	%Q adjustInsertionCursor $_tychoTclShellGlobalRememberedCursorPosition
 	break
     }
 
     bind $itk_component(text) <Double-Button-1> {
+	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	set tkPriv(selectMode) word
 	tkTextSelectTo %W %x %y
 	catch {%W mark set insert sel.first}
 	# Adjust the insertion cursor so that it is not before the prompt
-	%Q adjustInsertionCursor
+	%Q adjustInsertionCursor $_tychoTclShellGlobalRememberedCursorPosition
 	break
     }
 
     bind $itk_component(text) <Triple-Button-1> {
+	set _tychoTclShellGlobalRememberedCursorPosition [%W index insert]
 	set tkPriv(selectMode) line
 	tkTextSelectTo %W %x %y
 	catch {%W mark set insert sel.first}
 	# Adjust the insertion cursor so that it is not before the prompt
-	%Q adjustInsertionCursor
+	%Q adjustInsertionCursor $_tychoTclShellGlobalRememberedCursorPosition
 	break
     }
 
@@ -354,11 +362,25 @@ body ::tycho::TclShell::destructor {} {
 
 #########################################################################
 #### adjustInsertionCursor
-# Move the insertion cursor to after the prompt if it is before the prompt.
+# Adjust the insertion cursor so it stays on the current line. If the
+# second argument, _point_ is given, it must be a legal position on the
+# current line; if not given, it defaults to the position after the
+# prompt. If the insertion cursor is before the current line, then
+# is it moved to _point_; if the cursor is on the current line but
+# before the end of the prompt, it is moved to the end of the prompt;
+# otherwise, it is not moved. This method should be called anytime
+# Tk's default text bindings may move the cursor.
 #
-body ::tycho::TclShell::adjustInsertionCursor {} {
-    if {[$itk_component(text) compare insert <= promptEnd]} {
-	$itk_component(text) mark set insert {promptEnd +1 chars}
+body ::tycho::TclShell::adjustInsertionCursor {{point {}}} {
+    if { $point == "" } {
+	set point [$itk_component(text) index {promptEnd +1 chars}]
+    }
+    if { [$itk_component(text) compare insert <= promptEnd] } {
+	if { [$itk_component(text) compare insert <= {promptEnd -1 lines lineend}] }  {
+	    $itk_component(text) mark set insert $point
+	} else {
+	    $itk_component(text) mark set insert {promptEnd +1 chars}
+	}   
     }
 }
 
@@ -702,8 +724,9 @@ body ::tycho::TclShell::search {} {
 # (if there is one) is cleared.
 #
 body ::tycho::TclShell::seeFragment {point} {
+    set temp [$itk_component(text) index insert]
     Edit::seeFragment $point
-    after 200 "$this adjustInsertionCursor"
+    after 200 "$this adjustInsertionCursor" $temp
 }
 
 #########################################################################
@@ -801,6 +824,6 @@ body ::tycho::TclShell::insertWithTags {text args} {
 # "console" preferences.
 #
 body ::tycho::TclShell::preference {mode args} {
-    eval ::preference $mode "console" $args
+    eval ::tycho::preference $mode "console" $args
 }
 
