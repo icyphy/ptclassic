@@ -104,8 +104,8 @@ class ::tycho::HTML {
     # If true (the default), underline hyperlinks.
     itk_option define -underlinelinks underlineLinks UnderlineLinks 1
 
-    # Offset from the nominal 14 points for the font sizes.
-    itk_option define -size size Size 2
+    # Offset from the preferred font size.
+    itk_option define -size size Size 0
 
     # The default display font -- currently an X font, but should
     # be made symbolic in Tk 8.0
@@ -489,6 +489,8 @@ body ::tycho::HTML::constructor {args} {
         $myMenubar delete "Evaluate"
         $myMenubar delete "Revision Control..."
         $myMenubar delete "Toggle Read-Only"
+        $myMenubar delete "Increase Size"
+        $myMenubar delete "Decrease Size"
     }
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
