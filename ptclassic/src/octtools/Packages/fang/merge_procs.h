@@ -25,7 +25,7 @@
  * 
  */
 /* forward declaration */
-static merge_check_emit();
+static void merge_check_emit();
 
 
 static scan_point *merge_scan(outgeo, pointer, vertex, l_delta)
@@ -75,7 +75,7 @@ int l_delta;
     return (ptr);
 }
 
-static merge_check_emit(geo, x, y, l_delta, l_new, r_delta, r_new)
+static void merge_check_emit(geo, x, y, l_delta, l_new, r_delta, r_new)
 fa_geometry *geo;
 fa_coord x,y;
 int l_delta, l_new;
