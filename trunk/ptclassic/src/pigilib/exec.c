@@ -167,26 +167,26 @@ long userOptionWord;
 /* mark stars involved in errors detected by kernel */
 void
 PigiErrorMark(objName)
-char *objName;
+const char* objName;
 {
-    FindAndMark(&lastFacet, objName,0);
+    FindAndMark(&lastFacet, objName, 0);
 }
 
 /* mark stars with a pattern given the full name */
 void
 PigiMark(objName)
-char *objName;
+const char* objName;
 {
-    FindAndMark(&lastFacet, objName,1);
+    FindAndMark(&lastFacet, objName, 1);
 }
 
 /* mark stars with a pattern given the full name and the color to mark */
 void
 PigiMarkColor(objName,color)
-char *objName;
-char *color;
+const char* objName;
+const char* color;
 {
-    FindAndMarkColor(&lastFacet, objName,1,color);
+    FindAndMarkColor(&lastFacet, objName, 1, color);
 }
 
 /*=====================================================================*/

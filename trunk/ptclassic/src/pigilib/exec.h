@@ -47,9 +47,9 @@ extern int ptkRun ARGS((octObject *facetPtr, boolean now));
 extern int RpcRun ARGS((RPCSpot *spot, lsList cmdList, long userOptionWord));
 extern int RpcDisplaySchedule ARGS((RPCSpot *spot, lsList cmdList,
 				    long userOptionWord));
-extern void PigiErrorMark ARGS((char *objname));
-extern void PigiMark ARGS((char *objname));
-extern void PigiMarkColor ARGS((char *objName, char *color));
+extern void PigiErrorMark ARGS((const char* objname));
+extern void PigiMark ARGS((const char* objname));
+extern void PigiMarkColor ARGS((const char* objName, const char* color));
 extern int RpcRunDesignMaker ARGS((RPCSpot *spot, lsList cmdList,
 				   long userOptionWord));
 
