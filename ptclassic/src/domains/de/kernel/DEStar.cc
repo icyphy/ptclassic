@@ -31,16 +31,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
 
+ Mutability Modifications: John S. Davis II
+			   2/12/98
+
 *******************************************************************/
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
-#include "DEStar.h"
+#include "assert.h"
 #include "DEScheduler.h"
+#include "DEStar.h"
 #include "DEWormhole.h"
 #include "StringList.h"
 #include "PriorityQueue.h"
+#include "MutableCQEventQueue.h"
+#include "Error.h"
+
+
 
 /*******************************************************************
 
@@ -48,8 +56,38 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ********************************************************************/
 
-DEStar :: DEStar()
-: completionTime(0.0), arrivalTime(0.0), eventQ(0), delayType(FALSE), mode(SIMPLE) {}
+DEStar::DEStar() {
+
+    completionTime = 0.0; 
+    arrivalTime = 0.0; 
+    eventQ = 0; 
+    delayType = FALSE; 
+    mode = SIMPLE;
+    _pendingEventList = 0;
+    _mutabilitySet = 0;
+}
+
+DEStar::~DEStar() {
+    if( this->isMutable() ) { 
+	DETarget *tar = (DETarget *)this->target(); 
+	if( tar->isMutable() ) {
+	    clearAllPendingEvents();
+	    assert( _pendingEventList->size() == 0 );
+            delete _pendingEventList;
+        }
+    }
+}
+
+void DEStar::makeMutable() {
+    DETarget *tar = (DETarget *)this->target(); 
+    if( tar->isMutable() ) { 
+	delete _pendingEventList; 
+	BasePrioQueue *theQ = ((DEBaseSched *)scheduler())->queue();
+	_pendingEventList = new PendingEventList( (MutableCQEventQueue*)theQ);
+	_pendingEventList->initialize();
+    }
+    _mutabilitySet = 1;
+}
 
 // initialize DE-specific members.
 void DEStar :: initialize() {
@@ -84,6 +122,21 @@ void DEStar :: initialize() {
 			}
 		}
 	}
+
+	if( this->isMutable() ) {
+	    DETarget *tar = (DETarget *)this->target();
+	    if( tar->isMutable() ) {
+	       delete _pendingEventList; 
+	       _pendingEventList = new 
+		       PendingEventList( (MutableCQEventQueue*)eventQ );
+	       _pendingEventList->initialize();
+	    }
+	}
+}
+
+// Return TRUE if this star is mutable
+int DEStar::isMutable() {
+	return _mutabilitySet;
 }
 
 // declare inline so that it can be inlined into DEStar::run,
@@ -121,3 +174,58 @@ const char* DEStar :: domain() const {
 
 // isA function
 ISA_FUNC(DEStar,Star);
+
+Link* DEStar::addToPendingEventList(CqLevelLink* link) {
+	return _pendingEventList->appendGet(link);
+}
+
+CqLevelLink * DEStar::removePendingEvent(Link* eventToRemove) {
+    return _pendingEventList->remove(eventToRemove);
+}
+
+void DEStar::clearAllPendingEvents() {
+    if( this->isMutable() ) {
+        DETarget *target = (DETarget *)this->target(); 
+	if( target->isMutable() && _pendingEventList != 0 ) {
+            while( _pendingEventList->size() != 0 ) { 
+		_pendingEventList->removeHeadAndFree(); 
+            }
+	}
+    }
+}
+
+
+void DEStar::clearPendingEventsOfPortHole(DEPortHole *dePortHole) {
+    if( this->isMutable() ) {
+        DETarget *target = (DETarget *)this->target(); 
+	if( target->isMutable() && _pendingEventList != 0 ) {
+	    int size = _pendingEventList->size();
+	    int count = 0;
+	    CqLevelLink *cqlLink;
+	    // PortHole *portHole = dePortHole;
+	    while( count < size ) {
+		count++;
+
+		// Take out the head of the Pending Event List
+		cqlLink = _pendingEventList->getHeadAndRemove();
+
+		// Check to see if it matches the PortHole
+		if( ((Event*)cqlLink->e)->dest == dePortHole ) {
+		    cqlLink->destinationRef = 0;
+		    _pendingEventList->freeEvent(cqlLink);
+		}
+
+		// If not, put it back in the Pending Event List
+		else {
+		    cqlLink->destinationRef =
+			    this->addToPendingEventList(cqlLink);
+		}
+	    }
+	}
+    }
+}
+
+
+
+
+
