@@ -261,7 +261,7 @@ body ::tycho::TopLevel::destructor {} {
 	if $exitflag {
 	    set noMore 1
 	    foreach win [$topLevelWindows elements] {
-		if {[winfo exists $win] && [winfo ismapped $win]} {
+		if [winfo exists $win] {
 		    set noMore 0
 		    break
 		}
