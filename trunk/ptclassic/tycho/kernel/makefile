@@ -58,8 +58,6 @@ ITCL_SRCS = \
 	BuilderDialog.itcl \
 	CacheManager.itcl \
 	CircularList.itcl \
-	Class.itcl \
-	ClassSchedule.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
 	Compile.itcl \
@@ -67,7 +65,6 @@ ITCL_SRCS = \
 	CompileJava.itcl \
 	ControlPanel.itcl \
 	ControlSubpanel.itcl \
-	Curriculum.itcl \
 	DataModel.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
@@ -87,10 +84,8 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
-	HierModel.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
-	HyperlinkIndex.itcl \
 	IconLibrary.itcl \
 	IndexBrowser.itcl \
 	Interchange.itcl \
