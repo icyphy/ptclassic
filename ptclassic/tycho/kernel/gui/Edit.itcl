@@ -2378,9 +2378,9 @@ body ::tycho::Edit::incSearch {key} {
         $textWidget tag add currmatch $searchIndex \
                 "$searchIndex + $foundLength chars"
         $textWidget tag configure currmatch \
-                -background systemHighlight
+                -background [stylesheet get text search.background]
         $textWidget tag configure currmatch \
-                -foreground systemHighlightText
+                -foreground [stylesheet get text search.foreground]
 
         # Show selection
         $textWidget see $searchIndex
