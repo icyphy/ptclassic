@@ -131,6 +131,16 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
 }
 
 int CompileTarget::run() {
+    if (!galaxy()) {
+	Error::abortRun("No galaxy to run");
+	return FALSE;
+    }
+
+    if (haltRequested()) {
+	Error::abortRun(*galaxy(), "Can't continue after run-time error");
+	return FALSE;
+    }
+
     StringList universeClassName = sanitizedName(*galaxy());
     universeClassName += "Class";
     StringList universeName = sanitizedName(*galaxy());
