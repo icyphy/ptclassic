@@ -35,6 +35,7 @@ static char SccsId[]="$Id$";
 #include "facet_info.h"
 #include "oct_files.h"
 #include "mark.h"
+#include "master.h"
 #include "oct_utils.h"
 #include "term_update.h"
 
