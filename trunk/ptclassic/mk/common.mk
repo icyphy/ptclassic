@@ -73,7 +73,7 @@ PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
 
 # Build the ptlang binary if necessary
 $(PTLANG_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(PTARCH)/ptlang; $(MAKE) VPATH=$(PTLANG_VPATH))
+	(cd $(PTLANG_OBJ_DIR); $(MAKE) VPATH=$(PTLANG_VPATH))
 
 # islang binary in the obj directory
 ISLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/ipus/islang
@@ -102,7 +102,7 @@ PEPP= `if [ -f $(PEPP_IN_OBJ) ]; \
 
 # Build the pepp binary if necessary
 $(PEPP_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(PTARCH)/pepp; $(MAKE) VPATH=$(PEPP_VPATH))
+	(cd $(PEPP_OBJ_DIR); $(MAKE) VPATH=$(PEPP_VPATH))
 
 
 # Rule to build the ../doc/star directory
