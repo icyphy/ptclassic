@@ -59,6 +59,10 @@ namespace ::tycho {
 # The color of the outline of the oval. If "", 
 # the oval has no outline. By default, it is black.
 #
+# <li><b>-sticky</b>:
+# The grapple will not be deleted by the <b>ungrapple</b> method of
+# the Slate.
+#
 # <li><b>-width</b>:
 # The width of the outline of the oval, in pixels. By 
 # default, it is one.
@@ -102,6 +106,9 @@ class ::tycho::Grapple {
     # Update the *-outline* option
     proc _outline {id canvas slate outline}
 
+    # Update the *-sticky* option
+    proc _sticky {id canvas slate sticky}
+
     # Update the *-width* option
     proc _width {id canvas slate width}
 
@@ -130,6 +137,7 @@ class ::tycho::Grapple {
     set methodtable(_fill)     ::tycho::Grapple::_fill
     set methodtable(_item)     ::tycho::Grapple::_item
     set methodtable(_outline)  ::tycho::Grapple::_outline
+    set methodtable(_sticky)   ::tycho::Grapple::_sticky
     set methodtable(_width)    ::tycho::Grapple::_width
 
     set methodtable(construct) ::tycho::Grapple::construct
@@ -143,7 +151,8 @@ class ::tycho::Grapple {
     set optiondefault(-item)    ""
     set optiondefault(-outline) ""
     set optiondefault(-shape)   "point"
-    set optiondefault(-width)   "1"
+    set optiondefault(-sticky)  0
+    set optiondefault(-width)   1
 }
 
 ##########################################################################
@@ -177,6 +186,13 @@ body ::tycho::Grapple::_outline {id canvas slate outline} {
     if { $option(text$id) != "" } {
 	$canvas itemconfigure $component(label$id) -fill $outline
     }
+}
+
+##########################################################################
+## -sticky option configuration
+#
+body ::tycho::Grapple::_sticky {id canvas slate sticky} {
+    set option(sticky$id) $sticky
 }
 
 ##########################################################################
