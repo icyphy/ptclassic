@@ -59,7 +59,10 @@ ITCL_SRCS = \
 	UndirectedGraph.itcl \
 	VSM.itcl \
 	Strip.itcl \
-	SlateView.itcl 
+	SlateView.itcl \
+	Interchange.itcl \
+	testInterchange.itcl \
+	Model.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
