@@ -78,7 +78,8 @@ include $(ROOT)/mk/mathematica.mk
 C50T = $(OBJDIR)/domains/c50/targets
 CG56T = $(OBJDIR)/domains/cg56/targets
 CGCT = $(OBJDIR)/domains/cgc/targets
-CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
+CGCTCLT = $(OBJDIR)/domains/cgc/tcltk/targets
+CGCVIST = $(OBJDIR)/domains/cgc/vis/targets
 CGT = $(OBJDIR)/domains/cg/targets
 SDFT = $(OBJDIR)/domains/sdf/targets
 VHDLT = $(OBJDIR)/domains/vhdl/targets
@@ -390,7 +391,7 @@ ifdef CGC
 		LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
 		# CGC Tcl/Tk targets
 		CUSTOM_DIRS += $(CGCDIR)/tcltk/targets
-		TARGETS += $(CGCTCL)/CGCTclTkTarget.o
+		TARGETS += $(CGCTCLT)/CGCTclTkTarget.o
 	endif
 	ifdef CGCVIS
 		# CGC VIS stars
@@ -400,12 +401,7 @@ ifdef CGC
 		LIBFILES += $(LIBDIR)/libcgcvisstars.$(LIBSUFFIX)
 		# CGC VIS targets
 		CUSTOM_DIRS += $(CGCDIR)/vis/targets
-		ifeq ($(USE_SHARED_LIBS),yes) 
-			LIBS += -lcgcvistargets
-			LIBFILES += $(LIBDIR)/libcgcvistargets.$(LIBSUFFIX)
-		else
-			TARGETS += $(CGCDIR)/vis/CGCVISTarget.o
-		endif
+		TARGETS += $(CGCVIST)/CGCVISTarget.o
 	endif
 	CGCLIB = 1
 	CG = 1
