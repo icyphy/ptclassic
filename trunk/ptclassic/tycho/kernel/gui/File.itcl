@@ -588,8 +588,10 @@ body ::tycho::File::constructor {args} {
     addMenuItem "Concept Index" Help -underline 0 \
 	    -command {::tycho::File::openContext $TYCHO/tycho.idx}
 
+    set nm [::tycho::autoName .index]
     addMenuItem "Code Index" Help -underline 0 \
-	    -command {::tycho::File::openContext $TYCHO/codeDoc.idx}
+	    -command "::tycho::IndexBrowser $nm -file \$TYCHO/codeDoc.idx \
+            -width 80; $nm centerOnScreen"
     
     # Bindings
     bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
