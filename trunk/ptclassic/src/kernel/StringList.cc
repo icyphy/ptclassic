@@ -81,7 +81,7 @@ StringList :: newCopy () const {
 	char* s = new char[totalSize+1];
 	char* out = s;
 	StringListIter next(*this);
-	char* p;
+	const char* p;
 	while ((p = next++) != 0) {
 		// copy string including terminator
 		while (*s++ = *p++);
@@ -113,7 +113,9 @@ StringList :: consolidate () {
 
 void StringList::deleteAllStrings() {
 	totalSize = 0;
-	StringListIter next(*this);
+	// note use of ListIter, not StringListIter, so we can delete
+	// the result
+	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
 		delete next++;
 	}
@@ -123,7 +125,7 @@ void StringList::deleteAllStrings() {
 
 UserOutput& operator << (UserOutput& o, const StringList& sl) {
 	StringListIter next(sl);
-	char* s;
+	const char* s;
 	while ((s = next++) != 0)
 		o << s;
 	return o;
@@ -133,7 +135,7 @@ UserOutput& operator << (UserOutput& o, const StringList& sl) {
 
 ostream& operator << (ostream&o, StringList& sl) {
 	StringListIter next(sl);
-	char* s;
+	const char* s;
 	while ((s = next++) != 0)
 		o << s;
 	return o;

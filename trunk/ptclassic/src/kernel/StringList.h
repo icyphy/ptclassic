@@ -103,8 +103,8 @@ private:
 class StringListIter : private ListIter {
 public:
 	StringListIter(const StringList& s) : ListIter(s) {}
-	char* next() { return (char*)ListIter::next();}
-	char* operator++() { return next();}
+	const char* next() { return (const char*)ListIter::next();}
+	const char* operator++() { return next();}
 	ListIter::reset;
 };
 
