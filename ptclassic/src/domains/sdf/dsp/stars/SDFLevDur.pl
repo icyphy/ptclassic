@@ -1,6 +1,3 @@
-ident {
-#define MAXORDER 256
-}
 defstar {
 	name {LevDur}
 	domain {SDF}
@@ -90,30 +87,40 @@ New York, 1989.
 		default {8}
 		desc {The order of the recursion.}
 	}
+	protected {
+		double *aOrig, *aPrime, *r;
+		int ORD;
+	}
+	constructor {
+		aOrig = aPrime = r = 0;
+		ORD = 0;
+	}
+	destructor {
+		delete aOrig; delete aPrime;
+	}
 	start {
-		if (int(order) > MAXORDER) {
-			Error::abortRun(*this,
-				": Maximum order in LevDur exceeded");
-			return;
+		if (int(order) != ORD) {
+			delete aOrig; delete aPrime;
+			ORD = int(order);
+			aOrig = new double[ORD+1];
+			aPrime = new double[ORD+1];
+			r = new double[ORD+1];
 		}
-		refl.setSDFParams (int(order), int(order)-1);
-		lp.setSDFParams (int(order), int(order)-1);
-		errPower.setSDFParams (int(order)+1, int(order));
-		autocor.setSDFParams (2*int(order), int(order));
+		refl.setSDFParams (ORD, ORD-1);
+		lp.setSDFParams (ORD, ORD-1);
+		errPower.setSDFParams (ORD+1, ORD);
+		autocor.setSDFParams (2*ORD, ORD);
 	}
 	go {
-	    double aOrig[MAXORDER];
-	    double aPrime[MAXORDER];
 	    // Define pointers so that the arrays can be swapped
 	    double* a = aOrig;
 	    double* aP = aPrime;
 	    double gamma;
-	    double r[MAXORDER];
 	    int m;
 
 	    // for convenience, read the autocorrelation lags into a vector
-	    for (int i = 0; i <= int(order); i++) {
-		r[i] = float(autocor%(int(order)-i));
+	    for (int i = 0; i <= ORD; i++) {
+		r[i] = double(autocor%(ORD-i));
 	    }
 	    // Initial prediction error is simply the zero-lag of
 	    // of the autocorrelation, or the signal power estimate.
@@ -121,14 +128,14 @@ New York, 1989.
 
 	    // Output the zeroth order prediction error power, which is
 	    // simply the power of the input process
-	    errPower%(int(order)) << r[0];
+	    errPower%ORD << r[0];
 
 	    // First coefficient is always unity
 	    a[0] = 1.0;
 	    aP[0] = 1.0;
 
 	    // The order recurrence
-	    for (int M = 0; M < int(order); M++ ) {
+	    for (int M = 0; M < ORD; M++ ) {
 
 		// Compute the new reflection coefficient
 		double deltaM = 0.0;
@@ -138,7 +145,7 @@ New York, 1989.
 		// Compute and output the reflection coefficient
 		// (which is also equal to the last AR parameter)
 		aP[M+1] = gamma = -deltaM/P;
-		refl%(int(order)-M-1) << - double(gamma);
+		refl%(ORD-M-1) << - double(gamma);
 
 		for (m = 1; m < M+1; m++) {
 		    aP[m] = a[m] + gamma*a[M+1-m];
@@ -146,7 +153,7 @@ New York, 1989.
 
 		// Update the prediction error power
 		P = P*(1.0 - gamma*gamma);
-		errPower%(int(order)-M-1) << double(P);
+		errPower%(ORD-M-1) << double(P);
 
 		// Swap a and aP for next order recurrence
 		double* temp = a;
@@ -154,8 +161,8 @@ New York, 1989.
 		aP = temp;
 	    }
 	    // generate the lp outputs
-	    for (m = 1; m <= int(order); m++ ) {
-		lp%(int(order)-m) << -a[m];
+	    for (m = 1; m <= ORD; m++ ) {
+		lp%(ORD-m) << -a[m];
 	    }
 	}
 }
