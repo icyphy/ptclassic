@@ -24,6 +24,31 @@ deeper understanding of how the kernel works.  A detailed knowledge of
 C++ is assumed.
 
 @iftex
+@vskip 0pt plus 1filll
+@end iftex
+
+Copyright @copyright{} 1990, 1991, 1992 The Regents of the University of
+California.  All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies of
+this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY FOR
+DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING
+OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE
+UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF SUCH
+DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANT ABILITY
+AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS
+ON AN ``AS IS'' BASIS, AND THE UNIVERSITY OF CALIFORNIA HAS NO OBLIGATION
+TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
+
+@iftex
 @end titlepage
 @end iftex
 
@@ -1718,7 +1743,13 @@ required by this particular Target (the default version does nothing).
 virtual int commTime(int @var{sender},int @var{receiver},int @var{nUnits}, int @var{type});
 @end example
 
-[ FIXME: To be written ]
+Return the number of time units required to send @var{nUnits} units of
+data whose type is the code indicated by @var{type} from the child Target
+numbered @var{sender} to the child target numbered @var{receiver}.
+The default implementation returns 0 regardless of the parameters.
+No meaning is specified at this level for the type codes, as different
+languages have different types; all that is required is that different
+types supported by a particular target map into distinct type codes.
 
 @example
 Galaxy* galaxy();
@@ -1927,7 +1958,9 @@ wormhole was suspended even though it had more work to do.
 virtual const char* domain() const;
 @end example
 
-Return the domain for this schedule.  FIXME: is this used any more?
+Return the domain for this schedule.  This method is no longer used and
+will be removed from future releases; it dates back to the days
+in which a given scheduler could only be used in one domain.
 
 @example
 void setTarget(Target& @var{t});
@@ -2434,8 +2467,8 @@ virtual int ready();
 @end example
 
 FIXME: Soonhoi needs to explain the following, which is his text:
-make sure this port is ready for inside Galaxy if it is an input.
-if ready, set up the stopping condition for the inner-domain.
+``make sure this port is ready for inside Galaxy if it is an input.
+if ready, set up the stopping condition for the inner-domain.''
 
 @node class WormMultiPort,  , class FromEventHorizon, Interfacing domains
 @section Class WormMultiPort
@@ -3438,11 +3471,11 @@ The constructor takes one argument, a reference to a Particle.  It
 creates a one-element ParticleStack, and links the Plasma into a linked
 list of all Plasma objects.
 
-The @code{put} function (for putting a particle into the Plasma) adds
-a particle to the Plasma's ParticleStack.  As a rule, it should not
-be used directly [FIXME: change protection to force this?]; the
-Particle's @code{die} method will automatically add it to the right
-Plasma.
+The @code{put} function (for putting a particle into the Plasma) adds a
+particle to the Plasma's ParticleStack.  As a rule, it should not be
+used directly; the Particle's @code{die} method will automatically add
+it to the right Plasma (future releases may protect this method to
+prevent its general use).
 
 @example
 Particle* get();
@@ -4865,7 +4898,117 @@ returned as single-character tokens; it permits quoted strings to
 override this, and it has a file inclusion facility.  In short, it
 is a simple, reconfigurable lexical analyzer.
 
-[ FIXME: add methods ]
+
+Tokenizer has a public const data member named @code{defWhite}
+that contains the default whitespace characters: space, newline,
+and tab.  It is possible to change the definition of whitespace
+for a particular constructor.
+
+Tokenizer provides three different constructors:
+
+@example
+Tokenizer();
+@end example
+
+The default constructor creates a Tokenizer that reads from the
+standard input stream, @code{cin}.  Its special characters are
+simply @key{(} and @key{)}.
+
+@example
+Tokenizer(istream& @var{input},const char* @var{spec},
+          const char* @var{w} = defWhite);
+@end example
+
+This constructor creates a Tokenizer that reads from the stream named
+by @var{input}.  The other arguments specify the special characters
+and the whitespace characters.
+
+@example
+Tokenizer(const char* @var{buffer},const char* @var{spec},
+          const char* @var{w} = defWhite);
+@end example
+
+This constructor creates a Tokenizer that reads from the null-terminated
+string in @var{buffer}.
+
+Tokenizer's destructor closes any include files associated with the
+constructor and deletes associated internal storage.
+
+The following operations change the definition of whitespace and of
+special characters, respectively:
+
+@example
+const char* setWhite(const char* w);
+const char* setSpecial(const char* s);
+@end example
+
+In each case, the old value is returned.
+
+By default, the line comment character for Tokenizer is @key{#}.
+It can be changed by
+
+@example
+char setCommentChar(char n);
+@end example
+
+Use an argument of 0 to disable the feature.  The old comment character
+is returned.
+
+The next operation is the basic mechanism for reading tokens from
+the Tokenizer:
+
+@example
+Tokenizer& operator >> (char * @var{pBuffer});
+@end example
+
+Here @var{pBuffer} points to a character buffer that reads the token.
+There is a design flaw: there isn't a way to give a maximum buffer
+length, so overflow is a risk.
+
+By analogy with streams, the following operation is provided:
+
+@example
+operator void* ();
+@end example
+
+It returns null if EOF has already been reached and non-null otherwise.
+This permits loops like
+
+@example
+Tokenizer tin;
+while (tin) @{ ... do stuff ... }@
+@end example
+
+FIXME: more to write here.
+
+@example
+const char* current_file() const;
+int current_line() const;
+@end example
+
+@example
+int fromFile(const char* name);
+@end example
+
+@example
+int readingFromFile() const { return depth > 0 ? 1 : 0;}
+@end example
+
+@example
+int eof() const;
+@end example
+
+@example
+void skipwhite();
+@end example
+
+Skip whitespace (closing include file if no more space)
+
+@example
+void flush();
+@end example
+
+discard current line, or close file (error cleanup)
 
 @node augmented fstreams, class XGraph, class Tokenizer, I/O classes
 @section pt_ifstream and pt_ofstream: augmented fstream classes
@@ -4897,10 +5040,86 @@ ofstream classes and can be used as replacements.
 @node class XGraph, Histogram classes, augmented fstreams, I/O classes
 @section XGraph, an interface to the xgraph program
 
-The XGraph class provides an interface for the xgraph program for
-plotting data on an X window system display.
+The XGraph class provides an interface for the @file{xgraph} program for
+plotting data on an X window system display.  The modified @file{xgraph}
+program provided with the Ptolemy distribution should be used, not the
+contributed version from the X11R5 tape.
 
-FIXME: say more.
+The constructor for XGraph does not completely initialize the object;
+initialization is completed by the @code{initialize()} method:
+
+@example
+void initialize(Block* @code{parent}, int @code{noGraphs},
+     const char* @code{options}, const char* @code{title},
+     const char* @code{saveFile} = 0, int @code{ignore} = 0);
+@end example
+
+The @var{parent} argument is the name of a Block that is associated
+with the XGraph object; this Block is used in @code{Error::abortRun}
+messages to report errors.
+
+@var{noGraphs} specifies the number of data sets that the graph will
+contain.  Each data set is a separate stream and is plotted in a
+different color (a different line style for B/W displays).
+
+@var{options} is a series of command line options that will be passed
+unmodified to the xgraph program.  It is subject to expansion by the
+Unix shell.
+
+@var{title} is the title for the graph; it can contain special
+characters (it is @emph{not} subjected to expansion by the Unix shell).
+
+@var{saveFile} is the name of a file to save the graph data into, in
+ASCII form.  If it is not given, the data are not saved, and a faster
+binary format is used.
+
+@var{ignore} specifies the number of initial points to ignore from
+each data set.
+
+@example
+void setIgnore(int @var{n});
+@end example
+
+Reset the ``ignore'' parameter to @var{n}.
+
+@example
+void addPoint(float @var{y});
+@end example
+
+Add a single point to the first data set whose X value is
+automatically generated (0, 1, 2, 3... on successive calls)
+and whose Y value is @var{y}.
+
+@example
+void addPoint(float @var{x}, float @var{y});
+@end example
+
+Add the point (@var{x}, @var{y}) to the first data set.
+
+@example
+void addPoint(int @example{dataSet}, float @var{x}, float @var{y});
+@end example
+
+Add the point (@var{x}, @var{y}) to the data set indicated by
+@var{dataSet}.  Data sets start with 1.
+
+@example
+void newTrace(int @var{dataSet} = 1);
+@end example
+
+Start a new trace for the nth dataset.  This means that there will be
+no connecting line between the last point plotted and the next point
+plotted.
+
+@example
+void terminate();
+@end example
+
+This function flushes the data out to disk, closes the files, and
+invokes the xgraph program.
+
+If the destructor is called before @code{terminate}, it will close and
+delete the temporary files.
 
 @node Histogram classes,  , class XGraph, I/O classes
 @section Histogram classes
@@ -4917,37 +5136,230 @@ FIXME: say more.
 @menu
 * Mathematical classes::        Mathematical classes
 * class IntervalList::          Class IntervalList
-* Time::                        Time
+* Clock and TimeVal::           Classes for interacting with the system clock
 @end menu
 
 @node Mathematical classes, class IntervalList, Misc, Misc
 @section Mathematical classes
 
-Class Complex is a simple subset of functions provided in the Gnu
-and AT&T complex classes.
+@menu
+* class Complex::               class Complex
+* class Fraction::              class Fraction
+@end menu
+
+@node class Complex, class Fraction, Mathematical classes, Mathematical classes
+@subsection class Complex
+
+Class Complex is a simple subset of functions provided in the Gnu and
+AT&T complex classes.  The standard arithmetic operators are
+implemented, as are the assignment arithmetic operators @code{+=},
+@code{-=}, @code{*=}, and @code{/=}, and equality and inequality
+operators @code{==} and @code{!=}.  There is also @code{real()} and
+@code{imag()} methods for accessing real and imaginary parts.
+
+It was originally written when libg++ was subject to the GPL.
+The current licensing for libg++ does not prevent us from using it
+and still distributing Ptolemy the way we want, but having it makes
+ports to other compilers (e.g. cfront) easier.
+
+The following non-member functions take Complex arguments:
+
+@example
+Complex conj(const Complex&);
+double real(const Complex&);
+double imag(const Complex&);
+double abs(const Complex&);
+@end example
+
+Return the conjugate, real part, imaginary part, or absolute value,
+respectively.
+
+@example
+double arg(const Complex&);
+@end example
+
+Return the angle between the X axis and the vector made by the argument.
+The expression
+
+@example
+abs(z)*exp(Complex(0.,1.)*arg(z))
+@end example
+
+is in theory always equal to z.
+
+@example
+double norm(const Complex&);
+@end example
+
+return the absolute value squared.
+
+@example
+Complex sin(const Complex&);
+Complex cos(const Complex&);
+Complex exp(const Complex&);
+Complex log(const Complex&);
+Complex sqrt(const Complex&);
+@end example
+
+Standard mathematical functions.  @code{log} returns the principal
+logarithm.
+
+@example
+Complex pow(double base,const Complex& expon);
+Complex pow(const Complex& base, const Complex& expon);
+@end example
+
+Raise base to expon power.
+
+There is also an << operator to print a Complex on an ostream.
+
+@node class Fraction,  , class Complex, Mathematical classes
+@subsection class Fraction
 
 Class Fraction represents fractions.  The header @file{Fraction.h}
 also provides declarations for the @code{lcm} (least common multiple)
-and @code{gcd} (greatest common divisor) functions.
+and @code{gcd} (greatest common divisor) functions, as these functions
+are needed for Fraction but are generally useful.
 
-FIXME: say more.
+@example
+Fraction ();
+Fraction (int @var{num}, int @var{den}=1);
+@example
 
-@node class IntervalList, Time, Mathematical classes, Misc
+The default constructor produces a fraction with numerator 0 and
+denominator 1.  The other constructor allows the numerator and
+denominator to be specified arbitrarily.
+
+@example
+int num() const;
+int den() const;
+@end example
+
+Return the numerator or denominator.
+
+@example
+operator double() const;
+@end example
+
+Return the value of the fraction as a double.
+
+Class Fraction implements the basic binary math operators
+@code{+}, @code{-}, @code{*}, @code{/}; the assignment
+operators @code{=}, @code{+=}, @code{-=}, @code{*=},
+and @code{/=}, and the equality test operators @code{==}
+and @code{!=}.
+
+The method
+
+@example
+Fraction& simplify();
+@end example
+
+reduces the fraction to lowest terms, and returns a reference
+to the fraction.
+
+There is also an << operator to print a Fraction on an ostream.
+
+@node class IntervalList, Clock and TimeVal, Mathematical classes, Misc
 @section Class IntervalList
 
 The IntervalList class represents a set of integers, represented
 as a series of intervals of integers that belong to the set.
 
-FIXME: say more.
+There is also a text representation for IntervalLists.  This
+representation can be used to read or write IntervalList objects
+to streams, and also can be used in the IntervalList constructor.
+This text representation looks exactly like the format the ``rn''
+newsreader uses to record which articles have been read in a
+Usenet newsgroup (which is where we got it from; thank you, Larry
+Wall).
 
-@node Time,  , class IntervalList, Misc
-@section Time
+In the text representation, an IntervalList is specified as one
+or more Intervals, separated by commas.  An interval is either
+an unsigned integer or two unsigned intervals with an intervening
+minus sign.  Here is one possible IntervalList specification:
+
+1-1003,1006,1008-1030,1050
+
+Whitespace is not permitted in this representation.
+
+IntervalList specifiers do not have to be in increasing order,
+but if they are not, they are changed to "canonical form", in which
+any overlapping intervals are merged and the intervals are sorted
+to appear in increasing order.
+
+FIXME: describe methods.
+
+@node Clock and TimeVal,  , class IntervalList, Misc
+@section Classes for interacting with the system clock
 
 These classes provide simple means of interacting with the operating
 system's clock -- sleeping until a specified time, timing events, etc.
+They may be replaced with something more general.
 
-class Clock is...
+class TimeVal represents a time interval to microsecond precision.
+There are three constructors:
 
-class TimeVal is...
+@example
+TimeVal();
+TimeVal(long @var{sec}, long @var{usec});
+TimeVal(double @var{length});
+@end example
+
+The first represents a time interval of zero.  The second represents a
+time interval with the specified number of seconds and microseconds.
+In the third case, the @var{length} argument is rounded to the nearest
+multiple of one millionth.
+
+These classes rely on features found in BSD-based Unix systems and newer
+System V Unix systems.  Older System V systems tend not to provide the
+ability to sleep for a time specified more accurately than a second.
+
+@example
+operator double() const;
+@end example
+
+This returns the interval value as a double.
+
+@example
+TimeVal operator +(const TimeVal&) const;
+TimeVal operator -(const TimeVal&) const;
+TimeVal& operator +=(const TimeVal&);
+TimeVal& operator -=(const TimeVal&);
+@end example
+
+These operators do simple addition and subtraction of TimeVals.
+
+class Clock provides a simple interface to the system clock for
+measurement of actual elapsed time.  It has an internal TimeVal
+field that represents the starting time of a time interval.
+
+@example
+Clock();
+@end example
+
+The constructor creates a Clock with starting time equal to the
+time at which the constructor is executed.
+
+@example
+void reset();
+@end example
+
+This method resets the start time to ``now''.
+
+@example
+TimeVal elapsedTime() const;
+@end example
+
+This method returns the elapsed time since the last @code{reset} or
+the call to the constructor.
+
+@example
+int sleepUntil(const TimeVal& @var{howLong}) const;
+@end example
+
+This method causes the process to sleep until @var{howLong} after the
+start time.
+
 @contents
 @bye
