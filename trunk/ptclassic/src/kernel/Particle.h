@@ -26,6 +26,8 @@ $Id$
 	// class Particle
 	/////////////////////////////////
 
+class Packet;
+
 // Particle is a virtual base class -- you can't declare a Particle.
 class Particle
 {
@@ -39,7 +41,7 @@ public:
 	virtual operator Complex () const = 0;
 
 	// print Particle
-	virtual char* print () const = 0;
+	virtual StringList print () const = 0;
 
 	// Zero or initialize this Particle
 	virtual void initialize() = 0;
@@ -58,6 +60,11 @@ public:
 	virtual Particle* clone() = 0;
 	virtual Particle* useNew() = 0;
 	virtual void die() = 0;
+
+	// packet interface: these funcs return errors unless
+	// redefined
+	virtual void getPacket (Packet&) const;
+	virtual void operator << (const Packet&);
 
 protected:
 	// Before copying Particles, always compare their types
@@ -106,7 +113,7 @@ public:
 	operator float () const;
 	operator Complex () const;
 
-	char* print() const;
+	StringList print() const;
 
 	// Initialize
 	IntSample(int i) { data = i;}
@@ -147,7 +154,7 @@ public:
         operator float () const;
 	operator Complex () const;
 
-	char* print() const;
+	StringList print() const;
  
         // Initialize
         FloatSample(float f) {data=f;}
@@ -188,7 +195,7 @@ public:
         operator float () const;
 	operator Complex () const;
 
-	char* print() const;
+	StringList print() const;
  
         // Initialize
         ComplexSample(const Complex& c) {data=c;}
