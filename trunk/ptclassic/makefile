@@ -26,33 +26,33 @@
 #		       
 # Programmers:  J. T. Buck, Christopher Hylands
 #
-# The ARCH environment variable must be set.
+# The PTARCH environment variable must be set.
 # $Id$
 
 defaultTarget:		install
-	@echo Installation for $(ARCH) is complete.
+	@echo Installation for $(PTARCH) is complete.
 
-makefiles:		obj.$(ARCH)
+makefiles:		obj.$(PTARCH)
 	@echo Updating makefiles.  Ignore messages about needing to rerun make --
 	@echo the top-level makefile will make sure it is done right.
-	cd obj.$(ARCH); $(MAKE) $(MFLAGS) makefiles
+	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) makefiles
 
-all install:	obj.$(ARCH) sources 
-	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
+all install:	obj.$(PTARCH) sources 
+	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) $@
 
 clean realclean:
-	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
+	cd obj.$(PTARCH); $(MAKE) $(MFLAGS) $@
 
-sources depend TAGS: obj.$(ARCH)
+sources depend TAGS: obj.$(PTARCH)
 	cd src; $(MAKE) $(MFLAGS) makefiles $@
 
-obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
+obj.$(PTARCH) obj.$(PTARCH)/octtools: MAKEARCH
 	csh -f MAKEARCH
 
 # This rule builds and installs everything but the gnu tools.
 # tcltk, octtools, and gthreads source are distributed
 # as a separate tar file.
-everything: obj.$(ARCH) install_tcltk install_octtools install_xv \
+everything: obj.$(PTARCH) install_tcltk install_octtools install_xv \
 	install_gthreads install
 
 everything_clean: clean_tcltk clean_octtools clean_xv clean_gthreads clean
@@ -61,7 +61,7 @@ everything_clean: clean_tcltk clean_octtools clean_xv clean_gthreads clean
 # then everything else.
 # gcc source is distributed as a separate tar file
 # tcltk and octtools source are distributed as a separate tar file
-bootstrap: obj.$(ARCH) install_gnu install_tcltk install_octtools install_xv \
+bootstrap: obj.$(PTARCH) install_gnu install_tcltk install_octtools install_xv \
 	install_gthreads install
 
 bootstrap_clean: clean_gnu clean_tcltk clean_octtools clean_xv \
@@ -95,8 +95,8 @@ IRIX5_GNU_BUILD_CC=cc -Wf,-XNh2000,-XNg1500 -Olimit 3000 -cckr -O1
 SHELL=/bin/sh
 
 install_gnu:
-	@echo "Building gnu for $(ARCH)";
-	case $(ARCH) in \
+	@echo "Building gnu for $(PTARCH)";
+	case $(PTARCH) in \
 	hppa) 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
 		$(MFLAGS) hpgnu_all;; \
 	irix5)	$(MAKE) -f mk/scratch-srcs.mk CC="$(IRIX5_GNU_BUILD_CC)" \
@@ -113,12 +113,12 @@ clean_tcltk:
 # Usually rebuilding vem and the octtools library is not done everytime.
 # Note that the octtools source is distributed as a separate tar file.
 
-octtools: obj.$(ARCH)/octtools
-	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) all
-install_octtools: obj.$(ARCH)/octtools
-	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) install
+octtools: obj.$(PTARCH)/octtools
+	cd obj.$(PTARCH)/octtools; $(MAKE) $(MFLAGS) all
+install_octtools: obj.$(PTARCH)/octtools
+	cd obj.$(PTARCH)/octtools; $(MAKE) $(MFLAGS) install
 clean_octtools:
-	cd obj.$(ARCH)/octtools; $(MAKE) $(MFLAGS) clean
+	cd obj.$(PTARCH)/octtools; $(MAKE) $(MFLAGS) clean
 
 install_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_all
@@ -126,7 +126,7 @@ clean_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_clean
 
 install_gthreads:
-	cd obj.$(ARCH)/thread; $(MAKE) $(MFLAGS) gthreads_install
+	cd obj.$(PTARCH)/thread; $(MAKE) $(MFLAGS) gthreads_install
 
 clean_gthreads:
-	cd obj.$(ARCH)/thread; $(MAKE) $(MFLAGS) gthreads_clean
+	cd obj.$(PTARCH)/thread; $(MAKE) $(MFLAGS) gthreads_clean
