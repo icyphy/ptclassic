@@ -318,6 +318,12 @@ $(ITCL_DEST_LIB)/libitcl.a: \
 	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
 		rm -f iwidgets; \
 		ln -s iwidgets$(ITCL_MAJOR_VERSION_NUMBER) iwidgets)
+	# make links be relative, not absolute so we can move the dist.
+	-(cd $(ITCL_DEST)/bin; rm -f itclsh itkwish tclsh wish; \
+		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh; \
+		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish; \
+		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh; \
+		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) wish)
 
 $(ITCL_DEST):
 	mkdir $@
