@@ -869,6 +869,12 @@ void ArchTarget :: trailerCode() {
       clockName << "_clk";
       int clockTime = firing->endTime;
       pulseClock(clockName, clockTime);
+
+      // Add a new clock signal also.
+      VHDLSignal* newSignal = new VHDLSignal;
+      newSignal->setName(clockName);
+      newSignal->setType("BOOLEAN");
+      signalList.put(*newSignal);
     }
   }
 
