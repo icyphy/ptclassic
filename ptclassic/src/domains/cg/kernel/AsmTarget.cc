@@ -308,6 +308,7 @@ int AsmTarget :: genFile(const char* stuff,const char* base,const char* suffix)
 	if (!o) status = FALSE;
 	else {
 		o << stuff;
+		o.flush();
 		status = TRUE;
 	}
 	LOG_DEL; delete fullName;
