@@ -33,6 +33,7 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 SRCS= \
  SDFAutocor.pl \
  SDFBiQuad.pl \
+ SDFBitsToInt.pl \
  SDFBlackHole.pl \
  SDFBlockFIR.pl \
  SDFBlockAllPole.pl \
@@ -46,11 +47,15 @@ SRCS= \
  SDFComplexSum.pl \
  SDFCos.pl \
  SDFCut.pl \
+ SDFCxDiff.pl \
+ SDFCxGain.pl \
+ SDFCxLMS.pl \
+ SDFCxTable.pl \
  SDFDB.pl \
- SDFDistributor.pl \
- SDFDeMux.pl \
- SDFDownSample.pl \
  SDFDTFT.pl \
+ SDFDeMux.pl \
+ SDFDistributor.pl \
+ SDFDownSample.pl \
  SDFExp.pl \
  SDFFIR.pl \
  SDFFloatDC.pl \
@@ -61,16 +66,20 @@ SRCS= \
  SDFFloatRamp.pl \
  SDFFloatRect.pl \
  SDFFloatSum.pl \
+ SDFFloatTable.pl \
  SDFFloatThresh.pl \
  SDFFloor.pl \
  SDFFork.pl \
+ SDFHilbert.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
  SDFIntRamp.pl \
+ SDFIntTable.pl \
+ SDFIntToBits.pl \
  SDFIntegrator.pl \
+ SDFLMS.pl \
  SDFLevDur.pl \
  SDFLimit.pl \
- SDFLMS.pl \
  SDFLog.pl \
  SDFMux.pl \
  SDFPlay.pl \
@@ -82,6 +91,7 @@ SRCS= \
  SDFReciprocal.pl \
  SDFRectPolar.pl \
  SDFRepeat.pl \
+ SDFReverse.pl \
  SDFSgn.pl \
  SDFSin.pl \
  SDFSqrt.pl \
