@@ -100,9 +100,6 @@ private:
 
 	// List of dynamically allocated blocks
 	SequentialList tempBlockList;
-
-	// Instance of the target to generate ptcl code
-	SDFPTclTarget* ptclTarget;
 };
 
 #endif
