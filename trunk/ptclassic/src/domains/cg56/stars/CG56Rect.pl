@@ -1,5 +1,5 @@
 defstar {
-	name { FixRect }
+	name { Rect }
 	domain { CG56 }
 	desc { Rectangular Pulse Generator }
 	version { $Id$ }

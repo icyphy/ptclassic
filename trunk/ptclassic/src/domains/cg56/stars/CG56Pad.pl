@@ -1,5 +1,5 @@
 defstar {
-	name { FixPad}
+	name { Pad}
 	domain { CG56 }
 	desc { Fix pad }
 	version { $Id$ }

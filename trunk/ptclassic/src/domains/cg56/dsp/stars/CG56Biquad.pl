@@ -1,5 +1,5 @@
 defstar {
-	name {BiQuad}
+	name {Biquad}
 	domain { CG56 }
 	desc {
 This star generates code for a second order IIR filter (a "biquad").

@@ -1,5 +1,5 @@
 defstar {
-	name { FixImpulse }
+	name { Impulse }
 	domain { CG56 }
 	desc { Impulse generator }
 	version { $Id$ }

@@ -1,5 +1,5 @@
 defstar {
-	name { Quantizer }
+	name { Quant }
 	domain { CG56 }
 	desc { Linear fractional with adjustable offset. }
 	version { $Id$ }

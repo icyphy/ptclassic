@@ -1,5 +1,5 @@
 defstar {
-	name { FixDiff }
+	name { Sub }
 	domain { CG56 }
 	desc { any input subtractor }
 	version { $Id$ }

@@ -24,53 +24,39 @@ INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
- CG56Abs.pl \
  CG56ACos.pl \
- CG56Allpass.pl \
  CG56ASin.pl \
- CG56BiQuad.pl \
+ CG56Abs.pl \
+ CG56Add.pl \
  CG56BlockReverse.pl \
  CG56CircToLin.pl \
- CG56Comb.pl \
  CG56Commutator.pl \
+ CG56Const.pl \
  CG56Cos.pl \
  CG56Cut.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
  CG56DownSample.pl \
- CG56DSPlayBQ.pl \
- CG56FIR.pl \
- CG56FixDC.pl \
- CG56FixDiff.pl \
- CG56FixGain.pl \
- CG56FixImpulse.pl \
- CG56FixPad.pl \
- CG56FixProduct.pl \
- CG56FixRamp.pl \
- CG56FixRect.pl \
- CG56FixSum.pl \
+ CG56Gain.pl \
  CG56HostOut.pl \
  CG56HostSlider.pl \
  CG56IIDGaussian.pl \
  CG56IIDUniform.pl \
+ CG56Impulse.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
- CG56IntMult.pl \
- CG56IntProduct.pl \
- CG56IntQuantizer.pl \
- CG56IntReadFile.pl \
- CG56IntWriteFile.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
- CG56LMS.pl \
- CG56LMSGanged.pl \
  CG56LocateMax.pl \
  CG56Log.pl \
  CG56LookupTbl.pl \
  CG56Magnavox.pl \
  CG56MagnavoxIn.pl \
  CG56MagnavoxOut.pl \
+ CG56Mpy.pl \
+ CG56MpyInt.pl \
  CG56Neg.pl \
+ CG56Pad.pl \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
@@ -78,11 +64,14 @@ PL_SRCS= \
  CG56ProPortADDA.pl \
  CG56ProPortDA.pl \
  CG56Pulse.pl \
- CG56Quantizer.pl \
+ CG56Quant.pl \
+ CG56QuantInt.pl \
  CG56QuasarChgPd.pl \
- CG56RaisedCos.pl \
+ CG56Ramp.pl \
  CG56ReadFile.pl \
+ CG56ReadFileInt.pl \
  CG56Reciprocal.pl \
+ CG56Rect.pl \
  CG56Repeat.pl \
  CG56Reverse.pl \
  CG56Sgn.pl \
@@ -90,13 +79,15 @@ PL_SRCS= \
  CG56Sin.pl \
  CG56Sqr.pl \
  CG56Sqrt.pl \
+ CG56Sub.pl \
  CG56Tone.pl \
  CG56UpSample.pl \
  CG56VarDelay.pl \
  CG56VarQuasar.pl \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
- CG56WriteFile.pl 
+ CG56WriteFile.pl \
+ CG56WriteFileInt.pl
 
 
 

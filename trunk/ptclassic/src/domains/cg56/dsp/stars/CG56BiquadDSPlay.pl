@@ -1,5 +1,5 @@
 defstar {
-	name { DSPlayBQ }
+	name { BiquadDSPlay }
 	domain { CG56 }
 	desc { Second order IIR filter (Biquad) }
 	version { $Id$ }

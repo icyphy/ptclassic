@@ -1,5 +1,5 @@
 defstar {
-	name { IntWriteFile }
+	name { WriteFileInt }
 	domain { CG56 }
 	desc {
 When run on the simulator, arranges for its input to be logged to a file.

@@ -1,5 +1,5 @@
 defstar {
-	name { IntProduct }
+	name { MpyInt }
 	domain { CG56 }
 	desc { Two input integer multiplier }
 	version { $Id$ }

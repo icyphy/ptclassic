@@ -1,5 +1,5 @@
 defstar {
-	name { FixProduct }
+	name { Mpy }
 	domain { CG56 }
 	desc { Multipy any number of inputs, producing an output. }
 	version { $Id$ }
