@@ -76,9 +76,9 @@
 # <p><b>Links</b>
 # 
 # <ul>
-# <li><a href="../slate/doc/internals/howtoread.html">Reading <i>ComplexItem</i>
+# <li><a href="../../../slate/doc/internals/howtoread.html">Reading <i>ComplexItem</i>
 # documentation</a>.
-# <li><a href="../slate/doc/internals/items.html">Complex item classes</a>.
+# <li><a href="../../../slate/doc/internals/items.html">Complex item classes</a>.
 # </ul>
 #
 class ::tycho::Junction {
