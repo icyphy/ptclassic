@@ -53,8 +53,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		int number;
 	}
 	setup {
-		int i;
-		
 		if(high > low) 		
 			height	= (high-low)/(levels-0);
 		else			
