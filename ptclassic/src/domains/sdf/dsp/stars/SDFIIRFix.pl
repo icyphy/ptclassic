@@ -241,10 +241,10 @@ The input particles are only cast to this precision if the parameter
 		fwdAccum = 0.0;
 		for ( int i=1; i < numState; i++) {
 		    fdbckAccum += state[i] * fdbckCoefs[i];
+		    checkOverflow(fdbckAccum);
 		    fwdAccum += state[i] * fwdCoefs[i];
+		    checkOverflow(fwdAccum);
 		}
-		checkOverflow(fdbckAccum);
-		checkOverflow(fwdAccum);
 		if ( int(ArrivingPrecision) )
 		    fdbckAccum += Fix(signalIn%0);
 		else {
@@ -256,13 +256,7 @@ The input particles are only cast to this precision if the parameter
 		    state[i] = state[i-1];
 		}
 		state[1] = fdbckAccum;
-		// Split up out = fdbckAccum * fwdCoefs[0] + fwdAccum;
-		// in order to test for overflow at each computation
-		out = fdbckAccum;
-		checkOverflow(out);
-		out *= fwdCoefs[0];
-		checkOverflow(out);
-		out += fwdAccum;
+		out = fdbckAccum * fwdCoefs[0] + fwdAccum;
 		checkOverflow(out);
 		signalOut%0 << out;
 	     }
