@@ -34,10 +34,12 @@ VPATH = $(ROOT)/lib
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS = CompileMake.template README \
-	oct2ps.pro pigiDebugRpc pigiRpcConsole \
+SCRIPT_SRCS = pigiDebugRpc pigiRpcConsole \
 	pigiRpcDebug pigiRpcDebug.dbx pigiRpcDebug.ddd pigiRpcDebug.xdb \
-	pigiRpcShell \
+	pigiRpcShell
+
+EXTRA_SRCS = CompileMake.template README \
+	oct2ps.pro \
 	pigiXRes7 pigiXRes8 pigiXRes8.bw pigiXRes8.cp \
 	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
 	vem.bindings.7-3 vem.bindings.8-0 vem.bindings.8-1
@@ -47,6 +49,13 @@ EXTRA_SRCS = CompileMake.template README \
 MISC_FILES = 	Vem Vem-8.1 Vem-8.2 bw_patterns \
 		cg56 cgc colors defaultContent \
 		mathematica matlab rename tcl tech technology vem
+LIBR = dummy
 
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
+# Do make sources so that we ensure that the subdirectories are checked out
+all: $(SCRIPT_SRCS) $(EXTRA_SRCS) $(MISC_FILES)
+	-chmod a+x $(SCRIPT_SRCS)
+
+install: all
+
+# We have an all rule, so include tycommon.mk.
+include $(ROOT)/mk/tycommon.mk
