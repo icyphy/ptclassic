@@ -119,9 +119,8 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	setup {
 	      int interp = interpolation;
  	      int decimt = decimation;
-	      int oldSampleNum = int(ceil(double(tapsNum - decimt)/double(interp)));
               tapsNum=taps.size();
-	      if (oldSampleNum>0)
+	      int oldSampleNum = int(ceil(double(tapsNum - decimt)/double(interp)));	      if (oldSampleNum>0)
                    oldsample.resize(oldSampleNum);
               else
                    oldsample.resize(0);
@@ -138,23 +137,24 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	      }
         }
         initCode {
-		int interp = interpolation;
-		int i = 0;
-		StringList tapInit;
-		tapInit = "\torg\t$ref(taps)\n";
-		if (interp == 1)
-			for (i = 0; i < taps.size() ; i++)
-				tapInit << "\tdc\t" << double(taps[i]) << '\n';
-		else
-			for (i = 0; i < interp; i++)
-				for (int j = i; j < taps.size(); j += interp)
-					tapInit << "\tdc\t"
-						<< double(taps[j]) << '\n';
-		tapInit << "\torg\tp:\n";
-		addCode(tapInit);
-		oldsampleSize=oldsample.size();
-		if (oldsampleSize>0) 
-                     addCode(block);
+	    int interp = interpolation;
+	    int i = 0;
+	    StringList tapInit;
+	    tapInit = "\torg\t$ref(taps)\n";
+	    if (interp == 1)
+		for (i = 0; i < taps.size() ; i++)
+		    tapInit << "\tdc\t" << double(taps[i]) << '\n';
+	    else {
+		for (i = interp-1; i >= 0; i--)
+		    for (int j=i; j<taps.size(); j+=interp) {
+			tapInit << "\tdc\t"<< double(taps[j]) << '\n';
+		    }
+	    }
+	    tapInit << "\torg\tp:\n";
+	    addCode(tapInit);
+	    oldsampleSize=oldsample.size();
+	    if (oldsampleSize>0) 
+		addCode(block);
         }
         
 	go {
