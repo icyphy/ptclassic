@@ -68,11 +68,17 @@ class ::tycho::ButtonBox {
     #####################################################################
     ####                          options                            ####
 
+    # The width of the buttons.
+    itk_option define -buttonwidth buttonWidth ButtonWidth 8
+
     # The number of columns in the grid. Zero means a horizontal layout,
     # gives a vertical layout, any other number gives a rectangular
     # layout.
     # Note: Cannot be reliably changed once buttons have been added
     itk_option define -columns columns Columns 0
+
+    # The font to use for the buttons
+    itk_option define -font font Font [::tycho::font helvetica]
 
     # The horizontal padding of buttons
     itk_option define -padx padX Pad 11
@@ -80,23 +86,17 @@ class ::tycho::ButtonBox {
     # The vertical padding of buttons
     itk_option define -pady padY Pad 4
 
+    # The width of the default ring
+    itk_option define -ringwidth ringWidth RingWidth 4
+
     # The horizontal padding between buttons
     itk_option define -spacingx spacingX SpacingX 0
 
     # The vertical padding between buttons
     itk_option define -spacingy spacingY SpacingY 0
 
-    # The font to use for the buttons
-    itk_option define -font font Font [::tycho::font helvetica]
-
-    # The width of the default ring
-    itk_option define -ringwidth ringWidth RingWidth 4
-
     # The status bar to print help info to
     itk_option define -statusbar statusBar StatusBar ""
-
-    # The width of the buttons.
-    itk_option define -buttonwidth buttonWidth ButtonWidth 8
 
     ###################################################################
     ####                         public methods                    ####
@@ -210,6 +210,12 @@ configbody ::tycho::ButtonBox::spacingy {
 #### constructor
 #
 body ::tycho::ButtonBox::constructor {args} {
+
+    # The following are added to support keyboard traversal to button boxes.
+    # They cause the button box to visibly show that it has the focus.
+    itk_option add hull.highlightthickness
+    itk_option add hull.highlightcolor
+
     # Create the button site. This is needed for subclasses that
     # add other things around the button box
     itk_component add buttonsite {
@@ -256,23 +262,15 @@ body ::tycho::ButtonBox::constructor {args} {
 # <li>*-description*: If the *-statusbar* option of the button box
 # is not null, then this string is printed to the
 # status bar when the mouse moves over the button.
+# <li>*-underline <i>num</i>*: If this option is given, and <i>num</i>
+# is a nonnegative integer, then <i>num</i> specifies a character in
+# the button label to be underlined (starting with 0).  Also, a binding
+# is made so that typing that character when the buttonbox has the focus
+# will cause the corresponding button to be invoked.
 # </ul>
 #
 # If neither *-row* nor *-column* is given, the button box
 # fills up from left to right and top to bottom.
-#
-# For example,
-# <pre>
-#    button foo -description "a button" -text "Push Me" &#92
-#         -command "::tycho::post Thanks"
-# </pre>
-# will create a button with label "Push Me" and the specified command.
-# To use a bitmap instead, something like the following will work:
-# <pre>
-#    global ::TYCHO
-#    button foo -description "a button" &#92
-#        -bitmap @$TYCHO/kernel/img/back.xbm -command ...
-# </pre>
 #
 body ::tycho::ButtonBox::add {tag args} {
     # Set options
@@ -348,6 +346,17 @@ body ::tycho::ButtonBox::add {tag args} {
     bind $itk_component(button$tag) <Enter> \
 	    [code [list %Q putStatus $_description($tag)]]
     bind $itk_component(button$tag) <Leave> [code "%Q putStatus {}"]
+
+    # If a character was underlined, bind the hull to invoke the button.
+    if {[::info exists buttopts(-underline)]} {
+        if {[::info exists buttopts(-text)]} {
+            set char [string index $buttopts(-text) $buttopts(-underline)]
+            if {$char != {}} {
+                bind $itk_component(hull) <Key-[string tolower $char]> \
+                        [code [list $itk_component(button$tag) invoke]]
+            }
+        }
+    }
 }
 
 #####################################################################
