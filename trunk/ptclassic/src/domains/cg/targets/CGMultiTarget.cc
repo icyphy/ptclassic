@@ -426,10 +426,6 @@ void CGMultiTarget::downLoadCode(int pId, Profile*) {
 		((ParScheduler*)scheduler())->getProc(pId)->run();
 }
 
-void CGMultiTarget :: addCode(const char* code) {
-	child(curChild)->addCode(code);
-}
-
 static CGMultiTarget targ("FullyConnected","CGStar",
 "Fully-connected targets for parallel scheduling");
 
