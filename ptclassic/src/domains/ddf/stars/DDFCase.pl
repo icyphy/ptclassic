@@ -4,7 +4,8 @@ defstar {
 	desc {
 Route an input particle to one of the outputs depending on the 
 control particle.  The control particle should have value between
-zero and N-1, inclusive, where N is the number of outputs.
+zero and N-1, inclusive, where N is the number of outputs.  It
+can be used with EndCase to implement an if ... then construct.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
@@ -15,7 +16,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DDF library }
-
+	seealso { EndCase, HOFIfElse, HOFIfElseGr }
 	input {
 		name { input }
 		type { ANYTYPE }
@@ -23,6 +24,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name { control }
 		type { int }
+		desc { selects the output port to receive the input value. }
 	}
 	outmulti {
 		name { output }

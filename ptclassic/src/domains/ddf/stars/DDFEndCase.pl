@@ -5,7 +5,8 @@ defstar {
 Depending on the "control" particle, consume a particle from one of
 the data inputs and send it to the output.  The control particle
 should have value between zero and N-1, inclusive, where N is the
-number of data inputs.
+number of data inputs.  It can be used with Case to implement an
+if ... then construct.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
@@ -16,7 +17,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DDF library }
-
+	seealso { Case, HOFIfElse, HOFIfElseGr }
 	inmulti {
 		name { input }
 		type { ANYTYPE }
@@ -66,10 +67,10 @@ limitation of liability, and disclaimer of warranty provisions.
 			output.sendData();
 			waitFor(control);
 			readyToGo = FALSE;
-		} else {
+		}
+		else {
 			waitFor(iport);
 			readyToGo = TRUE;
-			return;
 		}
 	}
 }
