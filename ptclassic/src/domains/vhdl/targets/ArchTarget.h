@@ -83,8 +83,9 @@ public:
 	// Add the clock to the clock list and generate code to toggle it.
 	void toggleClock(const char*);
 
-	// Add the clock to the clock list and generate code to assert it.
-	void assertClock(const char*);
+	// Add the clock to the clock list and generate code
+	// to assert it with the given value.
+	void assertClock(const char*, int);
 
 	// Run the code.
 	/*virtual*/ int runCode();
@@ -192,7 +193,7 @@ private:
 	void connectSource(StringList, VHDLSignal*);
 
 	// Connect a multiplexor between the given input and output signals.
-	void connectMultiplexor(VHDLSignal*, VHDLSignal*, VHDLSignal*);
+	void connectMultiplexor(StringList, VHDLSignalList*, VHDLSignal*, VHDLSignal*);
 
 	// Connect a register between the given input and output signals.
 	void connectRegister(VHDLSignal*, VHDLSignal*, VHDLSignal*);
