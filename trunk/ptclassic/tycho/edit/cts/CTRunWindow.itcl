@@ -43,32 +43,47 @@ class ::tycho::CTRunWindow {
     constructor {args} {}
     destructor {}
 
-    method simulation {mode args}
+    # Tell the class to use for the simulation.
+    protected method _simulationClass {}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::CTRunWindow::constructor {args} {
-    puts "CTRunWindow $this $args"
+    # Create the widgets shaed by all simulations
+    itk_component add time {
+	::tycho::CTTimePanel $itk_interior.time
+    } {
+	keep -background -cursor -font
+    }
+    pack $itk_component(time) -side left -expand no \
+	    -padx 2 -pady 4 \
+	    -anchor n
+
+    # Create a slider bank, for testing
+    itk_component add controls {
+	::tycho::SliderPanel $itk_interior.controls
+    } {
+	keep -background -cursor -font
+    }
+    pack $itk_component(controls) -side left -expand no \
+	    -padx 2 -pady 4 \
+	    -anchor n
+
+    $itk_component(controls) add a -label A
+    $itk_component(controls) add b -label B
+    $itk_component(controls) add c -label C
+    $itk_component(controls) add d -label D
 
     # Initialize options
     eval itk_initialize $args
 }
 
-########################################################################
-#### simulation
+#####################################################################
+#### _simulationClass
+# Return the CT simulation class name.
 #
-body ::tycho::CTRunWindow::simulation {mode args} {
-    switch -exact $mode {
-	"create" {
-	    # Create a new simulation.
-	    set _simulation [uplevel #0 ::tycho::CTSimulation #auto $args]
-	    return $_simulation
-	}
-	default {
-	    eval chain $args
-	}
-    }
+body ::tycho::CTRunWindow::_simulationClass {} {
+    return ::tycho::CTSimulation
 }
-
