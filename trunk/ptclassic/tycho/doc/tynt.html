@@ -59,7 +59,8 @@ must install Tcl8.0 and then install Tcl8.0.3.
 <li> Download JDK1.1.x from
  <a href="http://www.javasoft.com"><CODE>www.javasoft.comm</CODE></a>
 and install it in <CODE>c:\jdk1.1.<I>x</I></CODE>
-
+Note that Tcl Blend will only work with the Sun JDK1.1 and later,
+it will not work with the Microsoft JDK.
 
 <li> Download Tcl8.0 from
 <a href="ftp://ftp.scriptics.com/pub/tcl/tcl8_0/tcl80p2.exe"><CODE>ftp://ftp.scriptics.com/pub/tcl/tcl8_0/tcl80p2.exe</CODE></a>.
@@ -165,7 +166,38 @@ To associate a suffix with a program:
 
 	</menu>
 
-	</ol>
+
+<LI> You will need to set the following environment values under NT's System
+control panel.  To bring up this control panel, open the <CODE>Start</CODE>
+menu, select <CODE>Settings</CODE>, select <CODE>Control Panels</CODE>,
+select the <CODE>System</CODE> icon 
+and then select the <CODE>Environment</CODE> tab.  
+ <br >If you have Adminstrator
+privileges, then you should be able to set the <CODE>System Variables</CODE>
+for everyone.  If you do not have Adminstrator privileges, then set
+the variables in the <CODE>User Variables</CODE> section
+<MENU>
+<LI> Add the following to the <CODE>Path</CODE>:
+<PRE>
+C:\Program Files\Tcl\bin;C:\JDK1.1.6\bin;C:\tycho0.3devel\bin
+</PRE>
+
+<LI> Create a <CODE>TYCHO</CODE> variable and set it to 
+<CODE>C:/tycho0.3</CODE>.  Note that the slash is a Unix style
+forward slash, not a DOS style backslash.
+
+<LI> Create a <CODE>JAVA_HOME</CODE> variable and set it to
+<CODE>C:/jdk1.1.6</CODE>.  Again, this is a Unix style forward slash
+
+
+<LI> To run Tycho, you may need to set <CODE>TCL_LIBRARY</CODE> to
+<PRE>
+C:/Program Files/Tcl/lib/tcl8.0.3
+</PRE>
+and <CODE>TK_LIBRARY</CODE> to
+C:/Program Files/Tcl/lib/tk8.0.3
+</MENU>
+
 
 <P> To start Tycho, click on the
 <CODE>tycho0.3/lib/windows/tycho-windows.itk</CODE> script
@@ -173,7 +205,7 @@ or add <CODE>%tycho%\bin</CODE> to your path and run <CODE>tycho</CODE>
 from the DOS prompt.
 
 <LI> Tycho includes HTML documentation of the Itcl classes that make up
-Tycho.  In Tycho0.2.1, these files are shipped with the Tycho distribution.
+Tycho.  In Tycho0.3, these files are shipped with the Tycho distribution.
 
 
 </OL>
