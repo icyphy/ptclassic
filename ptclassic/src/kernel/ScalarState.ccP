@@ -96,6 +96,8 @@ ParseToken State :: eval<T>Term(Tokenizer& lexer) {
 			else if (t3.tok == T_ERROR) return t3;
 			else if (t2.tok == '*')
 				t1.<C>val *= t3.<C>val;
+			else if (t3.<C>val == 0)
+				parseError ("divide by zero");
 			else	
 				t1.<C>val /= t3.<C>val;
 		}
