@@ -74,7 +74,7 @@ class TyConsole {
 
 protected:
   // the Tcl interpreter for this console
-  Tcl_Interp *interp;
+  Tcl_Interp *tyInterp;
 
   // the Ptolemy interpreter for this console
   PTcl *ptcl;
