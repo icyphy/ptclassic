@@ -1,10 +1,10 @@
 static const char file_id[] = "CalendarQueue.cc";
 /**************************************************************************
 Version identification:
-$Id$ $Revision$
+ $Id$ $Revision$
 
 WANRNING experimental version
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -133,8 +133,7 @@ double lastTime)
 
 // lowest level first, lowest fineLevel first.
 
-CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
-					Star* dest)
+CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv, Star* dest)
 {
     CqLevelLink* newLink = getFreeLink();
     // use the event counter to set the finest level of the sort
@@ -153,8 +152,8 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
     register CqLevelLink *current = NULL;
     int virtualBucket;
 
-// This is not in the paper, but you have to check if the new event actually 
-// has the smallest timestamp, if so, "cq_lastTime" should be reset
+    // This is not in the paper, but you have to check if the new event actually 
+    // has the smallest timestamp, if so, "cq_lastTime" should be reset.
     // I am overriding Hui's patch with mine which checks for the
     // condition on which the bucket needs to be set based on the
     // present bucket position and the new event, rather than the
@@ -162,16 +161,9 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
     // we do not need to fetch the event. I am inserting an assert
     // in NextEvent which should check for the correctness of this
     // way of doing things. - Anindo Banerjea
-    // Explanation: (cq_bucketTop - 1.5*cq_interval ) 
-    //              is the bottom of the bucket in time units.
-    //              as such if the new event is before it it should
-    //		    cause an adjustment of the lastBucket variable.
 
-    if( link->level < (cq_bucketTop - 1.5*cq_interval )) {
-	// I should never cause the cq_lastTime to increase.
-	// This is actually assured from the previous 'if', but still
-	// we assert that modulo floating point imprecisions :
-	assert(link->level <= (cq_lastTime * 1.0000001) );
+
+    if ( link->level < cq_lastTime ) {
         cq_lastTime = link->level;
         virtualBucket = (int)(cq_lastTime/cq_interval);
         cq_lastBucket = virtualBucket%cq_bucketNum;
@@ -179,12 +171,15 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
     }
     if (*bucket) {
 	current = *bucket;
+        if (cq_debug) printf("INSERT1: last time %lf, ev # %ld, time %lf, fine level %lf\n", 
+	cq_lastTime, link->absEventNum, link->level, link->fineLevel);
 	// Now we are going to look for the first element
 	// such that ((current->level > link->level) or
 	//            (level == level) and (finer_level > link->finer_level) or
 	//            (l==l) and (fl==fl) and (current->dest > link->dest))
 	// 	      (l==l) and (fl==fl) and (dest == dest) 
 	// 	             and (current->absEventNum > link->absEventNum)
+
 
 	// Sort on time stamp
 	while (current->level < link->level) 
@@ -259,6 +254,8 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	    *bucket = link;
 	}
     } else { // empty bucket 
+        if (cq_debug) printf("INSERT2: at time %lf, ev # %ld, time %lf, fine level %lf\n", 
+	cq_lastTime, link->absEventNum, link->level, link->fineLevel);
 	link->before = link->next = NULL;
 	*bucket = link;
     }
@@ -298,6 +295,8 @@ CqLevelLink* CalendarQueue :: NextEvent()
 	    cq_eventNum--;
 	    if ((cq_resizeEnabled) && (cq_eventNum < cq_bottomThreshold))
 		Resize(cq_bucketNum/2);
+	    if (cq_debug) printf("REMOVE: ev # %ld, time %lf, fine level %lf\n",
+	 		result->absEventNum, result->level, result->fineLevel);
 	    return(result);
 	} else {
 	    if ( ++i == cq_bucketNum) 
