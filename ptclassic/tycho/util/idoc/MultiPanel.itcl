@@ -38,8 +38,8 @@
 #######################################################################
 #### MultiPanel
 # A simple grouping of Subpanel widgets, MultiPanel allows addition and
-# removal of Subpanel and label widgets in a megawidget FIXME: with 
-# scrollbars. 
+# removal of Subpanel and label widgets in a megawidget with a vertical 
+# scrollbar. 
 #
 # Subpanels are added using the <code>append</code> command and can
 # contain any number of optional arguments that a subpanel widget will
@@ -59,7 +59,7 @@
 # catch {destroy .y}
 # ::tycho::Displayer .y
 # set mp [::tycho::MultiPanel .y.m]
-# pack $mp
+# pack $mp -fill both 
 # $mp appendlabel x -text Label
 # $mp appendlabel z -text Child
 # $mp append y {z} -text Panel
@@ -98,14 +98,17 @@ class ::tycho::MultiPanel {
     # Return the subpanel names as a list
     method panels {}
 
+    # Reset the scrollbar if the size has changed.
+    method redoScroll {}
+
     # Remove a subpanel/label
     method remove {element}
   
     # cget for subpanels/labels
-    method subcget {element args}
+    method itemcget {element args}
     
     # configure for subpanels/labels
-    method subconfig {element args}
+    method itemconfig {element args}
 
     ###################################################################
     ####                      private methods                      ####
@@ -116,9 +119,16 @@ class ::tycho::MultiPanel {
     ###################################################################
     ####                      private variables                    ####
 
-    private variable myData
+    # My internal canvas widget. Used to allow scrolling.
     private variable myCanvas
+
+    # Internal array mapping elements to widgets. 
+    private variable myData
+    
+    # Frame containing subpanels which is a "window" of myCanvas.
     private variable myFrame
+
+    # Internal circular list of elements.
     private variable myList
 }
 
@@ -170,6 +180,15 @@ body ::tycho::MultiPanel::constructor {args} {
     $myCanvas config -width 0
 
     eval itk_initialize $args
+
+    # setup the scrollbar because canvas can't tell
+    redoScroll
+
+    # FIXME: every click must be checked so that scrollbar can be reset
+    # This is probably too agressive.
+    set myTop [winfo toplevel [$this windowName]]
+    ::bind $myTop <ButtonRelease-1> "after 100 \
+            [code evalIfExists $this redoScroll]"
 }
 
 
@@ -210,6 +229,7 @@ body ::tycho::MultiPanel::append {element {children} args} {
     $myList append $element
 
     set newPanel $myFrame[::tycho::autoName .panel]
+ 
     if {$children != ""} {
         eval "::tycho::Subpanel $newPanel -childwidget $child $args"
     } else {
@@ -306,12 +326,22 @@ body ::tycho::MultiPanel::panels {} {
 }
 
 #####################################################################
+#### redoScroll
+# Appropriately configure -scrollregion to reflect the size of the 
+# frame.
+#
+body ::tycho::MultiPanel::redoScroll {} {
+    set frameHeight [winfo height $myFrame]
+    $myCanvas configure -scrollregion "0 0 0 $frameHeight"
+}
+
+
+#####################################################################
 #### remove 
 # Remove an element. FIXME: Children of subpanels are not removed yet 
 # will no longer be seen or useful.
 #
 body ::tycho::MultiPanel::remove {element} {
-
     set elname [elementinfo $element]
     unset myData($element)
     $myList remove $element
@@ -319,20 +349,20 @@ body ::tycho::MultiPanel::remove {element} {
 }
 
 #####################################################################
-#### subcget 
+#### itemcget 
 # cget on an individual subpanel.
 #
-body ::tycho::MultiPanel::subcget {element args} {
+body ::tycho::MultiPanel::itemcget {element args} {
 
     set elname [elementinfo $element]
     uplevel "$elname cget $args"
 }
 
 #####################################################################
-#### subconfigure 
+#### itemconfigure 
 # configure on an individual subpanel.
 #
-body ::tycho::MultiPanel::subconfig {element args} {
+body ::tycho::MultiPanel::itemconfig {element args} {
     
     set elname [elementinfo $element]
     uplevel "$elname configure $args"
@@ -355,4 +385,3 @@ body ::tycho::MultiPanel::elementinfo {args} {
     }
     return "$temp"
 }
-
