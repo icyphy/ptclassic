@@ -42,53 +42,32 @@ Galaxy :: ~ Galaxy () {}
 	////////////////////////////////////
 
 StringList
-Galaxy :: printRecursive () const {
+Galaxy :: print (int verbose) const {
 	StringList out;
 	out = "GALAXY: ";
-	out += readFullName();
+	out += fullName();
 	out += "\n";
 	out += "Descriptor: ";
-	out += readDescriptor();
+	out += descriptor();
 	out += "\n";
-	out += "Number of blocks: ";
-	out += numberBlocks();
-	out += "\n";
-	out += printPorts("Galaxy");
-	out += printStates("Galaxy");
-	out += "Blocks in the Galaxy:----------------------------------\n";
 	const Block* b;
 	CGalTopBlockIter next(*this);
-	while ((b = next++) != 0)
-		out += b->printRecursive();
-	return out;
-}
-
-	////////////////////////////////////
-	// Galaxy::printVerbose()
-	////////////////////////////////////
-
-StringList
-Galaxy :: printVerbose () const {
-	StringList out;
-	out = "GALAXY: ";
-	out += readFullName();
-	out += "\n";
-	out += "Descriptor: ";
-	out += readDescriptor();
-	out += "\n";
-	out += "Contained blocks: ";
-	const Block* b;
-	CGalTopBlockIter next(*this);
-	while ((b = next++) != 0) {
-		out += b->readName();
-		out += " ";
+	if (!verbose) {
+		out += "Contained blocks: ";
+		while ((b = next++) != 0) {
+			out += b->name();
+			out += " ";
+		}
 	}
-	out += "\n";
-	out += printPorts("Galaxy");
-	out += printStates("Galaxy");
+	out += printPorts("Galaxy",verbose);
+	out += printStates("Galaxy",verbose);
+	if (verbose) {
+		out += "Contained blocks: ";
+		while ((b = next++) != 0)
+			out += b->print(verbose);
+	}
 	return out;
 }
-
 
         ////////////////////////////////////
         // initialize()
@@ -156,12 +135,13 @@ Galaxy::blockWithName(const char* name) {
 	Block* b;
 	GalTopBlockIter next(*this);
 	while ((b = next++) != 0) {
-		if (strcmp(name,b->readName()) == 0)
+		if (strcmp(name,b->name()) == 0)
 			return b;
 	}
 	// not found
 	return 0;
 }
+
 
         ////////////////////////////////////
         // const char* domain()

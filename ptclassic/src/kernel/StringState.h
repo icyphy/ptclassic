@@ -47,9 +47,13 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const; // {return "StringState";}
+	const char* className() const; // {return "StringState";}
+	const char* type() const;
 
 	State* clone () const; // {return new StringState;}
+
+	// test for empty string
+	int null() const { return val == 0 || *val == 0;}
 
 	~StringState ();
 private:

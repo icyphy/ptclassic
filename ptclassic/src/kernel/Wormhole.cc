@@ -42,7 +42,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g,const char* targetName) : selfStar(s),
 	Runnable(targetName,g.domain(),&g), gal(g)
 {
 	// set up the parent pointer of inner Galaxy
-	g.setNameParent(g.readName(), &s);
+	g.setNameParent(g.name(), &s);
 
 	dynamicHorizons = FALSE;
 }
@@ -51,7 +51,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : selfStar(s),
 	Runnable(innerTarget,g.domain(),&g), gal(g)
 {
 	// set up the parent pointer of inner Galaxy
-	g.setNameParent(g.readName(), &s);
+	g.setNameParent(g.name(), &s);
 
 	dynamicHorizons = FALSE;
 }
@@ -62,7 +62,7 @@ Wormhole::Wormhole(Star& s,Galaxy& g,Target* innerTarget) : selfStar(s),
 
 const char* ghostName(const GenericPort& galp) {
 	char buf[80];
-	strcpy (buf, galp.readName());
+	strcpy (buf, galp.name());
 	strcat (buf, "(ghost)");
 	return hashstring(buf);
 }
@@ -73,21 +73,21 @@ const char* ghostName(const GenericPort& galp) {
 void Wormhole :: buildEventHorizons () {
 	// check so this isn't done twice.
 	if (selfStar.numberPorts() > 0 || !galP) return;
-	Domain* inSideDomain = Domain::domainOf(gal);
-	Domain* outSideDomain = Domain::domainOf(selfStar);
+	Domain* inSideDomain = Domain::of(gal);
+	Domain* outSideDomain = Domain::of(selfStar);
 // Take each of the galaxy ports and make a pair of EventHorizons; connect
 // them together.
 	BlockPortIter next(gal);
 	for (int n = gal.numberPorts(); n>0; n--) {
 		PortHole& galp = *next++;
 		PortHole& realGalp = (PortHole&) galp.realPort();
-		DataType type = realGalp.myType();
+		DataType type = realGalp.type();
 		int numToken = realGalp.numXfer();
 // separate rules for connecting inputs and outputs.
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
-			to.setEventHorizon(in, galp.readName(), this, 
+			to.setEventHorizon(in, galp.name(), this, 
 				&selfStar, type, numToken);
 			selfStar.addPort(*(to.asPort()));
 			from.setEventHorizon(in, ghostName(galp), this, 
@@ -100,7 +100,7 @@ void Wormhole :: buildEventHorizons () {
 		else {
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
-			from.setEventHorizon(out, galp.readName(), this, 
+			from.setEventHorizon(out, galp.name(), this, 
 				&selfStar, type, numToken);
 			selfStar.addPort(*(from.asPort()));
 			to.setEventHorizon(out, ghostName(galp), this, 
@@ -116,7 +116,7 @@ void Wormhole :: buildEventHorizons () {
 	MultiPortHole* mp;
 	while ((mp = mpi++) != 0) {
 		LOG_NEW; WormMultiPort* wp = new WormMultiPort(this, *mp);
-		wp->setPort(mp->readName(), &selfStar, mp->myType());
+		wp->setPort(mp->name(), &selfStar, mp->type());
 		selfStar.addPort(*wp);
 	}
 
@@ -149,23 +149,23 @@ StringList Wormhole :: print (int recursive) const {
 	out += " in ";
 	out += selfStar.domain();
 	out += " Wormhole: ";
-	out += selfStar.readFullName();
+	out += selfStar.fullName();
 	out += "\nDescriptor: ";
-	out += selfStar.readDescriptor();
+	out += selfStar.descriptor();
 	out += "\n";
-	out += selfStar.printPorts ("wormhole");
+	out += selfStar.printPorts ("wormhole",recursive);
 // we use the states from the inner galaxy.
-	out += gal.printStates ("wormhole");
+	out += gal.printStates ("wormhole",recursive);
 	out += "Blocks in the inner galaxy: ";
 	GalTopBlockIter next(gal);
 	if (recursive) {
 		out += "------------------------\n";
 		for (int i = gal.numberBlocks(); i > 0; i--)
-			out += (next++)->printRecursive();
+			out += (next++)->print(recursive);
 	}
 	else {
 		for (int i = gal.numberBlocks(); i>0; i--) {
-			out += (next++)->readName();
+			out += (next++)->name();
 			if (i > 1) out += ", ";
 		}
 		out += "\n";
@@ -193,8 +193,16 @@ int Wormhole :: checkReady() const {
 }
 
 // set scheduler stop time.  By default, argument is ignored.
-void Wormhole :: setStopTime(float) {
+void Wormhole :: setStopTime(double) {
 	target->resetStopTime(getStopTime());
+}
+
+int Wormhole :: run() {
+	if (!checkReady()) return TRUE;
+	setStopTime(1.0);		// 1.0 is dummy value.
+	if (!Runnable :: run()) return FALSE;
+	sumUp();
+	return TRUE;
 }
 
 // arrange things after run
@@ -203,5 +211,5 @@ void Wormhole :: sumUp() {}
 // should be redefined in the derived classes.  But, we can not
 // use abstract virtual method by some strange reason (compiler bug!) 
 // for now.
-float Wormhole :: getStopTime() { return 0 ;}
+double Wormhole :: getStopTime() { return 0 ;}
 

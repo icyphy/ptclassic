@@ -1,21 +1,19 @@
-static const char file_id[] = "Connect.cc";
+static const char file_id[] = "PortHole.cc";
 #ifdef __GNUG__
 #pragma implementation
 #pragma implementation "CircularBuffer.h"
 #endif
 
-#include "Connect.h"
+#include "PortHole.h"
 #include "CircularBuffer.h"
 #include "Block.h"
-#include "StringList.h"
 #include "Error.h"
 #include "Particle.h"
 #include "Geodesic.h"
 #include "Plasma.h"
 #include "miscFuncs.h"
 #include "GalIter.h"
-#include "WormConnect.h"
-#include <std.h>
+#include "EventHorizon.h"
  
 /**************************************************************************
 Version identification:
@@ -28,7 +26,7 @@ $Id$
  Date of creation: 1/17/90
  Revisions:
 
-Code for functions declared in Connect.h
+Code for functions declared in PortHole.h and CircularBuffer.h
 
 **************************************************************************/
 
@@ -81,7 +79,7 @@ extern const Attribute P_HIDDEN = {PB_HIDDEN,0};
 extern const Attribute P_VISIBLE = {0,PB_HIDDEN};
 
 // constructor
-GenericPort :: GenericPort () : type(ANYTYPE),aliasedTo(0),typePortPtr(0),
+GenericPort :: GenericPort () : myType(ANYTYPE),aliasedTo(0),typePortPtr(0),
 	aliasedFrom(0), attributeBits(0) {}
 
 // Small virtual methods
@@ -206,7 +204,7 @@ PortHole :: ~PortHole() {
 
 // small virtual functions for PortHole, GalPort, GalMultiPort
 
-void PortHole :: grabData () { return;}
+void PortHole :: receiveData () { return;}
 void PortHole :: sendData () { return;}
 
 // GalPort constructor
@@ -232,6 +230,19 @@ PortHole& GalMultiPort :: newPort() {
 // return number of tokens waiting on Geodesic
 int PortHole :: numTokens() const { return myGeodesic->size();}
 
+// return the number of initial delays on the Geodesic
+int PortHole :: numInitDelays() const {
+	return myGeodesic->numInit();
+}
+
+// adjust the number of initial delays on the Geodesic
+void PortHole :: adjustDelays(int newNumDelay) {
+	if (newNumDelay != numInitDelays()) {
+		myGeodesic->setDelay(newNumDelay);
+		myGeodesic->initialize();
+	}
+}
+
 void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
@@ -249,7 +260,7 @@ PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
                               DataType t) {
 // zero my plasma if my type is being changed.
-	if (t != myType()) myPlasma = 0;
+	if (t != type()) myPlasma = 0;
 	GenericPort::setPort (s, parent, t);
 	numberTokens = 1;
 	bufferSize = numberTokens;
@@ -258,7 +269,7 @@ PortHole& PortHole :: setPort(const char* s,
 
 // Print a Generic Port
 StringList
-GenericPort :: printVerbose () const {
+GenericPort :: print (int) const {
         StringList out;
  
         if(isItInput())
@@ -266,26 +277,20 @@ GenericPort :: printVerbose () const {
         else if(isItOutput())
            out = "      Output ";
         
-        out += "PortHole: ";
-        out += readFullName();
-        out += "\n";
+        out << "PortHole: " << fullName();
         
-        if(alias() != NULL) {
-           const GenericPort& eventualAlias = realPort();
-           out += "       Aliased to: ";
-           out += eventualAlias.readFullName();
-           out += "\n";
-	}
-	return out;
+        if(alias() != NULL)
+		out << "       Aliased to: " << realPort().fullName();
+	return out << "\n";
 }
 
 StringList
-PortHole :: printVerbose () const {
-	StringList out = GenericPort::printVerbose();
+PortHole :: print(int) const {
+	StringList out = GenericPort::print();
 	if (alias() == NULL) {
 		if (far() != NULL) {
 			out << "    Connected to port: "
-			    << far()->readFullName();
+			    << far()->fullName();
 			if (myGeodesic->numInit() > 0)
 				out << "(delay = "
 				    << myGeodesic->numInit() << ")";
@@ -339,17 +344,15 @@ void MultiPortHole :: delPorts () {
 }
 
 StringList
-MultiPortHole :: printVerbose () const {
+MultiPortHole :: print (int verbose) const {
 	StringList out;
-	out = "Multi ";
-	out += GenericPort::printVerbose();
+	out << "Multi " << GenericPort::print(verbose);
 	if (peerMPH) {
 		out += "bus connection to multiporthole ";
-		out += peerMPH->readFullName();
+		out += peerMPH->fullName();
 	}
-	out += "This MultiPortHole contains ";
-	out += numberPorts();
-	out += " PortHoles.\n";
+	out << "This MultiPortHole contains " <<numberPorts()
+	    <<" PortHoles.\n";
 // We don't add stuff on the PortList, since that will be printed
 // out by the enclosing Block::printPorts.
 	return out;
@@ -359,7 +362,7 @@ MultiPortHole :: printVerbose () const {
 Plasma* const Mark = (Plasma*)1;
 
 // return the type of my Plasma
-DataType PortHole :: plasmaType() const {
+DataType PortHole :: resolvedType() const {
 	return myPlasma ? myPlasma->type() : 0;
 }
 
@@ -391,8 +394,8 @@ PortHole :: setPlasma (Plasma* useType) {
 	if (myPlasma == Mark) return 0;
 
 // Set initial value if not set and not ANYTYPE.
-	if (myPlasma == 0 && myType() != ANYTYPE)
-		myPlasma = Plasma::getPlasma(myType());
+	if (myPlasma == 0 && type() != ANYTYPE)
+		myPlasma = Plasma::getPlasma(type());
 
 // I am allowed to change my type only if I am an output porthole.
 // This happens if, say, an output of type FLOAT feeds an input of
@@ -439,9 +442,9 @@ PortHole :: setPlasma (Plasma* useType) {
 	else {	
 		// first, if far() has known type, use it
 		if (far() && far()->myPlasma != Mark &&
-		    (far()->myPlasma || far()->myType() != ANYTYPE)) {
+		    (far()->myPlasma || far()->type() != ANYTYPE)) {
 			if (!far()->myPlasma) {
-				Plasma* p = Plasma::getPlasma(far()->myType());
+				Plasma* p = Plasma::getPlasma(far()->type());
 				far()->myPlasma = p;
 			}
 			myPlasma = far()->myPlasma;
@@ -491,7 +494,7 @@ void PortHole :: initialize()
 		(*p)->initialize();
 	}
 	// If this is an output PortHole or EventHorizon, initialize myGeodesic
-	if( (isItOutput() || isItInput() == far()->isItInput()) && myGeodesic) 
+	if(myGeodesic && (isItOutput() || asEH()))
 		myGeodesic->initialize();
 }
 
@@ -530,8 +533,8 @@ MultiPortHole& MultiPortHole :: setPort(const char* s,
 // contained ports.
 const char*
 MultiPortHole :: newName () {
-	char buf[512];
-	sprintf (buf, "%s#%d", readName(), ports.size());
+	StringList buf = name();
+	buf << "#" << ports.size();
 // save the string on the heap.  hashstring avoids multiple copies of "input#1"
 	return hashstring (buf);
 }
@@ -542,9 +545,9 @@ MultiPortHole :: newName () {
 
 PortHole& MultiPortHole :: installPort(PortHole& p) {
 	ports.put(p);
-	parent()->addPort(p.setPort(newName(), parent(), type));
+	parent()->addPort(p.setPort(newName(), parent(), type()));
 // for ANYTYPE multiportholes, all ports are resolved to be the same type.
-	if (myType() == ANYTYPE)
+	if (type() == ANYTYPE)
 		p.inheritTypeFrom(*this);
 	// we can do the following as a friend function
 	p.myMultiPortHole = this;
@@ -595,7 +598,7 @@ void MultiPortHole :: busConnect (MultiPortHole& peer, int width, int del) {
 Geodesic* PortHole :: allocateGeodesic () {
 	char buf[80];
 	strcpy (buf, "Node_");
-	strcat (buf, readName());
+	strcat (buf, name());
 	LOG_NEW; Geodesic *g = new Geodesic;
 	g->setNameParent(hashstring(buf), parent());
 	return g;

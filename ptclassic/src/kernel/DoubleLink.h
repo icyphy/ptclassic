@@ -57,7 +57,7 @@ public:
 	}
 
 	// constructor
-	DoubleLinkList() : head(0), tail(0), size(0) {}
+	DoubleLinkList() : myHead(0), myTail(0), mySize(0) {}
 	DoubleLinkList(Pointer* e) { firstNode(createLink(e)); }
 
         // Insert at the head of the list
@@ -71,15 +71,15 @@ public:
         // insert y immediately ahead of x
 	void insertAhead(DoubleLink *y, DoubleLink *x);
         	
-        // insert y immediately behind of x
+        // insert y immediately behind x
 	void insertBehind(DoubleLink *y, DoubleLink *x);	
 
         // Unlink a link from the list & return ptr to it.
-	// Alert! make sure that x is in the list before call this method!
+	// Alert! make sure that x is in the list before calling this method!
 	DoubleLink* unlink(DoubleLink *x);	
 
         // Remove a link from the list.
-	// Alert! make sure that x is in the list before call this method!
+	// Alert! make sure that x is in the list before calling this method!
 	void removeLink(DoubleLink *x) { unlink(x);	
 					 INC_LOG_DEL; delete x; }
 	void remove(Pointer e);
@@ -95,32 +95,32 @@ public:
         void reset(); 
 
         // get the number of elements in the list
-        int mySize() { return size;}
+        int size() { return mySize;}
 
         // get a pointer to the head of the list
-        DoubleLink *myHead() {return head;}
+        DoubleLink *head() {return myHead;}
         
         // get a pointer to the tail of the list
-        DoubleLink *myTail() {return tail;}
+        DoubleLink *tail() {return myTail;}
 
         // pop the head node
         DoubleLink *getHeadLink() 
-		{ if (size==0) return 0;
-           	  else return unlink(head); }
+		{ if (mySize==0) return 0;
+           	  else return unlink(myHead); }
 	Pointer takeFromFront();
         
         // get the tail node & unlink it from the list
         DoubleLink *getTailLink() 
-		{ if (size==0) return 0;
-		  else return unlink(tail); }
+		{ if (mySize==0) return 0;
+		  else return unlink(myTail); }
 	Pointer takeFromBack();
 
 protected: 
-        DoubleLink *head;
-        DoubleLink *tail;
+        DoubleLink *myHead;
+        DoubleLink *myTail;
        
 private:
-        int size;
+        int mySize;
 
 	// add the first node into the list
 	void firstNode(DoubleLink*);
@@ -135,8 +135,8 @@ private:
 class DoubleLinkIter 
 {
 public:
-	DoubleLinkIter(const DoubleLinkList& l) : list(&l), ref(l.head) {}
-	void reset() { ref = list->head;}
+	DoubleLinkIter(const DoubleLinkList& l) : list(&l), ref(l.myHead) {}
+	void reset() { ref = list->myHead;}
         void reset(DoubleLink *start) {ref=start;}
 	DoubleLink* nextLink();
 	Pointer	next(); 
@@ -144,7 +144,7 @@ public:
 
 	// attach the DoubleLinkIter to a different object
 	void reconnect(const DoubleLinkList& l) {
-		list = &l; ref = l.head;
+		list = &l; ref = l.myHead;
 	}
 private:
 	const DoubleLinkList* list;

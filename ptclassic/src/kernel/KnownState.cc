@@ -90,7 +90,7 @@ KnownState::nameList () {
 		ListIter next(*allStates);
                 for (int i=numStates; i>0; i--) {
                         State* t = (State*)next++;
-                        s += t->readName();
+                        s += t->name();
                         s += "\n";
                 }
         }

@@ -1,5 +1,5 @@
-#ifndef _WormConnect_h
-#define _WormConnect_h 1
+#ifndef _EventHorizon_h
+#define _EventHorizon_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -7,7 +7,7 @@
 
 #include "NamedObj.h"
 #include "DataStruct.h"
-#include "Connect.h"
+#include "PortHole.h"
 
 enum inOutType {IN, in, OUT, out};
 class Star;
@@ -64,7 +64,7 @@ public:
 	PortHole* ghostAsPort() { return ghostPort->asPort(); }
 
 	// Connect two EventHorizons.
-	void ghostConnect(EventHorizon& to );
+	virtual void ghostConnect(EventHorizon& to );
 
 	// Which wormhole it is in.
 	Wormhole* wormhole;
@@ -74,7 +74,7 @@ public:
 	virtual int isItOutput() const;
 
 	// set ports
-	void setEventHorizon(inOutType inOut, const char* portName, 
+	virtual void setEventHorizon(inOutType inOut, const char* portName, 
 		Wormhole* parentWormhole, Star* parentStar,
 		DataType type = FLOAT, unsigned numTokens = 1 );
 

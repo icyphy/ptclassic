@@ -22,7 +22,10 @@ $Id$
  Date of creation: 6/2/90
  Revisions:
 
+ Methods for ArrayState classes: expanded for <T>ArrayState
 
+ Important!  This is not a "real" template file, but the fake kind
+ of template provided by libg++'s "genclass".
 
 **************************************************************************/
 /*************************************************************************
@@ -41,12 +44,12 @@ $Id$
 }
 
 // destructor
-<T>ArrayState :: ~<T>ArrayState () {LOG_DEL; delete val;}
+<T>ArrayState :: ~<T>ArrayState () {LOG_DEL; delete [] val;}
 
 // assignment operator
 <T>ArrayState &	<T>ArrayState :: operator = (const <T>ArrayState & v) {
 	if (this != &v) {
-		LOG_DEL; delete val;
+		LOG_DEL; delete [] val;
 		LOG_NEW; val  = new <C> [nElements = v.nElements];
 		<C>* top = &(val[nElements]);
 		<C>* t = val;
@@ -79,13 +82,13 @@ State* <T>ArrayState :: clone() const { LOG_NEW; return new <T>ArrayState;}
 // Parse initValue to set value
 void <T>ArrayState  :: initialize() {
 // free any old memory
-	LOG_DEL; delete val;
+	LOG_DEL; delete [] val;
 	val = 0;
 	nElements = 0;
 
 	<C> buf[MAXLEN];
 	const char* specialChars = "*+-/()<[]";
-	Tokenizer lexer(initValue,specialChars);
+	Tokenizer lexer(initValue(),specialChars);
 
 	int i = 0, err = 0;
 	int numRepeats;
@@ -199,11 +202,17 @@ void <T>ArrayState :: resize (int newSize) {
 	// if nZero is negative
 	for (i = 0; i < nZero; i++)
 		val[oldSize+i] = 0;
-	LOG_DEL; delete oldVal;
+	LOG_DEL; delete [] oldVal;
 }
 
 // isA
 ISA_FUNC(<T>ArrayState,State);
+
+// className
+const char* <T>ArrayState :: className() const {return "<T>ArrayState";}
+
+// i am an array
+int <T>ArrayState :: isArray() const { return TRUE;}
 
 // make knownstate entry
 static <T>ArrayState proto;

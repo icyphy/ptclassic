@@ -39,22 +39,18 @@ Universe :: print (int recursive) const {
 	StringList out;
 	out = type;
 	out += " UNIVERSE: ";
-	out += readFullName ();
+	out += fullName ();
 	out += "\n";
 	out += "Descriptor: ";
-	out += readDescriptor();
+	out += descriptor();
 	out += "\n";
 	out += "CONTENTS:\n";
-
-	if (recursive)
-		out += Galaxy::printRecursive();
-	else
-		out += Galaxy::printVerbose();
+	out += Galaxy::print(recursive);
 	return out;
 }
 
 // setting the stopping condition
-void Runnable :: setStopTime (float stamp) {
+void Runnable :: setStopTime (double stamp) {
 	target->setStopTime(stamp) ;
 }
 

@@ -54,7 +54,7 @@ ISA_FUNC(DynamicGalaxy,Galaxy);
 
 // clone function: return error
 
-Block* DynamicGalaxy::clone() const {
+Block* DynamicGalaxy::makeNew() const {
 	Error::abortRun(*this, " cannot clone object of type 'DynamicGalaxy'");
 	return 0;
 }

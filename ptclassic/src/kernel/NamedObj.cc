@@ -23,33 +23,32 @@ where the parent is a Block (a specific type of NamedObj).
 #include "StringList.h"
 #include "Block.h"
 
-StringList NamedObj :: readFullName () const
+StringList NamedObj :: fullName () const
 {
 	StringList out;
-	if(blockIamIn != NULL) {
-		out = blockIamIn->readFullName();
-		out += ".";
-		out += name;
-	} else {
-		out = name;
-	}
+	if(prnt != NULL)
+		out << prnt->fullName() << ".";
+	out << nm;
 	return out;
 }
 
-int NamedObj::isA(const char* cname) const {
+int NamedObj :: isA(const char* cname) const
+{
 	return (strcmp(cname,"NamedObj") == 0);
 }
 
-// These virtual functions do nothing in the baseclass; still it
-// is more efficient spacewise (and no time penalty) to put them here.
-void NamedObj::initialize() {}
+const char* NamedObj :: className() const
+{
+	return "NamedObj";
+}
 
-const char* NamedObj::readClassName() const {return "NamedObj";}
+StringList NamedObj :: print(int) const
+{
+	StringList out;
+	out << fullName() << ": " << className() << "\n";
+	return out;
+}
 
-// printing methods.  printVerbose() must always be redefined.
-// by default, printRecursive is the same as printVerbose
-
-StringList NamedObj::printRecursive() const { return printVerbose ();}
-
+// empty destructor.
 NamedObj::~NamedObj() {}
 

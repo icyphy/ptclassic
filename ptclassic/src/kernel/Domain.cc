@@ -23,6 +23,8 @@ $Id$
 #include "Star.h"
 #include "Galaxy.h"
 #include "Scheduler.h"
+#include "EventHorizon.h"
+#include "Error.h"
 
 int Domain::numDomains = 0;
 
@@ -32,7 +34,7 @@ Domain* Domain::allDomains[NUMDOMAINS];
 Domain* Domain::named(const char* nm) {
 	if (!nm) return 0;
 	for (int i = 0; i < numDomains; i++) {
-		if (strcmp (nm, allDomains[i]->name) == 0)
+		if (strcmp (nm, allDomains[i]->myName) == 0)
 			return allDomains[i];
 	}
 	return 0;
@@ -40,7 +42,41 @@ Domain* Domain::named(const char* nm) {
 
 // get the domain of a block.
 
-Domain* Domain::domainOf (Block& b) {
+Domain* Domain::of (Block& b) {
 	return named(b.domain());
+}
+
+// default implementations provided for domains without wormhole
+// support.
+
+Star& Domain :: newWorm(Galaxy&,Target*)  {
+	// return *new XXXWormhole(innerGal,innerTarget);
+	Error::abortRun("No wormhole implemented for domain ",name());
+		// Following is a hack
+		LOG_NEW; return *(new Star);
+}
+
+// "fake" eventhorizon to use if there are none.
+
+class JunkHorizon : public PortHole, public EventHorizon {
+public:
+	JunkHorizon() : EventHorizon(this) {}
+	int isItOutput() const { return 0;}
+	int isItInput() const { return 0;}
+	void initialize() {}
+};
+
+EventHorizon& Domain :: newFrom() {
+	Error::abortRun("No wormhole implemented for domain ",name());
+	// hack
+	LOG_NEW; return *new JunkHorizon;
+}
+
+EventHorizon& Domain :: newTo() {
+	return Domain :: newFrom();
+}
+
+int Domain :: isGalWorm() {
+	return FALSE;
 }
 

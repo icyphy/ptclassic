@@ -52,9 +52,15 @@ public:
         // casting to a <C>
         operator <C>() { return val;}
 
+	// set initvalue, with a <C> argument
+	void setInitValue(<C>);
+
+	// this redeclaration is required by the "hiding rule".  Yuk!
+	void setInitValue(const char* s) { State::setInitValue(s);}
+
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "<T>State";}
+	const char* className() const {return "<T>State";}
 
 	State* clone () const; //  {return new <T>State;}
 

@@ -9,12 +9,6 @@ $Id$
 
  Programmer:  E. A. Lee and D. G. Messerschmitt, J. Buck
  Date of creation: 11/1/90
- Revisions:
-        11/1/90 -
-		This class was formerly defined in Connect.h,
-		but only Connect.cc really needs to see what's
-		inside, so it is now a separate module.
-
 
 class CircularBuffer manages a circular buffer (array with modulo
 addressing) containing pointers to Particles.  It is used to store

@@ -28,17 +28,12 @@ $Id$
 ********************************************************************/
 
 StringList
-Star :: printVerbose () const {
+Star :: print(int verbose) const {
 	StringList out;
-	out = "Star: ";
-	out += readFullName();
-	out += "\n";
-	out += "Descriptor: ";
-	out += readDescriptor();
-	out += "\n";
-	out += printPorts ("star");
-        out += printStates("star");
-	return out;
+	return out << "Star: " << fullName() << "\n"
+		   << "Descriptor: " << descriptor() << "\n"
+		   << printPorts ("star",verbose)
+		   << printStates("star",verbose);
 }
 
 // small virtual functions
@@ -46,9 +41,9 @@ Star :: printVerbose () const {
 // default go does nothing
 void Star :: go () {}
 
-// default fire() function.  Returns TRUE if everything OK, false if
+// default run() function.  Returns TRUE if everything OK, false if
 // a halt condition arises.
-int Star :: fire() {
+int Star :: run() {
 	if (!SimControl::doPreActions(this)) return FALSE;
 	go();
 	return SimControl::doPostActions(this);
@@ -74,6 +69,6 @@ int setStarIndices(Galaxy& g) {
 	return cnt;
 }
 
-const char* Star::readClassName() const {return "Star";}
+const char* Star::className() const {return "Star";}
 
 ISA_FUNC(Star,Block);

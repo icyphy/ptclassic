@@ -42,14 +42,14 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << "ERROR: " << n << ": ";
 	p3(m1,m2,m3);
 }
 
 void
 Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << "Warning: " << n << ": ";
 	p3(m1,m2,m3);
 }
@@ -61,7 +61,7 @@ Error :: message(cc* m1, cc* m2, cc* m3) {
 
 void
 Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
-	StringList n = o.readFullName();
+	StringList n = o.fullName();
 	cerr << n << ": ";
 	p3(m1,m2,m3);
 }

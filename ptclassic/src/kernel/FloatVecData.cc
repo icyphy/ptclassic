@@ -41,9 +41,9 @@ const FloatVecData& FloatVecData::operator=(const FloatVecData& src) {
 
 const char* FloatVecData::dataType() const { return "FloatVecData";}
 
-ISA_FUNC(FloatVecData,PacketData);
+ISA_FUNC(FloatVecData,Message);
 
-PacketData* FloatVecData::clone() const { LOG_NEW; return new FloatVecData(*this);}
+Message* FloatVecData::clone() const { LOG_NEW; return new FloatVecData(*this);}
 
 FloatVecData::~FloatVecData() { LOG_DEL; delete [] data;}
 

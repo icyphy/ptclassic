@@ -23,8 +23,6 @@ $Id$ (<T>Domain.cc)
 #include "KnownTarget.h"
 #include "<T>Scheduler.h"
 #include "<T>Wormhole.h"
-#include "<T>Connect.h"
-#include "<T>WormConnect.h"
 #include "<T>Geodesic.h"
 
 extern const char <T>domainName[] = "<T>";
@@ -35,12 +33,6 @@ public:
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new <T>Wormhole(innerGal,innerTarget);
 	}
-
-	// new input porthole
-	PortHole& newInPort() { LOG_NEW; return *new In<T>Port;}
-
-	// new output porthole
-	PortHole& newOutPort() { LOG_NEW; return *new Out<T>Port;}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() { LOG_NEW; return *new <T>fromUniversal;}
@@ -63,11 +55,13 @@ static <T>Domain proto;
 class <T>Target : public Target {
 public:
 	<T>Target() : Target("default-<T>","<T>Star","default <T> target"){}
-	void start()
+	void setup()
 	{
-		if (!mySched()) { LOG_NEW; setSched(new <T>Scheduler); }
+		if (!scheduler()) { LOG_NEW; setSched(new <T>Scheduler); }
+		scheduler()->setGalaxy(*galaxy());
+		Target::setup();
 	}
-	Block* clone() const { LOG_NEW; return new <T>Target;}
+	Block* makeNew() const { LOG_NEW; return new <T>Target;}
 	~<T>Target() { delSched();}
 };
 

@@ -90,7 +90,7 @@ TimeVal& TimeVal::operator-=(const TimeVal& t)
 
 // Signal handler used by sleep().
 static int gotcha = FALSE;
-void alarmHandler(int notUsed)
+void alarmHandler(int)
 {
     gotcha = TRUE;
 }

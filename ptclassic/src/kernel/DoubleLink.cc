@@ -42,8 +42,8 @@ void DoubleLinkList::insertAhead(DoubleLink *y, DoubleLink *x) {
 	y->next = x;
 	y->prev = tmp;
 	x->prev = y;
-	if (head==x) head=y;
-	size++;
+	if (myHead==x) myHead=y;
+	mySize++;
 }
 
 // insert y immediately behind of x
@@ -53,27 +53,27 @@ void DoubleLinkList::insertBehind(DoubleLink *y, DoubleLink *x) {
 	y->prev = x;
 	y->next = tmp;
 	x->next = y;
-	if (tail==x) tail=y;
-	size++;
+	if (myTail==x) myTail=y;
+	mySize++;
 }
 
 // make p be the first (only) node of this list 
 void DoubleLinkList :: firstNode(DoubleLink *p) {
-	head=p; 
-	tail=p; 
-	size=1; 
+	myHead=p; 
+	myTail=p; 
+	mySize=1; 
 	p->next=0; 
 	p->prev=0; 
 }
 
 void DoubleLinkList :: insertLink(DoubleLink  *p) {
-	if (head==0) firstNode(p);
-	else insertAhead(p,head);
+	if (myHead==0) firstNode(p);
+	else insertAhead(p,myHead);
 }
 
 void DoubleLinkList :: appendLink(DoubleLink *p) {
-	if (head==0) firstNode(p);
-	else insertBehind(p,tail);
+	if (myHead==0) firstNode(p);
+	else insertBehind(p,myTail);
 }
 
 void DoubleLinkList::remove(Pointer x) {
@@ -100,21 +100,21 @@ int DoubleLinkList :: find(Pointer e) {
 }
 
 DoubleLink* DoubleLinkList::unlink(DoubleLink *x) {
-	if (size == 0 || x == 0) return 0;
-	size--;
+	if (mySize == 0 || x == 0) return 0;
+	mySize--;
 	x->unlinkMe();
-	if (head==x) head = x->next;
-	if (tail==x) tail = x->prev;
+	if (myHead==x) myHead = x->next;
+	if (myTail==x) myTail = x->prev;
 	return x;
 }
 
 void DoubleLinkList :: initialize() {
-	while (head!=0) removeLink(head);
-	head = 0; tail = 0; size = 0;
+	while (myHead!=0) removeLink(myHead);
+	myHead = 0; myTail = 0; mySize = 0;
 }
 
 void DoubleLinkList :: reset() {
-	head = 0; tail = 0; size = 0;
+	myHead = 0; myTail = 0; mySize = 0;
 }
 
 Pointer DoubleLinkList :: takeFromFront() { 

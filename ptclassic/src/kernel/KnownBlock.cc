@@ -122,7 +122,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 	int idx = domainIndex (block);
 
 	// see if defined; if so, replace
-	KnownListEntry* kb = findEntry (block.readName(), allBlocks[idx]);
+	KnownListEntry* kb = findEntry (block.name(), allBlocks[idx]);
 	if (kb) {
 		// delete the block if it was on the heap
 		if (kb->onHeap) { LOG_DEL; delete kb->b;}
@@ -143,7 +143,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 KnownListEntry*
 KnownBlock::findEntry (const char* name, KnownListEntry* l) {
 	while (l) {
-		if (strcmp (name, l->b->readName()) == 0)
+		if (strcmp (name, l->b->name()) == 0)
 			break;
 		l = l->next;
 	}
@@ -193,6 +193,20 @@ KnownBlock::clone(const char* type) {
 	return 0;
 }
 
+Block*
+KnownBlock::makeNew(const char* type) {
+	if (numDomains == 0) bombNoDomains();
+	const Block* p = find(type);
+	if (p) return p->makeNew();
+	StringList msg = "No star/galaxy named '";
+	msg += type;
+	msg += "' in domain '";
+	msg += domainNames[currentDomain];
+	msg += "'";
+	Error::abortRun (msg);
+	return 0;
+}
+
 // Function to set the domain.
 int
 KnownBlock::setDomain (const char* newDom) {
@@ -228,7 +242,7 @@ KnownBlock::nameListForDomain (int idx) {
 	LOG_NEW; const char** table = new const char*[n];
 	l = allBlocks[idx];
 	for (int i = 0; i < n; i++) {
-		table[i] = l->b->readName();
+		table[i] = l->b->name();
 		l = l->next;
 	}
 	qsort (table, n, sizeof (char*), compar);

@@ -22,7 +22,8 @@ static MyType proto;
 static KnownBlock entry(proto,"MyType");
 
 Then the static method KnownBlock::clone(name) can produce a new
-instance of the named class in the current domain.
+instance of the named class in the current domain.  As for blocks,
+clone copies everything, makeNew just makes a new one.
 
 *******************************************************************/
 #ifndef _KnownBlock_h
@@ -65,7 +66,10 @@ public:
 
 // The clone method takes a string, finds the appropriate block in
 // the current domain, and returns a clone of that block.
+// makeNew just calls the constructor for the class and does not necessarily
+// copy states.
 	static Block* clone (const char* name);
+	static Block* makeNew (const char* name);
 
 // Return the names of known blocks in the current domain.
 	static StringList nameList();

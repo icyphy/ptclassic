@@ -5,9 +5,6 @@
 #pragma interface
 #endif
 
-#include "type.h"
-#include "Connect.h"
-#include "Block.h"
 #include "Star.h"
 
 /**************************************************************************
@@ -101,8 +98,8 @@ public:
 	~Galaxy ();
 
 	// class identification
-	int isA(const char*) const;
-	const char* readClassName() const {return "Galaxy";}
+	/* virtual */ int isA(const char*) const;
+	/* virtual */ const char* className() const {return "Galaxy";}
 
 	// system initialize method.  Derived Galaxies should not
 	// redefine initialize; they should write a start() method
@@ -113,8 +110,8 @@ public:
 	void wrapup();
 
         // Define States of component Blocks by States of this Block
-        void stateAlias(Block& b, char* stateName, char* expression)  {
-                b.stateWithName(stateName)->setValue(expression);
+        int stateAlias(Block& b, char* stateName, char* expression)  {
+		return b.setState(stateName,expression);
         }
 
 	// Add block and call setBlock for it
@@ -131,10 +128,7 @@ public:
 	int numberBlocks() const {return blocks.size();}
 
 	// Print a description of the galaxy
-	StringList printVerbose() const;
-
-	// Print a description of the galaxy and all contained galaxies
-	StringList printRecursive() const;
+	/* virtual */ StringList print(int verbose) const;
 
 	// Method replies FALSE to indicate that component blocks
 	// can be seen from outside.

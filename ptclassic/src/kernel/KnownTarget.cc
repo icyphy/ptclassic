@@ -56,7 +56,7 @@ KnownTargetEntry*
 KnownTarget::findEntry (const char* name) {
 	KnownTargetEntry* l = allTargets;
 	while (l) {
-		if (strcmp (name, l->targ->readName()) == 0)
+		if (strcmp (name, l->targ->name()) == 0)
 			break;
 		l = l->next;
 	}
@@ -99,7 +99,7 @@ void KnownTarget::addEntry (Target& target, const char* name, int isOnHeap) {
 	target.setBlock (name, NULL);
 
 	// see if defined; if so, replace
-	KnownTargetEntry* kb = findEntry (target.readName());
+	KnownTargetEntry* kb = findEntry (target.name());
 	if (kb) {
 		// delete the target if it was on the heap
 		if (kb->onHeap) { LOG_DEL; delete kb->targ;}
@@ -123,7 +123,7 @@ int KnownTarget::getList (const Block& b, const char** names, int nMax) {
 	while (l && n < nMax) {
 		Target& curTarg = *l->targ;
 		if (b.isA(curTarg.starType())) {
-			names[n] = curTarg.readName();
+			names[n] = curTarg.name();
 			n++;
 		}
 		l = l->next;

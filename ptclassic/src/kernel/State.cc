@@ -36,15 +36,13 @@ $Id$
 **************************************************************************/
 
 // small virtual functions in baseclass
-const char* State :: type () const { return "STRING";}
+void State :: setInitValue(const char* s) { myInitValue = s;}
+
+int State :: isArray() const { return FALSE;}
 
 State :: ~State() {}
 
-const char* State :: readClassName() const {return "State";}
-
 int State :: size () const { return 1;}
-
-StringList State :: currentValue () const { return initValue;}
 
 // See if character is part of an identifier
 inline unsigned int is_idchar(char c) {
@@ -56,9 +54,9 @@ State& State :: setState(const char* stateName,
 			 Block* parent ,
 			 const char* ivalue,
 			 const char* desc) {
-	descriptor = desc;
+	setDescriptor(desc);
 	setNameParent(stateName, parent);
-	initValue = ivalue;
+	myInitValue = ivalue;
 	return *this;
 }
 
@@ -145,7 +143,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 			}
 			else {
 				t.tok = T_Int;
-				t.intval = strtol(token,0,0);
+				t.intval = (int)strtol(token,0,0);
 				return t;
 			}
 		}
@@ -195,24 +193,18 @@ const State* State :: lookup (const char* name, Block* blockIAmIn) {
 StringList
 State::printVerbose() const {
 	StringList  out;
-	out = readFullName();
-	out += " type: ";
-	out += type();
-	out += "\n initial value: ";
-	out += initValue;
-	out += "\n current value: ";
-	out += currentValue();
-	out += "\n";
-        return out;
+	return out << fullName() << " type: " << type()
+		   << "\n initial value: " << myInitValue
+		   << "\n current value: " << currentValue() << "\n";
 };
 
 // change current value.  We use the initialization parser to do the job.
 void
 State::setCurrentValue(const char* newval) {
-	const char* save = initValue;
-	initValue = newval;
+	const char* save = myInitValue;
+	myInitValue = newval;
 	initialize();
-	initValue = save;
+	myInitValue = save;
 }
 
 // methods for class StateList
@@ -233,7 +225,7 @@ State* StateList::stateWithName(const char* name) {
 	StateListIter next(*this);
 	for (int i =  size(); i>0;i--) {
 		sp = next++;
-		if (strcmp(name,sp->readName()) == 0)
+		if (strcmp(name,sp->name()) == 0)
 			return  sp;
 	}
 	return NULL;

@@ -6,7 +6,7 @@
 #endif
 
 #include "NamedObj.h"
-#include "Connect.h"
+#include "PortHole.h"
 #include "State.h"
 
 /**************************************************************************
@@ -16,7 +16,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
+ Programmer:  E. A. Lee, D. G. Messerschmitt, J. Buck
  Date of creation: 1/17/90
 
  Block is the basic unit of computation...it is an abstraction that has
@@ -31,21 +31,23 @@ class Scheduler;
 
 class Block : public NamedObj
 {
+	// Give iterator classes special access.
 	friend class BlockPortIter;
 	friend class BlockStateIter;
 	friend class BlockMPHIter;
 	friend class BlockGenPortIter;
+
+	// These are defined in ConstIters.h.
 	friend class CBlockPortIter;
 	friend class CBlockStateIter;
 	friend class CBlockMPHIter;
 	friend class CBlockGenPortIter;
 public:
 	// Initialize the data structures
-	void initialize();
+	/* virtual */ void initialize();
 
-	// User-specified additional initialization
-	// By default, it does nothing.
-	virtual void start();
+	// execute the block <for executable blocks, otherwise this is error>
+	virtual int run();
 
 	// User-specified end of simulation
 	// again, does nothing by default.
@@ -83,22 +85,19 @@ public:
 	// virtual method to make a new object of the same type.
 	// Stars and galaxies should redefine it as, say
 	//
-	// virtual Block* clone () const {return new MyType;}
+	// virtual Block* makeNew () const {return new MyType;}
+	virtual Block* makeNew () const;
 
+	// make a duplicate object.  By default, this does makeNew
+	// and copyStates -- it can be redefined to copy any additional
+	// cruft.
 	virtual Block* clone () const;
-
-	// method for copying states during cloning.  It is designed for use
-	// by clone methods, and it assumes that the src argument has the same
-	// state list as me.  
-	// This method will be protected after ptlang add this method when
-	// cloning a star.
-        Block& copyStates(const Block&);
 
 	// Method to print out a description of the block
 	// Note that this function flattens the profile of a galaxy,
 	// which may not always be wanted.  It produces a great deal
 	// of data.
-	StringList printVerbose() const;
+	/* virtual */ StringList print(int verbose) const;
 
 	// Add elements to the to the lists
 	// Made public for the benefit of MultiPortHole and
@@ -130,10 +129,10 @@ public:
 			    int* io, int nMax) const;
 
 	// print portholes as part of the info-printing method
-	StringList printPorts(const char* type) const;
+	StringList printPorts(const char* type, int verbose) const;
 
 	// return the scheduler under which it is in.
-	virtual Scheduler* mySched() const;
+	virtual Scheduler* scheduler() const;
 
         // Add  State to the block
         void addState(State& s) {states.put(s);}
@@ -145,14 +144,13 @@ public:
         int numberStates() const {return states.size();}
 
         // print states as part of the info-printing method
-        StringList printStates(const char* type) const;
+        StringList printStates(const char* type,int verbose) const;
 
         // Retrieve the State with the given name
         virtual State *stateWithName(const char* name);
 
-        // Re-Define State
-        void setState(const char* stateName, const char* expression) {
-                        stateWithName(stateName)->setValue(expression);}
+        // Re-Define setState -- returns false if no state named stateName
+	int setState(const char* stateName, const char* expression);
 
 	// Return reference to Block as a Star.  Error if it's not.
 	virtual const Star& asStar() const;
@@ -167,9 +165,20 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const;
+	const char* className() const;
 
 protected:
+	// User-specified additional initialization
+	// By default, it does nothing.  It is called by initialize
+	// (and should also be called if initialize is redefined)
+	virtual void setup();
+
+	// method for copying states during cloning.  It is designed for use
+	// by clone methods, and it assumes that the src argument has the same
+	// state list as the "this" object.  
+        Block* copyStates(const Block&);
+
+private:
 	// Database for this block
 
 	// The following are set from within the Block; hence, protected
@@ -178,7 +187,6 @@ protected:
         // stateWithName can find a state.
         StateList states;
 
-private:
 	// This is a list of multiportholes in the block.
 	MPHList multiports;
 };

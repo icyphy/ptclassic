@@ -16,34 +16,37 @@ inline anyway).
 **************************************************************************/
 
 #include "DataStruct.h"
-#include <assert.h>
 
-void SingleLinkList :: insert(Pointer a)
+// add at head of list
+void SequentialList :: prepend(Pointer a)
 {
-	if (!empty()) {	// List not empty
+	if (dimen > 0) {	// List not empty
 		LOG_NEW; lastNode->next = new SingleLink(a,lastNode->next);
 	}
 	else	{	// List empty
 		LOG_NEW; lastNode = new SingleLink(a,0);
 		lastNode->next = lastNode;
 	}
+	dimen++;
 }
 
-void SingleLinkList :: append(Pointer a)
+// add at tail of list
+void SequentialList :: append(Pointer a)
 {
-	if (!empty()) {	// List not empty
+	if (dimen > 0) {	// List not empty
 		LOG_NEW; lastNode = lastNode->next = new SingleLink(a,lastNode->next);
 	}
 	else {		// List empty
 		LOG_NEW; lastNode = new SingleLink(a,0);
 		lastNode->next = lastNode;
 	}
+	dimen++;
 }
 
-Pointer SingleLinkList :: getAndRemove()
+// return and remove head of list
+Pointer SequentialList :: getAndRemove()
 {
-	// list must not be empty.
-	assert (!empty());
+	if (dimen == 0) return 0;
 
 	SingleLink *f = lastNode->next;	// Head of list
 	Pointer r = f->e;
@@ -52,13 +55,14 @@ Pointer SingleLinkList :: getAndRemove()
 	else lastNode->next = f->next;
 
 	LOG_DEL; delete f;
+	dimen--;
 	return r;
 }
 
-Pointer SingleLinkList :: getTailAndRemove()
+// return and remove tail of list
+Pointer SequentialList :: getTailAndRemove()
 {
-        // Note:  as in getAndRemove(), it is assumed that list is not empty
-	assert (!empty());
+	if (dimen == 0) return 0;
 
         Pointer r = lastNode->e;        // Save contents of tail
 
@@ -75,20 +79,21 @@ Pointer SingleLinkList :: getTailAndRemove()
                 LOG_DEL;  delete lastNode;
                 lastNode = p;
         }
+	dimen--;
         return r;
 }
 
-
-Pointer SingleLinkList :: elem(int i) const
+// return i-th element of list, null if fewer than i elements.
+Pointer SequentialList :: elem(int i) const
 {
-	if (empty()) return 0;
+	if (i > dimen) return 0;
 	SingleLink *f = lastNode->next;	// Head of list
 	for( int t = i; t > 0; t-- )
 		f = f->next;
 	return f->e;
 }
 
-void SingleLinkList :: initialize()
+void SequentialList :: initialize()
 {
 	if (empty()) return;	// List already empty
 
@@ -107,19 +112,21 @@ void SingleLinkList :: initialize()
 
 	// and mark the list empty
 	lastNode = 0;
+	dimen = 0;
 }
 
-// This function searches for an element in a SingleLinkList matching
+// This function searches for an element in a SequentialList matching
 // the argument, removing it if found.
-int SingleLinkList::remove (Pointer x) {
+int SequentialList::remove (Pointer x) {
 	// case of empty list
-	if (empty()) return 0;
+	if (dimen == 0) return 0;
 	// case of 1-element list
-	if (lastNode->next == lastNode) {
+	if (dimen == 1) {
 		if (lastNode->e != x) return 0;
 		// only element matches, zero the list
 		LOG_DEL; delete lastNode;
 		lastNode = 0;
+		dimen = 0;
 		return 1;
 	}
 	// general case
@@ -130,6 +137,7 @@ int SingleLinkList::remove (Pointer x) {
 			g->next = f->next;
 			if (f == lastNode) lastNode = g;
 			LOG_DEL; delete f;
+			dimen--;
 			return 1;
 		}
 		f = f->next;
@@ -139,8 +147,8 @@ int SingleLinkList::remove (Pointer x) {
 }
 
 // This function returns true if the argument is found in the list.
-int SingleLinkList::member (Pointer x) const {
-	if (empty()) return 0;
+int SequentialList::member (Pointer x) const {
+	if (dimen == 0) return 0;
 	SingleLink* f = lastNode;
 	do {
 		if (f->e == x) return TRUE;
@@ -148,4 +156,3 @@ int SingleLinkList::member (Pointer x) const {
 	} while (f != lastNode);
 	return FALSE;
 }
-

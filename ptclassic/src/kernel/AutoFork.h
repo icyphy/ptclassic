@@ -28,17 +28,21 @@ class GenericPort;
 class PortHole;
 
 class AutoFork {
+public:
+	AutoFork(Geodesic& g) : geo(g), forkStar(0), forkOutput(0) {}
+	~AutoFork() {}
+	// attach source or destination to the autofork
+	PortHole* setSource(GenericPort&, int delay = 0);
+	PortHole* setDest(GenericPort&, int alwaysFork = 0);
 private:
+	// associated geodesic
 	Geodesic& geo;
+	// associated automatically inserted fork star
 	Block* forkStar;
+	// points to output multiport of fork
 	MultiPortHole* forkOutput;
 	// cruft used for generating names for autoforks
 	static int nF;
 	static const char* autoForkName();
-public:
-	AutoFork(Geodesic& g) : geo(g), forkStar(0), forkOutput(0) {}
-	~AutoFork() {}
-	PortHole* setSource(GenericPort&, int delay = 0);
-	PortHole* setDest(GenericPort&, int alwaysFork = 0);
 };
 #endif

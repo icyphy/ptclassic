@@ -12,7 +12,7 @@ Iterators that work on const container objects, returning const
 pointers to inside objects.
 
 The more commonly used non-const iterators are defined in files
-Block.h, Connect.h, State.h, or Galaxy.h.
+Block.h, PortHole.h, State.h, or Galaxy.h.
 
 **************************************************************************/
 #ifndef _ConstIters_h
@@ -22,7 +22,7 @@ Block.h, Connect.h, State.h, or Galaxy.h.
 #endif
 
 #include "Block.h"
-#include "Connect.h"
+#include "PortHole.h"
 #include "State.h"
 #include "Galaxy.h"
 

@@ -35,26 +35,31 @@ class Target;
 class Scheduler {
 public:
 	// Constructor
-	Scheduler() : myTarget(0) {}
+	Scheduler() : myTarget(0), myGalaxy(0) {}
 
-	// setup sets up the schedule; it returns TRUE for success
-	// and FALSE for failure.
-	virtual int setup(Galaxy&) = 0;
+	// connect a galaxy to the scheduler
+	virtual void setGalaxy(Galaxy& g);
+
+	Galaxy* galaxy() { return myGalaxy;}
+
+	// setup sets up the schedule; it calls requestHalt for failure.
+
+	virtual void setup() = 0;
 
 	// run runs the simulation.
-	virtual int run(Galaxy&) = 0;
+	virtual int run() = 0;
 
 	// hack method to set stopping time
-	virtual void setStopTime(float limit) = 0;
+	virtual void setStopTime(double limit) = 0;
 
 	// method to retrieve stopping time
-	virtual float getStopTime() = 0;
+	virtual double getStopTime() = 0;
 
 	// hack method to set stopping time of wormhole
-	virtual void resetStopTime(float limit);
+	virtual void resetStopTime(double limit);
 
 	// set the currentTime 
-	virtual void setCurrentTime(float val);
+	virtual void setCurrentTime(double val);
 
 	// display schedule
 	virtual StringList displaySchedule();
@@ -63,7 +68,7 @@ public:
 	virtual ~Scheduler() {}
 
 	// current time of the schedule
-	float currentTime;
+	double currentTime;
 
 	// flag set if stop before deadlocked.
 	// for untimed domain, it is always FALSE.
@@ -76,7 +81,7 @@ public:
 	void setTarget(Target& t);
 
 	// get the target
-	Target& getTarget ();
+	Target& target ();
 
 	// Call code-generation functions in the Target to generate
 	// code for a run.
@@ -101,6 +106,7 @@ protected:
 private:
 	// Target pointer
 	Target* myTarget;
+	Galaxy* myGalaxy;
 };
 
 #endif

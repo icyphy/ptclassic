@@ -23,7 +23,7 @@ $Id$
 #include "InterpGalaxy.h"
 #include "StringList.h"
 #include "Error.h"
-#include "Connect.h"
+#include "PortHole.h"
 #include "Geodesic.h"
 #include "miscFuncs.h"
 #include "Domain.h"
@@ -48,7 +48,7 @@ GenericPort *
 InterpGalaxy::findGenPort (const char* star,const char* port) {
 	Block *st = blockWithName(star);
 	if (st == NULL) {
-		noInstance (star, readName());
+		noInstance (star, name());
 		return 0;
 	}
 	GenericPort *ph = st->multiPortWithName(port);
@@ -64,7 +64,7 @@ GenericPort *
 InterpGalaxy::findGenericPort (const char* star,const char* port) {
 	Block *st = blockWithName(star);
 	if (st == NULL) {
-		noInstance (star, readName());
+		noInstance (star, name());
 		return 0;
 	}
 	GenericPort *ph = st->multiPortWithName(port);
@@ -80,7 +80,7 @@ PortHole *
 InterpGalaxy::findPortHole (const char* star,const char* port) {
 	Block *st = blockWithName(star);
 	if (st == NULL) {
-		noInstance (star, readName());
+		noInstance (star, name());
 		return 0;
 	}
 	PortHole *ph = st->portWithName(port);
@@ -93,7 +93,7 @@ MultiPortHole *
 InterpGalaxy::findMPH(const char* star, const char* port) {
 	Block *st = blockWithName(star);
 	if (st == NULL) {
-		noInstance (star, readName());
+		noInstance (star, name());
 		return 0;
 	}
 	MultiPortHole *ph = st->multiPortWithName(port);
@@ -212,7 +212,7 @@ InterpGalaxy::delStar(const char* starname) {
 // find the block we are to remove
 	Block* st = blockWithName (starname);
 	if (st == NULL) {
-		noInstance (starname, readName());
+		noInstance (starname, name());
 		return 0;
 	}
 // this should always work, check anyway
@@ -239,7 +239,7 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	if (ph == NULL) return FALSE;
 // create new galaxy port, add to galaxy, do the alias
 	Plasma* pla = ph->setPlasma();
-	DataType dType = pla ? pla->type() : ph->myType();
+	DataType dType = pla ? pla->type() : ph->type();
 	if (ph->isItMulti()) {
 		LOG_NEW; GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
@@ -278,7 +278,7 @@ int
 InterpGalaxy::delNode (const char* nodename) {
 	Geodesic *g = nodes.nodeWithName (nodename);
 	if (g == NULL) {
-		noInstance (nodename, readName());
+		noInstance (nodename, name());
 		return FALSE;
 	}
 	if (!nodes.remove(g)) {
@@ -300,7 +300,7 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 	if (ph == NULL) return FALSE;
 	Geodesic *g = nodes.nodeWithName (node);
 	if (g == NULL) {
-		noInstance (node, readName());
+		noInstance (node, name());
 		return FALSE;
 	}
 	if (ph->isItOutput()) {
@@ -375,7 +375,7 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
 	else {
 		Block* blk = blockWithName(blockname);
 		if (blk ==  0) {
-			noInstance (blockname, readName());
+			noInstance (blockname, name());
 			return FALSE;
 		}
 		State *src = blk->stateWithName(statename);
@@ -434,13 +434,14 @@ InterpGalaxy::setDomain (const char* name) {
 // clone function: uses copy constructor.
 Block*
 InterpGalaxy::clone() const { LOG_NEW; return new InterpGalaxy(*this);}
+// makeNew function is the same.
+Block*
+InterpGalaxy::makeNew() const { return InterpGalaxy::clone();}
 
-// DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
+// DANGER WILL ROBINSON!!!  Casting actionList to const char* will cause all
 // the action strings to be combined into one string.  This will break
 // clone()!!!  Do not do it!
-
-// If you must print the action list do something like
-// for (i = actionList.size(); i > 0; i--) cout << actionList.next() << "\n";
+// However, "cout << actionList" is safe.
 
 // This is the key to the works -- the function that makes an identical
 // galaxy, given a galaxy.  It's the body of the copy constructor.
@@ -449,13 +450,13 @@ void
 InterpGalaxy::copy(const InterpGalaxy& g) {
 // make a new interpreted galaxy!  We do this by processing the action
 // list.
-	descriptor = g.descriptor;
-	className = g.className;
-	setNameParent(g.readName(), NULL);
+	setDescriptor(g.descriptor());
+	myClassName = g.myClassName;
+	setNameParent(g.name(), NULL);
 	const char* oldDom = NULL; // old domain
 
 // process the action list
-	int nacts = g.actionList.size();
+	int nacts = g.actionList.numPieces();
 	StringListIter next(g.actionList);
 
 	while (nacts > 0) {
@@ -590,10 +591,10 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 // class)
 void
 InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
-	const char* myName = hashstring(readName());
+	const char* myName = hashstring(name());
 	setNameParent(myName, parent());
 // use my name as the "class name" for all objects that are cloned from me.
-	className = myName;
+	myClassName = myName;
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate
 // type of wormhole, add it to the list, and change back to outerDomain
@@ -659,7 +660,7 @@ void
 InterpGalaxy::initialize () {
 	Block::initialize();
 	StringListIter next(initList);
-	int nacts = initList.size();
+	int nacts = initList.numPieces();
 	int err = 0;
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
@@ -727,7 +728,7 @@ NodeList::nodeWithName (const char* ident) {
 	Geodesic *g;
 	NodeListIter next(*this);
 	while ((g = next++) != 0) {
-		if (strcmp(ident, g->readName()) == 0)
+		if (strcmp(ident, g->name()) == 0)
 			return g;
 	}
 	return NULL;

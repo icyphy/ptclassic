@@ -47,9 +47,15 @@ public:
         // casting to a Complex
         operator Complex() { return val;}
 
+	// set init value
+	void setInitValue(const Complex& arg);
+
+	// this redeclaration is required by the "hiding rule".  Yuk!
+	void setInitValue(const char* s) { State::setInitValue(s);}
+
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "ComplexState";}
+	const char* className() const {return "ComplexState";}
 
 	State* clone () const;//  {return new ComplexState;}
 

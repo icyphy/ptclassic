@@ -25,9 +25,9 @@ void IntVecData::init(int l,const int *srcData) {
 
 const char* IntVecData::dataType() const { return "IntVecData";}
 
-ISA_FUNC(IntVecData,PacketData);
+ISA_FUNC(IntVecData,Message);
 
-PacketData* IntVecData::clone() const { LOG_NEW; return new IntVecData(*this);}
+Message* IntVecData::clone() const { LOG_NEW; return new IntVecData(*this);}
 
 IntVecData::~IntVecData() { LOG_DEL; delete data;}
 

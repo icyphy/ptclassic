@@ -21,7 +21,7 @@ $Id$
 
 #include "AutoFork.h"
 #include "Geodesic.h"
-#include "Connect.h"
+#include "PortHole.h"
 #include "Error.h"
 #include "KnownBlock.h"
 #include "Galaxy.h"
@@ -74,7 +74,7 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 		PortHole * forkInput;
 
 		// create the Fork star
-		if ((forkStar = KnownBlock::clone("Fork")) == 0 ||
+		if ((forkStar = KnownBlock::makeNew("Fork")) == 0 ||
 		    (forkOutput = forkStar->multiPortWithName("output")) == 0
 		    || (forkInput = forkStar->portWithName("input")) == 0) {
 			Error::abortRun (geo, "can't create Fork star");

@@ -21,36 +21,36 @@ $Id$
 #include "FixSample.h"
 #include "Plasma.h"
 
-static FixSample fixproto;
+static FixParticle fixproto;
 
 static Plasma fixPlasma(fixproto);
 
 extern const DataType FIX = "FIX";
 
-Particle* FixSample :: useNew () { LOG_NEW; return new FixSample;}
+Particle* FixParticle :: useNew () { LOG_NEW; return new FixParticle;}
 
-Particle* FixSample :: clone () {
+Particle* FixParticle :: clone () {
 	Particle* p = fixPlasma.get();
 	*p << double(*this);
 	return p;
 }
-void FixSample :: die () { fixPlasma.put(this);}
+void FixParticle :: die () { fixPlasma.put(this);}
 
-DataType FixSample :: readType() const {return FIX;}
+DataType FixParticle :: type() const {return FIX;}
 
 // loadup saturates the values --
-void FixSample :: operator << (int i) {
-	FloatSample::operator<<(i);
+void FixParticle :: operator << (int i) {
+	FloatParticle::operator<<(i);
 	saturate();
 }
 
-void FixSample :: operator << (double f) {
-	FloatSample::operator<<(f);
+void FixParticle :: operator << (double f) {
+	FloatParticle::operator<<(f);
 	saturate();
 }
 
-void FixSample :: operator << (const Complex& c) {
-	FloatSample::operator<<(c);
+void FixParticle :: operator << (const Complex& c) {
+	FloatParticle::operator<<(c);
 	saturate();
 }
 

@@ -39,13 +39,14 @@ int InterpUniverse :: newTarget(const char* newTargName) {
 	return target != 0;
 }
 
-Scheduler* InterpUniverse :: mySched() const {
-	return target->mySched();
+Scheduler* InterpUniverse :: scheduler() const {
+	return target->scheduler();
 }
 
 InterpUniverse :: ~InterpUniverse() {
 	if (!target) return;
 	LOG_DEL; delete target; target = 0;
 }
+
 // isa
 ISA_FUNC(InterpUniverse,Galaxy);

@@ -40,19 +40,16 @@ public:
 	Runnable(const char* targetname, const char* dom, Galaxy* g);
 
 	// initialize and/or generate schedule
-	int initSched() {
+	void initTarget() {
+		target->setGalaxy(*galP);
 		target->initialize();
-		return target->setup(*galP);
 	}
 
 	// run, until stopping condition
-	void run() { target->run();}
-
-	// end simulation
-	void endSimulation() { target->wrapup();}
+	int run() { return target->run();}
 
 	// set the stopping condition.  A hack.
-	virtual void setStopTime(float stamp);
+	virtual void setStopTime(double stamp);
 
 	// display schedule
 	StringList displaySchedule() {return target->displaySchedule();}
@@ -85,11 +82,13 @@ public:
 		Runnable(s,typeDesc,this) {}
 
 	// return my scheduler
-	Scheduler* mySched() const { return target->mySched();}
+	Scheduler* scheduler() const { return target->scheduler();}
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "Universe";}
+	const char* className() const {return "Universe";}
+
+	int run() { return Runnable::run();}
 
 protected:
 	// print, possibly recursively

@@ -26,8 +26,8 @@ protected:
 public:
 	~DynamicGalaxy() { zero();}
 
-	// the clone function returns an error and a null pointer.
-	Block* clone() const;
+	// the makeNew function returns an error and a null pointer.
+	Block* makeNew() const;
 
 	// class identification
         int isA(const char*) const;

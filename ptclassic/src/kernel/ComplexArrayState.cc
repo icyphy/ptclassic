@@ -8,7 +8,7 @@ static const char file_id[] = "ComplexArrayState.cc";
 #include "Tokenizer.h"
 #include "KnownState.h"
 
-const int MAXLEN = 2000;
+const int MAXLEN = 20000;
 
 /**************************************************************************
 Version identification:
@@ -45,28 +45,30 @@ ComplexArrayState :: ComplexArrayState (int size, const Complex& fill_value) {
 
 const char* ComplexArrayState :: type() const { return "COMPLEXARRAY";}
 
+const char* ComplexArrayState :: className() const {
+	return "ComplexArrayState";
+}
+
+int ComplexArrayState :: isArray() const { return TRUE;}
+
 int ComplexArrayState :: size() const { return nElements;}
 
 State *ComplexArrayState :: clone() const { LOG_NEW; return new ComplexArrayState;}
 
 ComplexArrayState :: ~ComplexArrayState () {
-	// ? no Complex destructor: do we want delete [] val, or delete val?
-	// g++ seems to want delete val
-	LOG_DEL; delete val;
+	LOG_DEL; delete [] val;
 }
 
 void ComplexArrayState  :: initialize() {
 
 	Complex buf[MAXLEN];
 	const char* specialChars = "*+-/()<,[]";
-	Tokenizer lexer(initValue,specialChars);
+	Tokenizer lexer(initValue(),specialChars);
 	double realval = 0;
 	double imagval = 0;
 	int numRepeats;
 
-	// ? no Complex destructor: do we want delete [] val, or delete val?
-	// g++ seems to want delete val
-	LOG_DEL; delete val;
+	LOG_DEL; delete [] val;
 	val = 0;
 	nElements = 0;
 
@@ -189,7 +191,7 @@ void ComplexArrayState :: resize (int newSize) {
 	if (newSize < nCopy) nCopy = newSize;
 	for (int i = 0; i < nCopy; i++)
 		val[i] = oldVal[i];
-	LOG_DEL; delete oldVal;
+	LOG_DEL; delete [] oldVal;
 }
 
 // make knownstate entry

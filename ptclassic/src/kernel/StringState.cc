@@ -35,13 +35,15 @@ $Id$
 
 StringState :: StringState() : val(0) {}
 
-const char* StringState :: readClassName() const {return "StringState";}
+const char* StringState :: className() const {return "StringState";}
+
+const char* StringState :: type() const { return "STRING";}
 
 void StringState  :: initialize() {
 	char buf[2048];
 	// cast is because cfront doesn't want to delete pointers to const
 	LOG_DEL; delete val;
-	const char* p = initValue;
+	const char* p = initValue();
 	char *q = buf;
 	while (*p) {
 		if (*p == '{') {
