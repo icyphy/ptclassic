@@ -10,7 +10,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cg/parScheduler
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
@@ -34,7 +34,7 @@ all:	makefile $(LIB)
 install:	makefile $(LIBDIR)/$(LIB)
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

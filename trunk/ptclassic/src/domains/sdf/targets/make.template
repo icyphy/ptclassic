@@ -13,7 +13,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/sdf/targets
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
@@ -34,7 +34,7 @@ install:	all $(LIBDIR)/$(LIB)
 
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 
 # Don't add anything after the next line; makedepend will zap it.
