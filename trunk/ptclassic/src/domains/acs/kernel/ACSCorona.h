@@ -37,13 +37,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 
-#include "CGStar.h"
-#include "NamedList.h"
+#include "ACSStar.h"
+#include "DataStruct.h"
 #include "ACSCore.h"
 
 class ACSCore;
 
-class ACSCorona : public CGStar {
+class ACSCorona : public ACSStar {
 public:
 
         // my domain
@@ -60,7 +60,7 @@ public:
 
 protected:
 
-	ACSCore *corelist;
+        SequentialList coreList;
 
 	ACSCore *currentCore;
 };
