@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "SDFStar.h"
+#include "DynDFStar.h"
 #include "CGPortHole.h"
 #include "CodeBlock.h"
 #include "SymbolList.h"
@@ -56,10 +56,9 @@ class Profile;
 	// class CGStar
 	////////////////////////////////////
 
-// by deriving from DataFlowStar rather than from SDFStar, and setting
-// isSDF to return TRUE, we permit non-SDF CGStars later on.
+// CG stars may have dynamic ports, but they must be scheduled statically.
 
-class CGStar : public DataFlowStar {
+class CGStar : public DynDFStar {
 friend class CGTarget;
 public:
 	// Constructor
@@ -76,8 +75,6 @@ public:
 
 	// Pointer to target
 	CGTarget* myTarget() { return (CGTarget*)targetPtr; }
-
-	int isSDF() const;
 
 	// class identification
 	int isA(const char*) const;
@@ -105,7 +102,10 @@ public:
 	// set the target pointer, initialize the various target pointers
 	// such as codeStreams & symbols if needed.
 	void setTarget(Target* t);
-	
+
+	// return error on attempt to execute dynamically
+	int setDynamicExecution(int);
+
 protected:
 	// Process code, expanding macros.
 	StringList processCode(CodeBlock&);
@@ -231,7 +231,7 @@ class CGStarPortIter : public BlockPortIter {
 public:
 	CGStarPortIter(CGStar& s) : BlockPortIter(s) {}
 	CGPortHole* next() { return (CGPortHole*)BlockPortIter::next();}
-	CGPortHole* operator++() { return next();}
+	CGPortHole* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif
