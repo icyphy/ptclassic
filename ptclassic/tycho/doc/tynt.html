@@ -1,97 +1,91 @@
 <!$Id$>
 <html>
 <head>
-<title>Tycho under Windows NT</title>
+<title>Tycho under Windows</title>
 </head>
 <body bgcolor="#faf0e6">
 <HR>
-<h1>Tycho under Windows NT</h1>
-<H2>Places to go</H2>
+<h1>Tycho under Windows</h1>
+The Windows port of Tycho is fairly young, so there are plenty of bugs.
+
+The only testing of this port was done under NT4.0, so Windows3.1 and
+Windows95 users may have other problems.
+
+<H2><A NAME="Windows external links (URLs)">External Windows Tcl
+places to go</A>
 <MENU>
-
 <LI> <A HREF="http://ourworld.compuserve.com:80/homepages/efjohnson/tclwin.htm">Tcl/Tk on Windows FAQ</A>
-
 </MENU>
 
-<H2>Installing tcl2.2</H2>
-You can pick up prebuilt Itcl2.2 NT binaries at <A HREF="ftp://ftp.tcltk.com/pub/itcl/itcl22.exe"><CODE>ftp://ftp.tcltk.com/pub/itcl/itcl22.exe</CODE></A>
-
+<H2><A NAME="windows bugs">Tycho/Macintosh bugs</A></H2>
 <MENU>
 
-<LI> I had to set the INCLUDE and LIB environment variables by using
-the system control panel.
+<LI> Tycho0.1.1 does not handle spaces in pathnames very well.  Tycho
+will work best if the distribution is installed in a directory that
+has a pathname that contains no spaces.
 
-<LI> Before running <CODE>nmake -f makefile.vc install</CODE>, be sure
-that <CODE>c:\bin</CODE> is in your path, or the iwidgets installation
-will fail.
+<LI> It would be nice if the installation was such that a windows user could
+just mouse on a Tycho Icon and then tycho would come up.
 
-<LI> In <CODE>iwidgets2.1.0</CODE>, I substituted <CODE>itclsh21</CODE>
-for <CODE>tclsh75</CODE>
+<LI> Don't use Itcl2.1 under windows, it does not support removing files
+and making directories.  If you use Itcl2.1, then Tycho <CODE>exec</CODE>s
+<CODE>rm</CODE> or <CODE>mkdir</CODE>, which fail under windows.
+
+<LI> Because of differences in the end-of-line characters between Unix
+and Windows, it appears that tcl scripts edited with the NT
+<CODE>Notebook</CODE> program cannot be sourced with Itcl2.2.
 
 </MENU>
 
 <H2>Installing Tycho Under NT</H2>
 <OL>
-<LI> Grab the tar file from <A HREF="http://ptolemy.eecs.berkeley.edu/tycho"><CODE>http://ptolemy.eecs.berkeley.edu/tycho</CODE></A>
+<LI> The Tycho home page at <A
+HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A> has a
+link to the downloads page that contains Tycho sources and Itcl
+binaries for Windows.
 
-<LI> Ungzip and untar the distribution using your favorite utility.  I used
-GNU tar from the Cygnus <A
-HREF="http://www.cygnus.com/misc/gnu-win32/">GNU-win32</A> tools.
 
-<LI> Tycho refers to the directory where the Tycho distribution is as
-<CODE>$TYCHO</CODE>.  In unix, under <CODE>csh</CODE>, you would do
-something like <CODE>setenv TYCHO /usr/local/tycho</CODE>.  Under NT,
-you can set the TYCHO variable by clicking on <CODE>Start</CODE>, then
-<CODE>Settings</CODE>, then <CODE>Control Panel</CODE> and finally the
-<CODE>System</CODE> icon.  In the <CODE>System Properties</CODE>
-window that comes up, select <CODE>Environment</CODE>.  There, you can
-add <CODE>TYCHO</CODE> as a User Variable.  Incidentally, this is
-where you set your path.
+<LI> Install Itcl by running <CODE>itcl22.exe</CODE>.
 
-<br> To create a script to start tycho under NT, I downloaded the
-distribution as <CODE>c:\users\cxh\tycho0.1.1</CODE>. Then I created a
-script called <CODE>c:\users\cxh\bin\ty.itcl</CODE> by using the
-<CODE>Notepad</CODE> Utility.  <CODE>ty.itcl</CODE>had the contents:
+<LI> Tycho refers to the directory where the Tycho distribution is
+with the environment variable <CODE>$TYCHO</CODE>.  In unix, under
+<CODE>csh</CODE>, you would do something like <CODE>setenv TYCHO
+/usr/local/tycho</CODE>.
 
-<LISTING>
-set env(TYCHO) c:/users/cxh/tycho0.1.1
-source $env(TYCHO)/kernel
-</LISTING>
+ <P> You can either hardwire this variable by setting it in the start
+up script, or under NT, you can set the TYCHO environment variable by
+clicking on <CODE>Start</CODE>, then <CODE>Settings</CODE>, then
+<CODE>Control Panel</CODE> and finally the <CODE>System</CODE> icon.
+In the <CODE>System Properties</CODE> window that comes up, select
+<CODE>Environment</CODE>.  There, you can add <CODE>TYCHO</CODE> as a
+User Variable.  Incidentally, this is where you set your path.
 
-then I clicked on the <CODE>ty.itcl</CODE> icon, and when I was
-prompted to select an application, I chose
-<CODE>c:/bin/itkwish2.1</CODE>
+ <P> If your tycho distribution is at <CODE>c:\Program
+Files\tycho0.1.1</CODE>, then you need not set the TYCHO environment
+variable, it will be set for you.  If your distribution is elsewhere, then you must either set the TYCHO variable, or edit <CODE>tycho0.1.1/lib/windows/tycho-windows</CODE>.
 
-<LI> The Tycho <CODE>tydoc</CODE> utility converts Itcl source files
-to html documentation.  The html code documentation is not shipped as
-part of the tycho tar file.  To create the documentation, you have two choices:
-	<OL>
-	<LI> Convert each Itcl doc file by opening it up with tycho,
-	and then selecting the <CODE>gendoc</CODE> option under the
-	<CODE>Special</CODE> menu.
-	
-	<LI> If you have GNU make installed, you can convert all the Itcl
-	files by first editing <CODE>$TYCHO/lib/tydoc/tydoc</CODE> and 
-	commenting out the line that contains the <CODE>exec</CODE> command
-	at the top, and then running <CODE>make</CODE> in the tycho directory:
-	<PRE>
-	make TYDOC="c:/bin/itclsh21 c:/users/cxh/tycho0.1.1/lib/tydoc/tydoc" itcldocs
-	</PRE>
+<LI> The script <CODE>tycho0.1.1/lib/windows/tycho-windows</CODE>
+first checks the <CODE>$TYCHO</CODE> variable, and if
+<CODE>$TYCHO</CODE> is not set, then the script expects that the Tycho
+distribution will be at <CODE>c:/Program Files/tycho0.1.1</CODE>.
 
-	</OL>
+<LI> Itcl2.2 associates files with the <CODE>itk</CODE> extension with
+the <CODE>itkwish</CODE> binary.  Apparently, the <CODE>itk</CODE>
+files must have Unix style end-of-line characters.
+
+<LI> Because of a bug in Itcl2.2, the path leading up to the
+<CODE>tycho-windows.itk</CODE> script cannot have any spaces in it.
+If you installed Tycho in <CODE>c:\Program Files</CODE>, then you must
+move either <CODE>c:\Program Files\tycho0.1.1\</CODE> or the
+<CODE>tycho0.1.1\lib\windows\tycho-window.itk</CODE> script to a
+directory that has no spaces in the pathname leading up to it.
+
+
+To start Tycho, click on the
+<CODE>tycho0.1.1/lib/windows/tycho-windows.itk</CODE> script.
 
 </OL>
 
-
-<H3>Tycho/NT bugs</H3>
-<OL>
-
-<LI> In the default NT setup, <CODE>exec rm</CODE> does not work,
-there is no <CODE>rm</CODE> binary.  Ditto with <CODE>exec
-mkdir</CODE>.  If you download the Cygnus tools.
-you will have mkdir and rm.
-
-</OL>
 <p>
 Up to: <A HREF="introduction.html">Tycho Introduction</A> -
 Previous: <A HREF="releasenotes.html">Release Notes</A> -
