@@ -117,6 +117,7 @@ realclean:	clean_tcl clean_tk clean_itcl
 $(TCL_OBJ)/config.status: $(TCLTK_OBJ) $(TCL_OBJ)
 	@echo "Configuring tcl"
 	(cd $(TCL_OBJ); $(TCL_SRC)/configure -v --srcdir=$(TCL_SRC) --prefix=$(TCL_INDEPENDENT_DEST) --exec-prefix=$(TCL_DEST) )
+	-(cd $(TCL_OBJ); ln -s $(TCL_SRC)/install-sh .)
 
 $(TCL_OBJ): 
 	mkdir $(TCL_OBJ)
@@ -165,7 +166,7 @@ $(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION) \
 	@echo "Configuring tk"
 	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) )
 	-(cd $(TK_OBJ); ln -s $(TK_SRC)/tk.h tk.h)
-
+	-(cd $(TK_OBJ); ln -s $(TK_SRC)/install-sh .)
 $(TK_OBJ):
 	mkdir $(TK_OBJ)
 
