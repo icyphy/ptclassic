@@ -299,7 +299,7 @@ irix5_configure: $(GNU_OBJ)
 # See http://www.cygnus.com/egcs
 EGCS_OBJ = $(GNU_OBJ)/egcs
 EGCS_SRC = $(GNU_SRC)/egcs
-EGCS_DEST = $(PTOLEMY)/gnu/egcs
+EGCS_DEST = $(PTOLEMY)/gnu
 EGCS_PREFIX=$(EGCS_DEST)/common
 EGCS_EXEC_PREFIX=$(EGCS_DEST)/$(PTARCH)
 all_egcs: configure_egcs bin_egcs install_egcs
