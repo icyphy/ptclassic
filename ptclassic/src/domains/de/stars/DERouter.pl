@@ -19,7 +19,7 @@ defstar {
 	name {Router}
 	domain {DE}
 	desc {
-	   "Randomly routes an input event to one of its outputs."
+	   "Randomly routes an input event to one of its outputs.\n"
 	   "Probability is equal for each output. Delay is zero."
 	}
 	input {

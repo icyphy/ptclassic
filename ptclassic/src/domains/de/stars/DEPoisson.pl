@@ -20,7 +20,7 @@ defstar {
 	domain {DE}
 	derivedfrom { RepeatStar }
 	desc {
-	   "Generates events according to a Poisson process."
+	   "Generates events according to a Poisson process.\n"
 	   "The first event comes out at time zero."
 	}
 	output {

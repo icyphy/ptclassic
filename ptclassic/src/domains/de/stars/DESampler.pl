@@ -18,7 +18,7 @@ defstar {
 	name {Sampler}
 	domain {DE}
 	desc {
-	   "Samples its data input at the times given by"
+	   "Samples its data input at the times given by\n"
 	   "events on its clock input."
 	}
 	input {

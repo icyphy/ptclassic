@@ -20,8 +20,8 @@ defstar {
 	name {FloatRamp}
 	domain {DE}
 	desc {
-	   "Produces a ramp output when stimulated by an input."
-	   "The time stamp of the output is the same as that of the input."
+	   "Produces a ramp output when stimulated by an input.\n"
+	   "The time stamp of the output is the same as that of the input.\n"
 	   "The value of the input is ignored."
 	}
 	input {

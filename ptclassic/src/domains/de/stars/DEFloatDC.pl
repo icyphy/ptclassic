@@ -20,8 +20,8 @@ defstar {
 	name {FloatDC}
 	domain {DE}
 	desc {
-		"Produces a DC output (default value is zero) when stimulated"
- 		"by an input.  The time stamp of the output is the same as"
+		"Produces a DC output (default value is zero) when stimulated\n"
+ 		"by an input.  The time stamp of the output is the same as\n"
 		"that of the input. The value of the input is ignored."
 	}
 	input {
