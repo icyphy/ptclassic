@@ -29,18 +29,18 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 # CG56 kernel support
 CG56DIR=$(ROOT)/src/domains/cg56/kernel
 
-EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) \
-     -I$(EGKERNEL) -I$(PARDIR) -I$(CGTARDIR)
+     -I$(PARDIR) -I$(CGTARDIR)
 
 # stars to make
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl
 
 # objects to make
-OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o $(PL_SRCS:.pl=.o)
+OBJS=	CG56MultiSimTarget.o Sim56Target.o S56XTarget.o Sub56Target.o \
+ $(PL_SRCS:.pl=.o)
 
 SRCS=	$(OBJS:.o=.cc)
 
