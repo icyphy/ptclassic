@@ -3,6 +3,7 @@
 <head>
 <title>Testing Tycho</title>
 </head>
+<body bgcolor="#faf0e6">
 <h1><A NAME="Testing Tycho">Testing Tycho</A></h1>
 <HR>
 This page is primarly for Tycho Developers.  Some of the commands
@@ -34,8 +35,10 @@ be tested.  The last line of the contents should return a value.
 <LI> The results to be compared against.
 </OL>
 
-Below is a sample piece of code that sources the <CODE>testDefs.tcl</CODE>
-file and then runs one test
+Below is a sample piece of code that sources the
+<CODE>testDefs.tcl</CODE> file and then runs one test.  The code below
+has the incorrect value return results to be compared against, so the
+test suite properly indicates that the test failed.
 
 <tcl><pre>
 if {[string compare test [info procs test]] == 1} then { 
@@ -45,8 +48,64 @@ test testExample-1.1 {This is the first test example, it does very little} {
 	catch {this is an error} errMsg1
 	set a "this is the value of a"
 	list $errMsg1 $a
+} {{invalid command name "this"} {this is NOT the value of a}}
+</pre></tcl>
+
+<H3>Parts of a test file</H3>
+Test files should be located in the <CODE>test</CODE> directory.
+
+ <P>It is better to have many small test files as opposed to a few
+large test files so that other developers can quickly find the tests
+for the class they are working with.  Usually tests for the class
+<CODE>Foo</CODE> are found in the file <CODE>test/testFoo.itcl</CODE>
+
+ <P>See <A HREF="../../kernel/test/testGraph.itcl"><CODE>$TYCHO/kernel/test/testGraph.itcl</CODE></A> for an example test file.
+
+ <P>Each test file should have the following parts:
+<OL>
+<LI> The Copyright
+
+<LI> The code that sources testDefs.tcl:
+<PRE>
+if {[string compare test [info procs test]] == 1} then { 
+    source $TYCHO/kernel/test/testDefs.tcl
 } {}
-</pre><tcl>
+</PRE>
+
+
+<LI> A line that will cause Tycho to exit if there are no more windows
+<PRE>
+set tychoExitWhenNoMoreWindows 0
+</PRE>
+
+
+<LI> A line that the user can uncomment if they want the test system to
+produce verbose messages:
+<PRE>
+#set VERBOSE 1
+</PRE>
+
+
+<LI> The individual tests, which should loosely follow the Tycho 
+file format standard:
+<PRE>
+############################################################################
+#### Foo
+test Foo-1.1 {Test out Foo} {
+
+} {}
+</PRE>
+
+
+<LI> The last line should run the test suite <CODE>doneTests</CODE>
+proc, which will optionally exit Tycho.  This line is necessary if
+the tests will be run from the makefile outside of Tycho.
+
+<PRE>
+doneTests
+</PRE>
+
+</OL>
 
 <HR>
 <H2>Testing Documentation</H2>
