@@ -2,7 +2,7 @@
 # Command-line program for the pakman utility \
     exec tclsh "$0" "$@"
 
-# @(#)pakman	1.2 02/10/98
+# $Id$
 # Author: John Reekie
 
 # If the PAKMAN_LIBRARY variable is set, add it to the auto_path
