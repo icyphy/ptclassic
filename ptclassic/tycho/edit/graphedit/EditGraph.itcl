@@ -71,6 +71,9 @@ class ::tycho::EditGraph {
     # Create another editor.
     method clone {}
 
+    # Select an icon -- for menubar use only
+    method iconselect {name}
+
     # Start creating a new edge
     method newclick {item x y}
 
@@ -176,9 +179,6 @@ class ::tycho::EditGraph {
     # Clear the selection
     protected method _selectionclear {foo}
 
-    # Add an icon to a menu
-    protected method addIconEntry {menu icons index}
-
     #################################################################
     ####                 protected variables                     ####
     
@@ -226,7 +226,9 @@ body ::tycho::EditGraph::constructor {args} {
     # If there is not already a graph model, create one
     if { $itk_option(-graph) == "" } {
 	configure -graph \
-                [uplevel #0 ::tycho::KeyedDigraph [::tycho::autoName graph]]
+                [uplevel #0 ::tycho::KeyedDigraph \
+                [::tycho::autoName graph] \
+                -strictoptions 0]
     }
 
     # If there is not already a layout model, create one
@@ -356,6 +358,15 @@ body ::tycho::EditGraph::loadLayout {} {
                 [$itk_option(-layout) itemget $edge]] \
                 [$itk_option(-layout) itemattrs $edge]
     }
+}
+
+########################################################################
+#### iconselect
+#
+# Process an icon selection.
+#
+body ::tycho::EditGraph::iconselect {name} {
+    vertex $name 100 100
 }
 
 ########################################################################
@@ -567,7 +578,7 @@ body ::tycho::EditGraph::vertex {icon x y} {
 
     # Add a vertex to the layout model
     set type  [$icons type $icon]
-    set attrs [$icons iconattrs $icon]
+    set attrs [$icons attributes icon $icon]
     set undo [eval [list $layout publish item \
 	    $name [list $type $x $y]] $attrs \
 	    -tags vertex]
@@ -577,14 +588,14 @@ body ::tycho::EditGraph::vertex {icon x y} {
     set undolayout [$layout getUndo current]
 
     # Add ports to the graph.
-    foreach port [$icons children port $icon] {
-        $graph publish keyin $name $port
+    foreach port [$icons names port $icon] {
+        $graph publish key $name $port
     }
 
     # Add the ports to the layout model
-    foreach port [$icons children port $icon] {
+    foreach port [$icons names port $icon] {
         set type  [$icons type $icon.$port]
-        set attrs [$icons portattrs $icon.$port]
+        set attrs [$icons attributes port $icon.$port]
 		
         # When creating the port item, give it a tag which is the same
         # as its type -- that is, "input" or "output". Give it a
@@ -596,7 +607,7 @@ body ::tycho::EditGraph::vertex {icon x y} {
         #eval $layout notify $cmd
 	eval [list $layout publish itemin $name $port [list $type 0 0]] \
 		$attrs \
-                -tags [list [$icons portcget $icon.$port -type]] \
+                -tags [list [$icons itemcget port $icon.$port -type]] \
 		-name $port
     }
 
@@ -927,32 +938,6 @@ body ::tycho::EditGraph::_selectionclear {foo} {
     $slate select clear
 }
 
-#####################################################################
-#### addIconEntry
-# Add an icon entry to the menus
-#
-body ::tycho::EditGraph::addIconEntry {menu icons index} {
-    if { $index != "" } {
-	menubar add [$icons groupcget $index -label] $menu -type cascade
-	foreach c [$icons children icon $index] {
-	    menubar command \
-		    [$icons iconcget $index.$c -label] \
-		    [$icons groupcget $index -label] \
-		    -command "$this vertex $index.$c 100 100"
-	}
-	foreach c [$icons children group $index] {
-	    addIconEntry $menu $icons $index.$c
-	}
-    } else {
-	foreach c [$icons roots icon] {
-	    menubar command [$icons iconcget $c -label] $menu \
-		    -command "$this vertex $c 100 100"
-	}
-	foreach c [$icons roots group] {
-	    addIconEntry $menu $icons $c
-	}
-    }
-}
 
     #####################################################################
     #####################################################################
@@ -994,7 +979,7 @@ body ::tycho::EditGraph::initializeMenubar {} {
     # Build a menu if icons from the icon index
     if { $itk_option(-icons) != "" } {
 	$myMenubar addMenu Icons -underline 0
-	addIconEntry Icons $itk_option(-icons) {}
+	$itk_option(-icons) menu $myMenubar Icons "$this iconselect"
     }
 
     # Add a Devel menu for development use
@@ -1005,7 +990,7 @@ body ::tycho::EditGraph::initializeMenubar {} {
     $myMenubar addSeparator Devel
 
     $myMenubar command {Show layout} Devel \
-		    -command "::tycho::post \[\[$this cget -layout\] describe\]"
+            -command "::tycho::post \[\[$this cget -layout\] describe\]"
     $myMenubar command {Show graph} Devel \
             -command "::tycho::post \[\[$this cget -graph\] describe\]"
 
