@@ -180,6 +180,9 @@ class ::tycho::EditForest {
     protected method drawSubgraphVertically {root xcoord} \
             {error "method disabled"}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Return the name of the data structure class being edited.
     protected method structClass {} {return ::tycho::Forest}
 }
@@ -334,4 +337,19 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
         incr ycoord [expr int(($y2-$y1)*$itk_option(-vertspacing))]
     }
     return [list $max $ycoord]
+}
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditForest::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
 }
