@@ -37,8 +37,10 @@ STARDOCDIR = ../../doc/stars
 PL_SRCS= \
  DETclScript.pl \
  DETkBarGraph.pl \
+ DETkButtons.pl \
  DETkMeter.pl \
  DELogicAnalyzer.pl \
+ DETkShowEvents.pl \
  DETkShowValues.pl \
  DETkSlider.pl \
  DETkText.pl
@@ -47,8 +49,10 @@ PL_SRCS= \
 # DELMSCxTkPlot.pl \
 
 TCL_SRCS= \
+  $(TCL_SCRIPT_DIR)/tkButtons.tcl \
   $(TCL_SCRIPT_DIR)/tkMeter.tcl \
   $(TCL_SCRIPT_DIR)/tkScript.tcl \
+  $(TCL_SCRIPT_DIR)/tkShowEvents.tcl \
   $(TCL_SCRIPT_DIR)/tkShowValues.tcl \
   $(TCL_SCRIPT_DIR)/tkSlider.tcl \
   $(TCL_SCRIPT_DIR)/tkText.tcl \
