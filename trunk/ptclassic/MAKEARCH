@@ -34,8 +34,12 @@ foreach x (optfir wfir)
 end
 cd ..
 
+# EXPDOMAINS = experimental domains
+# EXPDOMAINS = capsim thor bdf
+set EXPDOMAINS=
+
 cd domains
-foreach x (sdf ddf de capsim thor)
+foreach x (sdf ddf de $EXPDOMAINS)
 	mkdir $x
 	cd $x
 	ln -s ../../../src/domains/$x/makefile .
@@ -48,25 +52,6 @@ foreach x (sdf ddf de capsim thor)
 	cd ..
 end
 
-# Thor domain is a bit different
-cd thor
-foreach y (libarp pepp)
-	mkdir $y
-	cd $y
-	ln -s ../../../../src/domains/thor/$y/{make.template,makefile} .
-	cd ..
-end
-
-# thor/stars
-cd stars
-rm make.template
-foreach x (analyzerX11 drvmon generic xxttl)
-	mkdir $x
-	cd $x
-	ln -s ../../../../../src/domains/thor/stars/$x/{make.template,makefile} .
-	cd ..
-end
-
-# This is for the makefile, go back to the top, from src/domains/thor/stars
-cd ../../../..
+# This is for the makefile
+cd ../..
 touch obj.$ARCH
