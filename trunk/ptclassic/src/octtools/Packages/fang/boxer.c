@@ -31,7 +31,7 @@ static char SccsId[]="$Id$";
 #include "fa_internal.h"
 
 /*LINTLIBRARY*/
-static int put_box();
+static void put_box();
 
 
 #include "boxer_procs.h"	/* contains boxer_scan and 
