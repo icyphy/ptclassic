@@ -1,0 +1,128 @@
+# Version Identification:
+# $Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#
+# Makefile for oct2tim: convert from Octtools to Tycho Information Model
+#
+#
+# If this files name is make.template and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+#
+# root of source tree
+ROOT	      = ../../..
+# VPATH points to the real source directory
+VPATH         = $(ROOT)/src/octtools/oct2tim
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
+HDRS		= 
+
+LIBCSRCS	= oct2tim.c \
+		version.c
+
+SRCS = $(LIBCSRCS)
+
+OBJS = $(LIBCSRCS:.c=.o)
+
+C_INCL= -I../include $(PTCOMPAT_INCSPEC)
+
+MISC_FILES =	oct2tim.1
+
+all::	 makefile $(ROOT)/octtools/lib/oct2tim.pro oct2ps
+
+LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
+	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
+	-llist$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) -lst$(DBGFLAG) \
+	-lutility$(DBGFLAG) -lerrtrap$(DBGFLAG) \
+	-luprintf$(DBGFLAG) -lport$(DBGFLAG) 
+
+oct2tim:	$(OBJS)
+	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
+
+oct2tim.debug:	$(OBJS)
+	$(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
+
+oct2tim.debug.purify:	$(OBJS)
+	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
+
+TESTBINARY = ./oct2tim
+SCMOS_TECH = /usr/eesww/share/octtools/tech
+
+tests: $(TESTBINARY) sample-tmp sample2-tmp
+	if [ -d $(SCMOS_TECH) ]; then \
+		echo "The next test fails no matter what, so ignore it" ; \
+		echo "Testing sample2-tmp"; \
+		echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(SCMOS_TECH) -f interface -o sample2-out.ps sample2-tmp:symbolic" | csh -s; \
+		cmp $(VPATH)/sample2.ps sample2-out.ps; \
+		echo "Testing sample-tmp"; \
+		echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(SCMOS_TECH) -f interface -o sample-out.ps sample-tmp:physical" | csh -s ; \
+		cmp $(VPATH)/sample.ps sample-out.ps; \
+	else \
+		echo "$(SCMOS_TECH) does not exist, skipping 2 tests"; \
+	fi
+	@echo "Trivial test that produces a postscript file of $(PTOLEMY)/init.pal"
+	echo "setenv OCTTOOLS $(PTOLEMY); $(TESTBINARY) -=T $(PTOLEMY)/lib/colors -f interface -o oct2tim.out $(PTOLEMY)/init.pal:schematic" | csh -s
+	@echo "Use 'ghostview oct2tim.out' to view the test facet"
+
+sample-tmp:
+	cp -r $(VPATH)/sample $@
+
+sample2-tmp:
+	cp -r $(VPATH)/sample2 $@
+
+DEST = $(ROOT)/octtools/bin.$(PTARCH)/oct2tim
+
+$(DEST):	oct2tim
+		@echo Installing oct2tim
+		rm -f $(DEST)
+		ln oct2tim $(DEST)
+
+install: makefile $(DEST) $(BINDIR)/oct2tim
+
+$(BINDIR)/oct2tim:
+	(cd $(BINDIR); rm -f oct2tim; ln -s ../octtools/bin.$(PTARCH)/oct2tim .)
+
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+sources:	
+
+lint:	$(SRCS)
+	lint -u $(C_INCL) $^ > lint
+
+# Some versions of make require us to set LIB if we are going to
+# include common.mk
+LIB=none
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Dont add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.

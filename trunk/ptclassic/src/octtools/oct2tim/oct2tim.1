@@ -1,0 +1,127 @@
+.TH OCT2PS 1OCTTOOLS "29 January 1988"
+.SH NAME
+oct2ps \- Convert Oct facet to PostScript
+.SH SYNOPSIS
+.B oct2ps
+[\fIoptions\fR] \fIcell:view:facet\fR
+.SH DESCRIPTION
+.PP
+.I Oct2ps
+converts an Oct facet to PostScript.
+The PostScript is sent to standard output and can be sent
+to a PostScript printer.
+.PP
+A complete list of the command line options is given below.
+.TP 10
+.B -p
+Plot in portrait mode, scaling to fit on the page or in
+the box defined by the -b flag.
+.TP 10
+.B -l
+Plot in landscape mode, scaling to fit on the page or in
+the box defined by the -b flag.
+.TP 10
+.B -a
+Choose -l or -p, which ever gives the biggest plot (default).
+.TP 10
+.B "-b WxH"
+Width and height of a box to fit the plot in (in inches)
+.TP 10
+.B "-O XxY"
+Additional offset (in inches).
+Used for precisely placing a plot on the page.
+.TP 10
+.B "-o outfile"
+Name the output file name. The default is stdout.
+.TP 10
+.B "-s scale"
+Multiply the scale factor determined by -a, -l, -p or -b by \fIscale\fP
+(defaults to 1.0).
+< 1.0 shrinks the plot, > 1.0 grows the plot.
+.TP 10
+.B "-A abs"
+Do not plot anything that has its largest dimension less than
+\fIabs\fP points (72 points = 1 inch).
+.TP 10
+.B "-B"
+Plot outlines for each piece of geometry (in addition to the
+geometry itself).
+.TP 10
+.B -C
+Generate code for color postscript printers.
+.TP 10
+.B -t
+Generate labels for the formal terminal names.
+.TP 10
+.B -n
+Generate labels for the actual terminal names.
+.TP 10
+.B -x
+Generate labels for Oct labels.
+.TP 10
+.B -X
+Used with -x, only display a label if it fits within
+the bounding box of the label.
+.TP 10
+.B -c
+Generate labels for the connector instances.
+.TP 10
+.B -N
+Place the name of the cell in the lower left of the plot.
+.TP 10
+.B "-f facet"
+Name of facet type to use for instances
+\fI(contents, interface, or bb)\fP.
+\fIbb\fP draws the bounding box of the instance.
+Defaults to \fIcontents\fP.
+.TP 10
+.B "-T techdir"
+Replace the standard technology directory root with \fItechdir\fP.
+.TP 10
+.B "-P prologue"
+Replace the standard PostScript prologue file with \fIprologue\fP.
+Defaults to \fI~octtools/lib/oct2ps.pro\fP.
+Do not change this unless you really know what you are doing.
+.TP 10
+.B "-F font/size"
+Change to label font to \fIfont\fP and the size to \fIsize\fP.
+The default is \fITimes-Bold/7\fP.
+.TP 10
+.B -S list
+Suppress the comma separated list of layers.
+.TP 10
+.B -L
+Output the PostScript in a form that can be used by the \fIspecial\fP command
+of \fILaTeX\fP and \fIdvi2ps\fP.
+Forces portrait mode, forces \fIscale\fP to 1.0, and places the plot
+at the bottom center of the page.
+.TP 10
+.B cell
+Name of the cell to plot.
+.TP 10
+.B view
+Name of the view of the cell to plot.
+Defaults to \fIsymbolic\fP.
+.TP 10
+.B facet
+Name of the facet of the view of the cell to plot.
+Defaults to \fIcontents\fP.
+.SH FILES
+~octtools/lib/oct2ps.pro
+.SH BUGS
+Tiled donuts (and arcs) seem to put the Apple LaserWriter in an infinite loop.
+.br
+Does not correctly output filled pacman shapes
+.br
+Does not handle names or labels with ")" in them.
+.br
+Due to the fact that PostScript does not support a general 
+bit-blit facility, the method of outputting stippled layers
+is rather strange and slow.
+.SH "SEE ALSO"
+tech-edit(1OCTTOOLS), tap(3OCTTOOLS)
+.SH TRADEMARKS
+PostScript is a trademark of Adobe.
+LaserWriter is a trademark of Apple.
+.SH AUTHOR
+Rick L. Spickelmier
