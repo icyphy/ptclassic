@@ -52,6 +52,7 @@ Useful higher level OCT interface functions.
 
 static boolean SetParamProp();
 extern char* HashString();
+extern char* curDomainName();
 
 /* 8/14/89
 Opens the master of an instance, but allows you to choose which facet.
@@ -390,9 +391,8 @@ octObject *instPtr;
     if (KcIsKnown(akoName)) {
 	return (TRUE);
     }
-    (void)sprintf(buf,
-		  "Unknown star '%s' in current domain, trying to load it...",
-		  akoName);
+    (void)sprintf(buf, "Unknown star '%s' in domain %s, trying to load it...",
+		  akoName, curDomainName());
     PrintCon(buf);
     return LoadTheStar(instPtr, FALSE, (char *)NULL);
 }
