@@ -12,14 +12,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF logic library }
 	desc {
 This star applies a logical operation to any number of inputs.
-The inputs are integers interpreted as Booleans,
-where zero is a FALSE and nonzero is a TRUE.
+The inputs are integers interpreted as Boolean values,
+where zero means FALSE and a nonzero value means TRUE.
 The logical operations supported are {NOT AND NAND OR NOR XOR XNOR}.
 	}
 	explanation {
 The NOT operation requires that there be only one input.
 The XOR operation with multiple inputs tests for an odd number
-of TRUEs among the inputs.  The other operations are self explanatory.
+of TRUE values among the inputs.
+The other operations are self-explanatory.
 .ir "logic"
 .ir "Boolean logic"
 .ir "not (logical operation)"
@@ -34,18 +35,18 @@ of TRUEs among the inputs.  The other operations are self explanatory.
 	inmulti {
 		name { input }
 		type { int }
-		desc { Input logic values }
+		desc { Input logic values. }
 	}
 	output {
 		name { output }
 		type { int }
-		desc { Result of the logic test }
+		desc { Result of the logic test. }
 	}
 	defstate {
 		name { logic }
 		type { string }
 		default { "AND" }
-		desc { The test logic: one of NOT AND NAND OR NOR XOR or XNOR }
+		desc { The test logic: one of NOT AND NAND OR NOR XOR or XNOR. }
 	}
 	code {
 #define NOTID 0

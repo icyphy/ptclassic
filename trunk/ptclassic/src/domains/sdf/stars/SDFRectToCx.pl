@@ -1,7 +1,7 @@
 defstar {
 	name { RectToCx }
 	domain { SDF }
-	desc {Convert real and imaginary parts to a complex output.}
+	desc { Convert "real" and "imag" inputs to a complex output. }
 	version {$Id$}
 	author { E. A. Lee }
 	copyright {
