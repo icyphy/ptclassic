@@ -261,7 +261,9 @@ extern VOID_HACK clearerr();
 #endif /* clearerr */
 #ifndef _IBMR2
 #ifndef rewind
+#ifndef sgi
 extern VOID_HACK rewind();
+#endif /*sgi*/
 #endif /* rewind */
 #endif /* _IBMR2 */
 #endif /* __STDC__ */
@@ -279,7 +281,9 @@ extern void free(), exit(), perror();
 extern int abort(), exit();
 extern void free(), perror();
 #else
+#ifndef sgi
 extern VOID_HACK abort(), free(), exit(), perror();
+#endif /*sgi*/
 #endif
 extern char *getenv();
 #ifdef ultrix4
@@ -296,7 +300,9 @@ extern char *malloc(), *realloc(), *calloc();
 extern int sprintf();
 #else
 #ifndef _IBMR2
+#ifndef sgi
 extern char *sprintf();
+#endif /*sgi*/
 #endif
 #endif
 extern int system();
@@ -318,7 +324,10 @@ extern int sscanf();
 #else
 extern char *strcpy(), *strncpy(), *strcat(), *strncat(), *strerror();
 extern char *strpbrk(), *strtok(), *strchr(), *strrchr(), *strstr();
-extern int strcoll(), strxfrm(), strncmp(), strlen(), strspn(), strcspn();
+extern int strcoll(), strncmp();
+#ifndef sgi
+extern int strxfrm(), strlen(), strspn(), strcspn();
+#endif /*sgi*/
 extern char *memmove(), *memccpy(), *memchr(), *memcpy(), *memset();
 extern int memcmp(), strcmp();
 #endif /* ultrix4 */
