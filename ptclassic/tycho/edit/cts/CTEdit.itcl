@@ -100,7 +100,7 @@ body ::tycho::CTEdit::openControlPanel {graph} {
 	puts "Portnum = $portnum"
 
 	# Create a simulation run control panel
-	set rw [::tycho::view CTRunWindow -name $tl]
+	set rw [::tycho::view CTRunWindow -name $tl -debug 1]
 
 	# Create a simulation
 	set file [filename]
