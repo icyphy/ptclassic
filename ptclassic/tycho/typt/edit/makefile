@@ -51,15 +51,15 @@ EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
 	edit.tcl \
 	pkgIndex.tcl
 
-MISC_FILES =	tclIndex doc test
+DIRS =		bin demo doc test
+
+MISC_FILES =	tclIndex $(DIRS) adm
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex *.html
 
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/typt/edit
-
-DIRS =		bin demo doc test
 
 all install: tclIndex $(MISC_SRCS)
 
