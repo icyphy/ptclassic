@@ -102,7 +102,7 @@ generation domain, the global names are the resources to be managed.
 We need to assign a unique name for each block and their portholes, states,
 and variable. One approach was to use a structure (
 .c struct
-) hierarchy that is the same as the hierachical dataflow program
+) hierarchy that is the same as the hierarchical dataflow program
 representation. This approach was rejected since it takes away from the 
 compiler any chance of optimization with these global variables. 
 Instead, we assign a unique number to each star instance. Using that number
@@ -398,12 +398,12 @@ initialization section automatically. If some code should be unique
 in the initialization section, use addMainInit() method with the
 second argument that indicates the unique name of that code.
 .pp
-Unlike Ptolemy writtenin C++, the automatic 
+Unlike Ptolemy written in C++, the automatic 
 .Id "complex type, CGC domain"
 type conversion that C language supports is very restricted.
 The type of porthole or state determine the type of the
 corresponding variable in the generated code. Currently, we
-support interger, float or double, string, and complex type.
+support integer, float or double, string, and complex type.
 the complex type is automatically generated as follows:
 .(c
  typedef struct complex_data { double real; double imag; } complex;
@@ -448,7 +448,7 @@ part of the predefined \fBcomplex\fR structure.
 Type conversion between complex data types and integer or float data
 types are automatically supported in the CGCTarget class by one extra
 copying of buffers. The good thing is that the user doesn't have to
-worry about type conversion. Moreover, the same application gragh
+worry about type conversion. Moreover, the same application graph
 can be run in the simulation SDF domain and in the C-code
 generation domain by just changing the domain in the user interface.
 .pp
@@ -465,7 +465,7 @@ compiler and block boundaries may be dispersed after compilation, it
 is almost impossible to estimate the exact execution time of the star.
 Thus, we have to
 minimize the efficiency loss by giving rough but good estimates of
-excution times.  To make matters worse, the relative execution times of
+execution times.  To make matters worse, the relative execution times of
 stars heavily depend on which compiler we use and which architecture
 we target. In this release, we do not include any scheme to decide the
 relative execution times of stars in a target-specific way. Currently,
@@ -477,7 +477,7 @@ for the target of interest.
 
 .H1 "Multi-Processor Targets"
 .pp
-An examplary multi-processor target,
+An exemplary multi-processor target,
 .c CGCMultiTarget ,
 .Id "CGCMultiTarget, class"
 is implemented in the target directory. It models multiple computers
@@ -495,10 +495,10 @@ are fixed to be the default CGCTargets, the
 .c childType
 parameter is declared as a non-settable state. To make socket connections,
 we need to specify the port numbers for each computers. As a temporary
-workaround, we provide a parameter, called
+work-around, we provide a parameter, called
 .c portNumber ,
 in the target class. We use the consecutive port numbers starting 
-from this number for connections. This workaround works as long as no
+from this number for connections. This work-around works as long as no
 port number for a connection is already used in the pair of computers 
 on the connection.
 .pp
