@@ -63,13 +63,13 @@ void SubC50Target :: initStates() {
 }
 
 /*virtual*/ void SubC50Target :: mainLoopCode() {
-	myCode << "	call\n" << "ptolemyMain\n";
+	myCode << "\tret\n" << "ptolemyMain\n";
 	scheduler()->compileRun();
-	myCode << "	call\n";
+	myCode << "\tret\n";
 }
 
 void SubC50Target :: headerCode () {
-	myCode << "t.text\n" << "ptolemyInit\n";
+	myCode << ".text\n" << "ptolemyInit\n";
 	C50Target :: headerCode();
 };
 
