@@ -1,4 +1,4 @@
-# Makefile for Tycho Ptolemy Editors test directory
+# Makefile for Tycho Ptolemy Edit test directory
 #
 # @(#)makefile	$Id$
 # Author: Christopher Hylands
@@ -33,7 +33,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/editors/test
+VPATH =		$(ROOT)/typt/edit/test
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk

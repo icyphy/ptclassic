@@ -47,7 +47,7 @@
 
 # Make sure that the required packages are loaded
 package require tycho.util.tytest
-package require tycho.typt.editors
+package require tycho.typt.edit
 
 # Uncomment this to get a full report, or set in your Tcl shell window.
 # set VERBOSE 1
