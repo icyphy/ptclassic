@@ -130,7 +130,7 @@ Academic Press, New York, 1977.
 		desc {
 Whether or not to put the matrix into Smith canonical form. }
 	}
-	ccinclude { "Matrix.h", "Fraction.h" }
+	ccinclude { "Matrix.h", "Fraction.h", "ptdspExtendedGCD.h" }
 	header {
 #define intmin(m,n)             ( ( (m) < (n) ) ? (m) : (n) )
 #define intabs(m)               ( ( (m) > 0 ) ? (m) : (-(m)) )
@@ -167,45 +167,6 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 	}
 
 	return;
-}
-
-// Define extendedGCD
-int extendedGCD( int a, int b, int *alpha, int *beta)
-{
-	int lambdavalue = 0, muvalue = 0;
-	int gcdvalue = gcd(a, b);
-	int anorm = a / gcdvalue;
-	int bnorm = b / gcdvalue;
-
-	if ( intabs(a) <= intabs(b) ) {
-	  int mumax = intabs(anorm);
-	  for ( int mu = 0; mu < mumax; mu++ ) {
-	    int lambdap = ( 1 - mu * bnorm );
-	    int lambda = lambdap / anorm;
-	    if ( lambdap == (lambda * anorm) ) {
-	      lambdavalue = lambda;
-	      muvalue = mu;
-	      break;
-	    }
-	  }
-	}
-	else {
-	  int lambdamax = intabs(bnorm);
-	  for ( int lambda = 0; lambda < lambdamax; lambda++ ) {
-	    int mup = ( 1 - lambda * anorm );
-	    int mu = mup / bnorm;
-	    if ( mup == ( mu * bnorm ) ) {
-	      muvalue = mu;
-	      lambdavalue = lambda;
-	      break;
-	    }
-	  }
-	}
-
-	*alpha = lambdavalue;
-	*beta = muvalue;
-
-	return(gcdvalue);
 }
 
 	}
@@ -378,7 +339,7 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 	    for ( i = 1; i < r; i++ ) {
 	      int lcmvalue, lambda, mu;
 	      int di = d[i][i];
-	      int gcdvalue = extendedGCD(lastd, di, &lambda, &mu);
+	      int gcdvalue = Ptdsp_ExtendedGCD(lastd, di, &lambda, &mu);
 	      if ( gcdvalue == lastd ) {
 		lastd = di;
 		lasti = i;
