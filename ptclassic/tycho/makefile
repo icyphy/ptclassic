@@ -76,7 +76,7 @@ makefiles all clean depend realclean checkjunk sccsinfo sccsclean itcldocs \
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		if [ $$x = "java" ]; then \
-			if [ ! -d $(JAVAHOME) ]; then \
+			if [ ! -d "$(JAVAHOME)" ]; then \
 				echo "JAVAHOME = $(JAVAHOME), which does not exist, so no need to run in the java directory"; \
 				echo "mk/tycommon.mk contains the line that sets JAVAHOME"; \
 				continue; \
