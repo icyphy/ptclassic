@@ -209,7 +209,7 @@ StringList :: newCopy () const {
 	const char* p;
 	while ((p = next++) != 0) {
 		// copy string including terminator
-		while (*s++ = *p++);
+		while ( (*s++ = *p++) );
 		// advanced too far; back up by one
 		s--;
 	}
