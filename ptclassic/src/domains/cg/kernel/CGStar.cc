@@ -427,7 +427,7 @@ int CGStar :: deferrable() {
 			CGStarPortIter nextp(*this);
 			CGPortHole *p;
 			while ((p = nextp++) != 0) {
-				if (p->isItOutput()) {
+				if (p->isItOutput() && (!p->atBoundary())) {
 				    CGStar* s = (CGStar*) p->far()->parent();
 				    if (s->isItFork()) {
 					cascadeForks.append(s);
