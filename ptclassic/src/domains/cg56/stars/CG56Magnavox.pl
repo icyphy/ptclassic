@@ -5,94 +5,147 @@ defstar {
 DSP56000 -  A combined input/output star for the Magnavox CD player.
 	}
 	version { $Id$ }
-	author { J. Pino, ported from Gabriel }
+	author { Chih-Tsung Huang, J. Pino, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
 DSP56000 -  A combined input/output star for the Magnavox CD player.
 	}
 	input {
-		name {in1}
+		name {input1}
 		type {FIX}
 	}
 	input {
-		name {in2}
+		name {input2}
 		type {FIX}
 	}
 	output {
-		name {out2}
+		name {output1}
 		type {FIX}
 	}
 	output {
-		name {out2}
+		name {output2}
 		type {FIX}
 	}
 	state {
-		name {forceInterrupts}
-		type {int}
-		default {NO}
+		name { forceInterrupts }
+		type { string }
 		desc { If YES use interrupts, otherwise use polling. }
-		
+		default { "No" }		
+	}
+        state {
+		name { interruptBufferSize }
+                type { string }
+                desc { size of interrupt buffer }
+             	default { "default" }
+ 	}
+	state {
+		name { abortOnRealTimeError }
+		type { string }
+		desc { if yes, abort on rreal time error }
+		default { "yes" }
 	}
 	state {
-		name {in}
-		type {FIXARRAY}
-		default {""}
-		desc { Zero Padding. }
-		attributes { A_NONSETTABLE|A_ROM|A_XMEM }
+		name { starInBufptr }
+		type { fix }
+  		desc { internal }
+		default { 0 }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
 	}
 	state {
-	// Not Supported Yet
-		name {decimation}
-		type {int}
-		default {1}
-		desc {Decimation ratio.}
-		attributes { A_NONSETTABLE }
+		name { starOutBufptr }
+		type { fix }
+  		desc { internal }
+		default { 0 }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
 	}
 	state {
-	// Not Supported Yet
-		name {decimationPhase}
-		type {int}
-		default {0}
-		desc {Downsampler phase.}
-		attributes { A_NONSETTABLE }
+		name { saveReg }
+		type { fix }
+  		desc { internal }
+		default { 0 }
+ 		attributes { A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
 	}
 	state {
-	// Not Supported Yet
-		name {interpolation}
-		type {int}
-		default {1}
-		desc {Interpolation ratio.}
-		attributes { A_NONSETTABLE }
+		name { inIntBuffer }
+		type { fix }
+  		desc { internal }
+		default { 0 }
+ 		attributes { A_CIRC|A_NONSETTABLE|A_NONCONSTANT|A_XMEM }
 	}
-	protected {
-		int phaseLength;
+	state {
+		name { outIntBuffer }
+		type { fix }
+  		desc { internal }
+		default { 0 }
+ 		attributes { A_CIRC|A_NONSETTABLE|A_NONSETTABLE|A_XMEM }
 	}
-	start {
-		int d = decimation;
-		int i = interpolation;
-		int dP = decimationPhase;
-		input.setSDFParams(d, d+1+(taps.size()/i));
-		output.setSDFParams(i, i-1);
-		if (dP >= d) {
-			Error::abortRun (*this, ": decimationPhase too large");
-			return;
-		}
-		phaseLength = ceil(double(int(taps.size()))/double(i));
-	}
-	codeblock (fir1) {
-        move	#$addr(input),r5
-        move	#$addr(taps),r0
-	nop
-        clr	a	$mem(input):(r5)-,x1	$mem(taps):(r0)+,y1
-        rep	#$size(taps)
-        mac	x1,y1,a	$mem(input):(r5)-,x1	$mem(taps):(r0)+,y1
-	move	a,$ref(output)
-	}
+ 	
+        codeblock(pollingInit) {
+; Polling version
+; Configure SSI Port: Control Register A
+        bset    #m_wl1,x:m_cra          ; SSI word length = 16
+; Configure SSI Port: Control Register B
+        bset    #m_fsl,x:m_crb          ; SSI TX & RX frame-sync pulse width = \
+1 bit
+        bset    #m_syn,x:m_crb          ; SSI TX & RX Synchronous
+        bset    #m_ste,x:m_crb          ; SSI Transmit enable
+        bset    #m_sre,x:m_crb          ; SSI Receive enable
+; Configure Port C pins 8-5 as SSI pins
+        bset    #8,x:m_pcc
+        bset    #7,x:m_pcc
+        bset    #6,x:m_pcc
+        bset    #5,x:m_pcc
+        }
+
+        codeblock(abortyes) {
+; Polling version
+; Check for receiver overrun error
+        jclr    #m_roe,x:m_sr,$label(cont)
+        move    #$$123052,y0
+        jmp     ERROR
+$label(cont)
+        }
+
+        codeblock(polling) {
+; Process Channel One
+$label(loopOne)
+        jclr    #m_rdf,x:m_sr,$label(loopOne)
+        movep   x:m_rx,x0
+        move    x0,$ref(output1)
+        move    $ref(input1),x0
+        movep   x0,x:m_tx
+; Process Channel Two
+$label(loopTwo)
+        jclr    #m_rdf,x:m_sr,$label(loopTwo)
+        movep   x:m_rx,x0
+        move    x0,$ref(output2)
+        move    $ref(input2),x0
+        movep   x0,x:m_tx
+        }
+
+        initCode {
+        const char* f = forceInterrupts;
+	     if (f[0]=='n' || f[0]=='N')
+	          gencode(pollingInit);
+	}	   
+
 	go {
-		gencode(fir1);
-	}
+        const char* p = forceInterrupts;
+        const char* q = abortOnRealTimeError;
+    	      if (p[0]=='n' || p[0]=='N') {
+                  // polling
+                  if (q[0]=='y' || q[0]=='Y') 
+	               gencode(abortyes);
+                  gencode(polling);
+	      }
+        }
 	execTime {
-		return 1;
+                  return 21;
 	}
+        wrapup {
+        const char* i = forceInterrupts;               
+  //  	      if (i[0]=='y' || i[0]=='Y') 
+                  // interrupts
+        }
 }
