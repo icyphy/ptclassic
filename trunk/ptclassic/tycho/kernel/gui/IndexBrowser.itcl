@@ -194,6 +194,6 @@ body ::tycho::IndexBrowser::processItem {id} {
 	set file $CWD/$file
     }
 
-    after idle [code [list ::tycho::File::hyperJump $file $point]]
+    after idle [list ::tycho::File::hyperJump $file $point]
     return 1
 }

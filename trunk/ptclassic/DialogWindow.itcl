@@ -343,7 +343,7 @@ body ::tycho::DialogWindow::addButton {args} {
 #
 body ::tycho::DialogWindow::default {id} {
     eval [list $itk_component(bbox) default $id]
-    bind $itk_component(hull) <Return> "%Q invoke $id; break"
+    bind $itk_component(hull) <Return> "$this invoke $id; break"
 }
 
 ######################################################################
@@ -365,11 +365,11 @@ body ::tycho::DialogWindow::default {id} {
 # DialogWindow, the following sequence in the constructor will work,
 # for example:
 # <pre>
-#     $obj configure -okcommand "[info which $this] mymethod"
+#     $obj configure -okcommand "$this mymethod"
 #     addButton b -text "Push Me" \
-#             -command "[info which $this] execCommand -okcommand"
+#             -command "$this execCommand -okcommand"
 # </pre>
-# The "info which" commands return a fully qualified name for "$this"
+# The "this" variable returns a fully qualified name for the object
 # that includes the namespace context.
 #
 body ::tycho::DialogWindow::execCommand {option args} {

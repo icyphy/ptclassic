@@ -194,36 +194,36 @@ body ::tycho::EditSearch::constructor {args} {
     eval itk_initialize $args
 
     bind $itk_component(hull) <Control-s> \
-	    [code "$this configure -backwards 0; $this find"]
+	    "$this configure -backwards 0; $this find"
     bind $itk_component(hull) <Control-r> \
-	    [code "$this configure -backwards 1; $this find"]
+	    "$this configure -backwards 1; $this find"
 
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class
     # definition (as a default) because "$this" is known here.
     if {$itk_option(-findcommand) == {}} {
-	configure -findcommand [code "$this find"]
+	configure -findcommand "$this find"
     }
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Find <Ret>} \
-	    -command [code "$this execCommand -findcommand"]
+	    -command "$this execCommand -findcommand"
 
     addButton clearfind -text {Clear Marks} \
-	    -command [code "$this clearFindMatch"]
+	    -command "$this clearFindMatch"
 
     if {$itk_option(-nochange) == 0} {
 
 	if {$itk_option(-chfindcommand) == {}} {
-	    configure -chfindcommand [code "$this changeAndFind"]
+	    configure -chfindcommand "$this changeAndFind"
 	}
 
 	addButton change -text {Change<M-%>} \
-		-command [code "$this change"]
+		-command "$this change"
 	addButton changeandfind -text {Change&Find} \
-		-command [code "$this execCommand -chfindcommand"]
+		-command "$this execCommand -chfindcommand"
 
-	bind $itk_component(hull) <Meta-percent> [code "$this change"]
+	bind $itk_component(hull) <Meta-percent>  "$this change"
 
 	# Add an option to change all matches
 	itk_component add changeall {
@@ -339,13 +339,13 @@ body ::tycho::EditSearch::find {{start {}}} {
 	if {$backwardssw} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the bottom?"] {
-		after idle [code "$this focusin"]
+		after idle "$this focusin"
 		return [find end]
 	    }
 	} {
 	    if [::tycho::askuser \
 		    "Not found.  Start search again at the top?"] {
-		after idle [code "$this focusin"]
+		after idle "$this focusin"
 		return [find 1.0]
 	    }
 	}
