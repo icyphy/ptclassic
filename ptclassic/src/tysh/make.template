@@ -141,15 +141,15 @@ TY_OBJS =		$(OBJS) $(PTCL_OBJS) \
 			$(ALLSTARS) $(ALLTARGETS)
 
 PTINY_LIBS =		$(PTINY__LIBS) \
-			$(ITCL_LIBSPEC) \
+			$(ITCL_LIBSPEC) $(ITK_LIBSPEC) \
 			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
 PTRIM_LIBS =		$(PTRIM__LIBS) \
-			$(ITCL_LIBSPEC) \
+			$(ITCL_LIBSPEC) $(ITK_LIBSPEC) \
 			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
 TY_LIBS = 		$(LIBS) \
-			$(ITCL_LIBSPEC) \
+			$(ITCL_LIBSPEC) $(ITK_LIBSPEC) \
 			$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
 # Allow for user specified overriding definitions.  Do not declare
