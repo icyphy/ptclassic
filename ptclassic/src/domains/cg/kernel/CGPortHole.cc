@@ -18,7 +18,8 @@ Code for CG-type portholes and multiportholes.
 **************************************************************************/
 
 // constructor
-CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0) {}
+CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
+	embeddingFlag(0) {}
 
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {

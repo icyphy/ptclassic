@@ -74,8 +74,14 @@ public:
 	// The buffer assigned to this porthole is embedded in a buffer:
 	// ex) input.embed(output) means that the buffer of the input
 	// porthole contains the buffer of the output porthole.
-	void embed(CGPortHole& p) { p.embeddedPort = this; }
+	void embed(CGPortHole& p, int i = -1) { p.embeddedPort = this; 
+			embeddingFlag = TRUE; p.embeddedLoc = i; }
 	CGPortHole* embedded() { return embeddedPort; }
+	int embedding() { return embeddingFlag; }
+
+	// return where embedded. return -1 if not decided yet.
+	int whereEmbedded() { return embeddedLoc; }
+	void embedHere(int i) { embeddedLoc = i; }
 
 	// return true if I am a fork input
 	int fork() const { return forkDests.size();}
@@ -95,6 +101,9 @@ protected:
 	
 	// Where I am embedded.
 	CGPortHole* embeddedPort;
+	int embeddedLoc;
+	// Am I embedding ports?
+	int embeddingFlag;
 };
 
 	///////////////////////////////////////////
