@@ -65,6 +65,7 @@ PL_SRCS= \
  CG56Mux.pl \
  CG56Mpy.pl \
  CG56MpyInt.pl \
+ CG56MpyRx.pl \
  CG56MpyShift.pl \
  CG56Neg.pl \
  CG56Pad.pl \
@@ -86,9 +87,11 @@ PL_SRCS= \
  CG56Rotate.pl \
  CG56RectToCx.pl \
  CG56SSI.pl \
+ CG56SSISkew.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
  CG56Sin.pl \
+ CG56Skew.pl \
  CG56Sqr.pl \
  CG56Sqrt.pl \
  CG56Sub.pl \
