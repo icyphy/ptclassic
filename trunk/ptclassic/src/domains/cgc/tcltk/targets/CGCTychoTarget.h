@@ -50,6 +50,9 @@ public:
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
  
+  	int compileCode();
+	int runCode();
+
 protected:
         StringState scriptFile;
 
