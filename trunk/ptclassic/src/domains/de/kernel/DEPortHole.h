@@ -120,9 +120,6 @@ friend class MultiInDEPort;
         int moreData;
 
 public:
-	int getcomplete();
-	SequentialList *gettriggerList();
-
 	int isItInput () const {return TRUE; }
 
 	// Get particles from global queue and set the timeStamp.
