@@ -292,19 +292,9 @@ $(JDIST).tar.gz:  $(JDIST_EX)
 $(JDIST).zip:
 	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
 
-# Create a distribution and install it.
-# This rule is particular to our local installation
-JDESTDIR = /vol/ptolemy/pt0/ftp/pub/ptolemy/www/java
 
-updatewebsite: $(JDISTS)
-	@echo "Updating website"
-	(cd $(JDESTDIR); rm -rf $(JPACKAGE); mkdir $(JPACKAGE))
-	cp $(JDISTS) $(JDESTDIR)/$(JPACKAGE)
-	(cd $(JDESTDIR); gtar -zxf $(JPACKAGE)/$(JDIST).tar.gz;\
-	 chmod g+ws $(JPACKAGE))
-	(cd $(JDESTDIR)/$(JPACKAGE); chmod g+w $(JDISTS))
-
-installjdist:
+# Build sources in a form suitable for releasing
+buildjdist:
 	$(MAKE) sources
 	$(MAKE) realclean
 	@echo "Compile any classes that require JDK1.1"
@@ -314,7 +304,21 @@ installjdist:
 	$(MAKE) install
 	$(MAKE) jhtml
 	$(MAKE) jdist
+
+# Create a distribution and install it.
+# This rule is particular to our local installation
+JDESTDIR = /vol/ptolemy/pt0/ftp/pub/ptolemy/www/java
+installjdist:
+	$(MAKE) buildjdist
 	$(MAKE) updatewebsite
+
+updatewebsite: $(JDISTS)
+	@echo "Updating website"
+	(cd $(JDESTDIR); rm -rf $(JPACKAGE); mkdir $(JPACKAGE))
+	cp $(JDISTS) $(JDESTDIR)/$(JPACKAGE)
+	(cd $(JDESTDIR); gtar -zxf $(JPACKAGE)/$(JDIST).tar.gz;\
+	 chmod g+ws $(JPACKAGE))
+	(cd $(JDESTDIR)/$(JPACKAGE); chmod g+w $(JDISTS))
 
 ##############
 # Rules for testing 
