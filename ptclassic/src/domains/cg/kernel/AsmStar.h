@@ -15,6 +15,7 @@ $Id$
 
 #include "Attribute.h"
 #include "AsmConnect.h"
+#include "AsmTarget.h"
 // FixSample is included so AsmStars can use FIX-type ports
 #include "FixSample.h"
 #define		MAX_NUM_LABELS	10
@@ -107,6 +108,9 @@ protected:
 	// for accessing an element in a porthole buffer.
 	unsigned addrWithOffset(const char*, const char*);
 
+ 	// Lookup the unique global label name for the local label
+	StringList label(const char* name);
+
 	// For generation of error messages
 	void codeblockError(const char* p1, const char* p2 = "");
 
@@ -134,25 +138,22 @@ protected:
 	// baseclass method does not limit.
 	virtual StringList printFixValue(double) const;
 
+	// Pointer to target
+	AsmTarget* myTarget() { return (AsmTarget*)targetPtr; }
+
 private:
 	// State entry list.  This stores the addresses allocated to each
 	// State.
 	StateAddrEntry* addrList;
 	
 	// List of all local star labels
-	static char labels[MAX_NUM_LABELS][MAX_LABEL_LEN];
+	char labels[MAX_NUM_LABELS][MAX_LABEL_LEN];
 
 	// Total Number of Labels generated.
-	static int numLabels;
-
-	// Total Number of Labels generated.
-	static int lastLocalLabel;
+	int lastLocalLabel;
 
 	// Reset local star labels
 	void resetLabels(){ lastLocalLabel = -1; }
-
- 	// Lookup the unique global label name for the local label
-	StringList label(const char* name);
 };
 
 class AsmStarPortIter : public BlockPortIter {
