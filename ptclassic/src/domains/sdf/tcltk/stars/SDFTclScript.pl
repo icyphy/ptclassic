@@ -98,7 +98,7 @@ delim $$
 		// Standardized interface to Tcl
 		TclStarIfc tcl;
 	}
-	setup {
+	begin {
 	    tcl.setup(this,input.numberPorts(),
 			output.numberPorts(), (const char*)tcl_file);
 	}

@@ -80,9 +80,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    InfString sliderName;
 	    InfString command;
 
-	    // Keep track of whether the setup routine has run already.
-	    // Avoid recreating the window if so.
-	    int setupRun;
+	    // initial slider position
+	    int position;
 	}
 	constructor {
 	    // Name of the reset button
@@ -91,7 +90,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    butName += myInst;
 	    sliderName = "sdfLMSCxTkPlotscale";
 	    sliderName += myInst;
-	    setupRun = 0;
+	    position = 0;
 	}
 	destructor {
 	    // exit if no interpreter
@@ -109,7 +108,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    invCount = 0;
     
 	    // Compute slider position from parameters
-	    int position = int(0.5 + 100*(double(stepSize)
+	    position = int(0.5 + 100*(double(stepSize)
 			    - double(stepSizeLow))/(double(stepSizeHigh)
 			    - double(stepSizeLow)));
 
@@ -120,49 +119,49 @@ limitation of liability, and disclaimer of warranty provisions.
         	    return;
 	    }
 
-	    if (setupRun == 0 || !bg.windowExists()) {
-		setupRun = 1;
-
-		InfString idCopy((const char*)identifier);
-		InfString geoCopy((const char*)geometry);
-	        if(bg.setup(this,(char*)idCopy,2,taps.size(),
-		    double(fullScale), - double(fullScale), (char*)geoCopy,
-		    double(width), double(height)) == 0) {
-			Error::abortRun(*this, "Cannot create bar chart");
-			return;
-	        }
-
-		// Register the callback functions with Tcl
-		command = sliderName;
-		Tcl_CreateCommand (ptkInterp, (char*)command, setStep,
-			(ClientData)this, NULL);
-		command = butName;
-		Tcl_CreateCommand(ptkInterp, (char*)command, reset,
-			(ClientData)this, NULL);
-
-	        // Put controls entries into the window
-	        // First, a button to reset the taps
-	        command = "ptkMakeButton ";
-	        command += bg.winName;
-		command += ".middle ";
-	        command += butName;
-		command += " {Reset taps} ";
-	        command += butName;
-	        Tcl_GlobalEval(ptkInterp, (char*)command);
-	    	
-	        // Next, a slider to control the step size
-	        command = "ptkMakeScale ";
-	        command += bg.winName;
-		command += ".low ";
-	        command += sliderName;
-		command += " {step size} ";
-	        command += position;
-	        command += " ";
-	        command += sliderName;
-	        if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
-		    Error::warn(*this,"Cannot make step size control");
-    
+	    SDFLMSCx :: setup();
+	}
+	begin {
+	    InfString idCopy((const char*)identifier);
+	    InfString geoCopy((const char*)geometry);
+	    if ( bg.setup(this,(char*)idCopy,2,taps.size(),
+			  double(fullScale), - double(fullScale),
+			  (char*)geoCopy, double(width),
+			  double(height)) == 0 ) {
+		Error::abortRun(*this, "Cannot create bar chart");
+		return;
 	    }
+
+	    // Register the callback functions with Tcl
+	    command = sliderName;
+	    Tcl_CreateCommand(ptkInterp, (char*)command, setStep,
+			      (ClientData)this, NULL);
+	    command = butName;
+	    Tcl_CreateCommand(ptkInterp, (char*)command, reset,
+			      (ClientData)this, NULL);
+
+	    // Put controls entries into the window
+	    // First, a button to reset the taps
+	    command = "ptkMakeButton ";
+	    command += bg.winName;
+	    command += ".middle ";
+	    command += butName;
+	    command += " {Reset taps} ";
+	    command += butName;
+	    Tcl_GlobalEval(ptkInterp, (char*)command);
+	    	
+	    // Next, a slider to control the step size
+	    command = "ptkMakeScale ";
+	    command += bg.winName;
+	    command += ".low ";
+	    command += sliderName;
+	    command += " {step size} ";
+	    command += position;
+	    command += " ";
+	    command += sliderName;
+	    if ( Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK )
+		Error::warn(*this,"Cannot make step size control");
+
 	    // display the slider value
 	    command = bg.winName;
 	    command += ".low.";
@@ -170,8 +169,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    command += ".value configure -text {";
 	    command += double(stepSize);
 	    command += "}";
-	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
-		    Error::warn(*this,"Cannot update step size display");
+	    if ( Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK )
+		Error::warn(*this,"Cannot update step size display");
 
 	    // set the scale position
 	    command = bg.winName;
@@ -179,10 +178,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    command += sliderName;
 	    command += ".scale set ";
 	    command += position;
-	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
-		    Error::warn(*this,"Cannot set step size slider position");
+	    if ( Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK )
+		Error::warn(*this,"Cannot set step size slider position");
 
-	    SDFLMSCx :: setup();
+	    SDFLMSCx :: begin();
 	}
 	go {
 	    SDFLMSCx :: go();
@@ -208,8 +207,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    arglist { "()" }
 	    code {
 		for(int i=0; i < taps.size(); i++)
-		    if((bg.update(1,i,imag(taps[i])) == 0) ||
-		       (bg.update(0,i,real(taps[i])) == 0))
+		    if ( (bg.update(1,i,imag(taps[i])) == 0) ||
+		         (bg.update(0,i,real(taps[i])) == 0) )
 			Error::abortRun(*this,"Cannot update bar graph.");
 	    }
 	}
@@ -220,7 +219,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    arglist { "(char *newValue)" }
 	    code {
 		int position;
-		if(sscanf(newValue, "%d", &position) != 1) {
+		if (sscanf(newValue, "%d", &position) != 1) {
 		    Error::abortRun(*this,"Invalid value for step size");
 		    return;
 		}
@@ -234,7 +233,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		command += ".value configure -text {";
 		command += double(stepSize);
 		command += "}";
-		if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
+		if ( Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK )
 		    Error::abortRun(*this,"Cannot update step size display");
 	    }
 	}

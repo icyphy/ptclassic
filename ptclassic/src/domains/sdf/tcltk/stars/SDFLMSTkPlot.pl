@@ -80,9 +80,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    InfString sliderName;
 	    InfString command;
 
-	    // Keep track of whether the setup routine has run already.
-	    // Avoid recreating the window if so.
-	    int setupRun;
+	    // initial position of slider
+	    int position;
 	}
 	constructor {
 	    // Name of the reset button
@@ -91,7 +90,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    butName += myInst;
 	    sliderName = "sdfLMSTkPlotscale";
 	    sliderName += myInst;
-	    setupRun = 0;
+	    position = 0;
 	}
 	destructor {
 	    // exit if no interpreter
@@ -109,7 +108,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    invCount = 0;
     
 	    // Compute slider position from parameters
-	    int position = int(0.5 + 100*(double(stepSize)
+	    position = int(0.5 + 100*(double(stepSize)
 			    - double(stepSizeLow))/(double(stepSizeHigh)
 			    - double(stepSizeLow)));
 
@@ -119,49 +118,50 @@ limitation of liability, and disclaimer of warranty provisions.
 			"Step size is out of range of control");
         	    return;
 	    }
-	    if (setupRun == 0 || !bg.windowExists()) {
-		setupRun = 1;
 
-		InfString idCopy((const char*)identifier);
-		InfString geoCopy((const char*)geometry);
-	        if(bg.setup(this,(char*)idCopy,1,taps.size(),
-		    double(fullScale), - double(fullScale), (char*)geoCopy,
-		    double(width), double(height)) == 0) {
-			Error::abortRun(*this, "Cannot create bar chart");
-			return;
-		}
-
-		// Register the callback functions with Tcl
-		command = sliderName;
-		Tcl_CreateCommand (ptkInterp, (char*)command, setStep,
-			(ClientData)this, NULL);
-		command = butName;
-		Tcl_CreateCommand(ptkInterp, (char*)command, reset,
-			(ClientData)this, NULL);
-
-	        // Put controls entries into the window
-	        // First, a button to reset the taps
-	        command = "ptkMakeButton ";
-	        command += bg.winName;
-		command += ".middle ";
-	        command += butName;
-		command += " {Reset taps} ";
-	        command += butName;
-	        Tcl_GlobalEval(ptkInterp, (char*)command);
-	    	
-	        // Next, a slider to control the step size
-	        command = "ptkMakeScale ";
-	        command += bg.winName;
-		command += ".low ";
-	        command += sliderName;
-		command += " {step size} ";
-	        command += position;
-	        command += " ";
-	        command += sliderName;
-	        if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
-		    Error::warn(*this,"Cannot make step size control");
-    
+	    SDFLMS :: setup();
+	}
+	begin {
+	    InfString idCopy((const char*)identifier);
+	    InfString geoCopy((const char*)geometry);
+	    if ( bg.setup(this,(char*)idCopy,1,taps.size(),
+			  double(fullScale), - double(fullScale),
+			  (char*)geoCopy, double(width),
+			  double(height)) == 0) {
+		Error::abortRun(*this, "Cannot create bar chart");
+		return;
 	    }
+
+	    // Register the callback functions with Tcl
+	    command = sliderName;
+	    Tcl_CreateCommand(ptkInterp, (char*)command, setStep,
+			      (ClientData)this, NULL );
+	    command = butName;
+	    Tcl_CreateCommand(ptkInterp, (char*)command, reset,
+			      (ClientData)this, NULL);
+
+	    // Put controls entries into the window
+	    // First, a button to reset the taps
+	    command = "ptkMakeButton ";
+	    command += bg.winName;
+	    command += ".middle ";
+	    command += butName;
+	    command += " {Reset taps} ";
+	    command += butName;
+	    Tcl_GlobalEval(ptkInterp, (char*)command);
+	    	
+	    // Next, a slider to control the step size
+	    command = "ptkMakeScale ";
+	    command += bg.winName;
+	    command += ".low ";
+	    command += sliderName;
+	    command += " {step size} ";
+	    command += position;
+	    command += " ";
+	    command += sliderName;
+	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
+		Error::warn(*this,"Cannot make step size control");
+
 	    // display the slider value
 	    command = bg.winName;
 	    command += ".low.";
@@ -170,7 +170,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    command += double(stepSize);
 	    command += "}";
 	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
-		    Error::warn(*this,"Cannot update step size display");
+		Error::warn(*this,"Cannot update step size display");
 
 	    // set the scale position
 	    command = bg.winName;
@@ -179,9 +179,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    command += ".scale set ";
 	    command += position;
 	    if(Tcl_GlobalEval(ptkInterp, (char*)command) != TCL_OK)
-		    Error::warn(*this,"Cannot set step size slider position");
+		Error::warn(*this,"Cannot set step size slider position");
 
-	    SDFLMS :: setup();
+	    SDFLMS :: begin();
 	}
 	go {
 	    SDFLMS :: go();
