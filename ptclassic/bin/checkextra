@@ -1,8 +1,10 @@
 #! /bin/csh -f
 # $Id$
-# print a list of "extra" files.
-# print out the names of any files that are not significant in the first
-# 13 characters.  Linux has this problem with GNU ar.
+# * print a list of "extra" files.
+# * print out the names of any files that are not significant in the first
+#   13 characters.  Linux has this problem with GNU ar.
+# * If the name of the current directory, print out the names of any icons 
+#   that don't have contents; or schematics; 
 
 set res = 0
 set prefix = ""
@@ -18,11 +20,41 @@ foreach x ($*)
 end
 
 
-#gfold is GNU fold
+# Check for filenames that are not unique in the first 13 chars
+# gfold is GNU fold
 echo $files | gfold -s | checklen $toolongprefix
 if ($status == 1) then
 	set res = 1
 endif
+
+# If this is a stars directory check for empty ../icons
+set curdir = `pwd`
+set thisdir = `basename $curdir`
+set iconretval = 0
+if ( "$thisdir" == "stars" ) then
+	if ( -d ../icons ) then
+		echo "Checking for bogus icons in ../icons"
+		set badiconfile = /tmp/badicons$$
+		rm -f $badiconfile
+		foreach icon ( ../icons/* )
+			if ( "`basename $icon .ps`" != "`basename $icon`" ) then
+				continue
+			endif
+			if ( ! -f $icon/schematic/contents\; || ! -f $icon/schematic/contents\;) then
+				echo -n "`pwd`/$icon " >> $badiconfile
+			endif
+		end
+		if ( -f $badiconfile ) then
+			echo -n "The following icons should be removed: "
+			cat $badiconfile
+			echo "ls -lR:"
+			ls -lR `cat $badiconfile`
+			set iconretval = 1
+		endif
+		rm -f $badiconfile
+	endif
+endif
+
 
 ls . > /tmp/cj1$$
 
@@ -35,6 +67,10 @@ if ($#files > 0) then
 endif
 
 rm -f /tmp/cj[12]$$
+
+if ( $iconretval != 0 ) then
+	exit $iconretval
+endif
 
 exit $res
 endif
