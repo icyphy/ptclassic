@@ -14,26 +14,6 @@
 ;	I_HSTCM10 (get) I_HSTCM11 (putX) I_HSTCM12 (putY) I_HSTCM13 (putP)
 ; Also, qckMon uses x:m_pbddr for various flag bits.
 
-; Host port flow control interrupt handlers
-
-
-;
-; DMA request interupts.  These are hosed beyond belief.  Need to
-; convert to newer (count-based) style of interupts.
-;
-	org	p:i_hstcm+2		; Host command 1
-STARTR	bset	#0,x:m_pbddr		; Allow DSP writes to host port
-	nop
-	org	p:i_hstcm+4		; Host command 2
-STOPR	bclr	#0,x:m_pbddr		; Disallow DSP writes to host port
-	nop
-	org	p:i_hstcm+6		; Host command 3
-STARTW	bset	#1,x:m_pbddr		; Allow DSP reads from host port
-	nop
-	org	p:i_hstcm+8		; Host command 4
-STOPW	bclr	#1,x:m_pbddr		; Disallow DSP reads from host port
-	nop
-
 ;
 ; this is used by some simulator targets
 ;
