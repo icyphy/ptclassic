@@ -85,10 +85,17 @@ InterpUniverse :: ~InterpUniverse() {
 
 // Modify initTarget to invoke begin methods
 void InterpUniverse :: initTarget() {
-        // The following invokes the scheduler
-        Runnable::initTarget();
-        // The following invokes the begin methods of the stars
-        if (!SimControl::haltRequested()) myTarget()->begin();
+  if (myTarget()->resetRequested()) {
+    reset();
+    Target *newTarget = (Target*) myTarget()->clone();
+    // newTarget->copyStates(*myTarget());
+    LOG_DEL; delete myTarget();
+    setMyTarget(newTarget);
+  }
+  // The following invokes the scheduler
+  Runnable::initTarget();
+  // The following invokes the begin methods of the stars
+  if (!SimControl::haltRequested()) myTarget()->begin();
 }
 
 // isa

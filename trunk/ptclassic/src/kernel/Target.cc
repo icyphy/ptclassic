@@ -56,7 +56,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // constructor
 Target::Target(const char* nam, const char* starClass,const char* desc) :
-Block(nam,0,desc),
+Block(nam,0,desc),resetFlag(0),
 children(0), link(0), nChildren(0), sched(0), gal(0), dirFullName(0) {
 	starTypes = starClass;
 }
@@ -88,6 +88,25 @@ StringList Target::displaySchedule() {
 
 void Target::setGalaxy(Galaxy& g) {
 	gal = &g;
+}
+
+// With these methods, we enable a scheduler or a target to
+// reset the target & galaxy description back to that stored
+// in the action list.  See InterpUniverse::initTarget and
+// InterpGalaxy::reset for more details
+void Target::requestReset() {
+    //Handle case of being a child target
+    if (parent() && parent()->isA("Target")) 
+	((Target*)parent())->requestReset();
+    //Handle case of being inside a wormhole
+    if (galaxy() && galaxy()->parent() && galaxy()->parent()->isItWormhole() &&
+	galaxy()->parent()->target())
+	galaxy()->parent()->target()->requestReset();
+    resetFlag = 1;
+}
+
+int Target::resetRequested() {
+    return resetFlag;
 }
 
 // default setup: set all stars to have me as their Target, then
