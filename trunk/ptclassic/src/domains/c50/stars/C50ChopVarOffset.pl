@@ -47,7 +47,7 @@ limitation of liability, an disclaimer of warranty provisions.
 	mar	*,ar1			; arp = 1
 	lacc	#@(write),0		
 	sacb				; accb = nwrite
-	setc	sxm			; set sign xtension mode
+	setc	sxm			; set sign extension mode
 	.if	@(int(C50Chop::cmplx))			
 	lacc	*,1,ar4			; if input is cmplx double offset
 	.else
@@ -94,7 +94,7 @@ $label(skpTrl)
 	exectime{
 	// The execution time returned is the maximum execution time for 
 	// the star since the actual execution time is determined by 
-	// the value of the offset which is not known beforhand
+	// the value of the offset which is not known beforehand
 		return 41 + int(nwrite);
 	}
 }

@@ -121,7 +121,7 @@ an interrupt buffer of this size.
 		} else {
 
 		// a buffer size of 1 is equiv to just wait until
-		// the data is transfered to the AIC so its the same
+		// the data is transferred to the AIC so its the same
 		// as no buffer at all.  If we don't use a buffer then
 		// we don't need to allocate memory for rcvBuffer,
 		// tempBuffer, temp

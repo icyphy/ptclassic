@@ -83,7 +83,7 @@ as the control varies between -1.0 and 1.0.
 	lar	ar0,#$addr(counter)	; ar0-> counter
 	mar	*,ar3			; arp = 3
 	lacl	*,ar0			; load acc low with input, high acc = 0
-	setc	sxm			; set sign xtension mode
+	setc	sxm			; set sign extension mode
 	xc	1,neq			; if non-zero input clear counter
 	sach	*,0
 	lacc	*,15,ar1		; load acc with counter/2

@@ -92,7 +92,7 @@ if offset > 0, specify whether to use previously read inputs
 		int fillAsInt;
 //hiLim : start writing trailing zeros at this point
 //index : copy inputs starting at inputs[index]
-//padding: number of old inputs or zeros to write at begining
+//padding: number of old inputs or zeros to write at beginning
 //numInputs: number of inputs to copy
 //numCpy: number of inputs to store in pastInputs buffer
 //read: effective num of inputs to read(to allow for complex numbers)
