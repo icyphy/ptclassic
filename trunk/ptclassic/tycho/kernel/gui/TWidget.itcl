@@ -145,6 +145,10 @@ body ::tycho::TWidget::destructor {} {
         after 1000 "$this nextWindow; delete object $this"
         ::tycho::silentError
     }
+    # Delete the context menu if there is one
+    if { $myContextmenu != "" } {
+	delete object $myContextmenu
+    }
     # Unsubscribe from all preferences
     preference unsubscribeoptions $this
 }
