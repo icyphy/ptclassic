@@ -40,16 +40,16 @@
 # Note that keys are not constrained to be "inputs" or "outputs".
 #
 # Here are some example of creating and accessing a keyed digraph.
-# See the <a href="AbstractGraph">AbstractGraph</a> and
-# <a href="Digraph">Digraph</a> classes for more information
-# about graphs and directed graphs, and the <a href="Model">Model</a> 
+# See the <a href="AbstractGraph.html">AbstractGraph</a> and
+# <a href="Digraph.html">Digraph</a> classes for more information
+# about graphs and directed graphs, and the <a href="Model.html">Model</a> 
 # class for more information about the facilities inherited by this
 # class from Model. Create a graph and give keys and edges some attributes:
 # <tcl><pre>
 #     catch {delete object $graph}
 #     set graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
-#     $graph edgeconfigure -initialdelay {}
-#     $graph keyconfigure -tokencount 1 -type input
+#     $graph configureLink edge -initialdelay {}
+#     $graph configureEntity key -tokencount 1 -type input
 # </tcl></pre>
 #
 # Load data into the graph:
@@ -255,10 +255,10 @@ body ::tycho::KeyedDigraph::edge {vertex1 key1 vertex2 key2 args} {
     _verifynot edge [list $vertex1 $key1 $vertex2 $key2]
     
     # Record the edge
-    set inverse [_link edge [list $vertex1 $key1 $vertex2 $key2] $args]
+    set inverse [_link edge {} [list $vertex1 $key1 $vertex2 $key2] $args]
 
     # Add links to the adjacency matrix
-    adjacencyadd $vertex1 $vertex2
+    _adjacencyadd $vertex1 $vertex2
 
     # Clear any cached structural information
     catch {unset _cache}
@@ -306,11 +306,11 @@ body ::tycho::KeyedDigraph::edgeconfigure {vertex1 key1 vertex2 key2 args} {
 #
 # Remove an edge from the graph, and return the inverse command.
 #
-body ::tycho::KeyedDigraph::deleteedge {vertex1 key1 vertex2 key2} {
+body ::tycho::KeyedDigraph::edgedelete {vertex1 key1 vertex2 key2} {
     _verify edge [list $vertex1 $key1 $vertex2 $key2]
 
     # Delete it from the adjacency list
-    adjacencydelete $vertex1 $vertex2
+    _adjacencydelete $vertex1 $vertex2
 
     # Clear any cached structural information
     catch {unset _cache}
@@ -322,7 +322,7 @@ body ::tycho::KeyedDigraph::deleteedge {vertex1 key1 vertex2 key2} {
     # back to the adjacency list
     if { [array names _info \
 	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
-    	adjacencyadd $vertex1 $vertex2
+    	_adjacencyadd $vertex1 $vertex2
     }
     return $inverse
 }
@@ -385,20 +385,15 @@ body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
 body ::tycho::KeyedDigraph::keydelete {vertex key} {
     _verify key [list $vertex $key]
 
-    # Delete it from the adjacency list
-    adjacencydelete $vertex1 $vertex2
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
+    # FIXME
     # Delete the data and get the inverse command
     set inverse [_delete key [list $vertex $key]]
-    
+
     # If there are still keys between the same vertices, add
     # back to the adjacency list
     if { [array names _info \
 	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
-    	adjacencyadd $vertex1 $vertex2
+    	_adjacencyadd $vertex1 $vertex2
     }
     return $inverse
 }
@@ -411,17 +406,8 @@ body ::tycho::KeyedDigraph::keydelete {vertex key} {
 body ::tycho::KeyedDigraph::keyin {vertex key args} {
     _verifynot key [list $vertex $key]
     
-    # Record the key
-    set inverse [_link key [list $vertex $key] $args]
-
-    # Add links to the adjacency matrix
-    adjacencyadd $vertex1 $vertex2
-
-    # Clear any cached structural information
-    catch {unset _cache}
-
-    # Return the inverse command
-    return $inverse
+    # Record the key and return the inverse
+    _entity key $vertex $key $args
 }
 
 ########################################################################
@@ -438,5 +424,52 @@ body ::tycho::KeyedDigraph::keys {vertex {key *}} {
 	eval lappend result [lindex $quad 2]
     }
     return $result
+}
+
+########################################################################
+#### repair
+#
+# "Repair" a graph by deleting improperly-connected edges. This method
+# provides a default implementation that will remove invalid edges in 
+# most properly-written subclasses; however,
+# subclasses may choose to override it for efficiency, because it doesn't work
+# with the subclass, or to perform additional repairs. This
+# method should be called after building a graph if it is not certain
+# that the graph is correctly constructed.
+# This method cannot be recorded or published.
+#
+# FIXME: Doesn't work.
+#
+body ::tycho::KeyedDigraph::repair {} {
+    set modified 1
+
+    foreach {src tgt} [edges] {
+	if { ! [::info exists _vertices($src)] \
+                || ! [::info exists _vertices($tgt)] } {
+	    edgedelete $src $tgt
+	}
+    }
+    # Return null so record{} or publish{} will complain.
+    return ""
+}
+
+########################################################################
+#### verify
+#
+# Test whether a graph is properly constructed. This method
+# provides a default implementation that tests for invalid edges; however,
+# subclasses may choose to override this method for efficiency, because
+# it doesn't work with the subclass, or to perform additional tests.
+#
+# FIXME: Doesn't work
+#
+body ::tycho::KeyedDigraph::verify {} {
+    foreach {src tgt} [adjacency] {
+	if { ! [::info exists _vertices($src)] \
+		|| ! [::info exists _vertices($dst)] } {
+	    return 0
+	}
+    }
+    return 1
 }
 
