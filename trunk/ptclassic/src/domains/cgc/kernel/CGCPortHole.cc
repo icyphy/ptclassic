@@ -56,12 +56,15 @@ CGCPortHole :: ~CGCPortHole() {
 void CGCPortHole :: initialize() {
 	CGPortHole :: initialize();
 
-	// member initialize.
-	myType = NA;
+	// member initialize. same values as constructor.
+	maxBuf = 1;
+	manualFlag = FALSE;
 	hasStaticBuf = TRUE;
 	asLinearBuf = TRUE;
-	manualFlag = FALSE;
-	maxBuf = 1;
+	myType = NA;
+	converted = FALSE;
+	delete [] bufName;
+	bufName = 0;
 	manualOffset = 0;
 }
 
