@@ -1,9 +1,6 @@
 #ifndef _C50Target_h
 #define _C50Target_h 1
 /******************************************************************
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -29,10 +26,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 Programmer: Andreas Baensch
 Date of Creation: 30 April 1995
+Version: $Id$
 
 Modeled after code by J. Buck and J. Pino.
 
-Base target for TI 320C5x  assembly code generation.
+Base target for TI 320C5x assembly code generation.
 
 *******************************************************************/
 
@@ -50,12 +48,10 @@ extern StringList C50ONE;
 class C50Target : public virtual TITarget {
 public:
 	// constructor
-	C50Target (const char* nam, const char* desc) :
-		TITarget(nam,desc,"C50Star") {}
+	C50Target(const char* nam, const char* desc);
 
 	// copy constructor
-	C50Target(const C50Target& src) : 
-	  TITarget(src.name(),src.descriptor(),"C50Star") {}
+	C50Target(const C50Target& src);
 
 	// return a new copy of itself
 	/*virtual*/ Block* makeNew() const;
@@ -71,6 +67,11 @@ public:
 
 protected:
 	void writeFloat(double);
+	const char* memoryMapInitCode();
+	const char* startCode();
+
+private:
+	void initDataMembers();
 };
 
 // Adds the galaxy parameter ONE.  This should be called by any multiprocessor
