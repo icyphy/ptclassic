@@ -35,6 +35,7 @@ the circuit.
 		type {int}
 		default {2}
 		desc {Gain value}
+		attributes { A_XMEM|A_CONSTANT }
 	}
 	constructor {
 		noInternalState();
@@ -80,7 +81,7 @@ the circuit.
 	}
 	codeblock (cbStd) {
 	move	$ref(input),x1			; input
-	move	#$val(gain),y1			; gain
+	move	$ref(gain),y1			; gain
 	mpy	x1,y1,a
 	asr	a			; adjust for integer multiplication
 	move	a0,$ref(output)
