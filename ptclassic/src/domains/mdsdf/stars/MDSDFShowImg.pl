@@ -87,19 +87,20 @@ This star does not support frame numbers.  See ShowImg2.
     const char* saveMe = saveImage;
     int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-    char fileName[256]; fileName[0] = '\000';
-    if ((const char*) imageName) {
-      strcpy(fileName, (const char*) imageName);
+    StringList fileName;
+    const char* iname = imageName;
+    if (iname && iname[0]) {
+      fileName = (const char*) imageName;
     }
-    if (fileName[0] == '\000') {
+    else {
       char* nm = tempFileName();
-      strcpy(fileName, nm);
-      LOG_DEL; delete [] nm;
+      fileName = nm;
+      delete [] nm;
     }
 
     FILE* fptr = fopen(fileName, "w");
     if (fptr == (FILE*) NULL) {
-      Error::abortRun(*this, "can not create: ", fileName);
+      Error::abortRun(*this, "cannot create: ", fileName);
       delete image;
       return;
     }
@@ -127,13 +128,12 @@ This star does not support frame numbers.  See ShowImg2.
     fclose(fptr);
     delete [] buffer;
 
-    char cmdbuf[256];
-    sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);
+    StringList cmdbuf = "(";
+    cmdbuf << (const char*) command << " " << fileName;
     if (del) {
-      strcat (cmdbuf, "; rm -f ");
-      strcat (cmdbuf, fileName);
+      cmdbuf << "; rm -f " << fileName;
     }
-    strcat (cmdbuf, ")&");		// Run command in the background
+    cmdbuf << ")&"; 			// Run command in the background
     system (cmdbuf);
     delete image;
   } // end go{}
