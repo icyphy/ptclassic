@@ -60,7 +60,8 @@ proc testRevControl {versionControlSystem} {
     #::tycho::Displayer $wname
     set myEditView [::tycho::view Edit -file $testfile]
     #$wname centerOnScreen
-    set myRevControl [::tycho::RevControl::setup $myEditView $myEditView
+    set myRevControl [::tycho::RevControl::setup $myEditView $myEditView]
+    puts "$myEditView $myRevControl"
     ::tycho::safeUpdate $myEditView
 
     if {"$versionControlSystem" == "SCCS" } {
@@ -72,33 +73,39 @@ proc testRevControl {versionControlSystem} {
     }
 
     # Press the 'Checkout' button
-    $wname.revcontrol invoke checkout
-    ::tycho::safeUpdate $wname.revcontrol
+    $myEditView.revcontrol invoke checkout
+    ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'Checkin' button
-    $wname.revcontrol invoke checkin
-    ::tycho::safeUpdate $wname.revcontrol
+    $myEditView.revcontrol invoke checkin
+    ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'Checkout' button
-    $wname.revcontrol invoke checkout
-    ::tycho::safeUpdate $wname.revcontrol
+    $myEditView.revcontrol invoke checkout
+    ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'History' button
-    $wname.revcontrol invoke history
-    ::tycho::safeUpdate $wname.revcontrol
+    $myEditView.revcontrol invoke history
+    ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'unedit' button
-    $wname.revcontrol invoke unedit
-    ::tycho::safeUpdate $wname.revcontrol
+    $myEditView.revcontrol invoke unedit
+    ::tycho::safeUpdate $myEditView.revcontrol
 
     # Press the 'esc' button
-    $wname.revcontrol invoke cancel
+    $myEditView.revcontrol invoke cancel
+
+    # Remove the test file windows when we are done
+    global duration
+    after $duration delete object [$myEditView displayer]
 }
 
 test SCCS-1.1 {test out sccs} {
     testRevControl SCCS
-} {}
+    list {Done}
+} {Done}
 
 test RCS-1.1 {test out sccs} {
     testRevControl RCS
-} {}
+    list {Done}
+} {Done}
