@@ -3,9 +3,9 @@
 .SD
 Approximate MMSE timing recovery
 .DE
+.LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 .Ie "timing recovery, MMSE"
 .Ie "MMSE timing recovery"
