@@ -58,7 +58,8 @@ PTKDIR = $(ROOT)/src/ptklib
 
 INCL =		-I$(KERNDIR) -I$(PTCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
-		-I$(ITCL_INCDIR) -I$(TCL_INCDIR) -I$(PTOLEMY)/src/kernel
+		-I$(ITCL_INCDIR) -I$(TCL_INCDIR) -I$(ROOT)/src/kernel \
+		-I$(ROOT)/src/compat/ptolemy
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
