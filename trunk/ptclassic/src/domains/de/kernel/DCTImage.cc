@@ -103,6 +103,6 @@ void DCTImage::assemble(const BaseImage* bi)
 	}
 
 // Do the merge
-	DCTImage* di = (DCTImage*) bi;
+	const DCTImage* di = (const DCTImage*) bi;
 	copy(di->size, DCTData+di->startPos, di->DCTData);
 } // end DCTData::assemble()
