@@ -66,11 +66,10 @@ public:
 	// Generate code.
         /*virtual*/ void generateCode();
 
-	// redefine writeCode: default file is "code.vhd"
-	/*virtual*/ void writeCode();
-
-	// Compile, run the code.
-	/*virtual*/ int compileCode();
+	// Write, compile, run the code.
+	/*virtual*/ void writeCode() { SimVSSTarget::writeCode(); }
+	/*virtual*/ int compileCode() { return SimVSSTarget::compileCode(); }
+	/*virtual*/ int runCode() { return SimVSSTarget::runCode(); }
 
 	// Generate a comment.
 	/*virtual*/ StringList comment(const char* text,
@@ -87,18 +86,15 @@ public:
 	// Pulse the given clock TRUE at the given time.
 	void pulseClock(const char*, int);
 
-	// Add the clock to the clock list and generate code to toggle it.
-	void toggleClock(const char*);
+//	// Add the clock to the clock list and generate code to toggle it.
+//	void toggleClock(const char*);
 
 	// Assert the given clock with the given value at the given time.
 	void assertValue(const char*, int, int);
 
-	// Add the clock to the clock list and generate code
-	// to assert it with the given value.
-	void assertClock(const char*, int);
-
-	// Run the code.
-	/*virtual*/ int runCode();
+//	// Add the clock to the clock list and generate code
+//	// to assert it with the given value.
+//	void assertClock(const char*, int);
 
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, const char*, int=-1, int=-1);
@@ -128,8 +124,7 @@ protected:
 	VHDLMuxList muxList;
 	VHDLRegList regList;
 
-	/*virtual*/ void begin();
-
+	/*virtual*/ void begin() { SimVSSTarget::begin(); }
 	/*virtual*/ void setup();
 
 	// code generation init routine; compute offsets, generate initCode
