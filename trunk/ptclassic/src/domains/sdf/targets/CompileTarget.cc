@@ -25,12 +25,27 @@ a universe.
 #include "ConstIters.h"
 #include <ctype.h>
 #include "pt_fstream.h"
+#include "SDFCluster.h"
+
+Block* CompileTarget::makeNew() const {
+	LOG_NEW; return new CompileTarget(name(), starType(), descriptor());
+}
 
 void CompileTarget::setup() {
+	char* schedFileName = 0;
+	writeDirectoryName(destDirectory);
+	if (loopScheduler) {
+		schedFileName = writeFileName("schedule.log");
+		LOG_NEW; setSched(new SDFClustSched(schedFileName));
+	}
+	else {
+		LOG_NEW; setSched(new SDFScheduler);
+	}
 	// This kludge bypasses setup() in CGTarget, which casts
 	// the portholes to CGPortHole.  These casts are no good for
 	// this target, which has SDFPortHole types.
 	Target::setup();
+	LOG_DEL; delete [] schedFileName;
 }
 
 int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
