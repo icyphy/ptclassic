@@ -273,6 +273,7 @@ $(JDIST_EX): $(ROOT)/mk/tycommon.mk
 
 $(JDIST).tar.gz:  $(JDIST_EX)
 	(cd ..; gtar -zchf $(JPACKAGE)/$@ -X $(JDIST_EX) $(JPACKAGE))
+	rm -f $(JDIST_EX)
 
 $(JDIST).zip:
 	(cd ..; zip -r $(JPACKAGE)/$@ $(JPACKAGE) -x \*/SCCS/\* -x \*/makefile -x \*/$(JDIST).tar.gz -x \*/$(JDIST).zip)
