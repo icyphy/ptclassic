@@ -231,7 +231,6 @@ configbody ::tycho::Exec::dir {
 #### constructor
 #
 body ::tycho::Exec::constructor {args} {
-    # Create queries with an entrywidth of 60
     configure -queries [list \
             {line commandToExec {Command to Exec:} make } \
             {line dirToExecFrom {Directory to Exec from:} {}} \
