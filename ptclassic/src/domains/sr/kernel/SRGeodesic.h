@@ -66,6 +66,8 @@ public:
   PortHole * setOldSourcePort( GenericPort &, int, const char * = 0 );
   PortHole * setDestPort( GenericPort & );
   PortHole * setOldDestPort( GenericPort & );
+
+  PortHole * getReceiver();
   
 };
 

@@ -65,6 +65,13 @@ SRGeodesic::~SRGeodesic()
   destinationPort = NULL;
 }
 
+// Return the first receiver in the list, if any
+PortHole * SRGeodesic::getReceiver()
+{
+  ListIter nextReceiver( receivers );
+  return (PortHole *) nextReceiver++;
+}
+
 // Set this Geodesic's driver (node-style)
 //
 // @Description Used for node-style connections.  Calls newConnection before
