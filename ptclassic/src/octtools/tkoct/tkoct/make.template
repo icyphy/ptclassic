@@ -22,6 +22,9 @@ OBJS =		appinit.o tkoctTk.o toct.o tkoctDraw.o tkhFont.o toctFacet.o
 SRCS = 		$(OBJS:.o=.c)
 HDRS =		tkoct.h tkoctInt.h tkh.h toct.h
 
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
+LIB = foo
+
 all:	makefile tkoct
 
 # sol2.cfront requires -llist because of -ltap
