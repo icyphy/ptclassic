@@ -62,7 +62,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES =  bin demo doc test tclIndex
+MISC_FILES =  adm $(DIRS) tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
