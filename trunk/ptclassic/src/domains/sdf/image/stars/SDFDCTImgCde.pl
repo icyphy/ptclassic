@@ -1,7 +1,7 @@
 defstar {
 	name		{ DctCode }
 	domain		{ SDF }
-	version		{ $Id$ }1
+	version		{ $Id$ }
 	author		{ Paul Haskell }
 	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image palette }
