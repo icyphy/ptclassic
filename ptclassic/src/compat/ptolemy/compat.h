@@ -378,7 +378,7 @@ extern int errno;
 #else
 #ifdef PT_NT4VC
 #include <stdlib.h>
-#include <sys/errno.h>
+#include <errno.h>
 #else /* PT_NT4VC */
 extern int sys_nerr;
 #if defined (__GLIBC__) && (__GLIBC__ >= 2)
@@ -386,7 +386,7 @@ extern int sys_nerr;
 #else
 extern char *sys_errlist[];
 extern int errno;
-#endif /* (__GLIBC__) && (__GLIBC__ >= 2) */
+#endif /* (__GLIBC__) && (__GLIBC__ >= 2)*/
 #endif /* PTNBSD_386 */
 #endif /* PT_NT4VC */
 #endif /* NEED_SYS_ERRLIST */
