@@ -1650,7 +1650,7 @@ void genDef ()
 
 /* special GNU pragma for efficiency */
 	fprintf (fp, "\n#ifdef __GNUG__\n#pragma implementation\n#endif\n\n");
-
+	fprintf (fp, "\n# line 1 \"%s\"\n", inputFile);
 /* ID block */
 	if (idBlock)
 		fprintf (fp, "%s\n", idBlock);
