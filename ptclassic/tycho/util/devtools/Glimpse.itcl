@@ -73,7 +73,7 @@ class ::tycho::Glimpse {
     method help {}
 
     # Update the glimpse_index entry widget
-    method updateGlimpseIndex {}
+    method _updateGlimpseIndex {}
 
     ###################################################################
     ####                         public procs                      ####
@@ -136,11 +136,11 @@ body ::tycho::Glimpse::constructor {args} {
     if {$buttonList != {Tycho}} {
         lappend buttonList {Clear}
         radio defaultIndex {Default Index:} $buttonList \
-                Tycho -command "$this updateGlimpseIndex"
+                Tycho -command "$this _updateGlimpseIndex"
     }
 
     addButton update -text "Update Tycho DB" \
-            -command "$this updateTychoDatabase"
+            -command "updateTychoDatabase"
 
     addButton help -text "Help" -command "$this help"
 
@@ -198,6 +198,13 @@ body tycho::Glimpse::glimpseSearch {} {
 
     # Unix only? exec glimpse and get the output:
     set glimpseIndexDir [file dirname [file join [lindex $glimpse_index 0]]]
+
+    if {[::tycho::pathSearch glimpse] == {} } {
+	error "glimpse is not in your path.\nSee the glimpse home page\
+		(http://glimpse.cs.arizona.edu) for sources"
+
+    }
+
     # glimpse options: -y = don't prompt -n = show line numbers
     set glimpseOut [busy exec glimpse -y -n -H "$glimpseIndexDir" $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
@@ -234,12 +241,12 @@ body ::tycho::Glimpse::help {} {
 }
 
 #####################################################################
-#### updateGlimpseIndex
+#### _updateGlimpseIndex
 # Update the glimpse_index entry from the value of the 
 # Tycho/Ptolemy index buttons.  This method is public only because
 # of the way Tk handles radiobutton -command options.
 #
-body ::tycho::Glimpse::updateGlimpseIndex {} {
+body ::tycho::Glimpse::_updateGlimpseIndex {} {
     global TYCHO PTOLEMY tcl_library
 
     clear glimpse_index
@@ -271,25 +278,26 @@ body ::tycho::Glimpse::updateGlimpseIndex {} {
 #
 body ::tycho::Glimpse::updateTychoDatabase {} {
     global TYCHO
-    file delete -force [file join $TYCHO .glimpse_index]  \
-            [file join $TYCHO .glimpse_partitions] \
-            [file join $TYCHO .glimpse_messages] \
-            [file join $TYCHO .glimpse_statistics] \
-            [file join $TYCHO .glimpse_filenames] 
+    if {[::tycho::pathSearch glimpseindex] == {} } {
+	error "glimpseindex is not in your path.\nSee the glimpse home page\
+		(http://glimpse.cs.arizona.edu) for sources"
 
-    # Unix specific:
-    set savedir [pwd]
-    cd $TYCHO
+    }
+
+    # Save .glimpse_exclude, remove .glimpse*
+    file delete -force [file join $TYCHO glimpse_exclude]
+    file copy -force [file join $TYCHO .glimpse_exclude] \
+	    [file join $TYCHO glimpse_exclude]
+
+    file delete -force [glob [file join $TYCHO .glimpse*]]
+    file copy -force [file join $TYCHO glimpse_exclude] \
+	    [file join $TYCHO .glimpse_exclude]
 
     # Create a monitor window and make it run make glimpse.
     set win [::tycho::autoName .glimpseExec]
     ::tycho::Monitor $win \
-            -command {make glimpse} \
+            -command [list glimpseindex -H "$TYCHO" "$TYCHO"] \
             -dir [file join $TYCHO] \
             -autostart 1 -autodestroy 1
-
-    # Not needed any more because the above will map the window
-    # $win centerOnScreen
-
-    cd $savedir
+    file delete -force [file join $TYCHO glimpse_exclude]
 }
