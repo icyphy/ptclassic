@@ -89,6 +89,22 @@ ISLANG= `if [ -f $(ISLANG_IN_OBJ) ]; \
 $(ISLANG_IN_OBJ):
 	(cd $(ISLANG_OBJ_DIR); $(MAKE) VPATH=$(ISLANG_VPATH))
 
+# pepp binary in the obj directory.  Pepp is used by Thor to convert
+# .chdl files to .cc files.  'make sources' may need pepp
+PEPP_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/domains/thor/pepp
+PEPP_IN_OBJ=$(PEPP_OBJ_DIR)/pepp
+PEPP_VPATH=../../src/domains/thor/pepp
+
+# Use either the pepp binary in the obj directory or just use pepp
+PEPP= `if [ -f $(PEPP_IN_OBJ) ]; \
+	then echo $(PEPP_IN_OBJ) ; \
+	else echo pepp; fi`
+
+# Build the pepp binary if necessary
+$(PEPP_IN_OBJ):
+	(cd $(PTOLEMY)/obj.$(PTARCH)/pepp; $(MAKE) VPATH=$(PEPP_VPATH))
+
+
 # Rule to build the ../doc/star directory
 # Can't use mkdir -p here, it might not exist everywhere
 # Run 'exit 0' as the last command if the directories already exist.
@@ -142,8 +158,8 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 
 # Rule for the thor preprocessor
 # Make sure we always run the preprocessor in the source directory
-.chdl.cc:
-	cd $(VPATH); pepp $<
+.chdl.cc: $(PEPP_IN_OBJ)
+	cd $(VPATH); $(PEPP) $<
 
 ifeq ($(strip $(LIB)),)
 LIB=dummylib
@@ -281,4 +297,3 @@ sccsinfo:
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
-
