@@ -335,7 +335,10 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
 // routines to determine the buffer sizes
 /////////////////////////////////////////
 
-int CGCTarget :: decideBufSize(Galaxy& g) {
+// note that we allow the C compiler to do the actual allocation;
+// this routine just determines the buffer sizes.
+
+int CGCTarget :: allocateMemory(Galaxy& g) {
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
 	

@@ -62,7 +62,7 @@ protected:
 	StringList mainCode;
 
 	// buffer size determination
-	int decideBufSize(Galaxy&);
+	int allocateMemory(Galaxy&);
 
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit(Galaxy&);
