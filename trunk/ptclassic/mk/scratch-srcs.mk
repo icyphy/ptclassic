@@ -97,6 +97,12 @@ gnu_clean:
 hpgnu_all: 
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
 
+# No need to depend on  $(OBJARCH)/gnu, as irix5_all will run configure
+# for us.  This rule has not been tested in house at UCB, but should work.  
+irix5gnu_all: 
+	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
+
+
 #
 # Build and install tcl tools
 #
@@ -107,7 +113,7 @@ tcltk_all: tcltk_configure tcltk_bin tcltk_install
 tcltk_configure: $(OBJARCH)/tcltk
 $(OBJARCH)/tcltk: $(OBJARCH) 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
@@ -115,7 +121,7 @@ $(OBJARCH)/tcltk: $(OBJARCH)
 
 tcltk_bin: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
@@ -123,7 +129,7 @@ tcltk_bin: $(OBJARCH)/tcltk
 
 tcltk_install: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
@@ -141,7 +147,7 @@ tcltk_all_shared: tcltk_configure_shared tcltk_bin_shared tcltk_install_shared
 tcltk_configure_shared: $(OBJARCH)/tcltk.shared
 $(OBJARCH)/tcltk.shared: $(OBJARCH) 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS) $(C_SHARED_FLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
@@ -149,7 +155,7 @@ $(OBJARCH)/tcltk.shared: $(OBJARCH)
 
 tcltk_bin_shared: $(OBJARCH)/tcltk.shared
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
@@ -157,7 +163,7 @@ tcltk_bin_shared: $(OBJARCH)/tcltk.shared
 
 tcltk_install_shared: $(OBJARCH)/tcltk.shared
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC=$(CC) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
