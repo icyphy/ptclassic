@@ -43,7 +43,7 @@ a Tcl interpreter.
 #endif
 
 
-#include "tcl.h"
+#include <tcl.h>
 #include "MatlabIfc.h"
 #include "DataStruct.h"
 #include "StringList.h"
