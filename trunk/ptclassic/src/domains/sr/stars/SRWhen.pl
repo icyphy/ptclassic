@@ -6,7 +6,7 @@ defstar {
 When the clock input is true, copy the input to the output;
 when the clock is absent, make the output absent.
 }
-    version { $Id$ }
+    version { @(#)SRWhen.pl	1.1 4/25/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
