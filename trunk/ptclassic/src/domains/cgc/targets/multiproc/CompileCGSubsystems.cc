@@ -95,7 +95,9 @@ void CGWormTarget::wormPrepare() {
     cgcWorm->convertWormholePorts(*galaxy());
 }
 
-void CGWormTarget::setup() {
+int CGWormTarget::modifyGalaxy() {
+    // Let HOF type stars do there magic
+    if (!CGSharedBus::modifyGalaxy()) return FALSE;
     
     GalStarIter nextStar(*galaxy());
     CGStar* star;
@@ -132,7 +134,7 @@ void CGWormTarget::setup() {
 	    }
 	}
     }
-    CGSharedBus::setup();
+    return TRUE;
 }
 
 DataFlowStar* CGWormTarget::createSend(int from, int to, int /*num*/) {
