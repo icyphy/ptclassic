@@ -65,11 +65,11 @@ $(STARDOCDIR):
 # Make sure we always run the preprocessor in the source directory
 # the "mv" part moves the documentation to the doc dir.
 # note if there is no doc dir, the command continues despite the error.
-.pl.cc:
+.pl.cc: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
-.pl.h:
+.pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
@@ -115,8 +115,8 @@ $(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
 		ln $(STAR_MK).o $(LIBDIR)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(PTLANG_IN_OBJ) $(STARDOCDIR) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
-
+#sources:	$(PTLANG_IN_OBJ) $(STARDOCDIR) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
+sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
 CRUD=*.o core *~ *.bak ,* LOG*
 clean:
 	rm -f $(CRUD)
