@@ -30,11 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Set the script to execute to load the package
-package ifneeded Tycho 2.0 \
-	[list source [file join $dir tycho.tcl]]
-
-
 # This is not really a package, but a collection of packages
 # Look for packages inside this package.
 #
