@@ -166,7 +166,7 @@ ptkTkSetup(funcArray, size)
 #else
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
     			 ptkRPCFileProc, (ClientData) &RPCdata);
-#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
+#endif /* TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1 */
 
     pt = getenv("PTOLEMY");
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
