@@ -15,21 +15,21 @@
 ROOT=../../../..
 # True source directory
 VPATH = $(ROOT)/src/domains/bdf/kernel
-# Kernel directory
-KERNDIR=$(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 # SDF domain
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
 # Where to install the libraries
 DESTDIR=$(ROOT)/lib.$(ARCH)
 
-GPPFLAGS = -g
-GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
-
 # Rule for compiling with g++
+INCL=-I$(KERNDIR) -I$(SDFDIR)
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(KERNDIR) -I$(SDFDIR) -c $<
+	$(GNU) $(GPPFLAGS) $(INCL) -c $<
 
 # Library name
 LIB=libbdf.a
@@ -69,11 +69,12 @@ clean:
 sources:	$(SRCS) $(HDRS) make.template
 
 depend:	
-		makedepend -I$(KERNDIR) -I$(SDFDIR) -I$(GNUINCLUDE) $(SRCS)
+		cd $(VPATH);\
+		$(DEPEND) $(INCL) $(SRCS)|cat make.template - > make.n;\
+		mv -f make.n makefile
 
 makefile:	make.template
-		cd $(VPATH); rm -f makefile; cp make.template makefile; \
-		make -f make.template sources depend
+		cd $(VPATH); make -f make.template sources depend
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
