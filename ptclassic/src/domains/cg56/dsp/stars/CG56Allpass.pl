@@ -8,10 +8,10 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-DSP56000 - An allpass filter with one pole and one zero.
-           The location of these is given by the polezero input.
-           This is from fig. 1a of J.A. Moore, `About this 
-           reverberation business', Computer Music. Journal, Vol 3, No.2 
+An allpass filter with one pole and one zero.
+The location of these is given by the polezero input.
+This is from fig. 1a of J.A. Moore, `About this 
+reverberation business', Computer Music. Journal, Vol 3, No.2 
 	}
 
         input  {

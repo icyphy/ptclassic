@@ -8,12 +8,32 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-DSP56000 - Least Mean Square Adaptive Filter Star
-           The order is determined from the number of initial coefficients.
-           Initial coefficients default to a lowpass filter of order 8.
-           Default stepSize 0.01
-           The errorDelay must specify the total delay between
-           the filter output and the error input.
+.pp
+This star implements an adaptive filter using the LMS algorithm.
+The initial coefficients determine the order of the filter.
+The default coefficients specify
+an eighth order, equiripple, linear-phase, lowpass filter,
+the same as the default coefficients of the \fIFIR\fP star.
+.PP
+The \fIstepSize\fP parameter specifies the rate of adaptation.
+.PP
+The \fIerrorDelay\fP parameter specifies the relative delay between the output
+samples and the input error samples.  There must be at least
+a delay of one (you must add the delay in your system) because
+the path from the output to the error forms a closed feedback loop.
+You can insert more delays if you wish (you may have to decrease
+\fIstepSize\fP to keep the algorithm stable), but be sure to
+adjust the \fIerrorDelay\fP parameter accordingly.
+.PP
+The \fIdecimation\fP parameter specifies how many input samples should be
+consumed before firing the star.  For example, to downsample
+by a factor of two, the user could simply follow the LMS filter by
+a downsample star, which would be set to discard every second input.
+But it is inefficient for the LMS filter to compute these samples,
+only to have them discarded.  Setting the \fIdecimation\fP parameter to 2
+in the LMS filter is exactly equivalent,
+except that the discarded samples are not computed.
+Interpolation is not supported.
 	}
         
         output {

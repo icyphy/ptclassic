@@ -7,10 +7,10 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-DSP56000 - A variable length pulse generator.
-           A pulse begins when a non-zero trigger is received.
-           The pulse duration varies between 1 and max_delay
-           as the control varies between -1.0 and 1.0.
+A variable length pulse generator.
+A pulse begins when a non-zero trigger is received.
+The pulse duration varies between 1 and \fImaxDuration\fP
+as the control varies between -1.0 and 1.0.
 	}
 
         input  {

@@ -1,14 +1,15 @@
 defstar {
 	name { ASin  }
 	domain { CG56 }
-	desc { Arc Cosine }
+	desc { Arc Sine }
 	version { $Id$ }
 	author { Chih-Tsung, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-Arc Sin function using power series approximation.  
+Arc Sine function using power series approximation.  
 The output, in principal range -pi/2 to pi/2, is scaled down by pi.
+	seealso { ACos, Cos, Sin }
 	}
 	execTime {
 		return 55;
