@@ -492,25 +492,20 @@ body ::tycho::DialogWindow::newModal {class instance args} {
     } {
 	$instance centerOnScreen
     }
-    update
+    # The update here must be "update idletask".  Otherwise, it is not
+    # safe to invoke a modal dialog from within a method.  A plain "update"
+    # would allow the calling object to be destroyed.
+    update idletasks
     # Do not continue in this thread until the window is dismissed.
     if [winfo exists $instance] {
 	grab set $instance
-	# NOTE: We wait here for the window to be deleted.
-	# This is actually quite risky.  If called from within Ptolemy
-	# in certain circumstances, this causes the X server to hang.
-	# Apparently, it interferes with the Rpc connection
-	# to vem.  Why?  Should we implement our own version of tkwait?
+	# We wait here for the window to be deleted.
 	tkwait window $instance
 
 	# Because of the above grab, it is not safe to return before
 	# the window actually disappears.  The grab may never be released
 	# if an I/O operation is done before the window is released.
-	# NOTE: This update is risky.  If during the update, this newModal
-	# procedure is called with the same instance name (hopefully an
-	# unlikely event), then the code following the update will
-	# use the values of the new dialog window, not the old.
-	update
+	update idletasks
     }
     set returnVal $commandResult($instance)
     unset commandResult($instance)
