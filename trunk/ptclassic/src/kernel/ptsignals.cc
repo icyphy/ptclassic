@@ -88,6 +88,7 @@ as a blank function and define ptBlockSig and ptReleaseSig as below.
 */
 
 
+#include <stdio.h>		// Pick up NULL?  freebsd wants this.
 #include <signal.h>
 #include "compat.h" 
 #include "ptsignals.h"
