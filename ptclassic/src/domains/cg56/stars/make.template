@@ -49,6 +49,7 @@ PL_SRCS= \
  CG56Interpolator.pl \
  CG56IntMult.pl \
  CG56Limit.pl \
+ CG56LMS.pl \
  CG56LocateMax.pl \
  CG56Log.pl \
  CG56Magnavox.pl \
@@ -74,6 +75,7 @@ PL_SRCS= \
  CG56UpSample.pl \
  CG56VarDelay.pl \
  CG56VarQuasar.pl \
+ CG56WasteCycles.pl \
  CG56WriteFile.pl \
  CG56WriteFileInt.pl \
  CG56ZeroHld.pl
