@@ -76,11 +76,9 @@ void LoopTarget::setup() {
 	}
 	SDFScheduler* s = (SDFScheduler*) scheduler();
 	s->schedulePeriod = float(double(schedulePeriod));
-	s->setGalaxy(*galaxy());
+	if (galaxy()) s->setGalaxy(*galaxy());
 	Target::setup();
 }
 
 static LoopTarget loopTargetProto;
-static KnownTarget entry(loopTargetProto,"loop-SDF");
-
-
+static KnownTarget entry(loopTargetProto, "loop-SDF");
