@@ -110,7 +110,7 @@ necessary.
 		// find out which galaxy is recursive.
 		if (recurGal.null()) {
 			msg += "undefined name for recursion construct\n";
-			Error :: abortRun(msg);
+			Error :: abortRun(*this, msg);
 			return;
 		}
 
@@ -121,12 +121,12 @@ necessary.
 			msg += "Unmatched name ";
 			msg += (const char*)recurGal;
 			msg += " for recursion construct\n";
-			Error :: abortRun(msg);
+			Error :: abortRun(*this, msg);
 			return;
 		    }
 		    if(!(b->isA("InterpGalaxy"))) {
 			msg += "Sorry, recursion only works for InterpGalaxies";
-			Error :: abortRun(msg);
+			Error :: abortRun(*this, msg);
 			return;
 		    }
 		    masterGal = (InterpGalaxy*)b;
@@ -154,7 +154,7 @@ necessary.
 			msg += "unmatched number of ports with recursion galaxy\n";
 			flag++;
 		}
-		if (flag) Error :: abortRun(msg);
+		if (flag) Error :: abortRun(*this, msg);
 	    }
 	}
 	go {
@@ -179,7 +179,8 @@ necessary.
 		sched.setGalaxy(*myGal);
 		sched.setup();
 		if (Scheduler::haltRequested()) {
-			Error :: abortRun("error in setting up the scheduler");
+			Error :: abortRun(*this,
+					  "error in setting up the scheduler");
 			return;
 		}
 	    } else {
