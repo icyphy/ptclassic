@@ -541,9 +541,9 @@ PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 # this would not be defined if we are making a small stand-alone 
 # program to test the ptolemy libraries, see standalone.mk
 ifdef PIGI
-	LIBS += version.o 
+	LIBS += version.o -lptcl 
 endif
 
-LIBS += -lptcl -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
+LIBS += -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) \
 	$(SYSLIBS) $(LIB_FLUSH_CACHE)
 
