@@ -60,7 +60,7 @@ send it out in a Packet (with data of type GrayImage).
         }
         GrayImage* imgData = new GrayImage(width, height, int(frameId));
         frameId = int(frameId) + 1; // increment frame id
-        fread(imgData->retData(), sizeof(unsigned char),
+        fread((char*)imgData->retData(), sizeof(unsigned char),
                 unsigned(width*height), fp);
         fclose(fp);
 // Write whole frame to output here...
