@@ -38,6 +38,11 @@ two's complement addition.
 	setc	ovm
 	}
 
+
+	codeblock(clearSaturation){
+	clrc	ovm
+	}
+
 	codeblock(copyInput) {
 	lmmr	ar0,#$addr(input,0)
 	smmr	ar0,#$addr(output,0)
@@ -105,13 +110,14 @@ two's complement addition.
 			}
 		}
 		if (input.numberPorts() > 2) addCode(addEnd);
+		if (int(saturation)) addCode(clearSaturation);
 	}
 
 	exectime {
 		int time = 0;
 		if ( input.numberPorts() == 1 ) return 4;
 		if (int(saturation)){
-			time ++;
+			time += 2;
 		}
 		time += 10;
 		if (input.numberPorts() > 2){

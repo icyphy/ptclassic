@@ -39,6 +39,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	setc	ovm
 	}
 
+
+	codeblock(clearSaturation){
+	clrc	ovm
+	}
+	
 	codeblock(subStart) {
 	lar	ar0,#$addr(pos)			; ar0->pos input
 	lar	ar1,#$addr(output)		; ar1-> output
@@ -95,6 +100,8 @@ limitation of liability, and disclaimer of warranty provisions.
 			}
 		}
 		if (neg.numberPorts() > 1) addCode(subEnd);
+
+		if (int(saturation)) addCode(clearSaturation);
 	}
 
 	exectime {
