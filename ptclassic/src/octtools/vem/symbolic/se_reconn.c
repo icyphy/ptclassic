@@ -92,6 +92,7 @@ symConFunc *confun;		/* Connector function       */
     } else {
 	return reconn_format("Can't parse argument list", VEM_ARGRESP);
     }
+    return VEM_OK;
 }
 
 vemStatus seReconnect(spot, cmdList)
