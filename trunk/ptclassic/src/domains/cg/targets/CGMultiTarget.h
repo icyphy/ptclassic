@@ -164,6 +164,9 @@ protected:
 	// By default, it clones from KnownTarget list with "chile-type" state.
 	virtual Target* createChild(int);
  
+	// flatten wormholes if heterogeneous targets
+	void flattenWorm();
+
         // Optionally provides stats to the user
         /*virtual*/ int schedulerSetup();
 
