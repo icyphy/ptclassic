@@ -95,7 +95,7 @@ extern int getrusage(int who, struct rusage *rusage);
 /* sys/rusage.h is in Solaris2.3, but not Solaris2.4 */
 /*#include <sys/rusage.h>*/
 #include <sys/resource.h>
-#ifndef RUSAGE_SELF
+#if ! defined(RUSAGE_SELF) || RUSAGE_SELF == 0
 #include <sys/procfs.h>
 #endif
 #endif
