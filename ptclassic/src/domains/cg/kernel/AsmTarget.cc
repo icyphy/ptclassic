@@ -373,7 +373,8 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 	StringList tail = "\n\n\nProcedures End\n\n";
 	myCode << comment(heading) <<  procedures << comment(tail);
     }
-    myCode << comment(mem->printMemMap("",""));
+    StringList memMap = mem->printMemMap("","");
+    myCode << comment(memMap);
 }
 
 void AsmTarget :: writeCode(const char* name) {
