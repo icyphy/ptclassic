@@ -32,9 +32,9 @@ public:
 	// with scheduler as a friend.
 	Block* myTopology;
 
-	int initialize() {scheduler.setup(*myTopology);}
-	int go() {scheduler.run(*myTopology);}
-	int wrapup () {scheduler.wrapup(*myTopology);}
+	void initialize() {scheduler.setup(*myTopology);}
+	void go() {scheduler.run(*myTopology);}
+	void wrapup () {scheduler.wrapup(*myTopology);}
 
 	// Redefine char* cast
 	operator char* ();
