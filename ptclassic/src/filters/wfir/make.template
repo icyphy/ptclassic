@@ -4,6 +4,7 @@
 #
 # Copyright (c) 1994 The Regents of the University of California.
 #			All Rights Reserved.
+#
 # Makefile by Christopher Hylands
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -27,7 +28,7 @@ include $(CONFIG)
 # wfir.c:	hand massaged C version that works
 
 SRCS	      = wfir.c
-EXTRA_SRCS = 	wfir.f
+EXTRA_SRCS = 	wfir.f wfir-f2c.c
 EXTRA_DESTS= 	wfir-fortran
 
 OBJS = $(SRCS:.c=.o)
