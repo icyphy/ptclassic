@@ -67,7 +67,7 @@ class StringList;
 // don't know how generally it is available.
 extern "C" int strcasecmp(const char* s1, const char* s2);
 
-class CGWormBase;
+class Wormhole;
 class CodeStream;
 class Profile;
 
