@@ -27,6 +27,7 @@ $Id$
 #include "miscFuncs.h"
 #include "CGUtilities.h"
 #include "pt_fstream.h"
+#include "SimControl.h"
 #include <stream.h>
 #include <time.h>
 #include <string.h>
@@ -124,6 +125,7 @@ void CGTarget::setup() {
 
 void CGTarget::generateCode() {
 	if (parent()) setup();
+	if (SimControl::haltRequested()) return;
 	headerCode();
 	if(!allocateMemory() || !codeGenInit()) return;
 	mainLoopCode();
