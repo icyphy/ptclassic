@@ -41,7 +41,7 @@ F_SRC|F_DEST:
 
 #include "CGGeodesic.h"
 #include "Error.h"
-#include <builtin.h>
+#include "Fraction.h"
 
 void CGGeodesic :: initialize() {
 	Geodesic :: initialize();
