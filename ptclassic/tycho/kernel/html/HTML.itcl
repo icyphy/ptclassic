@@ -147,10 +147,10 @@ body ::tycho::HTML::constructor {args} {
     addTool back Back [code $itk_component(text) back]
     # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
-    global TYCHO
+    global ::TYCHO
     addTool home Home \
 	    [code $itk_component(text) switchFile \
-	    $TYCHO/kernel/doc/introduction.html]
+	    $TYCHO/doc/introduction.html]
     addTool reload Reload [code $this reload]
     addTool open Open [code $this altFile]
     addTool find Find [code $itk_component(text) search]
@@ -184,7 +184,7 @@ body ::tycho::HTML::constructor {args} {
 		-variable [scope sizeName($this)] \
 		-command [code \
 		"$this configure -sizeadjustment [lindex $size 1]; \
-		HTMLText::render ::tycho::HTML::$itk_component(text)"]
+		::tycho::HTMLText::render ::tycho::HTML::$itk_component(text)"]
 	# FIXME: Is the scoping on the previous line correct?
 	# I couldn't find anything else that would work (EAL).
     }
@@ -195,7 +195,7 @@ body ::tycho::HTML::constructor {args} {
 	    -label "Open Source" \
 	    -underline 1 \
 	    -accelerator {C-x s} \
-	    -command "$this openSource"
+	    -command [code "$this openSource"]
 
     $itk_component(fileMenu) delete "Save"
     $itk_component(fileMenu) delete "SaveAs..."
@@ -205,13 +205,17 @@ body ::tycho::HTML::constructor {args} {
     if {$itk_option(-file) != "NoName"} {
 	# In order to get reasonably interactive response, this is delayed.
 	# Not doing this seems to send the program into an infinite wait.
-	after 1 $itk_component(text) readFile $itk_option(-file)
+	# Note also that "after idle" doesn't work here.  The window
+	# does not get mapped until parsing is complete.
+	after 1 [code "$itk_component(text) readFile $itk_option(-file)"]
     }
 
     bind $prefix <Control-x><Key-s> [code "$this openSource; break"]
-    # disable save bindings
+    # disable certain bindings
     bind $prefix <Control-x><Control-s> { }
     bind $prefix <Control-x><Control-w> { }
+    bind $prefix <Control-x><Key-v> { }
+    bind $prefix <Control-x><Key-i> { }
 
     $itk_component(text) configure -readonly 1
     focusin
@@ -240,8 +244,8 @@ body ::tycho::HTML::destructor {} {
 # Query the user for a filename, insert it in place of the current file.
 #
 body ::tycho::HTML::altFile {} {
-    set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
-	    -text "Alternate file to load:"]
+    set filename [::tycho::DialogWindow::newModal FileBrowser \
+	    [::tycho::autoName .fileBrowser] -text "Alternate file to load:"]
     if {$filename != {}} {
 	switchFile $filename
     }
@@ -260,13 +264,13 @@ body ::tycho::HTML::focusin {} {
 # Open a window with help on the current widget.
 #
 body ::tycho::HTML::help {} {
-    global TYCHO
+    global ::TYCHO
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/HTMLHelp.html
 }
 
 #####################################################################
 #### openSource
-# Clear the current text and reload from the source file.
+# Open the source file using an HTML editor.
 #
 body ::tycho::HTML::openSource {} {
     # If a source window already exists, just raise it.
@@ -274,7 +278,7 @@ body ::tycho::HTML::openSource {} {
 	$sourcewin raiseWindow
 	return
     }
-    set win [autoName .edit]
+    set win [::tycho::autoName .edit]
     set obj [uplevel #0 ::tycho::EditHTML $win -file $file]
     wm deiconify $win
     set sourcewin "$obj"
@@ -353,10 +357,10 @@ body ::tycho::HTML::switchFile {filename} {
 
     # Record the new filename in various places.
     set file $filename
-    set filesOpen($file) $this
+    set filesOpen($file) [code $this]
     set previousfile $file
     wm iconname $prefix [file tail $file]
-    windowMenuAddAll $this $filename
+    windowMenuAddAll [code $this] $filename
 
     # Render the HTML file.
     $itk_component(text) readFile $file
@@ -384,7 +388,7 @@ body ::tycho::HTML::addTool {name label command} {
 		-foreground -highlightcolor -highlightbackground
     }
     # To use a bitmap instead, we need before the button command:
-    #       global TYCHO
+    #       global ::TYCHO
     # and as one of the button options:
     #		-bitmap @$TYCHO/kernel/img/back.xbm
 
