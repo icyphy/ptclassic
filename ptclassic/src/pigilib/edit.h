@@ -60,5 +60,7 @@ extern int RpcEditSeed ARGS((RPCSpot *spot, lsList cmdList,
 			     long userOptionWord));
 extern int RpcEditTarget ARGS((RPCSpot *spot, lsList cmdList,
 			       long userOptionWord));
+extern int RpcGetObjectNames ARGS((RPCSpot *spot, lsList cmdList,
+			       long userOptionWord));
 
 #endif   /* _EDIT_H */
