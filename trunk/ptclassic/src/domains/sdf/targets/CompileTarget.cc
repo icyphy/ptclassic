@@ -394,14 +394,21 @@ StringList CompileTarget::tcltkSetup() {
 StringList CompileTarget::tcltkInitialize(StringList& universeName) {
     StringList myCode = "\n// Initialize the Tcl/Tk interpreter\n";
     myCode += "ptkInterp = Tcl_CreateInterp();\n";
+    myCode += "#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1\n";
     myCode += "ptkW = Tk_CreateMainWindow(ptkInterp, NULL, \"";
     myCode += universeName;
     myCode += "\", \"Pigi\");\n";
+    myCode += "#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */\n";
     myCode +=
 "if (Tcl_Init(ptkInterp) == TCL_ERROR) {\n"
 "    cerr << \"Tcl_Init: Error initializing the Tcl interpreter\";\n"
 "    exit(1);\n"
 "}\n";
+
+    myCode +=
+#if TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1\n"
+"ptkW = Tk_MainWindow(ptkInterp);\n"
+"#endif /* TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1 */\n";
 
     myCode +=
 "\n"
