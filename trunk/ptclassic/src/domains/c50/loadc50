@@ -1,3 +1,8 @@
+#!/bin/sh
+# Version: $Id$
+# Copyright (c) 1996 The Regents of the University of California.
+# 	All Rights Reserved.
+#
 # loadc50
 # Bash script to load files with TI's DSK loader(dsk5l.exe)
 # Uses xdos to run dsk5l.exe.  The person running it must be root to
