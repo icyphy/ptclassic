@@ -236,7 +236,7 @@ $(VPATH)/$(STAR_MK).mk:	make.template
 # Rule for making a star list module for pulling stars out of libraries
 $(VPATH)/$(STAR_MK).c:	make.template
 		cd $(VPATH); rm -f $(STAR_MK).c
-		cd $(VPATH); genStarTable $(GENSTARVARS) $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3) > $(STAR_MK).c
+		cd $(VPATH); genStarTable $(MAKE) $(GENSTARVARS) $(DOMAIN) $(DOMAIN_2) $(DOMAIN_3) > $(STAR_MK).c
 
 $(STAR_MK).o:	$(VPATH)/$(STAR_MK).c
 
