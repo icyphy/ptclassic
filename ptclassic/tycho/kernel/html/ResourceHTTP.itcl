@@ -31,18 +31,10 @@
 #######################################################################
 
 #######################################################################
-#### Resource
+#### ResourceHTTP
 #
-# The Resource class abstracts the notion of files and (t some extent)
-# a file system. A given Resource object can be used as a directory
-# or as a file, making it very convenient for both moving around
-# file systems and accessing files within it. The data accessed by a
-# resource could be a local file system, an HTTP server, a database,
-# or anywhere else. Streamable resources act like regular files;
-# non-streamable resource act like data repositories. In all cases,
-# file and directory paths use a URL-like naming scheme.
 #
-class ::tycho::Resource {
+class ::tycho::ResourceHTTP {
     inherit ::tycho::Object
 
     constructor {args} {}
@@ -60,20 +52,11 @@ class ::tycho::Resource {
     # Return the content type of the current file
     method contenttype {}
 
-    # Make a duplicate of the contents of this resource
-    method copy {target}
-
-    # Delete this resource
-    method delete {}
-
     # Test if a given resource exists
     method exists {path}
 
     # Return the current file type 
     method filetype {}
-
-    # Flush buffered output to a streamable resource 
-    method flush {}
 
     # Read a string from a streamable resource 
     method gets {}
@@ -83,9 +66,6 @@ class ::tycho::Resource {
 
     # Return true if a given path is a file
     method isfile {path}
-
-    # Create a new directory
-    method mkdir {path}
 
     # Open a new resource
     method new {{path {}}}
@@ -117,29 +97,47 @@ class ::tycho::Resource {
     # Return true if a resource is writable
     method writeable {{path {}}}
 
-    # Write a string to a streamable resource
-    method write {}
+    ###################################################################
+    ####                        public procs                       ####
+
+    # Get the status of getting HTTP
+    proc httpStatus {}
 
     ###################################################################
-    ####                           public procs                    ####
+    ####                      public variables                     ####
 
-    # Create and open a new resource
-    proc openResource {path}
+    # Used with httpget
+    public variable statusVariableName {}
 
     ###################################################################
     ####                         protected methods                 ####
 
+    # Opening an HTTP connection. This returns the file name of the HTTP file.
+    method httpget {url}
+
+    # This is called by file event handler, from httpget.
+    method httpread {fd tmpfd}
+
+    # Set the global http status to "running" or "normal" or "abnormal"
+    method httpsetstatus {status}
+
+    # Wait until httpget is done.
+    method httpwait {}
+
     ###################################################################
     ####                        protected variables                ####
 
-    # The access mode
-    protected variable accessMode
-
+    # The name of the host name
+    protected variable hostname
+    
     # The full name of the current file (or directory)
     protected variable currentFile
 
-    # True if a file is open
-    protected variable fileIsOpen
+    # The name of the HTTP port. Default is 80
+    protected variable port 80
+
+    # The index of the get
+    protected variable idx
 
     ###################################################################
     ####                         private variables               ####
@@ -149,14 +147,14 @@ class ::tycho::Resource {
 #######################################################################
 #### constructor
 #
-body ::tycho::Resource::constructor {args} {
+body ::tycho::ResourceHTTP::constructor {args} {
     eval configure $args
 }
 
 #######################################################################
 #### destructor
 #
-body ::tycho::Resource::destructor {} {
+body ::tycho::ResourceHTTP::destructor {} {
     close
 }
 
@@ -166,73 +164,55 @@ body ::tycho::Resource::destructor {} {
 
 #####################################################################
 #### close
-body ::tycho::Resource::close {} {
+body ::tycho::ResourceHTTP::close {} {
     ::tycho::abstractMethod close
 }
 
 #####################################################################
 #### contenttype
-body ::tycho::Resource::contenttype {} {
+body ::tycho::ResourceHTTP::contenttype {} {
     ::tycho::abstractMethod contenttype
 }
 
 #####################################################################
-#### copy
-body ::tycho::Resource::copy {} {
-    ::tycho::abstractMethod clocopyse
-}
-
-#####################################################################
-#### delete
-body ::tycho::Resource::delete {} {
-    ::tycho::abstractMethod delete
-}
-
-#####################################################################
 #### exists
-body ::tycho::Resource::exists {[ath} {
+body ::tycho::ResourceHTTP::exists {[ath} {
     ::tycho::abstractMethod exists
 }
 
 #####################################################################
 #### filetype
-body ::tycho::Resource::filetype {} {
-    ::tycho::abstractMethod filetype
+body ::tycho::ResourceHTTP::filetype {} {
+    return "http"
 }
 
 #####################################################################
 #### flush
-body ::tycho::Resource::flush {} {
+body ::tycho::ResourceHTTP::flush {} {
     ::tycho::abstractMethod flush
 }
 
 #####################################################################
 #### gets
-body ::tycho::Resource::gets {} {
+body ::tycho::ResourceHTTP::gets {} {
     ::tycho::abstractMethod gets
 }
 
 #####################################################################
 #### glob
-body ::tycho::Resource::glob {path} {
+body ::tycho::ResourceHTTP::glob {path} {
     ::tycho::abstractMethod glob
 }
 
 #####################################################################
 #### isfile
-body ::tycho::Resource::isfile {path} {
-    ::tycho::abstractMethod isfile
-}
-
-#####################################################################
-#### mkdir
-body ::tycho::Resource::mkdir {path} {
-    ::tycho::abstractMethod mkdir
+body ::tycho::ResourceHTTP::isfile {path} {
+    return 0
 }
 
 #####################################################################
 #### new
-body ::tycho::Resource::new {{path {}}} {
+body ::tycho::ResourceHTTP::new {{path {}}} {
     set new [[info class] [::tycho::autoName resource]]
     if { $path == "" } {
 	$new open $currentFile
@@ -244,81 +224,152 @@ body ::tycho::Resource::new {{path {}}} {
 
 #####################################################################
 #### open
-body ::tycho::Resource::open {path {mode "r"}} {
-    ::tycho::abstractMethod open
+body ::tycho::ResourceHTTP::open {path {mode "r"}} {
+    if {$mode!="r"} {
+        return 0
+    }
+
 }
+
+
+
+
 
 #####################################################################
 #### path
-body ::tycho::Resource::path {} {
-    return $currentPath
-}
-
-#####################################################################
-#### puts
-body ::tycho::Resource::puts {string} {
-    ::tycho::abstractMethod puts
+body ::tycho::ResourceHTTP::path {} {
+    if {$port!={}} {
+        return "HTTP://$hostname$currentPath:$port"
+    } else {
+        return "HTTP://$hostname$currentPath"
+    }
 }
 
 #####################################################################
 #### read
-body ::tycho::Resource::read {} {
+body ::tycho::ResourceHTTP::read {} {
     ::tycho::abstractMethod read
 }
 
 #####################################################################
 #### readable
-body ::tycho::Resource::readable {{path {}}} {
+body ::tycho::ResourceHTTP::readable {{path {}}} {
     return 1
 }
 
 #####################################################################
 #### source
-body ::tycho::Resource::source {{path {}}} {
+body ::tycho::ResourceHTTP::source {{path {}}} {
     ::tycho::abstractMethod source
 }
 
 #####################################################################
 #### stat
-body ::tycho::Resource::stat {path varName} {
+body ::tycho::ResourceHTTP::stat {path varName} {
     ::tycho::abstractMethod stat
 }
 
 #####################################################################
 #### streamable
-body ::tycho::Resource::streamable {} {
+body ::tycho::ResourceHTTP::streamable {} {
     return 1
 }
 
 #####################################################################
 #### writable
-body ::tycho::Resource::writable {{path {}}} {
+body ::tycho::ResourceHTTP::writable {{path {}}} {
     return 0
-}
-
-#####################################################################
-#### write
-body ::tycho::Resource::write {data} {
-    ::tycho::abstractMethod write
-}
-
-#########################################################################
-#########################################################################
-####                        public procs                             ####
-
-#####################################################################
-#### openResource
-body ::tycho::Resource::openResource {path} {
-    if { [regexp {$http://} $path] } {
-	set new [::tycho::HTTPFile [::tycho::autoName httpfile]]
-    } else {
-	set new [::tycho::LocalFile [::tycho::autoName localfile]]
-    }
-    $new open $path 
-    return $new
 }
 
 #########################################################################
 #########################################################################
 ####                     protected methods                           ####
 
+#########################################################################
+#### httpget
+# Opening an HTTP connection. This returns the file name of the HTTP file.
+#
+body ::tycho::ResourceHTTP::httpget {url} {
+    # FIXME: need to find out where to collect protocols that Tycho
+    # understands:
+    set accept {text/*}
+
+    #puts "Going to get url: $url"
+    # 
+    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
+            host optport port path]} {
+        if {$host == {}} {set host $localhost}	;# Supply reasonable default
+        if {$port == {}} {set port 80}		;# HTTP default service
+        if {$path == {}} {set path /}
+    } else {
+        # Recover from malformed URL
+        if {![string match */* $var(path)]} {
+            # Assume only the hostname:port has been given
+            regexp {([^:]*)(:(.*))?} $var(path) all host optport port
+            if {$host == {}} {set host localhost}
+            if {$port == {}} {set port 80}
+            set path /
+        } else {
+            error "no hostname given in URL \"$url\""
+        }
+    }
+    puts "$host:$port, GET $path HTTP/1.0"
+    if {[catch {socket -async $host $port} fd]} {
+        unset $fd
+        error "Can't open $host, $port"
+    }
+    # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    # Wait until finished reading HTTP file
+    set tmpFile [::tycho::tmpFileName cache].html
+    set tmpfd [open $tmpFile "w"]
+    set statusVariableName [::tycho::autoName httpgetStatus]
+    httpStatus $statusVariableName "running"
+
+    # connect now!
+    fconfigure $fd -blocking no -translation crlf
+    puts $fd "GET $path HTTP/1.0\
+            User-Agent: Tycho Jr. Beta\
+            Accept-Encoding: $accept"
+    puts $fd ""
+    flush $fd
+    fconfigure $fd -translation auto
+
+    ::tycho::safeUpdate $this
+    fileevent $fd w {}
+    fileevent $fd r "$this httpread $fd $tmpfd"
+
+    # Wait until the entire http file is here!
+    httpwait
+
+    return $tmpFile
+}
+
+#########################################################################
+#### httpwait
+# Wait until the variable name has been changed.
+body ::tycho::ResourceHTTP::httpwait {} {
+    global $statusVariableName
+    puts "status: $statusVariableName"
+    if {[uplevel #0 "set $statusVariableName"]=="running"} {
+        tkwait variable $statusVariableName
+    }
+    return [uplevel #0 "set $statusVariableName"]
+}
+
+
+    ###################################################################
+    ####                        public procs                       ####
+
+#########################################################################
+#### httpsetstatus
+# Helper function to set the global variable
+# This is used so that tkwait can wait for
+# the global variable to change from "running" to either
+# "normal" or "abnormal"
+
+proc httpStatus {name value} {
+    global $name
+    set $name $value
+}
