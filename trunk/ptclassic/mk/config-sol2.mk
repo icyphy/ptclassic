@@ -78,6 +78,11 @@ LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 
+# These are the additional flags that we need when we are compiling code
+# which is to be dynamically linked into Ptolemy
+INC_LINK_FLAGS = -fpic
+
+
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
 # Note that cc uses -Bstatic
