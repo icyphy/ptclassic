@@ -74,7 +74,9 @@ int DecomGal :: simplify() {
 				p->numIO() * int(c->repetitions)) {
 				// this port has enough delay. Remove it.
 				LOG_DEL; delete p->far();
-				p->disconnect(0);
+				// deleting far disconnected the ports, but
+				// do this too in case geo is persistent:
+				p->disconnect();
 				if (toBeDeleted) {
 					LOG_DEL; delete toBeDeleted;
 				}

@@ -126,10 +126,18 @@ PortHole* Geodesic :: setDestPort (GenericPort& dp) {
 }
 
 int Geodesic :: disconnect (PortHole& p) {
-	if (originatingPort == &p) originatingPort = 0;
-	else if (destinationPort == &p) destinationPort = 0;
-	else return FALSE;
-	return TRUE;
+	// It is possible that originatingPort and destinationPort
+	// point to the same object; be sure to clear both if so.
+	int result = FALSE;
+	if (originatingPort == &p) {
+		originatingPort = 0;
+		result = TRUE;
+	}
+	if (destinationPort == &p) {
+		destinationPort = 0;
+		result = TRUE;
+	}
+	return result;
 }
 
 void Geodesic :: initialize()
