@@ -21,6 +21,7 @@ $Id$
 #include "ProcMemory.h"
 #include "AsmStar.h"
 #include "miscFuncs.h"
+#include <builtin.h>
 
 int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 	MemInterval* p = l;
