@@ -33,9 +33,9 @@
 static const char rcsid[] =
     "@(#) $Header$ (LBL)";
 
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
+
 #include "rtvc.h"
-
-
 RTVCGrabber::RTVCGrabber(int devno)
 {
 	fid_ = -1;
@@ -465,6 +465,6 @@ u_int32_t RTVCGrabber::ref_ts()
 	return (t + offset_);
 }
 
-#endif
-
+#endif /* NEEDED_FOR_SUNVIDEO_STAR */
+#endif /* sun */
 
