@@ -555,18 +555,16 @@ body ::tycho::Resource::chmod {permissions path} {
 # In the very base class, look at the file extension only
 #
 body ::tycho::Resource::contenttype {path} {
-    set ext [file extension $path]
-    puts "ext: $ext, path:$path"
-    if       {[regexp -nocase {.html|.htm} $ext]} {
+    set ext [string tolower [file extension $path]]
+    if       { $ext == ".html" || $string == ".htm" } {
         return "text/html"
-    } elseif {[regexp -nocase {.gif} $ext]} {
+    } elseif { $ext == ".gif" } {
         return "image/gif"
-    } elseif {[regexp -nocase {.jpg} $ext]} {
+    } elseif { $ext == ".jpg" || $ext == ".jpeg" } {
         return "image/jpg"
     } else {
-        return "text/text"
+        return "text/plain"
     }
-    #::tycho::abstractMethod contenttype
 }
 
 #####################################################################
