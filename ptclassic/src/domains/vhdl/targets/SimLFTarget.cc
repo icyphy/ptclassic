@@ -1,9 +1,9 @@
 static const char file_id[] = "SimLFTarget.cc";
 /******************************************************************
 Version identification:
-@(#)SimLFTarget.cc	1.51 01/30/97
+$Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
