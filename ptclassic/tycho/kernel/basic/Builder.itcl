@@ -55,6 +55,9 @@ class ::tycho::Builder {
     ###################################################################
     ####                         public procs                      ####
 
+    # Get the latest sources from version control and create tclIndex files.
+    proc all {}
+
     # Do what ever is necessary to Build Tycho.
     proc build {}
 
@@ -78,6 +81,9 @@ class ::tycho::Builder {
 
     # Create itcldocs in the subdirectories.
     proc itcldocs {}
+
+    # Build tcl extensions in %TYCHO/obj.$PTARCH.
+    proc tclexts {}
 
     # Run all the Tycho tests.
     proc testAll {}
@@ -107,6 +113,20 @@ class ::tycho::Builder {
     ###################################################################
     ###################################################################
     ####                      public procs                       ####
+
+
+#######################################################################
+#### all
+    # Get the latest sources from version control and create tclIndex files.
+#
+body ::tycho::Builder::all {} {
+    global TYCHO
+    set win [::tycho::autoName .allExec]
+    ::tycho::Monitor $win \
+            -command {make all} \
+            -dir $TYCHO \
+            -autostart 1 -autodestroy 1
+}
 
 
 #######################################################################
@@ -230,6 +250,32 @@ body ::tycho::Builder::itcldocs {} {
 	}
     }
     cd $savedir
+}
+
+#######################################################################
+#### sources
+# Do 'make sources'
+#
+body ::tycho::Builder::sources {} {
+    global TYCHO
+    set win [::tycho::autoName .tclextsExec]
+    ::tycho::Monitor $win \
+            -command {make sources} \
+            -dir $TYCHO \
+            -autostart 1 -autodestroy 1
+}
+
+#######################################################################
+#### tclexts
+# Build tcl extensions in $TYCHO/obj.$PTARCH.
+#
+body ::tycho::Builder::tclexts {} {
+    global TYCHO
+    set win [::tycho::autoName .tclextsExec]
+    ::tycho::Monitor $win \
+            -command {make tclexts} \
+            -dir $TYCHO \
+            -autostart 1 -autodestroy 1
 }
 
 #######################################################################

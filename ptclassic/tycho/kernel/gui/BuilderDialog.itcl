@@ -72,7 +72,7 @@ class ::tycho::BuilderDialog {
 #### constructor
 #
 body ::tycho::BuilderDialog::constructor {args} {
-    global TYCHO
+    global TYCHO tcl_platform
     displayer configure -title "Tycho Build Manager" \
 	    -menupadx 10
 
@@ -82,6 +82,10 @@ body ::tycho::BuilderDialog::constructor {args} {
 
     $myMenubar addSeparator Build
 
+    $myMenubar add {'make all'} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::all"
+
+    $myMenubar addSeparator Build
     $myMenubar add {Class Diagram Only} Build -underline 0 \
 	    -command "$this busy ::tycho::Builder::classDiagram"
 
@@ -94,6 +98,8 @@ body ::tycho::BuilderDialog::constructor {args} {
     $myMenubar add {Indices Only} Build -underline 0 \
 	    -command "$this busy ::tycho::Builder::indices"
 
+    $myMenubar add {Tcl Extensions} Build -underline 0 \
+	    -command "$this busy ::tycho::Builder::tclexts"
 
     $myMenubar addMenu Test -underline 0
 
@@ -137,7 +143,10 @@ body ::tycho::BuilderDialog::constructor {args} {
 
         $myMenubar add {Full Distribution} Distribute -underline 0 \
                 -command "$this busy ::tycho::Builder::distFull"
+    }
 
+    if { $tcl_platform(platform) == "macintosh" } {
+	$myMenubar disable {Tcl Extensions}
     }
 
 #### Start FIXME
