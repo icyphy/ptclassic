@@ -1,8 +1,8 @@
 ##
 # @summary	Test file for the tycho doc system
 # @author	Christopher Hylands
-# @version	$Id$
-# @copyright (c) 1995-%Q% The Regents of the University of California.
+# @version	@(#)test.itcl	1.4 06/17/96
+# @copyright (c) 1995-1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -36,10 +36,16 @@ catch {delete class ::tycho::DocSysTest}
 catch {delete class ::tycho::DocSysTestSimple}
 catch {delete class ::tycho::DocSysTestChild}
 
+# This method is outside a class, and should end up in a separate file
+proc methodOutsideAClass {} {
+    puts "foo"
+}
+
 #######################################################################
 ## DocSysTest
-# @desc This class is a test class for the tycho doc system
+# This class is a test class for the tycho doc system
 #
+# The line above intentionally left blank
 class ::tycho::DocSysTest {
     ##
     # A generic constructor
@@ -79,7 +85,7 @@ class ::tycho::DocSysTest {
     # A proc with one arg and a null body
     proc oneArgProc {statementType} {}
 
-    # A private proc with no args
+    # A private proc with no args . . 
     private proc privateProcNoArgs {}
 
     # A public method with two args, one of which takes a default
@@ -93,7 +99,7 @@ class ::tycho::DocSysTest {
 
 ##
 #### privateProcNoArgs
-# A private proc with no args
+# A private proc with no args. . .
 # Here's the body of something we declared in the class interface above
 # This comment has { curly brackets } and " double quotes"
 # We should preserve the new lines in the following text
@@ -101,6 +107,9 @@ class ::tycho::DocSysTest {
 # Console .c -text "A fresh Tcl console\n"
 # .c centerOnScreen
 # </pre></tcl>
+#
+# Also, here is a separate paragraph, there should be a white space above this
+#
 body ::tycho::DocSysTest::privateProcNoArgs {} {
     puts "privateProcNoArgs"
 }
@@ -143,6 +152,7 @@ proc getDirname {} {
 ## testHTMLDocSys
 # Produce documentation for the file named by the filename argument
 proc testHTMLDocSys {filename} {
+    puts "Producing documentation for $filename"
     ::tycho::HTMLDocSys .HTMLDocSys
     .HTMLDocSys readFile $filename
     .HTMLDocSys generateHTML
