@@ -60,7 +60,8 @@ void ComplexState  :: initialize() {
 			parseError ("invalid state type: ", t.s->readFullName());
 			return;
 		}
-		val = ((const ComplexState*)t.s)->val;
+		const ComplexState& cstate = *(const ComplexState*)t.s;
+		val = cstate.val;
 	}
 	// possibility two:
 	// if it does not begin with '(', assume a purely real value.
