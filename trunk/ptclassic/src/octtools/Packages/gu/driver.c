@@ -80,6 +80,10 @@ static int gu_test();
 static int check_changes();
 static char *write_box();
 
+static octObject *bag_test
+	ARGS((octObject *fct));
+
+
 static void usage(prog_name)
 char *prog_name;
 {
@@ -88,6 +92,7 @@ char *prog_name;
     exit(1);
 }
 
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -100,7 +105,8 @@ char *argv[];
     ohUnpackDefaults(&f, "r", ":physical:contents");
     if ((ohUnpackFacetName(&f, argv[1]) != OCT_OK) ||
 	(octOpenFacet(&f) < OCT_OK)) {
-	Fprintf(stderr, "%s: unable to open facet `%s'\n", ohFormatName(&f));
+	Fprintf(stderr, "%s: unable to open facet `%s'\n", argv[0],
+		ohFormatName(&f));
 	exit(1);
     }
     return gu_test(&f);
@@ -130,7 +136,7 @@ int modulus;
 static int gu_test(fct)
 octObject *fct;
 {
-    octObject *bag, *bag_test();
+    octObject *bag;
 
     updates = st_init_table(xid2cmp, xid2hash);
     sizes = st_init_table(st_numcmp, st_numhash);
@@ -704,8 +710,9 @@ char *buf;
 struct octBox *box;
 {
     if (box) {
-	Sprintf(buf, "(%d,%d) (%d,%d)", box->lowerLeft.x, box->lowerLeft.y,
-		box->upperRight.x, box->upperRight.y);
+	Sprintf(buf, "(%ld,%ld) (%ld,%ld)",
+		(long)box->lowerLeft.x, (long)box->lowerLeft.y,
+		(long)box->upperRight.x,(long)box->upperRight.y);
     } else {
 	Strcpy(buf, "no_size");
     }
@@ -730,8 +737,8 @@ int32 obj_xid;
     if (st_delete(updates, (char **) &key, (char **) &record)) {
 	/* The operators should match */
 	if (guOp(change) != record->op) {
-	    Fprintf(stderr, "ERROR: Operator mismatch for %d/%d: %s != %s\n",
-		    parent_xid, obj_xid,
+	    Fprintf(stderr, "ERROR: Operator mismatch for %ld/%ld: %s != %s\n",
+		    (long)parent_xid, (long)obj_xid,
 		    write_op(buf1, guOp(change)),
 		    write_op(buf2, record->op));
 	    errs++;
@@ -743,20 +750,22 @@ int32 obj_xid;
 		(rec_box->upperRight.x != record->old_size->upperRight.x) ||
 		(rec_box->upperRight.y != record->old_size->upperRight.y)) {
 		/* Bad box */
-		Fprintf(stderr, "ERROR: Size mismatch for %d/%d: %s != %s\n",
-			parent_xid, obj_xid,
+		Fprintf(stderr, "ERROR: Size mismatch for %ld/%ld: %s != %s\n",
+			(long)parent_xid, (long)obj_xid,
 			write_box(bb1, rec_box),
 			write_box(bb2, record->old_size));
 		errs++;
 	    }
 	} else {
 	    if ((rec_box && !record->old_size)) {
-		Fprintf(stderr, "ERROR: No size in update record for %d/%d\n",
-			parent_xid, obj_xid);
+		Fprintf(stderr,
+			"ERROR: No size in update record for %ld/%ld\n",
+			(long)parent_xid, (long)obj_xid);
 		errs++;
 	    } else if ((!rec_box && record->old_size)) {
-		Fprintf(stderr, "ERROR: No size in change record for %d/%d\n",
-			parent_xid, obj_xid);
+		Fprintf(stderr,
+			"ERROR: No size in change record for %ld/%ld\n",
+			(long)parent_xid, (long)obj_xid);
 		errs++;
 	    }
 	}
@@ -764,8 +773,8 @@ int32 obj_xid;
 	FREE(record);
     } else {
 	/* Not found */
-	Fprintf(stderr, "ERROR: Unsolicited change record for %d/%d\n",
-		parent_xid, obj_xid);
+	Fprintf(stderr, "ERROR: Unsolicited change record for %ld/%ld\n",
+		(long)parent_xid, (long)obj_xid);
 	errs++;
     }
     return errs;
@@ -783,8 +792,8 @@ static int check_extras()
     gen = st_init_gen(updates);
     while (st_gen(gen, (char **) &key, (char **) &record)) {
 	if (record->op != GU_NOOP) {
-	    Fprintf(stderr, "ERROR: Undetected change: %d/%d %s %s\n",
-		    key->parent_xid, key->obj_xid,
+	    Fprintf(stderr, "ERROR: Undetected change: %ld/%ld %s %s\n",
+		    (long)key->parent_xid, (long)key->obj_xid,
 		    write_op(op_buf, record->op),
 		    write_box(box_buf, record->old_size));
 	    count++;
@@ -801,7 +810,9 @@ octObject *fct;
     gu_gen gen;
     gu_change change;
     int i;
+#ifdef PRINT_TEST
     char op_buf[30], box_buf[100];
+#endif
     int32 fct_id;
     int err_count = 0;
 
@@ -812,7 +823,7 @@ octObject *fct;
 	       marked_layers[i].layer_id);
 #endif
 	gen = guStart(marked_layers[i].mark);
-	while (change = guNext(gen)) {
+	while ( (change = guNext(gen)) ) {
 #ifdef PRINT_TEST
 	    Printf("op: %s, xid: %d, old_size: %s\n",
 		   write_op(op_buf, guOp(change)),
@@ -830,7 +841,7 @@ octObject *fct;
 #endif
     octExternalId(fct, &fct_id);
     gen = guStart(inst_marker);
-    while (change = guNext(gen)) {
+    while ( (change = guNext(gen)) ) {
 #ifdef PRINT_TEST
 	Printf("op: %s, xid: %d, old_size: %s\n",
 	       write_op(op_buf, guOp(change)),
