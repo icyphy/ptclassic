@@ -320,7 +320,7 @@ $(GNU_DEST)/$(PTARCH):
 	-if [ ! -d $@ ]; then \
 		if [ ! -d $(GNU_DEST) ]; then \
 			mkdir $(GNU_DEST); \
-		fi
+		fi; \
 		mkdir $@; \
 	fi
 
