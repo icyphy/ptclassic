@@ -39,6 +39,7 @@ esterel2pl.tcl \
 gantt.tcl \
 mathexpr.tcl \
 message.tcl \
+starindex.tcl \
 pigilib.tcl \
 ptcl.tcl \
 ptcl_help.tcl \
@@ -53,7 +54,6 @@ ptkOptions.tcl \
 ptkParams.tcl \
 ptkPrfacet.tcl \
 ptkRunAllDemos.tcl \
-ptkStarIndex.tcl \
 tkMathematica.tcl \
 tkoct.tcl \
 topgetopt.tcl \
