@@ -17,7 +17,7 @@ outside this range, all outputs get zero.
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
 	explanation {
-.Id "demultiplexing"
+.Id "demultiplex"
 	}
 	input {
 		name {input}

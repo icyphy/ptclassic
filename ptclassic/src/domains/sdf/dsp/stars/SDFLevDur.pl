@@ -15,13 +15,13 @@ algorithm to compute both reflection coefficients and FIR linear
 predictor coefficients.
 .Ir "spectral estimation, maximum entropy"
 .Ir "maximum entropy spectral estimation"
-.Ir "Autocor"
+.Sr "Autocor"
 If the
 .c Autocor
 star is set so that it's \fIunbiased\fR parameter is zero,
 then the combined effect of that star and this one is called the
 autocorrelation algorithm.
-.Ir "autocorrelation algorithm"
+.Ir "autocorrelation method"
 The given order should be the same as the \fInoLags\fR parameter of the
 .c Autocor
 star.  Three outputs are generated.
@@ -39,13 +39,13 @@ performs linear prediction for the input process.
 This set of coefficients is suitable for directly feeding a
 .c BlockFIR
 filter star that accepts outside coefficients.
-.Ir "BlockFIR"
+.Sr "BlockFIR"
 The number of coefficients produced is equal to the \fIorder\fR.
 The final output \fIrefl\fR is the reflection coefficients,
 suitable for feeding directly to a
 .c BlockLattice
 star, which will then generate the forward and backward prediction error.
-.Ir "BlockLattice"
+.Sr "BlockLattice"
 The number of coefficients produced is equal to the \fIorder\fR.
 .pp
 Note that the definition of reflection coefficients is not quite
