@@ -166,13 +166,13 @@ body ::tycho::Edit::constructor {args} {
 	    -label "Select All" \
 	    -underline 0 \
 	    -accelerator "C-/" \
-	    -command "$this component text selectAll"
+	    -command "$this component text selectRange 1.0 end"
     
     $itk_component(editMenu) add command \
 	    -label "Unselect" \
 	    -underline 0 \
 	    -accelerator "C-\\" \
-	    -command "$this component text unselectAll"
+	    -command "$this component text unselectRange 1.0 end"
     
     $itk_component(editMenu) add command \
 	    -label "Find/Change..." \
