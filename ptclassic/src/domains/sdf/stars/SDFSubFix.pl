@@ -31,7 +31,7 @@ them to the precision specified by the parameter "InputPrecision". }
         defstate {
                 name { InputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc {
 Precision of the "neg" input in bits.  The input particles are only
 cast to this precision if the parameter "ArrivingPrecision" is set to NO.}
@@ -39,41 +39,43 @@ cast to this precision if the parameter "ArrivingPrecision" is set to NO.}
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc {
-Precision of the output in bits.  This is the precision that will hold
-the result of the difference of the inputs.}
+Precision of the output in bits.
+This is the precision that will hold the result of the difference
+of the inputs.
+When the value of the accumulation extends outside of the precision,
+the OverflowHandler will be called.
+		}
         }
         defstate {
                 name { OverflowHandler }
                 type { string }
                 default { "saturate" }
                 desc {
-The overflow characteristic for the output.  If the result
-of the difference cannot be fit into the precision of the output, overflow
-occurs and the overflow is taken care of by the method specified by this
-parameter.  The keywords for overflow handling methods are :
-"saturate"(default), "zero_saturate", "wrapped", "warning". }
+Overflow characteristic for the output.
+If the result of the sum cannot be fit into the precision of the output,
+then overflow occurs and the overflow is taken care of by the method
+specified by this parameter.
+The keywords for overflow handling methods are:
+"saturate" (the default), "zero_saturate", "wrapped", and "warning".
+		}
         }
         protected {
-                const char* IP;
-                const char* OP;
-                const char* OV;
-                int in_IntBits;
-                int in_len;
-                int out_IntBits;
-                int out_len;
-		Fix diff;
+                int in_IntBits, in_len;
+		Fix fixIn, diff;
         }
         setup {
-                IP = InputPrecision;
-                OP = OutputPrecision;
-                OV = OverflowHandler;
+                const char* IP = InputPrecision;
                 in_IntBits = Fix::get_intBits(IP);
                 in_len = Fix::get_length(IP);
-                out_IntBits = Fix::get_intBits(OP);
-                out_len = Fix::get_length(OP);
+
+                const char* OP = OutputPrecision;
+                int out_IntBits = Fix::get_intBits(OP);
+                int out_len = Fix::get_length(OP);
                 diff = Fix(out_len, out_IntBits);
+
+                const char* OV = OverflowHandler;
                 diff.set_ovflow(OV);
         }
         go {
