@@ -26,26 +26,8 @@ Star :: operator StringList () {
 	out += "Descriptor: ";
 	out += readDescriptor();
 	out += "\n";
-	out += "Ports in the star:\n";
-	for(int i = numberPorts(); i>0; i--)
-		out += StringList(nextPort());
+	out += printPorts ("star");
 	return out;
-}
-
-void Star :: beforeGo()
-{
-        for(int i = numberPorts(); i>0; i--) {
-                SDFPortHole& port = (SDFPortHole&)nextPort();
-                port.beforeGo();
-                }
-}
- 
-void Star :: afterGo()
-{
-        for(int i = numberPorts(); i>0; i--) {
-                SDFPortHole& port = (SDFPortHole&)nextPort();
-                port.afterGo();
-                }
 }
 
 /*******************************************************************
@@ -53,6 +35,23 @@ void Star :: afterGo()
 	class SDFStar methods
 
 ********************************************************************/
+
+
+void SDFStar :: beforeGo()
+{
+        for(int i = numberPorts(); i>0; i--) {
+                SDFPortHole& port = (SDFPortHole&)nextPort();
+                port.beforeGo();
+                }
+}
+ 
+void SDFStar :: afterGo()
+{
+        for(int i = numberPorts(); i>0; i--) {
+                SDFPortHole& port = (SDFPortHole&)nextPort();
+                port.afterGo();
+                }
+}
 
 // Redefine method setting internal data in the Block
 // so that various SDF-specific initilizations can be performed.
