@@ -8,8 +8,8 @@
 	location	{ SDF image library }
 	desc {
 Read a PPM-format image from a file and
-send it out in three Packets--a Red, Green, and Blue packet.
-Each packet is of type GrayImage.
+send it out in three inputs--a Red, Green, and Blue image.
+Each image is of type GrayImage.
 
 If present, the character '#' in the 'fileName' state is replaced with
 the frame number to be read next. For example, if the 'frameId' state is
@@ -25,18 +25,9 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "Error.h" }
 
 //////// OUTPUTS AND STATES.
-	output {
-		name { output1 }
-		type { packet }
-	}
-	output {
-		name { output2 }
-		type { packet }
-	}
-	output {
-		name { output3 }
-		type { packet }
-	}
+	output { name { output1 } type { message } }
+	output { name { output2 } type { message } }
+	output { name { output3 } type { message } }
 
 	defstate {
 		name	{ fileName }
@@ -147,12 +138,12 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 		LOG_DEL; delete rgbfp;
 
 // Write whole frame to output here...
-		Packet pktr(*rColor);
-		Packet pktg(*gColor);
-		Packet pktb(*bColor);
-		output1%0 << pktr;
-		output2%0 << pktg;
-		output3%0 << pktb;
+		Envelope envpr(*rColor);
+		Envelope envpg(*gColor);
+		Envelope envpb(*bColor);
+		output1%0 << envpr;
+		output2%0 << envpg;
+		output3%0 << envpb;
 		frameId = int(frameId) + 1; //increment frame id
 	} // end go{}
 } // end defstar{ ReadRgb }

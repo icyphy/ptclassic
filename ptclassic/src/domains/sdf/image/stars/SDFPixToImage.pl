@@ -16,7 +16,7 @@ star produces large sample rate changes, use the loop scheduler!
 	}
 	output {
 		name { output }
-		type { packet }
+		type { message }
 	}
 	defstate {
 		name { width }
@@ -48,7 +48,7 @@ star produces large sample rate changes, use the loop scheduler!
 			else if (data > 255) data = 255;
 			*d++ = data;
 		}
-		Packet pkt(*imgData);
-		output%0 << pkt;
+		Envelope envp(*imgData);
+		output%0 << envp;
 	}
 }
