@@ -105,13 +105,8 @@ limitation of liability, and disclaimer of warranty provisions.
       @datatype $starSymbol(buffer)[@size];
       @datatype *$starSymbol(bufferptr);
       SndSoundStruct $starSymbol(header);
+      int $starSymbol(counter);
     }
-
-    codeblock(noOpen) {
-	/* Use standard input for reading. */
-	$starSymbol(file) = 0;
-    }
-
 
     codeblock(openFileForReading) {
       /* Open file for reading */
