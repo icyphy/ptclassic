@@ -22,6 +22,9 @@ limitation of liability, and disclaimer of warranty provisions.
     type { string }
   }
 
+  // sprintf()
+  ccinclude{ <stdio.h> }
+
   setup {
     noInternalState();
     reactive();
