@@ -995,7 +995,6 @@ int AM_SetEventMask(eb_t eb, int mask)
 
 int AM_Wait(eb_t eb)
 {
-  fd_set temp_fdset;
 
   if (eb == NULL)
     return(AM_ERR_BAD_ARG);
