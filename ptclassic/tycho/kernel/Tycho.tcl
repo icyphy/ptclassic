@@ -93,6 +93,11 @@ set tycholib $tycho/lib
 if {![info exists tychoExitWhenNoMoreWindows]} {
     set tychoExitWhenNoMoreWindows 1
 }
+# Check to see whether the usual exit mechanism (where we enable 
+# C-x C-c and have the exit command in the File menu) is enabled.
+if {![info exists tychoShouldWeDoRegularExit]} {
+    set tychoShouldWeDoRegularExit 1
+}
 
 # Note that it is NOT normally acceptable to rely on the TCL_LIBRARY
 # and TK_LIBRARY environment variables, because most other tcl
@@ -178,7 +183,7 @@ if {$tychoWelcomeWindow != 0} {
 }
 # Determine whether we exit when there are no more windows.
 ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
-
+::tycho::Dismiss::setRegExit $tychoShouldWeDoRegularExit
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
@@ -193,3 +198,4 @@ unset tychoWelcomeWindow
 unset tychoConsoleWindow
 unset tychoOpenFiles
 unset tychoExitWhenNoMoreWindows
+unset tychoShouldWeDoRegularExit
