@@ -232,7 +232,8 @@ body ::tycho::DomainInfo::printStar {id} {
 # Return a list of all the domains.
 #
 body ::tycho::DomainInfo::domains {} {
-    if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
         return [split [::pitcl::knownDomains]]
     } {
         return [::domains]
@@ -264,7 +265,8 @@ body ::tycho::DomainInfo::diffDomains {domainA domainB} {
 # Return the list of known blocks in domain.
 # 
 body  ::tycho::DomainInfo::knownBlocks {domain} {
-    if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
         return [::pitcl::knownBlocks $domain]
     } {
         domain $domain
@@ -277,7 +279,8 @@ body  ::tycho::DomainInfo::knownBlocks {domain} {
 # Given the starName and domain, print the star
 #
 body ::tycho::DomainInfo::print {starName domain} {
-    if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
         return [::pitcl::print $starName $domain]
     } {
         ::domain $domain
@@ -383,7 +386,8 @@ body ::tycho::DomainInfo::diffStars {domainA domainB} {
 # that may or may not be out of date.
 #
 body ::tycho::DomainInfo::starInfo {starName} {
-    if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
+    global ptolemyfeature
+    if $ptolemyfeature(pitcl) {
         set printResults [::pitcl::print $starName $domainName]
     } {
         domain $domainName
