@@ -91,15 +91,17 @@ the high-priority output. The remainder of the coefficients are sent to
       // Initialize.
       int size = inImage.numCols() * inImage.numRows();
 
-      // FIXME
+      // FIXME: Unmaintainable use of the FloatMatrix class
       // Sets inImagePtr pointing to array representing the FloatMatrix itself.
-      // This only works because in the underlying implementation of FloatMatrix,
-      // inImage[0], which returns the 1st row, also returns the entire vector
-      // representing the matrix. 
+      // This only works because in the underlying implementation of
+      // FloatMatrix, inImage[0], which returns the first row, also returns
+      // the entire vector representing the matrix. 
       // A method should be added to the FloatMatrix class to does this instead
       // of relying on this current operation
       const double* inImagePtr = inImage[0];
 
+      // Perform the run-length encoding
+      // outDc and outAc are allocated using malloc in Ptdsp_RunLengthEncode
       Ptdsp_RunLengthEncode(inImagePtr, size, int(BlockSize), HiPri,
 			   double(Thresh), &outDc, &outAc, &indxDc, &indxAc); 
     }
@@ -142,7 +144,8 @@ the high-priority output. The remainder of the coefficients are sent to
   }
 
   destructor {
-    delete [] outDc;
-    delete [] outAc;
+    // outDc and outAc are allocated using malloc in Ptdsp_RunLengthEncode
+    free(outDc);
+    free(outAc);
   }
 } // end defstar { DctImgCde }
