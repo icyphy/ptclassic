@@ -42,7 +42,7 @@ delim off
 .sp 1.0i
 .)b
 .tm title \\n% \\$1 \"Output for table of contents
-.eh '\\f\\n(HX\\$1''%'
+.eh '\\f\\n(HXUC Berkeley, EECS''%'
 .oh '\\f\\n(HX\\$1''%'
 .nr S1 0 1 \" Initialize number register for major section numbers
 .S 14 \"title is 14 point
