@@ -12,7 +12,7 @@ static const char file_id[] = "Block.cc";
 
 /**************************************************************************
 Version identification:
-$Id$
+$Id$	%Q%
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -189,7 +189,8 @@ Block* Block::clone() const {
 					cP->newPort();
 				}	
 			}
-		}	
+		}
+		b->flags = flags;
 	}
 	return b;
 }
