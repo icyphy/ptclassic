@@ -85,6 +85,9 @@ all:		$(SRCS) stars_all
 
 install:	stars_install
 
+# matlab.mk checks this var before traversing the path
+NEED_MATLABDIR =	1
+
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
