@@ -119,7 +119,7 @@ void DecomGal :: decompose() {
 		
 		// find a strongly connected components.
 		while ((c = nextClust++) != 0) {
-			SequentialList* clist;
+			SequentialList* clist = (SequentialList *)NULL;
 			if (!(c->visited()) && (clist = findSCComponent(c))) {
 				makeCluster(clist);
 				LOG_DEL; delete clist;
