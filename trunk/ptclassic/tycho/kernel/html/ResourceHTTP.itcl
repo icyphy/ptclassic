@@ -30,6 +30,11 @@
 #                                        COPYRIGHTENDKEY
 #######################################################################
 
+# FIXME: Currently use one single global status flag
+# for the non-blocking download. Need to make one per URL
+# (and non-global?)
+set _httpstatus done
+
 #######################################################################
 #### ResourceHTTP
 # This provides an abstraction of remote files for anything that
@@ -58,7 +63,7 @@ class ::tycho::ResourceHTTP {
     ####                         public methods                    ####
 
     # Close the resource.
-    method close {} {}
+    method close {}
 
     # Return the content type of the current file
     method contenttype {}
@@ -82,7 +87,7 @@ class ::tycho::ResourceHTTP {
 
     # Write a string to a streamable resource.
     # Can't write into HTTP file! Read permission of off
-    method puts {}
+    method puts {string}
 
     # Return a string containing the data in a streamable resource 
     method read {}
@@ -92,6 +97,9 @@ class ::tycho::ResourceHTTP {
 
     # Return the progess indicator, as a decimal number. 1.0 is full.
     method progress {}
+
+    # Write to the file
+    method write {data}
 
     ###################################################################
     ####                           public procs                    ####
@@ -120,6 +128,9 @@ class ::tycho::ResourceHTTP {
     # Get the status of a resource
     proc stat {path varName}
 
+    # Parse a url
+    proc splitURL {url}
+
     # Return the type of a given file
     proc type {path}
 
@@ -136,16 +147,13 @@ class ::tycho::ResourceHTTP {
     protected method httpbusy {}
 
     # Test if a file has been cached locally
-    protected method httpcached {}
+    protected method httpcached {url}
 
     # Clean up after completing a get
     protected method httpdone {}
 
     # Initiate an HTTP get. Type is file or header.
     protected method httpget {url type}
-
-    # Parse a url
-    protected method httpsplit {url}
 
     # The file event handler
     protected method httpread {}
@@ -156,6 +164,11 @@ class ::tycho::ResourceHTTP {
     # FIXME
     method info {} {
 	concat [array get _forwarding] [array get _statinfo]
+    }
+
+    # FIXME
+    method openerror {str} {
+	::puts $str
     }
 
     ###################################################################
@@ -176,7 +189,7 @@ class ::tycho::ResourceHTTP {
     # The current status of an http get. This is a common array
     # so that tkwait can access it. Can be "header," "body,"
     # "abort," or "done".
-    protected common _httpstatus
+    #protected common _httpstatus
 
     ###################################################################
     ####                        protected variables                ####
@@ -240,9 +253,10 @@ body ::tycho::ResourceHTTP::constructor {args} {
 #
 body ::tycho::ResourceHTTP::destructor {} {
     # If we're still loading, forget it
-    if [httpbusy] {
-    	httpabort
-    }
+    #if [httpbusy] {
+#	::puts httpabort
+#    	httpabort
+#    }
 }
 
 #########################################################################
@@ -253,11 +267,13 @@ body ::tycho::ResourceHTTP::destructor {} {
 #### close
 body ::tycho::ResourceHTTP::close {} {
     if !$fileIsOpen {
-	error "File \"$this\" is not open"
+	openerror "File \"$this\" is not open (close)"
     }
     set fileIsOpen 0
-    ::close $fileid
-    set fileid ""
+    if { $fileid != "" } {
+        ::close $fileid
+        set fileid ""
+    }
 }
 
 #####################################################################
@@ -271,7 +287,7 @@ body ::tycho::ResourceHTTP::contenttype {} {
 #### eof
 body ::tycho::ResourceHTTP::eof {} {
     if !$fileIsOpen {
-	error "File \"$this\" is not open"
+	openerror "File \"$this\" is not open (eof)"
     }
    ::eof $fileid
 }
@@ -280,7 +296,7 @@ body ::tycho::ResourceHTTP::eof {} {
 #### gets
 body ::tycho::ResourceHTTP::gets {{varName {}}} {
     if !$fileIsOpen {
-	error "File \"$this\" is not open"
+	openerror "File \"$this\" is not open (gets)"
     }
     if { $varName == "" } {
 	::gets $fileid
@@ -341,7 +357,7 @@ body ::tycho::ResourceHTTP::puts {string} {
 #### read
 body ::tycho::ResourceHTTP::read {} {
     if !$fileIsOpen {
-	error "File \"$this\" is not open"
+	openerror "File \"$this\" is not open (read)"
     }
     ::read $fileid
 }
@@ -421,14 +437,22 @@ body ::tycho::ResourceHTTP::dirlist {path} {
 #
 body ::tycho::ResourceHTTP::exists {url} {
     # Do we already know if it exists?
+    while { [::info exists _forwarding($url)] } {
+	set url $_forwarding($url)
+    }
     if { [::info exists _exists($url)] } {
 	return $_exists($url)
     }
-    # Otherwise request the header and wait for it
-    httpget $url header
-    httpwait
+    # Otherwise create an object, request the header and wait for it
+    set resource [new $url]
+    $resource httpget $url header
+    $resource httpwait
+    ::delete object $resource
     
     # Return the result
+    while { [::info exists _forwarding($url)] } {
+	set url $_forwarding($url)
+    }
     return $_exists($url)
 }
 
@@ -443,6 +467,7 @@ body ::tycho::ResourceHTTP::mkdir {dir} {
 # Create a new HTTP object.
 #
 body ::tycho::ResourceHTTP::new {path args} {
+    #::puts "::tycho::ResourceHTTP::new $path $args"
     uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] $args
 }
 
@@ -463,7 +488,7 @@ body ::tycho::ResourceHTTP::query {path option} {
 	}
 	"isdirectory" {
 	    # If we already know, just return it
-	    stat $url opt
+	    stat $path opt
 	    if [::info exists opt(isdirectory)] {
 		return $opt(directory)
 	    }
@@ -472,21 +497,21 @@ body ::tycho::ResourceHTTP::query {path option} {
 	    # exists and ends in "/"
 	    set isdir 0
 	    if [exists $path] {
-		while { [::info exists _forwarding($url)] } {
-		    set url $_forwarding($url)
+		while { [::info exists _forwarding($path)] } {
+		    set path $_forwarding($path)
 		}
-		if [regexp {/$} $url] {
+		if [regexp {/$} $path] {
 		    set isdir 1
 		}
 		# As a second guess, it's a directory if it contains the
 		# string "Index of foo", where "foo" is the path component
 		# of the URL.
-		set path [lindex [httpsplit $url] 2]
-		set data [::tycho::resource read $url]
+		set path [lindex [splitURL $path] 2]
+		set data [::tycho::resource read $path]
 		set isdir [regexp "Index of $path" $data]
 
 		# Remember what it is
-		lappend _statinfo($url) isdirectory $isdir
+		lappend _statinfo($path) isdirectory $isdir
 		return $isdir
 	    }
 	    return 0
@@ -494,7 +519,7 @@ body ::tycho::ResourceHTTP::query {path option} {
 	"isfile" {
 	    # A URL is a file if it exists and is not a directory
 	    if [exists $path] {
-		return [expr { ! [query isdirectory $url] }]
+		return [expr { ! [query isdirectory $path] }]
 	    }
 	    return 0
 	}
@@ -525,9 +550,9 @@ body ::tycho::ResourceHTTP::query {path option} {
 #
 body ::tycho::ResourceHTTP::stat {path varName} {
     if [exists $path] {
-    	uplevel $varName v
+    	upvar $varName v
     	while { [::info exists _forwarding($path)] } {
-    		set path $_forwarding($path)
+	    set path $_forwarding($path)
     	}
     	array set v $_statinfo($path)
     }
@@ -555,11 +580,11 @@ body ::tycho::ResourceHTTP::debugputs {string} {
 #
 body ::tycho::ResourceHTTP::httpabort {} {
     # First see that there is a GET running
-    if ![::info exists _httpstatus($currentURL)] {
+    if ![::info exists _httpstatus] {
 	return
     }
     # Set the status so that httpdone knows what to do
-    set _httpstatus($currentURL) "abort"
+    set _httpstatus "abort"
 
     # Terminate with httpdone. This will enable any
     # threads hanging off tkwait to continue.
@@ -571,17 +596,25 @@ body ::tycho::ResourceHTTP::httpabort {} {
 # Return true if the HTTP GET is still running.
 #
 body ::tycho::ResourceHTTP::httpbusy {} {
-    expr { [::info exists _httpstatus($currentURL)] \
-	    && $_httpstatus($currentURL) != "done" }
+    global _httpstatus
+
+    debugputs "httpbusy{} returns [expr { [::info exists _httpstatus] \
+	    && ! [string compare $_httpstatus done] }]"
+
+    expr { [::info exists _httpstatus] \
+	    && ! [string compare $_httpstatus done] }
 }
 
 #########################################################################
 #### httpcached
 # Return true if the given file has been cached locally.
 #
-body ::tycho::ResourceHTTP::httpcached {path} {
-    expr { [::info exists _cachefile($path)] \
-    	&& [::file exists $_cachefile($path)] }
+body ::tycho::ResourceHTTP::httpcached {url} {
+    while { [::info exists _forwarding($url)] } {
+	set url $_forwarding($url)
+    }
+    expr { [::info exists _cachefile($url)] \
+    	&& [::file exists $_cachefile($url)] }
 }
 
 #########################################################################
@@ -614,27 +647,28 @@ body ::tycho::ResourceHTTP::httpdone {} {
 	    set _cachefile($currentURL) $filename
 	}
 	# Set status info
-    	set _statinfo($currentURL) [list \
-	    	-mtime $lastmodified \
-	    	-size $contentlength \
-	    	-type $contenttype]
+        set _statinfo($currentURL) [list \
+                -mtime $lastmodified \
+                -size $contentlength \
+                -type $contenttype]
+        debugputs "Status = [array get _statinfo]"
     }
     # To be picky, let's check that the content size is the
     # same as what we actually got...
     # Unfortunately, this is bogus, since our httpread{}
     # is putting an additional end-of-line at the end of the file.
-    if { $_httpstatus($currentURL) != "abort" && $requestMode == "file" } {
-	if { [::file size $filename] != $contentlength } {
-	    if $debug {
-		# debugputs "Received HTTP file size ([::file size \
-			$filename]) \
-			is not the same as content length ($contentlength)"
-	    }
-	}
-    }
+#     if { $_httpstatus != "abort" && $requestMode == "file" } {
+# 	if { [::file size $filename] != $contentlength } {
+# 	    if $debug {
+# 		# debugputs "Received HTTP file size ([::file size \
+# 			$filename]) \
+# 			is not the same as content length ($contentlength)"
+# 	    }
+# 	}
+#     }
     
     # Set the status
-    set _httpstatus($currentURL) "done"
+    uplevel #0 "set _httpstatus done"
     
     # One last update of notifycommand
     if { $notifycommand != "" } {
@@ -652,7 +686,7 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 
     # Parse URL into hostname, port, and path
     set currentURL $url
-    ::tycho::assign hostname port path [httpsplit $url]
+    ::tycho::assign hostname port path [splitURL $url]
 
     # Surfit starts here vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
     if {[catch {socket -async $hostname $port} socketid]} {
@@ -668,7 +702,7 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 	set fileid [::open $filename "w"]
 	debugputs "Cache file $filename on $fileid"
     }
-    set _httpstatus($url) "header"  ;# Initially we're getting the header
+    uplevel #0 "set _httpstatus header"  ;# Initially we're getting the header
     set status -1                   ;# Initial status - ?
     set requestMode $type           ;# header or file
     set contentloaded 0             ;# how much is loaded
@@ -743,12 +777,12 @@ body ::tycho::ResourceHTTP::httpread {} {
     ::gets $socketid line
 
     # Currently reading header or body?
-    if { $_httpstatus($currentURL) == "header" } {
+    if { [uplevel #0 "set _httpstatus"] == "header" } {
 	# Header mode, the information about this http get.
 	if { $line == {} } {
 	    # End of header is denoted by an empty line
 	    debugputs "            <-"
-	    set _httpstatus($currentURL) "body"
+	    uplevel #0 "set _httpstatus body"
 
 	    # Check status codes
 	    if {$status>=300 && $status<=399} {
@@ -776,7 +810,7 @@ body ::tycho::ResourceHTTP::httpread {} {
 	    regexp -nocase {^Location: (.+)} $line match forwardlocation
 	    regexp -nocase {^Content-length: ([0-9]+)} $line match contentlength
 	}
-    } elseif { $_httpstatus($currentURL) == "body" } {
+    } elseif { [uplevel #0 "set _httpstatus"] == "body" } {
 	# Body mode (content of http get), write to the cache file.
 	# Note that we only do this if the status _is_ "body," in
 	# case an abort is in progress.
@@ -787,16 +821,16 @@ body ::tycho::ResourceHTTP::httpread {} {
     if { $notifycommand != "" } {
 	uplevel #0 $notifycommand
     }
-    after idle "::fileevent $socketid readable \
-	    \"@scope ::tycho::ResourceHTTP [list $this httpread]\""
+    after idle "catch \[list ::fileevent $socketid readable \
+	    \"@scope ::tycho::ResourceHTTP [list $this httpread]\"\]"
 }
 
 #########################################################################
-#### httpsplit
+#### splitURL
 # Parse a url into the hostname, port, and return them
 # as a three-element list.
 #
-body ::tycho::ResourceHTTP::httpsplit {url} {
+body ::tycho::ResourceHTTP::splitURL {url} {
     set _port 80
     set _hostname {}
     set _path /
@@ -829,8 +863,8 @@ body ::tycho::ResourceHTTP::httpsplit {url} {
 # Wait until the current GET completes
 body ::tycho::ResourceHTTP::httpwait {} {
     # Wait until the status becomes "done"
-    while { $_httpstatus($currentURL) != "done" } {
-        tkwait variable _httpstatus($currentURL)
+    while { [uplevel #0 "set _httpstatus"] != "done" } {
+        uplevel #0 "tkwait variable _httpstatus"
     }
     return
 }
