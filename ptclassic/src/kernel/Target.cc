@@ -308,7 +308,12 @@ const char* Target::writeDirectoryName(const char* dirName) {
 	struct stat stbuf;
 	if(stat(dirFullName, &stbuf) == -1) {
 	    // Directory does not exist.  Attempt to create it.
-	    if (mkdir(dirFullName, 0777)) {
+	    StringList mkdir;
+	    // -p flag is necessary because it might be a nested directory
+	    // where one of the parent directories does not exist
+	    mkdir << "mkdir -p " << dirFullName;
+    
+	    if (system(mkdir)) {
 		Error::warn("Cannot create Target directory : ", dirFullName);
 		return 0;
 	    }
