@@ -43,7 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PrecisionState.h"
 
 // JMS
-#include <strstream.h>
+// strstream.h is not part of g++-2.95.1
+//#include <strstream.h>
 
 extern const bitWord PB_GLOBAL /* = 0x20 */;
 extern const Attribute P_GLOBAL;
