@@ -1475,7 +1475,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 #
 # <dt><b>get</b> _tagOrId_
 # <dd>
-# Get the current seleciton if there is one, or a null string
+# Get the current selection if there is one, or a null string
 # if not.
 #
 # <dt><b>item</b>

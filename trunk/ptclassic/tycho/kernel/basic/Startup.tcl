@@ -294,7 +294,7 @@ proc ::tycho::start {args} {
 
     # The main division here is between the non-graphical and
     # graphical versions. It's easier to farm the startup
-    # of tehse two versions to separate procs.
+    # of these two versions to separate procs.
     if $tychofeatures(-nogui) {
 	::tycho::startKernel
     } else {

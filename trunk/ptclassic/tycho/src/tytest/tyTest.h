@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * Tytest_TimerTask
  *
  * A procedure that starts and stop a C "task" of the kind required by
- * tha Tycho scheduler. 
+ * the Tycho scheduler. 
  */
 int
 Tytest_TestTask(ClientData dummy, Tcl_Interp *interp, int argc, char **argv);
