@@ -30,7 +30,8 @@ the same line, separated by tabs.
 		UserOutput output;
 	}
 	start {
-		output.fileName(fileName);
+		if (!output.fileName(fileName))
+			Error::abortRun(*this,"can't open file ",fileName);
 	}
 
 	go {
