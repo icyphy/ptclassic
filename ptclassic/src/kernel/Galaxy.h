@@ -159,6 +159,13 @@ public:
 	// Remove a block from the list
 	inline int removeBlock(Block& b) { return blocks.remove(&b);}
 
+	// Get the head of the blocks list--useful when there
+	// are Clusters with only one star in them.  By default, when
+	// a cluster hierarchy is created, every star is a Cluster.
+	// For such clusters, calling head() will give access to the star
+	// immediately rather than having to set up an iterator to get it.
+	inline Block* head() {return blocks.head();}
+
         // States initialize
         virtual void initState();
 
