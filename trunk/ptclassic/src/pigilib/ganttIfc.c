@@ -42,37 +42,45 @@ galaxy in a universe has depth 3.
 */
 #define MAX_DEPTH 64
 
-/* hack function to detect an instance corresponding to a multiport
-   star with specified number of ports: name.port=num .  It returns
-   true if there is exactly one "." character and exactly one "="
-   character.
+/* 
+ * Function to detect a name that is extended with a modifier like
+ * name.ext1=num.ext2=num.  It returns true if there is at least one
+ * "=" character after the first period.
  */
 
 static boolean
 specialInstance(s)
 char *s;
 {
+    char *eq, *p2;
     char *p = strchr(s, '.');
-    if (!p) return 0;
-    if (strchr(p+1,'.')) return 0;
-    return strchr(p+1,'=') ? 1 : 0;
+    if (!p) return 0;		/* No more periods in the string */
+    if (eq = strchr(p+1,'=')) {
+	/* If the '=' occurs before the next '.', return 1 */
+	p2 = strchr(p+1, '.');
+	if ( !p2 || p2 > eq) return 1;
+    }
+    return 0;
 }
 
 /*
-Copy the first component of s into buf.  Components are separated by
-'.' characters or '\0'.  Handle "special instance names" (see above).
-Caveats: assumes enough room in buf.
+Copy the first component of s into buf.
+Components are separated by '.' characters.
+If the component contains the character "=", return FALSE.
+Otherwise, return TRUE.
+If the buffer is not large enough, copy only what fits.
 */
-static void
-head(s, buf)
+static boolean
+head(s, buf, buflen)
 char *s;
 char *buf;
+int buflen;
 {
     char *end;
 
     end = strchr(s, '.');
     if (end == NULL || specialInstance(s)) {
-	strcpy(buf, s);
+	strncpy(buf, s, buflen);
     } else {
 	while (s != end) {
 	    *buf++ = *s++;
@@ -82,8 +90,8 @@ char *buf;
 }
 
 /*
-Advance s to point after the next '%' character in the string or
-else return NULL.    Handle "special instance names" (see above).
+Advance s to point after the next '.' character in the string or
+else return NULL if there are no more such characters.
 */
 static
 char *
@@ -121,30 +129,32 @@ int usePattern;
 {
     static char *pattern = "00010000 00010000 00010000 11111111 00010000 00010000 00010000 00010000";
 
-    octObject facet, inst;
+    octObject facet, inst, backup;
     char word[256];
     vemSelSet ss;
 
     if (name == NULL) return TRUE;
     facet = *rootFacetPtr;
     while (1) {
-	head(name, word);
-	if (ohGetByInstName(&facet, &inst, word) == OCT_NOT_FOUND) {
-	    return FALSE;
-	}
-	if (usePattern)
+	head(name, word, 256);
+	/* If name is wormhole, the following get will fail because */
+	/* there is no icon.  Skip the name in this case.	    */
+	if (ohGetByInstName(&facet, &inst, word) != OCT_NOT_FOUND) {
+	    if (usePattern)
 		ss = vemNewSelSet(facet.objectId, color->red,
 				  color->green, color->blue, 1, 1, 8, 8, 
 				  pattern);
-	else
+	    else
 		ss = vemNewSelSet(facet.objectId, color->red,
 				  color->green, color->blue, 2, 3, 1, 1, "0");
-	sets[(*depth)++] = ss;
-	vemAddSelSet(ss, inst.objectId);
-	if ((name = incr(name)) == NULL) break;
-	if (!MyOpenMaster(&facet, &inst, "contents", "r")) {
-	    return FALSE;
+	    sets[(*depth)++] = ss;
+	    vemAddSelSet(ss, inst.objectId);
+	    backup = facet;
+	    if (!MyOpenMaster(&facet, &inst, "contents", "r")) {
+	        return FALSE;
+	    }
 	}
+	if ((name = incr(name)) == NULL) break;
     }
     return TRUE;
 }
@@ -205,15 +215,16 @@ long userOptionWord;
 }
 
 void
-FindAndMarkError(facetP, name)
+FindAndMark(facetP, name, pattern)
 octObject *facetP;
 char *name;
+int pattern;
 {
     static RgbValue color = {65535, 0, 0};
 /* name contains the universe name as well, which must be stripped */
     name = incr(name);
     if (!name) return;
-    FrameStar(facetP, name, &color, findSets, &findDepth, 0);
+    FrameStar(facetP, name, &color, findSets, &findDepth, pattern);
 }
 
 /* Gantt chart support, from ~gabriel/src/ggirpc/ganttIfc.c */
