@@ -29,19 +29,6 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
-## BOGOSITY alert! This file now generates TIM format files,
-# so we have to load a bunch of needed files if we are running this
-# outside of Tycho
-if { [uplevel #0 info namespace all tycho] == {} } {
-    namespace ::tycho
-    source ../../kernel/Object.itcl
-    source ../../kernel/Interchange.itcl
-    source ../../kernel/Model.itcl
-    source ../../kernel/HyperlinkIndex.itcl
-    source ../../kernel/Path.tcl
-}
-namespace ::tycho
-
 #### tychoCompareFirst
 # Given two lists, return -1, 0, or 1 depending on whether the first
 # element of this first list is alphabetically less than, equal, or greater
@@ -132,6 +119,20 @@ proc tychoMkIndex {name filename prependTYCHO nested args } {
 # The rest of the arguments are any number of file names
 # from which the index should be created.  If any of these files
 # is missing or is not readable, then that file is ignored.
+#
+# This proc will onyl work is Tycho is running! If not, then the
+# following piece of code will need to be executed:
+# <tcl><pre>
+# if { [uplevel #0 info namespace all tycho] == {} } {
+#     namespace ::tycho
+#     source ../../kernel/Object.itcl
+#     source ../../kernel/Interchange.itcl
+#     source ../../kernel/Model.itcl
+#     source ../../kernel/HyperlinkIndex.itcl
+#     source ../../kernel/Path.tcl
+# }
+# namespace ::tycho
+# </pre></tcl>
 #
 proc tychoMkTIMIndex {name filename prependTYCHO nested args } {
     set index [::tycho::HyperlinkIndex [::tycho::autoName index] \
@@ -311,7 +312,7 @@ proc tychoStandardIndex {} {
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     # The standard index is not nested
-    eval tychoMkTIMIndex {{Tycho index}} \
+    eval tychoMkIndex {{Tycho index}} \
     	    [list [file join $TYCHO lib idx tycho.idx]] 1 0 $files 
     cd $olddir
 }
@@ -330,9 +331,9 @@ proc tychoCodeDocIndex {} {
     set files [tychoFindCodeDocHTML $TYCHO]
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
-    # The code index is nested
-    eval tychoMkTIMIndex {{Tycho Itcl Code Index}} \
-	    [list [file join $TYCHO lib idx codeDoc.idx]] 1 1 $files
+    # The code index is not nested either
+    eval tychoMkIndex {{Tycho Itcl Code Index}} \
+	    [list [file join $TYCHO lib idx codeDoc.idx]] 1 0 $files
     cd $olddir
 }
 
