@@ -101,7 +101,7 @@ XFontStruct *font;		/* Normal font      */
 
 #define gray_width 32
 #define gray_height 32
-static char gray_bits[] = {
+static unsigned char gray_bits[] = {
    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
    0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa,
    0x55, 0x55, 0x55, 0x55, 0xaa, 0xaa, 0xaa, 0xaa, 0x55, 0x55, 0x55, 0x55,
@@ -709,7 +709,7 @@ Window win;
 #define TI_CRSP	1
 
 typedef struct ti_info {
-    FNPTR( func, xtb_hret, (Window win, int ch, char *textcopy, xtb_data *val) );
+    FNPTR( func, xtb_hret, (Window win, int ch, char *textcopy, xtb_data val) );
     				/* Function to call   */
     int maxlen;			/* Maximum characters */
     int curidx;			/* Current index pos  */
@@ -911,7 +911,7 @@ void xtb_ti_new(win, text, maxchar, func, val, frame)
 Window win;			/* Parent window      */
 char *text;			/* Initial text       */
 int maxchar;			/* Maximum characters */
-FNPTR( func, xtb_hret, (Window, int, char *, xtb_data *) ); /* Callback */
+FNPTR( func, xtb_hret, (Window, int, char *, xtb_data) ); /* Callback */
 xtb_data val;			/* User data          */
 xtb_frame *frame;		/* Returned size      */
 /*
