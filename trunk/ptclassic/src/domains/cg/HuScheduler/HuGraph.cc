@@ -27,14 +27,13 @@ EGNode *QSGraph :: newNode(SDFStar* s, int i)
 void QSGraph :: resetGraph() {
 
 	// reset the runnable node list.
-	runnableNodes.initialize();
-	minWork = 0;
+	findRunnableNodes();
 
+	// update the minimum execution time if necessary
+	minWork = 0;
 	EGSourceIter nxtSrc(*this);
 	QSNode* src;
 	while ((src = (QSNode*) nxtSrc++) != 0) {
-		sortedInsert(runnableNodes,src,1);
-		// update the minimum execution time if necessary
 		if (src->myExecTime() < minWork) minWork = src->myExecTime();
 		src->resetAssignedFlag(0);
 	}
