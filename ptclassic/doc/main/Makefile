@@ -10,7 +10,7 @@ MAINSEC	      = overall
 TMPFILE	      = $$HOME/Almagest.main
 OPTIONS       =
 
-DIRS = overview pigi interpreter ptlang domains documents xgraph filters vem
+DIRS = overview pigi ptcl ptlang domains documents xgraph filters vem old-interp
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
