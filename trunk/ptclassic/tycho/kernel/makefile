@@ -67,7 +67,6 @@ ITCL_SRCS = \
 	FileBrowser.itcl \
 	FontManager.itcl \
 	Graphics.itcl \
-	GraphicsOject.itcl \
 	HTML.itcl \
 	HTMLText.itcl \
 	IndexBrowser.itcl \
