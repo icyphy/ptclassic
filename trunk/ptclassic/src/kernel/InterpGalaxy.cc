@@ -210,6 +210,7 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 
 int
 InterpGalaxy::setDomain (const char* name) {
+	myDomain = savestring (name);
 	// if we're already in the given domain, do nothing and return true
 	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
 	if (numberBlocks() > 0) {
@@ -235,6 +236,7 @@ InterpGalaxy::clone() {
 // list.
 	InterpGalaxy* gal = new InterpGalaxy;
 	gal->descriptor = descriptor;
+	gal->setNameParent(readName(), NULL);
 	const char* oldDom = NULL; // old domain
 
 // process the action list
@@ -318,6 +320,7 @@ InterpGalaxy::clone() {
 void
 InterpGalaxy::addToKnownList(const char* outerDomain) {
 	const char* myName = savestring(readName());
+	setNameParent(myName, parent());
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate
 // type of wormhole, add it to the list, and change back to outerDomain
