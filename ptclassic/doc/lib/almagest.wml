@@ -6,7 +6,7 @@
 #-----------------------------------------------------------------------
 # WebMaker, a FrameMaker to WWW converter
 # 
-# Copyright (C) 1994, CERN Geneva
+# Parts of this file are:# Copyright (C) 1994, CERN Geneva
 #-----------------------------------------------------------------------
 
 #-----------------------------------------------------------------------
@@ -44,10 +44,14 @@ NODE TOCNode
   HEADER
   {  
     @NavPanel=concatenate( 
-              button("[Next] ",    filename(next),     "[Next] "     ),
-              button("[Previous] ",filename(previous), "[Previous] " ),
-              button("[Top] ",     filename(top),      "[Top] "      ),
-              button("[Index] ",   filename(INDEX),    "[Index] "    )
+              button(image("next.gif", BOTTOM),    filename(next),
+		     image("nextg.gif", BOTTOM)     ), 
+              button(image("prev.gif", BOTTOM),filename(previous),
+		     image("prevg.gif", BOTTOM) ), 
+              button(image("top.gif", BOTTOM),     filename(top),
+		     image("topg.gif", BOTTOM)      ), 
+              button(image("index.gif", BOTTOM),   filename(INDEX),
+		     image("indexg.gif", BOTTOM)    ) 
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
@@ -87,10 +91,14 @@ NODE FirstPage
   HEADER
   {
     @NavPanel=concatenate(
-              button("[Next] ",    filename(next), "[Next] "),
-              button("[Contents] ",filename(exttoc),   "[Contents] "),
-              button("[Index] ",   filename(INDEX), "[Index] "),
-              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", "[Search] ")
+              button(image("next.gif", BOTTOM),    filename(next),
+		     image("nextg.gif", BOTTOM)), 
+              button(image("content.gif", BOTTOM), filename(exttoc),
+		     image("contentg.gif", BOTTOM)), 
+              button(image("index.gif", BOTTOM),   filename(INDEX),
+		     image("indexg.gif", BOTTOM)), 
+              button(image("search.gif", BOTTOM),
+		     "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", image("searchg.gif", BOTTOM))  
                          );
     write(*,paragraph(@NavPanel));
   }
@@ -114,12 +122,17 @@ NODE LevelOne
   HEADER
   {
     @NavPanel=concatenate( 
-              button("[Next] ",    filename(next),     "[Next] "     ),
-              button("[Previous] ",filename(previous), "[Previous] " ),
-              button("[Top] ",     filename(top),      "[Top] "      ),
-              button("[Contents] ",filename(exttoc),      "[Contents] " ),
-              button("[Index] ",   filename(INDEX),    "[Index] "    ),
-              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", "[Search] ")
+              button(image("next.gif", BOTTOM),    filename(next),
+		     image("nextg.gif", BOTTOM)     ), 
+              button(image("prev.gif", BOTTOM),filename(previous),
+		     image("prevg.gif", BOTTOM) ), 
+              button(image("top.gif", BOTTOM),     filename(top),
+		     image("topg.gif", BOTTOM)      ), 
+              button(image("content.gif", BOTTOM),filename(exttoc),
+		     image("contentg.gif", BOTTOM) ), 
+              button(image("index.gif", BOTTOM),   filename(INDEX),
+		     image("indexg.gif", BOTTOM)    ), 
+              button(image("search.gif", BOTTOM),  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", image("searchg.gif", BOTTOM))
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
@@ -140,13 +153,19 @@ NODE LevelTwo
   HEADER
   {
     @NavPanel=concatenate( 
-              button("[Next] ",    filename(next),     "[Next] "     ),
-              button("[Previous] ",filename(previous), "[Previous] " ),
-              button("[Up] ",      filename(up),       "[up] "       ),
-              button("[Top] ",     filename(top),      "[Top] "      ),
-              button("[Contents] ",filename(exttoc),      "[Contents] " ),
-              button("[Index] ",   filename(INDEX),    "[Index] "    ),
-              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", "[Search] ")
+              button(image("next.gif", BOTTOM),    filename(next),
+		     image("nextg.gif", BOTTOM)     ), 
+              button(image("prev.gif", BOTTOM),filename(previous),
+		     image("prevg.gif", BOTTOM) ), 
+              button(image("up.gif", BOTTOM),      filename(up),
+		     image("upg.gif", BOTTOM)       ), 
+              button(image("top.gif", BOTTOM),     filename(top),
+		     image("topg.gif", BOTTOM)      ), 
+              button(image("content.gif", BOTTOM),filename(exttoc),
+		     image("contentg.gif", BOTTOM) ), 
+              button(image("index.gif", BOTTOM),   filename(INDEX), 
+		     image("indexg.gif", BOTTOM)  ),
+              button(image("search.gif", BOTTOM),  "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl", image("searchg.gif", BOTTOM))
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(concatenate(headingnumber(up)," ",headingtext(up))));
@@ -173,11 +192,16 @@ NODE IndexNode
   HEADER
   {  
     @NavPanel=concatenate( 
-              button("[Next] ",    filename(next),     "[Next] "     ),
-              button("[Previous] ",filename(previous), "[Previous] " ),
-              button("[Top] ",     filename(top),      "[Top] "      ),
-              button("[Contents] ",filename(exttoc),      "[Contents] " ),
-              button("[Search] ", "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl" , "[Search] ")
+              button(image("next.gif", BOTTOM), filename(next),
+		    image("nextg.gif", BOTTOM)  ),
+              button(image("prev.gif", BOTTOM), filename(previous),
+		     image("prevg.gif", BOTTOM) ), 
+              button(image("top.gif", BOTTOM),  filename(top),
+		     image("topg.gif", BOTTOM)  ),
+              button(image("content.gif", BOTTOM),filename(exttoc),
+		     image("contentg.gif", BOTTOM)  ),
+              button(image("search.gif", BOTTOM),
+		     "http://ptolemy.eecs.berkeley.edu/cgi-bin/almagest-wais.pl" , image("searchg.gif", BOTTOM))  
                          );
     write(*,paragraph(@NavPanel));
     write(*,paragraph(maintitle()));
