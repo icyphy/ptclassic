@@ -161,6 +161,7 @@ It is usually close to the shift and control keys.
 Most window manipulations require that you hold down the meta key
 while depressing mouse buttons.
 .UH "Iconifying windows."
+.lp
 Depressing the meta key, and clicking the left mouse button in any window
 will iconify it.
 The window disappears, replaced by a symbol in the icon manager at the right
@@ -170,18 +171,21 @@ of the icon manager, and click the left mouse button.
 An alternative iconifying mechanism is to click any mouse button
 on the icon symbol at the left of the window header.
 .UH "Moving windows."
+.lp
 Holding the meta key and dragging with the middle mouse button will move
 a window.  ``Dragging'' simply means to hold the mouse button while
 moving the mouse.
 Alternatively, you can drag the
 left button in the middle of the window header.
 .UH "Resizing windows."
+.lp
 The meta key and right mouse button can be used to resize a window.
 Place the mouse cursor near a corner of a window, depress the meta key,
 and drag the right button.
 Alternatively, without the meta key,
 any button in the rightmost corner of the window header will resize the window.
 .UH "Mnemonic."
+.lp
 The window header has an iconify icon at the left, a blue bar for moving
 the window in the middle, and a resize symbol at the right.
 Correspondingly, without going to the window header, but using the meta key,
@@ -190,6 +194,7 @@ and the right button will resize it.  Hence, the window header can be used
 as a mnemonic to help remember which mouse button has which function when
 the meta key is depressed.
 .UH "Pick up and stuff."
+.lp
 In a text window, without the meta key, the mouse may be used to grab text
 and put it somewhere else,  either in the same window, or in some other window.
 This can be very useful to avoid copying long sections of text.
@@ -201,11 +206,13 @@ The highlighted text is "picked up", stored for future use.
 The middle button causes the highlighted text to be typed
 to whatever window has the mouse cursor.
 .UH "New windows."
+.lp
 A useful command, defined in ~ptolemy/.cshrc, is ``term''.
 Typing this in any window, followed by a carriage return,
 opens a new terminal window with a reasonable size and color.
 You may change the size and location in the usual way.
 .UH "Removing windows."
+.lp
 Most windows, including all pigi windows,
 can be removed by typing control-D with
 the mouse cursor in the window.
@@ -227,10 +234,12 @@ Some of these are set in ~ptolemy/.Xresources.
 If you have not used the X window system before,
 you will probably not have a file with the name .Xresources in your home
 directory, and can simply copy the one from ~ptolemy.
-This file defines some basic resources, including some
-which work around some bugs in X11R4.
+This file defines some basic resources.
 If you already have a file with this name, then you can probably
 use the one you have as is.
+.pp
+VEM can be extensively customized using resources.
+Please see the VEM section of the Almagest for instructions.
 .H3 "Running Pigi using Open Windows"
 .pp
 Pigi will run under Sun's Open Windows (which is based on a combination
