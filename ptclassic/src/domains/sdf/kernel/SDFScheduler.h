@@ -79,10 +79,10 @@ class SDFScheduler : public Scheduler {
 public:
 	// The setup function computes an SDF schedule
 	// and initializes all the blocks.
-	int setup(Block& galaxy);
+	int setup(Galaxy&);
 
 	// The run function resumes the run where it was left off.
-	int run(Block& galaxy);
+	int run(Galaxy&);
 
 	// Options for the scheduler are specified by setting
 	// various Booleans.  The repeatedFiring option will schedule
@@ -154,11 +154,10 @@ protected:
         // Schedule the synchronous data flow graph.
         virtual int computeSchedule(Galaxy & galaxy);
 
+	// run one iteration of the SDF schedule
+	virtual void runOnce();
+
 private:
-	// This is a kludge to help integrate SDFScheduler and
-	// DEScheduler together.  numIters says how many times
-	// to run the schedule.
-	void runOnce();
 	int numIters;
 	int numItersSoFar;
 
