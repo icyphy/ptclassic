@@ -85,6 +85,9 @@ install: $(LIBDIR) $(LIBDIR)/tcl.mk
 	    fi ; \
 	done
 
+# Avoid warnings about duplicate rules in this file and tycommon.m
+LIBR = dummylibr
+
 $(LIBDIR):
 	mkdir $@
 $(LIBDIR)/tcl.mk:
