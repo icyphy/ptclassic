@@ -20,7 +20,8 @@ public:
 	double imag() const { return i;}
 
 	// constructor, copy constructor
-	Complex(double rp = 0.0, double ip = 0.0) : r(rp), i(ip) {}
+	Complex() : r(0.0), i(0.0) {}
+	Complex(double rp, double ip = 0.0) : r(rp), i(ip) {}
 	Complex(const Complex& arg) : r(arg.r), i(arg.i) {}
 
 	// assignment operator

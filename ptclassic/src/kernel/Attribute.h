@@ -31,6 +31,9 @@ public:
 	// constructor
 	Attribute(bitWord on, bitWord off) : bitsOn(on), bitsOff(off) {}
 
+	// copy constructor
+	Attribute(const Attribute& a) : bitsOn(a.bitsOn), bitsOff(a.bitsOff){}
+
 	// Specify the combination of two attributes.
 	// This combination means that requirements of both attributes
 	// must be satisfied.  Hence, it really should be called an "and"
