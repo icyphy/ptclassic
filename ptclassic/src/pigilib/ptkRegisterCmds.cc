@@ -1,3 +1,4 @@
+static const char file_id[] = "ptkRegisterCommands.cc";
 /* 
 Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
