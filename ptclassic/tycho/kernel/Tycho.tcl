@@ -254,7 +254,9 @@ set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
 if {$tychostartfile != {} && \
 	[file exists $tychostartfile] && \
 	[file readable $tychostartfile]} {
-    uplevel #0 {source $tychostartfile}
+    if [catch {uplevel #0 {source $tychostartfile}} msg] {
+        ::tycho::warn "Failure sourcing $tychostartfile.\n$msg"
+    }
 }
 unset tychostartfile
 
