@@ -306,9 +306,17 @@ body ::tycho::ResourceMail::mailinitiate {{url {}}} {
 # The following is the handshake protocol between the client and
 # the server. When the mailhandler gets the expected state from
 # the server, it'll send out the right data.
-# <pre>State          Expect from Server             Send/"Action"
-# -----          ------------------             -----------
-#
+# <pre>
+# State          Expect from Server      "Action"
+# -----          ------------------      -----------
+# DISCONNECTED   "nothing!"              "mailabort"
+# CONNECT        22[0-9]                 HELO $myhost
+# HELO           25[0-9] Hello           MAIL FROM $myname@$myhost
+# MAILFROM       25[0-9] Sender ok       RCPT TO: $username
+# RCPTTO         25[0-9] Recipient ok    DATA
+# DATA1          35[0-9] Enter mail      "send the mail"
+# DATA2          25[0-9] Message accept  QUIT
+# QUIT           "nothing!"              "quit now, disconnect sock"
 # </pre>
 body ::tycho::ResourceMail::mailhandler {} {
     if {[::eof $socketid] && $state!="DISCONNECTED"} {
