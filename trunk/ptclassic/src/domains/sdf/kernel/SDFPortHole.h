@@ -45,6 +45,8 @@ from other cases:
 
 class SDFPortHole : public PortHole
 {
+private:
+	int maxBackValue;	// maximum % argument allowed
 public:
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles consumed/generated
@@ -54,11 +56,14 @@ public:
 			  // Number Particles consumed/generated
                           unsigned numTokens = 1,
 			  // Maximum delay the Particles are accessed
-			  unsigned delay = 0);
+			  unsigned maxPctValue = 0);
 
 	// Function to alter only numTokens and delay.
 	// We re-do porthole initialization if bufferSize changes
-	PortHole& setSDFParams(unsigned numTokens = 1, unsigned delay=0);
+	PortHole& setSDFParams(unsigned numTokens = 1, unsigned maxPctValue=0);
+
+	// Tell whether port uses old values
+	int usesOldValues() const { return maxBackValue >= numberTokens;}
 
 	// Modify simulated counts on geodesics, for scheduling
 	void decCount(int n);
