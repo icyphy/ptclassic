@@ -1,24 +1,109 @@
-<!-- $Id$ -->
+<!-- The $Id$ -->
 <html>
 <head>
-<title>Tycho Slate</title>
+<title>The Tycho Slate</title>
 </head>
 <body bgcolor="#faf0e6">
-<H1><A NAME="Tycho Slate">Tycho Slate</A></H1>
+<H1><A NAME="Tycho Slate">The Tycho Slate</A></H1>
 <HR>
-<OL>
-<LI><A HREF="usersGuides/index.html">User's Guides</A>
-<LI><A HREF="internals/index.html">Infrastructure Guides</A>
-<LI><A HREF="codeDoc/index.html">Class Documentation</A> 
-</OL>
-<p>
-<a href="../../../doc/index.html">Tycho Home Page</a><br>
-<p>
+
+ <P>
+
+The Slate is an [incr Tcl] megawidget layered over the Tcl/Tk canvas.
+It contains features that we believe to be necessary or useful for
+implementing complex graphical editing and visualization widgets.  The
+key features of the Slate are:
+
+<dl>
+<dt>A visual hierarchy
+
+<dd> The Slate implements a straight-forward visual hierarchy, as is
+common in many graphics packages. We are able to define new kinds of
+graphical items that are composed of simpler items. All of the canvas
+methods are rewritten to handle hierarchical items.
+
+ <P>
+<dt>Item shapes
+
+<dd> Every item has a shape, such as <i>point</i>, <i>rectangle</i>,
+<i> polygon</i>, or a custom-designed shape. Items can be queried for
+the coordinates of an <i>aspect</i>, such as the north-east corner or
+the second vertex. Items can be requested to move one or more aspects,
+reshaping the item.
+
+ <P><dt>Interactors
+
+<dd> Event-handlers can be bound to any level of the visual
+hierarchy. In addition, we implemented a more abstract and much more
+powerful user interaction framework, in which a particular sequence of
+user interactions is abstracted into objects called
+<i>interactors</i>.
+
+</dl>
+
+The Slate also contains other useful methods, such as highlighting and
+selection. Documentation available:
+
+<dl>
+<dt><A HREF="tutorial/index.html">A short tutorial</A>
+
+<dd> If
+you are reading this in the Tycho HTML browser, you can double-click
+on the Tcl code to execute it. Otherwise, you can copy and
+paste, or just read it.
+
+<dt><A HREF="internals/index.html">The programmer's guide</A>
+
+<dd> A somewhat-disorganized guide to the internals of the Slate,
+the available classes and features, and a programmer's
+FAQ.
+
+<dt><A HREF="codeDoc/index.html">Class documentation</A>
+
+<dd> Documentation for the Slate classes, generated from the source
+code by the <CODE>tydoc</CODE> utility.
+
+</dL>
+
+ <P>The downloads available are:
+
+<dl>
+
+<dt><A HREF="distribution.html">The distribution page</A>
+
+<dd>The unofficial disribution of the Slate. This contains the
+latest unreleased version of the Slate and supporting software.
+
+<dt><A
+HREF="http://ptolemy.eecs.berkeley.edu/tycho/">The Tycho distribution site</A>
+
+<dd>This is the official release of Tycho, which includes the Slate.
+The official release is very out of date.
+
+</dl>
+
+
+ <P> Some other useful links:
+
+<dl>
+<dt><A HREF="http://ptolemy.eecs.berkeley.edu/papers/98/slate/"><I>The Tycho Slate: Complex Drawing and Editing in Tcl/Tk</I></A>
+
+<dd>A paper about the Slate, which will appear in the Tcl/Tk
+conference in September 1998.
+
+<dt><A HREF="http://ptolemy.eecs.berkeley.edu/papers/97/tcltk-97/"><i>The Tycho User Interface System</i></A>
+
+<dd>A paper about Tycho.
+
+</dl>
+
+ <P>
 <HR>
 Copyright &#169 1996-%Q%, The Regents of the University of California.
 All rights reserved.
 <br>
 Last updated: $Date$,
-comments to: <author>tycho@eecs.berkeley.edu</author>
+comments to: <A HREF="mailto:johnr@eecs.berkeley.edu"><author>johnr@eecs.berkeley.edu</author></A>
+
 </body>
 </html>
