@@ -44,7 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLCompDecl.h"
 #include "VHDLSignal.h"
 #include "VHDLState.h"
-#include "VHDLPortVar.h"
 #include "VHDLCluster.h"
 #include "VHDLFiring.h"
 #include "Attribute.h"
@@ -166,8 +165,6 @@ private:
 	VHDLPortList firingPortMapList;
 	VHDLSignalList firingSignalList;
 	VHDLVariableList firingVariableList;
-	VHDLPortVarList firingPortVarList;
-	VHDLPortVarList firingVarPortList;
 
 	// The following are for keeping track of components and
 	// signals having to do with the controller.
@@ -177,9 +174,6 @@ private:
 	VHDLPortList ctlerPortMapList;
 	VHDLSignalList ctlerSignalList;
 	VHDLVariableList ctlerVariableList;
-	VHDLPortVarList ctlerPortVarList;
-	VHDLPortVarList ctlerVarPortList;
-
 
 	// Merge the Star's signal list with the Target's signal list.
 	void mergeSignalList(VHDLSignalList*);
@@ -261,7 +255,7 @@ private:
 	// Add in variable to port transfers here from varPortList.
 	StringList addVarPortTransfers(VHDLCluster*, int);
 
-	// Register compDecls and compMaps and merge signals.
+	// Register compDecls and merge signals.
 	void registerAndMerge(VHDLCluster*);
 
 	// Generate the entity_declaration.
