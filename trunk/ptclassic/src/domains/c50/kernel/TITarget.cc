@@ -3,7 +3,7 @@ static const char file_id[] = "TITarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: A. Baensch, Luis Gutierrez 
+ Programmer: A. Baensch and Luis Gutierrez 
  Date of creation: 6 May 1995
 
  Base target for TI  DSP assembly code generation.
@@ -37,20 +37,26 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "miscFuncs.h"
+#include "Galaxy.h"
 #include "TITarget.h"
 #include "TIAttributes.h"
 
+#define C50_MAX_LABEL_LENGTH 5
+#define C50_BITS_IN_WORD 16
+
 const Attribute ANY = {0,0};
 
-// a TIMemory represents the B1 and Users Data (UD) memories of a 320C5x.
+// TIMemory represents the B1 and Users Data (UD) memories of a 320C5x.
 // The B0 data memory is mapped into program memory.   
 // It is derived from DualMemory.
 TIMemory :: TIMemory(const char* b_map, const char* u_map) :
-	DualMemory("l","b",A_BMEM,ANY,b_map,"u",A_UMEM,ANY,u_map)
-{}
+	DualMemory("l", "b", A_BMEM, ANY, b_map, "u", A_UMEM, ANY, u_map)
+{
+}
 
-TITarget :: TITarget (const char* nam, const char* desc,
-	const char* stype): AsmTarget(nam,desc,stype)
+TITarget :: TITarget (const char* nam, const char* desc, const char* stype):
+	AsmTarget(nam,desc,stype)
 {
 	initStates();
 }
@@ -63,34 +69,32 @@ void TITarget :: initStates() {
 	addState(subFire.setState("subroutines?",this,"-1",
 	    "Write star firings as subroutine calls."));
 	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/C50");
+	maxFixedPointValue = 1.0 - 1.0 / double(1 << (C50_BITS_IN_WORD - 1));
+	minFixedPointValue = -1.0;
 }
 
+// complex numbers will be allocated in 2 consecutive words of memory.
 void TITarget :: setup() {
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new TIMemory(bMemMap,uMemMap);
 
-
 	AsmTarget::setup();
-
-// complex numbers in the C50 will be allocated 2 consecutive words of
-// memory.
 
 	GalStarIter nextStar(*galaxy());
 	AsmStar* s;
-	int	portSize;
-	while((s = (AsmStar*)nextStar++) != 0){
-	   BlockPortIter next(*s);
-	   AsmPortHole * p;
-	       while((p = (AsmPortHole*) next++) != 0) {
-		   if (p->resolvedType() == COMPLEX ){
-			portSize = p->numXfer();
-			portSize = 2*portSize;
-			p->setSDFParams(portSize,portSize-1);
-		    }
+	int portSize;
+	while ((s = (AsmStar*)nextStar++) != 0){
+	    BlockPortIter next(*s);
+	    AsmPortHole * p;
+	    while((p = (AsmPortHole*) next++) != 0) {
+		// allocate complex numbers in 2 consecutive words of memory
+		if (p->resolvedType() == COMPLEX ){
+		    portSize = p->numXfer();
+		    portSize = 2*portSize;
+		    p->setSDFParams(portSize,portSize-1);
 		}
-		
+	    }
 	}
-
 }
 
 TITarget :: ~TITarget () {
@@ -110,29 +114,30 @@ Block* TITarget :: makeNew () const {
 	LOG_NEW; return new TITarget(*this);
 }
 
+// either iterate for a finite number of repetitions of the schedule
+// or iterate for an infinite amount.  If we iterate for a finite
+// number, the stack (8 levels deep) which is used to hold the loop
+// count for nested loops will overflow if there are more than 8
+// levels of nested loops.  Also using the stack within a codeblock
+// will most likely break the program.
 void TITarget::beginIteration(int repetitions, int) {
-    if (repetitions == -1)		// iterate infinitely
-	*defaultStream << targetNestedSymbol.push("LOOP") << "\n";
-    else{
-      // iterate finitely
-      // since the stack(8 levels deep) is used to hold the loop
-      // count for nested loops the stack will overflow if 
-      // there are more than 8 levels of nested loops.  Also
-      // using the stack within a codeblock will most likely
-      // break the program.
-	*defaultStream << "\tlacc\t#" << repetitions << "\n"
-	       << targetNestedSymbol.push("LOOP") << "\tpush\n";
-    }
+	if (repetitions == -1) {		// iterate infinitely
+	    *defaultStream << targetNestedSymbol.push("LOOP") << "\n";
+	}
+	else {				// iterate finitely
+	    *defaultStream << "\tlacc\t#" << repetitions << "\n"
+			   << targetNestedSymbol.push("LOOP") << "\tpush\n";
+	}
 }
 
 void TITarget::endIteration(int repetitions, int) {
-	if (repetitions == -1)		// iterate infinitely
-		*defaultStream << "\tb\t"<< targetNestedSymbol.pop() << "\n";
-	else{
-	  // iterate finitely
-	  *defaultStream << "\tnop\n* prevent two endloops in a row\n"
-		        << "\tpop\n\tsub\t#1\n"
-		        << "\tbcnd\t" << targetNestedSymbol.pop() << ",GT\n";
+	if (repetitions == -1) {		// iterate infinitely
+	    *defaultStream << "\tb\t"<< targetNestedSymbol.pop() << "\n";
+	}
+	else {					// iterate finitely
+	    *defaultStream << "\tnop\n* prevent two endloops in a row\n"
+			   << "\tpop\n\tsub\t#1\n"
+			   << "\tbcnd\t" << targetNestedSymbol.pop() << ",GT\n";
 	}
 }
 
@@ -176,12 +181,12 @@ void TITarget::writeFloat(double val) {
 }
 
 void TITarget::trailerCode() {
-	trailer << "\tb\tENDE		;jump to end of programm\n";
- }
+	trailer << "\tb\tENDE		;jump to end of program\n";
+}
 
+// Put a STOP instruction at the end of program memory.
 void TITarget::frameCode() {
-	AsmTarget::frameCode();
-  // Put a STOP instruction at the end of program memory.
+    AsmTarget::frameCode();
     *defaultStream << "\t.ps 	02b00h\n"
 	   << "AIC_2ND sach    DXR\n"
 	   << "\tclrc    INTM\n"
@@ -202,59 +207,55 @@ void TITarget::frameCode() {
 	   << "ENDE\n\t.end\n";	
 }
 
+// Ensure that the value val is in the interval [-1,1)
 double TITarget::limitFix(double val) { 
-	const double limit = 1.0 - 1.0/double(1<<15);
-	if (val >= limit) return limit;
-	else if (val <= -1.0) return -1.0;
+	if (val >= maxFixedPointValue) return maxFixedPointValue;
+	else if (val <= minFixedPointValue) return minFixedPointValue;
 	else return val;
 }
 
 StringList TITarget::comment(const char* msg, const char* begin,
-const char* end, const char* cont) {
-	if (begin==NULL) return CGTarget::comment(msg,"; ");
-	else return CGTarget::comment(msg,begin,end,cont);
+			     const char* end, const char* cont) {
+	return (begin) ? CGTarget::comment(msg, begin, end, cont) :
+			 CGTarget::comment(msg, "; ");
 }
 
-/* Determine whether or not the star firing can be implemented with
-   static code which could be enclosed in a loop or subroutine.
-*/
-static int staticCode(CGStar& star)
-{
+// Determine whether or not the star firing can be implemented with
+// static code which could be enclosed in a loop or subroutine.
+static int staticCode(CGStar& star) {
     BlockPortIter nextPort(star);
     CGPortHole* port;
 
     // Test the parameters of all ports.
-    while ( (port = (CGPortHole*)nextPort++) != NULL)
-    {
-	/* If the buffer size is not the same as the number of
-	   particles transferred in one firing, then each firing must
-	   read from a different location.
-	*/
-	if (port->numXfer() != port->bufSize())
-	{
+    while ( (port = (CGPortHole*)nextPort++) != 0) {
+	// If the buffer size is not the same as the number of
+	// particles transferred in one firing, then each firing must
+	// read from a different location.
+	if (port->numXfer() != port->bufSize()) {
 	    if ((port->attributes() & PB_CIRC) == 0) return FALSE;
 	}
     }
     return TRUE;
 }
 
-void TITarget::writeFiring(Star& s, int level)
-{
+void TITarget::writeFiring(Star& s, int level) {
     CGStar& star = (CGStar&)s;
-    int threshold = (int)subFire;
+    int threshold = int(subFire);
 
-    if (threshold >= 0 && star.reps() > threshold && staticCode(star))
-    {
+    if (threshold >= 0 && star.reps() > threshold && staticCode(star)) {
 	if (star.index() < 0) setStarIndices(*galaxy());
 
+	// Get the first five characters of name of the star without
+	// the domain name of C50; e.g., C50WasteCycles would become Waste
 	StringList label;
-	const char *newname = star.className();
-	label << newname[4] << newname[5] << newname[6] << newname[7] \
-		<< newname[8] << separator << star.index();
+	const char* classname = star.className();
+	int domainNameLength = strlen(star.domain());
+	char* starname = savestring(&classname[domainNameLength]);
+	starname[C50_MAX_LABEL_LENGTH] = 0;
+	label << starname << separator << star.index();
 
 	// Generate procedure definition.
-	if (procedures.put("",label))
-	{
+	if (procedures.put("",label)) {
 	    procedures << label << '\n';
 	    CodeStream* previous = defaultStream;
 	    defaultStream = &procedures;
@@ -265,19 +266,14 @@ void TITarget::writeFiring(Star& s, int level)
 
 	// Invoke procedure.
 	mainLoop << "\tcall\t " << label << "\n";
-    }
-    else
-    {
 
+	delete [] starname;
+    }
+    else {
 	AsmTarget::writeFiring(s,level);
     }
 }
 
-
-
-
-
-
-
-
-
+const char* TITarget::domain() {
+	return galaxy() ? galaxy()->domain() : "C50";
+}
