@@ -6,7 +6,13 @@ beamforming.  The system has been converted from a data parallel form
 that uses a five-dimensional data array to a functional parallel form
 that uses higher-order functions to produce streams of streams.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/hof/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Date$
 .AL Karim P. Khiar
