@@ -50,6 +50,7 @@ static const char file_id[] = "POct.cc";
 extern "C" {
 #define Pointer screwed_Pointer
 #include "oct.h"  /* Oct Pointer Structure */
+#include "pigidefine.h" /* Constants used by pigi functions */
 #include "octIfc.h" 
 #include "local.h"
 #include "misc.h"
@@ -57,9 +58,10 @@ extern "C" {
 #include "util.h"
 #include "icon.h"
 #include "compile.h"
-#include "octIfc.h"
 #include "octMacros.h"    // For GetOrCreatePropStr
 void win_msg(const char*);  // for error dialog box.  FIXME: formalize this
+int KcDomainTargets();  // Used by ptkGetTargetNames
+char* KcDefTarget();  // Used by ptkGetTargetNames
 #undef Pointer
 }
 #include "miscFuncs.h"
@@ -426,12 +428,6 @@ int POct::ptkGetParams (int aC,char** aV) {
  	    return TCL_ERROR;
 	}
     
-	// Set the domain to be that of the instance
-	if (!setCurDomainInst(&instance)) {
-            Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
-            return TCL_ERROR;
-        }
-
 	if ( IsDelay(&instance) || IsBus(&instance) ) {
 	    // Parameters are stored differently for delays and buses.
 	    // can't use the "plist" form as for Stars, Gals, and Formals
@@ -466,7 +462,11 @@ int POct::ptkGetParams (int aC,char** aV) {
             return TCL_OK;
   	} else if (IsGal(&instance) || IsStar(&instance)) {
 	    // Must be a star or Galaxy
-	    // FIXME:  Do I need to check domain here??? - aok
+	    // Set the domain to be that of the instance
+	    if (!setCurDomainInst(&instance)) {
+                Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
+                return TCL_ERROR;
+            }
 	    if (!GetOrInitSogParams(&instance, &pList)) {
 		Tcl_AppendResult(interp, 
                                  "Error Getting Star or Galaxy parameters.  ", 
@@ -564,12 +564,6 @@ int POct::ptkSetParams (int aC,char** aV) {
             return TCL_ERROR;
         }
 
-	// Set the domain to be that of the instance
-	if (!setCurDomainInst(&instance)) {
-            Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
-            return TCL_ERROR;
-        }
-
         if ( IsDelay(&instance) ) {
             // Set Delay Parameters from the pList
             if (SetDelayParams(&instance,&pList) == 0) {
@@ -589,6 +583,11 @@ int POct::ptkSetParams (int aC,char** aV) {
 
         } else if (IsGal(&instance) || IsStar(&instance)) {
             // Must be a star or Galaxy
+	    // Set the domain to be that of the instance
+	    if (!setCurDomainInst(&instance)) {
+                Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
+                return TCL_ERROR;
+            }
             // Set Star or Galaxy params from the pList
             if (SetSogParams(&instance, &pList) == 0) {
                 ErrorFound = 1;
@@ -611,6 +610,85 @@ int POct::ptkSetParams (int aC,char** aV) {
     else return TCL_OK;
 
 }
+
+
+// ptkGetTargetNames <facet-id>
+// returns a list of names of targets for the passed facet
+//
+// Written by Alan Kamas  12/93
+// 
+int POct::ptkGetTargetNames (int aC,char** aV) {
+    octObject facet;
+    char *defaultTarget, *target ;
+    char *targetNames[MAX_NUM_TARGETS];
+    int nTargets, nChoices, i;
+
+    if (aC != 2) return  
+            usage ("ptkFacetContents <OctObjectHandle>");
+
+    if (strcmp(aV[1],"NIL")==0)  return result("{}");
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    if (!setCurDomainF(&facet)) {
+        Tcl_AppendResult(interp, 
+                         "Unknown domain found; correct the domain first",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    nTargets = KcDomainTargets(targetNames,MAX_NUM_TARGETS);
+
+    if(nTargets == 0) {
+        Tcl_AppendResult(interp, 
+			 "No targets supported by current domain.",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    /* for a galaxy, add "<parent>" as an option */
+    if (IsGalFacet(&facet)) {
+            targetNames[nTargets] = defaultTarget = "<parent>";
+	    nChoices = ++nTargets;
+    }
+    else defaultTarget = KcDefTarget();
+
+    // Return the list with the current target first
+
+    if (nChoices == 1) {
+	// Only one element means that no ordering need be done.
+	Tcl_AppendElement ( interp, targetNames[0] );
+	return TCL_OK;
+    }
+
+    // Get Current Target name
+    if (!GOCTargetProp(&facet, &target, defaultTarget)) {
+	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
+        return TCL_ERROR;
+    }
+    // If the Current Target matches any of our target choices, put it first
+    for (i = 0; i < nChoices; i++) {
+	if (strcmp(targetNames[i],target)==0) {
+	    // The current target has been found
+            Tcl_AppendElement(interp, target);
+	    // mark it as having been used
+	    targetNames[i] = "NIL";
+	}
+    }
+    // Now add the rest of the target choices to the output list
+    for (i = 0; i < nChoices; i++) {
+        // Only add it if it has not already been used
+        if (strcmp(targetNames[i],"NIL")!=0) {
+            Tcl_AppendElement(interp, targetNames[i]);
+        }
+    }   
+    return TCL_OK;
+}
+
 
 // ptkFacetContents <facet-id> <list_of_types>
 // where <facet-id> is the string Handle of the Oct ID.
@@ -930,6 +1008,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkCompile),
 	ENTRY(ptkGetParams),
 	ENTRY(ptkSetParams),
+	ENTRY(ptkGetTargetNames),
 	ENTRY(ptkFacetContents),
 	ENTRY(ptkGetMaster),
 	ENTRY(ptkOpenFacet),
