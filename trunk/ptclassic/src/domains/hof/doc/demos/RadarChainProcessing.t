@@ -6,7 +6,6 @@ beamforming.
 The system has been converted from a data parallel form that uses
 a five-dimensional data array to a functional parallel form
 that uses higher-order functions to manipulate streams of streams.
-.DE
 .EQ
 delim off
 .EN
@@ -24,12 +23,12 @@ The universe (global) parameters for this demonstration are:
 \fINa\fR number of sensors,
 \fINs\fR radar window size in samples (range bins), and
 \fINtargets\fR number of targets.
-
+.pp
 The Matlab star plots the Doppler axis versus a combination of the others.
 It can be used to determine the target speed by looking for the highest filter
 response.
 Thus, this filter will give the Doppler range frequency for the targets.
-
+.pp
 We give dimensions of the data processed by the bank of
 .c RadarAntenna
 galaxies.

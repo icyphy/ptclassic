@@ -4,7 +4,6 @@
 This demonstration implements a voice-cell recovery technique.
 Cells which have been dropped during transmission are replaced with
 the cell which arrived at the receiver immediately prior to the dropped cell.
-.SE
 .EQ
 delim off
 .EN

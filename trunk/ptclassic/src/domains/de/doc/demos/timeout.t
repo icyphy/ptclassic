@@ -11,7 +11,6 @@ The signal that clears the timer is a
 .c Poisson
 process with a mean interarrival time of one time unit.
 Thus, the timer expires quite often.
-.DE
 .EQ
 delim off
 .EN

@@ -7,7 +7,6 @@ star, an up/down counter.
 Events are generated at two different rates to count up and down.
 The up rate is faster than the down rate, so the trend is upwards.
 The value of the count is displayed every time it changes.
-.DE
 .EQ
 delim off
 .EN

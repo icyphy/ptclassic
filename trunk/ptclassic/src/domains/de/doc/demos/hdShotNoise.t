@@ -3,7 +3,6 @@
 .SD
 Generate a high-density shot noise process and verify its
 approximately Gaussian distribution by displaying a histogram.
-.DE
 .EQ
 delim off
 .EN

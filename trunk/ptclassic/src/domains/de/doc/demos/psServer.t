@@ -6,7 +6,6 @@ Unlike other servers, this server accepts new inputs at any time,
 regardless of how busy it is.
 Accepting a new input, however, slows down the service to all
 particles currently being served.
-.DE
 .EQ
 delim off
 .EN

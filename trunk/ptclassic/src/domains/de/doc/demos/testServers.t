@@ -3,7 +3,6 @@
 .SD
 This simple system demonstrates servers with random
 service times (uniform and exponential).
-.DE
 .EQ
 delim off
 .EN

@@ -5,7 +5,6 @@ This demo performs speech compression with a combination of
 silence detection, adaptive quantization, and adaptive estimation.
 After speech samples are read from a file, they are encoded, packetized,
 depacketized, decoded, and played on the workstation speaker.
-.DE
 .EQ
 delim off
 .EN

@@ -20,7 +20,6 @@ is set with a smaller capacity than the
 .c FIFOQueue
 star, so it overflows first.
 Overflow events are displayed.
-.DE
 .EQ
 delim off
 .EN

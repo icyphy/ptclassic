@@ -8,7 +8,6 @@ The upper input to the
 .c PriorityQueue
 has priority over the lower input.
 Thus, when the queue overflows, data is lost from the lower input.
-.DE
 .EQ
 delim off
 .EN

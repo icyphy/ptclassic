@@ -5,7 +5,6 @@ Demonstrate a blocking strategy in a queueing network.
 In a cascade of two queues and servers, when the second queue
 fills up, it prevents any further dequeuing of particles from
 the first queue until it once again has space.
-.DE
 .EQ
 delim off
 .EN

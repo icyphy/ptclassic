@@ -3,7 +3,6 @@
 .SD
 This is a high-level simulation of a shared memory
 with prioritized arbitration.
-.SE
 .EQ
 delim off
 .EN

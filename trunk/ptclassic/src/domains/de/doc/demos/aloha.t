@@ -10,7 +10,6 @@ a random delay.
 This simulation is built out of very low-level stars, and its complexity
 illustrates very clearly that this is not a reasonable approach
 for simulation.
-.DE
 .EQ
 delim off
 .EN

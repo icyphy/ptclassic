@@ -5,7 +5,6 @@ Demonstrate the use of the
 .c MeasureDelay
 block to measure the sojourn time of particles in a simple queueing system
 with a single server with a random service time.
-.DE
 .EQ
 delim off
 .EN

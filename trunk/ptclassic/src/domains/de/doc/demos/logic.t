@@ -6,7 +6,6 @@ Demonstrate the use of the
 star in its various instantiations as AND, NAND, OR, NOR, XOR, XNOR
 and inverter gates.
 The three test signals consist of square waves with periods 2, 4, and 6.
-.DE
 .EQ
 delim off
 .EN

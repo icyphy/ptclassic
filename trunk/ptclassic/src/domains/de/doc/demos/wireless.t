@@ -11,7 +11,6 @@ Two clusters on the left transmit to two clusters on the right over
 two distinct media, radio and infrared.
 The communication is implemented using shared data structures between
 the stars.
-.DE
 .EQ
 delim off
 .EN
