@@ -960,6 +960,8 @@ genDef ()
 	if (protectedMembers[0])
 		fprintf (fp, "protected:\n%s\n", protectedMembers);
 	fprintf (fp, "public:\n\t%s();\n", fullClass);
+        fprintf (fp, "\tconst char* readClassName() const {return \"%s\";}\n",
+		fullClass);
 	sprintf (destNameBuf, "~%s", fullClass);
 	for (i = C_EXECTIME; i <= C_DEST; i++) {
 		if (codeBody[i])
@@ -1013,6 +1015,7 @@ genDef ()
 	fprintf (fp, "\n{\n");
 	if (objDesc)
 		fprintf (fp, "\tdescriptor = \"%s\";\n", objDesc);
+	/* define the class name */
 	if (!consCode) consCode = "";
 	fprintf (fp, "%s\n%s\n", consStuff, consCode);
 	fprintf (fp, "}\n");
