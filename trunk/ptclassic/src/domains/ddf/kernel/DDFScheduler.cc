@@ -8,6 +8,7 @@
 #include "FloatState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
+#include <std.h>
 
 #include "CaseScheduler.h"
 #include "ForScheduler.h"
