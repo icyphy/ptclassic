@@ -36,7 +36,7 @@ character is ready, the output is made absent.  }
     desc { The baud rate }
   }
 
-  ccinclude { <stdio.h>, <fcntl.h>, <termios.h>, <errno.h> }
+  ccinclude { <stdio.h>, <fcntl.h>, <termios.h>, <errno.h>, <unistd.h> }
   hinclude { <termios.h> }
 
   protected {
