@@ -73,5 +73,13 @@ InterpUniverse :: ~InterpUniverse() {
 	LOG_DEL; delete target; target = 0;
 }
 
+// Modify initTarget to invoke begin methods
+void InterpUniverse :: initTarget() {
+        // The following invokes the scheduler
+        Runnable::initTarget();
+        // The following invokes the begin methods of the stars
+        target->begin();
+}
+
 // isa
 ISA_FUNC(InterpUniverse,Galaxy);

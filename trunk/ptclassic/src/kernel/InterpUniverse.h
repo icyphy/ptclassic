@@ -68,6 +68,10 @@ public:
 	int run() { return Runnable::run();}
 	// wrapup universe
 	void wrapup() { target->wrapup();}
+
+	// The following is redefined to invoke the begin methods.
+	void initTarget();
+
 	// class identification
 	int isA(const char*) const;
 };
