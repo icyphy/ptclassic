@@ -41,17 +41,16 @@ class PosixThread : public PtThread
 {
 public:
     // Constructor for new threads.
-    PosixThread();
-
-    // Constructor for existing threads.
-    PosixThread(pthread_t&);
+    PosixThread(ThreadScheduler&);
 
     // Destructor.
     /*virtual*/ ~PosixThread();
 
 protected:
     static void* runThis(PosixThread*);
+
     int setPriority(int);
+
     pthread_t thread;
 };
 

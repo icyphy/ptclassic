@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 // Constructor for new threads.
-PosixThread::PosixThread()
+PosixThread::PosixThread(ThreadScheduler& s) : PtThread(s)
 {
     // Initialize attributes.
     pthread_attr_t attributes;
@@ -62,13 +62,6 @@ PosixThread::PosixThread()
 
     // Discard temporary attribute object.
     pthread_attr_destroy(&attributes);
-}
-
-
-// Constructor for existing threads.
-PosixThread::PosixThread(pthread_t& t)
-{
-    thread = t;
 }
 
 
