@@ -104,7 +104,7 @@ const int linkingNotSupported =
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
-#if defined(PTIRIX5) || defined(PTLINUX) || defined(PTNBSD_386)
+#if defined(PTIRIX5) || defined(PTLINUX) || defined(PTNBSD_386) || defined(PTFREEBSD)
 // For USE_DLOPEN, we need ld so we can process .o files into .so files
 #define LOADER "/usr/bin/ld"
 #else
@@ -132,7 +132,7 @@ const int linkingNotSupported =
 #if defined(PTAIX)       
 #define NM_PROGRAM "/usr/ucb/nm"
 #else
-#if defined(PTIRIX5) || defined (PTLINUX) || defined(PTNBSD_386)
+#if defined(PTIRIX5) || defined(PTLINUX) || defined(PTNBSD_386) || defined(PTFREEBSD)
 #define NM_PROGRAM "/usr/bin/nm"
 #else
 #if defined(PTSOL2) || defined(PTSVR4)
@@ -140,7 +140,7 @@ const int linkingNotSupported =
 #else
 #define NM_PROGRAM "/bin/nm"
 #endif // PTSOL2
-#endif // PTIRIX5 || PTLINUX || PTNBSD_386
+#endif // PTIRIX5 || PTLINUX || PTNBSD_386 || PTFREEBSD
 #endif // PTAIX
 
 // Options to give the loader.  We also give it "-T hex-addr" to specify
@@ -184,9 +184,9 @@ const int linkingNotSupported =
 #ifdef PTHPPA
 inline size_t getpagesize() { return 4096;}
 #else
-#if defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386)
+#if defined(PTLINUX) || defined(PTALPHA) || defined(PTNBSD_386) || defined(PTFREEBSD)
 #include <unistd.h>
-#else /* PTLINUX || PTALPHA || PTNBSD_386 */
+#else /* PTLINUX || PTALPHA || PTNBSD_386 || PTFREEBSD */
 #ifdef __GNUG__
 #ifdef PTIRIX5
 #if defined(__SYSTYPE_SVR4) || defined(SYSTYPE_SVR4)
@@ -422,7 +422,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 #endif
 
-#if defined(PTLINUX) || defined(PTNBSD_386)
+#if defined(PTLINUX) || defined(PTNBSD_386) || define(PTFREEBSD)
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
 #define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
