@@ -46,6 +46,9 @@ VPATH =		$(ROOT)/src/tysh
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# $PTOLEMY/mk/ptbin.mk checks $(PITCL)
+# If PITCL is set, then we use libpitcl instead of libptcl
+PITCL = 1
 
 -include override.mk
 
