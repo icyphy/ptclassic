@@ -82,4 +82,3 @@ ones developed for \*(PT.
 They are, in fact, quite distinct from the \*(PT kernel,
 precisely so that other types of user interfaces can be readily
 accepted.
-.so installation
