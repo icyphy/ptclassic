@@ -12,7 +12,8 @@ if you are planning on extending tycho.
 <MENU>
 	<LI> <A HREF="../../README.files">$TYCHO/README.files</A> contains
 	a description of the tycho directory structure.
-	<LI> <A HREF="#tylndir and private trees"><CODE>tylndir</CODE> and private trees</A>
+	<LI> <A HREF="#tylndir and private trees"><CODE>tylndir</CODE>
+	and private trees</A>
 	<LI> <A HREF="#makefile structure">makefile structure</A>
 	<LI> <A HREF="#makefile rules">makefile rules</A>
 </MENU>
@@ -35,16 +36,25 @@ the sources in <CODE>~ptdesign/tycho</CODE>, do the following:
 
 <LI> <CODE>~ptdesign/tycho/bin/tylndir ~ptdesign/tycho</CODE>
 
-
-<LI> Then set your <CODE>TYCHO</CODE> environment to <CODE>~/ty</CODE>.
+<LI> Set your <CODE>TYCHO</CODE> environment to <CODE>~/ty</CODE>.
 If you are running the C shell, you would type:
 <LISTING>
 setenv TYCHO ~/ty
 </LISTING>
 You could place the above line in your <CODE>.cshrc</CODE> file so that
 it is set each time you log in.
+
+<LI> Place <CODE>$TYCHO/bin</CODE> in your path:
+<LISTING>
+set path = ($TYCHO/bin $path)
+</LISTING>
+
+<LI> Start tycho with files in your private tree by typing <CODE>tycho</CODE>.
+
 </OL>
 
+<CODE>tylndir</CODE> is not perfect, as it will create links for garbage
+files such as <CODE>,*</CODE> and <CODE>*~</CODE> in your private tree.
 
 <HR>
 <H3><A NAME="makefile structure">makefile structure</A></H3>
