@@ -101,11 +101,7 @@ public:
 	EGGate(EGNode* n, PortHole* p = 0) : 
 		parent(n), pPort(p), arc(0), far(0) {}
  
-	// disconnect this node & it's far end node, and deallocate them.
-	void removeMyArc();
-
-	// remove myself
-	void removeMe();
+	virtual ~EGGate();
 
 	// input or output?
 	int isItInput() { return pPort->isItInput(); }
@@ -127,6 +123,9 @@ public:
 	// set the original porthole and the index.
 	void setProperty(PortHole* p, int i) 
 		{ pPort = p; index = i; }
+
+	// return the aliased porthole
+	const PortHole* aliasedPort() { return pPort; }
 
 	// print the information associated with this arc
 	StringList printMe();
