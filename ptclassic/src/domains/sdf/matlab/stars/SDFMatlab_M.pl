@@ -79,11 +79,17 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 	// matrix.h and engine.h are provided with Matlab
 	header{
-// Matlab interface library and Matlab data types
+// Matlab interface library and Matlab data types (clash with COMPLEX)
 extern "C" {
 #include "matrix.h"
 #include "engine.h"
+#undef COMPLEX
+#undef REAL
 }
+
+// Give Matlab's definition of COMPLEX and REAL different names
+#define MXCOMPLEX  1
+#define MXREAL     0
 	}
 
 	protected {
@@ -206,7 +212,7 @@ extern "C" {
 		  // allocate Matlab matrices
 		  int rows = Amatrix.numRows();
 		  int cols = Amatrix.numCols();
-		  matlabInputMatrices[i] = mxCreateFull(rows, cols, COMPLEX);
+		  matlabInputMatrices[i] = mxCreateFull(rows, cols, MXCOMPLEX);
 		  mxSetName( matlabInputMatrices[i],
 			     (char *) matlabInputNames[i]);
 
