@@ -1,0 +1,234 @@
+dnl This file is an input file used by autoconf to generate the configure file.
+dnl 
+# Author: Christopher Hylands
+# Version: $Id$
+#
+# Copyright (c) 1996-1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+
+dnl Process this file with autoconf to produce a configure script.
+
+# Check to see if this file exists
+AC_INIT(tcl/Command.java)
+
+dnl Checks for programs.
+AC_PROG_CC
+AC_PROG_MAKE_SET
+
+#
+# User specified location of the tcl include
+#
+AC_ARG_WITH(tclinclude, [  --with-tclinclude=DIR          use Tcl 7.6 includes from DIR],
+        TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=/usr/local/include)
+if test ! -d $TCL_INCLUDE_DIR; then
+    AC_MSG_ERROR(Tcl directory $TCL_INCLUDE_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tcl.h])
+if test -f $TCL_INCLUDE_DIR/tcl.h; then 
+	AC_MSG_RESULT($TCL_INCLUDE_DIR/tcl.h)
+else
+	AC_MSG_ERROR([Cannot find $TCL_INCLUDE_DIR/tcl.h, try --with-tclinclude=DIR])
+fi
+
+#
+# User specified location of the tcl lib
+#
+AC_ARG_WITH(tcllib, [  --with-tcllib=DIR          use Tcl 7.6 lib from DIR],
+        TCL_LIB_DIR=$withval, TCL_LIB_DIR=/usr/local/lib)
+if test ! -d $TCL_LIB_DIR; then
+    AC_MSG_ERROR(Tcl directory $TCL_LIB_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tclConfig.sh])
+if test -f $TCL_LIB_DIR/tclConfig.sh; then 
+	AC_MSG_RESULT($TCL_LIB_DIR/tclConfig.sh)
+else
+	AC_MSG_ERROR([Cannot find $TCL_LIB_DIR/tclConfig.sh, try --with-tcllib=DIR])
+fi
+
+file=$TCL_LIB_DIR/tclConfig.sh
+. $file
+
+# The variables that we use from tclConfig.sh
+TCL_CC=$TCL_CC	
+TCL_CFLAGS=$TCL_CFLAGS
+TCL_LIB_SPEC=$TCL_LIB_SPEC
+TCL_SHLIB_CFLAGS=$TCL_SHLIB_CFLAGS
+TCL_SHLIB_LD=$TCL_SHLIB_LD
+TCL_SHLIB_LD_LIBS=$TCL_SHLIB_LD_LIBS
+TCL_SHLIB_SUFFIX=$TCL_SHLIB_SUFFIX
+TCL_SHLIB_VERSION=$TCL_SHLIB_VERSION
+# Tcl7.6 defines TCL_SRC_DIR, Tcl7.5 does not.
+#TCL_SRC_DIR=$TCL_SRC_DIR
+TCL_DL_LIBS=$TCL_DL_LIBS
+TCL_LD_FLAGS=$TCL_LD_FLAGS
+TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
+
+#
+# User specified location of the tk include
+#
+AC_ARG_WITH(tkinclude, [  --with-tkinclude=DIR          use Tk 4.2 include from DIR],
+        TK_INCLUDE_DIR=$withval, TK_INCLUDE_DIR=$TCL_INCLUDE_DIR)
+if test ! -d $TK_INCLUDE_DIR; then
+    AC_MSG_ERROR(Tk directory $TK_INCLUDE_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tk.h])
+if test -f $TK_INCLUDE_DIR/tk.h; then 
+	AC_MSG_RESULT($TK_INCLUDE_DIR/tk.h)
+else
+	AC_MSG_ERROR([Cannot find $TK_INCLUDE_DIR/tk.h, try --with-tkinclude=DIR])
+fi
+
+#
+# User specified location of the tk lib
+#
+AC_ARG_WITH(tklib, [  --with-tklib=DIR          use Tk 4.2 libs from DIR],
+        TK_LIB_DIR=$withval, TK_LIB_DIR=$TCL_LIB_DIR)
+if test ! -d $TK_LIB_DIR; then
+    AC_MSG_ERROR(Tk directory $TK_LIB_DIR doesn't exist)
+fi
+
+AC_MSG_CHECKING([for tkConfig.sh])
+if test -f $TK_LIB_DIR/tkConfig.sh; then 
+	AC_MSG_RESULT($TK_LIB_DIR/tkConfig.sh)
+else
+	AC_MSG_ERROR([Cannot find $TK_LIB_DIR/tkConfig.sh, try --with-tklib=DIR])
+fi
+
+file=$TK_LIB_DIR/tkConfig.sh
+. $file
+
+# The variables that we use from tkConfig.sh
+TK_XINCLUDES=$TK_XINCLUDES
+TK_LIBS=$TK_LIBS
+TK_LIB_SPEC=$TK_LIB_SPEC
+
+
+
+#
+# User specified location of the Java Development Kit (JDK)
+#
+AC_ARG_WITH(java, [  --with-java=DIR          use Java binaries from DIR],
+        JAVAHOME=$withval, JAVAHOME=`cd /opt/SUNWjws/JDK; pwd`)
+
+#
+# If the user called configure with -without-java, then we don't
+# set TYJAVA, and we won't cd down into the tyjava directory to do the build
+#
+if test "$with_java" = "no"; then
+	AC_MSG_WARN([Configure called with -without-java, so no java checking])
+	TYJAVA=""
+else
+	TYJAVA=tyjava
+	if test ! -d $JAVAHOME; then
+	    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
+	fi
+
+	if test ! -f $JAVAHOME/include/StubPreamble.h; then
+	    AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK), or use --without-java if you don't have Java. )
+	fi
+
+	AC_MSG_CHECKING([for the java compiler])
+	if test -f $JAVAHOME/bin/javac; then
+		AC_MSG_RESULT($JAVAHOME/bin/javac)
+	else
+		AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
+	fi
+
+	case "`uname -s" in
+		HP-UX) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/osfport
+		echo "To build tcljava under HPUX, see tyjava/tcljava/makefile"
+		;;
+		Linux) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/linux;;
+		SunOS) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/solaris;;
+		*)TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/idontknow;;
+	esac
+	#
+	# User specified Java architecture, used to find the jdk include files
+	#
+	AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR          use Java arch dependent includes from DIR],
+	        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$TMP_JAVA_ARCH_INCLUDE")
+	if test ! -d $JAVA_ARCH_INCLUDE; then
+	    AC_MSG_ERROR(Java directory $JAVA_ARCH_INCLUDE doesn't exist)
+	fi
+	AC_MSG_CHECKING([for the java oobj_md.h include file])
+	if test -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
+		AC_MSG_RESULT($JAVA_ARCH_INCLUDE/oobj_md.h)
+	else
+	    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
+	fi
+fi
+
+
+dnl Checks for libraries.
+
+dnl Checks for header files.
+AC_HEADER_STDC
+AC_CHECK_HEADERS(fcntl.h)
+
+dnl Checks for typedefs, structures, and compiler characteristics.
+
+dnl Checks for library functions.
+AC_FUNC_VPRINTF
+
+dnl Unfortunately tcl7.6 has the wrong TCL_SHLIB_LD command in
+dnl tclConfig.sh if we are running gcc.
+AC_MSG_CHECKING([command to build shared libs])
+if test "$TCL_CC" = "gcc"; then
+	# Under hppa10.20 gcc, we need to pass -fPIC to gcc so that
+	# collect will compile the intermediate file with -fPIC
+	TCL_SHLIB_LD="gcc -shared $TCL_SHLIB_CFLAGS"
+fi
+AC_MSG_RESULT($TCL_SHLIB_LD)
+
+dnl Substitute the following variables in the Makefile (in alphabetical order)
+AC_SUBST(JAVAHOME)
+AC_SUBST(JAVA_ARCH_INCLUDE)
+AC_SUBST(TCL_CC)
+AC_SUBST(TCL_CFLAGS)
+AC_SUBST(TCL_DL_LIBS)
+AC_SUBST(TCL_INCLUDE_DIR)
+AC_SUBST(TCL_LD_FLAGS)
+AC_SUBST(TCL_LD_SEARCH_FLAGS)
+AC_SUBST(TCL_LIB_DIR)
+AC_SUBST(TCL_LIB_SPEC)
+AC_SUBST(TCL_SHLIB_CFLAGS)
+AC_SUBST(TCL_SHLIB_LD)
+AC_SUBST(TCL_SHLIB_LD_LIBS)
+AC_SUBST(TCL_SHLIB_SUFFIX)
+AC_SUBST(TCL_SHLIB_VERSION)
+AC_SUBST(TCL_SRC_DIR)
+AC_SUBST(TK_INCLUDE_DIR)
+AC_SUBST(TK_LIBS)
+AC_SUBST(TK_LIB_DIR)
+AC_SUBST(TK_LIB_SPEC)
+AC_SUBST(TK_LIB_SPEC)
+AC_SUBST(TK_SRC_DIR)
+AC_SUBST(TK_XINCLUDES)
+
+
+AC_OUTPUT(makefile)

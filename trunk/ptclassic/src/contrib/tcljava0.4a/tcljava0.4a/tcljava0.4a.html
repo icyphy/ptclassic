@@ -1,0 +1,384 @@
+<html>
+<head>
+<title>Tcljava</title>
+</head>
+<body bgcolor=#faf0e6>
+<H1>Tcljava</H1>
+
+Places to go:
+<MENU>
+
+<LI> Sun's <A HREF="http://www.sunlabs.com/tcl/java.html">Tcl/Java
+interface</A> page.
+
+<LI> Ken Corey's <A HREF="http://www.sunlabs.com/people/ken.corey/talks_and_papers.html">Talks and Papers</A>, including a few on TclJava.
+
+<LI> Ken Corey's <A HREF="http://www.sunlabs.com/people/ken.corey/tcljava/refman.html">TclJava Reference Manual</A>
+
+<LI> <A HREF="http://www.ics.com/IntraNet/Abstracts/reynolds.html">Distributing Objects across Java and Tcl/Tk</A> Mark C. Reynolds, United Technologies
+
+<LI> <A HREF="http://simon.cs.cornell.edu/home/ioi/Jacl/">Jacl -- Tcl Interpreter for Java</A> Ioi Lam, Cornell
+
+</MENU>
+
+ <hr>
+ <P> Sun's <A HREF="http://www.sunlabs.com/tcl/java.html">Tcl/Java
+interface</A>, available at <A
+HREF="ftp://ftp.sunlabs.com/pub/tcl/tcljava0.4.tar.gz"><CODE>ftp://ftp.sunlabs.com/pub/tcl/tcljava0.4.tar.gz</CODE></A>
+can be used to create a shared library that is loaded by the Java byte
+interpreter.  This shared library has Java classes that allow the user
+to evaluate Tcl commands.  We created a GNU <CODE>autoconf</CODE> file
+that allows tcljava to be easily configured.
+ <P>We are particularly interested in combining Itcl and Java for use in the
+<A HREF="http://ptolemy.eecs.berkeley.edu/tycho">Tycho</A> project.
+
+<H2>Downloads</H2>
+<MENU>
+<LI>  The original Tcljava interface: <A
+HREF="ftp://ftp.sunlabs.com/pub/tcl/tcljava0.4.tar.gz"><CODE>ftp://ftp.sunlabs.com/pub/tcl/tcljava0.4.tar.gz</CODE></A>
+
+<LI> <A HREF="tcljava0.4a.tar.gz">Tcljava0.4a</A> (gzipped tar file)
+patched for use with jdk1.1, configure and NT. - <A
+HREF="tcljava0.4a.patch">Patch</A> to convert <CODE>tcljava0.4</CODE>
+to <CODE>tcljava0.4a</CODE>
+
+<LI> <A HREF="itcl2.2a.tar.gz">Itcl2.2 <CODE>makefile.vc</CODE></A> files
+that work with Microsoft Visual C++ (gzipped tar file).
+
+
+
+<LI> <A HREF="tcljava0.4a.nt.tar.gz"><CODE>tcljava0.4a.nt.tar.gz</CODE></A>
+contains NT 4.0 binaries for <CODE>tcljava0.4a</CODE> and
+<CODE>Itcl2.2</CODE>.
+
+</MENU>
+
+<HR>
+<H2>Installing Tcljava under Unix</H2>
+I created a GNU autoconf configure script that can be used to configure
+tcljava.  This script works under Solaris.
+
+<OL>
+
+<LI> Install tcl and tk by configuring with the
+<CODE>--enable-shared</CODE> option.
+
+<LI> You can either download a patched version of 
+<A HREF="tcljava0.4a.tar.gz">Tcljava</A> (<CODE>tcljava0.4a</CODE>), or 
+grab the original Tcljava interface<A
+HREF="ftp://ftp.sunlabs.com/pub/tcl/tcljava0.4.tar.gz"><CODE>ftp://ftp.sunlabs.com/pub/tcl/tcljava0.4.tar.gz</CODE></A> from Sun and then patch it with 
+the patch below.
+ <br>If you downloaded <CODE>tcljava0.4a</CODE>, then skip to step 5 below.
+
+<LI> If you are using the unpatched Sun <CODE>tcljava0.4</CODE> sources, then
+grab the <A HREF="tcljava0.4a.patch"><CODE>tcljava0.4a.patch</CODE></A>,
+file which contains the following new files:
+<DL>
+<DT> <CODE>configure.in</CODE>
+<DD> Autoconf source file
+
+<DT> <CODE>configure</CODE>
+<DD> Shell script to run that configures the installation
+
+<DT> <CODE>makefile.in</CODE>
+<DD> Makefile template that <CODE>configure</CODE> uses to create <CODE>makefile</CODE>
+
+<DT> <CODE>makefile.vc</CODE>
+<DD> Microsoft Visual C++ makefile for NT.
+</DL>
+The patch also contains a change to the following file:
+<DL>
+<DT> <CODE>TclTest.java</CODE>
+<DD> Apparently, in jdk1.1, The package <CODE>sun.tools.zip</CODE> does
+not exist.  This package was present in jdk1.0.2.  If you try to compile
+<CODE>TclTest.java</CODE> with the jdk1.1 <CODE>javac</CODE>, you will get
+<PRE>
+TclTest.java:13: Package sun.tools.zip not found in import.
+import sun.tools.zip.*;
+</PRE>
+ <br> Fixed a bug where if the user hit the demo button, java would crash
+because a pathname was hardwired in.
+</DL>
+
+
+<LI> Untar the Sun <CODE>tcljava0.4</CODE>tar file and then patch it with
+<PRE>
+patch < tcljava0.4a.patch
+</PRE>
+while in the directory above tcljava0.4 directory.
+
+
+<LI> <CODE>configure</CODE> has a number of options to set the paths.
+You can use: <CODE>configure -help</CODE> to see them all.
+
+ <br> You will probably need to specify at least three arguments:
+<DL>
+<DT> <CODE>--with-java</CODE>
+
+<DD>  You will probably need to use the <CODE>--with-java</CODE>
+option to tell configure where your Java installation is.  If you java
+installation is at <CODE>/opt/jdk1.1</CODE>, then you would use
+ <CODE--with-java=/opt/jdk1.1</CODE>.
+
+
+</DL>
+If your tcltk installation is not installed in the default location 
+(<CODE>/usr/local</CODE>), then you may need to call <CODE>configure</CODE>
+with other arguments.
+
+</OL>
+
+ <hr>
+<H2>Installing TclJava under NT</H2>
+
+<A HREF="tcljava0.4a.nt.tar.gz"><CODE>tcljava0.4a.nt.tar.gz</CODE></A>
+contains NT 4.0 binaries for <CODE>tcljava0.4a</CODE> and
+<CODE>Itcl2.2</CODE>.
+ <P>The binaries contain hardwired paths, and are only available for testing
+purposes.  If you have problems with this tar file, try building from scratch below.
+
+<OL> 
+<LI> Download <A HREF="tcljava0.4a.nt.tar.gz"><CODE>tcljava0.4a.nt.tar.gz</CODE></A>
+
+<LI> Install it in your <CODE>c:</CODE> drive.  The tar file consists of files
+in two directories: <CODE>c:\Program Files\Itcl2.2</CODE> and <CODE>c:\tcljava0.4</CODE>
+
+<LI> Download  and install the Java Development Kit from <A
+HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>.
+I installed it in <CODE>c:\jdk1.1</CODE>.  You will need to set your Path
+and the <CODE>CLASSPATH</CODE> environment variable according to the JDK
+instructions.
+
+<LI> Set your path to include <CODE>c:\Program Files\Itcl2.2\Bin</CODE>
+
+
+<LI> To run the tcljava interface, I had to set the
+<CODE>TCL_LIBRARY</CODE> and <CODE>TK_LIBRARY</CODE> environment
+variables.  Under NT, I brought up the control panel, selected the
+System Icon and then the Environment Tab.
+ <br>I set <CODE>TK_LIBRARY</CODE> to
+<CODE>c:/Program Files/Itcl2.2/Lib/Itcl/Tk4.2</CODE>
+ <br>I set <CODE>TCL_LIBRARY</CODE> to
+<CODE>c:/Program Files/Itcl2.2/Lib/Itcl/Tcl7.6</CODE>
+
+<LI> Start up the tcljava interface with the sample file:
+<PRE>
+cd c:\tcljava0.4a
+java TclTest
+</PRE>
+
+</OL>
+
+
+ <hr>
+<H2>Building Tcljava under NT</H2>
+
+ <P>I believe that to Install Tcljava under NT, you must rebuild Tcl from
+scratch.  If you do not rebuild Tcl from scratch, then when you try to
+link with the tcl and tk dll, VC++ will complain about invalid
+objects.
+
+<H3>Why not gcc?</H3>
+ <P>
+I don't think that java native methods can be compiled under gcc, if you
+run <CODE>javah</CODE>, then the <CODE>.c</CODE> file that is generated
+has a line like:
+<PRE>
+__declspec(dllexport) stack_item *Java_tcl_Interp_native_0005feval_stub(stack_item *_P_,structexecenv *_EE_) {
+</PRE>
+I downloaded the cygwin gcc (version cygnus-2.7.2-961023), and it failed to 
+compile this line, the error message was:
+<PRE>
+	tcl_classes.c: In function `__declspec':
+	tcl_classes.c:8: syntax error before `{'
+</PRE>
+I also had problems compiling
+<CODE>c:\jdk1.\include\win32\typdefs_md.h</CODE>, with gcc, there were
+errors in the <CODE>INT_OP</CODE> declaration.  I also had problems
+<CODE>__int64</CODE> in <CODE>typdefs_md.h</CODE>.
+Perhaps gcc can be used here, but I did not look into this any further.
+
+<H3>Installation procedure</H3>
+<OL>
+
+<LI> Download the Tcl/Tk sources.  Locally, we use Itcl, an object
+oriented extension to Tcl/Tk, so these instructions are based on Itcl sources.
+The Itcl2.2 sources can be obtained from: 
+<A HREF="http://www.tcltk.com/itcl"><CODE>http://www.tcltk.com/itcl
+</CODE></A>
+
+<LI> I untar'd the Itcl2.2 sources in <CODE>c:\Itcl2.2</CODE>
+
+<LI> The Itcl2.2 sources need several fixes the the <CODE>makefile.vc</CODE>
+files.  The <A HREF="itcl2.2a.tar.gz"><CODE>itcl2.2a.tar.gz</CODE></A> gzipped
+tar file contains the appropriate fixes.  You should grab <CODE>itcl2.2a.tar.gz</CODE> and untar it over the Itcl2.2 distribution.  <CODE>itcl2.2a.tar.gz</CODE> contains the following fixes:
+
+	<OL>
+
+	<LI> <CODE>tk4.2/win/makefile.vc</CODE> needed the
+	<CODE>$(IWISH)</CODE> rule changed to <CODE>$(WISH)</CODE>.
+
+
+	<LI> <CODE>makefile.vc</CODE> needed:
+	<PRE>
+	TKLIBDIR	= $(TKDIR)\Win
+	</PRE>
+
+	<LI> <CODE>itk/win/makefile.vc</CODE> needed
+	<PRE>
+	TARGET_DOC_ITK	= $(TARGET_DOC)\Itk
+	</PRE>
+	
+	<LI> Also, I fixed the installation rules so that <CODE>make
+	install</CODE>
+	will not fail if it is run a second time because <CODE>mkdir</CODE>
+	fails.
+	</OL>
+
+<LI> Build and install the Itcl2.2 distribution with:
+<PRE>
+cd c:\Itcl2.2
+nmake -f makefile.vc dist
+nmake -f makefile.vc install
+</PRE>
+Note that if you have already previously installed Tcl/Tk, you should
+remove any preexisting Tcl/Tk libraries, such as <CODE>tcl76.dll</CODE>
+or <CODE>tcl76i.dll</CODE>
+ <br>If you have the problem where everytime you run <CODE>nmake</CODE>, 
+all the files are rebuilt, then try using the Cygnus <CODE>chmod</CODE>
+and <CODE>touch</CODE> commands to update the mod times on all the files.
+The problem I noticed was that many of the files are dated Dec 31, 1969.
+
+<LI> Download the Java Development Kit from <A
+HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>.
+I installed it in <CODE>c:\jdk1.1</CODE>
+
+<LI> Download <A
+HREF="tcljava0.4a.tar.gz"><CODE>tcljava0.4a</CODE></A> (gzipped tar
+file).  This file is based on <CODE>tcljava0.4</CODE>, but it has been
+patched for use with jdk1.1, configure and NT.  I installed this as
+<CODE>c:\tcljava0.4a</CODE>
+
+ <br>
+I had to make the following changes to <CODE>tcljava0.4</CODE>:
+	<OL>
+	<LI> <CODE>tkJava.c</CODE> was failing to compile with
+	lots of problems in <CODE>rpcdce.h</CODE>.  The following small
+	test program fails to compile:
+	<PRE>
+	#include <tk.h>
+	#include <oobj.h>
+	int foo() { return 1;}
+	</PRE>
+	The rule I used to test this was:
+	<PRE>
+	tkj.obj:
+		cl -Ic:\jdk1.1\include -Ic:\jdk1.1\include\win32 \
+		-I$(TOOLS32)\include $(TK_INCLUDES)  \
+		/c tst.c
+	</PRE>
+	The fix is to insert
+	<PRE>
+/* NT4.0, vc++: If you don't undef Status, then rpcdce.h won't compile -cxh */
+#ifdef _MSC_VER
+#undef Status
+#endif
+	</PRE>
+	right before the line that includes <CODE>oobj.h</CODE>.
+
+	<LI> <CODE>TclTest.java</CODE>
+	JDK1.1 under Windows does not include the
+	<CODE>sun.tools.zip</CODE> package, so I had to comment out
+	a number of lines that tried to use it before the 
+	<CODE>TclTest.java</CODE> class would compile
+
+	<LI> When linking, I got an error about <CODE>perror</CODE>
+	not being defined, so I modified the makefile.vc to not
+	define <CODE>EXECHACK</CODE>
+
+	
+	<LI> <CODE>TclTest.java</CODE>
+	When trying to run <CODE>java TclTest</CODE>, I kept getting
+	errors about <CODE>create</CODE> not being found.  The fix was
+	to load the library at the top of <CODE>main</CODE> instead of
+	in the <CODE>TclTest</CODE> <CODE>static</CODE> section.
+
+	</OL>
+</PRE>
+
+<LI> I compiled the tcljava interface with:
+<PRE>
+cd c:\tcljava0.4a
+nmake -f makefile.vc all
+</PRE>
+
+
+<LI> To run the tcljava interface, I had to set the
+<CODE>TCL_LIBRARY</CODE> and <CODE>TK_LIBRARY</CODE> environment
+variables.  Under NT, I brought up the control panel, selected the
+System Icon and then the Environment Tab.
+ <br>I set <CODE>TK_LIBRARY</CODE> to
+<CODE>c:/Program Files/Itcl2.2/Lib/Itcl/Tk4.2</CODE>
+
+<LI> The command to actually run the interface is
+<PRE>
+java TclTest
+</PRE>
+
+</OL>
+
+<H3>Troubleshooting tcljava under NT</H3>
+
+<MENU>
+
+<LI> You might find the <A
+HREF="http://ourworld.compuserve.com:80/homepages/efjohnson/tclwin.htm">Tcl/Tk
+on Windows FAQ</A> useful.
+
+
+<LI> If you get an error message that looks likes:
+<PRE>
+The instruction at "0x1000f36b" referenced memory at "0x00000000". The
+memory could not be "read".
+</PRE>
+
+The search for all the Tcl76 dlls and remove all of them except the
+ one that you built. Also, check to be sure that you compiled Tcl and Tk with
+debugging turned on.  <CODE>Itcl2.2/tcl7.6/makefile.vc</CODE> and
+ <br>I fixed a bug in <CODE>TclTest.java</CODE>, where a path was hardwired
+in so that if the user hit the <CODE>demo</CODE> button, then they
+would see the above error.  Try using a button other than <CODE>demo</CODE>.
+
+<LI> If you get an error about not being able to find <CODE>tk.tcl</CODE>:
+<PRE>
+bash$ java TclTest
+java.lang.UnknownError: Can't find a usable tk.tcl in the following directories:
+ 
+   {c:/Program Files/Itcl2.2/Lib/Itcl/Tk4.2/tk.tcl} . c:/tk4.2 ./lib/itcl/tk4.2
+ c:/tk4.2/library c:/library
+This probably means that Tk wasn't installed properly.
+
+        at tcl.TkApplication.tkInit(TkApplication.java:39)
+        at TclTest.main(TclTest.java:152)
+bash$
+</PRE>
+
+Try setting <CODE>TK_LIBRARY</CODE> and <CODE>TCL_LIBRARY</CODE>in the
+system control panel under the Environment choice.
+
+ <br>I set <CODE>TK_LIBRARY</CODE> to
+<CODE>c:/Program Files/Itcl2.2/Lib/Itcl/Tk4.2</CODE>
+ <br>I set <CODE>TCL_LIBRARY</CODE> to
+<CODE>c:/Program Files/Itcl2.2/Lib/Itcl/Tcl7.6</CODE>
+
+</MENU>
+
+
+<hr>
+<p>
+<ADDRESS><a
+href="mailto:cxh@eecs.berkeley.edu">cxh@eecs.berkeley.edu</a><br>
+</ADDRESS>
+</body>
+</html>
+
