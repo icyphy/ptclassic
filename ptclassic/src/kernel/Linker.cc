@@ -357,6 +357,7 @@ static void cleanupSharedObjects(int linkSeqNum)
 char *
 Linker::generateSharedObject(int argc, char **argv, char* objName, int maxsize)
 {
+  return (char *)NULL;
 }
 #endif
 
