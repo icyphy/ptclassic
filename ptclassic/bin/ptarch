@@ -59,8 +59,8 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	exit 0 ;;
 
     sun4*:SunOS:5.*:*)
-        echo sol2
-        exit 0 ;;
+    echo sol2
+    exit 0 ;;
 
     sun4*:SunOS:*:*)
 	echo sun4
@@ -96,6 +96,13 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	# Linux support in Ptolemy might not be complete
 	echo linux
 	exit 0 ;;
+
+    i[34]86:NetBSD:1.0:*)
+ 	# NetBSD 0.8 and 0.9 not supported
+ 	# Specify architecture since NetBSD runs on multiple architectures
+ 	echo nbsd.386 
+ 	exit 0 ;;
+
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
