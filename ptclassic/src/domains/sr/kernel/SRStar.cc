@@ -69,7 +69,6 @@ void SRStar::initializeInstant()
 // By default, do nothing
 void SRStar::tick()
 {
-  return 0;
 }
 
 // Inter-instant time advacement
