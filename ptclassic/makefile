@@ -50,7 +50,8 @@ obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
 # then everything else.
 # gcc source is distributed as a separate tar file
 # tcltk and octtools source are distributed as a separate tar file
-bootstrap: obj.$(ARCH) install_gnu install_tcltk install_octtools install
+bootstrap: obj.$(ARCH) install_gnu install_tcltk install_octtools install_xv \
+			install
 
 .PHONY:	install_gnu install_tcltk install_octtools install
 
@@ -70,6 +71,7 @@ install_gnu:
 # For hppa, run install_hpgnu, not install_gnu
 install_hpgnu:
 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) $(MFLAGS) hpgnu_all
+
 install_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
 
@@ -82,3 +84,5 @@ octtools: obj.$(ARCH)/octtools
 install_octtools: obj.$(ARCH)/octtools
 	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) install
 
+install_xv:
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_all
