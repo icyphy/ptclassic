@@ -43,7 +43,7 @@ static char SccsId[]="$Id$";
 #include "message.h"
 #include "vemUtil.h"
 #include "vulcan.h"
-
+#include "oh.h"			/* For ohFormatName */
 
 
 static void handler( type, msg )
@@ -60,6 +60,15 @@ static void handler( type, msg )
 	break;
     case VULCAN_SEVERE:
 	head = "ERR";
+	break;
+    case VULCAN_PARTIAL:
+	head = "PARTIAL";
+	break;
+    case VULCAN_DEBUGGING:
+	head = "DEBUG";
+	break;
+    case VULCAN_FATAL:
+	head = "FATAL";
 	break;
     }
     vemMsg( MSG_C, "%s: %s", head, msg );
