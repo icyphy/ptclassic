@@ -34,6 +34,15 @@ provisions.
     desc { Right channel output }
   }
 
+  defstate {
+    name { homogeneous }
+    type { int }
+    default { 0 }
+    desc { If set to 1, the star sends out 2 samples of data per
+	     firing }
+  }
+
+
   constructor {
     encodingType.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
     encodingType.setInitValue("linear16");
@@ -41,8 +50,9 @@ provisions.
     channels.setInitValue(2);
   }
 
-  codeblock (convert) {
+  codeblock (homogeneousConvert) {
     /* Convert data in buffer to Output format */
+    /* this sends data out 2 samples per star-firing */
     {
       int j;
       j = 2*(($val(blockSize)/4) - $starSymbol(counter));
@@ -52,13 +62,34 @@ provisions.
     }
   }
   
+  codeblock (convert) {
+    /* Convert data in buffer to Output format */
+    {
+      int i, j;
+      for (i=0; i <($val(blockSize)/4); i++) {
+	j = 2*i;
+	$ref(left,($val(blockSize)/4) - 1 - i) = 
+	  $starSymbol(buffer)[j] /32768.0;
+	$ref(right,($val(blockSize)/4) - 1 - i) = 
+	  $starSymbol(buffer)[j+1] /32768.0;
+      }
+    }
+  }
+ 
+
   codeblock (setbufptr) {
     $starSymbol(bufferptr) = $starSymbol(buffer);
   }
 
   setup {
-    left.setSDFParams(1);
-    right.setSDFParams(1);
+    if(homogeneous == 1) {
+      left.setSDFParams(1);
+      right.setSDFParams(1);
+    }
+    else {
+      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+    }
   }
 
   initCode {
@@ -91,12 +122,19 @@ provisions.
 
   }
   go {
-    addCode("if ($starSymbol(counter) == 0) {\n");
-    addCode(setbufptr);
-    addCode(read);
-    addCode("$starSymbol(counter) = ($val(blockSize)/4);\n");
-    addCode("}\n");
-    addCode(convert);
+    if(homogeneous == 1) {
+      addCode("if ($starSymbol(counter) == 0) {\n");
+      addCode(setbufptr);
+      addCode(read);
+      addCode("$starSymbol(counter) = ($val(blockSize)/4);\n");
+      addCode("}\n");
+      addCode(homogeneousConvert);
+    }
+    else {
+      addCode(setbufptr);
+      addCode(read);
+      addCode(convert);
+    }
   }
 
   wrapup {
