@@ -55,13 +55,11 @@ endif
 
 if ($PTARCH =~ hppa?*) then
 	if ( ! $?SHLIB_PATH ) then
-		setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib
+		setenv SHLIB_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:$PTOLEMY/tcltk/itcl.{$PTARCH}/lib/itcl
 	endif
 else
 	if ( ! $?LD_LIBRARY_PATH ) then
-		# Save the LD_LIBRARY_PATH in case we are called with -bak
-		setenv S_LD_LIBRARY_PATH yes
-		setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:/usr/X11/lib:/usr/openwin/lib:/usr/local/X11/lib
+		setenv LD_LIBRARY_PATH $PTOLEMY/lib.${PTARCH}:$PTOLEMY/octtools/lib.${PTARCH}:$PTOLEMY/gnu/$PTARCH/lib:/usr/X11/lib:/usr/openwin/lib:/usr/local/X11/lib:$PTOLEMY/tcltk/itcl.{$PTARCH}/lib/itcl 
 	endif
 endif
 
