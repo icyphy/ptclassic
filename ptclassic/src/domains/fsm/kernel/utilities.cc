@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 *************************************************************************/
 
 #include <string.h>
+#include "Block.h"
 #include "Error.h"
 #include "Geodesic.h"
 #include "InfString.h"
@@ -170,7 +171,13 @@ int interp2port(Tcl_Interp* myInterp,PortHole* port,const char* ghostDomain) {
 	}
 	
       } else {
-	Error::abortRun("interp2port: ",port->type()," is not supported yet!");
+	buf = "interp2port: Not supported type ";
+	buf << port->type();
+	buf << " found in port ";
+	buf << port->name();
+	buf << " of ";
+	buf << port->parent()->name();
+	Error::abortRun(buf);
 	return FALSE;
       }
     }  // end of if (!strcmp(ghostDomain,"SDF"))
@@ -226,8 +233,13 @@ int interp2port(Tcl_Interp* myInterp,PortHole* port,const char* ghostDomain) {
       }
       
     } else {
-      Error::abortRun("interp2port: Data type ", port->type(),
-		      " is not supported yet!");
+      buf = "interp2port: Not supported type ";
+      buf << port->type();
+      buf << " found in port ";
+      buf << port->name();
+      buf << " of ";
+      buf << port->parent()->name();
+      Error::abortRun(buf);
       return FALSE;
     }
     
