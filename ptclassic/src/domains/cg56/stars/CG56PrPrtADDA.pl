@@ -305,12 +305,12 @@ $label(empty)
 	initCode {
 		const char     *f = forceInterrupts;
 		if (f[0] == 'n' || f[0] == 'N')
-			gencode(pollingInit);
+			addCode(pollingInit);
 		else {
-			gencode(interruptInit);
+			addCode(interruptInit);
 			genInterruptCode(interrupt);
 			genInterruptCode(interrupt1);
-			gencode(interruptCont);
+			addCode(interruptCont);
 		}
 	}
 
@@ -320,10 +320,10 @@ $label(empty)
 		if (p[0] == 'n' || p[0] == 'N') {
 			//polling
 				if (q[0] == 'y' || q[0] == 'Y')
-				gencode(abortyes);
-			gencode(polling);
+				addCode(abortyes);
+			addCode(polling);
 		} else {
-			gencode(interruptIn);
+			addCode(interruptIn);
 		}
 	}
 	execTime {
@@ -336,7 +336,7 @@ $label(empty)
 	wrapup {
 		const char     *i = forceInterrupts;
 		if (i[0] == 'y' || i[0] == 'Y') {
-			gencode(interruptTerminate);
+			addCode(interruptTerminate);
 		}
 	}
 }    

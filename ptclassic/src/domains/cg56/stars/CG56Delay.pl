@@ -70,15 +70,15 @@ A delay star of parameter total_delay unit delays.
                 delayBuf.resize(totalDelay);
         }		
         initCode {
-                gencode(block);
+                addCode(block);
 	}
         go {
 		if(totalDelay==0)
-		     gencode(zero);
+		     addCode(zero);
                 else if(totalDelay==1)
-	             gencode(one);
+	             addCode(one);
 		else     
-                     gencode(std);
+                     addCode(std);
         }		
 
 	execTime { 

@@ -46,7 +46,7 @@ default.
 	move	x0,$ref(output)
 	}
 	go {
-		gencode(sendsample);
+		addCode(sendsample);
 	}
 	execTime {
 		return 2;

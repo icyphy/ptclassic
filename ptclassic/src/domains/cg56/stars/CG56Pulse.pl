@@ -70,7 +70,7 @@ $label(cont)
         move    x0,$ref(output)
         }
         go {
-                gencode(std);
+                addCode(std);
         }		
 
 	execTime { 

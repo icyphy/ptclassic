@@ -43,7 +43,7 @@ The output is in the range (-1.0, 1.0).
         move    b1,$ref(output)
 	}
 	go {
-		gencode(main);
+		addCode(main);
 	}
 	execTime {
 		return 10;

@@ -29,7 +29,7 @@ or positive; right (negative) shifts are not supported.
 	type {FIX}
     }
     go {
-	gencode(cbMulShift);
+	addCode(cbMulShift);
     }
     codeblock (cbMulShift) {
 	move	$ref(factor1),x0

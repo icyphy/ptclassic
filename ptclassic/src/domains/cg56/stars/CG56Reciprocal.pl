@@ -59,6 +59,6 @@ $label(normalize)
  	}
  	go {
                  X=23-int(Nf);
-	 	 gencode(Rblock);
+	 	 addCode(Rblock);
 	}
 }

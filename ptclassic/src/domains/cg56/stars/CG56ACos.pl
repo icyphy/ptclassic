@@ -117,7 +117,7 @@ $label(l23)
         move    a,$ref(output)
 	}
 	go {
-		gencode(acosblock);
+		addCode(acosblock);
 	}
 }
 

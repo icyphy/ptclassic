@@ -39,7 +39,7 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 	} 
         go {
                 X=cyclesToWaste-4;
-                gencode(std);
+                addCode(std);
 	}
 	execTime { 
 		return int(cyclesToWaste);

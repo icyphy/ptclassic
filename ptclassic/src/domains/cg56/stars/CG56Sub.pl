@@ -41,12 +41,12 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
         }
 
 	go {
-		gencode(main);
+		addCode(main);
 		for (int i = 1; i <= neg.numberPorts(); i++) {
 			inputNum = i;
-			gencode(loop);
+			addCode(loop);
 		}
-		gencode(done);
+		addCode(done);
 	}
 	execTime {
 		return 2 * int  (neg.numberPorts()) + 2;

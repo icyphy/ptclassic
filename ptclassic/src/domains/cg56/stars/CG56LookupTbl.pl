@@ -113,17 +113,17 @@ one more memory location if \fIinterpolation\fR is "linear".
                                addedVal=2*coef[coefNum-1]-coef[coefNum-2];
                                break;
             	          }
-                          gencode(addblockinit);
+                          addCode(addblockinit);
 		}               
         }		
 	go {
         const char* q = interpolation;
 		switch (q[0]) {
 		case 'n': case 'N':    	// none
-			gencode(none);
+			addCode(none);
 			break;
 		default:
-			gencode(other);
+			addCode(other);
 			return;
 	        }
 	}

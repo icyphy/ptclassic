@@ -72,7 +72,7 @@ $label(cont)
         }		
 
         go {
-                gencode(std);
+                addCode(std);
         }		
 
 	execTime { 

@@ -43,7 +43,7 @@ which is then set to zero.
 	move	b,$ref(pulse)
 	} 
 
-        go { gencode(std); }
+        go { addCode(std); }
 	execTime { 
 		return 3;
 	}

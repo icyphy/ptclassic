@@ -58,16 +58,16 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	move	a,x:(r1)+
 	}
 	initCode {
-		gencode (initfill);
-		if (factor > 1) gencode(repeatcode);
-		gencode(fillcode);
+		addCode (initfill);
+		if (factor > 1) addCode(repeatcode);
+		addCode(fillcode);
 	}
 	codeblock (sendsample) {
 	move	$ref(input),x0
 	move	x0,$ref2(output,phase)
 	}
 	go {
-		gencode(sendsample);
+		addCode(sendsample);
 	}
 	execTime {
 		return 1;

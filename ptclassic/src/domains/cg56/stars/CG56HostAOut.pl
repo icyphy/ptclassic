@@ -32,7 +32,7 @@ blah
 graph $ref(input,0) $fullname() "$val(label)"
     }
     initCode {
-	genMiscCmd(cbAio);
+	addCode(cbAio,"aioCmds");
     }
     go {
 	; // nothing to do

@@ -69,12 +69,12 @@ Arithmetic shifts are used.
 	move	a1,$ref(output)
     }
     go {
-    	gencode(cbLoad);
+    	addCode(cbLoad);
 	if ( int(absShifts)!=0 ) {
-	    gencode(cbShifts);
+	    addCode(cbShifts);
 	}
-	if ( doSat )		gencode(cbSaveSat);
-	else			gencode(cbSaveNosat);
+	if ( doSat )		addCode(cbSaveSat);
+	else			addCode(cbSaveNosat);
     }
     exectime {
 	return int(absShifts) + 3;

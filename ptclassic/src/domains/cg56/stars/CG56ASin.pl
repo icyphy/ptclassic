@@ -93,7 +93,7 @@ $label(l5)
          move    a,$ref(output)
 	}
 	go {
-		gencode(asinblock);
+		addCode(asinblock);
 	}
 }
 

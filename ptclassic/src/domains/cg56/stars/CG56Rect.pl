@@ -101,7 +101,7 @@ $label(end)
 		              "Period must be greater than width");
         }			      
 	go {
-                gencode(main);
+                addCode(main);
 	}
 	execTime {
 		return 26;

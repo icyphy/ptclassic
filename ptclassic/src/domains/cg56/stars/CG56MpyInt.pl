@@ -33,7 +33,7 @@ Input and output are assumed to be integers (right-justified in word).
 	move 	a0,$ref(output)
 	}
  	go {
-		gencode(multblock);
+		addCode(multblock);
   	}
 	exectime {
 	 	return 4; 

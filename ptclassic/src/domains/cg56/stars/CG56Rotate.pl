@@ -88,11 +88,11 @@ $label(lab4)
 			rotate = length + rotation;
 
 		if (rotate > 0 && length > 1)
-			gencode(greater);
+			addCode(greater);
 		else if (length > 1)
-			gencode(other);
+			addCode(other);
 		else
-			gencode(one);
+			addCode(one);
 	}
 	exectime {
 		if (length > 1 && rotation == 0)

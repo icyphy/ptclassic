@@ -48,7 +48,7 @@ using polynomial approximation with eight bits of accuracy.
 	} 
 
         go {
-        gencode(std);
+        addCode(std);
 	}
 	execTime { 
 		return 49;

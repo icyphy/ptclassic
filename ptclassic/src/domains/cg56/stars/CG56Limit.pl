@@ -47,7 +47,7 @@ $label(end)
         }
 
  	go {
- 		gencode(limitblock);
+ 		addCode(limitblock);
  	}
 
 	exectime {

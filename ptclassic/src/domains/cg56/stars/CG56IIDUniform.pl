@@ -40,15 +40,15 @@ done with g++ (type "long long"), but it isn't portable.
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
 	initCode {
-		gencode(initSeed);
+		addCode(initSeed);
 	}
 	start {
 		scaledRange = int(double(range) * 8388608);
 	}
 	go {
-		gencode(random);
-		if (double(range) < CG56_ONE) gencode(rangeScale);
-		else gencode (range1);
+		addCode(random);
+		if (double(range) < CG56_ONE) addCode(rangeScale);
+		else addCode (range1);
 	}
 	execTime {
 		return (double(range) < CG56_ONE) ? 17 : 15;

@@ -59,13 +59,13 @@ Distributes an input signal among two outputs, alternating samples.
 
         go {
                 if (output.numberPorts() == 1) {
-                        gencode(one);
+                        addCode(one);
                         return;
                 }
-                gencode(main);
+                addCode(main);
                 for (int i = 1; i <= output.numberPorts(); i++) {
                         outputNum=i;
-                        gencode(loop);
+                        addCode(loop);
                 }
         }
        exectime {

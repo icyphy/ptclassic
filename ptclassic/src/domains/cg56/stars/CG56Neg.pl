@@ -27,6 +27,6 @@ The input is moved into accumlator "a", where the "neg" instruction is applied.
 	move	a,$ref(output)
 	}
 	go {
-		gencode(negblock);
+		addCode(negblock);
 	}
 }

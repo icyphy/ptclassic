@@ -70,8 +70,8 @@ and the output consists of overlapping blocks input particles.
 $label(loop)
         }    
 	go {
-                gencode(main);
-		if(nwrite>0) gencode(write);
+                addCode(main);
+		if(nwrite>0) addCode(write);
 	}
         execTime {
                 return 4+ 2*int(nwrite);

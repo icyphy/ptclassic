@@ -34,7 +34,7 @@ $label(sqrtend)
         move    b,$ref(output)
   	}
  	go {
- 		gencode(sqrtblock);
+ 		addCode(sqrtblock);
  	}
 
 	exectime {

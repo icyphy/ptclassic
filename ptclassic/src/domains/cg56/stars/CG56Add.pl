@@ -41,18 +41,18 @@ The inputs are added and the result is written on the output.
 	}
 	go {
 		if (input.numberPorts() == 1) {
-			gencode(one);
+			addCode(one);
 			return;
 		}
-		gencode(std);
+		addCode(std);
 		for (int i = 3; i <= input.numberPorts(); i++) {
 			char buf[80];
 			sprintf (buf, "\tadd\tx0,a\t$ref(input#%d),x0",i);
-			gencode(CodeBlock(buf));
+			addCode(CodeBlock(buf));
 		}
 		if (int(saturation))
-			gencode(sat);
-		else gencode(nosat);
+			addCode(sat);
+		else addCode(nosat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 2;
