@@ -50,7 +50,10 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	void setBufName(char* n) {bufName = n;}
+	void setBufName(const char* n) {
+	    delete [] bufName; bufName = savestring(n);
+	}
+    
 	char* getBufName() const;
 
 	// Initialize the geodesic.
