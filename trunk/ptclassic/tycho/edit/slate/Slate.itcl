@@ -157,6 +157,9 @@ class ::tycho::Slate {
 	eval $canvas focus $args
     }
 
+    # Focus on the slate
+    method focusin {}
+
     # Get the tags of an item or pict
     method gettags {id}
 
@@ -316,6 +319,11 @@ body ::tycho::Slate::constructor {args} {
 
     # Keep a pointer to the canvas to save typing
     set canvas $itk_component(canvas)
+
+    # Give the focus to the canvas when the slate gets mapped. This
+    # is convenient for simple applications. For explicit focus
+    # management, use the focusin{} method.
+    ::bind $canvas <Map> "focus $canvas"
 
     # Initialise some things
     set slatetags() {{}}
@@ -731,6 +739,27 @@ body ::tycho::Slate::find {mode args} {
 }
 
 #######################################################################
+#### focusin
+#
+# Put the focus into the canvas. This is needed for explicit
+# focus control: there seems to be no way to detect that the
+# focu{} command has been called with a megawidget as an
+# argument, so instead of calling
+# <pre>
+#     focus $slate
+# </pre>
+# you need to call
+# <pre>
+#     $slate focusin
+# </pre>
+#
+# If using Tk's default focus model, this is not needed.
+#
+body ::tycho::Slate::focusin {} {
+    uplevel #0 "focus $canvas"
+}
+
+#######################################################################
 #### gettags
 #
 body ::tycho::Slate::gettags {id} {
@@ -888,9 +917,6 @@ body ::tycho::Slate::itemconfigure {id args} {
 		}
 	    } else {
 		# Call the proc on the class to set the option
-#		::tycho::$picttype($id)::[string trimleft $option -] \
-#			$id $canvas $value
-
 		global $picttype($id)
 		[set $picttype($id)([string trimleft $option -])] \
 			$id $canvas $value
