@@ -47,11 +47,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringList.h"
 #include <ctype.h>
 #include "pt_fstream.h"
-#ifdef hppa
-#ifndef __GNUG__
+#if (defined(hppa) && ! defined(__GNUG__)) || defined(SOL2) || defined(SVR4) || defined(SYSV)
 #include <fcntl.h>		// For open().
-#endif /* __GNUG__ */
-#endif /*hppa*/
+#endif /*hppa GNUG SOL2*/
 
 // FIXME: required to fix a bug in the Sun4 errno.h file
 //      remove when Sun fixes it.
@@ -71,8 +69,20 @@ extern char *sys_errlist[];
 #define ARCH "sun3"
 #endif
 #if defined(__sparc__) || defined(sparc)
+#if defined(__svr4__) || defined(SVR4) || defined(SYSV)
+#if defined(__GNUG__)
+#define ARCH "sol2"
+#else
+#define ARCH "sol2.cfront"
+#endif /* __GNUG__ */
+#else
 #define ARCH "sun4"
-#endif
+#endif /* __svr4__ etc */
+#endif /* __sparc__ */
+#endif /* __sun__ */
+
+#ifdef linux
+#define ARCH "linux"
 #endif
 
 #ifdef vax
