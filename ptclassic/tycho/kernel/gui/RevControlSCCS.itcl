@@ -190,7 +190,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
     cdDir $dir
 
     # Run sccs create
-    if [catch {eval exec /usr/ccs/bin/sccs create $basefile} output] {
+    if [catch {eval exec sccs create $basefile} output] {
 	# There was some nasty error, so trash the SCCS file
 	set revfile [file join $revdir s.$basefile]
 	exec rm -f $revfile
@@ -201,7 +201,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 
     # Run sccs admin
     set opts [option get $itk_component(hull) adminOptions RevControlSCCS]
-    if [catch {eval exec /usr/ccs/bin/sccs admin $opts $basefile} output] {
+    if [catch {eval exec sccs admin $opts $basefile} output] {
 	error "Failed to run 'sccs admin $opts $basefile:\
 		$output."
     }
