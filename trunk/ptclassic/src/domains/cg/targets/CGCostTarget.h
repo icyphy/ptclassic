@@ -74,7 +74,7 @@ protected:
 	void disconnectAllStars(Galaxy& parent);
 
 	// Generate implementation costs for all stars for one target
-	int costInfoForOneTarget(CGTarget* userTarget);
+	int costInfoForOneTarget(CGTarget* userTarget, const char* domain);
 
 	// Find the right source or sink star to match the block port
 	int selectConnectStarBlock(Galaxy* localGalaxy, PortHole* localHole);
