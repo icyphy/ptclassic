@@ -120,9 +120,6 @@ public:
     virtual void wormOutputCode(PortHole&);
     virtual void allWormOutputCode();
 
-    // method for preparing a wormhole for code generation
-    virtual void wormPrepare();
-
     // methods for sending and receiving data to a target when
     // run inside of a wormhole. Argument is the "real port" of the 
     // interior star that is attached to an event horizon.  If no argument 
@@ -194,9 +191,6 @@ public:
 
     const char* lookupSharedSymbol(const char* scope, const char* name);
 
-    // set inheritFlag;
-    void amInherited() { inheritFlag = TRUE; }
-
     // virtual method to return the relative execution of a star
     // by default, it just returns the myExecTime() of the star.
     virtual int execTime(DataFlowStar* s, CGTarget* = 0)
@@ -205,6 +199,10 @@ public:
     // Additional initialization (invoked by initialize method).
     // If within a WormHole, generate, compile, load, and run code.
     /*virtual*/ void setup();
+
+   // initilization routine as a child target of a multiprocessor target
+   // initialize State and choose scheduler
+   virtual void childInit();
 
     // Combine all sections of code.
     virtual void frameCode();
@@ -322,12 +320,9 @@ private:
     // Counter used to make symbols unique.
     int counter;
 
-    // return non-zero if this target is not a child target, or not
-    // inherited from another target. Then, generate code in the setup
-    // stage if it is inside a wormhole.
-    int alone() { return (parent() == NULL) && (inheritFlag == FALSE); }
-
-    int inheritFlag;
+    // return non-zero if this target is not a child target
+    // Then, generate code in the setup stage if it is inside a wormhole.
+    int alone() { return (parent() == NULL) ; }
 
     // list of spliced stars
     SequentialList spliceList;

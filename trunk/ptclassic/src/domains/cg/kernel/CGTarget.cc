@@ -71,7 +71,7 @@ StringList CGTarget::indent(int depth) {
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep)
-: Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0), inheritFlag(0)
+: Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0)
   
 {
 	separator = sep;
@@ -110,6 +110,8 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 	loadFlag.clearAttributes(A_SETTABLE);
 	runFlag.clearAttributes(A_SETTABLE);
 
+	procedures.initialize();
+
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
 	counter = 0;
@@ -133,17 +135,12 @@ int CGTarget :: loadCode() { return TRUE; }
 int CGTarget :: runCode() { return TRUE; }
 
 // the main guy.
-// If there is no galaxy yet, we just create a scheduler and return.
-// This is not to my liking; the whole way we do this needs to be
-// rethought.  It also means that any derived classes of CGTarget that
-// are intended to be used as child targets of CGMultiTarget must
-// behave the same way.
 
 void CGTarget::setup() {
 	myCode.initialize();
 	makefile.initialize();
 	makeAllList.initialize();
-	procedures.initialize();
+
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
 	if (!scheduler()) {
@@ -167,7 +164,6 @@ void CGTarget::setup() {
 		break;
 	    }
 	}
-	if (!galaxy()) return;
 	if (!galaxySetup()) return;
 	if (haltRequested()) return;
 	if (filePrefix.null()) filePrefix = galaxy()->name();
@@ -199,7 +195,6 @@ void CGTarget::setup() {
 	if (inWormHole() && alone())
 	{
 	    adjustSampleRates();
-	    wormPrepare();
 	    generateCode();
 	    if (haltRequested()) return;
 	    if (compileCode())
@@ -215,7 +210,13 @@ void CGTarget::setup() {
 	}
 }
 
-void CGTarget::wormPrepare() {
+void CGTarget::childInit() {
+	// initialize state
+	initState();
+	// scheduler setup
+	if (!scheduler()) {
+		LOG_NEW; setSched(new SDFScheduler);
+	}
 }
 
 int CGTarget :: run() {
@@ -274,6 +275,9 @@ void CGTarget::generateCode() {
 	frameCode();
 	if (haltRequested()) return;
 	if (!parent()) writeCode();
+
+	// now initialize for the next run
+	procedures.initialize();
 }
 
 int* CGTarget::symbolCounter() {
@@ -362,6 +366,10 @@ CodeStream* CGTarget :: getStream(const char* name)
 void CGTarget :: frameCode() {}
 
 void CGTarget :: copySchedule(SDFSchedule& s) {
+	if (!scheduler()) {
+		LOG_NEW; setSched(new SDFScheduler);
+	}
+
 	SDFScheduler* sched = (SDFScheduler*) scheduler();
 	sched->copySchedule(s);
 	// indicate multiprocessor scheduler already generated schedule
@@ -388,7 +396,7 @@ void CGTarget :: endIteration(int /*reps*/, int depth) {
 
 
 int CGTarget :: incrementalAdd(CGStar*, int) {
-	Error:: abortRun("No Incremental-Add(so, no wormhole) supported yet");
+	Error:: abortRun("No Incremental-Add(so, no macro) supported yet");
 	return FALSE;
 }
 
