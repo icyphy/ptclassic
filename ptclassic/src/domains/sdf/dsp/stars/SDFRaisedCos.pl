@@ -28,11 +28,11 @@ The length of the filter (the number of taps) is \fIN\fP.
 Ideally, the impulse response of the filter would be
 .EQ
 h(n) ~=~ left ( { sin ( pi n / P ) } over { pi n / P } right )
-left ( { cos ( alpha pi n / P ) } over { 1 minus 2 alpha n / P } right )
+left ( { cos ( alpha pi n / P ) } over { 1 ~-~ 2 alpha n / P } right )
 .EN
 where $alpha$ is \fIexcessbw\fR.
 However, this pulse is centered at zero, and we can only implement causal
-filters in the SDF domain in Ptolemy.  Hence, the inpulse response is
+filters in the SDF domain in Ptolemy.  Hence, the impulse response is
 actually
 .EQ
 g(n) ~=~ h(n - M)
