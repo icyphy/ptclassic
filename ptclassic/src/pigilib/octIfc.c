@@ -45,6 +45,7 @@ Useful higher level OCT interface functions.
 #include "mkTerm.h"
 
 static boolean SetParamProp();
+extern char* HashString();
 
 /* 8/14/89
 Opens the master of an instance, but allows you to choose which facet.
@@ -193,8 +194,11 @@ IsGalFacet(facetPtr)
 octObject *facetPtr;
 {
     octObject fterm;
+    int status;
     fterm.objectId = 0;		/* silence Purify */
-    return(octGenFirstContent(facetPtr, OCT_TERM_MASK, &fterm) == OCT_OK);
+    status = (octGenFirstContent(facetPtr, OCT_TERM_MASK, &fterm) == OCT_OK);
+    if (status) FreeOctMembers(&fterm);
+    return status;
 }
 
 /* 8/8/89
@@ -366,6 +370,7 @@ LoadTheStar(instPtr, permB, linkArgs)
 
     ERR_IF1(!MyOpenMaster(&mFacet, instPtr, "interface", "r"));
     octFullName(&mFacet, &fullName);
+    FreeOctMembers(&mFacet);
     ERR_IF1(!KcLoad(fullName, permB, linkArgs));
     PrintCon("Load completed");
     return (TRUE);
@@ -482,6 +487,7 @@ ParamListType *pListPtr;
 	octObject galFacet;
 	ERR_IF1(!MyOpenMaster(&galFacet, instPtr, "contents", "r"));
 	ERR_IF1(!GetFormalParams(&galFacet, pListPtr));
+	FreeOctMembers(&galFacet);
     }
     else {
 	char *starName;
@@ -601,7 +607,7 @@ octObject *propPtr;
 
 /* GetCommentProp  5/31/89
 Outputs: commentPtr = returns comment string.  NULL means the prop doesn't
-    exist (or has a NULL value).
+    exist (or has a NULL value).  The string is hashed.
 */
 boolean
 GetCommentProp(objPtr, commentPtr)
@@ -610,8 +616,12 @@ char **commentPtr;
 {
     octObject prop;
 
-    *commentPtr = (GetByPropName(objPtr, &prop, "comment") == OCT_NOT_FOUND)
-	? NULL : prop.contents.prop.value.string;
+    if (GetByPropName(objPtr, &prop, "comment") == OCT_NOT_FOUND)
+	*commentPtr = NULL;
+    else {
+	*commentPtr = HashString(prop.contents.prop.value.string);
+	FreeOctMembers(&prop);
+    }
     return(TRUE);
 }
 
@@ -638,7 +648,7 @@ char *comment;
     return(TRUE);
 }
 
-/* 9/22/90, EAL
+/* Get or create the domain property.  The return value is from HashString.
 */
 boolean
 GOCDomainProp(facetPtr, domainPtr, defaultDomain)
@@ -647,9 +657,9 @@ char **domainPtr;
 char *defaultDomain;
 {
     octObject prop;
-    prop.objectId = 0;		/* silence Purify */
-    CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
-    *domainPtr = prop.contents.prop.value.string;
+    CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
+    *domainPtr = HashString(prop.contents.prop.value.string);
+    FreeOctMembers(&prop);
     return (TRUE);
 }
 
@@ -663,6 +673,7 @@ char *domain;
     octObject prop;
     prop.objectId = 0;		/* silence Purify */
     CK_OCT(CreateOrModifyPropStr(facetPtr, &prop, "domain", domain));
+    FreeOctMembers(&prop);
     return (TRUE);
 }
 
@@ -673,14 +684,16 @@ char **targetPtr;
 char *defaultTarget;
 {
     octObject prop;
-
+    prop.objectId = 0;
 /* don't use ohGetOrCreatePropStr, so we avoid problems with the user
    changing the domain and needing to do edit-target as well.
  */
     if (GetByPropName(facetPtr, &prop, "target") == OCT_NOT_FOUND)
-	*targetPtr = defaultTarget;
-    else
-	*targetPtr = prop.contents.prop.value.string;
+	*targetPtr = HashString(defaultTarget);
+    else {
+	*targetPtr = HashString(prop.contents.prop.value.string);
+	FreeOctMembers(&prop);
+    }
     return (TRUE);
 }
 
@@ -694,6 +707,7 @@ char *target;
     octObject prop;
 
     CK_OCT(CreateOrModifyPropStr(facetPtr, &prop, "target", target));
+    FreeOctMembers(&prop);
     return (TRUE);
 }
 

@@ -32,3 +32,4 @@ extern boolean CompileFacet();
 extern int RpcCompileFacet();
 extern void CompileInit();
 extern void CompileEnd();
+extern int RpcRunAllDemos();

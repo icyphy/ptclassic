@@ -465,6 +465,8 @@ long userOptionWord;
 	    else {
 		/* Change to full name because VEM re-opens facet */
 		octFullName(&mFacet, &fullName);
+		/* fullName is on the heap, will be freed by FreeOctMembers */
+		free(mFacet.contents.facet.cell);
 		mFacet.contents.facet.cell = fullName;
 		vemOpenWindow(&mFacet, NULL);
 		FreeOctMembers(&mFacet);

@@ -92,7 +92,7 @@ ptkTkSetup(funcArray, size)
     }
 
     /* arrange for "processEvents" to be called between stars */
-    KcRegisterAction();
+    KcSetEventLoop(1);
 
     return (RPC_OK);
 }
