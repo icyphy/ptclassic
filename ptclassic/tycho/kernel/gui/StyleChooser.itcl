@@ -93,7 +93,7 @@ class ::tycho::StyleChooser {
 body ::tycho::StyleChooser::constructor {args} {
     # Create the labeled grid. Give it a columnspan of just 2
     itk_component add items {
-	iwidgets::Labeledgrid $itk_component(childsite).items \
+	labeledgrid $itk_component(childsite).items \
                 -columnspan 2 -childcolumnspan 1 \
                 -labelforeground blue
     } {
