@@ -23,7 +23,8 @@ CC =		gcc
 OCT_CC =	gcc -fwritable-strings
 
 OPTIMIZER =	-O2
-WARNINGS =	-Wall -Wcast-qual
+#-Wsynth is new in g++-2.6.x
+WARNINGS =	-Wall -Wcast-qual -Wsynth
 
 # Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
 #  see /usr/include/sys/signals.h for more info.

@@ -22,7 +22,8 @@ RANLIB =	ranlib
 # Use gcc everywhere, including octtools
 CC =		gcc
 OPTIMIZER =	-O2
-WARNINGS =	-Wall -Wcast-qual
+#-Wsynth is new in g++-2.6.x
+WARNINGS =	-Wall -Wcast-qual -Wsynth
 GPPFLAGS =	-DUSG -g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
