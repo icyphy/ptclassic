@@ -99,6 +99,10 @@ source $ptolemy/lib/tcl/ptkOptions.tcl
 
 # Other Pigi procedures
 # source $ptolemy/lib/tcl/message.tcl
+
+# FIXME: Remove when no longer needed
+set unique 1
+
 source $ptolemy/lib/tcl/utilities.tcl
 
 # Always start tycho
