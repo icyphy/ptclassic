@@ -98,6 +98,9 @@ public:
 
 	Vector() {dimen = 0;}
 
+	// need public destructor
+	~Vector() {}
+
 private:
 	int dimen;	// Size of vector
 };
@@ -134,6 +137,9 @@ public:
         void initialize() {SingleLinkList::initialize(); numberNodes=0;}
 
 	Queue() {numberNodes = 0;}
+
+	// need public destructor
+	~Queue() {}
 };
 
 
