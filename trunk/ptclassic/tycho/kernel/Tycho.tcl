@@ -130,7 +130,10 @@ if {![info exists ptolemy]} {
 
 global ::ptolemyfeature
 
-# pitclpresent is set to 1 if the ::pitcl commands are present,
+# ptolemyfeature(ptolemy) is set to 1 if ptolemy is present
+set ptolemyfeature(ptolemy) 0
+
+# ptolemyfeature(pitcl) is set to 1 if the ::pitcl commands are present,
 # which indicates that we have access to the ptolemy kernel
 # via ::pitcl
 if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
@@ -140,7 +143,7 @@ if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
     set ptolemyfeature(pitcl) 0
 }
 
-# ptclpresent is set to 1 if the ptcl commands are present,
+# ptolemyfeature(ptcl) is set to 1 if the ptcl commands are present,
 # which indicates that we have access to the ptolemy kernel
 # via the older ptcl interface
 if {[uplevel #0 info commands domains] !=  {}} {
@@ -150,7 +153,7 @@ if {[uplevel #0 info commands domains] !=  {}} {
     set ptolemyfeature(ptcl) 0
 }
 
-# octtoolspresent is set to 1 if the ptk commands are present,
+# ptolemyfeature(octtools) is set to 1 if the ptk commands are present,
 # which indicates that we have access to the tcl/octtools commands.
 if {[uplevel #0 info commands ptkOpenFacet] != {} && \
 	[uplevel #0 info commands pvOpenWindow] != {}} {
