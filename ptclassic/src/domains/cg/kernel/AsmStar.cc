@@ -38,12 +38,6 @@ void AsmStar::fire() {
 	advance();
 }
 
-// The default substitution character is '$'.  Some assembly
-// languages may use this, so we allow a different character.
-// What appears after the $ is a function name, with an argument
-// that is the name of a porthole or state.
-char AsmStar::substChar() const { return '$'; }
-
 // lookup location for a symbol (a porthole or state) in a
 // codeblock.
 StringList
@@ -61,25 +55,6 @@ AsmStar::lookupAddress(const char* name) {
 			" does not have a memory address");
 	    else Error::abortRun(*this,name," is not defined");
 	    s = "";
-	}
-	return s;
-}
-
-// lookup unique label, if one doesn't exist, create new label
-StringList
-AsmStar::label(const char* name) {
-	StringList s = name;
-	int i = lastLocalLabel;
-	while (i > -1 ? strcmp(name,&labels[i][0]) != 0 : FALSE ) i--;
-	if (i == -1) {
-		lastLocalLabel++;
-		if (lastLocalLabel == MAX_NUM_LABELS) 
-		    Error::abortRun("Number of labels exceeds limit");
-		myTarget()->numLabels++;
-		strcpy(&labels[lastLocalLabel][0],name);
-		s += myTarget()->numLabels;
-	} else 	{
-		s += myTarget()->numLabels - (lastLocalLabel - i);
 	}
 	return s;
 }
@@ -205,8 +180,11 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s = lookupMem(id);
 	} else if (strcasecmp(func, "fullname") == 0) {
 		s = readFullName();
-	} else if (strcasecmp(func, "label") == 0) {
-		s = label(id);
+	} else if ((strcasecmp(func, "label") == 0) ||
+		   (strcasecmp(func, "codeblockSymbol") == 0)) {
+		s = codeblockSymbol(id);
+	} else if (strcasecmp(func, "starSymbol") == 0) {
+		s = starSymbol(id);
 	} else if (strcasecmp(func, "size") == 0) {
 		s = lookupSize(id);
 	} else {
@@ -217,90 +195,6 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s += ")";
 	}
 	return s;
-}
-
-void AsmStar::codeblockError (const char* p1, const char* p2) {
-	Error::abortRun(*this, "Syntax error in codeblock: ", p1, p2);
-}
-
-const int MAXLINELEN = 256;
-const int TOKLEN = 80;
-
-// process a CodeBlock.  This processing just substitutes for
-// macro calls.
-void AsmStar::gencode(CodeBlock& cb) {
-// Reset the local labels
-	resetLabels();
-
-	const char* t = cb.getText();
-// output this text
-	char line[MAXLINELEN], *o = line, c;
-	while ((c = *t++) != 0) {
-		if (c == substChar()) {
-			// two consecutive substChar values give
-			// one on the output.
-			if (*t == substChar()) {
-				*o++ = *t++;
-				continue;
-			}
-			// get the function.
-			char func[TOKLEN], *q = func;
-			while (isalnum(*t)) *q++ = *t++;
-			*q = 0;
-			// skip any whitespace
-			while (isspace(*t)) t++;
-			// must be pointing at a '('
-			if (*t++ != '(') {
-				codeblockError ("expecting '('", " after macro call");
-				return;
-			}
-			// get the identifier
-			char id[TOKLEN], arg2[TOKLEN], *p = id;
-			while (isalnum(*t) || *t == '#') *p++ = *t++;
-			*p = 0;
-			// skip any whitespace
-			while (isspace(*t)) t++;
-			// may be a ',' for 2nd argument
-			if (*t == ',') {
-				t++;
-				p = arg2;
-				while (isalnum(*t) || *t == '#') *p++ = *t++;
-				*p = 0;
-				// skip any whitespace
-				while (isspace(*t)) t++;
-			}
-			else arg2[0] = 0;
-			// must be pointing at a ')'
-			if (*t++ != ')') {
-				codeblockError ("expecting ')'",
-						"after macro call");
-				return;
-			}
-			// Don't know why the following two steps can't
-			// be consolidated, but if they are, the string
-			// becomes null
-			StringList tmp = processMacro(func,id,arg2);
-			const char* value = tmp;
-			if (value == 0 || *value == 0) {
-				value = "ERROR";
-			}
-			// plug result into code.
-			while (*value) *o++ = *value++;
-		}
-		else {
-			*o++ = c;
-			if (c == '\n') {
-				*o = 0;
-				addCode(line);
-				o = line;
-			}
-		}
-	}
-	if (o > line) {
-		*o++ = '\n';
-		*o = 0;
-		addCode(line);
-	}
 }
 
 // Update all PortHoles so that the offset is incremented by the

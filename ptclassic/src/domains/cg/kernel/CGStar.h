@@ -17,6 +17,7 @@ $Id$
 #include "Particle.h"
 #include "DataStruct.h"
 #include "Code.h"
+#include "CGTarget.h"
 
 
 	////////////////////////////////////
@@ -56,9 +57,66 @@ public:
 
 protected:
 
-	// Output lines of code
+	// Given a CodeBlock, generate output code. 
+	// Macros referencing states and inputs and outputs are processed here.
+	// The first method processes the codeblock and returns a StringList.
+	// The second method adds the code the target's code using addCode.
+	StringList processCode(CGCodeBlock& block);
 	void gencode(CGCodeBlock& block);
 	void addCode(const char*);
+
+	// Return the special character that introduces a macro
+	// in a code block.  This character is used by gencode() to
+	// parse the CodeBlock.  In this base class, the character is '$'.
+	virtual char substChar() const;
+
+	// For generation of error messages
+	void codeblockError(const char* p1, const char* p2 = "");
+
+	// Process the macros that are defined for this star.
+	// These are found by gencode.  In this class, the following
+	// functions are handled:
+	//      $val(name)      Value of state "name"
+	//      $ref(name)      $mem(name):$addr(name)
+	//      $ref2(name,o)   $mem(name):(address with offset)
+	//      $label(name)    unique label for (codeblock,name) pair.
+	//                      If the label does not exist, a new, unique
+	//                      label is created.
+	//	$codeblockSymbol(name)
+	//			Another name for label
+	//	$starSymbol(name)
+	//			Unique symbol for (star, name) pair.
+	// The number, names, and meaning of
+	// these functions can be easily redefined in derived classes.
+	virtual StringList processMacro(const char* func, const char* id,
+				const char* arg2);
+
+	// The following virtual methods return the substitution strings
+	// for the ref macros.
+	virtual StringList getRef(const char* name);
+	virtual StringList getRef2(const char* name, int offset);
+
+	// Look up the value of state and return it as a StringList.
+	// A zero-length StringList is returned if there is no such State.
+	virtual StringList lookupVal(const char* name);
+
+	// Lookup the unique global label name for the local symbol
+	// The first of these is local to a codeblock, the second
+	// is local to a star.  In both cases, the symbol is guaranteed
+	// to be unique with respect to all other symbols in the target.
+        StringList codeblockSymbol(const char* name);
+        StringList starSymbol(const char* name);
+
+	// Pointer to target
+        CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+
+private:
+	// List of all local star labels
+	StringList codeblockSymbols;
+	StringList starSymbols;
+
+	// Reset local codeblock labels
+	void resetCodeblockSyms(){ codeblockSymbols.initialize(); }
 };
 
 /*

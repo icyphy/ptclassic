@@ -31,7 +31,7 @@ protected:
 	// Request memory for all structures in a Star
 	int allocReq(AsmStar&);
 
-	virtual void doInitialization(AsmStar&);
+	void doInitialization(CGStar&);
 
 public:
 	AsmTarget(const char* nam, const char* desc,
@@ -39,9 +39,6 @@ public:
 		CGTarget(nam,stype,desc), mem(m) {}
 
 	Block* clone() const = 0;
-
-	// Total Number of Labels generated.
-	int numLabels;
 
 	// Initialize proc. pointers and create the schedule.
 	// Then allocate memory for all stars.

@@ -39,8 +39,10 @@ AsmGeodesic.h \
 AsmStar.h \
 AsmTarget.h \
 BaseMultiTarget.h \
+BaseCTarget.h \
 CGConnect.h \
 CGDisplay.h \
+CGGeodesic.h \
 CGStar.h \
 CGTarget.h \
 CGWormhole.h \
@@ -51,7 +53,7 @@ ProcMemory.h \
 Profile.h
 
 # Header files
-HDRS= $(H_WITH_MATCH) CGGeodesic.h CGWormConnect.h
+HDRS= $(H_WITH_MATCH) CGWormConnect.h
 
 # Library objects
 OBJS= $(H_WITH_MATCH:.h=.o) CGDomain.o AsmTargetInit.o

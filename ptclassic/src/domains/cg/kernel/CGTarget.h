@@ -20,6 +20,8 @@ $Id$
 
 #include "Target.h"
 
+class CGStar;
+
 class UserOutput;
 
 class CGTarget : public Target {
@@ -29,9 +31,13 @@ protected:
 	// The following utilities are used by many types of code generators
 	// Return a list of spaces for indenting
 	StringList indent(int depth);
+
+	// In base class, initialization just invokes the star initCode.
+	virtual void doInitialization(CGStar&);
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc);
 	void initialize();
+	int setup(Galaxy&);
 	void start();
 	int run();
 	void wrapup();
@@ -41,9 +47,11 @@ public:
 	virtual void writeCode(UserOutput&);
 	int isA(const char*) const;
 
-	// output a comment.  Default form uses "outputLineOrientedComment"
-	// to make comments beginning with semicolons.
+	// output a comment.  Default form uses C-style comments.
 	virtual void outputComment (const char*);
+
+	// Total Number of Labels generated.
+	int numLabels;
 
 	// destructor
 	~CGTarget();

@@ -15,6 +15,8 @@ This file contains definitions of CG-specific PortHole classes.
 #include "Connect.h"
 #include "SDFConnect.h"
 
+class CGGeodesic;
+
 /*****************************************************************
 CG: Code generation
 
@@ -28,16 +30,64 @@ These PortHoles are much like SDF PortHoles, from which they are derived.
 // Contains all the special features required for
 //   synchronous dataflow (CG)
 
-class CGPortHole : public SDFPortHole
-{
-	char* regClass;	// identifies the register class of the portHole
+class CGPortHole : public SDFPortHole {
+	friend class CGGeodesic;
 public:
-	void setRegClass(char* className) {regClass = className; }
+	CGPortHole() : offset(0), forkSrc(0) {}
+	~CGPortHole();
 
 	// Services of SDFPortHole that are used often:
 	// setPort(char* portName, Block* parent, dataType type,
 	//	unsigned numTokens, unsigned delay)
 	// setSDFParams(unsigned numTokens, unsigned delay);
+
+	// Allocate a geodesic and give it a name
+	virtual Geodesic* allocateGeodesic();
+
+	// Return the geodesic connected to this PortHole.
+        // This is typesafe because allocateGeodesic
+        // makes myGeodesic of this type.
+        CGGeodesic& cgGeo() const { return *(CGGeodesic*)myGeodesic;}
+
+	// Return the size of the buffer connected to this PortHole.
+	int bufSize() const;
+
+	// Return the size of the "local buffer" connected to this
+	// PortHole.  This returns zero for cases where no separate
+	// buffer is allocated, e.g. fork outputs (all destinations
+	// of the fork share the same buffer, whose size is returned
+	// by bufSize).
+	int localBufSize() const;
+
+	// return the offset position in the buffer.
+	unsigned bufPos() const { return offset;}
+
+	// Advance the offset by the number of tokens produced or
+	// consumed in this PortHole when the Star fires.
+	virtual void advance() {
+		offset += numberTokens;
+		int sz = bufSize();
+		if (offset >= sz) offset -= sz;
+	}
+
+	// Initialize the offset member -- must be called after
+	// any setSDFParams calls on ports take place (e.g. start
+	// funcs in AsmStars).  This is handled by doing it from
+	// CGTarget after everything has been init-ed.
+	// it returns TRUE on success, else FALSE (0)
+	int initOffset();
+
+	// return true if I am a fork input
+	int fork() const { return forkDests.size() > 0;}
+
+	// set a fork source
+        void setForkSource(CGPortHole* p);
+
+protected:
+	int offset;
+	// Stuff to support fork buffers
+	SequentialList forkDests;
+	CGPortHole* forkSrc;
 };
 
 	///////////////////////////////////////////
@@ -48,10 +98,6 @@ class InCGPort : public CGPortHole
 {
 public:
 	int isItInput () const ; // {return TRUE; }
-
-	// Get Particles from input Geodesic
-	// *****  CG has no data on the portholes
-	// void grabData();
 };
 
 	////////////////////////////////////////////
@@ -62,17 +108,6 @@ class OutCGPort : public CGPortHole
 {
 public:
         int isItOutput () const; // {return TRUE; }
-
-	void increment();
-
-	// Move the current Particle in the input buffer -- this
-	// method is invoked by the CGScheduler before go()
-	// void grabData();
-
-	// Put the Particles that were generated into the
-	// output Geodesic -- this method is invoked by the
-	// CGScheduler after go()
-	// void sendData();
 };
 
         //////////////////////////////////////////
@@ -83,9 +118,15 @@ public:
  
 class MultiCGPort : public MultiSDFPort {
 protected:
-	int memLoc;
+	CGPortHole* forkSrc;
 public:
-	void setMemLoc(int i) { memLoc = i;}
+	MultiCGPort() : forkSrc(0) {}
+
+	void setForkBuf(CGPortHole& p) { forkSrc = &p;}
+
+	// this function should be called by installPort for
+	// all derived output multiporthole classes.
+	void forkProcessing(CGPortHole&);
 
 	// Services of MultiSDFPort that are used often:
 	// setPort(const char* portName, Block* parent, dataType type,
@@ -101,9 +142,6 @@ public:
 class MultiInCGPort : public MultiCGPort {
 public:
         int isItInput () const; // {return TRUE; }
- 
-        // Add a new physical port to the MultiPortHole list
-        PortHole& newPort();
 };
  
  
@@ -116,9 +154,6 @@ public:
 class MultiOutCGPort : public MultiCGPort {     
 public:
         int isItOutput () const; // {return TRUE; }
-
-        // Add a new physical port to the MultiPortHole list
-        PortHole& newPort();
 };
 
 #endif

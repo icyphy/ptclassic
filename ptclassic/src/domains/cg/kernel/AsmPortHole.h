@@ -8,6 +8,7 @@ $Id$
                        All Rights Reserved.
 
  Programmer: J. Buck
+ Modified by: E. A. Lee
 
  These classes are portholes for stars that generate assembly language code.  
 
@@ -15,7 +16,7 @@ $Id$
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "SDFConnect.h"
+#include "CGConnect.h"
 
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;
@@ -31,35 +32,16 @@ class AsmGeodesic;
 
 // PortHole class specific to assembly code generation.
 // It contains methods for allocating memory for inputs and outputs.
-class AsmPortHole : public SDFPortHole {
+class AsmPortHole : public CGPortHole {
 	friend class AsmGeodesic;
-protected:
-	int offset;
-// Stuff to support fork buffers
-	SequentialList forkDests;
-	AsmPortHole* forkSrc;
 public:
-	AsmPortHole() : offset(0), forkSrc(0) {}
-
-	~AsmPortHole();
-
 	// Allocate a geodesic and give it a name
-	virtual Geodesic* allocateGeodesic();
+	Geodesic* allocateGeodesic();
 
 	// Return the geodesic connected to this PortHole.
 	// This is typesafe because allocateGeodesic
 	// makes myGeodesic of this type.
 	AsmGeodesic& geo() const { return *(AsmGeodesic*)myGeodesic;}
-
-	// Return the size of the buffer connected to this PortHole.
-	int bufSize() const;
-
-	// Return the size of the "local buffer" connected to this
-	// PortHole.  This returns zero for cases where no separate
-	// buffer is allocated, e.g. fork outputs (all destinations
-	// of the fork share the same buffer, whose size is returned
-	// by bufSize).
-	int localBufSize() const;
 
 	// Assign a memory address to the geodesic connected to this PortHole.
 	void assignAddr(ProcMemory& m, unsigned a);
@@ -68,9 +50,6 @@ public:
 	// geodesic connected to this PortHole.
 	unsigned baseAddr() const;
 
-	// return the offset position in the buffer.
-	unsigned bufPos() const { return offset;}
-
 	// Return the memory allocated to the
 	// geodesic connected to this PortHole.
 	ProcMemory* memory() const;
@@ -78,14 +57,6 @@ public:
 	// Return a string indicating the address with an offset for
 	// the current access.
 	virtual StringList location();
-
-	// Advance the offset by the number of tokens produced or
-	// consumed in this PortHole when the Star fires.
-	virtual void advance() {
-		offset += numberTokens;
-		int sz = bufSize();
-		if (offset >= sz) offset -= sz;
-	}
 
 	// Return TRUE if a circular buffer access is ever required
 	// for this buffer.  This was either specified by the programmer,
@@ -98,20 +69,6 @@ public:
 	int circAccessThisTime() const {
 		return offset + numberTokens > bufSize();
 	}
-
-	// Initialize the offset member -- must be called after
-	// any setSDFParams calls on ports take place (e.g. start
-	// funcs in AsmStars).  This is handled by doing it from
-	// AsmTarget after everything has been init-ed.
-	// it returns TRUE on success, else FALSE (0)
-	int initOffset();
-public:
-	// return true if I am a fork input
-	int fork() const { return forkDests.size() > 0;}
-
-	// set a fork source
-	void setForkSource(AsmPortHole* p);
-
 };
 
 class InAsmPort : public AsmPortHole {
@@ -125,16 +82,7 @@ public:
 
 };
 
-class MultiAsmPort : public MultiSDFPort {
-protected:
-	AsmPortHole* forkSrc;
-public:
-	void setForkBuf(AsmPortHole& p) { forkSrc = &p;}
-
-	// this function should be called by installPort for
-	// all derived output multiporthole classes.
-	void forkProcessing(AsmPortHole&);
-};
+#define MultiAsmPort MultiCGPort
 
 class MultiInAsmPort : public MultiAsmPort {
 public:
