@@ -23,6 +23,7 @@ vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
 vem*button*foreground: IndianRed
 vem*title*foreground: black
+vem*cursor*color: red
 #else
 *Background:    white
 *Foreground:    black
