@@ -15,7 +15,8 @@ other programs that assume that it has been normalized to unity.
 The denominator coefficients will be scaled by 1/leading denominator
 coefficient; the numerator coefficients will be scaled by
 gain/leading denominator coefficient.  An error will result if,
-after scaling, any of the coefficients is greater than 1.
+after scaling, any of the coefficients is greater than 1
+or less than -1.
     }
     version { $Id$ }
     author { Kennard White and Luis Gutierrez}
@@ -138,7 +139,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
             delays[i] = 0;
             if (i < numNumer) {
                 temp = scaleNumer*double(numerator[i]);
-                if (temp > 1 ) {
+                if ((temp > 1)||(temp < -1)) {
                     Error::abortRun(*this,"Scaled numerator ", 
                                           "coefficient > 1");
                 } else {
@@ -150,7 +151,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
             if ( i < numDenom ) {
                 temp = scaleDenom * -(double(denominator[i]));
-                if (temp > 1 ) {
+                if ((temp > 1)||(temp < -1)) {
                     Error::abortRun(*this,"Scaled denominator ", 
                                           "coefficient > 1");
                 } else {
