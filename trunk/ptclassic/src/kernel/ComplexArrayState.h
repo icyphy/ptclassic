@@ -45,7 +45,7 @@ public:
 				while (t < top) *t++ = fill_value; }
 
 	// Destructor
-	~ComplexArrayState () {delete[nElements] val;}
+	~ComplexArrayState ();
 
 	// Assignment operator
 	ComplexArrayState &	operator = (ComplexArrayState & v) {
@@ -69,7 +69,7 @@ public:
 			}
 
 	// The type
-	char* type() { return "ComplexArray";}
+	const char* type(); // { return "ComplexArray";}
 
         // the value as a string
         StringList currentValue();
