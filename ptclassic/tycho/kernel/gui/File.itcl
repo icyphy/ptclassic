@@ -54,6 +54,10 @@ option add *File.autoSaveInterval 5 widgetDefault
 class tycho::File {
     inherit Dismiss
 
+    #### autoSaveInterval option
+    # Defines the interval (in minutes) between auto-save operations.
+    itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
+
     #### file variable
     # Specify the name of the file associated with the data being edited.
     # FIXME: This should really be a public variable, not an itk option.
@@ -70,109 +74,114 @@ class tycho::File {
     # options.  When this is fixed, change this to a public variable.
     itk_option define -readonly readonly ReadOnly no
 
-    #### autoSaveInterval option
-    # Defines the interval (in minutes) between auto-save operations.
-    itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
-
     constructor {args} {}
     destructor {}
 
     ##########################################################################
     ####                         public methods                           ####
 
-    #### save
-    # Save to a given filename, or if none is given, to the name given by
-    # the file variable.
-    method save {{name ""}} {}
-
-    #### saveAs
-    # Open the file browser to save to some other file.
-    method saveAs {} { }
-
-    #### saveAsFile
-    # Change the associated file to the specified file name and then save.
-    method saveAsFile {filename} {}
-
-    #### crashSave
-    # Save data to a crash recovery file.
-    method saveCrash {} {}
-
-    #### markModified
-    # Mark the window as containing modified data.
-    method markModified {} {}
-
-    #### markUnmodified
-    # Mark the window as not containing modified data.
-    method markUnmodified {} {}
-
-    #### new
-    # Create a new window of the same class.
-    method new {} {}
+    #### evaluate
+    # Evaluate the data. The default behavior is an error.
+    method evaluate {}
 
     #### insertFile
     # Insert the contents of a file at the insertion cursor.
-    method insertFile {} {}
+    method insertFile {}
 
-    #### evaluate
-    # Evaluate the data. The default behavior is an error.
-    method evaluate {} {}
+    #### keyBindingsHelp
+    # Open a help window with the key bindings for this class.
+    method keyBindingsHelp {}
+
+    #### keybindings
+    # Return a string with the keybindings supported by this base class
+    method keybindings {}
+
+    #### markModified
+    # Mark the window as containing modified data.
+    method markModified {}
+
+    #### markUnmodified
+    # Mark the window as not containing modified data.
+    method markUnmodified {}
+
+    #### mouseBindingsHelp
+    # Open a window with help on mouse bindings.
+    method mouseBindingsHelp {}
+
+    #### mousebindings
+    # Return a string with the mouse bindings.
+    method mousebindings {}
+
+    #### new
+    # Create a new window of the same class.
+    method new {}
 
     #### print
     # Print the contents of the file. The default behavior is an error.
-    method print {} {}
+    method print {}
 
     #### revert
     # Revert to previously saved file.  The default behavior is an error.
-    method revert {} {}
+    method revert {}
+
+    #### save
+    # Save to a given filename, or if none is given, to the name given by
+    # the file variable.
+    method save {{name ""}}
+
+    #### saveAs
+    # Open the file browser to save to some other file.
+    method saveAs {}
+
+    #### saveAsFile
+    # Change the associated file to the specified file name and then save.
+    method saveAsFile {filename}
+
+    #### crashSave
+    # Save data to a crash recovery file.
+    method saveCrash {}
+
+    #### seename
+    # Find the point in the file identified by "name". The default
+    # implementation is an error.
+    method seename {name}
 
     #### source
     # Source a file and if the returned value is an itcl object,
     # attempt to set its file option.
-    method source {filename} {}
-
-    #### keyBindingsHelp
-    # Open a help window with the key bindings for this class.
-    method keyBindingsHelp {} {}
-
-    #### keybindings
-    # Return a string with the keybindings supported by this base class
-    method keybindings {} {}
-
-    #### mouseBindingsHelp
-    # Open a window with help on mouse bindings.
-    method mouseBindingsHelp {} {}
-
-    #### mousebindings
-    # Return a string with the mouse bindings.
-    method mousebindings {} {}
+    method source {filename}
 
     ##########################################################################
     ####                         public procedures                        ####
 
+    #### callAutoSave
+    # If the argument is a File object, call its autoSave method.
+    proc callAutoSave {obj}
+
+    #### emergencySave
+    # Call the saveCrash method for all File objects.
+    proc emergencySave {}
+
+    #### hyperjump
+    # Open a file and go to its internal point identified by name.
+    proc hyperjump {filename point}
+
     #### openwin
     # Open a file browser, and then open an editor for the file.
-    proc openwin {} {}
+    proc openwin {}
 
     #### opentext
     # Open a file browser, and then open a simple editor for the file.
-    proc opentext {} {}
+    proc opentext {}
 
     #### openContext
     # Open an editor to edit the file.
     # Which editor is determined by the file extension.
-    proc openContext {file} {}
+    proc openContext {file}
 
     # Register a file extension and an associated editor class.
-    proc registerEditor {extension editorClass} {}
+    proc registerEditor {extension editorClass}
 	
-    #### callAutoSave
-    # If the argument is a File object, call its autoSave method.
-    proc callAutoSave {obj} {}
-
-    #### emergencySave
-    # Call the saveCrash method for all File objects.
-    proc emergencySave {} {}
-
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -621,11 +630,21 @@ body tycho::File::evaluate {} {
 }
 
 #####################################################################
-# revert
+#### revert
 # Revert to previously saved file.
 #
 body tycho::File::revert {} {
     error "Don't know how to revert"
+}
+
+#####################################################################
+#### seename
+# In derived classes, this method will go to the point in a file
+# identified by the name argument.  What this means depends on what
+# type of data is contained in the file.
+#
+body tycho::File::seename {name} {
+    error "Don't know how to find point $name"
 }
 
 #####################################################################
@@ -755,12 +774,14 @@ body tycho::File::openContext {filename} {
 	set filename [checkForAutoSaveFiles $filename]
 	set ext [file extension $filename]
 	if {[info exists editors] && [info exists editors($ext)]} {
-	    return [$editors($ext) [autoName .file] -file $filename]
+	    set name [$editors($ext) [autoName .file] -file $filename]
 	} {
 	    set name [Edit [autoName .edit] -file $filename]
-	    wm deiconify $name
-	    return $name
 	}
+	wm deiconify $name
+	update
+	raise $name
+	return $name
     }
 }
 
@@ -798,6 +819,16 @@ body tycho::File::emergencySave {} {
 	$obj saveCrash
     }
 }    
+
+#####################################################################
+#### hyperjump
+# Given a string of the form "filename" or "filename#name", open
+# the corresponding file, and call "seename name".
+#
+body tycho::File::hyperjump {filename point} {
+    set win [File::openContext $filename]
+    $win seename $point
+}
 
 #####################################################################
 #### autoSave
