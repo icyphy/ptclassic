@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  A. Khazeni 
  Date of creation: 2/24/93 
  Revisions:
+        1/17/94  added constant definitions for types of overflow
 
 This header file declares the class type Fix and its supporting 
 functions. 
@@ -54,6 +55,14 @@ typedef void (*mask_func_pointer)(int, uint16*);
 
 #define WORDS_PER_FIX   4         // maximum size of the array Bits
 extern const int   FIX_MAX_LENGTH;
+
+//  Types of overflow--- do not change (constants are indices into an array)
+#define FIX_OVERFLOW_SATURATE		0
+#define FIX_OVERFLOW_ZERO_SATURATE	1
+#define FIX_OVERFLOW_WRAPPED		2
+#define FIX_OVERFLOW_WARNING		3
+#define TYPES_OF_FIX_OVERFLOW		4
+
 
 //////////////////////////////
 // Class Fix
