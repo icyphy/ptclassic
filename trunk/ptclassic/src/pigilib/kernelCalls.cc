@@ -401,12 +401,15 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 // Returns false if this fails (invalid domain).
 
 extern "C" boolean
-KcSetKBDomain(const char* domain) {
-	domain = domain ? hashstring(domain) : hashstring(DEFAULT_DOMAIN);
+KcSetKBDomain(const char* newdomain) {
+	const char* domain =
+		newdomain ? hashstring(newdomain) : hashstring(DEFAULT_DOMAIN);
+
 	if (!KnownBlock::validDomain(domain)) {
 		Error::abortRun("Invalid domain: ", domain);
 		return FALSE;
 	}
+
 	// FIXME: this isn't quite right, but can go away when we
 	// complete the job of eliminating current domain.  We avoid
 	// changing the galaxy domain if it is non-empty.
@@ -414,8 +417,10 @@ KcSetKBDomain(const char* domain) {
 	// equality can be used here because of hashstring call.
 	if (ptcl->currentGalaxy && ptcl->currentGalaxy->numberBlocks() == 0 &&
 	    ptcl->currentGalaxy->domain() != domain &&
-	    !ptcl->currentGalaxy->setDomain(domain))
+	    !ptcl->currentGalaxy->setDomain(domain)) {
 		return FALSE;
+	}
+
 	ptcl->curDomain = domain;
 	return TRUE;
 }
