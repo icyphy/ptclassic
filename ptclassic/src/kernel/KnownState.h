@@ -37,6 +37,7 @@ instance of class name.
 #include "Block.h"
 
 class KnownState {
+	friend class KnownStateOwner;
 
 // The known state list.  It's a pointer only so we can control when
 // the constructor is called.
