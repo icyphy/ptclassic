@@ -105,6 +105,8 @@ body ::tycho::Retarget::changeDomainA {} {
     foreach arg $arglist {
         set [lindex $arg 0] [lindex $arg 1]
     }
+    clear
+    catch {delete object component graphics}
     #addTool domainAButton -text "Change Domain A: $domainA" 
     #        -command "$this changeDomainA"
     modifyAfterDomainChange
@@ -120,6 +122,8 @@ body ::tycho::Retarget::changeDomainB {} {
     foreach arg $arglist {
         set [lindex $arg 0] [lindex $arg 1]
     }
+    clear
+    catch {delete object component graphics}
     #addTool domainBButton -text "Change Domain B: $domainB" \
     #        -command "$this changeDomainB"
     modifyAfterDomainChange
@@ -145,7 +149,7 @@ body ::tycho::Retarget::compareDomains {} {
         set header [list $header]
         foreach star [lindex $clashList $indexCount] {
             set contents [list tcl \
-                    "::tycho::Retarget::printStars $star foo \
+                    "::tycho::Retarget::printStars $star \"$header\" \
                     $domainA $domainB" ]
             component graphics add $star $contents $header
         }
@@ -190,33 +194,33 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
     }
     
     switch $relation "
-        commonStars { 
+        {Common Stars} { 
             set relationMessage \
                     \"The $starName star has the same ports, multiports \
                     and states \
                     in $domainA and $domainB.\"
         }
 
-        commonButPorts {
+        {Different Ports} {
             set relationMessage \
                     \"The $starName star does not have the same ports \
                     in $domainA and $domainB.\"
         }
-        commonButMultiPorts {
+        {Different Multiports} {
             set relationMessage \
                     \"The $starName star does not have the same multiports \
                     in $domainA and $domainB.\"
         }
-        commonButStates {
+        {Different States } {
             set relationMessage \
                     \"The $starName star does not have the same states \
                     in $domainA and $domainB.\"
         }
-        ${domainA}Only {
+        \"${domainA} Only\" {
             set relationMessage \
                     \"The $starName star is only in $domainA, not in $domainB.\"
         } 
-        ${domainB}Only {
+        \"${domainB} Only\" {
             set relationMessage \
                     \"The $starName star is only in $domainB, not in $domainA.\"
         }
@@ -227,7 +231,7 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
     "
 
     set retargWin [::tycho::HTMLMessage .retarget#auto -html "
-        <H1>Star: $starName in domains $domainA and $domainB</H1>
+        <H1>$starName star in domains $domainA and $domainB</H1>
         $relationMessage
 
         <tcl><pre>
