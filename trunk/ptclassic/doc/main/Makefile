@@ -10,10 +10,10 @@ HEADER        = $(PTOLEMY)/doc/headers/together
 MAINSEC	      = overall
 TMPFILE	      = tmp_print
 
-DIRS = overview pigi interpreter ptlang domains
+DIRS = overview pigi interpreter ptlang domains documents
 SECTIONS = overview/$(TMPFILE) pigi/$(TMPFILE) \
 	interpreter/$(TMPFILE) ptlang/$(TMPFILE) \
-	domains/$(TMPFILE)
+	domains/$(TMPFILE) documents/$(TMPFILE)
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
