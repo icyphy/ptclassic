@@ -2,7 +2,7 @@
 {titleSet title {Tycho Package Hierarchy}}
 {titleSet subtitle {$Id$}}
 
-{add ::typack::kernel {label {Kernel Package} color red} {}}
+{add ::typack::kernel {label {kernel Package} color red4} {}}
 {add ::tycho::Uninstantiable {label {Uninstantiable} altlink {$TYCHO/kernel/Uninstantiable.itcl {[ 	]*class[ 	]+::tycho::Uninstantiable}} link {$TYCHO/kernel/doc/codeDoc/Uninstantiable.html {}}} {::typack::kernel}}
 {add ::tycho::Object {label {Object} altlink {$TYCHO/kernel/Object.itcl {[ 	]*class[ 	]+::tycho::Object}} link {$TYCHO/kernel/doc/codeDoc/Object.html {}}} {::typack::kernel}}	
 {add Path {label {Path} altlink {$TYCHO/kernel/Path.tcl {}} link {$TYCHO/kernel/doc/codeDoc/Path.html {}}} {::typack::kernel}}
@@ -43,7 +43,7 @@
 
 
 
-{add ::typack::kernelui {label {KernelUI Package} color red} {::typack::kernel}}
+{add ::typack::kernelui {label {kernelui Package} color red4} {::typack::kernel}}
 
 
 {add ::tycho::TWidget {label {TWidget} altlink {$TYCHO/kernel/TWidget.itcl {[ 	]*class[ 	]+::tycho::TWidget}} link {$TYCHO/kernel/doc/codeDoc/TWidget.html {}}} {::itk::Widget ::typack::kernelui}}
@@ -104,7 +104,7 @@
 
 
 
-{add ::typack::devel {label {Devel Package} color yellow} {::typack::kernel}}
+{add ::typack::devel {label {devel Package} color pink3} {::typack::kernel}}
 {add ::tycho::Glimpse {label {Glimpse} altlink {$TYCHO/kernel/Glimpse.itcl {[ 	]*class[ 	]+::tycho::Glimpse}} link {$TYCHO/kernel/doc/codeDoc/Glimpse.html {}}} {::typack::devel}}
 
 {add ::tycho::RevControl {label {RevControl} altlink {$TYCHO/kernel/RevControl.itcl {[ 	]*class[ 	]+::tycho::RevControl}} link {$TYCHO/kernel/doc/codeDoc/RevControl.html {}}} {::typack::devel}}
@@ -121,7 +121,7 @@
 {add ::tycho::BuilderDialog {label {BuilderDialog} altlink {$TYCHO/kernel/BuilderDialog.itcl {[ 	]*class[ 	]+::tycho::BuilderDialog}} link {$TYCHO/kernel/doc/codeDoc/BuilderDialog.html {}}} {::tycho::View ::typack::devel}}
 
 
-{add ::typack::datastruct {label {DataStruct Package} color yellow} {::typack::kernel}}
+{add ::typack::datastruct {label {datastruct Package} color red2} {::typack::kernel}}
 {add ::tycho::Stack {label {Stack} altlink {$TYCHO/kernel/Stack.itcl {[ 	]*class[ 	]+::tycho::Stack}} link {$TYCHO/kernel/doc/codeDoc/Stack.html {}}} {::tycho::Object ::typack::datastruct}}
 
 {add List {label {List} altlink {$TYCHO/kernel/List.tcl {}} link {$TYCHO/kernel/doc/codeDoc/List.html {}}} { ::typack::datastruct}}
@@ -133,7 +133,7 @@
 {add ::tycho::Forest {label {Forest} altlink {$TYCHO/kernel/Forest.itcl {[ 	]*class[ 	]+::tycho::Forest}} link {$TYCHO/kernel/doc/codeDoc/Forest.html {}}} {::tycho::DirectedAcyclicGraph}}
 
 
-{add ::typack::html {label {HTML Package} color yellow} {::typack::kernel}}
+{add ::typack::html {label {html Package} color red2} {::typack::kernel}}
 {add ::tycho::HTML {label {HTML} altlink {$TYCHO/kernel/HTML.itcl {[ 	]*class[ 	]+::tycho::HTML}} link {$TYCHO/kernel/doc/codeDoc/HTML.html {}}} {::tycho::Edit ::typack::html}}
 {add ::tycho::HTMLMessage {label {HTMLMessage} altlink {$TYCHO/kernel/HTMLMessage.itcl {[ 	]*class[ 	]+::tycho::HTMLMessage}} link {$TYCHO/kernel/doc/codeDoc/HTMLMessage.html {}}} {::tycho::Message ::typack::html}}
 {add ::tycho::WelcomeMessage {label {WelcomeMessage} altlink {$TYCHO/kernel/WelcomeMessage.itcl {[ 	]*class[ 	]+::tycho::WelcomeMessage}} link {$TYCHO/kernel/doc/codeDoc/WelcomeMessage.html {}}} {::tycho::HTMLMessage}}
@@ -141,21 +141,21 @@
 {add ::tycho::EditHTML {label {EditHTML} altlink {$TYCHO/editors/textedit/EditHTML.itcl {[ 	]*class[ 	]+::tycho::EditHTML}} link {$TYCHO/editors/textedit/doc/codeDoc/EditHTML.html {}}} {::tycho::Edit ::typack::html}}
 {add ::tycho::EditMail {label {EditMail} altlink {$TYCHO/editors/textedit/EditMail.itcl {[ 	]*class[ 	]+::tycho::EditMail}} link {$TYCHO/editors/textedit/doc/codeDoc/EditMail.html {}}} {::tycho::Edit ::typack::html}}
 
-{add ::typack::htmldevel {label {HTMLDevel Package} color yellow} {::typack::html ::typack::devel}}
+{add ::typack::htmldevel {label {htmldevel Package} color pink3} {::typack::html ::typack::devel}}
 {add HTMLMap2DAG {label {HTMLMap2DAG} altlink {$TYCHO/lib/idx/HTMLMap2DAG.tcl {}} link {$TYCHO/lib/idx/doc/codeDoc/HTMLMap2DAG.html {}}} {::typack::htmldevel}}
 {add ::tycho::HTMLExport {label {HTMLExport} altlink {$TYCHO/editors/visedit/HTMLExport.itcl {[ 	]*class[ 	]+::tycho::HTMLExport}} link {$TYCHO/editors/visedit/doc/codeDoc/HTMLExport.html {}}} {::tycho::Object ::typack::htmldevel}}
 {add tychoMakeIndex {label {tychoMakeIndex} altlink {$TYCHO/lib/idx/tychoMakeIndex.tcl {}} link {$TYCHO/lib/idx/doc/codeDoc/tychoMakeIndex.html {}}} {::typack::htmldevel}}
 
 
-{add ::typack::javadevel {label {JavaDevel Package} color yellow} {::typack::devel}}
+{add ::typack::javadevel {label {javadevel Package} color pink3} {::typack::devel}}
 {add ::tycho::EditJava {label {EditJava} altlink {$TYCHO/editors/textedit/EditJava.itcl {[ 	]*class[ 	]+::tycho::EditJava}} link {$TYCHO/editors/textedit/doc/codeDoc/EditJava.html {}}} {::tycho::EditCpp ::typack::javadevel}}
 {add ::tycho::CompileJava {label {CompileJava} altlink {$TYCHO/kernel/CompileJava.itcl {[ 	]*class[ 	]+::tycho::CompileJava}} link {$TYCHO/kernel/doc/codeDoc/CompileJava.html {}}} {::tycho::Compile ::typack::javadevel}}
 
 
-{add ::typack::tclshell {label {TclShell Package} color yellow} {::typack::kernel}}
+{add ::typack::tclshell {label {tclshell Package} color red2} {::typack::kernel}}
 {add ::tycho::TclShell {label {TclShell} altlink {$TYCHO/kernel/TclShell.itcl {[ 	]*class[ 	]+::tycho::TclShell}} link {$TYCHO/kernel/doc/codeDoc/TclShell.html {}}} {::tycho::Edit}}
 
-{add ::typack::ItclDevel {label {ItclDevel Package} color yellow} {::typack::tclshell ::typack::devel}}
+{add ::typack::ItclDevel {label {itcldevel Package} color pink3} {::typack::tclshell ::typack::devel}}
 {add ::tycho::ItclClassList {label {ItclClassList} altlink {$TYCHO/editors/textedit/ItclClassList.itcl {[ 	]*class[ 	]+::tycho::ItclClassList}} link {$TYCHO/editors/textedit/doc/codeDoc/ItclClassList.html {}}} {::tycho::Edit ::typack::ItclDevel}}
 {add tychoMakeClassDAG {label {tychoMakeClassDAG} altlink {$TYCHO/kernel/tychoMakeClassDAG.tcl {}} link {$TYCHO/kernel/doc/codeDoc/tychoMakeClassDAG.html {}}} { ::typack::ItclDevel}}
 {add Profile {label {Profile} altlink {$TYCHO/typt/kernel/Profile.itcl {}} link {$TYCHO/typt/kernel/doc/codeDoc/Profile.html {}}} {::typack::ItclDevel}}
@@ -168,7 +168,7 @@
 
 
 
-{add ::typack::visedit {label {VisEdit Package} color yellow} {::typack::kernel}}
+{add ::typack::visedit {label {visedit Package} color red2} {::typack::kernel}}
 {add ::tycho::TCanvas {label {TCanvas} altlink {$TYCHO/editors/visedit/TCanvas.itcl {[ 	]*class[ 	]+::tycho::TCanvas}} link {$TYCHO/editors/visedit/doc/codeDoc/TCanvas.html {}}} {::tycho::File}}
 {add ::tycho::EditGraph {label {EditGraph} altlink {$TYCHO/editors/visedit/EditGraph.itcl {[ 	]*class[ 	]+::tycho::EditGraph}} link {$TYCHO/editors/visedit/doc/codeDoc/EditGraph.html {}}} {::tycho::TCanvas}}
 {add ::tycho::Graphics {label {Graphics} altlink {$TYCHO/editors/visedit/Graphics.itcl {[ 	]*class[ 	]+::tycho::Graphics}} link {$TYCHO/editors/visedit/doc/codeDoc/Graphics.html {}}} {::tycho::TCanvas}}
@@ -179,7 +179,7 @@
 {add ::tycho::EditLattice {label {EditLattice} altlink {$TYCHO/editors/visedit/EditLattice.itcl {[ 	]*class[ 	]+::tycho::EditLattice}} link {$TYCHO/editors/visedit/doc/codeDoc/EditLattice.html {}}} {::tycho::TCanvas}}
 
 
-{add ::typack::textedit {label {TextEdit Package} color yellow} {::typack::kernel}}
+{add ::typack::textedit {label {textedit Package} color red2} {::typack::kernel}}
 {add ::tycho::EditC {label {EditC} altlink {$TYCHO/editors/textedit/EditC.itcl {[ 	]*class[ 	]+::tycho::EditC}} link {$TYCHO/editors/textedit/doc/codeDoc/EditC.html {}}} {::tycho::EditProgram ::typack::texedit}}
 {add ::tycho::EditCpp {label {EditCpp} altlink {$TYCHO/editors/textedit/EditCpp.itcl {[ 	]*class[ 	]+::tycho::EditCpp}} link {$TYCHO/editors/textedit/doc/codeDoc/EditCpp.html {}}} {::tycho::EditC}}
 
@@ -188,7 +188,7 @@
 
 
 
-{add ::typack::ptolemydevel {label {PtolemyDevel Package} color yellow} {::typack::devel}}
+{add ::typack::ptolemydevel {label {ptolemydevel Package} color pink3} {::typack::devel}}
 {add ::tycho::EditPalette {label {EditPalette} altlink {$TYCHO/editors/visedit/EditPalette.itcl {[ 	]*class[ 	]+::tycho::EditPalette}} link {$TYCHO/editors/visedit/doc/codeDoc/EditPalette.html {}}} {::tycho::EditForest ::typack::ptolemydevel}}
 {add ::tycho::Retarget {label {Retarget} altlink {$TYCHO/typt/editors/Retarget.itcl {[ 	]*class[ 	]+::tycho::Retarget}} link {$TYCHO/typt/editors/doc/codeDoc/Retarget.html {}}} {::tycho::EditForest ::typack::ptolemydevel}}
 {add ::tycho::EditPtcl {label {EditPtcl} altlink {$TYCHO/editors/textedit/EditPtcl.itcl {[ 	]*class[ 	]+::tycho::EditPtcl}} link {$TYCHO/editors/textedit/doc/codeDoc/EditPtcl.html {}}} {::tycho::EditItcl ::typack::ptolemydevel}}
@@ -196,7 +196,7 @@
 {add ::tycho::EditPtlang {label {EditPtlang} altlink {$TYCHO/editors/textedit/EditPtlang.itcl {[ 	]*class[ 	]+::tycho::EditPtlang}} link {$TYCHO/editors/textedit/doc/codeDoc/EditPtlang.html {}}} {::tycho::EditCpp ::typack::ptolemydevel}}
 
 
-{add ::typack::ptolemy {label {Ptolemy Package} color yellow} {::typack::ptolemydevel}}
+{add ::typack::ptolemy {label {ptolemy Package} color red2} {::typack::ptolemydevel}}
 {add ::ptolemy::Universe {label {Universe} altlink {$TYCHO/typt/kernel/Universe.itcl {[ 	]*class[ 	]+::ptolemy::Universe}} link {$TYCHO/typt/kernel/doc/codeDoc/Universe.html {}}} {::ptolemy::Galaxy ::typack::ptolemy}}
 {add ::ptolemy::Block {label {Block} altlink {$TYCHO/typt/kernel/Block.itcl {[ 	]*class[ 	]+::ptolemy::Block}} link {$TYCHO/typt/kernel/doc/codeDoc/Block.html {}}} {::typack::ptolemy}}
 {add ::ptolemy::Galaxy {label {Galaxy} altlink {$TYCHO/typt/kernel/Galaxy.itcl {[ 	]*class[ 	]+::ptolemy::Galaxy}} link {$TYCHO/typt/kernel/doc/codeDoc/Galaxy.html {}}} {::ptolemy::Block ::typack::ptolemy}}
@@ -206,7 +206,7 @@
 {add ::tycho::Matlab {label {Matlab} altlink {$TYCHO/editors/textedit/Matlab.itcl {[ 	]*class[ 	]+::tycho::Matlab}} link {$TYCHO/editors/textedit/doc/codeDoc/Matlab.html {}}} {::tycho::TclShell ::typack::ptolemy}}
 
 
-{add ::typack::tycgc {label {TyCGC Package} color yellow} {::typack::ptolemy}}
+{add ::typack::tycgc {label {tycgc Package} color red2} {::typack::ptolemy}}
 {add ::tycho::ControlSubpanel {label {ControlSubpanel} altlink {$TYCHO/kernel/ControlSubpanel.itcl {[ 	]*class[ 	]+::tycho::ControlSubpanel}} link {$TYCHO/kernel/doc/codeDoc/ControlSubpanel.html {}}} {::tycho::TWidget ::typack::tycgc}}
 {add ::tycho::GraphicEq {label {GraphicEq} altlink {$TYCHO/typt/controls/GraphicEq.itcl {[ 	]*class[ 	]+::tycho::GraphicEq}} link {$TYCHO/typt/controls/doc/codeDoc/GraphicEq.html {}}} {::tycho::ControlSubpanel}}
 {add ::tycho::ToneControl {label {ToneControl} altlink {$TYCHO/typt/controls/ToneControl.itcl {[ 	]*class[ 	]+::tycho::ToneControl}} link {$TYCHO/typt/controls/doc/codeDoc/ToneControl.html {}}} {::tycho::ControlSubpanel}}
@@ -217,7 +217,7 @@
 {add ::tycho::Scheduler {label {Scheduler} altlink {$TYCHO/kernel/Scheduler.itcl {[ 	]*class[ 	]+::tycho::Scheduler}} link {$TYCHO/kernel/doc/codeDoc/Scheduler.html {}}} {::tycho::Uninstantiable ::typack::tycgc}}
 
 
-{add ::typack::tydoc {label {TyDoc Package} color yellow} {::typack::kernel}}
+{add ::typack::tydoc {label {tycoc Package} color red2} {::typack::kernel}}
 {add ::tycho::TyDoc {label {TyDoc} altlink {$TYCHO/lib/tydoc/TyDoc.itcl {[ 	]*class[ 	]+::tycho::TyDoc}} link {$TYCHO/lib/tydoc/doc/codeDoc/TyDoc.html {}}} {::typack::tydoc}}
 {add ::tycho::DocSys {label {DocSys} altlink {$TYCHO/lib/tydoc/TyDoc.itcl {[ 	]*class[ 	]+::tycho::DocSys}} link {$TYCHO/lib/tydoc/doc/codeDoc/DocSys.html {}}} {::tycho::TyDoc}}
 {add ::tycho::ListDocSys {label {ListDocSys} altlink {$TYCHO/lib/tydoc/TyDoc.itcl {[ 	]*class[ 	]+::tycho::ListDocSys}} link {$TYCHO/lib/tydoc/doc/codeDoc/ListDocSys.html {}}} {::tycho::DocSys}}
@@ -227,7 +227,7 @@
 {add ::tycho::DocClass {label {DocClass} altlink {$TYCHO/lib/tydoc/TyDoc.itcl {[ 	]*class[ 	]+::tycho::DocClass}} link {$TYCHO/lib/tydoc/doc/codeDoc/DocClass.html {}}} {::tycho::TyDoc}}
 
 
-{add ::typack::idoc {label {IDoc Package} color yellow} {::typack::tydoc}}
+{add ::typack::idoc {label {idoc Package} color red2} {::typack::tydoc}}
 {add ::tycho::IDocSys {label {IDocSys} altlink {$TYCHO/lib/tydoc/IDocSys.itcl {[ 	]*class[ 	]+::tycho::IDocSys}} link {$TYCHO/lib/tydoc/doc/codeDoc/IDocSys.html {}}} {::tycho::TyDoc ::typack::idoc}}
 {add ::tycho::JavaDocSys {label {JavaDocSys} altlink {$TYCHO/lib/tydoc/JavaDocSys.itcl {[ 	]*class[ 	]+::tycho::JavaDocSys}} link {$TYCHO/lib/tydoc/doc/codeDoc/JavaDocSys.html {}}} {::tycho::IDocSys}}
 {add ::tycho::IDoc {label {IDoc} altlink {$TYCHO/lib/tydoc/IDoc.itcl {[ 	]*class[ 	]+::tycho::IDoc}} link {$TYCHO/lib/tydoc/doc/codeDoc/IDoc.html {}}} {::tycho::File ::typack::idoc}}
@@ -235,7 +235,7 @@
 {add ::tycho::ItclDocSys {label {ItclDocSys} altlink {$TYCHO/lib/tydoc/ItclDocSys.itcl {[ 	]*class[ 	]+::tycho::ItclDocSys}} link {$TYCHO/lib/tydoc/doc/codeDoc/ItclDocSys.html {}}} {::tycho::IDocSys}}
 
 
-{add ::typack::slate {label {Slate Package} color yellow} {::typack::kernel}}
+{add ::typack::slate {label {slate Package} color red2} {::typack::kernel}}
 {add ::tycho::ComplexItem {label {ComplexItem} altlink {$TYCHO/editors/slate/ComplexItem.itcl {[ 	]*class[ 	]+::tycho::ComplexItem}} link {$TYCHO/editors/slate/doc/codeDoc/ComplexItem.html {}}} {::tycho::Uninstantiable ::typack::slate}}
 {add ::tycho::IncrCanvas {label {IncrCanvas} altlink {$TYCHO/editors/slate/IncrCanvas.itcl {[ 	]*class[ 	]+::tycho::IncrCanvas}} link {$TYCHO/editors/slate/doc/codeDoc/IncrCanvas.html {}}} {::tycho::TWidget ::typack::slate}}
 {add ::tycho::Slate {label {Slate} altlink {$TYCHO/editors/slate/Slate.itcl {[ 	]*class[ 	]+::tycho::Slate}} link {$TYCHO/editors/slate/doc/codeDoc/Slate.html {}}} {::tycho::IncrCanvas}}
@@ -286,13 +286,13 @@ e.html {}}} {::tycho::Uninstantiable ::typack::slate}}
 
 
 
-{add ::typack::misc {label {Misc Package} color yellow} {::typack::kernel}}
+{add ::typack::misc {label {misc Package} color red2} {::typack::kernel}}
 {add Math {label {Math} altlink {$TYCHO/kernel/Math.tcl {}} link {$TYCHO/kernel/doc/codeDoc/Math.html {}}} {::typack::misc}}
 {add Misc {label {Misc} altlink {$TYCHO/kernel/Misc.tcl {}} link {$TYCHO/kernel/doc/codeDoc/Misc.html {}}} {::typack::misc}}
 {add Tycho {label {Tycho} altlink {$TYCHO/kernel/Tycho.tcl {}} link {$TYCHO/kernel/doc/codeDoc/Tycho.html {}}} {::typack::misc}}
 
 
-{add ::typack::weld {label {WELD Package} color yellow} {::typack::kernel}}
+{add ::typack::weld {label {weld Package} color red2} {::typack::kernel}}
 {add ::tycho::resourceweld {label {ResourceWELD} altlink {$TYCHO/kernel/ResourceWELD.itcl {[ 	]*class[ 	]+::tycho::ResourceWELD}} link {$TYCHO/kernel/doc/codeDoc/ResourceWELD.html {}}} {::tycho::Resource ::typack::weld}}
 
 
