@@ -2,9 +2,9 @@
 # Config file to build on sun4 processor (SparcStation) running Solaris2.4
 # with gcc and g++
 
-# $Id$
+# @(#)config-sol2.mk	1.25 8/7/95
 
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -39,29 +39,16 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Get the g++ definitions for shared libraries; we override some below.
+# Comment the next line out if you don't want shared libraries.
+#include $(ROOT)/mk/config-g++.shared.mk
+
 #
 # Programs to use
 #
 RANLIB = true
 # Use gcc everywhere including in octtools
 CC =		gcc
-
-# Using GNU make conditionals causes havoc while bootstrapping gcc,
-# so we don't use them here, however, this is what the code would look like
-
-# common.mk looks at this variable to decide how to build shared libraries
-#USE_SHARED_LIBS = no
-#
-#ifeq ($(USE_SHARED_LIBS),yes) 
-# Use Position Independent Code to build shared libraries
-# Not yet supported on Solaris2 with g++
-#C_SHAREDFLAGS =	-fPIC
-#CC_SHAREDFLAGS =	-fPIC
-# mk/userstars.mk uses these vars
-#USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
-#USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
-#LIBSUFFIX =		so
-#endif
 
 OPTIMIZER =	-O2
 # -Wsynth is new in g++-2.6.x
@@ -79,21 +66,17 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 # Variables for the linker
 #
 # system libraries (libraries from the environment)
-SYSLIBS=-lsocket -lnsl -ldl -lg++ -lm
+SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lg++ $(SHARED_SYSLIBS) -lm
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
-# -s conflicts with purelink, so we leave it off.
+# -s conflicts with purelink, so if you are using purelink comment this out.
 #LINKSTRIPFLAGS=-Wl,-s
 
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR) $(LINKSTRIPFLAGS)
+LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS) 
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(ARCH):$(X11_LIBDIR)
-
-# These are the additional flags that we need when we are compiling code
-# which is to be dynamically linked into Ptolemy
-INC_LINK_FLAGS = -fpic
+LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
 
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
