@@ -1,8 +1,8 @@
 #include "Star.h"
-#include <String.h>
+#include "StringList.h"
 
 Star :: operator char* () {
-	String out;
+	StringList out;
 	out = "Star: ";
 	out += readFullName();
 	out += "\n";

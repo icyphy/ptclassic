@@ -1,8 +1,8 @@
 #include "Universe.h"
-#include <String.h>
+#include "StringList.h"
 
 SDFUniverse :: operator char* () {
-	String out;
+	StringList out;
 	out = "SYNCHRONOUS DATAFLOW UNIVERSE: ";
 	out += readFullName ();
 	out += "\n";
@@ -11,7 +11,7 @@ SDFUniverse :: operator char* () {
 	out += "\n";
 	out += "CONTENTS:\n";
 
-	out += myTopology->operator char* ();
+	out += *myTopology;
 
 	return out;
 }

@@ -1,7 +1,7 @@
 #include "type.h"
 #include "Connect.h"
 #include "Block.h"
-#include <String.h>
+#include "StringList.h"
 
 
 PortHole& PortHole :: setPort(char* s,
@@ -26,7 +26,7 @@ PortHole& SDFPortHole :: setPort (char* s,
 }
 
 PortHole :: operator char* () {
-	String out;
+	StringList out;
 	char* parentBlock;
 
 	// Get the name of the parent block, if there is one

@@ -1,8 +1,8 @@
 #include "Block.h"
-#include <String.h>
+#include "StringList.h"
 
 char* Block :: readFullName () {
-	String out;
+	StringList out;
 	if(blockIamIn != NULL) {
 	   out = blockIamIn->readFullName();
 	   out += ".";
@@ -15,7 +15,7 @@ char* Block :: readFullName () {
 
 
 Block :: operator char* () {
-	String out;
+	StringList out;
 	out = "Block: ";
 	out += readFullName();
 	out += "\n";
