@@ -694,9 +694,10 @@ struct octLabel *oneLabel;
     }
 
     /* Compute left margin */
+    /* Shift label slightly to clear lines if left justified -- EAL 1/5/94 */
     switch (oneLabel->horizJust) {
     case OCT_JUST_LEFT:
-	printf("/margin %d def\n", oneLabel->region.lowerLeft.x);
+	printf("/margin %d def\n", oneLabel->region.lowerLeft.x + 2);
 	break;
     case OCT_JUST_CENTER:
 	printf("/temp %d maxwidth sub 2 div def\n", regwidth);
@@ -712,10 +713,11 @@ struct octLabel *oneLabel;
     }
 
     /* Compute starting vertical position */
+    /* Shift label slightly to clear lines if bottom justified -- EAL 1/5/94 */
     switch (oneLabel->vertJust) {
     case OCT_JUST_BOTTOM:
 	printf("/y %d def\n",
-	       oneLabel->region.lowerLeft.y + maxheight - oneLabel->textHeight);
+	   2 + oneLabel->region.lowerLeft.y + maxheight - oneLabel->textHeight);
 	break;
     case OCT_JUST_CENTER:
 	printf("/y %d def\n",
