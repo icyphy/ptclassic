@@ -64,6 +64,7 @@ SRCS= \
  SDFFloatDiff.pl \
  SDFFloatGain.pl \
  SDFFloatImpulse.pl \
+ SDFFloatPad.pl \
  SDFFloatProduct.pl \
  SDFFloatRamp.pl \
  SDFFloatRect.pl \
