@@ -593,8 +593,18 @@ genDef ()
 	if (idBlock)
 		fprintf (fp, "%s\n", idBlock);
 /* The base class */
-	if (derivedFrom)
-		(void)strcpy (baseClass, derivedFrom);
+/* For stars, we append the domain name to the beginning of the name,
+   unless it is already there */
+	if (derivedFrom) {
+		if (domain &&
+		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
+			sprintf (baseClass, "%s%s", galDef ? "" : domain,
+				 derivedFrom);
+		}
+		else
+			(void) strcpy (baseClass, derivedFrom);
+	}
+/* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef)
 		(void)strcpy (baseClass, "Galaxy");
 	else
@@ -801,6 +811,25 @@ yylex () {
 			}
 			else if (c == ESC) {
 				*p++ = input();
+			}
+			else if (c == EOF) {
+				yyerror ("Unexpected EOF in string");
+				exit (1);
+			}
+		}
+		c = 0;
+		yylval = save(yytext);
+		return STRING;
+	}
+	/* Token like <stdio.h> */
+	else if (c == '<') {
+		p = yytext;
+		*p++ = c;
+		while (1) {
+			*p++ = input();
+			if (c == '>') {
+				*p = 0;
+				break;
 			}
 			else if (c == EOF) {
 				yyerror ("Unexpected EOF in string");
