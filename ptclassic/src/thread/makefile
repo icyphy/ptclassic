@@ -11,9 +11,7 @@
 
 DIRS =
 
-# The next line causes trouble with ARCHs like sun4.tst
-#ifneq (,$(filter sun%,$(ARCH)))
-ifeq (sun4,$(ARCH))
+ifneq (,$(filter sun%,$(ARCH)))
 DIRS = Awesime awe lwp
 endif
 
