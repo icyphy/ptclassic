@@ -1,4 +1,4 @@
-# Makefile for Ptolemy/Tcl interpreter
+# Makefile for Ptolemy/ITcl interpreter
 # Version identification:
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -39,7 +39,7 @@ ROOT =		../..
 # Path (absolute or relative) to the object directory root
 OBJDIR =	..
 # True source directory
-VPATH =		$(ROOT)/src/ptcl
+VPATH =		$(ROOT)/src/pitcl
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
@@ -48,19 +48,21 @@ include $(CONFIG)
 # if you want to create a custom pigiRpc, define a override.mk
 # file that defines the necessary variables to pull in the domains
 # you want.  See $(ROOT)/mk/ptbin.mk.  This files must at least 
-# define the variable PTCL which defines the name of the ptcl executable.
+# define the variable PITCL which defines the name of the pitcl executable.
 
 -include override.mk
 
 ifndef BASENAME
 ifndef PIGI
 	ALLBINARIES = 1
-	BASENAME = ptcl
-	PIGI = ptcl
+	BASENAME = pitcl
+	PIGI = pitcl
 endif
 endif
 
-# $PTOLEMY/mk/ptbin.mk checks $(PTCL)
+# $PTOLEMY/mk/ptbin.mk checks $(PTCL) 
+# If PTCL is set, we don't include Tk.  To use libpitcl instead of libptcl
+# set 'PITCL', see tysh/make.template.
 PTCL = 1
 
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
@@ -69,32 +71,32 @@ INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 
 C_INCL =	$(PTCOMPAT_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
 
-# Sources: LIB_SRCS contains the files that make up libptcl.so.
-# NON_LIB_SRCS contains the files that do not go into libptcl.so.
-LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PTcl.cc ptclInit.cc \
-		ptclError.cc ptclGantt.cc ptclInvokeInterp.cc \
-		ptclDescription.cc
+# Sources: LIB_SRCS contains the files that make up libpitcl.so.
+# NON_LIB_SRCS contains the files that do not go into libpitcl.so.
+LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PITcl.cc pitclInit.cc \
+		pitclError.cc pitclGantt.cc pitclInvokeInterp.cc \
+		pitclDescription.cc
 LIB_CSRCS = 	displayFile.c
-NON_LIB_SRCS =	ptclAppInit.cc
+NON_LIB_SRCS =	pitclAppInit.cc
 SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS)
 
 # Header files
 HDRS =		displayFile.h \
-		MatlabTcl.h MathematicaTcl.h PTcl.h ganttChart.h \
-		ptclDescription.h
+		MatlabTcl.h MathematicaTcl.h PITcl.h ganttChart.h \
+		pitclDescription.h
 
 # Objects that make up the library
 OBJS =		$(LIB_SRCS:.cc=.o) $(LIB_CSRCS:.c=.o)
 
 # HPUX has a hard time handling symbols that are defined both in a static
 # library and in a shared library, so, since we have different Error::
-# functions for pigiRpc, ptcl and tycho, we need to be sure that
-# libpigi, libptcl and libtycho are all static on the hppa.
+# functions for pigiRpc, ptcl, pitcl and tycho, we need to be sure that
+# libpigi, libptcl, libpitcl and libtycho are all static on the hppa.
 ifdef USE_CORE_STATIC_LIBS
-	LIBNONSHARED =		libptcl.a
+	LIBNONSHARED =		libpitcl.a
 	INSTALL = $(LIBDIR)/$(LIBNONSHARED)
 else
-	LIB =		libptcl.$(LIBSUFFIX)
+	LIB =		libpitcl.$(LIBSUFFIX)
 	INSTALL = $(LIBDIR)/$(LIB)
 endif
 
