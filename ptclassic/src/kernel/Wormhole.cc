@@ -41,6 +41,14 @@ Wormhole::Wormhole(Star& s,Galaxy& g) : selfStar(s),
 	dynamicHorizons = FALSE;
 }
 
+// function to form the name for the inner event horizon
+static const char* ghostName(const PortHole& galp) {
+	const char* gname = galp.readName();
+	char* n = new char[strlen(gname)+7];
+	strcpy (n, gname);
+	return strcat (n, "(ghost)");
+}
+
 // function to build the event horizons connecting the inner galaxy
 // to the outside.
 
@@ -56,40 +64,31 @@ void Wormhole :: buildEventHorizons () {
 		PortHole& realGalp = (PortHole&) galp.realPort();
 		dataType type = realGalp.myType();
 		int numToken = realGalp.numberTokens;
+// separate rules for connecting inputs and outputs.
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
 			to.setPort(in, galp.readName(), this, &selfStar,
 				   type, numToken);
 			selfStar.addPort(to);
-			from.setPort(in, galp.readName(), this, &selfStar,
+			from.setPort(in, ghostName(galp), this, &selfStar,
 				     type, numToken);
 			to.ghostConnect (from);
-			if (type == ANYTYPE) {
-				realGalp.inheritTypeFrom (from);
-				from.inheritTypeFrom (to);
-			}
+			from.inheritTypeFrom (realGalp);
+			to.inheritTypeFrom (from);
 			from.connect(galp,0);
 		}
 		else {
-// for outputs, we must propogate the type information back from
-// whatever the output is connected to, so there are no type conversions
-// across ghost connections.
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
 			from.setPort(out, galp.readName(), this, &selfStar,
 				     type, numToken);
 			selfStar.addPort(from);
-			to.setPort(out, galp.readName(), this, &selfStar,
+			to.setPort(out, ghostName(galp), this, &selfStar,
 				   type, numToken);
 			to.ghostConnect (from);
-			if (type == ANYTYPE) {
-				from.inheritTypeFrom (realGalp);
-				to.inheritTypeFrom (from);
-			} else {
-				to.inheritTypeFrom (from);
-				realGalp.inheritTypeFrom (to);
-			}
+			to.inheritTypeFrom (realGalp);
+			from.inheritTypeFrom (to);
 			galp.connect(to,0);
 		}
 	}
@@ -98,7 +97,7 @@ void Wormhole :: buildEventHorizons () {
 }
 
 Wormhole::~Wormhole () {
-// do later
+// to be done: destroy event horizons if dynamicHorizons is TRUE.
 }
 	
 // method for printing info on a wormhole
