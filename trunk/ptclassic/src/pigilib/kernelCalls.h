@@ -64,7 +64,7 @@ extern boolean KcDisplaySchedule();
 extern void KcEditSeed ARGS((int n));
 extern boolean KcIsKnown ARGS((const char* className));
 extern boolean KcIsCompiledInStar ARGS((const char* className));
-extern boolean KcCheckTerms ARGS((const char* name, char** newNames,
+extern boolean KcCheckTerms ARGS((const char* name, const char** newNames,
 				  const char** newTypes, int* newIsOut,
 				  int* numOrdPortsPtr, int* newNameCountPtr));
 extern boolean KcIsMulti ARGS((char* blockname, char* portname));
@@ -72,7 +72,7 @@ extern boolean KcGetParams ARGS((char* name, ParamListType* pListPtr));
 extern boolean KcGetTargetParams ARGS((char* name, ParamListType* pListPtr));
 extern boolean KcModTargetParams ARGS((ParamListType* pListPtr));
 extern boolean KcInfo ARGS((const char* name, char** info));
-extern void KcPrintTerms ARGS((const char* name));
+extern int KcPrintTerms ARGS((const char* name));
 extern int KcProfile ARGS((const char* name));
 extern boolean KcNumPorts ARGS((char* starname, char* portname, int numP));
 extern int numberOfDomains();
