@@ -61,7 +61,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 octls:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
 		-o octls \
-		$(LIBS) -lm 
+		$(LIBS) $(SYSLIBS) -lm 
 
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/octls
 

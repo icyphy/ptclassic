@@ -38,7 +38,7 @@ ROOT	      = ../../..
 VPATH         = $(ROOT)/src/octtools/installColors
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS = 		cleantap.h \
@@ -69,9 +69,9 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 installColors:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
 		-o installColors \
-		$(LIBS) $(X11_LIBSPEC) -lm 
+		$(LIBS) $(X11_LIBSPEC) $(SYSLIBS) -lm 
 
-DEST = $(OCTTOOLS)/bin.$(ARCH)/installColors
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/installColors
 
 $(DEST):	installColors
 		@echo Installing installColors
@@ -82,7 +82,7 @@ install: makefile $(DEST) $(BINDIR)/installColors
 
 $(BINDIR)/installColors:
 	(cd $(BINDIR); rm -f installColors; \
-		ln -s ../octtools/bin.$(ARCH)/installColors .)
+		ln -s ../octtools/bin.$(PTARCH)/installColors .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
