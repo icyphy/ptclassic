@@ -182,12 +182,24 @@ void XGraph :: fcheck(double y, int set) {
 }
 
 void XGraph :: addPoint(float y) {
-	addPoint(0, float(index), y);
+	addPoint(1, float(index), y);
 	index++;
 	dataToPlot = TRUE;
 }
 
 void XGraph :: addPoint (int dataSet, float x, float y) {
+    if (dataSet < 1) {
+	StringList msg = "Attempt to addPoint to non-positive dataSet ";
+	msg << "number: " << dataSet;
+	Error::abortRun(*blockIamIn, msg);
+	return;
+    }
+    if (dataSet > ng) {
+	StringList msg = "Attempt to addPoint to dataSet number: ";
+	msg << dataSet << " beyond number of graphs: " << ng;
+	Error::abortRun(*blockIamIn, msg);
+	return;
+    }
 	int didx = dataSet-1;
 	count[didx]++;
 	fcheck(x,dataSet);
