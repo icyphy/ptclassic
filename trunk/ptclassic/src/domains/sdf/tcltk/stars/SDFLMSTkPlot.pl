@@ -94,6 +94,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    setupRun = 0;
 	}
 	destructor {
+	    // exit if no interpreter
+	    if (!ptkInterp) return;
+
 	    // Remove Tcl commands
 	    command = butName;
 	    Tcl_DeleteCommand (ptkInterp, (char*)command);
