@@ -282,7 +282,7 @@ if {![info exists tychoWelcomeWindow]} {
     set tychoWelcomeWindow 1
 }
 if {![info exists tychoConsoleWindow]} {
-    # If tychoWelcomeWindow is 0, then no console window is opened.
+    # If tychoConsoleWindow is 0, then no console window is opened.
     set tychoConsoleWindow 1
 }
 set tychoOpenFiles 0
@@ -342,7 +342,9 @@ if {![info exists TychoVersionInfo]} {
 # tychoWelcomeMessage to zero before sourcing this file.
 # This can be done in your .Tycho/tychorc.tcl file.
 #
-if {$tychoWelcomeWindow != 0} {
+if { ! $tychoWelcomeWindow \
+    && [::tycho::preference get misc welcomeWindow] \
+    && ! [::tycho::preference get misc slowNetwork] } {
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
 }
 # Determine whether we exit when there are no more windows.
