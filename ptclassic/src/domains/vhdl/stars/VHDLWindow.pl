@@ -88,23 +88,14 @@ the window.
 		}
 	}
 
-	defstate {
-		name { WindowValues }
-		type { floatarray }
-		default { 0 }
-		desc {
-An array of numeric values for the window.
-The values to be output will be calculated and
-stored in this array in preparation for output.
-		}
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+        protected {
+		int realLen;
+		int realPeriod;
+		double* windowTaps;
 	}
 
-        protected {
-		// must be persistent data or there will be an error
-		// in WindowValues.setInitValue(window) because window will
-		// be destroyed if it were a local variable in setup
-		StringList window;
+	constructor {
+		windowTaps = 0;
 	}
 
 	setup {
@@ -116,14 +107,19 @@ stored in this array in preparation for output.
 		}
 
 		// Don't want to risk divide by zero
-		int realLen = int(length);
+		realLen = int(length);
 		if ( realLen < 4 ) {
 		    Error::abortRun(*this, "Window length is too small ",
 				    "(should be greater than 3)");
 		    return;
 		}
 
-		double* windowTaps = new double[realLen];
+                realPeriod = int(period);
+		if ( realPeriod < realLen ) realPeriod = realLen;
+		output.setSDFParams(realPeriod, realPeriod-1);
+
+		delete [] windowTaps;
+		windowTaps = new double[realLen];
 		int validWindow = PTDSPWindow(windowTaps, realLen, winType,
 					      (double *) WindowParameters);
 		if (! validWindow) {
@@ -132,27 +128,32 @@ stored in this array in preparation for output.
 				    wn, " window: PTDSPWindow failed.");
 		    return;
 		}
-
-		window.initialize();		// initialize to a null string
-		for (int i = 0; i < realLen; i++) {
-			window << windowTaps[i] << " ";
-		}
-		delete [] windowTaps;
-
-		WindowValues.setInitValue(window);
-		WindowValues.initialize();
 	}
 
 	go {
 		StringList out;
-		for (int i = 0; i < int(realPeriod); i++) {
+		int i = 0;
+		for (; i < realLen; i++) {
 			out << "$ref(output, ";
 			out << -i;
 			out << ") $assign(output) ";
-			out << WindowValues[i];
+			out << windowTaps[i];
 			out << ";\n";
 		}
+                for (; i < realPeriod; i++) {
+			out << "$ref(output, ";
+			out << -i;
+			out << ") $assign(output) ";
+			out << 0.0;
+			out << ";\n";
+		}
+		if ( int(period) < 0 ) realLen = 0;
+
 		addCode(out);
 		out.initialize();
+	}
+
+	destructor {
+		delete [] windowTaps;
 	}
 }
