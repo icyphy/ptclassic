@@ -226,7 +226,7 @@ body ::tycho::RunWindow::constructor {args} {
 # show{} command.
 #
 body ::tycho::RunWindow::add {tag create {options {}}} {
-    puts $create
+    # puts $create
     # set create [uplevel subst $create]
     # puts $create
 
@@ -356,7 +356,7 @@ body ::tycho::RunWindow::simulation {mode args} {
 	    # Create a new simulation.
 	    set simClass [_simulationClass]
 	    set _simulation [uplevel #0 $simClass #auto $args]
-            puts !$_simulation
+            # puts !$_simulation
 	    $_simulation startServer
 	    return $_simulation
 	}
@@ -380,7 +380,7 @@ body ::tycho::RunWindow::simulation {mode args} {
 	    if { $args != "" } {
 		set f [lindex $args 0]
 		set _scriptFile "[file root $f]Init.tcl"
-		puts "Script file is $_scriptFile"
+		# puts "Script file is $_scriptFile"
 		if [file exists $_scriptFile] {
 		    namespace _temp_ "set runWindow $this"
 		    namespace _temp_ "set simulation $_simulation"
