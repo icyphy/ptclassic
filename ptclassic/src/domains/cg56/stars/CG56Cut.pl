@@ -16,7 +16,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 main library }
+	location { CG56 control library }
 	explanation {
 This star reads a block of particles of any type, and writes a block
 of particles that somehow overlaps the input block.
