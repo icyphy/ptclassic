@@ -64,6 +64,10 @@ public:
 	/*virtual*/ int runCode();
 	/*virtual*/ void writeCode();
 	/*virtual*/ void frameCode();
+
+	int computeImplementationCost();
+	const char* printImplementationCost();
+
 private:
 	// stream for writeFile stars
 	CodeStream simulatorCmds;
