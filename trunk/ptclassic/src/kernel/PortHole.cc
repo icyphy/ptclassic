@@ -793,8 +793,12 @@ void MultiPortHole::busConnect (MultiPortHole& peer, int width, int numDelays,
 Domain* domainOf(const GenericPort& port)
 {
     Domain* d = NULL;
-    if (port.parent() && port.parent()->parent())
+    if (port.parent()) {
+	if(port.parent()->parent())
 	    d = Domain::of(*port.parent()->parent());
+	else
+	    d = Domain::of(*port.parent());
+    }
     return d;
 }
 
