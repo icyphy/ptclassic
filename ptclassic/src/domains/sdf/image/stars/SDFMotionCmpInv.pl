@@ -72,9 +72,9 @@ result to the output.
 		name { doInvMC }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, \
-				unsigned const char* diff, const char* horz, \
-				const char* vert, const int width, \
+		arglist { "(unsigned char* out, unsigned const char* prev,
+				unsigned const char* diff, const char* horz,
+				const char* vert, const int width,
 				const int height, const int blocksize)" }
 		code {
 			int ii, jj;
@@ -92,9 +92,9 @@ result to the output.
 		name { DoOneBlock }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned const char* prev, \
-				unsigned const char* diff, const char horz, \
-				const char vert, const int ii, const int jj, \
+		arglist { "(unsigned char* out, unsigned const char* prev,
+				unsigned const char* diff, const char horz,
+				const char vert, const int ii, const int jj,
 				const int blocksize)" }
 		code {
 			int i, j, index, mcindex;

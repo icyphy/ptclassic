@@ -96,8 +96,8 @@ can be added.
 		name { doMC }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* diff, unsigned const char* cur, \
-				unsigned const char* prev, char* horz, char* vert)" }
+		arglist { "(unsigned char* diff, unsigned const char* cur,
+			unsigned const char* prev, char* horz, char* vert)" }
 		code {
 			int ii, jj, xvec, yvec;
 	
@@ -178,9 +178,9 @@ can be added.
 		name { DoOneBlock }
 		access { protected }
 		type { "void" }
-		arglist { "(char& horz, char& vert, unsigned char* diff, \
-				unsigned const char* cur, unsigned const char* prev, \
-				const int ii, const int jj, const int xvec, \
+		arglist { "(char& horz, char& vert, unsigned char* diff,
+				unsigned const char* cur, unsigned const char* prev,
+				const int ii, const int jj, const int xvec,
 				const int yvec)" }
 		code { // Set diff frame and mvects.
 			int i, j, tmp1, tmp2;
