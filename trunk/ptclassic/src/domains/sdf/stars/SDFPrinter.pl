@@ -22,19 +22,19 @@ the same line, separated by tabs.
 	defstate {
 		name { fileName }
 		type { string }
-		default { "cout" }
+		default { "/dev/tty" }
 		desc { Filename for output. }
 	}
-	hinclude { "UserOutput.h" }
+	hinclude { "pt_fstream.h" }
 	protected {
-		UserOutput output;
+		pt_ofstream output;
 	}
 	wrapup {
 		output.flush();
 	}
 	start {
-		if (!output.fileName(fileName))
-			Error::abortRun(*this,"can't open file ",fileName);
+		// abortRun is called on open failure
+		output.open(fileName);
 	}
 
 	go {
