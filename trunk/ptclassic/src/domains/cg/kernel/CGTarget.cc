@@ -42,11 +42,12 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 : Target(name,starclass,desc), schedFileName(0), noSchedule(0)
 {
 	separator = sep;
+	targetNestedSymbol.setSeparator(separator);
 	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
 			"Directory to write to"));
 	addState(loopScheduler.setState("loopScheduler",this,"NO",
-
 			"Specify whether to use loop scheduler."));
+	addStream("code",&myCode);
 }
 
 // destructor
@@ -60,24 +61,14 @@ int CGTarget :: modifyGalaxy(Galaxy&) { return TRUE; }
 int CGTarget :: allocateMemory(Galaxy&) { return TRUE; }
 int CGTarget :: codeGenInit(Galaxy&) { return TRUE; }
 
-void CGTarget :: initStars(Galaxy& g) {
-	CGStar* s;
-	GalStarIter next(g);
-	while ((s = (CGStar*)next++) != 0 ) {
-		s->codeblockSymbol.setTarget(this);
-		s->starSymbol.setTarget(this);
-	}
-}
-
 // the main guy.
 int CGTarget::setup(Galaxy& g) {
 	// reset the label counter
-	numLabels = 0 ;
+	BaseSymbolList::reset() ;
 
 	gal = &g;
 
 	targetNestedSymbol.initialize();
-	targetNestedSymbol.setTarget(this);
 
 	if (!modifyGalaxy(g)) return FALSE;
 
@@ -85,8 +76,6 @@ int CGTarget::setup(Galaxy& g) {
 		if (!Target::setup(g)) return FALSE;
 	}
 	else g.initialize();
-
-	initStars(g);
 
 	// choose sizes for buffers and allocate memory, if needed
 	if(!allocateMemory(g)) return FALSE;
@@ -135,6 +124,22 @@ void CGTarget :: start() {
 		}
 	}
 	headerCode();
+}
+
+void CGTarget :: addStream(const char* name, StringList* slist)
+{
+	int flag = codeStringLists.add(name,slist);
+	if (flag == FALSE)
+	{
+		StringList message;
+		message << "addStream: " << name << " already exists";
+		Error::abortRun(*this,message);
+	}
+}
+
+StringList* CGTarget :: getStream(const char* name)
+{
+	return codeStringLists.get(name);
 }
 
 int CGTarget :: run() {
