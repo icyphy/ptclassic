@@ -91,6 +91,12 @@ class ::tycho::Graphics {
     # Add a button to the toolbar.
     protected method addTool {name args}
 
+    # Disable a tool button.
+    protected method disableTool {name}
+
+    # Enable a tool button.
+    protected method enableTool {name}    
+
     # Return the text to be saved.
     protected method saveText {}
 
@@ -328,7 +334,6 @@ body ::tycho::Graphics::addInfo {tag label value {width {}}} {
     }
 }
 
-
 #####################################################################
 #### addTool
 # Add a button to the toolbar at the top.
@@ -350,6 +355,22 @@ body ::tycho::Graphics::addTool {name args} {
 		-foreground -highlightcolor -highlightbackground
     }
     pack $itk_component($name) -side left
+}
+
+#####################################################################
+#### disableTool
+# Disable a tool added with <code>addTool</code, graying out the tool button.
+#
+body ::tycho::Graphics::disableTool {name} {
+    component $name configure -state disabled
+}
+
+#####################################################################
+#### enableTool
+# Enable a tool added with <code>addTool</code, restoring the tool button.
+#
+body ::tycho::Graphics::enableTool {name} {
+    component $name configure -state normal    
 }
 
 #######################################################################
