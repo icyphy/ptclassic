@@ -39,7 +39,15 @@ The dialog with the program should proceed as follows:
         Color output device [yes]:
 
 If you are modified the colors in $PTOLEMY/lib/colors/colors.pat,
-the defaults will work.  Otherwise, you must enter answers to the above
+the defaults will work.  If you are modifying the black & white colors
+in $PTOLEMY/lib/colors/bw.pat, then you should answer the question:
+
+        Directory in which ptolemy technology is installed
+
+with
+	$PTOLEMY/lib/bw_patterns
+
+Otherwise, you must enter answers to most of the above
 questions.  The program uses your DISPLAY environment variable to
 determine your output display type ("MIT X Consortium" above).
 If you wish to over-ride this, you can answer "yes" to the third
