@@ -60,6 +60,7 @@ extern "C" {
 #undef Pointer
 }
 #include "miscFuncs.h"
+#include "StringList.h"
 
 // FIXME: seems to need to be here for the error functions.  
 //        Will want to costomize error handeling for Tk - aok
@@ -69,9 +70,39 @@ extern "C" {
 //        Seems silly to include so much extra baggage - aok
 #include "isa.h"
 
+
+/////////////////////////////////////////////////////////////////
+// "C" callable functions.  These functions are used to convert
+// oct objects to strings and back again.  This is because TCL
+// functions can only be passed strings.
+
+// Converts an oct Facet Pointer into a string "handle" that
+// can be used by a TCL interpreter
+// To use this function, you must declare space for a char array that
+// is at least 15 chars long.
+extern "C" void ptkOctObj2Handle( octObject *objPtr, char *stringValue )
+{
+        sprintf( stringValue, "OctObj%-.8x", (long)objPtr->objectId);
+}
+
+// Converts a string "handle" into an oct Facet Pointer
+// To use this function, you must declare space for a char array that
+// is at least 15 chars long.
+extern "C" int ptkHandle2OctObj( char *stringValue, octObject *objPtr )
+{
+        objPtr->objectId = OCT_NULL_ID;
+        sscanf( stringValue, "OctObj%x", &objPtr->objectId);
+        if (objPtr->objectId == OCT_NULL_ID) {
+           return 0;
+        } else {
+           if (octGetById(objPtr) == OCT_NOT_FOUND) return 0;
+        }
+        return 1;
+}
+
+
 // we want to be able to map Tcl_interp pointers to POct objects.
 // this is done with a table storing all the POct objects.
-
 // for now, we allow up to MAX_POct POct objects at a time.
 const int MAX_POct = 10;
 
@@ -138,25 +169,19 @@ int POct::staticResult( const char* value) {
 	return TCL_OK;
 }
 
-/*  FIXME:  I can't get the Stringlist -> char * working.
-            Until then, the function is commented out.  -aok
-
 // Return a StringList result.
 // We arrange for Tcl to copy the value.
 int POct::result(StringList& value) {
-	char* str = value;
-	// VOLATILE will tell Tcl to copy the value, so it is safe
-	// if the StringList is deleted soon.
-	Tcl_SetResult(interp, (char*)str,TCL_VOLATILE);
-	return TCL_OK;
-} 
-*/
+        const char* str = value;
+        // VOLATILE will tell Tcl to copy the value, so it is safe
+        // if the StringList is deleted soon.
+        Tcl_SetResult(interp, (char*)str,TCL_VOLATILE);
+        return TCL_OK;
+}
 
 // Return a String result.
 // We arrange for Tcl to copy the value.
 int POct::result(char* value) {
-        // VOLATILE will tell Tcl to copy the value, so it is safe
-        // if the StringList is deleted soon.
         Tcl_SetResult(interp, value,TCL_VOLATILE);
         return TCL_OK;
 }
@@ -165,8 +190,6 @@ int POct::result(char* value) {
 // We arrange for Tcl to copy the value.
 int POct::result(int value) {
 	char str[64];
-        // VOLATILE will tell Tcl to copy the value, so it is safe
-        // if the StringList is deleted soon.
         sprintf( str, "%d", value);
         Tcl_SetResult(interp, str,TCL_VOLATILE);
         return TCL_OK;
@@ -179,26 +202,6 @@ void POct::addResult(const char* value) {
 
 
 // ------ Helper functions, not used directly as TCL commands -----
-
-// Converts an oct Facet Pointer into a string "handle" that
-// can be used by a TCL interpreter 
-void POct::ptkOctObj2Handle( octObject *objPtr, char *stringValue )
-{
-        sprintf( stringValue, "OctObj%x", (long)objPtr->objectId);
-}
-
-// Converts a string "handle" into an oct Facet Pointer 
-int POct::ptkHandle2OctObj( char *stringValue, octObject *objPtr )
-{
-        objPtr->objectId = OCT_NULL_ID;
-        sscanf( stringValue, "OctObj%x", &objPtr->objectId);
-        if (objPtr->objectId == OCT_NULL_ID) {
-           return 0;
-        } else {
-           if (octGetById(objPtr) == OCT_NOT_FOUND) return 0;
-        }
-        return 1;
-}
 
 // Sets Bus Parameters in the Oct data base
 // Works by first getting a prop from the oct data base, then modifying
