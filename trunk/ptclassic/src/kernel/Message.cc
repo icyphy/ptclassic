@@ -207,9 +207,10 @@ Particle& MessageParticle::initialize() { data = dummy; return *this;}
 // Returns the number of total Particles initialized, including
 // this one.  This should be redefined by the specific message class.
 // 3/2/94 added
-int MessageParticle::initParticleStack(Block* parent, ParticleStack& pstack,
-				       Plasma* myPlasma, 
-				       const char* delay) {
+int MessageParticle::initParticleStack(Block* /*parent*/,
+				       ParticleStack& /*pstack*/,
+				       Plasma* /*myPlasma*/, 
+				       const char* /*delay*/) {
   Error::abortRun("delays with initial values not supported by general Messages");
   return 0;
 }
