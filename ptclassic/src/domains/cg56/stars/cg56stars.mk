@@ -42,7 +42,6 @@ CG56STARS = \
  $(CG56)/CG56IIDUniform.o \
  $(CG56)/CG56Integrator.o \
  $(CG56)/CG56Interpolator.o \
- $(CG56)/CG56InterpTable.o \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56IntProduct.o \
  $(CG56)/CG56IntQuantizer.o \
@@ -54,6 +53,7 @@ CG56STARS = \
  $(CG56)/CG56LMSGanged.o \
  $(CG56)/CG56LocateMax.o \
  $(CG56)/CG56Log.o \
+ $(CG56)/CG56LookupTbl.o \
  $(CG56)/CG56Magnavox.o \
  $(CG56)/CG56MagnavoxIn.o \
  $(CG56)/CG56MagnavoxOut.o \

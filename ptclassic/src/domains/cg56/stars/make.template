@@ -55,7 +55,6 @@ PL_SRCS= \
  CG56IIDUniform.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
- CG56InterpTable.pl \
  CG56IntMult.pl \
  CG56IntProduct.pl \
  CG56IntQuantizer.pl \
@@ -67,6 +66,7 @@ PL_SRCS= \
  CG56LMSGanged.pl \
  CG56LocateMax.pl \
  CG56Log.pl \
+ CG56LookupTbl.pl \
  CG56Magnavox.pl \
  CG56MagnavoxIn.pl \
  CG56MagnavoxOut.pl \
