@@ -4,7 +4,7 @@
 Phased array antenna simulation.
 .DE
 .SV $Revision$ "October 15, 1990"
-.AL "Edward A. Lee"
+.AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This demo simulates a plane wave approaching an array of four antennas
@@ -22,6 +22,6 @@ envelope.  The
 .c Cut
 star is used to discard initial transients.
 .SA
-Cut.
+Cut and
 FIR.
 .ES
