@@ -45,14 +45,20 @@ include $(CONFIG)
 DIRS =	
 
 TCL_SRCS = \
-	init.tcl \
-	samples \
-	complexitem
+	demoGrapple.tcl \
+	demoLabeledLine.tcl \
+	demoSmartLine.tcl \
+	demoPaper1.tcl \
+	demoPaper2.tcl \
+	demoSelection1.tcl \
+	demoSelection2.tcl
 
-ITCL_SRCS = \
-	newslate.itcl
+ITCL_SRCS =
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	demo.tcl \
+	demo \
+	pkgIndex.tcl
 
 MISC_FILES = tclIndex
 
