@@ -23,6 +23,7 @@ A finite impulse response (FIR) filter.
 	  type { float }
 	  desc { Output float type }
 	}
+	hinclude {<vis_types.h>}
         ccinclude {<vis_proto.h>}
 	defstate {
 	  name {taps}
@@ -48,145 +49,185 @@ A finite impulse response (FIR) filter.
           attributes{ A_CONSTANT|A_SETTABLE }
         }
 	code {
-#define NumIn (1)
-#define	NumPack (4)
-#define UpperBound (32767) 
-#define LowerBound (-32768)
+#define NUMIN (1)
+#define	NUMPACK (4)
 	}
 	protected {
-	  int taplength,tappadlength,maxpast;
-	  double *accumpair;
-	  float *result;
+	  int taplength,tappadlength,maxpast,numloop;
 	  short *shift_taparray,scaledown;
 	}
 	constructor {
-	  accumpair=0;
-	  result=0;
-	  scaledown=0;
 	  shift_taparray=0;
 	}
 	destructor {
-	  free(accumpair);
-	  free(result);
 	  free(shift_taparray);
 	}
         setup {
 
 	  // determine tap length
-	       taplength = taps.size();
+	  taplength = taps.size();
 	  
 	  // determine input buffer size
-	       if (taplength == 0)
-		 maxpast = 1;
-	       else if ((taplength-1)%NumPack==0)
-		 maxpast = (int)(taplength-1)/NumPack+1;
-	       else
-		 maxpast = (int)(taplength-1)/NumPack+2;
-	  tappadlength = NumPack*maxpast;
-	  signalIn.setSDFParams(NumIn,maxpast-1);
+	  if (taplength == 0)
+	    maxpast = 1;
+	  else if ((taplength-1)%NUMPACK==0)
+	    maxpast = (int)(taplength-1)/NUMPACK+1;
+	  else
+	    maxpast = (int)(taplength-1)/NUMPACK+2;
+	  tappadlength = NUMPACK*maxpast;
+	  signalIn.setSDFParams(NUMIN,maxpast-1);
 	}
 	begin {
 	  int taprowindex, tapcolindex;
-	  short *indexcount;
+	  vis_s16 *indexcount;
 
   	  // allocate shifted tap and tmp arrays
-	       free(accumpair);
-	  free(result);
-	  free(shift_taparray);
-	  accumpair = (double *)
-	    memalign(sizeof(double),sizeof(double)*NumPack);
-	  result = (float *)
-	    memalign(sizeof(double),sizeof(float)*NumPack);
+	  if (shift_taparray) free(shift_taparray);
 	  shift_taparray = (short *)
-	    memalign(sizeof(double),sizeof(short)*NumPack*tappadlength);
+	    memalign(sizeof(double),sizeof(short)*NUMPACK*tappadlength);
 
           scaledown = (short) 1 << scalefactor;
 
 	  // initialize shifted taparrays to zero
-	       indexcount = shift_taparray;
-	  for(taprowindex=0;taprowindex<NumPack;taprowindex++){
+	  indexcount = shift_taparray;
+	  for(taprowindex=0;taprowindex<NUMPACK;taprowindex++){
 	    for(tapcolindex=0;tapcolindex<tappadlength;tapcolindex++){
 	      *indexcount++ = 0;
 	    }
 	  }
 	  
 	  // fill taparrays
-	       for(taprowindex=0;taprowindex<NumPack;taprowindex++){
-		 indexcount = shift_taparray + (tappadlength+1)*taprowindex;
-		 for(tapcolindex=0;tapcolindex<taplength;tapcolindex++){
-		   // scale taps, check under/overflow, and cast to short 
-		     *indexcount++ =
-			(short)(scale/scaledown*taps[tapcolindex]);
-		 }
-	       }
+	  for(taprowindex=0;taprowindex<NUMPACK;taprowindex++){
+	    indexcount = shift_taparray + (tappadlength+1)*taprowindex;
+	    for(tapcolindex=0;tapcolindex<taplength;tapcolindex++){
+	      // scale taps, check under/overflow, and cast to short 
+	      *indexcount++ = (short)(scale/scaledown*taps[tapcolindex]);
+	    }
+	  }
+
+	  // loop once for each set of filter taps
+	  if (taplength == 0)
+	    numloop = 0;	
+	  else		
+	    numloop = maxpast;
 	}
 	go {	
-	  double *tapptr[NumPack],tapvalue;
-	  double pairlohi,pairlolo,pairhilo,pairhihi;
-	  double pairlo,pairhi,pair,packedOut,*packedaccum;
-          float packedhi,packedlo,datahi,datalo;
-          float tappairhi,tappairlo,splithi,splitlo;
-	  int outerloop,innerloop,numloop,genindex;
+	  vis_d64 *tapptr0,*tapptr1,*tapptr2,*tapptr3,tapvalue;
+	  vis_d64 pairlohi,pairlolo,pairhilo,pairhihi,dhi,dlo;
+	  vis_d64 pairlo,pairhi,pair,*packedaccum;
+	  vis_d64 accumpair0,accumpair1,accumpair2,accumpair3;
+	  vis_f32  packedhi,packedlo,datahi,datalo,r0,r1,r2,r3;
+	  vis_f32  tappairhi,tappairlo,splithi,splitlo;
+	  int  	 outerloop;
 
 	  vis_write_gsr((scalefactor+1)<<3);	  
 	  
-	  // loop once for each set of filter taps
-	       if (taplength == 0)
-		 numloop = 0;	
-	       else		
-		 numloop = maxpast;	
-	  
-	  // initialize accumulator to zero
-	       for(genindex=0;genindex<NumPack;genindex++){
-		 accumpair[genindex] = vis_fzero();
-	       }
+	  accumpair0 = vis_fzero();
+	  tapptr0 = (double *) shift_taparray;
+	  accumpair1 = vis_fzero();
+	  tapptr1 = (double *) (shift_taparray + 4*(numloop));
+	  accumpair2 = vis_fzero();
+	  tapptr2 = (double *) ((shift_taparray) + 8*(numloop));
+	  accumpair3 = vis_fzero();
+	  tapptr3 = (double *) ((shift_taparray) + 12*(numloop));
 
-	  // initialize the tapptr to point at the beginning of
-	       // each tap array
-	       for(genindex=0;genindex<NumPack;genindex++){
-		 tapptr[genindex] = (double *) (shift_taparray +
-		   genindex*tappadlength);
-	       }
+	  /* filter data */
+	  for (outerloop = 0; outerloop < (numloop); outerloop++) {
+	    /* set up data */
+	    datahi = vis_read_hi(double(signalIn%outerloop));
+	    datalo = vis_read_lo(double(signalIn%outerloop));
+	    /* calculate four outputs */
+	    /*
+	     * 0: set up tap pairs for each
+	     * shifted taparray
+	     */
+	    tapvalue = *tapptr0++;
+	    tappairhi = vis_read_hi(tapvalue);
+	    tappairlo = vis_read_lo(tapvalue);
+	    /* take inner products */
+	    pairlolo = vis_fmuld8sux16(datalo, tappairlo);
+	    pairlohi = vis_fmuld8ulx16(datalo, tappairlo);
+	    pairhilo = vis_fmuld8sux16(datahi, tappairhi);
+	    pairhihi = vis_fmuld8ulx16(datahi, tappairhi);
+	    /* accumulate results */
+	    pairlo = vis_fpadd32(pairlolo, pairlohi);
+	    pairhi = vis_fpadd32(pairhilo, pairhihi);
+	    pair = vis_fpadd32(pairhi, pairlo);
+	    accumpair0 = vis_fpadd32(accumpair0,pair);
+	    /*
+	     * 1: set up tap pairs for each
+	     * shifted taparray
+	     */
+	    tapvalue = *tapptr1++;
+	    tappairhi = vis_read_hi(tapvalue);
+	    tappairlo = vis_read_lo(tapvalue);
+	    /* take inner products */
+	    pairlolo = vis_fmuld8sux16(datalo, tappairlo);
+	    pairlohi = vis_fmuld8ulx16(datalo, tappairlo);
+	    pairhilo = vis_fmuld8sux16(datahi, tappairhi);
+	    pairhihi = vis_fmuld8ulx16(datahi, tappairhi);
+	    /* accumulate results */
+	    pairlo = vis_fpadd32(pairlolo, pairlohi);
+	    pairhi = vis_fpadd32(pairhilo, pairhihi);
+	    pair = vis_fpadd32(pairhi, pairlo);
+	    accumpair1 = vis_fpadd32(accumpair1,pair);
+	    /*
+	     * 2: set up tap pairs for each
+	     * shifted taparray
+	     */
+	    tapvalue = *tapptr2++;
+	    tappairhi = vis_read_hi(tapvalue);
+	    tappairlo = vis_read_lo(tapvalue);
+	    /* take inner products */
+	    pairlolo = vis_fmuld8sux16(datalo, tappairlo);
+	    pairlohi = vis_fmuld8ulx16(datalo, tappairlo);
+	    pairhilo = vis_fmuld8sux16(datahi, tappairhi);
+	    pairhihi = vis_fmuld8ulx16(datahi, tappairhi);
+	    /* accumulate results */
+	    pairlo = vis_fpadd32(pairlolo, pairlohi);
+	    pairhi = vis_fpadd32(pairhilo, pairhihi);
+	    pair = vis_fpadd32(pairhi, pairlo);
+	    accumpair2 = vis_fpadd32(accumpair2,pair);
+	    /*
+	     * 3: set up tap pairs for each
+	     * shifted taparray
+	     */
+	    tapvalue = *tapptr3++;
+	    tappairhi = vis_read_hi(tapvalue);
+	    tappairlo = vis_read_lo(tapvalue);
+	    /* take inner products */
+	    pairlolo = vis_fmuld8sux16(datalo, tappairlo);
+	    pairlohi = vis_fmuld8ulx16(datalo, tappairlo);
+	    pairhilo = vis_fmuld8sux16(datahi, tappairhi);
+	    pairhihi = vis_fmuld8ulx16(datahi, tappairhi);
+	    /* accumulate results */
+	    pairlo = vis_fpadd32(pairlolo, pairlohi);
+	    pairhi = vis_fpadd32(pairhilo, pairhihi);
+	    pair = vis_fpadd32(pairhi, pairlo);
+	    accumpair3 = vis_fpadd32(accumpair3,pair);
+	  }
+	  /*
+	   * sum accumulators and pack outputs into a
+	   * double
+	   */
+	  splithi = vis_read_hi(accumpair0);
+	  splitlo = vis_read_lo(accumpair0);
+	  r3 = vis_fpadd32s(splithi, splitlo);
+	  splithi = vis_read_hi(accumpair1);
+	  splitlo = vis_read_lo(accumpair1);
+	  r2 = vis_fpadd32s(splithi, splitlo);    
+	  splithi = vis_read_hi(accumpair2);
+	  splitlo = vis_read_lo(accumpair2);
+	  r1 = vis_fpadd32s(splithi, splitlo);
+	  splithi = vis_read_hi(accumpair3);
+	  splitlo = vis_read_lo(accumpair3);
+	  r0 = vis_fpadd32s(splithi, splitlo);
+	  dhi = vis_freg_pair(r3,r2);
+	  dlo = vis_freg_pair(r1,r0);
+	  packedhi = vis_fpackfix(dhi);
+	  packedlo = vis_fpackfix(dlo);
 
-	  // filter data
-	       for(outerloop=0;outerloop<numloop;outerloop++){
-		 // set up data
-		      datahi = vis_read_hi(double(signalIn%(outerloop)));
-		 datalo = vis_read_lo(double(signalIn%(outerloop)));
-		 // calculate four outputs
-		      for(innerloop=0;innerloop<NumPack;innerloop++){
-			// set up tap pairs for each shifted taparray
-			     tapvalue = *tapptr[innerloop]++;
-			tappairhi = vis_read_hi(tapvalue);
-			tappairlo = vis_read_lo(tapvalue);
-			// take inner products
-			     pairlolo = vis_fmuld8sux16(datalo,tappairlo);
-			pairlohi = vis_fmuld8ulx16(datalo,tappairlo);	    
-			pairhilo = vis_fmuld8sux16(datahi,tappairhi);
-			pairhihi = vis_fmuld8ulx16(datahi,tappairhi);
-			// accumulate results
-			     pairlo = vis_fpadd32(pairlolo,pairlohi);
-			pairhi = vis_fpadd32(pairhilo,pairhihi);
-			pair = vis_fpadd32(pairhi,pairlo);
-			accumpair[innerloop] =
-			  vis_fpadd32(accumpair[innerloop],pair);
-		      }  
-	       }
-
-	  // sum accumulators and pack outputs into a double
-	       for(genindex=0;genindex<NumPack;genindex++){
-		 splithi = vis_read_hi(accumpair[genindex]);
-		 splitlo = vis_read_lo(accumpair[genindex]);
-		 result[genindex] = vis_fpadd32s(splithi,splitlo); 
-	       }
-	  
-	  packedaccum = (double *) result;
-	  packedhi = vis_fpackfix(*packedaccum);
-	  packedaccum++;
-	  packedlo = vis_fpackfix(*packedaccum);
-	  packedOut = vis_freg_pair(packedhi,packedlo);
-	  
-	  signalOut%0 << packedOut;
+	  signalOut%0 << vis_freg_pair(packedhi, packedlo);
 	}
 }	
 
