@@ -138,6 +138,9 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 	// compute the total (expected) workload with a single processor.
 	totalWork = exGraph->getExecTotal();
 
+	// targetPtr setup for each processor
+	mapTargets();
+
 	// prepare scheduling
 	if (!preSchedule()) {
 		invalid = TRUE;
@@ -255,20 +258,27 @@ int ParScheduler :: scheduleManually() {
 	CGStar* s;
 	while ((s = (CGStar*) iter++) != 0) {
 		// If it is a Fork star, assign the procId with the parent's.
-		if (s->isItFork()) {
+		if (s->isItFork() && (s->getProcId() < 0)) {
 			procIdOfFork(s);
 		}
-		if (s->getProcId() < 0) {
+		int sId = s->getProcId();
+		if (sId < 0) {
 			Error::abortRun(*s, " is not assigned a processor",
 				"Manual assignment fails.");
 			return FALSE;
-		} else if (s->getProcId() > numProcs) {
+		} else if (sId > numProcs) {
 			Error :: abortRun(*s, " procId is out of range",
 				"Manual assignment is failed");
 			return FALSE;
 		} else {
 			// set procId of all invocations of the star
 			ParNode* n = (ParNode*) s->myMaster();
+			CGTarget* t = parProcs->getProc(sId)->target();
+			if ((!t->support(s)) || (!t->hasResourcesFor(*s))) {
+				Error::abortRun(*t, " is not matched with",
+				  s->name());
+				return FALSE;
+			}
 
 			// for parallel stars, set up profile of ParNode.
 			Profile* pf = s->getProfile();
