@@ -81,8 +81,8 @@ if {[info commands HMinit_win] == {}} {
 #######################################################################
 #### HTML
 # This widget parses HTML using the library by Stephen Uhler and
-# displays it in a Tk text widget. Only local file accesses are
-# currently supported (no HTTP, FTP, etc). The HTML source can be
+# displays it in a Tk text widget. We support local file accesses as
+# well as remote files (HTTP, FTP, etc). The HTML source can be
 # specified using the insertData{} method or indirectly using the -file
 # option. If the HTML will have references to other files (such as
 # image files) that are relative, then the reference directory should
@@ -689,7 +689,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
             set filename $filename
         } elseif {[string match \$* $filename] || [string match ~* $filename]} {
             # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
-            set image [::tycho::expandPath $filename]
+            set filename [::tycho::expandPath $filename]
         } else {
             set filename [::tycho::url join \
                     [::tycho::url dirname [filename]] $filename]
@@ -867,8 +867,11 @@ body ::tycho::HTML::insertDirectoryContents {dirname} {
     # so that we can align the text properly.
     set spaceString "                   "
 
-    set dirFiles [lsort [glob -nocomplain [::tycho::url join $dirname *]]]
+    set dirFiles [lsort \
+            [::tycho::resource dirlist [::tycho::url join $dirname *]]]
     foreach dirFile $dirFiles {
+        ::puts "goin through $dirname, $dirFile"
+
         # If the filename is over 20 chars long, truncate it and add ...
         set shortName [::tycho::url tail $dirFile]
         if [::tycho::resource isdirectory $dirFile] {
@@ -1791,11 +1794,11 @@ proc HMinit_state {win} {
 #######################################################################
 #### HMlink_callback
 # Override the HTML library definition for the hyperlink callback
-# function. File/Resource now have support for HTTP! However, it
-# still doesn't have ftp and mailto, which will be implemented this
-# week. Files and names within a file work perfectly.
-# If the window lies within an HTML
-# widget, and the link is to another HTML file, then we reuse the same
+# function. File/Resource now have support for remote files.
+# Files and names within a file work perfectly.
+#
+# If the window lies within an HTML widget, and the 
+# link is to another HTML file, then we reuse the same
 # window to display the referenced file. Otherwise, we open a new
 # window.
 #
@@ -1805,8 +1808,8 @@ proc HMlink_callback {win href} {
     # Get the name of the HTML widget.
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
 
-    if [regexp {^gopher:|^news:|^telnet:|^wais:} \
-	    $href] {
+    # NOTE: https is secure HTTP, which we don't support.
+    if [regexp -nocase {^gopher:|^news:|^telnet:|^wais:|^https:} $href] {
 	if ![::tycho::askuser "OK to invoke netscape to view $href?"] {
             # The user said no, so just return
             return
