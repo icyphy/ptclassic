@@ -18,25 +18,27 @@ extern st_table *Edgetable[];
 extern ListPointer ListOfParams;
 extern bool pl_flag;
 
-GenStatements(Graph,pl_flag)
+GenStatements(Graph,pl_flag,bittrue)
 GraphPointer Graph;
 bool pl_flag;
+bool bittrue;
 {
     register NodePointer Node;
 
     for(Node = Graph->NodeList; Node != NULL; Node = Node->Next) {
         if (IsHierarchy(Node)) {
-	    GenHierarchyNode(Node,pl_flag);
+	    GenHierarchyNode(Node,pl_flag,bittrue);
 	}
 	else {
-	    GenSingleNode(Node,pl_flag);
+	    GenSingleNode(Node,pl_flag,bittrue);
 	}
     }
 }
 
-GenHierarchyNode(Node,pl_flag)
+GenHierarchyNode(Node,pl_flag,bittrue)
 NodePointer Node;
 bool pl_flag;
+bool bittrue;
 {
     char *model;
     
@@ -47,15 +49,15 @@ bool pl_flag;
 	    GenFuncCall(Node);
 	}
 	CASE(ITER) {
-	    GenIterCall(Node,pl_flag);
+	    GenIterCall(Node,pl_flag,bittrue);
 	}
 	CASE(DO) {
 	    Indent();
-	    GenDoLoopCall(Node,pl_flag);
+	    GenDoLoopCall(Node,pl_flag,bittrue);
 	}
 	CASE(DOBODY) {
 	    Indent();
-	    GenDoLoopBodyCall(Node,pl_flag);
+	    GenDoLoopBodyCall(Node,pl_flag,bittrue);
 	}
 	else {
 	    printmsg(NULL, "Node: %s, Not-implemented\n", Node->Name);
@@ -122,9 +124,10 @@ bool comma;
     return(comma);
 }
 
-GenIterCall(node,pl_flag)
+GenIterCall(node,pl_flag,bittrue)
 NodePointer node;
 bool pl_flag;
+bool bittrue;
 {
     GraphPointer Graph;
     char *index;
@@ -148,7 +151,7 @@ bool pl_flag;
     RemoveDelaysInGraph(Graph);
     RemoveLpDelaysInGraph(Graph);
     TopologicalOrder(Graph);
-    GenStatements(Graph,pl_flag);
+    GenStatements(Graph,pl_flag,bittrue);
 /*  Generate statements to display requested signals */
     GenDisplays(Graph,Graph->EdgeList,pl_flag);
     GenDisplays(Graph,Graph->ControlList,pl_flag);
@@ -164,9 +167,10 @@ bool pl_flag;
         GenDecrementLoopDelays(Graph, FALSE);
 }
 
-GenDoLoopCall (node,pl_flag)
+GenDoLoopCall (node,pl_flag,bittrue)
 NodePointer node;
 bool pl_flag;
+bool bittrue;
 {
     GraphPointer LoopGraph;
   
@@ -181,7 +185,7 @@ bool pl_flag;
     RemoveDelaysInGraph(LoopGraph);
     RemoveLpDelaysInGraph(LoopGraph);
     TopologicalOrder(LoopGraph);
-    GenStatements(LoopGraph,pl_flag);
+    GenStatements(LoopGraph,pl_flag,bittrue);
 /*  Generate statements to display requested signals */
     GenDisplays(LoopGraph,LoopGraph->EdgeList,pl_flag);
     GenDisplays(LoopGraph,LoopGraph->ControlList,pl_flag);
@@ -192,9 +196,10 @@ bool pl_flag;
     indexlevel--;
 }
 
-GenDoLoopBodyCall (node,pl_flag)
+GenDoLoopBodyCall (node,pl_flag,bittrue)
 NodePointer node;
 bool pl_flag;
+bool bittrue;
 {
     GraphPointer LoopBodyGraph;
 
@@ -210,7 +215,7 @@ bool pl_flag;
     RemoveDelaysInGraph(LoopBodyGraph);
     RemoveLpDelaysInGraph(LoopBodyGraph);
     TopologicalOrder(LoopBodyGraph);
-    GenStatements(LoopBodyGraph,pl_flag);
+    GenStatements(LoopBodyGraph,pl_flag,bittrue);
 /*  Generate statements to display requested signals */
     GenDisplays(LoopBodyGraph,LoopBodyGraph->EdgeList,pl_flag);
     GenDisplays(LoopBodyGraph,LoopBodyGraph->ControlList,pl_flag);
@@ -223,9 +228,10 @@ bool pl_flag;
     fprintf(CFD, "while (1);\n");
 }
 
-GenSingleNode(Node,pl_flag)
+GenSingleNode(Node,pl_flag,bittrue)
 NodePointer Node;
 bool pl_flag;
+bool bittrue;
 {
     STRINGSWITCH(Node->Master->Name)
         FIRSTCASE(CONST) { 
@@ -238,7 +244,7 @@ bool pl_flag;
             if (HasAttribute(edge->Attributes, "InFile") &&
               (!((int)GetAttribute(edge->Attributes, "IsConstant")))) {
 	        Indent();
-                GenNextInputsOfEdge(edge,pl_flag);
+                GenNextInputsOfEdge(edge,pl_flag,bittrue);
             }
         }
         CASE(SIN) { 
@@ -473,12 +479,15 @@ bool pl_flag;
     ENDSWITCH
 }
 
-GenNextInputsOfEdge(edge,pl_flag)
+GenNextInputsOfEdge(edge,pl_flag,bittrue)
 EdgePointer edge;
 bool pl_flag;
+bool bittrue;
 {
 /* For inputs which are NOT constants, we have to read once every sample */
 
+if(!bittrue)
+{
     if(IsArray(edge))
         fprintf(CFD,"ReadArray_");
     else
@@ -499,6 +508,16 @@ bool pl_flag;
     	GenEdgeName(edge);
     }
     fprintf(CFD, ");\n");
+} /* not bittrue */
+else if (bittrue)
+{
+/* ARRAY not handled yet, once see such a case, do so...*/
+    	GenEdgeName(edge);
+	fprintf(CFD," = *r_%s_",Root->Name);
+    	GenEdgeName(edge);
+	fprintf(CFD,";\n");
+} /* bittrue */
+
 }
 
 GenMinMaxInt(node, op)
