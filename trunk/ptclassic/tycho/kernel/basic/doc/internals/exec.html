@@ -90,9 +90,6 @@ Instead, call <CODE>clock format [clock seconds]</CODE>.
 command has been extended with subcommands that <CODE>copy</CODE>,
 <CODE>delete</CODE>, and <CODE>rename</CODE> files.  In addition,
 there is a <CODE>file</CODE> subcommand that will make a directory.
- <P> The tycho procs <CODE>::tycho::rm</CODE> and <CODE>::tycho::mkdir</CODE>
-can be uses with Itcl2.1 and Itcl2.2.  These procs check the itcl
-version number and then act accordingly.
 
 <LI> Be sure to wrap <CODE>exec chmod</CODE> <I>...</I> calls with
 <CODE>catch</CODE> so that the command does not fail on non-unix
