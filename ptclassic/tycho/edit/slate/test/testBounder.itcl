@@ -5,7 +5,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -31,18 +31,9 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.slate
+# Make sure that the test package is loaded
+package require slate.test
 
-# We also have to load this helper file
-source [file join $env(SLATE_LIBRARY) test defs.itcl]
-
-# This is used to make the tests watchable
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 50
-}
-#set VERBOSE 1
 
 ############################################################################
 #### Define a proc that creates and a rectangle around them,
@@ -99,13 +90,13 @@ test Bounder-basic-1 {Basic interaction, item ID} {
 
     # Perform a series of movements
     _interaction $r $r 100 100 10 0 15 -button 1 ;# east
-    set result [list [.s aspect $r ne]]
+    set result [list [.s feature $r ne]]
 
     _interaction $r $r 100 100 0 10 15 -button 1 ;# south
-    lappend result [.s aspect $r se]
+    lappend result [.s feature $r se]
 
     _interaction $r $r 100 100 -10 -10 15 -button 1 ;# north-west
-    lappend result [.s aspect $r nw]
+    lappend result [.s feature $r nw]
 
     set result
 } {{180.0 40.0} {180.0 180.0} {40.0 40.0}}
@@ -115,13 +106,13 @@ test Bounder-basic-2 {Basic interaction, by tag} {
 
     # Perform a series of movements
     _interaction foo $f 100 100 -10 0 15 -button 2 ;# west
-    set result [list [.s aspect $f sw]]
+    set result [list [.s feature $f sw]]
 
     _interaction foo $f 100 100 0 -10 15 -button 2 ;# north
-    lappend result [.s aspect $f nw]
+    lappend result [.s feature $f nw]
 
     _interaction foo $f 100 100 10 10 15 -button 2 ;# south-east
-    lappend result [.s aspect $f se]
+    lappend result [.s feature $f se]
 
     set result
 } {{40.0 180.0} {40.0 40.0} {180.0 180.0}}
@@ -141,14 +132,14 @@ test Bounder-bounds-1 {Use bounds of slate, by item ID} {
 
     # Perform a series of movements
     _interaction $r $r 100 100 10 0 50 -button 1 ;# east
-    set result [list [.s aspect $r ne]]
+    set result [list [.s feature $r ne]]
 
     _interaction $r $r 100 100 0 10 50 -button 1 ;# south
-    lappend result [.s aspect $r se]
+    lappend result [.s feature $r se]
 
     _interaction $r $r 100 100 -10 -10 50 -button 1 ;# north-west
     # Hm... we have to do a little rounding here...
-    set r [.s aspect $r nw]
+    set r [.s feature $r nw]
     lappend result [list [expr round([lindex $r 0])] [expr round([lindex $r 1])]]
 
     set result
@@ -163,16 +154,16 @@ test Bounder-bounds-2 {Use bounds of slate, by tag} {
 
     # Perform a series of movements
     _interaction foo $f 100 100 -10 0 50 -button 2 ;# west
-    set r [.s aspect $f sw]
+    set r [.s feature $f sw]
     set result [list [list [expr round([lindex $r 0])] \
 	    [expr round([lindex $r 1])]]]
 
     _interaction foo $f 100 100 0 -10 50 -button 2 ;# north
-    set r [.s aspect $f nw]
+    set r [.s feature $f nw]
     lappend result [list [expr round([lindex $r 0])] [expr round([lindex $r 1])]]
 
     _interaction foo $f 100 100 10 10 50 -button 2 ;# south-east
-    lappend result [.s aspect $f se]
+    lappend result [.s feature $f se]
 
     set result
 } [list \
@@ -194,10 +185,10 @@ test Bounder-constrain-1 {Constrain to x axis} {
 
     # Perform a series of movements
     _interaction $r $r 100 100 10 10 15 -button 1 ;# south-east
-    set result [list [.s aspect $r ne]]
+    set result [list [.s feature $r ne]]
 
     _interaction $r $r 100 100 -10 -10 15 -button 1 ;# north-west
-    lappend result [.s aspect $r nw]
+    lappend result [.s feature $r nw]
 
     set result
 } {{180.0 40.0} {40.0 40.0}}
@@ -208,10 +199,10 @@ test Bounder-constrain-2 {Constrain to y axis} {
 
     # Perform a series of movements
     _interaction $f $f 100 100 -10 -10 15 -button 2 ;# north-west
-    set result [list [.s aspect $f ne]]
+    set result [list [.s feature $f ne]]
 
     _interaction $f $f 100 100 10 10 15 -button 2 ;# south-east
-    lappend result [.s aspect $f se]
+    lappend result [.s feature $f se]
 
     set result
 } {{180.0 40.0} {180.0 180.0}}

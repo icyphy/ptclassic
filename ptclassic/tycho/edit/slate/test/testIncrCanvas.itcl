@@ -4,7 +4,7 @@
 # 
 # @Version: $Id$
 #
-# @Copyright (c) 1997-%Q% The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -30,17 +30,8 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# Make sure that the require packages are loaded
-package require tycho.util.tytest
-package require tycho.edit.slate
-
-# We also have to load this helper file
-source [file join $env(SLATE_LIBRARY) test defs.itcl]
-
-# This is used to make the tests watchable
-if { ! [::info exists SHORTTIME] } {
-    set SHORTTIME 50
-}
+# Make sure that the test package is loaded
+package require slate.test
 
 ############################################################################
 #### Comments on these tests
@@ -66,10 +57,10 @@ if { ! [::info exists SHORTTIME] } {
 #### Construction tests
 #
 test IncrCanvas-constructor.1 {Simplest construction test} {
-   catch {delete object .s}
+   catch {itcl::delete object .s}
    ::tycho::icanvas .s
 } {.s}
-delete object .s
+itcl::delete object .s
 
 # FIXME: add more tests with different options
 
@@ -310,7 +301,7 @@ _clean
 
 test IncrCanvas-create.1 {Test create and delete of simple items} {
     image create photo .img \
-	    -file [::tycho::expandPath $TYCHO/edit/slate/img/mantra.gif]
+	    -file [file join $env(SLATE_LIBRARY) img mantra.gif]
     set result 1
     # FIXME: Add other item types
     foreach item {
@@ -322,7 +313,7 @@ test IncrCanvas-create.1 {Test create and delete of simple items} {
 	{text 150 150 -text Foo}
 	{image 150 150 -image .img}
 	{bitmap 150 150 -bitmap \
-		@[::tycho::expandPath $TYCHO/kernel/img/arrowclose.xbm]}
+		@[file join $env(SLATE_LIBRARY) img arrowclose.xbm]}
     } {
 	set i [eval .s create $item]
 	_update
@@ -596,5 +587,5 @@ test IncrCanvas-type.5 {No match} {
 ####
 # Delete the last canvas and iconify main window
 _update
-catch {delete object .s}
+catch {itcl::delete object .s}
 wm iconify .
