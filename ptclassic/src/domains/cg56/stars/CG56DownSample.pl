@@ -16,9 +16,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 demo library }
-	explanation {
-.Ir "decimation"
-	}
 	input {
 		name {input}
 		type {ANYTYPE}
