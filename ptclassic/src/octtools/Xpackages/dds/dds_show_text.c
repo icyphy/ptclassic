@@ -245,7 +245,7 @@ typedef struct len_str_defn {
     char *str;			/* String */
 } len_str;
 
-static int getline(str, ostr)
+static int pt_getline(str, ostr)
 String *str;
 len_str *ostr;
 /*
@@ -319,7 +319,7 @@ int dest_col;			/* Destination columns  */
     /* Pass one - determine maximum word size */
     max_word = 0;
     idx = str;
-    while (getline(&idx, &line) >= 0) {
+    while (pt_getline(&idx, &line) >= 0) {
 	while (getword(&line, &word) >= 0) {
 	    if (word.len > max_word) max_word = word.len;
 	}
@@ -330,7 +330,7 @@ int dest_col;			/* Destination columns  */
     endptr = 0;
     idx = str;
     line_len = 0;
-    while (getline(&idx, &line) >= 0) {
+    while (pt_getline(&idx, &line) >= 0) {
 	if (line.len > 0) {
 	    while (getword(&line, &word) >= 0) {
 		if ((res_num + word.len + 1) >= res_alloc) {
