@@ -227,8 +227,8 @@ int CGCTarget::compileCode()
     if (onHostMachine(targetHost)) {
 	StringList ptolemy;
 	ptolemy << getenv("PTOLEMY");
-	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -lCGCrtlib -L" 
-	      << ptolemy << "/lib." << getenv("ARCH");
+	rtlib << "-I" << ptolemy << "/src/domains/cgc/rtlib -L" 
+	      << ptolemy << "/lib." << getenv("ARCH") << " -lCGCrtlib" ;
     }
     else {
 	rtlib << "CGCrtlib.c";
