@@ -88,82 +88,88 @@
 # </dl>
 #
 class ::tycho::Layout {
-    inherit ::tycho::Layout
-
+    inherit ::tycho::DataModel
+    
     constructor {args} {}
     destructor {}
     
     #################################################################
     ####                        options                          ####
-
+    
     #################################################################
     ####                     public methods                      ####
-
+    
     # Assign the values an item 
     method assign {item value}
-
+    
     # Add an item 
-    method add {item args}
-
+    method add {type item args}
+    
     # Get or set the coordinates of an item
     method coords {item args}
-
+    
+    # Forward a query to a subscriber view
+    method forward {method name args}
+    
     # Get an attribute of an item
     method itemcget {item args}
-
+    
     # Configure an item
     method itemconfigure {item args}
-
+    
     # Move an item
     method move {tag x y}
-
+    
     # Start moving an item
     method moveclick {tag x y args}
-
+    
     # Continue moving an item
     method movedrag {tag x y}
-
+    
     # Stop moving an item
     method moverelease {tag}
-
+    
     # Reshape an item
     method reshape {item x y args}
-
+    
     # Start reshaping an item
     method reshapeclick {item x y args}
-
+    
     # Continue reshaping an item
     method reshapedrag {item x y}
-
+    
     # Stop reshaping an item
     method reshaperelease {item}
-
+    
     # Subscribe to this model
-    method subscribe {type subscriber args}
-
+    method subscribe {type {subscriber {}} {command {}}}
+    
     # Unsubscribe from this model
-    method unsubscribe {type subscriber args}
-
+    method unsubscribe {type subscriber}
+    
     #################################################################
     ####                   protected methods                     ####
-
+    
     # Add an item
     protected method _additem {args} {eval add $args}
-
+    
     # Return a description of a single item
     protected method _describeitem {item {prefix {}}}
-
+    
     # Find items using a subscribed view
     protected method find {mode args}
-
+    
     #################################################################
     ####                   private variables                     ####
     
     # Flag to mark "dirty" coordinates
-    protected variable _dirty
+    private variable _dirty
     
     # Storage used during interaction sequences
-    protected variable _scratch
+    private variable _scratch
+    
+    # A list of subscribed slate views
+    private variable _views {}
 }
 
 ########################################################################
@@ -172,9 +178,9 @@ class ::tycho::Layout {
 body ::tycho::Layout::constructor {args} {
     # Evaluate options
     eval configure $args
-
+    
     # The "item" type
-    definetype item
+    type define item
 }
 
 ########################################################################
@@ -204,7 +210,7 @@ body ::tycho::Layout::assign {item value} {
 # Add an item. This method overrides the inherited method to deal
 # with the <b>-slatetype</b> and <b>-coords</b> attributes.
 #
-body ::tycho::Layout::add {item args} {
+body ::tycho::Layout::add {type item args} {
     array set opts $args
     if ![info exists opts(-slatetype)] {
         error "attribute \"-slatetype\" must be supplied"
@@ -212,7 +218,7 @@ body ::tycho::Layout::add {item args} {
     if ![info exists opts(-coords)] {
         error "attribute \"-coords\" must be supplied"
     }
-    eval chain $item $args
+    eval [list chain $type $item] $args
 }
 
 ########################################################################
@@ -223,7 +229,7 @@ body ::tycho::Layout::add {item args} {
 #
 body ::tycho::Layout::coords {item args} {
     if { $args == "" } {
-        itemcget $item -coords 
+        itemcget $item -coords
     } else {
         if $recording {
             history append \
@@ -232,6 +238,24 @@ body ::tycho::Layout::coords {item args} {
         }
         norecord itemconfigure $item -coords $args
     }
+}
+
+#######################################################################
+#### forward
+#
+# Call a method on a slate. The first widget in the list of widgets
+# subscribed with <b>subscribe view</b> must be able to respond to
+# the <b>slateid</b> method and the <b>component slate</b>
+# method.
+#
+body ::tycho::Layout::forward {method name args} {
+    if { $_views == "" } {
+        error "$modelname has no subscribed views"
+    }
+    set view [lindex $_views 0]
+    set id [$view slateid $name]
+    set slate [$view component slate]
+    eval $slate $method $id $args
 }
 
 ########################################################################
@@ -341,7 +365,7 @@ body ::tycho::Layout::moverelease {tag} {
     unset _scratch($tag.starty)
     unset _scratch($tag.currentx)
     unset _scratch($tag.currenty)
-
+    
     # Call the move method to construct history
     move $tag $deltax $deltay
 }
@@ -354,15 +378,14 @@ body ::tycho::Layout::moverelease {tag} {
 #
 body ::tycho::Layout::reshape {item x y args} {
     if ![exists $item] {
-    	error "Cannot reshape \"$item\""
+        error "Cannot reshape \"$item\""
     }
-	set _dirty($tag) 1
-	if $recording {
-		history append \
-				"reshape $item $x $y $args" \
-				"reshape $item [expr -$x] [expr -$y] $args"
-		}
-	}
+    set _dirty($item) 1
+    if $recording {
+        history append \
+                "reshape $item $x $y $args" \
+                "reshape $item [expr -$x] [expr -$y] $args"
+    }
 }
 
 ########################################################################
@@ -373,13 +396,13 @@ body ::tycho::Layout::reshape {item x y args} {
 #
 body ::tycho::Layout::reshapeclick {item x y args} {
     if ![exists $item] {
-    	error "Cannot reshape \"$item\""
+        error "Cannot reshape \"$item\""
     }
     set _scratch($item.startx) $x
     set _scratch($item.starty) $y
     set _scratch($item.currentx) $x
     set _scratch($item.currenty) $y
-
+    
     array set opts $args
     set _scratch($item.aspects) $opts(-aspects)
 }
@@ -392,7 +415,7 @@ body ::tycho::Layout::reshapeclick {item x y args} {
 #
 body ::tycho::Layout::reshapedrag {item x y} {
     if ![exists $item] {
-    	error "Cannot reshape \"$item\""
+        error "Cannot reshape \"$item\""
     }
     set _scratch($item.currentx) $x
     set _scratch($item.currenty) $y
@@ -406,20 +429,20 @@ body ::tycho::Layout::reshapedrag {item x y} {
 #
 body ::tycho::Layout::reshaperelease {item} {
     if ![exists $item] {
-    	error "Cannot reshape \"$item\""
+        error "Cannot reshape \"$item\""
     }
     set deltax [expr $_scratch($item.currentx) - $_scratch($item.startx)]
     set deltay [expr $_scratch($item.currenty) - $_scratch($item.starty)]
     set aspects $_scratch($item.aspects)
-
+    
     unset _scratch($item.startx)
     unset _scratch($item.starty)
     unset _scratch($item.currentx)
     unset _scratch($item.currenty)
     unset _scratch($item.aspects)
-
+    
     # Call the reshape method to construct history
-    eval reshape $item $deltax $deltay $args
+    eval reshape $item $deltax $deltay $aspects
 }
 
 ########################################################################
@@ -429,11 +452,11 @@ body ::tycho::Layout::reshaperelease {item} {
 # on the value of the _mode_ argument.
 #
 # <dl>
-# <dt><b>data</b> _subscriber_ ?_name_?
+# <dt><b>data</b> _subscriber_ ?_command_?
 # <dd>
 # As inherited from the _Model_ superclass.
 #
-# <dt><b>event</b> _subscriber_ ?_event_?
+# <dt><b>event</b> _subscriber_ ?_command_?
 # <dd>
 # As inherited from the _Model_ superclass.
 #
@@ -445,12 +468,12 @@ body ::tycho::Layout::reshaperelease {item} {
 #
 # </dl>
 #
-body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
-	if { $mode == "view" } {
-		lappend _views $subscriber
-	} else {
-		chain $mode $subscriber $name
-	}
+body ::tycho::Layout::subscribe {mode {subscriber {}} {command {}}} {
+    if { $mode == "view" } {
+        lappend _views $subscriber
+    } else {
+        chain $mode $subscriber $command
+    }
 }
 
 ########################################################################
@@ -460,11 +483,11 @@ body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
 # on the value of the _mode_ argument.
 #
 # <dl>
-# <dt><b>data</b> _subscriber_ ?_name_?
+# <dt><b>data</b> _subscriber_
 # <dd>
 # As inherited from the _Model_ superclass.
 #
-# <dt><b>event</b> _subscriber_ ?_event_?
+# <dt><b>event</b> _subscriber_
 # <dd>
 # As inherited from the _Model_ superclass.
 #
@@ -475,12 +498,12 @@ body ::tycho::Model::subscribe {mode subscriber {name {}} {command {}}} {
 #
 # </dl>
 #
-body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
-	if { $mode == "view" } {
-		set _views [::tycho::ldelete $_views $subscriber]
-	} else {
-		chain $mode $subscriber $name
-	}
+body ::tycho::Layout::unsubscribe {mode subscriber} {
+    if { $mode == "view" } {
+        set _views [::tycho::ldelete $_views $subscriber]
+    } else {
+        chain $mode $subscriber
+    }
 }
 
 #####################################################################
@@ -494,9 +517,9 @@ body ::tycho::Model::unsubscribe {mode subscriber {name {}}} {
 # the default method in order to make sure that the item's
 # <b>-coords</b> attribute is correctly updated.
 #
-body ::tycho::PortedDigraph::_describeitem {item {prefix {}}} {
-	itemcget $item -coords
-	_describe $item $prefix
+body ::tycho::Layout::_describeitem {item {prefix {}}} {
+    itemcget $item -coords
+    _describe $item $prefix
 }
 
 ########################################################################
@@ -505,9 +528,9 @@ body ::tycho::PortedDigraph::_describeitem {item {prefix {}}} {
 # Perform a "find" command, using one of the subscribed slate views.
 #
 body ::tycho::Layout::find {mode args} {
-	if { $_views != "" } {
-		eval [lindex $_views 0] find $mode $args
-	} else {
-		return ""
-	}
+    if { $_views != "" } {
+        eval [lindex $_views 0] find $mode $args
+    } else {
+        return ""
+    }
 }

@@ -68,24 +68,24 @@ group arithmetic -label {Basic Arithmetic} {
     icon multiply -label Multiply\
             -slatetype IconOval \
             -fill white \
+            -text "" \
+            -termstyles {2-1-north-east} \
             -graphics {
         line 25 25 75 75 -width 4
         line 25 75 75 25 -width 4
-    } \
-            -text "" \
-            -termstyles {2-1-north-east}
+    }
 
     icon subtract -label Subtract \
             -slatetype IconOval \
             -fill white \
+            -text "" \
+            -termstyles {2-1-north-east} \
             -graphics {
         line 25 50 75 50 -width 4
         line 40 15 60 15
         line 4 50 20 50
         line 12 42 12 58
-    } \
-            -text "" \
-            -termstyles {2-1-north-east}
+    }
 }
 
 group uncommitted \
@@ -128,7 +128,7 @@ group uncommitted \
 
 group miscellaneous \
         -label {Miscellaneous Icons} {
-    icon Foo \
+    icon foo \
             -slatetype IconFrame \
             -label {The Foo Icon} \
             -text Foo \
@@ -148,7 +148,7 @@ group miscellaneous \
                 -style doublearrowout -fill blue -type output
     }
     
-    icon Bar \
+    icon bar \
             -slatetype IconFrame \
             -label {The Bar Icon} \
             -height 60 \
@@ -164,7 +164,7 @@ group miscellaneous \
                 -style arrowout -fill blue
     }
     
-    icon Baz \
+    icon baz \
             -slatetype IconFrame \
             -label {The Baz Icon} \
             -height 60 \
@@ -194,7 +194,7 @@ group miscellaneous \
 }
 
 group sdf -label {SDF Icons} {
-    icon Ramp \
+    icon ramp \
             -slatetype IconFrame \
             -label {Ramp} \
             -text Ramp \
@@ -205,7 +205,7 @@ group sdf -label {SDF Icons} {
         terminal output -coords {100 50} -direction {1 0} \
                 -style arrowout -fill blue -type output
     }
-    icon Xgraph \
+    icon xgraph \
             -slatetype IconFrame \
             -label {Xgraph} \
             -text Xgraph \
@@ -220,7 +220,7 @@ group sdf -label {SDF Icons} {
         terminal input -coords {0 50} -direction {-1 0} \
                 -style circle -fill red
     }
-    icon Printer \
+    icon printer \
             -slatetype IconFrame \
             -label {Printer} \
             -text Printer \
