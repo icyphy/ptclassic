@@ -64,6 +64,10 @@ extern void KcSetDesc ARGS((const char* desc));
 extern boolean KcDisplaySchedule();
 extern void KcEditSeed ARGS((int n));
 extern boolean KcIsKnown ARGS((const char* className));
+extern const char* KcGalaxyDefSource ARGS((const char* baseName,
+					   const char* domain));
+extern const char* KcUniverseDefSource ARGS((const char* baseName));
+extern void KcSetUniverseDefSource ARGS((const char* pathName));
 extern boolean KcIsCompiledInStar ARGS((const char* className));
 extern boolean KcCheckTerms ARGS((const char* name, const char** newNames,
 				  const char** newTypes, int* newIsOut,

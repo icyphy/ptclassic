@@ -516,6 +516,42 @@ KcIsKnown(const char *className) {
 	return findClass(className) ? TRUE : FALSE;
 }
 
+/* 1/30/97
+Inputs: basename and domain of an interpreted galaxy.
+Outputs: if the Ptolemy kernel has a matching compiled galaxy,
+return its definition source string.  Otherwise return NULL.
+*/
+extern "C" const char*
+KcGalaxyDefSource (const char* baseName, const char* domain) {
+	// Galaxies are sought on the global knownlist.
+	const char* defSource = NULL;
+	if (KnownBlock::isDefined(baseName, domain, defSource))
+		return defSource;
+	return NULL;
+}
+
+/* 1/30/97
+Inputs: basename of an interpreted universe.
+Outputs: if the Ptolemy kernel has a matching compiled universe,
+return its definition source string.  Otherwise return NULL.
+*/
+extern "C" const char*
+KcUniverseDefSource (const char* baseName) {
+	// Universes are sought in the universe list of the active PTcl object.
+	InterpUniverse* u = ptcl->univWithName(baseName);
+	if (u != NULL)
+		return u->definitionSource();
+	return NULL;
+}
+
+/* 1/30/97
+Set the definition source string for the current universe.
+*/
+extern "C" void
+KcSetUniverseDefSource (const char* pathName) {
+	ptcl->universe->setDefinitionSource(pathName);
+}
+
 /* 3/28/91
 Return TRUE if className is a compiled-in star of the current domain,
 FALSE if unknown, derived from InterpGalaxy (meaning it is legal
