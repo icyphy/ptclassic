@@ -1,7 +1,14 @@
 $Id$
-README file for Tycho0.2.1devel
+README file for Tycho, version 0.2.1devel
 
-Tycho0.2.1devel is a textual and graphical editor implemented in Itcl
+Tycho is a framework for developing and running
+[incr Tcl] applications. Tycho consists of a number
+of packages that implement textual and graphical editors, 
+development tools, and so on. Tycho, or parts of Tycho,
+can be installed as part of your existing application,
+or Tycho can be run as a stand-alone application, into
+which you can add your own packages.
 
+See doc/packages.html for information on how Tycho packages work.
 See doc/overview.html for more information.
 See doc/releasenotes0.2.1.html for the release notes.
