@@ -41,7 +41,7 @@ star.  Three outputs are generated.
 On the \fIerrPower\fR output, a sequence of $order ~+~ 1$
 samples gives the prediction
 error power for each predictor order from zero to \fIorder\fR.
-The first sample, the corresponding to the zeroth order predictor,
+The first sample, which corresponds to the zeroth-order predictor,
 is simply an estimate of the power of the input process.
 Note that for signals without noise, the \fIerrPower\fR output can sometimes
 end up being a small negative number.
@@ -73,6 +73,9 @@ coefficients in the statistics literature.
 .Ir "partial correlation coefficients"
 .Ir "coefficients, partial correlation"
 .Ir "PARCOR"
+.Id "Makhoul, J."
+.Id "Kay, S. M."
+.Id "Haykin, S."
 .UH REFERENCES
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",

@@ -5,11 +5,11 @@ defstar {
     author	{ Mike J. Chen }
     location    { SDF dsp library }
     descriptor	{
-Compute the singular-value decomposition of a Toeplitz data matrix A
-by decomposing A into A = UWV', where U and V are orthogonal matrices,
-and V' represents the transpose of V. W is a diagonal matrix composed
-of the singular values of A, and the columns of U and V are the left
-and right singular vectors of A.
+Compute the singular-value decomposition (SVD) of a Toeplitz data matrix A
+by decomposing A into A = UWV', where U and V are orthogonal matrices
+and V' represents the transpose of V.
+W is a diagonal matrix composed of the singular values of A, and
+the columns of U and V are the left and right singular vectors of A.
     } 
     explanation {
 .pp
@@ -17,24 +17,29 @@ The singular-value decomposition is performed on a data matrix, which
 is usually provided by the
 .c
 Data_M
-star.  The dimensions of the input data matrix is given by the
-\fIrows\fR and \fIcols\fR parameters to the star.  The outputs are
-the three matrices: the vector of singular values, the matrix of right
-singular vectors, and the matrix of left singular vectors.  The terminals
-for each output is labeled on the star's icon as S, R, and L respectively.
+star.
+The dimensions of the input data matrix is given by the
+\fIrows\fR and \fIcols\fR parameters to the star.
+The outputs are the three matrices: the vector of singular values,
+the matrix of right singular vectors, and the matrix of left singular vectors.
+The terminals for each output is labeled on the star's icon as
+S, R, and L respectively.
 .pp
 The \fIthreshold\fR parameter gives the smallest floating point number
-that the algorithm will represent.  Anything smaller is considered
-zero.  The \fImax_iterations\fR parameter allows the user to control
-the number of iterations that the SVD algorithm will be allowed to run
-before stopping.  Normally, the SVD algorithm should converge before
-this value but this parameter is provided to prevent non-convergent
-matrices from causing the star to run too long.
+that the algorithm will represent.
+Anything smaller is considered zero.
+The \fImax_iterations\fR parameter allows the user to control the number of
+iterations that the SVD algorithm will be allowed to run before stopping.
+Normally, the SVD algorithm should converge before this value but this
+parameter is provided to prevent non-convergent matrices from causing
+the star from running too long.
 .pp
 The user can also speed up the execution of the star by optionally
 specifying that the matrices of the left and/or right singular vectors 
-should not be generated.  Not generating those matrices speeds up the
-execution.  The vector of singular values is always generated.
+should not be generated.
+Not generating those matrices will speed up the execution.
+The vector of singular values is always generated.
+.Id "Haykin, S."
 .UH "References"
 .ip [1]
 S. Haykin, \fModern Filters\fR, pp. 333-335,
@@ -65,24 +70,24 @@ Data_M
 	name	{ max_iterations }
 	type	{ int }
 	default	{ 30 }
-	desc    { Maximum number of iterations for the SVD routine to converge}
+	desc    { Maximum number of iterations for the SVD routine to converge. }
     }
     defstate {
 	name	{ generate_left }
 	type	{ int }
 	default	{ "YES" }
-	desc    { Specify whether to generate U, the matrix of left singular vectors}
+	desc    { Specify whether to generate U, the matrix of left singular vectors. }
     }
     defstate {
 	name	{ generate_right }
 	type	{ int }
 	default	{ "YES" }
-	desc    { Specify whether to generate V, the matrix of right singular vectors}
+	desc    { Specify whether to generate V, the matrix of right singular vectors. }
     }
     input {
 	name	{ input }
 	type	{ FLOAT_MATRIX_ENV }
-	desc	{ Input stream.}
+	desc	{ Input stream. }
     }
     output {
 	name 	{ svals }
@@ -441,4 +446,3 @@ Data_M
        } // close code
     } // end method
 } // end defstar
-

@@ -3,12 +3,12 @@ defstar {
 	domain { SDF }
 	derivedFrom { FIR }
 	desc {
-An adaptive filter using the LMS adaptation algorithm.
-The initial coefficients are given by the "taps" parameter.
-The default initial coefficients give an 8th order, linear phase
-lowpass filter.  To read initial coefficients from a file,
-replace the default coefficients with "< fileName",
-preferably specifying a complete path.
+An adaptive filter using the Least-Mean Square (LMS) algorithm.
+The initial filter coefficients are given by the "taps" parameter.
+The default initial coefficients give an 8th-order, linear phase
+lowpass filter.
+To read initial coefficients from a file, replace the default
+coefficients with "< fileName", preferably specifying a complete path.
 This star supports decimation, but not interpolation.
 	}
 	version {$Id$}
@@ -21,8 +21,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
 	explanation {
-When correctly used, this filter will adapt to try to minimize
-the mean-squared error of the signal at its \fIerror\fR input.
+When used correctly, this LMS adaptive filter will adapt to try to minimize
+the mean-squared error of the signal at its \fIerror\fR input [1].
 .Id "adaptive filter"
 .Id "filter, adaptive"
 .Id "filter, LMS"
@@ -36,13 +36,18 @@ in the path from the output of the filter back to the error input.
 This ensures correct alignment of the adaptation algorithm.
 The number of delays must be greater than zero or the dataflow
 graph will deadlock.
-The adaptation algorithm used is the well-known LMS, or stochastic-gradient
-algorithm.
+The adaptation algorithm used is the well-known LMS, or
+stochastic-gradient algorithm.
 .Ir "stochastic gradient algorithm"
 .lp
 If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values
 will be stored there after the run has completed.
+.Id "Haykin, S."
+.UH REFERENCES
+.ip [1]
+S. Haykin, \fIAdaptive Filter Theory\fR,
+Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 	}
 	seealso {FIR, adaptFilter, LMSCx, LMSPlot, LMSTkPlot, LMSPlotCx}
 	input {
