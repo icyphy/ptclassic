@@ -129,6 +129,12 @@ class ::tycho::IndexBrowser {
     itk_option define -file file File {}
 
     ##################################################################
+    ####                     public procs                         ####
+
+    # Make an index file in TIM format
+    proc makeIndexFile {name filename prependTYCHO nested args}
+
+    ##################################################################
     ####                     public methods                       ####
 
     # Go back up to the top-level display of hyperlinks
@@ -152,9 +158,6 @@ class ::tycho::IndexBrowser {
     # Process a file or directory selection.
     protected method processItem {filename}
 
-    # Set the contents of the index.
-    # protected method setContents {contents}
-
     # Fill the listbox with items.
     protected method updateListbox {}
 
@@ -167,8 +170,17 @@ class ::tycho::IndexBrowser {
     # The model we use to load the hyperlink index
     private variable indexModel
 
+    # Set if using a HyperlinkIndex model
+    private variable useHyperlinkIndex 0
+
     # A private variable we use to indicate "compatible" mode
     private variable compatible 0
+
+    # The index current list, if loaded from an index list
+    private variable indexList
+
+    # The entries in the index, if loading from an index list
+    private variable indexEntries
 }
 
 #########################################################################
@@ -196,47 +208,37 @@ configbody ::tycho::IndexBrowser::file {
     }
     close $fd
 
-    # Create the index model
-    set indexModel [::tycho::HyperlinkIndex [::tycho::autoName index] \
-	    -datafile $file \
-	    -statefile [file rootname $file].snapshot]
-    
-    # Create the index model
-    set indexModel [::tycho::HyperlinkIndex [::tycho::autoName index] \
-	    -datafile $file \
-	    -statefile [file rootname $file].snapshot]
-    
-    # Remember it
-    # set loadedModels($file) $indexModel
-
     # See if the first non-blankline indicates a TIM. If not, read the file
     # as a string and convert from the old index file format
     if { [regexp {#*[ \t]*@Tycho[ \t]*TIM} $firstline] } {
+        set useHyperlinkIndex 1
+
+        # Create the index model
+        set indexModel [::tycho::HyperlinkIndex [::tycho::autoName index] \
+                -datafile $file \
+                -statefile [file rootname $file].snapshot]
+
+        # Load it
         $indexModel load
+
+        # If the index is nested, add a "Back up" button
+        if { [$indexModel modelcget -nested] } {
+            if { ! [$itk_component(bbox) exists up] } {
+                $itk_component(bbox) add up -text "   Back up   " \
+                        -command "$this up" \
+                        -row 1 -column 0 -state disabled
+            }
+        }
     } else {
-	# FIXME: This is about three times slower than before! The
-	# reason is that the method will add all the entries
-	# in the list to the model, going through all the
-	# test for different cases and so on, so we can then
-	# retrieve the results below. We could do a couple of things:
-	# 1. Have the IndexBrowser just read the list as it used to
-	# do (although this makes the code more complicated).
-	# 2. Optimize the loadIndexListFile method some more
-	# 3. Provide a proc in HyperlinkIndex that will convert
-	# an index list into a snapshot file and test for it here.
-	# I like (3) best -- hjr.
-	$indexModel loadIndexListFile $file
+        # Otherwise, Open the file and read the contents
+        set fd [open $file r]
+        set contents [read $fd]
+        close $fd
+
+        # Remove comments and store resulting list in indexList
+        regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $contents {} indexList
     }
     
-    # If the index is nested, add a "Back up" button
-    if { [$indexModel modelcget -nested] } {
-	if { ! [$itk_component(bbox) exists up] } {
-	    $itk_component(bbox) add up -text "   Back up   " \
-		    -command "$this up" \
-		    -row 1 -column 0 -state disabled
-	}
-    }
-
     # Remember the directory of the file because the
     # files in the hyperlink index might be relative to this
     # directory.
@@ -258,6 +260,58 @@ body ::tycho::IndexBrowser::constructor {args} {
     updateListbox
 }
 
+body ::tycho::IndexBrowser::destructor {} {
+    # Delete the index model if there is on
+    if [::info exists indexModel] {
+        delete object $indexModel
+    }
+}
+
+
+    ##################################################################
+    ##################################################################
+    ####                     public procs                         ####
+
+######################################################################
+#### makeIndexFile
+# Make an index file in TIM format. This can also be read by the
+# Tycho IndexBrowser class.
+# The first argument is the name of the index.
+# The second argument is the name of the index file to create.
+# The third argument causes "$TYCHO/" to be prepended to the file name.
+# The fourth argument generates a one-level hierarchy if true.
+# The rest of the arguments are any number of file names
+# from which the index should be created.  If any of these files
+# is missing or is not readable, then that file is ignored.
+#
+proc ::tycho::IndexBrowser::makeIndexFile \
+        {name filename prependTYCHO nested args} {
+    set index [::tycho::HyperlinkIndex [::tycho::autoName index] \
+	    -datafile $filename \
+	    -statefile [file rootname $filename].snapshot]
+    $index modelconfigure -title $name
+    $index modelconfigure -directory [file dirname $filename]
+
+    foreach file $args {
+	if $prependTYCHO {
+	    $index parseFile [file join \$TYCHO $file]
+	} else {
+	    $index parseFile $file
+	}
+    }
+    # Sort the index, case-insensitive
+    $index sort -command tychoCompareNocase
+
+    # Make it nested if asked to
+    if { $nested } {
+        $index nest
+    }
+
+    # Write to its files
+    $index save
+
+    delete object $index
+}
 
     ##################################################################
     ##################################################################
@@ -348,22 +402,39 @@ body ::tycho::IndexBrowser::processItem {id} {
 
     if {$id == {}} {return 0}
 
-    # Process compatible mode
-
-    if {![$indexModel exists $id]} {
-	safeEval ::tycho::warn "No such item in index: $id"
-	return 0
-    }
-
-    # Hyper-jump here
-    if { [$indexModel isgroup $id] } {
-	# Process a hierarchical entry
-	$itk_component(bbox) enable up
-	$indexModel enter $id
-	reload
-	return 0
+    if $useHyperlinkIndex  {
+        # The data is in an index model. Check it.
+        if {![$indexModel exists $id]} {
+            safeEval ::tycho::warn "No such item in index: $id"
+            return 0
+        }
+        # Process it
+        if { [$indexModel isgroup $id] } {
+            # Process a hierarchical entry
+            $itk_component(bbox) enable up
+            $indexModel enter $id
+            reload
+            return 0
+        } else {
+            hyperJump [$indexModel filename $id] [$indexModel point $id]
+        }
     } else {
-        hyperJump [$indexModel filename $id] [$indexModel point $id]
+        # The data was loaded from an index list. Check it
+        if {![info exists indexEntries($id)]} {
+            safeEval ::tycho::warn "No such item in index: $id"
+            return 0
+        }
+        # Process it
+        set entry $indexEntries($id)
+        if {[llength $entry] == 2} {
+            # Entry is another index.
+            loadIndexList [lindex $entry 1]
+            return 0
+        } {
+            set filename [lindex $entry 1]
+            set point [lindex $entry 2]
+            hyperJump $filename $point
+        }
     }
     return 1
 }
@@ -373,11 +444,44 @@ body ::tycho::IndexBrowser::processItem {id} {
 # Get the hyperlink names from the index model and load the listbox.
 #
 body ::tycho::IndexBrowser::updateListbox {} {
-    # Get the title from the model
-    configure -text [$indexModel modelcget -title]
+    if $useHyperlinkIndex {
+        # Get the title from the model
+        configure -text [$indexModel modelcget -title]
 
-    # Clear the listbox and load the links into it
-    clearListbox
-    appendItems [$indexModel groups]
-    appendItems [$indexModel hyperlinks]
+        # Clear the listbox and load the links into it
+        clearListbox
+        appendItems [$indexModel groups]
+        appendItems [$indexModel hyperlinks]
+
+    } else {
+        # Load from index list
+        if {[llength $indexList] != 2} {
+            error "Syntax error in index file $itk_option(-file) \
+                    Should contain the form: name { items }"
+        }
+        configure -text [lindex $indexList 0]
+        set items {}
+        set count 1
+        foreach item [lindex $indexList 1] {
+            set len [llength $item]
+            if {$len != 3 && $len != 2} {
+                error "Syntax error in index item: $item \n\
+                        Should contain the form { id filename point } \
+                        or { id indexlist }"
+            }
+            set name [lindex $item 0]
+            # Special action to deal with duplicate entries.
+            if [::info exists indexEntries($name)] {
+                incr count
+                set name "$name $count"
+            } {
+                set count 1
+            }
+            set indexEntries($name) $item
+            lappend items $name
+        }
+        # We assume the items are already sorted alphabetically.
+        clearListbox
+        appendItems $items
+    }
 }
