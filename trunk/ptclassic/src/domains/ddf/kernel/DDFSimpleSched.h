@@ -65,11 +65,11 @@ public:
 	// iteration until it deadlocks.
 	void deadlockIteration(int flag) {runUntilDeadlock = flag;}
 
-	DDFSimpleSched () : runUntilDeadlock(0) {};
+	DDFSimpleSched ();
 
 protected:
 	// We nullify this routine to avoid the overhead.
-	void initStructures() {};
+	/* virtual */ void initStructures() {};
 
 	// A source is a star with no inputs.
 	/* virtual */ int isSource(Star&); 
@@ -97,14 +97,19 @@ private:
 	// the value of the pragma is non-zero.
 	int pragmaRegistered(DataFlowStar* as);
 
+	// Fire stars from the sequential list that is passed at most once each.
+	// Note that there may be repeated entries in these lists.
+	// Return FALSE if an error occurs or a halt is requested.
+	// Set the "firedOne" member if any star actually fires.
+	int fireStarsFrom (SequentialList& list);
+
 	// List used to store pointers to the stars that have pragmas
 	// registered.  This allows for efficient access at runtime.
 	// Note that every element appended to this list must be a
 	// DataFlowStar*.
 	SequentialList pragmaStars;
 
-	// Lists of enabled stars, by category, carried from one iteration
-	// to the next.
+	// Lists of enabled stars, by category.
         SequentialList enabledNonDef, enabledDefNonSources, defSources;
 
 	// Method to put in a star into one of the above lists.
@@ -114,6 +119,25 @@ private:
 	// This flag indicates whether an iteration should consist
 	// of running until deadlock.  By default, it is FALSE.
 	int runUntilDeadlock;
+
+	// Keep track of whether an actor has fired in the current
+	// iteration.
+	int firedOne;
+	
+	// In order to allow for easy profiling (to count the number
+	// of stars actually fired by this scheduler, even when there
+	// are wormholes), we run the stars through this method.
+	inline int runStar (DataFlowStar *s)  {
+	  (s->flags[firings])++;
+	  return s->run();
+	}
+	
+	// Flags associated with blocks.
+	enum {
+	  enabled = 0,
+	  firings = 1,
+	  iter =2
+	};
 };
 
 #endif
