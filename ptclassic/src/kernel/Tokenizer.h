@@ -35,8 +35,6 @@ is used.
 
 const int WORDBUF_SIZE = 256;
 
-const char defWhite[] = " \t\n";
-
 class TokenContext;
 class istream;
 
@@ -66,6 +64,10 @@ private:
 	void pop();
 
 public:
+	// the "default whitespace characters" string (it includes
+	// space, newline and tab)
+	static const char defWhite[];
+
 	// Status info funcs
 	const char* current_file() const { return curfile;}
 	int current_line() const { return line_num;}
@@ -111,6 +113,7 @@ public:
 		special = s;
 		return t;
 	}
+
 };
 
 #endif
