@@ -28,16 +28,16 @@ The output matrix has dimensions (rowsCols,rowsCols).
   go {
     Envelope pkt;
     (input%0).getMessage(pkt);
-    const ComplexMatrix *matrix = (const ComplexMatrix *)pkt.myData();
+    const ComplexMatrix& matrix = *(const ComplexMatrix *)pkt.myData();
 
-    if((matrix->numRows() != int(rowsCols)) ||
-       (matrix->numCols() != int(rowsCols))) {
+    if((matrix.numRows() != int(rowsCols)) ||
+       (matrix.numCols() != int(rowsCols))) {
       Error::abortRun(*this,"Dimension size of ComplexMatrix input does ",
                             "not match the given state parameters.");
       return;
     }
     ComplexMatrix *result = new ComplexMatrix(int(rowsCols),int(rowsCols));
-    *result = !(*matrix);        // invert the matrix
+    *result = !matrix;        // invert the matrix
 
     output%0 << *result;
   }

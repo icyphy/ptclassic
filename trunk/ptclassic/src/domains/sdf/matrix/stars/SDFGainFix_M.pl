@@ -94,19 +94,19 @@ parameter.  The keywords for overflow handling methods are :
     // get input
     Envelope inpkt;
     (input%0).getMessage(inpkt);
-    const FixMatrix *matrix = (const FixMatrix *)inpkt.myData();
+    const FixMatrix& matrix = *(const FixMatrix *)inpkt.myData();
 
-    FixMatrix *result = new FixMatrix(matrix->numRows(),matrix->numCols(),
+    FixMatrix *result = new FixMatrix(matrix.numRows(),matrix.numCols(),
                                       out_len, out_IntBits);
 
     Fix fixIn;
 
     // do scalar * matrix
-    for(int i = 0; i < matrix->numRows() * matrix->numCols(); i++) {
+    for(int i = 0; i < (matrix.numRows() * matrix.numCols()); i++) {
       if(int(UseArrivingPrecision))
-        fixIn = matrix->entry(i);
+        fixIn = matrix.entry(i);
       else
-        fixIn = Fix(in_len, in_IntBits, matrix->entry(i));
+        fixIn = Fix(in_len, in_IntBits, matrix.entry(i));
       result->entry(i).set_ovflow(OV);
       result->entry(i) = fixIn * Fix(gain);
     }

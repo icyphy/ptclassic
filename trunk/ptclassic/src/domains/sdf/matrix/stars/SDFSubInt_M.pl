@@ -41,16 +41,16 @@ Matrix C has dimensions (numRows,numCols).
           // get inputs
           Envelope Apkt;
           (Ainput%0).getMessage(Apkt);
-          const IntMatrix *Amatrix = (const IntMatrix *)Apkt.myData();
+          const IntMatrix& Amatrix = *(const IntMatrix *)Apkt.myData();
 
           Envelope Bpkt;
           (Binput%0).getMessage(Bpkt);
-          const IntMatrix *Bmatrix = (const IntMatrix *)Bpkt.myData();
+          const IntMatrix& Bmatrix = *(const IntMatrix *)Bpkt.myData();
 
           // just check that A's dimensions match the state info.
           // the operator - on matricies will check that A matches B
-          if((Amatrix->numRows() != int(numRows)) ||
-             (Amatrix->numCols() != int(numCols))) {
+          if((Amatrix.numRows() != int(numRows)) ||
+             (Amatrix.numCols() != int(numCols))) {
             Error::abortRun(*this,"Dimension size of IntMatrix inputs do ",
                                   "not match the given state parameters.");
             return;
@@ -58,7 +58,7 @@ Matrix C has dimensions (numRows,numCols).
 
           // do matrix subtraction
           IntMatrix *result = new IntMatrix(int(numRows),int(numCols));
-          *result = *Amatrix - *Bmatrix;
+          *result = Amatrix - Bmatrix;
           output%0 << *result;
 	}
 }

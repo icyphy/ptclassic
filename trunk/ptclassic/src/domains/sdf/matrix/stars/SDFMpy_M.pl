@@ -45,14 +45,14 @@ columns in B.
           // get inputs
           Envelope Apkt;
           (Ainput%0).getMessage(Apkt);
-          const FloatMatrix *Amatrix = (const FloatMatrix *)Apkt.myData();
+          const FloatMatrix& Amatrix = *(const FloatMatrix *)Apkt.myData();
 
           Envelope Bpkt;
           (Binput%0).getMessage(Bpkt);
-          const FloatMatrix *Bmatrix = (const FloatMatrix *)Bpkt.myData();
+          const FloatMatrix& Bmatrix = *(const FloatMatrix *)Bpkt.myData();
 
-          if((Amatrix->numRows() != int(numRows)) ||
-             (Bmatrix->numCols() != int(numCols))) {
+          if((Amatrix.numRows() != int(numRows)) ||
+             (Bmatrix.numCols() != int(numCols))) {
             Error::abortRun(*this,"Dimension size of FloatMatrix inputs do ",
                                   "not match the given state parameters.");
             return;
@@ -61,9 +61,9 @@ columns in B.
           // do matrix multiplication
           FloatMatrix *result = new FloatMatrix(int(numRows),int(numCols));
           // we could write 
-          //   *result = *Amatrix * *Bmatrix;
+          //   *result = Amatrix * Bmatrix;
           // but the following is faster
-          multiply(*Amatrix,*Bmatrix,*result);
+          multiply(Amatrix,Bmatrix,*result);
 
           output%0 << *result;
 	}
