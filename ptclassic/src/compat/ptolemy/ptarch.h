@@ -1,5 +1,3 @@
-#ifndef PTARCH_H
-#define PTARCH_H
 /**************************************************************************
 Version identification:
 $Id$
@@ -32,13 +30,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  Christopher X. Hylands
  Date of creation: October 20, 1995
 
- Definition of PTARCH Stripped from pigiLoader.cc.
+ Definition of constant PTARCH Stripped from pigiLoader.cc.
 
 **************************************************************************/
 
-#include "compat.h"
+
+// Check value of PTARCH
+// -- it could be defined by makefiles or other means
+// -- also prevents contents of file from being evaluated multiple times
+
+#ifndef PTARCH
 
 // Architecture-specific stuff.  The PTFOO defs come from compat.h
+#include "compat.h"
 
 #ifdef PTAIX
 #define PTARCH "aix"
@@ -106,3 +110,5 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #endif
+
+// End of check value of PTARCH
