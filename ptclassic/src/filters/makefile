@@ -28,13 +28,10 @@ PTOLEMY = ../..
 MAKEVARS =	\
 		"ARCH=$(ARCH)" 
 
-all install clean check sources checkjunk:
+all install clean realclean sources depend checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in filters/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../.. VPATH=../../../src/filters/$$x $@ ;\
 	  	cd .. ; \
 	 done
-
-sccsinfo:
-		sccs info
