@@ -1,0 +1,4 @@
+# Version: $Id$
+# This class is used to test the ItclClassList
+class A {
+}
