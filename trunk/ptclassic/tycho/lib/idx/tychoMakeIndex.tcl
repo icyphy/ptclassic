@@ -130,7 +130,6 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 		    $name != {adm} && \
 		    $name != {test} && \
 		    $name != {codeDoc} && \
-		    $name != {java} && \
 		    $name != $objdir && \
 		    $name != {junk} } {
 		set subfiles [tychoFindAllHTML [file join $dirname $name] \
@@ -172,6 +171,7 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 		    $name != {adm} && \
 		    $name != {test} && \
 		    $name != {java} && \
+		    $name != {tyjava} && \
 		    $name != $objdir && \
 		    $name != {junk} } {
 		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
