@@ -34,5 +34,5 @@ mescal/.* mailx -s "%s" mescal-cvs@gigascale.org
 impact/.* mailx -s "%s" mescal-cvs@gigascale.org
 
 #panda releated stuff (Bart Kienhuis)
-panda/.* mailx -s "%s" kienhuis@eecs.berkeley.edu rypkema@cas.et.tudelft.nl
+panda/.* mailx -s "%s" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
 
