@@ -100,10 +100,18 @@ body ::tycho::CTEdit::openControlPanel {graph} {
 	puts "Portnum = $portnum"
 
 	# Create a simulation run control panel
-	set rw [::tycho::view CTRunWindow -name $tl -debug 1]
+	set rw [::tycho::view CTRunWindow -name $tl]
 
 	# Create a simulation
-	set sim [$rw simulation create -debug 1 -portnum $portnum]
+	set file [filename]
+	set name [file tail [file root $file]]
+	puts "!$file $name"
+
+	# FIXME: need to be able to bring up the runwindow
+	# immediately
+	set sim [$rw simulation create -portnum $portnum]
+	$rw simulation name $name
+	$rw simulation script $file
 
         # Give the graph to the simulation so it can initialize
         # the simulation run-time
