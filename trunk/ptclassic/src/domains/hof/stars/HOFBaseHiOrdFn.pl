@@ -24,11 +24,8 @@ The name of the replacement block is given by the <i>blockname</i> parameter.
 If the replacement block is a galaxy, then the <i>where_defined</i> parameter
 gives the full name (including the full path) of the definition of the galaxy.
 This path name may (and probably should) begin with the environment
-<pre>
-</pre>
 variable $PTOLEMY or ~username.
-<pre>
-</pre>
+<p>
 Currently, this must be an oct facet, although in the future, other
 specifications (like ptcl files) may be allowed.
 The oct facet should contain the replacement galaxy,
