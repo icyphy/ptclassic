@@ -19,7 +19,7 @@ Code for CG-type portholes and multiportholes.
 **************************************************************************/
 
 // constructor
-CGPortHole :: CGPortHole() : offset(0), forkSrc(0) {}
+CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0) {}
 
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {
@@ -37,7 +37,6 @@ void CGPortHole::advance() {
 	int sz = bufSize();
 	if (offset >= sz) offset -= sz;
 }
-
 
 // allocate a CGGeodesic.  Use hashstring for the name since we expect
 // repeated names to occur (lots of Node_input and Node_output, for example)
