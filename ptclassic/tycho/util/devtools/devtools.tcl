@@ -41,3 +41,44 @@ if { [lsearch -exact $auto_path $env(DEVTOOLS_LIBRARY)] == -1 } {
     lappend auto_path $env(DEVTOOLS_LIBRARY)
 }
 
+### MODES
+########### Compound viewers (alphabetical)
+
+# "Diff" viewer -- will not run on the Macintosh
+if {$tcl_platform(platform) != "macintosh"} {
+    ::tycho::register mode "diffviewer" \
+	    -command {::tycho::view EditDiff -toolbar 1} \
+	    -viewclass ::tycho::EditDiff \
+	    -label {Diff Viewer}  \
+	    -category "tool" \
+	    -underline 0
+}
+
+# Directory Search
+::tycho::register mode "dirsearch" \
+        -command {set w [::tycho::autoName .dirsearch]; \
+        ::tycho::DirSearch $w -geometry +0+0;\
+	    wm deiconify $w} \
+	    -label {Directory Search}  \
+	    -category "tool" \
+	    -underline 1
+
+# Glimpse interface -- will not run on the Macintosh
+if {$tcl_platform(platform) != "macintosh"} {
+    ::tycho::register mode "glimpse" \
+	    -command {set w [::tycho::autoName .glimpse]; \
+	    ::tycho::Glimpse $w -geometry +0+0;\
+	    wm deiconify $w} \
+	    -label {Glimpse}  \
+	    -category "tool" \
+	    -underline 0
+}
+
+# Itcl class list and class diagram generator
+::tycho::register mode "itclclasslist" \
+	-command {::tycho::view ItclClassList -file {%s} -toolbar 1} \
+	-viewclass ::tycho::ItclClassList \
+	-label {Itcl Class List}  \
+	-category "tool" \
+	-underline 5
+
