@@ -23,31 +23,31 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-# base parallel schedulers
 
 
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/cg/multiScheduler
+VPATH = $(ROOT)/src/domains/cg/hierScheduler
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
+LOOPDIR=$(ROOT)/src/domains/sdf/loopScheduler
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 PARKERNEL = $(ROOT)/src/domains/cg/parScheduler
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(PARKERNEL)
+INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(KERNDIR) -I$(PARKERNEL) -I$(LOOPDIR)
 
-SRCS =	MultiScheduler.cc 
+HDRS =  HierCluster.h HierScheduler.h ShadowTarget.h
 
-HDRS =  MultiScheduler.h
+SRCS =	$(HDRS:.h=.cc)
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB = libMSH.$(LIBSUFFIX)
+LIB = libHier.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 
