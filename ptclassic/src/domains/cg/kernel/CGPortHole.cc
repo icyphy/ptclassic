@@ -76,11 +76,11 @@ void CGPortHole::advance() {
 }
 
 // make me a fork destination; set my source.
-void CGPortHole::setForkSource(CGPortHole * p) {
+void CGPortHole::setForkSource(CGPortHole* p) {
+	// set new forkSrc
 	forkSrc = p;
-	if (!p) return;
 	// add me as one of forkSrc's destinations
-	forkSrc->forkDests.put(this);
+	if (forkSrc) forkSrc->forkDests.put(this);
 }
 
 
