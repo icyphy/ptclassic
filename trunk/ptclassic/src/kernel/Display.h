@@ -16,7 +16,6 @@ used for X window displays, such as classes that invoke xgraph.
 #define _Display_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

@@ -2,7 +2,6 @@
 #define _ParticleQueue_h
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 /***************************************************************

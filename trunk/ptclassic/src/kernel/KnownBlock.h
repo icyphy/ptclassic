@@ -29,7 +29,6 @@ instance of the named class in the current domain.
 #define  _KnownBlock_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

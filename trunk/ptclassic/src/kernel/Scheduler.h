@@ -2,7 +2,6 @@
 #define _Scheduler_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 #include "StringList.h"

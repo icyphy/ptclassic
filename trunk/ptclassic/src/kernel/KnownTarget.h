@@ -28,7 +28,6 @@ instance of the named class in the current domain.
 *******************************************************************/
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
