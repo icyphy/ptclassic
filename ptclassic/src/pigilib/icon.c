@@ -86,6 +86,7 @@ char *fileName;
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
+	return(FALSE);
     }
     return (TRUE);
 }
@@ -104,6 +105,7 @@ char *fileName;
     PrintDebug(buf);
     if (util_csystem(buf)) {
 	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
+	return (FALSE);
     }
     return (TRUE);
 }
@@ -426,11 +428,12 @@ long userOptionWord;
 	        octFullName(&mFacet, &fullName);
 
 	        /* Figure out file names */
-		if (!IconFileToSourceFile (fullName, codeFile, domain))
-			return FALSE;
-
-	        ERR_IF1(!LookAtFile(codeFile));
-
+		if (!IconFileToSourceFile(fullName, codeFile, domain)) {
+		    PrintErr(ErrGet());
+		    ViDone();
+		}
+	        if (!LookAtFile(codeFile))
+		    PrintErr(ErrGet());
 		ViDone();
 	    } else {
 		PrintErr("The icon instance is not a universe, galaxy, palette, or star.");
