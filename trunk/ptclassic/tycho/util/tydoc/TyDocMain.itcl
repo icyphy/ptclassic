@@ -1256,8 +1256,11 @@ body ::tycho::HTMLDocSys::generateClassHTML {} {
 		Class "
 	set classTail [namespaceTail $className]
 	set classQualifiers [namespaceQualifiers $className]
+#	puts $fd "<a name=\"$classTail class documentation ($classQualifiers\
+#		namespace)\">\n$className</a></h1>\n[$class cget -comment]"
+
 	puts $fd "<a name=\"$classTail class documentation ($classQualifiers\
-		namespace)\">\n$className</a></h1>\n[$class cget -comment]"
+		namespace)\">\n$className</a></h1>"
 
 	putsClassContents $fd $class
 
@@ -1324,10 +1327,14 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 		    related documentation\
  		    ([namespaceQualifiers $className]\
 		    namespace)\">$className</A></H1>"
-	    puts $fd "[$class cget -comment]\n<HR>\nRelated class:\
+#	    puts $fd "[$class cget -comment]\n<HR>\nRelated class:\
+#		    <A HREF=\"[getFileName \
+#		    $className]\"><CODE>$className</CODE></A>"
+	    
+	    puts $fd "<HR>\nRelated class:\
 		    <A HREF=\"[getFileName \
 		    $className]\"><CODE>$className</CODE></A>"
-	    
+
 	    # The list of outside constructs we are going to output
 	    if {$verbose} {
 		set allConstructs {outsideOption outsideProc outsideEnsemble}
