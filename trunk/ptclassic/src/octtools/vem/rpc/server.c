@@ -47,6 +47,9 @@ static char SccsId[]="$Id$";
 #include "attributes.h"
 #include "rpcServer.h"
 #include "oh.h"
+#include "serverVem.h"		/* Pick up RPCDemonFunction() */
+#include "vemRPC.h"		/* Pick up vemCloseApplication() */
+#include "vemMain.h"		/* Pick up vemPending() */
 
 struct RPCApplication *RPCApplication;
 
