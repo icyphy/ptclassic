@@ -13,6 +13,7 @@ Produce code for inter-process communication (send-side)
 	}
 	private {
 		friend class CGCMultiTarget;
+		CGStar* partner;
 	}
 	input {
 		name {input}
@@ -47,6 +48,7 @@ Produce code for inter-process communication (send-side)
 		attributes { A_NONSETTABLE }
 	}
 	ccinclude { "StringList.h" }
+	hinclude { "CGCMultiTarget.h" }
 
 	setup {
 		numData = input.numXfer();
@@ -85,8 +87,15 @@ Produce code for inter-process communication (send-side)
     }	
 	}
 	initCode {
+		// obtain the hostAddr state from parent MultiTarget.
+		// Note that this routine should be placed here.
+		CGCMultiTarget* t = (CGCMultiTarget*) myTarget()->parent();
+		t->setMachineAddr(this, partner);
+		hostAddr.initialize();
+
+		// code generation.
 		StringList IPCproc = processCode(ipcHandler);	
-		addProcedure(IPCproc);
+		addProcedure(IPCproc, IPCHandlerName);
 		addGlobal("int $starSymbol(sId);\n");
 		addInclude("<stdio.h>");
 		addInclude("<sys/types.h>");
