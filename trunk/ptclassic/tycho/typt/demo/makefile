@@ -42,18 +42,25 @@ include $(CONFIG)
 
 ITCL_SRCS =
 
-TCL_SRCS =		audioio.tcl \
-				graphic.tcl \
-				parametric.tcl \
-				tonecontrol.tcl
+TCL_SRCS =	audioio.tcl \
+		graphic.tcl \
+		parametric.tcl \
+		tonecontrol.tcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
+# Files or directories that are present, but that 'make checkjunk' 
+# should not complain about
 MISC_FILES =	tclIndex \
-				audioio.html \
-				graphic.html \
-				parametric.html \
-				tonecontrol.html
+		audioio.html \
+		graphic.html \
+		parametric.html \
+		tonecontrol.html \
+		doc
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+# make realclean removes OPTIONAL_FILES
+OPTIONAL_FILES =
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
