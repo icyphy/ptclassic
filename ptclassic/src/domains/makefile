@@ -46,6 +46,20 @@ makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	    fi ; \
 	done
 
+starHTML.idx: $(wildcard */doc/stars/starHTML.idx)
+	echo "{Ptolemy Star HTML Index for all domains}" > $@
+	echo "{">> $@
+	@for x in $(DOMAINS); do \
+	    if [ -w $$x ] ; then \
+		echo "{{$$x domain stars} $$x/doc/stars/starHTML.idx {$$x domain stars}}" >> $@; \
+		( cd $$x ; \
+		echo making doc/stars/starHTML.idx in domains/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x doc/stars/starHTML.idx ;\
+		) \
+	    fi ; \
+	done
+	echo "}">> $@
+
 .PHONY:	TAGS
 TAGS:
 	@for x in $(DOMAINS); do \
