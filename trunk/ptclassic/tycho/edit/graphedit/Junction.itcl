@@ -244,7 +244,7 @@ body ::tycho::Junction::coords {id canvas slate args} {
 
     # No args: just return coordinates
     if { $args == "" } {
-    	list [lindex $coords 0] [lindex $coords 3]
+    	list [lindex $coords 2] [lindex $coords 1]
     } else {
     	set x [lindex $args 0]
     	set y [lindex $args 1]
