@@ -87,7 +87,7 @@ proc ::tycho::compileC {filename args} {
 # </pre></tcl>
 #
 class ::tycho::Compile {
-
+    inherit ::tycho::Object
     constructor {args} {}
     destructor {}
     
