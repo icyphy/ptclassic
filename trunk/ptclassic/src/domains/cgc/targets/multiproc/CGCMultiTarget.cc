@@ -36,12 +36,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "pt_fstream.h"
-#include "Error.h"
+// Ptolemy kernel include files
+#include "pt_fstream.h"		// define pt_ofstream class
+#include "StringList.h"		// define StringList class
+#include "Error.h"		// define Error class
+#include "Block.h"		// needed for KnownTarget.h
+#include "Target.h"		// needed for KnownTarget.h
+#include "KnownTarget.h"	// define KnownTarget to register target
+
+// Ptolemy domain include files
 #include "CodeBlock.h"
 #include "CGUtilities.h"
 #include "CGCStar.h"
-#include "KnownTarget.h"
 #include "CGCMultiTarget.h"
 #include "CGCTarget.h"
 #include "CGCSpread.h"
@@ -50,18 +56,22 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCUnixReceive.h"
 #include "CGCMacroStar.h"
 #include "CGCDDFCode.h"
-#include <ctype.h>
+
+// Standard include files
+#include <ctype.h>		// define isspace macro
 #include <stdio.h>
 #include <sys/types.h>
-#include <netdb.h>			// for struct hostent
+#include <netdb.h>		// define gethostbyname and struct hostent
 
 extern "C" {
 #include <netinet/in.h>			// for struct in_addr
-	char* inet_ntoa(struct in_addr);
+char* inet_ntoa(struct in_addr);
 }
 
-// stream for logging information.  It is opened by the setup method.
+// Defined in CGCDomain.cc
+extern const char CGCdomainName[];
 
+// stream for logging information.  It is opened by the setup method.
 static pt_ofstream feedback;
 
 // ---------------------------- code blocks --------------------------------
@@ -143,17 +153,19 @@ CodeBlock ipcConnectHandler (
 CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGSharedBus(name,starclass,desc) {
 
-	// port_number
-	addState(portNumber.setState("portNumber",this,"7654",
+	// port number
+	addState(portNumber.setState("portNumber", this, "7654",
 		"hopefully will not collide any port_numbers taken"));
 
 	// specify machine names
-	addState(machineNames.setState("machineNames",this,"herschel",
-		"machine names (separated by a comma)"));
-	addState(nameSuffix.setState("nameSuffix",this,"",
+	addState(machineNames.setState("machineNames", this, "herschel",
+		"machine names (separated by commas)"));
+	addState(nameSuffix.setState("nameSuffix", this, "",
 		"common suffix of machine names(e.g. .berkeley.edu)"));
 
-	// make some states invisible
+	// override target parameter values
+	destDirName = destDirectoryName(CGCdomainName);
+	destDirectory.setInitValue(destDirName);
 	childType.setInitValue("default-CGC");
 
 	machineInfo = 0;
@@ -171,7 +183,6 @@ void CGCMultiTarget :: installDDF() {
 	LOG_NEW; ddfcode = new CGCDDFCode(this);
 }
 
-// -----------------------------------------------------------------------------
 DataFlowStar* CGCMultiTarget :: createSend(int, int, int) {
 	LOG_NEW; CGCUnixSend* s = new CGCUnixSend;
 	return s;
@@ -203,7 +214,7 @@ void CGCMultiTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	CGCUnixSend* cs = (CGCUnixSend*) s;
 	CGCUnixReceive* cr = (CGCUnixReceive*) r;
 
-	// for each child_target
+	// for each child target
 	CGCTarget* ts = (CGCTarget*) cs->cgTarget();
 	CGCTarget* tr = (CGCTarget*) cr->cgTarget();
 
@@ -226,17 +237,16 @@ int CGCMultiTarget :: machineId(Target* tg) {
 	return -1;
 }
 	
-// -----------------------------------------------------------------------------
-			///////////////////
-			// setup
-			///////////////////
-
+// setup
 void CGCMultiTarget :: setup() {
 	currentPort = int(portNumber);
 
 	// all runs will append to the same file.
 	// FIXME: should not be done this way.
-	if (!feedback) feedback.open("cgcMulti_log");
+	if (!feedback) {
+		StringList path = logFilePathName(destDirectory,"cgcMulti_log");
+		feedback.open(path);
+	}
 	if (!feedback) return;
 
 	// machine idetifications
@@ -272,7 +282,8 @@ int CGCMultiTarget :: identifyMachines() {
 	const char* p = machineNames;
 	int i = 0;
 	while (*p) {
-		char buf[80], *b = buf;
+		char buf[256];
+		char *b = buf;
 		while (isspace(*p)) p++;
 		while ((*p != ',') && (*p != 0)) {
 			if (isspace(*p)) p++;
@@ -280,6 +291,7 @@ int CGCMultiTarget :: identifyMachines() {
 		}
 		if (*p == ',') p++;
 		*b = 0;		// end of string.
+
 		// record names
 		StringList mname = (const char*) buf;
 		mname << (const char*) nameSuffix;
@@ -287,8 +299,8 @@ int CGCMultiTarget :: identifyMachines() {
 		// internet address calculation
 		struct hostent* hp;
 		if ((hp = gethostbyname((const char*) mname)) == NULL) {
-			StringList errMsg;
-			errMsg << "host name error: " << mname;
+			StringList errMsg = "host name error: ";
+			errMsg << mname;
 			Error :: abortRun(errMsg);
 			return FALSE;
 		}
@@ -303,7 +315,7 @@ int CGCMultiTarget :: identifyMachines() {
 
 		i++;
 	}
-	
+
 	// check if the number of processors and the machine names are matched.
 	if (i != pnum) {
 		Error :: abortRun(*this, "The number of processors and",
@@ -372,21 +384,18 @@ void CGCMultiTarget :: setupSocketConnection(CGCTarget* t, int i) {
 	}
 }
 		
-// -----------------------------------------------------------------------------
 Block* CGCMultiTarget :: makeNew() const {
 	LOG_NEW; return new CGCMultiTarget(name(),starType(),descriptor());
 }
-// -----------------------------------------------------------------------------
-			/////////////////////////////
-			// wormhole interface method
-			/////////////////////////////
 
+// wormhole interface method
 int CGCMultiTarget :: receiveWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	cp.forceSendData();
 	return TRUE;
 }
-// -----------------------------------------------------------------------------
+
+// wormhole interface method
 int CGCMultiTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	cp.forceGrabData();
@@ -394,10 +403,7 @@ int CGCMultiTarget :: sendWormData(PortHole& p) {
 }
 
 
-			///////////////////
-			// CGDDF support
-			///////////////////
-
+// CGDDF support
 void CGCMultiTarget :: prepCode(Profile* pf, int numP, int numChunk) {
 	// call prepCode routine
 	for (int i = 0; i < numP; i++) {
@@ -416,12 +422,9 @@ void CGCMultiTarget :: prepCode(Profile* pf, int numP, int numChunk) {
 	mapArray = pf->assignArray(1);
 }
 
-// ------------------------------------------------------------------------
+ISA_FUNC(CGCMultiTarget, CGMultiTarget);
 
-ISA_FUNC(CGCMultiTarget,CGMultiTarget);
-
-static CGCMultiTarget targ("unixMulti_C","CGCStar",
-"A test target for parallel C code generation");
+static CGCMultiTarget targ("unixMulti_C", "CGCStar",
+			   "A test target for parallel C code generation");
 
 static KnownTarget entry(targ,"unixMulti_C");
-
