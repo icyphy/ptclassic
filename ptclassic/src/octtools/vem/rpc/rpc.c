@@ -1427,7 +1427,7 @@ FILE *stream;
 	if (num_read <= 0) {
 	    if (num_read == 0) {
 		(void) fprintf(stderr,
-			       "Vem RPC: connection has been broken.\n");
+		       "Vem RPCfread(): read 0 bytes, connection has been broken.\n");
 	    }
 	    return (size * count - len) / size;
 	}
