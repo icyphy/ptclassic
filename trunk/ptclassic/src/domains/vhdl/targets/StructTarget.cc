@@ -44,10 +44,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Constructor.
 StructTarget :: StructTarget(const char* name,const char* starclass,
 			 const char* desc) :
-VHDLTarget(name,starclass,desc) {
+SimVSSTarget(name,starclass,desc) {
   regsUsed = 0;
   muxsUsed = 0;
   sorsUsed = 0;
+
+  // Set the default to display the code.
+  analyze.setInitValue("NO");
+  // Set the default to not use loop scheduling.
+  loopingLevel.setInitValue("0");
+
   addCodeStreams();
   initCodeStreams();
 }
@@ -69,7 +75,7 @@ void StructTarget :: setup() {
   }
   if (galaxy()) setStarIndices(*galaxy()); 
   
-  VHDLTarget::setup();
+  SimVSSTarget::setup();
 
   clockList.initialize();
 
@@ -407,14 +413,12 @@ void StructTarget :: writeCode() {
 
 // Compile the code.
 int StructTarget :: compileCode() {
-  // Return TRUE indicating success.
-  return TRUE;
+  return SimVSSTarget::compileCode();
 }
 
 // Run the code.
 int StructTarget :: runCode() {
-  // Return TRUE indicating success.
-  return TRUE;
+  return SimVSSTarget::runCode();
 }
 
 // Merge the Star's signal list with the Target's signal list.
@@ -869,7 +873,7 @@ const char* StructTarget :: portAssign() {
   return assign;
 }
 
-ISA_FUNC(StructTarget,VHDLTarget);
+ISA_FUNC(StructTarget,SimVSSTarget);
 
 // Add in sensitivity list of input ports.
 // Do this explicitly for sake of synthesis.
@@ -1355,6 +1359,8 @@ void StructTarget :: addCodeStreams() {
   addStream("configuration_declaration", &configuration_declaration);
   addStream("firingAction", &firingAction);
   addStream("ctlerAction", &ctlerAction);
+
+  SimVSSTarget::addCodeStreams();
 }
 
 // Initialize codeStreams.
@@ -1369,7 +1375,7 @@ void StructTarget :: initCodeStreams() {
   firingAction.initialize();
   ctlerAction.initialize();
 
-  VHDLTarget::initCodeStreams();
+  SimVSSTarget::initCodeStreams();
 }
 
 // Initialize VHDLObjLists.
@@ -1391,7 +1397,7 @@ void StructTarget :: initVHDLObjLists() {
   ctlerPortVarList.initialize();
   ctlerVarPortList.initialize();
 
-  VHDLTarget::initVHDLObjLists();
+  SimVSSTarget::initVHDLObjLists();
 }
 
 // Initialize firing lists.
