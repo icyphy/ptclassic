@@ -131,7 +131,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Then we are using cfront
 #define EXTRAOPTS " -DPOSTFIX_OP="
 #else
+#if __GNUC_MINOR__ >= 7
+
+#ifdef PTSOL2
+#define EXTRAOPTS "-fpic"
+#else
 #define EXTRAOPTS ""
+#endif /* PTSOL2 */
+
+#else
+#define EXTRAOPTS ""
+#endif
 #endif /* ! __GNUG__ */
 #endif /* mips */
 
