@@ -261,9 +261,14 @@ int Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                         return FALSE;
                     }
                     else {
+                        //success is True only for the first event at the given
+                        //time for this port
                         int success = ((InDEPort*) port)->getFromQueue(sortArray[i]->p);
 			// Remove this Event from the Array
-			if (success) sortArray[i] = 0; 
+			//if (success) sortArray[i] = 0; 
+                        // This implies that the simultaneous events to the 
+                        // have been removed from the eventQ and discarded.
+                        sortArray[i] = 0;
                     }
                 }
             }
