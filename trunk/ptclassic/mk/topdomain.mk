@@ -40,7 +40,19 @@ makefiles:
 	    fi ; \
 	done
 
-all install clean sources realclean checkjunk sccsinfo:
+all install clean  realclean checkjunk sccsinfo:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		  echo making $@ in domains/$(ME)/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../src/domains/$(ME)/$$x $@ ; \
+		) \
+	    fi ; \
+	done
+
+sources: subsources doc/stars/starHTML.idx
+subsources:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
