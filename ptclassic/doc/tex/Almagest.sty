@@ -58,12 +58,19 @@
 \pagestyle{headings}
 
 %
-% Change the appearance of chapter headings.
+% Use chapter number in page numbers.
+% \pagenumbering{Chapter}
+%
+\def\@Chapter#1{\thechapter-\number#1}
+
+%
+% Change the appearance of chapter headings,
+% and reset the page number.
 %
 \def\@makechapterhead#1{ %
 {\raggedright \noindent \protect\Huge\bsf \@chapapp{} \thechapter . #1}%
-\par \vspace*{3pt} \noindent \rule{\textwidth}{1pt} \par \vspace*{15pt}}
-
+\par \vspace*{3pt} \noindent \rule{\textwidth}{1pt} \par \vspace*{15pt}%
+\setcounter{page}{1}}
 
 %
 % Change the appearance of section headings.
@@ -71,9 +78,9 @@
 % @startsection {NAME}{LEVEL}{INDENT}{BEFORESKIP}{AFTERSKIP}{STYLE}
 %
 \def\section{\@startsection{section}{1}{0pt}{0pt}{5pt}{\large\bsf}}
-\def\subsection{\@startsection{subsection}{2}{0pt}{0pt}{5pt}{\large\bsf}}
-\def\subsubsection{\@startsection{subsubsection}{3}{0pt}{0pt}{5pt}{\large\bsf}}
-\def\paragraph{\@startsection{paragraph}{4}{0pt}{0pt}{5pt}{\large\bsf}}
+\def\subsection{\@startsection{subsection}{2}{0pt}{0pt}{5pt}{\bsf}}
+\def\subsubsection{\@startsection{subsubsection}{3}{0pt}{0pt}{5pt}{\bsf}}
+\def\paragraph{\@startsection{paragraph}{4}{0pt}{0pt}{5pt}{\bsf}}
 
 %
 % Change the appearance of figure and table captions.
