@@ -175,21 +175,23 @@ entry box.  For example,
 Much more complicated dialogs are possible using the
 <a name="query procedure"><code>query</code> procedure</a>.  
 For example, the following call will create a dialog with one of
-each of the four kinds of queries:
+each of the five kinds of queries:
 <tcl><pre>
    ::tycho::query {title text} { &#92
-         {line w {w label} foo} &#92
-         {lines x {x label} bar 4} &#92
-         {radio y {y label} {A B C} A} &#92
+         {line v {v label} foo} &#92
+         {lines w {w label} bar 4} &#92
+         {radio x {x label} {A B C} A} &#92
+         {choice y {y label} {A B C} A} &#92
          {mediated z {z label} red {::tycho::querycolor Choose}}}
 </pre></tcl>
-This will return a list of the form {w <i>value</i> x <i>value</i> y
-<i>value</i> z <i>value</i>}.
+This will return a list of the form {v <i>value</i>
+w <i>value</i> x <i>value</i> y <i>value</i> z <i>value</i>}.
 The first query is much like the used by the <code>queryinfo</code>
 procedure, requesting a single line of text.
 The second is similar, except that it has multiple lines
 for the textual response.  The third is a collection of radio buttons,
 or buttons where the user can only select one.
+The fourth is a pop-up menu listing the choices.
 The last one is a <a name="mediated queries">mediated query</a>,
 which is a query where the response is created by some other widget.
 In this case, the <code>querycolor</code> procedure is used to
@@ -199,14 +201,15 @@ The first argument of <code>query</code> is the
 label for the entire query, and will appear at the top of the query
 window. The second argument is the queries, which is actually a
 collection of method invocations for the <code>Query</code> class.
-There are currently four relevant methods, shown with their arguments below:
+There are currently five relevant methods, shown with their arguments below:
 <menu>
+<li> choice tag label possibilities command
 <li> line tag label default
 <li> lines tag label default height
 <li> radio tag label possibilities default
 <li> mediated tag label default command
 </menu>
-In addition, all four can accept any number of additional arguments.
+In addition, all except choice can accept any number of additional arguments.
 These arguments are passed to the widget that implements the query
 (a Tk entry, a Tycho <code>Edit</code> object,
 a set of Tk radio buttons, or a single Tk
@@ -224,9 +227,11 @@ The arguments above are explained below:
 <li> height: the number of lines in a multi-line text query.
      An <code>Edit</code> widget is used, providing
      an emacs-like text editor.
-<li> possibilities: a list of button names.  These are the labels
-     that appear on each of the radio buttons.
-<li> command: a command to invoke for a mediated query.  Before
+<li> possibilities: a list of options.  These are the labels
+     that appear on each of the radio buttons, or the menu items in the
+     choice pop-up menu.
+<li> command: a command to invoke for a mediated query or when the user
+     changes the selection in a choice query.  Before
      invoking this command, the current (default) value of the
      query will be appended to the command, separated by a space.
      The command should return the new value of the query.
