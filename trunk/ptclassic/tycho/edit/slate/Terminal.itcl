@@ -167,6 +167,7 @@ class ::tycho::Terminal {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
+    set optiondefault(-anchor)    {50 50}
     set optiondefault(-direction) {1 0}
     set optiondefault(-length)    25
     set optiondefault(-type)      input
