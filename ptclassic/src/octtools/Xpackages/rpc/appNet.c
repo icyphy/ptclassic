@@ -38,10 +38,10 @@ static char SccsId[]="$Id$";
 /* KERNEL define to stop recursive inclusion of time.h in BSD and SUN */
 #ifdef sun
 #define KERNEL			/* On a sun, define KERNEL */
-#include "time.h"
+#include <time.h>
 #undef KERNEL
 #else				/* Everybody else includes it straight */
-#include "time.h"   
+#include <time.h>   
 #endif
 
 #include <sys/socket.h>

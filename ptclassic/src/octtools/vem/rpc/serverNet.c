@@ -36,7 +36,7 @@ static char SccsId[]="$Id$";
 
 /* kludge - due to moving target, handled in -I */
 #define KERNEL
-#include "time.h"
+#include <time.h>
 #undef KERNEL
 
 #include <sys/types.h>
