@@ -106,8 +106,8 @@ proc ed_RestoreParam {facet number {args ""}} {
 proc ed_WriteParam {paramdata facet number {args ""}} {
   if {$args == "Target"} {
     ptkSetTargetParams $facet $number $paramdata
-  } elseif {$args == "Attributes"} {
-    ptkSetAttributes $facet $paramdata
+  } elseif {$args == "Pragmas"} {
+    ptkSetPragmas $facet $number $paramdata
   } else {
     ptkSetParams $facet $number $paramdata
   }
@@ -116,18 +116,18 @@ proc ed_WriteParam {paramdata facet number {args ""}} {
 proc ed_GetParam {facet number {args ""}} {
   if {$args == "Target"} {
     set result [ptkGetTargetParams $facet $number]
-  } elseif {$args == "Attributes"} {
-    set result [ptkGetAttributes $facet]
+  } elseif {$args == "Pragmas"} {
+    set result [ptkGetPragmas $facet $number]
   } else {
     set result [ptkGetParams $facet $number]
   }
   return $result
 }
 
-proc ptkSetAttributes {facet attrdata} {
+proc ptkSetPragmas {facet instance attrdata} {
     # Need to add to the attrdata that data that is not supported
     # by the current target, but is stored in the facet.
-    set facetdata [ptkGetStringProp $facet "Attributes"]
+    set facetdata [ptkGetStringProp $facet "Pragmas"]
     foreach attr $facetdata {
 	# If the attribute is not in attrdata, append it
 	set flag 0
@@ -140,37 +140,47 @@ proc ptkSetAttributes {facet attrdata} {
 	    lappend attrdata $attr
 	}
     }
-    ptkSetStringProp $facet "Attributes" $attrdata
+    ptkSetStringProp $instance "Pragmas" $attrdata
 }
 
-proc ptkGetAttributes {facet} {
-    # There are two sources for attributes and values:
-    # the Target and the Star.
-    # Merge the two lists, and return only
-    # those relevant to the current target.
-    set stored [ptkGetStringProp $facet "Attributes"]
-    foreach attr [targetAttributes] {
-	set attrname [lindex $attr 0]
-	set attrtype [lindex $attr 1]
-	set attrvalue [lindex $attr 2]
+##########################################################################
+# Get the list of pragmas supported by the current target.
+# This is returned as a list of lists, where each sublist has three
+# elements, the pragma name, the type, and the default value.
+#
+proc ptkGetPragmas {facet instance} {
+
+    # First we need to get the name of the target as specified in the facet.
+    set target [lindex [ptkGetTargetNames $facet] 0]
+
+    # There are two sources for pragmas and values:
+    # the Target and the Star.  These lists may not agree because the
+    # Target may have been changed since the last time the pragmas were edited
+    # for the star. Merge the two lists, and return only
+    # those pragmas relevant to the current target.
+    set stored [ptkGetStringProp $instance "Pragmas"]
+
+    foreach pragma [pragmaDefaults $target] {
+	set pragmaname [lindex $pragma 0]
+	set pragmatype [lindex $pragma 1]
+	set pragmavalue [lindex $pragma 2]
 	foreach st $stored {
-	    if {[lindex $st 0] == $attrname} {
-		set attrvalue [lindex $st 2]
+	    if {[lindex $st 0] == $pragmaname} {
+		set pragmavalue [lindex $st 2]
 	    }
 	}
-	lappend targetAttributes [list $attrname $attrtype $attrvalue]
+	lappend targetPragma [list $pragmaname $pragmatype $pragmavalue]
     }
-    if {![info exists targetAttributes]} {
-	ptkImportantMessage .error "The target has no supported attributes"
+    if {![info exists targetPragma]} {
+	ptkImportantMessage .error "The target has no supported pragmas"
 	return ""
     }
-    return $targetAttributes
+    return $targetPragma
 }
 
-proc ptkProcessAttributes {instance} {
-    foreach attr [ptkGetAttributes $instance] {
-# FIXME: Replace with a ptcl call to set the attributes.
-	puts $attr
+proc ptkProcessPragmas {facet parentname instance starname} {
+    foreach pragma [ptkGetPragmas $facet $instance] {
+	pragma $parentname $starname [lindex $pragma 0] [lindex $pragma 2]
     }
 }
 
@@ -581,12 +591,15 @@ proc ed_ClearOctEntryGlobals {facet number} {
 # Three calling sequences are supported:
 #    ptkEditParams facetHandle instanceHandle
 #    ptkEditParams facetHandle targetName Target
-#    ptkEditParams facetHandle instanceHandle Attributes
-# The first of these edits a stars parameters.  The second
+#    ptkEditParams facetHandle instanceHandle Pragmas
+# The first of these edits a star's parameters.  The second
 # specifies the Target and then edits its parameters.
-# The third edits attributes of a star or galaxy.
+# The third edits Pragmas of a star or galaxy that are appropriate for the
+# specified Target.
+#
 # The "number" argument (misnamed) is the instanceHandle or Target name.
-# FIXME: for editing Attributes, it should be allowed to edit more
+#
+# FIXME: for editing Pragmas, it should be allowed to set values for more
 # than one star or galaxy at a time.
 
 proc ptkEditParams {facet number args} {
@@ -614,8 +627,8 @@ proc ptkEditParams {facet number args} {
   }
   if {$args == "Target"} {
     set params "{Edit Target} [list $params]"
-  } elseif {$args == "Attributes"} {
-    set params "{Edit Attributes} [list $params]"
+  } elseif {$args == "Pragmas"} {
+    set params "{Edit Pragmas} [list $params]"
   }
 
   set editType [lindex $params 0]
@@ -627,8 +640,8 @@ proc ptkEditParams {facet number args} {
 
   if { $args == "Target" } {
     set editType "Target \"$number\""
-  } elseif { $args == "Attributes" } {
-    set editType "Attributes \"$number\""
+  } elseif { $args == "Pragmas" } {
+    set editType "[ptkGetStarName $number] Pragmas"
   } elseif { [ptkIsBus $number] } {
     set editType "Bus Width"
   } elseif { [ptkIsDelay $number] } {
@@ -648,8 +661,8 @@ proc ptkEditParams {facet number args} {
   }
 
   toplevel $top
-  wm title $top "Edit Params"
-  wm iconname $top "Edit Params"
+  wm title $top "Edit $editType"
+  wm iconname $top "Edit $editType"
   bind $top <Destroy> \
     "ed_ClearOctEntryGlobals $facet $number
      destroy %W"
