@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -43,17 +43,22 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
-	Alonger.itcl \
 	AsLine.itcl \
+	AsOval.itcl \
+	AsPoint.itcl \
+	AsPolygon.itcl \
 	AsRectangle.itcl \
 	Axis.itcl \
 	Bounder.itcl \
 	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
-	Gridder.itcl \
 	Interactor.itcl \
+	IncrCanvas.itcl \
+	LabelledFrame.itcl \
+	LabelledItem.itcl \
 	LabelledOval.itcl \
+	LabelledRect.itcl \
 	Node.itcl \
 	Picture.itcl \
 	Repeater.itcl \
