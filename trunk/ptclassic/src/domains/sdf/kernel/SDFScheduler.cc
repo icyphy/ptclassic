@@ -4,7 +4,7 @@
 #include "Fraction.h"
 #include "Output.h"
 #include "StringList.h"
-#include "SDFWormhole.h"
+#include "KnownBlock.h"
 
 /**************************************************************************
 Version identification:
@@ -27,7 +27,7 @@ $Id$
 
 extern Error errorHandler;
 
-static void bombIfNotConnected(PortHole*);
+extern const char SDFdomainName[] = "SDF";
 
 /************************************************************************
 
@@ -131,7 +131,7 @@ int SDFScheduler :: setup (Block& block) {
 	for (i = alanShepard.totalSize(galaxy); i>0; i--)
 	{
 		Star& s = alanShepard.nextStar();
-		if (strcmp (s.domain(), "SDF") != 0) {
+		if (strcmp (s.domain(), SDFdomainName) != 0) {
 			StringList msg = s.readFullName();
 			msg += " is not an SDF star: domain = ";
 			msg += s.domain();
@@ -532,19 +532,7 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 	return v;
 }
 
-// We should handle this error better, but the alternative is a core dump.
+// Make an entry for KnownBlock
+static SDFScheduler proto;
+static KnownBlock entry(proto,SDFdomainName);
 
-extern "C" void exit (int);
-
-static void
-bombIfNotConnected (PortHole *p) {
-	if (p->far() == NULL) {
-
-		StringList msg;
-		msg = "Port ";
-		msg += p->readFullName();
-		msg += " is not connected.  Exiting.";
-		errorHandler.error (msg);
-		exit (1);
-	}
-}
