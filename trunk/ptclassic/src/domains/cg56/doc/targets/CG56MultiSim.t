@@ -1,10 +1,16 @@
-./" $Id$ 
+.\" $Id$ 
 .NA "CG56MultiSimTarget"
 .SD
 This is a target architecture for generating code for a multiprocessor
 DSP system, where the processors communicate via a shared memory. 
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/cg56/targets"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$ 
 .AL "Soonhoi Ha, Asawaree Kalavade and Jose Pino"
 .SH
