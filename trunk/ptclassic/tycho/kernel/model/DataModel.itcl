@@ -35,9 +35,7 @@
 # DataModel extends the Model class to support data models and the
 # TIM interchange format.  TIM is a simple meta-data format that
 # encourages a simple and clean representation of data, both in
-# in-memory objects and in an external file representation. See 
-# <a href="../../../doc/tim.html">the TIM documentation</a> for more 
-# details.
+# in-memory objects and in an external file representation.
 #
 # The data stored in a DataModel object is hierarchical. Each item is
 # referenced by its name, which consists of a list of name segments.
