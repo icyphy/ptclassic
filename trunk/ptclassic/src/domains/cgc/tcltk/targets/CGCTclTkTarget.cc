@@ -96,7 +96,7 @@ int CGCTclTkTarget :: codeGenInit() {
 
     // If the system is paused, wait until Go is hit again
     mainLoopInit << "if ( getPollFlag() ) processFlags();\n"
-    << "while (runFlag == -1) Tk_DoOneEvent(0);\n"
+		 << "while (runFlag == -1) Tk_DoOneEvent(0);\n"
 		 << "if (runFlag == 0) break;\n";
 
     mainLoopTerm << "runFlag = 0;\n";
@@ -134,7 +134,7 @@ void CGCTclTkTarget :: frameCode() {
     CGCTarget::frameCode();
 }
 
-static CGCTclTkTarget targ("TclTk_Target","CGCStar",
-"Target for Tcl/Tk C code generation");
+static CGCTclTkTarget targ("TclTk_Target", "CGCStar",
+			   "Target for Tcl/Tk C code generation");
 
-static KnownTarget entry(targ,"TclTk_Target");
+static KnownTarget entry(targ, "TclTk_Target");
