@@ -25,9 +25,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 /* Version $Id$
-   Copyright 1991 The Regents of the University of California.
-   All Rights Reserved.
-
    Programmer:  T. M. Parks
    Date of creation:  8 Nov 91
 */
@@ -50,7 +47,7 @@ extern "C" int gettimeofday(timeval *, struct timezone *);
 extern "C" int select(size_t, int*, int*, int*, const timeval*);
 #else
 #include <sys/types.h>
-#ifdef __GNUG__
+#if defined(__GNUG__) && !defined(PTAIX)
 extern "C" int select(int, fd_set*, fd_set*, fd_set*, timeval*);
 #endif
 #endif
