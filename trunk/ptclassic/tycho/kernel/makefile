@@ -57,6 +57,7 @@ ITCL_SRCS = \
 	ConsoleText.itcl \
 	DialogWindow.itcl \
 	Dismiss.itcl \
+	Edit.itcl \
 	EditSearch.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
