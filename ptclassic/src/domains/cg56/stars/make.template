@@ -29,7 +29,6 @@ PL_SRCS= \
  CG56Allpass.pl \
  CG56ASin.pl \
  CG56BiQuad.pl \
- CG56BlackHole.pl \
  CG56BlockReverse.pl \
  CG56CircToLin.pl \
  CG56Comb.pl \
@@ -52,7 +51,6 @@ PL_SRCS= \
  CG56FixSum.pl \
  CG56FixTable.pl \
  CG56FixThresh.pl \
- CG56Fork.pl \
  CG56HostAIN.pl \
  CG56HostIn.pl \
  CG56HostOut.pl \
