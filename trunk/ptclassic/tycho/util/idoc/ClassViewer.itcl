@@ -626,9 +626,9 @@ body ::tycho::IDoc::generateHtml {} {
         }
         Java {
             append html "\
-                    <a name = \"[javaNamespaceTail $className] \
-                    class documentation ([javaNamespaceQual \
-                    $className] namespace)\">\
+                    <a name = \"$className\
+                    class documentation ([$classModel modelcget -package]\
+                    package)\">\
                     $className</a></h1>\n"
           }
       }
@@ -1837,7 +1837,7 @@ body ::tycho::IDoc::formatExpl {class item type {extern 0}} {
                 }
             } {
                 if {$extern} {
-                    set html "<code>$shortname"
+                    set html "<dt><code>$shortname"
                 } else {
                     set html "<b>$shortname</b> "
                 }
@@ -1962,7 +1962,7 @@ body ::tycho::IDoc::generateHtmlContents {} {
                 append html "<a href=\"[::tycho::relativePath\
                         [file dirname [docFile $mainClass]]\
                         [docFile $extends]]\">"
-                append html "<code>$extends</code></a>- "
+                append html "<code>$extends</code></a> -\n"
             }
             
             set implements [$classModel parents -inheritance interface]
@@ -1972,19 +1972,19 @@ body ::tycho::IDoc::generateHtmlContents {} {
                     append html "<a href=\"[::tycho::relativePath\
                             [file dirname [docFile $mainClass]]\
                             [docFile $parent]]\">"
-                    append html "<code>$parent</code></a>- "
+                    append html "<code>$parent</code></a> -\n"
                 }
             }
             append html "<a href=\"[$classModel modelcget -source]\">Source\
-                    File</a> - "
-            append html "Contents:\n"
+                    File</a> -\n"
+            append html "Contents: "
             
-            set of_class "of [javaNamespaceTail $mainClass] class"
+            set of_class "of $mainClass class"
             
             # Check for constructors
             if {[$classModel Constructors] != {}} {
                 append html "<a href=\"#constructor $of_class\">constructor</a>\
-                        - "
+                        -\n"
             }
             
             # Check for destructor
@@ -1993,7 +1993,7 @@ body ::tycho::IDoc::generateHtmlContents {} {
                 if {$verbose || !$verbose && [$classModel get annotation \
                         $destructor.description Destructor] != { }} {
                     append html "<a href=\"#finalizer $of_class\"\
-                            >finalizer</a> - "
+                            >finalizer</a> -\n"
                 }
             }
             
@@ -2003,25 +2003,25 @@ body ::tycho::IDoc::generateHtmlContents {} {
                 if {[$classModel methods -protection $protection \
                         -scope instance] != {}} {
                     append html "<a href=\"#$protection methods\
-                            $of_class\">$protection methods</a> - "
+                            $of_class\">$protection methods</a> -\n"
                 }
                 # Check for static methods
                 if {[$classModel methods -protection $protection \
                         -scope class] != {}} {
                     append html "<a href=\"#$protection static methods\
-                            $of_class\">$protection static methods</a> - "
+                            $of_class\">$protection static methods</a> -\n"
                 }
                 # Check for variables
                 if {[$classModel variables -protection $protection \
                         -scope instance] != {}} {
                     append html "<a href=\"#$protection variables\
-                            $of_class\">$protection variables</a> - "
+                            $of_class\">$protection variables</a> -\n"
                 }
                 # Check for static variables
                 if {[$classModel variables -protection $protection \
                         -scope class] != {}} {
                     append html "<a href=\"#$protection static variables\
-                            $of_class\">$protection static variables</a> - "
+                            $of_class\">$protection static variables</a> -\n"
                 }
             }
             set html "[string trimright $html "- \n"]\n<HR>\n"      
@@ -2077,8 +2077,8 @@ body ::tycho::IDoc::generateHtmlBody {} {
                 foreach option $itk_options {
                     set nodash [string trimleft $option "-"]
                     append html "<a name = \"$nodash \
-                            itk_option $of_class\">"
-                    append html "[formatExpl $mainClass $option variable 1]</a>"
+                            itk_option $of_class\"></a>"
+                    append html "[formatExpl $mainClass $option variable 1]"
                 }
                 append html "</dl>"
             }
@@ -2090,10 +2090,11 @@ body ::tycho::IDoc::generateHtmlBody {} {
                         $constructor.description Constructor] != { }} {
                     append html "<H2><a name=\"constructor $of_class\"\
                             >Constructor</a></H2>\n<dl>"
-                    append html "<a name = \"constructor of $mainClass class\">"
+                    append html "<a name = \"constructor of\
+                            $mainClass class\"></a>"
                     append html "[formatExpl $mainClass\
                             $constructor Constructor 1]"
-                    append html "</a></dl>"
+                    append html "</dl>"
                 }
             }
             
@@ -2104,10 +2105,11 @@ body ::tycho::IDoc::generateHtmlBody {} {
                         $destructor.description Destructor] != { }} {
                     append html "<H2><a name=\"destructor $of_class\"\
                             >Destructor</a></H2>\n<dl>"
-                    append html "<a name = \"destructor of $mainClass class\">"
+                    append html "<a name = \"destructor of\
+                            $mainClass class\"></a>"
                     append html "[formatExpl $mainClass\
                             $destructor Destructor 1]"
-                    append html "</a></dl>"
+                    append html "</dl>"
                 }     
             }
             
@@ -2124,9 +2126,9 @@ body ::tycho::IDoc::generateHtmlBody {} {
                             $of_class\">$Protection Methods</a></H3><dl>"
                     foreach method $methods {
                         append temp "<a name = \"$method method of $mainClass\
-                                class\">"
+                                class\"></a>"
                         append temp "[formatExpl $mainClass\
-                                $method method 1]</a>"
+                                $method method 1]"
                     }
                     append temp "</dl>"
                 }
@@ -2139,9 +2141,9 @@ body ::tycho::IDoc::generateHtmlBody {} {
                             $of_class\">$Protection Procs</a></H3><dl>"
                     foreach proc $procs {
                         append temp "<a name = \"$proc proc of $mainClass\
-                                class\">"
+                                class\"></a>"
                         append temp "[formatExpl $mainClass\
-                                $proc method 1]</a>"
+                                $proc method 1]"
                     }
                     append temp "</dl>"
                 }
@@ -2154,9 +2156,9 @@ body ::tycho::IDoc::generateHtmlBody {} {
                             $of_class\">$Protection Variables</a></h3><dl>"
                     foreach variable $variables {
                         append temp "<a name = \"$variable variable of\
-                                $mainClass class\">"
+                                $mainClass class\"></a>"
                         append temp "[formatExpl $mainClass\
-                                $variable variable 1]</a>"
+                                $variable variable 1]"
                     }
                     append temp "</dl>"
                 }
@@ -2169,9 +2171,9 @@ body ::tycho::IDoc::generateHtmlBody {} {
                             $of_class\">$Protection Commons</a></h3><dl>"
                     foreach common $commons {
                         append temp "<a name = \"$common common of $mainClass\
-                                class\">"
+                                class\"></a>"
                         append temp "[formatExpl $mainClass\
-                                $common variable 1]</a>"
+                                $common variable 1]"
                     }
                     append temp "</dl>"
                 }
@@ -2183,21 +2185,25 @@ body ::tycho::IDoc::generateHtmlBody {} {
             }
         }
         Java {
-            set of_class "of [javaNamespaceTail $mainClass] class"
-            
+            # For anchors i.e: constructor of String class
+            set of_class "of $mainClass class"
+            # For anchors i.e.: clear method of java.lang.String class
+            set of_lclass "of\
+                    [$classModel modelcget -package].[$classModel\
+                    modelcget -name] class"
+
             # Check for constructors
             set constructors [$classModel Constructors]
             if {$constructors != {}} {
                 append html "<h2><a name=\"constructor $of_class\"\
-                        >Constructor</a></h2><dl>"
+                        >Constructor</a></h2>\n<dl>"
                 foreach constructor $constructors {
-                    append html "<a name = \"constructor of $mainClass\
-                            class\">"
+                    append html "<a name = \"[fixName $constructor 0]\
+                            $of_lclass\"></a>\n"
                     append html "[formatExpl $mainClass\
-                            $constructor Constructor 1]"
-                    append html "</a>"                
+                            $constructor Constructor 1]\n"
                 }
-                append html "</dl>"
+                append html "</dl>\n"
             }
             
             # Check for destructors
@@ -2208,10 +2214,10 @@ body ::tycho::IDoc::generateHtmlBody {} {
                         $destructor.description Destructor] != { }} {
                     append html "<h2><a name=\"finalizer $of_class\"\
                             >Finalizer</a></h2><dl>"
-                    append html "<a name = \"finalizer of $mainClass class\">"
+                    append html "<a name = \"finalizer $of_lclass\"></a>\n"
                     append html "[formatExpl $mainClass\
-                            $destructor Destructor 1]"
-                    append html "</a></dl>"
+                            $destructor Destructor 1]\n"
+                    append html "</dl>\n"
                 }
             }
             
@@ -2227,12 +2233,11 @@ body ::tycho::IDoc::generateHtmlBody {} {
                     append temp "<h3><a name=\"$protection methods\
                             $of_class\">$Protection Methods</a></h3><dl>"
                     foreach method $methods {
-                        append temp "<a name = \"$method method of $mainClass\
-                                class\">"
-                        append temp "[formatExpl $mainClass $method method 1]\
-                                </a>"
+                        append temp "<a name = \"[fixName $method 0]\
+                                method $of_lclass\"></a>\n"
+                        append temp "[formatExpl $mainClass $method method 1]\n"
                     }
-                    append temp "</dl>"
+                    append temp "</dl>\n"
                 }
 
                 # Check for static methods
@@ -2242,12 +2247,12 @@ body ::tycho::IDoc::generateHtmlBody {} {
                     append temp "<h3><a name=\"$protection static methods\
                             $of_class\">$Protection Static Methods</a></h3><dl>"
                     foreach smethod $smethods {
-                        append temp "<a name = \"$smethod static method\
-                                of $mainClass class\">"
-                        append temp "[formatExpl $mainClass $smethod method 1]\
-                                </a>"
+                        append temp "<a name = \"[fixName $smethod 0]\
+                                static method $of_lclass\"></a>\n"
+                        append temp "[formatExpl $mainClass \
+                                $smethod method 1]\n"
                     }
-                    append temp "</dl>"
+                    append temp "</dl>\n"
                 }
 
                 # Check for variables
@@ -2257,12 +2262,12 @@ body ::tycho::IDoc::generateHtmlBody {} {
                     append temp "<h3><a name=\"$protection variables\
                             $of_class\">$Protection Variables</a></h3><dl>"
                     foreach variable $variables {
-                        append temp "<a name = \"$variable variable of\
-                                $mainClass class\">"
+                        append temp "<a name = \"[fixName $variable 0]\
+                                variable $of_lclass\"></a>\n"
                         append temp "[formatExpl $mainClass $variable\
-                                variable 1]</a>"
+                                variable 1]\n"
                     }
-                    append temp "</dl>"
+                    append temp "</dl>\n"
                 }
 
                 # Check for static variables
@@ -2273,12 +2278,12 @@ body ::tycho::IDoc::generateHtmlBody {} {
                             $of_class\">$Protection Static Variables</a>\
                             </h3><dl>"
                     foreach svariable $svariables {
-                        append temp "<a name = \"$svariable static variable of\
-                                $mainClass class\">"
+                        append temp "<a name = \"[fixName $svariable 0]\
+                                static variable $of_lclass\"></a>\n"
                         append temp "[formatExpl $mainClass $svariable\
-                                variable 1]</a>"
+                                variable 1]\n"
                     }
-                    append temp "</dl>"
+                    append temp "</dl>\n"
                 }
                 
                 if {$temp != {}} {
@@ -2343,12 +2348,18 @@ body ::tycho::IDoc::hyperLink {class item type {text {}} {itemtype {}}} {
                 set itemtype "$itemtype "
             }
 
-            if {$type != "method"} {
+            if {$type != "method" && $type != "Constructor"} {
                 set text "<a href = \
                     \"[$classModel modelcget \
                     -source]#$protection$modifiers$itemtype$text\"\
                     >$text</a>"
-            } 
+            } else {
+                # FIXME: Need the arguments to distinguish methods, constructors
+                set text "<a href = \
+                        \"[$classModel modelcget \
+                        -source]#$protection$modifiers$itemtype$text\"\
+                        >$text</a>"
+            }
         }
     }
     return $text
