@@ -7,6 +7,7 @@ static const char file_id[] = "Block.cc";
 #include "StringList.h"
 #include "ConstIters.h"
 #include "Error.h"
+#include "SimControl.h"
 
 /**************************************************************************
 Version identification:
@@ -92,8 +93,9 @@ void Block :: initialize()
 	}
         // initialize States
 	states.initElements();
-	// call user-specified initialization
-	setup();
+	// call user-specified initialization (unless error occurred)
+	if (!SimControl::haltRequested())
+		setup();
 }
 
 // This method returns a GenericPort corresponding to the given name.

@@ -73,7 +73,11 @@ void Target::setGalaxy(Galaxy& g) {
 // do Scheduler::setup.
 
 void Target::setup() {
-	SimControl::clearHalt();
+	if (gal == 0) {
+		Error::abortRun(*this, "Error in Target::setup() -- ",
+				" no galaxy attached to the target");
+		return;
+	}
 	Target* t = child(0);
 	if (!t) t = this;
 	GalStarIter next(*gal);
@@ -92,7 +96,6 @@ void Target::setup() {
 		Error::abortRun(*this, "No scheduler!");
 		return;
 	}
-	sched->stopBeforeDeadlocked = FALSE;
 	sched->setGalaxy(*gal);
 	sched->setup();
 }
