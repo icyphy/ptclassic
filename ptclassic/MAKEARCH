@@ -105,11 +105,13 @@ end
 cd ..
 
 # Make posix thread and PN directories.
-# Currently specific to SunOS and Solaris.
-if ($PTARCH =~ sun?* || $PTARCH =~ sol?*) then
+# Currently specific to SunOS and Solaris, but we create the directories
+# anyway, so that make install_gthreads gives a good error message
+#if ($PTARCH =~ sun?* || $PTARCH =~ sol?*) then
+
 	mkarch thread thread/posix
 	mkarch domains/pn{,/kernel,/stars}
-endif
+#endif
 
 # Make thread and CP directories (currently specific to sun)
 if ($PTARCH =~ sun?*) then
