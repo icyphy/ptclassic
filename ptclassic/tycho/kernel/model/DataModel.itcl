@@ -290,11 +290,6 @@ body ::tycho::DataModel::add {name args} {
     # Invalidate cache
     @scope $scope set [set _dataname].cachevalid 0
 
-    # Add to history
-    if $recording {
-        history append "add $name $args" "delete $name"
-    }
-
     # Extract type and tail, and do lots of time-consuming
     # error-checking
     if ![regexp {([^:]+):(.+)} [lindex $name end] _ type tail] {
@@ -307,6 +302,11 @@ body ::tycho::DataModel::add {name args} {
     if { $context != "" \
             && ![@scope $scope ::info exists [set _dataname]($context)] } {
 	error "Unknown context \"$context\" in $modelname"
+    }
+
+    # Add to history
+    if $recording {
+        history append "add $name $args" "delete $name"
     }
 
     # Extract contents
@@ -491,11 +491,15 @@ body ::tycho::DataModel::configure {{option {}} args} {
 	foreach {opt _} [concat $option $args] {
 	    lappend undo $opt $current($opt)
 	}
-	# Record
-	history append "configure $option $args" $undo
     }
     # Call superclass
-    eval chain $option $args
+    set result [eval chain $option $args]
+
+    # Record (note: called after chain configure, since error may occur)
+    history append "configure $option $args" $undo
+
+    # Done
+    return $result
 }
 
 ########################################################################
