@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Scheduler.h"
 #include "EventHorizon.h"
 #include "Error.h"
+#include "AutoForkNode.h"
 
 int Domain::numDomains = 0;
 
@@ -66,6 +67,13 @@ Domain* Domain::named(const char* nm) {
 	return 0;
 }
 
+
+// Allocate a new geodesic.
+Geodesic& Domain :: newGeo(int multi) {
+	if (multi) { LOG_NEW; return *new AutoForkNode; }
+	else { LOG_NEW; return *new Geodesic; }
+}
+
 // default implementations provided for domains without wormhole
 // support.
 
@@ -84,6 +92,7 @@ public:
 	int isItOutput() const { return 0;}
 	int isItInput() const { return 0;}
 	void initialize() {}
+	/*virtual*/ Geodesic* allocateGeodesic() {return 0;}
 };
 
 EventHorizon& Domain :: newFrom() {
