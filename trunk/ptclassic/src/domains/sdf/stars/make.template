@@ -46,7 +46,7 @@ PL_SRCS= \
  SDFGain.pl \
  SDFGainCx.pl \
  SDFImpulse.pl \
- SDFMakeBitArray.pl \
+ SDFMakeSeqATMCell.pl \
  SDFMpy.pl \
  SDFPad.pl \
  SDFRamp.pl \
