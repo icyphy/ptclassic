@@ -57,6 +57,7 @@ PL_SRCS= \
  CG56Biquad.pl \
  CG56BiquadDSPlay.pl \
  CG56Comb.pl \
+ CG56DTMFPostTest.pl \
  CG56FFTCx.pl \
  CG56LMS.pl \
  CG56LMSRx.pl \
