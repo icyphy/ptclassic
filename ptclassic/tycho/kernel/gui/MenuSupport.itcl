@@ -81,6 +81,9 @@ class ::tycho::MenuSupport {
     # Disable an entry or an entire menu
     method disable {name}
 
+    # Test if a menu is empty
+    method empty {name}
+
     # Enable an entry or an entire menu
     method enable {name}
 
@@ -95,6 +98,9 @@ class ::tycho::MenuSupport {
 
     # Insert a separator before the specified entry
     method insertSeparator {before}
+
+    # Return the menu in which an entry is contained
+    method menuname {name}
 
     # Get an option of a menu
     method menucget {name option}
@@ -160,7 +166,7 @@ body ::tycho::MenuSupport::destructor {} {
 # can be given, except for *-menu* and *-label*. If there is already
 # an entry with the specified name, this method silently replaces the old
 # entry with the new entry. Note that the options apply only to the
-# newly created entry -- if creating a submenu, this menas that only
+# newly created entry -- if creating a submenu, this means that only
 # the options to the entry, not the menu itself, are set: use the
 # menuconfigure{} method to set the options of the submenu.
 #
@@ -321,6 +327,19 @@ body ::tycho::MenuSupport::enable {name} {
 
 
 #####################################################################
+#### empty
+# Test if a menu is empty. Flag an error if the menu does not exist.
+#
+body ::tycho::MenuSupport::empty {name} {
+    # Check validity
+    if { ! [::info exists menupath($name)] } {
+	error "Menu $name does not exist
+    }
+    return [string match [$menupath($name) index last] "none"]
+}
+
+
+#####################################################################
 #### entrycget
 # Get a configuration option of a menu entry. Flag an error if the entry
 # does not exist.
@@ -409,6 +428,24 @@ body ::tycho::MenuSupport::insertSeparator {before} {
     }
 
     $entrypath($before) insert $before separator
+}
+
+#####################################################################
+#### menuname
+# Return the menu in which an entry is contained. Flags an error
+# if the entry doesn't exist.
+#
+body ::tycho::MenuSupport::menuname {name} {
+    # Check validity
+    if { ! [::info exists entrypath($name)] } {
+	error "$name is not a entry"
+    }
+    foreach {menuname menu} [array get menupath] {
+	if { $menu == $entrypath($name) } {
+	    return $menuname
+	}
+    }
+    return {}
 }
 
 #####################################################################
