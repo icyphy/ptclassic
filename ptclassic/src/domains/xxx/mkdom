@@ -55,6 +55,8 @@ if ( ! $?ARCH ) then
     setenv ARCH `$PTOLEMY/bin/ptarch`
 endif
 
+set XXX = $PTOLEMY/src/domains/xxx
+
 set domain = $1
 set DOM = `echo $domain | tr a-z A-Z`	# upper case domain abbreviation
 set dom = `echo $domain | tr A-Z a-z`	# lower case domain abbreviation
@@ -72,14 +74,20 @@ if ($cwd !~ */src/domains/$dom) then
 	exit
 endif
 
-set XXX = $PTOLEMY/src/domains/xxx
+# Check to see if SCCS is being used for version control
+if (-d $XXX/SCCS) then
+	alias check_out	'sccs get -k \!^'
+	alias check_in	'sccs create \!^ ; rm -f ,\!^'
+else
+	alias check_out	'cp \!^ .'
+	alias check_in	'echo \!^'
+endif
 
 # Process the makefile.
-sccs -d $XXX get -k makefile
+check_out $XXX/makefile
 sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < makefile > $temp
-mv $temp makefile
-sccs create makefile
-rm ,makefile
+mv -f $temp makefile
+check_in makefile
 
 # Process the subdirectories.
 foreach dir ( kernel stars )
@@ -87,20 +95,18 @@ foreach dir ( kernel stars )
 	pushd $dir
 
 	# Process the makefile.
-	sccs -d $XXX/$dir get -k make.template
+	check_out $XXX/$dir/make.template
 	sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < make.template > $temp
-	mv $temp make.template
-	sccs create make.template
-	rm ,make.template
+	mv -f $temp make.template
+	check_in make.template
 
 	# Process the source files.
 	foreach file ( $XXX/$dir/XXX* )
 		set destfile=`echo $file:t | sed -e "s/XXX/$DOM/"`
-		echo $destfile
-		sccs -d $XXX/$dir get -k $file:t
-		sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $file:t > $destfile	
-		sccs create $destfile
-		rm $file:t ,$destfile
+		check_out $file
+		sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $file:t > $destfile
+		check_in $destfile
+		rm -f $file:t
 	end
 
 	popd
