@@ -56,7 +56,7 @@
 # <p>
 # This class is meant to serve as a base class for
 # such tools as class browsers for object-oriented languages, program
-# structure displays for hierarhical programs, navigation maps for
+# structure displays for hierarchical programs, navigation maps for
 # hypertext documents, etc.  The <code>EditForest</code> top-level
 # window class provides a convenient container for this widget.
 # <p>
