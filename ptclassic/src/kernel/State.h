@@ -54,6 +54,11 @@ public:
 // class State
 ////////////////////////////////////////////
 
+// attribute bit definitions
+const unsigned int A_CONSTANT = 1;
+const unsigned int A_SETTABLE = 2;
+const unsigned int A_DEFAULT = A_CONSTANT | A_SETTABLE;
+
 class State : public NamedObj
 {
 public:
@@ -62,23 +67,17 @@ public:
         State()  {initValue = 0;}
 
 	// Method setting internal data  in the State
-	State& setState(const char* stateName,
-			Block* parent,
-			const char* ivalue){
-					setNameParent(stateName, parent);
-					initValue = ivalue;
-					return *this;
-	}
-
-        // same, but set descriptor too
         State& setState(const char* stateName, 
 			Block* parent ,
 			const char* ivalue,
-			const char* desc) {
-               		 		descriptor = desc;
-               		 		return setState(stateName,parent,ivalue);
+			const char* desc = NULL,
+			unsigned int attr = A_DEFAULT) {
+               		 	if (desc) descriptor = desc;
+				setNameParent(stateName, parent);
+				initValue = ivalue;
+				attributeBits = A_DEFAULT;
+				return *this;
         }
-
 
 	// set the initial value
 	setValue(const char*  s) { initValue = s;}
@@ -106,6 +105,14 @@ public:
 	// output all info.  This is NOT redefined for each type of state
 	StringList printVerbose();
 
+	// attributes
+	unsigned int attributes() const { return attributeBits;}
+	unsigned int setAttributes(unsigned int newBits) {
+		return attributeBits |= newBits;
+	}
+	unsigned int clearAttributes(unsigned int newBits) {
+		return attributeBits &= ~newBits;
+	}
 protected:
 	// string used to set initial value by initialize()
 	const char* initValue;
@@ -122,6 +129,8 @@ protected:
 	// pushback token, for use in parsing
 	static ParseToken pushback;
 
+private:
+	unsigned int attributeBits;
 };
 
 ///////////////////////////////////////////
