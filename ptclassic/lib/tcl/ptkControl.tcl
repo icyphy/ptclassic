@@ -518,9 +518,12 @@ proc ptkStop { name } {
     set ptkRunFlag($name) STOP_PENDING
     halt
     global ptkOctHandles
-    if {[info exists ptkOctHandles($name)]} {
-	after 60000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
-    }
+
+# The following call is very dangerous -- it can cause the universe
+# to be deleted while it is still running if the dismiss button is pressed.
+#    if {[info exists ptkOctHandles($name)]} {
+#	after 60000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
+#    }
 }
 
 #######################################################################
@@ -538,20 +541,24 @@ proc ptkAbort { name } {
     set ptkRunFlag($name) ABORT
     halt
     global ptkOctHandles
-    if {[info exists ptkOctHandles($name)]} {
-	after 60000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
-    }
+# The following call is very dangerous -- it can cause the universe
+# to be deleted while it is still running if the dismiss button is pressed.
+#    if {[info exists ptkOctHandles($name)]} {
+#	after 60000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
+#    }
 }
 
 #######################################################################
 # Safety net: if after some time the ptkRunFlag has not been reset,
 # then reset it.
-proc ptkForceReset { trigger name octHandle } {
-    global ptkRunFlag
-    if {[info exists ptkRunFlag($name)] && $ptkRunFlag($name) == $trigger} {
-	ptkClearRunFlag $name $octHandle
-    }
-}
+# The following proc is very dangerous -- it can cause the universe
+# to be deleted while it is still running if the dismiss button is pressed.
+#proc ptkForceReset { trigger name octHandle } {
+#    global ptkRunFlag
+#    if {[info exists ptkRunFlag($name)] && $ptkRunFlag($name) == $trigger} {
+#	ptkClearRunFlag $name $octHandle
+#    }
+#}
 
 #######################################################################
 # procedure to pause a run
