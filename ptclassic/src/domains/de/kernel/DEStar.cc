@@ -35,6 +35,18 @@ Block& DEStar :: setBlock(char* s, Block* parent = NULL) {
 	return *this;
 }
 
+// initialize DE-specific members.
+void DEStar :: prepareForScheduling() {
+	arrivalTime = 0.0;
+	completionTime = 0.0;
+}
+
+void DEStar :: fire() {
+	go();
+	for (int k = numberPorts(); k > 0; k--) 
+		nextPort().sendData();
+}
+
 // DERepeatStar constructor
 
 // we need a method (or constructor) to link the feedback connection.

@@ -31,6 +31,12 @@ $Id$
 class DEStar : public Star {
 
 public:
+	// initialize domain-specific members
+	void prepareForScheduling();
+
+	// define firing
+	void fire();
+
 	// my domain
 	const char* domain() const;
 

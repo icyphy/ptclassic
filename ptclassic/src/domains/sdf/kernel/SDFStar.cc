@@ -36,6 +36,21 @@ Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
 	return *this;
 }
 
+// SDF-specific initialize
+void SDFStar :: prepareForScheduling() {
+	repetitions = 0;
+	noTimes = 0;
+}
+
+// firing SDF star
+void SDFStar :: fire() {
+	for(int i = numberPorts(); i > 0; i--)
+		nextPort().beforeGo();
+	go();
+	for(i = numberPorts(); i > 0; i--)
+		nextPort().afterGo();
+}
+
 // The following is defined in SDFDomain.cc -- this forces that module
 // to be included if any SDF stars are linked in.
 extern const char SDFdomainName[];
