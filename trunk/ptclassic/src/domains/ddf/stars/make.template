@@ -11,24 +11,23 @@
 # This will add the dependencies to the makefile.
 
 # SRCDIR is the directory containing the Ptolemy kernel source.
-SRCDIR = ../..
-DDFDIR = ..
-GPPFLAGS = -g -I$(SRCDIR) -I$(DDFDIR)
+SRCDIR = /usr/tools/ptolemy/src/kernel
+GPPFLAGS = -g -I$(SRCDIR) 
 GNU = g++
-GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include -I$(DDFDIR)
+GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include 
 
 # Where to install
-DESTDIR = .
+DESTDIR = /usr/tools/ptolemy/lib/ddf
 
 .SUFFIXES: .cc
 .cc.o:
 	$(GNU) $(GPPFLAGS) -c  $<
 
-SRCS=LastOfN.cc Repeater.cc Select.cc Switch.cc DownCounter.cc 
+SRCS=DDFSelf.cc LastOfN.cc Repeater.cc Select.cc Switch.cc DownCounter.cc 
 
-OBJS=LastOfN.o Repeater.o Select.o Switch.o DownCounter.o 
+OBJS=DDFSelf.o LastOfN.o Repeater.o Select.o Switch.o DownCounter.o 
 
-HDRS=LastOfN.h Repeater.h Select.h Switch.h DownCounter.h 
+HDRS=DDFSelf.h LastOfN.h Repeater.h Select.h Switch.h DownCounter.h 
 
 all:		makefile $(OBJS)
 
