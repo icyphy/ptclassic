@@ -1387,10 +1387,10 @@ yylex () {
 		--p;
 /* trim trailing whitespace or '\n' */
 		--p;
-		while (isspace(*p) || *p == 'n')
-			if( (*p == 'n') && (*(p-1) == ESC) )
-				p -= 2;
+		while (isspace(*p) || (*p == 'n' && *(p-1) == ESC)) {
+			if(*p == 'n') p -= 2;
 			else --p;
+		}
 		p[1] = 0;
 		c = 0;
 		yylval = save(yytext);
