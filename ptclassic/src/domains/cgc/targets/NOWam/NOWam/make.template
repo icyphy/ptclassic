@@ -66,11 +66,18 @@ HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
-all:	makefile $(OBJS)
+# sol2 and sol2.cfront
+ifneq (,$(filter sol%,$(PTARCH)))
+all: makefile $(LIB)
 
-# "make install" puts things in the official place
-install:	all
-		@echo Installation complete.
+install: makefile $(LIBDIR)/$(LIB)
+else
+# Non solaris platforms
+all: makefile
+	@echo "NOW active message target not supported on non-Solaris platforms"
+install: makefile
+	@echo "NOW active message target not supported on non-Solaris platforms"
+endif
 
 LIB=none	# required by common.mk
 
