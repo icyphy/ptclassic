@@ -44,6 +44,12 @@ static const char file_id[] = "$RCSfile$";
 // Class identification.
 ISA_FUNC(PNGeodesic, Geodesic);
 
+// Register the static PtGate.
+PtGate* PNGeodesic::fullGate = 0;
+GateKeeper PNGeodesic::fullKeeper(PNGeodesic::fullGate);
+
+int PNGeodesic::numFull = 0;
+
 // Constructor.
 PNGeodesic::PNGeodesic() : notEmpty(0), notFull(0), cap(1)
 { }
@@ -77,7 +83,18 @@ void PNGeodesic::slowPut(Particle* p)
 {
     // Avoid entering the gate more than once.
     CriticalSection region(gate);
-    while (sz >= cap && notFull) notFull->wait();
+    if (sz >= cap && notFull)
+    {
+	{
+	    CriticalSection region(fullGate);
+	    numFull++;
+	}
+        while (sz >= cap && notFull) notFull->wait();
+	{
+	    CriticalSection region(fullGate);
+	    numFull--;
+	}
+    }
     pstack.putTail(p); sz++;
     if (notEmpty) notEmpty->notifyAll();
 }
@@ -106,6 +123,19 @@ void PNGeodesic::pushBack(Particle* p)
 
 void PNGeodesic::setCapacity(int c)
 {
+    CriticalSection region(gate);
     cap = c;
     if (sz < cap && notFull) notFull->notifyAll();
+}
+
+int PNGeodesic::blockedOnFull()
+{
+    CriticalSection region(fullGate);
+    return numFull;
+}
+
+void PNGeodesic::resetFull()
+{
+    CriticalSection region(fullGate);
+    numFull = 0;
 }
