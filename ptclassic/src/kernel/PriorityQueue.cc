@@ -75,7 +75,7 @@ PriorityQueue :: PriorityQueue(Pointer a, float v, float fv = 1.0) :
 
 // lowest level first, lowest fineLevel first.
 
-LevelLink* PriorityQueue :: levelput(Pointer a, float v, float fv = 1.0)
+LevelLink* PriorityQueue :: levelput(Pointer a, float v, float fv)
 {
 	numberNodes++;			// increment numberNodes
 	LevelLink* newLink = getFreeLink();
@@ -116,7 +116,7 @@ LevelLink* PriorityQueue :: levelput(Pointer a, float v, float fv = 1.0)
 
 // highest level first, highest fineLevel first.
 
-LevelLink* PriorityQueue :: leveltup(Pointer a, float v, float fv = 1.0)
+LevelLink* PriorityQueue :: leveltup(Pointer a, float v, float fv)
 {
 	numberNodes++;			// increment numberNodes
 	LevelLink* newLink = getFreeLink();
@@ -223,7 +223,7 @@ PriorityQueue :: ~PriorityQueue () {
 	clearFreeList();
 }
 	
-void PriorityQueue :: put (Pointer a, float v = 0)
+void PriorityQueue :: put (Pointer a, float v)
 
 {
         // place at end of queue regardless of "number stamp" 

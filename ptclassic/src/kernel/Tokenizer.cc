@@ -43,7 +43,7 @@ Tokenizer::init() {
 }
 
 // This one reads from a file
-Tokenizer::Tokenizer(istream& input,const char *spec, const char* w=defWhite) {
+Tokenizer::Tokenizer(istream& input,const char *spec, const char* w) {
 	special = spec;
 	strm = &input;
 	whitespace = w;
@@ -52,7 +52,7 @@ Tokenizer::Tokenizer(istream& input,const char *spec, const char* w=defWhite) {
 }
 
 // This one reads from a text buffer
-Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w = defWhite) {
+Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w) {
 	special = spec;
 	whitespace = w;
 // istream constructor calls the second argument "char" even though it
