@@ -40,6 +40,14 @@ PL_SRCS= \
  CG56Distributor.pl \
  CG56DSPlayBQ.pl \
  CG56FIR.pl \
+ CG56FixDC.pl \
+ CG56FixDiff.pl \
+ CG56FixGain.pl \
+ CG56FixImpulse.pl \
+ CG56FixProduct.pl \
+ CG56FixSum.pl \
+ CG56FixTable.pl \
+ CG56FixThresh.pl \
  CG56Fork.pl \
  CG56Gain.pl \
  CG56DownSample.pl \
@@ -47,11 +55,14 @@ PL_SRCS= \
  CG56HostIn.pl \
  CG56HostOut.pl \
  CG56HostSlider.pl \
+ CG56IIDGaussian.pl \
  CG56IIDUniform.pl \
  CG56Impulse.pl \
  CG56Integrator.pl \
  CG56Interpolator.pl \
  CG56IntMult.pl \
+ CG56IntProduct.pl \
+ CG56IntQuantizer.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56LMS.pl \
@@ -72,6 +83,7 @@ PL_SRCS= \
  CG56Quasar.pl \
  CG56QuasarChgPd.pl \
  CG56Reciprocal.pl \
+ CG56Repeat.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
  CG56Sin.pl \
