@@ -2357,13 +2357,30 @@ body ::tycho::Edit::incSearch {key} {
     
     # Test for success
     if {$searchIndex != {}} {
+      # The behaviour of the selection tag changed in Tk 8.
+        # The changes file says:
+        #
+        # 11/25/96 (feature change) Under Windows and Macintosh, the selection
+        # highlight is now hidden whenever an entry or text widget loses focus.
+        # Also, the previous selection information is not lost when a new
+        # selection is made in a different widget. (SS)
         # Remove the selection
+
+
         $textWidget tag remove sel 1.0 end
-    
+        $textWidget tag delete currmatch    
+
         # Add selection
         set _incSearchFail 0
-        $textWidget tag add sel $searchIndex \
+        #$textWidget tag add sel $searchIndex \
+        #       "$searchIndex + $foundLength chars"
+
+        $textWidget tag add currmatch $searchIndex \
                 "$searchIndex + $foundLength chars"
+        $textWidget tag configure currmatch \
+                -background systemHighlight
+        $textWidget tag configure currmatch \
+                -foreground systemHighlightText
 
         # Show selection
         $textWidget see $searchIndex
