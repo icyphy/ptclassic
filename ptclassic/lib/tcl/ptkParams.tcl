@@ -148,9 +148,12 @@ proc ptkGetPragmas {facet instance} {
 }
 
 proc ptkProcessPragmas {facet parentname instance starname} {
+    set retval ""
     foreach pragma [ptkGetPragmas $facet $instance] {
         pragma $parentname $starname [lindex $pragma 0] [lindex $pragma 2]
+	set retval "$retval\tpragma $parentname $starname [lindex $pragma 0] [lindex $pragma 2]\n"
     }
+    return $retval
 }
 
 #############################################################################
