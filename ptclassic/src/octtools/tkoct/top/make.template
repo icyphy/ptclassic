@@ -1,0 +1,48 @@
+# Ptolemy-style makefile for top
+# top is used by ged which is a tcltk vem replacement.
+# Version identification:
+# $Id$
+# Copyright (c) 1991-1994 The Regents of the University of California.
+#                       All Rights Reserved.
+
+# Root of Ptolemy directory
+ROOT=../../..
+# Where we are
+VPATH = ../../../src/ged/top
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+OBJS =   	dlAdd.o  memHeap.o tclDh.o  tkMisc.o topMisc.o \
+		dlList.o memMalloc.o tclEval.o topBuf.o topMsg.o \
+		dlPtrAdd.o memPool.o tclMain.o topCB.o  topMsgPkg.o \
+		dlPtrList.o memPublic.o tclMisc.o topFixup.o topMsgTcl.o \
+		memCore.o memStack.o tclRet.o topFmt.o topVec.o \
+		memFail.o memTcl.o tkMain.o topIdleCB.o topVecSort.o
+
+SRCS = 		$(OBJS:.o=.c)
+
+HDRS =   	copyright.h topBuf.h topFixup.h topStd++.h \
+		dlMacros.h topCB.h  topMem.h topStd.h \
+		memCore.h topDlList.h topMisc.h topTcl.h \
+		memStats.h topFixup++.h topMsg.h topVec.h \
+
+
+LIB =		libtop.$(LIBSUFFIX)
+
+all: 		makefile $(LIB)
+
+install:	makefile $(OUT)
+
+# top is a package used by ged
+TOPDIR = $(VPATH)/../top
+TKGRAPHDIR = $(VPATH)		#ged uses tkgraph
+EEMDIR = $(VPATH)/../eem	#tkgraph uses eem
+
+C_INCL = -I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TKGRAPHDIR) -I$(EEMDIR) -I$(TK_INCDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Dont add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.

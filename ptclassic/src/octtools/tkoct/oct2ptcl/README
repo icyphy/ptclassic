@@ -1,0 +1,91 @@
+
+			oct2ptcl
+
+oct2ptcl is a translator from OCT to ptcl.  It reads OCT facets
+describing ptolemy palettes, universes and galaxies, extracts the
+netlist information and produces an equivalent ptcl script.  It
+is useful for quickly running one or more pre-existing ptolemy
+universes.  For example, to run *every* SDF demo, just type:
+
+    oct2ptcl -rgtv ~ptdesign/src/domains/sdf/demo/init.pal | ptcl
+
+This can be used to quickly verify that a change you have made to ptolemy
+hasn't broken anything in any major way.
+
+The combination of oct2ptcl and ptcl is relatively quick compared to
+pigi.  oct2ptcl can translate an entire universe in a few seconds.
+Translating every SDF demo (as in the example above) takes less than a
+minute (Sparc10), and it requires less than 20 seconds for ptcl to
+parse the result (of course, actually running the demos takes longer:
+5-10 minutes).
+
+oct2ptcl is a hack.  The bulk of it was written over two days,
+and improved the following week.  So don't be suprised if it gives
+you a terse error message and dumps core.  In theory oct2ptcl will
+work on domains other than SDF and on multi-domain facets, but that hasn't
+been tested much.  Also, the three facet corruptions mentioned
+in previous mail will prevent oct2ptcl from working.
+
+oct2ptcl is not a direct replacement for pigilib.  The primary reason
+that oct2ptcl is so much faster than pigilib is because it operates directly
+on the OCT facets loaded from disk rather than across an RPC link to VEM.
+Also, pigilib performs much better error checking and error reporting
+(telling you where the problem is).
+
+oct2ptcl is current located at "~kennard/src/oct2ptcl/sun4.opt/oct2ptcl".
+Invoke it without any arguments to get a summary of the options.
+
+Why oct2ptcl?
+-------------
+oct2ptcl was written for two reasons:
+1.  As an experiment to see how fast and flexible OCT is. Our current
+    translator, pigilib, runs over a very slow RPC link, is poorly written
+    and nearly impossible to understand or modify.  oct2ptcl demonstrates
+    that these failures are more related to RPC and pigilib than OCT itself.
+2.  To enable future extensions to Ptolemy so that stars may reference
+    other galaxies and universes by name.  In particular, a Finite State 
+    Machine star can reference galaxies by name rather than embedding
+    them into the graph via some complex wormhole mechanism.
+
+Problems with ptolemy kernel/ptcl
+---------------------------------
+1.  Ptcl is an imperative language not declarative.  This makes
+    the defgalaxy statements uglier and less orthogonal than they
+    could be.
+2.  The various different flavors of nets (geodisics) require
+    much special case handling.  There are two different flavors
+    of "normal" nets (with very different syntax): one for one-to-one
+    and one for one-to-many.  In the later case, delays must be specified
+    on the output port only.  Bus connections have different
+    syntax than scalar connections.  Several flavors of multi-ports connections
+    must be handled by oct2ptcl.  Nets going to I/O connectors
+    must be handled differently than internal nets (this special case
+    is somewhat reasonable).
+3.  The syntax "Add.input=3" (to specify that the add has 3 inputs)
+    must be processed by oct2ptcl, not in the kernel.
+4.  Related to the imperative-ness of ptcl, the outer domain of a defgalaxy
+    is hidden.  A given galaxy can only be used within a single outer domain.
+
+Facet corruptions:
+-----------------
+1.  An instance can be created in one of two ways:
+    a) By using the vem "create" command
+    b) Using make-star or make-galaxy, and specifing a facet as the palette
+       (e.g., instead of user.pal).
+    Unfortuantely, the second approach creates galaxy/universe facets;
+    in particular,
+    the instance is not placed into the INSTANCES bag.  Thus this mechanism
+    should not be used except to create palettes.
+2.  If a star or galaxy is completly regenerated, all instances of that
+    star or galaxy may be broken.  This typically happens when a star
+    is replaced by a galaxy: the user makes a galaxy to replace the star,
+    and then uses make-galaxy to construct an icon that over-writes the
+    previous one.  The problem is that the formalExternalIds of the instance's
+    terminals are then bogus.
+3.  Some interface facets have duplicate terminals.  That is, a formal
+    terminal with the same name will be listed twice.  Even worse, the
+    "input" and "output" properties will not be on the right ones.  I
+    dont know how these facets get created.  The fix is to go in a
+    delete the extra terminals (compare to the octIds of the contents facet),
+    and manually add the I/O props (all using attache).
+

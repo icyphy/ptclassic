@@ -1,0 +1,134 @@
+Questions
+
+Should the link-list package really do allocation?  The application may
+want to allocate out of a heap, a superheap, or strait from malloc.  It
+is difficult to support all these.  Also, in typical usage, the app. wants
+to allocate the object, fill in the data, and then pass it around a while
+before it finally gets inserted into the list in a given spot.  In such cases,
+little (if anything) is gained by doing the allocation through the ll.
+
+Idea: the ll package can take the user's object size on creation,
+and can add its link pointer size, and can then search for (or create)
+an existing super-heap of that size.  It can then construct a heap
+that references that super-heap.  This has the advantage of allowing
+all instances (and all instances of all objects of the smae size) to use the 
+same super heap, and it hides the user from the heap interface.  Disadvantage
+is that is requires a list of active super heaps and the ability
+to search it.
+    Question: Should all active super heaps be canidates, or should there
+    	be a seperate set of heaps for these generic, size-based requests.
+    Question: how should the list of all heaps be organized: table,
+	linked list, hash (no), binary?
+
+Where should the ll package place the link pointers with respect to the
+pointers seen by the app?  Three choices:
+    -	Let the user put the link pointers within the object.  The assures
+	correct allocation size, and allows the user to traverse the list
+	by itself.  If the link pointers are at the head of the object,
+	then there is no time wasted doing adds/subs, and the code is clearer.
+    -	Always put the link pointers "above" the user's object.  The problem
+	is that if the user creates the heap, or super-heap, or otherwise
+	allocates the objects, the user may not remeber to pad space for
+	the link pointers.
+    -	Allow the user to specify the offset.  Again, the user might screw
+	up the object size when setting up the heap, and traversal is
+	even slower because getting the offset requires a memory access.
+	The user also might screw up specifing the offset.
+
+The current superheaps (and eventually the instance heaps) collect and
+can print out all sorts of stats.  What should trigger this?  Is it up
+to each component that creates a heap to provide an interface to
+print out all stats?  Or should all heaps be linked together, so that 
+a single call to the memory package can produce the stats for all
+heaps that exist in the entire program?  How does the user active
+the dump of memory usage?  (In all cases where Ive done this before,
+there was a tcl-like inteperter with a command like "showMemory").
+
+Is the current idea of each instance heap having a constructor and destructor
+worthwhile?  The constructor doesnt seem that useful since you cant specify
+per-object arguments to the constructor.
+
+The current heap interface allows both user-allocated heaps (either static,
+or if the user embeds the object within his own larger object), and
+internal dynamically created heaps.  The problem with user-allocated heap
+is that if all heaps are linked together in some way, then if user-allocated
+heap disappears within the memory package being informed, the links will
+break and everyting will fall apart.
+
+Currently the header to each pool segment is allocated in the same chunk
+as the pool segment it self.  While this generally saves memory, it
+could cause problems with paging.  If one wants to traverse the headers
+without hitting the data objects themselves, then it would be better to
+put all the headers together into a common heap, and have them reference
+data blocks.  Cost is extra memory look to access data pointer, extra 
+memory allocation, etc.
+
+Its not clear how we should handle alignment of doubles.  doubles must
+be double-aligned.  However, forcing the heap to provide all objects
+with double-alignement could be expensive an unnessisary.  How should this
+be handled.
+
+There are several different methods for handling the free's of objects
+back to the heap.  There are two questions: what kind of freelist
+to maintain, and how do you know when to free an entire pool.
+    -	Maintain a simple linked free list.  Dont ever free pools,
+	except when the entire superheap is destroyed.
+    -	Like above, but periodically perform free-list compaction
+	where the free list is merge sorted, and then searched for
+	sequential data elements that all belong to the same chunk.
+	This compaction could be triggered by the destruction of a
+	instance heap, or timer based, or count of operations based.
+    -	Maintain a count in each chunk of the number free or allocated;
+	when none are allocated, then remove all elements from the freelist
+	and free the chunk.  Finding all the freelist elements could be
+	time-consuming.
+    -	If the freelist contains elements in both small chunks and large
+	chunks, which do we want re-use first?  Probably, we want
+	to move all live data into the larger chunks so that we can free
+	all the small chunks, so that there are fewer overall chunks on
+	which to do integrety checking, etc.  But such a strategy would
+	trap us into a single huge block as overall live count falls.
+	What impact does this have on the order in which the freelist is
+	kept?  Do we want a seperate freelist for each chunk?
+
+There are several approachs to verifying that frees are valid.
+There are two distinct problems:
+    1.	Verifying that the pointer passed to us actually belongs to this
+	heap, and isnt a bogus pointer.  This can be checked fairly cheaply
+	by traversing pool segments and determining if the pointer lies
+	inside a pool segment.  We can also verify that the pointers
+	value, module the objectSize, is 0.
+    2.	Verifying that the pointer passed is was previously allocated,
+	and has not already been freed.  This problem is more complicated.
+	-   We could put a 8 byte tag above each block.  This makes us
+	    little better than malloc.
+	-   We can traverse the freelist and see if the object is already
+	    free.  Note that the freelist could be a binary tree,
+	    in which case traversing it is not a big problem (or course,
+	    the code to balance the tree could be tricky).
+	-   We could maintain bitvectors recording the live/dead-ness
+	    of each object.  This has a memory overhead of about 1% for 16 byte
+	    blocks.  Checking and maintaining the bitvectors could be a pain.
+
+How list of global superHeaps and heaps are built and used.
+From our internal static state, we need to be able to find all
+heaps and all super heaps in order to print out stats.
+Question: should there be a list of heaps for each super heap, or 
+just a flat list of heaps.  In either case, the heaps must have
+a DLElem struct, and must have a super pointer.  If there is
+a per super heap list, then there must be a global list of all super
+heaps.
+Question: If we have global list of all super heaps for statistics purposes,
+can we use this list to search for heaps for a certain size?  We prob.
+dont want to, because we want to provide private heaps.
+
+Question: Given we need a list to search for "public" heaps of a given size,
+how do we implement the list/search.  There is atmost one heap of
+a given size.  One possibility is to have a table for "common" sizes,
+index by size, and then a cons list for other sizes.
+
+In the function memSuperHeapObAlloc, we first check the freelist,
+and then go get the next slice off of the pool seg.
+It might be quicker to: when a poolseg is allocated, immediately slice
+it up and put it on the free list.  This would mess up the stats, though.
+

@@ -1,0 +1,98 @@
+GGI Oct Policy
+edg  5/20/90
+
+The description below assumes that you are familiar with Oct and VEM
+schematic policy (see Oct documentation for more information).  GGI
+builds on the VEM schematic policy.  The policy rules specific to GGI
+are listed below:
+
+* Definitions:
+    * I/O port = an instance used in a galaxy to specify an input or
+    output port.  %pInput:schematic:interface and
+    %pOutput:schematic:interface are I/O ports.  I/O ports implement
+    formal terminals for galaxy schematic facets.
+    * term = terminal
+    * fterm = formal terminal
+    * aterm = actual terminal
+    * sog = star or galaxy
+    * port = an input or output terminal
+    * inst = instance
+    * prop = property
+
+* technology facet policy 1/30/89
+    * Distinguishing feature: named "tap.views:schematic:contents"
+    * Have only one tech facet
+    * This defines all the layers that are used in both schematics and icons
+    * "cursor" layer is for palettes (see palette facets) 
+    * "label" layer is for icon labels (so they can be turned off)
+
+* policy for palette facets  8/1/89 2/22/89
+    * Distinguishing feature: contains a cursor instance "%cCursor"
+    * stored in "<cell>:schematic:contents" facets
+    * cursor instance "%cCursor" tells the autoIcon routines where to
+    place the next icon instance in the palette.
+    * The cursor instance has 4 int props attached to it that determine
+    how icons are added to the palette: leftMargin, width, dx, dy.
+
+* policy for icons  8/1/89 6/15/89 1/23/89
+    * Distinguishing feature: icons are stored in a facet of the form:
+    "<cell>:schematic:interface"
+    * facet has one of these props defined: galaxy, star, universe, palette
+    * formal terms have props attached to them:
+	* "input" or "output"
+	* "single" or "multiple"  (this is currently unused 5/20/90)
+	* I/O ports also have these props defined.  Note:  the prop
+	(input or output) is opposite from the instance name.
+
+* schematics  6/1/89 1/23/89 5/29/88
+    * Distinguishing feature: stored in facet of the form:
+    "<cell>:schematic:contents"
+    * 3 types of schematic facets: galaxy, universe, and palette.
+    * galaxy schematic facet has at least one fterm attached to it,
+	palette facets have a cursor instance in it,
+	else assume it's a universe 
+    * galaxy has formal param list that may be empty 3/19/89:
+	* stored in string prop called "params" attached to facet 
+	* if prop does not exist then it means param list is empty 
+    * comment prop for objects 6/1/89:
+	* an instance or the facet can have a "comment" prop attached.
+	    This prop is for annotation of objects and is optional.  
+	* values of NULL and "" are not allowed.
+    * hardware prop for star instances 12/7/89:
+	* a star inst can have a prop called "hardware" attached.  This
+	    is for:
+	    (defstar star1 (ako sin) (hardware processor1) (param ...) ...)
+	* if "hardware" does not exist then the star's default is used
+	    if it exists.
+	* values of NULL and "" are not allowed.
+    * params prop for sog intances:
+	* whenever GGI looks for params of an inst and they do not exist,
+	    the default values in the star's definition are used and a
+	    new params prop is created for the inst.
+    * delays 5/29/88:
+	* place instance of delay icon on a path to associate the net
+	    the path is a member of to the delay instance 
+	* only one delay inst is allowed on a net
+	* a delay inst has a prop called "delay" of type int attached that
+	    specifies the number of delays for that inst
+	* during compile, all delay props are detached from nets and
+	    then the delay prop of each delay inst gets attached to
+	    associated net (done so deleting a delay inst works)
+    * auto-fork 6/15/89:
+	* auto-fork net has one output aterm and >= 2 input aterms.
+	aterms can be from both I/O ports or sog insts.  The type
+	of an aterm (in/out) is found by looking for a prop in the
+	corresponding fterm in the instance master.
+	* "autoFork" prop is attached to an auto-fork net to specify
+	the inst name of the fork star associated with the net
+	* assumes that # of fork outs is set by (param N #)
+	* ProcessSubGals() guesses universe type which is used to
+	determine the ako-name of the fork star used in auto-forks.
+	* delays are not allowed on auto-fork nets.  Use explicit fork
+	if delays are required.
+
+* params prop
+    * actual and formal param lists are stored in a string prop
+    * format of string is:
+	"<# of params>|<name1>|<value1>|<name2>|<value2>|...|"
+    * components are separated by '|' character
