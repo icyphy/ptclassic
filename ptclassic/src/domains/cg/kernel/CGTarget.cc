@@ -101,7 +101,7 @@ typeConversionTableRows(0)
 	addState(filePrefix.setState("file", this, "",
 	    "Prefix for file names."));
 	addState(loopingLevel.setState
-		("Looping Level(DEF,CLUST,SJS,ACYLOOP)",this,"ACYLOOP",
+		("Looping Level",this,"ACYLOOP #choices are: DEF, CLUST, SJS, ACYLOOP",
 		"SDF Schedulers:\n"
 		"\tDEF - The default SDF scheduler\n"
 		"\tCLUST - J. Buck's loop scheduler\n"
@@ -274,6 +274,8 @@ void CGTarget :: chooseScheduler() {
 
     // Full path name of the log file
     StringList logPath = logFilePathName(destDirectory, "schedule.log");
+	delete [] schedFileName;
+	schedFileName = logPath.newCopy();
 
     if (strcasecmp(tmpname,"ACYLOOP") == 0) {
 	// Determine if the graph is acyclic.  It not, use
@@ -293,7 +295,7 @@ void CGTarget :: chooseScheduler() {
 		<< "graphs.  Since this graph is not acyclic "
 		<< "the scheduler SJS will be used "
 		<< "(corresponding to old option 2).\n";
-		Error::message(message);
+		schedFileName << message;
 		loopingLevel.setCurrentValue("SJS");
 	    }
 	}
@@ -304,17 +306,11 @@ void CGTarget :: chooseScheduler() {
 		strcasecmp(sname,"NO") == 0) {
 	setSched(new SDFScheduler);
     } else if (strcasecmp(sname,"CLUST")==0 || strcmp(sname,"1")==0) {
-	delete [] schedFileName;
-	schedFileName = logPath.newCopy();
 	setSched(new SDFClustSched(schedFileName));
     } else if (strcasecmp(sname,"SJS") == 0 || strcmp(sname,"2")==0 ||
 		strcasecmp(sname,"YES")==0 ) {
-	delete [] schedFileName;
-	schedFileName = logPath.newCopy();
 	setSched(new LoopScheduler(schedFileName));
     } else if (strcasecmp(sname,"ACYLOOP") == 0) {
-	delete [] schedFileName;
-	schedFileName = logPath.newCopy();
 	setSched(new AcyLoopScheduler(schedFileName));
     } else {
 	Error::abortRun(*this, "Unknown scheduler.");
