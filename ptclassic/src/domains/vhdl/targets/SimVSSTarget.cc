@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SimVSSTarget.h"
 #include "KnownTarget.h"
-#include <ostream.h>
+//#include <ostream.h>
 
 // Constructor.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,

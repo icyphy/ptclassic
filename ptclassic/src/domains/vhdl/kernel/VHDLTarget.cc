@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "VHDLTarget.h"
-#include <ostream.h>
+//#include <ostream.h>
 
 static TypeConversionTable vhdlCnvTable[7] = {
   {  FLOAT, 	COMPLEX,	"FloatToCx"	},

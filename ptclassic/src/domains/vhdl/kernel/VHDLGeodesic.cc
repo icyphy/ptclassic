@@ -41,7 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLGeodesic.h"
 #include "VHDLPortHole.h"
 #include "Error.h"
-#include <ostream.h>
 
 // Return the name assigned to the buffer.
 // If I am a fork destination, my buffer name is that of the source.

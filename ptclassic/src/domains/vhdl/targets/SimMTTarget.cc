@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SimMTTarget.h"
 #include "KnownTarget.h"
-#include <ostream.h>
+//#include <ostream.h>
 
 // Constructor.
 SimMTTarget :: SimMTTarget(const char* name,const char* starclass,
@@ -113,12 +113,12 @@ int SimMTTarget :: compileCode() {
     
     // Generate command for MTI simulator.
     StringList command = "";
-    cout << "Entering SimMTTarget :: compileCode()" << endl << endl;
+//    cout << "Entering SimMTTarget :: compileCode()" << endl << endl;
     command << "cd " << (const char*) destDirectory;
     command << " ; ";
     command << "vlib work; ";
     command << "vcom " << filePrefix << ".vhdl";
-    cout << command;
+//    cout << command;
     system(command);
   }
   // Return TRUE indicating success.
@@ -160,16 +160,16 @@ int SimMTTarget :: runCode() {
   char 		name[30];
   char 		*p = name;
   strcpy(name, filePrefix);  
-  cout << endl << "File prefix is: " << name << endl;
+//  cout << endl << "File prefix is: " << name << endl;
   while (*p != 0) {
     if ((*p) >= 'A' && (*p) <= 'Z') {
       *p = *p - 'A' + 'a';
     }
-    cout << *p << " ";
+//    cout << *p << " ";
     p++;
   }
-  cout << endl;
-  cout << "File prefix (converted) is: " << name << endl;
+//  cout << endl;
+//  cout << "File prefix (converted) is: " << name << endl;
   
   // MTI 
   if (int(startup)) {
@@ -177,17 +177,17 @@ int SimMTTarget :: runCode() {
     StringList command = "";
     StringList sysCommand = "";   
     if (int(interactive)) {
-      cout    << "\nInteractive mode:\n\n";
-      cout.flush();
+//      cout    << "\nInteractive mode:\n\n";
+//      cout.flush();
       command << "cd " << (const char*) destDirectory;
-      cout    << "cd " << (const char*) destDirectory;
-      cout.flush();
+//      cout    << "cd " << (const char*) destDirectory;
+//      cout.flush();
       command << " ; ";
-      cout    << " ; ";
-      cout.flush();
+//      cout    << " ; ";
+//      cout.flush();
       command << "vsim -i " << name << " ; ";
-      cout    << "vsim -i " << name << " ; ";
-      cout.flush();
+//      cout    << "vsim -i " << name << " ; ";
+//      cout.flush();
 //      cout << "vsim -fn lucidasanstypewriter-12 " << name << " ; ";
       system(command);
     }
@@ -197,22 +197,22 @@ int SimMTTarget :: runCode() {
       comCode << "quit -f\n";
       writeFile(comCode, ".do", 0);
       command << "cd " << (const char*) destDirectory;
-      cout    << "cd " << (const char*) destDirectory;
-      cout.flush();
+//      cout    << "cd " << (const char*) destDirectory;
+//      cout.flush();
       command << " ; ";
-      cout    << " ; ";
-      cout.flush();
+//      cout    << " ; ";
+//      cout.flush();
       command << "vsim " << name << " < " << filePrefix << ".do; ";
-      cout    << "vsim " << name << " < " << filePrefix << ".do; ";
-      cout.flush();
+//      cout    << "vsim " << name << " < " << filePrefix << ".do; ";
+//      cout.flush();
       system(command);
     }
     sysCommand << "cd " << (const char*) destDirectory;
-    cout       << "cd " << (const char*) destDirectory;
-    cout.flush();
+//    cout       << "cd " << (const char*) destDirectory;
+//    cout.flush();
     sysCommand << " ; ";
-    cout       << " ; ";
-    cout.flush();
+//    cout       << " ; ";
+//    cout.flush();
     sysCommand << sysWrapup;
     system(sysCommand);
   }
