@@ -44,6 +44,7 @@ ensemble ::tycho::cache {
     option exists {url} {::tycho::CacheManager::exists $url}
     option initialize {} {::tycho::CacheManager::initialize}
     option remap {file1 file2} {::tycho::CacheManager::remap $file1 $file2}
+    option remove {url} {::tycho::CacheManager::remove $url}
     option same {url date size contenttype} {
         ::tycho::CacheManager::same $url $date $size $contenttype
     }
@@ -174,6 +175,9 @@ class ::tycho::CacheManager {
 
     # Remap the database.
     proc remap {file1 file2}
+
+    # Remove from the database (in memory and in cache directory)
+    proc remove {url}
 
     # True if url still has the same information
     proc same {url date size contenttype}
@@ -378,6 +382,25 @@ body ::tycho::CacheManager::remap {url file} {
         }
     }
     return 0
+}
+
+#####################################################################
+#### remove
+# Remove the cache file associated with the url if exists, and
+# clear it in memory.
+#
+body ::tycho::CacheManager::remove {url} {
+    if [info exists _URL($url)] {
+        set cachefile [getcachefile $url]
+        if [file exists $cachefile] {
+            file delete $cachefile
+        }
+    }
+    catch {unset _URL($url)}
+
+    # Update in the database as an empty entry, to make sure that
+    # previous multiple associations with the url are cleared.
+    update $url {} {} {} [file join $CACHEDIR _]
 }
 
 #####################################################################
