@@ -55,6 +55,8 @@ PL_SRCS=\
  VHDLBXnor.pl \
  VHDLBXnor3.pl \
  VHDLBNot.pl \
+ VHDLBMultiIn.pl \
+ VHDLBMultiOut.pl \
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
