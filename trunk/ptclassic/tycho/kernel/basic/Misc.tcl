@@ -31,17 +31,8 @@
 ##########################################################################
 
 
-#### syntax.tcl
-#
-# Functions for defining new "syntax" in tcl. Option reading,
-# new versions of foreach and similar functions, and so on.
-#
-# FIXME: The plethora of option-handling procs needs to be cut down
-# and simplified!
-#
-
-
-## apply script arg ?arg?
+##########################################################################
+#### apply script arg ?arg?
 #
 # "Apply" a script to some arguments. This is a clumsy imitation
 # of higher-order functions, but is very handy for building
@@ -49,21 +40,21 @@
 #
 # The script argument can have one of two formats. If it looks
 # like this:
-#
+# <pre>
 #     { .... %0 ..... %1 .... }
-#
+# </pre>
 # then each _arg_ is substituted for the corresponding place-holder
 # and the result evaluated IN THE CALLER'S CONTEXT. If it looks
 # like this:
-#
+# <pre>
 #     { lambda x y -> ... $x ..... $y .... }
-#
+# </pre>
 # then the names between the "lambda" and the "->" are used to
 # substitute argument values into the "body" of the script (after
 # the "->". For example, executing
-#
+# <pre>
 #     apply { lambda x y -> expr $x / $y } 6 3
-#
+# </pre>
 # will return 2. If there are not enough arguments, then the script
 # will _not_ be evaluated, but will be returned as-is. "Currying!"
 # (This is not the case for the simpler %0-style format -- in that
@@ -76,8 +67,8 @@ proc apply {script args} {
     applylkernel $script $args
 }
 
-
-## applyl script {arg ?arg?}
+##########################################################################
+#### applyl script {arg ?arg?}
 #
 # "Apply" a script to a list of arguments. This is the same as
 # apply{}, except that the arguments are in a list -- this is more
@@ -87,8 +78,8 @@ proc applyl {script actuals} {
     applylkernel $script $actuals
 }
 
-
-## applylkernel script {arg ?arg?}
+##########################################################################
+#### applylkernel script {arg ?arg?}
 #
 # This is the "kernel" for apply and applyl. It's necessary to
 # ensure that the "uplevel" evaluation works correctly.
@@ -129,33 +120,8 @@ proc applylkernel {script actuals} {
     }
 }
 
-
-## assert expr args
-#
-# Print an error if the argument expression fails.
-#
-# This used to check for a global variable called ASSERTIONS.
-# Since, however, tcl has no macro facility, I decided it would
-# be better to always print the error. To remove assertions after
-# debugging, you have to comment out the call in the relevant source
-# files.
-#
-# Hey, it's not my fault, _I_ didn't design the language!
-#
-# FIXME: This doesn't work outside tycho!
-#
-proc assert {expr args} {
-    if { ! [uplevel "expr $expr"] } {
-	if { $args != "" } {
-	    error $args
-	} else {
-	    error "Assertion failed: $expr"
-	}
-    }
-}
-
-
-## assign {varnames}+ list
+##########################################################################
+#### assign {varnames}+ list
 #
 # Assign elements of a list to multiple variables. If the number
 # of variable names is less then the length of the list, then
@@ -165,13 +131,13 @@ proc assert {expr args} {
 #
 # In really critical situations, you can use the obscure Tcl (7.5)
 # syntax:
-#
+# <pre>
 #    foreach {x y z} $list {}
-#
+# </pre>
 # instead of:
-#
+# <pre>
 #    assign x y z $list
-#
+# </pre>
 proc assign {args} {
     foreach var [lreplace $args end end] val [lindex $args end] {
 	upvar $var v
@@ -179,41 +145,10 @@ proc assign {args} {
     }
 }
 
-
-
-## behead varname listname
+##########################################################################
+#### getopt option listname
 #
-# Assign the first element of a list to the specified variable,
-# and remove the head from that list. Note that the list is
-# passed by _name_, so that it is destructively altered in place.
-# For example, suppose that fred equal {1 2 3 4}. Then
-#
-#     behead x fred
-#
-# (NB, no $ in front of _fred_) sets _x_ to 1, and _fred_ to {2 3 4}.
-# This is particularly useful for extracting optional arguments, 
-# as in:
-#
-#     if { $args != "" } {
-#         behead thing args
-#     }
-#     if { $args != "" } {
-#         behead thang args
-#     }
-#     process thing thang
-#
-proc behead {varname listname} {
-    upvar $varname  v
-    upvar $listname l
-
-    set v [lindex   $l 0]      ;# lhead
-    set l [lreplace $l 0 0]    ;# ltail
-}
-
-
-## getopt option listname
-#
-# A handy thang for reading option arguments fram an argument
+# A handy proc for reading option arguments fram an argument
 # list. Sort of like configuration options but more controlled.
 #
 # The first argument is the name of the option, the second the NAME
@@ -227,9 +162,9 @@ proc behead {varname listname} {
 #
 # For example, if args contains "1 2 -fred nerks 3 4", then after
 # the call
-#
+# <pre>
 #      getopt fred args  ;# NOTE args NOT $args!
-#
+# </pre>
 # the variable fred is set to "nerks" and args is set to "1 2 3 4".
 #
 # FIXME: Make listname an optional argument. By default, this proc
@@ -251,68 +186,8 @@ proc getopt {option listname} {
     return 0
 }
 
-
-## getoption option listname
-#
-# Like getopt{}, but sets the option variable to all arguments
-# following the option flag up to the next option flag.
-#
-# FIXME: Make listname an optional argument. By default, this proc
-# should use "args."
-#
-proc getoption {option listname} {
-
-    upvar $listname l
-    upvar $option   v
-
-    set t [lsearch -exact $l -$option]
-    if { $t != -1 } {
-	set ldash [lreplace $l 0 $t]
-	set tdash [lsearch -regexp $ldash {-[^0-9]}]
-
-	if { $tdash == -1 } {
-	    set tdash [llength $ldash]
-	}
-
-	set v [lrange   $ldash 0  [expr $tdash-1]]
-	set l [lreplace $l     $t [expr $t+$tdash]]
-
-	return 1
-    }
-
-    return 0
-}
-
-
-## getalloptions varname listname
-#
-# Get all options from an argument list into the specified
-# variable. This assumes that all arguments from the first
-# option onwards are options.
-#
-# This is very handy for processing non-option arguments in
-# a uniform way: co-ordinates are the example for which this
-# procedure was originally written.
-#
-proc getalloptions {varname listname} {
-
-    upvar $listname l
-    upvar $varname  v
-
-    set v {}
-    set t [lsearch -glob $l {-[a-z]*}]
-    if { $t != -1 } {
-	set v [lrange $l $t end]
-	set l [lrange $l 0 [expr $t-1]]
-
-	return 1
-    }
-
-    return 0
-}
-
-
-## getflag option listname
+##########################################################################
+#### getflag option listname
 #
 # Like getopt{}, but set the option variable to 1 if the
 # option flag is there, else 0. Delete the option flag 
@@ -339,8 +214,8 @@ proc getflag {option listname} {
     }
 }
 
-
-## loop n body
+##########################################################################
+#### loop n body
 #
 # Loop $n times. Called as "loop n body." The -counter option
 # introduces the name of a variable that ranges from 0 to $n-1.
@@ -362,50 +237,8 @@ proc loop {args} {
     }
 }
 
-
-## makeflag option
-#
-# More-or-less the reverse of getopt: given the name of a boolean value,
-# return a string that is either empty or contains an option. For example,
-#
-#     makeflag fred
-#
-# returns "-fred" if $fred is true in the calling environment, and
-#
-# returns "" if $fred is false in the calling environment.
-#
-proc makeflag {option} {
-    if {[uplevel [list set $option]]} {
-	return "-$option"
-    } else {
-	return ""
-    }
-}
-
-
-
-## makeopt option
-#
-# Given the name of a variable, return a string that is either
-# empty or contains an option. For example,
-#
-#     makeopt fred
-#
-# returns "-fred 123" if $fred is equal to 123 in the calling
-# environment, and returns "" if $fred is "" in the calling
-# environment.
-#
-proc makeopt {option} {
-    set value [uplevel [list set $option]]
-    if { $value != "" } {
-	return "-$option $value"
-    } else {
-	return ""
-    }
-}
-
-
-## readopt option listname
+##########################################################################
+#### readopt option listname
 #
 # Read an option argument, like getopt{}, but instead of setting
 # a variable return the read value of the option.
@@ -413,9 +246,9 @@ proc makeopt {option} {
 # The argument list is modified as for getopt{}.
 #
 # Example:
-#
+# <pre>
 #    set thing [readopt fred args]
-#
+# </pre>
 # Note that readopt{} does not make getopt{} redundant, since getopt{]
 # does not change the option variable if the option is not present.
 #
@@ -436,8 +269,8 @@ proc readopt {option listname} {
     return ""
 }
 
-
-## readoption option listname
+##########################################################################
+#### readoption option listname
 #
 # Like readopt{}, but returns all arguments
 # following the option flag up to the next option flag.
