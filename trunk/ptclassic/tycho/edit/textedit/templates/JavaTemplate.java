@@ -72,7 +72,7 @@ public class ClassName {
      * @return description
      * @exception full-classname description
      */	
-    protected int AProtectedMethod() {
+    protected int _AProtectedMethod() {
         return 1;
     }
 
@@ -80,7 +80,7 @@ public class ClassName {
     ////                         protected variables                      ////
 
     /** Description */
-    protected int aProtectedVariable;
+    protected int _aprotectedvariable;
 
     //////////////////////////////////////////////////////////////////////////
     ////                         private methods                          ////
@@ -93,7 +93,7 @@ public class ClassName {
      * @return description
      * @exception full-classname description
      */	
-    private int APrivateMethod() {
+    private int __APrivateMethod() {
         return 1;
     }
 
@@ -103,5 +103,5 @@ public class ClassName {
     /* Private variables should not have doc comments, they should
        have regular comments.
      */
-    private int aPrivateVariable;
+    private int __aprivatevariable;
 }
