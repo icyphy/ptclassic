@@ -81,7 +81,7 @@ proc tychoFindAllHTML {} {
     foreach name [exec ls] {
 	if [file isdirectory $name] {
 	    # Skip SCCS and RCS directories and anything called "junk"
-	    if {$name != {SCCS} && $name != {RCS} && $name != {junk} && $name != {codeDoc} } {
+	    if {$name != {SCCS} && $name != {RCS} && $name != {junk} } {
 		cd $name
 		set subfiles [tychoFindAllHTML]
 		cd ..
