@@ -39,12 +39,30 @@
       (borderPattern 1 "1")
   )
   (figureGroupDefault delay
-      (userData priority 5)
+      (userData priority 11)
       (width -2)
       (fillPattern 8 8 "0001100000011000000110000001100011111111000110000001100000011000")
       (borderPattern 1 "1")
   )
   (figureGroupDefault delayOutline
+      (userData priority 12)
+      (width -2)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault idelay
+      (userData priority 11)
+      (width -2)
+      (fillPattern 8 8 "0001100000011000000110000001100011111111000110000001100000011000")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault idelayI
+      (userData priority 12)
+      (width -2)
+      (fillPattern 1 1 "0")
+      (borderPattern 1 "1")
+  )
+  (figureGroupDefault idelayOutline
       (userData priority 12)
       (width -2)
       (fillPattern 1 1 "0")
