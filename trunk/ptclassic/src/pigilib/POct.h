@@ -107,6 +107,7 @@ public:
         int ptkIsDelay (int argc,char** argv);
         int ptkGetRunLength (int argc,char** argv);
         int ptkSetRunLength (int argc,char** argv);
+        int ptkSetEventLoop (int argc,char** argv);
 
 private:
         // these three functions are used to associate POct objects
