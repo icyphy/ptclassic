@@ -1,4 +1,4 @@
-# Makefile for the pakman template.tycho /doc directory
+# Makefile for the pakman template.simple /doc directory
 #
 # @Author: Christopher Hylands
 #
@@ -35,7 +35,7 @@
 ROOT =		../../../..
 
 # True source directory
-VPATH =		$(ROOT)/utils/pakman/template.tycho/doc
+VPATH =		$(ROOT)/utils/pakman/template.simple/doc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -46,7 +46,7 @@ DIRS =
 
 TCL_SRCS =
 ITCL_SRCS = 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) _makefile _index.html
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) _index.html
 
 MISC_FILES = 
 

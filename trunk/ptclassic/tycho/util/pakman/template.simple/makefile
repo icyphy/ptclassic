@@ -42,17 +42,16 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	bin doc
+DIRS =	doc
 
 TCL_SRCS =
 ITCL_SRCS = 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	_@.tcl \
-	_README.txt \
 	_pkgIndex.tcl \
 	copyright
 
-MISC_FILES = adm bin demos doc test
+MISC_FILES = doc
 
 REALCLEAN_STUFF =
 
