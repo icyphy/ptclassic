@@ -37,7 +37,8 @@ if ( -d stars ) then
 		cat starstitle >> /tmp/pt$$
 	endif
 	cd stars
-	cat * >> /tmp/pt$$
+	# The following is silent in case there is an SCCS directory
+	cat -s * >> /tmp/pt$$
 	cd ..
 endif
 if ( -d demos ) then
@@ -45,7 +46,8 @@ if ( -d demos ) then
 		cat demotitle >> /tmp/pt$$
 	endif
 	cd demos
-	cat * >> /tmp/pt$$
+	# The following is silent in case there is an SCCS directory
+	cat -s * >> /tmp/pt$$
 	cd ..
 endif
 /bin/rm -rf index
