@@ -95,12 +95,12 @@ update
 
 ############################################################################
 # Test EntryQuery
-# FIXME: fails
+after $duration .entry invoke cancel
 EntryQuery .entry \
 	-text "Enter here:" \
 	-default "Default text"
 .entry centerOnScreen
-
+update
 
 ############################################################################
 # Test YesNoCancel
