@@ -129,7 +129,7 @@
 # </tcl></pre>
 #
 class ::tycho::AbstractGraph {
-    inherit ::tycho::OldModel
+    inherit ::tycho::DataModel
 
     constructor {args} {}
     destructor {}
@@ -146,8 +146,11 @@ class ::tycho::AbstractGraph {
     # Return adjacency edges matching two vertex patterns
     method adjacency {{pattern1 *} {pattern2 *}}
 
+    # Remove all data
+    method clear {}
+
     # Remove a vertex _and_ adjacent edges from the graph
-    method delete {vertex}
+    method delete* {vertex}
 
     # Return the "depth" of a given vertex
     method depth {vertex}
@@ -158,12 +161,6 @@ class ::tycho::AbstractGraph {
     # Perform a depth-sort of the graph
     method depthSort {}
 
-    # Alternative depth-sort
-    method depthSortNotWorking {{roots {}}}
-
-    # Layout the vertices on a grid
-    method gridLayoutNotWorking {}
-
     # Layout the vertices on a grid, better for tree-like graphs
     method gridLayout {}
 
@@ -172,6 +169,9 @@ class ::tycho::AbstractGraph {
 
     # Return the number of vertices in the graph
     method numberofvertices {}
+
+    # Load data from a TIM string
+    method parse {data}
 
     # Return the topological sort of a graph
     method topologicalSort {{leaves {}}}
@@ -191,16 +191,13 @@ class ::tycho::AbstractGraph {
     # Add a vertex with attributes to the graph
     method vertex {vertex args}
 
-    # Return all attributes of a vertex
-    method vertexattrs {vertex}
-
-    # Get an attribute or attributes of a vertex
+     # Get an attribute or attributes of a vertex
     method vertexcget {vertex attribute}
 
     # Configure the vertex with one or more attributes
     method vertexconfigure {vertex args}
 
-    # Remove a vertex (but not adjacent edges) from the graph
+   # Remove a vertex (but not adjacent edges) from the graph
     method vertexdelete {vertex}
 
     # Return vertices matching a pattern
@@ -215,19 +212,11 @@ class ::tycho::AbstractGraph {
     # Delete an edge from the adjacency matrix
     protected method _adjacencydelete {vertex1 vertex2}
 
-    # Externalize data into the state file
-    protected method _externalize {fd}
-
     # Get the "leaves" of the graph
     protected method _graphleaves {}
 
     # Get the roots of the graph
     protected method _graphroots {}
-
-    # Vertices cannot be nested
-    protected method _vertex {context vertex args} {
-	_nesterror vertex $context $vertex
-    }
 
     #################################################################
     ####                  protected variables                    ####
@@ -263,9 +252,10 @@ body ::tycho::AbstractGraph::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # Define the "vertex" entity: no value
-    defineEntityType vertex \
-	    -leaf 1 \
+    # Define the "vertex" entity
+    definetype vertex \
+            -override 1 \
+	    -leafonly 0 \
 	    -description ""
 }
 
@@ -307,13 +297,25 @@ body ::tycho::AbstractGraph::adjacency {{pattern1 *} {pattern2 *}} {
 }
 
 ########################################################################
-#### delete
+#### clear
+#
+# Clear all data.
+#
+body ::tycho::AbstractGraph::clear {} {
+    catch {unset _cache}
+    catch {unset _adjacency}
+    catch {unset _vertices}
+    chain
+}
+
+########################################################################
+#### delete*
 #
 # Delete a vertex and all connected edges from the graph, and
-# return the inverse command. <i>This is an abstract method.</i>
+# return the undo command. <i>This is an abstract method.</i>
 #
-body ::tycho::AbstractGraph::delete {vertex} {
-    abstractMethod delete
+body ::tycho::AbstractGraph::delete* {vertex} {
+    abstractMethod delete*
 }
 
 ########################################################################
@@ -482,296 +484,6 @@ body ::tycho::AbstractGraph::depthSort {} {
 }
 
 ########################################################################
-#### depthSortNotWorking
-#
-# An alternative depth sort that might possibly be faster. 
-# (but doesn't work correctly yet).
-#
-# Perform a sort of the graph and return the vertices in a list of 
-# lists, where each sublist contains vertices of the corresponding 
-# depth. If the graph contains a cycle, then the sort will be as
-# though an arbitrary edge in each cycle were deleted.
-#
-# The sort works by initializing each vertex with the number of
-# parents it has. When the node is seen by a parent, the count is
-# is decremented. When the count reaches zero, the vertex has been
-# seen by all its parents, and should therefore go into the layer
-# following the one in which its last parent is. After processing
-# all the children of the current layer, the algorithm moves onto
-# the nodes in the next layer.
-#
-# If the graph has cycles, the algorithm will still function, returning
-# a sort of a similar acyclic graph (the same graph with cycles
-# broken). If the second argument is supplied, it is a list of starting
-# vertices -- this may be needed for cyclic graphs.
-# 
-body ::tycho::AbstractGraph::depthSortNotWorking {{roots {}}} {
-    # If we already have it, just return it
-    set cacheindex depthsort,[join $roots -]
-    if { [::info exists _cache($cacheindex)] } {
-	return $_cache($cacheindex)
-    }
-
-    # The current vertices and  result list
-    if { $roots == {} } {
-	set roots [_graphroots]
-    }
-    set current $roots
-    set result [list $current]
-    set depth 0
-    
-    # Initialize visited flags to the number of parents
-    foreach v [array names _vertices] {
-	set _cache($v,visited) [llength $_adjacency($v,parents)]
-    }
-    
-    # A counter that tells us whether we are done
-    set count [expr [llength [vertices *]] - [llength $current]]
-
-    # Keep looking until we run out of vertices
-    while { 1 } {
-	# The next layer of vertices
-	set next {}
-	
-	# Foreach in the current "layer," decrement the count of each
-	# child that has not already been done. If it has been seen by all
-	# its parents, add it to the next layer and record its depth in the
-	# graph.
-	foreach v $current {
-	    foreach w $_adjacency($v,children) {
-		if { $_cache($w,visited) } {
-		    incr _cache($w,visited) -1
-		    if { ! $_cache($w,visited) } {
-			set _cache($w,depth) $depth
-			lappend next $w
-			incr count -1
-		    }
-		}
-	    }
-	}
-
-	# If all vertices are processed, we're done
-	if { ! $count } {
-	    lappend result $next
-	    break
-	} elseif { $next == "" } {
-	    # If there are no next vertices, there's a cycle. To break
-	    # it, choose a child of a vertex of the current layer
-	    # which is still "live," and decrement its count (i.e. break
-	    # a link. We know we're done when "count" reaches zero.
-	    if { ! $count } {
-		# We're done
-		break
-	    } else {
-		# There's a cycle, so choose a child of a vertex
-		# of the current layer, decrement its count (i.e. delete
-		# an edge), and try again
-		# FIXME: Does this really work???
-		set x ""
-		foreach v $current {
-		    foreach w $_adjacency($v,children) {
-			if { $_cache($w,visited) > 0 } {
-			    set x $w
-			    incr _cache($x,visited) -1
-			    break
-			}
-		    }
-		    if { $x != "" } {
-			break
-		    }
-		}
-		continue
-	    } else {
-		# Done
-		break
-	    }
-	}
-
-	# Move on to the next layer
-	lappend result $next
-	set current $next
-	incr depth
-    }
-    set _cache($cacheindex) $result
-    return $result
-}
-
-########################################################################
-#### gridLayoutNotWorking
-#
-# Lay-out the graph in a grid form. The returned result is a list
-# of sub-lists, where each sub-list is a list of pairs being
-# the vertex name and the "width-position" of the vertex.
-#
-# The cache is updated with a "widthpos" attribute, which could
-# be used later for assigning positions to newly-added vertices.
-# This data would have to be placed into a different array, though,
-# since the cache is cleared when a new vertex is added.
-#
-body ::tycho::AbstractGraph::gridLayoutNotWorking {} {
-    # If we already have it, just return it
-    if { [::info exists _cache(gridlayout)] } {
-	return $_cache(gridlayout)
-    }
-    # Initialize vertices
-    foreach v [array names _vertices] {
-	set _cache($v,widthpos) -1
-    }
-
-    # Set an array indexed by depth, and find the "most complex"
-    # depth. This we'll choose simply to be the one with the most
-    # vertices.
-    set bydepth(-1) {}
-    set max 0
-    foreach {depth vertices} [depthSort] {
-	set bydepth($depth) $vertices
-	set firstfree($depth) 0
-	if { [llength $vertices] > $max } {
-	    set max [llength $vertices]
-	    set startlevel $d
-	}
-    }
-    set maxdepth $depth
-    incr depth
-    set bydepth($depth) {}
-
-    # Starting with this level, work backwards through the graph
-    # assigning positions
-    set currentlevel $startlevel
-    while { $currentlevel > 0 } {
-	# For each node in the level before, assign positions to its
-	# children and to itself
-	foreach parent $bydepth([expr $currentlevel-1]) {
-	    # First find a good starting point. If children
-	    # at this level are already allocated, use the lowest
-	    # of their positions.
-	    set startpos -1
-	    foreach c $_adjacency($parent,children) {
-		if { $_cache($c,depth) == $currentlevel \
-			&& $_cache($c,widthpos) > startpos } {
-		    set startpos $_cache($c,widthpos)
-		}
-	    }
-	    # If not, then use the "first free" position. This is
-	    # to prevent branches or separate subgraphs from
-	    # mixing in with already allocated vertices.
-	    if { $startpos == -1 } {
-		set startpos $firstfree($currentlevel)
-	    }
-	    # Assign a position to each child, keeping track of the
-	    # "average" position.
-	    set sum 0
-	    set n 0
-	    foreach c $_adjacency($parent,children) {
-		if { $_cache($c,depth) == $currentlevel } {
-		    # Usually, the child is at the current level.
-		    if { $_cache($c,widthpos) == -1 } {
-			while { [::info exists \
-				_cache($currentlevel,$startpos)] } {
-			    incr startpos
-			}
-			set _cache($c,widthpos) $startpos
-			set _cache($currentlevel,$startpos) $c
-		    }
-		} elseif { $_cache($c,depth) <= $startlevel \
-			&& $_cache($c,widthpos) == -1 } {
-		    # This case is fairly uncommon, and is I
-		    # think only necessary because some roots
-		    # may not have any children at level 1
-		    set d $_cache($c,depth)
-		    while { [::info exists \
-			    _cache($d,$firstfree($d))] } {
-			incr firstfree($d)
-		    }
-		    set _cache($c,widthpos) $firstfree($d)
-		    set _cache($d,$firstfree($d)) $c
-		}
-		# Regardless of where the child is, remember the position
-		set sum [expr $sum + $_cache($c,widthpos)]
-		incr n
-	    }
-	    if { $startpos > $firstfree($currentlevel) } {
-		set firstfree($currentlevel) $startpos
-	    }
-	    # Assign a position to the parent that is close
-	    # to the average of its children
-	    set ppos [expr floor($sum/$n)]
-	    while { [::info exists _cache([expr $currentlevel-1],$ppos])] } {
-		incr ppos
-	    }
-	    set _cache($parent,widthpos) $ppos)
-	    set _cache([expr $currentlevel-1],$ppos]) $parent
-	}
-	incr currentlevel -1
-    }
-    # Repeat the whole thing again, this time working upwards
-    # through levels from the one we started with.
-    set currentlevel $startlevel
-    while { $currentlevel <= $maxdepth } {
-	foreach child $bydepth([expr $currentlevel+1]) {
-	    set startpos -1
-	    foreach p $_adjacency($child,parents) {
-		if { $_cache($p,depth) == $currentlevel } {
-		    if { $_cache($p,widthpos) > startpos } {
-			set startpos $_cache($p,widthpos)
-		    }
-		}
-	    }
-	    if { $startpos == -1 } {
-		set startpos $firstfree($currentlevel)
-	    }
-	    set sum 0
-	    set n 0
-	    foreach p $_adjacency($child,parents) {
-		if { $_cache($p,depth) == $currentlevel \
-			&& $_cache($p,widthpos) == -1 } {
-		    while { [::info exists \
-			    _cache($currentlevel,$startpos)] } {
-			incr startpos
-		    }
-		    set _cache($p,widthpos) $startpos
-		    set _cache($currentlevel,$startpos) $p
-		}
-		set sum [expr $sum + $_cache($p,widthpos)]
-		incr n
-	    }
-	    if { $startpos > $firstfree($currentlevel) } {
-		set firstfree($currentlevel) $startpos
-	    }
-	    set cpos [expr floor($sum/$n)]
-	    while { [::info exists _cache([expr $currentlevel+1],$cpos])] } {
-		incr cpos
-	    }
-	    set _cache($child,widthpos) $cpos
-	    set _cache([expr $currentlevel-1],$cpos]) $child
-	}
-	incr currentlevel
-    }
-    # If there are any roots with no children at all, they haven't
-    # been assigned yet. Assign wherever they fit.
-    set rpos 0
-    foreach r $bydepth(0) {
-	if { $_cache($r,widthpos) == -1 } {
-	    while { [::info exists _cache(0,$rpos])] } {
-		incr rpos
-	    }
-	    set _cache($r,widthpos) $rpos
-	    set _cache(0,$rpos]) $r
-	}
-    }
-    # Assemble the result
-    set _cache(gridlayout) {}
-    foreach {depth vertices} $depthsort {
-	set r
-	foreach v $vertices {
-	    lappend r $v $_cache($v,widthpos)
-	}
-	lappend _cache(gridlayout) $r
-    }
-    return $_cache(gridlayout)
-}
-
-########################################################################
 #### gridLayout
 #
 # Lay-out the graph in a grid form. The returned result is a list
@@ -890,22 +602,6 @@ body ::tycho::AbstractGraph::_gridlayout {roots ymin} {
 }
 
 ########################################################################
-#### _externalize
-#
-# Write data to the state file.
-#
-body ::tycho::AbstractGraph::_externalize {fd} {
-    # Chain the superclass' method
-    chain $fd $mode
-
-    # Write additional data to the file
-    puts $fd "array set _vertices [list [array get _vertices]]\n"
-    puts $fd "array set _cache    [list [array get _cache]]\n"
-
-    return ""
-}
-
-########################################################################
 #### numberofedges
 #
 # Return the number of edges in the graph.
@@ -921,6 +617,18 @@ body ::tycho::AbstractGraph::numberofedges {} {
 #
 body ::tycho::AbstractGraph::numberofvertices {} {
     array size _vertices
+}
+
+########################################################################
+#### parse
+#
+# Read data from a string containing a TIM representation of a
+# model. This method extends the superclass method to clear
+# the cache.
+#
+body ::tycho::AbstractGraph::parse {data} {
+    catch {unset _cache}
+    chain $data
 }
 
 ########################################################################
@@ -1206,12 +914,16 @@ body ::tycho::AbstractGraph::verify {} {
 ########################################################################
 #### vertex
 #
-# Add a new vertex to the graph and return the inverse command.
+# Add a new vertex to the graph and return the undo command.
 # Additional arguments are a flat attribute-value list for the
-# vertex. Flag an error if the vertex already exists. 
+# vertex. Flag an error if the vertex already exists.
+#
+# <b>Note</b>: Call this method to add a vertex. Do _not_ call
+# the add{} method directly.
 #
 body ::tycho::AbstractGraph::vertex {vertex args} {
-    _verifynot vertex {} $vertex $vertex
+    # Add vertex
+    eval add vertex:$vertex $args
 
     # Initialize parent-child links
     set _adjacency($vertex,children) {}
@@ -1220,25 +932,11 @@ body ::tycho::AbstractGraph::vertex {vertex args} {
     # Clear the cache
     catch {unset _cache}
 
-    # Remember the vertex name here
+    # Remember the vertex name
     set _vertices($vertex) ""
 
-    # Add vertex
-    _addentity vertex {} $vertex $vertex {} $args
-
-    # Return inverse command
+     # Return undo command
     list vertexdelete $vertex
-}
-
-########################################################################
-#### vertexattrs
-#
-# Return a list containing the attributes of the vertex as a flat
-# attribute-value list. Flag an error if the vertex does not exist.
-#
-body ::tycho::AbstractGraph::vertexattrs {vertex} {
-    _verify vertex {} $vertex
-    _attributes vertex {} $vertex
 }
 
 ########################################################################
@@ -1247,9 +945,8 @@ body ::tycho::AbstractGraph::vertexattrs {vertex} {
 # Get an attribute of an vertex. Flag an error if the vertex does
 # not exist.
 #
-body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
-    _verify vertex {} $vertex
-    _itemcget vertex {} $vertex $attribute
+body ::tycho::AbstractGraph::vertexcget {vertex {attribute {}}} {
+    itemcget vertex:$vertex $attribute
 }
 
 ########################################################################
@@ -1260,22 +957,25 @@ body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
 # vertex does not exist.
 #
 body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
-    _verify vertex {} $vertex
-    _itemconfigure vertex {} $vertex $args
+    eval itemconfigure vertex:$vertex $args
 }
 
 ########################################################################
 #### vertexdelete
 #
-# Delete a vertex and return the inverse command. Flag an error if
+# Delete a vertex and return the undo command. Flag an error if
 # the vertex does not exist. This method clears any cached information
 # on the graph structure (transitive closure, depth, and so on)
 # so that they will be recalculated for the new structure. Note that
-# edges connected to this vertex are not deleted: use delete{}
+# edges connected to this vertex are not deleted: use <code>delete*</code>
 # for that.
 #
+# <b>Note</b>: Call this method to delete a vertex. Do _not_ call
+# the delete{} method directly.
+#
 body ::tycho::AbstractGraph::vertexdelete {vertex} {
-    _verify vertex {} $vertex
+    # Delete vertex and get undo command
+    set undo [delete vertex:$vertex]
 
     # Clear parent-child links
     unset _adjacency($vertex,children)
@@ -1287,8 +987,8 @@ body ::tycho::AbstractGraph::vertexdelete {vertex} {
     # Forget the copy of the vertex name
     unset _vertices($vertex)
 
-    # Call the superclass to delete and construct the undo command
-    concat vertex $vertex [_delete vertex {} $vertex]
+    # Return the undo command
+    return $undo
 }
 
 ########################################################################
@@ -1354,7 +1054,7 @@ body ::tycho::AbstractGraph::_adjacencydelete {vertex1 vertex2} {
 }
 
 ########################################################################
-#### _leaves
+#### _graphleaves
 #
 # Return the "leaves" of the graph.
 #
@@ -1369,7 +1069,7 @@ body ::tycho::AbstractGraph::_graphleaves {} {
 }
 
 ########################################################################
-#### _roots
+#### _graphroots
 #
 # Return the roots of the graph.
 #
