@@ -68,10 +68,14 @@ PL_SRCS= \
  CG56Cos.pl \
  CG56Cut.pl \
  CG56CxToRect.pl \
+ CG56CxToFix.pl \
+ CG56CxToInt.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
  CG56DownSample.pl \
  CG56Expr.pl \
+ CG56FixToCx.pl \
+ CG56FixToInt.pl \
  CG56Gain.pl \
  CG56HostAOut.pl \
  CG56HostOut.pl \
@@ -84,6 +88,8 @@ PL_SRCS= \
  CG56Impulse.pl \
  CG56Intgrtr.pl \
  CG56IntToBits.pl \
+ CG56IntToFix.pl \
+ CG56IntToCx.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
  CG56Log.pl \
