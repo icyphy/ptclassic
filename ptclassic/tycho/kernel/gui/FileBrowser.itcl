@@ -316,18 +316,12 @@ body ::tycho::FileBrowser::complete {{case 0}} {
         if {[string index $pattern \
                 [expr [string length $pattern] - 1]] == $directorySeparator} {
             # it's a complete directory
-            set localCWD [::tycho::expandPath \
-                    [file join $localCWD $pattern]]
-            updateListbox
-            $itk_component(dir) config -text $localCWD
+            processItem [file join $localCWD $pattern]
             setEntry {}
             return
         } else {
             # it's a directory/something
-            set localCWD [::tycho::expandPath \
-                    [file join $localCWD [file dirname $pattern]]]
-            updateListbox
-            $itk_component(dir) config -text $localCWD
+            processItem [file join $localCWD [file dirname $pattern]]
             setEntry [file tail $pattern]
             return [complete $case]
         }
