@@ -33,7 +33,6 @@ CCS_WITH_H_FILES=\
  AutoForkNode.cc \
  Block.cc \
  Clock.cc \
- Code.cc \
  ComplexArrayState.cc \
  ComplexState.cc \
  ComplexSubset.cc \
