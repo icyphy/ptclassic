@@ -474,7 +474,7 @@ body ::tycho::Monitor::jumpNextError { {direction 1} } {
 #######################################################################
 #### jumpToLine
 # This will open file context, and jump to entry number.
-# eLineNum = editor's line number (where error occured)
+# eLineNum = editor's line number (where error occurred)
 # cLineNum = compiler's line number (where error reported)
 # fname = filename of the error source code.
 #

@@ -465,7 +465,7 @@ body ::tycho::Model::history {mode args} {
 #
 # Other marks can be defined by clients, and subclasses of Model
 # may also add additional marks. A mark marks exactly one position
-# in the history: it is the last ocommandne executed to get to the state
+# in the history: it is the last command executed to get to the state
 # represented by the given mark. Thus, the "current" mark marks
 # the most recently-executed command.
 # 

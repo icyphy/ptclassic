@@ -109,7 +109,7 @@ proc ::ptkDisplayErrorInfo {} {
 ##########################################################################
 #### ErrorMessage
 # Issue an error message to the user. To issue an error message, simply call
-# the Tcl command <code>error</code>. If the error occured in processing a
+# the Tcl command <code>error</code>. If the error occurred in processing a
 # background Tk command, then <code>tkerror</code> will be invoked, which in turn
 # will create an instance of this class and pop up a modal dialog to
 # inform the user. "Modal" means that nothing further will happen until
