@@ -44,11 +44,9 @@
 # The modal dialogs are adequately tested by the demo script.
 
 
-if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
-} {}
-
-#set tychoExitWhenNoMoreWindows 0
+# Make sure that the required packages are loaded
+package require tycho.util.tytest
+package require tycho.edit.visedit
 
 #set VERBOSE 1
 
@@ -59,8 +57,16 @@ test openContext-1.1 {openContext} {
     openAllFiles \
 	    sample.fst \
 	    sample.gfk \
-	    \$TYCHO/doc/tychoClasses.dag \
-	    \$PTOLEMY/src/domains/sdf/demo/basic.pal
+	    \$TYCHO/doc/tychoClasses.dag
 } {}
 
 
+############################################################################
+#### openContext
+# Open up a Ptolemy editor. This should be moved to the typt package.
+if ![catch {package require tycho.typt.editors}] {
+    test openContext-1.2 {openContext, Ptolemy facet} {
+	openAllFiles \
+		\$PTOLEMY/src/domains/sdf/demo/basic.pal
+    } {}
+}
