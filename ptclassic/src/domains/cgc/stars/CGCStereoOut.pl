@@ -35,7 +35,8 @@ provisions.
       name { blockSize }
       type { int }
       default { 8180 }
-      desc { Number of bytes to write. }
+      desc { Number of bytes to write. Defaulted to buffer size of
+	       audio driver. Should be a multiple of 4. }
     }
 
     defstate {
@@ -91,8 +92,15 @@ provisions.
     }
 
     input {
-      name { input }
+      name { left }
       type { float }
+      desc { Left channel input }
+    }
+
+    input {
+      name { right }
+      type { float }
+      desc { Right channel input }
     }
 
     codeblock (declarations) {
@@ -126,22 +134,16 @@ provisions.
 	   output_val = 0x04; 	// Line_Out
 	 else
 	   output_val = 0x01;	// Speaker
-	 
-//	 info.record.encoding = encoding_val;
+
+	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));	 
+
 	 info.play.encoding = encoding_val;
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
 
-//	 info.record.precision = 8;
 	 info.play.precision =8;
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
-
-//	 info.record.channels = 2;
-//	 info.record.port = AUDIO_LINE_IN;
-//	 info.record.sample_rate = $ref(sampleRate);
-//	 info.record.gain = AUDIO_MAX_GAIN;
-//	 info.record.balance = AUDIO_MID_BALANCE;
 
 	 info.play.balance = AUDIO_MID_BALANCE*$ref(balance)/50;
 	 info.play.channels = 2;
@@ -151,9 +153,7 @@ provisions.
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
 
-//	 info.record.precision = $ref(precision);
 	 info.play.precision =$ref(precision);
-//	 info.record.sample_rate = $ref(sampleRate);
 	 info.play.sample_rate = $ref(sampleRate);
 
 	 ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
@@ -187,9 +187,15 @@ provisions.
 
     codeblock (convert) {
       /* Take data from Input and put it in buffer */
-      for ($starSymbol(counter)=0; $starSymbol(counter) <
-	     ($val(blockSize)/2); $starSymbol(counter)++) {
-	$starSymbol(buffer)[$starSymbol(counter)] = ceil($ref(input,$starSymbol(counter))*32768.0);
+      /* Data in buffer is alternate left and right channels */
+      for ($starSymbol(counter)=0; $starSymbol(counter) <($val(blockSize)/2); 
+	   $starSymbol(counter) = $starSymbol(counter)+2) {
+
+	$starSymbol(buffer)[$starSymbol(counter)] = 
+	  ceil($ref(left,$starSymbol(counter)/2)*32768.0);
+	$starSymbol(buffer)[$starSymbol(counter)+1] = 
+	  ceil($ref(right,$starSymbol(counter)/2)*32768.0);
+
       }
     }
 
@@ -224,7 +230,8 @@ provisions.
     setup {
       fileName.clearAttributes(A_SETTABLE);
       standardOutput = (strcmp(fileName,"") == 0);
-      input.setSDFParams(int(blockSize/2), int(blockSize/2)-1);
+      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
       
     initCode {
