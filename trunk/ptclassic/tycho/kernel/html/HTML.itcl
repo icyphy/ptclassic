@@ -1982,23 +1982,25 @@ proc HMset_image {win handle src} {
         if {[string first " $image " " [image names] "] >= 0} {
             HMgot_image $handle $image
         } else {
-            set type photo
             set ext [string tolower [::tycho::url extension $image]]
+            set type photo
             if {$ext==".bmp" || $ext==".xbm"} {set type bitmap}
-
             # FIXME: The following is hacked because JPG isn't supported
             if {$ext==".jpg" || $ext==".jpeg"} {
-                # FIXME: Make sure that if "convert" isn't installed or
                 # when we're not on UNIX, error is caught
-                catch {
-                    set cachefile [::tycho::resource cachefile $image]
+                set oldcachefile [::tycho::resource cachefile $image]
+                set ext [::tycho::url extension $oldcachefile]
+                # If the cache has not been remapped to a GIF file,
+                # then convert, then remap.
+                if {$ext==".jpg" || $ext==".jpeg"} {
                     # Take out extension (.jpg, .jpeg, etc)...
-                    set newcachefile {}
-                    regsub $ext $cachefile {} newcachefile
-                    ::puts "CACHEFILE:$cachefile   IMAGE:$image"
-                    eval exec convert -quality 5 $cachefile $newcachefile.gif
+                    regsub $ext $oldcachefile {} newcachefile
+                    set newcachefile "$newcachefile.gif"
+                    eval exec convert -quality 5 $oldcachefile $newcachefile
                     #file delete $cachefile
-                    set image $newcachefile.gif
+                    if ![::tycho::cache remap $image $newcachefile] {
+                        error "Remapping error"
+                    }
                 }
             }
 
