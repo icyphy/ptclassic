@@ -352,10 +352,11 @@ body ::tycho::Layout::move {tag x y} {
 # specified by tag.
 #
 body ::tycho::Layout::moveclick {tag x y} {
-    # puts "::tycho::Layout::moveclick $tag $x $y"
     # Just remember where we are, and don't record in the history
     set _scratch($tag.startx) $x
     set _scratch($tag.starty) $y
+    set _scratch($tag.currentx) $x
+    set _scratch($tag.currenty) $y
     return ""
 }
 
@@ -484,6 +485,9 @@ body ::tycho::Layout::reshapeclick {name x y args} {
     # Just remember where we are, and don't record in the history
     set _scratch($name.startx) $x
     set _scratch($name.starty) $y
+    set _scratch($name.currentx) $x
+    set _scratch($name.currenty) $y
+
     array set opts $args
     set _scratch($name.aspects) $opts(-aspects)
     return ""
@@ -495,8 +499,8 @@ body ::tycho::Layout::reshapeclick {name x y args} {
 # Continue reshaping an item specified by name.
 #
 body ::tycho::Layout::reshapedrag {name x y} {
-    set _scratch($tag.currentx) $x
-    set _scratch($tag.currenty) $y
+    set _scratch($name.currentx) $x
+    set _scratch($name.currenty) $y
     return ""
 }
 
@@ -511,12 +515,12 @@ body ::tycho::Layout::reshapedrag {name x y} {
 #
 body ::tycho::Layout::reshaperelease {name} {
     # puts "::tycho::Layout::reshaperelease $name $x $y"
-    set deltax [expr $_scratch($tag.currentx) - $_scratch($tag.startx)]
-    set deltay [expr $_scratch($tag.currenty) - $_scratch($tag.starty)]
-    unset _scratch($tag.startx)
-    unset _scratch($tag.starty)
-    unset _scratch($tag.currentx)
-    unset _scratch($tag.currenty)
+    set deltax [expr $_scratch($name.currentx) - $_scratch($name.startx)]
+    set deltay [expr $_scratch($name.currenty) - $_scratch($name.starty)]
+    unset _scratch($name.startx)
+    unset _scratch($name.starty)
+    unset _scratch($name.currentx)
+    unset _scratch($name.currenty)
 
     set aspects $_scratch($name.aspects)
     unset _scratch($name.aspects)
