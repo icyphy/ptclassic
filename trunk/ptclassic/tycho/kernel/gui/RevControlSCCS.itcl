@@ -74,10 +74,10 @@ class ::tycho::RevControlSCCS {
     ###################################################################
     ####                      public procs                         ####
 
-    # Check in the file associated with a File object.
+    # Check in the file associated with the specified File object.
     proc checkIn {object} {}
 
-    # Check out the file associated with a File object.
+    # Check out the file associated with the specified File object.
     proc checkOut {object} {}
 
     # Return 1 if the given file is under revision control, 0 otherwise.
@@ -109,7 +109,7 @@ body ::tycho::RevControlSCCS::constructor {args} {
 
 #####################################################################
 #### checkIn
-# Check in the file associated with a File object.
+# Check in the file associated with the specified File object.
 # 
 body ::tycho::RevControlSCCS::checkIn {object} {
     ::tycho::RevControl::checkIn $object
@@ -140,7 +140,7 @@ body ::tycho::RevControlSCCS::checkIn {object} {
 
 #####################################################################
 #### checkOut
-# Check out the file associated with a File object.
+# Check out the file associated with the specified File object.
 # 
 body ::tycho::RevControlSCCS::checkOut {object} {
     ::tycho::RevControl::checkOut $object

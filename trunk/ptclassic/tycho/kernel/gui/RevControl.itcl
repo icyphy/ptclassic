@@ -39,13 +39,13 @@ option add *revisionControlTypes {SCCS RCS} widgetDefault
 #######################################################################
 #### RevControl
 # Base class for revision control objects. The main entry point is is
-# the procedure "setup", which will create a revision control window of
-# the appropriate type. The list of revision control types is given by
-# the option "revisionControlTypes", which lists them in order of
-# preference (e.g. "SCCS RCS", which is the default value). It is
-# assumed that for each type listed, there is a class defined called
-# RevControl$type, where $type is the type, and that this class is
-# derived from RevControl.
+# the procedure <code>setup</code>, which will create a revision
+# control window of the appropriate type. The list of revision control
+# types is given by the option "revisionControlTypes", which lists them
+# in order of preference (e.g. "SCCS RCS", which is the default value).
+# It is assumed that for each type listed, there is a class defined
+# called <code>RevControl$</code><i>type</i>, where $<i>type</i> is the
+# type, and that this class is derived from <code>RevControl</code>.
 #
 class ::tycho::RevControl {
     inherit ::tycho::DialogWindow
@@ -56,7 +56,7 @@ class ::tycho::RevControl {
     ###################################################################
     ####                         options                           ####
 
-    # The object under version control.
+    # Specify the File object under version control.
     itk_option define -object object Object ""
 
     ###################################################################
@@ -71,7 +71,7 @@ class ::tycho::RevControl {
     # Put the file under revision control.
     method initializeRevControl {} 
 
-    # Unedit the file associated with this class.
+    # Unedit the file, reverting to the previously checked in version.
     method unedit {}
 
     # View the version control history.
@@ -80,10 +80,10 @@ class ::tycho::RevControl {
     ###################################################################
     ####                      public procs                         ####
 
-    # Check in the file associated with a File object.
+    # Check in the file associated with the given File object.
     proc checkIn {object} {}
 
-    # Check out the file associated with a File object.
+    # Check out the file associated with the given File object.
     proc checkOut {object} {}
 
     # Return 1 if the given file is under revision control, 0 otherwise.
@@ -92,10 +92,10 @@ class ::tycho::RevControl {
     # Make a revision control object of the specified type.
     proc makeRev {type editorWin editorObj} {}
 
-    # Setup revision control for an editor.
+    # Setup revision control for an editor of type File.
     proc setup {editorWin editorObj} {}
 
-    # Return the revision control class controlling a File object.
+    # Return the revision control class controlling a File object, if any.
     proc whichRevClass {obj} {}
 
     ###################################################################
@@ -134,6 +134,9 @@ class ::tycho::RevControl {
 
 #########################################################################
 #### -object configuration
+# Specify the File object under version control.
+# If the specified object is not a <code>::tycho::File</code> object,
+# or does not exist, then trigger an error.
 # 
 configbody ::tycho::RevControl::object {
     set object $itk_option(-object)
@@ -211,7 +214,8 @@ body ::tycho::RevControl::initializeRevControl {} {
 
 ###################################################################
 #### unedit
-# Query the user for confirmation, then unedit.  This base class method
+# Query the user for confirmation, then unedit the file, reverting to
+# the previously checked in version.  This base class method
 # only does the query.
 #
 body ::tycho::RevControl::unedit {} {
@@ -233,7 +237,7 @@ body ::tycho::RevControl::unedit {} {
 
 ###################################################################
 #### checkIn
-# Check in the file associated with a File object.
+# Check in the file associated with the specified File object.
 #
 body ::tycho::RevControl::checkIn {object} {
     if {$object == {}} {
@@ -255,7 +259,7 @@ body ::tycho::RevControl::checkIn {object} {
 
 ###################################################################
 #### checkOut
-# Check out the file associated with a File object.
+# Check out the file associated with the specified File object.
 #
 body ::tycho::RevControl::checkOut {object} {
     if {$object == {}} {
@@ -275,7 +279,8 @@ body ::tycho::RevControl::checkOut {object} {
 # Make a revision control object of the specified type.
 # The first argument is the type (SCCS, RCS, ...),
 # the second argument is the window name for the editor, and
-# the third argument is the editor object.
+# the third argument is the editor object, which must be an
+# instance of <code>::tycho::File</code> or a class derived from that.
 #
 body ::tycho::RevControl::makeRev {type editorWin editorObj} {
     # Create a revision control window
@@ -289,8 +294,10 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
 
 ###################################################################
 #### setup
-# Setup revision control for an editor.  The arguments are the name
-# of the top-level editor window and the name of the editor object.
+# Setup revision control for an editor. The arguments are the name of
+# the top-level editor window and the name of the editor object, which
+# must be an instance of <code>::tycho::File</code> or a class derived
+# from that.
 #
 body ::tycho::RevControl::setup {editorWin editorObj} {
 
@@ -334,9 +341,9 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 
 ###################################################################
 #### whichRevClass
-# Return the name of a suitable revision control class if the object is
-# under revision control. Otherwise, return an empty string.  The
-# object must be a ::tycho::File object.
+# Return the name of a suitable revision control class if the given
+# object is under revision control. Otherwise, return an empty string.
+# The object must be a <code>::tycho::File</code> object.
 #
 body ::tycho::RevControl::whichRevClass {obj} {
     if {![$obj isa ::tycho::File]} {
@@ -404,7 +411,7 @@ body ::tycho::RevControl::cdDir {dir} {
 }
 
 #####################################################################
-#### 
+#### getComments
 # Open a dialog box to query the user for comments.
 # 
 body ::tycho::RevControl::getComments {} {

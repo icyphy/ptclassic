@@ -32,14 +32,14 @@
 
 ##########################################################################
 #### Stack class.
-# This is a simple stack data structure with methods to push and pop.
+# A simple stack data structure with methods to push and pop.
 # Data stored on the stack is any arbitrary Tcl string.
 #
 class ::tycho::Stack {
 
     constructor {args} {}
 
-    # Reinitialize the stack
+    # Reinitialize the stack.
     method clear {}
 
     # Pop a value from the stack and return it.
@@ -59,7 +59,7 @@ body ::tycho::Stack::constructor {args} {}
 
 #####################################################################
 #### clear
-# Reinitialize the stack.
+# Reinitialize the stack, eliminating all previous items.
 #
 body ::tycho::Stack::clear {} {
     set data {}
