@@ -149,6 +149,7 @@ test UpSample-default-SDF-2 \
 #
 test UpSample-default-SDF-4 \
 	{Run the default-SDF scheduler with ACYLOOP loopScheduler} {
+    puts "UpSample-default-SDF-4 test: Expect 3 warnings"
     sdfTestScheduler default-SDF {targetparam loopScheduler ACYLOOP}
 } {{{0.0	
 0.0	
@@ -167,3 +168,82 @@ test UpSample-default-SDF-4 \
 0.0	
 }} \{\n\{\ scheduler\ \"Murthy\ and\ Bhattacharyya's\ SDF\ Loop\ scheduler\"\ \}\n\{\ fire\ Rampa\ \}\n\{\ fire\ UpSample.a\ \}\n\{\ repeat\ 3\ \{\n\ \ \{\ fire\ Printa\ \}\n\}\n\}\n}
 
+
+######################################################################
+#### test default-SDF
+#
+test UpSample-default-SDF-5 \
+	{Run the default-SDF scheduler with SJS loopScheduler} {
+    sdfTestScheduler default-SDF {targetparam loopScheduler SJS}
+} {} {KNOWN_FAILED}
+
+######################################################################
+#### test compile-SDF
+#
+test UpSample-compile-SDF-1 \
+	{Run the compile-SDF scheduler with DEF loopScheduler} {
+    sdfTestScheduler compile-SDF {targetparam "Looping Level" DEF}
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} {{
+  { scheduler "Simple SDF Scheduler" }
+  { fire UpSampleTest.Rampa }
+  { fire UpSampleTest.UpSample.a }
+  { fire UpSampleTest.Printa }
+  { fire UpSampleTest.Printa }
+  { fire UpSampleTest.Printa }
+}
+}}
+
+######################################################################
+#### test default-DDF
+#
+test UpSample-default-DDF-1 {Run the default-DDF Scheduler} {
+    sdfTestScheduler default-DDF
+} {{{0.0	
+0.0	
+0.0	
+}} {{ { scheduler "Dynamic Dataflow Scheduler" } }}}
+
+######################################################################
+#### test default-BDF
+#
+test UpSample-default-BDF-1 {Run the default-BDF Scheduler} {
+    sdfTestScheduler default-BDF
+} {{{0.0	
+0.0	
+0.0	
+0.0	
+1.0	
+0.0	
+0.0	
+2.0	
+0.0	
+0.0	
+3.0	
+0.0	
+0.0	
+4.0	
+0.0	
+}} {{
+  { scheduler "Buck's Boolean Dataflow Scheduler" }
+    { fire UpSampleTest.Rampa }
+    { fire UpSampleTest.UpSample.a }
+    { repeat 3 {
+    { fire UpSampleTest.Printa }
+  } }
+}
+}}
