@@ -50,7 +50,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB =		libdispatch.a
+LIB =		libdispatch.$(LIBSUFFIX)
 
 VERSION=8-2
 OTHERCFLAGS=-DCUR_VER=\"$(VERSION)\"
