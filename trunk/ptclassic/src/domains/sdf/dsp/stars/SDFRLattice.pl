@@ -32,17 +32,19 @@ will have minimal effect.
 .nf
 .na
 The structure is as follows:
+.cs R 18
 
      y[0]          y[1]                 y[n-1]           y[n]
 X(n) ---(+)->--o-->----(+)->--o--->-- ... ->--(+)->--o--->---o--->  Y(n)
-          \   /          \   /                  \   /        |
+          \\   /          \\   /                  \\   /        |
          +Kn /        +Kn-1 /                  +K1 /         |
             X              X                      X          |
-         -Kn \        -Kn-1 \                  -K1 \         V
-          /   \          /   \                  /   \        |
+         -Kn \\        -Kn-1 \\                  -K1 \\         V
+          /   \\          /   \\                  /   \\        |
         (+)-<--o--[z]--(+)-<--o--[z]- ... -<--(+)-<--o--[z]--/    
                w[1]           w[2]                   w[n]
 
+.cs R
 .fi
 where the [z] are unit delays and the (+) are adders.
 and "y" and "z" are defined in the code.
