@@ -33,7 +33,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	output.makeAbsent();
       } else {
 	char theString[10];
-	sprintf( theString, "%d", input.get() );
+	sprintf( theString, "%d", int(input.get()) );
 	output.emit() << theString;
       }
     }
