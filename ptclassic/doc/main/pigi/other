@@ -7,20 +7,72 @@ More advanced topics will be covered in following sections.
 .pp
 .IE "moving objects"
 Sometimes you may want to move objects around within your schematic.
-Use the VEM command \fIdrag-instance\fP to do this.
-In versions of VEM before 8.0, you must avoid the
-\fImove-instance\fP command because it can cause
-problems with instances that have actual parameters.  You can
-move objects as follows:
+Use the VEM command \fImove-objects\fP (``m'')
+in the \fISelection\fR menu to do this.
+You can move objects as follows:
 .BU
 Select the objects that you want to move.
 .BU
 Using the right mouse button, drag the objects to the desired
 location.
 .BU
-Execute \fIdrag-instance\fP, capital ``M''.
-.IE drag-instance
-In versions of VEM after 8.0, the \fImove-instance\fR command ``m'' is safe.
+Execute \fImove-objects\fP, ``m''.
+.IE move-objects
+.H2 "Copying objects"
+.pp
+You can create a new instance of any object in a facet by placing
+a point where you want the new instance, moving the mouse to the
+object you wish to copy, and executing ``create'' (``c'').
+However, this does not copy the parameter values.  If you wish
+to create a new instance of a star or galaxy
+that has exactly the same parameter
+values as an existing instance, you should use the \fIcopy-objects\fR
+.IE "copy-objects"
+(``x'') command in the VEM ``Selection'' menu.
+To do this, first select the object or objects you wish to copy.
+Then place a point in the center of the object.
+Then place a second point in the location where you would like the new
+object, and type ``x''.
+The new object starts life selected, so you can immediately
+move it, or type ``control-u'' to unselect it.
+As of this writing, VEM unfortunately does not allow you
+to copy objects from one facet to another.
+.H2 "Labeling a Design"
+.pp
+It is useful to annotate a block diagram with titles and comments.
+.IE labels
+.IE annotations
+The VEM \fIedit-label\fR (``E'') command in the ``Edit'' menu will do this.
+It takes two arguments: a point specifying the position of the label,
+and the name of a \fIlayer\fR, which determines the color of the label.
+.IE layers
+Place a point where you would like the label,
+and then type a layer name, such as "whiteSolid" (with the quotation marks).
+Then type ``E''.  A dialog box will appear, offering various options.
+Type the text for your label in the ``Label'' box.
+It can contain carriage returns.
+To select a text height (font size)
+.IE fonts
+you can move the slider to the right of the ``Text Height'' box.
+The middle button moves the slider by large amounts, and the left
+and right buttons are used for fine tuning.
+The default, 100, is too big for all but the loudest titles.
+Sizes 60 and 40 work well with the overall scaling of \*(PT facets.
+You can also change the justification by clicking the left button
+to the right of each justification box.  A popup menu lists the options.
+.pp
+To determine which layers (colors) are available for text labels,
+open the layers palette.  This can be done with the VEM \fIpalette\fR
+(``P'') command in the ``System'' menu.
+.IE "palette VEM command"
+A window will pop up showing the available colors.
+The names of the colors are themselves labels below each box.
+You will probably have to zoom in to see the names.
+.IE "layer names"
+.IE "colors"
+The layers "whiteSolid" and "blackSolid" work well for labels.
+The layers "whiteOutline" and "blackOutline" are similar, except
+that a box will be drawn around the label.
 .H2 "Icon Orientation"
 .pp
 .IE "transform, VEM command"
@@ -33,43 +85,131 @@ command ``transform'' (``t'').
 Select the icon you wish to transform and type ``t'' as many times
 as necessary to get the desired orientation.
 Each time, you get a 90 degree rotation.
-Then execute the move-object ``m'' or drag-instance ``M'' command
-(depending on your version of VEM).
+Then execute the move-object ``m'' to commit the change.
 Notice that a 180 degree rotation results in an
 upside down icon.  To avoid this, reflect the icon rather than rotating
 it.  To reflect it in the vertical direction (exchanging what's on top
 for what's on the bottom), select the object, type
 "my" (include the quotation marks), type ``t'' to transform,
-and ``M'' or ``m'' to move.
+and ``m'' to move.
 To reflect along the horizontal direction, use "mx" instead of "my".
-.H2 "Auto-forking"
+.H2 "Finding the names of terminals"
 .pp
-.IE auto-forks
-The most often used domain in
-Ptolemy uses synchronous data flow graphs to represent algorithms.  The
-instances in Pigi schematics correspond to nodes in a data flow graph,
-while the connecting wires correspond to the arcs.  Each arc is
-connected to exactly one input and one output.  In order to connect the
-same output to two or more different inputs, a fork star is used.  A
-fork star takes a sample from its input and duplicates it on all its
-outputs.  In a schematic, whenever a net connects a single output to
-two or more inputs, Pigi will insert a fork star into the system
-automatically.  This is called \fBauto-forking\fP.  There is
-one restriction: auto-forking nets cannot contain any delays.  If
-you want to use a delay there, you must use an explicit fork;
-see the section on delays, below.
+.IE "names of terminals"
+Some stars have several terminals, each with a different function.
+The documentation may refer to these terminals only by name.
+The name of a terminal is not normally visible when an icon is
+viewed with normal scaling.  However, zooming in will eventually
+reveal the name.  The easiest way to do this is to draw a box
+around the terminal and open a new window with the ``o'' command.
+Then you can zoom in here if necessary.
+.H2 "Multiple inputs and outputs"
+.pp
+.IE "multiple inputs"
+.IE "multiple outputs"
+\*(PT supports star definitions that do not specify how many
+inputs or outputs there are.
+The
+.c FloatAdd
+and
+.c Fork
+stars are defined this way, for instance.
+Take a close look at the third star in the second row
+of the SDF main.pal palette.
+It is an adder with only one input terminal.
+However, the input terminal is unusual in that it has
+two arrow heads.  This signals a multiple input.
+Any number of outputs can be connected to this terminal
+(subject to restrictions explained below), and
+each of those outputs will be added.
+.pp
+Sometimes, such terminals are not convenient.
+It is better to have a set of icons for the commonly used numbers
+of terminals.  The icon immediately to the left of the multi-input
+.c FloatAdd
+is also a
+.c FloatAdd,
+but it has an icon that shows only two normal inputs.
+The
+.c fork
+stars in the sixth row of the palette are similarly just different
+icons for the same star.
+It is easy to create such icons for any existing star.
+.pp
+Suppose you wish to create an icon for an adder with four inputs.
+In any facet, execute the pigi command ``Extend:make-star'' (``*'').
+.IE "make-star"
+A dialog box appears.
+Enter ``FloatSum.input=4'' for the star name,
+``SDF'' for the domain, and
+``~ptolemy/src/domains/sdf/stars'' for the star src directory
+(this is where the source code is stored).
+Note that ``input'' is the name of the particular multiple input
+that we want to specify.
+If you do not know where the source code is stored, then just look-inside
+(``i'') an existing instance of the star.
+The VEM console window and the header of the editing window
+that open both tell where the star source code is.
+.IE "source code, finding"
+A second dialog box appears asking you where you would like the icon put.
+Accept the default, ``./user.pal''.  Then open user.pal using ``O''
+to see the new four-input adder icon.
+You may edit this icon, as explained below.
 .H2 "Using delays"
 .pp
 .IE delays
-In the SDF and DDF domains, delays can be placed on data flow arcs.
+In the SDF and DDF domains, delays can be placed on arcs.
 A delay in these domains is not a star, but rather is a property
 of the arc connecting two stars.
+The interpretation of the delay is as an initial particle on the arc.
 To use these delays in
 Pigi, the user places a delay icon on top of the wire connecting two
 instances.
-The delay icon is a green diamond in the SDF palette.
+The delay icon is a green diamond in the SDF and system palettes.
 You can specify the number of delays by executing
 \fIedit-params\fP with the cursor on top of the delay icon.
+.H2 "Auto-forking"
+.pp
+.IE auto-forks
+.IE "nets"
+In pigi, a single output can be connected to any number of inputs,
+as one would expect.  The interpretation in most domains
+is that the one output is broadcast to all the inputs.
+There are several point-to-point connections, therefore,
+represented by the net.
+.pp
+However, there are restrictions.
+To understand these restrictions, it is worth explaining that VEM
+stores connectivity information in the form of netlists, simply listing
+all terminals that are connected together.
+If a delay appears somewhere on a net, and that net has more
+than one point-to-point connection, then it is not easy to determine
+for which connection(s) the delay is intended.
+Consequently, at the time of this writing,
+delays are disallowed on nets with more than one connection.
+If you attempt to put a delay on such a net, then when you try
+to run the system, an error message will be issued,
+and the offending net will be highlighted.
+To get rid of the highlighting, execute the pigi command ``Edit:clear-marks''.
+.IE "clear-marks"
+To fix the problem, delete the offending net, and replace it
+with one or more \fIfork\fR stars and a set of point-to-point connections.
+All domains for which this problem occurs have fork stars.
+.pp
+There is also a more subtle restriction.
+Suppose two outputs are connected to a single multiple-input terminal.
+Then neither of these outputs can also be connected to some other
+input terminal.
+If it is, \*(PT will issue the error message ``multiple output ports
+found on the same node.''
+The reason this happens is simple.  VEM knows nothing about multiple
+inputs, so it sees a net with more than one output and more than one
+input.  \*(PT is not given enough information to
+reconcile this and figure out which outputs should
+be connected to which inputs.
+To avoid this problem, it is again necessary to use explicit fork stars.
+.pp
+Both of the above restrictions may be eliminated in future versions.
 .H2 "Dealing with errors"
 .pp
 .IE errors
