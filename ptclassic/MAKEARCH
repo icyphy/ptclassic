@@ -21,7 +21,6 @@ alias optlink \
 optmkdir bin.$ARCH
 optmkdir lib.$ARCH
 optmkdir obj.$ARCH
-optmkdir octtools/obj.$ARCH
 optmkdir octtools/lib.$ARCH
 optmkdir octtools/bin.$ARCH
 
@@ -38,6 +37,20 @@ foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptk
 	endif
 	cd ..
 end
+
+# Directories with out top level make.templates or Makefiles
+foreach x (utils)
+	optmkdir $x
+end
+cd utils
+foreach x (libgslider)
+	optmkdir $x
+	cd $x
+	optlink ../../../src/utils/$x make.template
+	optlink ../../../src/utils/$x makefile
+	cd ..
+end
+cd ..
 
 foreach x (filters)
 	optmkdir $x
