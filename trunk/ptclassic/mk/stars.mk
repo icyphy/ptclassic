@@ -556,7 +556,7 @@ endif
 # External interface support - we need to expand libexttools, because it
 # depends upon the Ptolemy kernel.  Matlab always is pulled in
 
-CUSTOM_DIRS += $(CROOT)/utils/libexttools
+CUSTOM_DIRS += $(CROOT)/src/utils/libexttools
 LIBS += -lexttools $(MATLABEXT_LIB)
 LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
 
