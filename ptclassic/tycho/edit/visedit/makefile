@@ -54,7 +54,7 @@ ITCL_SRCS = \
 	EditForest.itcl \
 	EditForestWidget.itcl \
 	EditFSM.itcl \
-	EditMoore.itcl \
+	EditSTD.itcl \
 	Graphics.itcl \
 	GraphicsWidget.itcl
 
