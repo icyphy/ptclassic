@@ -295,12 +295,8 @@ body ::tycho::Interactor::activate {t x y args} {
 # Always return the bound script for this tag and options.
 #
 body ::tycho::Interactor::bind {t args} {
-    # Remember the target and bindings
-    if { ! [::info exists _bindings($t)] } {
-	set _bindings($t) [list $args]
-    } else {
-	lappend _bindings($t) $args
-    }
+    # Remember the binding
+    set _bindings([concat $t $args]) $args
 
     # Create the default activation binding
     $slate bind $t \
@@ -384,11 +380,9 @@ body ::tycho::Interactor::deactivate {x y args} {
 #
 body ::tycho::Interactor::disable {} {
     set temp [array get _bindings]
-    foreach {name options} $temp {
-	foreach o $options {
-	    eval $this unbind $name $o
+    foreach {ix options} $temp {
+	    eval $this unbind [lindex $ix 0] $options
 	}
-    }
     array set _bindings [array get temp]
 }
 
@@ -414,7 +408,8 @@ body ::tycho::Interactor::drag {x y} {
         uplevel #0 $dragprefix $target $x $y
     } else {
 	$slate movedrag $target $x $y
-    if { $dragcommand } != "" } {
+    }
+    if { $dragcommand != "" } {
     	uplevel #0 $dragcommand $target $x $y
     }
 }
@@ -428,10 +423,8 @@ body ::tycho::Interactor::drag {x y} {
 body ::tycho::Interactor::enable {} {
     set temp [array get _bindings]
     unset _bindings
-    foreach {tag options} $temp {
-	foreach o $options {
-	    eval $this bind $tag $o
-	}
+    foreach {ix options} $temp {
+    	eval $this bind [lindex $ix 0] $options
     }
 }
 
@@ -490,18 +483,18 @@ body ::tycho::Interactor::target {args} {
 #
 # Remove a binding from the interactor to an item or a tag. The
 # optional arguments _must_ be the same as they were for the
-# corresponding call to bind{}.
+# corresponding call to bind{}. If the interactor is currently
+# activated, deactivate it -- this makes some kinds of
+# complex interactior sequences easier to write.
 #
 body ::tycho::Interactor::unbind {t args} {
-    # Make sure that the interactor is deactivated first - ?
-    # if { $target != "" } {
-	# deactivate $t
-    # }
+    # Make sure that the interactor is deactivated first
+    if { $target != "" } {
+        deactivate $target 0 0 $args
+    }
 
     # Forget the target
-    if { $_bindings($t) == $args } {
-		unset _bindings($t)
-    }
+    unset _bindings([concat $t $args])
 
     # Remove the bindings
     $slate bind $t \
@@ -574,6 +567,3 @@ body ::tycho::Interactor::event {type args} {
     }
     return <$event>
 }
-
-
-
