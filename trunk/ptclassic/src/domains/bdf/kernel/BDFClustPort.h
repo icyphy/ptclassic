@@ -62,6 +62,46 @@ public:
 	int isItInput() const { return inFlag;}
 	int isItOutput() const { return !inFlag;}
 
+	void initGeo();
+	BDFCluster* parentClust() { return (BDFCluster*)parent();}
+	BDFClustPort* far() { return (BDFClustPort*)PortHole::far();}
+	int numIO() const { return numberTokens;}
+	BDFClustPort* outPtr() {
+		return far() ? 0 : pOutPtr;
+	}
+	int feedForward() const { return feedForwardFlag;}
+
+	// indicate that this is a feedforward arc.  Mark both
+	// ends of the connection.
+	void markFeedForward() {
+		feedForwardFlag = 1;
+		BDFClustPort* pFar = far();
+		if (pFar) pFar->feedForwardFlag = 1;
+	}
+
+	// return TRUE if there is delay on the arc that may be a
+	// problem for merging, and FALSE otherwise.
+	int fbDelay() const { return (numTokens() > 0 && !feedForward());}
+
+	// return the real far port aliased to bagPorts.
+	// If the bagPort is a port of the outsideCluster, return zero.
+	BDFClustPort* realFarPort(BDFCluster* outsideCluster);
+
+	void makeExternLink(BDFClustPort* val);
+
+	BDFClustPort* inPtr() {
+		return (bagPortFlag == BCP_BAG) ? (BDFClustPort*)&pPort : 0;
+	}
+
+	// functions to set and get maximum arc counts for buffer allocation
+	void setMaxArcCount(int howMany);
+	int maxArcCount();
+
+	// don't like this being public, but...
+	void setNumXfer(int v) { numberTokens = v;}
+
+	// NOTE: The following public members are not in SDFClustPort
+
 	// set/return the control bit
 	int isControl() const { return ctlFlag;}
 	void setControl(int val) { ctlFlag = val ? 1 : 0;}
@@ -76,44 +116,12 @@ public:
 	// cast is safe.
 	BDFClustPort* assoc() { return (BDFClustPort*)BDFPortHole::assoc();}
 
-	void initGeo();
-	BDFCluster* parentClust() { return (BDFCluster*)parent();}
-	BDFClustPort* far() { return (BDFClustPort*)PortHole::far();}
-	int numIO() const { return numberTokens;}
-	BDFClustPort* outPtr() {
-		return far() ? 0 : pOutPtr;
-	}
-
-	int feedForward() const { return feedForwardFlag;}
-
-	// indicate that this is a feedforward arc.  Mark both
-	// ends of the connection.
-	void markFeedForward() {
-		feedForwardFlag = 1;
-		BDFClustPort* pFar = far();
-		if (pFar) pFar->feedForwardFlag = 1;
-	}
-
 	// return TRUE if there is no sample rate change between me
 	// and who I am connected to
 	int sameRate();
 
-	// return TRUE if there is delay on the arc that may be a
-	// problem for merging, and FALSE otherwise.
-	int fbDelay() const { return (numTokens() > 0 && !feedForward());}
-
-	// return the real far port aliased to bagPorts.
-	// If the bagPort is a port of the outsideCluster, return zero.
-	BDFClustPort* realFarPort(BDFCluster* outsideCluster);
-
-	void makeExternLink(BDFClustPort* val);
-
 	int isBagPort() const { return bagPortFlag == BCP_BAG;}
 	int isDupPort() const { return bagPortFlag == BCP_DUP;}
-
-	BDFClustPort* inPtr() {
-		return (bagPortFlag == BCP_BAG) ? (BDFClustPort*)&pPort : 0;
-	}
 
 	// this one just traverses "inPtr" all the way.
 	BDFClustPort* innermost();
@@ -140,28 +148,26 @@ public:
 	int ignore() const { return ignoreFlag;}
 	void setIgnore(int val) { ignoreFlag = (val ? 1 : 0);}
 
-	// functions to set and get maximum arc counts for buffer allocation
-	int maxArcCount();
-	void setMaxArcCount(int howMany);
-	// don't like this being public, but...
-	void setNumXfer(int v) { numberTokens = v;}
 private:
-	// test for need to move tokens up through the cluster hierarchy
-	int seeIfMoveupNeeded();
-
 	// the real port
 	DFPortHole& pPort;
 
 	// the external link
 	BDFClustPort* pOutPtr;
 
-	// true if I am an input
-	unsigned char inFlag;
 	// true if I am a bag port
 	unsigned char bagPortFlag;
 
 	// true if I am a feedforward-only port (after marking)
 	unsigned char feedForwardFlag;
+
+	// NOTE: The following private members are not in SDFClustPort
+
+	// test for need to move tokens up through the cluster hierarchy
+	int seeIfMoveupNeeded();
+
+	// true if I am an input
+	unsigned char inFlag;
 
 	// true if I control some other port
 	unsigned char ctlFlag;
