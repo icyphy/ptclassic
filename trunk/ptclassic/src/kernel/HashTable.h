@@ -57,7 +57,7 @@ or copy constructor are used.  Finally, "const" is used where appropriate.
 #include "type.h"
 
 // Certain compilers need to have destructors protected
-#if defined(aix_xlC) || (defined(hpux) || defined(__hpux) && !defined(__GNUC__)
+#if defined(aix_xlC) || (defined(hpux) || defined(__hpux) && !defined(__GNUC__))
 #define NEED_PROTECT_HASHENTRY_DESTRUCTOR
 #endif
 
