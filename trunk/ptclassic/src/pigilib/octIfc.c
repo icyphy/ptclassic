@@ -362,6 +362,8 @@ ParamListType *pListPtr;
     if (GetByPropName(galFacetPtr, &prop, "params") == OCT_NOT_FOUND) {
 	pListPtr->length = 0;
 	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
+	pListPtr->dynamic_memory = 0;
+	pListPtr->flat_plist_flag = TRUE;
     }
     else {
 	if (!PStrToPList(prop.contents.prop.value.string, pListPtr)) {
@@ -740,14 +742,15 @@ char  *value;
 {
     octObject prop = {OCT_UNDEFINED_OBJECT, 0};
 
-    if (value == NULL || *value == '\0') {
-	/* empty string: delete prop if it exists */
+    if (value && *value) {
+	ERR_IF2(CreateOrModifyPropStr(objPtr,&prop,propName,value) != OCT_OK,
+		octErrorString());
+    }
+    else {		/* empty string: delete prop if it exists */
 	if (GetByPropName(objPtr, &prop, propName) != OCT_NOT_FOUND) {
 	    ERR_IF2(octDelete(&prop) != OCT_OK, octErrorString());
+	    FreeOctMembers(&prop);
 	}
-    } else {
-	ERR_IF2(CreateOrModifyPropStr(objPtr, &prop, propName, value) 
-	    != OCT_OK, octErrorString());
     }
     return(TRUE);
 }
