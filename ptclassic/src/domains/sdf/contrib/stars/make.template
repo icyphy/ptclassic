@@ -51,8 +51,11 @@ LIB =		libsdfcontribstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+SDFBeamAbs.pl \
+SDFBeamXYNorm.pl \
 SDFCIIDGaussian.pl \
 SDFCfft.pl \
+SDFConstCx1ofN.pl \
 SDFErrCnt.pl \
 SDFExpGen.pl \
 SDFMagSqr.pl \
@@ -64,6 +67,7 @@ SDFQPSK.pl \
 SDFQPSK2.pl \
 SDFRfft.pl \
 SDFSineGen.pl \
+SDFSrcPosXY.pl \
 SDFTWTA.pl \
 SDFVDecoder.pl \
 SDFVEncoder.pl \
