@@ -102,6 +102,67 @@ extern const Attribute A_NONCONSTANT = {0,AB_CONST};
 extern const Attribute A_NONSETTABLE = {0,AB_SETTABLE};
 extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 
+const int MAXLEN = 20000;
+const int MAXSTRINGLEN = 4096;
+
+// code duplication, once parseFileName is part of state, remove this function
+const State* tempLookup (const char* name, Block* blockIAmIn) {
+       while (blockIAmIn) {
+		if (blockIAmIn->isItWormhole())
+			blockIAmIn = blockIAmIn->parent();
+                State* p = blockIAmIn->stateWithName(name);
+                if (p) return p;
+                blockIAmIn = blockIAmIn->parent();
+        }
+	// not found, consult global symbol list
+        return KnownState::lookup(name);
+}
+
+// This could be moved as a member function of State so that other states
+// can use it.
+const char* parseFileName(State& state, const char* fileName) {
+    char* buf[MAXLEN];
+    char tokbuf[MAXSTRINGLEN];
+    const char* specialChars = "{}";
+    Tokenizer lexer(fileName,specialChars);
+    int i = 0;
+    int err=0;
+    while(!lexer.eof() && i < MAXLEN && err == 0) {
+	lexer >> tokbuf;
+	char c = tokbuf[0];
+	if (c != 0 && tokbuf[1]) c = 0;
+	switch (c) {
+	case '{': {
+	    // next token must be a state name.
+	    lexer >> tokbuf;
+
+	    const State* s = tempLookup(tokbuf,state.parent()->parent());
+	    if (!s) {
+		// state.parseError ("undefined symbol: ",tokbuf);
+		Error::abortRun(state,"undefined symbol: ",tokbuf);
+		err = 1;
+		return NULL;
+	    }
+	    buf[i++] = s->currentValue().newCopy();
+	    lexer >> tokbuf;
+	    if (tokbuf[0] != '}') {
+		// state.parseError ("expected '}'");
+		Error::abortRun(state,"undefined symbol: ",tokbuf);
+		err = 1;
+		return NULL;
+	    }
+	    break;
+	}
+	default: {
+	    buf[i++] = savestring(tokbuf);
+	}
+	}
+    }
+    StringList parsedFileName;
+    for (int j = 0 ; j < i ; j++) parsedFileName << buf[j];
+    return savestring(parsedFileName);
+}
+
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
 ParseToken
@@ -120,11 +181,13 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 // does not screw us up.
 		const char* tc = lexer.setSpecial ("");
                 lexer >> filename;
+		const char* parsedFileName = parseFileName(*this,filename);
+		if (parsedFileName==NULL) return t;
 // put special characters back.
 		lexer.setSpecial (tc);
-                if (!lexer.fromFile(filename)) {
+                if (!lexer.fromFile(parsedFileName)) {
 			StringList msg;
-			msg << filename << ": " << why();
+			msg << parsedFileName << ": " << why();
 			parseError ("can't open file ", msg);
 			t.tok = T_ERROR;
 			return t;
