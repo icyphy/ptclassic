@@ -185,7 +185,7 @@ group dynamic -label {Dynamic Icons} {
 }
 
 group arithmetic -label {Arithmetic Icons} {
-    icon gain \
+    icon gain_left \
             -slatetype IconFrame \
             -label {Gain} \
             -text Gain \
@@ -196,7 +196,18 @@ group arithmetic -label {Arithmetic Icons} {
          line 10 50 30 50 -width 1 -fill black
          line 70 50 90 50 -width 1 -fill black
      }
-     icon add3 \
+     icon gain_right \
+            -slatetype IconFrame \
+            -label {Gain} \
+            -text Gain \
+            -color lightsteelblue \
+            -termstyles {1-1-east} \
+            -graphics {
+         polygon 30 20 30 80 70 50 -fill red -outline black
+         line 10 50 30 50 -width 1 -fill black
+         line 70 50 90 50 -width 1 -fill black
+     }
+     icon add_3 \
             -slatetype IconOval \
             -label Add \
             -text "" \
