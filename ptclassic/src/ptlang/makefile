@@ -56,6 +56,16 @@ ptlang.o:	ptlang.c
 $(VPATH)/ptlang.c:	ptlang.y
 		cd $(VPATH); yacc ptlang.y; mv y.tab.c ptlang.c
 
+# Debugging version of ptlang
+ptlang.debug:	ptlang.debug.o
+	rm -f $@
+	$(CC) $^ -o $@ $(PTLANGLIB)
+ptlang.debug.o: 	ptlang.debug.c
+	$(CC) -g -c -o $@ -DYYERROR_VERBOSE -DYYDEBUG=1 $^
+$(VPATH)/ptlang.debug.c:	ptlang.y
+		cd $(VPATH); bison -y -t ptlang.y; mv y.tab.c ptlang.debug.c
+
+
 install:	$(BINDIR)/ptlang
 
 $(BINDIR)/ptlang:	ptlang
@@ -64,7 +74,7 @@ $(BINDIR)/ptlang:	ptlang
 sources:	ptlang.y
 
 clean:
-	rm -f ptlang.c ptlang.o ptlang
+	rm -f ptlang.c ptlang.o ptlang ptlang.debug.*
 
 depend:
 	echo no dependencies to make in this directory
