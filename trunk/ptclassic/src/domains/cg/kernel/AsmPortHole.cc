@@ -26,10 +26,11 @@ extern const Attribute P_CIRC(PB_CIRC,0);
 // read or written each time doesn't evenly divide the buffer size.
 
 int AsmPortHole::circAccess() const {
+	int bsiz = bufSize();
 	if ((attributes() & PB_CIRC) != 0) return TRUE;
-	if (numberTokens > 1 && bufferSize % numberTokens != 0) return TRUE;
+	if (numberTokens > 1 && bsiz % numberTokens != 0) return TRUE;
 	int farTokens = far()->numTokens();
-	if (farTokens > 1 && bufferSize % farTokens != 0) return TRUE;
+	if (farTokens > 1 && bsiz % farTokens != 0) return TRUE;
 	return FALSE;
 }
 
