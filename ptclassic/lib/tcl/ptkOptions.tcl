@@ -1,6 +1,7 @@
 # sets the default Options for widgets and windows used by Pigi
 #
 # Author: Alan Kamas, Kennard White, and Edward Lee
+# Contributors: Brian Evans
 # Version: $Id$
 #
 # Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -97,9 +98,17 @@ option add Pigi*selectForeground [ptkColor midnightblue] startupFile
 option add Pigi*Canvas.background [ptkColor antiqueWhite3] startupFile
 option add Pigi*Button.foreground [ptkColor firebrick] startupFile
 option add Pigi*Scale.Foreground [ptkColor bisque1] startupFile
+
+# COMPATIBILITY
+if { $tk_version >= 4.0 } {
+option add Pigi*troughColor [ptkColor tan4] startupFile
+option add Pigi*Scale.background [ptkColor bisque] startupFile
+option add Pigi*Scale.activeBackground [ptkColor bisque2] startupFile
+} else {
 option add Pigi*Scale.background [ptkColor tan4] startupFile
 option add Pigi*Scale.sliderForeground [ptkColor bisque] startupFile
 option add Pigi*Scale.activeForeground [ptkColor bisque2] startupFile
+}
 
 # Default font for all message windows used in Pigi
 option add Pigi*Message*Font [option get . mediumfont Pigi] startupFile
@@ -127,6 +136,12 @@ option add *CGC*Button.foreground [ptkColor blue4] startupFile
 option add *CGC*Button.activeBackground [ptkColor antiqueWhite3] startupFile
 option add *CGC*Button.activeForeground [ptkColor blue4] startupFile
 option add *CGC*Scale.Foreground [ptkColor antiqueWhite2] startupFile
+if { $tk_version >= 4.0 } {
 option add *CGC*Scale.background [ptkColor cadetBlue] startupFile
 option add *CGC*Scale.sliderForeground [ptkColor antiqueWhite2] startupFile
 option add *CGC*Scale.activeForeground [ptkColor antiqueWhite3] startupFile
+} else {
+option add *CGC*Scale.background [ptkColor cadetBlue] startupFile
+option add *CGC*Scale.sliderForeground [ptkColor antiqueWhite2] startupFile
+option add *CGC*Scale.activeForeground [ptkColor antiqueWhite3] startupFile
+}
