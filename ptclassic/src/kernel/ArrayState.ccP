@@ -1,8 +1,9 @@
-#include "logNew.h"
-REGISTER_FILE;
 #ifdef __GNUG__
 #pragma implementation
 #endif
+
+#include "logNew.h"
+REGISTER_FILE;
 
 #include <std.h>
 #include "<T>State.h"
