@@ -44,7 +44,7 @@ EXTRA_SRCS =	\
 	GraphicsHelp.html \
 	ProfileTclHelp.html \
 	index.html \
-	tclXProfile.c.patch
+	tclXprofile.c.patch
 
 MISC_FILES =
 
