@@ -26,6 +26,7 @@ endif
 MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
+ifeq ($(DIRS), "") 
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -35,3 +36,6 @@ makefiles all install clean sources depend realclean checkjunk sccsinfo:
 		) \
 	    fi ; \
 	done
+else
+	@echo "No need to do anything in thread directory for this ARCH."
+endif
