@@ -250,8 +250,8 @@ void AsmStar::addProcCode(const char* cmd) {
 }
 
 void AsmStar::genProcCode(CodeBlock& cb) {
-	const char* t = processCode(cb);
-	addProcCode(t);
+	StringList t = processCode(cb);
+	addProcCode((const char*)t);
 }
 
 // fire: prefix the code with a comment
