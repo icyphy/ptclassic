@@ -417,8 +417,19 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	Fraction& farStarRepetitions = farStar.repetitions;
 	Fraction farStarShouldBe;
 
+	// Check for invalid production or consumption
+	if(nearPort.numXfer() <= 0) {
+	    Error::abortRun(nearStar,
+		"Invalid number of samples produced or consumed");
+	    invalid = TRUE;
+	    return FALSE;
+	} else if(farPort.numXfer() <= 0) {
+	    Error::abortRun(farStar,
+		"Invalid number of samples produced or consumed");
+	    invalid = TRUE;
+	    return FALSE;
+	}
 	// compute what the far star repetitions property should be.
-
 	Fraction factor(nearPort.numXfer(),farPort.numXfer());
 	farStarShouldBe = nearStarRepetitions * factor;
 
