@@ -20,8 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
         location { SDF dsp library }
         explanation {
 .pp
-This star implements a finite-impulse response filter with multirate capability
-.
+This star implements a finite-impulse response filter with multirate capability.
 .Id "filter, FIR"
 .Id "FIR filter"
 The default coefficients correspond to an eighth-order, equiripple,
