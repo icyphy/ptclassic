@@ -19,35 +19,38 @@ MEMLOG = -DMEMORYLOG
 
 # C++ compiler to use.  I suppose calling this symbol GNU instead of
 # CPLUSPLUS shows our bias?
-GNU = /usr/lang/CC -I$(ROOT)/src/compat/cfront
+GNU = CC -I$(ROOT)/src/compat/cfront
 
 # flags for C++ compilation
-GPPFLAGS = -g -Dvolatile= $(MEMLOG)
+GPPFLAGS = -g $(MEMLOG)
 # flags for C compilation
-CFLAGS = -O
+CFLAGS = -g
+
+# command to use when getting files from SCCS (Gnu make)
+GET=safe-get
 
 # command to generate dependencies
-DEPEND=/usr/lang/CC -M
+DEPEND=CC -M
 
 # where libraries are
-LIBDIR=$(ROOT)/lib.CC
+LIBDIR=$(ROOT)/lib.cfront
 # where to install binaries
-BINDIR=$(ROOT)/bin.CC
+BINDIR=$(ROOT)/bin.cfront
 # Ptolemy kernel directory
 KERNDIR=$(ROOT)/src/kernel
 
 # where the Gnu library and linker is
 GNULIB=
 # linker to use for pigi and interpreter
-LINKER=/usr/lang/CC
+LINKER=CC
 # startup module
 CRT0=
 # system libraries (libraries from the environment)
 SYSLIBS=-lm
 # link flags
-LINKFLAGS=-L$(LIBDIR) -Bstatic
+LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -Bstatic
+LINKFLAGS_D=-L$(LIBDIR)
 
 # where help files go
 HELPDIR=~ptolemy/lib
@@ -77,3 +80,8 @@ LX11 = -lX11
 # LXEXT is normally just -lXext, but some vendors (e.g. DEC) have put
 # this library somewhere else, e.g. -lXext-mit.
 LXEXT = -lXext
+
+# Tcl stuff
+TCL_ROOT=$(ROOT)/tcl
+TCL_H_DIR=$(TCL_ROOT)/include
+TCL_LIBDIR=$(TCL_ROOT)/lib.sun4
