@@ -39,10 +39,9 @@ VPATH =		$(ROOT)/lib/tydoc/test
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 	coredump.tcl demo.tcl options.tcl test.tcl \
-		weirdness.tcl
+TCL_SRCS =
 
-ITCL_SRCS =	internals.tyc
+ITCL_SRCS =	test.tcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
