@@ -169,7 +169,7 @@ body ::tycho::Junction::_outline {id canvas slate outline} {
 #
 body ::tycho::Junction::_size {id canvas slate size} {
     set option(size$id) $size
-    coords $id $canvas $slate
+    eval coords $id $canvas $slate [coords $id $canvas $slate]
 }
 
 ##########################################################################
@@ -222,6 +222,7 @@ body ::tycho::Junction::construct {id canvas slate tags x y args} {
     foreach {opt val} [concat [array get optiondefault] $args] {
 	set option([string trimleft $opt -]$id) $val
     }
+puts !$option(size$id)
     # Create the primary component. This is the displayed polygon.
     set primary($id) [$canvas create polygon \
             [expr $x - $option(size$id)] $y \
@@ -252,6 +253,6 @@ body ::tycho::Junction::coords {id canvas slate args} {
 	    	[expr $x - $option(size$id)] $y \
     		$x [expr $y - $option(size$id)] \
     		[expr $x + $option(size$id)] $y \
-    		$x [expr $y - $option(size$id)]
+    		$x [expr $y + $option(size$id)]
     }
 }
