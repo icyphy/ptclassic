@@ -131,8 +131,6 @@ extern char *sprintf();
 #include <sys/socket.h>
 #endif
 
-#include <sys/socket.h>			/* Need for bind(). */
-
 #ifdef PTSUN4
 #include <sys/time.h>			/* For select() */
 /* Place all SunOS4.1.3 specific declarations here. (In alphabetical order). */
