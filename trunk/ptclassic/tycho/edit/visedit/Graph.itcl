@@ -114,6 +114,9 @@ class ::tycho::Graph {
     # Initialize the graph from a description
     method init {description}
 
+    # Change the value associated with the given attribute within contents
+    method modContents {nodename attr value}
+
     # Return the parents of a node.
     method parents {nodename}
 
@@ -383,6 +386,33 @@ body ::tycho::Graph::init {description} {
     foreach node $description {
         eval add $node
     }
+}
+
+#####################################################################
+#### modContents
+# Change the value associated with attr within the contents of a node
+# to the given value. If the attr does not exist, append it to the 
+# current contents. NOTE: If a value in the contents is the same as
+# the attr you wish to change, and occurs before the attr, an error will
+# be returned.
+#
+body ::tycho::Graph::modContents {nodename attr value} {
+    set current [contents $nodename]
+    set index [lsearch -exact $current $attr]
+    
+    # if there is no attr present
+    if {$index == -1} {
+        set new "$current $attr $value"
+        return [setContents $nodename $new]
+    }
+    # if the attr is found as a value
+    if {[expr $index/2*2] != $index} {
+        error "Attr is found as a value"           
+    }
+    # value is at index + 1
+    incr index
+    set new [lreplace $current $index $index $value]
+    setContents $nodename $new
 }
 
 #######################################################################
