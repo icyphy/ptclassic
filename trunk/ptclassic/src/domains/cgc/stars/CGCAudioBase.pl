@@ -83,7 +83,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	int standardIO:1;
     }
 
-    codeblock(globalDecl) {
+    codeblock(globalDec) {
       /* Struct that contains the header information */
       /* for Sun audio files */
       typedef struct sound_struct {
@@ -133,6 +133,15 @@ limitation of liability, and disclaimer of warranty provisions.
                    format. Please refer to the star Profile.");
 	      exit(1);
 	    }
+	  /* set the corresponding defstates using info in the header */
+	  /* this can be useful if the user is not sure of the */
+	  /* data encoding in the file */
+	  if($starSymbol(header).dataFormat == 3)
+	    $ref(encodingType) = "linear16";
+	  else
+	    $ref(encodingType) = "ulaw8";
+	  $ref(sampleRate) = $starSymbol(header).samplingRate;
+	  $ref(channels) = $starSymbol(header).channelCount;
 	}
     }
     codeblock(openFileForWriting) {
@@ -376,7 +385,7 @@ limitation of liability, and disclaimer of warranty provisions.
       /* Define audio driver : HACK: This is Sun Specific */
       addInclude("<sys/audioio.h>");
       /* Define the SunSound Struct for audio file header*/
-      addGlobal(globalDecl, "global");
+      addGlobal(globalDec, "globals");
       addGlobal(globals);
       addProcedure(audio_setupDef,   "CGCAudioBase_audio_setup");
       addProcedure(audio_controlDef, "CGCAudioBase_audio_control");
