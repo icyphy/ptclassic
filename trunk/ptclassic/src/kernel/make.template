@@ -42,7 +42,7 @@ LIBSRCS=Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc expandPath.cc Wormhole.cc WormConnect.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc gnulib3a.c
+ KnownState.cc State.cc StringState.cc Display.cc gnulib3a.c
 
 # All sources.
 SRCS=$(LIBSRCS) interpmain.cc
@@ -57,6 +57,7 @@ HDRS=dataType.h Block.h Connect.h \
  FloatArrayState.h IntArrayState.h \
  Tokenizer.h Topology.h Universe.h miscFuncs.h type.h \
  ComplexSubset.h Wormhole.h WormConnect.h \
+ Display.h \
  Linker.h Linker.sysdep.h \
 
 # Library objects
@@ -65,6 +66,7 @@ LIBOBJS=Block.o Connect.o ComplexArrayState.o ComplexState.o Fraction.o Galaxy.o
  PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
  expandPath.o Wormhole.o WormConnect.o Domain.o Linker.o DataStruct.o \
  checkConnect.o gnulib3a.o \
+ Display.o \
  FloatState.o IntState.o KnownState.o State.o StringState.o \
  FloatArrayState.o IntArrayState.o
 
