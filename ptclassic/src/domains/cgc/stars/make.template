@@ -49,16 +49,6 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC)
 # put base stars first
 PL_SRCS= \
  CGCAbs.pl \
- CGCChop.pl \
- CGCFIR.pl \
- CGCFix.pl \
- CGCGAL.pl \
- CGCGoertzelBase.pl \
- CGCLMS.pl \
- CGCPCMwrite.pl \
- CGCQuant.pl \
- CGCSGIAudio.pl \
- CGCXgraph.pl \
  CGCAdd.pl \
  CGCAddCx.pl \
  CGCAddFix.pl \
@@ -66,6 +56,8 @@ PL_SRCS= \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
  CGCBusFork.pl \
+ CGCCase.pl \
+ CGCChop.pl \
  CGCChopVarOffset.pl \
  CGCCollect.pl  \
  CGCCommutator.pl \
@@ -84,12 +76,16 @@ PL_SRCS= \
  CGCDirichlet.pl \
  CGCDistributor.pl \
  CGCDivByInt.pl \
+ CGCDownCounter.pl \
  CGCDownSample.pl \
  CGCDTMFPostTest.pl \
+ CGCEndCase.pl \
  CGCExp.pl \
  CGCExpr.pl \
  CGCFFTCx.pl \
+ CGCFIR.pl \
  CGCFIRFix.pl \
+ CGCFix.pl \
  CGCFixToCx.pl \
  CGCFixToFix.pl \
  CGCFixToFloat.pl \
@@ -98,11 +94,13 @@ PL_SRCS= \
  CGCFloatToInt.pl \
  CGCFloor.pl \
  CGCFork.pl \
+ CGCGAL.pl \
  CGCGGAL.pl \
  CGCGain.pl \
  CGCGainFix.pl \
  CGCGainInt.pl \
  CGCGoertzel.pl \
+ CGCGoertzelBase.pl \
  CGCGoertzelPower.pl \
  CGCImpulse.pl \
  CGCIntegrator.pl \
@@ -110,8 +108,10 @@ PL_SRCS= \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
  CGCIntToBits.pl \
- CGCLimit.pl \
+ CGCLMS.pl \
  CGCLMSOscDet.pl \
+ CGCLastOfN.pl \
+ CGCLimit.pl \
  CGCLog.pl \
  CGCLogic.pl \
  CGCMaxMin.pl \
@@ -122,12 +122,15 @@ PL_SRCS= \
  CGCMpyFix.pl \
  CGCMpyInt.pl \
  CGCMux.pl \
+ CGCOrderTwoInt.pl \
  CGCPad.pl \
  CGCPCM.pl \
  CGCPCMread.pl \
+ CGCPCMwrite.pl \
  CGCPcwzLinear.pl \
  CGCPolarToRect.pl \
  CGCPrinter.pl \
+ CGCQuant.pl \
  CGCQuantIdx.pl \
  CGCRamp.pl \
  CGCRampFix.pl \
@@ -138,21 +141,28 @@ PL_SRCS= \
  CGCRectToCx.pl \
  CGCRectToPolar.pl \
  CGCRepeat.pl \
+ CGCRepeater.pl \
  CGCReverse.pl \
  CGCTrainer.pl \
  CGCScrambler.pl \
+ CGCSGIAudio.pl \
  CGCSGIAudioIn.pl \
  CGCSGIAudioOut.pl \
+ CGCSelect.pl \
+ CGCSelf.pl \
  CGCSgn.pl \
  CGCSin.pl \
+ CGCSinc.pl \
  CGCSleep.pl \
+ CGCSpread.pl \
  CGCSqrt.pl \
  CGCSub.pl \
  CGCSubCx.pl \
  CGCSubFix.pl \
  CGCSubInt.pl \
- CGCSpread.pl \
+ CGCSumOfN.pl \
  CGCSunSound.pl \
+ CGCSwitch.pl \
  CGCTable.pl \
  CGCTableCx.pl \
  CGCTableInt.pl \
@@ -161,18 +171,9 @@ PL_SRCS= \
  CGCUpSample.pl \
  CGCWaveForm.pl \
  CGCXMgraph.pl \
- CGCXscope.pl \
  CGCXYgraph.pl \
- CGCCase.pl \
- CGCEndCase.pl \
- CGCDownCounter.pl \
- CGCRepeater.pl \
- CGCLastOfN.pl \
- CGCSumOfN.pl \
- CGCSelf.pl \
- CGCSwitch.pl \
- CGCSelect.pl \
- CGCSinc.pl
+ CGCXgraph.pl \
+ CGCXscope.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
