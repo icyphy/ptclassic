@@ -169,6 +169,8 @@ proc ::ptkExpandEnvVar { path } {::tycho::expandPath $path}
 # <code>currentPoint</code>.  These two should always be redefined
 # as a pair, since <code>currentPoint</code> is assumed to return
 # a syntax undertood by <code>seePoint</code>.
+# Derived classes may wish to redefine <code>setReadOnly</code>,
+# for example to disable menu entries.
 # Derived classes may also wish to override <code>reload</code>.
 # For example, the text editors derived from this class overload
 # <code>reload</code> to prevent it from corrupting the clipboard buffer.
@@ -261,6 +263,9 @@ class ::tycho::File {
 
     # Save data to a crash recovery file.
     method saveCrash {}
+
+    # Specify whether or not modifications are allowed in the displayed text.
+    method setReadOnly {bool}
 
     # Toggle the read-only status of a file (maybe invoking revision control).
     method toggleReadOnly {}
@@ -447,21 +452,12 @@ configbody ::tycho::File::file {
 #########################################################################
 #### -readonly option configuration
 # Set whether the data can be modified.  A value of 1 means "no", whereas
-# a value of 0 means "yes".
+# a value of 0 means "yes".  Note that this is independent of whether the
+# associated file is read-only.  This determines whether the buffer can
+# be modified, not whether the file can be modified.
 # 
 configbody ::tycho::File::readonly {
-    set readOnly $itk_option(-readonly)
-
-    if [winfo exists $prefix] {
-	if {$itk_option(-readonly)} {
-	    $itk_component(dismiss) configure -text \
-                    "DISMISS  $myclass (read only)"
-	} {
-	    $itk_component(dismiss) configure -text "DISMISS  $myclass"
-	}
-    } {
-	$itk_component(dismiss) configure -text "DISMISS  $myclass"
-    }
+    setReadOnly $itk_option(-readonly)
 }
 
 #########################################################################
@@ -972,6 +968,28 @@ body ::tycho::File::saveCrash {} {
 }
 
 #####################################################################
+#### setReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::File::setReadOnly {bool} {
+    if [winfo exists $prefix] {
+	if {$bool} {
+	    $itk_component(dismiss) configure -text \
+                    "DISMISS  $myclass (read only)"
+            disableMenuItem {Insert...} File
+            disableMenuItem Save File
+	} {
+	    $itk_component(dismiss) configure -text "DISMISS  $myclass"
+            enableMenuItem {Insert...} File
+            enableMenuItem Save File
+	}
+    }
+}
+
+#####################################################################
 #### toggleReadOnly
 # Toggle the read-only status of the file.  If the file is under
 # revision control (e.g. SCCS or RCS), then check in or check out
@@ -980,14 +998,14 @@ body ::tycho::File::saveCrash {} {
 body ::tycho::File::toggleReadOnly {} {
     set revclass [::tycho::RevControl::whichRevClass $this]
     if {$revclass != {}} {
-        if [getReadonly] {
+        if {![file writable [filename]]} {
             $revclass::checkOut $this
         } {
             $revclass::checkIn $this
         }
     } {
         # NOTE: Unix-only implementation here.
-        if [getReadonly] {
+        if {![file writable [filename]]} {
             exec chmod +w [filename]
             configure -readonly 0
         } {
