@@ -220,9 +220,10 @@ CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& /*target*/) {
 	DFPortHole *iSource,*iDestination,*iNew,*oSource,*oDestination,*oNew;
 
 	// Create the communication pair for this port
-	CommPair pair = (p->isItInput()? *incoming: *outgoing)(*p,numXfer,tar);
+	CommPair pair;
 
 	if (p->isItInput()) {
+	    pair = incoming(*p,numXfer,tar);
 	    inputs.append(*pair.inner);
 	    iNew = iSource = (DFPortHole*)pair.inner->portWithName("output");
 	    iDestination = &cgPort;
@@ -235,6 +236,7 @@ CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& /*target*/) {
 	    }
 	}
 	else {
+	    pair = outgoing(*p,numXfer,tar);
 	    outputs.append(*pair.inner);
 	    iSource = &cgPort;
 	    iNew=iDestination = (DFPortHole*)pair.inner->portWithName("input");
