@@ -79,6 +79,11 @@ public:
   StringList displaySchedule();  
 
 protected:
+  // The schedule of the galaxy
+  // Made protected to allow SRCGCRecursiveScheduler to access it.
+  // MR, VL, FB - SupÅÈlec, March 1998
+  SRRecursiveSchedule * schedule;
+
   // Number of instants to execute
   int numInstants;
 
