@@ -36,7 +36,8 @@ DIRS = Packages Xpackages vem
 LIBDIRS = Packages Xpackages
 
 # "leaf" directories with a make.template
-MTDIRS = attache installColors masters oct2ps oct2tim octfix octls octredomain
+MTDIRS = attache installColors masters oct2ps oct2tim \
+	octfix octgc octls octredomain
 
 
 # "leaf" directories with no make.template
