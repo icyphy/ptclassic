@@ -51,6 +51,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 #include "KnownState.h"
 #include "PtGate.h"
+#include "Scope.h"
 
 #define TOKSIZE 256
 
@@ -106,19 +107,6 @@ extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 const int MAXLEN = 20000;
 const int MAXSTRINGLEN = 4096;
 
-// code duplication, once parseFileName is part of state, remove this function
-const State* tempLookup (const char* name, Block* blockIAmIn) {
-       while (blockIAmIn) {
-		if (blockIAmIn->isItWormhole())
-			blockIAmIn = blockIAmIn->parent();
-		State* p = blockIAmIn->stateWithName(name);
-		if (p) return p;
-		blockIAmIn = blockIAmIn->parent();
-	}
-	// not found, consult global symbol list
-	return KnownState::lookup(name);
-}
-
 // This could be moved as a member function of State so that other states
 // can use it.  We allow the filename to be inherited from a state value
 // using the curly braces, e.g. < {FilterTapFile} or < {Directory}/{File}
@@ -138,7 +126,7 @@ StringList parseFileName(State& state, const char* fileName) {
 	  case '{': {
 	    // next token must be a state name followed by a closed curly brace
 	    lexer >> tokbuf;
-	    const State* s = tempLookup(tokbuf,state.parent()->parent());
+	    const State* s = state.lookup(tokbuf,state.parent()->parent());
 	    if (!s) {
 		Error::abortRun(state,"undefined symbol: ",tokbuf);
 		return emptyString;
@@ -188,7 +176,7 @@ StringList parseNestedExpression(State& state, const char* expression) {
 	    curSeparator = tokSeparator;
 
 	    // lookup the next token on the parameter list
-	    const State* s = tempLookup(tokbuf,state.parent()->parent());
+	    const State* s = state.lookup(tokbuf,state.parent()->parent());
 	    if (s) {
 	      lexer >> tmptokbuf;
 	      if ( tmptokbuf[0] == '}' ) {
@@ -345,15 +333,21 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 }
 
 const State* State :: lookup (const char* name, Block* blockIAmIn) {
+    if (parent()->scope()) {
+	State* p = parent()->scope()->lookup(name);
+	if (p) return p;
+    }	
+    else {
 	while (blockIAmIn) {
-		if (blockIAmIn->isItWormhole())
-			blockIAmIn = blockIAmIn->parent();
-		State* p = blockIAmIn->stateWithName(name);
-		if (p) return p;
+	    if (blockIAmIn->isItWormhole())
 		blockIAmIn = blockIAmIn->parent();
+	    State* p = blockIAmIn->stateWithName(name);
+	    if (p) return p;
+	    blockIAmIn = blockIAmIn->parent();
 	}
-	// not found, consult global symbol list
-	return KnownState::lookup(name);
+    }
+    // not found, consult global symbol list
+    return KnownState::lookup(name);
 }
 
 // put info.
