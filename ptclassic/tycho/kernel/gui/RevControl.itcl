@@ -365,9 +365,11 @@ body ::tycho::RevControl::compareVersion {} {
     }
 
     # We have the files! Now safely invoke diffWidget
-    set diffWidget [::tycho::view EditDiff -toolbar 1 -textheight 32 \
+    # FIXME: the text height should be a "set" preference, so this is
+    # just a hack.
+    set diffWidget [::tycho::view EditDiff -toolbar 1 \
+            -textheight [expr [preference get textHeight] - 7] \
             -filename1 $tmpFile1 -filename2 $tmpFile2]
-    $diffWidget configureUpdate
     $diffWidget compareFile
 
     cd $olddir
