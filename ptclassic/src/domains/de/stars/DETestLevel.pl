@@ -11,16 +11,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
+.pp
 This star detects threshold crossings if "crossingsOnly" is TRUE.
 Otherwise, it simply compares the input against the "threshold".
-
+.lp
 If "crossingsOnly" is TRUE, then: 
-(1) A TRUE is sent to "output" when the "input" particle exceeds or
-    equals the "threshold" value, having been previously smaller.
-(2) A FALSE is sent when the "input" particle is smaller than
-    "threshold" having been previously larger.
+.ip 1)
+A TRUE is sent to "output" when the "input" particle exceeds or
+equals the "threshold" value, having been previously smaller.
+.ip 2)
+ A FALSE is sent when the "input" particle is smaller than
+"threshold" having been previously larger.
+.lp
 Otherwise, no output is produced.
-
+.pp
 If "crossingsOnly" is FALSE, then a TRUE is sent to "output"
 whenever any "input" particle greater than or equal to "threshold"
 is received, and a FALSE is sent otherwise.
