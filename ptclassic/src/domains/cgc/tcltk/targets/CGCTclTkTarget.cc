@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "CGCTclTkTarget.h"
+#include "CGCStar.h"
 #include "KnownTarget.h"
 
 // #define PTOLEMY04
@@ -93,6 +94,14 @@ int CGCTclTkTarget :: codeGenInit() {
 	mainLoopTerm += "runFlag = 0;\n";
 
 	return CGCTarget::codeGenInit();
+}
+
+// Star States are global so that they may be accessed by call-back functions.
+void CGCTclTkTarget::declareStar(CGCStar* star)
+{
+    globalDecls << star->declareStates();
+    mainDecls << star->declarePortHoles();
+    mainInit << star->initCodeStates();
 }
 
 void CGCTclTkTarget :: beginIteration(int repetitions, int depth) {
