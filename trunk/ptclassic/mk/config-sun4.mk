@@ -19,4 +19,4 @@ TCL_H_DIR=$(TCL_ROOT)/include
 # Directory containing Tcl/Tk libraries
 TCL_LIBDIR=$(TCL_ROOT)/lib.$(ARCH)
 
-
+S56DIR= $(ROOT)/vendors/s56dsp
