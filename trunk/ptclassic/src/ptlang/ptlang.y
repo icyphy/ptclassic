@@ -77,6 +77,7 @@ int bodyMode = 0;		/* special lexan mode flag to read bodies  */
 int docMode = 0;		/* flag document bodies  */
 int descMode = 0;		/* flag descriptor bodies  */
 int codeMode = 0;		/* flag code block bodies  */
+int htmlOnly = 0;		/* If 1, then generate only .htm files */
 FILE* yyin;			/* stream to read from */
 
 char* progName = "ptlang";	/* program name */
@@ -463,6 +464,12 @@ version:
 		{ char b[SMALLBUFSIZE];
 		  objVer = $1;
 		  sprintf(b, "\"%s\"", $2);
+		  objDate = save(b);
+		}
+|	IDENTIFIER IDENTIFIER IDENTIFIER IDENTIFIER
+		{ char b[SMALLBUFSIZE];
+		  objVer = $1;
+		  sprintf(b, "\"%s/%s/%s\"", $2, $3, $4);
 		  objDate = save(b);
 		}
 |	'%' IDENTIFIER '%' '%' IDENTIFIER '%'	
@@ -1322,6 +1329,7 @@ void genDef ()
 	}
 	sprintf (fullClass, "%s%s", galDef ? "" : domain, objName);
 
+   if (!htmlOnly) {
 /***************************************************************************
 			CREATE THE .h FILE
 */
@@ -1506,7 +1514,7 @@ void genDef ()
 			 objName);
 	}
 	(void) fclose(fp);
-
+    }  /* htmlOnly */
 
 /**************************************************************************
 		CREATE THE HTML DOCUMENTATION FILE
@@ -2318,11 +2326,21 @@ int main (argc, argv)
 int argc;
 char **argv;
 {
-	if (argc != 2) {
-		fprintf (stderr, "Usage: %s file\n", *argv);
+	if (argc < 2 || argc > 3) {
+		fprintf (stderr, "Usage: %s -htm file\n", *argv);
 		exit (1);
 	}
-	inputFile = argv[1];
+	if (argc == 3) {
+		if (! strcmp(argv[1],"-htm")) { 
+			htmlOnly = 1;
+			inputFile = argv[2];
+		} else {
+			fprintf (stderr, "Usage: %s -htm file\n", *argv);
+			exit (1);
+		}
+	} else {
+		inputFile = argv[1];
+	}
 	if ((yyin = fopen (inputFile, "r")) == NULL) {
 		perror (inputFile);
 		exit (1);
