@@ -69,12 +69,12 @@ ALLSTARHTMLIDXS =	$(addprefix $(VPATH)/, \
 				$(filter-out thor, $(DOMAINS))))
 
 # Star index of all the star index files
-starHTML.idx: domainstarHTML $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+starHTML.idx: domainstarHTML $(TYCHOMAKEINDEX)
 	@echo "Merging $(VPATH)/$@"
 	@rm -f $(VPATH)/$@
 	@(cd $(VPATH); \
 	 echo "set TYCHO $(PTOLEMY)/tycho; \
-		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		source $(TYCHOMAKEINDEX); \
 		tychoVpathMergeIndices {} $(VPATH)/$@ $(VPATH)/ \
 			$(ALLSTARHTMLIDXS)" \
 		| itclsh)
@@ -99,12 +99,12 @@ ALLDEMOIDXS =	$(addprefix $(VPATH)/, \
 				$(filter-out thor, $(DOMAINS))))
 
 # Star index of all the star index files
-starDemo.idx: domainstardemoidx $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+starDemo.idx: domainstardemoidx $(TYCHOMAKEINDEX)
 	@echo "Merging $(VPATH)/$@"
 	@rm -f $(VPATH)/$@
 	@(cd $(VPATH); \
 	 echo "set TYCHO $(PTOLEMY)/tycho; \
-		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		source $(TYCHOMAKEINDEX); \
 		tychoVpathMergeIndices {} $(VPATH)/$@ $(VPATH)/ \
 			$(ALLDEMOIDXS)" \
 		| itclsh)
@@ -132,12 +132,12 @@ ALLDOMAINIDXS =	$(addprefix $(VPATH)/, \
 .PHONY:	TAGS domain.idx force
 
 # Star index of all the star index files
-domain.idx:  $(ALLDOMAINIDXS) $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl
+domain.idx:  $(ALLDOMAINIDXS) $(TYCHOMAKEINDEX)
 	@echo "Merging $(VPATH)/$@"
 	@rm -f $(VPATH)/$@
 	@(cd $(VPATH); \
 	 echo "set TYCHO $(PTOLEMY)/tycho; \
-		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+		source $(TYCHOMAKEINDEX); \
 		tychoVpathMergeIndices {} $(VPATH)/$@ $(VPATH)/ \
 			$(ALLDOMAINIDXS)" \
 		| itclsh)
@@ -176,7 +176,10 @@ TAGS:
 	done
 	-cat -s $(DOMAINS:%=%/TAGS) > $@
 
-starindex: $(PTOLEMY)/lib/tcl/starindex.tcl
+starindex: $(STARINDEX)
 	-mkdir $(ROOT)/doc
 	-mkdir $(ROOT)/doc/star-demo-index
-	mkStarIndex "$(sort $(DOMAINS))" $(ROOT)/doc/star-demo-index
+	echo "source $(STARINDEX); \
+		starindex_WriteWWWStarDemoDir \
+			\"$(sort $(DOMAINS))\" \
+			$(ROOT)/doc/star-demo-index" | itclsh
