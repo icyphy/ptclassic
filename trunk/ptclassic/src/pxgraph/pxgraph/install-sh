@@ -86,6 +86,14 @@ then
 fi
 
 
+# cygwin32 hack.  If $src does not exist, but $src.exe does, then
+# use src.exe
+if [ -f $src  -a -f ${src}.exe ]
+then
+	src=${src}.exe
+	dst=${dst}.exe
+fi
+
 # If destination is a directory, append the input filename; if your system
 # does not like double slashes in filenames, you may need to add some logic
 
