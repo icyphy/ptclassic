@@ -177,7 +177,7 @@ foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	cg/macroScheduler cg/ddfScheduler cgc/targets cgc/tcltk \
 	cg56/dsp cg96/dsp \
 	sdf/atm sdf/contrib sdf/dsp sdf/image \
-	sdf/matrix sdf/matlab sdf/nomatlab \
+	sdf/matrix sdf/matlab \
 	cgc/rtlib \
 	mdsdf/tcltk de/atm cg/multiScheduler $EXPEXTRAS )
 	optmkdir $x
