@@ -8,10 +8,13 @@ Soonhoi Ha
 .H1 "Introduction"
 .pp
 The discrete event (DE) domain in \*(PT provides a very general
+.IE "discrete event domain"
+.IE "DE domain"
 environment for the time-related simulation of the digital systems,
 such as queueing network simulation.  In the \*(DO domain, each
 .c Particle
 represent an \fIevent\fR which corresponds to the change of system
+.IE "event"
 state.  The
 .c DE\ Scheduler
 processes the events in the chronological order.  Since the time interval
@@ -28,6 +31,7 @@ and the latency in the
 .c Block .
 .H1 "The \\*(DO Scheduler
 .pp
+.IE "DE Scheduler"
 The scheduler in \*(PT determines the order of execution of
 blocks, and also expects a particular behavior on the part of
 .c Star s
@@ -43,26 +47,28 @@ will be the content of a
 .c Particle 
 in the \*(DO domain.  Each 
 .c Particle
-is assigned to a time stamp telling when it is generated. 
+is assigned a time stamp telling when it is generated. 
+.IE "time stamp"
 Since the events are irregularly spaced in time
 and the system responses can be very dynamic in general,
 all scheduling actions are done at runtime.  
 At runtime, the
 .c DE\ Scheduler
 processes the events in the chronological order until the
-global time reaches the \fIstop time\fR.
+global time reaches the "stop time".
 .pp
 The
 .c DE\ Scheduler
 maintains a \fIglobal event queue\fR where
+.IE "event queue"
 .c Particle s
 currently in the system are sorted in accordance with time stamps.
 Some 
 .c DEStar s
 are event-generators which do not consume any events. 
-For these stars, some system-generated triggering 
+They need to be triggered by the system-generated triggering
 .c Particle s
-are placed in the event-queue beforehand.
+which are to be placed in the event-queue before the system is executed.
 The 
 .c Scheduler
 fetches an event from the head of the queue, which is the
@@ -76,11 +82,143 @@ simultaneous events when defining
 After a block is executed it may generate some output events on its
 output 
 .c PortHole s.
-These events are by turns put into the global event queue.
+These events are also put into the global event queue.
 Then the scheduler fetches another events and repeats its action until
-a given \fIstop time\fR is reached. The \fIstop time\fR should be specified
-before scheduler runs (default is 100.0). \fBTime\fR within the \*(DO
-domain is simulated time. But the scale of time can be changed. 
+a given stopping condition is met.
+.pp
+There may have many simultaneous events in the event queue.
+Which event to be fetched first?
+One possible strategy is to choose one event arbitrarily.
+This scheme is the simplest in the implementation.  We can stack up
+the simultaneous events in the queue in the order of arrivals.  Since
+the events are randomly generated, their arrivals to the event queue
+are also random.  This scheme, however, has a pitfall.
+Suppose block A produces an output event to block B and block C
+respectively.  And block B processes the incoming event and
+generates an output event to block C.  If block B takes
+zero time (or insignificant time), block C should process two input
+events (one from block B, and one from block A) at the same time
+to generate the right result.  What happens if we stack the output
+events from block A into the event queue in the order in which
+block C is executed before block B.  Before block B is executed,
+block C is not aware of any possibility of simultaneous input events.
+To overcome this difficulty, the usual trick is to put an
+infinitesimal delay in the arc from block A to block C.
+This delay is enough to schedule block B before block C, thus
+enables block C to detect the simultaneous events.  This situation will
+be frequent since many 
+.c Star s
+in the DE domain are delay-free.  See the following sections for the reason.
+This example is a simple one.  If we have many blocks involved in
+this kind of delay-free operations, the assignment of
+infinitesimal delay is no longer easy but error-prone.
+.pp
+Our technique is to assign a level (called \fIdepth\fR) to the
+.IE "depth, DEStar"
+blocks in the DE domain.  The \fIdepth\fR of a block is
+defined as the minus of the longest path from the block 
+to any "terminating block".
+There are three categories of the terminating blocks.  The first one
+is a
+.c Star
+without output ports.  The second one is the 
+.c Star s
+on the 
+.c Wormhole
+boundary where the output ports of the
+.c Star
+corresponds to the output ports of the
+.c Wormhole .
+The third category is the \fIdelay-star\fRs which will be discussed
+in the next section.  By defining the \fIdepth\fR of a terminating star $-1$,
+the \fIdepth\fR of any non-terminating star is less than $-1$.
+If a 
+.c Star
+has a smallest \fIdepth\fR, it means that the star is to be scheduled first
+among the destinations of the simultaneous events.
+Therefore, when we put an event into the event queue, we first check the
+time stamp of the event, second compare the \fIdepth\fRs of the
+destination blocks among simultaneous events.
+During the process of depth assignment, we can detect any delay-free
+loop in the DE domain.
+.IE "delay-free loop"
+While the delay-free loop in the SDF domain results in a deadlock
+state of the system, the delay-free loop in the DE domain may be
+intentional.  The delay-free loop in the DE domain is detected when
+the \fIdepth\fRs of two 
+.c Star s
+depends on each other undecided during the recursive calculation
+of the depths.
+In other words, if there is a loop of 
+.c DE\ Star s
+with no terminating star,
+the loop is called delay-free.  The difficulty comes from the
+fact that the definition of the \fIdelay-star\fR is somewhat
+ambiguous.  We define a 
+.c DE\ Star
+as a \fIdelay-star\fR if it always takes a non-zero time
+to produce output events from any input event.
+But, there are some 
+.c DE\ Star s
+which generate some outputs without delay
+with some inputs but some outputs with a non-zero delay with some inputs.
+A good example is a 
+.c Queue\ Star .
+If the \fIdemand\fR input event arrives, the 
+.c Star
+generates an output immediately in case there are events stored in the 
+queue.  When, a normal input event arrives, however, it stores
+the event into the queue if the associated server is not free.
+By our definition, the 
+.c Queue\ Star
+is not a delay-star.  But it is possible to make a delay-free
+loop with this
+.c Queue\ Star
+without satisfying a real deadlock (or infinite loop of events) condition.
+Therefore, we just generates a warning message if we detect a delay-free
+loop to remind the user to check up the connections.
+.pp
+\fBTime\fR in the \*(DO
+domain means simulated time.  
+The time unit may need to be scaled if the DE domain inside a
+.c Wormhole
+is to be synchronized with the outer timed domain.
+The procedure of scaling time units is illustrated in 
+the "\fBDomains in Ptolemy\fR" document.
+.pp
+The DE domain is a timed domain.  
+If it contains another
+timed domain (such as THOR) in a
+.c DE\ Wormhole ,
+the wormhole can become a "process star"\** if the
+.(f
+\** Read document "\fBDomains in Ptolemy\fR" before read this paragraph.
+.)f
+inner domain is not deadlocked\** when stopping condition is met.
+.(f
+\** The domain is said deadlocked if there is no more runnable blocks
+in the domain.
+.)f
+Therefore, we keep another queue structure, called \fIprocess queue\fR.
+.IE "process queue"
+A process star is inserted into the process queue after
+execution as long as it is not deadlocked.
+On the other hand, the DE domain may reside inside a 
+.c Wormhole
+of another timed domain.  In this case, the 
+.c DE\ Scheduler
+must check when the system produces output events to the outer domain.
+The DE domain finishes its execution normally when the stop time
+is reached.  But if the flag \fIstopAfterOutput\fR is set,
+it finishes when it generates any output even before the stop time.
+The flag is set if the outer domain is timed.
+There is another flag, called \fIstopBeforeDeadlocked\fR, which
+is set when the DE domain finishes the current execution not
+deadlocked.  If the outer domain is a timed domain and the
+\fIstopBeforeDeadlocked\fR flag of the inner DE domain is set, then
+the
+.c Wormhole
+will be regarded as a process star in the outer domain.
 .H1 "Special \\*(DO Particles
 .pp
 .c Particle s
@@ -92,7 +230,8 @@ in \*(PT are derived from a basic
 .c class\ Particle .
 All
 .c Particle s
-in \*(PT are available for use within any particular domain.
+defined in the kernel of \*(PT are available 
+for use within any particular domain.
 However, each domain typically has some special
 .c Particle s
 that are particular to that domain.
@@ -114,6 +253,7 @@ are programmed in the \*(DO domain.
 .pp
 A 
 .c DE\ Star
+.IE "DE Star"
 can be viewed as an event-processing unit, which receives
 events from the outside, processes them, and generates output events after
 some latency. In the \*(DO domain, the management of the
@@ -121,7 +261,7 @@ time stamps of the
 .c Particle s
 is as important as the functionality of a
 .c Star .
-For the time-management, the
+For time-management, the
 .c DEStar\ class
 has two DE-specific members : 
 \fIarrivalTime\fR and \fIcompletionTime\fR.
@@ -132,18 +272,24 @@ tells when the last execution of the
 .c Star
 is completed.  
 Since the functionality and the time management are
-the orthogonal ingredients of the
+two orthogonal tasks of the
 .c DE\ Star ,
 we dedicate some 
 .c DE\ Star s, 
-so-called \fIdelay-stars\fR,
+so-called \fIdelay-star\fRs,
+.IE "delay-star, de"
 to the task of time-management (\fIDelay, ExpDelay, UniDelay\fR).
 The other 
 .c Star s,
-so-called \fIfunctional-stars\fR,
+so-called \fIfunctional-star\fRs,
+.IE "functional-star, de"
 are stripped of the time-management task, generating the output
 events at the same time when it receives input events.
-The delay-stars and the other-stars compose two orthogonal
+The
+.c DE\ Star
+has a flag, \fIdelayType\fR, to be set if it is categorized
+into the delay star, or reset otherwise.
+The delay-stars and the functional-stars compose two orthogonal
 sets of the
 .c DE\ Star s.
 By combining a delay-star and a functional-star, we can
@@ -152,9 +298,12 @@ realize a general
 (combining two stars means concatenating them).
 .H2 "Delay Stars
 .pp
-\fIDelay-stars\fR are in charge of time-management task
-in the \*(DO domain.  We can classify the delay-stars
+\fIDelay-star\fRs are in charge of time-management task
+in the \*(DO domain.  The more strict definition is already
+given in the previous section.
+We can classify the delay-stars
 further into two types.  One type is a \fIpure-delay\fR.
+.IE "pure-delay type, de"
 A delay-star of \fIpure-delay\fR type is that the output
 event is generated a user-given latency after the input
 event comes.  The following example will help the understanding.
@@ -163,10 +312,8 @@ It is the preprocessor format of the
 in the \*(DO domain.  For more details on the preprocessor,
 look at the document, "\fBThe Ptolemy Preprocessor Language\fR".
 .(c
-
 ident {
 /**************************************************************************
- Copyright (c) 1990 The Regents of the University of California.
 
  This star delays its input by random amount according to an
  exponential random variable with parameter mean.
@@ -177,7 +324,7 @@ defstar {
 	name {ExpDelay}
 	domain {DE}
 	desc {
-	   "Delays its input by random amount according to an"
+	   "Delays its input by random amount according to an\n"
 	   "exponential random variable with parameter mean."
 	}
 	input {
@@ -194,14 +341,31 @@ defstar {
 		default {"1.0"}
 		desc { "Amount of time delay" }
 	}
+	hinclude { <NegativeExpntl.h> }
+	ccinclude { <ACG.h> }
+	protected {
+		NegativeExpntl *random;
+	}
+// declare the static random-number generator in the .cc file
+	code {
+		extern ACG gen;
+	}
 	constructor {
 		input.inheritTypeFrom(output);
+		delayType = TRUE;
+		random = new NegativeExpntl(double(mean),&gen);
+	}
+	destructor {
+		delete random;
+	}
+	start {
+		random->mean(double(mean));
 	}
 	go {
-	   // Generate a uniform random variable.
-	   double p = drand48();
-	   // Turn it into an exponential, and add to completionTime
-	   completionTime = arrivalTime - log(p) * double(mean);
+	   // Generate a exponential random variable.
+	   double p = (*random)();
+	   // add to completionTime
+	   completionTime = arrivalTime + p;
 	   Particle& pp = input.get();
            output.put(completionTime) = pp;
 	}
@@ -210,9 +374,34 @@ defstar {
 Inside the \fIgo()\fR method description, the \fIcompletionTime\fR
 is determined by the arrival time of the current event plus
 a random delay which is exponentially distributed.  
+We use the gnu library for random number generation.
+.IE "random number generation"
+The
+.c ACG\ class
+.IE "ACG class"
+generates a sequence of uniformly distributed random numbers 
+between $0$ and $1$.  
+In \*(PT, we have only one instance of
+.c ACG\ class
+which is defined in the kernel.  Hence, an instance of the
+.c ACG\ class
+(\fIgen\fR) is declared as an external variable.
+The gnu library provides a set of classes for random number
+generations.   The
+.c NegativeExpntl\ class
+is one of them to generate a sequence of exponentially distributed
+random numbers.  The arguments of the class constructor are
+the mean value and the 
+.c ACG\ class 
+instance.
+Other examples of the classes for random number generations are
+.c Normal ,
+.c Uniform ,
+etc.
 The last two lines will be explained in subsection 4.2.
 .pp
 The other type is a \fIserver\fR.  
+.IE "server type, de"
 In a delay-star of \fIserver\fR type, the input event should wait
 until the previous execution is completed.  It emulates a server that
 can process only one event at a time.  Here is the example of a
@@ -232,12 +421,7 @@ defstar {
 	name {Server}
 	domain {DE}
 	desc {
-	   "This star emulates a server."
-	   "If input events arrive when it is not busy,"
- 	   "it delays them by the service time."
-	   "If they arrive when it is busy,"
- 	   "it delays them by more."
-	   "It must become free, and then serve them."
+	   "This star emulates a server.\n"
 	}
 	input {
 		name {input}
@@ -255,6 +439,7 @@ defstar {
 	}
 	constructor {
 		input.inheritTypeFrom(output);
+		delayType = TRUE;
 	}
 	go {
 	   // No overlapped execution. set the time.
@@ -284,6 +469,7 @@ called \fIself-scheduling star\fR.
 A self-scheduling star generates an event to itself.
 The feedback event triggers the star itself, which emulates
 an event generator.  An event generator is a special case of a delay star
+.IE "event generator, de"
 in that its role is mainly to control the time spacing of source events.
 The values of the source events can be determined by a functional block
 attached to the end of the event generator (e.g. \fIFloatDC, FloatRamp\fR,
@@ -292,6 +478,7 @@ etc).
 A self-scheduling star is derived from 
 .c class\ DERepeatStar
 which is again a derived class of
+.IE "DERepeatStar"
 .c class\ DEStar .
 The
 .c DERepeatStar\ class
@@ -311,9 +498,9 @@ ident {
 defstar {
 	name {Poisson}
 	domain {DE}
-	derivedfrom {DERepeatStar}
+	derivedfrom { RepeatStar }
 	desc {
-	   "Generates events according to a Poisson process."
+	   "Generates events according to a Poisson process.\n"
 	   "The first event comes out at time zero."
 	}
 	output {
@@ -332,19 +519,39 @@ defstar {
 		default {"1.0"}
 		desc { "The magnitude of samples generated" }
 	}
+	hinclude { <NegativeExpntl.h> }
+	ccinclude { <ACG.h> }
+	protected {
+		NegativeExpntl *random;
+	}
+// declare the static random-number generator in the .cc file
+	code {
+		extern ACG gen;
+	}
+	constructor {
+		random = new NegativeExpntl(double(meanTime),&gen);
+	}
+	destructor {
+		delete random;
+	}
+	start {
+		DERepeatStar :: start();
+		random->mean(double(meanTime));
+	}
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
+	   // (The double cast is because of a gnu compiler bug)
 	   output.put(completionTime) << float(double(magnitude));
 
 	   // and schedule the next firing
 	   refireAtTime(completionTime);
 
-	   // Generate a uniform random variable.
-	   double p = drand48();
+	   // Generate an exponential random variable.
+	   double p = (*random)();
 
-	   // Turn it into an exponential, and add to completionTime
-	   completionTime -= log(p) * double(meanTime);
+	   // add to completionTime
+	   completionTime += p;
 	}
 }
 .)c
@@ -368,8 +575,8 @@ generated in the current execution.
 Another method, \fIcanGetFired()\fR is seldom used in the
 .c Star
 definitions.  The method
-checks the feedback event, and return \fBTRUE\fR if there is
-a new event or \fBFALSE\fR otherwise.
+checks the feedback event, and return TRUE if there is
+a new event or FALSE otherwise.
 .H2 "Functional Stars
 .pp
 In the \*(DO domain, a
@@ -387,17 +594,18 @@ a new event arrives at.  The input
 containing a new 
 .c Particle
 has the \fIdataNew\fR flag set by the 
+.IE "dataNew, flag"
 .c Scheduler
 when it sends the event to the 
 .c Star .
 Then, the 
 .c Star
-can check up the \fIdataNew\fR flag to detect the event source.
+can check up the \fIdataNew\fR flag to detect the event path.
 And, it processes the input event and generates an output event
 without any latency.  The latency of a \fIfunctional-star\fR can 
 be modeled by concatenating a \fIdelay-star\fR which is explained
 in the previous subsection.
-Now, let's look at how to write the body of a
+Now, let's look at how to write the body of a functional
 .c DE\ Star 
 with an example : 
 .c Switch\ Star .
@@ -479,10 +687,10 @@ from the \fIcontrol\fR
 .c PortHole ,
 and
 .c control%2
-would retunr the second previous 
-.c Particle
-if we wish.
+would return the second previous 
+.c Particle .
 The second method, \fIget()\fR, is specific to 
+.IE "get(), de"
 .c InDEPort .
 It resets the \fIdataNew\fR member of the port as well as returns the
 recentest
@@ -492,17 +700,16 @@ input port after read the newly arrived event, which is a usual case,
 you have to use \fIget()\fR method instead of \fI%0\fR operator.
 This is why we use \fIget()\fR method for the \fIinput\fR
 .c PortHole .
-The last method, \fIput(int)\fR, is specific to 
+The last method, \fIput(float)\fR, is specific to 
+.IE "put(), de"
 .c OutDEPort .
 It sets the \fItimeStamp\fR member of the port as well as returns the
 recentest
 .c Particle
 from an output port. Let's look at a line in the above example.
-.sp
 .(c
 true.put(completionTime) = pp;
 .)c
-.sp
 It says that we copy the
 .c Particle\ pp
 to the output port with \fItimeStamp = completionTime\fR.
@@ -512,7 +719,7 @@ This rather long section describes the method how to design a
 .c DE\ Star .
 The good starting point to design a
 .c Star
-would always be to look at the existing 
+would be to look at the existing 
 .c Star s.		
 .H1 "EventHorizon in the \\*(DO Domain
 .pp
@@ -531,24 +738,25 @@ or removal of redundant repetitions of identical
 .c Particle s,
 and so forth.
 .pp
-In \*(PT there has been defined a \fIuniversal event horizon\fR.
-The interface between different domains requires first conversion
-to the universal event horizon, followed by a conversion from
-the universal event horizon to the second domain.
 The general mechanism of the domain interface is described in
-the document, "\fBDomain Interface in Ptolemy\fR".
+the document, "\fBDomains in Ptolemy\fR".
+The standard functions of 
+.c EventHorizon s
+are also fully discussed in the document.
+Refer to the document for more detailed explanations on the domain interface.
 In this section, \*(DO-specific features on the domain
 interface will be discussed.
 .H2 "DE Wormhole
 .pp
+.IE "DE Wormhole"
 The \*(DO domain may have a wormhole which contains another domain.
 An input port of a
-.c DE Wormhole
+.c DE\ Wormhole
 consists of a 
 .c DEtoUniversal\ EventHorizon
 and a
-.c (in-domain)fromUniversal\ EventHorizon.  Similarly, an output port
-consists of a 
+.c (in-domain)fromUniversal\ EventHorizon .  
+Similarly, an output port consists of a 
 .c (in-domain)toUniversal 
 and a
 .c DEfromUniversal\ EventHorizon .
@@ -560,46 +768,52 @@ from the \*(DO domain, it is fired when any input port
 has an event. When it is fired, it initiates the
 .c Scheduler
 of the inner domain.
-.H2 "Conversion from the \*(DO Domain to the Universal Event Horizon
+It is regarded as a delay star if the inner domain is timed, or
+as a functional star otherwise.
+.H2 "DEtoUniversal EventHorizon
 .pp
-The conversion from the \*(DO domain to the universal
-.c EventHorizon
-is the function of the
-.c DEtoUniversal\ EventHorizon .
-It transfers the incoming data to the associated 
-.c EventHorizon
-of the other domain.  The necessary data-conversion to the universal
-format should be done in this
-.c class .
-Currently, no conversion is performed since only universal
-.c Particle s
-are defined in the \*(PT.  For non-universal
-.c Particle s,
-further research is going on.
-The
-.c DEtoUniversal
-also copies the global time of the \*(DO domain into the other domain.
-.H2 "Conversion from the Universal Event Horizon to the \*(DO Domain
+.IE "DEtoUniversal
+It transfers the incoming data packets from the DE domain to the paired 
+.c FromEventHorizon
+of the other domain.  It also passes the timing information
+of the DE domain to the other domain.  Since the DE domain is timed,
+it sets the flag \fIoutputBeforeDeadlocked\fR if the DE domain
+finishes before deadlocked.
+Refer to the "\fBDomains in Ptolemy\fR" for the standard
+functions of the
+.c ToEventHorizon\ class .
+.H2 "DEfromUniversal EventHorizon
 .pp
+.IE "DEfromUniversal
 The
 .c DEfromUniversal\ EventHorizon
-receives the data from the associated 
-.c EventHorizon 
-of the other domain and converts it if necessary.  Since the \*(DO
-domain is a typical \fItimed\fR domain, it is important to
-set the \fItimeStamp\fR of the
-.c EventHorizon
-right.  According to the \fItimeStamp\fR, the received events are put into
+receives the data packets from the associated 
+.c ToEventHorizon 
+of the other domain and transfers them to the DE domain.
+The time stamp is copied from that of its counterpart after scaled.
+According to the time stamp, the received events are put into
 the global queue of the \*(DO domain.
+If the DE domain is the outer domain and the inner domain is also
+timed, this 
+.c EventHorizon
+examined the \fIoutputBeforeDeadlocked\fR flag of the counterpart
+.c EventHorizon .
+If the flag is set, the 
+.c Wormhole
+is regarded as a process star in the DE domain.
+On the other hand, if a DE domain is placed in a
+.c Wormhole
+of a timed domain, it sets the \fIstopAfterOutput\fR flag
+for the 
+.c DE\ Scheduler .
+Since this flag can be set only once before the 
+.c Scheduler
+runs, we redefine \fIinitialize()\fR method of the
+.c DEfromUniversal\ class
+to set the flag.
 If the
 .c DEfromUniversal
 is at an input port of a
 .c Wormhole
 it also sets the stopping condition of the inner
-\*(DO domain. The stopping condition of the \*(DO domain
-is the stop time of the
-.c DE\ Scheduler .
-The stop time is set to the \fItimeStamp\fR of the port.
-Since the \fItimeStamp\fR represents the current time of
-the outer domain, the inner \*(DO domain is not allowed to
-pass the current time of the outer domain.
+\*(DO domain through \fIready()\fR method. 
