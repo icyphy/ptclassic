@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 #include "ptkPlot_defs.h"
+#include <malloc.h>
 #include <math.h>
 #include "ieee.h"
 
@@ -102,7 +103,7 @@ static int drawAxes(interp,plotPtr)
     int nw, nh; /* # of pixels/char width, height, resp. */
     int nx, ny; /* # of ticks between first and last in x, y-dir, resp. */
     int nhTitle; /* # of titlefont pixels/char height */
-    double xStep, yStep, xStart, yStart, doubleTmp, doubleNum;
+    double xStep, yStep, xStart, yStart = 0.0, doubleTmp, doubleNum;
     double xCoord1, xCoord2, yCoord1, yCoord2, tickLength;
     double xLabelYCoord, yLabelXCoord;
 
@@ -281,20 +282,20 @@ static int drawAxes(interp,plotPtr)
 /* FIXME: Case -0.00 (eg., likely, -0.0000343) unresolved */
     for (doubleTmp=xStart; doubleTmp < plotPtr->xMax; doubleTmp+=xStep) {
 	xCoord1 = MAPX(doubleTmp);
-	sprintf(strTmp,"%s.pf.c create line %lf %d %lf %lf -tags nonData", name,
+	sprintf(strTmp,"%s.pf.c create line %f %d %f %f -tags nonData", name,
 		xCoord1, plotPtr->lly, xCoord1, yCoord1);
 	if (Tcl_Eval(interp,strTmp) != TCL_OK) {
 		Tcl_AddErrorInfo(interp, "Cannot create ticks");
 		return 0;
 	}
-	sprintf(strTmp,"%s.pf.c create line %lf %d %lf %lf -tags nonData", name,
+	sprintf(strTmp,"%s.pf.c create line %f %d %f %f -tags nonData", name,
 		xCoord1, plotPtr->ury, xCoord1, yCoord2);
 	if (Tcl_Eval(interp,strTmp) != TCL_OK) {
 		Tcl_AddErrorInfo(interp, "Cannot create ticks");
 		return 0;
 	}
 	sprintf(strTmp,
-"%s.pf.c create text %lf %lf -anchor n -font %s -text %1.2lf -tags nonData",
+"%s.pf.c create text %f %f -anchor n -font %s -text %1.2f -tags nonData",
 		name, xCoord1, xLabelYCoord, STD_FONT,
 		doubleTmp/pow(10.0,(double)xExp));
 	if (Tcl_Eval(interp,strTmp) != TCL_OK) {
@@ -310,20 +311,20 @@ static int drawAxes(interp,plotPtr)
     yLabelXCoord = plotPtr->llx-nw/2;
     for (doubleTmp=yStart; doubleTmp < plotPtr->yMax; doubleTmp+=yStep) {
 	yCoord1 = MAPY(doubleTmp);
-	sprintf(strTmp,"%s.pf.c create line %d %lf %lf %lf -tags nonData", name,
+	sprintf(strTmp,"%s.pf.c create line %d %f %f %f -tags nonData", name,
 		plotPtr->llx, yCoord1, xCoord1, yCoord1);
 	if (Tcl_Eval(interp,strTmp) != TCL_OK) {
 		Tcl_AddErrorInfo(interp, "Cannot create ticks");
 		return 0;
 	}
-	sprintf(strTmp,"%s.pf.c create line %d %lf %lf %lf -tags nonData", name,
+	sprintf(strTmp,"%s.pf.c create line %d %f %f %f -tags nonData", name,
 		plotPtr->urx, yCoord1, xCoord2, yCoord1);
 	if (Tcl_Eval(interp,strTmp) != TCL_OK) {
 		Tcl_AddErrorInfo(interp, "Cannot create ticks");
 		return 0;
 	}
 	sprintf(strTmp,
-"%s.pf.c create text %lf %lf -anchor e -font %s -text %1.2lf -tags nonData",
+"%s.pf.c create text %f %f -anchor e -font %s -text %1.2f -tags nonData",
 		name, yLabelXCoord, yCoord1, STD_FONT,
 		doubleTmp/pow(10.0,(double)yExp));
 	if (Tcl_Eval(interp,strTmp) != TCL_OK) {
@@ -361,7 +362,7 @@ static void displayPoint(interp,setPtr, point)
       (setPtr->persistence <= 0)) {
 
     sprintf(strTmp,
-	    "%s.pf.c create oval %lf %lf %lf %lf -fill black",
+	    "%s.pf.c create oval %f %f %f %f -fill black",
 	    plotPtr->name, canvX-radius, canvY-radius, canvX+radius, canvY+radius);
     if (Tcl_Eval(interp,strTmp) != TCL_OK) {
       Tcl_AddErrorInfo(interp, "plotPoint: Cannot plot data");
@@ -370,7 +371,7 @@ static void displayPoint(interp,setPtr, point)
     sscanf(interp->result,"%d",setPtr->id+point);
     
   } else {
-    sprintf(strTmp,"%s.pf.c coords %d %lf %lf %lf %lf",
+    sprintf(strTmp,"%s.pf.c coords %d %f %f %f %f",
 	    plotPtr->name, setPtr->id[point],
 	    canvX-radius, canvY-radius,canvX+radius,canvY+radius);
     if (Tcl_Eval(interp,strTmp) != TCL_OK) {
@@ -380,7 +381,7 @@ static void displayPoint(interp,setPtr, point)
   }
 }
 
-static int drawAllPoints(interp,plotPtr)
+static void drawAllPoints(interp,plotPtr)
     Tcl_Interp *interp;
     plotWin *plotPtr;
 {
@@ -495,13 +496,6 @@ int createPlot(interp,plotPtr,win,name,identifier,
     char *xTitle, *yTitle;
     double xMin, xMax, yMin, yMax;
 {
-    double doubleNum;
-    int width, height, rootx, rooty;
-    Tcl_HashEntry *hashEntryPtr;
-    int intTmp, heightFlag;
-    char *plotName, *geoPtr;
-    char *strPtr, *strPtr2;
-
     if ((xMax <= xMin) || (yMax <= yMin)) {
       Tcl_AddErrorInfo(interp, "createPlot: invalid x and y ranges");
     }
@@ -682,7 +676,6 @@ int plotPoint(interp,setPtr,xval,yval)
     double xval,yval;
 {
     plotWin *plotPtr;
-    Tk_Window plotwin;
     int intTmp, curPt, lower, upper, point;
 
     /* If there is no plot window associated with the dataset, return */
