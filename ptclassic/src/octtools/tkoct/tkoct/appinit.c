@@ -52,9 +52,9 @@ char *filename;
 {
   char *ptolemy = getenv("PTOLEMY");
   if (ptolemy)
-    sprintf(filename,"%s/src/tkvem/tkvem/ged.tcl",ptolemy);
+    sprintf(filename,"%s/lib/tcl/tkoct.tcl",ptolemy);
   else
-    sprintf(filename,"/users/ptolemy/src/tkvem/tkvem/ged.tcl");
+    sprintf(filename,"/users/ptolemy/lib/tcl/tkoct.tcl");
   return filename;
 }
 
@@ -97,7 +97,7 @@ Tcl_AppInit(interp)
 
     main = Tk_MainWindow(interp);
 
-    errProgramName("ged");
+    errProgramName("tkoct");
     errCore(1);
 
     if ( topMsgRegisterCmds(interp) != TCL_OK) {
@@ -132,6 +132,6 @@ Tcl_AppInit(interp)
      * then no user-specific startup file will be run under any conditions.
      */
 
-    tcl_RcFileName = "~/.gedrc";
+    tcl_RcFileName = "~/.tkoctrc";
     return TCL_OK;
 }
