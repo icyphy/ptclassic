@@ -58,7 +58,9 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
 MISC_FILES =	README
 
-all::	 makefile installColors
+BINARY =	installColors$(BINARY_EXT)
+
+all::	 makefile $(BINARY)
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-loct$(DBGFLAG) -ltap$(DBGFLAG) -llist$(DBGFLAG) \
@@ -66,23 +68,19 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-lutility$(DBGFLAG) -lst$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
-installColors:	$(OBJS)
-	$(CLINKER) $(LINKFLAGS) $(OBJS) \
-		-o installColors \
-		$(LIBS) $(X11_LIBSPEC) $(CSYSLIBS)
+$(BINARY): $(OBJS)
+	$(CLINKER) $(LINKFLAGS) $(OBJS) -o $@ $(LIBS) $(CSYSLIBS) 
 
-DEST = $(OCTTOOLS)/bin.$(PTARCH)/installColors
+DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
 
-$(DEST):	installColors
-		@echo Installing installColors
-		rm -f $(DEST)
-		ln installColors $(DEST)
+$(DEST): $(BINARY)
+		@echo Installing $(BINARY)
+		rm -f $(DEST);  ln $^ $@
 
-install: makefile $(DEST) $(BINDIR)/installColors
+install: makefile $(DEST) $(BINDIR)/$(BINARY)
 
-$(BINDIR)/installColors:
-	(cd $(BINDIR); rm -f installColors; \
-		ln -s ../octtools/bin.$(PTARCH)/installColors .)
+$(BINDIR)/$(BINARY):
+	(cd $(BINDIR); rm -f $(BINARY); ln -s ../octtools/bin.$(PTARCH)/$(BINARY) .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
