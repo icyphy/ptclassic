@@ -40,13 +40,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <string.h>
+
+// Include files from the Ptolemy kernel
+#include "dataType.h"
 #include "StringList.h"
-#include "CGUtilities.h"
-#include "CGCostTarget.h"
-#include "Scheduler.h"
 #include "miscFuncs.h"
-#include "SDFPTclTarget.h"
-#include "GalIter.h"
+#include "Scheduler.h"
 #include "Star.h"
 #include "DFPortHole.h"
 #include "KnownTarget.h"
@@ -54,11 +53,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ProfileTimer.h"
 #include "KnownBlock.h"
 
+// Include files from Ptolemy domains
+#include "SDFScheduler.h"
+
+#include "CGUtilities.h"
+#include "CGCostTarget.h"
+
 // constructor
 CGCostTarget::CGCostTarget(const char* nam, const char* startype,
 			   const char* desc, const char* assocDomain) :
-CGTarget(nam, startype, desc, assocDomain)
-{
+CGTarget(nam, startype, desc, assocDomain) {
+    tempBlockList.initialize();
 }
 
 int CGCostTarget::run() {
@@ -73,98 +78,78 @@ int CGCostTarget::run() {
 
     // The following code goes through all the non-atomic blocks in
     // the galaxy. Any encountered non-atomic blocks are ignored
-    Galaxy* dummyGlobalGalaxy = new Galaxy;
-    dummyGlobalGalaxy = galaxy(); 
+    Galaxy* dummyGlobalGalaxy = galaxy();
     GalAllBlockIter nextBlock(*dummyGlobalGalaxy);
-    Block* starBlock = new Block; 
-    while((starBlock = (Block*)nextBlock++) != 0) { 
+    const Block* origStarBlock;
+    while((origStarBlock = (Block*)nextBlock++) != 0) { 
 	// If the block is a star, then iterate through the portholes 
-        if (starBlock->isItAtomic()) {       
+        if (origStarBlock->isItAtomic()) {       
 
             // Declaring another dummy galaxy which consists of the stars form 
             // the dummyGlobalGalaxy which are then padded up
             Galaxy* dummyGalaxy = new Galaxy;
+	    Block* starBlock = origStarBlock->clone();
+	    addTempBlock(starBlock);
             dummyGalaxy->addBlock(*starBlock, "starBlock"); 
 
             // Following code handles any multiports
-            MultiPortHole* starBlockMport = new MultiPortHole;           
+            MultiPortHole* starBlockMport;
             BlockMPHIter nextstarBlockMport(*starBlock);
             while((starBlockMport = nextstarBlockMport++) != 0) {
-		if (starBlockMport->isItInput()) {              
-                      selectConnectStarBlock(dummyGalaxy, starBlockMport,
-					     "input");
-		}
-                else {
-                      selectConnectStarBlock(dummyGalaxy, starBlockMport,
-					     "output");
-                }
+		selectConnectStarBlock(dummyGalaxy, starBlockMport);
             }
-      
+
 	    // Following code handles single ports
-            PortHole* starBlockport = new PortHole;
+            PortHole* starBlockport;
             BlockPortIter nextstarBlockport(*starBlock);
             while((starBlockport = nextstarBlockport++) != 0) {
-		if (starBlockport->isItInput()) {
-                    selectConnectStarBlock(dummyGalaxy,
-					   (MultiPortHole*)starBlockport,
-					   "input"); 
-		}
-		else {                                     
-		    selectConnectStarBlock(dummyGalaxy,
-					   (MultiPortHole*)starBlockport,
-					   "output");
-                }
+                selectConnectStarBlock(dummyGalaxy,
+				       (MultiPortHole*)starBlockport);
 	    }
 
 	    printGalaxy(dummyGalaxy);
+	    delete dummyGalaxy;
+	    deleteTempBlocks();
          }
     }
     return TRUE;
 }
 
-void CGCostTarget::selectConnectStarBlock(Galaxy* localGalaxy,
-		MultiPortHole* localHole, char* portName) {
-    // The following switch statement will find the right match in 
-    // the data type for the block in the galaxy
+// Find the right source or sink star to match the block port.
+// The matched star will be then added to the passed in galaxy
+// Then the two ports will be connected within the galaxy
+int CGCostTarget::selectConnectStarBlock(Galaxy* localGalaxy,
+		MultiPortHole* localHole) {
     // The matched star will be then added to the passed in galaxy 
     // Then the two ports will be connected within the galaxy
-    if (strcmp(portName, "input") == 0) {
-	if (localHole->type() == "INTEGER") {    
-	    starPointer = KnownBlock::find("CGDummySourceInt", "CG");
-	    localGalaxy->addBlock(*starPointer, "CGDummySourceInt");
-	    localHole->connect(*starPointer->portWithName(portName), 0, 0);
-        }
-
-	if (localHole->type() == "FIX") {
-	    starPointer = KnownBlock::find("CGDummySourceFIX", "CG");
-	    localGalaxy->addBlock(*starPointer, "CGDummySourceFIX");
-	    localHole->connect(*starPointer->portWithName(portName), 0);
-	}
-
-	if (localHole->type() == "FLOAT") {
-	    starPointer = KnownBlock::find("CGDummySourceFLOAT", "CG");
-	    localGalaxy->addBlock(*starPointer, "CGDummySourceFLOAT");
-	    localHole->connect(*starPointer->portWithName(portName), 0);
-	}
- 
-	if (localHole->type() == "COMPLEX") {
-	    starPointer = KnownBlock::find("CGDummySourceCX", "CG");
-	    localGalaxy->addBlock(*starPointer, "CGDummySourceCX");
-	    localHole->connect(*starPointer->portWithName(portName), 0);
-	}
+    if (localHole->isItInput()) {
+	StringList starName = "CGDummySource";
+	const char* abbreviation = dataTypeAbbreviation(localHole->type());
+	if (abbreviation == 0) return FALSE;
+	starName << abbreviation;
+	const Block* sourceStarPtr = KnownBlock::find(starName, "CG");
+	if (sourceStarPtr == 0) return FALSE;
+	Block* starPointer = sourceStarPtr->clone();
+	addTempBlock(starPointer);
+	localGalaxy->addBlock(*starPointer, starName);
+	localHole->connect(*starPointer->portWithName("input"), 0, 0);
     } 
     else {
-	starPointer = KnownBlock::find("CGDummySink","CG");
+	const Block* sinkStarPtr = KnownBlock::find("CGDummySink", "CG");
+	if (sinkStarPtr == 0) return FALSE;
+	Block* starPointer = sinkStarPtr->clone();
+	addTempBlock(starPointer);
 	localGalaxy->addBlock(*starPointer, "CGDummySink");
-	localHole->connect(*starPointer->portWithName(portName), 0); 
+	localHole->connect(*starPointer->portWithName("output"), 0); 
     }
+    return TRUE;
 }  
 
 void CGCostTarget::printGalaxy(Galaxy* localGalaxy) {
     // The following function will print the information about the
     // stars found in the galaxy
     StringList ptclCode;
-    ptclCode  << "reset\nnewuniverse " << localGalaxy->name();
+    ptclCode << "reset\nnewuniverse " << localGalaxy->name();
     GalStarIter nextStar(*localGalaxy);
     Star* star;
     while ((star = nextStar++) != 0) {
@@ -177,10 +162,36 @@ void CGCostTarget::printGalaxy(Galaxy* localGalaxy) {
     }
 }
 
-void CGCostTarget::wrapup() {}
+void CGCostTarget::wrapup() {
+}
 
-ISA_FUNC(CGCostTarget,CGTarget);
+void CGCostTarget::deleteTempBlocks() {
+    ListIter bdel(tempBlockList);
+    Block *bd;
+    while ( (bd = (Block *)bdel++) ) {
+	  LOG_DEL; delete bd;
+    }
+    tempBlockList.initialize();
+}
 
-static CGCostTarget port("CGCostTarget", "CGStar",
-			 "A CG wormhole target");
+const char* CGCostTarget::dataTypeAbbreviation(const char* datatype) {
+    const char* abbreviation = 0;
+    switch(datatype[0]) {
+      case 'C':
+	if (strcmp(datatype, "COMPLEX") == 0) abbreviation = "Cx";
+	break;
+
+      case 'F':
+	if (strcmp(datatype, "FLOAT") == 0) abbreviation = "";
+	else if (strcmp(datatype, "FIX") == 0) abbreviation = "Fix";
+
+      case 'I':
+	if (strcmp(datatype, "INTEGER") == 0) abbreviation = "Int";
+    }
+    return abbreviation;
+}
+
+ISA_FUNC(CGCostTarget, CGTarget);
+
+static CGCostTarget port("CGCostTarget", "CGStar", "A CG wormhole target");
 static KnownTarget entry(port,"CGCostTarget");
