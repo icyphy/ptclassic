@@ -307,9 +307,10 @@ It outputs lines of comments, instead of code.
 		    float max_amp = 0.0;
 		    float amp;
 		    long * new_coefficients = new long[corona.taps.size()];
-		    
+		    int loop;
+
 		    // find maximum tap amplitude
-		    for (int loop=corona.taps.size()-1;loop >= 0;loop--)
+		    for (loop=corona.taps.size()-1;loop >= 0;loop--)
 		      {
 			amp = abs(corona.taps[loop]);
 			if (amp > max_amp) 
