@@ -50,7 +50,7 @@ void LSGraph::sortedInsert(LSNode *p) {
 	int freq = p->myMaster()->repetitions; 
 
 	while ((nl = nextNode.nextLink()) != 0) {
-		LSNode* n = nl->myNode();
+		LSNode* n = nl->node();
 		if (freq >= n->myMaster()->repetitions) {
 			candidates.insertAhead(tmp,nl);
 			return;

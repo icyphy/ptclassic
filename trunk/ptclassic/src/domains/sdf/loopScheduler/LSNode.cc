@@ -17,7 +17,7 @@ $Id$
 #endif
 
 #include "LSNode.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 
 int LSNode::fireable() {
 	EGGateLinkIter nextParent(ancestors);
