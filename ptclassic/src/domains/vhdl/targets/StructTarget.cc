@@ -338,7 +338,9 @@ void StructTarget :: trailerCode() {
   // Add in the entity, architecture, entity declaration, and
   // component mapping for the controller.
   VHDLFiring* ctlerFi = new VHDLFiring;
-  ctlerFi->setName("controller");
+  StringList ctlName = hashstring(filePrefix);
+  ctlName << "controller";
+  ctlerFi->setName(ctlName);
   ctlerFi->starClassName = "Sequencer";
   ctlerFi->genericList = ctlerGenericList.newCopy();
   ctlerFi->portList = ctlerPortList.newCopy();
@@ -1077,7 +1079,10 @@ StringList StructTarget :: addSensitivities(VHDLCluster* cl, int level) {
       // which will contain wait statements.  Synopsys complains that
       // it can't synthesize blocks with wait statements if they also
       // have sensitivity lists.
-      if (!strcmp(nfiring->name,"controller")) continue;
+      StringList ctlName = hashstring(filePrefix);
+      ctlName << "controller";
+      const char* ctlString = (const char*) ctlName;
+      if (!strcmp(nfiring->name,ctlString)) continue;
       // Another exception for those firings that wish to disable
       // sensitivity lists, usually due to needing wait statements
       // within the firing, such as for send/receive synchronization.
@@ -1130,7 +1135,10 @@ StringList StructTarget :: addWaitStatement(VHDLCluster* cl, int level) {
       // it can't synthesize blocks with wait statements if they also
       // have sensitivity lists.  Also don't want more than one wait
       // statement.
-      if (!strcmp(nfiring->name,"controller")) continue;
+      StringList ctlName = hashstring(filePrefix);
+      ctlName << "controller";
+      const char* ctlString = (const char*) ctlName;
+      if (!strcmp(nfiring->name,ctlString)) continue;
       if ((*(nfiring->portList)).head()) {
 	VHDLPortListIter nextPort(*(nfiring->portList));
 	VHDLPort* nport;
@@ -1329,7 +1337,7 @@ void StructTarget :: registerAndMerge(VHDLCluster* cl) {
 // Generate the entity_declaration.
 void StructTarget :: buildEntityDeclaration(int level) {
   entity_declaration << "-- firing use clauses\n";
-  entity_declaration << "library SYNOPSYS,IEEE;\n";
+  entity_declaration << "library SYNOPSYS,IEEE,PTVHDLSIM;\n";
   entity_declaration << "use SYNOPSYS.ATTRIBUTES.all;\n";
   entity_declaration << "use IEEE.STD_LOGIC_1164.all;\n";
   entity_declaration << "use std.textio.all;\n";
