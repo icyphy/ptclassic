@@ -12,44 +12,44 @@ Itcl classes.  These class lists can be used to generate a
 <A HREF="../../../../doc/tychoClasses.dag">graphical class diagram</A>.
 
 This tool is automatically invoked whenever you open any file with a
-<A NAME=".icl">".icl"</A> extension (.icl stands for Itcl Class List).
+<A NAME=".icl"><CODE>.icl</CODE></A> extension (.icl stands for Itcl Class List).
 
 The <A NAME="ItclClassList">ItclClassList class</A> is derived from 
 the <A HREF="../../../../kernel/doc/usersGuides/EditHelp.html">Edit class</A>,
 and therefore inherits all of its features.
 
  <P>The Itcl Class List tool consists of a tool bar and a windowpane
-containing the current list of itcl classes.  Usually, the user adds
+containing the current list of Itcl classes.  Usually, the user adds
 classes to the list and then generates a class diagram.
 
 <H2>Toolbar</H2>
 The tool bar consists of the following buttons:
 <DL>
 
-<DT> Include Tycho
+<DT> <CODE>Include Tycho</CODE>
 
 <DD> This button inserts the names of all of the Tycho Itcl files into
 the current list.  This is especially useful if you want to make a
 custom diagram of the Tycho classes and the classes on which you are working.
 
-<DT> Include Directory
+<DT> <CODE>Include Directory</CODE>
 
 <DD> This button brings up a file browser and prompts the user to
 select a file in a directory.  All of the <CODE>*.itcl</CODE> and
 <CODE>*.itk</CODE> files are then added to the current list of Itcl
 files.
 
-<DT> Clear
+<DT> <CODE>Clear</CODE>
 <DD> This button clears the entire contents of the current list.
 
-<DT> Diagram File Name
+<DT> <CODE>Diagram File Name</CODE>
 
 <DD> This button brings up a file browser that allows the you to
 select the file name of class diagram to be produced.  The class
 diagram that is produced is a Directed Acyclic Graph (DAG), so the 
 diagram file name should have a <CODE>.dag</CODE> extension.
 
-<DT> Update Class Diagram
+<DT> <CODE>Update Class Diagram</CODE>
 
 <DD> This button generates a class diagram from the current list of
 files.  The class diagram is a DAG, so the <A
@@ -60,10 +60,6 @@ class</A> is used.
 
 <H2>Bugs</H2>
 <MENU>
-
-<LI> Because we use a Directed Acyclic Graph to display the class hierarchy,
-multiple inheritance is not shown.  If a class has multiple inheritance,
-then we bring up a message.
 
 <LI> Since Itcl is dynamically scoped, it can be difficult to determine
 inheritance from just reading a file.  In particular, subtle
