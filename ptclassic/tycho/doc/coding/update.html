@@ -5,10 +5,12 @@
 </head>
 <body bgcolor="#faf0e6">
 <p>
-<h1>Using the Tcl "update" command in Itcl</h1>
+<h1>Using the Tcl <CODE>update</CODE> command in Itcl</h1>
 <p>
-Calling <a name=update>"update"</a>, <a name=after>"tkwait"</a>, or even
-<a name="update idletasks">"update idletasks"</a> within a method of any Itcl
+Calling the Tcl <a name=update><CODE>update</a></CODE> command ,
+<a name=after><CODE>tkwait</a></CODE>, or even
+<a name="update idletasks"><CODE>update idletasks</CODE></a>
+within a method of any Itcl
 object is very dangerous.  The Itcl object may be deleted during the
 update, so when the update returns, you will be trying to execute a
 method for an object that no longer exists.
@@ -16,13 +18,13 @@ method for an object that no longer exists.
 At least in version 2.0 of Itcl, this can cause a core dump.
 There are two alternatives: <code>safeUpdate</code> and <code>safeEval</code>.
 <p>
-<h3><a name="safeUpdate procedure">safeUpdate procedure</a></h3>
+<h3><a name="safeUpdate procedure"><CODE>safeUpdate</CODE> procedure</a></h3>
 <p>
 Tycho provides a method called
 <code>::tycho::safeUpdate</code>
 that takes a single argument, the name of an Itcl object.
 It calls update.  If the object is delete is deleted during
-the call to "update", then a
+the call to <CODE>update</CODE>, then a
 <a name="silent error">silent error</a> is triggered.
 This means that <code>safeUpdate</code> will never return,
 so execution does not continue within the calling thread.
@@ -34,13 +36,14 @@ A typical call within an Itcl method looks like this:
 <h3><a name="silent error">Silent errors</a></h3>
 <p>
 A "silent error" is an ordinary error where no error message is
-reported to the user, like a "throw" and "catch" in some languages.
+reported to the user, like a <CODE>throw</CODE> and <CODE>catch</CODE>
+in some languages.
 You can directly invoke a silent error with the following command:
 <pre>
      ::tycho::silentError
 </pre>
 <p>
-<h3><a name="safeEval">safeEval method</a></h3>
+<h3><a name="safeEval"><CODE>safeEval</CODE> method</a></h3>
 <p>
 The three key Tycho base classes,
 <code>Object</code>,
@@ -62,10 +65,10 @@ dialogs, as in the following example:
 <a href="../index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

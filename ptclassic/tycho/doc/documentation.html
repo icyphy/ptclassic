@@ -46,12 +46,12 @@ for checking their validity.
 <p>
 <h2><a name="HTML extensions">HTML Extensions</a></h2>
 <p>
-One key extension to HTML provided by Tycho allows
-<a name="Tcl extension to HTML">embedding Tcl
-scripts into a document</a> in such a manner that if the user double
-clicks on the script, the script will be executed.
-The HTML source for such a script is surrounded by
-by the delimitters &lt;tcl&gt; and &lt;/tcl&gt;.
+One key extension to HTML provided by Tycho allows <a name="Tcl
+extension to HTML">embedding Tcl scripts into a document</a> in such a
+manner that if the user double clicks on the script, the script will
+be executed.  The HTML source for such a script is surrounded by by
+the delimitters <CODE>&lt;tcl&gt;</CODE> and
+<CODE>&lt;/tcl&gt;</CODE>.
 For example, the HTML source
 <pre>
     &lt;tcl&gt;&lt;pre&gt;
@@ -81,23 +81,23 @@ which appears as follows in a document:
 The only difference is that the returned value is displayed
 in the status bar at the bottom of the window rather than in a dialog box.
 <p>
-
 When creating embedded tcl scripts, you may find it necessary to use
-the <A
-HREF="http://www.sandia.gov/sci_compute/iso_symbol.html">HTML
-Code Character Set</A> for things like greater-than '&gt;' and
-less-than '&lt;'.  Greater-than is coded <CODE>&amp;gt;</CODE>, less-than
-is coded <CODE>&amp;lt;</CODE>.  If you don't code characters that have
-meaning in HTML, then you might find that the output does not look the
-way you want it.  
-<p>
-In addition, Tycho expands hypertext references that begin with
-a dollar sign ($).  The characters up to the first slash (or up to then
-end if there are no slashes) are taken to be the name of an environment
-variable or a Tcl global variable.  The value of the variable is
-substituted.  Also, on Unix systems, filenames beginning with a tilde
-(~) specify files relative to a user's home directory, in the usual
-Unix fashion.
+the <A HREF="http://www.sandia.gov/sci_compute/iso_symbol.html">HTML
+Code Character Set</A> for things like greater-than
+"<CODE>&gt;</CODE>" and less-than "<CODE>&lt;</CODE>".  Greater-than
+is coded <CODE>&amp;gt;</CODE>, less-than is coded
+<CODE>&amp;lt;</CODE>.  If you don't code characters that have meaning
+in HTML, then you might find that the output does not look the way you
+want it.
+
+<p> In addition, Tycho expands hypertext references that begin with a
+dollar sign "<CODE>$</CODE>".  The characters up to the first slash
+(or up to then end if there are no slashes) are taken to be the name
+of an environment variable or a Tcl global variable.  The value of the
+variable is substituted.  Also, on Unix systems, filenames beginning
+with a tilde "<CODE>~</CODE>" specify files relative to a user's home
+directory, in the usual Unix fashion.
+
 <p>
 When writing HTML documentation, it is best if you use relative paths
 instead of using dollar sign references.
@@ -116,7 +116,40 @@ then remote users will be able to view the documentation.
 <p>
 <h2><a name="formatting documentation">Formatting Documentation</a></h2>
 
-The Tycho documentation should follow a consistent look and feel.  The
+The Tycho documentation should follow a consistent look and feel.
+<DL>
+<DT> Capitalization
+<DD> Macintosh, Tcl, Tk, Itcl, Tycho, Unix and Windows 
+should be capitalized.  For example
+<BLOCKQUOTE>
+Tycho0.1.1 will not work with Itcl2.0. 
+</BLOCKQUOTE>
+Words such as HTML or SCCS, where one would speak each letter individually
+should have all the letters capitalized.  Words such as Tcl, where one
+says, "Tickle" should only have the first letter capitalized.
+
+<DT> Filenames, Environment variables, HTML examples, Key bindings
+
+<DD> Anything that the user is expected to type should be wrapped in
+<CODE>&lt;CODE&gt;. . . &lt;/CODE&gt;</CODE>.  Please avoid wrapping
+things in "quotes".  If you must use quotes, then use double quotes,
+not single quotes.
+
+<DT> <CODE>&lt;DL&gt; . . . <CODE>&lt;/DL&gt;</CODE></CODE>
+<DD> Use Display Lists for describing Tcl proc args and listing 
+key bindings.  When discussing a Tcl proc argument that is not a literal
+name, wrap it in
+<CODE>&lt;CODE&gt;&lt;I&gt; . . . &lt;/I&gt;&lt;/CODE&gt;</CODE>
+
+<PRE>
+&lt;dl&gt;
+&lt;dt&gt;&lt;CODE&gt;C-x 0&lt;/CODE&gt;&lt;dd&gt;iconify the window
+&lt;/dl&gt;
+</PRE>
+
+</DL>
+
+ <P>The
 HTML editor has a <CODE>File Template</CODE> choice under the
 <CODE>Special</CODE> menu.  This <CODE>File Template</CODE> will fill
 the current buffer with the contents of <A
@@ -204,6 +237,7 @@ extension <a name=".idx extension">".idx"</a>, that file will be opened using an
 <a href="../kernel/doc/usersGuides/IndexBrowserHelp.html"> index browser</a>.
 <p>
 The <A HREF="troubleshooting.html#Problems creating indexes">Troubleshooting Guide</A> has hints about problems creating indexes.
+Tycho can also generate <A HREF="tychoClasses.html">Tycho Class Diagrams</A>.
 <p>
 <h2><a name="tydoc - The Tycho documentation system">
 <code>tydoc</code> - The Tycho documentation system</a></h2>
@@ -225,10 +259,10 @@ If you add a user's guide, follow these steps:
 <a href="index.html">Tycho Home Page</a><br>
 <p>
 <HR>
-Copyright &#169 %Q%, The Regents of the University of California.
+Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>eal@eecs.berkeley.edu</author>
 </body>
 </html>

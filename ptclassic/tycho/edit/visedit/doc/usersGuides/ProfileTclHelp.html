@@ -117,7 +117,7 @@ make TCL_SRC_INCLUDE_DIR=$PTOLEMY/src/tcltk/itcl2.1/tcl7.5/generic/ \
 
 
 The <CODE>tclXprofile</CODE> shared object will be in
-<CODE>$TYCHO/lib/profile/$PTARCH</CODE>.  Under solaris, the file will
+<CODE>$TYCHO/lib/profile/$PTARCH</CODE>.  Under Solaris, the file will
 be named <CODE>tclXprofile.so</CODE>.
 
 <HR>
@@ -131,21 +131,22 @@ We describe each in turn.
 <HR>
 <H3>Profiler Buttons</H3>
 
-<MENU>
+<DL>
+<DT> <CODE>Start Profiling</CODE>
+<DD> This button calls the TclX <CODE>profile on</CODE> command.  To
+profile the execution of your code, hit the <CODE>Start
+Profiling</CODE> button, execute your code, and hit the <CODE>Display
+Profile</CODE> button.
 
-<LI> <CODE>Start Profiling</CODE> - This button calls the TclX
-<CODE>profile on</CODE> command.  To profile the execution of your
-code, hit the <CODE>Start Profiling</CODE> button, execute your code,
-and hit the <CODE>Display Profile</CODE> button.
+<DT> <CODE>Display Profile</CODE>
+<DD> This button stops the TclX profiler and processes the profiler
+output.  For large runs, the processing of the data could take a
+moment, tcl is traversing large arrays.
 
-<LI> <CODE>Display Profile</CODE> - This button stops the TclX profiler
-and processes the profiler output.  For large runs, the processing of the
-data could take a moment, tcl is traversing large arrays.
+<DT> <CODE>Cancel Profile</CODE>
+<DD> This button stops the TclX profiler, but does not display the output.
 
-<LI> <CODE>Cancel Profile</CODE> - This button stops the TclX
-profiler, but does not display the output.
-
-</MENU>
+</DL>
 
 <HR>
 <H3>Profiler Grapher</H3>
@@ -172,7 +173,7 @@ displays a short description about that counter.
 Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%,
+Last updated: $Date$,
 comments to: <author>tycho@eecs.berkeley.edu</author>
 </body>
 </html>

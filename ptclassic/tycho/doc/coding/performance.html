@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+<!-- @(#)performance.html	1.7 12/16/96 -->
 <html>
 <head>
 <title>Performance in Tcl</title>
@@ -53,7 +53,7 @@ Brent Welch suggests the following hand tuning methods:
 
 <MENU>
 <LI> Inside a loop, shorter variable and procedure names can help.
-The tcl <CODE>rename</CODE> command can be useful in renaming long names
+The Tcl <CODE>rename</CODE> command can be useful in renaming long names
 to shorter names.
 
 <LI> Moving large comment blocks outside of inner loops and frequently
@@ -68,7 +68,7 @@ through a loop or executes a procedure.
 <LI> The Tcl <CODE>exec</CODE> is not portable to non-unix platforms.
 
 <LI> There is a lot of overhead in starting another process.  For
-example, calling the Unix date command is fairly slow:
+example, calling the Unix <CODE>date</CODE> command is fairly slow:
 <PRE>
 % time {exec date}
 287316 microseconds per iteration

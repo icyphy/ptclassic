@@ -60,15 +60,15 @@ If you are starting up Tycho0.1.1 or later and you see a message about
 </PRE>
 
 then the problem is that you are running an
-itcl2.0 <CODE>itkwish</CODE>, and Tycho0.1.1 requires itcl2.1, which
+Itcl2.0 <CODE>itkwish</CODE>, and Tycho0.1.1 requires Itcl2.1, which
 includes the tcl7.5 <CODE>file join</CODE> command.  The way to tell
 is to start <CODE>itkwish</CODE> by hand and type
 
 <PRE>
 set itcl::version
 </PRE>
-you should get back <CODE>2.0</CODE> if you are running itcl2.0 and
-<CODE>2.1</CODE> if you are running itcl2.1.
+you should get back <CODE>2.0</CODE> if you are running Itcl2.0 and
+<CODE>2.1</CODE> if you are running Itcl2.1.
 
 <H3><A NAME="Problems creating indexes">Problems creating indexes</A></H3>
 The steps to follow if the indexes start failing on you:
@@ -107,11 +107,14 @@ tycho"><CODE>itkwish</CODE></A> and then sourcing
 <CODE>$TYCHO/kernel/Tycho.tcl</CODE>.
 
  <P>If the tcl variable <A NAME="tyDebug variable"><CODE>tyDebug</CODE></A>
- is set to <CODE>1</CODE>,
-then <CODE>Tycho.tcl</CODE> will print out status messages as it
-starts up.  Also, if <CODE>tyDebug</CODE> is set to <CODE>1</CODE>, then
-tycho will not automatically exit if there is an error.
- <P> The example below shows how it is possible to start up tycho from <CODE>itkwish</CODE>
+is set to <CODE>1</CODE>, then <CODE>Tycho.tcl</CODE> will print out
+status messages as it starts up.  Also, if <CODE>tyDebug</CODE> is set
+to <CODE>1</CODE>, then Tycho will not automatically exit if there is
+an error during startup.
+
+ <P>The example below shows how it is possible to start up Tycho from
+<CODE>itkwish</CODE>
+
 <PRE>
 cxh@watson 357% setenv TYCHO ~/pt/tycho
 cxh@watson 358% cd $TYCHO/kernel
@@ -139,7 +142,7 @@ Previous: <A HREF="install.html">Installation</A> -
 Copyright &#169 1996, The Regents of the University of California.
 All rights reserved.
 <br>
-Last updated: %D%<br>
+Last updated: 96/12/17<br>
 comments to: <author>tycho@eecs.berkeley.edu</author>
 </body>
 </html>
