@@ -20,26 +20,27 @@
 # determines the list of default palettes; you may change this by
 # editing that file.
 #
-##############################################################################
-# Change the following line to point to the Ptolemy top-level directory
-ROOT = /usr/users/ptolemy
+# It is assumed that your PTOLEMY environment variable is defined and
+# points to the root of the Ptolemy tree.
+#
 #############################################################################
 # DON'T EDIT THIS STUFF.
 # get configuration info
+ROOT = $(PTOLEMY)
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
+OBJDIR = $(ROOT)/obj.$(ARCH)
 # Root of domain-specific object files
-DOBJ = $(ROOT)/obj.$(ARCH)/domains
+DOBJ = $(OBJDIR)/domains
 # Root of domain-specific header files
 DHDR = $(ROOT)/src/domains
 
-# libraries to link with that we always need
-LIBS =	-lpigi -lptolemy -loh -lrpc -llist -ltr -lutility -lst \
-	-lerrtrap -luprintf -lport -lX11 $(SYSLIBS)
+VPATH = .
 
-# main library name
-LIBFILE=$(LIBDIR)/libptolemy.a
+# Include information on all stars and targets.
+
+include $(ROOT)/stars.mk
 
 ##############################################################################
 # START YOUR EDITING HERE!!!!
@@ -54,41 +55,33 @@ OBJS=SDFSayDigit.o
 # will be built from a .cc file).
 PLSRCS=SDFSayDigit.pl
 
-# Stars from other directories to include
+# Stars and targets from other directories to include
 # The following makefile magic will include all SDF, DE, and DDF stars.
-
-SDF=$(DOBJ)/sdf/stars
-DDF=$(DOBJ)/ddf/stars
-DE=$(DOBJ)/de/stars
-SDFSRC=$(ROOT)/src/domains/sdf/stars
-DDFSRC=$(ROOT)/src/domains/ddf/stars
-DESRC =$(ROOT)/src/domains/de/stars
-
-# this defines the SDFSTARS variable.
-include $(SDFSRC)/sdfstars.mk
-
-# this defines the DESTARS variable.
-include $(DESRC)/destars.mk
-
-# this defines the DDFSTARS variable.
-include $(DDFSRC)/ddfstars.mk
+# The variables DDFSTARS, DESTARS, and SDFSTARS are defined by stars.mk.
+# There is one variable defined for each domain; also SDFTARGETS,
+# CGTARGETS, CGCTARGETS, CG56TARGETS, and CG96TARGETS.  You may include
+# any of these.  It is also possible to specify individual stars by
+# including their .o files individually.
 
 OTHERS=$(DDFSTARS) $(DESTARS) $(SDFSTARS)
 
-# Domain-specific libraries
-# You must specify them two ways, as shown.  You can remove libraries for
-# domains you don't need.
-# If you remove "ddf" domain, remove "dycon" also.
-
-DOMLIBS = -lsdf -lde -lddf -ldycon
-
-DOMLIBFILES = $(LIBDIR)/libsdf.a $(LIBDIR)/libde.a $(LIBDIR)/libddf.a \
- $(LIBDIR)/libdycon.a
-
-# Domain-specific include files we need.  Remove domains you don't use.
+# Domain-specific include files we need.  Remove domains you don't use,
+# or add domains that you do use.
 # Note: you only need the include files if you are WRITING a star
-# for that domain.
+# for that domain.  Here are some extra dependencies:
+# DDF and CGxxx stars also require $(DHDR)/sdf/kernel.
+# CGC, CG56, and CG96 stars also require $(DHDR)/cg/kernel.
+# CG96 stars also require $(DHDR)/cg56/kernel.
+
 DOMINC = -I$(DHDR)/sdf/kernel -I$(DHDR)/de/kernel -I$(DHDR)/ddf/kernel
+
+# The following specifies your version string.  It appears in the
+# startup window.
+VERSION = "Joe Blow's private pigi"
+
+# Specify where you want star documentation files to end up.  The
+# following version puts them in a subdirectory named starDoc.
+STARDOCDIR = starDoc
 
 # DON'T EDIT ANYTHING PAST THIS.
 ##############################################################################
@@ -96,35 +89,35 @@ DOMINC = -I$(DHDR)/sdf/kernel -I$(DHDR)/de/kernel -I$(DHDR)/ddf/kernel
 SRCS=$(OBJS:.o=.cc)
 HDRS=$(OBJS:.o=.h)
 
-# Rule for compiling with g++
-.SUFFIXES: .o .cc .h .pl
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(DOMINC) -I$(KERNDIR) -c $<
+INCL = $(DOMINC) -I$(KERNDIR)
 
-.pl.cc:
-	ptlang $<
+# Oct Tools libraries.
+OCTLIBS = -loh -lrpc -llist -ltr -lutility -lst -lerrtrap -luprintf -lport
 
-pigiRpc:	makefile $(SRCS) $(MAIN) $(OBJS) $(OTHERS) $(LIBFILE) \
-	$(DOMLIBFILES) $(PIGILIB) defpalettes.o pigiMain.o
-	$(LINKER) $(LDFLAGS) -L$(OCTLIBDIR) pigiMain.o \
-	defpalettes.o $(OBJS) $(OTHERS) $(DOMLIBS) $(LIBS) -o pigiRpc
+# Entire library list.
+# note that -lrpc is searched twice, before and after -lpigi.
+# (it is also in OCTLIBS).
+LIBS	= $(STAR_LIBS) -lrpc -lpigi -lgantt -lptolemy $(OCTLIBS) \
+		$(LX11) $(SYSLIBS)
 
-depend:	
-		$(DEPEND) $(DOMINC) -I$(K) $(SRCS) |\
-			 cat make.template - > makefile.n
-		mv -f makefile.n makefile
+# Libraries specified as files.
+LIBFILES = $(STAR_LIBFILES) \
+	$(LIBDIR)/libpigi.a $(LIBDIR)/libptolemy.a $(LIBDIR)/libgantt.a
 
-makefile:	make.template
-		make -f make.template sources depend # use new SRCS list
-		@echo makefile remade -- you must rerun make.
-		exit 1
+all:	makefile pigiRpc
+pigiRpc:	$(SRCS) $(OBJS) $(OTHERS) $(LIBFILES) \
+	defpalettes.o pigiMain.o
+	rm -f pigiRpc
+	echo char '*pigiVersion = "Version:' $(VERSION) \
+		'%created' `date` '";' | sed 's/%/\\n/' > version.c
+	$(CC) -c version.c
+	$(LINKER) $(LINKFLAGS) -L$(OCTLIBDIR) $(X11LIBDIR) version.o \
+		pigiMain.o defpalettes.o $(OTHERS) $(LIBS) \
+		-o pigiRpc
 
-# "make clean" removes .o files and other cruft
-clean:
-		rm -f *.o core *~ *.bak *# $(PLSRCS:.pl=.cc) $(PLSRCS:.pl=.h)
+LIB=dummy
 
-# "make sources" will do SCCS get on anything where SCCS file is newer.
-sources:	$(SRCS) $(HDRS) make.template
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
