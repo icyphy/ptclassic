@@ -73,7 +73,7 @@ public:
 	int amIFork() { return forkId; }
 
 	// offset initialize
-	void offsetInit();
+	void initBufPointer();
 };
 
 #endif
