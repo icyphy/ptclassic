@@ -185,7 +185,6 @@ protected:
 	// number of particles
 	int sz;
 
-private:
         // A connection may require some initial particles.
 	// This specifies the number.
 	int numInitialParticles;
