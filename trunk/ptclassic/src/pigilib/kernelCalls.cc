@@ -662,13 +662,14 @@ KcIsMulti(char* blockname, char* portname)
 //     if the star has any.  Callers can free() memory in ParamList
 //     array when no longer needed.
 static boolean
-realGetParams(const Block* block, ParamListType* pListPtr,char** names,
-	      int n_names)
+realGetParams(const Block* block, ParamListType* pListPtr,
+	      char** names, int n_names)
 {
 	if (block == 0) {
-		return FALSE;
+	    return FALSE;
 	}
-	pListPtr->array = NULL; // initialization
+	delete [] pListPtr->array;
+	pListPtr->array = 0; // initialization
 	int n = block->numberStates();
 	int j = 0; // # of settable states, initialized to 0
 	if (n) { 
