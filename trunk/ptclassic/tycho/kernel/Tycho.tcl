@@ -342,7 +342,7 @@ if {![info exists TychoVersionInfo]} {
 # tychoWelcomeMessage to zero before sourcing this file.
 # This can be done in your .Tycho/tychorc.tcl file.
 #
-if { ! $tychoWelcomeWindow \
+if { $tychoWelcomeWindow \
     && [::tycho::preference get misc welcomeWindow] \
     && ! [::tycho::preference get misc slowNetwork] } {
     ::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo
