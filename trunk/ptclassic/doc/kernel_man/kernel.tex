@@ -10,8 +10,8 @@
 @finalout
 @titlepage
 @title The Ptolemy Kernel
-@subtitle A programmer's companion for Ptolemy 0.4
-@subtitle December 8, 1992
+@subtitle A programmer's companion for Ptolemy 0.5-developent
+@subtitle August 24, 1992
 @author by Joseph T. Buck
 @end iftex
 
@@ -27,7 +27,7 @@ C++ is assumed.
 @vskip 0pt plus 1filll
 @end iftex
 
-Copyright @copyright{} 1990, 1991, 1992 The Regents of the University of
+Copyright @copyright{} 1992, 1993 The Regents of the University of
 California.  All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -53,20 +53,293 @@ TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 @end iftex
 
 @menu
-* Basic concepts::              Basic concepts, classes, and facilities
-* Block and related classes::
-* Control of execution::        Control of execution and error reporting
-* Interfacing domains::         Wormholes and related classes
-* connection classes::          Classes for connections between blocks
-* Particles and Messages::
-* The incremental linker::
-* Parameters and States::
-* known lists::                 Support for known lists and such
-* I/O classes::
-* Misc::                        Miscellaneous classes
+* Basic concepts::  Basic concepts, classes, and facilities
+* Support for multithreading::  
+* Block and related classes::  
+* Control of execution::  Control of execution and error reporting
+* Interfacing domains::  Wormholes and related classes
+* connection classes::  Classes for connections between blocks
+* Particles and Messages::  
+* The incremental linker::  
+* Parameters and States::  
+* known lists::     Support for known lists and such
+* I/O classes::     
+* Misc::            Miscellaneous classes
+
+ --- The Detailed Node Listing ---
+
+Basic concepts, classes, and facilities
+
+* Language subset::  The C++ Subset Used In Ptolemy
+* Iterators::       Iterators
+* utility functions::  Non-class utility functions
+* Generic Data Structures::  Generic Data Structures
+* class SequentialList::  class SequentialList
+* Doubly linked lists::  Doubly linked lists
+* Other containers::  Other generic container classes
+* class NamedObj::  class NamedObj
+* class NamedObjList::  class NamedObjList
+* Attributes::      Attributes
+
+Class SequentialList
+
+* SequentialList information functions::  
+* other SequentialList functions::  
+* class ListIter::  
+
+Doubly linked lists
+
+* class DoubleLink::  Class DoubleLink
+* class DoubleLinkList::  Class DoubleLinkList
+* class DoubleLinkIter::  Class DoubleLinkIter
+
+Other generic container classes
+
+* class Queue::     class Queue
+* class Stack::     class Stack
+
+Class NamedObj
+
+* NamedObj constructors::  NamedObj constructors and destructors
+* NamedObj public members::  NamedObj public members
+* NamedObj protected members::  NamedObj protected members
+
+Class NamedObjList
+
+* NamedObjList information::  NamedObjList information functions
+* other NamedObjList functions::  
+* NamedObjList iterators::  
+
+Attributes
+
+* Attribute member functions::  
+
+Support for multithreading
+
+* class PtGate::    
+* class CriticalSection::  
+* class GateKeeper::  
+* class KeptGate::  
+
+Block and related classes
+
+* class Block::     class Block
+* class Star::      class Star
+* class Galaxy::    class Galaxy
+* class DynamicGalaxy::  class DynamicGalaxy
+* class InterpGalaxy::  class InterpGalaxy
+* class Runnable::  class Runnable
+* class Universe::  class Universe
+* class InterpUniverse::  class InterpUniverse
+
+Class Block
+
+* Block constructors and destructors::  
+* Block public "information" members::  
+* other Block public members::  
+* Block protected members::  
+* Block iterator classes::  
+
+Class Star
+
+* Star public members::  Star public members
+* Star protected members::  Star protected members
+
+Class Galaxy
+
+* Galaxy public members::  Galaxy public members
+* Galaxy protected members::  Galaxy protected members
+* Galaxy iterators::  Galaxy iterators
+
+Class InterpGalaxy
+
+* building structures::  building structures with InterpGalaxy
+* deleting InterpGalaxy structures::  
+* InterpGalaxy and cloning::  
+* other InterpGalaxy functions::  
+
+Control of Execution and Error Reporting
+
+* class Target::    class Target
+* class Scheduler::  class Scheduler
+* class Error::     class Error
+* class SimControl::  class SimControl
+
+Class Target
+
+* Target public members::  Target public members
+* Target protected members::  Target protected members
+
+Class Scheduler
+
+* Scheduler public members::  Scheduler public members
+* Scheduler protected members::  Scheduler protected members
+
+Class SimControl
+
+* SimControl status flags::  Access to SimControl status flags.
+* pre- and postactions::  Preactions and Postactions
+* SimControl interrupts and polling::  
+
+Interfacing domains -- wormholes and related classes
+
+* class Wormhole::  class Wormhole
+* class EventHorizon::  class EventHorizon
+* class ToEventHorizon::  class ToEventHorizon
+* class FromEventHorizon::  class FromEventHorizon
+* class WormMultiPort::  class WormMultiPort
+
+Class Wormhole
+
+* Wormhole public members::  Wormhole public members
+* Wormhole protected members::  Wormhole protected members
+
+Class EventHorizon
+
+* How EventHorizons are used::  
+* EventHorizon public members::  
+* EventHorizon protected members::  
+
+How EventHorizons are used
+
+* EventHorizon public members::  EventHorizon public members
+* EventHorizon protected members::  EventHorizon protected members
+
+Classes for connections between blocks
+
+* class GenericPort::  class GenericPort
+* class PortHole::  class PortHole
+* class MultiPortHole::  class MultiPortHole
+* AutoFork and AutoForkNode::  AutoFork and AutoForkNode
+* class ParticleStack::  class ParticleStack
+* class Geodesic::  class Geodesic
+* class Plasma::    class Plasma
+* class ParticleQueue::  class ParticleQueue
+* classes for Galaxy ports::  classes for Galaxy ports
+
+Class GenericPort
+
+* GenericPort query functions::  
+* other GenericPort public members::  
+* GenericPort protected members::  
+
+Class PortHole
+
+* PortHole public members::  
+* PortHole protected members::  
+* class CircularBuffer::  a class used to implement PortHole
+
+Class MultiPortHole
+
+* MultiPortHole public members::  
+* MultiPortHole protected members::  
+
+AutoFork and AutoForkNode
+
+* class AutoFork::  class AutoFork
+* class AutoForkNode::  class AutoForkNode
+
+Class Geodesic
+
+* Geodesic public members::  Geodesic public members
+* Geodesic protected members::  Geodesic protected members
+
+Particles and Messages
+
+* class Particle::  class Particle
+* Particle public members::  Particle public members
+* Arithmetic Particle classes::  Arithmetic Particle classes
+* Messages::        The Heterogeneous Message Interface
+* Example Message types::  Example Message types
+
+The Heterogeneous Message Interface
+
+* class Envelope::  class Envelope
+* class Message::   class Message
+* class MessageParticle::  class MessageParticle
+
+The incremental linker
+
+* types of links::  Temporary vs. Permanent Incremental Linking
+* Linker public members::  Linker public members
+* Linker implementation::  Linker implementation
+
+Parameters and States
+
+* class State::     class State
+* types of states::  types of states
+
+Class State
+
+* State public members::  State public members
+* The State parser::  The State parser and protected members
+
+types of states
+
+* scalar states::   class IntState and class FloatState
+* class ComplexState::  class ComplexState
+* class StringState::  class StringState
+* numeric array states::  numeric array states
+* class StringArrayState::  class StringArrayState
+
+Support for known lists and such
+
+* class KnownBlock::  class KnownBlock
+* class KnownTarget::  class KnownTarget
+* class Domain::    class Domain
+* class KnownState::  class KnownState
+
+Class Domain
+
+* Domain virtual functions::  Domain virtual functions
+
+I/O classes
+
+* class StringList::  StringList, a kind of String class
+* class Tokenizer::  Tokenizer, a simple lexical analyzer class
+* augmented fstreams::  classes pt_ifstream and pt_ofstream
+* class XGraph::    Xgraph, an interface to the xgraph program
+* Histogram classes::  Histogram classes
+
+StringList, a kind of String class
+
+* StringList constructors::  constructors and assignment operators
+* adding to StringLists::  adding to StringLists
+* StringList info functions::  StringList information functions
+* StringList conversion::  StringList conversion to const char *
+* StringList destruction::  StringList destruction and zeroing
+* class StringListIter::  class StringListIter
+
+Tokenizer, a simple lexical analyzer class
+
+* Initializing Tokenizers::  Initializing Tokenizer objects
+* reading from Tokenizers::  Reading from Tokenizers
+* Tokenizer include files::  Tokenizer include files
+
+Histogram classes
+
+* class Histogram::  Class Histogram
+* class XHistogram::  Class XHistogram
+
+Miscellaneous classes
+
+* Mathematical classes::  Mathematical classes
+* class IntervalList::  Class IntervalList
+* Clock and TimeVal::  Classes for interacting with the system clock
+
+Mathematical classes
+
+* class Complex::   class Complex
+* class Fraction::  class Fraction
+
+Class IntervalList
+
+* class Interval::  class Interval and methods
+* IntervalList public members::  
+* IntervalList iterators::  IntervalList iterator classes.
 @end menu
 
-@node Basic concepts, Block and related classes, Top, Top
+@node Basic concepts, Support for multithreading, Top, Top
 @chapter Basic concepts, classes, and facilities
 
 This section describes some basic classes and low-level concepts that
@@ -82,19 +355,19 @@ from NamedObj, the basic object for implementing a named object that
 lives in a hierarchy.
 
 @menu
-* Language subset::             The C++ Subset Used In Ptolemy
-* Iterators::                   Iterators
-* utility functions::           Non-class utility functions
-* Generic Data Structures::     Generic Data Structures
-* class SequentialList::        class SequentialList
-* Doubly linked lists::         Doubly linked lists
-* Other containers::            Other generic container classes
-* class NamedObj::              class NamedObj
-* class NamedObjList::          class NamedObjList
-* Attributes::                  Attributes
+* Language subset::  The C++ Subset Used In Ptolemy
+* Iterators::       Iterators
+* utility functions::  Non-class utility functions
+* Generic Data Structures::  Generic Data Structures
+* class SequentialList::  class SequentialList
+* Doubly linked lists::  Doubly linked lists
+* Other containers::  Other generic container classes
+* class NamedObj::  class NamedObj
+* class NamedObjList::  class NamedObjList
+* Attributes::      Attributes
 @end menu
 
-@node Language subset, Iterators, Basic concepts, Basic concepts
+@node Language subset, Iterators,  , Basic concepts
 @section The C++ Subset Used In Ptolemy
 
 The Ptolemy system has grown up with the C++ language, so it does not
@@ -105,6 +378,11 @@ Instead, we focused on stability.  Accordingly, Ptolemy builds under
 the Gnu C++ compiler, version 2.2.2, with version 2.2 of the library
 @code{libg++}; it also build under Sun C++ 2.1, a port of the AT&T
 @file{cfront} compiler to the Sun.
+
+Ptolemy also builds under the (at the time of writing) latest versions
+of g++ (2.4.5) and libg++ (2.4), but it is important that the same
+version of compiler and libraries be used for compilation of all of
+Ptolemy.
 
 This means, for one thing, that templates are not used.  In addition,
 some features that do not work that well yet under g++, such as
@@ -130,11 +408,19 @@ public:
     // or a null pointer if no more
     InnerObject* next();
     // operator form: a synonym for next
-    InnerObject* operator++() @{ return next(); @}
+    InnerObject* operator++(POSTFIX_OP) @{ return next(); @}
     // reset the iterator to point to the first object
     void reset();
 @}
 @end example
+
+@code{POSTFIX_OP} is a macro that is defined to be an empty string on
+older compilers (such as cfront 2.1 and versions of g++ before 2.4) and
+to the string "int" with newer compilers.  This conditional behavior is
+required because of the evolution of the C++ language; previously,
+postfix and prefix forms of the operators ++ and -- were not
+distinguished when overloaded; now, a dummy int argument indicates that
+the postfix form is intended.
 
 A typical programming application for iterators might be something like
 
@@ -245,12 +531,12 @@ how to delete the items.
 There is an associated iterator class for SequentialList called ListIter.
 
 @menu
-* SequentialList information functions::
-* other SequentialList functions::
-* class ListIter::
+* SequentialList information functions::  
+* other SequentialList functions::  
+* class ListIter::  
 @end menu
 
-@node SequentialList information functions, other SequentialList functions, class SequentialList, class SequentialList
+@node SequentialList information functions, other SequentialList functions,  , class SequentialList
 @subsection SequentialList information functions
 
 These functions return information about the SequentialList but do not
@@ -372,12 +658,12 @@ We consider this class to have serious design flaws, so it may be
 reworked quite a bit in subsequent Ptolemy releases.
 
 @menu
-* class DoubleLink::            Class DoubleLink
-* class DoubleLinkList::        Class DoubleLinkList
-* class DoubleLinkIter::        Class DoubleLinkIter
+* class DoubleLink::  Class DoubleLink
+* class DoubleLinkList::  Class DoubleLinkList
+* class DoubleLinkIter::  Class DoubleLinkIter
 @end menu
 
-@node class DoubleLink, class DoubleLinkList, Doubly linked lists, Doubly linked lists
+@node class DoubleLink, class DoubleLinkList,  , Doubly linked lists
 @subsection Class DoubleLink
 
 Class DoubleLink is the base type for links in DoubleLinkList objects.
@@ -579,11 +865,11 @@ mixture.
 Class Stack implements a stack.
 
 @menu
-* class Queue::                 class Queue
-* class Stack::                 class Stack
+* class Queue::     class Queue
+* class Stack::     class Stack
 @end menu
 
-@node class Queue, class Stack, Other containers, Other containers
+@node class Queue, class Stack,  , Other containers
 @subsection Class Queue
 
 The constructor for class Queue builds an empty queue.  The following
@@ -649,12 +935,12 @@ State (@pxref{class State}), and
 Geodesic (@pxref{class Geodesic}).
 
 @menu
-* NamedObj constructors::       NamedObj constructors and destructors
-* NamedObj public members::     NamedObj public members
+* NamedObj constructors::  NamedObj constructors and destructors
+* NamedObj public members::  NamedObj public members
 * NamedObj protected members::  NamedObj protected members
 @end menu
 
-@node NamedObj constructors, NamedObj public members, class NamedObj, class NamedObj
+@node NamedObj constructors, NamedObj public members,  , class NamedObj
 @subsection NamedObj constructors and destructors
 
 All constructors and destructors are public.
@@ -788,12 +1074,12 @@ be obtained if the list is itself const; hence, two versions of some
 functions are provided.
 
 @menu
-* NamedObjList information::    NamedObjList information functions
-* other NamedObjList functions::
-* NamedObjList iterators::
+* NamedObjList information::  NamedObjList information functions
+* other NamedObjList functions::  
+* NamedObjList iterators::  
 @end menu
 
-@node NamedObjList information, other NamedObjList functions, class NamedObjList, class NamedObjList
+@node NamedObjList information, other NamedObjList functions,  , class NamedObjList
 @subsection NamedObjList information functions
 
 The @code{size} and @code{initialize} functions of SequentialList
@@ -901,10 +1187,10 @@ word specified is the @code{bitsOff} field.  Other than to initialize
 objects, we pretend that these data members are private.
 
 @menu
-* Attribute member functions::
+* Attribute member functions::  
 @end menu
 
-@node Attribute member functions,  , Attributes, Attributes
+@node Attribute member functions,  ,  , Attributes
 @subsection Attribute member functions
 
 @example
@@ -945,7 +1231,184 @@ Inline definitions of operators @code{&} and @code{|} are also defined
 to implement nondestructive forms of the @code{&=} and @code{|=}
 operations.
 
-@node Block and related classes, Control of execution, Basic concepts, Top
+@node Support for multithreading, Block and related classes, Basic concepts, Top
+@chapter Support for multithreading
+
+Multithreading means that there are multiple @emph{threads of control},
+or @emph{lightweight processes}, in the same Ptolemy process.  The
+principal consequence of the existence of multithreading is that it is
+necessary to provide mechanisms that guarantee exclusive access to
+resources.
+
+The Ptolemy kernel does not provide a multithreading library, as this
+is currently a very OS and CPU-specific operation.  There are a variety
+of such libraries that might be used; Sun's lightweight processes
+library and the University of Colorado's Awesime package are two
+examples.  What the kernel does provide is a locking mechanism for
+implementing @emph{critical regions}, noninterruptable regions of code
+in which only one thread can be active at a time.  This facility is used
+to protect critical resources in the kernel that might be accessed by
+multiple threads.
+
+@menu
+* class PtGate::    
+* class CriticalSection::  
+* class GateKeeper::  
+* class KeptGate::  
+@end menu
+
+@node class PtGate, class CriticalSection,  , Support for multithreading
+@section Class PtGate
+
+Objects of classes derived from PtGate are used as semaphores to obtain
+exclusive access to some resource.  PtGate is an abstract base class: it
+specifies certain functionality but does not provide an implementation.
+Derived classes typically provide the desired semantics for use with a
+particular threading library.
+
+PtGate has three virtual functions that must be implemented by each
+derived class.  The first is a public method:
+
+@example
+virtual PtGate* makeNew() const = 0;
+@end example
+
+The @code{makeNew} method returns a new object of the same class as the
+object it is called for, which is created on the heap.  For example, a
+hypothetical SunLWPGate object would return a new SunLWPGate.
+
+The other two methods are protected.  They are:
+
+@example
+virtual void lock() = 0;
+virtual void unlock() = 0;
+@end example
+
+The first call requests access for a resource; the second call releases
+access.  If code in another thread calls @code{lock()} on the same
+PtGate after @code{lock()} has already been called on it, the second
+call will block until the first thread does an @code{unlock()} call.
+Note that two successive calls to @code{lock()} on the same PtGate from
+the same thread will cause that thread to hang.  It is for this reason
+that these calls are protected, not public.  Access to PtGates by user
+code is accomplished by means of another class, CriticalSection.  The
+CriticalSection class is a friend of class PtGate.
+
+@node class CriticalSection, class GateKeeper, class PtGate, Support for multithreading
+@section Class CriticalSection
+
+CriticalSection objects exploit the properties of constructors and
+destructors in C++ to provide a convenient way to implement
+@emph{critical sections}: sections of code whose execution can be
+guaranteed to be atomic.  Their use ensures that data structures can be
+kept consistent even when accessed from multiple threads.  The
+CriticalSection class implements no methods other than constructors and
+a destructor.  There are three constructors:
+
+@example
+CriticalSection(PtGate *);
+CriticalSection(PtGate &);
+CriticalSection(GateKeeper &);
+@end example
+
+The function of all of these constructors is to optionally set a lock.
+The first constructor will set the lock on the given PtGate unless it
+gets a null pointer; the second form always sets the lock.  The third
+form takes a reference to an object known as a GateKeeper (discussed in
+the next section) that, in a sense, may "contain" a PtGate.  If it
+contains a PtGate, a lock is set; otherwise no lock is set.  The lock
+is set by calling @code{lock()} on the PtGate object.
+
+The CriticalSection destructor frees the lock by calling @code{unlock()}
+on the PtGate object, if a lock was set.
+
+CriticalSection objects are used only for their side effects.  For
+example:
+
+@example
+PtGate& MyClass::gate;
+...
+void MyClass::updateDataStructure() @{
+        CriticalSection region(MyClass::gate);
+        code;
+        ...
+@}
+@end example
+
+The code between the declaration of the CriticalSection and the end
+of its scope will not be interrupted.
+
+@node class GateKeeper, class KeptGate, class CriticalSection, Support for multithreading
+@section class GateKeeper
+
+The GateKeeper class provides a means of registering a number of PtGate
+pointers in a list, together with a way of creating or deleting a series
+of PtGate objects all at once.  The motivation for this is that most
+Ptolemy applications do not use multithreading, and we do not wish to
+pay the overhead of locking and unlocking where it is not needed.  We
+also want to have the ability to create a number of fine-grain locks
+all at once.
+
+GateKeeper objects should be declared only at file scope (never as
+automatic variables or on the heap).
+
+The constructor takes the form
+
+@example
+GateKeeper(PtGate *& gateToKeep);
+@end example
+
+The argument is a reference to a pointer to a GateKeeper, and the
+function of the constructor is to add this reference to a master list.
+It will later be possible to ``enable'' the pointer, by setting it to
+point to a newly created PtGate of the appropriate type, or ``disable''
+it, by deleting the PtGate object and setting the pointer to null.
+
+The GateKeeper destructor deletes the reference from the master list and
+also deletes any PtGate object that may be pointed to by the PtGate
+pointer.
+
+The public method
+
+@example
+int enabled() const;
+@end example
+
+returns 1 if the GateKeeper's PtGate pointer is enabled (points to a
+PtGate) and 0 otherwise (the pointer is null).
+
+There are two public static functions:
+
+@example
+static void enableAll(const PtGate& master);
+@end example
+
+This function creates a PtGate object for each GateKeeper on the list,
+by calling @code{makeNew()} on the master object.
+
+@example
+static void disableAll();
+@end example
+
+This function destroys all the PtGate objects and sets the pointers to
+be null.  This function must never be called from within a block
+controlled by a CriticalSection, or while multithreading operation is
+in progress.
+
+A GateKeeper may be used as the argument to a CriticalSection
+constructor call; the effect is the same as if the PtGate pointer were
+passed to the constructor directly.
+
+@node class KeptGate,  , class GateKeeper, Support for multithreading
+@section Class KeptGate
+
+A KeptGate object is simply a GateKeeper that contains its own PtGate
+pointer.  It is derived from GateKeeper, has a private PtGate pointer
+member, and a constructor with no arguments.  Like a GateKeeper, it
+should be declared only at file scope and may be used as an argument
+to a CriticalSection constructor call.
+
+@node Block and related classes, Control of execution, Support for multithreading, Top
 @chapter Block and related classes
 
 This section describes Block, the basic functional block class, and
@@ -957,17 +1420,17 @@ Although the Target class is derived from class Block, it is documented
 elsewhere, as it falls under control of execution (@pxref{class Target}).
 
 @menu
-* class Block::                 class Block
-* class Star::                  class Star
-* class Galaxy::                class Galaxy
-* class DynamicGalaxy::         class DynamicGalaxy
-* class InterpGalaxy::          class InterpGalaxy
-* class Runnable::              class Runnable
-* class Universe::              class Universe
-* class InterpUniverse::        class InterpUniverse
+* class Block::     class Block
+* class Star::      class Star
+* class Galaxy::    class Galaxy
+* class DynamicGalaxy::  class DynamicGalaxy
+* class InterpGalaxy::  class InterpGalaxy
+* class Runnable::  class Runnable
+* class Universe::  class Universe
+* class InterpUniverse::  class InterpUniverse
 @end menu
 
-@node class Block, class Star, Block and related classes, Block and related classes
+@node class Block, class Star,  , Block and related classes
 @section Class Block
 
 Block is the basic object for representing an actor in Ptolemy.
@@ -1001,14 +1464,14 @@ for example).  This feature is used by the KnownBlock class
 (@pxref{class KnownBlock}) to create blocks on demand.
 
 @menu
-* Block constructors and destructors::
-* Block public "information" members::
-* other Block public members::
-* Block protected members::
-* Block iterator classes::
+* Block constructors and destructors::  
+* Block public "information" members::  
+* other Block public members::  
+* Block protected members::  
+* Block iterator classes::  
 @end menu
 
-@node Block constructors and destructors, Block public "information" members, class Block, class Block
+@node Block constructors and destructors, Block public "information" members,  , class Block
 @subsection Block constructors and destructors
 
 Block has a default constructor, which sets the name and
@@ -1260,11 +1723,11 @@ The default constructor sets the target pointer to null, sets the internal
 state flag to TRUE, and sets the index value to -1.
 
 @menu
-* Star public members::         Star public members
-* Star protected members::      Star protected members
+* Star public members::  Star public members
+* Star protected members::  Star protected members
 @end menu
 
-@node Star public members, Star protected members, class Star, class Star
+@node Star public members, Star protected members,  , class Star
 @subsection Star public members
 
 @example
@@ -1359,12 +1822,12 @@ refer to PortHoles of an interior Block, although this is not a
 requirement.
 
 @menu
-* Galaxy public members::       Galaxy public members
-* Galaxy protected members::    Galaxy protected members
-* Galaxy iterators::            Galaxy iterators
+* Galaxy public members::  Galaxy public members
+* Galaxy protected members::  Galaxy protected members
+* Galaxy iterators::  Galaxy iterators
 @end menu
 
-@node Galaxy public members, Galaxy protected members, class Galaxy, class Galaxy
+@node Galaxy public members, Galaxy protected members,  , class Galaxy
 @subsection Galaxy public members
 
 @example
@@ -1547,13 +2010,13 @@ by means of the Error class.
 
 
 @menu
-* building structures::         building structures with InterpGalaxy
-* deleting InterpGalaxy structures::
-* InterpGalaxy and cloning::
-* other InterpGalaxy functions::
+* building structures::  building structures with InterpGalaxy
+* deleting InterpGalaxy structures::  
+* InterpGalaxy and cloning::  
+* other InterpGalaxy functions::  
 @end menu
 
-@node building structures, deleting InterpGalaxy structures, class InterpGalaxy, class InterpGalaxy
+@node building structures, deleting InterpGalaxy structures,  , class InterpGalaxy
 @subsection building structures with InterpGalaxy
 
 The no-argument constructor creates an empty galaxy.  There is a
@@ -1961,13 +2424,13 @@ during a simulation, as well as facilities to cleanly halt execution
 on an error.
 
 @menu
-* class Target::                class Target
-* class Scheduler::             class Scheduler
-* class Error::                 class Error
-* class SimControl::            class SimControl
+* class Target::    class Target
+* class Scheduler::  class Scheduler
+* class Error::     class Error
+* class SimControl::  class SimControl
 @end menu
 
-@node class Target, class Scheduler, Control of execution, Control of execution
+@node class Target, class Scheduler,  , Control of execution
 @section Class Target
 
 Class Target is derived from class Block (@pxref{class Block});
@@ -1985,11 +2448,11 @@ generated (the parent target represents the system as a whole, and
 child targets represent each processor).
 
 @menu
-* Target public members::       Target public members
-* Target protected members::    Target protected members
+* Target public members::  Target public members
+* Target protected members::  Target protected members
 @end menu
 
-@node Target public members, Target protected members, class Target, class Target
+@node Target public members, Target protected members,  , class Target
 @subsection Target public members
 
 @example
@@ -2276,11 +2739,11 @@ The Scheduler constructor just zeros its target, galaxy pointers.  The
 destructor is virtual and do-nothing.
 
 @menu
-* Scheduler public members::    Scheduler public members
+* Scheduler public members::  Scheduler public members
 * Scheduler protected members::  Scheduler protected members
 @end menu
 
-@node Scheduler public members, Scheduler protected members, class Scheduler, class Scheduler
+@node Scheduler public members, Scheduler protected members,  , class Scheduler
 @subsection Scheduler public members
 
 @example
@@ -2504,12 +2967,12 @@ and halts are requested.  Once exceptions are commonplace in C++
 implementations, a cleaner implementation could be produced.
 
 @menu
-* SimControl status flags::     Access to SimControl status flags.
-* pre- and postactions::        Preactions and Postactions
-* SimControl interrupts and polling::
+* SimControl status flags::  Access to SimControl status flags.
+* pre- and postactions::  Preactions and Postactions
+* SimControl interrupts and polling::  
 @end menu
 
-@node SimControl status flags, pre- and postactions, class SimControl, class SimControl
+@node SimControl status flags, pre- and postactions,  , class SimControl
 @subsection Access to SimControl status flags.
 
 SimControl currently has four global status bits: the error bit,
@@ -2648,14 +3111,14 @@ allows different domains to be interfaced.  It is this ability to
 integrate different domains that sets Ptolemy apart from other systems.
 
 @menu
-* class Wormhole::              class Wormhole
-* class EventHorizon::          class EventHorizon
-* class ToEventHorizon::        class ToEventHorizon
-* class FromEventHorizon::      class FromEventHorizon
-* class WormMultiPort::         class WormMultiPort
+* class Wormhole::  class Wormhole
+* class EventHorizon::  class EventHorizon
+* class ToEventHorizon::  class ToEventHorizon
+* class FromEventHorizon::  class FromEventHorizon
+* class WormMultiPort::  class WormMultiPort
 @end menu
 
-@node class Wormhole, class EventHorizon, Interfacing domains, Interfacing domains
+@node class Wormhole, class EventHorizon,  , Interfacing domains
 @section Class Wormhole
 
 A wormhole for a domain is much like a star belonging to that domain,
@@ -2689,11 +3152,11 @@ internally it can encapsulate an entire foreign domain with a separate
 Galaxy and a separate Target and Scheduler.
 
 @menu
-* Wormhole public members::     Wormhole public members
+* Wormhole public members::  Wormhole public members
 * Wormhole protected members::  Wormhole protected members
 @end menu
 
-@node Wormhole public members, Wormhole protected members, class Wormhole, class Wormhole
+@node Wormhole public members, Wormhole protected members,  , class Wormhole
 @subsection Wormhole public members
 
 @example
@@ -2816,12 +3279,12 @@ domain to the ``universal form''.  The other, derived from FromEventHorizon,
 converts from the universal form to the domain-specific form.
 
 @menu
-* How EventHorizons are used::
-* EventHorizon public members::
-* EventHorizon protected members::
+* How EventHorizons are used::  
+* EventHorizon public members::  
+* EventHorizon protected members::  
 @end menu
 
-@node How EventHorizons are used, EventHorizon public members, class EventHorizon, class EventHorizon
+@node How EventHorizons are used, EventHorizon public members,  , class EventHorizon
 @subsection How EventHorizons are used
 
 Generally, EventHorizons are used in pairs to form a connection
@@ -2881,6 +3344,14 @@ virtual int isItOutput() const;
 @end example
 
 Say if I am an input or an output.
+
+@example
+virtual int onlyOne() const;
+@end example
+
+Derived EventHorizon classes should redefine this method to return TRUE
+for domains in which only one particle may cross the event horizon
+boundary per execution.  The default implementation returns FALSE.
 
 @example
 virtual void setEventHorizon(inOutType @var{inOut}, const char* @var{portName},
@@ -3046,18 +3517,18 @@ generation domains, the Particles typically only move during scheduling
 and these objects merely provide information on the topology.
 
 @menu
-* class GenericPort::           class GenericPort
-* class PortHole::              class PortHole
-* class MultiPortHole::         class MultiPortHole
-* AutoFork and AutoForkNode::   AutoFork and AutoForkNode
-* class ParticleStack::         class ParticleStack
-* class Geodesic::              class Geodesic
-* class Plasma::                class Plasma
-* class ParticleQueue::         class ParticleQueue
-* classes for Galaxy ports::    classes for Galaxy ports
+* class GenericPort::  class GenericPort
+* class PortHole::  class PortHole
+* class MultiPortHole::  class MultiPortHole
+* AutoFork and AutoForkNode::  AutoFork and AutoForkNode
+* class ParticleStack::  class ParticleStack
+* class Geodesic::  class Geodesic
+* class Plasma::    class Plasma
+* class ParticleQueue::  class ParticleQueue
+* classes for Galaxy ports::  classes for Galaxy ports
 @end menu
 
-@node class GenericPort, class PortHole, connection classes, connection classes
+@node class GenericPort, class PortHole,  , connection classes
 @section Class GenericPort
 
 The class GenericPort is a base class that provides common elements
@@ -3078,12 +3549,12 @@ automatically cleaned up, so that other GenericPorts are never left
 with dangling pointers.
 
 @menu
-* GenericPort query functions::
-* other GenericPort public members::
-* GenericPort protected members::
+* GenericPort query functions::  
+* other GenericPort public members::  
+* GenericPort protected members::  
 @end menu
 
-@node GenericPort query functions, other GenericPort public members, class GenericPort, class GenericPort
+@node GenericPort query functions, other GenericPort public members,  , class GenericPort
 @subsection GenericPort query functions
 
 @example
@@ -3262,12 +3733,12 @@ may also be a member of a MultiPortHole, which is a logical group of
 PortHoles.
 
 @menu
-* PortHole public members::
-* PortHole protected members::
-* class CircularBuffer::        a class used to implement PortHole
+* PortHole public members::  
+* PortHole protected members::  
+* class CircularBuffer::  a class used to implement PortHole
 @end menu
 
-@node PortHole public members, PortHole protected members, class PortHole, class PortHole
+@node PortHole public members, PortHole protected members,  , class PortHole
 @subsection PortHole public members
 
 The constructor sets just about everything to null pointers.
@@ -3594,11 +4065,11 @@ The MultiPortHole constructor sets the ``peer MPH'' to 0.  The destructor
 deletes any constituent PortHoles.
 
 @menu
-* MultiPortHole public members::
-* MultiPortHole protected members::
+* MultiPortHole public members::  
+* MultiPortHole protected members::  
 @end menu
 
-@node MultiPortHole public members, MultiPortHole protected members, class MultiPortHole, class MultiPortHole
+@node MultiPortHole public members, MultiPortHole protected members,  , class MultiPortHole
 @subsection MultiPortHole public members
 
 @example
@@ -3714,11 +4185,11 @@ invoking @code{KnownBlock::makeNew("Fork")}, which works only for
 domains that have a fork star.
 
 @menu
-* class AutoFork::              class AutoFork
-* class AutoForkNode::          class AutoForkNode
+* class AutoFork::  class AutoFork
+* class AutoForkNode::  class AutoForkNode
 @end menu
 
-@node class AutoFork, class AutoForkNode, AutoFork and AutoForkNode, AutoFork and AutoForkNode
+@node class AutoFork, class AutoForkNode,  , AutoFork and AutoForkNode
 @subsection Class AutoFork
 
 An AutoFork object has an associated Geodesic and possibly an associated
@@ -3869,11 +4340,11 @@ ParticleStack; these particles are obtained from the Plasma of the
 originating port (so they will be of the correct type).
 
 @menu
-* Geodesic public members::     Geodesic public members
+* Geodesic public members::  Geodesic public members
 * Geodesic protected members::  Geodesic protected members
 @end menu
 
-@node Geodesic public members, Geodesic protected members, class Geodesic, class Geodesic
+@node Geodesic public members, Geodesic protected members,  , class Geodesic
 @subsection Geodesic public members
 
 @example
@@ -4172,14 +4643,14 @@ to the alias.
 @chapter Particles and Messages
 
 @menu
-* class Particle::              class Particle
-* Particle public members::     Particle public members
+* class Particle::  class Particle
+* Particle public members::  Particle public members
 * Arithmetic Particle classes::  Arithmetic Particle classes
-* Messages::                    The Heterogeneous Message Interface
-* Example Message types::       Example Message types
+* Messages::        The Heterogeneous Message Interface
+* Example Message types::  Example Message types
 @end menu
 
-@node class Particle, Particle public members, Particles and Messages, Particles and Messages
+@node class Particle, Particle public members,  , Particles and Messages
 @section Class Particle
 
 A Particle is a little package that contains data; they represent the
@@ -4335,12 +4806,12 @@ MessageParticle whose data field is an Envelope.  This permits it to
 hold a Message just like any other Envelope object.
 
 @menu
-* class Envelope::              class Envelope
-* class Message::               class Message
-* class MessageParticle::       class MessageParticle
+* class Envelope::  class Envelope
+* class Message::   class Message
+* class MessageParticle::  class MessageParticle
 @end menu
 
-@node class Envelope, class Message, Messages, Messages
+@node class Envelope, class Message,  , Messages
 @subsection Class Envelope
 
 class Envelope has two constructors.  The default constructor constructs
@@ -4678,12 +5149,12 @@ classes become usable.
 stripped, the incremental linker will not work!
 
 @menu
-* types of links::              Temporary vs. Permanent Incremental Linking
-* Linker public members::       Linker public members
-* Linker implementation::       Linker implementation
+* types of links::  Temporary vs. Permanent Incremental Linking
+* Linker public members::  Linker public members
+* Linker implementation::  Linker implementation
 @end menu
 
-@node types of links, Linker public members, The incremental linker, The incremental linker
+@node types of links, Linker public members,  , The incremental linker
 @subsection Temporary vs. Permanent Incremental Linking
 
 Code that is linked in by the ``temporary link'' technique does not
@@ -4843,11 +5314,11 @@ In addition, states have attributes, which represent logical properties
 the state either has or does not have.
 
 @menu
-* class State::                 class State
-* types of states::             types of states
+* class State::     class State
+* types of states::  types of states
 @end menu
 
-@node class State, types of states, Parameters and States, Parameters and States
+@node class State, types of states,  , Parameters and States
 @section Class State
 
 Class State is derived from class NamedObj (@pxref{class NamedObj}).
@@ -4862,11 +5333,11 @@ pointer, and sets the state's attributes to a value determined by
 the constant AB_DEFAULT.  The destructor does nothing extra.
 
 @menu
-* State public members::        State public members
-* The State parser::            The State parser and protected members
+* State public members::  State public members
+* The State parser::  The State parser and protected members
 @end menu
 
-@node State public members, The State parser, class State, class State
+@node State public members, The State parser,  , class State
 @subsection State public members
 
 @example
@@ -5049,11 +5520,15 @@ This method produces an appropriately formatted error message with
 the name of the state and the arguments and calls @code{Error::abortRun}.
 
 @example
-static ParseToken pushback;
+static ParseToken pushback();
+static void setPushback(const ParseToken&);
+static void clearPushback();
 @end example
 
-This is the pushback token, for use in parsing.  Notice that it is
-static, which means that the state parser is not reentrant.
+These functions manipulate the pushback token, for use in parsing.
+The first function returns the current pushback token, the second
+sets it to be a copy of the argument, the third clears it.
+There is only one such token, so the state parser is not reentrant.
 
 @example
 ParseToken evalIntExpression(Tokenizer& @var{lexer});
@@ -5102,14 +5577,14 @@ T_Float, T_EOF, or T_ERROR.
 @section types of states
 
 @menu
-* scalar states::               class IntState and class FloatState
-* class ComplexState::          class ComplexState
-* class StringState::           class StringState
-* numeric array states::        numeric array states
-* class StringArrayState::      class StringArrayState
+* scalar states::   class IntState and class FloatState
+* class ComplexState::  class ComplexState
+* class StringState::  class StringState
+* numeric array states::  numeric array states
+* class StringArrayState::  class StringArrayState
 @end menu
 
-@node scalar states, class ComplexState, types of states, types of states
+@node scalar states, class ComplexState,  , types of states
 @subsection Class IntState and class FloatState
 
 Class IntState, derived from State, has an integer current value.
@@ -5237,13 +5712,13 @@ method to create a new object based on its name (you cannot clone a
 domain, however).
 
 @menu
-* class KnownBlock::            class KnownBlock
-* class KnownTarget::           class KnownTarget
-* class Domain::                class Domain
-* class KnownState::            class KnownState
+* class KnownBlock::  class KnownBlock
+* class KnownTarget::  class KnownTarget
+* class Domain::    class Domain
+* class KnownState::  class KnownState
 @end menu
 
-@node class KnownBlock, class KnownTarget, known lists, known lists
+@node class KnownBlock, class KnownTarget,  , known lists
 @section Class KnownBlock
 
 The KnownBlock class is responsible for keeping a master list of all
@@ -5440,10 +5915,10 @@ functions, which provides the standard interface for each domain to
 describe its requirements.
 
 @menu
-* Domain virtual functions::    Domain virtual functions
+* Domain virtual functions::  Domain virtual functions
 @end menu
 
-@node Domain virtual functions,  , class Domain, class Domain
+@node Domain virtual functions,  ,  , class Domain
 @subsection Domain virtual functions
 
 @example
@@ -5575,14 +6050,14 @@ Return the number of known states.
 @chapter I/O classes
 
 @menu
-* class StringList::            StringList, a kind of String class
-* class Tokenizer::             Tokenizer, a simple lexical analyzer class
-* augmented fstreams::          classes pt_ifstream and pt_ofstream
-* class XGraph::                Xgraph, an interface to the xgraph program
-* Histogram classes::           Histogram classes
+* class StringList::  StringList, a kind of String class
+* class Tokenizer::  Tokenizer, a simple lexical analyzer class
+* augmented fstreams::  classes pt_ifstream and pt_ofstream
+* class XGraph::    Xgraph, an interface to the xgraph program
+* Histogram classes::  Histogram classes
 @end menu
 
-@node class StringList, class Tokenizer, I/O classes, I/O classes
+@node class StringList, class Tokenizer,  , I/O classes
 @section StringList, a kind of String class
 
 Class StringList provides a subset of the functions provided by the
@@ -5598,15 +6073,15 @@ There are also operators that add numeric values to the StringList;
 there is only one format available for such additions.
 
 @menu
-* StringList constructors::     constructors and assignment operators
-* adding to StringLists::       adding to StringLists
-* StringList info functions::   StringList information functions
-* StringList conversion::       StringList conversion to const char *
-* StringList destruction::      StringList destruction and zeroing
-* class StringListIter::        class StringListIter
+* StringList constructors::  constructors and assignment operators
+* adding to StringLists::  adding to StringLists
+* StringList info functions::  StringList information functions
+* StringList conversion::  StringList conversion to const char *
+* StringList destruction::  StringList destruction and zeroing
+* class StringListIter::  class StringListIter
 @end menu
 
-@node StringList constructors, adding to StringLists, class StringList, class StringList
+@node StringList constructors, adding to StringLists,  , class StringList
 @subsection StringList constructors and assignment operators
 
 The default constructor makes an empty StringList.  There is also
@@ -5742,12 +6217,12 @@ and tab.  It is possible to change the definition of whitespace
 for a particular constructor.
 
 @menu
-* Initializing Tokenizers::     Initializing Tokenizer objects
-* reading from Tokenizers::     Reading from Tokenizers
-* Tokenizer include files::     Tokenizer include files
+* Initializing Tokenizers::  Initializing Tokenizer objects
+* reading from Tokenizers::  Reading from Tokenizers
+* Tokenizer include files::  Tokenizer include files
 @end menu
 
-@node Initializing Tokenizers, reading from Tokenizers, class Tokenizer, class Tokenizer
+@node Initializing Tokenizers, reading from Tokenizers,  , class Tokenizer
 @subsection Initializing Tokenizer objects
 
 Tokenizer provides three different constructors:
@@ -6004,11 +6479,11 @@ histogram.  The XHistogram class uses a Histogram to collect the
 data and an XGraph to display it.
 
 @menu
-* class Histogram::             Class Histogram
-* class XHistogram::            Class XHistogram
+* class Histogram::  Class Histogram
+* class XHistogram::  Class XHistogram
 @end menu
 
-@node class Histogram, class XHistogram, Histogram classes, Histogram classes
+@node class Histogram, class XHistogram,  , Histogram classes
 @subsection Class Histogram
 
 The Histogram class accumulates data in a histogram.  Its constructor
@@ -6096,20 +6571,20 @@ and executes xgraph.
 This section includes classes that did not fit elsewhere.
 
 @menu
-* Mathematical classes::        Mathematical classes
-* class IntervalList::          Class IntervalList
-* Clock and TimeVal::           Classes for interacting with the system clock
+* Mathematical classes::  Mathematical classes
+* class IntervalList::  Class IntervalList
+* Clock and TimeVal::  Classes for interacting with the system clock
 @end menu
 
-@node Mathematical classes, class IntervalList, Misc, Misc
+@node Mathematical classes, class IntervalList,  , Misc
 @section Mathematical classes
 
 @menu
-* class Complex::               class Complex
-* class Fraction::              class Fraction
+* class Complex::   class Complex
+* class Fraction::  class Fraction
 @end menu
 
-@node class Complex, class Fraction, Mathematical classes, Mathematical classes
+@node class Complex, class Fraction,  , Mathematical classes
 @subsection class Complex
 
 Class Complex is a simple subset of functions provided in the Gnu and
@@ -6258,12 +6733,12 @@ Its methods in many cases perform set operations: forming the
 union, intersection, or set difference of two IntervalLists.
 
 @menu
-* class Interval::              class Interval and methods
-* IntervalList public members::
-* IntervalList iterators::      IntervalList iterator classes.
+* class Interval::  class Interval and methods
+* IntervalList public members::  
+* IntervalList iterators::  IntervalList iterator classes.
 @end menu
 
-@node class Interval, IntervalList public members, class IntervalList, class IntervalList
+@node class Interval, IntervalList public members,  , class IntervalList
 @subsection class Interval and methods
 
 The Interval class is in some ways simply an implementation detail of
