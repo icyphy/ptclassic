@@ -78,8 +78,13 @@ extern char *sys_errlist[];
 #define ARCH "mips"
 #define EXTRAOPTS "-G 0"
 #else
+#ifndef __GNUG__
+// Then we are using cfront
+#define EXTRAOPTS "-I/users/ptdesign/src/compat/cfront -DPOSTFIX_OP="
+#else
 #define EXTRAOPTS ""
-#endif
+#endif /* ! __GNUG__ */
+#endif /* mips */
 
 #ifdef __hppa__
 #define ARCH "snake"
