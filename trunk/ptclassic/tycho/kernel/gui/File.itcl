@@ -970,11 +970,10 @@ body ::tycho::File::openContext {filename} {
 	} else {
 	    set name [uplevel #0 Edit [autoName .edit] -file $filename]
 	}
-	# FIXME: Should call update here, but this causes a segfault.
-	# Cannot call TopLevel::raiseWindow here because the Tk raise
-	# command, for some reason, causes the window to be prematurely
-	# mapped (before all its insides are present).
-	wm deiconify $name
+	$name busy
+	$name centerOnScreen
+	update 
+	$name unBusy
 	return $name
     }
 }
@@ -1123,4 +1122,5 @@ body ::tycho::File::removeBackupFiles {} {
     set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
     exec rm -f $savefile
 }
+
 
