@@ -7,7 +7,7 @@ If "fileName" is not equal to "cout" (the default) or "stdout", it
 specifies the filename to write to.
 	}
 	version { $Id$ }
-	author { E. A. Lee }
+	author { E. A. Lee, Kennard }
 	copyright { 1992 The Regents of the University of California }
 	location { CGC main library }
 	explanation {
@@ -36,8 +36,10 @@ the same line, separated by tabs.
 		int fileOutput;
 	}
 	initCode {
-	    fileOutput = strcmp(fileName, "cout") &&
-			 strcmp(fileName, "stdout");
+	    const char *fn = fileName;
+	    fileOutput = fn==NULL 
+	      || strcmp(fn, "cout")==0 || strcmp(fn, "stdout")==0
+	      || strcmp(fn, "<cout>")==0 || strcmp(fn, "<stdout>")==0;
 	    if(fileOutput) {
 		StringList s =
 			processCode(CodeBlock("FILE *$starSymbol(fp);\n"));
