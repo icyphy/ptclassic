@@ -677,8 +677,18 @@ double *real;
 STREAM stream;
 {
     char *charArray;
+    union u_tag {
+      long lngs[2];
+      double db;
+    } u;
+
+#ifdef NEVER
     double db, *ptr;
     long lngs[2];
+#else
+    double db;
+#endif
+
 
     if (!RPCFloatingPointSame) {
 	charArray = RPCARRAYALLOC(char, 20);
@@ -691,11 +701,17 @@ STREAM stream;
 	(void) RPCFREE(charArray);
 	
     } else {
+#ifdef NEVER
 	RPCASSERT(RPCReceiveLong(&lngs[0], stream), FALSE);
 	RPCASSERT(RPCReceiveLong(&lngs[1], stream), FALSE);
 	ptr = (double *) lngs;
 	db = *ptr;
 	*real = db;
+#else
+  	RPCASSERT(RPCReceiveLong(&u.lngs[0], stream), FALSE);
+  	RPCASSERT(RPCReceiveLong(&u.lngs[1], stream), FALSE);
+ 	*real = u.db;
+#endif
     }
 	
     return TRUE;
