@@ -40,7 +40,7 @@ static const char file_id[] = "InstanceManager.cc";
 #pragma implementation
 #endif
 
-#include <string.h>
+#include <stdio.h>
 #include "miscFuncs.h"
 #include "StringList.h"
 #include "InstanceManager.h"
