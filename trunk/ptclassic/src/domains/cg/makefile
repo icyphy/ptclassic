@@ -12,7 +12,7 @@
 
 include ../../../topdomain.mk
 
-DIRS = kernel stars gilsScheduler dlScheduler quasiScheduler targets
+DIRS = kernel stars parScheduler dlScheduler quasiScheduler dcScheduler targets
 
 ME = cg
 
