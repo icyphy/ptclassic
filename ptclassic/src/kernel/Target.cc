@@ -14,6 +14,10 @@ $Id$
 
 ********************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Target.h"
 #include "Scheduler.h"
 #include "Galaxy.h"
@@ -135,3 +139,45 @@ IntList* Target :: whichProcs(Cluster*, PGParSchedule*) {
 	return 0;
 }
 
+// return the nth child.
+Target* Target::child(int n) {
+	Target*p = children;
+	while (n > 0 && p) {
+		p = p->link;
+		n--;
+	}
+	return p;
+}
+
+// add a new child target.
+void Target::addChild(Target& newChild) {
+	if (children == 0) {
+		children = &newChild;
+	}
+	else {
+		// attach new child to the end of the chain.
+		Target*p = children;
+		while (p->link) p = p->link;
+		p->link = &newChild;
+	}
+
+// Create child name.   This is a memory leak!
+	char buf[20];
+	sprintf (buf, "proc%d", nChildren);
+	char* cname = savestring(buf);
+	newChild.setNameParent(cname,this);
+
+	newChild.link = 0;
+	nChildren++;
+}
+
+// delete all children; use only when children were dynamically created.
+void Target::deleteChildren() {
+	Target* p = children;
+	while (p) {
+		children = p->link;
+		delete p;
+		p = children;
+	}
+	nChildren = 0;
+}
