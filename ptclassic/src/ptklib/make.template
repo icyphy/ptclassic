@@ -19,7 +19,7 @@ ROOT	      = ../..
 VPATH         = $(ROOT)/src/ptklib
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS	      = ptkBarGraph.h
@@ -46,7 +46,7 @@ lint:	$(LIBCSRCS)
 	lint -u $(LIBCSRCS) > lint
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
