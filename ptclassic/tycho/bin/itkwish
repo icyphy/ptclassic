@@ -3,7 +3,7 @@
 # Author: Christopher Hylands
 #         changed to bourne shell script by Wolfgang Reimer
 # Version: $Id$
-# Copyright (c) 1996-1997 The Regents of the University of California.
+# Copyright (c) 1996-%Q% The Regents of the University of California.
 # 	All Rights Reserved.
 
 # PTOLEMY and PTARCH are part of the Ptolemy project.
@@ -18,19 +18,21 @@
 if [ -z "$PTOLEMY" ]; then 
     if [ "$TYCHO" -a -f "$TYCHO/../bin/ptarch" ]; then
 	PTOLEMY="$TYCHO/.."
+	export PTOLEMY
     elif [ -d "/usr/eesww/share/ptolemy" ]; then
 	PTOLEMY=/usr/eesww/share/ptolemy
+	export PTOLEMY
     fi
-    export PTOLEMY
 fi
 
 if [ -z "$TYCHO" ]; then
     if [ "$PTOLEMY" -a -f "$PTOLEMY/tycho/bin/ptarch" ]; then
 	TYCHO="$PTOLEMY/tycho"
+	export TYCHO
     elif [ -d "/usr/eesww/share/tycho0.2/tycho0.2" ]; then
 	TYCHO=/usr/eesww/share/tycho0.2/tycho0.2
+	export TYCHO
     fi
-    export TYCHO
 fi
 
 # ITCLDIR should be the location of the untar'd itcl files
