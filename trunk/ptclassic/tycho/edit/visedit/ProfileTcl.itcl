@@ -1,0 +1,242 @@
+# A code profiler for Tcl and Itcl code, using the TclX extension.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) %Q% The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### options
+#
+
+#######################################################################
+#### ProfileTcl
+# A code profiler for Tcl and Itcl code, using the TclX extension.
+#
+# <p>
+# Here is an example of how to use the ProfileTcl:
+# <tcl><pre>
+#     ::tycho::ProfileTcl .x ...
+# </pre></tcl>
+#
+class ::tycho::ProfileTcl {
+    inherit ::tycho::EditForest
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Turn profiling off and report the results
+    method profileOff {}
+
+    # Turn profiling on
+    method profileOn {}
+
+    # Update the times displayed at the bottom.
+    method updateTimes {}
+
+    ###################################################################
+    ####                      public procs                         ####
+
+    ###################################################################
+    ####                   protected methods                       ####
+
+    ###################################################################
+    ####                   protected variables                     ####
+
+    ###################################################################
+    ####                   private methods                         ####
+
+    ###################################################################
+    ####                   private variables                       ####
+}
+
+#######################################################################
+#### -xxxx configuration
+# Description of xxxx option.
+#
+#configbody ::tycho::ProfileTcl::xxxx {
+#}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::ProfileTcl::constructor {args} {
+    addTool on -text {Profile On} -command "$this profileOn"
+    addTool off -text {Profile Off} -command "$this profileOff"
+
+    # Add a display at the bottom for the profile stats.
+    addInfo count {Call count} 0 10
+    addInfo real {Real time} 0 10
+    addInfo cpu {CPU time} 0 10
+    
+    eval itk_initialize $args
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::tycho::ProfileTcl::destructor {} {
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### profileOff
+# Turn profiling off and report the results.
+#
+body ::tycho::ProfileTcl::profileOff {} {
+    clear
+    profile off results
+    set depth 1
+    set maxdepth 1
+    while {$depth <= $maxdepth} {
+        set id [array startsearch results]
+        while {[set entry [array nextelement results $id]] != {}} {
+            set len [llength $entry]
+            if {$len > $maxdepth} {set maxdepth $len}
+            if {$len == $depth} {
+                # Since we have to have TclX here anyway, use lassign & keylget
+                lassign $results($entry) count real cpu
+                set parent [join [lrange $entry 1 end] +]
+                if {$parent == {}} {
+                    set color white
+                } {
+                    set fst [component graphics forest]
+                    set parcontents [$fst contents $parent]
+                    set partime [keylget parcontents cpu]
+                    if {$partime > 0} {
+                        set fraction [expr $cpu*10/$partime]
+                        # FIXME: Handle colors better.
+                        set colors [list black darkblue blue cyan purple magenta red orange yellow white white]
+                        set color [lindex $colors $fraction]
+                    } {
+                        set color black
+                    }
+                }
+                if {$depth >= 2} {
+                    set open 0
+                } {
+                    set open 1
+                }
+                set contents [list \
+                        [list label [lindex $entry 0]] \
+                        [list color $color] \
+                        [list count $count] \
+                        [list real $real] \
+                        [list cpu $cpu] \
+                        [list open $open]]
+                component graphics add [join $entry +] $contents $parent
+            }
+        }
+        array donesearch results $id
+        incr depth
+    }
+    component graphics redrawForest
+
+    # Set up bindings to update the times.
+    set cvs [component graphics canvasName]
+    $cvs bind node <Enter> "$this updateTimes"
+}
+
+#######################################################################
+#### profileOn
+# Turn profiling on.
+#
+body ::tycho::ProfileTcl::profileOn {} {
+    # "info procs" does not work in itcl, so we use "info which"
+    if {[info which -command profile] == {}} {
+        # TclX is not loaded.  Load it.
+        # FIXME: Hardwired path here.
+        load /users/cxh/pt/tcltk/tclX.sol2/lib/libtclx.so
+    }
+    profile -commands on
+}
+
+#######################################################################
+#### updateTimes
+# Update the times displayed at the bottom to those of the node closest
+# to the current position of the mouse.
+#
+body ::tycho::ProfileTcl::updateTimes {} {
+    set node [component graphics current]
+    set fst [component graphics forest]
+    set contents [$fst contents $node]
+    # Use TclX commands, since TclX is required to be present anyway.
+    set count [keylget contents count]
+    set real [keylget contents real]
+    set cpu [keylget contents cpu]
+    addInfo count {Call count} $count
+    addInfo real {Real time} $real
+    addInfo cpu {CPU time} $cpu
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
+
+#######################################################################
+#### NameA
+# Description.
+#
+#body ::tycho::ProfileTcl::NameA {anyargs} {
+#}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### MethodName
+# Description.
+#
+#body ::tycho::ProfileTcl::methodName {} {
+#}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+#######################################################################
+#### NameA
+# Description.
+#
+#body ::tycho::ProfileTcl::NameA {} {
+#}
