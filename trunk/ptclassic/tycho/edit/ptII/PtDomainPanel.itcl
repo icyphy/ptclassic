@@ -63,7 +63,10 @@ class ::tycho::PtDomainPanel {
     # Get the selected domain
     method getDomain {}
 
-    # Set the domain. Mainly useful for initialization
+    # Set the director
+    method setDirector {director}
+
+    # Set the domain
     method setDomain {domain}
     
     # Notify that a director has been selected
@@ -138,6 +141,25 @@ body ::tycho::PtDomainPanel::getDomain {} {
     return [$itk_component(main) get main.domain]
 }
 
+########################################################################
+#### setDomain
+#
+# Set the current domain
+#
+body ::tycho::PtDomainPanel::setDomain {domain} {
+    $itk_component(main) assign main.domain $domain
+    _selectDomain
+}
+
+########################################################################
+#### setDirector
+#
+# Set the current director
+#
+body ::tycho::PtDomainPanel::setDirector {director} {
+    $itk_component(main) assign main.director $director
+    _selectDirector $director
+}
 
 ########################################################################
 #### _selectDomain

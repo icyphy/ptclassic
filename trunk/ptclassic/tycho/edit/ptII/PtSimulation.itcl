@@ -75,10 +75,16 @@ class ::tycho::PtSimulation {
     # Add a new actor to the graph
     method addActor {name uniqueName}
 
+    # Add a new relation to the graph
+    method addRelation {name}
+
     # Get the names of all actors
     method actors {} {
 	return [array names _actors]
     }
+
+    # Clear everything
+    method clear {}
 
     # Connect an edge
     method connect {edgename source out target in}
@@ -105,6 +111,9 @@ class ::tycho::PtSimulation {
     method getDirectorName {} {
         return $_directorName
     }
+
+    # Add a link to a relation
+    method link {edgename actor port}
 
     # Respond to changes in the graph
     method notify {method args}
@@ -221,18 +230,11 @@ body ::tycho::PtSimulation::constructor {args} {
     set ptversion [java::call ptolemy.schematic.DomainLibrary \
 	    getPtolemyVersion]
     # puts "Ptolemy II version $ptversion"
-    
-    set _toplevelActor [java::new ptolemy.actor.TypedCompositeActor]
-    $_toplevelActor setName System
-    debug "Toplevel actor: $_toplevelActor"
 
-    set _manager [java::new ptolemy.actor.Manager]
-    $_toplevelActor setManager $_manager
-    debug "Manager: $_manager"
+    # Create the toplevel actor and manager
+    clear
 
-    $_toplevelActor setManager $_manager
-
-    ### FIXME
+     ### FIXME
     ###set _domain SDF
 }
 
@@ -253,6 +255,45 @@ body ::tycho::PtSimulation::addActor {name uniqueName} {
 	puts "$actor: [$actor toString]"
 	set _actors($uniqueName) $actor
     }
+}
+
+########################################################################
+#### addRelation
+#
+# Add a new relation to the graph
+#
+body ::tycho::PtSimulation::addRelation {name} {
+    # Get the relation
+    set relation [java::new ptolemy.actor.TypedIORelation \
+	    $_toplevelActor \
+	    $name]
+
+    puts "$relation: [$relation toString]"
+    set _relations($name) $relation
+}
+
+########################################################################
+#### clear
+#
+# Clear everything
+#
+body ::tycho::PtSimulation::clear {} {
+    catch {unset _actors}
+    catch {unset _relations}
+    
+    set _director ""
+    set _javaDirector ""
+    set _directorName ""
+ 
+    set _toplevelActor [java::new ptolemy.actor.TypedCompositeActor]
+    $_toplevelActor setName System
+    debug "Toplevel actor: $_toplevelActor"
+    
+    set _manager [java::new ptolemy.actor.Manager]
+    $_toplevelActor setManager $_manager
+    debug "Manager: $_manager"
+    
+    $_toplevelActor setManager $_manager
 }
 
 ########################################################################
@@ -444,6 +485,18 @@ body ::tycho::PtSimulation::constructSimulation {} {
             $e]]
         debug " -> $result"
     }
+}
+
+########################################################################
+#### link
+#
+# Link a relation to a port
+#
+body ::tycho::PtSimulation::link {edgename actor port} {
+    puts "link $edgename $actor $port"
+
+    set javaPort [$_actors($actor) getPort $port]
+    $javaPort link $_relations($edgename)
 }
 
 ########################################################################

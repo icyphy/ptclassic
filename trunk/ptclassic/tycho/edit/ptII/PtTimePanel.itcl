@@ -124,6 +124,8 @@ body ::tycho::PtTimePanel::get {item} {
 # Set the director that controls the execution.
 #
 body ::tycho::PtTimePanel::setDirector {domain director} {
+    puts "setDirector $domain $director"
+
     set _director $director
     set xmlDirector [$domainLibrary getDirector $domain $director]
     set class [$xmlDirector getAttribute "class"]
