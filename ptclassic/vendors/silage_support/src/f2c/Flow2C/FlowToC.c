@@ -755,6 +755,7 @@ bool tmp_thor;
    char inputName[100];
    char prec[10];
    char typ[10];
+   char arrSz[10];
    strcpy(name,Root->Name);
    strcat(name,"Prec.inputs");
    fp = fopen(name,"r");
@@ -768,6 +769,7 @@ bool tmp_thor;
    fscanf(fp,"%s",typ);
 if(strcmp(typ,"bool") == 0);
 else fscanf(fp,"%s",prec);
+if(strcmp(typ,"fixArray")==0) fscanf(fp,"%s",arrSz);
    fprintf (CFD, "\tinput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",inputName);
@@ -817,6 +819,7 @@ bool tmp_thor;
    char outputName[100];
    char prec[10];
    char typ[10];
+   char arrSz[10];
    strcat(outputName,"");
    strcpy(name,Root->Name);
    strcat(name,"Prec.outputs");
@@ -832,6 +835,7 @@ bool tmp_thor;
    fscanf(fq,"%s",typ);
 if( strcmp(typ,"bool") == 0);
 else fscanf(fq,"%s",prec);
+if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
    fprintf (CFD, "\toutput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",outputName);
@@ -855,10 +859,11 @@ GenPtProtectedVars()
    FILE *fq;
    char fileName[100];
    char portName[100];
+   char prec[10], typ[10], arrSz[10];
 
    strcpy(portName,"");
    strcpy(fileName,Root->Name);
-   strcat(fileName,".outputs");
+   strcat(fileName,"Prec.outputs");
    fq = fopen(fileName,"r");
 /* outputs */
    if(fq == NULL) 
@@ -871,6 +876,10 @@ GenPtProtectedVars()
 
    while( (fscanf(fq,"%s",portName) == 1 ) )
    {
+   fscanf(fq,"%s",typ);
+   if( strcmp(typ,"bool") == 0);
+   else fscanf(fq,"%s",prec);
+if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
    fprintf (CFD, "\t\tconst char* %s_P; \n",portName); 	/* precision read in */
    fprintf (CFD, "\t\tint %s_IntBits; \n",portName); 	/* int part */
    fprintf (CFD, "\t\tint %s_Len; \n",portName); 	/* word length */
@@ -881,7 +890,7 @@ GenPtProtectedVars()
 
    strcpy(portName,"");
    strcpy(fileName,Root->Name);
-   strcat(fileName,".inputs");
+   strcat(fileName,"Prec.inputs");
    fq = fopen(fileName,"r");
 
    if(fq == NULL) 
@@ -892,6 +901,10 @@ GenPtProtectedVars()
 
    while( (fscanf(fq,"%s",portName) == 1 ) )
    {
+   fscanf(fq,"%s",typ);
+   if( strcmp(typ,"bool") == 0);
+   else fscanf(fq,"%s",prec);
+if( strcmp(typ,"fixArray") == 0) fscanf(fq,"%s",arrSz);
    fprintf (CFD, "\t\tconst char* %s_P; \n",portName); 	/* precision read in */
    fprintf (CFD, "\t\tint %s_IntBits; \n",portName); 	/* int part */
    fprintf (CFD, "\t\tint %s_Len; \n",portName); 	/* word length */
@@ -1316,10 +1329,11 @@ bool bittrue;
 {
    FILE *fq; 	char in_fileName[100]; 		char portName[100];
    FILE *fp; 	char out_fileName[100]; 
+   char typ[10], prec[10], arrSz[10];
 
    strcpy(portName,"");
    strcpy(in_fileName,Root->Name); 	strcpy(out_fileName,Root->Name);
-   strcat(in_fileName,".inputs");	strcat(out_fileName,".outputs");
+   strcat(in_fileName,"Prec.inputs");	strcat(out_fileName,"Prec.outputs");
    fq = fopen(in_fileName,"r");		 fp = fopen(out_fileName,"r");
 
    if(fq == NULL) { fprintf(stderr,"input file not found.\n"); exit(-1); }
@@ -1341,6 +1355,10 @@ bool bittrue;
 	fprintf(CFD, "\n\t\t/* FixedPoint Precision Initialization */\n");
 	while( (fscanf(fq,"%s",portName) == 1 ) )
 	{
+   	fscanf(fq,"%s",typ);
+	if(strcmp(typ,"bool") == 0);
+	else fscanf(fq,"%s",prec);
+	if(strcmp(typ,"fixArray")==0) fscanf(fq,"%s",arrSz);
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
     	fprintf(CFD,"\t\t%s_IntBits = get_intbits (%s_P);\n",portName,portName);
     	fprintf(CFD,"\t\t%s_Len = get_len (%s_P);\n",portName,portName);
@@ -1348,6 +1366,10 @@ bool bittrue;
 	}
 	while( (fscanf(fp,"%s",portName) == 1 ) )
 	{
+   	fscanf(fp,"%s",typ);
+	if(strcmp(typ,"bool") == 0);
+	else fscanf(fp,"%s",prec);
+	if(strcmp(typ,"fixArray")==0) fscanf(fp,"%s",arrSz);
 	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
     	fprintf(CFD,"\t\t%s_IntBits = get_intbits (%s_P);\n",portName,portName);
     	fprintf(CFD,"\t\t%s_Len = get_len (%s_P);\n",portName,portName);
@@ -1368,12 +1390,13 @@ bool tmp_thor;
    FILE *fp;
    FILE *fq;
    char fInName[100], fOutName[100], inputName[100], outputName[100];
-   char inputTyp[10], inputPrec[10];
-   char outputTyp[10], outputPrec[10];
+   char inputTyp[10], inputPrec[10], inArrSz[10];
+   char outputTyp[10], outputPrec[10], outArrSz[10];
    struct listOfIO {
        	char name[100];
        	char typ[10];
        	char prec[10];
+       	char arrSz[10];
    };
    struct listOfIO inputList[10];	/* max num of inputs */ 
    struct listOfIO outputList[10];	/* max num of outputs */ 
@@ -1395,6 +1418,8 @@ bool tmp_thor;
    fscanf(fp,"%s",inputTyp);
    if(strcmp(inputTyp,"bool") == 0) strcpy(inputPrec,"2.0");
    else fscanf(fp,"%s",inputPrec);
+   if(strcmp(inputTyp,"fixArray")==0) fscanf(fp,"%s",inArrSz);
+   else strcpy(inArrSz,"");
 
    if(tmp_thor)
    {
@@ -1448,6 +1473,7 @@ fprintf(CFD,"\t\tint F_%s_%s = int(%s_%s);\n",Root->Name,inputName,Root->Name,in
    strcpy(inputList[numIn].name,inputName);
    strcpy(inputList[numIn].typ,inputTyp);
    strcpy(inputList[numIn].prec,inputPrec);
+   strcpy(inputList[numIn].arrSz,inArrSz);
    numIn++;
    } /* while */
    numberIn = numIn; 
@@ -1457,6 +1483,8 @@ fprintf(CFD,"\t\tint F_%s_%s = int(%s_%s);\n",Root->Name,inputName,Root->Name,in
    fscanf(fq,"%s",outputTyp);
    if(strcmp(outputTyp,"bool") == 0) strcpy(outputPrec,"2.0");
    else fscanf(fq,"%s",outputPrec);
+   if(strcmp(outputTyp,"fixArray") == 0) fscanf(fq,"%s",outArrSz);
+   else strcpy(outArrSz,"");
    
    if(!bittrue || tmp_thor)
    {
@@ -1475,6 +1503,7 @@ fprintf(CFD,"\t\tint F_%s_%s = int(%s_%s);\n",Root->Name,inputName,Root->Name,in
    strcpy(outputList[numOut].name,outputName);
    strcpy(outputList[numOut].typ,outputTyp);
    strcpy(outputList[numOut].prec,outputPrec);
+   strcpy(outputList[numOut].arrSz,outArrSz);
    numOut++;
    } /* while */
    numberOut = numOut; 
@@ -1791,56 +1820,6 @@ bool pl_flag;
             fprintf(CFD, ");\n");
         }
     }
-}
-
-GenPtProcessCall()
-{
-    FILE *fp;
-    FILE *fq;
-    char fInName[100], fOutName[100], inputName[100], outputName[100];
-    struct listOfIO {
-        char name[100];
-   };
-   struct listOfIO inputList[10];       /* max num of inputs */
-   struct listOfIO outputList[10];      /* max num of outputs */
-   int numIn, numOut, numberIn, numberOut, k ;
-
-
-    bool GenAddressOfParams(), comma = false;
-    
-
-   strcpy(fInName,Root->Name);
-   strcat(fInName,".inputs");
-   strcpy(fOutName,Root->Name);
-   strcat(fOutName,".outputs");
-   fp = fopen(fInName,"r");
-   if (fp == NULL) {fprintf(stderr,"error opening input file\n"); exit(-1); }
-   fq = fopen(fOutName,"r");
-   if (fq == NULL) {fprintf(stderr,"error opening output file\n"); exit(-1); }
-
-   while( fscanf(fp,"%s",inputName) == 1) {
-   strcpy(inputList[numIn].name,inputName);
-   numIn++; }
-   numberIn = numIn;
-
-   while( fscanf(fq,"%s",outputName) == 1) {
-   strcpy(outputList[numOut].name,outputName);
-   numOut++; }
-   numberOut = numOut;
-
-    fprintf(CFD, "\t/* Calling main simulation routine */\n");
-    fprintf(CFD, "\tSim_%s (", Root->Name);
-	if (GE(Root)->HasDelay) {
-	fprintf(CFD, "&SigTab");
-        comma = true;
-    }
-   for( k=0; k<numberIn; k++) 
-   fprintf(CFD, ", &recv_%s_%s\n", Root->Name,inputList[k].name);
-   for( k=0; k<numberOut; k++) 
-   fprintf(CFD, ", &send_%s_%s\n", Root->Name,outputList[k].name);
- 
-    fprintf(CFD, ");\n");
-    fclose(fp); fclose(fq);
 }
 
 GenProcessCall()
