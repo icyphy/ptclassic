@@ -45,58 +45,11 @@ void S56XTarget :: initStates() {
 
 void S56XTarget :: headerCode () {
 	CG56Target :: headerCode();
-	addCode(
-  		"; Breakpoint/trace interrupt handlers\n"
-		"	org	p:i_swi\n"
-		"	jsr	SWI_INTR\n"
-		"	org	p:i_trace\n"
-		"	jsr	SWI_INTR\n\n"
-		"; Qckmon/degmon monitor code\n\n"
-		"	org	p:$64\n"
-		"de_pc	dc	0			; saved PC\n"
-		"de_sr	dc	0			; saved SR\n"
-		"de_ipr	dc	0			; saved IPR\n"
-		"de_foo	dc	0			; temporary junk\n\n"
-		"SWI_INTR\n"
-		"	movem	ssl,p:de_sr		; save SR\n"
-		"	movem	ssh,p:de_pc		; save PC (pops stack)\n"
-		"	movep	x:m_ipr,p:de_ipr	; save IPR\n"
-		"	andi	#$fc,mr			; allow interrupts\n"
-		"	bclr	#2,x:m_pbddr		; clear allow-us-to-run flag\n"
-		"	bset	#3,x:m_pbddr		; indicate processor stopped\n"
-		"	bset	#m_hf3,x:m_hcr		; allow SIGUSRs to get to user\n"
-		"	move	x0,p:de_foo\n"
-		"	move	p:$8000,x0		; interrupt host\n"
-		"	move	p:de_foo,x0\n"
-		"SWI_LOOP				; wait for host to let\n"
-		"	jclr	#2,x:m_pbddr,SWI_LOOP	; us continue\n"
-		"	bclr	#3,x:m_pbddr		; indicate we're continuing\n"
-		"	movem	p:de_pc,ssh		; restore SR, PC, IPR\n"
-		"	movem	p:de_sr,ssl\n"
-		"	movep	p:de_ipr,x:m_ipr\n"
-		"; XXX stuff for de2 goes here\n"
-		"	nop\n"
-		"	rti				; continue\n\n"
-		"; Host port flow control interrupt handlers\n"
-		"	org	p:i_hstcm+2		; Host command 1\n"
-		"STARTR	bset	#0,x:m_pbddr		; Allow DSP writes to host port\n"
-		"	nop\n"
-		"	org	p:i_hstcm+4		; Host command 2\n"
-		"STOPR	bclr	#0,x:m_pbddr		; Disallow DSP writes to host port\n"
-		"	nop\n"
-		"	org	p:i_hstcm+6		; Host command 3\n"
-		"STARTW	bset	#1,x:m_pbddr		; Allow DSP reads from host port\n"
-		"	nop\n"
-		"	org	p:i_hstcm+8		; Host command 4\n"
-		"STOPW	bclr	#1,x:m_pbddr		; Disallow DSP reads from host port\n"
-		"	nop\n"
-		"	org	p:$90\n"
-		"START\n"
-		"; Set device driver DMA ready flag\n"
-		"	bset	#m_hf2,x:m_hcr\n"
-		"	bclr	#0,x:m_pbddr		; clear read DMA flow control bit\n"
-		"	bclr	#1,x:m_pbddr		; clear write DMA flow control bit\n\n");
-		interruptFlag = TRUE;
+	const char *path = expandPathName("~ptolemy/lib/cg56/s56x.asm");
+	StringList inc;
+	inc << "\tinclude '" << path << "'\n";
+	addCode(inc);
+	interruptFlag = TRUE;
 };
 
 Block* S56XTarget::clone() const {
@@ -105,10 +58,8 @@ Block* S56XTarget::clone() const {
 
 void S56XTarget :: wrapup () {
 	addCode (
-		 "; Error handler for s56x architecture: ignore interrupts, loop\n"
-		 "ERROR	ori	#03,mr\n"
-		 "WAIT	jmp	WAIT\n"
 		 "MAINEND equ	*\n"
+		 "	jmp	ERROR\n"
 		 "	org	p:$1ff0\n"
 		 "	nop\n"
 		 "	stop\n"
