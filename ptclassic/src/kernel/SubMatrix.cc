@@ -44,7 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Plasma.h"
 #include "Error.h"
 
-#define SMALL_STRING 32   // should be same as for StringList.cc
+#define SMALL_STRING 32
 
 /////////////////////////////////////
 // Helper functions
@@ -64,10 +64,10 @@ StringList ComplexSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", real((*this)[row][col]));
+      sprintf(buf, "%22.15g", real((*this)[row][col]));
       strm << buf;
       strm << "+";
-      sprintf(buf,"%22.15g", imag((*this)[row][col]));
+      sprintf(buf, "%22.15g", imag((*this)[row][col]));
       strm << buf;
       strm << "j ";
     }
@@ -183,7 +183,7 @@ StringList FixSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", (double)(*this)[row][col]);
+      sprintf(buf, "%22.15g", double((*this)[row][col]));
       strm << buf;
       strm << " ";
     }
@@ -299,7 +299,7 @@ StringList FloatSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%22.15g", (*this)[row][col]);
+      sprintf(buf, "%22.15g", (*this)[row][col]);
       strm << buf;
       strm << " ";
     }
@@ -415,7 +415,7 @@ StringList IntSubMatrix::print() const {
   strm << ")\n";
   for(int row = 0; row < nRows; row++) {
     for(int col = 0; col < nCols; col++) {
-      sprintf(buf,"%12d", (*this)[row][col]);
+      sprintf(buf, "%12d", (*this)[row][col]);
       strm << buf;
       strm << " ";
     }
