@@ -60,14 +60,21 @@ public:
 /// make portholes with a multiporthole
 	int
 	numPorts(const char* starname, const char* portname, int numP);
-
+	
+// change the domain
+	int
+	setDomain(const char* newDomain);
+		
 // Make a new, identical galaxy
 	virtual Block *clone();
 
 // "register" the galaxy (add it to the known list)
-	void addToKnownList();
+	void addToKnownList(const char* domain);
 
 // return a contained star/galaxy (this is protected in Galaxy)
 	Block* blockWithName(const char* s) {return Galaxy::blockWithName(s);}
+
+// This method lets us get at lower-level galaxies
+	Block* blockWithDottedName(const char* s);
 };
 #endif
