@@ -192,11 +192,10 @@ proc openAllFiles {args} {
     foreach testfile $args {
 	if {$VERBOSE == 1} {
 	    puts "$testfile"
+	    puts "testDefs.tcl: openAllFiles{}: win = $win"
 	}
 	if [ file exists [::tycho::expandPath $testfile]] {
 	    set win [::tycho::File::openContext $testfile]
-	    #	wm deiconify $win
-	    puts "testDefs.tcl: openAllFiles{}: win = $win"
 	    if [catch {$win displayer windowName}] {
 		after [expr {2 * $duration}] removeobj $win
 	    } else {
