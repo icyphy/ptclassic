@@ -41,11 +41,11 @@ INCL=-I$(C50DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
      -I$(PARDIR) -I$(CGTARDIR) -I$(C50STARDIR)
 
 # objects to make
-SRCS=	DSKC50Target.o
+OBJS=	DSKC50Target.o SubC50Target.o
 
-HDRS=	$(SRCS:.cc=.h)
+SRCS=	$(OBJS:.o=.cc)
 
-OBJS=	$(SRCS:.cc=.o)
+HDRS=	$(OBJS:.o=.h)
 
 ifeq ($(USE_SHARED_LIBS),yes) 
 
@@ -58,17 +58,12 @@ install:	all $(LIBDIR)/$(LIB)
 else
 
 # We are not building a shared library, so we link in .o files.
-all:	$(SRCS) makefile $(OBJS)
+all:		$(SRCS) makefile $(OBJS)
 install:	all
 	@echo Installation complete.
 LIB=none	# required by common.mk
 
 endif
-
-all:	$(SRCS) makefile $(OBJS)
-
-install:	all
-	@echo Installation complete.
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
