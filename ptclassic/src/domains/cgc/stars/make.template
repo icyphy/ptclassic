@@ -28,9 +28,11 @@ PL_SRCS= \
  CGCCollect.pl  \
  CGCCommutator.pl \
  CGCConst.pl \
+ CGCCopy.pl \
  CGCCos.pl \
  CGCCut.pl \
  CGCCutVarOffset.pl \
+ CGCCxToFloat.pl \
  CGCCxToRect.pl \
  CGCDB.pl \
  CGCDeMux.pl \
@@ -39,6 +41,7 @@ PL_SRCS= \
  CGCExp.pl \
  CGCFFTCx.pl \
  CGCFIR.pl \
+ CGCFloatToCx.pl \
  CGCFork.pl \
  CGCGain.pl \
  CGCIntegrator.pl \
