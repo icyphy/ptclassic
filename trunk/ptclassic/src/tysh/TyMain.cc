@@ -72,22 +72,13 @@ extern int		isatty _ANSI_ARGS_((int fd));
 extern char *		strcpy _ANSI_ARGS_((char *dst, CONST char *src));
 };
 
-char *tyFilename = NULL;
-
 /* This defines the default domain for Tycho */
 
 extern char DEFAULT_DOMAIN[];
 
-static void PrintVersion ()
-{
-    InfString pid = (int)getpid();
-    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "(proc. id. ",
-		(char*)pid, ")} {", tyFilename, "}", NULL);
-}
-
 static void PrintSigErrorMessage ()
 {
-    Tcl_VarEval(ptkInterp, "TyGrabMessage .message -text {Unable to set the \
+    Tcl_VarEval(ptkInterp, "::tycho::inform {Unable to set the \
 signal handlers, the program will continue but if a serious error occurs it \
 may not be handled appropriately.}", NULL);
 }
@@ -103,8 +94,6 @@ may not be handled appropriately.}", NULL);
 int
 main(int argc, char **argv) {
 
-    tyFilename = argv[0];
-
     // The following creates a Tcl interpreter, adds the ptcl and itcl 
     // extensions, and creates a top-level Tk window.
     TyConsole console(argc, argv);
@@ -116,8 +105,6 @@ main(int argc, char **argv) {
 
     // Initialize the incremental linking module
     Linker::init(argv[0]);
-
-    PrintVersion();
 
     if (setSignalHandlers())
         PrintSigErrorMessage();
