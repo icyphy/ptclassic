@@ -174,7 +174,7 @@ HDRS= $(SRCS:.cc=.h)
 DOMAIN=CGC
 STAR_MK=cgcstars
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
-LIB=libcgcstars.$(LIBSUFFIX)
+PTLIB=libcgcstars.$(LIBSUFFIX)
 
 all:		makefile stars_all
 

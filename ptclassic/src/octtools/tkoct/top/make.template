@@ -54,11 +54,11 @@ HDRS =   	copyright.h topBuf.h topFixup.h topStd++.h \
 		memStats.h topFixup++.h topMsg.h topVec.h \
 
 
-LIB =		libtop.$(LIBSUFFIX)
+PTLIB =		libtop.$(LIBSUFFIX)
 
-all: 		makefile $(LIB)
+all: 		makefile $(PTLIB)
 
-install:	makefile $(LIB) $(OUT)
+install:	makefile $(PTLIB) $(OUT)
 
 
 TOPDIR =	$(VPATH)/../top	# top is a package used by tkoct

@@ -44,7 +44,7 @@ include $(CONFIG)
 INCL = -I$(KERNDIR) -I$(PTCL_INCDIR)
 
 # Library name
-LIB=libsdf.$(LIBSUFFIX)
+PTLIB=libsdf.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS =     $(KERNEL_DLLDEP) $(PTMATHEMATICA_DLLDEP) $(PTCL_DESCRIPTION_OBJ)
@@ -61,10 +61,10 @@ SRCS= $(HDRS:.h=.cc) SDFDomain.cc
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 
 

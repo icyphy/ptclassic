@@ -45,7 +45,7 @@ include $(CONFIG)
 #INCL = -I$(KERNDIR)
 
 # Library name
-LIB=libsr.$(LIBSUFFIX)
+PTLIB=libsr.$(LIBSUFFIX)
 
 # Header files
 HDRS= SRPortHole.h SRScheduler.h SRStar.h SRNonStrictStar.h SRWormhole.h \
@@ -58,10 +58,10 @@ SRCS= $(HDRS:.h=.cc) SRDomain.cc
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 ## Added for Tcl
 # include the X11, tcl headers for C++ as well as C

@@ -131,11 +131,11 @@ all:	$(LIBNONSHARED) $(OTHER_OBJS)
 
 install: all $(LIBDIR)/$(LIBNONSHARED)
 else
-LIB =	libpigi.$(LIBSUFFIX)
+PTLIB =	libpigi.$(LIBSUFFIX)
 
-all:	$(LIB) $(OTHER_OBJS)
+all:	$(PTLIB) $(OTHER_OBJS)
 
-install: all $(LIBDIR)/$(LIB)
+install: all $(LIBDIR)/$(PTLIB)
 endif
 
 # Directory containing utilities for BarGraph

@@ -54,7 +54,7 @@ INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR) \
        -I$(ROOT)/src/utils/libptdsp
 
 # stars library
-LIB=libvhdlstars.$(LIBSUFFIX)
+PTLIB=libvhdlstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # put any derived stars first in the list

@@ -43,8 +43,8 @@ MISC_FILES = 	Copyright MANIFEST Makefile.dist README-tkman contrib \
 		tkman.1 tkman.tcl \
 		ANNOUNCE-tkman CHANGES backslash face.xbm
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = foo
 
 
 # We don't include common.mk since we don't use the compiler here

@@ -86,7 +86,7 @@ STAR_MK=c50dspstars
 DOMAIN=C50DSP
 DOMAIN_2=C50
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
-LIB=libc50dspstars.$(LIBSUFFIX)
+PTLIB=libc50dspstars.$(LIBSUFFIX)
 
 all:		makefile stars_all
 

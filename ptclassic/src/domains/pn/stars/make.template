@@ -45,7 +45,7 @@ INCL=	-I$(COMPAT) -I$(PNDIR) -I$(SDFDIR) -I$(KERNDIR) \
 	-I$(VPATH) $(INCL_THREADS)
 
 # Library name
-LIB= lib$(STAR_MK).$(LIBSUFFIX)
+PTLIB= lib$(STAR_MK).$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes must be listed before derived classes

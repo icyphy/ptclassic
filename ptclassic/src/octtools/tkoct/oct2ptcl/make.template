@@ -48,8 +48,8 @@ MISC_FILES =	Policy README BUGS
 
 BINARY =	oct2ptcl$(BINARY_EXT)
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = foo
 
 all:		makefile $(BINARY)
 

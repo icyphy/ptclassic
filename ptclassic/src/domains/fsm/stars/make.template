@@ -45,7 +45,7 @@ INCL = -I$(FSMDIR) -I$(KERNDIR) \
        -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
-LIB=libfsmstars.$(LIBSUFFIX)
+PTLIB=libfsmstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list

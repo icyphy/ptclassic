@@ -44,7 +44,7 @@ include $(CONFIG)
 INCL = -I$(KERNDIR)
 
 # Library name
-LIB=libhof.$(LIBSUFFIX)
+PTLIB=libhof.$(LIBSUFFIX)
 
 # Library sources
 SRCS= \
@@ -57,10 +57,10 @@ HDRS= HOFPortHole.h HOFScheduler.h HOFStar.h HOFWormhole.h
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

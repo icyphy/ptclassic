@@ -45,7 +45,7 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/sdf/stars \
        -I$(ROOT)/src/utils/libptdsp
 
 # Library name
-LIB=libsdfdspstars.$(LIBSUFFIX)
+PTLIB=libsdfdspstars.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
 DLLDEPS =     $(SDF_DLLDEP)

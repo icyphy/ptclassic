@@ -47,12 +47,12 @@ SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 INCL =-I$(SDFKERNEL) -I$(KERNDIR)
 
 OBJS = $(SRCS:.cc=.o)
-LIB = libls.$(LIBSUFFIX)
+PTLIB = libls.$(LIBSUFFIX)
 
-all:	makefile $(LIB) 
+all:	makefile $(PTLIB) 
 
 # "make install" puts things in the official place
-install:	all $(LIBDIR)/$(LIB)
+install:	all $(LIBDIR)/$(PTLIB)
 
 
 # include common definitions, rules

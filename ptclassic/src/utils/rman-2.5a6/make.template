@@ -38,8 +38,8 @@ SRCS = 	rman.c
 
 KRUFT =
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = foo
 
 KRUFT = rman
 
