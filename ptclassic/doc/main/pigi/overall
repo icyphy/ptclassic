@@ -13,10 +13,12 @@
 .AU
 Joseph Buck
 Edwin E. Goei
+Alan Kamas
 Phil Lapsley
 Edward A. Lee
 David G. Messerschmitt
 .AE
+.so introduction
 .so terminology
 .so setup
 .so xwindow
@@ -25,10 +27,11 @@ David G. Messerschmitt
 .so galaxies
 .so hardcopy
 .so other
-.so codegen
 .so newstars
 .so icons
 .so domains
+.so pigiRpc
+.so debugging
 .so moreinfo
 .so references
 .so pigiCommands

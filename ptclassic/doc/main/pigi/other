@@ -19,7 +19,7 @@ then the \fIplot signal\fR command will plot ten points with value 1.0
 and ten points with value -1.0.
 .IE "plot signal"
 The \fIoptions\fR parameter can accept any options understood by the
-xgraph program.
+xgraph program (see the xgraph section of the Almagest).
 To plot a signal stored in a file, simply use the following syntax
 for the \fIsignal\fR parameter:
 .(c
@@ -51,7 +51,7 @@ Furthermore, a fairly general expression language is supported.
 Parameter values set through pigi can be expressions.
 This is particularly useful for propagating values down from
 a universe parameter to star parameters somewhere down in the hierarchy.
-Examples of valid parameter expressions are:
+An example of a valid parameter expression is:
 .(c
 	PI/(2*order)
 .)c
@@ -235,12 +235,11 @@ open the layers palette.  This can be done with the VEM \fIpalette\fR
 (``P'') command in the ``System'' menu.
 .IE "palette VEM command"
 A window will pop up showing the available colors.
-The names of the colors are themselves labels below each box.
-You will probably have to zoom in to see the names.
+The names of the colors appear at the top of each column of boxes.
 .IE "layer names"
 .IE "colors"
-The layers "whiteSolid" and "blackSolid" work well for labels.
-The layers "whiteOutline" and "blackOutline" are similar, except
+The layers "redSolid" and "blackSolid" work well for labels.
+The layers "redOutline" and "blackOutline" are similar, except
 that a box will be drawn around the label.
 .H2 "Icon Orientation"
 .pp
@@ -279,7 +278,7 @@ Then you can zoom in here if necessary.
 \*(PT supports star definitions that do not specify how many
 inputs or outputs there are.
 The
-.c FloatAdd
+.c Add
 and
 .c Fork
 stars are defined this way, for instance.
@@ -425,12 +424,16 @@ not obvious, try deleting the indicated objects and redrawing them.
 In one of our examples, we used ``cp -r'' to make a copy of a facet.
 In general, however, copying entire designs this way does not work.
 For it to work in the general case, you must also change some data in
-the facets that you copy.  There is a program which is part of the
-Octtools distribution, called ``octmvlib'', that you can use to do
-this.  The procedure, however, requires you to be Oct knowledgeable and
-can sometimes be tricky.  Refer to the Octtools manual for detailed
-information on ``octmvlib'' [3].
-However, some simple examples will cover most cases.
+the facets that you copy.
+In particular, each facet has pointers to the icons it uses.
+If you move a galaxy, for example, then any pointer to the icon
+for that galaxy becomes invalid (or ``inconsistent'' in Oct terminology).
+.Ir inconsistent
+.pp
+A utility program called ``masters'' has been provided for this purpose.
+This replaces the program from the
+Octtools distribution, called ``octmvlib'', that was used with earlier
+versions of \*(PT.
 .H3 "Moving palettes, stars, galaxies, and universes"
 .pp
 Palettes, star icons, galaxies, and universes are stored as Oct facets.
@@ -452,36 +455,49 @@ where it is used.  The star icon itself is stored in two facets:
 	alphaCentaur/schematic/contents;
 	alphaCentaur/schematic/interface;
 .)c
+The first of these stores the schematic, the second stores the icon.
+The peculiar semicolon at the end is actually part of the file name.
 First move the source code:
 .(c
 	mv alphaCentaur.pl destinationDirectory
 .)c
-Then edit the makefile.template in that directory to reflect
-the new star.
+Then edit the makefile or make.template in that directory to be able
+to compile the new star.
 Then move the icon:
 .(c
 	mv alphaCentaur destinationDirectory
 .)c
 This moves the entire directory tree.
-Now is where things start to get a little tricky.
-You must change all references to the icon so that they
+You must now change all references to the icon so that they
 reflect the new location.  Suppose you have a test universe
-called alphaTest that also contains a galaxy called alphaGalaxy.
-If both of these contain instances of alphaCentaur, then both
-must be modified.  They are modified as follows:
+called alphaTest.
+This should be modified by running the ``masters'' program as follows:
 .(c
-	octmvlib -O "\fIoldpath\fP" -N "\fInewpath\fP" alphaTest:schematic
-	octmvlib -O "\fIoldpath\fP" -N "\fInewpath\fP" alphaGalaxy:schematic
+foucault.berkeley.edu 102: masters alphaTest
+Running masters on wave
+Pathname to replace (? for a listing):
 .)c
-The utility octmvlib simply replaces the oldpath
-(something like "~fred/ptolemyWork/newstars") with the new path
-(something like "~ptolemy/src/domains/sdf/icons").
-The quotation marks are required.
-The octmvlib utility should be in your path, if you followed the setup instructions.
-.pp
-Next, use octmvlib the same way
-to modify any palettes that reference the icon.
+Enter a question mark to get a list of all icons referenced in the facet:
+.(c
+Pathname to replace (? for a listing): ?
+
+Pathnames currently found in the facet (minus connectors and delays):
+	~yourname/oldDirectory/alphaCentaur
+        $PTOLEMY/src/domains/sdf/icons/Ramp
+        $PTOLEMY/src/domains/sdf/icons/Sin
+        $PTOLEMY/src/domains/sdf/icons/Xgraph
+Pathname to replace (? for help):
+.)c
+The last three items are pointers to official \*(PT icons.
+There is no need to change these.
+You should now enter the string you need to replace and the replacement
+value:
+.(c
+Pathname to replace (? for help): ~yourname/oldDirectory
+New pathname: ~yourname/destinationDirectory
+.)c
+Next, use masters the same way
+to modify any palettes that reference the moved icon.
 For instance, the "user.pal" palette is a likely candidate.
 If you miss a reference, Oct will issue an error message when it tries
 to open the offending palette.  
-This is a good time to run octmvlib.
