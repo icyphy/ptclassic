@@ -5,7 +5,7 @@ Simulate a fourth-power optical phase-locked loop
 with laser phase noise and additive Gaussian white noise
 operating on a complex baseband envelope model of the signal.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "John R. Barry"
@@ -65,7 +65,9 @@ quadrature eye diagrams.
 .UH "References"
 .ip [1]
 J. Barry and J. Kahn,
-.i "Carrier Synchronization for Heterodyne Detection of Optical Quadriphase-Shift Keying,"
-submitted to J. Lightwave Technology, manuscript 1213, February 1992.
+"Carrier Synchronization for Homodyne and Heterodyne Detection of
+Optical Quadriphase-Shift Keying,"
+\fIJournal of Lightwave Technology\fR, vol. 10, no. 12, pp. 1939-1951,
+Dec. 1992.
 .SA
 .ES

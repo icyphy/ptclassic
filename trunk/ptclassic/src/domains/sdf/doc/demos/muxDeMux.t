@@ -3,7 +3,7 @@
 .SD
 Demonstrate the Mux and DeMux stars, which perform multiplexing and demultiplexing.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

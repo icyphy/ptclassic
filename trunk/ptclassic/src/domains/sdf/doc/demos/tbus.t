@@ -5,7 +5,7 @@ This is a simple illustration of the bus facility in Ptolemy,
 in which multiple signals are combined onto a single graphical
 connection.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"

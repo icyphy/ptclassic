@@ -4,7 +4,7 @@
 This is an example of an inconsistent SDF system.
 It fails to run, generating an error message instead.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "J. Buck"

@@ -6,10 +6,10 @@ of three sinusoids in colored, Gaussian noise.
 Two mechanisms (Burg's algorithm and an LMS adaptive filter)
 for linear prediction are compared.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 31, 1990"
-.AL "E. A. Lee"
+.SV $Revision$	$Date$
+.AL "Edward A. Lee"
 .LD
 .Ie "linear prediction"
 .Ie "prediction, linear"

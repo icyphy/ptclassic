@@ -3,10 +3,10 @@
 .SD
 A universe that does motion compensation image coding.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "August 19, 1991"
-.AL "P. E. Haskell"
+.SV $Revision$	$Date$
+.AL "Paul E. Haskell"
 .LD
 This universe reads images from a file and performs motion compensation
 on the image sequence.

@@ -1,14 +1,14 @@
 .\" $Id$
 .NA allPole
 .SD
-Two realizations of an all-pole filter are shown to be equivalent.
+Two realizations of an all-pole filter are shown to be equivalent.
 One uses an FIR filter in a feedback path, the other uses the
 BlockAllPole star.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	"%D%"
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 A noise signal is fed into two realizations
 of an all pole filter.

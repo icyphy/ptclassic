@@ -4,11 +4,11 @@
 This is simple demonstration of chaos, in which the phase-space
 plot of the famous Henon map is given.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .IE chaos
 .SV $Revision$	$Date$
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 .Ir "Henon map"
 .Ir "chaos"

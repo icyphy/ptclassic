@@ -6,10 +6,10 @@ The plane wave approaches from angles starting from head on and slowly rotating
 360 degrees. The response of the antenna is plotted as a function of direction
 of arrival in polar form.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 15, 1990"
-.AL "E. A. Lee"
+.SV $Revision$	$Date$
+.AL "Edward A. Lee"
 .LD
 .Ie "phased array antenna"
 .Ie "antenna, phased array"

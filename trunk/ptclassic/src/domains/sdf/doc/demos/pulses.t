@@ -5,10 +5,10 @@ Generate raised cosine and square-root raised cosine pulses
 and demonstrates matched filtering with the square-root raised
 cosine pulse.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
 .SV $Revision$	$Date$
-.AL "E. A. Lee"
+.AL "Edward A. Lee"
 .LD
 .pp
 This demo generates a 25% excess bandwidth raised cosine pulse
@@ -32,7 +32,7 @@ at low excess bandwidths.
 .ip [1]
 E. A. Lee and D. G. Messerschmitt,
 .i "Digital Communication" ,
-Kluwer Academic Publishers, Boston, MA, 1988, pp. 154-172
+Kluwer Academic Publishers, Boston, MA, 1988, pp. 154-172.
 .SA
 RaisedCosine
 .ES

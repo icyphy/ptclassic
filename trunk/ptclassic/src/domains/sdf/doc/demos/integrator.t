@@ -4,9 +4,9 @@
 Demonstrate the features of the integrator star,
 such as limiting, leakage, and resetting.
 .DE
-.LO "~ptolemy/src/domains/sdf/demo"
+.LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
-.SV $Revision$ "October 15, 1990"
+.SV $Revision$	$Date$
 .AL "Edward A. Lee"
 .LD
 This system shows the various features of the
