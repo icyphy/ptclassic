@@ -153,6 +153,26 @@ const GenericPort& GenericPort :: realPort() const {
 // only this function and the destructor alters typePortPtr.
 void GenericPort :: inheritTypeFrom(GenericPort& p) {
 
+  // To run CGDDF, compile this with:
+  //  cd $PTOLEMY/obj.$PTARCH/kernel; rm -f PortHole.o
+  //  make USERFLAGS=-DCGDDF_PORTHOLE_CC_WORKAROUND install
+  // Note that to build for CGDDF, you will also need to recompile
+  // cg/parScheduler/CodeGen.cc.
+  // Note that this change breaks HOFMapGr, so you can't use HOF and CGDDF
+  // together (2/96)
+  // In general, we frown upon using #ifdefs in code, but in this case
+  // it allows CGDDF development to proceed.
+#ifdef CGDDF_PORTHOLE_CC_WORKAROUND
+  // CGDDF: instead of extracting this porthole from the circle, we
+  // enlarge the circle (cgddf needed this)
+  GenericPort* temp = typePortPtr;
+  if (temp) {
+        while (temp->typePortPtr != this) temp = temp->typePortPtr;
+  } else {
+        temp = this;
+  }
+  temp->typePortPtr = &p;
+#else // CGDDF_PORTHOLE_CC_WORKAROUND
   // If a typePortPtr already exists, we need to first remove
   // this porthole from the circle containing it.
   GenericPort *q;
@@ -161,9 +181,8 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
       q = q->typePortPtr;
     q->typePortPtr = typePortPtr;
   }
-
-  // Set my pointer
   typePortPtr = &p;
+#endif // CGDDF_PORTHOLE_CC_WORKAROUND
 
   // Now check for a circle already containing the destination port p.
   // Case 1: no pre-existing circle.  Make one and return.
@@ -173,7 +192,11 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
   }
   // case 2: a pre-existing circle.  Search for the link back to p
   // and make it point to me instead.
+#ifdef CGDDF_PORTHOLE_CC_WORKAROUND
+  GenericPort* q = p.typePortPtr;
+#else
   q = p.typePortPtr;
+#endif
   while (q->typePortPtr != &p)
     q = q->typePortPtr;
   q->typePortPtr = this;
