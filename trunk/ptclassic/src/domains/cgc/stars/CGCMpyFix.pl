@@ -1,9 +1,9 @@
 defstar {
 	name { MpyFix }
 	domain { CGC }
-	derivedFrom { CGCFix }
+	derivedFrom { Fix }
 	desc { Output the product of the inputs, as a fixed-point value. }
-	author { J.Weiss }
+	author { Jyergen Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.

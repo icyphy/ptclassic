@@ -1,7 +1,7 @@
 defstar {
-        name {FIRFix}
-        domain {CGC}
-	derivedFrom { CGCFix }
+        name { FIRFix }
+        domain { CGC }
+	derivedFrom { Fix }
         desc {
 A finite impulse response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are specified by the "taps" parameter.

@@ -5,7 +5,7 @@ defstar {
 Based star for the fixed-point stars in the CGC domain.
 	}
 	version { $Id$ }
-        author { J.Weiss }
+        author { Juergen Weiss }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
