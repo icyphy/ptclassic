@@ -43,6 +43,7 @@ EXTRA_SRCS =	\
 	fontmanager.html \
 	base.html \
 	console.html \
+	decorators.html \
 	dialogclasses.html \
 	dialogs.html \
 	dialog.html \
