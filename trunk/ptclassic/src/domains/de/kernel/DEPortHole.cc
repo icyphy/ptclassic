@@ -86,7 +86,7 @@ void InDEPort :: getSimulEvent()
         }
 }
 
-int InDEPort :: grabData (Particle* p)
+int InDEPort :: getFromQueue (Particle* p)
 {
 	// get an event from the global queue into either porthole or
 	// inQue depending on whether inQue exists or not.
@@ -114,7 +114,7 @@ void InDEPort :: cleanIt()
 	if (!inQue) moreData = 0;
 	else {
 		while (inQue->length() > 0) {
-			Particle* p = inQue->get();
+			Particle* p = (Particle*)inQue->get();
 			myPlasma->put(p);
 		}
 	}
@@ -208,44 +208,4 @@ PortHole& MultiOutDEPort :: newPort () {
 	p.timeStamp = 0.0;
 	p.depth = -1;
 	return installPort(p);
-}
-
-/**********************************************************
-
- Member functions for EventQueue..
-
- **********************************************************/
-
-Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
-	Event* temp;
-	// a free event instance
-	if (freeEventHead) {
-		temp = freeEventHead;
-		freeEventHead  = temp->next;
-	} else {
-		temp = new Event;
-	}
-	// set the event members.
-	temp->dest = ph;
-	temp->p = p;
-	return temp;
-}
-
-void EventQueue:: clearFreeEvents() {
-	if (!freeEventHead) return;
-	Event* temp;
-	while (freeEventHead->next) {
-		temp = freeEventHead;
-		freeEventHead = freeEventHead->next;
-		delete temp;
-	}
-	delete freeEventHead;
-}
-
-void EventQueue:: putFreeLink(LevelLink* p) {
-	if (p->fineLevel) {
-		Event* temp = (Event*) p->e;
-		putEvent(temp);
-	}
-	PriorityQueue:: putFreeLink(p);
 }
