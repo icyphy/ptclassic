@@ -445,7 +445,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     ostream* logstrm = 0;
     if (logFile && *logFile) {
 	StringList tmp = logFile;
-	tmp << ".AcySchedLogs";
+	tmp << ".acySchedLogs." << gal.name();
 	logstrm = new pt_ofstream(tmp.chars());
 	if (!*logstrm) {
 	    delete logstrm;
