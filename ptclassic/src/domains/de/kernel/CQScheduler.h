@@ -58,10 +58,6 @@ class CQScheduler : public DEBaseSched {
 	int errorDelayFree(PortHole* p);
 	void errorUndefined(PortHole* p);
 
-	// If output events are generated at the "start" phase,
-	// send them to the global event queue
-	void initialFire();
-
 	// check deley free loop
 	int checkDelayFreeLoop();
 
@@ -119,6 +115,9 @@ public:
 	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
 
 	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
+
+        // class identification
+        int isA(const char*) const;
 };
 
 #endif
