@@ -55,7 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 		name {identifier}
 		type{string}
-		default {"LMSCx filter taps"}
+		default {"LMSCx filter taps: Real (red) & Imag (blue)"}
 		desc {The string to identify the run-time display.}
 	}
 	defstate {
@@ -202,8 +202,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	    arglist { "()" }
 	    code {
 		for(int i=0; i < taps.size(); i++)
-		    if((bg.update(0,i,imag(taps[i])) == 0) ||
-		       (bg.update(1,i,real(taps[i])) == 0))
+		    if((bg.update(1,i,imag(taps[i])) == 0) ||
+		       (bg.update(0,i,real(taps[i])) == 0))
 			Error::abortRun(*this,"Cannot update bar graph.");
 	    }
 	}
