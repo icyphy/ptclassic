@@ -175,6 +175,23 @@ static int isVarExp(const char* exp) {
 	return (*exp != 0);
 }
 
+/* FIX ME!  If the initial delay values are for non-initializable
+   delays (indicated by a leading '*' character) and the expression for
+   the number of delays is constant (does not depend on any Galaxy
+   parameters) then parse the string *AND CLEAR IT*.  Clearing the string
+   prevents connections from being logged on the initList.
+*/
+static int getNumDelays(Galaxy* gal, const char*& values)
+{
+    int numDelays = 0;
+    if (values && *values == '*' && !isVarExp(values+1))
+    {
+	numDelays = evalExp(gal,values+1,"delay");
+	values = &emptyDelay;
+    }
+    return numDelays;
+}
+
 static void
 logConnect(StringList& list,const char* srcStar,const char* srcPipe,
 	   const char* dstStar,const char* dstPipe, 
@@ -220,9 +237,12 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 
 // add the action to the list, and to initList if variable
 	logConnect(actionList,srcStar,srcPipe,dstStar,dstPipe,initDelayValues);
+
+	int numDelays = getNumDelays(this, initDelayValues);
+
 	if (*initDelayValues)
 	  logConnect(initList,srcStar,srcPipe,dstStar,dstPipe,initDelayValues);
-	Galaxy::connect (*srcP, *dstP, 0, initDelayValues);
+	Galaxy::connect (*srcP, *dstP, numDelays, initDelayValues);
 	return TRUE;
 }
 
@@ -250,11 +270,14 @@ InterpGalaxy::busConnect(const char* srcStar,const char* srcPipe,
   MultiPortHole* d = findMPH (dstStar, dstPipe);
   if (s == 0 || d == 0) return FALSE;
   logBus(actionList,srcStar,srcPipe,dstStar,dstPipe,width,initDelayValues);
+
+  int numDelays = getNumDelays(this, initDelayValues);
+
   if (isVarExp(width) || *initDelayValues)
     logBus(initList,srcStar,srcPipe,dstStar,dstPipe,width,initDelayValues);
   int w = evalExp(this,width,"busWidth");
   if (w == 0) w = 1;
-  s->busConnect (*d, w, 0, initDelayValues);
+  s->busConnect (*d, w, numDelays, initDelayValues);
   return TRUE;
 }
 
@@ -376,7 +399,10 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		return FALSE;
 	}
 	if (ph->isItOutput()) {
-		if (!g->setSourcePort (*ph, 0, initDelayValues)) return FALSE;
+
+		int numDelays = getNumDelays(this, initDelayValues);
+
+		if (!g->setSourcePort (*ph, numDelays, initDelayValues)) return FALSE;
 	} else if (*initDelayValues) {
 	  Error::abortRun ("delay not allowed when nodeConnecting an input");
 	  return FALSE;
