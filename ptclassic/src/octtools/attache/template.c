@@ -442,7 +442,6 @@ struct enumTemplate *tmpPtr;
 {
     int32 *numberPtr = (int32 *) cptr;
     int stop;
-    long atol();
 
     stop = getString(tCurString, tCurString + strlen(tCurString), TEMP_STOPS);
     *numberPtr = atol(tCurString);
@@ -456,7 +455,6 @@ struct enumTemplate *tmpPtr;
 {
     octCoord *numberPtr = (octCoord *) cptr;
     int stop;
-    long atol();
 
     stop = getString(tCurString, tCurString + strlen(tCurString), TEMP_STOPS);
     *numberPtr = atol(tCurString);
