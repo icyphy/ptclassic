@@ -35,7 +35,7 @@
 # defined by the parent makefile prior to including this makefile:
 # SRCS
 # OBJS
-# LIB
+# PTLIB
 # DOMAIN, DOMAIN_2, DOMAIN_3
 # STAR_MK	Specifies the name of the star-reference file to build;
 #		both a C-verion (e.g., cgcstars.c) using genStarTable and
@@ -165,10 +165,10 @@ $(VPATH)/$(STAR_MK).c:	make.template
 $(STAR_MK).o:	$(VPATH)/$(STAR_MK).c
 
 # Standard "all" for stars directories
-stars_all:	$(SRCS) $(LIB) $(STAR_MK).o
+stars_all:	$(SRCS) $(PTLIB) $(STAR_MK).o
 
 # Rule for installing both the star library and star list
-stars_install:	all $(LIBDIR)/$(LIB) $(LIBDIR)/$(STAR_MK).o
+stars_install:	all $(LIBDIR)/$(PTLIB) $(LIBDIR)/$(STAR_MK).o
 		@echo Installation complete.
 
 # Rule for installing the star list
