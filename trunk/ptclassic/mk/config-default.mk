@@ -210,3 +210,7 @@ INCLUDE_IPUS_DOMAIN = yes
 
 # stars.mk uses this to decide whether to include the Ipus stars
 INCLUDE_PN_DOMAIN = yes
+
+# src/thread/makefile uses this to decide whether to build gthreads
+# gthreads should be built only on sol2, sol2.cfront and sun4.
+INCLUDE_GTHREADS = no
