@@ -36,12 +36,18 @@
 #
 # Execessive hacking under duress :-) : Christopher Hylands
 #
+
+# If pathname is a link, then remove it, create a directory by the
+# same name and then link linkspec.  Note that linkspec can be
+# one or more pathnames with a wildcard, such as *.
+# 
 proc replaceLinkWithDir {pathname linkspec} {
     if { [file type $pathname] == "link" } {
 	puts "Creating $pathname"
 	file delete $pathname
 	file mkdir $pathname
-	exec ln -s $linkspec $pathname
+	# linkspec is one or more wildcard pathnames, so we use sh -c
+	exec sh -c "ln -s $linkspec $pathname"
     } elseif { [file isdirectory $pathname] } {
 	puts "The directory $pathname already exists"
     } else {
@@ -105,7 +111,7 @@ proc mkPtolemyTree {override croot root ptarch} {
     puts "The new customized Ptolemy tree will go in $croot"
     puts "Using $override for $ptarch"
 
-    # here are some libraries which are in lib.$PTACH but do not get built
+    # here are some libraries which are in lib.$PTARCH but do not get built
     # often so, we just make a sym link to them
     set LIBDIR "$root/lib.$ptarch"
     set AUX_LIBRARIES "$LIBDIR/libCGCrtlib.* $LIBDIR/libcephes.*"
@@ -162,7 +168,7 @@ TREE:
 	}
     }
 
-    
+    # We need to make sources to build any makefiles that are out of date
     # process each directory, src directories before obj directories so that
     # the make.template and makefile symlinks are done correctly
     foreach dir [exec find $croot -type d -print | sort -r] {
@@ -180,21 +186,23 @@ TREE:
 	processDirectory $dir $croot $root
     }
 
+    # At this point, the basic directory structure has been built, so
+    # now we fine tune it by creating links where appropriate
+
+    # If the .glimpse files exist, then create links for them
+    if [file exists $root/src/.glimpse_exclude] {
+	puts "Creating $croot/src/.glimpse_exclude"
+	eval file delete -force [glob $croot/src/.glimpse*]
+	exec ln -s $root/src/.glimpse_exclude $croot/src/.glimpse_exclude
+	exec ln -s $root/src/.glimpse_index $croot/src/.glimpse_index
+    }
+
+
     file delete -force $croot/obj.$ptarch/makefile
     exec ln -s $root/src/makefile $croot/obj.$ptarch/makefile
 
     file delete -force $croot/MAKEARCH
     file copy $root/MAKEARCH $croot/MAKEARCH
-
-    # If the .glimpse files exist, then create links for them
-    if [file exists $root/src/.glimpse_exclude] {
-	file delete -force $croot/src/.glimpse_exclude
-	file copy $root/src/.glimpse_exclude $croot/src/.glimpse_exclude
-    }
-    if [file exists $root/src/.glimpse_index] {
-	file delete -force $croot/src/.glimpse_index
-	file copy $root/src/.glimpse_index $croot/src/.glimpse_index
-    }
 
     puts "Copying $override to $croot/mk/override.mk"
     file copy $override $croot/mk/override.mk
