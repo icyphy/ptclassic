@@ -92,7 +92,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		Complex sum = Complex(0.0, 0.0);
 		for (int i = 0;i < int(length); i++) {
 		    sum += (const Complex&)(signal%(int(length)-i-1))
-			* (const Complex&)(
+			* Complex(
 			    cos(double(omega%n)*i*double(timeBetweenSamples)),
 			    -sin(double(omega%n)*i*double(timeBetweenSamples)));
 		}
