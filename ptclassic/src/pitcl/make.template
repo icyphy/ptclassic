@@ -67,20 +67,24 @@ INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 		$(PTCOMPAT_INCSPEC) $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
 		$(MATHEMATICA_INCSPEC) $(MATHEMATICAIFC_INCSPEC)
 
+C_INCL =	$(PTCOMPAT_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
+
 # Sources: LIB_SRCS contains the files that make up libptcl.so.
 # NON_LIB_SRCS contains the files that do not go into libptcl.so.
 LIB_SRCS =	MatlabTcl.cc MathematicaTcl.cc PTcl.cc ptclInit.cc \
 		ptclError.cc ptclGantt.cc ptclInvokeInterp.cc \
 		ptclDescription.cc
+LIB_CSRCS = 	displayFile.c
 NON_LIB_SRCS =	ptclAppInit.cc
 SRCS =		$(LIB_SRCS) $(NON_LIB_SRCS)
 
 # Header files
-HDRS =		MatlabTcl.h MathematicaTcl.h PTcl.h ganttChart.h \
+HDRS =		displayFile.h \
+		MatlabTcl.h MathematicaTcl.h PTcl.h ganttChart.h \
 		ptclDescription.h
 
 # Objects that make up the library
-OBJS =		$(LIB_SRCS:.cc=.o)
+OBJS =		$(LIB_SRCS:.cc=.o) $(LIB_CSRCS:.c=.o)
 
 # HPUX has a hard time handling symbols that are defined both in a static
 # library and in a shared library, so, since we have different Error::
