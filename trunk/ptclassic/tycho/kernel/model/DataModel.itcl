@@ -35,13 +35,6 @@
 # DataModel extends the Model class to support the TIM interchange
 # format.  (See <a href="../../../doc/tim.html">the TIM documentation</a>).
 #
-# The class defines one type, called an _attribute_. Attributes are
-# written to the TIM file only if they differ from a default value.
-# The default attributes supported by all persistent models are:
-# <ul>
-# <li>...
-# </ul>
-#
 class ::tycho::DataModel {
     inherit ::tycho::Model
 
@@ -51,29 +44,17 @@ class ::tycho::DataModel {
     #################################################################
     ####                        options                          ####
 
-    # The file containing the data in this model 
-    public variable datafile {}
-
-    # The file containing an image of this model
-    public variable imagefile {}
-
     #################################################################
     ####                     public methods                      ####
 
     # Add a new item
     method add {type name args}
 
-    # Access annotations
-    method annotation {mode name args}
-
-    # Set the value of an item
-    method assign {type name value}
-
-    # Define an attribute of the model
-    method attribute {args}
-
     # Remove all data
     method clear {}
+
+    # Delete an item
+    method delete {type name}
 
     # Describe the data as a string in TIM format
     method describe {{type {}} {name {}} {prefix {}}}
@@ -81,14 +62,8 @@ class ::tycho::DataModel {
     # Check if an item exists
     method exists {type name}
 
-    # Externalize the data into an image file
-    method externalize {fd}
-
-    # Get the names and data of each item matching a pattern
+    # Get the names and attributes of each item matching a pattern
     method get {type {pattern {}}}
-
-    # Load data from an image file
-    method internalize {filename}
 
     # Get an attribute or attributes of an item
     method itemcget {type name {attribute {}}}
@@ -96,47 +71,35 @@ class ::tycho::DataModel {
     # Configure attributes of an item
     method itemconfigure {type name args}
 
-    # Get an attribute of the model
-    method modelcget {name}
-
-    # Configure attributes of the model
-    method modelconfigure {args}
-
     # Get the names of each item matching a pattern
     method names {type {pattern {}}}
-
-    # Add a new type of item
-    method newtype {type args}
 
     # Load data from a TIM string
     method parse {data}
 
-    # Write the model to its files
-    method save {args}
+    # Access the schema of this model
+    method schema {args}
 
     # Sort items in a given context
     method sort {type context args}
 
-    # Get an attribute of an item type
-    method typecget {type attribute}
-
-    # Add or change default attributes of an item type
-    method typeconfigure {type args}
-
-    # Get the value of an item
-    method value {type name}
-
     #################################################################
     ####                   protected methods                     ####
+
+    # Add a new item
+    protected method _add {type name args}
+
+    # Delete an item
+    protected method _delete {type name}
 
     # Create a header string
     protected method _header {}
 
+    # Configure attributes of an item
+    protected method _itemconfigure {type name args}
+
     #################################################################
     ####                  protected variables                    ####
-
-    # The Interchange object holding my data
-    protected variable _data
 
     #################################################################
     ####                    private methods                      ####
@@ -144,12 +107,9 @@ class ::tycho::DataModel {
     # Describe an attribute
     private method _describeattribute {type name prefix}
 
-    # Add a new item
-    private method _add {type name arguments}
-
     # Return a description of a single item
     private method _describeitem {type name {prefix {}}}
-    
+
     # Parse a nested item
     private method _parsegroup {type name data}
 
@@ -162,111 +122,32 @@ class ::tycho::DataModel {
     #################################################################
     ####                  private variables                    ####
 
-    # The default model attributes
-    private variable _defaultattributes {
-	-version 0.0
-	-class {}
-	-mode "model"
-	-title {}
-	-author {}
-    }
+    # The namespace holding my data
+    private variable _dataspace
 
-    # The safe interpreter provided for safe parsing
-    private variable safeInterp [interp create]
+    # My unique id
+    private variable _id
 
-    # Default type attributes
-    private common _typeattributes {
-    	-describe {}
-    	-leafonly 0
-    	-nonroot 0
-    	-ordered 1
-    	-rootonly 0
-    	-strict 1
-    	-valued 0
-    }
-
-    # Annotations. This data is accessed only by the annotation{}
-    # method, and is intended to allow clients to save arbitrary data
-    # in the image file.
-    private variable _annot
-
-    # The data of each item. The index of each entry is a pair of its
-    # full type and full name. For example, the item *bar* of type B
-    # nested in *foo* of type *A* would have the index
-    # <code>{A B},{foo bar}</code>. The value of the entry is the
-    # item's value, if its type has the *-valued* attribute set, or
-    # null if not, followed by a list of attribute-value pairs. For
-    # example, the item just given may have the array entry
-    # <pre>
-    #    _data({A B} {foo bar}) -> {Hello -today yes -volume loud}
-    # </pre>
-    private variable _data
-
-    # The ordered children of a given type of an item. An element is
-    # placed into this array only for those types that have the
-    # *-ordered* attribute set in the call to newtype{}. The array
-    # indices are the pair of the full type and the name of the
-    # enclosing context. For example, *foo* might have the entry
-    # <pre>
-    #    _order({A B},foo) -> {bar baz}
-    # </pre>
-    private variable _order
-
-    #### _typeinfo
-    # This array contains a set of entries for each item type.
-    # It is set up and accessed by the newtype{} and
-    # typeconfigure{} methods.
-    # <pre>
-    #    _typeinfo()                  -> List of types in order defined
-    #    _typeinfo($type)             -> $type
-    #    _typeinfo($type,defaults)    -> Default attribute values
-    #    _typeinfo($type,describe)    -> Script to describe this item
-    #    _typeinfo($type,leafonly)    -> Must be a leaf?
-    #    _typeinfo($type,nonroot)     -> Cannot be a root item?
-    #    _typeinfo($type,ordered)     -> Are instances ordered?
-    #    _typeinfo($type,rootonly)    -> Must be a root?
-    #    _typeinfo($type,strict)      -> Are attributes checked strictly?
-    #    _typeinfo($type,valued)      -> Has a value?
-    # </pre>
-    private variable _typeinfo
-
-    # Debugging only
-    method debug {args} {
-	eval $args
-    }
+    # The schema objects of each class
+    private common _schema
 }
 
 
 ########################################################################
 #### constructor
 #
-# The constructor of this class performs two main functions. Firstly,
-# it creates an instance of Interchange to hold this model's data.
-# Secondly, it defines the type "attribute" and creates the default
-# model attributes. The attribute type is given a *-describe* option
-# so that attributes are produced in a TIM description only if the
-# current value differs from the default.
-#  
 body ::tycho::DataModel::constructor {args} {
+    # Before we do anything, make sure we have a schema
+    schema
+
+    # Get me an ID
+    set _id [::tycho::autoName {}]
+
+    # Set the data namespace
+    set _dataspace ::tycho::ModelSchema::[info namespace tail [info class]]
+
     # Evaluate options
     eval configure $args
-    
-    # Create an Interchange object
-    set $_data [uplevel #0 Interchange [::tycho::autoName interchange]]
-
-    # Create the attribute type
-    $_data newtype attribute \
-	    -rootonly 1 \
-	    -ordered 1 \
-	    -valued 1 \
-	    -default {} \
-	    -describe [code "$this _describeattribute"]
-    
-    # Create the default attributes
-    foreach {name value} $_defaultattributes {
-	attribute $name $value
-    }
-    modelconfigure -class [info class]   ;# Override default
 }
 
 ########################################################################
@@ -278,82 +159,9 @@ body ::tycho::DataModel::constructor {args} {
 # in a call to newtype{}), and a list of attribute-value pairs.
 # Raise an error if the item already exists.
 #
-body ::tycho::NewInterchange::add {type name args} {
+body ::tycho::DataModel::add {type name args} {
     _verifynot $type $name
     _add $type $name $args
-}
-
-########################################################################
-#### assign
-#
-# Assign a value to the item specified by _type_ and _name_, and
-# return the original value so that it can be used to construct
-# an undo command. Raise an error if the item does not exist or
-# if the type does not have its *-valued* attribute set.
-#
-body ::tycho::NewInterchange::assign {type name value} {
-    _verify $type $name
-    if !$_typeinfo([lindex $type end],valued) {
-        error "Type [lindex $type end] cannot have a value assigned"
-    }
-    set index [list $type $name]
-    set result [lindex $_data($index) 0]
-    set _data($index) [lreplace $_data($index) 0 0 $value]
-    return $result
-}
-
-########################################################################
-#### annotation
-#
-# Read or set an annotation. If two arguments are supplied, then
-# an annotation named _name_ will be written to the image
-# file generated by externalize{}, with the value given by the
-# second argument. If the annotation already exists, its value
-# will be silently over-written. If one argument is supplied, then
-# the current value of the annotation named _name_ will be returned,
-# or an error raised if the annotation does not exist.
-#
-# This method is provided solely as a means for clients to have
-# additional data stored into and loaded from an image of the data.
-# It cannot be used to annotate individual items, nor will annotations
-# be produced in a TIM description produced by the describe{} method.
-#
-body ::tycho::NewInterchange::annotation {name args} {
-    if { [llength $args] > 1 } {
-        error "One or two arguments expected"
-    }
-    if { $args == "" } {
-        if ![::info exists _annot($name)] {
-            error "Annotation does not exist: $name"
-        }
-        return $_annot($name)
-    } else {
-        set _annot($name) [lindex $args 0]
-    }
-}
-
-########################################################################
-#### attribute
-#
-# Add a new attribute to the model. The attribute _name_ is defined and
-# given the _value_ as both its current and default values.
-# If the attribute already exists, its default value and current value
-# are changed to the given value. Model attributes are printed
-# in the description of the model only if they differ from the default.
-# Note that model attributes are treated separately from options
-# of Itk widgets or Itcl objects, in order to support dynamic creation
-# of attributes. This method is not undoable.
-#
-body ::tycho::DataModel::attribute {name value} {
-    if [$_data exists attribute $name] {
-	# Change existing attribute
-	$_data assign attribute $name $value
-	$_data itemconfigure attribute $name -default $value
-    } else {
-	# Create new attribute
-	$_data add attribute $name $value -default $value
-    }
-    return ""
 }
 
 ########################################################################
@@ -365,28 +173,15 @@ body ::tycho::DataModel::attribute {name value} {
 # the history explicitly with the <code>history add</code>.
 #
 body ::tycho::DataModel::clear {} {
-    set attributes [$_data get attribute]
-    $_data clear
+    set attributes [get attribute]
+    
+    # FIXME: clear all data
+
     foreach {name value} $attributes {
-	$_data assign attribute $name $value
+	_itemconfigure attribute $name $value
     }
     # Not undoable
     return ""
-}
-
-########################################################################
-#### clear
-#
-# Delete all data. Type information is not cleared -- if you
-# want to do that you should probably just create a new object.
-#
-set junk {
-    body ::tycho::NewInterchange::clear {} {
-	catch {unset _data}
-	catch {unset _order}
-	catch {unset _annot}
-	return
-    }
 }
 
 ########################################################################
@@ -400,14 +195,14 @@ set junk {
 # for children (which, depending on the settings of the type
 # attributes, can be more or less expensive). Secondly, this method
 # needs to return data that can be used to construct an undo
-# command, and it is simpler to do this is the method does not
+# command, and it is simpler to do this if the method does not
 # delete children. Thus, it is the client's responsibility to
 # decide whether and when to test for and delete child items.
 # This method returns the value and attributes of this item (prior
 # to deletion) if its type has *-valued* set, or just the list
 # of attributes if not.
 #
-body ::tycho::NewInterchange::delete {type name} {
+body ::tycho::DataModel::delete {type name} {
     _verify $type $name
 
     set itype [lindex $type end]
@@ -456,10 +251,9 @@ set junk {
 # method can safely be called to produce a description of a single 
 # item from within the *-describe* attribute of a type (see newtype{}).
 #
-body ::tycho::NewInterchange::describe {{type {}} {name {}} {prefix {}}} {
+body ::tycho::DataModel::describe {{type {}} {name {}} {prefix {}}} {
     if { $type != "" && $name!= "" } {
-	_verify $type $name
-	_describeitem $type $name $prefix
+        schema describe $_id $type $name
     } else {
 	set string ""
 	foreach type $_typeinfo() {
@@ -493,36 +287,8 @@ body ::tycho::NewInterchange::describe {{type {}} {name {}} {prefix {}}} {
 # Test if the item given by _type_ and _name_ exists, returning 1 if it
 # does and 0 if not.
 #
-body ::tycho::NewInterchange::exists {type name} {
+body ::tycho::DataModel::exists {type name} {
     ::info exists _data([list $type $name])
-}
-
-########################################################################
-#### externalize
-#
-# Write an image of the data to a file so that it
-# can be reconstructed rapidly at some later date. The string
-# format is "opaque," and should not be parsed or modified in
-# any way. Clients can use the annotation{} method
-# to add their own data to the output file. The argument is a
-# file descriptor so that clients can write comment data to
-# the start of the file if needed.
-#
-body ::tycho::NewInterchange::externalize {df} {
-    # This writes the contents of each internal array out as
-    # a huge list. I did try writing the array one element
-    # at a time: this gave larger files and took a fair
-    # bit longer to write out -- performance speedup
-    # when loading very large datasets was less then 5%.
-
-    puts $fd "# Item data\n"
-    puts $fd "array set _data \{[array get _data]\}\n\n"
-
-    puts $fd "# Item ordering\n"
-    puts $fd "array set _order \{[array get _order]\}\n\n"
-
-    puts $fd "# Annotations\n"
-    puts $fd "array set _annot \{[array get _annot]\}\n\n"
 }
 
 ########################################################################
@@ -538,7 +304,7 @@ body ::tycho::NewInterchange::externalize {df} {
 # 
 # FIXME: Better error-checking needed.
 #
-body ::tycho::NewInterchange::get {type {pattern {}}} {
+body ::tycho::DataModel::get {type {pattern {}}} {
     set p [llength $pattern]
     set t [llength $type]
     if { $p != $t && $p != $t-1 } {
@@ -572,31 +338,6 @@ body ::tycho::NewInterchange::get {type {pattern {}}} {
 }
 
 ########################################################################
-#### internalize
-#
-# Load data from an image file generated by the externalize{}
-# method. The object must have the correct types defined. Raise an
-# error if the object already contains data. If the client has its
-# own data stored in the image, it can access it with the annotation{}
-# method after this method returns.
-# 
-# In general, there is no guarantee that an image file will produce
-# a correct model object. In particular, changes in internal format
-# or its types or attributes may cause an error. To prevent this from
-# happening, clients should produce and track a version number when
-# creating and storing image files, and check the version number against
-# either an "authoritative" TIM description of the data or an internal
-# version number.
-#
-body ::tycho::NewInterchange::internalize {filename} {
-    if { [array names _data] != "" } {
-        error "$errorname already contains data"
-    }
-    # Source the file
-    source $data
-}
-
-########################################################################
 #### itemcget
 #
 # Get an attribute or attributes of the item specified by _type_ and
@@ -605,7 +346,7 @@ body ::tycho::NewInterchange::internalize {filename} {
 # the specified attribute. Raise an error if the item does not exist or
 # if the attribute is unknown.
 #
-body ::tycho::NewInterchange::itemcget {type name {attribute {}}} {
+body ::tycho::DataModel::itemcget {type name {attribute {}}} {
     _verify $type $name
 
     set itype [lindex $type end]
@@ -633,7 +374,7 @@ body ::tycho::NewInterchange::itemcget {type name {attribute {}}} {
 # and their values prior to this call, for use in building an undo command.
 # Raise an error if the item does not exist. 
 #
-body ::tycho::NewInterchange::itemconfigure {type name args} {
+body ::tycho::DataModel::itemconfigure {type name args} {
     _verify $type $name
     
     set itype [lindex $type end]
@@ -661,131 +402,6 @@ body ::tycho::NewInterchange::itemconfigure {type name args} {
 }
 
 ########################################################################
-#### load
-#
-# Load the data from files. With no arguments given, this method
-# uses the current values of the *-datafile* and *-imagefile* options.
-# If there are arguments, they are option-value pairs, where the valid
-# options are *-datafile* and *-imagefile*, and the values are used
-# instead of the options of the object. To prevent a file from being
-# read, supply a null value for that option. The image file must be a
-# local file (that is, <code>::tycho::resource isremote</code> returns
-# false), but the data file can be any valid URL.
-#
-# This method chooses whether to read the data file and supply the
-# contents to the Interchange object's parse{} method, or whether
-# to perform a fast load using the image file. It will load the
-# image file only if:
-# <ol>
-# <li>The value of the *-imagefile* option is not null.
-# <li>The image file exists, is a file, and has non-zero size.
-# <li>The data file exists and is a file.
-# <li>The modification date of the image file is no earlier than
-# modification date of the data file.
-# <li>Both files have header strings containing version, class,
-# and date fields.
-# <li>The version number and class of the imagefile is the same
-# as that the data file.
-# <li>The date in the image file header is no earlier than that of
-# the data file.
-# <li>The image file is successfully loaded.
-# </ol>
-#
-# If any of these conditions fails, the model is loaded from the data
-# file. Note that changing the *-datafile* or *-imagefile* options does
-# not cause the data to be reloaded: this must be done explicitly by
-# calling clear{} and then this method. Note also that, in general,
-# clients should not call this method directly -- instead, they
-# should call the procedure <code>::tycho::model open</code>. The
-# command history is cleared if loading from a data file, or set to the
-# history contained in the image file if loading from an image file.
-# After loading, subscribers are notified with the "save" event.
-# This method is not, by default, undoable, because of the potential
-# size of the undo command. A client could add an undo command to
-# the history explicitly with the <code>history add</code>.
-#
-body ::tycho::DataModel::load {args} {
-    # Figure out what files to load
-    set temp(-datafile) $datafile
-    set temp(-imagefile) $imagefile
-    array set temp $args
-    set image $temp(-imagefile)
-    set data $temp(-datafile)
-    if { $temp(-imagefile) != "" } {
-	set image [::tycho::expandPath $temp(-imagefile)]
-    }
-    if { $temp(-datafile) } { 
-	set data [::tycho::url expand $temp(-datafile)]
-    }
-
-    # Figure out whether the image file can be loaded.
-    set loadimage 0
-    if { $image != "" \
-	    &&  [file exists $image] \
-	    && ![file isdirectory $image] \
-	    &&  [file size $image] > 0 \
-	    &&  [::tycho::resource exists $data] \
-	    && ![::tycho::resource isdirectory $data] \
-	    && [file mtime $image] >= [::tycho::resource mtime $data] } {
-	::tycho::readFileHeader $image iopts
-	::tycho::readFileHeader $data dopts
-	if { [::info exists iopts(version)] \
-		&& [::info exists dopts(version)] \
-		&& $iopts(version) == $dopts(version) \
-		&& [::info exists iopts(class)] \
-		&& [::info exists dopts(class)] \
-		&& $iopts(class) == $dopts(class) \
-		&& [::info exists iopts(mtime)] \
-		&& [::info exists dopts(mtime)] \
-		&& $iopts(mtime) >= $dopts(mtime) } {
-	    # OK, clear the data and history and try loading the image file
-	    clear
-	    history clear
-	    if [catch {$_data internalize $file}] {
-		# Oops -- that failed... Load the data file.
-		clear
-		history clear
-		set fd [open $data]
-		$_data load [$fd read]
-		close $fd
-	    } else {
-		# Load the command history
-		history set [$_data annotation get history]
-	    }
-	}
-    }
-    # Notify subscribers that the model has been loaded
-    notify event "load"
-    
-    # Not undoable
-    return ""
-}
-
-########################################################################
-#### modelcget
-#
-# Get the current value of an attribute of the model. An error
-# is raised if the attribute is not known.
-#
-body ::tycho::DataModel::modelcget {name} {
-    if { ! [::info exists _currentoptions($name)] } {
-        error "Unknown option $name in $errorname"
-    }
-    return $_currentoptions($name)
-}
-
-########################################################################
-#### modelconfigure
-#
-# Change the current attributes of the model.  Raise an error if any
-# attribute has not been defined with the attribute{} method. Return
-# an undo command.
-#
-body ::tycho::DataModel::modelconfigure {args} {
-    concat "modelconfigure" [$_data itemconfigure attribute $name $value]
-}
-
-########################################################################
 #### names
 #
 # Return the names and data of items which have type _type_
@@ -809,7 +425,7 @@ body ::tycho::DataModel::modelconfigure {args} {
 # 
 # FIXME: Better error-checking
 #
-body ::tycho::NewInterchange::names {type {pattern {}}} {
+body ::tycho::DataModel::names {type {pattern {}}} {
     set p [llength $pattern]
     set t [llength $type]
     if { $p != $t && $p != $t-1 } {
@@ -837,82 +453,6 @@ body ::tycho::NewInterchange::names {type {pattern {}}} {
 }
 
 ########################################################################
-#### newtype
-#
-# Add a new item type. The first argument is the type of the item.
-# Following arguments are attribute names and their default values. The
-# following special attributes are recognised:
-# <ul>
-# <li><b>-describe</b> _script_: If not null, a script that will be 
-# evaluated to describe each item of this type. The item type and name,
-# and a prefix string, will be appended to the script, and the script
-# evaluated in the global scope. (Note that these are the same arguments
-# as required by the describe{} method.) The script must return a
-# valid description of the item or null (in which case no description
-# of that item will be produced by describe{}). The default is null.
-# <li><b>-leafonly</b> _bool_: If true, items of this type most be
-# a leaf item -- that is, they cannot contain nested items.
-# The default is false.
-# <li><b>-nonroot</b> _bool_: If true, items of this type cannot
-# be a root item. The default is false.
-# <li><b>-ordered</b> _bool_: If true, items of this type are ordered
-# within a given context. That is, the names{} and get{} methods
-# return items in the same order in which they were added.
-# The default is true.
-# <li><b>-rootonly</b> _bool_: If true, items of this type must
-# be a root item. The default is false.
-# <li><b>-strict</b> _bool_: If true, the attributes of this type
-# are limited to those that are declared with typeconfigure{}
-# or newtype{}. If not true, any attributes can be given to
-# items of this type. The default is true.
-# <li><b>-valued</b> _bool_: If true, items of this type have
-# a value. If not true, no value will be parsed or printed in the
-# external format. The default is false.
-# </ul>
-# Any other attribute names become an attribute of this type. For
-# example, the call
-# <pre>
-#     $NewInterchange newtype foo -ordered 1 -bar hello
-# </pre>
-# will create the type *foo* and make instances of it ordered.
-# In addition, any item of type *foo* can accept the attribute
-# *-bar*, which will have the default value "Hello." An error
-# will be raised if the type already exists.
-#
-# Some of the type attributes affect efficiency of certain attributes.
-# These following effects should be considered if performance
-# problems arise:
-# <ul>
-# <li> Items that cannot accept nested items should have the
-# *-leafonly* attribute set, as this makes printing large models faster.
-# <li> The *-ordered* attribute makes the names{}, get{}, and
-# describe{} (for nested items) methods faster. However, the
-# delete{} method is slower.
-# <li> The *-strict* attribute slows down parsing a TIM description.
-# It can be turned off if less error-checking is acceptable.
-# </ul>
-#
-body ::tycho::NewInterchange::newtype {type args} {
-    if [::info exists _typeinfo($type)] {
-        error "Item type $type already exists"
-    }
-    lappend _typeinfo() $type
-
-    array set opts $_typeattributes
-    array set opts $args
-
-    # Set special attributes
-    set _typeinfo($type) $type
-    foreach {a _} $_typeattributes {
-        set _typeinfo($type,[string trim $a "-"]) $opts($a)
-        unset opts($a)
-    }
-    
-    # Set defaults
-    set _typeinfo($type,defaults) [array get opts]
-}
-
-########################################################################
 #### parse
 #
 # Read data from a string containing a TIM representation of a
@@ -925,116 +465,29 @@ body ::tycho::NewInterchange::newtype {type args} {
 # to add an item. Otherwise, the item and its data is added. An error is
 # raised if the object already contains data.
 #
-body ::tycho::NewInterchange::parse {data} {
-    if { [array names _data] != "" } {
-        error "$errorname already contains data"
-    }
-    # Scan the string by dropping lines.
-    append $data "\n"
-    while { $data != "" } {
-        # Get the next line
-        regexp "^(\[^\n\]*)\n(.*)" $data _ line data
-        # Process if not a space or comment line
-        if ![regexp "^\[ \t\]*#" $line] {
-            # Get lines until a complete command 
-            set command $line
-            while { ! [::info complete $command] && $data != "" } {
-                regexp "^(\[^\n\]*)\n(.*)" $data _ line data
-                append command "\n" $line
-            }
-            # Check that the command is legal
-            if ![::info exists _typeinfo($type)] {
-                error "Illegal type: $type"
-            }
-            if $_typeinfo($type,nonroot) {
-                error "$type cannot be a root"
-            }
-            # Evaluate the command
-            if { $loadcommand != "" } {
-                uplevel #0 $loadcommand $command
-            } else {
-                _add $type $name $args
-            }
-        }
-    }
+body ::tycho::DataModel::parse {data} {
+    schema parse $_id $data
 }
 
 ########################################################################
-#### save
+#### schema
 #
-# Write the model data to files. With no arguments given, this method
-# writes to the files given by the *-datafile* and *-imagefile* options.
-# If there are arguments, they are option-value pairs, where the
-# valid options are *-datafile* and *-imagefile*, and the values
-# are used instead of the options of the object. Nothing is
-# written to a file if its name is null.  The image file must be a
-# local file (that is, <code>::tycho::resource isremote</code> returns
-# false), but the data file can be any valid URL. If the data file
-# is not writable, raise an error. If the image file is not writable,
-# just don't write it.
+# Access the schema of this model class. Each subclass of this
+# class will have a schema object created for it, which is used
+# to manage type definitions, parsing, and printing of instance
+# of that class. With no arguments, return the schema object.
+# If arguments are supplied, evaluate them on the schema object.
 #
-# The file given by *-datafile* is written in the TIM format, while
-# the file given by *-imagefile* is written in the opaque fast loading
-# format produced by the externalize{} method of the DataModelchange class.
-# Both files begin with an emacs-style header containing the mode, class,
-# and version attributes the model, and the current date. After writing,
-# the minor version number is incremented by one, and subscribers
-# are notified of the save event. A mark called "save" is also placed
-# into the command history.
-# This method is not, by default, undoable, because of the potential
-# size of the undo command. A client could add an undo command to
-# the history explicitly with the <code>history add</code>.
-#
-body ::tycho::DataModel::save {args} {
-    # Figure out what files to load
-    set temp(-datafile) $datafile
-    set temp(-imagefile) $imagefile
-    array set temp $args
-    set image $temp(-imagefile)
-    set data $temp(-datafile)
-    if { $image != "" } {
-	set image [::tycho::expandPath $temp(-imagefile)]
+body ::tycho::DataModel::schema {args} {
+    # Make sure one exists for this class
+    if ![::info exists _schema([info class])] {
+	set _schema([info class]) [::tycho::ModelSchema #auto]
     }
-    if { $data } { 
-	set data [::tycho::url expand $temp(-datafile)]
+    if { $args == "" } {
+	return $_schema([info class])
+    } else {
+	eval $_schema([info class]) $args
     }
-    
-    # Generate the header string
-    set header "# -*- [_header] -*-"
-
-    # Write the data file first
-    if { data != "" } {
-	if { ![::tycho::resource writable [file dirname $df]] \
-		|| ![::tycho::resource writable $df] } {
-	    error "File \"$data\" cannot be written"
-	}
-	set dd [open $data]
-    	puts $dd $header
-    	puts $dd [$_data describe]
-    	close $dd
-    }
-    # Then the image file
-    if { $image != "" } {
-	if { [file exists [file dirname $df]] && [file writable $df] } {
-	    set ii [open $image "w"]
-	    puts $ii $header                            ;# header
-	    $_data annotation set history [history get] ;# history
-	    $_data externalize $ii                      ;# data
-	    close $ii
-	}
-    }
-    # Increment version
-    foreach {major minor} [split [modelcget -version] "."] {}
-    incr minor
-    modelconfigure -version $major.$minor
-    
-    # Mark the command history
-    mark set "save" current
-
-    # Notify subscribers that the model has been saved
-    notify event "save"
-    
-    return ""
 }
 
 ########################################################################
@@ -1048,7 +501,7 @@ body ::tycho::DataModel::save {args} {
 #
 # FIXME: Error-checking
 #
-body ::tycho::NewInterchange::sort {type context args} {
+body ::tycho::DataModel::sort {type context args} {
     set itype [lindex $type end]
     set index [list $type $context]
 
@@ -1059,71 +512,6 @@ body ::tycho::NewInterchange::sort {type context args} {
     if [::info exists _order($index)] {
         set _order($index) [eval lsort $args [list $_order($index)]]
     }
-}
-
-########################################################################
-#### typecget
-#
-# Get attributes of an item type. Raise an error if the type is
-# invalid or the attribute is unknown. This method accesses attributes
-# defined for the type as well as special attributes such as
-# *-ordered* and *-valued*.
-# 
-body ::tycho::NewInterchange::typecget {type attribute} {
-    if ![::info exists _typeinfo($type)] {
-        error "Unknown type: $type"
-    }
-    array set opts $_typeattributes
-    if [::info exists opts($attribute)] {
-        return $_typeinfo($type,[string trimleft $attribute "-"])
-    }
-    array set opts $_typeinfo($type,defaults)
-    if [::info exists opts($attribute)] {
-        return $opts($attribute)
-    }  
-    error "Unknown attribute: $attribute"
-}
-
-########################################################################
-#### typeconfigure
-#
-# Add attributes to an item type or change default values. Raise an error
-# if the type does not exist or if there is already data of this type.
-# The latter restriction prevents type attributes being changed once data
-# is present in order to a) ensure consistency and b) keep the code
-# manageable. The same special attributes as for newtype{} are recognised.
-#
-body ::tycho::NewInterchange::typeconfigure {type args} {
-    if ![::info exists _typeinfo($type)] {
-        error "Unknown type: $type"
-    }
-    if { [array names _data [list [list * $type] *]] != "" } {
-        error "Cannot change attributes of type $type: data exists"
-    }
-    array set opts $_typeinfo($type,defaults)
-    array set opts $args
-    foreach {a _} $_typeattributes {
-        if [::info exists opts($a)] {
-            set _typeinfo($type,[string trimleft $a "-"]) $opts($a)
-            unset opts($a)
-        }
-    }
-    set _typeinfo($type,defaults) [array get opts]
-}
-
-########################################################################
-#### value
-#
-# Get the value of the item specified by _type_ and _name_. Raise an
-# error if the item does not exist or if this item's type has the
-# *-valued* attribute set false.
-#
-body ::tycho::NewInterchange::value {type name} {
-    _verify $type $name
-    if !$_typeinfo([lindex $type end],valued) {
-        error "Type [lindex $type end] is not valued"
-    } 
-    lindex $_data([list $type $name]) 0
 }
 
 #####################################################################
@@ -1160,7 +548,7 @@ body ::tycho::DataModel::_header {} {
 # value if its *-valued* attribute (as declared in a call to newtype{})
 # it set, followed by attribute-value pairs.
 #
-body ::tycho::NewInterchange::_add {type name arguments} {
+body ::tycho::DataModel::_add {type name arguments} {
     set itype [lindex $type end]
     set index [list $type $name]
 
@@ -1232,7 +620,7 @@ body ::tycho::DataModel::_describeattribute {type name prefix} {
 #
 # FIXME: Add line wrapping
 #
-body ::tycho::NewInterchange::_describeitem {type name {prefix {}}} {
+body ::tycho::DataModel::_describeitem {type name {prefix {}}} {
     set itype [lindex $type end]
     set index [list $type $name]
 
@@ -1303,7 +691,7 @@ body ::tycho::NewInterchange::_describeitem {type name {prefix {}}} {
 # _type_ and _name_. The _data_ is a string containing, on each line,
 # a list of attribute names and values, or a nested item declaration.
 #
-body ::tycho::NewInterchange::_parsegroup {type name data} {
+body ::tycho::DataModel::_parsegroup {type name data} {
     set itype [lindex $type end]
     set index [list $type $name]
 
@@ -1380,7 +768,7 @@ body ::tycho::NewInterchange::_parsegroup {type name data} {
 # Verify that the item given by _type_ and _name_ exists, raising an
 # error if it does not.
 #
-body ::tycho::NewInterchange::_verify {type name} {
+body ::tycho::DataModel::_verify {type name} {
     if ![::info exists _data([list $type $name])] {
     	error "Unknown [lindex $type end] \"$name\" in $errorname"
     }
@@ -1392,7 +780,7 @@ body ::tycho::NewInterchange::_verify {type name} {
 # Verify that no item with the given _type_ and _name_ exists, raising
 # an error if it does.
 #
-body ::tycho::NewInterchange::_verifynot {type name} {
+body ::tycho::DataModel::_verifynot {type name} {
     if [::info exists _data([list $type $name])] {
     	error "A [lindex $type end] \"$name\" already exists in $errorname"
     }
