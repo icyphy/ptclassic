@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "ConstIters.h"
 #include "CGCPortHole.h"
 #include "CGCGeodesic.h"
 #include "SDFStar.h"
@@ -417,8 +418,8 @@ Precision MultiCGCPort::precision() const
 	if (prec.isValid())
 		return prec;
 	else {
-		MPHIter nextPort(*(MultiCGCPort*)this);
-		CGCPortHole* port;
+		CMPHIter nextPort(*(const MultiCGCPort*)this);
+		const CGCPortHole* port;
 
 		// use the += operator of class Precision to combine the
 		// precisions of the connected ports;
@@ -427,7 +428,7 @@ Precision MultiCGCPort::precision() const
 		// which is exactly what we want
 		
 		Precision p;
-		while ((port = (CGCPortHole*)nextPort++) != NULL) {
+		while ((port = (const CGCPortHole*)nextPort++) != NULL) {
 			p += port->precision();
 		}
 		return prec;
