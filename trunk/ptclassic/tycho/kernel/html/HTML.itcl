@@ -1642,7 +1642,7 @@ proc HMextract_param {param key {val ""}} {
     set ws "    \n\r"
     
     # look for name=value combinations.  Either (') or (") are
-    # valid delimeters    (for emacs highlighting) ;#"
+    # valid delimiters    (for emacs highlighting) ;#"
     if {[regsub -nocase [format {.*%s[%s]*=[%s]*"([^"]*).*} $key $ws $ws] \
             $param {\1} value] ||
     [regsub -nocase [format {.*%s[%s]*=[%s]*'([^']*).*} $key $ws $ws] \
@@ -2423,7 +2423,7 @@ proc HMtag_menu {win param text} {
 
 #######################################################################
 #### HMtag_tcl {win param text} 
-# Set up an extension to HTML in which the delimitters <tcl> ... </tcl>
+# Set up an extension to HTML in which the delimiters <tcl> ... </tcl>
 # are understood to enclose a section of Tcl code. This code is
 # highlighted in the document, and double clicking on it causes the enclosed
 # Tcl code to be executed. The code is executed at the global scope.
