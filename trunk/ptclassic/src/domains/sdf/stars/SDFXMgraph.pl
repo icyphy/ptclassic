@@ -20,7 +20,7 @@ for a complete explanation of the options.
 	seealso { Xgraph xgraph XYgraph Xhistogram }
 	inmulti {
 		name { input }
-		type { anytype }
+		type { float }
 	}
 	defstate {
 		name {title}
