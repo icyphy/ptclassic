@@ -124,8 +124,18 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 		// allocate Matlab input matrices and generate their names
 		if ( numInputs > 0 ) {
-		  LOG_DEL; delete [] matlabInputMatrices;
+		  if ( matlabInputMatrices != 0 ) {
+		    LOG_DEL; delete [] matlabInputMatrices;
+		    for ( int k = 0; k < numInputs; k++ ) {
+		      if ( matlabInputMatrices[k] != 0 ) {
+			mxFreeMatrix(matlabInputMatrices[k]);
+		      }
+		    }
+		  }
 		  LOG_NEW; matlabInputMatrices = new MatrixPtr[numInputs];
+		  for ( int k = 0; k < numInputs; k++ ) {
+		    matlabInputMatrices[k] = 0;
+		  }
 		  LOG_DEL; delete [] matlabInputNames;
 		  LOG_NEW; matlabInputNames = new InfString[numInputs];
 		  nameMatlabMatrices( matlabInputNames,
@@ -135,8 +145,18 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 
 		// allocate Matlab output matrices and generate their names
 		if ( numOutputs > 0 ) {
-		  LOG_DEL; delete [] matlabOutputMatrices;
+		  if ( matlabOutputMatrices != 0 ) {
+		    LOG_DEL; delete [] matlabOutputMatrices;
+		    for ( int k = 0; k < numOutputs; k++ ) {
+		      if ( matlabOutputMatrices[k] != 0 ) {
+			mxFreeMatrix(matlabOutputMatrices[k]);
+		      }
+		    }
+		  }
 		  LOG_NEW; matlabOutputMatrices = new MatrixPtr[numOutputs];
+		  for ( int k = 0; k < numOutputs; k++ ) {
+		    matlabOutputMatrices[k] = 0;
+		  }
 		  LOG_DEL; delete [] matlabOutputNames;
 		  LOG_NEW; matlabOutputNames = new InfString[numOutputs];
 		  nameMatlabMatrices( matlabOutputNames,
@@ -159,12 +179,18 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		// convert Ptolemy input matrices to Matlab matrices
 		processInputMatrices();
 
-		// evaluate the Matlab command (non-zero means error)
-		// second argument indicates whether or not to abort on error
-		evaluateMatlabCommand(matlabCommand, TRUE);
-
-		// convert the Matlab matrices to Ptolemy matrices
-		processOutputMatrices();
+		// evaluate the Matlab command (returns non-zero on error)
+		if ( evaluateMatlabCommand(matlabCommand) ) {
+		  Error::abortRun( *this,
+				   "Matlab could not evaluate the command.");
+		}
+		else {
+		  // convert Matlab matrices to Ptolemy matrices
+		  if ( processOutputMatrices() ) {	// non-zero means error
+		    Error::abortRun( *this, "Could not convert the Matlab ",
+				     "output matrices to Ptolemy matrices" );
+		  }
+		}
 	}
 
 	destructor {
@@ -179,9 +205,11 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 	method {
 	  name { processInputMatrices }
 	  access { protected }
-	  type { void }
+	  type { int }
 	  arglist { "()" }
 	  code {
+		int errorFlag = FALSE;
+
 		// allocate memory for Matlab matrices
 		MPHIter nexti(input);
 		for ( int i = 0; i < numInputs; i++ ) {
@@ -287,10 +315,11 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		    }
 		  }
 		  else {
-		    char errstr[64];
-		    sprintf(errstr, "Unsupported data type %d on port %d",
-		     int(portType), i+1);
-		    Error::warn(*this, errstr);
+		    errorFlag = TRUE;
+		    InfString errstr;
+		    errstr = "Unsupported data type ";
+		    errstr << portType << " on input port " << i+1 << ".";
+		    Error::warn(*this, (const char *) errstr);
 		    matlabMatrix = mxCreateFull(1, 1, MXREAL);
 		    double *realp = mxGetPr(matlabMatrix);
 		    *realp = 0.0;
@@ -305,21 +334,27 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabInputMatrices[i] = matlabMatrix;
 		}
+
+		return( errorFlag );
 	  }
 	}
 
 	method {
 	  name { processOutputMatrices }
 	  access { protected }
-	  type { void }
+	  type { int }
 	  arglist { "()" }
 	  code {
 		// copy each Matlab output matrix to a Ptolemy matrix
-		MPHIter nextp(output);
-		InfString merrstr;
-		char *verbstr = "";
-		int matlabFatalError = FALSE;
+
+		// possible error messages and flags
 		int incompatibleOutportPort = FALSE;
+		int matlabFatalError = FALSE;
+		int nullMatlabMatrix = FALSE;
+		InfString merrstr, mverbstr, nerrstr, nverbstr;
+
+		// iterate through the output ports
+		MPHIter nextp(output);
 		for ( int j = 0; j < numOutputs; j++ ) {
 		  // current output porthole & advance nextp to next porthole
 		  PortHole *oportp = nextp++;
@@ -328,6 +363,25 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  // create a new Matlab matrix for deallocation and save ref.
 		  Matrix *matlabMatrix =
 			getMatlabMatrix( (char *) matlabOutputNames[j] );
+
+		  // save the pointer to the new Matlab matrix for deallocation
+		  matlabOutputMatrices[j] = matlabMatrix;
+
+		  // check to make that the Matlab matrix is defined
+		  if ( matlabMatrix == 0 ) {
+		    if ( ! nullMatlabMatrix ) {
+		      nullMatlabMatrix = TRUE;
+		      nerrstr = "For the Matlab command ";
+		      nerrstr << matlabCommand << ", ";
+		      nverbstr = " is not defined.";
+		    }
+		    else {
+		      nerrstr << " and ";
+		      nverbstr = " are not defined.";
+		    }
+		    nerrstr << matlabOutputNames[j];
+		    continue;
+		  }
 
 		  // allocate a Ptolemy matrix
 		  int rows = mxGetM(matlabMatrix);
@@ -380,43 +434,40 @@ The variables will be of the form output name + port number, e.g. "Pmm1".
 		  }
 		  else {
 		    if ( ! matlabFatalError ) {
+		      matlabFatalError = TRUE;
 		      merrstr = "For the Matlab command ";
 		      merrstr << matlabCommand << ", ";
-		      verbstr = " is not a full matrix.";
+		      mverbstr = " is not a full matrix.";
 		    }
 		    else {
 		      merrstr << " and ";
-		      verbstr = " are not full matrices.";
+		      mverbstr = " are not full matrices.";
 		    }
 		    merrstr << matlabOutputNames[j];
-		    matlabFatalError = TRUE;
 		  }
-
-		  // save the pointer to the new Matlab matrix for deallocation
-		  matlabOutputMatrices[j] = matlabMatrix;
 		}
 
-		// free Matlab memory-- assume Matlab memory alloc is efficient
-		for ( int k = 0; k < numInputs; k++ ) {
-		  mxFreeMatrix(matlabInputMatrices[k]);
-		}
-		for ( int m = 0; m < numOutputs; m++ ) {
-		  mxFreeMatrix(matlabOutputMatrices[m]);
-		}
-
-		// close Matlab connection and exit Ptolemy if fatal error
-		if ( matlabFatalError || incompatibleOutportPort ) {
-		  killMatlab();
-		  if ( incompatibleOutportPort ) {
-		    Error::abortRun(*this,
+		// print warning messages and return error status
+		if ( incompatibleOutportPort ) {
+		  Error::warn(*this,
 			"Output port data type is neither a floating-point",
 			"matrix nor a complex-valued matrix: the setup() ",
 			"method should have flagged this error.");
-		  }
-		  else {
-		    Error::abortRun(*this, (char *) merrstr, verbstr);
-		  }
 		}
+		if ( nullMatlabMatrix ) {
+		  Error::warn( *this,
+			       (const char *) nerrstr,
+			       (const char *) nverbstr );
+		}
+		if ( matlabFatalError ) {
+		  Error::warn( *this,
+			       (const char *) merrstr,
+			       (const char *) mverbstr );
+		}
+
+		return( incompatibleOutportPort ||
+			nullMatlabMatrix ||
+			matlabFatalError );
 	  }
 	}
 
