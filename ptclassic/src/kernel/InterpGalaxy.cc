@@ -18,8 +18,7 @@ $Id$
 #include "InterpGalaxy.h"
 #include "StringList.h"
 #include "Output.h"
-// next is temporary, until SDF dependency is gone
-#include "SDFConnect.h"
+#include "Connect.h"
 #include "string.h"
 
 extern Error errorHandler;
@@ -66,10 +65,10 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
 	if (srcP == NULL || dstP == NULL) return;
 
-	srcPipe = srcP->readName();
-	srcStar = srcP->parent()->readName();
-	dstPipe = dstP->readName();
-	dstStar = dstP->parent()->readName();
+	srcPipe = savestring(srcPipe);
+	srcStar = savestring(srcStar);
+	dstPipe = savestring(dstPipe);
+	dstStar = savestring(dstStar);
 // add the action to the list
 	actionList += "C";
 	actionList += srcStar;
@@ -81,6 +80,7 @@ InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 	connect (*srcP, *dstP, numberDelays);
 }
 
+void
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	starname = savestring (starname);
 	starclass = savestring (starclass);
@@ -94,6 +94,7 @@ InterpGalaxy::addStar(const char* starname,const char* starclass) {
 	return;
 }
 
+void
 InterpGalaxy::alias(const char* galportname,const char* starname,
 		    const char* portname) {
 	galportname = savestring (galportname);
@@ -105,13 +106,13 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 // create new galaxy port, add to galaxy, do the alias
 	if (ph->isItInput()) {
 		actionList += "I";
-		InSDFPort *p = new InSDFPort;
+		InPortHole *p = new InPortHole;
 		addPort(p->setPort(galportname,this));
 		alias (*p, *ph);
 	}
 	else {
 		actionList += "O";
-		OutSDFPort *p = new OutSDFPort;
+		OutPortHole *p = new OutPortHole;
 		addPort(p->setPort(galportname,this));
 		alias (*p, *ph);
 	}
@@ -121,6 +122,7 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	actionList += portname;
 }
 
+void
 InterpGalaxy::addState (const char* statename, const char* stateclass, const char* statevalue) {
         statename = savestring (statename);
         stateclass = savestring (stateclass);
@@ -137,27 +139,25 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
         return;
 }
 
-
+void
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
         blockname = savestring (blockname);
         statename = savestring (statename);
         statevalue = savestring (statevalue);
-	if(!strcmp(blockname, "this"))
-	{
-        State *src = stateWithName(statename);
-        if (src == 0) return;
-        setState(statename,statevalue);
-	initState();
+	if(!strcmp(blockname, "this")) {
+		State *src = stateWithName(statename);
+		if (src == 0) return;
+		setState(statename,statevalue);
+		initState();
 	}
-	else
-	{
-	Block* blk = blockWithName(blockname);
-	if (blk ==  0) return;	
-	State *src = blk->stateWithName(statename);
-	if(src == 0) return;
-	blk->setState(statename,statevalue);
-        initState();
-	};
+	else {
+		Block* blk = blockWithName(blockname);
+		if (blk ==  0) return;	
+		State *src = blk->stateWithName(statename);
+		if(src == 0) return;
+		blk->setState(statename,statevalue);
+		initState();
+	}
 //add action to list
         actionList += "R";
 	actionList += blockname;
@@ -166,13 +166,48 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
         return;
 }
 
+void
+InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
+	Block *st = blockWithName(star);
+	if (st == NULL) {
+		noInstance (star, readName());
+		return;
+	}
+	MultiPortHole *mp = st->multiPortWithName(port);
+	if (mp == NULL) {
+		StringList msg;
+		msg = "No MultiPortHole named \"";
+		msg += port;
+		msg += "\" in \"";
+		msg += star;
+		msg += "\"";
+		errorHandler.error (msg);
+		return;
+	}
+
+	// Quit if we already have the right number
+	int np = mp->numberPorts ();
+	if (np == num) return;
+
+	star = savestring (star);
+	port = savestring (port);
+// make the ports (allow case where we've already connected some)
+	for (int i = np; i < num; i++)
+		mp->newPort();
+// save on action list
+	actionList += "N";
+	actionList += star;
+	actionList += port;
+	actionList += num;
+	return;
+}
+
 // DANGER WILL ROBINSON!!!  Casting actionList to char* will cause all
 // the action strings to be combined into one string.  This will break
-// clone()!!!  Do not do it!  If you must, since StringList's copy
-// constructor does a complete copy, it's safe to do
-//	StringList foo(actionList);
-//	cout << foo;
-// though the result will be hard to read.
+// clone()!!!  Do not do it!
+
+// If you must print the action list do something like
+// for (i = actionList.size(); i > 0; i--) cout << actionList.next() << "\n";
 
 Block* 
 InterpGalaxy::clone() {
@@ -203,6 +238,7 @@ InterpGalaxy::clone() {
 			c = actionList.next();
 			d = actionList.next();
 			ndelay = atoi(actionList.next());
+
 			gal->connect (a, b, c, d, ndelay);
 			nacts -= 6;
 			break;
@@ -211,6 +247,7 @@ InterpGalaxy::clone() {
 			a = actionList.next();
 			b = actionList.next();
 			c = actionList.next();
+
 			gal->alias (a, b, c);
 			nacts -= 4;
 			break;
@@ -218,6 +255,7 @@ InterpGalaxy::clone() {
                         a = actionList.next();
                         b = actionList.next();
                         c = actionList.next();
+
                         gal->addState (a, b, c);
                         nacts -= 4;
                         break;
@@ -225,15 +263,25 @@ InterpGalaxy::clone() {
                         a = actionList.next();
                         b = actionList.next();
                         c = actionList.next();
-                        gal->setState (a, b, c);
+
                         gal->setState (a, b, c);
                         nacts -= 4;
                         break;
+
+		case 'N':	// make ports within multiports
+			a = actionList.next();
+			b = actionList.next();
+			c = actionList.next();
+
+			gal->numPorts (a, b, atoi (c));
+			nacts -= 3;
+			break;
 
 		default:
 			errorHandler.error ("Internal error in InterpGalaxy");
 		}
 	}
+
 	return gal;
 }
 
