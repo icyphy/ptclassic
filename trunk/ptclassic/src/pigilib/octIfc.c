@@ -513,7 +513,7 @@ ParamListType *pListPtr;
  
     /* Merge parameters: if false, no parameters from tempList were used */
     if (!MergeParams(pListPtr, &tempList)) {
-	free(tempList.array->name);		/* allocated by PStrToPList */
+	free(tempList.array[0].name);		/* allocated by PStrToPList */
     }
 
     /* Free memory */
@@ -557,7 +557,7 @@ ParamListType *pListPtr;
 
     /* Merge parameters: if false, no parameters from tempList were used */
     if (!MergeParams(pListPtr, &tempList)) {
-	free(tempList.array->name);		/* allocated by PStrToPList */
+	free(tempList.array[0].name);		/* allocated by PStrToPList */
     }
 
     /* Free memory */
@@ -948,12 +948,19 @@ char *c, *v, *f, *m;
     return octOpenFacet(t);
 }
 
-/* fns to free fields in an octObject.  There must be no other refs to
-   them!  Assumed retrieved from one of the oct functions that puts
-   everything on the heap.
+/*
+   FreeOctMembers
+
+   Frees fields in an octObject.  There must be no other references to
+   them!  Assumed that the octObject was retrieved from one of the oct
+   functions that puts everything on the heap.
 
    Warning: obj must have been received from the Oct interface, not
    filled in by the user.
+
+   Calling FreeOctMembers multiple times on the same octObject * will
+   not generate any new errors because upon successful memory
+   deallocation, type field is set to OCT_UNDEFINED_OBJECT.
 */
 
 boolean
@@ -963,6 +970,8 @@ octObject *o;
 	struct octFacet *f;
 	struct octProp *p;
 	struct octInstance *i;
+	int deleted = TRUE;
+
 	switch (o->type) {
 	  case OCT_UNDEFINED_OBJECT:
 		break;
@@ -1006,6 +1015,7 @@ octObject *o;
 		  case OCT_ID:
 			break;			/* nothing to free */
 		  default:
+			deleted = FALSE;
 			fprintf(stderr,
 			        "FreeOctMembers: OCT_PROP type %d not handled\n",
 				p->type);
@@ -1016,10 +1026,17 @@ octObject *o;
 	  case OCT_EDGE:
 		break;
 	  default:
+		deleted = FALSE;
 		fprintf(stderr,
 			"FreeOctMembers: type %d not handled\n",
 			o->type);
 		break;
 	}
+
+	/* since it has been deallocated, reset type to unknown */
+	if ( deleted ) {
+		o->type = OCT_UNDEFINED_OBJECT;
+	}
+
 	return TRUE;
 }
