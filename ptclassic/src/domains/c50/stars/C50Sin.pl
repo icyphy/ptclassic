@@ -66,7 +66,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 		// include its sine table. 
 
 		C50SinTable = 0;
-		GalStarIter nextStar(this.parent()->asGalaxy());
+		GalStarIter nextStar(this->parent()->asGalaxy());
 		Star *	s;
 		int	index = 0;
 		int	myindex = 0;
@@ -75,7 +75,7 @@ the range (-1.0, 1.0).  The parameter \fIphase\fR is in degrees
 			if ( (strcmp(s->className(),"C50Sin") == 0) ||
 			     (strcmp(s->className(),"C50Cos") == 0) ){
 			  index = i;
-			  if (strcmp(s->fullName(),this.fullName())==0){
+			  if (strcmp(s->fullName(),this->fullName())==0){
 				myindex = index;
 			  }
 			}
