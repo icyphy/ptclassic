@@ -37,7 +37,12 @@ PL_SRCS= \
   ACSExp.pl ACSExpFPSim.pl ACSExpFixSim.pl \
   ACSGain.pl ACSGainFPSim.pl ACSGainFixSim.pl \
   ACSPolarToRect.pl ACSPolarToRectFPSim.pl ACSPolarToRectFixSim.pl \
-  ACSXYgraph.pl ACSXYgraphFPSim.pl ACSXYgraphFixSim.pl
+  ACSXYgraph.pl ACSXYgraphFPSim.pl ACSXYgraphFixSim.pl ACSRampFPCGC.pl \
+  ACSAddFPCGC.pl ACSSinFPCGC.pl ACSCosFPCGC.pl ACSExpFPCGC.pl \
+  ACSForkFPCGC.pl ACSPolarToRectFPCGC.pl ACSXYgraphFPCGC.pl \
+  ACSGainFPCGC.pl ACSMpyFPCGC.pl
+
+  
 
 TMP_PL_SRCS = \
   ACSAdd.pl \
