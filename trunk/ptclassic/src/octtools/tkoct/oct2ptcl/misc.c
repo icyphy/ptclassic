@@ -110,3 +110,22 @@ otpCvtPropToStr( octObject *pProp) {
       pProp->contents.prop.type);
     return NULL;
 }
+
+
+/* Do some massage for initializable delays */
+char*
+otpCvtPropToStrDelay( octObject *pProp) {
+    switch ( pProp->contents.prop.type ) {
+    case OCT_INTEGER:
+        /* If it is a integer, add a '*' */
+	return memStrSaveFmt("*%d",pProp->contents.prop.value.integer);
+    case OCT_REAL:
+	return memStrSaveFmt("%g",pProp->contents.prop.value.real);
+    case OCT_STRING:
+	return pProp->contents.prop.value.string;
+    default: ;
+    }
+    errRaise(SPKG,-1,"Cannot convert prop type %d to string.",
+      pProp->contents.prop.type);
+    return NULL;
+}
