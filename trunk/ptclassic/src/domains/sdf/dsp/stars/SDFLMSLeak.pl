@@ -8,12 +8,12 @@ defstar {
 	derivedFrom { LMS }
 	desc {
 An LMS-based adaptive filter in which the step size is input (to the
-'step' input) every iteration. The 'stepSize' state is unused.
+"step" input) every iteration. The "stepSize" state is unused.
 
-Values in the 'taps' array change as the filter adapts to minimize the
-energy at the 'error' input.
+Values in the "taps" array change as the filter adapts to minimize the
+energy at the "error" input.
 
-The 'mu' state is used as a leak factor in the formula that updates
+The "mu" state is used as a leak factor in the formula that updates
 the filter coefficients.
 	}
 
