@@ -60,14 +60,19 @@ to the table's data.
       extern ACG* gen;
     }
 
+    constructor {
+      srttable = 0;
+    }
+
     setup {
       Envelope dumEnv(*new VoiceData());
       nEnv = dumEnv;
 
       LOG_NEW; srttable = new int* [int(numcpes)];
 
-      for (int i = 0; i < int(numcpes); i++)
-	  { LOG_NEW; srttable[i] = new int [indata.numberPorts()]; }
+      for (int i = 0; i < int(numcpes); i++) {
+	  LOG_NEW; srttable[i] = new int [indata.numberPorts()];
+      }
       
       for (i = 0; i < int(numcpes); i++)
 	  for (int j = 0; j < indata.numberPorts(); j++)
@@ -76,16 +81,16 @@ to the table's data.
 
     wrapup {
       for (int i = 0; i < int(numcpes); i++) {
-	  LOG_DEL; delete srttable[i];
+	  LOG_DEL; delete [] srttable[i];
       }
-      LOG_DEL; delete srttable;
+      LOG_DEL; delete [] srttable;
     }
 
     destructor {
       for (int i = 0; i < int(numcpes); i++) {
-	  LOG_DEL; delete srttable[i];
+	  LOG_DEL; delete [] srttable[i];
       }
-      LOG_DEL; delete srttable;
+      LOG_DEL; delete [] srttable;
     }
 
     go {
