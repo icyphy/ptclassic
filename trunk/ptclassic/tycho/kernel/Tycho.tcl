@@ -54,8 +54,8 @@ if [info exist env(PTOLEMY)] {
     set ptolemy $env(PTOLEMY)
     set PTOLEMY $env(PTOLEMY)
     if {![info exists tycho]} {
-	set tycho $ptolemy/tycho
-	set TYCHO $ptolemy/tycho
+	set tycho [file join $ptolemy tycho]
+	set TYCHO [file join $ptolemy tycho]
     }
 }
 
@@ -63,12 +63,12 @@ if {![info exists tycho]} {
     # Neither environment variable is set.
     # See whether there is a ~ptolemy or ~ptdesign user, in that order,
     # that has tycho installed.
-    if [file exists [glob ~ptolemy/tycho]] {
-	set tycho [glob ~ptolemy/tycho]
+    if [file exists [glob [file join ~ptolemy tycho]]] {
+	set tycho [glob [file join ~ptolemy tycho]]
 	set TYCHO $tycho
     } {
-	if [file exists [glob ~ptdesign/tycho]] {
-	    set tycho [glob ~ptdesign/tycho]
+	if [file exists [glob [file join ~ptdesign tycho]]] {
+	    set tycho [glob [file join ~ptdesign tycho]]
 	    set TYCHO $tycho
 	}
     }
@@ -81,21 +81,21 @@ if {![info exists tycho] || ![file exists $tycho]} {
 
 # If the ptolemy variables are not yet set, set them relative to tycho.
 if {![info exists ptolemy]} {
-    set ptolemy $tycho/..
+    set ptolemy [file join $tycho ..]
     set PTOLEMY $ptolemy
 }
 
 global ::tychokernel
-set tychokernel $tycho/kernel
+set tychokernel [file join $tycho kernel]
 
 global ::tycholib
-set tycholib $tycho/lib
+set tycholib [file join $tycho lib]
 
 global ::tychoslate
-set tychoslate $tycho/slate
+set tychoslate [file join $tycho slate]
 
 global ::tychoeditors
-set tychoeditors $tycho/editors
+set tychoeditors [file join $tycho editors]
 
 # Check to see whether the usual exit mechanism (where we exit
 # if there are no more windows) is enabled.
@@ -117,48 +117,49 @@ if {![info exists tychoShouldWeDoRegularExit]} {
 # under itkwish, and therefore the initialization files have already
 # been sourced.
 
-if [file isdirectory $PTOLEMY/tcltk/itcl/lib] {
+if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
     
     if {$tk_version >= 4.1 } {
 	# Really, we should be checking the environment variables here, rather
 	# than just overriding them.
-	if [file isdirectory $PTOLEMY/tcltk/itcl/lib/itcl/tcl] {
-	    set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tcl
-	    set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/itcl/tk
+	if [file isdirectory [file join $PTOLEMY tcltk itcl lib itcl tcl]] {
+	    set env(TCL_LIBRARY) [file join $PTOLEMY tcltk itcl lib itcl tcl]
+	    set env(TK_LIBRARY) [file join $PTOLEMY tcltk itcl lib itcl tk]
 	    set tk_library $env(TK_LIBRARY)
 	    uplevel #0 {
-		source $PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl
-		source $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl
-		source $PTOLEMY/tcltk/itcl/lib/itcl/itcl/itcl.tcl
-		source $PTOLEMY/tcltk/itcl/lib/itcl/itk/itk.tcl
-		source $PTOLEMY/tcltk/itcl/lib/itcl/iwidgets/iwidgets.tcl
+		source [file join $PTOLEMY tcltk itcl lib itcl tcl init.tcl]
+		source [file join $PTOLEMY tcltk itcl lib itcl tk tk.tcl]
+		source [file join $PTOLEMY tcltk itcl lib itcl itcl itcl.tcl]
+		source [file join $PTOLEMY tcltk itcl lib itcl itk itk.tcl]
+		source [file join $PTOLEMY tcltk itcl lib itcl \
+			iwidgets iwidgets.tcl]
 	    }
 	}
     } else {
-	if [file isdirectory $PTOLEMY/tcltk/itcl/lib/tcl] {
-	    set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
-	    set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
+	if [file isdirectory [file join $PTOLEMY tcltk itcl lib tcl]] {
+	    set env(TCL_LIBRARY) [file join $PTOLEMY tcltk itcl lib tcl]
+	    set env(TK_LIBRARY) [file join $PTOLEMY tcltk itcl lib tk]
 	    set tk_library $env(TK_LIBRARY)
 	    uplevel #0 {
-		source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
-		source $PTOLEMY/tcltk/itcl/lib/tk/tk.tcl
-		source $PTOLEMY/tcltk/itcl/lib/itcl/init.itcl
-		source $PTOLEMY/tcltk/itcl/lib/itk/init.itk
+		source [file join $PTOLEMY tcltk itcl lib tcl init.tcl]
+		source [file join $PTOLEMY tcltk itcl lib tk tk.tcl]
+		source [file join $PTOLEMY tcltk itcl lib itcl init.itcl]
+		source [file join $PTOLEMY tcltk itcl lib itk init.itk]
 	    }
 	}
     }
 }
 uplevel #0 {
-    set ::auto_path [linsert $auto_path 0 $tychoeditors/textedit ]
-    set ::auto_path [linsert $auto_path 0 $tychoeditors/visedit ]
-    set ::auto_path [linsert $auto_path 0 $tychoslate/kernel ]
-    set ::auto_path [linsert $auto_path 0 $tychoslate/pictures ]
-    set ::auto_path [linsert $auto_path 0 $tychoslate/shapes ]
-    set ::auto_path [linsert $auto_path 0 $tychoslate/interactors ]
-    set ::auto_path [linsert $auto_path 0 $tychoslate/combinators ]
-    set ::auto_path [linsert $auto_path 0 $tycholib/widgets ]
-    set ::auto_path [linsert $auto_path 0 $tycholib/util ]
-    source $tychokernel/Lib.tcl
+    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors textedit ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoslate kernel ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoslate pictures ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoslate shapes ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoslate interactors ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoslate combinators ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tycholib widgets ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tycholib util ] ]
+    source [file join $tychokernel Lib.tcl]
 }
 
 if {![info exists tychoWelcomeWindow]} {
@@ -172,7 +173,7 @@ if {![info exists tychoConsoleWindow]} {
 set tychoOpenFiles 0
 
 # Source ~/.Tycho/tychorc.tcl if it exists.
-set tychostartfile [glob -nocomplain ~/.Tycho/tychorc.tcl]
+set tychostartfile [glob -nocomplain [file join $env(HOME) .Tycho tychorc.tcl]]
 if {$tychostartfile != {} && \
 	[file exists $tychostartfile] && \
 	[file readable $tychostartfile]} {
