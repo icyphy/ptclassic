@@ -295,7 +295,6 @@ void CGTarget :: chooseScheduler() {
 		<< "graphs.  Since this graph is not acyclic "
 		<< "the scheduler SJS will be used "
 		<< "(corresponding to old option 2).\n";
-		schedFileName << message;
 		loopingLevel.setCurrentValue("SJS");
 	    }
 	}
