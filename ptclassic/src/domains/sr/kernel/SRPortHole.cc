@@ -193,12 +193,7 @@ void OutSRPort::clearPort()
 // Reset the particle in the port
 void OutSRPort::initialize()
 {
-  if ( !setResolvedType () ) {
-    Error::abortRun( *this, "can't determine DataType" );
-    return;
-  }
-
-  if ( !allocatePlasma() ) return;
+  PortHole::initialize();
 
   emittedParticle = (Particle *) 0;
 }
