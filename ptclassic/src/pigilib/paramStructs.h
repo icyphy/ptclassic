@@ -47,13 +47,14 @@ struct ParamStruct {
 typedef struct ParamStruct ParamType;
 
 struct ParamListStruct {
-    int length; /* length of array */
-    ParamType *array; /* points to first element */
+    int length;		/* length of array */
+    ParamType *array;	/* points to first element */
 };
 typedef struct ParamListStruct ParamListType;
 
 extern boolean PStrToPList();
 extern char * PListToPStr();
+extern void FreeFlatPList();
 
 #endif /* PARAMSTRUCTS_H */
 
