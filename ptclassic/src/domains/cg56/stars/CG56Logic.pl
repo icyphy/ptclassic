@@ -88,25 +88,25 @@ non-zero integer (not necessarily 1).
 	// Single-input cases
 
 	codeblock(inverter) {
-	clr	b	$ref(input#1),a		; set b = 0, read input to a
+	clr	b	$ref(input#1),a		; b = 0, a = input#1
 	tst	a	#$$01,y1	; test a, set y1 = 1
 	teq	y1,b			; if a = 0, then b = y1 = 1
 	move	b,$ref(output)			; output = b
 	}
 
 	codeblock(copyInput) {
-	move	$ref(input#1),a		; copy input to output by way of a
+	move	$ref(input#1),a		; copy input to output
 	move	a,$ref(ouput)
 	}
 
 	// Two-input cases
 
 	codeblock(twoInputAnd) {
-	move	$ref(input#1),x0			; read input#1 into register x0
-	move	$ref(input#2),x1			; read input#2 into register x1
-	mpy	x1,x0,a			#255,y0		; a = x0 * x1, y0=TRUE
-	tst	a					; test a
-	tne	y0,a					; if (a != 0) a = TRUE
+	move	$ref(input#1),x0		; x0 = input#1
+	move	$ref(input#2),x1		; x1 = input#2
+	mpy	x1,x0,a		#255,y0	; a = x0 * x1 and y0 = TRUE
+	tst	a			; test a
+	tne	y0,a			; if (a != 0) a = TRUE
 	}
 
 	// General cases
@@ -114,7 +114,7 @@ non-zero integer (not necessarily 1).
 	codeblock(prepareAndLoop) {
 	move	#<$addr(input#1)+1,r0		; r0 = input block address + 1
 	clr	b	$ref(input#1),a		; a = input#1
-	move    b,y0				; y0 = FALSE
+	move    b,y0			; y0 = FALSE
 	tst	a	x:(r0)+,b
 	}
 
@@ -238,10 +238,6 @@ $label(Xor)
 		addCode(saveResult);
 	}
 	exectime {
-                // FIXME. Estimates of execution time are given in pairs of
-		// oscillator cycles because that's the way it was done in
-		// Gabriel: they simply counted the number of instructions.
-
 		int numinputs = input.numberPorts();
 
 		// Time to read one input and write one output
