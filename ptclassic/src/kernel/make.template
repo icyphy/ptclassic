@@ -29,7 +29,7 @@ HELPDIR=$(ROOT)/help
 LIB=libptolemy.a
 
 # Library sources
-LIBSRCS=Block.cc Command.cc Connect.cc Fraction.cc Galaxy.cc Help.cc \
+LIBSRCS=Block.cc Connect.cc Fraction.cc Galaxy.cc \
  InterpGalaxy.cc Interpreter.cc KnownBlock.cc NamedObj.cc Output.cc \
  Particle.cc PriorityQueue.cc SpaceWalk.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc expandPath.cc \
@@ -44,8 +44,8 @@ LIBSRCS=Block.cc Command.cc Connect.cc Fraction.cc Galaxy.cc Help.cc \
 SRCS=$(LIBSRCS) interpmain.cc SDFDomain.cc DEDomain.cc
 
 # Header files
-HDRS=Block.h Command.h Connect.h DataStruct.h Domain.h FloatState.h \
- Fraction.h Galaxy.h Help.h IntState.h InterpGalaxy.h Interpreter.h \
+HDRS=Block.h Connect.h DataStruct.h Domain.h FloatState.h \
+ Fraction.h Galaxy.h IntState.h InterpGalaxy.h Interpreter.h \
  KnownBlock.h KnownState.h NamedObj.h Output.h Particle.h PriorityQueue.h \
  Scheduler.h SpaceWalk.h Star.h State.h StringList.h StringState.h \
  FloatArrayState.h IntArrayState.h \
@@ -54,7 +54,7 @@ HDRS=Block.h Command.h Connect.h DataStruct.h Domain.h FloatState.h \
  DEConnect.h DEScheduler.h DEStar.h DEUniverse.h
 
 # Library objects
-LIBOBJS=Block.o Command.o Connect.o Fraction.o Galaxy.o Help.o \
+LIBOBJS=Block.o Connect.o Fraction.o Galaxy.o \
  InterpGalaxy.o Interpreter.o KnownBlock.o NamedObj.o Output.o Particle.o \
  PriorityQueue.o SpaceWalk.o Star.o StringList.o Tokenizer.o Universe.o \
  expandPath.o \
