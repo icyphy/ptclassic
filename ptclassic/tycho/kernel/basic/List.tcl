@@ -121,19 +121,18 @@ proc lnull {list} {
 #
 # returns 1.
 #
-# NB This function does use foreach* because foreach* does not currently
-# handle *return* correctly.
-#
 proc lequal {list1 list2} {
     if { [llength $list1] != [llength $list2] } {
 	return 0
     }
 
-    foreach xy [zip $list1 $list2] {
-	assign x y $xy
-	if { $x != $y } {
+    set i 0
+    foreach x $list1 {
+	if { $x != [lindex $list2 $i] } {
 	    return 0
 	}
+
+	incr i
     }
     return 1
 }
@@ -148,11 +147,7 @@ proc ltake {list n} {
 }
 
 proc ldrop {list n} {
-    if { $n <= 0 } {
-	return $list
-    } else {
-	return [lreplace $list 0 [expr $n-1]]
-    }
+    return [lrange $list $n end]
 }
 
 
@@ -169,7 +164,7 @@ proc ldrop {list n} {
 # its head and tail. *lsplit {1 2 3 4} 1* works, because the
 # elements are not lists, but *lsplit {{1 2} {3 4}} 1* is not
 # the same as *[list [lhead $l] [ltail $l]]* where
-# l = {{1 2} {3 4}}.
+# l = {{1 2} {3 4}}. Use behead{}.
 #
 proc lsplit {list n} {
     if { $n <= 0 } {
@@ -180,6 +175,19 @@ proc lsplit {list n} {
 		[lrange $list 0 $n] \
 		[lreplace $list 0 $n]]
     }
+}
+
+
+## lreverse list
+#
+# Reverse a list.
+#
+proc lreverse {list} {
+    set result {}
+    foreach i $list {
+	set result [concat [list $i] $result]
+    }
+    return $result
 }
 
 
@@ -197,8 +205,10 @@ proc ldropUntil {list item} {
     set index [lsearch -exact $list $item]
     if { $index == -1 } {
 	return {}
+    } elseif { $index == 0 } {
+	return $list
     } else {
-	return [ldrop $list $index]
+	return [lrange $list $index end]
     }
 }
 
@@ -209,8 +219,9 @@ proc ldropUntil {list item} {
 #
 proc lcopy {n item} {
     set result {}
-    loop $n {
+    while {$n > 0} {
 	lappend result $item
+	incr n -1
     }
     return $result
 }
@@ -289,14 +300,18 @@ proc lchop {list n} {
 #
 # returns {{1 2} {3 4} {5 6}}.
 #
+# The test for odd-length list is an optimization: it allows the
+# loop body to be coded in a slightly faster manner.
+#
 proc lpairs {list} {
-    set result {}
+    if { [expr [llength $list]] % 2 != 0 } {
+	set list [lreplace $list end end]
+    }
 
-    while { [llength $list] > 1 } {
-	behead x list
-	behead y list
-	
-	lappend result [list $x $y]
+    set result {}
+    while { $list != "" } {
+	lappend result [list [lindex $list 0] [lindex $list 1]]
+	set list [lreplace $list 0 1]
     }
     return $result
 }
@@ -320,16 +335,25 @@ proc lpairs {list} {
 #
 proc zip {l1 l2 args} {
 
-    set result [apply* x $l1 y $l2 {
-	list $x $y
-    }]
+    set result {}
+    while { $l1 != "" && $l2 != "" } {
+	lappend result [list [lindex $l1 0] [lindex $l2 0]]
+	
+	set l1 [lreplace $l1 0 0]
+	set l2 [lreplace $l2 0 0]
+    }
 
-    while { ! [lnull $args] } {
+    while { $args != "" } {
 	behead list args
 
-	set result [apply* x $result y $list {
-	    concat $x [list $y]
-	}]
+	set temp {}
+	while { $result != "" && $list != "" } {
+	    lappend temp [concat [lindex $result 0] [list [lindex $list 0]]]
+
+	    set result [lreplace $result 0 0]
+	    set list   [lreplace $list   0 0]
+	}
+	set result $temp
     }
     return $result
 }
@@ -352,15 +376,17 @@ proc ltranspose {listlist} {
 
     set result [lcopy [llength [lindex $listlist 0]] {}]
 
-    # Add a space to work around the bug in apply*
-    lappend result " "
-
-    while { ! [lnull $listlist] } {
+    while { $listlist != "" } {
 	behead list listlist
 
-	set result [apply* x $result y $list {
-	    concat $x [list $y]
-	}]
+	set temp {}
+	while { $result != "" && $list != "" } {
+	    lappend temp [concat [lindex $result 0] [list [lindex $list 0]]]
+
+	    set result [lreplace $result 0 0]
+	    set list   [lreplace $list   0 0]
+	}
+	set result $temp
     }
     return $result
 }
@@ -440,8 +466,7 @@ proc lorder {list order} {
 proc lnub {list} {
     set result {}
     foreach i $list {
-	set list [ltail $list]
-	if { ! [lmember $list $i] } {
+	if { [lsearch -exact $result $i] == -1 } {
 	    lappend result $i
 	}
     }
