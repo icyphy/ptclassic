@@ -64,25 +64,10 @@ PL_SRCS= \
  HOFBusMerge.pl \
  HOFBusSplit.pl \
  HOFChain.pl \
- HOFDelayedMap.pl \
  HOFIfElseGr.pl \
  HOFNop.pl \
  HOFSrc.pl \
- HOFSrcCx.pl \
- HOFSrcInt.pl \
- HOFSrcFix.pl \
- HOFSrc_M.pl \
- HOFSrcCx_M.pl \
- HOFSrcInt_M.pl \
- HOFSrcFix_M.pl \
- HOFSrcGr.pl \
- HOFSrcGrCx.pl \
- HOFSrcGrInt.pl \
- HOFSrcGrFix.pl \
- HOFSrcGr_M.pl \
- HOFSrcGrCx_M.pl \
- HOFSrcGrFix_M.pl \
- HOFSrcGrInt_M.pl
+ HOFSrcGr.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
