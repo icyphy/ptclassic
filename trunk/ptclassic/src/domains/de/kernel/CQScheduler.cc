@@ -101,17 +101,19 @@ void CQScheduler :: setup () {
 // Run until StopTime.
 
 int CQScheduler :: run () {
+#ifdef PT_SIP
     // wrapUpPML() is part of SiP.  If SiP is not present, then
     // we link with sipdummy.o
     extern void wrapUpPML(void);
-
+#endif
     if (SimControl::haltRequested() || !galaxy()) {
         Error::abortRun("Calendar Queue scheduler has no galaxy to run");
         return FALSE;
     }
 
+#ifdef PT_SIP
     wrapUpPML();
-
+#endif
     while (TRUE) {
 
 	int bFlag = FALSE;  // flag = TRUE when the terminal is on the
