@@ -83,7 +83,7 @@ provisions.
   
   initCode {
     CGCAudioBase::initCode();
-    /* Hack: variable for the sync codeblock below */
+    /* variable for the sync codeblock below */
     addDeclaration(syncCounter);
     /* Declare buffer type and size depending on the encoding */
     if (strcasecmp(encodingType, "linear16") == 0){
@@ -112,7 +112,13 @@ provisions.
     } else {
 	addCode(convertUlaw);
     }
-    if ((int)aheadLimit >= 0 ) addCode(sync);
+    if ((int)aheadLimit >= 0 ) {
+	if (strcasecmp(encodingType, "linear16") == 0) {
+	    addCode(syncLinear16);
+    	} else {
+	    addCode(syncUlaw);
+    	}
+	}
     addCode(setbufptr);
     addCode(write);
   }
