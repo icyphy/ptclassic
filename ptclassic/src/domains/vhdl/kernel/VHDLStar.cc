@@ -123,6 +123,7 @@ StringList VHDLStar :: expandRef(const char* name) {
   
   // Check if it's a PortHole reference.
   else if ((port = (VHDLPortHole*) genPortWithName(portName)) != 0) {
+    StringList mapping;
     StringList direction;
     StringList type;
     
@@ -134,11 +135,14 @@ StringList VHDLStar :: expandRef(const char* name) {
       ref << "_";
       ref << port->bufPos();
     }
+    mapping = ref;
     direction = port->direction();
     type = port->dataType();
     
     // Register this port reference for use by target.
     registerPort(ref, direction, type);
+    // Register this port mapping for use by target.
+    registerPortMap(ref, mapping);
   }
 
   // Error:  couldn't find a State or a PortHole with given name.
@@ -197,6 +201,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 
   // Expand PortHole reference with offset.
   else if (port = (VHDLPortHole*)genPortWithName(portName)) {
+    StringList mapping;
     StringList direction;
     StringList type;
 
@@ -225,11 +230,14 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 		 % port->bufSize() );
       }
     }
+    mapping = ref;
     direction = port->direction();
     type = port->dataType();
     
     // Register this port reference for use by target.
     registerPort(ref, direction, type);
+    // Register this port mapping for use by target.
+    registerPortMap(ref, mapping);
   }
 
   return ref;
@@ -340,6 +348,8 @@ int VHDLStar :: run() {
 	firingPortList.initialize();
 	firingGenericList.initialize();
 	firingVariableList.initialize();
+	firingPortMapList.initialize();
+	firingGenericMapList.initialize();
 	status = targ()->runIt(this);
 	return status;
 }
@@ -552,21 +562,20 @@ void VHDLStar :: registerPort(StringList ref, StringList direction,
 			      StringList type) {
   VHDLPortListIter portNext(firingPortList);
   VHDLPort* nport;
-  int isNewPort = 1;
+  // Search for a match from the existing list.
   while ((nport = portNext++) != 0) {
     // Create temporary StringLists so as to allow safe (const char*) casts.
     StringList refTemp = ref;
-    StringList nameTemp = (*nport).name;
-    if (!strcmp(refTemp,nameTemp)) isNewPort = 0;
+    StringList nameTemp = nport->name;
+    // If a match is found, no need to go any further.
+    if (!strcmp(refTemp,nameTemp)) return;
   }
-  if (isNewPort == 1) {
-    // Allocate memory for a new VHDLPort and StringList.
-    VHDLPort* newport = new VHDLPort;
-    (*newport).name = ref;
-    (*newport).direction = direction;
-    (*newport).type = type;
-    firingPortList.put(*newport);
-  }
+  // Allocate memory for a new VHDLPort and put it in the list.
+  VHDLPort* newport = new VHDLPort;
+  newport->name = ref;
+  newport->direction = direction;
+  newport->type = type;
+  firingPortList.put(*newport);
 }
 
 // Register generic reference for use by target.
@@ -574,21 +583,20 @@ void VHDLStar :: registerGeneric(StringList ref, StringList type,
 				 StringList defaultVal) {
   VHDLGenericListIter genericNext(firingGenericList);
   VHDLGeneric* ngen;
-  int isNewgen = 1;
+  // Search for a match from the existing list.
   while ((ngen = genericNext++) != 0) {
     // Create temporary StringLists so as to allow safe (const char*) casts.
     StringList refTemp = ref;
-    StringList nameTemp = (*ngen).name;
-    if (!strcmp(refTemp,nameTemp)) isNewgen = 0;
+    StringList nameTemp = ngen->name;
+    // If a match is found, no need to go any further.
+    if (!strcmp(refTemp,nameTemp)) return;
   }
-  if (isNewgen == 1) {
-    // Allocate memory for a new VHDLGeneric and StringList.
-    VHDLGeneric* newgen = new VHDLGeneric;
-    (*newgen).name = ref;
-    (*newgen).type = type;
-    (*newgen).defaultVal = defaultVal;
-    firingGenericList.put(*newgen);
-  }
+  // Allocate memory for a new VHDLGeneric and put it in the list.
+  VHDLGeneric* newgen = new VHDLGeneric;
+  newgen->name = ref;
+  newgen->type = type;
+  newgen->defaultVal = defaultVal;
+  firingGenericList.put(*newgen);
 }
 
 // Register variable reference for use by target.
@@ -596,21 +604,58 @@ void VHDLStar :: registerVariable(StringList ref, StringList type,
 				  StringList initVal) {
   VHDLVariableListIter varNext(firingVariableList);
   VHDLVariable* nvar;	
-  int isNewVar = 1;
+  // Search for a match from the existing list.
   while ((nvar = varNext++) != 0) {
     // Create temporary StringLists so as to allow safe (const char*) casts.
     StringList refTemp = ref;
-    StringList nameTemp = (*nvar).name;
-    if (!strcmp(refTemp,nameTemp)) isNewVar = 0;
+    StringList nameTemp = nvar->name;
+    // If a match is found, no need to go any further.
+    if (!strcmp(refTemp,nameTemp)) return;
   }
-  if (isNewVar == 1) {
-    // Allocate memory for a new VHDLVariable and StringList.
-    VHDLVariable* newvar = new VHDLVariable;
-    (*newvar).name = ref;
-    (*newvar).type = type;
-    (*newvar).initVal = initVal;
-    firingVariableList.put(*newvar);
+  // Allocate memory for a new VHDLVariable and put it in the list.
+  VHDLVariable* newvar = new VHDLVariable;
+  newvar->name = ref;
+  newvar->type = type;
+  newvar->initVal = initVal;
+  firingVariableList.put(*newvar);
+}
+
+// Register port mapping for use by target.
+void VHDLStar :: registerPortMap(StringList ref, StringList mapping) {
+  VHDLPortMapListIter portMapNext(firingPortMapList);
+  VHDLPortMap* nPortMap;
+  // Search for a match from the existing list.
+  while ((nPortMap = portMapNext++) != 0) {
+    // Create temporary StringLists so as to allow safe (const char*) casts.
+    StringList refTemp = ref;
+    StringList nameTemp = nPortMap->name;
+    // If a match is found, no need to go any further.
+    if (!strcmp(refTemp,nameTemp)) return;
   }
+  // Allocate memory for a new VHDLPortMap and put it in the list.
+  VHDLPortMap* newPortMap = new VHDLPortMap;
+  newPortMap->name = ref;
+  newPortMap->mapping = mapping;
+  firingPortMapList.put(*newPortMap);
+}
+
+// Register generic mapping for use by target.
+void VHDLStar :: registerGenericMap(StringList ref, StringList mapping) {
+  VHDLGenericMapListIter genericMapNext(firingGenericMapList);
+  VHDLGenericMap* nGenericMap;
+  // Search for a match from the existing list.
+  while ((nGenericMap = genericMapNext++) != 0) {
+    // Create temporary StringLists so as to allow safe (const char*) casts.
+    StringList refTemp = ref;
+    StringList nameTemp = nGenericMap->name;
+    // If a match is found, no need to go any further.
+    if (!strcmp(refTemp,nameTemp)) return;
+  }
+  // Allocate memory for a new VHDLGenericMap and put it in the list.
+  VHDLGenericMap* newGenericMap = new VHDLGenericMap;
+  newGenericMap->name = ref;
+  newGenericMap->mapping = mapping;
+  firingGenericMapList.put(*newGenericMap);
 }
 
 ISA_FUNC(VHDLStar,CGStar);

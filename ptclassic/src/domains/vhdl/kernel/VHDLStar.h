@@ -42,6 +42,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLPort.h"
 #include "VHDLGeneric.h"
 #include "VHDLVariable.h"
+#include "VHDLPortMap.h"
+#include "VHDLGenericMap.h"
 
 class VHDLTarget;
 
@@ -51,11 +53,16 @@ public:
 	// This is public so that VHDLTarget and other targets can access it.
 	StateList referencedStates;
 
-	// Lists of VHDL ports and variables referenced.
+	// Lists of VHDL ports, generics, and variables referenced.
 	// This is public so that VHDLTarget and other targets can access it.
 	VHDLPortList firingPortList;
 	VHDLGenericList firingGenericList;
 	VHDLVariableList firingVariableList;
+
+	// Lists of VHDL port and generic mappings.
+	// This is public so that VHDLTarget and other targets can access it.
+	VHDLPortMapList firingPortMapList;
+	VHDLGenericMapList firingGenericMapList;
 
 	// Add a State to the list of referenced States.
 	void registerState(State*);
@@ -121,6 +128,10 @@ private:
 	// Register variable reference for use by target.
 	void registerVariable(StringList ref, StringList type,
 			      StringList initVal);
+	// Register port mapping for use by target.
+	void registerPortMap(StringList ref, StringList mapping);
+	// Register generic mapping for use by target.
+	void registerGenericMap(StringList ref, StringList mapping);
 };
 
 #endif
