@@ -186,12 +186,6 @@ class ::tycho::FontManager {
     # Attempt to set the font specified by the argument.
     method tryFont {font}
 
-    ###################################################################
-    ####                     protected methods                     ####
-
-    # Access the "fontmanager" preferences
-    protected method preference {mode args}
-
     ##########################################################################
     ####                      private common variables                    ####
 
@@ -660,18 +654,3 @@ body ::tycho::FontManager::tryFont {font} {
 	error "Invalid font: $font"
     }
 }
-
-#########################################################################
-#########################################################################
-####                    protected methods                            ####
-
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "fontmanager" preferences.
-#
-body ::tycho::FontManager::preference {mode args} {
-    tychoFontManagerPreferences $mode $args
-}
-
