@@ -225,7 +225,7 @@ ensemble ::tycho::registered {
 # <dt><b>filemode</b> _filename_
 # <dd>
 # Return the default file mode registered with a given path name.
-# See <a href="Registry.html#registeredFileMode proc of ::tycho::Registry class">
+#
 # <dt><b>files</b>
 # <dd>
 # Return a list of open files. Note that this really returns the list of
