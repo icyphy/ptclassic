@@ -319,7 +319,7 @@ int location;
     int len, facet_desc_exists = 0;
     struct desc *parent_desc = (struct desc *) c_parent_desc;
     char *ptr;
-    char *resolvedPath;		/* With env vars substituted in (AC) */
+    char *resolvedPath = (char *) NULL;	/* With env vars substituted in (AC) */
     char *pkgName, *message;
     int code;
 
