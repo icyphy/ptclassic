@@ -6,6 +6,14 @@
 # Change to the obj.$ARCH directory before invoking make.
 
 # Make sure the $ARCH variable is set.
+# First check if it is one of the arguments to ptmake
+foreach arg ($argv)
+	if ($arg =~ ARCH=*)  then
+		setenv ARCH `echo $arg|sed -e 's/ARCH=//'`
+		break
+	endif
+end
+
 if (! $?ARCH) then
 	setenv ARCH `ptarch`
 	echo ARCH=$ARCH
