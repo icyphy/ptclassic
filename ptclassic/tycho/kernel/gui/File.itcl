@@ -466,7 +466,7 @@ body ::tycho::File::destructor {} {
 	    set useSaveAs 1
             set copyFilename $file
 	    saveQuery $useSaveAs
-            ::tycho::rm $copyFilename
+            file delete $copyFilename
 	} else {
 	    saveQuery 
 	}

@@ -270,7 +270,7 @@ body ::tycho::EditItcl::gendocBuffer {} {
         set verbose 0
         set debug 0
         set generateIndex 0
-        ::tycho::rm -f $docfile
+        file delete -force $docfile
         ::tycho::HTMLDocSys::generateHTML \
                 $verbose $debug $generateIndex {An Itcl Class} $tail
     }]
@@ -400,7 +400,7 @@ body ::tycho::EditItcl::gendoc {filename} {
         set verbose 0
         set debug 0
         set generateIndex 0
-        ::tycho::rm -f $docfile
+        file delete -force $docfile
         ::tycho::HTMLDocSys::generateHTML \
                 $verbose $debug $generateIndex {An Itcl Class} $tail
     }]

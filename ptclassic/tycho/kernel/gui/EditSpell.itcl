@@ -274,7 +274,7 @@ body ::tycho::EditSpell::recheck {} {
 	safeEval ::tycho::inform "Spelling OK."
 	return
     }
-    ::tycho::rm $filename
+    file delete $filename
     set pattern [join $errs |]
     set tags [$tw spellCheckTags]
 
