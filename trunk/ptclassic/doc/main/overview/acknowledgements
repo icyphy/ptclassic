@@ -13,6 +13,8 @@ key management of the development of the kernel,
 and hence has impacted every aspect of Ptolemy.
 He also coordinated virtually all contributions, and
 authored both the interpreter and the ptlang preprocessor.
+He also designed the memory allocation system used by assembly
+language code generation domains.
 Other key contributors to the kernel include Soonhoi Ha
 and Ichiro Kuroda.
 Soonhoi Ha authored the DDF, DE, and CGC domains, including
@@ -20,8 +22,9 @@ many of the basic stars and the basic domain interface, and
 also made extensive contributions to the CG domain, the kernel,
 and parallel schedulers of all types.
 Philip Bitar had a major impact on the design of the DE domain.
-Jos\o"e\'" Pino has been pimarily responsible for the code generation
-domains, although extensive contributions have been made by Soonhoi Ha,
+Jos\o"e\'" Pino has been primarily responsible for the code generation
+domains, although extensive contributions have been made by Joe Buck,
+Soonhoi Ha,
 Praveen Murthy, Thomas M. Parks, and Kennard White.
 Chih-Tsung Huang, with some help from Jos\o"e\'" Pino, singlehandedly ported
 all the assembly code generation stars from Gabriel.
