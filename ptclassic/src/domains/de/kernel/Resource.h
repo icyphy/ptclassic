@@ -3,10 +3,10 @@
 
 /**************************************************************************
 Version identification:
-@(#)Resource.h	1.15     12/09/97
+@(#)Resource.h	$Id$
 
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1998- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -61,21 +61,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "type.h"
 #include "Galaxy.h"
 #include "DataStruct.h"
-#include "DEPolis.h"
+#include "DERCStar.h"
 #include "CQEventQueue.h"
-#include "PolisEventQ.h"
-#include "PolisScheduler.h"
+#include "DERCEventQ.h"
+#include "DERCScheduler.h"
 
-class PolisEventQ;
-class PolisEvent;
-class PolisScheduler;
+class DERCEventQ;
+class DERCEvent;
+class DERCScheduler;
 
 ////////////////////////////////////////////////////////////////////////////
 // Resource : to be used in a POLIS simulation.
 //
 // A Resource is used to control access to a simulated resource (eg CPU,
 // data bus etc.) during a POLIS simulation. It is designed to be used in 
-// conjunction with a PolisScheduler. 
+// conjunction with a DERCScheduler. 
 // It looks after keeping track of interrupted processes (more accurately 
 // their output Events), as well as deciding when a Star can access this
 // resource.
@@ -85,28 +85,28 @@ class PolisScheduler;
 
 class Resource {
     public:
-    Resource(const char*, int, PolisScheduler* );
+    Resource(const char*, int, DERCScheduler* );
 
     
-    void newEventFromEventQ(PolisEvent* , double);
-    void newEventFromInterruptQ(PolisEvent*, double);
-    void intQupdate(PolisEvent*, double, double);
-    int canAccessResource(PolisEvent*);
-    // used to get the destination of the event as a Polis Star
-    DEPolis* getPolisStar(Event*);
+    void newEventFromEventQ(DERCEvent* , double);
+    void newEventFromInterruptQ(DERCEvent*, double);
+    void intQupdate(DERCEvent*, double, double);
+    int canAccessResource(DERCEvent*);
+    // used to get the destination of the event as a DERC Star
+    DERCStar* getDERCStar(Event*);
     
     const char* name;
     int schedPolicy;
     double timeWhenFree; // set to ECT of last event in LL, or else -1
-    PolisScheduler* mysched;   // the PolisScheduler which created this object
+    DERCScheduler* mysched;   // the DERCScheduler which created this object
     
-    SequentialList* getOtherEvents(PolisEvent*, double);
+    SequentialList* getOtherEvents(DERCEvent*, double);
     // used to store information about interrupted processes
     SequentialList* intEventList; 
     
-    // Pointers to the event queues of the PolisScheduler controlling the simulation
-    PolisEventQ* eventQ;
-    PolisEventQ* interruptQ;
+    // Pointers to the event queues of the DERCScheduler controlling the simulation
+    DERCEventQ* eventQ;
+    DERCEventQ* interruptQ;
 };
 
 
@@ -122,11 +122,11 @@ class Resource {
 
 class ResLLCell {
 public: 
-    PolisEvent* event;
+    DERCEvent* event;
     double ECT;     // Expected Completion Time
     int priority;
 
-    ResLLCell( PolisEvent* e, double time, int prio) 
+    ResLLCell( DERCEvent* e, double time, int prio) 
          : event(e), ECT(time), priority(prio) {}
 
 };
