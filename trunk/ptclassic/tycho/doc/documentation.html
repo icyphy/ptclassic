@@ -73,6 +73,21 @@ substituted.  Also, on Unix systems, filenames beginning with a tilde
 (~) specify files relative to a user's home directory, in the usual
 Unix fashion.
 <p>
+When writing HTML documentation, it is best if you use relative paths
+instead of using dollar sign references.
+<MENU>
+<LI> HTML viewers other than Tycho do not understand dollar sign references.
+
+<LI> If the Tycho documentation is accessed via a httpd server, from a
+remote system then the dollar sign references will not expand
+properly.  At UC Berkeley, we make the latest version of Tycho
+available from the Ptolemy website, so remote users can preview Tycho.
+If the documentation contains dollar sign references, then remote users
+will have broken links.  If the documentation uses relative references,
+then remote users will be able to view the documentation.
+</MENU>
+
+<p>
 <h2><a name="formatting documentation">Formatting Documentation</a></h2>
 
 The Tycho documentation should follow a consistent look and feel.  The
