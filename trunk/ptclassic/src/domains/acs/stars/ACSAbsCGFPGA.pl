@@ -9,7 +9,7 @@ Produces the cosine of the input, that is assumed to be in radians
 	version {$Id$
 	author { P. Fiore }
 	copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
