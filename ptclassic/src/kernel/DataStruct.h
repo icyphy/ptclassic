@@ -14,6 +14,8 @@ deallocating memory for the objects, etc.
 Programmer: D.G. Messerschmitt
 	    U.C. Berkeley
 Date: Jan 10, 1990
+
+$Id$
 **************************************************************/
 
 	//////////////////////////////////////
@@ -37,6 +39,7 @@ protected:
 	void insert(Pointer a);	// Add at head of list
 	void append(Pointer a);	// Add at tail of list
 	Pointer getAndRemove();	// Return and remove head of list
+	Pointer getNotRemove(); // Return head, do not remove
 	Pointer next();		// Return next node on list, relative to
 				// last reference
 	Pointer elem(int);	// Return arbitary node of list
@@ -104,6 +107,11 @@ inline Pointer SingleLinkList :: getAndRemove()
 
 	delete f;
 	return r;
+}
+
+inline Pointer SingleLinkList :: getNotRemove()
+{
+        return lastNode->next->e;
 }
 
 inline Pointer SingleLinkList :: next()
@@ -183,27 +191,21 @@ class Queue : SingleLinkList
 {
 	int numberNodes;
 public:
-        void put(Pointer); 	// Add to the queue
-        Pointer get();		// Remove and return from the queue
-	int length();		// Return the length of the queue
-        void clear();		// Clear the queue
-	Queue();
+	// Add element to the queue
+        void put(Pointer p) {++numberNodes; SingleLinkList::append(p);}
+
+	// Remove and return element from end of the queue
+        Pointer get() {--numberNodes; return getAndRemove();}
+
+	// Return number of elements currently in queue
+	int length() {return numberNodes;}
+
+	// Clear the queue
+        void clear() {SingleLinkList::clear();}
+
+	Queue() {numberNodes = 0;}
 };
 
-inline void Queue :: put(Pointer p)
-	{ ++numberNodes; SingleLinkList::append(p); }
-
-inline Pointer Queue :: get()
-	{ --numberNodes; return getAndRemove(); }
-
-inline int Queue :: length()
-	{ return numberNodes; }
-
-inline void Queue ::  clear()
-	{ SingleLinkList::clear(); }
-
-inline Queue :: Queue()
-	{ numberNodes = 0; }
 
 	/////////////////////////////////////
 	//  class SequentialList
@@ -239,6 +241,39 @@ protected:
 
 private:
 	int dimen;	// Size of list
+};
+
+	//////////////////////////////////////
+	// class Stack
+	//////////////////////////////////////
+
+/*
+Class implements a stack, where elements are added (pushed)
+to the top of the stack or removed (pop'ed) from the top
+of the stack. In addition, we allow elements to be added
+to the bottom of the stack.
+*/
+
+class Stack : SingleLinkList
+{
+protected:
+	// Add element at the top of the stack
+	void pushTop(Pointer p) {insert(p);++dimen;}
+
+	// Add element to the bottom of the stack
+	void pushBottom(Pointer p) {append(p);++dimen;}
+
+	// Access and remove element from the top of the stack
+	Pointer popTop() {--dimen; return getAndRemove();}
+
+	// Access but do not remove element from top of stack
+	Pointer accessTop() {return getNotRemove();}
+
+	int size() {return dimen;}
+
+	Stack() {dimen=0;}
+private:
+	int dimen;	// Number elements on the stack
 };
 
 #endif
