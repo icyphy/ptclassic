@@ -30,5 +30,35 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-package ifneeded Tycho 0.1 \
-	[list source [file join $dir package.tcl]]
+# Set the script to execute to load the package
+package ifneeded Tycho 2.0 \
+	[list source [file join $dir tycho.tcl]]
+
+
+# Search the Tycho tree looking for more packages.
+# This code adapted from tclPkgUnknown:
+#
+# Copyright (c) 1991-1993 The Regents of the University of California.
+# Copyright (c) 1994-1996 Sun Microsystems, Inc.
+#
+# See the file "license.terms" for information on usage and redistribution
+# of this file, and for a DISCLAIMER OF ALL WARRANTIES.
+#
+namespace ::temp
+proc ::temp::findSubPackages {thisdir} {
+    # Find subdirectories with packages
+    # We can't use glob in safe interps, so enclose the following
+    # in a catch statement
+    catch {
+        foreach file [glob -nocomplain [file join $thisdir \
+                * pkgIndex.tcl]] {
+            set dir [file dirname $file]
+            if [catch {source $file} msg] {
+                tclLog "error reading package index file $file: $msg"
+            }
+            # Load further sub-packages
+            ::temp::findSubPackages [file dirname $file]
+        }
+    }
+}
+::temp::findSubPackages $dir
