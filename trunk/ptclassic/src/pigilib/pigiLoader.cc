@@ -248,6 +248,11 @@ static int compile (const char* name, const char* idomain, const char* srcDir,
 	  cmd << "-I" << ptSrcDir << "/domains/cg/kernel ";
 	}
 
+	//    -- stars in de _may_ rely on sip
+	if ( strcmp(domain, "de") != 0 ) {
+	  cmd << "-I" << ptSrcDir << "/domains/de/sip/kernel ";
+	}
+
 	//    -- stars in dataflow domains rely on includes in SDF kernel
 	if ( strcmp(domain, "sdf") != 0 ) {
 	  cmd << "-I" << ptSrcDir << "/domains/sdf/kernel ";
