@@ -265,11 +265,13 @@ body ::tycho::EditJava::gendocBuffer {} {
     }
 
     putStatus "Running javadoc"
+    # If the gendocBufferInteral fails, clear up the status bar
+    after 1000 $this putStatus \"\"
     #::tycho::safeUpdate $this
     # FIXME: should we have a preference for the javadoc command? 
     ::tycho::EditProgram::gendocBufferInternal \
             [list set docfile $htmlFile] \
-            {exec javadoc -version -author \
+            {::tycho::tyexec javadoc -version -author \
             -d [file join doc codeDoc] $tail}
 
     putStatus "Fixing HTML files in\
