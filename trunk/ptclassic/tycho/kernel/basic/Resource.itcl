@@ -53,7 +53,7 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 	    http:// {
 		set rclass ::tycho::ResourceHTTP
 	    }
-	    file:// {
+	    ftp:// {
 		error "Ftp access not supported yet"
 	    }
 	    file:/ {
@@ -90,6 +90,8 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # for binary data, and should not be used unless absolutely necessary.
 # <i>Do not delete or write to the cache file.</i> An error will be
 # triggered if this is not a streamable resource.
+# <dt><b>contenttype</d> 
+# <dd> Return the type of the content (binary, text/*, etc...)
 # <dt><b>chmod</d> _path_ _mode_
 # <dd> Change access permissions of a resource. The exact values of
 # _mode_ has not yet been determined but is probably a subset of the
@@ -157,6 +159,10 @@ ensemble ::tycho::resource {
     # Change access permissions of a resource
     option chmod {path mode} {
 	::tycho::resourceClass $path chmod $mode
+    }
+    # Return "text*", "directory*", or others
+    option contenttype {path} {
+        ::tycho::resourceClass $path contenttype
     }
     # Delete a given resource
     option delete {path} {
@@ -361,9 +367,6 @@ class ::tycho::Resource {
     # Connect a resource to a path name
     method connect {path}
 
-    # Return the content type of the resource
-    method contenttype {}
-
     # Test if the resource is currently open
     method isopen {}
 
@@ -384,6 +387,9 @@ class ::tycho::Resource {
 
     # Change the permissions of a resource
     proc chmod {path permissions}
+
+    # Return the content type of the resource
+    proc contenttype {}
 
     # Delete a resource
     proc delete {path}
