@@ -138,15 +138,6 @@ int SDFClusterGal::cluster() {
 	return change;
 }
 
-// Generate schedules in all the lower-level clusters.
-int SDFClusterGal::genSubScheds() {
-	SDFClusterGalIter nextClust(*this);
-	SDFCluster* c;
-	while ((c = nextClust++) != 0)
-		if (!c->genSched()) return FALSE;
-	return TRUE;
-}
-
 // Test to see if we have uniform rate.
 int SDFClusterGal::uniformRate() {
 	if (numberClusts() <= 1) return TRUE;
@@ -559,12 +550,6 @@ SDFClusterBag :: SDFClusterBag()
 : owner(TRUE), exCount(0), sched(0), gal(0)
 {}
 
-
-void SDFClusterBag :: createScheduler() {
-	LOG_DEL; delete sched;
-	LOG_NEW; sched = new SDFBagScheduler;
-}
-
 void SDFClusterBag :: createInnerGal() {
 	LOG_DEL; delete gal;
 	LOG_NEW; gal = new SDFClusterGal;
@@ -671,21 +656,44 @@ ostream& SDFClusterBag::printOn(ostream& o) {
 	return printPorts(o);
 }
 
-// generate the bag's schedule.  Also make schedules for "the bags within".
-// Does nothing for an empty bag.
-int SDFClusterBag::genSched() {
-	if (size() == 0) return TRUE;
+// FORCE is a special input that causes the cluster to simulate execution
+// even if it has already been executed "enough times"
+static const int FORCE = 2;
 
-	// create scheduler
-	createScheduler();
+// simulate the execution of the bag cluster.  We do not generate its
+// internal schedule until it becomes runnable, so that the "real stars"
+// will be executed in the right order (since simRunStar is called to
+// generate the schedule).
 
-	SDFClusterBagIter nextClust(*this);
-	SDFCluster* c;
-	while ((c = nextClust++) != 0)
-		if (!c->genSched()) return FALSE;
-	return (sched->setup(*gal));
+int SDFClusterBag::simRunStar(int deferFiring) {
+	// handle FORCE input
+	if (deferFiring == FORCE)
+		noTimes = 0;
+	int status = SDFStar::simRunStar(deferFiring);
+	if (status == 0) {
+		int nRun = loop();
+		if (sched == 0) {
+			genSched();
+			nRun -= 1;
+		}
+		if (nRun == 0) return status;
+		SDFSchedIter nextStar(*sched);
+		for (int i = 0; i < nRun; i++) {
+			nextStar.reset();
+			SDFStar* s;
+			while ((s = nextStar++) != 0)
+				s->simRunStar(FORCE);
+		}
+	}
+	return status;
 }
 
+int SDFClusterBag::genSched() {
+	if (sched) return TRUE;
+	LOG_NEW; sched = new SDFBagScheduler;
+	return sched->setup(*gal);
+}
+	
 // indent by depth tabs.
 static const char* tab(int depth) {
 	// this fails for depth > 20, so:
@@ -696,9 +704,7 @@ static const char* tab(int depth) {
 
 // return the bag's schedule.
 StringList SDFClusterBag::displaySchedule(int depth) {
-	if (sched == 0) {
-		return "schedule has not been computed";
-	}
+	if (sched == 0) genSched();
 	StringList sch;
 	if (loop() > 1) {
 		sch += tab(depth);
@@ -717,7 +723,9 @@ StringList SDFClusterBag::displaySchedule(int depth) {
 
 // run the cluster, taking into account the loop factor
 int SDFClusterBag::fire() {
-	if (!sched) return FALSE;
+	if (!sched) {
+		if (!genSched()) return FALSE;
+	}
 	sched->setStopTime(loop()+exCount);
 	sched->run(*gal);
 	exCount += loop();
@@ -846,6 +854,21 @@ int SDFAtomCluster::fire() {
 	return TRUE;
 }
 
+// simulate the execution of the atomic cluster, for schedule generation.
+// We pass through the call of simRunStar to the real star.
+int SDFAtomCluster::simRunStar(int deferFiring) {
+	// handle FORCE input
+	if (deferFiring == FORCE) {
+		noTimes = 0;
+		deferFiring = FALSE;
+	}
+	int status = SDFStar::simRunStar(deferFiring);
+	if (status == 0)
+		for (int i = 0; i < loop(); i++)
+			pStar.simRunStar(FALSE);
+	return status;
+}
+
 int SDFAtomCluster::myExecTime() {
 	return pLoop * pStar.myExecTime();
 }
@@ -914,12 +937,7 @@ int SDFClustSched::computeSchedule (Galaxy& gal) {
 	cgal = new SDFClusterGal(gal,logstrm);
 	cgal->cluster();
 
-// generate subschedules
-	if (!cgal->genSubScheds()) {
-		invalid = TRUE; return FALSE;
-	}
-
-// generate top-level schedule
+// generate schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm) {
 			*logstrm << "Schedule:\n" << displaySchedule();
