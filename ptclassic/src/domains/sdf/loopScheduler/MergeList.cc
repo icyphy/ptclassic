@@ -324,7 +324,7 @@ int MergeLink :: postClustering(LSGraph& g) {
 // the master of this adjacent_node.
 void MergeLink :: initialPhase() {
 
-	SDFStar* org = adjacent_node->myMaster();
+	DataFlowStar* org = adjacent_node->myMaster();
 	org->repetitions = adj_ix - 1;
 
 	// break the invocation links.
@@ -428,7 +428,7 @@ void MergeLink :: createClusters(LSGraph& g) {
 // the par_node
 void MergeLink :: finalPhase(LSGraph& g) {
 
-	SDFStar* master = par_node->myMaster();
+	DataFlowStar* master = par_node->myMaster();
 	master->setMaster(par_node);
 	int total = master->repetitions;
 	master->repetitions = total - par_node->invocationNumber() + 1;

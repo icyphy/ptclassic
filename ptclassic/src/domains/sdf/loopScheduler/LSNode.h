@@ -46,7 +46,7 @@ private:
 public:
 
 	// constructor with master and invocation number arguments
-	LSNode(SDFStar* master, int no) : EGNode(master,no) {
+	LSNode(DataFlowStar* master, int no) : EGNode(master,no) {
 		fired_flag = 0; }
 
 	// set, get, and reset the active flag

@@ -27,7 +27,7 @@ $Id$
 
 // Check whether a state which is modified during runtime,
 // exists in a block.
-int StateExists(SDFStar& star)
+int StateExists(DataFlowStar& star)
 {
   	BlockStateIter nextState(star);
   	State* s;
@@ -41,12 +41,12 @@ int StateExists(SDFStar& star)
 
 // This function checks whether the argument star uses past input or outputs. 
 
-int PastPortsUsed(SDFStar& star) 
+int PastPortsUsed(DataFlowStar& star) 
 {
-	BlockPortIter nextPort(star);
-	SDFPortHole* p;
+	DFStarPortIter nextPort(star);
+	DFPortHole* p;
 
-	while ((p = (SDFPortHole*) nextPort++) != 0) {
+	while ((p = nextPort++) != 0) {
 		if (p->usesOldValues())
 			return TRUE;
 	}
@@ -69,7 +69,7 @@ ExpandedGraph :: ~ExpandedGraph() {
 
 void ExpandedGraph::initialize() {}
 
-EGGate* ExpandedGraph::connect_invocations(SDFStar* src, int i, SDFStar* dest, 
+EGGate* ExpandedGraph::connect_invocations(DataFlowStar* src, int i, DataFlowStar* dest, 
                                       int j, int n_sam, int n_d)
 {
 
@@ -101,16 +101,16 @@ void ExpandedGraph :: setGate(EGGate* src_gate, PortHole* src_port, int src_ix,
 void ExpandedGraph::initialize_invocations()
 {
   	GalStarIter nextStar(*myGal);
-  	SDFStar *s;
+  	DataFlowStar *s;
 
-  	while ((s = (SDFStar*)nextStar++) != 0) {
+  	while ((s = (DataFlowStar*)nextStar++) != 0) {
 		nodecount += int(s->repetitions);
 		createInvocations(s);
 	}
 }
 
 // This function creates all invocations of a star.
-void ExpandedGraph::createInvocations(SDFStar* s)
+void ExpandedGraph::createInvocations(DataFlowStar* s)
 {
 	int num = s->repetitions;
 	EGNode* prev = 0;
@@ -141,8 +141,8 @@ void ExpandedGraph::createInvocations(SDFStar* s)
 // Return value : 1 if no errors found
 //                0 if there were problems
  
-int ExpandedGraph::ExpandArc(SDFStar* src, PortHole* src_port, 
-			     SDFStar* dest, PortHole* dest_port)
+int ExpandedGraph::ExpandArc(DataFlowStar* src, PortHole* src_port, 
+			     DataFlowStar* dest, PortHole* dest_port)
 {
 	// set up local variables for connection information.
 	int p = src_port->numberTokens;
@@ -243,7 +243,7 @@ int ExpandedGraph::ExpandArc(SDFStar* src, PortHole* src_port,
 // and its successor, and an arc with delay 1, is inserted from the last 
 // invocation to the first.
 
-int ExpandedGraph::SelfLoop(SDFStar& s)
+int ExpandedGraph::SelfLoop(DataFlowStar& s)
 { 
 	if ( enforcedSelfLoop || s.hasInternalState() || StateExists(s) || PastPortsUsed(s)) {
 
@@ -271,8 +271,8 @@ int ExpandedGraph::SelfLoop(SDFStar& s)
 
 int ExpandedGraph::createMe(Galaxy& galaxy, int selfLoopFlag)
 {
-	SDFStar *dest, *source;
-	SDFPortHole *dest_port, *source_port;
+	DataFlowStar *dest, *source;
+	DFPortHole *dest_port, *source_port;
 	GalStarIter nextStar(galaxy);
 
 	myGal = &galaxy;
@@ -284,17 +284,17 @@ int ExpandedGraph::createMe(Galaxy& galaxy, int selfLoopFlag)
 	initialize_invocations();
 
 	// make connections among EGNodes
-	while ((dest = (SDFStar*)nextStar++)!=0) {
+	while ((dest = (DataFlowStar*)nextStar++)!=0) {
 
 	   // make connections between all instances of the same Star if
 	   // current invocation depends on the previous invocation.
 	   if (!SelfLoop(*dest)) return FALSE;
 
-	   BlockPortIter nextPort(*dest);
-	   while((dest_port = (SDFPortHole*)nextPort++)!=0) {
-		source_port = (SDFPortHole*)dest_port->far();
+	   DFStarPortIter nextPort(*dest);
+	   while((dest_port = nextPort++) != 0) {
+		source_port = (DFPortHole*)dest_port->far();
       		if (dest_port->isItInput() && source_port->isItOutput()) {
-			source = (SDFStar*)source_port->parent();
+			source = (DataFlowStar*)source_port->parent();
 
 			// main routine to connect EGNodes
         		if (!ExpandArc(source,source_port,dest,dest_port)) 
@@ -342,7 +342,7 @@ void ExpandedGraph::removeArcsWithDelay()
 	}
 }
 
-EGNode *ExpandedGraph::newNode(SDFStar *s, int i) {
+EGNode *ExpandedGraph::newNode(DataFlowStar *s, int i) {
 	LOG_NEW; EGNode *tmp = new EGNode(s,i);
 	return tmp;
 }

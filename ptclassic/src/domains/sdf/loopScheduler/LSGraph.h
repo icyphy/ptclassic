@@ -95,7 +95,7 @@ public:
 
 protected:
 	// redefine these virtual allocators to allocate LS  nodes.
-	EGNode *newNode(SDFStar*,int);
+	EGNode *newNode(DataFlowStar*,int);
 
 private:
 	// make the reachability matrix

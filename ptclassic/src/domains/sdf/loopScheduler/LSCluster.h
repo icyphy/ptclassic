@@ -29,13 +29,13 @@ class ClusterNodeList;
 class SDFFiring {
 friend class LSCluster;
 
-	SDFStar* s;
+	DataFlowStar* s;
 	int count;
 
 	SDFFiring* next;
 
 public:
-	SDFFiring(SDFStar* p, int i) : s(p), count(i), next(0) {}
+	SDFFiring(DataFlowStar* p, int i) : s(p), count(i), next(0) {}
 	~SDFFiring();
 
 	int getExecTime() { return s->myExecTime() * count; }
@@ -54,7 +54,7 @@ private:
 	SDFFiring* prev;	// previous firing.
 
 	void determineOrder(LSGraph&, ClusterNodeList*);
-	void addFiring(SDFStar*, int);
+	void addFiring(DataFlowStar*, int);
 
 public:
 	// constructor.

@@ -56,7 +56,7 @@ void EGGate::hideMe(int flag) {
 	parent->hiddenGates.insertGate(this, 0);
 }
 	
-SDFStar* EGGate :: farEndMaster() {
+DataFlowStar* EGGate :: farEndMaster() {
 	if (far == 0) return 0;
 	return farEndNode()->myMaster(); }
 
@@ -74,7 +74,7 @@ void EGGateLink :: removeMeFromList() {
 // gate belonging to "master". A pointer to the first
 // prec gate for "master" is returned; null is returned if
 // master does not exist in the list.
-EGGate* EGGateList::findMaster(SDFStar *master) {
+EGGate* EGGateList::findMaster(DataFlowStar *master) {
 	EGGateLinkIter iter(*this);  
 	EGGate *q;
 	while ((q=iter++)!=0) {
@@ -96,7 +96,7 @@ EGGate* EGGateList::findMaster(SDFStar *master) {
 EGGateLink* EGGateList::findInsertPosition (EGNode *node, int delay, int& ret)
 {
 
-	SDFStar *master = node->myMaster();
+	DataFlowStar *master = node->myMaster();
 	int invocation = node->invocationNumber();
 
 	EGGate *p = findMaster(master);
@@ -212,10 +212,10 @@ void EGGateList::initialize() {
 	DoubleLinkList :: initialize();
 }
 
-EGGate* EGGateLinkIter :: nextMaster(SDFStar* m) {
+EGGate* EGGateLinkIter :: nextMaster(DataFlowStar* m) {
 	EGGate* tmp = next();
 	if (tmp == 0) return 0;
-	SDFStar* s = tmp->farEndMaster();
+	DataFlowStar* s = tmp->farEndMaster();
 	if (s == m || s == refMaster) return nextMaster(m);
 	refMaster = s;
 	return tmp;

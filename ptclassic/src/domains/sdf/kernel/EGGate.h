@@ -21,7 +21,7 @@ $Id$
 
 class EGGateLink;
 class EGNode;
-class SDFStar;
+class DataFlowStar;
 
 ///////////////////////////////////////////////////////////////
 //
@@ -131,7 +131,7 @@ public:
 	StringList printMe();
 
 	// the master on the far end of this arc
-	SDFStar *farEndMaster();
+	DataFlowStar *farEndMaster();
 
 	// set link pointer
 	void setLink(EGGateLink* p) { myLink = p; }
@@ -195,7 +195,7 @@ class EGGateList : public DoubleLinkList
 {
 private:
 	// Search the list for the first entry pointing to "master"   
-	EGGate* findMaster(SDFStar *master);
+	EGGate* findMaster(DataFlowStar *master);
 
 	// Search the list for the point where "node" should be inserted
 	// into the list.
@@ -238,7 +238,7 @@ public:
 
 class EGGateLinkIter : public DoubleLinkIter {
 private:
-	SDFStar* refMaster;
+	DataFlowStar* refMaster;
 	
 public:
 	EGGateLinkIter(const EGGateList& l) : 
@@ -250,7 +250,7 @@ public:
 
 	// return the next gate connected to a new master that is not
 	// the same as the argument master.
-	EGGate* nextMaster(SDFStar*);
+	EGGate* nextMaster(DataFlowStar*);
 };
 
 #endif

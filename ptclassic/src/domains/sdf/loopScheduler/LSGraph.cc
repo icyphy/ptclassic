@@ -73,7 +73,7 @@ void LSGraph::initializeCandidates()
 		sortedInsert((LSNode*) m);
 }
 
-EGNode *LSGraph::newNode(SDFStar *s, int i) 
+EGNode *LSGraph::newNode(DataFlowStar *s, int i) 
 	{ LOG_NEW; return new LSNode(s,i); }
 
 

@@ -18,7 +18,7 @@ $Id$
 #include "StringList.h"
 #include "LSNode.h"
 class LSGraph;
-class SDFStar;
+class DataFlowStar;
 
 // This class implements a list of expanded graph nodes for a cluster
 // invocation. 
@@ -65,8 +65,8 @@ public:
 	StringList print();
 
 	// first and second component star
-	SDFStar* first;
-	SDFStar* second;
+	DataFlowStar* first;
+	DataFlowStar* second;
 };
 
 ///////////////////////////////
