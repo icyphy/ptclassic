@@ -6,6 +6,7 @@ static const char file_id[] = "DynDFScheduler.cc";
 #include "DynDFScheduler.h"
 #include "GalIter.h"
 #include "SDFScheduler.h"
+#include "checkConnect.h"
 	
 /**************************************************************************
 Version identification:
@@ -89,8 +90,6 @@ inline DataFlowStar* peerStar(PortHole& p) {
 StringList DynDFScheduler :: displaySchedule () {
 	return "{ { scheduler \"Dynamic Dataflow Scheduler\" } }";
 }
-
-extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup

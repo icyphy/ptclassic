@@ -57,6 +57,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <time.h>
 #include "Fix.h"
 #include "StringList.h"
+#include "checkConnect.h"
 
 /////////////////////////////////////////
 // constructor
@@ -601,8 +602,6 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
   }
   return TRUE;
 }
-
-extern int warnIfNotConnected (Galaxy&);
 
 /////////////////////////////////////////
 // setup

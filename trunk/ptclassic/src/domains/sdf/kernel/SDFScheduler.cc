@@ -48,6 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "Target.h"
 #include "EventHorizon.h"
+#include "checkConnect.h"
 
 extern const char SDFdomainName[];
 
@@ -121,8 +122,6 @@ void SDFScheduler :: runOnce () {
 		invalid = !star->run();
 	}
 }
-
-extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup

@@ -48,6 +48,7 @@ These are the methods for the discrete event scheduler.
 #include "FloatState.h"
 #include "IntState.h"
 #include "GalIter.h"
+#include "checkConnect.h"
 
 extern const char DEdomainName[];
 
@@ -89,8 +90,6 @@ ISA_FUNC(DEBaseSched,Scheduler);
 StringList DEScheduler :: displaySchedule () {
     return "{ { scheduler \"Basic discrete-event run-time scheduler\" } }";
 }
-
-extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup
