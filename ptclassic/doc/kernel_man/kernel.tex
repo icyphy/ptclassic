@@ -5225,34 +5225,20 @@ the list.  Separate lists are maintained for each domain; the block
 is added to the list corresponding to \code{\var{block}.domain()}.
 
 \begin{example}
-static const char* domain();
-\end{example}
-
-Return the current domain name.
-
-\begin{example}
-static int setDomain (const char* \var{newDom});
-\end{example}
-
-Change the current domain.  Return TRUE if it worked, FALSE for an
-unknown domain.  This affects which sublist of blocks is searched by
-subsequent \code{find} and \code{clone} calls.
-
-\begin{example}
-static const Block* find (const char* \var{name});
+static const Block* find (const char* \var{name}, const char* \var{dom});
 \end{example}
 
 The find method returns a pointer the appropriate block in
-the current domain.  A null pointer is returned if no match
+the specified domain.  A null pointer is returned if no match
 is found.
 
 \begin{example}
-static Block* clone (const char* \var{name});
-static Block* makeNew (const char* \var{name});
+static Block* clone (const char* \var{name}, const char* \var{dom});
+static Block* makeNew (const char* \var{name}, const char* \var{dom});
 \end{example}
 
 The \code{clone} method takes a string, finds the appropriate block in
-the current domain, and returns a clone of that block (the
+the specified domain, and returns a clone of that block (the
 \code{clone} method is called on the block.  This method, as
 a rule, generates a duplicate of the block.
 
@@ -5266,23 +5252,43 @@ For either of these, an error message is generated (with
 match.
 
 \begin{example}
-static StringList nameList();
 static StringList nameList (const char* \var{domain});
 \end{example}
 
-Return the names of known blocks in the current domain (first form) or
+Return the names of known blocks in
 the given domain (second form).  Names are
 separated by newline characters.
 
 \begin{example}
-static int isDynamic (const char* \var{type});
+static const char* defaultDomain ();
 \end{example}
 
-Return true if the named block is dynamically linked.
+Returns the default domain name.  This is
+not used internally for anything; it is just set to the first domain
+seen during the building of known lists.
+
+\begin{example}
+static int setDefaultDomain (const char* newval);
+\end{example}
+
+Set the default domain name.  Return FALSE if
+the specified value is not a valid domain.
+
+\begin{example}
+static int validDomain (const char* newval);
+\end{example}
+
+Return TRUE if the given name is a valid domain.
+
+\begin{example}
+static int isDynamic (const char* \var{type}, const char* \var{dom});
+\end{example}
+
+Return TRUE if the named block is dynamically linked.
 
 There is an iterator associated with KnownBlock, called
 KnownBlockIter.  It takes as an argument the name of a domain.  The
-argument may be omitted, in which case the current domain is used.
+argument may be omitted, in which case the default domain is used.
 Its \code{next} function returns the type \code{const Block *}; it
 steps through the blocks on the known list for that domain.
 
