@@ -13,10 +13,16 @@ set s $ptkControlPanel.slider_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
-# used for this new run.
+# used for this new run.  Some trickiness occurs, however, because
+# parameter values may have changed, including the number of inputs.
 
-if {![winfo exists $s]} {
+if {[winfo exists $s]} {
+    set window_previously_existed 1
+} {
+    set window_previously_existed 0
+}
 
+if {!$window_previously_existed} {
     if {[set ${starID}(put_in_control_panel)]} {
 	frame $s
 	pack after $ptkControlPanel.low $s top
@@ -25,18 +31,22 @@ if {![winfo exists $s]} {
         wm title $s "Sliders"
         wm iconname $s "Sliders"
     }
+    frame $s.f
+}
 
-    proc setOut_$starID {position} "
+proc setOut_$starID {position} "
         setOutputs_$starID \
 	\[expr {[set ${starID}(low)]+([set ${starID}(high)]-\
 	[set ${starID}(low)])*\$position/100.0}]
-    "
+"
 
-    frame $s.f
-    set position [expr \
+set position [expr \
 	{round(100*([set ${starID}(value)]-[set ${starID}(low)])/ \
 	([set ${starID}(high)]-[set ${starID}(low)]))}]
-    ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
+ptkMakeScale $s.f m [set ${starID}(identifier)] $position setOut_$starID
+
+if {!$window_previously_existed} {
+
     pack append $s $s.f top
 
     proc destructorTcl_$starID {starID} {
@@ -47,7 +57,6 @@ if {![winfo exists $s]} {
 	    destroy $ptkControlPanel.slider_$starID
 	}
     }
-
     tkwait visibility $s
 }
 

@@ -13,28 +13,40 @@ set s $ptkControlPanel.label_$starID
 
 # If a window with the right name already exists, we assume it was
 # created by a previous run of the very same star, and hence can be
-# used for this new run.
+# used for this new run.  Some trickiness occurs, however, because
+# parameter values may have changed, including the number of inputs.
 
-if {![winfo exists $s]} {
+if {[winfo exists $s]} {
+    set window_previously_existed 1
+} {
+    set window_previously_existed 0
+}
+
+if {!$window_previously_existed} {
 
     proc tkShowValueMakeWindow {putInCntrPan win label numInputs univ starID} {
-	global ptkControlPanel
-        if {$putInCntrPan} {
-	    frame $win
-	    pack after $ptkControlPanel.low $win top
-        } {
-            toplevel $win
-            wm title $win "Show Values"
-            wm iconname $win "Show Values"
-        }
+	if {![winfo exists $win]} {
+	    global ptkControlPanel
+            if {$putInCntrPan} {
+	        frame $win
+	        pack after $ptkControlPanel.low $win top
+            } {
+                toplevel $win
+                wm title $win "Show Values"
+                wm iconname $win "Show Values"
+            }
 
-        frame $win.f
-        message $win.msg -width 12c -text $label
+            frame $win.f
+            message $win.msg -width 12c
+            pack append $win $win.msg {top expand} $win.f top
+	}
+	$win.msg configure -text $label
 
 	# The following flag is used if the waitBetweenOutputs parameter is set
 	global $starID
 	set ${starID}(tkShowValueWaitTrig) 0
         for {set i 0} {$i < $numInputs} {incr i} {
+	    catch {destroy $win.f.att$i}
 	    frame $win.f.att$i -class Attention
     	    button $win.f.att$i.button -relief raised -width 40 \
 		-command "incr ${starID}(tkShowValueWaitTrig)" \
@@ -43,14 +55,15 @@ if {![winfo exists $s]} {
 	    		{top frame w pady 4 expand filly}
 	    pack append $win.f $win.f.att$i {top expand filly}
         }
-        pack append $win $win.msg {top expand} $win.f top
 
         if {!$putInCntrPan} {
-            button $win.ok -text "DISMISS" -command \
-		"catch {incr ${starID}(tkShowValueWaitTrig)}
-		 ptkStop $univ
-		 destroy $win"
-            pack append $win $win.ok {top fillx}
+	    if {![winfo exists $win.ok]} {
+                button $win.ok -text "DISMISS" -command \
+		    "catch {incr ${starID}(tkShowValueWaitTrig)}
+		     ptkStop $univ
+		     destroy $win"
+                pack append $win $win.ok {top fillx}
+	    }
         }
 	if {[set ${starID}(wait_between_outputs)]} {
 	    # Arrange for the tkShowValueWaitTrig variable
@@ -60,15 +73,18 @@ if {![winfo exists $s]} {
 	    trace variable ptkRunFlag($univ) w tkShowValueReleaseWait
 	}
     }
+}
 
-    proc tkShowValueReleaseWait {runflag univ op} "
+proc tkShowValueReleaseWait {runflag univ op} "
 	global ${starID}
 	incr ${starID}(tkShowValueWaitTrig)
-    "
+"
 
-    tkShowValueMakeWindow [set ${starID}(put_in_control_panel)] \
+tkShowValueMakeWindow [set ${starID}(put_in_control_panel)] \
 	$s [set ${starID}(label)] \
 	[set ${starID}(numInputs)] [curuniverse] $starID
+
+if {!$window_previously_existed} {
 
     proc tkShowValueSetValues {starID numInputs win} {
         set c $win.f
@@ -93,22 +109,22 @@ if {![winfo exists $s]} {
 	    }
 	}
     }
+}
 
-    # In the following definition, the value of $s
-    # is evaluated when the file is sourced.
-    proc goTcl_$starID {starID} "
+# In the following definition, the value of $s
+# is evaluated when the file is sourced.
+proc goTcl_$starID {starID} "
         tkShowValueSetValues $starID [set ${starID}(numInputs)] $s
 	tkShowValueWait [set ${starID}(wait_between_outputs)] $starID \
 		[set ${starID}(numInputs)] $s [curuniverse]
-    "
+"
 
-    proc destructorTcl_$starID {starID} {
+proc destructorTcl_$starID {starID} {
         global $starID
         if {[set ${starID}(put_in_control_panel)]} {
             # Remove the meters from the control panel, if they still exist
             global ptkControlPanel
             destroy $ptkControlPanel.label_$starID
         }
-    }
 }
 unset s
