@@ -34,4 +34,4 @@
 # Itcl2.1 shell: [incr Tcl] sh  (tclsh + namespaces)
 #ITCLSH =	$(PTOLEMY)/tcltk/itcl.$(PTARCH)/bin/itclsh
 ITCLSH =	itclsh
-
+LIBDIR =	$(ROOT)/lib.$(PTARCH)
