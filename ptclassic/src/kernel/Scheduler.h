@@ -1,3 +1,7 @@
+// Programmer: Edward A. Lee
+// EECS Dept., UC Berkeley
+// Jan. 5, 1990
+
 #ifndef _Scheduler_h
 #define _Scheduler_h 1
 
