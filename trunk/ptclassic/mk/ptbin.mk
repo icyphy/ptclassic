@@ -130,6 +130,9 @@ REALCLEAN_STUFF =	$(EVERY_BINARY)
 ####################################################################
 # PIGI versions
 
+INSTALL += makefile $(BINDIR)/$(PIGI)
+
+ifndef ALLBINARIES
 # This is the default target
 $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
@@ -184,9 +187,13 @@ $(PIGI).debug.purecov: $(PT_DEPEND) $(ADD_OBJS)
 	$(CC) -c version.c
 	$(PURECOV) $(LINKER) $(LINKFLAGS_D) $(PIGI_OBJS) $(LIBS) -o $@
 
-INSTALL += makefile $(BINDIR)/$(PIGI)
+$(BINDIR)/$(PIGI): $(PIGI)
+		@echo Installing $<
+		rm -f $(BINDIR)/$(PIGI)
+		ln $< $(BINDIR)/$(PIGI)
 
-ifdef ALLBINARIES
+else
+
 INSTALL += $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAME).ptiny
 
 $(BASENAME): $(PT_DEPEND)
@@ -244,11 +251,6 @@ $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny
 	make PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
 
 endif #ALLBINARIES
-
-$(BINDIR)/$(PIGI): $(PIGI)
-		@echo Installing $<
-		rm -f $(BINDIR)/$(PIGI)
-		ln $< $(BINDIR)/$(PIGI)
 
 install: $(INSTALL)
 
