@@ -3,23 +3,21 @@
 # Makefile for domain sections.  Each domain should make a symbolic
 # link from this file to $(PTOLEMY)/src/domains/doc/Makefile.
 
+# The _short suffixes print only 
 PTOLEMY       = ../../../..
-PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
-HEADER        = $(PTOLEMY)/doc/headers/together $(PTOLEMY)/doc/headers/sogod
-MAINSEC	      = overall
-TMPFILE	      = tmp_print
-STARDIRS      = stars
-DEMODIRS      = demos
+DOCBIN	      = $(PTOLEMY)/doc/bin
+PRINTSEC      = printsec
+PRINTDOM      = printdom
 OPTIONS       =
 
-MAKEVARS =	\
-		"PTOLEMY=$(PTOLEMY)" \
-		"PRINTER=$(PRINTER)" \
-		"PRINTSEC=$(PRINTSEC)" \
-		"HEADER=$(HEADER)"
-
 print:
-	$(PTOLEMY)/doc/bin/printdom $(OPTIONS)
+	$(DOCBIN)/$(PRINTDOM) $(OPTIONS)
+
+print_short:
+	$(DOCBIN)/$(PRINTSEC) -H standalone $(OPTIONS) overall
 
 preview:
-	$(PTOLEMY)/doc/bin/printdom -preview $(OPTIONS)
+	$(DOCBIN)/$(PRINTDOM) -preview $(OPTIONS)
+
+preview_short:
+	$(DOCBIN)/$(PRINTSEC) -preview -H standalone $(OPTIONS) overall
