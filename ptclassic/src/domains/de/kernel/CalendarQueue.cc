@@ -90,19 +90,11 @@ void CalendarQueue :: clearFreeList()
 }
 
 
-
-
-
-
-
-
-/* 
- * This initializes a bucket array within the array CalendarQ. Bucket
- * width is set equal to "startInterval". cq_bucket[0] is made equal to
- * CalendarQ[qbase]; and the number of buckets is "nbuck". StartTime is the
- * time at which dequeueing begins. All external variables except 
- * "resizeEnabled are initialized.
- */
+// This initializes a bucket array within the array CalendarQ. Bucket
+// width is set equal to "startInterval". cq_bucket[0] is made equal to
+// CalendarQ[qbase]; and the number of buckets is "nbuck". StartTime is the
+// time at which dequeueing begins. All external variables except 
+// "resizeEnabled are initialized.
 
 void CalendarQueue :: LocalInit(int qbase, int nbuck, double startInterval, 
 double lastTime)
@@ -111,26 +103,26 @@ double lastTime)
     int i;
     long int n;
 
-/* set position and size of new queue */
+// set position and size of new queue 
     
     cq_firstSub = qbase;
     cq_bucket = CalendarQ + qbase;
     cq_interval = startInterval;
     cq_bucketNum = nbuck;
     
-/* initialize as empty */
+// initialize as empty 
     
     cq_eventNum = 0;
     for (i=0; i< cq_bucketNum; i++) cq_bucket[i] = NULL;
     
-/* set up initial position in queue */
+// set up initial position in queue 
 
     cq_lastTime = lastTime;
     n = (int) (lastTime/cq_interval);
     cq_lastBucket = n % cq_bucketNum;
     cq_bucketTop = (n+1.5)*cq_interval;
 
-/* set up queue size change thresholds */
+// set up queue size change thresholds 
     
     cq_bottomThreshold = cq_bucketNum/2 - 2;
     cq_topThreshold = 2*cq_bucketNum;
@@ -143,9 +135,7 @@ double lastTime)
 CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
 					Star* dest)
 {
-//    cerr << "CQ: Entering CalendarQueue ::levelput" << v << "," << fv << "," << dest << "\n";
     CqLevelLink* newLink = getFreeLink();
-
     newLink->setLink(a, v, fv, dest, 0, 0);
     int i = (int) (v / cq_interval);	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
@@ -162,11 +152,9 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
     int i, save_resizeEnabled, virtualBucket;
     double year;
 
-/* 
- * This is not in the paper, but you have to check if the new event
- * actually has the smallest timestamp, if so, "cq_lastTime" should
- * be reset
- */     
+// This is not in the paper, but you have to check if the new event
+// actually has the smallest timestamp, if so, "cq_lastTime" should
+// be reset
     if (cq_eventNum) {
 	save_resizeEnabled = cq_resizeEnabled;
 	cq_resizeEnabled = 0;
@@ -284,10 +272,8 @@ CqLevelLink* CalendarQueue :: NextEvent()
 	}
     }
     
-/* 
- * find lowest priority by examining first event of each bucket 
- * set cq_lastBucket, cq_lastTime, cq_bucketTop                 
- */
+// find lowest priority by examining first event of each bucket 
+// set cq_lastBucket, cq_lastTime, cq_bucketTop                 
     result = NULL;
     for (i=0; i<cq_bucketNum; i++) 
 	if (reg_cq_bucket[i]) {
@@ -331,13 +317,13 @@ void CalendarQueue :: Resize(int newSize)
 
     newInterval = NewInterval();
 
-/* save location and size of old calendar for use when copying calendar */
+// save location and size of old calendar for use when copying calendar 
 
     oldBucket = cq_bucket;
     oldBucketNum = cq_bucketNum;
     
 
-/* initialize new calendar */
+// initialize new calendar 
 
     if (cq_firstSub) 
 	LocalInit(0, newSize, newInterval, cq_lastTime);
@@ -372,7 +358,7 @@ double CalendarQueue :: NewInterval()
     int save_lastBucket;
     
 
-/* decide how many queue elements to sample */
+// decide how many queue elements to sample 
 
     if (cq_eventNum < 2) 
 	return(1.0);
@@ -383,7 +369,7 @@ double CalendarQueue :: NewInterval()
     if (sampleNum > 25)
 	sampleNum = 25;
 
-/* save important dynamic values */    
+// save important dynamic values 
 
     save_lastTime = cq_lastTime;
     save_lastBucket = cq_lastBucket;
@@ -413,28 +399,26 @@ double CalendarQueue :: NewInterval()
 	    validSeparationNum++;
 	}
 
-/* insert sampled events back */
+// insert sampled events back 
 
     for (i=0; i<sampleNum; i++) {
 	int temp;
 	temp = (int)(sampledEvent[i]->level/cq_interval); // find virtual bucket
-	temp = temp % cq_bucketNum;      /* find actual bucket  */
+	temp = temp % cq_bucketNum;      // find actual bucket  
 	InsertEventInBucket(&cq_bucket[temp], sampledEvent[i]);
     }	
 
-/* save important dynamic values */    
+// save important dynamic values 
 
     cq_lastTime = save_lastTime;
     cq_lastBucket = save_lastBucket;
     cq_bucketTop = save_bucketTop;
     cq_resizeEnabled = 1;
 
-/*
- * We should impose  a lower limit on the interval size. The problem can 
- * arise when the sampled events have very small intervals, while there 
- * are also events that will happen far in the future. The 
- * "NextEvent" routine would loop infinitely.
- */
+// We should impose  a lower limit on the interval size. The problem can 
+// arise when the sampled events have very small intervals, while there 
+// are also events that will happen far in the future. The 
+// "NextEvent" routine would loop infinitely.
     if (validSeparationNum && totalSeparation) {
 	resultInterval = (double)(3*totalSeparation/validSeparationNum);
 	if (resultInterval < MINI_CQ_INTERVAL) {
