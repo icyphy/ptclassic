@@ -288,7 +288,6 @@ Galaxy* Wormhole :: explode() {
 		PortHole* tempP = p->far();
 		EventHorizon* eveP = p->asEH();
 		PortHole* inP = eveP->ghostAsPort()->far();
-		GenericPort* alp = p->aliasFrom();
 		if (tempP) tempP->disconnect(1);
 		if (inP) inP->disconnect(1);
 
@@ -306,10 +305,8 @@ Galaxy* Wormhole :: explode() {
 		else if (tempP)
 			tempP->connect(*inP, numDelays, delayValues);
 
-		// update aliase pointer if necessary.
-		// since deleting EventHorizons may corrupt aliase pointers.
-		if (alp != 0)
-			alp->setAlias(*(inP->aliasFrom()));
+		// relink any aliases pointing at me to point to inner galaxy.
+		p->moveMyAliasesTo(*inP);
 	}
 
 	// Set the inner galaxy name to the wormhole selfStar name.
