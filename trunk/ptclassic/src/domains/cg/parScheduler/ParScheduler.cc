@@ -40,14 +40,14 @@ Date of last revision:
 #include "ParGraph.h"
 #include "GalIter.h"
 #include "UniProcessor.h"
-#include "CGWormBase.h"
 #include "StringList.h"
 #include "streamCompat.h"
 
 
 void ParScheduler::setup() {
-    // compute repetitions, schedule (by calling computeSchedule)
-    SDFScheduler::setup();
+    	// compute repetitions, schedule (by calling computeSchedule)
+    	SDFScheduler::setup();
+
 	// targetPtr setup for each processor
 	mapTargets();
 
@@ -64,7 +64,6 @@ void ParScheduler::setup() {
 	// by default, do nothing
 	mtarget->prepareCodeGen();
 	if (haltRequested()) { invalid = TRUE; return; }
-	
 }
 
 int ParScheduler::dagNodes() const {
@@ -174,17 +173,9 @@ int ParScheduler :: computeSchedule(Galaxy& g)
 	// targetPtr setup for each processor
 	mapTargets();
 
-	// prepare scheduling
-	if (!preSchedule()) {
-		invalid = TRUE;
-		return FALSE;
-	}
-
 	// schedule it.
-	if(!mainSchedule()) {
-		invalid = TRUE;
-		return FALSE;
-	}
+	mainSchedule();
+	if (haltRequested()) { invalid = TRUE; return FALSE; }
 
 	// finalize the schedule of wormholes.
 	if (inUniv && (!assignManually())) {
@@ -263,8 +254,6 @@ void ParScheduler :: saveProcIds() {
 }
 
 // Processor id of Fork star is  determined by the ancestor.
-// If the ancestor is a wormhole, the procId of the Fork should be given
-// explicitly.
 
 int procIdOfFork(CGStar* s) {
 	BlockPortIter piter(*s);
@@ -274,7 +263,7 @@ int procIdOfFork(CGStar* s) {
 	CGStar* farS = (CGStar*) p->far()->parent();
 	if (farS->isItFork()) {
 		s->setProcId(procIdOfFork(farS));
-	} else if (!farS->isItWormhole()) {
+	} else {
 		s->setProcId(farS->getProcId());
 	}
 	return  s->getProcId();
@@ -315,17 +304,16 @@ int ParScheduler :: scheduleManually() {
 				return FALSE;
 			}
 
-			// for parallel stars, set up profile of ParNode.
+			// base scheduler can not handle parallel stars,
 			Profile* pf = s->getProfile();
+			if (pf) {
+				Error::abortRun("Sorry, parallel task is",
+	" not supported. Please use other scheduler, e.g. MacroScheduler.");
+				return FALSE;
+			}
 
-			// We don't support CG wormholes anymore
-			/* if (s->isItWormhole()) {
-				CGWormBase* worm = s->myWormhole();
-				pf = worm->manualSchedule(s->reps());
-			} */
 			while (n) {
 				n->setProcId(s->getProcId());
-				n->withProfile(pf);
 				n = (ParNode*) n->getNextInvoc();
 			}
 		}
@@ -335,9 +323,9 @@ int ParScheduler :: scheduleManually() {
 	mtarget->clearCommPattern();
 	parProcs->initialize();
 	exGraph->findRunnableNodes();
-	parProcs->listSchedule(exGraph);
+	if (parProcs->listSchedule(exGraph) < 0) return FALSE;
 	mtarget->saveCommPattern();
-	return TRUE;
+	return parProcs->getMakespan();
 }
 
 /////////////////////////////
@@ -346,31 +334,6 @@ int ParScheduler :: scheduleManually() {
 
 // main automatic scheduling routine.
 int ParScheduler :: scheduleIt() { return FALSE; }
-
-//
-// After repetition counters of the stars are determined,
-// set up the assignedId field of the wormhole profile.
-// 
-int ParScheduler :: preSchedule() { 
-
-// We may need this code later for clusters, for now, wormholes are
-// not supported anymore
-
-	// // setup profiles of wormholes before main scheduling begins.
-// 	GalStarIter next(*galaxy());
-// 	CGStar* s;
-
-// 	// We don't support wormholes anymore.  We may need this code
-// 	// for clusters.
-// 	while ((s = (CGStar*) next++) != 0) {
-// 		if (s->isItWormhole()) {
-// 			CGWormBase* worm = s->myWormhole();
-// 			worm->setupProfile(s->reps());
-// 		}
-// 	}
-
-	return TRUE; 
-}
 
 /////////////////////////////
 // compileRun
@@ -434,50 +397,7 @@ void ParScheduler :: setProfile(Profile* profile) {
 	profile->setMinDisplacement(temp);
 }
 
-/////////////////////////////
-// finalSchedule
-/////////////////////////////
-//
-// At the last stage of scheduling, make the final schedule
-// for wormholes.
-
-int ParScheduler :: finalSchedule() {
-
-	// detect the wormholes, and finalize their schedule.
-        // We do not support wormholes anymore
-	/* GalStarIter next(*galaxy());
-	CGStar* s;
-	while ((s = (CGStar*) next++) != 0) {
-		if (s->isItWormhole()) {
-			CGWormBase* worm = s->myWormhole();
-			if (!worm->insideSchedule()) return FALSE;
-		}
-	} */
-	return TRUE;
-}
-
-/////////////////////////////
-// displaySchedule
-/////////////////////////////
-
-StringList ParScheduler :: displaySchedule() {
-
-	StringList out;
-
-	// Display Wormhole schedules.
-
-	out += "*********** Wormhole Schedules ************\n";
-	GalStarIter next(*galaxy());
-	CGStar* s;
-	while ((s = (CGStar*) next++) != 0) {
-		if (s->isItWormhole()) {
-			out += "-------- \n\n";
-			CGWormBase* worm = s->myWormhole();
-			out += worm->displaySchedule();
-		}
-	}
-	return out;
-}
+int ParScheduler :: finalSchedule() { return TRUE; }
 
 /////////////////////////////
 // write Gantt chart
