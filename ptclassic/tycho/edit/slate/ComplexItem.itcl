@@ -1,4 +1,6 @@
 ##########################################################################
+# The abstract superclass of all picts.
+#
 # @Version: $Id$
 # @Author: H. John Reekie
 #
