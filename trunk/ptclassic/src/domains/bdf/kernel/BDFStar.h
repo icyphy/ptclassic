@@ -18,7 +18,7 @@ $Id$
 #pragma interface
 #endif
 
-#include "SDFStar.h"
+#include "DynDFStar.h"
 #include "BDFPortHole.h"
 #include "Particle.h"
 
@@ -45,7 +45,6 @@ public:
 	int simRunStar(int deferFiring);
 	int deferrable();
 	// identification
-	int isSDF() const;
 	int isSDFinContext() const;
 	int isA(const char*) const;
 
@@ -69,11 +68,9 @@ protected:
 	int handleWait(BDFPortHole& port);
 
 private:
-	// Three boolean flags:
+	// boolean flags:
 	// I am "SDF in context"
 	unsigned char sdfCtx;
-	// I am SDF
-	unsigned char sdf;
 	// This star is executing under a dynamic scheduler
 	unsigned char dynExec;
 };
@@ -82,7 +79,7 @@ class BDFStarPortIter : public BlockPortIter {
 public:
 	BDFStarPortIter(BDFStar& s) : BlockPortIter(s) {}
 	BDFPortHole* next() { return (BDFPortHole*)BlockPortIter::next();}
-	BDFPortHole* operator++() { return next();}
+	BDFPortHole* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif
