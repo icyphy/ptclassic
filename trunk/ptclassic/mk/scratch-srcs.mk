@@ -84,8 +84,6 @@ $(OBJARCH)/gnu: $(OBJARCH)
 
 gnu_bin: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bin)
-	@echo "Now we rebuild gcc, bootstrapping gcc with itself"
-	(cd $(PTOLEMY)/obj.$(PTARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
 
 gnu_install: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) install)
@@ -98,17 +96,6 @@ gnu_clean:
 # for us
 hpgnu_all: 
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
-	@echo "Now we rebuild gcc, bootstrapping gcc with itself"
-	(cd $(PTOLEMY)/obj.$(PTARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
-
-# For irix5
-# No need to depend on  $(OBJARCH)/gnu, as irix5_all will run configure
-# for us
-irix5gnu_all:
-	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
-	@echo "Now we rebuild gcc, bootstrapping gcc with itself"
-	(cd $(PTOLEMY)/obj.$(PTARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
-
 
 #
 # Build and install tcl tools
