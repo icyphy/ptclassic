@@ -135,12 +135,14 @@ body ::tycho::MenuBar::addMenu {name args} {
     }
 
     # Get special options
-    set side left
-    set before {}
-    set after {}
-    getopt side args
-    getopt before args
-    getopt after args
+    array set temp [concat {-side left -before {} -after {}} $args]
+    set side   $temp(-side)
+    set before $temp(-before)
+    set after  $temp(-after)
+    unset temp(-side)
+    unset temp(-before)
+    unset temp(-after)
+    set args [array get temp]
 
     # Create the menu button
     itk_component add menuButton$name {
