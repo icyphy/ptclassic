@@ -40,10 +40,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "Block.h"
+#include "FloatState.h"
+#include "Scheduler.h"
 #include "StringArrayState.h"
 #include "StringState.h"
-#include "FloatState.h"
-#include "Block.h"
 #include "Target.h"
 
 class FSMTarget : public Target {
@@ -57,6 +58,19 @@ public:
 
 	void setup();
 	void begin();
+
+        // Let outside domain know whether to refire.
+	/*virtual*/ int selfFiringRequested() {
+            // Invoke scheduler to decide.
+            return scheduler()->selfFiringRequested();
+        }
+	
+	// If selfFiringRequested returns TRUE, return the time at which
+	// this firing is requested.
+	/*virtual*/ double nextFiringTime () {
+            // Invoke scheduler to decide.
+            return scheduler()->nextFiringTime();
+        }
 
 	// return a copy of itself
 	Block* makeNew() const;
