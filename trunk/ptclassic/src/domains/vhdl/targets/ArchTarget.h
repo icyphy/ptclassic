@@ -114,6 +114,7 @@ protected:
 	VHDLFiregroupList firegroupList;
 
 	VHDLDependencyList dependencyList;
+	VHDLDependencyList iterDependencyList;
 	VHDLTokenList tokenList;
 	VHDLMuxList muxList;
 	VHDLRegList regList;
@@ -128,6 +129,9 @@ protected:
 	// Stages of code generation.
 	/*virtual*/ void headerCode();
 	/*virtual*/ void trailerCode();
+
+	// Method redefined by derived targets to bring up interactive app.
+	virtual void interact() {}
 
 	// Combine all sections of code;
 	/*virtual*/ void frameCode();
