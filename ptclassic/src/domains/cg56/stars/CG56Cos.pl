@@ -3,7 +3,7 @@ defstar {
 	domain { CG56 }
 	desc { 
 Cosine function calculated by table lookup.
-Input range of (-1,1) scaled by $pi$.
+Input range of (-1,1) scaled by pi.
 	}
 	version { $Id$ }
 	acknowledge { Gabriel version by Maureen O'Reilly }
