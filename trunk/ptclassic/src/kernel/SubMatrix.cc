@@ -137,6 +137,18 @@ PtMatrix& ComplexSubMatrix::operator = (const PtMatrix& src) {
   return *this;
 }
 
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+ComplexSubMatrix& ComplexSubMatrix::operator = (const ComplexSubMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+    Error::abortRun("improper type in attempt to copy to ComplexSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const ComplexSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
+
 ComplexSubMatrix& ComplexSubMatrix::operator = (Complex value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
@@ -240,6 +252,18 @@ PtMatrix& FixSubMatrix::operator = (const PtMatrix& src) {
   }
   return *this;
 }
+
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+FixSubMatrix& FixSubMatrix::operator = (const FixSubMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+    Error::abortRun("improper type in attempt to copy to FixSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const FixSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
 
 FixSubMatrix& FixSubMatrix::operator = (Fix value) {
   for(int i = 0; i < totalDataSize; i++)
@@ -345,6 +369,17 @@ PtMatrix& FloatSubMatrix::operator = (const PtMatrix& src) {
   return *this;
 }
 
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+FloatSubMatrix& FloatSubMatrix::operator = (const FloatSubMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+      Error::abortRun("improper type in attempt to copy to FloatSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const FloatSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
 FloatSubMatrix& FloatSubMatrix::operator = (double value) {
   for(int i = 0; i < totalDataSize; i++)
     entry(i) = value;
@@ -441,6 +476,17 @@ int IntSubMatrix::operator == (const PtMatrix& m) {
 }
 
 PtMatrix& IntSubMatrix::operator = (const PtMatrix& src) {
+  if(dataType() != src.dataType() && parent->dataType() != src.dataType())
+    Error::abortRun("improper type in attempt to copy to IntSubMatrix");
+  else {
+    for(int i = 0; i < totalDataSize; i++)
+      entry(i) = ((const IntSubMatrix*)&src)->entry(i);
+  }
+  return *this;
+}
+
+// gcc-2.6.x requires this.  See the docs for -Wsynth for more info
+IntSubMatrix& IntSubMatrix::operator = (const IntSubMatrix& src) {
   if(dataType() != src.dataType() && parent->dataType() != src.dataType())
     Error::abortRun("improper type in attempt to copy to IntSubMatrix");
   else {

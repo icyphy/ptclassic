@@ -91,6 +91,8 @@ class ComplexSubMatrix: public ComplexMatrix {
 
   // General operators 
   /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  ComplexSubMatrix& operator = (const ComplexSubMatrix& src);
   ComplexSubMatrix& operator = (Complex value);
   /*virtual*/ int operator == (const PtMatrix& src);
   /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
@@ -150,6 +152,8 @@ class FixSubMatrix: public FixMatrix {
 
   // General operators 
   /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  FixSubMatrix& operator = (const FixSubMatrix& src);
   FixSubMatrix& operator = (Fix value);
   /*virtual*/ int operator == (const PtMatrix& src);
   /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
@@ -210,6 +214,8 @@ class FloatSubMatrix: public FloatMatrix {
 
   // General operators 
   /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  FloatSubMatrix& operator = (const FloatSubMatrix& src);
   FloatSubMatrix& operator = (double value);
   /*virtual*/ int operator == (const PtMatrix& src);
   /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }
@@ -269,6 +275,8 @@ class IntSubMatrix: public IntMatrix {
 
   // General operators 
   /*virtual*/ PtMatrix& operator = (const PtMatrix& src);
+  // Necessary for gcc-2.6.xx -Wsynth
+  IntSubMatrix& operator = (const IntSubMatrix& src);
   IntSubMatrix& operator = (int value);
   /*virtual*/ int operator == (const PtMatrix& src);
   /*virtual*/ int operator != (const PtMatrix& src) { return(!(*this == src)); }

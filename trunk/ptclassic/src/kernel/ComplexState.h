@@ -64,6 +64,11 @@ public:
         // assignment from a Complex
         Complex& operator=(const Complex& rvalue) { return val = rvalue;}
 
+	// assignment from a ComplexState
+	ComplexState& operator=(const ComplexState& arg) {
+		val = arg.val; return *this;
+	}
+
         // casting to a Complex
         operator Complex() { return val;}
 
