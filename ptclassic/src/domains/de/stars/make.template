@@ -20,29 +20,35 @@ GPPFLAGS = -g
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
 
-.SUFFIXES: .cc
+.SUFFIXES: .o .cc .h .pl
 .cc.o:
 	$(GNU) $(GPPFLAGS) -I$(DEDIR) -I$(KERNDIR) -c  $<
 
+.pl.cc:
+	cd $(VPATH); ptlang $<
+
+.pl.h:
+	cd $(VPATH); ptlang $<
+
 SRCS=DEDelay.cc DEPoisson.cc Record.cc DESampler.cc \
 	DEXgraph.cc DEBlackHole.cc EvenSpacer.cc DEFloatDC.cc DEFloatRamp.cc \
-	DEFork.cc PrServer.cc SpaceConst.cc SpaceUniform.cc Synch.cc \
+	DEFork.cc DEPrServer.cc SpaceConst.cc SpaceUniform.cc Synch.cc \
 	DESwitch.cc DEMerge.cc DERouter.cc DEServer.cc DEExpDelay.cc \
 	DEUniDelay.cc DEClock.cc
 
 OBJS=DEDelay.o DEPoisson.o Record.o DESampler.o \
 	DEXgraph.o DEBlackHole.o EvenSpacer.o DEFloatDC.o DEFloatRamp.o \
-	DEFork.o PrServer.o SpaceConst.o SpaceUniform.o Synch.o \
+	DEFork.o DEPrServer.o SpaceConst.o SpaceUniform.o Synch.o \
 	DESwitch.o DEMerge.o DERouter.o DEServer.o DEExpDelay.o \
 	DEUniDelay.o DEClock.o
 
 HDRS=DEDelay.h DEPoisson.h Record.h DESampler.h \
 	DEXgraph.h DEBlackHole.h EvenSpacer.h DEFloatDC.h DEFloatRamp.h \
-	DEFork.h PrServer.h SpaceConst.h SpaceUniform.h Synch.h \
+	DEFork.h DEPrServer.h SpaceConst.h SpaceUniform.h Synch.h \
 	DESwitch.h DEMerge.h DERouter.h DEServer.h DEExpDelay.h \
 	DEUniDelay.h DEClock.h
 
-all:		makefile $(OBJS)
+all:		$(SRCS) makefile $(OBJS)
 
 # nothing to install -- use it where it lies
 install:	all
