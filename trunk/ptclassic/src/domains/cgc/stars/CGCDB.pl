@@ -58,6 +58,7 @@ TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 	else {
 		f = $val(gain) * log10 (f);
 		if (f < $val(min)) f = $val(min);
+		$ref(output) = f;
 	}
 	}
 	go {
