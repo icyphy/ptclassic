@@ -36,7 +36,9 @@ PL_SRCS= \
  CGCPrinter.pl \
  CGCSin.pl \
  CGCUpSample.pl \
- CGCXMgraph.pl
+ CGCXMgraph.pl \
+ CGCSpread.pl \
+ CGCCollect.pl 
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
