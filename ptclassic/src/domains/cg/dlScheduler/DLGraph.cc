@@ -18,7 +18,6 @@ Date of last revision:
 
 #include "DLGraph.h"
 #include "EGConnect.h"
-#include "UserOutput.h"
 
 // redefine the virtual methods
 EGNode *DLGraph :: newNode(SDFStar* s, int i)
