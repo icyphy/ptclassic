@@ -69,7 +69,7 @@ extern "C" {
 #include "xfunctions.h"			/* define win_msg */
 #include "handle.h"
 #include "kernelCalls.h"		/* define functions prefixed by Kc */
-#include "dmmSupport.h"			/* for SetChangedFlag() */e
+int SetChangedFlag();
 #undef Pointer
 }
 
