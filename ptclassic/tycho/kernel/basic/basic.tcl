@@ -50,4 +50,4 @@ set TYCHO $env(TYCHO)
 set tycho $env(TYCHO)
 
 # Create the ::tycho namespace
-namespace ::tycho
+namespaceEval ::tycho
