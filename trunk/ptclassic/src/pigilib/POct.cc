@@ -51,23 +51,20 @@ a Tcl interpreter.
 
 extern "C" {
 #define Pointer screwed_Pointer		/* rpc.h and type.h define Pointer */
+#include "local.h"
 #include "oct.h"			/* octObject data structure */
 #include <pwd.h>			/* used for Make Star */
-#include "pigidefine.h"			/* constants used by pigi functions */
-#include "octIfc.h" 
-#include "local.h"
-#include "misc.h"
-#include "paramStructs.h"
+#include "octIfc.h" 			/* define GetOrCreatePropStr */
+#include "paramStructs.h"		/* ParamListType data structure */
 #include "palette.h"			/* used by MkSchemIcon */
-#include "util.h"
-#include "exec.h"
-#include "err.h"
-#include "ganttIfc.h"
-#include "icon.h"
-#include "compile.h"
-#include "octMacros.h"			/* for GetOrCreatePropStr */
+#include "util.h"			/* define UTechProp string */
+#include "exec.h"			/* define ptkRun */
+#include "err.h"			/* define ErrGet */
+#include "ganttIfc.h"			/* define FindNameSet */
+#include "icon.h"			/* define MkStar */
+#include "compile.h"			/* define CompileFacet */
 #include "xfunctions.h"			/* define win_msg */
-#include "handle.h"
+#include "handle.h"			/* define ptkHandle2OctObj */
 #include "kernelCalls.h"		/* define functions prefixed by Kc */
 #include "dmmSupport.h"			/* define SetChangedFlag */
 #undef Pointer
@@ -84,6 +81,9 @@ extern "C" {
 
 // The default number of iterations to run a universe
 #define PIGI_DEFAULT_ITERATIONS	10
+
+// The maximum number of targets for a domain
+#define MAX_NUM_TARGETS 50
 
 // Define the best way to pass back "NIL", 0, and 1 to the Tcl interpreter
 // the result method is actually TclObj::result
@@ -108,19 +108,24 @@ extern "C" void ptkOctObj2Handle( octObject *objPtr, char *stringValue )
 
 // Converts a string "handle" into an oct Facet Pointer
 // To use this function, you must declare space for a char array that
-// is at least 15 chars long.
+// is at least POCT_FACET_HANDLE_LEN chars long.
 extern "C" int ptkHandle2OctObj( char *stringValue, octObject *objPtr )
 {
+	int retval = TRUE;
+        objPtr->type = OCT_UNDEFINED_OBJECT;
         objPtr->objectId = OCT_NULL_ID;
-        sscanf(stringValue, "OctObj%lx", &objPtr->objectId);
+	sscanf(stringValue, "OctObj%lx", &objPtr->objectId);
         if (objPtr->objectId == OCT_NULL_ID) {
-           return FALSE;
+	    retval = FALSE;
+	}
+	else if (octGetById(objPtr) == OCT_NOT_FOUND) {
+	    FreeOctMembers(objPtr);
+	    objPtr->type = OCT_UNDEFINED_OBJECT;
+	    objPtr->objectId = OCT_NULL_ID;
+	    retval = FALSE;
         }
-	else {
-	   /* FIXME: Memory leak */
-	   if (octGetById(objPtr) == OCT_NOT_FOUND) return FALSE;
-        }
-        return TRUE;
+
+        return retval;
 }
 
 
@@ -169,7 +174,7 @@ POct::POct(Tcl_Interp* i)
         makeEntry();
 	registerFuncs();
 
-	// Initialize the states that remind Users of previous inputs
+	// Initialize the states that remind users of previous inputs
 	// for ptkSetSeed
         OldRandomSeed = 1;   
 	// for ptkSetMkStar
@@ -203,10 +208,12 @@ POct::~POct() {
 int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
     // Create uninitialized oct property object
     // cfront compiler doesn't support initialization code of the form
-    //   octObject facet = {OCT_UNDEFINED_OBJECT};
+    //   octObject prop = {OCT_UNDEFINED_OBJECT};
     // NOTE: prop has non-dynamic members, so do not use FreeOctMembers
+    // and do not define prop as an octObjectClass.
     octObject prop;
     prop.type = OCT_UNDEFINED_OBJECT;
+    prop.objectId = OCT_NULL_ID;
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -234,10 +241,12 @@ int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
 int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
     // Create uninitialized oct property object
     // cfront compiler doesn't support initialization code of the form
-    //   octObject facet = {OCT_UNDEFINED_OBJECT};
+    //   octObject prop = {OCT_UNDEFINED_OBJECT};
     // NOTE: prop has non-dynamic members, so do not use FreeOctMembers
+    // and do not define prop as an octObjectClass.
     octObject prop;
     prop.type = OCT_UNDEFINED_OBJECT;
+    prop.objectId = OCT_NULL_ID;
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -373,9 +382,10 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
 int POct::ptkCompile (int aC, char** aV) {
     // Create uninitialized facet
     // cfront compiler doesn't support initialization code of the form
-    //   octObject facet = {OCT_UNDEFINED_OBJECT};
+    //   octObject facet = {OCT_UNDEFINED_OBJECT, OCT_NULL_ID};
     octObject facet;
     facet.type = OCT_UNDEFINED_OBJECT;
+    facet.objectId = OCT_NULL_ID;
 
     // Error checking: number of arguments, oct facet file
     if (aC != 2) return usage ("ptkCompile <OctObjectHandle>");
@@ -453,7 +463,7 @@ int POct::ptkGetParams (int aC, char** aV) {
 	    // Parameters are stored differently for delays and buses.
 	    // can't use the "plist" form as for Stars, Gals, and Formals
 	    octObjectClass property;
-	    octObject *propertyp = (octObject *) property;
+	    octObject* propertyp = (octObject *) property;
 	    if (IsDelay(instance)) {
 		GetOrInitDelayProp(instance, propertyp);
 		strcpy(title, "Edit Delay");
@@ -1456,7 +1466,11 @@ int POct::ptkOpenFacet (int aC, char** aV) {
     // doesn't already exist
     // do not use octObjectClass for facet, because destructor causes
     // "freeing non-heap memory" error in Purify
-    octObject facet = {OCT_UNDEFINED_OBJECT};
+    // cfront compiler doesn't support initialization code of the form
+    //   octObject facet = {OCT_UNDEFINED_OBJECT, OCT_NULL_ID};
+    octObject facet;
+    facet.type = OCT_UNDEFINED_OBJECT;
+    facet.objectId = OCT_NULL_ID;
     octStatus status = OpenFacet(&facet, aV[1], viewType, facetType, "r");
     if (status == OCT_NO_EXIST) {
 	// Create a new facet
@@ -1467,8 +1481,11 @@ int POct::ptkOpenFacet (int aC, char** aV) {
 	    Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
             return TCL_ERROR;
         } else if (status == OCT_NEW_FACET) {
-	    // Do not free prop; otherwise, get freeing non-heap memory
-	    octObject prop = {OCT_UNDEFINED_OBJECT};
+	    // cfront compiler doesn't support initialization code of the form
+	    //   octObject prop = {OCT_UNDEFINED_OBJECT, OCT_NULL_ID};
+	    octObject prop;
+	    prop.type = OCT_UNDEFINED_OBJECT;
+	    prop.objectId = OCT_NULL_ID;
             GetOrCreatePropStr(&facet, &prop, "TECHNOLOGY", UTechProp);
 	    FreeOctMembers(&prop);
             GetOrCreatePropStr(&facet, &prop, "VIEWTYPE", "SCHEMATIC");
@@ -1525,7 +1542,7 @@ int POct::ptkIsStar (int aC, char** aV) {
     // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsStar <OctObjectHandle>");
     if (strcmp(aV[1], "NIL") == 0)  return POCT_TCL_FALSE;
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
@@ -1542,7 +1559,7 @@ int POct::ptkIsGalaxy (int aC, char** aV) {
     // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsGalaxy <OctObjectHandle>");
     if (strcmp(aV[1], "NIL") == 0)  return POCT_TCL_FALSE;
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
@@ -1561,7 +1578,7 @@ int POct::ptkIsBus (int aC, char** aV) {
     // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsBus <OctObjectHandle>");
     if (strcmp(aV[1], "NIL") == 0) return POCT_TCL_FALSE;
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
@@ -1581,7 +1598,7 @@ int POct::ptkIsDelay (int aC, char** aV) {
     // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkIsDelay <OctObjectHandle>");
     if (strcmp(aV[1], "NIL") == 0)  return POCT_TCL_FALSE;
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
@@ -1600,7 +1617,7 @@ int POct::ptkGetRunLength (int aC, char** aV) {
 
     // Error checking: number of arguments, oct facet file
     if (aC != 2) return usage ("ptkGetRunLength <OctObjectHandle>");
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
@@ -1624,7 +1641,7 @@ int POct::ptkSetRunLength (int aC, char** aV) {
     if (aC != 3) {
         return usage ("ptkSetRunLength <OctObjectHandle> <IterationValue>");
     }
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
         return TCL_ERROR;
@@ -1663,7 +1680,7 @@ int POct::ptkGetStarName(int aC, char** aV) {
     if (aC != 2) return
          usage("ptkGetStarName <octObjectHandle>");
     if (strcmp(aV[1], "NIL") == 0) return POCT_TCL_NIL;
-    if (ptkHandle2OctObj(aV[1], facet) == 0) {
+    if (!ptkHandle2OctObj(aV[1], facet)) {
          Tcl_AppendResult(interp, "Bad or Stale facet Handle passed to ", 
                           aV[0], (char *) NULL);
          return TCL_ERROR;
@@ -1686,31 +1703,30 @@ int POct::ptkGetStarName(int aC, char** aV) {
 // called from ptkParams.tcl
 // Asawaree Kalavade 11/22/95
 int POct::ptkSetDMMChangedFlag(int aC,char** aV) {
-    octObject instance = {OCT_UNDEFINED_OBJECT};
+    octObjectClass instance;
 
     // Error checking: number of arguments, value of arguments, oct facet file
     if (aC != 2) return usage ("ptkSetDMMChangedFlag <OctInstanceHandle>");
-    if (ptkHandle2OctObj(aV[1], &instance) == 0) {
+    if (!ptkHandle2OctObj(aV[1], instance)) {
 	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ",
 			 aV[0], (char *) NULL);
         return TCL_ERROR;
     }
 
-    if (IsStar(&instance) || IsGal(&instance)) {
-	// Must be a star or Galaxy
-	// Set the domain to be that of the instance
-	if (!setCurDomainInst(&instance)) {
+    // Facet must be a star or Galaxy
+    // Set the domain to be that of the instance
+    if (IsStar(instance) || IsGal(instance)) {
+	if (!setCurDomainInst(instance)) {
 	    Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
 	    return TCL_ERROR;
 	}
 
 	// if the domain is DMM, then set the changedFlag
-	const char* domain = getDomainInst(&instance);
+	const char* domain = getDomainInst(instance);
 	if (strcmp(domain, "DMM") == 0) {
-	    SetChangedFlag(&instance);
+	    SetChangedFlag(instance);
 	}
     }
-    FreeOctMembers(&instance);
     return TCL_OK;
 }
 
