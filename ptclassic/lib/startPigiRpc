@@ -22,7 +22,7 @@ test -x /bin/arch && PTARCH=`/bin/arch`
 test -x /bin/machine && PTARCH=`/bin/machine`
 
 # If PTARCH still is not set you need to do something else!
-export ARCH
+export PTARCH
 
 # Add the Ptolemy directories to the PATH.  You may also need to add
 # other directories if pigi fails to find any programs, or if some
