@@ -1,14 +1,6 @@
-/**CFile***********************************************************************
-
-  FileName    [ ptdspi0.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_i0 ]
-
-  Author      [ Stephen L. Moshier ]
-
-  Copyright   [ 
+/*
+Version identification:
+$Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -32,11 +24,27 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
-]
+					PT_COPYRIGHT_VERSION_2
+					COPYRIGHTENDKEY
 
-  Version     [ $Id$ ]
+ Programmer: Stephen L. Moshier
+
+*/
+
+/**CFile***********************************************************************
+
+  FileName    [ ptdspi0.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Function definition for Ptdsp_i0 ]
+
+  Copyright   [ 
+
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. ]
 
 ******************************************************************************/
 

@@ -1,22 +1,8 @@
-/**CFile***********************************************************************
+/*
+Version identification:
+$Id$
 
-  FileName    [ ptdspMuLaw.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Conversions from PCMMuLaw to Linear and back ]
-
-  Description [ Provides functions for compression of 16-bit linear
-                data to PCM 8-bit mu-law data and back. The 8-bit mu-law
-		format here is 8-bit PCM mu-law encoded audio. The 8
-		bits are: 1 bit for the sign, 3 bits for the exponent,
-		and 4 bits for the mantissa. ]
-
-  Author      [ Joseph T. Buck and Craig Reese ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -40,9 +26,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
- ]
 
-  Version     [ $Id$ ]
+ Programmer: Joseph T. Buck and Craig Reese
+
+*/
+
+/**CFile***********************************************************************
+
+  FileName    [ ptdspMuLaw.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Conversions from PCMMuLaw to Linear and back ]
+
+  Description [ Provides functions for compression of 16-bit linear
+                data to PCM 8-bit mu-law data and back. The 8-bit mu-law
+		format here is 8-bit PCM mu-law encoded audio. The 8
+		bits are: 1 bit for the sign, 3 bits for the exponent,
+		and 4 bits for the mantissa. ]
+
+  Copyright   [ 
+
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. ]
 
 ******************************************************************************/
 

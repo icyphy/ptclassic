@@ -1,16 +1,8 @@
-/**CFile***********************************************************************
+/*
+Version identification:
+$Id$
 
-  FileName    [ ptdspNearestNeighbor.c ]
-
-  PackageName [ ptdsp ]
-
-  Synopsis    [ Function definition for Ptdsp_NearestNeighbor ]
-
-  Author      [ Biling Lee and Brian Evans ]
-
-  Copyright   [ 
-
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -34,9 +26,26 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
-]
 
-   Version [ $Id$ ]
+ Programmer: Biling Lee and Brian Evans
+
+*/
+
+
+/**CFile***********************************************************************
+
+  FileName    [ ptdspNearestNeighbor.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ Function definition for Ptdsp_NearestNeighbor ]
+
+  Copyright   [ 
+
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions. ]
 
 ******************************************************************************/
 
