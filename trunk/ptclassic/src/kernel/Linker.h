@@ -31,6 +31,14 @@ public:
 	static int linkObj(const char* objName);
 
 // link in multiple files, search libraries, etc.
+
+// first form: args is the linker argument list, permanent is a boolean
+// that chooses whether link is permanent or temporary.
+
+// second form ("Tcl form"): argv[0], if begins with "p", specifies
+// a permanent link, otherwise temporary; remaining args are linker args.
+
+	static int multiLink(const char* args, int permanent);
 	static int multiLink(int argc, char** argv);
 
 // check whether linker is active (so objects can be marked as dynamically

@@ -42,6 +42,7 @@ to become a permanent part of the system.
 #include "miscFuncs.h"
 #include "StringList.h"
 #include "pt_fstream.h"
+#include <ctype.h>
 
 // static data objects
 int Linker::activeFlag = 0;
@@ -128,6 +129,36 @@ private:
 	char* tname;
 };
 
+int Linker::multiLink (const char* args, int perm) {
+	// make copy, leaving room for "permlink " and null terminator.
+	int l = strlen(args);
+	LOG_NEW; char* buf = new char[l + 10];
+	strcpy(buf, perm ? "permlink " : "templink ");
+	strcat(buf, args);
+	// max # of possible args is given if args has one-char args
+	// separated by spaces: at most l/2 args.  + "permlink", + null at end.
+	LOG_NEW; char** argv = new char *[l/2+2];
+	int argc = 0;
+	// now chop up the arglist.
+	char *p = buf;
+	while (*p) {
+		argv[argc++] = p;
+		while (*p && !isspace(*p)) p++;
+		if (*p) {
+			// null-terminate the string
+			*p++ = 0;
+			// skip any extra spaces.
+			while (*p && isspace(*p)) p++;
+		}
+	}
+	argv[argc] = 0;
+	int status = multiLink(argc,argv);
+	LOG_DEL; delete [] buf;
+	LOG_DEL; delete [] argv;
+	return status;
+}
+
+	
 // link in multiple files.  Arglist is char** and not const char**
 // to permit easy interfacing with Tcl.
 
