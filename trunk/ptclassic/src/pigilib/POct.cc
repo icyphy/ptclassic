@@ -73,6 +73,7 @@ extern const char* nthDomainName(int n);
 extern void KcEditSeed(int n);
 /* Declare the functions in kernelCalls used by ptkSetRunUniverse */
 extern boolean KcSetKBDomain(const char* domain);
+extern void KcSetEventLoop(int on);
 #undef Pointer
 }
 #include "miscFuncs.h"
