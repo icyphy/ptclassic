@@ -471,14 +471,19 @@ int CGMultiTarget :: totalWorkLoad() {
 
 int CGMultiTarget::downLoadCode(int index, int pId, Profile*) {
 	if (nChildrenAlloc == 1) {
-		ParScheduler* s = (ParScheduler*) scheduler();
+		ParScheduler* ps = (ParScheduler*) scheduler();
 
 		// set the numProcs of ParScheduler to be zero to call the
 		// SDFScheduler :: compileRun() method. Refer to the
 		// ParScheduler :: compileRun() method when numProcs = 0.
 
-		s->setUpProcs(0);
-		return ((CGTarget*) child(pId))->insertGalaxyCode(galaxy(), s);
+		ps->setUpProcs(0);
+		CGTarget* t = (CGTarget*) child(pId);
+		GalStarIter next(*galaxy());
+		Star* s;
+		while ((s = next++) != 0) s->setTarget(t);
+
+		return t->insertGalaxyCode(galaxy(), ps);
 	} else {
 		return ((ParScheduler*)scheduler())->
 			getProc(index)->genCodeTo(child(pId));
