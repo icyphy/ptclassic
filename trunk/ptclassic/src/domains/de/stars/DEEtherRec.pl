@@ -79,12 +79,20 @@ giving the time at which the particle should be sent to the output.
 		    Error::warn(*this,"Overwriting previously received data");
 		recdData = data.clone();
 		refireAtTime(firingTime);
+		// We have to force the refire event out to the global queue
+		// by hand; normally DEStar::run handles this, but we have
+		// not been called from DEStar::run.
 		feedbackOut->sendData();
 		dataValid = TRUE;
 	    }
 	}
 	begin {
 	    DEEther::begin();
+
+	    if(*((const char *) recName) == '-') {
+		Error::warn(*this,
+			    "Receiver address should not start with '-'");
+	    }
 
 	    if (!registerReceiver(recName, this)) {
 		Error::warn(*this,
