@@ -133,9 +133,9 @@ int CGStar::addCode (const char* string,const char* stream, const
     CodeStream* cs = getStream(stream);
     if (cs != NULL) {
 	if (name != NULL) {
-	    StringList nm;
-	    processCode(nm,name);
-	    if (!cs->sharedNames.isUnique(nm)) return FALSE;
+	    StringList temp;
+	    processCode(temp,name);
+	    if (!cs->sharedNames.isUnique(temp)) return FALSE;
 	}
 	return processCode(*cs,string);
     }
@@ -149,9 +149,9 @@ int CGStar::addProcedure(const char* string, const char* name) {
    CodeStream* proc = getStream(PROCEDURE);
    if (proc != NULL) {
        if (name != NULL) {
-	   StringList nm;
-	   processCode(nm,name);
-	   if (!proc->sharedNames.isUnique(nm)) return FALSE;
+	   StringList temp;
+	   processCode(temp,name);
+	   if (!proc->sharedNames.isUnique(temp)) return FALSE;
        }
        return processCode(*proc,string);
    }
@@ -301,10 +301,11 @@ int CGStar::processMacro(StringList& list, const char*& t) {
 	    if (*t == '\0')
 		list << start;
 	    else {
-		char temp[length+1];
+		char *temp = new char[length+1];
 		temp[length] = '\0';
 		strncpy(temp,start,length);
 	    	list << temp;
+		delete temp [];
 	    }
 	}
     }
