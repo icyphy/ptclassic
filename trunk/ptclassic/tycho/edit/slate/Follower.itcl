@@ -56,13 +56,13 @@ class ::tycho::Follower {
     destructor {}
 
     ###################################################################
-    ####                        protected methods                  ####
+    ####                        public methods                  ####
 
     # Attach the interactor to the current picture
-    protected method activate {t x y args}
+    method activate {t x y args}
 
     # Remove the interactor from the current picture
-    protected method deactivate {args}
+    method deactivate {args}
 }
 
 #######################################################################
@@ -79,19 +79,20 @@ body ::tycho::Follower::activate {t x y args} {
     # Set the target. The client can modify its options later
     # with -activatecommand if desired. If the target argument is
     # in fact a tag, get the current picture from the slate.
-    if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
-	target $t
-    } else {
-	target [$slate find withtag current]
-    }
+#    if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
+#	target $t
+#    } else {
+#	target [$slate find withtag current]
+#    }
+target $t
 
     # Set up the bindings.
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Motion $args] \
-	    [list @scope [info class] "$this drag %x %y; update idletasks"]
+	    "$this drag %x %y; update idletasks"
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] \
-	    [list @scope [info class] "$this release; $this deactivate $args"]
+	    "$this release %x %y; $this deactivate $args"
 
     # Execute the user-specified activation command
     execute $activatecommand $x $y $args
@@ -99,7 +100,6 @@ body ::tycho::Follower::activate {t x y args} {
     # Start the interaction sequence
     eval click $x $y $args
 }
-
 
 #######################################################################
 #### deactivate

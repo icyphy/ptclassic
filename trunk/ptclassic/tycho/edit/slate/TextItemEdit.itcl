@@ -56,41 +56,38 @@ class ::tycho::Editor {
     ###################################################################
     ####                         public methods                    ####
 
-    # Stop editing an item
-    method stop {}
+    # Attach the interactor to the current picture
+    method activate {t x y args}
+
+    # Click on a position in the text item.
+    method click {x y args}
+
+    # Double-click on the text item.
+    method dbclick {}
+
+    # Remove the interactor from the current picture
+    method deactivate {args}
+
+    # Drag the mouse to select.
+    method drag {x y}
 
     # Insert a key
     method key {key keysym state args}
 
+    # Release the mouse from the item.
+    method release {}
+
+    # Stop editing an item
+    method stop {}
 
     ###################################################################
     ####                        protected methods                  ####
 
-    # Attach the interactor to the current picture
-    protected method activate {t x y args}
-
-    # Click on a position in the text item.
-    protected method click {x y args}
-
-    # Double-click on the text item.
-    protected method dbclick {}
-
-    # Remove the interactor from the current picture
-    protected method deactivate {args}
-
-    # Drag the mouse to select.
-    protected method drag {x y}
-
     # Adjust the cursor position
-    #protected
-    method icursor {mode}
-
-    # Release the mouse from the item.
-    protected method release {}
+    protected method icursor {mode}
 
     # Adjust the selection in the text item
-    #protected 
-    method select {mode args}
+    protected method select {mode args}
 
     ###################################################################
     ####                        private  variables                 ####
@@ -101,7 +98,6 @@ class ::tycho::Editor {
     # A flag to indicate word-dragging mode
     protected variable wordmode 0
 }
-
 
 #######################################################################
 #### activate target x y
@@ -130,6 +126,7 @@ body ::tycho::Editor::activate {t x y args} {
     $slate focus $target
 
     # Create the binding to insert keys
+    # FIXME: Can this be bound to the individual item?
     ::bind $slate <Key> "$this key %A %K %s $args"
 
     # Execute the user-specified activation command
@@ -152,7 +149,6 @@ body ::tycho::Editor::activate {t x y args} {
     # Start the interaction sequence
     eval click $x $y $args
 }
-
 
 #######################################################################
 #### click
@@ -182,7 +178,6 @@ body ::tycho::Editor::click {x y args} {
     }
 }
 
-
 #######################################################################
 #### dbclick
 #
@@ -205,7 +200,6 @@ body ::tycho::Editor::dbclick {} {
 	    [eval ::tycho::Interactor::event Release] \
 	    [list @scope [info class] "$this release"]
 }
-
 
 #######################################################################
 #### deactivate
@@ -236,7 +230,6 @@ body ::tycho::Editor::deactivate {args} {
     # Clear the target
     target {}
 }
-
 
 #######################################################################
 #### drag
@@ -458,7 +451,6 @@ body ::tycho::Editor::key {key keysym state args} {
 	}
     }
 }
-
 
 #######################################################################
 #### release

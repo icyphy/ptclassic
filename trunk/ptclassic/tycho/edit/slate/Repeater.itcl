@@ -69,21 +69,21 @@ class ::tycho::Repeater {
     ###################################################################
     ####                         public methods                    ####
 
+    # Attach the interactor to the current picture
+    method activate {t x y args} {}
+
+    # Remove the interactor from the current picture
+    method deactivate {args} {}
+
+    # Record a mouse movement
+    method motion {x y} {}
+
+    # Reinvoke the activation command
+    method reactivate {x y} {}
+
 
     ###################################################################
     ####                   protected methods                       ####
-
-    # Attach the interactor to the current picture
-    protected method activate {t x y args} {}
-
-    # Remove the interactor from the current picture
-    protected method deactivate {args} {}
-
-    # Record a mouse movement
-    protected method motion {x y} {}
-
-    # Reinvoke the activation command
-    protected method reactivate {x y} {}
 
 
     ###################################################################
@@ -95,8 +95,7 @@ class ::tycho::Repeater {
     # The current mouse position
     private variable currentX
     private variable currentY
- }
-
+}
 
 #######################################################################
 #### activate target x y
@@ -114,10 +113,10 @@ body ::tycho::Repeater::activate {t x y args} {
     # Set up the bindings.
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] \
-	    [list @scope [info class] "$this deactivate"]
+	    "$this deactivate"
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Motion $args] \
-	    [list @scope [info class] "$this motion %x %y"]
+	    "$this motion %x %y"
     
     # Execute the user-specified command
     execute $command $x $y
@@ -128,9 +127,8 @@ body ::tycho::Repeater::activate {t x y args} {
     set currentY $y
     set afterid [after $delay \
 	    [list catch \
-	    [list @scope [info class] $this reactivate $currentX $currentY]]]
+	    [list $this reactivate $currentX $currentY]]]
 }
-
 
 #######################################################################
 #### deactivate
@@ -151,7 +149,6 @@ body ::tycho::Repeater::deactivate {args} {
 	    [eval ::tycho::Interactor::event Release $args] {}
 }
 
-
 #######################################################################
 #### motion
 #
@@ -161,7 +158,6 @@ body ::tycho::Repeater::motion {x y} {
     set currentX $x
     set currentY $y
 }
-
 
 #######################################################################
 #### reactivate
@@ -176,6 +172,6 @@ body ::tycho::Repeater::reactivate {x y} {
     # Set up another delayed call
     set afterid [after $interval \
 	    [list catch \
-	    [list @scope [info class] $this reactivate $currentX $currentY]]]
+	    [list $this reactivate $currentX $currentY]]]
 }
 
