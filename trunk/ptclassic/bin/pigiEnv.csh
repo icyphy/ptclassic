@@ -15,47 +15,19 @@
 # On interrupt, remove temporary files
 onintr catch
 
-# If 'ptiny' is a link to this script, then we just use ptinyRpc
-set progname = `basename $0`
-
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+# Set the commonly used environment variables
+source $PTOLEMY/bin/ptsetup.csh
+
 if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
-if ( ! $?PTARCH ) then
-    setenv PTARCH `$PTOLEMY/bin/ptarch`
-endif
-if ( ! $?USER ) then
-    setenv USER $LOGNAME
-endif
-if ( ! $?PTX11DIR ) then
-    switch ($PTARCH)
-	case sol2:
-	case sol2.cfront:
-	    setenv PTX11DIR /usr/openwin
-	    breaksw
-	case *:
-	    setenv PTX11DIR /usr/X11
-	    breaksw
-    endsw
+
+if ( ! $?DISPLAY ) then
+    echo "${0}: Your DISPLAY environment variable must be set or use the"
+    echo "    -display option"
+    exit 1
 endif
 
-if ( ! $?QCKMON ) then
-    switch ($PTARCH)
-	case sol2:
-	    setenv QCKMON qckMon5
-	    breaksw
-	case sun4:
-            setenv QCKMON qckMon
-	    breaksw
-    endsw
-endif
-
-if ( ! $?S56DSP ) then
-	setenv S56DSP /users/ptdesign/vendors/s56dsp
-endif
-
-if ( ! $?LD_LIBRARY_PATH ) then
-    setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
-endif
 
 # If the user has set PIGIRPC, check to see if it exists
 # We don't try and do anything smart if the user has set $PIGIRPC
@@ -69,10 +41,6 @@ endif
 
 set cell = init.pal
 set resfile = pigiXRes9
-
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
-setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
-setenv PTPWD `pwd`
 
 while ($#argv)
 	switch ($argv[1])
@@ -122,12 +90,6 @@ while ($#argv)
 	endsw
 	shift
 end
-
-if ( ! $?DISPLAY ) then
-    echo "${0}: Your DISPLAY environment variable must be set or use the"
-    echo "    -display option"
-    exit 1
-endif
 
 
 # Try and do some smart error recovery if the pigiRpc binary can't be found.
@@ -227,8 +189,6 @@ xrdb -merge $PTOLEMY/lib/$resfile
 if ( $?PIGIXRES ) then
     xrdb -merge $PIGIXRES
 endif
-
-set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
 
 if ( $?pigiconsole ) then
         setenv TAILARGS -console
