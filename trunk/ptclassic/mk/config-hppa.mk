@@ -200,8 +200,8 @@ X11_LIBDIR =	$(X11DIR)/lib
 #X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
-#X11EXT_LIBSPEC=-lXext -lSM -lICE
-X11EXT_LIBSPEC=-lXext
+X11EXT_LIBSPEC=-lXext -lSM -lICE
+#X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2/ld
