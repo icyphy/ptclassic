@@ -29,6 +29,9 @@ class PriorityQueue;
 class DEStar : public Star {
 
 public:
+	// my domain
+	const char* domain() { return "DE";}
+
 	// Redefine method setting internal data in the Block
 	// so that various DE-specific initilizations can be performed.
 	// If the parent pointer is not provied, it defaults to NULL
