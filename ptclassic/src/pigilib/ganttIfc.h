@@ -27,9 +27,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
+
 /*  ganttIfc.h  edg
 Version identification:
 $Id$
+Function prototypes by Brian Evans.
 */
 
 /* Do the right thing for sol2 boolean defs.  compat.h must be included
@@ -46,7 +48,7 @@ typedef struct RgbValue_s {
     unsigned short blue;
 } RgbValue;
 
-extern char *incr ARGS((char *s));
+extern char* incr ARGS((char *s));
 extern boolean FrameStarCall ARGS((char *name, RgbValue color, int usePattern));
 extern void FindClear();
 extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
@@ -55,9 +57,7 @@ extern int CreateFrames ARGS((RgbValue colors[], int n));
 extern int ClearFrames();
 extern int DestroyFrames();
 extern int Frame ARGS((char *stars[]));
-
-/* called by dmmSupport */
-extern char* incr();
-extern int RpcFindName();
+extern void FindAndMarkColor ARGS((octObject *facetP, char *name,
+				   int pattern, char *Color));
 
 #endif /* _GANTTIFC_H */
