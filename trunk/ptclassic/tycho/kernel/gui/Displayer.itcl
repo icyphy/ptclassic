@@ -527,7 +527,7 @@ body ::tycho::Displayer::destroyView {view} {
 	if { $tcl_version >= 8.0 } {
 	    delete object $view
 	} else {
-	    delete object [winfo command $view]
+	    delete object [winfoCommand $view]
 	}
     }
 
@@ -569,7 +569,7 @@ body ::tycho::Displayer::focusin {} {
 	if { $tcl_version >= 8.0 } {
 	    $currentView focusin
 	} else {
-	    [winfo command $currentView] focusin
+	    [winfoCommand $currentView] focusin
 	}
     }
 }
@@ -730,8 +730,8 @@ body ::tycho::Displayer::saveCrash {} {
     foreach view [array names _viewtag] {
 	# Really, we shouldn't be testing for membership of
 	# the subclass File here! FIXME
-	if [[winfo command $view] isa ::tycho::File] {
-	    [winfo command $view] saveCrash
+	if [[winfoCommand $view] isa ::tycho::File] {
+	    [winfoCommand $view] saveCrash
 	}
     }
 }
@@ -888,10 +888,10 @@ body ::tycho::Displayer::showView {view args} {
 	    if { $tcl_version >= 8.0 } {
 		$view focusin
 	    } else {
-		[winfo command $view] focusin
+		[winfoCommand $view] focusin
 	    }
 	}
-	[winfo command $view] focusin
+	[winfoCommand $view] focusin
 	return
     }
 
@@ -910,14 +910,14 @@ body ::tycho::Displayer::showView {view args} {
     # This used to be deferred because this code was being executed
     # while still in the View constructor. Deferment is no longer
     # needed because showView is called after the constructor returns.
-    # after idle [code [winfo command $view] focusin]
+    # after idle [code [winfoCommand $view] focusin]
 
     # FIXME: Itcl 3.0
     global tcl_version
     if { $tcl_version >= 8.0 } {
 	$view focusin
     } else {
-	[winfo command $view] focusin
+	[winfoCommand $view] focusin
     }
 }
 
