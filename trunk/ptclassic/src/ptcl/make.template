@@ -56,7 +56,7 @@ include $(CONFIG)
 # Blackboard* symbols, which are defined in the tk ipus stars.
 # Set up definitions for stars.mk
 
-ifndef PTCL
+ifdef FULL
 	BDF=1
 	CG56=1
 	CG96=1
@@ -72,6 +72,53 @@ ifndef PTCL
 	THOR=1
 	VHDL=1
 	CGFULL=1
+endif
+
+ifdef PTINY
+	DE=1
+	SDF=1
+	SDFDSP=1
+	SDFMATRIX=1
+	SDFMATLAB=1
+endif
+
+ifdef PTRIM
+	BDF=1
+	CGCFULL=1
+	CGFULL=1
+	DDF=1
+	DE=1
+	SDFFULL=1
+endif
+
+ifndef PTCL
+ifndef PTRIM
+ifndef PTINY
+ifndef FULL
+
+EXTRA_INSTALL=$(BINDIR)/ptcl.ptrim $(BINDIR)/ptcl.ptiny $(BINDIR)/ptcl
+
+ptcl.ptrim:
+	make PTRIM=1 ptcl.ptrim
+
+ptcl.ptiny:
+	make PTINY=1 ptcl.ptiny
+
+ptcl:
+	make FULL=1 ptcl
+
+$(BINDIR)/ptcl.ptrim: ptcl.ptrim
+	make PTRIM=1 install
+
+$(BINDIR)/ptcl.ptiny: ptcl.ptiny
+	make PTINY=1 install
+
+$(BINDIR)/ptcl: ptcl
+	make FULL=1 install
+
+endif
+endif
+endif
 endif
 
 include $(ROOT)/mk/ptcl.mk
