@@ -37,7 +37,28 @@
 # If we can't load package, then search first in the Ptolemy tcl tree,
 # Then prompt the user for the file to be loaded.
 # If the package still cannot be loaded, return an error.
-proc ::tycho::loadIfNotPresent {command package} {
+#
+# The optional packagePathList argument consists of a list of 2 element
+# sublists that contain other package names and pathnames to try and load
+# packagePathList can be used to try to load the package under an alternative
+# name.  The sublists consists of two elements, an alternative packagename
+# and a directory to try loading in.  The alternative packagename can be
+# empty.
+#
+# The example below attempts to load TclX to get the profile command.
+# If TclX can't be found, then it looks in $tycho/lib/profile/obj.$PTARCH
+# for a file named tclXprofile.ext, where ext is the sharedlibrary extension
+# returned by [info sharedlibextension].  If that file can't be found
+# then it looks in /users/ptdesign/lib/profile/obj.$PTARCH for the same file
+#
+# <tcl><pre>
+# tycho::loadIfNotPresent profile tclx \
+#                [list [list tclXprofile \
+#                [file join $tycho lib profile obj.$env(PTARCH)]] \
+#                [list tclXprofile \
+#                [file join / users ptdesign lib profile obj.$env(PTARCH)]]]  
+# </pre></tcl>
+proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
     global PTOLEMY env
 
     # "info procs" does not work in itcl, so we use "info which"
@@ -48,43 +69,93 @@ proc ::tycho::loadIfNotPresent {command package} {
 	    # package require failed, so first we look in the Ptolemy Tree
 
 	    set packageLibName \
-		    $package[info sharedlibextension]
+		    lib$package
 	    # We could be missing the library if it is not the case
 	    # as the package.
 	    set lowerCasePackageLibName \
-		    [string tolower $package][info sharedlibextension]
+		    lib[string tolower $package]
+
+	    if { $packageLibName != $lowerCasePackageLibName } {
+		set libNameList [list $packageLibName $lowerCasePackageLibName]
+	    } else {
+		set libNameList [list $packageLibName]
+	    }
 
 	    if [info exists env(PTARCH)] {
 		# If we are here, the Ptolemy is probably installed
 		set PTARCH $env(PTARCH)
 		
-		set ptolemyLibList \
-			"[file join $PTOLEMY tcltk itcl.$PTARCH lib] \
-			[file join $PTOLEMY tcltk itcl.$PTARCH lib itcl]"
-		foreach ptolemyLib $ptolemyLibList {
-		    if [file isdirectory $ptolemyLib] {
-			if { ![catch \
-				{load [file join \
-				       $ptolemyLib lib$packageLibName]} ] || \
-				![catch \
-				{load [file join \
-				       $ptolemyLib \
-				       lib$lowerCasepackageLibName]} ] } {
-			    # We loaded ok, so we are done.
-			    return
+		set libDirList [list \
+			[file join $PTOLEMY tcltk itcl.$PTARCH lib] \
+			[file join $PTOLEMY tcltk itcl.$PTARCH lib itcl]]
+            } else {
+                set libDirList {}
+            }
+
+            # Get the package name and directory from packagePathList
+            foreach packagePath $packagePathList {
+                # packagePath is a list: { {altpackagename} {altlibdir}}
+                if {[llength [lindex $packagePath 0]] > 0} {
+		    if {[lsearch \
+			    $libNameList [lindex $packagePath 0]]  == -1 } {
+			lappend libNameList [lindex $packagePath 0]
+		    }
+                }
+                if {[llength [lindex $packagePath 1]] > 0} {
+		    if {[lsearch $libDirList [lindex $packagePath 1]] == -1 } {
+			lappend libDirList [lindex $packagePath 1]
+		    }
+                }
+            }
+            
+
+            # Try to load each package from each directory.
+            # If we load successfully, then return.
+            foreach libDir $libDirList {
+                if [file isdirectory $libDir] {
+                    foreach libName $libNameList {
+			set libFile [file join $libDir \
+				$libName[info sharedlibextension]]
+			puts "loading $libFile"
+			if [file exists $libFile] {
+			    if [catch {load $libFile} errMsg] {
+				# We had an error.
+				# Show the error message and bring up 
+				# a yes/no/cancel window
+				set nm [::tycho::autoName .loaderYNC]
+				::tycho::YesNoQuery $nm \
+					-text "load $libFile\nfailed with\
+					the following error message:\n\
+					$errMsg\n\
+					Do you want to try other directories?"
+				set response [::tycho::Dialog::wait $nm]
+				if {$response == 0 } {
+				    ::tycho::silentError
+				}
+			    } else {
+				# We loaded ok, so we are done.
+				return
+			    }
 			}
 		    }
 		}
-	    }
+            }
 
 	    while {1} {
 		# We did not load ok, so we prompt the user.
 		set loadLibPath [::tycho::queryfilename \
 			"Enter the name of the library that contains the\n \
-                        command `$command' in the package `$package'"]
+                        command `$command' in the package `$package'\n\
+                        The following directories were searched:\n\
+                        $libDirList\n\
+                        for the following packages:\n\
+                        $libNameList"]
+
+		if {$loadLibPath == {} } {
+		    ::tycho::silentError
+		}
 
 		load $loadLibPath
-	
 		if {[info which -command $command] != {}} {
 		    # We loaded the command so exit the while loop
 		    break
@@ -95,7 +166,6 @@ proc ::tycho::loadIfNotPresent {command package} {
 		    error "`$command' not dynamically loaded"
 		}
 	    }
-		
 	}
     }
 }
