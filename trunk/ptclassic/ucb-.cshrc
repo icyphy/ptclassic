@@ -18,6 +18,9 @@ setenv FMHOME /usr/cluster/frame
 setenv FM_FLS_HOST mho.eecs.berkeley.edu
 set path = ($path $FMHOME/bin)
 
+# For Purify: allow 128 files to be open at the same time
+limit descriptors 128
+
 # HPPA needs these
 if ( "$PTARCH" == hppa || "$PTARCH" == "hppa.cfront" ) then
 	setenv PTX11DIR /usr/sww/X11
