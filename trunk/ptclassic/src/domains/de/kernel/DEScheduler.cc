@@ -1,3 +1,4 @@
+static const char file_id[] = "DEScheduler.cc";
 /**************************************************************************
 Version identification:
 $Id$

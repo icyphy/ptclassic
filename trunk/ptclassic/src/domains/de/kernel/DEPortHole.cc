@@ -1,3 +1,4 @@
+static const char file_id[] = "DEConnect.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -124,7 +125,7 @@ void InDEPort :: triggers (GenericPort& op)
 {
 	if (!triggerList) {
 		complete = FALSE;
-		triggerList = new SequentialList;
+		LOG_NEW; triggerList = new SequentialList;
 	}
 	if (triggerList) triggerList->put(&op);
 }
@@ -183,13 +184,13 @@ void MultiInDEPort :: triggers (GenericPort& op)
 {
 	if (!triggerList) {
 		complete = FALSE;
-		triggerList = new SequentialList;
+		LOG_NEW; triggerList = new SequentialList;
 	}
 	if (triggerList) triggerList->put(&op);
 }
 
 PortHole& MultiInDEPort :: newPort () {
-	InDEPort& p = *new InDEPort;
+	LOG_NEW; InDEPort& p = *new InDEPort;
 	// DE-specific
 	p.dataNew = FALSE;
 	p.timeStamp = 0.0;
@@ -202,7 +203,7 @@ PortHole& MultiInDEPort :: newPort () {
  
  
 PortHole& MultiOutDEPort :: newPort () {
-	OutDEPort& p = *new OutDEPort;
+	LOG_NEW; OutDEPort& p = *new OutDEPort;
 	// DE-specific
 	p.dataNew = FALSE;
 	p.timeStamp = 0.0;

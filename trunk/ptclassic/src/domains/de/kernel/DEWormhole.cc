@@ -1,3 +1,4 @@
+static const char file_id[] = "DEWormhole.cc";
 /******************************************************************
 Version identification:
  $Id$
@@ -55,7 +56,7 @@ void DEWormhole :: startNewPhase()
 // cloner -- clone the inside and make a new wormhole from that.
 Block* DEWormhole :: clone() const
 {
-	return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
+LOG_NEW; return new DEWormhole(gal.clone()->asGalaxy(), target->cloneTarget());
 }
 
 // sumUp();  If the inner domain is timed and stopBeforeDeadlocked,

@@ -1,3 +1,4 @@
+static const char file_id[] = "DEStar.cc";
 /******************************************************************
 Version identification:
 $Id$

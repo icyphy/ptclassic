@@ -1,3 +1,4 @@
+static const char file_id[] = "EventQueue.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -26,7 +27,7 @@ Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
 		temp = freeEventHead;
 		freeEventHead  = temp->next;
 	} else {
-		temp = new Event;
+		LOG_NEW; temp = new Event;
 	}
 	// set the event members.
 	temp->dest = ph;
@@ -40,9 +41,9 @@ void EventQueue:: clearFreeEvents() {
 	while (freeEventHead->next) {
 		temp = freeEventHead;
 		freeEventHead = freeEventHead->next;
-		delete temp;
+		LOG_DEL; delete temp;
 	}
-	delete freeEventHead;
+	LOG_DEL; delete freeEventHead;
 }
 
 void EventQueue:: putFreeLink(LevelLink* p) {
