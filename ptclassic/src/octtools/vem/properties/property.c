@@ -246,7 +246,7 @@ octObject *theProp;		/* The property */
 	(void) sprintf(valueArea, "%ld", theProp->contents.prop.value.integer);
 	break;
     case OCT_REAL:
-	(void) sprintf(valueArea, "%lg", theProp->contents.prop.value.real);
+	(void) sprintf(valueArea, "%g", theProp->contents.prop.value.real);
 	break;
     case OCT_STRING:
 	if (strlen(theProp->contents.prop.value.string) > 20) {
@@ -267,8 +267,8 @@ octObject *theProp;		/* The property */
 	}
 	break;
     case OCT_STRANGER:
-	(void) sprintf(valueArea, "%d bytes",
-		       theProp->contents.prop.value.stranger.length);
+	(void) sprintf(valueArea, "%ld bytes",
+		       (long)theProp->contents.prop.value.stranger.length);
 	break;
     case OCT_REAL_ARRAY:
 	(void) sprintf(valueArea, "[");
@@ -276,10 +276,10 @@ octObject *theProp;		/* The property */
 	if (len > 4) len = 4;
 	for (idx = 0; idx < len;  idx++) {
 	    if (idx > 0) {
-		(void) sprintf(temp, " %lg",
+		(void) sprintf(temp, " %g",
 			       theProp->contents.prop.value.real_array.array[idx]);
 	    } else {
-		(void) sprintf(temp, "%lg",
+		(void) sprintf(temp, "%g",
 			       theProp->contents.prop.value.real_array.array[idx]);
 	    }
 	    STRCONCAT(valueArea, temp);
@@ -693,7 +693,8 @@ int count;			/* Number of props */
     int i;
 
     prop_list = VEMARRAYALLOC(ddsFlagItem, count);
-    VEM_OCTCKRET(octInitGenContents(parent, OCT_PROP_MASK, &gen));
+    VEM_OCTCKRVAL(octInitGenContents(parent, OCT_PROP_MASK, &gen),
+		  (ddsFlagItem *)0);
     i = 0;
     while (octGenerate(&gen, &prop) == OCT_OK) {
 	octExternalId(&prop, &xid);
@@ -771,7 +772,7 @@ ddsHandle item;			/* Control button */
     ddsControl con_data;
     ddsItemList item_data;
     sel_cb *info;
-    octObject parent, prop;
+    octObject parent;
 
     dds_get(item, (ddsData) &con_data);
     info = (sel_cb *) con_data.user_data;
@@ -834,7 +835,6 @@ ddsHandle item;			/* Control button */
     sel_cb *info;
     octObject parent;
     char *key, *value;
-    int i;
 
     dds_get(item, (ddsData) &con_data);
     info = (sel_cb *) con_data.user_data;
@@ -1134,7 +1134,6 @@ ddsHandle item;			/* Control buttona */
 {
     prop_cb *info;
     octObject prop, fct;
-    char *key, *value;
     static char *prop_err =
 "The selected property doesn't exist\n\
 in the database.  You may want to use `New'\n\
@@ -1202,11 +1201,12 @@ ddsHandle item;			/* Control buttona */
 {
     prop_cb *info;
     octObject prop, new_prop;
-    char *key, *value;
+#ifdef NEVER
     static char *prop_err =
 "The selected property no longer exists\n\
 in the database.  You may want to use `New'\n\
 to make a new copy.";
+#endif
     static char *parse_err =
 "The value for the property cannot be parsed\n\
 given the property type.  Do you want to exit\n\
@@ -1391,7 +1391,7 @@ STR *area;			/* Buffer itself    */
 	    size = 128;
 	    *area = VEMREALLOC(char, *area, size);
 	}
-	(void) sprintf(*area, "%lf", prop->contents.prop.value.real);
+	(void) sprintf(*area, "%f", prop->contents.prop.value.real);
 	break;
     case OCT_STRING:
 	str_val_len = STRLEN(prop->contents.prop.value.string);
@@ -1422,7 +1422,7 @@ STR *area;			/* Buffer itself    */
 	str_val_len = 0;
 	cur_len = 0;
 	for (i = 0; i < prop->contents.prop.value.real_array.length; i++) {
-	    (void) sprintf(numbuf, "%lf",
+	    (void) sprintf(numbuf, "%f",
 		    prop->contents.prop.value.real_array.array[i]);
 	    str_val_len = STRLEN(numbuf);
 	    if (cur_len + str_val_len + 1 >= size) {
@@ -1434,6 +1434,12 @@ STR *area;			/* Buffer itself    */
 	    }
 	    STRCONCAT(*area, numbuf);
 	}
+	break;
+      case OCT_NULL:
+      case OCT_ID:
+      case OCT_STRANGER:
+	/* For completeness of enum handling.  Should we print an
+	   error message here? */
 	break;
     }
     return size;
@@ -1487,4 +1493,5 @@ octObject *one, *two;		/* Two properties */
     } else {
 	return 1;
     }
+    return 0;
 }
