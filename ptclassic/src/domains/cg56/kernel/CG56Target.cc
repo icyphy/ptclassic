@@ -23,19 +23,27 @@ const Attribute ANY(0,0);
 
 // a CG56Memory represents the X and Y memories of a 56000.  It is
 // derived from DualMemory.
-CG56Memory :: CG56Memory(unsigned x_addr, unsigned x_len, unsigned y_addr,
-			 unsigned y_len) :
-	DualMemory("x",A_XMEM,ANY,x_addr,x_len,"y",A_YMEM,ANY,y_addr,y_len)
+CG56Memory :: CG56Memory(const char* x_map, const char* y_map) :
+	DualMemory("x",A_XMEM,ANY,x_map,"y",A_YMEM,ANY,y_map)
 {}
 
-CG56Target :: CG56Target(const char* nam, const char* desc,
-			 unsigned x_addr, unsigned x_len,
-			 unsigned y_addr, unsigned y_len) :
-	xa(x_addr), xl(x_len), ya(y_addr), yl(y_len), inProgSection(0),
+CG56Target :: CG56Target(const char* nam, const char* desc) :
+	inProgSection(0),
 	AsmTarget(nam,desc,"CG56Star")
 {
-	LOG_NEW; mem = new CG56Memory(x_addr,x_len,y_addr,y_len);
+	initStates();
+	mem = 0;
+}
 
+void CG56Target :: initStates() {
+	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map"));
+	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
+}
+
+int CG56Target :: setup(Galaxy& g) {
+	LOG_DEL; delete mem;
+	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
+	return AsmTarget::setup(g);
 }
 
 void CG56Target :: headerCode () {
@@ -56,9 +64,10 @@ CG56Target :: ~CG56Target () {
 
 // copy constructor
 CG56Target :: CG56Target (const CG56Target& src) :
-AsmTarget(src.readName(),src.readDescriptor(),"CG56Star"),
-xa(src.xa), xl(src.xl), ya(src.ya), yl(src.yl), inProgSection(0) {
-	LOG_NEW; mem = new CG56Memory(xa,xl,ya,yl);
+AsmTarget(src.readName(),src.readDescriptor(),"CG56Star"), inProgSection(0)
+{
+	initStates();
+	copyStates(src);
 }
 
 // clone
