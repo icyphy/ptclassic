@@ -70,6 +70,7 @@ extern "C" {
 // there is a #define Complex 0, which causes no end of trouble.
 #include "ptk.h"
 #undef Pointer
+#include "mkIcon.h"
 }
 
 extern ACG* gen;
@@ -552,9 +553,12 @@ isStringInList(const char* string, const char* list[],
 ///////////////////////////////////////////////////////////////////////
 // Get information about the portholes of a sog.
 // Inputs: name = name of sog
-// Outputs: terms = list of info about each porthole
+// Outputs: newNamesArray, newTypes, newIsOut, numOrdPortsPtr, newNameCountPtr
+// See MkGetTerms in mkIcon.c.
 extern "C" boolean
-KcGetTerms(const char* name, TermList* terms)
+KcCheckTerms(const char* name, char** newNamesArray,
+	     const char** newTypes, int* newIsOut,
+	     int* numOrdPortsPtr, int* newNameCountPtr)
 {
 	const Block *block = (const Block *)NULL;
 	char* mphname[MAX_NUM_FIELDS];
@@ -563,8 +567,8 @@ KcGetTerms(const char* name, TermList* terms)
 	const char* cname;
 	int nf;
 
-	cname = parseClass (name, nf, mphname, npspec);
-	
+	cname = parseClass(name, nf, mphname, npspec);
+
 	if (!cname || (block = findClass(name)) == 0 ||
 	    !checkFields(block,(const char **)mphname,nf,isMPH)) {
 		StringList buf = "Invalid galaxy name '";
@@ -575,9 +579,7 @@ KcGetTerms(const char* name, TermList* terms)
 	const char *names[MAX_NUM_TERMS];
 	const char *newNames[MAX_NUM_TERMS];
 	const char *types[MAX_NUM_TERMS];
-	const char *newTypes[MAX_NUM_TERMS];
 	int isOut[MAX_NUM_TERMS];
-	int newIsOut[MAX_NUM_TERMS];
 
 	int n = block->portNames(names, types, isOut, MAX_NUM_TERMS);
 	int nm = block->multiPortNames(names+n, types+n,
@@ -585,11 +587,12 @@ KcGetTerms(const char* name, TermList* terms)
 	int numOrdPorts = n;
 	// Copy all the names of the ordinary portHoles
 	int newNameCount = 0;
-	for(int j=0; j<numOrdPorts; j++) {
+	for(int j = 0; j < numOrdPorts; j++) {
 		newNames[newNameCount] = names[j];
 		newTypes[newNameCount] = types[j];
 		newIsOut[newNameCount++] = isOut[j];
 	}
+
 	// For each multiPortHole, create newNames
 	for(j=0; j < nf; j++) {
 	    const char *mphName, *mphType;
@@ -618,37 +621,27 @@ KcGetTerms(const char* name, TermList* terms)
 		}
 	    }
 	}
+
 	// Since all the multiPortHoles treated above have been converted
 	// to ordinary PortHoles,
 	numOrdPorts = newNameCount;
 
 	// Now look for any multiPortHoles that were not converted
-	for(int mphNum = 0; mphNum < nm; mphNum++) {
+	for (int mphNum = 0; mphNum < nm; mphNum++) {
 	    int mpos;
-	    if(isStringInList(names[n+mphNum],(const char **)mphname, nf, mpos) &&
-			npspec[mpos])
+	    if (isStringInList(names[n+mphNum], (const char **)mphname,
+			       nf, mpos) && npspec[mpos])
 		continue;
 	    newNames[newNameCount] = names[n+mphNum];
 	    newTypes[newNameCount] = types[n+mphNum];
 	    newIsOut[newNameCount++] = isOut[n+mphNum];
 	}
 
-	terms->in_n = 0;
-	terms->out_n = 0;
-	for (int i=0; i < newNameCount; i++) {
-		if (newIsOut[i]) {
-			terms->out[terms->out_n].name = newNames[i];
-			terms->out[terms->out_n].type = newTypes[i];
-			terms->out[terms->out_n++].multiple =
-				(i >= numOrdPorts);
-		}
-		else {
-			terms->in[terms->in_n].name = newNames[i];
-			terms->in[terms->in_n].type = newTypes[i];
-			terms->in[terms->in_n++].multiple =
-				(i >= numOrdPorts);
-		}
-	}
+	// Return values
+	*numOrdPortsPtr = numOrdPorts;
+	*newNameCountPtr = newNameCount;
+	memcpy(newNamesArray, newNames, newNameCount * sizeof(const char*));
+
 	return TRUE;
 }
 
@@ -795,6 +788,30 @@ KcInfo(const char* name, char** info)
 
 static void displayStates(const Block *b,char** names,int n_names);
 
+extern void
+KcPrintTerms(const char* name) {
+	TermList terms;
+	MkGetTerms(name, &terms);
+	if (terms.in_n) accum_string ("Inputs:\n");
+	for (int i = 0; i < terms.in_n; i++) {
+		accum_string ("   ");
+		accum_string (terms.in[i].name);
+		if (terms.in[i].multiple) accum_string (" (multiple)");
+		accum_string (": ");
+		accum_string (terms.in[i].type);
+		accum_string ("\n");
+	}
+	if (terms.out_n) accum_string ("Outputs:\n");
+	for (i = 0; i < terms.out_n; i++) {
+		accum_string ("   ");
+		accum_string (terms.out[i].name);
+		if (terms.out[i].multiple) accum_string (" (multiple)");
+		accum_string (": ");
+		accum_string (terms.out[i].type);
+		accum_string ("\n");
+	} // end forloop
+}
+
 ///////////////////////////////////////////////////////////////////////
 // Input: the name of a star in the current domain
 // Pops up a window displaying the profile and returns true if all goes well,
@@ -854,27 +871,9 @@ KcProfile (const char* name) {
 		accum_string ("\n");
 // get termlist
 	if (!tFlag) {
-	TermList terms;
-	KcGetTerms (name, &terms);
-	if (terms.in_n) accum_string ("Inputs:\n");
-	for (int i = 0; i < terms.in_n; i++) {
-		accum_string ("   ");
-		accum_string (terms.in[i].name);
-		if (terms.in[i].multiple) accum_string (" (multiple)");
-		accum_string (": ");
-		accum_string (terms.in[i].type);
-		accum_string ("\n");
+		MkPrintTerms(name);
 	}
-	if (terms.out_n) accum_string ("Outputs:\n");
-	for (i = 0; i < terms.out_n; i++) {
-		accum_string ("   ");
-		accum_string (terms.out[i].name);
-		if (terms.out[i].multiple) accum_string (" (multiple)");
-		accum_string (": ");
-		accum_string (terms.out[i].type);
-		accum_string ("\n");
-	} // end forloop
-	} // end if (!tFlag)
+
 // now do states
 	displayStates(b,fieldnames,n_fields);
 	pr_accum_string ();
