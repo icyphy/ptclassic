@@ -274,7 +274,7 @@ body ::tycho::Glimpse::updateTychoDatabase {} {
     cd $TYCHO
 
     set win [::tycho::autoName .glimpseExec]
-    ::tycho::Exec $win -command {make glimpse} -dir [file join $TYCHO]
+    ::tycho::Monitor $win -command {make glimpse} -dir [file join $TYCHO]
     $win centerOnScreen
 
     cd $savedir
