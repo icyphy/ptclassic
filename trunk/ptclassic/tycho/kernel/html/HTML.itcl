@@ -958,8 +958,8 @@ body ::tycho::HTML::raiseWindow {} {
 body ::tycho::HTML::reload {} {
     # Handle Image files specially
     set ext [file extension $file]
-    if {($ext == ".gif" || $ext == ".ppm" || $ext == ".pgm" || \
-            $ext == ".xbm") && $myDisplayer != {}} {
+
+    if [isAnImageFileExtension $ext] {
         clear
         insertData "<img src=\"$file\" alt=\"$file\">"
     } else {
@@ -1652,10 +1652,16 @@ proc HMset_image {win handle src} {
 
     # If the slowNetwork misc preference is set, then don't display images.
     if {[$HTML isSlowNetwork] == 0} {
+        # if it's an absolute path
         if {[string match /* $src]} {
             set image $src
-        } else {
-            set image [uplevel #0 $HTML lastDirectory]/$src
+        } else {     
+            # if it begins $PTOLEMY, $TYCHO, etc.
+            if {[string match \$* $src]} {
+                set image [::tycho::expandPath $src]
+            } else {
+                set image [uplevel #0 $HTML lastDirectory]/$src
+            }
         }
 
         update
@@ -1669,6 +1675,10 @@ proc HMset_image {win handle src} {
         }
     }
 }
+# if {[string match $* $src} {
+    #    set image [::tycho::expandPath $src]
+    # } else {
+
 
 #######################################################################
 #### HMstack
