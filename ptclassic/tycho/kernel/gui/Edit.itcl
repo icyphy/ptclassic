@@ -2233,7 +2233,7 @@ body ::tycho::Edit::configureContextMenu {} {
 
     contextmenu command delete \
 	    -label "Delete" \
-	    -command "$this del"
+	    -command "$this deleteSelection"
 
     contextmenu separator contextsep2
 
