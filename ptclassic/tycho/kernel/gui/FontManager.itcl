@@ -312,7 +312,7 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 # <li>Try an alternate family. For example, if times is requested,
 # try lucidabright and palatino.
 # <li>If the requested font is bold, try a non-bold version.
-# <li>If the requested font is italicised, try a roman version.
+# <li>If the requested font is italicized, try a roman version.
 # <li>Try the same thing with the next size up.
 # <li>Try the same thing with the next size down.
 # <li>Give up and return "fixed."
