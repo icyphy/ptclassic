@@ -42,8 +42,8 @@ set alltestslist [list \
 	[file join editors visedit test alltests.itcl] \
 	[file join editors slate test alltests.itcl]]
 
-if [info exists env(PTOLEMY) ] {
-    puts "\$PTOLEMY is set, so we will run the Ptolemy tests"
+if { $ptolemyfeature(ptcl) || $ptolemyfeature(pitcl)} {
+    puts "Ptolemy seems to be present, so we will run the Ptolemy tests"
     lappend alltestslist \
 	    [file join typt kernel test alltests.itcl] \
 	    [file join typt editors test alltests.itcl]
