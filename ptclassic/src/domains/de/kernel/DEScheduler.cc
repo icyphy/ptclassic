@@ -162,7 +162,7 @@ DEScheduler :: run () {
 			eventQ.pushBack(f);		// push back
 			// set currentTime = next event time.
 			currentTime = level/relTimeScale;
-			stopBeforeDeadlocked = TRUE;  // there is extra events.
+			stopBeforeDeadFlag = TRUE;  // there is extra events.
 			return TRUE;
 		// If the event time is less than the global clock,
 		// it is an error...
@@ -261,7 +261,7 @@ DEScheduler :: run () {
 
 	if (haltRequested()) return FALSE;
 
-	stopBeforeDeadlocked = FALSE;	// yes, no more events...
+	stopBeforeDeadFlag = FALSE;	// yes, no more events...
 	return TRUE;
 }
 
