@@ -93,6 +93,9 @@ protected:
 	// Update the offset read and write pointers to the porthole queues.
 	void updateOffsets();
 
+	// Various hashed strings for quick comparison.
+        const char* hashBLANK;
+
 private:
 	// Maintain counter of firing number.
 	int firing;

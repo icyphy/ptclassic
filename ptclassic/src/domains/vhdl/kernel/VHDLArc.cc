@@ -51,7 +51,7 @@ VHDLArc :: ~VHDLArc() {}
 // Return a pointer to a new copy of the VHDLArc.
 VHDLArc* VHDLArc :: newCopy() {
   VHDLArc* newArc = new VHDLArc;
-  newArc->name = hashstring(this->name);
+  newArc->setName(this->name);
   newArc->type = this->type;
   newArc->lowWrite = this->lowWrite;
   newArc->highWrite = this->highWrite;

@@ -50,7 +50,7 @@ VHDLPort :: ~VHDLPort() {}
 // Return a pointer to a new copy of the VHDLPort.
 VHDLPort* VHDLPort :: newCopy() {
   VHDLPort* newPort = new VHDLPort;
-  newPort->name = hashstring(this->name);
+  newPort->setName(this->name);
   newPort->direction = this->direction;
   newPort->type = this->type;
 
@@ -80,9 +80,8 @@ VHDLPortList* VHDLPortList :: newCopy() {
 // Allocate memory for a new VHDLPort and put it in the list.
 void VHDLPortList :: put(StringList name, StringList direction,
 			 StringList type) {
-  if (this->inList(name)) return;
   VHDLPort* newPort = new VHDLPort;
-  newPort->name = hashstring(name);
+  newPort->setName(name);
   newPort->direction = direction;
   newPort->type = type;
   this->put(*newPort);
