@@ -29,6 +29,13 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io.h"
 #include "geo.h"
+#include "master.h"
+
+#include "chain.h"
+#include "io_procs.h"
+#include "oct_utils.h"
+
+#include "translate.h"
 
 static  octStatus fix_actuals();
 
@@ -51,7 +58,7 @@ static  octStatus fix_actuals();
     }\
 }
 
-octStatus term_read(), net_read(), instance_read(), polygon_read(),
+static octStatus term_read(), net_read(), instance_read(), polygon_read(),
 	  box_read(), circle_read(), path_read(), label_read(),
 	  prop_read(), bag_read(), layer_read(), point_read(),
 	  edge_read(), term_read();
@@ -81,6 +88,7 @@ octId oct_id_offset;
 #define BB_INIT 1
 #define BB_VALID 2
 
+int
 oct_translate(version_number, desc)
 int version_number;
 struct facet *desc;
