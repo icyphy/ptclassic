@@ -33,6 +33,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	initCode {
 		addInclude("<math.h>");
 	}
+        setup {
+		if ( int(modulo) == 0 ) {
+		    Error::abortRun(*this,
+				    "The modulo parameter cannot be zero");
+		    return;
+		}
+	}
 	go {
 		addCode(out);
 	}
@@ -40,6 +47,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref(output) = $ref(input) % $ref(modulo);
 	}
 	exectime {
-		return 23;	/* value taken from CG96Sin */
+		return 1;
 	}
 }
