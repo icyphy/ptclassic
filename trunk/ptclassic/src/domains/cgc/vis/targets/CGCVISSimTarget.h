@@ -40,13 +40,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGCVISSimTarget : public CGCTarget {
 public:
 	CGCVISSimTarget(const char* name, const char* starclass, const
-		       char* desc);
+		       char* desc, const char* assocDomain = CGCdomainName);
+
+	// Generate code for a Star firing.  By default, execute the star.
+        void writeFiring(Star&,int depth);
+
+	// Generate code.
+        void generateCode();
+
+	// Generate Timing Functions
+	void genProfileInit(int funcid);
+	void genProfileEnd(int funcid);
+	void generateTimingProc();
 
 	Block* makeNew() const;
 
 	int isA(const char*) const;
 protected:
 	int compileCode();
+	int functionCounter;
 };
 
 #endif

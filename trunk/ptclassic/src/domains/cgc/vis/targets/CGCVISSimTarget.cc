@@ -38,11 +38,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Error.h"
 #include "KnownTarget.h"
 #include "CGUtilities.h"
-// -----------------------------------------------------------------------------	
-CGCVISSimTarget::CGCVISSimTarget(const char* name,const char* starclass,const char* desc):CGCTarget(name,starclass,desc) {
-        compileCommand.setState("compileCommand",this,"cc","command for compiling code.");
-        compileOptions.setState("compileOptions",this,"-fast -xO4 -xdepend -xchip=ultra -xarch=v8plusa -V ${VSDKHOME}/util/vis.il","options to be specified for compiler.");
+// ----------------------------------------------------------------------------
+CGCVISSimTarget::CGCVISSimTarget(const char* name,const char* starclass,const char* desc, const char* assocDomain):CGCTarget(name,starclass,desc,assocDomain) {
+
+  functionCounter = 0;
+
+  compileCommand.setState("compileCommand",this,"cc","command for compiling code.");
+
+  compileOptions.setState("compileOptions",this,"-fast -xO4 -xdepend -xchip=ultra -xarch=v8plusa -V ${VSDKHOME}/util/vis.il","options to be specified for compiler.");
 }
+
+// ----------------------------------------------------------------------------
 
 int CGCVISSimTarget::compileCode()
 {
@@ -64,16 +70,72 @@ int CGCVISSimTarget::compileCode()
     return (systemCall(cmd, error, targetHost) == 0);
 }
 
-// -----------------------------------------------------------------------------
+// ----------------------------------------------------------------------------
+
 Block* CGCVISSimTarget :: makeNew() const {
 	LOG_NEW; return new CGCVISSimTarget(name(),starType(),descriptor());
 }
-// -----------------------------------------------------------------------------
+
+// ----------------------------------------------------------------------------
+
+void CGCVISSimTarget :: genProfileInit(int funcid){
+        *defaultStream << "begintimer_" << funcid << "();\n";
+}
+
+void CGCVISSimTarget :: genProfileEnd(int funcid){
+        *defaultStream << "endtimer_" << funcid << "();\n";
+}
+
+void CGCVISSimTarget :: writeFiring(Star& s,int) { // depth parameter ignored
+        genProfileInit(functionCounter);
+	s.run();
+	genProfileEnd(functionCounter);
+	functionCounter++;
+
+}
+
+// ----------------------------------------------------------------------------
+
+void CGCVISSimTarget::generateTimingProc(){
+    Galaxy& gal = *galaxy();
+    GalStarIter starIter(gal);
+    Star* star;
+    int index=0;
+
+    while ((star = starIter++) != NULL) {
+      procedures << "void begintimer_"<<index<<"()"<<"{}\n";
+      procedures << "void endtimer_"<<index<<"()"<<"{}\n";
+      index++;
+    }
+}
+
+void CGCVISSimTarget::generateCode() {
+	if (haltRequested()) return;
+	if (parent()) setup();
+	if (haltRequested()) return;
+	if(!allocateMemory()) {
+		Error::abortRun(*this,"Memory allocation error");
+		return;
+	}
+	if (haltRequested()) return;
+	generateCodeStreams();
+	generateTimingProc();
+	if (haltRequested()) return;
+	frameCode();
+	if (haltRequested()) return;
+	if (!parent()) writeCode();
+
+	// now initialize for the next run
+	procedures.initialize();
+}
+
+// ----------------------------------------------------------------------------
+
 ISA_FUNC(CGCVISSimTarget,CGCTarget);
 
-static CGCVISSimTarget myTargetPrototype("CGCVIS","CGCStar","A VIS target for VIS code generation");
+static CGCVISSimTarget myTargetPrototype("CGCVISSim","CGCStar","A VIS target for VIS code generation");
 
-static KnownTarget entry(myTargetPrototype,"CGCVIS");
+static KnownTarget entry(myTargetPrototype,"CGCVISSim");
 
 
 
