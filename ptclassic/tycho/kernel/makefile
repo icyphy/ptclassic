@@ -61,6 +61,9 @@ ITCL_SRCS = \
 	Edit.itcl \
 	EditText.itcl \
 	EditSearch.itcl \
+	EditSpell.itcl \
+	EditStack.itcl \
+	EditStackText.itcl \
 	EntryQuery.itcl \
 	ErrorMessage.itcl \
 	File.itcl \
