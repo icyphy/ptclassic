@@ -46,18 +46,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of Revision : 6/13/90
  Date of Revision : 6/20/90 
 
-	Wormholes are defined in this file.
-	A Wormhole is a Star with a pointer to a component Galaxy,
+	The Wormhole class is defined in this file.
+	A Wormhole is a Star with a component Galaxy
 	and a Target to fire the blocks in the Galaxy.
-	From the outside, #in%_Wormhole looks exactly like a % Star.
+	To the outside, a Wormhole behaves exactly like 
+	a Star of the outside domain, although the Galaxy encapsulated
+	in the Wormhole may be of a different domain.
 
-	Wormhole differs from "Universe" in that it needs interface
-	between two totally different domains. 
+	A Wormhole differs from a Universe in that it needs an
+	interface between the inside and outside domains, which are
+	often totally different. 
 
-	Derivation graph of Wormhole is
+	The Wormhole class is intended to be used as a "mix-in"
+	class with XXXStar to derive XXXWormhole.  The derivation
+	graph of Wormhole is:
 	Runnable -->   Wormhole --> SDFWormhole <-- SDFStar
 		 		--> DEWormhole  <-- DEStar
-		 		--> ??Wormhole  <-- ??Star
+		 		--> XXXWormhole  <-- XXXStar
 
 ********************************************************************/
 
@@ -67,26 +72,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	
 class Wormhole : public Runnable {
 public:
-	// constructors.  We never use plain Wormholes, we always have
-	// class SDFWormhole : public Wormhole, public SDFStar
-	// here we do
+	// Constructors.  We never use plain Wormholes.  We always have
+	// class SDFWormhole : public Wormhole, public SDFStar, etc.
+	// There we do
 	// SDFWormhole::SDFWormhole(Galaxy& g,Target* t) :
-	//	Wormhole(this,g,t) { buildEventHorizons();}
+	//	Wormhole(*this,g,t) { buildEventHorizons();}
 
 	Wormhole(Star& self, Galaxy& g, Target* innerTarget = 0);
 
 	// This form builds the Target from the KnownTarget list by
-	// using targetName
+	// using targetName.
 	Wormhole(Star& self, Galaxy& g, const char* targetName = 0);
 
+	// The following methods define the default, common behavior
+	// of the "setup", "begin", and "go" methods of the XXXWormhole
+	// classes.  Those methods of the XXXWormhole classes should be
+	// defined to invoke these methods, and possibly do some other
+	// domain-specific things.
+
+	// Defines the default, common behavior of XXXWormhole::setup().
 	void setup();
 
+	// Defines the default, common behavior of XXXWormhole::begin().
+	void begin();
+
+	// Defines the default, common behavior of XXXWormhole::go().
 	int run();
 
-	// return the inside Domain
+	// return the inside domain
 	const char* insideDomain() const { return gal.domain(); }
 
-	// return the scheduler of the outer domain.
+	// Return the scheduler of the outer domain.
 	// Note thar the scheduler of the inner domain can be get
 	// by scheduler() method of derived wormhole classes.
 	Scheduler* outerSched();
@@ -97,8 +113,8 @@ public:
 	// explode myself to expose the inside Galaxy.
 	Galaxy* explode();
 
-	// return a reference to the internal galaxy.  This is non-const
-	// function because the galaxy may be modified by the calling function
+	// Return a reference to the internal galaxy.  This is a non-const
+	// function because the galaxy may be modified by the calling function.
         Galaxy& insideGalaxy() { return gal; }
 	
 
@@ -108,10 +124,10 @@ protected :
 	void buildEventHorizons ();
 
 	// function to delete the event horizons and inside galaxy,
-	// to be called from XXXWormhole destructors.
+	// to be called from XXXWormhole destructors
 	void freeContents ();
 
-	// get the stopping condition for the inner domain.
+	// Get the stopping condition for the inner domain.
 	// Must be redefined in the derived class.
 	virtual double getStopTime() = 0;
 
