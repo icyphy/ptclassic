@@ -12,8 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
 	htmldoc {
-<a name="bit shifter"></a>
-Scale by shifting left \fIleftShifts\fP bits.
+Scale by shifting left <i>leftShifts</i> <a name="bit shifter">bits</a>.
 Negative values of N implies right shifting.
 Arithmetic shifts are used.
 	}
