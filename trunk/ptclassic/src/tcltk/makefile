@@ -313,6 +313,15 @@ install_tclblend:
 test_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) test)
 
+time_tclblend:
+	@echo "Be sure to run 'make test_jacl' first"
+	(cd $(JACL_OBJ); \
+		(echo lappend auto_path [pwd]\; \
+		cd $(JACL_SRC)/../tests\; \
+		source $(TCLBLEND_SRC)/../tests/time\; printStats\; exit\; )| \
+	CLASSPATH=$(JACL_OBJ)/jacl:$(JACL_OBJ)/jacl/tests:$(JACL_OBJ)/jacl/tests/javaload:$(TCLBLEND_OBJ)/tclblend \
+	time jtclsh)
+
 $(TCLBLEND_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
@@ -321,7 +330,7 @@ $(TCLBLEND_OBJ): $(TCLTK_OBJ)
 # Jacl
 
 JACL_MAJOR_VERSION = 1.0
-JACL_MINOR_VERSION = a1up1
+JACL_MINOR_VERSION = b1up1
 JACL_VERSION = $(JACL_MAJOR_VERSION)$(JACL_MINOR_VERSION)
 
 JACL_SRC =	$(TCLTK_SRC)/jacl$(JACL_VERSION)/unix
@@ -344,8 +353,124 @@ jacl:
 install_jacl:
 	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE) install)
 
+test_jacl:
+	(cd $(JACL_OBJ); PWD=$(JACL_OBJ); export PWD; $(MAKE) test)
+time_jacl:
+	@echo "Be sure to run 'make test_jacl' first"
+	(cd $(JACL_OBJ); \
+		(echo lappend auto_path [pwd]\; \
+		cd $(JACL_SRC)/../tests\; \
+		source $(TCLBLEND_SRC)/../tests/time\; printStats\; exit\; )| \
+	CLASSPATH=$(JACL_OBJ)/jacl:$(JACL_OBJ)/jacl/tests:$(JACL_OBJ)/jacl/tests/javaload:$(TCLBLEND_OBJ)/tclblend \
+	time java tcl.lang.Shell)
+
 $(JACL_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+######################################################
+# Tcldp
+
+TCLDP_MAJOR_VERSION = 4.0
+TCLDP_MINOR_VERSION = 
+TCLDP_VERSION = $(TCLDP_MAJOR_VERSION)$(TCLDP_MINOR_VERSION)
+
+TCLDP_SRC =	$(TCLTK_SRC)/tcl-dp/unix
+TCLDP_OBJ =	$(TCLTK_OBJ)/tcl-dp$(TCLDP_VERSION)
+TCLDP_DEST =	$(TCLTK_DEST)/dp.$(PTARCH)
+TCLDP_INDEPENDENT_DEST =	$(TCLTK_DEST)/dp
+
+all_tcldp: config_tcldp tcldp install_tcldp
+config_tcldp: $(TCLDP_OBJ)
+	@echo "Configuring tcldp"
+	(cd $(TCLDP_OBJ); PWD=$(TCLDP_OBJ); export PWD; \
+		$(TCLDP_SRC)/configure \
+		--srcdir=$(TCLDP_SRC) \
+		--with-tcl=$(TCL_OBJ)/unix \
+		--prefix=$(TCLDP_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+tcldp:
+	(cd $(TCLDP_OBJ); PWD=$(TCLDP_OBJ); export PWD; $(MAKE))
+
+# We are not handling separate prefix and exec_prefix directories here.
+install_tcldp: $(TCLDP_DEST) $(TCLDP_DEST)/pkgIndex.tcl \
+		$(TCLDP_DEST)/init.tcl
+	# We should use install-sh or something here.
+	cp $(TCLDP_OBJ)/libdp40.so $<
+	cp $(TCLDP_SRC)/../library/*.tcl $<
+
+
+$(TCLDP_DEST)/pkgIndex.tcl: $(TCLDP_DEST)
+	echo "package ifneeded dp 4.0 [list source [file join \$$dir init.tcl]]" > $@"
+
+$(TCLDP_DEST)/init.tcl: $(TCLDP_DEST)
+	echo "set dir $(TCLDP_DEST)" > $@
+	echo "load [file join \$$dir libdp40[info sharedlibextension]]" >> $@
+	echo "source [file join \$$dir acl.tcl]" >> $@
+	echo "source [file join \$$dir distribObj.tcl]" >> $@
+	echo "source [file join \$$dir dp_atclose.tcl]" >> $@
+	echo "source [file join \$$dir dp_atexit.tcl]" >> $@
+	echo "source [file join \$$dir ldelete.tcl]" >> $@
+	echo "source [file join \$$dir oo.tcl]" >> $@
+	echo "source [file join \$$dir rpc.tcl]" >> $@
+
+$(TCLDP_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+$(TCLDP_DEST): $(TCLTK_DEST)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+######################################################
+# Tcl8dp
+# Tcl-DP for tcl8
+TCL8DP_MAJOR_VERSION = 4.0
+TCL8DP_MINOR_VERSION = 
+TCL8DP_VERSION = $(TCL8DP_MAJOR_VERSION)$(TCL8DP_MINOR_VERSION)
+
+TCL8DP_SRC =	$(TCLTK_SRC)/tcl-dp/unix
+TCL8DP_OBJ =	$(TCLTK_OBJ)/tcl8-dp$(TCL8DP_VERSION)
+TCL8DP_DEST =	$(TCLTK_DEST)/dptcl8.$(PTARCH)
+TCL8DP_INDEPENDENT_DEST =	$(TCLTK_DEST)/dp
+
+all_tcl8dp: config_tcl8dp tcl8dp install_tcl8dp
+config_tcl8dp: $(TCL8DP_OBJ)
+	@echo "Configuring tcl8dp"
+	(cd $(TCL8DP_OBJ); PWD=$(TCL8DP_OBJ); export PWD; \
+		$(TCL8DP_SRC)/configure \
+		--srcdir=$(TCL8DP_SRC) \
+		--with-tcl=$(TCL8_OBJ) \
+		--prefix=$(TCL8DP_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+tcl8dp:
+	(cd $(TCL8DP_OBJ); PWD=$(TCL8DP_OBJ); export PWD; $(MAKE))
+
+# We are not handling separate prefix and exec_prefix directories here.
+install_tcl8dp: $(TCL8DP_DEST) $(TCL8DP_DEST)/pkgIndex.tcl \
+		$(TCL8DP_DEST)/init.tcl
+	# We should use install-sh or something here.
+	cp $(TCL8DP_OBJ)/libdp40.so $<
+	cp $(TCL8DP_SRC)/../library/*.tcl $<
+
+
+$(TCL8DP_DEST)/pkgIndex.tcl: $(TCL8DP_DEST)
+	echo "package ifneeded dp 4.0 [list source [file join \$$dir init.tcl]]" > $@"
+
+$(TCL8DP_DEST)/init.tcl: $(TCL8DP_DEST)
+	echo "set dir $(TCL8DP_DEST)" > $@
+	echo "load [file join \$$dir libdp40[info sharedlibextension]]" >> $@
+	echo "source [file join \$$dir acl.tcl]" >> $@
+	echo "source [file join \$$dir distribObj.tcl]" >> $@
+	echo "source [file join \$$dir dp_atclose.tcl]" >> $@
+	echo "source [file join \$$dir dp_atexit.tcl]" >> $@
+	echo "source [file join \$$dir ldelete.tcl]" >> $@
+	echo "source [file join \$$dir oo.tcl]" >> $@
+	echo "source [file join \$$dir rpc.tcl]" >> $@
+
+$(TCL8DP_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+$(TCL8DP_DEST): $(TCLTK_DEST)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
 
 ######################################################
 # TclX rules
@@ -486,3 +611,7 @@ clean_itcl:
 #######################
 $(TCLTK_OBJ)/makefile:
 	ln -s $(TCLTK_SRC)/makefile $@
+
+
+
+
