@@ -35,6 +35,7 @@ most significant bit first.
 	noInternalState();
     }
     setup {
+        /* Need (int) cast on sizeof to eliminate gcc warning */
 	if (int(nBits) > sizeof(int)*8) {
 	    StringList message = "nBits needs to be less than";
 	    message << (unsigned int)(sizeof(int)*8);

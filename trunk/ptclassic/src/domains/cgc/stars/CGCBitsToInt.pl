@@ -39,7 +39,8 @@ output integer will always be non-negative.
 	noInternalState();
     }
     setup {
-	if (int(nBits) > sizeof(int)*8) {
+        /* Need (int) cast on sizeof to eliminate gcc warning */
+	if (int(nBits) > (int)sizeof(int)*8) {
 	    StringList message = "nBits needs to be less than";
 	    message << (unsigned int)(sizeof(int)*8);
 	    Error::abortRun(*this,message);
