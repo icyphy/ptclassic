@@ -4,9 +4,9 @@ defstar {
         desc {
 A Finite Impulse Response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are in the "taps" state variable.
-Default coefficients give an 8th order, linear phase lowpass
-filter. To read coefficients from a file, replace the default
-coefficients with "<fileName".
+Default coefficients give an 8th-order, linear phase lowpass filter.
+To read coefficients from a file, replace the default coefficients
+with "<fileName".
         }
         version { $Id$ }
         author { E. A. Lee, A. Khazeni }
@@ -23,17 +23,17 @@ This star implements a finite-impulse response filter with multirate capability
 .
 .Id "filter, FIR"
 .Id "FIR filter"
-The default coefficients correspond to an eighth order, equiripple,
-linear-phase, lowpass filter.  The 3dB cutoff frequency at about 1/3
-of the Nyquist frequency.  To load filter coefficients from a file,
+The default coefficients correspond to an eighth-order, equiripple,
+linear-phase, lowpass filter.  The 3dB cutoff frequency is at approximately
+1/3 of the Nyquist frequency.  To load the filter coefficients from a file,
 simply replace the default coefficients with the string "<filename".
 .pp
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the FIR filter to work as expected regardless of
 the directory in which the ptolemy process actually runs.
-It is best to use tilde's in the filename to reference them to user's
-home directory.  This way, future filesystem reorganizations
+It is best to use tilde characters in the filename to reference them to
+the user's home directory.  This way, future file system reorganizations
 will have minimal effect.
 .pp
 When the \fIdecimation\fP (\fIinterpolation\fP)
@@ -41,12 +41,12 @@ state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
 it would be using UpSample and DownSample stars;
-a polyphase structure is used internally, avoiding unnecessary use
-of memory and unnecessary multiplication by zero.
-Arbitrary sample-rate conversions by rational factors can
-be accomplished this way.
+a polyphase structure is used internally, thereby avoiding the
+unnecessary memory locations and multiplication by zero.
+Arbitrary sample rate conversions by rational factors can
+be accomplished in this way.
 .pp
-To design a filter for a multirate system, simply assume the
+To design a filter for a multirate system, simply assume that the
 sample rate is the product of the interpolation parameter and
 the input sample rate, or equivalently, the product of the decimation
 parameter and the output sample rate.
@@ -55,8 +55,8 @@ parameter and the output sample rate.
 .Ir "filter, multirate"
 In particular, considerable care must be taken to avoid aliasing.
 Specifically, if the input sample rate is f,
-then the filter stopband should begin before f/2.
-If the interpolation ratio is i, then f/2 is a fraction 1/2i
+then the filter stopband should begin before $f/2$.
+If the interpolation ratio is $i$, then $f/2$ is a fraction $1/(2 i)$
 of the sample rate at which you must design your filter.
 .pp
 The \fIdecimationPhase\fP parameter is somewhat subtle.
@@ -65,7 +65,7 @@ Its interpretation is as follows; when decimating,
 samples are conceptually discarded (although a polyphase structure
 does not actually compute the discarded samples).
 If you are decimating by a factor of three, then you will select
-one of every three outputs, with three possible phases.
+one of every three outputs, with one of three possible phases.
 When decimationPhase is zero (the default),
 the latest (most recent) samples are the ones selected.
 The decimationPhase must be strictly less than
@@ -91,10 +91,11 @@ For more information about polyphase filters, see F. J. Harris,
                 default {
         "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
                 }
-                desc { Filter tap values. The precision of these taps
-in bits by default is 1.24.  Currently if a different precision is desired
-the cast to the new precision must be done explicitly in the go directive 
-of the star as done here. }
+                desc {
+Filter tap values. The precision of these taps
+in bits by default is 1.24.  Currently if a different precision is desired,
+then the cast to the new precision must be written explicitly in the go
+method of the star as is implemented in this star. }
         }
         defstate {
                 name {decimation}
@@ -119,15 +120,16 @@ of the star as done here. }
                 type {int}
                 default {"YES"}
                 desc {
-Use the arriving particles as they are if YES.  Cast them to the
-precision specified by the parameter "InputPrecision" otherwise. }
+Flag indicating whether or not to use the arriving particles as they are:
+YES keeps the same precision, and NO casts them to the precision specified
+by the parameter "InputPrecision". }
         }
         defstate {
                 name { InputPrecision }
                 type { string }
                 default { "2.14" }
                 desc {
-Precision of the input in bits.  The input particles are only casted
+Precision of the input in bits.  The input particles are only cast
 to this precision if the parameter "ArrivingPrecision" is set to NO.}
         }
         defstate {
@@ -203,7 +205,7 @@ to this precision if the parameter "ArrivingPrecision" is set to NO.}
             // Starting phase depends on the decimationPhase state.
             phase = Decim - int(decimationPhase) - 1;
 
-            // Interpterate once for each input consumed
+            // Interpolate once for each input consumed
             for (int inC = 1; inC <= Decim; inC++) {
                 // Produce however many outputs are required
                 // for each input consumed
@@ -232,4 +234,3 @@ to this precision if the parameter "ArrivingPrecision" is set to NO.}
             }
         }
 }
-
