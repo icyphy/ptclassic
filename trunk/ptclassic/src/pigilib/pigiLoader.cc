@@ -185,15 +185,28 @@ KcLoadInit (const char* argv0) {
 	Linker::init (argv0);
 	// look for a file specifying modules to be permanently linked in
 	// this relies on pigiRpc starting in the home directory.
-#ifdef notdef
-// This may or may not be safe for now...
+}
+
+// Function to read in a file and hand its contents as arguments
+// to the permlink function.  The file has one line in it, which
+// specifies arguments for the loader to be permanently linked in.
+
+extern "C" void
+KcDoStartupLinking() {
 	ifstream lstream(".pigilink");
 	if (lstream) {
-		char buf[1010];
-		lstream.getline(buf, 999);
-		Linker::multiLink(buf, 1);
+		const int bufsize = 1024;
+		char buf[bufsize], *p;
+		strcpy(buf, "permlink ");
+		p = buf + strlen(buf);
+		PrintDebug("processing .pigilink file");
+		lstream.getline(p, bufsize-10);
+		PrintDebug(buf);
+		if (Linker::multiLink(p, 1))
+			PrintDebug("link successful");
+		else
+			PrintDebug("link failed");
 	}
-#endif
 }
 
 // Load an object file (local only)
@@ -232,7 +245,7 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 	sprintf (ccName, "%s/%s%s.cc", srcDir, idomain, name);
 	char *sourceFile = preproc ? plName : ccName;
 // check existence of file.
-	int fd = open (sourceFile, O_RDONLY);
+	int fd = open (sourceFile, 0);
 	if (fd < 0) return noPermission ("Loader: can't open ", plName);
 	close (fd);
 	sprintf (oName, "%s/%s%s.o", objDir, idomain, name);
