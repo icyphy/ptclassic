@@ -45,7 +45,6 @@ EXTRA_SRCS =	\
 	EditForestHelp.html \
 	EditPaletteHelp.html \
 	EditSTDHelp.html \
-	GanttViewHelp.html \
 	GraphicsHelp.html \
 	ProfileTclHelp.html \
 	SlateViewHelp.html \
