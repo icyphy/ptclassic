@@ -50,10 +50,13 @@
 proc ::tycho::controlpanel {filename {widgetname {}}} {
     set name [file rootname [file tail $filename]]
     set directory [file dirname $filename]
-    
+
     # First make sure support packages are loaded
+    # Use update idletasks so we can see that packages are loading
     ::tycho::loadIfNotPresent ::tycho::timer tytimer
+    update idletasks
     ::tycho::loadIfNotPresent ::tycho::cgc tycgc
+    update idletasks
 
     # Check that it's not already loaded
     if { [::info which -command ::tycho::$name] != "" } {
@@ -61,6 +64,8 @@ proc ::tycho::controlpanel {filename {widgetname {}}} {
     }
 
     # Load it
+    puts "loading $filename"
+    update idletasks
     load $filename
 
     # Create the control panel widget
@@ -73,6 +78,18 @@ proc ::tycho::controlpanel {filename {widgetname {}}} {
     # Register the new widget so that we can access it by name later
     ::tycho::ControlPanel::register $name $widgetname
 
+    # Get the name of this module's custom script file. If not
+    # null, source the file. To get the name of the widget, the
+    # source file can use $controlPanel. (This is a global variable
+    # set before sourcing the file.)
+    set scriptfile [::tycho::$name scriptfile]
+    if { $scriptfile != "" } {
+        global controlPanel
+        set controlPanel $widgetname
+puts "Sourcing [::tycho::expandPath $scriptfile]"
+        source [::tycho::expandPath $scriptfile]
+    }
+
     # Return the widget name
     return $widgetname
 }
@@ -82,7 +99,7 @@ proc ::tycho::controlpanel {filename {widgetname {}}} {
 #
 # A <i>ControlPanel</i> is a class that displays a control panel
 # for a Tycho task running in the "background" in Tycho.
-# The task is executed by the _Backgrounder_ class, and
+# The task is executed by the _Scheduler_ class, and
 # interleaves execution with other tasks.
 #
 class ::tycho::ControlPanel {
@@ -112,20 +129,28 @@ class ::tycho::ControlPanel {
     ###################################################################
     ####                      public procs                         ####
 
-    # One line description procedure; listed in alphabetical order
-    proc publicProcA {anyargs} {}
+    # Register a widget by task name
+    proc register {name widget}
+
+    # Register a callback from a star
+    proc starConnect {galaxy star control callback}
 
     ###################################################################
     ####                   protected methods                       ####
-
-    # One line description of the method; listed in alphabetical order
-    protected method protectedMethodA {}
 
     ###################################################################
     ####                   protected variables                     ####
 
     # The common array of iteration counters
     protected common iterationcounter
+
+    # The common array of widgets, indexed by task name
+    protected common widgetnames
+
+    # The array of star parameters. Each index is a list
+    # of star name and control name; the corresponding
+    # value is the callback function.
+    protected variable starparameters
 
     ###################################################################
     ####                   private methods                         ####
@@ -201,61 +226,47 @@ body ::tycho::ControlPanel::constructor {args} {
             -command "::tycho::Scheduler::kill $cmd"
 }
 
-#######################################################################
-#### destructor
-#
-body ::tycho::ControlPanel::destructor {} {
-}
-
 
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
 
-#######################################################################
-#### NameA
-# Description.
-#
-body ::tycho::ControlPanel::publicMethodA {} {
-}
-
-#####################################################################
-#### NameB
-# Description.
-#
-body ::tycho::ControlPanel::publicMethodB {} {
-}
 
     ###################################################################
     ###################################################################
     ####                      public procedures                    ####
 
 #######################################################################
-#### NameA
-# Description.
+#### register
 #
-body ::tycho::ControlPanel::publicProcA {anyargs} {
+# Register a widget by task name.
+#
+body ::tycho::ControlPanel::register {name widget} {
+    set widgetnames($name) $widget
 }
 
+#######################################################################
+#### starConnect
+#
+# Register a callback for a star control. This procedure is
+# called by the *connectControl* function in the *tycgc*
+# support package. Stars call *connectControl* in their
+# *tychoSetup* code stream, to enable user-interface scripts
+# to control their parameters. The callbacks are regular
+# Tcl C functions, and will be the same ones used by the
+# TclTk target.
+#
+body ::tycho::ControlPanel::starConnect {galaxy star control callback} {
+    puts "starConnect $galaxy $star $control $callback"
+    # Add the 
+}
 
     ###################################################################
     ###################################################################
     ####                      protected methods                    ####
 
-#######################################################################
-#### MethodName
-# Description.
-#
-body ::tycho::ControlPanel::protectedMethodA {} {
-}
 
     ###################################################################
     ###################################################################
     ####                      private methods                      ####
 
-#######################################################################
-#### NameA
-# Description.
-#
-body ::tycho::ControlPanel::privateMethodA {} {
-}
