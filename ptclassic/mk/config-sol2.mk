@@ -1,5 +1,5 @@
 #
-# Config file to build on sun4 processor (SparcStation) running Solaris2.3
+# Config file to build on sun4 processor (SparcStation) running Solaris2.4
 # with gcc and g++
 
 # $Id$
@@ -68,7 +68,7 @@ OPTIMIZER =	-O2
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 MULTITHREAD =	-D_REENTRANT
 # Define PTSOL2_4 if you are on Solaris2_4
-LOCALFLAGS =	-DPTSOL2_4
+LOCALFLAGS =	-DPTSOL2_4 -pipe
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
@@ -80,7 +80,8 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 SYSLIBS=-lsocket -lnsl -ldl -lg++ -lm
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
-LINKSTRIPFLAGS=-Wl,-s
+# -s conflicts with purelink, so we leave it off.
+#LINKSTRIPFLAGS=-Wl,-s
 
 # Can't use -static here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
@@ -101,12 +102,12 @@ X11_LIBDIR =	/usr/openwin/lib
 X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	
+COLLECTOR =
 
-PURELINK =	
-PURIFY = 	purify -cache-dir=/var/pure/cache
-QUANTIFY = 	quantify	
-PURECOV =	purecov -cache-dir=/var/pure/cache
+PURELINK =	purelink $(COLLECTOR)
+PURIFY =	purelink $(COLLECTOR) purify
+QUANTIFY =	purelink $(COLLECTOR) quantify
+PURECOV = 	purecov $(COLLECTOR)
 
 # Variables for local Matlab installation
 # -- If Matlab is installed, then MATLABDIR points to where MATLAB is installed
