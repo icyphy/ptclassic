@@ -808,14 +808,14 @@ ifdef PITCL
 	ifdef USE_CORE_STATIC_LIBS
 		LIBPTCL = $(LIBDIR)/libpitcl.a
 	else
-		LIBPTCL = $(LIBDIR)/libpitcl.so
+		LIBPTCL = $(LIBDIR)/libpitcl.$(LIBSUFFIX)
 	endif
 else
 	# Use libptcl, not libpitcl
 	ifdef USE_CORE_STATIC_LIBS
 		LIBPTCL = $(LIBDIR)/libptcl.a
 	else
-		LIBPTCL = $(LIBDIR)/libptcl.so
+		LIBPTCL = $(LIBDIR)/libptcl.$(LIBSUFFIX)
 	endif
 endif
 
