@@ -223,7 +223,7 @@ test SDFFixToInt { SDFFixToInt} {
 ######################################################################
 #### test SDFFloatToCx
 # 
-test SDFFloatToCx { SDFFloatToCx} {
+test SDFFloatToCx-1 { SDFFloatToCx: integer steps} {
     sdfTest1In1Out FloatToCx
 } {{(0.0,0.0)	
 (1.0,0.0)	
@@ -235,6 +235,23 @@ test SDFFloatToCx { SDFFloatToCx} {
 (7.0,0.0)	
 (8.0,0.0)	
 (9.0,0.0)	
+}}
+
+######################################################################
+#### test SDFFloatToCx
+# 
+test SDFFloatToCx-2 { SDFFloatToCx: fractional steps} {
+    sdfTest1In1Out FloatToCx 0.015625
+} {{(0.0,0.0)	
+(0.015625,0.0)	
+(0.03125,0.0)	
+(0.046875,0.0)	
+(0.0625,0.0)	
+(0.078125,0.0)	
+(0.09375,0.0)	
+(0.109375,0.0)	
+(0.125,0.0)	
+(0.140625,0.0)	
 }}
 
 ######################################################################
