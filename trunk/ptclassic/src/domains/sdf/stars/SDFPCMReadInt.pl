@@ -53,7 +53,7 @@ periodically repeated, or the file contents can be padded with zeros.
 	setup {
 		input.close();
 		// open input file
-		input.open(fileName);
+		input.open(fileName, ios::in|ios::binary );
 		if (!input) {
 			Error::abortRun(*this, "can't open file ", fileName);
 		}
@@ -71,7 +71,7 @@ periodically repeated, or the file contents can be padded with zeros.
 			}
 			else if (periodic) {	// close and re-open file
 				input.close();
-				input.open(fileName);
+                                input.open(fileName, ios::in|ios::binary );
 				if (!input) {
 					Error::abortRun(*this,
 					     "can't re-open file ",
