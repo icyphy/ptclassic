@@ -38,40 +38,189 @@ Programmer: Jose Luis Pino
 #endif
 
 #include "CGWormTarget.h"
-// #include "CodeStream.h"
+#include "GalIter.h"
+#include "CGCFork.h"
+#include "Wormhole.h"
+#include "KnownTarget.h"
+#include "AnyCGStar.h"
+#include "ParScheduler.h"
 #include <iostream.h>
 
+class DummyComm : public AnyCGStar {
+public:
+    DummyComm(int t, int f):AnyCGStar(),partner(0),to(t),from(f){};
+    DummyComm():AnyCGStar(),partner(0),to(0),from(0){};
+    DummyComm *partner;
+    int to, from;
+};
+
+class DummySend : public DummyComm {
+public:
+    InAnyCGPort input;
+    DummySend(int t, int f):DummyComm(t,f) {
+	addPort(input.setPort("input",this,ANYTYPE));
+    }
+};
+
+class DummyReceive : public DummyComm {
+public:
+    OutAnyCGPort output;
+    DummyReceive(int t, int f):DummyComm(t,f) {
+	addPort(output.setPort("output",this,ANYTYPE));
+    }
+};
+
+CGWormTarget::
 CGWormTarget(const char* name,const char* starType,const char* desc):
 CGSharedBus(name,starType,desc) {
-//    childType.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
-    childTargets.put("default-CGC ","default-CGC");
-    schedName.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
-    oneStarOneProc.setAttributes(A_NONSETTABLE|A_NONCONSTANT);
+    childType.setInitValue("default-CGC");
 }
 
 void CGWormTarget::setup() {
-    oneStarOneProc.setCurrentValue("YES");
-    schedName.setCurrentValue("Hier");
-    // CodeStream childTargets;
-    GalStarIter nextStar;
+    GalStarIter nextStar(*galaxy());
     CGStar* star;
+    // FIXME - This code only processes top-level wormholes
     while ((star = (CGStar*)nextStar++) != NULL) {
 	Wormhole* worm = ((CGStar*)star)->asWormhole();
+	if (!worm) continue;
 	BlockPortIter nextPort(*star);
 	PortHole* port;
 	while ((port = nextPort++) != NULL) {
-	    if (! port->far()->parent()->isA("CGCStar") && 
+	    Wormhole* farWorm = ((CGStar*)port->far()->parent())->asWormhole();
+	    int farCGCFlag = farWorm?
+		(strcmp(farWorm->insideDomain(),"CGC") == 0)
+		: port->far()->parent()->isA("CGCStar");
+	    if (!farCGCFlag && 
 		strcmp(worm->insideDomain(),"CGC") != 0) {
 		PortHole* farPort = port->far();
 		int numDelays = port->numInitDelays();
 		const char* delayValues = port->initDelayValues();
 		port->disconnect();
+		CGCFork* cgcFork = new CGCFork;
+		galaxy()->addBlock(*cgcFork,"CGCWormFork");
+		PortHole& cgcForkOutput = cgcFork->output.newConnection();
+		if (farPort->isItOutput()) {
+		    farPort->connect(cgcFork->input,numDelays, delayValues);
+		    cgcForkOutput.connect(*port,0,"");
+//		    cgcFork->input.inheritTypeFrom(*farPort);
+//		    if (port->type() == ANYTYPE)
+//			port->inheritTypeFrom(cgcForkOutput);
+		}
+		else {
+		    port->connect(cgcFork->input,numDelays, delayValues);
+		    cgcForkOutput.connect(*farPort,0,"");
+//		    cgcFork->input.inheritTypeFrom(*port);
+//		    if (farPort->type() == ANYTYPE)
+//			farPort->inheritTypeFrom(cgcForkOutput);
+		}
 	    }
 	}
     }
     CGSharedBus::setup();
 }
 
-static CGWormTarget targ("WormTarget","CGStar","A CG wormhole target");
+DataFlowStar* CGWormTarget::createSend(int from, int to, int /*num*/) {
+    return new DummySend(to,from);
+}
+    
+DataFlowStar* CGWormTarget::createReceive(int from, int to, int /*num*/) {
+    return new DummyReceive(to,from);
+}
 
-static KnownTarget entry(targ,"WormTarget");
+inline DFPortHole* singlePort(DataFlowStar& star) {
+    if (star.numberPorts() != 1) {
+	StringList message;
+	message << "returnSinglePort: The star, "
+		<< star.className() << ", does not have "
+		"the only 1 port; it has "
+		<< star.numberPorts() << "ports.";
+	Error::abortRun(message);
+	return 0;
+    }
+    BlockPortIter ports(star);
+    return (DFPortHole*)ports++;
+}
+
+int CGWormTarget::replaceCommBlock
+(DataFlowStar& newStar, DataFlowStar& oldStar) {
+    if (!oldStar.parent()) {
+	Error::abortRun(oldStar,"replaceCommBlock: The old "
+			"communication star has no parent galaxy.");
+	return FALSE;
+    }
+    Galaxy& subGalaxy = oldStar.parent()->asGalaxy();
+    subGalaxy.removeBlock(oldStar);
+    subGalaxy.addBlock(newStar,newStar.name());
+    DFPortHole *newPort, *oldPort;
+    if ((newPort = singlePort(newStar)) == NULL) return FALSE;
+    if ((oldPort = singlePort(oldStar)) == NULL) return FALSE;
+    newStar.repetitions = oldStar.repetitions;
+
+    PortHole *farPort = oldPort->far();
+    int numDelays = oldPort->numInitDelays();
+    const char* delayValues = oldPort->initDelayValues();
+    int numSample = oldPort->numXfer();
+    oldPort->disconnect();
+
+    farPort->connect(*newPort,numDelays,delayValues);
+    newPort->setSDFParams(numSample,numSample-1);
+
+    if (! ((ParScheduler*)scheduler())->myProcs()
+	->replaceCommStar(newStar,oldStar)) {
+	Error::abortRun(*this,"Could not replace Send/Receive stars.");
+	return FALSE;
+    }
+
+    delete &oldStar;
+    return TRUE;
+}
+	
+void CGWormTarget::pairSendReceive(DataFlowStar* oldSend,
+				   DataFlowStar* oldReceive) {
+    int from = ((DummyComm*)oldSend)->from;
+    int to = ((DummyComm*)oldSend)->to;
+
+    PortHole* dummyPort = singlePort(*oldSend);
+    if (dummyPort == NULL) return;
+    
+    // FIXME - Assumes CGC is child 0
+    CommPair pair;
+
+    DataFlowStar *newSend, *newReceive;
+    if (from == 0) {
+	pair = cgChild(to)->fromCGC(*dummyPort);
+	if (SimControl::haltRequested()) return;
+	newSend = pair.cgcStar;
+	newReceive = pair.cgStar;
+    }
+    else {
+	pair = cgChild(from)->toCGC(*dummyPort);
+	if (SimControl::haltRequested()) return;
+	newSend = pair.cgStar;
+	newReceive = pair.cgcStar;
+    }
+    
+    if(!replaceCommBlock(*newSend,*oldSend) ||
+       !replaceCommBlock(*newReceive,*oldReceive)) {
+	delete newSend;
+	delete newReceive;
+	return;
+    }
+
+    StringList link = symbol("Link");
+    StringList send, receive;
+    send << "Send_" << link;
+    receive << "Receive_" << link;
+    newSend->setName(savestring(send));
+    newReceive->setName(savestring(receive));
+}
+
+int CGWormTarget::runCode() {	
+    // FIXME - assumes cgc target is child 0
+    return cgChild(0)->runCode();
+}
+
+ISA_FUNC(CGWormTarget,CGSharedBus);
+ 
+static CGWormTarget cgWormTarget("WormTarget","CGStar","A CG wormhole target");
+static KnownTarget entry(cgWormTarget,"WormTarget");
