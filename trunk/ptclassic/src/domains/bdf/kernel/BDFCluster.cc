@@ -284,15 +284,88 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 				// requirement 3: no buried control arcs.
 				// if met, do the merge and return the
 				// result.
-				if (!indirectPath(src,dest) &&
-				    !buriedCtlArcs(src,dest))
-					return merge(src,dest);
+				if (!indirectPath(src,dest)) {
+					if (!buriedCtlArcs(src,dest))
+						return merge(src,dest);
+					else return tryLoopMerge(src,dest);
+				}
 			}
 		}
 	}
 	return 0;
 }
 
+static int allowBury = FALSE;
+
+BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
+	// assumption: a and b meet every condition for merging
+	// except for buried control arcs.
+	// we can still merge them under certain conditions by doing
+	// a do-while loop around the merge.
+
+	// A necessary condition is that all external arcs be
+	// conditional on the same (or equivalent) signal.
+	// Even so, we may not want to do it; creating "if" arcs
+	// may be better.
+
+	BDFClustPortIter nexta(*a);
+	BDFClustPortIter nextb(*b);
+	BDFClustPort *p;
+	BDFClustPort *cond = 0;
+	BDFRelation desrel;
+	int rateChange = FALSE;
+
+	while ((p = nexta++) != 0 || (p = nextb++) != 0) {
+		BDFClustPort *pFar = p->far();
+		if (!pFar || pFar->parentClust() == a ||
+		    pFar->parentClust() == b) continue;
+		// OK, p is external.  Must be conditional.
+		if (!TorF(p->relType())) return 0;
+		if (cond) {
+			if (sameSignal(cond,p->assoc()) != desrel) return 0;
+		}
+		else {
+			cond = p->assoc();
+			desrel = p->relType();
+		}
+		if (p->numIO() != pFar->numIO()) rateChange = TRUE;
+	}
+	if (rateChange) {
+		if (logstrm)
+			*logstrm << a->name() << " and " << b->name()
+				 << ": doing loop merge, result:\n";
+		cond = cond->inPtr();
+		// hack!
+		allowBury = TRUE;
+		BDFCluster * c = merge(a,b);
+		allowBury = FALSE;
+		c->makeWhile(cond,desrel);
+		if (logstrm) *logstrm << *c << "\n";
+		return c;
+	}
+	if (logstrm)
+		*logstrm << " could be loop-merged, but no rate change\n";
+	return 0;
+}
+
+
+// make a cluster into a while loop.  Warning: the assumption is that
+// all external arcs are conditioned on cond; perhaps this should
+// be checked.
+
+void BDFCluster::makeWhile(BDFClustPort* cond,BDFRelation rel) {
+	// now de-conditionalize all c arcs.
+	BDFClustPortIter nextarc(*this);
+	BDFClustPort *p;
+	while ((p = nextarc++) != 0) {
+		p->setRelation(BDF_NONE);
+	}
+	// now make c a dowhile.
+	pCond = cond;
+	pType = (rel == BDF_TRUE) ? DO_UNTILTRUE : DO_UNTILFALSE;
+}
+
+// array of "reversals" for the loop types.
 static BDFLoopType revType[] = {
 	DO_ITER, DO_IFFALSE, DO_IFTRUE, DO_UNTILFALSE, DO_UNTILTRUE
 };
@@ -611,21 +684,35 @@ static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
 	return a;
 }
 
+// return TRUE if the parent cluster of arc has an output that is
+// connected to c.
+static int hasParallel(BDFClustPort* arc,BDFCluster* c) {
+	BDFCluster* pc = arc->parentClust();
+	BDFClustPortIter nextp(*pc);
+	BDFClustPort* p;
+	while ((p = nextp++) != 0) {
+		if (p->far() == 0 || p->isItInput()) continue;
+		if (p->far()->parentClust() == c) return TRUE;
+	}
+	return FALSE;
+}
+
 // this function forms a connection that provides "cond" to the current
-// cluster.  If cond is an input, we try to find a corresponding output.
-// if there is not we just use it as is.
+// cluster.  We prefer trying to remap the signal so that it is "parallel"
+// to another input arc.
 
 BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
 					  BDFRelation& rel) {
-	if (cond->isItInput()) {
+	if (!hasParallel(cond,this)) {
 		BDFClustPortRelIter iter(*cond);
 		BDFClustPort* acond;
 		BDFRelation r2;
 		while ((acond = iter.next(r2)) != 0) {
-			if (acond->isItOutput()) {
+			if (r2 == BDF_COMPLEMENT)
+				rel = reverse(rel);
+			if (hasParallel(acond,this)) {
 				cond = acond;
-				if (r2 == BDF_COMPLEMENT)
-					rel = reverse(rel);
+				break;
 			}
 		}
 	}
@@ -728,8 +815,11 @@ ostream& BDFCluster::printPorts(ostream& o) {
 	BDFClustPortIter next(*this);
 	BDFClustPort* p;
 	while ((p = next++) != 0) {
-		o << prefix << *p;
-		prefix = "\n\t  ";
+		// for selfloops, print only the input arc of the loop.
+		if (p->isItInput() || !p->selfLoop()) {
+			o << prefix << *p;
+			prefix = "\n\t  ";
+		}
 	}
 	return o << " )";
 }
@@ -840,10 +930,17 @@ void BDFClusterBag :: createInnerGal() {
 		gal->dupStream((BDFClusterGal*)parent());
 }
 
-// test for a pair of ports that are connected
-inline int ctlDelay(BDFClustPort* p,BDFClustPort* pfar) {
-	return (p->numTokens() > 0 &&
-		(p->isControl() || pfar->isControl()));
+// test to see whether we should turn a connection into a self loop after
+// a merge.  It is assumed that a and b are connected.  We leave the
+// self-loop under two conditions:
+// 1) if it is a control arc with delay, or
+// 2) it is a pair of conditional ports with mismatched conditions.
+// in the latter case, we should check somehow that the control arcs
+// for the signals remain visible.
+
+static int leaveSelfLoop(BDFClustPort* a,BDFClustPort* b) {
+	return ((a->numTokens()>0 && (a->isControl() || b->isControl())) ||
+		(TorF(a->relType()) && TorF(b->relType()) && !condMatch(a,b)));
 }
 
 // This function absorbs an atomic cluster into a bag.
@@ -858,15 +955,14 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 	gal->addBlock(*c,c->name());
 // adjust the bag porthole list.  Some of c's ports will now become
 // external ports of the cluster, while some external ports of the
-// cluster that connnect to c will disappear.
-// exception: we do not zap external ports if they are control ports
-// with delay; we make them self-loops.
+// cluster that connnect to c will disappear.  We will leave connecting
+// arcs as self-loops under some conditions (see above).
 	BDFClustPortIter next(*c);
 	BDFClustPort* cp;
 	while ((cp = next++) != 0) {
 		BDFClustPort* pFar = cp->far();
 		assert(cp);
-		if (pFar->parent() == this && !ctlDelay(cp,pFar)) {
+		if (pFar->parent() == this && !leaveSelfLoop(cp,pFar)) {
 			// the far side of this guy is one of my bag pointers.
 			// zap it and connect directly.
 			BDFClustPort* p = pFar->inPtr();
@@ -900,13 +996,13 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 
 	// zap is the list of connections between the two clusters.  These
 	// become internal connections so we zap them from both bags' lists
-	// of external pointers.  Exception: do not zap control ports with
-	// delay
+	// of external pointers.  Exceptions: as for absorb
 
 	while ((p = nextbp++) != 0) {
 		BDFClustPort *pFar = p->far();
 		assert(pFar);
-		if (pFar->parent() == b && !ctlDelay(p,pFar)) zap.put(p);
+		if (pFar->parent() == b && !leaveSelfLoop(p,pFar))
+			zap.put(p);
 	}
 
 	// now zap those that become internal
@@ -975,7 +1071,8 @@ void BDFClusterBag::adjustAssociations() {
 			}
 			// "upper" should always be non-null now
 			if (!upper) {
-				Error::abortRun(*bagp,msg);
+				if (!allowBury)
+					Error::abortRun(*bagp,msg);
 				bagp->setRelation(BDF_NONE);
 			}
 			else
@@ -1425,6 +1522,12 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	// do the clustering.
 	cgal = new BDFClusterGal(gal,logstrm);
 	cgal->cluster();
+	if (logstrm) {
+		*logstrm << "Clustering complete.  ";
+		if (cgal->numberClusts() > 1)
+			*logstrm << "Final clustering:\n" << *cgal;
+		else *logstrm << "\n";
+	}
 	cgal->initialize();
 	setGalaxy(*cgal);
 // recompute top-level repetitions.
