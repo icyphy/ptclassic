@@ -41,7 +41,12 @@ HDRS	      = compile.h \
 		mkTerm.h \
 		mkIcon.h \
 		palette.h \
-		octMacros.h
+		octMacros.h \
+		ptk.h \
+		ptkRegisterCmds.h \
+		ptkNet.h \
+		ptkTkSetup.h
+
 
 LIBCSRCS      = main.c \
 		util.c \
@@ -61,9 +66,20 @@ LIBCSRCS      = main.c \
 		mkIcon.c \
 		palette.c \
 		xfunctions.c \
-		options.c
+		options.c \
+		ptkGlobals.c \
+		ptkTemplate.c \
+		ptkNet.c \
+		ptkTkSetup.c 
 
-LIBCPPSRCS    = kernelCalls.cc XError.cc pigiLoader.cc
+
+LIBCPPSRCS    = kernelCalls.cc \
+		XError.cc \
+		pigiLoader.cc \
+		ptkConsoleWindow.cc \
+		ptkRegisterCmds.cc \
+		reg.cc
+
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
@@ -75,8 +91,8 @@ all:	makefile $(LIB)
 
 install: makefile $(LIBDIR)/$(LIB)
 
-INCL=-I$(KERNDIR)
-C_INCL=-I$(OCTTOOLS)/include $(X11INCL)
+INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
+C_INCL=-I$(OCTTOOLS)/include $(X11INCL) -I$(TCL_H_DIR)
 
 lint:	$(LIBCSRCS)
 	lint -u -I$(OCTTOOLS)/include $(LIBCSRCS) > lint
