@@ -26,6 +26,7 @@ DEAnd.pl \
 DEArbitrate.pl \
 DEBeep.pl \
 DEBlackHole.pl \
+DECellRoute.pl \
 DECellToImage.pl \
 DEClock.pl \
 DEDelay.pl \
