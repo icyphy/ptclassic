@@ -536,7 +536,8 @@ body ::tycho::Monitor::initialize \
         ::tycho::Monitor::initializeToolbar $toolbar
     }
 
-    $this raiseWindow
+    # Don't raise the window here, or we will see the window resize itself
+    #$this raiseWindow
     
     toolbar focusin commandtoexec
     if {$itk_option(-autostart) == 1} {
