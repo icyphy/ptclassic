@@ -41,7 +41,8 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	DomainInfo.itcl
+	DomainInfo.itcl \
+	PtWelcomeMessage.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
