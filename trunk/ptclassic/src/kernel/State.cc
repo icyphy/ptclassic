@@ -89,8 +89,10 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		return t;
 	}
 
-reparse:	
-        if (isdigit(*token) || *token == '.' )  {
+reparse:
+// note: we can get a minus if we goto reparse and the value of the
+// substituted state was negative.
+        if (isdigit(*token) || *token == '.' || *token == '-' )  {
 // possible scientific notation if ending in e or E.  Elim + and - as
 // special if so, and append to token.  Ugly hack.
 		int l = strlen(token);
