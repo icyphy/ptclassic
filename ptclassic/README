@@ -14,11 +14,10 @@ In order to run Ptolemy, do the following:
 Where "This_Directory" is the directory where you installed
 Ptolemy.  This README file should be found at $PTOLEMY/README
 
-For further information, see the Ptolemy manual.  To print your own
-copy of the manual, see the README.users_man file in the directory
-ptolemy/doc/users_man.  
+For further information, see $PTOLEMY/doc/index.html
 
 The Ptolemy home page at http://ptolemy.eecs.berkeley.edu has further
 information about Ptolemy.
 
 ptolemy.faq is the Ptolemy Frequently Asked Questions file.
+
