@@ -43,7 +43,7 @@ DataFlowStar is the baseclass for stars in the various dataflow domains.
 // stars should override these methods or avoid calling them; if not,
 // errors will be reported.
 
-DataFlowStar::DataFlowStar() : noTimes(0), repetitions(0,1), nInP(0),
+DataFlowStar::DataFlowStar() : repetitions(0,1), noTimes(0), nInP(0),
 master(0) {}
 
 // default runCost is 0
