@@ -915,6 +915,51 @@ proc HMcurrent_tags {win} {
 #######################################################################
 #### HMgoto
 # Modify Uhler's implementation
+# to not get confused by the presense of the keyword in a value.
+#
+# extract a value from parameter list (this needs a re-do)
+# returns "1" if the keyword is found, "0" otherwise
+#   param:  A parameter list.  It should alredy have been processed to
+#           remove any entity references
+#   key:    The parameter name
+#   val:    The variable to put the value into (use key as default)
+
+proc HMextract_param {param key {val ""}} {
+    
+    if {$val == ""} {
+        upvar $key result
+    } else {
+        upvar $val result
+    }
+    set ws "    \n\r"
+    
+    # look for name=value combinations.  Either (') or (") are valid delimeters
+    if {[regsub -nocase [format {.*%s[%s]*=[%s]*"([^"]*).*} $key $ws $ws] \
+            $param {\1} value] ||
+    [regsub -nocase [format {.*%s[%s]*=[%s]*'([^']*).*} $key $ws $ws] \
+            $param {\1} value] ||
+    [regsub -nocase [format {.*%s[%s]*=[%s]*([^%s]+).*} $key $ws $ws $ws] \
+            $param {\1} value] } {
+        set result $value
+        return 1
+    }
+    
+    # now look for valueless names
+    # I should strip out name=value pairs, so we don't end up with "name"
+    # inside the "value" part of some other key word - some day
+    
+    set bad \[^a-zA-Z\]+
+    # NOTE: Fixed to ignore if there is an "=".  EAL
+    if {[regexp -nocase  "^\[^=\]*$bad$key$bad" -$param-]} {
+        return 1
+    } else {
+        return 0
+    }
+}
+
+#######################################################################
+#### HMgoto
+# Modify Uhler's implementation
 # to support names with spaces and to make it more robust.
 #
 # The application should call here with the fragment name
