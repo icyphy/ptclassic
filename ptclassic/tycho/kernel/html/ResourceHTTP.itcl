@@ -212,9 +212,6 @@ class ::tycho::ResourceHTTP {
     # Parse a url
     proc splitURL {url}
 
-    # Return the type of a given file
-    proc type {path}
-
     ###################################################################
     ####                         protected methods                 ####
 
