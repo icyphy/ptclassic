@@ -78,64 +78,103 @@ extern "C" void KcLog(const char* str) { LOG << str; }
 // Parse a classname
 // We allow classnames to be specified as, say
 // Printer.input=2
-// This means to make a Printer star and to create two portholes
-// within the MultiPortHole named "input".  For now, there may
-// be only one multiporthole name specified.
+// or
+// SomeStar.state=value
+// they may be cascaded, for up to MAX_NUM_FIELDS fields:
+// Star.a=b.c=d.e=f
+// Values may be quoted like "foo" or 'bar'
+// Star.a="1.0".b='a b c'
 //
-// The returned name and mphname are in static buffers and will be
-// overwritten by the next call.
+// The first field represents either the name of a multiporthole
+// or the name of a state.  The second field represents either
+// the number of ports within the multiport or the value of the
+// state.
+// parseClass does not distinguish the two cases; it only separates
+// out the field names and values.
+
 // First argument: pointer to the name to be parsed
-// Second argument: pointer to a char* array that on return, will point
-//	to the name of the multiPortHole (mph).
-// Third argument: reference to an integer that on return will contain
-//	the number of portHoles to instantiate.
+// Second argument: reference, for returning the number of fields.
+// Third argument: pointer to an array of char* pointers that
+// get set with the names of the fields: port or state names.
+// Fourth argument: pointer to an array of char* pointers that
+// get set with the values for the fields.
+// The third and fourth can be omitted, to avoid returning the fields.
 // Return value: pointer to the stem, or class name.
+// 0 is returned if there is a syntax error.
 
-#define MAX_NUM_MULTS 4
+#define MAX_NUM_FIELDS 20
 
-static const char* parseClass (const char* name, const char* mph[], int nP[]) {
-	static char buf[128], buf2[MAX_NUM_MULTS][128];
-	char *p;
-	p = buf;
+const char quotes[] = "\'\"";
 
-	for( int i = 0; i < MAX_NUM_MULTS; i++) {
-	    mph[i] = buf2[i];
-	    buf2[i][0] = 0;
-	    nP[i] = 0;
+static const char* parseClass (const char* name, int& nf, char** fieldNames=0,
+			       char** fieldValues=0)
+{
+	static char buf[1024];
+	const char* cp = strchr(name,'.');
+	nf = 0;
+	if (cp == 0 || strchr(cp,'=') == 0) return name;
+	int l = cp - name;
+	strcpy(buf,name);
+	buf[l] = 0;
+
+	// parse a series of name=value.name=value extensions.
+	// all pointers point into buf, we add null characters to
+	// split fields.
+
+	char * p = buf + l + 1;
+	while (nf < MAX_NUM_FIELDS) {
+		if (fieldNames) fieldNames[nf] = p;
+		p = strchr(p,'=');
+		if (p == 0) return 0;
+		*p++ = 0;
+		char c = *p;
+		// see if this is a quote character, if so, look for
+		// a matching close quote.
+		if (strchr(quotes,c)) {
+			if (fieldValues) fieldValues[nf++] = p+1;
+			else nf++;
+			p = strchr(p+1,c);
+			if (p == 0) return 0;
+			*p++ = 0;
+			if (*p == 0) return buf;
+			else if (*p != '.') return 0;
+			p++;
+		}
+		else {
+			// normal case, dot or end of string ends value.
+			if (fieldValues) fieldValues[nf++] = p;
+			else nf++;
+			p = strchr(p,'.');
+			if (p == 0) return buf;
+			*p++ = 0;
+		}
 	}
-	while (*name && *name != '.') *p++ = *name++;
-	*p = 0;
-	if (*name == 0) return buf;
+	return 0;
+}
 
-	// we have a . field.
-	for(int mphCounter = 0; mphCounter < MAX_NUM_MULTS; mphCounter++) {
-	    name++;
-	    p = buf2[mphCounter];
-	    while (*name && *name != '=')
-		*p++ = *name++;
-	    *p = 0;
-
-	    // do we have a = field?
-	    if (*name == '=') {
-		name++;
-		nP[mphCounter] = atoi (name);
-	    }
-	    // skip to the next '.' or end of string
-	    while (*name && *name != '.') name++;
-	    if(*name == 0) return buf;
+// for debugging.
+extern "C" void testParse(const char* name) {
+	char* names[MAX_NUM_FIELDS];
+	char* values[MAX_NUM_FIELDS];
+	const char* cname;
+	int nf;
+	if ((cname = parseClass(name,nf,names,values)) != 0) {
+		cerr << "base: " << cname << "\n";
+		for (int i = 0; i < nf; i++) {
+			cerr << i << "). {" << names[i] << "} {"
+			     << values[i] << "}\n";
+		}
 	}
-	if(*name == '.') {
-            ErrAdd ("Too many multiPortHoles specified");
-	    return 0;
+	else {
+		cerr << "parseClass error\n";
 	}
-	return buf;
+	cerr.flush();
 }
 
 // Call parseClass from C, returning only the pointer to the class name.
 extern "C" const char* callParseClass (char* name) {
-	const char* junkChar[MAX_NUM_MULTS];
-	int junkInt[MAX_NUM_MULTS];
-	return parseClass (name, junkChar, junkInt);
+	int nf;
+	return parseClass (name, nf);
 }
 
 // const version of Block::multiPortWithName
@@ -149,23 +188,47 @@ static const MultiPortHole* findMPH(const Block* b,const char* name) {
 	return NULL;
 };
 
-// Find a class.  Handle Printer.input=2.  Fail if any mphname is bogus.
+// const version of Block::stateWithName
+static const State* findState(const Block* b,const char* name) {
+	CBlockStateIter next(*b);
+	const State* m;
+	while ((m = next++) != 0) {
+		if (strcmp (name, m->name()) == 0)
+			return m;
+	}
+	return NULL;
+}
+
+// Determine which field names are states and which are multiports
+// in a given block.  Return true for success, false if one is missing.
+
+static boolean checkFields(const Block* b,
+			   const char** names, int nf, int* isMPH) {
+	for(int i=0; i < nf; i++) {
+		if (findMPH(b,names[i])) isMPH[i] = 1;
+		else if (findState(b,names[i])) isMPH[i] = 0;
+		else {
+			char buf[80];
+			sprintf (buf,
+			  "No multiport or state named '%s' in class '%s'",
+				 names[i], b->className());
+			ErrAdd (buf);
+			return FALSE;
+		}
+	}
+	return TRUE;
+}
+
+// Find a class.  Handle Printer.input=2.  Fail if any name is bogus.
 static const Block* findClass (const char* name) {
-	const char* mph[MAX_NUM_MULTS];
-	int nP[MAX_NUM_MULTS];
-	const char* c = parseClass (name, mph, nP);
+	char* names[MAX_NUM_FIELDS];
+	int isMPH[MAX_NUM_FIELDS];
+	int nf;
+	const char* c = parseClass (name, nf, names);
 	if (!c) return 0;
 	const Block* b = KnownBlock::find (c);
 	if (!b) return b;
-	for(int i=0; i < MAX_NUM_MULTS; i++)
-	    if(nP[i] && !findMPH(b,mph[i])) {
-	        char buf[80];
-	        sprintf (buf, "No multiport named '%s' in class '%s'",
-				mph[i], c);
-	        ErrAdd (buf);
-	        return 0;
-	    }
-	return b;
+	return checkFields(b,names,nf,isMPH) ? b : 0;
 }
 
 // This function writes the domain to the log file, if and only if
@@ -204,23 +267,38 @@ KcClearUniverse(const char* name) {
 // Create a new instance of star or galaxy and set params for it
 extern "C" boolean
 KcInstance(char *name, char *ako, ParamListType* pListPtr) {
-	int nP[MAX_NUM_MULTS];
-	const char* mph[MAX_NUM_MULTS];
-	const char* cname = parseClass (ako, mph, nP);
+	char* names[MAX_NUM_FIELDS];
+	char* values[MAX_NUM_FIELDS];
+	int isMPH[MAX_NUM_FIELDS];
+	int nf;
+	const char* cname = parseClass (ako, nf, names, values);
+	if (!cname) return FALSE;
+	const Block* b = KnownBlock::find(cname);
+	if (!b || !checkFields(b,names,nf,isMPH)) return FALSE;
 	if (!cname || !currentGalaxy->addStar(name, cname))
 		return FALSE;
  	LOG << "\tstar " << SafeTcl(name) << " " << SafeTcl(cname) << "\n";
-	for(int j = 0; j < MAX_NUM_MULTS; j++ ) {
-	    if (nP[j] && !currentGalaxy->numPorts (name, mph[j], nP[j]))
-		return FALSE;
-	    if (nP[j])
-		LOG << "\tnumports " << SafeTcl(name) << " " << mph[j] << " "
-			<< nP[j] << "\n";
+	for(int j = 0; j < nf; j++ ) {
+		if (isMPH[j]) {
+			int nP = atoi(values[j]);
+			LOG << "\tnumports " << SafeTcl(name) << " " 
+			    << names[j] << " " << nP << "\n";
+			if (!currentGalaxy->numPorts (name, names[j], nP))
+				return FALSE;
+		}
+		else {
+			LOG << "\tsetstate " << SafeTcl(name) << " "
+			    << SafeTcl(names[j]) << " "
+			    << SafeTcl(values[j]) << "\n";
+			if (!currentGalaxy->setState(name,names[j],
+						     hashstring(values[j])))
+				return FALSE;
+		}
 	}
 	if (!pListPtr || pListPtr->length == 0) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
 		LOG << "\tsetstate " << SafeTcl(name) << " " <<
-			pListPtr->array[i].name << " " <<
+			SafeTcl(pListPtr->array[i].name) << " " <<
 			SafeTcl(pListPtr->array[i].value) << "\n";
 		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
 			pListPtr->array[i].value)) return FALSE;
@@ -341,7 +419,7 @@ static char dummyDesc[] =
 extern "C" void
 KcSetDesc(const char* desc) {
 	if (desc && *desc) {
-		currentGalaxy->setDescriptor(savestring(desc));
+		currentGalaxy->setDescriptor(hashstring(desc));
 	}
 	else currentGalaxy->setDescriptor(dummyDesc);
 }
@@ -439,13 +517,16 @@ extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
 {
 	const Block *block;
-	const char* mphname[MAX_NUM_MULTS];
-	int npspec[MAX_NUM_MULTS];
+	char* mphname[MAX_NUM_FIELDS];
+	char* npspec[MAX_NUM_FIELDS];
+	int isMPH[MAX_NUM_FIELDS];
 	const char* cname;
+	int nf;
 
-	cname = parseClass (name, mphname, npspec);
-
-	if (!cname || (block = findClass(name)) == 0) {
+	cname = parseClass (name, nf, mphname, npspec);
+	
+	if (!cname || (block = findClass(name)) == 0 ||
+	    !checkFields(block,mphname,nf,isMPH)) {
 		char buf[80];
 		sprintf (buf, "Invalid Galaxy Name '%s' (interpreted as '%s')",
 			name, cname);
@@ -471,12 +552,12 @@ KcGetTerms(char* name, TermList* terms)
 		newIsOut[newNameCount++] = isOut[j];
 	}
 	// For each multiPortHole, create newNames
-	for(j=0; j < MAX_NUM_MULTS; j++) {
+	for(j=0; j < nf; j++) {
 	    const char *mphName, *mphType;
 	    int dir;
-	    if (npspec[j]) {
+	    if (isMPH[j]) {
 		// Check that the block has a mph with name mphname[j]
-		int position;
+		int position = 0;
 		if(isStringInList(mphname[j], &(names[n]), nm, position)) {
 			mphName = names[n+position];
 			mphType = types[n+position];
@@ -489,7 +570,8 @@ KcGetTerms(char* name, TermList* terms)
 			return FALSE;
 		}
 		// Create the new names
-		for (int i = 1; i <= npspec[j]; i++) {
+		int np = atoi(npspec[j]);
+		for (int i = 1; i <= np; i++) {
 			char buf[128];
 			sprintf (buf, "%s#%d", mphName, i);
 			newNames[newNameCount] = savestring (buf);
@@ -505,7 +587,7 @@ KcGetTerms(char* name, TermList* terms)
 	// Now look for any multiPortHoles that were not converted
 	for(int mphNum = 0; mphNum < nm; mphNum++) {
 	    int mpos;
-	    if(isStringInList(names[n+mphNum], mphname, MAX_NUM_MULTS, mpos) &&
+	    if(isStringInList(names[n+mphNum], mphname, nf, mpos) &&
 			npspec[mpos])
 		continue;
 	    newNames[newNameCount] = names[n+mphNum];
@@ -550,6 +632,9 @@ KcGetParams, or KcGetTargetParams
 Inputs:
     name = name of block, or target, to get params of
     pListPtr = the address of a ParamList node
+    names = list of state names to exclude.
+                  names on this lists are not returned.
+    n_names: how many names.
 Outputs:
     return = TRUE if ok (no error), else FALSE.
         returns FALSE if star does not exist or new fails to allocate memory.
@@ -559,7 +644,8 @@ Outputs:
 */
 
 static boolean
-realGetParams(const Block* block, ParamListType* pListPtr)
+realGetParams(const Block* block, ParamListType* pListPtr,char** names,
+	      int n_names)
 {
 	if (block == 0) {
 		return FALSE;
@@ -578,9 +664,12 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 	    }
 	    CBlockStateIter nexts(*block);
 	    for (int i = 0; i < n; i++) {
+		    int pos;
 		    const State* s = nexts++;
-		    // Only return settable states
-		    if (s->attributes() & AB_SETTABLE) {
+		    // Only return settable states that are not in
+		    // the names list.
+		    if ((s->attributes() & AB_SETTABLE) &&
+			!isStringInList(s->name(),names,n_names,pos)) {
 		        tempArray[j].name = s->name();
 			tempArray[j].type = s->type();
 		        tempArray[j++].value = s->initValue();
@@ -608,13 +697,17 @@ realGetParams(const Block* block, ParamListType* pListPtr)
 /* Get a parameter list for a star or galaxy */
 extern "C" boolean
 KcGetParams(char* name, ParamListType* pListPtr) {
-	return realGetParams(findClass(name), pListPtr);
+	char *stateNames[MAX_NUM_FIELDS];
+	int nf;
+	const char* cname = parseClass(name, nf, stateNames);
+	return realGetParams(KnownBlock::find(cname),
+			     pListPtr, stateNames, nf);
 }
 
 /* like the above, except that it is for a target */
 extern "C" boolean
 KcGetTargetParams(char* name, ParamListType* pListPtr) {
-	return realGetParams(KnownTarget::find(name), pListPtr);
+	return realGetParams(KnownTarget::find(name), pListPtr, 0, 0);
 }
 
 /* modify parameters of a target */
@@ -630,7 +723,7 @@ KcModTargetParams(ParamListType* pListPtr) {
 			Error::abortRun (*galTarget, "no target-state named ", n);
 			return FALSE;
 		}
-		s->setValue(savestring(v));
+		s->setValue(hashstring(v));
 	}
 	return TRUE;
 }
@@ -658,13 +751,18 @@ KcInfo(char* name, char** info)
  Pops up a window displaying the profile and returns true if all goes well,
  otherwise returns false.
 */
-static void displayStates(const Block *b);
+static void displayStates(const Block *b,char** names,int n_names);
 
 extern "C" int
 KcProfile (char* name) {
+	char* fieldnames[MAX_NUM_FIELDS];
+	int n_fields = 0;
 	const Block* b = findClass (name);
 	int tFlag = 0;
-	if (!b) {
+	if (b) {
+		parseClass(name,n_fields,fieldnames);
+	}
+	else {
 		tFlag = 1;
 		b = KnownTarget::find (name);
 	}
@@ -741,16 +839,21 @@ KcProfile (char* name) {
 	} // end forloop
 	} // end if (!tFlag)
 // now do states
-	displayStates(b);
+	displayStates(b,fieldnames,n_fields);
 	pr_accum_string ();
 	return TRUE;
 }
 
-static void displayStates(const Block *b) {
-	if (b->numberStates()) accum_string ("States:\n");
+// display settable states.  Omit those in the "names" list.
+static void displayStates(const Block *b,char** names,int n_names) {
+	if (b->numberStates()) accum_string ("Settable states:\n");
 	CBlockStateIter nexts(*b);
 	const State *s;
+	int pos;
 	while ((s = nexts++) != 0) {
+		if ((s->attributes() & AB_SETTABLE) == 0 ||
+		    isStringInList(s->name(),names,n_names,pos))
+			continue;
 		accum_string ("   ");
 		accum_string (s->name());
 		accum_string (" (");
@@ -825,7 +928,7 @@ Set the target for the universe
 extern "C" int
 KcSetTarget(const char* targetName) {
 	LOG << "target " << targetName << "\n";
-	int temp = universe->newTarget (savestring(targetName));
+	int temp = universe->newTarget (hashstring(targetName));
 	galTarget = universe->myTarget();
 	return temp;
 }
