@@ -20,6 +20,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		default { 1.0 }
 		desc { The height of the impulse. }
+		attributes { A_GLOBAL }
 	}
 	defstate {
 		name {identifier}
