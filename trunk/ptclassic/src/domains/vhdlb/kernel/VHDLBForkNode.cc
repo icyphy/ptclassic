@@ -45,8 +45,9 @@ int VHDLBForkNode::isItPersistent () const {
 }
 
 // make a new source connection
-PortHole* VHDLBForkNode::setSourcePort (GenericPort &sp, int delay) {
-	return af.setSource(sp, delay);
+PortHole* VHDLBForkNode::setSourcePort (GenericPort &sp, int numDelays,
+					const char* initDelayValues) {
+	return af.setSource(sp, numDelays, initDelayValues);
 }
 
 // make a new destination connection.  We always make a fork star.
