@@ -1,49 +1,45 @@
 #include <stdlib.h>
+#include <stdio.h>
 #include "vis_types.h"
 #include "vis_proto.h"
 
 /***************************************************************/
-void vdk_cint_ptolemyfir(vis_s16 *src, vis_s16 *dst, int dlen, 
-                   vis_s16 *fir, int flen)
+void vdk_cint_ptolemyiir(vis_s16 *src, vis_s16 *dst, int dlen, vis_s16
+			 *taps0, int scalefactor)
 {
-    int i,k,nminusk,n;
-    vis_s32 accum;
+    int i;
+    vis_s32 nextstate,state1,state2;
 
+    nextstate=state1=state2=0;
     for(i=0;i<dlen;i++){
-      accum = 0;
-      nminusk=i;
-      n = flen;
-      if (nminusk < flen) {
-	n = nminusk+1;
-      }
-      for (k = 0; k < n; k++ ) {
-	accum += fir[k] * src[nminusk];
-	nminusk--;
-      }
-      dst[i] = (accum>>15);
+      nextstate = (src[i] - ((taps0[0]*state1+taps0[1]*state2)>>15))<<scalefactor;
+      dst[i] = (taps0[2]*nextstate + taps0[3]*state1 + taps0[4]*state2)>>15;
+      state2=state1;
+      state1=nextstate;
+      /*printf("src0=%i",src[i]);*/
+      printf("nextstate=%i;",nextstate);
+      /*printf("state\n");
+      printf("state1=%i\tstate2=%i\n",state1,state2);*/
     }
+      printf("\n");
+
  }
 
 /***************************************************************/
-void vdk_cfloat_ptolemyfir(vis_d64 *src, vis_d64 *dst, int dlen, 
-                   vis_d64 *fir, int flen)
+void vdk_cfloat_ptolemyiir(vis_d64 *src, vis_d64 *dst, int dlen, vis_d64 *taps1)
 {
-    int i,k,nminusk,n;
-    vis_d64 accum;
+    int i;
+    vis_d64 nextstate,state1,state2;
 
-    for(i=0;i<dlen;i++){
-      accum = 0;
-      nminusk=i;
-      n = flen;
-      if (nminusk < flen) {
-	n = nminusk+1;
-      }
-      for (k = 0; k < n; k++ ) {
-	accum += fir[k] * src[nminusk];
-	nminusk--;
-      }
-      dst[i] = accum;
+    nextstate=state1=state2=0.0;
+    for(i=0;i<dlen;i++){   
+      nextstate = src[i] - taps1[0] * state1 - taps1[1] * state2;
+      dst[i] = taps1[2]*nextstate + taps1[3]*state1 + taps1[4]*state2;
+      state2=state1;
+      state1=nextstate;
+      printf("nextstate=%f",nextstate);
     }
+      printf("\n");
  }
 
 /***************************************************************/
