@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc { Impulse generator }
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -25,26 +25,79 @@ which is then set to zero.
 		name { output }
 		type { fix }
 	}
-	// FIXME: Incompatible with SDF version as it does not support
-	// the states period and delay
+
 	state {
 		name { level }
 		type { fix }
 		desc { impulse size }
 		default { ONE }
 	}
+
+	state {
+		name { period }
+		type { int }
+		desc { 
+Non-negative period of the impulse train (0 means aperiodic)
+		}
+		default { 0 }
+	} 
+
+	state {
+		name { delay }
+		type { int }
+		desc {
+Non-negative delay on the output (0 means no delay)
+		}
+		default { 0}
+	} 
+
+	state {
+		name { count }
+		type { int }
+		desc { internal counter }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM|A_CONSEC }
+	}
+
  	state {
 		name { pulse }
 		type { FIX }
 		desc { internal }
 		default { 0 }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
-	}
- 	setup {
-		pulse = level;
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
 
-	codeblock(std) {
+ 	setup {
+		pulse = level;
+		count = 0;
+		if ( int(period) < 0 ) {
+			Error::abortRun(*this, "Period must be non-negative.");
+		}
+		if ( int(delay) < 0 ) {
+			Error::abortRun( *this, "Delay must be non-negative.");
+		}
+		if (int(period) == 1) output.setAttributes(P_NOINIT);
+		if ( int(period) == 0 ) {
+			count = 0;
+		}
+		else {
+		   	count = int(period)-(int(delay)%int(period)) - 1;
+		}
+	}
+
+	initcode{
+	// period = 1 is equiv to a constant so just
+		if (int(period) == 1) {
+			StringList constant;
+			constant.initialize();
+			constant<<"\t.ds\t$addr(output)\n\t.q15\t";
+			constant << double(pulse.asDouble());
+			constant <<"\n\t.text\n";
+			addCode(constant);
+		}
+	}
+
+	codeblock(single) {
 	zap					;clear P-Reg. and Accu
 	mar	*,AR5
 	lar	AR5,#$addr(pulse)		;Address pulse 		=>AR5
@@ -52,11 +105,69 @@ which is then set to zero.
 	sacl	*				;value pulse = 0
 	} 
 
+
+	codeblock(multiple){
+	lar	ar0,#$addr(count)
+	mar	*,ar0
+	lacc	#$val(period),0
+	sacb	
+	lacc	*+,0
+	add	#1,0
+	crlt	
+	lar	ar1,#$addr(output)
+	xc	1,NC
+	lacc	*,16
+	mar	*-,ar1
+	sach	*,0,ar0
+	sacl	*
+	}
+
+	codeblock(delayedSingle,""){
+	lar	ar0,#$addr(count)
+	mar	*,ar0
+	lacc	#@(int(delay)+1),0
+	sacb
+	lacc	*,0
+	add	#1,0
+	crlt
+	sacl	*+,0
+	lacc	*,16
+	xc	1,NC
+	lacc	*,0
+	sach	*,0,ar1
+	lar	ar1,#$addr(output)
+	sacl	*,0
+	}
+	
+		
         go {
-		addCode(std);
+		if ( int(period) > 1 ) {
+			addCode(multiple);
+		}
+		else if (int(period) == 1) {
+			return;
+		}
+		else if ( int(delay) ) {
+			addCode(delayedSingle());
+		}
+		else {
+			addCode(single);
+		}
 	}
 
 	execTime { 
-		return 6;
+		int time = 0;
+		if ( int(period) > 1 ) time = 13;
+		else if (int(period)==1) time = 0;
+		else if ( int(delay) ) time = 14;
+		else time = 5;
+		return (time);
 	}
 }
+
+
+
+
+
+
+
