@@ -98,6 +98,10 @@ proc NodeDrop { w x y } {
     # precedence constraints.
     set topBound [expr $dot($w,canvasTop) + 50]
     set bottomBound [expr $dot($w,canvasBottom) - 50]
+
+    set topBound $dot(startline)
+    set bottomBound $dot(deadline)
+
     foreach conn $dot($node,inConns) {
 	set connID $dot($conn,connID)
 	set coords [$w coords $connID]
@@ -266,6 +270,10 @@ proc ReadFile { f } {
     set bottomTokenList {}
     set iterConnList {}
 
+    # Establish a default value for the startline, deadline
+    set dot(startline) 50
+    set dot(deadline) 600
+
     # Open the file and get its file ID
     set fileId [open $f RDONLY]
     # Process the file line by line
@@ -394,13 +402,19 @@ proc DisplayGraph {} {
     set canvasRight 5000
     set canvasBottom 1000
 
+    set nprocs [llength $dot(nodeList)]
+    set dot(.view.c,nprocs) $nprocs
+
+    set initWidth [expr $nprocs*100 + 113]
+    set initHeight [expr $dot(deadline) - $dot(startline) + 100]
+
     set dot(.view.c,canvasLeft) $canvasLeft
     set dot(.view.c,canvasTop) $canvasTop
     set dot(.view.c,canvasRight) $canvasRight
     set dot(.view.c,canvasBottom) $canvasBottom
 
     frame .view
-    canvas .view.c -width 500 -height 500 -scrollregion \
+    canvas .view.c -width $initWidth -height $initHeight -scrollregion \
 	    " $canvasLeft $canvasTop $canvasRight $canvasBottom " \
 	    -xscrollcommand [list .view.xscroll set] \
 	    -yscrollcommand [list .view.yscroll set]
@@ -474,8 +488,6 @@ proc DisplayGraph {} {
     set y1 50
     set y2 75
 
-    set nprocs 8
-    set dot(.view.c,nprocs) $nprocs
     set level 0
 
     # Loop through all nprocs and draw big lines separating
@@ -484,6 +496,7 @@ proc DisplayGraph {} {
     set yyd [expr $dot(.view.c,canvasBottom) + 100]
 
     set xxs 50
+    set leftMost $xxs
 	set connID [.view.c create line $xxs $yys $xxs $yyd \
 		-width 2 ]
 
@@ -496,18 +509,43 @@ proc DisplayGraph {} {
     }
 
     incr xxs -87
+    set rightMost $xxs
 	set connID [.view.c create line $xxs $yys $xxs $yyd \
 		-width 2 ]
 
-    # Draw tokens at both top and bottom
+
+    set xxs 50
+    set xxd $rightMost
+    set yys 50
+    set connID [.view.c create line $xxs $yys $xxd $yys \
+	    -width 2 -fill red]
+    set yys $dot(deadline)
+    set connID [.view.c create line $xxs $yys $xxd $yys \
+	    -width 2 -fill red]
+
+    # Draw a time scale on the left and the right.
+    set timeIncr 50
+    set time 0
+    for { set y $dot(startline) } { $y <= $dot(deadline) } \
+	    { incr y $timeIncr } {
+	set x [expr $leftMost - 3]
+	set textID [.view.c create text [expr $x] [expr $y - 5] \
+		-anchor ne -text $time]
+	set x [expr $rightMost + 3]
+	set textID [.view.c create text [expr $x] [expr $y - 5] \
+		-anchor nw -text $time]
+	incr time $timeIncr
+    }
+
+    # Draw tokens at both top and bottom.
     set xt 112
     foreach topToken $dot(topTokenList) {
-	set yt 50
+	set yt [expr $dot(startline) - 10]
 	# Calculate where to place it
 	# Draw the topToken
 	DrawToken $topToken $xt $yt "top"
 
-	set yt 400
+	set yt [expr $dot(deadline) + 10]
 	# Calculate where to place it
 	# Draw the topToken
 	DrawToken $topToken $xt $yt "bottom"
@@ -516,12 +554,12 @@ proc DisplayGraph {} {
     }
 
     foreach bottomToken $dot(bottomTokenList) {
-	set yt 50
+	set yt [expr $dot(startline) - 10]
 	# Calculate where to place it
 	# Draw the bottomToken
 	DrawToken $bottomToken $xt $yt "top"
 
-	set yt 400
+	set yt [expr $dot(deadline) + 10]
 	# Calculate where to place it
 	# Draw the bottomToken
 	DrawToken $bottomToken $xt $yt "bottom"
@@ -590,22 +628,23 @@ proc Level { node } {
     return $level
 }
 
-# Procedure to recursively move a node and its predecessors to ASAP.
-proc asap { node } {
+# Procedure to recursively move a node and its predecessors to pack up.
+# This keeps them assigned to the same resource.
+proc UpPack { node } {
     global dot
 
     set w .view.c
 
-    set maxPredLevel 0
+    set maxPredLevel $dot(startline)
     # Find the connections leading into it
     foreach conn $dot($node,inConns) {
 	# Find the nodes which are predecessors
 	set predNode [lindex $conn 0]
-	# If it's a topToken, use predLevel = 60
+	# If it's a topToken, use predLevel = $dot(startline)
 	if { [lsearch $dot(topTokenList) $predNode] >= 0 } {
-	    set predLevel 60
+	    set predLevel $dot(startline)
 	} else {
-	    asap $predNode
+	    UpPack $predNode
 	    set predLevel $dot($predNode,endTime)
 	}
 	if { $predLevel > $maxPredLevel } {
@@ -621,27 +660,29 @@ proc asap { node } {
     set dot($node,endTime) [expr $level + $dot($node,latency)]
 
     $w move $dot($node,nodeID) 0 $dy
+    $w move $dot($node,textID) 0 $dy
     MoveArcs $w $node 0 0
 #    puts "StartTime: $node $dot($node,startTime)"
     return
 }
 
-# Procedure to recursively move a node and its predecessors to ALAP.
-proc alap { node } {
+# Procedure to recursively move a node and its predecessors to pack down.
+# This keeps them assigned to the same resource.
+proc DownPack { node } {
     global dot
 
     set w .view.c
 
-    set minSuccLevel 450
+    set minSuccLevel $dot(deadline)
     # Find the connections leading out of it
     foreach conn $dot($node,outConns) {
 	# Find the nodes which are successors
 	set succNode [lindex $conn 1]
-	# If it's a topToken, use succLevel = 390
+	# If it's a topToken, use succLevel = $dot(deadline)
 	if { [lsearch $dot(topTokenList) $succNode] >= 0 } {
-	    set succLevel 390
+	    set succLevel $dot(deadline)
 	} else {
-	    alap $succNode
+	    DownPack $succNode
 	    set succLevel $dot($succNode,startTime)
 	}
 	if { $succLevel < $minSuccLevel } {
@@ -657,6 +698,7 @@ proc alap { node } {
     set dot($node,startTime) [expr $level - $dot($node,latency)]
 
     $w move $dot($node,nodeID) 0 $dy
+    $w move $dot($node,textID) 0 $dy
     MoveArcs $w $node 0 0
 #    puts "EndTime: $node $dot($node,endTime)"
     return
@@ -796,33 +838,33 @@ proc setAllTimes {} {
     }
 }
 
-# procedure to move all nodes to ASAP
-proc allASAP {} {
+# procedure to move UpPack all nodes.
+proc UpPackAll {} {
     global dot
 
     foreach node $dot(nodeList) {
-	asap $node
+	UpPack $node
     }
 }
 
-# procedure to move all nodes to ALAP
-proc allALAP {} {
+# procedure to move DownPack all nodes.
+proc DownPackAll {} {
     global dot
 
     foreach node $dot(nodeList) {
-	alap $node
+	DownPack $node
     }
 }
 
 # Top-level script to set up and display the graph.
-button .asap -text ASAP -command "allASAP"
-button .alap -text ALAP -command "allALAP"
+button .upPack -text UpPack -command "UpPackAll"
+button .downPack -text DownPack -command "DownPackAll"
 button .setAll -text Times -command "setAllTimes"
 button .done -text Done -command "requestExit"
 ReadFile $GRAPH_FILE
 DisplayGraph
-pack .asap -side left
-pack .alap -side left
+pack .upPack -side left
+pack .downPack -side left
 pack .setAll -side left
 pack .done -side left
 
