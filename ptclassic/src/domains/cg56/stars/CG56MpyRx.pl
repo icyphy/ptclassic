@@ -65,6 +65,7 @@ The inputs are multiplied and the result is written on the output.
 	    runtime = 2;
 	    break;
 	case 1:
+            {    
 	    char buf[256];
 	    sprintf( buf, "input_r#%d", 1); // this is absurd
 	    CGPortHole *pr = (CGPortHole*) genPortWithName( buf);
@@ -74,6 +75,7 @@ The inputs are multiplied and the result is written on the output.
 	    forkInit( *pi, output_i);
 	    runtime = 0;
 	    break;
+	    }
 	case 2:
 	    runtime = 7;
 	    break;
