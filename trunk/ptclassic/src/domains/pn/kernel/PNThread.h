@@ -37,17 +37,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PosixCondition.h"
 #include "PosixMonitor.h"
 
-class PNThread : public PosixThread {};
-
-class PNThreadScheduler : public PosixScheduler {};
-
-class PNMonitor : public PosixMonitor {};
-
-class PNCondition : public PosixCondition
-{
-public:
-    PNCondition(PNMonitor& m) : PosixCondition(m) {}
-};
+typedef PosixThread PNThread;
+typedef PosixScheduler PNThreadScheduler;
+typedef PosixMonitor PNMonitor;
+typedef PosixCondition PNCondition;
 
 class DataFlowStar;
 class PtCondition;
