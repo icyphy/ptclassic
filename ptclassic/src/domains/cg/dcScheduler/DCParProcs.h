@@ -22,7 +22,6 @@ These schedule classes are used by the parallel scheduler
 #include "ParProcessors.h"
 
 class DCGraph;
-class BaseMultiTarget;
 
 			//////////////////////////
 			///  class DCParProcs  ///
@@ -30,18 +29,9 @@ class BaseMultiTarget;
 // Schedule for multiple processors.
 class DCParProcs : public ParProcessors {
 
-private:
-	// schedules
-	DCUniProc* schedules;
-
-protected:
-	ParNode* createCommNode(int i);
-
 public:
 	// Constructor takes number of processors as an argument
-	DCParProcs(int procs, BaseMultiTarget* mtarget);
-
-	// Destructor
+	DCParProcs(int procs, MultiTarget* mtarget);
 	~DCParProcs();
 
 	// Returns a pointer to the proper UniProc
@@ -70,6 +60,13 @@ public:
 	// We regard at most one idle processor as lightly loaded. Leave other
 	// idle processors untouched.
 	void categorizeLoads(int* procs);
+
+protected:
+	ParNode* createCommNode(int i);
+
+private:
+	// schedules
+	DCUniProc* schedules;
 };
 
 #endif
