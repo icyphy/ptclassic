@@ -901,7 +901,7 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
             open 1]
 
     set font [eval ::tycho::xfont $cnt(fontspec)]
-    set color [ptkColor $cnt(color) black]
+    set color [::tycho::color $cnt(color) black]
     if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
         # FIXME: cache the option for efficiency.
 	set color [preference get linkColor]
