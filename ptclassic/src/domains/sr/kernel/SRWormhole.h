@@ -48,14 +48,158 @@ ENHANCEMENTS, OR MODIFICATIONS.
   stars (i.e., all of their inputs must be known before the go()
   method is called).
 
+  <P>
+
+  Defining a wormhole amounts to defining three classes:
+
+  <OL>
+
+  <LI> SRWormhole, an SRStar that contains a foreign domain
+
+  <LI> SRtoUniversal, an InSRPort that attaches to SRWormholes and
+       moves information into foreign domains--a ToEventHorizon
+
+  <LI> SRfromUniversal, an OutSRPort that attaches to SRWormholes and
+       moves information from foreign domains---a FromEventHorizon
+
+  </OL>
+
+A few confusing things:
+
+  <P> isItInput and isItOutput indicate the direction of the porthole
+  <EM>on the outside of the wormhole</EM>.  Thus, both ports in a
+  toUniversal and fromUniversal indicate the same direction, even
+  though one is a "to" and the other is a "from."  This wierdness is
+  used by transferData() to determine when it is responsible for
+  moving particles.
+
+  <P> EventHorizon::moveFromGhost is mis-named--it should be moveToGhost, as
+  it moves particles FROM its own buffer TO the port given as an argument.
+
+  <P> FromEventHorizon::transferData() doesn't always--in one case, it's being
+  called from inside a wormhole and does not.
+
+<HR>
+
+<P> There are four cases for information flow:
+
+<PRE>
+    Outside domain: SR        Inside Domain: XXX
+			  |--SRWormhole-----------
+			  |
+1.  ---->   SRtoUniversal | XXXfromUniversal ---->     (isItInput = TRUE)
+			  |
+			  |-----------------------
+</PRE>
+
+   <P> It's the responsibility of SRtoUniversal to "push" particles across
+   the boundary to the XXXfromUniversal port.  To do this,
+
+   <OL>
+
+ <LI> Place the particle in the SRtoUniversal's myBuffer
+      CircularBuffer.  The XXXfromUniversal will own this particle
+      (i.e., call die() on it).  Since the OutSRPorts in the SR domain
+      nominally own the particles, a clone is made.
+
+ <LI> Set the SRtoUniversal::tokenNew flag to TRUE, indicating a new
+      particle is ready to be transfered.
+
+ <LI> Call ToEventHorizon::transferData().  This moves the particle
+      from the SRtoUniversal's myBuffer across the event horizon.
+
+      <P> If the tokenNew flag is TRUE, transferData() calls moveFromGhost
+      to move the particle from the SRtoUniversal's myBuffer to the
+      XXXfromUniversal's myBuffer.  It then calls the
+      XXXfromUniversal's sendData(), which moves the particles "into
+      the domain" from the buffer.  E.g., in the SDF domain, moves a
+      particle from the XXXfromUniversal's buffer to the attached
+      Geodesic.
+
+  </OL>
+
+   These must happen before the SRWormhole fires, but exactly when
+   depends on the domain.  In the SR domain, these are done inside
+   SRWormhole::go() just before Wormhole::run() is called.
+
+<HR>
+
+<PRE>
+    Outside domain: SR        Inside Domain: XXX
+			  |--SRWormhole-----------
+			  |
+2.  <---- SRfromUniversal | XXXtoUniversal   <----     (isItOutput = TRUE)
+			  |
+			  |-----------------------
+</PRE>
+
+   <P> The SRfromUniversal must "pull" particles across the boundary from
+   the XXXtoUniversal port.  To do this,
+
+ <OL>
+ <LI> Call FromEventHorizon::transferData() on the SRfromUniversal.
+      If there is a particle to transfer, this moves an outgoing
+      particle from the XXXtoUniversal's myBuffer to the
+      SRfromUniversal's myBuffer and sets the
+      SRfromUniversal::newToken flag.
+
+ <LI> Remove the particle from SRfromUniversal::myBuffer and send it
+      on its way.
+
+ </OL>
+
+<HR>
+
+<PRE>
+    Outside domain: XXX       Inside Domain: SR
+			   |--SRWormhole-----------
+			   |
+3.  ---->   XXXtoUniversal | SRfromUniversal ---->     (isItInput = TRUE)
+			   |
+			   |-----------------------
+</PRE>
+
+   <P> The XXXtoUniversal object will "push" particles into the
+   SRfromUniversal.  The new particle, if any, will be moved into the
+   SRfromUniversal::myBuffer, and SRfromUniversal::sendData() will be
+   called.  To make this work:
+
+ <OL>
+
+ <LI> Make SRfromUniversal::sendData() move a particle from its
+      myBuffer into the domain.
+
+ </OL>
+
+<HR>
+
+<PRE>
+    Outside domain: XXX       Inside Domain: SR
+			   |--SRWormhole-----------
+			   |
+4.  <---- XXXfromUniversal | SRtoUniversal   <----
+			   |
+ 			   |-----------------------
+</PRE>
+
+    <P> The XXXfromUniversal will "pull" particles from the SRtoUniversal
+    by calling FromEventHorizon::tranferData(), which calls
+    SRtoUniversal::receiveData().  To make this work:
+
+  <OL>
+
+  <LI> Make SRtoUniversal::receiveData() move the incoming particle,
+       if any, into the SRtoUniversal::myBuffer.  The event horizon
+       will own this particle, so cloning is necessary in the SR case.
+
+  </OL>
+
  **********************************************************************/
 class SRWormhole : public Wormhole, public SRStar {
 public:
 
-  // Constructor
   SRWormhole(Galaxy& g, Target* t=0);
 
-  // Destructor
   ~SRWormhole();
 
   void begin() { Wormhole::begin(); }
@@ -63,21 +207,21 @@ public:
 
   Scheduler * scheduler() const { return myTarget()->scheduler(); }
 
-  // clone -- allows interpreter/pigi to make copies
   Block * clone() const;
   Block * makeNew() const;
 
-  // identify myself as a wormhole
+  // Identify myself as a wormhole
   int isItWormhole() const { return TRUE; }
 
-  // use statelist for inner galaxy for stateWithName
+  // Return states from the foreign galaxy
   State * stateWithName (const char* name) {
     return gal.stateWithName(name);
   }
 
-  // state initialize
+  // Initialize the foreign galaxy's states 
   void initState() { gal.initState(); }
 
+  // Return information about the wormhole
   StringList print(int verbose) const {
     return Wormhole::print(verbose);
   }
@@ -90,13 +234,19 @@ protected:
   double getStopTime();
 };
 
+/**********************************************************************
+
+  Conversion from data in the SR domain to the Universal Event Horizon
+
+  @Description This can be on the inside or outside of a wormhole.
+
+**********************************************************************/
 class SRtoUniversal : public ToEventHorizon, public InSRPort {
 public:
 
-  // constructor
+  // Constructor
   SRtoUniversal() : ToEventHorizon(this) {}
 
-  // Put incoming particles into myBuffer
   void receiveData();
 
   void initialize();
@@ -104,23 +254,29 @@ public:
   int isItInput() const;
   int isItOutput() const;
 
-  // as EventHorizon
   EventHorizon* asEH();
 
-  /*virtual*/ Geodesic* allocateGeodesic() {
+  // Return a new Geodesic
+  Geodesic* allocateGeodesic() {
     return ToEventHorizon::allocateGeodesic();
   }
 
-  /*virtual*/ int onlyOne() const;
+  int onlyOne() const;
 
 };
 
+/**********************************************************************
+
+  Conversion from data in a Universal Event Horizon to the SR domain
+
+  @Description This can be on the inside or outside of a wormhole.
+
+**********************************************************************/
 class SRfromUniversal : public FromEventHorizon, public OutSRPort {
 public:
 
   SRfromUniversal() : FromEventHorizon(this) {}
 
-  // Emit particles in myBuffer
   void sendData();
 
   void transferParticle();
@@ -130,14 +286,14 @@ public:
   int isItInput() const;
   int isItOutput() const;
 
-  // as EventHorizon
   EventHorizon* asEH();
 
-  /*virtual*/ Geodesic* allocateGeodesic() {
+  // Return a new Geodesic
+  Geodesic* allocateGeodesic() {
     return FromEventHorizon::allocateGeodesic();
   }
 
-  /*virtual*/ int onlyOne() const;
+  int onlyOne() const;
 };
 
 #endif
