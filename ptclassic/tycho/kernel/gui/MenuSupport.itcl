@@ -51,6 +51,9 @@ class ::tycho::MenuSupport {
     # Add a separator to a menu
     method addSeparator {inMenu args}
 
+    # Clear all entries from a menu (but don't delete the menu)
+    method clear {menu}
+
     # Delete a menu or menu entry
     method delete {name}
 
@@ -77,12 +80,6 @@ class ::tycho::MenuSupport {
 
     # Set options of a menu
     method menuconfigure {name args}
-
-    ###################################################################
-    ####                      protected methods                    ####
-
-    # Delete submenus within a menu
-    protected method clearMenu {menu}
 
 
     ##########################################################################
@@ -200,6 +197,42 @@ body ::tycho::MenuSupport::addSeparator {inMenu args} {
 }
 
 #####################################################################
+#### clear
+# Clear all entries from a menu
+#
+body ::tycho::MenuSupport::clear {menu} {
+    # Check validity
+    if { ! [::info exists menupath($menu)] } {
+	return
+	# error "$menu is not a menu"
+    }
+
+    set i [$menupath($menu) index end]
+    if { $i == "none" } {
+	return
+    }
+    # Go from highest to lowest index
+    while { $i >= 0 } {
+	switch [$menupath($menu) type $i] {
+	    "cascade" {
+		$this delete [$menupath($menu) entrycget $i -label]
+	    }
+	    "separator" {
+		$menupath($menu) delete $i
+	    }
+	    default {
+		set name [$menupath($menu) entrycget $i -label]
+		$menupath($menu) delete $i
+		unset itemtype($name)
+		unset entrypath($name)
+	    }
+	}
+	incr i -1
+    }
+}
+
+
+#####################################################################
 #### delete
 # Delete a menu or a menu entry. If the specified menu or entry
 # does not exist, nothing happens.
@@ -214,7 +247,7 @@ body ::tycho::MenuSupport::delete {name} {
     # If it's a menu, delete it
     if { [::info exists menupath($name)] } {
 	# Delete nested submenus
-	clearMenu $menupath($name)
+	clear $menupath($name)
 
 	# Delete and forget the menu
 	destroy $menupath($name)
@@ -225,32 +258,6 @@ body ::tycho::MenuSupport::delete {name} {
     $entrypath($name) delete $name
     unset itemtype($name)
     unset entrypath($name)
-}
-
-
-#####################################################################
-#### clearMenu
-# Delete submenus from the given menu and clear all entries.
-#
-body ::tycho::MenuSupport::clearMenu {menu} {
-    set lastindex [$menu index end]
-    set i 0
-    while { $i <= $lastindex } {
-	switch [$menu type $i] {
-	    "cascade" {
-		$this delete [$menu entrycget $i -label]
-	    }
-	    "separator" {
-		;# do nothing
-	    }
-	    default {
-		set name [$menu entrycget $i -label]
-		unset itemtype($name)
-		unset entrypath($name)
-	    }
-	}
-	incr i
-    }
 }
 
 
