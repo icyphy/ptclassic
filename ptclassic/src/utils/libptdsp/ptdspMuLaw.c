@@ -103,7 +103,7 @@ char Ptdsp_LinearToPCMMuLaw(int sample) {
 
   /* Get the sample into sign-magnitude. */
   /* this code assumes a two's complement representation */
-  sign = (sample >> 8) & 0x80;
+  sign = sample < 0 ? 0x80 : 0;
   if ( sign ) sample = -sample;
   if ( sample > CLIP16 ) sample = CLIP16;
 
