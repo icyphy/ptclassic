@@ -155,15 +155,15 @@ octObject *theObj;		/* Some OCT object */
 	sprintf(text, "Layer named %s", theObj->contents.layer.name);
 	break;
     case OCT_POINT:
-	sprintf(text, "Point (%d,%d)", theObj->contents.point.x,
-		theObj->contents.point.y);
+	sprintf(text, "Point (%ld,%ld)", (long)theObj->contents.point.x,
+		(long)theObj->contents.point.y);
 	break;
     case OCT_EDGE:
-	sprintf(text, "Edge from (%d,%d) to (%d,%d)",
-		theObj->contents.edge.start.x,
-		theObj->contents.edge.start.y,
-		theObj->contents.edge.end.x,
-		theObj->contents.edge.end.y);
+	sprintf(text, "Edge from (%ld,%ld) to (%ld,%ld)",
+		(long)theObj->contents.edge.start.x,
+		(long)theObj->contents.edge.start.y,
+		(long)theObj->contents.edge.end.x,
+		(long)theObj->contents.edge.end.y);
 	break;
     default:
 	sprintf(text, "Illegal object type: 0x%x", theObj->type);
