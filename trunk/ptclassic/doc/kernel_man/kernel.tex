@@ -10,7 +10,7 @@
 @finalout
 @titlepage
 @title The Ptolemy Kernel
-@subtitle A programmer's companion for Ptolemy 0.5-developent
+@subtitle A programmer's companion for Ptolemy 0.5
 @subtitle August 24, 1992
 @author by Joseph T. Buck
 @end iftex
@@ -66,7 +66,7 @@ TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 * I/O classes::     
 * Misc::            Miscellaneous classes
 
- --- The Detailed Node Listing ---
+The Detailed Node Listing:
 
 Basic concepts, classes, and facilities
 
@@ -295,7 +295,8 @@ Class Domain
 
 I/O classes
 
-* class StringList::  StringList, a kind of String class
+* class StringList::  StringList, a list of strings
+* class InfString::  InfString, a class supporting unbounded strings
 * class Tokenizer::  Tokenizer, a simple lexical analyzer class
 * augmented fstreams::  classes pt_ifstream and pt_ofstream
 * class XGraph::    Xgraph, an interface to the xgraph program
@@ -2412,7 +2413,7 @@ their control.  In some domains, the Scheduler does almost everything;
 the Target simply starts it up.  In others, the Scheduler determines
 an execution order and the Target takes care of a many other
 details, such as generating code in accordance with the schedule,
-downloading the code to an imbedded processor, and executing it.
+downloading the code to an embedded processor, and executing it.
 
 The Error class provides a means to format error messages and optionally
 to halt execution.  The interface is always the same, but different
@@ -3500,7 +3501,7 @@ Derived classes have it return TRUE if the event horizon is ``ready''
 
 The class WormMultiPort, which is derived from MultiPortHole
 (@pxref{class MultiPortHole}), exists to
-handle the case where a galaxy with a multiporthole is imbedded in a
+handle the case where a galaxy with a multiporthole is embedded in a
 wormhole.  Its @code{newPort} function correctly creates a pair of
 EventHorizon objects when a new port is created in the multiporthole.
 Instances of this object are created by Wormhole::buildEventHorizons
@@ -4329,7 +4330,7 @@ Geodesic is derived from NamedObj (@pxref{class NamedObj}).
 
 The baseclass Geodesic, which is temporary, suffices for most simulation
 and code generation domains.  In fact, in a number of these domains it
-contains unused features, so it is perhaps too ``heaviweight'' an object.
+contains unused features, so it is perhaps too ``heavyweight'' an object.
 A Geodesic contains a ParticleStack member which is used as a queue for
 movement of Particles between two portholes; it also has an originating
 port and a destination port.
@@ -5493,7 +5494,7 @@ the value of @var{wantedType}; if it is T_Float, all numeric values
 are returned as T_Float; if it is T_Int, all numeric values are returned
 as T_Int.
 
-produce T_Int and T_Float tokens.  Names that take the form of a
+Names that take the form of a
 C or C++ identifier are assumed to be names of states defined at a
 higher level (states belonging to the parent galaxy or some ancestor
 galaxy).  They are searched for using @code{lookup}; if not found,
@@ -6004,7 +6005,7 @@ KnownState (State &@var{state}, const char* @var{name}, const char* @var{value})
 @end example
 
 This constructor permits names to be added to the global state symbol
-list, for use in state expresssions.  For example, we have
+list, for use in state expressions.  For example, we have
 
 @example
 static FloatState pi;
@@ -6051,17 +6052,21 @@ Return the number of known states.
 
 @menu
 * class StringList::  StringList, a kind of String class
+* class InfString::  InfString, a class supporting unbounded strings
 * class Tokenizer::  Tokenizer, a simple lexical analyzer class
 * augmented fstreams::  classes pt_ifstream and pt_ofstream
 * class XGraph::    Xgraph, an interface to the xgraph program
 * Histogram classes::  Histogram classes
 @end menu
 
-@node class StringList, class Tokenizer,  , I/O classes
+@node class StringList, class InfString,  , I/O classes
 @section StringList, a kind of String class
 
-Class StringList provides a subset of the functions provided by the
-typical C++ String class; enough for our purposes.  It is privately
+Class StringList provides a mechanism for organizing a list
+of strings.  It can also be used to construct strings
+of unbounded size, but the class InfString is preferred
+for this (@pxref{class InfString}).
+It is privately
 derived from SequentialList (@pxref{class SequentialList}).
 
 Its internal implementation is as a
@@ -6071,6 +6076,33 @@ strings; the individual substrings retain their separate identity
 until the conversion operator to type @code{const char *} is invoked.
 There are also operators that add numeric values to the StringList;
 there is only one format available for such additions.
+
+WARNING: if a function or expression returns a StringList, and
+that value is not assigned to a StringList variable or reference,
+and the @code{(const char*)} cast is used, it is possible (likely under
+g++) that the StringList temporary will be destroyed too soon,
+leaving the @code{const char*} pointer pointing to garbage.  Always
+assign a temporary StringList to a StringList variable or reference
+before using the @code{const char*} conversion.  Thus, instead of
+
+@example
+function_name(@var{xxx}, (const char*)functionReturningStringList(), @var{yyy});}
+@end example
+
+one should use
+
+@example
+StringList @var{temp_name} = (const char*)functionReturningStringList();
+function_name(@var{xxx},  @var{temp_name}, @var{yyy});}
+@end example
+
+This includes code like
+
+@example
+strcpy(destBuf,functionReturningStringList());
+@end example
+
+which uses the @code{const char*} conversion implicitly.
 
 @menu
 * StringList constructors::  constructors and assignment operators
@@ -6198,7 +6230,173 @@ StringList to a @code{const char *} string joins all the substrings into
 a single string, so that operation should be avoided if extensive
 use of StringListIter is planned.
 
-@node class Tokenizer, augmented fstreams, class StringList, I/O classes
+@node class InfString, class Tokenizer, class StringList, I/O classes
+@section InfString, a class suporting unbounded strings
+
+Class InfString provides a mechanism for building strings
+of unbounded size.  It provides a subset of the functions in a
+typical C++ String class.  Strings can be built up piece by piece.
+As segments are added, they are copied, so the caller
+need not keep the segments around.
+Upon casting to @code{(char*)}, the strings are collapsed into
+one continuous string, and a pointer to that string is returned.
+The calling function can treat this as an ordinary pointer to an ordinary
+array of characters, and can modify the characters.
+But the length of the string should not be changed, nor
+should the string be deleted.
+The InfString destructor is responsible for freeing the allocated memory.
+
+InfString is privately
+derived from SequentialList (@pxref{class SequentialList}),
+and is very similar to StringList in internal implementation
+(@pxref{class StringList}).  Its internal implementation is as a
+list of @code{char *} strings, each on the heap.
+The individual substrings retain their separate identity
+until the conversion cast to type @code{char *} is invoked,
+although if access to the individual strings is needed, then StringList
+should be used (@pxref{class StringList}).
+There are also operators that add numeric values to the StringList;
+there is only one format available for each such addition.
+
+WARNING: if a function or expression returns an InfString, and
+that value is not assigned to an InfString variable or reference,
+and the @code{(char*)} cast is used, it is possible (likely under
+g++) that the InfString temporary will be destroyed too soon,
+leaving the @code{char*} pointer pointing to garbage.  Always
+assign temporary InfStrings to InfString variables or references
+before using the @code{char*} conversion.  Thus, instead of
+
+@example
+function_name(@var{xxx}, (char*)functionReturningInfString(), @var{yyy});}
+@end example
+
+one should use
+
+@example
+InfString @var{temp_name} = (char*)functionReturningInfString();
+function_name(@var{xxx},  @var{temp_name}, @var{yyy});}
+@end example
+
+This includes code like
+
+@example
+strcpy(destBuf,functionReturningInfString());
+@end example
+
+which uses the @code{char*} conversion implicitly.
+
+@menu
+* InfString constructors::  constructors and assignment operators
+* adding to InfStrings::  adding to InfStrings
+* InfString info functions::  InfString information functions
+* InfString conversion::  InfString conversion to char *
+* InfString destruction::  InfString destruction and zeroing
+* class InfStringIter::  class InfStringIter
+@end menu
+
+@node InfString constructors, adding to InfStrings,  , class InfString
+@subsection InfString constructors and assignment operators
+
+The default constructor makes an empty InfString.  There is also
+a copy constructor and six single-argument constructors that can
+function as conversions from other types to type InfString; they
+take arguments of the types
+@code{char}, @code{const char *}, @code{int}, @code{double}, 
+@code{unsigned int}, and @code{const StringList&}.
+
+There are also seven assignment operators corresponding to these
+constructors: one that takes a @code{const InfString&} argument and
+also one for each of the six standard types:
+@code{char}, @code{const char *}, @code{int}, @code{double},
+@code{unsigned int}, and @code{const StringList&}.
+
+@node adding to InfStrings, InfString info functions, InfString constructors, class InfString
+@subsection adding to InfStrings
+
+There are seven functions that can add a printed representation of an
+argument to a InfString: one each for arguments of type
+@code{const InfString&}, @code{char}, @code{const char *}, @code{int},
+@code{double}, @code{unsigned int}, and @code{const StringList&}.
+In each case, the function
+can be accessed in either of two equivalent ways:
+
+@example
+InfString& operator += (@var{type} @var{arg});
+InfString& operator << (@var{type} @var{arg});
+@end example
+
+The second ``stream form'' is considered preferable; the ``+='' form is
+there for backward compatibility.  If a InfString object is added,
+each piece of the added InfString is added separately (boundaries
+between pieces are preserved); for the other five forms, a single
+piece is added.
+
+@node InfString info functions, InfString conversion, adding to InfStrings, class InfString
+@subsection InfString information functions
+
+@example
+int length() const;
+@end example
+
+Return the length in characters.
+
+@node InfString conversion, InfString destruction, InfString info functions, class InfString
+@subsection InfString conversion to char *
+
+@example
+operator char* ();
+@end example
+
+This function joins all the substrings in the InfString into a
+single piece, a returns a pointer to the resulting string.
+A null pointer is always returned if there are no characters.
+
+Warning: as pointed out above,
+if this function is called on a temporary InfString, it
+is possible that the compiler will delete the InfString object
+before the last use of the returned @code{char *} pointer.
+The result is that the pointer may wind up pointing to garbage.
+The best workaround for such problems is to make sure that any
+InfString object ``has a name'' before this conversion is applied
+to it; e.g. assign the results of functions returning InfString
+objects to local InfString variables or references before trying
+to convert them.
+
+@example
+char* newCopy() const;
+@end example
+
+This function makes a copy of the InfString's text in a single piece
+as a @code{char *} in dynamic memory.  The InfString object itself is
+not modified.
+This is useful when
+the caller wishes to be responsible for deletion of the returned text.
+
+@node InfString destruction, class InfStringIter, InfString conversion, class InfString
+@subsection InfString destruction and zeroing
+
+@example
+void initialize();
+@end example
+
+This function deallocates all pieces of the InfString and changes
+it to an empty InfString.
+
+@example
+~InfString();
+@end example
+
+The destructor calls the @code{initialize} function.
+
+@node class InfStringIter,  , InfString destruction, class InfString
+@subsection Class InfStringIter
+
+Class InfStringIter is a standard iterator that operates on
+InfStrings.  However, the InfString class is not intended for
+use when access to the individual components of the string is
+desired.  Use StringList for this.
+
+@node class Tokenizer, augmented fstreams, class InfString, I/O classes
 @section Tokenizer, a simple lexical analyzer class
 
 The Tokenizer class is designed to accept input for a string or file
