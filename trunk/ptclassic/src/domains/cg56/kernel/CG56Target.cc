@@ -42,10 +42,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56Star.h"
 #include "FixState.h"
 
+static TypeConversionTable cg56CnvTable[6] = {
+  {  FIX,	COMPLEX,	"FixToCx"	},
+  {  FIX,	INT,		"FixToInt"	},
+  {  COMPLEX, 	FIX, 		"CxToFix"	},
+  {  COMPLEX, 	INT,		"CxToInt"	},
+  {  INT,	COMPLEX,	"IntToCx"	},
+  {  INT,	FIX,		"IntToFix"	},
+};
+
+CG56Target::CG56Target (const char* nam, const char* desc) :
+MotorolaTarget(nam,desc,"CG56Star") {
+    // Initialize type conversion table
+    typeConversionTable = cg56CnvTable;
+    typeConversionTableRows = 6;
+}
+
+// copy constructor
+CG56Target::CG56Target(const CG56Target& src) : 
+MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {
+    // Initialize type conversion table
+    typeConversionTable = cg56CnvTable;
+    typeConversionTableRows = 6;
+}
+
 int CG56Target :: compileCode() {
-	StringList assembleCmds;
-	assembleCmds << "asm56000 -b -l -A -oso " << filePrefix;
-	return !systemCall(assembleCmds,"Errors in assembly",targetHost);
+    StringList assembleCmds;
+    assembleCmds << "asm56000 -b -l -A -oso " << filePrefix;
+    return !systemCall(assembleCmds,"Errors in assembly",targetHost);
 }
 
 void CG56Target :: headerCode () {
@@ -58,32 +82,35 @@ void CG56Target :: headerCode () {
 }
 
 void CG56Target :: setup() {
-	Galaxy* g = galaxy();
-	addCG56One(this,g);
-	MotorolaTarget :: setup();
+    Galaxy* g = galaxy();
+    addCG56One(this,g);
+    MotorolaTarget :: setup();
 }
 
 void addCG56One(Target* target,Galaxy* g) {
-	if (g && (g->stateWithName("ONE") == 0)) {
-		LOG_NEW; FixState& ONE = *new FixState;
-		g->addState(ONE.setState("ONE",target,"",
-					"Max Fix point value",
-					A_NONSETTABLE|A_CONSTANT));
-		ONE.setInitValue(CG56_ONE);
-	}
+    if (g && (g->stateWithName("ONE") == 0)) {
+	LOG_NEW; FixState& ONE = *new FixState;
+	g->addState(ONE.setState("ONE",target,"",
+				 "Max Fix point value",
+				 A_NONSETTABLE|A_CONSTANT));
+	ONE.setInitValue(CG56_ONE);
+    }
 }
 
 // makeNew
 Block* CG56Target :: makeNew () const {
-	LOG_NEW; return new CG56Target(*this);
+    LOG_NEW; return new CG56Target(*this);
 }
 
 void CG56Target::writeFloat(double val) {
-	myCode << "; WARNING: the M56000 does not support floating point!\n";
-	myCode << "; perhaps this state was meant to be type FIX?\n";
-	MotorolaTarget::writeFloat(val);
+    myCode << "; WARNING: the M56000 does not support floating point!\n";
+    myCode << "; perhaps this state was meant to be type FIX?\n";
+    MotorolaTarget::writeFloat(val);
 }
 
 const char* CG56Target::className() const { return "CG56Target";}
 
 ISA_FUNC(CG56Target,MotorolaTarget);
+
+
+

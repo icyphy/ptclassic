@@ -48,19 +48,20 @@ extern StringList CG56ONE;
 
 class CG56Target : public virtual MotorolaTarget {
 protected:
-	void writeFloat(double);
+    void writeFloat(double);
 public:
-	CG56Target (const char* nam, const char* desc) :
-		MotorolaTarget(nam,desc,"CG56Star") {}
-	// copy constructor
-	CG56Target(const CG56Target& src) : 
-	  MotorolaTarget(src.name(),src.descriptor(),"CG56Star") {}
-	Block* makeNew() const;
-	/*virtual*/ int isA(const char*) const;
-	void headerCode();
-	const char* className() const;
-	void setup();
-	int compileCode();
+    CG56Target (const char* nam, const char* desc);
+
+    // copy constructor
+    CG56Target(const CG56Target& src);
+
+    /*virtual*/ Block* makeNew() const;
+
+    /*virtual*/ int isA(const char*) const;
+    /*virtual*/ void headerCode();
+    /*virtual*/ const char* className() const;
+    /*virtual*/ void setup();
+    /*virtual*/ int compileCode();
 };
 
 // Adds the galaxy parameter ONE.  This should be called by any multiprocessor
