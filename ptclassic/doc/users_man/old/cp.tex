@@ -1,0 +1,72 @@
+\node CP Domain
+\chapter{CP Domain}
+\Author{Seungjun Lee \\
+Thomas M. Parks}
+\date{$Date$}
+
+\node Installing the CP Domain
+\section{Installing the CP Domain}
+By default, the CP domain is not compiled in to Ptolemy.
+The CP domain relies on the thread library in the directory
+\file{$PTOLEMY/src/thread/lwp}.
+If you want the thread library to be automatically updated along with
+the rest of Ptolemy, then edit the file \file{makefile} in
+\file{$PTOLEMY/src} and include \samp{thread} in the \code{SDIRS}
+variable.  For example:
+
+\begin{example}
+SDIRS = domains thread
+\end{example}
+
+\noindent
+If you want the library files for the CP domain to be automatically updated,
+then edit \file{makefile} in \file{$PTOLEMY/src/domains} and include \samp{cp}
+in the \code{DOMAINS} variable.  For example:
+
+\begin{example}
+DOMAINS = sdf de ddf bdf thor cp
+\end{example}
+
+\noindent
+Once these \file{makefile}s have been updated, then the thread and CP domain
+libraries will be updated whenever you type \samp{make install} in
+\file{$PTOLEMY/obj.$ARCH}.
+
+If you prefer to install the libraries manually then do not edit the
+\file{makefile}s.  Instead,
+go to the
+\file{$PTOLEMY/obj.$ARCH/thread/lwp} directory and type \samp{make
+install}.  For example:
+
+\begin{example}
+cd $PTOLEMY/obj.sun4/thread/lwp
+make install >& LOG &
+\end{example}
+
+\noindent
+This will place the file \file{liblwpthread.a} in the \file{$PTOLEMY/lib.$ARCH}
+directory.
+Next go to the
+\file{$PTOLEMY/obj.$ARCH/domains/cp} directory and type \samp{make install}.
+For example:
+
+\begin{example}
+cd $PTOLEMY/obj.sun4/domains/cp
+make install >& LOG &
+\end{example}
+
+\noindent
+This will place the files \file{libcp.a}, \file{libcpstars.a}, and
+\file{libcp.o} in the \file{$PTOLEMY/lib.$ARCH} directory.
+
+Once the libraries have been installed, you can build a special version
+of \code{pigiRpc} that includes the CP domain.  Due to conflicts
+between Sun's lightweight process library and the SDF domain, you
+should not include any part of the dataflow domains (SDF, DDF, BDF, CG,
+CGC, etc.) in \code{pigiRpc}.  If you do, then you will get a core dump
+every time you quit.
+If you must have both the CP domain and one or
+more of the dataflow domains and can accept this problem, then
+disregard the instructions below about eliminating references to
+dataflow domains.
+

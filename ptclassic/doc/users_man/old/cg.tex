@@ -1,0 +1,140 @@
+\c Version $Id$
+
+\node CG Domain
+\chapter{CG Domain}
+
+\Author{ J. Buck \\
+Soonhoi Ha \\
+Edward A. Lee \\
+Thomas M. Parks \\
+Jos\'{e} Pino \\
+Kennard White}
+\date{$Date$}
+
+\node CG Single-Processor Targets
+\section{Single-Processor Targets}
+
+All code is written to and compiled and run on the computer specified
+by the \var{host} parameter.  \vrindex{host parameter} If a remote
+computer is specified by \var{host} then \code{rsh} commands are used
+to place files on that compuer and to invoke the compiler.  You should
+verify that your \file{.rhosts} file is properly configured so that
+\code{rsh} will work.  The code is placed in the directory specified by
+the \var{directory} \vrindex{directory parameter} parameter, in files
+named according to the \var{file} \vrindex{file parameter} parameter.
+
+The parameters \var{display?}, \var{compile?}, \var{load?},
+and \var{run?} are
+\vrindex{display? parameter}
+\vrindex{compile? parameter}
+\vrindex{load? parameter}
+\vrindex{run? parameter}
+provided for debugging and development.  For example, during
+development you may want to set \var{display?} to \samp{TRUE} and set
+\var{compile?} to \samp{FALSE}.  This would allow you to view the
+generated code without compiling it.  Later you may want to set
+\var{compile?} back to \samp{TRUE} but set \var{run?} to \samp{FALSE}.
+This would allow you to verify that the generated code compiles
+correctly without attempting to run the program.  (If compilation
+fails, then the program will not be run regardless of the state of
+\var{run?}.)  Once everything works, you may want to set \var{display?}
+to \samp{FALSE} to avoid the annoyance of having the code displayed for
+every run.
+
+The complete list of parameters available to all code generation
+targets is given below.  Some targets hide these parameters while
+others make them available to the user.
+
+\begin{statelist}
+\state{STRING}{host}{}
+\vrindex{host parameter}
+The name of the computer where programs will be compiled and run.  If
+the name is blank, which is the default, then programs will be compiled
+and run on the same computer where Ptolemy is running.
+
+\state{STRING}{directory}{$HOME/PTOLEMY_SYSTEMS}
+\vrindex{directory parameter}
+The destination directory for files created in the code
+generation process.  If the directory does not already exist,
+it will be created.  All files are written into this directory on the
+\var{host} computer.
+
+\state{STRING}{file}{}
+\vrindex{file parameter}
+The base name for files created in the code generation process.
+If the name is blank, which is the default, then a suitable name will be
+generated automatically.
+The \file{.c} extension is automatically added to this name to form the
+complete file name.
+
+\state{INT}{display?}{TRUE}
+\vrindex{display? parameter}
+Controls the display of the generated code.
+
+\state{INT}{compile?}{TRUE}
+\vrindex{compile? parameter}
+Controls the invokation of the compiler after code generation.
+
+\state{INT}{load?}{TRUE}
+\vrindex{load? parameter}
+Controls downloading of the program to the \var{host} computer after
+compilation.  Some targets do not implement separate load and run
+operations and thus do not make \var{load?} available to the user.
+
+\state{INT}{run?}{TRUE}
+\vrindex{run? parameter}
+Controls the running of the program after compilation.
+
+\state{INT}{Looping Level}{0}
+\vrindex{Looping Level parameter}
+Determines which scheduling algorithm is used.  If set to \samp{0}, an
+in-line schedule will be generated.  If set to \samp{1}, then a
+conservative loop-generating algorithm is used.  If set to \samp{2},
+then a more exhaustive loop-generating algorithm is used.  The
+loop-generating algorithms generally produce more compact code but may
+take longer to run.
+\end{statelist}
+
+\node default-CG
+\subsection{\protect\code{default-CG}}
+
+The default-CG target makes only the \var{directory} and \var{Looping Level}
+parameters available to the user.
+\vrindex{directory parameter}
+\vrindex{Looping Level parameter}
+
+\node bdf-CG
+\subsection{\protect\code{bdf-CG}}
+
+\node CG Multi-Processor Targets
+\section{Multi-Processor Targets}
+
+\begin{statelist}
+\state{INT}{nprocs}{}
+\state{INT}{inheritProcessors}{}
+\state{INT}{sendTime}{}
+\state{INT}{oneStarOneProc}{}
+\state{INT}{manualAssignment}{}
+\state{INT}{adjustSchedule}{}
+\state{STRINGARRAY}{childType}{}
+\state{STRINGARRAY}{resources}{}
+\state{INT}{relTimeScales}{}
+\state{INT}{ganttChart}{}
+\state{STRING}{logFile}{}
+\state{INT}{amortizedComm}{}
+\state{INT}{ignoreIPC}{}
+\state{INT}{overlapComm}{}
+\state{INT}{useCluster}{}
+\end{statelist}
+
+\node SharedBus
+\subsection{\protect\code{SharedBus}}
+
+\node FullyConnected
+\subsection{\protect\code{FullyConnected}}
+
+\node CG Star Overview
+\section{An Overview of CG Stars}
+
+\node CG Demo Overview
+\section{An Overview of CG Demos}
