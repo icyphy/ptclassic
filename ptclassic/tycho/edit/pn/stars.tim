@@ -8,36 +8,38 @@ group source -label {Source Stars} {
     star ramp \
             -class {Ramp} \
             -label {Ramp} \
-            -icon {edit/cts/icons.tim#source.ramp} {
-        attribute InitValue -default 0.0 -type number -label step
-        attribute Slope -default 1.0 -type number -label value
-        port output -datatype float
+            -icon {edit/pn/icons.tim#source.ramp} {
+        attribute InitValue -default 0 -type number -label step
+        attribute Slope -default 1 -type number -label value
+        port output -datatype IntToken
     }
-    star const \
-            -class {Const} \
-            -label {Const} \
-            -icon {edit/cts/icons.tim#source.const} {
-        attribute Value -default 1.0 -type number -label Value
-        port output -datatype float
+}
+
+group dynamic -label {Dynamic Stars} {
+    star alternate \
+            -class {Alternate} \
+            -label {Alternate} \
+            -icon {edit/pn/icons.tim#dynamic.alternate} {
+        port input -datatype Token
+        port output0 -datatype Token
+        port output1 -datatype Token
     }
-    star impulse \
-            -class {Impulse} \
-            -label {Impulse} \
-            -icon {edit/cts/icons.tim#source.impulse} {
-        attribute Amplitude -default 1.0 -type number -label Amplitude
-        attribute AtTime -default 0.0 -type number -label "At Time"
-        port output -datatype float
+    star redirect \
+            -class {Redirect} \
+            -label {Redirect} \
+            -icon {edit/pn/icons.tim#dynamic.redirect} {
+        attribute InitState -default "0" -label "Initial State" -type number
+        port input -datatype Token
+        port output -datatype Token
     }
-    star squarewave \
-            -class {SquareWave} \
-            -label {SquareWave} \
-            -icon {edit/cts/icons.tim#source.squarewave} {
-        attribute MaxValue -default 1.0 -type number -label "Maximum Value"
-        attribute MinValue -default -1.0 -type number -label "Minimum Value"
-        attribute Frequency -default 1.0 -type number -label Frequency
-        port output -datatype float
+    star interleave \
+            -class {Interleave} \
+            -label {Interleave} \
+            -icon {edit/pn/icons.tim#dynamic.interleave} {
+	port input0 -datatype Token
+	port input1 -datatype Token
+        port output -datatype Token
     }
-    
 }
 
 group sink -label {Sink Stars} {
@@ -51,59 +53,3 @@ group sink -label {Sink Stars} {
     }
 }
 
-group dynamic -label {Dynamic Stars} {
-    star integral \
-            -class {IntegraRK4} \
-            -label {Integral} \
-            -icon {edit/cts/icons.tim#dynamic.integral} {
-        attribute InitState -default "0.0" -label "Initial State" -type number
-        port input -datatype float
-        port output -datatype float
-    }
-}
-
-group arithmetic -label {Basic Arithmetic} {
-    star add \
-            -class {Add} \
-            -label Add_2 \
-            -icon {edit/cts/icons.tim#arithmetic.add} {
-        port input -composite 1
-        port output -composite 0
-    }
-    star add_3 \
-            -class {Add} \
-            -label Add_3 \
-            -icon {edit/cts/icons.tim#arithmetic.add_3} {
-        port input -composite 1
-        port output -composite 0
-    }
-#    star multiply \
-#            -label Multiply \
-#            -icon {edit/graphedit/icons.tim#arithmetic.multiply} {
-#        port in -composite 1
-#        port out -composite 0
-#    }
-#    star subtract \
-#            -label Subtract \
-#            -icon {edit/graphedit/icons.tim#arithmetic.subtract} {
-#        port in -composite 1
-#        port out -composite 0
-#    }
-    star gain_left \
-            -class {Gain} \
-            -label Gain_Left \
-            -icon {edit/cts/icons.tim#arithmetic.gain_left} {
-        attribute Gain -default "1.0" -type number -label Gain
-        port input -composite 0
-        port output -composite 0
-    }
-    star gain_right \
-            -class {Gain} \
-            -label Gain_Right \
-            -icon {edit/cts/icons.tim#arithmetic.gain_right} {
-        attribute Gain -default "1.0" -type number -label Gain
-        port input -composite 0
-        port output -composite 0
-    }
-
-}
