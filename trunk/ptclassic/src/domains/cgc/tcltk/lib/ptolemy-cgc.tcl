@@ -144,7 +144,7 @@ proc makeRunWindow {} {
     frame .low -bd 10
 
     # quit button
-    button .quit -text QUIT -command "ptkStop cgc_prog; destroy ."
+    button .quit -text DISMISS -command "ptkStop cgc_prog; destroy ."
 
     # overall structure
     pack append . \
@@ -183,7 +183,9 @@ proc ptkGo {} {
 	.control.gofr.go configure -relief sunken
 	.control.pause configure -relief raised
 	goCmd
-	.control.gofr.go configure -relief raised
+	# The catch is needed in case the control window
+	# was dismissed.
+	catch {.control.gofr.go configure -relief raised}
 }
 
 # procedure to update the number of iterations
