@@ -282,6 +282,15 @@ limitation of liability, and disclaimer of warranty provisions.
       }
     }
 
+    codeblock (sync) {
+      {
+	/* Wait for samples to drain */
+	audio_info_t info;
+	ioctl($starSymbol(file), AUDIO_DRAIN, &info);
+      }
+    }
+
+
     initCode {
       addInclude("<stdio.h>");
       /* Define strcmp function */
