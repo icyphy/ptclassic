@@ -24,6 +24,7 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+#include "stdio.h"		/* for __filbuf */
 #include "port.h"
 #include "cp.h"
 
