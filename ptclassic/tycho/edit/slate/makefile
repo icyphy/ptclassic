@@ -40,7 +40,9 @@ VPATH =		$(ROOT)/editors/slate
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-TCL_SRCS = 
+TCL_SRCS = \
+	pkgIndex.tcl \
+	slate.tcl
   
 ITCL_SRCS = \
 	Animator.itcl \
@@ -90,7 +92,7 @@ DIRS =			test doc
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
 
-all install: $(MISC_SRCS) tclIndex
+# all install: $(MISC_SRCS) tclIndex
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
