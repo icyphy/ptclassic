@@ -6,14 +6,8 @@
 #\
 	exec itkwish -f "$0" ${1+"$@"}
 
-catch {delete class iwidgets::Labeledgrid}
-source ../generic/labeledgrid.itk
+catch {destroy .f}
 
-catch {delete class iwidgets::Widgettree}
-source ../generic/widgettree.itk
-
-
-catch {delete object .f}
 iwidgets::scrolledframe .f \
         -hscrollmode dynamic -vscrollmode dynamic \
         -height 400 -width 500
@@ -57,8 +51,9 @@ proc createQuery {win tag} {
 	    $a vskip -minsize 4
 
             $a add optionmenu option -label "An option menu" \
-		    -items {Unix VMS Linux OS/2 {Windows NT} DOS} \
-		    -initial DOS
+		    -entries {Unix VMS Linux OS/2 {Windows NT} DOS} \
+		    -initial DOS \
+                    -command "puts \[$a get option\]"
 
             $a add checkbutton baz -label "A checkbutton" \
                     -initial 1 -text "Check me!"
@@ -87,7 +82,7 @@ proc createQuery {win tag} {
             $b add radiobutton gee.b -text Bar -value bar
             $b add radiobutton gee.c -text Baz -value baz
             $b add radiobutton gee.d -text Goo -value goo
-            $b add radiobutton gee.e -text Boo -value boo
+            $b add radiobutton gee.e -text Boo -value boodest
             $b add radiobutton gee.f -text "A longer name" -value loo
 
             $b group checkies -label Checkies -rowspan 2 -columnspan 1
