@@ -170,7 +170,6 @@ _vem:
 
 
 linkvem.debug:
-
 	$(CC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
 linkvem:
 	$(CC) -o vem $(OBJECTS) $(VEMLIBS)
@@ -197,14 +196,17 @@ $(DESTBIN_D):	vem $(OCTBINDIR)
 		rm -f $(DESTBIN_D)
 		cp vem $(DESTBIN_D)
 
-install: $(DESTBIN) $(DESTBIN_D) 
+install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making install in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../../src/vem/vem/$$x install ;\
 		cd .. ; \
 	done
-
+$(BINDIR)/vem:
+	ln -s $(DESTBIN) $@ 
+$(BINDIR)/vem.debug:
+	ln -s $(DESTBIN_D) $@ 
 clean::
 	rm -f vem vem.debug
 
