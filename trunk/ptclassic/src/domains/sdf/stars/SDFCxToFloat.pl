@@ -22,6 +22,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Output float type }
 	}
 	go {
-                output%0 << (double)(input%0);
+                output%0 << double(input%0);
 	}
 }
