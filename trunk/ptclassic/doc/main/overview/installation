@@ -1,0 +1,108 @@
+.\" $Id$
+.H1 "Installation"
+.pp
+\*(PT is a large software system that relies on a properly configured
+software environment.  There are many things that can go wrong
+in getting \*(PT running.  For instance, the windowing system may
+not be the same one we use, or it may be used in a different way.
+There is also some configuration required by each user in order to
+use the graphical interface.  The information for doing this
+is given in the Pigi document, section 2 of the Almagest.
+Here we give the basic information required to get from a distribution
+tape to being able to run the system.
+.H2 "Basic \*(PT installation"
+.pp
+First note that the
+approximate disk space requirements are:
+.(b
+	\*(PT: 28 Mbytes
+	\*(PT (after you optionally remake): 37 Mbytes
+	Gnu subset: 14 Mbytes
+.)b
+Steps to install \*(PT:
+(steps 2-4 may not be necessary in the future)
+Much of this has to be done as root.
+.ip 1.
+Create a user "ptolemy".
+.ip 2.
+Create directory /usr/users (if not already there).
+.ip 3.
+cd /usr/users
+.ip 4.
+ln -s ~ptolemy
+(This creates a directory /usr/users/ptolemy).
+.ip 5.
+Load the tape in your drive.
+.ip 6.
+mt -f /dev/nrst8 rewind
+(This rewinds the tape.)
+.ip 7.
+tar xf /dev/nrst8 
+(This reads the tape, and will take a while.)
+.ip 8.
+chown -R ptolemy ptolemy
+(This changes ownership of all files to user ptolemy.)
+.ip 9.
+Edit ~ptolemy/.rhosts, adding a line for your system
+(This gives pigi permission to create a ptolemy process.)
+The added line will be of the form "hostname ptolemy", you can
+find the correct hostname with the command "hostname".
+.H2 "GNU Installation"
+.pp
+For convenience, some software from the Free Software Foundation is
+included on the distribution tape.  This includes the compiler
+used to make \*(PT, which is also the compiler you will use to extend
+\*(PT.  Note that this is not a complete set of Gnu software.
+.ip 1.
+cd /usr
+.ip 2.
+mkdir gnu (Unless there is such a directory there, in which case, you
+probably don't want to load the version from this tape).
+.ip 3.
+mt -f /dev/nrst8 fsf 1
+.ip 4.
+tar xf /dev/rst8
+.H2 "Testing the Installation
+.pp
+To test \*(PT:
+.ip 1.
+login as ptolemy
+.ip 2.
+Wait for the X window system to start up.
+Note that the ptolemy user is configured to start the X window system
+when you log on.
+If your installation uses X some other way, please modify the dot files
+in ~ptolemy
+accordingly.
+.ip 3.
+cd demo
+.ip 4.
+pigi
+.ip 5.
+Follow instructions in the Pigi manual, section 2 of the Almagest.
+.pp
+Note that the ptolemy user provides a model of a user properly
+configured to run ptolemy.  All the .files in the home directory
+are set up according to the tastes of the \*(PT authors,
+and according the standard use of windowing software in the \*(PT
+development group.
+.H2 "Troubleshooting"
+.ip "\fBPermission denied.\fR
+If when you start pigi you get the message "permission denied"
+and the \*(PT greeting window fails to pop up, then Vem was
+unable to start pigiRpc, the associated \*(PT process.
+This process is started using the Unix "rsh" command.
+This command can fail if your workstation does not have
+networking enabled, or the user's .rhosts file does not include
+the name of the workstation on which you are running.
+The following simple test checks your networking and .rhosts configuration:
+.(c
+	rsh name echo "hello world"
+.)c
+where "name" is the name of your workstation.  If you get back
+"hello world", then your workstation networking is correct.
+If you get the "permission denied" message again,
+then either your .rhosts is incorrect or networking is turned off
+on your workstation.
+If the latter is the problem,
+please ask your system administrator to enable networking.
