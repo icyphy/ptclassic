@@ -41,12 +41,18 @@ include $(CONFIG)
 
 TCL_SRCS = 	
 
+SIMPLE_TESTS = \
+	testDAG.itcl \
+	testForest.itcl \
+	testGraph.itcl
+
 GRAPHICAL_TESTS = \
 	testEditForest.itcl \
 	testEditSTD.itcl \
 	testFiles.itcl
 
 ITCL_SRCS = $(GRAPHICAL_TESTS) \
+	DirectedAcyclicGraph.itcl \
 	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
@@ -61,10 +67,15 @@ OPTIONAL_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: test_graphics
+tests:: test_simple test_graphics
 
+# These tests do not require a graphics terminal
+test_simple: $(TCL_SRCS) $(ITCL_SRCS)
+	tytestsh $(SIMPLE_TESTS)
+
+# These tests require a graphics terminal
 test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
-	tycho -noconsole -e alltests.itcl
+	tytest $(GRAPHICAL_TESTS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
