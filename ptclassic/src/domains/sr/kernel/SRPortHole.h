@@ -46,35 +46,31 @@ ENHANCEMENTS, OR MODIFICATIONS.
   @Description Communication in the SR domain is done through
   unbuffered wires that take on one value at the end of each instant,
   although the value of each wire evolves monotonically during each instant.
-
+ 
   <P> The value on a wire (and hence a port) may be unknown, absent,
   or present with some value.  The status (unknown, known absent, or
   known present) of both input and output ports may be tested.
+
+  <P> Rather than using farSidePort, the far() function looks at
+  myGeodesic->source() to find the port that drives the geodesic (and
+  hence the port).  When a port is an output, its far port is itself.
 
  **********************************************************************/
 class SRPortHole : public PortHole {
 public:
   // Identify the class
-  int isA(const char* className) const;
+  int			isA(const char* className) const;
 
-  virtual int known() const;
+  // Set the geodesic of this port
+  void 			setGeodesic(Geodesic * g) { myGeodesic = g; }
 
-  virtual int absent() const;
+  PortHole * 		far() const;
+  void 			connect(GenericPort &, int, const char* = 0);
 
-  virtual int present() const;
-
-  virtual Particle & get() const;
-
-  PortHole& newConnection ();
-
-  void connect(GenericPort &, int, const char* = 0);
-
-  SRPortHole * undoAliases();
-
-  SRPortHole * doAliases();
-
-protected:
-  virtual void setFarPort( SRPortHole * p );
+  virtual int		known() const;
+  virtual int		absent() const;
+  virtual int		present() const;
+  virtual Particle &	get() const;
 };
 
 
@@ -92,11 +88,7 @@ public:
 
   int known() const;
   int absent() const;
-  int present() const;  
-
-protected:
-  void setFarPort( SRPortHole * );
-  
+  int present() const;    
 };
 
 /**********************************************************************
@@ -106,22 +98,17 @@ protected:
  **********************************************************************/
 class OutSRPort : public SRPortHole {
 
-  friend class InSRPort;
-
-private:
-
-  // The particle emitted on this Port Hole.
+  // The particle emitted through this Geodesic
   //
   // @Description 0 denotes unknown, 1 denotes absent, and everything
   // else is a pointer to present particle.
-
+  
   Particle * emittedParticle;
 
 public:
 
   // Destroy the particle in the port, if any, resetting it to
   // "unknown"
-
   void clearPort();
 
   // Input/output identification.

@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "SRPortHole.h"
+#include "SRGeodesic.h"
 #include "SRStar.h"
 #include "Error.h"
 #include "Plasma.h"
@@ -43,78 +44,84 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Class identification.
 ISA_FUNC(SRPortHole,PortHole);
 
-// Return myself
-//
-// @Description Overrides the alias-resolving version in GenericPort,
-// since the SR domain doesn't want the hierarchy to be flattened.
-
-PortHole & SRPortHole::newConnection () {
-  cout << "newConnection called on " << this->parent()->name() << " "
-       << this->name() << "\n";
-  
-  PortHole * p = (PortHole *) this;
-  return *p;
-}
-
 // Connect this port to another
 //
-// @Description If this is an input, set the far port to the
-// destination.  If this is an output, set the far port of the
-// destination to point back here.  (Calls setFarPort.)
+// @Description This is used for point-to-point connections and
+// will either connect to the SRGeodesic of either port, or create a new one
+// if needed.  Calls SRGeodesic::setDestPort and SRGeodesic::setSourcePort
+// to make the connection.
 
 void SRPortHole::connect(GenericPort& destination,
 				 int,
 				 const char* = 0)
 {
-  // cout << "connect called on "
-       // <<  this->parent()->name() << " " << this->name()
-       // << " to " << destination.parent()->name() << " " << destination.name()
-       // << "\n";
+  SRPortHole & nearPort = (SRPortHole &) newConnection();
+  SRPortHole & farPort = (SRPortHole &) destination.newConnection();
 
-  SRPortHole * t = undoAliases();
-  SRPortHole * d = ((SRPortHole *) (&destination))->undoAliases();  
+  //  cout << "connect called on "
+  //       <<  nearPort.parent()->name() << " " << nearPort.name()
+  //       << " to " << farPort.parent()->name() << " " << farPort.name()
+  //       << "\n";
+    
+  enum { connect_both, connect_near, connect_far } c;
 
-  // cout << " (actually) "
-       // <<  t->parent()->name() << " " << t->name()
-       // << " to " << d->parent()->name() << " " << d->name()
-       // << "\n";
+  Geodesic * g = nearPort.geo();
+  if ( g ) {
 
-  t = this;
-  d = (SRPortHole *) &destination;
+    // The near port has a geodesic, so connect the far port to it
 
-  if ( t->isItInput() ) {
-    t->setFarPort( d );
+    c = connect_far;
+
   } else {
-    d->setFarPort( t );
+    g = farPort.geo();
+    if ( g ) {
+
+      // The destination has a geodesic, so connect the source to it
+
+      nearPort.myGeodesic = g;
+      c = connect_near;
+
+    } else {
+
+      // Nobody has a geodesic -- create one and connect both to that
+
+      LOG_NEW; g = new SRGeodesic;
+      c = connect_both;      
+    }
+  }
+
+  if ( c != connect_near ) {
+    farPort.myGeodesic = g;
+    if ( farPort.isItInput() ) {
+      g->setDestPort( farPort );
+    } else {
+      g->setSourcePort( farPort, 0, 0 );
+    }
+  }
+
+  if ( c != connect_far ) {
+    nearPort.myGeodesic = g;
+    if ( nearPort.isItInput() ) {
+      g->setDestPort( nearPort );
+    } else {
+      g->setSourcePort( nearPort, 0, 0 );
+    }
   }
 
 }
 
-SRPortHole * SRPortHole::undoAliases()
+// Return the PortHole that drives this one
+//
+// @Description This goes through the geodesic to find the source port,
+// rather than using the farSidePort field.
+
+PortHole * SRPortHole::far() const
 {
-  SRPortHole * p = this;
-  while ( p->aliasFrom() ) {
-    p = (SRPortHole *) p->aliasFrom();
+  if ( myGeodesic ) {
+    return myGeodesic->sourcePort();
   }
-  return p;
-}
 
-SRPortHole * SRPortHole::doAliases()
-{
-  return (SRPortHole *) translateAliases();
-}
-
-// Set the far port
-void SRPortHole::setFarPort( SRPortHole * ) {
-  // cout << "setFarPort called on non-input " << parent()->name() << " "
-  //     << name() << "\n";
-}
-
-// Set the far port for this input
-void InSRPort::setFarPort( SRPortHole * p ) {
-  // cout << "setFarPort called on input " << parent()->name() << " "
-       // << name() << "\n";
-  farSidePort = (PortHole *) p;
+  return NULL;
 }
 
 // Identify the port as an input
