@@ -77,10 +77,6 @@ Note the special processing required due to null packets.
       random = NULL;
     }
     
-    wrapup {
-      if (random) { LOG_DEL;  delete random; }
-    }
-
     destructor {
       if (random) { LOG_DEL;  delete random; }
     }
