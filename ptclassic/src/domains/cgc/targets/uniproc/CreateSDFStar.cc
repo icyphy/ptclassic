@@ -217,7 +217,8 @@ CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& /*target*/) {
 	int numXfer=((DataFlowStar*)cgPort.parent())->reps()*cgPort.numXfer(); 
 	int maxDelay= numXfer + cgPort.maxDelay()-cgPort.numXfer();
 	cgPort.disconnect();
-	DFPortHole *iSource,*iDestination,*iNew,*oSource,*oDestination,*oNew;
+	DFPortHole *iSource,*iDestination,*iNew,
+	    *oSource=NULL,*oDestination=NULL,*oNew=NULL;
 
 	// Create the communication pair for this port
 	CommPair pair;
@@ -418,7 +419,7 @@ int CGCTargetWH::linkFiles ()
 {
     StringList dir, linkCmd;
 
-    char* expandedDirName = expandPathName((const char*) destDirectory); 
+    const char* expandedDirName = expandPathName((const char*) destDirectory); 
     dir << expandedDirName;
     linkCmd << dir << "/" << (const char*) filePrefix << ".o " 
 	    << "-L" << getenv("PTOLEMY") << "/lib." <<getenv("PTARCH")
