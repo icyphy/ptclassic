@@ -127,14 +127,19 @@ body ::tycho::Polygon::_reshape {id canvas slate x y args} {
 #### _reshapeclick
 #
 body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
-    ::tycho::getflag ghost args
+    # Extract options
+    array set opts [concat {-ghost 0 -aspects {}} $args]
+    if { $opts(-aspects) == "" } {
+        error "Empty aspect list"
+    }
 
     # Remember how I am now.
     set scratch($id.prevX) $x
     set scratch($id.prevY) $y
 
-    # Get the coordinates of the line into an efficient-to-process form
+    # Get the coordinates of the polygon into an efficient-to-process form
     set i 0
+    set scratch($id.indexes) {}
     foreach {a b} [$slate coords $id] {
 	set scratch($id.$i.x) $a
 	set scratch($id.$i.y) $b
@@ -143,17 +148,18 @@ body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
     }
 
     # If the start vertex is repeated, delete it
-    set last [expr $i/2-1]
+    set last [expr $i-1]
     if { $scratch($id.0.x) == $scratch($id.$last.x) \
 	    && $scratch($id.0.y) == $scratch($id.$last.y) } {
 	unset scratch($id.$last.x)
 	unset scratch($id.$last.y)
+        set scratch($id.indexes) [lreplace $scratch($id.indexes) end end]
     }
-    set scratch($id.indexes) [lreplace $scratch($id.indexes) end end]
 
     # Figure out the vertices that will be changed
-    foreach aspect $args {
-	::tycho::assign a n [split $aspect "-"]
+    set scratch($id.vertices) {}
+    foreach aspect $opts(-aspects) {
+        ::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "vertex" {
 		lappend scratch($id.vertices) $n
@@ -168,13 +174,14 @@ body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
     }
     
     # Make sure there are no duplicates
-    set scratch($id.vertices) [::tycho::lnub scratch($id.vertices)]
+    set scratch($id.vertices) [::tycho::lnub $scratch($id.vertices)]
 
     # If the -ghost flag is set, draw the ghost line.
-    if { $ghost } {
-	set scratch($id.ghost) [eval $canvas create line \
-		$scratch($id.coords) \
-		-fill grey]
+    if { $opts(-ghost) } {
+	$slate ghost $id
+ 	set scratch($id.ghost) 1
+   } else {
+	set scratch($id.ghost) 0
     }
 }
 
@@ -185,7 +192,7 @@ body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
 # implement "inheritance."
 #
 body ::tycho::Polygon::_reshapedrag {id canvas slate x y} {
-    ::tycho::AsPolygon::reshapedrag $id $canvas $slate $x $y
+    ::tycho::Line::_reshapedrag $id $canvas $slate $x $y
 }
 
 #######################################################################
@@ -195,7 +202,7 @@ body ::tycho::Polygon::_reshapedrag {id canvas slate x y} {
 # implement "inheritance."
 #
 body ::tycho::Polygon::_reshaperelease {id canvas slate x y} {
-    ::tycho::AsPolygon::reshaperelease $id $canvas $slate $x $y
+    ::tycho::Line::_reshaperelease $id $canvas $slate $x $y
 }
 
 #######################################################################
@@ -260,26 +267,29 @@ body ::tycho::Polygon::reshape {coords x y args} {
     }
     
     # If the start vertex is repeated, delete it
-    set last [expr $i/2-1]
+    set last [expr $i-1]
     if { $_x(0) == $_x($last) && $_y(0) == $_y($last) } {
-	unset _x($last)
-	unset _y($last)
+        unset _x($last)
+        unset _y($last)
+        set indexes [lreplace $indexes end end]
+        set restore 1
+    } else {
+        set restore 0
     }
-    set indexes [lreplace $indexes end end]
 
     # Process all aspects to change coordinates
     foreach aspect $args {
 	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "length" {
-		error "Cannot set the \"length\" aspect of a line"
+		error "Cannot set the \"length\" aspect of a polygon"
 	    }
 	    "vertex" {
 		set _x($n) [expr $_x($n) + $x]
 		set _y($n) [expr $_y($n) + $y]
 	    }
 	    default {
-		error "Invalid aspect \"$aspect\" of line shape"
+		error "Invalid aspect \"$aspect\" of polygon shape"
 	    }
 	}
     }
@@ -288,6 +298,9 @@ body ::tycho::Polygon::reshape {coords x y args} {
     set coords {}
     foreach i $indexes {
 	lappend coords $_x($i) $_y($i)
+    }
+    if $restore {
+        lappend coords $_x(0) $_y(0)
     }
     return $coords
 }
