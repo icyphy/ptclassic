@@ -25,14 +25,17 @@ $Id$
 #include "ParProcessors.h"
 #include "ParNode.h"
 
+class ParScheduler;
+
 class CGFullConnect : public BaseMultiTarget {
 public:
 	CGFullConnect(const char* name,const char* sClass,const char* desc);
 	~CGFullConnect();
 	void start();
 	int setup(Galaxy&);
-	void addCode(const char* code);
 	void wrapup();
+
+	void addCode(const char*);
 
 	// compute profile
 	int computeProfile(int nP, int resWork = 0, IntArray* avail = 0);
@@ -69,6 +72,9 @@ public:
 	SDFStar* createSend(int from, int to, int num);
 	SDFStar* createReceive(int from, int to, int num);
 
+	// display Gantt chart
+	void displaySchedule(ParScheduler* );
+
 protected:
 	StringState childType;
 	StringState filePrefix;
@@ -81,6 +87,13 @@ protected:
 	// reset resources
 	virtual void resetResources();
 
+	// choose scheduler
+	virtual void chooseScheduler();
+
+	// create child targets
+	// By default, it clones from KnownTarget list with "chile-type" state.
+	virtual Target* createChild();
+ 
 	// parallel processors
 	ParProcessors* parProcs;
 
