@@ -77,6 +77,9 @@ public:
 	EGGateList ancestors;
 	EGGateList descendants;
 
+	// hidden Gates
+	EGGateList hiddenGates;
+
 	// return a pointer to the corresponding master
 	SDFStar *myMaster() {return pStar;}
 
