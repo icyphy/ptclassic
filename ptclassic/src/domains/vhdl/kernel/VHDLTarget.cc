@@ -591,8 +591,8 @@ void VHDLTarget :: registerState(State* state, int thisFiring/*=-1*/,
     state->initialize();
     initVal = state->currentValue();
   }
-  
-  ref << "_" << thisFiring;
+
+//  ref << "_" << thisFiring;
 
   if (firingVariableList.inList(ref)) return;
   
