@@ -462,7 +462,7 @@ int SimVSSTarget :: runCode() {
       comCode << "run\n";
       comCode << "quit\n";
       writeFile(comCode, ".com", 0);
-      command << "vhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
+      command << "ptvhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
       StringList error = "";
       error << "Could not simulate " << filePrefix << ".vhdl";
       (void) systemCall(command, error, targetHost);
