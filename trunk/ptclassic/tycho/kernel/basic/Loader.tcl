@@ -35,9 +35,16 @@
 #### loadIfNotPresent
 # Load 'package' if 'command' is not present.
 # If we can't load package, then search first in the Ptolemy tcl tree,
-# Then prompt the user for the file to be loaded.
-# If the package still cannot be loaded, return an error.
 #
+# If tk is not present, and we can't load the package, we call error.
+#
+# If tk is present, then prompt the user for the file to be loaded.
+# If the package still cannot be loaded, return an error.  
+#
+# Note that this is somewhat different from most of the other procs and
+# classes in kernel/basic in that it will bring up a window if tk is
+# present.
+# 
 # The optional packagePathList argument consists of a list of 2 element
 # sublists that contain other package names and pathnames to try and load
 # packagePathList can be used to try to load the package under an alternative
@@ -45,19 +52,11 @@
 # and a directory to try loading in.  The alternative packagename can be
 # empty.
 #
-# The example below attempts to load TclX to get the profile command.
-# If TclX can't be found, then it looks in $tycho/lib/profile/obj.$PTARCH
-# for a file named tclXprofile.ext, where ext is the sharedlibrary extension
-# returned by [info sharedlibextension].  If that file can't be found
-# then it looks in /users/ptdesign/lib/profile/obj.$PTARCH for the same file
-#
+# The example below attempts to load tytimer.so
 # <tcl><pre>
-# tycho::loadIfNotPresent profile tclx \
-#                [list [list tclXprofile \
-#                [file join $tycho lib profile obj.$env(PTARCH)]] \
-#                [list tclXprofile \
-#                [file join / users ptdesign lib profile obj.$env(PTARCH)]]]  
+# ::tycho::loadIfNotPresent ::tycho::timer tytimer
 # </pre></tcl>
+#
 proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
     global PTOLEMY env TYCHO
 
@@ -128,18 +127,25 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
 			puts "loading $libFile"
 			if [file exists $libFile] {
 			    if [catch {load $libFile} errMsg] {
-				# We had an error.
-				# Show the error message and bring up 
-				# a yes/no/cancel window
-				set nm [::tycho::autoName .loaderYNC]
-				::tycho::YesNoQuery $nm \
-					-text "load $libFile\nfailed with\
-					the following error message:\n\
-					$errMsg\n\
-					Do you want to try other directories?"
-				set response [::tycho::Dialog::wait $nm]
-				if {$response == 0 } {
-				    ::tycho::silentError
+				if [info exists tk_version] {
+				    # We had an error, and we have Tk
+				    # Show the error message and bring up 
+				    # a yes/no/cancel window
+				    set nm [::tycho::autoName .loaderYNC]
+				    ::tycho::YesNoQuery $nm \
+					    -text "load $libFile\nfailed with\
+					    the following error message:\n\
+					    $errMsg\n\
+					    Do you want to try other\
+					    directories?"
+				    set response [::tycho::Dialog::wait $nm]
+				    if {$response == 0 } {
+					::tycho::silentError
+				    }
+				} else {
+				    # No Tk, so call error
+				    error "Failed to load `$libFile':\n\
+					    $errMsg"
 				}
 			    } else {
 				# We loaded ok, so we are done.
@@ -150,7 +156,7 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
 		}
             }
 
-	    while {1} {
+	    while [info exists tk_version] {
 		# We did not load ok, so we prompt the user.
 		set loadLibPath [::tycho::queryfilename \
 			"Enter the name of the library that contains the\n \
