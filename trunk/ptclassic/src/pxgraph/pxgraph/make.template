@@ -28,7 +28,7 @@ all:	makefile pxgraph
 # here.
 pxgraph:	$(OBJS)
 	rm -f pxgraph
-	$(LINKER) $(LINKFLAGS) -o pxgraph $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) -lm
+	$(LINKER) $(LINKFLAGS) -o pxgraph $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
 
 OUT = $(BINDIR)/pxgraph
 
