@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, slate/doc directory.
+# Makefile for Ptolemy Tycho system, slate/kernel/doc directory.
 #
 # $Id$
 # Makefile Author: Christopher Hylands
@@ -39,20 +39,18 @@ VPATH =		$(ROOT)/slate/doc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS = \
-	tute.html \
-	tute-pictures.html \
-	tute-shapes.html \
-	tute-interactors.html \
-	tute-behavior.html \
-	tute-constraints.html
+EXTRA_SRCS = 
 
-MISC_FILES =
+MISC_FILES = tutorial
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
+# Sub directories to run make in.
+DIRS =          tutorial
+ 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
 
 
