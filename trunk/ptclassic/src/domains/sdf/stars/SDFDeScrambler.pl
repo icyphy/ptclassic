@@ -46,7 +46,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	defstate {
 	  name { shiftReg }
 	  type { int }
-	  default { 0 }
+	  default { 1 }
 	  desc { the shift register }
 	}
 	protected {
@@ -72,12 +72,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int reg = int(shiftReg) << 1;
 	  // Put the input in the low-order bit: zero = 0, nonzero = 1
 	  if ( int(input%0) ) {
-	    reg = reg | 0x01;
+	    reg++;
 	  }
 	  int masked = mask & reg;
-	  // Now we need to find the parity of "masked".
+	  // Now we need to find the parity of "masked"
 	  int parity = 0;
-	  // Calculate the parity of the masked word.
+	  // Calculate the parity of the masked word
 	  while (masked > 0) {
 	    // toggle parity if the low-order bit is one
 	    parity = parity ^ (masked & 1);
