@@ -36,7 +36,10 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     initCode {
-// empty for future use
+	if (!standardIO) {
+            addInclude("<fcntl.h>");		// Define open and O_RDONLY
+	    addInclude("<unistd.h>");		// Define read and write
+	}
     }
 
     codeblock(declarations, "const char* datatype, int size") {
