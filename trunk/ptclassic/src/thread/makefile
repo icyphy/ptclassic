@@ -163,6 +163,9 @@ gthreads_sol2.5.cfront: gthreads_sol2.cfront
 # sol2.5.egcs same as sol2.5
 gthreads_sol2.5.egcs: gthreads_sol2.5
 
+# sol2.5.static same as sol2.5
+gthreads_sol2.5.static: gthreads_sol2.5
+
 # Build library for sun4 using Gnu compiler.
 gthreads_sun4: $(GT_OBJ)
 	-cd $(GT_OBJ)/src; ln -s Makefile.SunOS Makefile
