@@ -39,4 +39,6 @@ extern void clr_accum_string();
 extern void pr_accum_string();
 extern void PrintVersion ();
 
+extern char* pigiFilename;
+
 #endif  /* _XFUNCTIONS_H */
