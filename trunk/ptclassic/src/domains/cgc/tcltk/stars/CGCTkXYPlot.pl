@@ -101,6 +101,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  // Add the ptkPlot module and ptkPlot_defs.h on which it depends
 	  addModuleFromLibrary("ptkPlot", "src/ptklib", "ptk");
 	  addInclude("\"ptkPlot_defs.h\"");
+	  addRemoteFile("$PTOLEMY/src/ptklib/ptkPlot_defs.h");
 
 	  addGlobal("ptkPlotWin $starSymbol(plotwin);");
 	  addGlobal("ptkPlotDataset $starSymbol(plotdataset);");
