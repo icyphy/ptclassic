@@ -103,20 +103,16 @@ void VHDLBTarget :: headerCode () {
 /////////////////////////////////////////
 
 int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
-  char IntGal[CHAR15] = "InterpGalaxy";
-  char intType[CHAR10] = "INT";
-  char floatType[CHAR10] = "FLOAT";
-  char anytypeType[CHAR10] = "ANYTYPE";
   StringList tempCode = "";
   StringList blockName = "";
   int dataIns = FALSE;
   int dataOuts = FALSE;
-  
+
   /* Temporarily store upper-level code:  ensure bottom-up code gen order */
   tempCode = vhdlCode;
   
   /* If top level, className = "InterpGalaxy", so use universe name instead */
-  if(!strcmp(galaxy.className(),IntGal)) {
+  if(!strcmp(galaxy.className(),"InterpGalaxy")) {
     blockName = galaxy.name();
   }
   else {
@@ -164,10 +160,10 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
        the outermost level is not aliased from aother port */
     /* Sometimes outer port is "at boundary" when inner, alias port is not */
     if(!(innermost->atBoundary()) || (ph->aliasFrom())) {
-      if(!strcmp(ph->type(), intType)) {
+      if(!strcmp(ph->type(), "INT")) {
 	phTypeDecl = "INTEGER";
       }
-      else if(!strcmp(ph->type(), floatType)) {
+      else if(!strcmp(ph->type(), "FLOAT")) {
 	phTypeDecl = "REAL";
       }
       else {
@@ -266,10 +262,10 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       /* Generic declarations for component declarations */
       if(genericDecl.numPieces() > 1) genericDecl << "; ";
       genericDecl << sanitize(st->name()) << ": ";
-      if(!strcmp(st->type(), intType)) {
+      if(!strcmp(st->type(), "INT")) {
 	genericDecl << "INTEGER";
       }
-      else if(!strcmp(st->type(), floatType)) {
+      else if(!strcmp(st->type(), "FLOAT")) {
 	genericDecl << "REAL";
       }
       else {
@@ -342,13 +338,13 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
 	geoName = terminal->getGeoReference();
 
 	signals << indent(1) << "signal " << ph->getGeoReference();
-	if(!strcmp(ph->type(), intType)) {
+	if(!strcmp(ph->type(), "INT")) {
 	  signals << ": INTEGER;\n";
 	}
-	else if(!strcmp(ph->type(), floatType)) {
+	else if(!strcmp(ph->type(), "FLOAT")) {
 	  signals << ": REAL;\n";
 	}
-	else if(!strcmp(ph->type(), anytypeType)) {
+	else if(!strcmp(ph->type(), "ANYTYPE")) {
 	  signals << ": REAL;\n";
 	}
 	else {
@@ -364,13 +360,13 @@ int VHDLBTarget :: galFunctionDef(Galaxy& galaxy) {
       else {
 	portDecl << "in ";
       }
-      if(!strcmp(ph->type(), intType)) {
+      if(!strcmp(ph->type(), "INT")) {
 	portDecl << "INTEGER";
       }
-      else if(!strcmp(ph->type(), floatType)) {
+      else if(!strcmp(ph->type(), "FLOAT")) {
 	portDecl << "REAL";
       }
-      else if(!strcmp(ph->type(), anytypeType)) {
+      else if(!strcmp(ph->type(), "ANYTYPE")) {
 	portDecl << "REAL";
       }
       else {
