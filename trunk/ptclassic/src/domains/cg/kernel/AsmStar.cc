@@ -13,6 +13,7 @@ $Id$
 *******************************************************************/
 #include "AsmStar.h"
 #include "ProcMemory.h"
+#include "IntState.h"
 #include <ctype.h>
 
 // Attributes for code generation, all processors.
@@ -24,7 +25,7 @@ extern const Attribute A_CIRC(AB_CIRC,0);
 extern const Attribute A_NOINIT(AB_NOINIT,0);
 extern const Attribute A_REVERSE(AB_REVERSE,0);
 extern const Attribute A_CONSEC(AB_CONSEC,0);
-extern const Attribute A_SHARED(AB_SHARED,0);
+extern const Attribute A_SYMMETRIC(AB_SYMMETRIC,0);
 
 // Generate code
 void AsmStar::fire() {
@@ -60,6 +61,34 @@ AsmStar::lookupAddress(const char* name) {
 	    s = "";
 	}
 	return s;
+}
+
+unsigned
+AsmStar::addrWithOffset (const char* name, const char* offset) {
+	int off;
+	AsmPortHole* p = (AsmPortHole*)portWithName(name);
+	if (!p) {
+		codeblockError(name, " is not a porthole name");
+		return 0;
+	}
+	if (isdigit(*offset)) off = atoi(offset);
+	else {
+		State* s = stateWithName(offset);
+		if (!s || !s->isA("IntState")) {
+			codeblockError(offset, " is not the name of an IntState");
+			return 0;
+		}
+		IntState* is = (IntState*)s;
+		off = *is;
+	}
+	// compute offset within buffer, circularly
+	off += p->bufPos();
+	int sz = p->bufSize();
+	while (off >= sz) off -= sz;
+	while (off < 0) off += sz;
+	// add the base
+	off += p->baseAddr();
+	return off;
 }
 
 // lookup size (of buffer or state) for symbol in a codeblock
@@ -112,9 +141,26 @@ extern "C" int strcasecmp(const char* s1, const char* s2);
 
 // handle functions
 StringList
-AsmStar::processMacro(const char* func, const char* id) {
+AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 	StringList s;
-	if (strcasecmp(func,"addr") == 0) {
+	if (strcasecmp(func,"ref2") == 0) {
+		if (*arg2 == 0) codeblockError("two arguments needed for ref2");
+		else {
+			s = lookupMem(id);
+			s += ":";
+			s += (int)addrWithOffset(id, arg2);
+		}
+	}
+	else if (strcasecmp(func,"addr2") == 0) {
+		if (*arg2 == 0)
+			codeblockError("two arguments needed for addr2");
+		else s = addrWithOffset(id, arg2);
+	}
+	// if more two-arg funcs are added, put them before here!
+	else if (*arg2 != 0) {
+		codeblockError(func, " is not a 2-argument macro");
+	}
+	else if (strcasecmp(func,"addr") == 0) {
 		s = lookupAddress(id);
 	} else if (strcasecmp(func, "ref") == 0) {
 		s = lookupMem(id);
@@ -171,11 +217,21 @@ void AsmStar::gencode(CodeBlock& cb) {
 				return;
 			}
 			// get the identifier
-			char id[TOKLEN], *p = id;
+			char id[TOKLEN], arg2[TOKLEN], *p = id;
 			while (isalnum(*t) || *t == '#') *p++ = *t++;
 			*p = 0;
 			// skip any whitespace
 			while (isspace(*t)) t++;
+			// may be a ',' for 2nd argument
+			if (*t == ',') {
+				t++;
+				p = arg2;
+				while (isalnum(*t) || *t == '#') *p++ = *t++;
+				*p = 0;
+				// skip any whitespace
+				while (isspace(*t)) t++;
+			}
+			else arg2[0] = 0;
 			// must be pointing at a ')'
 			if (*t++ != ')') {
 				codeblockError ("expecting ')'",
@@ -185,7 +241,7 @@ void AsmStar::gencode(CodeBlock& cb) {
 			// Don't know why the following two steps can't
 			// be consolidated, but if they are, the string
 			// becomes null
-			StringList tmp = processMacro(func,id);
+			StringList tmp = processMacro(func,id,arg2);
 			const char* value = tmp;
 			if (value == 0 || *value == 0) {
 				value = "ERROR";
