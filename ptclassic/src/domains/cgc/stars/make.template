@@ -45,6 +45,7 @@ PL_SRCS= \
  CGCFIR.pl \
  CGCFloatToCx.pl \
  CGCFork.pl \
+ CGCGAL.pl CGCGGAL.pl \
  CGCGain.pl \
  CGCIntegrator.pl \
  CGCIIDGaussian.pl \
@@ -69,6 +70,7 @@ PL_SRCS= \
  CGCRepeat.pl \
  CGCReverse.pl \
  CGCTrainer.pl \
+ CGCSGIAudio.pl CGCSGIAudioIn.pl CGCSGIAudioOut.pl \
  CGCSin.pl \
  CGCSleep.pl \
  CGCSqrt.pl \
