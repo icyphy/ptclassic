@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pakman
 
-MISC_FILES = 	_README.txt README.txt
+MISC_FILES =	README.txt
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -59,7 +59,9 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
+all:  sources $(MISC_SRCS) tclIndex
+
+install:
 
 sources:: pakman
 	chmod a+x pakman
