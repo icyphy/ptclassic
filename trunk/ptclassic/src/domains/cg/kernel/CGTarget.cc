@@ -765,6 +765,11 @@ int CGTarget :: modifyGalaxy() {
 	    }
 	}
     }
+
+    // Additional post-check to mirror pre-check.
+    // If gal wasn't broke, don't break it.
+    if (warnIfNotConnected(gal)) return FALSE;
+
     return TRUE;
 }
 
