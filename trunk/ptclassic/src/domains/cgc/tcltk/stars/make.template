@@ -59,7 +59,7 @@ PL_SRCS= \
  CGCTkBarGraph.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
- CGCTkParamBiquad.pl \
+ CGCTkParametricEq.pl \
  CGCTkSlider.pl \
  CGCTkStereoIn.pl \
  CGCTkStereoOut.pl \
