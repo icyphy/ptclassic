@@ -53,15 +53,20 @@ class InterpUniverse : public InterpGalaxy, public Runnable {
 private:
 	const char* targName;
 public:
-        InterpUniverse (const char* name = "mainGalaxy") :
-		Runnable((Target*)0, KnownBlock::domain(),this), targName(0)
-        { setBlock(name,NULL);}
+	// constructor: args are name and domain
+        InterpUniverse (const char* name, const char* dom);
 	~InterpUniverse();
+	// change the target, by specifying new target name
         int newTarget(const char* newTargName = 0);
+	// return my target name
 	const char* targetName() const;
+	// return my scheduler
 	Scheduler* scheduler() const;
+	// return my target
 	Target* myTarget() const { return target;}
+	// run universe
 	int run() { return Runnable::run();}
+	// wrapup universe
 	void wrapup() { target->wrapup();}
 	// class identification
 	int isA(const char*) const;
