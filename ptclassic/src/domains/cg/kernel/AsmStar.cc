@@ -173,9 +173,9 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s = readFullName();
 	} else if ((strcasecmp(func, "label") == 0) ||
 		   (strcasecmp(func, "codeblockSymbol") == 0)) {
-		s = codeblockSymbol(id);
+		s = codeblockSymbol.lookup(id);
 	} else if (strcasecmp(func, "starSymbol") == 0) {
-		s = starSymbol(id);
+		s = starSymbol.lookup(id);
 	} else if (strcasecmp(func, "size") == 0) {
 		s = lookupSize(id);
 	} else {
