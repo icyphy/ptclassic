@@ -34,8 +34,28 @@
 
 #######################################################################
 #### IDocSys
-# 
+# IDocSys is the parent of all <a href = 
+# "../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a> generators. 
+# These Classes may be viewed using the <a href = "IDoc.idoc">IDoc Viewer</a>.
 #
+# IDocSys is also the interface to the Class generators. When the proc:
+# ::tycho::IDocSys::generateIDoc is called with a list of filenames, 
+# the IDocSys class examines the extensions, using IDocSys::generator
+# and instantiates the correct child generator to process that file.
+# (Currently, <a href = "ItclDocSys.idoc">[incr Tcl]</a> and 
+# <a href ="JavaDocSys.idoc">Java</a> are supported). If a subsequent file
+# is of the same type, it uses the same generator.
+#
+# This procedure is also tied to the make idocs command as well as the 
+# Generate IDoc Documentation menu item in the Itcl and Java editors.
+# 
+# A timesaving feature of the IDocSys is that it will not generate 
+# documentation unnecessarily. It checks this in the modCheck proc, which
+# works in the same way as generateIDoc by calling the appropriate subclass.
+# modCheck examines a source file (given as an argument) for defined classes.
+# If there exists documentation of those defined classes which is newer than 
+# the source code <b>and</b> the generator for that type, new documentation
+# is not generated.
 #
 class ::tycho::IDocSys {
     inherit ::tycho::TyDoc
