@@ -46,6 +46,9 @@ protected:
 	// add a new child
 	void addChild(Target&);
 
+	// add a inherited child
+	void inheritChildren(Target*, int, int);
+
 	// remove the "children" list (no effect on children)
 	void remChildren() { nChildren = 0; children = 0;}
 
