@@ -80,7 +80,7 @@ OPTIONAL_FILES =
 REALCLEAN_STUFF =	tychoClasses.dag
 
 # Sub directories to run make in.
-DIRS =			coding demo
+DIRS =			coding demo packages
 
 
 
