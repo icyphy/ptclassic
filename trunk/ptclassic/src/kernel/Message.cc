@@ -100,9 +100,11 @@ int Message::errorConvert(const char* arg) const {
 // clone -- try to catch some errors for folks who don't redefine it.
 Message* Message::clone() const {
 	LOG_NEW; Message* p = new Message;
-	if (strcmp(dataType(),p->dataType()) != 0)
-		Error::abortRun("Message class ",dataType(),
+	// FIXME: Memory leak of p defined above on error
+	if (strcmp(dataType(),p->dataType()) != 0) {
+		Error::abortRun("Message class ", dataType(),
 				" doesn't redefine clone()!");
+	}
 	return p;
 }
 
