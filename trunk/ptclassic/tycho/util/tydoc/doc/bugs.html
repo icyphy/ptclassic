@@ -12,8 +12,9 @@
 
 	<LI> If we have a series of declarations that are not
 	separated by blank lines, should they all share the same
-	doc comment?
-
+	doc comment?  Usually, in the code, we have a comment, then
+	a bunch of declarations.  Currently tydoc dumps the first 
+	declaration, and then the comment, and then the other declarations. 
 
 	<LI> The arguments to <CODE>itk_option</CODE> are not
 	handled properly.  We currently print:
@@ -24,6 +25,20 @@
 	<LISTING>
 	itk_option define -master master Master "0"
 	</LISTING>
+
+	<LI> If we have a destructor that looks like:
+	<LISTING>
+	    destructor {
+		unset instances($this)
+	    }
+	</LISTING>
+	Then we incorrectly assume that <CODE>unset . . .</CODE>
+	is the args.
+
+
+	<LI> The kernel itcl files need to have tydoc tags added.
+	Each class needs a one line description, the author tags
+	need to be adjusted.
 
 </MENU>
 
@@ -36,6 +51,10 @@
 	to do this we need to be able to map what classes are defined
 	in what files, and check the mod times of the source files
 	against the html files.
+
+
+	<LI> The copyright should be hidden in a separate file, partly
+	to speed up redraw.
 </MENU>
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
