@@ -212,7 +212,7 @@ sccsinfo:
 # -- If Matlab is installed, then set MATLABDIR accordingly
 #    and set MATLABEXT_LIB to the external library directory
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-ifeq ($MATLABDIR,)
+ifeq ("$(MATLABDIR)","")
 MATLABDIR= $(ROOT)/src/compat/matlab
 else
 MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
