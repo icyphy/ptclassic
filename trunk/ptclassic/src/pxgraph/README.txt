@@ -48,4 +48,9 @@ that variable.
 Note that for this script to work, $PTOLEMY/bin needs to be in your
 path earlier than $PTOLEMY/bin.$PTARCH.
 
+If the Java version of pxgraph works and meets most of your needs,
+but you occasionally need the X11 version for something like MIF
+output, you can install the X11 version as pxgraph.x11 and then
+type a 'x' while the mouse is over the Java ptplot to start up
+pxgraph.x11 with the same command line arguments.
 
