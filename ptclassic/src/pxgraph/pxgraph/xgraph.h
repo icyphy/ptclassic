@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdio.h>              /* Pick up sprintf() */
 #include <malloc.h>
 
-#define VERSION_STRING	"Release: 11.3.4 Build: $Id$"
+#define VERSION_STRING	"11.3.4 (Build: $Id$)"
 
 #define MAXKEYS		50
 #define MAXATTR 	8
