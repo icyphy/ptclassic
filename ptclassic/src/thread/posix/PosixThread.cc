@@ -92,15 +92,15 @@ void PosixThread::initialize()
 #ifdef PTHPUX10
     pthread_create(&thread, attributes, runThis, this);
 #else // PTHPUX10
-#if defined(PTSOL2_CFRONT) && defined(PTSOL2_5)
+#if defined(PTSOL2_CFRONT)
     // Sol2.5.cfront CC4.1 gets the following error unless we cast:
     //  Error: Formal argument __func of type void*(*)(void*) in call to
     //  pthread_create(pthread**, pthread_attr_t*, void*(*)(void*), void*) is
     //  being passed void*(*)(PosixThread*).
     pthread_create(&thread, &attributes, (void*(*)(void*))runThis, this);
-#else // PTSOL2_CFRONT && PTSOL2_5
+#else // PTSOL2_CFRONT
     pthread_create(&thread, &attributes, runThis, this);
-#endif // PTSOL2_CFRONT && PTSOL2_5
+#endif // PTSOL2_CFRONT
 #endif //PTHPUX10
 
     // Discard temporary attribute object.
