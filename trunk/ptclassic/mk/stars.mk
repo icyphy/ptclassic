@@ -225,14 +225,28 @@ CG96T = $(OBJDIR)/domains/cg96/targets
 SDFTARGETS =	$(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o 
 CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 		$(SDFT)/CompileTarget.o 
+ifeq ($(USE_SHARED_LIBS),yes) 
+CGCTARGETS =
+CGCTARGETS_LIBS = 	-lcgctargets
+CGCTARGETS_LIBSFILES = $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
+else
 CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
 		$(CGCT)/main/CGCMultiTarget.o $(CGCTCL)/CGCTclTkTarget.o \
 		$(CGCT)/main/CGCMacroStar.o $(CGCT)/main/CGCDDFCode.o \
 		$(CGCT)/main/CGCSDFSend.o $(CGCT)/main/CGCSDFReceive.o \
 		$(CGCT)/main/CGCSDFBase.o $(CGCT)/main/CGCTargetWH.o
+CGCTARGETS =
+CGCTARGETS_LIBS =
+endif
 
 CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
 BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
+
+ifeq ($(USE_SHARED_LIBS),yes) 
+CG56TARGETS =
+CG56TARGETS_LIBS = 	-lcg56targets
+CG56TARGETS_LIBSFILES = $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
+else
 CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 		$(CG56T)/S56XTargetWH.o \
 		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
@@ -244,9 +258,16 @@ CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
 	 	$(CG56T)/CGCXSynchComm.o $(CG56T)/CG56XCSynchComm.o \
 		$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
 		$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
+CG56TARGETS_LIBS =
+CG56TARGETS_LIBSFILES =
+endif
+
 CG96TARGETS =	$(CG96T)/Sim96Target.o
 CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
+
+# If we are not using shared libraries, then this will be empty
+TARGETS_LIBS = $(CG56TARGETS_LIBS) $(CGCTARGETS_LIBS)
 
 #
 # Thread related definitions.
@@ -293,3 +314,4 @@ IPUS_TCL_STAR_LIBS =
 IPUS_TCL_STAR_LIBFILES =
 IPUS_STAR_LIBS =
 endif
+
