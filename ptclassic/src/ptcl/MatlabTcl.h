@@ -90,7 +90,7 @@ protected:
 	void sethandle();
 
 	// start a Matlab process if one is not running
-	int init();
+	int init(char* command = 0);
 
 	// evaluate a Matlab command
 	int evaluate(char* command, int outputBufferFlag);
