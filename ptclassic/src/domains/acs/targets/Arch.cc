@@ -55,7 +55,7 @@ Arch::Arch(const char* arch_path, const char* arch_filename)
   arch_directory=new char[MAX_STR];
   char* total_path=new char[MAX_STR];
   strcpy(arch_directory,arch_path);
-  sprintf(total_path,"%s/%s",arch_directory,arch_filename);
+  sprintf(total_path,"%s/src/domains/acs/utils/%s",arch_directory,arch_filename);
 
   arch_stream=new ifstream(total_path);
   if (arch_stream->bad())
