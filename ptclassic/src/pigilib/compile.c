@@ -213,21 +213,11 @@ octObject *facetPtr;
 	} else {
 	    /* assume it's a sog */
 	    ERR_IF1(!GetOrInitSogParams(&inst, &pList));
-	    if (IsGal(&inst)) {
-		/* do defgalaxy ako... */
-		akoName = BaseName(inst.contents.instance.master); 
-		ERR_IF1((name = UniqNameGet(akoName)) == NULL);
-		inst.contents.instance.name = name;
-		ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
-		ERR_IF1(!KcInstance(name, akoName, &pList));
-	    } else {
-		/* assume inst is a star... */
-		akoName = AkoName(inst.contents.instance.master);
-		ERR_IF1((name = UniqNameGet(akoName)) == NULL);
-		inst.contents.instance.name = name;
-		ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
-		ERR_IF1(!KcInstance(name, akoName, &pList));
-	    }
+	    akoName = BaseName(inst.contents.instance.master); 
+	    ERR_IF1((name = UniqNameGet(akoName)) == NULL);
+	    inst.contents.instance.name = name;
+	    ERR_IF2(octModify(&inst) != OCT_OK, octErrorString());
+	    ERR_IF1(!KcInstance(name, akoName, &pList));
 	}
     }
     return(TRUE);
@@ -524,12 +514,28 @@ octObject *facetPtr;
     return (TRUE);
 }
 
+extern char* curDomainName();
+
 static boolean
 CompileGal(galFacetPtr)
 octObject *galFacetPtr;
 {
     char msg[1000], *name;
     boolean xferedBool;
+    char *oldDomain, *galDomain;
+
+    oldDomain = curDomainName();
+
+    /* get the galaxy domain */
+    if (!GOCDomainProp(galFacetPtr, &galDomain, oldDomain)) {
+        PrintErr(ErrGet());
+        return (FALSE);
+    }
+    /* Call Kernel function to set KnownBlock current domain */
+    if (! KcSetKBDomain(galDomain)) {
+        PrintErr("Domain error in galaxy or wormhole.");
+        return (FALSE);
+    }
 
     name = BaseName(galFacetPtr->contents.facet.cell);
     if (DupSheetIsDup(&traverse, name)) {
@@ -543,11 +549,19 @@ octObject *galFacetPtr;
     }
     sprintf(msg, "CompileGal: facet = %s", name);
     PrintDebug(msg);
-    ERR_IF1(!KcDefgalaxy(name));
+    /*
+     * So that KcDefgalaxy recognizes wormholes, we have to restore the
+     * old domain.
+     */
+    KcSetKBDomain(oldDomain);
+    /*
+     * The following sets the new domain again.
+     */
+    ERR_IF1(!KcDefgalaxy(name,galDomain));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
     ERR_IF2(!ConnectPass(galFacetPtr), msg);
-    ERR_IF1(!KcEndDefgalaxy());
+    ERR_IF1(!KcEndDefgalaxy(oldDomain));
     ERR_IF2(!DupSheetAdd(&traverse, name), msg);
     ERR_IF2(!ClearDirty(galFacetPtr), msg);
     if (!xferedBool) {
@@ -562,12 +576,20 @@ octObject *facetPtr;
 {
     char *name;
     boolean xferedBool;
+    char* oldDomain;
+
+    if((oldDomain = setCurDomainF(facetPtr)) == NULL) {
+        PrintErr("Domain error in facet.");
+        KcSetKBDomain(oldDomain);
+        return (FALSE);
+    }
 
     name = BaseName(facetPtr->contents.facet.cell);
     ERR_IF1(!ProcessSubGals(facetPtr));
     xferedBool = DupSheetIsDup(&xfered, name);
     if (xferedBool && !IsDirty(facetPtr)) {
 	/* universe already xfered to kernel and is unchanged */
+        KcSetKBDomain(oldDomain);
 	return (TRUE);
     }
     PrintDebug("CompileUniv");
@@ -578,6 +600,7 @@ octObject *facetPtr;
     if (!xferedBool) {
 	ERR_IF1(!DupSheetAdd(&xfered, name));
     }
+    KcSetKBDomain(oldDomain);
     return (TRUE);
 }
 
@@ -638,6 +661,12 @@ long userOptionWord;
 	PrintErr(octErrorString());
 	ViDone();
     }
+
+    if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
+        PrintErr("Failed to set default domain.");
+        ViDone();
+    }
+
     if (!CompileFacet(&facet)) {
 	PrintErr(ErrGet());
 	ViDone();
