@@ -56,7 +56,7 @@ C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 MISC_FILES =	oct2tim.1
 
-all::	 makefile oct2ps
+all::	 makefile oct2tim
 
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
