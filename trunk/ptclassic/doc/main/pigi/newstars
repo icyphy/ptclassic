@@ -1,0 +1,45 @@
+.\" $Id$
+.H1 "Defining New Stars"
+.pp
+Only the most casual user will get by with the stars provided
+in the Ptolemy palettes.
+New stars are defined using the \*(PT preprocessor language,
+which is described in its section in the manual.
+At present, Pigi must be remade to install new stars.
+There is no dynamic linking.
+.sp
+(EXPLAIN HOW THE CASUAL USER SHOULD DO THIS)
+.sp
+.pp
+Once you have Pigi running with the new star installed, it is a simple
+matter to create an icon for it an use it.
+The Pigi command ``Extend:make-star'' (with accelerator ``*'')
+creates the icon.
+A dialog box will query you for the name of the star
+and the location of its source code.
+To be safe, the location should be specified as an absolute
+path, or equivalently relative your home directory.
+For instance, if your login name is ``joe'', and the star
+is defined in ~joe/ptolemy/mystar.pl, then the src
+directory is ~joe/ptolemy.
+Pigi will next query for the name of a palette into which
+to store the icon.
+If the palette does not already exist, it will be created.
+The dialog box suggests using the palette ``./user'', simply
+because this is easy to access via the open-palette (``O'') command.
+Note that you can have many palettes named ``user''; the one opened
+by the open-palette command is the one in the directory where
+you started Pigi.
+.pp
+After the icon has been created, you can use it immediately.  The icon
+that Pigi generates has a generic star symbol in it.  You can change
+this symbol if you want;
+see the section below on editing icons.
+.pp
+An important note: whenever the definition of a star is changed so that
+the new definition has different I/O ports, the icon must be updated as
+well.  You can do thid by calling \fImake-star\fP again to replace
+the old icon with a new one.  Furthermore, whenever you update the
+formal parameters of a star or create a new icon for a star, you must
+also re-instantiate the icon in all facets that refer to it.  This
+insures that data will be consistent.

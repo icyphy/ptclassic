@@ -1,0 +1,195 @@
+.\" $Id$
+.H1 "Setup"
+.pp
+This section explains how to configure a user to run Pigi.
+It includes an explanation of environment variables that are
+required, as well as enough information about the window system
+for the novice user to get started.
+.pp
+When \*(PT is installed on your system, a
+fictitious user named `ptolemy' is created.
+This user is configured according to the tastes
+of the authors of Ptolemy.
+To configure your own account to behave the same way,
+you can copy all the dot files from the directory ~ptolemy
+into your home directory.
+This behavior is explained below.
+Unless you are a new user, however, you will probably not want to overwrite
+features already defined in your own dot files.
+In this case, you will need to extract the features you desire
+from the dot files in ~ptolemy and add them to your own.
+To make this easy to do, we explain below the salient features
+of each of these files.
+.H2 "Environment Variables"
+.pp
+The most basic requirement
+is that \*(PT executables be in your path.
+.IE path
+This should be done in your .cshrc file, rather than your .login file,
+because RPC applications are started as separate processes,
+and new processes do not examine the .login file.
+.pp
+The ~ptolemy/.cshrc file defines the path variable to include the appriate bin
+directories to run ptolemy.
+.IE .cshrc
+The pertinent lines read:
+.EQ
+delim off
+.EN
+.(c
+if (! $?ARCH) setenv ARCH `/bin/arch`
+set path = ( . ~ptolemy/bin ~ptolemy/bin.$ARCH ~octtools/bin $path )
+.)c
+.EQ
+delim $$
+.EN
+The first of these lines sets your environment variable
+.c ARCH
+to the name of the type of machine you are running (e.g. sun3 or
+sun4).
+The second puts the \*(PT and Oct bin directories into your path.
+If you add these lines to a previously existing .cshrc file,
+be sure to put  these lines at the end of the file, after
+any other directives that set the path variable.
+.pp
+If you plan to print out any \*(PT documents, you will need to set
+the PRINTER environment variable.  In ~ptolemy/.cshrc the pertinent
+line reads:
+.(c
+set PRINTER = lw
+.)c
+You should replace
+.c "lw"
+with whatever printer name you are using.
+.H2 "The X Window System"
+.pp
+Pigi uses the X window system, version 11.4.
+This section provides just enough information about using X
+so that if you are not familiar with it you will nonetheless
+be able to get started.
+Complete documentation, however
+would be helpful.
+Complete guides to the X window system are
+available in many technical bookstores.
+If you are familiar with X, and your user account
+is properly configured to run version 11.4, you may skip
+the rest of this section, proceeding directly to the \*(PT demos.
+Pigi will automatically load the resources it needs
+for operation.
+If you wish to customize these resources, it may be useful
+to scan this section.
+Resources are explained below.
+.H3 "Starting X"
+.pp
+At the end of the file ~ptolemy/.login you will find the lines:
+.IE .login
+.(c
+echo "To prevent X windows from coming up, type ^c now"
+sleep 5
+xinit -g +100+100 -iconic -fg white -bg black \\\\
+        -title login -sb -sl 256 -C -e ~/.xinit
+.)c
+These lines start the X window system when you log in, unless you
+type control-c before the sleep command finishes.
+Some windows will open, together with an icon manager at the right
+of the screen.
+The number, size and location of the windows that are opened
+are specified in the ~ptolemy/.xinit file, which reads:
+.IE .xinit
+.(c
+#! /bin/csh -f
+xrdb ~/.Xresources
+xterm -geometry +0+0 -fn 9x15 -name "top left" &
+xterm -geometry 80x40+0-0 -fn 9x15 -name "bottom left" &
+xclock -geometry 120x120-0+0 &
+twm &
+/bin/csh
+.)c
+The second line reads X resources from the file ~/.Xresources.
+The next three lines open windows using the xterm and xclock commands.
+Then the window manager called ``twm'' is started.
+The function of the mouse buttons is determined by
+the ~ptolemy/.twmrc file.
+This file is reasonably easy to interpret, even without any X experience,
+so you may wish to examine it and customize it.
+.H3 "Manipulating Windows"
+.pp
+Assuming you use the file ~ptolemy/.twmrc without modification,
+rather than your own window manager,
+the basic window manipulations are explained below.
+Note that there are often several different ways to accomplish the
+same objective.  Feel free to experiment with key and mouse button
+combinations in various parts of the screen.
+First, you must identify the "meta" key on your keyboard.
+It may be labeled in any of various ways, including "meta", "left",
+"right", "alt",  or any of a number of other possibilities.
+It is usually close to the shift and control keys.
+Most window manipulations require that you hold down the meta key
+while depressing mouse buttons.
+.UH "Iconifying windows."
+Depressing the meta key, and clicking the left mouse button in any window
+will iconify it.
+The window disappears, replaced by a symbol in the icon manager at the right
+of the screen.
+To get the window back, place the cursor in the appropriate slot
+of the icon manager, and click the left mouse button.
+An alternative iconifying mechanism is to click any mouse button
+on the icon symbol at the left of the window header.
+.UH "Moving windows."
+Holding the meta key and dragging with the middle mouse button will move
+a window.  "Dragging" simply means to hold the mouse button while
+moving the mouse.
+Alternatively, you can drag the
+left button in the middle of the window header.
+.UH "Resizing windows."
+The meta key and right mouse button can be used to resize a window.
+Place the mouse cursor near a corner of a window, depress the meta key,
+and drag the right button.
+Alternatively, without the meta key,
+any button in the rightmost corner of the window header will resize the window.
+.UH "Mnemonic."
+The window header has an iconify icon at the left, a blue bar for moving
+the window in the middle, and a resize symbol at the right.
+Correspongingly, without going to the window header, but using the meta key,
+the left mouse button will iconify a window, the middle button will move it,
+and the right button will resize it.  Hence, the window header can be used
+as a mnemonic to help remember which mouse button has which function when
+the meta key is depressed.
+.UH "Pick up and stuff."
+In a text window, without the meta key, the mouse may be used to grab text
+and put it somewhere else,  either in the same window, or in some other window.
+This can be very useful to avoid copying long sections of text.
+The left mouse button, when depressed and dragged, highlights a region
+of text in a window, and stores the text.
+The right button can be used to modify the extent of the highlighted
+region.
+The highlighted text is "picked up", stored for future use.
+The middle button causes the highlighted text to be typed
+to whatever window has the mouse cursor.
+.UH "New windows."
+A useful command, defined in ~ptolemy/.cshrc, is "term".
+Typing this in any window, followed by a carriage return,
+opens a new terminal window with a resonable size and color.
+You may change the size and location in the usual way.
+.H3 "Resources"
+.pp
+A \fIresource\fR in X is a parameter 
+.IE resource
+that customizes the behavior of applications that run under X.
+For instance, resources determine the foreground and background
+color of your windows.
+Pigi requires that some resources be set.
+These resources are defined in the file ~ptolemy/lib/pigiXRes,
+and are automatically merged with whatever other resources you may
+have defined.
+The merging occurs when you invoke the startup script ~ptolemy/bin/pigi.
+In addition to these required resources, there are many optional resources.
+Some of these are set in ~ptolemy/.Xresources.
+.pp
+If you have not used the X window system before,
+you will probably not have a file with the name .Xresources in your home
+directory, and can simply copy the one from ~ptolemy.
+This file defines some basic resources, including some
+which fix some bugs in X11R4.
+If you already have a file with this name, then you can probably
+use the one you have as is.

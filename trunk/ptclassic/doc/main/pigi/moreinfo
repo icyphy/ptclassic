@@ -1,0 +1,10 @@
+.\" $Id$
+.H1 "Where to Find More Information"
+.pp
+To find out more about Ptolemy and its capabilities, see the Almagest,
+or complete Ptolemy
+User's Manual [1].  This document is a part of that manual,
+but may also be distributed or printed separately.
+.pp
+Pigi uses both VEM and Oct.  For more information on these two programs,
+see the VEM manual [2] and the Oct user's guide [3][4].
