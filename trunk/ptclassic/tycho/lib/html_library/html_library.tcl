@@ -1404,7 +1404,7 @@ proc HMcgiMap {data} {
 # version of the library routine, until the bug is fixed, make sure we
 # over-ride the library version, and not the otherway around
 
-* NOTE: commented out by hjr Dec 5, 1997, in response to a
+# NOTE: commented out by hjr Dec 5, 1997, in response to a
 # report from Tom Lane. See the ptdesign logs for Dec5 1997.
 
 # auto_load tkFocusOK
