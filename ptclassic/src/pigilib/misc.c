@@ -222,27 +222,23 @@ long userOptionWord;
 {
 	octObject facet = {OCT_UNDEFINED_OBJECT};
 	char *fullName;
-	char *command;
 
-/** Begin here. **/
 	ViInit("print facet");
 	ErrClear();
 
-/** Get facet information. **/
+	/* Get facet information. */
 	facet.objectId = spot->facet;
 	if (octGetById(&facet) != OCT_OK) {
 		PrintErr(octErrorString());
-		ViDone();
 	}
-	octFullName(&facet, &fullName);
-
-	command = "ptkPrintFacet ";
-	TCL_CATCH_ERR(
-             Tcl_VarEval( ptkInterp, command, fullName, (char *) NULL) );
+	else {
+		octFullName(&facet, &fullName);
+		TCL_CATCH_ERR( Tcl_VarEval( ptkInterp, "ptkPrintFacet ",
+					    fullName, (char *) NULL) );
+	}
 
 	ViDone();
-
-} /* end PrintFacet() */
+}
 
 
 int
@@ -424,18 +420,15 @@ int	permB;
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-	ViDone();
     } else if (status != VEM_OK) {
 	PrintErr("Cursor must be over an icon instance");
-	ViDone();
     } else if (!IsStar(&inst)) {
 	PrintErr("Instance is not a star");
-	ViDone();
     } else {
 	if (!LoadTheStar(&inst, permB, linkArgs))
 		PrintErr(ErrGet());
-	ViDone();
     }
+    ViDone();
 }
 
 

@@ -1104,21 +1104,17 @@ long userOptionWord;
 
     ViInit("compile-facet");
     ErrClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
-	ViDone();
     }
-
-    if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
+    else if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
         PrintErr("Failed to set default domain.");
-        ViDone();
     }
-
-    if (!CompileFacet(&facet)) {
+    else if (!CompileFacet(&facet)) {
 	PrintErr(ErrGet());
-	ViDone();
     }
     ViDone();
 }
@@ -1202,25 +1198,25 @@ long userOptionWord;
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
-	ViDone();
     }
-    if (!IsPalFacet(&facet)) {
+    else if (!IsPalFacet(&facet)) {
 	PrintErr("This command must be run in a palette");
-	ViDone();
+    }
+    else {
+	name = BaseName(facet.contents.facet.cell);
+	ptkOctObj2Handle(&facet, octHandle);
+
+	if (Tcl_VarEval(ptkInterp, "ptkRunAllDemos ", name, " ", octHandle,
+			(char *) NULL) == TCL_ERROR) {
+	    PrintErr("Run-all-demos control panel cannot be brought up");
+	}
+	else {
+	    RunAll(&facet);
+	    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkRunAllDemosDel ", name,
+				      " ", octHandle, (char *) NULL));
+	}
     }
 
-    name = BaseName(facet.contents.facet.cell);
-    ptkOctObj2Handle(&facet, octHandle);
-
-    if (Tcl_VarEval(ptkInterp, "ptkRunAllDemos ", name, " ", octHandle,
-      (char *) NULL) == TCL_ERROR) {
-	PrintErr("Run-all-demos control panel cannot be brought up");
-	ViDone();
-    }
-    RunAll(&facet);
-    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkRunAllDemosDel ", name,
-      " ", octHandle, (char *) NULL));
     FreeOctMembers(&facet);
     ViDone();
 }
-

@@ -72,24 +72,21 @@ char* name;
 
 	if( ohOpenFacet(&facet, name, "schematic", "contents", "r") <= 0) {
 		PrintErr(octErrorString());
-		ViDone();
 	}
-
-	if (!IsUnivFacet(&facet)) {
+	else if (!IsUnivFacet(&facet)) {
 		PrintErr("Schematic is not a universe");
-		ViDone();
 	}
-
-        /* Create a Tk window to handle the editing and
-           then do the run command */
-        ptkOctObj2Handle(&facet,facetHandle);
-        TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+	else {
+	    /* Create a Tk window to handle editing and then do run command */
+	    ptkOctObj2Handle(&facet, facetHandle);
+	    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
                    " \"Run universe with the following parameters\" ",
                    " \"ptkSetRunUniverse ", facetHandle, " {%s} \" ",
                    " \"[lindex [ptkGetParams ", facetHandle, " NIL] 1]\" ",
                    " Params ",
-                   (char *)NULL) )
-        
+                   (char *)NULL) );
+	}
+
 	ViDone();
 }
 
@@ -113,13 +110,13 @@ boolean now;
     name = BaseName(facetPtr->contents.facet.cell);
 
     TCL_CATCH_ERR1(
-	Tcl_VarEval(ptkInterp,"ptkRunControl ", name, " ", octHandle,
+	Tcl_VarEval(ptkInterp, "ptkRunControl ", name, " ", octHandle,
 	(char *)NULL));
 
     if (now) {
 	/* Run the universe right away */
         TCL_CATCH_ERR1(
-	    Tcl_VarEval(ptkInterp,"ptkGo ", name, " ", octHandle,
+	    Tcl_VarEval(ptkInterp, "ptkGo ", name, " ", octHandle,
 	    (char *)NULL));
     }
     return (TRUE);
@@ -138,18 +135,19 @@ long userOptionWord;
     ViInit("open run window");
     ErrClear();
     FindClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
-    	ViDone();
     }
-    if (!IsUnivFacet(&facet)) {
+    else if (!IsUnivFacet(&facet)) {
 	PrintErr("Schematic is not a universe");
-        ViDone();
+    }
+    else {
+	ptkRun(&facet, FALSE);
     }
 
-    ptkRun(&facet,FALSE);
     ViDone();
 }
 

@@ -195,10 +195,11 @@ long userOptionWord;
     ErrClear();
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
-                   " \"Make Star\" ",
-                   " \"ptkSetMkStar %s \" ",
-                   " [ptkGetMkStar]",
-                   (char *)NULL) )
+			       " \"Make Star\" ",
+			       " \"ptkSetMkStar %s \" ",
+			       " [ptkGetMkStar]",
+			       (char *)NULL) );
+
     ViDone();
 }
 
@@ -365,16 +366,16 @@ long userOptionWord;
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
         PrintErr(octErrorString());
-        ViDone();
     }
-
-    ptkOctObj2Handle(&facet,facetHandle);
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
-          " \"Make Schematic Icon\" ",
+    else {
+	ptkOctObj2Handle(&facet,facetHandle);
+	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+	  " \"Make Schematic Icon\" ",
           " \"ptkSetMkSchemIcon ", facetHandle, " %s \" ",
           " \" {{Enter pathname of palette} [ptkGetMkSchemIcon]}\" ",
-          (char *)NULL) )
+          (char *)NULL) );
+    }
+
     ViDone();
 }
 
@@ -400,10 +401,12 @@ long userOptionWord;
     }
 
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
-    if (status == VEM_NOSELECT)
+    if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-    else if (status != VEM_OK)
+    }
+    else if (status != VEM_OK) {
 	PrintErr("Cursor must be over an icon instance");
+    }
     else {
 	switch (inst.type) {
 	case OCT_FACET:
@@ -455,10 +458,12 @@ long userOptionWord;
     }
 
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
-    if (status == VEM_NOSELECT)
+    if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-    else if (status != VEM_OK)
+    }
+    else if (status != VEM_OK) {
 	PrintErr("Cursor must be over an icon instance");
+    }
     else {
 	if (IsStar(&inst)) {
 	    if (!MyOpenMaster(&mFacet, &inst, "interface", "r"))
@@ -553,19 +558,19 @@ long userOptionWord;
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-        ViDone();
-    } else if (status != VEM_OK) {
+    }
+    else if (status != VEM_OK) {
 	PrintErr("Cursor must be over an icon instance");
-	ViDone();
     }
-    if (!MyOpenMaster(&mFacet, &inst, "interface", "r")) {
+    else if (!MyOpenMaster(&mFacet, &inst, "interface", "r")) {
 	PrintErr(ErrGet());
-	ViDone();
     }
-    iconWindow = vemOpenWindow(&mFacet, NULL);
-    /* When editing icon it's convenient to have a smaller snap size */
-    vemWnGetOptions(iconWindow, &options);
-    options.snap = EDIT_ICON_SNAP;
-    vemWnSetOptions(iconWindow, &options);
+    else {
+	iconWindow = vemOpenWindow(&mFacet, NULL);
+	/* When editing icon it's convenient to have a smaller snap size */
+	vemWnGetOptions(iconWindow, &options);
+	options.snap = EDIT_ICON_SNAP;
+	vemWnSetOptions(iconWindow, &options);
+    }
     ViDone();
 }

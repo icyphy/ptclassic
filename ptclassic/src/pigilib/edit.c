@@ -126,19 +126,17 @@ long userOptionWord;
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
-    	ViDone();
+    }
+    else {
+	ptkOctObj2Handle(&facet, facetHandle);
+
+	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
+				   " \"Find Name\" ", " \"ptkSetFindName ",
+				   facetHandle, " %s \" ", " \"{{Name} {}}\" ",
+				   (char *)NULL) );
     }
 
-    ptkOctObj2Handle(&facet,facetHandle);
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
-                   " \"Find Name\" ",
-                   " \"ptkSetFindName ", facetHandle, " %s \" ",
-                   " \"{{Name} {}}\" ",
-                   (char *)NULL) )
-
     ViDone();
-
 }
 
 /* EditFormalParameters is still needed for the RunUniverse command.  -aok */
@@ -191,7 +189,7 @@ long userOptionWord;
 	PrintErr(octErrorString());
     	ViDone();
     }
-    ptkOctObj2Handle(&facet,facetHandle);
+    ptkOctObj2Handle(&facet, facetHandle);
 
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
@@ -203,10 +201,10 @@ long userOptionWord;
 	strcpy (instanceHandle, "NIL");
     } else {
 	/* cursor is over some type of instance... */
-	ptkOctObj2Handle(&inst,instanceHandle);
+	ptkOctObj2Handle(&inst, instanceHandle);
     }
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ",
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditParams ",
 			       facetHandle, " ",
 			       instanceHandle, (char *)NULL) )
 
@@ -239,29 +237,25 @@ long userOptionWord;
 	PrintErr(octErrorString());
     	ViDone();
     }
-    ptkOctObj2Handle(&facet,facetHandle);
+    ptkOctObj2Handle(&facet, facetHandle);
 
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-        ViDone();
     } else if (status != VEM_OK) {
 	/* cursor not over an instance... */
         PrintErr("Cursor must be over an icon instance");
-        ViDone();
     } else if (IsUniv(&inst) || IsPal(&inst)) {
         PrintErr("Pragmas can only be set for stars or galaxies");
-        ViDone();
     } else {
 	/* cursor is over some type of instance... */
-	ptkOctObj2Handle(&inst,instanceHandle);
+	ptkOctObj2Handle(&inst, instanceHandle);
+	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditParams ",
+				   facetHandle, " ",
+				   instanceHandle, " ",
+				   "Pragmas", (char *)NULL) );
     }
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ",
-			       facetHandle, " ",
-			       instanceHandle, " ",
-			       "Pragmas", (char *)NULL) )
 
     ViDone();
 }
@@ -361,16 +355,17 @@ long userOptionWord;
     ErrClear();
     if (dmMultiWhich("Palettes", palettes_n, items, NULL, NULL) != VEM_OK) {
 	PrintCon("Aborted entry");
-	ViDone();
     }
-    for (i = 0; i < palettes_n; i++) {
-	if (items[i].flag != 0) {
-	    if (ohOpenFacet(&facet, palettes[i], "schematic", "contents", "r")
-		< 0) {
-		PrintErr(octErrorString());
-		ViDone();
+    else {
+	for (i = 0; i < palettes_n; i++) {
+	    if (items[i].flag != 0) {
+		if (ohOpenFacet(&facet, palettes[i],
+				"schematic", "contents", "r") < 0) {
+		    PrintErr(octErrorString());
+		    break;
+		}
+		vemOpenWindow(&facet, NULL);
 	    }
-	    vemOpenWindow(&facet, NULL);
 	}
     }
     ViDone();
@@ -410,9 +405,9 @@ long userOptionWord;
 	obj = facet;
     }
     /* At this point, obj is either an instance or the facet */
-    ptkOctObj2Handle(&obj,facetHandle);
+    ptkOctObj2Handle(&obj, facetHandle);
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditText ",
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditText ",
 		   "\"Edit Comment\" ",
                    "\"ptkSetStringProp ", facetHandle, " comment %s\" ",
                    "[ptkGetStringProp ", facetHandle, " comment]",
@@ -433,18 +428,20 @@ long userOptionWord;
 
     ViInit("edit-domain");
     ErrClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
         PrintErr(octErrorString());
-        ViDone();
     }
-    ptkOctObj2Handle(&facet,facetHandle);
+    else {
+	ptkOctObj2Handle(&facet, facetHandle);
+	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkChooseOne ",
+				   "[ptkGetDomainNames ", facetHandle, "]  ",
+				   " \"ptkSetDomain ", facetHandle, " %s \" ",
+				   (char *)NULL) );
+    }
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkChooseOne ",
-                   "[ptkGetDomainNames ", facetHandle, "]  ",
-                   " \"ptkSetDomain ", facetHandle, " %s \" ",
-                   (char *)NULL) )
     ViDone();
 }
 
@@ -459,11 +456,12 @@ long userOptionWord;
     ErrClear();
     FindClear();
 
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
-                   " \"Set Seed\" ",
-                   " \"ptkSetSeed %s \" ",
-                   " \"{{Seed for Random Number} [ptkGetSeed]}\" ",
-                   (char *)NULL) )
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkEditStrings ",
+			       " \"Set Seed\" ",
+			       " \"ptkSetSeed %s \" ",
+			       " \"{{Seed for Random Number} [ptkGetSeed]}\" ",
+			       (char *)NULL) );
+
     ViDone();
 }
 
@@ -479,18 +477,19 @@ long userOptionWord;
 
     ViInit("edit-target");
     ErrClear();
+
     /* get current facet */
     facet.objectId = spot->facet;
     if (octGetById(&facet) != OCT_OK) {
         PrintErr(octErrorString());
         ViDone();
     }
-    ptkOctObj2Handle(&facet, facetHandle);
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkChooseOne ", 
-                   "[ptkGetTargetNames ", facetHandle, "]  ", 
-                   " \"ptkEditParams ", facetHandle, " %s Target \" ",
-                   (char *)NULL) )
+    else {
+	ptkOctObj2Handle(&facet, facetHandle);
+	TCL_CATCH_ERR( Tcl_VarEval(ptkInterp, "ptkChooseOne ", 
+				   "[ptkGetTargetNames ", facetHandle, "]  ", 
+				   " \"ptkEditParams ", facetHandle,
+				   " %s Target \" ", (char *)NULL) );
+    }
     ViDone();
 }
-
