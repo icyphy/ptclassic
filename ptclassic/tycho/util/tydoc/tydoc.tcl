@@ -61,7 +61,7 @@ if [info exists tk_version] {
     # ::tycho::register extensions "javaclass" .javaclass
 
     ::tycho::register stylesheet "tydoc" \
-	    [file join {$TYCHO} lib tydoc tydoc.style] \
+	    [file join {$TYCHO} util tydoc tydoc.style] \
 	    [file join ~ .Tycho styles tydoc.style]
 
     # Cliff's IDoc viewer (still under construction)
