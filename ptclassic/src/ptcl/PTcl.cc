@@ -823,7 +823,7 @@ int PTcl::halt(int argc,char ** argv) {
 
 // First, define the action function that will be called by the Ptolemy kernel.
 // The string tclAction passed will be executed as a Tcl command.
-static void ptkAction(Star* s, char *tclCommand) {
+void ptkAction(Star* s, const char *tclCommand) {
     if(tclCommand==NULL || *tclCommand == '\0') {
     	Tcl_Eval(PTcl::activeInterp,
 	  "error {null pre or post action requested}");
