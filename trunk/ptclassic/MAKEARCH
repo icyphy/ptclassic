@@ -130,7 +130,7 @@ cd ..
 # Experimental domains not included: capsim cgdsp3
 
 set EXPDOMAINS=(sproc silage cg56 cgc cg96 mq vhdlf vhdlb vhdl mdsdf hof \
-		ipus dmm codesign)
+		ipus )
 set EXPEXTRAS=(cg56/targets cg96/targets silage/targets vhdl/targets \
 		ipus/islang ipus/cat ipus/tcltk ipus/icp)
 set EXPSUBEXTRAS=(ipus/tcltk/kernel ipus/tcltk/stars ipus/icp/kernel)
