@@ -1,5 +1,5 @@
-#ifndef _CG56FictionTarget_h
-#define  _CG56FictionTarget_h 1
+#ifndef _CG56MultiSimTarget_h
+#define  _CG56MultiSimTarget_h 1
 
 /******************************************************************
 Version identification:
@@ -8,7 +8,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: S. Ha
+ Programmer: S. Ha, J. Pino
 
  This is a test multitarget class for CGCdomain.
 
@@ -23,9 +23,9 @@ $Id$
 #include "StringState.h"
 #include "ProcMemory.h"
 
-class CG56FictionTarget : public CGMultiTarget {
+class CG56MultiSimTarget : public CGMultiTarget {
 public:
-	CG56FictionTarget(const char* name, const char* starclass, const char* desc);
+	CG56MultiSimTarget(const char* name, const char* starclass, const char* desc);
 
 	void setup();
 	void wrapup();
@@ -58,9 +58,6 @@ protected:
 
 	// shared memory
 	ProcMemory* sharedMem;
-
-	//CG56FictionTarget supports AnyAsmStar stars.
-	const char* auxStarClass() const;
 
 private:
 	// state to disallow compiling code.

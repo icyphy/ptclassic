@@ -1,4 +1,4 @@
-static const char file_id[] = "CG56FictionTarget.cc";
+static const char file_id[] = "CG56MultiSimTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: S. Ha
+ Programmer: S. Ha, J. Pino
 
  Fiction target
 
@@ -19,16 +19,16 @@ $Id$
 #include "pt_fstream.h"
 #include "Error.h"
 #include "CGDisplay.h"
-#include "CG56FictionTarget.h"
-#include "CG56FictionSend.h"
-#include "CG56FictionReceive.h"
+#include "CG56MultiSimTarget.h"
+#include "CG56MultiSimSend.h"
+#include "CG56MultiSimReceive.h"
 #include "CG56Target.h"
 #include "KnownTarget.h"
 #include "FixState.h"
+#include "pt_fstream.h"
 
-const char* CG56FictionTarget::auxStarClass() const {return "AnyAsmStar";}
-// -----------------------------------------------------------------------------	
-CG56FictionTarget::CG56FictionTarget(const char* name,const char* starclass,
+// ----------------------------------------------------------------------------	
+CG56MultiSimTarget::CG56MultiSimTarget(const char* name,const char* starclass,
 	const char* desc) : CGMultiTarget(name,starclass,desc), sharedMem(0) {
 
         addState(doCompile.setState("doCompile",this,"NO",
@@ -40,31 +40,32 @@ CG56FictionTarget::CG56FictionTarget(const char* name,const char* starclass,
 	sharedMem = 0;
 	addState(sMemMap.setState("sMemMap",this,"4096-4195",
 		"shared memory map"));
+	destDirectory.setValue("~/DSPcode");
 }
 
 // -----------------------------------------------------------------------------
-Target* CG56FictionTarget :: createChild() {
+Target* CG56MultiSimTarget :: createChild() {
 	LOG_NEW; return new CG56Target("single-CG56",
-	"56000 code target for a Fiction Target.");
+	"56000 code target for a Multiple-Simulator Target.");
 }
 
 // -----------------------------------------------------------------------------
-DataFlowStar* CG56FictionTarget :: createSend(int from, int to, int num) {
-	LOG_NEW; CG56FictionSend* s = new CG56FictionSend;
+DataFlowStar* CG56MultiSimTarget :: createSend(int from, int to, int num) {
+	LOG_NEW; CG56MultiSimSend* s = new CG56MultiSimSend;
 	s->setProperty(num);
 	return s;
 }
 
-DataFlowStar* CG56FictionTarget :: createReceive(int from, int to, int num) {
-	LOG_NEW; CG56FictionReceive* r =  new CG56FictionReceive;
+DataFlowStar* CG56MultiSimTarget :: createReceive(int from, int to, int num) {
+	LOG_NEW; CG56MultiSimReceive* r =  new CG56MultiSimReceive;
 	r->setProperty(num);
 	return r;
 }
 
-void CG56FictionTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
+void CG56MultiSimTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	// connect send and receive
-	InCG56Port& rp = ((CG56FictionReceive*) r)->input;
-	OutCG56Port& sp = ((CG56FictionSend*) s)->output;
+	InCG56Port& rp = ((CG56MultiSimReceive*) r)->input;
+	OutCG56Port& sp = ((CG56MultiSimSend*) s)->output;
 	sp.connect(rp,0);
 
 	// memory allocation
@@ -79,11 +80,10 @@ void CG56FictionTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 
 const Attribute ANY = {0,0};
 
-void CG56FictionTarget :: setup() {
+void CG56MultiSimTarget :: setup() {
 	LOG_DEL; delete sharedMem;
 	LOG_NEW; sharedMem = new LinProcMemory("x",ANY,ANY,sMemMap);
 	CGMultiTarget :: setup();
-	destDirectory.setValue("~/DSPcode");
 	// allocate the sharedMemory
 	sharedMem->performAllocation();
 	Galaxy* g = galaxy();
@@ -100,33 +100,34 @@ void CG56FictionTarget :: setup() {
 			// wrapup
 			///////////////////
 
-void CG56FictionTarget :: wrapup() {
+void CG56MultiSimTarget :: wrapup() {
 	if (galaxy()->parent() == 0)		 wormLoadCode();
 }
 // -----------------------------------------------------------------------------
 
-void CG56FictionTarget :: addProcessorCode(int i, const char* s) {
+void CG56MultiSimTarget :: addProcessorCode(int i, const char* s) {
 	StringList code = s;
 	StringList fileName;
 	fileName << (const char*) filePrefix << i << ".asm";
 	char* codeFileName = writeFileName((const char*) fileName);
 	display(code,codeFileName);
+	LOG_DEL; delete codeFileName;
 
 // 	to create the .cmd file
 	StringList fName;
 	fName << "command" << i << ".cmd";
-	StringList cmd = "load ";
-	cmd << (const char*) filePrefix << i << "\n";
-	cmd << "go \n";
 	char* cmdFileName = writeFileName((const char*) fName);
-	display(cmd,cmdFileName);
+	pt_ofstream cmd(cmdFileName); if (!cmd) return; // failed!
+	cmd << "load " << (const char*) filePrefix << i << "\n";
+	cmd << "go \n";
+	LOG_DEL; delete cmdFileName;
 }
 
 			///////////////////
 			// wormLoadCode
 			///////////////////
 
-int CG56FictionTarget::wormLoadCode() {
+int CG56MultiSimTarget::wormLoadCode() {
 
     if (compileCode()) runCode();
 
@@ -136,7 +137,7 @@ int CG56FictionTarget::wormLoadCode() {
 }
 
 // -----------------------------------------------------------------------------
-int CG56FictionTarget :: compileCode() {
+int CG56MultiSimTarget :: compileCode() {
 	if (int(doCompile) == 0) return TRUE;
 
 	int flag = TRUE;
@@ -146,42 +147,43 @@ int CG56FictionTarget :: compileCode() {
 		char* codeFileName = writeFileName((const char*) fileName);
 
 		StringList assembleCmds;
-		assembleCmds << "asm56000" << "-A -b -l " << codeFileName;
+		assembleCmds << "asm56000 -A -b -l " << codeFileName;
 		flag = !systemCall(assembleCmds,"Errors in assembly");
 		if (flag == FALSE) break;
+		LOG_DEL; delete codeFileName;
 	}
 	return flag;
 }
 
 // -----------------------------------------------------------------------------
-int CG56FictionTarget :: runCode() {
+int CG56MultiSimTarget :: runCode() {
     return TRUE;
 }
 // -----------------------------------------------------------------------------
-Block* CG56FictionTarget :: makeNew() const {
-	LOG_NEW; return new CG56FictionTarget(name(),starType(),descriptor());
+Block* CG56MultiSimTarget :: makeNew() const {
+	LOG_NEW; return new CG56MultiSimTarget(name(),starType(),descriptor());
 }
 // -----------------------------------------------------------------------------
 			/////////////////////////////
 			// wormhole interface method
 			/////////////////////////////
 
-int CG56FictionTarget :: receiveWormData(PortHole& p) {
+int CG56MultiSimTarget :: receiveWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	cp.forceSendData();
 	return TRUE;
 }
 // -----------------------------------------------------------------------------
-int CG56FictionTarget :: sendWormData(PortHole& p) {
+int CG56MultiSimTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	cp.forceGrabData();
 	return TRUE;
 }
 // -----------------------------------------------------------------------------
-ISA_FUNC(CG56FictionTarget,CGMultiTarget);
+ISA_FUNC(CG56MultiSimTarget,CGMultiTarget);
 
-static CG56FictionTarget targ("Fiction-56000","CG56Star",
+static CG56MultiSimTarget targ("MultiSim-56000","CG56Star",
 "A test target for parallel MC56000-code generation");
 
-static KnownTarget entry(targ,"Fiction-56000");
+static KnownTarget entry(targ,"MultiSim-56000");
 
