@@ -2,7 +2,7 @@
 SCCS version identification
 $Id$
 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1992 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,34 +36,47 @@ Date: 10/2/92
 #include "NamedList.h"
 #include "CodeStream.h"
 
-class CodeStreamList : private NamedList
-{
+class BaseCodeStreamList : public NamedList {
 public:
-	// adds a new StringList called name to the list.  If a StringList
+	// adds a new CodeStream called name to the list.  If a CodeStream
 	// called name already exists in the list with a different
-	// StringList* return FALSE else return TRUE
-	int append(CodeStream* stream, const char* name)
-	{
+	// CodeStream* return FALSE else return TRUE
+	int append(CodeStream* stream, const char* name) {
         	return NamedList::append(stream, name);
 	}
 
-	// For temporary backward compatibility.
-	int add(const char* name, CodeStream* stream)
-	{
-	    return append(stream, name);
-	}
-
 	// return the pointer for the object of the specified name.
-	CodeStream* get(const char* name) const
-	{
+	CodeStream* get(const char* name) const {
         	return (CodeStream*)NamedList::get(name);
 	}
 	
 	// Remove a CodeStream from the list. "name" is not optional.
-	int remove(const char* name)
-	{
+	virtual int remove(const char* name) {
 	    return NamedList::remove(name);
 	}
 };
+
+class CodeStreamList : public BaseCodeStreamList {
+public:
+	~CodeStreamList() { deleteStreams(); }
+
+        // Remove a CodeStream from the list. "name" is not optional.
+        /*virtual*/ int remove(const char* name);
+
+	// Create a new CodeStream called 'name' if one does not exist.
+	// Return a NULL if memory allocation failed.  Return the CodeStream, if
+	// the stream was properly allocated or if it existed before.
+	CodeStream* newStream(const char* name);
+
+	// Delete all of the CodeStreams owned by the list
+	void deleteStreams();
+
+	// Initialize all of the CodeStreams owned by the list
+	void initialize();
+private:
+	// These streams are owned by the CodeStream list.
+	BaseCodeStreamList myStreams;
+};
+
 
 #endif
