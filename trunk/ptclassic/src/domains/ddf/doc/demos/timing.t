@@ -45,7 +45,11 @@ That boolean TRUE then triggers a sample taken from the input
 signal and the estimated derivative, closing the loop.
 .pp
 The universe in this system is in the DDF domain because of the
-dynamically controlled switch and select stars.
+dynamically controlled 
+.c Case
+and 
+.c EndCase
+stars.
 The three galaxies, however, are all actually wormholes, internally
 using the SDF domain.  This results in much more efficient execution,
 since the scheduling decisions within these galaxies can be made statically.

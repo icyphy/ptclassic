@@ -21,12 +21,15 @@ Inside the wormhole, however, the DDF domain schedules the stars
 dynamically to conditionally invoke the "then" and "else" clauses.
 This is done using
 a pair of
-.c Switch
+.c Case
 and
-.c Select
+.c EndCase
 stars.  The \fIfalse\fR and \fItrue\fR arms have different gain factors:
 1.0 and 2.0 respectively.  The \fIcontrol\fR boolean is provided by
 the threshold device, which remains true once the input value
 exceeds 0.5.  Thus, for the first 6 inputs, the false arm is
 invoked.  Afterwards, the true arm is invoked.
+.SA
+Case,
+EndCase.
 .ES

@@ -20,19 +20,19 @@ The incoming data is checked to see whether it is zero or one.
 If it is, the
 .c FloatThresh
 star produces FALSE boolean to the
-.c Switch 
+.c Case 
 and
-.c Select
+.c EndCase
 stars, causing the
-.c Select
+.c EndCase
 star to send a constant (value 1)
 to the output.  In case the incoming data is greater
 than 1, the two previous Fibonnacci numbers are computed
 recursively, and their sum is sent to the output.
 To do this,
 the incoming data is decremented by one twice after the
-trueOutput of the
-.c Switch
+true output(output#2) of the
+.c Case
 star.  Each decremented data sample is now fed into the 
 .c Self
 star which is similar to a recursive function call.
@@ -47,8 +47,8 @@ star (the
 star has a state called \fIrecurGal\fR which indicates the name of the
 galaxy to be called).  The 
 .c Self
-star also creates its own scheduler and works with the cloned galaxy.
-The dynamically created galaxy and scheduler are destroyed after
+star has its own scheduler and works with the cloned galaxy.
+The dynamically created galaxy is destroyed after
 the completion of the recursive computation.
 Since the depth of the recursion is data dependent, all scheduling
 decisions are made at runtime.
@@ -64,7 +64,7 @@ This mechanism for implementing recursion is intended only as
 proof of feasibility.  Much more work would be required to get
 a truly efficient recursive capability.
 .SA
-Switch,
-Select,
+Case,
+EndCase,
 Self.
 .ES
