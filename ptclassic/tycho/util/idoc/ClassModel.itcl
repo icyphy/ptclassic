@@ -348,7 +348,7 @@ body ::tycho::ClassModel::constructor {args} {
             -sourcefile
 
     # Define the "argument" entity
-    type define argument \
+    define argument \
 	    -type "" \
 	    -optional 0 \
 	    -default "" \
@@ -356,7 +356,7 @@ body ::tycho::ClassModel::constructor {args} {
 	    -explanation ""
 
     # Define the "constructor" entity
-    type define constructor \
+    define constructor \
 	    -protection public \
 	    -modifiers "" \
             -exceptions "" \
@@ -364,7 +364,7 @@ body ::tycho::ClassModel::constructor {args} {
 	    -explanation ""
 
     # Define the "destructor" entity
-    type define destructor \
+    define destructor \
 	    -protection public \
 	    -modifiers "" \
             -exceptions "" \
@@ -372,7 +372,7 @@ body ::tycho::ClassModel::constructor {args} {
 	    -explanation ""
 
     # Define the "method" entity
-    type define method \
+    define method \
 	    -protection public \
 	    -modifiers "" \
 	    -type "" \
@@ -382,7 +382,7 @@ body ::tycho::ClassModel::constructor {args} {
 	    -explanation ""
 
     # Define the "variable" entity
-    type define variable \
+    define variable \
 	    -protection protected \
 	    -modifiers "" \
 	    -type "" \

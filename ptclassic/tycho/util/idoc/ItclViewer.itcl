@@ -104,7 +104,7 @@ body ::tycho::ItclViewer::docFile {classname} {
         return [$this cget -file]
     }
     
-    set docname "[info namespace tail $classname].idoc"
+    set docname "[namespaceTail $classname].idoc"
     
     lappend dirs {$TYCHO/kernel/basic}
     lappend dirs {$TYCHO/kernel/model}
@@ -545,7 +545,7 @@ body ::tycho::ItclViewer::_generateHtmlBody {} {
     # Remove footer
     regexp {^(.*<hr>)(<br>[^:]+:.*)$} $html dmy html footer
     
-    set of_class "of [info namespace tail $_currentclass] class"
+    set of_class "of [namespaceTail $_currentclass] class"
     
     # Check for itk_options
     set itk_options [$classModel match variable -protection public \
@@ -563,8 +563,8 @@ body ::tycho::ItclViewer::_generateHtmlBody {} {
     }
     
     # Check for constructor
-    if [$classModel exists constructor:constructor] {
-	if {$verbose || [$classModel attrget constructor:constructor \
+    if [$classModel exists constructor] {
+	if {$verbose || [$classModel attrget constructor \
 			-description] != { }} {
 	    append html "<H2><a name=\"constructor $of_class\"\
 		    >Constructor</a></H2>\n<dl>"
@@ -698,7 +698,7 @@ body ::tycho::ItclViewer::_generateHtmlContents {} {
 	    File</a> -\n"
     append html "Contents:\n"
     
-    set of_class "of [info namespace tail [$classModel cget\
+    set of_class "of [namespaceTail [$classModel cget\
 	    -classname]] class"
     
     # Check for itk_options
@@ -711,7 +711,7 @@ body ::tycho::ItclViewer::_generateHtmlContents {} {
     # Check for constructor
     set constructor [$classModel match constructor]
     if {$constructor != {}} {
-	if {$verbose || [$classModel attrget constructor:$constructor \
+	if {$verbose || [$classModel attrget constructor \
 			-description] != { }} {
 	    append html "<a href=\"#constructor $of_class\"\
 		    >constructor</a> -\n"
@@ -721,7 +721,7 @@ body ::tycho::ItclViewer::_generateHtmlContents {} {
     # Check for destructor
     set destructor [$classModel match destructor]
     if {$destructor != {}} {
-	if {$verbose || [$classModel attrget destructor:$destructor \
+	if {$verbose || [$classModel attrget destructor \
 			-description] != { }} {
 	    append html "<a href=\"#destructor $of_class\"\
 		    >destructor</a> -\n"

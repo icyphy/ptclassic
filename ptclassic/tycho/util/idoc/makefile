@@ -54,7 +54,8 @@ TYJARFILE =
 # Sub directories to run make in.
 DIRS =	bin demo doc test
 
-TCL_SRCS = 
+TCL_SRCS = \
+	html.tcl
 
 ITCL_SRCS =  \
 	ClassModel.itcl \
