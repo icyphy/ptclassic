@@ -44,6 +44,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
+	CommandShell.itcl \
 	EditC.itcl \
 	EditCpp.itcl \
 	EditEsterel.itcl \
@@ -56,8 +57,7 @@ ITCL_SRCS = \
 	EditPtlang.itcl \
 	EditTcl.itcl \
 	Matlab.itcl \
-	Mathematica.itcl \
-	Shell.itcl
+	Mathematica.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
