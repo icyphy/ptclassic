@@ -227,6 +227,13 @@ XV_INSTALL=install
 # declarations to quiet gcc -Wall down
 PTCOMPAT_INCSPEC =	-I$(ROOT)/src/compat/ptolemy
 
+
+# Tcl file that makes generic tycho indices
+TYCHOMAKEINDEX =	$(ROOT)/tycho/lib/idx/tychoMakeIndex.tcl
+# Tcl file that makes star indices
+STARINDEX =		$(ROOT)/tycho/typt/lib/starindex.tcl
+
+
 # ptbin.mk uses this to decide whether to include the Ipus stars
 INCLUDE_IPUS_DOMAIN = no
 
