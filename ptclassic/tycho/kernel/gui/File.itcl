@@ -109,8 +109,14 @@ proc ::tycho::expandPath { path } {
     # exist.
     catch {
         set savedir [pwd]
-        cd [file dirname $path]
-        set path [format "%s/%s" [pwd] [file tail $path]]
+        # If the filename itself is a directory, normalize it
+        if [file isdirectory $path] {
+            cd $path
+            set path [pwd]
+        } {
+            cd [file dirname $path]
+            set path [format "%s/%s" [pwd] [file tail $path]]
+        }
         cd $savedir
     }
     return $path
