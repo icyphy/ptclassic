@@ -52,6 +52,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCollect.h"
 #include "CGSend.h"
 #include "CGReceive.h"
+#include "CGWormBase.h"
 #include "Geodesic.h"
 #include "pt_fstream.h"
 #include "stdlib.h"
@@ -130,6 +131,11 @@ void CGMultiTarget::setup() {
 	//choose the right scheduler
 	chooseScheduler();
 	
+	// in case of heterogeneous targets, flatten the wormholes.
+	if (childType.size() > 1) {
+		flattenWorm();
+	}
+
 	ParScheduler* sched = (ParScheduler*) scheduler();
 	sched->setGalaxy(*galaxy());
 	sched->setUpProcs(nChildrenAlloc);
@@ -287,6 +293,44 @@ void CGMultiTarget :: chooseScheduler() {
 	LOG_NEW; mainScheduler=new MultiScheduler(this,logFile,*mainScheduler);
     }
     setSched(mainScheduler);
+}
+
+void CGMultiTarget :: flattenWorm() {
+	Galaxy* myGalaxy = galaxy();
+	GalStarIter next(*myGalaxy);
+	CGStar* s;
+	CGStar* prev = 0;
+	Galaxy* prevG = myGalaxy;
+	int changeFlag = FALSE;
+	while ((s = (CGStar*) next++) != 0) {
+		if (prev) {
+			prevG->removeBlock(*prev);
+			LOG_DEL; delete prev;
+			prev = 0;
+		}
+		if (s->isItWormhole()) {
+			CGWormBase* w = (CGWormBase*)s->asWormhole();
+			if (w == NULL) {
+				Error::abortRun(*this,"flattenWorm: Wormhole does returns a NULL pointer.  Is the myWormhole() method defined for the current domain?");
+				return;
+			}
+			// if inside domain is a CG domain, explode wormhole.
+			prevG = (Galaxy*) s->parent();
+			if (w->isCGinside()) {
+				prev = s;
+				Galaxy* inG = w->explode();
+				prevG->addBlock(*inG, inG->name());
+				changeFlag = TRUE;
+			}
+		}
+	}
+	if (prev) {
+		prevG->removeBlock(*prev);
+		LOG_DEL; delete prev;
+	}
+
+	// recursive application of this routine.
+	if (changeFlag) flattenWorm();
 }
 
 void CGMultiTarget :: setStopTime(double f) {
