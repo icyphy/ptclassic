@@ -73,5 +73,8 @@ public:
 	Block* makeNew() const;
 	void setup();
 	~DDFTarget();
+	// class identification
+	int isA(const char*) const;
+	const char* className() const;
 };
 #endif

@@ -603,3 +603,5 @@ const char* whichType(DataType s) {
 	else if (strcmp(s, "STRING") == 0) return "char*";
 	return "double";
 }
+
+ISA_FUNC(CGCTarget,HLLTarget);
