@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // This is the abstract base class for other random-number types.
 
 #if defined(hppa) || defined(SVR4) || defined(SYSV)
-#ifndef __GNUG__
+#if !defined(__GNUG__) || defined(PT_EGCS)
 
 extern "C" long int lrand48();
 
@@ -43,7 +43,7 @@ protected:
 public:
 	virtual double operator()() = 0;
 };
-#endif /* __GNUG__ */
+#endif /* !__GNUG__ || PT_EGCS */
 #else /* hppa */
 #ifdef PT_USE_RAND
 //extern "C" int rand();
