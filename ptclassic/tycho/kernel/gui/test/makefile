@@ -45,6 +45,7 @@ SIMPLE_TESTS =
 
 # Removed testBuilderDialog.itcl until test levels are implemented
 GRAPHICAL_TESTS = \
+	testExec.itcl \
 	testIndexBrowser.itcl \
 	testMenuSupport.itcl \
 	testMenuBar.itcl \
