@@ -156,6 +156,7 @@ protected:
 	IntState overlapComm;
 	IntState ignoreIPC;
 	IntState useMultipleSchedulers;
+        IntState displaySchedulerStats;
 
 	IntState ganttChart;
 	StringState logFile;
@@ -181,6 +182,9 @@ protected:
  
 	// flatten wormholes if heterogeneous targets
 	void flattenWorm();
+
+        // Optionally provides stats to the user
+        /*virtual*/ int schedulerSetup();
 
 	// redefine the top-level iterations to do nothing
 	void beginIteration(int repetitions, int depth);
