@@ -70,8 +70,11 @@ sed -e '
 
  # Strip out leading whitespace in makefile variable assignments
  s/^[    ]+\([A-Za-z0-9_]+\)[]*=/\1 =/
- s/^[]+\([A-Za-z0-9_]+\)[   ]*=/\1 =/
- s/^[    ]*\([A-Za-z0-9_]+\)[    ]*\+=/\1 = $(\1)/
+ s/^[ ]+\([A-Za-z0-9_]+\)[   ]*=/\1 =/
+
+ # Deal with +=
+ # Getting the variable name seems to be difficult here, not sure why
+ s/^[ 	]*\([_A-Za-z0-9][_A-Za-z0-9]*\)[ ]*+=/\1 = $(\1)/
 
  # If we include any makefiles, then append .vc to the name.
  s/^[-   ]*include\(.*\)$/!include \1.vc/
