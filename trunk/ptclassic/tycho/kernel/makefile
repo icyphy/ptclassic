@@ -50,7 +50,6 @@ ITCL_SRCS = \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	CompileJava.itcl \
-	DataModel.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
 	DirectedAcyclicGraph.itcl \
@@ -60,9 +59,6 @@ ITCL_SRCS = \
 	Graph.itcl \
 	JRPC.itcl \
 	Library.itcl \
-	Model.itcl \
-	ModelRegistry.itcl \
-	ModelViewer.itcl \
 	MultiPanel.itcl \
 	PackageData.itcl \
 	PortedGraph.itcl \
@@ -70,8 +66,7 @@ ITCL_SRCS = \
 	ResourceFile.itcl \
 	ResourceWELD.itcl \
 	Stack.itcl \
-	Subpanel.itcl \
-	TextModel.itcl
+	Subpanel.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS) kernel.tcl pkgIndex.tcl
 
