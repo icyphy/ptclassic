@@ -704,8 +704,10 @@ PT_DEPEND += $(LIBPTCL) $(LIBDIR)/libptolemy.a \
 
 # unfortunately, if we are building a stand-alone program and
 # link in libPar we must also get gantt function definitions in ptcl
-ifdef CGPAR
-	PIGI=1
+ifndef PIGI
+	ifdef CGPAR
+		PIGI=1
+	endif
 endif
 
 # this would not be defined if we are making a small stand-alone 
