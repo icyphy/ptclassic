@@ -9,11 +9,39 @@
 This class provides a visual editor specialized for profiling
 the execution of tcl and tcl code.
 The profiler is derived from the
-<a href=EditForestHelp.html>EditForest class</a>, and
+<a href="EditForestHelp.html">EditForest class</a>, and
 therefore inherits all of its features.
 <p>
 The <A HREF="../../../../doc/coding/index.html">Tycho Programmer's Manual</A>
 includes a section on <A HREF="../../../../doc/coding/performance.html">Performance in Tcl</A>.
+
+<H2><A NAME="tclX profile command">TclX profile command</A></H2>
+
+The Profile Tcl tool uses the TclX <CODE>profile</CODE> command.  TclX
+is an extension to Tcl.  The TclX sources are available at <A
+HREF="ftp.neosoft.com:/pub/tcl/tclx-distrib"><CODE>ftp.neosoft.com:/pub/tcl/tclx-distrib</CODE></A>.
+To use the Profile Tcl tool, you must have TclX installed so that the
+TclX shared library can be loaded at runtime.
+
+ <P>TclX7.5.3-a1 does not understand Itcl namespaces.  The file <A
+HREF="tclXprofile.c.patch"><CODE>tclXprofile.c.patch</CODE></A> is a
+patch to <CODE>tclX7.5.3-a1/tcl/generic/tclXprofile.c</CODE> that
+modifies the profile command so it understands Itcl namespaces.  The
+Profile Tcl tool will work on Itcl scripts without this patch, but you
+won't have any namespace information, so the output will be a little
+hard to understand.
+	
+ <P>To install this patch, you will need Larry Wall's
+<CODE>patch</CODE> program.  (You can get <CODE>patch</CODE> from <A
+HREF="ftp://ptolemy.eecs.berkeley.edu/pub/gnu/src/patch-2.1.tar.gz"><CODE>ftp://ptolemy.eecs.berkeley.edu/pub/gnu/src/patch-2.1.tar.gz</CODE></A>).
+To install the patch, grab the TclX sources, cd to
+<CODE>tclX</CODE><I>version</I><CODE>/tcl/generic</CODE>, and then run
+<CODE>patch &lt;
+$TYCHO/editors/visedit/doc/usersGuides/tclXprofile.c.patch</CODE>.
+Then install TclX.
+
+<H2>Profiler Description</H2>
+
 <p>
 The profiler consists of the usual tycho menu bar with a few buttons,
 a graphical forest editor, a few counters and a the tycho status bar.
@@ -42,7 +70,7 @@ profiler, but does not display the output.
 <H3>Profiler Grapher</H3>
 
 The central area of the Profiler is a <a
-href=EditForestHelp.html>Forest editor</a>.  After generating a
+href="EditForestHelp.html">Forest editor</a>.  After generating a
 profile, the user can follow the execution of the tcl code by clicking
 on nodes in the graph.  As the mouse moves over nodes in the graph,
 the counters at the bottom of the screen display statistics about that
