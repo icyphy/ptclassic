@@ -117,7 +117,7 @@ by the color of the stem that connects the terminal to the body
 of the icon.  The following colors are currently in use:
 .nf
 .sp
-	ANYTYPE: black
+	ANYTYPE: red
 	FLOAT: blue
 	INT: yellow
 	COMPLEX: white
