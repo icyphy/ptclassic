@@ -198,7 +198,7 @@ void StringList::initialize() {
 	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
 		char* p = (char*)next++;
-		LOG_DEL; delete p;
+		LOG_DEL; delete [] p;
 	}
 	SequentialList::initialize();
 }
@@ -211,7 +211,7 @@ StringList::~StringList() {
 	ListIter next(*this);
 	for (int i=size(); i > 0; i--) {
 		char* p = (char*)next++;
-		LOG_DEL; delete p;
+		LOG_DEL; delete []p;
 	}
 }
 

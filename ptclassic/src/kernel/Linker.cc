@@ -122,7 +122,7 @@ public:
 	TFile() : tname(tempFileName()) {}
 	~TFile() {
 		unlink(tname);
-		LOG_DEL; delete tname;
+		LOG_DEL; delete [] tname;
 	}
 	operator const char*() const { return tname;}
 private:
