@@ -107,9 +107,18 @@ void Galaxy :: initialize() {
 // this is separate so derived galaxies can have more control.
 void Galaxy :: initSubblocks() {
 	GalTopBlockIter next(*this);
-	Block* b;
-	while ((b = next++) != 0 && !Scheduler::haltRequested())
+	Block *b,*b2;
+	b = next++;
+	// In the following, we carefully get the pointer to the next
+	// item in the iterator before calling the initialize(), in case
+	// as part of the initialization, the block deletes itself.
+	if (b) {
+	    do {
+		b2 = next++;
 		b->initialize();
+		b = b2;
+	    } while (b && !Scheduler::haltRequested());
+	}
 }
 
         ////////////////////////////////////
