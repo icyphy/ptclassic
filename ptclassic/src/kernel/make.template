@@ -37,15 +37,16 @@ HELPDIR=~ptolemy/lib
 LIB=libptolemy.a
 
 # Library sources
-LIBCCSRCS=AutoForkNode.cc \
- Block.cc Connect.cc ComplexArrayState.cc ComplexState.cc DataStruct.cc \
+LIBCCSRCS=Architecture.cc AutoForkNode.cc \
+ Block.cc Code.cc Connect.cc ComplexArrayState.cc ComplexState.cc \
+ DataStruct.cc \
  Display.cc Domain.cc Fraction.cc Galaxy.cc GalIter.cc Geodesic.cc   \
  InterpGalaxy.cc Interpreter.cc Linker.cc KnownBlock.cc NamedObj.cc \
- Output.cc Particle.cc PriorityQueue.cc Star.cc StringList.cc \
+ Output.cc Packet.cc Particle.cc PriorityQueue.cc Star.cc StringList.cc \
  Tokenizer.cc Universe.cc Wormhole.cc WormConnect.cc \
  checkConnect.cc expandPath.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc Architecture.cc Code.cc
+ KnownState.cc State.cc StringState.cc
 LIBCSRCS=gnulib3a.c
 
 LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
@@ -53,16 +54,15 @@ LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
 SRCS=$(LIBSRCS) interpmain.cc
 
 # Header files
-HDRS= AutoForkNode.h \
- Block.h CircularBuffer.h ComplexSubset.h Connect.h DataStruct.h \
+HDRS= Architecture.h AutoForkNode.h \
+ Block.h CircularBuffer.h Code.h ComplexSubset.h Connect.h DataStruct.h \
  Display.h Domain.h Fraction.h Galaxy.h GalIter.h Geodesic.h InterpGalaxy.h \
  InterpUniverse.h Interpreter.h KnownBlock.h Linker.h Linker.sysdep.h \
- NamedObj.h Output.h Particle.h ParticleStack.h Plasma.h PriorityQueue.h \
- Scheduler.h Star.h StringList.h Tokenizer.h \
+ NamedObj.h Output.h Packet.h Particle.h ParticleStack.h Plasma.h \
+ PriorityQueue.h Scheduler.h Star.h StringList.h Tokenizer.h \
  Universe.h WormConnect.h Wormhole.h dataType.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
- IntArrayState.h IntState.h KnownState.h State.h StringState.h \
- Architecture.h Code.h
+ IntArrayState.h IntState.h KnownState.h State.h StringState.h
 
 # Library objects
 LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
