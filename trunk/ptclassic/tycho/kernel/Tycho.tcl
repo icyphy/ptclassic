@@ -455,7 +455,8 @@ if {$tychoOpenFiles == 0} {
 		    -text "Welcome to Tycho\n"
 	}
 	# In theory, this could be a Build proc, but who wants to load it?
-	if { ![file exists [file join $TYCHO kernel doc codeDoc File.html]] \
+	if { ![file exists [file join $TYCHO kernel gui \
+		doc codeDoc File.html]] \
 		|| ![file exists [file join $TYCHO doc tychoClasses.dag]] \
 		|| ![file exists [file join $TYCHO lib idx tycho.idx]] \
 		|| ![file exists [file join $TYCHO lib idx codeDoc.idx]] } {
