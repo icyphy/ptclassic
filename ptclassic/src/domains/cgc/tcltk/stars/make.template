@@ -58,6 +58,8 @@ PL_SRCS= \
  CGCTkCheckButton.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
+ CGCTkMonoIn.pl \
+ CGCTkMonoOut.pl \
  CGCTkParametricEq.pl \
  CGCTkRadioButton.pl \
  CGCTkPlot.pl \
