@@ -81,11 +81,15 @@ EXPHDR =	port.h
 # pigilib needs the octtools copyright.h and ansi.h
 header:: $(OCTTOOLS)/include/copyright.h $(OCTTOOLS)/include/ansi.h
 
-$(OCTTOOLS)/include/copyright.h: copyright.h $(OCTTOOLS) $(OCTTOOLS)/include
+$(OCTTOOLS)/include/copyright.h: copyright.h
+	if [ ! -d $(OCTTOOLS) ]; then mkdir $(OCTTOOLS) ; fi
+	if [ ! -d $(OCTTOOLS)/include ]; then mkdir $(OCTTOOLS)/include ; fi
 	rm -f $@
 	cp $< $@
 
-$(OCTTOOLS)/include/ansi.h: ansi.h $(OCTTOOLS) $(OCTTOOLS)/include
+$(OCTTOOLS)/include/ansi.h: ansi.h
+	if [ ! -d $(OCTTOOLS) ]; then mkdir $(OCTTOOLS) ; fi
+	if [ ! -d $(OCTTOOLS)/include ]; then mkdir $(OCTTOOLS)/include ; fi
 	rm -f $@
 	cp $< $@
 
