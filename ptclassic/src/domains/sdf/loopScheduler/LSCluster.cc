@@ -112,6 +112,20 @@ int LSCluster :: run() {
 	return TRUE;
 }
 	
+static const int FORCE = 2;
+// simulate the execution of the cluster
+int LSCluster :: simRunStar(int) {
+
+	SDFFiring* f = firing;
+	while (f) {
+		for (int i = f->count; i > 0; i--) {
+			f->s->simRunStar(FORCE);
+		}
+		f = f->next;
+	}
+	return 0;
+}
+
 // indent by depth tabs.
 static const char* tab_2(int depth) {
 	// this fails for depth > 20, so:
