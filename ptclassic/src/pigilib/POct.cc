@@ -758,11 +758,13 @@ int POct::ptkSetStringProp (int aC,char** aV) {
 }
 
 // ptkGetMkSchemIcon
-// returns the past value of the MkSchemIcon Command
+// returns the past value of the MkSchemIcon2 Command
 //
 // Written by Alan Kamas  1/94
 //
 int POct::ptkGetMkSchemIcon (int aC,char** aV) {
+
+    if (aC != 1) return  usage ("ptkGetMkSchemIcon");
 
     // FIXME:  Add following line back for MkSchemIcon state
     // Tcl_AppendResult(interp, (char *)MkSchemPalette, (char *) NULL);
