@@ -8,7 +8,7 @@ zero 0, then only a single impulse is generated; otherwise, it
 specifies the period of the impulse train.  The impulse or impulse
 train is delayed by the amount specified by "delay".
 }
-    version { @(#)ACSImpulse.pl	1.1 05/07/98 }
+    version { $Id$ }
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
