@@ -344,6 +344,14 @@ void Block::initPorts () {
   }
 }
 
+// Reset the buffers in the PortHoles but still keep the
+// infrastructure of the PortHoles.
+void Block::resetPortBuffers()  {
+	PortListIter nextp(ports);
+	PortHole* p;
+	while ((p = nextp++) != NULL) p->resetBufferValues();
+}
+
 // return the scheduler for the Block.  Block derived classes that
 // contain schedulers will redefine this method.
 Scheduler* Block :: scheduler() const {
