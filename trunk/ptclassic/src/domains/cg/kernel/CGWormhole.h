@@ -73,6 +73,8 @@ public:
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
 
+protected:
+        /*virtual*/ void go();
 };
 
 
