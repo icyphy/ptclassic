@@ -78,7 +78,7 @@ public:
 	void initialize();
 
         // Return current Pointer on the buffer
-        Pointer* here();
+        Pointer* here() const;
 
         // Return next Pointer on the buffer
         Pointer* next();
@@ -87,7 +87,7 @@ public:
         Pointer* last();
  
         // Access buffer relative to current
-        Pointer* previous(int);
+        Pointer* previous(int) const;
  
         // Size of the buffer
         int size() const {return dimen;}
@@ -143,10 +143,13 @@ public:
 	}
 
 	// set up a port for determining the type of ANYTYPE connections
-	void inheritTypeFrom(GenericPort& p) { typePort = &p;}
+	void inheritTypeFrom(GenericPort& p) {
+		typePort = &p;
+		p.typePortBack = this;
+	}
 
 	// function to initialize PortHole Plasmas
-	virtual Plasma* setPlasma();
+	virtual Plasma* setPlasma(Plasma *useType = NULL) = 0;
 
 
 	// function to connect two portholes
@@ -156,7 +159,16 @@ public:
 	dataType myType () const { return type;}
 
 	// Constructor
-	GenericPort () : type(ANYTYPE), alias(0), typePort(0) {}
+	GenericPort () : type(ANYTYPE),alias(0),typePort(0),typePortBack(0) {}
+
+	// Destructor
+	~GenericPort() {
+		if (typePort && typePort->typePortBack == this)
+			typePort->typePortBack = 0;
+		if (typePortBack && typePortBack->typePort == this)
+			typePortBack->typePort = 0;
+	}
+
 
 protected:
 	// datatype of particles in this porthole
@@ -167,6 +179,9 @@ protected:
 
 	// PortHole to inherit type from for ANYTYPE connections
 	GenericPort* typePort;
+
+	// A pointer to point in the reverse direction
+	GenericPort* typePortBack;
 
 };
 
@@ -234,7 +249,7 @@ public:
 	virtual Geodesic* allocateGeodesic();
 
 	// initialize the Plasma
-	Plasma* setPlasma();
+	Plasma* setPlasma(Plasma *useType = NULL);
 
 	// Constructor: just worry about pointers here
 	PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
@@ -368,7 +383,7 @@ public:
 	StringList printVerbose ();
 
 	// function to set Plasma type of subportholes
-	Plasma* setPlasma();
+	Plasma* setPlasma(Plasma *useType = NULL);
 
 	// destructor
 	~MultiPortHole();
@@ -427,7 +442,7 @@ public:
 		     numInitialParticles = 0;}
 
 	// Destructor -- frees up all particles first
-	~Geodesic() {
+	virtual ~Geodesic() {
 		numInitialParticles = 0;
 		initialize();
 	}
