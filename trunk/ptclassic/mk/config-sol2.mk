@@ -142,9 +142,9 @@ WILDFORCEDEFINES=-Duint32_t="unsigned int" -Dint32_t=int
 
 # Uncomment the three lines below if you have the Annapolis 
 # Micro Systems Wildforce board and software
-WILDFORCECFLAGS = $(WILDFORCEDEFINES) -DPT_WILDFORCE -I$(WILDFORCE_INCL)
-SDFWILDFORCE =	1
-WILDFORCE = wildforce	
+#WILDFORCECFLAGS = $(WILDFORCEDEFINES) -DPT_WILDFORCE -I$(WILDFORCE_INCL)
+#SDFWILDFORCE =	1
+#WILDFORCE = wildforce	
 
 #
 # Variables for miscellaneous programs
