@@ -40,12 +40,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/param.h>
 #include <ctype.h>
 #include <string.h>
+#include "compat.h"
 
-#ifdef hpux
-#ifndef __GNUG__
-#include <sys/stat.h>
-#endif /* __GNUG__ */
-#endif /* hpux */
+#if defined(hpux) || defined(SYSV) || defined(SVR4) || defined(__svr4__)
+#include <sys/stat.h>		// Pick up chmod declaration.
+#endif /* hpux SYSV SVR4 */
+
 static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
 
 char* makeLower(const char* name) {
