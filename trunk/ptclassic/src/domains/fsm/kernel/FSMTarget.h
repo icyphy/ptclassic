@@ -40,27 +40,40 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "Target.h"
 #include "StringState.h"
 #include "FloatState.h"
+#include "Block.h"
+#include "Target.h"
 
 class FSMTarget : public Target {
+
+public:
+	// constructor
+	FSMTarget();
+
+	// destructor
+	~FSMTarget();
+
+	void setup();
+
+	// return a copy of itself
+	Block* makeNew() const;
+
+	// return the domain of the galaxy and "FSM" otherwise
+	/*virtual*/ const char* domain();
+
 protected:
-	// Input/Output name maps.
+	// Input name map
         StringState inputNameMap;         
+
+	// Output name map
 	StringState outputNameMap;   
 
-        // type of this machine.
+        // type of this finite state machine.
 	StringState machineType;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
-public:
-	FSMTarget();
-	void setup();
-	Block* makeNew() const;
-	~FSMTarget();
-private:
 };
 #endif
