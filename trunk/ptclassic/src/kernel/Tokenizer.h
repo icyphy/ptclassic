@@ -118,6 +118,12 @@ public:
 		return t;
 	}
 
+	// change comment character, return old one.
+	char setCommentChar(char n) {
+		char o = comment_char;
+		comment_char = n;
+		return o;
+	}
 };
 
 #endif
