@@ -128,6 +128,9 @@ public:
 	// parent is also a BDFClusterGal
 	BDFClusterGal* parentGal() { return (BDFClusterGal*)parent();}
 
+        // remove blocks from this galaxy without deallocating the blocks
+	void orphanPorts();
+
 protected:
 	ostream* logstrm;	// for logging errors
 
@@ -198,8 +201,9 @@ class BDFTopGal : public BDFClusterGal {
 public:
 	BDFTopGal(Galaxy& g, ostream* log = 0)
 	: BDFClusterGal(g,log), sched(0) {}
+	~BDFTopGal();
 	Scheduler* scheduler() const { return sched;}
-	void setSched(Scheduler* s) { sched = s;}
+	inline void setSched(Scheduler* s) { sched = s;}
 private:
 	Scheduler* sched;
 };
@@ -459,8 +463,13 @@ protected:
 
 class BDFWhileLoop : public BDFCluster {
 public:
+	// constructor
 	BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
 		     BDFCluster* first,BDFCluster* second=0);
+
+	// destructor
+	~BDFWhileLoop();
+
 	// overrides of virtual functions
 	ostream& printOn(ostream&);
 	void runInner();
@@ -468,8 +477,10 @@ public:
 	int genSched();
 	void genCode(Target&, int depth);
 	void fixBufferSizes(int);
+
 protected:
 	void setup();
+
 private:
 	// fix arcs of member clusters.
 	void fixArcs(BDFCluster*,BDFCluster*);
