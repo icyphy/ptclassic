@@ -493,7 +493,7 @@ body ::tycho::StyleSheet::_notify {command name args} {
 #
 body ::tycho::StyleSheet::dfltcget {name attribute} {
     if [exists $name] {
-	array set attrs [itemset $name]
+	array set attrs [assign $name]
 	if [::info exists attrs($attribute)] {
 	    return $attrs($attribute)
 	}
@@ -889,7 +889,7 @@ body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
     set string "${prefix}parameter $tail"
 
     # Print value
-    array set attrs [itemset $name]
+    array set attrs [assign $name]
     lappend string $attrs(-value)
     unset attrs(-value)
 

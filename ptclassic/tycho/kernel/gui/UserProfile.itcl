@@ -315,10 +315,10 @@ body ::tycho::UserProfile::registerstyle \
 # Update the name maps.
 #
 body ::tycho::UserProfile::_updatecache {} {
-    array set _mapclass [itemset map:class]
-    array set _unmapclass [itemset unmap:class]
-    array set _maptitle [itemset map:title]
-    array set _unmaptitle [itemset unmap:title]
+    array set _mapclass [assign map:class]
+    array set _unmapclass [assign unmap:class]
+    array set _maptitle [assign map:title]
+    array set _unmaptitle [assign unmap:title]
     cache validate
 }
 
@@ -342,8 +342,8 @@ body ::tycho::UserProfile::_newmap {type name} {
     set _map[set type]($name) $_id
     set _unmap[set type]($_id) $name
 	
-    itemset map:$type [array get _map$type]
-    itemset unmap:$type [array get _unmap$type]
+    assign map:$type [array get _map$type]
+    assign unmap:$type [array get _unmap$type]
 
     return $_id
 }
