@@ -152,6 +152,9 @@ REALCLEAN_STUFF =	$(EVERY_BINARY)
 INSTALL += makefile $(BINDIR)/$(PIGI)
 
 ifndef ALLBINARIES
+# On certain archs (hppa9), we can run strip -x and get a smaller binary
+# Note that doing a full strip on a binary will disable incremental linking
+# 
 # This is the default target
 $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 	echo char '*gVersion = "Version:' $(VERSION) \
@@ -161,6 +164,7 @@ $(PIGI): $(PT_DEPEND) $(ADD_OBJS)
 		>> version.c
 	$(CC) -c version.c
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $(PIGI_OBJS) $(LIBS) -o $@
+	$(STRIP_DEBUG) $@
 
 # Same, with debugging symbols.
 $(PIGI).debug: $(PT_DEPEND) $(ADD_OBJS)
