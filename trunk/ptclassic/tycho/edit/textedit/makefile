@@ -49,6 +49,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
+	Edit.itcl \
 	EditC.itcl \
 	EditCText.itcl \
 	EditCpp.itcl \
@@ -59,8 +60,12 @@ ITCL_SRCS = \
 	EditItclText.itcl \
 	EditMake.itcl \
 	EditMakeText.itcl \
+	EditProgram.itcl \
+	EditProgramText.itcl \
 	EditPtlang.itcl \
 	EditPtlangText.itcl \
+	EditSpice.itcl \
+	EditSpiceText.itcl \
 	EditTcl.itcl \
 	EditTclText.itcl \
 	EditText.itcl \
