@@ -44,11 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StringList.h"
+#include "Block.h"
 
-class Block;
-class Star;
-class Galaxy;
-class PortHole;
 class EventHorizon;
 class Geodesic;
 class Target;
@@ -82,7 +79,7 @@ public:
 	static Domain* named(const char* name);
 
 	// find Domain corresponding to argument Block
-	static Domain* of(Block&);
+	static Domain* of(const Block& b) { return named(b.domain());}
 
 	// return # of domains and nth domain
 	static int number() {return numDomains;}
