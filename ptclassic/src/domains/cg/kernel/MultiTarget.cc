@@ -79,7 +79,15 @@ void MultiTarget :: initState() {
 // is ANYTYPE, sets the send to be of
 void MultiTarget :: pairSendReceive(DataFlowStar* send, DataFlowStar* receive) {
 	PortHole* input = send->portWithName("input");
+	if (!input) {
+		Error::abortRun(*this,send->name(),": Send star does not have a porthole name 'input'");
+		return;
+	}
 	PortHole* output = receive->portWithName("output");
+	if (!output) {
+		Error::abortRun(*this,receive->name(),": Receive star does not have a porthole named 'output'");
+		return;
+	}	
 	if (output->type() == ANYTYPE) output->inheritTypeFrom(*input);
 }
 
