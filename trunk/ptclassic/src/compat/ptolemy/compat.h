@@ -260,7 +260,7 @@ extern int pclose(FILE *);
 extern void perror (const char *);
 extern int printf (const char *, ...);
 
-#if !defined(PTHPPA) && !defined(PTLINUX) && !defined(PTALPHA) && !(defined(PTSOL2) && !defined(PTSOL2_4))
+#if !defined(PTHPPA) && !defined(PTLINUX) && !defined(PTALPHA) && !(defined(PTSOL2) && !defined(PTSOL2_3)) && !defined(PTSOL2_4)
 extern int putenv (char *);
 #endif /* ! PTHPPA && ! PTLINUX && ! PTALPHA */
 
