@@ -361,7 +361,7 @@ body ::tycho::IDocSys::formatClassComment {expl} {
     # Append the footer
     append expl <hr>
     if {$author != ""} {
-        if {[llength $author] == 1} {
+        if {[llength $author] <= 2} {
             append expl "<br>Author: $author"
         } {
             append expl "<br>Authors: $author"
