@@ -2016,7 +2016,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
     # We failed to find a pre-existing html file with the right name,
     # so we just return the calculated name and hope that it gets
     # created later
-    puts "getFileName: returning at bottom: $docFile"
+    # puts "getFileName: returning at bottom: $docFile"
     return $docFile
 }
 
