@@ -111,13 +111,18 @@ The short term workaround is to add a space:
 <H4>HTML Interface Bugs and Requests for Enhancement</H4>
 
 <ul>
-<li>    HTTP is not supported, so hyperlinks can only be to local files.
 <li>    There should be a menu entry to hide the toolbar and location.
 <li>    Not all toolbar commands are available from menus.
 <li>    There are no key bindings for toolbar commands.
 <li>    The print command prints only a crude facsimile of the document.
 <li>	Need to support forms (most of the infrastructure is there already).
 <li> 	Need to support mailto, gif files, etc.
+
+
+<li> If you bring up an HTML document with a picture on it
+_without_ a link (say the Tycho home page), and click on the picture, it 
+somehow does a jump to the same page. It doesn't re-render the HTML, but
+it adds to the forward-back list.
 
 <li> If you <CODE>Open Source</CODE> and then do a <CODE>Save As</CODE>
 in the source file window to save the source as a different
