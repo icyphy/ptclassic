@@ -90,6 +90,25 @@ The initial guess at the angle being estimated in radians.
 		     }
 	}
 
+	defstate {
+		name { delayBuf }
+		type { fixarray }
+		default { ""}
+		desc { 
+Buffer to implement delays > 1 
+		}
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
+	}
+
+	defstate {
+		name { delayPtr }
+		type { int }
+		default { 0 }
+		desc {
+Pointer to next element to be stored in delayBuf. Needed only in delay > 1
+		}
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
+	}
 
 	constructor {
 		// taps state: not constant, length three, and not settable
@@ -99,6 +118,12 @@ The initial guess at the angle being estimated in radians.
 		// decimation is not supported
 		decimation.clearAttributes(A_SETTABLE);
 		decimationPhase.clearAttributes(A_SETTABLE);
+
+	}
+
+	initCode {
+		if (int(errorDelay) > 1)   addCode(initDelayPtr);
+		C50FIR::initCode(); // call initCode method of FIR filter
 	}
 
         method {
@@ -111,9 +136,9 @@ The initial guess at the angle being estimated in radians.
 				    "The step size must be positive");
 		    return;
 		}
-		if ( int(errorDelay) < 0 ) {
+		if ( (int(errorDelay) < 1) || (int(errorDelay) > 255) ) {
 		    Error::abortRun(*this,
-				    "The error delay must be non-negative");
+				    "The error delay must be in the range [1,255]");
 		    return;
 		}
 	    }
@@ -122,9 +147,29 @@ The initial guess at the angle being estimated in radians.
 	protected{
 		//intMu is a 16 bit representation of stepSize
 		int intMu;
+		// delayMask is used to implement modulo addressing
+		int delayMask;
 	}
 
 	setup {
+		// if delay requested is larger than 1 allocate 
+		// memory for delayBuf and delayPtr
+
+		if (int(errorDelay) > 1) {
+			delayBuf.setAttributes(A_UMEM|A_CIRC);
+			delayPtr.setAttributes(A_UMEM);
+			int buffSize = 1;
+			int delaySize = errorDelay - 1;
+		//to support modulo addressing delayBuf must be
+		// 2^k words long.
+			for ( int i = 0; i < 8; i++){
+				if ( buffSize >= delaySize) break;
+				buffSize = 2*buffSize;
+			}
+			delayBuf.resize(buffSize);
+			delayMask = buffSize - 1;
+		}
+
                 // FIXME: Parameters are not always resolved properly
 		// before setup but should be.  For now, check parameters
 		// in go method.
@@ -141,9 +186,9 @@ The initial guess at the angle being estimated in radians.
 	
 		double temp = stepSize.asDouble();
 		if (temp >= 0) {
-			intMu = int(32768*temp);
+			intMu = int(32768*temp + 0.5);
 		} else {
-			intMu = int(32768*(1-temp));
+			intMu = int(32768*(1-temp) + 0.5);
 		}
 
 		// call the LMS FIR filter setup method
@@ -151,30 +196,74 @@ The initial guess at the angle being estimated in radians.
 
 	}
 
-	codeblock(oscDetCode,"") {
-	setc	ovm			; set overflow mode
-	lar	ar1,#$addr(oldSamples,1)	; ar1->x[n-1]
-	lar	ar2,#$addr(cosOmega)	; ar2-> cosOmega
-	lar	ar3,#$addr(taps,1)	; ar3->taps[1]
-	mar	*,ar1
-	lmmr	treg0,#$addr(error)	; lmmr = e[n]
-	mpy	#@intMu			; preg = 0.5*e[n]*u
-	ltp	*,ar2			; treg = x[n-1]; acc = preg
-	sach	*,2			; cosOmega = 2*e[n]*u
-	mpy	*,ar3			; preg = 0.5(x[n-1]*2*e[n]*u)
-	lacc	*,15			; acc = -0.5*secondTap	
-	spac				; acc -= preg
-	sach	*,1,ar2			; secondTap = 2*acc
-	neg
-	sach	*,1			; output cosOmega
+	codeblock(initDelayPtr){
+	.ds	$addr(delayPtr)
+	.word	$addr(delayBuf)
+	.text
 	}
+
+	codeblock(initialCode) {
+	ldp	#00h			; data page pointer = 0
+	setc	ovm			; set overflow mode
+	lar	ar1,#$addr(oldSamples,1) ; ar1-> x[n-1]
+	lar	ar2,#$addr(cosOmega)	; ar2->cosOmega
+	lacl	#$starSymbol(cfs)	; acc -> taps[1]
+	add	#1			; acc++
+	samm	bmar			; BMAR -> taps[1]
+* taps for FIR are stored in program memory(at label $starSymbol(cfs))!!
+	blpd	bmar,ar3		; ar3 = taps[1]
+	mar	*,ar1			; arp = 1
+	}
+
+// this star is generally used with the diamond shaped delay symbol
+//attached to the feedback path leading to the error input. Only 
+//delays of 1 are currently supported with this symbol so a value
+//of 1 for the delay means do nothing as far as this star is
+//concerned.  For larger values of delays additional code is requird
+
+	codeblock(delayOne){
+	lmmr	treg0,#$addr(error)	; treg0 = error
+	}
+
+	codeblock(delayStd,""){
+	mar	*,ar4
+	lacl	#@delayMask
+	samm	dbmr
+	lmmr	ar4,#$addr(delayPtr)
+	bldd	#$addr(error),*+
+	apl	ar4			; the apl/opl thing is there because
+	opl	#$addr(delayBuf),ar4	; the C50 doesn't support modulo
+	smmr	ar4,#$addr(delayPtr)	; addressing directly.
+	sbrk	#$val(errorDelay)	; 0< erroDelay < 256 !!
+	apl	ar4
+	opl	#$addr(delayBuf),ar4
+	lt	*,ar1
+	}
+	
+	codeblock(finalCode,""){
+	mpy	#@intMu			; p = 0.5*error*Mu
+	ltp	*,ar2			; acc = 0.5*error*Mu, treg0 = x[n-1]
+	sach	*,3			; cosOmega = 4*error*Mu
+	mpy	*			; p = 2*error*Mu*x[n-1]
+	lacc	ar3,15			; acc = 0.5*taps[1](old)
+	spac				; acc = 0.5(taps[1](old)-4*error*Mu*x[n-1])
+	sach	ar3,1			; ar3 = 2*acc
+	neg				; acc = -acc
+	sach	*,1			; cosOmega = -2(acc)
+	bldp	ar3			; taps[1] = newtap
+	}
+
 
 	go {
 		CheckParameterValues();
 
 		// Update second tap and compute the output
 
-		addCode(oscDetCode());
+		addCode(initialCode);
+		if (int(errorDelay) > 1) addCode(delayStd());
+		else addCode(delayOne);
+		addCode(finalCode());
+
 
 		// Run the FIR filter
 		C50FIR :: go();
@@ -182,7 +271,7 @@ The initial guess at the angle being estimated in radians.
 	// Inherit the wrapup method
 
 	exectime {
-		return 15 + C50FIR::myExecTime();
+		return 20 + C50FIR::myExecTime();
 	}
 
 }
