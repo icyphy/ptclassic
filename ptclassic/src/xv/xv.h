@@ -266,6 +266,12 @@ typedef unsigned long u_long;
 #define random rand
 #endif
 
+#ifdef NO_BCOPY
+#define bcopy(d,s,l) memcpy(s,d,l)
+#define bzero(s,size) memset(s,0,size)
+#define bcmp(s1,s2,size) memcmp((char *)s1,(char *)s2,size)
+#endif
+
 /*****************************/
 /* END OF CONFIGURATION INFO */
 /*****************************/
