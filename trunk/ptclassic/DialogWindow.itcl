@@ -48,7 +48,8 @@
 # For example,
 # <tcl><pre>
 # ::tycho::DialogWindow .m -text {A dialog with a single customized pushbutton}
-# .m addButton pushme -text {Push Me} -command {post thanks; delete object .m}
+# .m addButton pushme -text {Push Me} -command &#92
+#      {::tycho::post thanks; delete object .m}
 # wm deiconify .m
 # </pre></tcl>
 # A childsite is provided for additional widgets below the label and
@@ -191,7 +192,7 @@ configbody ::tycho::DialogWindow::html {
 	} {
 	    # Create the message window.
 	    itk_component add html {
-		HTMLText $itk_interior.top.html \
+		::tycho::HTMLText $itk_component(top).html \
 			-scrollbar 0 \
 			-html $itk_option(-html)
 	    } {
@@ -241,7 +242,7 @@ configbody ::tycho::DialogWindow::text {
 	} {
 	    # Create the message window.
 	    itk_component add message {
-		message $itk_interior.top.message \
+		message $itk_component(top).message \
 			-width 15c \
 			-justify left \
 			-text $itk_option(-text)
@@ -269,32 +270,19 @@ configbody ::tycho::DialogWindow::width {
 #####################################################################
 #
 body ::tycho::DialogWindow::constructor {args} {
-    #
+
     # Create a frame to contain the text of the dialog, but also to
     # have room for a bitmap, inserted in derived classes.
-    #
     itk_component add top {
-	frame $itk_interior.top -border 10
+	frame $itk_component(childsite).top -border 10
     } {
 	keep -background -cursor
     }
-    pack $itk_component(top)
+    pack $itk_component(top) -side top
     
-    #
-    # Create a frame to serve as a childsite.
-    #
-    itk_component add childsite {
-	frame $itk_interior.childsite
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(childsite) -fill both -expand yes
-
-    #
     # Create a separator
-    #
     itk_component add separator {
-	frame $itk_interior.separator \
+	frame $itk_component(childsite).separator \
 		-relief sunken \
 		-width 3 \
 		-height 3 \
@@ -302,17 +290,22 @@ body ::tycho::DialogWindow::constructor {args} {
     } {
 	keep -background
     }
-    pack $itk_component(separator) -expand no -fill x
+    pack $itk_component(separator) -expand no -fill x \
+	    -after $itk_component(top)
     
-    #
     # Create a button box.
-    #
+    # FIXME: We should replace this with a Tycho buttonbox, since the iwidgets
+    # button box uses a different policy for mapping to the screen.  The
+    # iwidgets policy makes it impossible to center a window on the screen
+    # because the size of the window will not actually be known until after
+    # the window is mapped.
     itk_component add bbox {
-	buttonbox $itk_interior.bbox
+	buttonbox $itk_component(childsite).bbox
     } {
 	keep -background -cursor
     }
-    pack $itk_component(bbox) -expand no
+    pack $itk_component(bbox) -expand no \
+	    -after $itk_component(separator)
     
     # FIXME: In itcl2.0-beta, the following silliness appears to be
     # necessary to enable commandResult to be an array.
@@ -350,7 +343,7 @@ body ::tycho::DialogWindow::addButton {args} {
 #
 body ::tycho::DialogWindow::default {id} {
     eval [list $itk_component(bbox) default $id]
-    bind $itk_component(hull) <Return> "$prefix invoke $id; break"
+    bind $itk_component(hull) <Return> [code "$prefix invoke $id; break"]
 }
 
 ######################################################################
@@ -360,9 +353,9 @@ body ::tycho::DialogWindow::default {id} {
 # the leading minus sign.  For example, several of the derived classes
 # have a -okcommand option, which specifies the command to invoke in
 # response to pressing the "OK" button.  This command is invoked
-# as follows:
+# as follows, where $obj is the name of the object:
 # <pre>
-#    $this execCommand -okcommand
+#    $obj execCommand -okcommand
 # </pre>
 # The execCommand method sets the commandResult to the value returned
 # by the command executed. Any arguments beyond the option name to use
@@ -372,15 +365,16 @@ body ::tycho::DialogWindow::default {id} {
 # DialogWindow, the following sequence in the constructor will work,
 # for example:
 # <pre>
-#     $this configure -okcommand "[scope $this] mymethod"
-#     addButton b -text "Push Me" -command "$this execCommand -okcommand"
+#     $obj configure -okcommand [code "$this mymethod"]
+#     addButton b -text "Push Me" \
+#             -command [code "$this execCommand -okcommand"]
 # </pre>
-# The "scope" command forces "mymethod" to be invoked in the scope
-# of class that defining the button.
+# The "code" commands set the scope to that of the object that is
+# defining the button.
 #
 body ::tycho::DialogWindow::execCommand {option args} {
     set retval ""
-    global errorInfo
+    global ::errorInfo
     set errorInfo ""
     if {[info exists itk_option($option)] && $itk_option($option) != ""} {
 
@@ -418,7 +412,7 @@ body ::tycho::DialogWindow::invoke {args} {
 # size is frozen. The procedure returns immediately, returning the
 # instance name. A typical call would be:
 # <pre>
-#    DialogWindow::new YesNoQuery .y -text "Are you sure"
+#    ::tycho::DialogWindow::new YesNoQuery .y -text "Are you sure"
 # </pre>
 # The arguments after the class and instance names are just passed
 # directly to the constructor of the class.
@@ -455,7 +449,7 @@ body ::tycho::DialogWindow::new {class instance args} {
 # that value is returned. Otherwise, a null string is returned. A
 # typical call would be:
 # <pre>
-#    DialogWindow::newModal YesNoQuery .y -text "Are you sure"
+#    ::tycho::DialogWindow::newModal YesNoQuery .y -text "Are you sure"
 # </pre>
 # This will return 0 or 1.  The arguments after the class and instance
 # names are just passed directly to the constructor of the class.
