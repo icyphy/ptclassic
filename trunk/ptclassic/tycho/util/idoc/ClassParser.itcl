@@ -74,7 +74,7 @@ class ::tycho::IDocSys {
     protected method formatDesc {comment}
 
     # Format an explanation properly (in HTML)
-    protected method formatExpl {comment}
+    protected method formatExpl {comment {parsetags 1}}
 
     # Uncapitalize and unpluralize a docTag (Authors -> author)
     protected method formatTag {docTag}
@@ -150,6 +150,16 @@ body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
 # If there are many files, catch errors and return all of the messages.
 # If there is only one file, don't catch it so the user can trace the
 # stack.
+#
+# @param debug   a boolean enabling verbose debugging output. (Currently this
+# consists only of the names of the files as they are parsed.)
+# @param generateIndex  a boolean specifying whether an index should be 
+# generated. This is ignored in the current implementation as HTML is still
+# the preferred method for browsing. It would be simple to port the HTML 
+# index code to IDoc.
+# @param title  the title of the index file to be generated. Ignored.
+# @param filelist  the list of files to generateIDocs for. The files may be any
+# file type that IDoc supports.  
 #
 body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     set IDocSys ""
@@ -434,9 +444,78 @@ body ::tycho::IDocSys::formatDesc {comment} {
 # &lt;p&gt; tag for every empty line in a comment. Surround proc and
 # method names with &lt;code&gt; tags.
 #
-body ::tycho::IDocSys::formatExpl {comment} {
+# If parsetags is set (as it is by default), javadoc tags are removed
+# from the comment and formatted in a more useful way. Javadoc tags are
+# supported in Itcl comments as well as in Java. Currently, this recognizes
+# return, param, and exception. Since, deprecated, and see are not supported
+# as yet. See is most useful of the three.
+#
+body ::tycho::IDocSys::formatExpl {comment {parsetags 1}} {
     if {"$comment" == "\n"} {
         return {}
+    }
+
+    # Knows: return, param, exception
+    # Ignores: since, deprecated FIXME: see
+    if {$parsetags} {
+        # Parse line by line
+        set desc ""
+        set param ""
+        set return ""
+        set exception ""
+        set docTag desc
+        set commList [split $comment "\n"]
+        
+        foreach commLine $commList {
+            if [regexp {^[ 	]*@([A-Za-z]+):*[ 	]+(.*)} \
+                    $commLine dummy docTag docValue] {
+                set commLine $docValue
+                set docTag [formatTag $docTag]
+                append $docTag "\n"
+                # puts "ct: $docTag, cl: $docValue"
+            }
+            if {$docTag == "param" || $docTag == "return"\
+                    || $docTag == "exception"} {
+                append $docTag $commLine " "
+            } else {
+                append $docTag $commLine "\n"
+            }
+        }
+
+        set comment $desc
+
+        # Parameter comments
+        if {$param != {}} {
+            set paramList [split $param "\n"]
+            append comment "\n<b>Parameters</b><ul>\n"
+            foreach par $paramList {
+                if {$par != {}} {
+                    set parname [lindex $par 0]
+                    append comment "<li><i>$parname</i> [lreplace $par 0 0]\n"
+                }
+            }
+            append comment "</ul>\n"
+        }
+
+        # Exception comments
+        if {$exception != {}} {
+            set throwList [split $exception "\n"]
+            append comment "\n<b>Throws</b><ul>\n"
+            foreach throw $throwList {
+                if {$throw != {}} {
+                    set throwname [lindex $throw 0]
+                    append comment \
+                            "<li><i>$throwname</i> [lreplace $throw 0 0]\n"
+                }
+            }
+            append comment "</ul>\n"
+        }
+        
+        # Return comment (only one?)
+        if {$return != {}} {
+            set return [string trimleft $return " \t\n"]
+            append comment "\n<b>Returns</b> $return\n"
+        }
     }
     
     # Blank lines are a new paragraph
