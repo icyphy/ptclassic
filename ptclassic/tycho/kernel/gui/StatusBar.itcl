@@ -213,7 +213,8 @@ body ::tycho::StatusBar::constructor {args} {
 		-borderwidth 1 \
 		-relief raised
     } {
-	keep -background -cursor -font
+	keep -background -cursor
+	rename -font -messagefont messageFont MessageFont
     }
     pack $itk_component(mainStatus) \
 	    -fill both -expand on \
@@ -223,6 +224,9 @@ body ::tycho::StatusBar::constructor {args} {
     # Initialise options
     eval itk_initialize $args
     eval preference exclude $this $args
+
+    ::preference subscribe fonts $this \
+	    -messagefont messageFont
 }
 
 
