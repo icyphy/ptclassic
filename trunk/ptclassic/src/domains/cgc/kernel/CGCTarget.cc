@@ -393,16 +393,25 @@ int CGCTarget :: allocateMemory() {
 			if (loop) {
 				if (p->far() && (!p->atBoundary())) {
 					int nMe = p->numXfer();
-					CGCPortHole* farP = 
-						(CGCPortHole*) p->far();
+					CGCPortHole* farP = p->realFarPort();
 					int nFar = farP->numXfer();
 					if ((nMe < nFar) || (nMe%nFar != 0) ||
 					    (p->numInitDelays() > 0) || 
-					    p->usesOldValues() ||
-					    farP->usesOldValues() )
+					    p->usesOldValues() ) {
 						p->giveUpStatic();
+						farP->giveUpStatic();
+					    }
 				}
 			}
+		}
+	}
+
+	nextStar.reset();
+	while ((s = (CGCStar*)nextStar++) != 0) {
+		if (s->isItFork()) continue;
+		BlockPortIter next(*s);
+		CGCPortHole* p;
+		while ((p = (CGCPortHole*) next++) != 0) {
 			p->finalBufSize(useStaticBuffering());
 		}
 	}
