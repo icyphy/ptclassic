@@ -25,6 +25,7 @@ $Id$
 
 class Scheduler;
 class Galaxy;
+class EventHorizon;
 
 class Target : public Block {
 private:
@@ -141,9 +142,19 @@ public:
 	// Routines for writing code: schedulers may call these
 	// The depth normally just helps with indentations, but can
 	// be used for other purposes.
-	virtual StringList beginIteration(int repetitions, int depth);
-	virtual StringList endIteration(int repetitions, int depth);
-	virtual StringList writeFiring(Star& s, int depth);
+
+	// Function called to begin an iteration (default version
+	// does nothing)
+	virtual void beginIteration(int repetitions, int depth) {}
+
+	// Function called to end an iteration (default version
+	// does nothing)
+	virtual void endIteration(int repetitions, int depth) {}
+
+	// Function called to generate code for the star the way
+	// this target wants (default version does nothing)
+
+	virtual void writeFiring(Star& s, int depth) {}
 
         // resource management
         virtual int commTime(int sender,int receiver,int nUnits, int type);
@@ -152,6 +163,11 @@ public:
 	int isA(const char*) const;
 	const char* readClassName() const {return "Target";}
 
+	// functions to construct appropriate EventHorizon objects
+	// for communication with the target.  Default implementations
+	// forward to the Domain object for my galaxy's domain.
+	virtual EventHorizon& newFrom();
+	virtual EventHorizon& newTo();
 };
 
 
