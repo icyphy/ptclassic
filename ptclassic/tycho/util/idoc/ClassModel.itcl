@@ -30,152 +30,199 @@
 
 
 ##########################################################################
-#### Class
+#### ClassModel
 #
-# The _Class_ class implements a model of a object-oriented class. It
+# The _ClassModel_ class implements a model of a object-oriented class. It
 # is general enough to represent classes in most OO languages, although
 # there may be reason to subclass it to provide access methods 
 # more suitable to particular languages. It is designed to be
 # usable both for documenting classes and for use in 
-# object models. 
-#
-# The _Class_ class provides an interface to HierModel which allows entities
-# of different types to have the same name. HierModel requires that all 
-# entities have unique names regardless of type. The implementation "shines
-# through" in certain error cases and when it requires the type of a parent
-# when accessing a nested entity. FIXME: A happier interface might only require 
-# the parent type when there is a collision, however, Class requires it 
-# whenever a nested entity is accessed. Class only supports one level
-# of nesting.
+# object models. The names of methods (including constructors and
+# desctructors) should, in languages that support multiple
+# methods per operation, contain the full signature. For example:
+# <code>add(int,int):int</code> and <code>add(int,float):float</code>.
 #
 # The model has the following attributes:
-# <ul>
-#   <li><b>-name</b>: The class name of the class. (i.e. ::tycho::Class)
-#   <li><b>-language</b>: The language in which the class was written.
-#       Default is a null string.
-#   <li><b>-package</b>: The name of the package this class belongs to. 
-#       Default is null.
-#   <li><b>-protection</b>: The protection level of the class. Usually,
-#       this includes "public" and "package". The default is "public".
-#   <li><b>-modifiers</b>: Other class modifiers. Possible values depend
-#       on the languages. The default is null.
-#   <li><b>-exceptions</b>: Exceptions thrown by this class. An attribute
-#       because exceptions don't have attributes. The default is null.
-#   <li><b>-source</b>: The file in which the class resides.
-#   <li><b>-interface</b>: The file in which the class' interface resides.
-# </ul>
 #
-# The model has the following entities:
-# <ul>
-# <li><b>parent</b> _name_: A parent of the current class. Parents can
-# appear only at the top level. Parents have the following attribute:
-#    <ul>
-#    <li><b>-inheritance</b>: The type of inheritance from this parent.
-#        Either "implementation" or "interface". Default is "implementation".
-#    </ul>
-# 
-# <li><b>Constructor</b> _name_: A constructor. Constructors should be named
-# according to the language. (See note following methods below.)
-# Constructors can appear only at the top level. Constructors have the 
-# following attributes:
-#   <ul>
-#   <li><b>-protection</b>: The protection level of the method. Usually,
-#        this includes at least "private", "protected", and "public".
-#        The default is "public."
-#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
-#        on the languages. The default is null.
-#   <li><b>-exceptions</b>: Exceptions thrown by this Constructor. Default
+# <dl>
+# <dt><b>-exceptions</b>
+# <dd>
+# Exceptions thrown by this class. An attribute
+# because exceptions don't have attributes. The default is null.
+#
+# <dt><b>-inherits</b>
+# <dd>
+# A list of classes from which this class inherits.
+#
+# <dt><b>-implements</b>
+# <dd>
+# A list of interfaces that this class implements.
+#
+# <dt><b>-interface</b>
+# <dd>
+# The file in which the class' interface resides.
+#
+# <dt><b>-language</b>
+# <dd>
+# The language in which the class was written.
+# Default is a null string.
+#
+# <dt><b>-modifiers</b>
+# <dd>
+# Other class modifiers. Possible values depend
+# on the languages. The default is null.
+#
+# <dt><b>-name</b>
+# <dd>
+# The class name of the class. (i.e. ::tycho::ClassModel)
+#
+# <dt><b>-package</b>
+# <dd>
+# The name of the package this class belongs to. 
+# Default is null.
+#
+# <dt><b>-protection</b>
+# <dd>
+# The protection level of the class. Usually,
+# this includes "public" and "package". The default is "public".
+#
+# <dt><b>-source</b>
+# <dd>
+# The file in which the class resides.
+#
+# </dl>
+#
+# The model has the following types:
+# <p>
+# <dl>
+# <dt><b>constructor</b> _name_
+# <dd>
+# A constructor. Constructors typically contain nested
+# _argument_ entitiers, which represent the arguments of the constructor.
+# Constructors have the following attributes:
+#   <dl>
+#   <dt><b>-description</b>
+#   <dd> A short description of the constructor, in plain text.
+#   <dt><b>-exceptions</b>
+#   <dd> Exceptions thrown by this constructor. Default
 #        is null.
-#   </ul>
-# Constructors typically contain nested _parameter_ entitiers, which list
-# the parameters of the constructor, and may contain nested _annotation_ 
-# entities as documentation.
-#
-# <li><b>Destructor</b> _name_: A destructor. Destructors should be named
-# according to the language. (See note following methods below.)
-# Destructors can appear only at the top level. Destructors have the 
-# following attributes:
-#   <ul>
-#   <li><b>-protection</b>: The protection level of the method. Usually,
-#        this includes at least "private", "protected", and "public".
-#        The default is "public."
-#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the constructor, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
 #        on the languages. The default is null.
-#   <li><b>-exceptions</b>: Exceptions thrown by this Destructor. Default
-#        is null.
-#   </ul>
-# Destructors may contain nested _parameter_ entitiers, which list
-# any parameters, and may contain nested _annotation_ entities
-# as documentation.
-#
-# <li><b>method</b> _name_: A method. Methods can appear only
-# at the top level. Methods have the following attributes:
-#   <ul>
-#   <li><b>-protection</b>: The protection level of the method. Usually,
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the method. Usually,
 #        this includes at least "private", "protected", and "public".
 #        The default is "public."
-#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
+#   </dl>
+#
+# <dt><b>destructor</b> _name_
+# <dd>
+# A destructor. Destructors typically contain nested
+# _argument_ entitiers, which represent the arguments of the destructor.
+# Destructors have the following attributes:
+#   <dl>
+#   <dt><b>-description</b>
+#   <dd> A short description of the destructor, in plain text.
+#   <dt><b>-exceptions</b>
+#   <dd> Exceptions thrown by this destructor. Default
+#        is null.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the destructor, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
+#        on the languages. The default is null.
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   </dl>
+#
+# <dt><b>method</b> _name_
+# <dd>
+# A method. Methods typically contain nested _argument_ entities, which 
+# represent the arguments of the method. Methods have the following
+# attributes:
+#   <dl>
+#   <dt><b>-description</b>
+#   <dd> A short description of the method, in plain text.
+#   <dt><b>-exceptions</b>
+#   <dd> Exceptions thrown by this method. Default
+#        is null.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the method, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
 #        on the languages, but will include "virtual" for C++ and
 #        "synchronized" for Java. The default is null.
-#   <li><b>-type</b>: The return type of the method. The default is null.
-#   <li><b>-scope</b>: The scope of the method. This can be either
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   <dt><b>-scope</b>
+#   <dd> The scope of the method. This can be either
 #        "instance," meaning that the method operates on an instance
 #        of this class, or "class," meaning that the method operates
 #        on the shared class data. (These are called "class methods"
 #        in Smalltalk and "procs" in [Incr Tcl]). Default is
 #        "instance."
-#   <li><b>-exceptions</b>: Exceptions thrown by this method. Default
-#        is null.
-#   </ul>
-# Methods typically contain nested _parameter_ entities, which lists
-# the parameters of the method, and nested _annotation_ entities
-# which document its purpose. Methods should be uniquely named. In
-# languages which support polymorphism, method "names" in the Class
-# model should be the signatures of the given method, i.e.: add(int,int):int,
-# add(int,float):float, etc. 
+#   <dt><b>-type</b>
+#   <dd> The return type of the method. The default is null.
+#   </dl>
 #
-# <li><b>variable</b> _name_: A variable. Variables can appear only
-# at the top level. Variables have the following attributes:
-#   <ul>
-#   <li><b>-protection</b>: The protection level of the variable. Usually,
-#        this includes at least "private", "protected", and "public".
-#        The default is "protected."
-#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
+# <dt><b>variable</b> _name_
+# <dd>
+# A variable of the class. Variables have the following attributes:
+#   <dl>
+#   <dt><b>-default</b>
+#   <dd> The initial/default value of the variable. The defualt 
+#        is null. This attribute does not apply to certain languages and
+#        should then be ignored.
+#   <dt><b>-description</b>
+#   <dd> A short description of the variable, in plain text.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the variable, in HTML.
+#   <dt><b>-modifiers</b>
+#   <dd> Other modifiers. Possible values depend
 #        on the languages, but will include "static" for C++ and
 #        "synchronized" for Java. The default is null.
-#   <li><b>-type</b>: The type of the variable. The default is null.
-#   <li><b>-scope</b>: The scope of the variable. This can be either
+#   <dt><b>-protection</b>
+#   <dd> The protection level of the variable. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "protected."
+#   <dt><b>-scope</b>
+#   <dd> The scope of the variable. This can be either
 #        "instance," meaning that the method operates on an instance
 #        of this class, or "class," meaning that the method operates
 #        on the shared class data. (These are called "class variables"
 #        in Smalltalk and "common variables" in [Incr Tcl]). Default is
 #        "instance."
-#   <li><b>-default</b>: The initial/default value of the variable. The defualt 
-#        is null. This attribute does not apply to certain languages and
-#        should then be ignored.
-# </ul>
-# A variable often contains nested _annotation_ entities
-# which document its purpose.
+#   <dt><b>-type</b>
+#   <dd> The type of the variable. The default is null.
+# </dl>
 #
-# <li><b>annotation</b> _name_ _value_: A documentation annotation.
-# Annotations can appear at any level -- by convention, an annotation
-# named "description" is a short description while one named "explanation"
-# is a long description. Both are assumed to be in HTML format.
-# Annotations have no attributes.
-#
-# <li><b>parameter</b> _name_: A parameter. At the top level,
-# this is a class parameter, which probably only makes sense if the
-# languages supports generics ("templates" in C++). Inside a
-# method, it represents an argument to the method. It has the
-# following attributes:
-#   <ul>
-#   <li><b>-type</b>: The type of the parameter. Default is null.
-#   <li><b>-optional</b>: True is the parameter is optional. Default
+# <dt><b>argument</b> _name_
+# <dd>
+# An argument. At the top level, this is a class argument, which
+# probably only makes sense if the language supports generics
+# ("templates" in C++). Inside a method, it represents an argument
+# to the method. It has the following attributes:
+#   <dl>
+#   <dt><b>-default</b>
+#   <dd> The default value of the argument. This makes
+#       sense only if the argument is optional. Default is a null string.
+#   <dt><b>-description</b>
+#   <dd> A short description of the argument, in plain text.
+#   <dt><b>-explanation</b>
+#   <dd> An explanatory description of the argument, in HTML.
+#   <dt><b>-optional</b>
+#   <dd> True is the argument is optional. Default
 #       is zero (false).
-#   <li><b>-default</b>: The default value of the parameter. This makes
-#       sense only if the parameter is optional. Default is a null string.
-#   </ul>
-# </ul>
+#   <dt><b>-type</b>
+#   <dd> The type of the argument. Default is null.
+#   </dl>
+# </dl>
 #
 # Here is an example of a class model. This creates
 # a model and loads it with a string in TIM format -- usually,
@@ -185,20 +232,19 @@
 # contents:
 # <pre><tcl>
 #     catch {delete object $class}
-#     set class [::tycho::Class [::tycho::autoName class]]
-#     $class read string {
+#     set class [::tycho::ClassModel [::tycho::autoName class]]
+#     $class parse {
 #        modelconfigure -language Itcl -name ::tycho::exampleclass
-#        parent ::tycho::Mommy
-#        annotation description {An example class.}
-#        annotation explanation {This is a <i>silly</i> class.}
-#        variable foo {
-#            -protection public
-#            annotation explanation "This is a public variable."
-#        }
-#        method bar {
-#            annotation explanation "This is a public method."
-#            parameter x
-#            parameter y
+#        modelconfigure -description {An example class.}
+#        modelconfigure -explanation {This is a <i>silly</i> class.}
+#        modelconfigure -inherits ::tycho::Mommy
+#        variable foo \
+#            -protection public \
+#            -explanation "This is a public variable."
+#        method bar \
+#            -explanation "This is a public method." {
+#            argument x
+#            argument y
 #        }
 #     }
 #     $class describe
@@ -214,22 +260,13 @@
 #     $class get annotation bar.explanation method
 # </tcl></pre>
 #
-# Return the parameters of a method:
+# Return the arguments of a method:
 # <pre><tcl>
-#     $class parameters bar
+#     $class arguments bar
 # </tcl></pre>
 #
-# Programmers' NOTE: Many of the methods inherited from HierModel and above
-# are overridden here. This is in order to allow the user to create non-unique
-# names as long as the type/name pair is unique. Internally, Class appends 
-# a type-dependent prefix (see ::fullName and ::shortName) when it is storing
-# an entity, and removes that when it returns the name to the user. This
-# requires the user to be more aware of the types of items she is requesting,
-# and limits the nesting done, but it solves the problem of allowing non-unique
-# names.
-#
-class ::tycho::Class {
-    inherit ::tycho::HierModel
+class ::tycho::ClassModel {
+    inherit ::tycho::DataModel
 
     constructor {args} {}
     destructor {}
@@ -240,99 +277,29 @@ class ::tycho::Class {
     #################################################################
     ####                     public methods                      ####
 
-    # Add an annotation to the class or an entity
-    method annotation {name string {parenttype {}}}
+    # Add an argument with attributes to the class
+    method argument {method name args}
 
-    # Add a Constructor with attributes to the class
-    method Constructor {name args}
-
-    # Get the Constructor(s) of the class
-    method Constructors {}
-
-    # Delete an item
-    method delete {type name}
-
-    # Add a Destructor with attributes to the class
-    method Destructor {name args}
-
-    # Get the Destructor(s) of the class
-    method Destructors {}
-
-    # Return the value and args of an item.
-    method get {type name {parenttype{}}}
-
-    # Get an attribute of an item
-    method itemcget {type name option {parenttype{}}}
-
-    # Configure an attribute of an item
-    method itemconfigure {type name option value {parenttype{}}}
-
-    # Add a method with attributes to the class
-    method method {name args}
-
-    # Get the methods with matching attributes
-    method methods {args}
-
-    # Add a parameter with attributes to the class
-    method parameter {method name args}
-
-    # Get the parameters of a method
-    method parameters {method}
+    # Get the arguments of a method
+    method arguments {method}
 
     # Add a parent with attributes to the class
     method parent {name args}
 
     # Get the parents of the class with matching attributes
     method parents {args}
-
-    # Add a top-level variable with attributes to the class
-    method variable {name args}
-
-    # Get the variables with matching attributes
-    method variables {args}
-
-    #################################################################
-    ####                  protected methods                      ####
-    
-    # Evaluate code in this object's context
-    protected method evalInSpecificContext {args} {eval $args}
-
-    # Describe an entity.
-    protected method _describeentity {type context name prefix}
-
-    # Add a nested annotation with attributes to the class
-    protected method _annotation {context name string args}
-
-    # Methods cannot be nested
-    protected method _method {context name args} {
-    	_nesterror method $context $name
-    }
-
-    # Add a nested parameter with attributes to the class
-    protected method _parameter {context name string args}
-
-    # Variables cannot be nested
-    protected method _variable {context name args} {
-    	_nesterror variable $context $name
-    }
-    
-    # Return the full name of an entity (to store)
-    protected method fullName {type shortname}
-    
-    # Return the short name of an entity (for user interface)
-    protected method shortName {type fullname}
 }
 
 ########################################################################
 #### constructor
 #
-body ::tycho::Class::constructor {args} {
+body ::tycho::ClassModel::constructor {args} {
     # Evaluate options
     eval configure $args
 
     # Define the attributes of this model. See the class
     # comment for information.
-    defineModelAttributes \
+    modelconfigure \
             -interface "" \
             -name "" \
             -language "" \
@@ -343,32 +310,27 @@ body ::tycho::Class::constructor {args} {
             -exceptions ""
 
     # Define the "annotation" entity
-    defineEntityType annotation \
-	    -valued 1 \
-            -leaf 1
+    type define annotation \
+            :leafonly 1
 
     # Define the "parent" entity
-    defineEntityType parent \
-            -ordered 1 \
+    type define parent \
             -inheritance "implementation"
 
-    # Define the "Constructor" entity
-    defineEntityType Constructor \
-            -ordered 1 \
+    # Define the "constructor" entity
+    type define constructor \
 	    -protection public \
 	    -modifiers "" \
             -exceptions ""
 
-    # Define the "Destructor" entity
-    defineEntityType Destructor \
-            -ordered 1 \
+    # Define the "destructor" entity
+    type define destructor \
 	    -protection public \
 	    -modifiers "" \
             -exceptions ""
 
     # Define the "method" entity
-    defineEntityType method \
-            -ordered 1 \
+    type define method \
 	    -protection public \
 	    -modifiers "" \
 	    -type "" \
@@ -376,249 +338,33 @@ body ::tycho::Class::constructor {args} {
             -exceptions ""
 
     # Define the "variable" entity
-    defineEntityType variable \
+    type define variable \
 	    -protection protected \
 	    -modifiers "" \
 	    -type "" \
 	    -scope instance \
             -default "" \
 
-    # Define the "parameter" entity
-    defineEntityType parameter \
-	    -ordered 1 \
+    # Define the "argument" entity
+    type define argument \
 	    -type "" \
 	    -optional 0 \
 	    -default ""
 }
 
-########################################################################
-#### annotation
-#
-# Add a new annotation and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# annotation. Flag an error if the annotation already exists. 
-#
-body ::tycho::Class::annotation {name value {parenttype {}}} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    set fullcntxt [fullName $parenttype $cntxt]
-    set fulllocal [fullName annotation $local]
-    if {$cntxt != {}} {
-        set fullname $fullcntxt$separator$fulllocal
-    } {
-        set fullname $fulllocal
-    }
-
-    _verifynot annotation $fullcntxt $fulllocal $fullname
-    _addentity annotation $fullcntxt $fulllocal $fullname $value {}
-    list delete annotation $fullname
-}
 
 ########################################################################
-#### Constructor
+#### argument
 #
-# Add a new Constructor and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# constructor. Flag an error if the Constructor already exists. 
-# NOTE: This is capitalized to avoid collisions with the ::tycho::Class
-# constructor.
-#
-body ::tycho::Class::Constructor {name args} {
-    set fullname [fullName Constructor $name]
-
-    _verifynot Constructor {} $fullname $fullname
-    _addentity Constructor {} $fullname $fullname {} $args
-    list delete Constructor $name
-}
-
-########################################################################
-#### Constructors
-#
-# Get the Constructors of the class.
-#
-body ::tycho::Class::Constructors {} {
-    set cons {}
-    set con_cons [_children Constructor {}]
-    foreach con $con_cons {
-        lappend cons [shortName Constructor $con]
-    }
-    return $cons
-}
-
-########################################################################
-#### Delete
-#
-# Delete the item of the specified type and name. Certain types in Class
-# have a four character string prepended to them to prevent collisions
-# between types. These are added to the name before being passed to 
-# previous generic delete method.
-#
-body ::tycho::Class::delete {type name} {
-    set fullname [fullName $type $name]
-    set retval [chain $type $fullname]
-    # fix returned value to have name, not fullname
-    lreplace $retval 1 1 $name
-}
-
-########################################################################
-#### Destructor
-#
-# Add a new Destructor and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# Destructor. Flag an error if the Destructor already exists. 
-# NOTE: This is capitalized to avoid collisions with the ::tycho::Class
-# destructor.
-#
-body ::tycho::Class::Destructor {name args} {
-    set fullname [fullName Destructor $name]
-
-    _verifynot Destructor {} $fullname $fullname
-    _addentity Destructor {} $fullname $fullname {} $args
-    list delete Destructor $name
-}
-
-########################################################################
-#### Destructors
-#
-# Get the Destructors of the class.
-#
-body ::tycho::Class::Destructors {} {
-    set dess {}
-    set des_dess [_children Destructor {}]
-    foreach des $des_dess {
-        lappend dess [shortName Destructor $des]
-    }
-    return $dess
-}
-
-########################################################################
-#### get
-#
-# Get the value of an item. Flag an error if
-# the item does not exist.
-#
-body ::tycho::Class::get {type name {parenttype {}}} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    set fullcntxt [fullName $parenttype $cntxt]
-    set fulllocal [fullName $type $local]
-    if {$cntxt != {}} {
-        set fullname $fullcntxt$separator$fulllocal
-    } {
-        set fullname $fulllocal
-    }
-    chain $type $fullname
-}
-
-########################################################################
-#### itemcget
-#
-# Get an attribute of an item. The first argument is the
-# entity or link type. Flag an error if the item does
-# not exist.
-#
-body ::tycho::Class::itemcget {type name option {parenttype {}}} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    set fullcntxt [fullName $parenttype $cntxt]
-    set fulllocal [fullName $type $local]
-    if {$local != {}} {
-        set fullname $fullcntxt$separator$fulllocal
-    } {
-        set fullname $fulllocal
-    }
-    chain $type $fullname $option
-}
-
-########################################################################
-#### itemconfigure
-#
-# Configure attributes of an item. The first argument is the
-# entity or link type; only one option value pair is supported
-# Flag an error if the annotation does not exist. Return the inverse command.
-#
-body ::tycho::Class::itemconfigure {type name option value {parenttype {}}} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    set fullcntxt [fullName $parenttype $cntxt]
-    set fulllocal [fullName $type $local]
-    if {$cntxt != {}} {
-        set fullname $fullcntxt$separator$fulllocal
-    } {
-        set fullname $fulllocal
-    }
-
-    set retval [chain $type $fullname $option $value]
-
-    # FIXME: returns default value, not previous (undo) value
-    lreplace $retval 2 2 [shortName $type $fullname] 
-}
-
-########################################################################
-#### method
-#
-# Add a new method and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# method. Flag an error if the method already exists. 
-#
-body ::tycho::Class::method {name args} {
-    # Just make sure that the method name is top-level
-    if { [llength [split $name $separator]] > 1 } {
-        error "Method $name is not top-level"
-    }
-
-    set fullname [fullName method $name]
-
-    _verifynot method {} $fullname $fullname
-    _addentity method {} $fullname $fullname {} $args
-    list delete method $name
-}
-
-########################################################################
-#### methods
-#
-# Get the methods of the class with attributes that match the
-# given attributes and values. This can be used to get methods
-# with a given protection level, scope, and so on.
-#
-body ::tycho::Class::methods {args} {
-    set result {}
-    foreach method [_roots method] {
-    	array set temp $_attrs($method)
-    	set matching 1
-    	foreach {attr val} $args {
-	    if { $temp($attr) != $val } {
-		set matching 0
-		break
-	    }
-    	}
-    	if { $matching } {
-	    lappend result [shortName method $method]
-    	}
-    }
-    return $result
-}
-
-########################################################################
-#### parameter
-#
-# Add a parameter to a method, Constructor, or Destructor. 
+# Add an argument to a method, Constructor, or Destructor. 
 # This method is provided for convenience -- it is not used 
 # by the TIM file parser. 
 # Additional arguments are a flat attribute-value list for the
-# parameter. Flag an error if the parameter already exists. 
+# argument. Flag an error if the argument already exists. 
 #
-body ::tycho::Class::parameter {method name args} {
+body ::tycho::ClassModel::argument {method name args} {
     set fullmethod [fullName method $method]
-    set fullname [fullName parameter $name]
+    set fullname [fullName argument $name]
 
     # Create correct fullname if it's a Constructor or Destructor 
     if {![exists method $fullmethod]} {
@@ -628,22 +374,22 @@ body ::tycho::Class::parameter {method name args} {
         }
     }
 
-    _verifynot parameter $fullmethod $fullname $fullmethod$separator$fullname
-    _addentity parameter $fullmethod $fullname \
+    _verifynot argument $fullmethod $fullname $fullmethod$separator$fullname
+    _addentity argument $fullmethod $fullname \
             $fullmethod$separator$fullname {} $args
 
     # no support for the interface other than toplevel
-    list delete parameter $fullmethod$separator$fullname
+    list delete argument $fullmethod$separator$fullname
 }
 
 ########################################################################
-#### parameters
+#### arguments
 #
-# Get the parameters of a method, Constructor, or Destructor. If they
+# Get the arguments of a method, Constructor, or Destructor. If they
 # have the same name, returns the first it finds in order of method,
 # Constructor, Destructor.
 #
-body ::tycho::Class::parameters {method} {
+body ::tycho::ClassModel::arguments {method} {
     set fullmethod [fullName method $method]
 
     # Create correct fullname if it's a Constructor or Destructor 
@@ -655,9 +401,9 @@ body ::tycho::Class::parameters {method} {
     }
 
     set prms {}
-    set prm_prms [_children parameter $fullmethod]
+    set prm_prms [_children argument $fullmethod]
     foreach prm $prm_prms {
-        lappend prms [shortName parameter $prm]
+        lappend prms [shortName argument $prm]
     }
     return $prms
 }
@@ -669,7 +415,7 @@ body ::tycho::Class::parameters {method} {
 # Additional arguments are a flat attribute-value list for the
 # parent. Flag an error if the parent already exists.
 #
-body ::tycho::Class::parent {name args} {
+body ::tycho::ClassModel::parent {name args} {
     set fullname [fullName parent $name]
 
     _verifynot parent {} $fullname $fullname
@@ -685,7 +431,7 @@ body ::tycho::Class::parent {name args} {
 # current class extends (-inheritance implementation) or implements
 # (-inheritance interface)
 #
-body ::tycho::Class::parents {args} {
+body ::tycho::ClassModel::parents {args} {
     set result {}
     foreach parent [_children parent {}] {
         array set temp $_attrs($parent)
@@ -701,239 +447,4 @@ body ::tycho::Class::parents {args} {
         }
     }
     return $result
-}
-
-########################################################################
-#### variable
-#
-# Add a new variable and return the inverse command.
-# Additional arguments are a flat attribute-value list for the
-# variable. Flag an error if the variable already exists. 
-#
-body ::tycho::Class::variable {name args} {
-    # Just make sure that the variable name is top-level
-    if { [llength [split $name $separator]] > 1 } {
-        error "Variable $name is not top-level"
-    }
-
-    set fullname [fullName variable $name]
-
-    _verifynot variable {} $fullname $fullname
-    _addentity variable {} $fullname $fullname {} $args
-    list delete variable $name
-}
-
-########################################################################
-#### variables
-#
-# Get the variables of the class with attributes that match the
-# given attributes and values. This can be used to get variables
-# with a given protection level, scope, and so on.
-#
-body ::tycho::Class::variables {args} {
-    set result {}
-    foreach variable [_roots variable] {
-    	array set temp $_attrs($variable)
-    	set matching 1
-    	foreach {attr val} $args {
-	    if { $temp($attr) != $val } {
-		set matching 0
-		break
-	    }
-    	}
-    	if { $matching } {
-	    lappend result [shortName variable $variable]
-    	}
-    }
-    return $result
-}
-
-
-########################################################################
-########################################################################
-####                       protected methods                        ####
-
-
-########################################################################
-#### _annotation
-#
-# Add a nested annotation.
-# Additional arguments are a flat attribute-value list for the
-# annotation. Flag an error if the annotation already exists. 
-#
-body ::tycho::Class::_annotation {context name value args} {
-    _verifynot annotation $context $name $context$separator$name
-    _addentity annotation $context $name $context$separator$name \
-            $value $args
-}
-
-########################################################################
-#### _describeentity
-# Return a string describing the entity of type _type_ called _name_. 
-# The _prefix_ is prepended to each line. Redefined here to support the
-# new naming convention.
-#
-body ::tycho::Class::_describeentity {type context name prefix} {
-    set shortname [shortName $type $name]
-
-    set fullname [@scope ::tycho::Interchange $this \
-            _fullname $type $context $name]
-
-    # Get default options
-    array set dflt $_typeinfo($type,defaults)
-
-    # Figure out what kind of printout to do, according to whether
-    # I have children or not
-    if { $_typeinfo($type,leaf) \
-	    || [array names _info [list * $fullname *]] == "" } {
-        set nestedFormat 0
-    } else {
-        set nestedFormat 1
-    }
-
-    # Start string with type
-    set string $prefix$type
-
-    # Follow with the local name
-    lappend string $shortname
-
-    # If this type has a value, append that
-    if { $_typeinfo($type,valued) } {
-        append string " \\\n$prefix    "
-	lappend string $_value($fullname)
-    }
-    # If I have no children, print my attributes only
-    if { ! $nestedFormat } {
-	foreach {opt val} $_attrs($fullname) {
-	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
-                append string " \\\n$prefix    "
-		lappend string $opt $val
-	    }
-	}
-    } else {
-	# If I have children, then print enclosing braces, then
-	# attributes, then entities, then links
-	set childprefix $prefix
-	append childprefix "    "
-	append string " \{\n"
-
-	# Output attributes
-	foreach {opt val} $_attrs($fullname) {
-	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
-		append string $childprefix
-		lappend string $opt $val
-		append string "\n"
-	    }
-	}
-	# Output children: entities
-	foreach {_ etype} [array get _typeinfo *,entity] {
-	    set children [_children $etype $fullname]
-	    # Sort if not ordered, to improve readability
-	    if { ! $_typeinfo($etype,ordered) } {
-		set children [lsort $children]
-	    }
-	    foreach child $children {
-		append string [_describeentity $etype \
-                        $fullname $child $childprefix]
-	    }
-	}
-	# Output children: links
-	foreach {_ ltype} [array get _typeinfo *,link] {
-	    set children [_children $ltype $fullname]
-	    # Sort if not ordered, to improve readability
-	    if { ! $_typeinfo($ltype,ordered) } {
-		set children [lsort $children]
-	    }
-	    foreach child $children {
-		append string [_describelink $ltype \
-                        $fullname $child $childprefix]
-	    }
-	}
-	append string "$prefix\}"
-    }
-    return $string\n
-}
-
-########################################################################
-#### _parameter
-#
-# Add a nested parameter.
-# Additional arguments are a flat attribute-value list for the
-# parameter. Flag an error if the parameter already exists. 
-#
-body ::tycho::Class::_parameter {context name args} {
-    set fullname [fullName parameter $name]
-
-    _verifynot parameter $context $fullname $context$separator$fullname
-    _addentity parameter $context $fullname \
-            $context$separator$fullname {} $args
-}
-
-########################################################################
-#### fullName
-#
-# Return the full name of an entity, given it's type and name. The full 
-# name has a unique prefix attached to the current name of an entity to
-# avoid collisions between different types of the same name. HierModel
-# does not provide that functionality.
-#
-# Current full name prefixes are:
-# <ul>
-#   <li><b>ann_</b> annotation
-#   <li><b>con_</b> Constructor
-#   <li><b>des_</b> Destructor
-#   <li><b>met_</b> method
-#   <li><b>pnt_</b> parent
-#   <li><b>pra_</b> parameter
-#   <li><b>var_</b> variable
-# </ul>
-#
-body ::tycho::Class::fullName {type shortname} {
-    if {[llength [split $shortname $separator]] > 1} {
-        return $shortname
-    }
-    switch $type {
-        "Constructor" {return con_$shortname}
-        "Destructor" {return des_$shortname}
-        "method" {return met_$shortname}
-        "parameter" {return pra_$shortname}
-        "parent" {return pnt_$shortname}
-        "variable" {return var_$shortname}
-        default {return $shortname}
-    }
-}
-
-########################################################################
-#### shortName
-#
-# Return the short name of an entity, given it's type and full name.
-# The full name has a unique prefix attached to the short name of an entity 
-# to avoid collisions between different types of the same name. HierModel
-# does not provide that functionality.
-#
-# Current full name prefixes are:
-# <ul>
-#   <li><b>ann_</b> annotation
-#   <li><b>con_</b> Constructor
-#   <li><b>des_</b> Destructor
-#   <li><b>met_</b> method
-#   <li><b>pnt_</b> parent
-#   <li><b>pra_</b> parameter
-#   <li><b>var_</b> variable
-# </ul>
-#
-body ::tycho::Class::shortName {type fullname} { 
-    if {[llength [split $fullname $separator]] > 1} {
-        return $fullname
-    }
-    set shortname [string range $fullname 4 end]
-    switch $type {
-        "Constructor" {return $shortname}
-        "Destructor" {return $shortname}
-        "method" {return $shortname}
-        "parent" {return $shortname}
-        "parameter" {return $shortname}
-        "variable" {return $shortname}
-        default {return $fullname}
-    }
 }
