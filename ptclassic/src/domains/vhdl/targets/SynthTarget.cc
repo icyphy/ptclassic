@@ -44,13 +44,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 SynthTarget :: SynthTarget(const char* name,const char* starclass,
 			 const char* desc) :
 StructTarget(name,starclass,desc) {
-  addState(analyze.setState("analyze",this,"TRUE",
+  addState(analyze.setState("analyze",this,"YES",
 			    "switch for analyzing code into Synopsys."));
-  addState(elaborate.setState("elaborate",this,"TRUE",
+  addState(elaborate.setState("elaborate",this,"YES",
 			    "switch for elaborating design into structure."));
-  addState(compile.setState("compile",this,"TRUE",
+  addState(compile.setState("compile",this,"YES",
 			    "switch for compiling structure into gates."));
-  addState(report.setState("report",this,"TRUE",
+  addState(report.setState("report",this,"YES",
 			    "switch for generating area & timing reports."));
 }
 

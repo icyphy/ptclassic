@@ -46,6 +46,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLState.h"
 #include "VHDLPortVar.h"
 #include "VHDLCluster.h"
+#include "VHDLFiring.h"
+#include "Attribute.h"
 
 class StructTarget : public VHDLTarget {
 public:
@@ -54,25 +56,6 @@ public:
 
 	// Class identification.
 	/*virtual*/ int isA(const char*) const;
-
-	// The following are for keeping track of components and signals.
-	VHDLPortList firingPortList;
-	VHDLGenericList firingGenericList;
-	VHDLPortMapList firingPortMapList;
-	VHDLGenericMapList firingGenericMapList;
-	VHDLSignalList firingSignalList;
-	VHDLVariableList firingVariableList;
-	VHDLPortVarList firingPortVarList;
-	VHDLPortVarList firingVarPortList;
-
-	VHDLPortList systemPortList;
-	VHDLCompDeclList compDeclList;
-	VHDLSignalList signalList;
-	VHDLCompMapList compMapList;
-	VHDLStateList stateList;
-	VHDLArcList arcList;
-
-	VHDLClusterList clusterList;
 
 	// Main routine.
 	/*virtual*/ int runIt(VHDLStar*);
@@ -98,24 +81,80 @@ public:
 	// Run the code.
 	/*virtual*/ int runCode();
 
+	// Register the State reference.
+	/*virtual*/ void registerState(State*, int=-1, int=-1);
+
+	// Register PortHole reference.
+	/*virtual*/ void registerPortHole(VHDLPortHole*, int=-1);
+
+	// Return the assignment operators for States and PortHoles.
+	/*virtual*/ const char* stateAssign();
+	/*virtual*/ const char* portAssign();
+
+  	// The only reason for redefining this from HLLTarget
+ 	// is to change the separator from "." to "_".
+ 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
+
+protected:
+	/*virtual*/ void setup();
+
+	// code generation init routine; compute offsets, generate initCode
+	int codeGenInit();
+
+	// Stages of code generation.
+	/*virtual*/ void headerCode();
+	/*virtual*/ void trailerCode();
+
+	// Combine all sections of code;
+	/*virtual*/ void frameCode();
+
+private:
+	// The following are for keeping track of components and signals.
+	VHDLPortList firingPortList;
+	VHDLGenericList firingGenericList;
+	VHDLPortMapList firingPortMapList;
+	VHDLGenericMapList firingGenericMapList;
+	VHDLSignalList firingSignalList;
+	VHDLVariableList firingVariableList;
+	VHDLPortVarList firingPortVarList;
+	VHDLPortVarList firingVarPortList;
+
+	VHDLPortList systemPortList;
+	VHDLCompDeclList compDeclList;
+	VHDLSignalList signalList;
+	VHDLCompMapList compMapList;
+	VHDLStateList stateList;
+	VHDLArcList arcList;
+
+	VHDLClusterList clusterList;
+
+	CodeStream component_declarations;
+	CodeStream signal_declarations;
+	CodeStream component_mappings;
+	CodeStream configuration_declaration;
+	CodeStream firingAction;
+
+	// virtual function to add additional codeStreams.
+	virtual void addCodeStreams();
+
+	// virtual function to initialize codeStreams.
+	virtual void initCodeStreams();
+
+	// Initialize firing lists.
+	void initFiringLists();
+
 	// Assign names for each geodesic according to port connections.
 	void setGeoNames(Galaxy&);
 
 	// Register component declaration.
-	void registerCompDecl(StringList name,
-			      VHDLPortList* portList,
-			      VHDLGenericList* genList);
+	void registerCompDecl(StringList, VHDLPortList*, VHDLGenericList*);
 
 	// Merge the Star's signal list with the Target's signal list.
-	void mergeSignalList(VHDLSignalList* starSignalList);
+	void mergeSignalList(VHDLSignalList*);
 
 	// Register component mapping.
-	void registerCompMap(StringList label, StringList name,
-			     VHDLPortMapList* portMapList,
-			     VHDLGenericMapList* genMapList);
-
-	// Register the State reference.
-	/*virtual*/ void registerState(State*, int=-1, int=-1);
+	void registerCompMap(StringList, StringList, VHDLPortMapList*,
+			     VHDLGenericMapList*);
 
 	// Connect a source of the given value to the given signal.
 	void connectSource(StringList, StringList);
@@ -135,12 +174,32 @@ public:
 	// Add a register component declaration.
 	void registerRegister(StringList);
 
-	// Register PortHole reference.
-	/*virtual*/ void registerPortHole(VHDLPortHole*, int=-1);
+	// Flag indicating if registers are needed.
+        int regsUsed;
 
-  	// The only reason for redefining this from HLLTarget
- 	// is to change the separator from "." to "_".
- 	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
+	// Set the condition indicating registers are needed.
+	void setRegisters() { regsUsed = 1; }
+
+	// Return the condition indicating if registers are needed.
+        int registers() { return regsUsed; }
+
+	// Flag indicating if selectors are needed.
+        int selsUsed;
+
+	// Set the condition indicating selectors are needed.
+	void setSelectors() { selsUsed = 1; }
+
+	// Return the condition indicating if selectors are needed.
+        int selectors() { return selsUsed; }
+
+	// Flag indicating if sources are needed.
+        int sorsUsed;
+
+	// Set the condition indicating sources are needed.
+	void setSources() { sorsUsed = 1; }
+
+	// Return the condition indicating if sources are needed.
+        int sources() { return sorsUsed; }
 
 	// Register a read or write to an arc and the offset.
 	void registerArcRef(VHDLPortHole*, int);
@@ -161,8 +220,14 @@ public:
 	// Add in port to variable transfers here from portVarList.
 	void addPortVarTransfers(VHDLCluster*, int);
 
+	// Add in firing actions here.
+	void addActions(VHDLCluster*, int);
+
 	// Add in variable to port transfers here from varPortList.
 	void addVarPortTransfers(VHDLCluster*, int);
+
+	// Register compDecls and compMaps and merge signals.
+	void registerAndMerge(VHDLCluster*);
 
 	// Generate the entity_declaration.
 	void buildEntityDeclaration(int);
@@ -194,61 +259,9 @@ public:
 	// Generate the source entity and architecture.
 	StringList sourceCode();
 
-protected:
-	CodeStream component_declarations;
-	CodeStream signal_declarations;
-	CodeStream component_mappings;
-	CodeStream configuration_declaration;
-	CodeStream firingAction;
+	// Merge all firings into one cluster.
+	void allFiringsOneCluster();
 
-	// virtual function to add additional codeStreams.
-	virtual void addCodeStreams();
-
-	// virtual function to initialize codeStreams.
-	virtual void initCodeStreams();
-
-	// Initialize firing lists.
-	void initFiringLists();
-
-	/*virtual*/ void setup();
-
-	// code generation init routine; compute offsets, generate initCode
-	int codeGenInit();
-
-	// Stages of code generation.
-	/*virtual*/ void headerCode();
-	/*virtual*/ void trailerCode();
-
-	// Combine all sections of code;
-	/*virtual*/ void frameCode();
-
-private:
-	// Flag indicating if registers are needed.
-        int regsUsed;
-
-	// Set the condition indicating registers are needed.
-	void setRegisters() { regsUsed = 1; }
-
-	// Return the condition indicating if registers are needed.
-        int registers() { return regsUsed; }
-
-	// Flag indicating if selectors are needed.
-        int selsUsed;
-
-	// Set the condition indicating selectors are needed.
-	void setSelectors() { selsUsed = 1; }
-
-	// Return the condition indicating if selectors are needed.
-        int selectors() { return selsUsed; }
-
-	// Flag indicating if sources are needed.
-        int sorsUsed;
-
-	// Set the condition indicating sources are needed.
-	void setSources() { sorsUsed = 1; }
-
-	// Return the condition indicating if sources are needed.
-        int sources() { return sorsUsed; }
 };
 
 #endif
