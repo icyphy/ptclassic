@@ -10,14 +10,14 @@ It is automatically invoked whenever you open any file with a
 <A NAME=".java">".java" extension</A>.
 Java is an object-oriented language developed by Sun.  Java is similar
 to C++, but Java has a few new features, such as garbage collection. Java
-also is missing a few features C++ has, such as multiple inheritance.
+is also missing a few features C++ has, like multiple inheritance.
 <!-- If you don't know what java is, then you have probably been in solitary
 confinement :-) -->
  <P>
 The <a name="EditJava class">EditJava class</a> is derived from the
 <a href="EditCppHelp.html">EditCpp class</a>, and
 therefore inherits all of its features, such as invoking <CODE>make</CODE>.
-The EditJava class colors certain Java constructs, such as comments.
+The EditJava class colors certain Java constructs, as with comments.
  <P>
 For more Java resources, see the Tycho
 <A HREF="../../../../java/doc/index.html">Java</A> page.
@@ -31,7 +31,7 @@ HREF="../../../../kernel/doc/codeDoc/CompileJava.html"><CODE>CompileJava</CODE><
 class documentation discusses the programming details, we discuss the
 user level details below.
 <p>
-The EditJava editor support two primary methods of evaluating Java files:
+The EditJava editor supports two primary methods of evaluating Java files:
 <MENU>
 <li>If the <code>.java</code> file contains a <code>main()</code>, then we
 call <CODE>java -cs</CODE> <i>ClassName</i>, which will check the
@@ -99,7 +99,7 @@ this file and then invoke <CODE>Evaluate</CODE> with either
 <LI> The <CODE>Evaluate</CODE> choice under the <CODE>File</CODE> menu.
 <LI> By typing <CODE>C-xC-r</CODE>
 </MENU>
-then a 
+then an 
 <A
 HREF="../../../../kernel/doc/codeDoc/Exec.html"><CODE>Exec</CODE></A>
 widget will come up and evaluate and run the java file with
@@ -118,7 +118,7 @@ you edit this file and then invoke <CODE>Evaluate</CODE> as above, first
 <CODE>appletviewer</CODE> is run.
 <p>
 Note that the Exec windows that come up when you evaluate a Java file are
-persistant between evaluations.  This allows you to modify the command line
+persistent between evaluations.  This allows you to modify the command line
 once and reuse your command line during the next evaluation.
 
 <H2>'Special' Menu choices</H2>
@@ -129,7 +129,7 @@ menu places a body template at the current point in the buffer.
 The <A NAME="Java Editor File Template"><CODE>File Template</CODE>
 command</A> in the <CODE>Special</CODE> menu copies the file <A
 HREF="../../templates/JavaTemplate.java"><CODE>$TYCHO/editors/textedit/templates/JavaTemplate.java</CODE></A>
-into the editor does some substitutions described
+into the editor and does some substitutions described
 <A HREF="#java file template substitution">below</A>.
  <P>
 The <A NAME="Java Editor Generate doc"><CODE>Generate doc</CODE> command</A>
