@@ -31,6 +31,7 @@ endif
 setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2/
 setenv C_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2/include
 setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/g++-include:$PTOLEMY/gnu/$PTARCH/$PTARCH/include:$PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/2.7.2/include
+setenv LIBRARY_PATH $PTOLEMY/gnu/$PTARCH/lib
 
 # This variable is needed to find the libraries
 if ($PTARCH =~ hppa*) then
