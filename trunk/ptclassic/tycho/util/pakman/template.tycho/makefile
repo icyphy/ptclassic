@@ -50,7 +50,8 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	_@.tcl \
 	_README.txt \
 	_makefile \
-	_pkgIndex.tcl
+	_pkgIndex.tcl \
+	_copyright
 
 MISC_FILES = adm bin demos doc test
 
