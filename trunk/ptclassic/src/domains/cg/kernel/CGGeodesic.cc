@@ -63,16 +63,6 @@ F_SRC|F_DEST:
 #include "Error.h"
 #include "Fraction.h"
 
-void CGGeodesic :: initialize() {
-	Geodesic :: initialize();
-	maxNumParticles = size();
-}
-
-void CGGeodesic :: incCount(int n) {
-	Geodesic :: incCount(n);
-	if (size() > maxNumParticles) maxNumParticles = size();
-}
-
 ISA_FUNC(CGGeodesic,Geodesic);
 
 int CGGeodesic :: localBufSize() const {
@@ -110,6 +100,29 @@ int CGGeodesic :: forkDelay() const {
 	return n;
 }
 
+// minimum size needed considering only local information
+int CGGeodesic :: minNeeded() const
+{
+	const CGPortHole* dest = (const CGPortHole*)destinationPort;
+	int nOld = 0;
+	int type = forkType();
+	if ((type & F_SRC) != 0) {
+		// consider past sample access.
+		CGPortHole* dPort = (CGPortHole*)destinationPort;
+		ListIter next(dPort->forkDests);
+		CGPortHole* p;
+		while ((p = (CGPortHole*)next++) != 0) {
+			int temp = p->maxDelay() + 1 - p->numXfer() + 
+				p->numInitDelays();
+			if (temp > nOld) nOld = temp;
+		}
+	} else {
+		nOld = max(dest->maxDelay() + 1 - dest->numXfer(),0);
+	}
+		
+	return maxNumParticles() + nOld;
+}
+
 // recursive function to compute buffer and forkbuf sizes.  Note that
 // buffers are only actually allocated for types 0 and F_SRC.
 
@@ -124,7 +137,7 @@ int CGGeodesic :: internalBufSize() const {
 		Error::abortRun(*dest,
 "Attempt to determine buffer size before schedule has been computed\n"
 "(possibly from calling bufSize() in a star's setup() method)");
-		return 0;
+		return 1;
 	}
 	int bsiz = minNeeded();
 	int type = forkType();
@@ -142,7 +155,7 @@ int CGGeodesic :: internalBufSize() const {
 // one execution.
 	if (numInit() > 0 || dest->usesOldValues()) {
 		// cannot determine size without schedule.
-		if (maxNumParticles == 0) return 0;
+		if (maxNumParticles() == 0) return 0;
 		int total = drep * dest->numXfer();
 		if (total >= bsiz) {
 			// return the smallest factor of total
