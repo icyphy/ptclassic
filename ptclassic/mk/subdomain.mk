@@ -48,7 +48,7 @@ makefiles:
 	    fi ; \
 	done
 
-all install clean sources realclean checkjunk sccsinfo weblint:
+all install clean sources realclean extraclean checkjunk sccsinfo weblint:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \

@@ -81,7 +81,7 @@ makefiles:
 	    fi ; \
 	done
 
-all install clean realclean sources depend checkjunk sccsinfo::
+all install clean realclean extraclean sources depend checkjunk sccsinfo::
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
