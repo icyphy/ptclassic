@@ -41,7 +41,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PosixMonitor.h"
 
 typedef PosixThread PNThread;
-typedef PosixThreadList PNThreadList;
 typedef PosixMonitor PNMonitor;
 typedef PosixCondition PNCondition;
 
