@@ -11,14 +11,14 @@ $Id$
 
 *******************************************************************/
 
-#ifndef _CGFullConnect_h
-#define _CGFullConnect_h 1
+#ifndef _CGMultiTarget_h
+#define _CGMultiTarget_h 1
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 #include "IntState.h"
 #include "StringState.h"
 #include "Profile.h"
@@ -27,10 +27,10 @@ $Id$
 
 class ParScheduler;
 
-class CGFullConnect : public BaseMultiTarget {
+class CGMultiTarget : public MultiTarget {
 public:
-	CGFullConnect(const char* name,const char* sClass,const char* desc);
-	~CGFullConnect();
+	CGMultiTarget(const char* name,const char* sClass,const char* desc);
+	~CGMultiTarget();
 	void setup();
 	int run();
 	void wrapup();
@@ -73,9 +73,16 @@ public:
 	// redefine 
 	DataFlowStar* createSend(int from, int to, int num);
 	DataFlowStar* createReceive(int from, int to, int num);
+	DataFlowStar* createSpread();
+	DataFlowStar* createCollect();
 
 	// generate Gantt chart
 	void writeSchedule();
+
+	// redefine. When nChildrenAlloc = 1, we call the corresponding
+	// methods of the child target.
+	void wormInputCode(PortHole&);
+	void wormOutputCode(PortHole&);
 
 protected:
 	StringState childType;
@@ -85,6 +92,9 @@ protected:
 	IntState ignoreIPC;
 	IntState ganttChart;
 	StringState logFile;
+
+	// prepare child targets: create and initialize.
+	virtual void prepareChildren();
 
 	// reset resources
 	virtual void resetResources();
