@@ -68,13 +68,10 @@ class ::tycho::Compile {
     # If the editor widget exists, then jump to the next error
     public method jumpToLine {line}
     public method jumpNextError {} 
-    private variable editorWidget {}
-    private variable errorList {}
     public method setErrorCount {num}
-    private variable errorCount {}
     
-    ###################################################################
-    ####                         public methods                    ####
+    # Compile the file.
+    method compileFiles {}
 
     public variable view {}
     ###################################################################
@@ -82,9 +79,6 @@ class ::tycho::Compile {
 
     # Check the source files for necessary features.
     protected method checkSourceFiles {}
-
-    # Compile the file.
-    method compileFiles {}
 
     # Parse the error message, determine action (language dependent)
     # This is always called by compileFiles. It's generic here
@@ -131,6 +125,12 @@ class ::tycho::Compile {
 
     # Name of the Exec widget used to compile
     protected variable compileWidget {}
+
+    ###################################################################
+    ####                     private variables                     ####
+    private variable editorWidget {}
+    private variable errorList {}
+    private variable errorCount {}
 }
 
 #######################################################################
@@ -138,10 +138,9 @@ class ::tycho::Compile {
 #
 body ::tycho::Compile::constructor {args} {
     # compileWidget is the execModal widget
+    # NOTE: editor name is $editorName"
     set editorName [$this cget -view]
     set editorWidget $editorName.history.text
-    # puts "Okay, created, editor name is $editorName"
-    # puts "Okay, this is $this"
 }
 
 
@@ -270,7 +269,7 @@ body ::tycho::Compile::setErrorCount {count} {
 # eLineNum, which is the editor's line number.
 #
 body ::tycho::Compile::jumpNextError {} {
-    # puts "jumpNextError... errorCount=$errorCount   errorList=$errorList"
+    # NOTE: errorCount=$errorCount   errorList=$errorList
     if {$errorCount!=-1 && $errorCount<[llength $errorList]} {
         set entry [lindex $errorList $errorCount]
         jumpToLine $entry
