@@ -90,12 +90,14 @@ depend:
 doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
 	@echo "Updating $@"
 	rm -f $@
-	(cd doc/stars; \
-	echo "set TYCHO $(PTOLEMY)/tycho; \
-		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		ptolemyStarHTMLIndex \
-		\"\{General Ptolemy $(notdir $(ME)) stars\}\"" | itclsh)
-
+	if [ -w $(dir $@) ]; then \
+		(cd doc/stars; \
+		echo "set TYCHO $(PTOLEMY)/tycho; \
+			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+			ptolemyStarHTMLIndex \
+			\"\{General Ptolemy $(notdir $(ME)) stars\}\"" | \
+		itclsh); \
+	fi
 
 starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
 	@echo "Updating $@:"
@@ -109,11 +111,15 @@ starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
 				$$subdirs \
 				doc/stars/starHTML.idx" | itclsh; \
 	else \
-		echo "Merging only doc/stars/starHTML.idx"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; \
+		if [ -f doc/stars/starHTML.idx ]; then \
+			echo "Merging only doc/stars/starHTML.idx"; \
+			echo "set TYCHO $(PTOLEMY)/tycho; \
 			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 			tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
 				doc/stars/starHTML.idx" | itclsh; \
+		else \
+			echo "doc/stars/starHTML.idx does not exist, skipping";\
+		fi; \
 	fi
 
 SUBDOMAINDIRS = .
@@ -123,7 +129,7 @@ subdomainstarHTML:
 		( cd $$x ; \
 		  echo making doc/stars/starHTML.idx in domains/$$x ; \
 		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../src/domains/$$x 	\
+			VPATH=../../../src/domains/$(ME)/$$x 	\
 			doc/stars/starHTML.idx ; \
 		) \
 	    fi ; \
