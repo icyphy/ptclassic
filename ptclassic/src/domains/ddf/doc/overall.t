@@ -8,6 +8,8 @@ Soonhoi Ha
 .H1 "Introduction
 .pp
 The dynamic dataflow (DDF) domain in \*(PT provides a general
+.IE "dynamic dataflow"
+.IE "DDF domain"
 environment for dataflow computation and modeling of the systems.
 It is a superset of the untimed\** version of the
 synchronous dataflow (SDF) domain.
@@ -53,6 +55,7 @@ The \*(DO-specific
 overcome the modeling limitation of
 the SDF domain.  They can
 model the dynamic constructs such as
+.IE "dynamic construct"
 \fIconditionals\fR, \fIdata-dependent iterations\fR,
 and \fIrecursions\fR.
 The runtime efficiency of the dynamic scheduling is the cost
@@ -71,6 +74,7 @@ blocks, and also expects a particular behavior on the part of
 .c Star s
 within the \*(DO domain.
 In this section, we describe the operation of the \*(DO scheduler.
+.IE "DDF Scheduler"
 .pp
 The basic operation of the
 .c DDF\ Scheduler
@@ -112,7 +116,7 @@ has three input
 and one output
 .c PortHole .
 One input port (control port) receives the control value. 
-Depending the control value, \fBTRUE\fR or \fBFALSE\fR,
+Depending the control value, TRUE or FALSE,
 the
 .c Star
 routes either \fItrue\fR or \fIfalse\fR input port
@@ -124,6 +128,8 @@ is dependent on the control value.
 The
 .c Star s
 in the second group has members called \fIwaitPort\fR and \fIwaitNum\fR.
+.IE "waitPort, ddf"
+.IE "waitNum, ddf"
 Then, the scheduler checks whether the input arc
 pointed by the \fIwaitPort\fR has as many
 .c Particle s
@@ -176,6 +182,7 @@ excludes the possibility of using similar complicated analysis
 to determine the number of firing of the source 
 .c Star s.
 The technique we use is the \fIlazy-evaluation\fR technique.
+.IE "lazy evaluation"
 .pp
 In the \fIlaze-evaluation\fR technique, we fire a
 .c Star
@@ -202,7 +209,8 @@ for any
 .c Galaxy 
 of
 .c SDF\ Star s.
-Moreover, it clearly defines a "run" of the
+Moreover, it clearly defines a "run" (iteration) of the
+.IE "iteration, ddf"
 .c DDF\ Scheduler .
 Suppose a
 .c Wormhole
@@ -260,6 +268,7 @@ refer to the document, "\fBSDF Domain in Ptolemy\fR".
 .pp
 A
 .c DDF\ Star
+.IE "DDF Star"
 has at least one 
 .c PortHole ,
 either input or output, that receives or sends a non-deterministic
@@ -268,6 +277,7 @@ number of
 Such 
 .c PortHole s
 are called \fIdynamic\fR.
+.IE "dynamic PortHole"
 For the
 .c DDF\ Star ,
 how many
@@ -379,13 +389,13 @@ This
 has also a 
 .c private
 member called \fIreadyToGo\fR. The \fIreadyToGo\fR flag
-is set \fBTRUE\fR when the \fIwaitPort\fR points to the \fIinput\fR
+is set TRUE when the \fIwaitPort\fR points to the \fIinput\fR
 .c PortHole .
 Initially, the
 .c Star
- waits for the control data, and set the flag \fBFALSE\fR
+waits for the control data, and set the flag FALSE
 (\fIstart()\fR method).  When it is fired, it first checks the flag.
-If the flag is set \fBFALSE\fR, meaning that it waits for the control data,
+If the flag is set FALSE, meaning that it waits for the control data,
 it reads the control data from the \fIcontrol\fR input and decides
 how many
 .c Particle s
@@ -394,8 +404,8 @@ it needs from the \fIinput\fR
 Then, it changes the \fIwaitPort\fR pointer to the \fIinput\fR
 .c PortHole
 with appropriate value for the \fIwaitNum\fR, and set the
-\fIreadyToGo\fR flag \fBTRUE\fR.  
-If the flag is set \fBTRUE\fR when fired, it means that
+\fIreadyToGo\fR flag TRUE.  
+If the flag is set TRUE when fired, it means that
 the \fIinput\fR
 .c PortHole 
 has enough
@@ -404,7 +414,7 @@ Therefore, it discards the first \fIN-1\fR inputs and copies the
 last input to the output port.  Then, it goes into the next round :
 sets the \fIwaitPort\fR pointer to the \fIcontrol\fR
 .c PortHole
-and set the \fIreadyToGo\fR flag \fBFALSE\fR.
+and set the \fIreadyToGo\fR flag FALSE.
 .pp
 The next example is a 
 .c DDF\ Star
@@ -456,13 +466,15 @@ has a dynamic \fIoutput\fR
 which will generate the down-counter sequence of integer data
 starting from the value read through the \fIinput\fR
 .c PortHole .
-How it does is straightforward (\fIgo()\fR method).
+The code in the \fIgo()\fR method is self-explanatory.
 .H2 "DDFSelf Star For Recursion
 .pp
 There is a special
 .c Star
 in the \*(DO domain to realize the recursion construct :
+.IE "recursion"
 .c DDFSelf\ Star .
+.IE "DDFSelf Star"
 At compile time, it is just an atomic
 .c Star .
 But, if it is fired at runtime, it creates a
@@ -542,16 +554,17 @@ or removal of redundant repetitions of identical
 .c Particle s,
 and so forth.
 .pp
-In \*(PT there has been defined a \fIuniversal event horizon\fR.
-The interface between different domains requires first conversion
-to the universal event horizon, followed by a conversion from
-the universal event horizon to the second domain.
 The general mechanism of the domain interface is described in
-the document, "\fBDomain Interface in Ptolemy\fR".
+the document, "\fBDomains in Ptolemy\fR".
+The standard functions of
+.c EventHorizon s
+are also fully discussed in the document.  Refer to the
+document for more detailed explanations on the domain interface.
 In this section, \*(DO-specific features on the domain
 interface will be discussed.
-.H2 "DE Wormhole
+.H2 "DDF Wormhole
 .pp
+.IE "DDF Wormhole"
 The \*(DO domain may have a wormhole which contains another domain.
 An input port of a
 .c DDF Wormhole
@@ -572,40 +585,38 @@ from the \*(DO domain.  But, we restrict that it is a
 without dynamic input
 .c PortHole s.
 Therefore, it is fired when all input ports
-have enough events. When it is fired, it receives the data
+have enough data packets. When it is fired, it receives the data
 from the outside, initiates the
 .c Scheduler
-of the inner domain, and sends the output data to the outside.
-.H2 "Conversion from the \*(DO Domain to the Universal Event Horizon
+of the inner domain, and sends the output data packets to the
+outer domain.
+.H2 "DDFtoUniversal EventHorizon
 .pp
-The conversion from the \*(DO domain to the universal
-.c EventHorizon
-is the function of the
-.c DDFtoUniversal\ EventHorizon .
-It transfers the incoming data to the associated 
-.c EventHorizon
-of the other domain.  The necessary data-conversion to the universal
-format should be done in this
-.c class .
-Currently, no conversion is performed since only universal
-.c Particle s
-are defined in the \*(PT.  For non-universal
-.c Particle s,
-further research is going on.
-The
-.c DDFtoUniversal
-also copies the global time of the \*(DO domain into the inner domain
-if it is at an input port of a
-.c DDF\ Wormhole .
-.H2 "Conversion from the Universal Event Horizon to the \*(DO Domain
+.IE "DDFtoUniversal"
+It transfers the incoming data packets from the DDF domain
+to the paired 
+.c FromEventHorizon
+of the other domain.  
+Since the \*(DO domain is an untimed domain, it sets the
+\fIcurrentTime\fR of the DDF domain equal to that of the other
+domain.  The \fIgetNextStamp()\fR method of this class
+returns the sum of the \fIcurrentTime\fR and the \fIschedulePeriod\fR
+of the \*(DO domain.
+.H2 "DDFfromUniversal EventHorizon
 .pp
 The
-.c DEfromUniversal\ EventHorizon
+.c DDFfromUniversal\ EventHorizon
+.IE "DDFfromUniversal"
 receives the data from the associated 
-.c EventHorizon 
-of the other domain and converts it if necessary.  
+.c ToEventHorizon 
+of the other domain and transfers them to the \*(DO domain.
+Since the \*(DO domain is untimed, the
+.c DDFfromUniversal
+totally ignore the timing information from the other domain. 
 If it is at an input port of a 
-.c Wormhole ,
-it sets the stopping condition for the inner \*(DO domain.
-The stopping condition is a single "run" of the
+.c Wormhole 
+and it has enough data packets,
+it sets the stopping condition for the inner \*(DO domain (\fIready()\fR 
+method).
+The stopping condition is a single "run" (iteration) of the
 .c DDF\ Scheduler .
