@@ -68,10 +68,7 @@ public:
 	// for now, we assume each schedule interation takes 1.0
 	// time units.  (Argh).  Deal with roundoff problems.
 	void setStopTime (float limit) { stopTime = int(limit) ;}
-	void resetStopTime () { stopTime = 1; numFiring = 0; }
-
-	// declare "untimed"
-	int amITimed();
+	void resetStopTime (float v) { stopTime = 1; numFiring = 0; }
 
 	// scheduler Period : interface with timed domain.
 	float schedulePeriod;
