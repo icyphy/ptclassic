@@ -33,12 +33,15 @@ Note: all print functions append \n to string before printing.
 #include "local.h"
 #include <stdio.h>
 #include "rpc.h"
+#include "ptk.h"
 #include "err.h"
 #include "octMacros.h"
 #include "list.h"
 
 /* Controls whether errors get printed out in windows */
 static boolean errorWindows = TRUE;
+
+#define REPORT_TCL_ERRORS 1
 
 void
 ViSetErrWindows(state)
@@ -79,8 +82,7 @@ char *s;
     vemMessage("\n\0060", MSG_DISP);
 }
 
-
-/* PrintErr  5/10/88 4/25/88
+/* PrintErr  5/10/88 4/25/88 7/15/93
 Print error message to VEM console window and VEM log file.
 Change later to different color from PrintConLog().
 */
@@ -89,7 +91,8 @@ PrintErr(s)
 char *s;
 {
     char buf[MSG_BUF_MAX];
-    if (*s == 0) return;	/* ignore blank message */
+    char *msg;
+    if (*s == 0) return;        /* ignore blank message */
     (void) sprintf(buf, "\0062Error: %s\n\0060", s);
     (void) vemMessage(buf, MSG_DISP);
     if (errorWindows) {
@@ -97,6 +100,14 @@ char *s;
 	(void) sprintf(buf, "Error: %s", s);
 	win_msg (buf);
     }
+#if REPORT_TCL_ERRORS
+    msg = Tcl_GetVar(ptkInterp, "errorInfo", TCL_GLOBAL_ONLY);
+    if (msg == NULL) {
+        msg = ptkInterp->result;
+    }
+    (void) vemMessage(msg, MSG_DISP);
+    win_msg (msg);
+#endif
 }
 
 
