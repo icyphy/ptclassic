@@ -1,7 +1,8 @@
-/** One line description of file.
- @Author:
- @Version: $Id$
- @Copyright (c) 1997 The Regents of the University of California.
+/* One line description of file.
+ */
+
+/*
+ Copyright (c) 1997 The Regents of the University of California.
  All rights reserved.
  Permission is hereby granted, without written agreement and without
  license or royalty fees, to use, copy, modify, and distribute this
@@ -23,7 +24,84 @@
  ENHANCEMENTS, OR MODIFICATIONS.
  
                                         PT_COPYRIGHT_VERSION_2
-*/                                        COPYRIGHTENDKEY
+                                        COPYRIGHTENDKEY
+*/
 
+//#######################################################################
+//#### ClassName
+/** 
+@author
+@version $Id$
+ Description of the class
+@see classname
+@see full-classname
+ */
 public class ClassName {
+    /** Constructor
+@see full-classname#method-name
+@param parameter-name description
+@param parameter-name description
+@return description
+@exception full-classname description
+     */	
+    public ClassName() {
+    }
+
+    //########################################################################
+    //##                         public methods                           ####
+
+    /** Description
+@see full-classname#method-name
+@param parameter-name description
+@param parameter-name description
+@return description
+@exception full-classname description
+     */	
+    public int APublicMethod() {
+        return 1;
+    }
+
+
+    //########################################################################
+    //##                         protected methods                        ####
+
+    /** Description
+@see full-classname#method-name
+@param parameter-name description
+@param parameter-name description
+@return description
+@exception full-classname description
+     */	
+    protected int AProtectedMethod() {
+        return 1;
+    }
+
+    //########################################################################
+    //##                         protected variables                      ####
+
+    /** Description */
+    protected int aProtectedVariable;
+
+    //########################################################################
+    //##                         private methods                          ####
+
+    /* Private methods should not have doc comments, they should
+	have regular comments.
+@see full-classname#method-name
+@param parameter-name description
+@param parameter-name description
+@return description
+@exception full-classname description
+     */	
+    private int APrivateMethod() {
+        return 1;
+    }
+
+    //########################################################################
+    //##                         private variables                        ####
+
+    /* Private variables should not have doc comments, they should
+       have regular comments.
+     */
+    private int aPrivateVariable;
 }
