@@ -95,6 +95,10 @@ public:
 	// classes derived therefrom.
 	void addPort(PortHole& p) {ports.put(p);}
 
+	// This function saves the given MultiPortHole so portWithName
+	// can find it.
+	void addPort(MultiPortHole& p) {multiports.put(p);}
+
 	// Retrieve the PortHole with the given name
 	PortHole *portWithName(const char* name) const;
 
@@ -152,10 +156,6 @@ protected:
 	// The following are set from within the Block; hence, protected
 	PortList ports;
 	
-	// This function saves the given MultiPortHole so portWithName
-	// can find it.
-	void addPort(MultiPortHole& p) {multiports.put(p);}
-
         // stateWithName can find a state.
         StateList states;
 
