@@ -155,6 +155,8 @@ fixlinks:
 	#-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
 	-(cd $(ITCL_DEST)/lib/itcl; \
 		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.so libtcl.so)
+	@echo "Create a links for itclsh to ish"
+	-(cd $(ITCL_DEST)/bin; ln -s ish tclsh)
 	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
 	-(cd $(TCLTK_DEST); mkdir tcl tk; \
 		cd tcl; ln -s ../itcl/include/itcl include; \
