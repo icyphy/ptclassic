@@ -61,7 +61,7 @@ double BDFWormhole :: getArrivalTime() {
 	// At the very first call, we initialize "arrivalTime".
 	if (!mark) {
 		BDFScheduler* sched = (BDFScheduler*) parent()->scheduler();
-		arrivalTime = sched->currentTime;
+		arrivalTime = sched->now();
 		space = sched->schedulePeriod / double(repetitions) ;
 		mark = 1;
 	}
@@ -117,7 +117,7 @@ void BDFtoUniversal :: receiveData ()
 	} else {
 		// 2. annul increment of currentTime at the end of run.
 		BDFScheduler* sched = (BDFScheduler*) parent()->scheduler();
-		timeMark = sched->currentTime - sched->schedulePeriod;
+		timeMark = sched->now() - sched->schedulePeriod;
 	}
 
 	// transfer Data
