@@ -1,9 +1,8 @@
 #ifndef _StringList_h
 #define _StringList_h 1
-#include <std.h>
 #include "miscFuncs.h"
+#include <std.h>
 #include "DataStruct.h"
-#include "Output.h"
 
 /****************************************************************
 SCCS version identification
@@ -111,6 +110,7 @@ public:
 };
 
 // print a StringList on a UserOutput
+class UserOutput;
 UserOutput& operator << (UserOutput& o, const StringList& sl);
 
 // print a StringList on a stream (don't give function here so we
