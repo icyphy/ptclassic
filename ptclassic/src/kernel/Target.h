@@ -129,6 +129,14 @@ public:
 	virtual void genLoopInit(Star& s, int reps);
 	virtual void genLoopEnd(Star& s);
 
+	// Functions for generation of conditional constructs
+	// default versions do nothing
+	virtual void beginIf(PortHole& cond,int truthdir,int depth,int haveElsePart);
+	virtual void beginElse(int depth);
+	virtual void endIf(int depth);
+	virtual void beginDoWhile(int depth);
+	virtual void endDoWhile(PortHole& cond,int truthdir,int depth);
+
         // resource management
         virtual int commTime(int sender,int receiver,int nUnits, int type);
 
