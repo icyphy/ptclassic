@@ -8,7 +8,7 @@ Copyright (c) 1989 The Regents of the University of California.
 			All Rights Reserved.
 */
 
-#define MAX_NUM_TERMS 65  /* max total # input and output terms */
+#define MAX_NUM_TERMS 85  /* max total # input and output terms */
 
 #ifndef __cplusplus
 #ifndef const
