@@ -3,7 +3,12 @@ defstar {
   domain    { SDF }
   version   { $Id$ }
   author    { Mike J. Chen }
-  copyright { 1993 The Regents of the University of California }
+  copyright {
+Copyright (c) 1993-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+  }
   location  { SDF dsp library }
   descriptor {
 This star is used to estimate the frequencies of some specified number
