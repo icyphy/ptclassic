@@ -41,23 +41,26 @@ and hardware implementation costs.
 
 static const char file_id[] = "ImplementationCost.cc";
 
+// constructor
 ImplementationCost::ImplementationCost(int numProcessors, int numDataBanks) :
 		exectime(0), progNodes(numProcessors), progMemoryVector(0),
 		dataBanks(numDataBanks), dataMemoryVector(0) {
-	int i;
-	if (progNodes) {
-	    progMemoryVector = new int[progNodes];
-	    for (i = 0; i < numProcessors; i++) progMemoryVector[i] = 0;
-	}
-	if (dataBanks) {
-	    dataMemoryVector = new int[dataBanks];
-	    for (i = 0; i < dataBanks; i++) dataMemoryVector[i] = 0;
-	}
+	if (progNodes) progMemoryVector = new int[progNodes];
+	if (dataBanks) dataMemoryVector = new int[dataBanks];
+	initialize();
 }
 
+// destructor
 ImplementationCost::~ImplementationCost() {
 	delete [] progMemoryVector;
 	delete [] dataMemoryVector;
+}
+
+// initialize data members
+void ImplementationCost::initialize() {
+	int i;
+	for (i = 0; i < progNodes; i++) progMemoryVector[i] = 0;
+	for (i = 0; i < dataBanks; i++) dataMemoryVector[i] = 0;
 }
 
 int ImplementationCost::totalMemory() {
