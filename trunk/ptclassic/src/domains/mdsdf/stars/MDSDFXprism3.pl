@@ -89,7 +89,7 @@ for a complete explanation of the options.
 	  float* p = buffer;
 	  for(int i = 0; i < size; i++)
 	    *p++ = (float)inputMatrix->entry(i);
-	  fwrite(buffer,sizeof(float),size,fptr);
+	  fwrite((char *)buffer,sizeof(float),size,fptr);
 	  fclose(fptr);
 	  
 	  StringList cmd;
