@@ -1,6 +1,7 @@
-/* Version $Id$
+/* -*- C++ -*-
+Version $Id$ 
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -26,3 +27,53 @@ ENHANCEMENTS, OR MODIFICATIONS.
     Created:    23 October 1996
 
  */
+
+class Galaxy;
+class SRStar;
+class OutSRPort;
+// #include "SRStar.h"
+// #include "SRPortHole.h"
+
+/***********************************************************************
+
+  The dependency graph for an SR galaxy
+
+  @Description This graph has one vertex per star output in the galaxy.
+  The edges represent dependencies, which are usually the communication
+  channels.
+
+ **********************************************************************/
+
+class SRDependencyGraph {
+public:
+
+  SRDependencyGraph( Galaxy & );
+  ~SRDependencyGraph();
+
+  // Return the destination vertex of an edge
+  int destination(int v, int e) const { return fEdge[v][e]; }
+
+private:
+
+  // Galaxy from which this graph was derived
+  Galaxy * mygalaxy;
+
+  // Number of vertices in the graph
+  int numvertices;
+
+  // Array of pointers to the star of each vertex
+  SRStar ** stars;
+
+  // Array of pointers to the port of each vertex
+  OutSRPort ** ports;
+
+  // Forward edge counts
+  int * fEdgeCount;
+
+  // Array of forward edge lists
+  int ** fEdge;
+
+  int vertexOfStarPort( SRStar *, OutSRPort * ) const;
+
+};
+
