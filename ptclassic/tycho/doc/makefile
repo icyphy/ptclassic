@@ -58,13 +58,13 @@ EXTRA_SRCS =	abbreviations.html \
 		sponsors.html \
 		troubleshooting.html
 
-MISC_FILES =		coding img lib tychoClasses.dag
+MISC_FILES =		coding img tychoClasses.dag
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tychoClasses.dag
 
 # Sub directories to run make in.
-DIRS =			coding lib
+DIRS =			coding
 
 all: tychoClasses.dag
 
@@ -82,9 +82,10 @@ tychoClasses.dag: FORCE
 	fi
 
 # Traverse all the html files (except the codedoc files) and produce PostScript
-tycho.ps:
+tycho.ps: ../bin/html2ps
 	netscape &
-	tycho -e lib/html2ps.tcl
+	-chmod a+x $^
+	../bin/html2ps index.html tycho.ps
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
