@@ -30,6 +30,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /* Header files of Pigi TkCalls */
 
+/* the following fixes permit the "DECwindows" version of Xlib.h to work with
+   C++ */
+
+struct XSizeHints;
+struct XStandardColormap;
+struct XTextProperty;
+struct XWMHints;
+struct XClassHint;
+
 #include "tcl.h"
 #include "tk.h"
 
