@@ -961,7 +961,7 @@ genDef ()
 
 /* copyright */
 	if (objCopyright) {
-	    if ( strcasecmp(objCopyright,"copyright")==0 ) {
+	    if ( strncasecmp(objCopyright,"copyright",9)==0 ) {
 		fprintf (fp, "/*\n%s\n */\n", objCopyright);
 	    } else {
 		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
@@ -1039,8 +1039,13 @@ genDef ()
 	fprintf (fp, "// .cc file generated from %s by %s\n",
 		 inputFile, progName);
 /* copyright */
-	if (objCopyright)
+	if (objCopyright) {
+	    if ( strncasecmp(objCopyright,"copyright",9)==0 ) {
+		fprintf (fp, "/*\n%s\n */\n", objCopyright);
+	    } else {
 		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
+	    }
+	}
 
 /* special GNU pragma for efficiency */
 	fprintf (fp, "\n#ifdef __GNUG__\n#pragma implementation\n#endif\n\n");
