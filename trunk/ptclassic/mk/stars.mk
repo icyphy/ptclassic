@@ -401,12 +401,7 @@ ifdef ACS
 		LIBFILES += $(LIBDIR)/libacstargets.$(LIBSUFFIX)
 	else
 		TARGETS += $(ACST)/ACSCGCTarget.o \
-				$(ACST)/ACSCGTarget.o \
-				$(ACST)/ACSFPGATarget.o \
-				$(ACST)/ACSFixTarget.o \
-				$(ACST)/ACSFloatTarget.o \
-				$(ACST)/ACSJavaTarget.o \
-				$(ACST)/ACSSimTarget.o
+				$(ACST)/ACSCGTarget.o
 	endif
 
 	LIBS += -lacsstars -lacs
