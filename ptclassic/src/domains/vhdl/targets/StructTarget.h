@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLArc.h"
 #include "VHDLState.h"
 #include "VHDLPortVar.h"
+#include "VHDLCluster.h"
 
 class StructTarget : public VHDLTarget {
 public:
@@ -70,6 +71,8 @@ public:
 	VHDLCompMapList compMapList;
 	VHDLStateList stateList;
 	VHDLArcList arcList;
+
+	VHDLClusterList clusterList;
 
 	// Main routine.
 	/*virtual*/ int runIt(VHDLStar*);
