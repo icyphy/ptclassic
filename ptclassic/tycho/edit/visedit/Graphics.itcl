@@ -189,11 +189,8 @@ class ::tycho::Graphics {
     # Insert from the clipboard.
     method paste {}
 
-    # Open a print dialog to print the contents of the canvas.
+    # Print the contents of the canvas.
     method print {}
-
-    # Complete the printing of the canvas started with the print method.
-    method printOut {win}
 
     # Redo using the current redo buffer.
     method redo {}
@@ -274,17 +271,28 @@ class ::tycho::Graphics {
     # An object that manages dragging and selecting of items
     protected variable dragselector
 
+    # The default file format for the export command.
+    protected common exportFormat eps
+
     # An array of commands that will export the graphic some file format.
     protected variable fileformats
-
-    # The default file format for the export command.
-    protected variable fileformatdefault eps
 
     # Flag indicating whether undo and automatic updates are enabled.
     protected variable interactiveEnabled 0
 
     # An object that manages editing of text items
     protected variable lineeditor
+
+    # FIXME: The initial value of the following should be options
+
+    # Width of most recent print request.
+    protected common printWidth {}
+
+    # Color mode of most recent print request.
+    protected common printColor {color}
+
+    # Orientation of most recent print request.
+    protected common printOrient {landscape}
 
     # An object that manages selection of items
     protected variable selector
@@ -297,6 +305,12 @@ class ::tycho::Graphics {
 
     # The updateScrollbars method schedules this method for execution.
     private method configureScrollbars {}
+
+    ###################################################################
+    ####                   private procs                           ####
+
+    # Update the export dialog after a change in the file type.
+    private proc updateExportDialog {nm}
 
     ###################################################################
     ####                   private variables                       ####
@@ -1003,22 +1017,39 @@ body ::tycho::Graphics::edit {{ids {}}} {
 # formats.
 #
 body ::tycho::Graphics::export {} {
-    set win $prefix.export
-    if [winfo exists $win] {
-        $win raiseWindow
-        return
+    set nm [::tycho::autoName $prefix]
+    ::tycho::Query $nm \
+            -text {Export Graphics} -entrywidth 60 -queries [list \
+            [list line filename {Export to file:} $file] \
+            [list radio format {File format} \
+                    [array names fileformats] $exportFormat \
+                    -command [code updateExportDialog $nm]] \
+            [list line width {Width (e.g. 5i, 10c, 500p)} $printWidth] \
+            [list radio color {Color mode} {color gray mono} $printColor] \
+            [list radio orient {Orientation} {landscape portrait} $printOrient]]
+
+    updateExportDialog $nm
+    set response [safeEval ::tycho::Dialog::wait $nm]
+    if {$response != {}} {
+        array set pp $response
+        set fn $pp(filename)
+        set exportFormat $pp(format)
+
+        switch -exact $exportFormat {
+            eps {
+                set printWidth $pp(width)
+                set printColor $pp(color)
+                set printOrient $pp(orient)
+                exportEps $fn $printOrient $printColor $printWidth
+            }
+            gif {
+                exportGif $fn
+            }
+            xwd {
+                exportXwd $fn
+            }
+        }
     }
-    set result [safeEval ::tycho::query {} { \
-            {line filename {Export to file:} {~/}} \
-            {radio format {File format} \
-            [array names fileformats] $fileformatdefault}}]
-
-    set filename [lindex $result 1]
-    set format [lindex $result 3]
-
-    # Eps has additional options.  Rather than invoking another method,
-    # we just query the user here for those formats.
-    # FIXME:
 }
 
 #######################################################################
@@ -1031,7 +1062,11 @@ body ::tycho::Graphics::exportGif {filename} {
     set fn1 [::tycho::tmpFileName]
     exportXwd $fn1
     # NOTE: -transparent color option should be added for the background.
-    ::tycho::invoke xwdtopnm $fn1 | ppmtogif -interlace > $filename 2> /dev/null
+    if [catch { ::tycho::invoke xwdtopnm $fn1 | ppmtogif -interlace > \
+            $filename 2> /dev/null} msg] {
+        ::tycho::rm $fn1
+        error $msg
+    }
     ::tycho::rm $fn1
     # For some reason, the above leaves a non-readable file.    
     exec chmod +r $filename
@@ -1049,12 +1084,14 @@ body ::tycho::Graphics::exportGif {filename} {
 # their gray-scale equivalents) or mono (convert all colors to black or
 # white). The final argument optionally specifies the width of the
 # postscript image. It consists of a floating-point number followed by
-# c for centime- ters, i for inches, m for millimeters, or p or nothing
+# c for centimeters, i for inches, m for millimeters, or p or nothing
 # for printer's points (1/72 inch). If it is not given, then the image
 # size is the same as on the screen.
 # <p>
 # NOTE: Currently postscript is generated for the entire image in a single
 # file.  It would be good to be able to break it down into subimages.
+# If the image does not fit on the page, then how it is cropped is
+# unpredictable.
 # <p>
 # NOTE: It would be nice to take advantage of the colormap option
 # in the canvas postscript command to be able to map colors for monochrome
@@ -1132,10 +1169,17 @@ body ::tycho::Graphics::help {} {
 # where <i>methodname</i> is a method of this class (i.e. any class
 # derived from <code>Graphics</code>), and <i>args</i> is the
 # set of arguments appropriate for that method.
+# Every 30 items, this calls <code>::tycho::safeUpdate</code> in order
+# to preserve interactivity.
 #
 body ::tycho::Graphics::insertData {data} {
     if [getReadOnly] {bell; return}
+    set count 0
     foreach command $data {
+        if {[incr count] >= 30} {
+            ::tycho::safeUpdate $this
+            set count 0
+        }
         if [catch {
             eval $this $command
         } msg] {
@@ -1164,41 +1208,28 @@ body ::tycho::Graphics::modify {args} {
 
 #######################################################################
 #### print
-# Open a print dialog for printing the contents of the canvas.
+# Print the contents of the canvas.  It is first converted to postscript.
+# Then the user is queried for a print command.
 #
 body ::tycho::Graphics::print {} {
-    set win $prefix.print
-    if [winfo exists $win] {
-        $win raiseWindow
-        return
+    set answer [safeEval ::tycho::query {Print Graphics} [list \
+        [list line width {Width (e.g. 5i, 10c, 500p)} $printWidth] \
+        [list line cmd {Print command} $printCmd] \
+        [list radio color {Color mode} {color gray mono} $printColor] \
+        [list radio orient {Orientation} {landscape portrait} $printOrient] \
+    ]]
+    if {$answer != {}} {
+        array set pp $answer
+        # save for next time.
+        set printWidth $pp(width)
+        set printCmd $pp(cmd)
+        set printColor $pp(color)
+        set printOrient $pp(orient)
+        set tmpFile [::tycho::tmpFileName typr .eps]
+        exportEps $tmpFile $printOrient $printColor $printWidth
+        eval ::tycho::invoke $printCmd $tmpFile
+        ::tycho::rm $tmpFile
     }
-    ::tycho::Query $win -okcommand \
-            "$this printOut $win" \
-            -queries {{line width {Width (plus i or c)} {}} \
-            {line cmd {Print command} {lpr}}}
-    $win radio color {Color mode} {color gray mono} color
-    $win radio orient {Orientation} {normal rotated} normal
-    # FIXME: Use wait
-    $win centerOnScreen
-}
-
-#######################################################################
-#### printOut
-# Given the name of a print dialog opened by the <code>print</code>
-# method, execute the print command to complete the printing.
-#
-body ::tycho::Graphics::printOut {win} {
-
-    set color [$win get color]
-    set orient [$win get orient]
-    set width [$win get width]
-    set cmd [$win get cmd]
-
-    set tmpFile [::tycho::tmpFileName typr .eps]
-    exportEps $tmpFile $orient $color $width
-    eval ::tycho::invoke $cmd $tmpFile
-
-    destroy $win
 }
 
 #######################################################################
@@ -1651,9 +1682,11 @@ body ::tycho::Graphics::paste {} {
             if [catch {
                 eval $this $cmd
             } msg] {
-                # FIXME: Insert text label
-                safeEval ::tycho::warn "ignoring for now: $cmds\n$msg"
-                break
+                # NOTE: We might just want to insert text label here, since
+                # this could be a paste from a text widget.
+                global ::errorInfo
+                set saveInfo $errorInfo
+                error "Cannot paste: $cmds\n$msg" $errorInfo
             }
         }
     }
@@ -1786,4 +1819,28 @@ body ::tycho::Graphics::configureScrollbars {} {
         }
     }
     set scheduledUpdate {}
+}
+
+###################################################################
+###################################################################
+####                      private procs                        ####
+
+#########################################################################
+#### updateExportDialog
+# Update the export dialog after a change in the file type.
+#
+body ::tycho::Graphics::updateExportDialog {nm} {
+    set root [file rootname [$nm get filename]]
+    set ext [$nm get format]
+    $nm clear filename
+    $nm insert filename "$root.$ext"
+    if {$ext != {eps}} {
+        $nm disable color
+        $nm disable width
+        $nm disable orient
+    } {
+        $nm enable color
+        $nm enable width
+        $nm enable orient
+    }
 }
