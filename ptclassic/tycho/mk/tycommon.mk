@@ -49,7 +49,7 @@
 # HDRS		.h files.
 # JSRCS		.java files
 # OPTIONAL_JSRCS derived .java files (i.e. created by javacc)
-# JCLASS	.c
+# JCLASS	.class files
 # OBJS		.o files
 # LIBR		The name of the library being created.  We can't just call
 #		this LIB because of problems with the LIB environment variable
@@ -304,14 +304,17 @@ $(LIBDIR)/$(LIBR_DEBUG):	$(LIBDIR)/$(LIBR)
 	CLASSPATH=$(CLASSPATH)$(AUXCLASSPATH) $(JAVAC) $(JFLAGS) $<
 
 # Build all the Java class files.
-jclass:	$(JSRCS) $(JCLASS) 
+# Run in the subdirs first in case the subpackages need to be compiled first.
+jclass:	$(JSRCS) subjclass $(JCLASS) 
+
+subjclass:
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
 		    if [ -w $$x ] ; then \
 			( cd $$x ; \
-			echo making $@ in $$x ; \
-			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			echo making jclass in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) jclass ;\
 			) \
 		    fi ; \
 		done ; \
