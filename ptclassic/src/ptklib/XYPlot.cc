@@ -60,7 +60,8 @@ XYPlot::XYPlot () {
 	// for the KnownList, and this occurs before the Tcl interpreter has
 	// started.
 	if (unique == 2) {
-	  char sourceCmd[] = "source $env(PTOLEMY)/src/ptklib/ptkPlot.tcl";
+	  char sourceCmd[100];
+	  strncpy(sourceCmd,"source $env(PTOLEMY)/src/ptklib/ptkPlot.tcl",100);
 	  if (Tcl_GlobalEval(ptkInterp, sourceCmd) != TCL_OK) {
 	    Error::abortRun("XYPlot constructor: failed to source ptkPlot.tcl");
 	  }
@@ -126,7 +127,7 @@ int XYPlot::setup (Block* star,         // The star I am in
 }
 
 int XYPlot::addPoint(double x, double y) {
-  plotPoint(ptkInterp, &dataset, x, y);
+  return (plotPoint(ptkInterp, &dataset, x, y));
 }
 
 // Initialize the static counter for unique names,
