@@ -25,7 +25,7 @@ PIGIDIR = $(ROOT)/src/pigilib
 PTKLIB = $(ROOT)/src/ptklib
 INCL = -I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
  -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
-TCL_SCRIPT_DIR = ../../../sdf/tcltk/stars
+TCL_SCRIPT_DIR = $(ROOT)/src/domains/sdf/tcltk/stars
 
 # Library name
 LIB=libdetclstars.a
