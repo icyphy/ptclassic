@@ -2,6 +2,7 @@ defstar {
   name { TWTA }
   domain { SDF }
   desc { model of TWTA }
+  location { SDF user contribution library }
   author { N. Becker }
   explanation {
 A TWTA amplifier is modelled by its transfer characteristic.  Data points for

@@ -2,6 +2,7 @@ defstar {
   name { PowerEst }
   domain { SDF }
   desc { Power Estimator }
+  location { SDF user contribution library }
   author { N. Becker }
   explanation {
 Power is estimated by computing magnitude squared and then filtering with a
