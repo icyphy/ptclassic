@@ -1382,24 +1382,62 @@ int POct::ptkFacetContents (int aC, char** aV) {
         return TCL_ERROR;
     }
     octObjectMask mask = 0; 
-    for (int i=0; i< typeC; i++) {
-	if (strcasecmp(typeV[i],"FACET")==0)  mask |= OCT_FACET_MASK;
-	else if (strcasecmp(typeV[i],"TERM")==0)  mask |= OCT_TERM_MASK;
-	else if (strcasecmp(typeV[i],"NET")==0)  mask |= OCT_NET_MASK;
-	else if (strcasecmp(typeV[i],"INSTANCE")==0)  mask |= OCT_INSTANCE_MASK;
-	else if (strcasecmp(typeV[i],"PROP")==0)  mask |= OCT_PROP_MASK;
-	else if (strcasecmp(typeV[i],"BAG")==0)  mask |= OCT_BAG_MASK;
-	else if (strcasecmp(typeV[i],"POLYGON")==0)  mask |= OCT_POLYGON_MASK;
-	else if (strcasecmp(typeV[i],"BOX")==0)  mask |= OCT_BOX_MASK;
-	else if (strcasecmp(typeV[i],"CIRCLE")==0)  mask |= OCT_CIRCLE_MASK;
-	else if (strcasecmp(typeV[i],"PATH")==0)  mask |= OCT_PATH_MASK;
-	else if (strcasecmp(typeV[i],"LABEL")==0)  mask |= OCT_LABEL_MASK;
-	else if (strcasecmp(typeV[i],"LAYER")==0)  mask |= OCT_LAYER_MASK;
-	else if (strcasecmp(typeV[i],"POINT")==0)  mask |= OCT_POINT_MASK;
-	else if (strcasecmp(typeV[i],"EDGE")==0)  mask |= OCT_EDGE_MASK;
-	else if (strcasecmp(typeV[i],"FORMAL")==0)  mask |= OCT_FORMAL_MASK;
-	else if (strcasecmp(typeV[i],"CHANGE_LIST")==0)  mask |= OCT_CHANGE_LIST_MASK;
-	else if (strcasecmp(typeV[i],"CHANGE_RECORD")==0)  mask |= OCT_CHANGE_RECORD_MASK;
+    for (int i = 0; i < typeC; i++) {
+	const char* str = typeV[i];
+	switch( toupper(*str) ) {
+	  case 'B':
+	    if (strcasecmp(str, "BAG") == 0)
+		mask |= OCT_BAG_MASK;
+	    else if (strcasecmp(str, "BOX") == 0)
+		mask |= OCT_BOX_MASK;
+	    break;
+	  case 'C':
+	    if (strcasecmp(str, "CHANGE_LIST") == 0)
+		mask |= OCT_CHANGE_LIST_MASK;
+	    else if (strcasecmp(str, "CHANGE_RECORD")==0)
+		mask |= OCT_CHANGE_RECORD_MASK;
+	    else if (strcasecmp(str, "CIRCLE") == 0)
+		mask |= OCT_CIRCLE_MASK;
+	    break;
+	  case 'E':
+	    if (strcasecmp(str, "EDGE") == 0)
+		mask |= OCT_EDGE_MASK;
+	    break;
+	  case 'F':
+	    if (strcasecmp(str, "FACET") == 0)
+		mask |= OCT_FACET_MASK;
+	    else if (strcasecmp(str, "FORMAL") == 0)
+		mask |= OCT_FORMAL_MASK;
+	    break;
+	  case 'I':
+	    if (strcasecmp(str, "INSTANCE") == 0)
+		mask |= OCT_INSTANCE_MASK;
+	    break;
+	  case 'L':
+	    if (strcasecmp(str, "LABEL") == 0)
+		mask |= OCT_LABEL_MASK;
+	    else if (strcasecmp(str, "LAYER") == 0)
+		mask |= OCT_LAYER_MASK;
+	    break;
+	  case 'N':
+	    if (strcasecmp(str, "NET") == 0)
+		mask |= OCT_NET_MASK;
+	    break;
+	  case 'P':
+	    if (strcasecmp(str, "PATH") == 0)
+		mask |= OCT_PATH_MASK;
+	    else if (strcasecmp(str, "POINT") == 0)
+		mask |= OCT_POINT_MASK;
+	    else if (strcasecmp(str, "POLYGON") == 0)
+		mask |= OCT_POLYGON_MASK;
+	    else if (strcasecmp(str, "PROP") == 0)
+		mask |= OCT_PROP_MASK;
+	    break;
+	  case 'T':
+	    if (strcasecmp(str, "TERM") == 0)
+		mask |= OCT_TERM_MASK;
+	    break;
+	}
     }
 
     // Free the memory used by typeV as it was allocated by SplitList
