@@ -497,6 +497,10 @@ body ::tycho::SlateView::layout {mode args} {
 # arguments, which are called on the corresponding model object.
 # Raise an error if the given library is not loaded.
 #
+# <dt><b>proxy</b> _libname_
+# <dd>
+# Get the library proxy, which can be passed to ::tycho::model.
+#
 # </dl>
 #
 body ::tycho::SlateView::library {mode args} {
@@ -507,11 +511,20 @@ body ::tycho::SlateView::library {mode args} {
             if ![::info exists _library($libname)] {
                 error "Unknown library \"$libname\""
             }
+            set library [::tycho::model dereference $_library($libname)]
             if { [llength $args] > 1 } {
-                eval $_library($libname) [lreplace $args 0 0]
+                eval $library [lreplace $args 0 0]
             } else {
-                return $_library($libname)
+                return $library
             }
+        }
+       "proxy" {
+            # Extract args
+            set libname [lindex $args 0]
+            if ![::info exists _library($libname)] {
+                error "Unknown library \"$libname\""
+            }
+            return $_library($libname)
         }
         "addtomenu" {
             # Extract args
@@ -522,12 +535,12 @@ body ::tycho::SlateView::library {mode args} {
             if ![::info exists _library($libname)] {
                 error "Unknown library \"$libname\""
             }
-            set lib $_library($libname)
+            set library [::tycho::model dereference $_library($libname)]
 
             # Add to menubar
             set mb [menubar]
             if { $mb != "" } {
-                $lib makemenu $mb $menuname \
+                $library makemenu $mb $menuname \
                         -types $opts(-types) \
                         -command $opts(-command) \
                         -customizecommand $opts(-customizecommand)
@@ -541,9 +554,10 @@ body ::tycho::SlateView::library {mode args} {
             } else {
                 set libname [::file rootname [::file tail $path]]
             }
-            # Get the library model
-	    set path [::tycho::model load $path]
-	    set _library($libname) [::tycho::model link $path $this]
+            # Get the library model and link to it
+	    set proxy [::tycho::model locate $path]
+            ::tycho::model link $proxy $this
+	    set _library($libname) $proxy
         }
         "names" {
             array names _library
@@ -556,7 +570,7 @@ body ::tycho::SlateView::library {mode args} {
             # Unload each library
             # FIXME: unlink
             foreach lib $args {
-                ::tycho::unlink [$_library($lib) cget -modelpath] $this
+                ::tycho::model unlink $lib $this
                 unset _library($lib)
             }
         }
@@ -758,6 +772,10 @@ body ::tycho::SlateView::notifyevent {event args} {
 # returns false, then _command_ will not be called and the
 # popup menu will not be displayed.
 #
+# <dt><b>clear</b> _name_ _tag_ 
+# <dd>
+# Clear the given menu within the popup menu.
+#
 # <dt><b>delete</b> _name_ _tag_
 # <dd>
 # Delete the entry given by _tag_ from the popup menu named _name_.
@@ -816,6 +834,10 @@ body ::tycho::SlateView::popup {mode name args} {
 		    [list @scope [info context] $this _showpopup \
 		    %X %Y $_contextmenus($name) $command $predicate]
         }
+        "clear" {
+            # Clear a submenu
+	    eval $_contextmenus($name) clear $args
+	}
         "delete" {
             # Delete an entry
 	    eval $_contextmenus($name) delete $tag
@@ -964,6 +986,18 @@ body ::tycho::SlateView::_attrdel {name args} {
 # Change attributes of an item.
 #
 body ::tycho::SlateView::_attrset {name args} {
+    # Filter out -coords and -slatetype
+    array set opts $args
+    if [info exists opts(-coords)] {
+        eval $_slate coords $_itemid($name) $opts(-coords)
+        unset opts(-coords)
+    }
+    if [info exists opts(-slatetype)] {
+        # Can't change: just filter out
+        unset opts(-slatetype)
+    }
+    set args [array get opts]
+
     eval $_slate itemconfigure $_itemid($name) $args
 }
 
