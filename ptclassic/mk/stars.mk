@@ -433,4 +433,4 @@ endif
 PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
 	$(LIBFILES) $(STARS)
 
-LIBS += -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
+LIBS += -lptcl -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
