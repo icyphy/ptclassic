@@ -238,7 +238,7 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 		int deleteOld, const char* newFileName) {
-    char *expandedName = expandPathName(filePath);
+    char* expandedName = expandPathName(filePath);
     StringList expandedFilePath = expandedName;
     delete [] expandedName;
     if (access(expandedFilePath,R_OK) == -1) {
@@ -258,7 +258,7 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
 	    fileName << expandedFilePath;
     }
 
-    char *expandedDirName = expandPathName(dir);
+    char* expandedDirName = expandPathName(dir);
     StringList directory = expandedDirName;
     delete [] expandedDirName;
     StringList command;
@@ -284,18 +284,21 @@ int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
  
 // Open a pipe to the Unix command "hostname" and read the result
 int onHostMachine(const char* hname) {
-	if (hname==NULL||*hname=='\0'||(strcmp(hname,"localhost")==0))
-		return TRUE;
-	int retval = FALSE;
+	if (hname == 0 || *hname == '\0' || strcmp(hname,"localhost") == 0) {
+	    return TRUE;
+	}
+
 	FILE* fp = popen("hostname", "r");
 	if (fp == NULL) {
-	    Error::warn("popen error");
+	    Error::warn("Cannot open a pipe to 'hostname'");
+	    return FALSE;
 	}
-	else {
-	    char line[40];
-	    if (fgets(line, 40, fp) != NULL) {
-		retval = ( strncasecmp(line, hname, strlen(hname)) == 0 );
-	    }
+
+	int retval = FALSE;
+	char line[80];
+	if (fgets(line, 80, fp) != NULL) {
+	    line[79] = 0;
+	    retval = ( strncasecmp(line, hname, strlen(hname)) == 0 );
 	}
 	pclose(fp);
 	return retval;
@@ -337,4 +340,37 @@ const char* ptSanitize(const char* string)
 
     // Note that the result string is kept until the next invocation.
     return sanitizedString;
+}
+
+// This function returns an expanded local file name
+// If we are the local machine, then we just expand the path name.
+// Otherwise, we copy the file to the /tmp directory.
+// An error is indicated if the result is an empty string list
+StringList findLocalFileName(const char* hname, const char* dir,
+			     const char* filename, int& deleteFlag) {
+    StringList targetpath = dir;
+    targetpath << "/" << filename;
+
+    StringList pathname;
+    if ( !onHostMachine(hname) ) {
+	deleteFlag = TRUE;
+	pathname = "/tmp/";
+	pathname << filename;
+	StringList copycmd = "rcp -p ";
+	copycmd << hname << ":" << targetpath << " " << pathname;
+	if ( !system(copycmd) ) {
+	    pathname.initialize();
+	    StringList errmsg = "Could not copy ";
+	    errmsg << filename << " in the directory " << dir
+		   << " on the remote machine " << hname;
+	    Error::warn(errmsg);
+	}
+    }
+    else {
+	deleteFlag = FALSE;
+	char* expandedPathName = expandPathName(targetpath);
+	pathname = expandedPathName;
+	delete [] expandedPathName;
+    }
+    return pathname;
 }
