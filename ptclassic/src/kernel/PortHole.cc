@@ -309,8 +309,6 @@ Plasma* const Mark = (Plasma*)1;
 
 Plasma*
 PortHole :: setPlasma (Plasma* useType) {
-// return immediately if useType matches myPlasma and non-null.
-	if (far() == NULL) return myPlasma;
 // check for infinite recursion
 	
 	if (myPlasma == Mark) return 0;
@@ -350,7 +348,7 @@ PortHole :: setPlasma (Plasma* useType) {
 				myPlasma = typePort()->setPlasma();
 			}
 			// If still not set, try the connected output
-			if (!myPlasma) {
+			if (!myPlasma && far()) {
 				myPlasma = Mark;
 				myPlasma = far()->setPlasma();
 			}
@@ -358,12 +356,12 @@ PortHole :: setPlasma (Plasma* useType) {
 	} 
 // If it is an output PortHole.
 	else {	
-		// first, far() has known type: use it
-		if (far()->myPlasma && far()->myPlasma != Mark) {
+		// first, if far() has known type, use it
+		if (far() && far()->myPlasma && far()->myPlasma != Mark) {
 			myPlasma = far()->myPlasma;
 		}
 		// or, far() has typePort: set far() and use it
-		else if (far()->typePort()) {
+		else if (far() && far()->typePort()) {
 			Plasma* save = myPlasma;
 			myPlasma = Mark;
 			myPlasma = far()->setPlasma();
@@ -392,7 +390,7 @@ void PortHole :: initialize()
 {
 	// set plasma if not set
 	if (!setPlasma ()) {
-		Error::abortRun (*this, ": can't determine DataType");
+		Error::abortRun (*this, "can't determine DataType");
 		return;
 	}
 
