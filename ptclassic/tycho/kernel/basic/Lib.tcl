@@ -33,7 +33,28 @@
 
 ########################################################################
 
-# Register the standard context-sensitive editors
+### PROTOCOLS
+::tycho::register protocol "file" \
+	-class ::tycho::ResourceFile \
+	-label "Local Disk File"
+
+::tycho::register protocol "http" \
+	-class ::tycho::ResourceHTTP \
+	-label "Hy-Time Transport Protocol (HTTP)"
+
+::tycho::register protocol "ftp" \
+	-class ::tycho::ResourceFTP \
+	-label "File Transfer Protocol (FTP)"
+
+::tycho::register protocol "mailto" \
+	-class ::tycho::ResourceMailto \
+	-label "Mail Protocol"
+
+# FIXME: Make conditional upon presence of Java
+::tycho::register protocol "weld" \
+	-class ::tycho::ResourceWeld \
+	-label "Java-Based Interface to WELD"
+
 
 ### CATEGORIES
 ::tycho::register category new "text" -label "Text Editors"
