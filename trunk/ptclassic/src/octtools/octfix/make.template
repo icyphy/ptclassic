@@ -68,7 +68,7 @@ DEST = $(OCTTOOLS)/bin.$(PTARCH)/octfix
 $(DEST):	octfix
 		@echo Installing octfix
 		rm -f $(DEST)
-		ln octfix $(DEST)
+		ln octfix$(BINARY_EXT) $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/octfix
 
