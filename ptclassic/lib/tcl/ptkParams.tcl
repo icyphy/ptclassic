@@ -1248,23 +1248,28 @@ proc ptkEditText {title cmd string} {
 
   pack [label $w.label -text $title -relief raised \
               -font [option get . mediumfont Pigi]] \
-       -side top -fill x -expand 1
-  pack [frame $w.tframe -bd 2] -side top -fill x -expand 1
+       -side top -fill x
+
+  frame $w.tframe -bd 2
+
   scrollbar $w.tframe.vscroll -relief flat \
             -command "$w.tframe.text yview"
-  pack $w.tframe.vscroll -side right -fill y
 
   text $w.tframe.text -wrap word -width 60 -height 12 \
        -setgrid true -yscrollcommand "$w.tframe.vscroll set" \
        -relief raised -bd 2
 
+  pack $w.tframe.vscroll -side right -fill y
   pack $w.tframe.text -expand yes -fill both
-  pack [frame $w.f -bd 2 -relief sunken] -side top -fill x -expand true
+  pack $w.tframe -side top -fill both -expand 1
+
+  pack [frame $w.f -bd 2 -relief sunken] -side bottom -fill x -before $w.tframe
   $w.tframe.text insert 0.0 $string
+
   ptkOkCancelButtons $w.f \
     "ed_EditTextExecute \"$cmd\" $w.tframe.text; destroy $w" \
     "destroy $w"
-}    
+}
 
 # The following procedure is used in conjunction with ed_EditText for
 # editing long strings.
