@@ -320,12 +320,14 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 
 	set default {}
 	foreach type $pref {
-	    $dlg addButton $type -text "Yes ($type)" -command \
+            set bnm [string tolower $type]
+	    $dlg addButton $bnm \
+                    -text "Yes ($type)" -command \
 		    [code "::tycho::RevControl::makeRev \
                     ::tycho::RevControl$type $editorWin \
 		    $editorObj; $dlg nextWindow; delete object $dlg"]
 	    if {$default == {}} {
-		$dlg default $type
+		$dlg default $bnm
 		set default $type
 	    }
 	}
