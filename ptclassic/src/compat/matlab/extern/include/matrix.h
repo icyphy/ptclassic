@@ -8,7 +8,6 @@
 #ifndef matrix_h
 #define matrix_h
 
-typedef double Real;
 typedef char Matrix;
 
 #define TEXT    1                       /* mat.type indicating text */
@@ -29,14 +28,14 @@ typedef char Matrix;
 #define	mxGetPr(pm)		0
 #define	mxSetPr(pm,p)
 #define mxGetPi(pm)		0
-#define	mxGetPr(pm,p)
+#define	mxGetPi(pm,p)
 #define	mxGetNzmax(pm)		0
 #define	mxSetNzmax(pm,n)
 #define mxGetIr(pm)		0
 #define mxSetIr(pm,ir)
 #define	mxGetJc(pm)		0
 #define	mxSetJc(pm,jc)
-#define	mxGetString(pm,sp,sl)	0
+#define	mxGetString(pm,sp,sl)	1
 #define	mxCreateString(s)	0
 #define	mxGetScalar(pm)		0.0
 #define	mxIsFull(pm)		0
