@@ -25,7 +25,7 @@ SDFKERNDIR=$(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(SDFKERNDIR) -I$(KERNDIR)
 
-HDRS =	BitArray.h BaseImage.h DCTImage.h GrayImage.h MVImage.h \
+HDRS =	SeqATMCell.h BaseImage.h DCTImage.h GrayImage.h MVImage.h \
 	NetworkCell.h
 SRCS = $(HDRS:.h=.cc)
 
