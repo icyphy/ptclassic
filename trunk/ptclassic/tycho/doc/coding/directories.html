@@ -84,7 +84,7 @@ using Tcl scripts and the BuilderDialog instead.
  <P>
 The Makefile editor can insert a makefile template by using the
 <CODE>Template</CODE> choice of the <CODE>Special</CODE> menu.
-<A HREF="../../editors/textedit/templates/Cmakefile.mk"><CODE>$TYCHO/editors/textedi/templates/Cmakefile.mk</CODE></A> contains the template that the
+<A HREF="../../edit/textedit/templates/Cmakefile.mk"><CODE>$TYCHO/edit/textedi/templates/Cmakefile.mk</CODE></A> contains the template that the
 Makefile editor actually inserts.
 
 The general structure of a Tycho makefile is
@@ -107,7 +107,7 @@ copyright information.
 </DL>
 
 For example, <A
-HREF="../../kernel/makefile"><CODE>$TYCHO/kernel/makefile</CODE></A>
+HREF="../../kernel/gui/makefile"><CODE>$TYCHO/kernel/gui/makefile</CODE></A>
  contains:
 
 <PRE>
@@ -115,7 +115,7 @@ HREF="../../kernel/makefile"><CODE>$TYCHO/kernel/makefile</CODE></A>
 ROOT =		..
 
 # True source directory
-VPATH =		$(ROOT)/kernel
+VPATH =		$(ROOT)/kernel/gui
 </PRE>
 
 <LI> A section that includes <A
@@ -234,7 +234,7 @@ editing files.   The files removed include: <CODE>*.o core *~ *.bak ,*</CODE>
 <DD> This rule does everything <CODE>make clean</CODE> does, and it
 removed any files named in the <CODE>REALCLEAN_STUFF</CODE> makefile
 variable.  For example, in <A
-HREF="../../kernel/makefile"><CODE>$TYCHO/kernel/makefile</CODE></A>
+HREF="../../kernel/gui/makefile"><CODE>$TYCHO/kernel/gui/makefile</CODE></A>
 <CODE>REALCLEAN_STUFF</CODE> is set so that <CODE>tclIndex</CODE> is
 removed when <CODE>make realclean</CODE> is run
 
