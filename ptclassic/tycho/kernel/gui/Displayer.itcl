@@ -43,6 +43,9 @@
 # <li><b>-withdrawn</b>: If set, the window will not be deiconifies
 # but will remain withdrawn. This is useful if you want to call
 # <code>centerOnScreen</code>, for example.
+# <li><b>-name</b>: The name of the created window. This option
+# overrides the <b>-prefix</b> option. If neither <b>-prefix</b>
+# nor <b>-name</b> is specified, generate an automatic name.
 # <li><b>-prefix</b>: The prefix of the created window name.
 # <li><b>-geometry</b>: The window geometry, as for regular Tk
 # top-level windows.
@@ -93,14 +96,20 @@ proc ::tycho::view {view args} {
 	set withdrawn 0
     }
     
-    # Create the displayer and view, and attach and show the view
+    # Figure out what to call the displayer
+    set wname {}
     if { [::info exists temp(-prefix)] } {
-	set prefix $temp(-prefix)
+	set wname [::tycho::autoName $temp(-prefix)]
 	unset temp(-prefix)
-    } else {
-	set prefix .displayer
     }
-    set wname [::tycho::autoName $prefix]
+    if { [::info exists temp(-name)] } {
+	set wname $temp(-name)
+	unset temp(-name)
+    }
+    if { $wname == "" } {
+	set wname [::tycho::autoName .displayer]
+    }
+    # Create the displayer and view and show the view
     uplevel #0 $displayer $wname $options
     uplevel #0 $view $wname.v [array get temp]
     $wname showView $wname.v
@@ -157,9 +166,6 @@ class ::tycho::Displayer {
     constructor {args} {}
     destructor {}
 
-    # If non-zero, treat this window as the application master.
-    itk_option define -master master Master "0"
-
     # If non-zero, show a tool bar for each view.
     itk_option define -toolbar toolbar Toolbar "0"
 
@@ -208,14 +214,14 @@ class ::tycho::Displayer {
     #################################################################
     ####                   protected methods                     ####
 
+    # Update the -master configuration option
+    protected method configureMaster {master}
+
     # Check to see whether the specified view is attached with the Displayer.
     protected method verifyView {view {method {}}}
 
     #################################################################
     ####                   protected variables                   ####
-
-    # Avoid self-destructing recursively.
-    protected variable alreadyexiting 0
 
     # Text to insert in close button
     protected variable closetxt "Close"
@@ -237,16 +243,15 @@ class ::tycho::Displayer {
     protected common vertpos {+}
 }
 
-###################################################################
-#### -master configuration
-# If the value of this option is non-zero, then this window is treated
-# as a master window in the sense that when it is closed, it queries
-# the user to see whether to exit the program. By default, a Displayer
-# is not a master. A master Displayer has its close button labelled
-# "Quit" instead of "Close."
+#####################################################################
+#### configureMaster
+# Set this window as a "master" window: when the window is destroyed,
+# Tycho will exit. The displayer uses this method to set the text
+# in the close button of all its status bars. A master Displayer
+# has its close button labelled "Quit" instead of "Close."
 #
-configbody ::tycho::Displayer::master {
-    if $itk_option(-master) {
+body ::tycho::Displayer::configureMaster {master} {
+    if $master {
         set closetxt "Quit"
     } {
         set closetxt "Close"
@@ -377,30 +382,22 @@ body ::tycho::Displayer::constructor {args} {
 
 #########################################################################
 #### destructor
-# If this displayer is a master, query the user for exiting the program,
-# then exit.  Otherwise, destroy each of the views.
+# Otherwise, destroy each of the views.
 #
 body ::tycho::Displayer::destructor {} {
-    if {[::tycho::TopLevel::returnExitCon]} {return}
-    # To prevent hanging on incomplete construction, we check for
-    # existence of everything. 
-    if {[info exists alreadyexiting] && [info exists itk_option(-master)]} {
-	if $alreadyexiting {return}
-	set alreadyexiting 1
-	if {$itk_option(-master) != 0} {
-            # We want to exit the entire program, not just this object.
-            # In order to get the proper safety checks and confirmation,
-            # we cancel the current destruction with silentError and
-            # then at the top-level, invoke exitProgram.
-            # Calling exitProgram from here directly is not good because
-            # it tries to delete the current object, and we are already
-            # in the middle of deleting it.
-            after idle ::tycho::TopLevel::exitProgram
-            ::tycho::silentError
-	}
-	set alreadyexiting 0
-    }
-    # Destroy all the registered views.
+
+    # Make sure that it's OK to destroy this object.
+    confirmDestruct
+
+    # Destroy all the registered views. If any views object to
+    # this -- for example, by the user cancelling during a query to
+    # save a modified file -- then the destruction sequence is
+    # terminated with a call to ::tycho::silentError.
+    # This is actually a bit of a problem: what if we get half-way
+    # through the destruction and the user cancels? The query
+    # for whether to save a file or files really should be handled
+    # by the Displayer not by individual views. This would also
+    # be rather faster.
     foreach view [array names _viewtag] {
         destroyView $view
     }
