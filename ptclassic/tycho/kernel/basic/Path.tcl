@@ -778,7 +778,7 @@ ensemble ::tycho::url {
 	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    return "absolute"
-        } elseif [regexp {^\$.*} $name] {
+        } elseif {[regexp {^\$.*} $name] || [regexp {^\~.*} $name]} {
             # If it begins with $, then it's absolute. Currently ::file 
             # doesn't take care of this case (ie. [file pathtype \$PTOLEMY])
             return "absolute"
