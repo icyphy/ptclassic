@@ -18,11 +18,10 @@ include $(CONFIG)
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 SDFDSPSTARS = $(ROOT)/src/domains/sdf/dsp/stars
-TCLDIR = $(ROOT)/tcl/include
 PTKDIR = $(ROOT)/src/ptklib
 PIGIDIR = $(ROOT)/src/pigilib
-INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(TCLDIR) -I$(PIGIDIR) \
- -I$(SDFDSPSTARS) -I$(PTKDIR)
+INCL =	-I$(SDFDIR) -I$(KERNDIR) -I$(PTKDIR) -I$(PIGIDIR) -I$(SDFDSPSTARS) \
+	-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
 LIB=libsdftclstars.a
