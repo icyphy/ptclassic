@@ -924,7 +924,7 @@ body ::tycho::Slate::recreate {description args} {
 # if the single item denoted is a complex item and contains
 # a "region" entry in its method table, then that procedure
 # is called instead. Complex items in which the number of
-# coordinates does not match the number of coodinates of their
+# coordinates does not match the number of coordinates of their
 # primary (IconFrame, for example), will need to do this.
 #
 body ::tycho::Slate::region {tag args} {
