@@ -86,34 +86,28 @@ void TITarget :: initStates() {
 
 	addStream("TISubProcs", & TISubProcs);
 	
+	cxSetFlag = FALSE;
 }
 
-// complex numbers will be allocated in 2 consecutive words of memory.
 void TITarget :: setup() {
+        clearFlags();
 	LOG_DEL; delete mem;
 	LOG_NEW; mem = new TIMemory(bMemMap,uMemMap);
-
 	AsmTarget::setup();
-
-	GalStarIter nextStar(*galaxy());
-	AsmStar* s;
-	while ((s = (AsmStar*)nextStar++) != 0){
-	    BlockPortIter next(*s);
-	    AsmPortHole * p;
-	    while((p = (AsmPortHole*) next++) != 0) {
-		// allocate complex numbers in 2 consecutive words of memory
-		if (p->resolvedType() == COMPLEX ){
-		    int portSize = p->numXfer();
-		    portSize = 2*portSize;
-		    p->setSDFParams(portSize,portSize-1);
-		}
-	    }
-	}
-
+	setCxPortHoles();
 }
 
 TITarget :: ~TITarget () {
 	LOG_DEL; delete mem; mem = 0;
+}
+
+// overloaded run function
+int TITarget::run(){
+     // this will allocate memory for portholes & states 
+     int returnVal;
+     returnVal = CGTarget::run();
+     resetCxPortHoles();
+     return returnVal;
 }
 
 // copy constructor
@@ -300,4 +294,51 @@ void TITarget::clearFlags(void){
         TIFlags.initialize();
     }
 
+void  TITarget::setCxPortHoles(void){
+  // this function will set the SDF param of complex portholes
+  // to twice its value so that twice as much memory gets allocated
+  // It should only double the SDF params once on each run of the target
+  // thus it uses the flag 'cxSetFlag' to check for this condition
 
+        if (cxSetFlag == TRUE) return;
+	else  cxSetFlag = TRUE;
+
+	GalStarIter nextStar(*galaxy());
+	AsmStar* s;
+	while ((s = (AsmStar*)nextStar++) != 0){
+	    BlockPortIter next(*s);
+	    AsmPortHole * p;
+	    while((p = (AsmPortHole*) next++) != 0) {
+		if (p->resolvedType() == COMPLEX ){
+		    int portSize = p->numXfer();
+		    portSize = 2*portSize;
+		    p->setSDFParams(portSize,portSize-1);
+		}
+	    }
+	}
+}
+
+void  TITarget::resetCxPortHoles(void){
+  // this function will set the SDF param of complex portholes to
+  // half its value.  It is inteded to undo what setCxPortHoles() 
+  // does. It is needed because the SDF params of portholes can
+  // change on each run.  It should be called only after memory has
+  // been allocated and setCxPortHoles() has been called.
+ 
+         if (cxSetFlag == FALSE) return;
+	 else cxSetFlag = FALSE;
+
+	 GalStarIter nextStar(*galaxy());
+	 AsmStar* s;
+	 while ((s = (AsmStar*)nextStar++) != 0){
+	    BlockPortIter next(*s);
+	    AsmPortHole * p;
+	    while((p = (AsmPortHole*) next++) != 0) {
+		if (p->resolvedType() == COMPLEX ){
+		    int portSize = p->numXfer();
+		    portSize = int(portSize/2);
+		    p->setSDFParams(portSize,portSize-1);
+		}
+	    }
+	}
+}
