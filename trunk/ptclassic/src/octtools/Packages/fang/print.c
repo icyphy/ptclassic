@@ -2,7 +2,7 @@
 static char SccsId[]="$Id$";
 #endif /*lint*/
 /*
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1987-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -178,10 +178,6 @@ int indent;
 
 /*
  * print.c
- *
- * Copyright -C- 1987	Brian D. N. Lee
- * University of California, Berkeley
- *
  * Extra fang diagnostic routines.
  */
 
