@@ -6,8 +6,6 @@ Sends input values to a Tcl script.  Gets output values from a Tcl script.
 The star can communicate with Tcl either synchronously or asynchronously.
 	}
 	htmldoc {
-<pre>
-</pre>
 This star reads a file containing Tcl commands and communicates with Tcl
 via procedures defined in that file.  Those procedures can read the inputs
 to the star and set its outputs.
@@ -67,8 +65,6 @@ indexed by the state name.  For example the tcl command:
 set foo [set ${uniqueSymbol}(foo)]
 <p>
 will set the variable "foo" to the value of the state named "foo".
-<pre>
-</pre>
 	}
 	version { $Id$ }
 	author { E. A. Lee, D. Niehaus and J. L. Pino }
