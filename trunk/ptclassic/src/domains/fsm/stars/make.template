@@ -50,9 +50,9 @@ LIB=libfsmstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
-FSMDataIn.pl \
-FSMDataOut.pl \
-FSMMixed.pl
+FSMDataInInt.pl \
+FSMDataOutInt.pl \
+FSMStrictPure.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
