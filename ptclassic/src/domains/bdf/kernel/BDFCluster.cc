@@ -146,7 +146,18 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 			curCP->initGeo();
 		}
 	}
-	LOG_DEL; delete ptable;
+	LOG_DEL; delete [] ptable;
+}
+
+// remove blocks from this galaxy without deallocating the blocks.
+// It does deallocate the sequential list holding the block pointers. -BLE
+void BDFClusterGal::orphanBlocks() {
+	BDFClusterGalIter nextC(*this);
+	BDFCluster* c;
+	while ((c = nextC++) != 0) {
+		removeBlock(*c);
+		nextC.reset();
+	}
 }
 
 // Core clustering routine.  Alternate merge passes and loop passes
@@ -1533,24 +1544,12 @@ void BDFClusterBag::wrapup() {
 
 // destroy the bag.
 BDFClusterBag::~BDFClusterBag() {
-	if (!owner) {
-		// we do not own the contained blocks and ports
-		// so we remove them before deleting the galaxy.
-		GalTopBlockIter nextb(*gal);
-		Block* b;
-		while ((b = nextb++) != 0) {
-			gal->removeBlock(*b);
-			nextb.reset();
-		}
-		BlockPortIter nextp(*gal);
-		PortHole* p;
-		while ((p = nextp++) != 0) {
-			gal->removePort(*p);
-			nextp.reset();
-		}
-	}
-	LOG_DEL; delete gal;
-	LOG_DEL; delete sched;
+        // empty b's galaxy's list of blocks if b doesn't own them
+	// to prevent them from being prematurely deleted -BLE
+	if (gal && !owner) gal->orphanBlocks();
+	delete gal;
+	delete sched;
+	deleteAllGenPorts();
 }
 
 // This function, given a BDFClustPort, tries to find another port that
