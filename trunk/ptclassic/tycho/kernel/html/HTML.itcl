@@ -478,7 +478,7 @@ body ::tycho::HTML::constructor {args} {
         $myMenubar insert "Open Source" "Switch File..." \
                 -underline 1 -accelerator {C-x s} \
                 -command "$this openSource"
-        
+
         $myMenubar delete "Insert..."
         $myMenubar delete "Save"
         $myMenubar delete "SaveAs..."
@@ -494,6 +494,12 @@ body ::tycho::HTML::constructor {args} {
     bind $prefix <Control-x><Control-q> {bell; break}
     bind $prefix <Control-x><Key-i> {bell; break}
     bind $prefix <Control-x><Key-v> {bell; break}
+
+    # Add bindings for forward and back
+    bind $itk_component(text) <Meta-Left> "$this back"
+    bind $itk_component(text) <Control-Left> "$this back"
+    bind $itk_component(text) <Meta-Right> "$this forward"
+    bind $itk_component(text) <Control-Right> "$this forward"
 
     configure -readonly 1
     focusin
