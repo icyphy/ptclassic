@@ -32,7 +32,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of creation: 12/8/91
 
 WTC/BLE: Tcl/Tk initialization and invocation of begin methods 8/1/95
-BLE: Updated code generation to reflect changes in sanitizing star names
+BLE: Updated code generation to reflect changes in sanitizing star names.
+BLE: Updated code generation to reuse changes in stars.mk.
 
 This Target produces and compiles a standalone C++ program for
 a universe.
@@ -162,6 +163,10 @@ int CompileTarget::run() {
     myCode += galDef(galaxy(), universeClassName, 0);
     myCode += "\n// MAIN FUNCTION\n";
     myCode += "main(int argc, char** argv) {\n";
+
+    myCode += tcltkInitialize(universeName);
+
+    myCode += "\n// Define the universe being run";
     myCode += "int iterations;\n";
     myCode += universeClassName;
     myCode += " ";
@@ -179,8 +184,6 @@ int CompileTarget::run() {
 
     myCode += universeName;
     myCode += ".parseCommandLine(argc, argv, &iterations);\n";
-
-    myCode += tcltkInitialize(universeName);
 
     myCode += "\n// INITIALIZE CODE\n";
     myCode += universeName;
@@ -390,7 +393,7 @@ StringList CompileTarget::tcltkSetup() {
 
 // Initialize the Tcl/Tk interpreter (Wan-Teh Chang and Brian Evans)
 StringList CompileTarget::tcltkInitialize(StringList& universeName) {
-    StringList myCode = "\n// Initialize the Tcl interpreter\n";
+    StringList myCode = "\n// Initialize the Tcl/Tk interpreter\n";
     myCode += "ptkInterp = Tcl_CreateInterp();\n";
     myCode += "ptkW = Tk_CreateMainWindow(ptkInterp, NULL, \"";
     myCode += universeName;
