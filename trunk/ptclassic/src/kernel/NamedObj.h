@@ -31,18 +31,28 @@ public:
 	NamedObj (const char* n,Block* p,const char* d) :
 		name(n), blockIamIn(p), descriptor(d){}
 
+	// return just the end name
 	const char* readName() const { return name;}
+
+	// return the descriptor
 	const char* readDescriptor() const {return descriptor;}
 
+	// return the parent block
 	Block* parent() const { return blockIamIn;}
 
+	// return the full name
 	StringList readFullName() const;
 
+	// set the name and parent
 	void setNameParent (const char* my_name,Block* my_parent) {
 		name = my_name;
 		blockIamIn = my_parent;
 	}
 
+	// initialize the object
+	virtual void initialize() {}
+
+	// method to dump all info, must be redefined
 	virtual operator StringList () = 0;
 };
 
