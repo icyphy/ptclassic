@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/11/98
- Version: $Id$
+ Version: @(#)ACSFixSimCore.cc	1.4 03/18/98
 
 ***********************************************************************/
 
@@ -36,6 +36,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "ACSFixSimCore.h"
 #include "ACSKnownCategory.h"
+
+// isA
+ISA_FUNC(ACSFixSimCore, ACSCore);
 
 // Global category string
 extern const char ACSFixSimCategory[] = "FixSim";

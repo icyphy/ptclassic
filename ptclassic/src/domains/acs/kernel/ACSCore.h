@@ -3,7 +3,8 @@
 #define _ACSCore_h
 
 /**********************************************************************
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-1999 The Regents of the University of California
+and Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -12,24 +13,25 @@ software and its documentation for any purpose, provided that the above
 copyright notice and the following two paragraphs appear in all copies
 of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
-SUCH DAMAGE.
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA OR SANDERS, A LOCKHEED
+MARTIN COMPANY, BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL,
+INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS
+SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF CALIFORNIA
+OR SANDERS, A LOCKHEED MARTIN COMPANY HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+THE UNIVERSITY OF CALIFORNIA AND SANDERS, A LOCKHEED MARTIN COMPANY
+SPECIFICALLY DISCLAIM ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND
+THE UNIVERSITY OF CALIFORNIA OR SANDERS, A LOCKHEED MARTIN COMPANY
+HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands
  Date of creation: 1/15/98
- Version: $Id$
+ Version: @(#)ACSCore.h	1.11	06/18/99
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -43,6 +45,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class ACSCorona;
 
 class ACSCore : public ACSStar {
+  //JMS
+  //friend ACSCGFPGATarget::getCorona();
 public:
 
         // constructor takes a reference to a Corona
@@ -51,6 +55,8 @@ public:
 	// constructor without Corona reference for use by
 	// derrived core class default constructors.
 	ACSCore(const char*);
+
+//  ACSCore::~ACSCore(void);
 
 	// virtual makeNew( ACSCorona & ) defined by each core
 	// and used by Corona to build core list.
@@ -97,22 +103,21 @@ public:
 
 	/* virtual */ State *stateWithName(const char* name);
 
-
-protected:
-
+  // JMS
 	// dummy corona for virtual getCorona()
 	static ACSCorona dummy;
-
 	// returns reference to the core's corona
 	virtual ACSCorona & getCorona() const { return dummy; }
 
+
+
+protected:
 	// category string determines core base class, implementation, etc..
-	const char *category;
+        const char *category;
 
 	// Corona interfaces core to galaxy, contains ports, parameters.
 	// Corona is now defined in the derrived cores as a reference to
 	// the derrived Corona class.
        	// ACSCorona & corona;
-
 };
 #endif //_ACSCore_h

@@ -5,7 +5,7 @@ defcore {
     corona { XYgraph } 
     desc { Generates an X-Y plot with the pxgraph program.
 The X data is on "xInput" and the Y data is on "input". }
-    version { $Id$ }
+    version { @(#)ACSXYgraphFPCGC.pl	1.1 04/14/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

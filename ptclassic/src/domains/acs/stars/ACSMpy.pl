@@ -2,7 +2,7 @@ defcorona {
     name { Mpy }
     domain { ACS }
     desc { }
-    version { $Id$ }
+    version { @(#)ACSMpy.pl	1.1 03/09/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

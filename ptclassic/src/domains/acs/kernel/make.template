@@ -1,6 +1,6 @@
 # Makefile for ACS domain support
 # Version identification:
-# $Id$
+# @(#)make.template	1.11 04/28/98
 # @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -44,10 +44,12 @@ include $(CONFIG)
 
 # Include path
 CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
+ACSKERNEL = 	$(ROOT)/src/domains/acs/kernel
+ACSTARGET =	$(ROOT)/src/domains/acs/targets
 SDFKERNEL = 	$(ROOT)/src/domains/sdf/kernel
 PIGILIB = 	$(ROOT)/src/pigilib
 
-INCL =		-I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(PIGILIB) $(PTCOMPAT_INCSPEC)
+INCL =		-I$(CGKERNEL) -I$(ACSKERNEL) -I$(ACSTARGET) -I$(SDFKERNEL) -I$(KERNDIR) -I$(PIGILIB) $(PTCOMPAT_INCSPEC)
 
 # Library name
 PTLIB=libacs.$(LIBSUFFIX)
@@ -68,7 +70,8 @@ HDRS= \
 	ACSCGCCore.h \
 	ACSGeodesic.h \
 	ACSFPCGCCore.h \
-	ACSForkNode.h
+	ACSForkNode.h \
+	ACSCGFPGACore.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) ACSDomain.cc
@@ -88,4 +91,6 @@ include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+
+
 

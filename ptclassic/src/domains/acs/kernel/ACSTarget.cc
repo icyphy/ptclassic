@@ -1,6 +1,7 @@
 static const char file_id[] = "ACSTarget.cc";
 /**********************************************************************
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-1999 The Regents of the University of California
+and Sanders, a Lockheed Martin Company
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -9,19 +10,20 @@ software and its documentation for any purpose, provided that the above
 copyright notice and the following two paragraphs appear in all copies
 of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
-SUCH DAMAGE.
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA OR SANDERS, A LOCKHEED
+MARTIN COMPANY, BE LIABLE TO ANY PARTY FOR DIRECT, INDIRECT, SPECIAL,
+INCIDENTAL, OR CONSEQUENTIAL DAMAGES ARISING OUT OF THE USE OF THIS
+SOFTWARE AND ITS DOCUMENTATION, EVEN IF THE UNIVERSITY OF CALIFORNIA
+OR SANDERS, A LOCKHEED MARTIN COMPANY HAS BEEN ADVISED OF THE
+POSSIBILITY OF SUCH DAMAGE.
 
-THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
-INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
-MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
-PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
-CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
-ENHANCEMENTS, OR MODIFICATIONS.
-                                                        COPYRIGHTENDKEY
+THE UNIVERSITY OF CALIFORNIA AND SANDERS, A LOCKHEED MARTIN COMPANY
+SPECIFICALLY DISCLAIM ANY WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+PURPOSE. THE SOFTWARE PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND
+THE UNIVERSITY OF CALIFORNIA OR SANDERS, A LOCKHEED MARTIN COMPANY
+HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands, Edward A. Lee
@@ -44,6 +46,9 @@ ACSTarget::ACSTarget(const char* name,const char* starclass, const char* desc,
         const char* category, const char* assocDomain) :
     HLLTarget(name,starclass,desc,assocDomain) {
 
+      if (DEBUG_ACSTARGET)
+	printf("ACSTarget::ACSTarget invoked\n");
+
 	// This determines the core used in simulation.
 	addState(coreCategory.setState("Core Category", this, category, "Sets the core category."));
 	coreCategory.clearAttributes(A_SETTABLE);
@@ -56,13 +61,20 @@ ACSTarget::ACSTarget(const char* name,const char* starclass, const char* desc,
 
     }
 
-ACSTarget :: ~ACSTarget() {}
+ACSTarget :: ~ACSTarget() 
+{
+  if (DEBUG_ACSTARGET)
+    printf("ACSTarget::~ACSTarget invoked\n");
+}
 
 // Copied directly from the SDF default target.
 void ACSTarget::setup() {
 	delSched();
 	SDFScheduler *s;
 	pt_ofstream o;
+
+	if (DEBUG_ACSTARGET)
+	  printf("ACSTarget::setup() invoked\n");
 
 	// create a file with the schedule in it
 	if (!logFile.null()) o.open(logFile);

@@ -1,7 +1,7 @@
 #ifndef _ACSPortHole_h
 #define _ACSPortHole_h
 
-/*  Version $Id$
+/*  Version @(#)ACSPortHole.h	1.10 05/26/98
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
@@ -42,6 +42,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSGeodesic.h"
 #include "PrecisionState.h"
 
+// JMS
+#include <strstream.h>
+
 extern const bitWord PB_GLOBAL /* = 0x20 */;
 extern const Attribute P_GLOBAL;
 extern const Attribute P_LOCAL;
@@ -70,9 +73,14 @@ class ACSPortHole : public CGPortHole
 friend class ACSForkDestIter;
 public:
 
-	ACSPortHole() : maxBuf(1), manualFlag(0), hasStaticBuf(1),
-                        asLinearBuf(1), myType(NA), converted(0),
-			bufName(0), manualOffset(0) {}
+        // Initializations moved to ACSPortHole.cc
+	ACSPortHole() : CGPortHole(),
+	     // JMS 
+	     port_BW(0.0), port_id(-1), star_id(-1),
+	     path_id(-1), assigned(FALSE),
+	     maxBuf(1), manualFlag(0),
+	     hasStaticBuf(1), asLinearBuf(1), myType(NA),
+	     converted(0), bufName(0), manualOffset(0) {}
 	~ACSPortHole();
 
     // Class identification.
@@ -177,6 +185,14 @@ public:
 
  	// return TRUE if the precision assigned to this port is valid
 	int validPrecision() const { return prec.isValid(); }
+
+        // JMS
+        float port_BW;   // Bandwidth of connection(s) in bits
+        int port_id;     // Unique identifier for the port
+        int star_id;     // Acs id of the star this port is connected to
+        int remote_port_id; // Unique identifier of the destination port
+        int path_id;     // A unique identifier for the link between stars
+        int assigned;    // Boolean, true if a name has been bound to this port
 
 
 protected:

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Exp } 
     desc { Compute the exponential function of the input. }
-    version { $Id$ }
+    version { @(#)ACSExpFixSim.pl	1.1 03/16/98 }
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 2/29/98
- Version: $Id$
+ Version: @(#)ACSCGCCore.h	1.4	04/28/98
 
 ***********************************************************************/
 #ifdef __GNUG__
@@ -102,6 +102,9 @@ protected:
 
 	// Add a file to be copied over the remote machine
 	int addRemoteFile(const char*, int flag = FALSE);
+
+	// JMS
+	  /*virtual*/ int isA(const char*) const;
 
 };
 
