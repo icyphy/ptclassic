@@ -3,17 +3,27 @@ defstar {
 	domain { SDF }
 	desc {
 Output a waveform as specified by the array state "value" (default "1 -1").
-To halt the simulation after exhausing the data, set "haltAtEnd" to YES.
-Otherwise, to get a periodic waveform, set "periodic" to YES.
-Then the value list will be cyclically repeated.
-If "periodic" is not YES, and "haltAtEnd" is NO, then the value list is
-output only once, and 0.0 values are output subsequently.
-This star may be used to read a file by simply setting "value" to
-something of the form "< filename".
+You can get periodic signals with any period, and can halt a simulation
+at the end of the given waveform.  The following table summarizes the
+capabilities:
+
+haltAtEnd   periodic   period    operation
+-----------------------------------------------------------------------
+NO          YES        0         The period is the length of the waveform
+NO          YES        N>0       The period is N
+NO          NO         anything  Output the waveform once, then zeros
+YES         anything   anything  Stop after outputing the waveform once
+
+The first line of the table gives the default settings.
 	}
 	explanation {
-Since this star can be used to read a waveform from a file, there is no
-other star dedicated to this purpose.
+This star may be used to read a file by simply setting "value" to
+something of the form "< filename".  The file will be read completely
+and its contents stored in an array.  The size of the array is currently
+limited to 20,000 samples.  To read longer files, use the 
+.c ReadFile
+star.  This latter star reads one sample at a time, and hence also
+uses less storage.
 .IE "file read"
 .IE "waveform from file"
 .IE "reading from a file"
@@ -46,6 +56,12 @@ other star dedicated to this purpose.
 		default { "YES" }
 		desc { Output is periodic if "YES" (nonzero). }
 	}
+	defstate {
+		name { period }
+		type { int }
+		default { 0 }
+		desc { If greater than zero, gives the period of the waveform. }
+	}
 	protected {
 		int pos;
 	}
@@ -55,10 +71,13 @@ other star dedicated to this purpose.
 	go {
 		if (int(haltAtEnd) && (pos >= value.size()))
 			Scheduler::requestHalt();
-		if (pos >= value.size())
+		if (pos >= value.size()) {
 			output%0 << 0.0;
-		else
+			pos++;
+		} else
 			output%0 << value[pos++];
-		if (int(periodic) && pos >= value.size()) pos = 0;
+		if (int(periodic))
+		    if(int(period) <= 0 && pos >= value.size()) pos = 0;
+		    else if (int(period) > 0 && pos >= int(period)) pos = 0;
 	}
 }
