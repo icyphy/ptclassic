@@ -262,7 +262,7 @@ void SDFScheduler::reportDeadlock (GalStarIter& next) {
 // This routine simulates running the star, adding it to the
 // schedule where it can be run
 
-int SDFScheduler::addIfWeCan (SDFStar& star, int defer = FALSE) {
+int SDFScheduler::addIfWeCan (SDFStar& star, int defer) {
 	int runRes = simRunStar(star,defer);
 	if (runRes == 0) {
 		mySchedule.append(star);
@@ -312,7 +312,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 		// repetitions property.
 		// The block must be an SDFStar for this to work.
 		// Should there be some error checking here?
-		if(star.repetitions == 0) {
+		if(star.repetitions.numerator == 0) {
 
 			// Set repetitions to 1 and set repetitions for
 			// all blocks connected to the current block.
@@ -434,8 +434,8 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	////////////////////////////
 
 int SDFScheduler :: simRunStar (SDFStar& atom,
-				int deferFiring = FALSE,
-				int updateOutputs = TRUE){
+				int deferFiring,
+				int updateOutputs){
 
 	int test = notRunnable(atom);
 	if(test) return test;	// return if the star cannot be run
@@ -640,6 +640,6 @@ void SDFScheduler::setStopTime (float limit) {
 
 // timing control for wormholes
 
-void SDFScheduler::resetStopTime (float v) {
+void SDFScheduler::resetStopTime (float) {
 	numIters = 1; numItersSoFar = 0;
 }
