@@ -77,10 +77,10 @@ JAVADOC = 	$(JAVAHOME)/bin/javadoc
 JDOCFLAGS = 	-author -version # -doctype MIF
 
 # The jar command, used to produce jar files, which are similar to tar files
-JAR =		jar
+JAR =		$(JAVAHOME)/bin/jar
 
 # The 'java' interpreter
-JAVA =		java
+JAVA =		$(JAVAHOME)/bin/java
 
 # Script to run tclBlend
 JTCLSH =	jtclsh
