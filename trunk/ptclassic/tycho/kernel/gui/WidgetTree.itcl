@@ -1,43 +1,13 @@
+# An unfolding tree of widgets, with a button at each
+# node to open and close the node.
 #
-# Widgettree
-# ----------------------------------------------------------------------
-# Widgettree implements an unfolding tree of widgets, with a button at each
-# node to open and close the node. The widget is designed for
-# implementing unfolding preference and dialog boxes as well as
-# viewers of tree-like structures.
+# A grid of labeled widgets.
+# 
+# @Author: John Reekie
 #
-## WISH LIST:
-#   This section lists possible future enhancements.  
+# @Version: $Id$
 #
-#   1) Generally the Widgettree should be used together with
-#      a Scrolledframe widget. It would be nice if the widget
-#      would adjust itself in the scrolled frame so that when
-#      a node of the tree is opened, it scrolls so that it
-#      is entirely visible in the window. What we need is
-#      a see{} command.
-#   2) Same deal as above: the tree must adjust itself in the scrolled
-#      frame to make the button with the focus visible.
-#
-## BUGS:
-#   This section lists known bugs:
-#
-#   1) There are some bad artifacts when opening and closing nodes if
-#      the scroll bars are present. These must be fixed.
-#   2) Something is wrong with the way that options work...
-#   3) The locate{} method is broken.
-#
-# ----------------------------------------------------------------------
-#  AUTHOR: H. John Reekie              EMAIL: johnr@eecs.berkeley.edu
-#
-#  Inspired by the SubPanel and MultiPanel widgets written by
-#  Farhana Sheikh and Cliff Cordeiro of UC Berkeley. Widgettree
-#  is contributed to [incr Widgets] by the Tycho project at UC
-#  Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
-#
-#  $Id$
-# ----------------------------------------------------------------------
-#
-# Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -66,52 +36,167 @@
 #
 # Usual options.
 #
-itk::usual Widgettree {
+itk::usual WidgetTree {
     keep -font -background -cursor -disabledforeground -foreground \
 	    -highlightthickness -highlightcolor
     rename -labelfont -font font Font
 }
 
-# ------------------------------------------------------------------
-##                            WIDGETTREE
-# ------------------------------------------------------------------
+####
+# NOTE: this file doesn't quite follow the Tycho guidelines
+# because it was ported from iwidgets in a hurry.
 #
-# Widgettree implements an unfolding tree of widgets, with a button at
-# each node to open and close the node. The widget is designed for
-# implementing unfolding preference and dialog boxes as well as
-# viewers of tree-like structures. Each item in the tree is referenced
-# by a unique id, which is constructed in the same manner as hierarchical
-# Tk widget names, but without the leading period. Widgets can be added
-# to the tree either when the Widgettree is created or as each node
-# is opened. Default bindings provides traversal through the tree using
-# the cursor and return keys.
+
+#######################################################################
+#### WidgetTree
 #
-class iwidgets::Widgettree { 
-    inherit itk::Widget
+# <b>Summary</b>
+#
+# The <b>widgettree</b> command creates an unfolding tree of widgets,
+# with a button at each node to open and close the node. The widget is
+# designed for implementing unfolding preference and dialog boxes as
+# well as viewers of tree-like structures.
+#
+# Each item in the tree is referenced by a unique id, which is constructed
+# in the same manner as hierarchical Tk widget names, but without
+# the leading period. For example, a node at the top level may
+# have the id <code>foo</code>, and a widget contained within that
+# node the id <code>foo.bar</code>. Widgets and nodes are added to
+# the tree with the <b>add</b> method.
+#
+# Widgets can be added to the tree either when the Widgettree is
+# created or as each node is opened. To add widgets as node are opened,
+# supply the <b>-createcommand</b> option. This command will be
+# evaluated when a node with no children is opened -- it should
+# call <b>add</b> to add children to the node.
+#
+# For a complete example of the use of this class, see the demonstration
+# script <b>demo/widgettree</b> (where the path is relative to the
+# directory the <b>tycho.kernel.gui</b> package is installed in).
+#
+# <b>Tree traversal</b>
+#
+# If the <b>-traversal</b> option is true, the widget tree can be
+# navigated using tab traversal and cursor keys. Each button will accept
+# the focus, and can be traversed using the standard Tk traversal
+# mechanism. The Return key opens or closes the node with the focus. In
+# addition, cursor keys navigate the tree as follows:
+# <dl>
+# <dt>
+# <b>down</b>
+# <dd>
+# Move to the next button in the same node. If at the bottom,
+# stay there.
+# <dt>
+# <b>up</b>
+# <dd>
+# Move to the previous button in the same node. If at the top,
+# stay there.
+# <dt>
+# <b>left</b>
+# <dd>
+# Move up to the parent node, if there is one. If there
+# isn't, stay there.
+# <dt>
+# <b>right</b>
+# <dd>
+# If the node is closed, open it. If there are child nodes,
+# move to the first child. If there aren't any, stay there.
+# </dl>
+#
+# Widgettree does not implement a selection mechanism, but does provides
+# some support for it with the <b>locate</b> method. If required,
+# selection can be implemented by wrapping or subclassing Widgettree.
+#
+# <b>Components</b>
+#
+# <i>Widgettree</i> dynamically creates components as widgets
+# and nodes are added to the tree.
+# <dl>
+# <dt><i>id</i>
+# <dd>
+# A leaf item of the tree. The <i>id</i> item is the id passed to the
+# <b>add</b> method when the item was created.
+# <dt><i>nodeid</i>
+# <dd>
+# A frame containing the children of a tree node.  The frame is not
+# created until a child is added to that node with the <b>add</b> method.
+# See the "frame" widget manual entry for details.
+# <dt>
+# <i>id</i><b>button</b>
+# <dd>
+# The button of a tree node. See the "button" widget manual entry for
+# details.
+# <dt>
+# <i>id</i><b>label</b>
+# <dd>
+# The label of a tree node. See the "label" widget manual entry for
+# details.
+# </dl>
+#
+# Widgettree is inspired by the SubPanel and MultiPanel widgets written by
+# Farhana Sheikh and Cliff Cordeiro.
+#
+class ::tycho::WidgetTree { 
+    inherit ::tycho::TWidget
 
     constructor {args} {}
     destructor {}
 
+    #####################################################################
+    ####                          options                            ####
+
+    # Specifies the closed icon image.  
     itk_option define -closedicon closedIcon Icon closedNode
+
+    # Specifies the open icon image.  
     itk_option define -openicon openIcon Icon openNode
 
+    # The command to execute when a node of the tree is closed.
     public variable closecommand ""
+
+    # The command to execute when a node of the tree is opened
+    # if the node does not currently contain any widgets
     public variable createcommand ""
+
+    # The command to execute when a node of the tree is opened
     public variable opencommand ""
+
+    # The minimum indent for each level of the tree.
     public variable indent 24
 
+    # The horizontal padding to use when gridding leaf widgets.
     itk_option define -padx padX PadX 0
+
+    # The vertical padding to use when gridding leaf widgets.
     itk_option define -pady padY PadY 0
+
+    # Specify Tab and cursor traversal through the tree. 
     itk_option define -traversal traversal Traversal 1
 
+    # The background color
     itk_option define -background background Background "#ececec"
-    itk_option define -disabledforeground disabledForeground DisabledForeground #a3a3a3 
+
+    # The foreground color propagated to disabled child widgets
+    itk_option define -disabledforeground disabledForeground \
+	    DisabledForeground #a3a3a3 
+    
+    # The font
     itk_option define -font font Font \
 	    "-Adobe-Helvetica-Bold-R-Normal--*-120-*-*-*-*-*-*"
+    
+    # The foreground color propagated to child widgets
     itk_option define -foreground foreground Foreground black
+
+    # The highlight color
     itk_option define -highlightcolor highlightColor HighlightColor black
+
+    # The highlight thickness
     itk_option define -highlightthickness highlightThickness \
 	    HighlightThickness 2
+
+    ###################################################################
+    ####                         public methods                    ####
 
     public method add      {type id args}
     public method close    {nodeid}
@@ -128,9 +213,15 @@ class iwidgets::Widgettree {
     public method traverse {mode {nodeid {}}}
     public method type     {id}
 
+    ###################################################################
+    ####                         private methods                   ####
+
     private method _mkNodeFrame {id}  ;# Make the containing frame
     private method _verifyNode {id}   ;# Verify that an id is a node
     private method _updateNodes {}  ;# Update all nodes after configuration
+
+    ###################################################################
+    ####                         private variables                 ####
 
     private variable _children  ;# Children of each node
     private variable _type      ;# Type of each widget, or "node"
@@ -138,54 +229,28 @@ class iwidgets::Widgettree {
     private variable _row       ;# Grid row of each item
     private variable _state     ;# State of each node: "opened" or "closed"
     private variable _nextrow   ;# The next available row in each node
-
-    method debug {args} {
-        eval $args
-    }
 }
 
 #
 # Use option database to override default resources.
 #
-# option add *Widgettree.thickness 3 widgetDefault ???
+# option add *WidgetTree.thickness 3 widgetDefault ???
 
 #
-# Provide a lowercase access method for the Widgettree class
+# Provide a lowercase access method for the WidgetTree class
 #
 proc widgettree { args } {
-    uplevel ::iwidgets::Widgettree $args
+    uplevel ::::tycho::WidgetTree $args
 }
 
-# ------------------------------------------------------------------
-##                        CONSTRUCTOR
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::constructor {args} {
-    # The counter for top-level items
-    set _nextrow() 0
-
-    # Set the grid column options for the top level frame
-    grid columnconfigure $itk_interior 0 -minsize $indent -weight 0
-    grid columnconfigure $itk_interior 1 -weight 1
-
-    # Add borderwidth and relief options
-    itk_option add hull.borderwidth hull.relief
-
-    # Configure options
-    eval itk_initialize $args
-}
-
-# ------------------------------------------------------------------
-##                             OPTIONS
-# ------------------------------------------------------------------
-
-# ------------------------------------------------------------------
-# OPTION: -closedicon
+#########################################################################
+#### option configuration: -closedicon
 #
 # Specifies the closed icon image.  
 # The default value is an image called closedNode, which is generated
 # automatically. Currently we have no pixmap.
-# ------------------------------------------------------------------
-configbody iwidgets::Widgettree::closedicon {
+#
+configbody ::tycho::WidgetTree::closedicon {
     if { $itk_option(-closedicon) == "closedNode" } {
 	if {[lsearch [image names] closedNode] == -1} {
 	    image create bitmap closedNode -data {
@@ -202,52 +267,63 @@ configbody iwidgets::Widgettree::closedicon {
     _updateNodes
 }
 
-# ----------------------------------------------------------------------
-## OPTION -closecommand
+#########################################################################
+#### option configureation:  -closecommand
 #
 # The command to execute when a node of the tree is closed.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::closecommand {
-}
-
-# ----------------------------------------------------------------------
-## OPTION -createcommand
+# If this command is null, clicking on the open-close button will
+# close the node; if not, the node id is appended
+# to the command and the command is executed at the global scope,
+# and the node will not close automatically.
 #
-# The command to execute when a node of the tree is opened and
-# the node has no children.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::createcommand {
+configbody ::tycho::WidgetTree::closecommand {
 }
 
-# ----------------------------------------------------------------------
-## OPTION -disabledforeground
+#########################################################################
+#### option configureation:  -createcommand
+#
+# The command to execute when a node of the tree is opened
+# if the node does not currently contain any widgets. The node id is appended
+# to the command and the command is executed at the global scope.
+# The command should use the <b>add</b> method to create the contents of
+# the node. If the command is null, the node is opened but
+# nothing will be displayed.
+#
+configbody ::tycho::WidgetTree::createcommand {
+}
+
+########################################################################
+#### option configureation:  -disabledforeground
 #
 # The foreground color propagated to disabled child widgets, including
 # node labels.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::disabledforeground {
+#
+configbody ::tycho::WidgetTree::disabledforeground {
     _updateNodes
 }
 
-# ----------------------------------------------------------------------
-## OPTION -foreground
+########################################################################
+#### option configureation:  -foreground
 #
 # The foreground color propagated to child widgets, including node labels.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::foreground {
+#
+configbody ::tycho::WidgetTree::foreground {
     _updateNodes
 }
 
-# ----------------------------------------------------------------------
-## OPTION -indent
+########################################################################
+#### option configureation:  -indent
 #
-# The minimum indent for each level of the tree. This
-# option is needed in order that each level is indented correctly,
-# regardless of the presence or not of open-close buttons at
-# each level. It sets the minimum indent, not the actual indent,
-# since that's how Tk's grid manager works.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::indent {
+# The minimum indent for each level of the tree. This option is needed
+# in order that each level is indented correctly, regardless of the
+# presence or not of open-close buttons at each level. It sets the
+# minimum indent, not the actual indent: if either <b>-closedbitmap</b>
+# or <b>-openedbitmap</b> makes an open-close button wider than the
+# specified indent, that width will be used instead. (There is no
+# reasonable way to avoid this, since that's how Tk's grid manager
+# works.) The default value is 24 pixels.
+#
+configbody ::tycho::WidgetTree::indent {
     grid columnconfigure $itk_interior 0 -minsize $indent
     foreach id [array names _state] {
 	if [::info exists itk_component($id)] {
@@ -256,14 +332,14 @@ configbody iwidgets::Widgettree::indent {
     }
 }
 
-# ------------------------------------------------------------------
-# OPTION: -openicon
+#########################################################################
+#### -openicon option configuration
 #
 # Specifies the open icon image.  
 # The default value is an image called openNode, which is generated
 # automatically. Currently we have no pixmap.
-# ------------------------------------------------------------------
-configbody iwidgets::Widgettree::openicon {
+#
+configbody ::tycho::WidgetTree::openicon {
     if { $itk_option(-openicon) == "openNode" } {
 	if {[lsearch [image names] openNode] == -1} {
 	    image create bitmap openNode -data {
@@ -280,24 +356,28 @@ configbody iwidgets::Widgettree::openicon {
     _updateNodes
 }
 
-# ----------------------------------------------------------------------
-## OPTION -opencommand
+########################################################################
+#### option configureation:  -opencommand
 #
 # The command to execute when a node of the tree is opened
-# and the node already has children.
+# and the node already has children. The node id is appended
+# to the command and the command is executed at the global scope.
 # The node is opened after the command returns.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::opencommand {
+#
+configbody ::tycho::WidgetTree::opencommand {
 }
 
-# ----------------------------------------------------------------------
-## OPTION -padx
+########################################################################
+#### option configureation:  -padx
 #
-# The padding to use when packing widgets. Widgets are packed
-# with the <b>-padx</b> option to the Tk grid command set to this value.
-# Changing this option will re-pad _all_ widgets.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::padx {
+# The horizontal padding to use when gridding leaf widgets. By default,
+# all leaves are packed with the same padding. If needed, the Tk
+# \fBgrid configure\fR command can be used to override this
+# default -- note, however, that reconfiguring this option after
+# widgets have been created will return all widgets to the new
+# value of <b>-pady</b>.
+#
+configbody ::tycho::WidgetTree::padx {
     foreach id [array names _type] {
 	if { $_type($id) != "node" } {
 	    grid configure $itk_component($id) -padx $itk_option(-padx)
@@ -305,14 +385,17 @@ configbody iwidgets::Widgettree::padx {
     }
 }
 
-# ----------------------------------------------------------------------
-## OPTION -pady
+########################################################################
+#### option configureation:  -pady
 #
-# The padding to use when packing widgets. Widgets are packed
-# with the <b>-pady</b> option to the Tk grid command set to this value.
-# Changing this option will re-pad _all_ widgets.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::pady {
+# The vertical padding to use when gridding leaf widgets. By default,
+# all leaves are packed with the same padding. If needed, the Tk
+# \fBgrid configure\fR command can be used to override this
+# default -- note, however, that reconfiguring this option after
+# widgets have been created will return all widgets to the new
+# value of <b>-pady</b>.
+#
+configbody ::tycho::WidgetTree::pady {
     foreach id [array names _type] {
 	if { $_type($id) != "node" } {
 	    grid configure $itk_component($id) -pady $itk_option(-pady)
@@ -320,16 +403,16 @@ configbody iwidgets::Widgettree::pady {
     }
 }
 
-# ----------------------------------------------------------------------
-## OPTION -traversal
+########################################################################
+#### option configureation:  -traversal
 #
 # Specify whether or not to support Tab and cursor traversal through
 # the tree. If true, the tab and cursor keys can be used to
 # navigate through the tree (see <i>Tree Traversal</i>. The
 # default is true. Note that this option is not called <b>-takefocus</b>
 # because that allows the focus to go to the hull, which we don't want.
-# ----------------------------------------------------------------------
-configbody iwidgets::Widgettree::traversal {
+#
+configbody ::tycho::WidgetTree::traversal {
     if !$itk_option(-traversal) {
         # If this widget had the focus, remove it
         if [string match $itk_component(hull)* \
@@ -339,13 +422,31 @@ configbody iwidgets::Widgettree::traversal {
     }
 }
 
-# ------------------------------------------------------------------
-##                            METHODS
-# ------------------------------------------------------------------
+#######################################################################
+#### constructor
+#
+body ::tycho::WidgetTree::constructor {args} {
+    # The counter for top-level items
+    set _nextrow() 0
+
+    # Set the grid column options for the top level frame
+    grid columnconfigure $itk_interior 0 -minsize $indent -weight 0
+    grid columnconfigure $itk_interior 1 -weight 1
+
+    # Add borderwidth and relief options
+    itk_option add hull.borderwidth hull.relief
+
+    # Configure options
+    eval itk_initialize $args
+}
 
 
-# ------------------------------------------------------------------
-## METHOD: add type id ?option value...? ?optioncmds?
+#########################################################################
+#########################################################################
+####                      public methods                             ####
+
+#####################################################################
+#### add type id ?option value...? ?optioncmds?
 #
 # Add a new node or widget to the tree. The first argument is the widget type,
 # and the second is an id to give it. Raise an error if an item with
@@ -355,8 +456,8 @@ configbody iwidgets::Widgettree::traversal {
 # the type of the widget to create. Optional arguments are passed to the
 # widget constructor, except for the _optioncmds_, if supplied. The
 # return value is the id.
-# ------------------------------------------------------------------    
-body iwidgets::Widgettree::add {type id args} {
+#
+body ::tycho::WidgetTree::add {type id args} {
     if [::info exists _type($id)] {
 	error "Item $id already exists"
     }
@@ -446,16 +547,16 @@ body iwidgets::Widgettree::add {type id args} {
     return $id
 }
 
-# ------------------------------------------------------------------
-## METHOD: close nodeid
+#####################################################################
+#### close nodeid
 #
 # Close a node of the tree. If the node is already closed or is
 # disabled, do nothing.
 # If the -closecommand option is not null, append the nodeid and evaluate
 # the command in the global scope -- the close command must explicitly close
 # the node with the hide{} method. Otherwise, just close the node.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::close {nodeid} {
+#
+body ::tycho::WidgetTree::close {nodeid} {
     _verifyNode $nodeid
     if { $_state($nodeid) == "closed"  \
 	    || [$itk_component(${nodeid}button) cget -state] == "disabled" } {
@@ -472,14 +573,14 @@ body iwidgets::Widgettree::close {nodeid} {
     }
 }
 
-# ------------------------------------------------------------------
-## METHOD: delete id
+#####################################################################
+#### delete id
 #
 # Delete an item from the tree. If the item is a node, then all descendents
 # are deleted too. Raise an error if the item does not exist. Grid rows
 # occupied by the item are not reclaimed, but this should not be visible.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::delete {id} {
+#
+body ::tycho::WidgetTree::delete {id} {
     if ![::info exists _type($id)] {
 	error "Unknown item: $id"
     }
@@ -527,39 +628,39 @@ body iwidgets::Widgettree::delete {id} {
     set _children($parent) [lreplace $_children($parent) $t $t]
 }
 
-# ------------------------------------------------------------------
-## METHOD: disable nodeid
+#####################################################################
+#### disable nodeid
 #
 # Disable a node. The button will be disabled, and the label foreground
 # change to the disabled foreground.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::disable {nodeid} {
+#
+body ::tycho::WidgetTree::disable {nodeid} {
     _verifyNode $nodeid
     $itk_component(${nodeid}button) configure -state disabled
     $itk_component(${nodeid}label) configure \
 	    -foreground $itk_option(-disabledforeground)
 }
 
-# ------------------------------------------------------------------
-## METHOD: enable nodeid
+#####################################################################
+#### enable nodeid
 #
 # Enable a node. The button will be enabled, and the label foreground
 # change to the regular foreground.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::enable {nodeid} {
+#
+body ::tycho::WidgetTree::enable {nodeid} {
     _verifyNode $nodeid
     $itk_component(${nodeid}button) configure -state normal
     $itk_component(${nodeid}label) configure -foreground $itk_option(-foreground)
 }
 
-# ------------------------------------------------------------------
-## METHOD: hide nodeid
+#####################################################################
+#### hide nodeid
 #
 # Unconditionally close a node of the tree, without checking the
 # -closecommand option. If the node is already closed or is disabled,
 # do nothing.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::hide {nodeid} {
+#
+body ::tycho::WidgetTree::hide {nodeid} {
     _verifyNode $nodeid
     if { $_state($nodeid) != "closed" } {
 	return
@@ -575,13 +676,13 @@ body iwidgets::Widgettree::hide {nodeid} {
     set _state($nodeid) closed
 }
 
-# ------------------------------------------------------------------
-## METHOD: itemcget id option
+#####################################################################
+#### itemcget id option
 #
 # Get a configuration option of an item. If a node, get an option of
 # the node label, otherwise get an option of the corresponding widget.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::itemcget {id option} {
+#
+body ::tycho::WidgetTree::itemcget {id option} {
     if ![::info exists _type($id)] {
 	error "Unknown item: $id"
     }
@@ -592,13 +693,13 @@ body iwidgets::Widgettree::itemcget {id option} {
     }
 }
 
-# ------------------------------------------------------------------
-## METHOD: itemconfigure id ?option value ...? 
+#####################################################################
+#### itemconfigure id ?option value ...? 
 #
 # Configure options of an item. If a node, configure the
 # node label, otherwise configure the corresponding widget.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::itemconfigure {id {option {}} args} {
+#
+body ::tycho::WidgetTree::itemconfigure {id {option {}} args} {
     if ![::info exists _type($id)] {
 	error "Unknown item: $id"
     }
@@ -609,8 +710,8 @@ body iwidgets::Widgettree::itemconfigure {id {option {}} args} {
     }
 }
 
-# ------------------------------------------------------------------
-## METHOD: locate x y ?id?
+#####################################################################
+#### locate x y ?id?
 #
 # Return the id of the item at the given _x_ and _y_ coordinates.
 # If the _id_ argument is given, it must be a node, and the _x_ and
@@ -618,8 +719,8 @@ body iwidgets::Widgettree::itemconfigure {id {option {}} args} {
 # is negative, then the _x_ coordinate is ignored in figuring out
 # which item is under the mouse. If _x_ is non-negative, then an id
 # is returned only if the mouse is actually over an item.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::locate {x y {id {}}} {
+#
+body ::tycho::WidgetTree::locate {x y {id {}}} {
     if { $id == "" } {
 	set master $itk_interior
     } else {
@@ -659,21 +760,21 @@ body iwidgets::Widgettree::locate {x y {id {}}} {
     }
 }
 
-# ------------------------------------------------------------------
-## METHOD: names ?nodeid?
+#####################################################################
+#### names ?nodeid?
 #
 # Return the ids of children of a node. If _nodeid_ is not supplied, return
 # the top-level ids; otherwise return ids of the children of the node.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::names {{nodeid {}}} {
+#
+body ::tycho::WidgetTree::names {{nodeid {}}} {
     if { $nodeid != "" } {
 	_verifyNode $nodeid
     }
     return $_children($nodeid)
 }
 
-# ------------------------------------------------------------------
-## METHOD: open nodeid
+#####################################################################
+#### open nodeid
 #
 # Open a node of the tree. If the node is already opened or is disabled,
 # do nothing.
@@ -682,8 +783,8 @@ body iwidgets::Widgettree::names {{nodeid {}}} {
 # children and -opencommand is not null, append the id and
 # evaluate at the global scope. Raise an error if the node does not exist
 # or if _nodeid_ is not a node.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::open {nodeid} {
+#
+body ::tycho::WidgetTree::open {nodeid} {
     _verifyNode $nodeid
     if { $_state($nodeid) == "open"  \
 	    || [$itk_component(${nodeid}button) cget -state] == "disabled"} {
@@ -709,13 +810,13 @@ body iwidgets::Widgettree::open {nodeid} {
     $itk_component(${nodeid}button) configure -image $itk_option(-openicon)
 }
 
-# ------------------------------------------------------------------
-## METHOD: toggle nodeid
+#####################################################################
+#### toggle nodeid
 #
 # Toggle the state of a node: if it is open, close it; if it is closed,
 # open it. If it is disabled, do nothing.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::toggle {nodeid} {
+#
+body ::tycho::WidgetTree::toggle {nodeid} {
     _verifyNode $nodeid
     if { [$itk_component(${nodeid}button) cget -state] != "disabled" } {
 	if { $_state($nodeid) == "open" } {
@@ -726,8 +827,8 @@ body iwidgets::Widgettree::toggle {nodeid} {
     }
 }
 
-# ------------------------------------------------------------------
-## METHOD: traverse mode ?nodeid?
+#####################################################################
+#### traverse mode ?nodeid?
 #
 # Traverse the tree. This method is provided because Tk's default
 # Tab traversal doesn't give the user enough control over where
@@ -741,8 +842,8 @@ body iwidgets::Widgettree::toggle {nodeid} {
 # be <b>to</b>, which moves the focus to the given node.
 # If the <b>-traversal</b> option is false, the method returns
 # without doing anything.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::traverse {mode {nodeid {}}} {
+#
+body ::tycho::WidgetTree::traverse {mode {nodeid {}}} {
     if !$itk_option(-traversal) {
         return
     }
@@ -812,29 +913,33 @@ body iwidgets::Widgettree::traverse {mode {nodeid {}}} {
     }
 }
 
-# ------------------------------------------------------------------
-## METHOD: type id
+#####################################################################
+#### type id
 #
 # Return the type of _id_. The type will be value of the _type_
 # argument passed to the <b>add</b> method when the item was created.
 # Raise an error if the item does not exist.
-# ------------------------------------------------------------------
-body iwidgets::Widgettree::type {id} {
+#
+body ::tycho::WidgetTree::type {id} {
     if ![::info exists _type($id)] {
 	error "Unknown item: $id"
     }
     return $_type($id)
 }
 
-# ------------------------------------------------------------------
-## PRIVATE METHOD: _mkNodeFrame id
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+#####################################################################
+#### _mkNodeFrame
 #
 # Create the frame for an individual node. This method is called the
 # first time an item is added to a node, not when the node itself
 # is created. This strategy reduces the time to create each node
 # of the tree.
-# ------------------------------------------------------------------    
-body iwidgets::Widgettree::_mkNodeFrame {id} {
+#
+body ::tycho::WidgetTree::_mkNodeFrame {id} {
     # Create the frame
     itk_component add $id {
 	frame $itk_interior.$id
@@ -854,12 +959,12 @@ body iwidgets::Widgettree::_mkNodeFrame {id} {
     grid columnconfigure $itk_interior.$id 1 -weight 1
 }
 
-# ------------------------------------------------------------------
-## PRIVATE METHOD: _updateNodes
+#####################################################################
+#### _updateNodes
 #
 # Update node visuals in response to configuration update.
-# ------------------------------------------------------------------    
-body iwidgets::Widgettree::_updateNodes {} {
+#
+body ::tycho::WidgetTree::_updateNodes {} {
     foreach id [array names _state] {
         if { $_state($id) == "closed" } {
             $itk_component(${id}button) configure -image $itk_option(-closedicon)
@@ -876,12 +981,12 @@ body iwidgets::Widgettree::_updateNodes {} {
     }
 }
 
-# ------------------------------------------------------------------
-## PRIVATE METHOD: _verifyNode id
+#####################################################################
+#### _verifyNode id
 #
 # Raise an error if _id_ is not known or is not a node.
-# ------------------------------------------------------------------    
-body iwidgets::Widgettree::_verifyNode {id} {
+#
+body ::tycho::WidgetTree::_verifyNode {id} {
     if ![::info exists _type($id)] {
 	error "Unknown item: $id"
     }
