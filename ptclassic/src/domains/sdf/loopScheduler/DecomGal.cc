@@ -68,8 +68,10 @@ int DecomGal :: simplify() {
 		SDFClustPort* p;
 		while ((p = nextP++) != 0) {
 			if (p->isItOutput()) continue;
+		        // Use a two casts because Fraction does not
+			// have a direct cast to int. 
 			if (p->numTokens() >= 
-				p->numIO() * int(c->repetitions)) {
+				p->numIO() * int( double(c->repetitions))) {
 				// this port has enough delay. Remove it.
 				LOG_DEL; delete p->far();
 				p->disconnect(0);
