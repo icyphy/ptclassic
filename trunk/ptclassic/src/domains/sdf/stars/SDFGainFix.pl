@@ -78,33 +78,30 @@ then overflow occurs and the overflow is taken care of by the method
 specified by this parameter.
 The keywords for overflow handling methods are:
 "saturate" (the default), "zero_saturate", "wrapped", and "warning".
+The "warning" option will generate a warning message whenever overflow occurs.
 		}
         }
         protected {
 		Fix fixIn, out;
         }
         setup {
-                if ( ! int(ArrivingPrecision) ) {
-                  const char* IP = InputPrecision;
-                  int in_IntBits = Fix::get_intBits(IP);
-                  int in_len = Fix::get_length(IP);
-                  fixIn = Fix(in_len, in_IntBits);
-		}
+                if ( ! int(ArrivingPrecision) )
+                  fixIn = Fix( ((const char *) InputPrecision) );
 
-                const char* OP = OutputPrecision;
-                int out_IntBits = Fix::get_intBits(OP);
-                int out_len = Fix::get_length(OP);
-                out = Fix(out_len, out_IntBits);
-
-                const char* OV = OverflowHandler;
-                out.set_ovflow(OV);
+                out = Fix( ((const char *) OutputPrecision) );
+                out.set_ovflow( ((const char *) OverflowHandler) );
         }
 	go {
 		// all computations should be performed with out since that
 		// is the Fix variable with the desired overflow handler
-                fixIn = Fix(input%0);
 		out = Fix(gain);
-                out *= fixIn;
+		if ( int(ArrivingPrecision) ) {
+                  out *= Fix(input%0);
+		}
+		else {
+                  fixIn = Fix(input%0);
+                  out *= fixIn;
+		}
 		output%0 << out;
 	}
 }

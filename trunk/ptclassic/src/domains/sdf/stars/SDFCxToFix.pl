@@ -43,6 +43,7 @@ then overflow occurs and the overflow is taken care of by the method
 specified by this parameter.
 The keywords for overflow handling methods are:
 "saturate" (the default), "zero_saturate", "wrapped", and "warning".
+The "warning" option will generate a warning message whenever overflow occurs.
 		}
         }
 	defstate {
@@ -60,21 +61,16 @@ The keywords are: "truncate" (the default) and "round".
 		Fix out;
 	}
 	setup {
-		const char* OP = OutputPrecision;
-		int outIntBits = Fix::get_intBits(OP);
-		int outLen = Fix::get_length(OP);
-		out = Fix(outLen, outIntBits);
+		out = Fix( ((const char *) OutputPrecision) );
+		out.set_ovflow( ((const char *) OverflowHandler) );
 
 		const char* Masking = masking;
-		if ( strcasecmp(Masking, "truncate") == 0)
+		if ( strcasecmp(Masking, "truncate") == 0 )
 		  out.Set_MASK(Fix::mask_truncate);
-		else if ( strcasecmp(Masking, "round") == 0)
+		else if ( strcasecmp(Masking, "round") == 0 )
 		  out.Set_MASK(Fix::mask_truncate_round);
 		else
 		  Error::abortRun(*this, ": not a valid function for masking");
-
-		const char* OV = OverflowHandler;
-		out.set_ovflow(OV);
 	}
 	go {
 		out = (double) (input%0);

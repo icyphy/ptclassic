@@ -67,19 +67,15 @@ then overflow occurs and the overflow is taken care of by the method
 specified by this parameter.
 The keywords for overflow handling methods are:
 "saturate" (the default), "zero_saturate", "wrapped", and "warning".
+The "warning" option will generate a warning message whenever overflow occurs.
 		}
         }
         protected {
 		Fix t;
         }
         setup {
-		const char* OP = OutputPrecision;
-		int out_IntBits = Fix::get_intBits(OP);
-		int out_len = Fix::get_length(OP);
-		t = Fix(out_len, out_IntBits);
-
-                const char* OV = OverflowHandler;
-                t.set_ovflow(OV);
+		t = Fix( ((const char *) OutputPrecision) );
+                t.set_ovflow( ((const char *) OverflowHandler) );
         }
 	go {
 		t = Fix(value);
