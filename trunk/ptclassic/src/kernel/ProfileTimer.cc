@@ -47,6 +47,7 @@ extern "C" int getitimer(int, struct itimerval *);
 int ProfileTimer::setupFlag = 0;
 
 ProfileTimer::ProfileTimer() {
+#if !defined(PT_NO_TIMER)
     if (setupFlag != 0xABCDEF) {
 	itimerval year;
 	// One year until this interval timer triggers an interrupt.  If 
@@ -59,6 +60,7 @@ ProfileTimer::ProfileTimer() {
 	setitimer(ITIMER_PROF,&year,0);
 	setupFlag = 0xABCDEF;
     }
+#endif
     reset();
 }
 
@@ -75,8 +77,12 @@ TimeVal ProfileTimer::elapsedCPUTime() const {
 
 // Read the system clock.
 TimeVal ProfileTimer::timeOfProfile() const {
+#if defined(PT_NO_TIMER)
+    return 0;
+#else
     itimerval time;
     getitimer(ITIMER_PROF,&time);
     TimeVal t = time.it_value;
     return t;
+#endif  //PT_NO_TIMER
 }
