@@ -11,7 +11,7 @@
 # objects can be maintained.
 
 
-DIRS = kernel stars
+DIRS = kernel stars expgraph
 
 ME = sdf
 
