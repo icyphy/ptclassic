@@ -158,6 +158,7 @@ int SDFScheduler :: setup (Block& block) {
 			StringList msg = s.readFullName();
 			msg += " is not an SDF star: domain = ";
 			msg += s.domain();
+			errorHandler.error(msg);
 			invalid = TRUE;
 			return FALSE;
 		}

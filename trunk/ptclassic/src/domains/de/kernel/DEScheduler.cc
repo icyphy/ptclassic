@@ -70,6 +70,7 @@ int DEScheduler :: setup (Block& b) {
 			StringList msg = s.readFullName();
 			msg += " is not a DE star: domain = ";
 			msg += s.domain();
+			errorHandler.error(msg);
 			return FALSE;
 		}
 		// set up the block's event queue.
