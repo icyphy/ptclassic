@@ -9,14 +9,14 @@
     Definitions of domain-specific PortHole classes.
 */
 
-#ifndef _MTDFConnect_h
-#define _MTDFConnect_h
+#ifndef _MTDFPortHole_h
+#define _MTDFPortHole_h
 
 #ifdef __GNUG__
 #pragma interface
 #endif
 
-#include "Connect.h"
+#include "PortHole.h"
 class MTDFGeodesic;
 
 class MTDFPortHole : public PortHole
@@ -26,29 +26,31 @@ public:
     virtual int isA(const char* className) const;
 
     // Constructor.
-    MTDFPortHole();
-
-    // An alias for the inherited myGeodesic member.
-    MTDFGeodesic*& myGeodesic;
+    MTDFPortHole::MTDFPortHole()
+	: myGeodesic((MTDFGeodesic*&)PortHole::myGeodesic) {}
 
     // Allocate and return a MTDFGeodesic.
-    virtual Geodesic* allocateGeodesic();
+    /* virtual */ Geodesic* allocateGeodesic();
 
     /* Redefine PortHole methods because Geodesic lacks certain virtual
        functions.
     */
     void MTDFPortHole::getParticle();
     void MTDFPortHole::putParticle();
+
+protected:
+    // An alias for the inherited myGeodesic member.
+    MTDFGeodesic*& myGeodesic;
 };
 
 class InMTDFPort : public MTDFPortHole
 {
 public:
     // Input/output identification.
-    virtual int isItInput() const;
+    /* virtual */ int isItInput() const;
 
     // Get data from the Geodesic.
-    virtual void grabData();
+    /* virtual */ void receiveData();
 };
 
 
@@ -56,13 +58,13 @@ class OutMTDFPort : public MTDFPortHole
 {
 public:
     // Input/output identification.
-    virtual int isItOutput() const;
+    /* virtual */ int isItOutput() const;
 
     // Update buffer pointer (for % operator) and clear old Particles.
-    virtual void grabData();
+    /* virtual */ void receiveData();
 
     // Put data into the Geodesic.
-    virtual void sendData();
+    /* virtual */ void sendData();
 };
 
  
@@ -74,20 +76,20 @@ class MultiInMTDFPort : public MultiMTDFPort
 {
 public:
     // Input/output identification.
-    virtual int isItInput() const;
+    /* virtual */ int isItInput() const;
  
     // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+    /* virtual */ PortHole& newPort();
 };
  
 class MultiOutMTDFPort : public MultiMTDFPort
 {     
 public:
     // Input/output identification.
-    virtual int isItOutput() const;
+    /* virtual */ int isItOutput() const;
 
     // Add a new physical port to the MultiPortHole list.
-    virtual PortHole& newPort();
+    /* virtual */ PortHole& newPort();
 };
 
 #endif
