@@ -252,7 +252,7 @@ body ::tycho::Strip::addLabels {id canvas slate args} {
     foreach {name label} $args {
 	# Remember the label
 	set labels($name) $label
-	assign x0 y0 [$canvas coords $component($name)]
+	::tycho::assign x0 y0 [$canvas coords $component($name)]
 	lappend itemlist $name.label \
 		[list "text" $x0 $y0 -anchor nw -text $label -font $labelfont]
     }
@@ -394,7 +394,7 @@ body ::tycho::Strip::getBox {id canvas slate xposition} {
 #
 body ::tycho::Strip::moveBox {id canvas slate name low high} {
     # Get the coordinates of the strip
-    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
 
     # Calculate the positions of the box, reusing cached ones
     # if possible
@@ -427,7 +427,7 @@ body ::tycho::Strip::recompute {id canvas} {
     }
     
     # Set the range and conversion variables
-    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
     set length [expr $x1 - $x0]
     set range [expr $to($id) - $from($id)]
     set convertRatio($id) [expr $length / $range]
