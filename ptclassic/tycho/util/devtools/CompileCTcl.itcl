@@ -101,8 +101,10 @@ body ::tycho::CompileCTcl::createMakefile {} {
 	# Create a makefile by reading in from the template and 
 	# substituting %basename% for the value of $basename
 	# FIXME: templateMakefile should probably be a preference.
+	# FIXME: this will fail if tycho.edit.textedit is not installed
+	global env
 	set templateMakefile \
-		[file join $tycho editors textedit templates Cmakefile.mk]
+		[file join $env(TEXTEDIT_LIBRARY) templates Cmakefile.mk]
 	set fdin [open $templateMakefile r]
 	set fdout [open [file join $dirname $makefile] w]
 	while {[gets $fdin linein] >= 0} {
