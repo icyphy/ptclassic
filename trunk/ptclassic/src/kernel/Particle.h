@@ -28,28 +28,29 @@ $Id$
 // and Printer that operate independently of Particle type
 enum dataType { INT, FLOAT, STRING, ANYTYPE };
 
+// Particle is a virtual base class -- you can't declare a Particle.
 class Particle
 {
 public:
 	// Identify what type of Particle this is
-	virtual dataType readType() {};
+	virtual dataType readType() = 0;
 
 	// Cast this Particle to an int, float, and char*
-	virtual operator int () {return 0;};
-	virtual operator float () {return 0.;};
-	virtual operator StringList () {return "";};
+	virtual operator int () {return 0;}
+	virtual operator float () {return 0.;}
+	virtual operator StringList () {return "";}
 
 	// Zero or initialize this Particle
-	virtual void initialize() {};
+	virtual void initialize() = 0;
 
 	// Load the Particle with data
-	virtual operator << (int) {};
-	virtual operator << (float) {};
+	virtual void operator << (int) = 0;
+	virtual void operator << (float) = 0;
 
 	// Copy a Particle -- since Stars must be able to
 	// assign Particles in type-independent fashion,
 	// the compiler can't handle this
-	virtual Particle& operator = (const Particle&) {};
+	virtual Particle& operator = (const Particle&) = 0;
 
 protected:
 	// Before copying Particles, always compare their types
@@ -94,8 +95,8 @@ public:
 	void initialize() {data=0;}
 
 	// Load up with data
-	operator << (int i) {data=i;}
-	operator << (float f) {data=(int)f;}
+	void operator << (int i) {data=i;}
+	void operator << (float f) {data=(int)f;}
 
 	// Copy the Particle
 	Particle& operator = (const Particle&);
@@ -127,8 +128,8 @@ public:
         void initialize() {data=0.0;}
  
         // Load up with data
-        operator << (int i) {data=(float)i;}
-        operator << (float f) {data=f;}
+        void operator << (int i) {data=(float)i;}
+        void operator << (float f) {data=f;}
 
         // Copy the Particle
         Particle& operator = (const Particle&);
