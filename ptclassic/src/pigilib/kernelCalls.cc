@@ -241,6 +241,7 @@ static const MultiPortHole* findMPH(const Block* b,const char* name) {
 // const version of Block::stateWithName
 static const State* findState(const Block* b,const char* name) {
 	const char* clName = b->className();  // FIXME: needed by ACS domain.
+	clName = clName; // ACS needs b->className() as a secondary initialization on KnownBlock list.
 	CBlockStateIter next(*b);
 	const State* m;
 	while ((m = next++) != 0) {
@@ -727,6 +728,7 @@ realGetParams(const Block* block, ParamListType* pListPtr,
 	pListPtr->dynamic_memory = 0;
 	pListPtr->flat_plist_flag = TRUE;
 	const char* clName = block->className(); // FIXME: needed by ACS domain.
+	clName = clName; // ACS needs b->className() as a secondary initialization on KnownBlock list.
 
 	int n = block->numberStates();
 	int j = 0; // # of settable states, initialized to 0
@@ -941,6 +943,7 @@ KcProfile (const char* name) {
 // display settable states.  Omit those in the "names" list.
 static void displayStates(const Block *b,char** names,int n_names) {
 	const char* clName = b->className(); // FIXME: needed by ACS domain.
+	clName = clName; // ACS needs b->className() as a secondary initialization on KnownBlock list.
 	if (b->numberStates()) accum_string ("Settable states:\n");
 	CBlockStateIter nexts(*b);
 	const State *s;
