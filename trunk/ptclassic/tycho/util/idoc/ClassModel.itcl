@@ -55,6 +55,36 @@
 #   <li><b>-docfile</b>: The file with the parents documentation (.tim).
 #   </ul>
 # 
+# <li><b>constructor</b> _name_: A constructor. Constructors should be named
+# according to the language. (See note following methods below.)
+# Constructors can appear only at the top level. Constructors have the 
+# following attributes:
+#   <ul>
+#   <li><b>-protection</b>: The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
+#        on the languages. The default is null.
+#   </ul>
+# Constructors typically contain nested _parameter_ entitiers, which list
+# the parameters of the constructor, and may contain nested _annotation_ 
+# entities as documentation.
+#
+# <li><b>destructor</b> _name_: A destructor. Destructors should be named
+# according to the language. (See note following methods below.)
+# Destructors can appear only at the top level. Destructors have the 
+# following attributes:
+#   <ul>
+#   <li><b>-protection</b>: The protection level of the method. Usually,
+#        this includes at least "private", "protected", and "public".
+#        The default is "public."
+#   <li><b>-modifiers</b>: Other modifiers. Possible values depend
+#        on the languages. The default is null.
+#   </ul>
+# Destructors may contain nested _parameter_ entitiers, which list
+# any parameters, and may contain nested _annotation_ entities
+# as documentation.
+#
 # <li><b>method</b> _name_: A method. Methods can appear only
 # at the top level. Methods have the following attributes:
 #   <ul>
@@ -71,14 +101,13 @@
 #        on the shared class data. (These are called "class methods"
 #        in Smalltalk and "procs" in [Incr Tcl]). Default is
 #        "instance."
-#   <li><b>-sourcefile</b>: Source file which defines this method. Default is 
-#        "", which signifies $source. Useful when the model is flattened.
-#   <li><b>-sourceline</b>: Line in source which defines this method. Default 
-#        is 0.
 #   </ul>
 # Methods typically contain nested _parameter_ entities, which lists
 # the parameters of the method, and nested _annotation_ entities
-# which document its purpose.
+# which document its purpose. Methods should be uniquely named. In
+# languages which support polymorphism, method "names" in the Class
+# model should be the signatures of the given method, i.e.: add(int,int):int,
+# add(int,float):float, etc. 
 #
 # <li><b>variable</b> _name_: A variable. Variables can appear only
 # at the top level. Variables have the following attributes:
@@ -99,10 +128,6 @@
 #   <li><b>-default</b>: The initial/default value of the variable. The defualt 
 #        is null. This attribute does not apply to certain languages and
 #        should then be ignored.
-#   <li><b>-sourcefile</b>: Source file which defines this variable. Default is 
-#        "", which signifies $source. Useful when the model is flattened.
-#   <li><b>-sourceline</b>: Line in source which defines this variable. Default 
-#        is 0.</ul>
 # A variable often contains nested _annotation_ entities
 # which document its purpose.
 #
@@ -192,6 +217,18 @@ class ::tycho::Class {
     # Add a top-level annotation with attributes to the class
     method annotation {name string args}
 
+    # Add a constructor with attributes to the class
+    method construct {name args}
+
+    # Get the constructor(s) of the class
+    method constructors {}
+
+    # Add a destructor with attributes to the class
+    method destruct {name args}
+
+    # Get the destructor(s) of the class
+    method destructors {}
+
     # Add a method with attributes to the class
     method method {name args}
 
@@ -207,7 +244,7 @@ class ::tycho::Class {
     # Add a parent with attributes to the class
     method parent {name args}
 
-    # Get the parents of a method
+    # Get the parents of the class
     method parents {}
 
     # Add a top-level variable with attributes to the class
@@ -267,6 +304,18 @@ body ::tycho::Class::constructor {args} {
             -sourcefile "" \
             -docfile ""
 
+    # Define the "constructor" entity
+    defineEntityType constructor \
+            -ordered 1 \
+	    -protection public \
+	    -modifiers "" 
+
+    # Define the "destructor" entity
+    defineEntityType destructor \
+            -ordered 1 \
+	    -protection public \
+	    -modifiers "" 
+
     # Define the "method" entity
     defineEntityType method \
             -ordered 1 \
@@ -274,8 +323,6 @@ body ::tycho::Class::constructor {args} {
 	    -modifiers "" \
 	    -type "" \
 	    -scope instance \
-            -sourcefile "" \
-            -sourceline 0
 
     # Define the "variable" entity
     defineEntityType variable \
@@ -284,8 +331,6 @@ body ::tycho::Class::constructor {args} {
 	    -type "" \
 	    -scope instance \
             -default "" \
-            -sourcefile "" \
-            -sourceline 0
 
     # Define the "parameter" entity
     defineEntityType parameter \
@@ -310,6 +355,50 @@ body ::tycho::Class::annotation {name value args} {
     _verifynot annotation $cntxt $local $name
     _addentity annotation $cntxt $local $name $value $args
     list delete annotation $name
+}
+
+########################################################################
+#### construct
+#
+# Add a new constructor and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# constructor. Flag an error if the constructor already exists. 
+#
+body ::tycho::Class::construct {name args} {
+    _verifynot constructor {} $name $name
+    _addentity constructor {} $name {} {} $args
+    list delete constructor $name
+}
+
+########################################################################
+#### constructors
+#
+# Get the constructors of the class.
+#
+body ::tycho::Class::constructors {} {
+    _children constructor {}
+}
+
+########################################################################
+#### destruct
+#
+# Add a new destructor and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# destructor. Flag an error if the destructor already exists. 
+#
+body ::tycho::Class::destruct {name args} {
+    _verifynot destructor {} $name $name
+    _addentity destructor {} $name {} {} $args
+    list delete destructor $name
+}
+
+########################################################################
+#### destructors
+#
+# Get the destructors of the class.
+#
+body ::tycho::Class::destructors {} {
+    _children destructor {}
 }
 
 ########################################################################
@@ -398,8 +487,6 @@ body ::tycho::Class::parent {name args} {
 body ::tycho::Class::parents {} {
     _children parent {}
 }
-
-
 
 ########################################################################
 #### variable
