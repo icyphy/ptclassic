@@ -209,7 +209,7 @@ extern "C" int	MLEvaluate
 	PT_MMA_STUB((MLINK, ml_charp));
 extern "C" void MLDefaultHandler
 	PT_MMA_VOID_STUB((MLINK, unsigned long, unsigned long));
-extern "C" long int  MLDefaultYielder
+extern "C" PTMLLONG MLDefaultYielder
 	PT_MMA_STUB((MLINK, MLYieldParameters));
 
 extern "C" int	MLMainStep
@@ -293,7 +293,7 @@ extern "C" MLYieldFunctionObject MLCreateYieldFunction
 	PT_MMA_STUB((MLEnvironment, MLYieldFunctionType, MLPointer));
 extern "C" MLYieldFunctionType MLDestroyYieldFunction
 	PT_MMA_STUB((MLYieldFunctionObject));
-extern "C" long int MLCallYieldFunction
+extern "C" PTMLLONG MLCallYieldFunction
 	PT_MMA_STUB((MLYieldFunctionObject, MLINK, MLYieldParameters));
 
 extern "C" MLYieldFunctionObject MLYieldFunction
@@ -306,31 +306,46 @@ extern "C" MLYieldFunctionObject MLDefaultYieldFunction
 extern "C" int MLSetDefaultYieldFunction
 	PT_MMA_STUB((MLEnvironment, MLYieldFunctionObject));
 
-extern "C" long int MLError
+extern "C" PTMLLONG MLError
 	PT_MMA_STUB((MLINK));
 extern "C" int   MLClearError
 	PT_MMA_STUB((MLINK));
 extern "C" int   MLSetError
-	PT_MMA_STUB((MLINK, long int));
+	PT_MMA_STUB((MLINK, PTMLLONG));
 extern "C" kcharp_ct MLErrorMessage
 	PT_MMA_STUB((MLINK));
 
-extern "C" long int MLAlert
+
+/* MLVERSION is defined by Mathematica 3.0 */
+
+#ifdef MLVERSION
+
+extern "C" mldlg_result MLAlert
 	PT_MMA_STUB((MLEnvironment, kcharp_ct));
-
-extern "C" long int MLRequest
+extern "C" mldlg_result MLRequest
 	PT_MMA_STUB((MLEnvironment, kcharp_ct, ml_charp, long));
-extern "C" long int MLConfirm
-	PT_MMA_STUB((MLEnvironment, kcharp_ct, long int));
 
-extern "C" long int MLRequestArgv
+#else
+
+extern "C" void MLAlert
+	PT_MMA_VOID_STUB((MLEnvironment, kcharp_ct));
+extern "C" char *MLRequest
+	PT_MMA_STUB((MLEnvironment, kcharp_ct, ml_charp, long));
+
+#endif
+
+
+extern "C" mldlg_result MLConfirm
+	PT_MMA_STUB((MLEnvironment, kcharp_ct, PTMLLONG));
+
+extern "C" mldlg_result MLRequestArgv
 	PT_MMA_STUB((MLEnvironment, ml_charpp, long, ml_charp, long));
 
-extern "C" long int MLRequestToInteract
-	PT_MMA_STUB((MLEnvironment, long int));
+extern "C" mldlg_result MLRequestToInteract
+	PT_MMA_STUB((MLEnvironment, PTMLLONG));
 
 extern "C" int MLSetDialogFunction
-	PT_MMA_STUB((MLEnvironment, long int, MLDialogFunctionType));
+	PT_MMA_STUB((MLEnvironment, PTMLLONG, MLDialogFunctionType));
 
 extern "C" MLINKMark  MLCreateMark
 	PT_MMA_STUB((MLINK));
@@ -344,12 +359,29 @@ extern "C" int  MLNewExpression
 extern MLINK MLDuplicateLink
 	PT_MMA_STUB((MLINK, ml_charp, ml_longp));
 
-extern "C" long int MLPutCharToString
-	PT_MMA_STUB((ulong_ct, ml_charpp));
-
 extern "C" ml_ucharp MLStringNextPosFun
 	PT_MMA_STUB((MLStringPositionPointer));
+
+
+/* MLVERSION is defined by Mathematica 3.0 */
+
+#ifdef MLVERSION
+
 extern "C" kcharp_ct MLStringFirstPosFun
 	PT_MMA_STUB((kcharp_ct, MLStringPositionPointer));
+
+extern "C" long MLPutCharToString
+	PT_MMA_STUB((unsigned long, ml_charpp));
+
+#else
+
+extern "C" ml_ucharp MLStringFirstPosFun
+	PT_MMA_STUB((kcharp_ct, MLStringPositionPointer));
+
+extern "C" int MLPutCharToString
+	PT_MMA_STUB((int, ml_charpp));
+
+#endif
+
 extern "C" int MLStringCharFun
 	PT_MMA_STUB((MLStringPositionPointer));

@@ -60,4 +60,18 @@ extern "C" {
 }
 #endif
 
+#define PTMLLONG long
+
+/* Backwards compatibility with Mathematica 2.2 */
+
+#ifndef MLVERSION
+#undef PTMLLONG 
+#define PTMLLONG int
+typedef int mldlg_result;
+
+typedef ml_charp  kcharp_ct;
+typedef ml_charpp kcharpp_ct;
+typedef unsigned long ulong_ct;
+#endif
+
 #endif
