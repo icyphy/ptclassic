@@ -27,6 +27,8 @@ This file contains definitions of DDF-specific PortHole classes.
 
 class DDFPortHole : public PortHole
 {
+	friend class MultiDDFPort;
+
 	int varying;	// flag to be set if dynamic
 
 public:
@@ -101,6 +103,10 @@ public:
 // Dynamic dataflow MultiPortHole
  
 class MultiDDFPort : public MultiPortHole {
+protected:
+	// add the DDFPortHole to my portlist.
+	// Used by MultiInDDFPort and MultiOutDDFPort.
+	PortHole& finishNewPort(DDFPortHole&);
 public:
         // The number of Particles consumed
         unsigned numberTokens;

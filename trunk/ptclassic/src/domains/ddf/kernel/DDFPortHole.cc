@@ -119,16 +119,28 @@ MultiPortHole& MultiDDFPort :: setPort (const char* s,
         return *this;
 }
 
+// common code for making a new DDFPortHole in a DDFMultiPortHole.
+// called by MultiInDDFPort::newPort and MultiOutDDFPort::newPort.
+PortHole& MultiDDFPort :: finishNewPort(DDFPortHole& p) {
+	if (numberTokens == 0) {
+		p.numberTokens = 1;
+		p.varying = TRUE;
+	}
+	else {
+		p.numberTokens = numberTokens;
+		p.varying = FALSE;
+	}
+	return installPort(p);
+}
+ 
 PortHole& MultiInDDFPort :: newPort () {
-	LOG_NEW; PortHole& p = *new InDDFPort;
-	p.numberTokens = numberTokens;
-	return installPort(p);
+	LOG_NEW; DDFPortHole& p = *new InDDFPort;
+	return finishNewPort(p);
 }
- 
- 
+
 PortHole& MultiOutDDFPort :: newPort () {
-	LOG_NEW; PortHole& p = *new OutDDFPort;
-	p.numberTokens = numberTokens;
-	return installPort(p);
+	LOG_NEW; DDFPortHole& p = *new OutDDFPort;
+	return finishNewPort(p);
 }
+
 
