@@ -73,7 +73,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  double *inarray;
 	  float *result_filt;
 	  short n0;
-	  double scaledown,s1,s2;
+	  double scaledown;
 	  float *result;
 	}
 	constructor {
@@ -83,7 +83,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  inarray = 0;
 	  result_filt = 0;
 	  result = 0;
-	  scaledown = s1 = s2 = 0;
+	  scaledown = 0;
 	  n0 = 0;
 	}
 	destructor {
@@ -141,18 +141,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 
 	  // initialize states
-	  s1 = double(state1);
-	  s2 = double(state2);
+	       state[0] = short(state1);
+	  state[1] = short(state2);
 	}
 	go {	
 	  short *invalue;
-	  short next_state_sh;
 	  short *result_den;
 	  short *result_num;
 	  int outerloop,innerloop;
 	  float splithi, splitlo;
 	  float *statetmp,*taps;
-	  double next_state_dbl,out_dbl;
+	  double out_dbl;
 	  double *outvalue;
 	  double *packedfilt;
 	  double upper, lower;
@@ -161,23 +160,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	  vis_write_gsr(8);
 	  *inarray = double(signalIn%0);
        	  invalue = (short *) inarray;
+	  taps = (float *) dennum;
+	  statetmp = (float *) state;
 
 	  for(outerloop=3;outerloop>=0;outerloop--){
-	    // initialize state array
-		 state[0] = (short) s1;
-	    state[1] = (short) s2;
-	    statetmp = (float *) state;
 
 	    // find product of state and denominator/numerator
-	    taps = (float *) dennum;
 	    for(innerloop=0;innerloop<2;innerloop++){
-	      upper = vis_fmuld8sux16(*statetmp,*taps);
-	      lower = vis_fmuld8ulx16(*statetmp,*taps);
+	      upper = vis_fmuld8sux16(*statetmp,taps[innerloop]);
+	      lower = vis_fmuld8ulx16(*statetmp,taps[innerloop]);
 	      split_result = vis_fpadd32(upper,lower);
 	      splithi = vis_read_hi(split_result);
 	      splitlo = vis_read_lo(split_result);
 	      result_filt[innerloop] = vis_fpadd32s(splithi,splitlo);
-	      taps++;
 	    }
 
 	    // find next_state
@@ -185,15 +180,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	    *result = vis_fpackfix(*packedfilt);
 	    result_den = (short *) result;
 	    result_num = (result_den +1);
-	    next_state_dbl = (double)(1/scaledown)*(invalue[outerloop]
-						    - *result_den);
-	    next_state_sh = (short) next_state_dbl;
+	    state2 = double(state1);	    
+	    state1 = (double)(1/scaledown)*(invalue[outerloop] - *result_den);
 	    
 	    // find output
-	    out_dbl = (double)(n0*next_state_sh/scale + *result_num);
+		 out_dbl = (double)(n0*state1/scale + *result_num);
 	    outarray[outerloop] = (short) out_dbl;
-	    s2 = (double) s1;
-	    s1 = (double) next_state_sh;
+
+	    state[0] = short(state1);
+	    state[1] = short(state2);
 	  }
 	  outvalue = (double *) outarray;
 	  signalOut%0 <<  *outvalue;
