@@ -349,7 +349,6 @@ octObject *FacetA, *FacetB;
     termElement *termsOfA, *termsOfB;
     termElement *a, *b;
     termElement *equivA, *equivB, *firstA , *firstB;
-    termElement *listFormalTerminals();
     int  IOeq = NLE_TRUE;
     int  found;
     char  buf[128];
