@@ -99,6 +99,9 @@ int MatlabTcl::matlab(int argc, char** argv) {
     else if ( strcmp(argv[1], "get") == 0 ) {
 	return MatlabTcl::get(argc, argv);
     }
+    else if ( strcmp(argv[1], "send") == 0 ) {
+	return MatlabTcl::send(argc, argv);
+    }
     else if ( strcmp(argv[1], "set") == 0 ) {
 	return MatlabTcl::set(argc, argv);
     }
@@ -126,13 +129,23 @@ int MatlabTcl::end(int argc, char** /*argv*/) {
 // evaluate a Matlab command
 int MatlabTcl::eval(int argc, char** argv) {
     if (argc != 3) return usage("matlab eval <matlab_command>");
-    if (! matlabInterface.EvaluateOneCommand(argv[2]) ) return TCL_ERROR;
-    return TCL_OK;
+    int retval = matlabInterface.EvaluateOneCommand(argv[2]);
+    Tcl_AppendResult(tclinterp, matlabInterface.GetOutputBuffer(),
+		     TCL_VOLATILE);
+    if ( !retval) return TCL_ERROR;
+    else return TCL_OK;
 }
 
 // get a Matlab matrix
 int MatlabTcl::get(int argc, char** /*argv*/) {
     if (argc != 3) return usage("matlab get <matrix_name>");
+    return TCL_OK;
+}
+
+// evaluate a Matlab command
+int MatlabTcl::send(int argc, char** argv) {
+    if (argc != 3) return usage("matlab send <matlab_command>");
+    if (! matlabInterface.EvaluateOneCommand(argv[2]) ) return TCL_ERROR;
     return TCL_OK;
 }
 
