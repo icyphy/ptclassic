@@ -54,8 +54,9 @@ Geodesics can be created named or unnamed.
 #include "IntState.h"
 
 // constructor
-Geodesic::Geodesic() : pstack(0), originatingPort(0), destinationPort(0),
-numInitialParticles(0), sz(0), maxBufLength(0), gate(0), initValues(0)
+Geodesic::Geodesic() : originatingPort(0), destinationPort(0),
+maxBufLength(0), gate(0), pstack(0), sz(0), numInitialParticles(0), 
+initValues(0)
 { }
 
 StringList Geodesic :: print (int) const {
