@@ -14,24 +14,33 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
+.Ir "Matlab interface"
 The Matlab kernel is started during the setup phase if no other kernels
 have been started, i.e., if only one instance of this base star exists.
-.Ir "Matlab interface"
+The Unix command executed to start Matlab is the string
+\fIOSStartCommand\fR.
+The Matlab kernel is exitted during the wrapup phase.
+
+The \fIScriptDirectory\fR is an optional directory specifying where
+to find customized Matlab scripts.
+If \fIScriptDirectory\fR is specified, then the star will tell Matlab
+to change directories to this directory before the Matlab command
+defined by this star is evaluated.
+This allows custom scripts to be written without changing the value
+of Matlab's path.
 	}
 	defstate {
-		name { options }
+		name { OSStartCommand }
 		type { string }
-		default { "" }
-		desc { Command line options for Matlab. }
+		default { "matlab " }
+		desc { Command given to the operating system to start Matlab. }
 	}
 	defstate {
-		name { where_defined }
+		name { ScriptDirectory }
 		type { string }
 		default { "" }
 		desc {
 An optional directory specifying where to find any custom Matlab files.
-If specified, Matlab will change directories to this directory
-before the Matlab command defined by this star is evaluated by Matlab,
 You may use tilde characters and environment variables in the directory name.
 }
 	}
@@ -50,12 +59,19 @@ extern "C" {
 #define MXCOMPLEX  1
 #define MXREAL     0
 }
+
+#define MATLAB_BUFFER_LEN	1024
+#define MATLAB_ERROR_STRING	">> \x07???"
+#define MATLAB_ERROR_STRING_LEN	( sizeof(MATLAB_ERROR_STRING) - 1 )
 	}
 
 	protected {
 		// Matlab (C) structures
 		static Engine *matlabEnginePtr;
 		static int matlabStarsCount;
+
+		// place to put the first N output characters from Matlab
+		char matlabOutputBuffer[MATLAB_BUFFER_LEN + 1];
 	}
 
 	code {
@@ -120,6 +136,7 @@ extern "C" {
 		  }
 		  commandString << ")";
 		}
+		commandString << ";";		// suppress textual output
 	  }
 	}
 
@@ -134,8 +151,8 @@ extern "C" {
 
 		// Matlab does not return an error if a change directory,
 		// directory, or path command fails, so we must check
-		// existence of the directory given in where_defined state
-		const char *dirname = (const char *) where_defined;
+		// existence of the directory given in ScriptDirectory state
+		const char *dirname = (const char *) ScriptDirectory;
 		if ( dirname[0] != 0 ) {
 		  char *fulldirname = savestring( expandPathName(dirname) );
 		  struct stat stbuf;
@@ -157,13 +174,31 @@ extern "C" {
 		  delete [] fulldirname;
 		}
 
+		// engEvalString is supposed to return 0 on error but does not
 		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
-		if ( ( mstatus != 0 ) && abortOnError ) {
-		  char numstr[64];
-		  sprintf(numstr, "Matlab returned %d indicating ", mstatus);
-		  Error::abortRun( *this, numstr,
-				   "an error in the Matlab command ",
-				   matlabCommand );
+		matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
+
+		// kludge: if Matlab says that there was no error, then
+		// there might be an error.  If the output from the Matlab
+		// command is not null, then there is an error because we
+		// terminate Matlab commands with a semicolon to suppress
+		// output of result of expression
+		if ( mstatus == 0 ) {
+		  mstatus = ( matlabOutputBuffer[0] != 0 );
+		}
+
+		// report error if one occurred
+		if ( mstatus != 0 ) {
+		  StringList errstr;
+		  errstr = "\nThe Matlab command `";
+		  errstr << matlabCommand;
+		  errstr << "'\ngave the following error message:\n";
+		  if ( abortOnError ) {
+		    Error::abortRun( *this, errstr, matlabOutputBuffer );
+		  }
+		  else {
+		    Error::warn( *this, errstr, matlabOutputBuffer );
+		  }
 		}
 
 		return(mstatus);
@@ -198,13 +233,14 @@ extern "C" {
 	  code {
 		killMatlab();
 
-		InfString shellCommand = "matlab "; 
-		shellCommand << ((char *) options);
-		matlabEnginePtr = engOpen( ((char *) shellCommand) );
+		matlabEnginePtr = engOpen( ((char *) OSStartCommand) );
 		if ( matlabEnginePtr == 0 ) {
 		  Error::abortRun( *this, "Could not start Matlab using ",
-				   (char *) shellCommand );
+				   (char *) OSStartCommand );
 		}
+		engOutputBuffer(matlabEnginePtr,
+				matlabOutputBuffer,
+				MATLAB_BUFFER_LEN);
 	  }
 	}
 
