@@ -104,6 +104,22 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
 
+    codeblock (tychoSetup) {
+	connectControl(moduleName, "$val(starName)", "gain",
+		$starSymbol(setGain));
+	connectControl(moduleName, "$val(starName)", "freq",
+		$starSymbol(setcenterFreq2));
+    }
+    codeblock(tychoSetupband) {
+	connectControl(moduleName, "$val(starName)", "bw",
+		$starSymbol(setBandwidth));
+    }
+    codeblock(tychoSetuppass) {
+	connectControl(moduleName, "$val(starName)", "bw",
+		$starSymbol(setpassFreq));
+    }
+
+
     codeblock (setGainDef) {
         static int $starSymbol(setGain)(dummy, interp, argc, argv)
             ClientData dummy;                   /* Not used. */
@@ -254,18 +270,20 @@ limitation of liability, and disclaimer of warranty provisions.
     
     initCode {
 	CGCParametricEq :: initCode();
-	addCode(tkSetup, "tkSetup");
+	addCode(tkSetup,    "tkSetup");
+	addCode(tychoSetup, "tychoSetup");
 	if (strcasecmp(filtertype, "BAND") == 0) {
-	  addCode(tkSetupband, "tkSetup");
+	  addCode(tkSetupband,    "tkSetup");
+	  addCode(tychoSetupband, "tychoSetup");
 	  addCode(setBandwidthDef, "procedure");
 	}
 	else { 
-	  addCode(tkSetuppass, "tkSetup");
+	  addCode(tkSetuppass,    "tkSetup");
+	  addCode(tychoSetuppass, "tychoSetup");
 	  addCode(setpassFreqDef, "procedure");
 	}
         addCode(setGainDef, "procedure");
-	addCode(setcenterFreqDef, "procedure");
+	addCode(setcenterFreqDef,  "procedure");
 	addCode(setcenterFreqDef2, "procedure");
-
     }
 }
