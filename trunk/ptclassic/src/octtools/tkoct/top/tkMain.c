@@ -215,7 +215,7 @@ topTkInitialize1( Tcl_Interp *ip, int *argc, char **argv, Tk_Window *pWin) {
     Tk_CreateEventHandler(win, StructureNotifyMask, _topStructureProc,
 	    (ClientData) &info);
     Tk_GeometryRequest(win, 200, 200);
-    border = Tk_Get3DBorder(ip, win, None, "#4eee94");
+    border = Tk_Get3DBorder(ip, win, "#4eee94");
     if (border == NULL) {
 	Tcl_SetResult(ip, (char *) NULL, TCL_STATIC);
 	Tk_SetWindowBackground(win, WhitePixelOfScreen(Tk_Screen(win)));
