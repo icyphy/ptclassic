@@ -27,6 +27,15 @@ one Send star, more than one Send stars, and so on.)
 		name {output}
 		type {=input}
 	}
+	method {
+		name { amISpreadCollect }
+		access { protected }
+		arglist { "()" }
+		type { int }
+		code {
+			return -1;
+		}
+	}
 	setup {
 		MPHIter iter(output);
 		CGCPortHole* p;

@@ -26,6 +26,15 @@ is more than one. Its role is just opposite to that of Spread star.
 		name {output}
 		type {=input}
 	}
+	method {
+		name { amISpreadCollect }
+		access { protected }
+		arglist { "()" }
+		type { int }
+		code {
+			return 1;
+		}
+	}
 	setup {
 		MPHIter iter(input);
 		CGCPortHole* p;
