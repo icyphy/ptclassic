@@ -44,28 +44,38 @@ is to output it first (phase = 0). The maximum phase is "factor" - 1.
 		desc { Value to fill the output block. }
 		attributes { A_SETTABLE }
 	}
-	codeblock (sendsample) {
+	start {
+		output.setSDFParams(int(factor),int(factor)-1);
+		if (int(phase) >= int(factor))
+			Error::abortRun(*this, ": phase must be < factor");
+	}
+	codeblock (initfill) {
+; initialization code for star $fullname() - class CG56UpSample
 	move	$ref(output),r1
 	move	$size(output),m1
-	move	$ref(input),x0
-	move	$val(fill),a		x0,x:(r1)+
+	move	$val(fill),a
 	}
 	codeblock (repeatcode) {
-	rep	#($val(factor)-1)
+	rep	#$val(factor)
 	}
 	codeblock (fillcode) {
 	move	a,x:(r1)+
 	}
-	go {
-		gencode(sendsample);
+	initCode {
+		gencode (initfill);
 		if (factor > 1) {
-			if (factor > 2) {
-				gencode(repeatcode);
-			}
+			gencode(repeatcode);
 			gencode(fillcode);
 		}
 	}
+	codeblock (sendsample) {
+	move	$ref(input),x0
+	move	x0,$ref(output)
+	}
+	go {
+		gencode(sendsample);
+	}
 	execTime {
-		return int(factor) + 2 ;
+		return 1;
 	}
 }
