@@ -1,11 +1,16 @@
 defstar {
 	name { Copy }
 	domain { CGC }
-	desc { copy input to output }
-	version { @(#)CGCCopy.pl	1.5	1/29/96 }
+	desc { copy input to output
+CGCTarget.cc says:
+"Copy" stars are added if an input/output PortHole is a host/embedded
+PortHole and the buffer size is greater than the number of Particles
+transferred.
+}
+	version { $Id$}
 	author { S. Ha }
 	copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
