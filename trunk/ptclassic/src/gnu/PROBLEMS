@@ -1,0 +1,68 @@
+-*-Mode: text-*- -[Mon Mar 21 11:45:34 1994 by cxh]-
+Version: $Id$
+
+src/gnu/PROBLEMS
+
+This file contains pointers about different problems you may run
+across during the installation of the GNU tools.
+
+If you have problems with installing gcc, look at gcc/INSTALL.
+Also, look at gcc/gcc.info-8, and search for Installation Problems.
+
+------------------------------------------------------------------------
+
+DEC
+---
+* On aniljain, the following compile fails in gnu/libio:
+/users/ptdesign/obj.mips/gnu/gcc/xgcc -B/users/ptdesign/obj.mips/gnu/gcc/ -c -g -I. -I/users/ptdesign/src/gnu/src/libio -I/users/ptdesign/obj.mips/gnu/gcc/include filedoalloc.c
+
+        It looks like problems with size_t.  I changed
+	obj.mips/gnu/gcc/include/sys/types.h:  
+
+	  /* Changed by cxh 1/14/93.  size_t was being undefined during the
+	     libio build, so we comment out these the _POSIX_SOURCE lines
+	   */
+	  /*#if !defined(_POSIX_SOURCE) || defined(_XOPEN_SOURCE) commented out
+            by cxh*/
+	  #ifndef	_SIZE_T_
+          #define	_SIZE_T_
+          #ifndef _GCC_SIZE_T
+          #define _GCC_SIZE_T
+          typedef unsigned int size_t;
+          #endif
+          /* #endif commented out by cxh*/	/* _SIZE_T_ */
+
+
+make/main.c fails to compile
+----------------------------
+	If you already have gcc installed and main.c is compiled with
+	cc, which results in errors, then it could be that configure
+	got confused.  You could try building make CC set to gcc
+		make CC=/usr/local/gnu/bin/gcc
+	You should use the full pathname of gcc if you attempt to
+	compile gcc with a make CC=.  Otherwise make could become
+	confused. 
+
+	On hp, you can reconfigure the make directory with:
+	cd $PTOLEMY/obj.hppa/gnu/make
+	$PTOLEMY/src/gnu/src/make/configure hppa1.1-hp-hpux -v --srcdir=$PTOLEMY/src/gnu/src/make --prefix=$PTOLEMY/gnu/common --exec-prefix=$PTOLEMY/gnu/hppa 
+alloca undefined symbol in make build
+-------------------------------------
+	On the hppa, building with gcc may result in an error message
+	about alloca being undefined
+	Try building with:
+	cd $PTOLEMY/obj.hppa/gnu/make
+	make ALLOCA=alloca.o
+
+SGI
+---
+	When building on the SGI under irix4, try:
+	cd $PTOLEMY
+	make -k GNU_BUILD_CC=/usr/tools/gnu/bin/gcc bootstrap 
+
+
+	You may still need to do:
+	cd $PTOLEMY/src/gnu/make; make ALLOCA=alloca.o
+
+	This should solve the alloca problems in building cccp:
+	cd $PTOLEMY/src/gnu/gcc; make -k CC="cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1 "

@@ -1,0 +1,149 @@
+-*-Mode:text-*- -[Mon Mar 21 11:35:04 1994 by cxh]-
+Version: $Id$
+
+src/gnu/README
+
+This directory tree contains the source to GNU software necessary to
+build Ptolemy from scratch. 
+
+Note that the binary Ptolemy distributions include the GNU binaries
+produced by the sources in this directory.  You need not reinstall the
+GNU binaries from this directory if you already have the Ptolemy
+binary distribution.
+
+If you plan on doing dynamic linking you will need to have gcc
+available.
+
+Note that the tcl/tk source is elsewhere.
+
+This directory contains the following GNU tools
+	gcc-2.5.8
+	libg++-2.5.3
+	make-3.70
+
+makeinfo, the GNU documentation program is not currently part of the
+Ptolemy GNU binary distribution.  There are makinfo sources in
+$PTOLEMY/src/gnu/hp/gas-2.2.u2/texinfo
+
+makeinfo is part of the texinfo package.  texinfo is available via
+anonymous ftp at ftp.uu.net in packages/gnu.
+
+Versions
+--------
+	Ptolemy is particularly sensitive to the version of libg++.
+	Versions earlier than libg++-2.5.2 may work, but your are own
+	your own.  
+
+	libg++-2.5.2 has a bug showed up in the sun4.opt build when we
+	compiled pigiRpc with the -O option.  The problem was an
+	unknown symbol __vt$7istream$3ios during link time.  This
+	symbol comes from kernel/Tokenizer.cc.  Other than that, we
+	use libg++-2.5.2 on site for about a month with no problem.
+	For the 0.5 release, we upgraded to libg++-2.5.3.
+
+	Around the time of the Ptolemy 0.5 code freeze (12/93-1/94),
+	there were many versions of gcc/libg++.  We decided to ship
+	the first version gcc/libg++ that compiled Ptolemy straight
+	out of the box.
+
+	Ptolemy is not very sensitive to the version of GNU make.  Any
+	recent version of GNU make should work.  
+
+GNU make
+--------
+
+	You must use GNU make to compile Ptolemy, there are GNU make
+	extensions in some of the makefiles.
+
+	The 'clean' rules in the following makefiles cause problems with
+	SunOS4.1.3 make:
+		mk/common.mk, src/vem/vem/makefile
+
+	The 'all' rule in the following makefile causes problems with
+	SunOS4.1.3 make:
+		 src/vem/vem-bin.mk
+
+	src/domains/cg56/targets/makefile and mk/stars.mk contain a
+	makefile conditional dependent on S56DIR.  GNU make has
+	makefile conditionals, Sun make does not.
+
+	src/vem/vem/makefile depends on the $(@D) and $(@F) GNU make
+	directives. 
+
+
+HP
+--
+	The version of gcc-2.5.8 from the FSF does not have support
+	for the -g option.  The sources in src/hp are from
+	jaguar.cs.utah.edu.  Below is part of the gcc.info document
+	that describes the hp situation:
+-----Start------	
+	
+File: gcc.info,  Node: PA Install,  Next: Sun Install,  Prev: Cross-Compiler,  Up: Installation
+
+Installing on the HP Precision Architecture
+===========================================
+
+   There are two variants of this CPU, called 1.0 and 1.1, which have
+different machine descriptions.  You must use the right one for your
+machine.  All 7NN machines and 8N7 machines use 1.1, while all other
+8NN machines use 1.0.
+
+   The easiest way to handle this problem is to use `configure hpNNN'
+or `configure hpNNN-hpux', where NNN is the model number of the
+machine.  Then `configure' will figure out if the machine is a 1.0 or
+1.1.  Use `uname -a' to find out the model number of your machine.
+
+   `-g' does not work on HP-UX, since that system uses a peculiar
+debugging format which GNU CC does not know about.  There are
+preliminary versions of GAS and GDB for the HP-PA which do work with
+GNU CC for debugging.  You can get them by anonymous ftp from
+`jaguar.cs.utah.edu' `dist' subdirectory.  You would need to install
+GAS in the file
+
+     /usr/local/lib/gcc-lib/CONFIGURATION/GCCVERSION/as
+
+where CONFIGURATION is the configuration name (perhaps `hpNNN-hpux')
+and GCCVERSION is the GNU CC version number.  Do this *before* starting
+the build process, otherwise you will get errors from the HPUX
+assembler while building `libgcc2.a'.  The command
+
+     make install-dir
+
+will create the necessary directory hierarchy so you can install GAS
+before building GCC.
+
+   If you obtained GAS before October 6, 1992 it is highly recommended
+you get a new one to avoid several bugs which have been discovered
+recently.
+
+   To enable debugging, configure GNU CC with the `--gas' option before
+building.
+
+   It has been reported that GNU CC produces invalid assembly code for
+1.1 machines running HP-UX 8.02 when using the HP assembler.  Typically
+the errors look like this:
+     as: bug.s @line#15 [err#1060]
+       Argument 0 or 2 in FARG upper
+              - lookahead = ARGW1=FR,RTNVAL=GR
+     as: foo.s @line#28 [err#1060]
+       Argument 0 or 2 in FARG upper
+              - lookahead = ARGW1=FR
+
+   You can check the version of HP-UX you are running by executing the
+command `uname -r'.   If you are indeed running HP-UX 8.02 on a PA and
+using the HP assembler then configure GCC with "hpNNN-hpux8.02".
+
+-----End------	
+
+gcc and Purify
+--------------
+	To use Purelink and Purify from Pure Inc, be sure to build gcc
+	with out the GNU assembler, gas.  Also, be sure to use
+	ld-collect rather than GNU ld.  In this directory, we
+	configure gcc to not use gas and not to use GNU ld.  
+
+See Also
+--------
+	$PTOLEMY/src/vem/README		- Contains discussion about
+					vem and gcc
