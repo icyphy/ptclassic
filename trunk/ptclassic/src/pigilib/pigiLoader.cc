@@ -176,7 +176,8 @@ static void reportErrors (const char* text) {
 	buf << text << "\n";
 	FILE* fp = fopen(tmpFileName, "r");
 	if (fp == 0) {
-		buf << "Can't open error file!";
+            buf << "Can't open error file '" << tmpFileName << "': " 
+                << sys_errlist[errno];
 	}
 	else {
 		const int LINELEN = 80;
