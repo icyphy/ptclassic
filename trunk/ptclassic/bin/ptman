@@ -19,6 +19,8 @@ usage:
 	exit 1
 endif
 
+onintr interrupt
+
 # Parse command line arguments
 set done = 0
 while ($done == 0 && $#argv > 0)
@@ -98,8 +100,24 @@ if ("$domfiles" == "") exit 1
 if ($?printer) then
 	soelim $headers $files | ditroff -me -eqn -tbl $printer
 else if ($?DISPLAY) then
-	soelim $headers $files | ditroff -me -eqn -tbl -t | \
-		xditview -resolution 100 -geometry 756x881 -
+	soelim $headers $files | ditroff -me -eqn -tbl -t > /tmp/ptman.$$
+	if ($status) then
+		echo "ptman: problems running ditroff, trying nroff"
+		goto do_nroff
+	endif
+	xditview -resolution 100 -geometry 756x881 /tmp/ptman.$$
+	if ($status) then
+		echo "ptman: problems running xditview, trying nroff"
+		goto do_nroff
+	endif
 else
+do_nroff:
 	soelim $headers $files | eqn | tbl | nroff -me | more
 endif
+
+rm -f /tmp/ptman.$$
+exit 0
+
+interrupt:
+	rm -f /tmp/ptman.$$
+	exit 0
