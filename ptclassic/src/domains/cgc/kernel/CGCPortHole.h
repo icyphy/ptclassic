@@ -71,7 +71,7 @@ friend class ForkDestIter;
 public:
 	CGCPortHole() : maxBuf(1), manualFlag(0), hasStaticBuf(1),
                         asLinearBuf(1), myType(NA), converted(0),
-			bufName(0) {}
+			bufName(0), manualOffset(0) {}
 	~CGCPortHole();
 
 	void initialize();
