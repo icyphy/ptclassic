@@ -41,81 +41,6 @@ Programmer: Jose Luis Pino
 #include "GalIter.h"
 #include "Matrix.h"
 
-
-// Delete-safe iterators
-
-// DSNamedObjIter is not meant to be used except as a base class
-class DSNamedObjIter {
-public:
-    virtual ~DSNamedObjIter() { delete nextObjectThatMeetsTest; }
-    inline NamedObj* next() { return nextObjectThatMeetsTest->next(); }
-    inline NamedObj* operator++(POSTFIX_OP) { return next();}
-    inline void reset() { nextObjectThatMeetsTest->reset(); }
-    inline void put(NamedObj& o) { objectsThatMeetTest.put(o); }
-protected:
-    // This method must be called at the end of all derived class constructors
-    inline void initInternalIterator() {
-	nextObjectThatMeetsTest = new NamedObjListIter(objectsThatMeetTest);
-    }
-private:
-    NamedObjList objectsThatMeetTest;
-    NamedObjListIter *nextObjectThatMeetsTest;
-};   
-
-inline int defaultPortTest(PortHole&) { return TRUE; }
-class DSBlockPortIter:private DSNamedObjIter {
-public:
-    DSBlockPortIter(Block&,int (*)(PortHole&) = defaultPortTest);
-    virtual ~DSBlockPortIter() {};
-    inline PortHole* next() { return (PortHole*)DSNamedObjIter::next(); }
-    inline PortHole* operator++(POSTFIX_OP) { return next();}
-    inline void put(PortHole& p) { if (testPort(p)) DSNamedObjIter::put(p); }
-    DSNamedObjIter::reset;
-protected:
-    // This method must be called at the end of all derived class constructors
-    DSNamedObjIter::initInternalIterator;
-private:
-    int (*testPort)(PortHole&);    
-};   
-
-inline int defaultBlockTest(Block&) { return TRUE; }
-class DSBlockIter:private DSNamedObjIter {
-public:
-    DSBlockIter(int (*test)(Block&) = defaultBlockTest)
-    :DSNamedObjIter(), testBlock(test) {};
-    virtual ~DSBlockIter() {};
-    inline Block* next() { return (Block*)DSNamedObjIter::next(); }
-    inline Block* operator++(POSTFIX_OP) { return next();}
-    inline void put(Block& b) { if (testBlock(b)) DSNamedObjIter::put(b); }
-    DSNamedObjIter::reset;
-protected:
-    // This method must be called at the end of all derived class constructors
-    DSNamedObjIter::initInternalIterator;
-private:
-    int (*testBlock)(Block&);    
-};   
-
-class DSGalAllBlockIter:public DSBlockIter {
-public:
-    DSGalAllBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
-};
-
-class DSGalTopBlockIter :public DSBlockIter {
-public:
-    DSGalTopBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
-};
-		      
-inline int defaultGalaxyTest (Block& b) {return ! b.isItAtomic();}
-class GalGalaxyIter : private DSGalAllBlockIter {
-public:
-    GalGalaxyIter(Galaxy& g, int (*test)(Block&) = defaultGalaxyTest):
-    DSGalAllBlockIter(g,test) {};
-    inline Galaxy* next() { return (Galaxy*)DSGalAllBlockIter::next(); }
-    inline Galaxy* operator++(POSTFIX_OP) { return next();}
-    DSGalAllBlockIter::reset;
-    virtual ~GalGalaxyIter() {}
-};
-
 // Returns the total number of stars in a galaxy (recursively
 // all galaxies which are contained in the galaxy specified by
 // the user
@@ -137,6 +62,7 @@ private:
 // URL http://www.research.att.com/orgs/ssr/book/reuse.
 StringList printDot(Galaxy&);
 StringList printTopBlockDot(Galaxy&, const char*);
+StringList printClusterDot(Galaxy&);
 
 // This is a useful funtion to replace all instances of a string
 // with another string within a string.  Note, the string to match
@@ -159,44 +85,94 @@ void resetAllFlags(Galaxy&,int =0);
 // reset the flag specified only the top blocks inside of the galaxy
 void resetFlags(Galaxy&,int =0);
 
-// This class respects galaxy boundaries
-class GraphMatrix: public IntMatrix {
-friend class GraphMatrixIter;
+// Hopefully this implementation will be improved by having input and
+// output ports of a block stored in separate lists.  This could make
+// 2x speedup in some of the clustering code.
+class BlockOutputIter: private BlockPortIter {
 public:
-    GraphMatrix(Galaxy& g, int flagLocation=0);
-    ~GraphMatrix();
-
-    virtual int cluster(Block& replacement,int,int);
-
-    Block** graphBlock;
-
-    /*virtual*/ StringList print();
-protected:
-    int flagLoc;
-    int numBlocks;
-};
-
-class GraphMatrixIter {
-public:
-    inline GraphMatrixIter(GraphMatrix& m):myMatrix(m),current(0) {};
-    inline int next() {
-	while(current < myMatrix.numBlocks &&
-	      myMatrix.graphBlock[current] == NULL)
-	    current++;
-    	if (current >= myMatrix.numBlocks) current = -1;
-	return current++;
+    inline BlockOutputIter(Block& b):BlockPortIter(b) {};
+    inline PortHole* next() {
+	PortHole *port;
+	while ((port = PortListIter::next()) != NULL && !port->isItOutput());
+	return port;
     }
-    inline int operator++(POSTFIX_OP) { return next();}
-    inline void reset() { current = 0;}
-private:
-    GraphMatrix& myMatrix;
-    int current;
+    inline PortHole* operator++(POSTFIX_OP) { return BlockOutputIter::next();}
+    inline BlockPortIter::reset;
+    BlockPortIter::remove;
 };
 
-class TopologyMatrix: public GraphMatrix {
+class BlockInputIter: private BlockPortIter {
 public:
-    TopologyMatrix(Galaxy& g, int flagLocation=0);
-    /*virtual*/ int cluster(Block& replacement,int,int);
+    inline BlockInputIter(Block& b):BlockPortIter(b) {};
+    inline PortHole* next() {
+	PortHole *port;
+	while ((port = PortListIter::next()) != NULL && !port->isItInput());
+	return port;
+    }
+    inline PortHole* operator++(POSTFIX_OP) { return BlockInputIter::next();}
+    inline BlockPortIter::reset;
+    BlockPortIter::remove;
 };
 
+// This could be a method of the class generic port
+inline GenericPort& aliasedPort(GenericPort& port) {
+    GenericPort* p = &port;
+    while (p->aliasFrom()) p = p->aliasFrom();
+    return *p;
+}
+
+class SuccessorIter {
+public:
+    inline SuccessorIter(Block& b) {
+	successorPortIter = new BlockOutputIter(b);
+    }
+    inline ~SuccessorIter() { delete successorPortIter; }
+    inline void reset() { successorPortIter->reset(); }
+
+    inline Block* next() {
+	PortHole* port;
+	Block* parent;
+	while ((port=(*successorPortIter)++)!= NULL && (!port->far()
+	       || (parent=port->far()->parent())==NULL));
+	return port? parent: (Block*)NULL;	
+    }
+    inline Block* operator++(POSTFIX_OP) { return next(); }
+private:
+    BlockOutputIter *successorPortIter;
+};
+
+class PredecessorIter {
+public:
+    inline PredecessorIter(Block& b){
+	predecessorPortIter = new BlockInputIter(b);
+    }
+    inline ~PredecessorIter() { delete predecessorPortIter; }
+    inline void reset() { predecessorPortIter->reset(); }
+    // Skips over incorrectly connected ports, should we?
+    inline Block* next() {
+	PortHole* port;
+	Block* parent;
+	while ((port=(*predecessorPortIter)++)!= NULL && (!port->far()
+	       || (parent=port->far()->parent())==NULL));
+	return port? parent: (Block*)NULL;
+    }
+    inline Block* operator++(POSTFIX_OP) { return next(); }
+private:
+    BlockInputIter *predecessorPortIter;
+};
+
+class BlockStack : private Stack {
+public:
+    inline BlockStack() : Stack() {};
+    inline void push(Block& b) { Stack::pushTop(&b); }
+    inline Block* pop() { return (Block*) Stack::popTop(); }
+    virtual ~BlockStack() {};
+};
+
+// Delete a galaxy and its ports - useful for clustering, the Galaxy
+// destructor does not delete its ports
+void deleteGalaxy(Galaxy&);
+
+void cleanupAfterCluster(Galaxy&);
 #endif
+
