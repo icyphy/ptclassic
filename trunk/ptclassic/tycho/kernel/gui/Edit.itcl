@@ -294,6 +294,9 @@ class ::tycho::Edit {
     ##########################################################################
     ####                  protected methods and procedures                ####
 
+    # Configure the popup menu depending on the current context
+    protected method configureContextMenu {}
+
     # Return the region of text tagged with the given tag within which
     # the "current" mark sits.
     protected method getTaggedText {tag}
@@ -2196,6 +2199,51 @@ body ::tycho::Edit::writeSpellText {filename} {
 #####################################################################
 ####                     protected methods                       ####
 
+#####################################################################
+#### configureContextMenu
+# Configure the popup menu according to context. By default, this
+# menu contains menu entries for Undo, Cut, Copy, Paste, Delete and 
+# two entries that provide information about the widget.
+#
+# Subclasses that create a context menu (by calling "contextmenu create"
+# on themselves) should override this method.
+#
+body ::tycho::Edit::configureContextMenu {} {
+    # Clear the menu
+    contextmenu clear
+
+    contextmenu command undo \
+	    -label "Undo" \
+	    -command "$this undo"
+
+    contextmenu separator contextsep1
+
+    contextmenu command cut \
+	    -label "Cut" \
+	    -command "$this cut"
+
+    contextmenu command copy \
+	    -label "Copy" \
+	    -command "$this copy"
+
+    contextmenu command paste \
+	    -label "Paste" \
+	    -command "$this paste"
+
+    contextmenu command delete \
+	    -label "Delete" \
+	    -command "$this del"
+
+    contextmenu separator contextsep2
+
+    contextmenu command usersguide \
+            -label "Guide to the [info class] widget" \
+	    -command "$this help"
+
+    contextmenu command widgetname \
+            -label "Name of this [info class] widget..." \
+            -command "::tycho::post $this"
+}
 
 #####################################################################
 #### getTaggedText
