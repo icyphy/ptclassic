@@ -146,7 +146,7 @@ void DLParProcs :: scheduleIPC (DLNode* pd, int destP) {
 void DLParProcs :: scheduleSmall(DLNode* pd)
 {
 	// examine candidate processors
-	if (OSOPreq() && pd->invocationNumber() > 1) {
+	if (pd->sticky() && pd->invocationNumber() > 1) {
 		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
 		candidate->elem(0) = firstN->getProcId();
 		candidate->truncate(1);
