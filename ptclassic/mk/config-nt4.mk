@@ -96,29 +96,6 @@ TCL_VERSION_NUM=7.6i
 TK_VERSION_NUM=4.2i
 ITCL_VERSION_NUM=2.2
 
-#CYGNUS=/Cygnus/B19
-#TCL_ROOT=$(CYGNUS)/H-i386-cygwin32
-#TCL_ROOT=/usr/local
-# Combined -L and -l options to link with tcl library.
-#TCL_LIBSPEC=-L$(TCL_ROOT)/lib -ltcl80
-#TCL_LIBSPEC=-L$(TCL_ROOT)/lib/itcl -ltcl7.6i
-
-# Directory containing Tk include files
-#TK_INCDIR=$(TCL_ROOT)/include
-
-# Combined -L and -l options to link with tk library.  Can add
-# additional -L and/or -l options to support tk extensions.
-#TK_LIBSPEC=-L$(TCL_ROOT)/lib -ltk8.0vc.lib
-#TCL_LIBSPEC=-L$(TCL_ROOT)/lib/tcl -ltcl7.6i
-
-# Directory containing itcl include files
-#ITCL_INCDIR=$(CYGNUS)/include
-#ITCL_INCDIR=$(TCL_ROOT)/include/itcl
-#ITCL_LIBSPEC=-L$(TCL_ROOT)/lib/tcl -litcl2.2.a
-
-#ITK_INCDIR=$(TCL_ROOT)/itcl/include
-#ITK_LIBSPEC=-L$(TCL_ROOT)/lib/itcl -litk2.2
-
 #
 # Variables for the linker
 #
