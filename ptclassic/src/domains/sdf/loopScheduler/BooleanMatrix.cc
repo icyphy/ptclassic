@@ -37,10 +37,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "logNew.h"
 
 BooleanMatrix::BooleanMatrix(int m, int n) : nRows(m), nCols(n) {
-	LOG_NEW; data = new BoolWord*[nRows];
+	data = new BoolWord*[nRows];
 	nColWords = (nCols + 31) >> 5;
 	for (int i = 0; i < nRows; i++) {
-		LOG_NEW; data[i] = new BoolWord[nColWords];
+		data[i] = new BoolWord[nColWords];
 		for (int j = 0; j < nColWords; j++) data[i][j] = 0;
 	}
 }
@@ -52,8 +52,10 @@ void BooleanMatrix::clear() {
 }
 
 BooleanMatrix::~BooleanMatrix() {
-	for (int i = 0; i < nRows; i++) { LOG_DEL; delete data[i];}
-	LOG_DEL; delete data;
+	for (int i = 0; i < nRows; i++) {
+	  delete [] data[i];
+	}
+	delete [] data;
 }
 
 // "or" together two rows, destRow and srcRow, leaving the result in destRow.
