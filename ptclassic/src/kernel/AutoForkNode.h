@@ -18,29 +18,25 @@ $Id$
  This glass is a Geodesic that automatically generates auto-forks
  when attempts are made to connect multiple outputs to it.  It forbids
  the specification of multiple inputs.
+
+ Change: the auto-forking is moved into a separate class called AutoFork,
+ so we can make other types of auto-forking geodesics with greater ease.
 *************************************************************************/
 #include "Geodesic.h"
-
-class MultiPortHole;
-class Block;
+#include "AutoFork.h"
 
 class AutoForkNode : public Geodesic {
 public:
+	// constructor: make the AutoFork object refer to me.
+	AutoForkNode() : af(*this) {}
 	int isItPersistent () const;
 	PortHole* setSourcePort (GenericPort &, int delay = 0);
 	PortHole* setDestPort (GenericPort &);
-	AutoForkNode () : forkStar(0), forkOutput(0) {}
-	~AutoForkNode();
 
 	// class identification
 	int isA(const char*) const;
 
 private:
-	// pointers to the Fork star and its output multiporthole, if it exists
-	Block* forkStar;
-	MultiPortHole* forkOutput;
-	// cruft used for generating names for autoforks
-	static int nF;
-	const char* autoForkName();
+	AutoFork af;
 };
 #endif
