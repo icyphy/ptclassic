@@ -1,20 +1,41 @@
-/* 
+/*******************************************************************
+SCCS version identification
+$Id$
+
+Copyright (c) 1990-1994 The Regents of the University of California.
+All rights reserved.
+
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
+							COPYRIGHTENDKEY
+
+ Programmer: Kennard White
     toct.c :: Tcl OCT
 
     This file contains helper functions for dealing with OCT.  In particular,
     funcs for looking up OCT objects by name (esp. facets), and dealing
     with string forms of octIds.
 
-    Author: Kennard White
-
-    Copyright (c) 1990-93 The Regents of the University of California.
-    All rights reserved.  See the file "./copyright.h" for full copyright
-    notice, limitation of liability, and disclaimer of warranty provisions.
-#include "copyright.h"				COPYRIGHTENDKEY
-*/
-#if !defined(lint) && !defined(SABER)
-static char rcsid[] = "$Header$";
-#endif
+********************************************************************/
+#ifndef lint
+static char SccsId[] = "$Id$";
+#endif /* not lint */
 
 #include "topFixup.h"
 #include <tk.h>
@@ -71,7 +92,7 @@ _toctCvtStrId( char **idstr, octId *pId) {
 **/
 int
 _toctCvtOctId( octId *pId, char **idstr) {
-    int		idnum_in = (int) *pId, idnum, c, len;
+    int		idnum_in = (int) *pId, idnum, len;
     char	*s;
 
     for ( idnum=idnum_in, len=0; idnum != 0; len++) {
@@ -126,12 +147,11 @@ _toctScanOctName(char **idstr, char *buf, int buflen_in) {
 **/
 int
 toctGetClosest( Tcl_Interp *ip, char **spec, octObject *pPnt, octObject *pObj) {
-    char	*s = *spec, *s_next;
+    char	*s = *spec;
     int		halo;
     octPoint	pt;
     octBox	bbox;
     regObjGen	gen;
-    regStatus	sts;
     octId	afterId = oct_null_id;
     octObject	nextobj;
 
@@ -411,7 +431,6 @@ _toctFmtCmd( ClientData cld, Tcl_Interp *ip, int aC, char **aV) {
 static int
 _toctPropCmd( ClientData cld, Tcl_Interp *ip, int aC, char **aV) {
     octObject	obj;
-    char	*tn;
 
     if ( aC != 2 ) {
 	Tcl_AppendResult(ip,"usage: ",aV[0]," oct_tag",NULL);
