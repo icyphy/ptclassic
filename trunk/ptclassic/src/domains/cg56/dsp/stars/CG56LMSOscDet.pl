@@ -52,13 +52,13 @@ of the LMS star upon which this star derived.
 	// FIXME: Remove the error port when CG56LMS is derived from CG56FIR
         input {
 		name { error }
-		type { float }
+		type { fix }
 	}
 
 	// Unique port for LMSOscDet
 	output {
 		name { cosOmega }
-		type { float }
+		type { fix }
 		desc {
 Current estimated value of the cosine of the frequency of the dominate
 sinusoidal component of the input signal.
