@@ -27,15 +27,57 @@
 #
 # $Id$
 
-TCL_VERSION_NUM=76i
-TK_VERSION_NUM=42i
-ITCL_VERSION_NUM=22
-ITK_VERSION_NUM=22
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
+
+# SunOS4.x can't handle dots in the library names.  libitk2.2.so won't
+# work.  So, as hack, we redo things right after including config-default.mk
+# This is evil, but hey.
+
+# Start of text replicated in config-default.mk
+TCL_VERSION_NUM=76i
+TK_VERSION_NUM=42i
+ITCL_VERSION_NUM=22
+ITK_VERSION_NUM=22
+
+# Combined -L and -l options to link with tcl library.
+TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl$(TCL_VERSION_NUM)
+
+# Directory containing Tk include files
+TK_INCDIR=$(TCL_ROOT)/itk/include
+
+# Combined -L and -l options to link with tk library.  Can add
+# addtional -L and/or -l options to support tk extensions.
+TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION_NUM) #-lXpm
+
+# Directory containing itcl include files
+ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-litcl$(ITCL_VERSION_NUM)
+
+ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-litk$(ITCL_VERSION_NUM)
+
+# Location of the ish binary (tcl + namespaces)
+ISH=$(ROOT)/tcltk/$(ITCL_VERSION).$(PTARCH)/bin/ish
+
+# Location of the itcl library, needed for itcl_mkindex
+ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
+
+# For shared libraries, if we use them
+TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-ltcl$(TCL_VERSION_NUM)
+TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-ltk$(TK_VERSION_NUM)
+ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-litcl$(ITCL_VERSION_NUM)
+
+# end of text replicated in config-default.mk
+
 
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
