@@ -266,14 +266,19 @@ void CGTarget :: wrapup()
 }
 
 void CGTarget::generateCode() {
+	if (haltRequested()) return;
 	if (parent()) setup();
+	if (haltRequested()) return;
 	if(!allocateMemory()) 
 	{
 		Error::abortRun(*this,"Memory allocation error");
 		return;
 	}
+	if (haltRequested()) return;
 	generateCodeStreams();
+	if (haltRequested()) return;
 	frameCode();
+	if (haltRequested()) return;
 	if (!parent()) writeCode();
 }
 
