@@ -26,6 +26,7 @@ static const char file_id[] = "PTcl.cc";
 #include "Domain.h"
 #include <ACG.h>
 #include "Linker.h"
+#include "textAnimate.h"
 
 // we want to be able to map Tcl_interp pointers to PTcl objects.
 // this is done with a mapping table.
@@ -315,6 +316,13 @@ int PTcl::defgalaxy(int argc,char ** argv) {
 int PTcl::schedule(int argc,char ** argv) {
 	if (argc > 1)
 		return usage("schedule");
+	// should arrange so that previously computed schedule can
+	// be returned
+	if (!universe->initSched()) {
+		Tcl_SetResult(interp, "Error setting up the schedule.", 
+			      TCL_STATIC);
+		return TCL_ERROR;
+	}
 	return result(universe->displaySchedule());
 }
 
@@ -335,7 +343,7 @@ int PTcl::run(int argc,char ** argv) {
 int PTcl::cont(int argc,char ** argv) {
 	if (argc > 2)
 		return usage("cont <stoptime>");
-	if (*argv[1])
+	if (argc == 2)
 		lastTime = atof (argv[1]);
 	stopTime += lastTime;
 	universe->setStopTime(stopTime);
@@ -369,6 +377,24 @@ int PTcl::seed(int argc,char ** argv) {
 	if (argc == 2) val = atoi(argv[1]);
 	LOG_DEL; delete gen;
 	LOG_NEW; gen = new ACG(val);
+	return TCL_OK;
+}
+
+// animation control
+int PTcl::animation (int argc,char** argv) {
+	const char* t = "";
+	int c;
+	if (argc == 2) t = argv[1];
+	if (argc > 2 ||
+	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
+		return usage ("animation ?on/off?");
+	if (argc != 2) {
+		strcpy(interp->result, (c==0) ? "on" : "off");
+	}
+	else if (c == 0)
+		textAnimationOn();
+	else
+		textAnimationOff();
 	return TCL_OK;
 }
 
@@ -483,6 +509,18 @@ int PTcl::link(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+// Override tcl exit function with one that does cleanup of the universe.
+int PTcl::exit(int argc,char ** argv) {
+	int estatus = 0;
+	if (argc > 2) return usage("exit ?returnCode?");
+	if (argc == 2 && Tcl_GetInt(interp,argv[1], &estatus) != TCL_OK) {
+		return TCL_ERROR;
+	}
+	LOG_DEL; delete universe;
+	::exit (estatus);
+	return TCL_ERROR;	// should not get here
+}
+
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -501,6 +539,7 @@ struct InterpTableEntry {
 // Here is the table.  Make sure it ends with "0,0"
 static InterpTableEntry funcTable[] = {
 	ENTRY(alias),
+	ENTRY(animation),
 	ENTRY(busconnect),
 	ENTRY(connect),
 	ENTRY(cont),
@@ -511,6 +550,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(disconnect),
 	ENTRY(domain),
 	ENTRY(domains),
+	ENTRY(exit),
 	ENTRY(knownlist),
 	ENTRY(link),
 	ENTRY(newstate),
