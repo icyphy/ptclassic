@@ -72,7 +72,7 @@ Journal, Vol.  3, No. 2.
                 name { X }
 	        type { fix }
 	        default { ONE }
-	        desc { value of pole }
+	        desc { internal state }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
          }
 
