@@ -22,7 +22,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Output fix type }
 	}
 	defstate {
-		name { outputPrecision }
+		name { OutputPrecision }
 		type { string }
 		default { "4.14" }
 		desc {
@@ -32,6 +32,19 @@ If the value of the double cannot be represented by the number of bits
 specified in the precision parameter, then a error message is given.
 		}
 	}
+        defstate {
+                name { OverflowHandler }
+                type { string }
+                default { "saturate" }
+                desc {
+Overflow characteristic for the output.
+If the result of the sum cannot be fit into the precision of the output,
+then overflow occurs and the overflow is taken care of by the method
+specified by this parameter.
+The keywords for overflow handling methods are:
+"saturate" (the default), "zero_saturate", "wrapped", and "warning".
+		}
+        }
 	defstate {
 		name { masking }
 		type { string }
@@ -47,17 +60,21 @@ The keywords are: "truncate" (the default) and "round".
 		Fix out;
 	}
 	setup {
-		const char* Masking = masking;
-		const char* OutputPrecision = outputPrecision;
-		int outIntBits = Fix::get_intBits(OutputPrecision);
-		int outLen = Fix::get_length(OutputPrecision);
+		const char* OP = OutputPrecision;
+		int outIntBits = Fix::get_intBits(OP);
+		int outLen = Fix::get_length(OP);
 		out = Fix(outLen, outIntBits);
+
+		const char* Masking = masking;
 		if ( strcasecmp(Masking, "truncate") == 0)
 		  out.Set_MASK(Fix::mask_truncate);
 		else if ( strcasecmp(Masking, "round") == 0)
 		  out.Set_MASK(Fix::mask_truncate_round);
 		else
 		  Error::abortRun(*this, ": not a valid function for masking");
+
+		const char* OV = OverflowHandler;
+		out.set_ovflow(OV);
 	}
 	go {
 		out = (double) (input%0);
