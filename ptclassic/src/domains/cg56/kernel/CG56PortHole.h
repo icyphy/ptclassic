@@ -1,0 +1,62 @@
+#ifndef _CG56Connect_h
+#define _CG56Connect_h 1
+/******************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1991 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer: J. Buck
+
+ These classes are portholes for stars that generate assembly language code.  
+
+*******************************************************************/
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
+#include "SDFConnect.h"
+#include "AsmConnect.h"
+
+// portholes for CG56CodeStars and derived stars
+const bitWord PB_CIRC = 0x40;
+
+// attributes for code generation portholes
+
+class ProcMemory;
+class AsmGeodesic;
+
+class CG56PortHole : public AsmPortHole {
+public:
+};
+
+class InCG56Port : public InAsmPort {
+public:
+	int isItInput() const;
+};
+
+class OutCG56Port: public OutAsmPort {
+public:
+	int isItOutput() const;
+};
+
+// is anything here?
+class MultiCG56Port : public MultiAsmPort {
+public:
+	int someFunc();
+};
+
+class MultiInCG56Port : public MultiInAsmPort {
+public:
+	int isItInput() const;
+	PortHole& newPort();
+};
+
+class MultiOutCG56Port : public MultiOutAsmPort {
+public:
+	int isItOutput() const;
+	PortHole& newPort();
+};
+
+#endif
