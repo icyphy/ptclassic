@@ -70,6 +70,9 @@ all:	makefile $(LIBNONSHARED)
 # "make install" puts things in the official place
 install:	makefile $(LIBDIR)/$(LIBNONSHARED)
 
+# mathematica.mk checks this var before traversing the path
+NEED_MATHEMATICADIR = 	1
+
 # Include common make definitions
 include $(ROOT)/mk/common.mk
 
