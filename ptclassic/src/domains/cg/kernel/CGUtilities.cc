@@ -132,7 +132,15 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 // create the directory if necessary (-p)
     fileName << directory << "/" << file;
     mkdir << "mkdir -p " << directory;
+
+#if defined(__sgi) || defined(sgi)
+    // FIXME: If we are on the sgi, mkdir -p will return non-zero if
+    // the directory already exists.  So we don't check the return value.
+    // Bad idea? Blame SGI.  
+    rshSystem(hname,mkdir);
+#else
     if (rshSystem(hname,mkdir)) return FALSE;
+#endif
 
     cout << "rcpWriteFile: writing file " << file << "\n";
     cout.flush();
