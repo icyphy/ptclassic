@@ -938,7 +938,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(topblocks),
 	ENTRY(univlist),
 	ENTRY(wrapup),
-	0, 0
+	{ 0, 0 }
 };
 
 // register all the functions.
