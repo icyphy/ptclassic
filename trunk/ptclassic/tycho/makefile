@@ -110,11 +110,12 @@ typt/lib/PtolemyFacets.fst: FORCE
 # glimpse is not included with Tycho, see http://glimpse.cs.arizona.edu
 GLIMPSEINDEX =	/usr/sww/bin/glimpseindex
 glimpse: .glimpse_exclude
+	rm -f .glimpse_tmpi2
 	if [ "$(TYCHO)" = "" ]; then \
-		$(GLIMPSEINDEX) -H $(PTOLEMY)/tycho $(PTOLEMY)/tycho; \
+		$(GLIMPSEINDEX) -H "$(PTOLEMY)/tycho" "$(PTOLEMY)/tycho"; \
 		chmod a+r $(PTOLEMY)/tycho/.glimpse_*; \
 	else \
-		$(GLIMPSEINDEX) -H $(TYCHO) $(TYCHO); \
+		$(GLIMPSEINDEX) -H "$(TYCHO)" "$(TYCHO)"; \
 		chmod a+r $(TYCHO)/.glimpse_*; \
 	fi
 
