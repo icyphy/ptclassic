@@ -1,4 +1,7 @@
 .VR 0.$Revision$ "$Date$"
+.EQ
+delim off
+.EN
 .TI "CGC Domain"
 .ds DO "CGC
 .AU
@@ -547,4 +550,6 @@ such as cm5 and dsp3, we design new domains and let the CGC domain
 be a subDomain. We found out that if we need to redesign or add
 quite a few stars, making a new Domain is a better choice.
 In the next release, we will have some examples of this subDomain idea.
-
+.EQ
+delim $$
+.EN
