@@ -409,9 +409,9 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
 "}\n";
 
     myCode +=
-"#if TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1\n"
+"#if (TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION >= 8\n"
 "ptkW = Tk_MainWindow(ptkInterp);\n"
-"#endif /* TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1 */\n";
+"#endif /* (TK_MAJOR_VERSION >= 4 && TK_MINOR_VERSION >= 1) || TK_MAJOR_VERSION >= 8 */\n";
 
     myCode +=
 "\n"
