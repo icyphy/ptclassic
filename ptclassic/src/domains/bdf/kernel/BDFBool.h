@@ -44,7 +44,8 @@ class StringList;
 
 // a BoolSignal represents a single boolean signal, which may be negated.
 struct BoolSignal {
-	friend int operator==(const BoolSignal& a, const BoolSignal& b);
+	inline friend int operator==(const BoolSignal& a, const BoolSignal& b)
+	{return &(a.p) == &(b.p) && a.negated == b.negated;}
 	friend StringList& operator+=(StringList&, const BoolSignal&);
 	friend class BoolTerm;
 private:
@@ -61,10 +62,6 @@ public:
 		negated(a.negated), link(lnk), p(a.p) {}
 	const BoolSignal* next() const { return link;}
 };
-
-inline int operator==(const BoolSignal& a, const BoolSignal& b) {
-	return &(a.p) == &(b.p) && a.negated == b.negated;
-}
 
 // a BoolTerm represents the product of a constant integer and an indefinite
 // number of BoolSignal terms.
