@@ -46,21 +46,9 @@ Date of last revision:
 #include "PriorityQueue.h"
 #include "Error.h"
 
-DLParProcs :: DLParProcs(int pNum, MultiTarget* t) :ParProcessors(pNum,t) {
-	LOG_NEW; schedules = new UniProcessor[pNum];
-	candidate = 0;
-}
-
-DLParProcs :: ~DLParProcs() {
-	LOG_DEL; delete [] schedules;
-}
-
-UniProcessor* DLParProcs :: getProc(int num) { return &(schedules[num]); }
-
 void DLParProcs :: initialize(DLGraph* g) 
 {
 	ParProcessors :: initialize();
-	candidate = mtarget->candidateProcs(this, 0);
 
 	// member initialization
 	myGraph = g;
@@ -168,20 +156,18 @@ void DLParProcs :: scheduleSmall(DLNode* pd)
 {
 	// examine candidate processors
 	if (pd->atBoundary()) {
-		candidate->truncate(1);
-		candidate->elem(0) = 0;
+		candidate.truncate(1);
+		candidate.elem(0) = 0;
 	} else if (pd->sticky() && pd->invocationNumber() > 1) {
-		candidate->truncate(1);
+		candidate.truncate(1);
 		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
-		candidate->elem(0) = firstN->getProcId();
+		candidate.elem(0) = firstN->getProcId();
 	} else {
-		candidate = mtarget->candidateProcs(this, pd->myMaster());
-	}
-
-	if (candidate->size() == 0) {
-		Error::abortRun(*pd->myMaster(), " is not supported.",
+		if(!candidateProcs(pd->myMaster())) {
+			Error::abortRun(*pd->myMaster(), " is not supported.",
 			" please check resource constraints.");
-		return;
+			return;
+		}
 	}
 
 	// compare the earliest schedule time with candidate processors.
@@ -195,7 +181,6 @@ void DLParProcs :: scheduleSmall(DLNode* pd)
 
 	// renew the states of the graph
 	myGraph->decreaseNodes();
-	myGraph->decreaseWork(pd->getExTime());
 }
 
 // Among candidate processors, choose a processor that can execute
@@ -209,17 +194,17 @@ int DLParProcs :: compareCost(DLNode* node, int* earliest) {
 	if (!node->myMaster()) leng = node->getExTime();
 
 	int ix = 0;	// candidate array index
-	int optId = candidate->elem(0);
+	int optId = candidate.elem(0);
 	*earliest = costAssignedTo(node, optId, executeIPC(optId));
 	if (node->myMaster()) leng = mtarget->execTime(node->myMaster(), 
 					getProc(optId)->target());
 	int min = *earliest + leng;
 
-	int bound = candidate->size() - 1;
+	int bound = candidate.size() - 1;
 
 	while (ix < bound) {
 		ix++;
-		int pix = candidate->elem(ix);
+		int pix = candidate.elem(ix);
 		int cost = costAssignedTo(node, pix, executeIPC(pix));
 		if (cost >= 0) {
 			if (node->myMaster()) leng = mtarget->execTime(
@@ -279,145 +264,3 @@ void DLParProcs :: assignNode(DLNode* pd, int destP, int tm) {
 	}
 }
 	
-/*****************************************************************
-		For Scheduling Large Node
- ****************************************************************/
-
-// Schedule a big block (CGWormhole, or data parallel stars).
-// There will be idle time at the front of this block due to the
-// mismatched pattern of processor availability.
-void DLParProcs :: scheduleBig(DLNode* node, int when, IntArray& avail)
-{
-	Profile* pf = node->profile();
-
-	int optNum = pf->getEffP();
-
-	// schedule the idle node and the profile into the processors.
-	int shift = pf->frontIdleLength(avail);
-
-	int saveStart = 0, saveFinish = 0;
-	for (int i = optNum - 1; i >= 0; i--) {
-		// calculate time durations.
-		int t = shift + when + pf->getStartTime(i);
-		int leng = pf->getFinishTime(i) - pf->getStartTime(i);
-		int pix = pIndex[i];
-		UniProcessor* proc = getProc(pix);
-		proc->schedAtEnd(node, t, leng);
-		pf->assign(node->invocationNumber(),pf->getProcId(i),pix);
-		// set processor id for IPC.
-		if (pf->getProcId(i) == 0) {
-			node->setProcId(pix);
-			saveStart = t; 
-		}
-		if (saveFinish < t + leng) saveFinish = t + leng;
-	}
-	node->setScheduledTime(saveStart);
-	node->setFinishTime(saveFinish);
-	
-	// renew the states of the graph
-	fireNode(node);
-	myGraph->decreaseNodes();
-	myGraph->decreaseWork(node->getExTime());
-}
-
-// First, schedule the communication nodes associate with the wormhole node.
-// Second, determine the pattern of processor availability and store it
-// sorted.  
-// Return the schedule time.
-// Note that the avail[i] becomes negative when the i-th processor is
-// available at the "earliest" time.
-int DLParProcs :: determinePPA(DLNode* pd, IntArray& avail)
-{
-	// examine candidate processors
-	candidate = mtarget->candidateProcs(this, pd->myMaster());
-
-	// decide the starting processor assigned to the construct.
-	int earliest;
-	int optId = decideStartingProc(pd, &earliest);
-
-	// schedule communication.
-	scheduleIPC(optId);
-
-	// sort the processor indices with available time.
-	sortWithAvailTime(earliest);
-
-	// fill out the array.
-	for (int i = numProcs-1; i >= 0; i--) {
-		int temp = getProc(pIndex[i])->getAvailTime();
-		if (temp > earliest) {
-			avail[i] = temp - earliest;	// positive.
-		} else {
-			if (pIndex[i] == optId) {
-				int t = pIndex[0];
-				pIndex[0] = optId;
-				pIndex[i] = t;
-				temp = getProc(t)->getAvailTime();
-			}
-			avail[i] = temp - earliest;	// non-positive.
-		}
-	}
-	return earliest;
-}
-
-// Among candidate processors, choose a processor that can execute
-// the node earliest.
-int DLParProcs :: decideStartingProc(DLNode* node, int* earliest) {
-
-	// prepare the sortest list of the finish times of the ancestors.
-	prepareComm(node);
-
-	int ix = 0;	// candidate array index
-	int temp;
-	int optId = candidate->elem(0);
-	int start = executeIPC(optId);
-	temp = getProc(optId)->getAvailTime();
-	if (start < temp) start = temp;
-	int bound = candidate->size() - 1;
-
-	while (ix < bound) {
-		ix++;
-		int pix = candidate->elem(ix);
-		int cost = -1;
-
-		// If the processor is not available before the earliest
-		// time so far, ignore that processor.
-		temp = getProc(pix)->getAvailTime();
-		if (temp < start) {
-			cost = executeIPC(pix);
-			if (cost < temp) start = temp;
-			else if (cost < start) {
-				start = cost;
-				optId = pix;
-			}
-		}
-	}
-	*earliest = start;
-	return optId;
-}
-
-// Schedule a big block for invocations > 1. Use the same profile and
-// the same set of processors.
-void DLParProcs :: copyBigSchedule(DLNode* node, IntArray& avail) {
-	Profile* pf = node->profile();
-	int optNum = pf->getEffP();
-
-	// processor index
-	int ix = pf->assignedTo(1,0);
-
-	// schedule comm.
-	prepareComm(node);
-	scheduleIPC(ix);
-
-	// fill out the array pIndex[], and avail[].
-	for (int i = 0; i < optNum; i++)
-		pIndex[i] = pf->assignedTo(1,i);
-
-	int ref = getProc(ix)->getAvailTime();
-	avail[0] = 0;
-	for (i = 1; i < optNum; i++) {
-		avail[i] = getProc(pIndex[i])->getAvailTime() - ref;
-	}
-
-	// main scheduling routine.
-	scheduleBig(node, ref, avail);
-}

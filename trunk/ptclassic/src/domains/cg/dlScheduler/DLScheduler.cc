@@ -37,7 +37,6 @@ Date of last revision:
 #endif
 
 #include "DLScheduler.h"
-#include "CGWormBase.h"
 #include "Error.h"
 
 /////////////////////////////
@@ -78,46 +77,12 @@ int DLScheduler :: scheduleIt()
 	   // read the star
 	   CGStar* obj = node->myStar();
 
-	   // check the atomicity of the star
-	   if (obj->isItWormhole() && node->invocationNumber() > 1) {
-		node->withProfile(obj->getProfile(numProcs));
-		parSched->copyBigSchedule(node, avail);
-
-	   } else if (obj->isParallel()) {
-	   	// determine the pattern of processor availability.
-		// And return the schedule time.
-	   	int when = parSched->determinePPA(node, avail);
-
-	   	// compute the work-residual which can be scheduled in 
-	   	// parallel with this construct.  
-	   	// If the residual work is too small, we may 
-	   	// want to devote more processors to the construct. 
-	   	// If the residual work is large, we use the optimal value.
-	   	int resWork = myGraph->sizeUnschedWork() - 
-			myGraph->workAfterMe(node);
-
-		// We do not support wormholes... we may support them
-		// in the future again
-		if (obj->isItWormhole()) {
-	   		CGWormBase* worm = obj->myWormhole();
-
-			// Possible future revision: decide optimal number of 
-			// processors by an iterative procedure.
-	   		// calculate the optimal number of processors taking 
-			// the "front-idle-time" into account.
-	   		// worm->computeProfile(numProcs, resWork, &avail);
-           		if (haltRequested()) return FALSE;
-
-		} else {
-			// TO DO later.
-			// For data parallel stars, choose the best profile.
-			// setting the effP member of the profile.
-			
-		}
-
-		node->withProfile(obj->getProfile(numProcs));
-	   	parSched->scheduleBig(node, when, avail);
-
+	   if (obj->isParallel()) {
+		// this version of scheduler could not handle
+		// data parallel star. sorry!
+		Error::abortRun("Sorry, this scheduler can not handle ",
+			"parallel tasks. Try macroScheduler");
+		return FALSE;
 	   } else {
 	   	// schedule the object star.
 	   	parSched->scheduleSmall(node);	
@@ -140,7 +105,7 @@ int DLScheduler :: scheduleIt()
   mtarget->clearCommPattern();
   myGraph->resetGraph();
   parSched->initialize(myGraph);
-  parSched->listSchedule(myGraph);
+  if (parSched->listSchedule(myGraph) < 0) return FALSE;
   mtarget->saveCommPattern();
 	
   return TRUE;
@@ -156,7 +121,6 @@ StringList DLScheduler :: displaySchedule() {
 
 	StringList out;
 	out += parSched->display(galaxy);
-	out += ParScheduler :: displaySchedule();
 
 	return out;
 }
