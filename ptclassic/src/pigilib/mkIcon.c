@@ -102,7 +102,6 @@ octObject *destPtr, *srcPtr;
 		ErrAdd(octErrorString());
 		return FALSE;
 	    }
-	    octGetPoints(&srcItem, &num, points);
 	    octPutPoints(&destItem, num, points);
 
 /*  This is the way it should work but it doesn't work all the time:
