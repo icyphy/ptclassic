@@ -123,5 +123,3 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 # this flag. See also config-g++.mk
 CC_STATIC = #-static
 
-#S56DIR= $(ROOT)/vendors/s56dsp
-S56DIR=
