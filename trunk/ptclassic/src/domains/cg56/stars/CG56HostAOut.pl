@@ -104,6 +104,7 @@ aio_graph $ref(buffer,0) $fullname() {$val(label)} $val(blockSize) $val(mode) $r
 	.ENDL
 	bset	#0,x:(r2)
 $label(skip)		
+	nop				; jumps to end MUST have nop (loopsched)
     }
     initCode {
 	addCode( doCopyB ? cbAioHostLock : cbAioDirect, "aioCmds");
