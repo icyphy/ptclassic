@@ -127,6 +127,11 @@ interpreter.  To get around this restriction, see "multilink" or
 "permlink".
 }
 
+add_to_help matlab {<option> ?<arg> ...?} {
+Interact with a running Matlab process.
+Options include end, eval, get, set, start, and unset.
+}
+
 add_to_help multilink {<arg> ?<arg> ...?} {
 Incrementally link arbitrary code into the compiler.  The arguments
 are passed on to the linker, and may include .o files or linker switches
