@@ -1,5 +1,7 @@
 static const char file_id[] = "ACSDomain.cc";
 /**********************************************************************
+@Version: $Id$
+
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 
