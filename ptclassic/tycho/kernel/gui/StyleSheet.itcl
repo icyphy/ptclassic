@@ -51,22 +51,21 @@
 # to be returned, in the same format as for the <b>subscribe</b>
 # option. Color and font values are always converted into X values.
 #
-# <dt><b>register</b> _stylesheet_ _basefile_ _userfile_
+# <dt><b>register</b> _stylesheet_ _masterfile_ _userfile_
 # <dd>
 # Register a stylesheet. _stylesheet_ is the name which will be used
-# to refer to the stylesheet in future calls. _basefile_ is
+# to refer to the stylesheet in future calls. _masterfile_ is
 # the file containing the base style-sheet in TIM format, and
 # _userfile_ is the file containing user-specified styles,
 # also in TIM format. The two files are first checked for existence,
-# and if _userfile_ does not exist, then _basefile_
+# and if _userfile_ does not exist, then _masterfile_
 # is copied to _userfile_. The first time _stylesheet_
 # is accessed, _userfile_ is loaded into memory to create an
 # object that can be edited and modified. At that time, the modification
-# dates of _basefile_ and _userfile_ are compared, and
-# if _basefile_ is more recent than _userfile_, the loaded
+# dates of _masterfile_ and _userfile_ are compared, and
+# if _masterfile_ is more recent than _userfile_, the loaded
 # model is updated to add or remove any parameters present in
-# _basefile_ but not in _userfile_, or vice versa.
-#
+# _masterfile_ but not in _userfile_, or vice versa.
 #
 # <dt><b>set</b> _stylesheet_ _style_ _param_ _value_
 # <dd>
@@ -139,11 +138,11 @@ ensemble ::tycho::stylesheet {
     }
 
     # Register a stylesheet
-    option register {stylesheet basefile userfile} {
+    option register {stylesheet masterfile userfile} {
 	if [@scope ::tycho::StyleSheet ::info exists _stylefile($stylesheet)] {
 	    error "Style sheet \"$stylesheet\" is already registered"
 	}
-	@scope ::tycho::StyleSheet set _basefile($stylesheet) $basefile
+	@scope ::tycho::StyleSheet set _masterfile($stylesheet) $masterfile
 	@scope ::tycho::StyleSheet set _userfile($stylesheet) $userfile
     }
 
@@ -203,7 +202,7 @@ ensemble ::tycho::stylesheet {
 # which is a collection of parameters with arbitrary values.
 # All styles within a sheet have exactly the same set of
 # parameters, but with differing values. Widgets can subscribe
-# an option to a parameter, and that option is then kep in sync
+# an option to a parameter, and that option is then kept in sync
 # with the value of that parameter instance within the particular
 # style currently selected for that widget.
 # A style sheet has three types:
@@ -308,7 +307,7 @@ class ::tycho::StyleSheet {
     method subscribe {type {subscriber {}} args}
 
     # Synchronize this model with a "master" model
-    method synchronize {master style {context {}}}
+    method synchronize {master}
 
     # Unsubscribe from this model
     method unsubscribe {type subscriber args}
@@ -332,19 +331,25 @@ class ::tycho::StyleSheet {
     protected method _describeparameter {name {prefix {}}}
 
     #################################################################
+    ####                    private methods                      ####
+
+    # Utility routin for synchronizing with the master
+    private method _sync {master rstyle context}
+
+    #################################################################
     ####                   private variables                     ####
 
     # Mapping from widget name to subscribed style
     private common _widgetstyle
 
     # Mapping from widget name to a list of option-parameter pairs
-    private common _widgetoptions
+    private variable  _widgetoptions
     
     #################################################################
     ####               private common variables                  ####
 
-    # Mapping from sheet name to base file name
-    private common _basefile
+    # Mapping from sheet name to master file name
+    private common _masterfile
 
     # Mapping from sheet name to StyleSheet object
     private common _stylemodel
@@ -538,16 +543,21 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 	    if ![exists style:$style] {
 		error "Unknown style \"$style\" in style-sheet \"$modelname\""
 	    }
-	    # If the subscriber has already subscribed options, we
-	    # have to unsubscribe it first
-	    chain unsubscribe data $subscriber
+	    if [::info exists _widgetoptions($subscriber)] {
+		# If the subscriber has already subscribed options, we
+		# have to unsubscribe it first
+		unsubscribe data $subscriber
 
-	    # Change the style for this widget
-	    set _widgetstyle($subscriber) $style
+		# Change the style for this widget
+		set _widgetstyle($subscriber) $style
+		
+		# Resubscribe all preferences
+		eval subscribe options $subscriber $_widgetoptions($subscriber)
 
-	    # Resubscribe all preferences
-	    eval subscribe options $subscriber $_widgetoptions($subscriber)
-
+	    } else {
+		# Change the style for this widget
+		set _widgetstyle($subscriber) $style
+	    }
     	}
     	default {
 	    eval chain $mode $subscriber $args
@@ -558,117 +568,64 @@ body ::tycho::StyleSheet::subscribe {mode {subscriber {}} args} {
 ########################################################################
 #### synchronize
 #
-# "Synchronize" this model with a "master" model. _master_ is the
-# reference to the master model. The _context_ argument is the
-# context within which the synchronization takes place and is only
-# used by recursive calls. The synchronization process is as follows:
+# Synchronize this model with a "master" model. _master_ is the
+# reference to the master model. The synchronization process uses a style
+# called "default" in the master stylesheet to update this one.
+# Specifically, synchronization does this:
 # <ul>
-# <li>Add any style present in master but not here.
-# <li>Change the parameters of each style to match that of
-# the corresponding style in master, if there is one.
-# <li>Compare each style in this model with the "default"
-# style of the master. While doing so:
-#    <ul>
-#    <li>Add each parameter and group in master not present here.
-#    <li>Delete each parameter and group here that is not in master.
-#    <li>For all other groups, change the group's attributes to
-#    match the master.
-#    <li>For all other parameters, change the parameter's attributes
-#    to be the same as the master, with the exception of the
-#    parameter value, which is changed only if it is the same
-#    as the previous default.
-#   </ul>
+# <li>Attributes of the master stylesheet are merged.
+#
+# <li>Any style present in master but not here is added.
+# Styles here that are not in master are untouched.
+# Styles present in both are synchronized (see below).
+# In addition, the <b>-label</b> option is copied from the
+# master to here.
+#
+# <li>All styles are synchronized against the "default" style
+# of the master stylesheet:
+# <ul>
+# <li>Each group present in the master but not here is added.
+# Groups present here but not in the master are deleted.
+# Groups present in both are recursively synchronized, and
+# the attributes of the master group copied into the group
+# here.
+# <li>Each parameter present in the master but not here is
+# added. Parameters present here but not in the master are
+# deleted. Parameters present in both are synchronized but updating
+# every attribute _except_ <b>-value</b> and <b>-default</b>
+# to be the same as the master. 
+# Any attributes here but not in the master are deleted.
+# </ul>
+# Note that since evey style is synchronized in this way,
+# including new ones copied in from the master. The effect
+# of this is that styles in the master, other than "default,"
+# can omit attributes that have the same value as the default
+# style, as they will be correctly copied into this stylesheet
+# from the default style.
 # </ul>
 #
-body ::tycho::StyleSheet::synchronize {master mstyle {context {}}} {
+body ::tycho::StyleSheet::synchronize {master} {
+    puts "Synchronizing stylesheet: $modelname"
+
     set styles [match style]
     set rstyle [lindex $styles 0]
 
-    # If this style sheet has no styles, just copy the data
-    # from the master
-    if { $styles == "" } {
-	parse [$master describe]
-	return
-    }
-
-    # Update styles
+    # Add new styles and update existing styles
     foreach s [$master match style] {
         if ![exists style:$s] {
             # Add new style
             parse [$master describe style:$s]
         } else {
-            # Update style parameters
-            eval itemconfigure style:$s [$master assign style:$s]
+            # Update style label
+            itemconfigure style:$s -label [$master itemcget style:$s -label]
         }
     }
-
-    # Recursively process groups
-    set rgroups [match group [concat style:$rstyle $context]]
-    set mgroups [$master match group [concat style:$mstyle $context]]
-
-    # Add groups
-    foreach g [::tycho::lsubtract $mgroups $rgroups] {
-        set data [$master describe [concat style:$mstyle $context group:$g]]
-        foreach s $styles {
-	    # FIXME: this is wrong
-            parse [concat style:$s $context group:$g]
-        }
-    }
-    # Delete groups
-    foreach g [::tycho::lsubtract $rgroups $mgroups] {
-        foreach s $styles {
-            delete [concat style:$s $context group:$g]
-        }
-    }
-    # Synchronize groups
-    foreach g [::tycho::lintersection $rgroups $mgroups] {
-        synchronize $master $mstyle [concat $context group:$g]
-    }
-
-    # Process parameters
-    set rparams [match parameter [concat style:$rstyle $context]]
-    set mparams [$master match parameter [concat style:$mstyle $context]]
-
-    # Add parameters
-    foreach p [::tycho::lsubtract $mparams $rparams] {
-        set data [$master assign [concat style:$mstyle $context parameter:$p]]
-        foreach s $styles {
-            eval [list add [concat style:$s $context parameter:$p]] $data
-        }
-    }
-    # Delete parameters
-    foreach p [::tycho::lsubtract $rparams $mparams] {
-        foreach s $styles {
-            delete [concat style:$s $context parameter:$p]
-        }
-    }
-    # Synchronize parameters
-    foreach p [::tycho::lintersection $rparams $mparams] {
-        set mdata [$master assign [concat style:$mstyle $context parameter:$p]]
-
-
-        foreach s $styles {
-            set rdata [assign [concat style:$s $context parameter:$p]]
-	    
-            # Remember the data if it's not default
-            set protect 0
-            array set rattrs $rdata
-            if { $rattrs(-value) != $rattrs(-default) } {
-                set protect 1
-                set value $rattrs(-value)
-            }
-            # Merge master data
-            array set rattrs $mdata
-	    
-            # Restore value
-            if $protect {
-                set rattrs(-value) $value
-            }
-            # Modify the data
-            assign [concat style:$s $context parameter:$p] [array get rattrs]
-        }
+    # Synchronize all styles
+    foreach s [match style] {
+	_sync $master $s {}
     }
 }
+
 
 ########################################################################
 #### unsubscribe
@@ -717,9 +674,12 @@ body ::tycho::StyleSheet::unsubscribe {mode subscriber args} {
 		array set opts $_widgetoptions($subscriber)
 		set unsubs {}
 		foreach option $args {
-		    set name [namebysubscriber $subscriber $opts($option)]
-		    lappend unsubs $name
-		    unset opts($option)
+		    # FIXME: this check shouldn't be necessary...
+		    if [::info exists opts($option)] {
+			set name [namebysubscriber $subscriber $opts($option)]
+			lappend unsubs $name
+			unset opts($option)
+		    }
 		}
 		eval chain data $subscriber $unsubs
 		set _widgetoptions($subscriber) [array get opts]
@@ -768,8 +728,10 @@ body ::tycho::StyleSheet::_load {stylesheet} {
     }
     # If it's not loaded, load it
     if ![::info exists _stylemodel($stylesheet)] {
+	puts "Loading stylesheet: $stylesheet"
+
 	set userfile [::tycho::expandPath $_userfile($stylesheet)]
-	set basefile [::tycho::expandPath $_basefile($stylesheet)]
+	set masterfile [::tycho::expandPath $_masterfile($stylesheet)]
 
 	# Create the model
 	set model [::tycho::StyleSheet \
@@ -783,7 +745,7 @@ body ::tycho::StyleSheet::_load {stylesheet} {
         # (WidgetPreferences), the date comparison is not likely to be
 	# very robust. We need to use version numbers.
         if { ![::file exists $userfile] \
-		|| [::file mtime $basefile] > [::file mtime $userfile] } {
+		|| [::file mtime $masterfile] > [::file mtime $userfile] } {
 	    # If the user file exists, load it
 	    if [::file exists $userfile] {
 		# Load from the user file
@@ -793,12 +755,12 @@ body ::tycho::StyleSheet::_load {stylesheet} {
 	    }
             # Load from base file
             set base [::tycho::StyleSheet [::tycho::autoName stylesheet]]
-            set fd [open $basefile]
+            set fd [open $masterfile]
 	    $base parse [read $fd]
             close $fd
 
 	    # Synchronize the model with the updated base file data
-            $model synchronize $base "default"
+            $model synchronize $base
             ::delete object $base
 
             # Rewrite user file
@@ -860,5 +822,63 @@ body ::tycho::StyleSheet::_describeparameter {name {prefix {}}} {
         lappend string $attr $attrs($attr)
     }
     return $string\n
+}
+
+#####################################################################
+#####################################################################
+####                       private methods                       ####
+
+########################################################################
+#### _sync
+#
+# Synchronize with a master stylesheet. Called by the
+# synchronize{} method.
+#
+body ::tycho::StyleSheet::_sync {master rstyle context} {
+    set mgroups [$master match group [concat style:default $context]]
+    set rgroups [match group [concat style:$rstyle $context]]
+
+    # Add groups
+    foreach g [::tycho::lsubtract $mgroups $rgroups] {
+	set data [$master describe [concat style:default $context group:$g]]
+	parse $data [concat style:$rstyle $context]
+    }
+    # Delete groups
+    foreach g [::tycho::lsubtract $rgroups $mgroups] {
+	delete [concat style:$rstyle $context group:$g]
+    }
+    # Recursively synchronize groups
+    foreach g [::tycho::lintersection $rgroups $mgroups] {
+	_sync $master $rstyle [concat $context group:$g]
+    }
+
+    # Process parameters in this context
+    set mparams [$master match parameter [concat style:default $context]]
+    set rparams [match parameter [concat style:$rstyle $context]]
+
+    # Add parameters
+    foreach p [::tycho::lsubtract $mparams $rparams] {
+	set data [$master assign [concat style:default $context parameter:$p]]
+	eval [list add [concat style:$rstyle $context parameter:$p]] $data
+    }
+    # Delete parameters
+    foreach p [::tycho::lsubtract $rparams $mparams] {
+	delete [concat style:$rstyle $context parameter:$p]
+    }
+    # Synchronize parameters
+    foreach p [::tycho::lintersection $rparams $mparams] {
+	# My data
+	array set attrs [assign [concat style:$rstyle $context parameter:$p]]
+	set value $attrs(-value)
+	set default $attrs(-default)
+
+	# Override with master data
+        array set attrs [$master assign [concat style:default $context parameter:$p]]
+	set attrs(-value) $value
+	set attrs(-default) $default
+
+	# Restore the data
+	assign [concat style:$rstyle $context parameter:$p] [array get attrs]
+    }
 }
 
