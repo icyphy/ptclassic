@@ -56,6 +56,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			msg << n << " is out of the range [0,"
 			    << (numports - 1) << "]";
 			Error::abortRun(*this, msg);
+			return;
 		}
 
 		MPHIter nexti(input);
