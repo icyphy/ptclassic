@@ -48,25 +48,25 @@ ROOT =	$(srcdir)/../..
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-OTHERCFLAGS = -I$(ROOT)/../src/compat/ptolemy
+OTHERCFLAGS = 
 
 # makefile stubs that include architecture dependencies.
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIB =		libtyevent$(TCL_SHLIB_SUFFIX)
+LIB =		libtytimer$(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
 	-I$(srcdir) \
 	$(TCL_INCLUDES)
 
-SRCS = 		tySched.c
-HDRS =		tySched.h
+SRCS = 		tyTimer.c
+HDRS =		tyTimer.h
 
 EXTRA_SRCS =	makefile.in test.tcl index.html
 
-OBJS =		tySched.o
+OBJS =		tyTimer.o
 
 # `make realclean` removes these files
 REALCLEAN_STUFF = makefile
