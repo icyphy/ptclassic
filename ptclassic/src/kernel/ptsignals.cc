@@ -130,13 +130,13 @@ void ptReleaseSig (int) {};
 #else 
 #if defined(PTHPPA)
 void ptSafeSig( int ) {}
-long signalmask;
+long signalmask = 0;
 void ptBlockSig( int SigNum ) {
-	signalmask = sigblock(sigmask(SigNum));
+ 	signalmask = sigblock(sigmask(SigNum)) | sigmask(SigNum);
 }
 void ptReleaseSig( int SigNum ) {
 	/* remove this signal from the signal mask */
-	signalmask &= !(sigmask(SigNum));
+ 	signalmask &= ~(sigmask(SigNum));
 	sigsetmask(signalmask);
 }
 
