@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -61,7 +61,10 @@ OBJS = $(LIBCSRCS:.c=.o)
 
 LIB =		libdialogs.a
 
-LIB=libdialogs.a
+# The clean rule in mk/common.mk will remove KRUFT files.  If 
+# make clean does not remove libdialogs.a then rebuild will not recreate
+# libdialogs.a
+KRUFT =		$(LIB) 
 
 all::	$(LIB)
 
