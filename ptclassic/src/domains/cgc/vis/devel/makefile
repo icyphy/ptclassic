@@ -13,7 +13,7 @@
 # FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
 # ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
 # THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
-# SUCH DAMAGE.
+# SUCH DAMAGE. 
 # 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 # INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
@@ -30,7 +30,20 @@
 ROOT = ../../../../..
 VPATH = $(ROOT)/src/domains/cgc/vis/devel
 
-EXTRA_SRCS = 
+EXTRA_SRCS = \
+	c_fir16.c \
+	timingfir.c \
+	vis_fir16.c \
+	c_ptolemyfft.c  \
+	timingptolemyfft.c \
+	vis_ptolemyfft.c \
+	ptolemyfir.c  \
+	timingptolemyfir.c  \
+	vis_ptolemyfir.c \
+	ptolemyiir.c   \
+	timingptolemyiir.c  \
+	vis_ptolemyiir.c
+
 
 MISC_FILES = 
 
