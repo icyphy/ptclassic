@@ -134,13 +134,24 @@ if ( -d ../src/tst ) then
 		if ( -d ../../../src/tst/$x/stars) then
 			optmkdir stars
 			cd stars
-			optlink ../../../src/tst/$x make.template
-			optlink ../../../src/tst/$x makefile
+			optlink ../../../../src/tst/$x/stars make.template
+			optlink ../../../../src/tst/$x/stars makefile
 			cd ..
 		endif
 		cd ..
 	end
+
+	# Build any non domain tests
+	set NONDOMAINTSTS=(incLink)
+	foreach x ($NONDOMAINTSTS)
+		optmkdir $x
+		cd $x
+		optlink ../../../src/tst/$x makefile
+		cd ..
+	endif
+
 	cd ..
+
 endif
 
 cd domains
