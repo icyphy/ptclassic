@@ -75,7 +75,7 @@ void StringState :: initialize() {
 	// -- Substitute parameters that fall in between curly braces {}
 	// -- Zero out the white space characters so string info is unaltered
 	const char* specialChars = "{}";
-	Tokenizer lexer(initString, specialChars, whiteSpace);
+	Tokenizer lexer(initString, specialChars);
 	lexer.clearwhite();
 	StringList parsedString = "";
 	while (TRUE) {
