@@ -5,8 +5,6 @@ defstar {
 A Infinite Impulse Response (IIR) filter.
 Coefficients are in the "numerator" and "denominator", both start
 with z^0 terms and decrease in powers of z.
-Default coefficients give an 8th order Butterworth lowpass
-filter (XXX: or they will, when I get around to it).
     }
     version {$Id$}
     author { Kennard White }
@@ -23,8 +21,6 @@ This star implements a infinite-impulse response filter of arbirary order.
 The parameters of the star specify H(z), the Z-transform of an
 impulse response h(n).  The output of the star is the convolution
 of the input with h(n).
-The default coefficients give XXX.  The star does not yet have multirate
-functionality.
 .PP
 The transfer function implemented is of the form H(z)=G*N(1/z)/D(1/z),
 where N() and D() are polynomials.  The state "gain" specifies G, and
