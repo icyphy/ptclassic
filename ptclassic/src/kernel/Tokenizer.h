@@ -37,22 +37,24 @@ is used.
 
 const int WORDBUF_SIZE = 256;
 
+const char defWhite[] = " \t\n";
+
 class TokenContext;
 class istream;
 
 class Tokenizer {
 private:
-	char *special;		// list of one-character tokens
-	char *whitespace;	// list of whitespace characters
+	const char *special;	// list of one-character tokens
+	const char *whitespace;	// list of whitespace characters
 	istream *strm;		// associated input stream
 	TokenContext* stack;	// stack for include files
-	char* curfile;		// current input file name
+	const char* curfile;	// current input file name
 	int depth;		// depth of nesting
 	int line_num;		// current line number
 	char comment_char;	// character for comments
 	char quote_char;	// character for quoted strings
-	char escape_char;	// ch
-	char c;				// last char read
+	char escape_char;	// behave like the " \ " in C
+	char c;			// last char read
 	char ungot;
 
 	// this is the common part of all constructors
@@ -77,8 +79,8 @@ public:
 	int readingFromFile() const { return depth > 0 ? 1 : 0;}
 
 	// constructors
-	Tokenizer(istream& input,char *spec);
-	Tokenizer(char* buffer,char* spec);
+	Tokenizer(istream& input,const char* spec,const char* w = defWhite);
+	Tokenizer(const char* buffer,const char* spec,const char* w = defWhite);
 	Tokenizer();
 
 	// get next token
@@ -97,6 +99,12 @@ public:
 
 	// discard current line, or close file (error cleanup)
 	void flush();
+
+	// change whitespace characters
+	void setWhite(const char* w) { whitespace = w;}
+
+	// change special characters
+	void setSpecial(const char* s) { special = s;}
 };
 
 #endif
