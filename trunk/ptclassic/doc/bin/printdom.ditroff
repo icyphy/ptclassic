@@ -187,7 +187,7 @@ else
 	$printcommand $printoptions $dirheader/shared title
 else
 endif
-cat /tmp/index$$ >>! $ALMAGEST_INDEX
+if (-r /tmp/index$$) cat /tmp/index$$ >>! $ALMAGEST_INDEX
 /bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
 # XXX we'll enable this later
 #if (!($icons_norm)) /bin/rm -f ../icons/*.ps ../*/icons/*.ps
