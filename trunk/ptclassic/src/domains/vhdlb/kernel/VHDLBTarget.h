@@ -37,6 +37,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#define  CHAR15  15
+#define  CHAR10  10
+
 #include "HLLTarget.h"
 #include "IntState.h"
 #include "StringState.h"
