@@ -22,11 +22,11 @@ At compile time, this star appears to just be an atomic star.
 	seealso { fibonnacci }
 	inmulti {
 		name { input }
-		type { ANYTYPE }
+		type { float }
 	}
 	outmulti {
 		name { output }
-		type { ANYTYPE }
+		type { float }
 	}
 	codeblock (block) {
 /* Self star */
