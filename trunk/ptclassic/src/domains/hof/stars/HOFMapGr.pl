@@ -39,12 +39,13 @@ Example of a connection to the replacement block
 	}
 	inmulti {
 	  name {exin}
-	  type {=input}
+	  type {ANYTYPE}
 	  desc {
 Example of a connection to the replacement block
           }
 	}
 	constructor {
+	  output.inheritTypeFrom(exin);
 	  input_map.clearAttributes(A_SETTABLE);
 	  output_map.clearAttributes(A_SETTABLE);
 	  blockname.clearAttributes(A_SETTABLE);
@@ -87,7 +88,7 @@ Example of a connection to the replacement block
 	      return;
 	    }
 	    if (!(destgp = breakConnection(peo))) return;
-	    if (inputMap.numPieces() > 0) inputMap += " ";
+	    if (inputMap.size() > 0) inputMap += " ";
 	    inputMap += destgp->name();
 	    if (!connectInput(pi,destgp)) return;
 	  }
@@ -101,7 +102,7 @@ Example of a connection to the replacement block
 	      return;
 	    }
 	    if (!(sourcegp = breakConnection(pei))) return;
-	    if (outputMap.numPieces() > 0) outputMap += " ";
+	    if (outputMap.size() > 0) outputMap += " ";
 	    outputMap += sourcegp->name();
 	    if (!connectOutput(po, sourcegp)) return;
 	  }
