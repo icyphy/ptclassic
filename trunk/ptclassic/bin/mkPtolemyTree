@@ -41,5 +41,5 @@ if [ ! -f $PTOLEMY/bin/ptarch ]; then
 fi
 PTARCH=`$PTOLEMY/bin/ptarch`
 mkPtolemyTreescript=$PTOLEMY/bin/mkPtolemyTree.tcl
-ptolemytcl=$PTOLEMY/tcltk/itcl.$PTARCH/bin/itclsh
+ptolemytcl=$PTOLEMY/tcltk/tcl.$PTARCH/bin/itclsh
 exec $ptolemytcl $mkPtolemyTreescript "$@"
