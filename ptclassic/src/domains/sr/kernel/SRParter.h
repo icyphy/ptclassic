@@ -39,10 +39,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class SRDependencyGraph;
 class SRRecursiveSchedule;
 class Set;
+class SetIter;
 
 // The different partitioning routines
 typedef enum SRPartTypeEnum {
-  SRPartOneT, SRPartInOutT, SRPartExactT
+  SRPartOneT, SRPartInOutT, SRPartExactT, SRPartSweepT
 } SRPartType;
 
 /**********************************************************************
@@ -104,7 +105,9 @@ private:
 **********************************************************************/
 class SRPartInOut : public SRPart {
 public:
-  SRPartInOut( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {};
+  SRPartInOut( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    minset = 0;
+  };
   ~SRPartInOut();
   void init();
   Set * next( int );
@@ -125,7 +128,9 @@ private:
 **********************************************************************/
 class SRPartExact : public SRPart {
 public:
-  SRPartExact( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {};
+  SRPartExact( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    vertex = vindex = 0;
+  };
   ~SRPartExact();
   void init();
   Set * next( int );
@@ -143,6 +148,38 @@ private:
   // Array of indices into the vertex array
   int * vindex;
 
+};
+
+/**********************************************************************
+
+ Greedily generates all borders starting from each vertex
+
+ @Description Starting from each vertex in the graph, absorb the cheapest
+ vertex and return the border of the set.
+
+ **********************************************************************/
+class SRPartSweep : public SRPart {
+public:
+  SRPartSweep( Set & s, SRDependencyGraph & g ) : SRPart(s,g) {
+    kernel = 0;
+    sgIter = 0;
+  };
+
+  ~SRPartSweep();
+  void init();
+  Set * next( int );
+
+private:
+  // Iterates over the vertices in the subgraph
+  SetIter * sgIter;
+
+  // The kernel, grown from each vertex
+  Set * kernel;
+
+  Set * border();
+
+  // Flag indicating when all vertices have been exhausted
+  int done;
 };
 
 
