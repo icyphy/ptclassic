@@ -126,7 +126,7 @@ int CGCTarget :: starDataStruct(Block& block, int level) {
 	if (s->size() > 1) {
 		FloatArrayState* fs = (FloatArrayState*) s;
 		for (int i = 0; i < s->size(); i++) {
-			mainInitialization += "\t";
+			mainInitialization += "    ";
 			mainInitialization += sanitizedFullName(*s);
 			mainInitialization += "[";
 			mainInitialization += i;
@@ -395,6 +395,7 @@ int CGCTarget :: codeGenInit(Galaxy& g) {
 
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
+		if (s->amIFork()) continue;
 		s->offsetInit();
 		s->initCode();
 	}
