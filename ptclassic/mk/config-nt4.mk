@@ -121,6 +121,10 @@ X11_LIBDIR =	$(X11_DIR)/lib
 X11EXT_LIBSPEC=	-lXext -lSM -lICE
 X11_LIBSPEC =	-L$(X11_LIBDIR) -lX11
 
+# XMKMF and MKDIRHIER are used when building xv
+XMKMF =		$(X11_DIR)/bin/xmkmf
+MKDIRHIER =	$(X11_DIR)/bin/mkdirhier
+
 # Don't include Mathematica
 INCLUDE_MATHEMATICA = no
 
