@@ -6,7 +6,7 @@
 
   Synopsis    [ Function definition for Ptdsp_PartitionCodebook ]
 
-  Author      [ Biling Lee and Brian Evans ]
+  Author      [ Biling Lee and Brian L. Evans ]
 
   Copyright   [ 
 
@@ -50,15 +50,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
   Synopsis    [ Find optimum partition for fixed gain and shape codebooks ]
   Description [ Find the optimum partition of the training vector for
                 fixed gain and shape codebooks, and find the squared
-		error (squared distance) of this training vector. ]
+		error (squared distance) of this training vector.
+		Let X be the input vector and Si be the i_th shape codeword: 
+		1. First find shape codeword Si to maximize X'*Si
+		   (' means transpose )
+		2. Then find the j_th gain codeword gj to minimize
+		   (gj-X'*Si)^2
+		3. Squared error (squared distance) is
+		   ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. ]
   SideEffects []
 ******************************************************************************/
-/*
-  Let X=input vector, and Si=i_th shape codeword: 
-  1. First find shape codeword Si to maximize X'*Si (' means transpose )
-  2. Then find the j_th gain codeword gj to minimize (gj-X'*Si)^2
-  3. Squared error (squared distance) is ||X||^2+(gj-X'*Si)^2-(X'*Si)^2. 
-*/
 void 
 Ptdsp_PartitionCodebook(int* theindexShape, int* theindexGain, 
 			double* thedistance, const double* trnVector, 

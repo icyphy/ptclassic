@@ -35,7 +35,7 @@ Version: $Id$
 extern "C" {
 #endif
 
-extern void Ptdsp_Histogram (const int *matrix, int size, int *hist, 
+extern void Ptdsp_Histogram (const int* matrix, int size, int* hist, 
 			     int min, int max);
 
 #ifdef __cplusplus

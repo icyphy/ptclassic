@@ -55,7 +55,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 		roundoff problems. ]
   SideEffects []
 ******************************************************************************/
-
 double 
 Ptdsp_RaisedCosine(int t, int T, double excess) {
   const double DELTA = 1.0e-7;
@@ -76,7 +75,6 @@ Ptdsp_RaisedCosine(int t, int T, double excess) {
 		roundoff problems. ]
   SideEffects []
 ******************************************************************************/
-
 double
 Ptdsp_SqrtRaisedCosine(int t, int T, double excess) {
   double den, oneminus, oneplus, x;

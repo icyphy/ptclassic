@@ -12,7 +12,7 @@
 		bits are: 1 bit for the sign, 3 bits for the exponent,
 		and 4 bits for the mantissa. ]
 
-  Author      [ J. T. Buck ]
+  Author      [ Joseph T. Buck and Craig Reese ]
 
   Copyright   [ 
 
@@ -82,10 +82,12 @@ static int exponent_to_sample_table[8] =
 
 /**Function*******************************************************************
   Synopsis    [ Compress 16-bit linear data to 8-bit PCM mu-law data ]
+  Description [ Converts a 16-bit linear data sample (a fixed-point format)
+		into an 8-bit pulse compression modulated mu-law data
+	 	sample (a floating-point format). ]
   SideEffects []
   SeeAlso     [ Ptdsp_PCMMuLawToLinear ]
 ******************************************************************************/
-
 unsigned 
 char Ptdsp_LinearToPCMMuLaw(int sample) {
   int exponent, mantissa, sign;
@@ -109,32 +111,25 @@ char Ptdsp_LinearToPCMMuLaw(int sample) {
 
 /**Function*******************************************************************
   Synopsis    [ Uncompress 8-bit PCM mu-law data to 16-bit linear data ]
+  Description [ Converts an 8-bit pulse compression modulated mu-law data
+	 	sample (a floating-point format) and into a 16-bit
+		linear data sample (a fixed-point format).  The conversion
+		routine, by Craig Reese at the IDA/Supercomputing Research
+		Center, obeys the CCITT Recommendation G.711 and follows
+		MIL-STD-188-113,"Interoperability and Performance Standards
+		for Analog-to_Digital Conversion Techniques," dated
+		17 February 1987. ]
   SideEffects []
   SeeAlso     [ Ptdsp_LinearToPCMMuLaw ]
 ******************************************************************************/
-/*
-Author:  Craig Reese: IDA/Supercomputing Research Center
-Created: 29 September 1989
-
-References:
-1) CCITT Recommendation G.711  (very difficult to follow)
-2) MIL-STD-188-113,"Interoperability and Performance
-   Standards for Analog-to_Digital Conversion Techniques,"
-   17 February 1987
-
-Input: 8 bit ulaw sample
-Output: signed 16 bit linear sample
-*/
-int 
+int
 Ptdsp_PCMMuLawToLinear(unsigned char ulawbyte) {
   int sign, exponent, mantissa, sample;
-
   ulawbyte = ~ ulawbyte;
   sign = ( ulawbyte & 0x80 );
   exponent = ( ulawbyte >> 4 ) & 0x07;
   mantissa = ulawbyte & 0x0F;
-  sample = exponent_to_sample_table[exponent] +
-		( mantissa << ( exponent + 3 ) );
+  sample = exponent_to_sample_table[exponent] + ( mantissa << (exponent + 3) );
   if ( sign != 0 ) sample = -sample;
   return sample;
 }

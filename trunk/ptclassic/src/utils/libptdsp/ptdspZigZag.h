@@ -35,10 +35,10 @@ Version: $Id$
 extern "C" {
 #endif
 
-extern void Ptdsp_ZigZagScan (const double * inImg, double * outImg, int width,
+extern void Ptdsp_ZigZagScan (const double* inImg, double* outImg, int width,
 			      int height, int bSize);
-extern void Ptdsp_ZigZagInverse (const double * inImg, double * outImg,
-				 int width, int height,  int bSize);
+extern void Ptdsp_ZigZagInverse (const double* inImg, double* outImg,
+				 int width, int height, int bSize);
 
 #ifdef __cplusplus
 }

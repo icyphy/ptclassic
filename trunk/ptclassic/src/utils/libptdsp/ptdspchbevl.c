@@ -141,6 +141,3 @@ Ptdsp_chbevl( double x, double * array, int n ) {
 
   return( 0.5*(b0-b2) );
 }
-
-
-

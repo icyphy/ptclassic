@@ -61,7 +61,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 		and Kaiser ]
   SideEffects []
 ******************************************************************************/
-
 int 
 Ptdsp_WindowNumber(const char* wn) {
   int winType = PTDSP_WINDOW_TYPE_NULL;
@@ -92,7 +91,6 @@ Ptdsp_WindowNumber(const char* wn) {
   SideEffects []
   SeeAlso     [ Ptdsp_WindowNumber ]
 ******************************************************************************/
-
 int 
 Ptdsp_Window(double* window, int realLen, int winType, double* parameters) {
   double alpha = 0.0;

@@ -47,9 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 const double StartOfBlock = 524288.0;
 const double StartOfRun = 1048576.0;
 
-int larger (const double fl, const double in) {
-  return (fabs(fl) >= in); 
-}
+#define larger(fl,in) (fabs(fl) >= (in))
 
 /*---------------------------------------------------------------------------*/	
 /* Definition of exported functions                                          */
@@ -62,14 +60,11 @@ int larger (const double fl, const double in) {
 		run-length encodes it, and outputs the modified image. </p>
 		For the run-length encoding, all values with absolute
 		value less than "thresh" are set to 0.0, to help
-		improve compression. ]
+		improve compression.  Runlengths are coded with a
+		"start of run" symbol and then an (integer) run-length. ]
   SideEffects []
   SeeAlso     [ Ptdsp_RunLengthInverse ]
 ******************************************************************************/
-/*
-  Runlengths are coded with a "start of run" symbol and then an
-  (integer) run-length.
-*/
 void 
 Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
 			int HiPri, double thresh, double **outDc,
@@ -148,7 +143,7 @@ Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
       outPtr[j + k] = hiImage[i++];
     }	
   }
-  
+
   /* While still low priority input data left... */
   i = 0;
   while (i < loSize) {
@@ -184,4 +179,3 @@ Ptdsp_RunLengthInverse (const double * hiImage, const double * loImage,
     }
   } /* end while (indx < loSize) */
 }
-
