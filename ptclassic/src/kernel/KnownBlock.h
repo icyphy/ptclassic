@@ -78,10 +78,18 @@ class KnownListEntry {
 	Block* b;
 	int onHeap;
 	int dynLinked;
+	const char* definitionSource;
+	// definitionSource is:
+	// NULL for a built-in block type (anything defined by C++ code);
+	// hashstring'ed pathname of defining Vem facet for a compiled galaxy;
+	// or a special case constant string, currently one of
+	// "dynamically linked star" or "ptcl defgalaxy command"
+	int cloneInProgress;	// true while trying to clone this block
 	KnownListEntry *next;
 public:
-	KnownListEntry(Block* bl,int oh, KnownListEntry* n) :
-		b(bl), onHeap(oh), dynLinked(Linker::isActive()), next(n) {}
+	KnownListEntry(Block* bl, int oh, const char* ds, KnownListEntry* n) :
+		b(bl), onHeap(oh), dynLinked(Linker::isActive()),
+		definitionSource(ds), cloneInProgress(0), next(n) {}
 	~KnownListEntry ();
 };
 
@@ -91,13 +99,17 @@ public:
 // The constructor takes a block and a name, and adds a corresponding
 // entry to the known list.
 	KnownBlock (Block &block, const char* name) {
-		addEntry (block, name, 0);
+		addEntry (block, name, 0, NULL);
 	}
 
 // This function actually adds the block to the list.  If onHeap is true,
 // the block will be destroyed when the entry is removed or replaced from
-// the list.
-	static void addEntry (Block &block, const char* name, int onHeap);
+// the list.  definitionSource should be NULL for any block type defined
+// by C++ code, or a hashstring'ed path name for a block defined by an
+// identifiable file (such as a Vem facet), or a special case constant
+// string for other cases such as the ptcl defgalaxy command.
+	static void addEntry (Block &block, const char* name, int onHeap,
+			      const char* definitionSource);
 
 // The find method returns a pointer the appropriate block in the domain
 	static const Block* find (const char* name, const char* dom);
@@ -135,7 +147,9 @@ private:
 	static int domainIndex (const char* dom, int addIfNotFound = 0);
 	static int domainIndex (Block& block);
 	static KnownListEntry* findEntry (const char*, KnownListEntry*);
+	static KnownListEntry* findEntry (const char* name, const char* dom);
 	static void noMatch(const char* type, const char* dom);
+	static void recursiveClone(const char* type, const char* dom);
 };
 
 // An iterator that steps through the knownlist for a particular domain
