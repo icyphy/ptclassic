@@ -9,9 +9,8 @@ group source -label {Source Stars} {
             -class {Ramp} \
             -label {Ramp} \
             -icon {edit/pn/icons.tim#source.ramp} {
-        attribute InitValue -default 0 -type number -label step
-        attribute Slope -default 1 -type number -label value
-        port output -datatype IntToken
+        attribute seed -default 0 -type integer -label Seed
+        port output -datatype int
     }
 }
 
@@ -47,6 +46,13 @@ group dynamic -label {Dynamic Stars} {
 	port input -datatype Token
         port output -datatype Token
     }
+    star sieve \
+            -class {Sieve} \
+            -label {Sieve} \
+            -icon {edit/pn/icons.tim#dynamic.sieve} {
+        attribute prime -default "2" -label "A prime number" -type number
+        port input -datatype int
+    }
 }
 
 group sink -label {Sink Stars} {
@@ -59,4 +65,3 @@ group sink -label {Sink Stars} {
         port input -datatype float
     }
 }
-
