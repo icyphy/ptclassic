@@ -83,9 +83,12 @@ HLLTarget(name, starclass, desc) {
   displayFlag.setAttributes(A_SETTABLE);
 
   // Set the destination directory.
-  destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/VHDL");
+  StringList destDirName = destDirectoryName(VHDLdomainName);
+  destDirectory.setInitValue(destDirName);
+
   // Set the default to display the code.
   displayFlag.setInitValue("YES");
+
   // Set the default to not use loop scheduling.
   loopingLevel.setInitValue("0");
   
