@@ -66,7 +66,32 @@ which is in turn based on the Tcl test suite code.
 
  <P><CODE>test</CODE> takes four argument:
 <OL>
-<LI> The name of the test
+<LI> The name of the test: <CODE>foo-1.0</CODE>
+  <br> The name of the test should strictly follow the format below.
+	The Tcl tests that come with the tcl distribution follow a similar
+	format, so unless there is a strong need to not follow the format,
+	please stick with what works.
+	<MENU>
+	<LI> The first part of
+	name of the test should reflect the command that is
+	being tested.  
+
+	<LI> The test number should be separated by a dash '<CODE>-</CODE>'
+
+	<LI> Each test number consists of a major value and a minor value,
+	separated by a dot.  Usually the major value changes as different
+	parts of the command are being tested.  The minor value changes
+	for different tests for the particular part of the command under test.
+
+	<LI> Test numbers usually start with <CODE>1</CODE>, though if
+	you are
+	doing setup, you can start with <CODE>0</CODE>.
+
+	<LI> If you go back later and want to stick a test in between
+	<CODE>foo-1</CODE> and <CODE>foo-2</CODE>, you can always call
+	your new test <CODE>foo-1.1</CODE>
+	</MENU>
+
 
 <LI> The test description, usually a single sentence.
 
@@ -104,6 +129,11 @@ for the class they are working with.  Usually tests for the class
 
  <P>Each test file should have the following parts:
 <OL>
+
+<LI> The name of the test file should being with the word <CODE>test</CODE>.
+For example, if we were testing the tcl <CODE>foo</CODE> command, then
+the file would be named <CODE>testFoo.itcl</CODE>.
+
 <LI> The Copyright
 
 <LI> The code that sources testDefs.tcl:
