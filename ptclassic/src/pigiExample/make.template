@@ -27,7 +27,7 @@
 # DON'T EDIT THIS STUFF.
 # get configuration info
 ROOT = $(PTOLEMY)
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 OBJDIR = $(ROOT)/obj.$(ARCH)
@@ -40,7 +40,7 @@ VPATH = .
 
 # Include information on all stars and targets.
 
-include $(ROOT)/stars.mk
+include $(ROOT)/mk/stars.mk
 
 ##############################################################################
 # START YOUR EDITING HERE!!!!
@@ -120,7 +120,7 @@ pigiRpc:	$(SRCS) $(OBJS) $(OTHERS) $(PTCL_OBJS) $(LIBFILES) \
 
 LIB=dummy
 
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
