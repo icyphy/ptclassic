@@ -28,6 +28,8 @@ $Id$
         5/26/90 - I. Kuroda and J. Buck
                 Add StateList states and methods for State
 
+	5/29/90	- Change StringList cast to printVerbose function
+
  Block is the basic unit of computation...it is an abstraction that has
  inputs and outputs and certain generic methods common to all
  computational units
@@ -75,7 +77,7 @@ public:
 	// Note that this function flattens the profile of a galaxy,
 	// which may not always be wanted.  It produces a great deal
 	// of data.
-	virtual operator StringList ();
+	StringList printVerbose();
 
 	// Add elements to the to the lists
 	// Made public for the benefit of MultiPortHole and
