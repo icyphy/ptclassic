@@ -31,7 +31,7 @@ Flag that indicates whether or not to keep the precision of the arriving
 particles as is:  YES keeps the same precision, and NO casts them to the
 precision specified by the parameter "InputPrecision". } 
         }
-        defstate {
+      defstate {
                 name { InputPrecision }
                 type { precision }
                 default { 2.14 }
@@ -51,7 +51,7 @@ When the value of the accumulation extends outside of the precision,
 the OverflowHandler will be called.
                 }
         }
-        protected {
+          protected {
 		Fix fixIn, sum;
         }
         setup {
@@ -75,14 +75,15 @@ the OverflowHandler will be called.
         go {
                 MPHIter nexti(input);
                 PortHole *p;
-
 		// Fixed-point class in Ptolemy 0.5 can always represent 0.0
 		sum.setToZero();	// set to zero and clear error bits
                 while ((p = nexti++) != 0) {
+		  // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		  Fix tmpsum = (*p)%0;
                   if ( int(ArrivingPrecision) )
-                    sum += (const Fix&)((*p)%0);
+                    sum += tmpsum;
 		  else {
-                    fixIn = (const Fix&)((*p)%0);
+                    fixIn = tmpsum;
                     sum += fixIn;
 		  }
 		  checkOverflow(sum);

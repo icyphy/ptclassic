@@ -23,8 +23,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		MPHIter nexti(input);
 		PortHole *p;
 		Complex product(1.0, 0.0);
-		while ((p = nexti++) != 0)
-			product *= (const Complex&)((*p)%0);
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmpproduct; 
+		while ((p = nexti++) != 0) {
+			tmpproduct = (*p)%0;
+			product *= tmpproduct;
+		}
 		output%0 << product;
 	}
 }

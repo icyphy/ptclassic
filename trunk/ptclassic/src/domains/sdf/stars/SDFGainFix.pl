@@ -96,14 +96,16 @@ the OverflowHandler will be called.
 		out.set_rounding( int(RoundFix) );
         }
 	go {
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Fix tmpgain = input%0;
 		// all computations should be performed with out since that
 		// is the Fix variable with the desired overflow handler
 		out = Fix(gain);
 		if ( int(ArrivingPrecision) ) {
-                  out *= (const Fix &)(input%0);
+                  out *= tmpgain;
 		}
 		else {
-                  fixIn = (const Fix &)(input%0);
+                  fixIn = tmpgain;
                   out *= fixIn;
 		}
 		checkOverflow(out);

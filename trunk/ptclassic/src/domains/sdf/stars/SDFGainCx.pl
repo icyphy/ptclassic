@@ -29,7 +29,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Gain of the star. }
 	}
 	go {
-		output%0 << (const Complex&)(gain) * (const Complex&)(input%0);
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex tmpgain = (input%0);
+		Complex tmpgain2 = gain;
+		output%0 << tmpgain2 * tmpgain;
 	}
 }
 

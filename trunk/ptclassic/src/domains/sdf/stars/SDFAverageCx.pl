@@ -43,9 +43,11 @@ Input blocks of this size will be averaged to produce an output block.
 	}
 	go {
 	    for(int i=int(blockSize)-1; i >= 0; i-- ) {
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
 		Complex avg = Complex(0.0);
 		for(int j=int(numInputsToAverage)-1; j >= 0; j-- ) {
-		    avg += Complex((const Complex &)(input%(j*int(blockSize)+i)));
+		    Complex tmpavg = input%(j*int(blockSize)+i);
+		    avg += tmpavg;
 		}
 		output%i << Complex(real(avg)/int(numInputsToAverage),
 				    imag(avg)/int(numInputsToAverage));

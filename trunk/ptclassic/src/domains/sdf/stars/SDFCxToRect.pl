@@ -24,7 +24,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {float}
 	}
 	go {
-		Complex t = Complex((const Complex &)(input%0));
+		// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		Complex t = input%0;
 		real%0 << t.real();
 		imag%0 << t.imag();
 	}
