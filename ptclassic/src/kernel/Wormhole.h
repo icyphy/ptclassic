@@ -63,25 +63,14 @@ public:
 		from.ghostConnect(to);
 	}
 
-	// State to be set by users how long is the simulated time
-	// of the inside Domain.
-	// for DEWormhole : simulated delay
-	// for SDFWormhole : sampling delay (period)
-	double messageProcessingTime;
-
-	// When it starts execution
-	double currentTime;
-
 	// Methods to  print out description.
 	StringList printVerbose() { return print(0);}
 	StringList printRecursive() { return print(1);}
 
-	// virtual star functions
-	// "start" may be redefined if we want to adjust the state values
-	// after the scheduling is done. "go" is usually redefined for
-	// timeStamping business on EventHorizon.
-	void setup() { initSched();
-			currentTime = 0.0;} 
+	void setup() { initSched(); }
+
+	void run() { if (!checkReady()) return;
+		     Runnable :: run(); }
 
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
@@ -107,6 +96,8 @@ private :
 	// flag saying whether to zap event horizons in destructor
 	int dynamicHorizons;
 
+	// check ready
+	int checkReady();
 };
 
 #endif
