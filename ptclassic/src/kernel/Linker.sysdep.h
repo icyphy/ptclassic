@@ -129,6 +129,11 @@ extern "C" size_t getpagesize(void);
 
 #ifdef hpux
 #define NM_OPTIONS "-e -p -x"
+// On the hppa a symbol can have the same name in the code and an
+// entry segments.  nm -p cannot differentiate between the two, so we
+// define a separate method of checking for symbols
+#define USE_NM_GREP
+#define NM_GREP_STRING "..*|extern|entry'"
 #else
 #define NM_OPTIONS "-g"
 #endif
