@@ -68,7 +68,7 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 	return $rclass
     } else {
 	# ::puts -nonewline "$rclass::$procname $path $args -> "
-	set result [eval $rclass::$procname $path $args]
+	set result [eval [list $rclass::$procname $path] $args]
 	# ::puts $result
 	return $result
     }
@@ -84,10 +84,19 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # which provides syntactic manipulation of URL-style names.) The options
 # are:
 # <dl>
+# <dt><b>cachefile</d> _path_
+# <dd> Return the name of a cached copy of the file. This is provided
+# solely for the purpose of working around Tk's lack of support
+# for binary data, and should not be used unless absolutely necessary.
+# <i>Do not delete or write to the cache file.</i> An error will be
+# triggered if this is not a streamable resource.
 # <dt><b>chmod</d> _path_ _mode_
 # <dd> Change access permissions of a resource. The exact values of
 # _mode_ has not yet been determined but is probably a subset of the
 # first argument to the UNIX *chmod* command.
+# <dt><b>delete</d> _path_
+# <dd> Delete the given file. Will trigger an error if the file
+# does not exist or is not writable.
 # <dt><b>dirlist</d> _path_
 # <dd> Get a listing of a directory. Sub-directories have names
 # ending in a slash; files do not.
@@ -134,9 +143,30 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # </dl>
 #
 ensemble ::tycho::resource {
+    # Get a cached copy of the file
+    option cachefile {path} {
+	set resource [::tycho::resource new $path]
+	if ![$resource streamable] {
+	    error "$path is not streamable"
+	}
+	$resource open "r"
+	set result [$resource cachefile]
+	$resource close
+	return $result
+    }
     # Change access permissions of a resource
     option chmod {path mode} {
 	::tycho::resourceClass $path chmod $mode
+    }
+    # Delete a given resource
+    option delete {path} {
+	if ![::tycho::resource exists $path] {
+	    error "File \"$path\" does not exist"
+	}
+	if ![::tycho::resource writable $path] {
+	    error "File \"$path\" is not writable"
+	}
+	::tycho::resourceClass $path delete
     }
     # Get a directory listing in ls -F style format
     option dirlist {path} {
@@ -187,7 +217,7 @@ ensemble ::tycho::resource {
     }
     # Test if a resource is remote
     option isremote {path} {
-	::tycho::resourceClass $path isremote
+	::tycho::resourceClass $path query isremote
     }
     # Get the size
     option size {path} {
@@ -322,6 +352,9 @@ class ::tycho::Resource {
     ###################################################################
     ####                         public methods                    ####
 
+    # Get a cached copy of the data
+    method cachefile {}
+
     # Close the resource
     method close {}
 
@@ -350,7 +383,7 @@ class ::tycho::Resource {
     ####                           public procs                    ####
 
     # Change the permissions of a resource
-    proc chmod {permissions path}
+    proc chmod {path permissions}
 
     # Delete a resource
     proc delete {path}
@@ -410,6 +443,14 @@ body ::tycho::Resource::destructor {} {
 #########################################################################
 #########################################################################
 ####                      public methods                             ####
+
+#####################################################################
+#### cachefile
+# Get a cached copy of the contents of the file. This is provided
+# to work around Tcl's lack of binary data handling.
+body ::tycho::Resource::cachefile {} {
+    return $currentFile
+}
 
 #####################################################################
 #### close
