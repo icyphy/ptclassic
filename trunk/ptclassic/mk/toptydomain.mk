@@ -35,8 +35,8 @@
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles depend all install clean sources realclean checkjunk sccsinfo \
-extraclean tests weblint:
+makefiles depend all install clean sources itcldocs \
+	realclean checkjunk sccsinfo extraclean tests weblint :
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
