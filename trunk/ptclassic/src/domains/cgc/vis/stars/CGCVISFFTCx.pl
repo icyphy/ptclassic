@@ -62,43 +62,34 @@ limitation of liability, and disclaimer of warranty provisions.
           realOut.setSDFParams(s/4,s/4-1);
 	  imagOut.setSDFParams(s/4,s/4-1);
 	}
-	codeblock(mainDecl) {
-	  double *$starSymbol(rein) = (double *)
-	    memalign(sizeof(double),sizeof(double)*$val(sizeoffft)/4);
-	  double *$starSymbol(imin) = (double *)
-	    memalign(sizeof(double),sizeof(double)*$val(sizeoffft)/4);
-	  double *$starSymbol(Twcosine) = (double *)
-	    memalign(sizeof(double),sizeof(double)*$val(sizeoffft)/8);
-	  double *$starSymbol(Twsine) = (double *)
-	    memalign(sizeof(double),sizeof(double)*$val(sizeoffft)/8);
-	  double $starSymbol(twopi)=6.28318530717959;
-	}
-	codeblock(initialize) {
-	  vis_write_gsr(8);	
-	}
 	codeblock(calculateSinandCos) {
-	  static void calcTwSinCos(double *Twsine,double
-				   *Twcosine,double ExpofW,int N2)
+	  static void calcTwSinCos(vis_s16 *sinsarray,vis_s16
+				   *cossarray,int order, int size)
 	    {
-	      double scale = 32767.0;
-	      int i;
-	      short *indexcount0,*indexcount1;
-	      
-	      indexcount0 = (short *) Twcosine;
-	      indexcount1 = (short *) Twsine;
-	      for(i=0;i<N2;i++){
-		*indexcount0++ = (short) scale*cos(ExpofW*(N2-1-i));
-		*indexcount1++ = (short) -scale*sin(ExpofW*(N2-1-i));       
+	      vis_d64 twopioverN2;
+	      vis_s16 *indexcounts0,*indexcounts1;
+	      int N2,i,j;
+
+	      N2=size;
+	      indexcounts0=cossarray;
+	      indexcounts1=sinsarray;
+	      for(i=0;i<order-2;i++){
+		twopioverN2 = M_TWO_PI/N2;
+		N2 = N2/2;
+		for(j=0;j<N2;j++){
+		  *indexcounts0++=(vis_s16)$val(scale)* cos(twopioverN2*j);
+		  *indexcounts1++=(vis_s16)-$val(scale)*sin(twopioverN2*j);
+		}
 	      }
 	    }
 	}
 	codeblock(quadmult) {
-	  static double mult4x4(double mult1,double mult2)
+	  static vis_d64 mult4x4(vis_d64 mult1,vis_d64 mult2)
 	    { 
-	      double prodhihi,prodhilo,prodlohi,prodlolo;
-	      double prodhi,prodlo,product;
-	      float mult1hi,mult1lo,mult2hi,mult2lo;
-	      float packhi,packlo;
+	      vis_d64 prodhihi,prodhilo,prodlohi,prodlolo;
+	      vis_d64 prodhi,prodlo,product;
+	      vis_f32  mult1hi,mult1lo,mult2hi,mult2lo;
+	      vis_f32  packhi,packlo;
 
 	      mult1hi = vis_read_hi(mult1);
 	      mult1lo = vis_read_lo(mult1);
@@ -118,10 +109,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    }
 	}
 	codeblock(doublemult){
-	  static float mult2x2(float mult1,float mult2)
+	  static vis_f32 mult2x2(vis_f32 mult1,vis_f32 mult2)
 	    {
-	      double resultu,resultl,result;
-	      float product;
+	      vis_d64 resultu,resultl,result;
+	      vis_f32 product;
 
 	      resultu = vis_fmuld8sux16(mult1,mult2);
 	      resultl = vis_fmuld8ulx16(mult1,mult2);
@@ -132,17 +123,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(bitreverse) {
 #define SWAP(a, b) tempr=(a); (a)=(b); (b)=tempr
 
-	  static void reorderfft(short *s1,short *s2, int nn)
+	  static void reorderfft(vis_s16 *s1,vis_s16 *s2, int nn)
 	    {
 	      unsigned long n,j,i,m;
-	      short tempr;
+	      vis_s16 tempr;
 
 	      n=nn<<1;
 	      j=1;
 	      for(i=1;i<n;i+=2){
 		if(j>i){
-		  SWAP(s1[nn-1-(j-1)/2],s1[nn-1-(i-1)/2]);
-		  SWAP(s2[nn-(j-1)/2-1],s2[nn-(i-1)/2-1]);
+		  SWAP(s1[(j-1)/2],s1[(i-1)/2]);
+		  SWAP(s2[(j-1)/2],s2[(i-1)/2]);
 		}
 		m=n>>1;
 		while(m>=2 && j>m){
@@ -153,93 +144,105 @@ limitation of liability, and disclaimer of warranty provisions.
 	      }
 	    }
 	}
+	codeblock(globalDecl){
+#define M_TWO_PI (2*M_PI)
+	}
+	codeblock(mainDecl) {
+	  vis_d64 *$starSymbol(rein) = (vis_d64 *) memalign(sizeof(vis_d64),sizeof(vis_d64)*$val(sizeoffft)/4);
+	  vis_d64 *$starSymbol(imin) = (vis_d64 *) memalign(sizeof(vis_d64),sizeof(vis_d64)*$val(sizeoffft)/4);
+	  vis_s16 *$starSymbol(cossarray) = (vis_s16 *) memalign(sizeof(vis_d64),sizeof(vis_s16)*($val(sizeoffft)-4));
+	  vis_s16 *$starSymbol(sinsarray) = (vis_s16 *) memalign(sizeof(vis_d64),sizeof(vis_s16)*($val(sizeoffft)-4));
+	  int     $starSymbol(genindex);
+	}
+	codeblock(initialize) {
+	  vis_write_gsr(8);
+	  calcTwSinCos($starSymbol(sinsarray),$starSymbol(cossarray),$val(orderfft),$val(sizeoffft));
+	}
 	initCode {
 	  addInclude("<vis_proto.h>");
+	  addInclude("<vis_types.h>");
 	  addInclude("<math.h>");
-	  addProcedure(calculateSinandCos);
-	  addProcedure(quadmult);
-	  addProcedure(doublemult);
-	  addProcedure(bitreverse);
+	  addProcedure(calculateSinandCos,"sine");
+	  addProcedure(quadmult,"mult4");
+	  addProcedure(doublemult,"mult2");
+	  addProcedure(bitreverse,"reorder");
+	  addGlobal(globalDecl);
 	  addDeclaration(mainDecl);
 	  addCode(initialize);
 	}
 	codeblock(localDecl) {
-	  double ExpofW,reindtmp,imagindtmp;
-	  double xtcd,xtsd,ytsd,ytcd;
-	  float xtcf,ytsf,xtsf,ytcf;
-	  float reinftmp,imaginftmp;
-	  float *splitf_rein,*splitf_imin;
-	  float *Cf,*Sf;
-	  int N,N1,N2,i,j,k,l;
-	  short *splits_rein,*splits_imin,reinstmp,imaginstmp;
-	}	
-	codeblock(fft) {       
-	  splitf_rein = (float*)$starSymbol(rein);
-	  splitf_imin = (float*)$starSymbol(imin);
-	  splits_rein = (short*)$starSymbol(rein);
-	  splits_imin = (short*)$starSymbol(imin);
+	  vis_d64 reindtmp,imagindtmp,xtcd,xtsd,ytsd,ytcd,t0,t1,*twC,*twS;
+	  vis_f32 reinftmp,imaginftmp,xtcf,ytsf,xtsf,ytcf;
+	  vis_f32 *Cf,*Sf,*splitf_rein,*splitf_imin,C0,S0;
+	  int     N,N1,N2,i,j,k,l;
+	  vis_s16 reinstmp,imaginstmp,*splits_rein,*splits_imin;
+	}
+	codeblock(fft) {  
+	  splitf_rein = (vis_f32*)$starSymbol(rein);
+	  splitf_imin = (vis_f32*)$starSymbol(imin);
+	  splits_rein = (vis_s16*)$starSymbol(rein);
+	  splits_imin = (vis_s16*)$starSymbol(imin);
+	  twC = (vis_d64*) $starSymbol(cossarray);
+	  twS = (vis_d64*) $starSymbol(sinsarray);
 	  /*read in the input*/
-	  for(i=0;i<$val(sizeoffft)/4;i++){
-	    $starSymbol(rein)[i] = (double) $ref2(realIn,i);
-	    $starSymbol(imin)[i] = (double) $ref2(imagIn,i);
+	  for($starSymbol(genindex)=0;$starSymbol(genindex)<$val(sizeoffft)/4;$starSymbol(genindex)++){
+	    $starSymbol(rein)[$starSymbol(genindex)] = (double) $ref2(realIn,$starSymbol(genindex));
+	    $starSymbol(imin)[$starSymbol(genindex)] = (double) $ref2(imagIn,$starSymbol(genindex));
 	  }
-	  /*first stages of fft (order of fft minus last two)*/
-	  N=$val(sizeoffft);
-	  N2=N;
-	  for(k=0;k<$val(orderfft)-2;k++){
-	    N1=N2;
-	    N2=N2/2;
-	    ExpofW=$starSymbol(twopi)/N1;
-	    for(j=0;j<N2/4;j++){
-	      calcTwSinCos($starSymbol(Twsine),$starSymbol(Twcosine),ExpofW,N2);
-	      for(i=j;i<N/4;i+=N1/4){
-		l=i+N2/4;
-		reindtmp=vis_fpsub16($starSymbol(rein)[l],$starSymbol(rein)[i]);
-		$starSymbol(rein)[l] =
-		  vis_fpadd16($starSymbol(rein)[i],$starSymbol(rein)[l]);
-		imagindtmp=vis_fpsub16($starSymbol(imin)[l],$starSymbol(imin)[i]);
-		$starSymbol(imin)[l] =
-		  vis_fpadd16($starSymbol(imin)[i],$starSymbol(imin)[l]);
-		xtcd=mult4x4(reindtmp,$starSymbol(Twcosine)[j]);
-		xtsd=mult4x4(reindtmp,$starSymbol(Twsine)[j]);
-		ytsd=mult4x4(imagindtmp,$starSymbol(Twsine)[j]);
-		ytcd=mult4x4(imagindtmp,$starSymbol(Twcosine)[j]);
-		$starSymbol(rein)[i]=vis_fpsub16(xtcd,ytsd);
-		$starSymbol(imin)[i]=vis_fpadd16(xtsd,ytcd);
+	  /*
+	   * first stages of fft (order of fft minus
+	   * last two)
+	   */   
+	  N = $val(sizeoffft);
+	  N2 = N;
+	  for(k = 0;k < $val(orderfft)-2;k++){
+	    N1 = N2;
+	    N2 = N2/2;
+	    for(j = 0;j < N2/4;j++){
+	      t0 = *twC++;
+	      t1 = *twS++;
+	      for(i = j;i < N/4;i += N1/4){
+		l = i + N2/4;
+		reindtmp = vis_fpsub16($starSymbol(rein)[i], $starSymbol(rein)[l]);
+		$starSymbol(rein)[i] = vis_fpadd16($starSymbol(rein)[i], $starSymbol(rein)[l]);
+		imagindtmp = vis_fpsub16($starSymbol(imin)[i], $starSymbol(imin)[l]);
+		$starSymbol(imin)[i] = vis_fpadd16($starSymbol(imin)[i], $starSymbol(imin)[l]);
+		xtcd = mult4x4(reindtmp,t0);
+		xtsd = mult4x4(reindtmp,t1);
+		ytsd = mult4x4(imagindtmp,t1);
+		ytcd = mult4x4(imagindtmp,t0);
+		$starSymbol(rein)[l] = vis_fpsub16(xtcd, ytsd);
+		$starSymbol(imin)[l] = vis_fpadd16(xtsd, ytcd);
 	      }
 	    }
 	  }
 	  /*second to last stage of the fft*/
-	  N1=N2;
-	  N2=N2/2;
-	  ExpofW=$starSymbol(twopi)/N1;
-	  calcTwSinCos($starSymbol(Twsine),$starSymbol(Twcosine),ExpofW,N2);
-	  Cf=(float *) $starSymbol(Twcosine);
-	  Sf=(float *) $starSymbol(Twsine);
-	  j=0;
-	  for(i=0;i<N/4;i++){
-	    reinftmp=vis_fpsub16s(splitf_rein[j+1],splitf_rein[j]);
-	    imaginftmp=vis_fpsub16s(splitf_imin[j+1],splitf_imin[j]);
-	    splitf_rein[j+1]=vis_fpadd16s(splitf_rein[j+1],splitf_rein[j]);
-	    splitf_imin[j+1]=vis_fpadd16s(splitf_imin[j+1],splitf_imin[j]);
-	    xtcf=mult2x2(reinftmp,*Cf);
-	    xtsf=mult2x2(reinftmp,*Sf);
-	    ytsf=mult2x2(imaginftmp,*Sf);
-	    ytcf=mult2x2(imaginftmp,*Cf);
-	    splitf_rein[j]=vis_fpsub16s(xtcf,ytsf);
-	    splitf_imin[j]=vis_fpadd16s(xtsf,ytcf);
-	    j+=2;
+	  C0 = vis_to_float(0x7fff<<16|0x0000);
+	  S0 = vis_to_float(0x0000<<16|0x8000);
+	  j = 0;
+	  for(i = 0;i < N/4;i++){
+	    reinftmp = vis_fpsub16s(splitf_rein[j], splitf_rein[j+1]);
+	    imaginftmp = vis_fpsub16s(splitf_imin[j], splitf_imin[j+1]);
+	    splitf_rein[j] = vis_fpadd16s(splitf_rein[j + 1], splitf_rein[j]);
+	    splitf_imin[j] = vis_fpadd16s(splitf_imin[j + 1], splitf_imin[j]);
+	    xtcf = mult2x2(reinftmp, C0);
+	    xtsf = mult2x2(reinftmp, S0);
+	    ytsf = mult2x2(imaginftmp, S0);
+	    ytcf = mult2x2(imaginftmp, C0);
+	    splitf_rein[j+1] = vis_fpsub16s(xtcf, ytsf);
+	    splitf_imin[j+1] = vis_fpadd16s(xtsf, ytcf);
+	    j += 2;
 	  }	
 	  /*last stage of the fft*/
-	  i=0;
-	  for(j=0;j<N/2;j++){
-	    reinstmp=splits_rein[i+1]-splits_rein[i];
-	    imaginstmp=splits_imin[i+1]-splits_imin[i];
-	    splits_rein[i+1]=splits_rein[i]+splits_rein[i+1];
-	    splits_imin[i+1]=splits_imin[i]+splits_imin[i+1];
-	    splits_rein[i]=reinstmp;
-	    splits_imin[i]=imaginstmp;
-	    i+=2;
+	  i = 0;
+	  for(j = 0;j < N/2;j++){
+	    reinstmp = splits_rein[i] - splits_rein[i+1];
+	    imaginstmp = splits_imin[i] - splits_imin[i+1];
+	    splits_rein[i] = splits_rein[i] + splits_rein[i + 1];
+	    splits_imin[i] = splits_imin[i] + splits_imin[i + 1];
+	    splits_rein[i+1] = reinstmp;
+	    splits_imin[i+1] = imaginstmp;
+	    i += 2;
 	  }	
 	  reorderfft(splits_rein,splits_imin,$val(sizeoffft));
 	  /*output the results*/
@@ -255,8 +258,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(freeit){
 	  free($starSymbol(rein));
 	  free($starSymbol(imin));
-	  free($starSymbol(Twcosine));
-	  free($starSymbol(Twsine));	  
+	  free($starSymbol(cossarray));
+	  free($starSymbol(sinsarray));	  
 	}
 	wrapup {
 	  addCode(freeit);
