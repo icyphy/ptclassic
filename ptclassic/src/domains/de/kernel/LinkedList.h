@@ -99,7 +99,8 @@ public:
 	// Add at tail of list and get pointer.
 	Link * appendGet(Pointer a);    
 
-	// Remove pointer to link directly without searching
+	// Remove pointer to link directly without searching;
+	// Return TRUE if link is found; return false otherwise
 	void directRemove(Link * a);	
 
 	// Remove pointer by searching; return TRUE if removed
