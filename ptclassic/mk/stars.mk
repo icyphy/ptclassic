@@ -525,6 +525,7 @@ ifdef SDF
 		STARS += $(LIBDIR)/sdfdmmstars.o
 		LIBS += -lsdfdmmstars
 		LIBFILES += $(LIBDIR)/libsdfdmmstars.$(LIBSUFFIX)
+	endif
 	ifdef SDFMATRIX 
 		CUSTOM_DIRS += $(SDFDIR)/matrix/stars
 		STARS += $(LIBDIR)/sdfmatrixstars.o
