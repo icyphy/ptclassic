@@ -120,6 +120,9 @@ class ::tycho::Layout {
     # Clear the selection
     method selectionclear {foo}
 
+    # Get the type of an item
+    method type {foo}
+
     #################################################################
     ####                  protected methods                      ####
    
@@ -244,6 +247,16 @@ body ::tycho::Layout::item {item spec args} {
 body ::tycho::Layout::itemattrs {item} {
     _verify item $item
     _attributes item $item
+}
+
+########################################################################
+#### itemcget
+#
+# Get an attribute of an item.
+#
+body ::tycho::Layout::itemcget {item attribute} {
+    _verify item $item
+    _cget item $item $attribute
 }
 
 ########################################################################
@@ -472,3 +485,14 @@ body ::tycho::Layout::select {name} {
 body ::tycho::Layout::selectionclear {foo} {
     return ""
 }
+
+########################################################################
+#### type
+#
+# Get the type of an item
+#
+body ::tycho::Layout::type {item} {
+    _verify item $item
+    lindex [_get item $item] 0
+}
+
