@@ -286,7 +286,7 @@ $(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
 # Don't place $(STARDOCDIR) here, or the STARDOCDIR directory will be made
 # in non-star related directories.
 sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
-CRUD=*.o *.so core *~ *.bak ,* LOG* $(KRUFT) 
+CRUD=*.o *.so *.sl core *~ *.bak ,* LOG* $(KRUFT) 
 clean:
 	rm -f $(CRUD)
 
