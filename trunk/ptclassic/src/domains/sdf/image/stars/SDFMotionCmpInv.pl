@@ -110,7 +110,8 @@ write the result to 'output'.
 // motion vector points FROM the old block TO the current.
 				mcindex = index - int(horz) - (width * int(vert));
 				for(j = 0; j < blocksize; j++) {
-					out[index+j] = quant(diff[index+j]+prev[mcindex+j]);
+					out[index+j] =
+							quant(diff[index+j], prev[mcindex+j]);
 			}	}
 		}
 	} // end DoOneBlock{}
@@ -135,12 +136,18 @@ write the result to 'output'.
 		}
 	} // end DoLostBlock{}
 
+	// Do thresholding!
 	inline virtual method {
 		name { quant }
 		type { "unsigned char" }
 		access { protected }
-		arglist { "(const float in)" }
-		code { return((unsigned char) (in - 127.5)); }
+		arglist { "(const int i1, const int i2)" }
+		code {
+			int f = i1 + i2 - 128;
+			if (f < 0) { return ((unsigned char) 0); }
+			else if (f > 254) { return ((unsigned char) 255); }
+			else { return((unsigned char) f); }
+		}
 	}
 
 	method {
