@@ -38,7 +38,7 @@
 # find/change dialog box, and supports filling of text, with an
 # optional prefix added on each line.  To create an example,
 # <tcl><pre>
-# Edit .e
+# ::tycho::Edit .e
 # wm deiconify .e
 # </pre></tcl>
 #
