@@ -20,7 +20,7 @@ $Id$
 
 #include "Linker.sysdep.h"
 #include "Linker.h"
-#include "Output.h"
+#include "Error.h"
 #include "miscFuncs.h"
 #include "StringList.h"
 #include <sys/stat.h>
@@ -80,14 +80,14 @@ int Linker::linkObj (const char* objName) {
 // first, read the object file
 	int fd;
 	if ((fd = open (objName, 0, 0)) < 0) {
-		errorHandler.error("Can't open file ", objName);
+		Error::error("Linker: Can't open file ", objName);
 		return FALSE;
 	}
 
 	exec header;
 
 	if (read (fd, (void*) &header, sizeof(header)) <= 0) {
-		errorHandler.error("Can't read header from ", objName);
+		Error::error("Linker: Can't read header from ", objName);
 		return FALSE;
 	}
 	close (fd);
@@ -149,7 +149,7 @@ int Linker::linkObj (const char* objName) {
 	read (fd, (char*) init_fn, nsize);
 	close (fd);
 	if (makeExecutable(size,pagsiz,init_fn) != 0) {
-		errorHandler.error ("Can't make code executable -- mprotect");
+		Error::error ("Linker: Can't make code executable");
 		delete codeBlock;
 		unlink (tname);
 		return FALSE;

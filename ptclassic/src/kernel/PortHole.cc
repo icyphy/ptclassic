@@ -2,12 +2,13 @@
 #include "CircularBuffer.h"
 #include "Block.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include "Particle.h"
 #include "Geodesic.h"
 #include "Plasma.h"
 #include "miscFuncs.h"
 #include "GalIter.h"
+#include <std.h>
  
 /**************************************************************************
 Version identification:

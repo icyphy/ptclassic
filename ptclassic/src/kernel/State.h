@@ -3,7 +3,7 @@
 
 #include "DataStruct.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include "type.h"
 #include "NamedObj.h"
 #include "ComplexSubset.h"

@@ -13,14 +13,12 @@ description.
 
 *******************************************************************/
 #include "KnownBlock.h"
-#include "Output.h"
+#include "Error.h"
 #include <string.h>
 #include <std.h>
 #include "Scheduler.h"
 #include "Domain.h"
 #include "Linker.h"
-
-extern Error errorHandler;
 
 // private class for entries on known lists
 
@@ -167,7 +165,7 @@ int
 KnownBlock::setDomain (const char* newDom) {
 	int idx = domainIndex (newDom);
 	if (idx < 0) {
-		errorHandler.error ("Unknown domain: ", newDom);
+		Error::error ("Unknown domain: ", newDom);
 		return FALSE;
 	}
 	currentDomain = idx;

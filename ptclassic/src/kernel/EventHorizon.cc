@@ -1,7 +1,7 @@
 #include "WormConnect.h"
 #include "Star.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Error.h"
 #include "Wormhole.h"
 #include "Particle.h"
 #include "Plasma.h"
@@ -26,8 +26,6 @@ $Id$
 Code for functions declared in WormConnect.h
 
 **************************************************************************/
-
-extern Error errorHandler;
 
 /**************************************************************************
 
