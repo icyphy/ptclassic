@@ -44,8 +44,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLPort.h"
 #include "VHDLVariable.h"
 #include "VHDLPortVar.h"
-#include "VHDLGenericMap.h"
-#include "VHDLPortMap.h"
 #include "VHDLSignal.h"
 
 class VHDLFiring : public VHDLObj
@@ -72,9 +70,9 @@ class VHDLFiring : public VHDLObj
   // VarPort list.
   VHDLPortVarList* varPortList;
   // Generic map list.
-  VHDLGenericMapList* genericMapList;
+  VHDLGenericList* genericMapList;
   // Port map list.
-  VHDLPortMapList* portMapList;
+  VHDLPortList* portMapList;
   // Signal list.
   VHDLSignalList* signalList;
   // Extra variable declarations.

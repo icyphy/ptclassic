@@ -403,16 +403,16 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   dataName << rootName << "_data";
   doneName << rootName << "_done";
   
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
+  VHDLGenericList* genMapList = new VHDLGenericList;
+  VHDLPortList* portMapList = new VHDLPortList;
   genMapList->initialize();
   portMapList->initialize();
   
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
+  genMapList->put("pairid", "", pairid);
+  genMapList->put("numxfer", "", numxfer);
+  portMapList->put("go", "", "", goName);
+  portMapList->put("data", "", "", dataName);
+  portMapList->put("done", "", "", doneName);
   topCompMapList.put(label, name, portMapList, genMapList);
 
   // Also add to port list of main.
@@ -425,9 +425,9 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   }
   mainPortList.put(doneName, "IN", "STD_LOGIC");
   // Also add to port map list of main.
-  mainPortMapList.put(goName, goName);
-  mainPortMapList.put(dataName, dataName);
-  mainPortMapList.put(doneName, doneName);
+  mainPortMapList.put(goName, "", "", goName);
+  mainPortMapList.put(dataName, "", "", dataName);
+  mainPortMapList.put(doneName, "", "", doneName);
   // Also add to signal list of top.
   topSignalList.put(goName, "STD_LOGIC", goName, goName);
   topSignalList.put(dataName, vtype, dataName, dataName);

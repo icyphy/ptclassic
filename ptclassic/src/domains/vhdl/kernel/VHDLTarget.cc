@@ -864,8 +864,8 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompMapList* compMapList,
     if (compMap->genMapList->head()) {
       level++;
       all << indent(level) << "generic map(\n";
-      VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
-      VHDLGenericMap* ngenmap;
+      VHDLGenericListIter nextGenMap(*(compMap->genMapList));
+      VHDLGeneric* ngenmap;
       int genCount = 0;
       while ((ngenmap = nextGenMap++) != 0) {
 	level++;
@@ -885,8 +885,8 @@ StringList VHDLTarget :: addComponentMappings(VHDLCompMapList* compMapList,
     if (compMap->portMapList->head()) {
       level++;
       all << indent(level) << "port map(\n";
-      VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
-      VHDLPortMap* nportmap;
+      VHDLPortListIter nextPortMap(*(compMap->portMapList));
+      VHDLPort* nportmap;
       int portCount = 0;
       while ((nportmap = nextPortMap++) != 0) {
 	level++;
