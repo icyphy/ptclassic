@@ -151,6 +151,9 @@ class ::tycho::IDocSys {
     # Format an explanation properly (in HTML)
     private method formatExpl {comment}
 
+    # Format a description in a short form (when only an explanation is found).
+    private method shortDesc {comment}
+
     ###################################################################
     ####                   private variables                       ####
 
@@ -1171,6 +1174,9 @@ body ::tycho::IDocSys::addOutsideProc {procName arguments expl} {
     if {$expl != {}} {
         $classModel annotation $procName.explanation $expl method
     }
+    set desc [shortDesc "$expl"]
+    $classModel annotation $procName.description $desc method
+   
     set relatedModified 1
 }
 
@@ -1236,4 +1242,17 @@ body ::tycho::IDocSys::formatExpl {comment} {
 
 
     return "$comment"
+}
+
+#####################################################################
+#### shortDesc
+# Format a description into a short form. Used when only an explanation
+# is provided (like in outside/related procs).
+#
+body ::tycho::IDocSys::shortDesc {comment} {
+    set comment [formatDesc $comment]
+    if {[string length $comment] > 150} {
+        set comment "[string range $comment 0 150]..."
+    }
+    return $comment
 }
