@@ -298,6 +298,7 @@ hp_postgcc_install:
 	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make install)
 	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make \
 		YACC="$(GNU_OBJ)/bison/bison -y" install)
+	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 
 # Binaries to be renamed after installation
 HP_BINARIES= ar nm ranlib size strings strip
