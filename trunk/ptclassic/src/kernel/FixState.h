@@ -66,7 +66,8 @@ public:
 
         // casting to a Fix
         operator Fix() { return val;}
-        operator double() { return double(val);}
+	// convert to double (not done as cast because of ambiguity)
+	double asDouble() const { return double(val);}
 
 	// set init value
 	void setInitValue(const Fix& arg);
