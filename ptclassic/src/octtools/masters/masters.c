@@ -153,15 +153,30 @@ replaceInstance(newInst, oldInst, force)
     octObject new_term, term, facet, newinstance;
     octGenerator gen;
     octStatus status;
+    char filename[PATHNAMESIZE];
 
-    octGetFacet(oldInst, &facet);
-    if ( octCreate(&facet, newInst) != OCT_OK ) {
+    /*
+     * See if the constructed master pathname is actually valid.
+     * (Is there a better way to do this?)
+     */
+    strcpy(filename,newInst->contents.instance.master);
+    strcat(filename,"/schematic/interface;");
+    /* check for read access */
+    if (access(expandPathName(filename),4)) {
 	printf("\nNew path %s is not valid.\n", newInst->contents.instance.master);
 	newinstance = *newInst;
-	newinstance.contents.instance.master = prompt("Alternate pathname","");
-	replaceInstance(&newinstance, oldInst, force);
+	newinstance.contents.instance.master = prompt("Alternate pathname [default = no change]","");
+	/* no replacement if user enters a null string */
+	if (strlen(newinstance.contents.instance.master) > 0)
+	  replaceInstance(&newinstance, oldInst, force);
 	return;
     }
+
+    /*
+     * OK, make a new instance in the facet.
+     */
+    octGetFacet(oldInst, &facet);
+    OH_ASSERT(octCreate(&facet, newInst));
 
     /*
      *  Copy attachements for objects attached to the instance
