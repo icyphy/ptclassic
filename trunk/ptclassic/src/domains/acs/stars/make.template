@@ -65,7 +65,11 @@ PL_SRCS= \
   ACSAddFPCGC.pl ACSSinFPCGC.pl ACSCosFPCGC.pl ACSExpFPCGC.pl \
   ACSForkFPCGC.pl ACSPolarToRectFPCGC.pl ACSXYgraphFPCGC.pl \
   ACSGainFPCGC.pl ACSMpyFPCGC.pl ACSXMGraph.pl ACSXMGraphFPSim.pl \
-  ACSXMGraphFixSim.pl ACSXMGraphFPCGC.pl
+  ACSXMGraphFixSim.pl ACSXMGraphFPCGC.pl ACSPrinterFixSim.pl \
+  ACSPrinterFPSim.pl ACSConstFixSim.pl ACSImpulseFixSim.pl \
+  ACSImpulseFPCGC.pl ACSImpulseFPSim.pl ACSImpulse.pl \
+  ACSConstFPCGC.pl ACSConstFPSim.pl ACSConst.pl
+
 
   
 
