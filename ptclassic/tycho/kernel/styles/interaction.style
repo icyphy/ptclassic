@@ -11,11 +11,11 @@ configure -description {
 }
 
 style default \
-	-label "Noisy" \
+	-label "Normal" \
 	-description {
     The default style for user interaction.
 } {
-    parameter confirmOnExit 1 \
+    parameter confirmOnExit 0 \
 	    -type boolean \
 	    -label "Confirm on program exit" \
 	    -description {
@@ -53,12 +53,18 @@ style default \
     parameter singleStackTrace 0 \
 	    -type boolean \
 	    -label "Only create a single stack trace window"
+
+    parameter shortcuts automatic \
+            -type choice \
+            -values {automatic windows unix compromise} \
+            -value automatic \
+            -label "Keyboard shortcuts"
 }
 
 style quiet \
-	-label "Quiet" \
+	-label "Quieter" \
 	-description {
-    A less irritating style for user interaction.
+    Fewer dialogs.
 } {
     parameter confirmOnExit 0
     parameter welcomeWindow 0
@@ -66,4 +72,5 @@ style quiet \
     parameter fileBrowserUseLastDirectory 0
     parameter caseSensitiveCompletion 1
     parameter singleStackTrace 1
+    parameter shortcuts automatic
 }
