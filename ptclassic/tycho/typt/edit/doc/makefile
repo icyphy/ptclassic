@@ -1,4 +1,4 @@
-# Makefile for Ptolemy Tycho system, kernel/doc directory.
+# Makefile for Ptolemy Tycho system, typt/edit/doc directory.
 #
 # $Id$
 # Author: Christopher Hylands
@@ -32,7 +32,7 @@
 # Root of Tycho directory
 ROOT =		../../..
 # True source directory
-VPATH =		$(ROOT)/typt/editors/doc
+VPATH =		$(ROOT)/typt/edit/doc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
