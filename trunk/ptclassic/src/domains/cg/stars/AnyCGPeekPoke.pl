@@ -30,7 +30,7 @@ input {
 
 output {
     name {output}
-    type {ANYTYPE}
+    type {=input}
 }
 
 state {
