@@ -46,35 +46,6 @@ VPATH =		$(ROOT)/src/tycho/kernel
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# To make tycho with itcl-1.5, uncomment these and modify ITK refs below.
-# TCL_VERSION =	tcl7.4p1
-# TK_VERSION =	tk4.0p1
-# ITCL_VERSION =	itcl-1.5
-
-TCL_INCDIR=$(TCL_ROOT)/$(TCL_VERSION)/include
-
-# Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/$(TCL_VERSION).$(PTARCH)/lib -ltcl
-
-# Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/$(TK_VERSION)/include
-
-# Combined -L and -l options to link with tk library.  Can add
-# addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/$(TK_VERSION).$(PTARCH)/lib -ltk #-lXpm
-
-# Directory containing itcl include files
-ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
-
-SHARED_LIBRARY_R_LIST = -Wl,-R,$(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/$(ITCL_VERSION).$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/$(TCL_VERSION).$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/$(TK_VERSION).$(PTARCH)/lib/shared/
-
-# To make tycho with itcl-1.5, swap these
-ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
-#ITK_INCDIR=
-#ITK_LIBSPEC=
-
 -include override.mk
 
 # Directory containing utilities for BarGraph and XYPlot
