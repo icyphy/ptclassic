@@ -91,6 +91,8 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
 	-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
+	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_SRC)/libstdc++/*.cc .)
+	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_SRC)/libstdc++/stl/*.cc .)
 
 
 $(GNU_OBJ): $(OBJ_DIR) 
