@@ -20,6 +20,8 @@ Date of last revision: 5/92
 #include "streamCompat.h"
 #include "Error.h"
 
+int isMember(DCNodeList&, EGNode*);
+
 EGNode *DCGraph::newNode(DataFlowStar *s, int i)
 	{ LOG_NEW; return new DCNode(s,i); }
 
@@ -149,8 +151,8 @@ void DCGraph :: mergeClosure(DCNodeList& first, DCNodeList& second) {
 	DCNodeListIter niter(second);
 	DCNode* pnode;
 
-	while ((pnode = niter++) != 0) 
-		sortedInsert(first, pnode, 1);
+	while ((pnode = niter++) != 0) {
+		if (isMember(first, pnode) == FALSE) sortedInsert(first, pnode, 1);
 }
 
 			//////////////////
@@ -251,8 +253,6 @@ DCNode* DCGraph :: intersectNode(DCNode* D1, DCNode* D2, int direction) {
 	return last;
 }
 		
-int isMember(DCNodeList&, EGNode*);
-
 			//////////////////////
 			///  traceArcPath  ///
 			//////////////////////
