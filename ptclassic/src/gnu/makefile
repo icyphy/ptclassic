@@ -1,6 +1,6 @@
 # Makefile for $PTOLEMY/src/gnu, used to compile the GNU tools
 # $Id$
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -60,120 +60,154 @@ REL_GNU_BINDIR=../gnu/$(PTARCH)/bin
 # Location of Ptolemy bin dir.  We make links from here to the GNU stuff
 BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
+############################################################
+# Build the GNU tools for non-HP machines
 all: configure bin install
 .PHONY:	configure bin install
 
 MACH=`$(GNU_SRC)/gcc/config.guess`
 
 SHAREDLIB_CONFIGURE_FLAGS = --enable-shared
-# Minor fixes to the configure procedure.  These changes
-# are necessary if you are using SunOS make.  If you already have
-# GNU make, then these changes are not necessary, but they won't
-# hurt, either
 configure: $(GNU_OBJ)
-	(cd $(GNU_OBJ); \
-	$(GNU_SRC)/configure -v --srcdir=$(GNU_SRC) \
+	-mkdir $(GNU_OBJ)/make
+	(cd $(GNU_OBJ)/make; \
+	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS))
-	@echo "Now reconfiguring gcc directory so we set up gcc/cp right."
-	rm -rf $(GNU_OBJ)/gcc
-	mkdir $(GNU_OBJ)/gcc
-	(cd $(GNU_OBJ)/gcc; \
-	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS))
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+	@echo "Some non-GNU makes can't deal with VPATH"
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
-	# libio dir is not present in libg++-2.7.1 until later
-	#-(cd $(GNU_OBJ)/libio; ln -s $(GNU_SRC)/libio/*.c* .)
-	-(cd $(GNU_OBJ)/libiberty; ln -s $(GNU_SRC)/libiberty/*.c* .)
-	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.c .)
-	# Don't link the .h files, or cp/call.c won't compile
-	#-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_SRC)/gcc/*.h .)
-	#
-	# Looks like we need not make these links either in libg++-2.7.1
-	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.c* .)
-	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(GNU_SRC)/libg++/src/*.h .)
-	#-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(GNU_SRC)/libg++/gperf/src/*.c* .)
-	-mkdir $(GNU_OBJ)/gcc/objc
-	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.c .)
-	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.h .)
-	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(GNU_SRC)/gcc/objc/*.m .)
-	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.c .)
-	# gcc-2.7.0 needs this for make bootstrap
-	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(GNU_SRC)/gcc/cp/*.h .)
-	# In libg++-2.7.1, librx is not standalone
-	#-(cd $(GNU_OBJ)/librx; ln -s $(GNU_SRC)/librx/*.c .)
-	# No longer necessary in libg++-2.7.1
-	#-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_SRC)/libstdc++/*.cc .)
-	#-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_SRC)/libstdc++/stl/*.cc .)
-
-
-$(GNU_OBJ): $(OBJ_DIR) 
-	-mkdir "$(GNU_OBJ)"
-
-# If we are building GNU programs in a bare distribution, then the OBJ.$(PTARCH)
-# directory might not exist yet
-$(OBJ_DIR):
-	mkdir $(OBJ_DIR)
+	@echo "Now configure gcc with -with-gnu-as"
+	-mkdir $(GNU_OBJ)/gcc
+	(cd $(GNU_OBJ)/gcc; \
+	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) \
+		--with-gnu-as $(MACH) )
+	@echo "Now configure libg++"
+	-mkdir $(GNU_OBJ)/libg++
+	(cd $(GNU_OBJ)/libg++; \
+	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
 
 # DEC make can't seem to handle VPATH very well
 #GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 #	 then echo $(GNU_OBJ)/make/make ; \
 #	 else echo make; fi`
 
+bin: bin_make bin_gcc install_gcc bin_libg++
 
-# libg++-2.7.1 is supposed to be able to build shared libraries for
-# libstdc++ out of the box.  It can't.  The problem is that libiberty is
-# getting compiled with cc, before gcc is compiled.  Then when we try to
-# build libstdc++, we use the libiberty files that were built with cc,
-# which results in missing symbols when we try to create libstdc++.so
-#
-# So we build gcc first, then clean out libiberty and then rebuild
-bin:
-	@echo $$PATH
-	#	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
-	@echo "Build gcc first, so we can build shared libiberty.so"
-	(cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" LANGUAGES=c )
-	@echo "Build gnumake next"
-	# LDFLAGS is needed to build gmake
-	(cd $(GNU_OBJ)/make; $(MAKE) $(MFLAGS) \
+bin_make:
+	(cd $(GNU_OBJ)/make; $(MAKE) )
+
+# Build gcc with itself.  See src/gnu/src/gcc/INSTALL for more info.
+# Use the gcc '-v ' flag to see whether your gcc was compiled with cc or gcc
+bin_gcc:
+	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make bootstrap)
+
+install_gcc:
+	(cd $(GNU_OBJ)/make; $(MAKE) install)
+	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
+
+bin_libg++:
+	(cd $(GNU_OBJ)/libg++; \
+		PATH=$(GNU_OBJ)/binutils/gas:$(GNU_OBJ)/gcc:$(PATH); \
+		echo $$PATH; \
+		$(GNU_OBJ)/make/make \
 		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
-	@echo "Building libiberty and g++"
-	(cd $(GNU_OBJ); $(GNU_OBJ)/make/make $(MFLAGS) \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
-$(BINDIR):
-	mkdir $(BINDIR)
 install: $(BINDIR) 
-	#(cd $(GNU_OBJ); $(MAKE) CC="$(CC)" MAKEINFO="$(MAKEINFO)" install)
-	(cd $(GNU_OBJ); $(MAKE) CC=$(GNU_OBJ)/gnu/gcc MAKEINFO="$(MAKEINFO)" install)
+	(cd $(GNU_OBJ)/libg++; \
+		PATH=$(GNU_OBJ)/binutils/gas:$(GNU_OBJ)/gcc:$(PATH); \
+		echo $$PATH; \
+		$(GNU_OBJ)/make/make \
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ install)
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
 	-(cd $(BINDIR); rm -f gperf unprotoize protoize hp* dec* c++ make.old)
 
-# The bin rule above compiles gcc with cc, which may result in a buggy
-# gcc.  See src/gnu/src/gcc/INSTALL for more info.
-# Use the gcc '-v ' flag to see whether your gcc was compiled with cc or gcc
-bootstrap_gcc: configure
-	(cd $(GNU_OBJ)/gcc; $(MAKE) bootstrap)
-
-install_bootstrap_gcc:
-	(cd $(GNU_OBJ)/gcc; $(MAKE) install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
-
-# Rules for hppa
+############################################################
+# Build the GNU tools for HP machines
+#
 # See src/gnu/INSTALL for the details, but basically, we install a special
 # GNU assembler so the the -g flag will work.
-HP_GAS_SRC=$(PTOLEMY)/src/gnu/hp/gas-2.2.u2
-HP_GNU_SRC=$(PTOLEMY)/src/gnu/src.hp
+# Also, we need to install gcc before trying to build libg++
 
-# See $PTOLEMY/src/gnu/src.hp/gcc/INSTALL for more info
-#HP_MACH=`$(HP_GNU_SRC)/gcc/config.guess`
-HP_MACH=hppa1.1-hp-hpux
+# We use this to variable to setup for GNU gas.
+# See $PTOLEMY/src/gnu/src.hp/gcc/INSTALL for more info.
+#HP_MACH=`$(GNU_SRC)/gcc/config.guess`
+HP_MACH=hppa1.1-hp-hpux10.01
 
-hp_all: hp_configure hp_pregcc_install hp_bin install
+hp_all: hp_configure hp_pregcc_install hp_bin hp_postgcc_install install hp_post_install
+
+hp_configure: $(GNU_OBJ)
+	@echo "Configure binutils, as we need gas for debugging"
+	-mkdir $(GNU_OBJ)/binutils
+	(cd $(GNU_OBJ)/binutils; \
+	$(GNU_SRC)/binutils/configure --srcdir=$(GNU_SRC)/binutils \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+	@echo "hpux10 does not include yacc, so we include bison"
+	-mkdir $(GNU_OBJ)/bison
+	(cd $(GNU_OBJ)/bison; \
+	$(GNU_SRC)/bison/configure --srcdir=$(GNU_SRC)/bison \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+	@echo "wait to configure flex until we have gcc installed
+	-mkdir $(GNU_OBJ)/make
+	(cd $(GNU_OBJ)/make; \
+	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+	@echo "Now configure gcc with -with-gnu-as"
+	-mkdir $(GNU_OBJ)/gcc
+	(cd $(GNU_OBJ)/gcc; \
+	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) \
+		--with-gnu-as $(HP_MACH) )
+	@echo "Now configure libg++"
+	-mkdir $(GNU_OBJ)/libg++
+	(cd $(GNU_OBJ)/libg++; \
+	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+
+hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
+	if [ ! -d $(GNU_OBJ)/gas ]; then mkdir $(GNU_OBJ)/gas; fi
+	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
+	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/binutils/gas/as
+	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/gcc/as
+	-chmod a+x $(GNU_OBJ)/binutils/gas/as.new
+	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
+
+hp_bin: bin_make hp_bin_binutils bin_gcc install_gcc hp_install_gas hp_bin_others bin_libg++
+
+hp_bin_binutils:
+	(cd $(GNU_OBJ)/binutils; $(GNU_OBJ)/make/make)
+
+hp_install_gas:
+	(cd $(GNU_OBJ)/binutils/gas; $(GNU_OBJ)/make/make install)
+
+hp_bin_others:
+	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make)
+	# Reconfigure flex so as to avoid alloca problems
+	-mkdir $(GNU_OBJ)/flex
+	(cd $(GNU_OBJ)/flex; \
+	CC=$(BINDIR)/gcc; \
+	$(GNU_SRC)/flex/configure --srcdir=$(GNU_SRC)/flex \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(HP_MACH) )
+	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make YACC="$(GNU_OBJ)/bison/bison -y")
+
+hp_postgcc_install:
+	(cd $(GNU_OBJ)/bison; $(GNU_OBJ)/make/make install)
+	(cd $(GNU_OBJ)/flex; $(GNU_OBJ)/make/make \
+		YACC="$(GNU_OBJ)/bison/bison -y" install)
 
 # Binaries to be renamed after installation
 HP_BINARIES= ar nm ranlib size strings strip
@@ -185,99 +219,29 @@ hp_post_install:
 		fi; \
 	done
 
-hp_configure: $(GNU_OBJ)
-	@echo "Configure everything, then go back and reconfigure gcc"
-	@echo "The top level configure does not pass things down properly"
-	(cd $(GNU_OBJ); \
-	$(HP_GNU_SRC)/configure $(HP_MACH) --srcdir=$(HP_GNU_SRC) \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) \
-		--with-gnu-as)
-	@echo "Now reconfigure gcc with -gas"
-	(cd $(GNU_OBJ)/gcc; \
-	$(HP_GNU_SRC)/gcc/configure --srcdir=$(HP_GNU_SRC)/gcc \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS) \
-		--with-gnu-as hppa1.1-hp-hpux)
-	@echo "Make links for the source files.  Some makes are not smart"
-	@echo " enough to handle vpath"
-	@echo "We could try installing GNU make first, but HPs hate it when"
-	@echo "try to move a running binary, so installing make a second"
-	@echo "time could fail."
-	#-(cd $(GNU_OBJ)/bfd; ln -s $(HP_GNU_SRC)/bfd/*.c .)
-	#-(cd $(GNU_OBJ)/opcodes; ln -s $(HP_GNU_SRC)/opcodes/*.c .)
-	#-(cd $(GNU_OBJ)/binutils; ln -s $(HP_GNU_SRC)/binutils/*.c .)
-	-(cd $(GNU_OBJ)/make; ln -s $(HP_GNU_SRC)/make/*.c .)
-	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.h .)
-	-(cd $(GNU_OBJ)/make/glob; ln -s $(HP_GNU_SRC)/make/glob/*.c .)
-	# libio dir is not present in libg++-2.7.1 until later
-	#-(cd $(GNU_OBJ)/libio; ln -s $(HP_GNU_SRC)/libio/*.c* .)
-	-(cd $(GNU_OBJ)/libiberty; ln -s $(HP_GNU_SRC)/libiberty/*.c* .)
-	# Looks like we need not make these links either in libg++-2.7.1
-	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.c* .)
-	#-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.h .)
-	#-(cd $(GNU_OBJ)/libg++/gperf/src; ln -s $(HP_GNU_SRC)/libg++/gperf/src/*.c* .)
-	# Don't need gprof for Ptolemy.  BTW - gprof on hppa needs -lm
-	#-(cd $(GNU_OBJ)/libg++/gprof/src; \
-	#	ln -s $(HP_GNU_SRC)/libg++/gprof/src/*.c* .)
-	-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.c .)
-	# Don't link the .h files, or cp/call.c won't compile
-	#-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.h .)
-	-mkdir $(GNU_OBJ)/gcc/objc
-	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.c .)
-	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.h .)
-	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.m .)
-	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.c .)
-	# gcc-2.7.0 needs this for make bootstrap
-	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.h .)
-	# Building libg++ requires as to bin in gcc so -B arg will work
-	-(cd $(GNU_OBJ)/gcc; ln -s ../gas/as.new as)
-	# In libg++-2.7.1, librx is not standalone
-	#-(cd $(GNU_OBJ)/librx; ln -s $(HP_GNU_SRC)/librx/*.c .)
-	# No longer necessary in libg++-2.7.1
-	#-(cd $(GNU_OBJ)/libstdc++; ln -s $(HP_GNU_SRC)/libstdc++/*.cc .)
-	#-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(HP_GNU_SRC)/libstdc++/stl/*.cc .)
 
-# Set up links for GNU as.
-hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
-	if [ ! -d $(GNU_OBJ)/gas ]; then mkdir $(GNU_OBJ)/gas; fi
-	(cd $(GNU_OBJ)/gcc; $(MAKE)  install-dir)
-	-ln -s $(GNU_OBJ)/gas/as.new $(GNU_OBJ)/gas/as
-	-chmod a+x $(GNU_OBJ)/gas/as.new
-	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(HP_MACH)/$(GCC_VERSION)/as
+############################################################
+# Create various directories
+
+$(GNU_OBJ): $(OBJ_DIR) 
+	-mkdir "$(GNU_OBJ)"
+
+# If we are building GNU programs in a bare distribution, then 
+# the OBJ.$(PTARCH) directory might not exist yet
+$(OBJ_DIR):
+	mkdir $(OBJ_DIR)
 
 $(GNU_DEST)/$(PTARCH):
 	if [ ! -d $@ ]; then \
 		mkdir $@; \
 	fi
 
-# We must use gas with hp, so we change the path so the GNU as is first
-hp_bin:
-	#(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
-	@echo "Build gcc first, so we can build shared libiberty.so"
-	# We build C, C++ and objc here so that we don't have alloc problems
-	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
-		cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" )
-	@echo "Build gnumake next"
-	# LDFLAGS is needed to build gmake
-	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
-		cd $(GNU_OBJ)/make; $(MAKE) $(MFLAGS) \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
-	@echo "Building libiberty and g++"
-	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; \
-		cd $(GNU_OBJ); $(GNU_OBJ)/make/make $(MFLAGS) \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
-		LDFLAGS=-B$(GNU_OBJ)/gcc/ )
+$(BINDIR):
+	mkdir $(BINDIR)
 
-# In gcc-2.5.8, collect2 is not automagically installed.  The symptom
-# of this is that ptcl says that there is no SDF domain, and that perhaps
-# constructors are not being called
-install-collect2:	
-	(cd $(GNU_OBJ)/gcc; $(MAKE) install-collect2)
 
-irix5_all: all install-collect2
-
+############################################################
+# Rules to clean by
 clean:
 	(cd $(GNU_OBJ); $(MAKE) clean)
 
