@@ -1485,3 +1485,26 @@ int CGCStar :: addInclude(const char* decl) {
 	temp << decl << "\n";
 	return addCode(temp, "include", decl);
 }
+
+// Add options to be used when compiling a C program
+// We don't run process code on this - it would add a \n
+int CGCStar::addCompileOption(const char* decl) {
+    CodeStream *compileOptions;
+    if ((compileOptions = getStream("compileOptions")) == FALSE)
+	return FALSE;
+    StringList temp;
+    temp << " " << decl << " ";
+    return compileOptions->put(temp,decl);
+}
+
+// Add options to be used when linking a C program
+// We don't run process code on this - it would add a \n
+int CGCStar::addLinkOption(const char* decl) {
+    CodeStream *linkOptions;
+    if ((linkOptions = getStream("linkOptions")) == FALSE) return FALSE;
+    StringList temp;
+    temp << " " << decl << " ";
+    return linkOptions->put(temp,decl);
+}
+
+

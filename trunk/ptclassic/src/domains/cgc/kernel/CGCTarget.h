@@ -141,6 +141,9 @@ protected:
 	CodeStream setargFunc;		
 	CodeStream setargFuncHelp;	
 
+	CodeStream compileOptionsStream;
+	CodeStream linkOptionsStream;
+	
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
 
