@@ -86,6 +86,8 @@ PL_SRCS= \
  CG56Rotate.pl \
  CG56RectToCx.pl \
  CG56SSI.pl \
+ CG56SSIMono.pl \
+ CG56SSISink1.pl \
  CG56SSISkew.pl \
  CG56Sgn.pl \
  CG56Shifter.pl \
