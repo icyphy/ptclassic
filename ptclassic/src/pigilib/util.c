@@ -229,6 +229,7 @@ boolean bit;
 /***** UniqName routines  11/30/89
 Uses <search.h> package for hash table.
 */
+void hdestroy();
 
 static boolean UniqNameInitDone = FALSE;
 
@@ -327,27 +328,6 @@ char *item;
 	}
     }
     return(FALSE);
-}
-
-boolean
-IsBalancedParen(str)
-char *str;
-{
-    int count = 0;
-
-    while (*str != '\0') {
-	switch (*str++) {
-	case '(':
-	    count++;
-	    break;
-	case ')':
-	    count--;
-	    break;
-	default:
-	    break;
-	}
-    }
-    return (count == 0);
 }
 
 extern char* curDomainName();
