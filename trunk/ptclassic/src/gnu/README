@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Mon Feb 24 15:16:51 1997 by cxh]-
+-*-Mode:text-*- -[Thu Feb 27 22:30:08 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -117,6 +117,10 @@ HP
 	To verify that the proper sed is in your path, do:
 	ptuser@hewlett 19% sed -V
 	GNU sed version 2.05
+
+	The gcc-2.7.2.2 sources were patched with
+	libg++-2.7.2-hppa-gcc-fix which fixes a problem with 
+	building shared versions of libg++ and libstdc++ on the HP.
 
 Solaris
 -------
