@@ -226,7 +226,7 @@ Data_M
 *   kat3@ihlpe.att.com.
 */
 
-        int i,j,k,l,its;        /* Mostly loop variables */
+        int i,j,k,l = 0,its;        /* Mostly loop variables */
         double tol = 1.0e-22;   /* tells about machine tolerance */
         double c,f,g,h,s,x,y,z; /* Temporaries */
 
