@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,16 +20,10 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-
-    Copyright 1992 The Regents of the University of California.
-			All Rights Reserved.
-
-    Programmer:		T.M. Parks
-    Date of creation:	6 April 1992
-
+    Author:	T. M. Parks
+    Created:	6 April 1992
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -38,6 +32,8 @@ static const char file_id[] = "$RCSfile$";
 #include "KnownTarget.h"
 #include "MTDFTarget.h"
 #include "MTDFForkNode.h"
+#include "MTDFWormhole.h"
+#include "MTDFEventHorizon.h"
 
 extern const char MTDFdomainName[] = "MTDF";
 
@@ -47,7 +43,15 @@ public:
     // Constructor.
     MTDFDomain() : Domain(MTDFdomainName) {}
 
-    /* virtual */ Geodesic& newNode() { LOG_NEW; return *new MTDFForkNode; }
+    /*virtual*/ Geodesic& newNode()
+	{ LOG_NEW; return *new MTDFForkNode; }
+
+    /*virtual*/ Star& newWorm(Galaxy& galaxy, Target* target=0)
+	{ LOG_NEW; return *new MTDFWormhole(galaxy, target); }
+    /*virtual*/ EventHorizon& newTo()
+	{ LOG_NEW; return *new MTDFtoUniversal; }
+    /*virtual*/ EventHorizon& newFrom()
+	{ LOG_NEW; return *new MTDFfromUniversal; }
 };
 
 // Declare a prototype.
