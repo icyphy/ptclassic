@@ -44,7 +44,7 @@ public:
             const char* assocDomain = ACSdomainName);
     /* virtual */ Block* makeNew() const;
     
-    ACSJavaTarget :: ~ACSJavaTarget();
+    ~ACSJavaTarget();
 
     // Class identification.
     /*virtual*/ int isA(const char*) const;
