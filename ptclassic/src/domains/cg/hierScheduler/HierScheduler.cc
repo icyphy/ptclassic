@@ -37,6 +37,10 @@ Programmer: Jose Luis Pino
 
 #include "MultiScheduler.h"
 
+int MultiScheduler::dagNodes() const {
+    return topScheduler.dagNodes();
+}
+
 void MultiScheduler :: setup () {
     if (!galaxy()) {
 	Error::abortRun("MultiScheduler: no galaxy!");

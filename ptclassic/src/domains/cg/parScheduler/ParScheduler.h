@@ -95,6 +95,9 @@ public:
         virtual int scheduleIt();		  // automatic assignment.
 				// Should be redefined in the derived class.
 
+        // Return the total number of nodes in the precedence directed acyclic
+        // graph (DAG)
+        virtual int dagNodes() const;
 ////////// Methods for wormholes ////////////////
 
 	// finialize the schedule of wormholes.

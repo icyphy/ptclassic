@@ -67,6 +67,14 @@ void ParScheduler::setup() {
 	
 }
 
+int ParScheduler::dagNodes() const {
+    if (exGraph == NULL) {
+      Error::warn("ParScheduler::dagNodes: The multirate dataflow graph has not been expanded into a precedence DAG");
+      return 0;
+    }
+    return exGraph->numNodes();
+}
+
 /////////////////////////////
 // computeSchedule
 /////////////////////////////
