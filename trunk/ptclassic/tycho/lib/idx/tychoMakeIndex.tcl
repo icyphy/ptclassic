@@ -69,6 +69,9 @@ proc tychoMkIndex {name filename prependTYCHO args } {
 	}
     }
     set fd [open $filename w]
+    # Put a comment line that gives reasonable output in netscape.
+    puts $fd "# <h1>This is a Tycho index file. \
+            Use tycho to view it.</h1> <nothtml"
     puts $fd [list $name]
     puts $fd \{
     foreach entry [lsort -command tychoCompareFirst $entries] {
@@ -76,6 +79,7 @@ proc tychoMkIndex {name filename prependTYCHO args } {
     }
 
     puts $fd \}
+    puts $fd "# >"
     close $fd
 }
 
@@ -360,12 +364,16 @@ proc tychoMergeIndices {title outputfilename args} {
 
     # Dump out the newly merged file
     set fd [open $outputfilename w]
+    # Put a comment line that gives reasonable output in netscape.
+    puts $fd "# <h1>This is a Tycho index file. \
+            Use tycho to view it.</h1> <nothtml"
     puts $fd [list $title]
     puts $fd \{
     foreach entry [lsort -command tychoCompareFirst $entries] {
 	puts $fd [list $entry]
     }
     puts $fd \}
+    puts "# >"
     close $fd
 }
 
