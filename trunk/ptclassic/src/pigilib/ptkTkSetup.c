@@ -140,6 +140,7 @@ ptkTkSetup(funcArray, size)
     if (ptkW == NULL) {
 	ErrAdd("FATAL ERROR");
 	ErrAdd(ptkInterp->result);
+	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
 	PrintErr(ErrGet());
         exit(1);
     }
@@ -152,7 +153,10 @@ ptkTkSetup(funcArray, size)
 
     /* our vers of Tk_AppInit */
     if (_ptkAppInit( ptkInterp) != TCL_OK) {
-	PrintErr(ptkInterp->result);
+        ErrAdd("_ptkAppInit failed: ");
+        ErrAdd(ptkInterp->result);
+	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
+	PrintErr(ErrGet());
 	exit(1);
     }
 			 
@@ -174,7 +178,8 @@ ptkTkSetup(funcArray, size)
     if (Tcl_EvalFile(ptkInterp, buf) != TCL_OK) {
         ErrAdd("Unable to load ptk startup file: ");
         ErrAdd(ptkInterp->result);
-        PrintErr(ErrGet());
+	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
+	PrintErr(ErrGet());
 	exit(1);
     }
 
