@@ -54,12 +54,12 @@ proc ptkExpandEnvVar { path } {
 #	high	the value of the high end of the scale
 proc ptkMakeMeter {win name desc low high} {
     set s $win.$name
-    catch {destroy $w}
+    catch {destroy $s}
     frame $s
     if {$desc != ""} {
-        message $s.msg -text "$desc" -width 10c
+        message $s.msg -text "$desc" -width [option get . meterWidthInC Pigi]c
     }
-    frame $s.bar -bd 10
+    frame $s.bar
 	# Control for the low end of the meter
 	entry $s.bar.low -relief sunken -width 5
 
@@ -81,7 +81,8 @@ proc ptkMakeMeter {win name desc low high} {
 	    -tags lowOL
 
 	# The meter display itself
-	canvas $s.bar.plot -relief sunken -height 0.6c -width 10c
+	canvas $s.bar.plot -relief sunken -height 0.6c \
+		-width [option get . meterWidthInC Pigi]c
 
 	# High overload display
 	canvas $s.bar.highOL -relief sunken -width 0.3c -height 0.6c 
@@ -102,8 +103,8 @@ proc ptkMakeMeter {win name desc low high} {
 	    $s.bar.highOL left \
 	    $s.bar.high left
     if {$desc != ""} {pack append $s $s.msg {top fillx }}
-    pack append $s $s.bar {top fillx}
-    pack append $win $s top
+    pack $s.bar -pady 5 -anchor e
+    pack $s
 
     $s.bar.plot create rect 0c 0c 0c 0c \
 	-fill [option get . negativeColor NegativeColor] -tags negative
@@ -143,7 +144,8 @@ proc ptkSetMeter {win name value} {
     global ptklowMeterEdge ptkhighMeterEdge
     set low $ptklowMeterEdge($s)
     set high $ptkhighMeterEdge($s)
-    set scale [expr {10.0/($high - $low)}]
+    set meterWidth [option get . meterWidthInC Pigi]
+    set scale [expr {$meterWidth/($high - $low)}]
     set origin [expr {- $scale * $low}]
     set x [expr {$scale * ($value - $low)}]
     if {$value < 0.0} {
@@ -172,10 +174,11 @@ proc ptkMakeEntry {win name desc default callback} {
     set s $win.$name
     catch {destroy $s}
     frame $s
-    entry $s.entry -relief sunken -width 20 -insertofftime 0 
+    entry $s.entry -relief sunken -width 27 -insertofftime 0 
     label $s.label -text "${desc}:"
-    pack append $s $s.label left $s.entry right
-    pack append $win $s {top fill expand}
+    pack $s.label -side left
+    pack $s.entry -side right
+    pack $s -fill both -expand yes -pady 5
     $s.entry insert 0 $default
     bind $s.entry <Return> \
 	"$callback \[$win.$name.entry get\]; focus ."
@@ -193,29 +196,33 @@ proc ptkMakeButton {win name desc callback} {
     set s $win.$name
     catch {destroy $s}
     button $s -text "$desc" -command $callback
-    pack append $win $s {top fill expand}
+    pack $s -fill x -expand yes -anchor e -pady 5
     bind $s <ButtonPress-1> "$s configure -relief sunken; $s invoke"
     bind $s <ButtonRelease-1> "$s configure -relief raised"
 }
 
 #######################################################################
 # Procedure to make a scale in a control panel
-# All scales in the control panel range from 0 to 100,
+# All scales in the control panel actually range from 0 to 100.
 # Arguments:
-#       win     window name into which to put the pane
-#       name    name of the pane
-#       desc    description of the scale slider
-#       position        the initial value between 0 and 100 (int)
-#       callback        the name of the callback procedure to register changes
+#	win		window name into which to put the pane
+#	name		name of the pane
+#	desc		description of the scale slider
+#	position	the initial value between 0 and 100 (int)
+#	callback	the name of the callback procedure to register changes
 proc ptkMakeScale {win name desc position callback} {
     set s $win.$name
     catch {destroy $s}
     frame $s
     label $s.msg -text "${desc}:"
-    label $s.value -width 6
-    scale $s.scale -orient horizontal -from 0 -to 100 -length 7c \
+    label $s.value -width 5
+    scale $s.scale -orient horizontal -from 0 -to 100 \
+	-length [option get . scaleWidthInC Pigi]c \
 	-command $callback -showvalue 0
     $s.scale set $position
-    pack append $s $s.msg left $s.scale right $s.value right
-    pack append $win $s {top fill}
+    pack $s.msg -side left
+    pack $s.scale -side right -anchor e
+    pack $s.value -side right -fill both -expand yes
+
+    pack $s -fill both -pady 5 -expand yes
 }
