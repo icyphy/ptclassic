@@ -33,8 +33,117 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 #include "tytimer.h"
 
-/* FIXME: architecture dependencies are not being defined */
+/* The section below is copied from $PTOLEMY/src/compat/ptolemy/compat.h
+ * Users might not have Ptolemy, so we can't just include that here.
+ * FIXME: the real fix would be to modify configure.in so that it
+ * figures out the architecture.
+ */
+/***************************************************************************/
+/* Define #defines for each Ptolemy architecture. (Alphabetical, please) */
+
+#if defined(_AIX)
+/* IBM rs6000 and powerpc running AIX */
+#define PTAIX
+#endif
+
+#if defined(_AIX) && ! defined(__GNUC__)
+/* AIX with IBM xlc and xlC */
+#define PTAIX_XLC
+#endif
+
+#if defined(__alpha)
+/* DEC Alpha */
+#define PTALPHA
+#endif
+  
+#if defined(freebsd)
+/* FreeBSD */
+#define PTFREEBSD
+#endif
+
+#if defined(hpux) || defined(__hpux)
+/* HP PA, cfront or g++ */
+#define PTHPPA
+#endif
+
+#if defined(PTHPPA) && ! defined(__GNUC__)
+/* HP PA, cfront only, not g++ */
+#define PTHPPA_CFRONT
+#endif
+
+#if defined(__sgi) && defined(IRIX5)
+/* SGI running IRIX5.x */
+#define PTIRIX5
+#endif
+
+#if defined(__sgi) && ! defined(__GNUC__)
+/* SGI running IRIX5.x with native SGI CC*/
+#define PTIRIX5_CFRONT
+#endif
+
+#if defined(__sgi) && ! defined(__GNUC__) && defined(IRIX6) && defined (_ABIO32)
+/* SGI running IRIX6.x , native SGI CC in 32 bits mode */
+#define PTIRIX5			/* SGI says it is 100% compatible with IRIX5 */
+#define PTIRIX6
+#define PTIRIX6_32_CFRONT
+#endif
+
+#if defined(__sgi) && ! defined(__GNUC__) && defined(IRIX6) && defined (_ABI64)
+/* SGI running IRIX6.x , native SGI CC in 64 bit mode */
+#define PTIRIX6
+#define PTIRIX6_64_CFRONT
+#endif
+
+#if defined(linux)
+#define PTLINUX
+#endif
+
+#if defined(PTLINUX) && defined(__ELF__)
+/* Shorthand for Linux and ELF */
+#define PTLINUX_ELF
+#endif
+
+#if defined(netbsd_i386)
+#define PTNBSD_386
+#endif
+
+#if defined(sparc) && (defined(__svr4__) || defined(__SVR4))
+/* Sun SPARC running Solaris2.x, SunC++ or g++ */
+#ifndef SOL2
+#define SOL2
+#endif
+
 #define PTSOL2
+#endif
+
+#if defined(sparc) && (defined(__svr4__) || defined(__SVR4)) && !defined(__GNUC__)
+/* Sun SPARC running Solaris2.x, with something other than gcc/g++ */
+#define PTSOL2_CFRONT
+#endif
+
+#if defined(sparc) && !(defined(__svr4__) || defined(PTSOL2_CFRONT))
+/* Really, we mean sun4 running SunOs4.1.x, Sun C++ or g++ */
+#define SUN4
+#define PTSUN4
+#endif
+
+#if defined(sparc) && !defined(__svr4__) && !defined(__GNUC__)
+/* Really, we mean sun4 running SunOs4.1.x with something other than gcc/g++ */
+#define SUN4
+#define PTSUN4_CFRONT
+#endif
+
+/* Unixware1.1
+*#define PTSVR4
+*/
+
+#if defined(ultrix)
+/* DEC MIPS running Ultrix4.x */
+#define PTULTRIX
+#define PTMIPS
+#endif
+
+/* End of text copied from compat.h */
 
 /***************************************************************
  * This section of code is taken from the original code used for
