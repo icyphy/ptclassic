@@ -11,7 +11,7 @@
 @titlepage
 @title The Ptolemy Kernel
 @subtitle A programmer's companion for Ptolemy 0.4
-@subtitle December 7, 1992
+@subtitle December 8, 1992
 @author by Joseph T. Buck
 @end iftex
 
@@ -53,35 +53,38 @@ TO PROVIDE MAINTENANCE, SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS.
 @end iftex
 
 @menu
-* Basic concepts::              Basic concepts and classes
-* Block and related classes::   Block and related classes
+* Basic concepts::              Basic concepts, classes, and facilities
+* Block and related classes::
 * Control of execution::        Control of execution and error reporting
-* Interfacing domains::         Interfacing domains -- wormholes and related classes
+* Interfacing domains::         Wormholes and related classes
 * connection classes::          Classes for connections between blocks
-* Particles and Messages::      Particles and Messages
-* The incremental linker::      The incremental linker
-* Parameters and States::       Parameters and States
+* Particles and Messages::
+* The incremental linker::
+* Parameters and States::
 * known lists::                 Support for known lists and such
-* I/O classes::                 I/O classes
-* Misc::                        Misc
+* I/O classes::
+* Misc::                        Miscellaneous classes
 @end menu
 
 @node Basic concepts, Block and related classes, Top, Top
-@chapter Basic concepts and classes
+@chapter Basic concepts, classes, and facilities
 
 This section describes some basic classes and low-level concepts that
 are used throughout Ptolemy.  There are a number of iterator classes,
-all with the same interface.  A basic linked list class called
-SequentialList is heavily used.  States and Portholes can have
+all with the same interface.  Several important non-class library
+functions are provided.  A basic linked list class called
+SequentialList is heavily used.  States (@pxref{class State})
+and Portholes (@pxref{class PortHole}) can have
 @emph{attributes}; these are particularly important in code generation.
-Finally, many of the significant
-classes in Ptolemy -- functional blocks, portholes to implement
-connections, parameters -- are derived from NamedObj, the basic object
-for implementing a named object that lives in a hierarchy.
+Finally, many of the significant classes in Ptolemy -- functional
+blocks, portholes to implement connections, parameters -- are derived
+from NamedObj, the basic object for implementing a named object that
+lives in a hierarchy.
 
 @menu
 * Language subset::             The C++ Subset Used In Ptolemy
 * Iterators::                   Iterators
+* utility functions::           Non-class utility functions
 * Generic Data Structures::     Generic Data Structures
 * class SequentialList::        class SequentialList
 * Doubly linked lists::         Doubly linked lists
@@ -108,7 +111,7 @@ some features that do not work that well yet under g++, such as
 nested classes, are also avoided.  Nested enumerations, however,
 are used in several places.
 
-@node Iterators, Generic Data Structures, Language subset, Basic concepts
+@node Iterators, utility functions, Language subset, Basic concepts
 @section Iterators
 
 Iterators are a very basic and widely used concept in Ptolemy, and are
@@ -149,7 +152,72 @@ object that does not exist any more.  However, the @code{reset} member
 function will always make the iterator safe to use even if the list has
 been modified (user-written iterators should preserve this property).
 
-@node Generic Data Structures, class SequentialList, Iterators, Basic concepts
+@node utility functions, Generic Data Structures, Iterators, Basic concepts
+@section Non-class utility functions
+
+The kernel provides several useful ordinary (non-class) functions,
+primarily for manipulating strings and pathnames.  Some are defined
+in @file{miscFuncs.h}, others in @file{paths.h}.
+
+@example
+char* savestring(const char* @var{text});
+@end example
+
+The @code{savestring} function creates a copy of the @var{text} argument
+with @code{new} and returns a pointer to it.  It is the caller's
+responsibility to assure that the string is eventually deleted.  The
+argument must not be a null pointer.
+
+@example
+const char* hashstring(const char* @var{text});
+@end example
+
+This function enters a copy of @var{text} into a hash table and returns
+a pointer to the entry.  If two strings compare equal when passed to
+@code{strcmp}, then if both are passed to @code{hashstring}, the return
+values will be the same pointer.
+
+@example
+const char* expandPathName(const char* @var{fileName});
+@end example
+
+This function accepts a string and interprets it as a Unix pathname.
+If the string does not begin with a @code{~} or @code{$} character,
+the string itself is returned.  A leading ``@code{~/}'' is replaced
+by the user's home directory; a leading ``@code{~@var{user}/}'' is
+replaced by the home directory for @var{user}, unless there is no
+such user, in which case the original string is returned.  Finally,
+a leading ``@code{$@var{env}}'' is replaced by the value of the
+environment variable @var{env}; if there is no such environment
+variable, the original string is returned.
+
+If any substitutions are made, the return value is actually a pointer
+into a static buffer.  This means that a second call to this function
+may write on top of a value returned by a previous call.
+
+@example
+const char* pathSearch(const char* @var{file},const char* @var{path}=0);
+@end example
+
+For this function, @var{path} is a series of Unix-style directory names,
+separated by colons.  If no second argument is supplied or if the value
+is null, the value of the PATH environment variable is used instead.
+For each of the colon-separated directory strings, the function checks
+to see whether @var{dir}/@var{file} exists.  If it finds a match, it
+returns a pointer to an internal buffer containing the full path of the
+match.  If it does not find a match, it returns a null pointer.
+
+@example
+int progNotFound(const char* @var{program},const char* @var{extra}=0);
+@end example
+
+This function searches for @var{program} in the user's PATH using the
+@code{pathSearch} function.  If a match is found, the function returns
+false (0).  Otherwise it returns true (1) and also generates an error
+message with the @code{Error::abortRun} function.  If the @var{extra}
+argument is given, it forms the second line of the error message.
+
+@node Generic Data Structures, class SequentialList, utility functions, Basic concepts
 @section Generic Data Structures
 
 As Ptolemy does not use templates, our generic lists use the generic pointer
@@ -177,9 +245,9 @@ how to delete the items.
 There is an associated iterator class for SequentialList called ListIter.
 
 @menu
-* SequentialList information functions::  SequentialList information functions
-* other SequentialList functions::  other SequentialList functions
-* class ListIter::              class ListIter
+* SequentialList information functions::
+* other SequentialList functions::
+* class ListIter::
 @end menu
 
 @node SequentialList information functions, other SequentialList functions, class SequentialList, class SequentialList
@@ -300,7 +368,204 @@ DoubleLink implements a baseclass for nodes in the list, class
 DoubleLinkList implements the list itself, and class DoubleLinkIter forms an
 iterator.
 
-[ To be done ]
+We consider this class to have serious design flaws, so it may be
+reworked quite a bit in subsequent Ptolemy releases.
+
+@menu
+* class DoubleLink::            Class DoubleLink
+* class DoubleLinkList::        Class DoubleLinkList
+* class DoubleLinkIter::        Class DoubleLinkIter
+@end menu
+
+@node class DoubleLink, class DoubleLinkList, Doubly linked lists, Doubly linked lists
+@subsection Class DoubleLink
+
+Class DoubleLink is the base type for links in DoubleLinkList objects.
+There are two constructors:
+
+@example
+DoubleLink(Pointer @var{p}, DoubleLink* @var{next}, DoubleLink* @var{prev}):
+DoubleLink(Pointer @var{p});
+@end example
+
+The first form initializes the @var{next} and @var{prev} pointers of the
+node as well as the contents.  The second form sets these pointers to null.
+
+@example
+Pointer content();
+@end example
+
+Returns the content pointer of the node.
+
+@example
+virtual ~DoubleLink();
+@end example
+
+This is a do-nothing destructor, but making it virtual makes the right
+thing happen for derived classes.
+
+@example
+void unlinkMe();
+@end example
+
+This method deletes the node from the list it is contained in, by
+connecting together the elements pointed to by the @var{prev} and
+@var{next} pointers.
+
+The following data members are protected:
+
+@example
+DoubleLink *next; // next node in the list
+DoubleLink *prev; // previous node in the list
+Pointer e;        // contents of this node
+@end example
+
+@node class DoubleLinkList, class DoubleLinkIter, class DoubleLink, Doubly linked lists
+@subsection Class DoubleLinkList
+
+@example
+DoubleLinkList();
+DoubleLinkList(Pointer* @var{e});
+@end example
+
+The first form creates an empty list.  The second creates a one
+node list containing @var{e}; the node is on the heap.
+
+@example
+virtual ~DoubleLinkList();
+@end example
+
+The destructor FIXME.
+
+@example
+DoubleLink* createLink(Pointer @var{p});
+@end example
+
+Create a new DoubleLink containing @var{p} on the heap.
+This is a design error: it has nothing to do with DoubleLinkList
+and should not be a member of this class.
+
+@example
+void insertLink(DoubleLink *x);
+void insert(Pointer e);
+@end example
+
+These functions insert at the beginning of the list.  The first inserts
+a DoubleLink; the second creates a DoubleLink with @code{createLink}
+and inserts that.
+
+@example
+void appendLink(DoubleLink *x);
+void append(Pointer e);
+@end example
+
+These functions append at the end of the list.  The first appends
+a DoubleLink; the second creates a DoubleLink with @code{createLink}
+and appends that.
+
+@example
+void insertAhead(DoubleLink *y, DoubleLink *x);
+void insertBehind(DoubleLink *y, DoubleLink *x);
+@end example
+
+The first one inserts y immediately ahead of x; the second
+inserts y immediately after x.  Both these functions assume
+that x is in the list; disaster may result otherwise.
+
+@example
+DoubleLink* unlink(DoubleLink *x);
+@end example
+
+Unlink the link x from the list and return a pointer to it.
+Make sure that x is in the list before calling this method,
+or disaster may result.
+
+@example
+void removeLink(DoubleLink *x);
+@end example
+
+This is the same as @code{unlink}, except that x is deleted
+as well.  The same cautions apply.
+
+@example
+void remove(Pointer e);
+@end example
+
+The list is searched for a DoubleLink whose contents match e.  If
+a match is found, the node is deleted.  The search is made in the
+``forward'' direction.
+
+@example
+int find(Pointer e);
+@end example
+
+The list is searched for a DoubleLink whose contents match e.  If
+a match is found, 1 (true) is returned; otherwise 0 (false) is
+returned.
+
+@example
+virtual void initialize();
+@end example
+
+This function deletes all links of the list and makes the list empty.
+
+@example
+void reset();
+@end example
+
+This function resets the fields of the DoubleLinkList object without
+doing anything to the nodes (why is this here?).
+
+@example
+int size();
+@end example
+
+Return the number of elements in the list.  Should be const.
+
+@example
+DoubleLink *head();
+DoubleLink *tail();
+@end example
+
+Return a pointer to the head, or to the tail, of the list.  If
+the list is empty both will return a null pointer.
+
+@example
+DoubleLink *getHeadLink();
+Pointer takeFromFront();
+@end example
+
+The former function gets and removes the head link from the list,
+returning a pointer to it.  The second function calls the first
+to obtain the head node; it gets the node, saves the contents,
+deletes the node, and returns the contents.  If the list is empty,
+both functions return a null pointer.
+
+@example
+DoubleLink *getTailLink();
+Pointer takeFromBack();
+@end example
+
+These functions are identical to the previous pair except that
+they remove the last node rather than the first.
+
+The following two data members are protected:
+
+@example
+DoubleLink *myHead;
+DoubleLink *myTail;
+@end example
+
+@node class DoubleLinkIter,  , class DoubleLinkList, Doubly linked lists
+@subsection Class DoubleLinkIter
+
+DoubleLinkIter is an iterator for DoubleLinkList.  It is only capable
+of moving ``forward'' through the list (following the ``next'' links,
+not the ``prev'' links).
+
+Its @code{next} operator returns the Pointer values contained within
+the nodes; it is also possible to use the non-standard @code{nextLink}
+function to return successive DoubleLink pointers.
 
 @node Other containers, class NamedObj, Doubly linked lists, Basic concepts
 @section Other generic container classes
@@ -376,6 +641,12 @@ descriptor.
 Warning!  NamedObj assumes that the name and descriptor ``live'' as long
 as the NamedObj does.  They are not deleted by the destructor, so
 that they can be compile-time strings.
+
+Important derived types of NamedObj include
+Block (@pxref{class Block}),
+GenericPort (@pxref{class GenericPort}),
+State (@pxref{class State}), and
+Geodesic (@pxref{class Geodesic}).
 
 @menu
 * NamedObj constructors::       NamedObj constructors and destructors
@@ -505,7 +776,8 @@ The descriptor is set to @var{desc}.  The string pointed to by
 @section Class NamedObjList
 
 Class NamedObjList is simply a list of objects of class NamedObj.
-It is privately inherited from class SequentialList, and, as a rule,
+It is privately inherited from class SequentialList
+(@pxref{class SequentialList}), and, as a rule,
 other classes privately inherit from it.  It supports only a subset
 of the operations provided by SequentialList; in particular, objects
 are added only to the end of the list.  It provides extra operations,
@@ -517,8 +789,8 @@ functions are provided.
 
 @menu
 * NamedObjList information::    NamedObjList information functions
-* other NamedObjList functions::  other NamedObjList functions
-* NamedObjList iterators::      NamedObjList iterators
+* other NamedObjList functions::
+* NamedObjList iterators::
 @end menu
 
 @node NamedObjList information, other NamedObjList functions, class NamedObjList, class NamedObjList
@@ -584,7 +856,7 @@ class NamedObjListIter and class CNamedObjListIter.  The latter may
 be applied to const NamedObjList objects and returns const NamedObj
 pointers; the former requires non-const NamedObjList objects and
 returns non-const NamedObj pointers.  They obey the standard iterator
-interface (and are privately derived from class ListIter).
+interface and are privately derived from class ListIter.
 
 @node Attributes,  , class NamedObjList, Basic concepts
 @section Attributes
@@ -614,7 +886,7 @@ Attribute(bitWord @var{bitsOn}, bitWord @var{bitsOff});
 
 it has turned out that doing so presents severe problems with order of
 construction, since a number of global Attribute objects are used and
-there is no simple, portable way of guarantteeing that these objects
+there is no simple, portable way of guaranteeing that these objects
 are constructed before any use.  As a result, the @code{bitsOn} and
 @code{bitsOff} members are public, but we forbid use of that fact
 except in one place: constant Attribute objects can be initialized
@@ -629,7 +901,7 @@ word specified is the @code{bitsOff} field.  Other than to initialize
 objects, we pretend that these data members are private.
 
 @menu
-* Attribute member functions::  Attribute member functions
+* Attribute member functions::
 @end menu
 
 @node Attribute member functions,  , Attributes, Attributes
@@ -682,7 +954,7 @@ that a user of Ptolemy deals with.  Actors as well as collections of
 actors are Blocks.
 
 Although the Target class is derived from class Block, it is documented
-elsewhere, as it falls under control of execution.
+elsewhere, as it falls under control of execution (@pxref{class Target}).
 
 @menu
 * class Block::                 class Block
@@ -699,18 +971,25 @@ elsewhere, as it falls under control of execution.
 @section Class Block
 
 Block is the basic object for representing an actor in Ptolemy.
-It is derived from NamedObj.
+It is derived from NamedObj (@pxref{class NamedObj}).
 
-Important derived types of Block are Star, representing an atomic actor;
-Galaxy, representing a collection of actors that can be thought of as
-one actor, and Universe, representing an entire runnable system.
+Important derived types of Block are Star (@pxref{class Star}),
+representing an atomic actor;
+Galaxy (@pxref{class Galaxy}),
+representing a collection of actors that can be thought of as
+one actor, and Universe (@pxref{class Universe}),
+representing an entire runnable system.
 
-A Block has portholes (connections to other blocks), states (parameters
-and internal states), and multiportholes (organized collections of
-portholes).  While the exact data structure used to represent each is a
-secret of class Block, it is visible that there is an order to each list, in
-that iterators return the contained states, portholes, and
-multiportholes in this order.  Iterators are a set of helper classes
+A Block has portholes (connections to other blocks
+--- @pxref{class PortHole}),
+states (parameters and internal states --- @pxref{class State}),
+and multiportholes (organized collections of portholes
+--- @pxref{class MultiPortHole}).
+
+While the exact data structure used to represent each is a secret of
+class Block, it is visible that there is an order to each list, in that
+iterators return the contained states, portholes, and multiportholes in
+this order.  Iterators (@pxref{Iterators}) are a set of helper classes
 that step through the states, portholes, or multiportholes that belong
 to the Block, see the menu entry.
 
@@ -718,7 +997,8 @@ Furthermore, Blocks can be cloned, an operation that produces a
 duplicate block.  There are two cloning functions: @code{makeNew},
 which resembles making a new block of the same class, and @code{clone},
 which makes a more exact duplicate (with the same values for states,
-for example).
+for example).  This feature is used by the KnownBlock class
+(@pxref{class KnownBlock}) to create blocks on demand.
 
 @menu
 * Block constructors and destructors::
@@ -803,7 +1083,8 @@ Print portholes as part of the info-printing method.
 virtual Scheduler* scheduler() const;
 @end example
 
-Return the controlling scheduler for this block.  The default
+Return the controlling scheduler (@pxref{class Scheduler})
+for this block.  The default
 implementation simply recursively calls the @code{scheduler()} function on the parent, or returns 0
 if there is no parent.  The intent is that eventually a block with
 a scheduler will be reached (the top-level universe has a scheduler,
@@ -970,12 +1251,12 @@ and return a const pointer.
 @section Class Star
 
 Class Star represents the basic executable atomic version of Block.
-It is derived from Block.
+It is derived from Block (@pxref{class Block}).
 
-Stars have an associated Target (possibly null), an index value,
+Stars have an associated Target (@pxref{class Target}), an index value,
 and an indication of whether or not there is internal state.
 
-The default constructor sets the target to null, sets the internal
+The default constructor sets the target pointer to null, sets the internal
 state flag to TRUE, and sets the index value to -1.
 
 @menu
@@ -1059,7 +1340,8 @@ function.
 @node class Galaxy, class DynamicGalaxy, class Star, Block and related classes
 @section Class Galaxy
 
-A Galaxy is a type of Block that has an internal hierarchical structure.
+A Galaxy is a type of Block (@pxref{class Block})
+that has an internal hierarchical structure.
 In particular, it contains other Blocks (some of which may also be
 galaxies).  It is possible to access only the top-level blocks or to
 flatten the hierarchy and step through all the blocks, by means
@@ -1067,7 +1349,8 @@ of the various iterator classes associated with Galaxy.
 
 While we generally define a different derived type of Star for each
 domain, the same kinds of Galaxy (and derived classes such as
-DynamicGalaxy and InterpGalaxy) are used in each domain.  Accordingly,
+InterpGalaxy --- @pxref{class InterpGalaxy})
+are used in each domain.  Accordingly,
 a Galaxy has a data member containing its associated domain (which
 is set to null by the constructor).
 
@@ -1242,8 +1525,9 @@ for interfacing between user interfaces, such as ptcl or pigi, and
 the Ptolemy kernel, because it has commands for building structures
 given commands specified in the form of text strings.  These commands
 add stars and galaxies of given types and build connections between
-them.  InterpGalaxy interacts with the KnownBlock class to create
-stars and galaxies, and the Domain class to create wormholes.
+them.  InterpGalaxy interacts with the KnownBlock class
+(@pxref{class KnownBlock}) to create stars and galaxies,
+and the Domain class (@pxref{class Domain}) to create wormholes.
 
 InterpGalaxy differs from other classes derived from Block in that
 the ``class name'' (the value returned by @code{className()}) is a
@@ -1264,9 +1548,9 @@ by means of the Error class.
 
 @menu
 * building structures::         building structures with InterpGalaxy
-* deleting InterpGalaxy structures::  deleting InterpGalaxy structures
-* InterpGalaxy and cloning::    InterpGalaxy and cloning
-* other InterpGalaxy functions::  other InterpGalaxy functions
+* deleting InterpGalaxy structures::
+* InterpGalaxy and cloning::
+* other InterpGalaxy functions::
 @end menu
 
 @node building structures, deleting InterpGalaxy structures, class InterpGalaxy, class InterpGalaxy
@@ -1474,7 +1758,8 @@ asking the Domain class).
 
 Once @code{addToKnownList} is called on an InterpGalaxy object,
 that object should not be modified further or deleted.  The KnownBlock
-class will manage it from this point on.  It will be deleted if a second
+class (@pxref{class KnownBlock})
+will manage it from this point on.  It will be deleted if a second
 definition with the same name is added to the known list, or when the
 program exits.
 
@@ -1685,7 +1970,8 @@ on an error.
 @node class Target, class Scheduler, Control of execution, Control of execution
 @section Class Target
 
-Class Target is derived from class Block; at such, it can have states
+Class Target is derived from class Block (@pxref{class Block});
+at such, it can have states
 and a parent (the fact that it can also have portholes is not currently
 used).  A Target is capable of supervising the execution of only certain
 types of Stars; the @var{starClass} argument in its constructor
@@ -2220,7 +2506,7 @@ implementations, a cleaner implementation could be produced.
 @menu
 * SimControl status flags::     Access to SimControl status flags.
 * pre- and postactions::        Preactions and Postactions
-* SimControl interrupts and polling::  SimControl interrupts and polling
+* SimControl interrupts and polling::
 @end menu
 
 @node SimControl status flags, pre- and postactions, class SimControl, class SimControl
@@ -2379,9 +2665,14 @@ event horizon''.  The wormhole design, therefore, does not depend on the
 domain it contains, but only on the domain in which it is used as a
 block.  It must look like a star in that outer domain.
 
-The base Wormhole class is derived from class Runnable, just like the
-class Universe.  Every member of the Runnable class has a pointer to a
-component Galaxy and a Target.  Like a Universe, a Wormhole can perform
+The base Wormhole class is derived from
+class Runnable (@pxref{class Runnable}), just like the
+class Universe (@pxref{class Universe}).
+Every member of the Runnable class has a pointer to a
+component Galaxy (@pxref{class Galaxy}) and a Target (@pxref{class
+Target}).
+
+Like a Universe, a Wormhole can perform
 the scheduling actions on the component Galaxy. A Wormhole is different
 from a Universe in that it is not a stand-alone object.  Instead, it is
 triggered from the outer domain to initiate the scheduling.  Also, since
@@ -2525,9 +2816,9 @@ domain to the ``universal form''.  The other, derived from FromEventHorizon,
 converts from the universal form to the domain-specific form.
 
 @menu
-* How EventHorizons are used::  How EventHorizons are used
-* EventHorizon public members::  EventHorizon public members
-* EventHorizon protected members::  EventHorizon protected members
+* How EventHorizons are used::
+* EventHorizon public members::
+* EventHorizon protected members::
 @end menu
 
 @node How EventHorizons are used, EventHorizon public members, class EventHorizon, class EventHorizon
@@ -2736,7 +3027,8 @@ Derived classes have it return TRUE if the event horizon is ``ready''
 @node class WormMultiPort,  , class FromEventHorizon, Interfacing domains
 @section Class WormMultiPort
 
-The class WormMultiPort, which is derived from MultiPortHole, exists to
+The class WormMultiPort, which is derived from MultiPortHole
+(@pxref{class MultiPortHole}), exists to
 handle the case where a galaxy with a multiporthole is imbedded in a
 wormhole.  Its @code{newPort} function correctly creates a pair of
 EventHorizon objects when a new port is created in the multiporthole.
@@ -2748,7 +3040,8 @@ when the inner galaxy has one or more MultiPortHole objects.
 
 This chapter describes the classes that implement connections between
 blocks.  For simulation domains, these classes are responsible for
-moving objects called Particles from one Block to another.  For code
+moving objects called Particles (@pxref{class Particle})
+from one Block to another.  For code
 generation domains, the Particles typically only move during scheduling
 and these objects merely provide information on the topology.
 
@@ -2768,11 +3061,13 @@ and these objects merely provide information on the topology.
 @section Class GenericPort
 
 The class GenericPort is a base class that provides common elements
-between class PortHole and class MultiPortHole.  Any GenericPort object
+between class PortHole (@pxref{class PortHole})
+and class MultiPortHole (@pxref{class MultiPortHole}).
+Any GenericPort object
 can be assumed to be either one or the other; we recommend avoiding
 deriving any new objects directly from GenericPort.
 
-GenericPort is derived from class NamedObj.
+GenericPort is derived from class NamedObj (@pxref{class NamedObj}).
 
 GenericPort provides several basic facilities: aliases, which specify
 that another GenericPort should be used in place of this port, types,
@@ -2783,9 +3078,9 @@ automatically cleaned up, so that other GenericPorts are never left
 with dangling pointers.
 
 @menu
-* GenericPort query functions::  GenericPort query functions
-* other GenericPort public members::  other GenericPort public members
-* GenericPort protected members::  GenericPort protected members
+* GenericPort query functions::
+* other GenericPort public members::
+* GenericPort protected members::
 @end menu
 
 @node GenericPort query functions, other GenericPort public members, class GenericPort, class GenericPort
@@ -2967,9 +3262,9 @@ may also be a member of a MultiPortHole, which is a logical group of
 PortHoles.
 
 @menu
-* PortHole public members::     PortHole public members
-* PortHole protected members::  PortHole protected members
-* class CircularBuffer::        CircularBuffer -- a class used to implement PortHole
+* PortHole public members::
+* PortHole protected members::
+* class CircularBuffer::        a class used to implement PortHole
 @end menu
 
 @node PortHole public members, PortHole protected members, class PortHole, class PortHole
@@ -3299,8 +3594,8 @@ The MultiPortHole constructor sets the ``peer MPH'' to 0.  The destructor
 deletes any constituent PortHoles.
 
 @menu
-* MultiPortHole public members::  MultiPortHole public members
-* MultiPortHole protected members::  MultiPortHole protected members
+* MultiPortHole public members::
+* MultiPortHole protected members::
 @end menu
 
 @node MultiPortHole public members, MultiPortHole protected members, class MultiPortHole, class MultiPortHole
@@ -3385,7 +3680,8 @@ const char* newName();
 @end example
 
 This function generates names to be used for contained PortHoles.  They
-are saved in the hash table provided by the @code{hashstring} function.
+are saved in the hash table provided by the @code{hashstring} function
+(@pxref{utility functions}).
 
 @example
 PortHole& installPort(PortHole& @var{p});
@@ -3558,7 +3854,7 @@ permanent, in which case it can live in disconnected form.  As a rule,
 temporary geodesics are used for point-to-point connections and
 permanent geodesics are used for netlist connections.  In the latter
 case, the Geodesic has a name and is a member of a galaxy; hence,
-Geodesic is derived from NamedObj.
+Geodesic is derived from NamedObj (@pxref{class NamedObj}).
 
 The baseclass Geodesic, which is temporary, suffices for most simulation
 and code generation domains.  In fact, in a number of these domains it
@@ -3720,7 +4016,8 @@ These protected members point to my neighbors.
 @node class Plasma, class ParticleQueue, class Geodesic, connection classes
 @section Class Plasma
 
-Class Plasma is a pool for particles.  It is derived from ParticleStack.
+Class Plasma is a pool for particles.  It is derived from ParticleStack
+(@pxref{class ParticleStack}).
 Rather than allocating Particles as needed with @code{new} and freeing
 them with @code{delete}, we instead provide an allocation pool for each
 type of particle, so that very little dynamic memory allocation activity
@@ -3858,11 +4155,13 @@ Equivalent to @code{initialize()} followed by @code{setCapacity(@var{n})}.
 @node classes for Galaxy ports,  , class ParticleQueue, connection classes
 @section Classes for Galaxy ports
 
-Class GalPort is derived from class PortHole.
+Class GalPort is derived from class PortHole (@pxref{class PortHole}).
 
-Class GalMultiPort is derived from class MultiPortHole.
+Class GalMultiPort is derived from class MultiPortHole
+(@pxref{class MultiPortHole}).
 
-These classes are used by InterpGalaxy (and in other places) to create
+These classes are used by InterpGalaxy (@pxref{class InterpGalaxy}),
+and in other places, to create
 galaxy ports and multiports that are aliased to some port of a member
 block.  The constructor for each of these classes takes one argument,
 the interior port that is to be the alias.  The @code{isItInput} and
@@ -4240,7 +4539,8 @@ the argument.
 @node class MessageParticle,  , class Message, Messages
 @subsection Class MessageParticle
 
-MessageParticle is a derived type of Particle whose data field is an
+MessageParticle is a derived type of Particle (@pxref{class Particle})
+whose data field is an
 Envelope; accordingly, it can transport Message objects.
 
 MessageParticle defines no new methods of its own; it only provides
@@ -4550,7 +4850,7 @@ the state either has or does not have.
 @node class State, types of states, Parameters and States, Parameters and States
 @section Class State
 
-Class State is derived from class NamedObj.
+Class State is derived from class NamedObj (@pxref{class NamedObj}).
 
 The State baseclass is an abstract class; you cannot create a plain
 State.  The baseclass contains the initial value, which is always
@@ -4866,17 +5166,64 @@ gives the imaginary part.
 @node class StringState, numeric array states, class ComplexState, types of states
 @subsection Class StringState
 
+A StringState's current value is a string (more correctly, of type
+@code{const char*}).  The current value is created by the
+@code{initialize()} function by scanning the initial value string.
+This string is copied literally, except that curly braces are special.
+If a pair of curly braces surrounds the name of a galaxy state, the
+printed representation of that state's current value (returned by
+the @code{currentValue} function) is substituted.  To get a literal
+curly brace in the current value, prefix it with a backslash.
+
+Class StringState defines assignment operators so that different
+string values can be copied to the current value; the value is
+copied with @code{savestring} (@pxref{utility functions})
+and deleted by the destructor.
+
 @node numeric array states, class StringArrayState, class StringState, types of states
 @subsection numeric array states
 
-@example
-ComplexArrayState : public State/ComplexArrayState.h:29:
-FloatArrayState : public State/FloatArrayState.h:29:
-IntArrayState : public State/IntArrayState.h:29:
-@end example
+Classes IntArrayState and FloatArrayState are produced from the same
+pseudo-template.  Class ComplexArrayState has a very similar design.
+All return TRUE to @code{isArray}, provide an array element selection
+operator (@code{operator[](int)}), and an operator that converts
+the state into a pointer to the first element of its data (much like
+arrays in C).
+
+The expression parser for FloatArrayState accepts a series of ``subarray
+expressions'', which are concatenated together to get the current value
+when @code{initialize()} is called.  Subarray expressions may specify
+a single element, some number of copies of a single element, or a
+galaxy array state of the same type (another FloatArrayState).  A
+single element specifier may either be a floating point value, a
+scalar (integer or floating) galaxy state name, or a general floating
+expression enclosed in parentheses.  A number of copies of this
+single element can be specified by appending an integer expression
+enclosed in square brackets.
+
+The expression parsers for IntArrayState and ComplexArrayState differ
+only that where FloatArrayState wants a floating expression,
+IntArrayState wants an integer expression and ComplexArrayState
+wants a complex expression (an expression suitable for initializing
+a ComplexState).
 
 @node class StringArrayState,  , numeric array states, types of states
 @subsection Class StringArrayState
+
+As its name suggests, the current value for a StringArrayState is
+an array of strings.  Whitespace in the initial value string separates
+``words''; each word is assigned by @code{initialize()} into a
+separate array element.  Quotes can be use to permit ``words''
+to have whitespace.
+
+Current values of galaxy states can be converted into single elements
+of the StringArrayState value by surrounding their names with curly
+braces in the initial value.  Galaxy StringArrayState names will
+be translated into a series of values.
+
+There is currently no provision for modifying the current value of
+a StringArrayState other than calling of @code{initialize} to parse
+the current value string.
 
 @node known lists, I/O classes, Parameters and States, Top
 @chapter Support for known lists and such
@@ -5157,7 +5504,8 @@ KnownState manages two lists of states, one to represent the types of
 states known to the system (integer, string, complex, array of floating,
 etc), and one to represent certain predeclared global states.
 
-It is very much like KnownBlock in internal structure.  Since it manages
+It is very much like KnownBlock (@pxref{class KnownBlock})
+in internal structure.  Since it manages
 two lists, there are two kinds of constructors.
 
 @example
@@ -5229,7 +5577,7 @@ Return the number of known states.
 @menu
 * class StringList::            StringList, a kind of String class
 * class Tokenizer::             Tokenizer, a simple lexical analyzer class
-* augmented fstreams::          pt_ifstream and pt_ofstream: augmented fstream classes
+* augmented fstreams::          classes pt_ifstream and pt_ofstream
 * class XGraph::                Xgraph, an interface to the xgraph program
 * Histogram classes::           Histogram classes
 @end menu
@@ -5239,7 +5587,9 @@ Return the number of known states.
 
 Class StringList provides a subset of the functions provided by the
 typical C++ String class; enough for our purposes.  It is privately
-derived from SequentialList.  Its internal implementation is as a
+derived from SequentialList (@pxref{class SequentialList}).
+
+Its internal implementation is as a
 list of @code{char *} strings, each on the heap.  A StringList
 object can be treated either as a single string or as a list of
 strings; the individual substrings retain their separate identity
@@ -5248,7 +5598,7 @@ There are also operators that add numeric values to the StringList;
 there is only one format available for such additions.
 
 @menu
-* StringList constructors::     StringList constructors and assignment operators
+* StringList constructors::     constructors and assignment operators
 * adding to StringLists::       adding to StringLists
 * StringList info functions::   StringList information functions
 * StringList conversion::       StringList conversion to const char *
@@ -5909,7 +6259,7 @@ union, intersection, or set difference of two IntervalLists.
 
 @menu
 * class Interval::              class Interval and methods
-* IntervalList public members::  IntervalList public members
+* IntervalList public members::
 * IntervalList iterators::      IntervalList iterator classes.
 @end menu
 
