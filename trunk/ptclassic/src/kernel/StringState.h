@@ -32,7 +32,7 @@ class StringState : public State
 {
 public:
         // constructor
-        StringState() : val(0) { }
+        StringState();
 
         // parses initValue to set value
         void initialize();
@@ -47,7 +47,7 @@ public:
 
 	// class identification
 	int isA(const char*) const;
-	const char* readClassName() const {return "StringState";}
+	const char* readClassName() const; // {return "StringState";}
 
 	State* clone () const; // {return new StringState;}
 

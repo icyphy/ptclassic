@@ -33,6 +33,9 @@ $Id$
 
 **************************************************************************/
 
+StringState :: StringState() : val(0) {}
+
+const char* StringState :: readClassName() const {return "StringState";}
 
 void StringState  :: initialize() {
 	char buf[2048];
