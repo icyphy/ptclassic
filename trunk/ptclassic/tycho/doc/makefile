@@ -39,8 +39,7 @@ VPATH =		$(ROOT)/doc
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS =	abbreviations.html \
-		authors.html \
+EXTRA_SRCS =	authors.html \
 		bindings.html \
 		brahe.html \
 		bugs0.1.html \
