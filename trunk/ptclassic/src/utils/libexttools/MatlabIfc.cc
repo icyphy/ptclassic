@@ -248,11 +248,17 @@ const char* MatlabIfc :: BuildMatlabCommand(
 
 // start a Matlab process
 // FIXME: This is a hack to workaround problems in the Matlab 4 engine
-// interface that affects System V operating systems like Solaris and HP
+// interface that affects System V operating systems like Solaris and HP.
+// Problem is that engClose routine issues ioctl(2, TIOCGWINSZ, 0xEFFFC028)
+// which attempts to get the window size of terminal that does not exist.
+// This showed up when running tycho and opening a Matlab console.
+// If one runs tycho as "tycho -ptiny >/dev/null" then the problem does
+// not exist.  -- ble, cxh
 Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
-    FILE* tempfp = freopen("/dev/null", "w", stderr);
+    // A better solution is to use ioctl to sever the association
+    // from the parent stderr and the matlab engine stderr
+    freopen("/dev/null", "w", stderr);
     Engine* ep = engOpen(unixCommand);
-    fclose(tempfp);
     return ep;
 }
 
