@@ -38,6 +38,7 @@ static bool pl_flag = false;  /*  for generation of .pl file for Ptolemy*/
 static bool highlevel = false; /* include highlevel.h and stuff */
 static bool bittrue = false; /* include bittrue.h and stuff */
 static bool tmp_thor = false; /* temporary for thor-message i/f */
+static bool sdf_flag = false; /* generate sdf file (not silage) */
 
 /*
  * global functions 
@@ -121,7 +122,7 @@ char *argv[];
 /*
  * Translate to C
  */
-   FlowToC(l_flag,pl_flag,highlevel,bittrue,tmp_thor);
+   FlowToC(l_flag,pl_flag,highlevel,bittrue,tmp_thor,sdf_flag);
    GenMakefile (GraphName);
 
 /*
@@ -186,6 +187,10 @@ char **argv;
             case 't' :
 	       tmp_thor = true;
 	       fprintf(stderr,"tmp_thor simulation \n");
+	       break;
+            case 'z' :
+	       sdf_flag = true;
+	       fprintf(stderr,"generating SDF file \n");
 	       break;
 	    default:
 	       WRONG_ARG;
