@@ -108,7 +108,6 @@ ITCL_SRCS = \
 	TopLevel.itcl \
 	TWidget.itcl \
 	Tycho.tcl \
-	TypedData.itcl \
 	UndirectedGraph.itcl \
 	Uninstantiable.itcl \
 	View.itcl \
