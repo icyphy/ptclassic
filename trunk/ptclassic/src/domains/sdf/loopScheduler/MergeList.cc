@@ -84,12 +84,12 @@ MergeLink::~MergeLink() {
 	delete postClust;
 }
 
-void MergeList::insertMerge(LSNode *base, LSNode *relative, int d) {
+void MergeList::insertMerge(LSNode* base, LSNode* relative, int d) {
 	MergeListIter nextLink(*this);
 	MergeLink *m;
 	LOG_NEW; MergeLink* newlink = new MergeLink(base, relative, d);
 	int n1 = newlink->par_inv;
-	while ((m = nextLink++)!=0) {
+	while ((m = nextLink++) != 0) {
 		int n2 = m->par_inv;
 		if (n1 < n2) {
 			insertAhead(newlink, m);
@@ -141,10 +141,14 @@ int MergeLink::formRepeatedCluster(LSGraph &g)
 	int ix = par_node->invocationNumber();
 	int iy = son_node->invocationNumber();
 
-	//  attempt clustering to check whether deadlock occurs.
-	if (!preClustering(g, ix, iy)) return FALSE;
-	if (!mainClustering(g, ix, iy)) return FALSE;
-	if (son_node && ! postClustering(g)) return FALSE;
+	// attempt clustering to check whether deadlock occurs.
+	// on error, deallocate all dynamic memory
+	if (!preClustering(g, ix, iy) ||
+	    !mainClustering(g, ix, iy) ||
+	    (son_node && ! postClustering(g))) {
+		setUp();
+		return FALSE;
+	}
 
 	// no deadlock occurs. THEN,
 	// 1. initial phase
@@ -375,15 +379,13 @@ void MergeLink :: initialPhase() {
 
 //////////////////////////
 // Create Clusters
-//////////////////////////	
+//////////////////////////
 // With the ClusterNodeLists registered in the clustering attempts,
 // create real clusters in the APEG graph
 void MergeLink :: createClusters(LSGraph& g) {
 	// If the base_node is the first invocation, that means
 	// there are isolated parent nodes.
-	int isolatedFlag = FALSE;
-	if ((base_node->invocationNumber() > 1) && direction)
-		isolatedFlag = TRUE;
+	int isolatedFlag = ((base_node->invocationNumber() > 1) && direction);
 
 	// For preClust....
 	if (preClust) {
