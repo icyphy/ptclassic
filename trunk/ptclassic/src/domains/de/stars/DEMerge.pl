@@ -33,12 +33,13 @@ defstar {
 
 	go {
 	   completionTime = arrivalTime;
-	   for(int i=input.numberPorts(); i>0; i--) {
-		InDEPort& p = (InDEPort&) input();
-		if(p.dataNew) {
-		    Particle& pp = p.get();
+	   InDEMPHIter nextp(input);
+	   InDEPort* iport;
+	   while ((iport = nextp++) != 0) {
+		if(iport->dataNew) {
+		    Particle& pp = iport->get();
 		    output.put(completionTime) = pp;
-		    p.dataNew = FALSE;
+		    iport->dataNew = FALSE;
 		}
 	   }
 	}

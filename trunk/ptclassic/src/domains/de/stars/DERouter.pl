@@ -54,10 +54,10 @@ defstar {
            completionTime = arrivalTime;
 	   // choose a output port randomly
 	   double p = (*random)() + 1.0;
-	   output.reset();
+	   OutDEMPHIter nextp(output);
 	   OutDEPort* pp;
 	   for (int i = int(p); i > 0 ; i--) {
-		pp = (OutDEPort*) &(output());
+		pp = nextp++;
 	   }
 
 	   // route the data to the chosen port
