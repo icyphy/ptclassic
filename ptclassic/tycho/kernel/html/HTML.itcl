@@ -102,7 +102,7 @@ class ::tycho::HTML {
     private common sizeName
 
     # Keep track of the current source window for the current file.
-    private variable sourcewin
+    private variable sourcewin {}
 
     #### sourcewinIsMine
     # Return 1 if the sourcewin window is a valid source window.
@@ -134,7 +134,7 @@ body ::tycho::HTML::constructor {args} {
 
     # The text widget.
     itk_component add text {
-	[textWidget] $itk_component(childsite).text
+	[textWidget] $itk_component(childsite).text -top $this
     } {
 	keep -text -readonly -textfont -width -height -background \
 		-highlightbackground -highlightcolor -selectforeground \
@@ -144,17 +144,17 @@ body ::tycho::HTML::constructor {args} {
     pack $itk_component(text) -expand yes -fill both
 
     # A toolbar for frequently used functions.
-    addTool back Back [code $itk_component(text) back]
+    addTool back Back "[winfo command $itk_component(text)] back"
     # FIXME: need a forward command.
     # FIXME: should the user be allowed to change the home window?
     global ::TYCHO
     addTool home Home \
-	    [code $itk_component(text) switchFile \
-	    $TYCHO/doc/index.html]
-    addTool reload Reload [code $this reload]
-    addTool open Open [code $this altFile]
-    addTool find Find [code $itk_component(text) search]
-    addTool stop Stop [code $itk_component(text) stopRendering]
+	    "[winfo command $itk_component(text)] switchFile \
+	    $TYCHO/doc/index.html"
+    addTool reload Reload "$this reload"
+    addTool open Open "$this altFile"
+    addTool find Find "$itk_component(text) search"
+    addTool stop Stop "$itk_component(text) stopRendering"
 
     itk_component add formatMenuButton {
 	menubutton $itk_component(menuFrame).format \
@@ -182,11 +182,9 @@ body ::tycho::HTML::constructor {args} {
 	$itk_component(formatMenu) add radio \
 		-label [lindex $size 0] \
 		-variable [scope sizeName($this)] \
-		-command [code \
+		-command \
 		"$this configure -sizeadjustment [lindex $size 1]; \
-		::tycho::HTMLText::render ::tycho::HTML::$itk_component(text)"]
-	# FIXME: Is the scoping on the previous line correct?
-	# I couldn't find anything else that would work (EAL).
+		::tycho::HTMLText::render [winfo command $itk_component(text)]"
     }
     set sizeName($this) medium
 
@@ -195,7 +193,7 @@ body ::tycho::HTML::constructor {args} {
 	    -label "Open Source" \
 	    -underline 1 \
 	    -accelerator {C-x s} \
-	    -command [code "$this openSource"]
+	    -command "$this openSource"
 
     $itk_component(fileMenu) delete "Save"
     $itk_component(fileMenu) delete "SaveAs..."
@@ -207,10 +205,11 @@ body ::tycho::HTML::constructor {args} {
 	# Not doing this seems to send the program into an infinite wait.
 	# Note also that "after idle" doesn't work here.  The window
 	# does not get mapped until parsing is complete.
-	after 1 [code "$itk_component(text) readFile $itk_option(-file)"]
+	after 1 "[winfo command $itk_component(text)] \
+		readFile $itk_option(-file)"
     }
 
-    bind $prefix <Control-x><Key-s> [code "$this openSource; break"]
+    bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
     bind $prefix <Control-x><Control-s> { }
     bind $prefix <Control-x><Control-w> { }
@@ -228,9 +227,9 @@ body ::tycho::HTML::constructor {args} {
 #
 body ::tycho::HTML::destructor {} {
     if [sourcewinIsMine] {
-	windowMenuRemoveAll $file
-	windowMenuAddAll $sourcewin $file
-	set filesOpen($file) $sourcewin
+	# Schedule this for after destruction is complete because the
+	# base class destructor removes the menu entry.
+	after idle [code windowMenuAddAll $sourcewin $file]
     }
     catch {unset sizeName($this)}
 }
@@ -281,7 +280,7 @@ body ::tycho::HTML::openSource {} {
     set win [::tycho::autoName .edit]
     set obj [uplevel #0 ::tycho::EditHTML $win -file $file]
     wm deiconify $win
-    set sourcewin "$obj"
+    set sourcewin $obj
 }
 
 #####################################################################
@@ -323,44 +322,37 @@ body ::tycho::HTML::seeName {name} {
 # new file, it should now be removed from the Window menu (the HTML
 # browser widget will take its place).  This method essentially
 # accomplishes the same functions as configuring the -file option,
-# but specialized to this circustance.
+# but specialized to this circumstance.
 #
 body ::tycho::HTML::switchFile {filename} {
 
     # If the destination file is already open, raise it.
     if {[info exists filesOpen($filename)] && \
-	    [$filesOpen($filename) isa ::tycho::HTML]} {
-	$filesOpen($filename) raiseWindow
+	    [eval $filesOpen($filename) isa ::tycho::HTML]} {
+	eval $filesOpen($filename) raiseWindow
 	return
     }
 
     # Remove the old file from the list of open files, and
     # add its source file, if open, to the Window menu.
-    if [info exists filesOpen($file)] {
-	windowMenuRemoveAll $file
-	if [sourcewinIsMine] {
-	    windowMenuAddAll $sourcewin $file
-	    set filesOpen($file) $sourcewin
-	} {
-	    unset filesOpen($file)
-	}
-    }
-    if [info exists sourcewin] {
-	unset sourcewin
+    windowMenuRemoveAll $file
+    if [sourcewinIsMine] {
+	windowMenuAddAll $sourcewin $file
     }
 
     # Reclaim the source window, if it is open.
     if {[info exists filesOpen($filename)]} {
-	windowMenuRemoveAll $filename
 	set sourcewin $filesOpen($filename)
+	windowMenuRemoveAll $filename
+    } {
+	set sourcewin {}
     }
 
     # Record the new filename in various places.
     set file $filename
-    set filesOpen($file) [code $this]
     set previousfile $file
     wm iconname $prefix [file tail $file]
-    windowMenuAddAll [code $this] $filename
+    windowMenuAddAll $this $filename
 
     # Render the HTML file.
     $itk_component(text) readFile $file
@@ -405,7 +397,7 @@ body ::tycho::HTML::addTool {name label command} {
 # currently open HTML text. Otherwise, return 0.
 #
 body ::tycho::HTML::sourcewinIsMine {} {
-    if {[info exists sourcewin] && \
+    if {$sourcewin != {} && \
 	    [uplevel #0 info objects $sourcewin] != {} && \
 	    [$sourcewin isa ::tycho::File] && \
 	    [$sourcewin filename] == $file} {

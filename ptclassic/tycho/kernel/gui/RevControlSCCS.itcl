@@ -289,7 +289,7 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 	parseHistory $history [$itk_component(history) textWinName]
 
 	# Delay or the focus command is ignored.  Tk bug?
-	after 500 [code "focus [$itk_component(history) textWinName]"]
+	after 500 "focus [$itk_component(history) textWinName]"
 
 	cd $olddir
     }
@@ -377,7 +377,7 @@ body ::tycho::RevControlSCCS::parseHistory {history text} {
 	    $text tag add v$version $start insert
 	    $text tag configure v$version -foreground $versionColor -underline 1
 	    $text tag bind v$version <Double-Button-1> \
-		    [code "$this retrieveVersion $version"]
+		    "$this retrieveVersion $version"
 	} elseif [regexp {MRs:|COMMENTS:} $line] {
 	    # ignore
 	} else {

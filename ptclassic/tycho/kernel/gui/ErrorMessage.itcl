@@ -109,7 +109,7 @@ body ::tycho::ErrorMessage::constructor {args} {
     # Pack the stack trace button, if there is error info.
     global ::errorInfo
     if {$errorInfo != ""} {
-	addButton trace -text "Stack Trace" -command [code "$this stackTrace"]
+	addButton trace -text "Stack Trace" -command "$this stackTrace"
 	set localErrorInfo $errorInfo
     }
 

@@ -173,15 +173,15 @@ body ::tycho::FontManager::constructor {args} {
 
     # Add the OK button.
     addButton ok -text "OK <Ret>" -command \
-	    [code "$this execCommand -okcommand; $this nextWindow; \
-	    delete object $this"]
+	    "$this execCommand -okcommand; $this nextWindow; \
+	    delete object $this"
     default ok
 
     # Add the Cancel button.
     addButton cancel -text "Cancel <Esc>" -command \
-	    [code "$this clearFont; $this nextWindow; delete object $this"]
+	    "$this clearFont; $this nextWindow; delete object $this"
 
-    bind $prefix <Escape> [code "$this invoke cancel"]
+    bind $prefix <Escape> "$this invoke cancel"
 
     # Set up the menubar
     itk_component add menuFrame {
@@ -290,7 +290,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(familyMenu) add radio \
 		-label $family \
 		-variable [scope familySelection] \
-		-command [code "$this setCurrentFont"]
+		-command "$this setCurrentFont"
     }
 
     itk_component add sizeMenu {
@@ -304,7 +304,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(sizeMenu) add radio \
 		-label $size \
 		-variable [scope sizeSelection] \
-		-command [code "$this setCurrentFont"]
+		-command "$this setCurrentFont"
     }
 
     itk_component add weightMenu {
@@ -318,7 +318,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(weightMenu) add radio \
 		-label $weight \
 		-variable [scope weightSelection] \
-		-command [code "$this setCurrentFont"]
+		-command "$this setCurrentFont"
     }
 
     itk_component add styleMenu {
@@ -332,7 +332,7 @@ body ::tycho::FontManager::constructor {args} {
 	$itk_component(styleMenu) add radio \
 		-label $style \
 		-variable [scope styleSelection] \
-		-command [code "$this setCurrentFont"]
+		-command "$this setCurrentFont"
     }
 
     itk_component add miscMenu {
@@ -345,7 +345,7 @@ body ::tycho::FontManager::constructor {args} {
     foreach font [option get $itk_component(hull) specialFonts FontManager] {
 	$itk_component(miscMenu) add command \
 		-label $font \
-		-command [code "$this tryFont $font"]
+		-command "$this tryFont $font"
     }
 
     ##################################################################
@@ -367,7 +367,7 @@ body ::tycho::FontManager::constructor {args} {
     $itk_component(helpMenu) add command \
 	    -label "User's Guide" \
 	    -underline 0 \
-	    -command [code "$this help"]
+	    -command "$this help"
 
     set sample "
 ABCDEFGHIJKLMNOPQRSTUVWXYZ

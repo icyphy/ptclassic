@@ -182,7 +182,7 @@ body ::tycho::FileBrowser::constructor {args} {
 
     # Create directory button.
     $itk_component(buttons) add mkdir -text "New Directory" \
-	    -command [code $this mkdir]
+	    -command "$this mkdir"
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
@@ -208,7 +208,7 @@ body ::tycho::FileBrowser::help {} {
 # Make a new directory and go to it.
 #
 body ::tycho::FileBrowser::mkdir {} {
-    set dirname [queryinfo "Directory name" "$localCWD/" 80]
+    set dirname [::tycho::queryinfo "Directory name" "$localCWD/" 80]
     if {$dirname != {}} {
 	# FIXME: Unix command built in
 	exec mkdir $dirname

@@ -156,14 +156,14 @@ configbody ::tycho::RevControl::object {
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
 
-    addButton checkin -text "Checkin" -command [code $this checkIn]
-    addButton checkout -text "Checkout" -command [code $this checkOut]
-    addButton history -text "History" -command [code $this viewHistory]
-    addButton unedit -text "Unedit" -command [code $this unedit]
+    addButton checkin -text "Checkin" -command "$this checkIn"
+    addButton checkout -text "Checkout" -command "$this checkOut"
+    addButton history -text "History" -command "$this viewHistory"
+    addButton unedit -text "Unedit" -command "$this unedit"
     addButton cancel -text "Close <Esc>" -command \
-	   [code "$this nextWindow; delete object $this"]
+	   "$this nextWindow; delete object $this"
 
-    bind $itk_component(hull) <Escape> [code $this invoke cancel]
+    bind $itk_component(hull) <Escape> "$this invoke cancel"
 }
 
 ###################################################################

@@ -186,7 +186,7 @@ body ::tycho::ListBrowser::constructor {args} {
     # Scrollbar for items.
     itk_component add scroll {
 	scrollbar $itk_component(listscroll).scroll \
-		-command [code "$itk_component(listscroll).listbox yview"] \
+		-command "$itk_component(listscroll).listbox yview" \
 		-relief sunken
     } {
 	keep -background -cursor
@@ -202,7 +202,7 @@ body ::tycho::ListBrowser::constructor {args} {
     pack $itk_component(buttons) -expand no -before $itk_component(bbox)
 
     $itk_component(buttons) add help -text "    Help    " \
-	    -command [code $this help]
+	    -command "$this help"
 
     ###################################################################
     # bindings
@@ -210,50 +210,46 @@ body ::tycho::ListBrowser::constructor {args} {
     # to close the window.
     #
     # Any key breaks a sequence of Tabs
-    bind $itk_component(hull) <KeyPress> \
-	    [code {%Q breakCompleteSequence}]
+    bind $itk_component(hull) <KeyPress> {%Q breakCompleteSequence}
     bind $itk_component(hull) <Tab> { }
-    bind $itk_component(entry_entry) <Tab> \
-	    [code {%Q complete; break}]
+    bind $itk_component(entry_entry) <Tab> {%Q complete; break}
 
     # Mouse bindings
-    bind $itk_component(listbox) <Double-1> \
-	    [code {%Q select [%Q get entry]; break}]
-    bind $itk_component(listbox) <1> \
-	    [code %Q chooseItem %W %y]
+    bind $itk_component(listbox) <Double-1> {%Q select [%Q get entry]; break}
+    bind $itk_component(listbox) <1> {%Q chooseItem %W %y}
 
     # Navigation bindings
-    bind $itk_component(hull) <Meta-v> [code %Q scroll -1 pages]
+    bind $itk_component(hull) <Meta-v> {%Q scroll -1 pages}
     # Escape removed the window, so it doesn't work as an alternative to meta.
-    # bind $itk_component(hull) <Escape><v> [code %Q scroll -1 pages]
+    # bind $itk_component(hull) <Escape><v> {%Q scroll -1 pages}
 
-    bind $itk_component(hull) <Control-v> [code %Q scroll 1 pages]
-    bind $itk_component(hull) <Control-backslash> [code %Q clearselection]
-    bind $itk_component(hull) <Control-p> [code %Q scroll -1 selection]
-    bind $itk_component(hull) <Control-n> [code %Q scroll 1 selection]
+    bind $itk_component(hull) <Control-v> {%Q scroll 1 pages}
+    bind $itk_component(hull) <Control-backslash> {%Q clearselection}
+    bind $itk_component(hull) <Control-p> {%Q scroll -1 selection}
+    bind $itk_component(hull) <Control-n> {%Q scroll 1 selection}
 
     # Special keys for moving about.
-    bind $itk_component(hull) <Prior> [code %Q scroll -1 pages]
-    bind $itk_component(hull) <Next> [code %Q scroll 1 pages]
-    bind $itk_component(hull) <End> [code %Q goto end]
-    bind $itk_component(hull) <Meta-greater> [code %Q goto end]
-    # bind $itk_component(hull) <Escape><greater> [code %Q goto end]
-    bind $itk_component(hull) <Up> [code %Q scroll -1 selection]
-    bind $itk_component(hull) <Down> [code %Q scroll 1 selection]
-    bind $itk_component(hull) <Home> [code %Q goto 0]
-    bind $itk_component(hull) <Meta-less> [code %Q goto 0]
-    # bind $itk_component(hull) <Escape><less> [code %Q goto 0]
+    bind $itk_component(hull) <Prior> {%Q scroll -1 pages}
+    bind $itk_component(hull) <Next> {%Q scroll 1 pages}
+    bind $itk_component(hull) <End> {%Q goto end}
+    bind $itk_component(hull) <Meta-greater> {%Q goto end}
+    # bind $itk_component(hull) <Escape><greater> {%Q goto end}
+    bind $itk_component(hull) <Up> {%Q scroll -1 selection}
+    bind $itk_component(hull) <Down> {%Q scroll 1 selection}
+    bind $itk_component(hull) <Home> {%Q goto 0}
+    bind $itk_component(hull) <Meta-less> {%Q goto 0}
+    # bind $itk_component(hull) <Escape><less> {%Q goto 0}
     
     # We have gotten some reported problems about these keys
     # being undefined on some machines.  But they also seem
     # be needed for other machines.  Hence the catch.
     catch {
-	bind $itk_component(hull) <KP_Prior> [code %Q scroll -1 pages]
-	bind $itk_component(hull) <KP_Next> [code %Q scroll 1 pages]
-	bind $itk_component(hull) <KP_End> [code %Q goto end]
-	bind $itk_component(hull) <KP_Up> [code %Q scroll -1 selection]
-	bind $itk_component(hull) <KP_Down> [code %Q scroll 1 selection]
-	bind $itk_component(hull) <KP_Home> [code %Q goto 0]
+	bind $itk_component(hull) <KP_Prior> {%Q scroll -1 pages}
+	bind $itk_component(hull) <KP_Next> {%Q scroll 1 pages}
+	bind $itk_component(hull) <KP_End> {%Q goto end}
+	bind $itk_component(hull) <KP_Up> {%Q scroll -1 selection}
+	bind $itk_component(hull) <KP_Down> {%Q scroll 1 selection}
+	bind $itk_component(hull) <KP_Home> {%Q goto 0}
     }
     # Process any unevaluated arguments.
     eval itk_initialize $args
