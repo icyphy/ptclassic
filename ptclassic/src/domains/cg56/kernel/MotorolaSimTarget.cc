@@ -163,7 +163,8 @@ int MotorolaSimTarget::computeImplementationCost() {
 	int retval = FALSE;
 
 	// Initialize softwareCost and conditionally compute data memory usage
-	if (! MotorolaTarget::computeImplementationCost()) return FALSE;
+	retval = MotorolaTarget::computeImplementationCost();
+	if (! retval ) return FALSE;
 
 	// Conditionally compute the execution time
 	if ( int(reportExecutionTime) ) {
