@@ -428,7 +428,7 @@ proc ptkHighlightStar { star args } {
 	} else { set green 0 }
 	if {[llength $args] >= 3} {
 	    set blue [lindex $args 2]
-	} else { set blue o }
+	} else { set blue 0 }
     }
     ptkHighlight $star $red $green $blue
 }
