@@ -999,7 +999,7 @@ universe.galaxy.star.port
 @end example
 
 for a porthole; the output is the fullName of the parent, plus a period,
-plus the fullName of the NamedObj it is called on.
+plus the name of the NamedObj it is called on.
 
 @example
 void setNameParent (const char* @var{my_name},Block* @var{my_parent})
@@ -1798,7 +1798,7 @@ only implement @code{go()}.
 Target* targetPtr;
 @end example
 
-This is a public data member, set by the setTarget public member
+This is a protected data member, set by the setTarget public member
 function.
 
 @node class Galaxy, class DynamicGalaxy, class Star, Block and related classes
@@ -2435,7 +2435,7 @@ on an error.
 @section Class Target
 
 Class Target is derived from class Block (@pxref{class Block});
-at such, it can have states
+as such, it can have states
 and a parent (the fact that it can also have portholes is not currently
 used).  A Target is capable of supervising the execution of only certain
 types of Stars; the @var{starClass} argument in its constructor
@@ -2827,7 +2827,7 @@ wormhole was suspended even though it had more work to do.
 virtual const char* domain() const;
 @end example
 
-Return the domain for this schedule.  This method is no longer used and
+Return the domain for this scheduler.  This method is no longer used and
 will be removed from future releases; it dates back to the days
 in which a given scheduler could only be used in one domain.
 
@@ -2883,7 +2883,7 @@ bits.
 The following two data members are protected.
 
 @example
-// current time of the schedule
+// current time of the scheduler
 double currentTime;
 
 // flag set if stop before deadlocked.
@@ -3080,7 +3080,8 @@ It only provides one handler.
 static void catchInt(int signo = -1, int always = 0);
 @end example
 
-This signal installs a simple interrupt handler for the signal with
+This static member function installs a simple
+interrupt handler for the signal with
 Unix signal number @var{signo}.  If @var{always} is true, the
 signal is always caught; otherwise the signal is not caught
 if the current status of the signal is that it is ignored
@@ -3570,7 +3571,7 @@ Each of the above functions returns TRUE (1) or FALSE (0).
 StringList print (int @var{verbose} = 0) const;
 @end example
 
-Print human-readable information on the wormhole.
+Print human-readable information on the GenericPort.
 
 @example
 DataType type () const;
@@ -3709,7 +3710,7 @@ GenericPort* translateAliases();
 
 The above is a protected function.  If this function is called on
 a port with no alias, the address of the port itself is returned;
-otherwise, @code{translateAliases(*alias())} is returned.
+otherwise, @code{alias()->translateAliases()} is returned.
 
 @node class PortHole, class MultiPortHole, class GenericPort, connection classes
 @section Class PortHole
@@ -5234,14 +5235,14 @@ static int enabled();
 @end example
 
 Returns true if the linker is enabled (it is enabled by calling
-@code{Linker::init} if that function returns successfully.
+@code{Linker::init} if that function returns successfully).
 
 @example
 static const char* imageFileName();
 @end example
 
 Return the fully-expanded name of the executable image file (set by
-@code{Linker::init}.
+@code{Linker::init}).
 
 @example
 static void setDefaultOpts(const char* @var{newValue});
@@ -5863,7 +5864,7 @@ static Target* clone (const char* @var{name});
 
 The @code{clone} method takes a string, finds the appropriate target on
 the known target list, and returns a clone of that block (the
-@code{clone} method is called on the target.  This method, as
+@code{cloneTarget} method is called on the target).  This method, as
 a rule, generates a duplicate of the target.
 An error message is generated (with @code{Error::abortRun}) and
 a null pointer is returned if there is no match.
