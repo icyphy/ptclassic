@@ -42,7 +42,8 @@ int DFCluster::run() {
 }
 
 // Constructors
-DFCluster::DFCluster() : DataFlowStar(), Cluster(*(DataFlowStar*)this) {};
+DFCluster::DFCluster(const char* domain):DataFlowStar(),Cluster(*this,domain)
+{};
 
 DFClusterPort::DFClusterPort(const PortHole* master, Star* parent)
 : DFPortHole(), ClusterPort(*this,*master,parent) {
@@ -54,9 +55,13 @@ PortHole* DFCluster::clonePort(const PortHole* master, Star* parent) {
     return new DFClusterPort(master,parent);
 }
 
-Cluster* DFCluster::newCluster(Block* master) const {
-    LOG_NEW; Cluster* cluster = new DFCluster();
+Cluster* DFCluster::newCluster(Block* master,const char* domain) const {
+    LOG_NEW; Cluster* cluster = new DFCluster(domain);
     if (master) cluster->setMasterBlock(master);
+    if (domain)
+	cluster->myDomain = domain;
+    else
+	cluster->myDomain = myDomain;
     return cluster;
 }
 
