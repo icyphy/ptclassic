@@ -84,5 +84,6 @@ test IndexBrowser-1.1 {Bring up a index, select an hierarchichal index} {
     set win [::tycho::File::openContext IndexBrowser.idx]
     $win clearSelection
     $win goto 1
+    # It would be nice if we could some how get the return value here.
     $win ok
 } {}
