@@ -4,6 +4,7 @@
 #
 
 DIRS = wfir optfir
+PTOLEMY = ../../
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
