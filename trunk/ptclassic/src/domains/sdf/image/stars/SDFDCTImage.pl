@@ -125,7 +125,7 @@ cosine transform (DCT) and outputs a DCTImage.
 		}
 	} // end doDCT()
 
-	start {
+	setup {
 		blocksize = int(BlockSize);
 		LOG_NEW; cosData = new float[blocksize*blocksize];
 		cosSet();

@@ -116,7 +116,7 @@ New York, 1989.
 		LOG_DEL; delete aPrime;
 		LOG_DEL; delete r;
 	}
-	start {
+	setup {
 		// delete and remake arrays if the size has changed.
 		if (int(order) != ORD) {
 			LOG_DEL; delete aOrig;

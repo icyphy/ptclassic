@@ -35,7 +35,7 @@ For example, to compute just one FFT, only one iteration should be run.
 \fBBugs\fR: the routine currently used (from Gabriel) recomputes trig
 .Ir "Gabriel"
 functions for each term, instead of using a table.  Instead,
-ComplexFFT::start() should compute a table of appropriate size to save
+FFTCx::setup() should compute a table of appropriate size to save
 time.  This has no effect, obviously, if only one transform
 is performed.
 	}
@@ -148,7 +148,7 @@ static void fft_rif(double *data, int nn, int isign)
 	destructor {
 		LOG_DEL; delete data;
 	}
-	start {
+	setup {
 		fftSize = 1 << int(order);
 		if (fftSize < int(size)) {
 			Error::abortRun(*this, "2^order must be >= size");

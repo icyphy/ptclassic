@@ -126,7 +126,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		}
 	} // end doFirst()
 
-	start { firstTime = 1; }
+	setup { firstTime = 1; }
 
 	wrapup { LOG_DEL; delete [] cosData; }
 

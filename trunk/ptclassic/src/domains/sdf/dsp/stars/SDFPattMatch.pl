@@ -44,7 +44,7 @@ for viewing the values of the cross correlations.
 
 	protected { int N; }
 
-	start {
+	setup {
 		if ( winSize < tempSize )
 			Error::abortRun( *this,
 				"winSize must be >= tempSize" );

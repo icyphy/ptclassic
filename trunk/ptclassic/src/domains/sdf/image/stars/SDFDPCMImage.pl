@@ -38,7 +38,7 @@ directly to the "output".  Otherwise, subtract the "past" from the
 	}
 
 	protected { float leak; }
-	start { leak = float(double(alpha)); }
+	setup { leak = float(double(alpha)); }
 
 // This star code uses "wraparound" to represent negative values
 // using unsigned char's. Suppose unsigned char a = 3 and unsigned

@@ -44,7 +44,7 @@ can be added or reduced-search motion compensation can be performed.
 	}
 
 	protected { int blocksize; }
-	start { blocksize = int(BlockSize); }
+	setup { blocksize = int(BlockSize); }
 
 	virtual method {
 		name { doSyncImage }

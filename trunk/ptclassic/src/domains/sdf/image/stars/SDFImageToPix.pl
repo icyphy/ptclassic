@@ -38,7 +38,7 @@ individual pixels.
 	protected {
 		int np;
 	}
-	start {
+	setup {
 		np = int(width) * int(height);
 		output.setSDFParams(np, np-1);
 	}

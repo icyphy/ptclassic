@@ -47,7 +47,7 @@ samples.
 		desc {Count current iteration. }
 		attributes { A_NONCONSTANT | A_NONSETTABLE }
 	}
-	start {
+	setup {
 		inA.setSDFParams(1, int(truncationDepth));
 		inB.setSDFParams(1, int(truncationDepth));
 	}

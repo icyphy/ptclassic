@@ -85,7 +85,7 @@ limitation of liability, and disclaimer of warranty provisions.
 #define SDFWinType_Blackman	(5)
 #define SDFWinType_SteepBlackman	(6)
     }
-    start {
+    setup {
 	const char *wn = name;
 
 	/*IF*/ if ( strcasecmp( wn, "Rectangle")==0 ) {
