@@ -45,7 +45,6 @@ Loop scheduler
 #include "Target.h"
 #include "MergeList.h"
 #include "Error.h"
-#include "streamCompat.h"
 
 
 ////////////////////////////

@@ -38,7 +38,6 @@ Date of last revision: 5/92
 
 #include "DeclustScheduler.h"
 #include "miscFuncs.h"
-#include "streamCompat.h"
 
 // function to display the schedule
 StringList DeclustScheduler::displaySchedule() {

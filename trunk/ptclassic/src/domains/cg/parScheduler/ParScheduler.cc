@@ -43,7 +43,6 @@ Date of last revision:
 #include "StringList.h"
 #include "InfString.h"
 #include "ganttChart.h"
-#include "streamCompat.h"
 
 void ParScheduler::setup() {
     	// compute repetitions, schedule (by calling computeSchedule)
