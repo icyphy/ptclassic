@@ -1996,20 +1996,24 @@ proc HMset_image {win handle src} {
             if {$ext==".bmp" || $ext==".xbm"} {set type bitmap}
             # FIXME: The following is hacked because JPG isn't supported
             if {$ext==".jpg" || $ext==".jpeg"} {
-                # when we're not on UNIX, error is caught
-                set oldcachefile [::tycho::resource cachefile $image]
-                set ext [string tolower [::tycho::url extension $oldcachefile]]
-                # If the cache has not been remapped to a GIF file,
-                # then convert, then remap.
-                if {$ext==".jpg" || $ext==".jpeg"} {
-                    # Take out extension (.jpg, .jpeg, etc)...
-                    regsub [::tycho::url extension $oldcachefile] \
-                            $oldcachefile {} newcachefile
-                    set newcachefile "$newcachefile.gif"
-                    eval exec convert -quality 5 $oldcachefile $newcachefile
-                    #file delete $cachefile
-                    if ![::tycho::cache remap $image $newcachefile] {
-                        error "Remapping error"
+                # when we don't have the "convert" utility, catch.
+                catch {
+                    # Fetch the file remotely if necessary, and cache on disk.
+                    set oldcachefile [::tycho::resource cachefile $image]
+                    set ext [string tolower \
+                            [::tycho::url extension $oldcachefile]]
+                    # If the cache has not been remapped to a GIF file,
+                    # then convert, then remap.
+                    if {$ext==".jpg" || $ext==".jpeg"} {
+                        # Take out extension (.jpg, .jpeg, etc)...
+                        regsub [::tycho::url extension $oldcachefile] \
+                                $oldcachefile {} newcachefile
+                        set newcachefile "$newcachefile.gif"
+                        eval exec convert -quality 5 $oldcachefile $newcachefile
+                        #file delete $cachefile
+                        if ![::tycho::cache remap $image $newcachefile] {
+                            error "Remapping error"
+                        }
                     }
                 }
             }
