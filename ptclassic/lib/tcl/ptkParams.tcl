@@ -740,7 +740,7 @@ proc ptkEditParams {facet number args} {
   # -- <Return> binding is now bound to each parameter entry text window
   #    instead of top-level window because hitting Return when any of the
   #    buttons were selected would invoke two commands:  one for the Return
-  #    (save current parametes and destory window) and one for the button
+  #    (save current parameters and destroy window) and one for the button
   #    (e.g., the Cancel button restores old parameters and destroys window).
   #
   #    bind $top <Return> \
