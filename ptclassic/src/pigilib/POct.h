@@ -129,6 +129,8 @@ public:
 	int ptkCompile (int argc,char** argv);
 	int ptkGetParams (int argc,char** argv);
 	int ptkSetParams (int argc,char** argv);
+	int ptkGetDomainNames (int argc,char** argv);
+	int ptkSetDomain (int argc,char** argv);
 	int ptkGetTargetNames (int argc,char** argv);
 	int ptkGetTargetParams (int argc,char** argv);
 	int ptkSetTargetParams (int argc,char** argv);
