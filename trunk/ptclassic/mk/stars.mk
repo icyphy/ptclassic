@@ -715,9 +715,10 @@ ifdef PIGI
 endif
 
 # External interface support - we need to expand libexttools, because it
-# depends upon the Ptolemy kernel.  Matlab always is pulled in
-
-CUSTOM_DIRS += $(CROOT)/src/utils/libexttools
+# depends upon the Ptolemy kernel.  Matlab and mathematica are always pulled in
+CUSTOM_DIRS += $(CROOT)/src/utils/libexttools \
+	$(CROOT)/src/utils/libptmatlab \
+	$(CROOT)/src/utils/libptmathematica
 LIBS += -lexttools $(MATLABEXT_LIB) $(MATHEMATICAEXT_LIB)
 LIBFILES += $(LIBDIR)/libexttools.$(LIBSUFFIX)
 
