@@ -47,6 +47,7 @@ static const char file_id[] = "SDFTarget.cc";
 #include "SDFCluster.h"
 #include "pt_fstream.h"
 #include "AcyLoopScheduler.h"
+#include "Tokenizer.h"
 
 SDFTarget::SDFTarget(const char* nam, const char* desc,
 		     const char* assocDomain) :
@@ -82,8 +83,12 @@ void SDFTarget::setup() {
 	if (!logFile.null()) o.open(logFile);
 
 	const char* tmpname = loopScheduler;
+	Tokenizer lexer(tmpname,"#");
+	char buf[1024];
+	lexer >> buf;
+	loopScheduler.setCurrentValue(buf);
 
-	if (strcasecmp(tmpname,"ACYLOOP") == 0) {
+	if (strcasecmp(buf,"ACYLOOP") == 0) {
 	    // Determine if the graph is acyclic.  It not, use
 	    // another loop scheduler.
 	    // FIXME:
