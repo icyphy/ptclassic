@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc {
 The output is set to the input multiplied by a gain term.
-}
+	}
 	version { $Id$  }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
