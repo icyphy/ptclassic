@@ -29,6 +29,8 @@ $Id$
 class CGStar;
 class SDFSchedule;
 
+extern const char *CODE, *PROCEDURE;
+
 class CGTarget : public Target {
 public:
     CGTarget(const char* name, const char* starclass, const char* desc,
@@ -121,7 +123,7 @@ virtual StringList headerComment(const char* begin=NULL,const char* end="",const
     char separator;
 
 protected:
-    // Add a code StringList to the target.  This allows stars to access this
+    // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
     // constructor.  If a target tries to add a stream where another stream
     // with the same name already exists, Error::abortRun is called.
@@ -137,7 +139,7 @@ protected:
 
     // myCode contains the code generated for the target
     CodeStream myCode;
-    CodeStream procedures(SHARE);
+    CodeStream procedures;
 
     StringState destDirectory;
     // If we set this state 0, no looping. 1, Joe's looping.

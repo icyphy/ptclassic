@@ -31,6 +31,9 @@ $Id$
 #include <time.h>
 #include <string.h>
 
+extern const char* CODE = "code";
+extern const char* PROCEDURE = "procedure";
+
 // Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
 	StringList out;
@@ -52,8 +55,8 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 		"PTOLEMY_SYSTEMS","Directory to write to"));
 	addState(loopingLevel.setState("loopingLevel",this,"0",
 		"Specify whether to use loop scheduler and in what level."));
-	addStream("myCode",&myCode);
-	addStream("procedures",&procedures);
+	addStream(CODE, &myCode);
+	addStream(PROCEDURE, &procedures);
 }
 
 // destructor
