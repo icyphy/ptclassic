@@ -167,13 +167,14 @@ It outputs lines of comments, instead of code.
 		//
 		// Calculate BW
 		//
+                int out_bitlen=0;
 		// FIX:
 		if (pins->query_preclock(1)==UNLOCKED)
 		{
 		    int in_majorbit=pins->query_majorbit(0);
 		    int in_bitlen=pins->query_bitlen(0);
 		    int out_majorbit=in_majorbit+1;
-		    int out_bitlen=out_majorbit - (in_majorbit-in_bitlen);
+		    out_bitlen=out_majorbit - (in_majorbit-in_bitlen);
 		    
 		    input_width=in_bitlen;
 		    output_width=out_bitlen;
@@ -192,6 +193,16 @@ It outputs lines of comments, instead of code.
 		    acs_delay=taps;
 		}
 			    
+                //
+                // Calculate CLB sizes
+                //
+                taps=corona.taps.size();
+                // FIX:
+                resources->set_occupancy(out_bitlen/2,1);
+
+                // Calculate pipe delay
+                acs_delay=taps;
+
 		// Return happy condition
 		return(1);
 		}
