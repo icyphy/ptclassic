@@ -37,11 +37,11 @@
 include $(ROOT)/mk/config-default.mk
 
 # Get the g++ definitions; we override some below.
-include $(ROOT)/mk/config-g++.mk
+#include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
-#include $(ROOT)/mk/config-g++.shared.mk
+include $(ROOT)/mk/config-g++.shared.mk
 
 #
 # Programs to use
@@ -76,11 +76,11 @@ SYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lsocket -lnsl -ldl -lg++ $(SHARED_SYSLIBS) -
 # dynamic linking will not work.
 LINKFLAGS=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) $(LINKSTRIPFLAGS) 
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS_D=-L$(LIBDIR) -shared $(SHARED_LIBRARY_R_LIST)
 
 # These are the additional flags that we need when we are compiling code
 # which is to be dynamically linked into Ptolemy
-INC_LINK_FLAGS = -fpic
+INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
 
 
 # Flag that gcc expects to create statically linked binaries.
