@@ -38,35 +38,35 @@
 # (using symbols defined in the stars.mk file or your own additions).
 
 # root of source tree
-ROOT	      = ../..
+ROOT =		../..
 # Path (absolute or relative) to the object directory root
-OBJDIR= ..
+OBJDIR =	..
 # VPATH points to the "real" source directory
-VPATH         = $(ROOT)/src/pigiRpc
+VPATH =		$(ROOT)/src/pigiRpc
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 -include override.mk
 
 ifndef BASENAME
 ifndef PIGI
-	ALLBINARIES=1
-	BASENAME=pigiRpc
+	ALLBINARIES =	1
+	BASENAME =	pigiRpc
 endif
 endif
 
 TK=1
 
-PT_DEPEND += pigiMain.o
+PT_DEPEND +=	pigiMain.o
 
-ADD_OBJS=version.$(PIGI).o palettes.$(PIGI).o
+ADD_OBJS =	version.o palettes.$(PIGI).o
 
-PIGI_OBJS += pigiMain.o $(ADD_OBJS)
+PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
 
-LIBS += -L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist -ltr -lutility \
-	-lst -lerrtrap -luprintf -lport
+LIBS += 	-L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist \
+			-ltr -lutility -lst -lerrtrap -luprintf -lport
 
 LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
 	$(OCTLIBDIR)/liboh.$(LIBSUFFIX) $(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
@@ -76,6 +76,8 @@ LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
 	$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX) $(OCTLIBDIR)/libport.$(LIBSUFFIX)
 
 include $(ROOT)/mk/ptbin.mk
+
+all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
 palettes.$(PIGI).c: $(PT_DEPEND)
 	echo -n "char* defaultPalettes(){ return " > palettes.$(PIGI).c
@@ -100,7 +102,7 @@ realclean:	clean
 			ptinyRpc.debug ptinyRpc.debug.purify \
 			ptinyRpc.debug.purcov pigiRpc.cp \
 			ptinyRpc ptrimRpc pigiRpc.ptiny pigiRpc.ptrim \
-			version.* palettes.*
+			version.c palettes.*
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	pigiMain.cc
