@@ -26,6 +26,7 @@ $Id$
 #include "Error.h"
 #include "ConstIters.h"
 #include "miscFuncs.h"
+#include "Domain.h"
 #include <stdio.h>
 #include <sys/types.h>
 #include <sys/stat.h>
@@ -238,26 +239,15 @@ char* Target::writeFileName(const char* fileName) {
 	return savestring("/dev/null");
 }
 
-// Routines for writing code: schedulers may call these
-StringList Target::beginIteration(int repetitions, int) {
-	StringList out;
-	out = "REPEAT ";
-	out += repetitions;
-	out += " TIMES {\n";
-	return out;
+// default functions to make event horizons
+EventHorizon& Target :: newFrom() {
+	Domain* tDomain = Domain::domainOf(*gal);
+	return tDomain->newFrom();
 }
 
-StringList Target::endIteration(int, int) {
-	StringList out;
-	out = "}\n";
-	return out;
-}
-
-StringList Target::writeFiring(Star& s, int) {
-	StringList out;
-	out = s.readFullName();
-	out += "\n";
-	return out;
+EventHorizon& Target :: newTo() {
+	Domain* tDomain = Domain::domainOf(*gal);
+	return tDomain->newTo();
 }
 
 ISA_FUNC(Target,Block);
