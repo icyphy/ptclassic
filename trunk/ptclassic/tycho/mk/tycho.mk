@@ -48,6 +48,9 @@ JAVAHTMLDIR = 	$(JAVAHOME)/docs/api
 # The home of the Java Foundation Classes (JFC) aka Swing
 JFCHOME = 	/opt/swing
 
+# CLASSPATH necessary to find the swing.jar file for JFC
+JFCCLASSPATH = $(JFCHOME)/swing.jar
+
 # The variables below are for the SunTest JavaScope code coverage tool
 # See http://www.suntest.com/JavaScope
 # The 'jsinstr' command, which instruments Java code.
