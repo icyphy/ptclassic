@@ -19,6 +19,14 @@ of arbitrary length.  The length is specified by the constructor.
 class IntVecData : public PacketData {
 private:
 	int len;
+
+	init(int l,int *srcData) {
+		len = l;
+		data = new int[l];
+		for (int i = 0; i < l; i++)
+			data[i] = *srcData++;
+	}
+
 public:
 	// the pointer is public for simplicity
 	int *data;
@@ -32,11 +40,13 @@ public:
 	}
 
 	// constructor: makes an initialized array from a int array
-	IntVecData(int l,int *srcData) : len(l) {
-		data = new int[l];
-		for (int i = 0; i < l; i++)
-			data[i] = *srcData++;
-	}
+	IntVecData(int l,int *srcData) { init(l,srcData);}
+
+	// copy constructor
+	IntVecData(const IntVecData& src) { init(src.len,src.data);}
+
+	// clone
+	PacketData* clone() const { return new IntVecData(*this);}
 
 	// destructor
 	~IntVecData() {

@@ -19,6 +19,14 @@ of arbitrary length.  The length is specified by the constructor.
 class FloatVecData : public PacketData {
 private:
 	int len;
+
+	init(int l,float *srcData) {
+		len = l;
+		data = new float[l];
+		for (int i = 0; i < l; i++)
+			data[i] = *srcData++;
+	}
+
 public:
 	// the pointer is public for simplicity
 	float *data;
@@ -32,11 +40,10 @@ public:
 	}
 
 	// constructor: makes an initialized array from a float array
-	FloatVecData(int l,float *srcData) : len(l) {
-		data = new float[l];
-		for (int i = 0; i < l; i++)
-			data[i] = *srcData++;
-	}
+	FloatVecData(int l,float *srcData) { init(l,srcData); }
+
+	// copy constructor
+	FloatVecData(const FloatVecData& src) { init(src.len,src.data);}
 
 	// constructor: makes an initialized array from a double array
 	FloatVecData(int l,double *srcData) : len(l) {
@@ -44,6 +51,9 @@ public:
 		for (int i = 0; i < l; i++)
 			data[i] = *srcData++;
 	}
+
+	// clone
+	PacketData* clone() const { return new FloatVecData(*this);}
 
 	// destructor
 	~FloatVecData() {
