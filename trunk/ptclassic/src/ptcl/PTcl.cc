@@ -47,11 +47,13 @@ static const char file_id[] = "PTcl.cc";
 #include "KnownBlock.h"
 #include "Domain.h"
 #include <ACG.h>
+#include <stream.h>
 #include "Linker.h"
 #include "textAnimate.h"
 #include "SimControl.h"
 #include "ConstIters.h"
 #include "Scheduler.h"
+#include "InfString.h"
 
 // we want to be able to map Tcl_interp pointers to PTcl objects.
 // this is done with a table storing all the PTcl objects.
@@ -868,6 +870,33 @@ int PTcl::halt(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+// Added to support galileo - eal
+// Monitor commands to ptcl.  The third, monitorPtcl can be redefined.
+// The default method prints the command to the standard output using cout.
+
+// static member -- tells whether monitoring is on or off
+int PTcl::monitor = 0;
+
+int PTcl::monitorOn(int argc,char **argv) {
+  monitor = 1;
+  return TCL_OK;
+}
+
+int PTcl::monitorOff(int argc,char **argv) {
+  monitor = 0;
+  return TCL_OK;
+}
+
+int PTcl::monitorPtcl(int argc,char **argv) {
+  for (int i = 1; i < argc; i++) {
+    cout << argv[i];
+    cout << " ";
+  }
+  cout << "\n";
+  return TCL_OK;
+}
+
+
 /////////////////////////////////////////////////////////////////////////////
 //			Register actions with SimControl
 /////////////////////////////////////////////////////////////////////////////
@@ -991,7 +1020,12 @@ struct InterpTableEntry {
 #define ENTRY2(verb,action) { quote(verb), PTcl::action }
 
 // Here is the table.  Make sure it ends with "0,0"
+// Also, the first entry should be "monitorPtcl", because the
+// dispatcher treats it specially.
 static InterpTableEntry funcTable[] = {
+        ENTRY(monitorPtcl),
+        ENTRY(monitorOn),
+        ENTRY(monitorOff),
 	ENTRY(alias),
 	ENTRY(animation),
 	ENTRY(busconnect),
@@ -1066,6 +1100,23 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 	// this code makes an effective stack of active Tcl interpreters.
 	Tcl_Interp* save = activeInterp;
 	activeInterp = interp;
+
+	// Added to support galileo - eal
+	// If the flag monitor is set, call monitorPtcl to monitor commands.
+	// Avoid the call if the command is "monitorPtcl", "monitorOn",
+	// or "monitorOff".
+	if (monitor && i>2) {
+	  // Call monitorPtcl with the arguments being the
+	  // Ptcl command that we are executing and its arguments
+	  InfString cmd;
+	  cmd = "monitorPtcl ";
+	  for(int j = 0; j < argc; j++) {
+	    cmd += argv[j];
+	    cmd += " ";
+	  }
+	  Tcl_Eval(interp,(char*)cmd);
+	}
+
 	int status = (obj->*(funcTable[i].func))(argc,argv);
 	activeInterp = save;
 	return status;
