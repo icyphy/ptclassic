@@ -42,3 +42,12 @@ if { [lsearch -exact $auto_path $env(BASIC_LIBRARY)] == -1 } {
 }
 
 
+# The basic package is loaded by every program that uses
+# tycho. Set up some "basic" stuff:
+
+# Set global variables used by Tycho packages
+set TYCHO $env(TYCHO)
+set tycho $env(TYCHO)
+
+# Create the ::tycho namespace
+namespace ::tycho
