@@ -100,6 +100,16 @@ void EventHorizon :: setEventHorizon (
         inOrOut = inOut;
 }
 
+// This method should be called from the inside EH of the wormhole.
+void EventHorizon :: setParams(int numTok) {
+	asPort()->numberTokens = numTok;
+	asPort()->setMaxDelay(0);
+	ghostAsPort()->numberTokens = numTok;
+	ghostAsPort()->setMaxDelay(0);
+	// note that ghost port is the visible EH of the wormhole.
+	ghostAsPort()->initialize();
+}
+	
 int EventHorizon :: isItInput() const { return (inOrOut < 2); }
 int EventHorizon :: isItOutput() const { return (inOrOut > 1); }
 
@@ -170,7 +180,7 @@ void ToEventHorizon :: transferData ()
 
 	// call ghostPort->sendData() for further conversion if it is input.
 	if (isItInput())
-		ghostPort->asPort()->sendData();
+		ghostAsPort()->sendData();
 }
 
 void ToEventHorizon :: initialize()
@@ -181,7 +191,7 @@ void ToEventHorizon :: initialize()
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItInput())
-		ghostPort->initialize();
+		ghostAsPort()->initialize();
 }
 
 /**************************************************************************
@@ -194,7 +204,7 @@ void FromEventHorizon :: transferData ()
 {
 	// call ghostPort->grabData for initial conversion if it is output.
 	if (isItOutput())
-		ghostPort->asPort()->receiveData();
+		ghostAsPort()->receiveData();
 }
 
 void FromEventHorizon :: initialize()
@@ -205,7 +215,7 @@ void FromEventHorizon :: initialize()
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItOutput())
-		ghostPort->initialize();
+		ghostAsPort()->initialize();
 }
 
 int FromEventHorizon :: ready() { return TRUE ;}
