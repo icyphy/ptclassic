@@ -133,9 +133,8 @@ int PTcl::delUniv (const char* nm) {
 
 // Return a "usage" error
 int PTcl::usage(const char* msg) {
-	strcpy(interp->result,"wrong # args: should be \"");
-	strcat(interp->result,msg);
-	strcat(interp->result,"\"");
+	Tcl_AppendResult(interp,"incorrect usage: should be \"",msg,"\"",
+			(char*)NULL);
 	return TCL_ERROR;
 }
 
@@ -172,10 +171,7 @@ const Block* PTcl::getBlock(const char* name) {
 	const Block* b = currentGalaxy->blockWithDottedName(name);
 	if (!b) b = KnownBlock::find(name, curDomain);
 	if (!b) b = KnownTarget::find(name);
-	if (!b) {
-		strcpy(interp->result,"No such block: ");
-		strcat(interp->result,name);
-	}
+	if (!b) Tcl_AppendResult(interp,"No such block: ",name,(char*)NULL);
 	return b;
 }
 
@@ -324,8 +320,8 @@ int PTcl::statevalue(int argc,char ** argv) {
 	if (!b) return TCL_ERROR;
 	const State* s = findState(b, argv[2]);
 	if (!s) {
-		sprintf (interp->result, "No state named '%s' in block '%s'",
-			 argv[2], argv[1]);
+		Tcl_AppendResult(interp, "No state named ", argv[2],
+					 " in block ", argv[1], (char*)NULL);
 		return TCL_ERROR;
 	}
 	// return initial value if asked.
@@ -478,7 +474,9 @@ int PTcl::animation (int argc,char** argv) {
 	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
 		return usage ("animation ?on/off?");
 	if (argc != 2) {
-		strcpy(interp->result, textAnimationState() ? "on" : "off");
+		Tcl_SetResult(interp,
+			textAnimationState() ? "on" : "off",
+			TCL_STATIC);
 	}
 	else if (c == 0)
 		textAnimationOn();
@@ -545,11 +543,12 @@ int PTcl::listobjs (int argc,char ** argv) {
 	return TCL_OK;
 }
 
-
-int PTcl::reset(int argc,char**) {
-	if (argc > 1)
-		return usage ("reset");
-	newUniv("main", curDomain);
+int PTcl::reset(int argc,char** argv) {
+	if (argc > 2)
+		return usage ("reset ?<name>");
+	const char* nm = "main";
+	if (argc == 2) nm = hashstring(argv[1]);
+	newUniv(nm, curDomain);
 	return TCL_OK;
 }
 
@@ -584,7 +583,7 @@ int PTcl::deluniverse(int argc,char** argv) {
 
 int PTcl::curuniverse(int argc,char** argv) {
 	if (argc == 1) {
-		strcpy(interp->result, universe->name());
+		Tcl_AppendResult(interp,universe->name(),(char*)NULL);
 		return TCL_OK;
 	}
 	else if (argc == 2) {
@@ -658,7 +657,7 @@ int PTcl::domain(int argc,char ** argv) {
 	if (argc > 2)
 		return usage ("domain ?<newdomain>?");
 	if (argc == 1) {
-		strcpy(interp->result,curDomain);
+		Tcl_AppendResult(interp,curDomain,(char*)NULL);
 		return TCL_OK;
 	}
 
@@ -771,6 +770,110 @@ int PTcl::halt(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+/////////////////////////////////////////////////////////////////////////////
+//			Register actions with SimControl
+/////////////////////////////////////////////////////////////////////////////
+
+// First, define the action function that will be called by the Ptolemy kernel.
+// The string tclAction passed will be executed as a Tcl command.
+static void ptkAction(Star* s, char *tclCommand)
+{
+    if(!tclCommand || *tclCommand == NULL) {
+    	Tcl_Eval(PTcl::activeInterp,
+	    "error {null pre or post action requested}",0, (char **) NULL);
+	return;
+    }
+    Tcl_VarEval(PTcl::activeInterp,tclCommand," \"",
+		(const char*)(s->fullName()), "\"",
+		(char*)NULL);
+}
+
+// Destructor cancels an action and frees memory allocated for a TclAction
+TclAction::~TclAction() {
+    SimControl::cancel(action);
+    delete [] tclCommand;
+    delete [] name;
+}
+
+// constructor out-of-line to save code (esp. with cfront)
+TclActionList::TclActionList() {}
+// ditto for these.
+TclActionListIter :: TclActionListIter(TclActionList& sl) : ListIter (sl) {}
+
+
+// Return a pointer to the TclAction with the given name, if it exists.
+// Otherwise, return 0.
+TclAction* TclActionList::objWithName(const char* name) {
+    TclAction *obj;
+    ListIter next(*this);
+    while ((obj = (TclAction*)next++) != 0) {
+	if (strcmp(name,obj->name) == 0)
+	return obj;
+    }
+    return 0;
+}
+
+static TclActionList tclActionList;
+
+// Register a tcl command to be executed before or after the firing of any star.
+// The function takes two arguments, the first of which must be "pre" or "post".
+// This argument indicates whether the action should occur before or after
+// the firing of a star.  The second argument is a string giving a tcl command.
+// Before this command is invoked, however, the name of the star that triggered
+// the action will be appended as an argument.  For example:
+// 	registerAction pre puts
+// will result in the name of a star being printed on the standard output
+// before it is fired.  The value returned by registerAction is an
+// "action_handle", which must be used to cancel the action using cancelAction.
+//
+int PTcl::registerAction(int argc,char ** argv) {
+    if(argc != 3) return usage("registerAction <pre or post> <command>");
+    int pre;
+    if(strcmp("pre",argv[1]) == 0) pre = 1;
+    else if(strcmp("post",argv[1]) == 0) pre = 0;
+    else return usage("registerAction <pre or post> <command>");
+
+    TclAction *tclAction;
+    LOG_NEW; tclAction = new TclAction;
+    tclAction->tclCommand = savestring(argv[2]);
+    tclAction->action =
+	SimControl::registerAction(ptkAction, pre, tclAction->tclCommand);
+
+    // Create a unique name for the action
+    char buf[32];
+    sprintf(buf,"an%u",tclAction);
+    tclAction->name = savestring(buf);
+
+    // Register the action with the action list
+    tclActionList.put(*tclAction);
+
+    // The following guarantees to Tcl that the name will not be deleted
+    // at least until the next call to Tcl_Eval.  This is safe because only
+    // the cancelAction command below can delete this name.
+    Tcl_SetResult(interp,tclAction->name,TCL_STATIC);
+    return TCL_OK;
+}
+
+// Cancel a registered action
+// The single argument is the action_handle returned by registerAction
+//
+int PTcl::cancelAction(int argc,char ** argv) {
+    if(argc != 2) return usage("cancelAction <action_handle>");
+    TclAction *tclAction;
+    if(!(tclAction = tclActionList.objWithName(argv[1]))) {
+	Tcl_AppendResult(interp,
+	   "cancelAction: Failed to convert action handle", (char*) NULL);
+	return TCL_ERROR;
+    }
+    tclActionList.remove(tclAction);
+    LOG_DEL; delete tclAction;
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//				Function table
+/////////////////////////////////////////////////////////////////////////////
+
 // An InterpFuncP is a pointer to an PTcl function that takes an argc-argv
 // argument list and returns TCL_OK or TCL_ERROR.
 
@@ -794,6 +897,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(alias),
 	ENTRY(animation),
 	ENTRY(busconnect),
+	ENTRY(cancelAction),
 	ENTRY(connect),
 	ENTRY(cont),
 	ENTRY(curuniverse),
@@ -819,6 +923,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY2(permlink,multilink),
 	ENTRY(print),
 	ENTRY(renameuniv),
+	ENTRY(registerAction),
 	ENTRY(reset),
 	ENTRY(run),
 	ENTRY(schedtime),
@@ -854,8 +959,8 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char* argv[])
 			   {
 	PTcl* obj = findPTcl(interp);
 	if (obj == 0) {
-		strcpy(interp->result,
-		       "Internal error in PTcl::dispatcher!");
+		Tcl_SetResult(interp,
+		       "Internal error in PTcl::dispatcher!",TCL_STATIC);
 		return TCL_ERROR;
 	}
 	int i = int(which);
