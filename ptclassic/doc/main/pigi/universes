@@ -19,48 +19,7 @@ A dialog box titled ``Missing properties for init:schematic'' will appear.
 Just click the mouse on ``OK'' and continue.
 Wait until the ``Pigi is running'' message appears in the VEM console.
 We are now ready to learn about the basics of using VEM.
-.H2 "The basics of VEM"
-.pp
-As we said earlier, the fundamental Oct objects that we edit with VEM
-are called \fIfacets\fP.  This means that we read an entire facet from
-disk into VEM, make changes to it, and then save the facet back to
-disk.
-.pp
-Facets are specified by three names separated by colons.  This is
-usually written as ``cell:view:facet''.  The first component is the
-.IE cell
-.IE cell
-.IE facet
-cell name which is used to name the design.  In Pigi, the second
-component, called the view name, will always be
-``schematic''.\**
-.IE schematic
-.(f
-\** Other Oct applications use other views such as
-``symbolic'' or ``physical'' but these are not used by Pigi.
-.)f
-Last,
-there is the facet component which can either be ``contents'' or
-``interface''.
-.IE contents
-.IE interface
-The former is used for block diagrams, and the latter for icons.
-Note here that the term ``facet'' can
-refer to two different things.  It can mean the Oct object called a
-facet, or it can refer to the name of the last component of a facet's
-name.  The intended meaning is usually clear from context.
-If the facet component is not specified, VEM assumes that you mean the
-contents facet.  Thus, ``wave:schematic'' refers to the facet with cell
-name ``wave'', view name ``schematic'', and facet name ``contents''.
-.pp
-The two kinds of facets, contents and interface, are used to store
-two different kinds of data.
-Contents facets contain the actual definition of a design while
-interface facets contain schematic symbols.  In our example, we will
-create a universe with three stars.  The universe will be stored in a
-contents facet.  The three stars in our system will be represented by
-schematic symbols called \fBicons\fP.  These icons are stored in
-interface facets.
+.H2 "Basic VEM Commands"
 .pp
 VEM uses post-fix commands.  This means that the user enters the 
 arguments to a command before the command name itself.  Arguments
@@ -114,23 +73,83 @@ Let's try a few examples.
 Place the cursor in the window labeled ``init:schematic'' and:
 .BU
 Type ``shift-Z'' (capital Z) for \fIzoom-out\fP.
+This makes everything smaller.
 .IE zoom-out
 .BU
 Type ``z'' (lower-case z) for \fIzoom-in\fP.
+This makes everything bigger.
 .IE zoom-in
 .BU
 Type ``p'' for \fIpan\fP.  Pan moves the spot under the cursor
 to the center of the window.
 .IE pan
+Some people find the cross-hairs that automatically appear
+in new VEM windows extremely annoying.
+They mark the origin of your schematic, in case the concept
+of an origin in a schematic has any meaning to you.
+.IE cross-hairs
+Panning in some direction is a convenient way to be rid of them.
 .BU
-Now zoom out three times.
-This is necessary to make sure that
-the grid in the window is fine enough to create box and line
-arguments.
 Try entering each type of argument listed above,
 except for type ``object'', which we will explain later.
+For instance, enter a point.
+You will notice that you are only permitted to place points
+at certain locations.
+VEM has an implicit \fIgrid\fR to which points \fIsnap\fR.
+.IE grid
+.IE snap
+The default snap resolution is suitable for making \*(PT universes.
+Unfortunately, the default scale of the VEM window is far from suitable.
+To correct this, zoom out three times, if you haven't already
+done so.
+You will notice that now you can place points in many more locations.
+If the annoying cross-hairs re-appear, just pan to be rid of them.
 .BU
 Type a ``control-u'' to clear all arguments when you are done.
+.H2 "Terminology"
+.pp
+As we said earlier, the fundamental Oct objects that we edit with VEM
+are called \fIfacets\fP.  This means that we read an entire facet from
+disk into VEM, make changes to it, and then save the facet back to
+disk.
+.pp
+Facets are specified by three names separated by colons.  This is
+usually written as ``cell:view:facet''.  The first component is the
+.IE cell
+.IE cell
+.IE facet
+cell name which is used to name the design.  In Pigi, the second
+component, called the view name, will always be
+``schematic''.\**
+.IE schematic
+.(f
+\** Other Oct applications use other views such as
+``symbolic'' or ``physical'' but these are not used by Pigi.
+.)f
+Last,
+there is the facet component which can either be ``contents'' or
+``interface''.
+.IE contents
+.IE interface
+The former is used for block diagrams, and the latter for icons.
+Note here that the term ``facet'' can
+refer to two different things.  It can mean the Oct object called a
+facet, or it can refer to the name of the last component of a facet's
+name.  The intended meaning is usually clear from context.
+If the facet component is not specified, VEM assumes that you mean the
+contents facet.  Thus, ``wave:schematic'' refers to the facet with cell
+name ``wave'', view name ``schematic'', and facet name ``contents''.
+.pp
+The two kinds of facets, contents and interface, are used to store
+two different kinds of data.
+Contents facets contain the actual definition of a design while
+interface facets contain schematic symbols.  In our example, we will
+create a universe with three stars.  The universe will be stored in a
+contents facet.  The three stars in our system will be represented by
+schematic symbols called \fBicons\fP.  These icons are stored in
+interface facets.
+The universe itself can be given an icon, which will become
+its interface facet.
 .H2 "Back to the example"
 .pp
 Now we are ready to create a simple universe.  Let's create a simulation
@@ -314,7 +333,7 @@ typing 100, and clicking ``OK''.
 .LE
 A new window with a graph of a rough
 sine wave should appear.
-The execution of the xscope star created
+The execution of the Xgraph star created
 this new window which shows the output of our simulation.
 To remove this window, click on the ``Close'' button or
 press control-d in it.
