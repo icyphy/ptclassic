@@ -95,11 +95,11 @@ class ::tycho::Slate {
     method bbox     {args}                {}
     method bind     {tagOrID args}        {}
     method create   {class args}          {}
-    method delete   {picts}               {}
+    method delete   {args}                {}
     method deform   {x y args}            {}
     method find     {searchSpec args}     {}
     method lower    {args}                {}
-    method move     {picts args}          {}
+    method move     {tagOrID x y}         {}
     method raise    {args}                {}
     method roots    {picts}               {}
 
@@ -262,18 +262,32 @@ body ::tycho::Slate::addtag {tag searchSpec args} {
 # Return the bounding box of any number of picts. Each argument
 # can be a picture ID or a tag.
 #
+# Returns the bounding box as a four-list. If there are no pictures
+# matching the tags, return the null string. (This behavior matches
+# that of the canvas). The caller must therefore check the result if
+# calling this method with tags.
+#
 body ::tycho::Slate::bbox {args} {
-
     set picts {}
     foreach p $args {
-	if { [isObject $p] } {
+	if { $p == "all" } {
+	    set picts $slatePictures
+	    break
+	} elseif { [isObject $p] } {
 	    lappend picts $p
 	} else {
+	    # FIXME: Remove redundant pictures (children)
 	    lappend picts $tagdict($p)
 	}
     }
-
-    return [eval $itk_component(canvas) bbox [eval concat $picts]]
+    
+    # Flatten the picture list. If empty, return null string
+    set picts [eval concat $picts]
+    if { $picts == "" } {
+	return ""
+    } else {
+	return [eval $itk_component(canvas) bbox $picts]
+    }
 }
 
 
@@ -504,15 +518,28 @@ body ::tycho::Slate::create {class args} {
 # Delete one or more picts. If picts is the string "all" then
 # delete all objects from the canvas.
 #
-body ::tycho::Slate::delete {picts} {
-    if { $picts == "all" } {
-	set picts $slatePictures
+body ::tycho::Slate::delete {args} {
+    # Expand tags and the string "all" to get list of pictures
+    set picts {}
+    foreach p $args {
+	if { $p == "all" } {
+	    set picts $slatePictures
+	    break
+	} elseif { ! [isObject $p] } {
+	    set picts [concat $picts \
+		    [$this roots [$this find withtag $p]]]
+	} else {
+	    lappend picts $p
+	}
     }
 
-    foreach i $picts {
-	::delete object $i
-	set slatePictures [ldelete $slatePictures $i]
+    # Now delete each picture individually.
+    foreach p $picts {
+	::delete object $p
     }
+
+    # Remove the pictures from the slate's picture list
+    set slatePictures [lsubtract $slatePictures $picts]
 }
 
 
@@ -628,16 +655,15 @@ body ::tycho::Slate::lower {tagOrID args} {
 
 ## move tagOrID x y
 #
-## move tagOrID "click" x y [-ghost]
-## move tagOrID "drag"  x y
-## move tagOrID "release"
+# Move one or more picts the specified amount. The first argument
+# can either be a tag or a picture.
 #
-# Move one or picts the specified amount. The first argument
-# can either be a tag or a picture. (This command is more useful if
-# it is a tag, otherwise, it is the same as calling move{} on the
-# picture directly.)
+# NOTE: To access the "modal" move commadns (click, drag, release),
+# the pictures must be called directly.
 #
-body ::tycho::Slate::move {tagOrID args} {
+# FIXME: Constraint propagation with multiple items will be broken...
+#
+body ::tycho::Slate::move {tagOrID x y} {
 
     if { [isObject $tagOrID] } {
 	set pictures $tagOrID
@@ -646,7 +672,7 @@ body ::tycho::Slate::move {tagOrID args} {
     }
 
     foreach p $pictures {
-	eval $p move $args
+	eval $p move "direct" $x $y
     }
 }
 

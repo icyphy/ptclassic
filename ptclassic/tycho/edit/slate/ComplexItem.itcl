@@ -151,8 +151,10 @@ class ::tycho::Picture {
     # The utility method tags{} provides a simpler way of adding
     # tags to a picture's tag list than manipulating the option variable.
     #
+    private variable prevTags ""  ;# Hack so tag set works... FIXME
     public variable tags {} {
 	$this tag set $tags
+	set prevTags $tags
     }
 
 
@@ -183,6 +185,12 @@ class ::tycho::Picture {
     ## destructor
     #
     destructor {
+	# Find the tags on this picture and deregister them
+	foreach t [$this tag get] {
+	    $slate deregisterTag $t $this
+	}
+
+	# Delete the shape object if there is on
 	if { $shapeobject != "" } {
 	    delete object $shapeobject
 	}
@@ -1160,10 +1168,22 @@ body ::tycho::Picture::tag {mode args} {
 	    return $tags
 	}
 	"set" {
-	    set newtags [lsubtract $args $tags]
+	    #
+	    # This code figures out the new tags and the obsolete
+	    # "dead" tags and calls tag add and tag delete. This
+	    # is currently a hack to deal with the fact that this
+	    # can get called by the configuration code for the
+	    # -tags option.
+	    #
+	    # FIXME. Now this won't work if called from somehere else!!!
+	    #
+	    set newtags [lsubtract $args $prevTags]
 	    if { $tags != "" } {
-		set deadtags [lsubtract $tags $args]
+		set deadtags [lsubtract $prevTags $args]
+	    } else {
+		set deadtags {}
 	    }
+
 	    set tags $args
 
 	    if { $newtags != "" } {
