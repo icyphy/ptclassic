@@ -287,7 +287,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		int givenInstNo = 0;
 		command = "instance_index";
 		char* instance_index =
-		  Tcl_GetVar(ptkInterp,command,NULL);
+		  Tcl_GetVar(ptkInterp,command,(int)NULL);
 		Tcl_GetInt(ptkInterp, instance_index, &givenInstNo);
 
 		// If the instance numbers don't match,
@@ -297,7 +297,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		// If the instance numbers match, then reset
 		// parameter_name and proceed with substitutions
 		command = "parameter_name";
-		parameter_name = Tcl_GetVar(ptkInterp,command,NULL);
+		parameter_name = Tcl_GetVar(ptkInterp,command,(int)NULL);
 		if (!parameter_name) {
 		  Error::abortRun(*this,
 				  "Unxpected error setting parameter_name!");
@@ -329,7 +329,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      // The call to hashstring makes this string persistent
 	      // Hack alert: This is really a small memory leak.
 	      if(!block->setState(parameter_name,
-				  hashstring(Tcl_GetVar(ptkInterp,command,NULL)))) {
+				  hashstring(Tcl_GetVar(ptkInterp,command,(int)NULL)))) { 
 		Error::abortRun(*this,
 				"Bad name in parameter map: ", parameter_name);
 		return 0;
