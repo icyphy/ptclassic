@@ -188,6 +188,13 @@ protected:
 	// Return component mappings based on compMapList.
 	StringList addComponentMappings(VHDLCompMapList*, int=0);
 
+	// Return variable declarations based on variableList.
+	StringList addVariableDecls(VHDLVariableList*, int=0);
+
+	// Make this protected, not private, so it is still visible
+	// to derived targets that want to use it.
+	VHDLVariableList localVariableList;
+
 private:
 	VHDLVariableList variableList;
 
