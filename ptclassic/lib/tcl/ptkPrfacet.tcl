@@ -37,6 +37,11 @@
 # Note that this is done here so that the user's configuration is remembered
 # across multiple invocations of the print command
 # Note that the size and offsets are saved in the facets
+set ptkPrHeight 5
+set ptkPrWidth 5
+set ptkPrVertOffset -3
+set ptkPrHorOffset -1.75
+
 set ptkPortrait 1
 set ptkPrintToFile 0
 set ptkPrlabels 1
@@ -285,33 +290,15 @@ proc ptkPrfacetGetState {name} {
     # Open the facet
     set myOctHandle [ptkOpenFacet $name]
 
-    # For each property we want, see if it is set in the facet
-    # if it is set, then update the global variable.  If it is not set
-    # then set the globabl variable to its initial default
-    # We don't use a for look here because we need to handle the defaults
-    set tmp [ptkGetStringProp $myOctHandle ptkPrHeight]
-    if  {$tmp != ""} {
-	set ptkPrHeight $tmp
-    } else {
-	set ptkPrHeight 4
-    }
-    set tmp [ptkGetStringProp $myOctHandle ptkPrWidth] 
-    if  {$tmp != ""} {
-	set ptkPrWidth $tmp
-    } else {
-	set ptkPrWidth 4
-    }
-    set tmp [ptkGetStringProp $myOctHandle ptkPrVertOffset]
-    if  {$tmp != ""} {
-	set ptkPrVertOffset $tmp
-    } else {
-	set ptkPrVertOffset 1
-    }
-    set tmp [ptkGetStringProp $myOctHandle ptkPrHorOffset]
-    if  {$tmp != ""} {
-	set ptkPrHorOffset $tmp
-    } else {
-	set ptkPrHorOffset 1
+    # For each property, if the property is set in the facet, then 
+    # update the tcl var by the same name.
+    # If the property is not present, then don't update the variable,
+    # we will just use the initial defaults or the last settings
+    foreach prop {ptkPrHeight ptkPrWidth ptkPrVertOffset ptkPrHorOffset} {
+	set tmp [ptkGetStringProp $myOctHandle $prop]
+	if  {$tmp != ""} {
+	    set $prop $tmp
+	}
     }
     ptkCloseFacet $myOctHandle
 
