@@ -1,0 +1,144 @@
+#
+# This file is the make file for the tcljava demonstration program.
+# Based on the original tcljava0.4 Makefile
+#
+#
+# Location of the Itcl sources, include the Tcl and Tk sources
+SOURCE_ROOT	= c:\Itcl2.2
+
+# We want this rule to be first so that 'nmake -f makefile.vc' does the
+# right thing.
+all: TclTest.class libjtk
+
+# We include the makefile.vc from the Itcl2.2 distribution
+# That makefile defines things like TCLHOME etc.
+!include "$(SOURCE_ROOT)\makefile.vc"
+
+# Where's the root of the java distribution?
+JAVAHOME=c:\jdk1.1
+
+# What's the java compiler binary?
+JAVAC = $(JAVAHOME)\bin\javac
+
+# What's the java header program?
+JAVAH = $(JAVAHOME)\bin\javah
+
+# What's the javai library
+JAVAILIB = $(JAVAHOME)\lib\javai.lib
+
+# What's the object code suffix on this machine?
+SFX = .obj
+
+# What's the shared library suffix on this machine?
+SHLIBSFX = .dll
+
+# If you're using a version of Tk earlier than 4.1b1, you'll 
+# need to uncomment this line
+# OLDFLAGS += -DCREATEMAINWINDOWHACK
+
+# This provides a workaround for the 'exec' bug.  It's a brain-dead
+# replacement for the 'exec' command.  It's basically a 'system("cmd string")'
+# and nothing more. Probably only works under Unix, but maybe Dos?
+#TCLEXECFIX = -DTCLEXECFIX
+
+# What flags to compile the C code with?
+CFLAGS = $(INCLUDE) $(OLDFLAGS) $(TCLEXECFIX) $(TK_INCLUDES)
+
+CPU		   = i386
+INCLUDE		   = $(TOOLS32)\include 
+!include <ntwin32.mak>
+
+##################### You shouldn't need to change things below here
+
+.SUFFIXES: .java .class
+
+LIBPATH = \
+	-L$(TCLHOME)\unix \
+	-L$(TKHOME)\unix \
+	-L$(TCLHOME) \
+	-L$(TKHOME)
+
+CLASSEStcl = \
+	tcl.Command \
+	tcl.Interp \
+	tcl.Result \
+	tcl.Tcl_BreakException \
+	tcl.Tcl_ContinueException \
+	tcl.Tcl_ControlException \
+	tcl.Tcl_ErrorException \
+	tcl.Tcl_ResultCodeException \
+	tcl.Tcl_ReturnException \
+	tcl.Tcl_UserException \
+	tcl.Value \
+	tcl.TkApplication
+
+FILESjava = \
+	tcl\Command.java \
+	tcl\Interp.java \
+	tcl\Tcl_BreakException.java \
+	tcl\Tcl_ContinueException.java \
+	tcl\Tcl_ControlException.java \
+	tcl\Tcl_ErrorException.java \
+	tcl\Tcl_ResultCodeException.java \
+	tcl\Tcl_ReturnException.java \
+	tcl\Tcl_UserException.java \
+	tcl\Value.java \
+	tcl\TkApplication.java
+
+FILESclass = \
+	tcl\Command.class \
+	tcl\Interp.class \
+	tcl\Result.class \
+	tcl\Tcl_BreakException.class \
+	tcl\Tcl_ContinueException.class \
+	tcl\Tcl_ControlException.class \
+	tcl\Tcl_ErrorException.class \
+	tcl\Tcl_ResultCodeException.class \
+	tcl\Tcl_ReturnException.class \
+	tcl\Tcl_UserException.class \
+	tcl\Value.class \
+	tcl\TkApplication.class
+
+OBJS = tclJava$(SFX) tkJava$(SFX) tcl_classes$(SFX) 
+
+LIBJTK = jtk$(SHLIBSFX)
+libjtk: $(LIBJTK)
+
+TK_INCLUDES = -I$(TKDIR)\bitmaps -I$(TKDIR)\xlib -I$(TKDIR)\win \
+			-I$(TKDIR)\generic \
+			-I$(TKDIR)  -I$(TCLDIR)\generic
+
+INCLUDE = \
+	-I$(JAVAHOME)\include \
+	-I$(JAVAHOME)\include\win32 \
+	$(TK_INCLUDES) \
+	-I$(TOOLS32)\include
+
+.java.class:
+	$(JAVAC) -g $<
+
+tcl_classes.c: TclTest.class $(FILESclass)
+ 	$(JAVAH)  -stubs -o $@ $(CLASSEStcl)
+
+tcl_classes.h: TclTest.class $(FILESclass)
+ 	$(JAVAH)  -o $@ $(CLASSEStcl)
+
+$(LIBJTK):  tclJava.c tkJava.c tcl_classes.c tcl_classes.h
+	set LIB=c:\msdev\lib
+	cl   /nologo -LDd -D_DEBUG \
+		tcl_classes.c  tclJava.c tkJava.c $(INCLUDE)  \
+		$(JAVAILIB) \
+ 		$(TKLIBDIR)\$(TKLIB)  $(TCLLIBDIR)\$(TCLLIB) \
+		msvcrt.lib \
+		 -Fe$@ \
+		/link /debug:full /VERBOSE:lib /NODEFAULTLIB:libc.lib \
+		/NODEFAULTLIB:libcmt.lib /NODEFAULTLIB:msvcrt.lib \
+		/NODEFAULTLIB:libcd.lib /NODEFAULTLIB:libcmtd.lib
+
+
+#		$(guilibsdll) libc.lib 
+clean:
+	rm -f tcl_* *.class *$(SFX) $(LIBJTK) tcl\*.class *~ doc\*~ tcl\*~
+
+tclJava.c: tcl_classes.h
+tkJava.c: tcl_classes.h
