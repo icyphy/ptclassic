@@ -361,7 +361,7 @@ body ::tycho::EditSTD::getInfo {} {
 #### help
 # Open a help window.
 #
-body ::tycho::EditForest::help {} {
+body ::tycho::EditSTD::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
         [file join $TYCHO edit visedit doc usersGuides \
