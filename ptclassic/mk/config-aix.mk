@@ -77,8 +77,7 @@ WARNINGS =     -Wall -Wcast-qual
 DEBUGFLAG =	#-g
 
 CC_STATIC = #  -static
-# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS = 	$(DEBUGFLAG) -DUSG -mminimal-toc $(GCC_270_OPTIONS) $(CC_STATIC)
+LOCALCCFLAGS = 	$(DEBUGFLAG) -DUSG -mminimal-toc $(CC_STATIC)
 GPPFLAGS =     	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) $(ARCHFLAGS) \
 			$(LOCALCCFLAGS) $(USERFLAGS)
 LOCALCFLAGS =	-DPOSIX $(LOCALCCFLAGS)

@@ -73,8 +73,7 @@ OPTIMIZER=	-m486 -pipe -O2 # -fomit-frame-pointer -pipe
 ARCHFLAGS=	-Dnetbsd_i386
 
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
-# Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	$(GCC_270_OPTIONS)
+LOCALCCFLAGS =
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 LOCALCFLAGS =	-fwritable-strings
