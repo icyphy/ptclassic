@@ -31,7 +31,9 @@ based on the procedure defined by Shpak.
 		type { float }
 		default { "44100" }
 		desc { given in Hz }
+		attributes{ A_GLOBAL }
 	}
+
 	defstate {
 		name {centerFreq}
 		type { float }
@@ -40,7 +42,9 @@ based on the procedure defined by Shpak.
 Center frequency in Hz for bandpass and cutoff frequency for
 low/highpass filters
 		}
+		attributes{ A_GLOBAL }
 	}
+
 	defstate {
 		name {passFreq}
 		type { float }
@@ -49,6 +53,7 @@ low/highpass filters
 Passband frequency in Hz for low/highpass filters.
 Not needed for bandpass types.
 		}
+		attributes{ A_GLOBAL }
 	}
 	defstate {
 		name {gain}
@@ -73,9 +78,9 @@ and Hipass types.
 	  static void $starSymbol(setparams)(parametric_t *parametric){
 	    double gaintmp, t0, invf1prime;
 
-	    parametric->T = 1/$val(sampleFreq);
-	    parametric->omegap = 2*PI*$val(passFreq)*parametric->T;
-	    parametric->omegac = 2*PI*$val(centerFreq)*parametric->T;
+	    parametric->T = 1/$ref(sampleFreq);
+	    parametric->omegap = 2*PI*$ref(passFreq)*parametric->T;
+	    parametric->omegac = 2*PI*$ref(centerFreq)*parametric->T;
 	    t0 = log(2)/2;
 	    invf1prime = exp($ref(bandwidth)*t0);
 	    parametric->omegabw = parametric->omegac*(invf1prime-1/invf1prime);
@@ -93,8 +98,8 @@ and Hipass types.
 	}
         codeblock(constbw) {
 	  /* Newton approximation */
-          static double $sharedSymbol(CGCParamBiquad,constbw)(int niter, double tol, double bw,
-				double wc, double initial_guess) {
+          static double $sharedSymbol(CGCParamBiquad,constbw)(int niter,
+	     double tol, double bw, double wc, double initial_guess) {
 	      double x0,x1;
 	      double fval,fprimeval;
 	      int i;
@@ -163,7 +168,7 @@ and Hipass types.
 	      omegacwarp = 2*tan(parametric->omegac/2);
 	      omegacorner_guess = parametric->omegac - (parametric->omegabw/2);
 	      initial = parametric->omegac/omegacorner_guess;
-	      gamma = $sharedSymbol(CGCParamBiquad,constbw)(10,0.001, parametric->omegabw, omegacwarp, initial);
+	      gamma = $sharedSymbol(CGCParamBiquad,constbw)(5,0.001, parametric->omegabw, omegacwarp, initial);
 	      omegacornerwarp = omegacwarp/gamma;
 	      Qp = (sqrt(parametric->lineargain)*omegacwarp*omegacornerwarp) /
 		(omegacwarp*omegacwarp-omegacornerwarp*omegacornerwarp);
