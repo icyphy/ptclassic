@@ -1,4 +1,4 @@
-# Generate an IDoc file (a representation of a ::tycho::Class) from source.
+# Parse class from code and generate class models.
 #
 # @Author: Cliff Cordeiro
 #
@@ -33,23 +33,23 @@
 #######################################################################
 
 #######################################################################
-#### IDocSys
-# IDocSys is the parent of all <a href = 
+#### ClassParser
+# ClassParser is the parent of all <a href = 
 # "../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a> generators. 
 # These Classes may be viewed using the <a href = "IDoc.idoc">IDoc Viewer</a>.
 #
-# IDocSys is also the interface to the Class generators. When the proc:
-# ::tycho::IDocSys::generateIDoc is called with a list of filenames, 
-# the IDocSys class examines the extensions, using IDocSys::generator
+# ClassParser is also the interface to the Class generators. When the proc:
+# ::tycho::ClassParser::generateIDoc is called with a list of filenames, 
+# the ClassParser class examines the extensions, using ClassParser::generator
 # and instantiates the correct child generator to process that file.
-# (Currently, <a href = "ItclDocSys.idoc">[incr Tcl]</a> and 
-# <a href ="JavaDocSys.idoc">Java</a> are supported). If a subsequent file
+# (Currently, <a href = "ItclParser.idoc">[incr Tcl]</a> and 
+# <a href ="JavaParser.idoc">Java</a> are supported). If a subsequent file
 # is of the same type, it uses the same generator.
 #
 # This procedure is also tied to the make idocs command as well as the 
 # Generate IDoc Documentation menu item in the Itcl and Java editors.
 # 
-# A timesaving feature of the IDocSys is that it will not generate 
+# A timesaving feature of the ClassParser is that it will not generate 
 # documentation unnecessarily. It checks this in the modCheck proc, which
 # works in the same way as generateIDoc by calling the appropriate subclass.
 # modCheck examines a source file (given as an argument) for defined classes.
@@ -57,7 +57,7 @@
 # the source code <b>and</b> the generator for that type, new documentation
 # is not generated.
 #
-class ::tycho::IDocSys {
+class ::tycho::ClassParser {
     inherit ::tycho::TyDoc
 
     constructor {args} {}
@@ -142,7 +142,7 @@ class ::tycho::IDocSys {
 #######################################################################
 #### constructor
 #
-body ::tycho::IDocSys::constructor {args} {
+body ::tycho::ClassParser::constructor {args} {
 }
 
     ###################################################################
@@ -153,7 +153,7 @@ body ::tycho::IDocSys::constructor {args} {
 #### generateIDocIndex
 # Fixme!
 #
-body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
+body ::tycho::ClassParser::generateIDocIndex { {title {"Index of classes"}}} {
 # FIXME: FIXME: FIXME!
 }
 
@@ -181,8 +181,8 @@ body ::tycho::IDocSys::generateIDocIndex { {title {"Index of classes"}}} {
 # @param filelist  the list of files to generateIDocs for. The files may be any
 # file type that IDoc supports.  
 #
-body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
-    set IDocSys ""
+body ::tycho::ClassParser::generateIDoc {debug generateIndex title filelist} {
+    set ClassParser ""
 
     set oneFileOnly [expr [llength $filelist] == 1] 
 
@@ -192,14 +192,14 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     set retval ""
     foreach filename $filelist {
         set generator [generator $filename]
-        if {[info command $IDocSys] != {}} {
-            if ![$IDocSys isa $generator] {
-                delete object $IDocSys
-                set IDocSys [$generator [::tycho::autoName IDocSys]]
+        if {[info command $ClassParser] != {}} {
+            if ![$ClassParser isa $generator] {
+                delete object $ClassParser
+                set ClassParser [$generator [::tycho::autoName ClassParser]]
             }
         } {
             # First file
-            set IDocSys [$generator [::tycho::autoName IDocSys]]
+            set ClassParser [$generator [::tycho::autoName ClassParser]]
         }
 
         if ![$generator::modCheck $filename] {
@@ -219,17 +219,17 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
         } else {
             if {$oneFileOnly} {
                 # Don't catch errors
-                $IDocSys readFile $filename
+                $ClassParser readFile $filename
                 cd doc/codeDoc
-                $IDocSys generateSingleFileIDoc $filename
+                $ClassParser generateSingleFileIDoc $filename
                 cd ../..
             } else {
                 # Catch and accumulate errors for multiple files.
-                if [catch {$IDocSys readFile $filename} errMsg] {
+                if [catch {$ClassParser readFile $filename} errMsg] {
                     set retval "$retval\nWarning: $errMsg"
                 } else {
                     cd doc/codeDoc
-                    if [catch {$IDocSys generateSingleFileIDoc $filename} \
+                    if [catch {$ClassParser generateSingleFileIDoc $filename} \
                             errMsg] {
                         set retval "$retval\nWarning: $errMsg"
                     }
@@ -240,13 +240,13 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     }
     if {$generateIndex == 1} {
         cd doc/codeDoc
-        # Uses the last IDocSys object...not implemented anyway. :)
-        if [catch {$IDocSys generateIDocIndex $title} errMsg] {
+        # Uses the last ClassParser object...not implemented anyway. :)
+        if [catch {$ClassParser generateIDocIndex $title} errMsg] {
             set retval "$retval\nWarning: $errMsg"
         }
         cd ../..
     }
-    delete object $IDocSys
+    delete object $ClassParser
     return $retval
 }
 
@@ -258,17 +258,17 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
 # NOTE: This should not be redefined in it's children, rather when 
 # a new child is written, this method should be updated.
 #
-body ::tycho::IDocSys::generator {filename} {
+body ::tycho::ClassParser::generator {filename} {
     set extension [file extension $filename]
 
     # Note files with no extension are assumed to be Itcl or tcl scripts
     switch $extension {
-        ".itcl" {return "::tycho::ItclDocSys"}
-        ".itk"  {return "::tycho::ItclDocSys"}
-        ".tcl"  {return "::tycho::ItclDocSys"}
-        ".tk"   {return "::tycho::ItclDocSys"}
-        ".java" {return "::tycho::JavaDocSys"}
-        ""      {return "::tycho::ItclDocSys"}
+        ".itcl" {return "::tycho::ItclParser"}
+        ".itk"  {return "::tycho::ItclParser"}
+        ".tcl"  {return "::tycho::ItclParser"}
+        ".tk"   {return "::tycho::ItclParser"}
+        ".java" {return "::tycho::JavaParser"}
+        ""      {return "::tycho::ItclParser"}
     }
     return {}
 }
@@ -280,7 +280,7 @@ body ::tycho::IDocSys::generator {filename} {
 # Calls the procedure in the appropriate child class for the given file
 # extension.
 #
-body ::tycho::IDocSys::getClassesInSource {filename} {
+body ::tycho::ClassParser::getClassesInSource {filename} {
     set generator [generator $filename]
 
     if {$generator != {}} {
@@ -307,7 +307,7 @@ body ::tycho::IDocSys::getClassesInSource {filename} {
 #
 # For unsupported files, it silently returns 1 because it can't tell.
 #
-body ::tycho::IDocSys::modCheck {filename} {
+body ::tycho::ClassParser::modCheck {filename} {
     set generator [generator $filename]
 
     if {$generator != {}} {
@@ -326,7 +326,7 @@ body ::tycho::IDocSys::modCheck {filename} {
 # Safe update, local copy so we can run this in a script w/o Tycho.
 # This is a copy of ::tycho::safeUpdate, see kernel/TopLevel.itcl.
 #
-body ::tycho::IDocSys::tydocUpdate {obj} {
+body ::tycho::ClassParser::tydocUpdate {obj} {
     update
     if {$obj == {}} {return}
     # NOTE: Formerly used
@@ -360,7 +360,7 @@ body ::tycho::IDocSys::tydocUpdate {obj} {
 # some of the old information (author, contributors, copyright, and 
 # version) is used.
 #
-body ::tycho::IDocSys::formatClassComment {expl} {
+body ::tycho::ClassParser::formatClassComment {expl} {
     # save old information
     set oldauthor $author
     set oldcontrib $contributor
@@ -440,7 +440,7 @@ body ::tycho::IDocSys::formatClassComment {expl} {
 # Do the same to strange ones (lowercase and remove trailing s's). 
 # The error is encountered in the caller if it is an error.
 #
-body ::tycho::IDocSys::formatTag {docTag} {
+body ::tycho::ClassParser::formatTag {docTag} {
     set docTag [string tolower $docTag]
     set docTag [string trimright $docTag "s"]
     return $docTag
@@ -452,7 +452,7 @@ body ::tycho::IDocSys::formatTag {docTag} {
 # and returning a filler value if no description is found. (The IDoc
 # viewer requires a description.)
 #
-body ::tycho::IDocSys::formatDesc {comment} {
+body ::tycho::ClassParser::formatDesc {comment} {
     # remove carriage returns
     set commentList [split $comment "\n"]
     set comment [join $commentList " "]
@@ -489,7 +489,7 @@ body ::tycho::IDocSys::formatDesc {comment} {
 # return, param, and exception. Since, deprecated, and see are not supported
 # as yet. See is most useful of the three.
 #
-body ::tycho::IDocSys::formatExpl {comment {parsetags 1}} {
+body ::tycho::ClassParser::formatExpl {comment {parsetags 1}} {
     if {"$comment" == "\n"} {
         return {}
     }
@@ -592,7 +592,7 @@ body ::tycho::IDocSys::formatExpl {comment {parsetags 1}} {
 #
 # Only one of formatDesc and shortDesc need be called (short calls format)
 #
-body ::tycho::IDocSys::shortDesc {comment} {
+body ::tycho::ClassParser::shortDesc {comment} {
     set comment [formatDesc $comment]
 
     # Return the first sentence.
