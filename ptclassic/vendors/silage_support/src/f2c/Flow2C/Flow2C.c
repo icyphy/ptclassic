@@ -94,7 +94,8 @@ char *argv[];
    ParseOctInit();
 
    GraphName = RemoveVersion(FlowGraphName);
-   if(pl_flag) sprintf (CFile,"Silage%s.pl", GraphName);
+   if(sdf_flag) sprintf (CFile,"SDF%s.pl", GraphName);
+   else if(pl_flag) sprintf (CFile,"Silage%s.pl", GraphName);
    else sprintf (CFile,"%s.c", GraphName);
    sprintf (ComFile, "%s.com", GraphName);
    sprintf (Dump, "%s.dmp", FlowGraphName);
