@@ -85,7 +85,9 @@ TAGS:		$(SRCS)
 # Rule for detecting junk files
 
 checkjunk:
-	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) makefile make.template SCCS
+	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(LIB) \
+		$(EXTRA_DESTS) makefile make.template SCCS
 
+# "check" does not print anything if nothing is being edited.
 sccsinfo:
-	@if sccs check; then true; else sccs info; fi
+	@sccs check || true
