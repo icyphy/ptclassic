@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -62,14 +62,11 @@ REALCLEAN_STUFF =	tclIndex
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/kernel/model/demo
 
-sources:: $(DEMO_SRCS)
-	chmod a+x $(DEMO_SRCS)
-
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
-
-sources:: $(DEMO_SRCS)
+all: sources $(MISC_SRCS) tclIndex
 	chmod a+x $(DEMO_SRCS)
+
+install: all
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk

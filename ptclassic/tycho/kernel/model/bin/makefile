@@ -59,11 +59,10 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
-
-# Make the shell script/s executable
-sources::
+all:  sources $(MISC_SRCS) tclIndex
 	chmod a+x model
+
+install: all
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
