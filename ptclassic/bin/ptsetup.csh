@@ -20,8 +20,8 @@ if ( ! $?PTARCH ) then
     setenv PTARCH 
 else 
 	if ( $PTARCH != `$PTOLEMY/bin/ptarch` && $PTARCH !~ *?cfront ) then
-		echo "$progname : Warning: PTARCH == $PTARCH,"
-		echo " but PTOLEMY/bin/ptarch returns `$PTOLEMY/bin/ptarch`"
+		echo $progname : Warning: \$PTARCH == $PTARCH,
+		echo but \$PTOLEMY/bin/ptarch returns `$PTOLEMY/bin/ptarch`
 	endif
 endif
 if ( ! $?USER ) then
