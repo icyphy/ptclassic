@@ -31,7 +31,6 @@ It assumes that the following global variables have been defined:
 
 char* name            the name of the application 
 int   numIterations   default number of iterations
-char* startCmd        name of Tcl procedure to run to start application
 
 Author: Edward A. Lee
 Version: $Id$
@@ -605,7 +604,6 @@ int main(int argc, char *argv[]) {
     sprintf(command, "set numIterations %d", numIterations);
     if(Tcl_Eval(interp, command) != TCL_OK) goto error;
     if(Tcl_Eval(interp, initCmd) != TCL_OK) goto error;
-    if(Tcl_Eval(interp, startCmd) != TCL_OK) goto error;
     (void) Tcl_Eval(interp, "update");
     tkSetup();
 
