@@ -94,8 +94,7 @@ foreach {opt val} {\
         .s itemcget $f $opt
     } $val
 }
-update
-after $SHORTTIME
+_update
 
 _clean
 set f [.s create IconRect 140 140 180 180 \
@@ -126,8 +125,7 @@ foreach {opt val} {\
         .s itemcget $f $opt
     } $val
 }
-update
-after $SHORTTIME
+_update
 
 _rect
 foreach {opt val} {-fill green -outline yellow -width 2} {
@@ -136,8 +134,7 @@ foreach {opt val} {-fill green -outline yellow -width 2} {
 	.s itemconfigure $f $opt $val
         .s itemcget [.s primary $f] $opt
     } $val
-    update idletasks
-    after $SHORTTIME
+    _update
 }
 
 #### -textanchor
@@ -173,8 +170,7 @@ test IconRect-hsize-1 {Test -hsize} {
     .s itemconfigure $f -hsize 100
     .s coords [.s primary $f]
 } {50.0 80.0 150.0 120.0}
-update
-after $SHORTTIME
+_update
 
 _rect -anchor se
 test IconRect-hsize-2  {Test -hsize, non-center anchor} {
@@ -195,8 +191,7 @@ test IconRect-vsize-1 {Test -vsize} {
     .s itemconfigure $f -vsize 100
     .s coords [.s primary $f]
 } {70.0 50.0 130.0 150.0}
-update
-after $SHORTTIME
+_update
 
 _rect -anchor se
 test IconRect-vsize-2 {Test -vsize, non-center anchor} {
@@ -243,9 +238,7 @@ test IconRect-terminal-1 "Create a terminal and access as component" {
     # Test: just make sure we get something
     expr { [.s component $f input-1] != "" }
 } {1}
-update
-after $SHORTTIME
-after $SHORTTIME
+_update
 
 test IconRect-terminal-2 "Create a terminal and get coordinates" {
     .s call $f terminal input-2 Terminal 0 0 \
@@ -259,8 +252,7 @@ test IconRect-terminal-2 "Create a terminal and get coordinates" {
             [.s aspect [.s component $f input-1] origin terminal] \
             [.s aspect [.s component $f input-2] origin terminal]
 } {{100.0 80.0 100.0 60.0} {70.0 100.0 40.0 100.0}}
-update
-after $SHORTTIME
+_update
 
 test IconRect-terminal-3 "Resize and check terminals have moved" {
     .s itemconfigure $f -hsize 100 -vsize 100
@@ -269,7 +261,6 @@ test IconRect-terminal-3 "Resize and check terminals have moved" {
             [.s aspect [.s component $f input-1] origin terminal] \
             [.s aspect [.s component $f input-2] origin terminal]
 } {{100.0 50.0 100.0 30.0} {50.0 100.0 20.0 100.0}}
-update
-after $SHORTTIME
+_update
 
 

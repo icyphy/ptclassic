@@ -136,8 +136,7 @@ foreach r {flat raised sunken} \
 		[.s component $f surface itemcget -fill] \
 		[.s component $f shaded itemcget -fill]
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -154,8 +153,7 @@ foreach r {ridge groove} \
 		[.s component $f notlit itemcget -fill] \
 		[.s component $f notshaded itemcget -fill]
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -166,8 +164,7 @@ foreach b {0 1 2} \
 	.s itemconfigure $f -borderwidth $b
 	.s component $f surface coords
     } $c
-    update idletasks
-    after $SHORTTIME
+    _update
 }
     
 _frame
@@ -177,8 +174,7 @@ foreach c {red blue yellow} {
 	.s itemconfigure $f -color $c
 	.s component $f surface itemcget -fill
     } ${c}3
-    update idletasks
-    after $SHORTTIME
+    _update
 }
 
 incr i
@@ -189,8 +185,7 @@ foreach a {n s e w nw sw ne se c} p {n s e w nw sw ne se center} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 _frame -text Bar
@@ -200,8 +195,7 @@ foreach a {n s e w nw sw ne se c} p {s n w e sw nw se ne n} {
         .s itemconfigure $f -textanchor $a
         .s component $f label itemcget -anchor
     } $p
-    update
-    after $SHORTTIME
+    _update
 }
 
 #######################################################################
