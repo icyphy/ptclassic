@@ -410,90 +410,30 @@ static void pl_print_method( fp, node, autotick, unittime )
     int output_event_count;
     char pvarst[ 1024 ];
     
-    
-    /*
-     * Method to emit events. It knows whether the evenet being emitted
-     * is the dummy event by means of a passed flag. If flag is set (!=0) then
-     * it is a dummy event.
-     */
-     
-
-    fprintf( fp, "  method {\n" );
-    fprintf( fp, "    name { emitEventToIntQ }\n" );
+    fprintf( fp, "  method {\n");
+    fprintf( fp, "    name { emitEventToIntQ }\n");
     fprintf( fp, "    access { public }\n" );
-    fprintf( fp, "    arglist { \"( int outputPort, double delay, int isDummy )\" }\n" );
     fprintf( fp, "    type { void }\n" );
-    fprintf( fp, "    code {\n" );    
-    fprintf( fp, "\n   /*CLEANUP : code reuse, combine next 2 methods into 1? */\n");
-  
-    output_event_count = 1;
-    foreach_net_node_fanout( node, var ) {
-        pvar = isOutputEvent( var, node );
-        if ( pvar == NULL ) pvar = isIntOutput( var, node );
-        if ( pvar != NULL ) {
-            fprintf( fp, "      static const int c%s = %d;\n",
-                    util_make_valid_name( pvar ), output_event_count++ );
-        }
-    } end_foreach_net_node_fanout;
-    fprintf( fp, "\n" );
-    
-    /* added stuff */
-    fprintf( fp, "      double emitTime; \n\n");
-    fprintf( fp, "      DERCEvent *newEvent = new DERCEvent(); \n");
-    fprintf( fp, "      newEvent->src = this; \n");
-    fprintf( fp, "      newEvent->isDummy = isDummy; \n");
-    fprintf( fp, "      switch( outputPort ) {\n" );
-    foreach_net_node_fanout( node, var ) {
-        pvar = isOutputEvent( var, node );
-        if ( pvar == NULL ) pvar = isIntOutput( var, node );
-        if ( pvar != NULL ) {
-            strcpy( pvarst, util_make_valid_name( pvar ));
-            fprintf( fp, "            case c%s:\n", pvarst );
-            fprintf( fp, "                newEvent->dest = %s.far(); \n", pvarst); 
-            /* changed */
-            fprintf( fp, "                if(!needsSharedResource) {\n");
-            fprintf( fp, "                     OutDEPort* tl = ((OutDEPort*)newEvent->dest->far()); \n");
-            fprintf( fp, "                     tl->dataNew = FALSE;\n");
-            fprintf( fp, "                     tl->put(now+1/clkFreq) << ");
-            assoc_var = net_var_assoc_var( var );
-            if ( assoc_var == NIL(net_var_t)) {
-                fprintf( fp, "1;\n" );
-            } else {
-                if ( !isIntOutput( var, node )) {
-                    fprintf( fp, "%s;\n", util_make_valid_name(
-                            net_var_parent_var( assoc_var, node )));
-                } else {
-                    fprintf( fp, "%s;\n", util_make_valid_name( assoc_var ));
-                }
-            }
-            /*fprintf( fp, "                     tl->sendData();\n");*/
-            fprintf( fp, "                     newEvent->~DERCEvent();\n");
-            fprintf( fp, "                }\n");
-            fprintf( fp, "                else newEvent->outputPort = ");
-            fprintf( fp, "c%s;\n", pvarst);
-            fprintf( fp, "                break;\n" );
-        }
-    } end_foreach_net_node_fanout;
-    fprintf( fp, "            default:\n                break;\n" );
-    fprintf( fp, "      }\n" );
-    fprintf( fp, "      if (needsSharedResource) { \n");   
-    fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
-    fprintf( fp, "        newEvent->realTime = emitTime; \n");
-    fprintf( fp, "        if (isDummy) { \n");
-    fprintf( fp, "            // set fine level to -0.5 for scheduling in Q \n"); 
-    fprintf( fp, "            interruptQ->levelput(newEvent, emitTime, -0.5, (DEStar*)this); \n");
-    fprintf( fp, "        } else { \n");
-    fprintf( fp, "            interruptQ->levelput(newEvent, emitTime, ((DEPortHole*)newEvent->dest)->depth, ((DEStar*)&newEvent->dest->parent()->asStar())); \n");
-    fprintf( fp, "        }\n");
-    fprintf( fp, "        emittedEvents->prepend(newEvent); \n");
-    fprintf( fp, "      }\n");
-    fprintf( fp, "    }\n  }\n\n");
+    fprintf( fp, "    arglist { \"( int outputPort, double delay )\" }\n" );
+    fprintf( fp, "    code {\n" );  
+    fprintf( fp, "      double emitTime;\n" ); 
+    fprintf( fp, "      StarLLCell *temp = (StarLLCell)storeList->getAndRemove(); \n" ); 
+    fprintf( fp, "      if (temp == 0) temp = new StarLLCell(-1, -1); \n" ); 
+    fprintf( fp, "      if (needsSharedResource) { \n" );
+    fprintf( fp, "                emitTime = now + (delay/clkFreq);\n" ); 
+    fprintf( fp, "      } else { emitTime = now + (1/clkFreq); } \n" ); 
+    fprintf( fp, "      temp->time = emitTime; \n" ); 
+    fprintf( fp, "      temp->outputPort = outputPort; \n" ); 
+    fprintf( fp, "      emittedEvents->append(temp); \n" ); 
+    fprintf( fp, "    } \n" ); 
+    fprintf( fp, "  } \n" ); 
+
     
     fprintf( fp, "  method {\n");
     fprintf( fp, "    name { emitEvent }\n");
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    type { void }\n" );
-    fprintf( fp, "    arglist { \"(DERCEvent* event, double emitTime)\" }\n" );
+    fprintf( fp, "    arglist { \"(StarLLCell* cell, double emitTime)\" }\n" );
     fprintf( fp, "    code {\n" );
 
     output_event_count = 1;
@@ -507,9 +447,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     } end_foreach_net_node_fanout;
     fprintf( fp, "\n" );
 
-    fprintf( fp, "      OutDEPort* tl = ((OutDEPort*)event->dest->far()); \n");
-    fprintf( fp, "      tl->dataNew = FALSE;\n");
-    fprintf( fp, "      switch( event->outputPort ) {\n" );
+    fprintf( fp, "      switch( cell->outputPort ) {\n" );
 
     foreach_net_node_fanout( node, var ) {
         pvar = isOutputEvent( var, node );
@@ -517,6 +455,7 @@ static void pl_print_method( fp, node, autotick, unittime )
         if ( pvar != NULL ) {
             strcpy( pvarst, util_make_valid_name( pvar ));
             fprintf( fp, "            case c%s:\n", pvarst );
+            fprintf( fp, "                OutDEPort tl = & %s;\n",pvarst ); 
             fprintf( fp, "                tl->put(event->realTime) << ");
             assoc_var = net_var_assoc_var( var );
             if ( assoc_var == NIL(net_var_t)) {
@@ -535,8 +474,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     } end_foreach_net_node_fanout;
     fprintf( fp, "            default:\n               break;\n" );
     fprintf( fp, "      }\n" );
-    fprintf( fp, "      tl->sendData();\n");    
-    fprintf( fp, "      event->~DERCEvent();\n");
+    fprintf( fp, "      storeList->append(cell);\n");
     fprintf( fp, "    }\n  }\n");
 
 
@@ -632,12 +570,12 @@ static void pl_print_code( fp, root_node, node, option, trace, autotick, unittim
     foreach_net_node_fanout( node, var ) {
         if ( pvar = isOutputEvent( var, node )) {
             fprintf( fp, "#define emit_%s() ", util_make_valid_name( pvar ));
-            fprintf( fp, "%s%s_Star->emitEventToIntQ( %s, _delay, 0 )\n", model_name, 
+            fprintf( fp, "%s%s_Star->emitEventToIntQ( %s, _delay)\n", model_name, 
                     option, util_make_valid_name( pvar ));
         } else if ( pvar = isIntOutput( var, node )) {
             fprintf( fp, "#define emit_%s() ", 
                     util_make_valid_name( net_var_parent_var( pvar, node )));
-            fprintf( fp, "%s%s_Star->emitEventToIntQ( %s, _delay, 0 )\n", model_name, 
+            fprintf( fp, "%s%s_Star->emitEventToIntQ( %s, _delay)\n", model_name, 
                     option, util_make_valid_name( pvar ));
         }
     } end_foreach_net_node_fanout; 
@@ -862,6 +800,7 @@ static void pl_print_begin( fp, node, option, trace )
     fprintf( fp, "    else needsSharedResource = 1; \n");
     fprintf( fp, "    %s%s_Star = this;\n", model_name, option );
     fprintf( fp, "\n    emittedEvents = new SequentialList();\n");
+    fprintf( fp, "    storeList = new SequentialList();\n");
     fprintf( fp, "    _delay = 0.0;\n");
     fprintf( fp, "    if ( needsSharedResource < 2 ) {\n" );
     
@@ -1011,9 +950,33 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     fprintf( fp, "    StringList name;\n" );
     fprintf( fp, "    now = arrivalTime;\n" );
     fprintf( fp, "    name = Block::fullName();\n" );
-    /*  fprintf( fp, "    %s%s_Star = this;\n", model_name, option ); */
-    fprintf( fp, "\n    /* Now empty the list of events from previous firing */\n");
-    fprintf( fp, "    while (emittedEvents->getAndRemove() != 0);\n\n");
+
+
+    fprintf( fp, "    if (feedbackIn.dataNew) {\n" );
+    fprintf( fp, "        if (resourcePointer->topStar() == this) {\n" );
+    fprintf( fp, "            // This is the dummy event indicating end of resource usage \n" );
+    fprintf( fp, "            if(emittedEvents->head() == emittedEvents->tail() ) {\n" );
+    fprintf( fp, "                resourcePointer->removeTopStar(this); \n");
+    fprintf( fp, "                emittedEvents->getAndRemove(); \n");
+    fprintf( fp, "                assert(emittedEvents->getAndRemove() == 0); \n");
+    fprintf( fp, "            } else { \n");
+    fprintf( fp, "                StarLLCell *temp = (StarLLCell)emittedEvents->getAndRemove(); \n");
+    fprintf( fp, "                assert(now == temp->time()); \n");
+    fprintf( fp, "                emitEvent(temp, now); \n");
+    fprintf( fp, "                refireAtTime(((StarLLCell)emittedEvents->head())->time, 0.0); \n");
+    fprintf( fp, "            }\n");
+    fprintf( fp, "        } else { \n");
+    fprintf( fp, "            //The star has been preempted at the resource  \n");
+    fprintf( fp, "            double delay = resourcePointer->getECT(this)->timeWhenFree - ((StarLLCell)emittedEvents->head())->time; \n");
+    fprintf( fp, "            //The events being delayed in the queue \n");
+    fprintf( fp, "            ListIter listEvents(*emittedEvents); \n");
+    fprintf( fp, "            StarLLCell *q;  \n");
+    fprintf( fp, "            while((q = (StarLLCell*)listEvents++)!=0) {  \n");
+    fprintf( fp, "                q->time = q->time + delay; \n");
+    fprintf( fp, "            } \n");
+    fprintf( fp, "            refireAtTime(((StarLLCell)emittedEvents->head())->time, 0.0); \n");
+    fprintf( fp, "        } \n");
+    fprintf( fp, "     } else { // This star is firing for the first time, and has resource if req \n");
     
     /* Check input variables and check for missed deadlines */
     foreach_net_node_fanin( node, var ) {
@@ -1064,12 +1027,13 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     fprintf( fp, "    min_time = -1;\n" );
     fprintf( fp, "    _delay = 0.0;\n" );
     fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
-    fprintf( fp, "    if (needsSharedResource) emitEventToIntQ(0, _delay,1);// emit dummy event \n");
+    fprintf( fp, "    if (needsSharedResource) emitEventToIntQ(0, _delay);// emit dummy event \n");
     fprintf( fp, "    timeOfArrival = -1;// reset this as have finished this firing \n");
     if ( trace ) {
         fprintf( fp, "    if ( debug ) {\n" );
         fprintf( fp, "        tcl.go();\n" );
         fprintf( fp, "    }\n" );
+        fprintf( fp, "    refireAtTime(((StarLLCell)emittedEvents->head())->time, 0.0); \n" ); 
         fprintf( fp, "  }\n" );
     }
 } 
