@@ -33,6 +33,43 @@
 #######################################################################
 #### ResourceMail
 #
+# This is an abstraction of "write only" file system. The important
+# interfaces include: open, puts, and close. Open will initialize
+# variables. Puts will write entires into a temporary buffer. Close
+# will attempt to send mail, using the content in the temporary buffer.
+# Below is a mini-tutorial to send mail:
+# <br>
+# <ol>
+# <li>First, setup the email destination and content.<br>
+# <tcl><tt>catch {delete object .bb}
+# catch {unset val}
+# ::tycho::Query .bb
+# .bb line email {Your e-mail address} {}
+# .bb line sub {Your subject} {Testing...}
+# .bb lines text {Your content} "" 4
+# array set val [::tycho::Dialog::wait .bb]
+# set val(sub)   "Subject: $val(sub)"
+# set val(email) "mailto:$val(email)"</tt></tcl>
+#
+# <li>Create, initialize, and connect to e-mail host:<br>
+# <tcl><tt>set mailobj [::tycho::ResourceMail::new $val(email)]
+# $mailobj connect $val(email)
+# $mailobj open</tt></tcl>
+#
+# <li>Write content into buffer:<br>
+# <tcl><tt>$mailobj puts "$val(sub)"
+# $mailobj puts ""
+# foreach i [split $val(text) \n] {
+#   $mailobj puts $i
+# }
+# list "Okay, wrote content..."</tt></tcl>
+#
+# <li>Mail buffer to host:<br>
+# <tcl><tt>$mailobj close
+# after 10000 "delete object $mailobj"
+# list "Written..."</tt></tcl>
+# </ol>
+#
 class ::tycho::ResourceMail {
     inherit ::tycho::Resource
 
@@ -42,20 +79,12 @@ class ::tycho::ResourceMail {
     #####################################################################
     ####                          options                            ####
 
-    # Command to execute on each line received. It need not invoke
-    # any kind of updates to keep the user interface "live", but
-    # it doesn't matter if it does.
-    public variable notifycommand ""
-
     ###################################################################
     ####                         public methods                    ####
 
     # Close the resource. Calls mailinitiate to send out the message.
     method close {}
 
-    # Read a string from a streamable resource
-    method gets {{varName {}}}
-    
     # Get the progress of sending mail
     method getprogress {} {return $progress}
 
@@ -71,9 +100,6 @@ class ::tycho::ResourceMail {
     # Write a string to a streamable resource.
     # Can't write into HTTP file! Read permission of off
     method puts {string}
-
-    # Return a string containing the data in a streamable resource 
-    method read {}
 
     ###################################################################
     ####                           public procs                    ####
