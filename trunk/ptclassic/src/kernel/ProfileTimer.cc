@@ -67,8 +67,8 @@ void ProfileTimer::reset() {
     startTime = timeOfProfile();
 }
 
-// Elapsed time since last reset.
-TimeVal ProfileTimer::elapsedTime() const {
+// Elapsed time in seconds since last reset.
+TimeVal ProfileTimer::elapsedCPUTime() const {
     // time is counting down
     return startTime - timeOfProfile();
 }
