@@ -21,8 +21,23 @@ Contents:
 </ul>
 <h2><a name="bugs in the kernel">Bugs in the kernel</a></h2>
 
+<h3><a href="../kernel/gui/TopLevel.itcl">TopLevel</a></h3>
+<ul>
+
+<li> After using the Half Height command, the focus is not in the
+proper window.  The same is true of the Restore command.
+
+<li> Under Windows, with Unix style bindings, the Control-X
+bindings are broken.  For example C-x 2 does not make the
+window be half height, but C-x C-2 does if the Control key is
+not released between the x and the 2.
+
+</ul>
+
 <h3><a href="../kernel/gui/ColorBrowser.itcl">ColorBrowser</a></h3>
 <ul>
+
+<li> We should use the Tk8.0 Color Browser
 <li>The color browser requires that you press <CODE>Apply</CODE>
 to make the change take effect -- <CODE>OK</CODE> will not work.
 </ul>
@@ -38,12 +53,65 @@ label! The design is flawed, but it's probably not worth fixing
 this until we find out what support Tk 8.0 has for menubars,
 and using that.
 
+
+<li> The Arrow keys also don't always work in menus.
+
+ <br>The down arrow in the file menu of the TclShell does not
+highlight the middle menu entries This problem only occurs
+under Windows. The problem is that the TclShell constructor
+deletes some of the menu entries. The code below duplicates
+the problem:
+
+<tcl><pre>
+set w .menu
+catch {destroy $w}
+toplevel $w
+
+menu $w.menu
+set m $w.menu.file
+menu $m
+$w.menu add cascade -label "File" -menu $m -underline 0
+
+$m add command -label "One" -command {puts One}
+$m add command -label "Two" -command {puts Two}
+$m add command -label "Three" -command {puts Three}
+$m add command -label "doit" -command {$m delete Two}
+$w configure -menu $w.menu
+</pre></tcl>
+
+This problem occurs in Tk8.0.3 under Windows NT,but
+it does not occur under Tk8.0.4 under Cygwin32
+
+
+<li> The left and right arrows don't traverse between menus	
+This is more complex.  The problem is that Tycho is not
+using the menubar features of Tk8.  Converting Tycho to
+use the menubar features would be complex.
+
+ <br>The menu command says:
+<BLOCKQUOTE>
+	"Any menu can be set as a menubar for a toplevel window (see toplevel
+	command for syntax)"
+	The toplevel command has the syntax 'toplevel pathname -menu menuname'
+	So, we would need to modify the Displayer class so that it
+	called 'toplevel pathname -menu menuname'.
+</BLOCKQUOTE>
+
+Currently, the Displayer class creates a Frame that contains
+the menu buttons.  Adding <CODE>&lt;Left&gt;</CODE> and <CODE>&lt;Right&gt;</CODE> bindings to the
+Frame does not work
+
 </ul>
 
 <h3><a href="../kernel/gui/File.itcl">File</a></h3>
 <ul>
 <li>When you open a non-existent HTML file, you probably want
 the HTML editor, not the HTML viewer. But that's what you get.
+</ul>
+
+<h3><a href="../kernel/gui/FileBrowser.itcl">FileBrowser</a></h3>
+<ul>
+<li>Tycho should use the Tk8.0 file browser.
 </ul>
 
 <h3><a href="../kernel/gui/Displayer.itcl">Displayer</a></h3>
