@@ -42,6 +42,7 @@ static const char file_id[] = "HLLTarget.cc";
 
 #include "HLLTarget.h"
 #include "KnownTarget.h"
+#include "CGUtilities.h"
 #include "pt_fstream.h"
 #include <ctype.h>
 
@@ -80,16 +81,8 @@ StringList HLLTarget :: sanitizedName (const NamedObj& obj) const {
 
 
 StringList HLLTarget :: sanitize(const char* s) const {
-        LOG_NEW; char *snm = new char [strlen(s) + 2];
-        char *n = snm;
-	if(isdigit(*s)) *(n++) = 'x';
-        while (*s != 0) {
-            if(isalnum(*s)) *(n++) = *(s++);
-            else { *(n++) = '_'; s++; }
-        }
-        *n = 0;
+        const char *snm = ptSanitize(s);
         StringList out(snm);
-        LOG_DEL; delete snm;
         return out;
 }
 
