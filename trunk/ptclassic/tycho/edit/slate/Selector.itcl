@@ -414,11 +414,6 @@ body ::tycho::Selector::deactivate {args} {
 #  <li><b>+</b>: The interactor will be activated if
 #  there is more than one item in the selection.
 # </ul>
-# <li><b>-oneonly</b> _bool_: Specifies that the interactor will be
-# activated or bound if there is only one selected item, and that
-# item is tagged with _tag_. Otherwise, (the default), the
-# interactor will be bound if all selected items are tagged
-# with _tag_, regardless of how many are selected.
 # <li><b>-button</b> _int_: the *-button* option that will be passed to
 # the interactor when activated or bound.
 # <li><b>-modifiers</b> _modifiers_: the *-modifiers* list that will be
@@ -657,9 +652,50 @@ body ::tycho::Selector::unbind {tag args} {
 ####                     protected methods                       ####
 
 #######################################################################
+#### _attach
+#
+# Record a single delegate interactor.
+#
+body ::tycho::Selector::_attach {interactor id x y options} {
+    set _attached($interactor) [list $id $x $y $options]
+    eval $interactor activate $id $x $y $options
+}
+
+#######################################################################
+#### _clear
+#
+body ::tycho::Selector::_clear {} {
+    if { $clearprefix == "" } {
+	$slate _selection clear
+    } else {
+	eval $clearprefix
+    }
+}
+
+#######################################################################
+#### _debind
+#
+# Record a single delegate interactor.
+#
+body ::tycho::Selector::_debind {interactor id} {
+    set _debinded($id) 1
+    debind $id
+    $interactor configure -deactivatecommand "$this refresh"
+}
+
+#######################################################################
 #### _delegate
 #
-# Activate a delegate interactor in a certain mode.
+# Activate a delegate interactor in a certain mode. If only a single
+# item is selected, activate the first interactor found that has matching
+# options, and that has been bound to that item, or that has a tag to
+# which the interactor has been bound.
+#
+# If more than one item is selected, find the first interactor
+# that has matching options. Each item in the selection that
+# the interactor has been bound to, or that has a tag to which
+# the interactor has been bound, is added to the sub-selection.
+# The interactor is then activated on the sub-selection.
 #
 body ::tycho::Selector::_delegate {mode id x y args} {
     switch -exact $mode {
@@ -687,62 +723,29 @@ body ::tycho::Selector::_delegate {mode id x y args} {
 	    foreach index [array names _delegates [list + * *]] {
                 ::tycho::assign _ interactor options $index
                 set tags $_delegates($index)
-		# Activate a delegate interactor on the whole selection if
-		# every item is either in the interactor's tags or if it
-		# has a tag that is.
+		# Find the sub-selection: an item is in the sub-selection
+                # it is in the interactor's tags or if it has a tag that is.
 		if { $args == $options } {
 		    set ok 1
 		    foreach item [$slate find withtag "sel"] {
-			if { ! [::tycho::lmember $tags $item] \
-				&& [::tycho::ldisjoint $tags \
+                        if { [::tycho::lmember $tags $item] \
+                                || ![::tycho::ldisjoint $tags \
 				[$slate gettags $item]] } {
-			    set ok 0
-			    break
-			}
-		    }
-		    if { $ok } {
-			# Activate it
-			_debind $interactor $id
-			_attach $interactor "sel" $x $y $options
-			return 1
-		    }
-		}
+                            # Add the "subsel" also tag its highlight
+                            $slate addtag "subsel" withtag $item
+                            $slate addtag "highlight.subsel" \
+                                    withtag highlight.$item
+                        }
+                    }
+                    # Activate it
+                    _debind $interactor $id
+                    _attach $interactor "subsel" $x $y $options
+                    return 1
+                }
 	    }
 	}
     }
     return 0
-}
-
-#######################################################################
-#### _attach
-#
-# Record a single delegate interactor.
-#
-body ::tycho::Selector::_attach {interactor id x y options} {
-    set _attached($interactor) [list $id $x $y $options]
-    eval $interactor activate $id $x $y $options
-}
-
-#######################################################################
-#### _debind
-#
-# Record a single delegate interactor.
-#
-body ::tycho::Selector::_debind {interactor id} {
-    set _debinded($id) 1
-    debind $id
-    $interactor configure -deactivatecommand "$this refresh"
-}
-
-#######################################################################
-#### _clear
-#
-body ::tycho::Selector::_clear {} {
-    if { $clearprefix == "" } {
-	$slate _selection clear
-    } else {
-	eval $clearprefix
-    }
 }
 
 #######################################################################
@@ -767,6 +770,8 @@ body ::tycho::Selector::_detach {} {
         eval $interactor deactivate $info
     }
     catch {unset _attached}
+    $slate dtag "subsel"
+    $slate dtag "highlight.subsel"
 }
 
 #######################################################################
