@@ -1,5 +1,17 @@
+/**CFile***********************************************************************
 
-/*
+  FileName    [ ptdspRunLength.c ]
+
+  PackageName [ ptdsp ]
+
+  Synopsis    [ required ]
+
+  Description [ optional ]
+
+  Author      [ Paul Haskell ]
+
+  Copyright   [ 
+
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 
@@ -24,10 +36,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 					PT_COPYRIGHT_VERSION_2
 					COPYRIGHTENDKEY
+ ]
 
-Programmer: Paul Haskell
-Version: $Id$
-*/
+  Version     [ $Id$ ]
+
+******************************************************************************/
 
 #include <math.h>
 #include <malloc.h>
@@ -36,84 +49,79 @@ Version: $Id$
 const float StartOfBlock = 524288.0;
 const float StartOfRun = 1048576.0;
 
-/* return non-zero if fl >= in */
 int larger (const float fl, const float in) {
-  return (fabs((double)fl) >= ((double)in));
+  return (fabs((double)fl) >= (double)in); 
 }
 
-/*
-  This function takes a Float Matrix which represents a DCT image, 
-  inserts "start of block" markers, run-length encodes it, 
-  and outputs the modified image. 
-  For the run-length encoding, all values with absolute value 
-  less than "thresh" are set to 0.0, to help improve compression.
+/*---------------------------------------------------------------------------*/	
+/* Definition of exported functions                                          */
+/*---------------------------------------------------------------------------*/
 
+/**Function*******************************************************************
+  Synopsis    [ Run length encodes a DCT image ]
+  Description [ This function takes a float array which represents a
+                DCT image, inserts "start of block" markers,
+		run-length encodes it, and outputs the modified image. </p>
+		For the run-length encoding, all values with absolute
+		value less than "thresh" are set to 0.0, to help
+		improve compression. ]
+  SideEffects []
+  SeeAlso     [ Ptdsp_RunLengthInverse ]
+******************************************************************************/
+/*
   Runlengths are coded with a "start of run" symbol and then an
   (integer) run-length.
 */
-
-void Ptdsp_RunLengthEncode ( const Ptdsp_FloatMatrix_t inImage, int BlockSize,
-			    int HiPri, float thresh, float **outDc,
-			    float **outAc, int *indxDc, int *indxAc) { 
+void 
+Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
+			int HiPri, double thresh, double **outDc,
+			double **outAc, int *indxDc, int *indxAc) { 
   /* Initialize. */
-  int bSize = (int)BlockSize;
-  int size = inImage.numCols * inImage.numRows;
-  int blocks = size / (bSize*bSize);
+  int blocks = arraySize / (bSize*bSize);
   int i, blk, zeroRunLen;
-  
-  /* Temporary storage for one block. */
-  float* tmpFloatPtr = ( float* ) malloc(size * sizeof(float));
-  float* tmpPtr = tmpFloatPtr;
-  for ( i = 0; i < size; i++) {
-    tmpPtr[i] = (float)Ptdsp_FloatMatrixEntry(inImage,i);
-  }
   
   /* The biggest runlen blowup we can have is the string "01010101...".
      This gives a blowup of 50%, so with StartOfBlock and StartOfRun
      markers, 1.70 should be ok. */
   if (*outDc != 0) free(*outDc);
   if (*outAc != 0) free(*outAc);
-  *outDc = ( float* ) malloc(((int)(1.70*size + 1)) * sizeof(float));
-  *outAc = ( float* ) malloc(((int)(1.70*size + 1)) * sizeof(float));
+  *outDc = ( double* ) malloc(((int)(1.70*arraySize + 1)) * sizeof(double));
+  *outAc = ( double* ) malloc(((int)(1.70*arraySize + 1)) * sizeof(double));
   *indxDc = 0; *indxAc = 0;
   for ( blk = 0; blk < blocks; blk++) {
     /* High priority coefficients. */
     for(i = 0; i < HiPri; i++) {
-      (*outDc)[(*indxDc)++] = *tmpPtr++;
+      (*outDc)[(*indxDc)++] = *inImagePtr++;
     }
     
     /* Low priority coefficients--start with block header. */
     (*outAc)[(*indxAc)++] = StartOfBlock;
-    (*outAc)[(*indxAc)++] = (float)blk;
+    (*outAc)[(*indxAc)++] = (double)blk;
 	
     zeroRunLen = 0;
     for(; i < bSize*bSize; i++) {
       if(zeroRunLen) {
-	if (larger(*tmpPtr, thresh)) {
-	  (*outAc)[(*indxAc)++] = (float)zeroRunLen;
+	if (larger(*inImagePtr, thresh)) {
+	  (*outAc)[(*indxAc)++] = (double)zeroRunLen;
 	  zeroRunLen = 0;
-	  (*outAc)[(*indxAc)++] = *tmpPtr;
+	  (*outAc)[(*indxAc)++] = *inImagePtr;
 	} else {
 	  zeroRunLen++;
 	}
       } else {
-	if (larger(*tmpPtr, thresh)) {
-	  (*outAc)[(*indxAc)++] = *tmpPtr;
+	if (larger(*inImagePtr, thresh)) {
+	  (*outAc)[(*indxAc)++] = *inImagePtr;
 	} else {
 	  (*outAc)[(*indxAc)++] = StartOfRun;
 	  zeroRunLen++;
 	}
       }
-      tmpPtr++;
+      inImagePtr++;
     }
     /* Handle zero-runs that last till end of the block. */
     if(zeroRunLen) {
-      (*outAc)[(*indxAc)++] = (float)zeroRunLen;
+      (*outAc)[(*indxAc)++] = (double)zeroRunLen;
     }
   }
-  
-  /* Delete tmpFloatPtr and not tmpPtr since tmpPtr has been
-     incremented */
-  free(tmpFloatPtr);
 }
 
