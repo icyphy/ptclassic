@@ -65,6 +65,7 @@ ITCL_SRCS = \
 	FontManager.itcl \
 	FontDialog.itcl \
 	IndexBrowser.itcl \
+	LabeledGrid.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
@@ -87,6 +88,7 @@ ITCL_SRCS = \
 	TopLevel.itcl \
 	TWidget.itcl \
 	UserProfile.itcl \
+	WidgetTree.itcl \
 	View.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
