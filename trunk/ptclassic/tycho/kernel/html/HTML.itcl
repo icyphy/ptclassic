@@ -831,9 +831,9 @@ array set HMinsert_space_map {
 	dl	1 /dl	1
 	dt	1
 	form 1	/form 1
-	h1	2	/h1	1
-	h2	2	/h2	1
-	h3	2	/h3	1
+	h1	2	/h1	2
+	h2	2	/h2	2
+	h3	2	/h3	2
 	h4	1	/h4	1
 	h5	1	/h5	1
 	h6	1	/h6	1
