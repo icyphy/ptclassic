@@ -126,6 +126,12 @@ ensemble ::tycho::deregister {
 # See <a href="Registry.html#registerMode proc of ::tycho::Registry class">
 # ::tycho::Registry::registerMode</a>.
 #
+# <dt><b>profile</b> _filename_
+# <dd>
+# Register the user profile. _filename_ is the name of the user's
+# profile file.  If it doesn't exists, then it will be created with
+# a blank profile. See <a href="UserProfile.html">::tycho::UserProfile</a>.
+#
 # <dt><b>protocol</b> _protocol_ ?_option value_ ...?
 # <dd>
 # Register a new protocol.
@@ -171,6 +177,9 @@ ensemble ::tycho::register {
     }
     option mode {modename args} {
 	eval ::tycho::Registry::registerMode $modename $args
+    }
+    option profile {filename} {
+	::tycho::profile register $filename
     }
     option protocol {protocol args} {
 	eval ::tycho::Registry::registerProtocol $protocol $args
