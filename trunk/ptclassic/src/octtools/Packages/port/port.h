@@ -504,7 +504,7 @@ extern int gethostname( char * name, int namelen);
 #include <unistd.h>
 
 /* Don't include memset, it should be /usr/include/memory.h */
-extern char * memset ARGS(( char *, char *, int));
+/*extern char * memset ARGS(( char *, char *, int));*/
 #include <memory.h>
 
 extern void qsort
