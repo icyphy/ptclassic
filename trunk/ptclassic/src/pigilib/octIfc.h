@@ -83,14 +83,14 @@ extern boolean GetStringizedProp ARGS((octObject *objPtr, char *name,
 				       char *dest, int dlen));
 extern void IntizeProp ARGS((octObject *propPtr));
 extern boolean GetStringProp ARGS((octObject *objPtr, char *propName, 
-				   char **valuePtr));
+				   const char **valuePtr));
 extern boolean SetStringProp ARGS((octObject *objPtr, char *propName,
 				   char *value));
-extern boolean GOCDomainProp ARGS((octObject *facetPtr, char **domainPtr,
-			     char *defaultDomain));
+extern boolean GOCDomainProp ARGS((octObject *facetPtr, const char **domainPtr,
+				   const char *defaultDomain));
 extern boolean SetDomainProp ARGS((octObject *facetPtr, char *domain));
-extern boolean GOCTargetProp ARGS((octObject *facetPtr, char **targetPtr,
-			     char *defaultTarget));
+extern boolean GOCTargetProp ARGS((octObject *facetPtr, const char **targetPtr,
+				   const char *defaultTarget));
 extern boolean SetTargetProp ARGS((octObject *facetPtr, char *target));
 extern int GetIterateProp ARGS((octObject *facetPtr, int *pIterate));
 extern void SetIterateProp ARGS((octObject *facetPtr, int iterate));
@@ -103,7 +103,7 @@ extern boolean CreateOrModifyPropReal ARGS((octObject *c, octObject *t,
 extern boolean GetOrInitSogParams ARGS((octObject *instPtr,
 					ParamListType *pListPtr));
 extern boolean GetOrCreatePropStr ARGS((octObject *c, octObject *t,
-					char *s, char *s1));
+					const char *s, const char *s1));
 extern boolean GetOrCreatePropReal ARGS((octObject *c, octObject *t,
 					 char *s, double d));
 extern boolean OpenFacet ARGS((octObject *t, char *c, char *v,
