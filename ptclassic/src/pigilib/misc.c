@@ -8,7 +8,6 @@ $Id$
 #include "local.h"
 #include "rpc.h"
 #include "vemInterface.h"
-#include "kernelCalls.h"
 #include "util.h"
 #include "octIfc.h"
 #include "octMacros.h"
