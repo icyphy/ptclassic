@@ -60,6 +60,8 @@ endif
 TK=1
 OCT=1
 
+INCL = -I$(ROOT)/src/pigilib $(PTCOMPAT_INCSPEC)
+
 SRCS =		pigiMain.cc
 
 PT_DEPEND +=	pigiMain.o
@@ -86,5 +88,4 @@ palettes.$(PIGI).c: $(PT_DEPEND)
 	$(CC) -c palettes.$(PIGI).c	
 
 include $(ROOT)/mk/common.mk
-
 
