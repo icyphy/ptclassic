@@ -7,7 +7,7 @@ Base class for Goertzel algorithm stars.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -132,19 +132,18 @@ first-order feedback coefficient which is a function of k and N }
 ; x1: value of two-sample delay (state2)
 ; y0: feedback coefficient d1 divided by 2
 ; y1: ith input value
-	clr	a	#<$addr(input),r0		; a = 0
+	clr	a	#$addr(input),r0		; a = 0
 	clr	b	a,x1	$ref(halfd1),y0		; x1 = 0 and y0 = d1/2
+	move	x:(r0)+,a
 	}
 
 	codeblock(loop,"int len") {
 ; Begin loop for Goertzel algorithm: run all-pole section for @len iterations
 	do	#@len,$label(_GoertzelBase)
-	addl	a,b		x:(r0)+,a	; b = a + 2*b and a = x[n]
-	sub	x1,a		b,x0		; a = x[n] - state2
+	sub	x1,a		b,x0            ; a = x[n]-y[n-2] and x0=y[n-1]
+	mpyr	y0,x0,b		x0,x1		; b = y[n-1]*cos()  x1=y[n-1]
+	addl	a,b		x:(r0)+,a	; b = x[n]-y[n-2]+2*cos()*y[n-1]=y[n] and a=x[n+1]
 $label(_GoertzelBase)
-	macr	x0,y0,b		x0,x1		; b = (d1/2)*state1 and x1 = x0
-; End loop to compute Goertzel algorithm
-	asl	b		a,x0		; b = d1*state2
 	}
 
 	go {
@@ -160,7 +159,7 @@ $label(_GoertzelBase)
 		// ONLY to pass their values to derived stars
 
 		addCode(init);
-		addCode(loop(dftLength));
+		addCode(loop(dftLength+1));
 	}
 
 	exectime {

@@ -9,7 +9,7 @@ N-point DFT using Goertzel's algorithm.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -77,13 +77,13 @@ which is a function of k and N
 
 	codeblock(result) {
 ; compute complex-valued Goertzel filter output a + j b.  Register usage:
-; a  = state1 - state2*cos(theta)   where  x0 = state1  and  y0 = -cos(theta)
-; b  = -state2*sin(theta)           where  x1 = state2  and  y1 = -sin(theta)
-; note that accumulator a initially contains the value of state1
+; b  = state1 - state2*cos(theta)   where  x0 = state2=y[n-1]  and  y0 = -cos(theta)
+; a  = -state2*sin(theta)           where  x1 = state2=y[n-1]  and  y1 = -sin(theta)
+; note that accumulator b initially contains the value of y[n] = state1
 	move	#$val(negWnImag),y1
-	mpyr	y1,x1,b		#$val(negWnReal),y0
-	macr	x1,y0,a		b,y:$addr(output)
-	move	a,x:$addr(output)
+	mpyr	y1,x0,a		#$val(negWnReal),y0
+	macr	x1,y0,b		a,y:$addr(output)
+	move	b,x:$addr(output)
 	}
 
 	go {

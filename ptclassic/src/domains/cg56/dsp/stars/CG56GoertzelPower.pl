@@ -10,7 +10,7 @@ This form is used in touchtone decoding.
 	}
 	author { Brian L. Evans }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -55,12 +55,14 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 ; compute the power of the last Goertzel filter output z z*, where
 ; z z* = state1*state1 - state1*state2*2*cos(theta) + state2*state2
 ; where d1 = 2 cos(theta)
-	mpyr	x0,x0,a		x1,y0	; a = state1^2, y0 = x1 = state1
-	macr	y0,y0,a		b,y1	; a += state2^2, y1 = b = d1*state2
-	macr	-x0,y1,a		; b = -d1*state2*state1
+
+	mpy 	-y0,x0,a		; a = -cos(theta)*state2 
+	addl	b,a		b,y0	; a = state1-2*cos(theta)*state2
+	mpy 	x0,x0,b		a,y1	; b = state2*state2
+	macr    y0,y1,b			
 	}
 	codeblock(saveResult) {
-	move	a,$ref(output)
+	move	b,$ref(output)
 	}
 	go {
 		// Run the Goertzel second-order IIR filter

@@ -6,7 +6,7 @@ desc {
 version { $Id$ }
 author { Jose Luis Pino, ported from Gabriel }
 copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -71,9 +71,10 @@ initCode {
 		twcos << "	dc	"<< dtwcos << "\n";
 		twsin << "	dc	"<< dtwsin << "\n";
 	}
-	addCode("; Twiddle factors\n    org     x:$addr(twdfct)");
+	addCode(";Twiddle factors\n");
+	addCode("	org     x:$addr(twdfct)\n");
 	addCode(twcos);
-	addCode("	org	y:$addr(twdfct)");
+	addCode("	org	y:$addr(twdfct)\n");
 	addCode(twsin);
 	addCode("	org	p:\n");
 }
