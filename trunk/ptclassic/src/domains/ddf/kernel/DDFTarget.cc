@@ -57,6 +57,8 @@ Target("default-DDF","DataFlowStar","default DDF target")
 		"schedulePeriod for interface with a timed domains."));
 	addState(restructure.setState("restructure",this,"NO",
 		"perform auto-wormholization?"));
+	// Hide the restructure state because restructuring does not work.
+	restructure.clearAttributes(A_SETTABLE);
 }
 
 Block* DDFTarget::makeNew() const {
