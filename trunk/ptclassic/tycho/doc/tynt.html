@@ -18,11 +18,10 @@ places to go</A> </H2>
 <H2><A NAME="windows bugs">Tycho/Windows bugs</A></H2>
 <MENU>
 
-
 <li> The only testing of this port was done under NT4.0,
 so Windows3.1 and Windows95 users may have other problems.
 
-<LI> Tycho0.2.1 does not handle spaces in pathnames very well.  Tycho
+<LI> Tycho0.3 does not handle spaces in pathnames very well.  Tycho
 will work best if the distribution is installed in a directory that
 has a pathname that contains no spaces.
 
@@ -31,15 +30,9 @@ just mouse on a Tycho icon and then Tycho would come up.
 <CODE>$TYCHO/doc/img/tycho32.ico</CODE> is a 32 pixel wide icon
 that can be used under Windows with a shortcut. 
 
-<LI> Don't use Itcl2.1 under Windows, it does not support removing
-files and making directories.  If you use Itcl2.1, then Tycho
-<CODE>exec</CODE>s <CODE>rm</CODE> or <CODE>mkdir</CODE>, which fail
-under Windows.  Instead of using Itcl2.1 under Windows, use the
-Itcl2.2 binaries.
-
 <LI> Because of differences in the end-of-line characters between Unix
 and Windows, it appears that Tcl scripts edited with the NT
-<CODE>Notebook</CODE> program cannot be sourced with Itcl2.2.
+<CODE>Notebook</CODE> program cannot be sourced with Itcl3.0.
 
 <LI> If you run <CODE>nmake</CODE> from within the Tycho Monitor, then
 any submakes will bring up new windows, and the <CODE>nmake</CODE> output
@@ -54,19 +47,44 @@ HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.ee
 link to the downloads page that contains Tycho sources and Itcl
 binaries for Windows.
 
+<li> Ptolemy II requires Tcl Blend, the Tcl/Java interface.  Because
+of a compatibility issue in Tcl Blend, to install Tcl Blend 1.0, you
+must install Tcl8.0 and then install Tcl8.0.3.
 
-<LI> Install Itcl by running <CODE>itcl22.exe</CODE>.
 
-<LI> Because of a bug in Itcl2.2, the path leading up to the
-<CODE>tycho.0.2.1/lib/windows/tycho-windows.itk</CODE> script cannot
-have any spaces in it.  If you installed Tycho in <CODE>c:\Program
-Files</CODE>, then you must move either
-<CODE>c:\Program Files\tycho0.2.1\ </CODE> or the
-<CODE>tycho0.2.1\lib\windows\tycho-window.itk</CODE> script to a
-directory that has no spaces in the pathname leading up to it.  It is
-best if you move the entire Tycho distribution to
-<CODE>c:\tycho0.2.1</CODE>.
 
+
+<li> Uninstall Itcl2.2 before proceeding with the Itcl3.0 installation.
+
+<li> Download JDK1.1.x from
+ <a href="http://www.javasoft.com"><CODE>www.javasoft.comm</CODE></a>
+and install it in <CODE>c:\jdk1.1.<I>x</I></CODE>
+
+
+<li> Download Tcl8.0 from
+<a href="ftp://ftp.scriptics.com/pub/tcl/tcl8_0/tcl80p2.exe"><CODE>ftp://ftp.scriptics.com/pub/tcl/tcl8_0/tcl80p2.exe</CODE></a>.
+Install Tcl8.0 in <CODE>c:\Program Files\Tcl</CODE>
+
+<li> Remove the contents of <CODE>c:\Program Files\Tcl</CODE> so that
+we can install Tcl Blend 1.0 after installing Tcl 8.0.3.
+Note that you should remove the directory, not uninstall Tcl8.0.
+
+ <br>Hopefully, a future release of Tcl Blend will fix this problem, in
+which case installing Tcl8.0 and removing the directory will not be
+necessary.
+
+
+<li> Tycho0.3 requires Itcl3.0/Tcl8.0.3/Tk8.0.3.
+The Tcl Blast CD includes Itcl3.0.
+Eventually Itcl3.0 binaries will be available on
+<a href="http://www.tcltk.com/itcl"><CODE>http://www.tcltk.com/itcl</CODE></a>
+
+Download the Tcl Blast Windows binary and install it in 
+<CODE>C:\Program Files\Tcl</CODE>
+
+<li> Download Tcl Blend 1.0 from
+<a href="http://www.scriptics.com/software/java.html"><CODE>http://www.scriptics.com/software/java.html</CODE></a> and
+install it in <CODE>c:\Program Files\TclBlend1.0</CODE>
 
 <LI> There are two ways to start up Tycho:
 <DL>
@@ -103,25 +121,54 @@ In the <CODE>System Properties</CODE> window that comes up, select
 <CODE>Environment</CODE>.  There, you can add <CODE>TYCHO</CODE> as a
 User Variable.  Incidentally, this is where you set your path.
 
- <P> If your Tycho distribution is at <CODE>c:\tycho0.2.1</CODE>, then
+ <P> If your Tycho distribution is at <CODE>c:\tycho0.3</CODE>, then
 you need not set the <CODE>TYCHO</CODE> environment variable, it will
 be set for you, by the <CODE>tycho-windows</CODE> script.  If your
 distribution is elsewhere, then you must either set the
 <CODE>TYCHO</CODE> variable, or edit
-<CODE>tycho0.2.1/lib/windows/tycho-windows</CODE>.
+<CODE>tycho0.3/lib/windows/tycho-windows</CODE>.
 
-<LI> <CODE>tycho0.2.1/lib/windows/tycho-windows</CODE>
+<LI> <CODE>tycho0.3/lib/windows/tycho-windows</CODE>
 and <CODE>tycho.bat</CODE>
 first check the <CODE>TYCHO</CODE> variable, and if
 <CODE>TYCHO</CODE> is not set, then the script expects that the Tycho
-distribution will be at <CODE>c:\tycho0.2.1</CODE>.
+distribution will be at <CODE>c:\tycho0.3</CODE>.
 
-<LI> Itcl2.2 associates files with the <CODE>itk</CODE> extension with
-the <CODE>itkwish</CODE> binary.  Apparently, the <CODE>itk</CODE>
-files must have Unix style end-of-line characters.
+<LI> Associate the <CODE>itk</CODE> extension with 
+<CODE>C:\Program Files\Tcl\bin\wish80.exe</CODE>.
+To associate a suffix with a program:
+	<ol>
+	<li> Click on <CODE>My Computer</CODE> -&gt;
+	<CODE>View</CODE> -&gt; <CODE>Options</CODE> -&gt;
+	<CODE>File Types</CODE>-&gt;<CODE>New Type</CODE>
+
+	<li> Update the following fields
+	<menu>
+
+	<li> <CODE>Description of type</CODE>: Itkwish 
+	<li> <CODE>Associated Extension</CODE>: <CODE>itk</CODE>
+
+	</menu>
+
+	<li> Under the <CODE>Actions</CODE> window, click on 
+	<CODE>New</CODE>, then set the <CODE>Action</CODE>
+	field to <CODE>open</CODE>.
+
+
+	<li> Click on <CODE>Browse</CODE>, find the 
+	<CODE>wish80.exe</CODE> binary and set the 
+	<CODE>Application used to perform action</CODE>	
+	field.
+
+	<li> You are done, click <CODE>OK</CODE> until all
+	the windows close
+
+	</menu>
+
+	</ol>
 
 <P> To start Tycho, click on the
-<CODE>tycho0.2.1/lib/windows/tycho-windows.itk</CODE> script
+<CODE>tycho0.3/lib/windows/tycho-windows.itk</CODE> script
 or add <CODE>%tycho%\bin</CODE> to your path and run <CODE>tycho</CODE>
 from the DOS prompt.
 
