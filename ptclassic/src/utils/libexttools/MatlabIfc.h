@@ -163,7 +163,7 @@ public:
 			    char** imagPartStrings);
 	void FreeStringArray(char** strarray, int numstrings);
 
-private:
+protected:
 	// indicate whether or not to delete created figures upon destruction
 	int deleteFigures;
 
@@ -176,6 +176,9 @@ private:
 
 	// name attached to Matlab figures
 	StringList figureHandle;
+
+	// Matlab command to execute to tag Matlab figures
+	InfString figureHandleCommand;
 
 	// Matlab command to execute
 	InfString commandString;
