@@ -334,6 +334,10 @@ public:
 	//  accessed -- defaults to zero if never called
 	void setMaxDelay(int delay);
 
+	// return the type associated with my plasma (0 is returned if
+	// the plasma has not been set, e.g. before initialization)
+	DataType plasmaType () const;
+
 	// Number of Particles stored in the buffer each
 	// time the Geodesic is accessed -- normally this is
 	// one except for SDF, where it is the number of
@@ -424,6 +428,7 @@ class GalPort : public PortHole {
 public:
 	GalPort(GenericPort& a);
 	GalPort() {}
+	~GalPort();
 	int isItInput() const;
 	int isItOutput() const;
 };
@@ -453,6 +458,8 @@ public:
 
 	// If you want to defer creating the alias to an alias() call
 	GalMultiPort() {}
+
+	~GalMultiPort();
 
 	// queries pass through to the inside
 	int isItInput() const;

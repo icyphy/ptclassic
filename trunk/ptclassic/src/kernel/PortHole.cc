@@ -88,6 +88,9 @@ int GenericPort :: isItInput () const { return FALSE;}
 int GenericPort :: isItOutput () const { return FALSE;}
 int GenericPort :: isItMulti () const { return FALSE;}
 
+GalPort :: ~GalPort() {}
+GalMultiPort :: ~GalMultiPort() {}
+
 void GenericPort::setAlias (GenericPort& gp) {
 	aliasedTo = &gp;
 	gp.aliasedFrom = this;
@@ -350,6 +353,11 @@ MultiPortHole :: printVerbose () const {
 
 // define a marker value to prevent infinite recursion
 Plasma* const Mark = (Plasma*)1;
+
+// return the type of my Plasma
+DataType PortHole :: plasmaType() const {
+	return myPlasma ? myPlasma->type() : 0;
+}
 
 // The setPlasma function's job is to propagate types all around the
 // structure.  It is, unfortunately, necessarily complex.  It supports
