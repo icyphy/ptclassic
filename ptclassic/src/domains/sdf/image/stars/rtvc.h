@@ -1,6 +1,7 @@
 #ifndef RTVC_H_
 #define RTVC_H_
 
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 #include <stdlib.h>
 #include <sys/types.h>
 #include <unistd.h>
@@ -183,4 +184,5 @@ class RTVCGrabber {
 #define JPEG_PAL_FID 4
 };
 
+#endif /* sun */
 #endif

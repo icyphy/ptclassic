@@ -59,21 +59,26 @@ Y,U and V components.
 	    default { 2 }
 	    desc { downsample image by this factor in x and y directions. }
 	}
-	hinclude { "/users/ptdesign/src/domains/sdf/image/stars/rtvc.h"}
-	ccinclude { "/users/ptdesign/src/domains/sdf/image/stars/rtvc.cc" }
+	hinclude { "rtvc.h" }
+	ccinclude { "rtvc.cc" }
 	protected{
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 	    u_int width, height, bufsize;
 	    u_char* buffer;
 	    const char* port_str;
 	    struct timeval timePtr;
 	    double now, next, deltaT;
 	    RTVCGrabber* grabber;
+#endif // sun
 	}
 	constructor{
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 	    grabber = 0;
+#endif // sun
 	}
 
 	begin{
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 	    if (grabber) delete grabber;
 	    grabber = new RTVCGrabber((int)devNo);
 	    if (!grabber) {
@@ -102,6 +107,7 @@ Y,U and V components.
 					   "maximum frames_per_second is 30");
 	    deltaT = (1e6/fps);
 	    next  = 0;
+#endif // sun
 	}
 
 	method {
@@ -109,12 +115,17 @@ Y,U and V components.
 	    access { protected }
 	    type { double }
 	    code {
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 		gettimeofday(&timePtr,0);
 		return (1e6*(double)timePtr.tv_sec + (double)timePtr.tv_usec);
+#else
+	        return 0.0;
+#endif // sun
 	    }
 	}
 
 	go {
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 // Wait until it's time to grab a frame and set the next time to grab a frame
 	    do{
 		now = getTime();
@@ -142,8 +153,14 @@ Y,U and V components.
 	    frameIdOut%0 << int(frameId);
 
 	    frameId = int(frameId) + 1; //increment frame id
+#else
+	   Error::abortRun(*this, 
+	        "Sorry, the SDFSunVideo star is only supported on Suns running Solaris2.x");
+#endif // sun
 	} // end go{}
 	destructor{
+#if defined(sun) && (defined(__svr4__) || defined(SYSV))
 	    delete grabber;
+#endif // sun
 	}
     }
