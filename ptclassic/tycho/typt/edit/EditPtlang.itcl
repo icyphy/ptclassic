@@ -79,6 +79,9 @@ class ::tycho::EditPtlang {
 # <tcl><pre>
 #  ::tycho::view EditPtlang {-star {SDF Cos}}
 # </pre></tcl>
+# If you configure this option after construction, you must invoke
+# <code>reload</code> to view the new star.
+#
 configbody ::tycho::EditPtlang::star {
     global PTOLEMY
     set domainStarList $itk_option(-star)

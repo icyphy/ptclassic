@@ -70,6 +70,8 @@ class ::tycho::EditPalette {
 #######################################################################
 #### -facet configuration
 # Use oct2ptcl to convert a facet from Oct to Ptcl format.
+# If you configure this option after construction, you must invoke
+# <code>reload</code> to view the new facet.
 #
 configbody ::tycho::EditPalette::facet {
     set facet $itk_option(-facet)

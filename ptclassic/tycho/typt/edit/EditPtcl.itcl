@@ -143,6 +143,8 @@ body ::tycho::EditPtcl::constructor {args} {
 #######################################################################
 #### -facet configuration
 # Use oct2ptcl to convert a facet from Oct to Ptcl format.
+# If you configure this option after construction, you must invoke
+# <code>reload</code> to view the facet.
 #
 configbody ::tycho::EditPtcl::facet {
     set facet $itk_option(-facet)
