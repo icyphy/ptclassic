@@ -1,4 +1,4 @@
--*-Mode:text-*- -[Fri Feb 28 08:22:25 1997 by cxh]-
+-*-Mode:text-*- -[Mon Apr 14 13:57:54 1997 by cxh]-
 Version: $Id$
 
 src/gnu/README
@@ -221,6 +221,22 @@ DEC Alpha
 	messages like:
 		Unresolved:
 		_OtsRemainder32Unsigned
+
+
+	If you try to configure gcc or itcl and get messages like:
+		configure: error: can not find sources in 
+			--srcdir=/users/ptolemy/src/tcltk/itcl2.2 
+
+	The problem is that gnu sed has problems, below is an example:
+
+	218% echo "--srcdir=bar" | sed -e 's/[-_a-zA-Z0-9]*=//' 
+	--srcdir=bar
+	219% which sed
+	/usr/sww/bin/GNU/sed
+	220% echo "--srcdir=bar" | /usr/bin/sed -e 's/[-_a-zA-Z0-9]*=//' 
+	bar
+
+	The fix is to put /usr/bin in your path before GNU sed
 
 gcc and Purify
 --------------
