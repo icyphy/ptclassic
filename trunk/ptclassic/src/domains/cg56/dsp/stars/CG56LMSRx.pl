@@ -32,19 +32,21 @@ defstar {
 	type { FIX }
     }
     explanation {
-	DSP56000 - complex lms filter star.
-        The number of initial coefficients specify the order.
-        	y = c' * x	c[n+1] = c[n] + (step_size)(x)(e')
-	where x = input, c = coefficients, y = output,
-	      e = error (desired output - actual output,
-        and ' represents the complex conjugate.
-	Default step size 0.01
-        Error_delay must specify the total delay between
-           	the filter output and the error input.
-	 Last_tap_min constrains the minimum magnitude of both
-		the real & imaginary parts of the last tap.
-        Default coefficients give a 7th order filter, with the
-        		middle real tap = 0.5 and all others zero.
+For this complex LMS filter star,
+the number of initial coefficients specify the order.
+.EQ
+y = c' * x
+c[n+1] = c[n] + (step_size)(x)(e')
+.EN
+where $x$ = input, $c$ = coefficients, $y$ = output, $e$ = error
+(desired output - actual output), and ' represents the complex conjugate.
+Default \fIstep_size\fR is 0.01
+The parameter \fIerror_delay\fR must specify the total delay between
+the filter output and the error input, and
+\fIlast_tap_min\fR constrains the minimum magnitude of both
+the real and imaginary parts of the last tap.
+Default coefficients give a 7th-order filter, with the middle real
+tap equal to 0.5 and all other taps zero.
     }
     state {
 	name { init_taps_r }

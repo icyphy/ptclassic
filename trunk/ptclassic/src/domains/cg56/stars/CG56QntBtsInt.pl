@@ -13,8 +13,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 nonlinear functions library }
         explanation {
 .Id "quantizer"
-Normally, the output is just the two's complement number
-given by the top noBits of the input (for integer output)
+Normally, the \fIoutput\fR is just the two's complement number
+given by the top \fInoBits\fR of the \fIinput\fR (for integer output).
         }
 	input	{
 		name { input }

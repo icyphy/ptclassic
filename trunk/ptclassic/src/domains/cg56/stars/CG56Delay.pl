@@ -1,7 +1,7 @@
 defstar {
 	name { Delay }
 	domain { CG56 }
-	desc { A delay star of parameter totalDelay unit delays. }
+	desc { A delay star of an integer number of time units. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright {
@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 control library }
         explanation {
-A delay star of parameter totalDelay unit delays.
+A delay star of \fItotalDelay\fR unit time delays.
 }
 
         input  {

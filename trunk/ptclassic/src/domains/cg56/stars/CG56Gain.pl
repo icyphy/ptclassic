@@ -2,8 +2,8 @@ defstar {
 	name { Gain }
 	domain { CG56 }
 	desc {
-The output is set to the input multiplied by a gain term.  The gain must
-be in [-1,1].
+The output is set to the input multiplied by a gain term.
+The gain must be in the interval [-1,1].
 }
 	version { $Id$ }
 	author { J. Buck }
@@ -16,8 +16,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 arithmetic library }
 	explanation {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
-The only special case is for gain 1.  We eliminate ourselves from the circuit
-in that case.
+The only special case is for a \fIgain\fR of 1.
+We eliminate ourselves from the circuit in that case.
 	}
 	protected {
 		short identity;

@@ -14,15 +14,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 nonlinear functions library }
 	explanation {
-.PP
-The star quantizes the input to one of N+1 possible output levels
-using N thresholds.
-For an input less than or equal to the Nth threshold,
+The star quantizes the input to one of $N+1$ possible output levels
+using $N$ thresholds.
+For an input less than or equal to the $N$th threshold,
 but larger than all previous thresholds,
-the output will be the Nth level.
+the output will be the $N$th level.
 If the input is greater than all thresholds,
-the output is the (N+1)th level.
-There must be one more level than thresholds.
+the output is the $(N+1)$th level.
+The \fIlevels\fR parameter must be one greater than the number
+of \fIthresholds\fR.
 	}
 	input {
 		name {input}
