@@ -126,7 +126,7 @@ extern "C" {
 		StringList shellCommand = "matlab "; 
 		shellCommand << ((char *) options);
 		if ( matlabEnginePtr != 0 ) {
-		  if ( ! engClose( matlabEnginePtr ) ) {
+		  if ( engClose( matlabEnginePtr ) ) {
 		    Error::warn(*this, "Error when terminating connection ",
 			        "to the Matlab kernel.");
 		  }
@@ -250,30 +250,54 @@ extern "C" {
 
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
+		StringList errstr;
+		char *verbstr;
+		int fatalErrorFlag = FALSE;
 		for ( int j = 0; j < numOutputs; j++ ) {
+		  // create a new Matlab matrix for deallocation and save ref.
 		  Matrix *matlabMatrix =
 			engGetMatrix( matlabEnginePtr,
 				      (char *) matlabOutputNames[j] );
 
-		  double *realp = mxGetPr( matlabMatrix );
-		  double *imagp = mxGetPi( matlabMatrix );
+		  // allocate a Ptolemy matrix
 		  int rows = mxGetM( matlabMatrix );
 		  int cols = mxGetN( matlabMatrix );
-		  LOG_NEW;
 		  ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
-		  for ( int jrow = 0; jrow < rows; jrow++ ) {
-		    for ( int jcol = 0; jcol < cols; jcol++ ) {
-		      Amatrix[jrow][jcol] = Complex(*realp++, *imagp++);
+
+		  if ( mxIsFull(matlabMatrix) ) {
+		    // for real matrices, imagp will be null
+		    double *realp = mxGetPr( matlabMatrix );
+		    double *imagp = mxGetPi( matlabMatrix );
+		    LOG_NEW;
+		    for ( int jrow = 0; jrow < rows; jrow++ ) {
+		      for ( int jcol = 0; jcol < cols; jcol++ ) {
+		        double realValue = ( realp ) ? ( *realp++ ) : 0.0;
+		        double imagValue = ( imagp ) ? ( *imagp++ ) : 0.0;
+		        Amatrix[jrow][jcol] = Complex(realValue, imagValue);
+		      }
 		    }
+		  }
+		  else {
+		    if ( ! fatalErrorFlag ) {
+		      errstr = "For the Matlab command ";
+		      errstr << matlabCommand << ", ";
+		      verbstr = " is not a full matrix.";
+		    }
+		    else {
+		      errstr << " and ";
+		      verbstr = " are not full matrices.";
+		    }
+		    errstr << matlabOutputNames[j];
+		    fatalErrorFlag = TRUE;
 		  }
 
 		  // save the pointer to the new Matlab matrix for deallocation
 		  matlabOutputMatrices[j] = matlabMatrix;
 
-		  // Write the matrix to output port j
-		  // Do not delete Amatrix--- particle class will handle that
-		  PortHole* oportp = nextp++;
-		  ((*oportp)%0) << Amatrix;
+		  // write the matrix to output port j
+		  // do not delete Amatrix--- particle class will handle that
+		  PortHole *oportp = nextp++;
+		  (*oportp)%0 << Amatrix;
 		}
 
 		// free Matlab memory-- assume Matlab memory alloc is efficient
@@ -282,6 +306,14 @@ extern "C" {
 		}
 		for ( int m = 0; m < numOutputs; m++ ) {
 		  mxFreeMatrix(matlabOutputMatrices[m]);
+		}
+
+		// close Matlab connection and exit Ptolemy if fatal error
+		if ( fatalErrorFlag ) {
+		  engClose(matlabEnginePtr);
+		  if ( matlabInputMatrices != 0 ) free( matlabInputMatrices );
+		  if ( matlabOutputMatrices != 0 ) free( matlabOutputMatrices );
+		  Error::abortRun(*this, (char *) errstr, verbstr);
 		}
 	}
 
@@ -292,7 +324,7 @@ extern "C" {
 	}
 
 	wrapup {
-		if ( ! engClose(matlabEnginePtr) ) {
+		if ( engClose(matlabEnginePtr) ) {
 		  Error::warn(*this, "Error when terminating connection ",
 			      "to the Matlab kernel.");
 		}
