@@ -54,7 +54,7 @@ OTHERCFLAGS =
 # 'configure' creates these in the directory above.
 include ../tcl.mk
 
-LIB =		libtycgc(TCL_SHLIB_SUFFIX)
+LIB =		libtycgc$(TCL_SHLIB_SUFFIX)
 
 INCLUDE = \
 	-I./ \
