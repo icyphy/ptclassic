@@ -58,6 +58,7 @@ PL_SRCS= \
  CGCVISFFTCx.pl \
  CGCVISFIR.pl \
  CGCVISMpyDblSh.pl \
+ CGCVISMpySh.pl \
  CGCVISPackSh.pl \
  CGCVISSubSh.pl \
  CGCVISUnpackSh.pl
