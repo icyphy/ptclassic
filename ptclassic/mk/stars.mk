@@ -834,7 +834,7 @@ ifdef SDF
 	# Star for Annapolis Micro System Wildforce board
 	ifdef SDFWILDFORCE
 		CUSTOM_DIRS += $(SDFDIR)/wildforce/stars
-		STARS += $(LIBDIR)/sdfwildforce.o
+		STARS += $(LIBDIR)/sdfwildforcestars.o
 		LIBS += -lsdfwildforcestars $(WILDFORCE_LIBSPEC)
 		LIBFILES += $(LIBDIR)/libsdfwildforcestars.$(LIBSUFFIX)
 	endif
