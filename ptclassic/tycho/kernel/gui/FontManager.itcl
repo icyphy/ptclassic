@@ -54,11 +54,11 @@ option add *FontManager.fixedBold \
 option add *FontManager.fixedItalic \
 	{{lucidatypewriter 14 medium i} {courier 14 medium i}}
 option add *FontManager.variable \
-	{{lucida 14 medium r} {helvetica 14 medium r} 9x15}
+	{{helvetica 14 medium r} {lucida 14 medium r} 9x15}
 option add *FontManager.variableBold \
-	{{lucida 14 bold r} {helvetica 14 bold r} 9x15bold}
+	{{helvetica 14 bold r} {lucida 14 bold r} 9x15bold}
 option add *FontManager.variableItalic \
-	{{lucida 14 medium i} {helvetica 14 medium i}}
+	{{helvetica 14 medium i} {lucida 14 medium i}}
 
 #########################################################################
 #### FontManager
@@ -137,6 +137,15 @@ class ::tycho::FontManager {
     private common sizeSelection 14
     private common weightSelection medium
     private common styleSelection r
+
+    # An array indexed by valid fonts, cached for efficiency.
+    private common validFonts
+
+    # An array indexed by font specs searched already, for efficiency.
+    private common validFontSpecs
+
+    # An array indexed by font spec lists, for efficiency.
+    private common validFontSpecLists
 }
 
 #########################################################################
@@ -430,6 +439,9 @@ body ::tycho::FontManager::defaultFont {optionName} {
 # but a valid font is always returned.
 #
 body ::tycho::FontManager::findFont {specs} {
+    if [::info exists validFontSpecLists($specs)] {
+        return $validFontSpecLists($specs)
+    }
     foreach spec $specs {
 	if {[llength $spec] == 1} {
 	    if [fontValid $spec] {
@@ -438,6 +450,7 @@ body ::tycho::FontManager::findFont {specs} {
 	} elseif {[llength $spec] == 4} {
 	    set ft [eval getFont $spec]
 	    if {$ft != {}} {
+                set validFontSpecLists($specs) $ft
 		return $ft
 	    }
 	} else {
@@ -457,9 +470,10 @@ body ::tycho::FontManager::findFont {specs} {
 # in the window.
 #
 body ::tycho::FontManager::fontValid {font} {
+    if [::info exists validFonts($font)] {return 1}
     if {[catch {configure -displayfont $font}] == 0} {
 	set commandResult($prefix) $font
-	$itk_component(fontname) configure -text $font
+        set validFonts($font) 1
 	return 1
     }
     return 0
@@ -491,6 +505,8 @@ body ::tycho::FontManager::getCurrentFont {} {
 # method.
 #
 body ::tycho::FontManager::getFont {family {size 14} {weight medium} {style r}} {
+    set nm "$family-$size-$weight-$style"
+    if [::info exists validFontSpecs($nm)] {return $validFontSpecs($nm)}
     set foundries \
 	    [option get $itk_component(hull) preferredFoundries FontManager]
     set resolutions \
@@ -503,6 +519,7 @@ body ::tycho::FontManager::getFont {family {size 14} {weight medium} {style r}} 
 		set font \
 "-$foundry-$family-$weight-$style-normal-*-*-${size}0-$res-$res-*-*-$cod-*"
 	        if [fontValid $font] {
+                    set validFontSpecs($nm) $font
 		    return $font
 		}
 	    }
@@ -514,11 +531,13 @@ body ::tycho::FontManager::getFont {family {size 14} {weight medium} {style r}} 
 
 #########################################################################
 #### getValidSize
-# Return the next size larger than the argument in the sizes list,
-# or the largest value in the sizes list.
+# Return the next size larger than or equal to the argument in the
+# sizes list, or the largest value in the sizes list.
 #
 body ::tycho::FontManager::getValidSize {proposed} {
     set sizes [option get $itk_component(hull) sizes FontManager]
+    # The common case is that the proposed size is OK.  Optimize for this.
+    if {[lsearch -exact $sizes $proposed] >= 0} {return $proposed}
     foreach size $sizes {
 	if {$proposed <= $size} {return $size}
     }
@@ -541,11 +560,13 @@ body ::tycho::FontManager::help {} {
 # If the font is not valid, report an error.
 #
 body ::tycho::FontManager::setCurrentFont {} {
-    if {[getFont $familySelection $sizeSelection \
-	    $weightSelection $styleSelection] == {}} {
+    if {[set font [getFont $familySelection $sizeSelection \
+	    $weightSelection $styleSelection]] == {}} {
 	error "Invalid font specification: $familySelection, $sizeSelection, \
 		$weightSelection, $styleSelection"
     }
+    $itk_component(fontname) configure -text $font        
+    configure -displayfont $font
 }
 
 #########################################################################
@@ -557,6 +578,8 @@ body ::tycho::FontManager::setCurrentFont {} {
 #
 body ::tycho::FontManager::tryFont {font} {
     if [fontValid $font] {
+        $itk_component(fontname) configure -text $font        
+        configure -displayfont $font
 	set commandResult($prefix) $font
     } {
 	error "Invalid font: $font"
