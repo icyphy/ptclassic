@@ -1,7 +1,10 @@
 defstar {
 	name { DownCounter }
 	domain { DDF }
-	desc { A down counter from the input value to zero. }
+	desc {
+Given an integer input with value N, produce a sequence of output
+integers with values (N-1), (N-2), ... 1, 0.
+	}
 	version { $Id$ }
 	author { Soonhoi Ha }
 	copyright {
@@ -11,9 +14,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DDF library }
-	explanation {
-This star generates (int-1), (int-2), ... 1,0 samples for (int) input.
-	}
 	method {
 		name { readTypeName }
 		access { public }

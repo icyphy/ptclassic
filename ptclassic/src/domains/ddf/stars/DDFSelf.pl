@@ -2,12 +2,24 @@ defstar {
 	name { Self }
 	domain { DDF }
 	desc {
-This star represents the galaxy given by the parameter "recurGal",
-which must be above it in the hierarchy.  The instance of the galaxy
-is not created until it is actually needed, so the number of instances
-(the depth of the recursion) does not need to be known a-priori.
-If the parameter "reinitialize" is FALSE, then the instance of the
-galaxy is created the first time it fires and reused on subsequent firings.
+This is a first exploration of recursion and higher-order
+functions in dataflow.  It is still experimental, so do not
+expect it to be either efficient or bug-free.
+
+The star "represents" the galaxy given by the parameter "recurGal",
+which must be above it in the hierarchy.  That is, when the Self
+star fires, it actually invokes the galaxy that it represents.
+Since that galaxy is above the Self star in the hiearchy, it
+contains the Self star somewhere within it.  Thus, this star
+implements recursion.  Since the Self star takes an argument
+("recurGal") that specifies the function to invoke, it is itself
+a higher-order function.
+
+The instance of the "recurGal" galaxy is not created until it is
+actually needed, so the number of instances (the depth of the
+recursion) does not need to be known a-priori.  If the parameter
+"reinitialize" is FALSE, then the instance of the galaxy is created
+the first time it fires and reused on subsequent firings.
 If "reinitialize" is TRUE, then the galaxy is created on every firing
 and destroyed after the firing.  Inputs are sent to the instance
 of the galaxy and outputs are retrieved from it.  The inputs of the

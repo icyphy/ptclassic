@@ -2,9 +2,10 @@ defstar {
 	name { EndCase }
 	domain { DDF }
 	desc {
-Depending on the "control" input, route an "input" to
-the "output".  The value of the control token should lie between
-zero and N-1, inclusive, where N is the number of inputs.
+Depending on the "control" particle, consume a particle from one of
+the data inputs and send it to the output.  The control particle
+should have value between zero and N-1, inclusive, where N is the
+number of data inputs.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }

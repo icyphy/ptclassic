@@ -2,8 +2,8 @@ defstar {
 	name { Case }
 	domain { DDF }
 	desc {
-This star routes an "input" token to one "output" depending on the 
-"control" token.  The value of the control token should lie between
+Route an input particle to one of the outputs depending on the 
+control particle.  The control particle should have value between
 zero and N-1, inclusive, where N is the number of outputs.
 	}
 	version { $Id$ }
