@@ -38,50 +38,55 @@ namespace ::tycho {
 ##########################################################################
 ## Solid
 #
-# A 3D polygon. This accepts all "standard" relief options: flat,
+# A psuedo-3D polygon. This accepts all "standard" relief options: flat,
 # raised, sunken, ridge, and groove. Because
 # of some funnies with Tk's coordinates, the last two don't work too
 # well with sharp angles (< 25 or so), but with moderate angles
 # they look fine.
 #
+# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
+#
 class ::tycho::Solid {
     inherit ::tycho::Picture
 
-    # Create a new Solid item
+    # Create a new item
     proc construct {id canvas slate tags args}
 
     ###################################################################
     ####                            options                        ####
 
     # The width of the relief border
-    common borderwidth
+    common _borderwidth
 
     # The color of the frame
-    common color
+    common _color
 
     # The relief: raised, sunken, groove, ridge, or flat
-    common relief
+    common _relief
+
+    ###################################################################
+    ####                     option update procs                   ####
+
+    # Update the *-borderwidth* option
+    proc _borderwidth {id canvas slate borderwidth}
+    
+    # Update the *-color* option
+    proc _color {id canvas slate color}
+    
+    # Update the *-relief* option
+    proc _relief {id canvas slate relief}
 
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the -borderwidth option
-    proc borderwidth {id canvas slate bw}
-    
-    # Update the -color option
-    proc color {id canvas slate co}
-    
-    # Set or get the Solid's coordinates
+    # Set or get the item's coordinates
     proc coords {id canvas slate args}
 
     # Create a ghost of the polygon
     proc ghost {id canvas slate}
 
-    # Update the -relief option
-    proc relief {id canvas slate re}
-
     ###################################################################
-    ####                         protected variables               ####
+    ####                         picture components                ####
 
     # The polygons that are "lit"
     common lit
@@ -95,8 +100,11 @@ class ::tycho::Solid {
     # The polygons in the inside lit region (ridge and groove reliefs only)   
     common notshaded
     
-    # The polygonal surface of the Solid
+    # The polygonal surface
     common surface
+
+    ###################################################################
+    ####                         protected variables               ####
 
     # The object used to get shades of color
     common colorShadesObject
@@ -122,12 +130,13 @@ class ::tycho::Solid {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
-    set methodtable(borderwidth) ::tycho::Solid::borderwidth
-    set methodtable(color)       ::tycho::Solid::color
+    set methodtable(_borderwidth) ::tycho::Solid::_borderwidth
+    set methodtable(_color)       ::tycho::Solid::_color
+    set methodtable(_relief)      ::tycho::Solid::_relief
+
     set methodtable(construct)   ::tycho::Solid::construct
     set methodtable(coords)      ::tycho::Solid::coords
     set methodtable(ghost)       ::tycho::Solid::ghost
-    set methodtable(relief)      ::tycho::Solid::relief
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Picture::optiondefault]
@@ -135,6 +144,123 @@ class ::tycho::Solid {
     set optiondefault(-color)       background
     set optiondefault(-borderwidth) 2
     set optiondefault(-relief)      raised
+}
+
+##########################################################################
+## -borderwidth option configuration
+#
+# Update the *-borderwidth* configuration option. Just cause a redraw
+# by calling the coords{} method with the current coordinates.
+#
+# This could be made a lot faster by duplicating code.
+#
+body ::tycho::Solid::_borderwidth {id canvas slate borderwidth} {
+    set _borderwidth($id) $borderwidth
+    eval coords [$canvas coords $primary($id)]
+}
+
+##########################################################################
+## -color option configuration
+#
+# Update the *-color* configuration option.
+#
+body ::tycho::Solid::_color {id canvas slate color} {
+    set _color($id) $color
+    set colorShadesObject($id) [::tycho::Shades::new $_color($id)]
+
+    # FIXME: quick and dirty
+    _relief $id $canvas $_relief($id)
+    $canvas itemconfigure $surface($id) -fill [$colorShadesObject($id) matt]
+}
+
+##########################################################################
+## -relief option configuration
+#
+body ::tycho::Solid::_relief {id canvas slate relief} {
+    set _relief($id) $relief
+    if { $_relief($id) == "ridge" || $_relief($id) == "groove" } {
+
+	set light [$colorShadesObject($id) light]
+	set dark  [$colorShadesObject($id) dark]
+
+	if { $_relief($id) == "groove" } {
+	    set light $dark
+	    set dark [$colorShadesObject($id) light]
+	}
+
+	# Change the color of the lit and shaded components
+	foreach i $lit($id) {
+	    $canvas itemconfigure $i -fill $light
+	}
+	foreach i $shaded($id) {
+	    $canvas itemconfigure $i -fill $dark
+	}
+
+	# If the relief has changed to ridge or groove, then we
+	# have to create the inside border polygons, and move
+	# the surface if it exists.
+	if { ! [info exists notlit($id)] } {
+
+	    set coords [$canvas coords $primary($id)]
+
+	    assign inside junk1 junk2 \
+		    [polyBorders 45 -135 $coords $_borderwidth($id)]
+	    assign inside notlitC notshadedC \
+		    [polyBorders 45 -135 $inside $_borderwidth($id)]
+
+	    set notlit($id)    {}
+	    set notshaded($id) {}
+
+	    adjust $id $canvas "notshaded" $light $notshadedC
+	    adjust $id $canvas "notlit"    $dark  $notlitC
+
+	    if { [::info exists surface($id)] } {
+		eval $canvas coords $surface($id) $inside
+	    }
+	} else {
+	    foreach i $notshaded($id) {
+		$canvas itemconfigure $i -fill $light
+	    }
+	    foreach i $notlit($id) {
+		$canvas itemconfigure $i -fill $dark
+	    }
+	}
+    } else {
+	set light [$colorShadesObject($id) light]
+	set dark  [$colorShadesObject($id) dark]
+
+	if { $_relief($id) == "sunken" } {
+	    set light $dark
+	    set dark [$colorShadesObject($id) light]
+	} elseif { $_relief($id) == "flat" } {
+	    set light [$colorShadesObject($id) matt]
+	    set dark $light
+	}
+
+	# Change the color of the various components
+	foreach i $lit($id) {
+	    $canvas itemconfigure $i -fill $light
+	}
+	foreach i $shaded($id) {
+	    $canvas itemconfigure $i -fill $dark
+	}
+
+	# If the relief has changed _from_ ridge or groove, then we
+	# delete the inside border polygons and move the surface.
+	if { [::info exists notlit($id)] } {
+	    
+	    eval $canvas delete $notlit($id) $notshaded($id)
+	    unset notlit($id)
+	    unset notshaded($id)
+
+	    if { [::info exists surface($id)] } {
+		set coords [$canvas coords $primary($id)]
+		assign inside junk1 junk2 \
+			[polyBorders 45 -135 $coords $_borderwidth($id)]
+		eval $canvas coords $surface($id) $inside
+	    }
+	}
+    }
 }
 
 ##########################################################################
@@ -177,34 +303,6 @@ body ::tycho::Solid::adjust {id canvas name shade coords} {
 }
 
 ##########################################################################
-## borderwidth
-#
-# Update the *-borderwidth* configuration option. Just cause a redraw
-# by calling the coords{} method with the current coordinates.
-#
-# This could be made a lot faster by duplicating code.
-#
-body ::tycho::Solid::borderwidth {id canvas slate bw} {
-    eval $this coords [$canvas coords primary($id)]
-}
-
-
-##########################################################################
-## color
-#
-# Update the *-color* configuration option.
-#
-body ::tycho::Solid::color {id canvas slate co} {
-    set color($id) $co
-    set colorShadesObject($id) [::tycho::Shades::new $color($id)]
-
-    # FIXME: quick and dirty
-    relief $id $canvas $relief($id)
-    $canvas itemconfigure $surface($id) -fill [$colorShadesObject($id) matt]
-}
-
-
-##########################################################################
 ## construct
 #
 body ::tycho::Solid::construct {id canvas slate tags args} {
@@ -212,11 +310,11 @@ body ::tycho::Solid::construct {id canvas slate tags args} {
 
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $options] {
-	set [string trimleft $option -]($id) $value
+	set _[string trimleft $option -]($id) $value
     }
 
     # This object is used to get the shades of color
-    set colorShadesObject($id) [::tycho::Shades::new $color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $_color($id)]
     
     # Create the primary component for the outline coordinates
     set primary($id) [eval $canvas create polygon $args \
@@ -234,6 +332,10 @@ body ::tycho::Solid::construct {id canvas slate tags args} {
     eval coords $id $canvas $slate $args
 }
 
+
+    ##################################################################
+    ##################################################################
+    ####                     public methods                       ####
 
 ##########################################################################
 ## coords
@@ -262,7 +364,7 @@ body ::tycho::Solid::coords {id canvas slate args} {
 
     # Get the coordinates of the borders and the surface component
     assign inside litC shadedC \
-	    [polyBorders 45 -135 $coords $borderwidth($id)]
+	    [polyBorders 45 -135 $coords $_borderwidth($id)]
 
     # Adjust the positions of the border polygons, creating and
     # deleting them as necessary.
@@ -271,9 +373,9 @@ body ::tycho::Solid::coords {id canvas slate args} {
 
     # If the relief is "groove" or "ridge," adjust the inner borders
     # as well. Note that _inside_ is over-written with new values.
-    if { $relief($id) == "ridge" || $relief($id) == "groove" } {
+    if { $_relief($id) == "ridge" || $_relief($id) == "groove" } {
 	assign inside notlitC notshadedC \
-		[polyBorders 45 -135 $inside $borderwidth($id)]
+		[polyBorders 45 -135 $inside $_borderwidth($id)]
 
 	adjust $id $canvas "notshaded" [$colorShadesObject($id) light] $notshadedC
 	adjust $id $canvas "notlit"    [$colorShadesObject($id) dark]  $notlitC
@@ -296,98 +398,6 @@ body ::tycho::Solid::coords {id canvas slate args} {
 body ::tycho::Solid::ghost {id canvas slate} {
     eval $canvas create polygon [$canvas coords $primary($id)] \
 	    -outline grey {-fill {}}
-}
-
-##########################################################################
-## relief
-#
-# Update the *-relief* configuration option.
-#
-body ::tycho::Solid::relief {id canvas slate re} {
-    set relief($id) $re
-    if { $relief($id) == "ridge" || $relief($id) == "groove" } {
-
-	set light [$colorShadesObject($id) light]
-	set dark  [$colorShadesObject($id) dark]
-
-	if { $relief($id) == "groove" } {
-	    set light $dark
-	    set dark [$colorShadesObject($id) light]
-	}
-
-	# Change the color of the lit and shaded components
-	foreach i $lit($id) {
-	    $canvas itemconfigure $i -fill $light
-	}
-	foreach i $shaded($id) {
-	    $canvas itemconfigure $i -fill $dark
-	}
-
-	# If the relief has changed to ridge or groove, then we
-	# have to create the inside border polygons, and move
-	# the surface if it exists.
-	if { ! [info exists notlit($id)] } {
-
-	    set coords [$canvas coords $primary($id)]
-
-	    assign inside junk1 junk2 \
-		    [polyBorders 45 -135 $coords $borderwidth($id)]
-	    assign inside notlitC notshadedC \
-		    [polyBorders 45 -135 $inside $borderwidth($id)]
-
-	    set notlit($id)    {}
-	    set notshaded($id) {}
-
-	    adjust $id $canvas "notshaded" $light $notshadedC
-	    adjust $id $canvas "notlit"    $dark  $notlitC
-
-	    if { [::info exists surface($id)] } {
-		eval $canvas coords $surface($id) $inside
-	    }
-	} else {
-	    foreach i $notshaded($id) {
-		$canvas itemconfigure $i -fill $light
-	    }
-	    foreach i $notlit($id) {
-		$canvas itemconfigure $i -fill $dark
-	    }
-	}
-    } else {
-	set light [$colorShadesObject($id) light]
-	set dark  [$colorShadesObject($id) dark]
-
-	if { $relief($id) == "sunken" } {
-	    set light $dark
-	    set dark [$colorShadesObject($id) light]
-	} elseif { $relief($id) == "flat" } {
-	    set light [$colorShadesObject($id) matt]
-	    set dark $light
-	}
-
-	# Change the color of the various components
-	foreach i $lit($id) {
-	    $canvas itemconfigure $i -fill $light
-	}
-	foreach i $shaded($id) {
-	    $canvas itemconfigure $i -fill $dark
-	}
-
-	# If the relief has changed _from_ ridge or groove, then we
-	# delete the inside border polygons and move the surface.
-	if { [::info exists notlit($id)] } {
-	    
-	    eval $canvas delete $notlit($id) $notshaded($id)
-	    unset notlit($id)
-	    unset notshaded($id)
-
-	    if { [::info exists surface($id)] } {
-		set coords [$canvas coords $primary($id)]
-		assign inside junk1 junk2 \
-			[polyBorders 45 -135 $coords $borderwidth($id)]
-		eval $canvas coords $surface($id) $inside
-	    }
-	}
-    }
 }
 
 ##########################################################################

@@ -1,4 +1,4 @@
-##########################################################################
+ ##########################################################################
 # @Version: $Id$
 # @Author: H. John Reekie
 #
@@ -30,7 +30,7 @@
 #######################################################################
 #### Selector
 #
-# A _Selector_ is an interactor that selects canvas items. It can
+# A _Selector_ is an interactor that selects items. It can
 # be configured to select items by clicking, toggle items in and out
 # of the selection set, and, together with another mouse-follower
 # interactor, supports drag-selecting.
@@ -74,7 +74,7 @@ class ::tycho::Selector {
 
     # A script that controls whether interaction events are forwarded
     # to the slate (or proxy) or not. If this script is null, then
-    # events are forwards; if it is not null, then commands are forwarded
+    # events are forwarded; if it is not null, then commands are forwarded
     # only if it returns true. It has no arguments.
     public variable movepredicate {}
 

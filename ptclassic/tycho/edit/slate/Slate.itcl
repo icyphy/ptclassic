@@ -82,7 +82,7 @@ proc ::tycho::slate {pathName args} {
 #######################################################################
 #### Slate
 #
-# The slate is widget basedon the Tk canbas that support "complex"
+# The slate is a widget based on the Tk canbas that support "complex"
 # items, each of which can contain many "simple" canvas items.
 # All methods of the Slate can manipulate either simple or
 # complex items more-or-less transparently.
@@ -121,9 +121,8 @@ proc ::tycho::slate {pathName args} {
 #
 # The Slate class is designed to be fully compatible with the canvas,
 # so some of the methods are less efficient than they could be.
-# We are considering writing a second class, <i>Scratchpad</i>, which
-# will provide a faster interface for code that doesn't need
-# backwards compatibility.
+# We are considering writing a second class which will provide a
+# faster interface for code that doesn't need backwards compatibility.
 #
 class ::tycho::Slate {
     inherit ::tycho::TWidget
@@ -207,8 +206,8 @@ class ::tycho::Slate {
 	$canvas insert $id $beforeThis $string
     }
 
-    # Interact with complex items
-    method interact {mode item args}
+    # Interact with items
+    method interact {command item args}
 
     # Get a configuration option of an item
     method itemcget {id option}
@@ -500,7 +499,7 @@ body ::tycho::Slate::aspect {id args} {
 #### bbox
 #
 # Return the bounding box of any number of items, as a four-list. Each
-# argument can be an item, a item, or a tag. If there are no complex
+# argument can be an item or a tag. If there are no
 # items matching the tags, return the null string -- the caller must
 # check for this condition. (This behavior matches that of the canvas).
 #
@@ -568,7 +567,7 @@ body ::tycho::Slate::canvasy {screeny {gridspacing {}}} {
 #######################################################################
 #### component
 #
-# Access a component of an item. Pictures only support components
+# Access a component of a complex item. Items only support components
 # if they have been explicitly declared as such in the "components"
 # variable in the complex item class.
 #
@@ -583,6 +582,9 @@ body ::tycho::Slate::canvasy {screeny {gridspacing {}}} {
 # the slate thus still works as expected.
 #
 # <b>Note</b>: The first argument cannot be an arbitrary tag.
+#
+# FIXME: The bulk of this method should probably be moved into the
+# Picture class.
 #
 body ::tycho::Slate::component {id {component {}} {method {}} args} {
     # Check for "component canvas"
@@ -670,8 +672,9 @@ body ::tycho::Slate::coords {id args} {
 # for primitive canvas items; see the
 # <a> href="../../../complex items/doc/codeDoc/index.html"><b>complex items</b></a>
 # hierarchy for complex items implemented by the slate.
-#
-# FIXME: Explain how to create hierarchical complex items.
+# If the options include <code>-tag</code> with
+# tags returned by calling <code>gettags</code> on a complex item, the new 
+# item will be added to that complex item.
 #
 body ::tycho::Slate::create {type args} {
     if { [string match {[a-z]*} $type] } {
@@ -788,7 +791,7 @@ body ::tycho::Slate::delete {args} {
 # <li>*-constraints*: Include all constraints in the description.
 # </ul>
 #
-# FIXME: -hierarchical and -constraints options do nothing.
+# FIXME: *-hierarchical* and *-constraints* options do nothing.
 #
 body ::tycho::Slate::describe {id args} {
     # Create a "lambda" script with slate as argument
@@ -1095,8 +1098,8 @@ body ::tycho::Slate::gettags {id} {
 #### interact "drag" id x y
 #### interact "release" id
 #
-body ::tycho::Slate::interact {mode id args} {
-    switch -exact $mode {
+body ::tycho::Slate::interact {command id args} {
+    switch -exact $command {
 	"create" {
 	    # Create an interactor
 	    set interactor [::info context]::[eval ::tycho::$id #auto \
@@ -1185,7 +1188,7 @@ body ::tycho::Slate::itemcget {id option} {
 	}
     }
 
-    # If we get to here, id must be a complex item item
+    # If we get to here, id must be a complex item
     if { ! [string compare $option -tags] } {
 	# Return the tags of this complex item using the primary
 	return [$canvas gettags \
@@ -1195,7 +1198,7 @@ body ::tycho::Slate::itemcget {id option} {
 	    [list ::info exists optiondefault($option)]] } {
 	# Read the value directly from the class
 	return [@scope ::tycho::$itemtype($id) \
-		[list set [string trimleft $option -]($id)]]
+		[list set _[string trimleft $option -]($id)]]
     } else {
 	error "unknown option $option"
     }
@@ -1235,12 +1238,12 @@ body ::tycho::Slate::itemconfigure {id args} {
 	# We've been asked for all configuration values. Use
 	# the defaultoptions array to get the names of all options,
 	# and read their values.
- 	set result {}
+	set result {}
 	foreach option [@scope ::tycho::$itemtype($id) \
 		{array names optiondefault}] {
 	    # Read its value
 	    set value [@scope ::tycho::$itemtype($id) \
-		    [list set [string trimleft $option -]($id)]]
+		    [list set _[string trimleft $option -]($id)]]
 	    # Read default value
 	    set default [@scope ::tycho::$itemtype($id) \
 		    [list set optiondefault($option)]]
@@ -1260,7 +1263,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 		[list ::info exists optiondefault($option)]] } {
 	    # Read its value
 	    set value [@scope ::tycho::$itemtype($id) \
-		    [list set [string trimleft $option -]($id)]]
+		    [list set _[string trimleft $option -]($id)]]
 	    # Read default value
 	    set default [@scope ::tycho::$itemtype($id) \
 		    [list set optiondefault($option)]]
@@ -1303,7 +1306,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 		# Call the proc on the class to set the option
 		if { [@scope ::tycho::$itemtype($id) \
 			[list ::info exists optiondefault($option)]] } {
-		    $this call $id [string trimleft $option -] $value
+		    $this call $id _[string trimleft $option -] $value
 		} else {
 		    error "unknown option \"$option\""
 		}
@@ -1399,8 +1402,8 @@ body ::tycho::Slate::moveto {tag x y {aspect center}} {
 # <b>Note</b>: The functionality of the method is still evolving,
 # and much of it may end up in other methods, such as component{}.
 #
-body ::tycho::Slate::picture {mode args} {
-    switch -exact $mode {
+body ::tycho::Slate::picture {command args} {
+    switch -exact $command {
 	"adopt" {
 	    eval $this adopt $args
 	}
@@ -1536,6 +1539,8 @@ body ::tycho::Slate::recreate {description args} {
 #### region
 #
 # FIXME: Not working yet.
+#
+# FIXME: Be sure to give Picture classes the chance to override.
 #
 body ::tycho::Slate::region {id args} {
     # If there are no arguments, just read the region.

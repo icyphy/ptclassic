@@ -39,16 +39,25 @@
 # and adding procedures to override the default implementations
 # in this class.
 #
-# Picture and all of its subclasses are not classes in the usual sense:
-# instead of instantiating these classes, the Slate calls procedures
-# of those classes with the ID of a complex item as the first argument;
+# Picture and its subclasses are not classes in the usual sense:
+# instead of instantiating these classes, the Slate creates a new item
+# ID that uniquely identifies it; instead of calling methods on an 
+# object, the slate calls procedures in 
+# those classes with the ID of the item as the first argument;
 # instead of instance variables, these classes manipulate common arrays
-# indexed by item ID. This evilness is needed to avoid creating large
-# numbers of Itcl objects, which is just too inefficient.
+# indexed by item ID. The Picture class and its subclasses have
+# mechanism to simulate inheritance and to give complex items options
+# just like regular Tk canvas items. This evilness is needed to avoid
+# creating large numbers of objects, which is just too inefficient
+# in Itcl. (I know this because I did it first...)
 #
 # Because every "method" is just a procedure, each takes as its first 
 # three arguments the item ID, the canvas on which the item is being
-# drawn, and the slate on which the item is being drawn.
+# drawn, and the slate on which the item is being drawn. Arguments
+# following those three are arguments that would be passed to 
+# methods if these classes implemented objects in the normal way.
+#
+# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
 #
 class ::tycho::Picture {
     inherit ::tycho::Uninstantiable
@@ -69,18 +78,42 @@ class ::tycho::Picture {
     proc ghost {id canvas slate}
     
     ###################################################################
-    ####                         protected variables               ####
+    ####                         picture components                ####
 
-    # The virtual "method" table
-    common methodtable
-
-    # Default values of this item's options
-    common optiondefault
-
-    # The "primary" component that defines the item's coordinates
+    # The "primary" component that defines the item's coordinates. 
+    # Every Picture class must create exactly one primitive canvas item
+    # and place its ID into this array indexed by the complex item ID.
+    # The Slate uses this component to manipulate the coordinates of
+    # complex items. Note: subclasses are _not_ to create their own 
+    # copy of this variable.
     common primary
 
-    # The "shape" of items of this type -- rectangle by default
+    ###################################################################
+    ####                         protected variables               ####
+
+    # The virtual "method" table. This is a common array indexed by
+    # method name, with contents being the actual procedure to call
+    # to implement the method. Every subclass of Picture must create
+    # its own copy of this array, and fill it with methods names and
+    # procedures. For example, the Picture class has an
+    # entry named "coords" which contains "::tycho::Picture::coords".
+    # This array implements "inheritance": if a method is not implements
+    # in a given class, then the array contains the name of a procedure
+    # in one of its superclasses. For example, the Frame class has an
+    # entry called "ghost" with the value "::tycho::Picture::ghost": if
+    # the Slate calls "ghost" in a Frame item, it will execute the
+    # procedure defined in the Picture class.
+    common methodtable
+
+    # Default values of this item's options. Every class must create
+    # its own copy of this array and initialize it with the default 
+    # values of the item's options.
+    common optiondefault
+
+    # The "shape" of items of this type. Every Picture class must create
+    # its own copy of this array and set it to a type that indicates
+    # what shape the complex item is: point, line, polygon, rectangle,
+    # or oval.
     common shape "rectangle"
 
     ###################################################################

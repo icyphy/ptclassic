@@ -35,10 +35,15 @@ namespace ::tycho {
     }
 }
 
+########################################################################
 ## Terminal
 #
 # A "terminal" for making connections to dataflow nodes and
 # such. This kind of terminal is based on arrowed lines.
+#
+# <a href="../internals/howtoread>Reading <i>Picture</i> documentation</a>.
+#
+# <b>Note</b>: This is an experimental class.
 #
 class ::tycho::Terminal {
     inherit ::tycho::Picture
@@ -51,19 +56,37 @@ class ::tycho::Terminal {
 
     # The direction of the terminal away from its connection point,
     # as a unit vector pair
-    common direction
+    common _direction
 
     # The fill color of the terminal
-    common fill
+    common _fill
 
     # The length of the terminal line
-    common length
+    common _length
 
     # The "style" of the terminal: "arrow," "doublearrow," or "blob"
-    common style
+    common _style
 
     # The type of the terminal: "input" or "output"
-    common type
+    common _type
+
+    ###################################################################
+    ####                     option update procs                   ####
+
+    # Update the *-direction* option
+    proc _direction {id canvas slate direction}
+    
+    # Update the *-fill* option
+    proc _fill {id canvas slate fill}
+    
+    # Update the *-length* option
+    proc _length {id canvas slate length}
+    
+    # Update the *-style* option
+    proc _style {id canvas slate length}
+    
+    # Update the *-type* option
+    proc _type {id canvas slate type}
 
     ###################################################################
     ####                         public procs                      ####
@@ -74,26 +97,14 @@ class ::tycho::Terminal {
     # Set or get the Terminal's coordinates
     proc coords {id canvas slate args}
     
-    # Update the *-direction* option
-    proc direction {id canvas slate di}
-    
-    # Update the *-fill* option
-    proc fill {id canvas slate fi}
-    
-    # Update the *-length* option
-    proc length {id canvas slate le}
-    
-    # Update the *-style* option
-    proc style {id canvas slate ty}
-    
-    # Update the *-type* option
-    proc type {id canvas slate ty}
+    ###################################################################
+    ####                         picture components                ####
+
+    # An component item used for terminal ends
+    common blobitem
 
     ###################################################################
     ####                         protected variables               ####
-
-    # All methods are looked up through a table
-    common methodtable
 
     # The virtual "method" table
     common methodtable
@@ -110,14 +121,15 @@ class ::tycho::Terminal {
     #### Set method table
     array set methodtable [array get ::tycho::Picture::methodtable]
 
+    set methodtable(_direction)  ::tycho::Terminal::_direction
+    set methodtable(_fill)       ::tycho::Terminal::_fill
+    set methodtable(_length)     ::tycho::Terminal::_length
+    set methodtable(_style)      ::tycho::Terminal::_style
+    set methodtable(_type)       ::tycho::Terminal::_type
+
     set methodtable(aspect)      ::tycho::Terminal::aspect
     set methodtable(construct)   ::tycho::Terminal::construct
     set methodtable(coords)      ::tycho::Terminal::coords
-    set methodtable(direction)   ::tycho::Terminal::direction
-    set methodtable(fill)        ::tycho::Terminal::fill
-    set methodtable(length)      ::tycho::Terminal::length
-    set methodtable(style)       ::tycho::Terminal::style
-    set methodtable(type)        ::tycho::Terminal::type
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Picture::optiondefault]
@@ -129,6 +141,139 @@ class ::tycho::Terminal {
     set optiondefault(-fill)      black
 }
 
+##########################################################################
+#### -direction option configuration
+#
+body ::tycho::Terminal::_direction {id canvas slate direction} {
+    set _direction($id) $direction
+    set coords [$canvas coords $primary($id)]
+
+    # Figure the other end.
+    set x1 [expr [lindex $coords 0] \
+	    + [lindex $_direction($id) 0] * $_length($id)]
+    set y1 [expr [lindex $coords 1] \
+	    + [lindex $_direction($id) 1] * $_length($id)]
+
+    # Change the coordinates
+    eval $canvas coords $primary($id) [lrange $coords 0 1] $x1 $y1
+
+    # Get the right appearance by setting the style option. Force
+    # redraw by setting style to nothing.
+    set style $_style($id)
+    set _style($id) {}
+    _style $id $canvas $style
+}
+
+##########################################################################
+#### -fill option configuration
+#
+body ::tycho::Terminal::_fill {id canvas slate fill} {
+    set _fill($id) $fill
+
+    $canvas itemconfigure $primary($id) -fill $_fill($id)
+    if { [::info exists blobitem($id)] } {
+	$canvas itemconfigure $blobitem($id) -fill $_fill($id)
+    }
+}
+
+##########################################################################
+#### -length option configuration
+#
+body ::tycho::Terminal::_length {id canvas slate length} {
+    set _length($id) $length
+    set coords [$canvas coords $primary($id)]
+
+    # Figure the other end.
+    set x1 [expr [lindex $coords 0] \
+	    + [lindex $_direction($id) 0] * $_length($id)]
+    set y1 [expr [lindex $coords 1] \
+	    + [lindex $_direction($id) 1] * $_length($id)]
+
+    # Change the coordinates
+    eval $canvas coords $primary($id) $coords $x1 $y1
+
+    # Get the right appearance by setting the style option. Force
+    # redraw by setting style to nothing.
+    set style $_style($id)
+    set _style($id) {}
+    _style $id $canvas $style
+}
+
+##########################################################################
+#### -style option configuration
+#
+body ::tycho::Terminal::_style {id canvas slate style} {
+    # Check direction of arrow
+    if { $style == "arrow" } {
+	if { $_type($id) == "input" } {
+	    $canvas itemconfigure $primary($id) -arrow first
+	} else {
+	    $canvas itemconfigure $primary($id) -arrow last
+	}
+	if { [::info exists blobitem($id)] } {
+	    $canvas delete $blobitem($id)
+	    unset blobitem($id)
+	}
+    } elseif { $style == "doublearrow" && $_style($id) != "doublearrow" } {
+	if { [::info exists blobitem($id)] } {
+	    $canvas delete $blobitem($id)
+	}
+
+	set coords [$canvas coords $primary($id)]
+	set xdir [lindex $_direction($id) 0]
+	set ydir [lindex $_direction($id) 1]
+
+	if { $_type($id) == "input" } {
+	    $canvas itemconfigure $primary($id) -arrow first
+	    set blobitem($id) [$canvas create line \
+		    [expr [lindex $coords 0] + $xdir * 5] \
+		    [expr [lindex $coords 1] + $ydir * 5] \
+		    [expr [lindex $coords 0] + $xdir * 6] \
+		    [expr [lindex $coords 1] + $ydir * 6] \
+		    -fill $_fill($id) \
+		    -arrow first \
+		    -tags [$canvas gettags $id]]
+	} else {
+	    $canvas itemconfigure $primary($id) -arrow last
+	    set blobitem($id) [$canvas create line \
+		    [expr [lindex $coords 2] - $xdir * 5] \
+		    [expr [lindex $coords 3] - $ydir * 5] \
+		    [expr [lindex $coords 2] - $xdir * 6] \
+		    [expr [lindex $coords 3] - $ydir * 6] \
+		    -fill $_fill($id) \
+		    -arrow first \
+		    -tags [$canvas gettags $id]]
+	}
+    } elseif { $style == "blob" && $_style($id) != "blob" } {
+	$canvas itemconfigure $primary($id) -arrow none
+	if { [::info exists blobitem($id)] } {
+	    $canvas delete $blobitem($id)
+	}
+
+	set coords [$canvas coords $primary($id)]
+	set blobitem($id) [eval $canvas create oval \
+		[rectStretch [list \
+		[lindex $coords 2] [lindex $coords 3] \
+		[lindex $coords 2] [lindex $coords 3]] \
+		3] \
+		-fill $_fill($id) -outline $_fill($id) \
+		-tags [list [$canvas gettags $id]]]
+    }
+    set _style($id) $style
+}
+
+##########################################################################
+#### -type option configuration
+#
+body ::tycho::Terminal::_type {id canvas slate type} {
+    set _type($id) $type
+
+    # Get the right appearance by setting the style option. Force
+    # redraw by setting style to nothing.
+    set style $_style($id)
+    set _style($id) {}
+    _style $id $canvas $style
+}
 
 ##########################################################################
 #### aspect
@@ -155,30 +300,28 @@ body ::tycho::Terminal::aspect {id canvas slate args} {
     return $result
 }
 
-
 ##########################################################################
 #### construct
 #
 body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
     # Initialize the options
     foreach {option value} [concat [array get optiondefault] $args] {
-	set [string trimleft $option -]($id) $value
+	set _[string trimleft $option -]($id) $value
     }
 
     # Figure the other end.
-    set x1 [expr $x0 + [lindex $direction($id) 0] * $length($id)]
-    set y1 [expr $y0 + [lindex $direction($id) 1] * $length($id)]
+    set x1 [expr $x0 + [lindex $_direction($id) 0] * $_length($id)]
+    set y1 [expr $y0 + [lindex $_direction($id) 1] * $_length($id)]
 
     # The primary component is also the line.
     set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
-	    -tags $tags -fill $fill($id)]
+	    -tags $tags -fill $_fill($id)]
 
     # Update the style, forcing an update.
-    set st $style($id)
-    set style($id) {}
-    style $id $canvas $st
+    set style $_style($id)
+    set _style($id) {}
+    _style $id $canvas $style
 }
-
 
 ##########################################################################
 #### coords
@@ -195,138 +338,4 @@ body ::tycho::Terminal::coords {id canvas slate args} {
     set moveY [expr [lindex $args 1] - [lindex $coords 1]] 
 
     $canvas move $id $moveX $moveY
-}
-
-##########################################################################
-#### direction
-#
-body ::tycho::Terminal::direction {id canvas slate di} {
-    set direction($id) $di
-    set coords [$canvas coords $primary($id)]
-
-    # Figure the other end.
-    set x1 [expr [lindex $coords 0] \
-	    + [lindex $direction($id) 0] * $length($id)]
-    set y1 [expr [lindex $coords 1] \
-	    + [lindex $direction($id) 1] * $length($id)]
-
-    # Change the coordinates
-    eval $canvas coords $primary($id) [lrange $coords 0 1] $x1 $y1
-
-    # Get the right appearance by setting the style option. Force
-    # redraw by setting style to nothing.
-    set st $style($id)
-    set style($id) {}
-    style $id $canvas $st
-}
-
-##########################################################################
-#### fill
-#
-body ::tycho::Terminal::fill {id canvas slate fi} {
-    set fill($id) $fi
-
-    $canvas itemconfigure $primary($id) -fill $fill($id)
-    if { [::info exists blobitem($id)] } {
-	$canvas itemconfigure $blobitem($id) -fill $fill($id)
-    }
-}
-
-##########################################################################
-#### length
-#
-body ::tycho::Terminal::length {id canvas slate le} {
-    set length($id) $le
-    set coords [$canvas coords $primary($id)]
-
-    # Figure the other end.
-    set x1 [expr [lindex $coords 0] \
-	    + [lindex $direction($id) 0] * $length($id)]
-    set y1 [expr [lindex $coords 1] \
-	    + [lindex $direction($id) 1] * $length($id)]
-
-    # Change the coordinates
-    eval $canvas coords $primary($id) $coords $x1 $y1
-
-    # Get the right appearance by setting the style option. Force
-    # redraw by setting style to nothing.
-    set st $style($id)
-    set style($id) {}
-    style $id $canvas $st
-}
-
-##########################################################################
-#### style
-#
-body ::tycho::Terminal::style {id canvas slate st} {
-    # Check direction of arrow
-    if { $st == "arrow" } {
-	if { $type($id) == "input" } {
-	    $canvas itemconfigure $primary($id) -arrow first
-	} else {
-	    $canvas itemconfigure $primary($id) -arrow last
-	}
-	if { [::info exists blobitem($id)] } {
-	    $canvas delete $blobitem($id)
-	    unset blobitem($id)
-	}
-    } elseif { $st == "doublearrow" && $style($id) != "doublearrow" } {
-	if { [::info exists blobitem($id)] } {
-	    $canvas delete $blobitem($id)
-	}
-
-	set coords [$canvas coords $primary($id)]
-	set xdir [lindex $direction($id) 0]
-	set ydir [lindex $direction($id) 1]
-
-	if { $type($id) == "input" } {
-	    $canvas itemconfigure $primary($id) -arrow first
-	    set blobitem($id) [$canvas create line \
-		    [expr [lindex $coords 0] + $xdir * 5] \
-		    [expr [lindex $coords 1] + $ydir * 5] \
-		    [expr [lindex $coords 0] + $xdir * 6] \
-		    [expr [lindex $coords 1] + $ydir * 6] \
-		    -fill $fill($id) \
-		    -arrow first \
-		    -tags [$canvas gettags $id]]
-	} else {
-	    $canvas itemconfigure $primary($id) -arrow last
-	    set blobitem($id) [$canvas create line \
-		    [expr [lindex $coords 2] - $xdir * 5] \
-		    [expr [lindex $coords 3] - $ydir * 5] \
-		    [expr [lindex $coords 2] - $xdir * 6] \
-		    [expr [lindex $coords 3] - $ydir * 6] \
-		    -fill $fill($id) \
-		    -arrow first \
-		    -tags [$canvas gettags $id]]
-	}
-    } elseif { $st == "blob" && $style($id) != "blob" } {
-	$canvas itemconfigure $primary($id) -arrow none
-	if { [::info exists blobitem($id)] } {
-	    $canvas delete $blobitem($id)
-	}
-
-	set coords [$canvas coords $primary($id)]
-	set blobitem($id) [eval $canvas create oval \
-		[rectStretch [list \
-		[lindex $coords 2] [lindex $coords 3] \
-		[lindex $coords 2] [lindex $coords 3]] \
-		3] \
-		-fill $fill($id) -outline $fill($id) \
-		-tags [list [$canvas gettags $id]]]
-    }
-    set style($id) $st
-}
-
-##########################################################################
-#### type
-#
-body ::tycho::Terminal::type {id canvas slate ty} {
-    set type($id) $ty
-
-    # Get the right appearance by setting the style option. Force
-    # redraw by setting style to nothing.
-    set st $style($id)
-    set style($id) {}
-    style $id $canvas $st
 }
