@@ -27,8 +27,8 @@ Inputs: instPtr = delay instance pointer.
 Outputs: return = TRUE if no error.
 */
 static boolean
-EditDelayParams(facetPtr, instPtr)
-octObject *facetPtr, *instPtr;
+EditDelayParams(instPtr)
+octObject *instPtr;
 {
     octObject delayProp;
     static dmTextItem item = {"Number of delays", 1, 10, NULL, NULL};
@@ -54,28 +54,38 @@ octObject *facetPtr, *instPtr;
 Outputs: return = TRUE if no error.
 */
 static boolean
-EditSogParams(facetPtr, instPtr)
-octObject *facetPtr, *instPtr;
+EditSogParams(instPtr)
+octObject *instPtr;
 {
-    int i, width, maxwidth;
     ParamListType pList;
-    ParamType *place;
-    dmTextItem *items;
 
 /* set domain corresponding to the instance */
     setCurDomainInst(instPtr);
 
     ERR_IF1(!GetOrInitSogParams(instPtr, &pList));
-
     if (pList.length == 0) {
 	PrintErr("Star or galaxy has no parameters");
 	return(TRUE);
     }
-    items = (dmTextItem *) calloc(pList.length, sizeof(dmTextItem));
-    place = pList.array;
+    if (EditParamList(&pList,"Edit Actual Parameters"))
+	    SetSogParams(instPtr, &pList);
+    return(TRUE);
+}
+
+static boolean
+EditParamList(pListPtr, dmTitle)
+ParamListType *pListPtr;
+char* dmTitle;
+{
+    ParamType *place;
+    dmTextItem *items;
+    int i, width, maxwidth;
+
+    items = (dmTextItem *) calloc(pListPtr->length, sizeof(dmTextItem));
+    place = pListPtr->array;
     width = 0;
     maxwidth = 0;
-    for (i = 0; i < pList.length; i++) {
+    for (i = 0; i < pListPtr->length; i++) {
 	items[i].itemPrompt = place->name;
 	items[i].rows = 1;
 	items[i].value = place->value;
@@ -84,16 +94,16 @@ octObject *facetPtr, *instPtr;
 	items[i].userData = NULL;
 	place++;
     }
-    for (i = 0; i < pList.length; i++) {
+    for (i = 0; i < pListPtr->length; i++) {
 	items[i].cols = maxwidth + dmIncrement;
     }
-    if (dmMultiText("Edit Actual Parameters", pList.length, items) != VEM_OK) {
+    if (dmMultiText(dmTitle, pListPtr->length, items) != VEM_OK) {
 	PrintCon("Aborted entry");
-	return(TRUE);
+	return(FALSE);
     }
     /* should free place->value string before assignment */
-    place = pList.array;
-    for (i = 0; i < pList.length; i++) {
+    place = pListPtr->array;
+    for (i = 0; i < pListPtr->length; i++) {
 	if (!IsBalancedParen(items[i].value)) {
 	    char buf[512];
 	    sprintf(buf, "Unbalanced parentheses in parameter `%s`",
@@ -105,8 +115,6 @@ octObject *facetPtr, *instPtr;
 	place++;
     }
     free(items);
-
-    SetSogParams(instPtr, &pList);
     return(TRUE);
 }
 
@@ -265,7 +273,7 @@ Define the formal parameter list and default values for a Universe
 or galaxy.
 */
 int
-DefineParams(spot, cmdList, userOptionWord)
+DefineParams(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -292,7 +300,7 @@ long userOptionWord;
 Edit parameters.
 */
 int 
-EditParams(spot, cmdList, userOptionWord)
+EditParams(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -326,10 +334,10 @@ long userOptionWord;
     } else {
 	/* cursor is over some type of instance... */
 	if (IsDelay(&inst)) {
-	    status2 = EditDelayParams(&facet, &inst);
+	    status2 = EditDelayParams(&inst);
 	} else if (IsGal(&inst) || IsStar(&inst)) {
 	    /* inst is a sog... */
-	    status2 = EditSogParams(&facet, &inst);
+	    status2 = EditSogParams(&inst);
 	} else {
 	    PrintErr("Cursor must be over a star, galaxy, or delay instance");
 	    ViDone();
@@ -423,7 +431,7 @@ OpenPaletteInit()
 Uses global palettes variable.
 */
 int 
-RpcOpenPalette(spot, cmdList, userOptionWord)
+RpcOpenPalette(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -454,7 +462,7 @@ long userOptionWord;
 
 
 int 
-RpcEditComment(spot, cmdList, userOptionWord)
+RpcEditComment(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -532,7 +540,7 @@ static char *defaultPalettes () {
 #endif
 
 int
-RpcEditDomain(spot, cmdList, userOptionWord)
+RpcEditDomain(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -604,6 +612,7 @@ long userOptionWord;
     }
     PrintCon(sprintf(buf, "domain = '%s'", domain));
     free(items);
+    
     ViDone();
 }
 
@@ -611,7 +620,7 @@ long userOptionWord;
 void KcEditSeed();
 
 int
-RpcEditSeed(spot, cmdList, userOptionWord)
+RpcEditSeed(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -649,7 +658,7 @@ int KcDomainTargets();
 char* KcDefTarget();
 
 int
-RpcEditTarget(spot, cmdList, userOptionWord)
+RpcEditTarget(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -702,13 +711,20 @@ long userOptionWord;
     }
 
     sprintf(buf, "target = '%s'", target);
+/* put current target in "0" position, because of the way dmWhichOne works */
+    for (i = 1; i < nTargets+galFlag; i++) {
+	    if (strcmp(items[i].itemName, target) == 0) {
+		    items[i].itemName = items[0].itemName;
+		    items[0].itemName = target;
+	    }
+    }
     if (dmWhichOne(buf, nTargets+galFlag, items, &which, NULL, NULL) != VEM_OK
         || which == -1) {
         PrintCon("Aborted entry");
         ViDone();
     }
 
-    target = targetNames[which];
+    target = items[which].itemName;
 
     if (!SetTargetProp(&facet, target)) {
         PrintErr(ErrGet());
@@ -716,5 +732,17 @@ long userOptionWord;
     }
     PrintCon(sprintf(buf, "target = '%s'", target));
     free(items);
+/* now edit target parameters */
+    if (strcmp(target, "<parent>") != 0) {
+	ParamListType pList;
+	if (!GetTargetParams(target, &facet, &pList)) {
+	    PrintErr(ErrGet());
+	    ViDone();
+	}
+	if (pList.length > 0 && EditParamList(&pList,"Edit Target Params")) {
+	    SetTargetParams(&facet, &pList);
+        }
+    }
     ViDone();
 }
+
