@@ -3,8 +3,8 @@ defstar {
 	domain { SDF }
 	desc { 
 This is an amplifier; the fixed-point output is the fixed-point input
-multiplied by the "gain" (default 1.0). The precision of "gain", the
-input, and the output can be specified in bits.
+multiplied by the "gain" (default 1.0).
+The precision of "gain", the input, and the output can be specified in bits.
 	}
 	author { A. Khazeni }
 	version { $Id$ }
@@ -22,7 +22,8 @@ precision of this parameter is to use the parenthesis notation
 of (value, precision).  For example, filling the dialog
 box for the gain parameter with (2.546, 3.5) would create a fixed-point
 object formed by casting the double-precision floating-point number
-2.546 to a fixed-point number with a precision of 3.5. }
+2.546 to a fixed-point number with a precision of 3.5.
+	}
 	input {
 		name { input }
 		type { fix }
@@ -35,7 +36,7 @@ object formed by casting the double-precision floating-point number
 		name { gain }
 		type { fix }
 		default { 1.0 }
-		desc { Gain of the star.} 
+		desc { Gain of the star. }
 	}
         defstate {
                 name { ArrivingPrecision }
@@ -49,7 +50,7 @@ precision specified by the parameter "InputPrecision". }
         defstate {
                 name { InputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc {
 Precision of the input in bits.  The input particles are only cast
 to this precision if the parameter "ArrivingPrecision" is set to NO.}
@@ -57,52 +58,54 @@ to this precision if the parameter "ArrivingPrecision" is set to NO.}
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc {
-Precision of the output in bits.  This is the precision that will hold
-the result of the arithmetic operation on the inputs.}
+Precision of the output in bits.
+This is the precision that will hold the result of the arithmetic operation
+on the inputs.
+When the value of the product extends outside of the precision,
+the OverflowHandler will be called.
+		}
         }
         defstate {
                 name { OverflowHandler }
                 type { string }
                 default { "saturate" }
                 desc {
-Overflow characteristic for the output.  If the result
-of the product cannot be fit into the precision of the output, overflow
-occurs and the overflow is taken care of by the method specified by this
-parameter.  The keywords for overflow handling methods are :
-"saturate"(default), "zero_saturate", "wrapped", "warning". }
+Overflow characteristic for the output.
+If the result of the sum cannot be fit into the precision of the output,
+then overflow occurs and the overflow is taken care of by the method
+specified by this parameter.
+The keywords for overflow handling methods are:
+"saturate" (the default), "zero_saturate", "wrapped", and "warning".
+		}
         }
         protected {
-                const char* IP;
-                const char* OP;
-                const char* OV;
-                int in_IntBits;
-                int in_len;
-                int out_IntBits;
-                int out_len;
-		Fix out;
+		Fix fixIn, out;
+                int in_IntBits, in_len;
         }
         setup {
-                IP = InputPrecision;
-                OP = OutputPrecision;
-                OV = OverflowHandler;
-                in_IntBits = Fix::get_intBits (IP);
-                in_len = Fix::get_length (IP);
-                out_IntBits = Fix::get_intBits (OP);
-                out_len = Fix::get_length (OP);
+                const char* IP = InputPrecision;
+                in_IntBits = Fix::get_intBits(IP);
+                in_len = Fix::get_length(IP);
+
+                const char* OP = OutputPrecision;
+                int out_IntBits = Fix::get_intBits(OP);
+                int out_len = Fix::get_length(OP);
                 out = Fix(out_len, out_IntBits);
+
+                const char* OV = OverflowHandler;
                 out.set_ovflow(OV);
         }
 	go {
-                Fix fixIn;
-
+		// all computations should be performed with out since that
+		// is the Fix variable with the desired overflow handler
+		out = Fix(gain);
                 if ( int(ArrivingPrecision) )
-                   fixIn = Fix(input%0);
+                  fixIn = Fix(input%0);
                 else
-                   fixIn = Fix(in_len, in_IntBits, Fix(input%0));
-
-                out = fixIn * Fix(gain);
+                  fixIn = Fix(in_len, in_IntBits, Fix(input%0));
+                out *= fixIn;
 		output%0 << out;
 	}
 }
