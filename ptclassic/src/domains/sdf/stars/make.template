@@ -111,6 +111,7 @@ SRCS= \
  SDFPrinter.pl \
  SDFQuantizer.pl \
  SDFRaisedCos.pl \
+ SDFReadFile.pl \
  SDFReadImage.pl \
  SDFReadRgb.pl \
  SDFRealComplex.pl \
