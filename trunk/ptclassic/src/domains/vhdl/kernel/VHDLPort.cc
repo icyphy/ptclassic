@@ -55,6 +55,7 @@ VHDLPort* VHDLPort :: newCopy() {
   newPort->direction = this->direction;
   newPort->type = this->type;
   newPort->mapping = this->mapping;
+  newPort->signal = this->signal;
 
   return newPort;
 }
@@ -78,7 +79,7 @@ void VHDLPort :: connect(VHDLSignal* newSignal) {
       newSignal->setSource(this);
     }
     else {
-      Error::error(this->name, ": Attempt to drive newSignal that already has a source");
+      Error::error(this->name, ": Attempt to drive newSignal that already has a source: ", newSignal->name);
     }
   }
 }
@@ -104,12 +105,15 @@ VHDLPortList* VHDLPortList :: newCopy() {
 }
 
 // Allocate memory for a new VHDLPort and put it in the list.
-void VHDLPortList :: put(StringList name, StringList direction,
-			 StringList type, StringList mapping/*=""*/) {
+void VHDLPortList :: put(StringList name, StringList type,
+			 StringList direction,
+			 StringList mapping/*=""*/,
+			 VHDLSignal* signal/*=NULL*/) {
   VHDLPort* newPort = new VHDLPort;
   newPort->setName(name);
-  newPort->direction = direction;
   newPort->type = type;
+  newPort->direction = direction;
   newPort->mapping = mapping;
+  newPort->signal = signal;
   this->put(*newPort);
 }
