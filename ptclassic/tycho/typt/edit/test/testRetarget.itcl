@@ -72,16 +72,18 @@ test Retarget::constructor-1.1 {Create a Retarget window, do some things} {
     set retarget [::tycho::view Retarget -toolbar 1]
 
     # Choose DE domain for Domain A
-    set TY_TEST_SCRIPT {
-	%0 select DE
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 select DE
+	}
     }
     $retarget toolbar invoke domainAButton
 
     # Choose SDF domain for Domain B
-    set TY_TEST_SCRIPT {
-	%0 select HOF
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 select HOF
+	}
     }
     $retarget toolbar invoke domainBButton
 
@@ -116,16 +118,18 @@ test Retarget::universe-1.1 {Check a current universe} {
     set retarget [$ptclEditor menubar invoke Special Retarget]
 
     # Choose SDF domain for Domain A
-    set TY_TEST_SCRIPT {
-	%0 select SDF
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 select SDF
+	}
     }
     $retarget toolbar invoke domainAButton
 
     # Choose DE domain for Domain B
-    set TY_TEST_SCRIPT {
-	%0 select DE
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 select DE
+	}
     }
     $retarget toolbar invoke domainBButton
 

@@ -132,11 +132,12 @@ test DomainInfo::printStars-1.1 {Check out the printStars command} {
 ######################################################################
 #### queryDomains
 test DomainInfo::queryDomains-1.1 {Check out the queryDomains command} {
-    set TY_TEST_SCRIPT {
-	%0 clearSelection
-	%0 goto end
-	%0 select DE
-        unset TY_TEST_SCRIPT
+    set TY_TEST_MODAL {
+	{
+	    %0 clearSelection
+	    %0 goto end
+	    %0 select DE
+	}
     }
     ::tycho::DomainInfo::queryDomain {Which domain is your favorite?} {SDF}
 
