@@ -43,6 +43,9 @@ LIB = foo
 
 KRUFT = rman
 
+MISC_FILES =	Copyright MANIFEST Makefile.dist README-rman contrib \
+		rman.1 rman.html
+
 # Special to rman
 MANTITLEPRINTF = "%s(%s) manual page"
 MANREFPRINTF = "http://localhost/cgi-bin/man2html?%s?%s"
