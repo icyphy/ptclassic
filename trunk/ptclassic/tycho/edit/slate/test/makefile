@@ -60,8 +60,9 @@ SIMPLE_TESTS = \
 	dummy.tcl
 
 GRAPHICAL_TESTS = \
+	testIncrCanvas.itcl \
 	testSlate.itcl \
-	testIncrCanvas.itcl
+	testTute.itcl
 
 # make checkjunk should not complain about the OLD directory
 OPTIONAL_FILES = OLD
