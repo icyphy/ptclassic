@@ -58,5 +58,10 @@ all: sources $(EXTRA_SRCS) $(MISC_FILES)
 
 install: all
 
+tech: colors
+	ln -s $@ $^
+technology: colors
+	ln -s $@ $^
+
 # We have an all rule, so include tycommon.mk.
 include $(ROOT)/mk/tycommon.mk
