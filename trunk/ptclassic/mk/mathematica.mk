@@ -50,18 +50,29 @@ ifndef MATHLINKLIBNAME
 	MATHLINKLIBNAME = ML
 endif
 
+# MATHEMATICAARCH is set in the config makefiles.
+
 # matlabRootDir traverses the user's path, so we only run it when
 # we really need it.
 ifdef NEED_MATHEMATICADIR
 	MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
+	MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 	ifeq ("$(MATHEMATICADIR)","")
 	MATHEMATICADIR= 	$(ROOT)/src/compat/mathematica
 	MATHEMATICAEXT_LIB = 	-lptmathematica
 	else
-	MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
-				-l$(MATHLINKLIBNAME)
+	ifeq ($(wildcard $(MATHEMATICADIR)/Bin/MathLink),)
+		# Mathematica3.x
+		MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions \
+					-l$(MATHLINKLIBNAME)
+
+		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/AddOns/MathLink/DevelopersKits/$(MATHEMATICAARCH)/CompilerAdditions
+	else
+		# Mathematica2.x
+		MATHEMATICAEXT_LIB = 	-L$(MATHEMATICADIR)/Bin/MathLink \
+					-l$(MATHLINKLIBNAME)
 	endif
-	MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
+	endif
 endif
 
 # Ptolemy interface directories
