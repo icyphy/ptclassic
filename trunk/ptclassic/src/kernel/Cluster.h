@@ -73,7 +73,7 @@ public:
 		      Constructors & Destructors
      ******************************************************************/
     inline Cluster():sched(0) {};
-    inline ~Cluster() { setScheduler(NULL); }
+    inline ~Cluster() { setClusterScheduler(NULL); }
 
     /******************************************************************
 			 Class Identification
@@ -154,9 +154,11 @@ Merge: This merges the clusters inside the argument cluster into itself,
 		      Cluster scheduler methods
      ******************************************************************/
     // Return the internal scheduler for the cluster if there is any
-    /*virtual*/ Scheduler* scheduler() const { return sched; }
+    /*virtual*/ Scheduler* scheduler() const;
 
-    void setScheduler(Scheduler*);
+    Scheduler* clusterScheduler() const;
+
+    void setClusterScheduler(Scheduler*);
 
     /*virtual*/ int setTarget(Target*);
     
