@@ -112,6 +112,7 @@ public:
 
 	void EnableResize() { cq_resizeEnabled = 1; }
 	void DisableResize() { cq_resizeEnabled = 0; }
+	int isResizeEnabled() { return cq_resizeEnabled; }
 
 	// Constructor
 	MutableCalendarQueue() : cq_debug(0), cq_eventNum(0),
@@ -145,6 +146,7 @@ protected:
 	virtual void 	   clearFreeList();
 
 	void LocalInit(int qbase, int nbuck, double startInterval, double lastTime);
+	void InsertCqLevelLink( CqLevelLink * );
 	void InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *event);
 	CqLevelLink* NextEvent();
 	void Resize(int newSize);
