@@ -347,10 +347,7 @@ body ::tycho::EditSearch::find {{start {}}} {
         set firstind [lindex $result 0]
         set numchars [lindex $result 1]
         if {$firstind != {}} {
-            $text mark set insert $firstind
-            $tw breakUndo
-            $text see $firstind
-            $text tag add sel $firstind "$firstind + $numchars chars"
+            $tw selectRange $firstind "$firstind + $numchars chars"
         }
         # Mark the rest of the matches.
         $tw findAll findmatch $casesw $regexpsw $wordsw $pattern 1.0 end {}
