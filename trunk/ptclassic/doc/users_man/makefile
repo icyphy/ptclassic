@@ -21,12 +21,12 @@ chapter%.dvi:
 	$(ROOT)/doc/tex/mkchap $(TEX) $(<:.tex=) null $*
 	$(ROOT)/doc/fmconvert/tex2mml chapter $* > $(<:.tex=.mml)
 
-chapter13.dvi:	cgc.tex
-cgc.dvi:	chapter13.dvi
+chapter14.dvi:	cgc.tex
+cgc.dvi:	chapter14.dvi
 		mv -f chapter.dvi cgc.dvi
 
-chapter11.dvi:	cp.tex
-cp.dvi:		chapter11.dvi
+chapter12.dvi:	cp.tex
+cp.dvi:		chapter12.dvi
 		mv -f chapter.dvi cp.dvi
 
 # Update all of the Framemaker cross references.
