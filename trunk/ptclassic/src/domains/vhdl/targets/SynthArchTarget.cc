@@ -271,7 +271,8 @@ int SynthArchTarget :: compileCode() {
 	  comCode << "/* Generate reports on area and timing. */\n";
 	  comCode << "\n";
 	  comCode << "report_area > " << filePrefix << ".area.rep" << "\n";
-	  comCode << "report_timing -path full -delay max -max_paths 1 -nworst 1" << "\n";
+	  comCode << "report_timing -path full -delay max -max_paths 1"
+		  << " -nworst 1" << "\n";
 
 	  comCode << report_code;
 	}
