@@ -688,11 +688,13 @@ body ::tycho::Model::redo {{distance 1}} {
         incr _mark(current)
         incr count
 	
-        # Execute the command.
-        @scope $scope eval $this $_redo($_mark(current))
+        if { $_redo($_mark(current)) != "" } {
+            # Execute the command.
+            @scope $scope eval $this $_redo($_mark(current))
         
-        # Notify subscribers
-        eval notify data $_redo($_mark(current))
+            # Notify subscribers
+            eval notify data $_redo($_mark(current))
+        }
     }
     # Return the number of commands redone
     return $distance
@@ -762,17 +764,15 @@ body ::tycho::Model::subscribe {mode {subscriber {}} {command {}}} {
             if { $subscriber == "" } {
                 set subscriber "*"
             }
-            foreach {ix cmd} [array get _subs [list * * $subscriber]] {
-                foreach {m d s} $ix {}
-                append string "\nmode:       $m"
-                append string "\ndata:       $d"
-                append string "\nsubscriber: $s"
-                if { $cmd != "" } {
-                    append string "\ncommand:    $cmd"
-                }
-                append string "\n"
+            append string "Data subscribers:\n"
+            foreach {sub cmd} [array get _datasubs $subscriber] {
+                append string "    $sub [list $cmd]\n"
             }
-            return $string
+            append string "Event subscribers:\n"
+            foreach {sub cmd} [array get _eventsubs $subscriber] {
+                append string "    $sub [list $cmd]\n"
+            }
+            return $string\n
         }
 	default {
 	    error "bad option \"$mode\": should be data or event"
@@ -814,12 +814,13 @@ body ::tycho::Model::undo {{distance 1}} {
     # Undo the commands
     set count 0
     while { $count < $distance } {
-        # Execute the command
-        @scope $scope eval $this $_undo($_mark(current))
+        if { $_undo($_mark(current)) != "" } {
+            # Execute the command
+            @scope $scope eval $this $_undo($_mark(current))
 
-        # Notify subscribers
-		eval notify data $_undo($_mark(current))
-
+            # Notify subscribers
+            eval notify data $_undo($_mark(current))
+        }
         # Adjust indexes
         incr _mark(current) -1
         incr count
