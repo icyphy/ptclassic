@@ -51,10 +51,7 @@ void GrayImage::setSize(int a)
 
 
 unsigned char* GrayImage::retData()
-{
-	if (size == fullSize) return grayData;
-	return ((unsigned char*) NULL);
-} // end GrayImage::retData()
+{ return grayData; }
 
 
 BaseImage* GrayImage::fragment(int cellSz, int Num) const

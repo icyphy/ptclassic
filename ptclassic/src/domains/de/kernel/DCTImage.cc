@@ -65,10 +65,7 @@ void DCTImage::setSize(const int a)
 
 
 float* DCTImage::retData()
-{
-	if (size == fullSize) return DCTData;
-	return((float*) NULL);
-} // end DCTImage::retData()
+{ return DCTData; }
 
 
 BaseImage* DCTImage::fragment(int cellSz, int Num) const
