@@ -722,7 +722,7 @@ body ::tycho::Slate::find {mode args} {
 #
 body ::tycho::Slate::gettags {id} {
     # If a picture, get the primary
-    if { ! [string match {[0-9]*} $id] } {
+    if { [string match {_*} $id] } {
 	set id [@scope ::tycho::Picture [list set primary($id)]]
     }
     $canvas gettags $id
@@ -875,8 +875,15 @@ body ::tycho::Slate::itemconfigure {id args} {
 		}
 	    } else {
 		# Call the proc on the class to set the option
-		::tycho::$picttype($id)::[string trimleft $option -] \
+#		::tycho::$picttype($id)::[string trimleft $option -] \
+#			$id $canvas $value
+
+		global $picttype($id)
+		[set $picttype($id)([string trimleft $option -])] \
 			$id $canvas $value
+
+		[set $picttype($id)(update)] $id $canvas
+		
 	    }
 	}
     }
@@ -886,7 +893,7 @@ body ::tycho::Slate::itemconfigure {id args} {
 #### lower
 #
 body ::tycho::Slate::lower {id {belowThis {}}} {
-    eval $canvas raise $id $beloweThis
+    eval $canvas lower $id $belowThis
 }
 
 #######################################################################
@@ -1020,14 +1027,14 @@ body ::tycho::Slate::type {id} {
 #######################################################################
 #### xview
 #
-body ::tycho::Slate::xview {id} {
+body ::tycho::Slate::xview {args} {
     eval $canvas xview $args
 }
 
 #######################################################################
 #### yview
 #
-body ::tycho::Slate::yview {id} {
+body ::tycho::Slate::yview {args} {
     eval $canvas yview $args
 }
 
