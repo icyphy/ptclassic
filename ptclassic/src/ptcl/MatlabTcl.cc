@@ -198,7 +198,7 @@ int MatlabTcl::get(int argc, char** argv) {
     char **imagStrings = 0;
 
     // return a four-element list: numrows numcols realvalues imagvalues
-    if ( matlabInterface->MatlabGetVariable(argv[2], &numrows, &numcols,
+    if ( matlabInterface->GetMatlabVariable(argv[2], &numrows, &numcols,
 					    &realStrings, &imagStrings) ) {
 	char tmpbuf[64];
 	sprintf(tmpbuf, "%d", numrows);
@@ -278,7 +278,7 @@ int MatlabTcl::set(int argc, char** argv) {
     }
 
     // set the Matlab matrix whose name is the third argument, argv[2]
-    if ( matlabInterface->MatlabSetVariable(argv[2], numrows, numcols,
+    if ( matlabInterface->SetMatlabVariable(argv[2], numrows, numcols,
 					    realArgv, imagArgv) ) {
 	return TCL_OK;
     }
@@ -310,8 +310,10 @@ int MatlabTcl::status(int argc, char** /*argv*/) {
 }
 
 // unset a Matlab matrix
-int MatlabTcl::unset(int argc, char** /*argv*/) {
+int MatlabTcl::unset(int argc, char** argv) {
     if (argc != 3) return usage("matlab unset <matrix_name>");
     MATLABTCL_CHECK_MATLAB();
+    int merror = matlabInterface->UnsetMatlabVariable(argv[2]);
+    if ( merror ) return TCL_ERROR;
     return TCL_OK;
 }
