@@ -44,7 +44,7 @@ protected:
 	// The following sets the scheduler and tells it which target belongs
 	void setSched(Scheduler* sch);
 
-	void delSched() {delete sched; sched = 0;}
+	void delSched();
 
 	// add a new child
 	void addChild(Target&);
