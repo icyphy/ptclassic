@@ -464,5 +464,5 @@ body ::tycho::Dialog::new {class instance args} {
 # needed by dialog boxes.
 #
 body ::tycho::Dialog::preference {mode args} {
-    eval ::preference $mode "dialogs" $args
+    eval ::tycho::preference $mode "dialogs" $args
 }

@@ -512,7 +512,7 @@ body ::tycho::TopLevel::raiseWindow {} {
 #
 body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
     if { $exitWithNoConfirmation == 0 && \
-	    [::preference get misc confirmOnExit] } {
+	    [::tycho::preference get misc confirmOnExit] } {
 	set response [::tycho::askuser "OK to exit the program?"]
     } else {
 	set response 1
@@ -596,7 +596,7 @@ body ::tycho::TopLevel::safeEval {args} {
 # must indicate so by overriding this method.
 #
 body ::tycho::TopLevel::preference {mode args} {
-    eval ::preference $mode "global" $args
+    eval ::tycho::preference $mode "global" $args
 }
 
     #################################################################

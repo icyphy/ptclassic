@@ -307,7 +307,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 	return
     }
 
-    set pref [::preference get revcontrol revisionControlTypes]
+    set pref [::tycho::preference get revcontrol revisionControlTypes]
     set revclass [whichRevClass $editorObj]
 
     # If the file is not under revision control, query the user
@@ -351,7 +351,7 @@ body ::tycho::RevControl::whichRevClass {obj} {
     if {![$obj isa ::tycho::File]} {
         error "Cannot check revision control for $obj: Not a ::tycho::File."
     }
-    set pref [::preference get revcontrol revisionControlTypes]
+    set pref [::tycho::preference get revcontrol revisionControlTypes]
     set filename [$obj filename]
     set revclass {}
 
@@ -395,7 +395,7 @@ body ::tycho::RevControl::enableButton {button} {
 # "revcontrol" preferences.
 #
 body ::tycho::RevControl::preference {mode args} {
-    eval ::preference $mode "revcontrol" $args
+    eval ::tycho::preference $mode "revcontrol" $args
 }
 
 #####################################################################

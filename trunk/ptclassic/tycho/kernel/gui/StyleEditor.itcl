@@ -67,36 +67,36 @@ configbody ::tycho::PreferenceEditor::preferences {
     if { $group == "" } {
 	return
     }
-    configure -title [::preference cget $group -description]
+    configure -title [::tycho::preference cget $group -description]
     configure -labelcolor [::tycho::color blue black]
 
-    foreach preference [::preference names $group] {
-	set description [::preference description $group $preference]
+    foreach preference [::tycho::preference names $group] {
+	set description [::tycho::preference description $group $preference]
 	if { $description != "" } {
-	    switch -exact [::preference cget $group $preference -type] {
+	    switch -exact [::tycho::preference cget $group $preference -type] {
 		"integer" -
 		"number" -
 		"string" {
 		    line $preference $description \
-			    [::preference get $group $preference]
+			    [::tycho::preference get $group $preference]
 		}
 		"choice" {
 		    radio $preference $description \
-			    [::preference cget $group $preference -values] \
-			    [::preference get $group $preference]
+			    [::tycho::preference cget $group $preference -values] \
+			    [::tycho::preference get $group $preference]
 		}
 		"boolean" {
 		    check $preference $description \
-			    [::preference get $group $preference]
+			    [::tycho::preference get $group $preference]
 		}
 		"custom" {
 		    mediated $preference $description \
-			    [::preference get $group $preference] \
-			    [::preference cget $group $preference -edit]
+			    [::tycho::preference get $group $preference] \
+			    [::tycho::preference cget $group $preference -edit]
 		}
 		default {
 		    line $preference $description \
-			    [::preference get $group $preference]
+			    [::tycho::preference get $group $preference]
 		}
 	    }
 	}
@@ -130,14 +130,14 @@ body ::tycho::PreferenceEditor::update {args} {
 	# See if any entries have changed, and if so, update the preference
 	set group $itk_option(-preferences)
 	foreach {tag val} [$this get] {
-	    if { $val != [::preference current $group $tag] } {
-		::preference assign $group $tag $val
+	    if { $val != [::tycho::preference current $group $tag] } {
+		::tycho::preference assign $group $tag $val
 	    }
 	}
     } else {
 	# Update all specified entries
 	foreach tag $args {
-	    ::preference assign $group $tag [get $tag]
+	    ::tycho::preference assign $group $tag [get $tag]
 	}
     }
 }

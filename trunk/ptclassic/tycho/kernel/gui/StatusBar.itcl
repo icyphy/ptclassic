@@ -225,7 +225,7 @@ body ::tycho::StatusBar::constructor {args} {
     eval itk_initialize $args
     eval preference exclude $this $args
 
-    ::preference subscribe fonts $this \
+    ::tycho::preference subscribe fonts $this \
 	    -messagefont messageFont
 }
 
