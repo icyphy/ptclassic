@@ -24,7 +24,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		PortHole *p;
 		int sum = 0;
 		while ((p = nexti++) != 0)
-			sum += int((*p)%0);
+			sum += (int)((*p)%0);
 		output%0 << sum;
 	}
 }
