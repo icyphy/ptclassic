@@ -20,5 +20,5 @@ Domain
 University of California at Berkeley
 Berkeley, CA 94720
 .sp
-Copyright \(co 1990, 1991 Regents of the University of California
+Copyright \(co 1990, 1991, 1992 Regents of the University of California
 .fi
