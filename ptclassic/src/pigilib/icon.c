@@ -42,7 +42,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "util.h"
 #include "err.h"
 #include "vemInterface.h"
-#include "octMacros.h"
 #include "palette.h"
 #include "main.h"
 #include "ptk.h"

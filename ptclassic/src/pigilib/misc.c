@@ -43,7 +43,6 @@ $Id$
 #include "vemInterface.h"
 #include "util.h"
 #include "octIfc.h"
-#include "octMacros.h"
 #include "err.h"
 #include "main.h"
 #include "list.h"
