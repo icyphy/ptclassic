@@ -78,8 +78,11 @@ public:
 	// Method to get inputs from myStar
 	InfString getInputs();
 
-	// Array of flags indicating which inputs are new
-	int *inputNewFlags;
+	// Set or clear the new value flag for input port inNum
+	void setOneNewInputFlag(int inNum, int flag);
+
+	// Method to set all of the inputNewFlags to either TRUE or FALSE
+	void setAllNewInputFlags(int flag);
 
 	// Array of values that can be set from Tcl using the "setOutputs"
 	// command.
@@ -91,8 +94,8 @@ public:
 	// Method to set one value of the above array with boundary checking
 	void setOneOutput(int outNum, double outValue);
 
-	// Method to set all of the inputNewFlags to either TRUE or FALSE
-	void setAllNewInputFlags(int flag);
+	// Method to set or clear one of the outputNewFlags
+	void setOneNewOutputFlag(int outNum, int flag);
 
 	// Method to set all of the outputNewFlags to either TRUE or FALSE
 	void setAllNewOutputFlags(int flag);
@@ -103,6 +106,9 @@ protected:
 	// guaranteed to be unique.  After each use, it should
 	// be incremented.
 	static unique;
+
+	// Array of flags indicating which inputs are new
+	int *inputNewFlags;
 
 	// Size of the "inputNewFlags" array.
 	int inputArraySize;
