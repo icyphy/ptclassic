@@ -64,7 +64,7 @@ FSMStateStar::FSMStateStar ()
     addPort(stateIn.setPort("stateIn",this,FLOAT));
     addPort(stateOut.setPort("stateOut",this,FLOAT));
     addState(isInitState.setState("isInitState",this,"FALSE","Is this an initial state?"));
-    addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be embraced in a pair of double-quotes."));
+    addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be surrounded by a pair of double-quotes."));
 
     parsedCond = 0;
 }
@@ -103,12 +103,12 @@ FSMStateStar * FSMStateStar::nextState (int& condNum) {
     for (int i = 0; i < numConds; i++) {
       buf = parsedCond[i];
       if(Tcl_ExprBoolean(myInterp, (char*)buf, &(result[i])) != TCL_OK) {
-	buf  = "Cannot evaluate the condition #";
-	buf += i;
-	buf += " in ";
-	buf += this->name();
-	buf += ". The error message in Tcl : ";
-	buf += myInterp->result;
+	buf = "Cannot evaluate the condition #";
+	buf << i;
+	buf << " in ";
+	buf << this->name();
+	buf << ". The error message in Tcl : ";
+	buf << myInterp->result;
 	Error::abortRun(*this,(char*)buf);
 	delete [] result;
 	return 0;
@@ -200,8 +200,8 @@ Star* FSMStateStar::createWormhole(const char *galname,
 
     // Choose a name for the block
     StringList instancename = "FSM_";
-    instancename += galname;
-    instancename += count++;
+    instancename << galname;
+    instancename << count++;
     const char* instance = hashstring(instancename);
 
     // Is this needed?
@@ -216,8 +216,8 @@ Star* FSMStateStar::createWormhole(const char *galname,
 const char* FSMStateStar::ptkCompile(const char *galname,
 				     const char* where_defined) {
     InfString fullName = expandPathName(where_defined);
-    fullName += "/";
-    fullName += galname;
+    fullName << "/";
+    fullName << galname;
    
     // Save the current domain name, and let the current domain to be "FSM".
     // This is used for the outer domain when doing "ptkCompile".
@@ -225,7 +225,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
     ptcl->curDomain = this->domain(); // It would be "FSM".
 
     InfString command = "file exists ";
-    command += fullName;
+    command << fullName;
     Tcl_GlobalEval(ptkInterp, (char*)command);
     if (strcmp(ptkInterp->result,"0") == 0) {
       Error::abortRun(*this,"Specified file name for the block (Galaxy) ",
@@ -234,7 +234,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
     }
 
     command = "file isdirectory ";
-    command += fullName;
+    command << fullName;
     Tcl_GlobalEval(ptkInterp, (char*)command);
     if (strcmp(ptkInterp->result,"1") == 0) {
       // Specified file name is a directory, then consider it as a Oct facet.
@@ -242,7 +242,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
       // Try compiling the facet specified in the where_defined and 
       // galname argument.
       command = "ptkOpenFacet ";
-      command += fullName;
+      command << fullName;
       if(Tcl_GlobalEval(ptkInterp, (char*)command) == TCL_ERROR) {
 	Error::abortRun(*this,"Can't open the block (Galaxy) facet.");
 	return 0;
@@ -250,12 +250,12 @@ const char* FSMStateStar::ptkCompile(const char *galname,
       const char* facetHandle = hashstring(ptkInterp->result);
 
       command = "ptkCompile ";
-      command += facetHandle;
+      command << facetHandle;
       if(Tcl_GlobalEval(ptkInterp, (char*)command) == TCL_ERROR) {
 	InfString buf  = "Unable to compile the facet: ";
-	buf += where_defined;
-	buf += "/";
-	buf += galname;
+	buf << where_defined;
+	buf << "/";
+	buf << galname;
 	Error::abortRun(*this,(const char*)buf);
 	return 0;
       }
@@ -269,7 +269,7 @@ const char* FSMStateStar::ptkCompile(const char *galname,
 
       // Get the rootname of galname as the classname.
       command = "file rootname ";
-      command += galname;
+      command << galname;
       Tcl_GlobalEval(ptkInterp, command);
       const char* classname = hashstring(ptkInterp->result);
 
@@ -333,8 +333,6 @@ Geodesic** FSMStateStar::setupGeodesic (Star* worm, MultiPortHole& mph) {
 }
 
 char** FSMStateStar::strParser(const char* strings,int& numStr) {
-    InfString buf;
-
     char** parsedStr = 0;
     int numQuote = 0;
     int start = 0;
@@ -345,9 +343,8 @@ char** FSMStateStar::strParser(const char* strings,int& numStr) {
       start++;
     }
     if (numQuote%2 != 0) {
-      buf  = "Cannot parse the strings. ";
-      buf += "Unmatched double-quote.";
-      Error::abortRun(*this,(char*)buf);
+      Error::abortRun(*this, "Cannot parse the strings. ",
+		      "Unmatched double-quote.");
       return 0;	      
     }
     parsedStr = (char **) new (char *)[numQuote/2];
@@ -363,10 +360,8 @@ char** FSMStateStar::strParser(const char* strings,int& numStr) {
       
       // Find the left-side quote.
       if (strings[start] != '\"') {
-	buf  = "Cannot parse the strings. ";
-	buf += "Each string must be embraced in ";
-	buf += "a pair of double-quotes.";
-	Error::abortRun(*this,(char*)buf);
+	Error::abortRun(*this, "Cannot parse the strings. ",
+		"Each string must be surrounded by a pair of double-quotes.");
 	return 0;
       }
       start++;
@@ -388,8 +383,7 @@ char** FSMStateStar::strParser(const char* strings,int& numStr) {
     return parsedStr;
 }
 
-double* FSMStateStar::str2values (const char* string,int& numValues) {
-    InfString buf;
+double* FSMStateStar::str2values(const char* string,int& numValues) {
     int start = 0;
     int index;
 
@@ -409,9 +403,9 @@ double* FSMStateStar::str2values (const char* string,int& numValues) {
     for (index=0; index<numValues; index++) {
       while (string[start] == ' ') start++;
 
-      buf ="";
+      InfString buf ="";
       while (string[start] != ' ' && string[start] != '\0') {
-	buf += string[start];
+	buf << string[start];
 	start++;
       }
 
