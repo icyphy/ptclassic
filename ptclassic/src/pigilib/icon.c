@@ -433,7 +433,7 @@ long userOptionWord;
     startTycho();
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
-	"::tycho::view TclShell -geometry +0+0 -text {Welcome to Tycho in Pigi\n}\n",
+	"::tycho::view TclShell -geometry -0+0 -text {Welcome to Tycho in Pigi\n}\n",
 	(char *)NULL) );
 
     ViDone();
