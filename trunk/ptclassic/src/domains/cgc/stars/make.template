@@ -48,6 +48,7 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC)
 # source files for all stars, using preprocessor
 # put base stars first
 PL_SRCS= \
+ CGCAbs.pl \
  CGCChop.pl \
  CGCFIR.pl \
  CGCFix.pl \
@@ -80,6 +81,7 @@ PL_SRCS= \
  CGCDelay.pl \
  CGCDeMux.pl \
  CGCDeScrambler.pl \
+ CGCDirichlet.pl \
  CGCDistributor.pl \
  CGCDivByInt.pl \
  CGCDownSample.pl \
@@ -94,6 +96,7 @@ PL_SRCS= \
  CGCFloatToCx.pl \
  CGCFloatToFix.pl \
  CGCFloatToInt.pl \
+ CGCFloor.pl \
  CGCFork.pl \
  CGCGGAL.pl \
  CGCGain.pl \
