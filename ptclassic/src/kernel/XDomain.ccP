@@ -72,14 +72,15 @@ static <T>Domain proto;
 class <T>Target : public Target {
 public:
 	<T>Target() : Target("default-<T>","<T>Star","default <T> target"){}
+	Block* makeNew() const { LOG_NEW; return new <T>Target;}
+	~<T>Target() { delSched();}
+
+protected:
 	void setup()
 	{
 		if (!scheduler()) { LOG_NEW; setSched(new <T>Scheduler); }
-		scheduler()->setGalaxy(*galaxy());
 		Target::setup();
 	}
-	Block* makeNew() const { LOG_NEW; return new <T>Target;}
-	~<T>Target() { delSched();}
 };
 
 static <T>Target default<T>target;
