@@ -56,7 +56,7 @@ public:
 		  const char* assocDomain = "AnyAsm", ProcMemory* m = 0);
 
 	// Destructor
-	AsmTarget::~AsmTarget();
+	~AsmTarget();
 
 	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const {
