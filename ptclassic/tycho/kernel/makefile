@@ -71,6 +71,8 @@ ITCL_SRCS = \
 	EditPtlang.itcl \
 	EditPtlangText.itcl \
 	EditSearch.itcl \
+	EditSpice.itcl \
+	EditSpiceText.itcl \
 	EditTcl.itcl \
 	EditTclText.itcl \
 	EditText.itcl \
