@@ -9,6 +9,7 @@ $Id$
  Programmer:  J. T. Buck
  Date of creation: 6/12/90
  Revised to use preprocessor, 10/3/90
+ Revised to use XGraph class, 10/20/90
 
  This is derived from the basic Xgraph star.  It does an X-Y plot.
  The start and wrapup functions from the base class are used.
@@ -28,8 +29,6 @@ defstar {
 		type { float }
 	}
 	go {
-		if (!strm) return;
-		fprintf (strm, "%g %g\n", double(xInput%0), double(input%0));
-		index++;
+		graph.addPoint(double(xInput%0), double(input%0));
 	}
 }
