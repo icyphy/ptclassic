@@ -48,7 +48,7 @@ ErrClear()
 
 void
 ErrAdd(msg)
-char *msg;
+const char *msg;
 {
     /* if this is not the first message */
     if (next != errBuf) {
