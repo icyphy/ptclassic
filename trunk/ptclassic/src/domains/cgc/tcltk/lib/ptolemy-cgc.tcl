@@ -161,6 +161,7 @@ proc ptkGo {} {
 	.control.gofr.go configure -relief sunken
 	.control.pause configure -relief raised
 	goCmd
+	.control.gofr.go configure -relief raised
 }
 
 # procedure to update the number of iterations
