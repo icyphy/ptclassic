@@ -84,8 +84,7 @@ protected:
 	  { return expandRef(name, offset, ""); }
 
 	// Form expression interspersing operators within arg list.
-	StringList VHDLStar :: expandInterOp(const char*, const char*,
-					     const char*);
+	StringList expandInterOp(const char*, const char*, const char*);
 
 	// Assignment operator, depending on variable or signal
 	const char* expandAssign(const char*);
