@@ -7,10 +7,10 @@
 <h1><a name="scope in Itcl">Scope in Itcl</a></h1>
 <ol>
 <li><a href="#scoping problems">Scoping problems</a>
-<li><a href="#bind command">Using the "bind" command</a>
-<li><a href="#this variable">Using the variable "this"</a>
-<li><a href="#info which command">Using "info which command"</a>
-<li><a href="#code command">Using the "code" command</a>
+<li><a href="#bind command">Using the <CODE>bind</CODE> command</a>
+<li><a href="#this variable">Using the variable <CODE>this</CODE></a>
+<li><a href="#info which command">Using <CODE>info which command</CODE></a>
+<li><a href="#code command">Using the <CODE>code</CODE> command</a>
 </ol>
 <p>
 <h3><a name="scoping problems">Scoping problems</a></h3>
@@ -19,7 +19,7 @@ One of the trickiest parts about using Itcl is to properly
 manage namespaces and scope.
 A key problem that arises repeatedly is how to construct
 a command that is bound to an event (like a key press),
-bound to a button, executed in the background using "after,"
+bound to a button, executed in the background using <CODE>after</CODE>,
 or executed in some scope different from where the command
 is defined.  In general, the problem is that a command
 has a namespace context.  There are two
@@ -29,22 +29,22 @@ ways in Itcl that this namespace context can be represented:
     {@scope ::namespace commandname}
 </pre>
 Either of these can be executed as a command.
-(One of the unfortunately features of Itcl is that there are
+(One of the unfortunate features of Itcl is that there are
 several ways to accomplish just about everything related to
 namespaces and scope, and the subtle differences between them
 are not always clear.)
 <p>
-Within an Itcl object, the variable "this"
+Within an Itcl object, the variable <CODE>this</CODE>
 has the first of these two forms, as a fully qualified command name.
-The "info which" command can be used to obtain the first form for any
-command ("this" only works for an object).
-The "code" or the "scope" commands can be used to obtain the second form.
+The <CODE>info which</CODE> command can be used to obtain the first form for any
+command (<CODE>this</CODE> only works for an object).
+The <CODE>code</CODE> or the <CODE>scope</CODE> commands can be used to obtain the second form.
 <p>
 In Itcl, all commands that are executed as a consequence of a keyboard
 or window event are executed at the global scope (in namespace "::").
-Also, commands executed in the background using "after" are executed
+Also, commands executed in the background using <CODE>after</CODE> are executed
 at the global scope.  To verify this, we can use the
-<a name="info context command">"info context" command</a>,
+<a name="info context command"><CODE>info context</CODE> command</a>,
 which returns a null string at the global scope.
 For example:
 <tcl><pre>
@@ -56,7 +56,7 @@ namespace foo {
 }
 </pre></tcl>
 Above, we find that the context inside the namespace is
-reported as "::foo", but in the "after" command, it is reported
+reported as <CODE>::foo</CODE>, but in the <CODE>after</CODE> command, it is reported
 as an empty string, meaning the global context.
 Button commands work similarly:
 <tcl><pre>
@@ -76,7 +76,7 @@ is to be sure that commands that will execute at global scope can
 in fact execute at global scope.
 There are a number of ways to do this.
 <p>
-<h3><a name="bind command">Using the "bind" command</a></h3>
+<h3><a name="bind command">Using the <CODE>bind</CODE> command</a></h3>
 <p>
 Bindings to key or mouse events, like the button presses above,
 execute at the global scope.  Itcl has provided two particularly
@@ -111,20 +111,20 @@ namespace foo {
    bar .y   
 }
 </pre></tcl>
-Here, we define a class "bar" inside namespace "foo" derived from
+Here, we define a class <CODE>bar</CODE> inside namespace <CODE>foo</CODE> derived from
 an Itk top-level window class.  In the constructor, we pack
 into the window a canvas widget.
-We bind the key "a" to simply report the expansion for "%q",
-which will be "::foo::.y".
+We bind the key <CODE>a</CODE> to simply report the expansion for <CODE>%q<CODE>,
+which will be <CODE>::foo::.y</CODE>.
 The key "b" uses this expansion to delete the object.
 Notice that the window specified for the bindings is
-"$itk_component(hull)", which will be the top-level window.
+<CODE>itk_component(hull)</CODE>, which will be the top-level window.
 <p>
-The "%Q" directive is similar, except that the full
+The <CODE>%Q</CODE> directive is similar, except that the full
 expanded name of an Itk megawidget will
 be reported.
 <p>
-The <a name="winfo command command">"winfo command windowname"</a>
+The <a name="winfo command command"><CODE>winfo command windowname</CODE></a>
 command returns the fully-qualified command name of
 an object given a Tk top-level window name.
 For example, if the canvas window from the above example is still
@@ -133,20 +133,20 @@ present, try:
     ::tycho::inform [winfo command .y]
 </pre></tcl>
 Notice that this can execute in the global scope.
-The window name ".y" is visible to Tk in any scope because Tk
-has only a flat name space.  The Itk object ".y", however, is
+The window name <CDOE>y</CODE> is visible to Tk in any scope because Tk
+has only a flat name space.  The Itk object <CODE>.y</CODE>, however, is
 not visible in the global scope.
 <p>
-The <a name="winfo megawidget windowname">"winfo megawidget windowname"</a>
+The <a name="winfo megawidget windowname"><CODE>winfo megawidget windowname</CODE></a>
 command is similar, except that it returns the name of an Itk megawidget
 rather than a top-level window object.
 The specified window name can be any window inside the megawidget.
 <p>
-<h3><a name="this variable">Using the variable "this"</a></h3>
+<h3><a name="this variable">Using the variable <CODE>this</CODE></a></h3>
 <p>
-The variable "this" inside a class context has as its value
+The variable <CODE>this</CODE> inside a class context has as its value
 the fully qualified command name associated with the object
-(yes, it could have been used instead of %q in the above example).
+(yes, it could have been used instead of <CODE>%q</CODE> in the above example).
 Consider the following:
 <tcl><pre>
 namespace foo {
@@ -162,32 +162,33 @@ namespace foo {
    bar y
 }
 </pre></tcl>
-The value of the variable "this" is reported as "::foo::y", which is the
-fully qualified command name associated with the object "y".
-The context inside the constructor is "::foo::bar", a namespace
+The value of the variable <CODE>this</CODE>is reported as <CODE>::foo::y</CODE>, which is the
+fully qualified command name associated with the object <CODE>y</CODE>.
+The context inside the constructor is <CODE>::foo::bar</CODE>, a namespace
 associated with the class.
-The command "$this x" or "::foo::y x" can be executed at the global
-scope, so the "after" directive works.
+The command <CODE>$this x</CODE> or <CODE>::foo::y x</CODE> can be executed 
+at the global
+scope, so the <CODE>after</CODE> directive works.
 Notice that it would not have worked to say:
 <pre>
          after idle {$this x}
 </pre>
-because the "$this" will not be evaluated until the "after" command
+because the <CODE>$this</CODE> will not be evaluated until the <CODE>after</CODE> command
 triggers, and this will happen at the global scope where no variable
-"this" is defined.
+<CODE>this</CODE> is defined.
 <p>
-If in a binding or delayed invocation using "after" you wish to access
+If in a binding or delayed invocation using <CODE>after</CODE> you wish to access
 methods in a widget contained in the calling widget, use
 syntax like that in the following example:
 <pre>
-   after idle "$this component name method arg1 arg2 ... "
+   after idle <CODE>$this component name method arg1 arg2 ... </CODE>
 </pre>
-Here, "name" is the name of the Itk component, "method" is the name
+Here, <CODE>name</CODE> is the name of the Itk component, <CDOE>method</CODE> is the name
 of its method, and the argument list is the arguments to pass to the method.
 <p>
-<h3><a name="info which command">Using "info which command"</a></h3>
+<h3><a name="info which command">Using <CODE>info which command</CODE></a></h3>
 <p>
-The "info which" command
+The <CODE>info which</CODE> command
 takes one argument, which is the name of a command in the
 current scope, and returns a fully qualified command with namespace
 information. Thus, for example,
@@ -198,8 +199,8 @@ namespace foo {
    after idle [info which x]
 }
 </pre></tcl>
-The first line defines a procedure "x", the second informs
-us of its fully qualified name "::foo::x", and the third executes the fully
+The first line defines a procedure <CODE>x</CODE>, the second informs
+us of its fully qualified name <CODE>:foo::x</CODE> and the third executes the fully
 qualified name as a command at the global scope.
 The following, by contrast, yields an error:
 <tcl><pre>
@@ -223,17 +224,17 @@ namespace foo {
    bar y
 }
 </pre></tcl>
-Notice that "z" here is a procedure, not a method.
+Notice that <CODE>z</CODE> here is a procedure, not a method.
 A procedure does not need an instance of an object to be invoked.
-Indeed, the command that we schedule using "after" is "::foo::bar::z",
-which does not make any reference to any particular instance of the class "bar".
-Thus, "info which" should not be used to access methods, but can be used
+Indeed, the command that we schedule using <CODE>after</CODE> is <CODE>::foo::bar::z</CODE>,
+which does not make any reference to any particular instance of the class <CODE>bar</CODE>.
+Thus, <CODE>info which</CODE> should not be used to access methods, but can be used
 to access procedures.
 <p>
-<h3><a name="code command">Using the "code" command</a></h3>
+<h3><a name="code command">Using the <CODE>code</CODE> command</a></h3>
 <p>
-The "code" command returns a scoped reference in the second form
-described above, beginning with "@scope".
+The <CODE>code</CODE> command returns a scoped reference in the second form
+described above, beginning with <CODE>@scope</CODE>.
 For example:
 <tcl><pre>
 namespace foo {
@@ -242,8 +243,8 @@ namespace foo {
    after idle [code x]
 }
 </pre></tcl>
-In this case, the "[code x]" directive returns the list
-"@scope ::foo x", which can be executed as a command at the global
+In this case, the <CODE>[code x]</CODE> directive returns the list
+<CODE>@scope ::foo x</CODE>, which can be executed as a command at the global
 scope.  It can also be used in class definitions.
 For example:
 <tcl><pre>
@@ -259,8 +260,8 @@ namespace foo {
    bar y
 }
 </pre></tcl>
-The command that is scheduled by "after" is
-"@scope ::foo::bar z".
+The command that is scheduled by <CODE>after</CODE> is
+<CODE>@scope ::foo::bar z</CODE>.
 <p>
 <a href="../../doc/index.html">Tycho Home Page</a><br>
 <HR>
