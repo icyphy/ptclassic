@@ -69,6 +69,9 @@ class ::tycho::EditJava {
     # Execute the Java code in the selection (or the entire text widget).
     method evaluate {}
 
+    # Get the blank itcl template for a file and insert it into the window
+    method fileTemplate { fileTemplate {newClassName {}}}
+
     # Generate and display a doc file from the current buffer
     method gendocBuffer {}
  
@@ -195,6 +198,47 @@ body ::tycho::EditJava::evaluate {} {
     return $ret
 }
 
+#####################################################################
+#### fileTemplate
+# Insert the blank template into the file.
+# The fileTemplate argument names the template file that should by used.  
+# $TYCHO/editors/textedit/templates contains some sample templates.
+# If the optional className argument is set, then its value will 
+# be substituted wherever the template file contains the string 'ClassName'
+#
+# The Java 'package' line is adjusted if this file is located below
+# $TYCHO/java, otherwise the Java package line is commented out.
+#
+body ::tycho::EditJava::fileTemplate {fileTemplate {newClassName {}}} {
+    puts "$fileTemplate $newClassName $className"
+    ::tycho::EditProgram::fileTemplate $fileTemplate $newClassName
+    set className $newClassName
+
+    # Create a list of the canonical path to this file by using $TYCHO
+    # If this file is not within $TYCHO, then the first element of
+    # the list will not be $TYCHO
+    set canonicalPath [file split [::tycho::simplifyPath \
+            [filename] [list TYCHO]]]
+    if {[lindex $canonicalPath 0] == {$TYCHO} && \
+            [lindex $canonicalPath 1] == {java} && \
+            [llength $canonicalPath] > 2 } {
+        # This file is below $TYCHO/java, so we subsitute in the proper
+        # java package
+        set packageName [join [lrange $canonicalPath 2 \
+                [expr {[llength $canonicalPath] - 2}]] .]
+        substituteText "package MyPackageName;" \
+                "package $packageName;"
+
+    } else {
+        set packageName {}
+        substituteText "package MyPackageName;" \
+                "//package MyPackageName;"
+    }
+
+    # Fix the author tag by substituting in the author
+    substituteText "@author" "@author [preference get userName]"
+
+}
 ###################################################################
 #### gendocBuffer
 # Generate and display a doc file from the current file.
@@ -214,9 +258,11 @@ body ::tycho::EditJava::gendocBuffer {} {
     }
     # Figure out what file to open
     if {$packageName != {} } {
-        set htmlFile [file join doc codeDoc $packageName.[getClassName].html]
+        set htmlFile [file join [file dirname [filename]] \
+                doc codeDoc $packageName.[getClassName].html]
     } else {
-        set htmlFile [file join doc codeDoc [getClassName].html]
+        set htmlFile [file join [file dirname [filename]] \
+                doc codeDoc [getClassName].html]
     }
 
     putStatus "Running javadoc"
