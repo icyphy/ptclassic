@@ -33,8 +33,7 @@ defstar {
   go {
     // collect inputs and put into the matrix
     FixMatrix *matrix = new FixMatrix(int(numRows),int(numCols),input);
-    Envelope pkt(*matrix);
-    output%0 << pkt;
+    output%0 << *matrix;
   }
 }
 
