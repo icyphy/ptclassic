@@ -82,10 +82,17 @@ KcClearUniverse() {
     currentGalaxy = universe;
 }
 
-// Create a new instance of star or galaxy
+// Create a new instance of star or galaxy and set params for it
 extern "C" boolean
-KcInstance(char *name, char *ako) {
-    return currentGalaxy->addStar(name, ako);
+KcInstance(char *name, char *ako, ParamListType* pListPtr) {
+    if (!currentGalaxy->addStar(name, ako))
+	return FALSE;
+    if (!pListPtr || pListPtr->length == 0) return TRUE;
+    for (int i = 0; i < pListPtr->length; i++) {
+	if(!currentGalaxy->setState(name, pListPtr->array[i].name,
+				    pListPtr->array[i].value)) return FALSE;
+    }
+    return TRUE;
 }
 
 // connect
