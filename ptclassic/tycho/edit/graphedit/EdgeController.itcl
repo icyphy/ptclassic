@@ -37,8 +37,8 @@
 # connection and disconnecting them.
 #
 class ::tycho::DFGConnector {
-	inherit ::tycho::ViewController
-	
+    inherit ::tycho::ViewController
+    
     constructor {args} {}
     destructor {}
     
@@ -47,6 +47,12 @@ class ::tycho::DFGConnector {
 
     #################################################################
     ####                     public methods                      ####
+
+    # Get the drag-dropper
+    method _dropper {} {return $_dropper}
+
+    # Get the edge-splitting drag-dropper
+    method _splitter {} {return $_splitter}
 
     # Process a click event
     method click {id x y}
@@ -68,21 +74,24 @@ class ::tycho::DFGConnector {
 
     # Test for a drop target
     method trytarget {id}
- 
+    
     #################################################################
     ####                  protected methods                      ####
 
     # Reset all variables
-    protected method _cleanup {x y}
+    protected method _cleanup {}
+
+    # Start connection: grapple
+    protected method _initdrag:edge {x y}
 
     # Start connection: grapple
     protected method _initdrag:grapple {x y}
 
-    # Start connection: terminal
-    protected method _initdrag:terminal {x y}
-
     # Start connection: junction
     protected method _initdrag:junction {x y}
+
+    # Start connection: terminal
+    protected method _initdrag:terminal {x y}
 
     #################################################################
     ####                 protected variables                     ####
@@ -94,10 +103,10 @@ class ::tycho::DFGConnector {
     protected variable _dropper
 
     # The name of the edge being worked on
-    protected variable _edgename
+    protected variable _edgename ""
 
     # The line item representing the edge being worked on
-    protected variable _edgeitem
+    protected variable _edgeitem ""
 
     # The current grapple, if any
     protected variable _grapple ""
@@ -108,20 +117,20 @@ class ::tycho::DFGConnector {
     # The initial y
     protected variable _inity
 
-	# The mode we are currently drag-dropping in
-	protected variable _mode "idle"
+    # The mode we are currently drag-dropping in
+    protected variable _mode "idle"
 
-	# Set if we are currently moving
-	protected variable _moving 0
+    # Set if we are currently moving
+    protected variable _moving 0
 
     # The interactor to split edges
     protected variable _splitter
 
     # Eligible tags of the "to" terminal
-    protected variable _totags
+    protected variable _totags ""
 
     # The targetted terminal
-    protected variable _target
+    protected variable _target ""
 }
 
 ########################################################################
@@ -129,11 +138,11 @@ class ::tycho::DFGConnector {
 #
 body ::tycho::DFGConnector::constructor {args} {
     # Evaluate options
-    eval itk_initialize $args
+    eval configure $args
 
     # This DragDropper is used to create new edges from
     # terminals and junctions, and disconnect edges
-    set _dropper [$slate interactor Drag_dropper]
+    set _dropper [$slate interactor DragDropper]
     $_dropper bind input
     $_dropper bind output
     $_dropper configure \
@@ -146,8 +155,8 @@ body ::tycho::DFGConnector::constructor {args} {
 	    -dragcommand "$this drag" \
 	    -deactivatecommand "$this release"
 
-    # This Drag_dropper is used to split edges
-    set _splitter [$slate interactor Drag_dropper]
+    # This DragDropper is used to split edges
+    set _splitter [$slate interactor DragDropper]
     $_splitter configure \
 	    -startwhen distance \
 	    -sourcehalo 6 \
@@ -165,11 +174,11 @@ body ::tycho::DFGConnector::constructor {args} {
 # Process the click event from either drag-_dropper.
 #
 body ::tycho::DFGConnector::click {id x y} {
-	set _initx $x
-	set _inity $y
-	
-    puts "click [$slate type $id] ([$slate gettags $id]) $id $x $y"
+    # puts "click [$slate type $id] ([$slate gettags $id]) $id $x $y"
 
+    set _initx $x
+    set _inity $y
+    
     # Figure out what are clicking on
     if [$slate hastag $id "grapple"] {
         set _mode grapple
@@ -184,19 +193,22 @@ body ::tycho::DFGConnector::click {id x y} {
     switch -exact $_mode {
         "terminal" {
             # Set up to create a new line. Clear the selection
-            select clear
+            $slateview select clear
         }
         "grapple" {
             # Remember the grapple
             set _grapple $id
+
+            # Unhighlight it
+            $slate unhighlight $id
         }
         "edge" {
             # Set up to create a new line. Clear the selection
-            select clear
+            $slateview select clear
         }
         "junction" {
             # Set up to create a new line. Clear the selection
-            select clear
+            $slateview select clear
         }
     }
 }
@@ -211,34 +223,34 @@ body ::tycho::DFGConnector::click {id x y} {
 # to the disconnected end.
 #
 body ::tycho::DFGConnector::disconnect {edge end} {
-	set edgeitem [slateid $edge]
-	set port [$graph attrget $edge $end]
-	set portitem [slateid $port]
-	
-	# Disconnect
-	$graph publish attrset $edge $end {}
-	
-	# Move the end of the edge
-	if { $end == "-from" } {
-		set aspect "start"
-	} else {
-		set aspect "end"
-	}
-	set point [$slate aspect $portitem "terminal"]
-	set dirn  [$slate itemcget $portitem -direction]
-	set vector [::tycho::Shape::compassToVector $dirn]
-	set x [expr [lindex $point 0] + 10 * [lindex $vector 0]]
-	set y [expr [lindex $point 1] + 10 * [lindex $vector 1]]
-	$slate reshape $edgeitem $x $y -aspects $aspect
-	
-	# Place a sticky grapple on the end
+    set edgeitem [slateid $edge]
+    set port [$graph attrget $edge $end]
+    set portitem [slateid $port]
+    
+    # Disconnect
+    $graph publish attrset $edge $end {}
+    
+    # Move the end of the edge
+    if { $end == "-from" } {
+	set aspect "start"
+    } else {
+	set aspect "end"
+    }
+    set point [$slate aspect $portitem "terminal"]
+    set dirn  [$slate itemcget $portitem -direction]
+    set vector [::tycho::Shape::compassToVector $dirn]
+    set x [expr [lindex $point 0] + 10 * [lindex $vector 0]]
+    set y [expr [lindex $point 1] + 10 * [lindex $vector 1]]
+    $slate reshape $edgeitem $x $y -aspects $aspect
+    
+    # Place a sticky grapple on the end
     $slate grapple $edgeitem -interactor $dropper -aspects $_aspect
     $slate itemconfigure "$_aspect.$_edgeitem" -sticky 1
 
     # Tag the edge if it is completely disconnected
     if { [$graph attrget $edge -from] == "" && \
-           [$graph attrget $edge -to] == "" } {
-       $slate addtag disconnected withtag $_edgeitem
+	    [$graph attrget $edge -to] == "" } {
+	$slate addtag disconnected withtag $_edgeitem
     }
 }
 
@@ -248,17 +260,17 @@ body ::tycho::DFGConnector::disconnect {edge end} {
 # Test if a junction will accept a connection.
 #
 body ::tycho::DFGConnector::junctionaccepts {name id tag} {
-	set inputs [$_graph edges * $name]
-	set outputs [$_graph edges $name]
-	if { $tag == "input" } {
-		# An input connection can be made if there are no
-		# input connections and no more than three output connections.
-		expr {[llength $inputs] == 0 && [llength $outputs] <= 3}
-	} elseif { $tag == "output" } {
-		# An output connection can be made if there are no more
-		# than two output connections
-		expr [llength $outputs] <= 2}
-	}
+    set inputs [$graph edges * $name]
+    set outputs [$graph edges $name]
+    if { $tag == "input" } {
+	# An input connection can be made if there are no
+	# input connections and no more than three output connections.
+	expr {[llength $inputs] == 0 && [llength $outputs] <= 3}
+    } elseif { $tag == "output" } {
+	# An output connection can be made if there are no more
+	# than two output connections
+	expr {[llength $outputs] <= 2}
+    }
 }
 
 ########################################################################
@@ -272,7 +284,7 @@ body ::tycho::DFGConnector::junctionaccepts {name id tag} {
 # line to the right connection point.
 #
 body ::tycho::DFGConnector::drag {id x y} {
-    puts [list drag $id $x $y]
+    # puts [list drag $id $x $y]
 
     # If this is the first time, call for initial processing
     if !$_moving {
@@ -283,23 +295,28 @@ body ::tycho::DFGConnector::drag {id x y} {
     set _target $id
 
     if { $id == "" } {
-		# The drag-dropper is not over a target: just move start/end point
-		$slate reshapeto $_edgeitem $x $y $_aspect
+	# The drag-dropper is not over a target: move
+        # start/end point and grapple
+	$slate reshapeto $_edgeitem $x $y $_aspect
+        if { $_grapple != "" } {
+            $slate moveto $_grapple $x $y center
+        }
     } else {
-		# We are over a target: move start/end point to connection point
-		set coords [$slate aspect $id terminal]
-		eval $slate reshapeto $_edgeitem $coords $_aspect
+	# We are over a target: move start/end point to connection point
+	set coords [$slate aspect $id terminal]
+	eval $slate reshapeto $_edgeitem $coords $_aspect
 
-		# Change the end direction of the line 
+	# Change the end direction of the line 
         set dir [$slate itemcget $id -direction]
         if { $_aspect == "end" } {
             set dir [::tycho::Shape::compass $dir "rev"]
         }
-	    $slate itemconfigure $_edgeitem -$_aspect $dir
-    }
-    # Move the grapple
-    if { $_grapple != "" } {
-    	$slate moveto $_grapple $x $y
+	$slate itemconfigure $_edgeitem -$_aspect $dir
+
+        # Move the grapple
+        if { $_grapple != "" } {
+            eval $slate moveto $_grapple $coords center
+        }
     }
     # Rehighlight the edge if it is highlighted
     if { [$slate find withtag highlight.$_edgeitem] != "" } {
@@ -341,7 +358,7 @@ body ::tycho::DFGConnector::release {args} {
             $slate itemconfigure $_grapple -sticky 0
         }
         # Make it the current selection
-        select add $_edgeitem
+        $slateview select add $_edgeitem
 
         # Remove the disconnected tag
         $slate dtag $_edgeitem disconnected
@@ -366,15 +383,15 @@ body ::tycho::DFGConnector::trysource {id} {
     # puts "trysource $id"
     set name [itemname $id]
 
-	# See if we're already dragging something. This is needed to
-	# prevent a grapple that is being dragged from rehighlighting
-	# if the cursor moves ahead of it.
-    if [::info exists _scratch(name)] {
+    # See if we're already dragging something. This is needed to
+    # prevent a grapple that is being dragged from rehighlighting
+    # if the cursor moves ahead of it.
+    if { $_edgename != "" } {
         return 0
     }
     
     # Test the connectedness of the item
-    set edges [concat [$_graph edges $name] [$_graph edges * $name]]
+    set edges [concat [$graph edges $name] [$graph edges * $name]]
     set conn [llength $edges]
     if [$slate hastag $id "junction"] {
     	# Junctions have a connectivity of 4
@@ -393,23 +410,23 @@ body ::tycho::DFGConnector::trysource {id} {
 #
 body ::tycho::DFGConnector::trytarget {id} {
     # Make sure we're currently trying to connect
-    if ![::info exists _scratch(targettag)] {
+    if { $_totags == "" } {
         return 0
     }
     # We can connect if the item has the target tag
-    if [$_slate hastag $_scratch(targettag) $id] {
+    if [$slate hastag $id $_totags] {
         set name [itemname $id]
 
         # Test the connectedness of the item
-	    if [$slate hastag $id "junction"] {
-	    	# Try junctions
-	    	junctionaccepts $name $id $_scratch(targettag)
-	    } else {
-	    	# Terminals have a connectivity of 1
-		    set edges [concat [$_graph edges $name] [$_graph edges * $name]]
-    		set conn [llength $edges]
-	    	expr {$conn < 1}
-	    }
+	if [$slate hastag $id "junction"] {
+	    # Try junctions
+	    junctionaccepts $name $id $_totags
+	} else {
+	    # Terminals have a connectivity of 1
+	    set edges [concat [$graph edges $name] [$graph edges * $name]]
+	    set conn [llength $edges]
+	    expr {$conn < 1}
+	}
     } else {
         return 0
     }
@@ -423,13 +440,101 @@ body ::tycho::DFGConnector::trytarget {id} {
 #### _cleanup
 #
 body ::tycho::DFGConnector::_cleanup {} {
-	set _edgename ""
-	set _edgeitem ""
-	set _grapple ""
-	set _mode "idle"
-	set _moving 0
-	set _totags {}
-	set _target ""
+    set _edgename ""
+    set _edgeitem ""
+    set _grapple ""
+    set _mode "idle"
+    set _moving 0
+    set _totags {}
+    set _target ""
+}
+
+########################################################################
+#### _initdrag:edge
+#
+body ::tycho::DFGConnector::_initdrag:edge {x y} {
+    set edgeitem1 [$slate find withtag current]
+    set edgename1 [itemname $edgeitem1]
+    
+    # Get a unique junction name
+    while [$graph exists [set junctionname [::tycho::autoName junction]]] {}
+    
+    # Create the junction item
+    set coords [$slate coords [$slate primary $edgeitem1]]
+    set point [::tycho::Line::nearest $coords $_initx $_inity]
+    $layout publish add item $junctionname \
+            -slatetype Junction \
+            -coords $point \
+            -tags "junction input output"
+    set junctionitem [slateid $junctionname]
+
+    # Create the junction vertex
+    $graph publish add vertex $junctionname
+
+    # Get two unique edge names
+    while [$graph exists [set edgename2 [::tycho::autoName edge]]] {}
+    while [$graph exists [set _edgename [::tycho::autoName edge]]] {}
+
+    # Split the edge: get coordinates
+    set out [eval ::tycho::Line::direction [list $coords] $point]
+    set in [::tycho::Shape::compass $out rev]
+    set start1 [$slate aspect $edgeitem1 start]
+    set end1 [$slate aspect $junctionitem $in]
+    set start2 [$slate aspect $junctionitem $out]
+    set end2 [$slate aspect $edgeitem1 end]
+
+puts "out = $out, in = $in"
+
+    # Add the new edge
+    $graph publish add edge $edgename2 \
+	    -from $junctionname \
+	    -to [$graph attrget $edgename1 -to]
+    $layout publish add item $edgename2 \
+	    -slatetype SmartLine \
+	    -coords [concat $start2 $end2] \
+            -start $out \
+            -end [$slate itemcget $edgeitem1 -end] \
+            -tags "edge"
+    
+    # Modify the old edge
+    $graph publish attrset $edgename1 -to $junctionname
+    set x0 [lindex $end2 0]
+    set y0 [lindex $end2 0]
+
+    $layout publish reshape $edgename1 \
+            [expr [lindex $end1 0] - [lindex $end2 0]] \
+            [expr [lindex $end1 1] - [lindex $end2 1]] \
+            end
+
+    $layout publish attrset $edgename1 \
+            -arrow none \
+            -end $out
+
+    # Create the new edge which is being drawn. Find the point to join
+    if { $out == "w" || $out == "e" } {
+        if { $y < $_inity } {
+            set joinat "n"
+        } else {
+            set joinat "s"
+        }
+    } else {
+           if { $x < $_initx } {
+            set joinat "w"
+        } else {
+            set joinat "e"
+        }
+    }
+    # Now create the edge
+    $graph publish add edge $_edgename -from $junctionitem
+    $layout publish add item $_edgename \
+            -slatetype SmartLine \
+            -coords [concat [$slate aspect $junctionitem $joinat] $x $y] \
+            -start $joinat \
+            -end $joinat \
+            -tags "edge"
+
+    set _edgeitem [slateid $_edgename]
+    set _totags "input"
 }
 
 ########################################################################
@@ -443,75 +548,13 @@ body ::tycho::DFGConnector::_initdrag:grapple {x y} {
     set _aspect [$slate itemcget $_grapple -aspect]
     if { $_aspect == "start" } {
         set _totags "output"
-		set end "from"
+	set end "from"
     } else {
         set _totags "input"
-		set end "to"
+	set end "to"
     }     
     # Disconnect the edge
     $graph publish attrset $_edgename -$end ""
-}
-
-########################################################################
-#### _initdrag:edge
-#
-body ::tycho::DFGConnector::_initdrag:edge {x y} {
-    set edgeitem1 [$slate find withtag current]
-    set edgename1 [itemname $_edgeitem]
-	
-    # Get a unique junction name
-    while [$graph exists [set junctionname [::tycho::autoName junction]]] {}
-    
-	# Create the junction item
-	set coords [$slate coords [$slate primary $edgeitem1]]
-	set point [::tycho::Line::nearest $coords $_initx $_inity]
-    $layout publish add item $junctionname \
-            -slatetype Junction \
-            -coords $point \
-            -tags "junction"
-	set junctionitem [slateid $junctionname]
-
-	# Create the junction vertex
-	$graph publish add vertex $junctioname
-
-    # Get two unique edge names
-    while [$graph exists [set edgename2 [::tycho::autoName edge]]] {}
-    while [$graph exists [set _edgename [::tycho::autoName edge]]] {}
-
-	# Split the edge
-	set out [eval ::tycho::Line::direction [list $coords] $point]
-	set in [::tycho::Shape::compass $out rev]
-	set start1 [$slate aspect $edgeitem1 start]
-	set end1 [$slate aspect $junctionitem $in]
-	set start2 [$slate aspect $junctionitem $out]
-	set end2 [$slate aspect $edgeitem1 start]
-
-	$graph publish add edge $edgename2 \
-		-from $junctionitem \
-		-to [$graph attrget $edgename1 -to]
-	$graph publish attrset $edgename1 -to $junctionitem
-	
-	$layout publish add item $edgename2 \
-			-slatetype SmartLine \
-			-coords [concat $start1 $end1] \
-            -start $out \
-            -end $out \
-            -tags "edge"
-    
-    # Create the new edge which is being drawn
-    if { $x < $_initx } {
-    	set joinat "s"
-    } else {
-    	set joinat "n"
-    }
-    $graph publish add edge $_edgename -from $junctionitem
-    $layout publish add item $_edgename \
-            -slatetype SmartLine \
-            -coords [concat [$slate aspect $junctionitem $joinat] $x $y] \
-            -start $joinat \
-            -end $joinat \
-            -tags "edge"
-    set _edgeitem [slateid $_edgename]
 }
 
 ########################################################################
@@ -520,9 +563,9 @@ body ::tycho::DFGConnector::_initdrag:edge {x y} {
 body ::tycho::DFGConnector::_initdrag:junction {x y} {
     set junction [$slate find withtag "current"]
 
-	# Find the closest free terminal
-	error FIXME
-	
+    # Find the closest free terminal
+    error FIXME
+    
     # The "direction" of the terminal
     set dir [$slate itemcget $source -direction]
 

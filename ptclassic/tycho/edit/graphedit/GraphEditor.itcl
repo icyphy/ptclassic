@@ -65,14 +65,20 @@ class ::tycho::DFGEditor {
     #################################################################
     ####                     public methods                      ####
 
+    # Place a star
+    method addvertex {libname starname}
+
+    # Delete an edge
+    method deleteedge {name}
+
+    # Delete a vertex
+    method deletevertex {name}
+
     # Clear all data
     method clear {}
 
     # Edit parameters of the given vertices
     method editparameters {args}
-
-    # Place a star
-    method addvertex {libname starname}
 
     # Handle change notification from the graph model
     method notifygraph {method args}
@@ -97,9 +103,6 @@ class ::tycho::DFGEditor {
 
     # Start moving a vertex
     method vertexclick {tag x y args}
-
-    # Delete a vertex
-    method deletevertex {vertex}
 
     # Continue moving a vertex
     method vertexdrag {tag x y}
@@ -128,11 +131,17 @@ class ::tycho::DFGEditor {
     # The controller for connecting edges
     protected variable connector
 
+    # The interactor to connect edges
+    protected variable dropper
+
     # The controller for moving vertexes
     protected variable mover
 
     # The item selector
     protected variable selector
+
+    # The interactor to split edges
+    protected variable splitter
 
     # The semantic model
     protected variable _graph ""
@@ -187,22 +196,25 @@ body ::tycho::DFGEditor::constructor {args} {
     # Make a more pronounced highlight
     $_slate configure -highlightcolor azure2 -highlightwidth 4
 
-    # Create the interactor to move selected items
-    set follower [$_slate interactor Follower]
+    # Create the controller object for connecting edges
+    set connector [::tycho::DFGConnector [::tycho::autoName controller] \
+            -slate $_slate \
+            -slateview $this \
+            -graph $_graph \
+            -layout $_layout]
+		
+    # Create the controller object for moving vertexes
+    set mover [::tycho::DFGMover [::tycho::autoName controller] \
+            -slate $_slate \
+            -slateview $this \
+            -graph $_graph \
+            -layout $_layout]
 
-	# Create the controller object for connecting edges
-	set connector [::tycho::DFGConnector [::tycho::autoName controller] \
-		-slate $_slate -slateview $this \
-		-graph $_graph -layout $_layout \
-	]
-		
-	# Create the controller object for moving vertexes
-	set mover [::tycho::DFGMover [::tycho::autoName controller] \
-		-slate $_slate -slateview $this \
-		-graph $_graph -layout $_layout \
-		-follower $follower
-	]
-		
+    # Get handles to interactors
+    set follower [$mover _follower]
+    set dropper [$connector _dropper]
+    set splitter [$connector _splitter]
+
     # Enable vertex selection with button 1; shift-click toggles
     set selector [$_slate interactor Selector]
     $selector bind vertex -button 1
@@ -214,13 +226,17 @@ body ::tycho::DFGEditor::constructor {args} {
     $selector bind edge -button 1 \
             -modifiers shift -toggle 1
 
+    # Enable edge selection with control-button 1; shift-click toggles
+    $selector bind edge -button 1 -modifiers control
+    $selector bind edge -button 1 \
+            -modifiers {shift control} -toggle 1
+
     # Enable grapple selection with button 2; shift-click toggles
     $selector bind grapple -button 2
     $selector bind grapple -button 2 \
             -modifiers shift -toggle 1
 
-	# Delegate vertex movement for selected vertexes
-	set follower [$mover interactor follower]
+    # Delegate vertex movement for selected vertexes
     $selector delegate $follower vertex -button 1
     $selector delegate $follower vertex -button 1 \
             -modifiers shift
@@ -233,19 +249,17 @@ body ::tycho::DFGEditor::constructor {args} {
 
     # Delegate to the edge splitter if control-clicked on an edge
     # that is the only selected item
-    set splitter [$connector interactor splitter]
     $selector delegate $splitter edge -button 1 -mode {0 1} \
-    		-modifiers control
+            -modifiers control
     $selector delegate $splitter edge -button 1 -mode {0 1} \
             -modifiers {shift control}
-
+    
     # Delegate to the edge connector if control-clicked on a junction
-    set droppper [$connector interactor dropper]
     $selector delegate $dropper junction -button 1 -mode {0 1} \
-    		-modifiers control
+            -modifiers control
     $selector delegate $dropper junction -button 1 -mode {0 1} \
             -modifiers {shift control}
-
+    
     # Is this needed?
     # $_slate configure -exportselection 0
     # Experiment: move disconnected edges

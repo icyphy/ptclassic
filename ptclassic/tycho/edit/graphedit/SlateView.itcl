@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996- The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,8 +52,8 @@ class ::tycho::SlateView {
     # Find items.
     method find {mode args}
 
-    # Get the slate id of an item given its name
-    method slateid {name}
+    # Get or changed the name of an item given its slate id
+    method itemname {slateid {newname {}}}
 
     # Manipulate the layout model
     method layout {mode args}
@@ -64,17 +64,20 @@ class ::tycho::SlateView {
     # Manipulate models 
     method model {mode args}
 
-    # Get or changed the name of an item given its slate id
-    method itemname {slateid {newname {}}}
-
     # Handle change notification from the layout model
     method notify {method args}
+
+    # Get the slate id of an item given its name
+    method slateid {name}
 
     #################################################################
     ####                  protected methods                      ####
 
     # Add a new item
     method _add {_ name args}
+
+    # Change attributes of an item
+    method _attrset {name args}
 
     # Add a tag to all indicated items.
     method _addtag {tag args}
@@ -556,6 +559,15 @@ body ::tycho::SlateView::_addtag {tag args} {
     foreach name $args {
 	$_slate addtag $tag withtag $_itemid($name)
     }
+}
+
+########################################################################
+#### _attrset
+#
+# Change attributes of an item.
+#
+body ::tycho::SlateView::_attrset {name args} {
+    eval $_slate itemconfigure $_itemid($name) $args
 }
 
 ########################################################################

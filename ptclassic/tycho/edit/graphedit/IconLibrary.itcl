@@ -396,7 +396,7 @@ body ::tycho::IconLibrary::instantiate {icon layout args} {
     foreach t [match termstyle $icon] {
         lappend termstyles [concat $icon $t]
     }
-    eval lappend termstyles $attrs(-termstyles)
+    set termstyles [concat $termstyles $attrs(-termstyles)]
     unset attrs(-termstyles)
 
     # Add the icon item

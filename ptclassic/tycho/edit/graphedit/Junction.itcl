@@ -144,7 +144,7 @@ class ::tycho::Junction {
     set optiondefault(-fill)    black
     set optiondefault(-outline) black
     set optiondefault(-shape)   point
-    set optiondefault(-size)    10
+    set optiondefault(-size)    6
     set optiondefault(-width)   1
 }
 
@@ -184,30 +184,34 @@ body ::tycho::Junction::_width {id canvas slate width} {
 #### aspect
 #
 body ::tycho::Junction::aspect {id canvas slate args} {
-	if { $args == "" } {
-		return {n s e w}
-	}
-	set coords [$canvas coords $primary($id)]
-	set result {}
-	foreach a $args {
-		switch -exact $a {
-			w {
-				lrange $coords 0 1
-			}
-			n {
-				lrange $coords 2 3
-			}
-			e {
-				lrange $coords 4 5
-			}
-			s {
-				lrange $coords 6 7
-			}
-			default {
-				error "Unknown aspect \"$a\""
-			}
-		}
-	}
+    array set opts {-aspects {}}
+    array set opts $args
+
+    if { $opts(-aspects) == "" } {
+        return {n s e w}
+    }
+    set coords [$canvas coords $primary($id)]
+    set result {}
+    foreach a $opts(-aspects) {
+        switch -exact -- $a {
+            w {
+                lappend result [lrange $coords 0 1]
+            }
+            n {
+                lappend result [lrange $coords 2 3]
+            }
+            e {
+                lappend result [lrange $coords 4 5]
+            }
+            s {
+                lappend result [lrange $coords 6 7]
+            }
+            default {
+                error "Unknown aspect \"$a\""
+            }
+        }
+    }
+    eval concat $result
 }
 
 ##########################################################################
@@ -220,14 +224,14 @@ body ::tycho::Junction::construct {id canvas slate tags x y args} {
     }
     # Create the primary component. This is the displayed polygon.
     set primary($id) [$canvas create polygon \
-    	[expr $x - $option(size$id)] $y \
-    	$x [expr $y - $option(size$id)] \
-    	[expr $x + $option(size$id)] $y \
-    	$x [expr $y - $option(size$id)]
-	    -fill $option(fill$id) \
-	    -outline $option(outline$id) \
-	    -width $option(width$id) \
-	    -tags $tags]
+            [expr $x - $option(size$id)] $y \
+            $x [expr $y - $option(size$id)] \
+            [expr $x + $option(size$id)] $y \
+            $x [expr $y + $option(size$id)] \
+            -fill $option(fill$id) \
+            -outline $option(outline$id) \
+            -width $option(width$id) \
+            -tags $tags]
 }
 
 ##########################################################################
