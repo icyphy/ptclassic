@@ -152,7 +152,7 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 	}
 }
 
-const State* State :: lookup (char* name, const Block* blockIAmIn) const {
+const State* State :: lookup (const char* name, Block* blockIAmIn) {
         while (blockIAmIn) {
 		if (blockIAmIn->isItWormhole())
 			blockIAmIn = blockIAmIn->parent();
