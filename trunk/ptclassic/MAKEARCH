@@ -23,6 +23,7 @@ optmkdir lib.$ARCH
 optmkdir obj.$ARCH
 optmkdir octtools/obj.$ARCH
 optmkdir octtools/lib.$ARCH
+optmkdir octtools/bin.$ARCH
 
 # Now, make stuff under obj.$ARCH
 
