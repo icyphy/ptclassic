@@ -101,9 +101,6 @@ class ::tycho::CompileJava {
     ###################################################################
     ####                   protected variables                     ####
 
-    # Name of the Exec widget used to compile
-    protected variable compileWidget {}
-
     # Name of the Exec widget used to run appletviewer.
     protected variable appletviewerWidget {}
 }
@@ -176,7 +173,7 @@ body ::tycho::CompileJava::compileAndRun {filenames} {
     }
     set compileWidget [lindex $retList 1]
     # Make sure we parse the output of the compiler (ie. esp. error msg)
-    parseError $retList
+    parseError $compileWidget
 
     # If necessary, run the appletviewer.
     # If there is already an appletviewer widget, reuse it.
