@@ -25,23 +25,48 @@ INCL = -I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 # source files for all stars, using preprocessor
 PL_SRCS= \
  CG56Abs.pl \
+ CG56ACOS.pl \
  CG56Add.pl \
+ CG56ASIN.pl \
  CG56BiQuad.pl \
  CG56BlackHole.pl \
+ CG56Commutator.pl \
  CG56Cos.pl \
  CG56DC.pl \
+ CG56Distributor.pl \
  CG56Fork.pl \
  CG56Gain.pl \
  CG56DownSample.pl \
  CG56DummySource.pl \
  CG56DummySink.pl \
+ CG56HostIn.pl \
  CG56HostOut.pl \
  CG56IIDUniform.pl \
+ CG56Impulse.pl \
  CG56Integrator.pl \
+ CG56Interpolator.pl \
+ CG56IntMult.pl \
+ CG56Limit.pl \
+ CG56Log.pl \
+ CG56Mult.pl \
+ CG56Neg.pl \
+ CG56Peak.pl \
+ CG56Pickmin.pl \
+ CG56PickminVal.pl \
+ CG56Quantizer.pl \
+ CG56QuantizerInt.pl \
+ CG56Sgn.pl \
+ CG56Shifter.pl \
+ CG56Sin.pl \
+ CG56Sqr.pl \
+ CG56Sqrt.pl \
+ CG56TableLookup.pl \
  CG56Sub.pl \
  CG56Tone.pl \
  CG56UpSample.pl \
- CG56WriteFile.pl
+ CG56WriteFile.pl \
+ CG56WriteFileInt.pl \
+ CG56ZeroHld.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
