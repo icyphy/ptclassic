@@ -63,6 +63,8 @@ void InDEPort :: getSimulEvent()
 	if (moreData) {
 		DEScheduler* sched = (DEScheduler*) parent()->mySched();
 		sched->fetchEvent(this, timeStamp);
+	} else {
+		dataNew = FALSE;
 	}
 }	
 

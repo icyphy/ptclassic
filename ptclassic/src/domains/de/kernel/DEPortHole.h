@@ -113,7 +113,7 @@ public:
 	// check whether there are simultaneous events on the same arc.
 	// If yes, fetch the event from the event queue.
 	void getSimulEvent();
-	int existSimulEvents() {return moreData;}
+	int numSimulEvents() {return moreData;}
 
 	// constructor
 	InDEPort() : complete(TRUE), triggerList(0), beforeP(0) {}
