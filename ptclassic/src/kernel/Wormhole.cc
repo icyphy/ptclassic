@@ -309,6 +309,11 @@ Galaxy* Wormhole :: explode() {
 		if (alp != 0)
 			alp->setAlias(*(inP->aliasFrom()));
 	}
+
+	// Set the inner galaxy name to the wormhole selfStar name.
+	// The inner galaxy name may not be unique!
+	gal.setName(selfStar.name());
+	
 	galP = 0;
 	return &gal;
 }
