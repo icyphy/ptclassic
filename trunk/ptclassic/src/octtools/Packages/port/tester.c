@@ -84,7 +84,11 @@ extern int sys_nerr;
 extern int errno;
 #endif
 
+void first();
+void second();
+
 /* ARGSUSED */
+int
 main(argc, argv)
 int argc;
 char *argv[];
@@ -105,9 +109,10 @@ char *argv[];
 	first();
 	second();
 
-	exit((waserror) ? 1 : 0);
+	return ((waserror) ? 1 : 0);
 }
 
+void
 first()
 {
 	/*
@@ -318,6 +323,7 @@ first()
 	check(strrchr(one, '\0') == one, 8);	/* NUL in empty string. */
 }
 
+void
 second()
 {
 	/*
