@@ -32,7 +32,7 @@
 # This will add the dependencies to the makefile.
 #
 # root of source tree
-ROOT	      = ../../../../
+ROOT	      = ../../../..
 # VPATH points to the real source directory
 VPATH         = $(ROOT)/src/octtools/Packages/fc
 
