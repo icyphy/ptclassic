@@ -170,6 +170,13 @@ proc ::tycho::openContext {filename {mode {}}} {
 # entries. Finally, most derived classes will want to redefine
 # <code>focusin</code> to give the focus to a key widget.
 #
+# The <code>-file</code> options specifies the file to be opened.
+# If this option is given when the widget is constructed, the
+# insertData{} method will be called when the most specific constructor
+# calls itk_initialize{} -- because of this, constructors of derived
+# classes must ensure that insertData{} will function properly
+# by the time that itk_initialize{} is called.
+# 
 class ::tycho::File {
     inherit ::tycho::View
 
