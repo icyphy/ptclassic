@@ -55,7 +55,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringArrayState.h"
 
 // constructor
-Target::Target(const char* nam, const char* starClass,const char* desc) :
+Target::Target(const char* nam, const char* starClass, const char* desc) :
 Block(nam,0,desc),resetFlag(0),
 children(0), link(0), nChildren(0), sched(0), gal(0), dirFullName(0) {
 	starTypes = starClass;
@@ -107,7 +107,7 @@ void Target::requestReset() {
 		galaxy()->parent()->target()->requestReset();
 	}
 
-	resetFlag = 1;
+	resetFlag = TRUE;
 }
 
 int Target::resetRequested() {
@@ -137,9 +137,9 @@ int Target::galaxySetup() {
 // do I support a given star
 int Target :: support(Star* star) {
     // First check for target supported stars
-    int supportFlag = (int)NULL;
+    int supportFlag = FALSE;
     StringListIter types(starTypes);
-    const char* starType = (const char*)NULL;
+    const char* starType = 0;
     while (!supportFlag && ((starType = types++) != 0))
 	supportFlag = star->isA(starType);
 
@@ -147,15 +147,15 @@ int Target :: support(Star* star) {
     if (!supportFlag && galaxy()) {
 	supportFlag = (strcmp(galaxy()->domain(), star->domain()) == 0);
 	Domain* dom = Domain::of(*galaxy());
-	if(!dom) {
+	if(! dom) {
 	    Error::abortRun(*galaxy(),
 			    "Cannot figure out the domain of the galaxy");
 	    return FALSE;
 	}
 	StringListIter subdomains(dom->subDomains);
-	const char* sub = (const char *)NULL;
+	const char* sub = 0;
 	while (!supportFlag && ((sub = subdomains++) != 0))
-	    supportFlag = (strcmp(sub,star->domain()) == 0);
+	    supportFlag = (strcmp(sub, star->domain()) == 0);
     }
     return supportFlag;
 }
@@ -194,13 +194,10 @@ void Target::begin() {
 
 // default run: run the scheduler
 int Target::run() {
-	if (sched) {
-		return sched->run();
-	}
-	else {
-		Error::abortRun(*this, "No scheduler!");
-		return FALSE;
-	}
+	if (sched) return sched->run();
+
+	Error::abortRun(*this, "No scheduler!");
+	return FALSE;
 }
 
 // default wrapup: call wrapup on the galaxy
@@ -319,7 +316,7 @@ int Target::childHasResources(Star& s,int childNum) {
 
 const char* Target::writeDirectoryName(const char* dirName) {
 
-   if(dirName && *dirName) {
+   if (dirName && *dirName) {
 	// delete old value if any
 	LOG_DEL; delete [] dirFullName;
 	// expand the path name
@@ -327,27 +324,28 @@ const char* Target::writeDirectoryName(const char* dirName) {
 
 	// check to see whether the directory exists, create it if not
 	struct stat stbuf;
-	if(stat(dirFullName, &stbuf) == -1) {
+	if (stat(dirFullName, &stbuf) == -1) {
 	    // Directory does not exist.  Attempt to create it.
-	    StringList mkdir;
-	    // -p flag is necessary because it might be a nested directory
-	    // where one of the parent directories does not exist
-	    mkdir << "mkdir -p " << dirFullName;
-    
+	    // A -p flag is necessary because it might be a nested directory
+	    // in which one of the parent directories does not exist
+	    StringList mkdir = "mkdir -p ";
+	    mkdir << dirFullName;
 	    if (system(mkdir)) {
-		Error::warn("Cannot create Target directory : ", dirFullName);
+		Error::warn("Cannot create Target directory ", dirFullName);
 		return 0;
 	    }
 	} else {
 	    // Something by that name exists, see whether it's a directory
-	    if((stbuf.st_mode & S_IFMT) != S_IFDIR) {
+	    if ((stbuf.st_mode & S_IFMT) != S_IFDIR) {
 		Error::warn("Target directory is not a directory: ",
-					dirFullName);
+			    dirFullName);
 		return 0;
 	    }
 	}
 	return dirFullName;
-   } else return 0;
+   }
+
+   return 0;
 }
 
 // Method to set a file name for writing.
@@ -357,7 +355,7 @@ const char* Target::writeDirectoryName(const char* dirName) {
 // If dirFullName or fileName is NULL then it returns a
 // pointer to a new copy of the string "/dev/null".
 char* Target::writeFileName(const char* fileName) {
-	if(dirFullName && *dirFullName && fileName && *fileName) {
+	if (dirFullName && *dirFullName && fileName && *fileName) {
 		StringList fullName = dirFullName;
 		fullName += "/";
 		fullName += fileName;
