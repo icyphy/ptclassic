@@ -230,6 +230,90 @@ fixlinks:
 		rm -f `cd itcl && echo *.h`; ln -s itcl/*.h .)
 
 ######################################################
+# Tcl8.0/Tk8.0
+# This is experimental, and should go away when Itcl3.0 is out
+
+TCLTK8_VERSION = 8.0
+TCL8_SRC =	$(TCLTK_SRC)/tcl$(TCLTK8_VERSION)/unix
+TK8_SRC =	$(TCLTK_SRC)/tk$(TCLTK8_VERSION)/unix
+TCL8_OBJ =	$(TCLTK_OBJ)/tcl$(TCLTK8_VERSION)
+TK8_OBJ =	$(TCLTK_OBJ)/tk$(TCLTK8_VERSION)
+TCL8_DEST_BASE =	tcl$(TCLTK8_VERSION).$(PTARCH)
+TCL8_DEST =	$(TCLTK_DEST)/$(TCL8_DEST_BASE)
+TCL8_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl$(TCLTK8_VERSION)
+
+all_tcltk8: config_tcltk8 tcltk8 install_tcltk8
+config_tcltk8: config_tcl8 config_tk8
+config_tcl8: $(TCL8_OBJ)
+	@echo "Configuring tcl8"
+	(cd $(TCL8_OBJ); PWD=$(TCL8_OBJ); export PWD; \
+	$(TCL8_SRC)/configure \
+		--srcdir=$(TCL8_SRC) \
+		--prefix=$(TCL8_INDEPENDENT_DEST) \
+		--exec-prefix=$(TCL8_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+config_tk8: $(TK8_OBJ)
+	@echo "Configuring tk8"
+	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; \
+	$(TK8_SRC)/configure \
+		--srcdir=$(TK8_SRC) \
+		--with-tcl=$(TCL8_OBJ) \
+		--prefix=$(TCL8_INDEPENDENT_DEST) \
+		--exec-prefix=$(TCL8_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+tcltk8:
+	(cd $(TCL8_OBJ); PWD=$(TCL8_OBJ); export PWD; $(MAKE))
+	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; $(MAKE))
+
+install_tcltk8: $(TCL8_DEST) $(TCL8_INDEPENDENT_DEST)
+	(cd $(TCL8_OBJ); PWD=$(TCL8_OBJ); export PWD; $(MAKE) install)
+	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; $(MAKE) install)
+
+$(TCL8_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+$(TK8_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+$(TCL8_DEST): $(TCLTK_DEST)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+$(TCL8_INDEPENDENT_DEST): $(TCLTK_DEST)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+
+######################################################
+# TclBlend
+
+TCLBLEND_MAJOR_VERSION = 1.0
+TCLBLEND_MINOR_VERSION = a1up1
+TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
+
+TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
+TCLBLEND_OBJ =	$(TCLTK_OBJ)/tclBlend$(TCLBLEND_VERSION)
+TCLBLEND_DEST =	$(TCL8_DEST)
+TCLBLEND_INDEPENDENT_DEST =	$(TCL8_INDEPENDENT_DEST)
+
+all_tclblend: config_tclblend tclblend install_tclblend
+config_tclblend: $(TCLBLEND_OBJ)
+	@echo "Configuring tclblend"
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; \
+	$(TCLBLEND_SRC)/configure \
+		--srcdir=$(TCLBLEND_SRC) \
+		--with-tcl=$(TCL8_OBJ) \
+		--prefix=$(TCLBLEND_INDEPENDENT_DEST) \
+		--exec-prefix=$(TCLBLEND_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE))
+
+install_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) install)
+
+$(TCLBLEND_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+######################################################
 # TclX rules
 # we use TclX for the profile command
 all_tclx: all config_tclx tclx
