@@ -12,6 +12,8 @@
 #ifndef FILLPAT
 #define FILLPAT
 
+#include "ansi.h"
+
 #include "general.h"
 
 /* Can be typedef'ed to void if supported */
