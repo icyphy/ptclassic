@@ -34,9 +34,13 @@
 #######################################################################
 #### Edit
 # This class defines a window for editing plain text. It supports
-# emacs-like key bindings plus mouse movements. It interfaces to a
-# find/change dialog box, and supports filling of text, with an
-# optional prefix added on each line.  To create an example,
+# emacs-like key bindings plus mouse movements. It interfaces to
+# find/change and spell check dialog boxes, and supports filling of
+# text, with an optional prefix added on each line. It provides an Edit
+# menu and a Format menu. It has an undo mechanism and supports filling
+# text. It also provides an infrastructure, exploited in derived
+# classes, for parsing text in order to color it, control the font,
+# etc. To create an example,
 # <tcl><pre>
 # ::tycho::Edit .e
 # wm deiconify .e
@@ -54,25 +58,25 @@ class ::tycho::Edit {
     # Hand the focus to the text subwindow.
     method focusin {}
 
-    # Open a help window.  This should be redefined in derived classes.
+    # Open a help window.
     method help {}
 
-    # Return $modified.
-    method isModified {}
-
-    # Insert the given data into the display.
+    # Insert the given data at the insertion cursor.
     method insertData {data}
 
-    # Insert the contents of a file at the insertion cursor.
+    # Open a file browser and insert the contents of the selected file.
     method insertFile {}
 
-    # Directly load the contents of the file.
-    method loadFile {loadfile} 
+    # Return 1 if the text has been modified since the last save, 0 otherwise.
+    method isModified {}
+
+    # Insert the contents of the specified file at the insertion cursor.
+    method loadFile {filename}
 
     # Reload the current file. 
     method reload {}
 
-    # Save text to a file (by default, the file given by the -file option).
+    # Save text to the current file or a specified filename.
     method save {{name ""}}
 
     # Go to the point in the text given by the specified regular expression.
@@ -81,7 +85,7 @@ class ::tycho::Edit {
     # Query the user for an alternative font.
     method setFont {}
 
-    # Set the insertion point to the value of position.
+    # Set the insertion point to the value of the argument.
     method setInsert {position}
 
     ###################################################################
@@ -257,7 +261,7 @@ body ::tycho::Edit::focusin {} {
 
 ###################################################################
 #### help
-# Open a window with help on the current widget.
+# Open a help window.
 # This should be redefined in derived classes.
 #
 body ::tycho::Edit::help {} {
@@ -267,7 +271,7 @@ body ::tycho::Edit::help {} {
 
 ###################################################################
 #### insertData
-# Insert the given data into the display.
+# Insert the given data at the insertion cursor.
 #
 body ::tycho::Edit::insertData {data} {
     $itk_component(text) insertString insert $data
@@ -294,17 +298,18 @@ body ::tycho::Edit::isModified {} {
 
 #####################################################################
 #### loadFile
-# Load the specified file, if it exists.  Otherwise, do nothing.
+# Load the specified file, if it exists and does not have the name
+# "NoName".  Otherwise, do nothing.
 # If the file exists but is not readable, flag an error.
 #
-body ::tycho::Edit::loadFile {loadfile} {
+body ::tycho::Edit::loadFile {filename} {
     # Read contents from the specified file, unless the name is "NoName".
-    if {$loadfile != {NoName} && $loadfile != {}} {
-	if [file exists $loadfile] {
-	    if [file readable $loadfile] {
-		$itk_component(text) initFile $loadfile
+    if {$filename != {NoName} && $filename != {}} {
+	if [file exists $filename] {
+	    if [file readable $filename] {
+		$itk_component(text) initFile $filename
 	    } else {
-		error "File $loadfile is not readable"
+		error "File $filename is not readable"
 	    }
 	}
     }
@@ -312,8 +317,8 @@ body ::tycho::Edit::loadFile {loadfile} {
 
 ###################################################################
 #### reload
-# Reload the current file. If the contents are modified, then we 
-# ask the user if they want to proceed. The text is reparsed for
+# Reload the current file. If the contents are modified, then
+# ask the user first for confirmation. The text is reparsed for
 # coloration, etc.
 #
 body ::tycho::Edit::reload {} {
@@ -379,12 +384,9 @@ body ::tycho::Edit::save {{name ""}} {
 
 ###################################################################
 #### seeName
-# This method just calls seeName for the text widget. In the default
-# plain text widget, this just finds the first occurrence in the text
-# of a string that matches the regular expression given by the
-# argument, and makes sure it is visible. In other implementations, it
-# may find hypertext points or procedure definitions or things of that
-# sort.
+# Go to the point in the text given by the specified regular expression.
+# The insertion cursor is moved to the first match, and the background
+# color of the matching text is changed temporarily.
 #
 body ::tycho::Edit::seeName {regexpr} {
     $itk_component(text) seeName $regexpr
@@ -392,7 +394,8 @@ body ::tycho::Edit::seeName {regexpr} {
 
 ###################################################################
 #### setFont
-# Query the user for an alternative font.
+# Query the user for an alternative font.  This may be replaced in
+# the future with a simpler font handler that just controls the size.
 #
 body ::tycho::Edit::setFont {} {
     set ifont [cget -textfont]
@@ -405,7 +408,8 @@ body ::tycho::Edit::setFont {} {
 
 ###################################################################
 #### setInsert
-# Set the insert point to the given position.
+# Set the insert point to the given position, where the position can be
+# any mark understood by the underlying Tk text widget.
 #
 body ::tycho::Edit::setInsert {position} {
     $itk_component(text) setInsert $position
