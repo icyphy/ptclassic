@@ -103,7 +103,7 @@ inline static int exists (const char* file) {
 
 static int isYounger (const char* fileA, const char* fileB) {
 	struct stat bufA, bufB;
-	if (stat ((char*)fileA, &bufA) < 0 || stat ((char*)fileB, &bufB) < 0)
+	if (stat (fileA, &bufA) < 0 || stat (fileB, &bufB) < 0)
 		return FALSE;
 	return bufA.st_mtime > bufB.st_mtime;
 }
