@@ -802,7 +802,7 @@ int DeclustScheduler::pulldown(DCClusterList *combDCClusts, DCClusterList *Cleft
 		DCCluster* pullDCCluster = cl->pullWhich();
 
 		// candidate processors.
-		IntArray* canProcs = mtarget->candidateProcs(bestSchedule);
+		IntArray* canProcs = mtarget->candidateProcs(bestSchedule, 0);
 
 		// Shift onto each of these processors and listSchedule
 		int myProc = pullDCCluster->getProc();

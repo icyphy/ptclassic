@@ -57,7 +57,7 @@ UniProcessor* DLParProcs :: getProc(int num) { return &(schedules[num]); }
 void DLParProcs :: initialize(DLGraph* g) 
 {
 	ParProcessors :: initialize();
-	candidate = mtarget->candidateProcs(this);
+	candidate = mtarget->candidateProcs(this, 0);
 
 	// member initialization
 	myGraph = g;
@@ -172,7 +172,7 @@ void DLParProcs :: scheduleSmall(DLNode* pd)
 		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
 		candidate->elem(0) = firstN->getProcId();
 	} else {
-		candidate = mtarget->candidateProcs(this);
+		candidate = mtarget->candidateProcs(this, pd->myMaster());
 	}
 
 	// compare the earliest schedule time with candidate processors.
@@ -306,7 +306,7 @@ void DLParProcs :: scheduleBig(DLNode* node, int when, IntArray& avail)
 int DLParProcs :: determinePPA(DLNode* pd, IntArray& avail)
 {
 	// examine candidate processors
-	candidate = mtarget->candidateProcs(this);
+	candidate = mtarget->candidateProcs(this, pd->myMaster());
 
 	// decide the starting processor assigned to the construct.
 	int earliest;
