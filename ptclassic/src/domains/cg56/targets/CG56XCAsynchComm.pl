@@ -33,9 +33,17 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {buffer}
 		type {intarray}
 		default {0}
-		attributes { A_YMEM|A_NOINIT|A_NONSETTABLE } 
+		attributes { A_CIRC|A_YMEM|A_NOINIT|A_NONSETTABLE|A_CONSEC} 
 	}
 
+	state {
+		name { bufStart }
+		type { int }
+		default { 0 }
+		desc { pointer to the buffer }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
+	}
+	
 	state {
 		name {semaphore}
 		type {int}
@@ -44,6 +52,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 		
 codeblock(initBuffer) {
+	bclr    #m_hpl0,x:m_ipr		; set Host Port IPL 1
+	bset    #m_hpl1,x:m_ipr
+	org	$ref(bufStart)
+	dc	$addr(buffer)
 	org	$ref(semaphore)
 $val(VariableName)_sem
 	dc	0

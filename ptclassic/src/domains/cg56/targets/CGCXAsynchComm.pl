@@ -50,62 +50,23 @@ codeblock(updateLink,"const char* code") {
 }
 
 codeblock(declarations,"") {
-int $starSymbol(semaphoreAddr);
+QckItem $starSymbol(semaphore);
+QckItem $starSymbol(s56xBuffer);
 int $starSymbol(bufferAddr);
 @txType $starSymbol(buffer)[@blockSize];
+int $starSymbol(bufStart) = 0;
 }
 
 codeblock(loadDSPSymbols) {
-{
-	QckItem semaphore;
-	QckItem buffer;
-	if ((semaphore = qckItem(dsp,"$val(VariableName)_sem")) == 0) {
-		fprintf(stderr,"$val(VariableName) semaphore address resolution failed\n");
-		exit(1);
-	}
-	if ((buffer = qckItem(dsp,"$val(VariableName)")) == 0) {
-		fprintf(stderr,"$val(VariableName) semaphore address resolution failed\n");
-		exit(1);
-	}
-	$starSymbol(semaphoreAddr) = QckAddr(semaphore);
-	$starSymbol(bufferAddr) = QckAddr(buffer);
-}
-}
-
-codeblock(txBlock,"const char* txCode") {
-{
-	int semaphore;
-	int i;
-	if ((semaphore = qckGetY(dsp,$starSymbol(semaphoreAddr))) == -1) {
-		fprintf(stderr,"qckGetY $val(VariableName)_sem failed: %s\n",
-		       qckErrString);
-		exit(1);
-	}
-	else if (semaphore == 0) {
-		int status;
-
-		/* locking buffer */
-		status = qckPutY(dsp,$starSymbol(semaphoreAddr),1);
-		if (status == -1) {
-			fprintf(stderr,"Lock of $val(VariableName)_buf failed: %s\n",
-			       qckErrString);
-			exit(1);
-		}
-
-		/* Trasmitting buffer */
-		for (i=0;i < @blockSize; i ++ ) {
-			@txCode;
-		}
-		
-		/* unlocking buffer */
-		status = qckPutY(dsp,$starSymbol(semaphoreAddr),0);
-		if (status == -1) {
-			fprintf(stderr,"Lock of $val(VariableName)_buf failed: %s\n",
-			       qckErrString);
-			exit(1);
-		}
-	}
-}
+    if (($starSymbol(semaphore) = qckItem(dsp,"$val(VariableName)_sem")) == 0) {
+	    fprintf(stderr,"$val(VariableName) semaphore address resolution failed\n");
+	    exit(1);
+    }
+    if (($starSymbol(s56xBuffer) = qckItem(dsp,"$val(VariableName)")) == 0) {
+	    fprintf(stderr,"$val(VariableName) semaphore address resolution failed\n");
+	    exit(1);
+    }
+    $starSymbol(bufferAddr) = QckAddr($starSymbol(s56xBuffer));
 }
 	    
 initCode {
