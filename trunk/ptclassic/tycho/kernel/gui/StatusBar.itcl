@@ -79,7 +79,7 @@ class ::tycho::StatusBar {
     ###################################################################
     ####                         public methods                    ####
 
-    # Displaythe file status help
+    # Display the file status help
     method helpFileStatus {} {}
 }
 
