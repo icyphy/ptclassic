@@ -28,18 +28,6 @@
 
 
 
-##
-# Set up the "function table"
-#
-uplevel #0 {
-    set Picture(construct) ::tycho::Picture::construct
-    set Picture(destruct)  ::tycho::Picture::destruct
-    set Picture(coords)    ::tycho::Picture::coords
-    set Picture(draw)      ::tycho::Picture::draw
-    set Picture(ghost)     ::tycho::Picture::ghost
-    set Picture(update)    ::tycho::Picture::update
-}
-
 ## Picture
 #
 # An "empty" picture class into which items and other pictures can be
@@ -61,14 +49,28 @@ class ::tycho::Picture {
     ###################################################################
     ####                         protected variables               ####
 
-    # All pictures must have a "primary" item to define their coordinates
-    common primary
+    # All methods are looked up through a table
+    common methodtable
 
     # All options have a default value
     common optiondefault
 
+    # All pictures must have a "primary" item to define their coordinates
+    common primary
+
     # The "shape" of pictures of this class -- rectangle by default
     common shape "rectangle"
+
+    ###################################################################
+    ####                       class initialization                ####
+
+    #### Set method table
+    set methodtable(construct) ::tycho::Picture::construct
+    set methodtable(destruct)  ::tycho::Picture::destruct
+    set methodtable(coords)    ::tycho::Picture::coords
+    set methodtable(draw)      ::tycho::Picture::draw
+    set methodtable(ghost)     ::tycho::Picture::ghost
+    set methodtable(update)    ::tycho::Picture::update
 }
 
 
