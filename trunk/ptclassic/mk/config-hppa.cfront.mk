@@ -27,7 +27,9 @@ OCT_DEBUG_FLAGS =
 # is not needed for 3.0.
 GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG)
 # -Aa turns on ansi c, needed for tkoct
-CFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa
+# The cc man page says that defining _HPUX_SOURCE gives the same name space
+# compatibility as -Ac
+CFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa -D_HPUX_SOURCE
 
 # CC on HPs does not know the "-M" option as given in DEPEND.
 # makedepend is part of X11
