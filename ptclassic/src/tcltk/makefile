@@ -1,6 +1,6 @@
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -32,6 +32,18 @@
 #	setenv ARCH sun4
 #	setenv PTOLEMY /users/ptolemy
 
+# root of source tree
+ROOT	      = ../..
+# Path (absolute or relative) to the object directory root
+OBJDIR=..
+# VPATH points to the "real" source directory
+VPATH         = $(ROOT)/src/pigiRpc
+
+# Get configuration info
+# Need $(C_SHAREDFLAGS) and $(SHARED_LIBRARY_COMMAND) below
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
+
 # Destination of the tcl/tk binaries, libraries and include files. 
 TCLTK_DEST=$(PTOLEMY)/tcltk
 
@@ -41,6 +53,9 @@ TCLTK_SRC=$(PTOLEMY)/src/tcltk
 # Location of the architecture specific build directory.
 TCLTK_OBJ=$(PTOLEMY)/obj.$(PTARCH)/tcltk
 
+# Location of the architecture specific build directory for shared libraries
+TCLTK_SHARED_OBJ=$(PTOLEMY)/obj.$(PTARCH)/tcltk.shared
+
 # where to install binaries
 BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
@@ -48,294 +63,231 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 #---------------------------------------------------------
 
 # Version numbers
-#TCL_VERSION =		tcl7.3
-#TK_MAJOR_VERSION = 	tk3.6
-#TK_VERSION =		tk3.6p1
-#ITCL_VERSION =		itcl-1.5
-
 TCL_MAJOR_VERSION = 	tcl7.4
 TCL_VERSION =		tcl7.4p1
 TK_MAJOR_VERSION = 	tk4.0
 TK_VERSION =		tk4.0p1
 ITCL_MAJOR_VERSION =	itcl-2.0
-ITCL_VERSION =		itcl-2.0b
+ITCL_MAJOR_VERSION_NUMBER = 2.0
+ITCL_VERSION =		itcl-2.0b2
 
 
-
-
-# Location of the tcl source
-TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)
-# Location of the tk source
-TK_SRC =	$(TCLTK_SRC)/$(TK_VERSION)
 # Location of the itcl source
 ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION)
 
-
-# Location of the tcl only object files
-TCL_OBJ =	$(TCLTK_OBJ)/tcl
-#TCL_OBJ =	$(TCLTK_OBJ)/$(TCL_VERSION)
-# Location of the tk only object files
-TK_OBJ =	$(TCLTK_OBJ)/tk
-#TK_OBJ =	$(TCLTK_OBJ)/$(TK_VERSION)
-# Location of the tk only object files
+# Location of the itcl only object files
 ITCL_OBJ =	$(TCLTK_OBJ)/itcl
 
 
 # Destination of tcl only machine dependent files
-#TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
-TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(PTARCH)
+TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
 # Destination of the machine independent tcl files
-#TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
-TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
+TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
 
 # Destination of tk only machine dependent files
-#TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
-TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
+TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
 # Destination of the machine independent tk files
-#TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
-TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
+TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
 
 # Destination of itcl only machine dependent files
-#ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
-ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_VERSION).$(PTARCH)
+ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
 # Destination of the machine independent itcl files
-#ITCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/itcl
-ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/$(ITCL_VERSION)
+ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
 
-all: 		configure tcl tk itcl
-configure:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
-			$(ITCL_OBJ)/config.status \
-			$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) $(TCLTK_OBJ)/makefile
-bin:		tcl tk itcl
-install:	install_tcl install_tk install_itcl
-clean:		clean_tcl clean_tk clean_itcl
-realclean:	clean_tcl clean_tk clean_itcl
+ITCL_DEST_LIB = $(ITCL_DEST)/lib
+
+# Directory to make shared libraries in
+ITCL_SHARED_OBJ =	$(TCLTK_OBJ)/itcl.shared
+ITCL_SHARED_DEST_LIB = 	$(ITCL_DEST)/lib/shared
+
+all: 		configure itcl
+configure:	$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
+bin:		itcl
+install:	install_itcl
+clean:		clean_itcl
+realclean:	clean_itcl
+
+all_shared:	configure_shared itcl_shared
+configure_shared: $(ITCL_SHARED_OBJ)/config.status
+bin_shared:		itcl_shared
+install_shared:		install_itcl_shared
+clean_shared:		clean_itcl_shared
+realclean_shared:	clean_itcl_shared
 
 .PHONY:	tcl tk itcl configure install_tcl install_tk install_itcl \
 		clean_tcl clean_tk clean_itcl realclean 
 
-
-###########################################################################
-# Rules for tcl
-#
-
-# Configure tcl
-$(TCL_OBJ)/config.status: $(TCLTK_OBJ) $(TCL_OBJ)
-	@echo "Configuring tcl"
-	(cd $(TCL_OBJ); $(TCL_SRC)/configure -v --srcdir=$(TCL_SRC) --prefix=$(TCL_INDEPENDENT_DEST) --exec-prefix=$(TCL_DEST) )
-	-(cd $(TCL_OBJ); ln -s $(TCL_SRC)/install-sh .)
-
-$(TCL_OBJ): 
-	mkdir $(TCL_OBJ)
-
-$(TCLTK_OBJ):
-	mkdir $(TCLTK_OBJ)
-
-$(BINDIR)/tclsh:
-	ln -s $(TCL_DEST)/bin/tclsh $@ 
-
-# Build tcl
-tcl: $(TCL_OBJ)/libtcl.a
-$(TCL_OBJ)/libtcl.a: $(TCL_OBJ)
-	@echo "Making all in tcl"
-	(cd  $(TCL_OBJ); $(MAKE) all)
-
-# Install tcl
-install_tcl: $(TCL_DEST)/lib/libtcl.a $(BINDIR)/tclsh
-$(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
-	(cd  $(TCL_OBJ); $(MAKE) install)
-	if [ ! -f $(TCL_DEST)/lib/libtcl.a ]; then \
-		cd $(TCL_DEST)/lib; ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a; \
-	fi
-
-$(TCLTK_DEST):
-	mkdir $(TCLTK_DEST)
-
-$(TCL_INDEPENDENT_DEST):
-	mkdir $(TCL_INDEPENDENT_DEST)
-
-$(TCL_DEST):
-	mkdir $(TCL_DEST)
-
-$(TCL_DEST)/lib:
-	mkdir $(TCL_DEST)/lib
-
-clean_tcl:
-	(cd $(TCL_OBJ); $(MAKE) clean)
-
-######################################################################
-# Rules for tk
-#
-
-# Configure tk
-#	Need to make a link for tk.h so that we are sure it is installed
-#	Theoretically, GNU make should do the right thing, but . . .
-$(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) \
-			$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) \
-			$(TCLTK_OBJ)/$(TK_MAJOR_VERSION) #$(TK_OBJ)/xpm
-	@echo "Configuring tk"
-	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) )
-	-(cd $(TK_OBJ); ln -s $(TK_SRC)/tk.h tk.h)
-	-(cd $(TK_OBJ); ln -s $(TK_SRC)/install-sh .)
-$(TK_OBJ):
-	mkdir $(TK_OBJ)
-
-# Need the xpm directory for TkPixmap
-# TkPixmap is not needed for Ptolemy, but it might be needed for xpole
-$(TK_OBJ)/xpm:
-	mkdir $(TK_OBJ)/xpm
-	(cd $(TK_OBJ)/xpm; ln -s $(TK_SRC)/xpm/* .)
-
-# This link is necessary for the tk build to find libtcl.a
-$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION): $(TCL_OBJ)
-	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_MAJOR_VERSION))
-
-# This link is necessary for the tk build to find libtk.a
-$(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
-	(cd $(TCLTK_OBJ); ln -s $(TK_OBJ) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION))
-
-# Build tk
-tk: $(TK_OBJ)/libtk.a 
-$(TK_OBJ)/libtk.a: $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) #$(TK_OBJ)/xpm/libxpm.a
-	@echo "Making all in tk"
-	(cd  $(TK_OBJ); $(MAKE) \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		all)
-
-# Build libxpm for TkPixMap
-# Pick up the X11 includes on machines like Solaris2
-# If your system does not have strdup(), use the following (Ultrix4.3a)
-XPM_DEFINES=-DZPIPE -DNEED_STRDUP $(X11_INCSPEC)
-# Otherwise:
-#XPM_DEFINES=-DZPIPE $(X11_INCSPEC)
-
-# If necessary override values for each independent architecture
-# This line needs to be after the XPM_DEFINES line
-ROOT =	../..
-include $(ROOT)/mk/config-$(PTARCH).mk
-
-all_xpm: $(TK_OBJ)/xpm/libxpm.a
-$(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
-	(cd $(TK_OBJ)/xpm; $(MAKE) -f Makefile.noXtree \
-		DESTBINDIR=$(TK_DEST)/bin \
-		DESTLIBDIR=$(TK_DEST)/lib \
-		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
-		CC=$(CC) \
-		RANLIB=$(RANLIB) \
-		DEFINES="$(XPM_DEFINES)" \
-	all)
-
-# Install tk
-install_tk: $(TK_DEST)/lib/libtk.a #$(TK_DEST)/lib/libxpm.a
-$(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/lib $(TK_INDEPENDENT_DEST)
-	(cd  $(TK_OBJ); $(MAKE) \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		install)
-	if [ ! -f $(TK_DEST)/lib/libtk.a ]; then \
-		cd $(TK_DEST)/lib; ln -s lib$(TK_MAJOR_VERSION).a libtk.a; \
-	fi
-install_xpm:$(TK_DEST)/lib/libxpm.a
-$(TK_DEST)/lib/libxpm.a: $(TK_OBJ)/xpm/libxpm.a
-	(cd $(TK_OBJ)/xpm; $(MAKE) -f Makefile.noXtree \
-		DESTBINDIR=$(TK_DEST)/bin \
-		DESTLIBDIR=$(TK_DEST)/lib \
-		DESTINCLUDEDIR=$(TK_INDEPENDENT_DEST)/include \
-		RANLIB=$(RANLIB) \
-		DEFINES="$(XPM_DEFINES)" \
-	install)
-
-$(TK_DEST):
-	mkdir $(TK_DEST)
-$(TK_DEST)/lib:
-	mkdir $(TK_DEST)/lib
-$(TK_INDEPENDENT_DEST):
-	mkdir $(TK_INDEPENDENT_DEST)
-
-clean_tk:
-	(cd $(TK_OBJ); $(MAKE) clean)
-
 ######################################################################
 # Rules for itcl
 # itcl is an extension for tcl that provides tcl 'classes'
-#
+# The itcl-2.0b distribution contains tcl and tk
 
 # Configure itcl
 $(ITCL_OBJ)/config.status: config_itcl
-config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ) \
-		$(TCL_OBJ)/libtcl.a $(TK_OBJ)/libtk.a \
-		$(TCL_OBJ)/tclInt.h $(TCL_OBJ)/tcl.h \
-		$(TCL_OBJ)/tclRegexp.h $(TK_OBJ)/tk.h
+config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)
 	@echo "Configuring itcl"
 	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
-	@echo "Create link for itcl.h installation"
-	-(cd $(ITCL_OBJ)/src; ln -s $(ITCL_SRC)/src/itcl.h itcl.h)
-	-(cd $(ITCL_OBJ)/library; ln -s $(ITCL_SRC)/library/*.tcl .)
+$(TCLTK_OBJ): 
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
 $(ITCL_OBJ): $(TCLTK_OBJ)
-	if [ ! -d $@ ]; then \
-		echo "Making $@"; \
-		mkdir $@; \
-	fi
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
-$(TCL_OBJ)/tclInt.h:  $(TCL_OBJ)
-	if [ ! -f $@ ]; then \
-		(cd $<; ln -s $(TCL_SRC)/tclInt.h .); \
-	fi
-
-$(TCL_OBJ)/tclRegexp.h:  $(TCL_OBJ)
-	if [ ! -f $@ ]; then \
-		(cd $<; ln -s $(TCL_SRC)/tclRegexp.h .); \
-	fi
-
-$(TCL_OBJ)/tcl.h:  $(TCL_OBJ)
-	if [ ! -f $@ ]; then \
-		(cd $<; ln -s $(TCL_SRC)/tcl.h .); \
-	fi
-
-$(TK_OBJ)/tk.h:  $(TK_OBJ)
-	if [ ! -f $@ ]; then \
-		(cd $<; ln -s $(TK_SRC)/tk.h .); \
-	fi
-
-# This link is necessary for the itcl build to find libtcl.a
-#$(TCLTK_OBJ)/$(TCL_VERSION): $(TCL_OBJ)
-#	(cd $(TCLTK_OBJ); ln -s $(TCL_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION))
-
-# This link is necessary for the itcl build to find libtk.a
-#$(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
-#	(cd $(TCLTK_OBJ); ln -s $(ITCL_OBJ) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION))
-
-# Build itcl
-itcl: $(ITCL_OBJ)/libitcl.a 
+itcl: $(ITCL_OBJ)/iwidgets/init.iwidgets.in $(ITCL_OBJ)/libitcl.a 
 $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ) 
 	@echo "Making all in itcl"
 	(cd  $(ITCL_OBJ); $(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
 
+# Bug fix for itcl-2.0b
+$(ITCL_OBJ)/iwidgets/init.iwidgets.in:
+	ln -s $(ITCL_SRC)/iwidgets/init.iwidgets.in $@	
+
 # Install itcl
-install_itcl: $(ITCL_DEST)/lib/libitcl.a
-$(ITCL_DEST)/lib/libitcl.a: $(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) \
-		$(ITCL_DEST) $(ITCL_DEST)/lib $(ITCL_INDEPENDENT_DEST)
+install_itcl: $(ITCL_DEST_LIB)/libitcl.a
+
+$(ITCL_DEST_LIB)/libitcl.a: \
+		$(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) $(ITCL_DEST) \
+		$(ITCL_DEST_LIB) $(ITCL_INDEPENDENT_DEST) \
+		$(ITCL_DEST_LIB)/libtk.a \
+		$(ITCL_DEST_LIB)/libitcl.a $(ITCL_DEST_LIB)/libitk.a \
+		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
+		$(TK_DEST) $(TCL_INDEPENDENT_DEST) 
 	(cd  $(ITCL_OBJ); $(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
 		install)
+	-(cd $(ITCL_DEST_LIB); \
+		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).a libitcl.a)
 
 $(ITCL_DEST):
-	mkdir $(ITCL_DEST)
-$(ITCL_DEST)/lib:
-	mkdir $(ITCL_DEST)/lib
+	mkdir $@
+$(ITCL_DEST_LIB):
+	mkdir $@
 $(ITCL_INDEPENDENT_DEST):
-	mkdir $(ITCL_INDEPENDENT_DEST)
+	mkdir $@
+
+# Links so that we don't have to change version numbers in lots of makefiles.
+$(ITCL_DEST_LIB)/libtcl.a:
+	(cd $(ITCL_DEST_LIB); ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a)
+$(ITCL_DEST_LIB)/libtk.a:
+	(cd $(ITCL_DEST_LIB); ln -s lib$(TK_MAJOR_VERSION).a libtk.a)
+$(ITCL_DEST_LIB)/libitk.a:
+	(cd $(ITCL_DEST_LIB); \
+		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).a libitk.a)
+
+# Links so that older programs can find libs and includes.
+$(TCL_DEST):
+	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tcl.$(PTARCH))
+$(TCL_INDEPENDENT_DEST):
+	(cd $(TCLTK_DEST); ln -s itcl tcl)
+$(TK_DEST):
+	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tk.$(PTARCH))
+$(TK_INDEPENDENT_DEST):
+	(cd $(TCLTK_DEST); ln -s itcl kt)
 
 clean_itcl:
 	(cd $(ITCL_OBJ); $(MAKE) clean)
 
-##################################################################
+#######################
 $(TCLTK_OBJ)/makefile:
 	ln -s $(TCLTK_SRC)/makefile $@
+
+#######################
+# Produce shared libraries
+$(ITCL_SHARED_OBJ)/config.status: config_itcl_shared
+config_itcl_shared: $(TCLTK_OBJ) $(ITCL_SHARED_OBJ)
+	@echo "Configuring itcl"
+	(cd $(ITCL_SHARED_OBJ); PWD=$(ITCL_SHARED_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
+
+$(ITCL_SHARED_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
+itcl_shared: $(ITCL_SHARED_OBJ) \
+		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets.in \
+		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets \
+		$(ITCL_SHARED_OBJ)/tcl/libtcl.so \
+		$(ITCL_SHARED_OBJ)/tk/libtk.so \
+		$(ITCL_SHARED_OBJ)/itcl/libitcl.so \
+		$(ITCL_SHARED_OBJ)/itk/libitk.so
+	@echo "Done making all shared libraries in itcl"
+
+# Bug fix for itcl-2.0b
+$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets.in:
+	ln -s $(ITCL_SRC)/iwidgets/init.iwidgets.in $@	
+
+$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
+	(cd  $(ITCL_SHARED_OBJ)/iwidgets; $(MAKE) all)
+
+$(ITCL_SHARED_OBJ)/tcl/libtcl.so: 
+	(cd  $(ITCL_SHARED_OBJ)/tcl; $(MAKE) \
+	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
+	(cd  $(ITCL_SHARED_OBJ)/tcl; $(SHARED_LIBRARY_COMMAND) libtcl.so *.o)
+
+$(ITCL_SHARED_OBJ)/tk/libtk.so: 
+	(cd  $(ITCL_SHARED_OBJ)/tk; $(MAKE) \
+	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
+	(cd  $(ITCL_SHARED_OBJ)/tk; $(SHARED_LIBRARY_COMMAND) libtk.so *.o)
+
+$(ITCL_SHARED_OBJ)/itcl/libitcl.so: 
+	(cd  $(ITCL_SHARED_OBJ)/itcl; $(MAKE) \
+	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+	        SHLIB_LD=ld \
+		shared)
+$(ITCL_SHARED_OBJ)/itk/libitk.so: 
+	(cd  $(ITCL_SHARED_OBJ)/itk; $(MAKE) \
+	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+	        SHLIB_LD=ld \
+		shared)
+
+# Install itcl
+install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.so
+
+$(ITCL_SHARED_DEST_LIB)/libitcl.so: \
+		$(ITCL_DEST) $(ITCL_DEST_LIB) \
+		$(TCLTK_DEST) \
+		$(ITCL_SHARED_DEST_LIB) $(ITCL_INDEPENDENT_DEST) \
+		$(ITCL_SHARED_OBJ)/itcl/libitcl.so \
+		$(ITCL_SHARED_DEST_LIB)/libtcl.so \
+		$(ITCL_SHARED_DEST_LIB)/libtk.so \
+		$(ITCL_SHARED_DEST_LIB)/libitk.so \
+		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
+		$(TK_DEST) $(TCL_INDEPENDENT_DEST) 
+	(cd  $(ITCL_SHARED_OBJ); $(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
+		install)
+	mv $(ITCL_DEST_LIB)/libitcl.so.2 $(ITCL_SHARED_DEST_LIB)/libitcl.so
+
+
+$(ITCL_SHARED_DEST_LIB):
+	mkdir $@
+
+# Links so that we don't have to change version numbers in lots of makefiles.
+$(ITCL_SHARED_DEST_LIB)/libtcl.so: $(ITCL_SHARED_OBJ)/tcl/libtcl.so
+	mv $(TCLTK_OBJ)/itcl.shared/tcl/libtcl.so $@
+$(ITCL_SHARED_DEST_LIB)/libtk.so: $(ITCL_SHARED_OBJ)/tk/libtk.so 
+	mv $(TCLTK_OBJ)/itcl.shared/tk/libtk.so $@
+$(ITCL_SHARED_DEST_LIB)/libitk.so: $(ITCL_SHARED_OBJ)/itk/libitk.so 
+	mv $(ITCL_DEST_LIB)/libitk.so.2 $(ITCL_SHARED_DEST_LIB)/libitk.so
+
+
+clean_shared_itcl:
+	(cd $(ITCL_SHARED_OBJ); $(MAKE) clean)
