@@ -36,7 +36,6 @@ typedef TOPMask XPAxisFsMask;
     |XPAxisF_CalcXf|XPAxisF_CalcXfNotify|XPAxisF_CalcNonTriv	\
 )
 				
-typedef enum _XPAxisState XPAxisState;
 enum _XPAxisState {
      XPAxis_State_Null,
      XPAxis_State_Norm,
@@ -44,8 +43,8 @@ enum _XPAxisState {
      XPAxis_State_AdjLimHi,
      XPAxis_State_AdjLimBoth,
 };
+typedef enum _XPAxisState XPAxisState;
 
-typedef enum _XPAxisSide XPAxisSide;
 enum _XPAxisSide {
     XPAxisSide_Null,
     XPAxisSide_Left,
@@ -53,6 +52,7 @@ enum _XPAxisSide {
     XPAxisSide_Top,
     XPAxisSide_Bottom,
 };
+typedef enum _XPAxisSide XPAxisSide;
 
 
 typedef struct _XPAxisTick XPAxisTick;
