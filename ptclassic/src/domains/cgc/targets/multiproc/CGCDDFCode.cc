@@ -26,6 +26,7 @@ All rights reserved.
 // ----------- target dependent section......
 
 void CGCDDFCode :: startCode_Case(CGStar* s, Geodesic* gd, CGTarget* t) {
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
 	StringList out;
 	out << "\tswitch((int)";
 	if (gd) {
@@ -35,30 +36,34 @@ void CGCDDFCode :: startCode_Case(CGStar* s, Geodesic* gd, CGTarget* t) {
 		out << p->getGeoName();
 	}
 	out << ") {\n\t case 0: {\n";
-	t->getStream("code")->put(out);
+	t->getStream()->put(out);
 }
 
 void CGCDDFCode :: middleCode_Case(int i, CGTarget* t) {
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
 	StringList out;
 	out << "\tbreak; }\n\t case " << i+1 << ": {\n";
-	t->getStream("code")->put(out);
+	t->getStream()->put(out);
 }
 
 void CGCDDFCode :: endCode_Case(CGTarget* t) {
-	t->getStream("code")->put("\tbreak; }\n\t}\n");
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
+	t->getStream()->put("\tbreak; }\n\t}\n");
 }
 	
 void CGCDDFCode :: startCode_DoWhile(Geodesic* d, Geodesic* s, CGTarget* t) {
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
 	if (d && s) {
 		StringList out;
 		out << "\t" << ((CGCGeodesic*) d)->getBufName() << " = "
 		    << ((CGCGeodesic*) s)->getBufName() << ";\n";
-		t->getStream("code")->put(out);
+		t->getStream()->put(out);
 	}
-	t->getStream("code")->put("\tdo {\n");
+	t->getStream()->put("\tdo {\n");
 }
 
 void CGCDDFCode :: endCode_DoWhile(CGStar* s, Geodesic* gd, CGTarget* t) {
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
 	StringList out;
 	out << "\t} while ((int)";
 	if (gd) {
@@ -68,10 +73,11 @@ void CGCDDFCode :: endCode_DoWhile(CGStar* s, Geodesic* gd, CGTarget* t) {
 		out << p->getGeoName();
 	}
 	out << ");\n";
-	t->getStream("code")->put(out);
+	t->getStream()->put(out);
 }
 	
 void CGCDDFCode :: startCode_For(CGStar* s, Geodesic* gd, CGTarget* t) {
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
 	StringList out;
 	out << "\t{ int i;\n\t for (i = 0; i < ";
 	if (gd) {
@@ -81,24 +87,24 @@ void CGCDDFCode :: startCode_For(CGStar* s, Geodesic* gd, CGTarget* t) {
 		out << p->getGeoName();
 	}
 	out << "; i++) {\n";
-	t->getStream("code")->put(out);
+	t->getStream()->put(out);
 }
 
 void CGCDDFCode :: middleCode_For(CGStar* rv, CGStar* ds, int k, 
 				    int mo, CGTarget* t) {
-
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
 	// for intercycle parallelism, check modulo.
 	StringList out;
 	if (k > 1) {
 		if (!rv) {
 			out << "\t\t if (i % " << k << " != " 
 			    << mo << ") continue;\n";
-			t->getStream("code")->put(out);
+			t->getStream()->put(out);
 		} else {
 			out << "\t\t"; 
 			if (mo != 1) out << " else";
  			out << " if (i % " << k << " == " << mo << ") {\n";
-			t->getStream("code")->put(out);
+			t->getStream()->put(out);
 
 			t->incrementalAdd(rv);
 			int zz = 0;
@@ -106,13 +112,14 @@ void CGCDDFCode :: middleCode_For(CGStar* rv, CGStar* ds, int k,
 			t->incrementalAdd(ds, zz);
 
 			out = "\t\t continue;\n\t}\n";
-			t->getStream("code")->put(out);
+			t->getStream()->put(out);
 		}
 	}
 }
 
 void CGCDDFCode :: endCode_For(CGTarget* t) {
-	t->getStream("code")->put("\t}\n\t}\n");
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
+	t->getStream()->put("\t}\n\t}\n");
 }
 
 const char* whichType(DataType);
@@ -141,10 +148,11 @@ void CGCDDFCode :: startCode_Recur(Geodesic* arg, PortHole* p,
 	temp->initialize();
 	t->putStream("mainClose", temp);
 
-	saveCode = t->removeStream("code");
+	saveCode = t->removeStream("mainLoop");
 	temp = new CodeStream;
 	temp->initialize();
-	t->putStream("code", temp);
+	t->putStream("mainLoop", temp);
+	oldDefault = &(t->switchDefaultStream(*temp));;
 
 	// function name.
 	funcName.initialize();
@@ -179,7 +187,7 @@ void CGCDDFCode :: middleCode_Recur(Geodesic* selfGeo, Geodesic* gd,
 		out << ((CGCGeodesic*) gd)->getBufName();
 	}
 	out << ");\n";
-	t->getStream("code")->put(out);
+	t->getStream()->put(out);
 }
 
 void CGCDDFCode :: endCode_Recur(Geodesic* gd, const char* fName, 
@@ -205,7 +213,7 @@ void CGCDDFCode :: endCode_Recur(Geodesic* gd, const char* fName,
 	LOG_DEL; delete temp;
 
 	// body
-	temp = t->removeStream("code");
+	temp = t->removeStream("mainLoop");
 	out << *temp;
 	LOG_DEL; delete temp;
 
@@ -227,7 +235,8 @@ void CGCDDFCode :: endCode_Recur(Geodesic* gd, const char* fName,
 	t->putStream("mainInit", saveMainInit);
 	t->putStream("mainDecls", saveMainDecls);
 	t->putStream("mainClose", saveMainClose);
-	t->putStream("code", saveCode);
+	t->putStream("mainLoop", saveCode);
+	t->switchDefaultStream(*oldDefault);
 }
 
 void CGCDDFCode :: prepCode(MultiTarget* refT, Profile* pf,
