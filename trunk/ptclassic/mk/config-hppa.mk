@@ -47,12 +47,15 @@ include $(ROOT)/mk/config-g++.shared.mk
 
 # ptbin.mk uses this to decide whether to include the PN stars
 # If you are under HPUX10, then the PN domain requires DCE threads.
-#  you will need to install the DCE development set of the OS cds.
-#  If you don't have a /usr/include/pthread.h, then you probably
-#  don't have the DCE developement set installed.  If you don't have
-#  this installed, set INCLUDE_PN_DOMAIN to no
-INCLUDE_PN_DOMAIN = yes
-#INCLUDE_PN_DOMAIN = 
+# you will need to install the DCE development set of the OS cds.
+# If you don't have a /usr/include/pthread.h, then you probably
+# don't have the DCE developement set installed.  If you don't have
+# this installed, set INCLUDE_PN_DOMAIN to no
+#
+# It looks like under Ptolemy0.7 and HPUX10.20, the PN domain tends
+# to hang pigi.
+#INCLUDE_PN_DOMAIN = yes
+INCLUDE_PN_DOMAIN = no
 
 # Misc. flags for OS version, if you are under HPUX9.x:
 #ARCHFLAGS =	
