@@ -266,6 +266,9 @@ class ::tycho::EditDAG {
     ###################################################################
     ####                   protected methods                       ####
 
+    # Configure the popup menu depending on the current context
+    protected method configurePopup {}
+
     # convert the contents of a node into an array.
     protected method contentsToArray {node arrayname defaults}
 
@@ -395,6 +398,17 @@ body ::tycho::EditDAG::constructor {args} {
 	    [list $this showCurrentNodeInfo %s 1]"
     bind $slate <KeyRelease-Shift_R> "@scope ::tycho::EditDAG \
 	    [list $this showCurrentNodeInfo %s 1]"
+
+    # Create and configure the context-sensitive popup menu
+    # FIXME: Is this the right place for this code?
+    set myContextmenu [::tycho::PopupMenu .#auto \
+	    -command "@scope ::tycho::EditDAG [list $this configurePopup]"]
+
+    # Entries for developer information FIXME
+    contextmenu add {Describe this widget...} -command \
+	    "::tycho::post $itk_component(slate)"
+
+    bind $itk_component(slate) <Button-3> "$this contextmenu post %X %Y"
 
     # The following is done once in the constructor because it's fairly
     # expensive.
@@ -779,7 +793,11 @@ body ::tycho::EditDAG::redrawGraph {} {
             drawParentLines $node
         }
     }
-    $slate lower line node
+    # Lower lines beneath nodes. Check that nodes exist.
+    if { [$slate find withtag node] != "" } {
+	$slate lower line node
+    }
+
     interactiveEnable $saveinteractiveEnabled
     # The bounding box may have changed, so...
     ::tycho::Graphics::updateScrollbars
@@ -868,6 +886,38 @@ body ::tycho::EditDAG::verify {{repair {}}} {
     ###################################################################
     ####                      protected methods                    ####
 
+#####################################################################
+#### configurePopup
+# Configure the popup menu according to context. For the Graphics widget,
+# this method looks to find out if the mouse is over a node, and creates
+# menu entries accordingly.
+#
+body ::tycho::EditDAG::configurePopup {} {
+    set item [$slate find withtag current]
+    contextmenu clear
+    if { $item != "" } {
+	if { [lmember [$slate gettags $item] node] } {
+	    set node $nametable($item)
+	    set contents [$mygraph contents $node]
+
+	    foreach {attr value} $contents {
+		if { $attr == "link" || $attr == "altlink" } {
+		    set filename [lindex [file split [lindex $value 0]] end]
+		    contextmenu add "Open $filename" \
+			    -command [list eval $this hyperJump $value]
+		}
+	    }
+	    # FIXME: Add entries for other node attributes
+	}
+    }
+    # Add the default entry back into the menu.
+    # FIXME: This is bogus: we need a way to clear the menu
+    # _except for this entry.
+    contextmenu add {Describe this widget...} -command \
+	    "::tycho::post $itk_component(slate)"
+
+}
+
 #######################################################################
 #### contentsToArray
 # Given a node name, an array name, and a set of defaults, set entries
@@ -911,10 +961,16 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
 
     set font [::tycho::.tychoFonts findFont $cnt(fontspec)]
     set color [ptkColor $cnt(color) black]
+    if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
+        # FIXME: cache the option for efficiency.
+	set color [ptkColor [option get $itk_component(hull) \
+                linkColor EditDAG] black]
+    }
 
-    set id [$slate create text $xcoord $ycoord -anchor nw \
-            -fill $color -tag node -text $cnt(label) -font $font]
-    $slate addtag selectable withtag $id
+    # Since we are only creating a top-level item, we can call the
+    # canvas directly here
+    set id [$canvas create text $xcoord $ycoord -anchor nw \
+            -fill $color -tags {node selectable} -text $cnt(label) -font $font]
 
     register $id \
             [list add $node [$mygraph contents $node] \
@@ -923,12 +979,6 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
             [list deleteSubgraph $node] \
             [list editNode $id]
 
-    if {$cnt(link) != {} && $cnt(color) == {black}} {
-        # FIXME: cache the option for efficiency.
-        $slate itemconfigure $id -fill \
-                [ptkColor [option get $itk_component(hull) \
-                linkColor EditDAG] black]
-    }
     set nametable($id) $node
     if {$cnt(link) != {}} {
         $slate bind $id <Double-Button-1> "$this hyperJump $cnt(link)"
