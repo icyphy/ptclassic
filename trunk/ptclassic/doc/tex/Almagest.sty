@@ -49,10 +49,10 @@
 \def\ps@headings{\let\@mkboth\@gobbletwo
     \def\@oddfoot{\footnotesize \sf Ptolemy \hfill Last updated: \@date}
     \def\@evenfoot{\footnotesize \sf UC Berkeley \hfill Department of EECS}
-    \def\@oddhead{\footnotesize \sf \leftmark \hfill \thepage}
-    \def\@evenhead{\footnotesize \sf \thepage \hfill \rightmark}
-    \def\leftmark{The Almagest}
-    \def\chaptermark##1{\markright{##1}}
+    \def\@oddhead{\footnotesize \sf \rightmark \hfill \thepage}
+    \def\@evenhead{\footnotesize \sf \thepage \hfill \leftmark}
+    \def\rightmark{The Almagest}
+    \def\chaptermark##1{\markboth{##1}{The Almagest}}
     \def\sectionmark##1{} }
 \pagestyle{headings}
 
@@ -97,12 +97,14 @@
 %
 % Change indentation of "description" lists.
 %
-\renewenvironment{description}%
+\def\@indexKey{}
+\renewenvironment{indexlist}[1]%
 {\begin{list}{}{%
     \setlength{\leftmargin}{2in}%
     \setlength{\labelsep}{0.25in}%
     \setlength{\labelwidth}{1.5in}%
-    \renewcommand{\makelabel}[1]{\bf ##1 \hfill}}}%
+    \renewcommand{\makelabel}[1]{\bf ##1 \hfill}}%
+\def\@indexKey{#1}}%
 {\end{list}}
 
 %
