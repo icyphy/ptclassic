@@ -36,33 +36,41 @@ Programmer: Jose Luis Pino
 
 *****************************************************************/
 
-#include "GalIter.h"
 #include "StringList.h"
+#include "Galaxy.h"
+#include "GalIter.h"
 
-// GalStarIter essentially uses a GalAllBlockIter and skips the
-// internal galaxies, returning only stars.
+inline int defaultBlockTest(Block&) { return TRUE; }
 
-class GalGalaxyIter : private GalAllBlockIter {
+// Delete-safe iterators
+class DSGalAllBlockIter {
 public:
-    GalGalaxyIter(Galaxy& g);
-    Galaxy* next();
-    inline Galaxy* operator++(POSTFIX_OP) { return next();}
-    void reset() {	GalAllBlockIter::reset();}
-
-    // need a public destructor because of private derivation
-    ~GalGalaxyIter() {}
+    DSGalAllBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
+    virtual ~DSGalAllBlockIter() { delete nextBlockThatMeetsTest; }
+    inline Block* next() { return nextBlockThatMeetsTest->next(); }
+    inline Block* operator++(POSTFIX_OP) { return next();}
+    inline void reset() { nextBlockThatMeetsTest->reset(); }
+private:
+    int (*testBlock)(Block&);
+    BlockList blocksThatMeetTest;
+    BlockListIter *nextBlockThatMeetsTest;
 };
 
-
-class CGalGalaxyIter : private CGalAllBlockIter {
+class DSGalTopBlockIter {
+    DSGalTopBlockIter(Galaxy&, int (*)(Block&) = defaultBlockTest);
+    virtual ~DSGalTopBlockIter() {};
+		      
+inline int defaultGalaxyTest (Block& b) {return ! b.isItAtomic();}
+class GalGalaxyIter : private DSGalAllBlockIter {
 public:
-    CGalGalaxyIter(const Galaxy& g);
-    const Galaxy* next();
-    inline const Galaxy* operator++(POSTFIX_OP) { return next();}
-    inline void reset() {	CGalAllBlockIter::reset();}
+    GalGalaxyIter(Galaxy& g, int (*test)(Block&) = defaultGalaxyTest):
+    DSGalAllBlockIter(g,test) {};
+    inline Galaxy* next() { return (Galaxy*)DSGalAllBlockIter::next(); }
+    inline Galaxy* operator++(POSTFIX_OP) { return next();}
+    DSGalAllBlockIter::reset;
 
     // need a public destructor because of private derivation
-    ~CGalGalaxyIter() {}
+    virtual ~GalGalaxyIter() {}
 };
 
 // Returns the total number of stars in a galaxy (recursively
