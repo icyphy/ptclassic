@@ -35,6 +35,7 @@ STARDOCDIR = ../../doc/stars
 PL_SRCS= \
  SDFLMSTkPlot.pl \
  SDFLMSCxTkPlot.pl \
+ SDFMap.pl \
  SDFTclScript.pl \
  SDFTkBarGraph.pl \
  SDFTkMeter.pl \
