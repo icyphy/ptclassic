@@ -33,6 +33,7 @@ $Id$
 
 #include "sol2compat.h"
 #include "paramStructs.h"
+#include "oct.h"
 
 extern char *AkoName();
 
