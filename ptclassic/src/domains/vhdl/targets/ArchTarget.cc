@@ -728,7 +728,7 @@ void ArchTarget :: trailerCode() {
   VHDLMuxListIter nextMux(muxList);
   VHDLMux* mux;
   while ((mux = nextMux++) != 0) {
-    cout << "MUX with name " << mux->getName() << "\n";
+    //    cout << "MUX with name " << mux->getName() << "\n";
     if (mux->getInputs()->size() > 1) {
       connectMultiplexor(mux->getName(), mux->getInputs(), mux->getOutput(),
 			 mux->getControl());
@@ -750,8 +750,10 @@ void ArchTarget :: trailerCode() {
       }
       if (thePort) {
 	// Re-connect that port to the only input signal's name
+	/*
 	cout << "Reconnecting port " << outName;
-	cout<< " to signal " << mux->getInputs()->head()->getName() << "\n";
+	cout << " to signal " << mux->getInputs()->head()->getName() << "\n";
+	*/
 	thePort->connect(mux->getInputs()->head());
       }
       else {
@@ -784,6 +786,7 @@ void ArchTarget :: trailerCode() {
   ctlerFi->action = ctlerAction;
   ctlerAction.initialize();
   ctlerFi->noOutclocking = TRUE;
+  ctlerFi->groupNum = -1;
 
   masterFiringList.put(*ctlerFi);
 
@@ -808,7 +811,6 @@ void ArchTarget :: trailerCode() {
     VHDLFiringListIter nextFiring(masterFiringList);
     VHDLFiring* firing;
     while ((firing = nextFiring++) != 0) {
-      //      firing->groupNum = 21;
       cout << "Firing:  " << firing->getName() << "\t\t";
       cout << "GroupNum:  " << firing->groupNum << "\n";
     }
@@ -830,7 +832,12 @@ void ArchTarget :: trailerCode() {
 	firegroupName << "CONTROLLER";
       }
       else {
-	firegroupName << firing->groupNum;
+	if (firing->groupNum >= 0) {
+	  firegroupName << firing->groupNum;
+	}
+	else { /* (firing->groupNum < 0) */
+	  firegroupName << "N" << (-(firing->groupNum));
+	}
       }
       /*
       cout << "Firing Name:  " << firing->name << "\n";
