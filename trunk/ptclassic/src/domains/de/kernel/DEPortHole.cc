@@ -91,22 +91,10 @@ void OutDEPort :: sendData ()
 }	
 
 PortHole& MultiInDEPort :: newPort () {
-        InDEPort* newport = new InDEPort;
-        ports.put(*newport);
-        parent()->
-            addPort(newport->
-                        setPort(newName(), parent(), type));
-	newport->typePort = typePort;
-        return *newport;
+	return installPort(*new InDEPort);
 }
  
  
 PortHole& MultiOutDEPort :: newPort () {
-        OutDEPort* newport = new OutDEPort;
-        ports.put(*newport);
-        parent()->
-            addPort(newport->
-                        setPort(newName(), parent(), type));
-	newport->typePort = typePort;
-        return *newport;
+	return installPort(*new OutDEPort);
 }
