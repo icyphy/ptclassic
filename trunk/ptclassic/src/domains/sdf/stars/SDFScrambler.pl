@@ -4,24 +4,26 @@ defstar {
 	desc {
 Scramble the input bit sequence using a feedback shift register.
 The taps of the feedback shift register are given by the "polynomial"
-parameter, which should be a positive integer.  The n-th bit of this
-integer indicates whether the n-th tap of the delay line is fed back.
+parameter, which should be a positive integer.
+The n-th bit of this integer indicates whether the n-th tap of the
+delay line is fed back.
 The low-order bit is called the 0-th bit, and should always be set.
 The next low-order bit indicates whether the output of the first delay
-should be fed back, etc.  The default "polynomial" is an octal number
-defining the V.22bis scrambler. For an explanation of scramblers, see
+should be fed back, etc.
+The default "polynomial" is an octal number defining the V.22bis scrambler.
+For an explanation of scramblers, see
 Lee and Messerschmitt, Digital Communication, Second Edition,
-Kluwer Academic Publishers, 1994, pp 595-603.
+Kluwer Academic Publishers, 1994, pp. 595-603.
 	}
 	explanation {
 .IE "feedback shift register"
 .IE "pseudo-random sequence"
-.IE "PN sequence"
+.IE "pseudo-noise sequence"
 In scramblers based on feedback shift registers,
 all the bits to be fed back are exclusive-ored
 together (i.e., their parity is computed), and the result is exclusive-ored
-with the input bit.  This result is produced at the output and shifted
-into the delay line.
+with the input bit.
+This result is produced at the output and shifted into the delay line.
 With proper choice of polynomial, the resulting output appears highly random
 even if the input is highly non-random (e.g., all zeros or all ones).
 .pp
@@ -31,7 +33,8 @@ register is a so-called \fImaximal length feedback shift register\fR.
 .IE "maximal length feedback shift register"
 This means that with a constant input, the output will be sequence
 with period $2 sup N ~-~ 1$, where \fIN\fR is the order of the polynomial
-(the length of the shift register).  This is the longest possible sequence.
+(the length of the shift register).
+This is the longest possible sequence.
 Moreover, within this period, the sequence will appear to be white,
 in that a computed autocorrelation will be very nearly an impulse.
 Thus, the scrambler with a constant input can be very effectively used
@@ -87,23 +90,32 @@ order    polynomial
 30       010040000007
 .fi
 .pp
-The leading zero in the polynomial indicates an octal number.  Note also
-that reversing the order of the bits in any of these numbers will also result
-in a primitive polynomial.  Thus, the default value for the polynomial parameter
-is 0440001 in octal, or "100 100 000 000 000 001" in binary.  Reversing these bits
-we get "100 000 000 000 001 001" in binary, or 0400011 in octal.  This latter number
-is the one listed above as the primitive polynomial of order 17.
-The order is simply the index the highest order non-zero in the polynomial,
+The leading zero in the polynomial indicates an octal number.
+Note also that reversing the order of the bits in any of these numbers
+will also result in a primitive polynomial.
+Thus, the default value for the polynomial parameter
+is 0440001 in octal, or "100 100 000 000 000 001" in binary.
+Reversing these bits we get "100 000 000 000 001 001" in binary, or
+0400011 in octal.
+This latter number is the one listed above as the primitive polynomial
+of order 17.
+The order is simply the index the highest-order non-zero in the polynomial,
 where the low-order bit has index zero.
 .pp
 Since the polynomial and the feedback shift register are both implemented
-using type "int", the order of the polynomial is limited by the size of the "int"
-data type.  For simplicity and portability, the polynomial is also not allowed
-to be interpretable as a negative integer, so the sign bit cannot be used.
-Thus, if "int" is a 32 bit word, then the highest order polynomial allowed is
-30 (recall that indexing for the order starts at zero, and we cannot use the sign bit).
-Since many machines today have 32-bit integers, we give the primitive polynomials
-above only up to order 30.
+using type "int", the order of the polynomial is limited by the size of
+the "int" data type. 
+For simplicity and portability, the polynomial is also not allowed
+to be interpreted as a negative integer, so the sign bit cannot be used.
+Thus, if "int" is a 32-bit word, then the highest order polynomial allowed is
+30 (recall that indexing for the order starts at zero, and we cannot use
+the sign bit).
+Since many machines today have 32-bit integers, we give the primitive
+polynomials above only up to order 30.
+.UH REFERENCES
+.ip [1]
+Edward Lee and David Messerschmitt, \fIDigital Communication\fR,
+Second Edition, Kluwer Academic Publishers, 1994, pp. 595-603.
 	}
 	version { $Id$ }
 	author { E. A. Lee }
@@ -140,11 +152,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int mask;
 	}
 	setup {
-	  // Should check that generator polynomial does not exceed 31 bits. How?
+	  // The user interface should check that generator polynomial
+	  // specification does not exceed the integer precision of the machine
 	  mask = int(polynomial);
-	  // To avoid sign extension problems, the hob must be zero
+	  // To avoid sign extension problems, the high-order bit must be zero
 	  if (mask < 0) {
-	    Error::abortRun(*this,"Sorry, the polynomial must be a positive integer.");
+	    Error::abortRun(*this,
+			"Sorry, the polynomial must be a positive integer.");
 	    return;
 	  }
 	}
@@ -155,14 +169,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	  int parity = 0;
 	  // Calculate the parity of the masked word.
 	  while (masked > 0) {
-	    // toggle parity if the LOB is one
+	    // toggle parity if the low-order bit is one
 	    parity = parity ^ (masked & 1);
 	    masked = masked >> 1;
 	  }
 	  // Exclusive-or with the input
-	  parity = parity ^ (int(input%0) != 0);
+	  // nonzero input: exclusive or with 0x01
+	  // zero input: no exclusive or
+	  if ( int(input%0) ) {
+	    parity = parity ^ 0x01;
+	  }
 	  output%0 << parity;
 	  // Put the parity bit into the shift register
-	  shiftReg = reg + parity;
+	  shiftReg = reg | parity;
 	}
 }
