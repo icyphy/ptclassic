@@ -13,7 +13,7 @@ Swallows an input sample
 This star absorbs all inputs, hence no code needs to be generated!
 	}
 
-	input {
+	inmulti {
 		name { input }
 		type { ANYTYPE }
 	}
@@ -22,7 +22,7 @@ This star absorbs all inputs, hence no code needs to be generated!
 		noInternalState();
 	}
 	go {
-		addCode( CodeBlock( "/* BLACK HOLE FOR $ref(input) */" ));
+		addCode( CodeBlock( "/* BLACK HOLE */" ));
 	}
 }
 
