@@ -24,20 +24,8 @@ Date of last revision:
 ///////////////////////
 
 class DLScheduler : public ParScheduler {
-	//temporal hack to prevent createSubGals it wormhole exists
-	int wormFlag;
-	int noOverlap;	// set if overlapComm. is disallowed.
-
-	DLGraph* myGraph;
-
-protected:
-   	// The aggregate firing that represents the
-   	// schedule.
-   	DLParProcs* parSched;
-
 public:
-  	// Constructor
-  	DLScheduler(BaseMultiTarget* t, const char* log, int i) : 
+  	DLScheduler(MultiTarget* t, const char* log, int i) : 
 		ParScheduler(t, log), parSched(0), noOverlap(i) {
 		INC_LOG_NEW; myGraph = new DLGraph; exGraph = myGraph; }
 	~DLScheduler();
@@ -54,6 +42,18 @@ public:
 	// Need to redefine this function for now.
 	// Will be removed later.
 	int createSubGals();
+
+protected:
+   	// The aggregate firing that represents the
+   	// schedule.
+   	DLParProcs* parSched;
+
+private:
+	//temporal hack to prevent createSubGals it wormhole exists
+	int wormFlag;
+	int noOverlap;	// set if overlapComm. is disallowed.
+
+	DLGraph* myGraph;
 };
 
 #endif

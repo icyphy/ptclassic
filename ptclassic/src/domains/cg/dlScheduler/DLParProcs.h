@@ -29,9 +29,7 @@ Date of last revision:
 class DLParProcs : public ParProcessors {
 
 public:
-	// constructor
-	DLParProcs(int, BaseMultiTarget*);
-
+	DLParProcs(int, MultiTarget*);
 	~DLParProcs();
 
 	// initialize

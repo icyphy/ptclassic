@@ -18,7 +18,7 @@ Date of last revision:
 
 #include "DLParProcs.h"
 #include "StringList.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 #include "CGWormhole.h"
 #include "Profile.h"
 #include "DLNode.h"
@@ -27,7 +27,7 @@ Date of last revision:
 // candidate processors
 IntArray* candidate;
 
-DLParProcs :: DLParProcs(int pNum, BaseMultiTarget* t) :ParProcessors(pNum,t) {
+DLParProcs :: DLParProcs(int pNum, MultiTarget* t) :ParProcessors(pNum,t) {
 	 LOG_NEW; schedules = new UniProcessor[pNum];
 }
 

@@ -138,6 +138,7 @@ StringList DLScheduler :: displaySchedule() {
 }
 
 int DLScheduler :: createSubGals() {
-	if (!wormFlag) return ParScheduler :: createSubGals();
+	if ((!wormFlag) && noOverlap)
+		 return ParScheduler :: createSubGals();
 	else return FALSE;
 }
