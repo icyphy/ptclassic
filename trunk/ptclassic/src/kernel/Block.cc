@@ -32,16 +32,15 @@ Block :: printPorts (const char* type) {
 	out += type;
 	out += ":\n";
 	for(int i = numberPorts(); i>0; i--)
-		out += (StringList) nextPort();
+		out += nextPort().printVerbose();
 // Now do the multiports
 	int nmph = multiports.size();
 	if (nmph) {
 		out += "MultiPortHoles in the ";
 		out += type;
 		out += "\n";
-	}
-	for (i = nmph; i> 0; i--) {
-		out += (StringList) multiports++;
+		for (i = nmph; i> 0; i--)
+			out += multiports++.printVerbose();
 	}
 	return out;
 }
@@ -56,11 +55,12 @@ Block :: printStates (const char* type) {
         out += readName();
         out += ":\n";
         for(int i = numberStates(); i>0; i--)
-                out += (StringList) nextState();
+                out += nextState().printVerbose();
         return out;
 }
 
-Block :: operator StringList ()
+StringList
+Block :: printVerbose ()
 {
 	StringList out;
 	out = "Block: ";
@@ -70,7 +70,6 @@ Block :: operator StringList ()
 	out += readDescriptor();
 	out += "\n";
 	out += printPorts("block");
-        out += printPorts("block");
 	return out;
 }
 
