@@ -81,7 +81,7 @@ $(ROOT)/man/man1/tkman.1: tkman.1
 sources:	$(EXTRA_SRCS) $(SRCS) makefile
 
 depend:
-	@echo no dependencies in tkman directory (contributed code)
+	@echo "no dependencies in tkman directory (contributed code)"
 
 sccsinfo:
 	sccs info
