@@ -55,14 +55,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Default command to start the Matlab engine.  See the {Matlab External
 // Interface Guide For Unix Workstations}, 1993, page 2-14, under the
 // description for the engOpen command.  We use 'matlab' so as to allow
-// the user to define the matlab script to do special functions, such
-// as control Matlab running on another workstation
+// the user to define the matlab script to do special functions.
 #define MATLAB_START_COMMAND      "matlab"
 
 // counts how many instances of this class have been created
 static int matlabStarsCount = 0;
 
-// keeps track of the lone Ptolemy-controlled Matlab process running
+// keeps track of the lone controlled Matlab process that is running
 static Engine* matlabEnginePtr = 0;
 
 // default buffer to store return strings from Matlab
@@ -73,7 +72,7 @@ MatlabIfc :: MatlabIfc() {
     matlabStarsCount++;
     scriptDirectory = 0;
     deleteFigures = FALSE;
-    figureHandle = "PtolemyMatlabIfc";
+    figureHandle = "MatlabIfc";
     figureHandle << matlabStarsCount;
     MakeFigureHandleCommand();
     outputBuffer = matlabDefaultBuffer;
@@ -254,17 +253,7 @@ const char* MatlabIfc :: BuildMatlabCommand(
 // manage the Matlab process (low-level methods)
 
 // start a Matlab process
-// FIXME: This is a hack to workaround problems in the Matlab 4 engine
-// interface that affects System V operating systems like Solaris and HP.
-// Problem is that engClose routine issues ioctl(2, TIOCGWINSZ, 0xEFFFC028)
-// which attempts to get the window size of terminal that does not exist.
-// This showed up when running tycho and opening a Matlab console.
-// If one runs tycho as "tycho -ptiny >/dev/null" then the problem does
-// not exist.  -- ble, cxh
 Engine* MatlabIfc :: MatlabEngineOpen(char* unixCommand) {
-    // A better solution is to use ioctl to sever the association
-    // from the parent stderr and the matlab engine stderr
-    freopen("/dev/null", "w", stderr);
     return engOpen(unixCommand);
 }
 
@@ -332,40 +321,56 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
 // Matlab by using (1) userCommand if it is non-null, or (2) a
 // remote shell to the machine given by PTMATLAB_REMOTE_HOST
 // if the environment variable PTMATLAB_REMOTE_HOST is set, or
-// (3) "matlab".
+// (3) "matlab".  For cases (2) and (3), we run matlab inside
+// a shell process so that we can redirect standard error as
+// a temporary workaround to the following bug in Matlab 4.
+//
+// FIXME: The Matlab 4 engine interface has an undesirable side effects
+// on System V operating systems like Solaris and HP.  The problem is
+// that engClose routine issues ioctl(2, TIOCGWINSZ, 0xEFFFC028) which
+// attempts to get the window size of terminal that does not exist.
+// This showed up when running tycho and opening a Matlab console.
+// If one runs tycho as "tycho -ptiny >/dev/null" then the problem does
+// not exist.  See about for a temporary fix-- ble, cxh
 int MatlabIfc :: StartMatlab(char* userCommand) {
+    InfString command;
     const char* matlabServer = 0;
 
     KillMatlab();
 
-    // Build the command to start Matlab
-    InfString command;
+    // Use the command specified by the user if given:  this allows
+    // this interface to be used on platforms other than Unix
     if (userCommand) {
 	command = userCommand;
     }
     else {
-	matlabServer = getenv("PTMATLAB_REMOTE_HOST");
+	// Construct the basic shell command for the Matlab process
 	// FIXME: This assumes that we are using Unix and X windows
-	if (matlabServer) {
-	    const char* display = getenv("DISPLAY");
-	    const char* username = getenv("USER");
+        const char* display = getenv("DISPLAY");
+	command = "/bin/sh -c \'";
+	if (display) {
+	   command <<  "DISPLAY=" << display << "; export DISPLAY; ";
+	}
+	command << MATLAB_START_COMMAND << " 2>/dev/null'";
 
+	// See if the user wants to run the Matlab process on a remote machine
+        matlabServer = getenv("PTMATLAB_REMOTE_HOST");
+	if (matlabServer) {
 	    // See the {Matlab External Interface Guide For Unix Workstations},
 	    // 1993, page 2-14, under the explanation of the engOpen command.
 	    // We modified the example to use sh instead of csh to improve
 	    // portability. - ble, xw
-	    command = "rsh";
+	    StringList remoteCommand = "rsh";
+	    const char* username = getenv("USER");
+	    if (username == 0) {
+	        username = getenv("LOGNAME");
+	    }
 	    if (username) {
-		command << " -l " << username;
+		remoteCommand << " -l " << username;
 	    }
-	    command <<  " " << matlabServer << " \"/bin/sh -c \'";
-	    if (display) {
-		command <<  "DISPLAY=" << display << "; export DISPLAY; ";
-	    }
-	    command << MATLAB_START_COMMAND << "'\"";
-	}
-	else {
-	    command = MATLAB_START_COMMAND;
+	    remoteCommand <<  " " << matlabServer;
+	    remoteCommand << " \"" << command << "\"";
+	    command = remoteCommand;
 	}
     }
 
@@ -386,8 +391,8 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
 	return FALSE;
     }
 
-    // add the PTOLEMY_MATLAB_DIRECTORY to the Matlab path
-    char* fulldirname = expandPathName(PTOLEMY_MATLAB_DIRECTORY);
+    // add the MATLAB_SCRIPT_DIR to the Matlab path
+    char* fulldirname = expandPathName(MATLAB_SCRIPT_DIR);
     InfString setPathCommand = "path(path, '";
     setPathCommand << fulldirname;
     setPathCommand << "');";
@@ -452,13 +457,13 @@ int MatlabIfc :: ChangeMatlabDirectory() {
 
 // establish that all newly created Matlab figures will be
 // associated with the arg handle implemented by the Matlab
-// function defined by MATLAB_SET_FIGURES in PTOLEMY_MATLAB_DIRECTORY
+// function defined by MATLAB_SET_FIGURES in MATLAB_SCRIPT_DIR
 int MatlabIfc :: AttachMatlabFigureIds() {
     return EvaluateOneCommand(figureHandleCommand);
 }
 
 // close all figures associated with arg handle implemented by Matlab
-// script defined by MATLAB_CLOSE_FIGURES in PTOLEMY_MATLAB_DIRECTORY
+// script defined by MATLAB_CLOSE_FIGURES in MATLAB_SCRIPT_DIR
 int MatlabIfc :: CloseMatlabFigures() {
     InfString command = MATLAB_CLOSE_FIGURES;
     command << "('" << figureHandle << "');";
