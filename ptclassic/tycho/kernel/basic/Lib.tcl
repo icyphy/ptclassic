@@ -1,8 +1,8 @@
 # Master initialization file for the Tycho tcl/tk Ptolemy interface
 # Author: Edward A. Lee
-# Version: @(#)Lib.tcl	1.8	9/15/95
+# Version: $Id$
 #
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -43,6 +43,8 @@ set PTOLEMY $env(PTOLEMY)
 set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl-2.0b2/lib/tcl7.4
 set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl-2.0b2/lib/tk4.0
 set tk_library $env(TK_LIBRARY)
+
+# FIXME: Are the following needed?
 uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/tcl7.4/init.tcl
 uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/tk4.0/tk.tcl
 uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/itcl2.0/init.itcl
@@ -58,3 +60,22 @@ set auto_path [linsert $auto_path 0 \
 	$ptolemy/tcltk/itcl-2.0b2/lib \
 	$ptolemy/tcltk/itcl-2.0b2/lib/iwidgets2.0
 ]
+
+namespace tycho
+
+# Files that we are going to need right away, so there is no
+# point in deferring them to auto-loading.
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/Color.tcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/Font.itcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/Options.tcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/TopLevel.itcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/Dismiss.itcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/Font.itcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/Message.itcl
+uplevel #0 source $PTOLEMY/tycho/kernel_itk/ErrorMessage.itcl
+
+# Register the standard context-sensitive editors
+File::registerEditor .tcl EditTcl
+File::registerEditor .itcl EditItcl
+File::registerEditor .itk EditItcl
+File::registerEditor .tyc HTMLTcl
