@@ -138,7 +138,9 @@ PL_SRCS= \
  SDFXgraph.pl \
  SDFXhistogram.pl \
  SDFXscope.pl \
- SDFYuv2Rgb.pl
+ SDFYuv2Rgb.pl \
+ SDFZigZag.pl \
+ SDFZigZagInv.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
