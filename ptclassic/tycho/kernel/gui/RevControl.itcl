@@ -417,7 +417,7 @@ body ::tycho::RevControl::unedit {} {
 #
 body ::tycho::RevControl::openFile {} {
     if {[llength $difflist]==0} {
-        ::tycho::Dialog::inform \
+        ::tycho::warn \
                 "You need to select which file to open first."
         return
     }
