@@ -1,3 +1,7 @@
+#
+# ~ptolemy/src/utils/installColors/README
+# Version: $Id$
+#
 This directory contains a modified version of the pat2tap
 program from the Berkeley octtools distribution.
 The program has been modified to work more easily with Ptolemy,
@@ -8,9 +12,9 @@ To use the program:
 A text file is used to define the colors used by vem to display ptolemy
 facets.  In Vem terminology, it defines the "ptolemy technology."
 The colors can be changed, and users can define their own colors.
-The default ptolemy colors are defined in ~ptolemy/lib/colors/colors.pat
-for color monitors and ~ptolemy/lib/colors/colors.bw.pat for black
-and white monitors.
+The default ptolemy colors are defined in
+    ~ptolemy/lib/colors/ptolemy/colors.pat for color monitors; and
+    ~ptolemy/lib/colors/ptolemy/bw.pat for black and white monitors.
 
 Editing the text file is not sufficient to effect changes to the colors.
 The colors must be incorporated into the tap.views facet for any
@@ -60,12 +64,18 @@ vem.technology:  ~myLogin/myColors
 NOTE THAT FOR SOME REASON I DON'T UNDERSTAND, THE PIGI COMMAND
 OVERRIDES THIS X RESOURCE.  ONLY SOLUTION I KNOW OF IS TO CREATE
 YOUR OWN pigi SCRIPT.
+		Partial explaination of above problem.  The current
+		pigi script does an xrdb -merge, with the standard
+		ptolemy vem resources.  The overrides any resources
+		you specify in your resources.  We hope to switch
+		to application default resources soon, which should
+		eliminate this problem.
 
 You should also update the pointers in your new color specification
 by running the octmvlib program:
 
 	cd ~myLogin/myColors
-	octmvlib -O "~ptolemy/lib/colors" -N "~myLogin/myColors" tap.views:schematic
+	octmvlib -O "$PTOLEMY/lib/colors" -N "~myLogin/myColors" tap.views:schematic
 
 Then restart pigi.
 
@@ -80,8 +90,8 @@ To make installColors, in a C shell, type "setenv OCTTOOLS ~octtools".
 Then "make".
 
 
+--------
 The program includes a cleanup routine, explained by its author below:
-
 Author: Wan-Teh Chang  wtc@eecs.berkeley.edu
 
 After editing the vem pattern files, one uses pat2tap to generate the
@@ -94,4 +104,23 @@ From experience we found we don't need any design rules for Ptolemy.
 So cleantap is written to remove these spurious edges in the 
 DESIGN-RULES bag, sort of "clean up tap.views", hence the name.
 
+---------
+tapPP	(Kennard White)
+There is a new octtools program named "tapPP" which creates an index
+of all the connectors.  This supposedly speeds up vem.  It is not
+clear if we should run it or not since we have so few connectors.
 
+---------
+technologies (Kennard White)
+All octtools programs understand a "technology root directory".  This
+is specified with the "vem*technology" resource or with the "=-T" option.
+This directory then has a set of directories, which each directory cooresponding
+to a particular technology.  For ptolemy, the root directory is
+"~ptolemy/lib/colors", and the name of the technology is "ptolemy".
+Thus the ptolemy technology resides in "~ptolemy/lib/colors/ptolemy".
+Within this directory, there is one key facet "tap.views" which contains
+all the configuration information about the technology.  In particular,
+it contains all the color information, design rules, pointers to
+all the connectors, and pointers to all the layers.  The technology directory
+also contains "key" OCT cells for the technology.  We put these in the
+system pallete.
