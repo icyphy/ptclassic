@@ -1,34 +1,30 @@
 #include "Star.h"
-#include <stream.h>
+#include <String.h>
 
-OutputToUser :: OutputToUser()
-	{ outputStream = &cout; }	// Start with default
-
-void OutputToUser :: fileName(char *fileName)
-	{
-	if ( strcmp(fileName,"cout") == 0 )
-		outputStream = &cout;
-	else
-		outputStream = new ostream(fileName,io_writeonly,a_create);
-	}
-
-void OutputToUser :: outputString(char *s)
-        { ((ostream*)outputStream) -> operator<< (s) ; }
-
-void OutputToUser :: operator << (int i)
-	{ outputString(form("%d",i)); }
-
-void OutputToUser :: operator << (char *s)
-	{ outputString(form("%s",s)); }
-
-void OutputToUser :: operator << (float f)
-	{ outputString(form("%g",f)); }
-
-void Star :: profile() {
-	cout << "Star: " << readFullName() << "\n";
-	cout << "Descriptor: " << readDescriptor() << "\n";
-
-	cout << "Ports in the star:\n";
+Star :: operator char* () {
+	String out;
+	out = "Star: ";
+	out += readFullName();
+	out += "\n";
+	out += "Descriptor: ";
+	out += readDescriptor();
+	out += "\n";
+	out += "Ports in the star:\n";
 	for(int i = numberPorts(); i>0; i--)
-		nextPort().profile();
+		out += nextPort().operator char* ();
+	return out;
+}
+
+// Redefine method setting internal data in the Block
+// so that various SDF-specific initilizations can be performed.
+// If the parent pointer is not provied, it defaults to NULL
+Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
+	// First invoke the generic setBlock
+	Block::setBlock(s,parent);
+
+	// Then perform SDF-specific initializations
+	repetitions = 0;
+	noTimes = 0;
+
+	return *this;
 }

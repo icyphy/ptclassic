@@ -1,5 +1,5 @@
 #include "Star.h"
-#include <stream.h>
+#include <String.h>
 #include "Galaxy.h"
 #include "Block.h"
 
@@ -50,21 +50,27 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
 
 
 	////////////////////////////////////
-	// profile
+	// operator char* ()
 	////////////////////////////////////
 
-// Profile function will later be replaced with operator (char*).
 
-void Galaxy :: profile() {
-	cout << "GALAXY: " << readFullName() << "\n";
-	cout << "Descriptor: " << readDescriptor() << "\n";
-	cout << "Number of blocks: " << numberBlocks() << "\n";
-	if (numberPorts()>0) cout << "Ports in the Galaxy:\n";
-	for(int i = numberPorts(); i>0; i--)
-		nextPort().profile();
+Galaxy :: operator char* () {
+	String out;
+	out = "GALAXY: ";
+	out += readFullName();
+	out += "\n";
+	out += "Descriptor: ";
+	out += readDescriptor();
+	out += "\n";
+	out += "Number of blocks: ";
+	out += numberBlocks();
+	out += "\n";
+	if (numberPorts()>0) out += "Ports in the Galaxy:\n";
+	   for(int i = numberPorts(); i>0; i--)
+		out += nextPort();
 
-	cout << "Blocks in the Galaxy:----------------------------------\n";
-	for(i = numberBlocks(); i>0; i--) {
-		nextBlock().profile();
-	}
+	out += "Blocks in the Galaxy:----------------------------------\n";
+	for(i = numberBlocks(); i>0; i--)
+		out += nextBlock();
+	return out;
 }

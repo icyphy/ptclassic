@@ -2,7 +2,7 @@
 #define _connect_h 1
 
 #include "type.h"
-#include "SeqList.h"
+#include "DataStruct.h"
 
 class Geodesic;
 class Block;
@@ -43,7 +43,7 @@ public:
 	dataType type;
 
 	// Print a description of the PortHole
-	void profile();
+	operator char* ();
 
 	// The PortHole can be aliased to another PortHole.
 	// For example, any PortHole belonging to a Galaxy is aliased

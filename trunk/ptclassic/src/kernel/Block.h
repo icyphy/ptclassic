@@ -50,8 +50,7 @@ public:
 	// Note that this function flattens the profile of a galaxy,
 	// which may not always be wanted.  It produces a great deal
 	// of data.
-	// TO BE DONE: Convert to a cast to char*.
-	virtual void profile ();
+	virtual operator char* ();
 protected:
 	// Database for this block
 

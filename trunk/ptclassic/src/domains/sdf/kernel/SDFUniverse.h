@@ -4,7 +4,6 @@
 #include "type.h"
 #include "Star.h"
 #include "Scheduler.h"
-#include "SDFStar.h"
 
 /*******************************************************************
 
@@ -33,11 +32,11 @@ public:
 		{scheduler.run(*myTopology, numIterations);}
 	int wrapup () {scheduler.wrapup(*myTopology);}
 
-	// Redefine profile method
-	virtual void profile ();
+	// Redefine char* cast
+	operator char* ();
 
 	// Display the schedule
-	void displaySchedule() {scheduler.displaySchedule();}
+	char* displaySchedule() {scheduler.displaySchedule();}
 
 protected:
 	// The addBlock method should get invoked only once, with a

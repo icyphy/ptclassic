@@ -1,11 +1,18 @@
 #include "Universe.h"
-#include <stream.h>
+#include <String.h>
 
-// TO BE DONE: Make this a cast to char*
-void SDFUniverse :: profile () {
-	cout << "SYNCHRONOUS DATAFLOW UNIVERSE: " << readFullName () << "\n";
-	cout << "Descriptor: " << readDescriptor() << "\n";
-	cout << "CONTENTS:" << "\n";
+SDFUniverse :: operator char* () {
+	String out;
+	out = "SYNCHRONOUS DATAFLOW UNIVERSE: ";
+	out += readFullName ();
+	out += "\n";
+	out += "Descriptor: ";
+	out += readDescriptor();
+	out += "\n";
+	out += "CONTENTS:";
+	out += "\n";
 
-	myTopology->profile();
+	out += *myTopology;
+
+	return out;
 }

@@ -4,6 +4,12 @@
 #include "type.h"
 #include "Connect.h"
 #include "Block.h"
+#include "Output.h"
+
+/*
+This header includes everything needed by a class implementing
+the Star function
+*/
 
 	////////////////////////////////////
 	// class Star
@@ -37,29 +43,33 @@ public:
         virtual int wrapup() {};
 
 	// Method to print out description
-	virtual void profile ();
+	operator char* ();
 };
 
-/*
-class OutputToUser is for purpose of output from a Star.....
-we want to avoid direct output, since Cosmos should maintain
-control over where output goes (wherever in the Universe
-the user interface may be!)
-*/
+#include "Fraction.h"
 
-class OutputToUser
-{
-	// Rather than using ostream pointer, which would require
-	// recompiling stream.h for each Star, we use an Pointer
-	Pointer outputStream;
+	////////////////////////////////////
+	// class SDFStar
+	////////////////////////////////////
 
-	void outputString(char*);
+class SDFStar : public Star  {
+
 public:
-	OutputToUser();
-	void fileName		(char *);	// Name of file for output
-	void operator <<	 (int);		// Output data to the user
-	void operator <<	 (char*);
-	void operator <<	 (float);
+	// The number of repetitions of the star in a periodic
+	// schedule.  Initialized to 1 by setBlock.  Set to correct
+	// value by an SDF scheduler.  It is represented as a fraction
+	// for the convenience of the scheduler.
+	Fraction repetitions;
+
+	// During scheduling, the scheduler must keep track of how
+	// many times it has scheduled a star.  This is a convenient
+	// place to do that.
+	unsigned noTimes;
+
+	// Redefine method setting internal data in the Block
+	// so that various SDF-specific initilizations can be performed.
+	// If the parent pointer is not provied, it defaults to NULL
+	Block& setBlock(char* starName, Block* parent = NULL);
 };
 
 #endif

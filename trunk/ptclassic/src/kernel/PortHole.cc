@@ -1,7 +1,7 @@
 #include "type.h"
 #include "Connect.h"
 #include "Block.h"
-#include <stream.h>
+#include <String.h>
 
 
 PortHole& PortHole :: setPort(char* s,
@@ -25,7 +25,8 @@ PortHole& SDFPortHole :: setPort (char* s,
 	return *this;
 }
 
-void PortHole :: profile() {
+PortHole :: operator char* () {
+	String out;
 	char* parentBlock;
 
 	// Get the name of the parent block, if there is one
@@ -35,29 +36,34 @@ void PortHole :: profile() {
 		parentBlock = "null (no block)";
 
 	if(isItInput())
-	   cout << "	Input ";
+	   out = "	Input ";
 	else if(isItOutput())
-	   cout << "	Output ";
+	   out = "	Output ";
 
-	cout << "PortHole: " << parentBlock << "."
-	     << readName() << "\n";
+	out += "PortHole: ";
+	out += parentBlock;
+	out += ".";
+	out += readName();
+	out += "\n";
 
 	if(alias != NULL) {
 	   PortHole& eventualAlias = realPort();
-	   cout << "	  Aliased to: "
-		<< eventualAlias.blockIamIn->readFullName()
-		<< "."
-	        << eventualAlias.readName()
-		<< "\n";
+	   out += "	  Aliased to: ";
+	   out += eventualAlias.blockIamIn->readFullName();
+	   out += ".";
+	   out += eventualAlias.readName();
+	   out += "\n";
 	} else {
 
-	   if (farSidePort != NULL)
-	      cout << "	  Connected to port: "
-		   << farSidePort->blockIamIn->readFullName()
-		   << "."
-		   << farSidePort->readName()
-		   << "\n";
+	   if (farSidePort != NULL) {
+	      out += "	  Connected to port: ";
+	      out += farSidePort->blockIamIn->readFullName();
+	      out += ".";
+	      out += farSidePort->readName();
+	      out += "\n";
+	      }
 	   else
-	      cout << "	  Not connected.\n";
+	      out += "	  Not connected.\n";
 	}
+	return out;
 }
