@@ -68,7 +68,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    SDFTclScript::setup();
 	}
 	constructor {
+	    // Hide irrelevant outputs and states.
 	    output.setAttributes(P_HIDDEN);
 	    tcl_file.clearAttributes(A_SETTABLE);
+	    synchronous.clearAttributes(A_SETTABLE);
 	}
 }
