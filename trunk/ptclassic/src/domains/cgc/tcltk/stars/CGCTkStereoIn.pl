@@ -48,12 +48,12 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid volume");
                 return TCL_ERROR;
             }
-	    /* conveying the value changes of record volume to audioctl */
+	    /* conveying the value changes of record volume to audio device */
 	    $ref(volume) = (int) position/10;
 	    AUDIO_INITINFO(&info);
-	    ioctl($starSymbol(ctlfile), AUDIO_GETINFO, (caddr_t)(&info));
+	    ioctl($starSymbol(file), AUDIO_GETINFO, (caddr_t)(&info));
 	    info.record.gain = AUDIO_MAX_GAIN*$ref(volume)/10;
-	    ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
+	    ioctl($starSymbol(file), AUDIO_SETINFO, (caddr_t)(&info));
 
 	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);

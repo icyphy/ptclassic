@@ -59,12 +59,12 @@ limitation of liability, and disclaimer of warranty provisions.
                 errorReport("Invalid volume");
                 return TCL_ERROR;
             }
-	    /* conveying the value changes of volume to audioctl */
+	    /* conveying the value changes of volume to audio device */
 	    $ref(volume) = (int) position/10;
 	    AUDIO_INITINFO(&info);
-	    ioctl($starSymbol(ctlfile), AUDIO_GETINFO,(caddr_t)(&info));
+	    ioctl($starSymbol(file), AUDIO_GETINFO,(caddr_t)(&info));
 	    info.play.gain = AUDIO_MAX_GAIN*$ref(volume)/10;
-	    ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
+	    ioctl($starSymbol(file), AUDIO_SETINFO, (caddr_t)(&info));
 
 	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
@@ -87,11 +87,11 @@ limitation of liability, and disclaimer of warranty provisions.
                 return TCL_ERROR;
             }
 	    $ref(balance) = ((int)tkbalance/5) - 10;
-	    /* conveying the value changes of balance to audioctl */
+	    /* conveying the value changes of balance to audio device */
 	    AUDIO_INITINFO(&info);
-	    ioctl($starSymbol(ctlfile), AUDIO_GETINFO, (caddr_t)(&info));
+	    ioctl($starSymbol(file), AUDIO_GETINFO, (caddr_t)(&info));
 	    info.play.balance = AUDIO_MID_BALANCE*($ref(balance)+10)/10;
-	    ioctl($starSymbol(ctlfile), AUDIO_SETINFO, (caddr_t)(&info));
+	    ioctl($starSymbol(file), AUDIO_SETINFO, (caddr_t)(&info));
 	    
 	    sprintf(buf, "%d", $ref(balance));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
