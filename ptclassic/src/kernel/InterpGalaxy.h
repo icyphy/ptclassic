@@ -50,6 +50,8 @@ public:
 
 // "register" the galaxy (add it to the known list)
 	addToKnownList();
-			  
+
+// return a contained star/galaxy (this is protected in Galaxy)
+	Block* blockWithName(char* s) {return Galaxy::blockWithName(s);}
 };
 #endif
