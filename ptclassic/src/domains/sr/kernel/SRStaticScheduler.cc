@@ -44,6 +44,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern const char SRdomainName[];
 
+// Return a printed representation of the schedule
+//
+// @Description Identify this as the static SR scheduler and call
+// printVerbose()
+
 StringList SRStaticScheduler::displaySchedule()
 {
   StringList out;
@@ -52,6 +57,11 @@ StringList SRStaticScheduler::displaySchedule()
       << "}\n";
   return out;
 }
+
+// Return a printed representation of the schedule
+//
+// @Description For each cluster, print the repetition count and the
+// stars it contains.
 
 StringList SRSchedule::printVerbose() const
 {
@@ -75,7 +85,6 @@ StringList SRSchedule::printVerbose() const
   return out;
 }
 
-// Constructor
 SRStaticScheduler::SRStaticScheduler()
 {
   numInstantsSoFar = 0;
@@ -83,13 +92,13 @@ SRStaticScheduler::SRStaticScheduler()
   schedulePeriod = 10000.0;
 }
 
-// Domain identification.
+// Return the name of the SR domain
 const char* SRStaticScheduler::domain() const
 {
     return SRdomainName;
 }
 
-// Initialization.
+// Initialize the galaxy and compute the schedule
 void SRStaticScheduler::setup()
 {
     if (!galaxy()) {
@@ -123,11 +132,10 @@ int SRStaticScheduler::run()
 
 // Execute the galaxy for an instant
 //
-// This is a very simple scheduler--in each instant, it initializes
-// all the stars, runs each, and checks to see if any more outputs
-// have become defined.  If any have, it runs them all again.
-// Finally, it calls tick() to advance the stars' states.
-//
+// @Description Call initializeInstant() on each star, and then for
+// each cluster, call run() on each star in the cluster, repeating the
+// cluster as many times as necessary.  Call tick() on each star.
+
 void SRStaticScheduler::runOneInstant()
 {
   GalStarIter nextStar( *galaxy() );
@@ -169,8 +177,8 @@ void SRStaticScheduler::runOneInstant()
 
 // Set the stopping time, for compatibility with the DE scheduler
 //
-// Roundoff errors makes this non-trivial
-//
+// @Description Roundoff errors makes this non-trivial
+
 void SRStaticScheduler::setStopTime(double limit)
 {
   numInstants = int( floor(limit + 0.001) );
@@ -178,15 +186,19 @@ void SRStaticScheduler::setStopTime(double limit)
 
 // Set the stoppping time for a wormhole
 //
-// A wormhole invocation is always one instant--the time given is ignored.
-//
+// @Description A wormhole invocation is always one instant--the time
+// given is ignored.
+
 void SRStaticScheduler::resetStopTime(double)
 {
   numInstants = 1;
   numInstantsSoFar = 0;
 }
 
-// Do the actual scheduling
+// Generate the schedule
+//
+// @Description Decompose the graph into SCCs using SCCDecompose().
+// Cut the feedback arcs of each SCC using cutSCCs().
 
 int SRStaticScheduler::computeSchedule( Galaxy & g )
 {
@@ -201,6 +213,11 @@ int SRStaticScheduler::computeSchedule( Galaxy & g )
 
   return 0;
 }
+
+// Decompose the graph into strongly-connected components
+//
+// @Description After resetting the depth flags, call SCCVisit on all
+// unvisited stars
 
 void SRStaticScheduler::SCCDecompose( Galaxy & g )
 {
@@ -220,7 +237,12 @@ void SRStaticScheduler::SCCDecompose( Galaxy & g )
   }  
 }
 
-// The strongly-connected component algorithm from Sedgewick's Algorithms
+// Visit a star as part of SCC decomposition
+//
+// @Description This is the strongly-connected component algorithm
+// from Sedgewick's Algorithms.  Each SCC adds a cluster, and these
+// are generated in topological order.
+
 int SRStaticScheduler::SCCVisit( SRStar * s, Stack & stack, int & index )
 {
   //  cout << "Visiting " << s->name() << " with index " << index << "\n";
@@ -282,6 +304,19 @@ int SRStaticScheduler::SCCVisit( SRStar * s, Stack & stack, int & index )
   return min;
 
 }
+
+// Schedule each strongly-connected component
+//
+// @Description Using a heuristic from <BR> <BR>
+//
+// Peter Eades, Xuemin Lin, and W. F. Smyth. <BR>
+// A fast and effective heuristic for the feedback arc set problem. <BR>
+// <i>Information Processing Letters</i>, 47(6):319-323, October
+// 1993. <BR> <BR>
+//
+// order the stars in each cluster and count the
+// number of feedback arcs, which should be minimized.  This number
+// becomes the number of iterations for the cluster
 
 void SRStaticScheduler::cutSCCs( Galaxy & g )
 {

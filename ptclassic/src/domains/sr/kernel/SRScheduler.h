@@ -38,35 +38,34 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Scheduler.h"
 
+/**********************************************************************
+
+ The brute-force scheduler
+
+ @Description This simply fires each star in the universe (i.e., by
+ calling their go() methods) until no outputs have changed.  Then, all
+ stars' tick() methods are called and another instant is started.
+
+ **********************************************************************/
 class SRScheduler : public Scheduler
 {
 public:
   SRScheduler();
 
-  // Domain identification.
-  /*virtual*/ const char* domain() const;
+  const char* domain() const;
+ 
+  void setup();
 
-  // Initialization.
-  /*virtual*/ void setup();
+  void setStopTime(double);
 
+  void resetStopTime(double);
 
-  // Set the stopping time
-  /*virtual*/ void setStopTime(double);
+  // Return the stopping time of the simulation
+  double getStopTime() { return double(numInstants); }
 
-  // Set the stopping time when inside a Wormhole.
-  /*virtual*/ void resetStopTime(double);
+  int run();
 
-  // Return the stopping time.
-  /*virtual*/ double getStopTime() { return double(numInstants); }
-
-
-
-  // Run (or continue) the simulation
-  /*virtual*/ int run();
-
-  // Run the simulation for an instant
   virtual void runOneInstant();
-
 
   // The "time" of each instant, used when interfacing with a timed domain
   double schedulePeriod;
@@ -77,7 +76,6 @@ protected:
 
   // Number of instants already executed
   int numInstantsSoFar;
-
 };
 
 #endif
