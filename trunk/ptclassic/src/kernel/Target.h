@@ -71,6 +71,36 @@ public:
 
 	virtual StringList displaySchedule();
 
+	// A Target may understand certain annotations in blocks
+	// called "Hints".  This method returns the list of
+	// hints that a particular target understands.
+	// In derived classes, each item in the list is a three
+	// part string, "name type value", separated by spaces.
+	// The default implementation returns a StringList
+	// with only a single zero-length string in it.
+	StringList hint () { return ""; }
+
+	// To determine the value of all hints that have been
+	// specified for a particular block, call this method.
+	// In derived classes, it returns a list of "name value"
+	// pairs, separated by spaces.  In the base class, it
+	// returns an empty string.
+	StringList hint (const char* blockname) {return "";}
+
+	// To determine the value of a hint of a particular type
+	// that has been specified for a particular block, call this
+	// method. In derived classes, it returns a value.
+	StringList hint (const char* blockname, const char* hintname) {
+	    return "";
+	}
+
+	// To specify a hint to a target, call this method.
+	// The default implementation ignores all hints.
+	// The return value is always a null string.
+	StringList hint (const char* blockname,
+		   const char* name,
+		   const char* value) { return ""; }
+
 	// return the nth child Target, null if no children.
 	virtual Target* child(int n);
 
