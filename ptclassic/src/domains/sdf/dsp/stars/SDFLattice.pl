@@ -86,17 +86,17 @@ New York, 1989.
 		b = 0; f = 0; M = -1;
 	}
 	destructor {
-		LOG_DEL; delete b;
-		LOG_DEL; delete f;
+		LOG_DEL; delete [] b;
+		LOG_DEL; delete [] f;
 	}
 	setup {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (M != reflectionCoefs.size()) {
 			M = reflectionCoefs.size();
-			LOG_DEL; delete b;
+			LOG_DEL; delete [] b;
 			LOG_NEW; b = new double[M];
-			LOG_DEL; delete f;
+			LOG_DEL; delete [] f;
 			LOG_NEW; f = new double[M+1];
 		}
 		for (int i=0; i < M; i++)  b[i]=0.0 ;

@@ -55,20 +55,20 @@ limitation of liability, and disclaimer of warranty provisions.
 		reflectionCoefs = 0;
 	}
 	destructor {
-		LOG_DEL; delete b;
-		LOG_DEL; delete f;
-		LOG_DEL; delete reflectionCoefs;
+		LOG_DEL; delete [] b;
+		LOG_DEL; delete [] f;
+		LOG_DEL; delete [] reflectionCoefs;
 	}
 	setup {
 		// reallocate arrays only if size has changed,
 		// or this is the first run.
 		if (lastM != int(order)) {
 			lastM = int(order);
-			LOG_DEL; delete b;
+			LOG_DEL; delete [] b;
 			LOG_NEW; b = new double[lastM];
-			LOG_DEL; delete f;
+			LOG_DEL; delete [] f;
 			LOG_NEW; f = new double[lastM+1];
-			LOG_DEL; delete reflectionCoefs;
+			LOG_DEL; delete [] reflectionCoefs;
 			LOG_NEW; reflectionCoefs = new double[lastM];
 		}
 		for (int i=0; i < lastM; i++)  b[i]=0.0 ;

@@ -109,20 +109,22 @@ New York, 1989.
 		N = M = 0;
 	}
 	destructor {
-		LOG_DEL; delete f;
-		LOG_DEL; delete b;
-		LOG_DEL; delete aOrig;
-		LOG_DEL; delete aPrime;
+		LOG_DEL; delete [] f;
+		LOG_DEL; delete [] b;
+		LOG_DEL; delete [] aOrig;
+		LOG_DEL; delete [] aPrime;
 	}
 	setup {
 		if (N != int(numInputs)) {
-			LOG_DEL; delete f; LOG_DEL; delete b;
+			LOG_DEL; delete [] f;
+			LOG_DEL; delete [] b;
 			N = int(numInputs);
 			LOG_NEW; f = new double[N];
 			LOG_NEW; b = new double[N];
 		}
 		if (M != int(order)) {
-			LOG_DEL; delete aOrig; LOG_DEL; delete aPrime;
+			LOG_DEL; delete [] aOrig;
+			LOG_DEL; delete [] aPrime;
 			M = int(order);
 			LOG_NEW; aOrig = new double[M+1];
 			LOG_NEW; aPrime = new double[M+1];

@@ -82,7 +82,7 @@ Hence, much of the code here is quite similar to that in the FIR star.
 		taps = 0;
 	}
 	destructor {
-		LOG_DEL; delete taps;
+		LOG_DEL; delete [] taps;
 	}
 	setup {
 	    int d = decimation;
@@ -90,7 +90,7 @@ Hence, much of the code here is quite similar to that in the FIR star.
 	    int dP = decimationPhase;
 
 	    if (lastM != int(order)) {
-		LOG_DEL; delete taps;
+		LOG_DEL; delete [] taps;
 		lastM = int(order);
 		LOG_NEW; taps = new double[lastM];
 	    }
