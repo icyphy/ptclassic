@@ -72,7 +72,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	initCode {
 	    // definite prototypes for ptkMakeBarGraph and ptkSetBarGraph
-	    addInclude("\"ptkBarGraph.h\"");
+	    addModuleFromLibrary("ptkBarGraph", "src/ptklib", "ptk");
 
 	    addGlobal("int $starSymbol(invCount);");
 	    addGlobal("int $starSymbol(ids)[$val(tapSize)];");
@@ -151,7 +151,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			- $val(stepSizeLow));
 
 	    /* Make a slider for controlling the step size */
-	    makeScale("$starSymbol(.bar).low",	/* location of scale */
+	    makeScale("$starSymbol(.bar).low",		/* location of scale */
 		      "$starSymbol(scale)",		/* name of scale */
 		      "Step size",			/* identifier */
 		      position,				/* initial position */
@@ -172,84 +172,83 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	}
 	codeblock (procDefs) {
-	    static int
-	    $starSymbol(redraw)(dummy, interp, argc, argv)
-		ClientData dummy;		   /* Not used. */
-		Tcl_Interp *interp;		 /* Current interpreter. */
-		int argc;			   /* Number of arguments. */
-		char **argv;			/* Argument strings. */
-	    {
-		if(ptkSetBarGraph(interp, &w,
-			    "$starSymbol(.bar)",
-			    &$starSymbol(taps_ptr),
-			    1,
-			    $val(tapSize),
-			    $ref(fullScale),
-			    -$ref(fullScale),
-			    &$starSymbol(ids_ptr)) == 0)
-		    errorReport("Cannot redraw bar graph");
-		return TCL_OK;
-	    }
+static int
+$starSymbol(redraw)(dummy, interp, argc, argv)
+ClientData dummy;		/* Not used. */
+Tcl_Interp *interp;		/* Current interpreter. */
+int argc;			/* Number of arguments. */
+char **argv;			/* Argument strings. */
+{
+	if(ptkSetBarGraph(interp, &w,
+		    "$starSymbol(.bar)",
+		    &$starSymbol(taps_ptr),
+		    1,
+		    $val(tapSize),
+		    $ref(fullScale),
+		    -$ref(fullScale),
+		    &$starSymbol(ids_ptr)) == 0)
+	    errorReport("Cannot redraw bar graph");
+	return TCL_OK;
+}
 
-	    static int
-	    $starSymbol(reset)(dummy, interp, argc, argv)
-		ClientData dummy;		   /* Not used. */
-		Tcl_Interp *interp;		 /* Current interpreter. */
-		int argc;			   /* Number of arguments. */
-		char **argv;			/* Argument strings. */
-	    {
-		int i;
-		for (i=0; i<$val(tapSize); i++) {
-		    $ref(taps)[i] = $starSymbol(backup)[i];
-		}
-		$starSymbol(invCount) = 0;
-		return $starSymbol(redraw) (dummy, interp, argc, argv);
-	    }
+static int
+$starSymbol(reset)(dummy, interp, argc, argv)
+ClientData dummy;		/* Not used. */
+Tcl_Interp *interp;		/* Current interpreter. */
+int argc;			/* Number of arguments. */
+char **argv;			/* Argument strings. */
+{
+	int i;
+	for (i=0; i<$val(tapSize); i++) {
+	    $ref(taps)[i] = $starSymbol(backup)[i];
+	}
+	$starSymbol(invCount) = 0;
+	return $starSymbol(redraw) (dummy, interp, argc, argv);
+}
 
-	    static int
-	    $starSymbol(rescale)(dummy, interp, argc, argv)
-		ClientData dummy;		   /* Not used. */
-		Tcl_Interp *interp;		 /* Current interpreter. */
-		int argc;			   /* Number of arguments. */
-		char **argv;			/* Argument strings. */
-	    {
-		float temp;
-		if(sscanf(argv[1], "%4f", &temp) != 1) {
-		    Tcl_AppendResult(interp,
-			"Cannot reset full scale in bar graph",(char*) NULL);
-		    return TCL_ERROR;
-		}
-		$ref(fullScale) = $ref(fullScale) * temp;
-		/* Return new full scale value to tcl */
-		sprintf(interp->result, "%f -%f",
-		    $ref(fullScale), $ref(fullScale));
-		return TCL_OK;
-	    }
+static int
+$starSymbol(rescale)(dummy, interp, argc, argv)
+ClientData dummy;		/* Not used. */
+Tcl_Interp *interp;		/* Current interpreter. */
+int argc;			/* Number of arguments. */
+char **argv;			/* Argument strings. */
+{
+	float temp;
+	if (sscanf(argv[1], "%4f", &temp) != 1) {
+	    Tcl_AppendResult(interp,
+		"Cannot reset full scale in bar graph",(char*) NULL);
+	    return TCL_ERROR;
+	}
+	$ref(fullScale) = $ref(fullScale) * temp;
+	/* Return new full scale value to tcl */
+	sprintf(interp->result, "%f -%f", $ref(fullScale), $ref(fullScale));
+	return TCL_OK;
+}
 
-	    static int
-	    $starSymbol(setStep)(dummy, interp, argc, argv)
-		ClientData dummy;		   /* Not used. */
-		Tcl_Interp *interp;		 /* Current interpreter. */
-		int argc;			   /* Number of arguments. */
-		char **argv;			/* Argument strings. */
-	    {
-		int position;
-		static char buf[20];
+static int
+$starSymbol(setStep)(dummy, interp, argc, argv)
+ClientData dummy;		   /* Not used. */
+Tcl_Interp *interp;		 /* Current interpreter. */
+int argc;			   /* Number of arguments. */
+char **argv;			/* Argument strings. */
+{
+	int position;
+	static char buf[20];
 
-		if(sscanf(argv[1], "%d", &position) != 1) {
-		    errorReport("Invalid value for step size");
-		    return TCL_ERROR;
-		}
-		$ref(stepSize) = $val(stepSizeLow)
-		    + ($val(stepSizeHigh) - $val(stepSizeLow))
-		    * (position/100.0);
+	if(sscanf(argv[1], "%d", &position) != 1) {
+	    errorReport("Invalid value for step size");
+	    return TCL_ERROR;
+	}
+	$ref(stepSize) = $val(stepSizeLow)
+	    + ($val(stepSizeHigh) - $val(stepSizeLow))
+	    * (position/100.0);
 
-		/* set the step size display */
-		sprintf(buf, "%.4f", $ref(stepSize));
-		displaySliderValue("$starSymbol(.bar).low",
-				   "$starSymbol(scale)",
-				   buf);
-		return TCL_OK;
-	    }
+	/* set the step size display */
+	sprintf(buf, "%.4f", $ref(stepSize));
+	displaySliderValue("$starSymbol(.bar).low",
+			   "$starSymbol(scale)",
+			   buf);
+	return TCL_OK;
+}
 	}
 }
