@@ -102,6 +102,43 @@ char* dmTitle;
     return(TRUE);
 }
 
+/* 3/28/90
+Find a name starting at facet under cursor.  Name can have '.' between
+components and all components in heirarchy will be marked.
+*/
+/* Rewritten for Tcl/Tk by Alan Kamas, 1/94 */
+/* moved here 8/95, by Matt Tavis */
+int 
+RpcFindName(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    octObject facet;
+    char facetHandle[16]; 
+
+    ViInit("find-name");
+    ErrClear();
+
+    /* get current facet */
+    facet.objectId = spot->facet;
+    if (octGetById(&facet) != OCT_OK) {
+	PrintErr(octErrorString());
+    	ViDone();
+    }
+
+    ptkOctObj2Handle(&facet,facetHandle);
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+                   " \"Find Name\" ",
+                   " \"ptkSetFindName ", facetHandle, " %s \" ",
+                   " \"{{Name} {}}\" ",
+                   (char *)NULL) )
+
+    ViDone();
+
+}
+
 /* EditFormalParameters is still needed for the RunUniverse command.  -aok */
 /* 4/14/89 3/19/89
 Edit the formal parameters of a galaxy schematic facet.
