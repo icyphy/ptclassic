@@ -75,9 +75,9 @@ const char* PNScheduler::domain() const
 // Initialization.
 void PNScheduler::setup()
 {
-    if (galaxy() == NULL)
+    if (! galaxy())
     {
-	Error::abortRun(domain(), "Scheduler has no galaxy.");
+	Error::abortRun(domain(), "Process Networks Scheduler has no galaxy.");
 	return;
     }
    
@@ -96,8 +96,8 @@ void PNScheduler::setup()
 // Run (or continue) the simulation.
 int PNScheduler::run()
 {
-    if (!galaxy()) {
-	Error::abortRun("No galaxy to run");
+    if (! galaxy()) {
+	Error::abortRun("Process Networks Scheduler has no galaxy to run");
 	return FALSE;
     }
 
@@ -130,6 +130,8 @@ int PNScheduler::run()
 // Return number of full buffers encountered.
 int PNScheduler::increaseBuffers()
 {
+    if (! galaxy()) return 0;
+
     int fullBuffers = 0;
     PNGeodesic* smallest = NULL;
     
@@ -165,6 +167,8 @@ int PNScheduler::increaseBuffers()
 // Create threads (dataflow pocesses).
 void PNScheduler::createThreads()
 {
+    if (! galaxy()) return;
+
     GalStarIter nextStar(*galaxy());
     DataFlowStar* star;
 
@@ -191,6 +195,8 @@ void PNScheduler::deleteThreads()
 // Enable locking.
 void PNScheduler::enableLocking()
 {
+    if (! galaxy()) return;
+
     // Create new lock for this scheduler.
     LOG_NEW; monitor = new PNMonitor;
     LOG_NEW; start = new PNCondition(*monitor);
@@ -216,6 +222,8 @@ void PNScheduler::enableLocking()
 // Disable locking.
 void PNScheduler::disableLocking()
 {
+    if (! galaxy()) return;
+
     // Disable locking on all portholes.
     GalStarIter nextStar(*galaxy());
     Star* star;
