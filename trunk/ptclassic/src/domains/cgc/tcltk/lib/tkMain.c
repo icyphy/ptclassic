@@ -336,7 +336,7 @@ goCmd(dummy, interp, argc, argv)
 
 	setPollAction(runEventsOnTimer);
 
-	go();
+	go(argc, argv);
 
 	setPollAction(NULL);
 
