@@ -66,6 +66,7 @@
  *
  */
 #include "ansi.h"
+#include "region.h"
 /*
  * important top level defines
  *
