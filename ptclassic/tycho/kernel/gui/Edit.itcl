@@ -322,6 +322,14 @@ body ::tycho::Edit::focusin {} {
 }
 
 ###################################################################
+#### setInsert
+# Set the insert point to the given position.
+#
+body ::tycho::Edit::setInsert {position} {
+    $itk_component(text) setInsert $position
+}
+
+###################################################################
 #### getModified
 #
 body ::tycho::Edit::getModified {} {
