@@ -27,6 +27,14 @@ delete-objects	D	Deletes selected objects.
 drag-instance	M	T{
 Moves selected instance along with its properties and connections.
 T}
+move-instance	m	T{
+Replaces drag-instance on more recent versions of VEM.
+T}
+transform	t	T{
+Rotates an object 90 degrees.  Use the move-instance or drag-instance
+command to finalize the transform.  Use the "mx" or "my" modifier
+to reflect rather than rotate the object.
+T}
 open-window	o	Opens a new window.
 close-window	ctrl-D	Closes a window (doesn't save).
 save-window	S	Saves contents of window.
