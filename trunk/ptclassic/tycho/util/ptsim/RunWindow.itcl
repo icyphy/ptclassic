@@ -134,14 +134,11 @@ class ::tycho::RunWindow {
     # The array of control names, indexed by widget name
     protected variable widgetcontrols
 
+    # The simulation interface object.
+    protected variable _simulation
+
     # The name of the simulation
     protected variable _simulationName ""
-
-    ###################################################################
-    ####                     private variables                     ####
-
-    # The simulation interface object.
-    private variable _simulation
 }
 
 ######################################################################
