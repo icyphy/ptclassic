@@ -64,6 +64,9 @@ class ::tycho::EditCpp {
     # Insert a body template
     method bodyTemplate {}
 
+    # Generate class diagram consisting of all the .h files.
+    method classDAG {}
+
     # Comment out the selection using C++ style line-oriented comments.
     method commentSelection {}
 
@@ -124,6 +127,27 @@ public [getClassName]::AMethod()
 
     insertData $template
     markModified
+}
+
+#####################################################################
+#### classDAG
+# Generate a class diagram consisting of the classes from all
+# the .h files in the current directory
+#
+body ::tycho::EditCpp::classDAG {} {
+    if { [info command cppDAG] == {} } {
+        global TYCHO
+        source [file join $TYCHO kernel tychoMakeClassDAG.tcl]
+    }
+    set savedir [pwd]
+    cd [file dirname [filename]]
+    if [ catch {eval ::cppDAG [list [list "C++ Class Diagram of [file dirname [filename]]"]] class.dag [glob *.h]} errmsg] {
+        cd $savedir
+        global errorInfo
+        error "$errmsg $errorInfo"
+    }  
+    ::tycho::File::openContext class.dag
+    cd $savedir
 }
 
 #####################################################################
@@ -230,5 +254,12 @@ body ::tycho::EditCpp::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
                 -command "$this fileTemplate \
                 $itk_option(-hfiletemplate) \
                 \[$this getClassName\]"
+
+	$menubar separator specialsep3 special
+
+        $menubar command classdag special \
+		-label "Generate Class Diagram" -underline 1 \
+                -command "$this classDAG"
+
     }
 }
