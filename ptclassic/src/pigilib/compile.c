@@ -991,6 +991,9 @@ lsList cmdList;
 long userOptionWord;
 {
     octObject facet;
+    char* name;
+    char octHandle[16];
+
     ViInit("run-all-demos");
     ErrClear();
     facet.objectId = spot->facet;
@@ -1000,8 +1003,20 @@ long userOptionWord;
     }
     if (!IsPalFacet(&facet)) {
 	PrintErr("This command must be run in a palette");
+	ViDone();
     }
-    else RunAll(&facet);
+
+    name = BaseName(facet.contents.facet.cell);
+    ptkOctObj2Handle(&facet, octHandle);
+
+    if (Tcl_VarEval(ptkInterp, "ptkRunAllDemos ", name, " ", octHandle,
+      (char *) NULL) == TCL_ERROR) {
+	PrintErr("Run-all-demos control panel cannot be brought up");
+	ViDone();
+    }
+    RunAll(&facet);
+    TCL_CATCH_ERR(Tcl_VarEval(ptkInterp, "ptkRunAllDemosDel ", name,
+      " $ptkControlPanel ", octHandle, (char *) NULL));
     FreeOctMembers(&facet);
     ViDone();
 }
@@ -1027,27 +1042,21 @@ octObject *facetPtr;
 	    /* nothing */;
 	}
 	else if (IsUnivFacet(&univFacet)) {
-	    /* lastFacet is a global variable defined in exec.c,
-	     * storing the facet currently being run.  It is used
-	     * by the highlighting/marking routines. 
-	     */
-	    extern octObject lastFacet;
 	    char * name = BaseName(univFacet.contents.facet.cell);
 	    char msg[128];
-	    int n;
+	    char octHandle[16];
 
-	    lastFacet = univFacet;
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
 	    PrintDebug(msg);
-	    if (GetIterateProp(&univFacet,&n) < 0) {
-		n = 10;  /* default number of iterations */
-            }
-	    if (!CompileFacet(&univFacet) || !KcRun(n)) {
-		octFreeGenerator(&genInst);
-		sprintf (msg, "Execution of '%s' failed", name);
-		PrintErr(msg);
-		return FALSE;
-            }
+	    ptkOctObj2Handle(&univFacet, octHandle);
+	    /* ptkCompileRun is very similar to ptkGo, but assuming controlled
+	       by the run-all-demos panel instead of ordinary run control
+	       panel. */
+	    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "ptkCompileRun ", name,
+	      " ", octHandle, (char *) NULL));
+	    /* delete the universe after run finishes. */
+	    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "ptkDelLite ", name,
+	      " ", octHandle, (char *) NULL));
 	}
 	else if (IsPalFacet(&univFacet)) {
 	    RunAll(&univFacet);
