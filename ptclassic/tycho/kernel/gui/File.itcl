@@ -111,6 +111,7 @@ proc ::tycho::expandPath { path } {
         set savedir [pwd]
         cd [file dirname $path]
         set path [format "%s/%s" [pwd] [file tail $path]]
+        cd $savedir
     }
     return $path
 }
