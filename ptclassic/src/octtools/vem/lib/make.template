@@ -1,0 +1,118 @@
+# Version Identification:
+# $Id$
+# Copyright (c) 1990-1993 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# Makefile for Ptolemy   # Makefile for the VEM library
+#
+# Date of creation:  11/27/93
+#
+# If this files name is make.template and there is no makefile in
+# this directory, do
+#	cp make.template makefile
+#	make depend
+# This will add the dependencies to the makefile.
+#
+# root of source tree
+ROOT	      = ../../../..
+# VPATH points to the real source directory
+VPATH         = $(ROOT)/src/vem/vem/lib
+
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
+
+# Version of VEM (also usually overridden)
+VERSION = 8-2
+
+# Location of applications defaults file (usually overridden above)
+XAPP	= /usr/X11/lib/app-defaults
+
+# Primary command file
+PCF	= vem.bindings
+
+# Bitmap files
+BMS	= $(OCTTOOLS)/lib/vem/checkoff.bm \
+	  $(OCTTOOLS)/lib/vem/checkon.bm \
+	  $(OCTTOOLS)/lib/vem/checkoffhi.bm \
+	  $(OCTTOOLS)/lib/vem/checkonhi.bm \
+	  $(OCTTOOLS)/lib/vem/folder.bm \
+	  $(OCTTOOLS)/lib/vem/newcell.bm \
+	  $(OCTTOOLS)/lib/vem/other.bm \
+	  $(OCTTOOLS)/lib/vem/physical.bm \
+	  $(OCTTOOLS)/lib/vem/schematic.bm \
+	  $(OCTTOOLS)/lib/vem/symbolic.bm
+
+# Applications defaults
+ADS	= Vem
+
+#-------------------------------------------------------------------------
+all:
+install:  makefile $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) $(OCTTOOLS)/lib/$(ADS)
+
+$(OCTTOOLS)/lib/vem.bindings.$(VERSION):	$(OCTTOOLS)/lib/vem vem.bindings
+	cp vem.bindings $(OCTTOOLS)/lib/vem/vem.bindings.$(VERSION)
+
+$(OCTTOOLS)/lib/$(ADS): $(ADS)
+	cp $(ADS) $(OCTTOOLS)/lib/$(ADS)
+
+$(XAPP)/$(ADS):	$(ADS)
+	-cp $(ADS) $(XAPP)/$(ADS)
+
+$(OCTTOOLS)/lib/vem/checkoff.bm:	$(OCTTOOLS)/lib/vem checkoff.bm
+	cp checkoff.bm $(OCTTOOLS)/lib/vem/checkoff.bm
+
+$(OCTTOOLS)/lib/vem/checkon.bm:	$(OCTTOOLS)/lib/vem checkon.bm
+	cp checkon.bm $(OCTTOOLS)/lib/vem/checkon.bm
+
+$(OCTTOOLS)/lib/vem/checkoffhi.bm:	$(OCTTOOLS)/lib/vem checkoffhi.bm
+	cp checkoffhi.bm $(OCTTOOLS)/lib/vem/checkoffhi.bm
+
+$(OCTTOOLS)/lib/vem/checkonhi.bm:	$(OCTTOOLS)/lib/vem checkonhi.bm
+	cp checkonhi.bm $(OCTTOOLS)/lib/vem/checkonhi.bm
+
+$(OCTTOOLS)/lib/vem/folder.bm:	$(OCTTOOLS)/lib/vem folder.bm
+	cp folder.bm $(OCTTOOLS)/lib/vem/folder.bm
+
+$(OCTTOOLS)/lib/vem/newcell.bm:	$(OCTTOOLS)/lib/vem newcell.bm
+	cp newcell.bm $(OCTTOOLS)/lib/vem/newcell.bm
+
+$(OCTTOOLS)/lib/vem/other.bm:	$(OCTTOOLS)/lib/vem other.bm
+	cp other.bm $(OCTTOOLS)/lib/vem/other.bm
+
+$(OCTTOOLS)/lib/vem/physical.bm:	$(OCTTOOLS)/lib/vem physical.bm
+	cp physical.bm $(OCTTOOLS)/lib/vem/physical.bm
+
+$(OCTTOOLS)/lib/vem/schematic.bm:	$(OCTTOOLS)/lib/vem schematic.bm
+	cp schematic.bm $(OCTTOOLS)/lib/vem/schematic.bm
+
+$(OCTTOOLS)/lib/vem/symbolic.bm:	$(OCTTOOLS)/lib/vem symbolic.bm
+	cp symbolic.bm $(OCTTOOLS)/lib/vem/symbolic.bm
+
+$(OCTTOOLS)/lib/vem:;	-mkdir $(OCTTOOLS)/lib/vem
+
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+# Dont add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
