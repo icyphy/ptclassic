@@ -40,7 +40,7 @@
 # two) and its lattice-generating matrix. The format
 # of this matrix is a list of lists -- for example, the
 # default lattice generator, which creates a simple two-dimensional
-# square grid, has the value *{{1 0} {0 1}}*.
+# square lattice, has the value *{{1 0} {0 1}}*.
 #
 # To access the lattice, create a _projection_ entity that
 # projects onto two dimensions of the lattice. This projection
@@ -56,10 +56,10 @@ class ::tycho::Lattice {
     #################################################################
     ####                        options                          ####
 
-    # The dimensionality of this grid
+    # The dimensionality of this lattice
     public variable dimensionality 2
 
-    # The lattice generating matrix of this grid
+    # The lattice generating matrix of this lattice
     public variable lattice {{1 0} {0 1}}
 
     #################################################################
@@ -68,32 +68,23 @@ class ::tycho::Lattice {
     # Get the raw display coordinates of a projection
     public method getCoordinates {proj}
 
-    # Get the pixel display dimensions of a projection.
-    public method getDisplay {proj}
-
-    # Get the viewed lattice extent of a projection
-    public method getExtent {proj}
-
     # Get the lattice of a projection
     public method getLattice {proj}
 
     # Get the coordinates of the lattice points
     public method getLatticePoints {proj}
 
-    # Read the pixel display dimensions of a projection
-    public method getPixels {proj}
-
     # Make a projection in two dimensions
     public method projection {name dimensions args}
 
+    # Get an attribute of an projection
+    method projectioncget {projection args}
+
+    # Configure an projection
+    method projectionconfigure {projection args}
+
     # Delete a projection
     public method projectiondelete {name}
-
-    # Set the viewed lattice extent of a projection
-    public method setExtent {proj xlen ylen}
-
-    # Set the pixel display dimensions of a projection
-    public method setPixels {proj xpix ypix}
 
     #################################################################
     ####                  protected methods                      ####
@@ -134,38 +125,41 @@ body ::tycho::Lattice::constructor {args} {
     # default attributes
     defineEntityType projection \
 	    -valued 1 \
-	    -pixels {256 256} \
+	    -pixels {256 -256} \
 	    -extent {2 2}
 }
 
 ########################################################################
 #### getCoordinates
 #
-# Get the raw display coordinates of a projection.
+# Get the coordinates of the points of a projection.
 #
 body ::tycho::Lattice::getCoordinates {proj} {
-    _verify projection $proj
-    ...
-}
+    set L [getLattice $proj]
+    set E [projectioncget $proj -extent]
 
-########################################################################
-#### getDisplay
-#
-# Get the pixel display dimensions of a projection.
-#
-body ::tycho::Lattice::getDisplay {proj} {
-    _verify projection $proj
-    _cget projection $proj -pixels
-}
+    set xmax [expr [lindex $E 0] * \
+            ([lindex [lindex $L 0] 0] + [lindex [lindex $L 0] 1])]
+    set ymax [expr [lindex $E 1] * \
+            ([lindex [lindex $L 1] 0] + [lindex [lindex $L 1] 1])]
+    set max [::tycho::max $xmax $ymax]
 
-########################################################################
-#### getExtent
-#
-# Get the extent of a projection.
-#
-body ::tycho::Lattice::getExtent {proj} {
-    _verify projection $proj
-    _cget projection $proj -extent
+    set disp [projectioncget $proj -pixels]
+    set xfactor [expr [lindex $disp 0] / $max]
+    set yfactor [expr [lindex $disp 1] / $max]
+
+    # FIXME: make attribute
+    set xoffset 32
+    set yoffset 288
+
+    set result {}
+    set points [getLatticePoints $proj]
+    foreach {i j x y} $points {
+        lappend result $i $j \
+                [expr $xoffset + $x * $xfactor] \
+                [expr $yoffset + $y * $yfactor]
+    }
+    return $result
 }
 
 ########################################################################
@@ -195,42 +189,20 @@ body ::tycho::Lattice::getLattice {proj} {
 }
 
 ########################################################################
-#### getLatticeCoords
-#
-# Get the coordinates of the points of a projection.
-#
-body ::tycho::Lattice::getCoordinates {proj} {
-    set L [getLattice $proj]
-    set E [getExtent $proj]
-
-    set xmax [expr [lindex $E 0] * \
-            ([lindex [lindex $L 0] 0] + [lindex [lindex $L 0] 1])]
-    set ymax [expr [lindex $E 1] * \
-            ([lindex [lindex $L 1] 0] + [lindex [lindex $L 1] 1])]
-
-    set disp [getDisplay $proj]
-    set xfactor [expr [lindex $disp 0] / $xmax]
-    set yfactor [expr [lindex $disp 1] / $ymax]
-
-    set result {}
-    set points [getLatticePoints $proj]
-    foreach {x y} $points {
-        lappend result [expr $x * $xfactor] [expr $y * $yfactor]
-    }
-    return $result
-}
-
-########################################################################
 #### getLatticePoints
 #
-# Get the points of a projection.
+# Get the points of a projection. The result list is a
+# flat list of elements (_i_, _j_, _x_, _y_), where _i_
+# and _j_ are the lattice coordinates and _x_ and _y_
+# are the coordinates of the point relative to the base
+# lattice.
 #
 body ::tycho::Lattice::getLatticePoints {proj} {
     _verify projection $proj
 
     set P [_get projection $proj]
     set L [getLattice $proj]
-    set ext [getExtent $proj]
+    set ext [projectioncget $proj -extent]
 
     set result {}
 
@@ -249,14 +221,14 @@ body ::tycho::Lattice::getLatticePoints {proj} {
         set x $x0
         set y $y0
         while { $j <= $n } {
-            lappend result $x $y
+            lappend result $j $i $x $y
             incr j
-            incr x $u0
-            incr y $v0
+            set x [expr $x + $u0]
+            set y [expr $y + $v0]
         }
         incr i
-        incr x0 $u1
-        incr y0 $v1
+        set x0 [expr $x0 + $u1]
+        set y0 [expr $y0 + $v1]
     }
     return $result
 }
@@ -273,10 +245,10 @@ body ::tycho::Lattice::getLatticePoints {proj} {
 # <li><b>-pixels</b>: The size of the display in pixels. This
 # is a two-list. The default is a 256x256-pixel display.
 #
-# <li><b>-extent</b>: The extent of the grid in this projection.
-# This is the amount of the grid that can be viewed, based on
+# <li><b>-extent</b>: The extent of the lattice in this projection.
+# This is the amount of the lattice that can be viewed, based on
 # the underlying dimension implied by the lattice-generating
-# matrix. The default is two unit grid elements in each
+# matrix. The default is two unit lattice elements in each
 # direction.
 # </ul>
 #
@@ -300,6 +272,26 @@ body ::tycho::Lattice::projection {name dimensions args} {
 }
 
 ########################################################################
+#### projectioncget
+#
+# Get an attribute of an projection.
+#
+body ::tycho::Lattice::projectioncget {proj attribute} {
+    _verify projection $proj
+    _cget projection $proj $attribute
+}
+
+########################################################################
+#### projectionconfigure
+#
+# Configure an projection and return the inverse command.
+#
+body ::tycho::Lattice::projectionconfigure {proj args} {
+    _verify projection $proj
+    _configure projection $proj $args
+}
+
+########################################################################
 #### projectiondelete
 #
 # Delete a projection.
@@ -307,28 +299,4 @@ body ::tycho::Lattice::projection {name dimensions args} {
 body ::tycho::Lattice::projectiondelete {name} {
     _verify projection $name
     _delete projection $name
-}
-
-########################################################################
-#### setPixels
-#
-# Set the pixel display dimensions of a projection. An error
-# is flagged if the number of arguments does not match the
-# dimensionality of the projection.
-#
-body ::tycho::Lattice::setPixels {proj xpix ypix} {
-    _verify projection $proj
-    _configure projection $proj -pixels [list $xpix $ypix]
-}
-
-########################################################################
-#### setExtent
-#
-# Set the extent of a projection. An error
-# is flagged if the number of arguments does not match the
-# dimensionality of the projection.
-#
-body ::tycho::Lattice::setExtent {proj xext yext} {
-    _verify projection $proj
-    _configure projection $proj -extent [list $xext $yext]
 }
