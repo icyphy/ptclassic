@@ -67,8 +67,8 @@ DEDynMap.pl \
 DEDynMapGr.pl \
 DEDynMerge.pl \
 DEDynForkBase.pl \
-DEDynForkInt.pl
-
+DEDynForkInt.pl \
+DEDynFork.pl
 
 # The .cc files
 SRCS =		$(PL_SRCS:.pl=.cc)
