@@ -1,6 +1,13 @@
-// SCCS version identification
-// $Id$
-// Joseph T. Buck
+/*******************************************************************
+SCCS version identification
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+ Programmer: Joseph T. Buck
+
+ Methods for class Universe and Runnable
+*******************************************************************/
 //
 // Print out the universe
 

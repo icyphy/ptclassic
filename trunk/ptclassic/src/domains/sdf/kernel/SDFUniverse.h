@@ -4,10 +4,14 @@
 #include "Universe.h"
 #include "SDFScheduler.h"
 
-// SCCS version identification
-// $Id$
 
 /*******************************************************************
+SCCS version identification
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
 
 	An SDF Universe is a Star with a pointer to a component Galaxy,
 	and an SDF Scheduler to fire the blocks in the Galaxy.

@@ -1,6 +1,17 @@
-// A device to produce the correct portholes, wormholes, event horizons,
-// etc, for the <T> domain
-// $Id$ (<T>Domain.cc)
+/**********************************************************************
+Version identification:
+$Id$  (<T>Domain.cc)
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer:  J. T. Buck
+ Date of creation: 7/2/90
+
+ A device to produce the correct portholes, wormholes, event horizons,
+ etc, for the <T> domain so the interpreter can generate them dynamically.
+
+***********************************************************************/
 
 #include "Domain.h"
 #include "<T>Scheduler.h"
