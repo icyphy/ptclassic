@@ -60,6 +60,7 @@ the OverflowHandler will be called.
 		desc {
 Initial value output by the ramp.
 During simulation, this parameter holds the current value output by the ramp.
+The precision of this state is the precision of the accumulation.
 		}
 		attributes { A_SETTABLE|A_NONCONSTANT }
 	}
@@ -75,9 +76,10 @@ During simulation, this parameter holds the current value output by the ramp.
 		   Error::abortRun( *this, "Invalid OverflowHandler" );
         }
 	go {
+		// operator Fix() when applied to a FixState performs a cast
 		t = Fix(value);
                 output%0 << t;
-                t += step;
+                t += Fix(step);
 		checkOverflow(t);
                 value = t;
 	}
