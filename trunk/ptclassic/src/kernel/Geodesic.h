@@ -65,6 +65,9 @@ public:
 		numInitialParticles = sz = 0;
 	}
 
+	// class identification
+	int isA(const char*) const;
+
 	// Destructor -- virtual since we have subclasses
 	virtual ~Geodesic();
 
@@ -90,22 +93,36 @@ public:
 	// Return the number of Particles on the Geodesic
 	int size() const {return sz;}
 
+	// return the number of initial particles
+	int numInit() const {return numInitialParticles;}
+
 	// Information printing
 	StringList printVerbose() const;
 
+	// These methods are available for schedulers such as the
+	// SDF scheduler to simulate a run and keep track of the
+	// number of particles on the geodesic.
+	// incCount increases the count, decCount decreases it,
+	// they are virtual to allow additional bookkeeping
+	// in derived classes.
+
+	virtual void incCount(int);
+	virtual void decCount(int);
+
         // A connection may require some initial particles.
-        // Note that the SDFScheduler manipulates this number directly, but
-        // guarantees that when it is done, the value will
-        // be the same as when it started, or the run will have been aborted
-        // due to a sample-rate inconsistency.
+	// This member will become protected soon; use numInit() to
+	// read it.
 	int numInitialParticles;
 
 protected:
 	void portHoleConnect();
         PortHole *originatingPort;
         PortHole *destinationPort;
+
 private:
+	// Where the particles live
 	ParticleStack pstack;
+	// number of particles
 	int sz;
 };
 #endif
