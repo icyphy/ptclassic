@@ -77,7 +77,7 @@ the window.
 		value.setAttributes(A_NONSETTABLE|A_CONSTANT);
 	}
 
-	ccinclude { <string.h>, <math.h>, "cephes.h", "PTDSPWindow.h" }
+	ccinclude { <string.h>, <math.h>, "PTDSPWindow.h" }
 
 	setup {
 		const char* wn = name;
