@@ -52,6 +52,7 @@ EXTRA_SRCS =	\
 	FileBrowserHelp.html \
 	FileHelp.html \
 	FontManagerHelp.html \
+	HTMLHelp.html \
 	IndexBrowserHelp.html \
 	ListBrowserHelp.html \
 	contents.html
