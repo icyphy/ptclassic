@@ -112,7 +112,7 @@ ensemble ::tycho::profile {
 # profile.
 #
 # This model has the following types:
-#
+# <dl>
 # <dt><b>preference</b> _id_:
 # <dd>
 # A style preference. The attributes of the item are
