@@ -43,16 +43,12 @@ static const char file_id[] = "BDFCluster.cc";
 #endif
 
 #include "BDFCluster.h"
+#include "BDFClustPort.h"
 #include "GalIter.h"
 #include "Geodesic.h"
-#include "Plasma.h"
 #include "Target.h"
 #include "streamCompat.h"
 #include "Error.h"
-
-// common tests on BDFRelations
-inline int TorF(BDFRelation r) { return r == BDF_TRUE || r == BDF_FALSE;}
-inline int SorC(BDFRelation r) { return r == BDF_SAME || r == BDF_COMPLEMENT;}
 
 // A BDFClusterGal is a Galaxy, built from another galaxy.
 
@@ -104,9 +100,14 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 		if (a) {
 			// find the ClustPort that corresponds to a, and
 			// set me to be associated with that.
+			// because of the special properties of BDF_SAME
+			// and BDF_COMPLEMENT relations, we do not need
+			// to do redundant settings -- the relations are
+			// transitive -- hence the test.
 			BDFClustPort* assoc = ptable[a->index()];
 			int r = realP.assocRelation();
-			curCP->setRelation(r, assoc);
+			if (!SorC(r) || r != curCP->relType())
+				curCP->setRelation((BDFRelation)r, assoc);
 
 			// flag the associated port if it controls
 			// the dataflow of another port
@@ -121,6 +122,9 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 			curCP->connect(*in,delay);
 			curCP->initGeo();
 		}
+	}
+	if (logstrm) {
+		*logstrm << "Initial universe:\n" << *this << "\n";
 	}
 	LOG_DEL; delete ptable;
 }
@@ -148,13 +152,27 @@ int BDFClusterGal::clusterCore(int& urate) {
 	return change;
 }
 
+static int pseudNum = 0;
+
+// fn to make names for pseudoports
+static const char* pseudoName() {
+	StringList name = "_dup_";
+	pseudNum++;
+	name += pseudNum;
+	return hashstring(name);
+}
+
 // Top level of clustering algorithm.  Here's the outline.
 // 1. Do a clusterCore pass.
 // 2. If not reduced to uniform rate, mark feedforward delays as ignorable
 //    and do another clusterCore pass.
 // 3. Do a pass that merges parallel loops with the same rate.
 
+
+
 int BDFClusterGal::cluster() {
+	// this next one is not re-entrant, sorry
+	pseudNum = 0;
 	int urate;
 	int change = clusterCore(urate);
 
@@ -402,9 +420,6 @@ int BDFClusterGal :: markFeedForwardDelayArcs() {
 // This is the loop pass.  It loops any cluster for which loopFactor
 // returns a value greater than 1.
 
-// This version only does non-integral rate conversions (e.g. 2->3 or
-// 3->2) when there are only two clusters.
-
 int BDFClusterGal::loopPass() {
 	if (logstrm)
 		*logstrm << "Starting loop pass\n";
@@ -416,87 +431,221 @@ int BDFClusterGal::loopPass() {
 	// changes if no delays between the clusters and rate
 	// mismatch exists.
 	// We can ignore feedforward delays.
-	if (numberClusts() == 2) {
-		BDFCluster* c1 = nextClust++;
-		BDFCluster* c2 = nextClust++;
-		// check to see that there are no delays on arcs,
-		// and that a sample rate change is needed.
-		BDFClustPortIter nextPort(*c1);
-		BDFClustPort* p;
-		while ((p = nextPort++) != 0) {
-			if (p->fbDelay() ||
-			    p->numIO() == p->far()->numIO()) return FALSE;
-		}
-		// ok, loop both clusters so that their
-		// repetitions values become 1.
-		int r1 = c1->reps();
-		int r2 = c2->reps();
-		c1->loopBy(r1);
-		c2->loopBy(r2);
-		if (logstrm)
-			*logstrm << "looping " << c1->readName() << " by "
-				<< r1 << " and " << c2->readName() << " by "
-					<< r2 << "\n";
+	if (numberClusts() == 2 && nonIntegralRateChange())
 		return TRUE;
-	}
 
-	// "normal" case: only loop to do integral rate conversions.
+	// "normal" case: only loop to do integral rate conversions,
+	// or insertion of an "if" clause.
 	BDFCluster *c;
 	while ((c = nextClust++) != 0) {
-		int fac = c->loopFactor();
-		if (fac > 1) {
-			c->loopBy(fac);
+		BDFRelation rel;
+		int fac;
+		BDFClustPort* cond = c->tryIfClause(rel,logstrm);
+		if (cond) changes = TRUE;
+		else if ((fac = c->loopFactor()) > 1) {
+				c->loopBy(fac);
 			if (logstrm)
 				*logstrm << "looping " << c->readName()
 					<< " by " << fac <<"\n";
 			changes = TRUE;
 		}
 	}
-	if (logstrm && !changes)
-		*logstrm << "Loop pass made no changes\n";
+	if (logstrm) {
+		if (changes)
+			*logstrm << "After loop pass:\n" << *this;
+		else *logstrm << "Loop pass made no changes\n";
+	}
 	return changes;
 }
 
-// get the control port.  We don\'t care here about "same data" relations.
-static BDFClustPort* controlPort(BDFClustPort* p,BDFRelation& relation) {
-	BDFClustPort* a = p->assoc();
-	relation = p->relType();
-	if (!TorF(relation)) {
-		relation = BDF_NONE;
-		a = 0;
+BDFClustPort* BDFCluster::tryIfClause(BDFRelation& rel,ostream* logstrm) {
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort *p;
+	BDFClustPort *cond = 0;
+	while ((p = nextPort++) != 0) {
+		BDFClustPort* pFar = p->far();
+		if (p->numTokens() > 0 || p->numIO() != pFar->numIO() ||
+		    condMatch(p,pFar))
+			return 0;
+		// we are looking for: my end unconditional, far end is
+		// conditional.
+		if (!TorF(p->relType()) && TorF(pFar->relType())) {
+			// conditional: if a previous one was also,
+			// this must be the same condition.
+			BDFClustPort* ncond = pFar->assoc();
+			BDFRelation nrel = pFar->relType();
+			if (cond) {
+				BDFRelation r = sameSignal(cond,ncond);
+				if (r == BDF_NONE ||
+				    (r == BDF_SAME && nrel != rel) ||
+				    (r == BDF_COMPLEMENT && nrel == rel)) {
+					if (logstrm)
+						*logstrm << readName()
+				    << ": condition mismatch, cannot ifIze\n";
+					return 0;
+				}
+			}
+			else {
+				cond = ncond;
+				rel = nrel;
+			}
+		}
 	}
+	if (cond) {
+		if (logstrm)
+			*logstrm << readName() <<
+				" conditional: execute if " <<
+				cond->readName() << " is " <<
+				(rel == BDF_TRUE ? "true\n" : "false\n");
+		// at this point, create the loop
+		ifIze(cond,rel,logstrm);
+	}
+	return cond;
+}
+
+void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
+	if (pCond) {
+		Error::abortRun(*this," already conditional!");
+		return;
+	}
+
+// see if this condition is available already in this cluster.
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort *p;
+	BDFRelation r;
+	while ((p = nextPort++) != 0 && (r = sameSignal(cond,p)) == BDF_NONE)
+		;
+	if (!p) {
+		// condition is not available here -- create a new connection
+		if (logstrm)
+			*logstrm << "Creating a boolean arc to pass "
+				 << cond->readName() << " to " << readName()
+				 << "\n";
+		cond = connectBoolean(cond,rel);
+		r = BDF_SAME;
+	}
+	pCond = cond;
+	if (r == BDF_COMPLEMENT) rel = reverse(rel);
+	pType = (rel == BDF_TRUE ? DO_IFTRUE : DO_IFFALSE);
+	// now adjust conditions on my ports:
+	// unconditionals get a condition
+	// matching condition unchanged
+	// complementary conditions get zeroed
+	nextPort.reset();
+	while ((p = nextPort++) != 0) {
+		if (p == cond) continue;
+
+		// FIXME: should deal correctly with already-conditional
+		// ports.
+
+		p->setRelation(rel,cond);
+	}
+	if (logstrm)
+		*logstrm << "After ifIzing: " << *this << "\n";
+}
+
+// this creates a duplicate of a port.  For bag ports, we recursively
+// go all the way down to the "real thing".
+static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
+	BDFClustPort* in = cond->inPtr();
+	BDFClustPort* a;
+	BDFCluster* cpar = cond->parentClust();
+	if (!in) {
+		LOG_NEW; a = new BDFClustPort(*cond,cpar);
+		a->setPort(name,cpar,INT);
+	}
+	else {
+		BDFClustPort* d = createDupPort(in,name);
+		LOG_NEW; a = new BDFClustPort(*d,cpar,1);
+	}
+	a->setRelation(BDF_SAME,cond);
+	cpar->addPort(*a);
 	return a;
 }
 
-// determine whether two signals have a fixed relation or not.  It
-// returns one of BDF_SAME, BDF_COMPLEMENT, or BDF_NONE.
+// this function forms a connection that provides "cond" to the current
+// cluster.  If cond is an input, we try to find a corresponding output.
+// if there is not we just use it as is.
 
-static BDFRelation sameSignal(BDFClustPort* a1, BDFClustPort* a2)
-{
-	BDFRelation rel;
-	BDFClustPortRelIter iter(*a1);
+BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
+					  BDFRelation& rel) {
+	if (cond->isItInput()) {
+		BDFClustPortRelIter iter(*cond);
+		BDFClustPort* acond;
+		BDFRelation r2;
+		while ((acond = iter.next(r2)) != 0) {
+			if (acond->isItOutput()) {
+				cond = acond;
+				if (r2 == BDF_COMPLEMENT)
+					rel = reverse(rel);
+			}
+		}
+	}
+	BDFCluster* cpar = cond->parentClust();
+	// create a new port in the far cluster
+	BDFClustPort *a = createDupPort(cond,pseudoName());
+	// create it in the near cluster -- name matches original
+	// condition
+	LOG_NEW; BDFClustPort *b = new BDFClustPort(*cond,this);
+	b->setPort(cond->readName(),this,INT);
+	addPort(*b);
+	b->setRelation(BDF_NONE);
+	b->connect(*a,0);
+	b->initGeo();
+	return b;
+}
+
+// find the gcd of two integers.  Should be in a more-readily-accessible
+// place.  Uses Euclid algorithm.
+static int gcd(int a, int b) {
+	if (a < b) {
+		int t = a; a = b; b = t;
+	}
+	// now b is less.  Check for zero
+	if (b <= 0) return 0;
+	while (1) {
+		int rem = a % b;
+		if (rem == 0) return b;
+		a = b;
+		b = rem;
+	}
+}
+
+
+// This version only does non-integral rate conversions (e.g. 2->3 or
+// 3->2) when there are only two clusters.
+
+int BDFClusterGal::nonIntegralRateChange() {
+	BDFClusterGalIter nextClust(*this);
+
+	// special handling for two clusters: do arbitrary rate
+	// changes if no delays between the clusters and rate
+	// mismatch exists.
+	// We can ignore feedforward delays.
+	BDFCluster* c1 = nextClust++;
+	BDFCluster* c2 = nextClust++;
+	// check to see that there are no delays on arcs,
+	// and that a sample rate change is needed.
+	BDFClustPortIter nextPort(*c1);
 	BDFClustPort* p;
-	while ((p = iter.next(rel)) != 0) {
-		if (p == a2) return rel;
+	int n1, n2;
+	while ((p = nextPort++) != 0) {
+		n1 = p->numIO();
+		n2 = p->far()->numIO();
+		if (p->fbDelay() || n1 == n2 || !condMatch(p,p->far()))
+			return FALSE;
 	}
-	return BDF_NONE;
+	// ok, loop both clusters so that they agree.
+	int g = gcd(n1,n2);
+	c1->loopBy(n2/g);
+	c2->loopBy(n1/g);
+	if (logstrm)
+		*logstrm << "looping " << c1->readName() << " by "
+			 << n2/g << " and " << c2->readName() << " by "
+			 << n1/g << "\n";
+	return TRUE;
 }
 
-// determine whether two ports have matching conditions
-static int condMatch(BDFClustPort* p1, BDFClustPort *p2) {
-	BDFRelation r1, r2;
-
-	BDFClustPort* a1 = controlPort(p1,r1);
-	BDFClustPort* a2 = controlPort(p2,r2);
-	if (r1 == r2) {
-		return (r1 == BDF_NONE) || sameSignal(a1,a2) == BDF_SAME;
-	}
-	else if (r1 == BDF_NONE || r2 == BDF_NONE) return FALSE;
-	else {
-		// opposite conditions -- but two complements cancel out
-		return sameSignal(a1,a2) == BDF_COMPLEMENT;
-	}
-}
 
 // This function returns TRUE if a cluster matches the rate of all its
 // neighbors.
@@ -536,30 +685,6 @@ int BDFCluster::loopFactor() {
 		}
 	}
 	return retval;
-}
-
-static const char* labels[] = { "<ifFalse:", "<ifTrue:", "<Same:", "<Compl:" };
-
-// fn to print a single port of a cluster
-static ostream& operator<<(ostream& o, BDFClustPort& p) {
-	o << p.parent()->readName() << "." << p.readName();
-
-	// print BDF control information
-	if (p.isControl()) o << "[C]";
-	BDFRelation r = p.relType();
-	BDFClustPort* a = p.assoc();
-	if (a && r != BDF_NONE) o << labels[r] << a->readName() << ">";
-
-	// print connectivity
-	BDFClustPort* pFar = p.far();
-	if (p.isItOutput())
-		o << "=>";
-	else
-		o << "<=";
-	if (!pFar) o << "0";
-	else o << pFar->parent()->readName() << "." << pFar->readName();
-	if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
-	return o;
 }
 
 // fn to print ports of a cluster.
@@ -616,18 +741,20 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 // Exception: if both loop factors are the same, we "unloop" and
 // "reloop".
 
-	// unloop check
-	if (c1->loop() == c2->loop() && c1->loop() > 1) {
-		fac = c1->unloop();
-		c2->unloop();
-	}
+	
+// unloop check: put this back right, must handle conditions as well.
+//	if (c1->loop() == c2->loop() && c1->loop() > 1) {
+//		fac = c1->unloop();
+//		c2->unloop();
+//	}
 
 	if (logstrm)
 		*logstrm << "merging " << c1->readName() << " and " <<
 			c2->readName() << "\n";
 
-	BDFClusterBag* c1Bag = (c1->loop() == 1) ? c1->asBag() : 0;
-	BDFClusterBag* c2Bag = (c2->loop() == 1) ? c2->asBag() : 0;
+	BDFClusterBag* c1Bag = c1->looped() ? 0 : c1->asBag();
+	BDFClusterBag* c2Bag = c2->looped() ? 0 : c2->asBag();
+
 	if (c1Bag) {
 		if (c2Bag) c1Bag->merge(c2Bag,this); // merge two bags
 		else c1Bag->absorb(c2,this);   // put c2 into the c1 bag
@@ -647,10 +774,10 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 	if (logstrm)
 		*logstrm << "result is " << *c1Bag << "\n\n";
 
-	if (fac > 1) {
-		// reloop after merge
-		c1Bag->loopBy(fac);
-	}
+//	if (fac > 1) {
+//		// reloop after merge
+//		c1Bag->loopBy(fac);
+//	}
 	return c1Bag;
 }
 
@@ -753,20 +880,6 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	adjustAssociations();
 }
 
-// this function finds an external port in the cluster that, if the inPtr
-// chains are followed, leads to the same AtomCluster port as does the
-// argument.  If no such port is found, zero is returned.
-
-static BDFClustPort* findPort(BDFCluster* cl, BDFClustPort* p) {
-	p = p->innermost();
-	BDFClustPortIter nextPort(*cl);
-	BDFClustPort* q;
-	while ((q = nextPort++) != 0) {
-		if (p == q->innermost()) return q;
-	}
-	return 0;
-}
-
 // this function recalculates BDF_{SAME,COMPLEMENT,TRUE,FALSE} relations
 // after merging of clusters.  For each bag port, the underlying real
 // port may be marked the SAME or COMPLEMENT of other real ports, but
@@ -776,8 +889,6 @@ static BDFClustPort* findPort(BDFCluster* cl, BDFClustPort* p) {
 // For BDF_TRUE and BDF_FALSE, the clustering algorithm makes sure that
 // the control port remains an external port, or can be "remapped" to
 // one that is.  If not -- which indicates a bug -- an error is reported.
-
-static BDFClustPort* remapAfterMerge(BDFClustPort*,BDFRelation&);
 
 static const char msg[] = "Control port is buried, algorithm error?";
 
@@ -798,8 +909,7 @@ void BDFClusterBag::adjustAssociations() {
 				}
 				if (r_remap == BDF_COMPLEMENT) {
 					// reverse the sense of the relation
-					r = (r == BDF_TRUE) ?
-						BDF_FALSE : BDF_TRUE;
+					r = reverse(r);
 				}
 			}
 			// "upper" should always be non-null now
@@ -828,7 +938,12 @@ void BDFClusterBag::adjustAssociations() {
 				upper = lower->outPtr();
 			}
 		}
-		if (upper) bagp->setRelation(r, upper);
+		if (upper) {
+			// relation may already be set because of
+			// other relations that are transitive.
+			if (bagp->relType() != r)
+				bagp->setRelation(r, upper);
+		}
 		else bagp->setRelation(BDF_NONE);
 	}
 }
@@ -1080,7 +1195,8 @@ BDFCluster* BDFCluster::mergeCandidate() {
 
 
 // function to create names for atomic clusters and portholes.
-static const char* mungeName(NamedObj& o) {
+// This is a static class function.
+const char* BDFCluster::mungeName(NamedObj& o) {
 	StringList name = o.readFullName();
 	const char* cname = strchr (name, '.');
 	if (cname == 0) return "top";
@@ -1125,10 +1241,16 @@ BDFAtomCluster::~BDFAtomCluster() {
 	}
 }
 
+static const char* do_conds[] = { 0, "if(", "if(!", "until(", "until(!" };
+
 // print functions.
 ostream& BDFCluster::printBrief(ostream& o) {
-	if (pLoop > 1) {
-		o << pLoop << "*";
+	if (pType == DO_ITER) {
+		if (pLoop > 1)
+			o << pLoop << "*";
+	}
+	else {
+		o << do_conds[pType] << pCond->readName() << ")";
 	}
 	return o << readName();
 }
@@ -1160,106 +1282,6 @@ int BDFAtomCluster::fire() {
 int BDFAtomCluster::myExecTime() {
 	return pLoop * pStar.myExecTime();
 }
-
-// constructor for BDFClustPort, port for use in cluster.
-// if bp is set it's a "bag port" belonging to an BDFClusterBag.
-BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
-: pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0),
-  ctlFlag(0)
-{
-	const char* name = bp ? port.readName() : mungeName(port);
-	setPort(name,parent,INT);
-	myPlasma = Plasma::getPlasma(INT);
-	numberTokens = port.numXfer();
-}
-
-void BDFClustPort::initGeo() { myGeodesic->initialize();}
-
-// return true if port has same rate as its neighbor.
-int BDFClustPort::sameRate() {
-	return (numIO() == far()->numIO() && condMatch(this,far()));
-}
-
-// This method is called on a cluster porthole to create a connection
-// with a "bag port" in the parent ClusterBag.
-
-void BDFClustPort::makeExternLink(BDFClustPort* bagPort) {
-	pOutPtr = bagPort;
-	bagPort->numberTokens = numberTokens;
-	// if I am connected, disconnect me and connect my peer
-	// to my external link (the bagPort)
-	BDFClustPort* pFar = far();
-	if (pFar) {
-		int del = numTokens();
-		disconnect();
-		bagPort->connect(*pFar,del);
-		bagPort->initGeo();
-	}
-}
-
-// return the atomic cluster port I am connected to.
-BDFClustPort* BDFClustPort :: innermost() {
-	BDFClustPort* p = this;
-	while (p->isBagPort()) p = p->inPtr();
-	return p;
-}
-
-// return the real far port aliased to bag ports.
-BDFClustPort* BDFClustPort :: realFarPort(BDFCluster* outsideCluster) {
-	if (parentClust() == outsideCluster) return 0;
-	if (far()) return far();
-	return pOutPtr->realFarPort(outsideCluster);
-}
-
-// set relationship
-void BDFClustPort :: setRelation(int r, BDFClustPort* assoc) {
-	// do not reference myGeodesic before it is set.
-	int nT = myGeodesic ? numTokens() : 0;
-	setBDFParams(numIO(),assoc,(BDFRelation)r,nT);
-}
-
-// method for BDFClustPortRelIter.  This iterator steps through
-// all ports that are "the same" or "the complement" of the original
-// port.  The far() port is included in this iteration if there is
-// no delay and neither side is a conditional port.  Q: should we
-// generalize this to admit conditional ports controlled by the same
-// conditions?
-
-BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
-	if (pos == 0) return 0;
-	BDFRelation posrel = pos->relType();
-	BDFClustPort* pfar = pos->far();
-	// we see if we should jump over to the farSidePort.
-	// it must be connected, have the same rate and no delay.
-	// the "noFar" flag avoids crossing the same arc twice in
-	// a row.
-	if (!justDidFar && pfar && pos->numTokens() == 0 &&
-	    pos->numXfer() == pfar->numXfer() &&
-	    !TorF(posrel) && !TorF(pfar->relType())) {
-		pos = pos->far();
-		justDidFar = 1;
-		rel = BDF_SAME;
-		return pos;
-	}
-	// if we hopped over but there are no links on this side,
-	// hop back and proceed from there.
-	if (justDidFar && !SorC(posrel)) {
-		pos = pfar;
-		posrel = pfar->relType();
-	}
-	if (!SorC(posrel)) pos = 0;
-	else {
-		if (posrel == BDF_COMPLEMENT) rev = !rev;
-		pos = pos->assoc();
-		rel = (rev ? BDF_COMPLEMENT : BDF_SAME);
-		justDidFar = 0;
-	}
-	if (pos == start) return 0;
-	else return pos;
-}
-
-
-
 
 // methods for BDFClustSched, the clustering scheduler.
 
