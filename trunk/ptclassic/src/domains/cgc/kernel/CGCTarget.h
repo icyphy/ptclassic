@@ -97,9 +97,6 @@ public:
 	}
 	void putStream(const char* n, CodeStream* cs) { addStream(n, cs); }
 	
-	// Splice in stars.
-	/*virtual*/ int modifyGalaxy();
-
 	// Functions defining the pragma mechanism. Currently used in
 	// CGC to support command-line arguments in the generated code.
 	/*virtual*/ StringList pragma () const {return "state_name_mapping STRING"; }
@@ -172,6 +169,9 @@ protected:
 	// the iteration.
 	/*virtual*/ void wormInputCode(PortHole&);
 	/*virtual*/ void wormOutputCode(PortHole&);
+
+    	// Test if we need type conversion stars.
+	/*virtual*/ int needsTypeConversionStar(PortHole&);
 
 	// states
 	IntState staticBuffering;
