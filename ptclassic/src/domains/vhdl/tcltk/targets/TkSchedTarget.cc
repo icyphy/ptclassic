@@ -403,15 +403,22 @@ void TkSchedTarget :: setup() {
 void TkSchedTarget :: interact() {
   StringList graph_data;
 
-  int lat = 10;
+  //  int lat = 10;
   // Iterate over firing list and print names.
   VHDLFiringListIter fireNext(masterFiringList);
   VHDLFiring* nextFire;
   while ((nextFire = fireNext++) != 0) {
-    graph_data << "Node " << nextFire->name << " latency "
-	       << lat << "\n";
-    lat += 10;
-  //	       << nextFire->latency << "\n";
+      // Exclude the controller.
+      StringList ctlName = hashstring(filePrefix);
+      ctlName << "controller";
+      if (strcmp(ctlName, nextFire->getName())) {
+	  graph_data << "Node " << nextFire->name << " latency "
+	      //	       << lat << "\n";
+	      //    lat += 10;
+		     << nextFire->latency
+		     << " procnum "
+		     << nextFire->groupNum << "\n";
+      }
   }
   // Iterate over dependency list and print names.
   VHDLDependencyListIter depNext(dependencyList);
