@@ -61,4 +61,3 @@ test EditForest-1.1 {Create a Forest, then display it} {
 # {{a {} {c d} aa} {c a {} cc} {d a {} dd}} {{b {} e bb} {e b {} {e e}}}
 
 doneTests
-exit
