@@ -48,9 +48,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern int setPortIndices(Galaxy&);
 
 Cluster::Cluster(Star&self, const char* domain):
-selfStar(self),master(NULL),myDomain(domain),sched(0) {};
+selfStar(self),master(NULL),myDomain(domain),sched(0),scheduled(0) {};
 
 /*virtual*/ Cluster::~Cluster() {
+    if (isClusterAtomic()) {
+	if (master) ((Star*)master)->setParentCluster(0);
+    }
     LOG_DEL; delete sched;
 }
 
@@ -92,6 +95,7 @@ void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
     }
     master = m;
     if (master->isItAtomic()) {
+	((Star*)master)->setParentCluster(this);
 	StringList fullname = master->fullName();
 	star().setName(hashstring(fullname));
 	// Add the star's ports to the internal galaxy,
@@ -249,26 +253,92 @@ int Cluster::run() {
 	// Atomic Cluster - if there is no master, then it is a
 	// virtual sink or source node
 	return master? master->run() : TRUE;
-    else if (sched)
+    else if (sched) {
 	// Cluster contains a scheduled galaxy
-	return sched->run();
-    else
-	// Cluster contains a un-scheduled galaxy
-	return FALSE;
-}
-
-int Cluster::generateSchedule() {
-    if (isClusterAtomic()) {
-	return TRUE;
-    }
-    else {
-	if (!generateSubSchedules()) return FALSE;
-	sched->setup();
+	sched->compileRun();
 	return !SimControl::haltRequested();
     }
+    else {
+	Error::abortRun(star(),"Cluster contains a un-scheduled galaxy");
+	return FALSE;
+    }
 }
 
-int Cluster::generateSubSchedules() {
+int Cluster::addSplicedStar(Star& s) {
+    if (!isClusterAtomic()) {
+	// We could handle this case, if we moved all the clusters
+	// in this cluster into a new cluster -AND- move the schedule.
+	// For now, we do not handle this case
+	Error::abortRun(star(),
+			"Cannot add a spliced star to a non-atomic cluster");
+	return FALSE;
+    }
+
+    // Create a temporary galaxy, so that we can connect the new clusters
+    Galaxy gal;
+    int nports = 0;
+    // Save parent information, so we can restore parents after addBlock
+    Block* sPrnt = s.parent();
+    Block* mPrnt = master->parent();
+    gal.addBlock(s,s.name());
+    gal.addBlock(*master,master->name());
+    nports = setPortIndices(gal);
+    // Restore parent information
+    s.setParent(sPrnt);
+    master->setParent(mPrnt);
+    
+    LOG_NEW; PortHole** newPorts = new PortHole* [nports];
+    for (int i = 0; i < nports; i++) newPorts[i] = 0;
+
+    // Create new clusters
+    // Create cluster containing spliced star
+    Cluster* starCluster = newCluster();
+    starCluster->setMasterBlock(&s,newPorts);
+    addCluster(starCluster);
+    s.setTarget(master->target());
+    // Create the cluster containing the original star
+    Cluster* orgCluster = newCluster();
+    orgCluster->setMasterBlock(master,newPorts);
+    addCluster(orgCluster);
+
+    // Now we connect up the Cluster ports to match the real ports.
+    // There may be fewer Cluster ports than real ports if there
+    // are self-loops, for such cases, ptable[i] will be null.
+    for (i = 0; i < nports; i++) {
+	PortHole* source = newPorts[i];
+	// Make sure that the far port is one of the two stars
+	// If not, we remove the port
+	PortHole* far = source->asClusterPort()->real().far();
+	if ( far->parent() != master && far->parent() != &s) {
+	    source->parent()->removePort(*source);
+	    continue;
+	}
+
+	if (!source || source->isItInput()) continue;
+
+	PortHole* destination = newPorts[far->index()];
+	connect(source,destination);
+    }
+    LOG_DEL; delete newPorts;
+
+    // This cluster no longer has a master
+    master = NULL;
+
+    return TRUE;
+}
+	    
+int Cluster::generateSchedule() {
+    if (isClusterAtomic()) {
+	return scheduled = TRUE;
+    }
+    else {
+	if (!generateSubSchedules()) return scheduled = FALSE;
+	sched->setup();
+	return scheduled = !SimControl::haltRequested();
+    }
+}
+
+/*virtual*/ int Cluster::generateSubSchedules() {
     if (!isClusterAtomic()) {
 	ClusterIter cluster(*this);
 	Cluster* n;

@@ -52,6 +52,8 @@ public:
 
     Cluster(Star& self,const char* domain);
 
+    void clearMaster() { master = NULL; }
+    
     virtual ~Cluster();
     // set the master and build cluster
     virtual void setMasterBlock(Block* master,PortHole** newPorts = NULL);
@@ -112,6 +114,11 @@ public:
 
     const char* myDomain;
 
+    Block* masterBlock() const { return master; }
+
+    // Add a spliced star to this cluster
+    virtual int addSplicedStar(Star&);
+
 protected:
     // The Star part of the Cluster.
     Star& selfStar;
@@ -123,6 +130,9 @@ protected:
 
     // Generate the schedules of all the internal clusters.
     virtual int generateSubSchedules();
+
+    // Has this cluster been scheduled?
+    int scheduled;
 
 private:
     // Connect two Cluster PortHoles together
@@ -159,7 +169,7 @@ public:
 class ClusterPort {
 public:
     ClusterPort(PortHole& self, const PortHole& p, Star* parent);
-    const PortHole& real() const { return master; }
+    PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
 	return real().isItInput();
@@ -184,7 +194,7 @@ private:
 
     // master is a reference to the original PortHole that this
     // porthole represents.
-    const PortHole& master;
+    PortHole& master;
 };
 
 class ClusterPortIter : private BlockPortIter {
