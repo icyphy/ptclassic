@@ -134,6 +134,7 @@ static void startTycho() {
 	"   set tychoConsoleWindow 0\n",
 	"   set tychoWelcomeWindow 0\n",
 	"   set tychoExitWhenNoMoreWindows 0\n",
+	"   set tychoShouldWeDoRegularExit 0\n",
 	"   source $ptolemy/tycho/kernel/Tycho.tcl",
 	"}}\n",
 	(char *)NULL) );
