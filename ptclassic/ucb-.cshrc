@@ -49,3 +49,4 @@ setenv LM_LICENSE_FILE /opt/lm/lmgrd.key
 # Needed for s56x demos
 setenv S56DSP /users/ptdesign/vendors/s56dsp
 setenv QCKMON qckMon5
+setenv LD_LIBRARY_PATH ${LD_LIBRARY_PATH}:${S56DSP}/lib
