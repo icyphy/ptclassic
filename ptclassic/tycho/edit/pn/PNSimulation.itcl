@@ -81,7 +81,7 @@ body ::tycho::PNSimulation::startServer {} {
     _send {
 	set univ [java::new pt.domains.pn.kernel.PNUniverse]
 	$univ setName Universe
-        set exec [$univ getExecutor]
+        #set exec [$univ getExecutor]
     }
 }
 
@@ -121,6 +121,9 @@ body ::tycho::PNSimulation::_construct {} {
 		    debug " -> $result"
 		}
 	    }
+            # Initialize the star
+            debug "\$[set v] initialize"
+            set result [_send "\$[set v] initialize"]
         }
     }
 
@@ -160,9 +163,9 @@ body ::tycho::PNSimulation::_construct {} {
             set fromport [lindex $from 1]
 	    set fromport [lindex [split $fromport -] 0]
 
-            debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
+            debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
             set result [_send "set $fromname \[\$[set fromvertex] \
-                    getIOPort $fromport\]"]
+                    getPort $fromport\]"]
             debug " -> $result"
 
             debug "\$\{[set fromname]\} link \$[set rname]"
@@ -196,9 +199,9 @@ body ::tycho::PNSimulation::_construct {} {
                 set toport [lindex $to 1]
 		set toport [lindex [split $toport -] 0]
 
-                debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
+                debug "set $toname \[\$[set tovertex] getPort $toport\]"
                 set result [_send "set $toname \[\$[set tovertex] \
-                        getIOPort $toport\]"]
+                        getPort $toport\]"]
                 debug " -> $result"
 
                 debug "\$\{[set toname]\} link \$[set rname]"
@@ -218,25 +221,21 @@ body ::tycho::PNSimulation::_construct {} {
 	set toport [lindex [split $toport -] 0]
 
         # Get the actual port names
-        debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
+        debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
         set result [_send "set $fromname \
-            \[\$[set fromvertex] getIOPort $fromport\]"]
+            \[\$[set fromvertex] getPort $fromport\]"]
         debug " -> $result"
 
-        debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
-        set result [_send "set $toname \[\$[set tovertex] getIOPort $toport\]"]
+        debug "set $toname \[\$[set tovertex] getPort $toport\]"
+        set result [_send "set $toname \[\$[set tovertex] getPort $toport\]"]
         debug " -> $result"
 
         # Make the connection, dude
         debug "set $e \[ \
-            \$univ {connect \
-            pt.kernel.IOPort pt.kernel.IOPort \
-            String} \$\{[set fromname]\} \$\{[set toname]\} \
+            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"
         set result [_send "set $e \[ \
-            \$univ {connect \
-            pt.kernel.IOPort pt.kernel.IOPort \
-            String} \$\{[set fromname]\} \$\{[set toname]\} \
+            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"]
         debug " -> $result"
     }
