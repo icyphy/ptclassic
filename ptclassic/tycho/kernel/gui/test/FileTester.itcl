@@ -72,6 +72,14 @@ proc _rdfile {name} {
     set result
 }
 
+############################################################################
+#### Define a proc to update and delay a little
+#
+proc _update {} {
+    update
+    after 200
+}
+
 #######################################################################
 #### FileTester
 # This is a simple subclass of File that provides
@@ -111,8 +119,6 @@ class ::tycho::FileTester {
 # can be seen.
 #
 body ::tycho::FileTester::constructor {args} {
-    eval configure $args
-
     # A title
     itk_component add title {
 	label $itk_interior.title -text "Miniature File Test Widget"
@@ -128,6 +134,11 @@ body ::tycho::FileTester::constructor {args} {
 	keep -background -cursor
     }
     pack $itk_component(string) -side top -expand yes -fill both
+
+    # Evaluate options. Note that this must be done after
+    # constructing the visual components, in order that the
+    # call to reload{} initiated here will not fail.
+    eval itk_initialize $args
 }
 
 #######################################################################
