@@ -71,7 +71,7 @@ EXTERN char *util_file_search
 EXTERN int   util_pipefork
 	ARGS((char **argv, FILE **toCommand, FILE **fromCommand, int *pid));
 EXTERN int   util_csystem
-	ARGS((char *command));
+	ARGS((const char *command));
 EXTERN char *util_print_time
 	ARGS((long t));
 EXTERN char *util_strsav
