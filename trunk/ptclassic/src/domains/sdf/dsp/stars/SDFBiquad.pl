@@ -3,10 +3,8 @@ defstar {
 	domain {SDF}
 	version {$Id$}
 	desc {
-A two-pole, two-zero IIR filter (a biquad).
-The default is a Butterworth filter with a cutoff 0.1 times sample freq.
-The transfer function is (n0+n1*z1+n2*z2)/(1+d1*z1+d2*z2)
-where z1 = {z sup -1}, z2 = {z sup -2}.
+A two-pole, two-zero digital IIR filter (a biquad).
+The default is a Butterworth filter with a cutoff 0.1 times sampling frequency.
 	}
 	author { J. T. Buck }
 	copyright {
@@ -27,11 +25,19 @@ This two-pole, two-zero IIR filter has a transfer function of
 .Id "biquad filter"
 .Id "filter, IIR"
 .Id "IIR filter"
-The default is a Butterworth filter with a cutoff 0.1 times sample freq.
+It is implemented in direct form II [1].
+The default coefficient give a Butterworth filter with a
+cutoff of 0.1 times sampling frequency.
 .Ir "filter, Butterworth"
 .Ir "Butterworth filter"
 .lp
 \fBThis star will eventually be replaced by a general IIR star.\fR
+.ID "Oppenheim, A. V."
+.ID "Schafer, R. W."
+.UH REFERENCES
+.ip [1]
+A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	input {
 		name{input}
