@@ -1,10 +1,10 @@
-static const char file_id[] = "MultiScheduler.cc";
+static const char file_id[] = "HierScheduler.cc";
 
 /*****************************************************************
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,110 +35,217 @@ Programmer: Jose Luis Pino
 #pragma implementation
 #endif
 
-#include "MultiScheduler.h"
-#include "Scope.h"
-#include "CGCluster.h"
+#include "HierScheduler.h"
+#include "SDFScheduler.h"
+#include "LoopScheduler.h"
+#include "SDFCluster.h"
+#include "GalIter.h"
+#include "GraphUtils.h"
+#include "HierCluster.h"
 
-/*virtual*/double MultiScheduler::getStopTime() {
-    return topCluster->getStopTime();
+/*virtual*/double HierScheduler::getStopTime() {
+    return TRUE; // topScheduler.getStopTime();
 }	
 
-/*virtual*/ void MultiScheduler::setStopTime(double limit) {
-    topCluster->setStopTime(limit);
+/*virtual*/ void HierScheduler::setStopTime(double /*limit*/) {
+    // topScheduler.setStopTime(limit);
 }
 
-/*virtual*/ StringList MultiScheduler::displaySchedule(){
+/*virtual*/ StringList HierScheduler::displaySchedule(){
     StringList schedule;
     schedule << "J.L. Pino's Hierarchical Scheduler\n\t["
 	     << sdfStars << " SDF Nodes]\t[" << dagNodes()
-	     << " Precedence DAG Nodes]\n\tTop-level ";
-    if (topCluster) schedule << topCluster->displaySchedule();
+	     << " Precedence DAG Nodes]\n\tTop-level "
+	     << topScheduler.displaySchedule(); 
+    GalStarIter nextStar(*galaxy());
+    DataFlowStar* star;
+    while ((star = (DataFlowStar*) nextStar++) != NULL)
+	if (star->isItWormhole()) {
+	    schedule << "Cluster \"" << star->fullName() << "\" using\n\t"
+		     << star->scheduler()->displaySchedule()
+		     << "_______________________________________"
+		     << "_______________________________________\n\n";
+	}
     return schedule;
 }   
 
-/*virtual*/ int MultiScheduler::run() { return topCluster->run(); }
+/*virtual*/ int HierScheduler::run() { return TRUE /*topCluster->run()*/; }
 
-int MultiScheduler::dagNodes() const {
-    return topScheduler.dagNodes();
+int HierScheduler::dagNodes() const {
+    return TRUE; // topScheduler.dagNodes();
 }
 
-void MultiScheduler :: setup () {
+int flattenGalaxy(Galaxy& g) {
+    return g.stateWithName("Scheduler")?FALSE:TRUE;
+}
+
+Cluster* newUserSpecifiedCluster(Galaxy& g) {
+    // FIXME - shouldn't this also fix the cluster/internal stars
+    // repetitions number?
+    const char* schedType = g.stateWithName("Scheduler")->initValue();
+    Scheduler* scheduler;
+    if (strcmp(schedType,"Cluster") == 0)
+	scheduler = new SDFClustSched("");
+    else if (strcmp(schedType,"Loop") == 0)
+	scheduler = new LoopScheduler("");
+    else
+	scheduler = new SDFScheduler;
+    Cluster* cluster = new HierCluster(g);
+    cluster->setScheduler(scheduler);
+    return cluster;
+}
+
+#define VISITED flags[0]
+#define BLOCK_NUMBER flags[1]
+#define ANCESTORS flags[2]
+#define DECENDENTS flags[3]
+
+// The complexity is shown within the O() function.
+// Let:
+//	V = number of top blocks in the galaxy
+//	E = number of arcs in the galaxy
+
+void clusterChains(Galaxy& g) {
+
+    // initialize flags for finding chain clusters - O(V)
+    DSGalTopBlockIter nextBlock(g);
+    Block *block;
+    int blockNum = 0;
+    while ((block = nextBlock++) != NULL) {
+	block->VISITED = block->BLOCK_NUMBER = blockNum++;
+	block->ANCESTORS = block->DECENDENTS = 0;
+    }
+    
+    // compute total number of ancestors and decendents - O(E)
+    nextBlock.reset();
+    while ((block = nextBlock++) != NULL) {
+	BlockOutputIter nextPort(*block);
+	PortHole* port;
+	while ((port = nextPort++) != NULL) {
+	    Block*  farBlock = port->far()->parent();
+	    if (farBlock->VISITED == block->BLOCK_NUMBER) continue;
+	    farBlock->VISITED = block->BLOCK_NUMBER;
+	    farBlock->ANCESTORS++;
+	    block->DECENDENTS++;
+	}
+    }
+
+    nextBlock.reset();
+    while ((block = nextBlock++) != NULL) {
+	if (block->ANCESTORS==1 && block->DECENDENTS==1) {
+	    BlockOutputIter nextPort(*block);
+	    Block* decendent = (nextPort.next())->parent();
+	    if (decendent->parent()->parent())
+		((HierCluster*)decendent->parent())->merge(*block);
+	    else
+		(new HierCluster(*block))->merge(*decendent);
+	}
+    }
+
+}
+	    
+	    
+	
+    
+    
+    
+	    
+    
+void HierScheduler :: setup () {
+
+    invalid = FALSE;
+    
     if (!galaxy()) {
-	Error::abortRun("MultiScheduler: no galaxy!");
+	Error::abortRun("HierScheduler: no galaxy!");
 	return;
     }
 
-    Scope::createScope(*galaxy());
-    
     if (!checkConnectivity()) return;
 
-    // Need to initialize galaxy BEFORE constructing the Clusters.
-    // If not, the porthole parameters are not properly propigated.
-    galaxy()->initialize();
+    // We count the number of stars in the unclustered system to
+    // return the number of stars in the original sdf graph.
+    sdfStars = totalNumberOfStars(*galaxy());
 
-    if (SimControl::haltRequested()) return;
-    
-    // Need to set repetitions of the master galaxy
-    repetitions();
-    
-    GalStarIter nextStar(*galaxy());
-    DataFlowStar* star;
-    sdfStars = 0;
-    while ((star = (DataFlowStar*) nextStar++) != NULL) sdfStars++;
+    if (!repetitions()) return;
+    initializeForClustering(*galaxy(),flattenGalaxy,newUserSpecifiedCluster);
 
-    LOG_NEW; topCluster = new CGCluster(galaxy()->domain());    
-    
-    // We should set the target of the topCluster before construction
-    // the clusters for the galaxy, so that all the internal clusters
-    // have their target set correctly
-    topCluster->setMasterBlock(galaxy());
-    topCluster->setTarget(&target());
+    TopologyMatrix topology(*galaxy());
 
-    // set the top level scheduler
-    topScheduler.setTarget(target());
-    topCluster->setInnerSched(&topScheduler);
+    // Well-order clustering - FIXME, we should be ignoring arcs with
+    // sufficient delay!
+    GraphMatrixIter nextSink(topology);
+    GraphMatrixIter nextSource(topology);
+    int sink;
 
-    // set the inner schedulers
-    FatClusterIter next(*topCluster);
-    CGCluster* fatCluster;
-    while ((fatCluster = (CGCluster*)next++) != 0)
-	fatCluster->innerSched()->setTarget(*mtarget->child((fatCluster->getProcId())));
-    topCluster->generateSchedule();
+    while ((sink = nextSink++) != -1) {
+	int possibleSource, source(-1);
+	nextSource.reset();
+	while ((possibleSource = nextSource++) != -1) {
+	    if (possibleSource == sink) continue;
+	    if (topology[possibleSource][sink]) {
+		if (source != -1) {
+		    source = -1;
+		    break;
+		}
+		else 
+		    source = possibleSource;
+	    }
+	}
+	if (source != -1) {
+	    Block *src = topology.graphBlock[source];
+	    Block *snk = topology.graphBlock[sink];
+	    HierCluster* cluster=NULL;
+	    if (! snk->isItAtomic()) {
+		cluster = (HierCluster*)snk;
+		cluster->absorb(*src);
+	    }
+	    else {
+		cluster = src->isItAtomic() ?
+		    new HierCluster(src->asStar()):(HierCluster*)src;
+		cluster->absorb(*snk);
+	    }
+	    topology.cluster(*cluster,source,sink);
+	    nextSink.reset();
+	    sink = nextSink++;
+	}
+    }
+	    
+    StringList dot, textDescription, topo;
 
-    // Before we can fix the buffers sizes we must set the repetitions
-    // count of the top cluster.
-    topCluster->repetitions = 1;
+    topo << topology.print();
+    dot << printDot(*galaxy());
+    textDescription << galaxy()->print(FALSE);
 
-    // Now fix buffer sizes
-    topCluster->fixBufferSizes(1);
+    mtarget->writeFile(dot,".dot");
+    mtarget->writeFile(textDescription,".desc");
+    mtarget->writeFile(topo,".topo");
 
     // Set all looping levels for child targets > 0.  Targets might
     // have to do different style buffering (ie. CGC)
     int childNum = 0;
-    { 
     CGTarget* child;
-    while ((child = mtarget->cgChild(childNum++))) {
-      child->loopingLevel = 3;
-    }
-    }
+    while ((child = mtarget->cgChild(childNum++)))
+	child->loopingLevel = 3;
     mtarget->requestReset();
+    Error::abortRun("Sorry, but the rest of the scheduler is not implemented");
     return;
 }
 
-int MultiScheduler::computeSchedule(Galaxy& /*g*/) {
-     return topCluster->generateSchedule();
+int HierScheduler::computeSchedule(Galaxy& /*g*/) {
+    return FALSE ; //topCluster->generateSchedule();
 }
 
-void MultiScheduler :: compileRun() {
-    topScheduler.compileRun();
+void HierScheduler :: compileRun() {
+    // topScheduler.compileRun();
 }
 
-void MultiScheduler :: prepareCodeGen() {
+void HierScheduler :: prepareCodeGen() {
     // prepare code generation for each processing element:
     // galaxy initialize, copy schedule, and simulate the schedule.
-    ParScheduler::prepareCodeGen();
+    // ParScheduler::prepareCodeGen();
 }
 
-MultiScheduler::~MultiScheduler() {
-    delete topCluster;
+HierScheduler::~HierScheduler() {
 }
+
+
