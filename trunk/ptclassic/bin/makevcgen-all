@@ -14,6 +14,7 @@ dirs="$PTOLEMY/src/kernel \
 	$PTOLEMY/src/utils/dumpexts \
 	$PTOLEMY/src/utils/libexttools \
 	$PTOLEMY/src/utils/libptmathematica \
+	$PTOLEMY/src/utils/libptmatlab \
 	$PTOLEMY/src/domains/de/kernel \
 	$PTOLEMY/src/domains/de/stars \
 	$PTOLEMY/src/ptcl"
