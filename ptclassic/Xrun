@@ -1,8 +1,0 @@
-#! /bin/sh
-# $Id$
-# This script fires up X11R4 from a bare Sun tube.
-# The following files define the configuration:
-# .xinitrc, .Xresources, .twmrc
-xinit
-clear_colormap
-kbd_mode -a
