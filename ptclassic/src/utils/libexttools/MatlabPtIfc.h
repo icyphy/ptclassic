@@ -49,12 +49,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class MatlabPtIfc : public MatlabIfc {
 public:
 	// convert Ptolemy particles to Matlab matrices
-	Matrix* PtolemyToMatlab(Particle& particle, DataType portType,
+	mxArray* PtolemyToMatlab(Particle& particle, DataType portType,
 				int* errflag);
 
 	// convert Matlab matrices to Ptolemy particles
 	int MatlabToPtolemy(Particle& particle, DataType portType,
-			    Matrix* matlabMatrix, int* warnflag,
+			    mxArray* matlabMatrix, int* warnflag,
 			    int* errflag);
 };
 

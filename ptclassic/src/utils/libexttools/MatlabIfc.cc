@@ -268,13 +268,13 @@ int MatlabIfc :: MatlabEngineOutputBuffer(char* buffer, int buferLength) {
 }
 
 // get pointer to a copy of a Matlab matrix
-Matrix* MatlabIfc :: MatlabEngineGetMatrix(char* name) {
-    return engGetMatrix(matlabEnginePtr, name);
+mxArray* MatlabIfc :: MatlabEngineGetMatrix(char* name) {
+    return engGetArray(matlabEnginePtr, name);
 }
 
 // put a matrix in the Matlab environment (Matlab will copy the matrix)
-int MatlabIfc :: MatlabEnginePutMatrix(Matrix* matrixPtr) {
-    return engPutMatrix(matlabEnginePtr, matrixPtr);
+int MatlabIfc :: MatlabEnginePutMatrix(mxArray* matrixPtr) {
+    return engPutArray(matlabEnginePtr, matrixPtr);
 }
 
 // kill the Matlab connection
@@ -325,13 +325,13 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
 // a shell process so that we can redirect standard error as
 // a temporary workaround to the following bug in Matlab 4.
 //
-// FIXME: The Matlab 4 engine interface has an undesirable side effect
+// FIXME: The Matlab 4 engine interface has an undesirable side effects
 // on System V operating systems like Solaris and HP.  The problem is
 // that engClose routine issues ioctl(2, TIOCGWINSZ, 0xEFFFC028) which
 // attempts to get the window size of terminal that does not exist.
 // This showed up when running tycho and opening a Matlab console.
 // If one runs tycho as "tycho -ptiny >/dev/null" then the problem does
-// not exist.  See above for a temporary fix-- ble, cxh
+// not exist.  See about for a temporary fix-- ble, cxh
 int MatlabIfc :: StartMatlab(char* userCommand) {
     InfString command;
     const char* matlabServer = 0;
@@ -385,7 +385,7 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
 			<< " to the remote machine.";
 	}
 	else {
-	    errorString = "Could not start Matlab using the command '";
+	    errorString = "Could not start Matlab using '";
 	    errorString << command << "'.";
 	}
 	return FALSE;
@@ -484,18 +484,18 @@ int MatlabIfc :: KillMatlab() {
     return retval;
 }
 
-void MatlabIfc :: FreeMatlabMatrices(Matrix *matlabMatrices[], int numMatrices) {
+void MatlabIfc :: FreeMatlabMatrices(mxArray *matlabMatrices[], int numMatrices) {
     if ( matlabMatrices ) {
 	for ( int k = 0; k < numMatrices; k++ ) {
 	    if ( matlabMatrices[k] ) {
-		mxFreeMatrix(matlabMatrices[k]);
+		mxDestroyArray(matlabMatrices[k]);
 		matlabMatrices[k] = 0;
 	    }
 	}
     }
 }
 
-void MatlabIfc :: NameMatlabMatrix(Matrix* matrixPtr, const char *name) {
+void MatlabIfc :: NameMatlabMatrix(mxArray* matrixPtr, const char *name) {
     mxSetName(matrixPtr, name);
 }
 
@@ -504,15 +504,15 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
 				   int numrows, int numcols,
 				   char** realPartStrings,
 				   char** imagPartStrings) {
-    int realOrComplex = (imagPartStrings) ? MXCOMPLEX : MXREAL;
-    Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
+    mxComplexity realOrComplex = (imagPartStrings) ? mxCOMPLEX : mxREAL;
+    mxArray* newMatlabMatrixPtr = mxCreateDoubleMatrix(numrows, numcols, realOrComplex);
 
     // check for memory allocation error
     if ( newMatlabMatrixPtr == 0 ) return FALSE;
 
     // copy real part over to new Matlab matrix
     // Matlab stores values in column-major order like Fortran
-    Real* realp = mxGetPr(newMatlabMatrixPtr);
+    double* realp = mxGetPr(newMatlabMatrixPtr);
     for ( int jcol = 0; jcol < numcols; jcol++ ) {
 	// to convert row-major to column-major ordering use
 	// index = jcol * numrows + jrow
@@ -526,7 +526,7 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
     // copy imag part over to new Matlab matrix (if complex)
     // Matlab stores values in column-major order like Fortran
     if ( realOrComplex == MXCOMPLEX ) {
-	Real* imagp = mxGetPi(newMatlabMatrixPtr);
+	double* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
 	    // to convert row-major to column-major ordering use
 	    // index = jcol * numrows + jrow
@@ -540,7 +540,7 @@ int MatlabIfc :: SetMatlabVariable(const char* name,
 
     mxSetName(newMatlabMatrixPtr, name);
     MatlabEnginePutMatrix(newMatlabMatrixPtr);
-    mxFreeMatrix(newMatlabMatrixPtr);
+    mxDestroyArray(newMatlabMatrixPtr);
 
     return TRUE;
 }
@@ -552,13 +552,13 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 				   char*** imagPartStrings) {
 
     int retval = TRUE;
-    Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
+    mxArray* matlabMatrix = MatlabEngineGetMatrix(name);
 
     if ( matlabMatrix ) {
 	*numrows = mxGetM(matlabMatrix);
 	*numcols = mxGetN(matlabMatrix);
-	Real* realp = mxGetPr(matlabMatrix);
-	Real* imagp = mxGetPi(matlabMatrix);
+	double* realp = mxGetPr(matlabMatrix);
+	double* imagp = mxGetPi(matlabMatrix);
 	int numelements = (*numrows) * (*numcols);
 	// Under cfront compiler, we cannot use (char *) instead of char* here
 	*realPartStrings = new char* [numelements];
@@ -578,7 +578,7 @@ int MatlabIfc :: GetMatlabVariable(char* name,
 		index++;
 	    }
 	}
-	mxFreeMatrix(matlabMatrix);
+	mxDestroyArray(matlabMatrix);
     }
     else {
 	retval = FALSE;
