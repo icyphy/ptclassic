@@ -32,14 +32,13 @@ limitation of liability, and disclaimer of warranty provisions.
 extern ACG* gen;
 	}
 	go {
-	  double value;
+	  double value = 0;
+	  int coinToss = ( (gen->asLong() & 0x01) == 0 );
 	  if( int(bipolar) ) {
-	    value = ( ( (gen->asLong() & 0x01) == 0 ) ? 
-			 double(amplitude) : - double(amplitude) );
+	    value = coinToss ? double(amplitude) : - double(amplitude);
 	  }
 	  else {
-	    value = ( ( (gen->asLong() & 0x01) == 0 ) ? 
-			double(amplitude) : 0 );
+	    value = coinToss ? double(amplitude) : 0;
 	  }
 	  output%0 << value;
 	}
