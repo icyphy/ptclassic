@@ -44,6 +44,8 @@ proc ptlangTroffToHTML {args} {
     foreach file $args {
 	set infile [open [::tycho::expandPath $file] r]
 	set tmpfile [open "/tmp/$file" w]
+        set delim 1
+        set ineq 0
         while {[gets $infile lineIn] >= 0} {
             if [regexp {^[ 	]*explanation[ 	]*\{[ 	]*$} $lineIn] {
                 # Replace with htmldoc
@@ -66,29 +68,31 @@ proc ptlangTroffToHTML {args} {
                     set newline {}
                     set end 0
                     set count 0
-                    while {[regexp -indices {\$([^\$]*)\$} $line dummy eqn] \
-                            != 0} {
-                        puts "CHECK: Inline equations in $file"
-                        set start [lindex $eqn 0]
-                        set end [lindex $eqn 1]
-                        if {$start > 1} {
-                            append newline \
-                                    [string range $line 0 [expr $start-2]]
-                        }
-                        set eqnt [string range $line $start $end]
-                        regsub -all {~} $eqnt { } eqnt
-                        regsub -all {[\(\)=]} $eqnt {</i>&<i>} eqnt
-                        regsub -all {log|sin|cos|min|max} $eqnt {</i>&<i>} eqnt
-                        regsub -all {[0-9]+} $eqnt {</i>&<i>} eqnt
-                        regsub -all {sub[ 	]+([^ 	]*)} \
-                                $eqnt {<sub>\1</sub>} eqnt
-                        regsub -all {sup[ 	]+([^ 	]*)} \
-                                $eqnt {<sup>\1</sup>} eqnt
-                        append newline "<i>$eqnt</i>"
-                        set line [string range $line [expr $end+2] end]
-                        if {[incr count] > 10} {
-                            puts "Warning: unprocessed equations"
-                            break
+                    if $delim {
+                        while {[regexp -indices {\$([^\$]*)\$} \
+                                $line dummy eqn] != 0} {
+                            puts "CHECK: Inline equations in $file"
+                            set start [lindex $eqn 0]
+                            set end [lindex $eqn 1]
+                            if {$start > 1} {
+                                append newline \
+                                        [string range $line 0 [expr $start-2]]
+                            }
+                            set eqnt [string range $line $start $end]
+                            regsub -all {~} $eqnt { } eqnt
+                            regsub -all {[\(\)=]} $eqnt {</i>&<i>} eqnt
+                            regsub -all {log|sin|cos|min|max} $eqnt {</i>&<i>} eqnt
+                            regsub -all {[0-9]+} $eqnt {</i>&<i>} eqnt
+                            regsub -all {sub[ 	]+([^ 	]*)} \
+                                    $eqnt {<sub>\1</sub>} eqnt
+                            regsub -all {sup[ 	]+([^ 	]*)} \
+                                    $eqnt {<sup>\1</sup>} eqnt
+                            append newline "<i>$eqnt</i>"
+                            set line [string range $line [expr $end+2] end]
+                            if {[incr count] > 10} {
+                                puts "Warning: unprocessed equations"
+                                break
+                            }
                         }
                     }
                     append newline $line
@@ -196,10 +200,22 @@ proc ptlangTroffToHTML {args} {
                         }
                         {^\.(EQ)} {
                             puts $tmpfile "<pre>"
+                            set ineq 1
                             puts "WARNING: Equation in $file"
                         }
                         {^\.(EN)} {
                             puts $tmpfile "</pre>"
+                            set ineq 0
+                        }
+                        {^\delim off} {
+                            if $ineq {
+                                set delim 0
+                            }
+                        }
+                        {^\delim \$\$} {
+                            if $ineq {
+                                set delim 1
+                            }
                         }
                         {^\.(TS)} {
                             puts $tmpfile "<pre>"
