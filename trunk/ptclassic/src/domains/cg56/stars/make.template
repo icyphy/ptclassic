@@ -74,6 +74,7 @@ PL_SRCS= \
  CG56CxToInt.pl \
  CG56Delay.pl \
  CG56Distributor.pl \
+ CG56DivByInt.pl \
  CG56DownSample.pl \
  CG56Expr.pl \
  CG56FixToCx.pl \
@@ -109,6 +110,7 @@ PL_SRCS= \
  CG56MpyCx.pl \
  CG56MpyShift.pl \
  CG56Neg.pl \
+ CG56OrderTwoInt.pl \
  CG56Pad.pl \
  CG56PrPrtAD.pl \
  CG56PrPrtADDA.pl \
