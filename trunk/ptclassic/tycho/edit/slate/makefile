@@ -92,7 +92,7 @@ ITCL_SRCS = \
 	Stepper.itcl \
 	Terminal.itcl
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) slate.tcl pkgIndex.tcl README.txt
 
 MISC_FILES = $(DIRS) tclIndex bin demo img 
 
