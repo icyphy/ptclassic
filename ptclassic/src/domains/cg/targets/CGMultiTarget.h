@@ -55,7 +55,8 @@ public:
 	CGMultiTarget(const char* name,const char* sClass,const char* desc);
 	~CGMultiTarget();
 	int run();
-	void wrapup();
+
+	/*virtual*/ void writeCode();
 
 	// type identification
 	/*virtual*/ int isA(const char*) const;
@@ -132,8 +133,6 @@ protected:
 	IntState overlapComm;
 	IntState ignoreIPC;
 
-	// other parameters
-	StringState filePrefix;
 	IntState ganttChart;
 	StringState logFile;
 	IntState amortizedComm;
