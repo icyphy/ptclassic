@@ -1,3 +1,4 @@
+static const char file_id[] = "XXXDomain.cc";
 /**********************************************************************
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -35,10 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  etc, for the XXX domain so the interpreter can generate them dynamically.
 
 ***********************************************************************/
-static const char file_id[] = "XXXDomain.cc";
 
 #include "Domain.h"
 #include "Target.h"
+#include "Galaxy.h"
 #include "KnownTarget.h"
 #include "XXXScheduler.h"
 #include "XXXWormhole.h"
@@ -73,7 +74,7 @@ public:
 	XXXTarget() : Target("default-XXX", "XXXStar", "default XXX target"){}
 
 	// Destructor
-	~XXXTarget() { delSched(); }
+	~XXXTarget() { delSched();}
 
 	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const { LOG_NEW; return new XXXTarget;}
