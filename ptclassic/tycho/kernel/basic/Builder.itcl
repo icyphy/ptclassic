@@ -41,6 +41,12 @@
 #
 # See the BuilderDialog class for a graphical interface
 #
+# FIXME: there should be a proc to build tclIndex files.
+#
+# FIXME: it would be nice if we could parse makefiles to get variables.
+#
+# FIXME: No tests as of yet
+#
 class ::tycho::Builder {
     inherit ::tycho::Uninstantiable
 
