@@ -52,7 +52,6 @@
 # appear only at the top level. FIXME: implement that. Parents have the 
 # following attributes:
 #   <ul>
-#   <li><b>-scope</b>: FIXME: John, what did you mean by this?
 #   <li><b>-source</b>: The file in which the parent class resides.
 #   <li><b>-docfile</b>: The file with the parents documentation (.tim).
 #   </ul>
@@ -132,17 +131,15 @@
 #   </ul>
 # </ul>
 #
-# Here is an example of a class model:
-# For more general information on models, see <a href="Model.html">Model</a>.
-# <pre><tcl quiet>
+# Here is an example of a class model. This creates
+# a model and loads it with a string in TIM format -- usually,
+# though, you would set the *-datafile* option and
+# call load{} (see <a href="Model.html">Model</a>). After
+# creating it, call the describe{} method to confirm its
+# contents:
+# <pre><tcl>
 #     catch {delete object $class}
 #     set class [::tycho::Class [::tycho::autoName class]]
-# </tcl></pre>
-#
-# Now load the class with some data. In this example, give it a string
-# in TIM format -- usually, you would set the *-datafile* option and
-# call load{} (see <a href="Model.html">Model</a>):
-# <pre><tcl quiet>
 #     $class read string {
 #        modelconfigure -language Itcl -name ::tycho::exampleclass
 #        annotation description {An example class.}
@@ -157,10 +154,6 @@
 #            parameter y
 #        }
 #     }
-# </tcl></pre>
-#
-# Display a TIM representation of the class:
-# <pre><tcl>
 #     $class describe
 # </tcl></pre>
 #
@@ -179,11 +172,8 @@
 #     $class parameters bar
 # </tcl></pre>
 #
-# <b>Note</b>: At present, this class does not support undo commands.
-# This should be fixed in future.
-#
 class ::tycho::Class {
-    inherit ::tycho::Model
+    inherit ::tycho::HierModel
 
     constructor {args} {}
     destructor {}
@@ -196,18 +186,6 @@ class ::tycho::Class {
 
     # Add a top-level annotation with attributes to the class
     method annotation {name string args}
-
-    # Delete an item
-    method delete {type name}
-
-    # Get the value of an item
-    method get {type name}
-    
-    # Get an attribute of an item
-    method itemcget {type name option}
-
-    # Configure attributes of an item
-    method itemconfigure {type name args}
 
     # Add a method with attributes to the class
     method method {name args}
@@ -254,9 +232,6 @@ class ::tycho::Class {
 #### constructor
 #
 body ::tycho::Class::constructor {args} {
-    # Default separator
-    configure -separator "."
-
     # Evaluate options
     eval configure $args
 
@@ -323,72 +298,7 @@ body ::tycho::Class::annotation {name value args} {
 
     _verifynot annotation $cntxt $local $name
     _addentity annotation $cntxt $local $name $value $args
-    return
-}
-
-########################################################################
-#### delete
-#
-# Delete an item. Flag an error if
-# the item does not exist.
-#
-body ::tycho::Class::delete {type name} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify $type $cntxt $local
-    _delete $type $cntxt $local
-    return
-}
-
-########################################################################
-#### get
-#
-# Get the value of an item. Flag an error if
-# the item does not exist.
-#
-body ::tycho::Class::get {type name} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify $type $cntxt $local
-    _get $type $cntxt $local
-}
-
-########################################################################
-#### itemcget
-#
-# Get an attribute of an item. The first argument is the
-# entity or link type. Flag an error if the item does
-# not exist.
-#
-body ::tycho::Class::itemcget {type name option} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify $type $cntxt $local
-    _cget $type $cntxt $local $option
-}
-
-########################################################################
-#### itemconfigure
-#
-# Configure attributes of an item. The first argument is the
-# entity or link type; the optional argument list
-# is a flat list of attribute-value pairs. Flag an error if the
-# annotation does not exist.
-#
-body ::tycho::Class::itemconfigure {type name args} {
-    set splut [split $name $separator]
-    set cntxt [lreplace $splut end end]
-    set local [lindex $splut end]
-
-    _verify $type $cntxt $local
-    _configure $type $cntxt $local $args
-    return
+    list delete annotation $name
 }
 
 ########################################################################
@@ -399,9 +309,13 @@ body ::tycho::Class::itemconfigure {type name args} {
 # method. Flag an error if the method already exists. 
 #
 body ::tycho::Class::method {name args} {
+    # Just make sure that the method name is top-level
+    if { [llength [split $name $separator]] > 1 } {
+        error "Method $name is not top-level"
+    }
     _verifynot method {} $name $name
     _addentity method {} $name {} {} $args
-    return
+    list delete method $name
 }
 
 ########################################################################
@@ -438,12 +352,9 @@ body ::tycho::Class::methods {args} {
 # parameter. Flag an error if the parameter already exists. 
 #
 body ::tycho::Class::parameter {method name args} {
-    # Just make sure that the method name is top-level
-    if { [llength [split $method $separator]] > 1 } {
-        error "Method $method is not top-level"
-    }
-    _verifynot parameter $method $name
-    _addentity parameter $method $name $method$separator$name $args
+    _verifynot parameter $method $name $method$separator$name
+    _addentity parameter $method $name $method$separator$name {} $args
+    list delete parameter $method$separator$name
 }
 
 ########################################################################
@@ -463,8 +374,13 @@ body ::tycho::Class::parameters {method} {
 # variable. Flag an error if the variable already exists. 
 #
 body ::tycho::Class::variable {name args} {
+    # Just make sure that the variable name is top-level
+    if { [llength [split $name $separator]] > 1 } {
+        error "Variable $name is not top-level"
+    }
     _verifynot variable {} $name $name
     _addentity variable {} $name {} {} $args
+    list delete variable $name
 }
 
 ########################################################################
@@ -501,7 +417,7 @@ body ::tycho::Class::variables {args} {
 ########################################################################
 #### _annotation
 #
-# Add a nested annotation and return the inverse command.
+# Add a nested annotation.
 # Additional arguments are a flat attribute-value list for the
 # annotation. Flag an error if the annotation already exists. 
 #
