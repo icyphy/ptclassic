@@ -144,8 +144,10 @@ static void loadStartup(Tcl_Interp* interp) {
 		StringList putenvArg;
 		putenvArg << "TCL_LIBRARY=" << dir;
 		putenv(hashstring(putenvArg));
-		if (Tcl_EvalFile(interp, f) == TCL_ERROR)
+		char * fname = f.newCopy();
+		if (Tcl_EvalFile(interp, fname) == TCL_ERROR)
 			fprintf(stderr, "ptcl: error in startup file");
+		LOG_DEL; delete fname;
 	}
 	else fprintf(stderr, "ptcl: cannot locate Tcl startup file\n");
 }

@@ -65,7 +65,9 @@ Error :: error(cc* m1, cc* m2, cc* m3) {
 	else
 		msg << "ERROR: ";
 	msg << m1 << (m2 ? m2 : "") << (m3 ? m3 : "");
-	Tcl_SetResult(PTcl::activeInterp, msg, TCL_VOLATILE);
+	char* msgc = msg.newCopy();
+	Tcl_SetResult(PTcl::activeInterp, msgc, TCL_VOLATILE);
+	LOG_DEL; delete msgc;
 }
 
 void
