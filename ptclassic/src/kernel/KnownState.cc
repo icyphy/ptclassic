@@ -19,9 +19,11 @@ description.
 
 extern Error errorHandler;
 
-StateList *KnownState::allStates;       // define the static member
+StateList *KnownState::allStates;       // the list of state types
+StateList *KnownState::allGlobals;	// the list of global state values
 
-int KnownState::numStates = 0;          // define the number of states
+int KnownState::numStates = 0;          // define the number of state types
+int KnownState::allGlobals = 0;		// and the number of global values
 
 // Constructor.  Adds a state to the known list
 
@@ -36,9 +38,23 @@ KnownState::KnownState (State &state, const char* name) {
         allStates->put (&state);
 }
 
-State*
+KnownState::KnownState (State& state, const char* name, const char* value) {
+	if (numGlobals == 0)
+		allGlobals = new StateList;
+	numGlobals++;
+	state.setState (name,NULL,value);
+	state.initialize();
+	allGlobals->put (&state);
+}
+
+const State*
 KnownState::find(const char* type) {
         return numStates == 0 ? NULL : allStates->stateWithName(type);
+}
+
+const State*
+KnownState::lookup(const char* name) {
+	return numGlobals == 0 ? NULL : allGlobals->stateWithName(name);
 }
 
 // The main cloner.  This method gives us a new state of the named
@@ -46,7 +62,7 @@ KnownState::find(const char* type) {
 
 State *
 KnownState::clone(const char* type) {
-        State *p = find(type);
+        const State *p = find(type);
         if (p) return p->clone();
 // If we get here, we don't know the state.  Report error, return NULL.
         errorHandler.error("KnownState::clone: unknown state name: ",type)
@@ -59,13 +75,36 @@ StringList
 KnownState::nameList () {
         StringList s;
         if (numStates > 0) {
-                allStates->reset();
+		ListIter next(*allStates);
                 for (int i=numStates; i>0; i--) {
-                        State& t = (*allStates)++;
-                        s += t.readName();
+                        State* t = (State*)next++;
+                        s += t->readName();
                         s += "\n";
                 }
         }
         return s;
 }
+
+// Here is a short, standard global symbol list.  By putting this
+// here we always get them.
+#include "IntState.h"
+#include "FloatState.h"
+
+static FloatState pi;
+KnownState k_pi(pi,"PI","3.14159265358979323846");
+
+const char one[] = "1";
+const char zero[] = "0";
+
+static IntState true;
+KnownState k_true(true,"TRUE",one);
+
+static IntState yes;
+KnownState k_yes(yes,"YES",one);
+
+static IntState false;
+KnownState k_false(false,"FALSE",zero);
+
+static IntState no;
+KnownState k_no(no,"NO",zero);
 
