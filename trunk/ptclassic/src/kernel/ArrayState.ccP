@@ -1,9 +1,8 @@
+static const char file_id[] = "<T>ArrayState.cc";
+
 #ifdef __GNUG__
 #pragma implementation
 #endif
-
-#include "logNew.h"
-REGISTER_FILE;
 
 #include <std.h>
 #include "<T>State.h"
