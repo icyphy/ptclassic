@@ -43,6 +43,11 @@ Useful higher level OCT interface functions.
 #include "region.h"
 #include "oct.h"
 #include "mkTerm.h"
+#include "vemInterface.h"
+#include "pigiLoader.h"
+#include "kernelCalls.h"
+
+#include "octIfc.h"
 
 static boolean SetParamProp();
 extern char* HashString();
