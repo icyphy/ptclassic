@@ -213,7 +213,7 @@ struct InterpTableEntry {
 // Here is the table.  Make sure it ends with "0,0"
 static InterpTableEntry funcTable[] = {
 	ENTRY(pvOpenWindow),
-	0, 0
+	{ 0, 0 }
 };
 
 // register all the functions.
