@@ -77,36 +77,19 @@ than one version installed on your system.
 <p>
 
 Tycho includes HTML documentation of the Itcl classes that make up
-Tycho.  To save space, these files are not shipped in the Tycho tar
-file, you must build them after untarring the distribution.
-The way to do this is:
-<PRE>
-cd $TYCHO
-make install &gt;&amp; install.out &amp;
-</PRE>
+Tycho.  In Tycho0.2 and earlier, these files (located in the
+<CODE>doc/codeDoc</CODE> directory) were not shipped with the
+distribution and had to be installed.  In Tycho0.2.1, these files are
+shipped in the Tycho tar file, so there is no need to build them by
+hand.
 
-The <CODE>install</CODE>  makefile rule will update the HTML files in
-<CODE>doc/codeDoc</CODE>, create concept and code indexes and then
-regenerate the HTML documentation using the indexes.  <CODE>make install</CODE>
-usually takes 10-15 minutes to complete.
-
- <P>The
-<A HREF="../kernel/gui/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
-is an experimental graphical interface to the build process.  The
-BuilderDialog interface will change over time, but you may find it useful
-for building the HTML documentation.  To run the BuilderDialog, choose the
-<CODE>Build Tycho</CODE> submenu choice under the <CODE>Tools</CODE> menu
-choice in the main <CODE>Window</CODE> menu.
-
- <P>The TclJava interface and the Profile command require compilation
-of C files.  To build these packages, run
+ <P>The Tycho/Ptolemy CGC interface requires compilation
+of C files.  To build this package, run
 <PRE>
 cd $TYCHO
 make tclexts
-</PRE>
-Note that to build the TclJava, you need to have JDK1.1.1, and to build
-the <CODE>profile</CODE> command, you need to have the Tcl sources.
- <P>See <A HREF="coding/buildtclexts.html">Building Tcl Extensions</A>
+</PRE> 
+<P>See <A HREF="coding/buildtclexts.html">Building Tcl Extensions</A>
 for more information.
 
 <p>
@@ -115,7 +98,7 @@ for more information.
 To use Tycho standalone (independent of Ptolemy),
 the command-line syntax is:
 <pre>
-    tycho [-nowelcome] [-noconsole] [-debug] [-tty] [file...]
+    tycho [-nowelcome] [-noconsole] [-debug] [-tty] [-e tclfile] [file...]
 </pre>
 
 All arguments and options are optional.
@@ -143,13 +126,20 @@ can also be set to modify the behaviour of Tycho over a slow network.
 <DD> Start <CODE>itkwish</CODE> inside the Gnu <CODE>gdb</CODE> debugger.
 <DT> <A NAME="-tty tycho option"><CODE>-tty</CODE></A>
 <DD> Start a non-graphical version of Tycho that has a tty prompt.
+<DT> <A NAME="-e tycho option"><CODE>-e <CODE>tclfile</CODE></CODE></A>
+<DD> Start up and source <CODE><I>tclfile</I></CODE>.  Note that
+at startup time, <CODE>~/.Tycho/tychorc.tcl</CODE> is also sourced.
+See
+<a href="#customizing Tycho on startup">Customizing Tycho on Startup</a>
+for more information.
 </DL>
 <p>
 <h2><a name="Ptolemy with Tycho">Executing Tycho with Ptolemy</a></h2>
 <p>
 If you are running Ptolemy version 0.6 or higher, then
 Tycho is already running when you run the user interface <CODE>pigi</CODE>.
-You can obtain a Tycho console window with the key binding <CODE>y</CODE>.
+You can obtain a Tycho console window by typing a <CODE>y</CODE> while
+the mouse cursor is over a vem facet or palette.
 You can also run Tycho with the Ptolemy textual interpreter, 
 <CODE>ptcl</CODE>.
 The command-line syntax for this is:
@@ -202,18 +192,6 @@ The directory <A HREF="../typt"><CODE>$TYCHO/typt</CODE></A>
 contains the Ptolemy specific Tycho features.  The <A
 HREF="../typt/doc/usersGuides/index.html"><CODE>typt</CODE> User's Guides</A>
 documentation is a good starting point.
-<h2><a name="debugging Tycho with Ptolemy">Debugging Tycho with Ptolemy</a></h2>
-
-<p> Since Ptolemy is a fundamentally extensible system, Tycho running
-with Ptolemy has special features to allow experimentation and
-debugging.  One feature is that it traps segmentation faults and
-related errors that cause the program to crash and attempts to save
-any unsaved work before exiting.  Of course, there is no guarantee
-that this will work, so files are saved with the prefix
-<CODE>#crash#</CODE> . When the file is reopened Tycho will check to
-see if a <CODE>#crash#</CODE> file exists, and if it does, it will give the
-user the option of opening it.
-
 <p>
 
 <h2><a name="customizing Tycho on startup">Customizing Tycho on Startup
@@ -228,7 +206,7 @@ that the <CODE>.Tycho</CODE> directory is used to store other state
 information for Tycho, such as your personal dictionary for spelling
 checks.
 
-<P>Note that <CODE>ptcl</CODE> sources
+<P>Note that upon startup <CODE>ptcl</CODE> sources
 <A NAME=".ptclrc"><CODE>~/.ptclrc</CODE></A> and
 <CODE>pigi</CODE> sources <A NAME=".ptkrc"><CODE>~/.ptkrc</CODE></A>.
 
