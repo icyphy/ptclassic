@@ -79,6 +79,11 @@ sources:	$(SRCS)
 clean:
 	rm -f ptlang.c ptlang.o ptlang ptlang.debug.*
 
+realclean: clean
+
+extraclean: realclean
+	rm -f $(SRCS)
+
 depend:
 	echo no dependencies to make in this directory
 
