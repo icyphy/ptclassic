@@ -219,13 +219,10 @@ void ArchTarget :: headerCode() {}
 
 // Trailer code (done last).
 void ArchTarget :: trailerCode() {
-  // Control signals referred to later.
-  VHDLSignal* feedback_clock = new VHDLSignal("feedback_clock", "BOOLEAN", 0);
-  signalList.put(*feedback_clock);
-  VHDLSignal* firstIterDone = new VHDLSignal("FIRST_ITER_DONE", "INTEGER", 0);
-  signalList.put(*firstIterDone);
-  VHDLSignal* iterClockSignal = new VHDLSignal("start_clock", "BOOLEAN", 0);
-  signalList.put(*iterClockSignal);
+    // Control signals referred to later.
+    signalList.put("feedback_clock", "BOOLEAN", 0);
+    signalList.put("FIRST_ITER_DONE", "INTEGER", 0);
+    signalList.put("start_clock", "BOOLEAN", 0);
 
   extract_ports();
   extract_tokens();
@@ -257,8 +254,7 @@ void ArchTarget :: extract_ports() {
     VHDLPortListIter nextPort(*(firing->portList));
     VHDLPort* port;
     while ((port = nextPort++) != 0) {
-      VHDLSignal* newSignal = new VHDLSignal(port->getName(), port->getType(), 0);
-      signalList.put(*newSignal);
+      VHDLSignal* newSignal = signalList.add(port->getName(), port->getType(), 0);
       port->connect(newSignal);
       // If it's an input, also add a mux.
       if (port->isItInput()) {
@@ -278,8 +274,7 @@ void ArchTarget :: extract_tokens() {
   VHDLTokenListIter nextToken(tokenList);
   VHDLToken* token;
   while ((token = nextToken++) != 0) {
-    VHDLSignal* newSignal = new VHDLSignal(token->getName(), token->getType(), 0);
-    signalList.put(*newSignal);
+    VHDLSignal* newSignal = signalList.add(token->getName(), token->getType(), 0);
     VHDLReg* newReg = new VHDLReg(token->getName(), token->getType());
     newReg->setOutput(newSignal);
 
@@ -451,10 +446,8 @@ void ArchTarget :: extract_arcs() {
       if (ix >= 0) { destName << "_" << ix; }
       else { /* (ix < 0) */ destName << "_N" << (-ix); }
 
-      VHDLSignal* sourceSignal = new VHDLSignal(sourceName, arc->getType(), 0);
-      VHDLSignal* destSignal = new VHDLSignal(destName, arc->getType(), 0);
-      signalList.put(*sourceSignal);
-      signalList.put(*destSignal);
+      VHDLSignal* sourceSignal = signalList.add(sourceName, arc->getType(), 0);
+      signalList.put(destName, arc->getType(), 0);
 
       // FIXME: feedback_clock and first_iter_done should be merged.
       VHDLSignal* feedback_clock = signalList.vhdlSignalWithName("feedback_clock");
@@ -551,8 +544,7 @@ void ArchTarget :: construct_regs() {
   while ((reg = nextReg++) != 0) {
     // Create a dummy clock if the register doesn't have one.
     if (!reg->getClock()) {
-      VHDLSignal* newSignal = new VHDLSignal("DummyClock", "BOOLEAN", 0);
-      signalList.put(*newSignal);
+      VHDLSignal* newSignal = signalList.add("DummyClock", "BOOLEAN", 0);
       reg->setClock(newSignal);
     }
     connectRegister(reg->getInput(), reg->getOutput(), reg->getClock());
@@ -651,8 +643,7 @@ void ArchTarget :: frameCode() {
 	clockName << "_clk";
 	pulseClock(clockName, firing->endTime);
 	// Add a new clock signal also.
-	VHDLSignal* newSignal = new VHDLSignal(clockName, "BOOLEAN", 0);
-	signalList.put(*newSignal);
+	signalList.put(clockName, "BOOLEAN", 0);
       }
     }
   }
@@ -904,8 +895,7 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
       newToken->clockName = clockName;
 
       // Add a new clock signal also.
-      VHDLSignal* newSignal = new VHDLSignal(clockName, "BOOLEAN", 0);
-      signalList.put(*newSignal);
+      signalList.put(clockName, "BOOLEAN", 0);
 
       newToken->setSourceFiring(currentFiring);
       newPort->setToken(newToken);
@@ -1030,6 +1020,12 @@ void ArchTarget :: registerState(State* state, const char* varName,
     listState->initVal = initVal;
     listState->type = stType;
     listState->lastFiring = -1;
+    if (constState) {
+	listState->constant = 1;
+    }
+    else {
+	listState->constant = 0;
+    }
     stateList.put(*listState);
   }
   // set listState to the one that's actually in the list.
@@ -1058,6 +1054,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
     firingVariableList.put(*inVar);
 
     if (constState) {
+      listState->constant = 1;
       listState->constRefFiringList << currentFiring->getName();
     }
 
@@ -1079,8 +1076,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
       outToken->clockName = clockName;
 
       // Add a new clock signal also.
-      VHDLSignal* newSignal = new VHDLSignal(clockName, "BOOLEAN", 0);
-      signalList.put(*newSignal);
+      signalList.put(clockName, "BOOLEAN", 0);
 
       outToken->setSourceFiring(currentFiring);
       outPort->setToken(outToken);
