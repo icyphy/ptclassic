@@ -44,7 +44,7 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y
 
-test remove.0 {create a test universe} {
+test remove-0 {create a test universe} {
     namespace pitcl {
         defGalaxy y SDF {
             addBlock z Ramp
@@ -65,19 +65,19 @@ test remove.0 {create a test universe} {
 ######################################################################
 #### remove
 
-test remove.1 {remove a simple star} {
+test remove-1 {remove a simple star} {
     ::pitcl::currentGalaxy .x
     ::pitcl::remove b
     ::pitcl::blocks
 } {a c d e}
 
-test remove.2 {remove a galaxy by relative name} {
+test remove-2 {remove a galaxy by relative name} {
     ::pitcl::currentGalaxy .x
     ::pitcl::remove a
     ::pitcl::blocks .x
 } {c d e}
 
-test remove.3 {remove a galaxy by absolute name} {
+test remove-3 {remove a galaxy by absolute name} {
     ::pitcl::currentGalaxy .main
     ::pitcl::remove .x.e
     ::pitcl::blocks .x
@@ -86,13 +86,13 @@ test remove.3 {remove a galaxy by absolute name} {
 set univlist [::pitcl::knownUniverses]
 set loc [lsearch -exact $univlist .x]
 set newunivlist [lreplace $univlist $loc $loc]
-test remove.4 {remove a universe} {
+test remove-4 {remove a universe} {
     ::pitcl::currentGalaxy .x
     ::pitcl::remove .x
     list [::pitcl::knownUniverses] [::pitcl::currentGalaxy]
 } [list $newunivlist .main]
 
-test remove.5 {attempt to remove main} {
+test remove-5 {attempt to remove main} {
     ::pitcl::addUniverse .main SDF
     ::pitcl::addBlock a Ramp
     ::pitcl::remove .main
