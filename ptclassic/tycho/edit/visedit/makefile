@@ -48,6 +48,8 @@ ITCL_SRCS = \
 	EditDAGWidget.itcl \
 	EditForest.itcl \
 	EditForestWidget.itcl \
+	EditPalette.itcl \
+	EditPaletteWidget.itcl \
 	EditSTD.itcl \
 	GanttView.itcl \
 	GanttDF.itcl \
