@@ -66,7 +66,6 @@ extern "C" {
 #include "xfunctions.h"			/* define win_msg */
 #include "handle.h"			/* define ptkHandle2OctObj */
 #include "kernelCalls.h"		/* define functions prefixed by Kc */
-#include "dmmSupport.h"			/* define SetChangedFlag */
 #undef Pointer
 }
 
@@ -1701,37 +1700,6 @@ int POct::ptkGetStarName(int aC, char** aV) {
     }
 }
 
-// sets the dmm changed flag for DMM domain applications whenever
-// parameter is changed
-// called from ptkParams.tcl
-// Asawaree Kalavade 11/22/95
-int POct::ptkSetDMMChangedFlag(int aC,char** aV) {
-    octObjectClass instance;
-
-    // Error checking: number of arguments, value of arguments, oct facet file
-    if (aC != 2) return usage ("ptkSetDMMChangedFlag <OctInstanceHandle>");
-    if (!ptkHandle2OctObj(aV[1], instance)) {
-	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ",
-			 aV[0], (char *) NULL);
-        return TCL_ERROR;
-    }
-
-    // Facet must be a star or Galaxy
-    // Set the domain to be that of the instance
-    if (IsStar(instance) || IsGal(instance)) {
-	if (!setCurDomainInst(instance)) {
-	    Tcl_AppendResult(interp, "Invalid Domain Found.", (char *) NULL);
-	    return TCL_ERROR;
-	}
-
-	// if the domain is DMM, then set the changedFlag
-	const char* domain = getDomainInst(instance);
-	if (strcmp(domain, "DMM") == 0) {
-	    SetChangedFlag(instance);
-	}
-    }
-    return TCL_OK;
-}
 
 ///////////////////////////////////////////////////////////////////////////
 // The rest of the code in this file is duplicated from the PTcl class
@@ -1774,7 +1742,6 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkSetDomain),
 	ENTRY(ptkGetTargetNames),
 	ENTRY(ptkGetTargetParams),
-	ENTRY(ptkSetDMMChangedFlag),
 	ENTRY(ptkSetTargetParams),
 	ENTRY(ptkFacetContents),
 	ENTRY(ptkOpenMaster),
