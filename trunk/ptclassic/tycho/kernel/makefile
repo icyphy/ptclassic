@@ -84,7 +84,6 @@ ITCL_SRCS = \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	HyperlinkIndex.itcl \
-	IconIndex.itcl \
 	IndexBrowser.itcl \
 	Interchange.itcl \
 	KeyedDigraph.itcl \
