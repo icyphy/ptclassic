@@ -195,8 +195,8 @@ limitation of liability, and disclaimer of warranty provisions.
             {
 		int i;
 		if(argc != $ref(numOutputs)+1) {
-                    errorReport("Invalid number of arguments");
-                    return TCL_ERROR;
+                    /* Ignore -- probably premature */
+                    return TCL_OK;
 		}
 		for(i=0; i<$ref(numOutputs); i++) {
                     if(sscanf(argv[i+1], "%f", &$starSymbol(outs)[i]) != 1) {
