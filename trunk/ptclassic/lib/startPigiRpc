@@ -16,12 +16,12 @@
 # You may need to change it for your system.
 PTOLEMY=/usr/users/ptolemy
 
-# Set ARCH properly.  SunOS has this
-test -x /bin/arch && ARCH=`/bin/arch`
+# Set PTARCH properly.  SunOS has this
+test -x /bin/arch && PTARCH=`/bin/arch`
 # Ultrix has this
-test -x /bin/machine && ARCH=`/bin/machine`
+test -x /bin/machine && PTARCH=`/bin/machine`
 
-# If ARCH still is not set you need to do something else!
+# If PTARCH still is not set you need to do something else!
 export ARCH
 
 # Add the Ptolemy directories to the PATH.  You may also need to add
@@ -29,7 +29,7 @@ export ARCH
 # of your private stars want to invoke special programs that need to
 # be on the path.
 
-PATH=$PTOLEMY/bin:$PTOLEMY/bin.${ARCH}:$PATH
+PATH=$PTOLEMY/bin:$PTOLEMY/bin.${PTARCH}:$PATH
 export PATH
 
 # Now exec the real pigiRpc.
