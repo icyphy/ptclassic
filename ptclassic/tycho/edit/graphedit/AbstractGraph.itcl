@@ -80,6 +80,15 @@ class ::tycho::Graph {
     # Add an arc between existing nodes, if it does not already exist.
     method addArc {parent child}
 
+    # Return the value of the specified attribute for the specified node.
+    method attribute {attrname node}
+
+    # Set the specified attribute for all nodes to the specified value.
+    method attributeInit {attrname {initvalue 0}}
+
+    # Set the specified attribute for the specified node to the specified value.
+    method attributeSet {attrname node {value 1}}
+
     # Return the list of children of a node.
     method children {nodename}
 
@@ -122,15 +131,6 @@ class ::tycho::Graph {
     # Verify that all parents and children of nodes are present.
     method verifyAll {{repair {}}}
 
-    # Return the "visited" flag for the specified node.
-    method visited {node}
-
-    # Reset the "visited" flag for all nodes.
-    method visitedInit {{initvalue 0}}
-
-    # Set the "visited" flag for the given node.
-    method visitedSet {node {value 1}}
-
     ###################################################################
     ####                   protected methods                       ####
 
@@ -155,7 +155,7 @@ class ::tycho::Graph {
     ###################################################################
     ####                   private variables                       ####
 
-    private variable visitedFlag
+    private variable attributeArray
 }
 
     ###################################################################
@@ -210,6 +210,46 @@ body ::tycho::Graph::addArc {parent child} {
         lappend childrennames($parent) $child
         lappend parentnames($child) $parent
     }
+}
+
+#######################################################################
+#### attribute
+# Return the value of the specified attribute for the specified node.
+# It is an error if the attribute has not been set for this node.
+# The method <code>attributeInit</code> or <code>attributeSet</code>
+# should be used to set the value of the attribute.
+# Attributes are used by various algorithms that traverse the graph.
+# For example, to keep track of which nodes have beed visited already
+# in some graph traversal algorithm, you could use an attribute with
+# "visited" that takes value 0 or 1.
+#
+body ::tycho::Graph::attribute {attrname node} {
+    return $attributeArray($attrname,$node)
+}
+
+#######################################################################
+#### attributeInit
+# Set the specified attribute for all nodes to the specified value.
+# The attribute name is an arbitrary identifying string, and the value
+# is an arbitrary string.  If the value is not given, it defaults to "0".
+#
+body ::tycho::Graph::attributeInit {attrname {initvalue 0}} {
+    if [info exists contentslist] {
+        set searchid [array startsearch contentslist]
+        while {[set node [array nextelement contentslist $searchid]] != {}} {
+            set attributeArray($attrname,$node) $initvalue
+        }
+        array donesearch contentslist $searchid
+    }
+}
+
+#######################################################################
+#### attributeSet
+# Set the specified attribute for the specified node to the specified value.
+# The attribute name and value can be any arbitrary Tcl strings.
+#
+body ::tycho::Graph::attributeSet {attrname node {value 1}} {
+    set attributeArray($attrname,$node) $value
 }
 
 #######################################################################
@@ -467,43 +507,6 @@ body ::tycho::Graph::verifyAll {{repair {}}} {
         }
     }
     # array donesearch contentslist $id
-}
-
-#######################################################################
-#### visited
-# Return the "visited" flag for the specified node. The method
-# <code>visitedInit</code> has to be run before this can be run. This
-# flag can be used in graph traversal algorithms to keep track of nodes
-# that have been already visited.
-#
-body ::tycho::Graph::visited {node} {
-    return $visitedFlag($node)
-}
-
-#######################################################################
-#### visitedInit
-# Reset the "visited" flag for all nodes. This flag can be used in
-# graph traversal algorithms to keep track of nodes that have been
-# already visited.
-#
-body ::tycho::Graph::visitedInit {{initvalue 0}} {
-    if [info exists contentslist] {
-        set searchid [array startsearch contentslist]
-        while {[set node [array nextelement contentslist $searchid]] != {}} {
-            set visitedFlag($node) $initvalue
-        }
-        array donesearch contentslist $searchid
-    }
-}
-
-#######################################################################
-#### visitedSet
-# Set the "visited" flag for the given node. This flag can be used in
-# graph traversal algorithms to keep track of nodes that have been
-# already visited.
-#
-body ::tycho::Graph::visitedSet {node {value 1}} {
-    set visitedFlag($node) $value
 }
 
     ###################################################################
