@@ -71,4 +71,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		addCode(result);
 		addCode(saveResult);
 	}
+
+	exectime {
+		return 5 + CG56GoertzelBase::myExecTime();
+	}
 }

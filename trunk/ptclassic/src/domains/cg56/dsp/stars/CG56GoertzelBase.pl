@@ -135,7 +135,9 @@ $label(_GoertzelBase)
 	}
 
 	exectime {
-		// The do command takes 6 cycles
-		return (6 + 6*int(N));
+		// The do command takes 6 oscillator cycles
+		// However, the exectime is given in half oscillator cycles
+		// Why?  Because that's the way it was done in Gabriel
+		return (4 + 3*int(N));
 	}
 }

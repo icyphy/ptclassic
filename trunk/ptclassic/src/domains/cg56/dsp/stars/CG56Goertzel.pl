@@ -93,4 +93,8 @@ which is a function of k and N
 		// Register status after CG56GoertzelBase::go():
 		addCode(result);
 	}
+
+	exectime {
+		return 4 + CG56GoertzelBase::myExecTime();
+	}
 }
