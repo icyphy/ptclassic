@@ -338,6 +338,8 @@ ifdef PN
 		LIBFILES += $(LIBDIR)/libpnstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libpn.$(LIBSUFFIX)
 		ifneq ("$(filter sun% sol% ,$(PTARCH))","")
+			CUSTOM_DIRS += $(CROOT)/thread/gthreads \
+				$(CROOT)/thread/posix
 			# POSIX thread library from Florida State University.
 			LIBFILES += $(ROOT)/thread/lib.$(PTARCH)/libgthreads.a
 			LIBS += -lposixthread \
