@@ -35,7 +35,8 @@ LINKER =	CC
 # startup module
 CRT0 =
 # system libraries (libraries from the environment)
-SYSLIBS =	-lm
+# /usr/lib/end.o is necessary for debugging with xdb
+SYSLIBS =	-lm /usr/lib/end.o
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
@@ -60,3 +61,5 @@ X11EXT_LIBSPEC = -L/usr/lib/X11R5 -lXext
 # Ptolemy will not build the s56dsp files under sun cfront or on the hppa
 #S56DIR= 	$(ROOT)/vendors/s56dsp
 S56DIR=
+
+FLUSH_CACHE = $(LIBDIR)/flush_cache.o
