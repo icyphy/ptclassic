@@ -116,7 +116,7 @@ body ::tycho::JRPC::constructor {args} {
     # FIXME: we need to save the output
     set _logFile [::tycho::tmpFileName JRPClog .txt]
     if [catch {set _subprocpid [exec tyjtclsh \
-            [file join $tycho util devtools JRPCServer.tcl] \
+            [file join $tycho util ptsim JRPCServer.tcl] \
             $portnum $debug >& $_logFile &]} err] {
         puts "Failed to start up tyjtclsh:\n$err\nLogfile:\n"
 	if [file exists $_logFile] {
