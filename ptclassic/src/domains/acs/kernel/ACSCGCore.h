@@ -177,6 +177,12 @@ protected:
 		return addCode(decl, "mainInit", name);
 	}
 
+	// This function checks whether "state" is to be set from a command-line
+	// argument. If it is, returns the name to be specified on the command-
+	// line. The function returns "" otherwise.
+	StringList cmdArg(const State* state) const;
+	int isCmdArg (const State* state) const;
+
 private:
 
 	// List of all states pointed to in the code.

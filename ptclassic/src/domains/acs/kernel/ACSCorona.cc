@@ -68,13 +68,13 @@ void ACSCorona::initCores()
 }
 
 // select Core to be used
-int ACSCorona::setCore(const char *coreName)
+int ACSCorona::setCore(const char *coreCategory)
 {
   ListIter iterator(coreList);
   ACSCore* ptr;
   // iterate through list until Core is found, if not return null
   while ( (ptr = (ACSCore*)(iterator++)) != 0 ) {
-	if ( strcmp(coreName,ptr->getCategory()) == 0 ) {
+	if ( strcmp(coreCategory, ptr->getCategory()) == 0 ) {
 		currentCore = ptr;
 		return TRUE;
 	}
