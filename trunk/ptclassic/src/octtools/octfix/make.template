@@ -46,7 +46,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-C_INCL= -I../include
+C_INCL= -I../include $(PTCOMPAT_INCSPEC)
 
 all::	 makefile octfix
 
@@ -57,7 +57,7 @@ LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 
 octfix:	$(OBJS)
 	$(LINKER) $(LINKFLAGS) $(OBJS) \
-  		-o octfix \
+		-o octfix \
 		$(LIBS) -lm 
 
 DEST = $(OCTTOOLS)/bin.$(ARCH)/octfix
@@ -68,7 +68,7 @@ $(DEST):	octfix
 		ln octfix $(DEST)
 
 install: makefile $(DEST) $(BINDIR)/octfix
-	
+
 $(BINDIR)/octfix:
 	(cd $(BINDIR); rm -f octfix; ln -s ../octtools/bin.$(ARCH)/octfix .)
 
