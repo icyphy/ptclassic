@@ -122,7 +122,6 @@ const char *s;
 
 /* 3/28/90
 Highlight a star with a color and keep track of allocated vemSelSets.
-You can call this with out using Gantt, see RpcFindStar().
 Inputs:
     rootFacetPtr = facet to start looking for name in
     name = name of star, components are separated by '.'
