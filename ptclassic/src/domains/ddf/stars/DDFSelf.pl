@@ -21,7 +21,7 @@ defstar {
 	domain { DDF }
 	desc { "This star realizes recursion" }
 	hinclude { "InterpGalaxy.h" }
-	ccinclude { "KnownBlock.h", "DDFScheduler.h" }
+	ccinclude { "DDFScheduler.h" }
 	protected {
 		InterpGalaxy* gal;
 	}
