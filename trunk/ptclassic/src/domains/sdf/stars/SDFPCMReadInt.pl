@@ -52,11 +52,6 @@ periodically repeated, or the file contents can be padded with zeros.
 	destructor  { LOG_DEL; delete input;}
 
 	code {
-		// Stuff for reporting errors (should be moved to a system
-		// routine):
-		extern int errno;
-		extern char *sys_errlist[];
-
 		// This routine is by
 		// Craig Reese: IDA/Supercomputing Research Center
 		// 29 September 1989
