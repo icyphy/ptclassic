@@ -596,6 +596,7 @@ octObject *facetPtr;
     }
     PrintDebug("CompileUniv");
     KcClearUniverse();
+    ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
     ERR_IF1(!ClearDirty(facetPtr));
