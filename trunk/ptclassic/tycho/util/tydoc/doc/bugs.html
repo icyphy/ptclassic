@@ -26,15 +26,6 @@
 	option add *RevControlSCCS.versionColor [ptkColor blue black] widgetDefault
 	</LISTING>
 
-	<LI> If we have a destructor that looks like:
-	<LISTING>
-	    destructor {
-		unset instances($this)
-	    }
-	</LISTING>
-	Then we incorrectly assume that <CODE>unset . . .</CODE>
-	is the args.
-
 	<LI> Links that work from the kernel directory do not
 	necessarily work from the doc/codeDoc directory.
 	<CODE>ListBrowser.itcl</CODE> has such a link.
