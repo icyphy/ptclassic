@@ -78,8 +78,11 @@ static int setOutputs(
 TclStarIfc::TclStarIfc () {
 	starID = "tclStar";
 	starID += unique++;
+	inputNewFlags = NULL;
 	outputValues = NULL;
-	arraySize = 0;
+	outputNewFlags = NULL;
+	outputArraySize = 0;
+	inputArraySize = 0;
 }
 
 // destructor
@@ -110,7 +113,9 @@ TclStarIfc::~TclStarIfc() {
 	buf += starID;
 	Tcl_DeleteCommand(ptkInterp, (char*)buf);
 	Tcl_UnsetVar(ptkInterp,(char*)starID,TCL_GLOBAL_ONLY);
+	LOG_DEL; delete [] inputNewFlags;
 	LOG_DEL; delete [] outputValues;
+	LOG_DEL; delete [] outputNewFlags;
 }
 
 int TclStarIfc::setup (Block* star,
@@ -163,14 +168,27 @@ int TclStarIfc::setup (Block* star,
 			(char*)val, TCL_GLOBAL_ONLY);
 	}
 
-	if (numOutputs > 0) {
-		LOG_DEL; delete [] outputValues;
-		LOG_NEW; outputValues = new double[numOutputs];
+	if (numInputs > 0) {
+		LOG_DEL; delete [] inputNewFlags;
+		LOG_NEW; inputNewFlags = new int[numInputs];
 		// Initialize the outputs
 		for (int i = 0; i < numOutputs; i++)
-		outputValues[i] = 0.0;
+		  inputNewFlags[i] = FALSE;
 	}
-	arraySize = numOutputs;
+	inputArraySize = numInputs;
+
+	if (numOutputs > 0) {
+		LOG_DEL; delete [] outputValues;
+		LOG_DEL; delete [] outputNewFlags;
+		LOG_NEW; outputValues = new double[numOutputs];
+		LOG_NEW; outputNewFlags = new int[numOutputs];
+		// Initialize the outputs
+		for (int i = 0; i < numOutputs; i++) {
+		  outputValues[i] = 0.0;
+		  outputNewFlags[i] = FALSE;
+		}
+	}
+	outputArraySize = numOutputs;
 
 	char ncstring4[] = "ptkDisplayErrorInfo";
 	if(tcl_file[0] == '$') {
@@ -251,13 +269,13 @@ int TclStarIfc::wrapup() {
     else return TRUE;
 }
 
-
+// Works for all Ptolemy domains
 InfString TclStarIfc::getInputs () {
 	BlockPortIter nexti(*myStar);
 	PortHole *p;
 	InfString result;
 	while ((p = nexti++) != 0) {
-	    // return a quoted string for tcl consumption
+	    // return a quoted string for Tcl consumption
 	    result += "{";
 	    result += ((*p)%0).print();
 	    result += "} ";
@@ -267,13 +285,25 @@ InfString TclStarIfc::getInputs () {
 
 // Load the local buffer outputValues[] with values supplied by Tcl
 void TclStarIfc::setOneOutput (int outNum, double outValue) {
-	if(outNum >= arraySize) {
+	if(outNum >= outputArraySize) {
 	    Error::warn(*myStar,"Too many outputs supplied by Tcl");
-	} else {
+	}
+	else {
 	    outputValues[outNum] = outValue;
 	}
 }
 
+// Sets all elements of inputNewFlags array to flag (either TRUE or FALSE)
+void TclStarIfc::setAllNewInputFlags (int flag) {
+	for ( int port = 0; port < inputArraySize; port++ )
+	  inputNewFlags[port] = flag;
+}
+
+// Sets all elements of outputNewFlags array to flag (either TRUE or FALSE)
+void TclStarIfc::setAllNewOutputFlags (int flag) {
+	for ( int port = 0; port < outputArraySize; port++ )
+	  outputNewFlags[port] = flag;
+}
 
 // Initialize the static counter for unique names.
 // The initialization occurs at load time.
