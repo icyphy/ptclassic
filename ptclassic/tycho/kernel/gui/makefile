@@ -59,6 +59,7 @@ ITCL_SRCS = \
 	EditSpell.itcl \
 	EditStack.itcl \
 	ErrorMessage.itcl \
+	Exec.itcl \
 	File.itcl \
 	FileBrowser.itcl \
 	FontManager.itcl \
