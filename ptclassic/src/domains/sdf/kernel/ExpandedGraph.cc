@@ -253,7 +253,6 @@ int ExpandedGraph::ExpandArc(DataFlowStar* src, PortHole* src_port,
 
 int ExpandedGraph::SelfLoop(DataFlowStar& s)
 { 
-	parallelizable = TRUE;
 	if ( enforcedSelfLoop || s.hasInternalState() || PastPortsUsed(s) ||
 	     s.isItWormhole()) {
 		parallelizable = FALSE;
@@ -295,6 +294,7 @@ int ExpandedGraph::createMe(Galaxy& galaxy, int selfLoopFlag)
 	initialize_invocations();
 
 	// make connections among EGNodes
+	parallelizable = TRUE;
 	while ((dest = (DataFlowStar*)nextStar++)!=0) {
 
 	   // make connections between all instances of the same Star if
