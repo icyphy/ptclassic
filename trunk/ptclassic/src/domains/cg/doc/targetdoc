@@ -6,18 +6,26 @@ A code generation \fBDomain\fR is specific to the language generated,
 such as C (CGC), DSP56000 assembly code (CG56), and DSP96000 assembly
 code (CG96).  Each code generation domain has a default target which
 defines routines generic to the target language.  A derived
-\fBTarget\fR, can then be written which defines architecture specific
+.c Target
+can then be written which defines architecture specific
 routines.  A given language, particularly a generic language such as C,
 may run on many target architectures.  Code generation functions are
 cleanly divided between the default domain target and the architecture
 specific target.
 .pp
-All target architectures are derived from the base class \fBTarget\fR.
-The special class \fBKnownTarget\fR is used to add targets to the known
-list of targets much as \fBKnownBlock\fR is used to add stars (and
+All target architectures are derived from the base class
+.c Target .
+The special class
+.c KnownTarget
+is used to add targets to the known
+list of targets much as
+.c KnownBlock
+is used to add stars (and
 other blocks) to the known block list and to assign names to them.
 .pp
-A \fBTarget\fR object has methods for generating a schedule, compiling
+A
+.c Target
+object has methods for generating a schedule, compiling
 the code, and running the code (which may involve downloading code to
 target hardware and beginning its execution).  There also may be child
 targets (for representing multiprocessor targets) together with methods
@@ -26,7 +34,8 @@ that are user specified.
 .H2 "Single-Processor Target"
 .pp
 .Ir "CGTarget, class"
-The base target for all code generation domains is the \fBCGTarget\fR,
+The base target for all code generation domains is the
+.c CGTarget ,
 which represents a single processor by default.  As the generic code
 generation target, the CGTarget class defines many common functions for
 code generation targets.  Methods defined here include virtual methods
@@ -40,23 +49,37 @@ are free to redefine these virtual methods if necessary.
 .Ir "procedures, code stream"
 A code generation target manages code streams which are used to store
 star and target generated code. The CGTarget class has the two
-predefined code streams: \fBmyCode\fR and \fBprocedures\fR.  Derived
+predefined code streams:
+.c myCode
+and
+.c procedures .
+Derived
 targets are free to add more code streams using the CGTarget method
-\fBaddStream(stream-name)\fR.  For example, the default CGC target
+.c addStream(\fIstream-name\fR) .
+For example, the default CGC target
 defines six additional code streams.
 .pp
-The \fBaddCode(code,<stream name>,<unique name>)\fR method of a CG star
+The
+.(c
+addCode(code,\fIstream name\fR,\fI<unique name>\fR)
+.)c
+method of a CG star
 provides an interface to all the code streams (stream name and
 unique-name arguments are optional).  This method defaults to adding
-code into the \fBmyCode\fR stream.  If a stream name is specified,
-addCode looks up the stream using the \fBgetStream(stream-name)\fR
+code into the
+.c myCode
+stream.  If a stream name is specified,
+addCode looks up the stream using the
+.c "getStream(\fIstream-name\fR)"
 method and then adds the code into that stream.  Furthermore, if a
 unique name is provided for the code, the code will only be added if no
 other code has previously been added with the given unique name.  The
 method addCode will return TRUE if the code-string has been added to
 the stream and otherwise will return FALSE. 
 .pp
-Other methods, such as \fBaddProcedure(code,<unique name>)\fR can be
+Other methods, such as
+.c "addProcedure(code,\fI<unique name>\fR)"
+can be
 defined, to provide a more efficient or convenient interfaces to a
 specific code stream (in this case, procedures).  With addProcedure it
 becomes clear why unique names are necessary.  Recall that
@@ -65,28 +88,29 @@ main body of the code.  For example, say we wanted to write a
 function in C to multiply two numbers.  The codeblock to do this
 could read:
 .(c
-	codeblock(sillyMultiply) {
+codeblock(sillyMultiply) {
 /* A silly function */
 double $sharedSymbol(silly,mult)(double a, double b)
-{
-	double m;
-	m = a*b;
-	return m;
+    {
+        double m;
+        m = a*b;
+        return m;
+    }
 }
 .)c
 Note that in this codeblock we used the sharedSymbol macro described in
 the code generation macros section.  To add this code to the procedures
 stream, in the initCode method of the star, we can call either:
 .(c
-	addProcedure(sillyMultiply,"mult");
+    addProcedure(sillyMultiply,"mult");
 .)c
 or
 .(c
-	addCode(sillyMultiply,"procedures","mult");
+    addCode(sillyMultiply,"procedures","mult");
 .)c
 or
 .(c
-	getStream("procedures")->put(sillyMultiply,"mult");
+    getStream("procedures")->put(sillyMultiply,"mult");
 .)c
 .pp
 As with addCode, addProcedure returns a TRUE or FALSE indicating
@@ -111,28 +135,44 @@ if (addProcedure("/* A silly function */\en","mult")) {
 .Id "generateCode, method"
 .Id "mainLoopCode, method"
 Once the program graph is scheduled, the target generates the code in
-the virtual method \fBgenerateCode()\fR. (Note: code streams should be
+the virtual method
+.c generateCode() .
+(Note: code streams should be
 initialized before this method is called.)  All the methods called by
 generateCode are virtual, thus allowing for target customization.  The
-generateCode method then calls \fBallocateMemory()\fR which allocates
+generateCode method then calls
+.c allocateMemory()
+which allocates
 the target resources. After resources are allocated, the initCode
-method of the stars are called by \fBcodeGenInit()\fR. The next step is
-to form the main loop by calling the method \fBmainLoopCode()\fR. The
-number of iteration cycles are determined by the argument of the "run"
-directive which a user specifies in \fBpigi\fR or in \fBptcl\fR.  To
-complete the body of the main loop, \fBgo()\fR methods of stars are
+method of the stars are called by
+.c codeGenInit() .
+The next step is to form the main loop by calling the method
+.c mainLoopCode() .
+The number of iteration cycles are determined by the argument of the "run"
+directive which a user specifies in
+.i pigi
+or in
+.i ptcl .
+To complete the body of the main loop,
+.c go()
+methods of stars are
 called in the scheduled order.  After forming the main loop, the
-\fBwrapup()\fR methods of stars are called.  
+.c wrapup()
+methods of stars are called.  
 .pp
 .Id "frameCode, method"
 .Id "writeCode, method"
 Now, all of the code has been generated; however, the code can be in
-multiple target streams.  The \fBframeCode()\fR method is then called
-to piece the code streams and place its resultant into the \fBmyCode\fR
+multiple target streams.  The
+.c frameCode()
+method is then called
+to piece the code streams and place its resultant into the
+.c myCode
 stream. Finally, the code is written to a file by the method
-\fBwriteCode()\fR.  The default file name is \fB"code.output"\fR, and
+.c writeCode() .
+The default file name is \fI"code.output"\fR, and
 that file will be located in the directory specified by a target
-parameter, \fBdestDirectory\fR.
+parameter, \fIdestDirectory\fR.
 .pp
 .Id "destDirectory, target parameter"
 .pp
@@ -141,10 +181,20 @@ parameter, \fBdestDirectory\fR.
 .Id "runCode, method"
 Finally, since all of the code has been generated for a target, we are
 ready to compile, load, and execute the code.  Derived targets should
-redefine the virtual methods \fBcompileCode()\fR, \fBloadCode()\fR, and
-\fBrunCode()\fR to do these operations.  At times it does not make
-sense to have separate loadCode() and runCode() methods, and in these
-cases, these operations should be collapsed into the runCode method.
+redefine the virtual methods
+.c compileCode() ,
+.c loadCode() ,
+and
+.c runCode()
+to do these operations.  At times it does not make
+sense to have separate
+.c loadCode()
+and
+.c runCode()
+methods, and in these
+cases, these operations should be collapsed into the
+.c runCode
+method.
 .H3 "Wormholes"
 .Ir "wormholes, code generation"
 .pp
@@ -154,14 +204,25 @@ cases, these operations should be collapsed into the runCode method.
 .Id "wormOutputCode, method"
 Unfortunately at the time of this release, no code generation target
 was ready that supported wormholes.  However, the methods necessary to
-support wormholes have already been incorporated into CGTarget.  To
-support wormholes, a target should redefine the virtual methods,
-\fBsendWormData()\fR, \fBreceiveWormData()\fR, \fBwormInputCode()\fR,
-and \fBwormOutputCode()\fR.  The sendWormData() method sends data from
-the \*PT host to the target architecture.  The wormInputCode() method
-is in charge of defining the code in the target language to read in the
-data from the \*PT host.  The methods receiveWormData() and
-wormOutputCode() are similar except that they correspond to data moving
+support wormholes have already been incorporated into
+.c CGTarget .
+To support wormholes, a target should redefine the virtual methods,
+.c sendWormData() ,
+.c receiveWormData() ,
+.c wormInputCode() ,
+and
+.c wormOutputCode() .
+The
+.c sendWormData()
+method sends data from
+the \*PT host to the target architecture.  The
+.c wormInputCode()
+method is in charge of defining the code in the target language to read in the
+data from the \*PT host.  The methods
+.c receiveWormData()
+and
+.c wormOutputCode()
+are similar except that they correspond to data moving
 in the opposite direction.
 .pp
 As can be seen in reading this section, there are many virtual methods in
@@ -170,8 +231,12 @@ way is to look at any existing target in the appropriate domain.
 .pp
 .Ir "AsmTarget, class"
 .Ir "HLLTarget, class"
-Derived from the CGTarget class, the \fBAsmTarget\fR class serves as
+Derived from the CGTarget class, the
+.c AsmTarget
+class serves as
 the base target for all single processor assembly code generation
-targets.  Similarly, the \fBHLLTarget\fR class serves as the base
+targets.  Similarly, the
+.c HLLTarget
+class serves as the base
 target for all single processor high-level language targets, such as C
 or Silage.
