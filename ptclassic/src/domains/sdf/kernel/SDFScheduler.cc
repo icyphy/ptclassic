@@ -4,7 +4,6 @@
 #include "Fraction.h"
 #include "Output.h"
 #include "StringList.h"
-#include "KnownBlock.h"
 
 /**************************************************************************
 Version identification:
@@ -27,7 +26,7 @@ $Id$
 
 extern Error errorHandler;
 
-extern const char SDFdomainName[] = "SDF";
+extern const char SDFdomainName[];
 
 /************************************************************************
 
@@ -531,8 +530,3 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 	}
 	return v;
 }
-
-// Make an entry for KnownBlock
-static SDFScheduler proto;
-static KnownBlock entry(proto,SDFdomainName);
-

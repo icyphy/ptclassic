@@ -2,7 +2,6 @@
 #include "DEScheduler.h"
 #include "Output.h"
 #include "StringList.h"
-#include "KnownBlock.h"
 
 /**************************************************************************
 Version identification:
@@ -23,7 +22,7 @@ These are the methods for the discrete event scheduler.
 
 extern Error errorHandler;
 
-extern const char DEdomainName[] = "DE";
+extern const char DEdomainName[];
 
 /*******************************************************************
 		Main DE scheduler routines
@@ -137,6 +136,3 @@ DEScheduler :: run (Block& galaxy) {
 	} // end of while
 }
 
-// Make an entry for KnownBlock
-static DEScheduler proto;
-static KnownBlock entry(proto,DEdomainName);
