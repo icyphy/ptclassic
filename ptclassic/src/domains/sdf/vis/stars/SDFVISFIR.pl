@@ -35,7 +35,7 @@ limitation of liability, and disclaimer of warranty provisions.
       	defstate {
 	  name { scale }
 	  type { float }
-	  default { "10000.0" }
+	  default { "32767.0" }
 	  desc { Filter tap scale }
 	  attributes { A_CONSTANT|A_SETTABLE }
 	}
@@ -53,8 +53,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  shift_taparray = 0;
 	}
 	destructor {
-	  if (shift_taparray)
-	    free(shift_taparray);
+	  free(shift_taparray);
 	}
         setup {
 	  int taprowindex, tapcolindex;
@@ -64,128 +63,134 @@ limitation of liability, and disclaimer of warranty provisions.
 	    taplength = taps.size();
 	  
 	  // determine input buffer size
-	    if (taplength == 0)
-	      maxpast = 1;
-	    else if ((taplength-1)%NumPack==0)
-	      maxpast = int((taplength-1)/NumPack)+1;
-	    else
-	      maxpast = int((taplength-1)/NumPack)+2;
+	       if (taplength == 0)
+		 maxpast = 1;
+	       else if ((taplength-1)%NumPack==0)
+		 maxpast = int((taplength-1)/NumPack)+1;
+	       else
+		 maxpast = int((taplength-1)/NumPack)+2;
 	  tappadlength = NumPack*maxpast;
 	  signalIn.setSDFParams(NumIn,maxpast);
 	  
 	  // allocate shifted taparrays
-	    if (shift_taparray)
-	      free(shift_taparray);
-	    shift_taparray = (short*) malloc(NumPack*tappadlength);
+	       if (shift_taparray)
+		 free(shift_taparray);
+	  shift_taparray = (short*) malloc(NumPack*tappadlength);
 	  
 	  // initialize shifted taparrays to zero
-	    for(taprowindex=0;taprowindex<NumPack;taprowindex++){
-	      for(tapcolindex=0;tapcolindex<tappadlength;tapcolindex++){
-		shift_taparray[taprowindex*tappadlength+tapcolindex] = 0;
-	      }
-	    }
+	       for(taprowindex=0;taprowindex<NumPack;taprowindex++){
+		 for(tapcolindex=0;tapcolindex<tappadlength;tapcolindex++){
+		   shift_taparray[taprowindex*tappadlength+tapcolindex] = 0;
+		 }
+	       }
 	  
 	  // fill taparrays
-	    for(taprowindex=0;taprowindex<NumPack;taprowindex++){
-	      for(tapcolindex=0;tapcolindex<taplength;tapcolindex++){
-		// scale taps, check for under/overflow,
-		// and cast to short
-		  intmp = scale*taps[tapcolindex];
-		if (intmp <= double(LowerBound)){
-		  shift_taparray[taprowindex*(tappadlength+1)+tapcolindex]=\
-		    double(LowerBound);
-		}
-		else if (intmp >= double(UpperBound)){
-		  shift_taparray[taprowindex*(tappadlength+1)+tapcolindex]=\
-		    double(UpperBound);
-		}
-		else{ 
-		  shift_taparray[taprowindex*(tappadlength+1)+tapcolindex]=\
-		    short(intmp);
-		}
-	      }	
-	    }
+	       for(taprowindex=0;taprowindex<NumPack;taprowindex++){
+		 for(tapcolindex=0;tapcolindex<taplength;tapcolindex++){
+		   // scale taps, check for under/overflow, and cast to short
+		   intmp = scale*taps[tapcolindex];
+		   if (intmp <= double(LowerBound)){
+		     shift_taparray[taprowindex*(tappadlength+1)+tapcolindex]=\
+		       double(LowerBound);
+		   }
+		   else if (intmp >= double(UpperBound)){
+		     shift_taparray[taprowindex*(tappadlength+1)+tapcolindex]=\
+		       double(UpperBound);
+		   }
+		   else{ 
+		     shift_taparray[taprowindex*(tappadlength+1)+tapcolindex]=\
+		       short(intmp);
+		   }
+		 }	
+	       }
 	}
 	go {	
-	  
-          union vis_dreg {
-            double dreg64;
-            short  sreg16[NumPack];
-          };		
-	  
-	  union vis_dreg packedOut;
+
+	  union vis_dfreg {
+	    double double64[2];
+	    float  quad32[NumPack];
+	  };
+
+	  union vis_dfreg packedaccum;
 	  int outerloop, innerloop, numloop;
 	  int genindex, tapindex;
 	  float datahi, datalo;
 	  unsigned long taphi[NumPack], taplo[NumPack];
 	  float tappairhi[NumPack], tappairlo[NumPack];
-	  float t0,t1;
+	  float splithi,splitlo,packedhi,packedlo;
 	  float accumfinal[NumPack];
 	  double pairlohi[NumPack], pairlolo[NumPack];
 	  double pairhilo[NumPack], pairhihi[NumPack];
 	  double accum_pairlo[NumPack], accum_pairhi[NumPack];
 	  double accum_pair[NumPack];
+	  double packedOut;
+	  
+	  vis_write_gsr(8);	  
 	  
 	  // loop once for each set of filter taps
-	    if (taplength == 0)
-	      numloop = 0;
-	    else	
-	      numloop = maxpast;
+	       if (taplength == 0)
+		 numloop = 0;	
+	       else		
+		 numloop = maxpast;	
 	  
 	  // initialize accumulator to zero
-	    for(genindex=0;genindex<NumPack;genindex++){
-	      accum_pairlo[genindex] = vis_fzero();
-	      accum_pairhi[genindex] = vis_fzero();
-	      accum_pair[genindex] = vis_fzero();
-	    }
+	       for(genindex=0;genindex<NumPack;genindex++){
+		 accum_pairlo[genindex] = vis_fzero();
+		 accum_pairhi[genindex] = vis_fzero();
+		 accum_pair[genindex] = vis_fzero();
+	       }
 	  // filter data
-	    for(outerloop=0;outerloop<numloop;outerloop++){
-	      // set up data
-		datahi = vis_read_hi(double(signalIn%(outerloop)));
-	      datalo = vis_read_lo(double(signalIn%(outerloop)));
+	       for(outerloop=0;outerloop<numloop;outerloop++){
+		 // set up data
+		      datahi = vis_read_hi(double(signalIn%(outerloop)));
+		 datalo = vis_read_lo(double(signalIn%(outerloop)));
 
-	      // calculate four outputs
-		for(innerloop=0;innerloop<NumPack;innerloop++){
-		  // set up tap pairs for each shifted taparray
-		  tapindex = innerloop*tappadlength+NumPack*outerloop;
-		  taphi[innerloop] =
-		    (shift_taparray[tapindex]<<16)|\
-		      (shift_taparray[tapindex+1] & 0xffff);
-		  tappairhi[innerloop] = vis_to_float(taphi[innerloop]);
-		  taplo[innerloop] = (shift_taparray[tapindex+2]<<16)|\
-		    (shift_taparray[tapindex+3] & 0xffff);
-		  tappairlo[innerloop] = vis_to_float(taplo[innerloop]);
+		 // calculate four outputs
+		      for(innerloop=0;innerloop<NumPack;innerloop++){
+			// set up tap pairs for each shifted taparray
+			tapindex = innerloop*tappadlength+NumPack*outerloop;
+			taphi[innerloop] =
+			  (shift_taparray[tapindex]<<16)|\
+			  (shift_taparray[tapindex+1] & 0xffff);
+			tappairhi[innerloop] = vis_to_float(taphi[innerloop]);
+			taplo[innerloop] = (shift_taparray[tapindex+2]<<16)|\
+			  (shift_taparray[tapindex+3] & 0xffff);
+			tappairlo[innerloop] = vis_to_float(taplo[innerloop]);
 
-		  // take inner products
-		    pairlolo[innerloop] =\
-		      vis_fmuld8sux16(datalo,tappairlo[innerloop]);
-		  pairlohi[innerloop] =\
-		    vis_fmuld8ulx16(datalo,tappairlo[innerloop]);	    
+			// take inner products
+			pairlolo[innerloop] =\
+			  vis_fmuld8sux16(datalo,tappairlo[innerloop]);
+			pairlohi[innerloop] =\
+			  vis_fmuld8ulx16(datalo,tappairlo[innerloop]);	    
 
-		  pairhilo[innerloop] =\
-		    vis_fmuld8sux16(datahi,tappairhi[innerloop]);
-		  pairhihi[innerloop] =\
-		    vis_fmuld8ulx16(datahi,tappairhi[innerloop]);
+			pairhilo[innerloop] =\
+			  vis_fmuld8sux16(datahi,tappairhi[innerloop]);
+			pairhihi[innerloop] =\
+			  vis_fmuld8ulx16(datahi,tappairhi[innerloop]);
 
-		  // accumulate results
-		    accum_pairlo[innerloop] +=\
-		      vis_fpadd32(pairlolo[innerloop],pairlohi[innerloop]);
-		  accum_pairhi[innerloop] +=\
-		    vis_fpadd32(pairhilo[innerloop],pairhihi[innerloop]);
-		  accum_pair[innerloop] +=\
-		    vis_fpadd32(accum_pairhi[innerloop],accum_pairlo[innerloop]);
-		}  
-	    }
+			// accumulate results
+		        accum_pairlo[innerloop] +=\
+			  vis_fpadd32(pairlolo[innerloop],pairlohi[innerloop]);
+			accum_pairhi[innerloop] +=\
+			  vis_fpadd32(pairhilo[innerloop],pairhihi[innerloop]);
+			accum_pair[innerloop] +=\
+			  vis_fpadd32(accum_pairhi[innerloop],accum_pairlo[innerloop]);
+		      }  
+	       }
 	  // sum accumulators and pack outputs into a double
-	    for(genindex=0;genindex<NumPack;genindex++){
-	      t0 = vis_read_hi(accum_pair[genindex]);
-	      t1 = vis_read_lo(accum_pair[genindex]);
-	      accumfinal[genindex] = vis_fpadd32s(t0,t1); 
-	    }
+	       for(genindex=0;genindex<NumPack;genindex++){
+		 splithi = vis_read_hi(accum_pair[genindex]);
+		 splitlo = vis_read_lo(accum_pair[genindex]);
+		 packedaccum.quad32[genindex] = vis_fpadd32s(splithi,splitlo); 
+	       }
 
-	  for(genindex=0;genindex<NumPack;genindex++)
-	    packedOut.sreg16[genindex] = short(accumfinal[genindex]);
-	  
-	  signalOut%0 << packedOut.dreg64;
+	  packedhi = vis_fpackfix(packedaccum.double64[0]);
+	  packedlo = vis_fpackfix(packedaccum.double64[1]);
+	  packedOut = vis_freg_pair(packedhi,packedlo);
+
+	  signalOut%0 << packedOut;
 	}
-      }
+	wrapup {
+	  free(shift_taparray);
+	}
+}
