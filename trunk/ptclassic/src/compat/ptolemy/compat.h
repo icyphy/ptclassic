@@ -1,4 +1,4 @@
-/**************************************************************************
+/*****************************************************************
 Version identification:
 $Id$
 
@@ -26,8 +26,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 
+#ifndef PT_COMPAT_H
+#define PT_COMPAT_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #if defined(__sparc) && defined(__svr4__)
 #define SOL2
+#endif
+
+#ifndef ARGS
+#if defined(__STDC__) || defined(__cplusplus)
+#define ARGS(args)	args
+#else
+#define ARGS(args)	()
+#endif
 #endif
 
 #ifndef linux
@@ -71,3 +86,8 @@ extern int sscanf (const char *, const char *, ...);
 extern int unlink(const char *);
 #endif /* __GNUC__ */
 
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* PT_COMPAT_H */
