@@ -113,7 +113,7 @@ char *codeDir, **iconDir;
 /* generate a command line to edit a file */
 extern char* getenv();
 
-static char defaultDisplay[] = "xedit -name ptolemy_code %s";
+static char defaultDisplay[] = "tycho %s";
 
 static void genDispCommand(buf, file, background)
 char* buf;
