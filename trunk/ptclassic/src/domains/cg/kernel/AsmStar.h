@@ -69,7 +69,7 @@ protected:
 	ProcMemory* lookupEntry(const char*,unsigned&);
 
 	// format an address for assembly language code
-	virtual const char* format(unsigned addr);
+	// virtual const char* format(unsigned addr);
 
 	// character that introduces a symbol in a code block
 	virtual char substChar() const;
