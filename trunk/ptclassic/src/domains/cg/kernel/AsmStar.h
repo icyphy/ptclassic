@@ -59,9 +59,6 @@ public:
 	// and prepare SDF properties of the star for scheduling.
 	void initialize();
 
-	// If postprocessing for a line of code after symbol substitution
-	// is needed, the function addCode(char*) should be redefined.
-
 	// Add a state entry after memory allocation to indicate memory
 	// requirements for the state.
 	void addEntry(const State&,ProcMemory&,unsigned);
@@ -81,7 +78,7 @@ protected:
 		return (AsmPortHole*)portWithName(name);
 	}
 
-	// Save PC, gencode, Restore PC & set interruptFlag=TRUE.
+	// Save PC, addCode, Restore PC & set interruptFlag=TRUE.
 	void genInterruptCode(CodeBlock& block);
 
 	// State or PortHole reference.
@@ -128,16 +125,6 @@ protected:
 	// Reset the state entry list.
 	void zapStateEntries();
 
-	// add runCmds or miscCmds to the target streams.  cmd2 is
-	// supported to allow for individual command separators.
-	void addRunCmd(const char*,const char* cmd2=NULL);
-	void addMiscCmd(const char*,const char* cmd2=NULL);
-	void genRunCmd(CodeBlock&);
-	void genMiscCmd(CodeBlock&);
-
-	// Pass procedure code onto the target
-	void addProcCode(const char*);
-	void genProcCode(CodeBlock&);
 
 private:
 	// State entry list.  This stores the addresses allocated to each

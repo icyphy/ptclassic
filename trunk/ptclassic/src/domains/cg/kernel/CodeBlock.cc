@@ -1,5 +1,5 @@
 static const char file_id[] = "Code.cc";
-#include "Code.h"
+#include "CodeBlock.h"
 #include <stream.h>
 
 /**************************************************************************

@@ -27,10 +27,7 @@ HLLTarget::HLLTarget(const char* nam, const char* startype,
 }
 
 void HLLTarget::wrapup() {
-    char* codeFileName = writeFileName("code.output");
-    pt_ofstream codeFile(codeFileName);
-    if (!codeFile) return;
-    writeCode(codeFile);
+    writeCode();
 }
 
 // Routines for writing code: schedulers may call these

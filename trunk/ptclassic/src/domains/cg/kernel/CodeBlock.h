@@ -1,5 +1,5 @@
-#ifndef _Code_h
-#define _Code_h 1
+#ifndef _CodeBlock_h
+#define _CodeBlock_h 1
 /******************************************************************
 Version identification:
 $Id$

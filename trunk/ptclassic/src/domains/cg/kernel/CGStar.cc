@@ -20,6 +20,7 @@ $Id$
 #include "CGWormhole.h"
 #include "CGTarget.h"
 #include "StringList.h"
+#include "CodeStream.h"
 #include <ctype.h>
 
 /*******************************************************************
@@ -61,8 +62,8 @@ const int TOKLEN = 80;
 
 // Find the code StringList called name, if a StringList doesn't exist 
 // with the name name specified Error::abortRun is called.
-StringList* CGStar::getStream(const char* name) {
-	StringList* slist = myTarget()->getStream(name);
+CodeStream* CGStar::getStream(const char* name) {
+	CodeStream* slist = myTarget()->getStream(name);
 	if (slist == NULL) 
 	{
 		StringList message;
@@ -116,13 +117,30 @@ void CGStar :: setTarget(Target* t)
 	Star::setTarget(t);
 	codeblockSymbol.setSeparator(myTarget()->separator);
 	starSymbol.setSeparator(myTarget()->separator);
-	code = getStream("code");
+	myCode = getStream("myCode");
+	procedures = getStream("procedures");
 }
 
 // Add a string to the Target code.
-void CGStar::addCode (const char* string)
+void CGStar::addCode (const char* string,const char* stream)
 {
-	*code << processCode(string);
+	CodeStream* c;
+	if (stream == NULL) *myCode << processCode(string);
+	else if (c = getStream(stream)) *c << processCode(string);
+}
+
+// Add a procedure to the target procedure stream.
+void CGStar::addProcedure(const char* code, const char* name)
+{
+	procedures->put(code,name);
+}
+
+// Add a comment to a target stream.
+void CGStar::outputComment (const char* msg,const char* stream)
+{
+	CodeStream* c;
+	if (stream == NULL) *myCode << myTarget()->comment(msg);
+	else if (c = getStream(stream)) *c << myTarget()->comment(msg);
 }
 
 // Process a CodeBlock, expanding macros.

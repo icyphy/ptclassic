@@ -14,12 +14,9 @@ Date: 10/2/92
 #define _CodeStreamList_h 1
 
 #include "NamedList.h"
-#include "StringList.h"
+#include "CodeStream.h"
 
-// For temporary backward compatibility.
-typedef StringList CodeStream;
-
-class StringListList : private NamedList
+class CodeStreamList : private NamedList
 {
 public:
 	// adds a new StringList called name to the list.  If a StringList

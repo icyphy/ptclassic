@@ -17,7 +17,7 @@ $Id$
 
 #include "SDFStar.h"
 #include "CGPortHole.h"
-#include "Code.h"
+#include "CodeBlock.h"
 #include "SymbolList.h"
 #include "IntState.h"
 
@@ -29,6 +29,7 @@ extern "C" int strcasecmp(const char* s1, const char* s2);
 
 class CGTarget;
 class CGWormhole;
+class CodeStream;
 
 	////////////////////////////////////
 	// class CGStar
@@ -86,11 +87,18 @@ protected:
 	SymbolList codeblockSymbol;
 	SymbolList starSymbol;
 
-	// Process the string and add it to the Target code.
-	void addCode(const char*);
+	// Process the string and add it to the Target code.  If stream
+	// is NULL (default) code is added to the myCode stream.
+	void addCode(const char*code, const char* stream=NULL);
 
-	// For temporary backward compatibility.
-	void gencode(const char* code) { addCode(code); };
+	// Add a procedure to the procedure stream.
+	void addProcedure(const char*code,const char* name=NULL);
+
+	// output a comment to a target stream, if stream name is
+	// null, output the comment to myCode stream.  Note: this will
+	// only use the default comment separators specified by comment
+	// in Target class.
+	virtual void outputComment(const char* msg,const char* stream=NULL);
 
 	// Return the special character that introduces a macro
 	// in a code block.  This character is used by gencode() to
@@ -145,7 +153,7 @@ protected:
 	// need rather that allowing functions to call this routine directly.
 	// Initialize the pointers by overloading the star public member
 	// function void setTarget(Target* ).
-	StringList* getStream(const char* name);
+	CodeStream* getStream(const char* name);
 	
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.
@@ -191,7 +199,8 @@ private:
 	int forkId;
 	
 	// Main code stream, the reference is set in the setTarget method.
-	StringList* code;
+	CodeStream *myCode;
+	CodeStream *procedures;
 	
 };
 

@@ -37,11 +37,10 @@ const char* AsmTarget :: auxStarClass() const { return "AnyAsmStar";}
 void AsmTarget :: initStates() {
 	uname = 0;
 	StringList hostPrompt,hostDes,runPrompt,runDes;
-	hostPrompt = "Host for "; hostPrompt += className();
-	hostDes= "Host on which "; hostDes+=className();
-	hostDes+=" is installed";
-	runPrompt = "Run "; runPrompt += className(); runPrompt += "?";
-	runDes = "Download and run on "; runDes += className();
+	hostPrompt << "Host for " << fullName();
+	hostDes    << "Host on which " << fullName() << " is installed";
+	runPrompt  << "Run " << fullName() << "?";
+	runDes     << "Download and run on " << fullName();
  	addState(displayFlag.setState("Display code?",this,"YES",
 		"display code if YES."));
 	addState(runFlag.setState(savestring(runPrompt),this,"NO",
@@ -54,9 +53,6 @@ void AsmTarget :: initStates() {
 }
 
 void AsmTarget :: setup() {
-	runCmds.initialize();
- 	miscCmds.initialize();
-	procCode.initialize();
 	if (galaxy()) {
 		LOG_DEL; delete uname;
 		uname = makeLower(galaxy()->name());
@@ -64,16 +60,8 @@ void AsmTarget :: setup() {
 	CGTarget::setup();
 }
 
-int AsmTarget :: hostSystemCall(const char* cmd, const char* err) {
-	int val = rshSystem(targetHost,cmd,workingDirectory());
-	if (err != NULL && val != 0) Error::abortRun(err);
-	return val;
-}
-
 void AsmTarget :: headerCode() {
-	StringList code = "generated code for target ";
-        code += fullName();
-	outputComment (code);
+	CGTarget :: headerCode();
 	disableInterrupts();
 }
 
@@ -268,11 +256,7 @@ AsmTarget::~AsmTarget() {
 		LOG_DEL; delete b;
 	}
 }
-
-void AsmTarget :: outputComment (const char* msg) {
-	outputLineOrientedComment ("; ", msg, 80);
-}
-
+/*
 void AsmTarget :: outputLineOrientedComment(const char* prefix,
 					    const char* msg,
 					    int lineLen) {
@@ -298,22 +282,16 @@ void AsmTarget :: outputLineOrientedComment(const char* prefix,
 	addCode(line);
 	LOG_DEL; delete line;
 }
-
+*/
 char* AsmTarget :: fullFileName(const char* base, const char* suffix)
 {
-	StringList bname = fileName(base,suffix);
+	StringList bname = base;
+	if (suffix != NULL) bname << suffix;
 	char* fullName = writeFileName(bname);
 	return fullName;
 }
 
-char* AsmTarget :: fileName(const char* base, const char* suffix)
-{
-	StringList bname = base;
-	if (suffix != NULL) bname += suffix;
-	return bname.newCopy();
-}
-
-int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix)
+int AsmTarget::genDisFile(const char* stuff,char* base,const char* suffix)
 {
 	char* name = fullFileName(base,suffix);
 	int status = display(stuff,name);
@@ -321,9 +299,10 @@ int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix)
 	return status;
 }
 
-int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix)
+int AsmTarget :: genFile(const char* stuff,char* base,const char* suffix)
 {
 	int status;
+	if (stuff == NULL) return FALSE;
 	char* fullName = fullFileName(base, suffix);
 	pt_ofstream o(fullName);
 	if (!o) status = FALSE;
@@ -335,20 +314,16 @@ int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix)
 	return status;
 }
 
-void AsmTarget::disableInterrupts() {
-	outputComment("Disable Interrupts");
-}
+void AsmTarget::disableInterrupts() {}
 
-void AsmTarget::enableInterrupts() {
-	outputComment("Enable Interrupts");
-}
+void AsmTarget::enableInterrupts() {}
 
 void AsmTarget::saveProgramCounter() {
-	outputComment("Save program counter");
+	myCode << "Save program counter";
 }
 
 void AsmTarget::restoreProgramCounter() {
-	outputComment("Restore program counter");
+	myCode << "Restore program counter";
 }
 
 // dummies to do code generation for wormhole data motion.  These
@@ -358,7 +333,7 @@ void AsmTarget :: wormInputCode(PortHole& p) {
 	StringList msg = "Xfer ";
 	msg << ap->bufSize() << " values from host to location ";
 	msg << ap->location();
-	outputComment(msg);
+	myCode << comment(msg);
 }
 
 void AsmTarget :: wormOutputCode(PortHole& p) {
@@ -366,17 +341,26 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
 	StringList msg = "Xfer ";
 	msg << ap->bufSize() << " values from location ";
 	msg << ap->location() << " to host";
-	outputComment(msg);
+	myCode << comment(msg);
+}
+
+/*virtual*/ void AsmTarget::frameCode() {
+    if (procedures.numPieces() > 0) {
+	StringList heading = "\n\n\nProcedures Begin\n\n";
+	StringList tail = "\n\n\nProcedures End\n\n";
+	myCode << comment(heading) <<  procedures << comment(tail);
+    }
+    myCode << comment(mem->printMemMap("",""));
+}
+
+void AsmTarget :: writeCode() {
+        if (int(displayFlag) && !haltRequested())
+                if (!genDisFile(myCode,uname,asmSuffix())) return;
+        else 
+                if (!genFile(myCode,uname,asmSuffix())) return;
 }
 
 void AsmTarget :: wrapup() {
-	myCode += procCode;
-	procCode.initialize();
-	if (int(displayFlag) && !haltRequested()) {
-		if (!genDisFile(myCode,uname,asmSuffix())) return;
-	} else {
-		if (!genFile(myCode,uname,asmSuffix())) return;
-	}
 	if (int(runFlag) && !haltRequested()) {
 		if (compileCode() && !haltRequested()) {
 			if (loadCode() && !haltRequested()) runCode();

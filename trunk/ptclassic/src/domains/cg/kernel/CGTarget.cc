@@ -24,7 +24,11 @@ $Id$
 #include "SDFCluster.h"
 #include "CGDisplay.h"
 #include "miscFuncs.h"
+#include "CGUtilities.h"
+#include "pt_fstream.h"
 #include <stream.h>
+#include <time.h>
+#include <string.h>
 
 // Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
@@ -43,11 +47,12 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 {
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
-	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
-			"Directory to write to"));
+	addState(destDirectory.setState("destDirectory",this,
+		"PTOLEMY_SYSTEMS","Directory to write to"));
 	addState(loopScheduler.setState("loopScheduler",this,"NO",
 			"Specify whether to use loop scheduler."));
-	addStream("code",&myCode);
+	addStream("myCode",&myCode);
+	addStream("procedures",&procedures);
 }
 
 // destructor
@@ -70,6 +75,7 @@ int CGTarget :: codeGenInit() { return TRUE; }
 
 void CGTarget::setup() {
 	myCode.initialize();
+	procedures.initialize();
 	writeDirectoryName(destDirectory);
 	if (!scheduler()) {
 		if(int(loopScheduler)) {
@@ -80,51 +86,48 @@ void CGTarget::setup() {
 		}
 	}
 	if (!galaxy()) return;
-// We have a galaxy; continue the setup.
-	headerCode();
+
 	// reset the label counter
 	BaseSymbolList::reset() ;
 
+	// reset nestedSymbols
 	targetNestedSymbol.initialize();
 
 	if (!noSchedule) {
 		if (!modifyGalaxy()) return;
 		Target::setup();
-		if (Scheduler::haltRequested()) return;
+		if (haltRequested()) return;
 	}
 	noSchedule = 0;		// reset for next setup.
 
 	// choose sizes for buffers and allocate memory, if needed
+	if (inWormHole()) {
+		generateCode();
+		wormLoadCode();
+	}
+}
+
+void CGTarget::generateCode() {
+	headerCode();
 	if(!allocateMemory() || !codeGenInit()) return;
-
-	// if inside a wormhole, proceed to generate and download
-	// code now.
-	if(galaxy()->parent()) wormCodeGenerate();
-}
-
-// default code generation for a wormhole.  This produces an infinite
-// loop that reads from the inputs, processes the schedule, and generates
-// the outputs.
-int CGTarget :: wormCodeGenerate() {
-	BlockPortIter nextPort(*galaxy());
-	PortHole* p;
-	beginIteration(-1,0);
-	// generate wormhole inputs
-	while ((p = nextPort++) != 0) {
-		if (p->isItInput()) wormInputCode(p->newConnection());
-	}
-	scheduler()->compileRun();
-	nextPort.reset();
-	// generate wormhole outputs
-	while ((p = nextPort++) != 0) {
-		if (p->isItOutput()) wormOutputCode(p->newConnection());
-	}
-	endIteration(-1,0);
+	mainLoopCode();
+	trailerCode();
 	frameCode();
-	return wormLoadCode();
+	if (!parent()) writeCode();
 }
 
-void CGTarget :: addStream(const char* name, StringList* slist)
+void CGTarget :: mainLoopCode() {
+	// Generate Code.  Iterate an infinite number of times if 
+	// target is inside a wormhole
+	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+	beginIteration(iterations,0);
+	if (inWormHole()) wormInputCode();
+	scheduler()->compileRun();
+	if (inWormHole()) wormOutputCode(); 
+	endIteration(iterations,0);
+}
+
+void CGTarget :: addStream(const char* name, CodeStream* slist)
 {
 	int flag = codeStringLists.add(name,slist);
 	if (flag == FALSE)
@@ -135,36 +138,21 @@ void CGTarget :: addStream(const char* name, StringList* slist)
 	}
 }
 
-StringList* CGTarget :: getStream(const char* name)
+CodeStream* CGTarget :: getStream(const char* name)
 {
 	return codeStringLists.get(name);
 }
 
 int CGTarget :: run() {
-	// if a wormhole, setup already generated code.
-	// We must do the transfer of data to and from the target.
-	if(galaxy()->parent()) {
-		BlockPortIter nextPort(*galaxy());
-		PortHole* p;
-		while ((p = nextPort++) != 0) {
-			if (p->isItInput() &&
-			    !sendWormData(p->newConnection())) return FALSE;
-		}
-		nextPort.reset();
-		while ((p = nextPort++) != 0) {
-			if (p->isItOutput() &&
-			    !receiveWormData(p->newConnection())) return FALSE;
-		}
-	}
-	else {
-		// Note that stopTime in an SDF scheduler is always integral
-		int iters = (int)scheduler()->getStopTime();
-		beginIteration(iters,0);
-		scheduler()->compileRun();
-		endIteration(iters,0);
-		frameCode();
-	}
-	return !Scheduler::haltRequested();
+    // if a wormhole, we must do the transfer of data to and from the target.
+    if(inWormHole()) {
+	if(!sendWormData()) return FALSE;
+	if(!receiveWormData()) return FALSE;
+    }
+    else 	
+	generateCode();
+	
+    return !haltRequested();
 }
 
 void CGTarget :: frameCode() {}
@@ -176,31 +164,18 @@ void CGTarget :: copySchedule(SDFSchedule& s) {
 	noSchedule = TRUE;
 }
 
-StringList CGTarget :: generateCode() {
-	setup();
-	if (galaxy()->parent() == 0) {
-		run();
-		Target::wrapup();
-	}
-	return myCode;
-}
-
 Block* CGTarget :: makeNew() const {
 	LOG_NEW; return new CGTarget(name(),starType(),descriptor());
 }
 
-void CGTarget :: addCode(const char* code) {
-	if(code) myCode += code;
+void CGTarget :: headerCode () {
+	myCode << headerComment();
 }
 
-void CGTarget :: headerCode () {
-	StringList code = "generated code for target ";
-	code += fullName();
-	outputComment(code);
-}
+void CGTarget :: trailerCode() {}
 
 void CGTarget :: beginIteration(int reps, int depth) {
-	myCode << "REPEAT " << reps << " TIMES { /* depth " << depth << "*/\n";
+    myCode << "REPEAT " << reps << " TIMES { /* depth " << depth << "*/\n";
 }
 
 void CGTarget :: endIteration(int /*reps*/, int depth) {
@@ -213,8 +188,7 @@ int CGTarget :: compileCode() {
 }
 
 int CGTarget :: loadCode() {
-	Error::abortRun("No loadCode method defined for current target");
-	return FALSE;
+	return TRUE; // load and Run can be combined in runCode method
 }
 
 int CGTarget :: runCode() {
@@ -222,21 +196,60 @@ int CGTarget :: runCode() {
 	return FALSE;
 }
 
+int CGTarget::inWormHole() {
+	return int(galaxy()->parent());
+}
+
+void CGTarget :: wormInputCode() {
+	BlockPortIter nextPort(*galaxy());
+	PortHole* p;
+	while ((p = nextPort++) != 0) {
+		if (p->isItInput()) wormInputCode(p->newConnection());
+	}
+}
 void CGTarget :: wormInputCode(PortHole& p) {
 	myCode << "/* READ from wormhole port " << p.fullName() << " */\n";
 }
 
+void CGTarget :: wormOutputCode() {
+	BlockPortIter nextPort(*galaxy());
+	PortHole* p;
+	while ((p = nextPort++) != 0) {
+		if (p->isItOutput()) wormOutputCode(p->newConnection());
+	}
+}
 void CGTarget :: wormOutputCode(PortHole& p) {
 	myCode << "/* WRITE to wormhole port " << p.fullName() << " */\n";
 }
 
+int CGTarget :: sendWormData() {
+    BlockPortIter nextPort(*galaxy());
+    PortHole* p;
+    while ((p = nextPort++) != 0) {
+	if (p->isItInput() && !sendWormData(p->newConnection())) 
+	    return FALSE;
+    }
+    return TRUE;
+}
+
 int CGTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
-	cout << "sending " << cp.bufSize() << " values to worm port " << cp.fullName() << "\n";
+	cout << "sending " << cp.bufSize() << " values to worm port " 
+	     << cp.fullName() << "\n";
 	cout.flush();
 	// data are discarded
 	cp.forceGrabData();
 	return TRUE;
+}
+
+int CGTarget :: receiveWormData() {
+    BlockPortIter nextPort(*galaxy());
+    PortHole* p;
+    while ((p = nextPort++) != 0) {
+	if (p->isItOutput() && !receiveWormData(p->newConnection())) 
+	    return FALSE;
+    }
+    return TRUE;
 }
 
 int CGTarget :: receiveWormData(PortHole& p) {
@@ -262,30 +275,64 @@ void CGTarget :: writeFiring(Star& s,int) { // depth parameter ignored
 }
 
 void CGTarget :: wrapup() {
-	Target :: wrapup();
 	display(myCode);
 }
 
-void CGTarget :: writeCode(ostream& o) {
-	o << myCode;
-	o.flush();
+void CGTarget :: writeCode() {
+    char* codeFileName = writeFileName("code.output");
+    pt_ofstream codeFile(codeFileName);
+    if (!codeFile) return;
+    codeFile << myCode;
+    codeFile.flush();
 }
 
 ISA_FUNC(CGTarget,Target);
 
-void CGTarget :: outputComment (const char* msg) {
-	StringList code = "/* ";
-        code += msg;
-        code += " */\n";
-        addCode(code);
+StringList CGTarget::comment(const char* msg, const char* b, 
+const char* end, const char* cont) {
+    StringList cmt;
+    if (msg==NULL) return cmt;
+    char begin;
+    if (b==NULL) begin ='#';
+    else begin = *b;
+    if (cont==NULL) {	/*multiline comments unsupported*/
+	LOG_NEW; char* c = new char[strlen(msg)];
+	strcpy(c,msg);
+	for (char* line=strtok(c,"\n"); line; line=strtok(NULL,"\n"))
+	    cmt << begin << line << end << "\n";
+	LOG_DEL; delete(c);
+    }
+    else if (*cont=='\0') /*multiline comments supported, no cont char*/
+	cmt << begin << msg << end << "\n";
+    else { /*multiline comments supported, continue char desired*/
+	LOG_NEW; char* c = new char[strlen(msg)];
+	char* line = strtok(c,"/n");
+	cmt << begin << line << "\n";
+	while(line = strtok(NULL,"\n"))
+	    cmt << cont << line << '\n';
+	cmt << end << '\n';
+	LOG_DEL; delete(c);
+    }
+    return cmt;
 }
 
+StringList CGTarget::headerComment(const char* begin, const char* end, 
+    const char* cont) {
+	StringList header,msg;
+	time_t t = time(NULL);
+	msg 	<< "User:      " << cuserid(NULL) << "\n"
+		<< "Date:      " << ctime(&t)
+		<< "Target:    " << fullName() << "\n"
+		<< "Universe:  " << galaxy()->name() << "\n";
+	if (begin==NULL) header << comment(msg);
+	else header << comment(msg,begin,end,cont);
+	return header;
+}
+	
 int CGTarget :: systemCall(const char* command, const char* error) {
-	StringList cmd = "cd ";
-	cmd += workingDirectory();
-	cmd += ";";
-	cmd += command;
-	int i = system(cmd);
-	if(i != 0 && error != NULL) Error::abortRun(error);
+	int i;
+	if(i=rshSystem(NULL,command,workingDirectory()) != 0 && 
+          error != NULL)
+		Error::abortRun(error);
 	return i;
 }
