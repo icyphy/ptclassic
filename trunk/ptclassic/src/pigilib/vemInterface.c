@@ -102,7 +102,7 @@ const char *s;
     else printf ("%s\n", s);
 }
 
-/* PrintErr  5/10/88 4/25/88 7/15/93
+/* PrintErr  5/10/88 4/25/88 7/15/93 2/15/96
 Print error message to VEM console window and VEM log file.
 Change later to different color from PrintConLog().
 */
@@ -123,11 +123,11 @@ const char *s;
 	fprintf (stderr, "Error: %s\n", s);
 	return;
     }
-    (void) sprintf(buf, "\0062Error: %s\n\0060", s);
+    (void) sprintf(buf, "\0062Error: %.1000s\n\0060", s);
     (void) vemMessage(buf, MSG_DISP);
     if (errorWindows) {
 	/* print error message in a dialog box */
-	(void) sprintf(buf, "Error: %s", s);
+ 	(void) sprintf(buf, "Error: %.1000s", s);
 	win_msg (buf);
     }
 #if REPORT_TCL_ERRORS
@@ -141,7 +141,7 @@ const char *s;
 }
 
 
-/* PrintDebug  5/10/88 4/7/88
+/* PrintDebug  5/10/88 4/7/88 2/15/96
 Print debug info if PrintDebug is turned on.
 */
 static int printDebugState = TRUE;
@@ -156,7 +156,7 @@ const char *s;
     char buf[1024];
 #endif /* OLDNEVER */
     if (printDebugState) {
-	(void) sprintf(buf, "\0062Debug: %s\n\0060", s);
+ 	(void) sprintf(buf, "\0062Debug: %.1000s\n\0060", s);
 	(void) vemMessage(buf, MSG_DISP);
     }
 }
