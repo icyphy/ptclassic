@@ -61,6 +61,12 @@ This is not currently handled.
 		default {1}
 		desc {Number of particles in a block.}
 	}
+	state {
+		name {useCircular}
+		type {INT}
+		default {1}
+		desc { "Boolean: use circular addressing on inputs." }
+	}
 	defstate {
 		name {ptrarray }
 		type {INTARRAY }
@@ -124,6 +130,11 @@ This is not currently handled.
 		input.setSDFParams(portsize, portsize-1);
 		output.setSDFParams(portsize, portsize-1);
 		computeIterations();
+		if ( int(useCircular) ) {
+			input.setAttributes(P_CIRC);
+		} else {
+			input.setAttributes(P_NONCIRC);
+		}
 	}
 	
 	go {
