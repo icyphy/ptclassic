@@ -371,7 +371,8 @@ int Linker::multiLink (int argc, char** argv) {
 	char command[512];
 	// DYNLIB is hppa specific
 	sprintf (command, "%s %s -A %s %s %x %s -o ",
-		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem, DYNLIB);
+		 LOADER, LOADOPTS, symTableName, LOC_OPT,
+		 (unsigned int)availMem, DYNLIB);
 	D( Error::message(command); )
 	StringList cmd = command;
 	cmd << tname;
