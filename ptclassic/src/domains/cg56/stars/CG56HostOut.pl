@@ -77,23 +77,23 @@ $label(l1)
 $label(l3)
         }        
         go { 
-        const char* p=blockOnHost;		
-        if (samplesConsumed==1) {
+            const char* p=blockOnHost;		
+            if (samplesConsumed==1) {
                 if(p[0]=='y` || p[0]=='Y') 
 	              gencode(yeshostBlock);
 		else
 	              gencode(elsehostBlock);
-	}	
-        else {
+	    }	
+            else {
                if (p[0]=='n' || p[0]== 'N')
 	              gencode(nohostBlock);
 	       else
 	              gencodeblock(done);
-       }
+            }
        }
 
 	execTime { 
 		return 2;
 	}
-    }
+}
  
