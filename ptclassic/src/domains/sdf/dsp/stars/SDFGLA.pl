@@ -285,7 +285,7 @@ represent a training vector.
   wrapup {
     const char* sf = saveFile;
     if (sf != NULL && *sf != 0) {
-      char* saveFileName = savestring(expandPathName(sf));
+      char* saveFileName = expandPathName(sf);
       // open the file for writing
       FILE* fp;
       if (!(fp = fopen(saveFileName,"w"))) {
