@@ -39,8 +39,8 @@ actually
 <pre>
 g(n) ~=~ h(n - M)
 </pre>
-where <i>M  </i>=<i>  length/</i>2 if <i>length</i> is even, and <i>M  </i>=<i>  </i>(<i>length+</i>1)<i>/</i>2 if
-<i>length</i> is odd.
+where <i>M </i>=<i> length/</i>2 if <i>length</i> is even, and <i>M
+</i>= (<i>length+</i>1)<i>/</i>2 if <i>length</i> is odd.
 The impulse response is simply truncated outside this range, so
 the impulse response will generally not be symmetric if <i>length</i> is even
 because it will have one more sample to the left than to the right of center.
