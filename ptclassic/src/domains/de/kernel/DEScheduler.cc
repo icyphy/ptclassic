@@ -26,6 +26,7 @@ These are the methods for the discrete event scheduler.
 #include "FloatState.h"
 #include "GalIter.h"
 #include "DEWormConnect.h"
+#include "IntState.h"
 
 extern const char DEdomainName[];
 
@@ -198,7 +199,7 @@ DEScheduler :: run (Galaxy& g) {
 			// Record the arrival time, and flag existence of data.
 			if (!s->isItWormhole()) {
 				InDEPort* inp = (InDEPort*) terminal;
-				inp->grabData(ent->p);
+				inp->getFromQueue(ent->p);
 			} else {
 				DEtoUniversal* ep = (DEtoUniversal*) terminal;
 				ep->fetchData(ent->p);
@@ -242,7 +243,7 @@ DEScheduler :: run (Galaxy& g) {
 				     if (dest->isItWormhole()) {
 success = ((DEtoUniversal*) tl)->fetchData(ee->p);
 				     } else {
-success = ((InDEPort*) tl)->grabData(ee->p);
+success = ((InDEPort*) tl)->getFromQueue(ee->p);
 				     }
 				     if (success) eventQ.extract(h);
 				} else if (!tl) {
@@ -286,7 +287,7 @@ int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 
 			// if same destination star with same time stamp..
 			if (tl == p) {
-				if (tl->grabData(ent->p)) eventQ.extract(h);
+				if (tl->getFromQueue(ent->p)) eventQ.extract(h);
 				return TRUE;
 			}
 		} 
