@@ -113,8 +113,7 @@ boolean now;
 	Tcl_VarEval(ptkInterp, "ptkRunControl ", name, " ", octHandle,
 	(char *)NULL));
 
-    if (now) {
-	/* Run the universe right away */
+    if (now) {				/* Run the universe right away */
 	TCL_CATCH_ERR1(
 	    Tcl_VarEval(ptkInterp, "ptkGo ", name, " ", octHandle,
 	    (char *)NULL));
@@ -148,6 +147,7 @@ long userOptionWord;
 	ptkRun(&facet, FALSE);
     }
 
+    FreeOctMembers(&facet);
     ViDone();
 }
 
