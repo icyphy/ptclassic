@@ -2,7 +2,7 @@ static const char file_id[] = "CGMultiTarget.cc";
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)CGMultiTarget.cc	1.33	10/29/93
 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -718,6 +718,26 @@ int CGMultiTarget::downLoadCode(int index, int pId, Profile*) {
 }
 
 ISA_FUNC(CGMultiTarget, MultiTarget);
+
+// check for presence of child targets of appropriate type.
+int CGMultiTarget :: childIsA(const char* type) const {
+
+	// problem: when this is called on the obj on the known
+	// target list,
+	// its state will not be initialized, so we have to use
+	// a different StringArrayState that we can initialize.
+
+	StringArrayState copy;
+	copy.setInitValue(childType.initValue());
+	copy.initialize();
+
+	int nt = copy.size();
+	for (int i = 0; i < nt; i++) {
+		const Target* t = KnownTarget::find(copy[i]);
+		if (t && t->isA(type)) return TRUE;
+	}
+	return Target::childIsA(type);
+}
 
 static CGMultiTarget targ("FullyConnected","CGStar",
 "Fully-connected targets for parallel scheduling");
