@@ -55,7 +55,6 @@ find the correct hostname with the command "hostname".
 .pp
 For a VaxStation or DecStation, the procedure is exactly as above,
 except that the device names to use are different.
-.\" ??? we need to find out the device name ???
 .H2 "Special considerations for installation under Open Windows"
 .pp
 \*(PT was developed using the X11R4 distribution from MIT.  It will
@@ -76,12 +75,17 @@ at least it works.
 In order for all utilities included with this distribution to work
 under Open Windows (either version), you must install the Athena
 widgets (the freely redistributable widget set from the X11R4 distribution),
-which are provided with this distribution under the
-``~ptolemy/athena.sunX'' directory, where the X may be a 3 or 4 depending
+which are provided with this distribution under the ``~ptolemy/athena.sunX'' 
+directory, where the X may be a 3 or 4 depending
 on your machine type.  To install them, become root
 and copy all files in that directory into ``/usr/openwin/lib'' (or, if
-you have installed Open Windows in a non-standard place, into
-``$OPENWINHOME/lib'').
+.EQ
+delim ##
+.EN
+you have installed Open Windows in a non-standard place, into ``$OPENWINHOME/lib'').
+.EQ
+delim $$
+.EN
 .pp
 After installation, the ptolemy account will contain several scripts for
 starting up X11R4 (Xrun), Open Windows with
