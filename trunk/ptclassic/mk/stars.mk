@@ -82,6 +82,7 @@ OPTIONAL_LIBS = $(ATM_LIBS) $(CONTRIB_LIBS)
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
+	$(LIBDIR)/libMacro.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX) \
 	$(LIBDIR)/libDL.$(LIBSUFFIX) $(LIBDIR)/libMSH.$(LIBSUFFIX) \
 	$(LIBDIR)/libPar.$(LIBSUFFIX) \
 	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
@@ -189,7 +190,7 @@ $(OPTIONAL_LIBS) \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 \
 -lsilagestars -lsilage \
--lcgstars -lDC -lHu -lDL -lMSH -lPar -lcg \
+-lcgstars -lcgddf -lMacro -lDC -lHu -lDL -lMSH -lPar -lcg \
 -lddfstars -lddf \
 -lthorstars -lthor \
 -ldestars -lde \
@@ -214,6 +215,7 @@ CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
 		$(SDFT)/CompileTarget.o 
 CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
 		$(CGCT)/main/CGCMultiTarget.o $(CGCTCL)/CGCTclTkTarget.o \
+		$(CGCT)/main/CGCMacroStar.o $(CGCT)/main/CGCDDFCode.o \
 		$(CGCT)/main/CGCSDFSend.o $(CGCT)/main/CGCSDFReceive.o \
 		$(CGCT)/main/CGCSDFBase.o $(CGCT)/main/CGCTargetWH.o
 
