@@ -2,7 +2,6 @@
 .NA useless
 .SD
 Useless demo of CG domain
-.DE
 .SV $Revision$ $Date$
 .EQ
 delim off

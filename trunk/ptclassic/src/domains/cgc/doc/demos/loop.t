@@ -2,7 +2,6 @@
 .NA loop
 .SD
 Demonstrates the code size reduction by loop scheduling.
-.DE
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .EQ

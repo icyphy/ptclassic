@@ -2,7 +2,6 @@
 .NA pipeline
 .SD
 Demonstration of generation of pipelined schedules by retiming
-.DE
 .SV $Revision$ $Date$
 .AL "J. T. Buck"
 .EQ

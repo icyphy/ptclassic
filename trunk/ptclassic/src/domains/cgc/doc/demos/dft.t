@@ -2,7 +2,6 @@
 .NA dft
 .SD
 Compute a discrete Fourier transform of a finite signal.
-.DE
 .IE adaptFilter
 .SV $Revision$ $Date$
 .AL "S. Ha"

@@ -2,7 +2,6 @@
 .NA lms
 .SD
 A universe showing the LMS adaptive filter.
-.DE
 .SV 1.1 "November 24, 1992"
 .AL "Chih-Tsung Huang (ported from Gabriel)"
 .EQ

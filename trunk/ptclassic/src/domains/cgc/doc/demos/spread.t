@@ -6,7 +6,6 @@ Demonstrates the
 and the
 .c Collect
 stars.
-.DE
 .SV $Revision$	$Date$
 .AL "S. Ha"
 .EQ

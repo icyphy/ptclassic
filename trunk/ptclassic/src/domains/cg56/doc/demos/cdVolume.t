@@ -4,7 +4,6 @@
 A universe showing volume control with
 .c gxslider
 star.
-.DE
 .SV 1.1 "November 24, 1992"
 .AL "Jose Pino"
 .EQ

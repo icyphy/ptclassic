@@ -2,7 +2,6 @@
 .NA adaptFilter
 .SD
 A demo of the LMS adaptive filter star
-.DE
 .IE adaptFilter
 .SV $Revision$ $Date$
 .AL "S. Ha"

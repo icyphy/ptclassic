@@ -2,7 +2,6 @@
 .NA upsample
 .SD
 Upsampling demonstration.
-.DE
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .EQ

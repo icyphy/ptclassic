@@ -2,7 +2,6 @@
 .NA adaptFilter_multi
 .SD
 A demo of C-code generation for a multiprocessor target.
-.DE
 .SV $Revision$	$Date$
 .AL "S. Ha"
 .EQ

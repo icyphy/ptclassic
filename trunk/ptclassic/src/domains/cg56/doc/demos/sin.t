@@ -2,7 +2,6 @@ o.\" $Id$
 .NA sin
 .SD
 A sine wave generator using the double integrator method.
-.DE
 .SV 1.1 "November 24, 1992"
 .AL "Chih-Tsung Huang (ported from Gabriel)"
 .EQ

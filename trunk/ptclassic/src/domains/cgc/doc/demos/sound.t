@@ -2,7 +2,6 @@
 .NA sound
 .SD
 Generate a sound to play over the workstation speaker.
-.DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .EQ

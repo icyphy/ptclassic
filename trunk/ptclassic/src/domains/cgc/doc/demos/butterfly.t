@@ -2,7 +2,6 @@
 .NA butterfly
 .SD
 The butterfly curves.
-.DE
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .EQ
