@@ -64,68 +64,68 @@ uplevel #0 {
 namespace ::tycho {
     ::tycho::File::registerExtensions {} \
             {::tycho::view Edit {-file {%s}}} \
-            {Plain text editor}
+            {Plain text editor} "text"
     ::tycho::File::registerExtensions {.sched .c .y} \
             {::tycho::view EditC {-file {%s}}} \
-            {C editor}
+            {C editor} "text"
     ::tycho::File::registerExtensions {.C .cc .h .H} \
             {::tycho::view EditCpp {-file {%s}}} \
-            {C++ editor}
+            {C++ editor} "text"
     ::tycho::File::registerExtensions {.dag} \
             {::tycho::view EditDAG {-file {%s}}} \
-            {DAG editor}
+            {DAG editor} "graphics"
     ::tycho::File::registerExtensions {.strl} \
             {::tycho::view EditEsterel {-file {%s}}} \
-            {Esterel editor}
+            {Esterel editor} "text"
     ::tycho::File::registerExtensions {.fst} \
             {::tycho::view EditForest {-file {%s}}} \
-            {Forest editor}
+            {Forest editor} "graphics"
     ::tycho::File::registerExtensions {} \
             {::tycho::view EditHTML {-file {%s}}} \
-            {HTML editor}
+            {HTML editor} "text"
     ::tycho::File::registerExtensions {.itcl .itk} \
             {::tycho::view EditItcl {-file {%s}}} \
-            {Itcl editor}
+            {Itcl editor} "text"
     ::tycho::File::registerExtensions {.java} \
             {::tycho::view EditJava {-file {%s}}} \
-            {Java editor}
+            {Java editor} "text"
     ::tycho::File::registerExtensions .tcl \
             {::tycho::view EditTcl {-file {%s}}} \
-            {Tcl editor}
+            {Tcl editor} "text"
     ::tycho::File::registerExtensions .pal \
             {::tycho::view EditPalette {-file {%s}}} \
-            {Palette editor}
+            {Palette editor} "graphics"
     ::tycho::File::registerExtensions .pl \
             {::tycho::view EditPtlang {-file {%s}}} \
-            {Ptlang editor}
+            {Ptlang editor} "text"
     ::tycho::File::registerExtensions {.pt .ptcl} \
             {::tycho::view EditPtcl {-file {%s}}} \
-            {Ptcl editor}
+            {Ptcl editor} "text"
     ::tycho::File::registerExtensions {} \
             {::tycho::view TclShell  {-file {%s}}} \
-            {Tcl shell}
+            {Tcl shell} "tools"
     ::tycho::File::registerExtensions {} \
             {::tycho::view ProfileTcl {-file {%s}} Displayer {-toolbar 1}} \
-            {Tcl profiler}
+            {Tcl profiler} "tools"
     ::tycho::File::registerExtensions {} \
             {::tycho::view CommandShell  {-file {%s}}} \
-            {Command Shell}
+            {Command shell} "tools"
     if {[uplevel #0 info commands matlab] != {}} {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Matlab {-file {%s}}} \
-                {Matlab console}
+                {Matlab console} "tools"
     }
     if {[uplevel #0 info commands mathematica] != {}} {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Mathematica {-file {%s}}} \
-                {Mathematica console}
+                {Mathematica console} "tools"
     }
     ::tycho::File::registerExtensions {.html .htm .htl} \
             {::tycho::view HTML {-file {%s}} Displayer {-toolbar 1}} \
             {}
     ::tycho::File::registerExtensions {.mk .template} \
             {::tycho::view EditMake {-file {%s}}} \
-	    {Makefile editor}
+	    {Makefile editor} "text"
     ::tycho::File::registerFilenames {Makefile makefile GNUmakefile} \
             {::tycho::view EditMake {-file {%s}}} \
 	    {} 
@@ -134,7 +134,7 @@ namespace ::tycho {
     #       {Finite state machine editor}
     ::tycho::File::registerExtensions {.std} \
             {::tycho::view EditSTD {-file {%s}}} \
-            {State transition diagram editor}
+            {State transition diagram editor} "graphics"
     ::tycho::File::registerExtensions {.idx} \
             {::tycho::DialogWindow::new IndexBrowser [::tycho::autoName .idx] \
             -file {%s}} \
