@@ -1139,7 +1139,10 @@ body ::tycho::Graphics::focusin {} {
 # Open a help window.
 #
 body ::tycho::Graphics::help {} {
-    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/GraphicsHelp.html" {}
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditGraphicsHelp.html] html
 }
 
 #######################################################################

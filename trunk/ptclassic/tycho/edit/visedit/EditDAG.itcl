@@ -635,7 +635,10 @@ body ::tycho::EditDAG::exportImagemap {filename {keepfragment 0}} {
 # Open a help window.
 #
 body ::tycho::EditDAG::help {} {
-    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditDAGHelp.html" {}
+    global ::TYCHO
+    ::tycho::File::openContext \
+        [file join $TYCHO edit visedit doc usersGuides \
+	    EditDAGHelp.html] html
 }
 
 #########################################################################
