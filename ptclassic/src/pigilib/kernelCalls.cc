@@ -481,8 +481,8 @@ KcDisplaySchedule() {
 	    Error::error("No current target");
 	    return FALSE;
 	}
-	StringList name = "~/schedule.";
-	name << ptcl->universe->name();
+	StringList name = "~/";
+	name << ptcl->universe->name() << ".sched";
 	pt_ofstream str(name);
 	if (str) {
 		str << ptcl->currentTarget->displaySchedule();
