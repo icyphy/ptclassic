@@ -81,7 +81,7 @@ class ::tycho::View {
     method addMyMenus {}
 
     # Add a subview to the view
-    method addSubview {subviewName}
+    method addSubview {subviewName type side args}
 
     # Change the cursor to the "watch" and execute the arguments.
     method busy {args}
