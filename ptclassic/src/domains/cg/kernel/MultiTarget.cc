@@ -60,14 +60,6 @@ SDFStar* BaseMultiTarget :: createReceive(int from, int to, int num) {
 	LOG_NEW; return new SDFStar;
 }
 
-SDFStar* BaseMultiTarget :: createSpread() {
-	LOG_NEW; return new SDFStar;
-}
-
-SDFStar* BaseMultiTarget :: createCollect() {
-	LOG_NEW; return new SDFStar;
-}
-
 void BaseMultiTarget :: pairSendReceive(SDFStar*, SDFStar*) {}
 
 void BaseMultiTarget :: setProfile(Profile*) {}
