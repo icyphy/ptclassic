@@ -63,7 +63,7 @@ private:
 
 	// Replaces quotation marks with quoted quotation marks
 	// in a string (i.e. " => \")
-	StringList CompileTarget::quoteQuotationMarks(const char* str);
+	StringList quoteQuotationMarks(const char* str);
 
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
 
