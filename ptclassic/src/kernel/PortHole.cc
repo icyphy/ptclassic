@@ -206,7 +206,8 @@ void GenericPort :: connect(GenericPort& destination, int numberDelays,
 	    geo->setSourcePort(*realSource, numberDelays, initDelayValues);
 	    geo->setDestPort(destination);
 	}
-	// else fail silently 
+	else Error::abortRun(*realSource,
+		"could not allocate geodesic for connection.");
 	return;
 }
 
@@ -762,24 +763,19 @@ void MultiPortHole::busConnect (MultiPortHole& peer, int width, int numDelays,
 	initDelayValuesBus = initDelayValues;
 }
 
-// Be extra careful to accomodate connections in the star's constructor
-// when there is no parent galaxy, like for DERepeatStar.
-Domain* domainOf(GenericPort& port)
+// Get the domain of the galaxy that the parent star is in.
+// Return NULL on error.
+Domain* domainOf(const GenericPort& port)
 {
     Domain* d = NULL;
-    if (port.parent() != NULL)
-    {
-	// Get the domain of the galaxy that the parent star is in.
-	if (port.parent()->parent() != NULL)
+    if (port.parent() && port.parent()->parent())
 	    d = Domain::of(*port.parent()->parent());
-	// Or get the domain of the parent star itself.
-	else d = Domain::of(*port.parent());
-    }
     return d;
 }
 
 // allocate a new Geodesic.  Set its name and parent according to the
 // source porthole (i.e. *this).
+// Return NULL on error.
 Geodesic* PortHole :: allocateGeodesic () {
 	StringList nm;
 	nm << "Node_" << name();
