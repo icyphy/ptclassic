@@ -708,9 +708,7 @@ body ::tycho::File::help {} {
 #
 body ::tycho::File::hyperJump {filename {point {}}} {
     if {$filename != {}} {
-        set char [string index $filename 0]
-        # FIXME: The next line does not look portable.
-        if {$char != "/" && $char != "~" && $char != "\$"} {
+	if [::tycho::isRelative $filename] {
             set filename [file join [file dirname $file] $filename]
         }
     }
