@@ -188,7 +188,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 	exec mkdir $revdir
     }
     cdDir $dir
-    puts [exec cat $basefile]
+
     # Run sccs create
     if [catch {eval exec /usr/ccs/bin/sccs create $basefile} output] {
 	# There was some nasty error, so trash the SCCS file
