@@ -3,7 +3,7 @@ static const char file_id[] = "CGCTychoTarget.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -45,7 +45,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // constructor
 CGCTychoTarget::CGCTychoTarget(const char* name,const char* starclass,
                    const char* desc) : CGCMakefileTarget(name,starclass,desc) {
+		     // StringList mainfunc = "\"go_";
+		     // mainfunc << "galaxy()->name()\"";
+        // use the galaxy()->name() to attach the name to go
 	funcName.setInitValue("go");
+		     //	funcName.setInitValue(mainfunc);
 	//StringList compOpts = "$(TCLTK_CFLAGS)";
 
 	// There is no point in including X11 directories here,
@@ -91,7 +95,7 @@ int CGCTychoTarget :: codeGenInit() {
     globalDecls << "char *name = \"" << galaxy()->name() << "\";\n"
 		<< "int numIterations = "
 		<< int(scheduler()->getStopTime()) << ";\n"
-		<< "static char startCmd[] = \"" << startCommand << "\";\n"
+		<< "static char startCmd[] = \"" << startCommand << "\";\n";
       //dont include tkMain.c "#include \"tkMain.c\"\n\n";
 
     // If the system is paused, wait until Go is hit again
@@ -135,7 +139,7 @@ void CGCTychoTarget :: frameCode() {
 }
 
 static CGCTychoTarget targ("Tycho_Target", "CGCStar",
-			   "Target for Tcl/Tk C code generation");
+			   "Target for Tcl/Tk C code generation with Custom Control Panels");
 
 static KnownTarget entry(targ, "Tycho_Target");
 
