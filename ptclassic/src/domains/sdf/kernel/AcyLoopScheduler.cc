@@ -75,10 +75,13 @@ void findSinks(Galaxy* g, int flagLoc,
 	       SequentialList& sinks, Block* deletedNode);
 #endif
 
-// following defines are used for Blocks
-#define PARTITION flags[2]
-#define TMP_PARTITION flags[1]
-#define NODE_NUM flags[0]
+// The following macros are used for Blocks
+#define PARTITION(pp) ((pp)->flags[2])
+#define TMP_PARTITION(pp) ((pp)->flags[1])
+#define NODE_NUM(pp) ((pp)->flags[0])
+
+// The following macros are used for Galaxies
+#define GALAXY_PARTITION(gg) ((gg).flags[2])
 
 // Constructor. Set all data member pointers to 0.
 AcyLoopScheduler :: AcyLoopScheduler()
@@ -174,13 +177,13 @@ int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc, int cnt)
 	// succ can; we simply OR succ's row with s's.  However, if
 	// we already know we can visit succ, then we do not have to
 	// update since it would have happened before.
-	if (!reachMatrix.m[s->NODE_NUM][succ->NODE_NUM]) {
+	if (!reachMatrix.m[NODE_NUM(s)][NODE_NUM(succ)]) {
 	    cnt += graphSize;
 	    for (int i = 0; i < graphSize; i++) {
-		reachMatrix.m[s->NODE_NUM][i] = reachMatrix.m[s->NODE_NUM][i] |
-			reachMatrix.m[succ->NODE_NUM][i];
+		reachMatrix.m[NODE_NUM(s)][i] = reachMatrix.m[NODE_NUM(s)][i] |
+			reachMatrix.m[NODE_NUM(succ)][i];
 	    }
-	    reachMatrix.m[s->NODE_NUM][succ->NODE_NUM] = 1;
+	    reachMatrix.m[NODE_NUM(s)][NODE_NUM(succ)] = 1;
 	}
     }
     s->flags[flagLoc] = 2;
@@ -255,7 +258,7 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
     nodelist = new DataFlowStar*[graphSize];
     nextStar.reset();
     while ( (s = (DataFlowStar*)nextStar++) != NULL ) {
-	nodelist[s->NODE_NUM] = s;
+	nodelist[NODE_NUM(s)] = s;
 	DFStarPortIter nextPort(*s);
 	while ((starPort = nextPort++) != NULL) {
 	    if (starPort->isItInput()) continue;
@@ -277,8 +280,8 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
 	    // this is likely to be a rare event, in the buffer-computation
 	    // algorithms, we will make sure of this if the sum of the delays
 	    // happens to be greater.
-	    incMatrix.m[s->NODE_NUM][t->NODE_NUM] += numP;
-	    delMatrix.m[s->NODE_NUM][t->NODE_NUM] += numD;
+	    incMatrix.m[NODE_NUM(s)][NODE_NUM(t)] += numP;
+	    delMatrix.m[NODE_NUM(s)][NODE_NUM(t)] += numD;
 	}
     }   
 }
@@ -360,7 +363,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	i = 0;
 	ListIter nextStar(wellOrderedList);
 	while ( (d=(DataFlowStar*)nextStar++) != NULL) {
-	    RPMCTopSort[i] = d->NODE_NUM;
+	    RPMCTopSort[i] = NODE_NUM(d);
 	    i++;
 	}
 	topSort = RPMCTopSort;
@@ -388,7 +391,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 
 	clusterGraph = (AcyCluster*)(gal.head());
 	clusterGraph->settnob(-1);
-	clusterGraph->PARTITION = 0;
+	PARTITION(clusterGraph) = 0;
 
 	// The following function is a hack; see its comments for more info.
 	if (!clusterSplicedStars(clusterGraph)) return FALSE;
@@ -405,7 +408,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 
 	// Flatten everything for the second heuristic
 	dummy.initializeForClustering(gal);
-	gal.PARTITION = 0;
+	GALAXY_PARTITION(gal) = 0;
 
 	// APGAN requires the node numbers in the clusters as well; hence,
 	// copy those numbers to the constituent clusters.  RPMC did not
@@ -601,12 +604,12 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	AcyClusterIter nextClust(*gr);
 	while ((c = nextClust++) != NULL && lflag+rflag < 2) {
 	    // first start with some cluster in the left partition
-	    if (c->PARTITION == c->parent()->PARTITION && lflag == 0) {
+	    if (PARTITION(c) == PARTITION(c->parent()) && lflag == 0) {
 		leftSubGraph = c;
 		lflag = 1;
 		continue;
 	    }
-	    if (c->PARTITION != c->parent()->PARTITION && rflag == 0) {
+	    if (PARTITION(c) != PARTITION(c->parent()) && rflag == 0) {
 		rightSubGraph = c;
 		rflag = 1;
 	    }
@@ -616,7 +619,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	nextClust.reset();
 	while ((c = nextClust++) != NULL) {
 	    if (c == leftSubGraph || c == rightSubGraph) continue;
-	    if (c->PARTITION == c->parent()->PARTITION) {
+	    if (PARTITION(c) == PARTITION(c->parent())) {
 		leftGroup.append(c);
 	    } else {
 		rightGroup.append(c);
@@ -627,7 +630,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    c = (AcyCluster*)nextLeft++;
 	    newL = (AcyCluster*)(leftSubGraph->group(*c));
 	    if (!newL) return -1;
-	    newL->PARTITION = leftSubGraph->PARTITION;
+	    PARTITION(newL) = PARTITION(leftSubGraph);
 	    while ((c = (AcyCluster*)nextLeft++) != NULL) {
 		if (!newL->absorb(*c)) return -1;
 	    }
@@ -637,7 +640,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    c = (AcyCluster*)nextRight++;
 	    newR = (AcyCluster*)(rightSubGraph->group(*c));
 	    if (!newR) return -1;
-	    newR->PARTITION = rightSubGraph->PARTITION;
+	    PARTITION(newR) = PARTITION(rightSubGraph);
 	    while ((c = (AcyCluster*)nextRight++) != NULL) {
 		if (!newR->absorb(*c)) return -1;
 	    }
@@ -648,13 +651,13 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	if (leftCost < 0 || rightCost < 0) return -1;
 	totalCost = leftCost + cost + rightCost;
     } else {
-	// Else, there is only one node and its PARTITION value the same as
-	// it ever was.  So add it's PARTITION value to top sort.
+	// Else, there is only one node and its PARTITION() value the same as
+	// it ever was.  So add it's PARTITION() value to top sort.
 	// NOTE!!! Here we assume that the numbering produced by 
 	// numberBlocks() that was called
 	// earlier is still valid.
 	
-	RPMCTopSort[gr->PARTITION] = gr->head()->NODE_NUM;
+	RPMCTopSort[PARTITION(gr)] = NODE_NUM(gr->head());
     }
     return totalCost;
 }
@@ -711,7 +714,7 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	    snk = (AcyCluster*)p->far()->parent();
 	    // first check whether this arc is part of a multiarc that
 	    // has already been clustered previously.
-	    if (reachMatrix.m[src->NODE_NUM][snk->NODE_NUM] == -1) {
+	    if (reachMatrix.m[NODE_NUM(src)][NODE_NUM(snk)] == -1) {
 		nextEdge.remove();
 		continue;
 	    }
@@ -720,8 +723,8 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	    // src can reach snk.
 	    flag = 1;
 	    for (i = 0; i<graphSize; i++) {
-		if (reachMatrix.m[src->NODE_NUM][i] == 1 &&
-		    reachMatrix.m[i][snk->NODE_NUM] == 1) {flag=0; break;}
+		if (reachMatrix.m[NODE_NUM(src)][i] == 1 &&
+		    reachMatrix.m[i][NODE_NUM(snk)] == 1) {flag=0; break;}
 	    }
 	    if (flag) {
 		tmp = gcd(src->loopFactor(), snk->loopFactor());
@@ -737,15 +740,15 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	// matrix and the edge list.  The edgelist is updated next time around;
 	// now it is simply marked to be deleted.
 	omega = (AcyCluster*)(clusterSrc->group(*clusterSnk));
-	omega->NODE_NUM = clusterSrc->NODE_NUM;
+	NODE_NUM(omega) = NODE_NUM(clusterSrc);
 	// the following two statements are to make it easy to determine
 	// which way the arc is going between clusterSrc and clusterSnk.
 	// Even though it is obvious here, it won't be obvious when we
 	// retrieve the clusters from omega using ClusterIter.  Then, rather
 	// than physically checking which direction the arcs are going, we
-	// can just look at TMP_PARTITION
-	clusterSrc->TMP_PARTITION = 0;
-	clusterSnk->TMP_PARTITION = 1;
+	// can just look at TMP_PARTITION()
+	TMP_PARTITION(clusterSrc) = 0;
+	TMP_PARTITION(clusterSnk) = 1;
 	// mark this edge (that we just clustered) for deletion
 	clusterEdge->DELETE = 1;
 	// mark all the output ports from clusterSrc and clusterSnk
@@ -764,21 +767,21 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	// as the OR of the rows (and columns) of the previous clusterSrc
 	// and clusterSnk.
 	for (i=0; i<graphSize; i++) {
-	    reachMatrix.m[clusterSrc->NODE_NUM][i] = 
-	       (reachMatrix.m[clusterSrc->NODE_NUM][i]==1) |
-	       (reachMatrix.m[clusterSnk->NODE_NUM][i]==1);
-	    reachMatrix.m[i][clusterSrc->NODE_NUM] =
-	       (reachMatrix.m[i][clusterSrc->NODE_NUM]==1) |
-	       (reachMatrix.m[i][clusterSnk->NODE_NUM]==1);
+	    reachMatrix.m[NODE_NUM(clusterSrc)][i] = 
+	       (reachMatrix.m[NODE_NUM(clusterSrc)][i]==1) |
+	       (reachMatrix.m[NODE_NUM(clusterSnk)][i]==1);
+	    reachMatrix.m[i][NODE_NUM(clusterSrc)] =
+	       (reachMatrix.m[i][NODE_NUM(clusterSrc)]==1) |
+	       (reachMatrix.m[i][NODE_NUM(clusterSnk)]==1);
 	       // The above update can cause self-loops to occur
-	       // in the reachability matrix since if i=clusterSrc->NODE_NUM,
+	       // in the reachability matrix since if i = NODE_NUM(clusterSrc)
 	       // then that entry will be 1 by the above test; hence, we
 	       // set it to 0 below.
 	    reachMatrix.m[i][i] = 0;
 	}
 	for (i = 0; i < graphSize; i++) {
-	    reachMatrix.m[clusterSnk->NODE_NUM][i] = -1;
-	    reachMatrix.m[i][clusterSnk->NODE_NUM] = -1;
+	    reachMatrix.m[NODE_NUM(clusterSnk)][i] = -1;
+	    reachMatrix.m[i][NODE_NUM(clusterSnk)] = -1;
 	}
     }
     // graph has been completely clustered now.  Build up the schedule
@@ -818,15 +821,15 @@ int AcyLoopScheduler::buildAPGANTopsort(AcyCluster* gr, int ti)
     }
     else if (gr->numberBlocks() == 1) {
 	// Atomic block; hence, a leaf node in the schedule tree.  We can
-	// label its PARTITION flag by its index in the toplogical sort.
-	gr->head()->PARTITION = ti;
-	APGANTopSort[ti++] = gr->head()->NODE_NUM;
+	// label its PARTITION() flag by its index in the toplogical sort.
+	PARTITION(gr->head()) = ti;
+	APGANTopSort[ti++] = NODE_NUM(gr->head());
 	return ti;
     }
     else {
 	AcyClusterIter nextClust(*gr);
 	tmp = nextClust++;
-	if (tmp->TMP_PARTITION) {
+	if (TMP_PARTITION(tmp)) {
 	    rightOmega = tmp;
 	    leftOmega = nextClust++;
 	}
@@ -976,8 +979,8 @@ void AcyLoopScheduler::fixBufferSizes(int i, int j) {
 	    DFStarPortIter nextPort(*s);
 	    while ((p=nextPort++) != NULL) {
 		t = (DataFlowStar*)p->far()->parent();
-		if(t && topInvSort[t->NODE_NUM] > split
-		     && topInvSort[t->NODE_NUM] <= j) {
+		if(t && topInvSort[NODE_NUM(t)] > split
+		     && topInvSort[NODE_NUM(t)] <= j) {
 		    if (p->geo())
 		    p->geo()->setMaxArcCount(repsij*(p->numXfer()));
 		}
@@ -1374,20 +1377,20 @@ void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
 	nodesTobeVisited.append(s);
 	for (int i=0; i<graphSize; i++) nodeColors.m[0][i] = 0;
 	while ((t = (DataFlowStar*)nodesTobeVisited.getAndRemove()) != NULL) {
-	    nodeColors.m[0][t->NODE_NUM] = 2;
+	    nodeColors.m[0][NODE_NUM(t)] = 2;
 	    SuccessorIter nextSucc(*t);
 	    while ((u=(DataFlowStar*)nextSucc++) != NULL) {
-		if (reachMatrix.m[u->NODE_NUM][s->NODE_NUM]) {
+		if (reachMatrix.m[NODE_NUM(u)][NODE_NUM(s)]) {
 		    StringList message;
 		    message << "Failed to create reachability matrix. ";
 			    << "Graph appears to be non-acyclic.";
 		    Error::abortRun(message);
 		    return;
 		}
-		reachMatrix.m[s->NODE_NUM][u->NODE_NUM] = 1;
-		if (nodeColors.m[0][u->NODE_NUM] == 0) {
+		reachMatrix.m[NODE_NUM(s)][NODE_NUM(u)] = 1;
+		if (nodeColors.m[0][NODE_NUM(u)] == 0) {
 		    nodesTobeVisited.append(u);
-		    nodeColors.m[0][u->NODE_NUM] = 1;
+		    nodeColors.m[0][NODE_NUM(u)] = 1;
 		}	
 	    }
 	}
