@@ -440,6 +440,10 @@ body ::tycho::HTML::constructor {args} {
 
     bind $text <space> "$this scroll 1; break"
 
+    # Scroll using cursor keys w/o waiting for invisible cursor to move.
+    bind $text <Up> "$text yview scroll -1 units; break"
+    bind $text <Down> "$text yview scroll 1 units; break"
+
     # Double clicks normally select text, something we don't want here.
     bind $text <Double-Button-1> {break}
 
