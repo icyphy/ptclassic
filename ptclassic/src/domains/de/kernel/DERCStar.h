@@ -31,6 +31,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
  
+
+/* Base class for stars used in a resource contention simulation in 
+   the DE domain. It defines several methods that must be provided in 
+   the derived stars.
+*/
+
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -50,9 +56,13 @@ class DERCStar : public DERepeatStar {
     /* virtual */ virtual const char* className() const;
     /* virtual */ virtual int isA(const char*) const;
     /* virtual */ virtual double getDelay();
-    /* virtual */ virtual SequentialList* getEvents ();
-    /* virtual */ virtual void emitEvent(Event*, double ) {};
-    /* virtual */ virtual int emitEventToIntQ(int, double ) {return 0;};
+    /* virtual */ virtual void emitEvent(Event*, double ) {
+        Error::abortRun("Method emitEvent must be overridden in derived classes");
+    };
+    /* virtual */ virtual int emitEventToIntQ(int, double ) {
+        Error::abortRun("Method emitEventtoIntQ must be overridden in derived classes");
+        return 0;
+    };
     Resource* resourcePointer;
     char resource[1024];
     double timeOfArrival;
@@ -75,8 +85,8 @@ class DERCStar : public DERepeatStar {
 class StarLLCell {
  public: 
     Event* event;
-    double time;     /* Expected Completion Time */
-    int outputPort;
+    double time;    // time when event should be emitted
+    int outputPort;   // POLIS specific
     
     StarLLCell(double, int);
 };

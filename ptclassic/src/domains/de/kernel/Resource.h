@@ -69,7 +69,7 @@ class ResLLCell;
 class DERCStar;
 
 ////////////////////////////////////////////////////////////////////////////
-// Resource : to be used in a POLIS simulation.
+// Resource : to be used to simulate resource contention
 //
 // A Resource is used to control access to a simulated resource (eg CPU,
 // data bus etc.) during a POLIS simulation. It is designed to be used in 
@@ -87,7 +87,7 @@ class Resource {
 
     // returns int so it can pass along value from DEStar.run()
     int newEventFromEventQ(CqLevelLink* , double); 
-    int canAccessResource(Event*);
+    int canAccessResource(CqLevelLink*);
     // used to get the destination of the event as a DERC Star
     DERCStar* getDERCStar(CqLevelLink*);
 
@@ -100,7 +100,7 @@ class Resource {
     double timeWhenFree; // set to ECT of last event in LL, or else -1
     DERCScheduler* mysched;   // the DERCScheduler which created this object
     
-    SequentialList* getOtherEvents(CqLevelLink*, double);
+    SequentialList* getOtherLinks(CqLevelLink*, double);
     // used to store information about interrupted processes
     SequentialList* intStarList; 
     

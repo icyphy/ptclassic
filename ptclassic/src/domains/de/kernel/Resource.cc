@@ -84,14 +84,17 @@ Resource::Resource(const char* n, int policy, DERCScheduler* sched)
 /////////////////////////////////////////////////////////////////////////
 
 int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
-    // printf("newEventFromEventq: %p at time %f, for port %s\n", link, now,((Event*)link->e)->dest->name());fflush(0);
     double nextTry;    
 
-    // ASSUMING that DERCStars only use the feedbackIn port for 
+    // Each link contains an event, the destination star of the event, and
+    // the time of the event. In the following code we refer to links and
+    // events interchangably.
+
+    // ASSUMING that DERCStars use the feedbackIn port *only* for 
     // controling the emitting of events
     if ( ((Event*)link->e)->dest == getDERCStar(link)->feedbackIn) {
          // fire the star. This firing is signifying that an event is ready 
-        // for output
+        // for output or that a Star is finished using this Resource
         DERCStar* starUsingResource = getDERCStar(link);
         starUsingResource->arrivalTime = now;
         starUsingResource->startNewPhase();
@@ -104,16 +107,14 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
         return TRUE;
     }
         
-    // Must have an event that is trying to fire the star and use the resource
+    
 
     // first get all links from the eventQ with the current time, 
     // with events for stars for this Resource
-    SequentialList* sortList = getOtherEvents(link, now);
+    SequentialList* sortList = getOtherLinks(link, now);
         
-    // Move these links to an array for more efficent processing
-    
+    // Move these links to an array for more efficent processing    
     const int dimen = sortList->size();
-    //printf("dimen is %d\n", dimen);fflush(0);
     CqLevelLink** sortArray = new CqLevelLink*[dimen];
     int i;
     for (i=0 ; i<dimen ; i++) {
@@ -140,6 +141,7 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
         return TRUE;
     }
 
+    // Must have an event that is trying to fire the star and use the resource
     
     if (getDERCStar(link)->needsSharedResource) {
         //////////////////////////////////////
@@ -151,7 +153,6 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
         for (i=0 ; i<dimen ; i++){
             if (getDERCStar(link)->timeOfArrival == -1){
                 getDERCStar(sortArray[i])->timeOfArrival = now;	
-                //printf("event for star %s\n", getDERCStar(sortArray[i])->name());fflush(0);
             }
         }     
         
@@ -191,7 +192,7 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
        
         /* Now have the current link of highest priority.     */
         /* See if this link can access the Resource           */
-        if (!canAccessResource((Event*)topLink->e)) {
+        if (!canAccessResource(topLink)) {
             // Cannot access resource, so reschedule the Events
             for (i=0 ; i<dimen ; i++) {
                 // Reschedule each event(ie link) at the appropriate time 
@@ -228,7 +229,6 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
         } else {
             // can access Resource!
             // Need to make available any other Events for the Star
-            //printf("can access SW resource, now is %f\n", now);fflush(0);
             DERCStar* starUsingResource = getDERCStar(topLink);
             starUsingResource->arrivalTime = now;
             DERCStar* dest;
@@ -260,11 +260,9 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
                     }
                 }
             }
-            //printf("about to fire a SW star...\n");fflush(0);
+         
             // fire the star. The Star wil store its o/p events 
             if (!starUsingResource->run()) return FALSE;
-            //printf("have fired the SW star...\n");fflush(0);
-            
             // Now update the Resources SequentialList of executing stars
             double updateDelay = starUsingResource->getDelay();
         
@@ -273,7 +271,6 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             ListIter oldStarList(*intStarList);
             ResLLCell* p;
             while ((p = (ResLLCell*)oldStarList++) != 0) {
-                //printf("updating %p in SW\n", p);fflush(0);
                 double oldTime = p->ECT;
                 p->ECT = oldTime + updateDelay;
             }    
@@ -281,14 +278,12 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
 
             // now add the firing star to the resources list of executing stars
             p = new ResLLCell(starUsingResource, (now+updateDelay), starUsingResource->priority);
-            //printf("\nadding ResLLCell %p to intStarList of resource %p\n", p, this);fflush(0);
             intStarList->prepend(p);
                     
             // Now reschedule the remaining links that were originally taken 
             // from the eventQ       
             for (i=0 ; i<dimen ; i++){
                 if (sortArray[i] != 0) {
-                    //printf("rescheduling link %p for star %s from time %f\n", sortArray[i], getDERCStar(sortArray[i])->name(), now);fflush(0);
                     assert(indexOftop != i);
                     // Reschedule each event at the appropriate time by 
                     // looking at the Resources Linked List to see all 
@@ -309,7 +304,6 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
                         Error::abortRun("HW Event never got rescheduled in NewEventFromEventQ()");
                         return FALSE;
                     }
-                    //printf("\rRescheduling at time %f\n", nextTry);fflush(0);
                     sortArray[i]->level = nextTry;
                     eventQ->pushBack(sortArray[i]);
                 }      
@@ -323,7 +317,6 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             // Resource is not free
             // Reschedule the Links. Remember all such Events use Star
             // for same time (same freq)
-            //printf("HW resource not free, timeWhenFree %f, now %f\n", timeWhenFree, now);fflush(0);
             for (i=0 ; i<dimen ; i++) {
                 sortArray[i]->level = timeWhenFree;
                 eventQ->pushBack(sortArray[i]);
@@ -363,17 +356,20 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             this->timeWhenFree = nextTry;
         }
     }
+    LOG_DEL; delete [] sortArray;
     return TRUE;
 }
 
 ////////////////////////////////////////////////////////////////////////////
-// This method returns a SequentialList of all other current Linkss in the
-// eventQ, and the passed event, who also want to access this resource at
-// this time. However, if one of the links for at the current time are on a 
-// feedbackIn port, it is the only link returned.
+// This method returns a SequentialList of all other current Links in the
+// eventQ, and the passed link, who also want to access this resource at
+// this time. However, if one of the links at the current time are on a 
+// feedbackIn port, it is the only link returned. This is because we assume 
+// the feebbackIn port is *only* used in DERCStars for signalling that
+// an event is ready to be emitted.
 ///////////////////////////////////////////////////////////////////////////
 
-SequentialList* Resource :: getOtherEvents(CqLevelLink* f, double now) {
+SequentialList* Resource :: getOtherLinks(CqLevelLink* f, double now) {
   
     SequentialList* sortList = new SequentialList();
     sortList->prepend(f);
@@ -396,7 +392,8 @@ SequentialList* Resource :: getOtherEvents(CqLevelLink* f, double now) {
     // for this resource. sortList is used for this in a circular fashion,
     // ie set a pointer to the top event and go through list until reach it 
     // again. Any events using this resource get appended to the tail of the 
-    // list.
+    // list. However if any link has an event on a feedbackIn port, this is 
+    // the only link returned.
     CqLevelLink* topLink = (CqLevelLink*)sortList->getAndRemove();
     sortList->append(topLink); // Set marker to event at end of list
     CqLevelLink* nextLink;  
@@ -429,11 +426,11 @@ SequentialList* Resource :: getOtherEvents(CqLevelLink* f, double now) {
 
 
 //////////////////////////////////////////////////////////////
-// Used to check if the current Event can gain access to
+// Used to check if the current Link can gain access to
 // the Resource. Returns 1 if it can, else 0
 //////////////////////////////////////////////////////////////
 
-int Resource :: canAccessResource(Event* newEvent) {
+int Resource :: canAccessResource(CqLevelLink* newLink) {
     // if resource is not currently being used, can access it!
     if (intStarList->size() == 0) {
         return 1;
@@ -454,9 +451,8 @@ int Resource :: canAccessResource(Event* newEvent) {
     ResLLCell* topCell = (ResLLCell*)intStarList->head();
             
     //newPriority > oldPriority ?
-    if (((DERCStar*)&(newEvent->dest->parent()->asStar()))->priority > topCell->priority) {
-        //printf("preempting!!\n");
-        return 1;
+    if (getDERCStar(newLink)->priority > topCell->priority) {
+        return 1; //  pre-empting!
     } else {
         return 0;
     }
@@ -470,7 +466,6 @@ int Resource :: canAccessResource(Event* newEvent) {
  */
 void Resource :: removeFinishedStar(DERCStar* star) {
     ResLLCell* p = (ResLLCell*) intStarList->getAndRemove();
-    //printf("removing ResLLCell %p from resource %p\n", p, this);fflush(0);
     assert( star == p->star); // finished star must be at top of intStarList
 
     if (intStarList->size() == 0 ) {
@@ -485,7 +480,6 @@ void Resource :: removeFinishedStar(DERCStar* star) {
 ResLLCell* Resource :: getTopCell() {
     // warning: returns 0 if intStarList is empty
     ResLLCell* p = (ResLLCell*) intStarList->head();
-    //printf("returning top cell %p from %p resource\n", p, this);fflush(0);
     if ( p ==0 ) {
         Error::abortRun("resource does not currently have any stars using it");
     }
@@ -515,6 +509,6 @@ DERCStar* Resource :: getDERCStar(CqLevelLink* link) {
 // For some reason, under Cygwin32, we need to the body in the .cc file
 ResLLCell :: ResLLCell( DERCStar* s, double time, int prio) {
     star = s;
-    ECT = time;
+    ECT = time;    // Expected Completion Time
     priority = prio;
 }
