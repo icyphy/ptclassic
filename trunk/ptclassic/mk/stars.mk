@@ -817,11 +817,11 @@ ifdef SDF
 		LIBS += -lsdfvisstars
 		LIBS += $(VSDKHOME)/util/vis.il
 	endif
-	# Annapolis Wildforce FPGA board
+	# Star for Annapolis Micro System Wildforce board
 	ifdef SDFWILDFORCE
 		CUSTOM_DIRS += $(SDFDIR)/wildforce/stars
 		STARS += $(LIBDIR)/sdfwildforce.o
-		LIBS += -lsdfwildforce $(WILDFORCE_LIBSPEC)
+		LIBS += -lsdfwildforcestars $(WILDFORCE_LIBSPEC)
 	endif
 	ifdef CG
 		# FIXME: The only thing in sdf/targets also depends on 
@@ -862,6 +862,12 @@ ifdef SDFLIB
 	ifneq ($(USE_SHARED_LIBS),yes) 
 		TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o
 	endif
+endif
+
+ifdef SDFWILDFORCE
+	CUSTOM_DIRS += $(SDFDIR)/wildforce/kernel
+	LIBS += -lsdfwildforce
+	LIBFILES += $(LIBDIR)/libsdfwildforce.$(LIBSUFFIX)
 endif
 
 ifdef HOF
