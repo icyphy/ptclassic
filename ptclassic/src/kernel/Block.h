@@ -3,6 +3,7 @@
 
 #include "NamedObj.h"
 #include "Connect.h"
+#include "State.h"
 
 /**************************************************************************
 Version identification:
@@ -23,6 +24,9 @@ $Id$
 
 	3/23/90 - J. Buck
 		Make a Block a type of NamedObj
+
+        5/26/90 - I. Kuroda and J. Buck
+                Add StateList states and methods for State
 
  Block is the basic unit of computation...it is an abstraction that has
  inputs and outputs and certain generic methods common to all
@@ -90,6 +94,28 @@ public:
 	// print portholes as part of the info-printing method
 	StringList printPorts(const char* type);
 
+        // Add  State to the block
+        addState(State& s) {states.put(s);}
+
+	// Initialize the State
+        virtual void initState(){states.initElements();}
+
+        // Return number of states 
+        int numberStates() const {return states.size();}
+
+        State& nextState() {return states++;}
+
+        // print states as part of the info-printing method
+        StringList printStates(const char* type);
+
+        // Retrieve the State with the given name
+        State *stateWithName(const char* name);
+
+        // Re-Define State
+        setState(const char* stateName, const char* expression) {
+                        stateWithName(stateName)->setValue(expression);}
+
+
 protected:
 	// Database for this block
 
@@ -99,6 +125,9 @@ protected:
 	// This function saves the given MultiPortHole so portWithName
 	// can find it.
 	addPort(MultiPortHole& p) {multiports.put(p);}
+
+        // stateWithName can find a state.
+        StateList states;
 
 private:
 	// This is a list of multiportholes in the block.
