@@ -78,22 +78,31 @@ int port2interp(PortHole* port,Tcl_Interp* myInterp,const char* ghostDomain) {
 
   } else if (!strcmp(ghostDomain,"DE") || !strcmp(ghostDomain,"FSM") ||
 	     !strcmp(ghostDomain,"DDF")) {
-    InfString statusStr;
-    InfString valueStr;
-    InfString buf;
+
     if (!port->geo()->size()) {
       // There is no token, i.e. the event is absent.
-      // Then set both status and value to 0.
-      statusStr = "0";
-      valueStr = "0";
+      // Then set status to 0 but keep previous value.
+      InfString statusStr = "0";
+      // Register into Tcl interp.
+      InfString buf = port->name();
+      buf << "(s)";
+      Tcl_SetVar(myInterp,buf,statusStr,TCL_GLOBAL_ONLY);
 
     } else {
       // There exist tokens: First set status to 1.
-      statusStr = "1";
+      InfString statusStr = "1";
+      // Register into Tcl interp.
+      InfString buf = port->name();
+      buf << "(s)";
+      Tcl_SetVar(myInterp,buf,statusStr,TCL_GLOBAL_ONLY);
 
       // Then grab Particle directly from Geodesic, and set value.
       Particle* p = port->geo()->get();
-      valueStr = p->print();
+      InfString valueStr = p->print();
+      // Register into Tcl interp.
+      buf = port->name();
+      buf << "(v)";
+      Tcl_SetVar(myInterp,buf,valueStr,TCL_GLOBAL_ONLY);
 
       // Recycle the Particle by putting it into Plasma.
       p->die();
@@ -103,14 +112,6 @@ int port2interp(PortHole* port,Tcl_Interp* myInterp,const char* ghostDomain) {
 	p->die();
       }
     }
-
-    // Register into Tcl interp.
-    buf = port->name();
-    buf << "(s)";
-    Tcl_SetVar(myInterp,buf,statusStr,TCL_GLOBAL_ONLY);
-    buf = port->name();
-    buf << "(v)";
-    Tcl_SetVar(myInterp,buf,valueStr,TCL_GLOBAL_ONLY);
 
   } else {
     InfString buf = "port2interp: ";
