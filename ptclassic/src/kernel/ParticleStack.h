@@ -56,36 +56,38 @@ class ParticleStack {
 public:
 	// put a particle onto the stack
 	void put(Particle* p) {
-		if (!head) tail = p;
-		p->link = head; head = p;
+		if (!pHead) pTail = p;
+		p->link = pHead; pHead = p;
 	}
 
 	// get a particle from the stack.
 	// derived classes must do the empty-stack check!
-	// if we get the last, tail will still point to it.
+	// if we get the last, pTail will still point to it.
+	// however, tail() will correctly return null.
+
 	Particle* get() {
-		Particle* p = head;
-		head = p->link;
+		Particle* p = pHead;
+		pHead = p->link;
 		return p;
 	}
 
 	// put an article on the "tail" of the stack (to use the
 	// stack like a queue)
 	void putTail(Particle* p) {
-		if (head) tail->link = p;
-		else head = p;	// first particle
-		tail = p;	// point to new last particle
+		if (pHead) pTail->link = p;
+		else pHead = p;	// first particle
+		pTail = p;	// point to new last particle
 		p->link = 0;	// terminate the chain
 	}
 
 	// empty stack check
-	int empty() const { return head ? 0 : 1;}
+	int empty() const { return pHead ? 0 : 1;}
 
 	// return true if more than one member (for Plasma)
-	int moreThanOne() const { return (head && head->link) ? 1 : 0;}
+	int moreThanOne() const { return (pHead && pHead->link) ? 1 : 0;}
 
 	// constructor (built with 0 or one particle)
-	ParticleStack(Particle*h) : head(h), tail(h) {
+	ParticleStack(Particle*h) : pHead(h), pTail(h) {
 		// make sure the stack is "terminated"
 		if (h) h->link = 0;
 	}
@@ -95,9 +97,14 @@ public:
 
 	// return all Particles to their Plasmas
 	void freeup ();
-protected:
-	Particle* head;
+
+	// return ptr to head, tail respectively.
+	Particle* head() const { return pHead;}
+	// note that for an empty stack, pTail may not be 0,
+	// hence the following code:
+	Particle* tail() const { return pHead ? pTail : 0;}
 private:
-	Particle* tail;
+	Particle* pHead;
+	Particle* pTail;
 };
 #endif
