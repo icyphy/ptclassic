@@ -27,6 +27,7 @@ David G. Messerschmitt
 .so codegen
 .so newstars
 .so icons
+.so domains
 .so moreinfo
 .so references
 .so pigiCommands

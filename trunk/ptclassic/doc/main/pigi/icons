@@ -123,12 +123,14 @@ of the icon.  The following colors are currently in use:
 	COMPLEX: white
 .sp
 .fi
-The color is not currently set automatically by the icon generator,
-so to stick with this convention, you have to change the color
-manually.  To do this, select the stem, type ``"xxxxOutline"'',
+The color is currently set automatically by the icon generator.
+You can also change the color
+manually.  To do this, select the stem, type ``"xxxx"'',
 where xxxx is replaced by the color name (the quotes are necessary),
 and then type the single character ``l'' (or Edit:change-layer in the menu).
 Again, be sure to save the window.
+To see what color names are available in the current technology,
+execute the Vem ``System:palette'' command, or ``P''.
 .pp
 One final editing operation is a little trickier: moving terminals.
 Pigi places terminals rather arbitrarily, since it knows nothing
@@ -160,6 +162,16 @@ To orient terminals so they are aiming up or down, select
 the terminal, type ``t'' (or Selection:transform in the menu),
 then type ``m'' to move it.  Repeatedly typing ``t'' will continue
 to transform the terminal.
+.pp
+As of this writing, when an icon is edited, instances of the icon
+may disappear from open palettes.  This is a Vem bug
+that will hopefully be fixed soon.
+DO NOT SAVE THE PALETTE WITH AN ICON MISSING.
+If you do, another related bug in Vem will damage the palette
+by confusing its bounding box.  An Oct expert is required to
+repair the damage.
+Instead, execute the Vem ``System:re-read'' command to get the icon
+to reappear.  At that time, it is safe to save the palette.
 .pp
 A little more detail on the Oct internals may be useful.
 For make-schem-icon, if the schematic is called xxx,
