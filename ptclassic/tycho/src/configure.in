@@ -38,7 +38,7 @@ AC_PROG_MAKE_SET
 #
 # User specified location of the Ptolemy Tree
 #
-AC_ARG_WITH(tcl, [  --with-ptolemy=DIR          use Tcl/Tk from DIR],
+AC_ARG_WITH(ptolemy, [  --with-ptolemy=DIR          use Tcl/Tk from DIR],
         _PTOLEMY=$withval, _PTOLEMY=$PTOLEMY)
 if test ! -d $_PTOLEMY; then
     AC_MSG_ERROR(Tcl directory $_PTOLEMY doesn't exist)
@@ -47,7 +47,7 @@ fi
 #
 # User specified location of the tcl include
 #
-AC_ARG_WITH(tcl, [  --with-tclinclude=DIR          use Tcl 7.6 includes from DIR],
+AC_ARG_WITH(tclinclude, [  --with-tclinclude=DIR          use Tcl 7.6 includes from DIR],
         TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/itcl/include/itcl)
 if test ! -d $TCL_INCLUDE_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_INCLUDE_DIR doesn't exist)
@@ -63,7 +63,7 @@ fi
 #
 # User specified location of the tcl lib
 #
-AC_ARG_WITH(tcl, [  --with-tcllib=DIR          use Tcl 7.6 lib from DIR],
+AC_ARG_WITH(tcllib, [  --with-tcllib=DIR          use Tcl 7.6 lib from DIR],
         TCL_LIB_DIR=$withval, TCL_LIB_DIR=$_PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl)
 if test ! -d $TCL_LIB_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_LIB_DIR doesn't exist)
@@ -100,7 +100,7 @@ TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 # We must set this arg after sourcing tclConfig.sh, as Tcl7.6 tclConfig.sh
 # sets TCL_SRC_DIR.  However, if you are using the automounter, then 
 # tclConfig.sh will probably have the wrong value.
-AC_ARG_WITH(tcl, [  --with-tclsrc=DIR          use Tcl srcs lib from DIR],
+AC_ARG_WITH(tclsrc, [  --with-tclsrc=DIR          use Tcl srcs lib from DIR],
         TCL_SRC_DIR=$withval, TCL_SRC_DIR=$_PTOLEMY/src/tcltk/itcl2.2/tcl7.6)
 #if test ! -d $TCL_SRC_DIR; then
 #    AC_MSG_ERROR(Tcl directory $TCL_SRC_DIR doesn't exist)
@@ -115,7 +115,7 @@ fi
 #
 # User specified location of the tk include
 #
-AC_ARG_WITH(tcl, [  --with-tkinclude=DIR          use Tk 4.2 include from DIR],
+AC_ARG_WITH(tkinclude, [  --with-tkinclude=DIR          use Tk 4.2 include from DIR],
         TK_INCLUDE_DIR=$withval, TK_INCLUDE_DIR=$TCL_INCLUDE_DIR)
 if test ! -d $TK_INCLUDE_DIR; then
     AC_MSG_ERROR(Tk directory $TK_INCLUDE_DIR doesn't exist)
@@ -131,7 +131,7 @@ fi
 #
 # User specified location of the tk lib
 #
-AC_ARG_WITH(tcl, [  --with-tklib=DIR          use Tk 4.2 libs from DIR],
+AC_ARG_WITH(tklib, [  --with-tklib=DIR          use Tk 4.2 libs from DIR],
         TK_LIB_DIR=$withval, TK_LIB_DIR=$TCL_LIB_DIR)
 if test ! -d $TK_LIB_DIR; then
     AC_MSG_ERROR(Tk directory $TK_LIB_DIR doesn't exist)
@@ -159,7 +159,7 @@ TK_LIB_SPEC=$TK_LIB_SPEC
 # We must set this arg after sourcing tkConfig.sh, as Tk4.2 tkConfig.sh
 # sets TK_SRC_DIR.  However, if you are using the automounter, then 
 # tkConfig.sh will probably have the wrong value.
-AC_ARG_WITH(tk, [  --with-tksrc=DIR          use Tk srcs lib from DIR],
+AC_ARG_WITH(tksrc, [  --with-tksrc=DIR          use Tk srcs lib from DIR],
         TK_SRC_DIR=$withval, TK_SRC_DIR=$TCL_SRC_DIR/../tk4.2)
 #if test ! -d $TK_SRC_DIR; then
 #    AC_MSG_ERROR(Tk directory $TK_SRC_DIR doesn't exist)
@@ -174,7 +174,7 @@ fi
 #
 # User specified location of the Java Development Kit (JDK)
 #
-AC_ARG_WITH(tcl, [  --with-java=DIR          use Java binaries from DIR],
+AC_ARG_WITH(java, [  --with-java=DIR          use Java binaries from DIR],
         JAVAHOME=$withval, JAVAHOME=`cd /opt/SUNWjws/JDK; pwd`)
 if test ! -d $JAVAHOME; then
     AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
