@@ -49,8 +49,8 @@ class ::tycho::SlateView {
      # The width of the slate
     itk_option define -width width Width 400
 
-    # The background color of the slate
-
+    # Specify what type of scrolling to use: bars, bars, or none.
+    itk_option define -scrolling scrolling Scrolling {auto}
 
     #################################################################
     ####                     public methods                      ####
@@ -93,6 +93,12 @@ class ::tycho::SlateView {
 
     # Manipulate context-sensitive (popup) menus
     method popup {mode tag args}
+
+    # Query the user for the type of scrollbars to use.
+    method scrollQuery {}
+
+    # Set the scrolling style (use with scrollQuery).
+    method scrollSet {dialog}
 
     # Get the contained slate
     method slate {}
@@ -163,6 +169,9 @@ class ::tycho::SlateView {
     # Manipulate the the selection
     protected method _select {mode {name {}}}
 
+    # Update the scrollbars to reflect the current canvas contents.
+    method updateScrollbars {}
+
     #################################################################
     ####                  protected variables                    ####
     
@@ -175,6 +184,9 @@ class ::tycho::SlateView {
     #################################################################
     ####                   private methods                       ####
     
+    # The updateScrollbars method schedules this method for execution.
+    private method _configureScrollbars {}
+
     # Load items from the model into the slate
     private method _loadlayout {{item {}}}
 
@@ -201,15 +213,41 @@ class ::tycho::SlateView {
 
     # The mapping from item IDs to item names
     private variable _nameof
+
+    # Pending configuration command
+    private variable scheduledUpdate {}
+}
+
+#######################################################################
+#### -scrolling option configuration
+# If the value is "bars", then the canvas is equipped with scrollbars.
+# If the value is "auto", then the canvas is equipped with scrollbars
+# only when its contents are not all visible.
+# Otherwise, scrolling is turned off.  For the change to take effect
+# after configuring this option, call <code>updateScrollbars</code>.
+#
+configbody ::tycho::SlateView::scrolling {
+    # Do not call updateScrollbars here because this configuration occurs
+    # too often.
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::SlateView::constructor {args} {
+    # Create a top frame to contain both the canvas and vertical 
+    # scrollbar and a bottom frame to hold the horizontal scrollbar and 
+    # some filler.
+    itk_component add top {
+	frame $itk_interior.top
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(top) -fill both -expand yes -side top
+
     # Create a slate
     itk_component add slate {
-        uplevel #0 ::tycho::slate $itk_interior.slate
+        uplevel #0 ::tycho::slate $itk_component(top).slate
     } {
         keep -cursor
         rename -background -canvascolor canvasColor CanvasColor
@@ -230,6 +268,44 @@ body ::tycho::SlateView::constructor {args} {
     #}
     #set _slate [$itk_component(scrolledslate) component slate]
     #pack $itk_component(scrolledslate) -expand yes -fill both -side left
+
+    # Create vertical scrollbar. This may not be packed.
+    itk_component add vsb {
+        scrollbar $itk_component(top).vsb \
+                -orient vertical \
+                -command "$_slate yview"
+    } {
+        keep -background -cursor
+    }
+    
+    # Frame to hold the horizontal scrollbar and filler.
+    itk_component add bottom {
+	frame $itk_interior.bottom
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(bottom) -fill both -side bottom \
+            -before $itk_component(top)
+
+    # Create horizontal scrollbar. This may not be packed.
+    itk_component add hsb {
+        scrollbar $itk_component(bottom).hsb \
+                -orient horizontal \
+                -command "$_slate xview"
+    } {
+        keep -background -cursor
+    }
+
+    # Filler frame for the lower right corner.
+    itk_component add filler {
+	frame $itk_component(bottom).filler
+    } {
+	keep  -background -cursor
+    }
+
+    $_slate configure \
+            -xscrollcommand "$itk_component(hsb) set" \
+            -yscrollcommand "$itk_component(vsb) set"
 
     # Modify the binding tags of the canvas so that this megawidget
     # gets events too. This is unfortunate but appears to be necessary
@@ -260,6 +336,11 @@ body ::tycho::SlateView::constructor {args} {
     popup bind "global" #background \
 	    [list @scope [info class] $this _configurePopup]
     _initializePopup
+
+    # Bind configure events to update the display.
+    # Interactivity is enabled only after the first configure event.
+    bind $itk_component(bottom) <Configure> "$this updateScrollbars"
+
 }
 
 ########################################################################
@@ -881,6 +962,44 @@ body ::tycho::SlateView::popup {mode name args} {
     }
 }
 
+#####################################################################
+#### scrollQuery
+# Query the user for the type of scrollbars to use.
+#
+body ::tycho::SlateView::scrollQuery {} {
+    set name [::tycho::autoName .query]
+    ::tycho::Query $name -okcommand "$this scrollSet $name"
+    switch -exact [cget -scrolling] {
+        bars {set default {Always use scrollbars}}
+        auto {set default {Automatic scrollbars}}
+        default {set default {Never use scrollbars}}
+    }
+    $name radio scrolling {} [list \
+            {Always use scrollbars} \
+            {Automatic scrollbars} \
+            {Never use scrollbars}] $default
+    $name centerOnScreen
+}
+
+#####################################################################
+#### scrollSet
+# Set the scrolling style of the child widget depending on the user's
+# response in the specified dialog box.
+#
+body ::tycho::SlateView::scrollSet {dialog} {
+    set prevoption [cget -scrolling]
+    switch -exact [$dialog get scrolling] {
+        {Always use scrollbars} {set option bars}
+        {Automatic scrollbars} {set option auto}
+        default {set option none}
+    }
+    if {$option != $prevoption} {
+        configure -scrolling $option
+        updateScrollbars
+        markModified
+    }
+}
+
 ########################################################################
 #### slate
 #
@@ -902,6 +1021,19 @@ body ::tycho::SlateView::slateid {name} {
         return $_itemid($name)
     } else {
         return $name
+    }
+}
+
+#########################################################################
+#### updateScrollbars
+# Update the range of the scrollbars so that they cover the bounding box
+# of the contents of the canvas.  This should be called after each action
+# that changes the bounding the box of the items in the canvas or the size
+# of the canvas.
+#
+body ::tycho::SlateView::updateScrollbars {} {
+    if {$scheduledUpdate == {}} {
+        set scheduledUpdate [after idle [code $this _configureScrollbars]]
     }
 }
 
@@ -1163,6 +1295,75 @@ body ::tycho::SlateView::_select {mode {name {}}} {
 #####################################################################
 #####################################################################
 ####                       private methods                       ####
+
+#########################################################################
+#### _configureScrollbars
+# This method does the work of updateScrollbars, and should be called
+# via updateScrollbars.
+#
+body ::tycho::SlateView::_configureScrollbars {} {
+    set bwidth 0
+    set bheight 0
+    set bbox [$_slate bbox all]
+    if {$itk_option(-scrolling) == {auto}} {
+        set cwidth [winfo width $_slate]
+        if {$cwidth == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cwidth [cget -canvaswidth]
+        }
+        set cheight [winfo height $_slate]
+        if {$cheight == 1} {
+            # The canvas has not been mapped yet.  Use the requested width.
+            set cheight [cget -canvasheight]
+        }
+	
+        if {$bbox != {}} {
+            # So that the scrollbars don't move to the edge of the contents
+            set marg 4
+            set bbox [list [expr [lindex $bbox 0] - $marg] \
+                    [expr [lindex $bbox 1] - $marg] \
+                    [expr [lindex $bbox 2] + $marg] \
+                    [expr [lindex $bbox 3] + $marg]]
+        }
+
+        if {$bbox != {}} {
+            set bwidth [expr [lindex $bbox 2] - [lindex $bbox 0]]
+            set bheight [expr [lindex $bbox 3] - [lindex $bbox 1]]
+        }
+    } {
+        set cwidth 1
+        set cheight 1
+    }
+    if {$itk_option(-scrolling) == {bars} || \
+            $bwidth > $cwidth || \
+            $bheight > $cheight} {
+        pack $itk_component(vsb) -side right -fill y -expand 0 \
+                -before $_slate
+        pack $itk_component(hsb) -side left -fill x -expand 1
+        set fillwidth [winfo reqwidth $itk_component(vsb)]
+        $itk_component(filler) configure -width $fillwidth
+        pack $itk_component(filler) -side right -expand 0
+	
+        $_slate configure -scrollregion $bbox
+
+	# Add scrollbar padding to status bar
+	statusbar configure -scrollbarpad 1
+    } {
+        if [winfo ismapped $itk_component(vsb)] {
+            pack forget $itk_component(vsb)
+            pack forget $itk_component(hsb)
+            pack forget $itk_component(filler)
+            # Unpack and repack bottom so that it shrinks
+            pack forget $itk_component(bottom)
+            pack $itk_component(bottom) -fill both -side bottom \
+                    -before $itk_component(top)
+
+	    # Remove scrollbar padding from status bar
+	    statusbar configure -scrollbarpad 0
+        }
+    }
+    set scheduledUpdate {}
+}
 
 #######################################################################
 #### _loadlayout
