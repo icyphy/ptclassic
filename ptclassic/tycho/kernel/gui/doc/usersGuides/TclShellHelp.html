@@ -1,0 +1,70 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>User's Guide to the Tcl Console Window</title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Key bindings </a>]
+<HR>
+<h1><a name="Tcl console window">User's Guide to the Tcl Console Window</a></h1>
+<p>
+A <a name="console window">console window</a>
+in Tycho provides a shell for interacting with
+the Tcl interpreter.  Note that Tk and Itcl are understood by
+this interpreter, as are, of course, all Tycho commands.
+If you are running a version of Tycho with Ptolemy attached,
+the ptcl commands are also understood.
+Commands are executed at the global scope.
+A console windows is derived from the <a href=EditHelp.html>Edit window</a>,
+and therefore inherits all of its features.
+This page documents the additional features provided.
+<p>
+<ul>
+<li><a href="#bindings, console window">Key Bindings</a>
+<li><a href="#console window, special features">Special Features</a>
+</ul>
+<p>
+<h2><a name="bindings, console window">Key Bindings</a></h2>
+<dl COMPACT>
+<b><dt>Return</b><dd>execute the current line as a Tcl command
+<b><dt>C-a</b><dd>go to the beginning of the command
+<b><dt>C-e</b><dd>go to the end of the command
+<b><dt>C-k</b><dd>erase to the end of the command (save to cliboard)
+<b><dt>C-n</b><dd>down one command
+<b><dt>C-p</b><dd>up one command
+<b><dt>C-u</b><dd>erase the current command (save to clipboard)
+</dl>
+<p>
+<h2><a name="console window, special features">Special Features</a></h2>
+<p>
+The Console window has a number of features designed to make
+it easier to experiment with Tcl scripts.  Foremost among
+these is the <a name=history>history</a>
+mechanism, which keeps a record of previously
+executed commands.  A "Special" menu provides two commands related to this:
+<dl>
+<b><dt>Edit history</b><dd>
+Open a window that contains the history (previously executed commands)
+for the specified console window.
+This is opened as an Itcl context-sensitive editor, so it
+can be edited and evaluated.
+<b><dt>Clear history</b><dd>
+Reset the history buffer.
+</dl>
+<p>
+Note that the Save-As command, unlike the Edit history command,
+saves a snapshot of the previously executed command together with
+the returned values and prompts.
+Thus, it provides a mechanism for documenting an interaction
+with the Tcl interpreter.
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

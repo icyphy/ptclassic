@@ -1,0 +1,53 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Error Handling</Title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Bindings </a>]
+<HR>
+<a name="error handling">
+<h1>Error Handling</h1>
+</a>
+<p>
+Errors in scripts, procedures, and methods should be handled simply
+by calling the
+<a name="error procedure"><em>error procedure</em></a>,
+which is built into Tcl.  The single argument is an error message.
+This procedure unravels the stack (so you do not need to return
+after calling it).  If the error occurs in the background (most
+errors are
+<a name="background errors">background errors</a>, since Tycho
+applications are interactive, and most procedures are invoked in
+response to key or mouse bindings), then the error procedure calls
+the <a name="tkerror procedure"><em>tkerror</em> procedure</a>.
+This procedure is defined by Tycho
+in the global scope, rather than the "tycho" scope.
+Thus, if I trigger an error as follows:
+<tcl><pre>
+error {Error message}
+</pre></tcl>
+Tcl believes that an error occurred trying to run the Tcl script
+embedded in this text.  If you click on the "Stack Trace" button
+that appears in error message box,
+you can verify that the error occurred within a call of the form
+"uplevel #0 $cmd".  This is, in fact, the statement that executes
+embedded Tcl code in this document.  The Tcl code you just executed
+triggered an error.
+The <a name="stack trace">stack trace</a>
+generally reflects information about the most recent
+error that generated a stack trace.  Thus, if you invoke the "tkerror"
+script directly the stack trace will be
+fairly meaningless, if there is one at all.  The correct way to
+signal an error within your own scripts by calling error, not tkerror.
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

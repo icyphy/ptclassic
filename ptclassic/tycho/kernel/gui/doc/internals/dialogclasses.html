@@ -1,0 +1,239 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Dialog Classes</Title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Bindings </a>]
+<HR>
+<a name="dialog classes">
+<h1>Dialog Classes</h1>
+</a>
+<p>
+Tycho provides a set of classes for asking the user questions.
+These can be <a name="yes-no questions">yes-no questions</a>,
+questions that require a <a name="typed response questions">typed response</a>,
+or questions that require a file name response.
+<h2>Contents</h2>
+<ul>
+<li><a href="#YesNoQuery class">YesNoQuery Class</a>
+<li><a href="#YesNoCancel class">YesNoCancel Class</a>
+<li><a href="#EntryQuery class">EntryQuery Class</a>
+<li><a href="#FileBrowser class">FileBrowser Class</a>
+</ul>
+<a name="YesNoQuery class">
+<h2>YesNoQuery Class</h2>
+</a>
+<p>
+The YesNoQuery class poses a question and offers two buttons,
+labeled "Yes" and "No".  For example:
+<tcl><pre>
+::tycho::YesNoQuery .y -text {Are you awake?} &#92
+    -yescommand {inform {You said yes!}} &#92
+    -nocommand {inform {Then how did you click on the No button?}}
+.y centerOnScreen
+</pre></tcl>
+The options "<a name="yescommand option">-yescommand</a>" and
+"<a name="nocommand option">-nocommand</a>" specify scripts to be executed
+in response to these buttons.  The default scripts simply destroy
+the window and return 0 or 1, but the return value is lost.
+To get the return value, you should use the
+"<a href="dialogwindow.html#newModal procedure">newModal</a>" procedure.
+For example,
+<tcl><pre>
+if [::tycho::DialogWindow::newModal YesNoQuery .z -text {Are you awake?}] {
+    inform {You said yes!}
+} {
+    inform {Then how did you click on the No button?}
+}
+</pre></tcl>
+
+<p>
+There is a bit of a technicality with using this capability.
+Suppose you wish to create a dialog box that returns the strings
+"yes" or "no" instead of 0 or 1.  The -yescommand and -nocommand
+options specify Tcl scripts, and it is difficult to get a Tcl
+script to return a value.  You could use the "set" command as
+follows:
+<tcl><pre>
+set x [
+    ::tycho::DialogWindow::newModal YesNoQuery .z -text {Are you awake?} &#92
+         -yescommand {set y {yes}} &#92
+         -nocommand {set y {no}}
+]
+inform "Your answer was $x"
+</pre></tcl>
+But this not good coding style.  The variable "y" gets set
+at the global scope, clobbering any previous value the user might
+have unwisely stored in y.  The DialogWindow class provides
+a procedure
+<a name="answer procedure">
+"answer"
+</a>
+that simply returns its argument precisely
+for this purpose.  Thus, the preferred script is:
+<tcl><pre>
+set x [
+    DialogWindow::newModal YesNoQuery .z -text {Are you awake?} &#92
+        -yescommand {DialogWindow::answer {yes}} &#92
+        -nocommand {DialogWindow::answer {no}}
+]
+::tycho::inform "Your answer was $x"
+</pre></tcl>
+
+<p><a name="YesNoCancel class">
+<h2>YesNoCancel Class</h2>
+</a>
+<p>
+The YesNoCancel class is like the YesNoQuery class, but there is one
+more button labeled "Cancel" and one more option
+<a name="cancelcommand option">-cancelcommand</a>.
+To see an example, execute this:
+<tcl><pre>
+set x [::tycho::DialogWindow::newModal YesNoCancel .z -text {Are you awake?}]
+::tycho::inform "The value returned was $x"
+</pre></tcl>
+By default, the cancel button returns -1.
+
+<p><a name="EntryQuery class">
+<h2>EntryQuery Class</h2>
+</a>
+<p>
+The EntryQuery class opens a dialog box with one or more text entry widgets.
+It is used by the "<a href="dialogs.html#queryinfo procedure">queryinfo</a>"
+procedure described above.
+You can also create instances of it directly.
+It creates a dialog box with one or more entry widgets, an OK button,
+and a Cancel button.  The actions taken in response to these buttons
+are given by the <a name="okcommand option">-okcommand</a> and
+<a name="cancelcommand option">-cancelcommand</a> options.
+By default, the -okcommand just returns the value entered by the user.
+The -cancelcommand does nothing.  After either command is executed,
+the widget is destroyed.  The
+<a name="queries option">-queries option</a> specifies the initial
+list of entry boxes that will appear in the window.
+The value of this option should be a list of three or four-element lists.
+The first element of each list is an arbitrary tag used to identify
+the entry box.  The second element is the label to put next to the
+entry box.  The third element is the default string to put into
+entry box.  The optional fourth element specifies the number of text
+lines that should be allowed in the entry box.  This defaults to one.
+For example,
+<tcl><pre>
+::tycho::EntryQuery .z &#92
+    -queries {{first {First entry:} {Default string}} &#92
+        {second {Second entry:} {Another default}}}  &#92
+    -entrywidth 60 &#92
+    -okcommand {inform "Result of a get: [.z get]"} &#92
+    -cancelcommand {inform "You canceled"}
+.z centerOnScreen
+</pre></tcl>
+If you click OK, you see the result of the
+<a name="get method"><em>get</em> method</a> for this widget.
+The get method returns a list of two-element lists.  The first element
+of each list is a tag, and the second element is the value in the
+corresponding entry box (which will be either the default or a new
+value entered by the user.  Note that the order in which entries
+are returned is arbitrary.
+<p>
+Alternatively, entry boxes can be added after the EntryQuery object
+is created using the
+<a name="addQuery method">addQuery method</a>.
+This method takes three arguments,
+a tag, a label, and a default string.  These serve the same function
+as the elements passed in a -queries option.  The removeQuery method
+takes a tag as an argument and simply removes the corresponding query.
+Click again on the above example to create the EntryQuery, if you dismissed
+it.  Then try this example:
+<tcl><pre>
+.z addQuery third {Third entry:} {Yet another default} 4
+</pre></tcl>
+Notice that now the query has four lines and that the OK button
+is no longer triggered by <Return>.  It can now be triggered by
+<Meta-Return>.  This is because in a multi-line entry box, <Return>
+moves the insertion cursor to a new line.
+The <a name="removeQuery">removeQuery method</a>
+takes a tag as an argument and simply removes the corresponding query.
+<tcl><pre>
+.z removeQuery first
+</pre></tcl>
+The get method may also specify a particular tag.
+<tcl><pre>
+::tycho::inform [.z get second]
+</pre></tcl>
+The <a name="clear method">clear method</a>
+clears all defaults (or a single default, if
+a tag argument is given).
+<tcl><pre>
+.z clear
+</pre></tcl>
+The
+<a name="insert method">insert method</a>
+inserts a string into the specified entry.
+<tcl><pre>
+.z insert third {An inserted string. }
+</pre></tcl>
+You may delete this window by clicking on the OK button.
+<p>
+The class is derived from <a href="dialogwindow.html">DialogWindow</a>,
+so it has the
+options -text, -bitmap, and -title, which control the text
+of the query, a bitmap left of the query, and a window manager title.
+For example,
+<tcl><pre>
+::tycho::EntryQuery .aa &#92
+    -bitmap questhead &#92
+    -text {Enter modified values, then click OK} &#92
+    -queries {{first {First entry:} {Default string}} &#92
+        {second {Second entry:} {Another default}}}  &#92
+    -entrywidth 20 &#92
+    -title "EntryQuery Widget" &#92
+    -okcommand {inform "Result of a get: [.aa get]"} &#92
+    -cancelcommand {inform "You canceled"}
+.aa centerOnScreen
+</pre></tcl>
+The order of the -bitmap and -text options relative to the -queries
+option is important.  In most circumstances, you will want them first.
+<p>
+You also have access to the "new" and "newModal" methods of the base class.
+For example,
+<tcl><pre>
+::tycho::inform [::tycho::DialogWindow::newModal EntryQuery .z &#92
+    -queries {{onlytag {Enter a value} {default value}}}]
+</pre></tcl>
+
+<p>
+<a name="FileBrowser class">
+<h2>FileBrowser Class</h2>
+</a>
+<p>
+A rather more elaborate dialog box is a file browser.
+Consider the example:
+<tcl><pre>
+::tycho::FileBrowser .f -command "inform"
+wm deiconify .f
+</pre></tcl>
+The <a name="command option">-command option</a>
+specifies a command to execute once the user
+has selected a file name.  The file name is appended as an argument
+to the command before the command is executed.  Thus, in this example,
+if you select a file named "foo" in directory /users/bar/, then
+the command that is executed will be "inform /users/bar/foo".
+Refer to the <a href="../usersGuides/FileBrowserHelp.html">user-level documentation</a>
+for further information about the file browser.
+<p>
+As usual, you can get a modal file browser using newModal.
+<tcl><pre>
+::tycho::inform [::tycho::DialogWindow::newModal FileBrowser .w]
+</pre></tcl>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

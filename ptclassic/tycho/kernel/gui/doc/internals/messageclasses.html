@@ -1,0 +1,62 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Message Classes</Title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Bindings </a>]
+<HR>
+<a name="message classes">
+<h1>Message Classes</h1>
+</a>
+<p>
+The <a href="dialogs.html">dialog procedures</a> that post messages for
+the user are based on Itcl classes described below.  These classes can
+also be invoked directly by the user, providing much more flexibility.
+They also serve as base classes for more elaborate dialogs.
+<p>
+<ul>
+<li><a href="#Message class">Message Class</a>
+<li><a href="#ErrorMessage class">ErrorMessage Class</a>
+</ul>
+<p>
+<a name="Message class">
+<h2>Message Class</h2>
+</a>
+<p>
+Many messages require an "OK" button that has the effect of dismissing
+the message.  The Message class is derived from
+<a href="dialogwindow.html">DialogWindow</a> and adds
+this feature.
+<tcl><pre>
+::tycho::Message .x -text {A simple message window}
+wm deiconify .x
+</pre></tcl>
+Of course, you can also add buttons to this using the
+<a name="addButton method">addButton method</a>:
+<tcl><pre>
+.x addButton pushme -text {Push Me} -command {post thanks}
+</pre></tcl>
+<p>
+<a name="ErrorMessage class">
+<h2>ErrorMessage Class</h2>
+</a>
+<p>
+The class ErrorMessage is derived from
+<a href="#Message class">Message</a> and simply adds the
+"<a name="stack trace">Stack Trace</a>" button.
+<tcl><pre>
+::tycho::ErrorMessage .xx -text {An error message}
+wm deiconify .xx
+</pre></tcl>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

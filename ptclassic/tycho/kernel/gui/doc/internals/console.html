@@ -1,0 +1,77 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>The Console and ConsoleText Classes</title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Key bindings </a>]
+<HR>
+<h1><a name="Console class">The Console and ConsoleText Classes</a></h1>
+<p>
+The Console class, derived from <a href=edit.html>Edit</a>,
+is a top-level window that provides an interface to the Tcl
+<a name=interpreter>interpreter</a>.
+The <a href="../usersGuides/ConsoleHelp.html">help window</a>
+gives additional information.
+<p>
+You may create an instance of the Console class as follows:
+<tcl><pre>
+::tycho::Console .e
+.e centerOnScreen
+</pre></tcl>
+<p>
+<a name="ConsoleText class">
+<h2>ConsoleText Class</h2>
+<p>
+The top-level Console class window
+is implemented by packing into it a megawidget that implements
+the console itself.
+This megawidget, the ConsoleText class, can be used
+stand-alone inside any other widget or window.
+For example, a graphics window could contain a console subwindow.
+<p>
+We can create an instance of the ConsoleText megawidget in its own top-level
+window as follows:
+<tcl><pre>
+::tycho::TopLevel .t
+::tycho::ConsoleText .t.t
+.t.t printPrompt ""
+pack .t.t
+.t centerOnScreen
+</pre></tcl>
+Notice that you can enter Tcl, Itcl, Tk, and Itk commands into the text window.
+Also notice that the "printPrompt" method was used above to create the first
+prompt.
+To delete the above example:
+<tcl><pre>
+delete object .t
+</pre></tcl>
+ConsoleText has a number of options.  For example:
+<tcl><pre>
+::tycho::TopLevel .p
+::tycho::ConsoleText .p.t &#92
+    -width 60 &#92
+    -scrollbar 0 &#92
+    -height 20 &#92
+    -text "My own welcome message\n"
+pack .p.t
+.p.t printPrompt ""
+.p centerOnScreen
+</pre></tcl>
+There are a large number of public methods for ConsoleText.
+See the class documentation.
+To delete the above example:
+<tcl><pre>
+delete object .p
+</pre></tcl>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

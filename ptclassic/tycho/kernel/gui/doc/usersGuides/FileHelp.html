@@ -1,0 +1,111 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>User's Guide to the Tycho File Class</title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Key bindings </a>]
+<HR>
+<h1>User's Guide to the Tycho File Class</h1>
+<p>
+The File class in Tycho is the base class for most editors.
+It provides a top-level window with a menu bar at the top.
+It also provides some common key bindings that are therefore shared
+by all derived classes, and
+it handles <a name="auto-save">auto-save</a> and
+<a name="crash recovery">crash recovery</a>.
+By itself, this class is not very useful;
+the derived classes are the ones actually used.
+<p>
+<ul>
+<li><a href="#file access">File Access Commands</a>
+<li><a href="#Window menu">Window Menu</a>
+<li><a href="#Help menu">Help Menu</a>
+<li><a href="#keyboard traversal of menus">Keyboard Traversal of the Menus</a>
+</ul>
+<p>
+<h2><a name="file access">File Access Commands</a></h2>
+<p>
+The following commands are available in the File menu as well
+through key bindings.
+<dl COMPACT>
+<b><dt>C-x C-f</b><dd>open a file
+<b><dt>C-x i</b><dd>insert a file at the cursor
+<b><dt>C-x C-s</b><dd>save to the current file name
+<b><dt>C-x C-w</b><dd>save to some other file name
+<b><dt>C-x p</b><dd>print the contents
+<b><dt>C-x C-r</b><dd>evaluate a file (only valid in some derived classes)
+<b><dt>C-x k</b><dd>close the window
+<b><dt>C-x 0</b><dd>close the window
+<b><dt>C-x o</b><dd>move the focus to another window
+<b><dt>C-x C-c</b><dd>exit the program
+</dl>
+<p>
+In addition to all of the above, the File menu provides the following
+command:
+<dl>
+<b><dt>Revert</b>
+<dd> Revert to the previously saved version of this file.
+</dl>
+<p>
+<h2><a name="Window menu">Window Menu</a></h2>
+<p>
+File objects have a Window menu in the menu bar.
+The menu contains commands to open new, blank editors
+for any type of editor that has been registered with the File class.
+In addition, all open editors that are associated with named files
+are listed.  This makes it easier to find editors that may have been
+buried by other windows on the screen.
+Note that if the editor is open in another screen of a virtual window
+manager, it will not appear when you issue the command in the Window
+menu.  Also, if an editor has the name "NoName" associated with it,
+it does not appear in the Window menu.  To give it a name, use SaveAs
+(in the File menu).
+<p>
+<h2><a name="Help menu">Help Menu</a></h2>
+<p>
+The Help menu provides access to the on-line documentation for Tycho.
+The "User's Guide" entry in the menu will bring up a user's guide
+for the widget in which you invoke the command, if one exists.
+The "Index" entry will bring up the master Tycho index.
+<p>
+<h2><a name="keyboard traversal of menus">Keyboard
+Traversal of the Menus</a></h2>
+<p>
+The mechanism for keyboard traversal of the menus is exactly
+that provided in Tk.  Thus, the following explanation is from
+the Tk man pages, written by John Ousterhout.
+<p>
+"The menus can be invoked using the Alt key (sometimes
+"Alt Graph") together with the underlined character
+in the menu title.  Once the menu is posted, typing
+the underlined character in a menu item will invoke it.
+The F10 key will post the "File" menu.
+<p>
+<h2><a name="autosave">Autosave</a> and
+<a name="crash recovery">Crash Recovery</a></h2>
+<p>
+Periodically, if its data has been modified, a File object will save
+the data to a file with the same name as the current file but with the
+prefix "#auto#".  This file is automatically removed when you save the
+modified data.
+<p>
+If you are running <a href="../running.html#Ptolemy with Tycho">
+Ptolemy with Tycho</a>, then Tycho will also attempt to save modified
+data when the program crashes.  This is important because Ptolemy
+is fundamentally an extensible system, into which users routinely
+add their own code, so it is not uncommon in the process of doing
+code development to get crashes.  The crash recovery files have
+the prefix "#crash".  There is no guarantee that their contents
+will be correct, since often the crash occurs due to corrupted data.
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

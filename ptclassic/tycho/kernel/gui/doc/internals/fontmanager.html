@@ -1,0 +1,160 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>The FontManager Class</title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Key bindings </a>]
+<HR>
+<h1><a name="FontManager class">The FontManager Class</a></h1>
+<p>
+<ul>
+<li><a href="#fonts, examining">Examining Fonts</a>
+<li><a href="#fonts, setting">Setting Fonts Interactively</a>
+<li><a href="#font utilities">Font Utilities</a>
+<ul COMPACT>
+	<li><a href="#font, checking">Checking a Font</a>
+	<li><a href="#font, specification">Getting a Font
+		from a Specification</a>
+	<li><a href="#font, finding valid">Finding a Valid Font</a>
+	<li><a href="#default fonts">Default Fonts</a>
+</ul>
+</ul>
+<p>
+<h2><a name="fonts, examining">Examining Fonts</a></h2>
+<p>
+</a>
+The FontManager class in Tycho provides a top-level window within
+which the user can select a font, together with a set of utilities
+for controling X window fonts.  The simplest use of the class is as follows:
+<tcl><pre>
+::tycho::FontManager .fontmanager
+.fontmanager centerOnScreen
+</pre></tcl>
+This creates an interactive window that permits the user
+to try out the available fonts.
+Rather than exposing to the user the arcane font specification
+that is used by the X window system, this window provides
+a set of pull-down menus that can be used to select fonts
+by family, size, weight, and style.  Since some of the best
+X window fonts do not conform to this partitioning, a
+separate menu is provided for selecting miscellaneous fonts
+by name.  For example, the 9x15 and 10x20 fonts are particularly
+nice screen fonts.  When the user selects a font,
+a sample is displayed.
+<p>
+<h2><a name="fonts, setting">Setting Fonts Interactively</a></h2>
+<p>
+</a>
+The FontManager class can be used to set fonts in any Tycho text widget.
+Opening a FontManager with a specified -okcommand option is one way
+to do this.
+For example, the following code will query the user for
+a font selection, and then post the font name in a new window when
+the user clicks the OK button:
+<tcl><pre>
+::tycho::FontManager .fm &#92
+        -okcommand "::tycho::post \[.fm getCurrentFont\]"
+.fm centerOnScreen
+</pre></tcl>
+The backslashes in front of the square brackets are needed to defer
+the evaluation of the <code>getCurrentFont</code> method until
+the OK button is pushed.
+<p>
+<h2><a name="font utilities">Font Utilities</a></h2>
+<p>
+</a>
+For the convenience of applications that wish to directly control
+fonts, without user intervention, an instance of the FontManager class
+is created when Tycho starts up in tycho namespace.
+This instance, called .tychoFonts, is never mapped to the screen.
+By interacting with it through its public members, however, an
+application can check the validity of a font, find a font given
+a prioritized list, or query for the default fonts used in Tycho
+(which can vary by installation, since X window fonts are not
+standardized).
+<p>
+<h3><a name="font, checking">Checking a Font</a></h3>
+<p>
+The <a name="fontValid method">"fontValid" method</a>
+of the FontManager returns zero or one
+if the specified font is invalid or valid (installed on the current system).
+For example, the following checks to see whether the font 9x15
+is installed on your system:
+<tcl><pre>
+if [::tycho::.tychoFonts fontValid 9x15] {
+    ::tycho::post {The 9x15 font is available}
+} {
+    ::tycho::post {The 9x15 font is not available}
+}
+</pre></tcl>
+<p>
+<h3><a name="font, specification">Getting a Font from a Specification</a></h3>
+<p>
+</a>
+The <a name="getFont method">"getFont" method</a> takes as arguments a
+font specification, and checks to see whether the font is
+available on the current system. If it is, it return the font name.
+Otherwise, return the empty string. A font specification consists of
+four items, the family, point size, weight, and style. Common
+families are "times", "courier", and "helvetica". Reasonable point
+sizes are 12, 14, 18, and 24. The weight is typically either "medium"
+or "bold", and the style is either "r" or "i" for roman or italic.
+<tcl><pre>
+set font [::tycho::.tychoFonts getFont times 18 medium i]
+if {$font != {}} {
+    ::tycho::post "The font name is: $font"
+} {
+    ::tycho::post {No font was found}
+}
+</pre></tcl>
+<p>
+<h3><a name="font, finding valid">Finding a Valid Font</a></h3>
+<p>
+Frequently, applications will wish to search through some set of
+preferred fonts before resorting to the only font guaranteed to exist
+on all systems, "fixed".  The method <a name="findFont method">"findFont"</a>
+takes a list of
+specifications and tries to find a font that matches one in the list.
+Specifications earlier in the list are given priority.
+A specification is either a font name or a list with four items. The
+items are the family, point size, weight, and style.
+These items have the same meaning as that used in the
+"<a href="#getFont method">getFont</a>" method.  For example, the following
+code will try to use the 9x15 font, but if it is not installed,
+it will try to use a courier font, and if that is not installed,
+it will resort to "fixed".
+<tcl><pre>
+::tycho::post [
+    ::tycho::.tychoFonts findFont {
+         9x15
+         {courier 14 medium r}
+    }
+]
+</pre></tcl>
+The "findFont" method always returns a valid font name.
+<p>
+<h3><a name="default fonts">Default Fonts</a></h3>
+<p>
+The <a name="defaultFont method">"defaultFont" method</a> returns the name of a
+preferred font from a list of possibilities.
+The possible options are fixed, fixedBold, fixedItalic,
+variable, variableBold, and variableItalic.
+For example, to identify the font that Tycho is using as its
+default fixed-width italic font, issue the following command
+<tcl><pre>
+::tycho::post [
+    ::tycho::.tychoFonts defaultFont fixedItalic
+]
+</pre></tcl>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

@@ -1,0 +1,89 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>File Class</Title>
+</head>
+<body>
+[<a href="../introduction.html">        Home     </a>]
+[<a href="../authors.html">             Authors  </a>]
+[<a href="../../../tycho.idx">          Index    </a>]
+[<a href="../abbreviations.html">       Abbreviations </a>]
+[<a href="../bindings.html">            Bindings </a>]
+<HR>
+<a name="File class">
+<h1>File Class</h1>
+</a>
+<p>
+The base class for all Tycho windows that have associated with them
+persistent data stored in the file system is the File class, which
+is derived from <a href="dismiss.html">Dismiss</a>.
+See the <a href="../usersGuides/FileHelp.html">User's Guide</a>
+for a description
+of the user interface it provides.
+Here we explain how to use the class in scripts.
+<p>
+To create an instance of the File class directly,
+do the following:
+<tcl><pre>
+::tycho::File .file
+.file centerOnScreen
+</pre></tcl>
+You can now pack other items into its childsite frame.
+For example:
+<tcl><pre>
+button .file.childsite.b1 -text pushme -command "::tycho::inform thanks"
+pack .file.childsite.b1
+</pre></tcl>
+However, this class is not intended to be used this way.
+It is intended to be used instead as a base class for any top-level window
+that has persistent data associated with it.
+It provide some of the common functionality shared by all Tycho text editors,
+for example.
+In the base class, many of the commands in the menu and key bindings
+do nothing useful.  They often just issue an error message.
+For example, it does not make sense to save to a file, because
+the File class itself has no persistent data.
+<p>
+The File class accepts the following options:
+<dl>
+<a name="file option">
+<b><dt>-file <i>name</i></b><dd>
+</a>
+This associates
+a file name with the File object and adjusts the
+label in the window header.
+<a name="readonly option">
+<b><dt>-readonly <i>bool</i></b><dd>
+</a>
+This specifies whether or not the file object accepts commands
+to modify its data.  In the base class, the only action is to handle
+the annotation at the botton of the window that indicates whether the
+file has been modified.
+The "bool" value can be
+"yes", "no", "true", "false", "1", or "0" (it is not case sensitive).
+<a name="autosaveinterval option">
+<b><dt>-autosaveinterval <i>value</i></b><dd>
+</a>
+The value
+is the time (in minutes) between saves.  In this base class,
+there is no meaningful save operation, so the
+<a name="autosave">autosave</a> operation
+does not do anything.  In derived classes, if the data has been
+modified, then the auto-save operation will create a file called
+#auto#name, where "name" is the associated file name.  This file
+is automatically deleted when a successful save occurs.
+<a name="crash recovery">
+If the tycho program crashes, the File object will attempt to
+save any modified data into files called #crash#name.  Of course,
+the data in these files may have been corrupted by the cause of
+the crash.  This crash recovery mechanism currently only works
+if you are running Tycho with Ptolemy</a> (see <a href="../running.html">
+Running Tycho</a>).
+</dl>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>
