@@ -103,7 +103,7 @@ inserted stars, for example send and receive stars for interprocessor
 communication. We apply the sequential code generation routine for
 each processor with the associated sub-universe.
 
-We may generate parallel codes inside a wormhole so that the main
+We may generate parallel code inside a wormhole so that the main
 workstation can communicate with the target multiprocessor system. 
 Then, the wormhole interface code should be added to the generated code.
 Another possibility of using the wormhole mechanism was to generate code
@@ -1205,9 +1205,9 @@ After restoring all hidden EGGates of the APEG, create sub-universes.
 It includes sub-universe initialization, and simulation of the schedule on
 the processor obtained from the parallel scheduling.
 
-(4) Let the target do something necessary, if any, before generating codes.
+(4) Let the target do something necessary, if any, before generating code.
 
-(5) Generate codes for all processors.
+(5) Generate code for all processors.
 
 @node other ParScheduler protected members, other ParScheduler public members, CompileRun, class ParScheduler
 @subsection Other ParScheduler protected members
@@ -3305,7 +3305,7 @@ $(PTOLEMY)/src/domains/cg/kernel directory. We do not cover all classes
 in that directory. We will concentrate on how to organize the code by
 which methods.
 
-A segment of codes is formed in a CodeStream class. Each target will have
+A segment of code is formed in a CodeStream class. Each target will have
 a list of CodeStreams, and arrange them to generate the final code.
 A star uses CodeBlock classes to form a code segment, which will be
 copied to a CodeStream of the target class after some processing.
@@ -3364,6 +3364,33 @@ This method returns the pointer of the CodeStream with the given name. If
 a stream is not found, it returns NULL. It is a public method of the 
 CGTarget class. The CGStar class has the same method to get the
 CodeStream with the given name from the target class it belongs to.
+
+The following methods allow stars to construct a new Stream and add it to
+an existing target stream.  Some of the possible uses for this new class are:
+* a group of cgstars can build a procedure together
+* a cgstar can add control flow constructs at the end of the mainLoop code
+
+@example
+CodeStream* CGTarget::newStream(const char * name);
+@end example
+
+The CodeStreamList class now has two types of CodeStreams, CodeStreams that
+it owns and those owned by the target.  Streams created with newStream
+will be owned by the CodeStreamList.
+
+@example
+virtual void CGStar::frameCode
+@end example
+
+This method will Combine star generated CodeStreams to the Target-defined
+CodeStreams.  This should be done with the addCode method and usually using
+a unique name.
+
+@example
+int CGTarget::starFrameCode();
+@end example
+
+This method in CGTarget calls all of the star frameCode methods.
 
 Now we will explain the public members of class CodeStream.
 
@@ -3636,6 +3663,15 @@ Symbols in the list are deletes in the destructor or in the following method:
 void initialize();
 @end example
 
+The public method
+
+@example
+Stringlist symbol(const char*)
+@example
+
+makes a unique symbol from the supplied argument by adding the seperator and
+a unique number to the argument string.
+
 Now, class SymbolList is privately derived from class BaseSymbolList with
 the same constructor and a default destructor.
 This class uncovers only three methods of the base class.
@@ -3746,8 +3782,15 @@ char separator;
 int symbolCounter;
 @end example
 
-These are public members in the CGTarget class. They are set in the
-constructor.
+These are private members in the CGTarget class. They are set in the
+constructor. The methods
+
+@example
+virtual int* CGTarget::symbolCounter();
+virtual char CGTarget::separator();
+@end example
+
+return symbolCounter and seperator respectively.
 
 @node Resource Management, Utility Functions, Unique Symbol Generation, Base Classes for Code Generation
 @section Resource Management
@@ -4410,73 +4453,116 @@ variables. Copy the symbol counter (@code{symbolCounter}) of the parent
 target to the symbol counter of this target to achieve a unique symbol
 in the system scope.
 
-(2) Write initial code.
-
-@example
-virtual void headerCode();
-@end example
-
-In this base class, this protected method writes the  header comment 
-to @code{myCode} CodeStream.
-
-@example
-virtual StringList headerComment(const char* @var{begin} = NULL, const char* @var{end} = "", const char* @var{cont} = NULL);
-@end example
-
-This method is a public virtual method to generate the header comment in
-the code. In this base class, the head comments include the user id,
-code creation date, target name, and the galaxy name. The arguments are
-passed to @code{comment} method.
-
-@example
-virtual StringList comment(const char* @var{cmt}, const char* @var{begin} = NULL, const char* @var{end} = "", const char* @var{cont} = NULL);
-@end example
-
-This public method generates a comment from a specified string @var{cmt}.
-We prepend @var{begin} and append @var{end} to the string. If @var{begin}
-is NULL, we prepend '#' as a shell-stype comment. If @var{cont} is
-specified, multi-line comments are supported.
-
-(3) We compute buffer sizes, allocate memory, etc: @code{allocateMemory}.
+(2) We compute buffer sizes, allocate memory, etc: @code{allocateMemory}.
 
 @example
 virtual int allocateMemory();
 @end example
 
-This method is protected. It does nothing and returns TRUE in this base class.
+This method is protected. It does nothing and returns TRUE in this
+base class.
 
-(4) We do initialization for code generation: for example, compute offsets
-of portholes and call @code{initCode} methods of stars: @code{codeGenInit}.
+(3) Call the method @code{generateCodeStreams()}.  This method will be
+described later.
+
+(4) Organize the CodeStreams into a single code stream and save the result
+to the @code{myCode} stream: @code{frameCode}.
+
+@example
+virtual void frameCode();
+@end example
+
+This method is a protected method. It does nothing in this base
+class.
+
+(5) If this target is not a child target, write the generated code
+to a file: @code{writeCode}.
+
+@example
+virtual void writeCode(const char* @var{name} = NULL);
+@end example
+
+This is a public method to write the @code{myCode} stream to the argument
+file. If no argument is given, use "code.output" as the default file
+name.
+
+(6) If it is a child target, copy the symbol counter to that of
+the parent target.
+
+The methods described above for code generation are all virtual
+methods.  They will be redefined in the derived targets.
+
+The method 
+   
+@example
+void CGTarget::generateCodeStreams();
+@end example
+   
+does the following things:
+
+(1) Write initial code.
+
+@example
+virtual void headerCode();
+@end example
+
+In this base class, this protected method writes the  header comment
+to the @code{myCode} CodeStream.
+
+@example
+virtual StringList headerComment(const char* @var{begin} = NULL, const char*
+@var{end} = "", const char* @var{cont} = NULL);
+@end example
+
+This method is a public virtual method to generate the header
+comment in the code. In this base class, the head comments include the
+user id, code creation date, target name, and the galaxy name. The
+arguments are passed to the @code{comment} method.
+
+@example
+virtual StringList comment(const char* @var{cmt}, const char* @var{begin} = 
+NULL, const char* @var{end} = "", const char* @var{cont} = NULL);
+@end example
+
+This public method generates a comment from a specified string @var{cmt}.
+We prepend @var{begin} and append @var{end} to the string. If @var{begin}
+is NULL, we prepend '#' as a shell-stype comment. If @var{cont} is 
+specified, multi-line comments are supported.
+
+(2) We do initialization for code generation: for example, compute
+offsets of portholes and call @code{initCode} methods of stars:
+@code{codeGenInit}.
 
 @example
 virtual int codeGenInit();
 @end example
 
-Is a protected method. It does nothing and returns TRUE in this base class.
+is a protected method. It does nothing and returns TRUE in this
+base class.
 
-(5) Generate the code for the main loop: @code{mainLoopCode}.
+(3) Generate the code for the main loop: @code{mainLoopCode}.
 
 @example
 virtual void mainLoopCode();
 @end example
 
-In this method we first compute the number of iterations. If this target
-is inside a wormhole, the number is -1 indicating an infinite loop. Otherwise,
-the @code{stopTime} of the scheduler determines the number of iteration.
-In this base class, we call the following five methods sequentially:
-@code{beginIteration}, @code{wormInputCode} if inside a wormhole,
-@code{compileRun}, @code{wormOutputCode} if inside a wormhole, and
+In this method we first compute the number of iterations. If this
+target is inside a wormhole, the number is -1 indicating an infinite
+loop. Otherwise, the @code{stopTime} of the scheduler determines the number
+of iteration.  In this base class, we call the following five methods
+sequentially: @code{beginIteration}, @code{wormInputCode} if inside a 
+wormhole, @code{compileRun}, @code{wormOutputCode} if inside a wormhole, and
 @code{endIteration}. In the derived class, this sequence may be changed
 (@pxref{class CGMultiTarget}).
 
 @example
-void beginIteration(int @var{numIter}, int @var{depth});
-void endIteration(int @var{numIter}, int @var{depth});
+void beginIteration(int @var{numiter}, int @var{depth});
+void endIteration(int @var{numiter}, int @var{depth});
 @end example
 
-These public methods form the head or ending of the main loop. The arguments of
-both methods are the number of iteration and the depth of the loop. In the
-main loop, the depth is set 0.
+These public methods form the head or ending of the main loop. The
+arguments of both methods are the number of iteration and the depth of
+the loop. In the main loop, the depth is set 0.
 
 @example
 virtual void wormInputCode();
@@ -4485,27 +4571,27 @@ virtual void wormInputCode(PortHole& @var{p});
 virtual void wormOutputCode(PortHole& @var{p});
 @end example
 
-The above methods are all public. They generate code at the wormhole 
-boundary if
-the target resides in a wormhole. The last two methods generate code
-for the argument porthole that is at the wormhole boundary. In this
-base class, put comments in @code{myCode} CodeStream indicating that
-the methods are successfully executed. They should be redefined in the
-derived classes to be useful. The first two methods traverse all
-portholes at the wormhole boundary to use the last two methods.
+The above methods are all public. They generate code at the wormhole
+boundary if the target resides in a wormhole. The last two methods
+generate code for the argument porthole that is at the wormhole
+boundary. In this base class, put comments in @code{myCode} CodeStream
+indicating that the methods are successfully executed. They should be
+redefined in the derived classes to be useful. The first two methods
+traverse all portholes at the wormhole boundary to use the last two
+methods.
 
 @example
 virtual void compileRun(SDFScheduler* @var{sched});
 @end example
 
-This protected method calls @code{compileRun} of the argument scheduler.
-By default, this method calls @code{go} methods of all stars in the scheduled
-order to generate code in @code{myCode} CodeStream.
+This protected method calls @code{compileRun} of the argument scheduler. 
+By default, this method calls @code{go} methods of all stars in the
+scheduled order to generate code in @code{myCode} CodeStream.
 
-(6) Call @code{wrapup} methods of stars to generate code after the main loop,
-but still inside the main function.
+(4) Call @code{wrapup} methods of stars to generate code after the main
+loop, but still inside the main function.
 
-(7) Add more code if necessary: @code{trailerCode}
+(5) Add more code if necessary: @code{trailerCode}
 
 @example
 virtual void trailerCode();
@@ -4513,38 +4599,15 @@ virtual void trailerCode();
 
 This protected method does nothing in this base class.
 
-(8) Organize the CodeStreams into a single code and save the result to
-@code{myCode} stream: @code{frameCode}.
-
-@example
-virtual void frameCode();
-@end example
-
-This method is a protected method. It does nothing in this base class.
-
-(9) If this target is not a child target, write the generated code to a file:
-@code{writeCode}.
-
-@example
-virtual void writeCode(const char* @var{name} = NULL);
-@end example
-
-This is a public method to write the @code{myCode} stream to the argument
-file. If no argument is given, use ''code.output'' as the default file name.
-
-(10) If it is a child target, copy the symbol counter to that of the parent
-target.
-
-The methods described above for code generation are all virtual methods.
-They will be redefined in the derived targets. 
+The method
 
 @example
 virtual int wormLoadCode();
 @end example
 
-This method is protected. It downloads code to the target machine and starts
-it executing if the target resides in a wormhole. In this base class, we
-just display the code.
+is protected. It downloads code to the target machine
+and starts executing it if the target resides in a wormhole. In this
+base class, we just display the code.
 
 Now, we discuss the @code{run} method.
 
@@ -4666,7 +4729,7 @@ virtual int insertGalaxyCode(galaxy* @var{g}, SDFScheduler* @var{sched});
 
 This method inserts the code for the argument galaxy @var{g} incrementally.
 We have to allocate resources and generate initialization, main loop, and
-wrapup codes. It is used to generate code for galaxy inside a dynamic
+wrapup code. It is used to generate code for galaxy inside a dynamic
 construct. A dynamic construct is a wormhole in the code generation domain.
 When we call @code{go} method of the wormhole, we generate code
 for the inside galaxy (@pxref{CGDDF Domain}).
@@ -4933,15 +4996,6 @@ virtual void pairSendReceive(DataFlowStar* @var{snd}, DataFlowStar* @var{rcv});
 
 This method pairs a Send, @var{snd}, and a Receive, @var{rcv}, stars. In this
 base class, it does nothing.
-
-@example
-virtual void addProcessorCode(int @var{pid}, const char* @var{code});
-@end example
-
-The arguments of this method are the processor id and the generated code for
-that processor. In this base class, we append the argument code into the
-@code{myCode} stream so that codes for all child targets are placed
-sequentially in one code.
 
 @example
 virtual IntArray* candidateProcs(ParProcessors* @var{procs}, DataFlowStar* @var{s});
@@ -6128,7 +6182,7 @@ initialization, and main loop into a single @code{myCode} stream in order.
 For single processor code generation, it would be feasible. For
 multiprocessor case, however, the parent target may add some extra code
 strings. Therefore, we assign different code streams to different
-section of codes. On the other hand, if we have too many code streams,
+section of code. On the other hand, if we have too many code streams,
 it would be arduous to remember all. 
 
 @example
@@ -6700,16 +6754,6 @@ DataFlowStar* createSpread();
 @end example
 
 These methods create CGCCollect and CGCSpread stars.
-
-@example
-void addProcessorCode(int @var{procId}, const char* @var{s});
-@end example
-
-The first argument of this method is the processor index, and the second
-argument is the final code for that processor. This method stores the
-code to a file named after the child target name. If there is only one
-child target, the file is named after the galaxy name.
-We also display the code.
 
 @node CGDDF Domain, CGdsp3 Domain, CGC Domain, Top
 @chapter CGDDF Domain
@@ -8470,13 +8514,6 @@ DSP32CTarget object.
 
 We will create a code file for each processing element. Since the file name
 will be same as the child target name, we also hide @code{filePrefix} state.
-
-@example
-void addProcessorCode(int @var{index}, const char* @var{code});
-@end example
-
-This is a redefined public method to write the @var{code} to a 
-file associated with the child target of the given @var{index}.
 
 This class defines the following states.
 
