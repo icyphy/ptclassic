@@ -30,4 +30,4 @@ interpreter:	obj.$(ARCH)
 
 pigi:		obj.$(ARCH)
 		cd obj.$(ARCH); umask 2; $(MAKE) $(MFLAGS) \
-			DIRS="kernel preproc domains pigiRpc" install
+			DIRS="kernel preproc domains pigilib libgantt pigiRpc" install
