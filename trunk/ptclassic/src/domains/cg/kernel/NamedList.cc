@@ -37,12 +37,14 @@ Programmer: J. Pino, T. M. Parks
 #include "NamedList.h"
 #include "miscFuncs.h"
 
+// Constructor
 NamedNode::NamedNode(Pointer objt, const char* name) 
 {
     obj = objt;
     nm = savestring(name);
 }
 
+// Destructor
 NamedNode::~NamedNode()
 {
     LOG_DEL; delete [] nm;
@@ -52,8 +54,8 @@ NamedNode::~NamedNode()
 Pointer NamedListIter::next()
 {
     NamedNode* node = (NamedNode*)ListIter::next();
-    if (node != NULL) return node->object();
-    else return NULL;
+    if (node) return node->object();
+    return 0;
 }
 
 // Put a named object at the end of the list.
@@ -61,19 +63,15 @@ Pointer NamedListIter::next()
 int NamedList::append(Pointer object, const char* name)
 {
     NamedNode* node = getNamedNode(name);
-    if (node != NULL)
-    {
-	// Adding two objects with the same name is not allowed.
-	if (node->object() != object) return FALSE;
-	// Adding the same object twice is allowed. Only one copy is kept.
-	else return TRUE;
+    if (node) {
+	// Adding two objects with the same name is not allowed, but
+	// adding the same object twice is allowed (only one copy is kept).
+	return (node->object() == object);
     }
-    else
-    {
-	LOG_NEW; node = new NamedNode(object, name);
-	SequentialList::put(node);
-	return TRUE;
-    }
+
+    LOG_NEW; node = new NamedNode(object, name);
+    SequentialList::append(node);
+    return TRUE;
 }
 
 
@@ -89,21 +87,21 @@ void NamedList::prepend(Pointer object, const char* name)
 Pointer NamedList::get(const char* name) const
 {
     NamedNode* node = getNamedNode(name);
-    if (node != NULL) return node->object();
-    else return NULL;
+    if (node) return node->object();
+    return 0;
 }
 
 // Remove a named object from the list.
 // Return FALSE on error.
 int NamedList::remove(const char* name)
 {
+    int retval = FALSE;
     NamedNode* node = getNamedNode(name);
-    if (node != NULL) 
-    {
+    if (node) {
+	retval = SequentialList::remove(node);
 	LOG_DEL; delete node;
-	return SequentialList::remove(node);
     }
-    else return FALSE;
+    return retval;
 }
 
 // Delete all the nodes in the list.
@@ -121,17 +119,17 @@ void NamedList::deleteNodes()
 // Return NULL on error.
 NamedNode* NamedList::getNamedNode(const char* name) const
 {
-    NamedNode* n;
-    if (name == NULL)
+    NamedNode* n = 0;
+    if (name == 0)
     {
 	n = (NamedNode*)SequentialList::head();
     }
     else
     {
 	ListIter node(*this);
-	while ((n = (NamedNode*)node++) != NULL)
+	while ((n = (NamedNode*)node++) != 0)
 	{
-	    if(strcmp(name, n->name()) == 0) break;
+	    if (strcmp(name, n->name()) == 0) break;
 	}
     }
     return n;
