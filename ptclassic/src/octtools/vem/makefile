@@ -210,7 +210,7 @@ $(DESTBIN_D):	vem.debug $(OCTBINDIR)
 		ln vem.debug $(DESTBIN_D)
 
 install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem \
-		$(BINDIR)/../octtools/bin.sol2/debug/vem
+		$(BINDIR)/../octtools/bin.$(PTARCH)/debug/vem
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making install in $$x ; \
