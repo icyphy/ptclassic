@@ -58,9 +58,16 @@ GateKeeper* GateKeeper::listHead = 0;
 // reference to a PtGate pointer; this pointer is modified when
 // the GateKeeper "enables" or "disables" the PtGate pointer.
 GateKeeper::GateKeeper(PtGate*& gateToKeep)
-: gate(gateToKeep), next(listHead), valid(GateKeeper_cookie)
+: gate(gateToKeep)
 {
+    // Be sure to add this item to the list only once.
+    // This really should not be necessary.
+    if (valid != GateKeeper_cookie)
+    {
+	next = listHead;
 	listHead = this;
+    }
+    valid = GateKeeper_cookie;
 }
 
 // destructor: delete gate, remove from list.
@@ -73,7 +80,7 @@ GateKeeper::~GateKeeper () {
 		// code here to search for and zap "this" from the list
 		// started by listHead
 		GateKeeper *p = listHead;
-		while (p->next && p->next != p)
+		while (p->next && p->next != this)
 			p = p->next;
 		if (p->next == 0) Error::error("GateKeeper error!");
 		else p->next = p->next->next;
