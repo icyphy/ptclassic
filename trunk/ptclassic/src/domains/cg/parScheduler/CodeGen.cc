@@ -135,6 +135,10 @@ void UniProcessor :: createSubGal() {
 				} else {
 					cp->connect(*evep,p->numTokens());
 				}
+				// add Galaxy porthole
+				LOG_NEW; GalPort* gP = new GalPort(*cp);
+				subGal->addPort(gP->setPort(
+					p->name(),subGal,p->type()));
 				continue;
 			}
 
