@@ -257,7 +257,7 @@ body ::tycho::EditJava::gendocBuffer {} {
             [file join [file dirname [filename]] $docDir]"
     #::tycho::safeUpdate $this
     fixJavaHTMLFiles [file join \
-            [::tycho::preference get java javaHome] api] \
+            [::tycho::preference get java javaHome] docs api] \
             [file join [file dirname [filename]] $docDir]
     putStatus ""
     #::tycho::safeUpdate $this
