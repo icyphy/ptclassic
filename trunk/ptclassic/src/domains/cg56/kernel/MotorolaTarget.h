@@ -63,7 +63,9 @@ public:
 	// copy constructor
 	MotorolaTarget(const MotorolaTarget&);
 
-	Block* makeNew() const;
+	// return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
 	void setup();
 	void beginIteration(int repetitions, int depth);
 	void endIteration(int repetitions, int depth);
@@ -142,6 +144,12 @@ protected:
 	// Other data members
 	int inProgSection;
 	StringList assemblerOptions;
+
+	// maximum value in fixed-point format
+	double maxFixedPointValue;
+
+	// minimum value in fixed-point format
+	double minFixedPointValue;
 
 private:
 	void initStates();
