@@ -57,7 +57,7 @@ void CGStar::advance() {
 	}
 }
 
-const int MAXLINELEN = 256;
+const int MAXLINELEN = 1024;
 const int TOKLEN = 80;
 
 // Find the code StringList called name, if a StringList doesn't exist 
