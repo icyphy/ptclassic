@@ -135,11 +135,13 @@ RPCFunction **array;
 	RPCExit(-1);
     }
 /* initialize modules: compilation of universes, signal catching, loader*/
-    *array = CommandArray;
+    open_display (xDisplay);
     PrintVersion();
+    KcDoStartupLinking();
     welcome_window ();
     PrintConLog("PIGI is running");
     vemPrompt();
+    *array = CommandArray;
     return(sizeof(CommandArray) / sizeof(RPCFunction));
 }
 
@@ -147,7 +149,6 @@ void pr_accum_string();
 
 welcome_window ()
 {
-	open_display (xDisplay);
 	accum_string ("Ptolemy Interactive Graphics Interface\n");
 	accum_string (pigiVersion);
 	accum_string ("\nCopyright 1990, 1991 Regents of the University of California");
