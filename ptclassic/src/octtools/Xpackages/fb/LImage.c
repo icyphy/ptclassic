@@ -330,7 +330,7 @@ LImageWidget liw;
     int alloc_lines = 5;
     int cur_width, word_size, count, i;
 
-    if (liw->lImage.line_array) XtFree(liw->lImage.line_array);
+    if (liw->lImage.line_array) XtFree((char *)liw->lImage.line_array);
     liw->lImage.num_lines = 0;
     liw->lImage.max_line_width = 0;
     liw->lImage.all_height = 0;
@@ -343,7 +343,7 @@ LImageWidget liw;
     liw->lImage.line_array[0].line = word;
     liw->lImage.line_array[0].count = count;
     liw->lImage.num_lines = 1;
-    while (word = getword(&idx, &count)) {
+    while ( (word = getword(&idx, &count)) ) {
 	word_size = XTextWidth(liw->lImage.font, word, count);
 	if (cur_width + word_size > 2*liw->lImage.image.width) {
 	    /* Too large for this line */
@@ -351,7 +351,7 @@ LImageWidget liw;
 		/* Make more lines */
 		alloc_lines *= 2;
 		liw->lImage.line_array = (LILabelLine *)
-		  XtRealloc(liw->lImage.line_array,
+		  XtRealloc((char *)liw->lImage.line_array,
 			    alloc_lines * sizeof(LILabelLine));
 	    }
 	    liw->lImage.line_array[liw->lImage.num_lines-1].width = cur_width;
@@ -529,7 +529,10 @@ Widget new;			/* Actual new values      */
     return redisplay;
 }
 
-#define li_abs(a)	((a) < 0 ? -(a) : (a))
+/* Cast to long in case Time is unsigned, thus avoiding
+ warning: unsigned value < 0 is always 0
+ */
+#define li_abs(a)	(((long)a) < 0 ? -((long)a) : ((long)a))
 
 /*ARGSUSED*/
 static void LiPushAction(w, evt, params, num_params)
@@ -542,7 +545,7 @@ Cardinal *num_params;
     Time diff;
 
     if (evt->type == ButtonPress) {
-	diff = li_abs(evt->xbutton.time - sw->lImage.last_ms);
+	diff = li_abs((long)evt->xbutton.time -(long)sw->lImage.last_ms);
 	if (diff < sw->lImage.click_thres) {
 	    sw->lImage.click_count++;
 	} else {
