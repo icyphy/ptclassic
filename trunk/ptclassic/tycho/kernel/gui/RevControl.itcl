@@ -216,7 +216,8 @@ body ::tycho::RevControl::initializeRevControl {} {
 #### unedit
 # Query the user for confirmation, then unedit the file, reverting to
 # the previously checked in version.  This base class method
-# only does the query.
+# only does the query.  If the user does not confirm, exit with
+# a silent error.
 #
 body ::tycho::RevControl::unedit {} {
     if {$file == {}} {
@@ -226,7 +227,8 @@ body ::tycho::RevControl::unedit {} {
 	    "Are you sure you want to discard your changes (if any)?"] {
 	enableButton checkout
     } {
-	error "Unedit cancelled"
+        ::tycho::silentError
+        # error "Unedit cancelled"
     }
 }
 
