@@ -40,6 +40,7 @@ HREF="http://www.sunlabs.com/people/brent.welch/book/index.html"><CITE>Practical
 Programming in Tcl and Tk</CITE></A>, by 
 <A NAME="Welch, B."><author>Brent B. Welch</author></A>, page 87.
 
+<BLOCKQUOTE>
 <MENU>
 
 <LI> Accessing large lists can really slow things down, using arrays
@@ -62,6 +63,8 @@ are not removed, they are parsed each time the interpreter iterates
 through a loop or executes a procedure.
 
 </MENU>
+</BLOCKQUOTE>
+
 
 <LI> If you are using <CODE>exec</CODE>, then you may want to reconsider.
 <OL>
@@ -81,6 +84,29 @@ See the <A HREF="../../kernel/doc/internals/exec.html">Tycho Exec Internals Guid
 
 </OL>
 
+
+
+<LI> If your application is taking a long time to start up, try the following
+things.
+<OL>
+<LI> Use the 
+<A
+HREF="../../editors/visedit/doc/usersGuides/ProfileTclHelp.html">Graphical
+Tcl Profiler</A> to look for bottlenecks.  Look for lots of calls to <CODE>unknown</CODE> and <CODE>tcl_unknown</CODE>.
+
+<LI> Autoloading Itcl files takes more time than just sourcing them.
+If you source the files necessary before creating your first widget,
+you might see a speedup.  You might find it interesting to put
+<CODE>puts</CODE> statements.  at the top of the <CODE>unknown</CODE>,
+<CODE>tcl_unknown</CODE> and <CODE>auto_load</CODE> procs in
+<CODE>lib/itcl/tcl/init.tcl</CODE> (If you are using Tycho from within
+Ptolemy, then this file would be at <A
+HREF="../../../../tcltk/itcl/lib/itcl/tcl/init.tcl"><CODE>$PTOLEMY/tcltk/itcl/lib/itcl/tcl/init.tcl</CODE></A>.
+However, this link may not work for you)
+
+
+
+</OL>
 
 </MENU>
 
