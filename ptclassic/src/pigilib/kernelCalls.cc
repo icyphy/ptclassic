@@ -505,16 +505,6 @@ KcNumPorts (char* starname, char* portname, int numP) {
 	return currentGalaxy->numPorts(starname, portname, numP);
 }
 
-/*
-Load object file dynamically into kernel.
-*/
-extern "C" boolean
-KcLoad(char* file)
-{
-	ErrAdd("Load not implemented yet");
-	return FALSE;
-}
-
 /* 9/22/90, by eal
 Return the number of domains that the system knows about
 */
