@@ -43,7 +43,7 @@ proc ptkCreateXYPlot {w title geo} {
     pack [menubutton $w.mbar.v -text View -underline 0 -menu $w.mbar.v.m] \
 	-side left
     menu $w.mbar.f.m
-    $w.mbar.f.m add command -label "Print ..." -command "ptkPrintXYPlot $w \"$title\""
+    $w.mbar.f.m add command -label "Print ..." -command "ptkPrintXYPlot $w $w.pf.c \"$title\""
     $w.mbar.f.m add command -label "Quit" -command "destroy $w
 	proc $w.pf.c args \"\""
     menu $w.mbar.v.m
@@ -62,7 +62,7 @@ proc ptkCreateXYPlot {w title geo} {
 # possible FIXME: generalize ptkPrfacet.tcl routines so that they
 # it can be consolidated with this routine.
 
-proc ptkPrintXYPlot {w title} {
+proc ptkPrintXYPlot {w canv title} {
     catch "destroy ${w}_print"
     toplevel [set wpr ${w}_print]
     wm title $wpr "Print Plot: $title"
@@ -124,7 +124,7 @@ proc ptkPrintXYPlot {w title} {
     pack [label $wpr.p.plabel -text "Printer: "] \
 	 -side left -fill none -anchor nw
     pack [entry $wpr.p.printer -relief ridge -bg wheat3 -width 10] -side right
-    bind $wpr.p.printer <Return> "ptkPrintXYPlotGo $w; destroy $wpr"
+    bind $wpr.p.printer <Return> "ptkPrintXYPlotGo $w $canv; destroy $wpr"
     bind $wpr.p.printer <Tab> "focus $wpr.file"
     pack $wpr.p -side bottom -anchor w -padx 5 -pady 5
     global env
@@ -136,7 +136,7 @@ proc ptkPrintXYPlot {w title} {
 
 }
 
-proc ptkPrintXYPlotGo w {
+proc ptkPrintXYPlotGo w canv {
 	
    global env
    set wpr ${w}_print
@@ -145,7 +145,7 @@ proc ptkPrintXYPlotGo w {
    set canvHeight [winfo height $w]
 
    set psfile [$wpr.file get]
-   set command "$w.pf.c postscript -file ${psfile}"
+   set command "$canv postscript -file ${psfile}"
 
    upvar #0 ${wpr}Orient orient
 
