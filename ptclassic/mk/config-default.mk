@@ -74,6 +74,11 @@ CURSES_LIBSPEC = -lcurses
 # hppa.cfront has problems linking vem with -g, so we override this
 OCT_DEBUG_FLAGS = -g
 
+# OCTTOOLS_IV_DIR is usually set to iv in $PTOLEMY/mk/config-default.mk
+# but config-nt4.mk overrides it and sets it to nothing because Cygwin
+# cannot compile iv because of signal issues.
+OCTTOOLS_IV_DIR = iv
+
 # If the X11 include directories are in /usr/include/X11, leave
 # the following symbol blank.  Otherwise define it as "-Idir" where
 # dir is the PARENT of the include directory, which must end in X11.
