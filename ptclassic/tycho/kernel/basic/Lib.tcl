@@ -431,8 +431,8 @@ if $ptolemyfeature(ptolemy) {
 	    -label "Ptolemy Home Page" \
 	    -underline 0 \
 	    -command {::tycho::openContext \
-	    [file join $PTOLEMY doc html index.html] "html"}
-    -before usersguide
+	    [file join $PTOLEMY doc html index.html] "html"} \
+	    -before usersguide
 }
 
 
