@@ -2,11 +2,14 @@ defstar {
   name      { MatrixFix }
   domain    { SDF }
   desc      { 
-Produces a matrix with fixed-point entries. The entries are
-read from the array parameter "FixMatrixContents" in rasterized order:
-i.e. for a MxN matrix, the first row is filled from left to right
-using the first N values from the array. All entries have the
-same precision, as specifid by the parameter "FixPrecision".
+Generate a matrix with fixed-point entries.
+  }
+  explanation {
+The entries of the generated matrix are read from the array parameter
+\fIFixMatrixContents\fR in rasterized order: i.e. for an $M x N$ matrix,
+the first row is filled from left to right using the first $N$ values
+from the array.  All entries have the same precision, as specified by
+the parameter \fIFixPrecision\fR.
   }
   version   { $Id$ }
   author    { Mike J. Chen }
@@ -65,4 +68,3 @@ Precision of all entries in the matrix.
     output%0 << matrix;
   }
 }
-

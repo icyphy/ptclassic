@@ -34,9 +34,9 @@ limitation of liability, and disclaimer of warranty provisions.
                 type { int }
                 default { "YES" }
                 desc {
-Flag that indicates whether or not to keep the preciion of the
+Flag that indicates whether or not to keep the precision of the
 arriving matrix: YES keeps the same precision, and NO casts
-them to the precision specified by the paramter "InputPrecision". }
+them to the precision specified by the parameter "InputPrecision". }
         }
         defstate {
                 name { InputPrecision }

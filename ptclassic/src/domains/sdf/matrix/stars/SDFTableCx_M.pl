@@ -67,7 +67,7 @@ The table containing matrices. Each matrix with dimension numRows*numCols is giv
 //  check if table doesn't have enough elements.
     if ( size != size/dimension*dimension ) {
       Error::abortRun(*this,"The number of elements in state parameter ",
-                            "'complexTable' does't match the specified ",
+                            "'complexTable' doesn't match the specified ",
                             "dimension.");
       return;
     }

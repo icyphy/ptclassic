@@ -34,7 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	name { numCols }
 	type { int }
 	default { 2 }
-	desc { The number of colums in the matrix. }
+	desc { The number of columns in the matrix. }
   }
   ccinclude { "Matrix.h" } 
   setup {
