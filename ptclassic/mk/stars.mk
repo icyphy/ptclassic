@@ -58,7 +58,6 @@ $(LIBDIR)/libcg96stars.a $(LIBDIR)/libcg96.a \
 $(LIBDIR)/libcg56dspstars.a \
 $(LIBDIR)/libcg56stars.a $(LIBDIR)/libcg56.a \
 $(LIBDIR)/libsilagestars.a $(LIBDIR)/libsilage.a \
-$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
 $(LIBDIR)/libcgstars.a $(PARLIBFILES) $(LIBDIR)/libcg.a \
 $(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a \
 $(LIBDIR)/libthorstars.a $(LIBDIR)/libthor.a \
@@ -68,19 +67,24 @@ $(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdfmatrixstars.a \
 $(LIBDIR)/libbdfstars.a $(LIBDIR)/libbdf.a \
 $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a
 
+# CG-DDF no longer supported
+#$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
+
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
 -lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 $(S56WH_LIBDIR) $(S56WH_LIB)\
 -lsilagestars -lsilage \
--lcgddfstars -lcgddf \
 -lcgstars -lDC -lHu -lDL -lPar -lcg \
 -lddfstars -lddf \
 -lthorstars -lthor \
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars
+
+# CG-DDF no longer supported
+#-lcgddfstars -lcgddf \
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
