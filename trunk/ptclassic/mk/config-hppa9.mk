@@ -52,6 +52,9 @@ include $(ROOT)/mk/config-hppa.mk
 # Misc. flags for OS version, if you are under HPUX9.x:
 ARCHFLAGS =
 
+# PN domain is not supported under hpux9
+INCLUDE_PN_DOMAIN = no
+
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
 # If you are running under HPUX9.x, you may want to 
 # comment out FLUSH_CACHE and LIB_FLUSH_CACHE
