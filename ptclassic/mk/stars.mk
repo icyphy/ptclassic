@@ -171,6 +171,7 @@ ifdef C50
 		$(C50DIR)/targets $(C50DIR)/dsp/stars
 	# must bring in the parallel schedulers for multi-c50 targets
 	# CGFULL = 1
+	CG = 1
 	PALETTES += PTOLEMY/src/domains/c50/icons/main.pal
 	STARS += $(LIBDIR)/c50dspstars.o $(LIBDIR)/c50stars.o
 	LIBS += -lc50dspstars -lc50stars -lc50
