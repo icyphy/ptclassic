@@ -51,6 +51,7 @@ DEPrinter.pl \
 DEQueue.pl \
 DEQueueBase.pl \
 DERanGen.pl \
+DERealTimeStar.pl \
 DERouter.pl \
 DESampler.pl \
 DEServer.pl \
@@ -58,7 +59,9 @@ DEStack.pl \
 DEStatistics.pl \
 DEStopTimer.pl \
 DESwitch.pl \
+DESynchronize.pl \
 DETestLevel.pl \
+DETimer.pl \
 DEUDCounter.pl \
 DEUnPacketize.pl \
 DEVarDelay.pl \
