@@ -87,7 +87,7 @@ StringList CGCTclTkTarget :: compileLine(const char* fName) {
   // Note that this comes first, so it can only be overridden
   // with the environment variable.
   if (x11dirstring) {
-    linkOpts << " -L" << x11dirstring << "/lib ";
+    cmd << " -L" << x11dirstring << "/lib ";
   }
   cmd << (const char*) linkOptions;
   return cmd;
