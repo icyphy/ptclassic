@@ -42,7 +42,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	
+DIRS =		internals usersGuides
 
 TCL_SRCS = 
 
@@ -51,7 +51,7 @@ ITCL_SRCS =
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	index.html
 
-MISC_FILES = codeDoc img
+MISC_FILES = 	$(DIRS) codeDoc img
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
