@@ -387,7 +387,10 @@ jsinstr:
 	$(JSINSTR) $(JSINTRFLAGS) $(JSRCS)
 # If the jsoriginal directory does not exist, then instrument the Java files.
 jsoriginal:
-	@if [ ! -d jsoriginal ]; then $(JSINSTR) $(JSINTRFLAGS) $(JSRCS); fi
+	@if [ ! -d jsoriginal ]; then \
+		echo "$(JSINSTR) $(JSINTRFLAGS) $(JSRCS)"; \
+		$(JSINSTR) $(JSINTRFLAGS) $(JSRCS); \
+	fi
 
 # Back out the instrumentation.
 jsrestore:
@@ -399,7 +402,8 @@ jsbuild:
 jstest_jsimple:
 	$(MAKE) AUXCLASSPATH=:$(JSCLASSPATH) test_jsimple
 	@echo "To view code coverage results, run javascope or jsreport"
-# If necessary, instrument the classes, then rebuild, then run the tests
+	@echo "To get a summary, run jsreport -dbsummary" 
+`# If necessary, instrument the classes, then rebuild, then run the tests
 jsall: jsoriginal
 	$(MAKE) clean
 	$(MAKE) jsbuild
