@@ -18,18 +18,18 @@ Code for SDF-type portholes and multiportholes.
 
 **************************************************************************/
 
-int InSDFPort :: isItInput () { return TRUE;}
+int InSDFPort :: isItInput () const { return TRUE;}
 
 void InSDFPort :: grabData () { getParticle();}
 
-int OutSDFPort :: isItOutput () { return TRUE;}
+int OutSDFPort :: isItOutput () const { return TRUE;}
 
 void OutSDFPort :: grabData () { clearParticle();}
 
 void OutSDFPort :: sendData () { putParticle();}
 
-int MultiInSDFPort :: isItInput () { return TRUE;}
-int MultiOutSDFPort :: isItOutput () { return TRUE;}
+int MultiInSDFPort :: isItInput () const { return TRUE;}
+int MultiOutSDFPort :: isItOutput () const { return TRUE;}
 
 PortHole& SDFPortHole :: setPort (
 			     const char* s,
