@@ -620,6 +620,7 @@ int POct::ptkSetParams (int aC,char** aV) {
 int POct::ptkGetTargetNames (int aC,char** aV) {
     octObject facet;
     char *defaultTarget, *target ;
+    char *domain;
     char *targetNames[MAX_NUM_TARGETS];
     int nTargets, nChoices, i;
 
@@ -634,14 +635,11 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    if (!setCurDomainF(&facet)) {
-        Tcl_AppendResult(interp, 
-                         "Unknown domain found; correct the domain first",
-                         (char *) NULL);
+    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
-
-    nTargets = KcDomainTargets(targetNames,MAX_NUM_TARGETS);
+    nTargets = KcDomainTargets(domain, targetNames, MAX_NUM_TARGETS);
 
     if(nTargets == 0) {
         Tcl_AppendResult(interp, 
@@ -656,7 +654,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
 	    nChoices = nTargets + 1;
     }
     else {
-            defaultTarget = KcDefTarget();
+            defaultTarget = KcDefTarget(domain);
 	    nChoices = nTargets;
     }
 
@@ -704,6 +702,7 @@ int POct::ptkGetTargetNames (int aC,char** aV) {
 //
 int POct::ptkGetTargetParams (int aC,char** aV) {
     octObject facet;
+    char *domain;
     char *target ;
 
     if (aC != 3) return
@@ -719,10 +718,9 @@ int POct::ptkGetTargetParams (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    if (!setCurDomainF(&facet)) {
-        Tcl_AppendResult(interp,
-                         "Unknown domain found; correct the domain first",
-                         (char *) NULL);
+    // Set the domain to be that of the passed facet
+    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
 
@@ -769,6 +767,7 @@ int POct::ptkGetTargetParams (int aC,char** aV) {
 //
 int POct::ptkSetTargetParams (int aC,char** aV) {
     octObject facet;
+    char *domain;
     char *target ;
 
     if (aC != 4) return
@@ -782,10 +781,9 @@ int POct::ptkSetTargetParams (int aC,char** aV) {
         return TCL_ERROR;
     }
 
-    if (!setCurDomainF(&facet)) {
-        Tcl_AppendResult(interp,
-                         "Unknown domain found; correct the domain first",
-                         (char *) NULL);
+    // Set the domain to be that of the passed facet
+    if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
+        Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
     }
 
