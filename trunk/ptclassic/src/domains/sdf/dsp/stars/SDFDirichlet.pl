@@ -25,10 +25,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name{ input }
 		type{ float }
+		desc{ The input x to the Dirichlet kernel. }
 	}
 	output {
 		name{ output }
 		type{ float }
+		desc{ The output of the Dirichlet kernel. }
 	}
 	defstate {
 		name { N }

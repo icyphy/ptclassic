@@ -8,7 +8,7 @@ The sinc function is defined as ${ sin ( x ) } over { x }$.
         version {$Id$}
 	author { Brian Evans }
 	copyright {
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -18,10 +18,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	input {
 		name{input}
 		type{float}
+		desc{The input x to the sinc function.}
 	}
 	output {
 		name{output}
 		type{float}
+		desc{The output of the sinc function.}
 	}
 	ccinclude { <math.h> }
 	go {
