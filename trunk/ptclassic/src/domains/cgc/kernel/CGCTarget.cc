@@ -42,20 +42,21 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addState(saveFileName.setState("saveFileName",this,"",
                         "file name to save the generated code."));
 	initCodeStrings();
+
+	// stream definition
+	addStream("globalDecls", &globalDecls);
+	addStream("include", &include);
+	addStream("mainDecls", &mainDecls);
+	addStream("mainInit", &mainInit);
 }
 
-StringList CGCTarget :: sectionComment(const StringList s) {
-	StringList out = "\n/****** ";
-	out += s;
-	out += " ******/\n";
+StringList CGCTarget :: sectionComment(StringList s) {
+	StringList out = comment(s, " /**** ", " *****/");
 	return out;
 }
 
 void CGCTarget :: headerCode () {
-        StringList code = "Generated C code for target ";
-        code += fullName();
-	StringList tmp = sectionComment(code);
-	staticDeclarations = tmp;
+	globalDecls << headerComment("/* ", " */", " * ");
 }
 
 
@@ -90,7 +91,7 @@ void CGCTarget :: starDataStruct(CGCStar* block, int) {
 	out += block->declareState(s);	// declare and initialize state
     }
 
-    if (block->emptyFlag == 0) staticDeclarations += out;
+    if (block->emptyFlag == 0) globalDecls += out;
 }
 
 void CGCTarget :: setup() {
@@ -103,15 +104,13 @@ void CGCTarget :: setup() {
 }
 
 void CGCTarget :: initCodeStrings() {
-	staticDeclarations.initialize();
+	globalDecls.initialize();
 	procedures.initialize();
 	include.initialize();
-	mainDeclarations.initialize();
-	mainInitialization.initialize();
+	mainDecls.initialize();
+	mainInit.initialize();
 	wormIn.initialize();
 	wormOut.initialize();
-	includeFiles.initialize();
-	globalDecls.initialize();
 }
 	
 static char* complexDecl = 
@@ -120,38 +119,31 @@ static char* complexDecl =
 void CGCTarget :: frameCode () {
     Galaxy* gal = galaxy();
     // Data structure declaration
-    StringList leader = "Code from Universe: ";
-    leader += gal->fullName();
-    staticDeclarations += sectionComment(leader);
-    staticDeclarations += sectionComment("Data structure declations");
+    globalDecls += sectionComment("Data structure declations");
     galDataStruct(*gal,1);
 
     // Assemble all the code segments
     StringList runCode = include;
     runCode += complexDecl;
-    runCode += staticDeclarations;
+    runCode += globalDecls;
     runCode += procedures;
     runCode += sectionComment("Main function");
     runCode += (const char*) funcName;
     runCode += "() {\n";
-    runCode += mainDeclarations;
-    runCode += mainInitialization;
+    runCode += mainDecls;
+    runCode += mainInit;
     runCode += myCode;
     
-    myCode = runCode;
+    myCode.initialize();
+    myCode += runCode;
 
     // after generating code, initialize code strings again.
     initCodeStrings();
 }
 
-StringList CGCTarget :: generateCode() {
-	setup();
-	if (galaxy()->parent() == 0) {
-		run();
-		Target :: wrapup();
-	}
+void CGCTarget :: generateCode() {
+	CGTarget :: generateCode();
 	myCode += "}\n";
-	return myCode;
 }
 
 void CGCTarget :: wrapup () {
@@ -219,10 +211,10 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
         if (repetitions == -1)          // iterate infinitely
                 myCode += "while(1) {\n";
         else {
-                mainDeclarations += indent(1);
-                mainDeclarations += "int i";
-                mainDeclarations += unique;
-                mainDeclarations += ";\n";
+                mainDecls += indent(1);
+                mainDecls += "int i";
+                mainDecls += unique;
+                mainDecls += ";\n";
                 myCode += "for (i";
                 myCode += unique;
                 myCode += "=0; i";
@@ -252,54 +244,6 @@ void CGCTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << updateCopyOffset();
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
-
-void CGCTarget :: addInclude(const char* inc) {
-
-	// check whether the file is included or not.
-	StringListIter next(includeFiles);
-	const char* p;
-
-	while ((p = next++) != 0) {
-		if (!strcmp(inc,p)) return;
-	}
-
-	// add new file
-	includeFiles += inc;
-	StringList out = "#include ";
-	out += inc;
-	out += "\n";
-	include += out;
-}
-
-void CGCTarget :: addGlobal(const char* decl) {
-
-	// check whether the file is included or not.
-	StringListIter next(globalDecls);
-	const char* p;
-
-	while ((p = next++) != 0) {
-		if (!strcmp(decl,p)) return;
-	}
-
-	// add new file
-	globalDecls += decl;
-	staticDeclarations += decl;
-}
-
-void CGCTarget :: addDeclaration(const char* decl) {
-	mainDeclarations += indent(1);
-	mainDeclarations += decl;
-}
-
-void CGCTarget :: addProcedure(const char* decl) {
-	procedures += decl;
-}
-
-void CGCTarget :: addMainInit(const char* decl) {
-	mainInitialization += indent(1);
-	mainInitialization += decl;
-}
-
 
 // clone
 Block* CGCTarget :: makeNew () const {
