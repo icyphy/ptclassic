@@ -1,9 +1,9 @@
 static const char file_id[] = "DDFTarget.cc";
 /**********************************************************************
 Version identification:
-@(#)DDFTarget.cc	1.1	8/15/95
+$Id$
 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,7 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDFTarget, the default target to be used in the DDF
  domain.
 
- If useOldScheduler is non-zero, then the DDF scheduler from the 0.5.2 release
+ If useFastScheduler is non-zero, then the DDF scheduler from the 0.5.2 release
  is used.  Otherwise, if restructure is non-zero, SDF stars are clustered
  and scheduled ahead of time.  Otherwise, the DDFSimpleSched is used.
  The latter is the default.
@@ -63,10 +63,10 @@ Target("default-DDF","DataFlowStar","default DDF target")
 	    "In each iteration, run until the system deadlocks."));
 	addState(restructure.setState("restructure",this,"NO",
 	    "Cluster SDF actors and pre-schedule (experimental!)"));
-	addState(useOldScheduler.setState("useOldScheduler",this,"NO",
+	addState(useFastScheduler.setState("useFastScheduler",this,"NO",
 	    "Use the DDF scheduler from the 0.5.2 release of Ptolemy."));
 	addState(numOverlapped.setState("numOverlapped",this,"1",
-	    "Number of iteration cycles to be overlapped (used by old scheduler only)"));
+	    "Number of iteration cycles to be overlapped (used by fast scheduler only)"));
 	addState(logFile.setState("logFile",this,"",
             "Log file to write to (none if empty). Used only by the restructuring scheduler."));
 	LOG_NEW; firings = new TextTable;
@@ -78,7 +78,7 @@ Block* DDFTarget::makeNew() const {
 
 void DDFTarget::setup() {
 	DDFScheduler* s;
-	if (int(useOldScheduler)) {
+	if (int(useFastScheduler)) {
 	  LOG_NEW; s = new DDFScheduler;
 	} else {
 	  if (int(restructure)) {
