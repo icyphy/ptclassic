@@ -19,7 +19,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 Richard Stevens and Christopher Scannell are employees of the
 U.S. Government whose contributions to this computer program fall
-within the scope of 17 U.S.C. A7 105 
+within the scope of 17 U.S.C. A7 105.
 	}
 	location { DDF library }
 	input {
@@ -65,10 +65,10 @@ within the scope of 17 U.S.C. A7 105
 		}
 	}
 	begin {
-		waitFor(input, (int)threshold);
+		waitFor(input, int(threshold));
 	}
 	go {
-		for (int i = (int)numconsumed; i > 0; i--) {
+		for (int i = int(numconsumed); i > 0; i--) {
 			input.receiveData();
 		}
 
@@ -78,6 +78,6 @@ within the scope of 17 U.S.C. A7 105
 		// generate output, and get ready for next firing
 		output.sendData();
 
-		waitFor(input, (int)threshold);
+		waitFor(input, int(threshold));
 	}
 }
