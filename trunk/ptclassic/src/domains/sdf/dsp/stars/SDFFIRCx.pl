@@ -8,7 +8,7 @@ Default coefficients give an 8th order, linear phase, lowpass filter.
 To read coefficients from a file, use the syntax: "<fileName".
 Real and imaginary parts should be paired with parentheses, e.g. (1.0, 0.0).
 	}
-	location { SDF main library }
+	location { SDF dsp library }
 	version {$Id$}
 	copyright { 1990 The Regents of the University of California }
 	author { E. A. Lee }

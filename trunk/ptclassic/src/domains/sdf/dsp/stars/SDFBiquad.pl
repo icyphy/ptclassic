@@ -10,7 +10,7 @@ where z1 = {z sup -1}, z2 = {z sup -2}.
 	}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF dsp library }
 	explanation {
 .lp
 This two-pole, two-zero IIR filter has a transfer function of
