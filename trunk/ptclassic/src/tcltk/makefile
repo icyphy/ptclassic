@@ -207,7 +207,8 @@ fixlinks:
 		ln -s libitk$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitk.$$LIBVERSION; \
 	)
 	@echo "Create a links for itclsh to ish"
-	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish itclsh)
+	-(cd $(ITCL_DEST)/bin; rm -f ish tclsh itkwish itclsh)
+	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) ish)
 	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
 	-(cd $(ITCL_DEST)/bin; \
 		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish)
