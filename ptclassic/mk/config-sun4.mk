@@ -25,6 +25,9 @@ CFLAGS =	-g $(OPTIMIZER)
 #
 # Variables for the linker
 #
+# Since we are compiling octtools with gcc, we don't want the 
+# -lmm library linked in
+OCTTOOLS_MM_LIB=
 
 # Flag that gcc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
