@@ -27,7 +27,6 @@ void MemMap::appendSorted(unsigned start, unsigned length,
 
 	if (first == 0) {
 		first = m;
-		last = m;
 		m->next = 0;
 		return;
 	}

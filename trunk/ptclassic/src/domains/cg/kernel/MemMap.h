@@ -52,9 +52,8 @@ public:
 class MemMap {
 	friend class MemMapIter;
 	MemAssignment* first;
-	MemAssignment* last;
 public:
-	MemMap() : first(0), last(0) {}
+	MemMap() : first(0) {}
 	// Clear the memory map.
 	// Warning! does delete on all the MemAssignment objects!
 	void zero();
