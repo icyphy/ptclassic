@@ -246,7 +246,7 @@ body ::tycho::Simulation::perform {graph} {
 #
 body ::tycho::Simulation::pause {} {
     debug "Pause"
-    $director setPause true
+    $director pause 
 }
 
 #######################################################################
@@ -256,7 +256,7 @@ body ::tycho::Simulation::pause {} {
 #
 body ::tycho::Simulation::resume {} {
     debug "Resume"
-    $director setPause false
+    $director resume
 }
 
 #######################################################################
@@ -285,7 +285,7 @@ body ::tycho::Simulation::startServer {} {
 #
 body ::tycho::Simulation::stop {} {
     debug "Stop"
-    $director setStop true
+    $director stop
 }
 
 
