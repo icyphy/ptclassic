@@ -1,4 +1,4 @@
--*-Mode: text-*- -[Sat Apr 16 15:38:09 1994 by cxh]-
+-*-Mode: text-*- -[Thu Aug  3 15:41:41 1995 by cxh]-
 Version: $Id$
 
 src/gnu/PROBLEMS
@@ -68,13 +68,13 @@ SGI
 	>*** Error code 1 (bu21)
 	If you do, try:
 
-	cd $PTOLEMY/obj.$ARCH/gnu; make
+	cd $PTOLEMY/obj.$PTARCH/gnu; make
 
 	You may still need to do:
-	cd $PTOLEMY/obj.$ARCH/gnu/make; make ALLOCA=alloca.o
+	cd $PTOLEMY/obj.$PTARCH/gnu/make; make ALLOCA=alloca.o
 
 	This should solve the alloca problems in building cccp:
-	cd $PTOLEMY/obj.$ARCH/gnu; make/make CC="cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1"
+	cd $PTOLEMY/obj.$PTARCH/gnu; make/make CC="cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1"
 
 	Note that under IRIX5 gcc -g does not work.  The SGI apps faq says:
 
