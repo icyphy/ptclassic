@@ -679,9 +679,7 @@ body ::tycho::File::help {} {
 # Insert the specified data.
 #
 body ::tycho::File::insertData {data} {
-    # FIXME: Under itcl2.1b, if this method signals an error, 
-    # then we can't bring up a html viewer.
-    # error "Sorry, insert data not implemented yet."
+    error "Sorry, insert data not implemented yet."
 }
 
 #####################################################################
