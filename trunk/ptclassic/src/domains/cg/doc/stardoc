@@ -1,0 +1,368 @@
+.\" $Id$
+.H1 "Writing Code Generation Stars" 
+.pp
+Code generation stars are very similar to C++ simulation stars.
+The main difference is that the initialization (setup), run time (go), and
+termination (wrapup) functions produce code to be compiled and
+executed later. Additionally, code generation stars  have one more 
+function, called 
+.c initCode()
+.c "initCode, method"
+between setup and go functions. In the setup stage, 
+stars do not generate any code since the stars are not scheduled yet.
+The initCode functions are called for each star after compile-time 
+scheduling is performed but before run-time scheduling begins. It
+generates the code outside the main loop, such as initialization code,
+global declaration code, and procedure declaration code. The go function
+generates the code for the main loop corresponding for the star, while
+the wraup function generates the code after the main loop.
+.pp
+The
+.c CGStar
+.Id "CGStar, class"
+class is the base class of all code generation stars of practical use, such
+as C-code generation stars and assemler generation stars. In this section,
+we explain the common features  that the CGStar class provides for
+all derivative code generation stars. We use some practical code generation
+stars as examples. 
+.H2 "Codeblocks
+.pp
+Suppose you wish to define a star that generates assembler code for
+the Motorola DSP56001 that adds two numbers stored in memory,
+and then writes the result back to memory.
+(Note that this would be a very poor code generator, since it takes
+control of memory allocation.  But it serves as a simple example.)
+Assume the memory locations used have addresses 10, 11, and 12,
+respectively, and lie in the "x" memory bank.
+This can be done as follows:
+.(c
+defstar {
+	... \fIstar definition directives\fP ...
+	codeblock (blockname) {
+		move x:10,a
+		move x:11,x0
+		add x0,a
+		move a,x:12
+	}
+	go {
+		addCode(blockname);
+	}
+}
+.)c
+The
+.c codeblock
+directive defines a block of code with an associated identifying name
+("blockname" in this case).
+The go() method then generates code based on this code block.
+The code inside the code block would be processed in some way first in
+the practical code generation domains.
+For instance, memory and registers would be allocated, code would
+be compacted, etc.
+.pp
+A codeblock consists of lines of code.  Within each line, 
+spaces, tabs, and the newline are important, and are preserved.
+For this reason,
+the brackets "{ }" should not be on the same lines with the code.
+The following code, for example, will not yield the expected result:
+.(c
+	codeblock (blockname) { move x:10,a
+		move x:11,x0
+		add x0,a
+		move a,x:12 }
+.)c
+It is bad form for two reasons.
+First, spaces and tabs between the opening "{"
+and the first non-space character will be lost.
+Second, the code on the last line will be lost.
+Anything preceding the closing "}" on the same line is discarded.
+.pp
+The above
+.c codeblock
+directive is translated by the preprocessor (ptlang) into a definition
+of a static public member in the ``.h'' file:
+.(c
+class CGStarname : public CGStar
+{
+	...
+	static CGCodeBlock blockname;
+	...
+}
+.)c
+An associated constructor call will appear in the ``.cc'' file:
+.(c
+CGCodeBlock CGStarname :: blockname (
+"	move x:10,a\n"
+"	move x:11,x0\n"
+"	add x0,a\n"
+"	move a,x:12\n"
+);
+.)c
+The argument is a single string, divided into pieces for convenience.
+.pp
+The "blockname" argument to the codeblock directive identifies the particular
+block.  Any number of blocks can be defined, and conditional code
+generation is easily accomplished, as in the following example:
+.(c
+	go {
+		if (parameter == YES)
+			addCode(yesblock);
+		else
+			addCode(noblock);
+	}
+.)c
+.pp
+So far, we use 
+.c addCode() 
+method to generate the code inside the main
+.Id "addCode, method"
+body. We can use 
+.c addProcedure()
+.Id "addProcedure, method"
+method to generate a procedure declaration outside the main body.
+Refer to the target section on how to use these methods in details.
+.H2 "Macros
+.pp
+.Id "macros, code generation stars"
+In code generation stars, inputs and outputs no longer hold values, but
+instead are resources (for example, memory locations or 
+registers in assembler generation, or global variables in c-code generation) 
+within the target machine where values will be stored. 
+Since they are connected together among
+other stars, the resources allocated for them have the global
+access scope.
+Inputs and outputs are not only demands for resources. States as well
+as star variables may need global resources if they are persistent
+across the invocations of the star.
+.pp
+When we program a code generation star, however, we do not have any global
+information on which resources are available, or which
+global variables already exists in c-code generation domain.
+For star writers, we provide a set of macros to access those global
+components. The macros are expanded in a language specific or a target
+specific way after the target hardware allocate the resources properly.
+In this section, we discuss the macros defined in the CGStar class.
+.UH "$ref(name):"
+.Id "ref, CG macro"
+It refers to a state or a port. If it refers to a port, it is functionally
+equivalent to \fBname%0\fR operator in the SDF simulation stars.
+If a star has a multi-porthole, say \fIinput\fR, the first real porthole
+is \fIinput#1\fR. To access that porthole, we use
+.c $ref(input#1)
+or 
+.c $ref(input#internal_state)
+where \fBinternal_state\fR has the current value, 1. The \fB#\fR is
+a special character in expanding the name argument of macros.
+.UH "$ref(name,offset):"
+.Id "ref, CG macro"
+It refers to an array state or a port with an offset that is not negative. 
+For a port, it is functionally equivalent to \fBname%offset\fR operator
+in SDF simulation stars. 
+.UH "$val(state-name):"
+The argument of this macro should be a state. It returns the string
+corresponding to the current value of the state. If the state is an
+array state, it still returns only one string which contains all
+elements of the array spaced by the new line character. 
+If there is a constant state, we can use this macro to use the
+value directly in the code. The advantage of not using \fB$ref\fR macro
+is we do not need to allocate any resource for that state since its
+value is taken out when generating codes.
+.UH "$size(name):"
+.Id "size, CG macro"
+It computes the size of the argument state or port. The size of a state
+is one except for an array state whose size is the number of elements.
+The size of a port is the buffer size allocated to the port. The buffer
+size is usually larger than the number of tokens consumed or produced
+through that port.
+.UH "$starSymbol(name):"
+.Id "starSymbol, CG macro"
+It generates a unique label for a star variable of global scope.
+To prevent some stars from using the same name for the variables,
+we use this macro. Then, the given name is appended by a unique string
+to make the whole string for the variable is unique. 
+As an example, we show some parts of ptlang file of the 
+.c CGCPrinter
+star.
+.(c
+	initCode {
+		...
+		StringList s;
+                s << "    FILE* $starSymbol(fp);";
+                addDeclaration(s);
+                addInclude("<stdio.h>");
+                addCode(openfile);
+           	... 
+        }
+	codeblock (openfile) {
+    if(!($starSymbol(fp)=fopen("$val(fileName)","w"))) {
+        fprintf(stderr,"ERROR: cannot open output file for Printer star.\n");
+        exit(1);
+    }
+	}
+.)c
+The file pointer \fBfp\fR for a star instance should be unique globally, and
+the $starSymbol macro guarantees the uniqueness. Within the same star
+instance, the macro returns the same label. Refer to the CGC domain document
+for the method: addDeclaration and addInclude.
+.UH "$sharedSymbol(list,name):"
+.Id "sharedSymbol, CG macro"
+More than one star classes or star instances may need to access the same
+data structures such as sin/cos table for assemblers and conversion table
+from linear to mu-law PCM encoder. These global data structures should be
+created and initialized only once in the generated code. And, they are
+given a unique name over all global variables. The first argument, 
+.c list ,
+identifies the class of this data structure. And the second argument,
+.c name ,
+can be a generic name for that data structure. For example, take a look
+at a part of the ptlang file of the
+.c CGCPCM 
+star.
+.(c
+    codeblock (sharedDeclarations)
+    {
+        int $sharedSymbol(PCM,offset)[8];
+
+        /* Convert from linear to mu-law */
+        int $sharedSymbol(PCM,mulaw)(x)
+        double x;
+        {
+            double m;
+            m = (pow(256.0,fabs(x)) - 1.0) / 255.0;
+            return 4080.0 * m;
+        }
+    }
+    codeblock (sharedInit)
+    {
+        /* Initialize PCM offset table. */
+        {
+            int i;
+            double x = 0.0;
+            double dx = 0.125;
+
+            for(i = 0; i < 8; i++, x += dx)
+            {
+                $sharedSymbol(PCM,offset)[i] = $sharedSymbol(PCM,mulaw)(x);
+            }
+        }
+    }
+    initCode {
+	...
+        if (addGlobal(sharedDeclarations, "$sharedSymbol(PCM,PCM)"))
+            addCode(sharedInit);
+    }
+.)c
+The above code is to create a conversion table and a conversion function
+from linear to mu-law PCM encoder. The conversion table is named
+.c offset ,
+and belongs to the
+.c PCM
+class. The conversion function is named 
+.c mulaw ,
+and belongs to the same PCM class. Other stars or derived stars can access
+that table or fuction by saying
+.c $sharedSymbol(PCM,offset)
+or
+.c $sharedSymbol(PCM,mulaw) !
+In the initCode method, it tries to put the sharedDeclarations codeblock
+to the global scope (by addGlobal() method in the CGC domain). That code
+block is given a unique label by
+.c $sharedSymbol(PCM,PCM) .
+If it is the first definition of that codeblock, so succeeds in putting
+it, it puts the sharedInit codeblock, too. If there are more than one
+instances of this star, only one instance will succeed in doing this.
+.UH "$label(name):"
+.Id "label, CG macro"
+It creates a unique label for codeblock. A star may contain more than
+one codeblocks. If we use the same name using this macro, each codeblock
+will get different strings. This macro is useful in assembler language
+generation stars to generate labels. For example, here is some parts of
+.c CG56HostOut
+star.
+.(c
+        codeblock(cbSingleBlocking) {
+$label(wait)
+        jclr    #m_htde,x:m_hsr,$label(wait)
+        jclr    #0,x:m_pbddr,$label(wait)
+        movep   $ref(input),x:m_htx
+        }
+        codeblock(cbMultiBlocking) {
+        move    #$addr(input),r0
+        .LOOP   #$val(samplesOutput)
+$label(wait)
+        jclr    #m_htde,x:m_hsr,$label(wait)
+        jclr    #0,x:m_pbddr,$label(wait)
+        movep   x:(r0)+,x:m_htx
+        .ENDL
+        nop
+        }
+.)c
+Two codeblocks above defines the same \fIwait\fR label. The 
+.c $label
+macro will assign unique strings to each label.
+.UH "$codeblockSymbol(name):"
+.Id "codeblockSymbol, CG macro"
+It is the same as the
+.c $label(name)
+macro.
+.pp
+The base CGStar class provides the above 8 macros. In the derived
+classes, we can add more macros, or can redefine the meaning of
+these macros. Refer to each domain document to see how these
+macros are actually expanded.
+.H2 "Possibilities for Effective Buffering"
+.pp
+In principle, block communicate each other through porthole
+connections. In code generation domain, we allocate a buffer for
+each input-output connection by default. There are some stars, however,
+that do not modify data at all. A good, and also
+ubiquitous, example is a 
+.c Fork 
+.Id "Fork, CG star"
+star. When a Fork star has \fIN\fR outputs, the default behavior is
+to create \fIN\fR buffers for output connections and copy data from
+input buffer to \fIN\fR output buffers, which is a very expensive
+and silly approach. Therefore, we pay special attention to this
+Fork type stars. A gain star of unity gain is another example.
+In the start method of these kinds of stars, we call
+.c forkInit()
+method to indicate that it is a Fork-type star.  For example, the
+.c CGCFork
+star is defined as
+.(c
+defstar {
+	name { Fork }
+	domain { CGC }
+	desc { Copy input to all outputs }
+	version { @(#)CGCFork.pl	1.6	11/11/92 }
+	author { E. A. Lee }
+	copyright { 1992 The Regents of the University of California }
+	location { CGC demo library }
+	explanation {
+Each input is copied to every output.  This is done by the way the buffers
+are laid out; no code is required.
+	}
+	input {
+		name {input}
+		type {ANYTYPE}
+	}
+	outmulti {
+		name {output}
+		type {=input}
+	}
+	constructor {
+		noInternalState();
+	}
+	start {
+		forkInit(input,output);
+	}
+	exectime {
+		return 0;
+	}
+}
+.)c
+In the current release,
+all code generation domains do not allocate buffers to the outputs of
+the Fork-type stars, and reuse the input buffer.
+.pp
+
+[embedding stuff to be included: spread/collect stars]
