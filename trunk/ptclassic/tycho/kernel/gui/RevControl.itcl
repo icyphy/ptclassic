@@ -523,7 +523,7 @@ body ::tycho::RevControl::help {} {
 # from that.
 #
 # This proc returns the name of the dialog box that is created so we
-# can access it for testing.
+# can access it for testing, or a null string if user cancels.
 #
 body ::tycho::RevControl::setup {editorWin editorObj} {
     # If a rev control window is already open, use it.

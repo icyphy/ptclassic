@@ -1,6 +1,4 @@
 # A Dialog box for selecting a font.
-# Note: this file used to be called "FontManager.itcl": see that
-# file for the complete SCCS history.
 #
 # @Author: Edward A. Lee
 # @Version: $Id$
@@ -132,20 +130,17 @@ body ::tycho::FontDialog::constructor {args} {
     # The font family menu
     choice family {Font family:} [lsort [::tycho::FontManager::family]] \
 	    Helvetica \
-	    -command "$this updateDisplay"
+            -command "$this updateDisplay"
 
     # The font size menu
     choice size {Font size:} [::tycho::FontManager::size] 12 \
-	    -command "$this updateDisplay"
+            -command "$this updateDisplay"
 
     # The font style menu
     choice style {Font style:} {Roman Italic Bold {Bold Italic}} Roman \
-	    -command "$this updateDisplay"
+            -command "$this updateDisplay"
 
     # Here we add a sample of the font.
-    # FIXME: This should be a separate window: the size changes
-    # you get with the embedded text is extremely disconcerting
-    # because the option menus move!
 
     set sample \
 "

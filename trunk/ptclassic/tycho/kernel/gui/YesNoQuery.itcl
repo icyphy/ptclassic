@@ -34,6 +34,7 @@
 ##########################################################################
 #### askuser
 # Ask the user a question, and return 0 or 1 for answers No and Yes.
+# Also return 0 if the user dismisses the query window without responding.
 # This is done by opening a modal dialog box ("modal" means that nothing
 # further happens in this thread of control until this dialog box is
 # dismissed).
@@ -54,7 +55,12 @@
 proc ::tycho::askuser {question} {
     set name [autoName .yesno]
     uplevel #0 [list ::tycho::YesNoQuery $name -text $question]
-    return [::tycho::Dialog::wait $name]
+    set response [::tycho::Dialog::wait $name]
+    if {$response == 1} {
+        return 1
+    } else {
+        return 0
+    }
 }
 
 ##########################################################################
@@ -91,18 +97,19 @@ body ::tycho::YesNoQuery::constructor {args} {
     #
     # Pack the yes and no buttons.
     #
-    addButton yes -text "Yes <Ret>" -command \
-	    "$this execCommand -yescommand; \
+    addButton yes -text "Yes" \
+            -underline 0 \
+	    -command "$this execCommand -yescommand; \
 	    $this prevWindow; \
 	    delete object $this"
-    addButton no -text "No <Esc>" -command \
-	    "$this execCommand -nocommand; \
+    addButton no -text "No" \
+            -underline 0 \
+	    -command "$this execCommand -nocommand; \
 	    $this prevWindow; \
 	    delete object $this"
     default yes
 
-    bind $prefix <Return> "$this invoke yes"
-    bind $prefix <Escape> "$this invoke no"
+    # bind $prefix <Return> "$this invoke yes"
 
     #
     # Explicitly handle configs that may have been ignored earlier.

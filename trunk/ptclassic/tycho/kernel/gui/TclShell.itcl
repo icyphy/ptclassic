@@ -301,22 +301,25 @@ body ::tycho::TclShell::constructor {args} {
     }
 
     # Modify backspace, control-w, meta-b, etc to avoid deleting the prompt
-    # or backspacing beyond it.  Note that emacs bindings are assumed here.
-    # Bad idea?
-    #
+    # or backspacing beyond it.
     bind $text <BackSpace> "%Q backSpace; break"
     bind $text <Control-h> "%Q backSpace; break"
-    bind $text <Delete> "%Q backSpace; break"
-    bind $text <Control-b> "%Q backChar; break"
-    bind $text <Control-w> "%Q deleteSelection; break"
-    bind $text <Meta-b> "%Q backWord; break"
-    bind $text <Key-Escape><Key-b> "%Q backWord; break"
-    bind $text <Control-p> "%Q backCommand 1; break"
-    bind $text <Control-n> "%Q backCommand -1; break" 
+    bind $text <<Cut>> "%Q deleteSelection; break"
+
+    # Navigation
+    bind $text <<UpLine>> "%Q backCommand 1; break"
+    bind $text <<DownLine>> "%Q backCommand -1; break" 
     bind $text <Up> "%Q backCommand 1; break"
     bind $text <Down> "%Q backCommand -1; break"
-    bind $text <Control-u> "%Q killLine; break"
+    bind $text <<ClearToStart>> "%Q killLine; break"
     
+    # NOTE: Emacs bindings assumed here.  Probably not a good idea, but
+    # unless we unbind them in the text widget, better to intercept them
+    # here.  Maybe not necessary with Tcl 8.0.
+    bind $text <Control-b> "%Q backChar; break"
+    bind $text <Meta-b> "%Q backWord; break"
+    bind $text <Key-Escape><Key-b> "%Q backWord; break"
+
     # Modify search to not allow changing the text
     bind $text <<Search>> \
             "%Q incSearchMinibuffer; %Q adjustInsertionCursor; break"

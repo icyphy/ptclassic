@@ -152,10 +152,13 @@ body ::tycho::ErrorMessage::constructor {args} {
     # Pack the stack trace button, if there is error info.
     global ::errorInfo
     if {$errorInfo != ""} {
-	addButton trace -text "Stack Trace <s>" -command "$this stackTrace"
-	bind $prefix <Control-h> "$this stackTrace"
-	bind $prefix <b> "$this stackTrace"
-	bind $prefix <s> "$this stackTrace"
+	addButton trace -text "Stack Trace" -underline 0 \
+                -command "$this stackTrace"
+        # Remove undocumented bindings
+	# bind $prefix <Control-h> "$this stackTrace"
+	# bind $prefix <b> "$this stackTrace"
+        # Redundant now that -underline is supported by ButtonBox
+	# bind $prefix <s> "$this stackTrace"
 	set localErrorInfo $errorInfo
     }
 
@@ -195,8 +198,7 @@ body ::tycho::ErrorMessage::stackTrace {} {
 	$trace configure -readonly 1
 	raise $name
     } else {
-	# Otherwise, create a new window with the name
-	# given by -stackwindow if not null
+	# Otherwise, create a new window
 	if { $name == "" } {
 	    set name [::tycho::autoName .stacktrace]
 	}

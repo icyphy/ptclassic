@@ -408,11 +408,6 @@ class ::tycho::Query {
 
     # Keep track of which subwindow should get the focus initially.
     private variable focuswindow {}
-
-    # If any multi-line text entry widgets are used, then we cannot use
-    # <Return> to dismiss the window.
-    private variable EditWidgetCount 0
-    private variable returnDismisses 0
 }
 
 #####################################################################
@@ -455,25 +450,25 @@ body ::tycho::Query::constructor {args} {
 	configure -okcommand "$this get"
     }
 
-    addButton ok -text "OK <M-Ret>" \
+    addButton ok -text "OK" \
+            -underline 0 \
 	    -command "$this ok"
-    addButton cancel -text "Cancel <ESC>" \
+    addButton cancel -text "Cancel" \
+            -underline 0 \
 	    -command "$this execCommand -cancelcommand; \
 	    $this prevWindow; \
 	    delete object $this"
 
-    # Enable <Return> binding if there are no multi-line text entry widgets.
-    if {$EditWidgetCount == 0} {
-	default ok
-	$itk_component(bbox) buttonconfigure ok -text "OK <Ret>"
-	set returnDismisses 1
-    }
+    # Enable <Return> binding
+    default ok
 
     # In any case, allow meta-return to dismiss the window.
-    bind $itk_component(hull) <Meta-Return> \
-	    "$this invoke ok; break"
+    # No good.  No Meta button on Windows machines.
+    # bind $itk_component(hull) <Meta-Return> \
+    #    "$this invoke ok; break"
 
-    bind $prefix <Escape> "$this invoke cancel"
+    # Redundant:
+    # bind $prefix <Escape> "$this invoke cancel"
 }
 
 
@@ -556,7 +551,7 @@ body ::tycho::Query::check {tag label default args} {
 # <li> the default entry item (the one initially selected),
 # <li> optional position arguments, given as option-value pairs, and
 # <li> an optional -command option that gives
-#      the command to execute when a new item is selected.
+#      a command to execute when a new item is selected.
 # </menu>
 # The command given by the -command option is invoked whenever the
 # changes the choice, and also when the default choice is set.
@@ -589,13 +584,12 @@ body ::tycho::Query::choice {tag label entries default args} {
 
     # Create the option menu button
     itk_component add tag_$tag {
-        eval [list menubutton $itk_component(querysite).tag_$tag \
+        menubutton $itk_component(querysite).tag_$tag \
                 -width $itk_option(-entrywidth) \
 		-indicatoron 1 \
 		-menu $itk_component(querysite).tag_$tag.menu \
 		-textvariable [scope $itk_component(hull)_[set tag]sw] \
-		-relief raised -bd 2 -highlightthickness 2 -anchor c] \
-		$args
+		-relief raised -bd 2 -highlightthickness 2 -anchor c
     } {
         keep -background -cursor
         # Need to be able to control each one individually.
@@ -882,15 +876,6 @@ body ::tycho::Query::lines {tag label default lines args} {
     if {$focuswindow == {}} {
         set focuswindow $twin
     }
-    
-    # If <Return> is enabled to dismiss the window, disable it.
-    if {$returnDismisses} {
-        $itk_component(bbox) default {}
-        $itk_component(bbox) buttonconfigure ok -text "OK <M-Ret>"
-        bind $itk_component(hull) <Return> { }
-        set returnDismisses 0
-    }
-    incr EditWidgetCount
     
     # NOTE: Control-tab moves the focus
 

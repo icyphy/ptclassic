@@ -42,7 +42,7 @@
 # specified, then the default behavior is to return the selected item
 # when the <code>ListBrowser</code> is waited for using
 # <code>::tycho::Dialog::wait</code>
-# procedure.
+# procedure (or a null string if the user cancels).
 # <p>
 # When the user has selected an item, the <code>processItem</code>
 # protected method is consulted. If this method return 1, and the
@@ -65,6 +65,7 @@
 # and pattern matching on entries.  See the
 # <a href="../usersGuides/ListBrowserHelp.html">help page</a> for details.
 # It is not case sensitive in its matching.
+# Control+Tab is used to move the focus from one field to another.
 #
 class ::tycho::ListBrowser {
     inherit ::tycho::Query
@@ -195,13 +196,15 @@ body ::tycho::ListBrowser::constructor {args} {
     itk_component add scroll {
 	scrollbar $itk_component(listscroll).scroll \
 		-command "$itk_component(listscroll).listbox yview" \
-		-relief sunken
+		-relief sunken \
+                -takefocus 0
     } {
 	keep -background -cursor
     }
     pack $itk_component(scroll) -side right -fill y
 
-    $itk_component(bbox) add help -text "    Help    " \
+    addButton help -text "Help" \
+            -underline 0 \
 	    -command "$this help" \
 	    -row 1 -column 1
 
@@ -211,46 +214,55 @@ body ::tycho::ListBrowser::constructor {args} {
     # to close the window.
     #
     # Any key breaks a sequence of Tabs
-    bind $itk_component(hull) <KeyPress> {%Q breakCompleteSequence}
-    bind $itk_component(hull) <Tab> { }
+    bind $itk_component(tag_entry) <KeyPress> "$this breakCompleteSequence"
     bind $itk_component(tag_entry) <Tab> {%Q complete; break}
+    bind $itk_component(tag_entry) <<NextPane>> "focus $itk_component(listbox)"
 
     # Mouse bindings
-    bind $itk_component(listbox) <Double-1> {%Q selectItem [%Q get entry]; break}
+    bind $itk_component(listbox) <Double-1> \
+            {%Q selectItem [%Q get entry]; break}
     bind $itk_component(listbox) <1> {%Q chooseItem %W %y}
+    bind $itk_component(listbox) <<NextPane>> "focus $itk_component(hull)"
 
     # Navigation bindings
-    bind $itk_component(hull) <Meta-v> {%Q scroll -1 pages}
-    # Escape removed the window, so it doesn't work as an alternative to meta.
-    # bind $itk_component(hull) <Escape><v> {%Q scroll -1 pages}
+    bind $itk_component(tag_entry) <<UpPage>> {%Q scroll -1 pages; break}
+    bind $itk_component(tag_entry) <<DownPage>> {%Q scroll 1 pages; break}
+    bind $itk_component(tag_entry) <<UpLine>> {%Q scroll -1 units; break}
+    bind $itk_component(tag_entry) <<DownLine>> {%Q scroll 1 units; break}
+    bind $itk_component(tag_entry) <<Bottom>> {%Q goto end; break}
+    bind $itk_component(tag_entry) <<Top>> {%Q goto 0; break}
 
-    bind $itk_component(hull) <Control-v> {%Q scroll 1 pages}
-    bind $itk_component(hull) <Control-backslash> {%Q clearSelection}
-    bind $itk_component(hull) <Control-p> {%Q scroll -1 units}
-    bind $itk_component(hull) <Control-n> {%Q scroll 1 units}
+    bind $itk_component(listbox) <<UpPage>> {%Q scroll -1 pages; break}
+    bind $itk_component(listbox) <<DownPage>> {%Q scroll 1 pages; break}
+    bind $itk_component(listbox) <<UpLine>> {%Q scroll -1 units; break}
+    bind $itk_component(listbox) <<DownLine>> {%Q scroll 1 units; break}
+    bind $itk_component(listbox) <<Bottom>> {%Q goto end; break}
+    bind $itk_component(listbox) <<Top>> {%Q goto 0; break}
 
     # Special keys for moving about.
-    bind $itk_component(hull) <Prior> {%Q scroll -1 pages}
-    bind $itk_component(hull) <Next> {%Q scroll 1 pages}
-    bind $itk_component(hull) <End> {%Q goto end}
-    bind $itk_component(hull) <Meta-greater> {%Q goto end}
-    # bind $itk_component(hull) <Escape><greater> {%Q goto end}
-    bind $itk_component(hull) <Up> {%Q scroll -1 units}
-    bind $itk_component(hull) <Down> {%Q scroll 1 units}
-    bind $itk_component(hull) <Home> {%Q goto 0}
-    bind $itk_component(hull) <Meta-less> {%Q goto 0}
-    # bind $itk_component(hull) <Escape><less> {%Q goto 0}
+    bind $itk_component(tag_entry) <Prior> {%Q scroll -1 pages; break}
+    bind $itk_component(tag_entry) <Next> {%Q scroll 1 pages; break}
+    bind $itk_component(tag_entry) <Up> {%Q scroll -1 units; break}
+    bind $itk_component(tag_entry) <Down> {%Q scroll 1 units; break}
     
+    bind $itk_component(listbox) <Prior> {%Q scroll -1 pages; break}
+    bind $itk_component(listbox) <Next> {%Q scroll 1 pages; break}
+    bind $itk_component(listbox) <Up> {%Q scroll -1 units; break}
+    bind $itk_component(listbox) <Down> {%Q scroll 1 units; break}
+
     # We have gotten some reported problems about these keys
     # being undefined on some machines.  But they also seem
     # be needed for other machines.  Hence the catch.
     catch {
-	bind $itk_component(hull) <KP_Prior> {%Q scroll -1 pages}
-	bind $itk_component(hull) <KP_Next> {%Q scroll 1 pages}
-	bind $itk_component(hull) <KP_End> {%Q goto end}
-	bind $itk_component(hull) <KP_Up> {%Q scroll -1 units}
-	bind $itk_component(hull) <KP_Down> {%Q scroll 1 units}
-	bind $itk_component(hull) <KP_Home> {%Q goto 0}
+	bind $itk_component(tag_entry) <KP_Prior> {%Q scroll -1 pages; break}
+	bind $itk_component(tag_entry) <KP_Next> {%Q scroll 1 pages; break}
+	bind $itk_component(tag_entry) <KP_Up> {%Q scroll -1 units; break}
+	bind $itk_component(tag_entry) <KP_Down> {%Q scroll 1 units; break}
+
+	bind $itk_component(listbox) <KP_Prior> {%Q scroll -1 pages; break}
+	bind $itk_component(listbox) <KP_Next> {%Q scroll 1 pages; break}
+	bind $itk_component(listbox) <KP_Up> {%Q scroll -1 units; break}
+	bind $itk_component(listbox) <KP_Down> {%Q scroll 1 units; break}
     }
 
     # Get preferences. No real need to subscribe for dialogs.
@@ -306,7 +318,9 @@ body ::tycho::ListBrowser::breakCompleteSequence {} {
 #
 body ::tycho::ListBrowser::chooseItem {lb ypos} {
     $lb selection clear @0,0 end
-    $lb selection set [$lb nearest $ypos]
+    set idx [$lb nearest $ypos]
+    $lb selection set $idx
+    $lb activate $idx
     # If we don't clear the first element, then if we select an item,
     # scroll down one page and select another item, the entry widget
     # will contain both the old and new elements, separated with a "\n"
@@ -387,6 +401,7 @@ body ::tycho::ListBrowser::complete {} {
 	    if {$firstone == -1} {set firstone $index}
             lappend matches $name
 	    $itk_component(listbox) selection set $index
+	    $itk_component(listbox) activate $index
 	}
 	incr index
     }
@@ -432,10 +447,13 @@ body ::tycho::ListBrowser::complete {} {
 # forms understood by the Tk listbox widget.
 #
 body ::tycho::ListBrowser::goto {item} {
-    $itk_component(listbox) see $item
-    setEntry [$itk_component(listbox) get $item]
-    set idx [$itk_component(listbox) index $item]
+    set lb $itk_component(listbox)
+    $lb see $item
+    setEntry [$lb get $item]
+    set idx [$lb index $item]
     set scrollposition $idx
+    $lb selection set $idx
+    $lb activate $idx
 }
 
 ######################################################################
@@ -508,13 +526,14 @@ body ::tycho::ListBrowser::selectItem {name} {
 # second argument were "units".
 #
 body ::tycho::ListBrowser::scroll {num what} {
-    clear
+    clear entry
     set lb $itk_component(listbox)
     if {$what == "pages"} {
 	$lb yview scroll $num $what
 	set scrollposition [$lb nearest 0]
         $lb selection clear 0 end
         $lb selection set $scrollposition
+        $lb activate $scrollposition
     } elseif {$what == "units"} {
 	incr scrollposition $num
 	set size [$lb size]
@@ -525,6 +544,7 @@ body ::tycho::ListBrowser::scroll {num what} {
 	}
         $lb selection clear 0 end
         $lb selection set $scrollposition
+        $lb activate $scrollposition
     } elseif {$what == "selection"} {
 	set indexes [$lb curselection]
 	if {$indexes == {}} {
@@ -574,7 +594,7 @@ body ::tycho::ListBrowser::processItem {item} {
 # this to take further action as well.
 #
 body ::tycho::ListBrowser::setEntry {string} {
-    clear
+    clear entry
     insert entry $string
 }
 

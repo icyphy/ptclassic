@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 # 
-# @Copyright (c) 1997 The Regents of the University of California.
+# @Copyright (c) 1997-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -337,10 +337,13 @@ ensemble ::tycho::resource {
 # </pre></tcl><br>
 # <br>
 # Create a new mail object, send 0-9, close.
-# <tcl><pre>set obj [::tycho::resource new mailto:$destination]
-# $obj open
-# for {set i 0} {$i < 10} {incr i} {$obj puts "LINE $i"}
-# $obj close
+# <tcl><pre>
+# if {$destimation != {}} {
+#     set obj [::tycho::resource new mailto:$destination]
+#     $obj open
+#     for {set i 0} {$i < 10} {incr i} {$obj puts "LINE $i"}
+#     $obj close
+# }
 # </pre></tcl>
 #
 #
