@@ -25,7 +25,8 @@ codeblock(receiveToken,"") {
     char* pValue = (char*) &value;
     pValue++;
     if ((value = qckPeek($val(S56XFilePrefix)_dsp,"$val(VariableName)")) == -1) { 
-	fprintf(stderr, "$val(VariableName): Receive Data Failed\n", qckErrString);
+	fprintf(stderr, "$val(VariableName): Receive Data Failed: %s\n",
+		qckErrString);
 	exit(1);
     }
     memset(fixValue,0,sizeof(fixValue));
@@ -39,7 +40,8 @@ codeblock(receiveBlock,"") {
 	int i;
 	int offset;
 	if ( qckGetBlkItem($val(S56XFilePrefix)_dsp,$starSymbol(s56xBuffer),value,$val(blockSize)+1) == -1) { 
-	    fprintf(stderr,"$val(VariableName): Receive Data Failed\n", qckErrString);
+	    fprintf(stderr, "$val(VariableName): Receive Data Failed: %s\n",
+		    qckErrString);
 	    exit(1);
 	}
 	offset = value[$val(blockSize)] - $starSymbol(bufferAddr);
