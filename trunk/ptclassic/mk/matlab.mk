@@ -75,8 +75,9 @@ ifdef NEED_MATLABDIR
 			MATLABEXT_LIB = -L$(MATLABEXTERN) -lptmatlab -lmat
 		else
 			# Matlab 5.0
-			MATLABEXT2_LIB = $(MATLABEXTRAOPTS) -L$(MATLABEXTERN) -leng -lmat -lmx
+			MATLABEXT_LIB = $(MATLABEXTRAOPTS) -L$(MATLABEXTERN) -leng -lmat -lmx
 		endif
+		MATLABEXT2_LIB = $(MATLABEXT_LIB)
 		endif
 	endif
 	MATLAB_INCSPEC =	-I$(MATLABDIR)/extern/include
