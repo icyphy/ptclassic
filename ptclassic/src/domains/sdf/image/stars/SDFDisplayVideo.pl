@@ -11,17 +11,68 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image palette }
 	desc {
-Accept a stream of black-and-white images from input GrayImages
-and generate output in URT-RLE format. Send the output to the command
-"getx11 -m". Of course, this program must be in your PATH, as well
-as the commands "rawtorle" and "rleflip". These commands are all
-part of the "URT" video tool library.
+Accept a stream of black-and-white images from input GrayImages,
+save the images to files, and display the resulting files as a
+moving video sequence. This star requires that programs from the
+"Utah Raster Toolkit" be in your $path variable. Although this
+toolkit is not included with Ptolemy it is available for free.
+See this star's long description (with the "look-inside" or
+"manual" commands in the Ptolemy menu) for info on how to get
+the toolkit.
 
-The user can set the root filename of the displayed images (which will
-probably be printed in the display window titlebar) and
-can choose whether or not the image files are saved or deleted.
-The image frame number is appended to the root filename to form the
-complete filename of the displayed images.
+The user can set the root filename of the displayed images (which
+probably will be printed in the display window titlebar) with the
+'ImageName' state. If no filename is set, a default will be chosen.
+
+The 'Save' state can be set to "YES" or "NO" to choose whether
+the created image files should be saved or deleted.
+Each image's frame number is appended to the root filename
+to form the image's complete filename.
+	}
+	explanation {
+At the end of a simulation this star pops up an X window and
+loads in a sequence of video frames for display.
+Pressing the left or right mouse buttons inside the window plays
+the video sequence backwards or forwards.
+The middle mouse button allows single-stepping through frames.
+If you hold down the shift key while pressing the left mouse button,
+you loop through the sequence.
+The shift key and middle mouse button lets you alter the frame rate
+of the displayed video.
+The shift key and right mouse button loops through the video
+sequence alternately forwards and backwards.
+To end a loop playback, press any mouse button in the video window.
+To close the window type 'q' inside.
+.pp
+This star uses programs from the
+\fIUtah Raster Toolkit\fR
+to display moving video in an X window.
+The Utah Raster Toolkit is a collection of software tools from the
+University of Utah.
+These programs are available free via anonymous ftp.
+To get the software:
+.nf
+unix> ftp cs.utah.edu
+
+ftp name> anonymous
+ftp passwd> YOUR EMAIL ADDRESS
+ftp> binary
+ftp> cd pub
+ftp> get urt-3.0.tar.Z
+ftp> quit
+
+unix> uncompress urt-3.0.tar.Z
+unix> tar xvf urt-3.0.tar
+.fi
+.sp
+Then, change directories to the new urt_3.0 directory and build the
+software.
+To use the software, put the name of the directory with the URT
+executable files into the definition of the $path variable
+inside the .cshrc file in your home directory.
+.pp
+These instructions are appropriate as of December 1992 but may change
+in the future.
 	}
 
 	ccinclude { "GrayImage.h" , <std.h> , <stdio.h> }
