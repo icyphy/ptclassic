@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc { Hard shifter. }
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -31,50 +31,51 @@ Arithmetic shifts are used.
 		default { 1 }
 		desc { Number of left shifts. }
 	}
-	state {
-		name {absShifts}
-		type {INT}
-		desc { Absolute value of number of bit shifts. }
-		default { 0 }
-		attributes { A_NONSETTABLE }
-	}
 
-	setup {
-		int scnt = int(leftShifts);
-		absShifts = (scnt >= 0) ? scnt : - scnt;
-		absShifts = absShifts - 1;
+	codeblock(shift,""){
+	mar	*,ar1
+	lar	ar1,#$addr(input)
+	lar	ar2,#$addr(output)
+	lacc	*,@(int(shifts)),ar2
 	}
-
-	codeblock(cbLoad) {
-	mar 	*,AR6
-	lar	AR6,#$addr(input)		;Address input		=> AR6
-	lar	AR7,#$addr(output)		;Address output		=> AR7
-        lacc    *,15,AR7			;Accu = input
+	
+	codeblock(storeHigh){
+	sach	*,0
 	}
-
-	codeblock(cbShifts) {
-        rpt     #$val(absShifts)		;repeat number of shifts
-	.if	#$val(leftShifts)>0		;
-          sfl     				;left shifts
-	.else					;
-          sfr					;right shifts
-	.endif					;
-	}
-
-	codeblock(cbSave) {
-	sach	*,1				;output = Accu
-	}
+	
+	codeblock(storeLow){
+	sacl	*,0
+	}	
 
 	constructor {
 		noInternalState();
 	}
+	
+	protected{
+		int shifts;
+	}
+
+	setup {
+		if ((int(leftShifts) > 15) || (int(leftShifts) < -15)) {
+			shifts = 0;
+			return;
+		}
+		if (int(leftShifts) < 0 ) {
+			shifts = 16 + int(leftShifts);
+		} else {
+			shifts = int(leftShifts);
+		}
+	}
+
 	go {
-		addCode(cbLoad);
-		if ( int(absShifts) != 0 ) addCode(cbShifts);
-		addCode(cbSave);
+		addCode(shift());
+		if (int(leftShifts) >= 0) 
+			addCode(storeLow);
+		else
+			addCode(storeHigh);
 	}
 
 	exectime {
-		return int(absShifts) + 5;
+		return 5;
 	}
 }
