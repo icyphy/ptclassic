@@ -39,10 +39,10 @@ proc ::tycho::foo {} {
 
     # FIXME FIXME
     # Load stars and icons
-    # $nm loadStars [::tycho::expandPath {$TYCHO/editors/graphedit/stars.tim}]
-    # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
+    # $nm loadStars [::tycho::expandPath {$TYCHO/edit/graphedit/stars.tim}]
+    # $nm loadIcons [::tycho::expandPath {$TYCHO/edit/graphedit/icons.tim}]
 
-    $nm library load editors/graphedit/stars.tim
+    $nm library load edit/graphedit/stars.tim
     $nm library addtomenu stars stars -command "$nm newstar stars"
     return $nm
 }
