@@ -40,7 +40,7 @@ all install:	obj.$(ARCH) sources
 clean realclean:
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) $@
 
-sources depend: obj.$(ARCH)
+sources depend TAGS: obj.$(ARCH)
 	cd src; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
