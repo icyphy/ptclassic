@@ -212,6 +212,11 @@ if ($status != 0) then
 	set path = ( $path /usr/X11/bin /usr/bin/X11 )
 endif
 xrdb -query > $dbfile
+if ($status != 0) then 
+	echo "${progname}: 'xrdb -query' failed. Exiting"
+	exit 1
+endif
+
 xrdb -merge $PTOLEMY/lib/$resfile
 
 # Allow user-specified X resources
