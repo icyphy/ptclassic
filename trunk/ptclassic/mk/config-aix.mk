@@ -87,7 +87,7 @@ X11_LIBSPEC =  $(SMTLIB) -L/usr/lib -lIM -L/usr/lpp/X11/lib -lX11 # -lpthreads
 X11EXT_LIBSPEC=-lXext
 
 VEM_X11_LIBSPEC = \
-$(SMTLIB) -L/usr/lib -lXaw -lXmu $(X11EXT_LIBSPEC) -lIM -lXt -lX11
+$(SMTLIB) -L/usr/lib -lXaw -lXmu $(X11EXT_LIBSPEC) -lIM -lXt -lX11 #-lpthreads
 
 # system libraries (libraries from the environment)
 SYSLIBS= -lbsd -lm
