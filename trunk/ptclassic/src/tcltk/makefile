@@ -78,7 +78,7 @@ TCLX_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(TCLX_VERSION)/unix
 # BLT
 BLT_VERSION =		blt2.0
 BLT_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(BLT_VERSION)
-BLT_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(BLT_VERSION)/unix
+BLT_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(BLT_VERSION)
 
 # Location of the itcl source
 ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)
@@ -220,12 +220,12 @@ $(TCLX_OBJ):
 
 ######################################################
 # Blt rules
-# we use Blt for the profile command
 all_blt: all config_blt blt
 
-# FIXME: configure fails with GNU make!  try set path=(`pwd` $path)
 config_blt: $(BLT_OBJ)	
-	( cd $(BLT_OBJ); \
+	( cd $(BLT_OBJ); PWD=$(ITCL_OBJ); export PWD; \
+		TKLIBDIR=$(ITCL_DEST_LIB)/itcl; export TKLIBDIR; \
+		TCLLIBDIR=$(ITCL_DEST_LIB)/itcl; export TCLLIBDIR; \
 		$(BLT_SRC)/configure \
 		--srcdir=$(BLT_SRC) \
 		--prefix=$(ITCL_INDEPENDENT_DEST) \
@@ -236,6 +236,7 @@ blt:
 	@echo "Making all in blt"
 	(cd  $(BLT_OBJ); \
 		$(MAKE) \
+		CC="$(CC)" \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
