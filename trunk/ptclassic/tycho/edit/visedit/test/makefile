@@ -50,7 +50,7 @@ MISC_FILES =	sample.fst sample.gfk
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-test:: $(ITCL_SRCS) $(MISC_FILES)
+tests:: $(ITCL_SRCS) $(MISC_FILES)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
