@@ -1,0 +1,119 @@
+.\" $Id$
+.\" Be sure you have properly checked
+.\" out this file with SCCS (the version number should not be a number above):
+.H1 "References"
+.IE references
+.ip [Bha92]
+S. Bhattacharyya and E. A. Lee, "Scheduling Synchronous Dataflow
+Graphs for Efficient Looping," to appear in \fIJ. of VLSI Signal Processing\fR.
+.ip [Bie90]
+J. Bier, E. Goei, W. Ho, P. Lapsley, M. O'Reilly, G. Sih and E.A. Lee,
+"Gabriel: A Design Environment for DSP," \fIIEEE Micro Magazine\fR,
+October 1990, Vol. 10, No. 5, pp. 28-45.
+.ip [Buc91]
+J. Buck, S. Ha, E. A. Lee, and D. G. Messerschmitt, "Multirate Signal
+Processing in Ptolemy", \fIProc. of the Int. Conf. on Acoustics, Speech, and
+Signal Processing\fR, Toronto, Canada, April, 1991.
+.ip [Buc92a]
+J. Buck and E. A. Lee, "The Token Flow Model," presented at Data Flow
+Workshop, Hamilton Island, Australia, May, 1992.
+.ip [Buc92b]
+J. Buck, S. Ha, E. A. Lee, D. G. Messerschmitt, "Ptolemy: a Framework for
+Simulating and Prototyping Heterogeneous Systems", invited paper, to appear in
+\fIInternational Journal of Computer Simulation\fR, special issue on
+"Simulation Software Development," 1992.
+.ip [Ha91]
+Soonhoi Ha and E.A. Lee, "Compile-Time Scheduling and Assignment of
+Dataflow Program Graphs with Data-Dependent Iteration," \fIIEEE
+Transactions on Computers\fR, November, 1991.
+.ip [Ha92]
+S. Ha, "Compile-Time Scheduling of Dataflow Program Graphs with
+Dynamic Constructs," Ph.D. Dissertation, EECS Dept., University of
+California, Berkeley, CA 94720, April 1992.
+.ip [Har86]
+D. S. Harrison, P. Moore, R. Spickelmier, A. R. Newton, "Data
+Management and Graphics Editing in the Berkeley Design Environment,"
+\fIProc. of the IEEE Int. Conf. on Computer-Aided Design\fR, November 1986.
+.ip [Ho88]
+W.-H. Ho, E. A. Lee, and D. G. Messerschmitt, "High Level Data Flow
+Programming for Digital Signal Processing", in \fIVLSI Signal Processing
+III\fR, Ed. R. W. Brodersen and H. S. Moscovitz, IEEE Press, New York,
+1988.
+.ip [Kal91]
+A. Kalavade, "Hardware/Software Codesign Using Ptolemy", MS Report,
+Electronics Research Laboratory, University of California, Berkeley, CA
+94720, December, 1991.
+.ip [Kal92]
+A. Kalavade, E.A. Lee, "Hardware/Software Co-Design Using Ptolemy - A
+Case Study ", to appear in \fIProceedings of the IFIP International Workshop
+on Hardware/Software Co-Design\fR, Grassau, Germany, May 19-21, 1992.
+.ip [Lap91]
+P. D. Lapsley, "Host Interface and Debugging of Dataflow DSP Systems",
+MS Thesis, Electronics Research Laboratory, University of California,
+Berkeley, CA 94720, December, 1991.
+.ip [Lee87a]
+E. A. Lee and D. G. Messerschmitt, "Static Scheduling of Synchronous
+Data Flow Programs for Digital Signal Processing," \fIIEEE Transactions on
+Computers\fR, January, 1987.
+.ip [Lee87b]
+E. A. Lee and D. G. Messerschmitt, "Synchronous Data Flow" \fIIEEE
+Proceedings\fR, September, 1987.
+.ip [Lee88a]
+E. A. Lee, "Recurrences, Iteration, and Conditionals in Statically
+Scheduled Block Diagram Languages", in \fIVLSI Signal Processing III\fR, Ed.
+R. W. Brodersen and H. S. Moscovitz, IEEE Press, New York, 1988.
+.ip [Lee89b]
+E. A. Lee, W.-H. Ho, E. Goei, J. Bier, and S. Bhattacharyya, "Gabriel: A
+Design Environment for DSP", \fIIEEE Trans. on ASSP\fR, November, 1989.
+.ip [Lee91a]
+E. A. Lee, "Consistency in Dataflow Graphs", \fIIEEE Transactions on
+Parallel and Distributed Systems\fR, Vol. 2, No. 2, April 1991.
+.ip [Lee91b]
+E. A. Lee, "Static Scheduling of Data-Flow Programs for DSP," in
+\fIAdvanced Topics in Data-Flow Computing\fR, ed. J.-L. Gaudiot and L. Bic,
+Prentice-Hall, 1991.
+.ip [Lee91c]
+E. A. Lee and J. C. Bier, "Architectures for Statically Scheduled Dataflow",
+reprinted in \fIParallel Algorithms and Architectures for DSP Applications\fR,
+ed. M. A. Bayoumi, Kluwer Academic Pub., 1991.
+.ip [Lee92a]
+E. A. Lee, "Data Parallelism in Graphical Signal Flow Representations of
+Algorithms", Technical Report, EECS Dept., UC Berkeley, August 13,
+1992.
+.ip [Lee92b]
+E. A. Lee, "A Design Lab for Statistical Signal Processing," \fIProceedings
+of ICASSP\fR, San Francisco, March, 1992.
+.ip [Lee93]
+E. A. Lee, "Multidimensional Streams Rooted in Dataflow", EECS Dept.,
+UC Berkeley, August 1, 1992. to appear in \fIProc. IFIP Working Conference
+on Architectures and Compilation Techniques for Fine and Medium-Grain
+Parallelism\fR, Orlando, FL, January, 1993.
+.ip [Mes84a]
+D. G. Messerschmitt, "A Tool for Structured Functional Simulation", \fIIEEE
+Journal on Selected Areas in Communications\fR, SAC-2(1), January, 1984.
+.ip [Mes84b]
+D. G. Messerschmitt, "Structured Interconnection of Signal Processing
+Programs," \fIProc. of Globecom\fR, Atlanta, Georgia, 1984.
+.ip [Ous90]
+J. Ousterhout, "Tcl: An Embeddable Command Language," USENIX
+Conference Proceedings, Winter, 1990.
+.ip [Ous91]
+J. Ousterhout, "An X11 Toolkit Bassed on the Tcl Language," USENIX
+Conference Proceedings, Winter, 1991.
+.ip [Pin92]
+J. Pino, S. Ha, E. Lee, J. Buck, "Software Synthesis for DSP Using
+Ptolemy", invited paper in the \fIJournal on VLSI Signal Processing\fR, special
+issue on "Synthesis for DSP", to appear.
+.ip [Sih92a]
+G. C. Sih and E.A. Lee, "A Compile-Time Scheduling Heuristic for
+Interconnection-Constrained Heterogeneous Processor Architectures", to
+appear, \fIIEEE Trans. on Parallel and Distributed Systems\fR.
+.ip [Sih92b]
+G. C. Sih and E. A. Lee, "Declustering: A New Multiprocessor Scheduling
+Technique," to appear in \fIIEEE Trans. on Parallel and Distributed Systems\fR.
+.ip [Tho86]
+\fIThor Tutorial\fR, VLSI CAD Group, Stanford University, 1986.
+.ip [Won92]
+Anthony Wong, "A Library of DSP Blocks and Applications for the
+Motorola DSP96000 Family", Master's Report, Plan II, EECS Dept., UC
+Berkeley, CA 94720, May, 1992.
