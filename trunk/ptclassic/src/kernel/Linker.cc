@@ -165,6 +165,9 @@ int Linker::doingDynLink() { return dynLinkFlag;}
 // to a page boundary.
 
 void Linker::adjustMemory() {
+#ifdef LINKING_NOT_SUPPORTED
+  Error::abortRun("Linker::adjustMemory() not supported on this platform");
+#else
 #if defined(USE_DLOPEN) || defined(USE_SHLLOAD)
   Error::abortRun(
     "Linker: adjustMemory() not used on architectures that support dlopen()");
@@ -181,6 +184,7 @@ void Linker::adjustMemory() {
 	size_t t2 = (t / ps) * ps;
 	if (t2 < t) availMem = (char *) (t2 + ps);
 #endif // USE_DLOPEN || USE_SHLLOAD
+#endif // LINKING_NOT_SUPPORTE
 }
 
 
@@ -680,7 +684,7 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 
 int
 Linker::invokeConstructors (const char* objName, void * dlhandle) {
-#ifdef NO_INVOKECONSTRUCTORS
+#if defined(NO_INVOKECONSTRUCTORS) || defined(LINKING_NOT_SUPPORTED)
         return 1;
 #else //NO_INVOKECONSTRUCTORS  
 	int nCalls = 0;
@@ -826,7 +830,7 @@ Linker::invokeConstructors (const char* objName, void * dlhandle) {
 }
 
 size_t Linker::readInObj(const char* objName) {
-#if defined (USE_DLOPEN) || defined (USE_SHLLOAD)
+#if defined (USE_DLOPEN) || defined (USE_SHLLOAD) || defined(LINKING_NOT_SUPPORTED)
   Error::abortRun("Linker: readInObj(",
  		   objName,
   		  ") not used on architectures that support dlopen()");
