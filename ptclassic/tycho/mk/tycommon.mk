@@ -385,7 +385,7 @@ HTMLS=$(filter %.html,  $(EXTRA_SRCS))
 weblint:
 	@if [ "$(HTMLS)" != "" ]; then \
 		echo "Running weblint on $(HTMLS)"; \
-		weblint -x netscape -d heading-order $(HTMLS); \
+		weblint -x Netscape,Java -d heading-order $(HTMLS); \
 	fi
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
