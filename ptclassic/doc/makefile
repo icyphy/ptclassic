@@ -33,7 +33,7 @@ almagest print:
 
 
 prtitle:
-	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
+	lpr -P$(PRINTER) title.ps; \
 
 prindex:
 	cd $$HOME; $(PTOLEMY)/doc/bin/prindex Almagest.index
