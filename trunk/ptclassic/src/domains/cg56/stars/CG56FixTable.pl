@@ -54,7 +54,7 @@ one more memory location if \fIinterpolation\fR is "linear".
 	}                  
        	input {
 		name { input }
-		type { int }
+		type { fix }
 	}
 	output {
 		name { output }
