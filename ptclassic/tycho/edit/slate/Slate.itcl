@@ -161,6 +161,9 @@ class ::tycho::Slate {
     # Manipulate the selection -- low level
     method _selection {option {id {}} {index {}}}
 
+    # Animate movement of an item
+    method animate {tagOrID x y args}
+
     # Align and distribute items
     method align {where args}
 
@@ -257,6 +260,9 @@ class ::tycho::Slate {
     ###################################################################
     ####                    private variables                      ####
 
+    # The slate's animator
+    private variable animator
+
     # The slate's selector
     private variable selector
 }
@@ -273,6 +279,14 @@ body ::tycho::Slate::constructor {args} {
 
     # Create the selection handler
     ::selection handle [::info namespace tail $this] "$this select describe"
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::Slate::destructor {} {
+	catch {delete object $animator}
+	catch {delete object $selector}
 }
 
 #######################################################################
@@ -303,15 +317,43 @@ body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
 }
 
 #######################################################################
-#### align
+#### animate
 #
-# Align items in the vertical or horizontal axis. The first argument
-# specifies the alignment, and can be one of "left," "center," "right," 
-# "top," "middle," or "bottom." Following arguments are items IDs or tags
-# specifying the items to align. <b>Not implemented</b>.
+# Animate movement of an item. This is a simple animation
+# mechanism that creates an instance of the Animator class
+# to perform animation. The animator object is set up to
+# move or reshape the item by the given coordinates
+# _x_ and _y_ coordinates.  Additional arguments
+# are either passed to the Animator object's constructor
+# or are used to activate the interactor. To move an object,
+# just execute:
+# <pre>
+#   $slate animate $id 50 50
+# </pre>
+# To reshape an object, execute something like:
+# <pre>
+#   $slate animate $id 50 50 -prefix reshape vertex-1
+# </pre>
 #
-body ::tycho::Slate::align {where args} {
-    ;# FIXME
+body ::tycho::Slate::animate {tagOrID x y args} {
+    # Mess around with arguments
+    set cargs {}
+    array set opts $args
+    foreach o {prefix clickprefix dragprefix releaseprefix
+    activatecommand deactivatecommand dragcommand
+    distance duration interval} {
+	if [::info exists opts(-$o)] {
+	    lappend cargs -$o $opts(-$o)
+	}
+    }
+    set args [array get opts]
+    
+    # Create the Animator
+    set animator [eval [list interactor Animator \
+	    -distance [list $x $y]] $cargs]
+    
+    # Activate it
+    eval $animator activate $tagOrID 0 0 $args
 }
 
 #######################################################################
@@ -440,14 +482,18 @@ body ::tycho::Slate::ghost {tag args} {
     set tags [concat "ghost" "ghost.$tag" $args]
     switch -exact $shape {
 	"rectangle" -
-	"oval" -
-	"polygon" {
+	"oval" {
 	    return [eval $canvas create $shape \
 		    [$canvas coords $primary] -outline grey \
                     -tags [list $tags]]
 	}
+	"polygon" {
+	    return [eval $canvas create polygon \
+		    [$canvas coords $primary] -outline grey {-fill ""} \
+                    -tags [list $tags]]
+	}
 	"line" {
-	    return [eval $canvas create $shape \
+	    return [eval $canvas create line \
 		    [$canvas coords $primary] -fill grey \
 		    -arrow [$canvas itemcget $primary -arrow] \
                     -tags [list $tags]]
@@ -830,11 +876,15 @@ body ::tycho::Slate::reshape {id x y args} {
 #### reshapeclick
 #
 # Start a reshape interaction sequence at coordinates
-# (_x_, _y_). Additional arguments include various flags that may
-# be supplied by the interactors that the slate uses to affect
-# the behavior of items, such as *-ghost*, which says that an
-# item is to be moved or reshaped using a "ghost" outline, and
-# the aspects to be reshaped.
+# (_x_, _y_). Additional arguments include various
+# flags that control the reshaping process:
+# <ul>
+# <li><b>-ghost</b>: If supplied and true, use a "ghost" outline
+# during the reshaping.
+# <li><b>-aspects</b>: The aspects to be reshaped. If not supplied,
+# then either a sensible default will be used or an error
+# will be raised (the usual case).
+# </ul>
 #
 body ::tycho::Slate::reshapeclick {id x y args} {
     eval [shape $id reshapeclick] $id $canvas $this $x $y $args
