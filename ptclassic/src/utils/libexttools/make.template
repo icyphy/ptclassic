@@ -45,10 +45,9 @@ include $(CONFIG)
 LIB=libexttools.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
-LIBPTMATLABDIR=$(ROOT)/src/utils/libptmatlab
 INCL = -I$(KERNDIR) $(PTCOMPAT_INCSPEC) \
-	$(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC) \
-	$(MATHEMATICA_INCSPEC) $(MATHEMATICAIFC_INCSPEC)
+	$(MATLAB_INCSPEC) -I$(PTMATLABLIB) \
+	$(MATHEMATICA_INCSPEC) -I$(PTMATHEMATICALIB)
 
 # Library sources.  CCS_WITH_H_FILES includes all .cc files with a
 # corresponding .h file with the same root.
