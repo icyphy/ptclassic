@@ -222,7 +222,7 @@ class ::tycho::Displayer {
     method hideView {view}
 
     # Move the focus to the next View
-    method nextView {}
+    method nextPane {}
 
     # Resize the window to the original requested size.
     method originalSize {}
@@ -308,7 +308,7 @@ body ::tycho::Displayer::constructor {args} {
 
     # cycle the focus through the attached views and the minibuffer 
     # (if there is one).
-    bind $prefix <<NextPane>> "$this nextView; break"
+    bind $prefix <<NextPane>> "$this nextPane; break"
 
     # Setup a frame for the menu bar
     itk_component add menuFrame {
@@ -484,7 +484,7 @@ body ::tycho::Displayer::attachView {view args} {
                     -closecommand [list "$this prevWindow; delete object $this"]
         } {
             keep -background -font -activebackground -cursor \
-                    -highlightthickness -activeforeground \
+                    -ness -activeforeground \
                     -foreground -highlightcolor -highlightbackground \
                     -messagefont
             rename -padx -buttonpadx buttonPadX ButtonPadX
@@ -506,7 +506,8 @@ body ::tycho::Displayer::attachView {view args} {
         itk_component add toolbar$tag {
             uplevel #0 ::tycho::ToolBar \
                     $itk_component(toolFrame).toolbar$tag \
-                    -statusbar $statuswidget
+                    -statusbar $statuswidget \
+                    -highlightthickness 2
         } {
             keep -background -cursor -font
             rename -padx -buttonpadx buttonPadX ButtonPadX
@@ -679,27 +680,39 @@ body ::tycho::Displayer::hideView {view} {
 }
 
 #######################################################################
-#### nextView
-# Move the focus to the next view, or to the status bar. If the
-# focus is on the status bar, move it to the current view.
-# Otherwise, move the focus to the next view in the list of
-# views, or, if at the end of the list of views, to the
-# status bar if it has an entry widget.
+#### nextPane
+# Circulate the focus between the current view, the status bar, and the
+# toolbar, in that order. If it has no entry widget, it is skipped. If
+# there is no toolbar, it is skipped.
 #
-# <b>Note</b>: This method currently only toggles between the current
-# view and its statusbar. It needs to be fixed...
-#
-body ::tycho::Displayer::nextView {} {
+body ::tycho::Displayer::nextPane {} {
     set f [focus -lastfor $itk_component(hull)]
     set sb [$currentView statusbar]
+    set tb [$currentView toolbar]
 
+    # If the focus is currently in the status bar entry box,
+    # then the status bar name will be a prefix of the focus window name.
+    # Construct a list of windows to attempt to give the focus to.
+    set tryfocus {}
     if { [string first $sb $f] == 0 } {
-        $currentView focusin
+        # Status bar has the focus.
+        set tryfocus [list $tb $currentView]
+    } elseif { [string first $tb $f] == 0} {
+        # Toolbar has the focus.
+        set tryfocus [list $currentView]
     } else {
+        # Current view has the focus
         if { [$sb mode] == "entry" } {
-            $sb focusin
+            # Status bar has an entry widget.
+            set tryfocus [list $sb $tb $currentView]
         } else {
-            $currentView focusin
+            set tryfocus [list $tb $currentView]
+        }
+    }
+    foreach win $tryfocus {
+        if {$win != {}} {
+            $win focusin
+            return
         }
     }
 }
