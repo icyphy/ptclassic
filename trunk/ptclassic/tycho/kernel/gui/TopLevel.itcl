@@ -105,9 +105,6 @@ class ::tycho::TopLevel {
 
     inherit ::itk::Toplevel
 
-    # Specify the logical "next window" (C-x o shifts the focus there).
-    itk_option define -before before Before {}
-
     # Specify the size and/or placement of the window.
     itk_option define -geometry geometry Geometry "" {
  	wm geometry $itk_component(hull) $itk_option(-geometry)
@@ -207,30 +204,6 @@ class ::tycho::TopLevel {
 }
 
 #####################################################################
-#### -before option
-# By default, a top-level window is inserted in the beginning of the
-# list of top-level windows.  Thus, scrolling through windows
-# using the "C-x o" binding will visit the windows in the reverse order
-# in which they are created.  However, sometimes, we wish to
-# place a window in a particular place in this order.  If the
-# value of the -before option is non-null, it is taken to be
-# the window name of a top-level window that currently exists,
-# and the new window is placed in the window order before that one.
-#
-configbody ::tycho::TopLevel::before {
-    # Check to see that $itk_option(-before) is not null before calling winfo
-    if {$itk_option(-before) != {} } {
-	set tl [winfo toplevel $itk_option(-before)]
-	if {$tl != {} &&  \
-		[uplevel #0 info objects $tl] != {} && \
-		[$tl isa ::tycho::TopLevel]} {
-	    $topLevelWindows remove $prefix
-	    $topLevelWindows insert $prefix $tl
-	}
-    }
-}
-
-#####################################################################
 #### -geometry option
 # By default, the geometry option is set to the
 # null string, deferring to the window manager the control over
@@ -272,9 +245,25 @@ body ::tycho::TopLevel::constructor {args} {
     }
     
     # Support for switching the focus from one window to the next.
-    # We put the new window at the beginning of the list.  It may be
-    # later moved using the -before option.
-    $topLevelWindows insert $prefix
+    # A top-level window is inserted in the list of windows before the
+    # window that currently has the focus, if there is one.
+    # Thus, scrolling through windows using the "C-x o" binding
+    # will go from this window to the window that had the focus when
+    # it was created.
+    set before [focus]
+    if {$before != {}} {
+        set tl [winfo toplevel $before]
+        if {$tl != {} &&  \
+                [uplevel #0 info which $tl] != {} && \
+                [$tl isa ::tycho::TopLevel] && \
+                $tl != $prefix} {
+            $topLevelWindows insert $prefix $tl
+        } {
+            $topLevelWindows insert $prefix
+        }
+    } {
+        $topLevelWindows insert $prefix
+    }
 
     bind $prefix <Control-x><o> "$this nextWindow 1; break"
     
@@ -475,6 +464,9 @@ body ::tycho::TopLevel::nextWindow {{raise 0}} {
 		[winfo ismapped $win] && \
 		[uplevel #0 info which -command $win] != {} && \
 		[$win isa ::tycho::TopLevel]} {
+            # Deferred version overrides wm focus change due to window
+            # exposure.  FIXME: There must be a better way...
+            after 200 "$win focusin"
 	    $win focusin
 	    if {$raise != 0} {$win raiseWindow}
 	    break
