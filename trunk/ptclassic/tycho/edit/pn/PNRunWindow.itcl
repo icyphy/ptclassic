@@ -64,14 +64,16 @@ class ::tycho::PNRunWindow {
 #
 body ::tycho::PNRunWindow::constructor {args} {
     # Create the widgets shared by all simulations
-    itk_component add time {
-	::tycho::PNTimePanel $itk_interior.time
-    } {
-	keep -background -cursor -font
+    set junk {
+	itk_component add time {
+	    ::tycho::PNTimePanel $itk_interior.time
+	} {
+	    keep -background -cursor -font
+	}
+	pack $itk_component(time) -side left -expand no \
+		-padx 2 -pady 4 \
+		-anchor n
     }
-    pack $itk_component(time) -side left -expand no \
-	    -padx 2 -pady 4 \
-	    -anchor n
 
     # Initialize options
     eval itk_initialize $args
