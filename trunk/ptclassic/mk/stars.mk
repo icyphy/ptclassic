@@ -1,77 +1,66 @@
 #
 # stars.mk :: Common definitions of star and target subsets.
+# Version: $Id$
 #
 # Eventually this file will be automatically generated.
 # But for now, we do it by hand.
-# Also, for now we ignore the libraries that must be linked against.
-# That should also be a function of the domains.
 #
-# Extracted from Joe's pigiRpc makefile by Kennard.
-# Version: $Id$
-
 # The following makefile symbols should be defined:
 # ROOT		the root of the ptolemy tree (e.g., $PTOLEMY).  Typically
 #		a relative path.
 # OBJDIR	the root of the object file tree for this arch.
 #		it can be either relative to current directory or absolute.
 #
+# Problem with this file: it does not make clear which domains need
+# which libraries, so there may be a bit too much searching and remaking
+# when subset Ptolemies are built.  The symbols STAR_LIBFILES and
+# STAR_LIBS include ALL libraries.  It is OK to make subset Ptolemy builds
+# depend on these symbols and search all libraries, but it slows things
+# down a bit.
 
-# The following symbols point to the directories containing the object
-# files for the stars.  Defined in terms of OBJDIR, which is typically
-# a relative (../..) path.  If you copy this makefile to make an
-# alternate pigiRpc, replace the definitions by absolute paths.
+# Stub files that pull in the stars.
+SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfimagestars.o \
+ 	   $(LIBDIR)/sdfdspstars.o 
+CGCSTARS = $(LIBDIR)/cgcstars.o
+CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
+CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
+CGSTARS = $(LIBDIR)/cgstars.o
+DDFSTARS = $(LIBDIR)/ddfstars.o
+THORSTARS = $(LIBDIR)/thorstars.o
+DESTARS = $(LIBDIR)/destars.o
+CGDDFSTARS = $(LIBDIR)/cgddfstars.o 
 
-SDF=$(OBJDIR)/domains/sdf/stars
-SDF_DSP=$(OBJDIR)/domains/sdf/dsp/stars
-SDF_IMAGE=$(OBJDIR)/domains/sdf/image/stars
-DDF=$(OBJDIR)/domains/ddf/stars
-DE =$(OBJDIR)/domains/de/stars
-Thor=$(OBJDIR)/domains/thor/stars
-CG=$(OBJDIR)/domains/cg/stars
-CGDDF=$(OBJDIR)/domains/cg-ddf/stars
-CGC=$(OBJDIR)/domains/cgc/stars
-CG56=$(OBJDIR)/domains/cg56/stars
-CG56DSP=$(OBJDIR)/domains/cg56/dsp/stars
-CG96=$(OBJDIR)/domains/cg96/stars
-CG96DSP=$(OBJDIR)/domains/cg96/dsp/stars
+# parallel scheduler libraries.
+PARLIBFILES = $(LIBDIR)/libDC.a $(LIBDIR)/libHu.a  $(LIBDIR)/libDL.a \
+	$(LIBDIR)/libPar.a $(LIBDIR)/libcgstars.a $(LIBDIR)/libcg.a
 
-# The following symbols point to the directories containing the source
-# code for the stars of each domain.
+# Library files reqd by stars.  Note that libptolemy.a is not included.
+STAR_LIBFILES=\
+$(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgc.a \
+$(LIBDIR)/libcg96dspstars.a \
+$(LIBDIR)/libcg96stars.a $(LIBDIR)/libcg96.a \
+$(LIBDIR)/libcg56dspstars.a \
+$(LIBDIR)/libcg56stars.a $(LIBDIR)/libcg56.a \
+$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
+$(LIBDIR)/libcgstars.a $(PARLIBFILES) $(LIBDIR)/libcg.a \
+$(LIBDIR)/libddfstars.a $(LIBDIR)/libddf.a $(LIBDIR)/libdycon.a \
+$(LIBDIR)/libthorstars.a $(LIBDIR)/libthor.a \
+$(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
+$(LIBDIR)/libsdfimagestars.a $(LIBDIR)/libImage.a \
+$(LIBDIR)/libsdfdspstars.a \
+$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libEG.a $(LIBDIR)/libsdf.a
 
-SDF_SRC=$(ROOT)/src/domains/sdf/stars
-SDF_DSP_SRC=$(ROOT)/src/domains/sdf/dsp/stars
-SDF_IMAGE_SRC=$(ROOT)/src/domains/sdf/image/stars
-DDF_SRC=$(ROOT)/src/domains/ddf/stars
-DE_SRC =$(ROOT)/src/domains/de/stars
-Thor_SRC=$(ROOT)/src/domains/thor/stars
-CG_SRC=$(ROOT)/src/domains/cg/stars
-CGDDF_SRC=$(ROOT)/src/domains/cg-ddf/stars
-CGC_SRC=$(ROOT)/src/domains/cgc/stars
-CG56_SRC=$(ROOT)/src/domains/cg56/stars
-CG56DSP_SRC=$(ROOT)/src/domains/cg56/dsp/stars
-CG96_SRC=$(ROOT)/src/domains/cg96/stars
-CG96DSP_SRC=$(ROOT)/src/domains/cg96/dsp/stars
-
-
-# These include files define makefile symbols which list the
-# the paths of all the stars in a particular star subset.
-# Text in these included makefiles requires that certain symbols
-# be defined already.  The comments on the right indicate the
-# required symbol and the resulting star list symbol.
-
-include $(SDF_SRC)/sdfstars.mk			# SDF -> SDFSTARS
-include $(SDF_DSP_SRC)/sdfdspstars.mk		# SDF_DSP -> SDF_DSPSTARS
-include $(SDF_IMAGE_SRC)/sdfimagestars.mk	# SDF_IMAGE -> SDF_IMAGESTARS
-include $(DE_SRC)/destars.mk			# DE -> DESTARS
-include $(DDF_SRC)/ddfstars.mk			# DDF -> DDFSTARS
-include $(Thor_SRC)/thorstars.mk		# Thor -> ThorSTARS
-include $(CG_SRC)/cgstars.mk			# CG -> CGSTARS
-include $(CGDDF_SRC)/cgddfstars.mk		# CGDDF -> CGDDFSTARS
-include $(CGC_SRC)/cgcstars.mk			# CGC -> CGCSTARS
-include $(CG56_SRC)/cg56stars.mk		# CG56 -> CG56STARS
-include $(CG56DSP_SRC)/cg56dspstars.mk		# CG56DSP -> CG56DSP_STARS
-include $(CG96_SRC)/cg96stars.mk		# CG96 -> CG96STARS
-include $(CG96DSP_SRC)/cg96dspstars.mk		# CG96DSP -> CG96DSP_STARS
+# Library switches reqd by stars.  Note that -lptolemy is not included.
+STAR_LIBS=\
+-lcgcstars -lcgc \
+-lcg96dspstars -lcg96stars -lcg96 \
+-lcg56dspstars -lcg56stars -lcg56 \
+-lcgddfstars -lcgddf \
+-lcgstars -lDC -lHu -lDL -lPar -lcg \
+-lddfstars -lddf -ldycon \
+-lthorstars -lthor \
+-ldestars -lde \
+-lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lEG -lsdf
 
 # Extra targets
 SDFT = $(OBJDIR)/domains/sdf/targets
