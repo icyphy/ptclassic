@@ -1062,7 +1062,7 @@ tstReadWriteObjects()
 	if (obj.type == OCT_INSTANCE) {
 #if !defined(MCC_DMS)
 	/*    (void) sprintf(buffer, "%s/src/oct/tst/sample", CADROOT);*/
-	    (void) sprintf(buffer, "%s/oct/tstdir/sample", CADROOT);
+	    (void) sprintf(buffer, "%s/oct/tst/sample", CADROOT);
 #else
 	    (void) sprintf(buffer, "%s/sample", ptcGetWorkingWorkspace());
 #endif
