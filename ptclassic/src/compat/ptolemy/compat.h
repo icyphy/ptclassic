@@ -123,6 +123,14 @@ extern char *sprintf();
 #include <stdio.h>			/* Get the decl for FILE.  sigh.
 					 * Also get sprintf() for linux. */
 #include <sys/types.h>			/* Need for bind(). */
+
+#ifndef SYS_SOCKET_H
+#define SYS_SOCKET_H		/* mips Ultrix4.3A requires this
+				   otherwise we get conflicts with
+				   thor/kernel/rpc.c and ptkNet.c */
+#include <sys/socket.h>
+#endif
+
 #include <sys/socket.h>			/* Need for bind(). */
 
 #ifdef PTSUN4
