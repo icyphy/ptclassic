@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -40,11 +40,10 @@ namespace ::tycho {
 ##########################################################################
 ## SmartLine
 #
-# A line item that understands how to place itself given its start and end
+# A line item that understands how to place itself given start and end
 # points and their directions. The directions are specified as compass
-# directions: "n", "s", "e", or "w". Although there are presently
-# no facilities for user adjustment of line placement, this class
-# has been designed to support this extension.
+# directions: "n", "s", "e", or "w". The line can also be placed
+# manually, and in the future, will support user-driven reshaping.
 #
 # When a line is drawn, it is first rotated so that its start is in
 # the "east" direction. Lines with the end pointing "north" are
@@ -70,6 +69,16 @@ namespace ::tycho {
 # The minimum distance from an end-point of a line
 # to the first vertex.
 #
+# <li><b>-autoshape</b>:
+# A flag that says whether the line is to automatically reshape
+# itself when either of the aspects "start" or "end" are reshaped,
+# or when either of the options <b>-start</b> or <b>-end</b> are
+# set. Even if it is on, explicitly setting the coordinates will
+# change the line to the given coordinates, until the next time
+# <b>start</b> or <b>end</b> is reshaped or <b>-start</b> or
+# <b>-end</b> is set. When this happens, all coordinates except the
+# start and end will be ignored.
+#
 # <li><b>-arrow</b>:
 # The location of the arrow-head on the line: can be
 # one of <i>none</i>, <i>first</i>, <i>last</i>, or <i>both</i>. 
@@ -88,7 +97,7 @@ namespace ::tycho {
 # The color of the line. Black by default.
 #
 # <li><b>-smooth</b>:
-# The flag controlling whether the line is
+# A flag controlling whether the line is
 # drawn with curves instead of straight segments. Off by default.
 #
 # <li><b>-start</b>:
@@ -106,12 +115,7 @@ namespace ::tycho {
 #
 # </ul>
 #
-# <p><b>Components</b>
-#
-# <ul>
-# <li><b>segments</b>:
-# The visible line.
-# </ul>
+# <p><b>Components</b>: (none)
 #
 # <b>Bugs</b>: (none)
 # 
@@ -123,9 +127,8 @@ namespace ::tycho {
 #  <P><b>Example</b>
 #
 #  <P>Create a smart line and an object for moving it around
-# (this is an example of how to implement a simple kind of
-# constraint using interactors and the slate -- some support
-# for this will be built into the interactors in the near future):
+# (this is an example of how to implement "constraints" using
+# interactors.):
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
 #   proc mv {mode id x y args} {
@@ -179,6 +182,9 @@ class ::tycho::SmartLine {
     # Update the *-arrow* option
     proc _arrow {id canvas slate arrow}
 
+    # Update the *-autoshape* option
+    proc _autoshape {id canvas slate auto}
+
     # Update the *-beta* option
     proc _beta {id canvas slate beta}
 
@@ -200,14 +206,26 @@ class ::tycho::SmartLine {
     # Update the *-width* option
     proc _width {id canvas slate width}
 
+    # Constructor for subclasses
+    proc _construct {id canvas slate tags args}
+
     # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
+    proc construct {id canvas slate tags args}
 
     # Set or get the lines's coordinates
     proc coords {id canvas slate args}
 
-    # Highlight the line
-    proc highlight {id canvas slate args}
+    # Reshape one or more aspects of an item
+    proc reshape {id canvas slate x y args}
+
+    # Start a reshape interaction sequence
+    proc reshapeclick {id canvas slate x y args}
+
+    # Continue a reshape interaction sequence
+    proc reshapedrag {id canvas slate x y}
+
+    # Terminate a reshape interaction sequence
+    proc reshaperelease {id canvas slate}
 
     ###################################################################
     ####                         private variables                 ####
@@ -435,19 +453,25 @@ class ::tycho::SmartLine {
 
     set methodtable(_alpha)	::tycho::SmartLine::_alpha
     set methodtable(_arrow)	::tycho::SmartLine::_arrow
+    set methodtable(_autoshape)	::tycho::SmartLine::_autoshape
     set methodtable(_beta)	::tycho::SmartLine::_beta
     set methodtable(_end)	::tycho::SmartLine::_end
     set methodtable(_fill)      ::tycho::SmartLine::_fill
     set methodtable(_smooth)	::tycho::SmartLine::_smooth
+    set methodtable(_state)	::tycho::SmartLine::_state
     set methodtable(_start)	::tycho::SmartLine::_start
 
     set methodtable(construct)  ::tycho::SmartLine::construct
     set methodtable(coords)     ::tycho::SmartLine::coords
-    set methodtable(highlight)  ::tycho::SmartLine::highlight
+    set methodtable(reshape)    ::tycho::SmartLine::reshape
+    set methodtable(reshapeclick)   ::tycho::SmartLine::reshapeclick
+    set methodtable(reshapedrag)    ::tycho::SmartLine::reshapedrag
+    set methodtable(reshaperelease) ::tycho::SmartLine::reshaperelease
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
+    set optiondefault(-autoshape) 1
     set optiondefault(-alpha)	  12
     set optiondefault(-arrow)     last
     set optiondefault(-beta)	  30
@@ -474,7 +498,31 @@ body ::tycho::SmartLine::_alpha {id canvas slate alpha} {
 #
 body ::tycho::SmartLine::_arrow {id canvas slate arrow} {
     set option(arrow$id) $arrow
-    $canvas itemconfigure $component(segments$id) -arrow $arrow
+    $canvas itemconfigure $primary($id) -arrow $arrow
+}
+
+##########################################################################
+## -autoshape option configuration
+#
+# If autoshaping is turned off, the reshaping procedures are
+# removed from the method table.
+#
+body ::tycho::SmartLine::_autoshape {id canvas slate auto} {
+    if { $option(auto$id) && ! $auto } {
+        unset methodtable(reshape)
+        unset methodtable(reshapeclick)
+        unset methodtable(reshapedrag)
+        unset methodtable(reshaperelease)
+    } elseif { !$option(auto$id) && $auto } {
+        set methodtable(reshape)    ::tycho::SmartLine::reshape
+        set methodtable(reshapeclick)   ::tycho::SmartLine::reshapeclick
+        set methodtable(reshapedrag)    ::tycho::SmartLine::reshapedrag
+        set methodtable(reshaperelease) ::tycho::SmartLine::reshaperelease
+    }
+    set option(autoshape$id) $autoshape
+    if $auto {
+        redraw $id $canvas $slate
+    }
 }
 
 ##########################################################################
@@ -489,8 +537,10 @@ body ::tycho::SmartLine::_beta {id canvas slate beta} {
 ## -end option configuration
 #
 body ::tycho::SmartLine::_end {id canvas slate end} {
-    set option(end$id) $end
-    redraw $id $canvas $slate
+    if { $option(end$id) != $end } {
+        set option(end$id) $end
+        redraw $id $canvas $slate
+    }
 }
 
 ##########################################################################
@@ -498,7 +548,7 @@ body ::tycho::SmartLine::_end {id canvas slate end} {
 #
 body ::tycho::SmartLine::_fill {id canvas slate fill} {
     set option(fill$id) $fill
-    $canvas itemconfigure $component(segments$id) -fill $fill
+    $canvas itemconfigure $primary($id) -fill $fill
 }
 
 ##########################################################################
@@ -506,15 +556,17 @@ body ::tycho::SmartLine::_fill {id canvas slate fill} {
 #
 body ::tycho::SmartLine::_smooth {id canvas slate smooth} {
     set option(smooth$id) $smooth
-    $canvas itemconfigure $component(segments$id) -smooth $smooth
+    $canvas itemconfigure $primary($id) -smooth $smooth
 }
 
 ##########################################################################
 ## -start option configuration
 #
 body ::tycho::SmartLine::_start {id canvas slate start} {
-    set option(start$id) $start
-    redraw $id $canvas $slate
+    if { $option(start$id) != $start } {
+        set option(start$id) $start
+        redraw $id $canvas $slate
+    }
 }
 
 ##########################################################################
@@ -534,25 +586,41 @@ body ::tycho::SmartLine::_width {id canvas slate width} {
 }
 
 ##########################################################################
+#### _construct
+#
+# Low-level constructor for subclasses to call.
+#
+body ::tycho::SmartLine::_construct {id canvas slate tags args} {
+    # Create the primary component -- the line
+    set primary($id) [eval $canvas create line $args [list \
+            -arrow   $option(arrow$id) \
+            -fill    $option(fill$id) \
+            -smooth  $option(smooth$id) \
+            -tags $tags]]
+
+    # Call redraw to reshape it
+    redraw $id $canvas $slate
+}
+
+##########################################################################
 #### construct
 #
-body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
+body ::tycho::SmartLine::construct {id canvas slate tags args} {
+    ::tycho::getalloptions options args
+
     # Initialize the options
-    foreach {opt val} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $val
+    foreach {opt val} [concat [array get optiondefault] $options] {
+        set option([string trimleft $opt -]$id) $val
     }
 
-    # Create the primary component for the outline coordinates.
-    # This is a transparent line.
-    set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
-	    -fill "" -tags $tags]
+    # Create the primary component -- the line
+    set primary($id) [eval $canvas create line $args [list \
+            -arrow   $option(arrow$id) \
+            -fill    $option(fill$id) \
+            -smooth  $option(smooth$id) \
+            -tags $tags]]
 
-    # Create the "segments" component which is the visible line.
-    set component(segments$id) [$canvas create line $x0 $y0 $x1 $y1 \
-	    -fill $option(fill$id) -arrow $option(arrow$id) -tags $tags \
-	    -width $option(width$id)]
-
-    # Call redraw to do the work
+    # Call redraw to reshape it
     redraw $id $canvas $slate
 }
 
@@ -564,37 +632,52 @@ body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
 body ::tycho::SmartLine::coords {id canvas slate args} {
     # No args: just return coordinates
     if { $args == "" } {
-	return [$canvas coords $primary($id)]
+        return [$canvas coords $primary($id)]
     }
-
-    # Move the primary
-    set coords $args
-    eval $canvas coords $primary($id) $coords
-
-    # Call redraw to do the work
-    redraw $id $canvas $slate
+    # Set the coordinates. Do not reshape.
+    eval $canvas coords $primary($id) $args
 }
 
-##########################################################################
-#### highlight
+#######################################################################
+#### reshape
 #
-# Highlight the Smartline. We have to provide this because the
-# default Slate highlighting draws the highlight between
-# the two end points...
+# Reshape the line. Currently, only <b>start</b> and <b>end</b> can
+# be reshaped.
 #
-body ::tycho::SmartLine::highlight {id canvas slate args} {
-    # Delete existing highlight
-    if { [$canvas find withtag highlight.$id] != "" } {
-        $canvas delete highlight.$id
-    }
-    array set opts $args
-    set line $component(segments$id)
-    eval $canvas create line [$canvas coords $line] [list \
-            -arrow [$canvas itemcget $line -arrow] \
-            -width [expr $opts(-highlightwidth) * 2] \
-            -fill $opts(-highlightcolor) \
-            -tags $opts(-tags)]
-    $canvas lower highlight.$id $id
+body ::tycho::SmartLine::reshape {id canvas slate x y args} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	eval ::tycho::Line::_reshape $id $canvas $slate $x $y $args
+	redraw $id $canvas $slate	
+}
+
+#######################################################################
+#### reshapeclick
+#
+body ::tycho::SmartLine::reshapeclick {id canvas slate x y args} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	eval ::tycho::Line::_reshapeclick $id $canvas $slate $x $y $args
+}
+
+#######################################################################
+#### reshapedrag
+#
+body ::tycho::SmartLine::reshapedrag {id canvas slate x y} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	::tycho::Line::_reshapedrag $id $canvas $slate $x $y
+	redraw $id $canvas $slate	
+}
+
+#######################################################################
+#### reshaperelease
+#
+body ::tycho::SmartLine::reshaperelease {id canvas slate} {
+	# Get Line to do the work and then redraw.
+	# This could be made more efficient later...
+	::tycho::Line::_reshaperelease $id $canvas $slate
+	redraw $id $canvas $slate
 }
 
 
@@ -608,10 +691,18 @@ body ::tycho::SmartLine::highlight {id canvas slate args} {
 # Redraw the line.
 #
 body ::tycho::SmartLine::redraw {id canvas slate} {
+	# If autoshape is not on, just return
+	if !$option(autoshape$id) {
+		return
+	}
     set flipped 0
     
     # Get the coordinates
-    ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+    set coords [$canvas coords $primary($id)]
+    set x0 [lindex $coords 0]
+    set y0 [lindex $coords 1]
+    set x1 [lindex [lreplace $coords end end] end]
+    set y1 [lindex $coords end]
 
     # "Normalize" the line
     set x [expr $x1-$x0]
@@ -649,10 +740,10 @@ body ::tycho::SmartLine::redraw {id canvas slate} {
     }
 
     # Redraw the line
-    eval $canvas coords $component(segments$id) $coords
+    eval $canvas coords $primary($id) $coords
 
     # Move to correct coordinates
-    $canvas move $component(segments$id) $x0 $y0
+    $canvas move $primary($id) $x0 $y0
 }
 
 ##########################################################################
