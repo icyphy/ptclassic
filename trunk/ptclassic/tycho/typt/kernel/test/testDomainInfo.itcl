@@ -42,5 +42,74 @@ if {[namespace ptolemy {info classes DomainInfo}] == {} } {
     uplevel #0 {
 	set ::auto_path [linsert $auto_path 0 [file join $TYCHO typt kernel]] 
     }
+    if {[namespace ptolemy {info classes Object}] == {} } {
+	uplevel #0 {
+	    set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
+	}
+    }
 }
+
+namespace ::tycho
+
+######################################################################
+#### domains
+# Pretty much every binary has SDF in it.
+#
+test DomainInfo::domains-1.1 {Check out the domains command} {
+    lsearch [::tycho::DomainInfo::domains] SDF
+} {1}
+
+######################################################################
+#### stars
+# Pretty much every binary has SDF Ramp in it.
+#
+test DomainInfo::stars-1.1 {Get information about a star} {
+    catch {delete object .sdf}
+    ::tycho::DomainInfo .sdf SDF
+    set retval1 [expr { [lsearch [.sdf stars] Ramp] != -1 }]
+    list $retval1 \
+	    [.sdf printStar Ramp] \
+	    [.sdf descriptor Ramp] \
+	    [.sdf multiports Ramp] \
+	    [.sdf ports Ramp] \
+	    [.sdf states Ramp]
+} {1 {Ramp
+	Descriptor { Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.}
+	Ports {
+	Output output
+	ot connected.
+}
+	MultiPorts {}
+	State
+	{	step FLOAT A_DYNAMIC
+} {	value FLOAT A_CONSTANT A_DYNAMIC
+}
+} {Descriptor { Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.}} {MultiPorts {}} {Ports {
+	Output output
+	ot connected.
+}} {States {{step {FLOAT A_DYNAMIC}} {value {FLOAT A_CONSTANT A_DYNAMIC}}}}}
+
+######################################################################
+#### knownBlocks
+# 
+#
+test DomainInfo::knownBlocks-1.1 {Check out the knownBlocks command} {
+    set retval1 [expr { [lsearch [::tycho::DomainInfo::knownBlocks SDF] Ramp] \
+	    != -1 }]
+    list $retval1 [::tycho::DomainInfo::print Ramp SDF]
+} {1 {Star: Ramp
+Descriptor: Generate a ramp signal, starting at "value" (default 0) and
+incrementing by step size "step" (default 1) on each firing.
+Ports:
+	Output output
+	ot connected.
+
+States:
+	step type: FLOAT A_DYNAMIC
+	value type: FLOAT A_CONSTANT A_DYNAMIC
+______________________________________________________________________________
+
+}}
 
