@@ -3108,7 +3108,7 @@ static SimHandlerFunction setPoll(SimHandlerFunction f);
 \end{example}
 
 Register a function to be called by \code{haltRequested} if the poll
-flag is set.  Returns old handler if any.
+flag is set, and set the poll flag.  Returns old handler if any.
 
 \node Interfacing domains, connection classes, Control of execution, Top
 \chapter{Interfacing domains -- wormholes and related classes}
@@ -4482,7 +4482,7 @@ derived classes.
 void portHoleConnect();
 \end{example}
 
-This function completes a connection once the originating and
+This function completes a connection if the originating and
 destination ports are set up.
 
 \begin{example}
@@ -5869,7 +5869,7 @@ static Target* clone (const char* \var{name});
 \end{example}
 
 The \code{clone} method takes a string, finds the appropriate target on
-the known target list, and returns a clone of that block (the
+the known target list, and returns a clone of that target (the
 \code{cloneTarget} method is called on the target).  This method, as
 a rule, generates a duplicate of the target.
 An error message is generated (with \code{Error::abortRun}) and
@@ -6253,9 +6253,8 @@ But the length of the string should not be changed, nor
 should the string be deleted.
 The InfString destructor is responsible for freeing the allocated memory.
 
-InfString is privately
-derived from SequentialList (\pxref{class SequentialList}),
-and is very similar to StringList in internal implementation
+InfString is publically
+derived from StringList, adding only the cast char*
 (\pxref{class StringList}).  Its internal implementation is as a
 list of \code{char *} strings, each on the heap.
 The individual substrings retain their separate identity
