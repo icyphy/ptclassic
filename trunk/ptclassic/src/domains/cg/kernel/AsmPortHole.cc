@@ -20,6 +20,7 @@ $Id$
 
 // attributes
 extern const Attribute P_CIRC(PB_CIRC,0);
+extern const Attribute P_SHARED(PB_SHARED,0);
 
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens
@@ -97,6 +98,15 @@ AsmPortHole :: ~AsmPortHole() {
 	while ((p = (OutAsmPort*)next++) != 0) p->setForkSource(0);
 	if (forkSrc)
 		forkSrc->remEntry(this);
+}
+
+// make me a fork destination; set my source.
+void AsmPortHole::setForkSource(AsmPortHole * p) {
+	forkSrc = p;
+	if (!p) return;
+	// add me as one of forkSrc's destinations
+	forkSrc->forkDests.put(this);
+	forkSrc->forkIn = 1;
 }
 
 int InAsmPort :: isItInput() const {return TRUE; }

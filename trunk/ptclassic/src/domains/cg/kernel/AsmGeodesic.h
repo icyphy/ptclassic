@@ -31,22 +31,19 @@ class ProcMemory;
 
 class AsmGeodesic : public Geodesic {
 public:
-	AsmGeodesic () : maxNumParticles(0), src(0), forkType(0),
-		mem(0), addr(0) {}
+	AsmGeodesic () : maxNumParticles(0), mem(0), addr(0) {}
 	void initialize();
 	void incCount(int);
 	// class identification
 	int isA(const char*) const;
 	int bufSize() const;
 
-	// setSourcePort and setDestPort add processing to support
-	// fork buffers.
-	PortHole* setSourcePort(GenericPort&, int = 0);
-	PortHole* setDestPort(GenericPort&);
+	// return my "fork type"
+	int forkType() const;
 
 	// return the value of any delay on the outputs of forks --
 	// return zero if not associated with a fork buffer.
-	int forkDelay();
+	int forkDelay() const;
 
 	// Assign a memory and address to the geodesic
 	void assignAddr(ProcMemory& m, unsigned a) {
@@ -62,20 +59,17 @@ public:
 
 	ProcMemory* memory() const;
 	
-	AsmGeodesic* srcGeo() {
-		if (src) return &src->geo();
-		else return 0;
+protected:
+	AsmPortHole* src() {
+		return ((AsmPortHole*)originatingPort)->forkSource();
 	}
-	const AsmGeodesic *srcGeo() const {
-		if (src) return (const AsmGeodesic*)src->myGeodesic;
-		else return 0;
+	const AsmPortHole* src() const {
+		return ((const AsmPortHole*)originatingPort)->forkSource();
 	}
 private:
 	int internalBufSize() const;
 	int maxNumParticles;
 	SequentialList dests;
-	AsmPortHole *src;
-	int forkType;
 	ProcMemory* mem;
 	unsigned addr;
 };

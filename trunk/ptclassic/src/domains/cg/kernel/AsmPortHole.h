@@ -20,8 +20,10 @@ $Id$
 
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;
+const bitWord PB_SHARED = 0x200;
 
 extern const Attribute P_CIRC;
+extern const Attribute P_SHARED;
 
 // attributes for code generation portholes
 
@@ -89,15 +91,16 @@ public:
 		return offset + numberTokens > bufSize();
 	}
 
-	// Mark me as a fork input port
-	void makeForkBuf() { forkIn = 1;}
 	// Initialize
 	void initialize();
 public:
+	// Mark me as a fork input port
+	void makeForkBuf() { forkIn = 1;}
 	int fork() const { return forkDests.size() > 0;}
 	void remEntry(AsmPortHole* p) { forkDests.remove(p);}
 	AsmPortHole* forkSource() { return forkSrc;}
-	void setForkSource(AsmPortHole* p) { forkSrc = p;}
+	const AsmPortHole* forkSource() const { return forkSrc;}
+	void setForkSource(AsmPortHole* p);
 
 };
 
