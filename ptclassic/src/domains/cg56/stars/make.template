@@ -59,10 +59,12 @@ PL_SRCS= \
  CG56ASin.pl \
  CG56Abs.pl \
  CG56Add.pl \
+ CG56AddCx.pl \
  CG56BitsToInt.pl \
  CG56CircToLin.pl \
  CG56Commutator.pl \
  CG56Const.pl \
+ CG56ConstCx.pl \
  CG56Cos.pl \
  CG56Cut.pl \
  CG56CxToRect.pl \
