@@ -95,8 +95,8 @@ CqLevelLink * PendingEventList::remove( Link * obj )
 
 void PendingEventList::freeEvent( CqLevelLink * aboutToDieLevelLink ) {
 	if( aboutToDieLevelLink->destinationRef != 0 ) {
-	    Error::abortRun("Attempt to free CqLevelLink that has
-	    a non-null destinationRef!");
+	    Error::abortRun("Attempt to free CqLevelLink that has"
+                    "a non-null destinationRef!");
 	}
 	CqLevelLink *before;
 	CqLevelLink *next;
