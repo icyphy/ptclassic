@@ -24,8 +24,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 		name { OutputPrecision }
-		type { string }
-		default { "2.14" }
+		type { precision }
+		default { 2.14 }
 		desc {
 Precision of the output, in bits.
 The complex number is cast to a double and then converted to this precision.
