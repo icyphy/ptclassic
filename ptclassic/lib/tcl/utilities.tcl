@@ -61,7 +61,7 @@ proc ptkTychoLoadFSM { file } {
     set classname [file tail [file rootname $file]]
 
     set winName [::tycho::File::isFileOpen $file]
-    if {$winName != "0"} {
+    if {$winName != ""} {
 	# File has been open already.
         $winName ptkCompile
     } else {
