@@ -404,7 +404,8 @@ body ::tycho::EditBubbleAndArc::bind_B1 {x y} {
 	    # If we are not in item-creating state, and mouse
 	    # is not over any item, unselect the selected item.
 	    set curTags [$slate gettags current]
-	    if {[lsearch $curTags selected] == -1} {
+	    if {[lsearch $curTags selected] == -1 && \
+		[lsearch $curTags selectedpoint] == -1} {
 		$this unselect
 	    }
 	}
