@@ -314,7 +314,7 @@ body ::tycho::ResourceFTP::ftpinit {{url {}}} {
     regsub [::tycho::url tail $currentURL] $ftppath {} ftppath
 
     # If trailing char is /, then it is a directory. Else, probably file.
-    if [regexp {^.*/} $currentURL] {set ftptype "dir"} {set ftptype "file"}
+    if [regexp {^.*/$} $currentURL] {set ftptype "dir"} {set ftptype "file"}
 
     debugputs "$ftpserver:$ftpport   path:$ftppath   file:$ftpfile"
 
@@ -442,17 +442,37 @@ body ::tycho::ResourceFTP::ftphandler {} {
 
         TYPE {
             # 200 PORT command successful.
-            if [regexp -nocase {^22[0-9] .*} $line] {
+            if [regexp -nocase {^20[0-9] .*} $line] {
                 set cmd "TYPE I"    ;# Always binary transfer
                 set state RETR
                 after $timeout "eval $this ftptimeout $state"
             }
         }
         RETR {
-            
-            set cmd "RETR [::tycho::url join $ftppath $ftpfile]"
+            # 200 Type set to I.
+            if [regexp -nocase {^20[0-9] .*} $line] {
+                set cmd "RETR [::tycho::url join $ftppath $ftpfile]"
+                set state FILE_DIR
+                after $timeout "eval $this ftptimeout $state"
+            }
         }
-
+        FILE_DIR {
+            # This is unique, because if this is not a file, then we'll
+            # re-attempt to access this as a directory.
+            #
+            # 150 Binary data connection for README (1,2,3,4,9999) (555 bytes)
+            # 550 /pub: not a plain file.
+            if [regexp -nocase {^15[0-9] .*} $line] {
+                # Successful, just wait for ready string
+                set state TRANSFER2
+                # DO NOT SET A TIMEOUT!
+            } else {
+                set status 150          ;# Error shouldn't fault
+                set cmd "CWD $ftppath"
+                set state LIST
+                after $timeout "eval $this ftptimeout $state"
+            }
+        }
 
         CWD {
             # Protocol for file list
