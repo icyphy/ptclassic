@@ -31,6 +31,8 @@ endif
 
 
 setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.27/
+# C_INCLUDE_PATH must be set or CGC TclTk demos will fail to compile
+setenv C_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.27/include
 
 # HPUX9.x requires that $PTOLEMY/gnu/$PTARCH/lib
 # be added to LIBRARY_PATH, or else incremental linking will fail with
