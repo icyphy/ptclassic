@@ -48,6 +48,7 @@ CGWormBase.h \
 CGWormhole.h \
 CodeBlock.h \
 CodeStream.h \
+CodeStreamList.h \
 IntArray.h \
 MReq.h \
 MemMap.h \
@@ -59,8 +60,7 @@ SymbolList.h \
 UniqueStringList.h \
 
 # Header files
-HDRS= $(H_WITH_MATCH) \
-CodeStreamList.h
+HDRS= $(H_WITH_MATCH) 
 
 # Library objects
 OBJS= $(H_WITH_MATCH:.h=.o) CGDomain.o AsmTargetInit.o
