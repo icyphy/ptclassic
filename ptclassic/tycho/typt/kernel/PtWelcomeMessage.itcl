@@ -124,8 +124,6 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 
     configure -textwidth 60
     configure -textheight 17
-    configure -data $html
     configure -scrollbar 0
+    insertData $html
 }
-
-
