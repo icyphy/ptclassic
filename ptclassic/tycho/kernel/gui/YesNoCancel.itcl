@@ -1,4 +1,4 @@
-# Yes-no query box.
+# Yes-no query box with a cancel button.
 #
 # @Author: Edward A. Lee
 #
@@ -37,7 +37,7 @@
 # command to execute in response to the user's answer can be specified
 # using the options "-yescommand", "-nocommand", and "-cancelcommand".
 # The value returned by whichever command is executed will be that
-# returned by the procedure <code>getResult</code>, if that is
+# returned by the procedure <code>wait</code>, if that is
 # used. By default, the value returned by the cancel button is -1,
 # while yes is 1 and no is 0.
 #
