@@ -2,10 +2,10 @@ defstar {
 	name { VarDelay }
 	domain { C50 }
 	desc { A variable delay with linear interpolation. }
-	version { $Id$ }
-	author { Luis Gutierrez, based on the CG56 version }
+	version {$Id$}
+	author { Luis Gutierrez, based on the CG56 version, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -33,14 +33,14 @@ between -1.0 and 1.0.
 		type { fixarray }
 		desc { buffer }
 		default { "0" }
-		attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM}
+		attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
 	}
 	state  {
 		name { bufStart }
 		type { int }
 		default { 0 }
 		desc { pointer to the buffer }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
 	state  {
 		name { maxDelay }
@@ -54,9 +54,9 @@ between -1.0 and 1.0.
 	}
 
 	codeblock(block) {
-	.ds	$addr(bufStart)	; initialize internal buffer	
-	.word	$addr(buf)   
-	.text 	
+	  mar *,ar0
+	  lar ar0,#$addr(buf)
+	  sar ar0,$addr(bufStart)
 	}			      
 
 	codeblock(std,"") {

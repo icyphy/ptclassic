@@ -2,11 +2,11 @@ defstar {
     name { Mux }
     domain { C50 }
     desc { Multiplexes any number of inputs onto one output stream. }
-    version { $Id$ }
-    author { Luis Gutierrez, based on CG56 version }
+    version {$Id$}
+    author { Luis Gutierrez, based on CG56 version, G. Arslan }
     acknowledge { SDF version by E. A. Lee, CG56 version by Kennard White }
     copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -42,6 +42,10 @@ case, we could pre-calculate a set of tables at compile time instead
 of performing runtime advancement.
 This is not currently handled.
     }
+
+	//FIXME: All inputs buffer are allocated at the same memory location
+	//       Causes dublicated memory allocation error durin compiling
+
 	inmulti {
 		name {input}
 		type {ANYTYPE}
@@ -72,7 +76,7 @@ This is not currently handled.
 		type {INTARRAY }
 		default {""}
 		desc { Array of pointers to outputs }
-		attributes { A_NONSETTABLE|A_UMEM|A_RAM|A_NOINIT|A_CIRC}
+		attributes { A_NONSETTABLE|A_BMEM|A_CIRC}
 	}
 	
 	protected{
@@ -82,13 +86,11 @@ This is not currently handled.
 
 	initCode{
 	  StringList ptrInit;
-	  ptrInit << "\t.ds   $addr(ptrarray)\n";
+	  ptrInit << "\tmar *,ar0\n";
 	  for (int i=1; i<= n; i++){
-	    ptrInit<<"\t.word  $addr(input#";
-	    ptrInit<<i;
-	    ptrInit<<")\n";
+	    ptrInit<< "\tlar ar0,#$addr(input#" << i << ")\n"
+	           << "\tsar ar0,($addr(ptrarray)+" << (i-1) << ")\n";
 	  }
-	  ptrInit<<"\t.text\n";
 	  addCode(ptrInit);
 	}
 

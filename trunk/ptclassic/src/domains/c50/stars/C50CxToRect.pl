@@ -2,8 +2,8 @@ defstar {
 	name {CxToRect}
 	domain {C50}
 	desc { Convert complex data to real and imaginary parts. }
-	version { $Id$ }
-	author { Luis Gutierrez }
+	version {$Id$}
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -28,7 +28,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock (convert){
 	lmmr	ar0,#$addr(input,0)
-	lmmr	ar1,#$addr(input,1)
+	lmmr	ar1,#($addr(input)+1)
 	smmr	ar0,#$addr(real)
 	smmr	ar1,#$addr(imag)
 	}

@@ -8,9 +8,9 @@ where B = blockSize, and sends the first B particles to the first output,
 the next B particles to the next output, etc.
 	}
 	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -70,8 +70,8 @@ Distributes an input signal among two outputs, alternating samples.
 	codeblock(oneCx){
 	lmmr	ar1,#$addr(input,0)
 	lmmr	ar2,#$addr(input,1)
-	smmr	ar1,#$addr(output#1,0)
-	smmr	ar2,#$addr(output#1,1)
+	smmr	ar1,#$addr(output#1)
+	smmr	ar2,#$addr(output#1)+1)
 	}
 	
 	codeblock(moveBlockInit){
@@ -81,7 +81,7 @@ Distributes an input signal among two outputs, alternating samples.
 	codeblock(moveBlock,"int Inum"){
 	lar	ar1,#$addr(output#@Inum)
 	rpt	#@(effBlockSize - 1)
-	bldd	#$addr(input,@(effBlockSize*(Inum-1))),*+
+	bldd	#($addr(input)+@(effBlockSize*(Inum-1))),*+
 	}
 
 	go {

@@ -7,10 +7,10 @@ Coefficients are in the "taps" state variable.  Default coefficients
 give an 8th order, linear phase lowpass filter.  To read coefficients
 from a file, replace the default coefficients with "<fileName".
 	}
-	version { $Id$ }
-	author { Luis Gutierrez }
+	version {$Id$}
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -45,7 +45,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	"-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
 		}
 		desc { Filter tap values }
-		attributes { A_SETTABLE }
+		attributes { A_SETTABLE | A_CONSTANT | A_UMEM}
 	}
 	state {
 		name {decimation}
@@ -70,7 +70,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		type {fixarray}
 		default {0}
 		desc {internal}
-                attributes {A_NONCONSTANT|A_NONSETTABLE|A_UMEM}
+                attributes {A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
 	}
 
 	protected {
@@ -87,27 +87,10 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		oldSamples.resize(int(tapsNum)+1);
         }
 
-        initCode {
-		char buf[32];
-		double temp;
-		tapInit.initialize();
-		tapInit<<"$starSymbol(cfs):\n";
-		for (int i = (tapsNum - 1); i >= 0 ; i--){
-			temp = double(taps[i]);
-			sprintf(buf,"%.15f",temp);	
-			tapInit << "\t.q15\t"<<buf<<"\n";
-		}
-		addCode(tapInit,"TISubProcs");
-        }
+       
 
 	go {
 		addCode(std());
-	}
-
-	codeblock(block,"int space"){
-	.ds	$addr(oldSamples)
-	.space	@space
-	.text
 	}
 
 
@@ -116,12 +99,12 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	setc	ovm			; set overflow mode
 	LAR	AR2,#$addr(oldSamples)	; AR0 -> start of old sample array
 	LAR	AR1,#$addr(output)	; AR1 -> output signal
-	lar	ar0,#$addr(oldSamples,@(tapsNum-1))
+	lar	ar0,#($addr(oldSamples)+@(tapsNum-1))
 	ZAP				; zero accumulator and product reg.
 	MAR	*,AR2			; ARP = AR0
 	BLDD	#$addr(input),*,ar0	; move (input) to first addr in array
 	RPT	#@(int(tapsNum)-1)		; these two instructions 
-	MACD	$starSymbol(cfs),*-	; implement the filter
+	MACD	$addr(taps),*-	; implement the filter
 	lta	*,ar1
 	sacb
 	addb				; saturate on overflow

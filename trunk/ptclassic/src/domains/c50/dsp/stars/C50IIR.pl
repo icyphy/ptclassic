@@ -16,10 +16,10 @@ error will result if, after scaling, any of the coefficients is greater
 or equal than 1 or less than -1.  Extra code is added to saturate 
 accumulator in case of overflow.
     }
-    version { $Id$}
-    author { Luis Gutierrez, based on the SDF version}
+    version {$Id$}
+    author { Luis Gutierrez, based on the SDF version, G. Arslan}
     copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -61,12 +61,14 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	type {fixarray}
 	default { ".5 .25 .1" }
 	desc { Numerator coefficients. }
+	attributes { A_CONSTANT|A_SETTABLE|A_UMEM }
     }
     defstate {
 	name {denominator}
 	type {fixarray}
 	default { "1 .5 .3" }
 	desc { Denominator coefficients. }
+	attributes { A_CONSTANT|A_SETTABLE|A_UMEM }
     }
 //    defstate {
 //	name {decimation}
@@ -92,19 +94,18 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	type {fixarray}
 	default { "0.0" }
 	desc { internal state: contains delays }
-	attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
+	attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
     }
     defstate{
 	name {offset}
 	type {int}
 	default { 0 }
 	desc {internal state}
-	attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM}
+	attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
     }
     protected {
-	int i;
 	int numState;
-	StringList coeffs;
+	StringList coeffsd, coeffsn;
 	int numDenom,numNumer;
     }
 
@@ -121,7 +122,9 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
     initCode{
 	char	buf[32];
-	coeffs.initialize();
+	coeffsd.initialize();
+	coeffsn.initialize();
+
 	double b0, scaleDenom, scaleNumer;
 
 	// Set up scaling to distribute the gain through the numerator,
@@ -135,11 +138,11 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	    Error::abortRun(*this, "Must have non-zero leading denominator");
 	    return;
 	}
-	if (numDenom > 1) coeffs<<"$starSymbol(dnm):\n";
+	if (numDenom > 1)
 	scaleDenom = 1.0 / b0;
 	scaleNumer = scaleDenom * double(gain);
 	delays.resize(numState+1);
-	for (i = numState-1; i > 0; i--){
+	for (int i = numState-1; i > 0; i--){
             if ( i < numDenom ) {
                 double temp = scaleDenom * -(double(denominator[i]));
                 if ((temp >= 1) || (temp < -1)) {
@@ -151,15 +154,15 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
                 }
 		else {
 		    sprintf(buf,"%.15f",temp);
-                    coeffs<<"\t.q15\t"<<buf<<"\n";
+                    coeffsd << buf << " ";
                 }
             }
 	    else {
-                coeffs<<"\t.q15\t"<<double(0)<<"\n";
+                coeffsd << double(0)<<" ";
             }
         }
 
-	coeffs<<"$starSymbol(num):\n";
+	denominator.setInitValue(coeffsd);
 	
 	for (i = 0; i < numState; i++) {
             delays[i] = 0;
@@ -174,15 +177,15 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
                 }
 		else {
 		    sprintf(buf,"%.15f",temp);
-                    coeffs<<"\t.q15\t"<<buf<<"\n";
+                    coeffsn << buf << " ";
                 }
             }
 	    else {
-		coeffs<<"\t.q15\t"<<double(0)<<"\n";
+		coeffsn << double(0) << " ";
             }
 	}
 	delays[numState]=double(0);
-	addCode(coeffs,"TISubProcs");
+	numerator.setInitValue(coeffsn);
     }
 
     go {
@@ -201,7 +204,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	LAR	AR1,#$addr(signalOut)
 	MAR	*,AR0
 	ZAP
-	MAC	$starSymbol(num),*,AR1
+	MAC	$addr(numerator),*,AR1
 	pac
 	sacb
 	addb
@@ -221,7 +224,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	bldd	#$addr(signalIn),*0+
 	zap	
 	rpt	#@iterD
-	macd	$starSymbol(dnm),*-
+	macd	$addr(denominator),*-
 	apac
 	add	*+,15	; acc contains resultA/2
 	sacb		; these two inst. are used to
@@ -229,7 +232,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	sach	*
 	zap
 	rpt	#@iterN	
-	mac	$starSymbol(num),*+
+	mac	$addr(numerator),*+
 	lta	*,ar1	; acc	contains resultB/2
 	sacb		; these two inst. are used to
 	addb		; saturate acc in case of overflws

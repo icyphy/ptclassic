@@ -2,10 +2,10 @@ defstar {
 	name { Delay }
 	domain { C50 }
 	desc { Delay input by totalDelay unit delays. }
-	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
+	version {$Id$}
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -25,22 +25,16 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fixarray }
 		desc { buffer }
 		default { "0" }
-                attributes {A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+                attributes {A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
         }
         state  {
                 name { delayBufStart }
                 type { int }
                 default { 0 }
                 desc { pointer to the buffer }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
         }
-        state  {
-                name { delayBufSpace }
-                type { int }
-                default { 0 }
-                desc { memory space for buffer }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+      
         state  {
                 name { totalDelay }
 	        type { int }
@@ -55,11 +49,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	codeblock(block) {
 ; initialize delay star
 ; pointer to internal buffer
-	.ds	$addr(delayBuf)
-	.space  $val(delayBufSpace)
-	.ds	$addr(delayBufStart)
-  	.word	$addr(delayBuf)
-   	.text
+        mar *,ar0
+        lar ar0,#$addr(delayBuf)
+        sar ar0,$addr(delayBufStart)
 	}
         		      
         codeblock(one) {
@@ -75,7 +67,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	ldp	#00h
 	lmmr	ar1,#$addr(delayBufStart)
 	splk	#$addr(delayBuf),cbsr1
-	splk	#$addr(delayBuf,@(int(bufSize)-1)),cber1
+	splk	#($addr(delayBuf)+@(int(bufSize)-1)),cber1
 	splk	#9h,cbcr
 	mar	*,ar1
 	bldd	*,#$addr(output)
@@ -94,7 +86,7 @@ limitation of liability, and disclaimer of warranty provisions.
         setup {
 		bufSize = int(totalDelay);
                 delayBuf.resize(bufSize);
-		delayBufSpace = bufSize * 16;
+		
         }		
         initCode {
                 addCode(block);

@@ -2,8 +2,8 @@ defstar {
 	name { AddCx }
 	domain { C50 }
 	desc { Add any number of integer inputs, producing an integer output. }
-	version { $Id$ }
-	author { Luis Gutierrez, based on CG56 version }
+	version {$Id$}
+	author { Luis Gutierrez, based on CG56 version, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -44,30 +44,30 @@ two's complement addition.
 	}
 
 	codeblock(copyInput) {
-	lmmr	ar0,#$addr(input,0)
-	smmr	ar0,#$addr(output,0)
-	lmmr	ar0,#$addr(input,1)
-	smmr	ar0,#$addr(output,1)
+	lmmr	ar0,#$addr(input)
+	smmr	ar0,#$addr(output)
+	lmmr	ar0,#($addr(input)+1)
+	smmr	ar0,#($addr(output)+1)
 	}
 
 	codeblock(addStart) {
-	lar	ar0,#$addr(input#1)		; ar0-> input 1
+	lar	ar0,#$addr(input)		; ar0-> input 1
 	lar	ar1,#$addr(output)		; ar1-> output
-	lar	ar2,#$addr(input#2)		; ar2-> input2
+	lar	ar2,#($addr(input)+1)		; ar2-> input2
 	mar	*,ar0				; arp = 0
 	lacc	*+,16,ar2			; acc = re(in1); ar0->im(in1)
 	add	*+,16,ar1			; acc =re(in1)+re(in2); ar2->im(in2)
 	sach	*+,0,ar0			; store real result; ar1->im(out)
 	lacc	*,16,ar2			; acc = imm(in1); ar0->im(in1)
 	add	*,16,ar1			; acc =imm(in1)+imm(in2); ar2->im(in2)
-	sach	*,0,ar0				; store imaginary result; ar1->im(out)
-	}
+	sach	*,0,ar0				; store imaginary result; ar1->im(out)}
+
 
 
 //addOdd assumes that imaginary part of prev. result is stored in 
 //acc and that arp -> ar0; ar0->im(inj); ar1->im(po)
 	codeblock(addOdd,"int j"){
-	lar	ar0,#$addr(input#@j,1)		; ar0 -> imm(inj)
+	lar	ar0,#($addr(input#@j)+1)		; ar0 -> imm(inj)
 	add	*-,16,ar1			;acc=imm(inj)+imm(po);ar0->re(inj)
 	sach	*-,0,ar0			;imm(out) = acc; ar1->re(po)
 	lacc	*,16,ar1			;acc = re(inj); ar0->re(inj)
@@ -76,7 +76,7 @@ two's complement addition.
 //addEven assumes that real part of prev result is stored in acc
 // and that arp-> ar0; ar0->re(inj); ar1->re(po)
 	codeblock(addEven,"int j"){
-	lar	ar0,#$addr(input#@j,0)		; ar0->re(inj)
+	lar	ar0,#$addr(input#@j)		; ar0->re(inj)
 	add	*+,16,ar1			; acc = re(inj)+re(po); ar0->im(inj)
 	sach	*+,0,ar0			; re(out) = acc; ar1-> im(po)
 	lacc	*,16,ar1			; acc = im(j); ar0->im(inj)

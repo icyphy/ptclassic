@@ -5,10 +5,10 @@ defstar {
 The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
-	version { $Id$ }
-	author { Luis Gutierrez, based on CG56 version }
+	version {$Id$}
+	author { Luis Gutierrez, based on CG56 version, G. Arslan }
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -33,39 +33,28 @@ of <i>thresholds</i>.
 		name {output}
 		type {fix}
 	}
-        state  {
-                name { thresholds }
-                type { fixarray }
-                default { "0.1 0.2 0.3 0.4" }
-                desc { threshold file }
-                attributes { A_NONCONSTANT|A_SETTABLE}
-        }
 	state {
-		name { augThresholds }
+		name { thresholds }
 		type { fixarray }
 		default { "0.1 0.2 0.3 0.4 1.0 " }
 		desc { internal state }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
 	}
         state  {
                 name { levels }
                 type { fixarray }
                 default { "0.05 0.15 0.25 0.35 0.45" }
                 desc { levels file }
-                attributes { A_NONCONSTANT|A_UMEM }
+                attributes { A_NONCONSTANT|A_UMEM|A_SETTABLE }
         }
  
 	constructor {
 		noInternalState();
 	}
 
-	protected{
-		StringList ThresholdValues;
-	}
-
 	codeblock(main) {
 	setc	ovm			; addition/subs. saturates
-	lar	ar0,#$addr(augThresholds)	; ar0 -> threshold
+	lar	ar0,#$addr(thresholds)	; ar0 -> threshold
 	lar	ar1,#65535		; initialize ar1
 	lar	ar3,#$addr(input)	; ar3 -> input
 	lar	ar4,#$addr(output)	; ar4 -> output value
@@ -88,7 +77,7 @@ $starSymbol(lp):
 	codeblock(one){
 	lar	ar0,#$addr(input)
 	lar	ar1,#0000h
-	lar	ar2,#$addr(augThresholds)
+	lar	ar2,#$addr(thresholds)
 	mar	*,ar0
 	lacc	*,16,ar2		; acc = input
 	sub	*,16,ar0		; acc = input - threshold
@@ -102,28 +91,11 @@ $starSymbol(lp):
 	}
 
 
-	initCode{
-		addCode(ThresholdValues);
-	}
-
+	
         setup {
-		ThresholdValues.initialize();
-                int n = thresholds.size() + 1;
-		augThresholds.resize(n);
-		n--;
-		ThresholdValues << "\t.ds\t$addr(augThresholds)\n";
-		for ( int j = 0; j < n; j++) {
-			ThresholdValues << "\t.q15\t"
-					<<  double(thresholds[j])
-					<< "\n";
-		}
-		ThresholdValues << "\t.word\t32767\n";
-                if (levels.size() == 0) {       // set to default: 0, 1, 2...
-                        levels.resize(n + 1);
-                        for (int i = 0; i <= n; i++)
-                                levels[i] = i;
-                }
-                else if (levels.size() != n+1) {
+	       int n = thresholds.size();
+
+               if (levels.size() != n+1) {
                         Error::abortRun (*this,
                               "must have one more level than thresholds");
                 }

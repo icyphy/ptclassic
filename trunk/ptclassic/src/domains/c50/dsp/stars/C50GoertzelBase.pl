@@ -1,11 +1,11 @@
 defstar {
 	name { GoertzelBase }
 	domain { C50 }
-	version { $Id$}
+	version {$Id$}
 	desc {
 Base class for Goertzel algorithm stars
 	}
-	author { Luis Gutierrez, based on CG56 Implementation}
+	author { Luis Gutierrez, based on CG56 Implementation, G. Arslan}
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -40,7 +40,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { delays }
 		type { fixarray }
 		default { 0.0 }
-		attributes { A_UMEM|A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_BMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
 	state {
 		name { wnReal }
@@ -50,7 +50,7 @@ limitation of liability, and disclaimer of warranty provisions.
 internal state for the storage of the real part of the twiddle factor,
 which is a function of k and N
 		}
-		attributes {A_UMEM|A_NONSETTABLE|A_NONCONSTANT|A_CONSEC }
+		attributes {A_UMEM|A_NONSETTABLE|A_CONSTANT|A_CONSEC }
 	}
 	state {
 		name { wnImag }
@@ -60,8 +60,19 @@ which is a function of k and N
 internal state for the storage of the imaginary part of the twiddle factor,
 which is a function of k and N
 		}
-		attributes { A_UMEM|A_NONSETTABLE|A_NONCONSTANT}
+		attributes { A_UMEM|A_NONSETTABLE|A_CONSTANT}
 	}
+
+	state {
+		name { cf }
+		type { fixarray }
+		default { "0 0" }
+		desc {
+ceofficients 
+		}
+		attributes { A_BMEM|A_NONSETTABLE|A_NONCONSTANT}
+	}
+
 	protected {
 		double theta;
 		StringList coeffs;
@@ -123,9 +134,9 @@ which is a function of k and N
 
 	initCode{
 		coeffs.initialize();
-		coeffs<<"$starSymbol(cf)\n\t.q15\t-0.5\n\t.q15\t";
-		coeffs<<double(cos(theta));
-		coeffs<<"\n$starSymbol(cfe)\n";
+		coeffs << "-0.5 ";
+		coeffs << double(cos(theta));
+		cf.setInitValue(coeffs);
 	}
 		
 	codeblock(init,"int iter") {
@@ -140,7 +151,7 @@ which is a function of k and N
 	rptb	$starSymbol(gl)		; block repeat inst.
 	zap				; zero prod reg & acc
 	rpt	#1			; repeat twice
-	macd	$starSymbol(cf),*-	; implements part of filter
+	macd	$addr(cf),*-	        ; implements part of filter
 	lta	*+,ar0			; add previous prod. and set ar0 active
 	add	*+,14,ar1		; add input to acc and inc input pointer
 $starSymbol(gl):			; next inst is end of repeat block

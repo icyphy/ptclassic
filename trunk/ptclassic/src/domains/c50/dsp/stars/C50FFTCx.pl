@@ -3,10 +3,10 @@ name { FFTCx }
 domain { C50 }
 desc {
 }
-version { $Id$ }
-author { Luis Gutierrez }
+version {$Id$}
+author { Luis Gutierrez, G. Arslan }
 copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -39,14 +39,14 @@ state {
 state {
 	name{tempArray}
 	type {fixarray}
-	attributes {A_RAM|A_CONSTANT|A_NONSETTABLE|A_NOINIT|A_UMEM}
+	attributes {A_NONCONSTANT|A_NONSETTABLE|A_BMEM}
 	
 }
 
 state {
 	name {twdfct}
 	type {FIXARRAY}
-	attributes {A_RAM|A_CONSTANT|A_NONSETTABLE|A_NOINIT|A_UMEM}
+	attributes {A_CONSTANT|A_NONSETTABLE|A_UMEM}
 }
 
 setup {
@@ -86,7 +86,6 @@ initCode {
 	double	dtwcos, dtwsin;
 
 	twiddle.initialize();
-	twiddle <<"*Twiddle factors\n\t.ds\t$addr(twdfct)\n";
 
 	for(int i = 0; i < halfOrder; i++) {
 		dtwcos = cos (i*2.0*M_PI/double( (int (order))));
@@ -96,14 +95,13 @@ initCode {
 		if (dtwsin > C50_ONE) dtwsin = C50_ONE;		
 	// twiddle factors are stored in memory with the real part followed
 	// by the imaginary part
-		sprintf(buf,"%.15f",dtwcos);
-		twiddle <<"\t.q15\t"<<buf<<"\n";
+		sprintf(buf,"%.15f ",dtwcos);
+		twiddle << buf;
 		sprintf(buf,"%.15f",dtwsin);
-		twiddle <<"\t.q15\t"<<buf<<"\n";
+		twiddle << buf;
 
 	}
-	twiddle<<"\t.text\n";
-	addCode(twiddle);
+	twdfct.setInitValue(twiddle);
 }
 
 codeblock(butterfly){
@@ -147,7 +145,7 @@ codeblock(firstStage,""){
 	bldd	*0+,#$addr(tempArray)
 	mar	*-
 	rpt	#@(int(order)-1)
-	bldd	*0-,#$addr(tempArray,@(order))
+	bldd	*0-,#($addr(tempArray)+@(order))
 	splk	#@(int(order)),indx
 	lar	ar2,#$addr(tempArray)
 	rpt	#@(twiceOrder - 1)
@@ -157,7 +155,7 @@ codeblock(firstStage,""){
 	splk	#@(halfOrder-1),brcr
 	splk	#3,indx
 	lar	ar1,#$addr(output)
-	lar	ar2,#$addr(output,2)
+	lar	ar2,#($addr(output)+2)
 	rptb	$label(stage1)
 	lacc    *,15,ar1        ; acc = re(2)
 	add     *,15,ar1        ; acc = re(2)+re(1)

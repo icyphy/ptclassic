@@ -5,11 +5,11 @@ defstar {
 Sine function calculated by table lookup.  Input range of [-1,1) is scaled
 by pi.  Output is sin(pi*input).
 	}
-	version { $Id$ }
+	version {$Id$}
 	acknowledge { Gabriel version by Maureen O'Reilly }
-	author { Luis Gutierrez }
+	author { Luis Gutierrez, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -40,9 +40,9 @@ the range [-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 	state {
 		name { tbl }
 		type { fixarray }
-		default { "0.0" }
+		default { "0[129]" }
 		desc { internal state to hold sin table }
-		attributes { A_UMEM|A_CIRC|A_NONSETTABLE|A_SHARED|A_NOINIT }
+		attributes { A_UMEM|A_CIRC|A_NONSETTABLE}
 	}
 
 	protected{
@@ -76,18 +76,22 @@ the range [-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 	
 
 	begin {
-		setC50SinTable();
+//FIXME The table is not allocated in both cases if the following comment
+//      line will be activated. In this case the table is allocated every 
+//      time the function is called. 
+
+
+                setC50SinTable();
 		
 		if (C50SinTable) {
 			tbl.resize(129);
 		} else {
-			tbl.clearAttributes(A_UMEM);
+//tbl.clearAttributes(A_UMEM);
 			tbl.clearAttributes(A_SHARED);
 		}
 	}
 
 	setup {
-
 		int tempPhase;
 		double temp;
 		
@@ -124,6 +128,8 @@ the range [-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 	initCode {
 
 	//add sin table only if it has not been added yet
+        //initialization is not working ! so sin and cos cannot be used !
+ 
 	
 	if (C50SinTable) {
 	
@@ -131,21 +137,19 @@ the range [-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 		double value;
 		double floor;
 		floor = double(1/32768); // floor = smallest pos. value
-		sinTable<<"\t.ds\t$addr(tbl)\n$sharedSymbol(Sin,SINTBL):\n";
+		
 		for (int i = 0; i< 128; i++){
 			value = sin(double(i*M_PI/128));
 			if ((value < floor) && (value > -floor)) 
-			    sinTable<<"\t.q15\t0.0\n";
+			    sinTable<<"0.0 ";
 			else if (value > C50_ONE )
-			    sinTable<<"\t.q15\t0.999999999\n";
+			    sinTable<<"0.999999999 ";
 			else {
-			    sinTable<<"\t.q15\t"
-				    << value
-			            << "\n";
+			    sinTable << value << " ";
 			}
 		}
-		sinTable<<"\t.q15\t0.0\n\t.text\n";
-		addCode(sinTable);
+		sinTable<<"0.0 ";
+		tbl.setInitValue(sinTable);
 	}
 
 	}
@@ -162,7 +166,7 @@ the range [-1.0, 1.0).  The parameter <i>phase</i> is in degrees
 	abs				; acc = abs(input) with saturation
 	bsar	9			; get 7 MSB in accH
 	add	#1,14			; round up
-	add	#$sharedSymbol(Sin,SINTBL),15	; add base address of table
+	add	#$addr(tbl),15	        ; add base address of table
 	bit	*,0			; test to see if input is negative
 	sach	*,1,ar3			; ar3 = address of entry on table
 	clrc	ovm			; unset overflow mode

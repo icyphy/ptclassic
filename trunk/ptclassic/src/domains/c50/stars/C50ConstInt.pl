@@ -2,8 +2,8 @@ defstar {
 	name { ConstInt }
 	domain { C50 }
 	desc { Constant source }
-	version { $Id$ }
-	author { Luis Gutierrez, Brian L. Evans, Edward A. Lee, Jose Luis Pino, and Joseph T. Buck }
+	version {$Id$}
+	author { Luis Gutierrez, Brian L. Evans, Edward A. Lee, Jose Luis Pino, and Joseph T. Buck, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -18,31 +18,19 @@ The output buffer is initialized with the specified DC value.
 	output {
 		name {output}
 		type {int}
-		attributes{P_NOINIT}
+		
 	}
 	state {
 		name {level}
 		type {int}
 		default {"0"}
 		descriptor { Constant value to go to the output. }
+		attributes { A_UMEM | A_SETTABLE | A_CONSTANT }
 	}
 	constructor {
 		noInternalState();
 	}
-	codeblock (org) {
-	.ds	$addr(output)
-	}
-	codeblock (dc) {
-	.word	 $val(level)
-	}
-	codeblock (orgp) {
-	.text
-	}
-	initCode {
-		addCode(org);
-		for (int i=0 ; i<output.bufSize() ; i++) addCode(dc);
-		addCode(orgp);
-	}
+	
 	execTime {
 		return 0;
 	}

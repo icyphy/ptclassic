@@ -13,10 +13,10 @@ consumed on previous firings (if "use_past_inputs" parameter is YES),
 or zero (otherwise).  If "offset" is negative, then the first "offset"
 input particles will be discarded.
 	}
-	version { $Id$}
-	author { Luis Gutierrez, based on CG56 version }
+	version {$Id$}
+	author { Luis Gutierrez, based on CG56 version, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -64,10 +64,10 @@ if offset > 0, specify whether to use previously read inputs
 
 	state {
 		name { pastInputs }
-		type { intarray}
+		type { fixarray}
 		default {" 0 0"}
 		desc { internal storage for past inputs }
-		attributes{ A_NONSETTABLE|A_CIRC|A_UMEM }
+		attributes{ A_NONSETTABLE|A_CIRC|A_BMEM|A_NONCONSTANT }
 	}
 	
 	state{
@@ -75,7 +75,7 @@ if offset > 0, specify whether to use previously read inputs
 		type { int }
 		default { 0 }
 		desc { it's were the next input goes in pastInputs }
-		attributes { A_NONSETTABLE|A_UMEM }
+		attributes { A_NONSETTABLE|A_BMEM|A_NONCONSTANT }
 	}
 
 	state{
@@ -83,7 +83,7 @@ if offset > 0, specify whether to use previously read inputs
 		type { fix }
 		default { 0.0 }
 		desc { Value of fill particles }
-		attributes { A_CONSTANT|A_NONSETTABLE }
+		attributes { A_CONSTANT|A_NONSETTABLE|A_BMEM }
 	}
 
 	protected {
@@ -208,9 +208,9 @@ if offset > 0, specify whether to use previously read inputs
 	}
 
 	codeblock(initPtr){
-	.ds	$addr(pastInputsPtr)
-	.word	$addr(pastInputs)
-	.text
+         mar *, ar0
+         lar ar0, #$addr(pastInputs)         ; load addr of pastInputs 
+         sar ar0, $addr(pastInputsPtr) ; store it in its pointer
 	}
 
 	codeblock(padNsavePastInputs,"int saveindx"){
@@ -227,7 +227,7 @@ if offset > 0, specify whether to use previously read inputs
 	rpt	#@(int(padding)-1)		
 	bldd	*+,#$addr(output)		; copy last inputs to output
 	rpt	#@(int(numCpy)-1)		
-	bldd	#$addr(input,@saveindx),*+	; save current inputs
+	bldd	#($addr(input)+@saveindx),*+	; save current inputs
 	smmr	ar0,#$addr(pastInputsPtr)	; save ptr for next time
 	zap
 	samm	brcr				; clear circ buffer reg.
@@ -246,13 +246,13 @@ if offset > 0, specify whether to use previously read inputs
 	}
 
 	codeblock(writeInputToOutput,"int idx"){
-	lar	ar0,#$addr(output,@padding)
+	lar	ar0,#($addr(output)+@padding)
 	rpt	#@(int(numInputs)-1)
-	bldd	#$addr(input,@idx),*+
+	bldd	#($addr(input)+@idx),*+
 	}
 
 	codeblock(padWithNumberEnd,"int iter"){
-	lar	ar0,#$addr(output,@(int(hiLim)))
+	lar	ar0,#($addr(output)+@(int(hiLim)))
 	rpt	#@(iter - 1)
 	sacl	*+
 	}

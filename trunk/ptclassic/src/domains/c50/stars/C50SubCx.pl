@@ -2,8 +2,8 @@ defstar {
 	name { SubCx }
 	domain { C50 }
 	desc { output is the "pos" input minus all the "neg" inputs }
-	version { $Id$ }
-	author { Luis Gutierrez, based on CG56 version }
+	version {$Id$}
+	author { Luis Gutierrez, based on CG56 version, G. Arslan }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
@@ -61,7 +61,7 @@ limitation of liability, and disclaimer of warranty provisions.
 //subOdd assumes that imaginary part of prev. result is stored in 
 //acc and that arp -> ar0; ar0->im(inj); ar1->im(po)
 	codeblock(subOdd,"int j"){
-	lar	ar0,#$addr(neg#@j,1)	    ; ar0 -> imm(inj)
+	lar	ar0,#($addr(neg#@j)+1)	    ; ar0 -> imm(inj)
 	sub	*-,16,ar1		    ;acc=imm(po)-imm(inj); ar0->re(inj)
 	sach	*-,0,ar1		    ;im(out) = acc; ar1->re(po)
 	lacc	*,16,ar0		    ;acc = re(po)
@@ -70,7 +70,7 @@ limitation of liability, and disclaimer of warranty provisions.
 //subEven assumes that real part of prev result is stored in acc
 // and that arp-> ar0; 
 	codeblock(subEven,"int j"){
-	lar	ar0,#$addr(neg#@j,0)	    ;ar0->re(inj)		
+	lar	ar0,#$addr(neg#@j)	    ;ar0->re(inj)		
 	sub	*+,16,ar1		    ;acc = re(po)-re(inj); ar0->im(inj)
 	sach	*+,0,ar1		    ;re(out) = acc; ar1->im(po)
 	lacc	*,16,ar0		    ;acc = im(po)

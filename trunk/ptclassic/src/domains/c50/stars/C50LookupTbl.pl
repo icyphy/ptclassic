@@ -2,10 +2,10 @@ defstar {
 	name { LookupTbl }
 	domain { C50 }
 	desc { Table lookup }
-	version { $Id$ }
-	author { A. Baensch }
+	version {$Id$}
+	author { A. Baensch, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -91,7 +91,7 @@ one more memory location if <i>interpolation</i> is "linear".
 		type { fix }
 		desc { internal }
 		default { 0 }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
 	}
 	state { 
 		name { coefNum }
@@ -118,7 +118,7 @@ one more memory location if <i>interpolation</i> is "linear".
 		    else if (strcasecmp(tabletype, "linear") == 0)
 			addedVal = 2*coef[int(coefNum) - 1] -
 				   coef[int(coefNum) - 2];
-		    addCode(addblockinit);
+
 		}
 		else if ( strcasecmp(interptype, "none") != 0 ) {
 		    Error::abortRun(*this,
@@ -139,12 +139,7 @@ one more memory location if <i>interpolation</i> is "linear".
 			return;
 		}
 	}
-
-	codeblock(addblockinit) {
-	.ds     #$addr(addedVal)		;initialize for added value
-	.q15    #$val(addedVal)
-	.text
-	}
+	
 
 	codeblock (none) {
 	mar 	*,AR6				;

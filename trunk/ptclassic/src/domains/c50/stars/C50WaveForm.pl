@@ -6,10 +6,10 @@ A value of values is repeated at the output with period period, zero-padding
 or truncating to period if necessary.  Setting period to 0 (default) output
 the value once.  The default value is 0.1 0.2 0.3 0.4.
         }
-	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
+	version {$Id$}
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1996-1997 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -51,7 +51,7 @@ limited to 20,000 samples.
 		type { fixarray }
                 desc { One period of the output waveform. }
 		default { "0.1 0.2 0.3 0.4" }
-                attributes { A_CIRC|A_NONCONSTANT|A_UMEM}
+                attributes { A_CIRC|A_CONSTANT|A_UMEM}
 	}
         state {
 	        name { haltAtEnd }
@@ -91,22 +91,19 @@ limited to 20,000 samples.
                 type { int }
                 desc { pointer }
                 default { 0 }
-                attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+                attributes { A_NONCONSTANT|A_NONSETTABLE|A_BMEM }
         }
 
 	protected {
 		int X,len;
 	}
 
-        codeblock (org) {
-	.ds   	$addr(output)		; initialization of DC block
-        }
+       
         codeblock (dc) {
-        .q15	#$val(firstVal)
+	  lacl #$val(firstVal)
+          sacl $addr(output)
         }
-        codeblock (orgp) {
-        .text
-        }
+      
         codeblock (impulse) {
 	mar	*,AR6				; impulse
 	lar 	AR7,#$addr(output)		;Address output		=> AR7
@@ -141,7 +138,7 @@ limited to 20,000 samples.
         codeblock (zeroPaddedSequence,"") {
 	mar	*,ar2
 	lmmr	ar2,#$addr(dataCirc)
-	lacc	#$addr(value,@valueLen)
+	lacc	#($addr(value)+@valueLen)
 	samm	arcr
 	cmpr	1	
 	lar	ar3,#$addr(output)
@@ -152,16 +149,10 @@ limited to 20,000 samples.
 	smmr	ar2,#$addr(dataCirc)
 	}
 
-        codeblock(makeblock) {
-	.ds	$addr(dataCirc)		; output sample count
-       	.int	1,0
-	.text
-	}            
-
         codeblock(initDataCirc) {
-        .ds     $addr(dataCirc)		; initialization of dataCirc
-        .word   $addr(value)
-        .text
+	    mar *,ar0
+	    lar ar0,#$addr(value)
+	    sar ar0,$addr(dataCirc)
         }
 
 	setup {
@@ -178,18 +169,16 @@ limited to 20,000 samples.
 		else
 			value.resize(int(period));
 	}
-	initCode {
-		if (int(period) == 1) {
-			// special case, reproduce Const star.
-			addCode(org);
-			for (int i = 0; i < output.bufSize(); i++) addCode(dc);
-			addCode(orgp);
-		}
-		else {
-			addCode(initDataCirc);
 
-		}
+	initCode {
+	                if (int(period) == 1){
+			  addCode(dc);
+			}
+			else{
+			addCode(initDataCirc);
+			}
 	}
+
 	go {
                 if (int(haltAtEnd)) Scheduler::requestHalt();
 

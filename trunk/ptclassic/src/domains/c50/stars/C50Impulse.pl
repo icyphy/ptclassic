@@ -2,10 +2,10 @@ defstar {
 	name { Impulse }
 	domain { C50 }
 	desc { Impulse generator }
-	version { $Id$ }
-	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
+	version {$Id$}
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel, G. Arslan }
 	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1996 The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -90,9 +90,8 @@ Non-negative delay on the output (0 means no delay)
 		if (int(period) == 1) {
 			StringList constant;
 			constant.initialize();
-			constant<<"\t.ds\t$addr(output)\n\t.q15\t";
-			constant << double(pulse.asDouble());
-			constant <<"\n\t.text\n";
+			constant <<"lacl $addr(pulse)\n"
+			         << "sacl $addr(output)\n";
 			addCode(constant);
 		}
 	}
