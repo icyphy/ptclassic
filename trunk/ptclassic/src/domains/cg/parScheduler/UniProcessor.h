@@ -160,7 +160,7 @@ public:
 	// generate code
 	StringList generateCode() {
 		targetPtr->generateCode();
-		return (*targetPtr->getStream("myCode"));
+		return (*targetPtr->getStream("code"));
 	}
 
 
