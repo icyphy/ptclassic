@@ -45,7 +45,7 @@ public:
 };
 #endif /* !__GNUG__ */
 #else /* hppa ...*/
-#ifdef PT_USE_SRAND
+#ifdef PT_USE_RAND
 extern "C" {
 #include <stdlib.h>
 };
