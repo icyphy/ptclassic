@@ -7,6 +7,9 @@
 <h1><a name="BuilderDialog Widget">User's Guide to the BuilderDialog Widget</a></h1>
 The BuilderDialog widget allows the user to build documentation and indexes
 on platforms that do not have a <code>make</code> binary.
+ <P>
+<B>This is a preliminary implementation, and it is bound to change over time
+</B>
 <p>
 The BuilderDialog widget consists of a set of radio buttons that allow
 the user to choose different operations, and a set of regular buttons that
@@ -15,10 +18,23 @@ invoke different operations.
 You can access the BuilderDialog from the <code>Tools</code> submenu under
 <code>Window</code> toolbar menu.
 
-<h2>BuilderDialog Radio Buttons</h2>
-The BuilderDialog Radio Buttons allow the user to select an operation to
-be performed when the user hits the <code>OK</code> or <code>Build</code>
-buttons.  Below are the radio buttons.
+<h2>BuilderDialog Menu</h2>
+The BuilderDialog menus allow the user to choose from different catagories
+of build operations.
+<DL>
+<DT> <CODE>Build</CODE>
+<DD> Build files that are derived from Tycho source files.
+
+<DT> <CODE>Test</CODE>
+<DD> Run the Tycho Tests.
+
+<DT> <CODE>Distribute</CODE>
+<DD> This menu choice is only present if <CODE>$TYCHO/adm</CODE>
+is present.
+
+</DL>
+
+<H3>Build Menu</H3>
 <dl>
 <dt><code>Full</code>
 <dd>Do a Full build; takes about 10 minutes
@@ -37,18 +53,6 @@ and then recreates the Itcl HTML documentation using the code index.
 <dd>Build only the Class Diagram.  
 See the <A HREF="../../../editors/textedit/doc/usersGuides/ItclClassListHelp.html"><CODE>ItclClassList</CODE></A> documentation for the way to build
 custom class diagrams.
-</dl>
-
-<h2>BuilderDialog Buttons</h2>
-<dl>
-<dt><code>OK</code>
-<dd>Run the operation that is selected in the radio buttons, then
-destroy the BuilderDialog window.
-<dt><code>Cancel</code>
-Destroy the BuilderDialog window without running any build operations.
-<dt><code>Build</code>
-<dd>Run the operation that is selected in the radio buttons, but
-do not destroy the BuilderDialog window.
 </dl>
 
 <p>
