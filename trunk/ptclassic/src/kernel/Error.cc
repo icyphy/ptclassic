@@ -45,7 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 typedef const char cc;
 
-KeptGate gate;
+static KeptGate gate;
 
 static void p4(cc* m1, cc* m2, cc* m3=0, cc* m4=0) {
 	CriticalSection region(gate);

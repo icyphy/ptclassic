@@ -59,8 +59,7 @@ extern "C" {
 
 // the gate object ensures that messages come out in one piece even
 // with multi-threading.
-
-extern KeptGate gate;
+static KeptGate gate;
 
 typedef const char cc;
 
