@@ -101,7 +101,13 @@ proc ::tycho::expandPath { path } {
     }
     # If the result is not absolute, prepend the current working directory.
     if {[string first "/" $path] != 0} {
-        set path [format "%s/%s" [pwd] $path]
+	global ::env
+	if [info exists env(PTPWD)] {
+	    set CWD $env(PTPWD)
+	} {
+	    set CWD [pwd]
+	}
+        set path [format "%s/%s" $CWD $path]
     }
     
     # Get a consistent filename using "cd".  Note that this may not work
