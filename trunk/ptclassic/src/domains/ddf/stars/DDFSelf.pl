@@ -29,7 +29,7 @@ This allows the inputs and outputs of this star to be matched
 unambiguously with the inputs and outputs of the referenced galaxy.
 	}
 	version { $Id$ }
-	author { Soonhoi Ha and E. A. Lee }
+	author { Soonhoi Ha and Edward A. Lee }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -48,11 +48,6 @@ necessary.
 	}
 	seealso { fibonnacci }
 	hinclude { "InterpGalaxy.h",  "Domain.h", "DDFScheduler.h"}
-	protected {
-		InterpGalaxy *masterGal;
-		InterpGalaxy *myGal;
-		DDFScheduler  sched;
-	}
 	inmulti {
 		name { input }
 		type { ANYTYPE }
@@ -86,10 +81,15 @@ necessary.
 		arglist { "()" }
 		code { return TRUE;}
 	}
+	protected {
+		InterpGalaxy *masterGal;
+		InterpGalaxy *myGal;
+		DDFScheduler sched;
+	}
 	constructor {
 		masterGal = 0;
 		myGal = 0;
-	}	
+	}
 	destructor {
 		LOG_DEL; delete myGal;
 	}
@@ -154,7 +154,7 @@ necessary.
 			msg += "unmatched number of ports with recursion galaxy\n";
 			flag++;
 		}
-		if (flag) Error::abortRun(msg);
+		if (flag) Error :: abortRun(msg);
 	    }
 	}
 	go {
@@ -179,7 +179,7 @@ necessary.
 		sched.setGalaxy(*myGal);
 		sched.setup();
 		if (Scheduler::haltRequested()) {
-			Error :: abortRun("error in setup the scheduler in DDFSelf\n");
+			Error :: abortRun("error in setting up the scheduler");
 			return;
 		}
 	    } else {
@@ -206,7 +206,7 @@ necessary.
 	    for (j = output.numberPorts(); j > 0; j--) {
 	    	OutDDFPort& p = *(OutDDFPort*) nexto++;
 	    	numXfred = p.moveData();
-		for (int c = numXfred; c>0; c--) p.sendData();
+		for (int c = numXfred; c > 0; c--) p.sendData();
 	    }
 	}
 }
