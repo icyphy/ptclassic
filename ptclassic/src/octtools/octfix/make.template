@@ -70,7 +70,7 @@ $(DEST):	octfix
 install: makefile $(DEST) $(BINDIR)/octfix
 	
 $(BINDIR)/octfix:
-	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/octfix .)
+	(cd $(BINDIR); rm -f octfix; ln -s ../octtools/bin.$(ARCH)/octfix .)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
