@@ -34,32 +34,37 @@
 #######################################################################
 #### Graph
 # A graph is a collection of nodes that may have other nodes as parents
-# or children. This class
-# provides methods to build, browse, and edit such a data structure.
-# Data stored on the nodes of the graph are arbitrary Tcl strings. A
-# method is provided to encode the data structure as a list, which can,
-# for example, be written to a file. A method is also provided to
-# convert this list back into a graph.
+# or children. This class provides methods to build, browse, and edit
+# such a data structure. The contents of each node can be arbitrary Tcl
+# string. Graphical editors and viewers for this class, however, expect
+# the contents to be a Tcl list with an even number of elements. The
+# even elements (0, 2, 4, ...) are arbitrary keywords, and the odd
+# elements are arbitrary strings or lists. Although certain keywords
+# are understood by certain graphical display widgets, any keywords can
+# be used. A method is provided to describe the data structure as a
+# list, which can, for example, be written to a file. A method is also
+# provided to convert this list back into a graph.
 # <p>
 # Here is an example of how to use the Graph:
 # <tcl><pre>
 #    catch {delete object foo}
 #    ::tycho::Graph foo
-#    foo add a aa
-#    foo add c cc a
-#    foo add d dd a
-#    foo add e ee a c
-#    foo add f ff e a
+#    foo add a {}
+#    foo add c {} a
+#    foo add d {} a
+#    foo add e {} a
+#    foo add f {} e
 #    foo addArc d e
 #    ::tycho::post [foo describe]
 # </pre></tcl>
 # The description that is posted in the last line will be:
-# {{d dd a {}} {e ee a {c f}} {a aa {} {c d e}} {f ff e a} {c cc a {}}},
-# or some permutation of these list items. This is a list of nodes
-# in the graph.  Each node is a list of four items, the name,
-# contents, parents, and children of the node.  The <code>verifyAll</code>
-# method can be used to check the graph to make sure that all parents
-# and children that are mentioned are present.
+# "{d {} a} {e {} {a d}} {a {} {}} {f {} e} {c {} a}",
+# or some permutation of these list items. This is a list of nodes in
+# the graph. Each node is a list of three items, the name, contents,
+# and list of parents. In the above example, the contents of each node
+# is an empty list. The <code>verifyAll</code> method can be used to
+# check the graph to make sure that all parents and children that are
+# mentioned are present.
 #
 class ::tycho::Graph {
 
@@ -70,7 +75,7 @@ class ::tycho::Graph {
     ####                         public methods                    ####
 
     # Add a node to the graph.
-    method add {nodename contents {parents {}} {children {}}}
+    method add {nodename contents {parents {}}}
 
     # Add an arc between existing nodes, if it does not already exist.
     method addArc {parent child}
@@ -87,6 +92,9 @@ class ::tycho::Graph {
     # Delete a node from the graph.
     method delete {nodename}
 
+    # Delete an arc from the graph.
+    method deleteArc {parent child}
+
     # Return a list that describes the graph.
     method describe {}
 
@@ -99,23 +107,35 @@ class ::tycho::Graph {
     # Return the parents of a node.
     method parents {nodename}
 
+    # Give the specified node a new name.
+    method rename {nodename newname}
+
     # Return a list of names of the roots of the graph (nodes with no parents).
     method roots {}
 
     # Set a new name and contents for the specified node.
-    method setNode {oldname newname contents}
+    method setContents {nodename contents}
 
     # Verify that a node is present.
     method verify {nodename}
+
+    # Verify that all parents and children of nodes are present.
+    method verifyAll {{repair {}}}
+
+    # Return the "visited" flag for the specified node.
+    method visited {node}
+
+    # Reset the "visited" flag for all nodes.
+    method visitedInit {{initvalue 0}}
+
+    # Set the "visited" flag for the given node.
+    method visitedSet {node {value 1}}
 
     ###################################################################
     ####                   protected methods                       ####
 
     # In listname, remove the olditem and append the newitem.
     protected method listreplace {listname olditem newitem}
-
-    # Verify that all parents and children of nodes are present.
-    method verifyAll {}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -124,13 +144,18 @@ class ::tycho::Graph {
     protected variable rootnames {}
 
     # Array storing the contents of each node of the tree.
-    protected variable contentsstring
+    protected variable contentslist
 
     # Array storing the parent name for each node of the tree.
     protected variable parentnames
 
     # Array storing the list of children for each node.
     protected variable childrennames
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    private variable visitedFlag
 }
 
     ###################################################################
@@ -139,19 +164,20 @@ class ::tycho::Graph {
 
 #######################################################################
 #### add
-# Add a node to the graph with the specified parents and children (if
-# any). It is not verified whether the parents or children exist, so
-# when the complete graph has been constructed, <code>verifyAll</code>
-# should be invoked. It is an error if the specified node name already
-# exists in the graph.
+# Add a node to the graph with the specified name and contents. If
+# parents are specified (using the optional third argument), then this
+# node is added to the list of children of the parents. Otherwise, it
+# is identified as a root node. It is not verified whether the parents
+# exist (indeed, they frequently will not exist) so when the complete
+# graph has been constructed, <code>verifyAll</code> should be invoked.
+# It is an error if the specified node name already exists in the
+# graph.
 #
-body ::tycho::Graph::add {nodename contents {parents {}} {children {}}} {
+body ::tycho::Graph::add {nodename contents {parents {}}} {
     if {$nodename == {}} {
         error "Graph: Blank node name is not allowed."
-    } elseif {$nodename == {all}} {
-        error "Graph: Cannot use \"all\" for a node name."
     }
-    if [info exists contentsstring($nodename)] {
+    if [info exists contentslist($nodename)] {
         error "Graph: Duplicate node name in graph: $nodename"
     }
     if {$parents == {}} {
@@ -164,14 +190,17 @@ body ::tycho::Graph::add {nodename contents {parents {}} {children {}}} {
         }
     }
     set parentnames($nodename) $parents
-    set childrennames($nodename) $children
-    set contentsstring($nodename) $contents
+    set contentslist($nodename) $contents
+    if ![info exists childrennames($nodename)] {
+        set childrennames($nodename) {}
+    }
 }
 
 #######################################################################
 #### addArc
 # Add an arc between existing nodes, if it doesn't already exist.
-# If it does exist, ignore.
+# If it does exist, ignore.  It is an error if either node does
+# not exist.
 #
 body ::tycho::Graph::addArc {parent child} {
     verify $parent
@@ -200,7 +229,7 @@ body ::tycho::Graph::clear {} {
     set rootnames {}
     # The catch is in case the forest is already clear
     catch {
-        unset contentsstring
+        unset contentslist
         unset parentnames
         unset childrennames
     }
@@ -213,7 +242,7 @@ body ::tycho::Graph::clear {} {
 #
 body ::tycho::Graph::contents {nodename} {
     verify $nodename
-    return $contentsstring($nodename)
+    return $contentslist($nodename)
 }
 
 #######################################################################
@@ -250,26 +279,46 @@ body ::tycho::Graph::delete {nodename} {
     }
     # Finally, remove from the database.
     unset parentnames($nodename)
-    unset contentsstring($nodename)
+    unset contentslist($nodename)
     unset childrennames($nodename)
+}
+
+#######################################################################
+#### deleteArc
+# Delete an existing arc between existing nodes.
+# If it does not exist, ignore.  It is an error if either node does
+# not exist.
+#
+body ::tycho::Graph::deleteArc {parent child} {
+    verify $parent
+    verify $child
+    set pindex [lsearch -exact $childrennames($parent) $child]
+    set cindex [lsearch -exact $parentnames($child) $parent]
+    if {$pindex >= 0 && $cindex >= 0} {
+        set childrennames($parent) \
+                [lreplace $childrennames($parent) $pindex $pindex]
+        set parentnames($child) \
+                [lreplace $parentnames($child) $cindex $cindex]
+    }
 }
 
 #######################################################################
 #### describe
 # Return a list that describes the graph. The returned list contains
 # one element for each node in the graph, in arbitrary order. Each node
-# is described as a list with four elements: the node name, the
-# contents, the list of parents, and the list of children.
+# is described as a list with three elements: the node name, the
+# contents, and the list of parents.
 #
 body ::tycho::Graph::describe {} {
     set result {}
-    foreach node [array names contentsstring] {
+    set searchid [array startsearch contentslist]
+    while {[set node [array nextelement contentslist $searchid]] != {}} {
         lappend result [list \
                 $node \
-                $contentsstring($node) \
-                $parentnames($node) \
-                $childrennames($node)]
+                $contentslist($node) \
+                $parentnames($node)]
     }
+    array donesearch contentslist $searchid
     return $result
 }
 
@@ -278,35 +327,21 @@ body ::tycho::Graph::describe {} {
 # Return 1 if the specified node exists, otherwise, return 0.
 #
 body ::tycho::Graph::exists {nodename} {
-    return [info exists contentsstring($nodename)]
+    return [info exists contentslist($nodename)]
 }
 
 #######################################################################
 #### init
 # Initialize the graph from a description. The format of the
 # description should be compatible with that produced by the
-# <code>describe</code> method.
+# <code>describe</code> method.  The graph should be verified
+# after this using <code>verifyAll</code>.
 #
 body ::tycho::Graph::init {description} {
     clear
     foreach node $description {
-        set nodename [lindex $node 0]
-        set contentsstring($nodename) [lindex $node 1]
-        set parents [lindex $node 2]
-        set children [lindex $node 3]
-        set parentname($nodename) $parents
-        set childrennames($nodename) $children
-        if {$parents == {}} {
-            lappend rootnames $nodename
-        } {
-            # A parent is specified
-            lappend childrennames($parent) $nodename
-        }
-        foreach child $children {
-            lappend parentnames($child) $child
-        }
+        eval add $node
     }
-    verifyAll
 }
 
 #######################################################################
@@ -319,6 +354,39 @@ body ::tycho::Graph::parents {nodename} {
     return $parentnames($nodename)
 }
 
+#######################################################################
+#### rename
+# Give a node a new name. It is an error if the new name is already the
+# name of another node. It is assumed that the parents and children of
+# the node exist (that the graph has been verified using
+# <code>verifyAll</code>).
+#
+body ::tycho::Graph::rename {nodename newname} {
+    verify $nodename
+    if [info exists contentslist($newname)] {
+        error "Duplicate node name in graph: $newname"
+    }
+    set parents $parentnames($nodename)
+    if {$parents == {}} {
+        listreplace rootnames $nodename $newname
+    } {
+        foreach parent $parents {
+            listreplace childrennames($parent) $nodename $newname
+        }
+    }
+    foreach child $childrennames($nodename) {
+        listreplace parentnames($child) $nodename $newname
+    }
+    set parentnames($newname) $parents
+    set childrennames($newname) $childrennames($nodename)
+    set contentslist($newname) $contentslist($nodename)
+    if {$nodename != $newname} {
+        unset parentnames($nodename)
+        unset childrennames($nodename)
+        unset contentslist($nodename)
+    }
+}
+
 #####################################################################
 #### roots
 # Return a list the names of the root nodes (those with no parents).
@@ -328,50 +396,115 @@ body ::tycho::Graph::roots {} {
 }
 
 #######################################################################
-#### setNode
-# Set a new name and contents for the specified node.
-# It is an error if the new name is already the name of another node.
+#### setContents
+# Set the contents of a node.
 #
-body ::tycho::Graph::setNode {oldname newname contents} {
-    verify $oldname
-    if {$newname != $oldname && [info exists contentsstring($newname)]} {
-        error "Duplicate node name in graph: $newname"
-    }
-    set parents $parentnames($oldname)
-    if {$parents == {}} {
-        listreplace rootnames $oldname $newname
-    } {
-        foreach parent $parents {
-            verify $parent
-            listreplace childrennames($parent) $oldname $newname
-        }
-    }
-    foreach child $childrennames($oldname) {
-        verify $child
-        listreplace parentnames($child) $oldname $newname
-    }
-    set parentnames($newname) $parents
-    set childrennames($newname) $childrennames($oldname)
-    set contentsstring($newname) $contents
-    if {$oldname != $newname} {
-        unset parentnames($oldname)
-        unset childrennames($oldname)
-        unset contentsstring($oldname)
-    }
+body ::tycho::Graph::setContents {nodename contents} {
+    verify $nodename
+    set contentslist($nodename) $contents
 }
 
 #######################################################################
 #### verify
 # Verify that a node exists in the graph with the name given by the
 # argument. Trigger an error if not. In other words, if this method
-# returns, the nodename is valid.
+# returns, the nodename is valid.  Note that this method does not
+# check the validity of the parents and children of a node.  That
+# is done by <code>verifyAll</code>.
 #
 body ::tycho::Graph::verify {nodename} {
-    if ![::info exists contentsstring($nodename)] {
+    if ![::info exists contentslist($nodename)] {
         error "No node in forest $this with name $nodename"
     }
 }
 
+#######################################################################
+#### verifyAll
+# Verify that all parents and children of all nodes exist as nodes in
+# the graph. If no argument is given, or if the argument is an empty string,
+# then trigger an error on the first invalid one encountered. Otherwise,
+# repair the graph by removing the offending reference to a parent or
+# child.
+#
+body ::tycho::Graph::verifyAll {{repair {}}} {
+    if ![array exists contentslist] {
+        # graph is empty.
+        return
+    }
+    # For some reason, array search cannot be used here.
+    # set id [array startsearch contentslist]
+    # while {[set node [array nextelement contentslist $id]] != {}}
+
+    foreach node [array names contentslist] {
+        set idx 0
+        foreach parent $parentnames($node) {
+            if ![info exists contentslist($parent)] {
+                if {$repair != {}} {
+                    # Remove the offending parent entry.
+                    set parentnames($node) \
+                            [lreplace $parentnames($node) $idx $idx]
+                    if {$parentnames($node) == {}} {
+                        lappend rootnames $node
+                    }
+                } {
+                    error "Missing node referenced as a parent: $parent"
+                }
+            }
+            incr idx
+        }
+        set idx 0
+        foreach child $childrennames($node) {
+            if ![info exists contentslist($child)] {
+                if {$repair != {}} {
+                    # Remove the offending child entry.
+                    set childrennames($node) \
+                            [lreplace $childrennames($node) $idx $idx]
+                } {
+                    error "Missing node referenced as a child: $child"
+                }
+            }
+            incr idx
+        }
+    }
+    # array donesearch contentslist $id
+}
+
+#######################################################################
+#### visited
+# Return the "visited" flag for the specified node. The method
+# <code>visitedInit</code> has to be run before this can be run. This
+# flag can be used in graph traversal algorithms to keep track of nodes
+# that have been already visited.
+#
+body ::tycho::Graph::visited {node} {
+    return $visitedFlag($node)
+}
+
+#######################################################################
+#### visitedInit
+# Reset the "visited" flag for all nodes. This flag can be used in
+# graph traversal algorithms to keep track of nodes that have been
+# already visited.
+#
+body ::tycho::Graph::visitedInit {{initvalue 0}} {
+    if [info exists contentslist] {
+        set searchid [array startsearch contentslist]
+        while {[set node [array nextelement contentslist $searchid]] != {}} {
+            set visitedFlag($node) $initvalue
+        }
+        array donesearch contentslist $searchid
+    }
+}
+
+#######################################################################
+#### visitedSet
+# Set the "visited" flag for the given node. This flag can be used in
+# graph traversal algorithms to keep track of nodes that have been
+# already visited.
+#
+body ::tycho::Graph::visitedSet {node {value 1}} {
+    set visitedFlag($node) $value
+}
 
     ###################################################################
     ###################################################################
@@ -394,20 +527,3 @@ body ::tycho::Graph::listreplace {listname olditem newitem} {
     lappend $listname $newitem
 }
 
-#######################################################################
-#### verifyAll
-# Verify that all parents and children exist as nodes in the graph.
-# Trigger an error on the first invalid one encountered.
-#
-body ::tycho::Graph::verifyAll {} {
-    set id [array startsearch parentnames]
-    while {[set node [array nextelement parentnames $id]] != {}} {
-        foreach parent $parentnames($node) {
-            verify $parent
-        }
-        foreach child $childrennames($node) {
-            verify $child
-        }
-    }
-    array donesearch parentnames $id
-}
