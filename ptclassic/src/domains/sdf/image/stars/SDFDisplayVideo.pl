@@ -9,7 +9,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location	{ ~haskell/Ptolemy }
+	location	{ SDF image palette }
 	desc {
 Accept a stream of black-and-white images from input GrayImages
 and generate output in URT-RLE format. Send the output to the command
