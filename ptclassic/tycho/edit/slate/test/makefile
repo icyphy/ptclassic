@@ -69,6 +69,8 @@ GRAPHICAL_TESTS = \
 	testRectangle.itcl \
 	testLine.itcl \
 	testFrame.itcl \
+	testLabeledItem.itcl \
+	testLabeledRect.itcl \
 	testLabeledFrame.itcl \
 	testTute.itcl
 
