@@ -45,7 +45,8 @@ CGStar.h \
 CGTarget.h \
 CGUtilities.h \
 CGWormhole.h \
-Code.h \
+CodeBlock.h \
+CodeStream.h \
 IntArray.h \
 MReq.h \
 MemMap.h \
@@ -53,6 +54,7 @@ NamedList.h \
 ProcMemory.h \
 Profile.h \
 SymbolList.h \
+UniqueStringList.h \
 
 # Header files
 HDRS= $(H_WITH_MATCH) \
