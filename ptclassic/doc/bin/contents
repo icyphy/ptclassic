@@ -14,7 +14,7 @@ fgrep -f ${dircmds}fgrep.contents $* > /tmp/ptc$$
 awk -f ${dircmds}awk.contents /tmp/ptc$$ > /tmp/ptcf$$
 
 # Print it.
-ditroff -me -P${PRINTER} ${dirheader}contents /tmp/ptcf$$
+ditroff -me -P$PRINTER ${dirheader}contents /tmp/ptcf$$
 
 /bin/rm /tmp/ptc$$ /tmp/ptcf$$
 exit 0
