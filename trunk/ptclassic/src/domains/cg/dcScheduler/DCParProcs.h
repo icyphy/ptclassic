@@ -39,7 +39,6 @@ These schedule classes are used by the parallel scheduler
 
 *****************************************************************/
 
-#include "DCUniProc.h"
 #include "DCNode.h"
 #include "ParProcessors.h"
 
@@ -53,12 +52,8 @@ class DCParProcs : public ParProcessors {
 
 public:
 	// Constructor takes number of processors as an argument
-	DCParProcs(int procs, MultiTarget* mtarget);
-	~DCParProcs();
-
-	// Returns a pointer to the proper UniProc
-	DCUniProc *getSchedule(int num) { return &(schedules[num]); }
-	UniProcessor* getProc(int num);
+	DCParProcs(int n, MultiTarget* t) : ParProcessors(n,t) {}
+	~DCParProcs() {}
 
 	// return the amount of the IPC.
 	int commAmount() { return commCount; }
@@ -85,10 +80,6 @@ public:
 
 protected:
 	ParNode* createCommNode(int i);
-
-private:
-	// schedules
-	DCUniProc* schedules;
 };
 
 #endif
