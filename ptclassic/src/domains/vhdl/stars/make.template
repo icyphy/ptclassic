@@ -57,51 +57,52 @@ INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR) \
 LIB=libvhdlstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
+# put any derived stars first in the list
 PL_SRCS = \
+ VHDLXgraph.pl \
+ VHDLAdd.pl \
+ VHDLAddCx.pl \
+ VHDLAddInt.pl \
+ VHDLAverage.pl \
  VHDLBlackHole.pl \
  VHDLConst.pl \
- VHDLConstInt.pl \
  VHDLConstCx.pl \
- VHDLImpulse.pl \
- VHDLRect.pl \
- VHDLWaveForm.pl \
- VHDLWaveFormCx.pl \
+ VHDLConstInt.pl \
+ VHDLCos.pl \
+ VHDLCxToFloat.pl \
+ VHDLCxToRect.pl \
+ VHDLDistributor.pl \
+ VHDLDownSample.pl \
+ VHDLExp.pl \
+ VHDLFIR.pl \
+ VHDLFIRInt.pl \
+ VHDLFloatToCx.pl \
  VHDLFork.pl \
  VHDLGain.pl \
  VHDLGainInt.pl \
- VHDLAdd.pl \
- VHDLAddInt.pl \
- VHDLAddCx.pl \
- VHDLSub.pl \
- VHDLSubInt.pl \
+ VHDLImpulse.pl \
+ VHDLInhomogeneous.pl \
+ VHDLIntegrator.pl \
+ VHDLLMS.pl \
  VHDLMpy.pl \
- VHDLMpyInt.pl \
  VHDLMpyCx.pl \
+ VHDLMpyInt.pl \
+ VHDLPolarToRect.pl \
+ VHDLQuant.pl \
  VHDLRamp.pl \
  VHDLRampInt.pl \
- VHDLAverage.pl \
- VHDLIntegrator.pl \
- VHDLFIR.pl \
- VHDLFIRInt.pl \
- VHDLLMS.pl \
- VHDLInhomogeneous.pl \
- VHDLDistributor.pl \
- VHDLUpSample.pl \
- VHDLDownSample.pl \
- VHDLCos.pl \
- VHDLSin.pl \
- VHDLExp.pl \
+ VHDLRect.pl \
  VHDLRectToCx.pl \
- VHDLCxToRect.pl \
  VHDLRectToPolar.pl \
- VHDLPolarToRect.pl \
- VHDLCxToFloat.pl \
- VHDLFloatToCx.pl \
- VHDLQuant.pl \
+ VHDLSin.pl \
+ VHDLSub.pl \
+ VHDLSubInt.pl \
+ VHDLUpSample.pl \
+ VHDLWaveForm.pl \
+ VHDLWaveFormCx.pl \
  VHDLWindow.pl \
- VHDLXgraph.pl \
  VHDLXMgraph.pl \
- VHDLXYgraph.pl \
+ VHDLXYgraph.pl
 
 # The .cc files
 SRCS =	$(PL_SRCS:.pl=.cc)
