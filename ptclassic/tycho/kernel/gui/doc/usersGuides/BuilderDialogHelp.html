@@ -11,9 +11,7 @@ on platforms that do not have a <code>make</code> binary.
 <B>This is a preliminary implementation, and it is bound to change over time
 </B>
 <p>
-The BuilderDialog widget consists of a set of radio buttons that allow
-the user to choose different operations, and a set of regular buttons that
-invoke different operations.
+The BuilderDialog is a swall widget consisting of only a menu bar.
 <p>
 You can access the BuilderDialog from the <code>Tools</code> submenu under
 <code>Window</code> toolbar menu.
@@ -36,15 +34,26 @@ is present.
 
 <H3>Build Menu</H3>
 <dl>
+<dt><code>Check Files</code>
+<dd>Check the Tycho installation and list what files need to be updated.
+
 <dt><code>Full</code>
 <dd>Do a Full build; takes about 10 minutes
-The Full build performs all of the operations below.
+The Full build performs most of the operations below.
  <br>The Full build takes a long time because it creates the Itcl HTML
 documentation, then creates the code index from the Itcl HTML documentation,
 and then recreates the Itcl HTML documentation using the code index.
 
+<dt><code>'make all'</code>
+<dd>Get the latest sources from version control and create
+<CODE>tclIndex</CODE> files.  <CODE>Full</CODE> does not perform this
+operation, since it requires a <CODE>make</CODE> binary.
+
 <dt><code>Glimpse</code>
 <dd>Build the <A HREF="GlimpseHelp.html">Glimpse</A> database.
+<CODE>Full</CODE> does not perform this operation, since it requires
+the <CODE>glimpseindex</CODE> binary.
+
 <dt><code>Itcl HTML docs</code>
 <dd>Build the Itcl HTML docs; takes about 9 minutes
 <dt><code>Indices Only</code>
@@ -53,6 +62,14 @@ and then recreates the Itcl HTML documentation using the code index.
 <dd>Build only the Class Diagram.  
 See the <A HREF="../../../editors/textedit/doc/usersGuides/ItclClassListHelp.html"><CODE>ItclClassList</CODE></A> documentation for the way to build
 custom class diagrams.
+
+<dt> <CODE>Tcl extensions</CODE>
+
+<dd> Build the <A HREF="../../../doc/coding/buildtclexts.html">Tcl
+Extensions</A>.  The <CODE>Full</CODE> menu choice does not perform
+this operation as it requires a <CODE>make</CODE> binary, a C compiler,
+Java JDK1.1.1 and the Tcl sources.
+
 </dl>
 
 <p>
