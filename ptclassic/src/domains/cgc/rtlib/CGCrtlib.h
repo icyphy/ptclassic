@@ -43,6 +43,13 @@ extern "C" {
 /* Define the prototype for memset */
 #include <string.h>
 
+/* Define the CHAR_BIT constant which is the number of bits per byte */
+#include <limits.h>
+
+#ifndef CHAR_BIT
+#define CHAR_BIT 8
+#endif
+
 /* 
  Definition of single (FIX_WORD) and double (FIX_DWORD) unsigned 
  word types.
@@ -68,8 +75,8 @@ extern "C" {
 #endif
 
 #define FIX_MAX_LENGTH 64 
-#define FIX_BITS_PER_WORD  (8*sizeof(FIX_WORD))
-#define FIX_WORDS_PER_FIX  ((FIX_MAX_LENGTH+FIX_BITS_PER_WORD-1) / FIX_BITS_PER_WORD)
+#define FIX_BITS_PER_WORD (CHAR_BIT * sizeof(FIX_WORD))
+#define FIX_WORDS_PER_FIX (1 + ((FIX_MAX_LENGTH - 1)/FIX_BITS_PER_WORD))
 
 typedef FIX_WORD fix[FIX_WORDS_PER_FIX];
 typedef struct {
