@@ -108,7 +108,10 @@ currentTarget(0), definingGal(0)
 PTcl::~PTcl() {
 	LOG_DEL; delete universe;
 	removeEntry();
-	if (myInterp) { LOG_DEL; delete interp;}
+	if (myInterp) {
+		Tcl_DeleteInterp(interp);
+		interp = 0;
+	}
 }
 
 // Attach the PTcl to a new universe
