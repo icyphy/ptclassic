@@ -14,40 +14,56 @@ $Id$
 **************************************************************************/
 
 #include "Particle.h"
-#include <stream.h>
 #include "Output.h"
-
+#include <builtin.h>		// for gnu form(...) function
 extern Error errorHandler;
-extern PlasmaList plasmaList;
+
+// Here are the plasmas!
+// Create instances of each particle and plasma
+
+static IntSample iproto;
+static FloatSample fproto;
+static ComplexSample cproto;
+
+Plasma* Plasma :: plasmaList = 0;
+static Plasma intPlasma(iproto);
+static Plasma floatPlasma(fproto);
+static Plasma complexPlasma(cproto);
 
 	///////////////////////////////////////
 	// class Particle
 	///////////////////////////////////////
 
-Particle* Particle :: clone() 
-{
-	return (plasmaList.getPlasma(readType()))->get() ;
+void Particle :: badCopy (const Particle& src) const {
+	StringList msg = "Attempt to copy ";
+	msg += src.readType();
+	msg += " Particle to ";
+	msg += readType();
+	msg += " Particle";
+	errorHandler.error (msg);
 }
 
-void Particle :: die()
-{
-	plasmaList.getPlasma(readType())->put(this) ;
-}
+extern const dataType ANYTYPE = "ANYTYPE";
 
 	///////////////////////////////////////
 	// class IntSample
 	///////////////////////////////////////
 
+extern const dataType INT = "INT";
+
+Particle* IntSample :: clone () { return intPlasma.get();}
+
+void IntSample :: die () { intPlasma.put(this);}
+
+Particle* IntSample :: useNew () { return new IntSample;}
+
 Particle& IntSample :: operator = (const Particle& p)
 {
 	if(compareType(p)) {
 		// Types are compatible, so we can copy
-		data = int(p);
-		}
-	else
-		errorHandler.error(
-		"Particle: attempt to assign incompatible Particle types"
-			);
+		data = ((IntSample&)p).data;
+		link = 0;
+	}
 	return *this;
 }
 
@@ -71,29 +87,34 @@ void IntSample :: operator << (Complex& c) {data=int(abs(c));}
 	// class FloatSample
 	////////////////////////////////////////
 
+extern const dataType FLOAT = "FLOAT";
+
+Particle* FloatSample :: useNew () { return new FloatSample;}
+
+Particle* FloatSample :: clone () { return floatPlasma.get();}
+
+void FloatSample :: die () { floatPlasma.put(this);}
+
 Particle& FloatSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-                data = float(p);
-                }
-        else
-                errorHandler.error(
-                "Particle: attempt to assign incompatible Particle types"
-                        );
+                data = ((FloatSample&)p).data;
+		link = 0;
+	}
 	return *this;
 }
 
 
 dataType FloatSample :: readType() const {return FLOAT;}
- 
+
         // Cast to an int, float, and Complex
 FloatSample :: operator int () const {return int(data);}
 FloatSample :: operator float () const {return data;}
 FloatSample :: operator Complex () const {return Complex(data);}
 
 char* FloatSample :: print () const { return form("%f",data);}
- 
+
  
         // Initialize the Particle
 void FloatSample :: initialize() {data=0.0;}
@@ -107,16 +128,21 @@ void FloatSample :: operator << (Complex& c) {data=abs(c);}
         // class ComplexSample
         ////////////////////////////////////////
 
+extern const dataType COMPLEX = "COMPLEX";
+
+Particle* ComplexSample :: useNew () { return new ComplexSample;}
+
+Particle* ComplexSample :: clone () { return complexPlasma.get();}
+
+void ComplexSample :: die () { complexPlasma.put(this);}
+
 Particle& ComplexSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-                data = Complex(p);
-                }
-        else
-                errorHandler.error(
-                "Particle: attempt to assign incompatible Particle types"
-                        );
+		data = ((ComplexSample&)p).data;
+		link = 0;
+	}
         return *this;
 }
 
@@ -141,76 +167,29 @@ void ComplexSample :: operator << (int i) {data=Complex(i);}
 void ComplexSample :: operator << (float f) {data=Complex(f);}
 void ComplexSample :: operator << (Complex& c) {data=c;}
 
-
-	////////////////////////////////////////
-	// class Plasma
-	////////////////////////////////////////
-
-Particle* Plasma :: get()
+Plasma* Plasma :: getPlasma(dataType t)
 {
-	Particle* p;
+	Plasma* p = plasmaList;
 
-	if(size() == 0) // A new Particle has to be created
-
-		switch (type) {
-
-			case INT:
-				p = new IntSample(0); 
-				break;
-
-			case FLOAT:
-				p = new FloatSample(0); 
-				break;
-
-			case COMPLEX:
-				p = new ComplexSample(0);
-				break;
-		
-			/**********************************************
-			***********************************************
-			* NOTE: Add new Particle types here ***********
-			***********************************************
-			**********************************************/
-
-			default:
-				errorHandler.error(
-				"Plasma: Unsupported Particle type requested"
-				);
-				p = NULL;
-			}
-        else {
-		// need the cast to avoid a warning
-                p = (Particle *)Stack::popTop();
-		p->initialize();
+	while (p) {
+		dataType dt = p->head->readType();
+		if (t == dt) return p;
+		p = p->nextPlasma;
 	}
-
-	return p;
+	if(t == ANYTYPE)
+		errorHandler.error("can't create Plasma with type ANYTYPE");
+	else
+		errorHandler.error("unknown Particle type ", t);
+	return 0;
 }
 
-	/////////////////////////////////////////
-	// class PlasmaList
-	/////////////////////////////////////////
+// Plasma destructor
 
-Plasma* PlasmaList :: getPlasma(dataType t)
-{
-	Plasma* p;
-
-	if(t == ANYTYPE)
-		errorHandler.error(
-		"PlasmaList: cannot create Plasma with dataType=ANYTYPE"
-				);
-
-	// Find a Plasma, if one with that type is already on the list
-	for(int i= size(); i>0; i--) {
-		p = (Plasma*)next();
-		if(p->type == t )
-			return p;
-		}
-
-	// One doesnt exist, so we have to create it
-	p = new Plasma(t);
-	// Add it to the list
-	put(p); 	
-
-	return p;
+Plasma :: ~Plasma () {
+	Particle* p = head->link;
+	while (p) {
+		delete head;
+		head = p;
+		p = p->link;
+	}
 }
