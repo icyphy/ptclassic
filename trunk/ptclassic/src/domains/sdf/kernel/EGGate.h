@@ -97,7 +97,7 @@ private :
 class EGGate {
 public:
 	EGGate(EGNode* n, PortHole* p = 0) : 
-		parent(n), pPort(p), arc(0), far(0) {}
+		parent(n), arc(0), far(0), pPort(p){}
  
 	virtual ~EGGate();
 
