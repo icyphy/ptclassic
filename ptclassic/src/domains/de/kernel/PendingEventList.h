@@ -62,10 +62,15 @@ public:
 	~PendingEventList();
 
 	// Append to tail and return pointer to element
-	Link * appendGet( CqLevelLink * obj ); 
+	Link * appendGet(CqLevelLink * obj); 
 
 	// return and remove head of list
-	void freeHeadAndRemove(); 
+	void removeHeadAndFree(); 
+
+	// Free a CqLevelLink. Note that this function requires
+	// the destinationRef to be set to 0 before being called.
+	// Otherwise an error will occur.
+	void freeEvent(CqLevelLink * obj);
 
 	// Clear list
 	LinkedList::initialize;
@@ -74,6 +79,11 @@ public:
 	LinkedList::size;
 
 private:
+        // Return and remove head of list
+        CqLevelLink * getHeadAndRemove() {
+	    return (CqLevelLink *)LinkedList::getHeadAndRemove();
+	}
+
 	// Remove an element from the list
 	CqLevelLink * remove( Link * obj ); 
 
