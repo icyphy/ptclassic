@@ -1,0 +1,15 @@
+#!/bin/csh -f
+# Author: Jose Luis Pino
+# Version: $Id$
+#
+# Copyright (c) 1990-%Q% The Regents of the University of California.
+# 	All Rights Reserved.
+#
+# usage: tychoOpen file1 file2 file3 ....
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+if ( ! $?PTARCH ) setenv PTARCH `$PTOLEMY/bin/ptarch`
+
+foreach file ($argv)
+    $PTOLEMY/bin.$PTARCH/itkwish -f $PTOLEMY/tycho/lib/tychoSend.tcl "File::openContext $file"
+end
