@@ -13,7 +13,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -163,6 +163,9 @@ public:
 	// run method for code-generation targets
 	/* virtual */ void compileRun();
 
+	// Compute the BMLB bound for the galaxy
+	int computeBMLB();
+
 	// Set up and execute everything related to RPMC+DPPO
 	int callRPMC(Galaxy& gal);
 
@@ -194,6 +197,9 @@ public:
 	void printStarNumbers();
 
 protected:
+	// create the nodelist
+	void createNodelist(Galaxy& gal);
+
 	// generate top-sort using RPMC
 	int RPMC(AcyCluster* gr);
 
