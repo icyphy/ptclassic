@@ -1,5 +1,7 @@
 #!/bin/csh -f
 
+# $Id$
+
 # Print a man page for a Ptolemy star.  Star can have its domain prepended to
 # it (e.g., SDFLMS) or not (e.g., LMS).  Looks through all the domains in
 # $PTOLEMY/src/domains unless the PTMAN path is set to a subset.  If DISPLAY
