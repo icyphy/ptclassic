@@ -34,7 +34,22 @@
 #######################################################################
 #### ControlSubpanel
 # A superclass for control panels that can be packed into
-# in instance of ControlPanel.
+# in instance of ControlPanel. This class provides a graphical
+# widget for these sub-panels and a simple way of connecting
+# embedded control widgets into the control panels.
+#
+# To create a sub-panel sub-class, just:
+# <ol>
+# <li>In the constructor, create any graphical elements needed,
+# such as sliders and buttons.
+# <li>Implement the requestConnect{} method. This method will be
+# called by the ControlPanel{} at the appropriate time. The method
+# should call the protected method connect{} to connect connect
+# control widgets to callback names.
+# </ol>
+#
+# See the <a href="../controls"><code>$TYCHO/typt/controls</code></a>
+# directory for examples of sub-panels.
 #
 class ::tycho::ControlSubpanel {
     inherit ::tycho::TWidget
