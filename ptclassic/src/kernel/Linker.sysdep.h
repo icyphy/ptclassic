@@ -216,7 +216,7 @@ inline size_t getpagesize() { return 4096;}
 extern "C" int getpagesize(void);
 #endif /* SVR4 */
 #else
-#ifdef SOLARIS2_6
+#ifdef PTSOL2_6
 extern "C" int getpagesize(void);
 #else
 extern "C" size_t getpagesize(void);
