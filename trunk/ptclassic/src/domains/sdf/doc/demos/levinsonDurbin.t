@@ -7,21 +7,23 @@ Use the Levinson Durbin algorithm to estimate the parameters of an AR process.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
-.IE LevDur
-.IE "Levinson-Durbin algorithm"
-.IE "system identification"
+.Ie "system identification"
 This demo generates an auto-regressive (AR) random process by filtering
 Gaussian white noise with an all-pole filter.
 Then it estimates the autocorrelation of the process
 and uses the Levinson Durbin algorithm to estimate the parameters
 of the process.
+.Ie "Levinson-Durbin algorithm"
 The transfer function of the all-pole filter is:
+.Ie "allpole filter"
+.Ie "filter, allpole"
 .EQ
 H(z) ~=~ 1 over {1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2}
 .EN
 where in this case $d sub 1 ~=~ -0.9$
 and $d sub 2 ~=~ 0.5$.
 The \fIlp\fR output of the
+.Ie LevDur
 .c LevDur
 star is estimates of the negative of these parameters, as can be verified
 using the plot produced by this demo.
@@ -39,6 +41,8 @@ white noise.
 .pp
 The reflection coefficients are also plotted, but it is difficult
 in this demo to verify that they are correct.
+.Ie "reflection coefficients"
+.Ie "coefficients, reflection"
 However, the fact that they become very small after the second one
 is reassuring because the AR noise is second order.
 Note that the definition of reflection coefficients is not universal
@@ -50,6 +54,9 @@ star.
 The ones generated correspond to the definition in most other texts,
 and correspond to the definition of partial-correlation (PARCOR)
 coefficients in the statistics literature.
+.Ir "partial correlation coefficients"
+.Ir "coefficients, partial correlation"
+.Ir "PARCOR"
 .pp
 The prediction error power is plotted as a function of the
 predictor order.  The first sample corresponds to the zero-th

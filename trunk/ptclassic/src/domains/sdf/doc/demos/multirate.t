@@ -3,7 +3,6 @@
 .SD
 A universe that upsamples a signal by a ratio of 5/2.
 .DE
-.IE FIR
 .SV $Revision$ "October 15, 1990"
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
@@ -15,7 +14,11 @@ and
 stars and feeds it into an
 .c FIR
 star with parameters set to upsample
-by a ratio of 5/2.  The FIR star internally uses a polyphase
+by a ratio of 5/2.
+.Ie FIR
+.Ie "multirate signal processing"
+.Ie "sample rate conversion"
+The FIR star internally uses a polyphase
 filter structure for efficient computation.
 Because of properties of synchronous dataflow scheduling, when you
 run this universe for 25 iterations, you get 50 samples of the input
@@ -27,6 +30,7 @@ twice the output sample rate.  The low cutoff conservatively prevents
 aliasing due to the sample rate conversions.
 The filter was designed using the optfir program, which can be invoked
 through the pigi menu.
+.Ir "optfir"
 .SA
 optfir,
 interp,

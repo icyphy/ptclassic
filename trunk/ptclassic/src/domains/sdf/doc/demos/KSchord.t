@@ -20,6 +20,9 @@ The initial burst yields the fairly broad spectrum characteristic of the
 onset of a complex sound, with high frequencies predominant.  Relative to
 the fundamental and second harmonic, the higher frequencies die down
 fairly rapidly, so that the underlying lower tones prevail to the end.
+.Ir "Karplus-Strong algorithm"
+.Ir "sound synthesis"
+.Ir "plucked string"
 .UH "REFERENCES"
 .ip [1]
 Richard Moore,
