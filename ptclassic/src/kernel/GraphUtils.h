@@ -184,12 +184,10 @@ public:
     BlockPortIter::remove;
 };
 
-// Find the original port from a alias chain
-// This could be a method of the class generic port
+// Find the topmost port of an alias chain
+// This is historical, and should be replaced by uses of getTopAlias().
 inline GenericPort& aliasedPort(GenericPort& port) {
-    GenericPort* p = &port;
-    while (p->aliasFrom()) p = p->aliasFrom();
-    return *p;
+    return port.getTopAlias();
 }
 
 // This iterates over the successor Blocks of a Block.  A successor
