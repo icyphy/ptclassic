@@ -163,7 +163,7 @@ void ParProcessors::findCommNodes(ParGraph* graph, EGNodeList& readyNodes) {
 	int hidden = FALSE;
 
 	EGIter iter(*graph);
-	ParNode *pg, *desc;
+	ParNode *pg;
 	while ((pg = (ParNode*) iter++) != 0) {
 	   hidden = FALSE;
 	   EGGateLinkIter giter(pg->descendants);
