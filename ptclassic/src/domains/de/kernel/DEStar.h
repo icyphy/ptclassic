@@ -7,10 +7,9 @@ $Id$
 
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
- Date of revision: 8/28/90
 
- Definition of DEStar and DERepeatStar (which fires itself repeatedly).
- Revisoin : add DEPriorityStar.
+ Revised 10/2/90 -- DERepeatStar and DEPriorityStar now have their
+ own .h files.
 
 *******************************************************************/
 #ifndef _DEStar_h
@@ -21,8 +20,9 @@ $Id$
 #include "Particle.h"
 #include "Output.h"
 #include "Star.h"
-#include "PriorityQueue.h"
 #include "IntState.h"
+
+class PriorityQueue;
 
 	////////////////////////////////////
 	// class DEStar
@@ -60,67 +60,6 @@ public:
 	// initialize().
 	PriorityQueue *eventQ;
 
-};
-
-	////////////////////////////////////
-	// class DERepeatStar
-	////////////////////////////////////
-
-class DERepeatStar : public DEStar {
-
-protected:
-	// specify the feedback links to fire itself.
-	InDEPort feedbackIn;
-	OutDEPort feedbackOut;
-
-	// access the feedback arc.
-	void refireAtTime(float when);	// send next event.
-	int canGetFired();		// can it be fired?
-
-public:
-	// define the common start function for this class
-	// completionTime should be setup beforehand.
-	void start();
-
-	// constructor
-	DERepeatStar();
-};
-
-	////////////////////////////////////
-	// class DEPriorityStar
-	////////////////////////////////////
-
-class DEPriorityStar : public DERepeatStar {
-
-protected:
-	int numEvent;		// number of queued event
-
-	Queue* inQueue;		// queue for each input ports
-	IntState queueSize;	// size of inQueue
-
-	PriorityQueue priorityList;	// priority list of input ports
-
-public:
-	// setup priorityList
-	void priority(InDEPort& p, int level)
-		{priorityList.levelput(&p, float(level)) ;}
-
-	// define start() method to initialize queues, etc.
-	void start();
-
-	// when an event is coming while the star is executing the previous
-	// event, queue that event and return FALSE.
-	// If the incoming event is runnable, return TRUE.
-	int isItRunnable();
-
-	// get the particle associated with an input port
-	Particle* fetchData(InDEPort& p);
-
-	// go to the next execution. Usually called at the end of go().
-	void goToNext() {if (numEvent > 0) refireAtTime(completionTime) ;}
-
-	// constructor
-	DEPriorityStar();
 };
 
 #endif
