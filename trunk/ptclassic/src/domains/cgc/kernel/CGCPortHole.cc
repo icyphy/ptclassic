@@ -53,6 +53,7 @@ void CGCPortHole :: initialize() {
 	asLinearBuf = TRUE;
 	manualFlag = FALSE;
 	maxBuf = 1;
+	manualOffset = 0;
 }
 
 // allocate a CGCGeodesic.  Use hashstring for the name since we expect
@@ -67,10 +68,29 @@ Geodesic* CGCPortHole::allocateGeodesic() {
 }
 
 void CGCPortHole::setFlags() {
+	if (isItOutput() && (embedded() || embedding())) {
+		asLinearBuf = TRUE;
+		hasStaticBuf = TRUE;
+		return;
+	}
 	if (bufSize() % numXfer() != 0)
 		asLinearBuf = FALSE;
 	if ((numXfer() * parentReps()) % bufSize() != 0)
 		hasStaticBuf = FALSE; 
+}
+
+		////////////////////////////////////////
+		// Buffer type determination routines
+		////////////////////////////////////////
+
+// Set the buffer type.
+void CGCPortHole :: setBufferType() {
+	if (isItOutput()) {
+		CGCPortHole* farP = (CGCPortHole*) far();
+		if (embedded()) myType = EMBEDDED;
+		else if (farP && farP->embedded()) myType = EMBEDDED;
+		else myType = OWNER;
+	}
 }
 
 BufType CGCPortHole::bufType() const { 
@@ -90,6 +110,12 @@ BufType CGCPortHole::bufType() const {
 // porthole start writing from offset 0, and the input porthole
 // start reading from the (maxBuf - offset).
 int CGCPortHole :: initOffset() {
+	if (manualOffset) {
+		offset = manualOffset;
+		asLinearBuf = FALSE;
+		hasStaticBuf = FALSE;
+		return TRUE;
+	}
 	if (isItOutput()) {
 		offset = numXfer() - 1;
 		return TRUE;
@@ -249,23 +275,14 @@ int CGCPortHole :: isConverted(){
 	else if (strcmp(type(),resolvedType()) == 0) converted = FALSE;
 	else if (strcmp(type(), ANYTYPE) == 0) converted = FALSE;
 	else if ((strcmp(type(),COMPLEX) == 0) || 
-	    (strcmp(type(),"COMPLEXARRAY") == 0)) converted = TRUE;
+	    (strcmp(type(),"COMPLEXARRAY") == 0)) converted = 1;
 	else if ((strcmp(resolvedType(),COMPLEX) == 0) || 
-	    (strcmp(resolvedType(),"COMPLEXARRAY") == 0)) converted = TRUE;
+	    (strcmp(resolvedType(),"COMPLEXARRAY") == 0)) converted = -1;
 	else converted = FALSE;
 
 	return converted;
 }
 
-const char* CGCPortHole :: getLocalGeoName() {
-	if (bufName) return bufName;
-	if (isItInput() || (isConverted() == FALSE))
-		 return geo().getBufName();
-	StringList temp = geo().getBufName();
-	temp << "_local";
-	return (const char*) temp;
-}
-	
 // Dummy
 int MultiCGCPort :: someFunc() { return 1; }
 
