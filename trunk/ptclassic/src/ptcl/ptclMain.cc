@@ -16,8 +16,10 @@ Eventually we will use streams instead and move this stuff into the PTcl
 class.
 
 **************************************************************************/
-
+static const char file_id[] = "ptclMain.cc";
 #include "PTcl.h"
+#include "Linker.h"
+#include "Scheduler.h"
 #include "Error.h"
 #include <stdio.h>
 
@@ -35,7 +37,11 @@ main (int argc, char** argv) {
 		fprintf (stderr, "Usage: ptcl [file]\n");
 		return 1;
 	}
+	Linker::init(argv[0]);	// initialize incremental link module
 	int tty = isatty(0);
+	if (tty) {		// set up interrupt handler
+		Scheduler::catchInt();
+	}
 	// all this stuff should be moved into the PTcl class.
 	// streams would be better than stdio.
 
