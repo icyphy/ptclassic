@@ -67,20 +67,20 @@ X11_LIBSPEC= -lX11
 X11EXT_LIBSPEC = -lXext
 #X11EXT_LIBSPEC = -L/usr/X11/lib -lXext
 
-TCL_ROOT=$(ROOT)/tcl
+TCL_ROOT=$(ROOT)/tcltk
 
 # Directory containing Tcl include files
-TCL_INCDIR=$(TCL_ROOT)/tcl7.1/include
+TCL_INCDIR=$(TCL_ROOT)/tcl/include
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.1/lib/$(ARCH) -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(ARCH)/lib -ltcl
 
 # Directory containing Tk include files
-TK_INCDIR=$(TCL_ROOT)/tk3.4/include
+TK_INCDIR=$(TCL_ROOT)/tk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/tk3.4/lib/$(ARCH) -ltk -lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/tk/lib/$(ARCH) -ltk -lXpm
 
 #-----------------------------------------------------------------------
 # 		Global options to use
