@@ -68,6 +68,10 @@ class ::tycho::RevControlRCS {
     # Check out the file associated with a File object.
     proc checkOut {object} {}
 
+    # Check out the previous checked in file, and remove from history
+    # FIXME: Need to add in the following:
+    proc fixRecent {object version} {::tycho::inform "Not yet implemented"}
+
     # Return 1 if the given file is under revision control, 0 otherwise.
     proc isUnderRevControl {file} {}
 
