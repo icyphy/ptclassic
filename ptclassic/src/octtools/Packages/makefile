@@ -35,7 +35,7 @@ DIRS = avl cp da errtrap fang fc gu harpoon kd lel list mm nle oct octmm \
 
 
 # "leaf" directories with a make.template
-MTDIRS = avl cp da errtrap fang fc gu harpoon kd lel list mm nle oct octmm \
+MTDIRS = avl cp da errtrap fang fc gu harpoon kd lel list nle oct octmm \
 	oh options pep port pq region st symbolic symlib tap th timer \
 	tr uprintf utility vov vulcan
 
