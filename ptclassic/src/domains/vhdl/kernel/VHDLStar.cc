@@ -120,12 +120,10 @@ StringList VHDLStar :: expandRef(const char* name) {
   
   // Check if it's a State reference.
   if ((state = stateWithName(name)) != 0) {
-    StringList tempName = targ()->sanitizedFullName(*state);
-    ref = sanitize(tempName);
-//    ref << "_";
-//    ref << firing;
+      ref = starSymbol.lookup(state->name());
+//    ref << "_" << firing;
     
-    targ()->registerState(state, firing);
+    targ()->registerState(state, ref, firing);
   }
   
   // Check if it's a PortHole reference.
@@ -191,17 +189,14 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 //    StringList initVal;
 
     if (state->isArray()) {
-      StringList tempName = targ()->sanitizedFullName(*state);
-      ref = sanitize(tempName);
+      ref = starSymbol.lookup(state->name());
 
       // generate constant for index from state
       if (offsetState != NULL) {
 	int offsetInt = *(IntState*)offsetState;
-	targ()->registerState(state, firing, offsetInt);
-	ref << "_P";
-	ref << offsetInt;
-//	ref << "_";
-//	ref << firing;
+	targ()->registerState(state, ref, firing, offsetInt);
+	ref << "_P" << offsetInt;
+//	ref << "_" << firing;
       }
 
       // generate constant for index
@@ -211,11 +206,9 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 	for (int i=0; offset[i]>='0' && offset[i]<='9'; i++) {
 	  offsetInt = 10*offsetInt + (offset[i]-'0');
 	}
-	ref << "_P";
-	ref << offsetInt;
-//	ref << "_";
-//	ref << firing;
-	targ()->registerState(state, firing, offsetInt);
+	targ()->registerState(state, ref, firing, offsetInt);
+	ref << "_P" << offsetInt;
+//	ref << "_" << firing;
       }
     }
 
