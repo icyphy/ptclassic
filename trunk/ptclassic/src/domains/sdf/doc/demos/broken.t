@@ -20,7 +20,7 @@ of sample rate inconsistencies.
 .Ie "inconsistent SDF system"
 .Ie "sample rate inconsistencies"
 The
-c. Add
+.c Add
 star requires a single input sample on both input arcs, but because of the
 .c UpSample
 star, its input arcs have different sample rates.
