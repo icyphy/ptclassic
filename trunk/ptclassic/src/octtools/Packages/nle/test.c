@@ -34,6 +34,7 @@ static char SccsId[]="$Id$";
 /* open chip, get the bag "NLE_BAG", and merge the cells inside */
 
 /*ARGSUSED*/
+int
 main(argc,argv)
 int argc;
 char **argv;
