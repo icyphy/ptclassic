@@ -57,7 +57,7 @@ StringList CGCStar :: getActualRef(CGCPortHole* port, const char* offset) {
 	if (port->bufSize() > 1) {
 		ref << "[(";
 		if (port->staticBuf() == FALSE) {
-	    		ref << targ()->offsetName(port);
+			ref << targ()->offsetName(port);
 		} else {
 			ref << port->bufPos();
 		}
@@ -100,7 +100,7 @@ StringList CGCStar::expandRef(const char* name)
 			ref << port->getLocalGeoName();
 			if (port->numXfer() > 1) ref << "[0]";
 		} else {
-			ref << getActualRef(port,0);
+			ref << getActualRef(port, 0);
 		}
 	}
     }
@@ -186,9 +186,8 @@ void CGCStar :: initBufPointer() {
 	BlockPortIter next(*this);
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*) next++) != 0) {
-		StringList out;
 		decideBufferType(p);		// buffer type determination.
-		out << initializeOffset(p);
+		StringList out = initializeOffset(p);
 		out << initializeBuffer(p);
 		if (out.length() > 0) addMainInit(out);
 	}
@@ -281,16 +280,17 @@ void CGCStar :: moveDataFromShared() {
 		if (flag > 0)
 			ep = (CGCPortHole*) farP->embedded();
 
+		StringList pname = targ()->offsetName(p);
+		StringList aname = targ()->appendedName(*p, "copy_ix");
+
 		if (p->numXfer() > 1) {
 			code << "\t{ int i,j,k;\n\t for(i = 0; i < ";
 			code << p->numXfer() << "; i++) {\n";
-			code << "\t\t j = (";
-			code << targ()->offsetName(p);
+			code << "\t\t j = (" << pname;
 			int temp = p->bufSize() - p->numXfer() + 1;
 			code << " + " << temp;
 			code << " + i) % " << p->bufSize() << ";\n";
-			code << "\t\t k = (j - ";
-			code << targ()->appendedName(*p, "copy_ix") << " + ";
+			code << "\t\t k = (j - " << aname << " + ";
 			code << p->bufSize() << ") % ";
 			code << p->bufSize() << ";\n";
 			code << "\t\t if (" << farP->numXfer(); 
@@ -305,11 +305,9 @@ void CGCStar :: moveDataFromShared() {
 			code << "[k];\n\t}\n\t}\n";
 		} else {
 			code << "\t{ int j,k;\n";
-			code << "\t j = (";
-			code << targ()->offsetName(p);
+			code << "\t j = (" << pname;
 			code << " + i) % " << p->bufSize() << ";\n";
-			code << "\t k = (j - ";
-			code << targ()->appendedName(*p, "copy_ix") << " + ";
+			code << "\t k = (j - " << aname << " + ";
 			code << p->bufSize() << ") % ";
 			code << p->bufSize() << ";\n";
 			code << "\t if (" << farP->numXfer(); 
@@ -431,22 +429,24 @@ void CGCStar :: doTypeConversion() {
 				addInclude("<math.h>");
 				code << getAbs((const char*) temp);
 			} else {
-				code << getActualRef(p, "j") << ".real = ";
+				StringList ar = getActualRef(p, "i");
+				code << ar << ".real = ";
 				code << p->getLocalGeoName() << "[i];\n\t\t";
-				code << getActualRef(p, "j") << ".imag = 0";
+				code << ar << ".imag = 0";
 			}
 			code << ";\n\t}}\n"; 
 		} else {
 			code << "\t";
+			StringList ar = getActualRef(p, 0);
 			if (strcmp(p->type(),COMPLEX) == 0) {
-				code << getActualRef(p, 0) << " = ";
+				code << ar << " = ";
 				addInclude("<math.h>");
 				StringList temp = p->getLocalGeoName();
 				code << getAbs((const char*) temp);
 			} else {
-				code << getActualRef(p, 0) << ".real = ";
+				code << ar << ".real = ";
 				code << p->getLocalGeoName() << ";\n\t";
-				code << getActualRef(p, 0) << ".imag = 0";
+				code << ar << ".imag = 0";
 			}
 			code << ";\n";
 		}
@@ -464,11 +464,12 @@ void CGCStar :: updateOffsets() {
 	while ((p = (CGCPortHole*) next++) != 0) {
 		if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
 			if (p->numberTokens == p->bufSize()) continue;
-			code2 << "\t" << t->offsetName(p) << " += ";
+			StringList pname = t->offsetName(p);
+			code2 << "\t" << pname << " += ";
 			code2 << p->numberTokens << ";\n\tif (";
-			code2 << t->offsetName(p) << " >= ";
+			code2 << pname << " >= ";
 			code2 << p->bufSize() << ")\n\t\t";
-			code2 << t->offsetName(p) << " -= ";
+			code2 << pname << " -= ";
 			code2 << p->bufSize() << ";\n";
 		}
 	}
@@ -523,8 +524,10 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 
 		// If it is embedding inputs;
 		if (p->embedding()) {
+			StringList pname = targ()->appendedName(*p, "copy");
+
 			out << "    " << whichType(p->resolvedType());
-			out << " " << targ()->appendedName(*p, "copy");
+			out << " " << pname;
 			out << '[' << p->numXfer() << "];\n";
 			if (dimen <= p->numXfer()) { 
 				// If the input on this arc does not have
@@ -532,7 +535,7 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 				out << "    " << whichType(p->resolvedType());
 				out << "* " << p->getGeoName();
 				out << " = ";
-				out << targ()->appendedName(*p, "copy");
+				out << pname;
 				out << ";\n";
 				return out;
 			}
@@ -614,26 +617,28 @@ StringList CGCStar :: initializeBuffer(CGCPortHole* p) {
 		return out;
 
 	} else if (p->bufType() == COPIED) {
+		StringList temp = targ()->appendedName(*p, "copy");
 		out << "    { int i;\n    for (i = 0; i < ";
 		out << p->numXfer() << "; i++) {\n\t";
-		out << typelessPortInit(p->resolvedType(), 
-					targ()->appendedName(*p, "copy"));
+		out << typelessPortInit(p->resolvedType(), temp);
 		out << "    }}\n";
 	} 
 
 	// for copied and owner buffer
 	if (p->bufSize() > 1) {
 		// initialize output buffer
+		StringList init = 
+			typelessPortInit(p->resolvedType(),p->getGeoName());
+
 		out << "    { int i;\n    for (i = 0; i < ";
-		out << p->bufSize() << "; i++) {\n\t";
-		out << typelessPortInit(p->resolvedType(),p->getGeoName());
-		out << "    }}\n";
+		out << p->bufSize() << "; i++) {\n\t" << init << "    }}\n";
 	}
 
 	// for automatic type conversion.
 	if (p->isConverted() && (p->numXfer() > 1)) {
 		out << "    { int i;\n    for (i = 0; i < ";
 		out << p->numXfer() << "; i++) {\n\t";
+
 		StringList temp = p->getLocalGeoName();
 		out << typelessPortInit(p->type(),(const char*) temp);
 		out << "    }}\n";
@@ -652,7 +657,7 @@ StringList CGCStar :: declareOffset(const CGCPortHole* p) {
 	if ((p->bufSize() > 1) && (p->staticBuf() == FALSE)) {
 		emptyFlag = FALSE;
 		out << "    " << "int ";
-		out << targ()->appendedName(*p,"ix") << ";\n";
+		out << targ()->appendedName(*p, "ix") << ";\n";
 	}
 	// copy_offset definition.
 	if (p->isItInput()) {
@@ -661,8 +666,7 @@ StringList CGCStar :: declareOffset(const CGCPortHole* p) {
 		    (farP->embedding() && farP->bufType() == COPIED))) {
 			emptyFlag = FALSE;
 			out << "    " << "int ";
-			out << targ()->appendedName(*p, "copy_ix");
-			out << " = 0;\n";
+			out << targ()->appendedName(*p,"copy_ix") << " = 0;\n";
 		}
 	}
 	return out;
@@ -711,13 +715,24 @@ StringList typelessStateInit(const char* typeName, const char* val) {
 }	
 		
 // declare and initialize state
+// Note: no automatic aggregate initialization is possibile inside
+// function.
+
 StringList CGCStar :: declareState(const State* s) {
+	int flag = targ()->makingFunc();
+
+	StringList sname = targ()->correctName(*s);
 	StringList out;
-	out << "    " << whichType(s->type()) <<  " ";
-	out << targ()->correctName(*s);
+	out << "    " << whichType(s->type()) <<  " " << sname;
 
 	if (s->size() > 1) {
-		out << "[" << s->size() <<  "] = {\n";
+		StringList initS;
+
+		out << "[" << s->size();
+
+		if (flag) out << "];\n";
+		else out <<  "] = {\n";
+
 		StringList temp = s->currentValue();
 		const char* sval = temp;
 		int leng = 0;
@@ -731,18 +746,30 @@ StringList CGCStar :: declareState(const State* s) {
 				c = *sval++;
 			}
 			*wc = 0;
-			leng += strlen(wval) + 3;
-			if (leng > 80) {
-				out << "\n";
-				leng = strlen(wval) + 3;
+			StringList sinit = typelessStateInit(s->type(),wval);
+
+			if (flag) {
+				initS << "\t" << sname;
+				initS << "[" << i << "] = " << sinit << ";\n";
+			} else {
+				leng += strlen(wval) + 3;
+				if (leng > 80) {
+					out << "\n";
+					leng = strlen(wval) + 3;
+				}
+				out << sinit;
+				if (i != maxIndex)  out << ",  ";
 			}
-			out << typelessStateInit(s->type(),wval);
-			if (i != maxIndex)  out << ",  ";
 		}
-		out << " };\n";
+		if (flag) {
+			addMainInit(initS);
+		} else {
+			out << " };\n";
+		}
 	} else {
-		out << " = ";
-		out << typelessStateInit(s->type(),s->currentValue()) << ";\n";
+		StringList temp = s->currentValue();
+		StringList it = typelessStateInit(s->type(),temp);
+		out << " = " << it << ";\n";
 	}
 	emptyFlag = FALSE;
 	return out;
