@@ -39,7 +39,8 @@ include $(ROOT)/mk/config-g++.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
-include $(ROOT)/mk/config-g++.shared.mk
+# gcc-2.7.2 cannot produce shared libraries under hpux 10, so we can't do this
+#include $(ROOT)/mk/config-g++.shared.mk
 
 # Note that hppa does support shl_load() style dynamic linking, see
 # $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
