@@ -29,7 +29,11 @@ TYCHO=${TYCHO-$PTOLEMY/tycho}
 HOME=${HOME-.}
 ARCH=${PTARCH-`(/bin/arch || /bin/machine || $PTOLEMY/bin/arch ) 2> /dev/null`}
 PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$PTARCH/pigiRpc}
-COMMAND=${COMMAND-$PIGIRPC}
+
+#COMMAND=${COMMAND-$PIGIRPC}
+if [ -z "$COMMAND" ]; then
+    COMMAND=$PIGIRPC
+fi
 DISPLAY=${DISPLAY-'unix:0'}
 TAILARGS=${TAILARGS-''}
 TCL_LIBRARY=${TCL_LIBRARY-$PTOLEMY/tcltk/tcl/lib/tcl}
