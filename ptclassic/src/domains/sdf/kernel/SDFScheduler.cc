@@ -24,8 +24,6 @@ $Id$
 
 **************************************************************************/
 
-extern Error errorHandler;
-
 extern const char SDFdomainName[];
 
 /************************************************************************
@@ -67,8 +65,12 @@ int SDFScheduler :: run (Block& galaxy) {
 		errorHandler.error ("SDF schedule is invalid -- can't run");
 		return;
 	}
+	if (haltRequestFlag) {
+		errorHandler.error ("Can't continue after run-time error");
+		return;
+	}
 	galaxy;			// dummy statement
-	while (numItersSoFar < numIters) {
+	while (numItersSoFar < numIters && !haltRequestFlag) {
 		runOnce();
 		numItersSoFar++;
 	}
@@ -97,11 +99,18 @@ void SDFScheduler :: runOnce () {
 			PortHole& port = currentStar.nextPort();
 			port.beforeGo();
 		}
-		currentStar.go();
+
+		if (!haltRequestFlag)
+			currentStar.go();
+
+		if (haltRequestFlag) { invalid = TRUE; return;}
+
 		for (j = currentStar.numberPorts(); j > 0; j--) {
 			PortHole& port = currentStar.nextPort();
 			port.afterGo();
 		}
+
+		if (haltRequestFlag) { invalid = TRUE; return;}
 	}
 }
 
@@ -117,6 +126,7 @@ int SDFScheduler :: setup (Block& block) {
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	invalid = FALSE;
+	haltRequestFlag = FALSE;
 
 // check connectivity
 	StringList msg = checkConnect (galaxy);
@@ -128,6 +138,10 @@ int SDFScheduler :: setup (Block& block) {
 
 	// initialize galaxy and all contents.
 	galaxy.initialize();
+	if (haltRequestFlag) {
+		invalid = TRUE;
+		return FALSE;
+	}
 
 	// initialize the SpaceWalk member
 	alanShepard.setupSpaceWalk(galaxy);
