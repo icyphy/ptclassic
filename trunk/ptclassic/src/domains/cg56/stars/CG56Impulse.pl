@@ -24,7 +24,7 @@ which is then set to zero.
 		name { impulseSize }
 		type { fix }
 		desc { impulse size }
-		default { 1.0 }
+		default { ONE }
 	}
  	state {
 		name { pulse }
