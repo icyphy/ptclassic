@@ -6,11 +6,11 @@
 PTOLEMY       = /usr/users/ptolemy
 
 DIRS =	\
+	$(PTOLEMY)/src/domains/cg/doc \
+	$(PTOLEMY)/src/domains/thor/doc \
 	$(PTOLEMY)/src/domains/de/doc \
 	$(PTOLEMY)/src/domains/ddf/doc \
 	$(PTOLEMY)/src/domains/sdf/doc \
-	$(PTOLEMY)/src/domains/cg/doc \
-	$(PTOLEMY)/src/domains/thor/doc \
 	$(PTOLEMY)/doc/main
 
 # omitted from main distribution
