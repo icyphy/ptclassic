@@ -48,7 +48,8 @@ set unique 0
 proc tkerror message {
     ptkImportantMessage .error "Background error in Tk"
     global REPORT_TCL_ERRORS
-    if {$REPORT_TCL_ERRORS == 1} {ptkImportantMessage .error $message}
+    if {$REPORT_TCL_ERRORS == 1 && $message != ""} \
+        {ptkImportantMessage .error $message}
 }
 
 
