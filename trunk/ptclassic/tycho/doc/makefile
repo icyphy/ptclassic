@@ -55,12 +55,12 @@ EXTRA_SRCS =	abbreviations.html \
 		releasenotes.html \
 		releasenotes0.1.html \
 		releasenotes0.1.1.html \
-		running.html \
 		sponsors.html \
 		troubleshooting.html \
 		tymac.html \
 		tychoFaq.html \
-		tynt.html
+		tynt.html \
+		tyunix.html
 
 
 MISC_FILES =		coding img tychoClasses.dag
