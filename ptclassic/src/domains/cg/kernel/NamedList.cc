@@ -105,14 +105,12 @@ int NamedList::remove(const char* name)
 }
 
 // Delete all the nodes in the list.
+// Modeled after NamedObjList::deleteAll
 void NamedList::deleteNodes()
 {
-    ListIter node(*this);
     NamedNode* n;
-    while ((n = (NamedNode*)node++) != 0) {
-	SequentialList::remove(n);
+    while ((n = (NamedNode*)SequentialList::getAndRemove()) != 0) {
 	LOG_DEL; delete n;
-	node.reset();
     }
 }
 
