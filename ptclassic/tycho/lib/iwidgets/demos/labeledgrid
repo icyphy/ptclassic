@@ -1,7 +1,7 @@
 #!/bin/sh
 # ----------------------------------------------------------------------
 #  DEMO: Query Widget in [incr Widgets]
-# $Id$
+# @(#)query	1.2 08/12/97
 # ----------------------------------------------------------------------
 #\
 	exec itkwish -f "$0" ${1+"$@"}
@@ -96,7 +96,7 @@ proc createQuery {win tag} {
 
             $q add entry name -label "Name:" -columnspan 3
             $q add entry street -label "Street:" -columnspan 3
-            $q add entry city -label "City/Street:" -columnspan 2
+            $q add entry city -label "City/State:" -columnspan 2
             $q add entry state -style plain
             $q add entry zip -label "ZIP:"
             $q vskip
@@ -105,7 +105,7 @@ proc createQuery {win tag} {
             $q vskip
             $q add entry email -label "E-mail:" -columnspan 2
             $q vskip
-            $q vskip  ;# FIXME: need to be able to insert space
+            $q vskip -minsize 12
 
             $q group interests -label "Interests:" -columnspan 3
             $q add checkbutton interests.compilers -text "Compilers"
@@ -138,7 +138,7 @@ proc createQuery {win tag} {
                     -onvalue On -offvalue Off \
                     -initial On -text "Check me too!"
 
- 	    $q group gee -label "Group here" -rowspan 4 \
+            $q group gee -label "Group here" \
                     -rowspan 2 -childspan 3 -childstyle simple
 
             $q group gee.a -label "Choose one" -initial foo
@@ -148,7 +148,6 @@ proc createQuery {win tag} {
             $q group gee.b -label "Choose another" -initial goo
             $q add radiobutton gee.b.a -text Goo -value goo
             $q add radiobutton gee.b.b -text Boo -value boo
-
 
             $q group radio -label "Radio here" -rowspan 2 -columnspan 1 \
                     -initial A
@@ -185,3 +184,38 @@ proc createQuery {win tag} {
         }
     }
 }
+
+set junk {
+    $win add query boxed.q \
+	    -columnspan 8 -childspan 3 \
+            -childstyle boxed -labelcolor blue {
+	
+	group entries -label "Enter here" \
+		-rowspan 2 -colspan 2 \
+                -childspan 2 -childstyle simple {
+	    
+	    add entry foo -label "An entry" -initial "Some text"
+	    add entry oof -label "Another entry" -initial "Some more text"
+	}
+	group checks -label "Check here" -rowspan 2 -columnspan 1
+	add checkbutton a -label "A checkbutton" -initial 1 -text "Check me!"
+	add checkbutton b -label "Another" -initial 1 -text "Check me too!"
+    }
+    group gee -label "Group here" \
+	    -rowspan 2 -childspan 3 -childstyle simple {
+
+	group a -label "Choose one" -initial foo {
+	    add radiobutton a -text Foo -value foo
+	    add radiobutton b -text Bar -value bar
+	}
+	group b -label "Choose another" -initial goo {
+	    add radiobutton a -text Goo -value goo
+	    add radiobutton b -text Boo -value boo
+	}
+    }
+    group radio -label "Radio here" -rowspan 2 -columnspan 1 -initial A {
+	add radiobutton a -value M -text "Mars calling"
+	add radiobutton b -value E -text "Earth calling"
+    }
+}
+set junk ""
