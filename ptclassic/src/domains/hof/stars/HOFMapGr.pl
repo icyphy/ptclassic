@@ -2,6 +2,15 @@ defstar {
 	name { MapGr }
 	domain { HOF }
 	derivedFrom { Map }
+	version { $Id$ }
+	author { Edward A. Lee, Tom Lane }
+	location { HOF main library }
+	copyright {
+Copyright (c) 1994-%Q% The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	desc {
 A variant of the Map star where the replacement block is specified
 by graphically connecting it.
@@ -11,31 +20,14 @@ The HOFNop stars are the only exception: they may be used in addition to the
 one replacement block in order to control the order of connection.
 	}
 	htmldoc {
-See the documentation for the
-<tt>Map</tt>
+See the documentation for the <tt>Map</tt>
 star, from which this is derived, for background information.
 The parameter values of the graphically connected replacement block
 serve as default parameter values for all replacement blocks.
-These values will be overridden with the <i>parameter_map</i> parameter,
+These values can be overridden with the <i>parameter_map</i> parameter,
 where the format is the same as in other higher-order stars.
         }
-	version { $Id$ }
-	author { Edward A. Lee }
-	copyright {
-Copyright (c) 1990-%Q% The Regents of the University of California.
-All rights reserved.
-See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty provisions.
-	}
-	location { HOF main library }
-	ccinclude { "InfString.h" }
-	outmulti {
-	  name {exout}
-	  type {anytype}
-	  desc {
-Example of a connection to the replacement block
-          }
-	}
+
 	inmulti {
 	  name {exin}
 	  type {anytype}
@@ -43,6 +35,17 @@ Example of a connection to the replacement block
 Example of a connection to the replacement block
           }
 	}
+	outmulti {
+	  name {exout}
+	  type {anytype}
+	  desc {
+Example of a connection to the replacement block
+          }
+	}
+
+	ccinclude { "Galaxy.h" }
+	ccinclude { "InfString.h" }
+
 	constructor {
 	  input_map.clearAttributes(A_SETTABLE);
 	  output_map.clearAttributes(A_SETTABLE);
@@ -50,21 +53,17 @@ Example of a connection to the replacement block
 	  where_defined.clearAttributes(A_SETTABLE);
 	  parameter_map.setInitValue("");
 	}
+
 	method {
-	  name { preinitialize }
-	  access { public }
+	  name { doExpansion }
+	  type { int }
 	  code {
-	    HOFBaseHiOrdFn::preinitialize();
-
-	    Galaxy* mom = idParent();
-	    if(!mom) return;
-
 	    // Make sure we know the number of connections on the
 	    // input and output multiPortHoles.
-	    initConnections(input);
-	    initConnections(output);
-	    initConnections(exout);
-	    initConnections(exin);
+	    if (! initConnections(input)) return 0;
+	    if (! initConnections(output)) return 0;
+	    if (! initConnections(exout)) return 0;
+	    if (! initConnections(exin)) return 0;
 
 	    // At this point, any HOFNop stars will have been disconnected,
 	    // so there should be only one example star.
@@ -74,8 +73,12 @@ Example of a connection to the replacement block
 	    MPHIter nextexo(exout);
 	    MPHIter nextexi(exin);
 
-	    // Make the first block connection, and in the process, build
-	    // the input_map and output_map and blockname states.
+	    // Make the first block connection, and in the process,
+	    // build the input_map and output_map.
+	    // CAUTION: StringArrayState treats '#' as a comment introducer.
+	    // To avoid failing with port names like 'input#1', we put
+	    // quote marks around them.  A port name containing a quote will
+	    // still cause havoc...
 	    PortHole *pi, *po, *pei, *peo;
 	    InfString inputMap, outputMap;
 	    GenericPort *sourcegp, *destgp;
@@ -86,48 +89,57 @@ Example of a connection to the replacement block
 	      if ((pi = nexti++) == 0) {
 		Error::abortRun(*this,
 				"Not enough inputs for the specified replacement block");
-		return;
+		return 0;
 	      }
-	      if (!(destgp = breakConnection(peo))) return;
-	      if (inputMap.numPieces() > 0) inputMap += " ";
+	      if (!(destgp = breakConnection(peo))) return 0;
+	      inputMap += " \"";
 	      inputMap += destgp->name();
-	      if (!connectInput(pi,destgp)) return;
+	      inputMap += "\"";
+	      if (!connectInput(pi,destgp)) return 0;
 	    }
-	    input_map.setInitValue((const char*)inputMap);
-	    input_map.initialize();
+	    input_map.setCurrentValue((const char*)inputMap);
+
 	    // Iterate over the outputs next
 	    while ((pei = nextexi++) != 0) {
 	      if ((po = nexto++) == 0) {
 		Error::abortRun(*this,
 				"Not enough outputs for the specified replacement block");
-		return;
+		return 0;
 	      }
-	      if (!(sourcegp = breakConnection(pei))) return;
-	      if (outputMap.numPieces() > 0) outputMap += " ";
+	      if (!(sourcegp = breakConnection(pei))) return 0;
+	      outputMap += " \"";
 	      outputMap += sourcegp->name();
-	      if (!connectOutput(po, sourcegp)) return;
+	      outputMap += "\"";
+	      if (!connectOutput(po, sourcegp)) return 0;
 	    }
+	    output_map.setCurrentValue((const char*)outputMap);
+
 	    if (!myblock) {
 	      Error::abortRun(*this,
 			      "No connections to a replacement block!");
-	      return;
+	      return 0;
 	    }
-	    output_map.setInitValue((const char*)outputMap);
-	    output_map.initialize();
-	    blockname.setInitValue(myblock->name());
-	    blockname.initialize();
+	    if (myblock->parent() != idParent()) {
+	      Error::abortRun(*this,
+			      "Replacement block is in wrong galaxy");
+	      return 0;
+	    }
 
 	    // Iterate over the remaining blocks.
-	    if (!iterateOverPorts(nexti,nexto,mom,2)) return;
+	    if (!iterateOverPorts(nexti,nexto,2)) return 0;
 
-	    // Set the parameter values after all the clones have been created
+	    // Set the original block's parameter values only after
+	    // all the clones have been created,
 	    // so that cloning takes the right default values.
-	    if(!setParams(myblock, 1)) return;
+	    if (!setParams(myblock, 1)) return 0;
 
-	    mom->deleteBlockAfterInit(*this);
+	    return 1;
 	  }
 	}
+
 	// Override the default method to create new block.
+	// Note we do not use the blockname parameter;
+	// so it is not necessary to set the blockname state above.
 	method {
 	    name { createBlock }
 	    type { "Block*" }
@@ -137,22 +149,18 @@ Example of a connection to the replacement block
               Block *block = myblock->clone();
 	      if (!block) {
 		Error::abortRun(*this,
-				"Unable to create instance of block: ",
+				"Unable to create an instance of block: ",
 				myblock->name());
 		return NULL;
 	      }
-	      // Set the target
+	      // Set the target in the new block.
+	      // This may no longer be necessary, but it can't hurt.
 	      if (target()) block->setTarget(target());
 
-	      // Choose a unique name for the block.
-	      StringList instancename = "Map_";
-	      instancename += (const char*)myblock->name();
-	      instancename += count++;
-	      // The following amounts to a small memory leak
-	      // FIXME: see notes in HOFBase.pl
-	      const char* instance = hashstring(instancename);
-
-	      mom.addBlock(*block,instance);
+	      // Add to parent galaxy.  Note that since new blocks are
+	      // added at the end of the block list, this block will get
+	      // a preinitialize call later on.
+	      mom.addBlock(*block, genUniqueName(mom, myblock->name()));
 
 	      return block;
             }
