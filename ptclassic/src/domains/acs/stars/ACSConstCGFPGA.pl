@@ -6,10 +6,10 @@ defcore {
 	desc {
 	    Generates a single delay for multiple lines
 	}
-        version { @(#)ACSConstCGFPGA.pl	1.2 09/08/99}
+        version{ $Id$ }
         author { Ken Smith }
         copyright {
-Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
+Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
