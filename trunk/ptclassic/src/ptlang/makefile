@@ -9,7 +9,7 @@ VPATH = $(ROOT)/src/ptlang
 BINDIR = $(ROOT)/bin.$(ARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 all:	ptlang
