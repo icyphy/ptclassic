@@ -318,7 +318,7 @@ TableDefLocPtr dest;		/* Additional entries */
     result[i].w_name = (String) 0;
     /* Now merge the results */
     for (j = 0;  j < d_len;  j++) {
-	if (update = FindDefLoc(result, dest[j].w_name)) {
+	if ( (update = FindDefLoc(result, dest[j].w_name)) ) {
 	    update->loc = dest[j].loc;
 	} else {
 	    /* Add to end */
@@ -373,7 +373,7 @@ TableLocPtr locp;		/* Widget location information     */
 	/* Make more space */
 	tbl->a_layout += tbl->a_layout;
 	tbl->locs = (TableLocEntryPtr)
-	  XtRealloc(tbl->locs, tbl->a_layout * sizeof(TableLocEntry));
+	  XtRealloc((char *)tbl->locs, tbl->a_layout * sizeof(TableLocEntry));
     }
     tbl->locs[tbl->n_layout].w = w;
     tbl->locs[tbl->n_layout].loc = *locp;
@@ -452,7 +452,7 @@ WidgetList wl;			/* Widget list       */
 		/* Make more space */
 		result->a_layout += result->a_layout;
 		result->locs = (TableLocEntryPtr)
-		  XtRealloc(result->locs,
+		  XtRealloc((char *)result->locs,
 			    result->a_layout * sizeof(TableLocEntry));
 	    }
 	    result->locs[result->n_layout].w = wl[i];
@@ -796,6 +796,9 @@ TableWidget tw;			/* Table widget */
 				       (Dimension *) 0, (Dimension *) 0);
 	}
 	break;
+    case XtGeometryDone:
+	/* Added for completeness, should there be an action here? */
+	break;
     }
 }
 
@@ -1115,6 +1118,9 @@ printf("\tRequest granted new size %d, %d, %d\n", width, height, bdr);
 	    /* Turn off all but the size changes */
 	    reply->request_mode &= (CWWidth|CWHeight|CWBorderWidth);
 	    return XtGeometryAlmost;
+	case XtGeometryDone:
+	    /* Added for completeness, should there be an action here? */
+	    return result;
 	}
 	/*NOTREACHED*/
     } else {
@@ -1123,6 +1129,7 @@ printf("\tRequest granted new size %d, %d, %d\n", width, height, bdr);
 		   (String *) NULL, (Cardinal *) NULL);
     }
     /*NOTREACHED*/
+    return XtGeometryNo;
 }
 
 
@@ -1320,7 +1327,7 @@ XtTblMask *opt_r;		/* Returned options  */
 	(strcmp(parent->core.widget_class->core_class.class_name,
 		TBL_CLASS_NAME)==0)) {
 	tw = (TableWidget) parent;
-	if (locp = TblLocLookup(tw->table.real_layout, w)) {
+	if ( (locp = TblLocLookup(tw->table.real_layout, w)) ) {
 	    if (c_r) *c_r = locp->ax;
 	    if (r_r) *r_r = locp->ay;
 	    if (hspan_r) *hspan_r = locp->h_span;
@@ -1336,7 +1343,8 @@ XtTblMask *opt_r;		/* Returned options  */
 		tw->table.layout_db = temp;
 	    }
 	    /* Attempt to look it up */
-	    if (temp = FindDefLoc(tw->table.layout_db, w->core.name)) {
+	    if ( (temp = FindDefLoc(tw->table.layout_db,
+				    w->core.name)) ) {
 		if (c_r) *c_r = temp->loc.ax;
 		if (r_r) *r_r = temp->loc.ay;
 		if (hspan_r) *hspan_r = temp->loc.h_span;
@@ -1353,6 +1361,7 @@ XtTblMask *opt_r;		/* Returned options  */
 		   (String *) NULL, (Cardinal *) NULL);
     }
     /*NOTREACHED*/
+    return False;
 }
 
 
@@ -1423,7 +1432,7 @@ String spec;			/* Option letters */
 	all_chars['H'] = TBL_SM_HEIGHT;
     }
     for (idx = spec;  *idx;  idx++) {
-	result |= all_chars[*idx];
+	result |= all_chars[(int)*idx];
     }
     return result;
 }
@@ -1543,7 +1552,7 @@ String layout;			/* String layout specification */
 	layout = XtNewString(layout);
 	result = (TableDefLocPtr) XtCalloc(len+1, sizeof(struct _TableDefLoc));
 	idx = result;
-	while (spec = GetSpec(&layout)) {
+	while ( (spec = GetSpec(&layout)) ) {
 	    DefParse(spec, idx);
 	    idx++;
 	}
