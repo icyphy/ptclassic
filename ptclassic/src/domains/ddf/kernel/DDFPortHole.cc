@@ -39,9 +39,9 @@ int MultiOutDDFPort :: isItOutput () const { return TRUE;}
 PortHole& DDFPortHole :: setPort (
 			     const char* s,
                              Block* parent,
-                             dataType t = FLOAT,
-                             unsigned numTokens = 1,
-			     unsigned delay = 0)
+                             DataType t,
+                             unsigned numTokens,
+			     unsigned delay)
 {
 	// Initialize PortHole
         PortHole::setPort(s,parent,t);
@@ -74,7 +74,7 @@ void DDFPortHole :: imageConnect()
 	imageGeo = realPort.myGeodesic;
 }
 
-void DDFPortHole :: setDDFParams(unsigned numTokens = 1)
+void DDFPortHole :: setDDFParams(unsigned numTokens)
 {
 	numberTokens = numTokens;
 	bufferSize = numberTokens;
@@ -111,8 +111,8 @@ void OutDDFPort :: moveData()
 
 MultiPortHole& MultiDDFPort :: setPort (const char* s,
                              Block* parent,
-                             dataType t = FLOAT,
-                             unsigned numTokens = 1) {
+                             DataType t,
+                             unsigned numTokens) {
         MultiPortHole::setPort(s,parent,t);
 	numberTokens = numTokens;
         return *this;
