@@ -98,7 +98,7 @@ void ToEventHorizon :: transferData ()
 {
 // It moves a Particle from the Universal EventHorizon to the ghostPort.
 
-	Pointer* p;
+	Particle** p;
 
 	// check if data in.
 	if (dataNew == FALSE) return;
@@ -118,13 +118,13 @@ void ToEventHorizon :: transferData ()
 
 		// Copy from the buffer to this Particle
 		// since we need previous values sometimes.
-		*pp = *(Particle *)*p;
+		*pp = **p;
 	
 		// ghostPort :: current pointer
-		Pointer* q = ghostPort->myBuffer->next();
+		Particle** q = ghostPort->myBuffer->next();
 
 		// put the current particle to Plasma
-		ghostPort->myPlasma->put((Particle*)*q);
+		ghostPort->myPlasma->put(*q);
 
 		// Get a new Particle (event) from the Geodesic
 		*q = pp;
