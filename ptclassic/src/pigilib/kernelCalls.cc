@@ -1,7 +1,7 @@
 static const char file_id[] = "kernelCalls.cc";
 /* 
 Version identification:
-$Date$ $Id$
+$Id$
 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Ptolemy kernel calls.
 Some code borrowed from Interpreter.cc, see this file for more info.
 
-Programmer: J. Buck, E. Goei
+Programmer: J. Buck, E. Goei, E. A. Lee
 */
 
 #include "kernelCalls.h"
@@ -49,24 +49,22 @@ Programmer: J. Buck, E. Goei
 #include <signal.h>
 #include <ctype.h>
 
+extern "C" {
+#include "ptk.h"
+}
+
 // Include the global ptcl object (contains the universe) - aok
 #include "ptcl.h"
 
 extern ACG* gen;
 extern char DEFAULT_DOMAIN[];
 
-// The following static variables should be taken from the
-// PTcl object, instead of being static to KernelCalls -aok
-// static InterpUniverse *universe = NULL;  // Universe to execute
-// static InterpGalaxy *currentGalaxy = NULL;  // galaxy to make things in
-// static Target *galTarget = NULL;         // target for a galaxy
-// static const char *curDomain = DEFAULT_DOMAIN; // current domain
-
 // This variable is only used by the KcDefGalaxy and KcEndDefgalaxay
 // functions.  These two functions are called in order from compile.c
 // Thus, this is not a state worth worrying about. - aok
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 
+///////////////////////////////////////////////////////////////////////
 // Define a stream for logging -- log output to pigiLog.pt
 
 pt_ofstream LOG;
@@ -77,6 +75,7 @@ KcInitLog(const char* file) {
 	return LOG ? TRUE : FALSE;
 }
 
+///////////////////////////////////////////////////////////////////////
 // a SafeTcl is just a const char* with a different way of printing.
 class SafeTcl {
 	friend ostream& operator<<(ostream&,const SafeTcl&);
@@ -86,6 +85,7 @@ public:
 	SafeTcl(const char* s) : str(s) {}
 };
 
+///////////////////////////////////////////////////////////////////////
 // Write a string to a stream so it remains as "one thing"
 ostream& operator<<(ostream& o,const SafeTcl& stcl) {
 	const char* str = stcl.str;
@@ -107,8 +107,7 @@ ostream& operator<<(ostream& o,const SafeTcl& stcl) {
 
 extern "C" void KcLog(const char* str) { LOG << str; }
 
-// Write a value (such as a parameter value) to the LOG file
-// in a way that is safe for
+///////////////////////////////////////////////////////////////////////
 // Parse a classname
 // We allow classnames to be specified as, say
 // Printer.input=2
@@ -275,6 +274,7 @@ static void logDomain() {
 	oldDom = ptcl->curDomain;
 }
 
+///////////////////////////////////////////////////////////////////////
 // Return the domain of an object: note, it may not be the current
 // domain (e.g. SDF in DDF)
 extern "C" const char *
@@ -287,6 +287,7 @@ KcDomainOf(char* name) {
 	return b->domain();
 }
 
+///////////////////////////////////////////////////////////////////////
 // Create a new instance of star or galaxy and set params for it
 extern "C" boolean
 KcInstance(char *name, char *ako, ParamListType* pListPtr) {
@@ -373,6 +374,7 @@ KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width
 		return ptcl->currentGalaxy->connect(inst1, t1, inst2, t2, delay);
 }
 
+///////////////////////////////////////////////////////////////////////
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
@@ -381,11 +383,10 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 	return ptcl->currentGalaxy->alias(fterm, inst, aterm);
 }
 
-/* Given the name of a domain, set ptcl->curDomain, and the domain of the
-   galaxy if it exists, to correspond to the this domain.
-   Returns false if this fails (invalid domain).
-        EAL, 9/23/90
-*/
+///////////////////////////////////////////////////////////////////////
+// Given the name of a domain, set ptcl->curDomain, and the domain of the
+// galaxy if it exists, to correspond to the this domain.
+// Returns false if this fails (invalid domain).
 
 extern "C" boolean
 KcSetKBDomain(const char* domain) {
@@ -407,15 +408,15 @@ KcSetKBDomain(const char* domain) {
 	return TRUE;
 }
 
-/* 9/22/90, by eal
-Return the name of the current domain in KnownBlock
-*/
+///////////////////////////////////////////////////////////////////////
+// Return the name of the current domain in KnownBlock
 extern "C" const char*
 curDomainName() {
 	return ptcl->curDomain;
 }
 
-// start a galaxy definition
+///////////////////////////////////////////////////////////////////////
+// galaxy definition
 extern "C" boolean
 KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 	logDomain();
@@ -458,7 +459,11 @@ KcSetDesc(const char* desc) {
 	else ptcl->currentGalaxy->setDescriptor(dummyDesc);
 }
 
+///////////////////////////////////////////////////////////////////////
 // Run the universe
+// FIXME:
+// This should go away, but first the RunAll function in compile.c has
+// to be updated.
 extern "C" boolean
 KcRun(int n) {
  	LOG << "run " << n << "\nwrapup\n";
@@ -475,6 +480,7 @@ KcRun(int n) {
 
 extern "C" boolean LookAtFile(const char*);
 
+///////////////////////////////////////////////////////////////////////
 // Display the schedule.  Must run the universe first.
 extern "C" boolean
 KcDisplaySchedule() {
@@ -538,15 +544,10 @@ isStringInList(const char* string, const char* list[],
 	return FALSE;
 }
 
-/* 5/17/90
-Get information about the portholes of a sog.
-Inputs: name = name of sog
-Outputs: terms = list of info about each porthole
-
-Changed to support multiPortHoles, 7/24/90
-Changed to add info on data types, 10/5/90
-Changed to support several multiPortHole clusters, 12/22/91
-*/
+///////////////////////////////////////////////////////////////////////
+// Get information about the portholes of a sog.
+// Inputs: name = name of sog
+// Outputs: terms = list of info about each porthole
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
 {
@@ -648,9 +649,8 @@ KcGetTerms(char* name, TermList* terms)
 	return TRUE;
 }
 
-/* 7/31/90
-Ask if a porthole within a named block is a multiporthole.
-*/
+///////////////////////////////////////////////////////////////////////
+// Ask if a porthole within a named block is a multiporthole.
 extern "C" boolean
 KcIsMulti(char* blockname, char* portname)
 {
@@ -659,24 +659,22 @@ KcIsMulti(char* blockname, char* portname)
 	return block->multiPortWithName(portname) ? TRUE : FALSE;
 }
 
-/*
-Get default params of a block, or for a target.
-KcGetParams, or KcGetTargetParams
-
-Inputs:
-    name = name of block, or target, to get params of
-    pListPtr = the address of a ParamList node
-    names = list of state names to exclude.
-                  names on this lists are not returned.
-    n_names: how many names.
-Outputs:
-    return = TRUE if ok (no error), else FALSE.
-        returns FALSE if star does not exist or new fails to allocate memory.
-    pListPtr = returns a filled ParamList node that contains params
-        if the star has any.  Callers can free() memory in ParamList
-        array when no longer needed.
-*/
-
+///////////////////////////////////////////////////////////////////////
+// Get default params of a block, or for a target.
+// KcGetParams, or KcGetTargetParams
+// 
+// Inputs:
+//     name = name of block, or target, to get params of
+//     pListPtr = the address of a ParamList node
+//     names = list of state names to exclude.
+//                   names on this lists are not returned.
+//     n_names: how many names.
+// Outputs:
+//     return = TRUE if ok (no error), else FALSE.
+//     returns FALSE if star does not exist or new fails to allocate memory.
+//     pListPtr = returns a filled ParamList node that contains params
+//     if the star has any.  Callers can free() memory in ParamList
+//     array when no longer needed.
 static boolean
 realGetParams(const Block* block, ParamListType* pListPtr,char** names,
 	      int n_names)
@@ -728,7 +726,8 @@ realGetParams(const Block* block, ParamListType* pListPtr,char** names,
 	return TRUE;
 }
 
-/* Get a parameter list for a star or galaxy */
+///////////////////////////////////////////////////////////////////////
+// Get a parameter list for a star or galaxy */
 extern "C" boolean
 KcGetParams(char* name, ParamListType* pListPtr) {
 	char *stateNames[MAX_NUM_FIELDS];
@@ -738,13 +737,15 @@ KcGetParams(char* name, ParamListType* pListPtr) {
 			     pListPtr, stateNames, nf);
 }
 
-/* like the above, except that it is for a target */
+///////////////////////////////////////////////////////////////////////
+// like the above, except that it is for a target
 extern "C" boolean
 KcGetTargetParams(char* name, ParamListType* pListPtr) {
 	return realGetParams(KnownTarget::find(name), pListPtr, 0, 0);
 }
 
-/* modify parameters of a target */
+///////////////////////////////////////////////////////////////////////
+// modify parameters of a target
 extern "C" boolean
 KcModTargetParams(ParamListType* pListPtr) {
 	if (!ptcl->currentTarget) return TRUE;
@@ -762,11 +763,10 @@ KcModTargetParams(ParamListType* pListPtr) {
 	return TRUE;
 }
 
-/*
-Inputs: name = name of block to get info of
-    info = adr of (char *) for return value
-Outputs: info = points to info string, free string when done
-*/
+///////////////////////////////////////////////////////////////////////
+// Inputs: name = name of block to get info of
+//     info = adr of (char *) for return value
+// Outputs: info = points to info string, free string when done
 extern "C" boolean
 KcInfo(char* name, char** info)
 {
@@ -780,11 +780,10 @@ KcInfo(char* name, char** info)
 	return TRUE;
 }
 
-/* 10/5/90 
- Input: the name of a star in the current domain
- Pops up a window displaying the profile and returns true if all goes well,
- otherwise returns false.
-*/
+///////////////////////////////////////////////////////////////////////
+// Input: the name of a star in the current domain
+// Pops up a window displaying the profile and returns true if all goes well,
+// otherwise returns false.
 static void displayStates(const Block *b,char** names,int n_names);
 
 extern "C" int
@@ -869,6 +868,7 @@ KcProfile (char* name) {
 	return TRUE;
 }
 
+///////////////////////////////////////////////////////////////////////
 // display settable states.  Omit those in the "names" list.
 static void displayStates(const Block *b,char** names,int n_names) {
 	if (b->numberStates()) accum_string ("Settable states:\n");
@@ -898,9 +898,8 @@ static void displayStates(const Block *b,char** names,int n_names) {
 	}
 }
 	
-/* 7/25/90
-   Make multiple ports in a star multiporthole
- */
+///////////////////////////////////////////////////////////////////////
+// Make multiple ports in a star multiporthole
 extern "C" boolean
 KcNumPorts (char* starname, char* portname, int numP) {
 	LOG << "\tnumports " << starname << " " << portname << " "
@@ -908,22 +907,21 @@ KcNumPorts (char* starname, char* portname, int numP) {
 	return ptcl->currentGalaxy->numPorts(starname, portname, numP);
 }
 
-/* 9/22/90, by eal
-Return the number of domains that the system knows about
-*/
+///////////////////////////////////////////////////////////////////////
+// Return the number of domains that the system knows about
 extern "C" int
 numberOfDomains() {
         return Domain::number();
 }
 
-/* 9/22/90, by eal
-Return the name of the nth domain in the list of known domains
-*/
+///////////////////////////////////////////////////////////////////////
+// Return the name of the nth domain in the list of known domains
 extern "C" const char*
 nthDomainName(int n) {
         return Domain::nthName(n);
 }
 
+///////////////////////////////////////////////////////////////////////
 // add a node with the given name
 extern "C" int
 KcNode (const char* name) {
@@ -931,6 +929,7 @@ KcNode (const char* name) {
 	return ptcl->currentGalaxy->addNode(name);
 }
 
+///////////////////////////////////////////////////////////////////////
 // connect a porthole to a node
 extern "C" int
 KcNodeConnect (const char* inst, const char* term, const char* node) {
@@ -939,17 +938,15 @@ KcNodeConnect (const char* inst, const char* term, const char* node) {
 	return ptcl->currentGalaxy->nodeConnect(inst, term, node);
 }
 
-/*
-Return a list of targets supported by the current domain.
-*/
+///////////////////////////////////////////////////////////////////////
+// Return a list of targets supported by the current domain.
 extern "C" int
 KcDomainTargets(const char** names, int nMax) {
 	return KnownTarget::getList(ptcl->curDomain,names,nMax);
 }
 
-/*
-Set the target for the universe
-*/
+///////////////////////////////////////////////////////////////////////
+// Set the target for the universe
 extern "C" int
 KcSetTarget(const char* targetName) {
 	LOG << "target " << targetName << "\n";
@@ -958,66 +955,28 @@ KcSetTarget(const char* targetName) {
 	return temp;
 }
 
-/*
-Return the default target name for the current domain.
-*/
+///////////////////////////////////////////////////////////////////////
+// Return the default target name for the current domain.
 extern "C" const char*
 KcDefTarget() {
 	return KnownTarget::defaultName(ptcl->curDomain);
 }
 
-/*
-Register functions to handle animation.
-*/
-
-static SimAction *animatePre = 0, *animatePost = 0;
-
-static void onHighlight(Star* s, const char*) {
-	Error::mark(*s);
-}
-
-static void offHighlight(Star*, const char*) {
-	FindClear();
-}
-
-extern "C" void
-KcSetAnimationState(int s) {
-	if (s) {
-	    if (!animatePre) {
-		animatePre = SimControl::registerAction(onHighlight,1);
-		animatePost = SimControl::registerAction(offHighlight,0);
-	    }
-        }
-	else {
-	    if (animatePre) {
-		SimControl::cancel(animatePre);
-		SimControl::cancel(animatePost);
-	    }
-	}
-}
-
-/* 
-Get the state of animation.
-*/
-extern "C" int
-KcGetAnimationState() {
-	return (animatePre != 0);
-}
-
+///////////////////////////////////////////////////////////////////////
 extern "C" const char*
 KcExpandPathName(const char* name) {
     return expandPathName(name);
 }
 
+///////////////////////////////////////////////////////////////////////
 // catch signals -- Vem passes the SIGUSR1 signal by default
-
 extern "C" void
 KcCatchSignals() {
 	SimControl::catchInt(SIGUSR1);
 }
 
-/* functions for enabling and disabling the run-time Tk event loop */
-
+///////////////////////////////////////////////////////////////////////
+// functions for enabling and disabling the run-time Tk event loop
 extern "C" void processEvents(Star*, const char*);
 
 static SimAction* saveAction = 0;
@@ -1037,14 +996,7 @@ extern "C" void KcSetEventLoop(int on) {
 	}
 }
 
-/* Halt simulation from Tcl/Tk code */
-
-extern "C" int KcRequestHalt(ClientData dummy, Tcl_Interp* ip, 
-                             int aC, char** aV) {
-	SimControl::requestHalt();
-	return TCL_OK;
-}
-
+///////////////////////////////////////////////////////////////////////
 // interface to hashstring function.
 extern "C" const char* HashString(const char* arg) {
     return hashstring(arg);
