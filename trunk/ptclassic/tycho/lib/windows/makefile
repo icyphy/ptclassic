@@ -40,7 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
-	tycho-windows
+	tycho-windows.itk
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
