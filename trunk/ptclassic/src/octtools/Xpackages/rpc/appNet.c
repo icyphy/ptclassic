@@ -90,32 +90,29 @@ RPCByteSwappedApplication(a, b, c, d, int32val)
 int a, b, c, d;
 int32 int32val;
 {
-    char number[sizeof(int32)];
-    int32 *pointer;
-    char rebmun[sizeof(int32)];
-    int32 *retniop;
+    int32 theNumber;
+    char* number;
 
-    int i;
-
-
-    RPCByteSwapped = 0;		/* Assume same byte ordering */
-
+    /* Assume the same byte ordering */
+    RPCByteSwapped = 0;
+    number = (char*) &theNumber;
     number[0] = a;
     number[1] = b;
     number[2] = c;
     number[3] = d;
-    pointer = (int32 *) number;
-    
-    if (*pointer != int32val) /* We don't see it the same way */ {
+ 
+    if (theNumber != int32val) {
+      /* Since we don't see it the same way, flip the word around */
+      number[0] = d;
+      number[1] = c;
+      number[2] = b;
+      number[3] = a;
 
-      /* Flip the word around */
-
-      for(i=0; i<sizeof(int32); i++) rebmun[i] = number[(sizeof(int32)-1)-i];
-      retniop = (int32 *) rebmun;
-      if(*retniop == int32val) /* We see it backwards */ {
-	RPCByteSwapped = 1;
-      } else {
+      if (theNumber != int32val) {
 	(void) fprintf(stderr, "RPCByteSwappedApplication() Failure\n");
+      }
+      else {
+	RPCByteSwapped = 1;			/* We see it backwards */
       }
     }
 }
@@ -150,7 +147,8 @@ int option;
 
     if (!RPCByteSwapped) {
 	sin.sin_port = port;
-    } else {
+    }
+    else {
 	sin.sin_port = (0x00ff & (port >> 8)) | ((port & 0x00ff) << 8);
     }
 
@@ -205,7 +203,8 @@ STREAM *receiveStream;
 	    (void) fprintf(stderr, "RPC Error: bad inet connect\n");
 	    return RPC_ERROR;
 	}
-    } else {
+    }
+    else {
 	(void) fprintf(stderr, "RPC Error: protocol not supported: %s\n", protocol);
 	return RPC_ERROR;
     }
@@ -318,7 +317,8 @@ fprintf(stderr, "client here: could not find the demon\n");
 		    return RPC_ERROR;
 		}
 /* fprintf(stderr, "client here: sent application complete message\n"); */
-            } else if (functionNumber <= size) {
+            }
+	    else if (functionNumber <= size) {
 
 		/* user rpc functions */
 		if (RPCReceiveVemArgs(&spot, &argList, &userOptionWord,
@@ -339,7 +339,8 @@ fprintf(stderr, "client here: could not find the demon\n");
 		if (RPCApplicationFunctionComplete() != RPC_OK) {
 		    return RPC_ERROR;
 		}
-	    } else {
+	    }
+	    else {
 		(void) fprintf(stderr, "RPC Error: bad function number\n");
 		return RPC_ERROR;
 	    }
@@ -460,7 +461,8 @@ unsigned long rmask;		/* read selection mask		*/
 {
     if (FDMASK(fileno(RPCReceiveStream)) & rmask) {
 	return RPC_OK;
-    } else {
+    }
+    else {
 	return RPC_ERROR;
     }
 }
@@ -476,7 +478,8 @@ RPCInterrupted()
 {
     if (errno == EINTR) {
 	return RPC_OK;
-    } else {
+    }
+    else {
 	(void) fprintf(stderr, "RPC Error: interrupted select\n");
 	return RPC_ERROR;
     }
