@@ -23,6 +23,12 @@ public:
 // linked).  Actually it's set while constructors or other functions that
 // have just been linked are being run.
 	static int isActive() { return activeFlag;}
+
+// see whether the linker is enabled.
+	static int enabled() { return ptolemyName != 0;}
+
+// get name of executable image file (for make-like checking)
+	static const char* imageFileName() { return ptolemyName;}
 private:
 	static const char* genHeader(const char*);
 	static const char* ptolemyName;
