@@ -51,9 +51,6 @@ NO_IMPLICIT_TEMPLATES = -fno-implicit-templates
 
 DEPEND= $(CPLUSPLUS) -MM
 
-# Command to build shared libraries (Not really supported yet)
-SHARED_LIBRARY_COMMAND =	g++ -shared -o
-
 # where the Gnu library is
 GNULIB=$(PTOLEMY)/gnu/$(PTARCH)/lib
 
