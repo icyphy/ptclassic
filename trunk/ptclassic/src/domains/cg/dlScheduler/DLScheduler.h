@@ -24,6 +24,10 @@ Date of last revision:
 ///////////////////////
 
 class DLScheduler : public ParScheduler {
+	//temporal hack to prevent createSubGals it wormhole exists
+	int wormFlag;
+	int noOverlap;	// set if overlapComm. is disallowed.
+
 	DLGraph* myGraph;
 
 protected:
@@ -33,8 +37,8 @@ protected:
 
 public:
   	// Constructor
-  	DLScheduler(BaseMultiTarget* t, const char* log) : 
-		ParScheduler(t, log), parSched(0) {
+  	DLScheduler(BaseMultiTarget* t, const char* log, int i) : 
+		ParScheduler(t, log), parSched(0), noOverlap(i) {
 		INC_LOG_NEW; myGraph = new DLGraph; exGraph = myGraph; }
 	~DLScheduler();
 
@@ -46,6 +50,10 @@ public:
 
   	// main body of the schedule
   	int scheduleIt();
+
+	// Need to redefine this function for now.
+	// Will be removed later.
+	void createSubGals();
 };
 
 #endif
