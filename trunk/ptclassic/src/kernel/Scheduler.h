@@ -57,10 +57,16 @@ public:
 	virtual ~Scheduler() {}
 
 	// allow errorhandler to ask for a halt
-	static void requestHalt() { haltRequestFlag++;}
+	static void requestHalt() { haltRequestFlag = TRUE; }
 
 	// read the halt flag
-	static int haltRequested() { return haltRequestFlag;}
+	static int haltRequested() {
+		if (interrupt) reportInterrupt();
+		return haltRequestFlag;
+	}
+
+	// turn on interrupt catching
+	static void catchInt(int signo = -1, int always = 0);
 
 	// current time of the schedule
 	float currentTime;
@@ -71,10 +77,25 @@ public:
 
 	// identify itself
 	virtual const char* domain() const;
-protected:
 
+protected:
+	// only schedulers can clear the halt flag.
+	static void clearHalt() {
+		interrupt = haltRequestFlag = FALSE;
+	}
+
+private:
 	// request flag for halting -- schedulers must poll and reset
 	static int haltRequestFlag;
+
+	// interrupt flag -- set by user interrupt.
+	volatile static int interrupt;
+
+	// interrupt handler routine
+	static void intCatcher();
+
+	// tell user about interrupts
+	static void reportInterrupt();
 };
 
 #endif
