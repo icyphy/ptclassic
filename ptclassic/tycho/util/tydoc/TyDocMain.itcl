@@ -1019,6 +1019,9 @@ class ::tycho::HTMLDocSys {
     # Generate HTML for all the files named in filelist
     public proc generateHTML {verbose debug generateIndex title filelist}
 
+    # Return a list of all the classes defined in the given source file.
+    public proc getClassesInSource {filename}
+
     ###################################################################
     ####                   public variables                        ####
 
@@ -1422,7 +1425,7 @@ body ::tycho::HTMLDocSys::modCheck {filename} {
     
     set sourceTime [file mtime $filename]
 
-    set classes [::tycho::IDocSys::getClassesInSource $filename]
+    set classes [getClassesInSource $filename]
     foreach class $classes {
         set docFile [file join doc codeDoc [info namespace tail $class].html]
         if ![file exists $docFile] {
@@ -1495,6 +1498,27 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 	}
     }
     delete object $HTMLDocSys
+    return $retval
+}
+
+#####################################################################
+#### getClassesInSource
+# Quickly scan the source file for the classes which are defined within.
+# Requires around 5% of the time it takes to make the docs.
+# This is identical to the same proc in IDocSys. It's repeated here
+# for efficiency so that the tydoc executable does not need to source
+# IDocSys. Maybe there is a shorter file it could belong to?
+#
+body ::tycho::HTMLDocSys::getClassesInSource {filename} {
+    set fd [open $filename]
+    while {![eof $fd]} {
+        gets $fd lineIn
+        if [regexp {^[	 ]*(class)[ 	]+(::[a-zA-Z_:]*)[ 	]+\{} \
+                $lineIn dummy dummy2 classname] {
+            lappend retval $classname
+        }
+    }
+    close $fd
     return $retval
 }
  
