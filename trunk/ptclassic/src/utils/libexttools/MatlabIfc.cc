@@ -86,8 +86,14 @@ MatlabIfc :: MatlabIfc() {
 #if MATLABSHARED
     if (! Linker::enabled())
 	Error::abortRun( "Internal error - Linker isn't enabled");
-    else if (Linker::multiLink("-lptmatlab", 1) == FALSE) {
+    else { 
+	StringList linkArg = "-L";
+	linkArg << getenv("PTOLEMY") << "/lib." << getenv("PTARCH")
+		<< " -lptmatlab";
+	if (Linker::multiLink(linkArg, 1) == FALSE) {
 #include "MatlabIfc.cc.Auto2"
+    	}
+
     }
 #elif MATLABSTATIC
     // do nothing
