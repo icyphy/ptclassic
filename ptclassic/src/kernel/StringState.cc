@@ -79,15 +79,21 @@ void StringState :: initialize() {
 	// Parse the initial string
 	// -- Substitute parameters that fall in between curly braces {}
 	// -- Zero out the white space characters so string info is unaltered
-	// -- Do not treat double quotes as the quotation character:
-	//    we reset the quotation character to be an unprintable character
 	const char* specialChars = "!{}";
 	const char* whiteSpace = "";
 	Tokenizer lexer(initString, specialChars, whiteSpace);
 	char unprintableChar = ASCII_CONTROL_B_CHAR;
 	StringList parsedString = "";
 
+	// -- Do not treat double quotes as the quotation character:
+	//    we reset the quotation character to be an unprintable character
 	lexer.setQuoteChar(unprintableChar);
+
+	// -- Do not support # for comments: it is used to represent
+	//    frame numbers in video files and to represent port names
+	//    e.g. input#1
+	lexer.setCommentChar(unprintableChar);
+
 	while (TRUE) {
         	ParseToken t = getParseToken(lexer, T_STRING);
 		if (t.tok == T_EOF || t.tok == T_ERROR) break;
