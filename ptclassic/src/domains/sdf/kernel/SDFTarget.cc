@@ -145,7 +145,7 @@ else return FALSE;
 
 // Determines the total no. of input that this SDFWormhole has
 int SDFTarget :: noOfInputs(){
-BlockPortIter nextp(*this);
+BlockPortIter nextp(*galaxy());
         PortHole* p;
         int nInP = 0;
         while ((p = nextp++) != 0)
