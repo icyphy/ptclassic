@@ -53,30 +53,18 @@ protected:
 };
 
 
-class ThreadList;
-
-
-class PosixScheduler : public ThreadScheduler
+class PosixThreadList : public ThreadList
 {
 public:
     // Constructor.  System-wide initialization.
-    PosixScheduler();
-
-    // Destructor.  Terminate all threads.
-    /*virtual*/ ~PosixScheduler();
-
-    // Register a thread with this scheduler.
-    /*virtual*/ void add(PtThread* t);
+    PosixThreadList();
 
     // Allow all registered threads to run (or continue).
     /*virtual*/ void run();
 
 protected:
-    ThreadList* threads;
     pthread_t mainThread;
-
-    // Scheduling policy.
-    int policy;
+    pthread_attr_t mainAttributes;
 
     // Priority limits.
     int maxPriority;
