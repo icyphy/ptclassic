@@ -56,8 +56,8 @@ set path = ( . ~ptolemy/bin ~ptolemy/bin.$ARCH ~octtools/bin $path )
 .)c
 The first of these lines sets your environment variable
 .c ARCH
-to the name of the type of machine you are running (e.g. sun3 or
-sun4).
+to the name of the type of machine you are running (e.g. sun3,
+sun4, vax, or mips).
 The second puts the \*(PT and Oct bin directories into your path.
 If you add these lines to a previously existing .cshrc file,
 be sure to put  these lines at the end of the file, after
@@ -105,7 +105,14 @@ to scan this section.
 Resources are explained below.
 .H3 "Starting X"
 .pp
-At the end of the file ~ptolemy/.login you will find the lines:
+At some installations, the X window server runs continually.
+In our default installation, the server is
+started explicitly by each workstation
+user.  This permits a user to select a preferred window system.
+The ``ptolemy'' user in the standard distribution
+is configured under this latter model.
+Unless the installer has modified it to conform with your installation,
+then at the end of the file ~ptolemy/.login you will find the lines:
 .IE "login file"
 .(c
 echo "To prevent X windows from coming up, type ^c now"
@@ -136,6 +143,9 @@ The function of the mouse buttons is determined by
 the ~ptolemy/.twmrc file.
 This file is reasonably easy to interpret, even without any X experience,
 so you may wish to examine it and customize it.
+If your installation uses the X window system in some way that differs
+from our default, then whoever installed \*(PT should have modified
+the .login file above to reflect this.
 .H3 "Manipulating Windows"
 .pp
 Assuming you use the file ~ptolemy/.twmrc without modification,
