@@ -41,7 +41,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
 #include "CGPortHole.h"
-#include "AutoForkNode.h"
+#include "AsmForkNode.h"
+#include "CGGeodesic.h"
 #include "CGWormhole.h"
 
 // For the hacks below to avoid doing wormholes:
@@ -70,6 +71,15 @@ public:
         EventHorizon& newTo() {
                 LOG_NEW; return *new CGtoUniversal;
         }
+
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+	        // FIXME - this will work but is a hack.  We should 
+	        // define CGForkNode.  Since no CG domain is derived from
+	        // this class it should be ok.
+		if (multi) { LOG_NEW; return *new AsmForkNode;}
+		else { LOG_NEW; return *new CGGeodesic;}
+	}
 
 	// constructor
 	CGDomain() : Domain("CG") {}
