@@ -72,7 +72,7 @@ go {
 		addCode(code);
 	}
 	else {
-		StringList code = receiveData;
+		StringList code = (const char*) receiveData;
 		code << "\t$ref(output) = ";
 		if (strcmp(output.resolvedType(),INT)==0) 
 			code << "value;\n";
