@@ -43,9 +43,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DestinedEventList.h"
 
 
-DestinedEventList::DestinedEventList() {}
+// DestinedEventList::DestinedEventList() {}
 
-Link * DestinedEventList::appendGet( Link * obj ) 
+Link * DestinedEventList::appendGet( CqLevelLink * obj ) 
 {
 	return (Link *)LinkedList::appendGet( obj );
 }

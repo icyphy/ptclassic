@@ -2,7 +2,7 @@
 #define _LinkedList_h 1
 /**************************************************************************
 Version identification:
-@(#)LinkedList.h	2.17	02/12/97
+$Id$ $Revision$
 
 Copyright (c) 1990-1997 The Regents of the University of California.
 All rights reserved.
@@ -40,11 +40,12 @@ the type of interest to and from the void*, allocating and
 deallocating memory for the objects, etc.
 
  Modified: John Davis, 5/18/97
-        LinkedList class has been rewrittent to be more
-        general. In particular, an arbitrary member can be
-        removed (regardless of the position in the list) and
-        the Links can be directly accessed in an efficient
-        manner. 
+        LinkedList is a base class. It is a modified version
+	of SequentialList found in the kernel. It has been 
+	rewritten to be more general. In particular, an arbitrary 
+	member can be removed (regardless of the position in 
+	the list) and the Links can be directly accessed in an 
+	efficient manner. 
 
 **************************************************************************/
 
@@ -77,6 +78,7 @@ class LinkedList
 	friend class LinkedListIter;
 public:
 	// Destructor
+	// FIXME: Change this
 	~LinkedList()  { initialize(); }
 
 	// Constructor
