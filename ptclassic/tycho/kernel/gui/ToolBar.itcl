@@ -48,6 +48,12 @@ class ::tycho::ToolBar {
     # The font to use for the buttons
     itk_option define -font font Font [::tycho::font screen]
 
+    # The horizontal button padding
+    itk_option define -padx padX Pad 11
+
+    # The vertical button padding
+    itk_option define -pady padY Pad 4
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -63,7 +69,7 @@ class ::tycho::ToolBar {
     ###################################################################
     ####                         protected methods                 ####
 
-    # Add a button to the toolbar.
+    # Print a message to the status bar.
     protected method putStatus {string}
 }
 
@@ -79,16 +85,6 @@ body ::tycho::ToolBar::constructor {args} {
 	keep -background -cursor
     }
     pack $itk_component(leftpacking) -side left
-
-    # Create and delete a bogus button. This appears to be necessary
-    # to keep the itk options manager happy.
-    itk_component add bogus {
- 	eval button $itk_interior.junk
-    } {
- 	keep -padx -pady -font
-    }
-    destroy $itk_component(bogus)
-    unset itk_component(bogus)
 
     # Initialize options
     eval itk_initialize $args
