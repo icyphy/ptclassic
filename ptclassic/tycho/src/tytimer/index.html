@@ -22,14 +22,17 @@ Tcl.
     source $tycho/src/tytest/testtask.tcl
 </pre></tcl>
 
-To more clearly see the interleaving of these two tasks:
+The top number is the counter incremented by the C task; the bottom
+one is the counter incremented in Tcl.  To more clearly see the
+interleaving of these two tasks:
+
 <tcl quiet><pre>
     ::tycho::timer period 200
 </pre></tcl>
 
  <P>Source files:
 <ul>
-<li><A HREF="test.tcl">Test file</A>
+<li><A HREF="../tytest/test.tcl">Test file</A>
 <li><A HREF="tyTimer.h">Header file</A>
 <li><A HREF="tyTimer.c">C source file</A>
 </ul>
