@@ -71,6 +71,8 @@ proc ::tycho::filename {} {
 #######################################################################
 # options
 #
+option add *FileBrowser.textForeground \
+	[ptkColor black black] widgetDefault
 option add *FileBrowser.textBackground \
 	[ptkColor antiqueWhite white] startupFile
 
@@ -171,6 +173,7 @@ body ::tycho::FileBrowser::constructor {args} {
 	entry $itk_interior.childsite.entry -relief sunken -bd 3
     } {
 	keep -background -cursor -foreground -font
+	rename -foreground -textforeground textForeground Foreground
 	rename -background -textbackground textBackground Background
     }
     pack $itk_component(entry) \
@@ -201,6 +204,7 @@ body ::tycho::FileBrowser::constructor {args} {
 		-selectmode single
     } {
 	keep -background -cursor -foreground -font
+	rename -foreground -textforeground textForeground Foreground
 	rename -background -textbackground textBackground Background
     }
     pack $itk_component(listbox) -side left -expand yes -fill both
