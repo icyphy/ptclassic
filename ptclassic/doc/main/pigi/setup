@@ -96,9 +96,7 @@ them is to simply copy the files in this directory to the directory
 containing the Open Windows libraries, which is usually
 ``/usr/openwin/lib'' or ``$OPENWINHOME/lib''.
 .pp
-Pigi will run under Sun's Open Windows Version 2
-(which is based on a combination
-of X11R4 and NeWS, another windowing protocol), once the Athena widgets
+Pigi will run under Sun's Open Windows Version 2 or 3, once the Athena widgets
 are installed.  This document will
 not attempt to teach you how to use Open Windows; there are excellent
 tutorial documents available from Sun.  We'll assume as a starting
@@ -131,4 +129,3 @@ on the distribution tape, along with its manual entry, which can be
 found in ``~ptolemy/doc/man/man1/twm.1''.  This problem was discovered
 too late to know whether the problem is in Open Windows or in VEM;
 we apologize for making you use an uglier window manager.
-
