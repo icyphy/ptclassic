@@ -445,6 +445,11 @@ body ::tycho::HTML::constructor {args} {
     bind $text <Control-Right> "$this forward"
     bind $text <Alt-Right> "$this forward"
 
+    # Don't break on Alt-key combinations: the top-level window needs
+    # it for menu traversal
+    # FIXME: should this be here, or in TopLevel or in Displayer?
+    bind $prefix <Alt-Key> {tkTraverseToMenu %W %A; tkMenuUnpost {}}
+
     # Make the insertion cursor invisible.
     $text configure -insertofftime 0
     $text configure -insertbackground [$text cget -background]
