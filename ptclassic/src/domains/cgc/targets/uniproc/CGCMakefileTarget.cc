@@ -193,17 +193,19 @@ char *CGCMakefileTarget :: expandMakefileVariables(const char *makefileLine)
 	    break;
 	}
 	case '$' : {
-	    // Set whitespace to include tabs and spaces
+	  			// Set whitespace to include tabs and spaces
 	    lexer.setWhite("\r\t ");
-	    // next token might be an environment variable
+	    			// Next token might be an environment variable
 	    lexer >> tokbuf;
 	    const char* value = getenv (tokbuf);
 	    if (!value)
-				// Wrap the value in $()
+				// Wrap the value in $(), with trailing space
 		expandedVars << "$(" << tokbuf << ") ";
 	    else
-		expandedVars << value;
-	    lexer.setWhite("\r");	// Set whitespace back to original;
+				// Need a trailing space here
+		expandedVars << value << " ";
+				// Set whitespace back to original;
+	    lexer.setWhite("\r");	
 	    break;
 	}
 	default: {
