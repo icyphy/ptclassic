@@ -62,6 +62,9 @@ class ::tycho::Retarget {
     # Look for conflicts in the current universe
     method checkUniverse {}
 
+    # Open a help window.
+    method help {}
+
     ###################################################################
     ####                         public procedures                 ####
 
@@ -203,14 +206,19 @@ body ::tycho::Retarget::compareDomains {} {
     set dirtyCompareDomains 0
 }
 
-    ###################################################################
-    ###################################################################
-    ####                      public methods                       ####
+###################################################################
+#### help
+# Open a window with help on the current widget.
+#
+body ::tycho::Retarget::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    $TYCHO/editors/textedit/doc/usersGuides/RetargetHelp.html
+}
 
-
     ###################################################################
     ###################################################################
-    ####                      public methods                       ####
+    ####                      public procedures                    ####
 
 #######################################################################
 #### printStars
@@ -319,3 +327,4 @@ body ::tycho::Retarget::modifyAfterDomainChange { {ports 0} {multiports 0} \
             "Comparison of $domainA and $domainB domains"
 
 }
+
