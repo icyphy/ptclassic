@@ -270,7 +270,9 @@ octObject *instPtr;
 	return (TRUE);
     }
     PrintCon(
-	sprintf(buf, "Unknown star '%s', trying to load it...", akoName));
+	sprintf(buf,
+	  "Unknown star '%s' in current domain, trying to load it...",
+	  akoName));
     ERR_IF1(!MyOpenMaster(&mFacet, instPtr, "interface", "r"));
     octFullName(&mFacet, &fullName);
     ERR_IF1(!KcLoad(fullName));
@@ -418,6 +420,34 @@ char *comment;
 	    != OCT_OK, octErrorString());
     }
     return(TRUE);
+}
+
+/* 9/22/90, EAL
+*/
+boolean
+GOCDomainProp(facetPtr, domainPtr, defaultDomain)
+octObject *facetPtr;
+char **domainPtr;
+char *defaultDomain;
+{
+    octObject prop;
+
+    CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
+    *domainPtr = prop.contents.prop.value.string;
+    return (TRUE);
+}
+
+/* 8/7/89
+*/
+boolean
+SetDomainProp(facetPtr, domain)
+octObject *facetPtr;
+char *domain;
+{
+    octObject prop;
+
+    CK_OCT(ohCreateOrModifyPropStr(facetPtr, &prop, "domain", domain));
+    return (TRUE);
 }
 
 /*****  5/2/90 10/23/89
