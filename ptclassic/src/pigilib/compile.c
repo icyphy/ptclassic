@@ -733,7 +733,7 @@ octObject *galFacetPtr;
     if (strcmp(oldDomain,galDomain) != 0)
 	sprintf(msg, "CompileGal: facet = %s, %s inside %s wormhole",
 		name, galDomain, oldDomain);
-    else sprintf(msg, "CompileGal: facet = %s", name);
+    else sprintf(msg, "CompileGal: facet = %s, %s galaxy", name, galDomain);
     PrintDebug(msg);
     /*
      * So that KcDefgalaxy recognizes wormholes, we have to restore the
@@ -766,45 +766,41 @@ static boolean
 CompileUniv(facetPtr)
 octObject *facetPtr;
 {
+    char msg[512];
     char *name;
     boolean xferedBool;
-    char *oldDomain, *domain;
+    char *domain;
     char* target;
     
-    oldDomain = curDomainName();
+    name = BaseName(facetPtr->contents.facet.cell);
     domain = getDomainF(facetPtr);
     if(!domain) {
-        PrintErr("Domain error in facet.");
+	sprintf(msg, "Domain error in facet %s", name);
+        PrintErr(msg);
         return (FALSE);
     }
+    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "reset; domain ",
+		   domain, (char*) NULL));
+
+    ERR_IF1(!ProcessSubGals(facetPtr));
+    xferedBool = DupSheetIsDup(&xfered, name);
+    if (xferedBool && !IsDirtyOrGone(facetPtr)) {
+	/* universe already xfered to kernel and is unchanged */
+	Tcl_VarEval(ptkInterp, "curuniverse ", name, (char *) NULL);
+	return (TRUE);
+    }
+
+    sprintf(msg, "CompileUniv: facet = %s, %s universe", name, domain);
+    PrintDebug(msg);
+    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "newuniverse ", name, " ",
+		   domain, (char*) NULL));
 
     /* get the target */
     if (!GOCTargetProp(facetPtr, &target, KcDefTarget())) {
         PrintErr(ErrGet());
         return (FALSE);
     }
-
-    name = BaseName(facetPtr->contents.facet.cell);
-    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "domain ", domain, "; ",
-    				"target ", target, (char*) NULL));
-    /* The following is temporarily required, until we complete the
-     * conversion to ptcl calls, because the above target command
-     * creates a new instance of the target. Is the above really
-     * necessary?
-     */
-    ERR_IF1(!ProcessTargetParams(target,facetPtr));
-    ERR_IF1(!ProcessSubGals(facetPtr));
-    xferedBool = DupSheetIsDup(&xfered, name);
-    if (xferedBool && !IsDirtyOrGone(facetPtr)) {
-	/* universe already xfered to kernel and is unchanged */
-        TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "domain ",
-		oldDomain, (char*) NULL));
-	return (TRUE);
-    }
-    PrintDebug("CompileUniv");
-    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "deluniverse ", name, "; ",
-		"newuniverse ", name, " ", domain, "; ",
-		"target ", target, "; ", (char*) NULL));
+    TCL_CATCH_ERR1(Tcl_VarEval(ptkInterp, "target ", target, (char*) NULL));
     ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
@@ -813,10 +809,6 @@ octObject *facetPtr;
     if (!xferedBool) {
 	ERR_IF1(!DupSheetAdd(&xfered, name));
     }
-    /* Replacing the following line with a tcl call fails with a complaint
-       that the galaxy is not empty, so we can't change domains. 
-       Is the line even necessary? */
-    KcSetKBDomain(oldDomain);
     return (TRUE);
 }
 
