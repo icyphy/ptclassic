@@ -1,0 +1,36 @@
+.\" $Id$
+.\"
+.\" Use printsec in ~ptolemy/doc/bin or Makefiles in ~ptolemy/doc
+.\" to print this out.  To get this section only, as a standalone document,
+.\"     % cd ~ptolemy/doc/sect1/pigi
+.\"     % make print
+.\"
+.\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
+.\" BELOW, to indicate a new version.  Be sure you have properly checked
+.\" out this file with SCCS (the version number should not be a number below):
+.VR 0.$Revision$ "October 10, 1990"
+.\"
+.TI "The \*(PT Interactive Graphical Interface"
+.AU
+Joseph Buck
+Edwin E. Goei
+Phil Lapsley
+Edward A. Lee
+David G. Messerschmitt
+.AE
+.so terminology
+.so setup
+.so demos
+.so universes
+.so galaxies
+.so other
+.so newstars
+.so icons
+.so moreinfo
+.so references
+.so pigiCommands
+
+Add something like (to lead into next section):
+Hence we will study alternatives like the use of multiple subcarriers,
+each carrying a narrowband signal.
+.so vemCommands
