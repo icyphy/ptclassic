@@ -57,6 +57,9 @@ class ::tycho::EditPtcl {
     ##########################################################################
     ####                         public methods                           ####
 
+    # Return a list of domains that have stars in this universe 
+    method domains {}
+
     # Open a help window.
     method help {}
 
@@ -113,7 +116,15 @@ body ::tycho::EditPtcl::constructor {args} {
     #menubar addMenu Special -underline 0
     menubar add "Retarget" Special -underline 0 \
             -command "::tycho::view Retarget -edit $this -toolbar 1"
-    menubar add "List Stars" Special -underline 0 \
+
+    if {[catch {::pitcl::domains}] == 1 } {
+	menubar disable Retarget
+    }
+    menubar add "List Domain(s)" Special -underline 5 \
+            -command "::tycho::inform \
+        \"Domain(s) used: \[$this domains\]\""
+
+    menubar add "List Stars" Special -underline 5 \
             -command "::tycho::inform \
         \"Stars used: \[$this stars\]\""
 
@@ -165,6 +176,22 @@ configbody ::tycho::EditPtcl::facet {
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
+
+###################################################################
+#### domains
+# Return a list of domains that have stars in this universe 
+#
+body ::tycho::EditPtcl::domains {} {
+    # Get the list of stars, in the form {domain star} {domain star}
+    set domainStarList [stars]
+    set domainList {}
+    foreach domainStar $domainStarList {
+        if {[lsearch $domainList [lindex $domainStar 0]] == -1 } {
+            lappend domainList [lindex $domainStar 0]
+        }
+    }
+    return $domainList
+}
 
 ###################################################################
 #### help
