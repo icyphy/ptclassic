@@ -80,7 +80,7 @@ $(BINDIR)/ptplay:	ptplay
 	fi
 
 
-ptplay.nt4 ptplay.nt4.vc ptplay.mips ptplay.unixware:
+ptplay.nt4 ptplay.nt4.vc ptplay.mips ptplay.unixware ptplay.alpha4:
 	@echo "$(PTARCH) architecture does not have a ptplay (yet)."
 
 ptplay.cfront:  ptplay.sun4
