@@ -41,21 +41,48 @@ protected:
 	// Add blocks to the list
 	void addBlock(Block& b) {blocks.put(&b);}
 
-	// Connect sub-blocks.
+	// Connect sub-blocks with a delay (default to zero delay)
 	// Returns a reference to the Geodesic it created.
-	Geodesic& connect(PortHole& source, PortHole& destination);
-
-	// Connect sub-blocks with a zero-valued delay
 	Geodesic& connect(PortHole& source, PortHole& destination,
-			  int numberDelays);
+			  int numberDelays = 0);
 
-	// Connect sub-blocks with a given-valued delay
-	// NOT IMPLEMENTED YET
+	// TO BE DONE:
+	// Allow delays to be initialized to something reasonable.
 	// Geodesic& connect(PortHole& source, PortHole& destination,
 			// int numberDelays, Particle& delayValue);
 
+	// connect is overloaded so that it can accept MultiPortHoles on
+	// either input.  Each such call to connect allocates a new PortHole,
+	// so in an interactive execution we have to be careful about
+	// disconnecting these connections.  We cannot simply remake a
+	// connection with another call to connect.
+	Geodesic& connect(MultiPortHole& source, PortHole& destination,
+			  int numberDelays = 0) {
+		return connect(source.realPort().newPort(),
+			       destination,
+			       numberDelays);
+	}
+	Geodesic& connect(PortHole& source, MultiPortHole& destination,
+			  int numberDelays = 0) {
+		return connect(source,
+			       destination.realPort().newPort(),
+			       numberDelays);
+	}
+	Geodesic& connect(MultiPortHole& source, MultiPortHole& destination,
+			  int numberDelays = 0) {
+		return connect(source.realPort().newPort(),
+			       destination.realPort().newPort(),
+			       numberDelays);
+	}
+
+
 	// Connect a Galaxy PortHole to a PortHole of a sub-block
 	alias(PortHole& galPort, PortHole& blockPort) {
+		galPort.alias = &blockPort;
+	}
+
+	// Overload to alias MultiPortHoles
+	alias(MultiPortHole& galPort, MultiPortHole& blockPort) {
 		galPort.alias = &blockPort;
 	}
 

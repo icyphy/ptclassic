@@ -9,7 +9,8 @@
 
 // Need to add error checking
 
-Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination) {
+Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
+			int numberDelays = 0) {
 
 	// Resolve any aliases
 	PortHole& realSource = source.realPort();
@@ -28,25 +29,17 @@ Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination) {
 	realSource.farSidePort = &realDest;
 	realDest.farSidePort = &realSource;
 
+	// Set the number of delays
+	geo->setInitialParticles(numberDelays);
+
 	return *geo;
 }
 
 
-Geodesic& Galaxy :: connect (PortHole& source, PortHole& destination,
-			int numberDelays) {
-
-	// Call the connect method with two arguments
-	Geodesic& geo = connect(source,destination);
-
-	// Set the number of delays
-	geo.setInitialParticles(numberDelays);
-
-	return geo;
-}
-
-// TO BE DONE:  need a third connect method that accepts a Particle
+// TO BE DONE:  need another connect method that accepts a Particle
 // reference as a fourth parameter giving the value of the initial Particle
 // put on the Geodesic.
+
 
 
 	////////////////////////////////////
