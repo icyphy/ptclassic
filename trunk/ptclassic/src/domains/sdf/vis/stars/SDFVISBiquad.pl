@@ -61,7 +61,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 	  double *inarray;
-	  double *result_filt;
 	  double *split_result;
 	  float *result;
 	  short *dennum;
@@ -75,7 +74,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  state = 0;
 	  outarray = 0;
 	  inarray = 0;
-	  result_filt = 0;
 	  result = 0;
 	  scaledown = 0;
 	  n0 = 0;
@@ -86,7 +84,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	  free(state);
 	  free(outarray);
 	  free(inarray);
-	  free(result_filt);
 	  free(result);
 	  free(split_result);
 	}
@@ -99,11 +96,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  free(state);
 	  free(inarray);
 	  free(outarray);
-	  free(result_filt);
 	  free(result);
 	  free(split_result);
 	  inarray = (double *) memalign(sizeof(double),sizeof(double));
-	  result_filt = (double *) memalign(sizeof(double),sizeof(double)*2);
 	  split_result = (double *)
 	    memalign(sizeof(double),sizeof(short)*NUMPACK);
 	  result = (float *) memalign(sizeof(float),sizeof(float));
@@ -130,16 +125,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  state[3] = 0;
 	}
 	go {	
-	  double *outvalue;
-	  double *packedfilt;
+	  double *outvalue,*packedfilt;
 	  double upper, lower;
 	  double *allstates,*alltaps;
-	  float *statemem;
-	  float *result_ptr;
+	  float *statemem,*result_ptr;
 	  int outerloop,innerloop;
-	  short *statetap_prod;
-	  short *invalue;
-	  short *result_den;
+	  short *statetap_prod,*invalue,*result_den;
 
 	  vis_write_gsr(8);
 	  *inarray = double(signalIn%0);
