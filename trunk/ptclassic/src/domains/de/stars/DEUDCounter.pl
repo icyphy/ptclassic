@@ -63,17 +63,14 @@ a Null star to the unneeded inputs.
 
 		// check the countUp/Down input to change the content.
 		while (countUp.dataNew) {
-			countUp.dataNew = FALSE;
 			content++;
 			countUp.getSimulEvent();
 		}
 		while (countDown.dataNew) {
-			countDown.dataNew = FALSE;
 			content--;
 			countDown.getSimulEvent();
 		}
 		while (demand.dataNew) {
-			demand.dataNew = FALSE;
 			output.put(completionTime) << content;
 			demand.getSimulEvent();
 		}
