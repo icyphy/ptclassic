@@ -825,7 +825,7 @@ void Fix:: overflow_handler (int rsign)
 	break;
 
     case ovf_warning:			// warning
-	Error::abortRun(" Fix : overflow error");
+	Error::warn(" Fix : overflow error");
 	/* fall through -- also do the saturate */
 
     case ovf_saturate:			// saturate
