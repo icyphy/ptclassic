@@ -36,7 +36,8 @@ public:
 	DCNode* takeFromFront()
 		{ return (DCNode*) EGNodeList :: takeFromFront(); }
 
-	DCNode* headNode() { return (DCNode*) ((EGNodeLink*) head)->myNode(); }
+	DCNode* headNode() { 
+		return head? ((DCNode*) ((EGNodeLink*) head)->myNode()) : 0; }
 	int member(DCNode* n);
 
 	void removeNodes();
