@@ -102,6 +102,11 @@ delim $$
 		// Standardized interface to Tcl
 		TclStarIfc tcl;
 	}
+	code {
+	extern "C" {
+        	#include "ptk.h"
+	}
+    	}
 	setup {
 		tcl.setup( this,
 			   input.numberPorts(),
