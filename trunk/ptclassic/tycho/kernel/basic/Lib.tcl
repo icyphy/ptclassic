@@ -262,8 +262,8 @@
         ::tycho::DirSearch $w -geometry +0+0;\
 	    wm deiconify $w} \
 	    -label {Directory Search}  \
-	    -category "tool" \	
-            -underline 0
+	    -category "tool" \
+	    -underline 0
 
 # Itcl class list and class diagram generator
 ::tycho::register mode "itclclasslist" \
