@@ -82,8 +82,9 @@ proc roundDownTwo {x} {
 # the field increment so they will fit.
 #
 proc axisIncrement {low high space width padding} {
-    set maxnum   [expr $space / ($width+$padding)]
-    set estimate [expr ($high - $low) / ($maxnum)]
+    set maxnum   [expr double($space) / ($width+$padding)]
+puts $maxnum
+    set estimate [expr (double($high) - $low) / ($maxnum)]
     set estimate [axisRoundUp $estimate]
 
     return $estimate
@@ -115,7 +116,7 @@ proc rangeValues {low high inc} {
 proc mapRange {low high values lowdash highdash} {
     set result {}
 
-    set scale [expr ($highdash - $lowdash) / ($high - $low)]
+    set scale [expr (double($highdash) - $lowdash) / ($high - $low)]
     foreach n $values {
 	lappend result [expr $lowdash + ($n-$low) * $scale]
     }
@@ -129,11 +130,11 @@ proc mapRange {low high values lowdash highdash} {
 # nearest multiple of the second.
 #
 proc roundDownTo {x i} {
-    return [expr $i * (floor($x/$i))]
+    return [expr $i * (floor(double($x)/$i))]
 }
 
 proc roundUpTo {x i} {
-    return [expr $i * (ceil($x/$i))]
+    return [expr $i * (ceil(double($x)/$i))]
 }
 
 
