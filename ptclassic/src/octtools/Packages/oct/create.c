@@ -27,8 +27,18 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "attach.h"
+#include "bb.h"
+#include "change_record.h"
+#include "create.h"
+#include "oct_utils.h"
+#include "ref.h"
 
 #undef octCreate
+
+/* Perhaps this could be static?*/
+int oct_do_uncreate
+	ARGS((generic *ptr, int by_user));
 
 octStatus
 octCreate(container, object)
