@@ -62,9 +62,14 @@ void MotorolaSimTarget :: initStates(
 
 int MotorolaSimTarget::compileCode() {
 	StringList assembleCmds = "asm";
+	StringList postAssembleCmds = "cldlod ";
 	assembleCmds << dspType << " " << assemblerOptions << " " 
 		     << filePrefix<<".asm";
-	return !systemCall(assembleCmds, "Errors in assembly");
+	postAssembleCmds << " "<<filePrefix<<".cld > "<<filePrefix<<".lod";
+	int valid = !systemCall(assembleCmds, "Errors in assembly", targetHost);
+	int valid2 = !systemCall(postAssembleCmds, "Errors in post processing",
+			      targetHost);
+	return (valid && valid2);
 }
 
 int MotorolaSimTarget::loadCode() {
