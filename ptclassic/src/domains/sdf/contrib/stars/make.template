@@ -54,10 +54,7 @@ SDFTWTA.pl \
 SDFVDecoder.pl \
 SDFVEncoder.pl \
 SDFVariance.pl \
-SDFWirelessChannel.pl \
-SDFSharedMem.pl \
-SDFReadVar.pl \
-SDFWriteVar.pl
+SDFWirelessChannel.pl
 
 # The .cc files
 SRCS =		$(LIB_CC_SRCS) $(PL_SRCS:.pl=.cc)
