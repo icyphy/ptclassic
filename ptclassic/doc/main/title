@@ -8,8 +8,11 @@
 .sp 1i
 \*(PT
 .)b
-.sp 2i
+.sp 1i
+.hl
 .sz 14
-.(b C
-\f6This section describes the \*(PT kernel and user interfaces.
-.)b
+\f5This section describes the \*(PT kernel and user interfaces.
+.sp
+Department of Electrical Engineering and Computer Science
+University of California at Berkeley
+Berkeley, CA 94720
