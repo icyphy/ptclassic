@@ -71,8 +71,8 @@ public:
 	ParNode* backComm (ParNode* n);
 
 	// redefine 
-	SDFStar* createSend(int from, int to, int num);
-	SDFStar* createReceive(int from, int to, int num);
+	DataFlowStar* createSend(int from, int to, int num);
+	DataFlowStar* createReceive(int from, int to, int num);
 
 	// generate Gantt chart
 	void writeSchedule();

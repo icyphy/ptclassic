@@ -80,7 +80,7 @@ private:
 
 protected:
 	// redefine these virtual allocators to allocate DCNodes
-	EGNode* newNode(SDFStar*, int);
+	EGNode* newNode(DataFlowStar*, int);
 
 	// Initialize the graph.  Returns TRUE if okay, else returns FALSE.
 	int initializeGraph();

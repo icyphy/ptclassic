@@ -190,7 +190,7 @@ int CGFullConnect :: run() {
 			PortHole& realP = p->newConnection();
 			Geodesic* realG = realP.far()->geo();
 			ParNode* pn = (ParNode*)
-				((SDFStar*) realP.parent())->myMaster();
+				((DataFlowStar*) realP.parent())->myMaster();
 			while (pn) {
 			    CGStar* s = (CGStar*) pn->getCopyStar();
 			    PortHole* tp = s->portWithName(realP.name());
@@ -206,7 +206,7 @@ int CGFullConnect :: run() {
 			PortHole& realP = p->newConnection();
 			Geodesic* realG = realP.far()->geo();
 			ParNode* pn = (ParNode*)
-				((SDFStar*) realP.parent())->myMaster();
+				((DataFlowStar*) realP.parent())->myMaster();
 			while (pn) {
 			    CGStar* s = (CGStar*) pn->getCopyStar();
 			    PortHole* tp = s->portWithName(realP.name());
@@ -237,7 +237,7 @@ int CGFullConnect :: wormCodeGenerate() {
                 if (p->isItInput()) {
 			PortHole& realP = p->newConnection();
 			ParNode* pn = (ParNode*)
-				((SDFStar*) realP.parent())->myMaster();
+				((DataFlowStar*) realP.parent())->myMaster();
 			while (pn) {
 				int ip = pn->getProcId();
 				if (iprocs[ip] == 0) {
@@ -260,7 +260,7 @@ int CGFullConnect :: wormCodeGenerate() {
                 if (p->isItOutput()) {
 			PortHole& realP = p->newConnection();
 			ParNode* pn = (ParNode*)
-				((SDFStar*) realP.parent())->myMaster();
+				((DataFlowStar*) realP.parent())->myMaster();
 			while (pn) {
 				int ip = pn->getProcId();
 				if (iprocs[ip] == 0) {
@@ -324,13 +324,13 @@ ParNode* CGFullConnect :: backComm(ParNode* n) {
 void CGFullConnect :: resetResources() {}			
 
 // create communication stars
-SDFStar* CGFullConnect :: createSend(int from, int to, int /*num*/) {
+DataFlowStar* CGFullConnect :: createSend(int from, int to, int /*num*/) {
 	LOG_NEW; CGSend* newS = new CGSend;
 	newS->registerProcs(from, to);
 	return newS;
 }
 
-SDFStar* CGFullConnect :: createReceive(int from, int to, int /*num*/) {
+DataFlowStar* CGFullConnect :: createReceive(int from, int to, int /*num*/) {
 	LOG_NEW; CGReceive* newS = new CGReceive;
 	newS->registerProcs(from, to);
 	return newS;

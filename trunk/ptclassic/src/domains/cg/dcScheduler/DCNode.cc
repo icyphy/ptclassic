@@ -23,7 +23,7 @@ Date of last revision: 5/92
                         ///  *Constructor*  ///
                         ///////////////////////
 
-DCNode::DCNode(SDFStar* s, int invoc_no) : ParNode(s, invoc_no)
+DCNode::DCNode(DataFlowStar* s, int invoc_no) : ParNode(s, invoc_no)
 {
 	scheduledTime = -1;	// Initialize to something invalid
 	finishTime = -1;	// Initialize to something invalid

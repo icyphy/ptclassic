@@ -32,7 +32,7 @@ class DLNode : public ParNode {
 
 public: 
 	// Constructor declaration
-	DLNode(SDFStar* Mas, int invoc_no);
+	DLNode(DataFlowStar* Mas, int invoc_no);
 
 	// Constructor used for idle nodes or communication nodes
 	DLNode(int type);

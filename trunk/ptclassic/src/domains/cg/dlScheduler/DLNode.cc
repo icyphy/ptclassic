@@ -23,7 +23,7 @@ Date of last revision:
                         ///  *Constructor*  ///
                         ///////////////////////
 
-DLNode::DLNode(SDFStar* Mas, int invoc_no) : ParNode(Mas, invoc_no) {}
+DLNode::DLNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no) {}
 
 // Alternate constructor for idle nodes and communication nodes
 // If type = 1, it is an idle node.
