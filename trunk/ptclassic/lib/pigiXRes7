@@ -1,13 +1,13 @@
 ! $Id$
 ! VEM options for Pigi:
-vem.bindings:	~ptolemy/lib/vem.bindings.7-3
+vem.bindings:	$PTOLEMY/lib/vem.bindings.7-3
 vem.deftechname:	ptolemy
 vem.grid.major.units:	100
 vem.grid.minor.units:	10
 vem.lambda:	1
 vem.logfile:	/dev/null
 vem.snap:	25
-vem.technology:	~ptolemy/lib/technology
+vem.technology:	$PTOLEMY/lib/technology
 
 ! Optional vem options:
 vem*font: 9x15
