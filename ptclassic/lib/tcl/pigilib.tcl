@@ -36,6 +36,7 @@ proc pigilib_init_env {} {
 	set env(PTOLEMY) [glob ~ptolemy]
     }
     set ptolemy $env(PTOLEMY)
+    set PTOLEMY $env(PTOLEMY)
     #set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
     #set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
     set env(TCL_LIBRARY) $env(PTOLEMY)/tcltk/tcl/lib/tcl
