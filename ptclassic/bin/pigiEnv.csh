@@ -37,6 +37,29 @@ if ( ! $?PTX11DIR ) then
 	    breaksw
     endsw
 endif
+
+if ( ! $?QCKMON ) then
+    switch ($ARCH)
+	case sol2:
+	    setenv QCKMON qckMon5
+	    breaksw
+	case sun4:
+            setenv QCKMON qckMon
+	    breaksw
+    endsw
+endif
+
+if ( ! $?S56DSP ) then
+    switch ($ARCH)
+	case sol2:
+	    setenv S56DSP /users/ptdesign/vendors/s56sol2
+	    breaksw
+	case sun4:
+            setenv S56DSP /users/ptdesign/vendors/s56dsp
+	    breaksw
+    endsw
+endif
+
 if ( ! $?LD_LIBRARY_PATH ) then
     setenv LD_LIBRARY_PATH /usr/lib:${PTX11DIR}/lib
 endif
