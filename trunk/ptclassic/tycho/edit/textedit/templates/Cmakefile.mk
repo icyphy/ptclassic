@@ -44,7 +44,8 @@ include $(CONFIG)
 
 OTHERCFLAGS =
 
-include $(TYCHO)/obj.$(PTARCH)/tcl.mk
+# If tcl.mk does not exist, then try running 'cd $PTOLEMY/tycho; make tclexts'
+include $(TYCHO)/lib.$(PTARCH)/tcl.mk
 
 # Tycho substitutes in our filename in the line below
 BASENAME = %basename%
