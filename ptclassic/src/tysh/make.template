@@ -46,14 +46,28 @@ VPATH =		$(ROOT)/src/tycho/kernel
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+# Note that the rest of Ptolemy uses itcl-2.0, once tycho does these
+# lines should go into the cosmic dustbin.
+ITCL_VERSION =	itcl-1.5
+# Directory containing itcl include files
+ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litcl
+
+# itk is part of itcl-2.0b
+#ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
+#ITK_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib -litk
+ITK_INCDIR=
+ITK_LIBSPEC=
+
 -include override.mk
 
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = 	$(ROOT)/src/ptklib
 
 INCL = 		-I$(KERNDIR) -I$(PTCL_INCDIR) \
+		-I$(ITCL_INCDIR) \
 		-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC) -I$(PTKDIR) \
-		-I$(ITCL_INCDIR) -I$(TCL_INCDIR) -I$(ROOT)/src/kernel \
+		-I$(ROOT)/src/kernel \
 		-I$(ROOT)/src/compat/ptolemy
 
 # For development period, disable optimization
