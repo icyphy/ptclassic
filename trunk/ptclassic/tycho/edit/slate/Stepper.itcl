@@ -43,18 +43,11 @@
 #
 # <p><b>Options</b>
 #
+# See also: <a href="Interactor.html">Interactor</a>.
+#
 # <dl>
 # <dt><dd>
 # <dl>
-# <dt><b>-activatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-deactivatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-dragcommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
 # <dt><b>-gridded</b>
 # <dd>If true, the cursor movement is quantized to a
 # grid with size given by the <code>-stepsize</code> option. For

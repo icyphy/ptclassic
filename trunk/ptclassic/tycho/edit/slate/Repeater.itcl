@@ -45,24 +45,17 @@
 #
 # <p><b>Options</b>
 #
+# See also: <a href="Interactor.html">Interactor</a>.
+#
 # <dl>
 # <dt><dd>
 # <dl>
-# <dt><b>-activatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
 # <dt><b>-command</b>
 # <dd>The script that is executed repeatedly as long as the
 # mouse button is held down.
 #
-# <dt><b>-deactivatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
 # <dt><b>-delay</b>
 # <dd>The time delay between the first and second clicks.
-#
-# <dt><b>-dragcommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
 #
 # <dt><b>-interval</b>
 # <dd>The time interval between executions of the script.

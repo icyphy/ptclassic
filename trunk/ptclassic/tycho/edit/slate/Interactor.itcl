@@ -72,10 +72,25 @@
 # which is applied to the same four arguments when the interactor is 
 # de-activated.
 #
+# <dt><b>-clickprefix</b>
+# <dd>If not null, this is a script which has the target and coordinates
+# appended and evaluated in the click{} method. This is typically used
+# if the mouse interaction is not going directly to a Slate.
+#
 # <dt><b>-dragcommand</b>
 # <dd>If not null, this is a function-script 
 # which is applied to the same four arguments at the completion of the
 # interactor's <code>drag</code> method.
+#
+# <dt><b>-dragprefix</b>
+# <dd>If not null, this is a script which has the target and coordinates
+# appended and evaluated in the drag{} method. This is typically used
+# if the mouse interaction is not going directly to a Slate.
+#
+# <dt><b>-releaseprefix</b>
+# <dd>If not null, this is a script which has the target and coordinates
+# appended and evaluated in the release{} method. This is typically used
+# if the mouse interaction is not going directly to a Slate.
 #
 # </dl></dl>
 #
@@ -279,9 +294,12 @@ body ::tycho::Interactor::cascade {args} {
 # Start an interaction sequence. The co-ordinates _x_ and _y_
 # are the current mouse coordinates relative to the slate.
 # By default, this method simply forwards a *click* action
-# to the target, or to the proxy interactor if there
-# is one. Sub-classes that over-ride this method should always call
-# this implementation to forward the click action.
+# to the target. If this interactor has a proxy interactor,
+# then it calls the click{} method of the proxy; if there is
+# no proxy but the *-clickprefix* option is not null, then it
+# appends the current target and _x_ and _y_ coordinates and
+# evaluates it. Sub-classes that over-ride this method should
+# always call this implementation to forward the click action.
 #
 body ::tycho::Interactor::click {x y args} {
     if { $proxy != "" } {
@@ -326,8 +344,11 @@ body ::tycho::Interactor::disable {} {
 # Continue an interaction sequence with a mouse move. The co-ordinates
 # _x_ and _y_ are the current mouse coordinates relative to
 # the slate. By default, this method simply forwards a *drag*
-# action to the target, or to the proxy interactor if there
-# is one. Sub-classes that over-ride this method should always call
+# action to the target. If this interactor has a proxy interactor,
+# then it calls the drag{} method of the proxy; if there is
+# no proxy but the *-dragprefix* option is not null, then it
+# appends the current target and _x_ and _y_ coordinates and
+# evaluates it. Sub-classes that over-ride this method should always call
 # this implementation to forward the drag action.
 #
 body ::tycho::Interactor::drag {x y} {
@@ -387,13 +408,16 @@ body ::tycho::Interactor::proxy {args} {
 #### release
 #
 # Terminate an interaction sequence. By default, this method
-# simply forwards a *release* action to the target, or to the
-# proxy interactor if there is one. Sub-classes that over-ride
+# simply forwards a *release* action to the target. If this
+# interactor has a proxy interactor,
+# then it calls the release{} method of the proxy; if there is
+# no proxy but the *-releaseprefix* option is not null, then it
+# appends the current target and _x_ and _y_ coordinates and
+# evaluates it.  Sub-classes that over-ride
 # this method should always call this implementation to forward
 # the release action.
-#
 # The _x_ and _y arguments to this method should be the coordinates
-# of the cursor when it is release -- they will usually (always?)
+# of the cursor when it is released -- they will usually (always?)
 # be the same as the coordinates given to the last call to drag{}.
 #
 body ::tycho::Interactor::release {x y} {

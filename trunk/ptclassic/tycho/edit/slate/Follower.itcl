@@ -48,17 +48,13 @@
 #
 # <p><b>Options</b>
 #
+# See also: <a href="Interactor.html">Interactor</a>.
+#
 # <dl>
 # <dt><dd>
 # <dl>
-# <dt><b>-activatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-deactivatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-dragcommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
+# <dt><b>(none)</b>
+# <dd>
 #
 # </dl></dl>
 #

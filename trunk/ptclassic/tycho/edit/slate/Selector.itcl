@@ -87,16 +87,10 @@
 #
 # <dl>
 # <dt><dd>
+#
+# See also: <a href="Interactor.html">Interactor</a>.
+#
 # <dl>
-# <dt><b>-activatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-deactivatecommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
-# <dt><b>-dragcommand</b>
-# <dd>See <a href="Interactor.html">Interactor</a>.
-#
 # <dt><b>-dragmode</b>
 # <dd>This can be <i>overlapping</i>, in which case an item 
 # is selected if the drag-selector interactor has dragged out a region 
