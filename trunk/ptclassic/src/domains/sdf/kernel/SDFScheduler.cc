@@ -117,13 +117,22 @@ int SDFScheduler :: setup (Block& block) {
 
 	int i;
 
-	// force recomputation of repetitions and noTimes
+	// force recomputation of repetitions and noTimes.  Also make
+	// sure all stars are SDF.
 
 	for (i = alanShepard.totalSize(galaxy); i>0; i--)
 	{
-		SDFStar& s = (SDFStar&)alanShepard.nextStar();
-		s.repetitions = 0;
-		s.noTimes = 0;
+		Star& s = alanShepard.nextStar();
+		if (strcmp (s.domain(), "SDF") != 0) {
+			StringList msg = s.readFullName();
+			msg += " is not an SDF star: domain = ";
+			msg += s.domain();
+			invalid = TRUE;
+			return FALSE;
+		}
+		SDFStar* p = (SDFStar*)&s;
+		p->repetitions = 0;
+		p->noTimes = 0;
 	}
 	
 	alanShepard.setupSpaceWalk(galaxy);
