@@ -45,7 +45,7 @@ if ( -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ) then
 	setenv ITK_LIBRARY $ITCLDIR/itcl/lib/itcl/itk
 	setenv IWIDGETS_LIBRARY $ITCLDIR/itcl/lib/itcl/iwidgets
 
-	$ITCLDIR/itcl.$PTARCH/bin/itkwish $*
+	exec $ITCLDIR/itcl.$PTARCH/bin/itkwish $*
 else
 	if ( -f $PTOLEMY/tcltk/tcl/lib/tcl/init.tcl) then
 		# Itcl2.0, which was shipped with Ptolemy0.6
@@ -54,8 +54,11 @@ else
 		setenv ITCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl
 		setenv ITK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itk
 		setenv IWIDGETS_LIBRARY $PTOLEMY/tcltk/itcl/lib/iwidgets
+		exec $PTOLEMY/bin.$PTARCH/itkwish $*
+	else
+		exec $itkwish $*
 	endif
-	$PTOLEMY/bin.$PTARCH/itkwish $*
+	
 endif
 
 
