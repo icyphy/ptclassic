@@ -64,6 +64,9 @@ sccsinfo:
 
 makefiles: makefile
 
+# Generate html files from itcl files, requires itclsh and tycho
+itcldocs:
+	$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS)
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
