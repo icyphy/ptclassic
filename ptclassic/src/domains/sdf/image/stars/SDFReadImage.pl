@@ -27,7 +27,7 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 .Ir "image reading"
 	}
 
-	ccinclude { "GrayImage.h", <std.h>, <stdio.h> }
+	ccinclude { "GrayImage.h", <std.h>, <stdio.h>, "miscFuncs.h", "StringList.h", "Error.h" }
 
 	output { name { output } type { message } }
 
@@ -46,25 +46,25 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 
 	method {
 		name { genFileName }
-		type { "char *" }
+		type { "char*" }
 		arglist { "(const char* str, const int d)" }
 		access { protected }
 		code {
-			char* filename = expandPathName(str);
 			char num[16];
 			sprintf(num, "%d", d);
-			char* newname = subCharByString(filename, '#', num);
+			char* filename = expandPathName(str);
+			char* newfilename = subCharByString(filename, '#', num);
 			delete [] filename;
-			return newname;
+			return newfilename;
 		} // end genFileName()
 	}
 
 	go {
 		// Open file containing the image.
-		char expandedName = genFileName(fileName, int(frameId));
-		StringList fullname = expandedName;
+		char *expandedName = genFileName(fileName, int(frameId));
+		StringList fullName = expandedName;
 		delete [] expandedName;
-		FILE* fp = fopen(fullName, "r");
+		FILE *fp = fopen(fullName, "r");
 		if (fp == (FILE*) NULL) {
 			Error::abortRun(*this, "File not opened: ", fullName);
 			return;
