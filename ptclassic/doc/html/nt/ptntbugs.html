@@ -409,7 +409,9 @@ As a hack, I modified util_cystem so that we call /bin/bash:
  <p>I then rebuilt the octtools libutility and pigi
 I then copied bash.exe from the Cygwin directory to /bin
 
- <p>I'll see if I can figure out a better solution than my hack above.
+ <p>The above change is in <CODE>0.7.2devel</CODE>.
+Note that to get it to work, you need to copy
+<CODE>bash.exe</CODE> to <CODE>/bin/bash/exe</CODE>
 
  <p><CODE>util_csystem()</CODE>
  is also used to compile the star by hand from within
