@@ -69,7 +69,7 @@ StringList CGTarget::indent(int depth) {
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep)
-: Target(name,starclass,desc), schedFileName(0), noSchedule(0)
+: Target(name,starclass,desc), schedFileName(0), noSchedule(0), inheritFlag(0)
 {
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
@@ -138,7 +138,7 @@ void CGTarget::setup() {
 	noSchedule = 0;		// reset for next setup.
 
 	// choose sizes for buffers and allocate memory, if needed
-	if (inWormHole() && (parent() == NULL)) {
+	if (inWormHole() && alone()) {
 		adjustSampleRates();
 		generateCode();
 		wormLoadCode();
@@ -163,9 +163,31 @@ void CGTarget :: mainLoopCode() {
 	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
 	beginIteration(iterations,0);
 	if (inWormHole()) wormInputCode();
-	scheduler()->compileRun();
+	compileRun((SDFScheduler*) scheduler());
 	if (inWormHole()) wormOutputCode(); 
 	endIteration(iterations,0);
+}
+
+int CGTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
+	// save infos
+	Galaxy* saveGal = galaxy();
+	setGalaxy(*g);
+	Target& saveT = s->target();
+	s->setTarget(*this);
+
+        if(!allocateMemory() || !codeGenInit()) return FALSE;
+        compileRun(s);
+        Target :: wrapup();
+
+	// restore info
+	setGalaxy(*saveGal);
+	s->setTarget(saveT);
+	return TRUE;
+}	
+
+// virtual function
+void CGTarget :: compileRun(SDFScheduler* s) {
+	s->compileRun();
 }
 
 void CGTarget :: addStream(const char* name, CodeStream* slist)
@@ -230,6 +252,11 @@ int CGTarget :: compileCode() {
 
 int CGTarget :: loadCode() {
 	return TRUE; // load and Run can be combined in runCode method
+}
+
+int CGTarget :: incrementalAdd(CGStar*) {
+	Error:: abortRun("No Incremental-Add(so, no wormhole) supported yet");
+	return FALSE;
 }
 
 int CGTarget :: runCode() {
@@ -396,4 +423,17 @@ int CGTarget::systemCall(const char*command,const char*error,const char*host){
 const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
 {
     return sharedSymbol.lookup(scope, name);
+}
+
+void CGTarget :: switchCodeStream(Block* b, CodeStream* cs) {
+	CGStar* s;
+	if (b->isItAtomic()) {
+		s = (CGStar*) b;
+		s->myCode = cs;
+	} else {
+		Galaxy *g = (Galaxy*) b;
+		GalStarIter nextS(*g);
+		while ((s = (CGStar*) nextS++) != 0)
+			s->myCode = cs;
+	}
 }
