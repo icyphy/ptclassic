@@ -1,10 +1,10 @@
-# Definition of a Tcl context-sensitive editor.
+# Definition of a Tcl editor that handles Ptolemy Tcl extensions
 #
 # @Author: Christopher Hylands
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -35,15 +35,21 @@
 # This class defines a window that provides an emacs-like editor
 # specialized for editing Ptolemy Tcl files.  Usually ptcl commands
 # are used to define Ptolemy Universes.
-
+#
 # The EditPtcl class colorizes the code, identifying comments and
 # procedure definitions, supports hyperlinks to procedures that can be
 # auto-loaded, automatically indents the code, and fills blocks of
 # comments.  It also provides a command for evaluating a region of
 # Ptcl code.
 
-class ::tycho::EditPTcl {
+class ::tycho::EditPtcl {
     inherit ::tycho::EditTcl
+ 
+    ###################################################################
+    ####                            options                        ####
+
+    # Specify the name of the Oct facet associated with the data being edited.
+    itk_option define -facet facet File "init.pal"
 
     ###################################################################
     ####                     public methods                        ####
@@ -62,17 +68,37 @@ class ::tycho::EditPTcl {
     protected method textWidget {} {return ::tycho::EditPtclText}
 }
 
+#######################################################################
+#### -facet configuration
+# Use oct2ptcl to convert a facet from Oct to Ptcl format.
+#
+configbody ::tycho::EditPtcl::facet {
+    set facet $itk_option(-facet)
+    if {$facet != {init.pal} } {
+	set facet [::tycho::expandPath $facet]
+    }
+    # Unix-ism here.  Why anyone would buy (let alone write)
+    # an operating system without an exec is beyond me. :-)
+    #
+    # oct2ptcl is part of Ptolemy, it converts Oct facets to Ptolemy
+    # tcl commands.  
+    # -r recursive translation: convert sub-galaxies
+    # -g append a run and a wrap up command
+    exec oct2ptcl -rg $facet > $facet.pt
+
+    configure -file $facet.pt
+}
+
+
 ###################################################################
 #
-body ::tycho::EditTcl::constructor {args} {
+body ::tycho::EditPtcl::constructor {args} {
     
     eval itk_initialize $args
     
-    # Add to the format menu a command to recolorize.
-    addMenuSeparator Format
-        
-    addMenuItem "Show Links" Format -underline 1 \
-	    -command "$this component text busy tagLinks"
+    addMenu Special left Window -underline 0
+    addMenuItem "Retarget" Special -underline 0 \
+	    -command {set w [::tycho::Retarget #auto]; $w centerOnScreen}
 
     addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
@@ -82,7 +108,7 @@ body ::tycho::EditTcl::constructor {args} {
 #### help
 # Open a help window.
 #
-body ::tycho::EditTcl::help {} {
+body ::tycho::EditPtcl::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
 	    $TYCHO/editors/textedit/doc/usersGuides/EditPtclHelp.html
