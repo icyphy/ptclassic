@@ -103,7 +103,11 @@ TyConsole::TyConsole(int argc, char **argv) {
   // Load the startup file Lib.tcl
   char *pt = getenv("PTOLEMY");
   InfString command = pt ? pt : "~ptolemy";
+#if ITCL_MAJOR_VERSION
+  command << "/tycho/kernel_itk/Lib.tcl";
+#endif
   command << "/tycho/kernel/Lib.tcl";
+#endif
   if (Tcl_EvalFile(interp, (char*)command) != TCL_OK) {
     fprintf(stderr,
 	"Unable to load Lib.tcl startup file: %s\n ", interp->result);
