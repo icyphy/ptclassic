@@ -183,7 +183,7 @@ void PortHole :: allocateBuffer()
 
 PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
-                              dataType t = FLOAT) {
+                              DataType t) {
 	GenericPort::setPort (s, parent, t);
 	numberTokens = 1;
 	bufferSize = numberTokens;
@@ -207,7 +207,7 @@ GenericPort :: printVerbose () const {
         out += "\n";
         
         if(alias() != NULL) {
-           GenericPort& eventualAlias = realPort();
+           const GenericPort& eventualAlias = realPort();
            out += "       Aliased to: ";
            out += eventualAlias.readFullName();
            out += "\n";
@@ -375,7 +375,7 @@ void PortHole :: initialize()
 {
 	// set plasma if not set
 	if (!setPlasma ()) {
-		Error::abortRun (*this, ": can't determine dataType");
+		Error::abortRun (*this, ": can't determine DataType");
 		return;
 	}
 
@@ -419,7 +419,7 @@ Particle& PortHole ::  operator % (int delay)
 
 MultiPortHole& MultiPortHole :: setPort(const char* s,
                               Block* parent,
-                              dataType t = FLOAT) {
+                              DataType t) {
 	GenericPort::setPort (s, parent, t);
         return *this;
 }

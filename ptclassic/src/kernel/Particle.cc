@@ -47,13 +47,13 @@ void Particle :: badCopy (const Particle& src) const {
 	Error::abortRun (msg);
 }
 
-extern const dataType ANYTYPE = "ANYTYPE";
+extern const DataType ANYTYPE = "ANYTYPE";
 
 	///////////////////////////////////////
 	// class IntSample
 	///////////////////////////////////////
 
-extern const dataType INT = "INT";
+extern const DataType INT = "INT";
 
 Particle* IntSample :: clone () {
 	Particle* p = intPlasma.get();
@@ -74,7 +74,7 @@ Particle& IntSample :: operator = (const Particle& p)
 	return *this;
 }
 
-dataType IntSample :: readType() const {return INT;}
+DataType IntSample :: readType() const {return INT;}
 IntSample :: operator int () const {return data;}
 IntSample :: operator float () const {return float(data);}
 IntSample :: operator Complex () const {return Complex(data);}
@@ -94,7 +94,7 @@ void IntSample :: operator << (Complex& c) {data=int(abs(c));}
 	// class FloatSample
 	////////////////////////////////////////
 
-extern const dataType FLOAT = "FLOAT";
+extern const DataType FLOAT = "FLOAT";
 
 Particle* FloatSample :: useNew () { return new FloatSample;}
 
@@ -117,7 +117,7 @@ Particle& FloatSample :: operator = (const Particle& p)
 }
 
 
-dataType FloatSample :: readType() const {return FLOAT;}
+DataType FloatSample :: readType() const {return FLOAT;}
 
         // Cast to an int, float, and Complex
 FloatSample :: operator int () const {return int(data);}
@@ -139,7 +139,7 @@ void FloatSample :: operator << (Complex& c) {data=abs(c);}
         // class ComplexSample
         ////////////////////////////////////////
 
-extern const dataType COMPLEX = "COMPLEX";
+extern const DataType COMPLEX = "COMPLEX";
 
 Particle* ComplexSample :: useNew () { return new ComplexSample;}
 
@@ -160,7 +160,7 @@ Particle& ComplexSample :: operator = (const Particle& p)
         return *this;
 }
 
-dataType ComplexSample :: readType() const {return COMPLEX;}
+DataType ComplexSample :: readType() const {return COMPLEX;}
  
         // Cast to an int, float, Complex
 	// when casting to a real, we use the magnitude
@@ -214,12 +214,12 @@ void ParticleStack :: freeup () {
 	}
 }
 
-Plasma* Plasma :: getPlasma(dataType t)
+Plasma* Plasma :: getPlasma(DataType t)
 {
 	Plasma* p = plasmaList;
 
 	while (p) {
-		dataType dt = p->head->readType();
+		DataType dt = p->head->readType();
 		if (t == dt) return p;
 		p = p->nextPlasma;
 	}

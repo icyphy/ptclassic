@@ -54,7 +54,7 @@ public:
 		}
 		return head->useNew();
 	}
-	dataType type() { return head->readType();}
+	DataType type() { return head->readType();}
 
 // constructor -- all objs built are added to the static linked list.
 	Plasma(Particle& p) : ParticleStack(&p), nextPlasma(plasmaList) {
@@ -62,7 +62,7 @@ public:
 	}
 
 // get the appropriate Plasma object given a type
-	static Plasma* getPlasma (dataType t);
+	static Plasma* getPlasma (DataType t);
 private:
 // The global list of Plasmas (points to head of list)
 	static Plasma* plasmaList;
