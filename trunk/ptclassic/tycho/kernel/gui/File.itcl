@@ -1516,18 +1516,38 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 
     # See whether a backup or crash recovery files exists and is
     # newer than the file being opened.
-    if {[file exists $emerfile] && \
-	    [file mtime $emerfile] > [file mtime $filename]} {
-	if [::tycho::askuser "A crash recovery file exists for $filename. \
-		\nDo you wish to open it instead?"] {
-	    return $emerfile
+    if [file exists $emerfile] {
+	if [file exists $filename] {
+	    if {[file mtime $emerfile] > [file mtime $filename]} {
+		if [::tycho::askuser "A crash recovery file exists for\
+			$filename. \
+			\nDo you wish to open it instead?"] {
+		    return $emerfile
+		}
+	    }
+	} else {
+	    if [::tycho::askuser "A crash recover file exists, but\
+		    $filename does not.\
+		    \nDo you wish to open the crash recovery file instead?"] {
+		return $emerfile
+	    }
 	}
     }
-    if {[file exists $backfile] && \
-	    [file mtime $backfile] > [file mtime $filename]} {
-	if [::tycho::askuser "A newer auto-save file exists for $filename. \
-		\nDo you wish to open it instead?"] {
-	    return $backfile
+    if [file exists $backfile] {
+	if [file exists $filename] {
+	    if {[file mtime $backfile] > [file mtime $filename]} {
+		if [::tycho::askuser "A newer auto-save file exists\
+			for $filename. \
+			\nDo you wish to open it instead?"] {
+		    return $backfile
+		}
+	    }
+	} else {
+	    if [::tycho::askuser "A auto-save file exists, but \
+		    $filename does not.\
+		    \nDo you wish to open the auto-save file instead?"] {
+		return $backfile
+	    }
 	}
     }   
 
