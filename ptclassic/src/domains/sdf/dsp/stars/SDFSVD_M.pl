@@ -48,7 +48,7 @@ The vector of singular values is always generated.
 .Id "Haykin, S."
 .UH "References"
 .ip [1]
-S. Haykin, \fModern Filters\fR, pp. 333-335,
+S. Haykin, \fIModern Filters\fR, pp. 333-335,
 Macmillan Publishing Company, New York, 1989.
 .SA
 Data_M
