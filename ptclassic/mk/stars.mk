@@ -411,7 +411,7 @@ ifdef ACS
 	# star icons
 	PALETTES += PTOLEMY/src/domains/acs/icons/acs.pal
 	# kernel and stars
-	CUSTOM_DIRS += $(ACSDIR)/kernel $(ACSDIR)/stars
+	CUSTOM_DIRS += $(ACSDIR)/kernel $(ACSDIR)/stars $(ACSDIR)/targets
 	STARS +=  $(LIBDIR)/acsstars.o
 	ifeq ($(USE_SHARED_LIBS),yes) 
 		LIBS += -lacstargets
