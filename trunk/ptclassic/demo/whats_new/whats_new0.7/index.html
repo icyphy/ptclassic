@@ -27,7 +27,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 <title>What's New in Ptolemy0.7</title>
 </head>
 <body bgcolor=#faf0e6>
-<H1>What's New in Ptolemy 0.7</H1>
+<h1><img src="../../../tycho/typt/kernel/img/ptolemyWelcome.gif"
+alt="Ptolemy Logo">
+<A NAME="What's New in Ptolemy 0.7">What's New in Ptolemy 0.7</A>
+</h1>
 
 Unlike earlier releases of Ptolemy, Ptolemy 0.7 does not contain a
 "What's New" facet, instead we are using HTML to describe the new
@@ -43,7 +46,7 @@ won't know how to handle.
 
  <hr>
 <H2>New work</H2>
-<DT> Further integrations of <A HREF="tycho/Tycho.html">Tycho</A>
+<DT> Further integrations of <A HREF="$TYCHO/doc/index.html">Tycho</A>
 into Ptolemy. 
 
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~eal">Edward A. Lee</A>,
@@ -55,12 +58,12 @@ and many others.
 
 <MENU>
 	<LI> The
-	<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/ptpub/tyjava.html">Java/Tycho
+	<A HREF="$TYCHO/java/doc/index.html">Java/Tycho
 	 interface</A>, including a Process Networks Sieve of Eratosthenes
 	 demo.
 
 	<LI> Compilation and dynamic <A
-HREF="$TYCHO/tycho/kernel/doc/usersGuides/LoaderHelp.html">loading</A>
+HREF="$TYCHO/kernel/doc/usersGuides/LoaderHelp.html">loading</A>
 of C modules at runtime.
 
 	<LI> Improved <A
@@ -71,37 +74,35 @@ HREF="$TYCHO/kernel/doc/usersGuides/PreferencesHelp.html">preferences</A>
 	compiler errors.
 
 	<LI> Ptolemy <A
-HREF="$TYCHO/tycho/typt/editors/doc/usersGuides/RetargetHelp.html">Retargetting
+HREF="$TYCHO/typt/editors/doc/usersGuides/RetargetHelp.html">Retargetting
 Tool</A>
 
 </MENU>
  <DL>
-<DT> 
-<A HREF="$PTOLEMY/src/domains/fsm/demo/init.pal">Finite
-State Machine (FSM) domain</A>
+<DT> Finite State Machine (FSM) domain
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~bilung">Bilung Lee</A> - 
-<A HREF="http://ptolemy.eecs.berkeley.edu/~bilung/FSM/fsm.html">Further documentatoin  </A>
+<A HREF="$PTOLEMY/src/domains/fsm/demo/init.pal">
+FSM Palette</A> -
 
-<DT> 
-<A HREF="$PTOLEMY/src/domains/sr/demo/init.pal">Synchronous/Reactive (SR) Domain</A>
+<A HREF="fsm.html">Further documentation</A>
 
+<DT> Synchronous/Reactive (SR) Domain
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~sedwards">Stephen Edwards</A> -
-<A HREF="http://ptolemy.eecs.berkeley.edu/~sedwards/srdomain/">Further documentation </A>
+<A HREF="$PTOLEMY/src/domains/sr/demo/init.pal">SR Palette</A> -
+<A HREF="overall">Further documentation </A>
 
-<DT> <A HREF="$PTOLEMY/src/domains/c50/demo/init.pal">Generation for
-the TMS320C50 DSP Domain</A>Code
+<DT> Code Generation for the TMS320C50 DSP Domain
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~luisgm">Luis Gutierrez</A>,
 <a href="http://www.ece.utexas.edu/~bevans">Brian L. Evans</a> (UT Austin)
+<A HREF="$PTOLEMY/src/domains/c50/demo/init.pal">C50 Palette</A>
 
-<DT> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/ptpub/typesys.html">Type
-System Modifications</A>
+<DT> Type System Modifications
 <DD> <a href="mailto:tgl@sss.pgh.pa.us">Tom Lane</a>(Structured
 Software Systems),
-<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A> -
+<A HREF="typesys.html">Further documentation</A>
 
-
-<DT> 
-<A HREF="$PTOLEMY/src/domains/cgc/vis/demo/vis.pal">UltraSparc C Code Generation</A> (PTARCH=sol2.5.cfront only, requires Sun VIS Software Development Kit)
+<DT> UltraSparc C Code Generation (PTARCH=sol2.5.cfront only, requires Sun VIS Software Development Kit)
 <DD> <a href="http://www.ctr.columbia.edu/~bchen">William Chen</a>
 (Columbia University),
 <A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A> -
@@ -146,35 +147,65 @@ contents</A>, and as a <A HREF="$PTOLEMY/src/domains/starHTML.idx.fst">graphical
 <H3>Minor changes</H3>
 <DL>
 
-<DT> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh/ptpub/ptrecursion.html">Galaxy Recursion Tests</A>
+<DT>Galaxy Recursion Tests
 <DD> Compiling recursive galaxies are warned against.
  <BR> <a href="mailto:tgl@sss.pgh.pa.us">Tom Lane</a> 
 (Structured Software Systems), 
-<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
+<A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A> -
+<A HREF="ptrecursion.html">Further Documentation</A>
 
-<DT> <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil/talk/talk.html">New
-Audio Infrastructure</A>
+<DT> New Audio Infrastructure
 <DD> New Stars that can use the linear16 audio capabilities of the UltraSparc.
  <BR><A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A>,
 <a href="http://www.ctr.columbia.edu/~bchen">William Chen</a>
-(Columbia University)
+(Columbia University).
+ <br>
+
+The stars below inherit from the <A
+HREF="$PTOLEMY/src/domains/cgc/stars/CGCAudioBase.htm"><CODE>CGCAudioBase</CODE>
+star</A>.  See the individual star documentation for a list of demos that use that star.
+
+<MENU>
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/stars/CGCMonoIn.htm"><CODE>CGCMonoIn</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/stars/CGCMonoOutIn.htm"><CODE>CGCMonoOut</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/stars/CGCStereoIn.htm"><CODE>CGCStereoIn</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/stars/CGCStereoOut.htm"><CODE>CGCStereoOut</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/tcltk/stars/CGCTkMonoIn.htm"><CODE>CGCTkMonoIn</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/tcltk/stars/CGCTkMonoOut.htm"><CODE>CGCTkMonoOut</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/tcltk/stars/CGCTkStereoIn.htm"><CODE>CGCTkStereoIn</CODE> star</A>
+
+<LI> <A HREF="$PTOLEMY/src/domains/cgc/tcltk/stars/CGCTkStereoOut.htm"><CODE>CGCTkStereoOut</CODE> star</A>
+
+</MENU>
+ <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil/talk/talk.html">Further
+documentation</A>
 
 <DT> CGC control panel 
 <DD> The CGC control panel is more configurable.
  <br><A HREF="http://ptolemy.eecs.berkeley.edu/~johnr">John Reekie</A>,
- <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A>
+ <A HREF="http://ptolemy.eecs.berkeley.edu/~sunil">Sunil Bhave</A> -
+<A HREF="$PTOLEMY/src/domains/cgc/tcltk/demo/tycho.pal">CGC Tycho Palette</A>
 
 <DT> <CODE>ptcl</CODE> can handle HOF stars.
 <DD> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
 
-<DT> Ptolemy0.7 will use <A HREF="http://www.tcltk.com">Itcl 2.2</A>,
-which runs under Tcl 7.6 and Tk4.2.
+<DT> Ptolemy0.7 uses <A HREF="http://www.tcltk.com">Itcl 2.2</A>,
+	which runs under Tcl 7.6 and Tk4.2.
 <DD> The Itcl installation will use shared libraries, where available.
+	If you downloaded the <CODE>other.src</CODE> tar file, then the
+	<A HREF="$PTOLEMY/src/tcltk/makefile"><CODE>$PTOLEMY/src/tcltk/makefile
+</CODE></A> will contain the makefile rules necessary to build Itcl with
+	shared libraries.
+
  <BR> <A HREF="http://ptolemy.eecs.berkeley.edu/~cxh">Christopher Hylands</A>
 
 </DL>
-
-
 
 <H3>Backward compatiblity Issues</H3>
 
@@ -230,7 +261,9 @@ has been changed.
 <DD> Sunil Bhave removed the old PCMread/write and 
 	SunSound stars from ptdesign. Instead you can use the new
 	MonoIn/Out stars, which have been added to the cgc palettes.
-	The TkSunSound star is also gone
+	The TkSunSound star is also gone.
+        In Ptolemy 0.7, the mu law conversion tables are in the 
+	<CODE>libptdsp</CODE> library.  If you use
 </DL>
 
 <p>
