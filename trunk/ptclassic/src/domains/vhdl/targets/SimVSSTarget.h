@@ -86,6 +86,9 @@ protected:
 	
 	/*virtual*/ void setup();
 
+	// Method to write out com file for VSS if needed.
+	void setWriteCom();
+
 private:
 //	CodeStream preSynch;
 //	CodeStream postSynch;
@@ -129,7 +132,11 @@ private:
 	int needC2V;
 	int needV2C;
 	int pairNumber;
+	int writeCom;
 	void configureCommPair(CommPair&);
+
+	// Method to write out com file for VSS if needed.
+	void writeComFile();
 };
 
 #endif

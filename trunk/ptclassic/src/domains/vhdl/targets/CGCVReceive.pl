@@ -16,6 +16,8 @@ limitation of liability, and disclaimer of warranty provisions.
     explanation { }
   public {
     int numXfer;
+//    StringList destDir;
+//    StringList filePre;
   }
   protected {
   }
@@ -28,7 +30,19 @@ limitation of liability, and disclaimer of warranty provisions.
     type {int}
     default {21}
   }
+  defstate {
+    name {destDir}
+    type {string}
+    default {"~/PTOLEMY_SYSTEMS"}
+  }
+  defstate {
+    name {filePre}
+    type {string}
+    default {"CGCVHDL"}
+  }
 setup {
+//  destDir = "/users/cameron/PTOLEMY_SYSTEMS";
+//  filePre = "CGCVHDLCG56Test2";
   numXfer = output.numXfer();
 //  CGCVSynchComm::setup();
 }
@@ -63,6 +77,21 @@ initCode {
   int $starSymbol(recvaddrlen) = sizeof($starSymbol(recvaddr));
   int $starSymbol(i);
 ");
+
+// This must be the first call to add code to mainInit
+  StringList command = "";
+  command << "cd " << (const char*) destDir;
+  command << " ; ";
+  command << "vhdlsim -i " << filePre << ".com " << "parts";
+
+//  system(command);
+  StringList startvss = "";
+  startvss << "
+  /* Start VSS Simulator */
+  system(\"";
+  startvss << command << "&";
+  startvss << "\");\n";
+  addCode(startvss, "mainInit", "startVSS");
   addCode("
   /* Init */
   for ($starSymbol(i)=0 ; $starSymbol(i) < BUFFSIZE ; $starSymbol(i)++) {

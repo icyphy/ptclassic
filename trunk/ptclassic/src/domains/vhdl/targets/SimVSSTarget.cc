@@ -77,6 +77,7 @@ void SimVSSTarget :: setup() {
   needC2V = 0;
   needV2C = 0;
   pairNumber = 0;
+  writeCom = 1;
 
   // Generate the command to set the SIM_ARCH environment variable here.
   StringList command = "";
@@ -103,6 +104,9 @@ CommPair SimVSSTarget :: toCGC(PortHole&) {
 }
 
 void SimVSSTarget :: configureCommPair(CommPair& pair) {
+  pair.cgcStar->setState("destDir", hashstring(destDirectory));
+  pair.cgcStar->setState("filePre", hashstring(filePrefix));
+
   StringList prNum = pairNumber;
   pair.cgcStar->setState("pairNumber", hashstring(prNum));
   pair.cgStar->setState("pairNumber", hashstring(prNum));
@@ -328,6 +332,9 @@ end;
 // Write the code to a file.
 void SimVSSTarget :: writeCode() {
   writeFile(myCode,".vhdl",displayFlag);
+  if (writeCom) {
+    writeComFile();
+  }
 }
 
 // Write the command log to a file.
@@ -614,4 +621,18 @@ void SimVSSTarget :: registerV2C(int pairid, int numxfer) {
   topSignalList.put(goName, "STD_LOGIC", goName, goName);
   topSignalList.put(dataName, "INTEGER", dataName, dataName);
   topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
+}
+
+// Method to write out com file for VSS if needed.
+void SimVSSTarget :: setWriteCom() {
+  writeCom = 1;
+}
+
+// Method to write out com file for VSS if needed.
+void SimVSSTarget :: writeComFile() {
+  // Make sure to do the com file uniquely too!!!
+  StringList comCode = "";
+  comCode << "run\n";
+  comCode << "quit\n";
+  writeFile(comCode, ".com", 0);
 }

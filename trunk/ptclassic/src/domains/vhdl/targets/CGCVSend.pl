@@ -16,6 +16,8 @@ location { VHDL Target Directory }
 explanation {}
   public {
     int numXfer;
+//    StringList destDir;
+//    StringList filePre;
   }
   protected {
   }
@@ -28,19 +30,31 @@ input {
     type {int}
     default {11}
   }
+  defstate {
+    name {destDir}
+    type {string}
+    default {"~/PTOLEMY_SYSTEMS"}
+  }
+  defstate {
+    name {filePre}
+    type {string}
+    default {"CGCVHDL"}
+  }
 setup {
+//  destDir = "/users/cameron/PTOLEMY_SYSTEMS";
+//  filePre = "CGCVHDLCG56Test2";
   numXfer = input.numXfer();
 //  VHDLCSynchComm::setup();
 }
 
 initCode {
-        CodeStream *compileOptions, *linkOptions;
-        if ((compileOptions = getStream("compileOptions")) == FALSE)
-            return;
-        if ((linkOptions = getStream("linkOptions")) == FALSE)
-            return;
-//        compileOptions->put("-I$S56DSP/include ","S56X Include");
-        linkOptions->put("-lsocket -lnsl","socket Link");
+  CodeStream *compileOptions, *linkOptions;
+  if ((compileOptions = getStream("compileOptions")) == FALSE)
+    return;
+  if ((linkOptions = getStream("linkOptions")) == FALSE)
+    return;
+//  compileOptions->put("-I$S56DSP/include ","S56X Include");
+  linkOptions->put("-lsocket -lnsl","socket Link");
   addInclude("<stdio.h>");
   addInclude("<string.h>");
   addInclude("<unistd.h>");
@@ -63,6 +77,21 @@ initCode {
   int $starSymbol(sendaddrlen) = sizeof($starSymbol(sendaddr));
   int $starSymbol(i);
 ");
+
+// This must be the first call to add code to mainInit
+  StringList command = "";
+  command << "cd " << (const char*) destDir;
+  command << " ; ";
+  command << "vhdlsim -i " << filePre << ".com " << "parts";
+
+//  system(command);
+  StringList startvss = "";
+  startvss << "
+  /* Start VSS Simulator */
+  system(\"";
+  startvss << command << "&";
+  startvss << "\");\n";
+  addCode(startvss, "mainInit", "startVSS");
   addCode("
   /* Init */
   for ($starSymbol(i)=0 ; $starSymbol(i) < BUFFSIZE ; $starSymbol(i)++) {
