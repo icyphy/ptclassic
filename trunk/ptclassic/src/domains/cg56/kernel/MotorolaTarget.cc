@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <ctype.h>
+#include <stdio.h>
 
 #include "StringList.h"
 #include "Error.h"
