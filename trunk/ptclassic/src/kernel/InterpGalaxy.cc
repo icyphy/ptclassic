@@ -731,6 +731,10 @@ NodeList::nodeWithName (const char* ident) {
 	return NULL;
 }
 
+void NodeList::put(Geodesic& g) {
+	SequentialList::put(&g);
+}
+
 // function to initialize NodeList
 void NodeList::initialize () {
 	// delete permanent nodes

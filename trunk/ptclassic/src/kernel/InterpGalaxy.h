@@ -16,7 +16,6 @@ $Id$
 #define _InterpGalaxy_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
@@ -31,7 +30,7 @@ class Target;
 class NodeList : public SequentialList {
 	friend class NodeListIter;
 public:
-	void put(Geodesic& g) { SequentialList::put(&g);}
+	void put(Geodesic& g);
 	SequentialList::size;
 	Geodesic* nodeWithName (const char* name);
 	void initialize();
