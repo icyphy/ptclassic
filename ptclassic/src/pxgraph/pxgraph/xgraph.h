@@ -45,7 +45,9 @@ extern int sprintf();
 #else
 #ifndef sgi
 #ifndef SOL2
+#ifndef ultrix
 extern char *sprintf();
+#endif
 #endif
 #endif
 #endif
