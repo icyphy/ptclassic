@@ -43,6 +43,7 @@ static char SccsId[]="$Id$";
 #include "harpoon.h"
 #include "tap.h"
 #include "th.h"
+#include "errtrap.h"
 #include "pepint.h"        /*  Includes pep.h too */
 
 #define    MAX_PEP_DISTANCE    300     /* 15 lambda  - halo size */
@@ -132,7 +133,7 @@ pepCapSameLayer(facet, bb1, bb2, layer)
     regObjGen  regGener;            /* Region generator  */
     octCoord distx, disty;          /* Horizontal and vertical distance */
     octCoord dist, width;           /* Distance and alignment size */
-    octCoord w1, w2;                /* Wire segment widths */
+    octCoord w1 = (octCoord)0, w2 = (octCoord)0 ;   /* Wire segment widths */
     char      *lname;               /* Layer name */
 
     BB1 = *bb1;
@@ -165,13 +166,13 @@ pepCapSameLayer(facet, bb1, bb2, layer)
     if(dist > MAX_PEP_DISTANCE)  return ((double) 0.0);
     if(dist <= 0) {
 	fprintf(stderr, "WARNING: short detected by PEP:\n");
-	fprintf(stderr, "  The objects located in (%d,%d)-(%d,%d) and in ",
-		BB1.bb.lowerLeft.x, BB1.bb.lowerLeft.y,
-		BB1.bb.upperRight.x, BB1.bb.upperRight.y,
+	fprintf(stderr, "  The objects located in (%ld,%ld)-(%ld,%ld) and in ",
+		(long)BB1.bb.lowerLeft.x, (long)BB1.bb.lowerLeft.y,
+		(long)BB1.bb.upperRight.x, (long)BB1.bb.upperRight.y);
+	fprintf(stderr, "(%ld,%ld)-(%ld,%ld) on layer %s\n  are shorted but belong to different nets\n",
+		(long)BB2.bb.lowerLeft.x, (long)BB2.bb.lowerLeft.y,
+		(long)BB2.bb.upperRight.x, (long)BB2.bb.upperRight.y,
 		layer->contents.layer.name);
-	fprintf(stderr, "(%d,%d)-(%d,%d) on layer %s\n  are shorted but belong to different nets\n",
-		BB2.bb.lowerLeft.x, BB2.bb.lowerLeft.y,
-		BB2.bb.upperRight.x, BB2.bb.upperRight.y);
 	return 0;
     }
     if(distx < 0) {
