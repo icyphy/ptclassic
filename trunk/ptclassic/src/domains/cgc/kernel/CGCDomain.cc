@@ -17,10 +17,8 @@ $Id$
 #include "Domain.h"
 #include "CGCTarget.h"
 #include "KnownTarget.h"
-#include "SDFScheduler.h"
 #include "CGCConnect.h"
 #include "CGCForkNode.h"
-#include "ProcMemory.h"
 
 // for error messages (temporary, until wormholes exist):
 #include "Error.h"
@@ -34,7 +32,7 @@ extern const char CGCdomainName[] = "CGC";
 class CGCDomain : public Domain {
 public:
 	// new wormhole
-	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
+	Star& newWorm(Galaxy& ,Target* )  {
 		// return *new CGCWormhole(innerGal,innerTarget);
 		Error::abortRun("No CGC wormhole implemented yet");
 		// Following is a hack
