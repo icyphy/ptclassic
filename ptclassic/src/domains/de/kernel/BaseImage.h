@@ -1,7 +1,7 @@
-// filename:       BaseImage.h
-// author:         Paul Haskell
-// creation date:  7/1/91
-// SCCS info:      $Id$
+// filename:		BaseImage.h
+// author:			Paul Haskell
+// creation date:	7/1/91
+// SCCS info:		$Id$
 
 #ifndef _BaseImage_h
 #define _BaseImage_h
@@ -39,6 +39,19 @@
  The comparison functions {==, !=, <, >, etc.} compare two objects'
  frameId's.  They can be used to resequence images or to sort image
  fragments.
+
+ There is a GNU g++ compiler bug that prevents us from writing
+ a function copy(int, char*, char*).  This function would conflict
+ (erroneously) with the copy(int, unsigned char*, unsigned char*)
+ function.  Until this bug is fixed, just CAST char*'s to unsigned
+ char*'s before calling copy().
+
+ The copy constructor and clone() functions have an optional integer
+ argument.  If a nonzero argument is provided, then all state values
+ of the copied object are copied to the created object, but none
+ of the image data is copied.  If no argument or a zero argument
+ is provided, then the image data is copied as well.  Classed derived
+ from BaseImage should maintain this policy.
  ******************************/
 
 #include "Packet.h"
@@ -46,58 +59,64 @@
 
 class BaseImage: public PacketData {
 protected:
-    int width, height;
-    int startPos, size, fullSize;
-    int frameId;
-    void copy(int, float*, float*);
-    void copy(int, char*, char*);
+	int width, height;
+	int startPos, size, fullSize;
+	int frameId;
+	void copy(int, float*, float*);
+	void copy(int, unsigned char*, unsigned char*);
+
+	inline double	min(double a, double b)	{return (a < b ? a : b);}
+	inline float	min(float a, float b)	{return (a < b ? a : b);}
+	inline int		min(int a, int b)		{return (a < b ? a : b);}
+	inline double	max(double a, double b)	{return (a > b ? a : b);}
+	inline float	max(float a, float b)	{return (a > b ? a : b);}
+	inline int		max(int a, int b)		{return (a > b ? a : b);}
 
 public:
-    BaseImage(int a, int b, int c, int d);
+	BaseImage(int a, int b, int c, int d):
+			width(a), height(b), frameId(c), fullSize(d)
+			{ startPos = 0; size = fullSize; }
 
-    BaseImage(int a, int b, int c);
+	BaseImage(int a, int b, int c):
+			width(a), height(b), frameId(c)
+			{ startPos = 0; size = fullSize = width*height; }
 
-    BaseImage(BaseImage& bi);
+	BaseImage(BaseImage& bi, int a = 0):
+			width(bi.width), height(bi.height), frameId(bi.frameId),
+			startPos(bi.startPos), size(bi.size), fullSize(bi.fullSize)
+			{ a--; } // To prevent 'a unused' warnings.
 
-    virtual ~BaseImage() { }
+	virtual ~BaseImage() { ; }
 
-    inline int retWidth()  const { return(width); }
-    inline int retHeight() const { return(height); }
-    inline int retSize()   const { return(size); }
+	inline int retWidth()	const { return(width); }
+	inline int retHeight()	const { return(height); }
+	inline int retSize()	const { return(size); }
 
-    inline int operator==(BaseImage& a) const
-            { return (frameId == a.frameId); }
-    inline int operator!=(BaseImage& a) const
-            { return (!(*this == a)); }
-    inline int operator<(BaseImage& a) const
-            { return (frameId < a.frameId); }
-    inline int operator>(BaseImage& a) const
-            { return (a < *this); }
-    inline int operator<=(BaseImage& a) const
-            { return ((*this < a) || (*this == a)); }
-    inline int operator>=(BaseImage& a) const
-            { return ((*this > a) || (*this == a)); }
+	inline int operator==(BaseImage& a) const
+			{ return (frameId == a.frameId); }
+	inline int operator!=(BaseImage& a) const
+			{ return (!(*this == a)); }
+	inline int operator<(BaseImage& a) const
+			{ return (frameId < a.frameId); }
+	inline int operator>(BaseImage& a) const
+			{ return (a < *this); }
+	inline int operator<=(BaseImage& a) const
+			{ return ((*this < a) || (*this == a)); }
+	inline int operator>=(BaseImage& a) const
+			{ return ((*this > a) || (*this == a)); }
 
-    virtual BaseImage* fragment(int, int) = 0;
-    virtual void assemble(BaseImage*)= 0;
+	virtual BaseImage* fragment(int, int) { return (BaseImage*) NULL; }
+	virtual void assemble(BaseImage*)	 { ; }
 
 // PacketData-like stuff
-    virtual const char* dataType() const
-            { return("BaseI"); }
-
-// Derived classes must redfine clone(), a virtual function in PacketData.
-
-    ////////////// Utilities Functions
-    inline double min(double a, double b) {return (a < b ? a : b);}
-    inline float  min(float a, float b)   {return (a < b ? a : b);}
-    inline int    min(int a, int b)       {return (a < b ? a : b);}
-    inline double max(double a, double b) {return (a > b ? a : b);}
-    inline float  max(float a, float b)   {return (a > b ? a : b);}
-    inline int    max(int a, int b)       {return (a > b ? a : b);}
+	virtual const char* dataType() const
+			{ return("BaseI"); }
+	virtual PacketData* clone() const
+			{ return new BaseImage(*this); }
+	virtual PacketData* clone(int a) const
+			{ return new BaseImage(*this, a); }
 };
 
-// The following function is just like the c library strstr, which
-// is unfortunately missing from the g++ libraries.
 const char* StrStr(const char*, const char*);
 
-#endif  // #ifndef _BaseImage_h
+#endif // #ifndef _BaseImage_h
