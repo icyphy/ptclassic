@@ -92,29 +92,67 @@ CodeStream CGCTychoTarget::mainLoopBody() {
     return body;
 }
 
-void CGCTychoTarget :: addStaticDecls( StringList result, const char *string ) {
+void CGCTychoTarget :: addStaticDecls
+                 ( StringList &result, const char *string ) {
   int length;
   char *start;
+  char *current = (char *)string;
 
-  while ( *string != '\0' ) {
+  while ( *current != '\0' ) {
+    // skip white space
+    while ( *current != '\0' 
+	    && ( *current == ' ' || *current == '\n' || *current == '\t' )) {
+      current++;
+    }
+    if ( *current == '\0' ) break;
     length = 0;
-    start = (char *)string;
-    result << "static ";	
-    while ( *string != '\0' && *string != ';' ) {
-      length++;
-      string++;
+    start = current;
+    // If this is a comment, go to the end of it
+    if ( *current == '/' && *(current+1) == '*' ) {
+      current += 2;
+      while ( *current != '\0'
+	      && *current != '*' && *(current+1) != '/') {
+	current++;
+	length++;
+      }
+
+    } else if ( ! strncmp(start, "typedef", 7) ) {
+      // In a typedef. This is fragile and should match braces
+      while ( *current != '\0' && *current != '}' ) {
+	length++;
+	current++;
+      }
+      while ( *current != '\0' && *current != ';' ) {
+	length++;
+	current++;
+      }
+    } else {
+      while ( *current != '\0' && *current != ';' ) {
+	length++;
+	current++;
+      }
     }
     length++;
-    if ( *string == '\0' ) {
-      result << start;
+    if ( *current == '\0' ) {
+      result << "static" << start;
       break;
     } else {
+      if ( *current == '*' && *(current+1) == '/' ) {
+	/* skip the 2 symbols */
+	length+=3;
+	current+=3;
+	result << "\n";
+      } else if ( ! strncmp(start, "typedef", 7)) {
+	result << "\n";
+      } else {
+	result << "\n" << "static ";
+      }
       char *temp = new char[length+1];
       temp[length] = '\0';
       strncpy(temp,start,length);
       result << temp;
       delete [] temp; 
-      string++;
+      current++;
     }
   }
 }
@@ -143,8 +181,9 @@ void CGCTychoTarget :: frameCode() {
 
   // Add static variable decls from stars, with
   // a "static" in front of each
-  addStaticDecls(myCode, (const char *)mainDecls);
   addStaticDecls(myCode, (const char *)globalDecls);
+  addStaticDecls(myCode, (const char *)mainDecls);
+
 
   // Add the procedures
   myCode << procedures;
