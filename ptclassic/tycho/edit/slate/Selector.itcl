@@ -149,7 +149,7 @@ class ::tycho::Selector {
 #### activate target x y
 #
 # Add a picture object to the selected objects. Apart from the standard
-# -button and -modifiers options, thie method also responds to the
+# -button and -modifiers options, the method also responds to the
 # following (meaning that these options can be given when the
 # call to bind{} is made.):
 #

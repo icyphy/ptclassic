@@ -437,7 +437,7 @@ body ::tycho::Slate::addtag {add mode args} {
 # _center_, and the eight compass
 # points: _n_, _s_, _e_, _w_, _ne_, _nw_, _se_, and _sw_. If the
 # *-region* option is given, these aspects will be assumed regardless
-# of teh picture's actual shape, and will denote the corners
+# of the picture's actual shape, and will denote the corners
 # of the picture's _region_ (see the region{} method).
 #
 # If there are no arguments, return the list of valid aspects for
