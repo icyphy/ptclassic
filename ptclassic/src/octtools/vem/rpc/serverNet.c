@@ -67,6 +67,8 @@ static char SccsId[]="$Id$";
 #include "rpcServer.h"
 #include "serverUtils.h"
 
+#include "serverNet.h"
+
 /* maximum number of rpc applications */
 int RPCMaxApplications = 0;
 
