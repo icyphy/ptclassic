@@ -104,9 +104,6 @@ public:
 	// return TRUE if all member clusters have the same rate
 	int uniformRate();
 
-	// generate schedules for clusters
-	void genSubScheds();
-
 	// I would prefer for these to be protected rather than
 	// public.
 
@@ -123,8 +120,14 @@ public:
 	// galaxy
 	void dupStream(BDFClusterGal *pgal) { logstrm = pgal->logstrm;}
 
+	// generate schedules for interior clusters
+	void genSubScheds();
+
+	// Note: The remaining public methods are not in SDFClusterGal
+
 	// parent is also a BDFClusterGal
 	BDFClusterGal* parentGal() { return (BDFClusterGal*)parent();}
+
 protected:
 	ostream* logstrm;	// for logging errors
 
@@ -138,32 +141,15 @@ protected:
 	// it merges it and returns the result; otherwise it returns 0.
 	BDFCluster* fullSearchMerge();
 
-	// function to attempt a combination merge and while-loop
-	// 0 is returned on failure, the new merged cluster on success.
-	BDFCluster* tryLoopMerge(BDFCluster*,BDFCluster*);
-
-	// check needed by fullSearchMerge
-	int buriedCtlArcs(BDFCluster*, BDFCluster*);
-
 	// merge two clusters, returning the result.
 	BDFCluster* merge(BDFCluster* c1,BDFCluster* c2);
-
-	// do non-integral rate changes, if any
-	int nonIntegralRateChange();
-
-	// create a while loop
-	void makeWhile(BDFClustPort*, BDFRelation);
 
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
 
-	// create a new arc to pass boolean information
-	BDFClustPort* connectBoolean(BDFCluster* c,BDFClustPort* cond,
-				     BDFRelation& rel);
-
 	// return true if there is an indirect path between two
 	// member clusters
-	int indirectPath(BDFCluster* src,BDFCluster* dst,
+	int indirectPath(BDFCluster* src, BDFCluster* dst,
 			 int ignoreDelayArcs = FALSE);
 
 	// function used in finding paths by indirectPath.
@@ -173,13 +159,32 @@ protected:
 	// mark feed-forward delays
 	int markFeedForwardDelayArcs();
 
+	// Note: The remaining protected methods are not in SDFClusterGal
+
 	// make feedback arcs for while loops
 	int markWhileFeedbackArcs();
 
+	// function to attempt a combination merge and while-loop
+	// 0 is returned on failure, the new merged cluster on success.
+	BDFCluster* tryLoopMerge(BDFCluster*,BDFCluster*);
+
+	// check needed by fullSearchMerge
+	int buriedCtlArcs(BDFCluster*, BDFCluster*);
+
+	// do non-integral rate changes, if any
+	int nonIntegralRateChange();
+
+	// create a while loop
+	void makeWhile(BDFClustPort*, BDFRelation);
+
+	// create a new arc to pass boolean information
+	BDFClustPort* connectBoolean(BDFCluster* c,BDFClustPort* cond,
+				     BDFRelation& rel);
+
 private:
-	int bagNumber;		// number for generating bag names
-	int urateFlag;
-	SequentialList stopList;// this list is used by fullSearchMerge.
+	int bagNumber;			// number for generating bag names
+	SequentialList stopList;	// list used by fullSearchMerge.
+	int urateFlag;			// uniform rate flag (not in SDF)
 };
 
 enum BDFLoopType {
@@ -206,13 +211,14 @@ private:
 class BDFCluster : public BDFStar {
 protected:
 	int pLoop;		// loop count
+	int visitFlag;		// visit flag
 	BDFClustPort* pCond;	// condition
 	BDFLoopType pType;	// type of "loop"
-	short visitFlag;	// visit flag
 	int dataIndependent();
+
 public:
 	// constructor: looping is 1 by default
-	BDFCluster() : pLoop(1), pCond(0), pType(DO_ITER), visitFlag(0) {}
+	BDFCluster() : pLoop(1), visitFlag(0), pCond(0), pType(DO_ITER) {}
 
 	// make destructor virtual
 	virtual ~BDFCluster() {}
