@@ -212,6 +212,9 @@ CC_SHAREDFLAGS =
 USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
 USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
 
+# Suffix for object files
+OBJSUFFIX =	o
+
 # Libraries are of the form libfoo.$(LIBSUFFIX) 
 LIBSUFFIX = 	a
 LIBNONSHAREDSUFFIX = a
