@@ -47,9 +47,7 @@ DIRS =	 bin demo doc test
 TCL_SRCS = \
 	DataModel.itcl \
 	Model.itcl \
-	ModelLocator.itcl \
-	ModelViewer.itcl \
-	TextModel.itcl
+	ModelLocator.itcl
 
 ITCL_SRCS = 
 
