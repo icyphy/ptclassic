@@ -44,7 +44,7 @@ ifneq (,$(filter hppa%,$(PTARCH)))
 ptlang:	ptlang.y
 	cd $(VPATH); yacc ptlang.y; mv y.tab.c ptlang.c
 	rm -f ptlang
-	$(CC) ptlang.o -o ptlang $(PTLANGLIB)
+	$(CC) $(VPATH)/ptlang.c -o ptlang $(PTLANGLIB)
 else
 ptlang:	ptlang.o
 	rm -f ptlang
