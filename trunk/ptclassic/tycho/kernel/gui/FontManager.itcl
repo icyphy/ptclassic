@@ -192,7 +192,7 @@ class ::tycho::FontManager {
     private common screenFont
     set screenFont(8)  5x8
     set screenFont(10) 6x12
-    set screenFont(12) 8x13
+    set screenFont(12) 7x13
     set screenFont(14) 9x15
     set screenFont(16) 9x15
     set screenFont(18) 8x16
