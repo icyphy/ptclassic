@@ -40,12 +40,26 @@ class PtThread
 {
 public:
     // Destructor.
+    // The thread must terminate when it is deleted
+    // if it has not done so already.
     virtual ~PtThread() {}
 
 protected:
     // Main function of the thread.
-    // The thread will self-destruct upon termination.
     virtual void run() = 0;
+};
+
+class ThreadScheduler
+{
+public:
+    // Register a thread.
+    virtual void add(PtThread*) = 0;
+
+    // Allow all threads to run.
+    virtual void run() = 0;
+
+    // Delete (and terminate) all threads.
+    virtual ~ThreadScheduler() {}
 };
 
 #endif
