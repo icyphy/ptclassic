@@ -36,12 +36,25 @@ DOMAINS = sdf hof de ddf bdf thor cg cgc c50 cg56 vhdlb \
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles all install clean sources depend realclean checkjunk sccsinfo:
+makefiles all install clean depend realclean checkjunk sccsinfo:
 	@for x in $(DOMAINS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		echo making $@ in domains/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x $@ ;\
+		) \
+	    fi ; \
+	done
+
+# We have a separate target for sources so that we can build starHTML.idx
+# after ptlang has been run on the star .pl files
+sources: subsources starHTML.idx
+subsources:
+	@for x in $(DOMAINS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making sources in domains/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x sources ;\
 		) \
 	    fi ; \
 	done
