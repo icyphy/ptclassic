@@ -19,6 +19,7 @@ This file contains member functions for EventQueue..
 #endif
 
 #include "EventQueue.h"
+#include "Particle.h"
 
 Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
 	Event* temp;
@@ -35,15 +36,25 @@ Event* EventQueue:: getEvent(Particle* p, PortHole* ph) {
 	return temp;
 }
 
+// delete the free events.
 void EventQueue:: clearFreeEvents() {
 	if (!freeEventHead) return;
-	Event* temp;
 	while (freeEventHead->next) {
-		temp = freeEventHead;
+		Event* temp = freeEventHead;
 		freeEventHead = freeEventHead->next;
-		LOG_DEL; delete temp;
+		LOG_DEL; delete temp; 
 	}
 	LOG_DEL; delete freeEventHead;
+	freeEventHead = 0;
+}
+
+// Put the unused particles into the plasmas.
+void EventQueue:: clearParticles() {
+	Event* temp = freeEventHead;
+	while (temp) {
+		temp->p->die();
+		temp = temp->next;
+	}
 }
 
 void EventQueue:: putFreeLink(LevelLink* p) {
@@ -52,4 +63,16 @@ void EventQueue:: putFreeLink(LevelLink* p) {
 		putEvent(temp);
 	}
 	PriorityQueue:: putFreeLink(p);
+}
+
+void EventQueue :: initialize() {
+	// first maintain free links and free events.
+	clearFreeEvents();
+	PriorityQueue :: initialize();
+	clearParticles();
+}
+
+EventQueue :: ~EventQueue() {
+	initialize();
+	clearFreeEvents();
 }

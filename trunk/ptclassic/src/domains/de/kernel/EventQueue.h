@@ -50,12 +50,8 @@ class EventQueue : public PriorityQueue
 			freeEventHead = e;
 		}
 	void clearFreeEvents();
+	void clearParticles();
 
-protected:
-	void clearFreeList() {
-		clearFreeEvents();
-		PriorityQueue :: clearFreeList();
-	}
 public:
 	void pushHead(Particle* p, PortHole* ph, float v, float fv) {
 		Event* temp = getEvent(p, ph);
@@ -68,7 +64,11 @@ public:
 	}
 	void putFreeLink(LevelLink* p);
 
+	// put the residual events and particles into the free stores.
+	void initialize();
+
 	EventQueue() : freeEventHead(0) {}
+	~EventQueue();
 };
 
 #endif
