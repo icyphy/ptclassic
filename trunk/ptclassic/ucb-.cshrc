@@ -37,6 +37,10 @@ if ( "$PTARCH" =~ sol?* ) then
                 $SYNOPSYS/$SIM_ARCH/sim/bin \
                 $SYNOPSYS/$SIM_ARCH/sge/bin )
 
+	# Needed for Synopsys to find libCLI.so
+	setenv LD_LIBRARY_PATH \
+		${LD_LIBRARY_PATH}:${SYNOPSYS}/${SIM_ARCH}/sim/lib
+
 	# Only include /usr/tools/bin in our path if we are running under
 	# Solaris otherwise the sun4 build will fail because
 	# /usr/tools/mathematica is Solaris 
