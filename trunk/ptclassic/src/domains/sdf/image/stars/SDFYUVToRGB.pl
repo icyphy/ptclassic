@@ -3,7 +3,7 @@
 	name	{ YUVToRGB }
 	domain	{ SDF }
 	version	{ $Id$ }
-	author	{ Sun-Inn Shih }
+	author	{ Sun-Inn Shih, Brian L. Evans, and T. J. Klausutis }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -16,9 +16,9 @@ Read three GrayImages that describe a color image in YUV format and
 output three GrayImages that describe an image in RGB format.
 	}
 	explanation {
-The YUV format, which is a linear mapping of the RGB format, is used
-in broadcast television to maintain compability between color and
-black-and-white televisions [1].
+The YUV format, which is an affine mapping (linear mapping plus offset)
+of the RGB format, is used in broadcast television to maintain compability
+between color and black-and-white televisions [1].
 Y is the luminance (intensity) of the image, and U and V represent the
 chrominance (hue and saturation).
 The YUV format is based on how the eyes perceive color.
@@ -27,10 +27,25 @@ whereas the V axis has turquoise at its minimum point and red at its
 maximum point.
 In this implementation, each of the RGB values and each of the YUV values
 are integer values in the range from 0 to 255 (inclusive).
+.pp
+This star supports two YUV formats--- the usual one [1] and
+the CCIR 601 standard.
+The usual YUV definition shifts the YUV values so that they fall in
+the range from 0 to 255 (inclusive).
+The CCIR 601 standard scales and then shifts the YUV values so that fall in
+the range from 0 to 255 (inclusive).
+The CCIR 601 standard was developed so that more of the YUV space maps into
+the RGB space.
+All RGB values, however, map into both YUV standards, so RGB to YUV conversion
+followed by YUV to RGB conversion is nearly lossless.
+The CCIR 601 standard is used in the MPEG and H.261 compression standards.
 .Id "format conversion, YUV to RGB"
 .Id "image format conversion, YUV to RGB"
 .Ir "image format, red-green-blue (RGB)"
 .Ir "image format, luminance-chrominance (YUV)"
+.Id "CCIR 601 standard"
+.Id "MPEG"
+.Id "H.261"
 .Id "Pratt, W."
 .UH REFERENCES
 .ip [1]
@@ -48,6 +63,16 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	output { name { output2 } type { message } }
 	output { name { output3 } type { message } }
 
+        defstate {
+                name    { CCIR_601 }
+                type    { int }
+                default { TRUE }
+                desc    {
+TRUE means that the YUV color space is the shifted-and-scaled YUV space
+defined by the CCIR 601 standard, which is used in the MPEG and H.261
+standards; otherwise, the usual YUV space is meant. }
+	}
+
 	inline method {		// perform rounding in range [0, 255]
 		name { quant }
 		type { "unsigned char" }
@@ -61,7 +86,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 	} // end quant()
 
 	go {
-// Read inputs.
+		// Read inputs.
 		Envelope envp1, envp2, envp3;
 		(input1%0).getMessage(envp1);
 		(input2%0).getMessage(envp2);
@@ -70,7 +95,7 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		TYPE_CHECK(envp2, "GrayImage");
 		TYPE_CHECK(envp3, "GrayImage");
 
-// Change into RGB format
+		// Change into RGB format
 		GrayImage* redI = (GrayImage*) envp1.writableCopy();
 		GrayImage* greenI = (GrayImage*) envp2.writableCopy();
 		GrayImage* blueI = (GrayImage*) envp3.writableCopy();
@@ -101,24 +126,34 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		unsigned char* bptr = blueI->retData();
 
 		int i, j, temp1, temp2;
-		unsigned char rrr, ggg, bbb;
+		double rvalue, gvalue, bvalue;
+		double yvalue, uvalue, vvalue;
 		for (i = 0; i < height; i++) {
 			temp1 = i * width;
 			for (j = 0; j < width; j++){
 				temp2 = j + temp1;
-				rrr = quant(rptr[temp2]
-						+ 1.4026 * (bptr[temp2]-127.5));
-				ggg = quant(rptr[temp2]
-						- 0.3444 * (gptr[temp2]-127.5)
-						- 0.7144 * (bptr[temp2]-127.5));
-				bbb = quant(rptr[temp2]
-						+ 1.773 * (gptr[temp2]-127.5));
-				rptr[temp2] = rrr;
-				gptr[temp2] = ggg;
-				bptr[temp2] = bbb;
-		}	}
+				yvalue = rptr[temp2];
+				uvalue = gptr[temp2];
+				vvalue = bptr[temp2];
+				if ( CCIR_601 ) {
+				  yvalue = 255.0*(yvalue -  16)/219.0;
+				  uvalue = 255.0*(uvalue - 128)/224.0;
+				  vvalue = 255.0*(vvalue - 128)/224.0;
+				}
+				else {
+				  uvalue -= 128;
+				  vvalue -= 128;
+				}
+				rvalue = yvalue + 1.4020*vvalue;
+				gvalue = yvalue - 0.3441*uvalue - 0.7141*vvalue;
+				bvalue = yvalue - 1.7720*uvalue;
+				rptr[temp2] = quant(rvalue);
+				gptr[temp2] = quant(gvalue);
+				bptr[temp2] = quant(bvalue);
+			}
+		}
 
-// Write whole frame to output here...
+		// Write whole frame to output here...
 		Envelope envpy(*redI);
 		Envelope envpu(*greenI);
 		Envelope envpv(*blueI);
