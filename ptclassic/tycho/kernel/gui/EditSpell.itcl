@@ -259,11 +259,24 @@ body ::tycho::EditSpell::next {} {
 # Check the spelling from the beginning.
 # 
 body ::tycho::EditSpell::recheck {} {
+    global tcl_platform
     set tw $itk_option(-edit)
 
     set filename [::tycho::tmpFileName tychoSpell]
     if {[$tw busy $tw writeSpellText $filename] != ""} {return}
-    set errs [exec spell $filename]
+    if {$tcl_platform(platform) == "unix" } {
+	set errs [exec spell $filename]
+    } else {
+	# Windows
+	if {[::tycho::pathSearch ispell.exe] == {} } {
+	    ::tycho::htmlmessage {Sorry, the <code>ispell</code> binary \
+		    cannot be found.  You can download this binary from \
+		    <a href="http://ptolemy.eecs.berkeley.edu/tycho/tychoTools.html"><code>http://ptolemy.eecs.berkeley.edu/tycho/tychoTools.html</code>. \
+		}
+	     return
+	}
+	set errs [exec ispell -u $filename]
+    }
     set dict [readDictionary]
     foreach exception $dict {
 	if {[set idx [lsearch -exact $errs $exception]] >= 0} {
