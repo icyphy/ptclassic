@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLCompDecl.h"
 #include "VHDLCompMap.h"
 #include "VHDLSignal.h"
+#include "VHDLArc.h"
 #include "VHDLState.h"
 #include "VHDLPortVar.h"
 
@@ -68,6 +69,7 @@ public:
 	VHDLSignalList signalList;
 	VHDLCompMapList compMapList;
 	VHDLStateList stateList;
+	VHDLArcList arcList;
 
 	// Main routine.
 	/*virtual*/ int runIt(VHDLStar*);
@@ -118,8 +120,12 @@ public:
 	// Register the State reference.
 	/*virtual*/ void registerState(State*, int=-1, int=-1);
 
+	// Connect a register between the given input and output signals.
+	void connectReg(StringList inName, StringList outName,
+				StringList type);
+
 	// Add a register component declaration.
-	void registerRegister(State*);
+	void registerRegister(StringList);
 
 	// Register PortHole reference.
 	/*virtual*/ void registerPortHole(VHDLPortHole*, int=-1);
@@ -127,6 +133,9 @@ public:
   	// The only reason for redefining this from HLLTarget
  	// is to change the separator from "." to "_".
  	/*virtual*/ StringList sanitizedFullName(const NamedObj&) const;
+
+	// Register a read or write to an arc and the offset.
+	void registerArcRef(VHDLPortHole*, int);
 
 	// Allocate memory for a new VHDLSignal and put it in the list.
 	void signalListPut(VHDLSignalList*, StringList, StringList, StringList,

@@ -40,6 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLStar.h"
 #include "VHDLState.h"
 #include "KnownTarget.h"
+#include <ostream.h>
 
 // Constructor.
 StructTarget :: StructTarget(const char* name,const char* starclass,
@@ -267,6 +268,62 @@ void StructTarget :: headerCode() {
 
 // Trailer code (done last).
 void StructTarget :: trailerCode() {
+
+  
+// ** CONSTRUCTION SECTION - START
+  cout << "#############################\n";
+  VHDLArcListIter nextArc(arcList);
+  VHDLArc* arc;
+  while ((arc = nextArc++) != 0) {
+    cout << "\n";
+    cout << "Name:  " << arc->name << "\n";
+    cout << "    lowWrite:   " << arc->lowWrite << "\n";
+    cout << "    highWrite:  " << arc->highWrite << "\n";
+    cout << "    lowRead:    " << arc->lowRead << "\n";
+    cout << "    highRead:   " << arc->highRead << "\n";
+
+    // Determine which signals need to be fed back through registers.
+    // All signals which were read, but weren't written, must be latched.
+    for (int ix = arc->lowRead; ix < arc->lowWrite; ix++) {
+      StringList sourceName = arc->name;
+      StringList destName = arc->name;
+
+      int sx = (ix + (arc->highWrite - arc->lowWrite) + 1);
+      if (sx >= 0) {
+	sourceName << "_" << sx;
+      }
+      else { /* (sx < 0) */
+	sourceName << "_N" << (-sx);
+      }
+
+      if (ix >= 0) {
+	destName << "_" << ix;
+      }
+      else { /* (ix < 0) */
+	destName << "_N" << (-ix);
+      }
+      
+      // sourceName is input to register, destName is output of register.
+      connectReg(sourceName, destName, "INTEGER");
+      cout << "Connecting " << sourceName << " and " << destName << "\n";
+
+      // Must also create signals for those lines which are neither read nor
+      // written by a $ref() - eg if more delays than tokens read.
+      // However, do not create a signal if it's a wormhole input.
+      // Will have created a system port input instead.
+
+      // If no system port by the given name, go ahead and make the signal.
+      if (sx < arc->lowWrite) {
+	signalListPut(&signalList, sourceName, "INTEGER", "", "");
+      }
+      if (ix < arc->lowWrite) {
+	signalListPut(&signalList, destName, "INTEGER", "", "");
+      }
+    }
+  }
+// ** CONSTRUCTION SECTION  - END
+
+
   int level = 0;
   // Generate the entity_declaration.
   entity_declaration << "entity " << galaxy()->name() << " is\n";
@@ -653,7 +710,8 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
   // Root is ref, without marking for any particular firing.
   root = ref;
 
-  if (thisFiring >= 0) ref << "_" << thisFiring;
+//  if (thisFiring >= 0) ref << "_" << thisFiring;
+  ref << "_" << thisFiring;
 
   StringList refIn = sanitize(ref);
   refIn << "_In";
@@ -695,7 +753,7 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
     if (isFirstStateRef) {
       // make regi, map it to IN and OUT
 
-      registerRegister(state);
+      registerRegister(state->type());
       
       StringList label = reg;
       StringList name = "Reg";
@@ -767,14 +825,39 @@ void StructTarget :: registerState(State* state, int thisFiring/*=-1*/,
   listState->lastFiring = thisFiring;
 }
 
+// Connect a register between the given input and output signals.
+void StructTarget :: connectReg(StringList inName, StringList outName,
+				StringList type) {
+      registerRegister("INTEGER");
+      
+      StringList label = outName;
+      label << "_REG";
+      
+      StringList name = "Reg";
+//      name << "_" << type;
+      name << "_" << "INT";
+
+      VHDLPortMapList* portMapList = new VHDLPortMapList;
+      VHDLGenericMapList* genMapList = new VHDLGenericMapList;
+      portMapList->initialize();
+      genMapList->initialize();
+      
+      portMapListPut(portMapList, "D", inName);
+      portMapListPut(portMapList, "Q", outName);
+      portMapListPut(portMapList, "C", "clock");
+      
+      portListPut(&systemPortList, "clock", "IN", "boolean");
+      
+      registerCompMap(label, name, portMapList, genMapList);
+}
+
 // Add a register component declaration.
-void StructTarget :: registerRegister(State* state) {
+void StructTarget :: registerRegister(StringList regType) {
   // Set the flag indicating registers are needed.
   setRegisters();
 
-  StringList stType = stateType(state);
   StringList name = "Reg";
-//  name << "_" << stType;
+//  name << "_" << regType;
   name << "_" << "INT";
 
   VHDLPortList* portList = new VHDLPortList;
@@ -782,23 +865,44 @@ void StructTarget :: registerRegister(State* state) {
   portList->initialize();
   genList->initialize();
   
-  portListPut(portList, "D", "IN", stType);
-  portListPut(portList, "Q", "OUT", stType);
+//  portListPut(portList, "D", "IN", regType);
+//  portListPut(portList, "Q", "OUT", regType);
+  portListPut(portList, "D", "IN", "INTEGER");
+  portListPut(portList, "Q", "OUT", "INTEGER");
   portListPut(portList, "C", "IN", "boolean");
 
   registerCompDecl(name, portList, genList);
 }
 
 // Register PortHole reference.
-void StructTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
-  StringList ref = port->getGeoName();
-  if (offset >= 0) ref << "_" << offset;
+void StructTarget :: registerPortHole(VHDLPortHole* port,
+				      int tokenNum/*=-1*/) {
+  // The registry keeps track of all refed arcs, and their min/max R/W offsets.
+  registerArcRef(port, tokenNum);
 
+// I want to pass along the offset info as well as whether it's
+// a read or a write so I can keep tabs on the production window and
+// the read window, and then do nice things at the end based on that.
+// Also, must do special things if it's a wormhole input.
+
+// Continue to do normal signal naming and portmapping.
+
+  // Create a port and a port mapping for this firing entity.
+  StringList ref = port->getGeoName();
+  if (tokenNum >= 0) {
+    ref << "_" << tokenNum;
+  }
+  else { /* (tokenNum < 0) */
+    ref << "_N" << (-tokenNum);
+  }
+  
   portListPut(&firingPortList, ref, port->direction(), port->dataType());
   portMapListPut(&firingPortMapList, ref, ref);
+
   // For wormhole inputs, create a system port.
+  // But for delayed values of wormhole inputs, do not create another port.
   // For local inputs, create a signal.
-  if (port->atBoundary()) {
+  if ((port->atBoundary()) && (tokenNum >= 0)) {
     // Port at wormhole boundary, so create a system port instead of a signal.
     portListPut(&systemPortList, ref, port->direction(), port->dataType());
   }
@@ -808,6 +912,56 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, int offset/*=-1*/) {
 }
 
 ISA_FUNC(StructTarget,VHDLTarget);
+
+// Register a read or write to an arc and the offset.
+void StructTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
+  StringList direction = port->direction();
+  StringList name = port->getGeoName();
+  int noSuchArc = 1;
+  
+  // Search through the arc list for an arc with the given name.
+  // If one is found, update it's low/high write/read markers.
+  VHDLArcListIter nextArc(arcList);
+  VHDLArc* arc;
+  while ((arc = nextArc++) != 0) {
+    if (!strcmp(arc->name, name)) {
+      noSuchArc = 0;
+      if (!strcmp(port->direction(),"OUT")) {
+	if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
+	if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
+      }
+      else if (!strcmp(port->direction(),"IN")) {
+	if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
+	if (tokenNum > arc->highRead) arc->highRead = tokenNum;
+      }
+      else {
+	Error::error(*port, " is neither IN nor OUT");
+      }
+    }
+  } 
+
+  // If no arc with the given name is in the list, then create one.
+  if (noSuchArc) {
+    VHDLArc* newArc = new VHDLArc;
+    newArc->name = name;
+    if (!strcmp(port->direction(),"OUT")) {
+      newArc->lowWrite = tokenNum;
+      newArc->highWrite = tokenNum;
+      newArc->lowRead = 0;
+      newArc->highRead = 0;
+    }
+    else if (!strcmp(port->direction(),"IN")) {
+      newArc->lowWrite = port->geo().numInit();
+      newArc->highWrite = port->geo().numInit();
+      newArc->lowRead = tokenNum;
+      newArc->highRead = tokenNum;
+    }
+    else {
+      Error::error(*port, " is neither IN nor OUT");
+    }
+    arcList.put(*newArc);
+  }
+}
 
 // Allocate memory for a new VHDLSignal and put it in the list.
 void StructTarget :: signalListPut(VHDLSignalList* nlist, StringList nname,

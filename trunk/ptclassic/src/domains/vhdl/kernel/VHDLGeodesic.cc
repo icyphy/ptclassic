@@ -50,8 +50,10 @@ char* VHDLGeodesic :: getBufName() const {
 
 // Initialize the geodesic.
 void VHDLGeodesic :: initialize() {
-  nextIn = 0;
-  nextOut = 0;
+//  nextIn = numInit();
+//  nextOut = 0;
+  nextIn = numInit()-1;
+  nextOut = -1;
   CGGeodesic::initialize();
 }
 
