@@ -1,19 +1,25 @@
 .\" $Id$
-.TH PRFACET 1 "22 March 1993"
+.TH PRFACET 1 "$Date$"
 .SH NAME
-prfacet \- send PostScript version of a facet to a printer.
+prfacet \- send PostScript view of a facet to a printer or file.
 .SH SYNOPSIS
 .B prfacet
-[
-options
-]
-.I "facet name"
+[ -TOFILE file-name ]
+[ oct2ps-options ]
+facet-name
 .SH DESCRIPTION
 .I Prfacet
 uses the
 .I oct2ps
 OCTTOOLS program to send the PostScript
-version of a facet to a printer.
+version of a facet to a printer or a file.
+If the first command-line option to
+.I prfacet
+is
+.I -TOFILE
+then the PostScript is saved to
+.I "file-name".
+Otherwise, the PostScript is sent to the printer.
 The printer must be specified in the user's PRINTER
 environment variable.
 .PP
@@ -29,12 +35,25 @@ The
 utility may be invoked from within the
 .I pigi
 Ptolemy graphical interface.
-.PP
-Also, see the manual page for
-.I facet2ps,
-which saves the PostScript representation of a facet to
-a file.
 .SH ENVIRONMENT
 .TP 10
 PRINTER
 Selects printer to be used.
+.SH OCT2PS\ OPTIONS
+A few of the useful
+.I oct2ps
+options are described below.
+.TP 10
+-b \fIWxH\fR
+Width and height (in inches) of a box to fit the plot in.
+.TP
+-B
+Plot outlines for each piece of geometry (in addition to the
+geometry itself).
+.TP
+-x
+Generate labels for OCT labels.
+.TP
+-X
+Used with -x, only display a label if it fits within the
+bounding box of the label.
