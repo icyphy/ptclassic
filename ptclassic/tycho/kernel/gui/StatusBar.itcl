@@ -108,8 +108,14 @@ class ::tycho::StatusBar {
     # Create an entry field to open a file in the status bar
     method fileentry {label args}
     
+    # Put the focus in the statusbar
+    method focusin {}
+    
     # Get the most recent string written to the status bar
     method get {}
+
+    # Get the current mode
+    method mode {}
 
     # Put a string to the status bar
     method puts {string}
@@ -125,8 +131,8 @@ class ::tycho::StatusBar {
 
     # Set the label text
     private method _label {label}
-
-   # Lock the current display mode
+    
+    # Lock the current display mode
     private method _lock {}
 
     # Set the current display mode
@@ -616,6 +622,9 @@ body ::tycho::StatusBar::entry {label args} {
     # The Escape key returns the focus to where it was
     bind $itk_component(feedback) <Escape> "$opts(-returnfocus) focusin"
    
+    # Allow the following to be handled by the top-level (displayer)
+    bind $itk_component(feedback) <Control-x><o> { }
+
     # Now focus on the entry
     focus $itk_component(feedback)
 }
@@ -667,12 +676,36 @@ body ::tycho::StatusBar::fileentry {label args} {
 }
 
 #######################################################################
+#### focusin
+#
+# Put the focus in the status bar. If there is an entry widget,
+# put the focus there; otherwise, just focus on the toplevel.
+#
+body ::tycho::StatusBar::focusin {} {
+    if [::info exists itk_component(feedback)] {
+        focus $itk_component(feedback)
+    } else {
+        focus $itk_component(hull)
+    }
+}
+
+#######################################################################
 #### get
 #
 # Get the most recent string written to the statusbar.
 #
 body ::tycho::StatusBar::get {} {
     $itk_component(message) cget -text
+}
+
+#######################################################################
+#### mode
+#
+# Get the current mode of the status bar. This can be one of
+# <b>message</b>, <b>progress</b>, or <b>entry</b>.
+#
+body ::tycho::StatusBar::mode {} {
+    return $_mode
 }
 
 #######################################################################
