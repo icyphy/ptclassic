@@ -137,6 +137,9 @@ class ::tycho::HTML {
     # Return the reference directory.
     method lastDirectory {}
 
+    # Display the link destination in the status bar
+    method linkEnter {xpos ypos}
+
     # Open the source file using an HTML editor.
     method openSource {}
 
@@ -256,6 +259,10 @@ body ::tycho::HTML::constructor {args} {
     # Initialize the text window.  The returned value is supposed to be
     # the global variable used to store the state of the window, but isn't.
     HMinit_win $text
+
+    # Add a binding for links to display the destination.
+    $text tag bind link <Enter> "$this linkEnter %x %y"
+    $text tag bind link <Leave> "$this statusbar puts {}"
 
     # Modifications on configuration in the HTML library:
     $text tag configure link -underline 1
@@ -544,6 +551,19 @@ body ::tycho::HTML::insertData {data} {
 #
 body ::tycho::HTML::lastDirectory {} {
     return $itk_option(-directory)
+}
+
+#####################################################################
+#### linkEnter
+# Display the link destination in the status bar for the link below
+# the specified mouse position.
+#
+body ::tycho::HTML::linkEnter {xpos ypos} {
+    set tags [$itk_component(text) tag names @$xpos,$ypos]
+    set link [lindex $tags [lsearch -glob $tags L:*]]
+    # regsub -all {[^L]*L:([^ ]*).*}  $tags {\1} link
+    regsub L: $link {} link
+    statusbar puts $link
 }
 
 #####################################################################
