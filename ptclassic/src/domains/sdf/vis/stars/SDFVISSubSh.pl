@@ -1,7 +1,7 @@
 defstar {
 	name { QuadSub16 }
 	domain { SDF }
-	version { 3/14/96 @(#)SDFQuadSub16.pl	1.6 }
+	version { $Date$ $Id$}
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
