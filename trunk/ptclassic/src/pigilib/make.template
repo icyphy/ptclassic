@@ -22,6 +22,8 @@ VPATH         = $(ROOT)/src/pigilib
 CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
+PTCLHDRS = $(ROOT)/src/ptcl
+
 HDRS	      = compile.h \
 		edit.h \
 		err.h \
@@ -42,6 +44,7 @@ HDRS	      = compile.h \
 		mkIcon.h \
 		palette.h \
 		octMacros.h \
+		ptcl.h \
 		ptk.h \
 		ptkRegisterCmds.h \
 		ptkNet.h \
@@ -91,7 +94,7 @@ all:	makefile $(LIB)
 
 install: makefile $(LIBDIR)/$(LIB)
 
-INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
+INCL=-I$(KERNDIR) -I$(TCL_H_DIR) -I$(PTCLHDRS)
 C_INCL=-I$(OCTTOOLS)/include $(X11INCL) -I$(TCL_H_DIR)
 
 lint:	$(LIBCSRCS)
