@@ -35,6 +35,7 @@ defstar {
 	}
 	constructor {
 		input.inheritTypeFrom(output);
+		delayType = TRUE;
 	}
 	go {
 	   completionTime = arrivalTime + double(delay);
