@@ -47,8 +47,7 @@
 # editor. The -text option, inherited from the base class, specifies
 # a welcome message. For example,
 # <tcl><pre>
-# ::tycho::TclShell .c -text "A fresh Tcl shell\n"
-# .c centerOnScreen
+# ::tycho::view TclShell [list -text "A fresh Tcl Shell\n"]
 # </pre></tcl>
 # <p>
 #
