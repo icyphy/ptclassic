@@ -123,9 +123,10 @@ PortHole* AutoFork::setDest (GenericPort &gp, int alwaysFork) {
 
 int AutoFork::nF = 0;
 
+// generate a name for the auto-fork, and hash and return it.
 const char* AutoFork::autoForkName() {
-	char buf[16];
-	sprintf (buf, "auto-fork-%d", ++nF);
+	StringList buf = "auto-fork-";
+	buf << ++nF;
 	return hashstring (buf);
 }
 
