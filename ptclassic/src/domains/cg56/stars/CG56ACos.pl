@@ -7,9 +7,29 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-Arc Cosine function using series approximation.  
-The output is scaled down by pi.
+.PP
+A power series expansion is used to compute the arc cosine of the input,
+which is in the range -1.0 to 1.0.  The output is in the principle range of
+0 to pi, scaled down by a factor of pi for the fixed point device.
+.PP
+The power series is factorized carefully so that intermediate factors never
+exceed 1.0 in magnitude.  This is essential because these intermediate results
+have to be moved from the accumulator back to the \fIx\fR or \fIy\fR
+data registers for subsequent multiplication.
+.PP
+The runtime of this star can vary from a few instruction cycles, if
+the input is close to certain values such as +/-0.5 and +/-1.0, to some 55
+instructions.  This is because the input value is first tested against certain
+particular values to which handy cosine values are available.  Failing that,
+the power series expansion is used.  This approach speeds up the runtime
+execution for a small number of cases but may have serious impact on parallel
+scheduling.  It may thus be desirable to remove the initial boundary value
+checks.
+.PP
+The runtime can be improved by reducing the order of the power series
+expansion, at the expense of precision.
 	}
+        seealso { ASin, Cos, Sin }
 	execTime {
 		return 55;
 	}
