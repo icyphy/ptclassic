@@ -82,6 +82,9 @@ protected:
 	int staticResult(const char*);
 
 public:
+// the active Tcl interpreter, for error reporting.
+	static Tcl_Interp* activeInterp;
+
 	PTcl(Tcl_Interp* interp = 0);
 	~PTcl();
 
