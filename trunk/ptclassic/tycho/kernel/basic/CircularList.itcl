@@ -87,6 +87,9 @@ body ::tycho::CircularList::append {element {after {}}} {
 	    set forward($element) $element
 	    set backward($element) $element
 	} {
+	    if [info exists forward($element)] {
+		remove $element
+	    }
 	    set forward($element) $first
 	    set forward($last) $element
 	    set backward($element) $last
@@ -100,6 +103,7 @@ body ::tycho::CircularList::append {element {after {}}} {
 	    if [info exists forward($element)] {
 		remove $element
 	    }
+	    if {$last == $after} {set last $element}
 	    set forward($element) $forward($after)
 	    set forward($after) $element
 	    set backward($element) $after
@@ -154,6 +158,7 @@ body ::tycho::CircularList::elements {{start {}}} {
 # If the element already exists in the list, it is first removed.
 #
 body ::tycho::CircularList::insert {element {before {}}} {
+
     if {$before == {}} {
 	if {$last == {}} {
 	    set last $element
@@ -161,6 +166,9 @@ body ::tycho::CircularList::insert {element {before {}}} {
 	    set forward($element) $element
 	    set backward($element) $element
 	} {
+	    if [info exists forward($element)] {
+		remove $element
+	    }
 	    set forward($element) $first
 	    set forward($last) $element
 	    set backward($element) $last
@@ -174,6 +182,7 @@ body ::tycho::CircularList::insert {element {before {}}} {
 	    if [info exists forward($element)] {
 		remove $element
 	    }
+	    if {$first == $before} {set first $element}
 	    set forward($element) $before
 	    set backward($element) $backward($before)
 	    set forward($backward($before)) $element

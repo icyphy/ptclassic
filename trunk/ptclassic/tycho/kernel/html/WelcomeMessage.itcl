@@ -98,8 +98,10 @@ class ::tycho::WelcomeMessage {
 body ::tycho::WelcomeMessage::constructor {args} {
 
     global TYCHO
+    # An option -palette 3/3/2 below restricts the palette,
+    # but it is better to restrict it in the source.
     if {!$ptolemygifexists} {
-	image create photo ptolemygif -palette 3/3/2  \
+	image create photo ptolemygif \
 		-file $TYCHO/tycho/kernel/ptolemyWelcome.gif
     }
     configure -image ptolemygif

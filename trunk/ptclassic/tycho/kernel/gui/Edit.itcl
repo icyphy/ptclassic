@@ -100,7 +100,7 @@ body ::tycho::Edit::constructor {args} {
 	[textWidget] $itk_component(childsite).text \
 		-markmodified "$this markModified"
     } {
-	keep -text -readonly -font -width -height -background \
+	keep -text -readonly -textfont -width -height -background \
 		-highlightbackground -highlightcolor -selectforeground \
 		-cursor -insertbackground -foreground -textfont \
 		-textbackground
@@ -227,6 +227,10 @@ body ::tycho::Edit::constructor {args} {
 		$itk_component(text) readFile $file
 		$itk_component(text) configure -readonly $savereadonly
 	    } {
+		# FIXME: This error does not cause the object to be
+		# properly deleted.  This window will remain in existence,
+		# but cannot be accessed.  Using centerOnScreen, for example,
+		# causes a core dump.
 		error "File $file is not readable"
 	    }
 	}

@@ -32,7 +32,7 @@
 ##########################################################################
 #### Stack class.
 # This is a simple stack data structure with methods to push and pop.
-# Data stored on the stack is any arbitrary Tcl value.
+# Data stored on the stack is any arbitrary Tcl string.
 #
 class ::tycho::Stack {
 
@@ -66,8 +66,8 @@ body ::tycho::Stack::clear {} {
 
 #####################################################################
 #### pop
-# Pop the stack.  If there is nothing on the stack, return an
-# empty string.
+# Pop a value from the stack and return it. If there is nothing on the
+# stack, return an empty string.
 #
 body ::tycho::Stack::pop {} {
     if {[llength $data] > 0} {
@@ -81,7 +81,7 @@ body ::tycho::Stack::pop {} {
 
 #####################################################################
 #### push
-# Push the stack.
+# Push a value onto the stack.
 #
 body ::tycho::Stack::push {value} {
     set data [linsert $data 0 $value]
