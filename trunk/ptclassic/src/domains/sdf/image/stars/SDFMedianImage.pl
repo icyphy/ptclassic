@@ -28,11 +28,11 @@ when displaying single frames from a moving sequence.
 .Id "median filtering"
 	}
 
-	ccinclude { "GrayImage.h", <std.h> }
-
 // INPUT AND STATES.
 	input { name { inData } type { message } }
+
 	output { name { outData } type { message } }
+
 	defstate {
 		name	{ FilterWidth }
 		type	{ int }
@@ -40,16 +40,17 @@ when displaying single frames from a moving sequence.
 		desc	{ Size of median filter window (should be odd number). }
 	}
 
-////// CODE.
+////// CODE
+	ccinclude { "GrayImage.h", <std.h> }
 
 	code {
 // Function to sort unsigned char's.
 // These types and casts are required to satisfy cfront's
 // ridiculously strict rules.
 		extern "C" {
-			static int sortUC(const void* aV,const void* bV) {
-				unsigned const char* a = (unsigned const char*)aV;
-				unsigned const char* b = (unsigned const char*)bV;
+			static int sortUC(const void* aV, const void* bV) {
+				unsigned const char* a = (unsigned const char*) aV;
+				unsigned const char* b = (unsigned const char*) bV;
 				if (*a < *b) return -1;
 				else if (*a == *b) return 0;
 				else return 1;
@@ -60,23 +61,28 @@ when displaying single frames from a moving sequence.
 		unsigned char* buf;
 	}
 
+	constructor { buf = (unsigned char*) NULL; }
+
 	setup {
+		wrapup();
+
 		size = int(FilterWidth);
-		if (size <= 0) size = 3;
+		if (size <= 0) { size = 3; }
 		size = 1 + 2*(size/2); // an odd number for sure
 		LOG_NEW; buf = new unsigned char[size*size];
 	}
 
-	wrapup { LOG_DEL; delete buf; }
+	wrapup { LOG_DEL; delete buf; buf = (unsigned char*) NULL; }
+
+	destructor { wrapup(); }
+
 
 	method {
 		name	{ retMedian }
 		access	{ protected }
 		type	{ "unsigned char" }
 		arglist { "(unsigned const char* p, int pi, int pj)" }
-
-		code
-		{
+		code {
 		// Copy data to buf.
 			int i, j, cnt = 0;
 			for(i = pi-size/2; i <= pi+size/2; i++) {
@@ -89,6 +95,7 @@ when displaying single frames from a moving sequence.
 			return(buf[(size/2) * (size+1)]); // median value.
 		} // end code {}
 	} // end method { retMedian }
+
 
 	go {
 // Read data from input and initialize.
