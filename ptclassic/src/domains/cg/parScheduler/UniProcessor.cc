@@ -61,7 +61,7 @@ StringList UniProcessor :: display(int makespan)
 	    sumIdle += obj->getDuration();
 	} else {
 	    if (node->myStar())
-		schedule <<  node->readRealName();
+		schedule <<  node->myStar()->fullName();
 	    else if (node->getType() == -1)
 		schedule << "send";
 	    else
