@@ -48,6 +48,8 @@ to become a permanent part of the system.
 int Linker::activeFlag = 0;
 const char* Linker::ptolemyName = 0;
 const char* Linker::symTableName = 0;
+// by default, search math and C libraries
+const char* Linker::myDefaultOpts = "-lm -lc";
 char* Linker::memBlock = 0;
 char* Linker::availMem = 0;
 
@@ -186,6 +188,8 @@ int Linker::multiLink (int argc, char** argv) {
 		const char* objName = expandPathName(argv[i]);
 		cmd << " " << objName;
 	}
+	// these options go last so libraries will be searched properly.
+	cmd << " " << myDefaultOpts;
 	if (system (cmd)) {
 		Error::abortRun("Error in linking file");
 		return FALSE;
@@ -308,6 +312,11 @@ size_t Linker::readInObj(const char* objName) {
 	}
 	close(fd);
 	return size;
+}
+
+// function to set default options: uses hashstring to manage memory
+void Linker::setDefaultOpts(const char* arg) {
+	myDefaultOpts = hashstring(arg);
 }
 
 // helper class to clean things up -- frees memory and zaps the
