@@ -19,15 +19,18 @@ $Id$
 
 #include "BaseCTarget.h"
 #include "StringState.h"
+#include "IntState.h"
 
 class CGCPortHole;
 class EventHorizon;
+class CGCStar;
 
 class CGCTarget : public BaseCTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
 	Block* clone() const;
 	void headerCode();
+	void start();	// reset uniqueId.
 	int setup(Galaxy&);
 	void wrapup();
 	void beginIteration(int repetitions, int depth);
@@ -50,10 +53,11 @@ public:
 	void addMainInit(const char* decl);
 
 	// name the offset of portholes
-	StringList offsetName(CGCPortHole*);
+	StringList offsetName(const CGCPortHole*);
 
 	// make public this method
-	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
+	StringList correctName(const NamedObj& p) 
+		{return  sanitizedFullName(p); }
 
 	// compile and run the code
 	int compileCode();
@@ -61,6 +65,10 @@ public:
 
 	// generate code for a single processor in a multiprocessor target
 	StringList generateCode(Galaxy& g);
+
+	// static buffering option can be set by parent target
+	void wantStaticBuffering() { staticBuffering = TRUE; }
+	int useStaticBuffering() { return int(staticBuffering); }
 
 protected:
 	char *schedFileName;
@@ -80,19 +88,27 @@ protected:
 	// redefine frameCode() method
 	void frameCode();
 
+	// return a name that can be used as C identifier, derived from
+	// the actual name
+	StringList sanitizedFullName(const NamedObj &b) const;
+
 	// states
+	IntState staticBuffering;
 	StringState funcName;
 	StringState compileCommand;
 	StringState compileOptions;
 	StringState linkOptions;
 	StringState saveFileName;
 
+	// give a unique name for a galaxy. 
+	int galId;
+
 private:
 	StringList includeFiles;
 	StringList globalDecls;
 	StringList sectionComment(const StringList s);
-	int galDataStruct(Galaxy& galaxy, int level=0);
-	int starDataStruct(Block& block, int level=0);
+	virtual int galDataStruct(Galaxy& galaxy, int level=0);
+	virtual int starDataStruct(CGCStar* block, int level=0);
 	void setGeoNames(Galaxy& galaxy);
 
 	// setup forkDests list for all Fork input portholes
