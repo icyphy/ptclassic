@@ -53,7 +53,8 @@ MISC_FILES = \
 	tk2html.awk \
 	tk2html.perl \
 	tk2html2.awk \
-	widgettree.n
+	widgettree.n \
+	labeledgrid.n
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
