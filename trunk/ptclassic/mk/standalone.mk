@@ -57,8 +57,10 @@ endif
 	
 VPATH=.
 
-#This definition is needed so that make won't complain w/ common.mk
-LIB=dummy
+ifndef LIB
+	#This definition is needed so that make won't complain w/ common.mk
+	LIB=dummy
+endif
 
 include $(ROOT)/mk/common.mk
 
