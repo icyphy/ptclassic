@@ -42,7 +42,12 @@ include $(CONFIG)
 
 TCL_SRCS =
   
-ITCL_SRCS =
+ITCL_SRCS = \
+	PtEdit.itcl \
+	RunPanel.itcl \
+	RunWindow.itcl \
+	Simulation.itcl \
+	SliderPanel.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	ptII.style \
