@@ -22,9 +22,10 @@ parameters and states, running the simulation, restarting it, etc.
 extends the Tcl interpreter language by adding new commands.  The
 underlying grammar and control structure of Tcl are not altered.
 Commands in Tcl have a simple syntax: a verb followed by arguments.
-This document will not explain Tcl; please refer to [REFERENCE]
-for that.  Instead, it will describe only the extensions to Tcl
-made by
+This document will not explain Tcl; please refer to the file
+``~ptolemy/tcl/Tcl.man'' which is included with this distribution;
+it is a copy of the Tcl Unix-style manual entry.  This document
+describes only the extensions to Tcl made by
 .i ptcl .
 .pp
 The interpreter has a
