@@ -655,6 +655,19 @@ int PTcl::isgalaxy (int argc,char ** argv) {
 	return TCL_OK;
 }
 
+int PTcl::iswormhole (int argc,char ** argv) {
+	if (argc != 2)
+		return usage ("iswormhole <block>");
+	const Block* b = getBlock(argv[1]);
+	if (!b) return TCL_ERROR;
+	if (b->isItWormhole()) {
+            result("1");
+	} else {
+            result("0");
+        }
+	return TCL_OK;
+}
+
 int PTcl::topblocks (int argc,char ** argv) {
 	if (argc > 2)
 		return usage ("topblocks ?<block-or-classname>?");
@@ -1202,6 +1215,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(halt),
 	ENTRY(initialize),
         ENTRY(isgalaxy),
+        ENTRY(iswormhole),
 	ENTRY(knownlist),
 	ENTRY(link),
 	ENTRY(listobjs),
