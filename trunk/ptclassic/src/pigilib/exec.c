@@ -38,8 +38,7 @@ int *nPtr;
 	    PrintCon("Aborted entry");
 	    return (FALSE);
     }
-    ERR_IF2((*nPtr = atoi(item.value)) <= 0,
-	"Invalid entry, number must be > 0");
+    *nPtr = atoi(item.value);
     if (*nPtr != oldN) {
 	/* set prop only if it changes, to avoid creation of OctChangeRecord */
 	SetIterateProp(facetPtr, *nPtr);
