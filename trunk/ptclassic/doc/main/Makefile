@@ -5,6 +5,7 @@
 
 PTOLEMY       = ../..
 PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
+PRINTTITLE    = $(PTOLEMY)/doc/bin/printtitle
 HEADER        = $(PTOLEMY)/doc/headers/together
 MAINSEC	      = overall
 TMPFILE	      = $$HOME/Almagest.main
@@ -22,6 +23,7 @@ $(DIRS):
 	cd $@; $(MAKE) $(MFLAGS) $(MAKEVARS) print
 
 print:
+	$(PRINTTITLE) $(OPTIONS) title
 	rm -f $(TMPFILE)
 	for x in $(DIRS); do \
 		cd $$x ; \
@@ -29,7 +31,8 @@ print:
 		cd .. ; \
 	done
 	$(PRINTSEC) $(OPTIONS) $(HEADER) init $(TMPFILE)
-	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title
+	
+	$(PRINTTITLE) $(OPTIONS) title
 #	/bin/rm $(TMPFILE)
 
 preview:
