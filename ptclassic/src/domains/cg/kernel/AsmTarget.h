@@ -42,10 +42,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGTarget.h"
 #include "SDFScheduler.h"
+#include "RepStateList.h"
 
 class ProcMemory;
 class AsmStar;
-class AsmTargetPtr;
 
 class AsmTarget : public CGTarget {
 public:
@@ -89,6 +89,17 @@ public:
 
 	void headerCode();
 
+	//lookup a shared state
+	State* lookupSharedState(const State& s) const {
+		return sharedStarStates.equivalentState(s);	
+	}
+
+	// Look up an address for a Shared State entry by name.
+	// Return a pointer to the memory in which the state will be stored,
+	// or NULL if no entry is found.  Set the second argument
+	// equal to the address.
+	ProcMemory* lookupSharedEntry(State&,unsigned&);
+
 protected:
 	ProcMemory* mem;
 
@@ -120,7 +131,7 @@ protected:
 
 private:
 	void initStates();
-
+	RepStateList sharedStarStates;
 };
 
 #endif

@@ -41,6 +41,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SymbolList.h"
 #include "IntState.h"
 
+// Although both of these attributes are defined here, it is up to
+// the derived targets to implement the various combinations.
+const bitWord AB_SHARED = 0x10; // global state on the uniprocessor level
+const bitWord AB_GLOBAL = 0x20; // global state over all processors
+
+// A state is shared over all the stars either:
+// Globally - all stars over all the processors
+// Locally -  all stars over the current processor 
+extern const Attribute A_SHARED;
+				
+extern const Attribute A_GLOBAL; // state is visible over all the processors
+
+// By default, states are both private and local.  That means, all the 
+// stars instances of a particular class have there own copy of each state.
+extern const Attribute A_PRIVATE;
+extern const Attribute A_LOCAL;
+
 class StringList;
 
 // the following function is provided by the SunOS and Ultrix libs.

@@ -43,6 +43,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CodeStream.h"
 #include <ctype.h>
 
+extern const Attribute A_GLOBAL = {AB_GLOBAL,0};
+extern const Attribute A_LOCAL  = {0,AB_GLOBAL};
+extern const Attribute A_SHARED = {AB_SHARED,0};
+extern const Attribute A_PRIVATE = {0,AB_SHARED};
+
 /*******************************************************************
 
 	class CGStar methods

@@ -57,12 +57,27 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 	while ((s = nextState++) != 0) {
 		if ((s->attributes() & AB_MEMORY) == 0 ||
 		    (s->attributes() & AB_NOINIT) != 0) continue;
-		// too bad -- switching on state types
-		StringList smsg;
-		smsg << "initialization for state " << s->fullName();
+                StringList smsg;
+		if ((s->attributes() & AB_SHARED) != 0) {
+			if (lookupSharedState(*s) == s) {
+				smsg << "initialization for global state "
+				     << s->name();
+			}
+			else {
+				continue; // global state only initialize once
+			}
+		}
+		else {
+			smsg << "initialization for state " << s->fullName();
+		}
 		myCode << comment(smsg);
 		unsigned addr;
 		ProcMemory *mem = star.lookupEntry(s->name(),addr);
+		if (mem==NULL) {
+			Error::abortRun(*this,"No memory allocated for ",
+					s->fullName());
+			return;
+		}
 		orgDirective(mem->name(), addr);
 
 		// handle A_REVERSE attribute, which makes arrays

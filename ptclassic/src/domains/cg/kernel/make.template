@@ -54,6 +54,7 @@ MemMap.h \
 NamedList.h \
 ProcMemory.h \
 Profile.h \
+RepStateList.h \
 SymbolList.h \
 UniqueStringList.h \
 

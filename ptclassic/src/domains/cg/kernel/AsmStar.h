@@ -41,14 +41,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "AsmPortHole.h"
 
 // Define attribute bit masks for code generation states
-const bitWord AB_MEMORY = 0x20;	// state is in memory
-const bitWord AB_CIRC   = 0x40;	// circular buffer
-const bitWord AB_NOINIT = 0x80;	// don't care about initial value (RAM state)
-const bitWord AB_REVERSE = 0x100;// write out in reverse order
-const bitWord AB_CONSEC = 0x200; // allocate consecutively with next state
-				 // (of same star)
-const bitWord AB_SYMMETRIC = 0x400; // allocate in two memories
-
+const bitWord AB_MEMORY  =  0x100; // state is in memory
+const bitWord AB_CIRC    =  0x200;  // circular buffer
+const bitWord AB_NOINIT  =  0x400; // do not initialize
+const bitWord AB_REVERSE =  0x800; // write out in reverse order
+const bitWord AB_CONSEC  = 0x1000; // allocate consecutively with next state
+				    // (of same star)
+const bitWord AB_SYMMETRIC = 0x2000; // allocate in two memories
 // Define attributes for code generation states
 // note that attributes may combine several attribute bits.
 extern const Attribute A_ROM; // a ROM state

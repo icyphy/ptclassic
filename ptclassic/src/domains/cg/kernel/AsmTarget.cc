@@ -73,6 +73,11 @@ int AsmTarget::allocateMemory() {
 	if (mem == 0) return FALSE;
 	mem->reset();
 
+// clear the sharedStarState list.  As states are added to this list,
+// the memory allocation requests are processed.  Thus, we must
+// clear the list each time we allocateMemory.
+	sharedStarStates.initialize();
+
 	GalStarIter nextStar(*galaxy());
 // request memory, using the Target, for all stars in the galaxy.
 // note that allocReq just posts requests; performAllocation processes
@@ -122,8 +127,23 @@ AsmTarget::allocReq(AsmStar& star) {
 	BlockStateIter nextState(star);
 	State* s;
 	while ((s = nextState++) != 0) {
-		// skip states that are not in memory
-		if ((s->attributes() & AB_MEMORY) == 0) continue;
+		// if state is global, put it on the globalStateList
+		if ((s->attributes() & AB_SHARED) !=0) {
+			if (lookupSharedState(*s) == 0) {
+				// first time a global state encountered 
+				// add state to global list and continue
+				// with memory allocation request
+				sharedStarStates.put(*s);
+			}
+			else {
+				// since global state already encountered
+				// we do not have to ask for memory to
+				// be allocated again.
+				continue;
+			}
+		} 
+                // skip states that are not in memory
+                if ((s->attributes() & AB_MEMORY) == 0) continue;
 		if (!mem->allocReq(*s)) {
 			Error::abortRun(*s,
 			      "memory allocation failed for state buffer:",
@@ -255,6 +275,17 @@ void AsmTarget::saveProgramCounter() {
 
 void AsmTarget::restoreProgramCounter() {
 	myCode << "Restore program counter";
+}
+
+ProcMemory* AsmTarget::lookupSharedEntry(State& s,unsigned& a) {
+	State* sharedState = lookupSharedState(s);
+	if (sharedState == 0) {
+		return 0;
+	}
+	else {
+		return ((AsmStar*)sharedState->parent())
+				->lookupEntry(sharedState->name(),a);
+	}
 }
 
 // dummies to do code generation for wormhole data motion.  These

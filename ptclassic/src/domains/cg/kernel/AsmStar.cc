@@ -215,6 +215,19 @@ void AsmStar::addEntry(const State& s,ProcMemory& m, unsigned a) {
 
 // look up a state in the table.
 ProcMemory* AsmStar :: lookupEntry(const char* s, unsigned& a) {
+
+	// Check if shared state.  If so, tell the target to
+	// lookup the memory
+	State* stateP = stateWithName(s);
+	if ((stateP->attributes() & AB_SHARED) !=0) {
+	        AsmTarget* t = (AsmTarget*)targetPtr;
+		if (stateP != t->lookupSharedState(*stateP)) {
+			return t->lookupSharedEntry(*stateP,a); 
+		}
+	}
+
+	// If we get here, the state was allocated memory in
+	// this star.
 	StateAddrEntry* p = addrList;
 	while (p && strcmp(p->stateName,s) != 0) p = p->link;
 	if (p) {
@@ -244,7 +257,6 @@ void AsmStar::initialize() {
 	zapStateEntries();
 	CGStar::initialize();
 }
-
 
 // run: prefix the code with a comment
 
