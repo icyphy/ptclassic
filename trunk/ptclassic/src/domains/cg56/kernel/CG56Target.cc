@@ -44,8 +44,8 @@ void CG56Target :: initStates() {
 		A_NONSETTABLE|A_NONCONSTANT));
 	addState(disCode.setState("Display code?",this,"YES",
 	                          "display code if YES."));
-	addState(dirName.setState("dirName",this,"~/DSPcode",
-				  "directory for all output files"));
+	// change default value of destDirectory
+	destDirectory.setValue("~/DSPcode");
 }
 
 void CG56Target :: addCode(const char* code) {
@@ -67,10 +67,8 @@ char* makeLower(const char* name) {
 }
 
 int CG56Target :: setup(Galaxy& g) {
-	LOG_DEL; delete dirFullName; dirFullName = 0;
 	LOG_DEL; delete mem; mem = 0;
 	LOG_DEL; delete uname; uname = 0;
-	dirFullName = writeDirectoryName(dirName);
 	cmds.initialize();
 	LOG_NEW; mem = new CG56Memory(xMemMap,yMemMap);
 	uname = makeLower(g.readName());
@@ -104,7 +102,6 @@ void CG56Target :: wrapup () {
 
 CG56Target :: ~CG56Target () {
 	LOG_DEL; delete mem; mem = 0;
-	LOG_DEL; delete dirFullName; dirFullName = 0;
 	LOG_DEL; delete uname; uname = 0;
 }
 
@@ -121,7 +118,7 @@ Block* CG56Target :: clone () const {
 	LOG_NEW; return new CG56Target(*this);
 }
 
-StringList CG56Target::beginIteration(int repetitions, int) {
+void CG56Target::beginIteration(int repetitions, int) {
 	StringList out;
 	if (repetitions == -1) {	// iterate infinitely
 		out = targetNestedSymbol.push("LOOP");
@@ -134,10 +131,10 @@ StringList CG56Target::beginIteration(int repetitions, int) {
 		out += targetNestedSymbol.push("LOOP");
 		out += "\n";
 	}
-	return out;
+	addCode(out);
 }
 
-StringList CG56Target::endIteration(int repetitions, int) {
+void CG56Target::endIteration(int repetitions, int) {
 	StringList out;
 	if (repetitions == -1)	{	// iterate infinitely
 		out = "\tjmp\t";
@@ -148,7 +145,7 @@ StringList CG56Target::endIteration(int repetitions, int) {
 		out = targetNestedSymbol.pop();
 		out += "\n";
 	}
-	return out;
+	addCode(out);
 }
 
 void CG56Target::codeSection() {

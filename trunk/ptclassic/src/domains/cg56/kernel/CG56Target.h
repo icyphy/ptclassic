@@ -50,7 +50,6 @@ protected:
 	char* uname;
 	IntState disCode;
 	int inProgSection;
-	StringState dirName;
 public:
 	CG56Target (const char* nam, const char* desc);
 	// copy constructor
@@ -59,8 +58,8 @@ public:
 	void headerCode();
 	void wrapup();
 	int setup(Galaxy&);
-	StringList beginIteration(int repetitions, int depth);
-	StringList endIteration(int repetitions, int depth);
+	void beginIteration(int repetitions, int depth);
+	void endIteration(int repetitions, int depth);
 	void addCode(const char*);
 	~CG56Target();
 };
