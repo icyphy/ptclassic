@@ -108,6 +108,9 @@ public:
     virtual int generateSchedule();
 
     virtual Block* cloneCluster()  const;
+
+    const char* myDomain;
+
 protected:
     // The Star part of the Cluster.
     Star& selfStar;
@@ -116,8 +119,6 @@ protected:
 
     DynamicGalaxy gal;
     Scheduler* sched;
-
-    const char* myDomain;
 
     // Generate the schedules of all the internal clusters.
     virtual int generateSubSchedules();
@@ -144,7 +145,7 @@ public:
 class ClusterPort {
 public:
     ClusterPort(PortHole& self, const PortHole& p, Star* parent);
-    PortHole& real() const { return master; }
+    const PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
 	return real().isItInput();
@@ -169,7 +170,7 @@ private:
 
     // master is a reference to the original PortHole that this
     // porthole represents.
-    PortHole& master;
+    const PortHole& master;
 };
 
 class ClusterPortIter : private BlockPortIter {
