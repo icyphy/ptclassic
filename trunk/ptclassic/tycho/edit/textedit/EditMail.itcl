@@ -182,6 +182,11 @@ body ::tycho::EditMail::help {} {
 # Send the mail in the content
 #
 body ::tycho::EditMail::sendmail {} {
+    # Error check before sending out data
+    if {[llength [$this toolbar get mailto]] > 1} {
+        error "Sending to multiple user is not supported in this version."
+    }
+
     toolbar disable send
     toolbar disable mailto
     toolbar disable subject
