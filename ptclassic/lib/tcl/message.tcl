@@ -80,8 +80,7 @@ proc ptkImportantMessage {w text} {
     wm iconname $w "Ptolemy Message"
 
     button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
-    message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 25c \
-            -text $text -justify left
+    message $w.msg -width 25c -text $text -justify left
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
 
     wm geometry $w +200+200
@@ -119,8 +118,8 @@ proc ptkStartupMessage {pigiVersion pigiFilename} {
     button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
     frame $w.f -relief raised -bd 5
     frame $w.f.msg
-    message $w.f.msg.msg1 -font -Adobe-Helvetica-Bold-R-Normal-*-240-* \
-	-justify center -foreground firebrick -width 20c -text { \
+    message $w.f.msg.msg1 -font [option get . bigfont Bigfont] \
+	-justify center -foreground [ptkColor firebrick] -width 20c -text { \
 Ptolemy Interactive Graphical Interface }
     append text $pigiVersion {
 } {
@@ -131,11 +130,10 @@ Copyright \251 1990-1993 Regents of the University of California
 - All rights reserved -
 For copyright notice, limitation of liability,
 and disclaimer of warranty provisions, push the button below. "
-    message $w.f.msg.msg2 -font -Adobe-times-medium-r-normal--*-180* \
-	-justify center -text $text -width 20c
+    message $w.f.msg.msg2 -justify center -text $text -width 20c
     button $w.f.msg.copyright -command "ptkDisplayCopyright" \
 	-text {more information} \
-	-background burlywood1 -font -Adobe-times-medium-r-normal--*-180*
+	-background [ptkColor burlywood1] -font -Adobe-times-medium-r-normal--*-180*
 
     pack append $w.f.msg $w.f.msg.msg1 {top fillx} $w.f.msg.msg2 {top} \
 	$w.f.msg.copyright {top fillx}
@@ -187,8 +185,7 @@ proc ptkDisplayProfile {} {
     wm iconname $w "Profile"
 
     button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
-    message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 25c \
-            -text $ptkProfileString -justify left
+    message $w.msg -width 25c -text $ptkProfileString -justify left
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
 
     wm geometry $w +200+200
