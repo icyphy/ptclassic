@@ -60,6 +60,7 @@ CCS_WITH_H_FILES=\
  Geodesic.cc \
  HashTable.cc \
  Histogram.cc \
+ InfString.cc \
  IntArrayState.cc \
  IntState.cc \
  IntVecData.cc \
