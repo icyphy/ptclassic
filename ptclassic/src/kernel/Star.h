@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Block.h"
 class Galaxy;
 class Target;
+class Wormhole;
 
 	////////////////////////////////////
 	// class Star
@@ -85,6 +86,10 @@ public:
 	// class identification
 	/* virtual */ int isA(const char*) const;
 	/* virtual */ const char* className() const;
+
+        // If I am a wormhole, return a pointer to me as a wormhole.
+        // Return NULL if not.
+        virtual Wormhole* asWormhole();
 
 	// make a duplicate Star.  This will call Block::clone 
     	// and then set Star specific data members such as the
