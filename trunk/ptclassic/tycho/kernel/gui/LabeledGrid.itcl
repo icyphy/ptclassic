@@ -1,7 +1,7 @@
 #
-# Query
+# Labeledgrid
 # ----------------------------------------------------------------------
-# The Query class implements a grid of labeled widgets for user input,
+# The Labeledgrid class implements a grid of labeled widgets for user input,
 # such as entry fields, radiobuttons and checkbuttons, option menus, and
 # so on. It uses the Tk <b>grid</b> geometry manager to implement the 
 # principles of alignment and grid-based design described in the book
@@ -19,13 +19,13 @@
 # ----------------------------------------------------------------------
 #  AUTHOR: H. John Reekie              EMAIL: johnr@eecs.berkeley.edu
 #
-#  Based on the tycho::Query widget by Prof. Edward A. Lee of UC Berkeley.
-#  iwidgets::Query is a itk::Widget instead of an itk::Toplevel, and
+#  Based on the tycho::Labeledgrid widget by Prof. Edward A. Lee of UC Berkeley.
+#  iwidgets::Labeledgrid is a itk::Widget instead of an itk::Toplevel, and
 #  adds more structured grid placement, different display styles, and
 #  the facility to support arbitrary widget types. Original author is
 #  Prof. Edward A. Lee; additional contributions by Joel R. King,
 #  Bilung Lee, Christopher Hylands, Seehyun Kim, and Mark L. Ulferts.
-#  Query is contributed to [incr Widgets] by the Tycho project at UC
+#  Labeledgrid is contributed to [incr Widgets] by the Tycho project at UC
 #  Berkeley: http://ptolemy.eecs.berkeley.edu/tycho.
 #
 #  $Id$
@@ -60,7 +60,7 @@
 #
 # Usual options.
 #
-itk::usual Query {
+itk::usual Labeledgrid {
     keep -font -background -cursor
 }
 
@@ -68,7 +68,7 @@ itk::usual Query {
 ##                            QUERY
 # ------------------------------------------------------------------
 #
-# The Query class implements a grid of labeled widgets for user input,
+# The Labeledgrid class implements a grid of labeled widgets for user input,
 # such as entry fields, radiobuttons and checkbuttons, option menus, and
 # so on. It uses the Tk <b>grid</b> geometry manager to implement the 
 # principles of alignment and grid-based design described in the book
@@ -80,11 +80,11 @@ itk::usual Query {
 # into one, two, three, four, or six columns. The layout within each
 # window uses different combinations of these columns to produce a
 # pleasing and readable layout. Mullet and Sano's examples generally
-# use the left column for labels -- Query supports this as its default
+# use the left column for labels -- Labeledgrid supports this as its default
 # mode, but also adds other display styles, such as labeled bounding
 # boxes.
 #
-# Query views a grid as being divided into groups, where each group
+# Labeledgrid views a grid as being divided into groups, where each group
 # contains labeled widgets, or other groups. All widgets are
 # placed into the same layout grid, however, ensuring that alignment is
 # achieved even between logical groups. Groups can be contained within
@@ -108,7 +108,7 @@ itk::usual Query {
 # the defaullt column span of children; the option can be overridden
 # when a particular child is created.
 #
-# One of the unique features of Query is its ability to perform
+# One of the unique features of Labeledgrid is its ability to perform
 # standard operations on widgets regardless of what type they are.
 # The operations are: setting the current value, reading the current
 # value, enabling and disabling user input, and creating and deleting
@@ -116,16 +116,16 @@ itk::usual Query {
 # client programs, and relieves them of any need to understand
 # particular widgets.
 #
-# Query provides a useful set of widgets for placing into a layout,
+# Labeledgrid provides a useful set of widgets for placing into a layout,
 # including entry and text fields, radio buttons and check buttons,
 # and option menus. However, since the number of different kinds of
-# widget that could be placed into a Query window is potentially
+# widget that could be placed into a Labeledgrid window is potentially
 # unlimited, the <b>newtype</b> procedure is provided so that new
-# widget types can be added to Query's collection of known widget types.
+# widget types can be added to Labeledgrid's collection of known widget types.
 #
 # <h3>Item types</h3>
 #
-# By default, Query recognises the following widget types:
+# By default, Labeledgrid recognises the following widget types:
 #
 # <dl>
 # <dt><b>entry</b>
@@ -148,13 +148,13 @@ itk::usual Query {
 #
 # <dt><b>_type_</b>
 # <dd>
-# A widget of some other type. New types can be added to the Query
+# A widget of some other type. New types can be added to the Labeledgrid
 # class with the <b>newtype</b> procedure, and can then be created
 # in the same way as the built-in item types.
 #
 # </dl>
 #
-# Widgets are added to Query with the <b>add</b> method. This method
+# Widgets are added to Labeledgrid with the <b>add</b> method. This method
 # accepts any options that are valid for the particular widget type,
 # and the following:
 #
@@ -185,7 +185,7 @@ itk::usual Query {
 #
 # <h3>Item groups</h3>
 #
-# A new group of items is added to Query with the <b>group</b> method.
+# A new group of items is added to Labeledgrid with the <b>group</b> method.
 # Groups accept many of the same options as regular items, and can
 # have labels and bounding boxes. Items within a group have hierarchical
 # tags; for example, the item <code>foo.bar</code> is within the group
@@ -253,11 +253,11 @@ itk::usual Query {
 #
 # <h3>Adding new types</h3>
 #
-# Query provides a mechanism for defining new item types. For each
+# Labeledgrid provides a mechanism for defining new item types. For each
 # of the operations it supports on its items, it has a small script
 # that it evaluates to perform this action. These scripts are added
-# to the Query class with the <b>newtype</b> procedure, which accepts
-# a number of options that specify the scripts that Query evaluates
+# to the Labeledgrid class with the <b>newtype</b> procedure, which accepts
+# a number of options that specify the scripts that Labeledgrid evaluates
 # to perform operations on items of the new type. These options are:
 # <dl>
 # <dt><b>-assign</b>
@@ -285,22 +285,22 @@ itk::usual Query {
 # <dd> The default "stickiness" of widget of thos type.
 # </dl>
 #
-# Before evaluating a script, Query performs the following
+# Before evaluating a script, Labeledgrid performs the following
 # substitutions:
 # <ul>
 # <li><code>%a</code> is substituted with additional arguments.
 # <li><code>%t</code> is substituted with the item tag.
 # <li><code>%v</code> is substituted with the control variable.
 # <li><code>%w</code> is substituted with the widget path.
-# <li><code>%Q</code> is substituted with the Query widget.
+# <li><code>%Q</code> is substituted with the Labeledgrid widget.
 # </ul>
 #
 # <h3>Display styles</h3>
 #
-# Query supports several display styles. A display style is simply
+# Labeledgrid supports several display styles. A display style is simply
 # a combination of label position and item border. Different display
 # styles can be mixed, although this should of course be done with care
-# and there are some caveats (note that the default behaviour of Query
+# and there are some caveats (note that the default behaviour of Labeledgrid
 # is to use the same display style for every item within a group.)
 # Depending on the style, zero or more rows or columns of the grid
 # may be used, in addition to the rows and columns required to display
@@ -339,13 +339,13 @@ itk::usual Query {
 # left of the item for spacing.
 # </dl>
 #
-# The default behavior of Query is to give top-level items the
+# The default behavior of Labeledgrid is to give top-level items the
 # <b>simple</b> style, and items within those the <b>plain</b>
 # style -- plain and simple...
 #
 # <h3>Caveats</h3>
 #
-# Query is designed to make it easy to construct designed
+# Labeledgrid is designed to make it easy to construct designed
 # layouts. It provides no support for changing an existing layout.
 # Although layouts can be moved around by directly calling the Tk
 # <b>grid</b> command, this is unlikely to be very reliable.
@@ -359,7 +359,7 @@ itk::usual Query {
 # needs to be taken to avoid placing items within the same column (for
 # example) as a border in another part of the layout.
 # ------------------------------------------------------------------
-class iwidgets::Query {
+class iwidgets::Labeledgrid {
     inherit itk::Widget
     
     constructor {args} {}
@@ -493,20 +493,20 @@ class iwidgets::Query {
 #
 # Use option database to override default resources.
 #
-# option add *Query.thickness 3 widgetDefault ???
+# option add *Labeledgrid.thickness 3 widgetDefault ???
 
 #
-# Provide a lowercase access method for the Query class.
+# Provide a lowercase access method for the Labeledgrid class.
 #
-proc ::iwidgets::query { path args } {
+proc ::iwidgets::labeledgrid { path args } {
     # Create widget
-    uplevel ::iwidgets::Query $path $args
+    uplevel ::iwidgets::Labeledgrid $path $args
 }
 
 # ------------------------------------------------------------------
 ##                        CONSTRUCTOR
 # ------------------------------------------------------------------
-body iwidgets::Query::constructor {args} {
+body iwidgets::Labeledgrid::constructor {args} {
     set _row() 0
     set _col() 0
     set _currow() 0
@@ -531,7 +531,7 @@ body iwidgets::Query::constructor {args} {
 # this option only affects the layout of items subsequently added
 # to the grid, not of items already added.
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::columnspan {
+configbody iwidgets::Labeledgrid::columnspan {
     set _columnspan() $itk_option(-columnspan)
     set _nextcol() $itk_option(-columnspan)
     set _lastcol() $itk_option(-columnspan)
@@ -545,7 +545,7 @@ configbody iwidgets::Query::columnspan {
 # Changing this option only affects the default column span of
 # items subsequently added to the grid, not of items already added. 
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::childspan {
+configbody iwidgets::Labeledgrid::childspan {
     set _childspan() $itk_option(-childspan)
 }
 
@@ -554,7 +554,7 @@ configbody iwidgets::Query::childspan {
 #
 # The default style of top-level items. The default is "simple".
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::childstyle {
+configbody iwidgets::Labeledgrid::childstyle {
     set _childstyle() $itk_option(-childstyle)
 }
 
@@ -568,7 +568,7 @@ configbody iwidgets::Query::childstyle {
 # by calling the <b>grid configure</b>command with the Tk widget
 # path as argument.
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::labelanchor {
+configbody iwidgets::Labeledgrid::labelanchor {
 }
 
 # ----------------------------------------------------------------------
@@ -576,7 +576,7 @@ configbody iwidgets::Query::labelanchor {
 #
 # The foreground color of the text labels.
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::labelcolor {
+configbody iwidgets::Labeledgrid::labelcolor {
 }
 
 # ----------------------------------------------------------------------
@@ -584,7 +584,7 @@ configbody iwidgets::Query::labelcolor {
 #
 # The font of the text labels.
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::labelfont {
+configbody iwidgets::Labeledgrid::labelfont {
 }
 
 # ----------------------------------------------------------------------
@@ -594,7 +594,7 @@ configbody iwidgets::Query::labelfont {
 # are gridded with the <b>-padx</b> option to the Tk <b>grid</b> command
 # set to this value.
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::padx {
+configbody iwidgets::Labeledgrid::padx {
     foreach slave [grid slaves $itk_interior] {
 	if { [grid info $slave -padx] != $itk_option(-padx) } {
 	    grid configure $slave -padx $itk_option(-padx)
@@ -609,7 +609,7 @@ configbody iwidgets::Query::padx {
 # are gridded with the <b>-pady</b> option to the Tk <b>grid</b> command
 # set to this value.
 # ----------------------------------------------------------------------
-configbody iwidgets::Query::pady {
+configbody iwidgets::Labeledgrid::pady {
     foreach slave [grid slaves $itk_interior] {
 	if { [grid info $slave -pady] != $itk_option(-pady) } {
 	    grid configure $slave -pady $itk_option(-pady)
@@ -635,7 +635,7 @@ configbody iwidgets::Query::pady {
 # hold its value, which can be accessed within control scripts
 # as *%v*.
 # ------------------------------------------------------------------
-body iwidgets::Query::add {type tag args} {
+body iwidgets::Labeledgrid::add {type tag args} {
     if [::info exists _layout($tag)] {
 	error "Item already exists: \"$tag\""
     }
@@ -710,7 +710,7 @@ body iwidgets::Query::add {type tag args} {
 # assignment is not supported, raise an error. Raise an error if
 # _tag_ does not exist.
 # ------------------------------------------------------------------
-body iwidgets::Query::assign {tag value} {
+body iwidgets::Labeledgrid::assign {tag value} {
     if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
@@ -724,7 +724,7 @@ body iwidgets::Query::assign {tag value} {
 # will also be deleted. Raise an error if _tag_ does not exist,
 # or if deletion is not supported for its type.
 # ------------------------------------------------------------------
-body iwidgets::Query::delete {tag} {
+body iwidgets::Labeledgrid::delete {tag} {
     if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
@@ -756,7 +756,7 @@ body iwidgets::Query::delete {tag} {
 # Disable an item. If the item is a group, all members of the group
 # will also be disabled. Raise an error if _tag_ does not exist.
 # ------------------------------------------------------------------
-body iwidgets::Query::disable {tag} {
+body iwidgets::Labeledgrid::disable {tag} {
     if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
@@ -769,7 +769,7 @@ body iwidgets::Query::disable {tag} {
 # Enable an item. If the item is a group, all members of the group
 # will also be enabled. Raise an error if _tag_ does not exist.
 # ------------------------------------------------------------------
-body iwidgets::Query::enable {tag} {
+body iwidgets::Labeledgrid::enable {tag} {
     if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
@@ -779,10 +779,10 @@ body iwidgets::Query::enable {tag} {
 # ------------------------------------------------------------------
 ## METHOD: exists tag
 #
-# Return one if _tag_ is an item in this Query widget, otherwise
+# Return one if _tag_ is an item in this Labeledgrid widget, otherwise
 # zero.
 # ------------------------------------------------------------------
-body iwidgets::Query::exists {tag} {
+body iwidgets::Labeledgrid::exists {tag} {
     ::info exists _type($tag)]
 }
 
@@ -798,7 +798,7 @@ body iwidgets::Query::exists {tag} {
 # all top-level items. Raise an error if _tag_ is supplied but is not
 # an item.
 # ------------------------------------------------------------------
-body iwidgets::Query::get {{tag {}}} {
+body iwidgets::Labeledgrid::get {{tag {}}} {
     if { $tag != "" } {
         return [eval [_getcmd get $tag]]
     } else {
@@ -819,7 +819,7 @@ body iwidgets::Query::get {{tag {}}} {
 # Add a group. Options are as described in <i>Item Groups</i> above.
 # Raise an error if an item with that tag already exists.
 # ------------------------------------------------------------------
-body iwidgets::Query::group {tag args} {
+body iwidgets::Labeledgrid::group {tag args} {
     if [::info exists _layout($tag)] {
 	error "Item already exists: \"$tag\""
     }
@@ -886,7 +886,7 @@ body iwidgets::Query::group {tag args} {
 # current column counter past the end of the group, call <b>vskip</b>
 # to move to the next row. 
 # ------------------------------------------------------------------
-body iwidgets::Query::hskip {{tag {}} args} {
+body iwidgets::Labeledgrid::hskip {{tag {}} args} {
     if { [llength $args] & 1 } {
 	set args [concat $tag $args]
 	set tag _
@@ -915,7 +915,7 @@ body iwidgets::Query::hskip {{tag {}} args} {
 # Get an option of an item. The options can be any that can be specified
 # to <b>add</b> or <b>group</b>. Raise an error if _tag_ does not exist.
 # ------------------------------------------------------------------
-body iwidgets::Query::itemcget {tag option} {
+body iwidgets::Labeledgrid::itemcget {tag option} {
     if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
@@ -939,7 +939,7 @@ body iwidgets::Query::itemcget {tag option} {
 # If more arguments are supplied, each option is set to the specified
 # value.
 #
-# Because Query does not support re-arrangement of the layout, some
+# Because Labeledgrid does not support re-arrangement of the layout, some
 # options cannot be specified. For widgets, these are <b>-columnspan</b>,
 # <b>-initial</b>, and <b>-style</b>. For groups, these are
 # <b>-column</b>, <b>-columnspan</b>,
@@ -948,7 +948,7 @@ body iwidgets::Query::itemcget {tag option} {
 # <b>-childspan</b> options affect only subsequently-created
 # items.
 # ------------------------------------------------------------------
-body iwidgets::Query::itemconfigure {tag {option {}} args} {
+body iwidgets::Labeledgrid::itemconfigure {tag {option {}} args} {
     if ![::info exists _type($tag)] {
 	error "Unknown tag: \"$tag\""
     }
@@ -998,7 +998,7 @@ body iwidgets::Query::itemconfigure {tag {option {}} args} {
 # with the largest row span, and the current column counter reset
 # to the start column of the group.
 # ------------------------------------------------------------------
-body iwidgets::Query::vskip {{tag {}} args} {
+body iwidgets::Labeledgrid::vskip {{tag {}} args} {
     if { [llength $args] & 1 } {
 	set args [concat $tag $args]
 	set tag _
@@ -1044,7 +1044,7 @@ body iwidgets::Query::vskip {{tag {}} args} {
 # <li><i>_rowspan($tag)</i> is the height including borders
 # </ul>
 # ------------------------------------------------------------------
-body iwidgets::Query::_drawitem {tag style label \
+body iwidgets::Labeledgrid::_drawitem {tag style label \
 	col row colspan rowspan {path {}} {sticky {}}} {
     set delta 0
     switch -exact $style {
@@ -1197,7 +1197,7 @@ body iwidgets::Query::_drawitem {tag style label \
 # <b>enable</b>, <b>delete</b>, <b>disable</b>, or <b>create</b>.
 # The _tag_ argument is the item to evaluate the command on.
 # ------------------------------------------------------------------
-body iwidgets::Query::_getcmd {mode tag args} {
+body iwidgets::Labeledgrid::_getcmd {mode tag args} {
     set command [set _[set mode]($_type($tag))]
     if { $command != "" } {
         if [::info exists itk_component($tag)] {
@@ -1217,7 +1217,7 @@ body iwidgets::Query::_getcmd {mode tag args} {
 # Access a group. The mode is assign, delete, disable, enable,
 # or get.
 # ------------------------------------------------------------------
-body iwidgets::Query::_group {mode tag args} {
+body iwidgets::Labeledgrid::_group {mode tag args} {
     switch -exact $mode {
 	"assign" {
 	    if [::info exists [scope $tag$unique]] {
@@ -1275,12 +1275,12 @@ body iwidgets::Query::_group {mode tag args} {
 # ------------------------------------------------------------------
 ## PROCEDURE: newtype type ?option value?
 #
-# Add a new item type to the Query class. Following arguments are
+# Add a new item type to the Labeledgrid class. Following arguments are
 # an option-value list, where legal options are as described in
 # <i>Control Scripts</i> above. Raise an error if the _type_ already
 # exists, or if an invalid option is specified.
 # ------------------------------------------------------------------
-body iwidgets::Query::newtype {type args} {
+body iwidgets::Labeledgrid::newtype {type args} {
     if { [lsearch -exact $_knowntypes $type] != -1 } {
 	error "Type \"$type\" is already defined"
     }
