@@ -42,8 +42,9 @@ include $(CONFIG)
 # Include path
 CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
 SDFKERNEL = 	$(ROOT)/src/domains/sdf/kernel
+PIGILIB = 	$(ROOT)/src/pigilib
 
-INCL =		-I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR)
+INCL =		-I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(PIGILIB) $(PTCOMPAT_INCSPEC)
 
 # Library name
 LIB=libacs.$(LIBSUFFIX)
@@ -57,6 +58,8 @@ HDRS= \
 	ACSStar.h \
 	ACSTarget.h \
 	ACSWormhole.h \
+	ACSKnownCategory.h \
+	ACSFPSimCore.h \
 	# ACSGeodesic.h
 
 # Library sources

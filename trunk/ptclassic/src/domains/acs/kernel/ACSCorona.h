@@ -40,11 +40,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ACSStar.h"
 #include "DataStruct.h"
 #include "ACSCore.h"
+#include "ACSKnownCategory.h"
 
 class ACSCore;
 
-class ACSCorona : public ACSStar {
+class ACSCorona : public ACSStar {	
 public:
+
+	// Default constructor initializes init core flag to zero ( no cores ).
+	ACSCorona::ACSCorona() : initCoreFlag(0) { }
+
+	// This is a constructor with init core flag as argument.
+	ACSCorona::ACSCorona(int initCoreFlag_) : initCoreFlag(initCoreFlag_) { }
+	// constructor needs to know where to look for core sources.
+	virtual const char* getSrcDirectory() const = 0;
+
+	// constructor needs a method to construct cores and add them
+	// to the coreList.
+	void addCores();
 
         // my domain
         const char* domain() const;
@@ -52,16 +65,28 @@ public:
         // class identification
         int isA(const char*) const;
 
-	// select ACSCore to be used
+	// select ACSCore to be used by target
 	int setCore(const char*);
 
 	// register ACSCore in list
 	static int registerCore(ACSCore &, const char*);
 
+	// get available Core Categories
+	StringList getCoreCategories() { 
+		return ACSKnownCategory::Categories();
+	}
+
 protected:
 
+	// List of availabel cores
         SequentialList coreList;
 
+	// Core used in current run ( FIXME: could be a list also ).
 	ACSCore *currentCore;
+
+	// Flag used to indicate if coreList needs to be constructed.
+	int initCoreFlag;
+
+
 };
 #endif //_ACSCorona_h

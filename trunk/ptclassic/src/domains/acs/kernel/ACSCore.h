@@ -46,7 +46,19 @@ class ACSCore : public ACSStar {
 public:
 
         // constructor takes a reference to a Corona
-        ACSCore(ACSCorona &, const char *);
+        ACSCore(ACSCorona &, const char*);
+
+	// constructor without Corona reference for use by
+	// derrived core class default constructors.
+	ACSCore(const char*);
+
+	// virtual makeNew( ACSCorona & ) defined by each core
+	// and used by Corona to build core list.
+	virtual ACSCore* makeNew( ACSCorona & ) const = 0;
+
+	// get core category defined in the base core class
+	// of each category.
+	const char* getCategory() const { return category; }
 
         // my domain
         const char* domain() const;
@@ -57,16 +69,28 @@ public:
 	// pure virtual
 	void go() = 0;
 
+	// adds state to Corona states list
+	// a rather odd compile problem without
+	// the cast to ACSStar& ( addState actually
+	// defined in Block.h ).
+	inline void addState(State& s) {
+		((ACSStar&)corona).addState(s);
+		ACSStar::addState(s);
+	}
+
 protected:
 
 	// returns reference to the core's corona
 	inline ACSCorona & getCorona() const { return corona; };
 
-        const char *category;
+	// category string determines core base class, implementation, etc..
+	const char *category;
+
 
 private:
 
-        ACSCorona & corona;
+	// Corona interfaces core to galaxy, contains ports, parameters.
+       	ACSCorona & corona;
 
 };
 #endif //_ACSCore_h
