@@ -124,7 +124,7 @@ body ::tycho::CompileJava::destructor {} {
         delete object $compileWidget
     }
     if {$appletviewerWidget != {} && \
-            [info object ::tycho::$appletviewerWidget] !op= {}} {
+            [info object ::tycho::$appletviewerWidget] != {}} {
         delete object $appletviewerWidget
     }
 }
