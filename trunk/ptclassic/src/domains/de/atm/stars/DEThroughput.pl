@@ -119,7 +119,7 @@ lines considered as a whole.  (Packets are of type
 		    iport->get().getMessage(inEnv);
 		    v = (const VoiceData*) inEnv.myData();
 
-		    // update totals as appropiate depending on whether this
+		    // update totals as appropriate depending on whether this
 		    // packet is null or not
 			
 		    if (v -> nulltestMessage()) {

@@ -64,7 +64,7 @@ stars.
                name {numVci}
                type {int}
                default {"1"}
-               desc { VCI of associated telephpne }
+               desc { VCI of associated telephone }
        }
 
        ccinclude { "VoiceData.h" }

@@ -174,8 +174,8 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                     else {
                   
 			//  received a token on the "feedback"port caused by a
-			//  call to refire this star, transmit a packet with appropiate
-			//  header information
+			//  call to refire this star, transmit a packet with
+			//  appropriate header information
                         LOG_NEW; VoiceData*  w2 = new VoiceData();
                         unsigned char*  ptz = w2->asVoice();
                         ptz[0] = vpi;  ptz[2] = vciSrc;  ptz[3] = vciDst;
