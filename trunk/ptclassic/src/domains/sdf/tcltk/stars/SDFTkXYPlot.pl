@@ -11,7 +11,7 @@ There are also buttons for zooming in and out, and for
 resizing the box to just fit the data in view.
 	}
 	version { $Id$ }
-	author { Wei-Jen Huang, E. A. Lee, and D. Niehaus }
+	author { Wei-Jen Huang, Edward A. Lee, and Douglas Niehaus }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -89,7 +89,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 	  XYPlot xyplot;
-	  InfString labCopy, geoCopy, xtCopy, ytCopy;
+	  char *labCopy;
+	  char *geoCopy;
+	  char *xtCopy;
+	  char *ytCopy;
 	}
 
 	// The private method "validRange" takes one argument: a float
@@ -118,9 +121,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    if (range[0] >= range[1]) {
 	      StringList msg;
 	      msg << "The first number in the float array state \""
-	        << range.name() << "\" should be less than the second, "
-		<< "but they are " << range[0] << " and " << range[1]
-	        << ", respectively."; 
+	          << range.name() << "\" should be less than the second, "
+		  << "but they are " << range[0] << " and " << range[1]
+	          << ", respectively."; 
 	      Error::abortRun(*this, msg);
 	      return FALSE;
 	    }
@@ -128,40 +131,57 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 	}
 
-	begin {
-	  // Need to make non-const copies of strings to
-	  // avoid compilation warnings
-	  labCopy = (const char*)label;
-	  geoCopy = (const char*)geometry;
-	  xtCopy = (const char*)xTitle;
-	  ytCopy = (const char*)yTitle;
+	constructor {
+	  labCopy = geoCopy = xtCopy = ytCopy = 0;
+	}
 
+	setup {
 	  // Check for valid x and y ranges.  They should each be a
 	  // float array with the two elements, with the first element
 	  // being less than the second.
 	  if (!validRange(xRange)) return;
 	  if (!validRange(yRange)) return;
+	}
+
+	destructor {
+	  delete [] labCopy;
+	  delete [] geoCopy;
+	  delete [] xtCopy;
+	  delete [] ytCopy;
+	}
+
+	begin {
+	  // Need to make non-const copies of strings to
+	  // avoid compilation warnings
+	  delete [] labCopy;
+	  labCopy = savestring( (const char*)label );
+	  delete [] geoCopy;
+	  geoCopy = savestring( (const char*)geometry );
+	  delete [] xtCopy;
+	  xtCopy = savestring( (const char*)xTitle );
+	  delete [] ytCopy;
+	  ytCopy = savestring( (const char*)yTitle );
 
 	  int plotstyle = 0;
-	  if (strcmp(style,"connect") == 0) plotstyle = 1;
+	  if (strcmp(style, "connect") == 0) plotstyle = 1;
 
 	  // create the XYplot window labeling, scaling,
 	  // and ranging as specified by the parameters
-	  xyplot.setup(this,	   
-		       (char*)  labCopy,     // Label for the XY plot
-		       (int)    persistence, // The number of data points to retain
-		       (int)    updateSize,  // The number of data points between refreshes
-		       (char*)  geoCopy,     // Geometry for the window
-		       (char*)  xtCopy,      // Title for X-axis
-		                xRange[0],   // minimum X range value
-		                xRange[1],   // maximum X range value
-		       (char*)  ytCopy,      // Title for Y-axis
-		                yRange[0],   // minimum Y range value
-		                yRange[1],   // maximum Y range value
-		                Y.numberPorts(),   // The number of data sets
-		       (int)    plotstyle);  // the plot style to use
-
+	  xyplot.setup(		this,
+		       		labCopy,     // label for XY plot
+			(int)	persistence, // number data points to retain
+			(int)	updateSize,  // number data points between refreshes
+				geoCopy,     // geometry for the window
+				xtCopy,      // title for X-axis
+				xRange[0],   // minimum X range value
+				xRange[1],   // maximum X range value
+				ytCopy,      // title for Y-axis
+				yRange[0],   // minimum Y range value
+				yRange[1],   // maximum Y range value
+				Y.numberPorts(),   // number of data sets
+			(int)	plotstyle);  // plot style to use
 	}
+
 	go {
 	  MPHIter nextx(X), nexty(Y);
 	  PortHole *px, *py = (PortHole *)NULL;
