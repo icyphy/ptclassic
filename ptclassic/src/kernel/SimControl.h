@@ -3,6 +3,9 @@
 #ifdef __GNUG__
 #pragma interface
 #endif
+
+// Needed as "volatile" not defined for all compilers
+#include "compat.h" 
 /**************************************************************************
 Version identification:
 $Id$
@@ -53,7 +56,6 @@ and when the flag bits are checked.  It can be used as an X event loop,
 for example.  Polling functionality completed by Alan Kamas.  1/95
 
 **************************************************************************/
-
 
 class Star;
 class SimAction;
@@ -146,11 +148,12 @@ private:
 	static int nPre, nPost;
 
 	// system status flags
-	static volatile unsigned int flags;
+	static VOLATILE unsigned int flags;
+
 	// polling status flag.  NOTE: This is a separate flag from "flags" 
 	// to avoid any possible race conditions.  It is int to make sure
 	// that it is atomic.
-	static volatile int pollflag;
+	static VOLATILE int pollflag;
 	// PtGate for controlling threaded access to flags
 	static PtGate* gate;
 
