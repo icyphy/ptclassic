@@ -1,7 +1,7 @@
 /* $Id$ */ 
 /* contains the translation between the DSP pins and the values received
  * over the socket. 
- */
+ *
  * contains the translation for constructing the corresponding pin map 
  * array for use by sim56000.  This is used to
  * tranlate between the order in which ThorDSP56000 wants to send and
