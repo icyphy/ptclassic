@@ -136,13 +136,28 @@ upper right of most Tycho windows and then clicking on
 For reference, we list the <CODE>javadoc</CODE> tags below:
 <DL>
 <DT> <CODE>@see <I>classname</I></CODE>
-<DD> 
+<DD>  <CODE>javadoc</CODE> will not create links in the html
+output for the <CODE>@see</CODE> tags unless <CODE>javadoc</CODE>
+is passed both the file that contains the <CODE>@see</CODE> and the 
+file that is refered to.
+ <br>
+For example, if your class <CODE><I>Foo.java</I></CODE> uses
+<CODE>@see <I>Bar.java</I></CODE>, then you must run <CODE>javadoc
+Foo.java Bar.java</CODE>.
 
-<DT> <CODE>@see <I>full-classname</I></CODE>
-<DD> 
 
-<DT> <CODE>@see <I>full-classname</I>#<I>method-name</I> </CODE><DT> 
-<DD> 
+<DT> <CODE>@see <I>full.classname</I></CODE>
+<DD>
+
+<DT> <CODE>@see <I>full.classname</I>#<I>method-name</I> </CODE>
+<DD>
+
+<DT> <CODE>@see <I>full.classname</I>#<I>method-name(first.arg.type, second.arg.type)</I> </CODE>
+<DD> White space is significant here, there must be a single space
+between the arguments
+
+<DT> <CODE>@see <I>&lt; a href="myfile.html"&gt;My File&lt;/a&gt;</I></CODE>
+<DD>
 
 <DT> <CODE>@version <I>text</I></CODE>
 <DD> The <CODE>@version</CODE> tag may only be used before a class
