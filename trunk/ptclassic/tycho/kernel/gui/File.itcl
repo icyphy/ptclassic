@@ -1167,7 +1167,7 @@ body ::tycho::File::windowMenuRemoveAll {label} {
 # exists and is a File object, and if so, call its autoSave method.
 #
 body ::tycho::File::callAutoSave {obj} {
-    if {[info objects $obj] != "" && [$obj isa ::tycho::File]} {
+    if {[infoObjects $obj] != "" && [$obj isa ::tycho::File]} {
 	$obj autoSave
     }
 }
@@ -1296,7 +1296,7 @@ body ::tycho::File::openWin {{megawidget {}}} {
         if { $mw != "" } {
             set megawidget $mw
         }
-        set megawidget [winfo command $megawidget]
+        set megawidget [winfoCommand $megawidget]
     }
     if { $megawidget == {} || [$megawidget isa ::tycho::File] != 1} {
         ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
