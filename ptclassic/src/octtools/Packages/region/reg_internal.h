@@ -1,7 +1,7 @@
 /* Version Identification:
  * $Id$
  */
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -37,6 +37,7 @@
 
 #include "copyright.h"
 #include "port.h"
+#include "utility.h"
 
 #define MAX_ERR_SIZE	2048
 extern char _reg_error[];
@@ -79,9 +80,14 @@ extern char *reg_fault();
    (type *) _reg_mem : (type *) reg_fault(REG_MEM))
 
 #define REG_REALLOC(type, ptr, newcount) \
+((_reg_mem = (char *) (REALLOC(type, (ptr), (newcount)))) ? \
+ (type *) _reg_mem : (type *) reg_fault(REG_MEM))
+
+#ifdef NEVER
+#define REG_REALLOC(type, ptr, newcount) \
   ((_reg_mem = realloc((char *) ptr, (unsigned) (sizeof(type) * (newcount)))) ? \
    (type *) _reg_mem : (type *) reg_fault(REG_MEM))
-
+#endif
 #define REG_FREE(ptr)	free((char *) ptr)
 
 #define REG2STR		(void) sprintf
