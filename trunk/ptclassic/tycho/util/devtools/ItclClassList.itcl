@@ -125,7 +125,7 @@ body ::tycho::ItclClassList::browseClassDiagram {} {
 body ::tycho::ItclClassList::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO editors textedit doc usersGuides \
+	    [file join $TYCHO edit textedit doc usersGuides \
             ItclClassListHelp.html]
 }
 
@@ -178,13 +178,17 @@ body ::tycho::ItclClassList::includeTychoClasses {} {
     # If you update this list, update
     # $TYCHO/kernel/tychoMakeClassDAG.tcl
     set dirs [list \
-            kernel \
-            [file join editors textedit] \
-            [file join editors visedit] \
-            [file join editors slate] \
+            [file join kernel basic] \
+            [file join kernel html] \
+            [file join kernel model] \
+            [file join kernel gui] \
+            [file join edit textedit] \
+            [file join edit visedit] \
+            [file join edit slate] \
+            [file join util devtools] \
+            [file join util tydoc] \
             [file join typt editors ] \
             [file join typt kernel ] \
-            [file join lib tydoc ] \
             [file join lib util ] \
             [file join lib widgets ] \
     ]

@@ -240,15 +240,19 @@ proc tychoStandardDAG {} {
     # If you update this list, update
     # $TYCHO/editors/textedit/ItclClassList.itcl too.
     set dirs [list \
-            kernel \
-            [file join editors textedit] \
-            [file join editors visedit] \
-            [file join editors slate] \
+            [file join kernel basic] \
+            [file join kernel html] \
+            [file join kernel model] \
+            [file join kernel gui] \
+            [file join edit textedit] \
+            [file join edit visedit] \
+            [file join edit slate] \
+            [file join util devtools] \
+            [file join util tydoc] \
             [file join typt editors ] \
             [file join typt kernel ] \
             [file join typt controls ] \
-            [file join lib idx ] \
-            [file join lib tydoc ]
+            [file join lib idx ]
     ]
 
     foreach dir $dirs {
