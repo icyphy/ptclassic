@@ -115,6 +115,9 @@ install: all subinstall
 
 .PHONY: install all subinstall
 
+test_exec_msg:
+	@echo "This message is used to test the Exec class"
+
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
 
