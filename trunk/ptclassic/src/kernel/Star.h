@@ -71,6 +71,9 @@ public:
         // Return myself as a Cluster
         virtual Cluster* asCluster();
         virtual const Cluster* asCluster() const;
+
+	Cluster* parentCluster() { return prntCluster; }
+        void setParentCluster(Cluster* cluster) { prntCluster = cluster; }
     
 	// Return my indexValue.
 	int index() const { return indexValue;}
@@ -80,7 +83,7 @@ public:
 	int hasInternalState() { return inStateFlag; }
 
 	// constructor
-	Star() : indexValue(-1), inStateFlag(TRUE) {}
+	Star() : indexValue(-1), inStateFlag(TRUE), prntCluster(0) {}
 
 	// class identification
 	/* virtual */ int isA(const char*) const;
@@ -102,6 +105,7 @@ private:
 	int indexValue;
 	int inStateFlag; // indicate there are internal states (default)
 	friend setStarIndices(Galaxy&);
+        Cluster* prntCluster;
 };
 
 int setStarIndices(Galaxy&);
