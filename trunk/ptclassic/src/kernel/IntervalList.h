@@ -20,6 +20,10 @@ order, and there are always gaps between intervals.
 #ifndef _IntervalList_h
 #define _IntervalList_h 1
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 #include "type.h"
  
 class istream;
