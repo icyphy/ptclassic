@@ -435,7 +435,7 @@ DelayedMap(clientData)
  */
 
 void perror(s)
-const char *s;
+char *s;
 {
     errorReport(s);
 }
