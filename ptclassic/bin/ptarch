@@ -103,6 +103,10 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
  	echo nbsd.386 
  	exit 0 ;;
 
+    i[34]86:FreeBSD:*:*)
+ 	echo freebsd
+ 	exit 0 ;;
+
 esac
 
 #echo '(No uname command or uname output not recognized.)' 1>&2
