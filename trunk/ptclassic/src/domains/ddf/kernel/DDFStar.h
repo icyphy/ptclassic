@@ -17,8 +17,6 @@ $Id$
 #include "Star.h"
 #include "Particle.h"
 #include "Fraction.h"
-// next is included so SDFStar defns don't have to.
-#include "SDFConnect.h"
 #include "DDFConnect.h"
 
 	////////////////////////////////////
