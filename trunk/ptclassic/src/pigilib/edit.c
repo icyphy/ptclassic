@@ -41,6 +41,9 @@ $Id$
 #include "octIfc.h"
 #include "exec.h"
 
+#include "ptk.h"  /* Interpreter name, window name, etc.  aok */
+#include "handle.h"
+
 void FindClear();
 
 #define dmWidth 40
@@ -79,52 +82,10 @@ char* msg2;
     return(TRUE);
 }
 
-static boolean			   
-EditDelayParams(instPtr)
-octObject *instPtr;
-{
-    octObject delayProp;
+/* EditDelayParams no longer needed - aok */
+/* EditBusParams no longer needed - aok */
+/* EditSogParams no longer needed - aok */
 
-    GetOrInitDelayProp(instPtr, &delayProp);
-    return editBusOrDelay(&delayProp,"Number of delays","Edit Delay");
-}
-
-static boolean			   
-EditBusParams(instPtr)
-octObject *instPtr;
-{
-    octObject busProp;
-    GetOrInitBusProp(instPtr, &busProp);
-    return editBusOrDelay(&busProp,"Bus Width","Edit Bus Width");
-}
-
-static boolean EditParamList();
-
-/* EditSogParams  5/27/88
-Outputs: return = TRUE if no error.
-*/
-static boolean
-EditSogParams(instPtr)
-octObject *instPtr;
-{
-    ParamListType pList;
-
-/* set domain corresponding to the instance */
-    if (!setCurDomainInst(instPtr)) {
-	PrintErr("Invalid domain found");
-	return(FALSE);
-    }
-
-    ERR_IF1(!GetOrInitSogParams(instPtr, &pList));
-    if (pList.length == 0) {
-	PrintErr("Star or galaxy has no parameters");
-	return(TRUE);
-    }
-    if (EditParamList(&pList,"Edit Actual Parameters") == TRUE) {
-	    SetSogParams(instPtr, &pList);
-    }
-    return TRUE;
-}
 
 /* body of parameter-edit code.
 Returns 0 if there is an error.
@@ -171,6 +132,7 @@ char* dmTitle;
     return(TRUE);
 }
 
+/* EditFormalParameters is still needed for the RunUniverse command.  -aok */
 /* 4/14/89 3/19/89
 Edit the formal parameters of a galaxy schematic facet.
 Returns 0 if there is an error.
@@ -313,8 +275,10 @@ long userOptionWord;
     ViDone();
 }
 
+
 /* EditParams  5/27/88 4/24/88
 Edit parameters.
+Changed 9/93 to use the POct code and the TCL/Tk tools - aok
 */
 int 
 EditParams(spot, cmdList, userOptionWord) /* ARGSUSED */
@@ -324,7 +288,7 @@ long userOptionWord;
 {
     octObject facet, inst;
     vemStatus status;
-    boolean status2;
+    char facetHandle[16], instanceHandle[16];
 
     ViInit("edit-params");
     ErrClear();
@@ -334,6 +298,7 @@ long userOptionWord;
 	PrintErr(octErrorString());
     	ViDone();
     }
+    ptkOctObj2Handle(&facet,facetHandle);
 
     /* get name of instance under cursor */
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
@@ -342,30 +307,14 @@ long userOptionWord;
         ViDone();
     } else if (status != VEM_OK) {
 	/* cursor not over an instance... */
-	if (IsGalFacet(&facet) || IsUnivFacet(&facet)) {
-	    status2 = EditFormalParams(&facet);
-	} else {
-	    PrintErr("Cursor must be over an instance, galaxy, or universe schematic");
-	    ViDone();
-	}
+	strcpy (instanceHandle, "NIL");
     } else {
 	/* cursor is over some type of instance... */
-	if (IsDelay(&inst)) {
-	    status2 = EditDelayParams(&inst);
-	} else if (IsBus(&inst)) {
-	    status2 = EditBusParams(&inst);
-	} else if (IsGal(&inst) || IsStar(&inst)) {
-	    /* inst is a sog... */
-	    status2 = EditSogParams(&inst);
-	} else {
-	    PrintErr("Cursor must be over a star, galaxy, or delay instance");
-	    ViDone();
-	}
+	ptkOctObj2Handle(&inst,instanceHandle);
     }
-    if (!status2) {
-	PrintErr(ErrGet());
-	ViDone();
-    }
+
+    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditParams ", facetHandle, " ", instanceHandle, (char *)NULL) )
+
     ViDone();
 }
 
