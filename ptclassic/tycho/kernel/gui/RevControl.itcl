@@ -1,10 +1,10 @@
 # Definition of the class which handles revision control.
 #
-# Authors: Joel King and Edward A. Lee
+# @Authors: Joel King and Edward A. Lee
 #
-# Version: $Id$
+# @Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -83,7 +83,7 @@ class ::tycho::RevControl {
     # Return 1 if the given file is under revision control, 0 otherwise.
     proc isUnderRevControl {file} {return 0}
 
-    # Make a revision control of the specified type.
+    # Make a revision control object of the specified type.
     proc makeRev {type editorWin editorObj} {}
 
     # Setup revision control for an editor.
@@ -198,9 +198,10 @@ body ::tycho::RevControl::unedit {} {
 
 ###################################################################
 #### makeRev
-# Make a revision control.  The first argument is the type (SCCS, RCS, ...),
-# the second argument is the window name for the editor, and the third
-# argument is the editor object.
+# Make a revision control object of the specified type.
+# The first argument is the type (SCCS, RCS, ...),
+# the second argument is the window name for the editor, and
+# the third argument is the editor object.
 #
 body ::tycho::RevControl::makeRev {type editorWin editorObj} {
     # Create a revision control window
@@ -267,7 +268,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 
 ###################################################################
 #### enableButton
-# Enable one of "checkin" or "checkout" buttons.
+# Enable one of "checkin" or "checkout" buttons and make it the default.
 # The argument must be one of "checkin" or "checkout".
 # The other button is disabled.
 #
@@ -285,7 +286,7 @@ body ::tycho::RevControl::enableButton {button} {
 
 ###################################################################
 #### initializeRevControl 
-# Do various checks before placing file under revision control. 
+# Put the file under revision control.
 #
 body ::tycho::RevControl::initializeRevControl {} {
     if {$file == {}} {
@@ -298,7 +299,7 @@ body ::tycho::RevControl::initializeRevControl {} {
 
 #####################################################################
 #### cdDir
-# Change to the appropriate file directory, with error checks.
+# Change to the given directory with appropriate error checks.
 # 
 body ::tycho::RevControl::cdDir {dir} {
     if {[file isdirectory $dir] && [file executable $dir]} {

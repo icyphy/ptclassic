@@ -1,11 +1,11 @@
 # Definition of a basic window with a menu bar and dismiss button
 #
-# Author: Edward A. Lee
-# Contributors: Joel King
+# @Author: Edward A. Lee
+# @Contributors: Joel King
 #
-# Version: $Id$
+# @Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -97,12 +97,10 @@ class ::tycho::File {
     ##########################################################################
     ####                         public methods                           ####
 
-    # Query the user for a filename, then load its contents into the current
-    # editor.
+    # Query the user for a filename, insert it into the current editor.
     method altFile {}
 
-    # Query the user for a filename, then evaluate its contents as 
-    # Tcl commands. 
+    # Query the user for a filename, then evaluate its contents as Tcl commands
     method evaluate {}
 
     # Return the name of the file associated with the object.
@@ -114,7 +112,7 @@ class ::tycho::File {
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
-    # Insert data.
+    # Insert the specified data.
     method insertData {data}
 
     # Insert the contents of a file.
@@ -123,19 +121,17 @@ class ::tycho::File {
     # Mark the window as containing modified data.
     method markModified {}
 
-    # Mark the window as not containing modified data.
+    # Mark the window as containing unmodified data.
     method markUnmodified {}
-
-    # Check in a file using the selected revision control program command
-    # if the file is writable. Otherwise check the file out using the
-    # specified revision control program command. 
-    method revisionControl {}
 
     # Print the contents of the file. The default behavior is an error.
     method print {}
 
     # Reload the previously saved file.  The default behavior is an error.
     method reload {}
+
+    # Create a revision control object for the current file.  
+    method revisionControl {}
 
     # Save to a given filename, or if none is given, to the name given by
     # the file variable.
@@ -157,7 +153,7 @@ class ::tycho::File {
     # Append a file editor to the window menu.
     method windowMenuAppend {obj label}
 
-    # Remove a filename from the window menu.
+    # Remove the name of an open file from the Window menu.
     method windowMenuRemove {filename}
 
     ##########################################################################
@@ -217,7 +213,7 @@ class ::tycho::File {
     ##########################################################################
     ####                  protected methods and procedures                ####
 
-    # Add an entry to the window menu.
+    # Add the specified file to the window menu entry.
     protected method addWindowMenuEditor {desc command}
 
     # Save a backup file and arrange to be called again later.
@@ -226,7 +222,7 @@ class ::tycho::File {
     # Check for auto-save or crash-recovery files, and return the file to open.
     protected proc checkForAutoSaveFiles {filename} {}
 
-    # Remove auto-save and crash-recovery files, if they exist.
+    # Remove the backup file that gets automatically created periodically.
     protected method removeBackupFiles {}
 
     ##########################################################################
@@ -660,6 +656,7 @@ body ::tycho::File::insertData {data} {
 
 #####################################################################
 #### insertFile
+# Insert the contents of a file.
 # Open a file browser to query the user for a filename, and then
 # insert the contents of that file at the insertion cursor.
 #
@@ -695,7 +692,7 @@ body ::tycho::File::markUnmodified {} {
 
 #####################################################################
 #### print
-# Print the data.  The default behavior is an error.
+# Print the contents of the file. The default behavior is an error.
 #
 body ::tycho::File::print {} {
     error "Sorry, print not implemented yet."
@@ -703,7 +700,7 @@ body ::tycho::File::print {} {
 
 #####################################################################
 #### reload
-# Reload the current file.
+# Reload the previously saved file.  The default behavior is an error.
 #
 body ::tycho::File::reload {} {
     error "Sorry, reload not implemented yet."
@@ -711,8 +708,9 @@ body ::tycho::File::reload {} {
 
 ###################################################################
 #### revisionControl
-# Create a revision control object for the current file.  
-#
+# Check in a file using the selected revision control program command
+# if the file is writable. Otherwise check the file out using the
+# specified revision control program command. 
 body ::tycho::File::revisionControl {} {
     ::tycho::RevControl::setup $itk_component(hull) $this
 }
@@ -799,8 +797,9 @@ body ::tycho::File::saveAsFile {filename} {
 
 #####################################################################
 #### saveCrash
-# Save a crash recovery file, which has a name constructed from the
-# true file name by prepending the prefix "#crash#".
+# Save data to a crash recovery file.
+# The crash recovery filename is constructed from the true file name
+# by prepending the prefix "#crash#".
 #
 body ::tycho::File::saveCrash {} {
     if {$modified && $file != ""} {

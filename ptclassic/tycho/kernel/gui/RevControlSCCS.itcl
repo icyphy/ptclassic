@@ -1,10 +1,10 @@
 # Definition of the class which handles revision control using SCCS.
 #
-# Authors: Joel King and Edward A. Lee
+# @Authors: Joel King and Edward A. Lee
 #
-# Version: $Id$
+# @Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -54,10 +54,10 @@ class ::tycho::RevControlSCCS {
     ###################################################################
     ####                      public methods                       ####
 
-    # Checkin the file associated with this class.
+    # Check in the file associated with this class.
     method checkIn {}
 
-    # Checkout the file associated with this class.
+    # Check out the file associated with this class.
     method checkOut {}
 
     # Put the file under revision control.
@@ -81,7 +81,7 @@ class ::tycho::RevControlSCCS {
     ###################################################################
     ####                   protected methods                       ####
 
-    # Get the users comments.
+    # Open a dialog box to query the user for comments.
     protected method getComments {} 
 
     # Return 1 if the file is checked out, 0 otherwise.
@@ -199,7 +199,7 @@ body ::tycho::RevControlSCCS::initializeRevControl {} {
 
 #####################################################################
 #### retrieveVersion
-# Retrieve the specified version and display.
+# Get the specified version and open the file.
 # 
 body ::tycho::RevControlSCCS::retrieveVersion {version} {
     set dir [file dirname $file]

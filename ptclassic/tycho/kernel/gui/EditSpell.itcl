@@ -1,9 +1,10 @@
 # Spell checker associated with an EditText widget.
 #
-# $Id$
-# Authors: Edward A. Lee
+# @Author: Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Version: $Id$
+#
+# @Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -188,8 +189,8 @@ body ::tycho::EditSpell::dictionary {} {
 
 #####################################################################
 #### learn
-# Add to the personal dictionary the word currently in the misspell
-# window. Then move to the next spelling error. The dictionary file is
+# Add to the personal dictionary the word currently in the misspell window.
+# Then move to the next spelling error. The dictionary file is
 # sorted is sorted while we are at it.
 # 
 body ::tycho::EditSpell::learn {} {
@@ -280,7 +281,7 @@ body ::tycho::EditSpell::recheck {} {
 
 #####################################################################
 #### replace
-# Replace the selection with the word currently in the spelling entry.
+# Replace the selection with the contents of the entry query.
 # Then move to the next spelling error.
 # 
 body ::tycho::EditSpell::replace {} {

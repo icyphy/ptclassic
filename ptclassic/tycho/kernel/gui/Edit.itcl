@@ -1,11 +1,11 @@
 # Definition of an editable text window.
 #
-# Author: Edward A. Lee
-# Contributors: Joel King
+# @Author: Edward A. Lee
+# @Contributors: Joel King
 #
-# Version: $Id$
+# @Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -51,7 +51,7 @@ class ::tycho::Edit {
     ###################################################################
     ####                      public methods                       ####
 
-    # Call this to give the text subwindow the focus.
+    # Hand the focus to the text subwindow.
     method focusin {}
 
     # Open a help window.  This should be redefined in derived classes.
@@ -60,7 +60,7 @@ class ::tycho::Edit {
     # Return $modified.
     method isModified {}
 
-    # Insert data.
+    # Insert the given data into the display.
     method insertData {data}
 
     # Insert the contents of a file at the insertion cursor.

@@ -1,10 +1,10 @@
 # List browser.
 #
-# Author: Edward A. Lee
+# @Author: Edward A. Lee
 #
-# Version: $Id$
+# @Version: $Id$
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -259,8 +259,8 @@ body ::tycho::ListBrowser::constructor {args} {
 
 ######################################################################
 #### breakCompleteSequence
-# Break the interpretation of a sequence of Tabs as scrolling through
-# matching items.  This is bound to any key other than Tab.
+# Break the interpretation of a sequence of Tabs as scrolling over matches.
+# This is bound to any key other than Tab.
 #
 body ::tycho::ListBrowser::breakCompleteSequence {} {
     set uselastpattern 0
@@ -373,7 +373,7 @@ body ::tycho::ListBrowser::help {} {
 
 ######################################################################
 #### ok
-# select the item specified in the entry box.
+# Select the item specified in the entry box.
 #
 body ::tycho::ListBrowser::ok {} {
     select [get entry]
@@ -381,7 +381,7 @@ body ::tycho::ListBrowser::ok {} {
 
 ######################################################################
 #### select
-# Select the item specified by the argument.
+# Select the item specified in the argument.
 #
 body ::tycho::ListBrowser::select {name} {
     # This method might be in the middle of being processed already.
