@@ -258,6 +258,7 @@ public:
 	int registerAction(int argc,char** argv);
 	int reset(int argc,char** argv);
 	int run(int argc,char** argv);
+	int stoptime(int argc,char** argv);
 	int schedtime(int argc,char** argv);
 	int schedule(int argc,char** argv);
 	int seed(int argc,char** argv);
