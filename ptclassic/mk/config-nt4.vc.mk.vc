@@ -101,11 +101,9 @@
 #    that d:\progra~1\micros~2\common\msdev98\bin is in your path.
 # 6. MSVC++ does not understand the Cygwin symbolic links, so you will
 #    have to build in the $PTOLEMY/src directory
-# 7. In each directory that you want to build in, you will need to
-#    generate a makefile.vc file from from makefile.  To do this,
-#    open each makefile from within Tycho, and then go to the Special
-#    menu and select 'Generate VC Makefile'.  The makevcgen Tcl
-#    script will do this	
+# 7. Run the Shell script $PTOLEMY/bin/mkvcgen-all, which will
+#    generate a makefile.vc file from from a makefile in each
+#    directory we are building in.	
 # 8. Statically linked binaries will not pull in the stars
 # 	unless the the *star.c file is edited and compiled as a .cc file.
 #	For each *stars.c file (destars.c, sdfstars.c sdfdspstars.c),
