@@ -53,8 +53,9 @@ OPTIMIZER =	-m486 -pipe -g
 #OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
 #LINUXDEF =	-Dlinux -DNO_RAND_OPTIMIZE #-D_GNU_SOURCE -D_BSD_SOURCE
 
-# -Wsynth is new in g++-2.6.x
-WARNINGS =	-Wall -Wcast-qual -Wcast-align -Wsynth
+# -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
+# Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
+WARNINGS =	-Wall -Wcast-qual -Wcast-align # -Wsynth
 GPPFLAGS =	$(LINUXDEF) $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 
