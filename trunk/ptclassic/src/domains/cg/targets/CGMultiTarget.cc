@@ -289,6 +289,10 @@ void CGMultiTarget :: flattenWorm() {
 		}
 		if (s->isItWormhole()) {
 			CGWormBase* w = s->myWormhole();
+			if (w == NULL) {
+				Error::abortRun(*this,"flattenWorm: Wormhole does returns a NULL pointer.  Is the myWormhole() method defined for the current domain?");
+				return;
+			}
 			// if inside domain is a CG domain, explode wormhole.
 			prevG = (Galaxy*) s->parent();
 			if (w->isCGinside()) {
