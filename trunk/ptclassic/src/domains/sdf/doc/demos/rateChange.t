@@ -9,7 +9,13 @@ The input, filter, and output are plotted on a common frequency scale.
 .EQ
 delim off
 .EN
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .EQ
 delim $$
 .EN

@@ -8,7 +8,13 @@ rate of a sinusoid by a factor of 8/5, and at the same
 time produce a complex approximately analytic signal
 (one that has no negative frequency components).
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .Se ComplexFIR
 .SV $Revision$ "October 15, 1990"

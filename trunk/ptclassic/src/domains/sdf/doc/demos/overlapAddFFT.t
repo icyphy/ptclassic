@@ -3,7 +3,13 @@
 .SD
 Convolution is implemented in the frequency domain using overlap and add.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "E. A. Lee"

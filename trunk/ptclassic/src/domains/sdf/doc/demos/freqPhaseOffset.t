@@ -5,7 +5,13 @@ Impose frequency jitter and phase offset on a sinusoid using the
 .c freqPhase
 SDF block.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .Ir "frequency offset"
 .Ir "phase jitter"

@@ -3,7 +3,13 @@
 .SD
 Sound generator using FM modulation that plays on the workstation speaker.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee and Tom M. Parks"

@@ -4,7 +4,13 @@
 Generate a pseudo-random sequence of zeros and ones using a
 maximal-length shift register.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .IE psuedoRandom
 .SV $Revision$	$Date$

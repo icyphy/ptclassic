@@ -10,7 +10,13 @@ stars.
 Note that because these are multirate stars, one iteration involves
 more than one sample.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .Se Commutator
 .Se Distributor

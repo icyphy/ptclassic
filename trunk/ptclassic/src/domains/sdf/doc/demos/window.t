@@ -5,7 +5,13 @@ Generate and display four window functions and the magnitude
 of their Fourier transforms.
 The windows displayed are the Hanning, Hamming, Blackman, and steep Blackman.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Kennard White"

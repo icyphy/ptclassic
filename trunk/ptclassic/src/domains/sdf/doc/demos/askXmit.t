@@ -4,7 +4,13 @@
 Synthesize an amplitude-shift keyed (ASK) signal
 with a 100% excess bandwidth raised cosine pulse.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

@@ -4,7 +4,13 @@
 A universe that converts an RGB color image to YUV and back,
 and then displays it on the workstation screen.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Paul E. Haskell"

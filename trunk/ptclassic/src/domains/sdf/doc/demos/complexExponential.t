@@ -3,7 +3,13 @@
 .SD
 Generate and plot a complex exponential.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .Ir "complex exponential"
 .Ie "expgen"

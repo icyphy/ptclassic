@@ -4,7 +4,13 @@
 A time-varying spectrum is computed using the autocorrelation
 method and displayed using a waterfall plot.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"

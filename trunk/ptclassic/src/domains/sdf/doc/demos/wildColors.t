@@ -6,7 +6,13 @@ Demonstrate the
 star by creating a bar graph that simulataneously
 displays 12 random sequences.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"

@@ -4,7 +4,13 @@
 An LMS adaptive filter converges so that its transfer function
 matches that of a fixed FIR filter.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
