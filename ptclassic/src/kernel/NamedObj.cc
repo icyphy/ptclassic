@@ -22,6 +22,7 @@ where the parent is a Block (a specific type of NamedObj).
 #include "NamedObj.h"
 #include "StringList.h"
 #include "Block.h"
+#include "SimControl.h"
 
 StringList NamedObj :: fullName () const
 {
@@ -68,13 +69,12 @@ NamedObj* NamedObjList::findObj(const char* name) const {
 	return 0;
 }
 
-// Apply initialize() to all elements
+// Apply initialize() to all elements.  Stop if an error occurs.
 
 void NamedObjList::initElements() {
 	NamedObj *p;
 	NamedObjListIter next(*this);
-	for(int i=size(); i>0; i--)  {
-		p  = next++;
+	while ((p = next++) != 0 && !SimControl::haltRequested()) {
 		p->initialize();
 	};
 };
