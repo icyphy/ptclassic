@@ -28,10 +28,22 @@ $Id$
 class EGMaster;
 
 	////////////////////////////////////
+	// class DataFlowStar
+	////////////////////////////////////
+
+// This abstract class includes all dataflow stars.  Eventually more
+// will be here.
+
+class DataFlowStar : public Star {
+public:
+	int isA(const char*) const;
+};
+
+	////////////////////////////////////
 	// class SDFStar
 	////////////////////////////////////
 
-class SDFStar : public Star  {
+class SDFStar : public DataFlowStar  {
 private:
         // pointer to master of instances for an expanded graph
 	// TEMPORARY: these kinds of things don't belong here.
