@@ -389,13 +389,12 @@ int PTcl::computeSchedule() {
 int PTcl::schedule(int argc,char **) {
 	if (argc > 1)
 		return usage("schedule");
-	// should arrange so that previously computed schedule can
-	// be returned
 	SimControl::clearHalt();
 	// Here we call Runnable::initTarget rather than Universe::initTarget,
 	// because Universe::initTarget invokes the begin methods of the 
 	// stars.  We just want to generate the schedule.
-	universe->Runnable::initTarget();
+	if (! (universe->myTarget() && universe->myTarget()->scheduler()) )
+	    universe->Runnable::initTarget();
 	if (SimControl::flagValues() & SimControl::error) {
 		Tcl_AppendResult(interp, "Error in setting up the schedule",
 			(char*) NULL);
