@@ -50,7 +50,12 @@ At compile time, this star appears to just be an atomic star.
 		type { "const char*" }
 		code { return "Self"; }
 	}
+	constructor {
+		gal = 0;
+	}	
 	start {
+		if (gal) return TRUE;
+
 		StringList msg = "DDFSelf Star \"";
 		msg += readName();
 		msg += "\" :\n";
@@ -100,6 +105,7 @@ At compile time, this star appears to just be an atomic star.
 		// clone the recursion galaxy
 		InterpGalaxy* myGal = (InterpGalaxy*) gal->clone();
 		myGal->setNameParent(gal->readName(), this);
+		sched.resetGal();
 
 		// make a image connection between DDFSelf and galaxy.
 		BlockPortIter next(*myGal);
