@@ -130,7 +130,7 @@ class ::tycho::HTML {
     # Clear the window.
     method clear {}
  
-   # Decrease the current font size in this widget.
+    # Decrease the current font size in this widget.
     method downSize {}
     
     # Execute Tcl code embedded in the HTML.
@@ -1705,7 +1705,7 @@ proc HMset_image {win handle src} {
 # Each orthogonal text property has its own stack, stored as a list.
 # The current (most recent) tag is the last item on the list.
 # Push is {} for pushing and {/} for popping.
-# Fixed by EAL to not fail on poping empty stack.
+# Fixed by EAL to not fail on popping empty stack.
 #
 proc HMstack {win push list} {
     upvar #0 HM$win var
@@ -1773,79 +1773,147 @@ proc HMtag_/color {win param text} {
 	HMstack $win / "Tcolor {}"
 }
 
+# If you mess with the dl code, make sure that the javadoc output looks ok.
+# See also $TYCHO/kernel/test/dltest.html
+#
+# Here's a summary of how the HTML dl code works.  This is a little
+# long winded, but this code is very tricky.
+#
+# The variable HM$win is an array of stacks.  
+# The indent is saved on a stack and gets pushed and popped depending
+# on the level of indentation. 
+# HMstack $win {} "indent 1" pushes 1 onto the stack.
+# HMstack $win / "indent 1" pops the current value off the stack
+# To read the stack, do:
+# upvar $0 HM$win var; puts $var(indent)
+#
+# The HTMLcurrent_tag proc sets level which is also saved in HM$win.
+# In general, level is derived from the length of indent, which is a list.
+# level and indent are tightly coupled, if you change one, you have to
+# consider the other.  level is also used in 
+# $TYCHO/lib/html_library/html_library.tcl
+#
+# sawdd is a flag that is set to 1 once we have seen a dd.  sawdd is
+# used to increment the indentation only once in the case of multiple dds
+#
+# When we see a dl flag, we savethe value of the indent stack as 'dlindent',
+# which is in turn a stack.  
+# To determine the level of indentation when we get a dt, dd or /dl
+# we copy the saved value into indent and act accordingly.
+# For dt, we decrement the indent stack
+# For dd, we increment if this is the first dd, otherwise we leave it be
+# For dl, we decrement the indent stack, and pop the dl stack.
+#
+
 #######################################################################
 #### HMtag_dl
-# Sadly, javadoc produces dls that have only dd, no dt, this breaks things
-# So, here we set a variable which we clear when we see HMtag_dt
-# and we check in HMtag_/dl.
-# 
-# FIXME:  This will not work for nested dl dd dl dd /dl /dl
-# If you mess with this code, make sure that the javadoc output looks ok.
+# When we see a dl, we save the current indent stack, and set sawdd to 0.
 #
 proc HMtag_dl {win param text} {
-    global gHMtag_dlflag
-    set gHMtag_dlflag 1
+    upvar #0 HM$win var
+    # Save the current indent level on the stack.
+    HMstack $win {} "dlindent [list $var(indent)]"
+
+    # For some reason, level is not keeping up with changes to indent.
+    # Get the new level.
+    set level [llength $var(indent)]
+    incr level -1
+    set var(level) $level
+
+    # sawdd is 1 if we've seen dd.
+    set var(sawdd) 0
 }
 
 #######################################################################
 #### HMtag_/dl
-# If we have not yet seen a dt, then call HMtag_dt now.
-# 
+# When we see a /dl, we restore our saved stack and set level accordingly.
 #
 proc HMtag_/dl {win param text} {
-    global gHMtag_dlflag
-    if {$gHMtag_dlflag == 1} {
-	upvar #0 HM$win var
-	upvar $text data
-        # The depth of the indent is determined by depth of the "indent" stack.
-        HMstack $win {/} "indent {}"
-	incr var(level) -1
-	set level $var(level)
-	$win insert $var(S_insert) "$data" \
-		"hi [lindex $var(list) end] indent$level $var(font)"
-	set data {}
-    }
+    upvar #0 HM$win var
+    upvar $text data
+
+    # Set the current indent to the indent we saved when we saw dl
+    set var(indent) [lindex $var(dlindent) end]
+
+    # Get the new level.
+    HMstack $win / "indent {}"
+    set level [llength $var(indent)]
+    incr level -1
+    set var(level) $level
+
+    # Pop the saved value off the stack, we are done with it.
+    HMstack $win / "dlindent {}"
+
+    $win insert $var(S_insert) "$data" \
+            "hi [lindex $var(list) end] indent$level $var(font)"
+    set data {}
 }
 
 #######################################################################
 #### HMtag_dt
 # Modify the original to permanently remove the indent introduced by
-# tag_dl.  NOTE: This assumes well-structured definition lists.
-# I'm not sure what will happen with badly constructed HTML.
+# tag_dl.
+# Pop the indent stack, set sawdd to 0, output the data, and push
+# the indent stack.
 #
 proc HMtag_dt {win param text} {
-        # Deal with dls that have no dt: dl dd /dl.  See HMtag_dl
-        global gHMtag_dlflag
-        set gHMtag_dlflag 0
-	upvar #0 HM$win var
-	upvar $text data
-        # The depth of the indent is determined by depth of the "indent" stack.
-        HMstack $win {/} "indent {}"
-	incr var(level) -1
-	set level $var(level)
-	$win insert $var(S_insert) "$data" \
-		"hi [lindex $var(list) end] indent$level $var(font)"
-	set data {}
+    upvar #0 HM$win var
+    upvar $text data
+    # When we see a dd, we will set sawdd to 1.
+    set var(sawdd) 0
+
+    # Set the current indent to the indent we saved when we saw dl.
+    set var(indent) [lindex $var(dlindent) end]
+
+    # Pop an the indent stack.
+    # The depth of the indent is determined by depth of the "indent" stack.
+    HMstack $win {/} "indent {}"
+
+    # Get the new level.
+    set level [llength $var(indent)]
+    incr level -1
+    set var(level) $level
+
+    # Note that we might have blank data at this point, since we could
+    # have '<dt> <b>  <b>', so we need to leave the indent set at
+    # the right place.
+    $win insert $var(S_insert) "$data" \
+            "hi [lindex $var(list) end] indent$level $var(font)"
+    set data {}
 }
 
 #######################################################################
 #### HMtag_dd
 # Modify the original to reinsert the indent removed by
 # tag_dt.  This indent will be removed later by tag_/dd.
-# NOTE: This assumes well-structured definition lists.
-# I'm not sure what will happen with badly constructed HTML.
+# If we have not yet seen a dd, then push the indent stack.
 #
 proc HMtag_dd {win param text} {
-	upvar #0 HM$win var
-	upvar $text data
-        # The depth of the indent is determined by depth of the "indent" stack.
+    upvar #0 HM$win var
+    upvar $text data
+    if {$var(sawdd) == 0} {
+        # If we have not yet seen a dd, then indent one level.
+        set var(sawdd) 1
+
+        # Set the current indent to the indent we saved when we saw dl.
+        set var(indent) [lindex $var(dlindent) end]
+
+        # Get the new level
+        set level [llength $var(indent)]
+        incr level -1
+        set var(level) $level
+
+        # Push something onto the "indent" stack.
         # The value "1" is irrelevant, but some value is needed.
-        HMstack $win {} "indent 1"
-	incr var(level) 1
-	set level $var(level)
-	$win insert $var(S_insert) "$data" \
-		"hi [lindex $var(list) end] indent$level $var(font)"
-	set data {}
+        # The depth of the indent is determined by depth of the "indent" stack.
+        #HMstack $win {} "indent 1"
+	#incr var(level) 
+
+    }
+    set level $var(level)
+    $win insert $var(S_insert) "$data" \
+            "hi [lindex $var(list) end] indent$level $var(font)"
+    set data {}
 }
 
 #######################################################################
