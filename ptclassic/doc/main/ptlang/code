@@ -1,0 +1,14 @@
+.\" $Id$
+.H1 "Writing C++ code"
+.pp
+The various segments of C++ code that can be defined as
+part of a star definition can refer to states, inputs, and outputs.
+The precise mechanism for these references depends somewhat
+on the domain, except for state references, which are standard
+across domains.
+.H2 "Reading and writing states"
+.pp
+<< More to come here. >>
+.H2 "Reading inputs and writing outputs"
+.pp
+<< More to come here. >>
