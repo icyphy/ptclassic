@@ -278,6 +278,11 @@ endif # ?selectPtolemy
 if ( ! $?selectPtolemy && $?selectJava) then
 	# We selected java
 
+	if ($PTARCH !~ sol?* ) then
+		echo "Sorry, tycho -java is only support under PTARCH==sol2*"
+		exit 42
+	endif
+
 	# Add $Tycho/lib.$PTARCH to LD_LIBRARY_PATH so we can find libjtk.so
 	# Note that under hpux, this file will be libjtk.sl, so we can't
 	# easily check
@@ -297,8 +302,9 @@ if ( ! $?selectPtolemy && $?selectJava) then
 		endif
 	endif
 
-	set prog = (java -classpath ${CLASSPATH}:${TYCHO}/lib/java:${TYCHO}/lib/java/tycho Tycho)
+	set prog = (java -Denv.PTOLEMY=$PTOLEMY -Denv.TYCHO=$TYCHO -classpath ${CLASSPATH}:${TYCHO}/java:${TYCHO}/java/tycho Tycho)
 
+	echo "Starting: $prog"
 endif
 
 ##################################################################
