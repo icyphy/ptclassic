@@ -62,7 +62,7 @@ int DFPortHole :: parentReps() const {
 }
 
 PortHole& DFPortHole :: setPort(const char* portName, Block* parent,
-				DataType type, unsigned numTokens) {
+				DataType type, int numTokens) {
 	if (numTokens == 0) {
 		varying = 1;
 		numberTokens = 1;
