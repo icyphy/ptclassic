@@ -81,7 +81,8 @@ proc ::tycho::loadIfNotPresent {command package {packagePathList {}}} {
 		set libNameList [list $packageLibName]
 	    }
 
-	    if [info exists env(PTARCH)] {
+	    if {[info exists env(PTARCH)] && \
+		    [info exists PTOLEMY]} {
 		# If we are here, the Ptolemy is probably installed
 		set PTARCH $env(PTARCH)
 		
