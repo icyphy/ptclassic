@@ -40,7 +40,8 @@ VPATH         = $(ROOT)/src/octtools/Xpackages/rpc
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-HDRS		= rpc.h \
+HDRS		= appNet.h \
+		rpc.h \
 		rpcApp.h \
 		rpcInternal.h
 
