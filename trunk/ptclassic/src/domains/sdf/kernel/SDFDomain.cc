@@ -82,4 +82,7 @@ static SDFTarget defaultSDFtarget("default-SDF",
 
 static KnownTarget entryDefault(defaultSDFtarget,"default-SDF");
 
+static SDFPTclTarget SDFPTclTargetProto("SDF-to-PTcl",
+					"Generate CG PTcl Equivalent");
+
 static KnownTarget entryPTcl(SDFPTclTargetProto,"SDF-to-PTcl");

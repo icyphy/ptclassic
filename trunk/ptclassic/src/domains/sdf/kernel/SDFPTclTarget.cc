@@ -140,6 +140,3 @@ int SDFPTclTarget::run() {
 void SDFPTclTarget::wrapup() {
 };
 
-static SDFPTclTarget SDFPTclTargetProto("SDF-to-PTcl",
-					"Generate CG PTcl Equivalent");
-
