@@ -13,9 +13,7 @@ Version identification:
 
 *******************************************************************/
 
-#include "AsmStar.h"
-#include "AsmConnect.h"
-#include "dataType.h"
+#include "MReq.h"
 
 class ProcMemory;
 
@@ -25,26 +23,16 @@ class MemAssignment {
 	friend class MemMap;
 	friend class MemMapIter;
 	MemAssignment* next;
-public:
 	unsigned start;
-	unsigned length;
+	MReq& req;
+public:
+	unsigned addr() { return start;}
+	int length() { return req.size();}
+	int circ() { return req.circ();}
 
-	// A memory allocation is for either a State or a PortHole.
-	// Hence, after the allocation is done, one of the following
-	// two pointers will be non-null.
-	const State* state;
-	AsmPortHole* port;
-
-	// The following Boolean indicates whether a block of memory
-	// will be accessed as a circular buffer.
-	int circular;
-
-	// The type is registered here, for the convenience of symbolic
-	// debuggers.
-	DataType type;
-
-	MemAssignment() : next(0), start(0), length(0), state(0), port(0),
-			  circular(FALSE), type(INT) {}
+	StringList print() { return req.print();}
+	MemAssignment(unsigned addr, MReq& mreq, MemAssignment* link = 0)
+		: next(link), start(addr), req(mreq) {}
 	~MemAssignment() {}
 };
 
@@ -59,9 +47,7 @@ public:
 	void zero();
 	~MemMap() {zero();}
 	int empty() const { return first == 0;}
-	void appendSorted(unsigned start, unsigned length,
-			  const State* state, AsmPortHole* port,
-			  int circular, DataType type);
+	void appendSorted(unsigned start, MReq& mreq);
 };
 
 class MemMapIter {

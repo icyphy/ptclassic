@@ -14,16 +14,8 @@ $Id$
 #include "MemMap.h"
 
 // Append an allocation sorted in order of memory address.
-void MemMap::appendSorted(unsigned start, unsigned length,
-                          const State* state, AsmPortHole* port,
-                          int circular, DataType type) {
-	LOG_NEW; MemAssignment *m = new MemAssignment;
-	m->start = start;
-	m->length = length;
-	m->state = state;
-	m->port = port;
-	m->circular = circular;
-	m->type = type;
+void MemMap::appendSorted(unsigned start, MReq& mreq) {
+	LOG_NEW; MemAssignment *m = new MemAssignment(start,mreq);
 
 	if (first == 0) {
 		first = m;
