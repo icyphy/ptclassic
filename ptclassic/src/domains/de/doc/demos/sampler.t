@@ -3,6 +3,7 @@
 .SD
 Demonstrates the Sampler star.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ "October 22, 1990"
 .AL "E. A. Lee"
 .LD

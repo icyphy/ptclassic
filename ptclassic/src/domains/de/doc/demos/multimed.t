@@ -3,6 +3,7 @@
 .SD
 A network that transports video, audio, and data.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "Paul Haskell, Greg Walter."
 .LD

@@ -3,6 +3,7 @@
 .SD
 Demonstrates the use of the PriorityQueue block together with a Server.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

@@ -3,6 +3,7 @@
 .SD
 Simulates the effect on a sinusoid of random delay and reordering of samples.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
 .LD

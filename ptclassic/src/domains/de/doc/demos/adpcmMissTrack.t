@@ -6,6 +6,7 @@ using a simple voice-recovery technique such as
 zero-sample substitution in an ADPCM packet-switched
 network. 
 .SE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 10/20/92
 .AL "GSWalter."
 .LD

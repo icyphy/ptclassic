@@ -5,6 +5,7 @@ This demonstration shows how embedded-ADPCM with
 LSB dropping may be used in an ATM network to
 prevent mistracking between the coder and decoder.
 .SE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 10/20/92
 .AL "GSWalter."
 .LD

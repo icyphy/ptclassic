@@ -5,6 +5,7 @@ This demonstration implements a voice-cell recovery
 technique.  Cells which have been dropped during
 transmission are replaced with all 0 bits.
 .SE
+.LO "~ptolemy/src/domains/de/demo"
 .SV 1.1 10/1/92
 .AL "GSWalter."
 .LD

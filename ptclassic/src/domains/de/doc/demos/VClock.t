@@ -3,6 +3,7 @@
 .SD
 Model a network with four inputs and "virtual clock" buffer service.
 .DE
+.LO "~ptolemy/src/domains/de/demo"
 .SV $Revision$ 11/9/92
 .AL "Paul Haskell."
 .LD
