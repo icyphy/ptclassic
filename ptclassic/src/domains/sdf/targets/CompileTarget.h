@@ -41,17 +41,20 @@ a universe.
 #endif
 
 #include "HLLTarget.h"
+#include "IntState.h"
 
 class CompileTarget : public HLLTarget {
 public:
 	void setup();
 	int run();
 	void wrapup ();
-	CompileTarget(const char* nam,const char* stype,const char* desc) :
-		HLLTarget(nam,stype,desc) {}
+	CompileTarget(const char* nam, const char* stype, const char* desc);
 	Block* makeNew() const;
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
+
+protected:
+	IntState includeTclTkFlag;
 
 private:
 	// Method to return a pointer to the MultiPortHole that spawned a

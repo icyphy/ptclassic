@@ -52,6 +52,16 @@ a universe.
 #include "pt_fstream.h"
 #include "SDFCluster.h"
 
+// Constructor
+CompileTarget::CompileTarget(const char* nam,
+			     const char* stype,
+			     const char* desc)
+: HLLTarget(nam,stype,desc)
+{
+	addState(includeTclTkFlag.setState("Include Tcl/Tk", this, "NO",
+		 "Specify whether to generate Tcl/Tk initialization code"));
+}
+
 Block* CompileTarget::makeNew() const {
 	LOG_NEW; return new CompileTarget(name(), starType(), descriptor());
 }
@@ -114,7 +124,6 @@ int CompileTarget::run() {
     StringList universeClassName = sanitizedName(*galaxy());
     universeClassName += "Class";
     StringList universeName = sanitizedName(*galaxy());
-    int tcltkFlag = TRUE;
 
     // First generate the files that define the galaxies
     GalTopBlockIter next(*galaxy());
@@ -138,7 +147,7 @@ int CompileTarget::run() {
 
     myCode += "\n// Constant setting whether or not to include Tcl/Tk\n";
     myCode += "#define SDF_COMPILE_TCL_TK ";
-    myCode += tcltkFlag;
+    myCode += includeTclTkFlag;
     myCode += "\n";
 
     myCode += "\n#if SDF_COMPILE_TCL_TK\n";
@@ -307,7 +316,7 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
 StringList CompileTarget::tcltkSetup() {
     StringList myCode;
     myCode.initialize();
-    myCode += "\n// Tcl/Tk include files\n";
+    myCode += "// Include files needed by Tcl/Tk commands\n";
     myCode += "#include <iostream.h>\n";
     myCode += "#include \"SimControl.h\"\n";
     myCode += "\n";
@@ -358,7 +367,7 @@ const char *expandeddirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\
 char *fulldirname = new char[strlen(expandeddirname) + 1];
 strcpy(fulldirname, expandeddirname);
 if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n\
-    cerr << \"Tcl_EvalFile: Error in evaluating pigilib.tcl\";\n\
+    cerr << \"Tcl_EvalFile: Error in evaluating $PTOLEMY/lib/tcl/pigilib.tcl\";\n\
     exit(1);\n\
 }\n\
 delete [] fulldirname;\n";
