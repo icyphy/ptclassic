@@ -103,4 +103,7 @@ void InterpUniverse :: initTarget() {
 }
 
 // isa
-ISA_FUNC(InterpUniverse,Galaxy);
+// FIXME: This is not quite right since it does not check both parents
+// (InterpGalaxy and Runnable).  It can't check Runnable right now
+// because Runnable does not have isA defined!
+ISA_FUNC(InterpUniverse,InterpGalaxy);
