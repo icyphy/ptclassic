@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location  { ATM demo library }
+    location  { SDF ATM library }
     explanation {  
 This star maintains a routing table which is updated by the
 .c MQControl

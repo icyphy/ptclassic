@@ -11,7 +11,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-    location  { ATM demo library }
+    location  { SDF ATM library }
 
     explanation {  
 Accept two input packets, and route them to the proper
