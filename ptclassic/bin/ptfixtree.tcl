@@ -301,7 +301,7 @@ proc pftFixFacet { facet } {
 	return "skip"
     }
     set masters [pftOctLs $facet]
-    if { $do_domainchange != {}} {
+    if { "$do_domainchange" != "0" } {
 	regsub -all {:} $facet {/} facetpath
 	if [file writable "$facetpath\;"] {
 	    pftOctReDomain $facet "dummy" $do_domainchange
