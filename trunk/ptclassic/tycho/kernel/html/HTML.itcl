@@ -33,8 +33,6 @@
 
 # FIXME:  Known bugs
 #  - Many of the File menu commands do not do anything reasonable.
-#  - Dismissing the window before rendering is finished causes an
-#    infinite recursion that results in an error message.
 
 #######################################################################
 #### HTML
@@ -177,7 +175,7 @@ body ::tycho::HTML::constructor {args} {
 		-label [lindex $size 0] \
 		-variable [scope sizeName($this)] \
 		-command "$this configure -sizeadjustment [lindex $size 1]; \
-		$itk_component(text) render"
+		::HTMLText::render $itk_component(text)"
     }
     set sizeName($this) medium
 
@@ -185,6 +183,7 @@ body ::tycho::HTML::constructor {args} {
     $itk_component(fileMenu) entryconfigure 2 \
 	    -label "Open Source" \
 	    -underline 1 \
+	    -accelerator {} \
 	    -command "$this openSource"
 
     if {$itk_option(-file) != "NoName"} {
