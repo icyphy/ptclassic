@@ -679,13 +679,18 @@ realGetParams(const Block* block, ParamListType* pListPtr,
 	if (block == 0) {
 	    return FALSE;
 	}
-	delete [] pListPtr->array;
-	pListPtr->array = 0; // initialization
+
+	// initialization
+	pListPtr->array = 0;
+	pListPtr->length = 0;
+	pListPtr->dynamic_memory = 0;
+	pListPtr->flat_plist_flag = TRUE;
+
 	int n = block->numberStates();
 	int j = 0; // # of settable states, initialized to 0
 	if (n) { 
 	    /* Since we don't know beforehand how many of the n states
-	       are nonsettable, we temperarily requests n ParamStructs
+	       are nonsettable, we temporarily request n ParamStructs
 	       at tempArray. 
 	    */
 	    LOG_NEW; ParamType* tempArray = new ParamStruct[n];
