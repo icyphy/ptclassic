@@ -73,7 +73,6 @@ char *help;			/* Help message if any  */
  * of the nets listed in `nets'.
  */
 {
-    octObject inst;
     octObject *result = (octObject *) 0;
     dmWhichItem *items;
     int i;
