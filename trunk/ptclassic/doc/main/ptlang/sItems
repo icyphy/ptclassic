@@ -286,8 +286,11 @@ If you specify attributes, you
 specify the state of both bits: for example, A_NONCONSTANT|A_SETTABLE.
 In the above example, the attributes were equal to the default,
 so the item could have been omitted.
-.pp
 Attributes are ignored for galaxy states.
+.pp
+Mechanisms for accessing and updating states in C++ methods
+associated with a star are explained below, in the section entitled
+``Writing C++ code.''
 .UH "input, output, inmulti, outmulti"
 .pp
 .IE "input { }"
@@ -379,6 +382,10 @@ defstar {
 	}
 }
 .)c
+.pp
+Full details for accessing portholes C++ methods
+associated with a star are explained below, in the section entitled
+``Writing C++ code.''
 .UH constructor
 .pp
 .IE "constructor { }"
