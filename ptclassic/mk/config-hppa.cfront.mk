@@ -150,22 +150,23 @@ LINKER =	CC
 CLINKER = $(CC)
 # startup module
 CRT0 =
+# List of libraries to search, obviating the need to set SHLIB_PATH
+# See the ld man page for more information.  These path names must
+# be absolute pathnames, not relative pathnames.
+SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
+
 # system libraries (libraries from the environment)
 # /usr/lib/end.o is necessary for debugging with xdb under hpux9.x
 # /opt/langtools/lib/end.o is necessary for debugging with xdb under hpux10.x
 #SYSLIBS =	-lm /opt/langtools/lib/end.o
-SYSLIBS =	$(LIBGCC_SPEC) -lm -L/opt/dce/lib/libcma.a -lcma /opt/langtools/lib/end.o
+SYSLIBS =	$(LIBGCC_SPEC) -lm -L/opt/dce/lib/libcma.a -lcma /opt/langtools/lib/end.o  $(SHARED_LIBRARY_R_LIST)
 
 # system libraries for linking .o files from C files only
 CSYSLIBS = $(SYSLIBS)
 
 # ptlang uses this library to find alloca()
 PTLANGLIB= -lPW
-
-# List of libraries to search, obviating the need to set SHLIB_PATH
-# See the ld man page for more information.  These path names must
-# be absolute pathnames, not relative pathnames.
-SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work
@@ -180,11 +181,11 @@ SHARED_LIBRARY_R_LIST = -Wl,+s,+b,$(SHARED_LIBRARY_PATH)
 # whether a binary is dynamically or statically linked)
 
 # link flags
-LINKFLAGS =	-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS =	-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 # In cfront, this will result in a 69Mb pigiRpc
 #   -g causes chaos with /usr/lib/end.o and xdb, so we skip it
-LINKFLAGS_D =	-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS_D =	-L$(LIBDIR)
 
 #
 # Directories to use
