@@ -1,0 +1,224 @@
+# Mega-widget with a list of subpanel widgets.
+#
+# @Author: Cliff Cordeiro
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### options
+#
+
+#######################################################################
+#### MultiPanel
+# A simple grouping of Subpanel widgets, MultiPanel allows addition and
+# removal of Subpanel and label widgets in a megawidget FIXME: with 
+# scrollbars. 
+# <p>
+# Here is an example of how to use the MultiPanel:
+# <tcl><pre>
+# catch {destroy .y}
+# ::tycho::Displayer .y
+# ::tycho::MultiPanel .y.m
+# pack .y.m
+# .y.m appendlabel x -text Label!
+# .y.m append y -text Panel!
+# pack forget .y.childsite
+# .y centerOnScreen
+# </pre></tcl>
+#
+class ::tycho::MultiPanel {
+    inherit ::tycho::TWidget
+
+    constructor {args} {}
+    destructor {}
+     
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Append a new subpanel 
+    method append {element args}
+
+    # Append a new label
+    method appendlabel {element args}
+
+    # Reinitialize the multipanel
+    method clear {}
+
+    # Returns the subpanel names as a list/return info on element.
+    method elementinfo {args}
+
+    # Remove a subpanel
+    method remove {element}
+ 
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    private variable myData
+    private variable myFrame
+    private variable myList
+}
+
+
+#######################################################################
+#### constructor
+#
+body ::tycho::MultiPanel::constructor {args} {
+
+    itk_component add mainFrame {
+        frame $itk_interior.mainFrame
+    } {
+        keep -background
+    }
+
+    set myFrame $itk_component(mainFrame)
+    set myList [::tycho::CircularList [::tycho::autoName list]]
+
+    pack $myFrame -side top -expand 1 -fill both
+
+    eval itk_initialize $args
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::tycho::MultiPanel::destructor {} {
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### append
+# Description.
+#
+body ::tycho::MultiPanel::append {element {children} args} {
+
+    # check children
+    if {[llength $children] > 1} {
+        # put multiple children in a frame
+        set child $myFrame[::tycho::autoName .cframe]
+        frame $child
+        foreach childel $children {
+            set cname [elementinfo $childel]
+            pack $cname -in $child -anchor nw
+        }
+    } else {
+        # only one child, no frame necessary
+        if {[llength $children] == 1} {
+            set child [elementinfo $children]
+        }
+    }
+        
+    # do this here in case there's an error
+    $myList append $element
+
+    set newPanel $myFrame[::tycho::autoName .panel]
+    if {$children != ""} {
+        eval "::tycho::Subpanel $newPanel -childwidget $child $args"
+    } else {
+        eval "::tycho::Subpanel $newPanel $args"
+    }
+    pack $newPanel -anchor nw
+
+    set myData($element) $newPanel
+}
+
+#####################################################################
+#### appendlabel
+# Add a label to the bottom of the multipanel.
+#
+body ::tycho::MultiPanel::appendlabel {element args} {
+
+    # do this first in case there's an error
+    $myList append $element
+
+    set newLabel $myFrame[::tycho::autoName .label]
+    eval "label $newLabel $args"
+    pack $newLabel -anchor nw -side top
+
+    set myData($element) $newLabel
+}
+
+
+#####################################################################
+#### clear
+# Clear the internal list and remove subpanels from the multipanel widget.
+#
+body ::tycho::MultiPanel::clear {} {
+
+    foreach element [$myList elements] {
+        remove $element
+    }
+}
+
+#####################################################################
+#### elements
+# Return the widget name of a subpanel or label.
+# With no args, return the elements of the internal list of subpanels/labels.
+#
+body ::tycho::MultiPanel::elementinfo {args} {
+
+    if {$args == ""} {
+        return [$myList elements]
+    }
+    set temp ""
+    foreach element $args {
+        if {[catch {lappend temp $myData($element)}] == 1} {
+            error "MultiPanel::elementinfo: Can't find element: $element"
+            return {}
+        }
+    }
+    return "$temp"
+}
+
+#####################################################################
+#### remove 
+# Remove an element.
+#
+body ::tycho::MultiPanel::remove {element} {
+
+    if {[catch {set elname $myData($element)}] == 1} {
+        error "MultiPanel::remove: Can't find element: $element"
+        return {}
+    }
+    unset myData($element)
+    $myList remove $element
+    destroy $elname    
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      private methods                      ####
+
+
