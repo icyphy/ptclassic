@@ -145,6 +145,7 @@ PL_SRCS= \
  CGCSleep.pl \
  CGCSqrt.pl \
  CGCSub.pl \
+ CGCSubCx.pl \
  CGCSubFix.pl \
  CGCSubInt.pl \
  CGCSpread.pl \
