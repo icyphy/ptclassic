@@ -147,6 +147,7 @@ void ToEventHorizon :: initialize()
 	// Initialize members
 	timeStamp = 0.0;
 	dataNew = FALSE;
+	outputBeforeDeadlocked = FALSE;
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItInput())
