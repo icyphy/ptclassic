@@ -107,7 +107,7 @@ class ::tycho::EditDiff {
     # Used with diffResult, this is a counter to keep track where in diff
     public variable diffResultLineCount 0
     
-    # Keep track of where exactly differences occured.
+    # Keep track of where exactly differences occurred.
     public variable differenceList {}
 
     # Keep track of where in the error we are now.
