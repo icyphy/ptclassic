@@ -33,7 +33,7 @@
 # needed, but the common arrays get upset otherwise.
 namespace ::tycho {
     if { [::info classes SmartLine] == "" } {
-	uplevel #0 {source $tychoslate/SmartLine.itcl}
+	uplevel #0 {source $env(SLATE_LIBRARY)/SmartLine.itcl}
     }
 }
 
