@@ -9,7 +9,8 @@
 #
 # CAVEAT: This assumes the filename to be got is the first
 # argument.  This may not be the case.  The first argument
-# may be an option to pass to get.
+# may be an option to pass to get.  Any options that come
+# after the filename are discarded.
 #
 # $Id$
 
@@ -36,5 +37,5 @@ else
 	cd $dir
 endif
 
-get $*
+get SCCS/$root
 
