@@ -75,8 +75,9 @@ public:
 	StringList displaySchedule();
 
 	// print methods
-	StringList printVerbose() const;
-	StringList printRecursive() const;
+	StringList print(int verbose = 0) const {
+		return Wormhole::print(verbose);
+	}
 
 	// clone -- allows interpreter/pigi to make copies
 	Block* clone() const;
@@ -94,6 +95,9 @@ public:
 
 	// return myself
 	CGWormhole* myWormhole();
+
+	// FIXME: what should this do?
+	double getStopTime() { return 0.0;}
 
 /*******  methods for parallel scheduler. ********/
 
