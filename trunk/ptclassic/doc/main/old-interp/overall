@@ -8,7 +8,7 @@
 .\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
 .\" BELOW, to indicate a new version.  Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
-.VR 0.$Revision$ "January 9, 1991"
+.VR 0.$Revision$ "%D%"
 .TI "The \*(PT Interpreter"
 .AU
 Joseph Buck
