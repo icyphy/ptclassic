@@ -222,7 +222,7 @@ net_node_t *node;
   net_var_t *var, *pvar;
 
   fprintf( fp, "  private {\n" );
-/*  fprintf( fp, "    static SequentialList *emittedEvents;\n" ); */
+  fprintf( fp, "    static SequentialList *emittedEvents;\n" ); 
   fprintf( fp, "    int nemitevent;\n" );
   fprintf( fp, "    double min_time;\n" );
   fprintf( fp, "    double end_time;\n" );
