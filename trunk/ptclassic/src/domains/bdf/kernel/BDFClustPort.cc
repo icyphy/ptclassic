@@ -318,3 +318,28 @@ void BDFClustPort::sendData() {
 	}
 }
 
+// The following procedures are used in the propagation of arc
+// counts from outer to inner arcs.
+int BDFClustPort::maxArcCount() {
+	BDFClustPort* p = this;
+	while (p && !p->geo()) p = p->outPtr();
+	if (p) return p->geo()->maxNumParticles();
+	Error::abortRun(*this, "can't find outer geodesic");
+	return 0;
+}
+
+// if I have a geodesic, set its count, else look inside.
+void BDFClustPort::setMaxArcCount(int n) {
+	BDFClustPort* p = this;
+	while (p && !p->geo()) {
+		BDFClustPort* q = p->inPtr();
+		if (q == 0) {
+			p->real().geo()->setMaxArcCount(n);
+			return;
+		}
+		else p = q;
+	}
+	if (p) p->geo()->setMaxArcCount(n);
+	else Error::abortRun(*this, "can't find inner geodesic");
+}
+

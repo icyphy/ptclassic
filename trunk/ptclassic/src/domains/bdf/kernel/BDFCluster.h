@@ -79,7 +79,7 @@ public:
 	int uniformRate();
 
 	// generate schedules for clusters
-	int genSubScheds();
+	void genSubScheds();
 
 	// I would prefer for these to be protected rather than
 	// public.
@@ -238,6 +238,10 @@ public:
 	// generate the schedule (does nothing except for bags)
 	virtual int genSched() { return TRUE;}
 
+	// generate buffer sizes.  Arg is #times cluster is executed
+	// (for constant repetitions)
+	virtual void fixBufferSizes(int) = 0;
+
 	// execute the cluster
 	void go();
 
@@ -249,6 +253,11 @@ public:
 
 	// generate code
 	virtual void genCode(Target&, int depth) = 0;
+
+	// generate code for loop beginning and ending
+	// by default, no code.
+	virtual void genLoopInit(Target&, int) {}
+	virtual void genLoopEnd(Target&) {}
 
 	// static function to make temporary names
 	static const char* mungeName(NamedObj&);
@@ -288,6 +297,13 @@ public:
 
 	// code generation
 	void genCode(Target&, int depth);
+
+	// code generation for loop beginning and end.
+	void genLoopInit(Target&, int reps);
+	void genLoopEnd(Target&);
+
+	// set buffer sizes
+	void fixBufferSizes(int nReps);
 };
 
 // An BDFBagScheduler is a modified BDFScheduler that lives in
@@ -344,8 +360,8 @@ public:
 	// generate my schedule
 	int genSched();
 
-	// simulate execution, used during schedule generation
-	int simRunStar(int deferFiring);
+	// compute buffer sizes.
+	void fixBufferSizes(int nReps);
 
 	// print my schedule
 	StringList displaySchedule(int depth);
@@ -396,6 +412,7 @@ public:
 	void runInner();
 	StringList displaySchedule(int depth);
 	void genCode(Target&, int depth);
+	void fixBufferSizes(int);
 protected:
 	void setup();
 private:
@@ -405,7 +422,7 @@ private:
 	BDFCluster* b;		// sink of boolean, or null
 };
 
-class DFDynScheduler;
+class DynDFScheduler;
 
 class BDFClustSched : public BDFScheduler {
 public:
@@ -438,7 +455,7 @@ private:
 	// The clustered galaxy.
 	BDFClusterGal* cgal;
 	// The dynamic scheduler
-	DFDynScheduler* dynSched;
+	DynDFScheduler* dynSched;
 	// The log file name
 	const char* logFile;
 	// True if dynamic scheduling allowed.
@@ -450,14 +467,14 @@ class BDFClustPortIter : public BlockPortIter {
 public:
 	BDFClustPortIter(BDFCluster& s) : BlockPortIter(s) {}
 	BDFClustPort* next() { return (BDFClustPort*)BlockPortIter::next();}
-	BDFClustPort* operator++() { return next();}
+	BDFClustPort* operator++(POSTFIX_OP) { return next();}
 };
 
 class BDFClusterGalIter : public GalTopBlockIter {
 public:
 	BDFClusterGalIter(BDFClusterGal& g) : GalTopBlockIter(g) {}
 	BDFCluster* next() { return (BDFCluster*)GalTopBlockIter::next();}
-	BDFCluster* operator++() { return next();}
+	BDFCluster* operator++(POSTFIX_OP) { return next();}
 	GalTopBlockIter::reset;
 };
 
@@ -465,7 +482,7 @@ class BDFClusterBagIter : public GalTopBlockIter {
 public:
 	BDFClusterBagIter(BDFClusterBag& b) : GalTopBlockIter(*(b.gal)) {}
 	BDFCluster* next() { return (BDFCluster*)GalTopBlockIter::next();}
-	BDFCluster* operator++() { return next();}
+	BDFCluster* operator++(POSTFIX_OP) { return next();}
 	GalTopBlockIter::reset;
 };
 

@@ -108,6 +108,10 @@ public:
 
 	// return last Boolean value
 	int lastBool() const { return lastBoolValue;}
+
+	// functions to set and get maximum arc counts for buffer allocation
+	int maxArcCount();
+	void setMaxArcCount(int howMany);
 private:
 	// the real port
 	DFPortHole& pPort;

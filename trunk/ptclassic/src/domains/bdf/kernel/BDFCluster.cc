@@ -48,7 +48,7 @@ static const char file_id[] = "BDFCluster.cc";
 #include "Geodesic.h"
 #include "Target.h"
 #include "pt_fstream.h"
-// #include "DFDynScheduler.h"
+#include "DynDFScheduler.h"
 #include "Error.h"
 #include <assert.h>
 
@@ -191,12 +191,15 @@ int BDFClusterGal::cluster() {
 }
 
 // Generate schedules in all the lower-level clusters.
-int BDFClusterGal::genSubScheds() {
+// generate sub-schedules and fix buffer sizes.
+void BDFClusterGal::genSubScheds() {
 	BDFClusterGalIter nextClust(*this);
 	BDFCluster* c;
 	while ((c = nextClust++) != 0)
-		if (!c->genSched()) return FALSE;
-	return TRUE;
+		c->genSched();
+	nextClust.reset();
+	while ((c = nextClust++) != 0)
+		c->fixBufferSizes(c->reps());
 }
 
 // Test to see if we have uniform rate.  Since a uniform-rate cluster
@@ -334,11 +337,30 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 	return 0;
 }
 
+// this function returns true if the only neighbor of "me" is "only"
+// and false otherwise.
+static int onlyNeighbor(BDFCluster* me,BDFCluster* only) {
+	BDFClustPortIter nextPort(*me);
+	BDFClustPort* p;
+	while ((p = nextPort++) != 0) {
+		BDFClustPort* pFar = p->far();
+		if (pFar == 0) continue;
+		BDFCluster* peer = pFar->parentClust();
+		if (peer != me && peer != only) return FALSE;
+	}
+	return TRUE;
+}
+
 BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	// assumption: a and b meet every condition for merging
 	// except for buried control arcs.
 	// we can still merge them under certain conditions by doing
 	// a do-while loop around the merge.
+
+	// It will be preferable under some circumstances to avoid the
+	// do-while and do if-then-else instead.  We do this when all
+	// external ports are attached to "leaf clusters" without a
+	// rate change.   That is what the "ifInstead" flag is for.
 
 	// A necessary condition is that all external arcs be
 	// conditional on the same (or equivalent) signal.
@@ -346,12 +368,16 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 	// Even so, we may not want to do it; creating "if" arcs
 	// may be better.
 
+	// We should verify that while-loops produced by this method
+	// are "proper" -- non-deadlocked and bounded.  This could be
+	// done by a mini-state-traversal.
+
 	BDFClustPortIter nexta(*a);
 	BDFClustPortIter nextb(*b);
 	BDFClustPort *p;
-	BDFClustPort *cond = 0;
-	BDFRelation desrel;
-	int rateChange = FALSE;
+	BDFClustPort *condSrc = 0;
+	BDFRelation desrel = BDF_NONE;
+	int ifInstead = TRUE;
 
 	while ((p = nexta++) != 0 || (p = nextb++) != 0) {
 		BDFClustPort *pFar = p->far();
@@ -359,32 +385,58 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 		    pFar->parentClust() == b) continue;
 		// OK, p is external.  Must be conditional.
 		if (!TorF(p->relType())) return 0;
-		if (cond) {
-			if (sameSignal(cond,p->assoc()) != desrel) return 0;
+		// all sources of conditionals must correspond
+		// (the actual conditionals may be delays of one another)
+		if (condSrc) {
+			BDFClustPort* nSrc = p->assoc();
+			if (nSrc->isItInput()) nSrc = nSrc->far();
+			BDFRelation ssig = sameSignal(condSrc,nSrc);
+			// either the control signals must be the same, or
+			// they must be opposite and the relTypes are also
+			// opposite.  Otherwise return.
+			switch (ssig) {
+			case BDF_SAME:
+				if (p->relType() != desrel) return 0;
+				break;
+			case BDF_COMPLEMENT:
+				if (p->relType() == desrel) return 0;
+				break;
+			default:
+				return 0;
+			}
 		}
 		else {
-			cond = p->assoc();
+			condSrc = p->assoc();
+			if (condSrc->isItInput()) condSrc = condSrc->far();
 			desrel = p->relType();
 		}
-		if (p->numIO() != pFar->numIO()) rateChange = TRUE;
+		// see if we can turn off "ifInstead"
+		if (ifInstead &&
+		    (p->numIO() != pFar->numIO() ||
+		     !onlyNeighbor(pFar->parentClust(),p->parentClust())))
+			ifInstead = FALSE;
 	}
-	if (cond && rateChange) {
-		// arrange so a is the source of the cond signal.
-		// Be conditional on the source (the output)
-		if (cond->isItInput()) cond = cond->far();
-		if (cond->parentClust() == b) {
+	if (!condSrc) return 0;
+	if (logstrm)
+		*logstrm << a->name() << " and " << b->name()
+			 << ": doing loop merge, result:\n";
+	if (ifInstead) {
+		if (logstrm)
+			*logstrm << "could loop-merge, but do if instead\n";
+	}
+	else {
+		// make a the source of the condition.
+		if (condSrc->parentClust() == b) {
 			BDFCluster* t = a; a = b; b = t;
 		}
 		if (logstrm)
 			*logstrm << a->name() << " and " << b->name()
 				 << ": doing loop merge, result:\n";
-		LOG_NEW; BDFCluster *c = new BDFWhileLoop(desrel,cond,a,b);
+		LOG_NEW; BDFCluster *c = new BDFWhileLoop(desrel,condSrc,a,b);
 		addBlock(c->setBlock(genBagName(),this));
 		if (logstrm) *logstrm << *c << "\n";
 		return c;
 	}
-	if (logstrm)
-		*logstrm << " could be loop-merged, but no rate change\n";
 	return 0;
 }
 
@@ -647,7 +699,7 @@ BDFClustPort* BDFCluster::ifFactor(BDFRelation& rel) {
 	// of the initial token on the feedback arc.
 	// FIXME: for now we assume initial tokens are always FALSE.
 	if (cond->selfLoop() && rel == BDF_FALSE) {
-		cerr << "Avoiding making 'if' out of " << name() << "\n";
+//		cerr << "Avoiding making 'if' out of " << name() << "\n";
 		return 0;
 	}
 	return cond;
@@ -1212,48 +1264,42 @@ ostream& BDFClusterBag::printOn(ostream& o) {
 	return printPorts(o);
 }
 
-// FORCE is a special input that causes the cluster to simulate execution
-// even if it has already been executed "enough times"
-static const int FORCE = 2;
-
-// simulate the execution of the bag cluster.  We do not generate its
-// internal schedule until it becomes runnable, so that the "real stars"
-// will be executed in the right order (since simRunStar is called to
-// generate the schedule).
-
-// ? what about conditionals ?
-
-int BDFClusterBag::simRunStar(int deferFiring) {
-	// handle FORCE input
-	if (deferFiring == FORCE)
-		noTimes = 0;
-	int status = DataFlowStar::simRunStar(deferFiring);
-	if (status == 0) {
-		int nRun = loop();
-		if (sched == 0) {
-			genSched();
-			nRun -= 1;
-		}
-		if (nRun == 0) return status;
-		SDFSchedIter nextStar(*sched);
-		for (int i = 0; i < nRun; i++) {
-			nextStar.reset();
-			DataFlowStar* s;
-			while ((s = nextStar++) != 0)
-				s->simRunStar(FORCE);
-		}
+// propagate buffer sizes downward to set sizes of cluster-boundary
+// buffers.
+void BDFClusterBag::fixBufferSizes(int nReps) {
+	// account for looping of this cluster
+	// we need not worry about pCond, it does not affect the size.
+	nReps *= loop();
+	// pass down sizes of external buffers.
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort* p;
+	while ((p = nextPort++) != 0) {
+		BDFClustPort* in = p->inPtr();
+		int n = p->maxArcCount();
+		in->setMaxArcCount(n);
 	}
-	return status;
+	BDFClusterBagIter nextClust(*this);
+	BDFCluster* c;
+	while ((c = nextClust++) != 0)
+		c->fixBufferSizes(nReps);
 }
 
-// create internal schedule in the bag.
+// generate internal schedules
 int BDFClusterBag::genSched() {
 	if (sched) return TRUE;
 	LOG_NEW; sched = new BDFBagScheduler;
 	sched->setGalaxy(*gal);
 	sched->setup();
-	return !Scheduler::haltRequested();
+	if (Scheduler::haltRequested()) return FALSE;
+	// generate sub-schedules.
+	BDFClusterBagIter nextClust(*this);
+	BDFCluster* c;
+	while ((c = nextClust++) != 0) {
+		if (!c->genSched()) return FALSE;
+	}
+	return TRUE;
 }
+
 
 // indent by depth tabs.
 static const char* tab(int depth) {
@@ -1597,6 +1643,41 @@ void BDFAtomCluster::runInner() {
 	}
 }
 
+// set the buffer sizes of the actual buffers -- we can pass down all
+// but the self-loops.
+// A self-loop buffer size is just numInitDelays * numXfer.
+// For a wormhole boundary, the size is nReps * numXfer (the
+// total # moved throughout the execution of the schedule).
+void BDFAtomCluster::fixBufferSizes(int nReps) {
+	// # times real star is executed
+	nReps *= loop();
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort *cp;
+	while ((cp = nextPort++) != 0) {
+		DFPortHole& rp = cp->real();
+		int sz = cp->maxArcCount();
+		rp.setMaxArcCount(sz);
+	}
+	// set repetitions: only includes constant term
+	pStar.repetitions = Fraction(nReps,1);
+	// may need to set self-loops separately
+	if (numberPorts() == pStar.numberPorts()) return;
+	DFStarPortIter nextReal(pStar);
+	DFPortHole *dp;
+	while ((dp = nextReal++) != 0) {
+		if (dp->atBoundary()) {
+			int siz = dp->numXfer() * nReps;
+			dp->setMaxArcCount(siz);
+		}
+		if (dp->far()->parent() == &pStar) {
+			// self-loop! bufsize = #init + #write
+			int siz = dp->numInitDelays() + dp->numXfer();
+			dp->setMaxArcCount(siz);
+		}
+	}
+}
+
+
 int BDFAtomCluster::myExecTime() {
 	return pLoop * pStar.myExecTime();
 }
@@ -1678,12 +1759,15 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 		// top level is SDF.
 		SDFScheduler::repetitions();
 		status = SDFScheduler::computeSchedule(*cgal);
+		if (status) {
+			if (logstrm)
+				*logstrm << "Generate subschedules, propagate buffer sizes\n";
+			cgal->genSubScheds();
+			if (logstrm)
+				*logstrm << "Schedule:\n" << displaySchedule();
+		}
 	}
-	if (logstrm) {
-		if (status)
-			*logstrm << "Schedule:\n" << displaySchedule();
-		LOG_DEL; delete logstrm;
-	}
+	if (logstrm) { LOG_DEL; delete logstrm; }
 	return status;
 }
 
@@ -1716,12 +1800,8 @@ int BDFClustSched::handleDynamic(Galaxy& gal) {
 				"\nDynamic execution would b");
 		return FALSE;
 	}
-#if 1
-	Error::abortRun("Dynamic execution not yet implemented");
-	return FALSE;
-#else
 	LOG_DEL; delete dynSched;
-	LOG_NEW; dynSched = new DFDynScheduler;
+	LOG_NEW; dynSched = new DynDFScheduler;
 	dynSched->setGalaxy(*cgal);
 	// create schedules for each cluster
 	BDFClusterGalIter nextClust(*cgal);
@@ -1729,13 +1809,10 @@ int BDFClustSched::handleDynamic(Galaxy& gal) {
 	while ((c = nextClust++) != 0) c->genSched();
 	dynSched->setup();
 	return !haltRequested();
-#endif
 }
 
 int BDFClustSched::run() {
-#if 0
 	if (dynSched) return dynSched->run();
-#endif
 	return BDFScheduler::run();
 }
 
@@ -1752,46 +1829,72 @@ StringList BDFBagScheduler::displaySchedule(int depth) {
 // The following functions are used in code generation.  Work is
 // distributed among the two scheduler and two cluster classes.
 void BDFClustSched::compileRun() {
-//	StringList code;
-//	Target& target = getTarget();
-//	BDFSchedIter next(mySchedule);
-//	BDFCluster* c;
-//	while ((c = (BDFCluster*)next++) != 0) {
-//		c->genCode(target,1);
-//	}
+	Target& targ = target();
+	SDFSchedIter next(SDFScheduler::mySchedule);
+	BDFCluster* c;
+	while ((c = (BDFCluster*)next++) != 0) {
+		c->genCode(targ,1);
+	}
 }
 
 void BDFAtomCluster::genCode(Target& t, int depth) {
+	if (pCond) {
+		DFPortHole& condPort = pCond->innermost()->real();
+		t.beginIf(condPort,pType==DO_IFTRUE,depth++,0);
+	}
 	if (loop() > 1) {
+		t.genLoopInit(real(),loop());
 		t.beginIteration(loop(), depth);
 		t.writeFiring(real(), depth+1);
 		t.endIteration(loop(), depth);
+		t.genLoopEnd(real());
 	}
 	else t.writeFiring(real(), depth);
+	if (pCond)
+		t.endIf(--depth);
+}
+
+void BDFAtomCluster::genLoopInit(Target& t, int reps) {
+	t.genLoopInit(real(), reps);
+}
+
+void BDFAtomCluster::genLoopEnd(Target& t) {
+	t.genLoopEnd(real());
 }
 
 void BDFClusterBag::genCode(Target& t, int depth) {
+	BDFClusterBagIter nextClust(*this);
+	BDFCluster* c;
+	if (pCond) {
+		DFPortHole& condPort = pCond->innermost()->real();
+		t.beginIf(condPort,pType==DO_IFTRUE,depth++,0);
+	}
 	if (loop() > 1) {
-		t.beginIteration(loop(), depth);
-		depth++;
+		while ((c = nextClust++) != 0)
+			c->genLoopInit(t,loop());
+		t.beginIteration(loop(), depth++);
 	}
 	sched->genCode(t, depth);
 	if (loop() > 1) {
-		depth--;
-		t.endIteration(loop(), depth);
+		t.endIteration(loop(), --depth);
+		nextClust.reset();
+		while ((c = nextClust++) != 0)
+			c->genLoopEnd(t);
 	}
+	if (pCond)
+		t.endIf(--depth);
 }
 
 void BDFBagScheduler::genCode(Target& t, int depth) {
-//	BDFSchedIter next(mySchedule);
-//	BDFCluster* c;
-//	while ((c = (BDFCluster*)next++) != 0) {
-//		c->genCode(t, depth);
-//	}
+	SDFSchedIter next(mySchedule);
+	BDFCluster* c;
+	while ((c = (BDFCluster*)next++) != 0) {
+		c->genCode(t, depth);
+	}
 }
 
 // return true if star can be scheduled data-independently, because
-// all condtional ports have conditions and rates that match neighbors.
+// all conditional ports have conditions and rates that match neighbors.
 int BDFCluster::dataIndependent() {
 	BDFClustPortIter nextp(*this);
 	BDFClustPort *p;
@@ -1837,6 +1940,21 @@ void BDFWhileLoop::runInner() {
 	}
 }
 
+void BDFWhileLoop::fixBufferSizes(int nReps) {
+	nReps *= loop();
+	// pass down sizes of external buffers.
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort* p;
+	while ((p = nextPort++) != 0) {
+		BDFClustPort* in = p->inPtr();
+		int n = p->maxArcCount();
+		in->setMaxArcCount(n);
+	}
+	// now fix inner clusters.
+	a->fixBufferSizes(nReps);
+	if (b) b->fixBufferSizes(nReps);
+}
+
 // Output schedule as a do-while.
 
 StringList BDFWhileLoop::displaySchedule(int depth) {
@@ -1865,15 +1983,19 @@ StringList BDFWhileLoop::displaySchedule(int depth) {
 	return sch;
 }
 
-void BDFWhileLoop::genCode(Target&, int) {
-	Error::abortRun(*this," genCode not yet implemented");
+void BDFWhileLoop::genCode(Target& t, int depth) {
+	t.beginDoWhile(depth);
+	a->genCode(t,depth+1);
+	if (b) b->genCode(t,depth+1);
+	DFPortHole& condPort = pCond->innermost()->real();
+	t.endDoWhile(condPort,pType == DO_UNTILFALSE,depth);
 }
 
 // Build a BDFWhileLoop.  It has one or two member clusters, which
 // are pulled out of the parent galaxy.
 
 BDFWhileLoop::BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
-			   BDFCluster* first,BDFCluster* second=0)
+			   BDFCluster* first,BDFCluster* second)
 : a(first), b(second) {
 	pType = (t == BDF_TRUE ? DO_UNTILTRUE : DO_UNTILFALSE);
 	pCond = cond;
