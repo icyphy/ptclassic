@@ -31,8 +31,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(order) {
-	move	$ref(lower),y0			; y0 = lower input
-	move	$ref(upper),x0	y0,a		; x0 = upper input
+	move	$ref(lower),a			; a = lower input
+	move	$ref(upper),x0	a,y0		; x0 = upper input, y0 = a
 	cmp	x0,a	x0,b			; compare upper to lower
 	tlt	x0,a			; a holds lesser value
 	tlt	y0,b			; b holds greater value

@@ -111,9 +111,9 @@ non-zero integer (not necessarily 1).
 	// General cases
 
 	codeblock(prepareAndLoop) {
-	clr	b	$ref(input#1),a			; b = FALSE
-	move	#<$addr(input#1)+1,r0	b,y0	; r0 = input block address
-	move	a,b
+	clr	b	$ref(input#1),a		; a = input#1
+	move	#<$addr(input#1)+1,r0		; r0 = input block address + 1
+	move	a,b	b,y0			; y0 = FALSE
 	}
 
 	codeblock(logicAndOpAndLoad,"int numinputs") {
