@@ -44,41 +44,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // constructor
 CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
-                   const char* desc) : CGCTarget(name,starclass,desc) {
+                   const char* desc) : CGCMakefileTarget(name,starclass,desc) {
 	funcName.setInitValue("go");
 	StringList compOpts =
-		  "-I$PTOLEMY/tcltk/tk/include -I$PTOLEMY/tcltk/tcl/include "
-		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib "
-		  "-I$PTOLEMY/src/ptklib";
+	          "$(X11_INCSPEC) -I$(TK_INCDIR) -I$(TCL_INCDIR) "
+		  "-I$(TK_INCDIR) -I$(PTOLEMY)/src/domains/cgc/tcltk/lib "
+		  "-I$(PTOLEMY)/src/ptklib -I$(ROOT)/src/domains/cgc/rtlib";
 	// There is no point in including X11 directories here,
 	// since they will be different for each platform.
 	compileOptions.setInitValue(hashstring(compOpts));
 
-	// Note that as a last resort, a guess at the X11 library is given
 	StringList linkOpts =
-		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
-		  "-L$PTOLEMY/tcltk/tcl.$ARCH/lib "
-		  "-L$PTOLEMY/lib.$ARCH "
-		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
-		  "-L/usr/X11/lib "
-		  "-ltk -ltcl -lptk -lX11 -lsocket -lnsl -lm";
+		  "$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib"
+		  "$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)";
+
 	linkOptions.setInitValue(hashstring(linkOpts));
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
 	addStream("tkSetup", &tkSetup);
-}
-
-// Modify the compile line
-StringList CGCTclTkTarget :: compileLine(const char* fName) {
-    // If the appropriate environment variable is defined,	
-    // include the location of the X11 directories.
-    char *x11dirstring = getenv("PTX11DIR");
-    if (x11dirstring) {
-	compileOptionsStream << " -I" << x11dirstring << "/include ";
-	linkOptionsStream << " -L" << x11dirstring << "/lib ";
-    }
-    return CGCTarget::compileLine(fName);
 }
 
 void CGCTclTkTarget :: initCodeStrings() {
@@ -133,7 +117,7 @@ CodeStream CGCTclTkTarget::mainLoopBody() {
 	 << iterator << "=0;\n"
 	 << "while (" << iterator << "++ != numIterations) {\n"
 	 << mainLoopInit << mainLoop << "}} /* MAIN LOOP END */\n"
-	 <<  mainLoopTerm;
+	 << mainLoopTerm;
 
     defaultStream = &myCode;
     return body;
