@@ -61,8 +61,7 @@ proc ptkTychoLoadFSM { file } {
     set classname [file tail [file rootname $file]]
 
     if [::tycho::registry isopen $file] {
-	set winName [lindex [::tycho::registry windows $filename] 0]
-
+	set winName [lindex [::tycho::registry windows $file] 0]
     } else {
       	# File is not open yet , then open a new window.
 	# Look ::tycho::view in "Displayer.itcl" to see how to
@@ -72,7 +71,6 @@ proc ptkTychoLoadFSM { file } {
         # To make sure the data are there before we invoke ptkCompile 
         $winName reload
     }
-
     $winName ptkCompile
 
     # Successfully loading & return the classname 
