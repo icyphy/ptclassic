@@ -117,8 +117,11 @@ void GenericPort::setAlias (GenericPort& gp) {
 
 
 PortHole& GenericPort :: newConnection () {
-	// my apologies for this horrible cast
-	return *(PortHole *)&realPort();
+	// first resolve aliases.
+	GenericPort& real = realPort();
+	if (!real.isItMulti()) return (PortHole&)real;
+	// Alias points to a MPH.  Use its newConnection method.
+	return real.newConnection();
 }
 
 // translate aliases, if any.
@@ -558,7 +561,8 @@ MultiPortHole :: setResolvedType (DataType useType) {
     myResolvedType = typePort()->setResolvedType(useType);
     return myResolvedType;
   } else {
-    return 0;
+    if (useType) return 0;
+    else return myResolvedType;
   }
 }
 
