@@ -1,9 +1,36 @@
-/* $Id$ */
+/* Version Identification:
+ * $Id$
+ */
+/* Copyright (c) 1990-1993 The Regents of the University of California.
+ * All rights reserved.
+ * 
+ * Permission is hereby granted, without written agreement and without
+ * license or royalty fees, to use, copy, modify, and distribute this
+ * software and its documentation for any purpose, provided that the above
+ * copyright notice and the following two paragraphs appear in all copies
+ * of this software.
+ * 
+ * IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+ * FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ * ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+ * THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+ * SUCH DAMAGE.
+ * 
+ * THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+ * INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+ * MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+ * PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+ * CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ * ENHANCEMENTS, OR MODIFICATIONS.
+ * 
+ */
+
 #include "port.h"
 #include "utility.h"
 #include "options.h"
 #include "oct.h"
 #include "oh.h"
+#include "errtrap.h"
 #include <pwd.h>
 
 #define PATHNAMESIZE       2048
@@ -167,12 +194,13 @@ replaceInstance(newInst, oldInst, force)
 }
 
 
+int
 main(argc, argv)
 int argc;
 char **argv;
 {
     char *input_name, *newpath, *oldpath;
-    octObject outfacet, instance, newinstance;
+    octObject instance, newinstance;
     octGenerator gen;
     int oldlen;
     int option;
@@ -183,7 +211,7 @@ char **argv;
     int subst = 0;		/* Number of substitutions. */
     extern int optind;
     extern char *optarg;
-    char* filename[PATHNAMESIZE];
+    char filename[PATHNAMESIZE];
     FILE* pipe;
 
     /* make sure the PTOLEMY environment variable is set. If not, set it. */
@@ -332,5 +360,5 @@ char **argv;
             OH_ASSERT(octCloseFacet(&facet));
 	}
     }
-    exit(0);
+    return 0;
 }
