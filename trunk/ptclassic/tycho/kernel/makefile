@@ -42,6 +42,7 @@ include $(CONFIG)
 
 TCL_SRCS = \
 	Color.tcl \
+	Defaults.tcl \
 	Lib.tcl \
 	Path.tcl \
 	tychoMakeClassDAG.tcl
