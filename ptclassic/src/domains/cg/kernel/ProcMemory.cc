@@ -169,7 +169,7 @@ int LinProcMemory::performAllocation() {
 	return TRUE;
 }
 
-static share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
+static unsigned share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 	unsigned s = max(xa,ya);
 	unsigned end = min(xa+xl,ya+yl);
 	return max(end,s) - s;
@@ -222,7 +222,7 @@ int DualMemory::performAllocation() {
 	newMem.addChunk(yAddr,sAddr-yAddr);
 	newMem.addChunk(yAddr+yLen,sAddr+sLen-yAddr-yLen);
 	y.copyMem(newMem);
-	if (!y.performAllocation()) return FALSE;
+	return y.performAllocation();
 }
 
 void DualMemory::reset() {
