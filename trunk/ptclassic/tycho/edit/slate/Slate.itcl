@@ -162,7 +162,7 @@ class ::tycho::Slate {
     method _selection {option {id {}} {index {}}}
 
     # Animate movement of an item
-    method animate {tagOrID x y args}
+    method animate {mode {tagOrID {}} {x {}} {y {}} args}
 
     # Align and distribute items
     method align {where args}
@@ -260,8 +260,8 @@ class ::tycho::Slate {
     ###################################################################
     ####                    private variables                      ####
 
-    # The slate's animator
-    private variable animator
+    # A list of active Animator objects
+    private variable animators ""
 
     # The slate's selector
     private variable selector
@@ -323,37 +323,99 @@ body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
 # mechanism that creates an instance of the Animator class
 # to perform animation. The animator object is set up to
 # move or reshape the item by the given coordinates
-# _x_ and _y_ coordinates.  Additional arguments
-# are either passed to the Animator object's constructor
-# or are used to activate the interactor. To move an object,
-# just execute:
+# _x_ and _y_ coordinates.  The _mode_ argument can have
+# the following values:
+# <ul>
+# <li><b>move</b>: Move the item.
+# <li><b>reshape</b>: Reshape the item. The additional arguments
+# must contain a *-aspects* option for this to work correctly.
+# <li><b>wait</b>: Wait until animation completes. Note that
+# the animate{} method returns immediately, and the animation
+# proceeds in the background. To perform a series oa animations,
+# insert <code>animate wait</code> calls.
+# <li><b>done</b>: This is for use by the animation code itself.
+# _Do not use_.
+# </ul>
+# To move an object, just execute:
 # <pre>
-#   $slate animate $id 50 50
+#   $slate animate move $id 50 50
 # </pre>
 # To reshape an object, execute something like:
 # <pre>
-#   $slate animate $id 50 50 -prefix reshape vertex-1
+#   $slate animate reshape $id 50 50 -aspects vertex-1
 # </pre>
+# Here is a more complex example:
 #
-body ::tycho::Slate::animate {tagOrID x y args} {
-    # Mess around with arguments
-    set cargs {}
-    array set opts $args
-    foreach o {prefix clickprefix dragprefix releaseprefix
-    activatecommand deactivatecommand dragcommand
-    distance duration interval} {
-	if [::info exists opts(-$o)] {
-	    lappend cargs -$o $opts(-$o)
-	}
+# <pre><tcl quiet>
+# set s [[::tycho::view TCanvas] component slate]
+# set f [$s create Frame 50 50 100 100 -color green]
+# set a [$s create Solid 150.0 60.0 182.0 60.0 &#92
+#         182.0 44.0 214.0 76.0 182.0 108.0 182.0 &#92
+#         92.0 150.0 92.0 150.0 60.0 &#92
+#         -color red]
+# update
+# after 1000
+# $s animate move $f 100 100
+# $s animate move $a 50 50 -duration 500
+# $s animate wait
+# $s animate reshape $f 100 100 -aspects se -interval 200 
+# $s animate wait
+# $s animate reshape $f 100 100 -aspects nw -duration 2000
+# $s animate reshape $a 100 0 &#92
+#         -aspects {vertex-1 vertex-2 vertex-3 vertex-4 vertex-5} &#92
+#         -duration 2000
+# $s animate wait
+# $s animate move $f -200 -200 -ghost 1
+# $s animate reshape $a 100 0 &#92
+#         -aspects {vertex-0 vertex-6}
+# </tcl></pre>
+#
+body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
+    switch -exact $mode {
+        "move" -
+        "reshape" {
+            # Mess around with arguments
+            set cargs {}
+            array set opts $args
+            foreach o {prefix clickprefix dragprefix releaseprefix
+            activatecommand deactivatecommand dragcommand
+            distance duration interval} {
+                if [::info exists opts(-$o)] {
+                    lappend cargs -$o $opts(-$o)
+                }
+            }
+            set args [array get opts]
+            
+            # Create the Animator
+            set animator [eval [list interactor Animator \
+                    -distance [list $x $y] \
+                    -prefix [list $this $mode]] \
+                    $cargs]
+            lappend animators $animator
+            $animator configure \
+                    -deactivatecommand "$this animate done $animator"
+
+            # Activate it
+            eval $animator activate $tagOrID 0 0 $args
+        }
+        "wait" {
+            # Wait until animation completes
+            while { $animators != "" } {
+                ::tycho::safeUpdate $this
+            }
+        }
+        "done" {
+            set t [lsearch -exact $animators $tagOrID]
+            if { $t < 0 } {
+                # uh-oh.... just print a message
+                puts "Uh-oh... bogus animator $tagOrID"
+            }
+            set animators [lreplace $animators $t $t]
+        }
+        default {
+            error "Invalid option \"$mode\""
+        }
     }
-    set args [array get opts]
-    
-    # Create the Animator
-    set animator [eval [list interactor Animator \
-	    -distance [list $x $y]] $cargs]
-    
-    # Activate it
-    eval $animator activate $tagOrID 0 0 $args
 }
 
 #######################################################################
