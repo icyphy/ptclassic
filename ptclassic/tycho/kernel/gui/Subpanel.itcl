@@ -145,6 +145,9 @@ class ::tycho::Subpanel {
     # Specify the text to be inserted in the subpanel label
     itk_option define -text subpanelTitle SubpanelTitle ""
 
+    # The character to underline and bind in the text.
+    itk_option define -underline underline Underline {}
+
     ###################################################################
     ####                        public methods                     ####
 
@@ -153,6 +156,9 @@ class ::tycho::Subpanel {
 
     # Open a subpanel.
     method open {}
+
+    # Toggle the state of the subpanel.
+    method toggle {}
 
     ###################################################################
     ####                       private variables                   ####
@@ -274,6 +280,25 @@ configbody ::tycho::Subpanel::state {
 configbody ::tycho::Subpanel::text {
 
     $itk_component(title) configure -text $itk_option(-text)
+}
+
+#######################################################################
+#### -underline configuration
+# The character in the title of the subpanel to underline and bind.
+#
+configbody ::tycho::Subpanel::underline {
+
+    set ul $itk_option(-underline)
+    if {$ul != {}} {
+        $itk_component(title) configure -underline $ul
+        set char [string index $itk_option(-text) $ul]
+        if {$char != {}} {
+            # Bind to the top level.
+            set tl [winfo toplevel $itk_component(hull)]
+            bind $tl <Key-[string tolower $char]> \
+                    "$this toggle; break"
+        }
+    }
 }
 
 #######################################################################
@@ -422,14 +447,15 @@ body ::tycho::Subpanel::open {} {
     configure -state open
 }
 
-
-
-
-
-
-
-
-
-
-
-
+#####################################################################
+#### toggle 
+# Toggle the state of the subpanel.  That is, if it is open, close it.
+# If it is closed, open it.
+#
+body ::tycho::Subpanel::toggle {} {
+    if {[cget -state] == {open}} {
+        close
+    } else {
+        open
+    }
+}
