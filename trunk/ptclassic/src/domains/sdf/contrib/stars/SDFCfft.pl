@@ -12,7 +12,7 @@ Compute the complex FFT.
 <i>InputSize</i> is number of input samples.
 <i>fftSize</i> is the size of FFT.
 Zero padding is used if
-fftSize > InputSize
+fftSize &gt; InputSize
 Inverse FFT is used if <i>Inverse</i> is 1.
 Use Hamming window if <i>UseWindow</i> is true.
 	}
