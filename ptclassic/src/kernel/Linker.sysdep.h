@@ -115,7 +115,7 @@ const int linkingNotSupported =
 #endif // PTSOL2
 #endif // PTIRIX5
 
-#if defined(PTHPPA) &&  __GNUG__ > 1
+#if defined(PTHPPA) &&  __GNUG__ > 1 && defined(USE_SHLLOAD)
 // Define USE_SHLLOAD for Neal Becker's HPPA shl_load() style
 // dynamic linking.  You can add -DUSE_SHLLOAD to MISCCFLAGS in 
 // $PTOLEMY/mk/config-hppa.mk
@@ -123,7 +123,6 @@ const int linkingNotSupported =
 // As of 4/95 the linker patch was PHSS_5083* for hpux9.x
 // gcc-2.7.2 under HPUX10.01 cannot create shared libraries, so this
 // might not work.
-#ifdef USE_SHLLOAD
 #define SHARED_OBJECT_COMMAND "g++ -shared -fPIC -nostdlib -o"
 #include <dl.h>
 #include <errno.h>
