@@ -177,7 +177,7 @@ body ::tycho::MenuBar::delete {name} {
     # See if it's a top-level menu
     if { [::info exists itk_component(menu$name)] } {
 	# Delete a top-level menu
-	clear $itk_component(menu$name)
+	clear $name
 
 	destroy $itk_component(menu$name)
 	destroy $itk_component(menuButton$name)
