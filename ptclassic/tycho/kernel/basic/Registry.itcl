@@ -826,7 +826,7 @@ body ::tycho::Registry::registerHelp {name args} {
     if [::info exists opts(-before)] {
     	set t [lsearch -exact $_helpentries() $name]
     	if { $t >= 0 } {
-	    set $_helpentries() [linsert $_helpentries() $t $name]
+	    set _helpentries() [linsert $_helpentries() $t $name]
     	} else {
 	    lappend _helpentries() $name
     	}
