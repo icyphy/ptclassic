@@ -235,7 +235,7 @@ Linker::genHeader (const char* objName) {
 // Open a pipe to "nm" to get symbol information
 	char command[256];
 	char* sym = 0;
-	sprintf (command, "/bin/nm -g %s", objName);
+	sprintf (command, "%s -g %s", NM_PROGRAM, objName);
 	FILE* fd = popen (command, "r");
 	if (fd == 0) {
 		Error::abortRun("Linker: can't exec '/bin/nm' command");
