@@ -204,6 +204,7 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 		    $name != {lang} && \
 		    $name != {src} && \
 		    $name != {test} && \
+		    $name != {iwidgets3.0.0} && \
 		    $name != $objdir } {
 		set subfiles [tychoFindAllHTML [file join $dirname $name] \
 			[expr $depth + 1]]
@@ -257,6 +258,7 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 		    $name != {test} && \
 		    $name != {src} && \
 		    $name != {tyjava} && \
+		    $name != {iwidgets3.0.0} && \
 		    $name != $objdir } {
 		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
 			[expr $depth + 1]]
