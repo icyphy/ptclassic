@@ -72,7 +72,7 @@ indices:
 
 # If JAVAHOME is not set, then don't go down into the java directory
 makefiles all clean depend realclean checkjunk sccsinfo sccsclean itcldocs \
-	tests idocs extraclean weblint:
+	tests idocs extraclean weblint dists:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		if [ $$x = "java" ]; then \
