@@ -56,6 +56,7 @@ extern void SetIterateProp();
 extern boolean IsUnivFacet();
 extern boolean IsBus();
 extern boolean MyOpenMaster();
+extern boolean OpenFacet();
 
 
 /* FIXME: These Functions are NOT defined in octIfc.c */
