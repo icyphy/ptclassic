@@ -104,7 +104,7 @@ one-character directives in the state parser.
 	DataType intype = returnDataType(inDataType);
 	if ( intype == 0 ) {
 	    Error::abortRun(*this,
-			    "CGCExpr star does not support the type",
+			    "CGCExpr star does not support the type ",
 			    (const char*) inDataType);
 	    return;
 	}
@@ -113,7 +113,7 @@ one-character directives in the state parser.
 	DataType outtype = returnDataType(outDataType);
 	if ( outtype == 0 ) {
 	    Error::abortRun(*this,
-			    "CGCExpr star does not support the type",
+			    "CGCExpr star does not support the type ",
 			    (const char*) outDataType);
 	    return;
 	}
