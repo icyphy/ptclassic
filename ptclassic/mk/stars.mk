@@ -72,9 +72,9 @@ $(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
 $(LIBDIR)/libvhdlfstars.a $(LIBDIR)/libvhdlf.a \
 $(LIBDIR)/libvhdlbstars.a $(LIBDIR)/libvhdlb.a
 
-CP_LIBFILES= $(LIBFILES)/libcpstars.a $(LIBFILES)/libcpipstars.a \
+CP_LIBFILES= $(LIBDIR)/libcpstars.a $(LIBDIR)/libcpipstars.a \
 	$(LIBDIR)/libcp.a
-LWP_LIBFILES= $(LIBFILES)/liblwpthread.a
+LWP_LIBFILES= $(LIBDIR)/liblwpthread.a
 
 
 # CG-DDF no longer supported
