@@ -25,9 +25,9 @@
 # ENHANCEMENTS, OR MODIFICATIONS.
 #                                                         COPYRIGHTENDKEY
 ##########################################################################
-if {[info class Slider] != ""} {
-    delete class Slider
-}
+#if {[info class Slider] != ""} {
+#    delete class Slider
+#}
 
 
 
@@ -339,13 +339,13 @@ class ::tycho::Slider {
 
 ## constructor args
 #
-body Slider::constructor {args} {
+body ::tycho::Slider::constructor {args} {
 
     #
     # Create the slate on which everything gets drawn.
     #
     itk_component add slate {
-	slate $itk_interior.slate
+	::tycho::slate $itk_interior.slate
     } {
 	keep -background -cursor -relief \
 		-borderwidth
@@ -368,15 +368,11 @@ body Slider::constructor {args} {
     #
     ::set initialized 1
     redraw
-
-puts "$this done!"
-
 }
 
 ## redraw
 #
-body Slider::redraw {} {
-puts "$this redraw!"
+body ::tycho::Slider::redraw {} {
 
     #
     # Delete existing pictures
