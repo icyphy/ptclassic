@@ -29,6 +29,12 @@ static char SccsId[]="$Id$";
 #include <sys/file.h>
 #include "internal.h"
 
+#include "change_list.h"
+#include "bb.h"
+#include "io.h"
+#include "mark.h"
+#include "oct_files.h"
+#include "oct_utils.h"
 
 
 extern void fsys_close();	/* Used here and there. */
