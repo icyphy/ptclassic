@@ -2,6 +2,8 @@
 #define _PTK_H 1
 
 /* 
+Version: $Id$
+
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,27 +29,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-
-/*
-    ptk.h  aok
-    Version: $Id$
-*/
-
-/* Header files of Pigi TkCalls */
-
-/* Do the right thing for sol2 boolean defs.  compat.h must be included
- * first so sys/types.h is included correctly.
- */
-#include "sol2compat.h"
-
-/* the following fixes permit the "DECwindows" version of Xlib.h to work with
-   C++ */
-
-struct XSizeHints;
-struct XStandardColormap;
-struct XTextProperty;
-struct XWMHints;
-struct XClassHint;
 
 #include "tcl.h"
 
