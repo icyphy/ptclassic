@@ -305,7 +305,7 @@ int CGStar::processMacro(StringList& list, const char*& t) {
 		temp[length] = '\0';
 		strncpy(temp,start,length);
 	    	list << temp;
-		delete temp [];
+		delete [] temp; 
 	    }
 	}
     }
