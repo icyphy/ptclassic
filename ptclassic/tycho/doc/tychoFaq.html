@@ -144,8 +144,10 @@ that Itcl runs under.
 
  <P>Tycho has been run
 under WindowsNT, but some of the features that use <CODE>exec</CODE> are
-broken.  The Macintosh port requires Itcl2.2p2, which, as of 5/97 has not
-yet been released by Lucent.
+broken.
+ <P> The Macintosh port requires Itcl2.2p2, the prebuilt Itcl2.2
+binaries will not work.  The Macintosh port is basically untested.
+
 
 <DT> <A NAME="installation, what do I need"><B>2.3 What do I need to Install Tycho?</B></A>
 <DD> 
@@ -158,15 +160,19 @@ yet been released by Lucent.
 	<LI> Solaris2, SunOs and HPUX 10.x binaries can be obtained
 	from <A HREF="http://ptolemy.eecs.berkeley.edu"><CODE>http://ptolemy.eecs.berkeley.edu</CODE></A>
 
-	<LI> On the Macintosh, Tycho 0.2 requires Itcl2.2p2, which is
-	not yet released
+	<LI> On the Macintosh, Tycho 0.2 requires Itcl2.2p2.
 	</MENU>
 
-	
-	<LI> To use the Tcljava interface, you will need JDK 1.1, which
+	<LI> To use the Tcljava interface, you will need JDK 1.1.1, which
 	can be downloaded from <A HREF="http://www.javasoft.com"><CODE>http://www.javasoft.com</CODE></A>.  Tcljava has been built on Solaris2.5.1, 
-	HPUX10.20 and Windows NT4.0.
+	and Windows NT4.0.
 
+	<LI> To use the Tcl Profiler, you will need the Tcl sources, as
+	the C file that implements the <CODE>profile</CODE> command
+	requires tclInt.h
+
+	<LI> To use TkSteal, you will need the Tk sources.  TkSteal
+	sources are not shipped with Tycho.
 	</MENU>
 
 
@@ -221,8 +227,7 @@ generated documentation and active Tcl examples.
 <DT> <A NAME="java, instead of Itcl"><B>3.3 Why didn't you use Java?</B></A>
 <DD> When we started Tycho, Java was still very new.  Currently, we
 don't know of a good canvas like Java class like the Tk canvas.  We'd
-rather not reinvent the wheel here and write our own Java canvas.  We
-are looking into integrating Java and Tycho using Sun's TclJava interface.
+rather not reinvent the wheel here and write our own Java canvas.
 
  <P> Also, we wanted to be able to provide an easily extensible
 environment for non-programmers, which makes an interpreted language
