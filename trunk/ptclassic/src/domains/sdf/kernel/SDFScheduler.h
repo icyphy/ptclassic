@@ -105,7 +105,10 @@ public:
 	// timing/interation control
 	void setStopTime (float limit);
 	void resetStopTime (float v);
-	int getStopTime () {return numIters;}
+
+	// stopping time is floating, in general, though it is always
+	// integral for SDF
+	float getStopTime () {return float(numIters);}
 
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
@@ -114,7 +117,7 @@ public:
         const char* domain() const;
 
 	// Generate code using the Target to produce the right language
-	StringList compileRun();
+	void compileRun();
 
 protected:
 	// Flag for errors detected while computing the schedule
