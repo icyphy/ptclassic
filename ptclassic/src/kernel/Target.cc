@@ -226,17 +226,6 @@ void Target::addChild(Target& newChild) {
 	nChildren++;
 }
 
-// inherit children
-void Target::inheritChildren(Target* father, int start, int stop) {
-	if (start < 0 || stop >= father->nProcs()) {
-		Error::abortRun(name(),
-			"inheritance fails due to indices out of range");
-		return;
-	}
-	children = father->child(start);
-	nChildren = stop - start + 1;
-}
-
 // delete all children; use only when children were dynamically created.
 void Target::deleteChildren() {
 	Target* p = children;

@@ -72,7 +72,7 @@ public:
 	virtual StringList displaySchedule();
 
 	// return the nth child Target, null if no children.
-	Target* child(int n);
+	virtual Target* child(int n);
 
 	// return the nth target, where I count as #0 if no children
 	Target* proc(int n) {
@@ -181,9 +181,6 @@ protected:
 
 	// add a new child
 	void addChild(Target&);
-
-	// add a inherited child
-	void inheritChildren(Target*, int, int);
 
 	// remove the "children" list (no effect on children)
 	void remChildren() { nChildren = 0; children = 0;}
