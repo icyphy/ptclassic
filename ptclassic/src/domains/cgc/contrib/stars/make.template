@@ -71,14 +71,11 @@ DOMAIN =	CGC_CONTRIB
 DOMAIN_2 =	CGC
 MISC_FILES =	#README README.notes
 
-EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES) override.mk
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS) $(MISC_FILES)
 
 all:		$(SRCS) stars_all
 
 install:	stars_install
-
-# allow CC_SHAREDFLAGS to be overridden (neal@ctd.comsat.com (Neal Becker))
--include $(VPATH)/override.mk
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
