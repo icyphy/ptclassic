@@ -328,7 +328,7 @@ proc tychoCodeDocIndex {} {
     cd $TYCHO
     # The code index is nested
     eval tychoMkTIMIndex {{Tycho Itcl Code Index}} \
-	    [list [file join $TYCHO lib idx codeDoc.idx]] 1 0 $files
+	    [list [file join $TYCHO lib idx codeDoc.idx]] 1 1 $files
     cd $olddir
 }
 
