@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "StringState.h"
 #include "StringArrayState.h"
 #include "IntState.h"
+#include "HashTable.h"		// To pick up the definition of TextTable
 
 class CGCPortHole;
 class CGCStar;
@@ -96,6 +97,19 @@ public:
 	// Splice in stars.
 	/*virtual*/ int modifyGalaxy();
 
+	// Functions defining the pragma mechanism. Currently used in
+	// CGC to support command-line arguments in the generated code.
+	/*virtual*/ StringList pragma () const {return "state_name_mapping STRING"; }
+	/*virtual*/ StringList pragma (const char* parentname,	
+				   const char* blockname) const;
+	/*virtual*/ StringList pragma (const char* parentname,	
+				   const char* blockname,	
+				   const char* pragmaname) const;
+	/*virtual*/ StringList pragma (const char* parentname,	
+				   const char* blockname,	
+				   const char* name,		
+				   const char* value);		
+
 protected:
 
 	/*virtual*/ void setup();
@@ -118,6 +132,13 @@ protected:
 	CodeStream wormIn;
 	CodeStream wormOut;
 	CodeStream mainClose;
+
+	// Four new CodeStreams to add in codes for command-line
+	// argument support.
+	CodeStream cmdargStruct;	
+	CodeStream cmdargStructInit;	
+	CodeStream setargFunc;		
+	CodeStream setargFuncHelp;	
 
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
@@ -170,6 +191,9 @@ private:
 	// setup forkDests list for all Fork input portholes
 	// This complete list is needed to decide the buffer size computation.
 	void setupForkDests(Galaxy&);
+
+	// Use this to store the pragmas set for the target.
+	TextTable* mappings;
 };
 
 #endif

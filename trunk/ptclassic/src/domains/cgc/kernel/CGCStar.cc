@@ -3,7 +3,7 @@ static const char file_id[] = "CGCStar.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "CGCTarget.h"		// To pick up the pragma method in CGCTarget.
 #include "CGCStar.h"
 #include "CGCGeodesic.h"
 #include "CGUtilities.h"
@@ -57,6 +58,39 @@ const char* CGCStar :: domain () const { return CGCdomainName;}
 // isA
 ISA_FUNC(CGCStar, CGStar);
 
+
+// This function checks whether "state" is to be set from a command-line
+// argument. If it is, returns the name to be specified on the command-
+// line. The function returns "" otherwise.
+
+char* isCmdArg(const State* state) {
+  int i = 0;
+  char temp[128];
+  StringList mapsList = state->parent()->target()->\
+    pragma(state->parent()->parent()->name(),
+	   state->parent()->name(),
+	   "state_name_mapping");
+  const char* maps = (const char*)mapsList;
+  maps = strstr(maps, state->name());
+
+  if (maps) {
+    while((!isspace(*maps)) && (*maps != '\0'))
+      maps++;
+
+    if (*maps != '\0')
+      while((isspace(*maps)) && (*maps != '\0'))
+	maps++;
+
+    if (*maps != '\0')
+      while ((!isspace(*maps)) && (*maps != '\0')) {
+	temp[i++] = *maps++;
+      }
+  }
+  temp[i] = '\0';
+  return temp;
+}
+    
+
 // substitute macros for fixed point variables
 StringList CGCStar::expandMacro(const char* func, const StringList& argList)
 {
@@ -74,6 +108,37 @@ StringList CGCStar::expandMacro(const char* func, const StringList& argList)
 
     return CGStar::expandMacro(func, argList);
 }
+
+// Expand State value macros. If "name" state can be set via command-
+// line argument, then change it to a reference and add it to the list
+// of referneced states.
+StringList CGCStar::expandVal(const char *name)
+{						
+  StringList ref;				
+  State* state;					
+						
+  if ((state = stateWithName(name)) != NULL)	
+    {						
+      if (*isCmdArg(state) != '\0')		
+	{					
+	  registerState(state);			
+						
+      	  ref << starSymbol.lookup(state->name());
+	}						
+      else						
+	{						
+	  ref << CGStar::expandVal(name);		
+	}						
+    }							
+							
+  else							
+    {							
+      codeblockError(name, " is not defined as a state");
+      ref.initialize();						
+    }								
+								
+  return ref;							
+}								
 
 // Reference to State or PortHole.
 // For references to states or ports of type FIX the reference is replaced
@@ -794,6 +859,72 @@ StringList CGCStar::declareStates(Attribute a)
     return dec;
 }
 
+// Declare 'struct' for states settable via command-line arguments
+StringList CGCStar::cmdargStates(Attribute a)
+{
+  StringList struct_mem;
+
+  State* state;
+  StateListIter stateIter(referencedStates);
+  while ((state = stateIter++) != NULL)
+    {
+      if (state->attributes() == a)
+	struct_mem << cmdargState(state);
+    }
+
+    return struct_mem;
+}
+
+// Initialize the 'struct' declared above to the default values.
+StringList CGCStar::cmdargStatesInits(Attribute a)
+{
+  StringList struct_init;
+
+  State* state;
+  StateListIter stateIter(referencedStates);
+  while ((state = stateIter++) != NULL)
+    {
+      if (state->attributes() == a)
+	struct_init << cmdargStatesInit(state);
+    }
+
+    return struct_init;
+}
+
+// Define the function codes to set the appropriate 'struct'
+// member to that specified on the command-line.
+StringList CGCStar::setargStates(Attribute a)		
+{
+  StringList setarg_proc;
+
+  State* state;
+  StateListIter stateIter(referencedStates);
+  while ((state = stateIter++) != NULL)
+    {
+      if (state->attributes() == a)
+	setarg_proc << setargState(state);
+    }
+
+    return setarg_proc;
+}
+
+// Define the '-help' option by adding each settable states
+// and their default values.
+StringList CGCStar::setargStatesHelps(Attribute a)	
+{
+  StringList arg_help;
+
+  State* state;
+  StateListIter stateIter(referencedStates);
+  while ((state = stateIter++) != NULL)
+    {
+      if (state->attributes() == a)
+	arg_help << setargStatesHelp(state);
+    }
+
+    return arg_help;
+}
+
 // Generate initialization code for State data structures.
 StringList CGCStar::initCodeStates(Attribute a)
 {
@@ -1045,6 +1176,75 @@ StringList CGCStar::declareState(const State* state)
     return dec;
 }
 
+// Declare the state variable as a 'struct' member.
+StringList CGCStar::cmdargState(const State* state)
+{
+  StringList struct_mem;
+  char temp[128];
+
+  strcpy(temp, isCmdArg(state));
+  if (*temp != '\0') {
+    if (state->isA("IntState"))
+      struct_mem << "\tint";
+    else struct_mem << "\tdouble";
+
+    struct_mem << " " << temp;
+    struct_mem << ";\n";
+  }
+
+  return struct_mem;
+}
+
+// Initialize the 'struct' member as declared above.
+StringList CGCStar::cmdargStatesInit(const State* state)
+{
+  StringList struct_init;
+  char temp[128];
+
+  strcpy(temp, isCmdArg(state));
+  if (*temp != '\0') {
+    struct_init << state->currentValue() << ", ";
+  }
+
+  return struct_init;
+}
+
+// Generate code segment to set the 'struct' member using
+// command-line specified values.
+StringList CGCStar::setargState(const State* state)	
+{
+  StringList setarg_proc;
+  char temp[128];
+
+  strcpy(temp, isCmdArg(state));
+  if (*temp != '\0') {
+    setarg_proc << "\t\t\tif(!strcmp(arg[i], \"-" << temp << "\")) {\n";
+    setarg_proc << "\t\t\t\tif(arg[i+1])\n";
+    setarg_proc << "\t\t\t\t\targ_store." << temp << "=";
+    if(state->isA("IntState"))
+      setarg_proc << "atoi";
+    else setarg_proc << "atof";
+    setarg_proc << "(arg[i+1]);\n\t\t\t\tcontinue;\n\t\t\t}\n";
+  }
+
+  return setarg_proc;
+}
+
+// Adds each settable state and their default values to the
+// code segment that generates the help message.
+StringList CGCStar::setargStatesHelp(const State* state)
+{
+  StringList arg_help;
+  char temp[128];
+
+  strcpy(temp, isCmdArg(state));
+  if (*temp != '\0') {
+    arg_help << "\t" << temp << "\\tdefault : " << state->currentValue() << "\\\n\\n";
+  }
+
+  return arg_help;
+}
+  
 // Generate initialization code for State variable.
 
     // initializer classes for method CGCStar::initCodeState() [JW 1994]
@@ -1178,8 +1378,20 @@ StringList CGCStar::declareState(const State* state)
 StringList CGCStar::initCodeState(const State* state)
 {
     StringList code;
-    StringList val = state->currentValue();
+    StringList val;
+    char state_name[128];
+    
     StringList name = starSymbol.lookup(state->name());
+    
+    // If "state" is to be setted using command-line arguments,
+    // initialize it from the 'struct' member.
+    strcpy(state_name, isCmdArg(state));
+    if ((*state_name != '\0')) {	
+      val = "arg_store.";		
+      val << state_name;		
+    }					
+    else				
+      val = state->currentValue();	
 
     if (state->isArray())	// Array initialization.
     {
