@@ -47,8 +47,7 @@ MISC_FILES =	\
 	README.files \
 	copyright \
 	.glimpse_exclude \
-	pkgIndex.tcl \
-	tycho.tcl
+	pkgIndex.tcl
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 # You probably don't want to add $(SRCS) to this, rather, change
