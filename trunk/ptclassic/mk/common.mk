@@ -239,7 +239,7 @@ clean:
 realclean:
 	rm -f $(CRUD) $(LIB) $(CLIB) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(REALCLEAN_STUFF)
 
-DEPEND_INCL=$(INCL) $(C_INCL)
+DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 
 depend:		$(SRCS) $(HDRS)
 # We use a GNU make conditional here
