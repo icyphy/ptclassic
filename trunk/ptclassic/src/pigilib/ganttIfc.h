@@ -65,6 +65,7 @@ extern boolean GanttRun();
 extern boolean GanttInit();
 extern void FindClear();
 extern int RpcFindName();
+void FindAndMark(/* octObject facetP, char *name, int pattern */);
 #endif /* __cplusplus */
 
 typedef struct RgbValue_s {
