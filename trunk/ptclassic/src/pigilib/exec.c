@@ -179,3 +179,65 @@ char *objName;
 {
     FindAndMark(&lastFacet, objName,1);
 }
+/* mark stars with a pattern given the full name and the color to mark */
+void
+PigiMarkColor(objName,color)
+char *objName;
+char *color;
+{
+    FindAndMarkColor(&lastFacet, objName,1,color);
+}
+
+/*=====================================================================*/
+/* Asawaree Kalavade 7/19/94, 10/16/94 11/22/95 */
+/* Bring up a panel to run the DesignMakER */
+int
+RpcRunDesignMaker(spot, cmdList, userOptionWord) /* ARGSUSED */
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+        /* modeled after RpcRun in exec.c */
+        octObject facet;
+        char* name;
+        char octHandle[16];
+        char command[100];
+        ViInit("run-DesignMaker");
+        ErrClear();
+        facet.objectId = spot->facet;
+        if (octGetById(&facet) != OCT_OK) {
+                PrintErr(octErrorString());
+                ViDone();
+        }
+
+
+        if (!IsUnivFacet(&facet))
+        {
+                PrintErr("Schematic is not a universe, can't run DesignMaker");
+                ViDone();
+        }
+	/* check if DMM domain, else prompt user to use R */
+	if(!GOCDomainProp(&facet,&domainName,DEFAULT_DOMAIN))
+        {
+                PrintErr("Domain error in facet %s",domainName);
+                ViDone();
+        }
+        if(strcmp(domainName,"DMM")!= 0)
+        {
+                PrintErr("Domain is not DMM, use regular run control (R)");
+                ViDone();
+        }
+
+        /* set the lastFacet to be this facet */
+        lastFacet = facet;
+        /* the foll. reflects what is done in ptkRun() */
+        name = BaseName(facet.contents.facet.cell);
+        ptkOctObj2Handle(&facet, octHandle);
+        /* call ptkRunDesignMaker,
+                which executes the function to bring up panel */
+        TCL_CATCH_ERR1(
+        Tcl_VarEval(ptkInterp, "ptkRunDesignMaker ", name, " ", octHandle,
+        (char *) NULL));
+        return TRUE;
+}
+
