@@ -52,7 +52,7 @@ cd obj.$ARCH
 optlink ../src makefile
 
 # interp used to be in the line below, as of 0.5.1, it is no longer.
-foreach x (domains ptcl kernel galileo pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
+foreach x (domains ptcl kernel tycho pigiRpc pigilib libgantt ptlang pxgraph ptklib octtools)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -81,13 +81,13 @@ foreach x (optfir wfir)
 end
 cd ..
 
-# Make subdirectories of galileo
-cd galileo
+# Make subdirectories of tycho
+cd tycho
 foreach x (kernel)
 	optmkdir $x
 	cd $x
-	optlink ../../../src/galileo/$x make.template
-	optlink ../../../src/galileo/$x makefile
+	optlink ../../../src/tycho/$x make.template
+	optlink ../../../src/tycho/$x makefile
 	cd ..
 end
 cd ..
