@@ -239,7 +239,8 @@ int POct::SetDelayParams( octObject *instPtr, ParamListType *pList) {
 
 }
 
-// Deletes all of the elements of the passed pList
+// Deletes all of the elements of the passed parameter list pList
+// The memory was allocated in POct::MakePList below 
 void POct::DeletePList( ParamListType* pList) {
     for (int i=0; i < pList->length; i++) {
 	
@@ -249,15 +250,16 @@ void POct::DeletePList( ParamListType* pList) {
 	// Note that it is not legal C++ to delete a "const T *"
 	// pointer, hence the casts.
 
-        delete (char*)(pList->array[i].name);
-        pList->array[i].name = NULL;
-        delete (char*)(pList->array[i].type);
-        pList->array[i].type = NULL;
-        delete (char*)(pList->array[i].value);
-        pList->array[i].value = NULL;
+	// strings created by savestring, which uses the new operator
+        delete [] (char*)(pList->array[i].name);
+        pList->array[i].name = 0;
+        delete [] (char*)(pList->array[i].type);
+        pList->array[i].type = 0;
+        delete [] (char*)(pList->array[i].value);
+        pList->array[i].value = 0;
     }
     delete [] pList->array;
-    pList->array = NULL;
+    pList->array = 0;
 }
 
 
