@@ -32,12 +32,12 @@ are passed through unchanged.
         }
 	codeblock (main) {
         move    #$val(threshold),b
-        move    $ref(input),x0
-        cmpm    x0,b
+        move    $ref(input),a
+        cmpm    b,a
         jpl     $label(end)
-        clr     x0
+        clr     a
 $label(end)
-        move    x0,$ref(output)
+        move    a,$ref(output)
 	}
 
 	go {
