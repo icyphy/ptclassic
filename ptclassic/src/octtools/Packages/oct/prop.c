@@ -29,12 +29,19 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "io.h"
 
+#include "io_procs.h"
+#include "mark.h"
+#include "oct_utils.h"
+
+#include "prop.h"
+
 static int prop_write_fields(), prop_read_fields(), prop_free_fields();
 static int prop_copy_fields();
 
 extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
 
+void
 oct_prop_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -148,6 +155,11 @@ generic *pptr;
       break;
     case OCT_INTEGER_ARRAY :
       FREE(prop->user_prop.value.integer_array.array);
+      break;
+    case OCT_NULL :
+    case OCT_INTEGER :
+    case OCT_REAL :
+    case OCT_ID :
       break;
     }
 
