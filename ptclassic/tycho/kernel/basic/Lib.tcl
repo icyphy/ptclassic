@@ -133,10 +133,8 @@ namespace ::tycho {
 
     if {$tcl_platform(platform) != "macintosh"} {
 	::tycho::File::registerExtensions {} \
-		{set w [::tycho::autoName .glimpse]; \
-                ::tycho::Glimpse $w -geometry +0+0;\
-                wm deiconify $w} \
-		{Glimpse} "tools"
+		{::tycho::view EditDiff -toolbar 1} \
+		{Diff} "tools"
     }
 
     if {$tcl_platform(platform) != "macintosh"} {
@@ -145,6 +143,14 @@ namespace ::tycho {
                 ::tycho::Monitor $w;\
                 $w centerOnScreen} \
 		{Exec} "tools"
+    }
+
+    if {$tcl_platform(platform) != "macintosh"} {
+	::tycho::File::registerExtensions {} \
+		{set w [::tycho::autoName .glimpse]; \
+                ::tycho::Glimpse $w -geometry +0+0;\
+                wm deiconify $w} \
+		{Glimpse} "tools"
     }
 
     ::tycho::File::registerExtensions {.icl} \
