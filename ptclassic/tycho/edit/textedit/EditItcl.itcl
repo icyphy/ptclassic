@@ -127,7 +127,7 @@ body ::tycho::EditItcl::constructor {args} {
     menubar add "Generate class diagram" Special -underline 9  \
 	    -command "::tycho::view ItclClassList \
 	    {-file \
-	    [file join [file dirname [$this filename]] classList.icl]]} \
+	    [file join [file dirname [$this filename]] classList.icl]} \
 	    Displayer {-toolbar 1}"
 }
 
