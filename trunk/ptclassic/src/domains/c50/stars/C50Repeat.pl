@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc { Repeats each input sample the specified number of times. }
 	version { $Id$ }
-	author { A. Baensch }
+	author { Luis Gutierrez, A. Baensch }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -29,36 +29,84 @@ worst case.
 		name {output}
 		type {=input}
 	}
-	// FIXME: Does not support a blocksize parameter
+
+	state {
+		name {blockSize}
+		type { int }
+		default { 1 }
+		desc { Number of particles in a block }
+	}
+
 	state {
 		name {numTimes}
 		type {int}
 		default {2}
 		desc { Repetition factor }
 	}
+
+	protected {
+		//effBlockSize hold the number of words per block
+		int effBlockSize;
+	}
+
 	setup {
-		output.setSDFParams(int(numTimes),int(numTimes)-1);
+		if (input.resolvedType() == COMPLEX ) 
+			effBlockSize = 2*int(blockSize);
+		else 
+			effBlockSize = int(blockSize);
+		int reps = int(numTimes)*int(blockSize);
+		input.setSDFParams(int(blockSize), int(blockSize)-1);
+		output.setSDFParams(reps, reps - 1);
 	}
+
 	codeblock(cbOnce) {
-    	splk	#$addr(input),BMAR		;Address input 		=>BMAR
-    	bldd	BMAR,#$addr(output)		;output = input
+	lamm	ar1,#$addr(input)
+	samm	ar1,#$addr(output)
 	}
-	codeblock(cbRepLoop) {
-	mar     *,AR0				;
-	lar	AR0,#$addr(input)		;Address input		=> AR0
-    	lar	AR7,#$addr(output)		;Address output		=> AR7
-    	lacc	*,0,AR7				;Accu = input
-    	rpt	#$val(numTimes)-1		;for number of numTimes
-    	  sacl	*				;outputsample(i) = input
+
+	codeblock(cbOnceCx){
+	lamm	ar1,#$addr(input,0)
+	lamm	ar2,#$addr(input,1)
+	samm	ar1,#$addr(output,0)
+	samm	ar2,#$addr(output,1)
 	}
- 
+
+	codeblock(initRepLoop,""){
+	lacc	#$addr(input)
+	samm	cbsr1
+	samm	ar1
+	add	#@(effBlockSize-1)
+	samm	cber1
+	lacl	#9
+	samm	cbcr	; set up circ buff. addrsd by ar1
+	mar	*,ar1
+	}
+
+	codeblock(cbRepLoop,"") {
+	rpt	#@(effBlockSize*int(numTimes)-1)
+	bldd	*+,#$addr(output)
+	zap
+	samm	cbcr	; disable circ buffer
+	}
+
 	go {
-		// should fork star if there is we only repeat by one input
-		if ( int(numTimes) == 1 ) addCode(cbOnce);
-		else addCode(cbRepLoop);
+
+		if ((int(numTimes) == 1) && (effBlockSize == 1) ) 
+			addCode(cbOnce);
+		else if ((int(numTimes) == 1) && (effBlockSize == 2))
+			addCode(cbOnceCx);
+		else {
+			addCode(initRepLoop());
+			addCode(cbRepLoop());
+		}
 	}
 
 	exectime {
-		return int(numTimes)+4;
+		if ((int(numTimes)==1) && (effBlockSize == 1))
+			return 2;
+		else if ((int(numTimes)==1) && (effBlockSize == 2))
+			return 4;
+		else 
+			return (11 + (effBlockSize*int(numTimes)));
 	}
 }

@@ -114,7 +114,7 @@ test.  This ensures that the first test result will always be TRUE.
 	lar	ar0,#$addr(lower)
 	lar	ar1,#$addr(upper)
 	mar	*,ar1
-	lach	*,16,ar0	; accH = upper
+	lacc	*,16,ar0	; accH = upper
 	sub	*,16,ar2	; acc = upper - lower
 	}
 
@@ -151,10 +151,12 @@ test.  This ensures that the first test result will always be TRUE.
 	xc	1,neq
 	lacl	#01h		; if(prevResult XOR result) ? acc = 1:acc = 0
 	sacl	*		
+	clrc	ovm
 	}
 
 	codeblock(noCrossings) {
 	smmr	ar2,#$addr(output)
+	clrc	ovm
 	}
 
 	go {

@@ -55,9 +55,10 @@ limitation of liability, and disclaimer of warranty provisions.
 
         codeblock(std,"") {
 	lmmr	ar1,#$addr(dataPtr)	
-	mar	*,ar1
-	lacl	#$addr(data,@(dataLen)),0	
+	lacc	#$addr(data,@(dataLen))	
 	samm	arcr		
+	mar	*,ar1
+	lar	ar4,#$addr(dataPtr)
 	cmpr	1
 	lar	ar2,#$addr(output)
 	xc	1,TC
@@ -67,17 +68,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	lamm	ar1
 	sub	#$addr(data),0
 	samm	ar3
-	lacl	#$addr(data)
 	lmmr	arcr,#$addr(N)
+	lacc	#$addr(data)
 	cmpr	1
 	lar	ar3,#0000h
 	xc	1,TC
 	lamm	ar1
 	cmpr	0
-	mar	*,ar2
+	mar	*,ar4
 	xc	1,TC
 	lamm	ar1
-	sacl	*,0
+	sacl	*
 	}
 
         setup {
@@ -93,7 +94,7 @@ limitation of liability, and disclaimer of warranty provisions.
         }		
 
 	execTime { 
-                 return 24;
+                 return 25;
 	}
 }
 

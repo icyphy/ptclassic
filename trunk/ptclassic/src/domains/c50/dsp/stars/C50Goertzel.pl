@@ -40,6 +40,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	codeblock(result) {
 	lar	ar3,#$addr(output)
 	sach	*+,2		; output real part
+	bcndd	$starSymbol(cfe),UNC
 	pac			; acc = p
 	sach	*,1		; output imaginary part
 	}
@@ -50,6 +51,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 		// Output the complex result
 		addCode(result);
+		addCode(C50GoertzelBase::coeffs);
+		
 	}
 
 	exectime {

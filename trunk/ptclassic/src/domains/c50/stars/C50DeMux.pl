@@ -34,7 +34,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	outmulti {
 		name {output}
-		type {anytype}
+		type {=input}
 	}
 	defstate {
 		name {blockSize}
@@ -63,49 +63,48 @@ limitation of liability, and disclaimer of warranty provisions.
 	    ptrInit<<i;
 	    ptrInit<<")\n";
 	  }
-	  ptrInit<<"\ttext:\n";
+	  ptrInit<<"\t.text\n";
 	  addCode(ptrInit);
 	}
 
 	codeblock(loadAddress,""){
-	ldp	#00h			; data page ptr = 0
-	lar	ar0,#$addr(input)
-	lar	ar1,#$addr(ptrarray)	; ar1 -> ptrarray
-	lmmr	indx,#$addr(control)	; index = control
-	mar	*,ar1
-	mar	*0+			; ar1 -> ptrarray[control]
+	ldp	#00h
 	splk	#$addr(ptrarray),cbsr1	; load circ buff addr.
 	splk	#$addr(ptrarray,@(n-1)),cber1
 	splk	#0009h,cbcr		; enable circ buff 1 with ar1
+	lar	ar1,#$addr(ptrarray)	; ar1 -> ptrarray
+	lmmr	indx,#$addr(control)	; index = control
+	mar	*,ar1
+	lar	ar3,#$addr(input)
+	mar	*0+			; ar1 -> ptrarray[control]
 	}
 	
 	codeblock(moveInput,""){
-	.if	@iter
-	lacl	*+,0,ar0
-	samm	bmar
+	lar	ar3,*+,ar3
 	rpt	#@iter
-	bldd	*+,bmar
+	bldd	#$addr(input),*+
 	mar	*,ar1
-	.else
-	lacl	*+,0,ar0
+	}
+	
+	codeblock(moveOne){
+	lacc	*+,0,ar3
 	samm	ar2			
-	lacl	*,0,ar2
-	sacl	*,0,ar1
-	.endif		
+	lacc	*,0,ar2
+	sach	*,0,ar1		
 	}
 	
 	codeblock(moveZero,""){
-	.if	@iter
-	lacl	*+,0,ar2
+	lacc	*+,0,ar2
 	samm	ar2
 	rpt	#@iter
 	sach	*+,0	
 	mar	*,ar1
-	.else
-	lacl	*+,0,ar2
+	}
+	
+	codeblock(moveOneZero){
+	lacc	*+,0,ar2
 	samm	ar2
 	sach	*,0,ar1
-	.endif
 	}
 
 	codeblock(restore){
@@ -138,8 +137,16 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	go {
 		addCode(loadAddress());
-		addCode(moveInput());
-		for (int i = 1; i<n; i++) addCode(moveZero());
+		if (iter) 
+			addCode(moveInput());
+		else
+			addCode(moveOne);	
+		for (int i = 1; i<n; i++) {
+			if (iter) 
+				addCode(moveZero());
+			else
+				addCode(moveOneZero);
+		}
 		addCode(restore);
 	}
 

@@ -7,7 +7,7 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -42,39 +42,91 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {FIX}
 		default {0.0}
 		desc { Value to fill the output block }
-		attributes { A_SETTABLE|A_UMEM }
+		attributes { A_SETTABLE }
 	}
+
+	protected {
+		//holds effective offset from begining of output buffer
+		int effOffset;
+		//holds effective size of output buffer
+		int effSize;
+		// holds the value of fill as an integer(dsk5a doesn't handle 
+		// real numbers when used in instructions like add #<number>
+		int fillAsInt;
+	}	
+
 	setup {
 		output.setSDFParams(int(factor), int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, "phase must be < factor");
+		if (int(phase) == -1 ) phase = int(factor) - 1;
+		if (input.resolvedType() == COMPLEX ){ 
+			effOffset = 2*int(phase);
+			effSize = 2*int(factor);
+		} else {
+			effOffset = int(phase);
+			effSize = int(factor);
+		}
+		double temp = fill.asDouble();
+		if (temp >= 0) {
+			fillAsInt = int(32768*temp + 0.5);
+		} else {
+			fillAsInt = int(32768*(1-temp) + 0.5);
+		}
 	}
+
 	initCode {
-		addCode(initfill);
-		if (int(factor) > 1) addCode(repeatcode);
+		addCode(initfill());
+		if (int(factor) > 1) addCode(repeatcode());
 		addCode(fillcode);
 	}
-	codeblock (initfill) {
-	mar	*,AR0				;
-	lar	AR1,#$addr(output)		;Address output		=> AR1
-	lar	AR0,#$addr(fill)		;Address fill		=> AR0
-	lacc	*,15,AR1			;Accu = fill
+
+	codeblock (initfill,"") {
+	lacc	#@fillAsInt,0
+	mar	*,AR1			;
+	lar	AR1,#$addr(output)	;ar1->output
 	}
-	codeblock (repeatcode) {
-	rpt	#$size(output)-1		;for number of output size
+
+	codeblock (repeatcode,"") {
+	rpt	#@(effSize-1)		;for number of output size
 	}
+
 	codeblock (fillcode) {
-	sach	*,1				;outputsample(i) = fill 
+	sacl	*+,0			;outputsample(i) = fill 
 	}
-	codeblock (sendsample) {
-	mar	*,AR6				;
-	lar	AR6,#$addr(input)		;Address input		=> AR6
-	bldd	*,#$addr(output,phase)		;output = input
+
+	codeblock (sendsampleStd,"") {
+	mar	*,ar1
+	lar	AR1,#$addr(input)		;Address input	=> AR1
+	bldd	*,#$addr(output,@effOffset)	;output = input
 	}
+
+	codeblock (sendsampleCplx,""){
+	mar	*,ar1
+	lar	ar1,#$addr(input)
+	rpt	#1
+	bldd	*+,#$addr(output,@effOffset)
+	}
+
 	go {
-		addCode(sendsample);
+		if (input.resolvedType() == COMPLEX) 
+			addCode(sendsampleCplx());
+		else
+			addCode(sendsampleStd());
 	}
+
 	execTime {
-		return 4;
+		if (input.resolvedType() == COMPLEX)
+			return 5;
+		else	return 3;
 	}
 }
+
+
+
+
+
+
+
+
+

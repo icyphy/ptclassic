@@ -87,9 +87,11 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }
 
         initCode {
+		tapInit.initialize();
 		tapInit<<"$starSymbol(cfs):\n";
-		for (int i = (tapsNum - 1); i >= 0 ; i--)
+		for (int i = (tapsNum - 1); i >= 0 ; i--){
 			tapInit << "\t.q15\t" << double(taps[i]) << '\n';
+		}
 		tapInit<<"$starSymbol(cfe):\n";
         }
 
@@ -107,6 +109,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 
 //FIXME: star does not support decimation or interpolation.
 	codeblock(std,""){
+	setc	ovm			; set overflow mode
 	LAR	AR2,#$addr(oldSamples)	; AR0 -> start of old sample array
 	LAR	AR1,#$addr(signalOut)	; AR1 -> output signal
 	lar	ar0,#$addr(oldSamples,@(tapsNum-1))
@@ -115,8 +118,11 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	BLDD	#$addr(signalIn),*,ar0	; move (input) to first addr in array
 	RPT	#@(int(tapsNum)-1)		; these two instructions 
 	MACD	$starSymbol(cfs),*-	; implement the filter
+	lta	*,ar1
+	sacb
+	addb				; saturate on overflow
 	BCNDD	$starSymbol(cfe),UNC	; will branch after SACH instruction
-	LTA	*,AR1			; ARP = AR1
+	clrc	ovm			; unset overflow mode
 	SACH	*			; save output
 	}
 	
@@ -124,3 +130,4 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		return 10 + int(tapsNum);
 	}
 }
+

@@ -33,7 +33,7 @@ between -1.0 and 1.0.
 		type { fixarray }
 		desc { buffer }
 		default { "0" }
-		attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
+		attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM}
 	}
 	state  {
 		name { bufStart }
@@ -61,27 +61,29 @@ between -1.0 and 1.0.
 
 	codeblock(std,"") {
 	ldp	#0
-	lacl	#@(size - 1)
-	samm	dbmr			; used for modulo 2^k addressing
+	lacc	#@(size - 1)
+	setc	sxm			; set sign xtension mode
+	mar	*,ar2			; arp = 0
+	samm	dbmr			; used for modulo 2^k addressin
+	lmmr	ar2,#$addr(bufStart)	; ar2 = pointer to start of buff.
 	lmmr	ar1,#$addr(input)	; ar1 = most recent input
-	lar	ar0,#$addr(bufStart)	; ar0 = pointer to start of buff.
-	mar	*,ar0			; arp = 0
-	smmr	ar1,*+			; store input on buffer, inc ar0
-	apl	ar0			; get lowest k-1 bits
-	opl	#$addr(bufStart),ar0	; add address; so ar0->nxt position
-	smmr	ar0,#$addr(bufStart)	; store nxt postion
+	lamm	ar1
+	sacl	*+,0			; store input on buffer, inc ar2
+	apl	ar2			; get lowest k-1 bits
+	opl	#$addr(buf),ar2		; add address; so ar2->nxt position
+	smmr	ar2,#$addr(bufStart)	; store nxt postion
 	lmmr	treg0,#$addr(control)	; treg0 = control
-	lacc	#4000h,1		; 
-	add	treg0,0			; acc = 0.5(control+1)*2
-	sfr				; acc = 0.5(control+1)
-	samm	treg0			; treg0 = 0.5(control+1)
-	mpy	#$val(maxDelay)		; p = 0.5(maxDelay)*(0.5(control+1))
+	lacc	#4000h,15		; 
+	add	treg0,14		; acc = 0.5(control+1)*2
+	sach	treg0,1			; treg0 = 0.5(control+1)
+$starSymbol(delay)	.set	-$val(maxDelay)
+	mpy	#$starSymbol(delay)	; p = -0.5(maxDelay)*(0.5(control+1))
 	pac				; acc = p
-	add	#0003,14		; rnd up and add 1 more delay to ar0
-	sach	indx,1			; indx = maxDelay*(0.5(control+1))+1
-	mar	*0-			; ar0 = bufStart - indx
-	apl	ar0			; get lowest k-1 bits
-	opl	#$addr(buf),ar0		; ar0 = loc in buffer of element
+	sub	#0001,15		; add 1 more delay to ar2
+	add	ar2,15			; ar2 = ar2 - calculated delay
+	sach	ar2,1			; store ar2
+	apl	ar2			; get lowest k-1 bits
+	opl	#$addr(buf),ar2		; ar2 = loc in buffer of element
 	bldd	*,#$addr(output)	; output element
 	}
 
@@ -106,6 +108,6 @@ between -1.0 and 1.0.
 	}		
 
 	execTime { 
-		 return 23;
+		 return 24;
 	}
 }

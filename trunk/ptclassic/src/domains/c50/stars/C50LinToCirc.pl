@@ -52,7 +52,8 @@ Data movement is repeated inline so may not be efficient for large N.
     }
 
     protected {
-	int n,bufferSize,xferType,time;
+	int n,xferType,time;
+	int inputBuffSize,outputBuffSize;
     }
 
 
@@ -62,17 +63,20 @@ Data movement is repeated inline so may not be efficient for large N.
 	arglist { "()" }
 	access { protected }
 	code {
-		bufferSize = output.bufSize();
+		outputBuffSize = output.bufSize();
+		inputBuffSize = input.bufSize();
 		xferType = 3;
-		time = 11 + bufferSize;
+		time = 11 + inputBuffSize;
 		if (input.resolvedType() == COMPLEX ){
-			if (bufferSize == 2){
+			if ((inputBuffSize == 2) &&
+			    (outputBuffSize == 2)){
 				xferType = 2;
 				time = 4;
 				return;
 			}
 		} else {
-			if (bufferSize == 1){
+			if ((inputBuffSize == 1) &&
+			    (outputBuffSize == 1)){
 				xferType = 1;
 				time = 2;
 				return;
@@ -124,17 +128,17 @@ Data movement is repeated inline so may not be efficient for large N.
 
     codeblock(setupCircBuffer,"") {
 	lmmr	ar0,#$addr(ptr)		; ar0 = start address
-	lacc	#$addr(input),0
+	lacc	#$addr(output),0
 	samm	cbsr1			; set circ buff start addr
-	add	#@(bufferSize-1),0
+	add	#@(outputBuffSize-1),0
 	samm	cber1			; set circ buff end addr
-	lacl	#08
+	lacl	#8
 	samm	cbcr			; set ar0 = cir. buff reg.
 	mar	*,ar0			; arp -> ar0
     }
 
     codeblock(moveData,""){
-	rpt	#@(bufferSize - 1)
+	rpt	#@(inputBuffSize - 1)
 	bldd	#$addr(input),*+
     }
 
@@ -152,7 +156,7 @@ Data movement is repeated inline so may not be efficient for large N.
 
     codeblock(restore) {
 	zap
-	samm	brcr
+	samm	cbcr
 	smmr	ar0,#$addr(ptr)
     }
 

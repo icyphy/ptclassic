@@ -45,7 +45,7 @@ of \fIthresholds\fR.
 		type { fixarray }
 		default { "0.1 0.2 0.3 0.4 1.0 " }
 		desc { internal state }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
 	}
         state  {
                 name { levels }
@@ -57,6 +57,10 @@ of \fIthresholds\fR.
  
 	constructor {
 		noInternalState();
+	}
+
+	protected{
+		StringList ThresholdValues;
 	}
 
 	codeblock(main) {
@@ -75,6 +79,8 @@ $starSymbol(lp):
 	lamm	ar1			; acc = level
 	add	#$addr(levels),0	; acc -> indx output value
 	samm	ar0			; ar0 -> indx output value
+	clrc	ovm
+	nop
 	lacc	*,0,ar4			; acc = output value
 	sacl	*,0,ar2			; output value
 	}
@@ -95,12 +101,23 @@ $starSymbol(lp):
 	sach	*			; output high acc.
 	}
 
+
+	initCode{
+		addCode(ThresholdValues);
+	}
+
         setup {
+		ThresholdValues.initialize();
                 int n = thresholds.size() + 1;
 		augThresholds.resize(n);
-		for ( int j = 0; j < n; j++) augThresholds[j] = thresholds[j];
-		augThresholds[n - 1] = 0.9999694824;
 		n--;
+		ThresholdValues << "\t.ds\t$addr(augThresholds)\n";
+		for ( int j = 0; j < n; j++) {
+			ThresholdValues << "\t.q15\t"
+					<<  double(thresholds[j])
+					<< "\n";
+		}
+		ThresholdValues << "\t.word\t32767\n";
                 if (levels.size() == 0) {       // set to default: 0, 1, 2...
                         levels.resize(n + 1);
                         for (int i = 0; i <= n; i++)
@@ -119,6 +136,6 @@ $starSymbol(lp):
 	}
 	exectime {
 		if ( thresholds.size() == 1 ) return 13;
-	        return 12 + 4*int(thresholds.size());
+	        return 13 + 4*int(thresholds.size());
 	}
 }

@@ -13,12 +13,13 @@ assume that it has been normalized to unity.  The denominator coefficients
 will be scaled by 1/leading denominator coefficient; the numerator
 coefficients will be scaled by gain/leading denominator coefficient.  An
 error will result if, after scaling, any of the coefficients is greater
-than 1 or less than -1.
+or equal than 1 or less than -1.  Extra code is added to saturate 
+accumulator in case of overflow.
     }
-    version { @(#)C50IIR.pl	1.13	3/13/96 }
+    version { $Id$}
     author { Luis Gutierrez, based on the SDF version}
     copyright {
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -105,7 +106,6 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     protected {
 	int numState;
 	StringList coeffs;
-	int time;
 	int numDenom,numNumer;
     }
 
@@ -113,7 +113,6 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     ccinclude { <minmax.h> }
 
     setup {
-	time = 0;
 	numNumer = numerator.size();
 	numDenom = denominator.size();
 	numState = max(numNumer, numDenom);
@@ -122,6 +121,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 
     initCode{
+	coeffs.initialize();
 	double b0, scaleDenom, scaleNumer;
 
 	// Set up scaling to distribute the gain through the numerator,
@@ -142,10 +142,10 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	for (int i = numState-1; i > 0; i--){
             if ( i < numDenom ) {
                 double temp = scaleDenom * -(double(denominator[i]));
-                if ((temp > 1) || (temp < -1)) {
+                if ((temp >= 1) || (temp < -1)) {
 		    StringList msg = "After scaling, denominator coefficient #";
 		    msg << i  << " has a value of " << temp
-			<< " which is not is the range of (-1, 1).";
+			<< " which is not is the range of [-1, 1).";
                     Error::abortRun(*this, msg);
 		    return;
                 }
@@ -186,31 +186,34 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     go {
 	if (numState == 1) {
 		addCode(one);
-		time = 13;
 	}
 	else {
 		addCode(std(int(numState -2),int(numState-1)));
-		time = 23 + 2*numState;
 	}
 	addCode(coeffs);
     }
 
     codeblock(one) {
 ; H(z) = 1 so just pass input to output
+	setc	ovm
 	LAR	AR0,#$addr(signalIn)
 	LAR	AR1,#$addr(signalOut)
 	MAR	*,AR0
 	ZAP
 	MAC	$starSymbol(num),*,AR1
+	pac
+	sacb
+	addb
 	BCNDD	$starSymbol(cfe),UNC
+	clrc	ovm
 	SACH	*
-	NOP	
     }
 
     codeblock(std,"int iterD, int iterN") {
 ;        b[0] + b[1]z^-1 + ... + b[n]z^-n
 ; H(z) = ----------------------------------
-;        1  - a[1]z^-1 - ... - a[n]z^-n
+;        1  + a[1]z^-1 + ... + a[n]z^-n
+	setc	ovm		; set overflow mode
 	lar	ar0,#$addr(delays)
 	lar	ar1,#$addr(signalOut)
 	lmmr	indx,#$addr(offset)
@@ -218,21 +221,37 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	bldd	#$addr(signalIn),*0+
 	zap	
 	rpt	#@iterD
-	macd	dnm,*-
+	macd	$starSymbol(dnm),*-
 	apac
-	add	*+,15
-	sach	*,1
+	add	*+,15	; acc contains resultA/2
+	sacb		; these two inst. are used to
+	addb		; saturate acc in case of overflws
+	sach	*
 	zap
 	rpt	#@iterN	
-	mac	num,*+
-	bcndd	cfe,UNC
-	lta	*,ar1
-	sach	*,1
+	mac	$starSymbol(num),*+
+	lta	*,ar1	; acc	contains resultB/2
+	sacb		; these two inst. are used to
+	addb		; saturate acc in case of overflws
+	bcndd	$starSymbol(cfe),UNC
+	clrc	ovm
+	sach	*	
 	}
 		
 
     exectime {
-	return time;
+	if (numState == 1) 
+		return 10;
+	else	
+		return (20+2*numState);	
     }
 }
+
+
+
+
+
+
+
+
 

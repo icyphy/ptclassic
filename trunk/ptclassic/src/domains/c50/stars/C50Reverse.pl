@@ -3,10 +3,10 @@ defstar {
 	domain { C50 }
 	desc {
 On each execution, read a block of "N" samples (default 64)
-and write them out backwards.
+and writes them out backwards.
 	}
 	version { $Id$ }
-	author { A. Baensch }
+	author { A. Baensch, Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -29,29 +29,79 @@ limitation of liability, and disclaimer of warranty provisions.
                 default {64}
 		desc {Number of particles read and written}
 	}
+	protected {
+		// number of inputs
+		int numInputs;
+	}
+
 	setup {
                 input.setSDFParams(int(N),int(N)-1);
                 output.setSDFParams(int(N),int(N)-1);
+		numInputs = int(N);
+	
         }
 
- 	codeblock(main) {
-        mar 	*,AR0				;
-	lar     AR0,#$addr(input)+$val(N)	;Address last input 	=> AR0
-        splk	#$addr(output),BMAR		;Address output		=> BMAR
-        rpt     #$val(N)-1			;for number of N
-	 bldd	*-,BMAR				;output(i) = input(N-i)
+ 	codeblock(std,"") {
+        mar 	*,AR0			
+	lar	ar0,#$addr(input,@(numInputs-1))
+        rpt     #@(numInputs-1)		;for number of N
+	bldd	*-,#$addr(output)	;output(i) = input(N-i)
         }
+
+	codeblock(cmplx,""){
+	lacc	#@numInputs
+	samm	brcr
+	mar	*,ar1
+	lacc	#$addr(output)
+	samm	bmar
+	lar	ar1,#$addr(input,@(2*(numInputs - 1)))
+	rptb	$label(rev)
+	rpt	#1
+	bldd	*+,bmar
+	sbrk	#4
+	lamm	bmar
+	add	#2
+$label(rev)
+	samm	bmar
+	}
+
         codeblock(one) {
-        splk    #$addr(input),BMAR		;Address input		=> BMAR
-        bldd    BMAR,#$addr(output)		;output = input
+	lmmr	ar1,#$addr(input)
+	smmr	ar1,#$addr(output)
+	}
+
+	codeblock(oneCx){
+	lmmr	ar0,#$addr(input,0)
+	lmmr	ar1,#$addr(input,1)
+	smmr	ar0,#$addr(output,0)
+	smmr	ar1,#$addr(output,1)
 	}
 
         go {
-                if ( int(N) > 1) addCode(main);
-		else addCode(one);
+                if ( numInputs > 1) {
+			if (input.resolvedType() == COMPLEX)
+				addCode(cmplx());
+			else
+				addCode(std());
+		} else {
+			if (input.resolvedType() == COMPLEX)
+				addCode(oneCx);
+			else
+				addCode(one);
+		}
         }
         exectime {
-                if ( int(N) > 1) return 2*int(N)+4;
-		else return 3;
+                if ( numInputs > 1) {
+			if (input.resolvedType() == COMPLEX)
+				 return (7*numInputs + 7);
+			else
+				 return (3 + numInputs);
+		} else {
+			if (input.resolvedType() == COMPLEX)
+				return 4;
+			else 
+				return 2;
+		}
 	}
 }
+

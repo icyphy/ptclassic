@@ -64,17 +64,17 @@ as the control varies between -1.0 and 1.0.
 	setup {
 		double temp = onVal.asDouble();
 		if (temp >= 0)	{
-			iOnVal = int(32768*temp);
+			iOnVal = int(32768*temp + 0.5);
 		} else {
-			iOnVal = int(32768*(1-temp));
+			iOnVal = int(32768*(1-temp) + 0.5);
 		}
 
 		temp = offVal.asDouble();
 
 		if ( temp >= 0) {
-			iOffVal = int(32768*temp);
+			iOffVal = int(32768*temp + 0.5);
 		}else{
-			iOffVal = int(32768*(1-temp));
+			iOffVal = int(32768*(1-temp) + 0.5);
 		}
 	}
 	
@@ -91,7 +91,7 @@ as the control varies between -1.0 and 1.0.
 	lar	ar1,#$addr(duration)	; ar1 -> duration
 	lacc	*,0,ar0			; load acc with duration/2
 	add	#4000h,1		; acc = 0.5*(duration + 1)
-	sfl				; shift acc left for nxt inst
+	sfr				; shift acc right for nxt inst
 	samm	treg0			; treg0 = 0.5*(duration+1)
 	mpy	#$val(maxDuration)	; p = 0.5(maxDur*(duration+1)/2)
 	pac				; acc = p = newLength/2

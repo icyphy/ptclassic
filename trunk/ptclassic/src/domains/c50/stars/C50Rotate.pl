@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc { Rotate a block of input data }
 	version { $Id$ }
-	author { A. Baensch }
+	author { A. Baensch, Luis Gutierrez }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -44,66 +44,78 @@ The parameter \fIrotation\fR must be smaller than the parameter
 		default { 16 }
 		desc { length of input data }
 	}
-	state  {
-		name { rotate }
-		type { int }
-		default { 0 }
-		desc { internal length of input data }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+
+	protected{
+	// effective length of the data(to allow for complex inputs)
+		int effLength;
+	// effective rotation
+		int effRotation;
+	// start address for block move
+		int start;
 	}
 
-	codeblock(greater) {
-	mar	*,AR0				;
-	lar     AR0,#$addr2(input,rotate)	;Address input,rotate	=> AR0
-	splk    #$addr(output),BMAR		;Address output		=> BMAR
-	rpt     #$val(length)-$val(rotate)-1	;for number of (length-rotate)
-       	 bldd	*+,BMAR				;output(i) = input()	
-	lar     AR0,#$addr(input)		;Address input		=> AR0
-	rpt     #$val(rotate)-1			;for number of rotate
-	 bldd   *+,BMAR				;output(i) = input()
+	codeblock(greater,"") {
+	lacc	#$addr(input)
+	samm	cbsr1
+	add	#@(effLength-1)
+	samm	cber1
+	lacl	#9
+	samm	cbcr
+	mar	*,ar1
+	lar	ar1,#$addr(input,@start)
+	rpt	#@(effLength-1)
+	bldd	*+,#$addr(output)	
        	}
-	codeblock(other) {
+
+	codeblock(other,"") {
 	mar    	*,AR0       			;
  	lar     AR0,#$addr(input)		;Address input		=> AR0
-	splk    #$addr(output),BMAR		;Address output		=> BMAR
-	rpt     #$val(length)			;for number of length
-	 bldd	*+,BMAR				;output(i) = input(i)
+	rpt     #@(effLength-1)			;for number of length
+	bldd	*+,#$addr(output)		;output(i) = input(i)
 	}
+
 	codeblock(one) {
-	splk    #$addr(input),BMAR		;just move data from in to out
-	bldd    BMAR,#$addr(output)		;
+	lmmr	ar1,#$addr(input)
+	smmr	ar1,#$addr(output)
 	} 
 
 	setup {
+		if (input.resolvedType() == COMPLEX) {
+			effLength = 2*int(length);
+			effRotation = 2*int(rotation);
+		}else{ 
+			effLength = int(length);
+			effRotation = int(rotation);
+		}
 		input.setSDFParams(int(length),int(length)-1);
 		output.setSDFParams(int(length),int(length)-1);
 	}
 	go {
-		int i = rotation;
+		int i = effRotation;
 
-		if (i > int(length) || -i > int(length)) {
+		if (i > int(effLength) || -i > int(effLength)) {
 		    Error::abortRun(*this,
 				    "Number of rotations > block length");
 		    return;
 		}
 
-		rotate = rotation;
-		if (int(rotation) < 0) {
-			rotate = int(length) + int(rotation);
+		start = effRotation;
+		if (int(effRotation) < 0) {
+			start = int(effLength) + int(effRotation);
 		}
 
-		if (int(rotate) > 0 && int(length) > 1) addCode(greater);
-		else if (int(length) > 1) addCode(other);
+		if (int(start) > 0 && int(effLength) > 1) addCode(greater());
+		else if (int(effLength) > 1) addCode(other());
 		else addCode(one);
 	}
 	exectime {
 		int cost = 0;
-		if (int(length) > 1 && int(rotation) == 0)
-			cost = 4 + 2*int(length);
-		else if (length == 1)
+		if (int(effLength) > 1 && int(effRotation) == 0)
+			cost = 4 + 2*int(effLength);
+		else if (effLength == 1)
 			cost = 3;
 		else
-			cost = 7 + 4 * int(length);
+			cost = 9 +  int(effLength);
 		return cost;
 	}
 }

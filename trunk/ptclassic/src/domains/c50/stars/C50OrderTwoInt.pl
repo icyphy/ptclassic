@@ -39,17 +39,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	lacc	*+,16		
 	sub	*,16,ar1
 	lar	ar1,#0012h		
-* there's a bug in the dsk debugger because the following inst.
-* produces the wrong result.
-*	xc	2,LT			
-* to work around it, replace inst. with two consecutive
-* xc 1,LT instructions
-	xc	1,LT
+	xc	2,LT
 	mar	*+,ar0			
-	xc	1,LT
 	mar	*-,ar1	
 	bldd	*,#$addr(greater),ar0
 	bldd	*,#$addr(lesser)
+	clrc	ovm
 	}
 
  	go {
@@ -57,6 +52,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	exectime {
-		return 12;	
+		return 13;	
 	}
 }
