@@ -37,7 +37,7 @@ HDRS= CGCConnect.h CGCStar.h CGCTarget.h CGCGeodesic.h CGCForkNode.h \
 
 # Library objects
 OBJS= CGCConnect.o CGCStar.o CGCDomain.o CGCTarget.o CGCGeodesic.o  \
-	CGCWormConnect.o CGCForkNode.o
+	CGCForkNode.o
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)
