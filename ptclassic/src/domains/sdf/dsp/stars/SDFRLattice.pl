@@ -5,7 +5,7 @@ defstar {
 A recursive (IIR) lattice filter.  The default coefficients
 implement the synthesis filter for a particular 4th-order AR random process.
 To read reflection coefficients from a file, replace the default
-coefficients with "<fileName", preferably specifying a complete path.
+coefficients with "&lt; fileName", preferably specifying a complete path.
 	}
 	version {$Id$}
 	author { Alan Kamas}
@@ -29,10 +29,8 @@ This will allow the RLattice filter to work as expected regardless of
 the directory in which Ptolemy actually runs and regardless of
 future file system reorganizations.
 <p>
-<pre>
-<pre>
 The structure is as follows:
-
+<pre>
      y[0]          y[1]                 y[n-1]           y[n]
 X(n) ---(+)-&gt;--o--&gt;----(+)-&gt;--o---&gt;-- ... -&gt;--(+)-&gt;--o---&gt;---o---&gt;  Y(n)
           \   /          \   /                  \   /        |
@@ -46,7 +44,6 @@ X(n) ---(+)-&gt;--o--&gt;----(+)-&gt;--o---&gt;-- ... -&gt;--(+)-&gt;--o---&gt;-
 </pre>
 where the [z] are unit delays and the (+) are adders
 and "y" and "z" are defined in the code.
-</pre>
 <p>
 The reflection (or PARCOR) coefficients should be specified
 left to right, K1 to Kn as above.
@@ -55,9 +52,11 @@ Using exactly the same coefficients in the
 star will result in precisely the inverse transfer function.
 The default reflection coefficients give the following transfer function:
 <pre>
-H(z) ~=~ 1 over { 1 ~-~ 2 z sup -1 ~+~ 1.91z sup -2 ~-~ 0.91z sup -3 ~+~
-0.205z sup -4 } ~.
+                           1
+H(z) =  --------------------------------------
+        1 - 2z<sup>-1</sup> + 1.91z<sup>-2</sup> - 0.91z<sup>-3</sup> + 0.205z<sup>-4</sup>
 </pre>
+<p>
 Hence, the same coefficients in the
 <tt>Lattice</tt>
 star will give transfer function <i>H <sup>-</i>1<i></sup> </i>(<i>z</i>)<i></i>.
