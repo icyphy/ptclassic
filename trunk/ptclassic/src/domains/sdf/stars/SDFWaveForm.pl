@@ -2,10 +2,19 @@ defstar {
 	name { WaveForm }
 	domain { SDF }
 	desc {
-Output a waveform as specified by the array state
-"value" (default "1 -1").  Note that a file may be
-specified for the state value.  If "periodic" is YES then
-the waveform is periodic; otherwise zeros come after the end.
+Output a waveform as specified by the array state "value" (default "1 -1").
+To get a periodic waveform, set "periodic" to YES.  Then the value list
+will be cyclically repeated.  If "periodic" is not YES, then the value
+list is output only once, and 0.0 values are output subsequently.
+This star may be used to read a file by simply setting "value" to
+something of the form "< filename".
+	}
+	explanation {
+Since this star can be used to read a waveform from a file, there is no
+other star dedicated to this purpose.
+.IE "file read"
+.IE "waveform from file"
+.IE "reading from a file"
 	}
 	version {$Id$}
 	author { J. T. Buck }
