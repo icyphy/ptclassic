@@ -17,6 +17,7 @@ description.
 #include <string.h>
 #include <std.h>
 #include "Scheduler.h"
+#include "Domain.h"
 
 extern Error errorHandler;
 
@@ -105,6 +106,15 @@ KnownBlock::findEntry (const char* name, KnownListEntry* l) {
 Block*
 KnownBlock::find(const char* type) {
 	KnownListEntry* e = findEntry (type, allBlocks[currentDomain]);
+	if (!e) {
+		Domain* dp = Domain::named(domainNames[currentDomain]);
+		dp->subDomains.reset();
+		for (int i = dp->subDomains.size(); i > 0; i--) {
+			int ix = domainIndex(dp->subDomains.next());
+			KnownListEntry* en = findEntry(type, allBlocks[ix]);
+			if (en) return en->b;
+		}
+	}
 	return e ? e->b : NULL;
 }
 
