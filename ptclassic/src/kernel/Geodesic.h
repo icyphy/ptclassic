@@ -112,17 +112,18 @@ public:
 	virtual void incCount(int);
 	virtual void decCount(int);
 
-        // A connection may require some initial particles.
-	// This member will become protected soon; use numInit() to
-	// read it.
-	int numInitialParticles;
 
 protected:
 	void portHoleConnect();
+	// my neighbors
         PortHole *originatingPort;
         PortHole *destinationPort;
 
 private:
+        // A connection may require some initial particles.
+	// This specifies the number.
+	int numInitialParticles;
+
 	// Where the particles live
 	ParticleStack pstack;
 	// number of particles
