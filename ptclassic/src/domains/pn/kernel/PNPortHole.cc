@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,7 +35,7 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "PNMonitor.h"
+#include "PNThread.h"
 #include "PNPortHole.h"
 #include "PNGeodesic.h"
 #include "CircularBuffer.h"
