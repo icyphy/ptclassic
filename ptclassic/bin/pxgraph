@@ -34,6 +34,9 @@ else
 	exec $PTOLEMY/bin.$PTARCH/pxgraph ${1+"$@"}
     else 
 	echo "$0: Could not find $PTOLEMY/bin.$PTARCH/pxgraph"
+	echo "    \$PT_USE_X11_PXGRAPH was set, so Ptolemy is attempting to"
+	echo "    use the X11 pxgraph instead of the Java pxgraph."
+	echo "    See $PTOLEMY/src/pxgraph/README.txt for more information"
     fi
 fi
 
