@@ -36,6 +36,7 @@ public:
 		    unsigned x_addr, unsigned x_len,
 		    unsigned y_addr, unsigned y_len);
 	Block* clone() const;
+	void headerCode();
 	~CG56Target();
 
 private:
