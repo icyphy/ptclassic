@@ -146,10 +146,13 @@ class ::tycho::HTML {
     method httpget {url}
 
     # This is called by file event handler, from httpget.
-    method httpread {}
+    method httpread {fd tmpfd}
 
-    # This will set the global variable ready so that tycho can read it.
-    method httpclose {}
+    # Set the global http status to "running" or "normal" or "abnormal"
+    method httpsetstatus {status}
+
+    # Wait until httpget is done.
+    method httpwait {}
 
     # Open a file and go to its internal point identified by name.
     method hyperJump {filename {point {}} {push 1}}
@@ -210,6 +213,9 @@ class ::tycho::HTML {
 
     # Render the given text for a particular HTML object.
     proc render {obj {html {}}} {}
+
+    # Used with httpget
+    public variable statusVariableName {}
 
     ###################################################################
     ####                     protected methods                     ####
@@ -692,24 +698,101 @@ body ::tycho::HTML::help {} {
 # Opening an HTTP connection. This returns the file name of the HTTP file.
 #
 body ::tycho::HTML::httpget {url} {
-    #puts "Going to get url: $url"
+    # FIXME: need to find out where to collect protocols that Tycho
+    # understands:
+    set accept {text/*}
 
+    #puts "Going to get url: $url"
+    # 
+    # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
+    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
+            host optport port path]} {
+        if {$host == {}} {set host $localhost}	;# Supply reasonable default
+        if {$port == {}} {set port 80}		;# HTTP default service
+        if {$path == {}} {set path /}
+    } else {
+        # Recover from malformed URL
+        if {![string match */* $var(path)]} {
+            # Assume only the hostname:port has been given
+            regexp {([^:]*)(:(.*))?} $var(path) all host optport port
+            if {$host == {}} {set host localhost}
+            if {$port == {}} {set port 80}
+            set path /
+        } else {
+            error "no hostname given in URL \"$url\""
+        }
+    }
+    puts "$host:$port, GET $path HTTP/1.0"
+    if {[catch {socket -async $host $port} fd]} {
+        unset $fd
+        error "Can't open $host, $port"
+    }
+    # Surfit ends here ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+    # Wait until finished reading HTTP file
+    set tmpFile [::tycho::tmpFileName cache].html
+    set tmpfd [open $tmpFile "w"]
+    set statusVariableName [::tycho::autoName httpgetStatus]
+    httpStatus $statusVariableName "running"
+
+    # connect now!
+    fconfigure $fd -blocking no -translation crlf
+    puts $fd "GET $path HTTP/1.0\
+            User-Agent: Tycho Jr. Beta\
+            Accept-Encoding: $accept"
+    puts $fd ""
+    flush $fd
+    fconfigure $fd -translation auto
+
+    ::tycho::safeUpdate $this
+    fileevent $fd w {}
+    fileevent $fd r "$this httpread $fd $tmpfd"
+
+    # Wait until the entire http file is here!
+    httpwait
+
+    return $tmpFile
+}
+
+#########################################################################
+#### httpwait
+# Wait until the variable name has been changed.
+body ::tycho::HTML::httpwait {} {
+    global $statusVariableName
+    puts "status: $statusVariableName"
+    if {[uplevel #0 "set $statusVariableName"]=="running"} {
+        tkwait variable $statusVariableName
+    }
+    return [uplevel #0 "set $statusVariableName"]
+}
+
+#########################################################################
+#### httpsetstatus
+# Helper function to set the global variable
+# This is used so that tkwait can wait for
+# the global variable to change from "running" to either
+# "normal" or "abnormal"
+
+proc httpStatus {name value} {
+    global $name
+    set $name $value
 }
 
 #########################################################################
 #### httpread
 # This is called by file event handler, from httpget.
 #
-body ::tycho::HTML::httpread {} {
-
-}
-
-#########################################################################
-#### httpclose
-# This will set the global variable ready so that tycho can read it.
-#
-body ::tycho::HTML::httpclose {} {
-
+body ::tycho::HTML::httpread {fd tmpfd} {
+    if [eof $fd] {
+        httpStatus $statusVariableName "done"
+	catch {close $fd}
+	catch {close $tmpfd}
+	puts "closing $fd $tmpfd"
+    } else {
+	gets $fd line
+	#puts ">$line"
+        puts $tmpfd $line
+    }
 }
 
 #####################################################################
@@ -737,6 +820,7 @@ body ::tycho::HTML::httpclose {} {
 # NOTE: This method really should support the syntax "filename#fragment"
 # in the filename argument.  Someday.
 #
+
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
         # If this is a http link, make sure to download it to our
@@ -745,6 +829,11 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         if {[regexp -nocase {^http://} $filename]} {
             # Translate from a http file to a local file (later cache).
             set filename [httpget $filename]
+            puts "filename:$filename, done:[$this httpwait]"
+
+            hyperJump $filename
+            reload
+            return
         }
 	# Use isRelative, not 'file pathtype' so that we handle paths
 	# that start with ~ and $.
