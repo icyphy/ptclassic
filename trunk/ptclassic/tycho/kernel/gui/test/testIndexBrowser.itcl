@@ -77,7 +77,7 @@ proc testIndexBrowserSetup {} {
 }
 
 proc testIndexBrowserCloseFile {filename} {
-    set displayer [::tycho::File::isFileOpen $filename]
+    set displayer [::tycho::registry::isopen $filename]
     if {$displayer != {}} {
         delete object [$displayer displayer]
     }
