@@ -136,7 +136,7 @@ clean_tcl:
 #	Need to make a link for tk.h so that we are sure it is installed
 #	Theoretically, GNU make should do the right thing, but . . .
 $(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) $(TCLTK_OBJ)/$(TCL_VERSION) \
-			$(TCLTK_OBJ)/$(TK_MAJOR_VERSION) $(TK_OBJ)/xpm
+			$(TCLTK_OBJ)/$(TK_MAJOR_VERSION) #$(TK_OBJ)/xpm
 	@echo "Configuring tk"
 	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) )
 	-(cd $(TK_OBJ); ln -s $(TK_SRC)/tk.h tk.h)
@@ -145,6 +145,7 @@ $(TK_OBJ):
 	mkdir $(TK_OBJ)
 
 # Need the xpm directory for TkPixmap
+# TkPixmap is not needed for Ptolemy, but it might be needed for xpole
 $(TK_OBJ)/xpm:
 	mkdir $(TK_OBJ)/xpm
 	(cd $(TK_OBJ)/xpm; ln -s $(TK_SRC)/xpm/* .)
@@ -159,7 +160,7 @@ $(TCLTK_OBJ)/$(TK_MAJOR_VERSION): $(TK_OBJ)
 
 # Build tk
 tk: $(TK_OBJ)/libtk.a 
-$(TK_OBJ)/libtk.a: $(TK_OBJ) $(TK_OBJ)/xpm/libxpm.a
+$(TK_OBJ)/libtk.a: $(TK_OBJ) #$(TK_OBJ)/xpm/libxpm.a
 	@echo "Making all in tk"
 	(cd  $(TK_OBJ); $(MAKE) \
 		X11_INCLUDES="$(X11_INCSPEC)" \
@@ -190,7 +191,7 @@ $(TK_OBJ)/xpm/libxpm.a: $(TK_OBJ)/xpm
 	all)
 
 # Install tk
-install_tk: $(TK_DEST)/lib/libtk.a $(TK_DEST)/lib/libxpm.a
+install_tk: $(TK_DEST)/lib/libtk.a #$(TK_DEST)/lib/libxpm.a
 $(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/lib $(TK_INDEPENDENT_DEST)
 	(cd  $(TK_OBJ); $(MAKE) \
 		X11_INCLUDES="$(X11_INCSPEC)" \
