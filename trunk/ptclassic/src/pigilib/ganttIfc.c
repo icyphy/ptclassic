@@ -58,7 +58,7 @@ char *s;
     char *eq, *p2;
     char *p = strchr(s, '.');
     if (!p) return 0;		/* No more periods in the string */
-    if (eq = strchr(p+1,'=')) {
+    if ( (eq = strchr(p+1,'=')) ) {
 	/* If the '=' occurs before the next '.', return 1 */
 	p2 = strchr(p+1, '.');
 	if ( !p2 || p2 > eq) return 1;
