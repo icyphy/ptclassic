@@ -148,10 +148,11 @@ typedef FILE *STREAM;
 #define RPCLOCATION "unknown"
 #endif /* RPCLOCATION */
 
+/* Use ansi CPP token '#' to get function_and_args into message */
 #define RPCASSERT(function_and_args, returnCode) \
     if (!function_and_args) { \
 	char buffer[1024]; \
-        (void) sprintf(buffer, "Vem RPC Error: %s: function_and_args", RPCLOCATION); \
+        (void) sprintf(buffer, "Vem RPC Error: %s: %s", RPCLOCATION, #function_and_args); \
 	perror(buffer); \
 	return returnCode; \
     }
