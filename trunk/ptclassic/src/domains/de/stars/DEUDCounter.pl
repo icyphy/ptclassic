@@ -2,12 +2,12 @@ defstar {
 	name { UDCounter }
 	domain { DE }
 	desc {
-This is an up/down counter.
-The processing order of the ports is: countUp -> countDown -> demand -> reset.
-Specifically, all simultaneous "countUp" inputs are processed.
-Then all simultaneous "countDown" inputs are processed.
-If there are multiple simultaneous "demand" inputs, all but the first
-are ignored.  Only one output will be produced.
+This is an up/down counter.  The processing order of the ports is:
+countUp -&gt; countDown -&gt; demand -&gt; reset.  Specifically, all
+simultaneous "countUp" inputs are processed.  Then all simultaneous
+"countDown" inputs are processed.  If there are multiple simultaneous
+"demand" inputs, all but the first are ignored.  Only one output will
+be produced.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
