@@ -281,6 +281,8 @@ config_header: config_header.c Makefile
 	$(CC) $(CCFLAGS) -o $@ $@.c
 
 install:
+	rm -f $(INSTALL_INCLUDE)/pthread.h
+	rm -rf $(INSTALL_INCLUDE)/pthread
 	cp $(INCS)/*.h $(INSTALL_INCLUDE)
 	if ( test ! -d $(INSTALL_INCLUDE)/pthread ) ; then \
 	  mkdir $(INSTALL_INCLUDE)/pthread ; \
