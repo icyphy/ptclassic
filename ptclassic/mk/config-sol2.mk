@@ -90,7 +90,7 @@ MATLABLIBDIR =
 # Used by xv
 #XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL =
-XV_CC =		gcc
+XV_CC =		gcc -traditional
 XMKMF =		/usr/openwin/bin/xmkmf
 
 # Used by tcltk to build the X pixmap extension
