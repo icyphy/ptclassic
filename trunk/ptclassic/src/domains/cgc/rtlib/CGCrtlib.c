@@ -37,7 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <stdio.h>
 #include <math.h>
-#include <memset.h>		/* declare memset for sun4 */
+#include <memory.h>		/* declare memset for sun4 */
 #include <string.h>		/* declare memset for sol2 */
 
 #include "CGCrtlib.h"
