@@ -99,7 +99,6 @@ void CalendarQueue :: clearFreeList()
 void CalendarQueue :: LocalInit(int qbase, int nbuck, double startInterval, 
 double lastTime)
 {
-//    cerr << "Entering CalendarQueue ::LocalInit";
     int i;
     long int n;
 
@@ -126,7 +125,6 @@ double lastTime)
     
     cq_bottomThreshold = cq_bucketNum/2 - 2;
     cq_topThreshold = 2*cq_bucketNum;
-//    cerr << '\n';
 
 }
 
@@ -422,7 +420,6 @@ double CalendarQueue :: NewInterval()
     if (validSeparationNum && totalSeparation) {
 	resultInterval = (double)(3*totalSeparation/validSeparationNum);
 	if (resultInterval < MINI_CQ_INTERVAL) {
-	    // printf("interval:%f, eventNumber:%d\n", resultInterval, cq_eventNum);
 	    return((double)MINI_CQ_INTERVAL);
 	} else
 	    return((double)resultInterval);
@@ -433,7 +430,6 @@ double CalendarQueue :: NewInterval()
 
 void CalendarQueue :: pushBack(CqLevelLink* a) {
   
-// cerr << "Entering CalendarQueue :: pushBack:" <<  a->level << "," << a->fineLevel << "," << a->dest;
 
     int i = (int)(a->level / cq_interval);	// find virtual bucket
     i = i % cq_bucketNum;	// find actual bucket
@@ -441,14 +437,11 @@ void CalendarQueue :: pushBack(CqLevelLink* a) {
     if ((cq_resizeEnabled) &&
 	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
 	    Resize(2 * cq_bucketNum);
-//  cerr << '\n';
 }
 
 void CalendarQueue :: initialize()
 {
-//   cerr << "Enterring CalenderQueue::initialize";
 	if (cq_eventNum == 0) {
-//   cerr << '\n';
 	    return;		// Queue already empty
 	}
 	for (int i = cq_bucketNum - 1; i>=0; i--) {
@@ -465,7 +458,6 @@ void CalendarQueue :: initialize()
 	}
 
 	cq_eventNum = 0;
-//   cerr << '\n';
 }
 
 // Destructor -- delete all Links 
