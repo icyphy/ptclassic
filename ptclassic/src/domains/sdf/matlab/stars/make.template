@@ -48,7 +48,8 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(MATLABDIR)/extern/include
+EXTTOOLSLIB = $(ROOT)/src/utils/libexttools
+INCL = -I$(SDFDIR) -I$(KERNDIR) $(MATLAB_INCSPEC) -I$(EXTTOOLSLIB)
 
 # Library name
 LIB=libsdfmatlabstars.$(LIBSUFFIX)
@@ -90,7 +91,6 @@ install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
-
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
