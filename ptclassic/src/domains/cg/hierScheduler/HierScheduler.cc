@@ -305,7 +305,7 @@ void HierScheduler :: setup () {
     int childNum = 0;
     CGTarget* child;
     while ((child = mtarget->cgChild(childNum++)))
-	child->loopingLevel = 3;
+	child->loopingLevel = "3";
 }
 
 void HierScheduler :: compileRun() {
