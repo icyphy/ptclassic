@@ -159,20 +159,22 @@ if [ -z "${PIGIRPC-}" ]; then
     if [ "${pigidebug:+x}" ]; then
 	if [ -x "$PIGIRPC.debug" ]; then
 	    PIGIRPC="$PIGIRPC.debug"
-        elif [ -x "$PIGIRPC" ]; then
-	    echo "$prg: $PIGIRPC.debug does not exist or is not executable."
-	    echo "      Using $PIGIRPC instead."
+        else
+	    if [ -x "$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE.debug" ]; then
+		echo "$prg: $PIGIRPC.debug does not exist or is not"
+		PIGIRPC="$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE.debug"
+		echo "       executable. Using $PIGIRPC instead."
+	    elif [ -x "$PIGIRPC" ]; then
+		echo "$prg: $PIGIRPC.debug does not exist or is not"
+		echo "       executable. Using $PIGIRPC instead."
+	    fi	
 	fi
     fi
 fi
 
 if [ ! -x "$PIGIRPC" ]; then
     echo "$prg: $PIGIRPC does not exist or is not executable."
-    if [ "${pigidebug:+x}" -a \
-	-x "$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE.debug" ]; then
-	PIGIRPC="$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE.debug"
-	echo "      Using $PIGIRPC instead."
-    elif [ -x "$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE" ]; then
+    if [ -x "$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE" ]; then
 	PIGIRPC="$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE"
 	echo "      Using $PIGIRPC instead."
     else
