@@ -28,6 +28,8 @@ $Id$
 #include "miscFuncs.h"
 #include "Domain.h"
 #include "Plasma.h"
+#include "IntState.h"
+#include <ctype.h>
 
 // Report an error: no such star or porthole
 
@@ -86,41 +88,111 @@ InterpGalaxy::findPortHole (const char* star,const char* port) {
 	return ph;
 }
 
+// Find a MPH.
+MultiPortHole *
+InterpGalaxy::findMPH(const char* star, const char* port) {
+	Block *st = blockWithName(star);
+	if (st == NULL) {
+		noInstance (star, readName());
+		return 0;
+	}
+	MultiPortHole *ph = st->multiPortWithName(port);
+	if (ph == NULL) noInstance (port, star);
+	return ph;
+}
+
+// Evaluate an expression as if it were an IntState initializer in
+// a containing star.  Empty expressions return 0.
+static int evalExp(Galaxy* gal, const char* exp, const char* dummyName) {
+	if (exp == 0 || *exp == 0) return 0;
+	Block temp("", gal, "");
+	IntState tstate;
+	tstate.setState(dummyName, &temp, exp);
+	tstate.initialize();
+	return int(tstate);
+}
+
+// Return TRUE if the given expression is variable, FALSE if it is a
+// constant.  We want to err in the conservative direction, i.e. reporting
+// variable falsely is safe, and the other way is not.
+static int isVarExp(const char* exp) {
+	if (!exp) return 0;	// null is fixed
+	while (*exp && (isdigit(*exp) || isspace(*exp))) exp++;
+	// return false (not variable) if at end of string, otherwise true.
+	return (*exp != 0);
+}
+
+static void
+logConnect(StringList& list,const char* srcStar,const char* srcPipe,
+	   const char* dstStar,const char* dstPipe, const char* delay) {
+	list += "C";
+	list += srcStar;
+	list += srcPipe;
+	list += dstStar;
+	list += dstPipe;
+	list += delay;
+}
+
 // Form a point-to-point connection.
 int
 InterpGalaxy::connect(const char* srcStar,const char* srcPipe,
 		      const char* dstStar,const char* dstPipe,
-		      int numberDelays) {
+		      const char* delay) {
+	if (delay == 0) delay = "";
 // Get the source and destination ports
 	PortHole *srcP = findPortHole (srcStar, srcPipe);
 	PortHole *dstP = findPortHole (dstStar, dstPipe);
 	if (srcP == NULL || dstP == NULL) return FALSE;
 
-	srcPipe = hashstring(srcPipe);
-	srcStar = hashstring(srcStar);
-	dstPipe = hashstring(dstPipe);
-	dstStar = hashstring(dstStar);
+// add the action to the list, and to initList if variable
+	logConnect(actionList,srcStar,srcPipe,dstStar,dstPipe,delay);
+	int del = 0;
+	if (isVarExp(delay))
+		logConnect(initList,srcStar,srcPipe,dstStar,dstPipe,delay);
+	else del = evalExp(this,delay,"delay");
+	Galaxy::connect (*srcP, *dstP, del);
+	return TRUE;
+}
 
-// add the action to the list
-	actionList += "C";
-	actionList += srcStar;
-	actionList += srcPipe;
-	actionList += dstStar;
-	actionList += dstPipe;
-	actionList += numberDelays;
-// Now it's obvious:
-	Galaxy::connect (*srcP, *dstP, numberDelays);
+static void
+logBus(StringList& list, const char* srcStar,const char* srcPipe,
+       const char* dstStar,const char* dstPipe, const char* width,
+       const char* delay) {
+	list += "B";
+	list += srcStar;
+	list += srcPipe;
+	list += dstStar;
+	list += dstPipe;
+	list += width;
+	list += delay;
+}
+
+// Form a bus connection
+int
+InterpGalaxy::busConnect(const char* srcStar,const char* srcPipe,
+		      const char* dstStar,const char* dstPipe,
+			 const char* width, const char* delay) {
+	if (delay == 0) delay = "";
+	MultiPortHole* s = findMPH (srcStar, srcPipe);
+	MultiPortHole* d = findMPH (dstStar, dstPipe);
+	if (s == 0 || d == 0) return FALSE;
+	logBus(actionList,srcStar,srcPipe,dstStar,dstPipe,width,delay);
+	int numberDelays = 0;
+	if (isVarExp(width) || isVarExp(delay))
+		logBus(initList,srcStar,srcPipe,dstStar,dstPipe,width,delay);
+	else numberDelays = evalExp(this,delay,"delay");
+	int w = evalExp(this,width,"busWidth");
+	if (w == 0) w = 1;
+	s->busConnect (*d, w, numberDelays);
 	return TRUE;
 }
 
 // Add a star to the galaxy.
 int
 InterpGalaxy::addStar(const char* starname,const char* starclass) {
-	starname = hashstring (starname);
-	starclass = hashstring (starclass);
 	Block *src = KnownBlock::clone(starclass);
 	if (src == 0) return FALSE;
-	addBlock(src->setBlock(starname,this));
+	addBlock(src->setBlock(hashstring(starname),this));
 //add action to list
 	actionList += "S";
 	actionList += starname;
@@ -165,8 +237,6 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 // first get the portname for the contained star
 	GenericPort *ph = findGenPort (starname, portname);
 	if (ph == NULL) return FALSE;
-	portname = hashstring (portname);
-	starname = hashstring (starname);
 // create new galaxy port, add to galaxy, do the alias
 	Plasma* pla = ph->setPlasma();
 	DataType dType = pla ? pla->type() : ph->myType();
@@ -224,7 +294,8 @@ InterpGalaxy::delNode (const char* nodename) {
 // Connect a porthole to a node.
 int
 InterpGalaxy::nodeConnect (const char* star, const char* port,
-			   const char* node, int delay) {
+			   const char* node, const char* delay) {
+	if (delay == 0) delay = "";
 	GenericPort *ph = findGenericPort (star, port);
 	if (ph == NULL) return FALSE;
 	Geodesic *g = nodes.nodeWithName (node);
@@ -232,13 +303,15 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		noInstance (node, readName());
 		return FALSE;
 	}
-	star = hashstring (star);
-	port = hashstring (port);
-	node = hashstring (node);
 	if (ph->isItOutput()) {
-		if (!g->setSourcePort (*ph, delay)) return FALSE;
+		int del;
+		if (isVarExp(delay)) del = 0;
+		else del = evalExp(this,delay,"delay");
+		if (!g->setSourcePort (*ph, del)) return FALSE;
 	}
-	else if (delay) {
+	else if (delay && *delay) {
+
+		    
 		Error::abortRun ("delay not allowed when nodeConnecting an input");
 		return FALSE;
 	}
@@ -250,6 +323,13 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 	actionList += port;
 	actionList += node;
 	actionList += delay;
+	if (isVarExp(delay)) {
+		initList += "c";
+		initList += star;
+		initList += port;
+		initList += node;
+		initList += delay;
+	}
 	return TRUE;
 }
 
@@ -258,8 +338,6 @@ int
 InterpGalaxy::disconnect (const char* star, const char* port) {
 	PortHole* ph = findPortHole (star, port);
 	if (ph == NULL) return FALSE;
-	star = hashstring (star);
-	port = hashstring (port);
 	ph->disconnect();
 // add to actionList.  Yes, when we clone, clone will connect and
 // then disconnect.
@@ -273,8 +351,7 @@ InterpGalaxy::disconnect (const char* star, const char* port) {
 int
 InterpGalaxy::addState (const char* statename, const char* stateclass, const char* statevalue) {
         statename = hashstring (statename);
-        stateclass = hashstring (stateclass);
-        statevalue = hashstring (statevalue);
+	statevalue = hashstring (statevalue);
         State *src = KnownState::clone(stateclass);
         if (src == 0) return FALSE;
         Block::addState(src->setState(statename,this,statevalue));
@@ -289,8 +366,6 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
 // change a value of a state within the galaxy.
 int
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
-        blockname = hashstring (blockname);
-        statename = hashstring (statename);
         statevalue = hashstring (statevalue);
 	if(!strcmp(blockname, "this")) {
 		State *src = stateWithName(statename);
@@ -321,29 +396,13 @@ InterpGalaxy::setState (const char* blockname, const char* statename, const char
 // create a specified number of ports in a porthole.
 int
 InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
-	Block *st = blockWithName(star);
-	if (st == NULL) {
-		noInstance (star, readName());
-		return FALSE;
-	}
-	MultiPortHole *mp = st->multiPortWithName(port);
-	if (mp == NULL) {
-		StringList msg;
-		msg = "No MultiPortHole named \"";
-		msg += port;
-		msg += "\" in \"";
-		msg += star;
-		msg += "\"";
-		Error::abortRun (msg);
-		return FALSE;
-	}
+	MultiPortHole *mp = findMPH (star, port);
+	if (mp == NULL) return FALSE;
 
 	// Quit if we already have the right number
 	int np = mp->numberPorts ();
 	if (np == num) return TRUE;
 
-	star = hashstring (star);
-	port = hashstring (port);
 // make the ports (allow case where we've already connected some)
 	for (int i = np; i < num; i++)
 		mp->newPort();
@@ -401,7 +460,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *action;
-		int ndelay;
+		const char *ndelay, *width;
 
 		action = next++;
 		switch (action[0]) {
@@ -424,10 +483,21 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			b = next++;
 			c = next++;
 			d = next++;
-			ndelay = atoi(next++);
+			ndelay = next++;
 
 			connect (a, b, c, d, ndelay);
 			nacts -= 6;
+			break;
+
+		case 'B':	// add a bus connection
+			a = next++;
+			b = next++;
+			c = next++;
+			d = next++;
+			width = next++;
+			ndelay = next++;
+			busConnect (a, b, c, d, width, ndelay);
+			nacts -= 7;
 			break;
 
 		case 'A':	// add an alias porthole to the galaxy
@@ -455,7 +525,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			a = next++;
 			b = next++;
 			c = next++;
-			ndelay = atoi(next++);
+			ndelay = next++;
 			nodeConnect (a, b, c, ndelay);
 			nacts -= 5;
 			break;
@@ -507,6 +577,13 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 
 // if we're producing a wormhole, change the domain back
 	if (oldDom) KnownBlock::setDomain (oldDom);
+
+// copy the initialization list.
+	StringListIter nextI(g.initList);
+	initList.initialize();
+	const char* s;
+	while ((s = nextI++) != 0)
+		initList += s;
 }
 
 // add the galaxy to the known list (completing the definition of a galaxy
@@ -562,30 +639,85 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 // name so it can be used elsewhere)
 
 void InterpGalaxy :: zero () {
-	// delete permanent nodes
-	NodeListIter nextn(nodes);
-	for (int i = nodes.size(); i > 0; i--) {
-		LOG_DEL; delete nextn++;
-	}
-	// delete component blocks
-	GalTopBlockIter nextb(*this);
-	for (i = numberBlocks(); i > 0; i--) {
-		LOG_DEL; delete nextb++;
-	}
-	// delete ports
-	BlockPortIter nextp(*this);
-	for (i = numberPorts(); i > 0; i--) {
-		LOG_DEL; delete nextp++;
-	}
-
-	// delete states
-	BlockStateIter nexts(*this);
-	for (i = numberStates(); i > 0; i--) {
-		LOG_DEL; delete nexts++;
-	}
+	// remove nodes
+	nodes.initialize();
+	// remove other stuff
+	DynamicGalaxy :: zero();
 	// Clear action list
 	actionList.initialize();
+	// Clear init list
+	initList.initialize();
 }
+
+// turns out that member and baseclass destructors do everything,
+// so this is empty.
+InterpGalaxy :: ~InterpGalaxy () {}
+
+void
+InterpGalaxy::initialize () {
+	Block::initialize();
+	StringListIter next(initList);
+	int nacts = initList.size();
+	int err = 0;
+	while (nacts > 0) {
+		const char *a, *b, *c, *d, *action;
+		int ndelay, width;
+		action = next++;
+		switch (action[0]) {
+		case 'B':
+			a = next++;
+			b = next++;
+			c = next++;
+			d = next++;
+			width = evalExp(this,next++,"busWidth");
+			ndelay = evalExp(this,next++,"delay");
+			{
+				MultiPortHole* s = findMPH (a, b);
+				MultiPortHole* dp = findMPH (c, d);
+				if (s == 0 || dp == 0) err++;
+				else s->busConnect(*dp, width, ndelay);
+			}
+			nacts -= 7;
+			break;
+		case 'C':
+			a = next++;
+			b = next++;
+			c = next++;
+			d = next++;
+			ndelay = evalExp(this,next++,"delay");
+			{
+				PortHole* s = findPortHole(a, b);
+				if (s == 0) err++;
+				else {
+					s->setDelay(ndelay);
+				}
+			}
+			nacts -= 6;
+			break;
+		case 'c':
+			a = next++;
+			b = next++;
+			c = next++;
+			ndelay = evalExp(this,next++,"delay");
+			{
+				Geodesic *g = nodes.nodeWithName(c);
+				if (g == 0) err++;
+				g->setDelay(ndelay);
+			}
+			nacts -= 5;
+			break;
+		default:
+			err++;
+		}
+		if (err) {
+			Error::abortRun (*this,
+					 "Internal error in initialize()");
+			return;
+		}
+	}
+	initSubblocks();
+}
+
 
 // function to find Node with given name, or NULL if no match
 Geodesic*
@@ -597,6 +729,16 @@ NodeList::nodeWithName (const char* ident) {
 			return g;
 	}
 	return NULL;
+}
+
+// function to initialize NodeList
+void NodeList::initialize () {
+	// delete permanent nodes
+	NodeListIter nextn(*this);
+	for (int i = size(); i > 0; i--) {
+		LOG_DEL; delete nextn++;
+	}
+	SequentialList::initialize();
 }
 
 // isa

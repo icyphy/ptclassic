@@ -7,10 +7,6 @@ $Id$
 
  Programmer:  J. T. Buck
  Date of creation: 3/18/90
- Revisions:
-	5/26/90 - I. Kuroda
-		add InterpGalaxy::addState
-		add InterpGalaxy::setState
 
  InterpGalaxy is a galaxy that may dynamically be added to, as well
  as cloned.
@@ -24,7 +20,7 @@ $Id$
 #pragma interface
 #endif
 
-#include "Galaxy.h"
+#include "DynamicGalaxy.h"
 #include "KnownBlock.h"
 #include "KnownState.h"
 #include "StringList.h"
@@ -38,6 +34,8 @@ public:
 	void put(Geodesic& g) { SequentialList::put(&g);}
 	SequentialList::size;
 	Geodesic* nodeWithName (const char* name);
+	void initialize();
+	~NodeList() { initialize();}
 };
 
 class NodeListIter : private ListIter {
@@ -48,10 +46,11 @@ public:
 	ListIter::reset;
 };
 
-class InterpGalaxy: public Galaxy {
+class InterpGalaxy: public DynamicGalaxy {
 
 private:
 	StringList actionList;	// saves actions used in building galaxy
+	StringList initList;	// actions to be done by initialize()
 	NodeList nodes;
 	const char* className;
 
@@ -64,7 +63,10 @@ protected:
 	GenericPort* findGenPort(const char* star,const char* port);
 	GenericPort* findGenericPort(const char* star,const char* port);
 
-	// body of destructor
+	// find a star multiporthole
+	MultiPortHole* findMPH(const char* star, const char* port);
+
+	// routine to reset all structures (like body of destructor)
 	void zero();
 
 	// body of copy constructor
@@ -97,6 +99,9 @@ public:
 	void
 	setDescriptor(const char* dtext) { descriptor = dtext;}
 
+// initialize: does variable-parameter connections
+	void initialize();
+
 // add a new star to the galaxy
 	int
 	addStar(const char* starname, const char* starclass);
@@ -108,7 +113,13 @@ public:
 // add a connection (point-to-point)
 	int
 	connect(const char* srcstar, const char* srcport, const char* dststar,
-		const char* dstport, int delay = 0);
+		const char* dstport, const char* delay = 0);
+
+// add a bus connection
+	int
+	busConnect(const char* srcstar, const char* srcport,
+		   const char* dststar, const char* dstport,
+		   const char* width, const char* delay = 0);
 
 // disconnect a porthole (works for point-to-point or netlist connections)
 	int
@@ -129,7 +140,7 @@ public:
 // connnect a porthole to a node
 	int
 	nodeConnect(const char* star, const char* port, const char* node,
-		    int delay = 0);
+		    const char* delay = 0);
 
 // add a state
 	int
@@ -163,6 +174,6 @@ public:
 	int isA(const char*) const;
 
 // Destructor
-	~InterpGalaxy() { zero();}
+	~InterpGalaxy();
 };
 #endif
