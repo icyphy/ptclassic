@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -30,11 +30,13 @@ static char SccsId[]="$Id$";
 #include "errtrap.h"
 #include "utility.h"
 #include "cp_internal.h"
+#include "cp_procs.h"
 
 #define VAL(char) ( (int) ( char - '0'))
 
 extern tr_stack *cp_stack;
 
+int
 cp_get_path (number, path)
 int *number;
 cp_path **path;
@@ -65,6 +67,7 @@ cp_path **path;
     return 1;
 }
 
+int
 cp_get_point (point)
 cp_point *point;
 {
@@ -82,6 +85,7 @@ cp_point *point;
     return 1;
 }
 
+int
 cp_get_sinteger(ret_val)
 int *ret_val;
 {
@@ -116,6 +120,7 @@ int *ret_val;
     return 1;
 }
 
+int
 cp_get_integer(ret_val)
 int *ret_val;
 {
@@ -142,7 +147,7 @@ int *ret_val;
     *ret_val = val;
     return 1;
 }
-
+int
 cp_get_shortname (ret_ptr)
 char **ret_ptr;
 {
@@ -169,6 +174,7 @@ char **ret_ptr;
     return 1;
 }
 
+int
 cp_get_transterm()
 {
     cp_point pnt;
@@ -217,6 +223,7 @@ cp_get_transterm()
     return 1;
 }
 
+void
 cp_get_transform(array, x, y, type)
 double array[2][2];
 int32 *x, *y;
@@ -225,7 +232,7 @@ int *type;
     while (cp_get_transterm());
     tr_get_transform(cp_stack, array, x, y, type);
 }
-
+void
 flush (type)
 type_type type;
 {
