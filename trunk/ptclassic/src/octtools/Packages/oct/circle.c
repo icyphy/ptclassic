@@ -34,12 +34,15 @@ static char SccsId[]="$Id$";
 #include "geo.h"
 #include "io.h"
 
+#include "circle.h"
+
 static octStatus circle_read_fields(), circle_write_fields();
 static octStatus circle_bb();
 
 extern struct object_desc oct_geo_desc;
 static struct object_desc *super = &oct_geo_desc;
 
+void
 oct_circle_desc_set(object_desc)
 struct object_desc *object_desc;
 {
