@@ -5,14 +5,17 @@ defstar {
 	version { $Id$ }
 	author { Karim-Patrick Khiar }
 	copyright {
-Copyright (c) 1990-$Id$ The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	explanation {
-Compute the inner product of two vectors; one given by two angles in spherical components, the other in cartesian components.
-        <R,U> = [Rx, Ry, Rz]*[cos(sn)*sin(gn), sin(sn), cos(sn)*cos(gn)]'
+Compute the inner product of two vectors; one given by two angles in
+spherical components, the other in cartesian components.
+.EQ
+<R,U> = [Rx, Ry, Rz]*[cos(sn)*sin(gn), sin(sn), cos(sn)*cos(gn)]'
+.EN
 .Id "Compute the inner product of two vectors"
 .Id "format conversion, spherical to cartesian"
 	}
@@ -59,14 +62,20 @@ Compute the inner product of two vectors; one given by two angles in spherical c
 	}
 	ccinclude { <math.h> }
 	go {
-	// Line originally was:
-	//	x%0 << magnitude *(cos(site)*sin(gise)*Rx + sin(site)*Ry+ cos(site)*cos(gise)*Rz) ;
-	// But sol2.cfront barfs with:
-	// line 63: Error: Overloading ambiguity between
-	// operator*(const Complex&, double) and FloatState::operator double().
+// Line originally was:
+// x%0 << magnitude * 
+//        (cos(site)*sin(gise)*Rx + sin(site)*Ry+ cos(site)*cos(gise)*Rz) ;
+// But sol2.cfront barfs with:
+// line 63: Error: Overloading ambiguity between
+// operator*(const Complex&, double) and FloatState::operator double().
+//
+// Now, we use casts whenever a state is referenced
 
-	x%0 << (double)magnitude* (cos(site)*sin(gise)*(double)Rx +
-                                   sin(site)*(double)Ry +
- 				   cos(site)*cos(gise)*(double)Rz);
+	double sited = double(site);
+	double gised = double(gise);
+
+	x%0 << (double(magnitude) * (cos(sited)*sin(gised)*double(Rx) +
+                                     sin(sited)*double(Ry) +
+ 				     cos(sited)*cos(gised)*double(Rz)));
 	}
 }
