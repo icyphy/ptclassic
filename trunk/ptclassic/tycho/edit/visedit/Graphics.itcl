@@ -538,7 +538,7 @@ body ::tycho::Graphics::constructor {args} {
             "$this updateScrollbars; $this dependenceUpdate resize"
 
     # Defer until after constructors in derived classes have completed.
-    after idle [catch "$this interactiveEnable 1"]
+    after idle [list catch "$this interactiveEnable 1"]
 
     # Enable selection with button 1; shift-click toggles
     $slate selector bind click selectable -button 1
@@ -1164,7 +1164,7 @@ body ::tycho::Graphics::exportXwd {filename} {
 #
 body ::tycho::Graphics::focusin {} {
     focus [$slate component canvas]
-    displayer setCurrentView $view
+    displayer setCurrentView $this
 }
 
 #######################################################################
