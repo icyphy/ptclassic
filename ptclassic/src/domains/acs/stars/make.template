@@ -16,8 +16,9 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # ACSDIR is the directory containing ACS domain support
-ACSDIR = $(ROOT)/src/domains/acs/kernel
-INCL = -I$(ACSDIR) -I$(KERNDIR)
+ACSDIR = 	$(ROOT)/src/domains/acs/kernel
+CGKERNEL = 	$(ROOT)/src/domains/cg/kernel
+INCL = 		-I$(ACSDIR) -I$(CGKERNEL) -I$(KERNDIR)
 
 # Library name
 LIB=libacsstars.$(LIBSUFFIX)
@@ -25,7 +26,39 @@ LIB=libacsstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \
-  ACSNop.pl
+  ACSNop.pl \
+
+TMP_PL_SRCS = \
+  ACSAdd.pl \
+  ACSAddCGC.pl \
+  ACSAddFPGA.pl \
+  ACSAddFPSim.pl \
+  ACSAddFPSimStat.pl \
+  ACSAddJava.pl \
+  ACSFork.pl \
+  ACSForkCGC.pl \
+  ACSForkFPGA.pl \
+  ACSForkFPSim.pl \
+  ACSForkFPSimStat.pl \
+  ACSForkJava.pl \
+  ACSMpy.pl \
+  ACSMpyCGC.pl \
+  ACSMpyFPGA.pl \
+  ACSMpyFPSim.pl \
+  ACSMpyFPSimStat.pl \
+  ACSMpyJava.pl \
+  ACSRamp.pl \
+  ACSRampCGC.pl \
+  ACSRampFPGA.pl \
+  ACSRampFPSim.pl \
+  ACSRampFPSimStat.pl \
+  ACSRampJava.pl \
+  ACSSink.pl \
+  ACSSinkCGC.pl \
+  ACSSinkFPGA.pl \
+  ACSSinkFPSim.pl \
+  ACSSinkFPSimStat.pl \
+  ACSSinkJava.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
