@@ -501,7 +501,7 @@ _xpAxisGeomCheck( XPAxisWdg *pAxis) {
      * In a perfect world we should check to see if our geometry actually
      * changed.  But its difficult to do that correctly when considering
      * the interactions with requested geoms that might or might
-     * not be granted (do you predict it will be or wont be??).
+     * not be granted (do you predict it will be or wont be?).
      * So instead, we always recalc.
      */
     pAxis->Flags |= XPAxisF_GeomXfNotify;
