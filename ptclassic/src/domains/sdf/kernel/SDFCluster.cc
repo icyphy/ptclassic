@@ -944,18 +944,19 @@ static const char* mungeName(NamedObj& o) {
 	StringList name = o.fullName();
 	const char* cname = strchr (name, '.');
 	if (cname == 0) return "top";
+	// Change dots . to underscores _, but leave the first dot alone
 	cname++;
-// change dots to _ .
-	char buf[80];
+	char* buf = new char[ strlen(cname) + 1 ];
+	strcpy(buf, cname);
 	char* p = buf;
-	int i = 0;
-	while (i < 79 && *cname) {
-		if (*cname == '.') *p++ = '_';
-		else *p++ = *cname;
-		cname++;
+	while (*p) {
+		if (*p == '.') *p = '_';
+		p++;
 	}
 	*p = 0;
-	return hashstring(buf);
+	const char* hashed = hashstring(buf);
+	delete [] buf;
+	return hashed;
 }
 
 // create an atomic cluster to surround a single DataFlowStar.
