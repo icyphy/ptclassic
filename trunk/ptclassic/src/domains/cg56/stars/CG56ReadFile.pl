@@ -1,13 +1,16 @@
 defstar {
 	name { ReadFile }
 	domain { CG56 }
-	desc { Reads data from file for use by simulator.}
+	desc { Reads data from file for use with simulator.}
 	version { $Id$ }
 	author { Chih-Tsung Huang }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-Reads data from file for use by simulator.
+.Ir "Motorola DSP56000 simulator"
+.Ir "simulator, Motorola DSP56000"
+.Id "file input"
+Reads data from file for use with Motorola DSP56000 simulator.
 	}
 	execTime {
 		return 2;

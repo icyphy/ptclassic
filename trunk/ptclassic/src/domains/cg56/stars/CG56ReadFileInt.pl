@@ -7,7 +7,10 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-Reads data from file for use by simulator.
+.Ir "Motorola DSP56000 simulator"
+.Ir "simulator, Motorola DSP56000"
+.Id "file input"
+Reads data from file for use by Motorola DSP56000 simulator.
 	}
 	execTime {
 		return 2;
