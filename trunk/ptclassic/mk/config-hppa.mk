@@ -1,5 +1,7 @@
-# Configuration makefile to make on an HP7xx machine ("snake")
-# running HP-UX with g++2.3.3.u1 or later.
+# Configuration makefile to make on an HP-PA machine (7xx or 8xx)
+# running HP-UX with g++2.3.3.u1 or later.  The debug format is the
+# one invented by Utah (HP's format is proprietary) so you will need
+# gdb to debug.
 #
 # $Id$
 # Copyright (c) 1993 The Regents of the University of California.
