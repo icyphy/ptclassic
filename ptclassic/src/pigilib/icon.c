@@ -98,7 +98,7 @@ char *fileName;
 Open a window and run xedit on a file.
 Runs in the background and returns immediately.
 */
-static boolean
+boolean
 LookAtFile(fileName)
 char *fileName;
 {
