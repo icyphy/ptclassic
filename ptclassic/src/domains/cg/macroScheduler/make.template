@@ -10,15 +10,15 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/cg/macroScheduler
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+CONFIG = 	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
-CGKERNEL = $(ROOT)/src/domains/cg/kernel
-PARKERNEL = $(ROOT)/src/domains/cg/parScheduler
-DLKERNEL = $(ROOT)/src/domains/cg/dlScheduler
+SDFKERNEL = 	$(ROOT)/src/domains/sdf/kernel
+CGKERNEL =	$(ROOT)/src/domains/cg/kernel
+PARKERNEL =	$(ROOT)/src/domains/cg/parScheduler
+DLKERNEL =	$(ROOT)/src/domains/cg/dlScheduler
 
-INCL=-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(DLKERNEL) -I$(KERNDIR)
+INCL = 	-I$(SDFKERNEL) -I$(CGKERNEL) -I$(PARKERNEL) -I$(DLKERNEL) -I$(KERNDIR)
 
 SRCS =	CGMacroCluster.cc MacroGraph.cc MacroScheduler.cc MacroParProcs.cc \
 	CGMacroStar.cc
@@ -26,9 +26,9 @@ SRCS =	CGMacroCluster.cc MacroGraph.cc MacroScheduler.cc MacroParProcs.cc \
 HDRS =  CGMacroCluster.h MacroGraph.h MacroScheduler.h MacroParProcs.h \
 	CGMacroStar.h
 
-OBJS = $(SRCS:.cc=.o)
+OBJS =	$(SRCS:.cc=.o)
 
-LIB = libMacro.a
+LIB =	libMacro.$(LIBSUFFIX)
 
 all:	makefile $(LIB)
 
