@@ -23,8 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	7 January 1993
+    Author:	T.M. Parks
+    Created:	7 January 1993
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -35,75 +35,91 @@ static const char file_id[] = "$RCSfile$";
 
 #include "RTDFScheduler.h"
 #include "MTDFStar.h"
-#include "CriticalSection.h"
-
-// Constructor.
-RTDFScheduler::RTDFScheduler()
-{
-    setCurrentTime(0.0);
-}
-
-// Initialization.
-void RTDFScheduler::setup()
-{
-    MTDFScheduler::setup();
-    setCurrentTime(0.0);
-}
 
 // Run (or continue) the simulation.
 int RTDFScheduler::run()
 {
     // Force current time to be startTime.
-    clock.reset();
+    {
+	CriticalSection x(monitor);
+	clock.reset();
+    }
 
     // Lower priority to allow Threads to run.
-    main.setPriority(MTDFThread::minPriority());
+    thread->setPriority(MTDFThread::minPriority());
 
     // Wait until enough time has elapsed.
-    while ( (startTime + clock.elapsedTime() < stopTime)
-	    && !SimControl::haltRequested() )
-	;
+    while( (now() < getStopTime()) && !SimControl::haltRequested());
 
     // Raise priority to prevent Threads from running.
-    main.setPriority(MTDFThread::maxPriority());
+    thread->setPriority(MTDFThread::maxPriority());
 
     // Update startTime but keep current time consistent.
-    startTime += clock.elapsedTime();
-    clock.reset();
+    {
+	CriticalSection x(monitor);
+	startTime += clock.elapsedTime();
+	clock.reset();
+    }
+
+    StringList msg;
+    if (SimControl::haltRequested()) msg << "Run halted ";
+    else msg << "Run completed ";
+    msg << "at " << now() << '\n';
+    msg << "stopTime = " << getStopTime();
+
+    Error::message(msg);
 
     return !SimControl::haltRequested();
 }
 
 // Select thread function for a star.
-void (*RTDFScheduler::thread(MTDFStar* star))(MTDFStar*)
+void (*RTDFScheduler::selectThread(MTDFStar* star))(MTDFStar*)
 {
     if (star->period > 0.0) return periodicThread;
+    else if (star->isSource()) return sourceThread;
     else return starThread;
 }
 
 // Thread for periodic Stars.
 void RTDFScheduler::periodicThread(MTDFStar* star)
 {
-    RTDFScheduler* sched = (RTDFScheduler*)star->scheduler();
+    MTDFScheduler& sched = *(MTDFScheduler*)star->scheduler();
     TimeVal wake = star->lag;
     
-    while(TRUE)
+    do
     {
-	star->thread().sleep(wake - sched->now());
-	star->run();
+	star->thread().sleep(sched.delay(wake));
 	wake += star->period;
-    }
+    } while (star->run());
+}
+
+// Thread for (non-periodic) source Stars.
+void RTDFScheduler::sourceThread(MTDFStar* star)
+{
+    RTDFScheduler& sched = *(RTDFScheduler*)star->scheduler();
+
+    while( (sched.now() < sched.getStopTime()) && star->run() );
 }
 
 // Set current time.
 void RTDFScheduler::setCurrentTime(double time)
 {
+    CriticalSection x(monitor);
     startTime = time;
     clock.reset();
 }
 
 // Current time.
-double RTDFScheduler::now() const
+double RTDFScheduler::now()
 {
-    return startTime + clock.elapsedTime();
+    CriticalSection x(monitor);
+    TimeVal t = startTime + clock.elapsedTime();
+    return t;
+}
+
+// Delay used for sleeping Threads.
+TimeVal RTDFScheduler::delay(TimeVal when)
+{
+    CriticalSection x(monitor);
+    return when - (startTime + clock.elapsedTime());
 }
