@@ -4,6 +4,10 @@
 #include "type.h"
 #include "DataStruct.h"
 
+// SCCS version identification
+// $Id$
+
+
 class Geodesic;
 class Block;
 

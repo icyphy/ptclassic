@@ -3,6 +3,8 @@
 #include "Block.h"
 #include "StringList.h"
 
+// SCCS version identification
+// $Id$
 
 PortHole& PortHole :: setPort(char* s,
 			      Block* parent,

@@ -3,6 +3,10 @@
 #include "Galaxy.h"
 #include "Block.h"
 
+
+// SCCS version identification
+// $Id$
+
 	////////////////////////////////////
 	// connect
 	////////////////////////////////////

@@ -3,6 +3,10 @@
 
 #include "type.h"
 
+// SCCS version identification
+// $Id$
+
+
 /**************************************************************
 This header file contains basic container class data structures
 used widely. Each container class stores a set of void*'s,

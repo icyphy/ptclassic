@@ -1,6 +1,9 @@
 #include "Fraction.h"
 #include "StringList.h"
 
+// SCCS version identification
+// $Id$
+
 /*
 
  Copyright (c) 1989 The Regents of the University of California.

@@ -3,6 +3,10 @@
 
 #define SMALL_STRING 10
 
+
+// SCCS version identification
+// $Id$
+
 StringList :: operator = (char* s)
 	 {put(s);totalSize+=strlen(s);}
  

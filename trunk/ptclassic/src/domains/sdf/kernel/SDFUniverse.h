@@ -5,6 +5,10 @@
 #include "Star.h"
 #include "Scheduler.h"
 
+
+// SCCS version identification
+// $Id$
+
 /*******************************************************************
 
 	Universes are defined in this file.

@@ -1,6 +1,10 @@
 #include "Universe.h"
 #include "StringList.h"
 
+
+// SCCS version identification
+// $Id$
+
 SDFUniverse :: operator char* () {
 	StringList out;
 	out = "SYNCHRONOUS DATAFLOW UNIVERSE: ";
