@@ -36,14 +36,14 @@ GrayImage::GrayImage(const GrayImage& gi, int a):
 
 
 GrayImage::~GrayImage()
-{ delete grayData; grayData = (unsigned char*) NULL; }
+{ LOG_DEL; delete grayData; grayData = (unsigned char*) NULL; }
 
 
 void GrayImage::setSize(int a)
 {
 	if (size != fullSize) return;
 	if (a == fullSize) return;
-	delete grayData;
+	LOG_DEL; delete grayData;
 	LOG_NEW; grayData = new unsigned char[a];
 	size = fullSize = a;
 } // GrayImage::setSize()
@@ -65,7 +65,7 @@ BaseImage* GrayImage::fragment(int cellSz, int Num) const
 	GrayImage* retval = (GrayImage*) clone(1);
 	retval->startPos = startPos + Num*cellSz;
 	retval->size = min(startPos+size-retval->startPos, cellSz);
-	delete retval->grayData; // some other way to do this?
+	LOG_DEL; delete retval->grayData; // some other way to do this?
 	LOG_NEW; retval->grayData = new unsigned char[retval->size];
 
 	int offset = retval->startPos - startPos;
@@ -84,7 +84,7 @@ void GrayImage::assemble(const BaseImage* bi)
 		LOG_NEW; unsigned char* tmpPtr = new unsigned char[fullSize];
 		for(int t = 0; t < fullSize; t++) {tmpPtr[t]=(unsigned char) 0;}
 		copy(size, tmpPtr+startPos, grayData);
-		delete grayData;
+		LOG_DEL; delete grayData;
 		grayData = tmpPtr;
 		size = fullSize;
 	}
