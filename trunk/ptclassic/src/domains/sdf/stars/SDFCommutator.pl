@@ -3,17 +3,15 @@ defstar {
 	domain {SDF}
 	version {$Id$}
 	desc {
-Takes n input streams and combines them to form one output stream.
+Takes N input streams and synchronously combines them into one output stream,
+where N is the number of inputs.  It consumes N input particles from each
+input, and produces N*B particles on the output, where B = blockSize.
+The first B particles on the output come from the first input,
+the next B particles from the next input, etc.
 	}
-	author { J. T. Buck }
+	author { J. T. Buck and E. A. Lee}
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
-	explanation {
-This star synchronously combines streams.
-On each firing it consumes one particle from each
-input and produces the n particles on the output stream,
-ordered according to the inputs.
-	}
 	inmulti {
 		name {input}
 		type {ANYTYPE}
@@ -22,14 +20,28 @@ ordered according to the inputs.
 		name {output}
 		type {=input}
 	}	
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
+	}
 	start {
 		int n = input.numberPorts();
-		output.setSDFParams(n,n-1);
+		MPHIter nexti(input);
+		PortHole* p;
+		while((p = nexti++) != 0)
+		   ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+		output.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
 	}
 	go {
 		MPHIter nexti(input);
-		for (int i = input.numberPorts()-1; i >= 0; i--)
-			output%i = (*nexti++)%0;
+		PortHole* p;
+		for (int i = input.numberPorts()-1; i >= 0; i--) {
+		    p = nexti++;
+		    for (int j = int(blockSize)-1; j >= 0; j--)
+			output%(j+i*int(blockSize)) = (*p)%j;
+		    }
 	}
 }
 
