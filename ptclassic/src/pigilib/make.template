@@ -61,6 +61,7 @@ HDRS	      = compile.h \
 		vemInterface.h \
 		ganttIfc.h \
 		octIfc.h \
+		octObjectClass.h \
 		icon.h \
 		misc.h \
 		options.h \
