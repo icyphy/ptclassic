@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 
 
-#if (defined(sun) && (defined(__svr4__) || defined(SVR4) || defined(SYSV)))
+#if (defined(sun) && (defined(__svr4__) || defined(SVR4) || defined(SYSV))) && !defined(PTSOL2_4)
 /* Solaris2.3 defines type boolean as an enum, which is a no no
  * See also octtools/include/port/port.h
  * We can't just include "port.h", or we will need to add
