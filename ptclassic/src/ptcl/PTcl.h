@@ -43,6 +43,7 @@ interpreter.
 
 #include "tcl.h"
 #include "NamedObj.h"
+#include "SimControl.h"
 
 class InterpUniverse;
 class InterpGalaxy;
@@ -50,6 +51,7 @@ class Target;
 class Block;
 class StringList;
 
+/////////////////////////////////////////////////////////////////////
 // IUList is a list of InterpUniverses.  The destructor deletes
 // all universes on the list.
 
@@ -80,6 +82,60 @@ public:
 	NamedObjListIter::reset;
 };
 
+/////////////////////////////////////////////////////////////////////
+//				Action handling
+// TclAction is a simple class that contains the relevant information
+// about an action that has been registered via Tcl.
+class TclAction {
+public:
+	char* name;
+	SimAction *action;
+	char* tclCommand;
+
+	// Destructor cancels the action and
+	// frees the memory associated with the above pointers.
+	~TclAction();
+};
+
+// TclActionList is a list of pre or post actions that have been
+// registered via Tcl.  Each action has a name that can be used to
+// refer to it from Tcl.
+//
+class TclActionList : private SequentialList {
+	friend class TclActionListIter;
+public:
+	TclActionList();
+
+	// Add object to list
+        void put(TclAction& s) {SequentialList::put(&s);}
+
+        // export size and initialize functions
+        SequentialList::size;
+        SequentialList::initialize;
+
+        // find the object with the given name and return pointer
+        // or NULL if it does not exist.
+        TclAction* objWithName(const char* name);
+
+        // head of list
+        TclAction* head() {return (TclAction*)SequentialList::head();}
+
+	// Remove object from the list.  Note this does not delete it.
+	// Returns TRUE if the object is removed.
+	int remove(TclAction* o) { return SequentialList::remove(o);}
+};
+
+// an iterator for NamedObjList
+class TclActionListIter : private ListIter {
+public:
+        TclActionListIter(TclActionList& sl);
+        TclAction* next() { return (TclAction*)ListIter::next();}
+        TclAction* operator++(POSTFIX_OP) { return next();}
+        ListIter::reset;
+};
+
+
+/////////////////////////////////////////////////////////////////////
 class PTcl {
 
 // Used in pigilib's kernel calls, so must be public - aok
@@ -171,6 +227,7 @@ public:
 	int alias(int argc,char** argv);
 	int animation(int argc,char** argv);
 	int busconnect(int argc,char** argv);
+	int cancelAction(int argc,char** argv);
 	int connect(int argc,char** argv);
 	int cont(int argc,char** argv);
 	int curuniverse(int argc,char** argv);
@@ -195,6 +252,7 @@ public:
 	int numports(int argc,char** argv);
 	int print(int argc,char** argv);
 	int renameuniv(int argc,char** argv);
+	int registerAction(int argc,char** argv);
 	int reset(int argc,char** argv);
 	int run(int argc,char** argv);
 	int schedtime(int argc,char** argv);
