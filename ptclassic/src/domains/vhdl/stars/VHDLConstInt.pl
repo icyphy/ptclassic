@@ -15,7 +15,7 @@ defstar {
   location { VHDL main library }
   output {
     name { output }
-    type { float }
+    type { int }
   }
   defstate {
     name { level }
