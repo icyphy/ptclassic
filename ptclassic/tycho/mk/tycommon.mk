@@ -563,7 +563,7 @@ checkjunk:
 # Rules for cleaning
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
-	config.cache config.log config.status \
+	config.cache config.log config.status manifest.tmp \
 	$(JCLASS) $(JPACKAGE).zip $(JPACKAGE).jar \
 	$(JDISTS) $(KRUFT)  
 
