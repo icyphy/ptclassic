@@ -206,7 +206,9 @@ dnl Unfortunately tcl7.6 has the wrong TCL_SHLIB_LD command in
 dnl tclConfig.sh if we are running gcc.
 AC_MSG_CHECKING([command to build shared libs])
 if test "$TCL_CC" = "gcc"; then
-	TCL_SHLIB_LD='gcc -shared'
+	# Under hppa10.20 gcc, we need to pass -fPIC to gcc so that
+	# collect will compile the intermediate file with -fPIC
+	TCL_SHLIB_LD="gcc -shared $TCL_SHLIB_CFLAGS"
 fi
 AC_MSG_RESULT($TCL_SHLIB_LD)
 
