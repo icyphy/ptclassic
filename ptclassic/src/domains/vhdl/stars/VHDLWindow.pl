@@ -260,7 +260,7 @@ stored in this array in preparation for output.
 	if ( int(period) < 0 )
 	    realLen = 0;
 
-	WindowValues.setInitValue(windowVals);
+	WindowValues.setInitValue(savestring(windowVals));
 	WindowValues.initialize();
     }
 
