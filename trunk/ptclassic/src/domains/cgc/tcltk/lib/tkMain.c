@@ -94,6 +94,8 @@ static void             StructureProc _ANSI_ARGS_((ClientData clientData,
 
 static char initCmd[] = "source $env(PTOLEMY)/src/domains/cgc/tcltk/lib/ptolemy-cgc.tcl";
 static int runFlag = 0;
+static int dontExit = 0;
+static int exitRequest = 0;
 
 void tkSetup();
 /*
@@ -189,6 +191,27 @@ static VOLATILE int pollflag = 0;
 
 static void setPollFlag() {
         pollflag = 1;
+}
+
+static int
+handleExit(dummy, interp, argc, argv)
+    ClientData dummy;                   /* Not used. */
+    Tcl_Interp *interp;                 /* Current interpreter. */
+    int argc;                           /* Number of arguments. */
+    char **argv;                        /* Argument strings. */
+{
+  if (dontExit == 1) {
+    /* Defer exiting until dontExit is cleared */
+    exitRequest = 1;
+    return TCL_OK;
+  }
+  else {
+    /* Go ahead and exit right now */
+    exit(0);
+  }
+  /* Should never be reached, but just in case... */
+  runFlag = 0;
+  return TCL_OK;
 }
 
 /*
@@ -336,7 +359,34 @@ goCmd(dummy, interp, argc, argv)
 
 	setPollAction(runEventsOnTimer);
 
+	/* Temporarily disallow exiting */
+	dontExit = 1;
 	go(argc, argv);
+	/*
+	  If DISMISS was pressed, then runFlag should
+	  have been set to 0, causing a break out of go(),
+	  and here is where we do an exit if DISMISS was
+	  in fact what brings us to this point.
+
+	  We want to make sure that the wrapup C code is executed
+	  (for instance, tearing down sockets when running with
+	  VHDL, so that ptvhdlsim is exited) before we exit entirely.
+	  It should work like this:  runFlag = 0 causes go() to break
+	  out of its while loop and then execute the wrapup stage.
+	  We need to give the C code time to exit out of go() and return
+	  to this point before doing the global exit, if DISMISS was
+	  in fact pressed.  Formerly, DISMISS caused an immediate exit
+	  when the event was handled, which prevented wrapup C code
+	  from being executed.
+
+	  However, we also need to handle the case where DISMISS
+	  wasn't pressed in the middle of a go() call, so we only
+	  throttle the exit if it's during a run.  Tricky.
+	  */
+	/* Clear restriction on exiting */
+	dontExit = 0;
+	/* If an exit was requested during go(), then do it now */
+	if (exitRequest == 1) handleExit();
 
 	setPollAction(NULL);
 
@@ -597,6 +647,8 @@ int main(int argc, char *argv[]) {
     }
     XSetForeground(Tk_Display(w), DefaultGCOfScreen(Tk_Screen(w)),
             BlackPixelOfScreen(Tk_Screen(w)));
+    Tcl_CreateCommand(interp, "handleExit", handleExit, (ClientData) w,
+            (void (*)()) NULL);
     Tcl_CreateCommand(interp, "goCmd", goCmd, (ClientData) w,
             (void (*)()) NULL);
     Tcl_CreateCommand(interp, "stopCmd", stopCmd, (ClientData) w,
