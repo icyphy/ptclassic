@@ -24,8 +24,8 @@ PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 
-                                                PT_COPYRIGHT_VERSION_2
-                                                COPYRIGHTENDKEY
+						PT_COPYRIGHT_VERSION_2
+						COPYRIGHTENDKEY
 
  Programmer:  Raza Ahmed
  Date of creation: 07/09/96
@@ -51,25 +51,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class CGCostTarget : public CGTarget {
 public:
-        // constructor
-        CGCostTarget(const char* nam, const char* startype, const char* desc,
+	// constructor
+	CGCostTarget(const char* nam, const char* startype, const char* desc,
 		     const char* assocDomain = CGdomainName);
 
 	// Return a copy of itself
-        /*virtual*/ Block* makeNew() const;
+	/*virtual*/ Block* makeNew() const;
 
 	/*virtual*/ int run();
 	/*virtual*/ void wrapup();
 
-        /*virtual*/ int isA(const char* cname) const;
+	/*virtual*/ int isA(const char* cname) const;
 
 protected:
 	// Find the right source or sink star to match the block port
-        int selectConnectStarBlock(Galaxy* localGalaxy,
+	int selectConnectStarBlock(Galaxy* localGalaxy,
 		MultiPortHole* localHole);
 
-        // Print the information about the stars found in the galaxy
-        void printGalaxy(Galaxy* localGalaxy);
+	// Print the information about the stars found in the galaxy
+	void printGalaxy(Galaxy* localGalaxy);
 
 	// Add a newly created block
 	inline void addTempBlock(Block* block) { tempBlockList.put(block); };
