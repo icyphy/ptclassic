@@ -57,7 +57,8 @@ HDRS	      = compile.h \
 		POct.h \
 		PVem.h \
 		TclStarIfc.h \
-		BarGraph.h
+		BarGraph.h \
+		pigidefine.h
 
 
 LIBCSRCS      = main.c \
