@@ -62,9 +62,9 @@ between -1.0 and 1.0.
 	codeblock(std,"") {
 	ldp	#0
 	lacc	#@(size - 1)
-	setc	sxm			; set sign xtension mode
+	setc	sxm			; set sign extension mode
 	mar	*,ar2			; arp = 0
-	samm	dbmr			; used for modulo 2^k addressin
+	samm	dbmr			; used for modulo 2^k addressing
 	lmmr	ar2,#$addr(bufStart)	; ar2 = pointer to start of buff.
 	lmmr	ar1,#$addr(input)	; ar1 = most recent input
 	lamm	ar1

@@ -1,7 +1,9 @@
 defstar {
     name { MpyCx }
     domain { C50 }
-    desc { Multiply any number of rectangular complex inputs, producing an output. }
+    desc {
+Multiply any number of rectangular complex inputs, producing an output.
+    }
     version { $Id$ }
     author { Luis Gutierrez }
     copyright {
@@ -11,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { C50 main library }
-	htmldoc {
+    htmldoc {
 <a name="multiplication"></a>
 The inputs are multiplied and the result is written on the output.
     }
@@ -51,7 +53,7 @@ The inputs are multiplied and the result is written on the output.
     }
 
     codeblock(cbMoreThanTwo,"int j"){
-* for abreviation po = previous output; inj = input j
+* for abbreviation po = previous output; inj = input j
 	lar	ar0,#$addr(input#@j)	; load address of jth input, arp->ar2
 	lt	*+,ar0			; treg0 = re(po), ar2->imm(po)
 	mpy	*+,ar2			; p = re(inj)*re(po), r0->imm(inj)

@@ -46,9 +46,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	protected {
-		//holds effective offset from begining of output buffer
+		// holds effective offset from beginning of output buffer
 		int effOffset;
-		//holds effective size of output buffer
+		// holds effective size of output buffer
 		int effSize;
 		// holds the value of fill as an integer(dsk5a doesn't handle 
 		// real numbers when used in instructions like add #<number>

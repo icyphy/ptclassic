@@ -45,9 +45,9 @@ limitation of liability, and disclaimer of warranty provisions.
 		attributes { A_SETTABLE }
 	}
 	protected{
-		// effective offset from the begining of input buffer
+		// effective offset from the beginning of input buffer
 		int effOffset;
-		// eff size of input
+		// effective size of input
 		int effSize;
 	}
 

@@ -52,7 +52,7 @@ and when underflow occurs, <i>underVal</i> is output.
 
     codeblock(cbSkew,"") {
 	setc	ovm		; set overflow mode
-	clrc	sxm		; clear sign xtension mode
+	clrc	sxm		; clear sign extension mode
 	lar	ar0,#$addr(error)
 	lar	ar1,#$addr(accum)
 	lar	ar2,#$addr(output)
