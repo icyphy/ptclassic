@@ -12,7 +12,7 @@
 
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
-DOMAINS = sdf de ddf bdf thor cg cg-ddf sproc cgc cg56 cg96 $(EXPDOMAINS)
+DOMAINS = sdf de ddf bdf thor cg cg-ddf sproc silage cgc cg56 cg96 $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
