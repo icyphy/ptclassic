@@ -58,8 +58,7 @@ int MotorolaSimTarget::compileCode() {
 	assembleCmds << dspType << " " << assemblerOptions << " " << filePrefix;
 	resetImplementationCost();
 	int valid = !systemCall(assembleCmds, "Errors in assembly");
-	if (valid && int(reportMemoryUsage)) {
-	    computeImplementationCost();
+	if (valid && int(reportMemoryUsage) && computeImplementationCost() ) {
 	    Error::message(*this, printImplementationCost());
 	}
 	return valid;
