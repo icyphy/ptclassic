@@ -31,6 +31,7 @@ PL_SRCS= \
 	SRAdd.pl \
 	SRAnd.pl \
 	SRConst.pl \
+	SREnvelopeGen.pl \
 	SRIntToString.pl \
 	SRItcl.pl \
 	SRItclCounter.pl \
