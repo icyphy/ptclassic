@@ -46,7 +46,6 @@ ITCL_SRCS = \
 	Alonger.itcl \
 	Axis.itcl \
 	Bounder.itcl \
-	Diagonal.itcl \
 	Editor.itcl \
 	Follower.itcl \
 	Frame.itcl \
