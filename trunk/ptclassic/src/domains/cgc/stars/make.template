@@ -39,6 +39,7 @@ PL_SRCS= \
  CGCDistributor.pl \
  CGCDownSample.pl \
  CGCExp.pl \
+ CGCExpr.pl \
  CGCFFTCx.pl \
  CGCFIR.pl \
  CGCFloatToCx.pl \
