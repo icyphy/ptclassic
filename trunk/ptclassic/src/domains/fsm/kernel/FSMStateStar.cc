@@ -203,7 +203,7 @@ Star* FSMStateStar::createWormhole(const char *galname,
     const char* instance = hashstring(instancename);
 
     // Is this needed?
-    KnownBlock::addEntry(*newWorm, instance, 1);
+    KnownBlock::addEntry(*newWorm, instance, 1, "FSM");
 
     // Set the parent of the wormhole to be the parent of this star.
     newWorm->setBlock(instance,parent());
