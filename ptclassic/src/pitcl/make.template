@@ -84,7 +84,7 @@ $(BINDIR)/ptcl:	ptcl
 		ln ptcl $(BINDIR)
 
 # extra stuff to delete
-REALCLEAN_STUFF=ptcl ptcl.debug
+REALCLEAN_STUFF=ptcl ptcl.debug ptcl.ptiny
 
 
 LIB=dummy		# required since no LIB
