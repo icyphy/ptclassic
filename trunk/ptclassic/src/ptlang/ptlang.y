@@ -191,9 +191,27 @@ int   methodMode;		/* modifier flags for a method */
 int   pureFlag;			/* if true, class is abstract */
 char* galPortName;		/* name of galaxy port */
 
-/* codes for "standard methods".  To add more, add them at the end,
- * modify N_FORMS, and put types in the codeType array and names in
- * the codeFuncName array.  The C_CONS is processed special.
+/* Codes for "standard methods" (go, begin, etc.)
+ * To add more,
+ *
+ * 1. Add a your method to the end of the list below
+ *	e.g., #define C_MYMETHOD 10
+ * 2. Modify #define N_FORMS to be the (new) number of standard methods
+ *	e.g., #define N_FORMS 11 
+ * 3. Add the return type to the end of the codeType array below
+ *	e.g., char* codeType[] = { ..., "void "};
+ * 4. Add the method name to the end of the codeFuncName array below
+ *	e.g., char* codeFuncName[] = { ..., "myMethod" };
+ * 5. Add the new token to the token list (one of the %token lines)
+ *	e.g., %token MYMETHOD
+ * 6. Add the token to the others in the stdkey2: rule
+ *	 e.g., | MYMETHOD { methKey = C_MYMETHOD; }
+ * 7. Add the token to the keyword: rule
+ *	e.g., |MYMETHOD
+ * 8. Add your token to struct tentry keyTable[] =
+ *	e.g., {"myMethod", MYMETHOD},
+ *
+ * The C_CONS is processed specially.
  * C_SETUP and after are protected; rest are public.
  */
 #define C_CONS 0
@@ -204,17 +222,18 @@ char* galPortName;		/* name of galaxy port */
 #define C_DEST 5
 #define C_SETUP 6
 #define C_GO 7
+#define C_TICK 8
 
+#define N_FORMS 9
 
-#define N_FORMS 8
 char* codeBody[N_FORMS];		/* code bodies for each entity */
 int inlineFlag[N_FORMS];		/* marks which are to be inline */
 char destNameBuf[MEDBUFSIZE];		/* storage for destructor name */
 
 /* types and names of standard member funcs */
-char* codeType[] = {"","int ","void ","void ","void ","","void ","void "};
+char* codeType[] = {"","int ","void ","void ","void ","","void ","void ", "void "};
 char* codeFuncName[] = {
-"","myExecTime","wrapup","initCode","begin",destNameBuf,"setup","go"};
+"","myExecTime","wrapup","initCode","begin",destNameBuf,"setup","go","tick"};
 
 int methKey;			/* signals which of the standard funcs */
 
@@ -238,7 +257,7 @@ typedef char * STRINGVAL;
 %token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT INOUT ACCESS
 %token INMULTI OUTMULTI INOUTMULTI
-%token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP CONNECT ID
+%token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP TICK CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
 %token VERSION AUTHOR ACKNOWLEDGE COPYRIGHT EXPLANATION SEEALSO LOCATION
@@ -379,6 +398,7 @@ stdkey2:
 |	SETUP				{ methKey = C_SETUP;}
 |	GO				{ methKey = C_GO;}
 |	WRAPUP				{ methKey = C_WRAPUP;}
+|       TICK				{ methKey = C_TICK;}
 |	INITCODE			{ methKey = C_INITCODE;}
 |	EXECTIME			{ methKey = C_EXECTIME;}
 |	START
@@ -660,7 +680,7 @@ keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
 |INPUT|OUTPUT|INOUT|INMULTI|OUTMULTI|INOUTMULTI
 |TYPE
-|DEFAULT|BEGIN|SETUP|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
+|DEFAULT|BEGIN|SETUP|GO|WRAPUP|TICK|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|ACKNOWLEDGE|VERSION|COPYRIGHT
 |EXPLANATION|START
 |SEEALSO|LOCATION|CODEBLOCK|EXECTIME|PURE|INLINE|HEADER|INITCODE|STATIC
@@ -1616,6 +1636,7 @@ struct tentry keyTable[] = {
 	{"start", START},
 	{"state", DEFSTATE},
 	{"static", STATIC},
+        {"tick", TICK},
 	{"type", TYPE},
 	{"version", VERSION},
 	{"virtual", VIRTUAL},
