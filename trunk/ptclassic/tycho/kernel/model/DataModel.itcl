@@ -147,6 +147,9 @@ class ::tycho::DataModel {
     # Define or configure item types
     method type {mode {type {}} args}
 
+    # Get a unique id
+    method uniqueid {prefix}
+
     #################################################################
     ####                   protected methods                     ####
 
@@ -224,6 +227,9 @@ class ::tycho::DataModel {
 
     # Local copy of the :leafonly flag, indexed by type
     private variable _leafonly
+ 
+    # Counters used to construct unique ids
+    private variable _idprefix
  
     # Local copy of the :override flag, indexed by type
     private variable _override
@@ -1136,6 +1142,26 @@ body ::tycho::DataModel::type {mode {type {}} args} {
     }
 }
 
+
+########################################################################
+#### uniqueid
+#
+# Get a unique ID based on the given prefix. This method is useful
+# for automatically alocating names but ensuring that they do not
+# clash with existing names in the model.
+#
+body ::tycho::DataModel::uniqueid {prefix} {
+    if ![info exists _idprefix($prefix)] {
+	set _idprefix($prefix) -1
+    }
+    # In this loop, increment the counter first. This is so that
+    # a set of unique names can be obtained, without having
+    # to create items in the model in-between.
+    while { [exists $prefix[incr _idprefix($prefix)]] } {
+	;# do nothing
+    }
+    return $prefix$_idprefix($prefix)
+}
 
 #####################################################################
 #####################################################################
