@@ -295,7 +295,7 @@ body ::tycho::HTML::constructor {args} {
             -command "$this appletViewer"
     # This causes us to require that Exec.itcl be read in at startup
     if ![::tycho::Exec::execWidgetIsSupported] {
-	$myMenubar disable Appletviewer
+	menubar disable Appletviewer
     }
 
 
