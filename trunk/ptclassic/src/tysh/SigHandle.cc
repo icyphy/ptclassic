@@ -53,8 +53,8 @@ Some refinement by Brian Evans.
 #define SH_ITCLTK_PROG "itkwish"
 
 // Sub-directory of $PTOLEMY that contains itcl files to source plus file names
-#define SH_ITCLTK_DEBUG_SCRIPT "/tycho/kernel/TyCoreDebug.itcl"
-#define SH_ITCLTK_RELEASE_SCRIPT "/tycho/kernel/TyCoreRelease.itcl"
+#define SH_ITCLTK_DEBUG_SCRIPT "/tycho/kernel/CoreDebug.itcl"
+#define SH_ITCLTK_RELEASE_SCRIPT "/tycho/kernel/CoreRelease.itcl"
 
 // Used so we can call the Tcl procedure emergencySave
 extern Tcl_Interp *ptkInterp;
