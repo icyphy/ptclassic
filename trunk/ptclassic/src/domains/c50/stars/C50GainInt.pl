@@ -79,7 +79,7 @@ the circuit.
 	lar	ar1,#$addr(output)
 	mar	*,ar0
 	lacc	*,@shift
-	add	*,ar1
+	add	*,0,ar1
 	sacl	*
 	}
 	
@@ -90,7 +90,7 @@ the circuit.
 	samm	treg0
 	mar	*,ar0
 	mpy	*,ar1
-	sacl	*
+	spl	*
 	}
 
 	go {

@@ -100,7 +100,7 @@ limited to 20,000 samples.
         }
 
         codeblock (org) {
-	.ds   	#$addr(output)		; initialization of DC block
+	.ds   	$addr(output)		; initialization of DC block
         }
         codeblock (dc) {
         .q15	#$val(firstVal)
@@ -165,7 +165,7 @@ $label(l28)
 	}            
 
         codeblock(initDataCirc) {
-        .ds     $ref(dataCirc)		; initialization of dataCirc
+        .ds     $addr(dataCirc)		; initialization of dataCirc
         .word   $addr(value)
         .text
         }

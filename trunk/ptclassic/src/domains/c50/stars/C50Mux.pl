@@ -42,172 +42,111 @@ case, we could pre-calculate a set of tables at compile time instead
 of performing runtime advancement.
 This is not currently handled.
     }
-    inmulti {
-        name {input}
-        type {ANYTYPE}
-	attributes {P_CIRC}
-    }
-    input {
-	name {control}
-	type {INT}
-    }
-    output {
-	name {output}
-	type {=input}
-    }
-    state {
-	name {blockSize}
-	type {INT}
-	default {1}
-	desc {Number of particles in a block.}
-    }
-    state {
-	name {useCircular}
-	type {INT}
-	default {1}
-	desc { "Boolean: use circular addressing on inputs." }
-    }
-    state {
-	name {ptrvec}
-	type {INTARRAY}
-	default {""}
-	desc { "Array containing pointers to inputs and their lengths" }
-	attributes {A_NONSETTABLE|A_NOINIT|A_UMEM}
-    }
-    state {
-	name {curinput}
-	type {INT}
-	default {0}
-	desc { "Current input within go() loop." }
-	attributes {A_NONSETTABLE|A_NONCONSTANT}
-    }
-    state {
-	name {useModuloB}
-	type {INT}
-	default {0}
-	desc { "True if any input is not scalar." }
-	attributes {A_NONSETTABLE|A_NONCONSTANT}
-    }
-    setup {
-	output.setSDFParams(int(blockSize),int(blockSize)-1);
-	input.setSDFParams(int(blockSize),int(blockSize)-1);
-	if ( int(useCircular) ) {
-	    input.setAttributes(P_CIRC);
-	} else {
-	    input.setAttributes(P_NONCIRC);
+	inmulti {
+		name {input}
+		type {ANYTYPE}
+		attributes {P_CIRC}
 	}
-
-	int np = input.numberPorts();
-	ptrvec.resize(2*np);
-    }
-    initCode {
-	StringList buff;
-	int i, np = input.numberPorts();
-
-	int allScalorB = TRUE;
-	MPHIter portiter(input);
-	for (i=0; i < np; i++) {
-	    AsmPortHole *port = (AsmPortHole*) portiter++;
-	    if ( port->bufSize() != 1 )
-		allScalorB = FALSE;
+	input {
+		name {control}
+		type {INT}
 	}
-	useModuloB = int(useCircular) && ! allScalorB;
-
-	buff<<"\t.ds	$addr(ptrvec)\n";
-	addCode("\torg	x:$addr(ptrvec)\n");
-	for (i=0; i < np; i++) {
-	    buff<<"\t.word\t$addr(input#";
-	    buff<<i+1;
-	    buff<<")\n";
+	output {
+		name {output}
+		type {=input}
 	}
-	for ( i=0; i < np; i++) {
-	    // There is a weirdness with scalar inputs: see cbCopy below
-	    buff<<"\t.word\t$size(input#";
-	    buff<<i+1;
-	    buff<<")\n";
+	defstate {
+		name {blockSize}
+		type {int}
+		default {1}
+		desc {Number of particles in a block.}
 	}
-	buff<<"\t.text\n";
-	addCode(buff);
-    }
-    codeblock(cbCopyScalor) {
-	lar	ar0,#$addr(ptrvec)
-	lmmr	indx,#$addr(control)
-	mar	*,ar0
-	mar	*0+
-	lacl	*
-	samm	ar0
-	bldd	*,#$addr(output)
-    }
-    codeblock(cbCopyBlock,"int offset,int iter") {
-	lar	ar0,#$addr(ptrvec)
-	lmmr	indx,#$addr(control)
-	mar	*,ar0
-	mar	*0+
-	.if	$val(useModuloB)
-	lacl	*,ar1		; acc = address of port
-	samm	cbsr1		; cbsr1 = start address of port
-	samm	ar1		; ar2 = start address of port
-	lamm	ar0		; acc -> address of port
-	add	#@offset,0	; acc -> end address of port
-	samm	cber1		; cbsr1 = end address of port
-	lacl	#09
-	samm	cbcr		; set circ buff cntrl reg
-	.else
-	lacl	*,ar1
-	samm	ar1		; ar2 = start address of port
-	.endif
-	rpt	#@iter
-	bldd	*+,#$addr(output)
-	.if	$val(useModuloB)
-	zap
-	samm	cbcr
-	.endif
+	defstate {
+		name {ptrarray }
+		type {INTARRAY }
+		default {""}
+		desc { Array of pointers to outputs }
+		attributes { A_NONSETTABLE|A_UMEM|A_RAM|A_NOINIT|A_CIRC}
 	}
-
-    // the cbAdvancePtr is only code-gen'd when bufsize > 1.
-    // note that ports are 1-based array, while states are 0-based
-    codeblock(cbAdvancePtr,"int iter, int size") {
-	; advance ptr for input#$val(curinput)
-	lar	ar1,#$addr(ptrvec,curinput)
-	mar	*,ar1
-	.if	$val(useModuloB)
-	ldp	#00h
-	lacc	*
-	lar	ar0,#@size
-	samm	cbsr1
-	add	ar0
-	samm	cber1
-	lacl	#09
-	samm	cbcr
-	.endif
-	rpt	#@iter
-	mar	*+
-	smmr	ar1,#$addr(ptrvec,(curinput)
-	.if	$val(useModuloB)
-	splk	#00,cbcr
-	.endif
-	}
-
-
-    go {
-	if ( int(blockSize) == 1 )	addCode(cbCopyScalor);
-	else				addCode(cbCopyBlock(int(ptrvec.size())/2,int(blockSize)-1));
 	
-	if ( int(useCircular) ) {
-	    int np = input.numberPorts();
-	    MPHIter portiter(input);
-	    int iter, size;
-	    iter = int(blockSize) - 1;
-	    for (int i=0; i < np; i++) {
-		AsmPortHole *port = (AsmPortHole*) portiter++;
-		if ( port->bufSize() != int(blockSize) ) {
-		    // The test above also catchs the bufSize==1 problem
-		    curinput = i;
-		    size = (port->bufSize()) - 1;
-		    addCode(cbAdvancePtr(iter, size));
-		}
-	    }
+	protected{
+		int n;
+		int iter;
 	}
 
-    }
+	initCode{
+	  StringList ptrInit;
+	  ptrInit << "\t.ds   $addr(ptrarray)\n";
+	  for (int i=1; i<= n; i++){
+	    ptrInit<<"\t.word  $addr(input#";
+	    ptrInit<<i;
+	    ptrInit<<")\n";
+	  }
+	  ptrInit<<"\ttext:\n";
+	  addCode(ptrInit);
+	}
+
+	codeblock(loadAddress,""){
+	lmmr	indx,#$addr(control)
+	lar	ar1,#$addr(ptrarray)
+	mar	*,ar1
+	mar	*0+
+	lacl	*,0,ar2
+	samm	ar2		; ar2 -> start of current input
+	}
+	
+	codeblock(moveInput,""){
+	.if	@iter		; if iter > 0 use block xfer
+	lacl	#$addr(output),0
+	samm	bmar
+	rpt	#@iter
+	bldd	*+,bmar
+	.else
+	lacl	*,0
+	lar	ar2,#$addr(output)			
+	sacl	*,0
+	.endif		
+	}
+	
+	method {
+		name { computeIterations }
+		type { " void " }
+		arglist { "()" }
+		access { protected }
+		code {
+			iter = int(blockSize);
+			if (output.resolvedType() == COMPLEX ){
+				iter = 2*iter;
+			};
+			iter --;
+		}
+	}
+
+	setup {
+		n = input.numberPorts();
+		ptrarray.resize(n);
+		int portsize = int(blockSize);
+		input.setSDFParams(portsize, portsize-1);
+		output.setSDFParams(portsize, portsize-1);
+		computeIterations();
+	}
+	
+	go {
+		addCode(loadAddress());
+		addCode(moveInput());
+	}
+	exectime{
+		int time = 6;
+		if (iter){
+			time += 4 + iter;
+		} else {
+			time += 3;
+		}
+		return time;
+	}
 }
+
+
+
+
+

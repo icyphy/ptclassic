@@ -47,7 +47,7 @@ the output is the input truncated to this many significant bits
 	}
 
         go { 
-		std();
+		addCode(std());
    	}
 	
 
