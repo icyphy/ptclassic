@@ -52,6 +52,8 @@ include $(ROOT)/mk/config-g++.mk
 RANLIB =	ranlib
 # ptlang and islang use yacc, which is not necessarily part of hpux10.x
 YACC =		bison -y
+# islang uses lex, which is not necessarily part of hpux10.x
+LEX =		flex
 # src/kernel/makefile uses this to 
 HP_AS =		/usr/ccs/bin/as
 # Use gcc everywhere, including octtools
