@@ -63,6 +63,21 @@ delim off
 .S \\n(BX
 ..
 
+.\" Multi line display directive without the keep
+.\" This macro uses the standard font for Ptolemy classes.
+.de (d
+.ft CB
+.sp 0.5
+.(l
+.S 11
+..
+.de )d
+.sp 0.5
+.)l
+.ft R
+.S \\n(BX
+..
+
 .de BU
 .ip \ \ \ \ \ \(bu
 ..
