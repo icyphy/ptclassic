@@ -30,6 +30,8 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "st.h"
 #include "oh.h"
+#include "vov.h"
+#include "errtrap.h"
 #include "octmm.h"
 
 extern char *optProgName;
@@ -95,11 +97,10 @@ char *filename;
 {
     char *insert_name, *inst_cell, *inst_view;
     octObject inst, facet, master, layer;
-    octStatus status;
+    octStatus status = OCT_OK;
     octGenerator gen;
     octId *inst_array;
     int i, ninst;
-    char buffer[2048];
 
     /*
      *  Copy the old cell and then open it for changing
@@ -130,6 +131,7 @@ char *filename;
     VOVinputFacet( &facet );
     VOVoutputFacet( &facet );
 
+    /* My guess is that this is do nothing code - cxh */
     if (status == OCT_INCONSISTENT) {
 	ohPrintInconsistent(&facet, stdout);
 	exit(-1);
