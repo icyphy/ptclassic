@@ -176,7 +176,8 @@ namespace ::tycho {
             {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
             {Tcl profiler} "tools"
 
-    if {[info namespace all pitcl] != "pitcl" || $ptolemyfeature(octtools)} {
+    if {$ptolemyfeature(octtools) || $ptolemyfeature(ptcl) \
+	    || $ptolemyfeature(pitcl) } {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Retarget -file {%s} -toolbar 1} \
                 {Ptolemy Retargeter} "tools"
