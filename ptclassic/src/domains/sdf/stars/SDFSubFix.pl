@@ -87,15 +87,22 @@ the OverflowHandler will be called.
                 if ( int(ArrivingPrecision) ) {
 		  diff = (const Fix&)(pos%0);
                   while ((p = nexti++) != 0) {
-                    diff -= (const Fix&)((*p)%0);
+		    // We use temporary variables to avoid
+		    // gcc2.7.2/2.8 problems
+	    	    Fix tmp = (*p)%0;	
+                    diff -= tmp;
 		    checkOverflow(diff);
 		  }
 		}
 		else {
-		  fixIn = (const Fix&)(pos%0);
-		  diff = fixIn;
+	          Fix tmp = pos%0;
+		  fixIn = tmp;
+		  diff = tmp;
                   while ((p = nexti++) != 0) {
-		    fixIn = (const Fix&)((*p)%0);
+		    // We use temporary variables to avoid
+		    // gcc2.7.2/2.8 problems
+		    Fix tmp = (*p)%0;
+		    fixIn = tmp;
                     diff -= fixIn;
 		    checkOverflow(diff);
 		  }
