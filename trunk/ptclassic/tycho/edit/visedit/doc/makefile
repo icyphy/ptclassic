@@ -53,6 +53,9 @@ MISC_FILES =	codeDoc
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
+# Sub directories to run make in.
+DIRS =		usersGuides
+
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
