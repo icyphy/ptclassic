@@ -11,7 +11,7 @@ All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CG56 demo library }
+	location { CG56 dsp library }
         explanation {
 Coefficients from the adaptive filter are used for the FIR filter in parallel.
 The order is determined from the number of initial coefficients.
