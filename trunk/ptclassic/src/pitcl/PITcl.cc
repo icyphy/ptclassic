@@ -227,7 +227,7 @@ const Block* PTcl::getBlock(const char* name) {
 // FIXME: this command should be able to handle named galaxies, it
 // should be able to recurse over subgalaxies, and it should print 
 // target settings.
-int PTcl::description(int argc,char** argv) {
+int PTcl::description(int argc,char** /*argv*/) {
 	if (argc > 1) return usage("description");
 	return result(ptclDescription(currentGalaxy));
 }
