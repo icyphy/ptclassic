@@ -29,7 +29,7 @@ Find the reciprocal of a fraction in terms of a fraction and some left shifts.
 	}
 	output {
 		name { s }
-		type { fix }
+		type { int }
 	}
 	state {
 		name {Nf}
