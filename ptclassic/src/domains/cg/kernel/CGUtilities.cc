@@ -52,7 +52,9 @@ static const char file_id[] = "CGUtilities.cc";
 #include "compat.h"
 #include <sys/stat.h>		// declare stat structure and chmod function
 
-static const char defaultDisplay[] = "xedit -name ptolemy_code %s";
+extern "C" {
+#include "displayFile.h"	// declare displayFile()
+}
 
 // Maximum number of characters in the name of a host machine
 #define MAX_HOSTNAME_LEN 128
@@ -252,15 +254,15 @@ int rcpWriteFile(const char* hname, const char* dir, const char* file,
 
     //  display the file on local machine
     if (displayFlag) {
-	const char* disp = getenv("PT_DISPLAY");
-	char cmdbuf[256];
-	sprintf(cmdbuf, (disp ? disp : defaultDisplay), outputFileName);
-	StringList displayCommand;
-	if (tmpFile) displayCommand << "(";
-	displayCommand << cmdbuf;
-	if (tmpFile) displayCommand << "; rm " << tmpFile << ")";
-	displayCommand << "&";
-	system(displayCommand);
+	if (displayFile(outputFileName,
+			(void (*)(char *)) NULL,
+			(void (*)(char *)) NULL) != TRUE )
+	  status = FALSE;
+	if (tmpFile) {
+	  StringList displayCommand;
+	  displayCommand << "; rm " << tmpFile;
+	  system(displayCommand);
+	}
     }
 
     LOG_DEL; delete [] tmpFile;
