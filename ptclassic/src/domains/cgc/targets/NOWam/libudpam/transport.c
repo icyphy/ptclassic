@@ -36,6 +36,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <string.h>
 #include <errno.h>
 #include <netdb.h>
+#include <signal.h> 	/* define sigemptyset and sigaction */
 #include <sys/ipc.h>
 #include <sys/sem.h>
 #include <sys/types.h>
