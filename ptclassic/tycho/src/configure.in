@@ -237,4 +237,4 @@ AC_SUBST(TK_XINCLUDES)
 AC_OUTPUT(makefile tcl.mk:../mk/tcl.mk.in java.mk:../mk/java.mk.in \
 	profile/makefile tksteal/makefile \
 	tyjava/makefile tyjava/tcljava/makefile tyjava/eprintf/makefile \
-	tytimer/makefile tytest/makefile cgctest/makefile)
+	tytimer/makefile tytest/makefile tycgc/makefile)
