@@ -5,10 +5,10 @@
 # $Id$
 # Author: John Reekie
 
-# If the EDIT_LIBRARY variable is set, add it to the auto_path
-if [info exists env(EDIT_LIBRARY)] {
-    if { [lsearch -exact $auto_path $env(EDIT_LIBRARY)] }  {
-	lappend auto_path $env(EDIT_LIBRARY)
+# If the PTEDIT_LIBRARY variable is set, add it to the auto_path
+if [info exists env(PTEDIT_LIBRARY)] {
+    if { [lsearch -exact $auto_path $env(PTEDIT_LIBRARY)] }  {
+	lappend auto_path $env(PTEDIT_LIBRARY)
     }
 }
 
@@ -52,7 +52,7 @@ if !$ok {
 	    1. Install tycho.typt.edit in a subdirectory of your Tcl library\n\
 	    2. Install tycho.typt.edit in the directory given by the TCL_PACKAGES \
 	    variable.\n\
-	    3. Set the EDIT_LIBRARY variable to point to the \
+	    3. Set the PTEDIT_LIBRARY variable to point to the \
 	    edit directory\n\
 	    4. Set the TYCHO variable to point to your \
 	    Tycho installation\n"
