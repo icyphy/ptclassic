@@ -12,13 +12,13 @@
 # This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
-ROOT=../../..
+ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/ddf
+VPATH = $(ROOT)/src/domains/ddf/kernel
 # Kernel directory
 KERNDIR=$(ROOT)/src/kernel
 # SDF support directory
-SDFDIR=$(ROOT)/src/domains/sdf
+SDFDIR=$(ROOT)/src/domains/sdf/kernel
 # Where to install the libraries
 DESTDIR=$(ROOT)/lib.$(ARCH)
 
