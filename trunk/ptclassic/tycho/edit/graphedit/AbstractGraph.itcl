@@ -1264,9 +1264,9 @@ body ::tycho::AbstractGraph::verify {} {
 ########################################################################
 #### vertex
 #
-# Add a new vertex to the graph, and return the inverse command. Flag an
-# error if the vertex already exists. Additional arguments are a flat
-# attribute-value list for the vertex.
+# Add a new vertex to the graph and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# vertex. Flag an error if the vertex already exists. 
 #
 body ::tycho::AbstractGraph::vertex {vertex args} {
     _verifynot vertex $vertex
@@ -1289,8 +1289,7 @@ body ::tycho::AbstractGraph::vertex {vertex args} {
 #### vertexattrs
 #
 # Return a list containing the attributes of the vertex as a flat
-# attribute-value list. An error will result of the vertex does
-# not exist.
+# attribute-value list. Flag an error if the vertex does not exist.
 #
 body ::tycho::AbstractGraph::vertexattrs {vertex} {
     _verify vertex $vertex
@@ -1300,7 +1299,8 @@ body ::tycho::AbstractGraph::vertexattrs {vertex} {
 ########################################################################
 #### vertexcget
 #
-# Get an attribute of an vertex.
+# Get an attribute of an vertex. Flag an error if the vertex does
+# not exist.
 #
 body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
     _verify vertex $vertex
@@ -1310,9 +1310,9 @@ body ::tycho::AbstractGraph::vertexcget {vertex attribute} {
 ########################################################################
 #### vertexconfigure
 #
-# Configure the vertex and return the inverse command. An error will
-# occur if the vertex does not exist. The argument list
-# is a flat list of attribute-value pairs. Return the inverse command.
+# Configure the vertex and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# vertex does not exist.
 #
 body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
     _verify vertex $vertex
@@ -1322,8 +1322,8 @@ body ::tycho::AbstractGraph::vertexconfigure {vertex args} {
 ########################################################################
 #### vertexdelete
 #
-# Delete a vertex from the graph, and return the inverse command. This
-# method clears any cached information
+# Delete a vertex and return the inverse command. Flag an error if
+# the vertex does not exist. This method clears any cached information
 # on the graph structure (transitive closure, depth, and so on)
 # so that they will be recalculated for the new structure. Note that
 # edges connected to this vertex are not deleted: use delete{}
