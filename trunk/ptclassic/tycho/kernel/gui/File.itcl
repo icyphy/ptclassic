@@ -1560,6 +1560,19 @@ body ::tycho::File::initializeMenubar {} {
 	    {::tycho::File::openContext \
 	    [file join $TYCHO doc index.html]}
 
+    # FIXME: We should be able to easily add and subtract Help items
+    # on a global basis without modifying this file.
+    global ptolemyfeature
+    if $ptolemyfeature(ptolemy) {
+	$myMenubar command "About Ptolemy" Help -underline 0 -command \
+		ptkStartupMessage
+        global ::PTOLEMY
+	$myMenubar command "Ptolemy Home Page" Help -underline 0 -command \
+	    {::tycho::File::openContext \
+	    [file join $PTOLEMY doc html index.html]}
+
+    }
+
     $myMenubar command "Guide to $myclass widget" Help -underline 0 \
 	    -command "$this help"
     
