@@ -32,12 +32,14 @@
 
 #######################################################################
 #### EditItcl
-# This class defines a window for editing Itcl code.  Itcl, developed
-# by Michael McLennan, is an object-oriented extension to Tcl/Tk,
-# developed by John Ousterhout.  This editor colorizes the source
-# code for easy identification of class definitions, methods, procedures,
-# etc.  It also supports hyperlinks through the code, to a limited
-# degree.  Hyperlinks are obtained by the "Show Links" command.
+# This class defines a window for editing Itcl code. Itcl, developed by
+# Michael McLennan, is an object-oriented extension to Tcl/Tk,
+# developed by John Ousterhout. This editor colorizes the source code
+# for easy identification of class definitions, methods, procedures,
+# etc. It also supports evaluation of regions of code (the selection,
+# if there is one, or the entire file, otherwise) hyperlinks through
+# the code, to a limited degree. Hyperlinks are obtained by the "Show
+# Links" command.
 #
 class ::tycho::EditItcl {
     inherit ::tycho::EditTcl
@@ -45,16 +47,14 @@ class ::tycho::EditItcl {
     constructor {args} {}
     destructor {}
 
-    #### help
     # Open a help window.
     method help {}
 
     ###################################################################
     ####                    protected methods                      ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditItclText}
+    # Return the name of the type of text widget to use (EditItclText).
+    protected method textWidget {} {return ::tycho::EditItclText}
 }
 
 ###################################################################

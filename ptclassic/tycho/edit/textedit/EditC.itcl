@@ -43,16 +43,14 @@ class ::tycho::EditC {
     constructor {args} {}
     destructor {}
 
-    #### help
-    # Open a window with help on the current widget.
+    # Open a window with help on the C editor.
     method help {}
 
     ###################################################################
     ####                  protected methods                        ####
 
-    #### textWidget
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditCText}
+    # Return the name of the type of text widget to use (EditCText).
+    protected method textWidget {} {return ::tycho::EditCText}
 }
 
 ###################################################################
