@@ -267,7 +267,7 @@ body ::tycho::EditJava::gendocBuffer {} {
     # Everytime we run javadoc, it wants to write AllNames.html,
     # packages.html and tree.html.  We remove these incase they are
     # links to files that we can't write.
-    file delete -f [file join $docDir AllNames.html] \
+    file delete -force [file join $docDir AllNames.html] \
 	    [file join $docDir packages.html] \
 	    [file join $docDir tree.html]
 
@@ -289,7 +289,7 @@ body ::tycho::EditJava::gendocBuffer {} {
     putStatus ""
     #::tycho::safeUpdate $this
     if ![file exists $htmlFile] {
-        puts "$htmlFile does not exist"
+        putStatus "$htmlFile does not exist"
         set treeFile [file join doc codeDoc tree.html]
         if [file exists $treeFile] {
             set window [::tycho::File::openContext $treeFile]
@@ -342,7 +342,10 @@ body ::tycho::EditJava::parseNow {start stop} {
     # To get C++ style comments:
     EditProgram::parseNow $start $stop
    
-
+    # If the user comments out the package directive and then reparses
+    # the file, the packageName should reflect the change and be {}
+    set className {}
+    set packageName {}
     set text $itk_component(text)
 
     # Remove tags first, if necessary
@@ -402,6 +405,7 @@ body ::tycho::EditJava::parseNow {start stop} {
 	    [option get $hull classColor EditJava]
     $text tag configure methodname -foreground \
 	    [option get $hull methodColor EditJava]
+    putStatus "Package Name: Class Name: "
 }
 
 #### tagLinks
