@@ -112,7 +112,6 @@ body ::tycho::ItclClassList::constructor {args} {
             -text {Diagram File Name} \
         -command "$this browseClassDiagram"
 
-
     toolbar button updateClassDiagram \
             {Generate a class diagram from the files listed in the \
             current file} \
