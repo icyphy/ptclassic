@@ -31,8 +31,9 @@ $Id$
  consists of calling these constructors, this is vital.
 
 **************************************************************************/
-
+#ifndef hpux
 #include "Linker.sysdep.h"
+#endif
 #include "Linker.h"
 #include "Error.h"
 #include "miscFuncs.h"
@@ -79,6 +80,11 @@ typedef void (*PointerToVoidFunction) ();
 const int HEADSIZE = 2 * sizeof (PointerToVoidFunction);
 
 int Linker::linkObj (const char* objName) {
+#ifdef hpux
+	Error::abortRun ("Incremental linking not yet supported for HP-UX");
+	return FALSE;
+}
+#else
 	if (!ptolemyName)
 		Error::abortRun ("Incremental linking disabled");
 // here, objName is the pathname of the .o file.
@@ -282,3 +288,4 @@ Linker::genHeader (const char* objName) {
 	return savestring(oname);
 }
 
+#endif /* hp-ux */
