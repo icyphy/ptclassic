@@ -53,6 +53,7 @@ ITCL_SRCS = \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
 	ColorPicker.itcl \
+	Dialog.itcl \
 	Displayer.itcl \
 	Edit.itcl \
 	EditSearch.itcl \
@@ -78,8 +79,10 @@ ITCL_SRCS = \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
 	Shortcuts.itcl \
+	Stack.itcl \
 	StatusBar.itcl \
 	StyleSheet.itcl \
+	Subpanel.itcl \
 	TArchetype.itcl \
 	TclShell.itcl \
 	ToolBar.itcl \
@@ -96,7 +99,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	makefile \
 	pkgIndex.tcl
 
-MISC_FILES = adm bin demo doc test
+MISC_FILES = adm bin demo doc test tclIndex
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
