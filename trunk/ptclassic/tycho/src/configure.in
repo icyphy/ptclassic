@@ -249,6 +249,36 @@ else
 	else
 	    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
 	fi
+
+	case "`uname -s" in
+		HP-UX) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/hp700_ux100
+			JAVA_ARCH_LIB_CHK=libjpeg.sl
+		echo "To build tcljava under HPUX, see tyjava/tcljava/makefile"
+			;;
+		Linux) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/linux
+			JAVA_ARCH_LIB_CHK=libjava.so
+			;;
+		SunOS) TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/sparc/green_threads
+			JAVA_ARCH_LIB_CHK=libjava.so
+			;;
+		*)TMP_JAVA_ARCH_LIB=$JAVAHOME/lib/idontknow;;
+	esac
+	#
+	# User specified Java architecture, used to find the jdk shared libs
+	#
+	AC_ARG_WITH(javaarchlib, [  --with-javaarchlib=DIR        use Java architecture dependent libraries from DIR],
+	        JAVA_ARCH_LIB=$withval, JAVA_ARCH_LIB="$TMP_JAVA_ARCH_LIB")
+	if test ! -d $JAVA_ARCH_LIB; then
+	    AC_MSG_ERROR(Java directory $JAVA_ARCH_LIB doesn't exist)
+	fi
+	AC_MSG_CHECKING([for the java $JAVA_ARCH_LIB_CHK library file])
+	if test -f $JAVA_ARCH_LIB/$JAVA_ARCH_LIB_CHK; then
+		AC_MSG_RESULT($JAVA_ARCH_LIB/$JAVA_ARCH_LIB_CHK)
+	else
+	    AC_MSG_ERROR(There's no $JAVA_ARCH_LIB_CHK in $JAVA_ARCH_LIB. Use the --with-javaarchlib= configure flag to specify the location of the architecture dependent library files in the JDK. )
+	fi
+
+
 fi
 
 dnl Checks for libraries.
@@ -275,6 +305,7 @@ AC_MSG_RESULT($TCL_SHLIB_LD)
 dnl Substitute the following variables in the Makefile (in alphabetical order)
 AC_SUBST(JAVAHOME)
 AC_SUBST(JAVA_ARCH_INCLUDE)
+AC_SUBST(JAVA_ARCH_LIB)
 AC_SUBST(TCL_CC)
 AC_SUBST(TCL_CFLAGS)
 AC_SUBST(TCL_DL_LIBS)
