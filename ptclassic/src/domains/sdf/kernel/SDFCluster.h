@@ -72,6 +72,9 @@ class SDFCluster;
 class SDFClusterBag;
 class ostream;
 
+// indent by depth tabs.
+const char* tab(int depth);
+
 // A SDFClusterGal is a galaxy made up of SDFCluster objects.  When
 // constructed, it is a flat galaxy with one atomic cluster corresponding
 // to each star in the original galaxy.  The cluster() function introduces
