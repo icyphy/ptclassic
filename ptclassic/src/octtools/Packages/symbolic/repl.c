@@ -1,6 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
+/*
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -25,8 +26,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
- * 
  */
+
 /*LINTLIBRARY*/
 /*
  * Instance Replacement
