@@ -1162,9 +1162,20 @@ XColor **value;			/* Returned value  */
 	    } else {
 		/* Color display station */
 		if (!XAllocColor(xv_disp(), xv_cmap(), *value)) {
+		  /* If we can't get a color, print a warning and
+		   * default to black.  In the dark ages (before color
+		   * hogs like netscape), vem would exit if it ran out of
+		   * colors.
+		   */
+		  vemMsg(MSG_A, "Cannot allocate color for requested pixel for `%s', try exiting color hogs like netscape.\n",
+			 name);
+		  (void) vuBlack(*value);
+
+#ifdef CRASHANDBURNIFWERUNOUTOFCOLORS
 		    errRaise(def_pkg_name, VEM_RESOURCE,
 			     "Cannot allocate color for requested pixel for `%s', try exiting color hogs like netscape.\n",
 			     name);
+#endif
 		}
 	    }
 	} else {
