@@ -74,7 +74,7 @@ CPLUSPLUS =	g++ -I$(ROOT)/src/compat/cfront -DPT_EGCS
 OPTIMIZER =	#-O2
 # -Wsynth was new in g++-2.6.x, but is not in egcs-1.1.1
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
-WARNINGS =	-Wall #-Wsynth -Wno-non-virtual-dtor #-Wcast-qual 
+WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual 
 
 # PT_NO_TIMER : Used in ProfileTimer.cc and SimControl.cc
 # PT_ERRNO_IS_A_FUNCTION: Used by src/octtools/internal.h
