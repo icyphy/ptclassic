@@ -1,18 +1,18 @@
 # Makefile for $PTOLEMY/src/gnu, used to compile the GNU tools
 # $Id$
-# Copyright (c) 1994 The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
 # license or royalty fees, to use, copy, modify, and distribute this
-# software and its documentation for any purpose, provided that the above
-# copyright notice and the following two paragraphs appear in all copies
-# of this software.
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
 # 
-# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
-# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
-# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
-# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 # SUCH DAMAGE.
 # 
 # THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -21,14 +21,10 @@
 # PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
-# Version:
-# @(#)makefile	1.1 3/21/94
-
-# src/gnu/Makefile
-# You should not need to edit this file, merely set the
-# ARCH and PTOLEMY environment variables, for example:
-#	setenv ARCH sun4
-#	setenv PTOLEMY /users/ptolemy
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#
 
 # Destination of the GNU binaries, libraries and include files.
 GNU_DEST=$(PTOLEMY)/gnu
@@ -201,7 +197,7 @@ hp_configure: $(GNU_OBJ)
 	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.c .)
 	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.h .)
 	# Building libg++ requires as to bin in gcc so -B arg will work
-	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_OBJ)/gas/gas as)
+	-(cd $(GNU_OBJ)/gcc; ln -s $(GNU_OBJ)/gas/as as)
 	-(cd $(GNU_OBJ)/librx; ln -s $(GNU_OBJ)/librx/*.c .)
 	-(cd $(GNU_OBJ)/libstdc++; ln -s $(GNU_OBJ)/libstdc++/*.cc .)
 	-(cd $(GNU_OBJ)/libstdc++/stl; ln -s $(GNU_OBJ)/libstdc++/stl/*.cc .)
