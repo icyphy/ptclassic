@@ -48,26 +48,18 @@ Date of last revision:
 // connected through a subset of the arcs of the ExpandedGraph.
 
 class HuGraph : public DLGraph {
-
 public:
-	// reset the graph for new schedules.
-	// initialize runnableNodes.
-	void resetGraph();
+	// Put given node in sorted order into the EGNodeList
+	// Sort earliest timeTBS first. Among the same timeTBS fields,
+	// sort highest SL first. Ignore flag argument.
+	/* virtual */ void sortedInsert(EGNodeList&, ParNode *, int flag);
 
-	// find a runnable block whose execution time is closest to
-	// the given limit.
-	HuNode* findTinyBlock(int limit);
+protected:
+	// redefine these virtual allocator to allocate Hu Nodes.
+	/* virtual */ EGNode *newNode(DataFlowStar*, int);
 
-	// return the smallest execution time among the runnable nodes.
-	int smallestExTime();
-	int getMinWork() { return minWork; }
-
-	// redefine these virtual allocator to allocate DL Nodes.
-	EGNode *newNode(DataFlowStar*, int);
-
-private:
-	// Minimum execution time among all runnable nodes.
-	int minWork;
+	// reset the HuNode specific data members
+	virtual void resetNodes();
 };
 
 #endif

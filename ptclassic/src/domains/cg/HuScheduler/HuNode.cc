@@ -37,13 +37,15 @@ Date of last revision:
 #endif
 
 #include "HuNode.h"
+#include "EGGate.h"
+
                         ///////////////////////
                         ///  *Constructor*  ///
                         ///////////////////////
 
-HuNode::HuNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
+HuNode::HuNode(DataFlowStar* Mas, int invoc_no) : DLNode(Mas, invoc_no)
 {
-	assignedFlag = 0;
+	timeTBS = 0;
 	preferredProc = 0;
 }
 
@@ -51,8 +53,26 @@ HuNode::HuNode(DataFlowStar* Mas, int invoc_no) : ParNode(Mas, invoc_no)
 // If type = 1, it is an idle node.
 // If type = -1, it is a send node, type = -2 indicates a receive node
 
-HuNode::HuNode(int t) : ParNode(t) {
-	assignedFlag = 0;
+HuNode::HuNode(int t) : DLNode(t) {
+	timeTBS = 0;
 	preferredProc = 0;
+}
+
+                        ///////////////////////
+                        ///  setAvailTime   ///
+                        ///////////////////////
+
+void HuNode :: setAvailTime() {
+	// scan the ancestors.
+	EGGateLinkIter preciter(ancestors);
+	EGGate* q;
+
+	int maxT = 0;
+	while((q = preciter++)!=0) {
+		HuNode* p = (HuNode*) q->farEndNode();
+		int fTime = p->getFinishTime();
+		if (fTime > maxT) maxT = fTime;
+	}
+	timeTBS = maxT;
 }
 

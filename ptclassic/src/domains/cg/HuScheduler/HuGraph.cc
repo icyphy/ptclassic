@@ -43,74 +43,48 @@ Date of last revision:
 EGNode *HuGraph :: newNode(DataFlowStar* s, int i)
 	{ LOG_NEW; return new HuNode(s,i); }
 
-void HuGraph :: resetGraph() {
+                        ////////////////////////
+                        ///  sortedInsert  ///
+                        ////////////////////////
 
-	// reset the runnable node list.
-	findRunnableNodes();
+// Insert a ParNode into the EGNodeList in sorted order.
+// Redefine it to sort by timeTBS first and static Level next.
 
-	// update the minimum execution time if necessary
-	minWork = 0;
-	EGSourceIter nxtSrc(*this);
-	HuNode* src;
-	while ((src = (HuNode*) nxtSrc++) != 0) {
-		if (src->myExecTime() < minWork) minWork = src->myExecTime();
-		src->resetAssignedFlag(0);
+void HuGraph::sortedInsert(EGNodeList& nlist, ParNode *node, int) {
+
+	HuNode*  pd = (HuNode*) node;
+
+	// Attach a link iterator to the runnableNodes
+	EGNodeListIter NodeIter(nlist);
+	EGNodeLink* nl;
+	EGNodeLink* tmp = nlist.createLink(node);
+
+	int nodeT = pd->availTime();
+	int nodeSL = node->getLevel();  // The StaticLevel of node
+
+	// Find the correct location for node in the list
+	while ((nl = NodeIter.nextLink()) != 0) {
+		HuNode* pd = (HuNode*) nl->node();
+		// Sort earliest timeTBS first
+		if (pd->availTime() > nodeT) break;
+		else if (pd->availTime() < nodeT) continue;
+		else if (pd->getLevel() <= nodeSL) break;
 	}
 
-	resetNodes();
-
-	// reset the appropriate members for schedule.
-	unschedNodes = nodeCount;
-	unschedWork  = ExecTotal;
+	if (nl) nlist.insertAhead(tmp, nl);
+	else    nlist.appendLink(tmp);
 }
 
-			///////////////////////
-			///  findTinyBlock  ///
-			///////////////////////
+// HuNode specific reset.
+void HuGraph :: resetNodes() {
 
-// find a runnable block whose execution time is closest to the
-// given limit.
+	EGIter nxtNod(*this);
+	HuNode* node;
 
-HuNode* HuGraph :: findTinyBlock(int limit)
-{
-	// If the geven limit is smaller than the minWork, return 0;
-	if (limit < minWork) return (HuNode*) 0;
-
-	// Attach a link iterator to the runnable nodes
-	EGNodeListIter NodeIter(runnableNodes);
-	HuNode* pd;
-	HuNode *obj = 0;
-	int closest = limit;
-
-	// go through the runnable node list
-	while ((pd = (HuNode*) NodeIter++) != 0) {
-                // The HuNode associated with dlnk
-		int temp = limit - pd->myExecTime();
-		if (temp >= 0 && temp < closest) {
-			temp = closest;
-			obj = pd;
-		}
+	while ((node = (HuNode*) nxtNod++) != 0) {
+		node->resetVisit();
+		node->resetWaitNum();
+		node->setAvailTime(0);
+		node->setPreferredProc(0);
 	}
-
-	// fetch the "obj" node from the runnable list.
-	if (obj) runnableNodes.remove(obj);
-
-	return obj;
 }
-
-// Return the smallest execution time among the runnable nodes.
-int HuGraph :: smallestExTime()
-{
-	// Attach a link iterator to the DLNodeList
-	EGNodeListIter NodeIter(runnableNodes);
-	HuNode *pd;
-	int small = unschedWork;
-
-	// Iterate for all runnable nodes.
-	while ((pd = (HuNode*) NodeIter++) != 0) 
-		if (pd->myExecTime() < small) small = pd->myExecTime();
-	
-	minWork = small;
-	return small;
-}
-
