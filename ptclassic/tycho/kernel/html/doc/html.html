@@ -14,7 +14,7 @@ written by Stephen Uhler of Sun Microsystems, which supports all the
 features of HTML 2.0.
 There is currently no support in Tycho for
 <a name=HTTP>HTTP</a> hyperlink references, so you cannot
-within Tycho directly read documents on the internet.
+read documents directly on the internet from within Tycho.
 If Tycho encounters a HTML reference
 that it does not understand, then Tycho with ask the user if they want 
 to start up <CODE>Netscape</CODE>. (The Macintosh does not support
@@ -44,14 +44,14 @@ set h [::tycho::view HTML &#92
 	-scrollbar 0 &#92
 	-textheight 20]
 </pre></tcl>
-By default, an HTML widget is read only, so
+By default, an HTML widget is read-only, so
 you cannot modify its contents.
 You can change this, and read in a file as follows:
 <tcl quiet><pre>
 $h configure -readonly no
 $h insertData " Some &lt;b&gt;More&lt;/b&gt; html"
 </pre></tcl>
-Notice that emacs-like <a href="../../../doc/bindings.html">key bindings</a>
+Notice that Emacs-like <a href="../../../doc/bindings.html">key bindings</a>
 can be used to navigate through the text.
 There are a large number of other public methods for HTML.
 See the class documentation.
