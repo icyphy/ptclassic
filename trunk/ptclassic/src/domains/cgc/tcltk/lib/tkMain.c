@@ -159,18 +159,18 @@ static void ptReleaseSig ARGS((int SigNum)) {}
 #else 
 #if defined(PTHPPA)
 static void ptSafeSig ARGS(( int foo )) {}
-static long signalmask;
+static long signalmask = 0;
 /* Don't use prototypes since the cc distributed with hppa
  * won't work with them
  */
 static void ptBlockSig (SigNum) {
 int Signum;
-	signalmask = sigblock(sigmask(SigNum));
+        signalmask = sigblock(sigmask(SigNum)) | sigmask(SigNum);
 }
 static void ptReleaseSig (SigNum) {
 int Signum;
 	/* remove this signal from the signal mask */
-	signalmask &= !(sigmask(SigNum));
+	signalmask &= ~(sigmask(SigNum));
 	sigsetmask(signalmask);
 }
 
