@@ -1,0 +1,1137 @@
+
+#-----------------------------------------------------------------------
+# WebMaker, a FrameMaker to WWW converter
+# 
+# Copyright (C) 1994, CERN Geneva
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+#
+# Contains definition of:
+#     
+#          VARIABLE       @NavPanel
+#          NODE           FirstPage
+#          NODE           LevelOne
+#          NODE           LevelTwo
+#          NODE           TOCNode
+#          PARAGRAPH      ExtTOCHeading-TocNode
+#          NODE           IndexNode
+#          PARAGRAPH      IndexHeading-IndexNode
+#
+# This node package should only be used if an external table of contents
+# and an index are to be generated, as the navigation panels of all 
+# other nodes are pointing to these pages.
+
+#-----------------------------------------------------------------------
+#
+# Define variables.
+#
+VARIABLE @NavPanel
+
+
+#-------------------------------------------------------------------------
+#
+#  Define node for the external global Table of Contents and heading 
+#  paragraph rule that uses it.
+#
+NODE TOCNode
+{
+  TITLE headingtext()
+  HEADER
+  {  
+    @NavPanel=concatenate( 
+              button("[Next] ",    filename(next),     "[Next] "     ),
+              button("[Previous] ",filename(previous), "[Previous] " ),
+              button("[Top] ",     filename(top),      "[Top] "      ),
+              button("[Index] ",   filename(INDEX),    "[Index] "    )
+                         );
+    write(*,paragraph(@NavPanel));
+    write(*,paragraph(maintitle()));
+  }
+  FOOTER
+  {
+    write(*,toc(4,global));
+    write(*,hrule());
+    write(*,address(concatenate(maintitle()," - ",date())));
+    write(*,paragraph(@NavPanel));
+  }
+}
+
+# Paragraph rule for heading paragraph that triggers external TOC Node
+# Note: This rule should be used only once, i.e. there should be a tag,
+#       such as "Chapter-TOC", that appears only once in the Frame doc.
+#
+PARAGRAPH "ExtTOCHeading-TocNode" TYPE Heading
+{
+  LEVEL 1
+  NEWNODE TOCNode
+  FILENAMEKEY exttoc
+  ACTIONS
+  {
+    write(*,heading(1,text()));
+    write(*,hrule());
+  }
+}
+
+#-----------------------------------------------------------------------
+#
+#  Define the entry page of the generated web.
+#
+NODE FirstPage
+{
+  TITLE maintitle()
+  HEADER
+  {
+    @NavPanel=concatenate(
+              button("[Next] ",    filename(next), "[Next] "),
+              button("[Contents] ",filename(exttoc),   "[Contents] "),
+              button("[Index] ",   filename(INDEX), "[Index] "),
+              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl", "[Search] ")
+                         );
+    write(*,paragraph(@NavPanel));
+  }
+  FOOTER
+  {
+    write(*,toc(1,local));
+    write(*,hrule());
+    write(*,address(concatenate(maintitle()," - ",date())));
+    write(*,paragraph(@NavPanel));
+  }
+}
+
+
+#-------------------------------------------------------------------------
+#
+#  Define other lower level nodes. 
+#
+NODE LevelOne
+{
+  TITLE concatenate(headingnumber()," ",headingtext())
+  HEADER
+  {
+    @NavPanel=concatenate( 
+              button("[Next] ",    filename(next),     "[Next] "     ),
+              button("[Previous] ",filename(previous), "[Previous] " ),
+              button("[Top] ",     filename(top),      "[Top] "      ),
+              button("[Contents] ",filename(exttoc),      "[Contents] " ),
+              button("[Index] ",   filename(INDEX),    "[Index] "    ),
+              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl", "[Search] ")
+                         );
+    write(*,paragraph(@NavPanel));
+    write(*,paragraph(maintitle()));
+  }
+  FOOTER
+  {
+    write(*,toc(1,local));
+    write(*,hrule());
+    write(*,address(concatenate(maintitle()," - ",date())));
+    write(*,paragraph(@NavPanel));
+  }
+}
+
+
+NODE LevelTwo
+{
+  TITLE concatenate(headingnumber()," ",headingtext())
+  HEADER
+  {
+    @NavPanel=concatenate( 
+              button("[Next] ",    filename(next),     "[Next] "     ),
+              button("[Previous] ",filename(previous), "[Previous] " ),
+              button("[Up] ",      filename(up),       "[up] "       ),
+              button("[Top] ",     filename(top),      "[Top] "      ),
+              button("[Contents] ",filename(exttoc),      "[Contents] " ),
+              button("[Index] ",   filename(INDEX),    "[Index] "    ),
+              button("[Search] ",  "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl", "[Search] ")
+                         );
+    write(*,paragraph(@NavPanel));
+    write(*,paragraph(concatenate(headingnumber(up)," ",headingtext(up))));
+  }
+  FOOTER
+  {
+    write(*,toc(1,local));
+    write(*,hrule());
+    write(*,address(concatenate(maintitle()," - ",date())));
+    write(*,paragraph(@NavPanel));
+  }
+}
+
+
+
+
+#-------------------------------------------------------------------------
+#
+#  Define node for the Index and the heading paragraph rule that uses it.
+#
+NODE IndexNode
+{
+  TITLE headingtext()
+  HEADER
+  {  
+    @NavPanel=concatenate( 
+              button("[Next] ",    filename(next),     "[Next] "     ),
+              button("[Previous] ",filename(previous), "[Previous] " ),
+              button("[Top] ",     filename(top),      "[Top] "      ),
+              button("[Contents] ",filename(exttoc),      "[Contents] " ),
+              button("[Search] ", "http://ptolemy.eecs.berkeley.edu/cgi-bin/users-man-wais.pl" , "[Search] ")
+                         );
+    write(*,paragraph(@NavPanel));
+    write(*,paragraph(maintitle()));
+  }
+  FOOTER
+  {
+    write(*,index(Index,letter));
+    write(*,hrule());
+    write(*,address(concatenate(maintitle()," - ",date())));
+    write(*,paragraph(@NavPanel));
+  }
+}
+
+# Paragraph rule for heading paragraph that triggers Index Node.
+# Note: This rule should be used only once, i.e. there should be a tag,
+#       such as "Chapter-Index", that appears only once in teh Frame doc.
+#
+PARAGRAPH "IndexHeading-IndexNode" TYPE Heading
+{
+  LEVEL 1
+  FILENAMEKEY INDEX
+  NEWNODE IndexNode
+  ACTIONS
+  {
+    write(*,heading(1,text()));
+    write(*,hrule());
+  }
+}
+
+#-------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# WebMaker, a FrameMaker to WWW converter
+# 
+# Copyright (C) 1994, CERN Geneva
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+#
+# Contains definition of:
+#
+#     Node triggering heading rules (To used any of these rules EITHER
+#     'nodes-012.html' OR 'nodes-012TI.html' must be included):
+#
+#          PARAGRAPH      L1H1HR-Node1
+#          PARAGRAPH      L1H1-Node1
+#          PARAGRAPH      L2H1HR-Node2
+#          PARAGRAPH      L2H1-Node2
+#          PARAGRAPH      L2H2-Node2
+#          PARAGRAPH      L3H1HR-Node2
+#          PARAGRAPH      L3H1-Node2
+#          PARAGRAPH      L3H2-Node2
+#          PARAGRAPH      L3H3-Node2
+#
+#     Heading rules:
+#
+#          PARAGRAPH      L1H1
+#          PARAGRAPH      L1H1HR
+#          PARAGRAPH      L2H1
+#          PARAGRAPH      L2H1HR
+#          PARAGRAPH      L2H2
+#          PARAGRAPH      L2H2HR
+#          PARAGRAPH      L3H1
+#          PARAGRAPH      L3H1HR
+#          PARAGRAPH      L3H2
+#          PARAGRAPH      L3H2HR
+#          PARAGRAPH      L3H3
+#          PARAGRAPH      L3H3HR
+#          PARAGRAPH      L4H1
+#          PARAGRAPH      L4H1HR
+#          PARAGRAPH      L4H2
+#          PARAGRAPH      L4H2HR
+#          PARAGRAPH      L4H3
+#          PARAGRAPH      L4H3HR
+#          PARAGRAPH      L4H4
+#          PARAGRAPH      L4H4HR
+
+
+#---------------------------------------------------------------------
+#
+# Node triggering headings. May be used with both the node packages
+# 'nodes-012.wml' and 'nodes-012TI.wml'.
+#
+PARAGRAPH "L1H1HR-Node1" TYPE Heading
+{
+  LEVEL 1
+  NEWNODE LevelOne
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L1H1-Node1" TYPE Heading
+{
+  LEVEL 1
+  NEWNODE LevelOne
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L2H1HR-Node2" TYPE Heading
+{
+  LEVEL 2
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L2H1-Node2" TYPE Heading
+{
+  LEVEL 2
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L2H2-Node2" TYPE Heading
+{
+  LEVEL 2
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L3H1HR-Node2" TYPE Heading
+{
+  LEVEL 3
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L3H1-Node2" TYPE Heading
+{
+  LEVEL 3
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L3H2-Node2" TYPE Heading
+{
+  LEVEL 3
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L3H3-Node2" TYPE Heading
+{
+  LEVEL 3
+  NEWNODE LevelTwo
+  ACTIONS
+  {
+    write(*,heading(3,concatenate(number()," ",text())));
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Headings of Level 1 that do not trigger a node 
+#
+PARAGRAPH "L1H1" TYPE Heading
+{
+  LEVEL 1
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L1H1HR" TYPE Heading
+{
+  LEVEL 1
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Headings of Level 2 that do not trigger a node
+#
+PARAGRAPH "L2H1" TYPE Heading
+{
+  LEVEL 2
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L2H1HR" TYPE Heading
+{
+  LEVEL 2  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L2H2" TYPE Heading
+{
+  LEVEL 2
+  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L2H2HR" TYPE Heading
+{
+  LEVEL 2
+  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+#---------------------------------------------------------------------
+#
+# Headings of Level 3 that do not trigger a node
+#
+PARAGRAPH "L3H1" TYPE Heading
+{
+  LEVEL 3
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L3H1HR" TYPE Heading
+{
+  LEVEL 3  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L3H2" TYPE Heading
+{
+  LEVEL 3
+  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L3H2HR" TYPE Heading
+{
+  LEVEL 3  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L3H3" TYPE Heading
+{
+  LEVEL 3
+  ACTIONS
+  {
+    write(*,heading(3,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L3H3HR" TYPE Heading
+{
+  LEVEL 3  ACTIONS
+  {
+    write(*,heading(3,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Headings of Level 4 that do not trigger a node
+#
+PARAGRAPH "L4H1" TYPE Heading
+{
+  LEVEL 4
+  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L4H1HR" TYPE Heading
+{
+  LEVEL 4  ACTIONS
+  {
+    write(*,heading(1,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L4H2" TYPE Heading
+{
+  LEVEL 4
+  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L4H2HR" TYPE Heading
+{
+  LEVEL 4  ACTIONS
+  {
+    write(*,heading(2,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L4H3" TYPE Heading
+{
+  LEVEL 4
+  ACTIONS
+  {
+    write(*,heading(3,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L4H3HR" TYPE Heading
+{
+  LEVEL 4  ACTIONS
+  {
+    write(*,heading(3,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+PARAGRAPH "L4H4" TYPE Heading
+{
+  LEVEL 4
+  ACTIONS
+  {
+    write(*,heading(4,concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "L4H4HR" TYPE Heading
+{
+  LEVEL 4  ACTIONS
+  {
+    write(*,heading(4,concatenate(number()," ",text())));
+    write(*,hrule());
+  }
+}
+
+#---------------------------------------------------------------------
+#-----------------------------------------------------------------------
+# WebMaker, a FrameMaker to WWW converter
+# 
+# Copyright (C) 1994, CERN Geneva
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+#
+# Contains definition of:
+#
+#          PARAGRAPH      L1BulletItem
+#          PARAGRAPH      L2BulletItem
+#          PARAGRAPH      L3BulletItem
+#          PARAGRAPH      L1NumberItem
+#          PARAGRAPH      L2NumberItem
+#          PARAGRAPH      L3NumberItem
+#          PARAGRAPH      L1GlossaryItem-1
+#          PARAGRAPH      L1GlossaryItem-2
+#          PARAGRAPH      L1GlossaryItem-3
+#          PARAGRAPH      L1GlossaryItem-4
+#          PARAGRAPH      L1GlossaryItem-5
+#          PARAGRAPH      L1PlainItem
+#          PARAGRAPH      L2PlainItem
+#          PARAGRAPH      L3PlainItem
+
+
+#---------------------------------------------------------------------
+#
+# Bulleted lists.
+
+PARAGRAPH "L1BulletItem" TYPE List
+{
+  LEVEL 1
+  KIND Bullet
+  ACTIONS
+  {
+    write(*,listitem(paragraph(text())));
+  }
+}
+
+PARAGRAPH "L2BulletItem" TYPE List
+{
+  LEVEL 2
+  KIND Bullet
+  ACTIONS
+  {
+    write(*,listitem(paragraph(text())));
+  }
+}
+
+PARAGRAPH "L3BulletItem" TYPE List
+{
+  LEVEL 3
+  KIND Bullet
+  ACTIONS
+  {
+    write(*,listitem(paragraph(text())));
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Numbered lists.
+
+PARAGRAPH "L1NumberItem" TYPE List
+{
+  LEVEL 1
+  KIND Number
+  ACTIONS
+  {
+    write(*,listitem(paragraph(text())));
+  }
+}
+
+PARAGRAPH "L2NumberItem" TYPE List
+{
+  LEVEL 2
+  KIND Number
+  ACTIONS
+  {
+    write(*,listitem(paragraph(text())));
+  }
+}
+
+PARAGRAPH "L3NumberItem" TYPE List
+{
+  LEVEL 3
+  KIND Number
+  ACTIONS
+  {
+    write(*,listitem(paragraph(text())));
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Glossary lists.
+
+PARAGRAPH "L1GlossaryHeader" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,glossterm(text(current,1,1)))
+  }
+}
+
+PARAGRAPH "L1GlossaryBody" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*, glossdescription(paragraph(text(current,1,*))));
+  }
+}
+
+PARAGRAPH "L1GlossaryItem-1" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(
+                 glossterm(text(current,1,1)),
+                 glossdescription(paragraph(text(current,2,*)))));
+  }
+}
+
+PARAGRAPH "L1GlossaryItem-2" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(
+                 glossterm(bold(text(current,1,1))),
+                 glossdescription(paragraph(text(current,2,*)))));
+  }
+}
+
+PARAGRAPH "L1GlossaryItem-3" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(
+                 glossterm(text(current,1,2)),
+                 glossdescription(paragraph(text(current,3,*)))));
+  }
+}
+
+PARAGRAPH "L1GlossaryItem-4" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(
+                 glossterm(bold(text(current,1,2))),
+                 glossdescription(paragraph(text(current,3,*)))));
+  }
+}
+
+PARAGRAPH "L1GlossaryItem-5" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(
+                 glossterm(bold(number())),
+                 glossdescription(paragraph(text()))));
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Plain lists (A simulation of plain lists with glossary lists).
+
+PARAGRAPH "L1PlainItem" TYPE List
+{
+  LEVEL 1
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(glossterm(""),
+             glossdescription(paragraph(text()))));
+  }
+}
+
+PARAGRAPH "L2PlainItem" TYPE List
+{
+  LEVEL 2
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(glossterm(""),
+             glossdescription(paragraph(text()))));
+  }
+}
+
+PARAGRAPH "L3PlainItem" TYPE List
+{
+  LEVEL 3
+  KIND Glossary
+  ACTIONS
+  {
+     write(*,concatenate(glossterm(""),
+             glossdescription(paragraph(text()))));
+  }
+}
+
+#---------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+# WebMaker, a FrameMaker to WWW converter
+# 
+# Copyright (C) 1994, CERN Geneva
+#-----------------------------------------------------------------------
+
+#-----------------------------------------------------------------------
+#
+# Contains definition of:
+#
+#          PARAGRAPH      FMDocumentTitle
+#          PARAGRAPH      SimpleBody
+#          PARAGRAPH      NumberedBody
+#          PARAGRAPH      PreformattedText
+#          PARAGRAPH      FixedWidthText
+#          PARAGRAPH      QuotedText
+#          PARAGRAPH      Ignore
+#          PARAGRAPH      InListSimple
+#          PARAGRAPH      InListNumbered
+
+
+#---------------------------------------------------------------------
+#
+# The title of the Frame document is treated specially:
+# It is TYPE Normal. 
+
+PARAGRAPH "FMDocumentTitle" TYPE Normal
+{
+  ACTIONS
+  {
+    write(*,heading(1,text())); 
+    write(*,hrule());
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Normal paragraphs.
+
+PARAGRAPH "SimpleBody" TYPE Normal
+{
+  ACTIONS
+  {
+    write(*,paragraph(text()));
+  }
+}
+
+PARAGRAPH "NumberedBody" TYPE Normal
+{
+  ACTIONS
+  {
+    write(*,paragraph(concatenate(number()," ",text())));
+  }
+}
+
+PARAGRAPH "PreformattedText" TYPE Normal
+{
+  CONTEXT Preformatted
+  ACTIONS
+  {
+    write(*,text());
+  }
+}
+
+PARAGRAPH "FixedWidthText" TYPE Normal
+{
+  ACTIONS
+  {
+    write(*,paragraph(teletype(text())));
+  }
+}
+
+PARAGRAPH "QuotedText" TYPE Normal
+{
+  CONTEXT Quote
+  ACTIONS
+  {
+    write(*,paragraph(text()));
+  }
+}
+
+PARAGRAPH "Ignore" TYPE Normal
+{
+  ACTIONS
+  {
+    write(*,comment(concatenate("FM pgf ignored")));
+  }
+}
+
+
+#---------------------------------------------------------------------
+#
+# Normal InList paragraphs.
+
+PARAGRAPH "InListSimple" TYPE Normal
+{
+  INLIST
+  ACTIONS
+  {
+    write(*,paragraph(text()));
+  }
+}
+
+PARAGRAPH "InListNumbered" TYPE Normal
+{
+  INLIST
+  ACTIONS
+  {
+    write(*,paragraph(concatenate(number()," ",text())));
+  }
+}
+
+#---------------------------------------------------------------------
+
+#---------------------------------------------------------------------
+#
+# WebMaker Version Beta 1.4 Copyright (C) 1994, CERN Geneva
+#
+# Default configuration file generated by wmconfig on 94/12/29
+# for the FrameMaker document `users_man.MIF'.
+#
+# If used as is to translate `users_man.MIF', the entire document
+# is translated into a single node and every paragraph to a
+# simple paragraph. Please edit to suit.
+#
+#---------------------------------------------------------------------
+
+
+#---------------------------------------------------------------------
+#
+# This file contains no WML node rules; the default value for
+# 'FirstPage' is used. To use one of the two node rule packages
+# defined in the two WML library files,
+#
+#       include/nodes-012.wml
+#       include/nodes-012TI.wml
+#
+# copy the contents of one of these files here. Then assign a paragraph
+# rule from the file 'headings.wml' to the heading paragraphs which are
+# to trigger a new node.
+
+
+
+#---------------------------------------------------------------------
+#
+# The following rules map all the paragraph formats of as "Default".
+# To use any of the paragraph rules defined in the WML paragraph
+# library files,
+#
+#       include/headings.wml
+#       include/lists.wml
+#       include/normals.wml
+#
+# replace "Default" with the name of the paragraph rule to be
+# used, and copy the paragraph rule into this file. If the paragraph
+# rule chosen is not of TYPE Normal, then the TYPE below must be
+# changed accordingly.
+
+PARAGRAPH "Default" TYPE Normal
+{
+  ACTIONS
+  {
+    write(*,paragraph(concatenate(number()," ",text()))); 
+  }
+}
+
+# Paragraph formats used AND contained in the paragraph catalog(s).
+
+PARAGRAPH "Title" TYPE Normal { USES "FMDocumentTitle" }
+PARAGRAPH "ExternalTOC" TYPE Heading { USES "ExtTOCHeading-TocNode" }
+
+
+PARAGRAPH "1Heading" TYPE Heading { USES "L1H1HR-Node1" } 
+PARAGRAPH "1HeadingTOC" TYPE Heading { USES "L1H1HR-Node1" } 
+PARAGRAPH "Appendix" TYPE Heading { USES "L1H1HR-Node1" }
+PARAGRAPH "AppendixCont" TYPE Heading { USES "L1H1HR" }
+PARAGRAPH "2Heading" TYPE Heading { USES "L2H1HR-Node2" } 
+PARAGRAPH "2HeadingTOC" TYPE Heading { USES "L2H1HR-Node2" } 
+PARAGRAPH "3Heading" TYPE Heading { USES "L3H1HR-Node2" } 
+PARAGRAPH "3HeadingTOC" TYPE Heading { USES "L3H1HR-Node2" } 
+PARAGRAPH "4Heading" TYPE Heading { USES "L4H1" } 
+
+# Used by title.MIF
+PARAGRAPH "Subheading" TYPE Heading { USES "L2H1" } 
+PARAGRAPH "SubheadAny" TYPE Heading { USES "L2H1" } 
+PARAGRAPH "Explanation" TYPE Heading { USES "L2H1" } 
+PARAGRAPH "Cover" TYPE Heading { USES "L1H1HR-Node1" } 
+
+PARAGRAPH "Bullet" TYPE List { USES "L1BulletItem" } 
+PARAGRAPH "ListElem" TYPE List { USES "L1NumberItem" } 
+PARAGRAPH "ListElemCont" TYPE List { USES "L1NumberItem" } 
+
+PARAGRAPH "WideDefinition" TYPE List { USES "L1GlossaryItem-2" } 
+PARAGRAPH "WideDefinition2" TYPE List { USES "L1GlossaryItem-2" }
+PARAGRAPH "NarrowDefinition" TYPE List { USES "L1GlossaryItem-2" }
+
+#PARAGRAPH "TitleTOC" TYPE Heading { USES "ExtTOCHeading-TocNode" } 
+PARAGRAPH "TitleTOC" TYPE Normal { USES "Default"  }
+PARAGRAPH "SectionTOC" TYPE Normal { USES "Default" } 
+PARAGRAPH "AppendixTOC" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "Commands" TYPE Normal { USES "FixedWidthText" }
+PARAGRAPH "CommandsCont" TYPE Normal { USES "FixedWidthText" } 
+PARAGRAPH "Code" TYPE Normal { USES "FixedWidthText" } 
+
+# InfoHeader is used by ptglossary.MIF
+PARAGRAPH "InfoHeader" TYPE List { USES "L1GlossaryHeader" } 
+PARAGRAPH "InfoBody" TYPE List { USES "L1GlossaryBody" } 
+
+PARAGRAPH "IndexExampleLOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 18LOM" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "IndexExampleIX" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "Display" TYPE Normal { USES "Default" } 
+PARAGRAPH "ExerciseCont" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexStarExLOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexStarRefLOM" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "IndexStarExIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "Heading" TYPE Normal { USES "Default" } 
+PARAGRAPH "Figure" TYPE Normal { USES "Default" } 
+PARAGRAPH "Footnote" TYPE Normal { USES "Default" } 
+PARAGRAPH "Exercise1" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "IndexStarDefIX" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "Definition" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexReferenceLOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "GroupTitlesIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "OtherContrib" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexDefinitionIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "Reference" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 14LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "AlphaList" TYPE Normal { USES "Default" } 
+PARAGRAPH "Equation" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "Type 19LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "Indent" TYPE Normal { USES "Default" } 
+PARAGRAPH "Exercise" TYPE Normal { USES "Default" } 
+PARAGRAPH "Body" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexLOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 15LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexStarRefIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "Level1IX" TYPE Normal { USES "Default" } 
+
+
+PARAGRAPH "Shrinked Figure" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 11LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Footer" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "Part" TYPE Normal { USES "Default" } 
+PARAGRAPH "PartA" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexDefinitionLOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 16LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexReferenceIX" TYPE Normal { USES "Default" } 
+
+#PARAGRAPH "Author" TYPE Heading { USES "ExtTOCHeading-TocNode" }
+PARAGRAPH "Author" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "ContTitle" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 12LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "LBody" TYPE Normal { USES "Default" } 
+PARAGRAPH "Table" TYPE Normal { USES "Default" } 
+PARAGRAPH "PartCont" TYPE Normal { USES "Default" } 
+
+PARAGRAPH "Type 17LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Header" TYPE Normal { USES "Default" } 
+PARAGRAPH "AlphaList1" TYPE Normal { USES "Default" } 
+PARAGRAPH "IndexStarDefLOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 13LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Type 20LOM" TYPE Normal { USES "Default" } 
+PARAGRAPH "Level2IX" TYPE Normal { USES "Default" } 
+PARAGRAPH "5Heading" TYPE Normal { USES "Default" } 
+
+# Paragraph formats NOT used but contained in the paragraph catalog(s).
+
+PARAGRAPH "Section" TYPE Normal { USES "Default" } 
+PARAGRAPH "CellHeading" TYPE Normal { USES "Default" } 
+PARAGRAPH "4HeadingNew" TYPE Normal { USES "Default" } 
+PARAGRAPH "TableFootnote" TYPE Normal { USES "Default" } 
+PARAGRAPH "Example" TYPE Normal { USES "Default" } 
+PARAGRAPH "CellBody" TYPE Normal { USES "Default" } 
+PARAGRAPH "allen_special" TYPE Normal { USES "Default" } 
+PARAGRAPH "TableTitle" TYPE Normal { USES "Default" } 
+PARAGRAPH "Affiliation" TYPE Normal { USES "Default" } 
+
+# Paragraph formats used but NOT contained in the paragraph catalog(s).
+
+# from filter.MIF
+PARAGRAPH "computer" TYPE Normal { USES "Default" } 
+PARAGRAPH "computerA" TYPE Normal { USES "Default" } 
+#
+PARAGRAPH "ActiveIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "IgnoreCharsIX" TYPE Normal { USES "Default" } 
+# from pigi.MIF
+PARAGRAPH "MenuHeader" TYPE Normal { USES "Default" } 
+PARAGRAPH "MenuBody" TYPE Normal { USES "Default" } 
+#
+PARAGRAPH "SortOrderIX" TYPE Normal { USES "Default" } 
+PARAGRAPH "ActiveTOC" TYPE Normal { USES "Default" } 
+PARAGRAPH "SeparatorsIX" TYPE Normal { USES "Default" } 
+
+
+#---------------------------------------------------------------------
+#
+# The following rules map all character format tags as "Emphasise".
+# The complete list of what a character format may be mapped to is:
+#
+#      Bold        Cite       Code        Definition
+#      Emphasise   Italic     Keyboard    Sample
+#      Strong      Teletype   Underline   Variable
+
+# Character formats used AND contained in the character catalog(s).
+
+CHARACTER { TAG "figure" MAP Emphasise } 
+CHARACTER { TAG "Emphasis" MAP Emphasise } 
+CHARACTER { TAG "EquationVariables" MAP Emphasise } 
+CHARACTER { TAG "Bold" MAP Bold } 
+CHARACTER { TAG "Symbol" MAP Emphasise } 
+CHARACTER { TAG "ProgramCode" MAP Code } 
+CHARACTER { TAG "Superscript" MAP Emphasise } 
+CHARACTER { TAG "Class" MAP Code } 
+
+# Character formats NOT used but contained in the character catalog(s).
+
+CHARACTER { TAG "Subscript" MAP Emphasise } 
+
+# Character formats used but NOT contained in the character catalog(s).
+
+CHARACTER { TAG "class" MAP Code } 
+
+
+# Map Courier-Bold to Code
+CHARACTER
+{
+  FAMILY "Courier"
+  WEIGHT "Bold"
+    MAP Code
+}
+
+#---------------------------------------------------------------------
+#
+# The default values of the available options for the conversion
+# of graphics may be edited here.
+
+GRAPHIC DEFAULT
+{
+  REALSIZE   120  # Percentage scaling of output size relative to original.
+  REALFORMAT GIF  # Output format may be GIF, XBM, XWD, RS, PBM, PS, PICT. 
+  MARGIN     0    # Percentage margin size relative to cropped output size.
+  MARGINPIX  0    # Margin size in pixels (overrides MARGIN).
+  BORDER     0    # Border thickness in pixels. 
+  ICON       NO   # If YES generate an icon of the image.
+  ICONSIZE   25   # Percentage icon size relative to original.
+  ICONFORMAT GIF  # Output icon format may be GIF or XBM.
+  ROTATION   NIL  # May be LEFT or RIGHT, to rotate 1/4 revolution.
+}
+
+
+# End
