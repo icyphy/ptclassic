@@ -364,7 +364,7 @@ endif
 
 ifdef NOWAM # Networks Of Workstations Active Messages
      # NOWam only supported under sol2 and sol2.cfront
-     ifeq (,$(filter sol%,$(PTARCH)))
+     ifneq (,$(filter sol%,$(PTARCH)))
 	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam
 	CGC = 1
 	ifeq ($(USE_SHARED_LIBS),yes) 
