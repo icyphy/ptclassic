@@ -68,7 +68,7 @@ extern "C" {
 #define PTHPPA_CFRONT
 #endif
 
-#if defined(__sgi)
+#if defined(__sgi) && defined(IRIX5)
 /* SGI running IRIX5.x */
 #define PTIRIX5
 #endif
@@ -76,6 +76,19 @@ extern "C" {
 #if defined(__sgi) && ! defined(__GNUC__)
 /* SGI running IRIX5.x with native SGI CC*/
 #define PTIRIX5_CFRONT
+#endif
+
+#if defined(__sgi) && ! defined(__GNUC__) && defined(IRIX6) && defined (_ABIO32)
+/* SGI running IRIX6.x , native SGI CC in 32 bits mode */
+#define PTIRIX5			/* SGI says it is 100% compatible with IRIX5 */
+#define PTIRIX6
+#define PTIRIX6_32_CFRONT
+#endif
+
+#if defined(__sgi) && ! defined(__GNUC__) && defined(IRIX6) && defined (_ABI64)
+/* SGI running IRIX6.x , native SGI CC in 64 bit mode */
+#define PTIRIX6
+#define PTIRIX6_64_CFRONT
 #endif
 
 #if defined(linux)
@@ -127,11 +140,14 @@ extern "C" {
 #define PTMIPS
 #endif
 
-
+/* Definition of common 64-bit preprocessor symbols */
+#if defined(PTALPHA) || defined(PTIRIX6)
+#define PT64BIT
+#endif
 
 /***************************************************************************/
 /* Used to keep function paramters straight.  Note that SunOS4.1.3 cc
- *  is non ANSI, so we can't use function paramaters everywhere.
+ *  is non ANSI, so we can't use function parameters everywhere.
  */
 #ifndef ARGS
 #if defined(__STDC__) || defined(__cplusplus)
