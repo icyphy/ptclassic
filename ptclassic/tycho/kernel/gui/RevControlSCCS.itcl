@@ -107,6 +107,14 @@ body ::tycho::RevControlSCCS::constructor {args} {
     eval itk_initialize $args 
 
     configure -text "SCCS revision control for: $file"
+
+    # FIXME: This is a complete hack: force the window to resize
+    # itself so that if the -text option goes over more than
+    # one line, the contents of the window are correctly
+    # displayed. This is completely bogus and needs to be
+    # fixed properly. Note: this only happens on some window
+    # managers, such as ctwm.
+    after idle "$itk_component(childsite) configure -borderwidth 1"
 }
 
 #####################################################################
