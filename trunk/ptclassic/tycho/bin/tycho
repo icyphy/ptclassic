@@ -81,5 +81,5 @@ set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path )
 if (! -x $prog) then
     echo "Program does not exist: $prog"
 else
-    $prog &
+    $prog
 endif
