@@ -55,7 +55,7 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 		set rclass ::tycho::ResourceHTTP
 	    }
 	    ftp {
-		error "Ftp access not supported yet"
+                set rclass ::tycho::ResourceFTP
 	    }
 	    file {
 		set rclass ::tycho::ResourceFile
