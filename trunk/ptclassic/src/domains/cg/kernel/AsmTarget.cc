@@ -168,11 +168,11 @@ AsmTarget::allocReq(AsmStar& star) {
 // Routines to modify the galaxy to permit use of the loop scheduler.
 
 void AsmTarget :: mainLoopCode() {
-	switchCodeStream(galaxy(),&mainLoop);
+	defaultStream = &mainLoop;
         if (inWormHole()) allWormInputCode();
         compileRun((SDFScheduler*) scheduler());
         if (inWormHole()) allWormOutputCode();
-	switchCodeStream(galaxy(),&trailer);
+	defaultStream = &trailer;
 }
 
 inline int hasCirc(PortHole* p) {
