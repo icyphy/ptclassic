@@ -72,7 +72,7 @@ public:
 	int isA(const char*) const;
 
 	// generate code
-	StringList genCode(Target&, int);
+	void genCode(Target&, int);
 };
 
 #endif

@@ -71,7 +71,7 @@ public:
 	StringList displaySchedule() { return displaySchedule(0);}
 
 	// Generate code using the Target to produce the right language.
-	StringList genCode(Target&, int depth);
+	void genCode(Target&, int depth);
 };
 
 #endif

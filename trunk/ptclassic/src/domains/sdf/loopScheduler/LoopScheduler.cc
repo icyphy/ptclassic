@@ -107,13 +107,11 @@ StringList LoopScheduler::displaySchedule() {
 	return sch;
 }
 
-StringList LoopScheduler::compileRun() {
-	StringList code;
+void LoopScheduler::compileRun() {
 	Target& target = getTarget();
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*) next++) != 0) {
-		code += ((SDFCluster*) c)->genCode(target,0);
+		c->genCode(target,0);
 	}
-	return code;
 }
