@@ -26,6 +26,7 @@ static char SccsId[]="$Id$";
  */
 /*LINTLIBRARY*/
 #include "port.h"
+#ifdef LACK_SYS5
 /*
  * strstr - find first occurrence of wanted in s
  */
@@ -51,3 +52,4 @@ CONST char *wanted;
 	return NULL;
     return scan;
 }
+#endif
