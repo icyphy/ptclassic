@@ -51,15 +51,14 @@ for viewing the values of the cross correlations.
 
 	go {
 		float Cmax = 0, Cofn, top = 0, bottom = 0;
-		int n, m, nmax;
+		int n, m, nmax = 0;
 
 		for ( n = 0; n < N; n++ ) {
 			top = bottom = 0;
 			for ( m = 0; m < tempSize; m++ ) {
-				top += float( templ%( tempSize - 1 - m ) ) *
-						float( window%( winSize - 1 - ( n + m ) ) );
-				bottom += float ( window%( winSize - 1 - ( n + m ) ) ) *
-						float ( window%( winSize - 1 - ( n + m ) ) );
+				float wval = window%( winSize - 1 - ( n + m ));
+				top += float(templ%(tempSize - 1 - m)) * wval;
+				bottom += wval * wval;
 			}
 			Cofn = top / bottom;
 			values%( N - 1 - n ) << Cofn;
