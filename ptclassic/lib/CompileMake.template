@@ -16,10 +16,10 @@
 # Root of source tree
 ROOT = $(PTOLEMY)
 # Path (absolute or relative) to the object directory root
-OBJDIR=$(ROOT)/obj.$(ARCH)
+OBJDIR=$(ROOT)/obj.$(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 SDF=$(OBJDIR)/domains/sdf/stars
