@@ -165,7 +165,11 @@ kd_box box;
 /* Generates a random box in `box' */
 {
     static int init = 0;
+#ifdef SYSV
+    long lrand48();
+#else
     long random();
+#endif
 
     if (!init) {
 	struct timeval tp;
@@ -173,12 +177,23 @@ kd_box box;
 
 	/* Randomize generator */
 	(void) gettimeofday(&tp, &whocares);
+#ifdef SYSV
+	(void) srand48((int) (tp.tv_sec + tp.tv_usec));	
+#else
 	(void) srandom((int) (tp.tv_sec + tp.tv_usec));
+#endif
 	init = 1;
     }
 
+#ifdef SYSV
+    box[KD_LEFT] = (lrand48() % RANGE_SPAN) + MIN_RANGE;
+    box[KD_BOTTOM] = (lrand48() % RANGE_SPAN) + MIN_RANGE;
+    box[KD_RIGHT] = box[KD_LEFT] + (lrand48() % BOX_RANGE);
+    box[KD_TOP] = box[KD_BOTTOM] + (lrand48() % BOX_RANGE);
+#else
     box[KD_LEFT] = (random() % RANGE_SPAN) + MIN_RANGE;
     box[KD_BOTTOM] = (random() % RANGE_SPAN) + MIN_RANGE;
     box[KD_RIGHT] = box[KD_LEFT] + (random() % BOX_RANGE);
     box[KD_TOP] = box[KD_BOTTOM] + (random() % BOX_RANGE);
+#endif
 }
