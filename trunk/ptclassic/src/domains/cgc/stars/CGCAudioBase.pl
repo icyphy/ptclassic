@@ -2,7 +2,7 @@ defstar
 {
     name { PCM }
     domain { CGC }
-    desc { Base class for reading and writing PCM data. }
+    desc { Base class for reading and writing mu-law encoded PCM data. }
     version { $Id$ }
     author { T. M. Parks }
 
@@ -11,21 +11,48 @@ defstar
 	name { fileName }
 	type { string }
 	default { "/dev/audio" }
+	desc { File for PCM data.  If blank, use standard io. }
     }
 
     protected
     {
+	static SymbolList sharedSymbols;
+	const char *share;
 	int standardIO:1;
     }
 
-    codeblock (globalDeclarations)
+    constructor
     {
-	int pcmOffset[8];
+	addSharedSymbolList(&sharedSymbols, "PCM");
+	share = lookupSharedSymbol("PCM","mulaw");
     }
 
-    codeblock (globalInit)
+    code
     {
+	SymbolList CGCPCM::sharedSymbols;
+    }
 
+    setup
+    {
+	standardIO = strcmp(fileName,"") == 0;
+    }
+
+    codeblock (sharedDeclarations)
+    {
+	int $sharedSymbol(PCM,offset)[8];
+
+	/* Convert from linear to mu-law */
+	int $sharedSymbol(PCM,mulaw)(x)
+	double x;
+	{
+	    double m;
+	    m = (pow(256.0,fabs(x)) - 1.0) / 255.0;
+	    return 4080.0 * m;
+	}
+    }
+
+    codeblock (sharedInit)
+    {
 	/* Initialize PCM offset table. */
 	{
 	    int i;
@@ -34,7 +61,7 @@ defstar
 
 	    for(i = 0; i < 8; i++, x += dx)
 	    {
-		pcmOffset[i] = 4080.0 * (pow(256.0,fabs(x)) - 1.0) / 255.0;
+		$sharedSymbol(PCM,offset)[i] = $sharedSymbol(PCM,mulaw)(x);
 	    }
 	}
     }
@@ -57,10 +84,10 @@ defstar
 
     initCode
     {
-	addInclude("<mp.h>");
+	addInclude("<math.h>");
 	addInclude("<stdio.h>");
-	addGlobal(globalDeclarations);
-	addGlobal(declarations);
-	addCode(globalInit);
+	addDeclaration(declarations);
+	if (addGlobal(sharedDeclarations, share))
+	    addCode(sharedInit);
     }
 }
