@@ -21,10 +21,10 @@ $Id$
 #include <sys/types.h>
 #include <sys/stat.h>
 #include "Linker.h"
+#include "Error.h"
 #include "Domain.h"
 #include "miscFuncs.h"
 #include "StringList.h"
-#include "Interpreter.h"
 #include <ctype.h>
 #include "streamCompat.h"
 
@@ -195,11 +195,10 @@ linkObject (const char* ofile) {
 }
 
 // tables for suffixes and preprocessors
-const int N_PREPROCS = 3;
-const int INTERP_FILE = 3;
+const int N_PREPROCS = 2;
 
-static const char *preprocSuffix[] = { "", "pl", "chdl", "pt" };
-static const char *preprocProg[] = { "", "ptlang", "pepp", 0 };
+static const char *preprocSuffix[] = { "", "pl", "chdl" };
+static const char *preprocProg[] = { "", "ptlang", "pepp" };
 
 // Here is the function that loads in a star!
 // name = username of the star
@@ -222,14 +221,6 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 	if (fd < 0) return noPermission ("Loader: can't open ", plName);
 	close (fd);
 	sprintf (oName, "%s/%s%s.o", objDir, idomain, name);
-// Special case hack: Interpreter file.  We simply load the file into
-// an Interpreter object and run the command router.  We always return
-// success.
-	if (preproc == INTERP_FILE) {
-		Interpreter intObj(sourceFile);
-		intObj.commandRouter();
-		return TRUE;
-	}
 // if there is a makefile, use make.
 	char makeFile[512];
 	sprintf (makeFile, "%s/%s", objDir, "Makefile");
