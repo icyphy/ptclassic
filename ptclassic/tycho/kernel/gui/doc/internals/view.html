@@ -1,14 +1,60 @@
 <!-- $Id$ -->
 <html>
 <head>
-<Title>View Class</title>
+<Title>The View and Displayer Classes</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="#View class">View Class</a></h1>
+<h1><a name="#View class">The View and Displayer Classes</a></h1>
 <p>
-(In progress)
+Tycho's View and Displayer classes act in concert to present a
+window to the user containing graphics and text editors, and other
+kinds of display. A Displayer is a top-level window; a View is a
+widget that can be placed into a Displayer. Displayer is used as-is;
+View is an abstract class that is subclassed in order to provide
+appropriate functionality. Displayers can contain
+more than one View; some Views can themselves contain other Views.
+
+<p><b>Note:</b> Although the Displayer-View architecture is
+designed to support multiple view of data within the one
+top-level window, this functionality is not yet used anywhere
+within Tycho. The rest of this description will onyl place a single
+view into each displayer.
+
+<p>Creating a new Displayer is the same as creating any other
+widget:
+<tcl><pre>
+::tycho::Displayer .d
+.d centerOnScreen
+</pre></tcl>
+
+You will see an empty displayer containing a
+<a href="decorators.html#StatusBar class">status bar</a>.
+A view is created as a child of the displayer; for example,
+we can create a text editor and it will place itself into its
+displayer:
+<tcl><pre>
+::tycho::Edit .d.e -name aView
+set bogus ""
+</pre></tcl>
+
+The Edit widget has placed itself into the Displayer and
+configured its menubar. To better illustrate this, we'll
+just use an empty View. First delete the Edit view:
+<tcl><pre>
+.d destroyView aView
+</pre></tcl>
+
+
+<p>Finally, deleting a Displayer and the Views contained
+in it is the same as deleting any other widget:
+<tcl><pre>
+delete object .d
+</pre></tcl>
+
+
 <p>
 <a href="decorators.html">Decorator classes</a><br>
+<a href="../codeDoc/Displayer.html">Displayer class documentation</a><br>
 <a href="../codeDoc/View.html">View class documentation</a><br>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
 <p>
