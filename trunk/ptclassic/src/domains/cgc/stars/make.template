@@ -64,7 +64,6 @@ PL_SRCS= \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
  CGCBusFork.pl \
- CGCCase.pl \
  CGCChopVarOffset.pl \
  CGCCollect.pl  \
  CGCCommutator.pl \
@@ -83,9 +82,7 @@ PL_SRCS= \
  CGCDeScrambler.pl \
  CGCDistributor.pl \
  CGCDivByInt.pl \
- CGCDownCounter.pl \
  CGCDownSample.pl \
- CGCEndCase.pl \
  CGCExp.pl \
  CGCExpr.pl \
  CGCFixToCx.pl \
@@ -107,7 +104,6 @@ PL_SRCS= \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
  CGCIntToBits.pl \
- CGCLastOfN.pl \
  CGCLimit.pl \
  CGCLinQuantIdx.pl \
  CGCLog.pl \
@@ -137,14 +133,12 @@ PL_SRCS= \
  CGCRectToCx.pl \
  CGCRectToPolar.pl \
  CGCRepeat.pl \
- CGCRepeater.pl \
  CGCReverse.pl \
  CGCTrainer.pl \
  CGCScrambler.pl \
  CGCSGIAudioIn.pl \
  CGCSGIAudioOut.pl \
  CGCSelect.pl \
- CGCSelf.pl \
  CGCSgn.pl \
  CGCSin.pl \
  CGCSleep.pl \
@@ -156,7 +150,6 @@ PL_SRCS= \
  CGCSubCx.pl \
  CGCSubFix.pl \
  CGCSubInt.pl \
- CGCSumOfN.pl \
  CGCSwitch.pl \
  CGCTable.pl \
  CGCTableCx.pl \
