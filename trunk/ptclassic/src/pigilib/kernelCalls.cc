@@ -422,6 +422,10 @@ KcGetTerms(char* name, TermList* terms)
 	cname = parseClass (name, mphname, npspec);
 
 	if (!cname || (block = findClass(name)) == 0) {
+		char buf[80];
+		sprintf (buf, "Invalid Galaxy Name '%s' (interpreted as '%s')",
+			name, cname);
+		ErrAdd (buf);
 		return FALSE;
 	}
 	const char *names[MAX_NUM_TERMS];
