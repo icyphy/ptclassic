@@ -19,6 +19,8 @@ VPATH = $(ROOT)/src/domains/ddf/kernel
 KERNDIR=$(ROOT)/src/kernel
 # SDF support directory
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
+# Dynamic constructs support directory
+DYCONDIR=$(ROOT)/src/domains/ddf/constructs
 # Where to install the libraries
 DESTDIR=$(ROOT)/lib.$(ARCH)
 
@@ -30,7 +32,7 @@ GNUINCLUDE = $(GNULIB)/g++-include
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -c $<
+	$(GNU) $(GPPFLAGS) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR) -c $<
 
 # Library name
 LIB=libddf.a
@@ -38,17 +40,14 @@ LIB=libddf.a
 # Library sources
 SRCS= \
  DDFConnect.cc DDFScheduler.cc DDFStar.cc DDFWormhole.cc DDFWormConnect.cc \
- DDFDomain.cc DDFAutoWorm.cc \
- CaseScheduler.cc ForScheduler.cc DoWhileScheduler.cc RecurScheduler.cc
+ DDFDomain.cc DDFAutoWorm.cc 
 
 # Header files
-HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFUniverse.h DDFWormhole.h DDFWormConnect.h \
- CaseScheduler.h ForScheduler.h DoWhileScheduler.h RecurScheduler.h
+HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFUniverse.h DDFWormhole.h DDFWormConnect.h 
 
 # Library objects
 OBJS= DDFConnect.o DDFScheduler.o DDFStar.o DDFWormhole.o DDFWormConnect.o \
- DDFDomain.o  DDFAutoWorm.o \
- CaseScheduler.o ForScheduler.o DoWhileScheduler.o RecurScheduler.o
+ DDFDomain.o  DDFAutoWorm.o 
 
 all:	makefile $(LIB)
 
@@ -74,7 +73,7 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(SDFDIR) -I$(KERNDIR) $(SRCS) |\
+		g++ -MM -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR) $(SRCS) |\
 			 cat make.template - > makefile.n
 		mv -f makefile.n makefile
 
