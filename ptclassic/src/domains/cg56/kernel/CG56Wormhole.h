@@ -86,8 +86,8 @@ public:
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
 
-	// return myself
-	/*virtual*/ CGWormBase* myWormhole();
+	// return myself as a wormhole
+	/*virtual*/ Wormhole* asWormhole();
 
 };
 
