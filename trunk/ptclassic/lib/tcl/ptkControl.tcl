@@ -341,6 +341,7 @@ proc ptkGrAnimation { on} {
 proc ptkHighlightStar { star } {
     ptkClearHighlights
     ptkHighlight $star
+    update
 }
 
 #######################################################################
