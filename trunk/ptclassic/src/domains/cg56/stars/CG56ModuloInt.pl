@@ -36,11 +36,11 @@ limitation of liability, and disclaimer of warranty provisions.
 Invisible parameter of the mask to implement integer modulo arithmetic
 by powers of two.
 		}
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
 	}
 	codeblock(powerOfTwo) {
 	move	$ref(input),a
-	move	#$val(powerOfTwoMask),x0
+	move	$ref(powerOfTwoMask),x0
 	and	x0,a
 	move	a,$ref(output)
 	}
