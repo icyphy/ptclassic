@@ -168,8 +168,7 @@ The values of the input ports will be passed as arguments to this function.
 						     numInputs);
 		  matlabInterface.FreeMatlabMatrices(matlabOutputMatrices,
 						     numOutputs);
-		  Error::abortRun( *this,
-				   "Matlab could not evaluate the command.");
+		  Error::abortRun( *this, matlabInterface.GetErrorString() );
 		}
 		else {
 		  // convert Matlab matrices to Ptolemy matrices
@@ -291,10 +290,15 @@ The values of the input ports will be passed as arguments to this function.
 		  StringList matrixId = matlabOutputNames[j];
 		  matrixId << " on output port " << j;
 		  int errflag = FALSE;
+		  int warnflag = FALSE;
 		  int badport = matlabInterface.MatlabToPtolemy(
-		  			(*oportp)%0, portType,
-		  			matlabMatrix, matrixId, &errflag);
+		  			(*oportp)%0, portType, matlabMatrix,
+					&warnflag, &errflag);
 		  incompatibleOutportPort = incompatibleOutportPort || badport;
+
+		  if ( warnflag ) {
+		    Error::warn(*this, matlabInterface.GetWarningString() );
+		  }
 
 		  if ( errflag ) {
 		    if ( ! matlabFatalError ) {
