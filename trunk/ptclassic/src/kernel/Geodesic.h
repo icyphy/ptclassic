@@ -64,14 +64,15 @@ public:
 	// set the source and destination portholes -- virtual
 	// these functions return a pointer to the "real porthole"
 	// on success, NULL on failure.
-	virtual PortHole* setSourcePort (GenericPort &, int delay = 0);
+	virtual PortHole* setSourcePort (GenericPort &, int numDelays = 0,
+					 const char* initDelayValues = 0);
 	virtual PortHole* setDestPort (GenericPort &);
 
 	// disconnect from porthole
 	virtual int disconnect (PortHole &);
 
 	// change the number of delays
-	virtual void setDelay (int);
+	virtual void setDelay (int numDelays, const char* initDelayValues = 0);
 
 	// return true if the Geodesic is persistent
 	// (may exist in a disconnected state)
@@ -93,8 +94,6 @@ public:
 	// initialize() for Geodesic initializes the number of Particles
 	// to that given by the numInitialParticles field, and
 	// also calls initialize() for each of those Particles
-	// TO BE DONE:  There should be a way to specify the value
-	// of these initial particles.
 	virtual void initialize();
 
 	// Put a Particle into the Geodesic.  Note that this is not
@@ -156,6 +155,10 @@ public:
 	virtual void delLock();
 
 	int isLockEnabled() const { return gate != 0;}
+
+        // Return the initValues string
+        const char * initDelayValues();
+
 protected:
 	// connect up the neighbors.
 	void portHoleConnect();
@@ -181,10 +184,15 @@ protected:
 
 	// number of particles
 	int sz;
+
 private:
         // A connection may require some initial particles.
 	// This specifies the number.
 	int numInitialParticles;
+
+        // Pointer to the string that specifies the values of the initial
+        // particles.  The string is kept in InterpGalaxy's initList.
+        const char *initValues;
 
 };
 #endif

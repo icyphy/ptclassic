@@ -44,6 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Fix.h"
 #include "isa.h"
 
+class Block; // added 3/2/94 for initParticleStack
+
 extern const DataType MESSAGE;
 
 class Message {
@@ -196,10 +198,21 @@ public:
 	void accessMessage (Envelope& p) const;
 
 	// fill in remaining functions for Particle classes
-
 	MessageParticle(const Envelope& p);
 	MessageParticle();
 	Particle& initialize();
+
+	// The next two methods return an error.  Should be redefined by
+	// derived classes.
+ 
+        // Initialize a given ParticleStack with the values in the delay
+        // string, obtaining other Particles from the given Plasma.  
+        // Returns the number of total Particles initialized, including
+        // this one.  This should be redefined by the specific message class.
+	// 3/2/94 added
+        /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
+                                          Plasma* myPlasma, 
+					  const char* delay = 0);
 
 	// load with data -- these cause errors except for a Envelope argument.
 

@@ -51,10 +51,11 @@ Geodesics can be created named or unnamed.
 #include "Plasma.h"
 #include "StringList.h"
 #include "PtGate.h"
+#include "IntState.h"
 
 // constructor
 Geodesic::Geodesic() : pstack(0), originatingPort(0), destinationPort(0),
-numInitialParticles(0), sz(0), maxBufLength(0), gate(0)
+numInitialParticles(0), sz(0), maxBufLength(0), gate(0), initValues(0)
 { }
 
 StringList Geodesic :: print (int) const {
@@ -94,16 +95,21 @@ void Geodesic :: portHoleConnect () {
 }
 
 // this function changes the sourceport.
-PortHole* Geodesic :: setSourcePort (GenericPort& sp, int delay) {
+// 3/2/94 changed to add initDelayValues
+PortHole* Geodesic :: setSourcePort (GenericPort& sp, int numDelays,
+				     const char* initDelayValues) {
 	originatingPort = &sp.newConnection();
 	portHoleConnect();
-	numInitialParticles = delay;
+	numInitialParticles = numDelays;
+	initValues = initDelayVales;
 	return originatingPort;
 }
 
 // this function adjusts the delay.
-void Geodesic :: setDelay (int delay) {
-	numInitialParticles = delay;
+// 3/2/94 changed to add initDelayValues
+void Geodesic :: setDelay (int numDelays, const char* initDelayValues) {
+	numInitialParticles = numDelays;
+	initValues = initDelayValues;
 }
 
 PortHole* Geodesic :: setDestPort (GenericPort& dp) {
@@ -125,16 +131,44 @@ void Geodesic :: initialize()
 	// and put them in Plasma
 	pstack.freeup();
 
-	// Initialize the buffer to the number of Particles
-	// specified in the connection; note that these Particles
-	// are initialized by Plasma
-	for(int i=numInitialParticles; i>0; i--) {
-		Particle* p = originatingPort->myPlasma->get();
-		pstack.putTail(p);
+	// Initialize the buffer if initDelays has values.
+	// Note: need to check for non-empty strings, empty strings
+	// are returned from the oct database.
+        if(initValues && *initValues != 0 && *initValues != '*') { 
+          // get one particle of the right type to generate the rest
+          Particle* p = originatingPort->myPlasma->get();
+    
+          // call particle specific function to generate the other initial
+          // particles and automatically put them on the pstack.
+          numInitialParticles = p->initParticleStack(parent(),pstack,
+                                                     originatingPort->myPlasma,
+                                                     initValues);
+
+          // finally, put this particle at the head of the pstack
+          if(numInitialParticles > 0)
+            pstack.put(p);
+          else originatingPort->myPlasma->put(p);
+
+          sz = maxBufLength = numInitialParticles;
+        }
+        else {
+	  if(initValues && *initValues == '*') {
+	    // '*' is a marker put in front of old style delays
+	    // evaluate the string as an IntState
+	    IntState tstate;
+	    tstate.setState("initDelays",parent(),initValues+1);
+	    tstate.initialize();
+	    numInitialParticles = int(tstate);
+	  }
+          // old code: initialize the buffer to the number of Particles
+          // specified in the connection; note that these Particles
+          // are initialized by Plasma
+          for(int i=numInitialParticles; i>0; i--) {
+            Particle* p = originatingPort->myPlasma->get();
+            pstack.putTail(p);
+          }
+          sz = maxBufLength = numInitialParticles;
 	}
-	sz = maxBufLength = numInitialParticles;
-	// TO DO: Allow Particles in the Geodesic to be
-	// initialized to specific values
 }
 
 // Functions for determining maximum buffer size during a simulated run.
@@ -210,3 +244,8 @@ Geodesic :: ~Geodesic () {
 
 // isa
 ISA_FUNC(Geodesic,NamedObj);
+
+// Return the initial delay values string.
+const char* Geodesic::initDelayValues() {
+  return initValues;
+}

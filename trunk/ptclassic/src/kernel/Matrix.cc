@@ -2037,6 +2037,7 @@ DataType ComplexMatrixEnvParticle::type() const { return COMPLEX_MATRIX_ENV;}
 // the number of toal particles initialized, including this one.
 // Assumes that the delay string is in the following format:
 // "nrows ncols (A[0][0].real,A[0][0].imag) (A[0][1].real,A[0][1].imag), ... A[0][ncols-1] A[1][0] ... (A[nrows][ncols].real,A[nrows][ncols].imag)"
+// 3/2/94 added
 int ComplexMatrixEnvParticle::initParticleStack(Block* parent,
                                                 ParticleStack& pstack,
                                                 Plasma* myPlasma,
@@ -2162,6 +2163,7 @@ DataType FixMatrixEnvParticle::type() const { return FIX_MATRIX_ENV;}
 // the number of toal particles initialized, including this one.
 // Assumes that the delay string is in the following format:
 // "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+// 3/2/94 added
 int FixMatrixEnvParticle::initParticleStack(Block* parent,
                                             ParticleStack& pstack,
                                             Plasma* myPlasma, 
@@ -2287,6 +2289,7 @@ DataType FloatMatrixEnvParticle::type() const { return FLOAT_MATRIX_ENV;}
 // the number of toal particles initialized, including this one.
 // Assumes that the delay string is in the following format:
 // "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+// 3/2/94 added
 int FloatMatrixEnvParticle::initParticleStack(Block* parent,
                                               ParticleStack& pstack,
                                               Plasma* myPlasma, 
@@ -2413,6 +2416,7 @@ DataType IntMatrixEnvParticle::type() const { return INT_MATRIX_ENV;}
 // the number of toal particles initialized, including this one.
 // Assumes that the delay string is in the following format:
 // "nrows ncols A[0][0] A[0][1] ... A[0][ncols-1] A[1][0] ... A[nrows][ncols]"
+// 3/2/94 added
 int IntMatrixEnvParticle::initParticleStack(Block* parent,
                                             ParticleStack& pstack,
                                             Plasma* myPlasma, 

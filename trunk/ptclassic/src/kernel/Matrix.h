@@ -558,6 +558,7 @@ class ComplexMatrixEnvParticle : public MatrixEnvParticle {
   // Initialize a given ParticleStack with the values in the delay string,
   // obtaining other Particles from the given Plasma.  Returns the
   // number of total Particles initialized, including this one.
+  // 3/2/94 added
   /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
                                     Plasma* myPlasma, const char* delay = 0);
 
@@ -597,6 +598,7 @@ class FixMatrixEnvParticle : public MatrixEnvParticle {
   // Initialize a given ParticleStack with the values in the delay string,
   // obtaining other Particles from the given Pplasma.  Returns then
   // number of total Particles initialized, including this one.
+  // 3/2/94 added
   /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
                                     Plasma* myPlasma, const char* delay = 0);
 
@@ -637,10 +639,10 @@ class FloatMatrixEnvParticle : public MatrixEnvParticle {
   // Initialize a given ParticleStack with the values in the delay string,
   // obtaining other Particles from the given Plasma.  Returns the
   // number of total Particles initialized, including this one.
+  // 3/2/94 added
   /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
                                     Plasma* myPlasma, const char* delay = 0);
                                     
-
   // load with data
   // These assignments return an error
   virtual void operator << (int i);
@@ -677,9 +679,9 @@ class IntMatrixEnvParticle : public MatrixEnvParticle {
   // Initialize a given ParticleStack with the values in the delay string,
   // obtaining other Particles from the given Plasma.  Returns the
   // number of total Particles initialized, including this one.
+  // 3/2/94 added
   /*virtual*/ int initParticleStack(Block* parent, ParticleStack& pstack,
                                     Plasma* myPlasma, const char* delay = 0);
-                                    
 
   // load with data
   // These assignments return an error

@@ -156,10 +156,10 @@ protected:
 	// Add blocks to the list
 	void addBlock(Block& b) {blocks.put(b);}
 
-	// Connect sub-blocks with a delay (default to zero delay)
+	// Connect sub-blocks with an initial delay values string
 	void connect(GenericPort& source, GenericPort& destination,
-			  int numberDelays = 0) {
-		source.connect(destination,numberDelays);
+		     int numberDelays = 0, const char* initDelayValues = 0) {
+		source.connect(destination, numberDelays, initDelayValues);
 	}
 
 	// Connect a Galaxy PortHole to a PortHole of a sub-block

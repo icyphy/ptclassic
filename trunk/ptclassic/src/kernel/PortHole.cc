@@ -168,8 +168,9 @@ GenericPort :: ~GenericPort () {
 
 // The connect method
 // This method is virtual and may be overridden
-
-void GenericPort :: connect(GenericPort& destination,int numberDelays)
+// 3/2/94 changed to add initDelayValues
+void GenericPort :: connect(GenericPort& destination, int numberDelays,
+			    const char* initDelayValues)
 {
 	// Resolve any aliases and MultiPortHole stuff:
 	// newConnection is a virtual function that does the right
@@ -177,15 +178,16 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	// create Geodesic, wire it up.
 	PortHole* realSource = &newConnection();
 	Geodesic* geo = realSource->allocateGeodesic();
-	geo->setSourcePort(*realSource,numberDelays);
+	geo->setSourcePort(*realSource, numberDelays, initDelayValues);
 	geo->setDestPort(destination);
 	return;
 }
 
 // set delay by adjusting geodesic.
-void PortHole :: setDelay (int delays) {
+// 3/2/94 changed to add initDelayValues
+void PortHole :: setDelay (int numberDelays, const char* initDelayValues) {
 	if (myGeodesic)
-		myGeodesic->setDelay (delays);
+		myGeodesic->setDelay(numberDelays, initDelayValues);
 }
 
 // This is not a GenericPort method because the concept of disconnecting
@@ -263,6 +265,11 @@ int PortHole :: numInitDelays() const {
 	return myGeodesic->numInit();
 }
 
+// 3/2/94 added to support initDelayValues
+const char* PortHole::initDelayValues() const {
+	return myGeodesic->initDelayValues();
+}
+
 void PortHole :: allocateBuffer()
 {
 	// If there is a buffer, release its memory
@@ -305,6 +312,7 @@ GenericPort :: print (int) const {
 	return out << "\n";
 }
 
+// 3/2/94 changed to add initDelayValues
 StringList
 PortHole :: print(int) const {
 	StringList out = GenericPort::print();
@@ -315,6 +323,9 @@ PortHole :: print(int) const {
 			if (myGeodesic->numInit() > 0)
 				out << "(delay = "
 				    << myGeodesic->numInit() << ")";
+			if (myGeodesic->initDelayValues())
+				out << "(initValues = "
+				    << myGeodesic->initDelayValues() << ")";
 			out += "\n";
 		}
 		else
@@ -361,7 +372,9 @@ int MultiPortHole :: isItMulti() const { return TRUE;}
 void MultiPortHole :: initialize() {}
 
 // MPH constructor
-MultiPortHole :: MultiPortHole() : peerMPH(0), busDelay(0) {}
+// 3/2/94 changed to add initDelayValues
+MultiPortHole :: MultiPortHole() : peerMPH(0), numDelaysBus(0),
+                                   initDelayValuesBus(0)  {}
 
 // MPH destructor
 
@@ -659,20 +672,23 @@ PortHole& MultiPortHole :: newConnection() {
 // Create a bus connection between two multiportholes.
 // any pre-existing connection to either is broken.
 // if bus already exists we can efficiently do nothing or widen it.
-
-void MultiPortHole :: busConnect (MultiPortHole& peer, int width, int del) {
-	if (peerMPH == &peer && del == busDelay && width >= numberPorts()) {
+// 3/2/94 changed to add initDelayValues
+void MultiPortHole::busConnect (MultiPortHole& peer, int width, int numDelays,
+				const char* initDelayValues) {
+	if (peerMPH == &peer && numDelays == numDelaysBus &&
+	    initDelayValues == initDelayValuesBus && width >= numberPorts()) {
 		// fast way: do nothing or widen existing bus
 		for (int i = numberPorts(); i < width; i++)
-			connect (peer, del);
+			connect (peer, numDelays, initDelayValues);
 		return;
 	}
 	// slow way: disconnect, build the bus.
 	delPorts();
 	peer.delPorts();
 	for (int i = 0; i < width; i++)
-		connect (peer, del);
-	busDelay = del;
+		connect (peer, numDelays, initDelayValues);
+	numDelaysBus = numDelays;
+	initDelayValuesBus = initDelayValues;
 }
 
 // allocate a new Geodesic.  Set its name and parent according to the

@@ -52,7 +52,8 @@ public:
 	AutoFork(Geodesic& g);
 	~AutoFork();
 	// attach source or destination to the autofork
-	PortHole* setSource(GenericPort&, int delay = 0);
+	PortHole* setSource(GenericPort&, int numDelays = 0,
+			    const char* initDelayValues = 0);
 	PortHole* setDest(GenericPort&, int alwaysFork = 0);
 private:
 	// associated geodesic
