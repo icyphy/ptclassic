@@ -64,8 +64,6 @@ ITCL_SRCS = \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	CompileJava.itcl \
-	ControlPanel.itcl \
-	ControlSubpanel.itcl \
 	DataModel.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
@@ -116,7 +114,6 @@ ITCL_SRCS = \
 	RevControl.itcl \
 	RevControlSCCS.itcl \
 	RevControlRCS.itcl \
-	Scheduler.itcl \
 	Shortcuts.itcl \
 	Stack.itcl \
 	StatusBar.itcl \
