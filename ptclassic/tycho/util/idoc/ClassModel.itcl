@@ -184,7 +184,7 @@
 # A variable of the class. Variables have the following attributes:
 #   <dl>
 #   <dt><b>-default</b>
-#   <dd> The initial/default value of the variable. The defualt 
+#   <dd> The initial/default value of the variable. The default 
 #        is null. This attribute does not apply to certain languages and
 #        should then be ignored.
 #   <dt><b>-description</b>

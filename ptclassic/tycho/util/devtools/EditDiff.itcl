@@ -128,7 +128,7 @@ class ::tycho::EditDiff {
     public variable linecolor2 {{} {}}
 
     # Keep track where we can insert in the text. This is added for
-    # concurency with seeFragment during insertion.
+    # concurrency with seeFragment during insertion.
     public variable textLineCount 1
     
     ####################################################################
