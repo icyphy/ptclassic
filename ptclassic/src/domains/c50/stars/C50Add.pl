@@ -22,13 +22,6 @@ The inputs are added and the result is written on the output.
 		name {output}
 		type {FIX}
 	}
-	state  {
-                name { inputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
 	codeblock (std) {
 	mar	*,AR5
 	lar	AR5,#$addr(input#2)	; address 2nd input -> AR5
@@ -36,8 +29,8 @@ The inputs are added and the result is written on the output.
 	lar	AR7,#$addr(output)
 	lacc	*,15,AR5		; 2nd input -> ACC
 	}
-	codeblock (loop) {
-	lar	AR5,#$addr(input#inputNum)
+	codeblock (loop, "int i") {
+	lar	AR5,#$addr(input#@i)
 	add	*,15
 	}
 	codeblock (nosat) {
@@ -53,14 +46,16 @@ The inputs are added and the result is written on the output.
 	go {
 		if (input.numberPorts() == 1) {
 			addCode(one);
-			return;
 		}
-		addCode(std);
-		for (int i = 3; i <= input.numberPorts(); i++) {
-			inputNum=i;
-			addCode(loop);
+		else {
+			addCode(std);
+			for (int i = 3; i <= input.numberPorts(); i++) {
+				addCode(loop(i));
+			}
+			// FIXME: No support for saturation arithmetic
+			// See the CG56 Add star
+	 		addCode(nosat);
 		}
-	 	addCode(nosat);
 	}
 	exectime {
 		if (input.numberPorts() == 1) return 4;
