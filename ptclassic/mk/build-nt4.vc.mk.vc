@@ -4,7 +4,7 @@
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1998-%Q% The Regents of the University of California.
+# Copyright (c) 1998-$Date$ The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -48,12 +48,11 @@ $(LIBDIR):
 # Tcl script that converts Unix makefiles to MSVC++ nmake files
 MAKEVCGEN=$(PTOLEMY)\bin\makevcgen
 
-# Pass in PTLIB because usually we build a static libptolemy.a
 KERNEL_LIB=$(PTOLEMY)\src\kernel\libptolemy.lib
 $(LIBDIR)\libptolemy.lib: $(KERNEL_LIB)
 $(KERNEL_LIB): $(PTOLEMY)\src\kernel\makefile.vc
 	cd $(PTOLEMY)\src\kernel
-	nmake -f makefile.vc PTLIB=libptolemy.lib install
+	nmake -f makefile.vc install PTLIB=libptolemy.lib
 
 $(PTOLEMY)\src\kernel\makefile.vc: $(PTOLEMY)\src\kernel\makefile
 	\bin\sh -c PTOLEMY=/users/ptolemy; export PTOLEMY $(MAKEVCGEN) $@ $<
@@ -81,16 +80,23 @@ $(DE_STAR_LIB): $(KERNEL_LIB) $(DE_LIB)
 	nmake -f makefile.vc install
 
 # SDF does not work yet, we are using DE to test because it is simpler
-#SDF_LIB=$(PTOLEMY)\src\domains\sdf\kernel\libsdf.lib
-#SDF_DEP=$(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB) 
-#$(SDF_LIB): $(SDF_DEP)
-#	cd $(PTOLEMY)\src\domains\sdf\kernel
-#	nmake -f makefile.vc install
-#SDF_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfstars.lib
-#SDF_STAR_DEP=$(SDF_DEP) $(SDF_LIB)
-#$(SDF_STAR_LIB): $(SDF_STAR_DEP)
-#	cd $(PTOLEMY)\src\domains\sdf\stars
-#	nmake -f makefile.vc
+SDF_LIB=$(PTOLEMY)\src\domains\sdf\kernel\libsdf.lib
+SDF_DEP=$(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB) 
+$(SDF_LIB): $(SDF_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\kernel
+	nmake -f makefile.vc install
+
+SDF_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfstars.lib
+SDF_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
+$(SDF_STAR_LIB): $(SDF_STAR_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\stars
+	nmake -f makefile.vc
+
+SDF_LS_LIB=$(PTOLEMY)\src\domains\sdf\loopScheduler\libLS.lib
+SDF_LS_DEP=$(SDF_DEP) $(SDF_LIB)
+$(SDF_LS_LIB): $(SDF_LS_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\loopScheduler
+	nmake -f makefile.vc
 
 ptcl:$(PTCL_LIB)
 PTCL_LIB=$(PTOLEMY)\src\ptcl\libptcl.lib
@@ -100,7 +106,8 @@ $(PTCL_LIB): $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LI
 	nmake -f makefile.vc install
 
 
-$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
+ptcl.p:$(PTCL_PTINY)
+$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB) $(SDF_STAR_LIB) $(SDF_LS_LIB)
 	cd $(PTOLEMY)\src\ptcl
 	touch override.mk.vc
 	nmake -f makefile.vc ptcl.ptiny
