@@ -1,7 +1,7 @@
 #ifndef lint
 static char SccsId[]="$Id$";
 #endif /*lint*/
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -59,7 +59,12 @@ static char SccsId[]="$Id$";
 #include "xvals.h"
 #include <stdio.h>
 #include <sys/types.h>
+#ifdef SYSV
+#include <dirent.h>
+#include <unistd.h>
+#else
 #include <sys/dir.h>
+#endif
 #include <sys/stat.h>
 
 #include "fb.h"
@@ -90,11 +95,13 @@ static char *SymClass = SYM_CLASS;
 static char *SchClass = SCH_CLASS;
 static char *OthClass = OTH_CLASS;
 
+static void Open();
+#ifdef NEVER
 static char *XtClassName = "Browser";
 static void XtStart();
-static void Open();
 static void Dump();
 static void Refresh();
+#endif
 
 static int scan_dir();
 static int oct_cell();
@@ -198,15 +205,21 @@ char *dir;
  * (if non-zero) looking at items in the directory `dir'.
  */
 {
-    ddsHandle body, cb, help;
+    ddsHandle body, cb;
     ddsPosition pos;
     char full_path[MAX_NAME], title_text[MAX_NAME*2];
     refresh_data *rd;
     int i;
+#ifndef SYSV
     extern char *getwd();
+#endif
 
     rd = ALLOC(refresh_data, 1);
+#ifdef SYSV
+    if (strcmp(dir, ".") == 0) dir = getcwd(full_path, MAX_NAME);
+#else
     if (strcmp(dir, ".") == 0) dir = getwd(full_path);
+#endif
     rd->dir = XtNewString(dir);
     (void) sprintf(title_text, "VEM %s: %s", vemVerString(),
 		   util_tilde_compress(dir));
@@ -269,7 +282,11 @@ fb_item **items;		/* Returned list of items */
  */
 {
     DIR *dp;
+#ifdef SYSV
+    struct dirent *entry;
+#else
     struct direct *entry;
+#endif
     struct stat buf;
     char full_name[MAX_NAME];
     dary all;
@@ -283,8 +300,8 @@ fb_item **items;		/* Returned list of items */
     one.data = (caddr_t) 0;
     *daSetLast(fb_item, all) = one;
     /* Set up the rest of the cells */
-    if (dp = opendir(dir)) {
-	while (entry = readdir(dp)) {
+    if ( (dp = opendir(dir)) ) {
+	while ( (entry = readdir(dp)) ) {
 	    if (entry->d_name[0] != '.') {
 		(void) sprintf(full_name, "%s/%s", dir, entry->d_name);
 		if (stat(full_name, &buf) == 0) {
@@ -327,7 +344,11 @@ dary all;			/* Complete list        */
  */
 {
     DIR *top, *lv;
+#ifdef SYSV
+    struct dirent *one, *two;
+#else
     struct direct *one, *two;
+#endif
     struct stat buf;
     char full_name[MAX_NAME];
     char disp_name[MAX_NAME];
@@ -345,17 +366,17 @@ dary all;			/* Complete list        */
     fct.contents.facet.cell = path;
     fct.contents.facet.version = OCT_CURRENT_VERSION;
     fct.contents.facet.mode = "r";
-    if (top = opendir(path)) {
-	while (one = readdir(top)) {
+    if ( (top = opendir(path)) ) {
+	while ( (one = readdir(top)) ) {
 	    (void) sprintf(full_name, "%s/%s", path, one->d_name);
 	    if ((one->d_name[0] != '.') &&
 		(stat(full_name, &buf) == 0) &&
 		((buf.st_mode & S_IFMT) == S_IFDIR)) {
 		fct.contents.facet.view = one->d_name;
-		if (lv = opendir(full_name)) {
-		    while (two = readdir(lv)) {
+		if ( (lv = opendir(full_name)) ) {
+		    while (( two = readdir(lv)) ) {
 			(void) strcpy(fct_name, two->d_name);
-			if (p = strchr(fct_name, ';')) {
+			if ( (p = strchr(fct_name, ';')) ) {
 			    *p = '\0';
 			    fct.contents.facet.facet = fct_name;
 			    fct.contents.facet.version = p+1;
@@ -465,11 +486,7 @@ caddr_t global_data;		/* Global data   */
  * and then opens the cell.
  */
 {
-    int arg_len;
-    Arg arg_list[MAX_ARGS];
-    Widget pop_up, vpane, sub_box, close;
     char full_name[MAX_NAME];
-    char command[MAX_NAME];
     char cell[MAX_NAME], view[MAX_NAME], facet[MAX_NAME];
     octObject fct;
     char *viewtype;
