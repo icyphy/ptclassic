@@ -35,3 +35,10 @@ Block& SDFStar :: setBlock(char* s, Block* parent = NULL) {
 
 	return *this;
 }
+
+// The following is defined in SDFDomain.cc -- this forces that module
+// to be included if any SDF stars are linked in.
+extern const char SDFdomainName[];
+
+const char* SDFStar :: domain () const { return SDFdomainName;}
+

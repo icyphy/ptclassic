@@ -24,6 +24,15 @@ $Id$
 
 **************************************************************************/
 
+// return the type
+char* <T>State :: type() { return "<T>";}
+
+// the value as a string
+StringList <T>State :: currentValue() { StringList s; s = val; return s;}
+
+// clone
+State* <T>State :: clone () { return new <T>State;}
+
 ParseToken pt;
 
 void <T>State  :: initialize() {

@@ -20,10 +20,6 @@ $Id$
 // next is included so SDFStar defns don't have to.
 #include "SDFConnect.h"
 
-// The following is defined in SDFScheduler.cc -- this forces that module
-// to be included if any SDF stars are linked in.
-extern const char SDFdomainName[];
-
 	////////////////////////////////////
 	// class SDFStar
 	////////////////////////////////////
@@ -32,7 +28,7 @@ class SDFStar : public Star  {
 
 public:
 	// my domain
-	const char* domain() { return SDFdomainName;}
+	const char* domain() const;
 
 	// The number of repetitions of the star in a periodic
 	// schedule.  Initialized to 1 by setBlock.  Set to correct

@@ -55,3 +55,19 @@ int DERepeatStar :: canGetFired() {
 		feedbackIn.dataNew = FALSE;	// reset the flag.
 	return i;
 }
+
+// The following is defined in DEDomain.cc -- this forces that module
+// to be included if any DE stars are linked in.
+extern const char DEdomainName[];
+
+const char* DEStar :: domain() const {
+	return DEdomainName;
+}
+
+// start method for DERepeatStar
+
+void DERepeatStar :: start() {
+	feedbackOut.put(completionTime) << 0.0;
+	feedbackOut.sendData();
+}
+

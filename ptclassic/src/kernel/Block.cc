@@ -184,3 +184,22 @@ Block::asGalaxy () const {
 	errorHandler.error (readFullName(), " is not a Galaxy!");
 	exit (1);
 }
+
+// small virtual functions
+void Block::start () {}
+
+void Block::wrapup () {}
+
+Block& Block::setBlock(const char* s, Block* parent) {
+	setNameParent (s, parent);
+	return *this;
+}
+
+int Block::isItAtomic () const { return TRUE;}
+
+void Block::initState () { states.initElements();}
+
+// destructor isn't really do-nothing because it calls destructors
+// for members
+Block::~Block () {}
+

@@ -47,11 +47,11 @@ public:
 
 	// User-specified additional initialization
 	// By default, it does nothing.
-	virtual void start() {}
+	virtual void start();
 
 	// User-specified end of simulation
 	// again, does nothing by default.
-	virtual void wrapup() {}
+	virtual void wrapup();
 
 	// Methods making ports available on the outside;
 	// can be read but not set
@@ -60,10 +60,7 @@ public:
 
 	// Method setting internal data in the Block
 	// If the parent pointer is not provied, it defaults to NULL
-	virtual Block& setBlock(const char* s, Block* parent = NULL) {
-		setNameParent (s, parent);
-		return *this;
-	}
+	virtual Block& setBlock(const char* s, Block* parent = NULL);
 
 	// Constructor
 	Block() {}
@@ -71,10 +68,13 @@ public:
 	// Another constructor
 	Block(const char* n,Block* p,const char* d) : NamedObj(n,p,d) {}
 
+	// destructor
+	~Block();
+
 	// Method to reply "false" if the block contains component
 	// blocks that can be seen from the outside.
 	// i.e., it is true for stars and wormholes, false for galaxies.
-	virtual int isItAtomic () const {return TRUE;}
+	virtual int isItAtomic () const; // {return TRUE;}
 
 	// virtual method to make a new object of the same type.  This
 	// version should never be called; stars and galaxies should 
@@ -113,7 +113,7 @@ public:
         addState(State& s) {states.put(s);}
 
 	// Initialize the State
-        virtual void initState(){states.initElements();}
+        virtual void initState();
 
         // Return number of states 
         int numberStates() const {return states.size();}
