@@ -223,6 +223,8 @@ KcMakeState(char *name, char *type, char *initVal) {
 // connect or busconnect
 extern "C" boolean
 KcConnect(char *inst1, char *t1, char *inst2, char *t2, char* delay, char* width) {
+	if (width == 0) width = "";
+	if (delay == 0) delay = "";
 	if (*width) {
 		LOG << "\t(busconnect (";
 	}
