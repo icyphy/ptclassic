@@ -33,5 +33,216 @@
 if {[string compare test [info procs test]] == 1} then { 
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
-# See tycho/editors/slate/doc/internals/tute-drawing.html
 
+if {[string compare test [info procs _slate]] == 1} then { 
+    source [file join $TYCHO editors slate test defs.itcl]
+} {}
+
+if { ! [::info exists SHORTTIME] } {
+    set SHORTTIME 50
+}
+#set VERBOSE 1
+
+############################################################################
+#### Comments on these tests
+#
+# These tests test out only the methods in Slate. For tests
+# that apply to individual item types, shapes, or interactors,
+# see the individual test files. For tests of the methods
+# inherited from Slate.itcl, see testSlate.itcl.
+#
+# Tests are on a per-method basis. Most methods have (at least)
+# four cases: pass a simple item by ID, pass a tag that will
+# match a simple item, pass a complex item by ID, and pass a tag
+# that will match a complex item.
+#
+
+#######################################################################
+#### constructor
+#
+test Slate-constructor.1 {Simplest construction test} {
+   catch {delete object .s}
+   ::tycho::slate .s
+} {.s}
+delete object .s
+
+# FIXME: add more tests with different options
+
+#######################################################################
+#### align
+
+#######################################################################
+#### aspect
+
+#######################################################################
+#### delete
+
+#######################################################################
+#### describe
+
+############################################################################
+#### ghost{}
+#
+_twoitems
+test Slate-ghost.1 {Pass simple item by ID} {
+    set h [.s ghost $r blah]
+    string compare  [list \
+	    [.s.canvas find withtag ghost] \
+	    [.s.canvas find withtag ghost.$r] \
+	    [.s.canvas find withtag blah]] \
+	    [list $h $h $h]
+} {0}
+
+test Slate-ghost.2 {Pass complex item by ID} {
+    set j [.s ghost $f blab]
+    string compare  [list \
+	    [lsort [.s.canvas find withtag ghost]] \
+	    [.s.canvas find withtag ghost.$f] \
+	    [.s.canvas find withtag blab]] \
+	    [list [lsort [list $h $j]] $j $j]
+} {0}
+
+_twoitems
+test Slate-ghost.11 {Pass simple item by tag} {
+    set h [.s ghost foo blah]
+    string compare  [list \
+	    [.s.canvas find withtag ghost] \
+	    [.s.canvas find withtag ghost.$r] \
+	    [.s.canvas find withtag ghost.foo] \
+	    [.s.canvas find withtag blah]] \
+	    [list $h $h $h $h]
+} {0}
+
+test Slate-ghost.12 {Pass complex item by tag} {
+    set j [.s ghost bar blab]
+    string compare  [list \
+	    [lsort [.s.canvas find withtag ghost]] \
+	    [.s.canvas find withtag ghost.$f] \
+	    [.s.canvas find withtag ghost.bar] \
+	    [.s.canvas find withtag blab]] \
+	    [list [lsort [list $h $j]] $j $j $j]
+} {0}
+
+_twoitems
+test Slate-ghost.21 {Multiple items by tag} {
+    .s addtag foo all
+    set hs [.s ghost foo]
+    string compare [lsort $hs] \
+	    [lsort [.s.canvas find withtag ghost]]
+} {0}
+
+############################################################################
+#### highlight{}
+#
+_twoitems
+test Slate-highlight.1 {Pass simple item by ID} {
+    set h [.s highlight $r blah]
+    string compare  [list \
+	    [.s.canvas find withtag highlight] \
+	    [.s.canvas find withtag highlight.$r] \
+	    [.s.canvas find withtag blah]] \
+	    [list $h $h $h]
+} {0}
+
+test Slate-highlight.2 {Pass complex item by ID} {
+    set j [.s highlight $f blab]
+    string compare  [list \
+	    [lsort [.s.canvas find withtag highlight]] \
+	    [.s.canvas find withtag highlight.$f] \
+	    [.s.canvas find withtag blab]] \
+	    [list [lsort [list $h $j]] $j $j]
+} {0}
+
+_twoitems
+test Slate-highlight.11 {Pass simple item by tag} {
+    set h [.s highlight foo blah]
+    string compare  [list \
+	    [.s.canvas find withtag highlight] \
+	    [.s.canvas find withtag highlight.$r] \
+	    [.s.canvas find withtag highlight.foo] \
+	    [.s.canvas find withtag blah]] \
+	    [list $h $h $h $h]
+} {0}
+
+test Slate-highlight.12 {Pass complex item by tag} {
+    set j [.s highlight bar blab]
+    string compare  [list \
+	    [lsort [.s.canvas find withtag highlight]] \
+	    [.s.canvas find withtag highlight.$f] \
+	    [.s.canvas find withtag highlight.bar] \
+	    [.s.canvas find withtag blab]] \
+	    [list [lsort [list $h $j]] $j $j $j]
+} {0}
+
+_twoitems
+test Slate-highlight.21 {Multiple items by tag} {
+    .s addtag foo all
+    set hs [.s highlight foo]
+    string compare [lsort $hs] \
+	    [lsort [.s.canvas find withtag highlight]]
+} {0}
+
+#######################################################################
+#### interactor
+
+#######################################################################
+#### move
+
+#######################################################################
+#### moveclick
+#### movedrag
+#### moverelease
+#
+# These methods are tested as a set. Mainly, these tests confirm
+# that the interaction is being forwarded to the Shape class;
+# see testShape.itcl for that class for more complex tests.
+#
+_twoitems
+test Slate-moveclick.1 {Move the simple item, no ghosting} {
+    .s moveclick $r 100 100; _update
+    .s movedrag $r 110 110; _update
+    .s movedrag $r 120 120; _update
+    .s moverelease $r 120 120; _update
+    .s coords $r
+} {60.0 60.0 100.0 100.0}
+
+test Slate-moveclick.2 {Move the simple item, with ghosting} {
+    .s moveclick $r 100 100 -ghost; _update
+    .s movedrag $r 90 90; _update
+    .s movedrag $r 80 80; _update
+    set result [.s coords ghost]
+    .s moverelease $r 80 80; _update
+    concat $result [.s coords $r]
+} {40.0 40.0 80.0 80.0 40.0 40.0 80.0 80.0}
+
+#######################################################################
+#### moveto
+
+#######################################################################
+#### recreate
+
+#######################################################################
+#### region
+
+#######################################################################
+#### reshape
+
+#######################################################################
+#### reshapeclick
+#### reshapedrag
+#### reshaperelease
+
+#######################################################################
+#### reshapeto
+
+#######################################################################
+#### select
+
+#######################################################################
+#### selector
+
+#######################################################################
+#### shape
+
+#######################################################################
+#### unhighlight
