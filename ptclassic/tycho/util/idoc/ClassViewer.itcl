@@ -105,6 +105,9 @@ class ::tycho::IDoc {
     # Return a description of the current class.
     public method describe {}
 
+    # Place a ghost handle a certain number of pixels from the actual one.
+    public method ghostHandle {horizontal pixels}
+
     # Insert the specified data.
     public method insertData {data}
     
@@ -139,22 +142,22 @@ class ::tycho::IDoc {
     ####                      private methods                      ####
 
     # Bind a description to <enter>ing a label.
-    private method binddesc {item label}
+    private method bindDesc {item label}
   
     # Bind an explanation to double clicking a label.
-    private method bindexpl {item label}
+    private method bindExpl {item label}
 
     # Display the contents of myClass in contents widget.
     private method display {}
 
     # Display the proper methods/procedures in the contents widget.
-    private method displaymeth {protection}
+    private method displayMeth {protection}
 
     # Display the proper variables in the contents widget.
-    private method displayvar {protection}
+    private method displayVar {protection}
 
     # Format the explanation of the given item in HTML.
-    private method formatexpl {item}
+    private method formatExpl {item}
 
     # Setup the resizing handles to behave properly.
     private method setupHandles {}
@@ -242,6 +245,19 @@ body ::tycho::IDoc::constructor {args} {
         usual
     }
 
+    # add ghost handles which move with the mouse
+    itk_component add hGhost {
+        frame $itk_interior.hGhost
+    } {
+        usual
+    }
+
+    itk_component add vGhost {
+        frame $itk_interior.vGhost
+    } {
+        usual
+    }
+
     pack $itk_component(contents) -side left -anchor w -fill y \
             -in $itk_interior
 
@@ -306,6 +322,57 @@ body ::tycho::IDoc::describe {} {
     return [$myClass describe]
 }
 
+#####################################################################
+#### ghostHandle
+# Control the ghost handle (for lack of a standard name), which is the
+# handle (Iwidgets' panedwindow calls it a "sash") that moves when you
+# are resizing a frame. This is done by _placing_ a frame of the correct
+# size on top of the proper location. This is not always exactly what 
+# the resizing does because the actual widgets are packed and resized
+# by their options, not by the packer.
+#
+body ::tycho::IDoc::ghostHandle {horizontal pixels} {
+    if {$horizontal} {
+        if {$pixels == 0} {
+            # when the mouse is released, sent ghostHandle 1 0
+            place forget $itk_component(hGhost)
+        } {
+            set cWidth [expr [winfo width $itk_component(contents)]]
+            set width [winfo width [$this windowName]]
+            set wRatio [lindex [wm grid [[displayer] windowName]] 2]
+            set location [expr ($cWidth-$pixels)/$wRatio*$wRatio]
+            if {$location < 0} {
+                set location 0
+            } elseif {$location > $width} {
+                set location $width
+            }
+            place $itk_component(hGhost) -x $location -y 0 -width 4 \
+                    -relheight 1.0 
+        }
+    } {
+        if {$pixels == 0} {
+            # when the mouse is released, sent ghostHandle 0 0
+            place forget $itk_component(vGhost)
+        } {     
+            set tHeight [expr [winfo height $itk_component(html1)]]
+            set height [winfo height [$this windowName]]
+            set hRatio [lindex [wm grid [[displayer] windowName]] 3]
+            set location [expr ($tHeight-$pixels)/$hRatio*$hRatio]
+            if {$location < 0} {
+                set location 0
+            } elseif {$location > $height} {
+                set location $height
+            }
+            place $itk_component(vGhost) -y $location -x 0 -height 4 \
+                    -relwidth 1.0 -in $itk_component(htmlFrame) 
+
+        }
+        
+    }
+
+}
+
+
 #######################################################################
 #### insertData
 # Append the specified data to the existing display.
@@ -345,25 +412,34 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
 #####################################################################
 #### resizeFrame
 # Resize the frame after a mouse event involving either handle.
+# The calculations are straightforward. Because of the gridding effect
+# caused by the HTML widgets, resizing is limited to certain units
+# of pixels. Because of the strangeness of the packer, small 
+# changes in requested height of frames sometimes have odd effects.
+# A fix would be to use the placer instead. This will be required
+# in the general case.
 #
 body ::tycho::IDoc::resizeFrame {horizontal pixels} {
     if {$horizontal} {
         set cWidth [winfo pixels . [$this cget -contentswidth]]
         set hWidth [winfo width $itk_component(html1)]
-        # get ratio of width/pixels because HTML is "special"
-        set hRatio [expr $hWidth.0 / [$this cget -htmlwidth]]
-        $this config -contentswidth [expr $cWidth - $pixels]
-        $this config -htmlwidth [expr int(($hWidth + $pixels)/$hRatio)]
+        # get ratio of HTML width/pixels
+        set wRatio [lindex [wm grid [[displayer] windowName]] 2]
+        # round pixels to grid
+        set cNew [expr ($cWidth-$pixels)/$wRatio*$wRatio]
+        set hNew [expr $hWidth + ($cWidth - $cNew)]
+        $this config -contentswidth $cNew
+        $this config -htmlwidth [expr round(($hNew)/$wRatio.0)]
     } {
         set tHeight [winfo height $itk_component(html1)]
         set bHeight [winfo height $itk_component(html2)]
-        if {$tHeight > $bHeight} {
-            set ratio [expr $tHeight.0 / [$this cget -topheight]]
-        } {
-            set ratio [expr $bHeight.0 / [$this cget -bottomheight]]
-        }
-        $this config -topheight [expr int(($tHeight - $pixels)/$ratio)]
-        $this config -bottomheight [expr int(($bHeight + $pixels)/$ratio)]
+        # get ratio of HTML height/pixels
+        set hRatio [lindex [wm grid [[displayer] windowName]] 3]
+        # round pixels to grid
+        set tNew [expr ($tHeight - $pixels)/$hRatio*$hRatio]
+        set bNew [expr $bHeight + ($tHeight - $tNew)]
+        $this config -topheight [expr round(($tNew)/$hRatio)]
+        $this config -bottomheight [expr round(($bNew)/$hRatio)]
     }
 }
 
@@ -372,12 +448,12 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
     ####                      private methods                      ####
 
 ###########################################################################
-#### binddesc
+#### bindDesc
 # bind to the enter and shift release events on the given label
 # the display of the description of the given item in the statusbar
 # if such a description exists
 #
-body ::tycho::IDoc::binddesc {item label} {
+body ::tycho::IDoc::bindDesc {item label} {
     if ![catch {set desc [$myClass get annotation $item.description]}] {
         $myContents bind $label <Enter> \
                 [code "$this putStatus \{$desc\}"]
@@ -391,16 +467,16 @@ body ::tycho::IDoc::binddesc {item label} {
 }
 
 ###########################################################################
-#### bindexpl
+#### bindExpl
 # bind to the double click event on the given label
 # the display of the explanation of the given item in HTML
 # the explanation includes extra information besides the
 # actual explanation field of the item
 #
-body ::tycho::IDoc::bindexpl {item label} {
+body ::tycho::IDoc::bindExpl {item label} {
  
     # format explanation
-    set expl [formatexpl $item]
+    set expl [formatExpl $item]
 
     # bind explanation to double click
     $myContents bind $label <Double-Button-1> \
@@ -437,18 +513,18 @@ body ::tycho::IDoc::display {} {
     # insert each type (Protected Method, etc.) by protection order
     foreach protection {public protected private} {
         # Variables        
-        displayvar $protection   
+        displayVar $protection   
         # Methods
-        displaymeth $protection   
+        displayMeth $protection   
     }
 }
 
 #####################################################################
-#### displaymeth
+#### displayMeth
 # Display the methods/procedures of the given protection in the myContents
 # widget in according to the $language variable.
 #
-body ::tycho::IDoc::displaymeth {protection} {
+body ::tycho::IDoc::displayMeth {protection} {
 
     switch $language {
         Itcl {
@@ -465,8 +541,8 @@ body ::tycho::IDoc::displaymeth {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <Double-Click>
-                binddesc $method $method\m
-                bindexpl $method $method\m
+                bindDesc $method $method\m
+                bindExpl $method $method\m
                 lappend subnames $method\m
             }
             # insert panel if any methods found
@@ -487,8 +563,8 @@ body ::tycho::IDoc::displaymeth {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <Double-Click>
-                binddesc $method $method\p
-                bindexpl $method $method\p
+                bindDesc $method $method\p
+                bindExpl $method $method\p
                 lappend subnames $method\p
             }
             # insert panel if any procs found
@@ -509,8 +585,8 @@ body ::tycho::IDoc::displaymeth {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <Double-Click>
-                binddesc $method $method\p
-                bindexpl $method $method\p
+                bindDesc $method $method\p
+                bindExpl $method $method\p
                 lappend subnames $method\p
             }
             # insert panel if any methods found
@@ -525,11 +601,11 @@ body ::tycho::IDoc::displaymeth {protection} {
 }
 
 #####################################################################
-#### displayvar
+#### displayVar
 # Display the variables of the given protection in the myContents
 # widget in according to the $language variable.
 #
-body ::tycho::IDoc::displayvar {protection} {
+body ::tycho::IDoc::displayVar {protection} {
 
     switch $language {
         Itcl {
@@ -544,8 +620,8 @@ body ::tycho::IDoc::displayvar {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -optioncolor]
                 # setup bindings on <Enter> and <Double-Click>
-                binddesc $variable $variable\v
-                bindexpl $variable $variable\v
+                bindDesc $variable $variable\v
+                bindExpl $variable $variable\v
                 lappend subnames $variable\v
             }
             # insert panel if any itk_options found
@@ -565,8 +641,8 @@ body ::tycho::IDoc::displayvar {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <Double-Click>
-                binddesc $variable $variable\v
-                bindexpl $variable $variable\v
+                bindDesc $variable $variable\v
+                bindExpl $variable $variable\v
                 lappend subnames $variable\v
             }
             # insert panel if any variables found
@@ -587,8 +663,8 @@ body ::tycho::IDoc::displayvar {protection} {
                         -font [$this cget -bodyfont] \
                         -fg [$this cget -$protection\color]
                 # setup bindings on <Enter> and <Double-Click>
-                binddesc $variable $variable\v
-                bindexpl $variable $variable\v
+                bindDesc $variable $variable\v
+                bindExpl $variable $variable\v
                 lappend subnames $variable\v
             }
             # insert panel if any variables found
@@ -603,12 +679,12 @@ body ::tycho::IDoc::displayvar {protection} {
 }
 
 #####################################################################
-#### formatexpl
+#### formatExpl
 # Format the explanation of the given item in HTML. This is usually
 # bound to a double click on an item in the contents widget.
 # An item may not have an explanation, but _must_ have a description.
 #
-body ::tycho::IDoc::formatexpl {item} {
+body ::tycho::IDoc::formatExpl {item} {
     if [catch {set expl [$myClass get annotation $item.explanation]}] {
         set expl [$myClass get annotation $item.description]
     }
@@ -633,13 +709,23 @@ body ::tycho::IDoc::setupHandles {} {
     set updown $itk_component(updown)
     set leftright $itk_component(leftright)
 
-    $updown config -cursor sb_v_double_arrow -height 3
-    $leftright config -cursor sb_h_double_arrow -width 3
+    $updown config -cursor sb_v_double_arrow -height 4
+    $leftright config -cursor sb_h_double_arrow -width 4
+    $itk_component(vGhost) config -cursor sb_h_double_arrow -bg white
+    $itk_component(hGhost) config -cursor sb_v_double_arrow -bg white
     
     bind $updown <1> {set lastPress "%y"}
-    bind $updown <ButtonRelease-1> {%Q resizeFrame 0 [expr $lastPress - %y]}
+    bind $updown <B1-Motion> {%Q ghostHandle 0 [expr $lastPress - %y]}
+    bind $updown <ButtonRelease-1> {
+        %Q resizeFrame 0 [expr $lastPress - %y]
+        %Q ghostHandle 0 0
+    }
     bind $leftright <1> {set lastPress "%x"}
-    bind $leftright <ButtonRelease-1> {%Q resizeFrame 1 [expr $lastPress - %x]}
+    bind $leftright <B1-Motion> {%Q ghostHandle 1 [expr $lastPress - %x]}
+    bind $leftright <ButtonRelease-1> {
+        %Q resizeFrame 1 [expr $lastPress - %x]
+        %Q ghostHandle 1 0
+    }
 
 
 
