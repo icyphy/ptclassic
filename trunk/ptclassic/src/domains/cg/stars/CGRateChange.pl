@@ -1,6 +1,7 @@
 defstar {
 	name { RateChange }
 	domain { CG }
+	derivedFrom { CGVarTime }
 	desc {
 Consumes "consume" samples and produces "produce" samples.
 	}

@@ -1,6 +1,7 @@
 defstar {
 	name { Sink }
 	domain { CG }
+	derivedFrom { CGVarTime }
 	desc {
 Swallows an input sample
 	}

@@ -1,11 +1,12 @@
 defstar {
 	name { Through }
 	domain { CG }
+	derivedFrom { CGVarTime }
 	desc {
 Generates conditional code, depending on the value of
 the Boolean state "control".
 	}
-	version {$Revision$ $Date$}
+	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { CG demo library }
