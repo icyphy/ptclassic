@@ -21,7 +21,7 @@ or questions that require a file name response.
 <h2><a name="YesNoQuery class">YesNoQuery Class</a></h2>
 <p>
 The YesNoQuery class poses a question and offers two buttons,
-labeled "Yes" and "No".  For example:
+labeled <CODE>Yes</CODE> and <CODE>No</CODE>.  For example:
 <tcl><pre>
 ::tycho::YesNoQuery .y -text {Are you awake?} &#92
     -yescommand {::tycho::inform {You said yes!}} &#92
@@ -47,13 +47,15 @@ if [::tycho::Dialog::wait .z] {
 </pre></tcl>
 
 <p>
-There is a bit of a technicality with using this capability.
-Suppose you wish to create a dialog box that returns the strings
-"yes" or "no" instead of 0 or 1.  The <CODE>-yescommand</CODE> and
-<CODE>-nocommand</CODE>
-options specify Tcl scripts, and it is difficult to get a Tcl
-script to return a value.  You could use the "set" command as
-follows:
+
+There is a bit of a technicality with using this capability.  Suppose
+you wish to create a dialog box that returns the strings
+<CODE>yes</CODE> or <CODE>no</CODE> instead of <CODE>0</CODE> or
+<CODE>1</CODE>.  The <CODE>-yescommand</CODE> and
+<CODE>-nocommand</CODE> options specify Tcl scripts, and it is
+difficult to get a Tcl script to return a value.  You could use the
+"set" command as follows:
+
 <tcl><pre>
 ::tycho::YesNoQuery .z -text {Are you awake?} &#92
          -yescommand {set y {yes}} &#92
@@ -78,7 +80,7 @@ as follows:
 <p>
 The <code>YesNoCancel</code> class is like the
 <code>YesNoQuery</code> class, but there is one
-more button labeled "Cancel" and one more option
+more button labeled <CODE>Cancel</CODE> and one more option
 <a name="cancelcommand option"><CODE>-cancelcommand</CODE></a>.
 To see an example, execute this:
 <tcl><pre>
@@ -87,8 +89,8 @@ To see an example, execute this:
 </pre></tcl>
 By default, the cancel button returns <CODE>-1</CODE>, unless you specify
 something different withe the <CODE>-cancelcommand</CODE> option.
-Similarly, by default, the Yes button returns <CODE>1</CODE>
-and the No button <CODE>0</CODE>.
+Similarly, by default, the <CODE>Yes</CODE>button returns <CODE>1</CODE>
+and the <CODE>No</CODE> button <CODE>0</CODE>.
 
 <p>
 <h2><a name="Query class">Query Class</a></h2>
@@ -96,19 +98,21 @@ and the No button <CODE>0</CODE>.
 The <code>Query</code> class opens a dialog box with one or more
 <a name="text entry">text entry widgets widgets</a>
 and/or <a name="radio button widgets">radio button widgets.</a>
-It is used by the "<a href="dialogs.html#query procedure">query</a>"
-and "<a href="dialogs.html#queryinfo procedure">queryinfo</a>"
+It is used by the 
+<a href="dialogs.html#query procedure"><CODE>query</CODE></a>
+and <a href="dialogs.html#queryinfo procedure"><CODE>queryinfo</CODE></a>
 procedures, which provide simpler interfaces.
 You can also create instances of it directly.
 <p>
-The actions taken in response to the OK and Cancel buttons
-are given by the <a name="okcommand option"><CODE>-okcommand</CODE></a> and
+The actions taken in response to the <CODE>OK</CODE> and
+<CODE>Cancel</CODE> buttons are given by the 
+<a name="okcommand option"><CODE>-okcommand</CODE></a> and 
 <a name="cancelcommand option"><CODE>-cancelcommand</CODE></a> options.
-By default, both buttons destroy the object.  In addition, if you use the class
-as a modal dialog using <code>wait</code>, then
-the OK button returns the user responses as a list and the
-Cancel button returns a null string.  After either command is executed,
-the widget is destroyed.
+By default, both buttons destroy the object.  In addition, if you use
+the class as a modal dialog using <code>wait</code>, then the <CODE>OK</CODE>
+button returns the user responses as a list and the <CODE>Cancel</CODE> button
+returns a null string.  After either command is executed, the widget
+is destroyed.
 <p>
 The <code>Query</code> class creates a dialog box with any of
 several types of interactions with the user.
@@ -127,10 +131,10 @@ and posted by the <code>inform</code> command.
 The <code>line</code> method takes three arguments,
 a tag, a label, and a default string.
 <p>
-The <code>get</code> method, invoked above on clicking the OK button, returns
-an indexed list of entries.  A modal dialog can be created as well,
-and will return the values in the same form as the <code>get</code> method.
-For example,
+The <code>get</code> method, invoked above on clicking the <CODE>OK</CODE>
+button, returns an indexed list of entries.  A modal dialog can be created as
+well, and will return the values in the same form as the <code>get</code>
+method. For example,
 <tcl><pre>
 ::tycho::Query .bb
 .bb line text {Enter Something} {foo bar}
@@ -168,8 +172,8 @@ text edit boxes, as in the following example:
 Now the query will have four lines.
 An <code>Edit</code> widget is used, providing
 an Emacs-like text editor.
-Note that the OK button
-is no longer triggered by &lt;Return&gt;.  It can now be triggered by
+Note that the <CODE>OK</CODE> button
+is no longer triggered by <CODE>Return</CODE>.  It can now be triggered by
 <CODE>Meta-Return</CODE>.
 This is because in a multi-line entry box, <CODE>Return</CODE>
 moves the insertion cursor to a new line.
@@ -237,11 +241,11 @@ This keyword is actually the method name for the <code>Query</code>
 class.  Here is a summary of the arguments associated with each
 method:
 <menu>
-<li> choice tag label possibilities default command
-<li> line tag label default
-<li> lines tag label default height
-<li> radio tag label possibilities default
-<li> mediated tag label default command
+<li> <CODE>choice <I>tag label possibilities default command</I></CODE>
+<li> <CODE>line <I>tag label default</I></CODE>
+<li> <CODE>lines <I>tag label default height</I></CODE>
+<li> <CODE>radio <I>tag label possibilities default</I></CODE>
+<li> <CODE>mediated <CODE>tag label default command</CODE></CODE>
 </menu>
 In addition, all except choice can accept any number of additional arguments.
 These arguments are passed to the widget that implements the query
@@ -252,20 +256,20 @@ query is optional.
 <p>
 The arguments above are explained below:
 <menu>
-<li> tag: a string that uniquely
-     identifies the query.
-<li> label: a string that is inserted in the display to the left
-     of the query.
-<li> default: the initial value of the query.
-<li> height: the number of lines in a multi-line text query.
-<li> possibilities: a list of possible choices.  These are the labels
-     that appear on each of the radio buttons or in the pop-up menu
-     in the choice query.
-<li> command: a command to invoke for a mediated query or, in the choice,
-     when the user changes the selection.  Before
-     invoking this command, the current (default) value of the
-     query will be appended to the command, separated by a space.
-     The command should return the new value of the query.
+<li> <CODE><I>tag</I></CODE>: a string that uniquely identifies the query.
+<li> <CODE><I>label</I></CODE>: a string that is inserted in the
+display to the left of the query.
+<li> <CODE><I>default</I></CODE>: the initial value of the query.
+<li> <CODE><I>height</I></CODE>: the number of lines in a multi-line text
+query. 
+<li> <CODE><I>possibilities</I></CODE>: a list of possible choices.
+These are the labels that appear on each of the radio buttons or in the
+pop-up menu in the choice query.
+<li> <CODE><I>command</I></CODE>: a command to invoke for a mediated query or,
+in the choice, when the user changes the selection.  Before
+invoking this command, the current (default) value of the
+query will be appended to the command, separated by a space.
+The command should return the new value of the query.
 </menu>
 Note that no two queries in the same dialog box
 can have the same tag.
@@ -321,7 +325,7 @@ inserts a string into the specified entry.
 .z insert second {An inserted string. }
 </pre></tcl>
 <p>
-You may delete this window by clicking on the OK button.
+You may delete this window by clicking on the <CODE>OK</CODE> button.
 <p>
 The class is derived from <a href="dialog.html">Dialog</a>,
 so it has the
