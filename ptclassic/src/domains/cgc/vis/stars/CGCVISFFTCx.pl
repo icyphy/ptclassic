@@ -1,6 +1,7 @@
 defstar {
 	name { VISFFTCx }
 	domain { CGC }
+	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen }
 	copyright {
@@ -9,10 +10,10 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  A single complex sequence FFT using radix 2.
-	    Input length must be power of two.
+A single complex sequence FFT using radix 2.
+Input length must be power of two.
 	}
 	input {
 	  name { realIn }
@@ -62,91 +63,89 @@ limitation of liability, and disclaimer of warranty provisions.
           realOut.setSDFParams(s/4,s/4-1);
 	  imagOut.setSDFParams(s/4,s/4-1);
 	}
-	codeblock(calculateSinandCos) {
-	  static void calcTwSinCos(vis_s16 *sinsarray,vis_s16
-				   *cossarray,int order, int size)
-	    {
-	      vis_d64 twopioverN2;
-	      vis_s16 *indexcounts0,*indexcounts1;
-	      int N2,i,j;
 
-	      N2=size;
-	      indexcounts0=cossarray;
-	      indexcounts1=sinsarray;
-	      for(i=0;i<order-2;i++){
-		twopioverN2 = M_TWO_PI/N2;
-		N2 = N2/2;
-		for(j=0;j<N2;j++){
-		  *indexcounts0++=(vis_s16)$val(scale)* cos(twopioverN2*j);
-		  *indexcounts1++=(vis_s16)-$val(scale)*sin(twopioverN2*j);
-		}
-	      }
-	    }
+	codeblock(calculateSinandCos) {
+void $sharedSymbol(CGCVISFFTCx,calcTwSinCos)(vis_s16 *sinsarray, vis_s16 *cossarray, int order, int size) {
+	vis_d64 twopioverN2;
+	vis_s16* indexcounts0 = cossarray;
+	vis_s16* indexcounts1 = sinsarray;
+	int i = 0;
+	int N2 = size;
+	int maxi = order - 2;
+
+	for(i = 0; i < maxi; i++) {
+	  int j;
+	  twopioverN2 = M_TWO_PI/N2;
+	  N2 = N2/2;
+	  for(j = 0; j < N2; j++){
+	    *indexcounts0++=(vis_s16)$val(scale) * cos(twopioverN2 * j);
+	    *indexcounts1++=(vis_s16)(-$val(scale)) * sin(twopioverN2 * j);
+	  }
+	}
+}
 	}
 	codeblock(quadmult) {
-	  static vis_d64 mult4x4(vis_d64 mult1,vis_d64 mult2)
-	    { 
-	      vis_d64 prodhihi,prodhilo,prodlohi,prodlolo;
-	      vis_d64 prodhi,prodlo,product;
-	      vis_f32  mult1hi,mult1lo,mult2hi,mult2lo;
-	      vis_f32  packhi,packlo;
+vis_d64 $sharedSymbol(CGCVISFFTCx,mult4x4)(vis_d64 mult1,vis_d64 mult2) { 
+	vis_d64 prodhihi, prodhilo, prodlohi, prodlolo;
+	vis_d64 prodhi, prodlo, product;
+	vis_f32 packhi, packlo;
 
-	      mult1hi = vis_read_hi(mult1);
-	      mult1lo = vis_read_lo(mult1);
-	      mult2hi = vis_read_hi(mult2);
-	      mult2lo = vis_read_lo(mult2);
-	      
-	      prodhihi = vis_fmuld8sux16(mult1hi,mult2hi);
-	      prodhilo = vis_fmuld8ulx16(mult1hi,mult2hi);
-	      prodlohi = vis_fmuld8sux16(mult1lo,mult2lo);
-	      prodlolo = vis_fmuld8ulx16(mult1lo,mult2lo);
+	vis_f32 mult1hi = vis_read_hi(mult1);
+	vis_f32 mult1lo = vis_read_lo(mult1);
+	vis_f32 mult2hi = vis_read_hi(mult2);
+	vis_f32 mult2lo = vis_read_lo(mult2);
 
-	      prodhi = vis_fpadd32(prodhihi,prodhilo);
-	      prodlo = vis_fpadd32(prodlohi,prodlolo);
-	      packhi = vis_fpackfix(prodhi);
-	      packlo = vis_fpackfix(prodlo);
-	      return product = vis_freg_pair(packhi,packlo);
-	    }
+	prodhihi = vis_fmuld8sux16(mult1hi,mult2hi);
+	prodhilo = vis_fmuld8ulx16(mult1hi,mult2hi);
+	prodlohi = vis_fmuld8sux16(mult1lo,mult2lo);
+	prodlolo = vis_fmuld8ulx16(mult1lo,mult2lo);
+
+	prodhi = vis_fpadd32(prodhihi,prodhilo);
+	prodlo = vis_fpadd32(prodlohi,prodlolo);
+	packhi = vis_fpackfix(prodhi);
+	packlo = vis_fpackfix(prodlo);
+	return product = vis_freg_pair(packhi,packlo);
+}
 	}
 	codeblock(doublemult){
-	  static vis_f32 mult2x2(vis_f32 mult1,vis_f32 mult2)
-	    {
-	      vis_d64 resultu,resultl,result;
-	      vis_f32 product;
+vis_f32 $sharedSymbol(CGCFFTCx,mult2x2)(vis_f32 mult1, vis_f32 mult2) {
+	vis_d64 resultu,resultl,result;
+	vis_f32 product;
 
-	      resultu = vis_fmuld8sux16(mult1,mult2);
-	      resultl = vis_fmuld8ulx16(mult1,mult2);
-	      result = vis_fpadd32(resultu,resultl);
-	      return product = vis_fpackfix(result);
-	    }
+	resultu = vis_fmuld8sux16(mult1,mult2);
+	resultl = vis_fmuld8ulx16(mult1,mult2);
+	result = vis_fpadd32(resultu,resultl);
+	return product = vis_fpackfix(result);
+}
 	}
 	codeblock(bitreverse) {
-#define SWAP(a, b) tempr=(a); (a)=(b); (b)=tempr
+#define SWAP(a,b,t) (t)=(a); (a)=(b); (b)=(t)
 
-	  static void reorderfft(vis_s16 *s1,vis_s16 *s2, int nn)
-	    {
-	      unsigned long n,j,i,m;
-	      vis_s16 tempr;
+void $sharedSymbol(CGCVISFFTFx,reorderfft)(vis_s16* s1, vis_s16* s2, int nn) {
+	unsigned long n,j,i,m;
+	vis_s16 tempr;
 
-	      n=nn<<1;
-	      j=1;
-	      for(i=1;i<n;i+=2){
-		if(j>i){
-		  SWAP(s1[(j-1)/2],s1[(i-1)/2]);
-		  SWAP(s2[(j-1)/2],s2[(i-1)/2]);
-		}
-		m=n>>1;
-		while(m>=2 && j>m){
-		  j-=m;
-		  m>>=1;
-		}
-		j+=m;
-	      }
-	    }
+	n= nn << 1;
+	j = 1;
+	for (i = 1; i < n; i += 2){
+	  if (j > i) {
+	    SWAP(s1[(j-1)/2], s1[(i-1)/2], temppr);
+	    SWAP(s2[(j-1)/2], s2[(i-1)/2], temppr);
+	  }
+	  m = n >> 1;
+	  while(m >= 2 && j > m){
+	    j -= m;
+	    m >>= 1;
+	  }
+	  j += m;
 	}
+}
+	}
+
 	codeblock(globalDecl){
 #define M_TWO_PI (2*M_PI)
 	}
+
 	codeblock(mainDecl) {
 	  vis_d64 *$starSymbol(rein) = (vis_d64 *) memalign(sizeof(vis_d64),sizeof(vis_d64)*$val(sizeoffft)/4);
 	  vis_d64 *$starSymbol(imin) = (vis_d64 *) memalign(sizeof(vis_d64),sizeof(vis_d64)*$val(sizeoffft)/4);
@@ -156,9 +155,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	codeblock(initialize) {
 	  vis_write_gsr(8);
-	  calcTwSinCos($starSymbol(sinsarray),$starSymbol(cossarray),$val(orderfft),$val(sizeoffft));
+	  $sharedSymbol(CGCVISFFTCx,calcTwSinCos)($starSymbol(sinsarray),$starSymbol(cossarray),$val(orderfft),$val(sizeoffft));
 	}
 	initCode {
+	  CGCVISBase::initCode();
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	  addInclude("<math.h>");
@@ -207,10 +207,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		$starSymbol(rein)[i] = vis_fpadd16($starSymbol(rein)[i], $starSymbol(rein)[l]);
 		imagindtmp = vis_fpsub16($starSymbol(imin)[i], $starSymbol(imin)[l]);
 		$starSymbol(imin)[i] = vis_fpadd16($starSymbol(imin)[i], $starSymbol(imin)[l]);
-		xtcd = mult4x4(reindtmp,t0);
-		xtsd = mult4x4(reindtmp,t1);
-		ytsd = mult4x4(imagindtmp,t1);
-		ytcd = mult4x4(imagindtmp,t0);
+		xtcd = $sharedSymbol(CGCVISFFTCx,mult4x4)(reindtmp,t0);
+		xtsd = $sharedSymbol(CGCVISFFTCx,mult4x4)(reindtmp,t1);
+		ytsd = $sharedSymbol(CGCVISFFTCx,mult4x4)(imagindtmp,t1);
+		ytcd = $sharedSymbol(CGCVISFFTCx,mult4x4)(imagindtmp,t0);
 		$starSymbol(rein)[l] = vis_fpsub16(xtcd, ytsd);
 		$starSymbol(imin)[l] = vis_fpadd16(xtsd, ytcd);
 	      }
@@ -225,10 +225,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	    imaginftmp = vis_fpsub16s(splitf_imin[j], splitf_imin[j+1]);
 	    splitf_rein[j] = vis_fpadd16s(splitf_rein[j + 1], splitf_rein[j]);
 	    splitf_imin[j] = vis_fpadd16s(splitf_imin[j + 1], splitf_imin[j]);
-	    xtcf = mult2x2(reinftmp, C0);
-	    xtsf = mult2x2(reinftmp, S0);
-	    ytsf = mult2x2(imaginftmp, S0);
-	    ytcf = mult2x2(imaginftmp, C0);
+	    xtcf = $sharedSymbol(CGCFFTCx,mult2x2)(reinftmp, C0);
+	    xtsf = $sharedSymbol(CGCFFTCx,mult2x2)(reinftmp, S0);
+	    ytsf = $sharedSymbol(CGCFFTCx,mult2x2)(imaginftmp, S0);
+	    ytcf = $sharedSymbol(CGCFFTCx,mult2x2)(imaginftmp, C0);
 	    splitf_rein[j+1] = vis_fpsub16s(xtcf, ytsf);
 	    splitf_imin[j+1] = vis_fpadd16s(xtsf, ytcf);
 	    j += 2;
@@ -244,7 +244,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    splits_imin[i+1] = imaginstmp;
 	    i += 2;
 	  }	
-	  reorderfft(splits_rein,splits_imin,$val(sizeoffft));
+	  $sharedSymbol(CGCVISFFTFx,reorderfft)(splits_rein,splits_imin,$val(sizeoffft));
 	  /*output the results*/
 	  for(i=0;i<$val(sizeoffft)/4;i++){
 	    $ref2(realOut,i) = $starSymbol(rein)[i];
