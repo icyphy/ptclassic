@@ -52,30 +52,36 @@ void Wormhole :: buildEventHorizons () {
 // them together.
 	for (int n = gal.numberPorts(); n>0; n--) {
 		PortHole& galp = gal.nextPort();
+		dataType type = galp.realPort().myType();
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
 			to.setPort(in, galp.readName(), this, &selfStar,
-				   galp.realPort().myType());
+				   type);
 			selfStar.addPort(to);
 			from.setPort(in, galp.readName(), this, &selfStar,
-				     galp.realPort().myType());
+				     type);
 			to.ghostConnect (from);
-			to.inheritTypeFrom (from);
-			from.inheritTypeFrom (galp);
+			if (type == ANYTYPE) {
+				to.inheritTypeFrom (from);
+				from.inheritTypeFrom (galp);
+			}
 			from.connect(galp,0);
 		}
 		else {
+// for outputs, we must propogate the type information back from
+// whatever the output is connected to, so there are no type conversions
+// across ghost connections.
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
 			from.setPort(out, galp.readName(), this, &selfStar,
-				     galp.realPort().myType());
+				     ANYTYPE);
 			selfStar.addPort(from);
 			to.setPort(out, galp.readName(), this, &selfStar,
-				   galp.realPort().myType());
+				   ANYTYPE);
 			to.ghostConnect (from);
 			to.inheritTypeFrom (from);
-			from.inheritTypeFrom (galp);
+			galp.inheritTypeFrom (to);
 			galp.connect(to,0);
 		}
 	}
