@@ -20,8 +20,10 @@ $Id$
 #include "ProcMemory.h"
 #include "UserOutput.h"
 #include "CGDisplay.h"
+#include "KnownBlock.h"
+#include "miscFuncs.h"
 
-int AsmTarget::decideBufSize(Galaxy& g) {
+int AsmTarget::allocateMemory(Galaxy& g) {
 // clear the memory
 	if (mem == 0) return FALSE;
 	mem->reset();
@@ -37,7 +39,6 @@ int AsmTarget::decideBufSize(Galaxy& g) {
 	if (!mem->performAllocation()) return FALSE;
 	return TRUE;
 }
-	
 
 int AsmTarget :: codeGenInit(Galaxy& g) {
 
@@ -85,6 +86,131 @@ AsmTarget::allocReq(AsmStar& star) {
 		}
 	}
 	return TRUE;
+}
+
+// Routines to modify the galaxy to permit use of the loop scheduler.
+
+inline int hasCirc(PortHole* p) {
+	return (p->attributes() & PB_CIRC) != 0;
+}
+
+inline int wormEdge(PortHole& p) {
+	PortHole* f = p.far();
+	if (!f) return TRUE;
+	else return (p.isItInput() == f->isItInput());
+}
+
+extern int warnIfNotConnected (Galaxy&);
+
+// Here's the main guy.
+AsmTarget::modifyGalaxy(Galaxy& g) {
+	if (!int(loopScheduler)) return TRUE;
+	// init and call start methods.  We must do this so that
+	// the numberTokens values will be correct.
+	if (warnIfNotConnected(g)) return FALSE;
+	g.initialize();
+	if (Scheduler::haltRequested()) return FALSE;
+	int status = TRUE;
+	GalStarIter nextStar(g);
+	Star* s;
+	while ((s = nextStar++) != 0) {
+		BlockPortIter nextPort(*s);
+		PortHole* p;
+		while ((p = nextPort++) != 0 && status) {
+			if (p->isItOutput() || wormEdge(*p) ||
+			    p->numberTokens == p->far()->numberTokens)
+				continue;
+			// we have a rate conversion.
+			int nread = p->numberTokens;
+			int nwrite = p->far()->numberTokens;
+			if (nread < nwrite && nwrite%nread == 0) {
+				// I run more often than my writer.
+				// must have P_CIRC but writer does not
+				// need it.
+				if (!hasCirc(p)) {
+					if (!spliceStar(p, "CircToLin",0))
+						return FALSE;
+				}
+			}
+			else if (nread > nwrite && nread%nwrite == 0) {
+				// My writer runs more often than me.
+				// It needs PB_CIRC, I do not.
+				if (!hasCirc(p->far())) {
+					if (!spliceStar(p, "LinToCirc",1))
+						return FALSE;
+				}
+			}
+			else {
+				// nonintegral rate conversion, both need
+				// PB_CIRC
+				int code;
+				if (!hasCirc(p)) {
+					p = spliceStar(p, "CircToLin", 0);
+					if (!p) return FALSE;
+				}
+				if (!hasCirc(p->far())) {
+					if (!spliceStar(p, "LinToCirc", 1))
+						return FALSE;
+				}
+			}
+		}
+	}
+	return status;
+}
+
+PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
+				int delayBefore)
+{
+	PortHole* pfar = p->far();
+	int ndelay = p->numTokens();
+	p->disconnect();
+	if (p->isItOutput()) {
+		PortHole* t = p;
+		p = pfar;
+		pfar = t;
+	}
+	
+	// p is now an input port.
+	Block* newb = KnownBlock::clone(name);
+	if (newb == 0) {
+		Error::abortRun("failed to clone a ", name, "!");
+		return 0;
+	}
+	PortHole* ip = newb->portWithName("input");
+	PortHole* op = newb->portWithName("output");
+	if (ip == 0 || op == 0) {
+		Error::abortRun(name, " has the wrong interface for splicing");
+		LOG_DEL; delete newb;
+		return 0;
+	}
+
+	// connect up the new star
+	pfar->connect(*ip,delayBefore ? ndelay : 0);
+	p->connect(*op,delayBefore ? 0 : ndelay);
+
+	// save in the list of spliced stars
+	spliceList.put(newb);
+
+	// initialize the new star.  Name it and add it to the galaxy.
+	// using size of splice list in name forces unique names.
+	StringList newname("splice-");
+	newname << newb->readClassName() << "-" << spliceList.size();
+	gal->addBlock(*newb,hashstring(newname));
+	newb->initialize();
+
+	// check errors in initialization
+	if (Scheduler::haltRequested()) return 0;
+	return ip;
+}
+
+AsmTarget::~AsmTarget() {
+	ListIter next(spliceList);
+	Block* b;
+	while ((b = (Block*)next++) != 0) {
+		// prevent some galaxy types from deleting b twice.
+		gal->removeBlock(*b);
+		LOG_DEL; delete b;
+	}
 }
 
 void AsmTarget :: outputComment (const char* msg) {
