@@ -303,6 +303,9 @@ protected:
     // Append a string to the Tcl result as a list element.
     void addResult(const char*);
     
+    // Append a string list to the Tcl result as list elements.
+    void addListResult(StringList&);
+    
     // Iterate over the blocks inside a galaxy, adding names to the result.
     void galTopBlockIter (const Block* b, int deep, int fullname);
 
