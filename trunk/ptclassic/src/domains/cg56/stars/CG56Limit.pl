@@ -21,13 +21,13 @@ The star hard limits input samples to keep the range of
 	state {
 		name {bottom}
 		type {FIX}
-		default {"0.0"}
+		default {0}
 		desc {Lower limit of the output.}
 	}
 	state {
 		name {top}
 		type {FIX}
-		default {1.0}
+		default {ONE}
 		desc {Upper limit of the output.}
 	}
 

@@ -64,7 +64,7 @@ DSP56000 - A comb filter with a one-pole lowpass filter
         state  {
                 name { X }
 	        type { fix }
-	        default { 1.0 }
+	        default { ONE }
 	        desc { value of pole }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
          }

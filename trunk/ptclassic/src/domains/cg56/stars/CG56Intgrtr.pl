@@ -38,7 +38,7 @@ reset.
 	state {
 		name {feedbackGain}
 		type {FIX}
-		default {"1.0"}
+		default {ONE}
 		desc { The gain on the feedback path.}
 	}
  	state {
@@ -50,13 +50,13 @@ reset.
 	state {
 		name {initialValue}
 		type {FIX}
-		default {"0.0"}
+		default {0}
 		desc { Value at time zero and also reset value if used. }
 	}
 	state {
 		name {sum}
 		type {FIX}
-		default {"0.0"}
+		default {0}
 		desc { An internal state.}
 		attributes { A_NONSETTABLE|A_YMEM|A_NONCONSTANT }
 	}
