@@ -41,47 +41,42 @@ limitation of liability, and disclaimer of warranty provisions.
 		int *binary;
 	}
 	constructor {
+		bits = 0;
 		binary = 0;
 	}
 	destructor {
-		LOG_DEL; delete [] binary;
+		delete [] binary;
 	}
 	setup {
 		bits = input.numberPorts();	
-		LOG_DEL; delete [] binary;
-		LOG_NEW; binary = new int[bits];
+		delete [] binary;
+		binary = new int[bits];
 	}	
 	go {
 		MPHIter nexti(input);
-		int number;
 
-		for( int i=0; i< bits; i++){
+		for (int i = 0; i < bits; i++) {
 			binary[i]= (*nexti++)%0;
 		}
 
-		for(i=0; i< bits; i++)
-		{
-	// The following is a Thor-specific condition check where we do not
-	// want the number to be latched in if the bus is tristate (value 3)
-			if(binary[i] ==3)
-			{
+		for (i = 0; i < bits; i++) {
+			// The following is a Thor-specific condition check
+			// where we do not want the number to be latched in
+			// if the bus is tristate (value 3)
+			if ( binary[i] == 3 ) {
 				output%0 << int(previous); 
 				return; 
 			}
 		}
 
-		number = binary[bits-1] ? -1 : 0;
-
-		for( i=(bits-2); i>=0; i--)
-		{
+		int number = binary[bits-1] ? -1 : 0;
+		for(i = bits - 2; i >= 0; i--) {
 			number <<= 1;
 			int d = binary[i] ? 1 : 0;
 			number += d;
 		}
 
-		previous= number;
+		previous = number;
 		output%0 << number;	
-
 	} // go
 }
-

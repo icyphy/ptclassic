@@ -27,41 +27,41 @@ limitation of liability, and disclaimer of warranty provisions.
 		int *binary;
 	}
         constructor {
+		bits = 0;
                 binary = 0;
         }
         destructor {
-                LOG_DEL; delete [] binary;
+                delete [] binary;
         }
         setup {
                 bits = output.numberPorts();
-                LOG_DEL; delete [] binary;
-                LOG_NEW; binary = new int[bits];
+                delete [] binary;
+                binary = new int[bits];
         }
 	go {
-		int i =0;
-	    	int in = int (input%0);
+	    	int in = int(input%0);
 
-/* 	convert the integer to binary and store it into an array
-	to be output on the bus, msb is the sign bit
-*/
+		// convert the integer to binary and store it into an array
+		// to be output on the bus, msb is the sign bit
 
-		if(in<0)	{binary[bits-1] = 1; in += 2 << (bits-1);}
-		else		binary[bits-1] = 0;
+		if (in < 0) {
+			binary[bits-1] = 1;
+			in += 2 << (bits-1);
+		}
+		else {
+			binary[bits-1] = 0;
+		}
 
-		while (i< (bits-1)) 
-		{
- 	     		binary[i++] = in & 0x1;
-			in = in >> 1;
+		for (int i = 0; i < bits - 1; i++) {
+ 	     		binary[i] = in & 0x1;
+			in >>= 1;
 		}
 
 		MPHIter nextp(output);
-		i=0;
 		PortHole* p;
-		while ((p=nextp++) != 0)
-		{
-			(*p)%0  << binary[i];
-			i++;
+		int j = 0;
+		while ((p = nextp++) != 0) {
+			(*p)%0 << binary[j++];
 		}
-
 	    } //go
 }
