@@ -48,22 +48,21 @@ static const char file_id[] = "SDFTarget.cc";
 #include "pt_fstream.h"
 #include "AcyLoopScheduler.h"
 
-// Defined in SDFDomain.cc
-extern const char SDFdomainName[];
-
-SDFTarget::SDFTarget(const char* nam, const char* desc) :
-Target(nam,"SDFStar",desc)
+SDFTarget::SDFTarget(const char* nam, const char* desc,
+		     const char* assocDomain) :
+Target(nam,"SDFStar",desc,assocDomain)
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
 	addState(loopScheduler.setState("loopScheduler",this,"1",
 			"Specify whether to use loop scheduler."));
 	addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
-		"schedulePeriod for interface with a timed domain."));
+			"schedulePeriod for interface with a timed domain."));
 }
 
 Block* SDFTarget::makeNew() const {
-	LOG_NEW; return new SDFTarget(name(), descriptor());
+	LOG_NEW; return new SDFTarget(name(), descriptor(),
+				      getAssociatedDomain());
 }
 
 SDFTarget::~SDFTarget() {
@@ -96,20 +95,20 @@ void SDFTarget::setup() {
 	    }
 	}
 	switch(int(loopScheduler)) {
-	case 0:
+	    case 0:
 		LOG_NEW; s = new SDFScheduler;
 		break;
-	case 1:
+	    case 1:
 		LOG_NEW; s = new SDFClustSched(logFile);
 		break;
-	case 2:
+	    case 2:
 		LOG_NEW; s = new SDFClustSched(logFile);
 		break;
-	case 3:
+	    case 3:
 		LOG_NEW; s = new AcyLoopScheduler(logFile);
 		break;
-	default:
-		Error::abortRun(*this,"Unknown scheduler");
+	    default:
+		Error::abortRun(*this, "Unknown scheduler");
 		return;
 	}
 	s->schedulePeriod = schedulePeriod;
@@ -123,8 +122,4 @@ void SDFTarget::setup() {
 	if (o) {
 		o << scheduler()->displaySchedule() << "\n";
 	}
-}
-
-const char* SDFTarget::domain() {
-	return galaxy() ? galaxy()->domain() : SDFdomainName;
 }
