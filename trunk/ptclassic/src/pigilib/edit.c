@@ -5,7 +5,6 @@ $Id$
 
 
 /* Includes */
-#include <stdio.h>
 #include <string.h>
 #include <sys/file.h>
 #include "local.h"
@@ -16,6 +15,7 @@ $Id$
 #include "util.h"
 #include "err.h"
 #include "octIfc.h"
+#include "exec.h"
 
 
 #define dmWidth 40
@@ -116,7 +116,7 @@ Returns 0 if there is an error.
 Returns 1 if the parameters were changed or if the user clicked OK.
 Returns 2 if the command was aborted by the user.
 */
-static int
+int
 EditFormalParams(galFacetPtr)
 octObject *galFacetPtr;
 {
@@ -703,86 +703,4 @@ long userOptionWord;
     PrintCon(sprintf(buf, "architecture = '%s'", arch));
     free(items);
     ViDone();
-}
-
-static int
-RunUniverse(spot, name, iterations)
-RPCSpot *spot;
-char* name;
-int iterations;
-{
-	octObject facet;
-	octStatus status;
-	int editStatus;
-	Window newWindow;
-
-	ViInit(name);
-	ErrClear();
-
-	if( ohOpenFacet(&facet, name, "schematic", "contents", "r") <= 0) {
-		PrintErr(octErrorString());
-		ViDone();
-	}
-
-	/* I don't understand why the following two commands are needed,
-	   but if they are omitted, than an error in the run causes the
-	   RPC application to exit.  */
-	newWindow = vemOpenWindow(&facet, NULL);
-
-	if (octGetById(&facet) != OCT_OK) {
-		PrintErr(octErrorString());
-		ViDone();
-	}
-
-	if (!IsUnivFacet(&facet)) {
-		PrintErr("Schematic is not a universe");
-		ViDone();
-	}
-	if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
-		PrintErr("Failed to set default domain.");
-		ViDone();
-	}
-
-	if (!(editStatus = EditFormalParams(&facet))) {
-	    PrintErr(ErrGet());
-            ViDone();
-        }
-
-	if(editStatus == 1) {
-		if(!CompileFacet(&facet)) {
-			PrintErr(ErrGet());
-			ViDone();
-		}
-		if(!KcRun(iterations)) {
-			PrintErr(ErrGet());
-			ViDone();
-		}
-	} else if (editStatus == 2) {
-		PrintCon("Aborted entry");
-	}
-	ViDone();
-}
-
-
-/* Invoke a standard facet to plot a signal */
-int 
-PlotSignal(spot, cmdList, userOptionWord)
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-	return RunUniverse(spot,
-		"~ptolemy/src/domains/sdf/utilities/plotsignal", 100000);
-}
-
-
-/* Invoke a standard facet to plot a magnitude DFT */
-int 
-MagDFT(spot, cmdList, userOptionWord)
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-	return RunUniverse(spot,
-		"~ptolemy/src/domains/sdf/utilities/magdft",1);
 }
