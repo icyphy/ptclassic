@@ -52,10 +52,22 @@ foreach x (sdf ddf de thor $EXPDOMAINS)
 	cd ..
 end
 
+# At this point, we are in obj.$ARCH/domains.
+
 # special case: thor/pepp
 mkdir thor/pepp
 cd thor/pepp
 ln -s ../../../../src/domains/thor/pepp/{make.template,makefile} .
+cd ../..
+
+#special case: cg/loopScheduler
+mkdir cg/loopScheduler
+ln -s ../../../../src/domains/cg/loopScheduler/{make.template,makefile} .
+cd ../..
+
+#special case: sdf/expgraph
+mkdir sdf/expgraph
+ln -s ../../../../src/domains/sdf/expgraph/{make.template,makefile} .
 cd ../..
 
 # This is for the makefile
