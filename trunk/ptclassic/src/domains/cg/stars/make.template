@@ -10,13 +10,14 @@
 
 ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/cg/stars
-# KERNDIR is the directory containing the Ptolemy kernel source.
-KERNDIR = $(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-GPPFLAGS = -g
-GNU = g++
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
@@ -60,8 +61,8 @@ clean:
 		rm -f *.o core *~ *#
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(CGDIR) -I$(KERNDIR) -I$(SDFDIR) $(CCSRCS)|\
-			cat make.template - > makefile.n
+		$(DEPEND) -I$(CGDIR) -I$(KERNDIR) -I$(SDFDIR) $(CCSRCS)|\
+			cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 
 makefile:	make.template

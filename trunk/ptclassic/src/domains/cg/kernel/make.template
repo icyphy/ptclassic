@@ -15,15 +15,13 @@
 ROOT=../../../..
 # True source directory
 VPATH = $(ROOT)/src/domains/cg/kernel
-# Kernel directory
-KERNDIR=$(ROOT)/src/kernel
-# Where to install the libraries
-DESTDIR=$(ROOT)/lib.$(ARCH)
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 # SDF directory
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
-
-GPPFLAGS = -g
-GNU = g++
 
 # Rule for compiling with g++
 .SUFFIXES: .cc
@@ -53,12 +51,12 @@ $(LIB):	$(OBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(DESTDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(LIB)
 
-$(DESTDIR)/$(LIB):	$(LIB)
-		rm -f $(DESTDIR)/$(LIB)
-		cp $(LIB) $(DESTDIR)
-		ranlib $(DESTDIR)/$(LIB)
+$(LIBDIR)/$(LIB):	$(LIB)
+		rm -f $(LIBDIR)/$(LIB)
+		cp $(LIB) $(LIBDIR)
+		ranlib $(LIBDIR)/$(LIB)
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -69,8 +67,8 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		g++ -MM -I$(KERNDIR) -I$(SDFDIR) $(SRCS)|\
-			cat make.template - > makefile.n
+		$(DEPEND) -I$(KERNDIR) -I$(SDFDIR) $(SRCS)|\
+			cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 
 makefile:	make.template
@@ -78,12 +76,6 @@ makefile:	make.template
 		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
-
-# Commands to make some sources from templates
-
-#SDFDomain.cc :	$(KERNDIR)/XDomain.ccP
-#	cd $(VPATH); rm -f SDFDomain.cc; \
-#	sed 's/<T>/SDF/g' $(KERNDIR)/XDomain.ccP > SDFDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

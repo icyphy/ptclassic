@@ -13,16 +13,17 @@ HEADERS =	LSNode.h LSMaster.h LSGraph.h \
 ROOT=../../../..
 # True source directory
 VPATH = $(ROOT)/src/domains/sdf/loopScheduler
-KERNEL = $(ROOT)/src/kernel
+
+# get configuration info
+CONFIG=$(ROOT)/config-$(ARCH).mk
+include $(CONFIG)
+
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
-# Where to install the libraries
-DESTDIR=$(ROOT)/lib.$(ARCH)
 
-GPPFLAGS = -g
-GNU = g++
-INC =-I$(SDFKERNEL) -I$(KERNEL) -I$(EGKERNEL) -I$(LSKERNEL)
+
+INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) -I$(LSKERNEL)
 .SUFFIXES: .cc 
 .cc.o:
 	$(GNU) $(GPPFLAGS) $(INC) -c $<
@@ -39,12 +40,12 @@ $(LIB):	makefile $(LIBOBJS)
 	ranlib $(LIB)
 
 # "make install" puts things in the official place
-install:	all $(DESTDIR)/$(LIB)
+install:	all $(LIBDIR)/$(LIB)
 
-$(DESTDIR)/$(LIB):	$(LIB)
-		rm -f $(DESTDIR)/$(LIB)
-		cp $(LIB) $(DESTDIR)
-		ranlib $(DESTDIR)/$(LIB)
+$(LIBDIR)/$(LIB):	$(LIB)
+		rm -f $(LIBDIR)/$(LIB)
+		cp $(LIB) $(LIBDIR)
+		ranlib $(LIBDIR)/$(LIB)
 
 
 clean:
@@ -54,8 +55,8 @@ sources:	$(SOURCES) $(HEADERS) make.template
 
 depend:		$(SOURCES)
 		cd $(VPATH); \
-		g++ -MM $(INC) $(SOURCES) | cat make.template - > makefile.n
-		mv -f makefile.n makefile
+		$(DEPEND) $(INC) $(SOURCES) |\
+		 cat make.template - > makefile.n; mv -f makefile.n makefile
 
 makefile:	make.template
 		cd $(VPATH); make -f make.template sources depend
