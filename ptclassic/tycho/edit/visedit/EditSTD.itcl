@@ -53,6 +53,9 @@ class ::tycho::EditSTD {
     # Clear all previous highlight states.
     method clearHighlightState {}
 
+    # Draw the visual syntax of an arc based on preemptiveness and entry type
+    method drawArcAttribute {arc}
+
     method editArc {arc} 
     method editArcDone {arc w}
 
@@ -211,6 +214,13 @@ body ::tycho::EditSTD::clearHighlightState {} {
     foreach id $preHighLtStateId {
         $slate itemconfigure $id -fill white
     }
+}
+
+################################################################
+#### drawArcAttribute
+# Draw the visual syntax of an arc based on preemptiveness and entry type
+#
+body ::tycho::EditSTD::drawArcAttribute {arc} {
 }
 
 ###################################################################
