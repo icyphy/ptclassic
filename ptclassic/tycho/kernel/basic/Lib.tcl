@@ -57,18 +57,17 @@
 
 
 ### CATEGORIES
-::tycho::register category new "text" -label "Text Editors"
-::tycho::register category new "html" -label "HTML Viewers"
-::tycho::register category new "graphics" -label "Graphics Editors"
-::tycho::register category new "tool" -label "Tools"
-::tycho::register category new "ptolemy" -label "Ptolemy Tools"
+::tycho::register category new "text" -label "Text Editors" -underline 0
+::tycho::register category new "html" -label "HTML Viewers" -underline 0
+::tycho::register category new "graphics" -label "Graphics Editors" -underline 0
+::tycho::register category new "tool" -label "Tools" -underline 3
+::tycho::register category new "ptolemy" -label "Ptolemy Tools" -underline 0
 
 ::tycho::register category open "text" -label "Open Text Editors"
 ::tycho::register category open "html" -label "Open HTML Viewers"
 ::tycho::register category open "graphics" -label "Open Graphics Editors"
 ::tycho::register category open "tool" -label "Open Tools"
 ::tycho::register category open "ptolemy" -label "Open Ptolemy Tools"
-
 
 ### MODE MAPPINGS
 
@@ -115,96 +114,94 @@
 	-command {::tycho::view Edit -file {%s}} \
 	-viewclass ::tycho::Edit \
 	-label {Plain Text Editor} \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # C
 ::tycho::register mode "c" \
 	-command {::tycho::view EditC -file {%s}} \
 	-viewclass ::tycho::EditC \
 	-label {C Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # C++
 ::tycho::register mode "c++" \
 	-command {::tycho::view EditCpp -file {%s}} \
 	-viewclass ::tycho::EditCpp \
 	-label {C++ Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 1
 
 # Esterel
 ::tycho::register mode "esterel" \
 	-command {::tycho::view EditEsterel -file {%s}} \
 	-viewclass ::tycho::EditEsterel \
 	-label {Esterel Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # HTML editor
 ::tycho::register mode "edithtml" \
 	-command {::tycho::view EditHTML -file {%s}} \
 	-viewclass ::tycho::EditHTML \
 	-label {HTML Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # Images
 ::tycho::register mode "image" \
 	-command {::tycho::view HTML -file {%s} -image 1 -toolbar 1} \
-	-category "html"
+	-category "html" \
+	-underline 0
 
 # HTML viewer
 ::tycho::register mode "html" \
 	-command {::tycho::view HTML -file {%s} -toolbar 1} \
 	-viewclass ::tycho::HTML \
 	-label {HTML Viewer}  \
-	-category "html"
+	-category "html" \
+	-underline 0
 
 # Itcl
 ::tycho::register mode "itcl" \
 	-command {::tycho::view EditItcl -file {%s}} \
 	-viewclass ::tycho::EditItcl \
 	-label {Itcl Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # Java
 ::tycho::register mode "java" \
 	-command {::tycho::view EditJava -file {%s}} \
 	-viewclass ::tycho::EditJava \
 	-label {Java Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # Makefiles and Microsoft Visual C++
 ::tycho::register mode "makefile" \
 	-command {::tycho::view EditMake -file {%s}} \
 	-viewclass ::tycho::EditMake \
 	-label {Makefile Editor}  \
-	-category "text"
-
-# Ptcl -- Ptolemy's Tcl interface language
-::tycho::register mode "ptcl" \
-	-command {::tycho::view EditPtcl -file {%s}} \
-	-viewclass ::tycho::EditPtcl \
-	-label {Ptcl Editor}  \
-	-category "ptolemy"
-
-# Ptlang -- Ptolemy's star definition language
-::tycho::register mode "ptlang" \
-	-command {::tycho::view EditPtlang -file {%s}} \
-	-viewclass ::tycho::EditPtlang \
-	-label {Ptlang Editor}  \
-	-category "ptolemy"
+	-category "text" \
+	-underline 0
 
 # SDL -- System description language
 ::tycho::register mode "sdl" \
 	-command {::tycho::view EditSDL -file {%s}} \
 	-viewclass ::tycho::EditSDL \
 	-label {SDL Editor} \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 # Tcl
 ::tycho::register mode "tcl"  \
 	-command {::tycho::view EditTcl -file {%s}} \
 	-viewclass ::tycho::EditTcl \
 	-label {Tcl Editor}  \
-	-category "text"
+	-category "text" \
+	-underline 0
 
 ########### graphical editors (alphabetical)
 
@@ -213,7 +210,8 @@
 	-command {::tycho::view EditDAG -file {%s}} \
 	-viewclass ::tycho::EditDAG \
 	-label {DAG Editor}  \
-	-category "graphics"
+	-category "graphics" \
+	-underline 0
 
 # NOTE: Not useful on its own.
 # ::tycho::register mode {.fsm} \
@@ -225,21 +223,24 @@
 	-command {::tycho::editgraph {%s}} \
 	-viewclass ::tycho::EditGraph \
 	-label {Graph Editor}  \
-	-category "graphics"
+	-category "graphics" \
+	-underline 0
 
 # Tree viewer
 ::tycho::register mode "forest" \
 	-command {::tycho::view EditForest -file {%s}} \
 	-viewclass ::tycho::EditForest \
 	-label {Forest Editor}  \
-	-category "graphics"
+	-category "graphics" \
+	-underline 0
 
 # State-transition diagram editor
 ::tycho::register mode "std" \
 	-command {::tycho::view EditSTD -file {%s}} \
 	-viewclass ::tycho::EditSTD \
 	-label {State Transition Diagram Editor}  \
-	-category "graphics"
+	-category "graphics" \
+	-underline 0
 
 # Tycho index browser
 ::tycho::register mode "indexbrowser" \
@@ -252,27 +253,31 @@
 ::tycho::register mode "builder" \
 	-command {::tycho::view BuilderDialog} \
 	-label {Tycho Builder}  \
-	-category "tool"
+	-category "tool" \
+	-underline 6
 
 # Itcl class list and class diagram generator
 ::tycho::register mode "itclclasslist" \
 	-command {::tycho::view ItclClassList -file {%s} -toolbar 1} \
 	-viewclass ::tycho::ItclClassList \
 	-label {Itcl Class List}  \
-	-category "tool"
+	-category "tool" \
+	-underline 5
 
 # Tcl profiling tool
 ::tycho::register mode "profile" \
 	-command {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
 	-label {Tcl Profiler}  \
-	-category "tool"
+	-category "tool" \
+	-underline 4
 
 # Tcl shell
 ::tycho::register mode "tclshell" \
 	-command {::tycho::view TclShell -file {%s}} \
 	-viewclass ::tycho::TclShell \
 	-label {Tcl Shell}  \
-	-category "tool"
+	-category "tool" \
+	-underline 4
 
 # Tools that will not run on the Macintosh
 if {$tcl_platform(platform) != "macintosh"} {
@@ -282,14 +287,16 @@ if {$tcl_platform(platform) != "macintosh"} {
 	    -command {::tycho::view EditDiff -toolbar 1} \
 	    -viewclass ::tycho::EditDiff \
 	    -label {Diff Viewer}  \
-	    -category "tool"
+	    -category "tool" \
+	    -underline 0
 
     # Monitor window for exec'ed processes
     ::tycho::register mode "monitor" \
 	    -command {::tycho::view Monitor -toolbar 1} \
 	    -viewclass ::tycho::Monitor \
 	    -label {Exec Window}  \
-	    -category "tool"
+	    -category "tool" \
+	    -underline 0
 
     # Glimpse interface
     ::tycho::register mode "glimpse" \
@@ -297,7 +304,8 @@ if {$tcl_platform(platform) != "macintosh"} {
 	    ::tycho::Glimpse $w -geometry +0+0;\
 	    wm deiconify $w} \
 	    -label {Glimpse}  \
-	    -category "tool"
+	    -category "tool" \
+	    -underline 0
 }
 
 ########### Compound viewers (alphabetical)
@@ -307,7 +315,8 @@ if {$tcl_platform(platform) != "macintosh"} {
 	-command {::tycho::view IDoc -file {%s}} \
 	-viewclass ::tycho::IDoc \
 	-label {IDoc Viewer}  \
-	-category "html"
+	-category "html" \
+	-underline 0
 
 ########### Miscellaneous and conditional modes
 
@@ -336,6 +345,22 @@ if {[uplevel #0 info commands mathematica] != {}} {
 
 ########### Ptolemy bits
 
+# Ptcl -- Ptolemy's Tcl interface language
+::tycho::register mode "ptcl" \
+	-command {::tycho::view EditPtcl -file {%s}} \
+	-viewclass ::tycho::EditPtcl \
+	-label {Ptcl Editor}  \
+	-category "ptolemy" \
+	-underline 1
+
+# Ptlang -- Ptolemy's star definition language
+::tycho::register mode "ptlang" \
+	-command {::tycho::view EditPtlang -file {%s}} \
+	-viewclass ::tycho::EditPtlang \
+	-label {Ptlang Editor}  \
+	-category "ptolemy" \
+	-underline 2
+
 # The VEM facet mode behaves differently if we are inside Ptolemy
 if $ptolemyfeature(octtools) {
     # Ptolemy and vem are present.  Use them.
@@ -350,7 +375,8 @@ if $ptolemyfeature(octtools) {
 	    -command {::tycho::view EditPalette -facet {%s}} \
 	    -viewclass ::tycho::EditPalette \
 	    -label {Palette Editor} \
-	    -category "ptolemy"
+	    -category "ptolemy" \
+	    -underline 0
 }
 # Retargetting editor
 if { $ptolemyfeature(ptolemy)} {
