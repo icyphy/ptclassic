@@ -33,11 +33,32 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { The period of the impulse train, 0 = aperiodic. }
 	}
 	defstate {
+		name { delay }
+		type { int }
+		default { 0 }
+		desc { Output will be delayed by this amount(Delay >= 0) }
+	} 
+	defstate {
 		name { count }
 		type { int }
 		default { 0 }
 		desc { An internal state. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
+	setup {
+		if (int(period) < 0) {
+			Error::abortRun(*this,
+				"Period must be non-negative");
+		};
+		if (int(delay) < 0) {
+			Error::abortRun(*this,
+				"Delay must be non-negative");
+		};
+		if (int(period) == 0){
+			count = - int(delay);
+		} else {
+			count = - (int(delay)%int(period));
+		};
 	}
 	go {
 		double t = 0.0;
@@ -47,4 +68,5 @@ limitation of liability, and disclaimer of warranty provisions.
 		output%0 << t;
 	}
 }
+
 
