@@ -45,7 +45,7 @@ package require tycho.kernel.gui
 # It would be nice if the tests would work in a vanilla itkwish binary.
 # Check for necessary classes and adjust the auto_path accordingly.
 #
-if {[namespace ptolemy {info classes File}] == {} } {
+if {[namespace ptolemy {info classes File} ] == {} } {
     uplevel #0 {
 	set ::auto_path [linsert $auto_path 0 [file join $TYCHO kernel]] 
     }
@@ -111,7 +111,7 @@ test IndexBrowser-1.1 {Bring up a index, select an simple node} {
 #### 
 # 
 # This next test is going to need the HTML browser...
-if ![catch {package require tycho.kernel.html}] {
+if ![catch {package require tycho.kernel.html} ] {
     test IndexBrowser-1.2 {Bring up a index, select an hierarchichal index} {
 	testIndexBrowserSetup
 
