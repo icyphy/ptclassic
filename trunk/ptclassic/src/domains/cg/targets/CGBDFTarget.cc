@@ -38,7 +38,7 @@ BDF code generation!
 
 CGBDFTarget::CGBDFTarget(const char* name, const char* starclass,
 			 const char* desc)
-: CGTarget(name,starclass,desc,'_')
+: CGTarget(name,starclass,desc)
 {
 	// make loopingLevel invisible
 	loopingLevel.clearAttributes(A_SETTABLE);
