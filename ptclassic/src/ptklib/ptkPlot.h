@@ -39,39 +39,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
  */
 #include "ptkPlot_defs.h"
 
-int plotPoint(Tcl_Interp *interp,
-	      plotDataset *setPtr,
-	      double xval,
-	      double yval);
+void ptkInitPlot(ptkPlotWin *plotPtr);
 
-void freeAssoc(Tcl_Interp *interp,
-	      plotDataset *setPtr,
-	      plotWin *plotPtr);
-
-void assocData(Tcl_Interp *interp,
-	       plotDataset *setPtr,
-	       plotWin *plotPtr);
-
-int createDataset(Tcl_Interp *interp,
-		  plotDataset *setPtr,
+int ptkCreatePlot(Tcl_Interp *interp,
+		  ptkPlotWin* plotPtr,
 		  Tk_Window *win,
-		  int persistence,
-		  int batch);
+		  char *name,
+		  char *identifier,
+		  char *geometry,
+		  char *xTitle,
+		  char  *yTitle,
+		  double xMin, 
+		  double xMax, 
+		  double yMin, 
+		  double yMax,
+		  int numsets,
+		  int batch,
+		  int style,
+		  int persistence);
 
-void freeDataset(plotDataset *setPtr);
-void freePlot(Tcl_Interp *interp, plotWin *plotPtr);
+int ptkPlotPoint(Tcl_Interp *interp,
+		 ptkPlotWin *plotPtr,
+		 int setnum,
+		 double xval,
+		 double yval);
 
-int createPlot(Tcl_Interp *interp,
-		plotWin* plotPtr,
-		Tk_Window *win,
-		char *name,
-		char *identifier,
-		char *geometry,
-		char *xTitle,
-		char  *yTitle,
-		double xMin, 
-		double xMax, 
-		double yMin, 
-		double yMax);
+int ptkPlotBreak(Tcl_Interp *interp,
+		 ptkPlotWin *plotPtr,
+		 int setnum);
+
+void ptkFreePlot(Tcl_Interp *interp, ptkPlotWin *plotPtr);
+
+const char *ptkPlotErrorMsg();
 
 #endif
