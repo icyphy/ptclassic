@@ -1,4 +1,4 @@
--*-Mode: text-*- -[Fri Jul  1 13:30:36 1994 by cxh]-
+-*-Mode: text-*- -[Fri Aug 26 18:32:17 1994 by cxh]-
 Version: $Id$
 
 src/tcl/README
@@ -20,17 +20,29 @@ directory.  You will need to set the $PTOLEMY and $ARCH variables:
 The makefile $PTOLEMY/mk/scratch-srcs.mk has rules to build tcl and
 tk. 
 
-Most of the sources in this directory are available via anonymous ftp from
-ftp.cs.berkeley.edu in ucb/tcl/.  The TkPixmap is available via
+Most of the sources in this directory are available via anonymous ftp
+from ftp.cs.berkeley.edu in ucb/tcl/.  The TkPixmap is available via
 anonymous ftp from harbor.ecn.purdue.edu in pub/tcl/extensions
+
+You may use your own tcltk even if it does not have TkPixmap installed
+in it.  The program 'xpole' uses TkPixmap.  xpole is not part of
+Ptolemy, but it is available via anonymous ftp from
+ptolemy.eecs.berkeley.edu in the pub/misc directory.
+
+If you chose to use your own tcltk, you will need to either
+1) Edit $PTOLEMY/mk/config-default.mk and change the TCL_ROOT,
+   TCL_INCDIR, TCL_LIBSPEC, TK_INCDIR AND TK_LIBSPEC.
+or
+2) make links in $PTOLEMY/tcltk/*
 
 Versions
 --------
 	Ptolemy 0.5 uses tcl7.3 and tk3.6.
 	tk3.6 has had the following patches applied:
 		tk3.6p1 patch
-	TkPixmap3.6e is necessary for xpole, and to get the Mr Ptolemy
-	face in the welcome window.
+	TkPixmap3.6e is necessary for xpole, but not for Ptolemy in
+	general.
+
 
 GNU make
 --------
