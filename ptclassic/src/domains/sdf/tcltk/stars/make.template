@@ -43,7 +43,8 @@ PL_SRCS= \
  SDFTkMeter.pl \
  SDFTkShowValues.pl \
  SDFTkSlider.pl \
- SDFTkText.pl
+ SDFTkText.pl \
+ SDFTkXYPlot.pl
 
 TCL_SRCS= \
  tkMeter.tcl \
