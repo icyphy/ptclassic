@@ -34,6 +34,9 @@ static char SccsId[]="$Id$";
 #include "geo.h"
 #include "io.h"
 
+#include "oct_utils.h"
+#include "io_procs.h"
+
 #include "circle.h"
 
 static octStatus circle_read_fields(), circle_write_fields();
@@ -90,7 +93,7 @@ struct object_desc *object_desc;
 
 #define TO_RADS (3.14159265358979/1800)
 
-static
+static octStatus
 circle_bb(cptr, box)
 generic *cptr;
 struct octBox *box;
