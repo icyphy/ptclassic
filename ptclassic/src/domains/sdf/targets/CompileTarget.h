@@ -61,6 +61,10 @@ private:
 	// "name.newPort()" for a MultiPortHole.
 	StringList expandedName(const GenericPort* p) const;
 
+	// Replaces quotation marks with quoted quotation marks
+	// in a string (i.e. " => \")
+	StringList CompileTarget::quoteQuotationMarks(const char* str);
+
 	StringList galDef(Galaxy* galaxy, StringList className, int level);
 
 	int writeGalDef(Galaxy& galaxy, StringList className);

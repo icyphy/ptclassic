@@ -252,6 +252,29 @@ StringList CompileTarget::expandedName(const GenericPort* p) const {
 	return out;
 }
 
+// Replace all quotation marks in a string with \"
+StringList CompileTarget::quoteQuotationMarks(const char* str) {
+    StringList ret;
+    char piece[101];
+    if (!str) return "";
+    while (*str != NULL) {
+	char* piecep = piece;
+        for (int i = 0; i < 100; i++) {
+	    if (*str == NULL) {
+		piecep = NULL;
+		break;
+	    } else if (*str == '\"') {
+	        piecep++ = '\\';
+	        piecep++ = '\"';
+	    } else {
+	        piecep++ = *str;
+	    }
+	    str++;
+	}
+	ret += piece;
+    }
+}
+
 // Define a galaxy
 StringList CompileTarget::galDef(Galaxy* galaxy,
 			StringList className, int level) {
@@ -382,7 +405,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	myCode += ".setState(\"";
 	myCode += galState->name();
 	myCode += "\", this, \"";
-	myCode += galState->initValue();
+	myCode += quoteQuotationMarks(galState->initValue());
 	myCode += "\"));\n";
     }
     next.reset();
@@ -410,7 +433,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 	    myCode += s->name();
 	    myCode += "\",\"";
 	    // Want to get initial value here -- before processing
-	    myCode += s->initValue();
+	    myCode += quoteQuotationMarks(s->initValue());
 	    myCode += "\");\n";
 	}
     }
