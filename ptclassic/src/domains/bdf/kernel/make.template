@@ -55,6 +55,20 @@ install:	makefile $(LIBDIR)/$(LIB)
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
+# This is a GNU make conditional
+ifeq ($(ARCH),hppa)
+BDFSchList.o: BDFSchList.cc
+	@echo "DANGER: serious hppa specific bug here."
+	@echo "If, under gcc-2.5.8, BDFSchList is compiled with optimization"
+	@echo "turned on, then at link time, the symbol:"
+	@echo "   info__C12BDFSchedulerRC8PortHole (data)"
+	@echo "will be undefined."
+	@echo "This symbol comes from void BDFTestNode::run(BDFScheduler& sch)"
+	@echo "   int test = sch.getBoolValue(port);"
+	@echo "So we compile this file without the optimizer on hppa only"
+	$(CPLUSPLUS) $(CC_SHAREDFLAGS) -DUSG -g $(WARNINGS) -I$(VPATH) $(INCL) -c $< 
+endif
+
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
 
