@@ -60,8 +60,8 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # Note that cc uses -Bstatic
 CC_STATIC = 	-static
 
-# gcc-2.7.0/libg++-2.7 seems to require -liostream
-SYSLIBS =	-liostream -lg++ -lm
+# gcc-2.7.0/libg++-2.7 seems to require -liostream and -liberty (for memmove)
+SYSLIBS =	-liostream -lg++ -liberty -lm
 
 #
 # Directories to use
