@@ -1515,9 +1515,9 @@ body ::tycho::File::saveText {} {
 #
 body ::tycho::File::removeBackupFiles {} {
     set savefile [file join [file dirname $file] "#auto#[file tail $file]"]
-    ::tycho::rm -f $savefile
+    file delete -force $savefile
     set savefile [file join [file dirname $file] "#crash#[file tail $file]"]
-    ::tycho::rm -f $savefile
+    file delete -force $savefile
 }
 
 
