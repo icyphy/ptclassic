@@ -50,7 +50,7 @@ LIBCCSRCS=Architecture.cc AutoForkNode.cc \
  Tokenizer.cc Universe.cc UserOutput.cc Wormhole.cc WormConnect.cc \
  checkConnect.cc expandPath.cc int.Vec.cc \
  FloatArrayState.cc FloatState.cc IntArrayState.cc IntState.cc \
- KnownState.cc State.cc StringState.cc
+ KnownState.cc State.cc StringState.cc Animate.cc
 LIBCSRCS=gnulib3a.c
 
 LIBSRCS = $(LIBCCSRCS) $(LIBCSRCS)
@@ -69,7 +69,7 @@ HDRS= Architecture.h Attribute.h AutoForkNode.h \
  dataType.h int.Vec.h miscFuncs.h type.h \
  ComplexArrayState.h ComplexState.h FloatState.h FloatArrayState.h \
  IntArrayState.h IntState.h KnownState.h State.h StringState.h \
- FloatVecData.h IntVecData.h ImageData.h
+ FloatVecData.h IntVecData.h ImageData.h Animate.h
 
 # Library objects
 LIBOBJS=$(LIBCCSRCS:.cc=.o) $(LIBCSRCS:.c=.o)
