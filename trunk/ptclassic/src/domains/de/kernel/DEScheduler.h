@@ -23,7 +23,7 @@ $Id$
 #include "Galaxy.h"
 #include "DEStar.h"
 #include "Scheduler.h"
-
+#include "EventQueue.h"
 
 	////////////////////////////
 	// DEScheduler
