@@ -56,5 +56,5 @@ install_octtools: obj.$(ARCH)
 # then everything else.  gcc and tcl/tk source are usually distributed as a
 # separate tar file. 
 bootstrap: obj.$(ARCH)
-	$(MAKE) -f mk/scratch-srcs.mk
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) install
 	$(MAKE) $(MFLAGS) install_octtools install
