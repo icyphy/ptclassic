@@ -35,9 +35,11 @@
 # A palette is an octtools facet that contains other sub-facets.
 # In Ptolemy, a facet is a directory with a .pal suffix.
 # <p>
-# Here is an example of how to use the EditPalette:
+# Here is an example of how to use the EditPalette, this example
+# requires Ptolemy be installed locally, and could take a few minutes
+# to bring up an editor
 # <tcl><pre>
-#     ::tycho::view EditPalette [list -file $PTOLEMY/init.pal]
+#     ::tycho::view EditPalette [list -facet $PTOLEMY/init.pal]
 # </pre></tcl>
 #
 class ::tycho::EditPalette {
@@ -73,7 +75,7 @@ configbody ::tycho::EditPalette::facet {
     set facet $itk_option(-facet)
     if {$facet != "" } {
 	set facet [::tycho::expandPath $facet]
-	set facetTmpFile ::tycho::tmpFileName [file tail $facet] .fst
+	set facetTmpFile [::tycho::tmpFileName [file tail $facet] .fst]
         set recurse 0
 	ptolemyMkFacetGraph [list [list $facet]] $facetTmpFile $recurse $facet
 
