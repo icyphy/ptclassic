@@ -24,7 +24,7 @@ Complex operator / (const Complex& x, const Complex& y) {
 
 Complex exp(const Complex& arg) {
 	double angle = arg.imag();
-	double mag = arg.real();
+	double mag = exp(arg.real());
 	return Complex(mag*cos(angle), mag*sin(angle));
 }
 
