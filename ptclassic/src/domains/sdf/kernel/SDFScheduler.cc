@@ -88,12 +88,14 @@ SDFSchedule :: printVerbose () const {
 int SDFScheduler :: run () {
 	if (invalid) {
 		Error::abortRun(*galaxy(),
-				"Error during setup - can't run");
+				"Can't run because it is invalid, possibly ",
+				"because of an earlier setup or run-time ",
+				"error, or because halt was requested.");
 		return FALSE;
 	}
 	if (haltRequested()) {
 		Error::abortRun(*galaxy(),
-				"Can't continue after run-time error");
+				"Can't run after halt was requested.");
 		return FALSE;
 	}
 	while (numItersSoFar < numIters && !haltRequested()) {
@@ -101,7 +103,9 @@ int SDFScheduler :: run () {
 		currentTime += schedulePeriod;
 		numItersSoFar++;
 	}
-	numIters++;
+	// FIXME (wtc): I don't think we need the following line.
+	// I commented it out and see if things still work.
+	//numIters++;
 	return TRUE;
 }
 
@@ -139,38 +143,34 @@ void SDFScheduler :: setup () {
 	invalid = FALSE;
 
 	// Check to see if the original user galaxy is connected
-        checkConnectivity();
-        if (invalid) return;
+        if (!checkConnectivity()) return;
 
         prepareGalaxy();
+	// If halt is requested in the middle of galaxy initialization,
+	// the galaxy is left in an invalid state.
+	if (SimControl::haltRequested()) {
+		invalid = TRUE;
+		return;
+	}
 
 	// Check connectivity again, blocks could have been deleted
 	// with galaxy()->deleteBlockAfterInit.  This can happen with
 	// hof stars and the CGC wormhole target
 
-        checkConnectivity();
-        if (invalid) return;
+        if (!checkConnectivity()) return;
 
 	currentTime = 0;
-
-	if (haltRequested()) {
-		invalid = TRUE;
-		return;
-	}
 
 	// force recomputation of repetitions and noTimes.  Also make
 	// sure all stars are SDF.
 
-        checkStars();
-	if (invalid) return;
+        if (!checkStars()) return;
 
-	repetitions();
-	if (invalid) return;
+	if (!repetitions()) return;
 
         // Schedule the graph.
 
-        computeSchedule(*galaxy());
-	if (invalid) return;
+        if (!computeSchedule(*galaxy())) return;
 
 	adjustSampleRates();
 	return;
@@ -192,10 +192,11 @@ int SDFScheduler::checkConnectivity()
 	return TRUE;
 }
 
-// Check that all stars in "galaxy" have the SDF property.
-// We assume they have already been checked (by the target, say)
-// and are at least DataFlowStar.
-
+// Check that all stars in "galaxy" have the SDF property,
+// and that their portholes produce or consume positive numbers
+// of tokens.  We assume they have already been checked (by the
+// target, say) and are at least DataFlowStar.
+//
 // Note that "isSDFinContext" is used.  If actors are inserted
 // after the schedule is computed, the SDF property may be lost,
 // so in that case checkStars should be overriden and isSDF used
@@ -210,6 +211,18 @@ int SDFScheduler::checkStars()
 			Error::abortRun(*s, " is not SDF");
 			invalid = TRUE;
 			return FALSE;
+		}
+		// Check if each of the star's portholes produces or
+		// consumes positive number of tokens.
+		BlockPortIter nextPort(*s);
+		PortHole* p;
+		while ((p = nextPort++) != 0) {
+			if(p->numXfer() <= 0) {
+				Error::abortRun(*s, "Porthole \"", p->name(),
+				    "\" does not produce or consume positive number of tokens.");
+				invalid = TRUE;
+				return FALSE;
+			}
 		}
 	}
 	return TRUE;
@@ -336,10 +349,8 @@ int SDFScheduler::addIfWeCan (DataFlowStar& star, int defer) {
 int SDFScheduler :: repetitions () {
 	
 	// The following iteration occurs exactly as many times as
-	// there are blocks in the universe.
-	// Note that for a connected universe, this iteration would
-	// entirely unnecessary.  Is there some way to get rid of it?
-	// Should we allow disconnected universes?
+	// there are blocks in the universe.  This way we can step
+	// through all the connected subgraphs.
 	DFGalStarIter next(*galaxy());
 	DataFlowStar* s;
 	while ((s = next++) != 0) {
@@ -406,7 +417,7 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 		// having determined that it has not previously been done.
 
 		if(reptArc(nearPort,farPort)) {
-			reptConnectedSubgraph (*(farPort.parent()));
+			reptConnectedSubgraph(*(farPort.parent()));
 			subgraph.put(farPort.parent()->asStar());
 		}
 	}
@@ -432,18 +443,6 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	Fraction& farStarRepetitions = farStar.repetitions;
 	Fraction farStarShouldBe;
 
-	// Check for invalid production or consumption
-	if(nearPort.numXfer() <= 0) {
-	    Error::abortRun(nearStar,
-		"Invalid number of samples produced or consumed");
-	    invalid = TRUE;
-	    return FALSE;
-	} else if(farPort.numXfer() <= 0) {
-	    Error::abortRun(farStar,
-		"Invalid number of samples produced or consumed");
-	    invalid = TRUE;
-	    return FALSE;
-	}
 	// compute what the far star repetitions property should be.
 	Fraction factor(nearPort.numXfer(),farPort.numXfer());
 	farStarShouldBe = nearStarRepetitions * factor;
