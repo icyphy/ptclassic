@@ -42,6 +42,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 typedef void (*SIG_PT)(int);
 #endif
 
+// SIGEMT and SIGSYS are possible not defined in /usr/include/signal.h  
+//   or /usr/include/sys/signal.h
+#if defined(PTLINUX) || defined(PTLINUX_ELF)
+#ifndef SIGEMT
+#define SIGEMT 7	/* EMT instruction */
+#endif
+#ifndef SIGSYS
+#define	SIGSYS	12	/* bad argument to system call */    
+#endif
+#endif
+
 // Function prototypes
 int setHandlers(SIG_PT sigHandler);
 void signalHandler(int signo);
