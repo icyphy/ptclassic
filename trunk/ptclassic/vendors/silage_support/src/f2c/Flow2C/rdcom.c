@@ -237,14 +237,20 @@ EdgePointer FindEntry(Graph, Name)
     char *edgename, *GetArrayName();
     GraphPointer SubGraph;
 
+
     for (edge = Graph->EdgeList; edge != NULL; edge = edge->Next) {
 	edgename = edge->Name;
-        if (!strncmp(edgename,Name,strlen(Name)))
+/* commented this out because it gives wrong results if
+two inputs are say x1 and x. 
+Asawaree, 3/6/93 */
+        /*if (!strncmp(edgename,Name,strlen(Name))) */
+        if (!strcmp(edgename,Name))
 	    return(edge);
     }
     for (edge = Graph->ControlList; edge != NULL; edge = edge->Next) {
 	edgename = GetArrayName(edge);
-        if (!strncmp(edgename,Name,strlen(Name)))
+        /*if (!strncmp(edgename,Name,strlen(Name))) */
+        if (!strncmp(edgename,Name))
 	    return(edge);
     }
     for (node = Graph->NodeList; node != NULL; node = node->Next) {
