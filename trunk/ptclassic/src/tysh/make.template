@@ -46,12 +46,13 @@ VPATH =		$(ROOT)/src/tycho/kernel
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# To use Tcl 7.4 and tk4.0, set the following
-# FIXME: The version should not be hardwired in this way.
-TCL_INCDIR=$(TCL_ROOT)/tcl7.4/include
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4.$(PTARCH)/lib -ltcl
-TK_INCDIR=$(TCL_ROOT)/tk4.0/include
-TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0.$(PTARCH)/lib -ltk #-lXpm
+# To use Tcl 7.4p1 and tk4.0p1, set the following
+# FIXME: The version should not be hardwired in this way, once we update
+#	 ptolemy to tk4.x, this should go away
+TCL_INCDIR=$(TCL_ROOT)/tcl7.4p1/include
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl7.4p1.$(PTARCH)/lib -ltcl
+TK_INCDIR=$(TCL_ROOT)/tk4.0p1/include
+TK_LIBSPEC=-L$(TCL_ROOT)/tk4.0p1.$(PTARCH)/lib -ltk #-lXpm
 
 # Directory containing utilities for BarGraph and XYPlot
 PTKDIR = $(ROOT)/src/ptklib
@@ -74,24 +75,24 @@ OPTIMIZER=
 # libraries
 # Note that we have two underscores in the name PTINY__LIBS to differentiate 
 # it from PTINY_LIBS below
-PTINY__LIBS =	$(PTINY_STAR_LIBS) -lsdftclstars -ldetclstars \
-		-lhofstars -lhof \
+PTINY__LIBS =	$(PTINY_STAR_LIBS) \
+		$(PTINY_TCL_STAR_LIBS) $(HOF_LIBS) \
 		-lptk -lptolemy $(LIB_FLUSH_CACHE)
 
-PTRIM__LIBS =	$(PTRIM_STAR_LIBS) -lsdftclstars -ldetclstars \
-		-lhofstars -lhof \
+PTRIM__LIBS =	$(PTRIM_STAR_LIBS) \
+		$(PTRIM_TCL_STAR_LIBS) $(HOF_LIBS) \
 		-lptk -lptolemy \
 		$(LIB_FLUSH_CACHE)
 
-LIBS =		$(STAR_LIBS) -lsdftclstars -ldetclstars -lmdsdftclstars \
-		-lhofstars -lhof \
+LIBS =		$(STAR_LIBS) \
+		$(TCL_STAR_LIBS) $(HOF_LIBS) \
 		-lptk -lptolemy $(LIB_FLUSH_CACHE)
 
 PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
 	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
-	$(LIBDIR)/libptk.$(LIBSUFFIX)
+	$(LIBDIR)/libptk.a
 
 PTRIM_LIBFILES = $(PTRIM_STAR_LIBFILES) \
 	$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
@@ -103,7 +104,7 @@ LIBFILES = 		$(STAR_LIBFILES) \
 			$(LIBDIR)/libdetclstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
-			$(LIBDIR)/libptk.$(LIBSUFFIX)
+			$(LIBDIR)/libptk.a
 
 VERSION=0.6.tycho
 
@@ -125,6 +126,7 @@ ALLSTARS = $(ATMSTARS) $(SDFSTARS) \
 	$(DDFSTARS) $(THORSTARS) $(DESTARS) $(BDFSTARS) \
 	$(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o \
 	$(MDSDFSTARS)  $(LIBDIR)/mdsdftclstars.o \
+	$(IPUSSTARS) \
 	$(LIBDIR)/hofstars.o
 
 PTINY_TARGETS =		$(SDFTARGETS) 
