@@ -47,6 +47,9 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/domains/sdf/stars \
 # Library name
 LIB=libsdfstars.$(LIBSUFFIX)
 
+# Used to create .dlls under nt4.vc
+DLLDEPS =     $(SDF_STARS_DLLDEP)
+
 # source files for all stars, using preprocessor
 # base classes/stars go in the front of the list
 PL_SRCS= \

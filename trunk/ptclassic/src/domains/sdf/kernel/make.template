@@ -46,6 +46,9 @@ INCL = -I$(KERNDIR) -I$(PTCL_INCDIR)
 # Library name
 LIB=libsdf.$(LIBSUFFIX)
 
+# Used to create .dlls under nt4.vc
+DLLDEPS =     $(KERNEL_DLLDEP) $(PTMATHEMATICA_DLLDEP) $(PTCL_DESCRIPTION_OBJ)
+
 # Header files
 HDRS= DynDFScheduler.h EGGate.h EGNode.h ExpandedGraph.h \
  SDFPortHole.h SDFScheduler.h SDFStar.h SDFWormhole.h \
