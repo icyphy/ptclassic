@@ -1,7 +1,7 @@
-# Definition of a window that displays HTML.
-# 
+# Definition of a text widget that displays formatted HTML.
+#
 # @Author: Edward A. Lee
-# @Contributor: This uses the HTML library by Stephen Uhler.
+# @Contributor: Stephen Uhler (HTML library), 
 #
 # @Version: $Id$
 #
@@ -28,45 +28,104 @@
 # ENHANCEMENTS, OR MODIFICATIONS.
 # 
 # 						PT_COPYRIGHT_VERSION_2
+#
+# Portions of the code in this file are modified from the HTML library
+# by Stephen Uhler (of Sun Microsystems), and "surfit", written by
+# members of the PASTIME project at the Australian National University.
+# The copyrights below apply to those versions:
+#
+#	Copyright (c) 1996 Australian National University and
+#	Sun Microsystems
+#
+#--------
+#
+#	PASTIME Project
+#	Cooperative Research Centre for Advanced Computational Systems
+#	COPYRIGHT NOTICE AND DISCLAIMER.
+#
+#	Copyright (c) 1995 ANU and CSIRO
+#	on behalf of the participants in
+#	the CRC for Advanced Computational Systems (ACSys)
+#
+# This software and all associated data and documentation ("Software")
+# was developed for research purposes and ACSys does not warrant that 
+# it is error free or fit for any purpose.  ACSys disclaims all liability
+# for all claims, expenses, losses, damages and costs any user may incur 
+# as a result of using, copying or modifying the Software.
+#
+#
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME: Many features are missing.
-# Perhaps the most important and relatively easy to support:
-# - forms
-# - a forward button
-# - hotlist support
+# FIXME: Known bugs
+# - The rendering is quite slow.  Needs to be speeded up.
+# - The Tcl extension should use more standard HTML syntax.
+# - Embedded windows should be supported.
+
+# Load the HTML library, if necessary, and make adjustments.
+if {[info commands HMinit_win] == {}} {
+    uplevel #0 {
+	source [file join $TYCHO lib html_library html_library.tcl]
+
+	# Make format adjustments -- better than the default
+	set HMtag_map(h2) {size 20 weight bold}
+	set HMtag_map(h3) {size 20 style i}
+	set HMtag_map(h5) {size 16 weight bold}
+
+        set HMinitialtag_map $HMtag_map(hmstart)
+        unset HMtag_map(hmstart)
+    }
+}
 
 #######################################################################
 #### options
 #
 option add *HTML.fontSize medium widgetDefault
+option add *HTML.textWidth 100 widgetDefault
+option add *HTML.textHeight 40 widgetDefault
+
+option add *HTML.textBackground \
+	[ptkColor linen white] widgetDefault
+option add *HTML.textForeground \
+	[ptkColor black black] widgetDefault
+
+option add *HTML.relief raised widgetDefault
+option add *HTML.targetColor [ptkColor lightskyblue white] widgetDefault
+option add *HTML.findMatchColor [ptkColor forestGreen black] widgetDefault
+option add *HTML.selectColor [ptkColor yellow white] widgetDefault
+
+# Define the color for embedded Tcl code in the HTML document.
+option add *HTML.tclColor [ptkColor purple black] widgetDefault
 
 #######################################################################
 #### HTML
-# A window containing a text widget that displays HTML using the
-# HTML library by Stephen Uhler.  The HTML may be specified directly
-# using the -data option or indirectly using the -file option.
-# An interface to an HTML editor is provided through the "Open Source"
-# menu command.  Buttons are provided for frequently executed commands.
-# <p>
-# This class is meant to provide an integrated documentation system,
-# not to replace standard Web browsers.  In fact, it does not at this
-# time have HTTP capability, so it will not read files off the Web.
-# <p>
-# This HTML parser is a bit slow,
-# and does not include most features of HTML beyond version 2.0.
-# Nonetheless, it is small, simple, and easily extended, so it serves
-# our purposes well.
+# FIXME: Update docs.
+# This widget parses HTML using the library by Stephen Uhler and
+# displays it in a Tk text widget. Only local file accesses are
+# currently supported (no HTTP, FTP, etc). The HTML source can be
+# specified using the -data option or indirectly using the -file
+# option. If the HTML will have references to other files (such as
+# image files) that are relative, then the reference directory should
+# be specified using the -directory option if the -data option was
+# used.  Otherwise, the directory is inferred from the -file option.
 # 
 class ::tycho::HTML {
-    inherit ::tycho::File
+    inherit ::tycho::Edit
+
+    ###################################################################
+    ####                       options                             ####
+
+    # The directory for relative references to images and the like,
+    itk_option define -directory directory Directory {}
+
+    # Offset from the nominal 14 points for the font sizes.
+    itk_option define -size size Size 2
 
     constructor {args} {}
     destructor {}
 
     ###################################################################
-    ####                       public methods                      ####
+    ####                      public methods                       ####
 
     # Prompt the user for a file name and load in place of the current file.
     method altFile {}
@@ -77,11 +136,8 @@ class ::tycho::HTML {
     # Clear the window.
     method clear {}
 
-    # Return the current insertion point in a form usable by seePoint.
-    method currentPoint {}
-
-    # Give the text subwindow the focus.
-    method focusin {}
+    # Execute Tcl code embedded in the HTML.
+    method execTcl {}
 
     # Open a help window.
     method help {}
@@ -92,14 +148,29 @@ class ::tycho::HTML {
     # Insert the specified data.
     method insertData {data}
 
+    # Return 1 if rendering is in progress, and 0 otherwise.
+    method isRendering {} {return $isrendering}
+
+    # Return the reference directory.
+    method lastDirectory {}
+
     # Open the source file using an HTML editor.
     method openSource {}
 
     # Raise the HTML browser window and the source window (if any).
     method raiseWindow {}
 
-    # Go to a specified point within the file.
+    # Go to the specified hypertext reference, line, or range.
     method seePoint {point}
+
+    # Indicate whether rendering is currently in progress.
+    method setRendering {val} {set isrendering $val}
+
+    # Request that rendering stop.  Note that it does not occur immediately.
+    method stopRendering {}
+
+    # Return the full path name of the text window.
+    method textWinName {}
 
     # Add a file editor object to the window menus of all open File objects.
     method windowMenuAddAll {label}
@@ -107,17 +178,26 @@ class ::tycho::HTML {
     # Remove a filename from the window menus of all open File objects.
     method windowMenuRemoveAll {filename}
 
-    #########################################################################
-    ####                   protected methods                             ####
+    ###################################################################
+    ####                      public procedures                    ####
 
-    # Add a button to the toolbar.
-    protected method addTool {name label command}
+    # Render the given text for a particular HTML object.
+    proc render {obj {html {}}} {}
 
-    # Return the name of the type of text widget to use.
-    protected method textWidget {} {return ::tycho::HTMLText}
+    ###################################################################
+    ####                      protected variables                  ####
 
-    #########################################################################
-    ####              private methods and variables                      ####
+    # Indicate whether a rendering operation is in progress.
+    protected variable isrendering 0
+
+    ###################################################################
+    ####                      private methods                      ####
+
+    # Return 1 if the sourcewin window is a valid source window.
+    private method sourcewinIsMine {}
+
+    ###################################################################
+    ####                     private variables                     ####
 
     # Keep track of the requested size adjustment.
     private common sizeName
@@ -125,94 +205,117 @@ class ::tycho::HTML {
     # Keep track of the current source window for the current file.
     private variable sourcewin {}
 
-    # Return 1 if the sourcewin window is a valid source window.
-    private method sourcewinIsMine {}
-
     # Store the name of our stack object
     private variable stack {}
+
+    # The name of the global array used to store the state of the window.
+    private variable stateArrayName {}
+}
+
+#########################################################################
+#### -size configuration
+# The size of normal text will be 14 points plus the size adjustment
+# set with this option.
+#
+configbody ::tycho::HTML::size {
+    HMset_state [textWinName] -size $itk_option(-size)
 }
 
 ###################################################################
 #
 body ::tycho::HTML::constructor {args} {
 
-    # A frame for accelerator buttons
-    itk_component add acc {
-	frame $itk_component(childsite).acc -relief sunken
-    } {
-	keep -background -cursor
+    # Add buttons to the toolbar, if it exists.
+    if {[llength $bars] > 2} {
+        # The "code" prevents triggering "unknown".
+        set myToolbar [lindex $bars 2]
+
+        # FIXME: need a forward command.
+        # FIXME: should the user be allowed to change the home window?
+
+        $myToolbar addButton back {Go back to the previously viewed page} \
+                -text Back -command "$this back"
+
+        global ::TYCHO
+
+        $myToolbar addButton home {Go to the Tycho home page} \
+                -text Home -command "$this hyperJump $TYCHO/doc/index.html"
+
+        $myToolbar addButton reload {Reload and reparse from the file} \
+                -text Reload -command "$this reload"
+
+        $myToolbar addButton open {Open a new file} \
+                -text Open -command "$this altFile"
+
+        $myToolbar addButton find {Find text or a pattern on this page} \
+                -text Find -command "$this search"
+
+        $myToolbar addButton stop {Abort rendering} \
+                -text Stop -command "$this stopRendering"
     }
-    pack $itk_component(acc) -expand no -fill x
 
-    # The text widget.
-    itk_component add text {
-	[textWidget] $itk_component(childsite).text -top $this
-    } {
-	keep -text -readonly -textfont \
-		-highlightbackground -highlightcolor -selectforeground \
-		-cursor -insertbackground -textfont \
-		-textbackground -textforeground -size
-        rename -width -textwidth textWidth TextWidth
-        rename -height -textheight textHeight TextHeight
-    }
-    pack $itk_component(text) -expand yes -fill both
+    set text $itk_component(text)
 
-    # FIXME: The HTML object comes up different sizes on different
-    # machines.  Below is an attempt to fix this, but unfortunately, it
-    # this attempt merely demonstrates that the "wm grid" command
-    # does not work.
-    #     set grid [wm grid $prefix]
-    #     if {$grid != {}} {
-    #         set width [lindex $grid 0]
-    #         set height [lindex $grid 1]
-    #         wm grid $prefix $width $height 7 13
-    #     }
+    # Initialize the text window.  The returned value is supposed to be
+    # the global variable used to store the state of the window, but isn't.
+    HMinit_win $text
 
-    # A toolbar for frequently used functions.
-    addTool back Back "$this back"
-    # FIXME: need a forward command.
-    # FIXME: should the user be allowed to change the home window?
-    global ::TYCHO
-    addTool home Home \
-	    "$this hyperJump $TYCHO/doc/index.html"
-    addTool reload Reload "$this reload"
-    addTool open Open "$this altFile"
-    addTool find Find "$itk_component(text) search"
-    addTool stop Stop "$itk_component(text) stopRendering"
+    # Modifications on configuration in the HTML library:
+    $text tag configure link -underline 1
 
-    addMenu Format left {} -underline 1
+    # Additions:
+    $text tag configure subscript -offset -6
+    $text tag configure superscript -offset +6
+
+    set stateArrayName HM$text
 
     eval itk_initialize $args
 
-    # Configure the reference directory of the widget
-    component text configure -directory [file dirname $file]
+    if {$itk_option(-directory) == {}} {
+        configure -directory [file dirname $file]
+    }
+
+    # Mark read-only to prevent modifications
+    configure -readonly 1
+    
+    bind $text <space> "$this scroll 1; break"
+
+    # Double clicks normally select text, something we don't want here.
+    bind $text <Double-Button-1> {break}
 
     array set sizes {tiny -2 small 0 medium 2 large 4 huge 8}
-    foreach size {tiny small medium large huge} {
-        # Note that the File base class has no method for adding radio
-        # buttons to menus.
-	$itk_component(menuFormat) add radio \
-		-label [lindex $size 0] \
-		-variable [scope sizeName($this)] \
-		-command \
-		"$this configure -size $sizes($size); \
-		::tycho::HTMLText::render [winfo command $itk_component(text)]"
+    if {$myMenubar != {}} {
+        foreach size {tiny small medium large huge} {
+            $myMenubar addRadioItem [lindex $size 0] Format \
+                    -variable [scope sizeName($this)] \
+                    -command \
+                    "$this configure -size $sizes($size); \
+                    ::tycho::HTML::render $this"
+        }
     }
+
     set sizeName($this) [option get $itk_component(hull) fontSize HTML]
     configure -size $sizes($sizeName($this))
 
     # Modify the menu commands appropriately.
-    insertMenuItem "Open Source" "Switch File..." File \
-            -underline 1 -accelerator {C-x s} \
-	    -command "$this openSource"
+    if {$myMenubar != {}} {
+        $myMenubar removeMenu Edit
+        $myMenubar disableMenuItem "Font..." Format
+        $myMenubar removeMenuItem "Fill Region" Format
+        $myMenubar removeMenuItem "Right Fill Column" Format
+        $myMenubar removeMenuItem "Set Fill Prefix" Format
 
-    disableMenuItem "Insert..." File
-    disableMenuItem "Save" File
-    disableMenuItem "SaveAs..." File
-    disableMenuItem "Evaluate" File
-    disableMenuItem "Revision Control..." File
-    disableMenuItem "Toggle Read-Only" File
-
+        $myMenubar insertMenuItem "Open Source" "Switch File..." File \
+                -underline 1 -accelerator {C-x s} \
+                -command "$this openSource"
+        
+        $myMenubar disableMenuItem "Insert..." File
+        $myMenubar disableMenuItem "Save" File
+        $myMenubar disableMenuItem "SaveAs..." File
+        $myMenubar disableMenuItem "Evaluate" File
+        $myMenubar disableMenuItem "Revision Control..." File
+        $myMenubar disableMenuItem "Toggle Read-Only" File
+    }
     bind $prefix <Control-x><Key-s> "$this openSource; break"
     # disable certain bindings
     bind $prefix <Control-x><Control-s> { }
@@ -229,11 +332,9 @@ body ::tycho::HTML::constructor {args} {
 }
 
 ###################################################################
-# Ensure that after this object is gone, if the
-# corresponding source file is still open, it will appear in the
-# "Window" menu.
 #
 body ::tycho::HTML::destructor {} {
+    stopRendering
     if [sourcewinIsMine] {
 	# Schedule this for after destruction is complete because the
 	# base class destructor removes the menu entry.
@@ -247,7 +348,7 @@ body ::tycho::HTML::destructor {} {
 
     ###################################################################
     ###################################################################
-    ####                       public methods                      ####
+    ####                      public methods                       ####
 
 ###################################################################
 #### altFile
@@ -282,25 +383,21 @@ body ::tycho::HTML::back {} {
 # Clear the current text.
 #
 body ::tycho::HTML::clear {} {
-    HMreset_win [$itk_component(text) textWinName]
-    $itk_component(text) deleteRange 1.0 end
+    HMreset_win [textWinName]
+    deleteRange 1.0 end
 }
 
-###################################################################
-#### currentPoint
-# Return the current insertion point in a form usable by seePoint.
+#####################################################################
+#### execTcl
+# Execute the Tcl code under the "current" mark.
+# The Tcl code is simply the largest contiguous region of text tagged
+# "tcl".  The code is executed in the global scope.
 #
-body ::tycho::HTML::currentPoint {} {
-    set idx [[component text textWinName] yview]
-    return [list yview [lindex $idx 0]]
-}
-
-###################################################################
-#### focusin
-# Hand the focus to the text window.
-#
-body ::tycho::HTML::focusin {} {
-    $itk_component(text) focusin
+body ::tycho::HTML::execTcl {} {
+    set cmd [getTaggedText tcl]
+    if {$cmd != {}} {
+	uplevel #0 $cmd
+    }
 }
 
 #########################################################################
@@ -315,7 +412,8 @@ body ::tycho::HTML::help {} {
 #####################################################################
 #### hyperJump
 # Open a file and go to its internal point identified by name. If the
-# filename has the extension ".html", ".htm", or "htl", then open it in
+# filename has the extension ".html", ".htm", or "htl", and this window
+# is inside a <code>Displayer</code> object, then open it in
 # this same window. If the filename is the empty string, then move the
 # view to a location within the same file. If filename is relative
 # (does not begin with "/", "~", or "$"), then prepend the directory of
@@ -342,9 +440,11 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
         set filename [::tycho::expandPath $filename]
 
         # If the filename has the ".html", ".htm", or ".htl" extension, open it
-        # in this window (unless it is already open in another window).
+        # in this window (unless it is already open in another window or
+        # we are not inside a Displayer).
         set ext [file extension $filename]
-        if {$ext == ".html" || $ext == ".htm" || $ext == ".htl"} {
+        if {($ext == ".html" || $ext == ".htm" || $ext == ".htl") && \
+                $myDisplayer != {}} {
 
             # Special care is required here because there might be a
             # source file open for either the old or the new file. If
@@ -365,7 +465,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 $stack push [list $file [currentPoint]]
             }
 
-            component text configure -directory [file dirname $filename]
+            configure -directory [file dirname $filename]
             configure -file $filename
             if {$point != {}} {
                 after 200 [list $this seePoint $point]
@@ -387,10 +487,22 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 
 #####################################################################
 #### insertData
-# Insert the specified data, which should be HTML.
+# Insert the specified data, cancelling any previous rendering.
 #
 body ::tycho::HTML::insertData {data} {
-    component text configure -html $data
+    stopRendering
+    # This is done in the background so that construction completes.
+    # The time delays seems to be necessary to ensure that the window
+    # gets mapped immediately.
+    after 100 [list ::tycho::HTML::render $this $data]
+}
+
+#####################################################################
+#### lastDirectory
+# Return the directory for relative references to images and the like.
+#
+body ::tycho::HTML::lastDirectory {} {
+    return $itk_option(-directory)
 }
 
 #####################################################################
@@ -417,15 +529,95 @@ body ::tycho::HTML::raiseWindow {} {
     if [sourcewinIsMine] {
 	$sourcewin raiseWindow
     }
-    ::tycho::TopLevel::raiseWindow
+    ::tycho::View::raiseWindow
 }
 
 #####################################################################
 #### seePoint
-# Go to a specified point within the file.
+# Goto the specified hypertext reference, line number, or range.
+# The <i>point</i> can take any of three forms:
+# <pre>
+#    {line <i>linenumber</i>}
+#    {range <i>startindex endindex</i>}
+#    {yview <i>fraction</i>}
+#    <i>name</i>
+# </pre>
+# In the first three forms, the point is a list beginning with the keyword
+# "line", "range", or "yview".  If the point has neither of these forms, then
+# it is interpreted as the name of named anchor in the HTML file.
+# In all cases, the background color of the matching text is changed
+# temporarily.  Notice that this will not be visible if the "range" form
+# is used and the two indices are equal.  As a side effect, the selection
+# (if there is one) is cleared.
 #
 body ::tycho::HTML::seePoint {point} {
-    $itk_component(text) seePoint $point
+    set text $itk_component(text)
+    if {[llength $point] == 2 && [lindex $point 0] == {line}} {
+        # First form: A line number.
+        set ln [lindex $point 1]
+        set sidx [$text index "$ln.0"]
+        set eidx [$text index "$ln.0 lineend +1 char"]
+    } elseif {[llength $point] == 3 && [lindex $point 0] == {range}} {
+        # Second form: A range of indexes
+        set sidx [lindex $point 1]
+        set eidx [lindex $point 2]
+    } elseif {[llength $point] == 2 && [lindex $point 0] == {yview}} {
+        # Third form: a yview spec.
+        $text yview moveto [lindex $point 1]
+        return
+    } {
+        # Third form: a named anchor.
+        ::tycho::saferUpdate $this
+        HMgoto $text $point
+        return
+    }
+    if {$sidx != {} && $eidx != {}} {
+	$text tag add hypertarget $sidx $eidx
+	$text tag configure hypertarget \
+		-background [option get $itk_component(hull) \
+		targetColor HTML]
+	$text tag configure hypertarget \
+		-foreground black
+        # A delay seems to be needed here to ensure that the target is seen.
+        # The moving of the insertion index is also delayed in case the
+        # binding that triggered this also involves the insertion cursor.
+	after 200 "$this component text mark set insert $sidx; 	\
+                selection clear -displayof $text; $text see insert"
+        after 8000 [list catch \
+               [list $text tag delete hypertarget]]
+    }
+}
+
+#####################################################################
+#### stopRendering
+# Stop the rendering.  This simply disables the HMrender proc by
+# setting a flag that causes HMrender to return immediately without
+# doing anything.
+#
+body ::tycho::HTML::stopRendering {} {
+    # The HTML library version 0.3 has a bug where HMset_state win -stop 1
+    # does not properly set the stop bit in the control array.  So
+    # instead, we set it directly.
+    # HMset_state [textWinName] -stop 1
+    upvar #0 $stateArrayName var
+    set var(stop) 1
+}
+
+#####################################################################
+#### textWinName
+# Return the full path name of the text widget. Note that this path
+# name is defined as a command at the global scope. This is intended
+# only to be used for interfacing to legacy Tcl/Tk code that interacts
+# directly with a Tk text widget. A null string is returned if for some
+# reason the text window name does not exist (due to an error in
+# construction).
+#
+body ::tycho::HTML::textWinName {} {
+    if [info exists itk_component(text)] {
+	return $itk_component(text)
+    } {
+	return {}
+    }
 }
 
 #####################################################################
@@ -459,34 +651,66 @@ body ::tycho::HTML::windowMenuRemoveAll {filename} {
     }
 }
 
-#########################################################################
-#########################################################################
-####                     protected methods                           ####
+    ###################################################################
+    ###################################################################
+    ####                      public procedures                    ####
 
 #####################################################################
-#### addTool
-# Add a button to the toolbar at the top.
-# The arguments are: a name for the button and itk_component,
-# the text label to use for the button, and the command associated with
-# the button.
+#### render
+# Render the given HTML text in the given <code>HTML</code> window.
+# If the given HTML text is not given or is a null string, then use the
+# value of the -data option for the given object as the text.
+# This is a procedure rather than a method because the object it operates
+# on may be destroyed during the rendering process.  It should be invoked
+# in the background, using "after", not in the constructor!
+# Otherwise, the constructor does not complete until rendering is
+# finished.  Moreover, the "update" calls in the rendering are dangerous
+# in a constructor.
 #
-body ::tycho::HTML::addTool {name label command} {
-    itk_component add $name {
-	button $itk_component(acc).$name \
-		-text $label \
-		-command $command
-    } {
-	keep -background -font -activebackground -cursor \
-		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
-    }
-    # To use a bitmap instead, we need before the button command:
-    #       global ::TYCHO
-    # and as one of the button options:
-    #		-bitmap @$TYCHO/kernel/img/back.xbm
+body ::tycho::HTML::render {obj {html {}}} {
 
-    pack $itk_component($name) -side left
+    if {[info objects $obj] == {} || ![$obj isa ::tycho::HTML]} {return}
+
+    if {$html == {}} {
+        set html [$obj cget -data]
+    }
+    # Cancel previous rendering if necessary.
+    if [$obj isRendering] {
+        $obj stopRendering
+        # Allow some time for rendering to complete.
+        after 100 [list ::tycho::HTML::render $obj $html]
+        return
+    }
+
+    $obj setRendering 1
+
+    # Get the name of the Tk text widget.
+    set tktext [$obj textWinName]
+    $tktext configure -state normal
+    
+    # Remove all existing text in the widget.
+    $tktext delete 1.0 end
+    
+    # Put the insertion cursor at the top
+    $tktext mark set insert @0,0
+    HMreset_win $tktext
+
+    # Note that the following parsing operation results in many
+    # calls to update, which can result in the widget $this being destroyed.
+    HMparse_html $html "HMrender $tktext"
+
+    # The catch is in case the object no longer exists
+    catch {
+	$obj setRendering 0
+    }
+
+    # FIXME: The following removes the insertion cursor, which
+    # is good, but disables all the navigation bindings, which
+    # is bad.  Perhaps those bindings can be redone in the
+    # HTML class.
+    # $tktext configure -state disabled
 }
+
 
 #########################################################################
 #########################################################################
@@ -509,3 +733,595 @@ body ::tycho::HTML::sourcewinIsMine {} {
 	return 0
     }
 }
+
+
+    ###################################################################
+    ###################################################################
+    ####         modifications to the HTML library                 ####
+
+# Instead of blindly inserting newlines, as done in the original
+# library, we only insert them if they are not already there.
+# The following table indicates how many newlines are desired
+# by the tag. It replaces "HMinsert_map" in the original library.
+
+array set HMinsert_space_map {
+	blockquote 2 /blockquote 1
+	br	1
+	dd	1 /dd	1
+	dl	1 /dl	1
+	dt	1
+	form 1	/form 1
+	h1	2	/h1	1
+	h2	2	/h2	1
+	h3	2	/h3	1
+	h4	1	/h4	1
+	h5	1	/h5	1
+	h6	1	/h6	1
+	li   1
+	/dir 1
+	/ul 1
+	/ol 1
+	/menu 1
+	p	2
+	pre 1	/pre 1
+}
+
+array set HMparam_map {
+    -foreground S_fgcolor
+    -background S_bgcolor
+}
+
+#######################################################################
+# The following empty procedures prevent calls to "unknown", which
+# is very expensive.  This makes the HTML parser significantly faster.
+
+foreach tag {
+    !-- a address applet author b banner
+    base big blockquote body br caption center
+    cite code dd dfn div dl dt em form h1 h2 h3 h4 h5 h6 head hr
+    html i img input isindex kbd li link map meta ol option p param
+    pre samp script select small strike strong style sub sup table
+    td textarea th title tr tt u ul var
+    /a /address /applet /author /b /banner /big /blockquote /body /caption
+    /center /cite /code /dfn /div /dl /em /form /h1 /h2 /h3
+    /h4 /h5 /h6 /head /html /i /kbd /map /ol /p /pre /samp /select
+    /small /strike /strong /sub /sup /table /textarea /title /tt /u /ul /var
+} {
+    if {[info proc HMtag_$tag] == {}} {
+        proc HMtag_$tag {win param text} {}
+    }
+}
+
+#######################################################################
+#### HMcurrent_tags
+# extract set of current text tags
+# tags starting with T map directly to text tags, all others are
+# handled specially.  There is an application callback, HMset_font
+# to allow the application to do font error handling.
+# Modified by EAL for greater efficiency.  Avoid calls that set
+# fonts or get fonts if they've occurred before.
+#
+proc HMcurrent_tags {win} {
+    upvar #0 HM$win var
+
+    set family [lindex $var(family) end]
+    set size [lindex $var(size) end]
+    set weight [lindex $var(weight) end]
+    set style [lindex $var(style) end]
+    set S_adjust_size [lindex $var(S_adjust_size) end]
+    set font "font:$family:$size:$weight:$style:$S_adjust_size"
+
+    # Avoid repeatedly configuring the same font tag.
+    global HMfont_tag_done
+    if ![info exists HMfont_tag_done($win$font)] {
+        set xfont [HMx_font $family $size $weight $style $S_adjust_size]
+        HMset_font $win $font $xfont
+        set HMfont_tag_done($win$font) $xfont
+    } {
+        set xfont $HMfont_tag_done($win$font)
+    }
+    set indent [llength $var(indent)]
+    incr indent -1
+    lappend tags $font indent$indent
+    foreach tag [array names var T*] {
+        lappend tags [lindex $var($tag) end]
+    }
+    set var(font) $font
+    set var(xfont) $xfont
+    set var(level) $indent
+    return $tags
+}
+
+#######################################################################
+#### HMgoto
+# Modify Uhler's implementation
+# to support names with spaces and to make it more robust.
+#
+# The application should call here with the fragment name
+# to cause the display to go to this spot.
+# If the target exists, go there (and do the callback),
+# otherwise schedule the goto to happen when we see the reference.
+#
+proc HMgoto {win where {callback HMwent_to}} {
+    upvar #0 HM$win var
+    if {[regexp "N:$where" [$win mark names]]} {
+	catch {$win see "N:$where"}
+	update
+	eval $callback $win [list $where]
+	return 1
+    } else {
+	set var(goto) $where
+	return 0
+    }
+}
+
+#######################################################################
+#### HMinit_state
+# initialize the window's state array
+# Parameters beginning with S_ are NOT reset
+#  adjust_size:		global font size adjuster
+#  unknown:		character to use for unknown entities
+#  tab:			tab stop (in cm)
+#  stop:		enabled to stop processing
+#  update:		how many tags between update calls
+#  tags:		number of tags processed so far
+#  symbols:		Symbols to use on un-ordered lists
+#  bgcolor:             The background color.
+#  fgcolor:             The forground color.
+#
+proc HMinit_state {win} {
+    upvar #0 HM$win var
+    array set tmp [array get var S_*]
+    catch {unset var}
+    array set var {
+        stop 0
+        tags 0
+        fill 0
+        list list
+        S_adjust_size 0
+        S_tab 1.0
+        S_unknown \xb7
+        S_update 10
+        S_symbols O*=+-o\xd7\xb0>:\xb7
+        S_insert Insert
+        linkfg blue
+    }
+    set var(S_bgcolor) [$win cget -background]
+    set var(S_fgcolor) [$win cget -foreground]
+    array set var [array get tmp]
+    set var(bgcolor) $var(S_bgcolor)
+    set var(fgcolor) $var(S_fgcolor)
+}
+
+#######################################################################
+#### HMlink_callback
+# Override the HTML library definition for the hyperlink callback
+# function. This does not at this time support HTTP, but does support
+# files and names within a file. If the window lies within an HTML
+# widget, and the link is to another HTML file, then we reuse the same
+# window to display the referenced file. Otherwise, we open a new
+# window.
+#
+proc HMlink_callback {win href} {
+
+    if {![winfo exists $win]} {return}
+
+    # Get the name of the HTML widget.
+    set HTML [uplevel #0 winfo command [winfo megawidget $win]]
+
+    if [regexp {^http:|^ftp:|^gopher:|^news:|^mailto:|^telnet:|^wais:} $href] {
+	if [::tycho::askuser "OK to invoke netscape to view $href?"] {
+	    if [catch {exec netscape -remote openURL($href) &} errMsg] {
+		::tycho::ErrorMessage .netscapeError -text $errMsg
+		wm deiconify .netscapeError
+	    }
+	}
+	return
+    }
+
+    if {![regexp {(file:)?([^#]*)#(.+)} $href dummy noise file fragment]} {
+	regexp {(file:)?([^#]*)} $href dummy noise file
+	set fragment {}
+    }
+
+    # Got a reference to a file (or if file == {}, a local point).
+    uplevel #0 [list $HTML hyperJump $file $fragment]
+}
+
+#######################################################################
+#### HMrender
+# HMrender gets called for every html tag
+#   win:   The name of the text widget to render into
+#   tag:   The html tag (in arbitrary case)
+#   not:   a "/" or the empty string
+#   param: The un-interpreted parameter list
+#   text:  The plain text until the next html tag
+# If the tag has an entry in the HMtag_map, then that entry is used
+# to change the state (font, size, etc.).  If there is a
+# procedure called HMtag_$tag, then that procedure is invoked.
+#
+proc HMrender {win tag not param text} {
+    upvar #0 HM$win var
+    if {$var(stop)} return
+    global HMtag_map HMinsert_space_map HMlist_elements
+    set tag [string tolower $tag]
+    set text [HMmap_esc $text]
+    
+    # manage compact rendering of lists
+    if {[info exists HMlist_elements($tag)]} {
+        # NOTE: mod EAL.  Syntax error in the original.
+        set list "list [expr {[HMextract_param $param compact] ? {compact} : {list}}]"
+    } else {
+        set list ""
+    }
+    
+    # adjust (push or pop) tag state
+    if [info exists HMtag_map($tag)] {
+        HMstack $win $not "$HMtag_map($tag) $list"
+    }
+    
+    set insert $var(S_insert)
+    # insert white space (with current font).  NOTE: modified by EAL.
+    if [info exists HMinsert_space_map($not$tag)] {
+        set ins $insert
+        # Skip if we are the top of the widget.
+        if ![$win compare $ins == 1.0] {
+            set spaces $HMinsert_space_map($not$tag)
+            for {set ind $spaces} {$ind > 0} {incr ind -1} {
+                set curline [$win get "$ins linestart" "$ins lineend"]
+                set ins [$win index "$ins -1 line"]
+                if [regexp {^[ 	]*$} $curline] {
+                    incr spaces -1
+                } {
+                    break
+                }
+            }
+            while {$spaces > 0} {
+                incr spaces -1
+                $win insert $insert "\n" "space $var(font)"
+            }
+        }
+    }
+    # If we are in fill mode, trim the text.
+    if [lindex $var(fill) end] {
+        # If the current line contains only spaces, remove them.
+        set curline [$win get "$insert linestart" "$insert lineend"]
+        if [regexp {^ *$} $curline] {
+            # Check for embedded windows
+            if {[$win dump -window "$insert linestart" "$insert lineend"] \
+                    == {}} {
+                $win delete "$insert linestart" "$insert lineend"
+            }
+        }
+        if [$win compare $insert == "$insert linestart"] {
+            set text [string trimleft $text]
+        }
+        set text [HMzap_white $text]
+    }
+    
+    # generic mark hook
+    # NOTE: mod EAL
+    # catch {HMmark $not$tag $win $param text} err
+    
+    # do any special tag processing
+    # Need a ignore unrecognized HTML tags.  Here we check explictly.
+    # Could use a catch alternatively, but that tends to hide errors.
+    # FIXME: Change to a catch for release.
+    if {[info proc HMtag_$not$tag] != {}} {
+        HMtag_$not$tag $win $param text
+    }
+    
+    # add the text with proper tags
+    set tags [HMcurrent_tags $win]
+    $win insert $var(S_insert) $text $tags
+    
+    # We need to do an update every so often to insure interactive response.
+    # This can cause us to re-enter the event loop, and cause recursive
+    # invocations of HMrender, so we need to be careful.
+    if {!([incr var(tags)] % $var(S_update))} {
+        update
+    }
+}
+
+#######################################################################
+#### HMset_image
+# An image callback function, called by the HTML library when it encounters
+# and image. Read in an image if we don't already have one and
+# call back to library for display.
+#
+proc HMset_image {win handle src} {
+
+    # Get the name of the HTML widget.
+    set HTML [uplevel #0 winfo command [winfo megawidget $win]]
+
+    if {[string match /* $src]} {
+	set image $src
+    } else {
+	set image [uplevel #0 $HTML lastDirectory]/$src
+    }
+
+    update
+    if {[string first " $image " " [image names] "] >= 0} {
+	HMgot_image $handle $image
+    } else {
+	set type photo
+	if {[file extension $image] == ".bmp"} {set type bitmap}
+	catch {image create $type $image -file $image} image
+	HMgot_image $handle $image
+    }
+}
+
+#######################################################################
+#### HMstack
+# Push or pop tags to/from stack.
+# Each orthogonal text property has its own stack, stored as a list.
+# The current (most recent) tag is the last item on the list.
+# Push is {} for pushing and {/} for popping.
+# Fixed by EAL to not fail on poping empty stack.
+#
+proc HMstack {win push list} {
+    upvar #0 HM$win var
+    array set tags $list
+    if {$push == ""} {
+        foreach tag [array names tags] {
+            lappend var($tag) $tags($tag)
+        }
+    } else {
+        foreach tag [array names tags] {
+            catch {set var($tag) [lreplace $var($tag) end end]}
+        }
+    }
+}
+
+#######################################################################
+#### HMtag_body
+# This code is modified from "surfit".
+# HTML 3.2 introduces various attributes for the BODY tag.
+# BACKGROUND (Tk 4.1 cannot support this), BGCOLOR, TEXT, LINK, VLINK, ALINK
+#
+proc HMtag_body {win param text} {
+    upvar #0 HM$win var
+    if {[HMextract_param $param bgcolor]} {
+        set color [ptkColor $bgcolor grey]
+        $win configure -background $color
+        set var(bgcolor) $color
+    }
+    
+    set savetext $text
+    if {[HMextract_param $param text]} {
+        set color [ptkColor $text black]
+        $win configure -foreground $color
+        set var(fgcolor) $color
+    }
+    set text $savetext
+
+    if {[HMextract_param $param link]} {
+        set color [ptkColor $link blue]
+        set var(linkfg) $color
+        $win tag configure link -foreground $color
+    }
+}
+
+#######################################################################
+#### HMtag_color
+# This proc is directly from Stephen Uhler's sample, with only slight
+# modifications. A new HTML tag, inserted just for fun. Change the
+# color of the text. Use HTML tags of the form: <color value=blue> ...
+# </color> The color has lower priority than all other tags.
+# NOTE: This is not standard HTML.  Use <font color=foo> instead.
+#
+proc HMtag_color {win param text} {
+	set value black
+	HMextract_param $param value
+	set value [ptkColor $value black]
+	$win tag configure $value -foreground $value
+	$win tag lower $value
+	HMstack $win "" "Tcolor $value"
+}
+
+proc HMtag_/color {win param text} {
+	HMstack $win / "Tcolor {}"
+}
+
+#######################################################################
+#### HMtag_font
+# The following is modified from surfit.
+#
+proc HMtag_font {win param text} {
+    upvar #0 HM$win var
+    if {[HMextract_param $param size]} {
+        HMstack $win "" "size [expr [lindex $var(size) end] + $size]"
+    } else {
+        HMstack $win "" [list size [lindex $var(size) end]]
+    }
+    if {[HMextract_param $param color]} {
+        set color [ptkColor $color black]
+        HMstack $win "" "Tcolor color$color"
+        $win tag configure color$color -foreground $color
+    } else {
+        HMstack $win "" [list Tcolor black]
+    }
+}
+
+proc HMtag_/font {win param text} {
+    upvar #0 HM$win var
+    HMstack $win "/" [list size {}]
+    HMstack $win "/" [list Tcolor black]
+}
+
+#######################################################################
+#### HMtag_tcl {win param text} 
+# Set up an extension to HTML in which the delimitters <tcl> ... </tcl>
+# are understood to enclose a section of Tcl code. This code is
+# highlighted in the document, and double clicking on it causes the enclosed
+# Tcl code to be executed. The code is executed at the global scope.
+# Normally, this tag will be used together with the standard <pre>...</pre>
+# HTML tag to prevent the text from filling and wrapping.
+
+proc HMtag_tcl {win param text} {
+
+    upvar #0 HM$win var
+
+    # Get the name of the HTML window and widget command.
+    set HTML [winfo megawidget $win]
+    set HTMLcommand [winfo command $HTML]
+
+    # Set the color
+    set color [option get $HTML tclColor HTML]
+    $win tag configure tcl -foreground $color
+    $win tag bind tcl <Double-Button-1> \
+	    "uplevel #0 $HTMLcommand execTcl; break"
+
+    # Reduce the size because courier fonts on X window systems
+    # are absurdly large.  Also tag the text "tcl".
+    HMstack $win {} "Ttcl tcl size [expr [lindex $var(size) end] - 2]"
+}
+
+proc HMtag_/tcl {win param text} {
+    upvar #0 HM$win var
+    HMstack $win / "Ttcl {} size {}"
+}
+
+#######################################################################
+#### HMx_font
+# Generate an X font name using the FontManager class in Tycho.
+# Also, cache font requests locally for additional efficiency
+# (this yields about an 18% speed improvement in rendering).
+#
+proc HMx_font {family size weight style {adjust_size 0}} {
+    global HMx_font_cache
+    set cachename "$family.$size.$weight.$style.$adjust_size"
+    if [info exists HMx_font_cache($cachename)] {
+        return $HMx_font_cache($cachename)
+    }
+    # The HTML library seems to call this with empty strings for arguments.
+    # I don't know why.  We have to handle that situation.
+    if {$size == {}} {return fixed}
+    incr size $adjust_size
+    set size [::tycho::.tychoFonts getValidSize $size]
+    # We try hard to find a reasonable font.
+    set result [::tycho::.tychoFonts findFont [list \
+	    [list $family $size $weight $style] \
+	    [list $family $size medium $style] \
+	    [list $family $size medium r] \
+            [list times 14 medium r] \
+        ]]
+    set HMx_font_cache($cachename) $result
+    return $result
+}
+
+#######################################################################
+#### HMtag_hmstart
+# Modify to not depend on being in the HMtag_map array.
+#
+proc HMtag_hmstart {win param text} {
+	upvar #0 HM$win var
+        global HMinitialtag_map
+        HMstack $win {} $HMinitialtag_map
+	$win mark gravity $var(S_insert) left
+	$win insert end "\n " last
+	$win mark gravity $var(S_insert) right
+}
+
+#######################################################################
+#### HMtag_hr
+# Improve the horizontal rule a bit.
+#
+proc HMtag_hr {win param text} {
+	upvar #0 HM$win var
+	$win insert $var(S_insert) "\n" space "\n\n\n" \
+		thin "\t" "thin hr" "\n\n\n" thin
+	$win tag configure hr -background black
+}
+
+#######################################################################
+#### HMtag_sub
+# Subscripts.
+#
+proc HMtag_sub {win param text} {
+    upvar #0 HM$win var
+    HMstack $win "" \
+            [list Tsubscript subscript size [expr [lindex $var(size) end] - 2]]
+}
+
+proc HMtag_/sub {win param text} {
+    HMstack $win "/" [list Tsubscript {} size {}]
+}
+
+#######################################################################
+#### HMtag_sup
+# Superscripts.
+#
+proc HMtag_sup {win param text} {
+    upvar #0 HM$win var
+    HMstack $win "" \
+            [list Tsuperscript superscript \
+            size [expr [lindex $var(size) end] - 2]]
+}
+
+proc HMtag_/sup {win param text} {
+    HMstack $win "/" [list Tsuperscript {} size {}]
+}
+
+#######################################################################
+#### HMwent_to
+# Override the library function to put the start of the named region
+# at the top of the window and to temporarily change the backgound color.
+#
+proc HMwent_to {win where {count 0} {color {}}} {
+    if {![winfo exists $win]} {return}
+    if {$count >= 6} return
+    if {$count == 0} {
+        set range [$win tag nextrange "N:$where" 1.0]
+        if {$range != {}} {
+            # Put the start of the named region at the top of the window.
+            # (The following sometimes puts the line we want to see one line
+            # above the visible part of the window. Hence the correction after).
+            set start [expr int([lindex $range 0])]
+            set length [expr int([$win index end])]
+            set fraction [expr "$start.0/$length"]
+            $win yview moveto $fraction
+
+            # The following ensures the item in question is in view.
+            $win see [lindex $range 0]
+        }
+    }
+
+    if {$color == {}} {
+        set color [option get [winfo megawidget $win] targetColor HTML]
+    }
+
+    # Temporarily change the background color
+    upvar #0 HM$win var
+    $win tag configure "N:$where" -background $color -foreground black
+    after 8000 [list catch [list \
+            $win tag configure "N:$where" -background {} -foreground {}]]
+    update
+}
+
+#######################################################################
+#### Table handling
+# FIXME: This code is temporary, pending proper table handling.
+# It does not render the table, which is relatively hard to do, but
+# tries to format the text in such a way that table entries are at least
+# distinguished from one another.
+
+#######################################################################
+#### HMtag_/tr
+# For a table item, if the text does not end in a period, add a period.
+#
+proc HMtag_/td {win param text} {
+    upvar #0 HM$win var
+    set line [$win get "$var(S_insert) linestart" $var(S_insert)]
+    if {![regexp {\.[ 	]*$} $line]} {
+        $win insert $var(S_insert) "."
+    }
+}
+
+# Tags for the rudimentary table support:
+set HMtag_map(tr) {indent 1}
+set HMinsert_space_map(tr) 1
+
+# Increase the tab stops from 1 to 1.5 cm.
+HMset_state -tab 1.5
+

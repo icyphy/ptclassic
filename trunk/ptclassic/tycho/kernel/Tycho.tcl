@@ -170,8 +170,8 @@ uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychoslate shapes ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychoslate interactors ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychoslate combinators ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib widgets ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tycholib util ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt kernel ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychopt lib ] ]
@@ -232,21 +232,20 @@ if {$tychoWelcomeWindow != 0} {
 }
 # Determine whether we exit when there are no more windows.
 ::tycho::TopLevel::exitWhenNoMoreWindows $tychoExitWhenNoMoreWindows
-::tycho::Dismiss::setRegExit $tychoShouldWeDoRegularExit
+::tycho::Displayer::normalExit $tychoShouldWeDoRegularExit
 # If there are no command-line arguments, and the -noconsole
 # option was not given, open a console window
 if {$tychoOpenFiles == 0} {
     if {$tychoConsoleWindow != 0} {
-	uplevel #0 {::tycho::TclConsole .mainConsole \
-		-master 1 -text "Welcome to Tycho\n" -geometry +0+0}
+	uplevel #0 {::tycho::Displayer .mainConsole -geometry +0+0 -master 1; \
+                ::tycho::TclShell .mainConsole.s \
+                -stdout 1 -text "Welcome to Tycho\n"}
 	wm deiconify .mainConsole
     }
 }
 
 tk appname tycho
 
-unset tychoWelcomeWindow
-unset tychoConsoleWindow
-unset tychoOpenFiles
-unset tychoExitWhenNoMoreWindows
-unset tychoShouldWeDoRegularExit
+unset tychoWelcomeWindow tychoConsoleWindow \
+        tychoOpenFiles tychoExitWhenNoMoreWindows tychoShouldWeDoRegularExit
+

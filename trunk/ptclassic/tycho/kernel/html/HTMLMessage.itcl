@@ -40,8 +40,8 @@
 #
 proc ::tycho::htmlmessage {source} {
     set name [::tycho::autoName .m]
-    ::tycho::HTMLMessage $name -html $source \
-            -htmlwidth 70 -htmlheight 15
+    ::tycho::HTMLMessage $name -data $source \
+            -textwidth 70 -textheight 15
     $name centerOnScreen
 }
 
@@ -54,12 +54,12 @@ proc ::tycho::htmlmessage {source} {
 # window.  Here is an example:
 # <tcl><pre>
 # catch {delete object .m}
-# ::tycho::HTMLMessage .m -html {<h1>Header</h1>}
+# ::tycho::HTMLMessage .m -data {<h1>Header</h1>}
 # .m centerOnScreen
 # </pre></tcl>
 # <p>
-# The -html option specifies the HTML source to render.
-# The -htmlwidth and -htmlheight options
+# The -data option specifies the HTML source to render.
+# The -textwidth and -textheight options
 # specify the size of the resulting HTML window in "average" characters.
 # Regrettably, it seems to be system dependent what this means.
 # The -directory option specifies the directory with respect to which
@@ -79,12 +79,11 @@ class ::tycho::HTMLMessage {
 body ::tycho::HTMLMessage::constructor {args} {
 
     itk_component add html {
-        ::tycho::HTMLText $itk_component(top).html
+        ::tycho::HTML $itk_component(top).html
     } {
         keep -background -cursor -textforeground \
-                -scrollbar -directory -html -size
-        rename -width -htmlwidth htmlWidth HTMLWidth
-        rename -height -htmlheight htmlHeight HTMLHeight
+                -scrollbar -directory -data -size \
+                -textwidth -textheight
     }
     pack $itk_component(html) -side right -fill both
 

@@ -1,4 +1,4 @@
-# Spell checker associated with an EditText widget.
+# Spell checker associated with an Edit widget.
 #
 # @Author: Edward A. Lee
 #
@@ -53,9 +53,9 @@ option add *EditSpell.spellMatchForegroundColor \
 # typically spell checked.
 # <p>
 # This dialog box should be child window of the
-# EditText widget or its top-level window so that it is removed when
+# Edit widget or its top-level window so that it is removed when
 # the parent is removed. To do this, just give it a name that is the
-# name of the EditText window (or its top-level parent) with an
+# name of the Edit window (or its top-level parent) with an
 # additional field appended after a period. For example, if the name of
 # the top-level object is ".file0", the search object could be
 # ".file0.search". Note that this is a UNIX-specific spell checker.
@@ -68,8 +68,8 @@ class ::tycho::EditSpell {
     #################################################################
     ####                        options                          ####
 
-    # Specify the associated EditText object.
-    itk_option define -edittext edittext EditText {}
+    # Specify the associated Edit object.
+    itk_option define -edit edit Edit {}
 
     # Specify whether changes are allowed in the text being checked.
     itk_option define -nochange nochange NoChange 0
@@ -115,15 +115,15 @@ class ::tycho::EditSpell {
 }
 
 #####################################################################
-#### -edittext option
-# Set the associated EditText widget.
+#### -edit option
+# Set the associated Edit widget.
 # 
-configbody ::tycho::EditSpell::edittext {
-    if {$itk_option(-edittext) == {} || \
-	    [::info objects $itk_option(-edittext)] == {} || \
-	    ![$itk_option(-edittext) isa ::tycho::EditText]} {
-	error "EditSpell::find: Invalid -edittext option: \
-		$itk_option(-edittext)"
+configbody ::tycho::EditSpell::edit {
+    if {$itk_option(-edit) == {} || \
+	    [::info objects $itk_option(-edit)] == {} || \
+	    ![$itk_option(-edit) isa ::tycho::Edit]} {
+	error "EditSpell::find: Invalid -edit option: \
+		$itk_option(-edit)"
     }
 }
 
@@ -183,7 +183,7 @@ body ::tycho::EditSpell::constructor {args} {
 # Clear the highlighting in the text window due to the spell check.
 # 
 body ::tycho::EditSpell::clearSpellMatch {} {
-    set tw $itk_option(-edittext)
+    set tw $itk_option(-edit)
     [$tw textWinName] tag remove spellmatch 1.0 end
 }
 
@@ -227,7 +227,7 @@ body ::tycho::EditSpell::next {} {
     if {$upto == {}} {
 	recheck
     } {
-	set tw $itk_option(-edittext)
+	set tw $itk_option(-edit)
 	set tx [$tw textWinName]
 	set range [$tx tag nextrange spellmatch $upto]
 	if {$range == {}} {
@@ -259,7 +259,7 @@ body ::tycho::EditSpell::next {} {
 # Check the spelling from the beginning.
 # 
 body ::tycho::EditSpell::recheck {} {
-    set tw $itk_option(-edittext)
+    set tw $itk_option(-edit)
 
     set filename "/tmp/tychoSpell[pid]x[incr count]"
     if {![$tw busy writeSpellText $filename]} {return}
@@ -306,7 +306,7 @@ body ::tycho::EditSpell::recheck {} {
 # Then move to the next spelling error.
 # 
 body ::tycho::EditSpell::replace {} {
-    set editWindow $itk_option(-edittext)
+    set editWindow $itk_option(-edit)
 
     set changeto [get word]
     if {[$editWindow getSelection] != {}} {
