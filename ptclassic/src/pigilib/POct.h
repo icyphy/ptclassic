@@ -145,6 +145,7 @@ public:
 	int ptkSetFindName (int argc,char** argv);
 	int ptkGetMkStar (int argc,char** argv);
 	int ptkSetMkStar (int argc,char** argv);
+	int ptkSetRunUniverse (int argc,char** argv);
 	int ptkGetComment (int argc,char** argv);
 	int ptkSetComment (int argc,char** argv);
 	int ptkGetMkSchemIcon (int argc,char** argv);

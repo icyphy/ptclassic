@@ -57,6 +57,7 @@ char* name;
 {
 	octObject facet;
 	int editStatus;
+        char facetHandle[16];
 
 	ViInit(name);
 	ErrClear();
@@ -70,21 +71,22 @@ char* name;
 		PrintErr("Schematic is not a universe");
 		ViDone();
 	}
+
 	if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
 		PrintErr("Failed to set default domain.");
 		ViDone();
 	}
 
-	if (!(editStatus = EditFormalParams(&facet))) {
-	    PrintErr(ErrGet());
-            ViDone();
-        }
-
-	if(editStatus == 1) {
-		ptkRun(&facet,TRUE);
-	} else if (editStatus == 2) {
-		PrintCon("Aborted entry");
-	}
+        /* Create a Tk window to handle the editing and
+           then do the run command */
+        ptkOctObj2Handle(&facet,facetHandle);
+        TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
+                   " \"Run universe with the following parameters\" ",
+                   " \"ptkSetRunUniverse ", facetHandle, " {%s} \" ",
+                   " \"[lindex [ptkGetParams ", facetHandle, " NIL] 1]\" ",
+                   " Params ",
+                   (char *)NULL) )
+        
 	ViDone();
 }
 
@@ -93,7 +95,8 @@ char* name;
  * If now == TRUE, the universe is run right away.
  * Otherwise, we wait for the user to press the GO button.
  */
-static boolean
+/* used externally by SetRunUniverse */
+boolean
 ptkRun(facetPtr,now)
 octObject *facetPtr;
 boolean now;
