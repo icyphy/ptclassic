@@ -80,6 +80,9 @@ class ::tycho::EditTcl {
     # Configure the popup menu depending on the current context
     protected method configureContextMenu {}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     ##########################################################################
     ####                         protected variables                      ####
 
@@ -101,11 +104,6 @@ body ::tycho::EditTcl::constructor {args} {
     
     # Set the fill prefix to be the comment character for Tcl.
     set fillPrefix "#"
-
-    menubar insert "Select Body" "Unselect"  -command "$this selectConstruct"
-    menubar insert "Evaluate Body" "Reload" \
-            -accelerator "C-x C-R" \
-            -command "$this evaluateConstruct"
 
     bind $itk_component(text) <Control-x><Control-Shift-R> \
             "$this evaluateConstruct"
@@ -337,7 +335,7 @@ body ::tycho::EditTcl::configureContextMenu {} {
 	contextmenu add {Evaluate selection} -command "$this evaluate"
     }
 
-    # FIXME: These must be a better way of doing this
+    # FIXME: There must be a better way of doing this
     if { $itk_option(-file) != "" && $itk_option(-file) != "NoName" } {
 	set link [file split $itk_option(-file)]
 	set path [lrange $link 0 [expr [llength $link] - 2]]
@@ -352,3 +350,25 @@ body ::tycho::EditTcl::configureContextMenu {} {
     }
 }
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditTcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        menubar insert "Select Body" "Unselect"  \
+                -command "$this selectConstruct"
+        
+        menubar insert "Evaluate Body" "Reload" \
+                -accelerator "C-x C-R" \
+                -command "$this evaluateConstruct"
+    }
+}

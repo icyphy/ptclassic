@@ -96,6 +96,12 @@ class ::tycho::TCanvas {
     # Update the scrollbars to reflect the current canvas contents.
     method updateScrollbars {}
 
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    
     # Access the "graphics" preferences
     protected method preference {mode args}
 
@@ -230,16 +236,6 @@ body ::tycho::TCanvas::constructor {args} {
     $slate configure \
             -xscrollcommand "$itk_component(hsb) set" \
             -yscrollcommand "$itk_component(vsb) set"
-
-    # Create and configure the widget's menu bar
-
-    menubar insert {Export} {Print...} -underline 1 \
-            -command "$this export"
-
-    menubar addMenu Format -underline 1
-
-    menubar add {Scrollbars...} Format -underline 0 \
-            -command "$this scrollQuery"
 
     eval itk_initialize $args
 
@@ -543,20 +539,6 @@ body ::tycho::TCanvas::scrollSet {dialog} {
     }
 }
 
-#####################################################################
-#### preference
-# Access the preferences associated with this widget. This method
-# overrides the default method in ::tycho::TWidget to access the
-# "graphics" preferences.
-#
-body ::tycho::TCanvas::preference {mode args} {
-    eval ::tycho::preference $mode "graphics" $args
-}
-
-###################################################################
-###################################################################
-####                     protected methods                     ####
-
 #########################################################################
 #### updateScrollbars
 # Update the range of the scrollbars so that they cover the bounding box
@@ -568,6 +550,44 @@ body ::tycho::TCanvas::updateScrollbars {} {
     if {$scheduledUpdate == {}} {
         set scheduledUpdate [after idle [code $this configureScrollbars]]
     }
+}
+
+###################################################################
+###################################################################
+####                     protected methods                     ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::TCanvas::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        $menubar insert {Export} {Print...} -underline 1 \
+                -command "$this export"
+        
+        $menubar addMenu Format -underline 1
+        
+        $menubar add {Scrollbars...} Format -underline 0 \
+                -command "$this scrollQuery"
+    }
+}
+
+#####################################################################
+#### preference
+# Access the preferences associated with this widget. This method
+# overrides the default method in ::tycho::TWidget to access the
+# "graphics" preferences.
+#
+body ::tycho::TCanvas::preference {mode args} {
+    eval ::tycho::preference $mode "graphics" $args
 }
 
 ###################################################################

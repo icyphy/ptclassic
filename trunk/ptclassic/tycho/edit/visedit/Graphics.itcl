@@ -210,6 +210,9 @@ class ::tycho::Graphics {
     # Find all the items in the canvas that have all of the specified tags.
     protected method findAll {args}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # If the argument is non-null, return it.  Otherwise, return the selection.
     protected method itemlist {{items {}}}
 
@@ -218,12 +221,18 @@ class ::tycho::Graphics {
 
     # Return the text to be saved.
     protected method saveText {}
-
+   
     ###################################################################
     ####                   protected variables                     ####
     
     # Flag indicating whether undo and automatic updates are enabled.
     protected variable interactiveEnabled 0
+
+    ##########################################################################
+    ####                         private methods                          ####
+    
+    # Initialize the menu bar.
+    private method initializeMenubar {menubar}
 
     ###################################################################
     ####                   private variables                       ####
@@ -254,8 +263,6 @@ class ::tycho::Graphics {
 #### constructor
 #
 body ::tycho::Graphics::constructor {args} {
-    global tcl_platform
-
     interactiveEnable 0
 
     # Add a widget at the bottom for displaying info
@@ -270,39 +277,6 @@ body ::tycho::Graphics::constructor {args} {
     pack $itk_component(info) -expand no -fill x \
             -side bottom \
             -before $itk_component(bottom)
-
-    # Create and configure the widget's menu bar
-
-    menubar addMenu Edit -before Window -underline 0
-
-    menubar add {Undo} Edit -underline 0 -accelerator "z" \
-	    -command "$this undo"
-
-    menubar add {Redo} Edit -underline 0 -accelerator "d" \
-	    -command "$this redo"
-
-    menubar addSeparator Edit
-
-    menubar add Cut Edit -underline 0 -accelerator "x" \
-	    -command "$this modify cut"
-    
-    menubar add Copy Edit -underline 1 -accelerator "c" \
-	    -command "$this copy"
-    
-    menubar add Paste Edit -underline 0 -accelerator "v" \
-	    -command "$this modify paste"
-    
-    menubar addSeparator Edit
-
-    menubar add {Title...} Edit -underline 0 -accelerator "T" \
-            -command "$this titleAdd"
-
-    menubar add {Edit Item} Edit -underline 0 -accelerator "e" \
-	    -command "$this edit"
-
-    # Undo and Redo menu start out disabled
-    menubar disable Undo
-    menubar disable Redo
 
     eval itk_initialize $args
 
@@ -1193,6 +1167,26 @@ body ::tycho::Graphics::findAll {args} {
     }
 }
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::Graphics::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::Graphics::initializeMenubar $menubar
+    }
+}
+
 #######################################################################
 #### itemlist
 # If the argument is non-null, just return it.  Otherwise, return a list
@@ -1281,4 +1275,46 @@ body ::tycho::Graphics::saveText {} {
         append dsc "\n"
     }
     return $dsc
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::Graphics::initializeMenubar {menubar} {
+
+    $menubar addMenu Edit -before Window -underline 0
+
+    $menubar add {Undo} Edit -underline 0 -accelerator "z" \
+            -command "$this undo"
+
+    $menubar add {Redo} Edit -underline 0 -accelerator "d" \
+	    -command "$this redo"
+
+    $menubar addSeparator Edit
+
+    $menubar add Cut Edit -underline 0 -accelerator "x" \
+	    -command "$this modify cut"
+    
+    $menubar add Copy Edit -underline 1 -accelerator "c" \
+	    -command "$this copy"
+    
+    $menubar add Paste Edit -underline 0 -accelerator "v" \
+	    -command "$this modify paste"
+    
+    $menubar addSeparator Edit
+
+    $menubar add {Title...} Edit -underline 0 -accelerator "T" \
+            -command "$this titleAdd"
+
+    $menubar add {Edit Item} Edit -underline 0 -accelerator "e" \
+	    -command "$this edit"
+
+    # Undo and Redo menu start out disabled
+    $menubar disable Undo
+    $menubar disable Redo
 }

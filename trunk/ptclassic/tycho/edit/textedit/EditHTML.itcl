@@ -98,6 +98,9 @@ class ::tycho::EditHTML {
     # Fix the link between start and end, which has error indicated by err.
     protected method fixLink {link start end err}
 
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Given an HTML anchor, return the filename and point within the file.
     protected method parseLink {dest}
 
@@ -115,23 +118,6 @@ body ::tycho::EditHTML::constructor {args} {
 	    -commandcolor commandColor \
 	    -pointercolor pointerColor \
 	    -destcolor destColor
-
-    # Add to the format menu commands to comment and uncomment
-    # the regions defined by the selection.
-    menubar addSeparator Format
-        
-    menubar command "Recolorize" Format -underline 0 \
-	    -command "$this parseRegion 1.0 end"
-
-    menubar addSeparator Edit
-        
-    menubar command "Check Links" Edit -underline 6 \
-	    -command "$this busy $this checkLinks"
-
-    menubar addMenu Special -underline 0
-    menubar command "File Template" Special -underline 0 \
-	    -command "$this fileTemplate"
-
 }
 
 #####################################################################
@@ -416,6 +402,38 @@ body ::tycho::EditHTML::fixLink {link start end err} {
 		"$start +[string length $replacement] chars"
     }
     return $replacement
+}
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+        # Add to the format menu commands to comment and uncomment
+        # the regions defined by the selection.
+        menubar addSeparator Format
+        
+        menubar command "Recolorize" Format -underline 0 \
+                -command "$this parseRegion 1.0 end"
+        
+        menubar addSeparator Edit
+        
+        menubar command "Check Links" Edit -underline 6 \
+                -command "$this busy $this checkLinks"
+        
+        menubar addMenu Special -underline 0
+        menubar command "File Template" Special -underline 0 \
+                -command "$this fileTemplate"
+    }
 }
 
 #####################################################################

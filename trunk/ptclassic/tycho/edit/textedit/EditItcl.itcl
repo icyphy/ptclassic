@@ -104,8 +104,8 @@ class ::tycho::EditItcl {
     # Tag and color the code in a region.
     method parseNow {start stop}
 
-    ##########################################################################
-    ####                         public procedures                        ####
+    ###################################################################
+    ####                    public procedures                      ####
 
     # Run tydoc on filename, generate html documentation and display it.
     proc gendoc {filename}
@@ -114,49 +114,33 @@ class ::tycho::EditItcl {
     proc genidoc {filename}
 
     ###################################################################
+    ####                    protected methods                      ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
     ####                   protected variables                     ####
 
     protected variable className {}
 
-    ##########################################################################
-    ####                         protected commons                        ####
+    ####################################################################
+    ####                    protected commons                       ####
 
     # Regular expression to select a construct
     protected common selectConstructRegexp {^(proc|body|configbody)}
 
+    ###################################################################
+    ####                      private methods                      ####
+
+    # Initialize the menubar.
+    private method initializeMenubar {menubar}
 }
 
 ###################################################################
 #
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
-
-    # If you add Special Menu choices, be sure to consider deleting them
-    # in EditPTcl, which inherits from EditItcl.
-
-    menubar add "Body Template" Special -underline 0 \
-	    -command "$this bodyTemplate"
-
-    menubar add "File Template" Special -underline 0 \
-	    -command "$this fileTemplate $itk_option(-filetemplate) \
-	    		\[$this getClassName\]"
-
-    menubar add "Test Template" Special -underline 0 \
-	    -command "$this fileTemplate $itk_option(-testtemplate) \
-	    		\[$this getClassName\]"
-
-    menubar addSeparator Special
-
-    menubar add "Generate doc" Special -underline 0 \
-	    -command "$this gendocBuffer"
-
-    menubar add "Generate idoc" Special -underline 9 \
-            -command "$this genidocBuffer"
-
-    menubar add "Generate class diagram" Special -underline 9  \
-	    -command "::tycho::view ItclClassList \
-	    -file [file join [file dirname [$this filename]] classList.icl] \
-	    -toolbar 1"
 }
 
 ###################################################################
@@ -462,3 +446,63 @@ body ::tycho::EditItcl::genidoc {filename} {
     }]
 }
 
+###################################################################
+###################################################################
+####                    protected methods                      ####
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditItcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    # If you add Special Menu choices, be sure to consider deleting them
+    # in EditPTcl, which inherits from EditItcl.
+    if {$menubar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditItcl::initializeMenubar $menubar
+    }
+}
+
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
+#####################################################################
+#### initializeMenubar
+# Initialize the menu bar.  Adds entries specific to this class.
+#
+body ::tycho::EditItcl::initializeMenubar {menubar} {
+ 
+    $menubar add "Body Template" Special -underline 0 \
+            -command "$this bodyTemplate"
+    
+    $menubar add "File Template" Special -underline 0 \
+            -command "$this fileTemplate $itk_option(-filetemplate) \
+            \[$this getClassName\]"
+
+    $menubar add "Test Template" Special -underline 0 \
+            -command "$this fileTemplate $itk_option(-testtemplate) \
+            \[$this getClassName\]"
+
+    $menubar addSeparator Special
+    
+    $menubar add "Generate doc" Special -underline 0 \
+            -command "$this gendocBuffer"
+        
+    $menubar add "Generate idoc" Special -underline 9 \
+            -command "$this genidocBuffer"
+
+    $menubar add "Generate class diagram" Special -underline 9  \
+            -command "::tycho::view ItclClassList \
+            -file [file join [file dirname [$this filename]] classList.icl] \
+            -toolbar 1"
+}

@@ -157,6 +157,9 @@ class ::tycho::TclShell {
     # Evaluate the current command.
     protected method evalTextEntry {}
 
+    # Initialize the menu/status/tool bars associated with this widget.
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     # Insert text and apply one or more tags to that text.
     protected method insertWithTags {text args}
 
@@ -302,31 +305,6 @@ body ::tycho::TclShell::constructor {args} {
     bind $itk_component(text) <Control-s> "%Q searchQuery 0 1; break"
     bind $itk_component(text) <Control-r> "%Q searchQuery 1 1; break"
 
-    # Remove the unneeded menu items.
-    menubar delete "Reload"
-    menubar delete "Switch File..."
-    menubar delete "Toggle Read-Only"
-    menubar delete "Revision Control..."
-    menubar delete "Goto Line..."
-
-    # Remove the Format menu altogether
-    menubar delete Format
-    
-    # Change some of the configuration made by default.
-    displayer configure -title "Tcl Shell"
-    
-    # Add a Special menu
-    menubar addMenu Special -underline 0
-
-    menubar add "Edit history" Special -underline 0 \
-	    -command "$this displayHistory"
-
-    menubar add "Clear history" Special -underline 0 \
-	    -command "$this clearHistory"
-
-    menubar add "Set namespace" Special -underline 0 \
-	    -command "$this queryNamespace"
-
     printPrompt ""
 
     # Remove binding for altfile and revision control.
@@ -334,9 +312,6 @@ body ::tycho::TclShell::constructor {args} {
     bind $prefix <Control-x><Control-q> { }
     bind $prefix <Control-x><v> { }
 
-    # Add myself to the list of open files. 
-    set menulabel "[info class] $this"
-    windowMenuAddAll $menulabel
 }
 
 ###################################################################
@@ -818,6 +793,51 @@ body ::tycho::TclShell::evalTextEntry {} {
     } else {
 	printPrompt "INCOMPLETE"
     }
+}
+
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::TclShell::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    # Change some of the configuration made by default.
+    displayer configure -title "Tcl Shell"
+    
+    if {$menubar != {}} {
+        # Remove the unneeded menu items.
+        $menubar delete "Reload"
+        $menubar delete "Switch File..."
+        $menubar delete "Toggle Read-Only"
+        $menubar delete "Revision Control..."
+        $menubar delete "Goto Line..."
+
+        # Remove the Format menu altogether
+        $menubar delete Format
+            
+        # Add a Special menu
+        $menubar addMenu Special -underline 0
+
+        $menubar add "Edit history" Special -underline 0 \
+                -command "$this displayHistory"
+        
+        $menubar add "Clear history" Special -underline 0 \
+                -command "$this clearHistory"
+
+        $menubar add "Set namespace" Special -underline 0 \
+                -command "$this queryNamespace"    
+    }
+
+    # Add myself to the list of open files. 
+    set menulabel "[info class] $this"
+    windowMenuAddAll $menulabel
 }
 
 #####################################################################
