@@ -1,7 +1,10 @@
 defstar {
 	name {TkImpulse}
 	domain {CGC}
-	desc { Output an impulse when a button is pushed.  }
+	desc {
+Output a specified value when a button is pushed.
+Optionally synchronize by halting until the button is pushed.
+        }
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
@@ -28,6 +31,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {"Impulse"}
 		desc {The string to identify the slider in the control panel.}
 	}
+	defstate {
+	        name {synchronize}
+		type {int}
+		default {"NO"}
+		desc {Halt until the user presses the button.}
+	}
 
 	initCode {
 	    addCode(tkSetup,"tkSetup");
@@ -35,12 +44,22 @@ limitation of liability, and disclaimer of warranty provisions.
 	    addCode("$ref(level) = 0.0;");
 	}
 	go {
-	    addCode(std);
+	  if (int(synchronize)) addCode(sync);
+	  else addCode(nosync);
 	}
-	codeblock (std) {
+	codeblock (nosync) {
 	    $ref(output) = $ref(level);
 	    $ref(level) = 0.0;
         }
+	codeblock (sync) {
+	    while ($ref(level) != $val(level)) {
+	      /* The following will sleep until there is an event to process */
+	      Tk_DoOneEvent(0);
+	    }
+	    $ref(output) = $ref(level);
+	    /* Use level as a flag to */
+	    $ref(level) = $val(level) - 1.0;
+	}
 	// Note that window names cannot start with upper case letters
 	codeblock (tkSetup) {
 	    /* Establish the Tk button */
