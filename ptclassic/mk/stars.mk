@@ -98,12 +98,12 @@ STAR_LIBS=\
 $(S56WH_LIBDIR) $(S56WH_LIB) \
 -lsilagestars -lsilage \
 -lcgstars -lDC -lHu -lDL -lPar -lcg \
-$(MATLABEXT_LIBDIR) $(MATLABEXT_LIB) \
 -lddfstars -lddf \
 -lthorstars -lthor \
 -ldestars -lde \
 -lbdfstars -lbdf \
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
+$(MATLABEXT_LIBDIR) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf
