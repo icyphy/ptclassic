@@ -92,8 +92,8 @@ group arithmetic -label {Basic Arithmetic} {
             -class {Multiply} \
             -label Multiply \
             -icon {edit/graphedit/icons.tim#arithmetic.multiply} {
-        port in -composite 1
-        port out -composite 0
+        port input -composite 1
+        port output -composite 0
     }
 #    star subtract \
 #            -label Subtract \
