@@ -65,8 +65,10 @@ static int check_nets
 static void check_type_direction
   ARGS((char *name, octObject *impl, int *set_p, char **type, char **dir));
 
+#ifdef AVOID_DIALOGS
 static void ask_term_dir
   ARGS((char *tn, int *set_p, char **type, char **dir));
+#endif
 
 static void sub_typedir
   ARGS((octObject *impl, int *set_p, char **type, char **dir));
@@ -121,11 +123,8 @@ char *dir;			/* Terminal direction (if any)     */
  * inconclusive, it asks the user using a dialog box.
  */
 {
-    octObject newTerm, termImpl, finalBag, obj, aterm;
-    octGenerator gen;
-    struct octBox bb;
-    int ignored, total;
-    int okay, type_direction_p;
+    octObject newTerm, finalBag;
+    int type_direction_p;
     symTermFunc tf;
 
     tf.func = seTermFunc;  tf.data = (char *) facet;
@@ -427,10 +426,8 @@ char **dir;			/* Terminal direction 		     */
  * is on, it will query the user.
  */
 {
-    int expert = vemExpert( 0 );
     int i, ask;
-    octObject prop;
-
+    (void)vemExpert( 0 );
     sub_typedir(impl, set_p, type, dir);
 
     ask = 0;
@@ -529,7 +526,7 @@ char **dir;			/* Terminal direction */
 }
 
 
-
+#ifdef AVOID_DIALOGS
 static void ask_term_dir(tn, set_p, type, dir)
 char *tn;			/* Terminal name                     */
 int *set_p;			/* May be TYPE_SET, DIR_SET, or both */
@@ -602,6 +599,7 @@ don't want to set the terminal type or direction.";
 	}
     }
 }
+#endif
 
 
 /*ARGSUSED*/
@@ -620,7 +618,7 @@ lsList cmdList;			/* Argument list            */
     octObject itemBag, aterm, fct, implBag;
     octGenerator gen;
     /* RLS added new variables for automatic naming */
-    char *formatstring, buffer[1024], *term_name;
+    char *formatstring = (char*)NULL, buffer[1024], *term_name;
     int format = 0, count = 0;
     lsGen lgen;
 
