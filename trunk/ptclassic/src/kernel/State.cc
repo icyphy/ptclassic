@@ -44,107 +44,99 @@ inline unsigned int is_idchar(char c) {
         return isalnum(c) || c == '_';
 }
 
-// The state tokenizer without type specification
-ParseToken
-State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn) {
-	return getParseToken(lexer, blockIAmIn, "NONE");	};
+ParseToken State :: pushback;
 
-// The state tokenizer: return next token
+// The state tokenizer: return next token when parsing a state
+// initializer string.  Handles references to files and other states.
 ParseToken
-State :: getParseToken(Tokenizer& lexer, Block* blockIAmIn, char* stateType) {
+State :: getParseToken(Tokenizer& lexer, int stateType) {
         char token[TOKSIZE];
 	ParseToken t;
+
+// allow for one pushback token.
+	if (pushback.tok) {
+		t = pushback;
+		pushback.tok = 0;
+		return t;
+	}
 
 	lexer >> token;
         if (*token == '<') {
                 char filename[TOKSIZE];
 // temporarily disable special characters, so '/' (for instance)
-// doesn't screw us up.
+// does not screw us up.
 		const char* tc = lexer.setSpecial ("");
                 lexer >> filename;
 // put special characters back.
 		lexer.setSpecial (tc);
                 if (!lexer.fromFile(filename)) {
-			StringList msg = readFullName();
-			msg += ": can't open file '";
-			msg += filename;
-			msg += "' in initValue string";
-			errorHandler.error (msg);
-			t.tok = "ERROR";
+			parseError ("can't open file ", filename);
+			t.tok = T_ERROR;
 			return t;
 		}
                 else lexer >> token;
         }
-
+	
         if (*token == 0) {
-                t.tok = "EOF";
+                t.tok = T_EOF;
                 return t;
         }
-
-	if(*token  == ',') {
-		t.tok = "SEPARATOR";
-		t.cval = (char)*token;
+	
+// handle all special characters
+	if(strchr (",[]+*-/()", *token)) {
+		t.tok = t.cval = *token;
 		return t;
 	}
 
-	if(*token == '[' || *token == ']') {
-		t.tok = "REPEATER";
-		t.cval = (char)*token;
-		return t;
-	}
-
-        if (*token == '+' || *token == '-' || *token == '*' ||  *token == '/'
-	|| *token == '(' || *token == ')') {
-                t.tok = "OP";
-                t.cval = (char)*token;
-		return t;
-	}
-
+reparse:	
         if (isdigit(*token) || *token == '.' )  {
 // possible scientific notation if ending in e or E.  Elim + and - as
 // special if so, and append to token.  Ugly hack.
 		int l = strlen(token);
 		if (token[l-1] == 'e' || token[l-1] == 'E') {
-			const char* tc = lexer.setSpecial("*()/");
+			const char* tc = lexer.setSpecial("*()/[],");
 			lexer >> token + l;
 			lexer.setSpecial(tc);
 		}
-		if (!strcmp(stateType,"FLOAT")) {
-                        t.tok = "FLOAT";
+		if (stateType == T_Float) {
+                        t.tok = T_Float;
                         t.doubleval = atof(token);
 			return t;
                 }
                 else {
-                        t.tok = "INT";
+                        t.tok = T_Int;
                         t.intval = atoi(token);
 			return t;
-                }
-        }
-
-        if (is_idchar(*token)) {
-                State* s = lookup(token,blockIAmIn);
-                // better, maybe, to return type and value of the State
-		if(s){
-			t.tok =  "ID"; 
-			t.s =  s ;
-			return t;
-        	}
-		else if(!strcmp(this->type(),"STRING")){
-			t.tok = "STRING";
-			t.sval = savestring(token);
+		}
+	}
+	if (is_idchar(*token)) {
+                State* s = lookup(token,parent()->parent());
+		if (!s) {
+			parseError ("undefined symbol", token);
+			t.tok = T_ERROR;
 			return t;
 		}
-		else {
-			StringList msg = "initState string for ";
-			msg += readFullName();
-			msg += " contains undefined symbol '";
-			msg += token;
-			msg += "'";
-			errorHandler.error (msg);
-			t.tok = "NULL";
-			t.s = 0;
+// hack -- right now we only return a state pointer for Complex
+		if (strcmp(s->type(), "COMPLEX") == 0) {
+			t.tok = T_ID;
+			t.s = s;
 			return t;
-		} 
+		}
+		else if (s->size() == 1) {
+			StringList value = s->currentValue();
+			strncpy (token, value, TOKSIZE-1);
+			goto reparse;
+		}
+		else {
+			parseError ("can't use aggregate states", token);
+			t.tok =  T_ERROR; 
+			return t;
+        	}
+	}
+	else {
+		parseError ("unexpected token", token);
+		t.tok = T_ERROR;
+		return t;
 	}
 }
 
@@ -190,5 +182,16 @@ State* StateList::stateWithName(const char* name) {
 			return  sp;
 	}
 	return  NULL;
+}
+
+// complain of parse error
+void State::parseError (const char* text, const char* text2) {
+	StringList msg = "Error initializing ";
+	msg += readFullName();
+	msg += ": ";
+	msg += text;
+	msg += " ";
+	msg += text2;
+	errorHandler.error (msg);
 }
 
