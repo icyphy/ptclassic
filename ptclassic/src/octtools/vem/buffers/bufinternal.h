@@ -112,6 +112,9 @@ extern st_table *_activeBufTable;
  * Local routines
  */
 
+void bufMarkActive
+    ARGS((octId id));
+
 extern intern_buffer *_bufFindBuffer
   ARGS((octId id));
    /* Returns an internal buffer given a facet id (bufinternal.c) */
