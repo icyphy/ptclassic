@@ -351,6 +351,32 @@ static const State* findState(const Block* b, const char* nm) {
 	return 0;
 }
 
+// initialize: initialize a block or state (or porthole?)
+int PTcl::initialize(int argc, char** argv) {
+    if (argc == 3) {
+	// Initialize a state.  Cast away the const.
+	Block* blk = (Block*)getBlock(argv[1]);
+	if (!blk) return TCL_ERROR;
+	State* st = (State*)findState(blk, argv[2]);
+	if (!st) {
+	    Tcl_AppendResult(interp,"No such state: ", argv[1], ":",
+	    	argv[2],(char*)NULL);
+	    return TCL_ERROR;
+	}
+	st->initialize();
+    } else if (argc == 2) {
+	// Initialize a state.  Cast away the const.
+	Block* blk = (Block*)getBlock(argv[1]);
+	if (!blk) return TCL_ERROR;
+	blk->initialize();
+    } else {
+	return usage("initialize <block> ?<state>?\n"
+		"or initialize this\n"
+		"or initialize target");
+    }
+    return TCL_OK;
+}
+
 // statevalue: return a state value
 // syntax: statevalue <block> <state> ?current|initial?
 // default is current value
@@ -1141,6 +1167,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(domains),
 	ENTRY(exit),
 	ENTRY(halt),
+	ENTRY(initialize),
 	ENTRY(knownlist),
 	ENTRY(link),
 	ENTRY(listobjs),
