@@ -1,0 +1,213 @@
+# Graphical front end used to generate a class diagram
+#
+# @Author: Christopher Hylands
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1996 The Regents of the University of California.
+# All rights reserved.
+#
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+#                                        PT_COPYRIGHT_VERSION_2
+#                                        COPYRIGHTENDKEY
+#######################################################################
+
+
+#######################################################################
+#### options
+#
+
+#######################################################################
+#### ItclClassDiagram
+# This class brings up a dialog box that can be used to create a class
+# diagram for a set of itcl classes.
+#
+# <p>
+# Here is an example of how to use the ItclClassDiagram:
+# <tcl><pre>
+#  ::tycho::ItclClassDiagram .i
+#  .i centerOnScreen
+# </pre></tcl>
+#
+class ::tycho::ItclClassDiagram {
+    inherit ::tycho::Query
+
+    constructor {args} {}
+    destructor {}
+    
+    ###################################################################
+    ####                            options                        ####
+
+    # One line description of xxxx option; listed in alphabetical order
+    itk_option define -xxxx xxxx Xxxx ""
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Bring up a filebrowser for the user to find a list of classes with.
+    method browseClassDiagram {browseFile}
+
+    # Bring up a filebrowser for the user to find a list of classes with.
+    method browseClassList {browseFile}
+
+    # Bring up help for this widget
+    method help {}
+
+    # Add the tycho classes to the classListFile
+    method includeTychoClasses {dummy}
+
+    # Update the class diagram using the classes in the classFileList
+    method updateClassDiagram {}
+
+    ###################################################################
+    ####                   private variables                       ####
+
+    # File containing List of classes to be diagrammed
+    private variable classListFile {classList.cll}
+
+    # File containing the class diagram
+    private variable classDiagramFile {classDiagram.dag}
+}
+
+#######################################################################
+#### constructor
+#
+body ::tycho::ItclClassDiagram::constructor {args} {
+configure -queries [list \
+        [list mediated browseClassList {Browse Class List File} \
+        $classListFile \
+        "$this browseClassList"] \
+        [list mediated browseClassDiagram {Browse Class Diagram File} \
+        $classDiagramFile \
+        "$this browseClassDiagram"] \
+        [list mediated includeTychoClasses {} \
+        {Include Tycho Classes} \
+        "$this includeTychoClasses"]
+    ]
+
+    eval itk_initialize $args
+    eval preference exclude $this $args
+
+    addButton editClassList -text "Edit Class List File" \
+            -command "::tycho::File::openContext $classListFile"
+    addButton updateClassDiagram -text "Update class diagram" \
+            -command "$this updateClassDiagram"
+    addButton help -text "Help" \
+            -command "$this help"
+}
+
+
+#######################################################################
+#### destructor
+#
+body ::tycho::ItclClassDiagram::destructor {} {
+}
+
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+#######################################################################
+#### browseClassDiagram
+# Bring up a filebrowser for the user to find a list of classes with.
+#
+body ::tycho::ItclClassDiagram::browseClassDiagram {browseFile} {
+    set classDiagramFile [::tycho::queryfilename \
+            "Choose Class Diagram File Name" $browseFile]
+    insert browseClassDiagram $classDiagramFile
+} 
+
+#######################################################################
+#### browseClassList
+# Bring up a filebrowser for the user to find a list of classes with.
+#
+body ::tycho::ItclClassDiagram::browseClassList {browseFile} {
+    set classListFile [::tycho::queryfilename "Choose Class List File Name" \
+            $browseFile]
+    insert browseClassList $classListFile
+} 
+
+######################################################################
+#### help
+# Open a help window.
+#
+body ::tycho::ItclClassDiagram::help {} {
+    global ::TYCHO
+    ::tycho::File::openContext \
+	    [file join $TYCHO editors visedit doc usersGuides \
+            ItclClassDiagramHelp.html]
+}
+
+#####################################################################
+#### includeTychoClasses
+# Add the tycho classes to the classListFile
+#
+body ::tycho::ItclClassDiagram::includeTychoClasses { dummy } {
+    global tycho
+    set olddir [pwd]
+    cd $tycho
+    # Generate a list of classes
+    set dirs [list \
+            kernel \
+            [file join editors textedit] \
+            [file join editors visedit] \
+            [file join editors slate] \
+            [file join typt editors ] \
+            [file join typt kernel ] \
+            [file join lib tydoc ] \
+    ]
+
+    foreach dir $dirs {
+        eval lappend files [glob [file join $dir {*.itcl}]]
+    }
+    cd $olddir
+
+    set openFileWindow [::tycho::File::isFileOpen $classListFile]
+
+    if { $openFileWindow != {} } {
+       $openFileWindow saveQuery
+    }
+    set fd [open $classListFile "a"]
+    foreach file $files {
+        puts $fd [file join "\$TYCHO" $file]
+    }
+    close $fd
+}
+
+#####################################################################
+#### updateClassDiagram
+# Update the class diagram using the classes in the classFileList
+#
+body ::tycho::ItclClassDiagram::updateClassDiagram {} {
+    global TYCHO
+    set fd [open $classListFile "r"]
+    set fileenv [split [read $fd]]
+    close $fd
+
+    if {$fileenv == {} } {
+        error "Read in $classDiagramFile, but it was empty!"
+    }
+    
+   eval tychoMkClassGraph {{Tycho Class Hierarchy}} $classDiagramFile \
+            $fileenv
+    ::tycho::File::openContext $classDiagramFile
+}
