@@ -1,5 +1,5 @@
 ##########################################################################
-# Version: @(#)Index.itcl	1.13 02/25/97
+# Version: $Id$
 # Author: John Reekie
 #
 # Copyright (c) 1996-1997 The Regents of the University of California.
@@ -51,6 +51,27 @@ class ::tycho::IconIndex {
     # Get the children of an icon
     method children {type name}
     
+    # Test if an icon is present
+    method exists {name}
+
+    # Add a group to the array
+    method group {name args}
+    
+    # Get the attributes of a group
+    method groupattrs {name}
+
+    # Get an attribute or attributes of a group
+    method groupcget {name attribute}
+
+    # Configure the group with one or more attributes
+    method groupconfigure {name args}
+    
+    # Delete a group
+    method groupdelete {name}
+
+    # Add a nested group to the array
+    method groupin {context name args}
+    
     # Add an icon to the array
     method icon {name data args}
     
@@ -69,20 +90,39 @@ class ::tycho::IconIndex {
     # Add a nested icon to the array
     method iconin {context name data args}
     
-    # Test if an icon is present
-    method exists {name}
+    # Get the attributes of a port
+    method portattrs {name}
 
-    # Return an icon
-    method get {name}
+    # Get an attribute or attributes of a port
+    method portcget {name attribute}
 
+    # Configure the port with one or more attributes
+    method portconfigure {name args}
+    
+    # Delete a port
+    method portdelete {name}
+
+    # Add a nested port to the array
+    method portin {context name data args}
+    
     # Get the root entries
     method roots {type}
     
+    # Get the Slate type of an icon
+    method type {name}
+
     #################################################################
     ####                  protected methods                      ####
     
+    # Ports cannot appear at top level
+    method port {name data args} {
+	_toplevelerror port $name
+    }
+    
     # Evaluate code in this object's context
-    protected method evalInSpecificContext {args} {eval $args}
+    protected method evalInSpecificContext {args} {
+	eval $args
+    }
 }
 
 ########################################################################
@@ -95,8 +135,11 @@ body ::tycho::IconIndex::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # The icon entity type
-    defineEntityType icon -valued 1
+    # The group entity type. Label is for menu display.
+    defineEntityType group -valued 0 -label ""
+
+    # The icon entity type. Label is for menu display.
+    defineEntityType icon -valued 1 -label ""
 
     # The port entity type
     defineEntityType port -valued 1
@@ -119,7 +162,93 @@ body ::tycho::IconIndex::assign {name value} {
 # Return the children of an icon.
 #
 body ::tycho::IconIndex::children {type name} {
-    _children type $name
+    _children $type $name
+}
+
+########################################################################
+#### exists
+#
+# Returns true if the icon exists, else false.
+#
+body ::tycho::IconIndex::exists {name} {
+    _exists icon $name
+}
+
+########################################################################
+#### group
+#
+# Add a new group to the array. Flag an error if the group
+# already exists. Additional arguments are the initial values
+# of group attributes. Return the inverse command. If the
+# *-label* attribute is null, set it to the group name.
+#
+body ::tycho::IconIndex::group {name args} {
+    _verifynot group $name
+    _entity group {} $name $args
+    if { [_cget group $name -label] == "" } {
+	_configure group $name [list -label $name]
+    }
+}
+
+########################################################################
+#### groupattrs
+#
+# Return a list containing the attributes of the group as a flat
+# attribute-value list.
+#
+body ::tycho::IconIndex::groupattrs {name} {
+    _verify group $name
+    _attributes group $name
+}
+
+########################################################################
+#### groupcget
+#
+# Get an attribute of a data group. Flag an error if the group
+# does not exist or the attribute does not.
+#
+body ::tycho::IconIndex::groupcget {name attribute} {
+    _verify group $name
+    _cget group $name $attribute
+}
+
+########################################################################
+#### groupconfigure
+#
+# Configure the given group and return the inverse command.  The
+# argument list is a flat list of attribute-value pairs.
+# Flag an error if the group does not exist.
+# 
+body ::tycho::IconIndex::groupconfigure {name args} {
+    _verify group $name
+    _configure group $name $args
+}
+
+########################################################################
+#### groupdelete
+#
+# Delete a group. Flag an error if the group does not exist.
+# Return the inverse command.
+#
+body ::tycho::IconIndex::groupdelete {name} {
+    _verify group $name
+    _delete group $name
+}
+
+########################################################################
+#### groupin
+#
+# Add a new nested group to the array. Flag an error if the group
+# already exists. Additional arguments are the initial values
+# of group attributes. Return the inverse command.  If the
+# *-label* attribute is null, set it to the group name.
+#
+body ::tycho::IconIndex::groupin {context name args} {
+    _verifynotin group $context $name
+    _entity group $context $name $args
+    if { [_cget group $context$_separator$name -label] == "" } {
+	_configure group $context$_separator$name [list -label $name]
+    }
 }
 
 ########################################################################
@@ -127,11 +256,15 @@ body ::tycho::IconIndex::children {type name} {
 #
 # Add a new icon to the array. Flag an error if the icon
 # already exists. Additional arguments are the initial values
-# of icon attributes. Return the inverse command.
+# of icon attributes. Return the inverse command. If the
+# *-label* attribute is null, set it to the icon name.
 #
 body ::tycho::IconIndex::icon {name value args} {
     _verifynot icon $name
     _entity icon {} $name [concat [list $value] $args]
+    if { [_cget icon $name -label] == "" } {
+	_configure icon $name [list -label $name]
+    }
 }
 
 ########################################################################
@@ -184,31 +317,84 @@ body ::tycho::IconIndex::icondelete {name} {
 #
 # Add a new nested icon to the array. Flag an error if the icon
 # already exists. Additional arguments are the initial values
-# of icon attributes. Return the inverse command.
+# of icon attributes. Return the inverse command.  If the
+# *-label* attribute is null, set it to the icon name.
 #
 body ::tycho::IconIndex::iconin {context name value args} {
     _verifynotin icon $context $name
     _entity icon $context $name [concat [list $value] $args]
+    if { [_cget icon $context$_separator$name -label] == "" } {
+	_configure icon $context$_separator$name [list -label $name]
+    }
 }
 
 ########################################################################
-#### exists
+#### port
 #
-# Returns true if the icon exists, else false.
+# Add a new port to the array. Flag an error if the port
+# already exists. Additional arguments are the initial values
+# of port attributes. Return the inverse command.
 #
-body ::tycho::IconIndex::exists {name} {
-    _exists icon $name
+body ::tycho::IconIndex::port {name value args} {
+    _verifynot port $name
+    _entity port {} $name [concat [list $value] $args]
 }
 
 ########################################################################
-#### get
+#### portattrs
 #
-# Get the value of an icon. Flag an error if the icon does
-# not exist.
+# Return a list containing the attributes of the port as a flat
+# attribute-value list.
 #
-body ::tycho::IconIndex::get {name} {
-    _verify icon $name
-    _get icon $name
+body ::tycho::IconIndex::portattrs {name} {
+    _verify port $name
+    _attributes port $name
+}
+
+########################################################################
+#### portcget
+#
+# Get an attribute of a data port. Flag an error if the port
+# does not exist or the attribute does not.
+#
+body ::tycho::IconIndex::portcget {name attribute} {
+    _verify port $name
+    _cget port $name $attribute
+}
+
+########################################################################
+#### portconfigure
+#
+# Configure the given port and return the inverse command.  The
+# argument list is a flat list of attribute-value pairs.
+# Flag an error if the port does not exist.
+# 
+body ::tycho::IconIndex::portconfigure {name args} {
+    _verify port $name
+    _configure port $name $args
+}
+
+########################################################################
+#### portdelete
+#
+# Delete a port. Flag an error if the port does not exist.
+# Return the inverse command.
+#
+body ::tycho::IconIndex::portdelete {name} {
+    _verify port $name
+    _delete port $name
+}
+
+########################################################################
+#### portin
+#
+# Add a new nested port to the array. Flag an error if the port
+# already exists. Additional arguments are the initial values
+# of port attributes. Return the inverse command.
+#
+body ::tycho::IconIndex::portin {context name value args} {
+    _verifynotin port $context $name
+    _entity port $context $name [concat [list $value] $args]
 }
 
 ########################################################################
@@ -218,5 +404,17 @@ body ::tycho::IconIndex::get {name} {
 #
 body ::tycho::IconIndex::roots {type} {
     _roots $type
+}
+
+########################################################################
+#### type
+#
+# Get the slate type of an icon. Flag an error if the icon does
+# not exist.
+#
+body ::tycho::IconIndex::type {name} {
+    set t [_type $name]
+    _verify $t $name
+    _get $t $name
 }
 
