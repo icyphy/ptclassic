@@ -53,7 +53,7 @@ error samples.
                 type { fixarray }
                 desc { internal }
                 default { "-4.0609e-2 -1.6280e-3 1.7853e-1 3.7665e-1 3.7665e-1 1.7853e-1 -1.6280e-3 -4.0609e-2" }
-                attributes { A_XMEM }
+                attributes { A_NONCONSTANT|A_XMEM }
         }
         state {
                 name { coefLen }
