@@ -6,7 +6,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J. Pino
 
  This is the baseclass for stars that generate assembly language code.  
 
@@ -28,6 +28,8 @@ extern const Attribute A_NOINIT(AB_NOINIT,0);
 extern const Attribute A_REVERSE(AB_REVERSE,0);
 extern const Attribute A_CONSEC(AB_CONSEC,0);
 extern const Attribute A_SYMMETRIC(AB_SYMMETRIC,0);
+
+int AsmStar::numLabels = 0 ;
 
 // Generate code
 void AsmStar::fire() {
@@ -62,6 +64,22 @@ AsmStar::lookupAddress(const char* name) {
 	    else Error::abortRun(*this,name," is not defined");
 	    s = "";
 	}
+	return s;
+}
+
+// lookup unique label, if one doesn't exist, create new label
+StringList
+AsmStar::label(const char* name) {
+	unsigned a;
+	StringList s = name;
+	int i = lastLocalLabel;
+	while (i > -1 && strcmp(name,labels[i]) != 0 ) i--;
+	if (i == -1) {
+		lastLocalLabel++;
+		numLabels++;
+		strcpy(labels[lastLocalLabel],name);
+		s += numLabels;
+	} else 	s += numLabels - (lastLocalLabel - i);
 	return s;
 }
 
@@ -186,6 +204,8 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s = lookupMem(id);
 	} else if (strcasecmp(func, "fullname") == 0) {
 		s = readFullName();
+	} else if (strcasecmp(func, "label") == 0) {
+		s = label(id);
 	} else if (strcasecmp(func, "size") == 0) {
 		s = lookupSize(id);
 	} else {
@@ -208,6 +228,9 @@ const int TOKLEN = 80;
 // process a CodeBlock.  This processing just substitutes for
 // macro calls.
 void AsmStar::gencode(CodeBlock& cb) {
+// Reset the local labels
+	resetLabels();
+
 	const char* t = cb.getText();
 // output this text
 	char line[MAXLINELEN], *o = line, c;
