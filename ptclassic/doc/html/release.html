@@ -142,7 +142,12 @@ they have been moved off the main palette.
 <li> We have not tested the interface to Mathematica.
 
 <li> Under Solaris 2.5.1 with Sun CC 4.2, binaries built with
-VIS do not start up, the binaries are apparently invalid
+VIS do not start up, the binaries are apparently invalid.
+This is likely a loader (ld) problem.
+
+<li> The Matlab interface has not been tested with recent releases
+of Matlab.  The Matlab interface worked for us under
+Solaris2.5.1 with Matlab 5.2.  The most recent release is Matlab 5.3.
 
 </menu>
 
@@ -223,7 +228,7 @@ make
 
 <h3><a name="pxgraph">Pxgraph</a></h3>
 Pxgraph has been converted to Java.  See
-the troubleshooting guide at.
+the troubleshooting guide at
 <a href="http://ptolemy.eecs.berkeley.edu/java/ptolemy.plot2.0/ptolemy/plot/doc/internals/troubleshooting.html"><CODE>$PTOLEMY/tycho/java/ptolemy/plot/doc/internals/troubleshooting.html</CODE></a>
 
 If you don't have Java, see
@@ -690,14 +695,14 @@ For changes after 2/6/99, see $PTOLEMY/ChangeLog.
 <pre>
 	* Upgrades
 	binutils-2.8.1 -> binutils-2.9.1 (Used only under HPUX)
-	egcs-1.0.2 -> egcs-1.1.1
+	egcs-1.0.2 -> gcc-2.95.1
 	make-3.76.1 -> make-3.77
 	
 	* src/gnu/README:
 	Updated version numbers
 	
 	* src/gnu/makefile:
-	GCC_VERSION updated for egcs1.1		
+	GCC_VERSION updated for gcc-2.95.1
 </pre>
 <p>
 <hr>
