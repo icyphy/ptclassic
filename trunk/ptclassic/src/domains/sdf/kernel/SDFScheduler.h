@@ -56,7 +56,6 @@ public:
 	ListIter::reset();
 };
 
-
 class GalStarIter;
 
 	////////////////////////////
@@ -129,14 +128,41 @@ public:
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
 
-	// my domain
-	const char* domain() const;
+        // my domain
+        const char* domain() const;
 
 protected:
-	// This method checks to see whether a domain name is supported
-	// by the scheduler.  When a new domain is created that uses
-	// this scheduler, simply redefine this function
-	virtual int isDomainSupported(const char* domainName);
+        // This method checks to see whether a domain name is supported
+        // by the scheduler.  When a new domain is created that uses
+        // this scheduler, simply redefine this function
+        virtual int isDomainSupported(const char* domainName);
+
+	// Flag for errors detected while computing the schedule
+	int invalid;
+
+        // The following virtual protected methods are called
+        // successively by the setup method. Each sets the invalid
+        // flag if it encounters a problem.
+
+        // Verify connectivity for the galaxy.
+        virtual int checkConnectivity(Galaxy& galaxy);
+      
+        // Initialize the galaxy for scheduling.
+        virtual int prepareGalaxy(Galaxy&galaxy);
+
+        // Check that all stars belong to the right domain.
+        virtual int checkStars(Galaxy &galaxy);
+
+        // Initialize the stars for scheduling.
+        virtual int prepareStars(Galaxy &galaxy);
+
+        // set the repetitions property of each atomic block
+        // in the galaxy, and recursively call the repetitions
+        // function for each non-atomic block in the galaxy.
+        virtual int repetitions (Galaxy& galaxy);
+
+        // Schedule the synchronous data flow graph.
+        virtual int computeSchedule(Galaxy & galaxy);
 
 private:
 	// This is a kludge to help integrate SDFScheduler and
@@ -149,11 +175,6 @@ private:
 	/******************************************************
 		Members used in computing the repetitions
 	*******************************************************/
-	// set the repetitions property of each atomic block
-	// in the galaxy, and recursively call the repetitions
-	// function for each non-atomic block in the galaxy.
-	int repetitions (Galaxy& galaxy);
-
 	// set the repetitions property of each atomic block is
 	// the subgraph (which may be the whole graph) connected
 	// to block.  Called by repetitions().
@@ -222,10 +243,8 @@ private:
 	// Pointer to star that may be causing deadlock
 	Block* dead;
 
-	// Function to report on deadlock
-	void reportDeadlock(GalStarIter&);
-	// Flag for errors detected while computing the schedule
-	int invalid;
+        // Function to report on deadlock
+        void reportDeadlock(GalStarIter&);
 };
 
 #endif
