@@ -32,7 +32,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // stream, with seed set by srandom and values read by random.
 // This works fine within Ptolemy.
 
-#if defined(hppa) || defined(SVR4) || defined(SYSV)
+#if defined(hppa) || defined(SVR4) || defined(SYSV) || defined(__sgi)
 #ifndef __GNUG__
 extern "C" {
   void srand48(long int);
