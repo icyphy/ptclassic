@@ -273,7 +273,8 @@ AC_SUBST(TK_SRC_DIR)
 AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TYJAVA)
 
+# Removed tksteal/makefile for the 0.7 release
 AC_OUTPUT(makefile tcl.mk:../mk/tcl.mk.in java.mk:../mk/java.mk.in \
-	profile/makefile tksteal/makefile \
+	profile/makefile \
 	tyjava/makefile tyjava/tcljava/makefile tyjava/eprintf/makefile \
 	tytimer/makefile tytest/makefile tycgc/makefile)
