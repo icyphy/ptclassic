@@ -142,6 +142,15 @@ protected:
 	int sendWormData();
 	int receiveWormData();
 
+	// These are needed by the silly "hiding rule", which is not
+	// enforced by g++.
+
+	int sendWormData(PortHole& p) { return MultiTarget::sendWormData(p);}
+	
+	int receiveWormData(PortHole& p) {
+		return MultiTarget::receiveWormData(p);
+	}
+
 	// parallel processors
 	ParProcessors* parProcs;
 
