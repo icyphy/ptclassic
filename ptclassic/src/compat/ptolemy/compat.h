@@ -36,7 +36,7 @@ extern int sprintf();
 #ifndef sgi
 #ifndef SOL2
 #ifndef ultrix
-#if !(defined(sun) && defined (__GNUC__))
+#if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
 extern char *sprintf();
 #endif /*sun && __GNUC__*/
 #endif /*ultrix*/
@@ -61,7 +61,9 @@ extern int fscanf (FILE *, const char *, ...);
 /*extern int pclose(...);*/
 extern void perror (const char *);
 extern int printf (const char *, ...);
+#if !defined(hppa) && !defined(__hppa__)
 extern int putenv (char *);
+#endif
 extern int puts (const char *);
 extern int sscanf (const char *, const char *, ...);
 extern int unlink(const char *);
