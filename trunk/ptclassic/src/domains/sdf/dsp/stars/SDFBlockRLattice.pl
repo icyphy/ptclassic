@@ -84,10 +84,11 @@ limitation of liability, and disclaimer of warranty provisions.
             // Iterate for each block
             for (int j = int(blockSize)-1; j >= 0; j--) {
 		double k;
-		
+		int i;
+
 		// Forward:  Compute each of the Y values
 		y[0] = double (signalIn%j);   // y(0)=x(n)
-		for (int i=1; i <= M; i++) {
+		for (i = 1; i <= M; i++) {
 			k = reflectionCoefs[M-i];
 			y[i] = k * w[i] + y[i-1];
 		}

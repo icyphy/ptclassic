@@ -713,9 +713,9 @@ int AcyLoopScheduler :: checkTopsort()
     // less than graphSize.
     DataFlowStar *nodei, *pn;
     DFPortHole *p, *q;
-    int flag=0;
+    int i, flag=0;
     StringList message = "AcyLoopScheduler::checkTopsort:\n";
-    for (int i=0; i<graphSize; i++) topInvSort[i] = -1;
+    for (i = 0; i<graphSize; i++) topInvSort[i] = -1;
     for (i = 0; i < graphSize; i++) {
 	if ( (topSort[i] >= 0) && (topSort[i] < graphSize) &&
 	    (topInvSort[topSort[i]] == -1) ) {
@@ -1368,11 +1368,11 @@ int AcyLoopScheduler::DPPO()
     int cur, left, bottom, btmlft;
     int costij, cst, costTmp;
     int tmpInc1, tmpInc2, tmpDel1, tmpDel2;
-    int i, ke, g;
+    int i, j, ke, g;
     int N2 = graphSize*graphSize;
     int N3 = N2*graphSize;
     int* costs = new int[N3];
-    for (int j = 0; j< N3; j++) costs[j] = 0;
+    for (j = 0; j< N3; j++) costs[j] = 0;
     int* reps = new int[graphSize];
 
     costMatrix.resize(graphSize,graphSize);

@@ -104,11 +104,12 @@ represent a training vector.
 // First find the shape codeword Si to maximize X'*Si ( ' means transpose ),
       int indexShape = 0;
       double shapeDistance = 0;
-      for ( int j=0; j<dimension; j++ )
+      int i,j;	
+      for ( j=0; j<dimension; j++ )
 	shapeDistance += matrix.entry(j)*shapeCodebook[j];
 
       double sum = 0;
-      for ( int i = 1; i<sizeShapeCodebook; i++ ) {
+      for ( i = 1; i<sizeShapeCodebook; i++ ) {
 	for ( j=0; j<dimension; j++ )
 	  sum += matrix.entry(j)*shapeCodebook[i*dimension+j];
 	if ( sum > shapeDistance ) {

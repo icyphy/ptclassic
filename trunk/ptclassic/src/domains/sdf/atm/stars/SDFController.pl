@@ -74,7 +74,8 @@ to the table's data.
       }
 
       LOG_NEW; srttable = new int* [int(numcpes)];
-      for (int i = 0; i < int(numcpes); i++) {
+      int i;	
+      for (i = 0; i < int(numcpes); i++) {
          LOG_NEW; srttable[i] = new int [indata.numberPorts()];
       }
       

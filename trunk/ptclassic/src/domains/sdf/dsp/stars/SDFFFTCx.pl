@@ -97,9 +97,10 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	go {
 		// load up the array
 		double* p = data;
+		int i;
 
 		// note: particle at maximum delay is the first one
-		for (int i = int(size)-1; i >= 0; i--) {
+		for (i = int(size)-1; i >= 0; i--) {
 			// We use a temporary variable to avoid gcc2.7.2/2.8 problems
 			Complex t = input%i;
 			*p++ = t.real();

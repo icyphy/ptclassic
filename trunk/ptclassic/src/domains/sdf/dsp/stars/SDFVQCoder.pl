@@ -118,7 +118,8 @@ input matrix.
       // been stored in the array halfCodewordPower[numCodewords].
 
       double distance = 0;
-      for ( int i = 0; i < dimension; i++ ) {
+      int i;	
+      for ( i = 0; i < dimension; i++ ) {
 	  distance += matrix.entry(i) * floatCodebook[i];
       }
       distance -= halfCodewordPower[0];
