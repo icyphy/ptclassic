@@ -47,17 +47,8 @@ McGraw-Hill: New York, 1986.
 		type{float}
 		desc{The output of the sinc function.}
 	}
-	ccinclude { <math.h> }
+	ccinclude { "ptdspSinc.h" }
 	go {
-		const double DELTA = 1.0e-9;	// Approximately zero
-		double x = input%0;
-		double sincValue;
-
-		if ( ( -DELTA < x ) && ( x < DELTA ) )
-		  sincValue = 1.0;
-		else
-		  sincValue = sin(x) / x;
-
-		output%0 << sincValue;
+		output%0 << Ptdsp_Sinc(double(input%0));
 	}
 }
