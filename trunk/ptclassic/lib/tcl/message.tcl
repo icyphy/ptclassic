@@ -106,22 +106,36 @@ proc ptkDisplayErrorInfo {} {
 }
 
 ###################################################################
-# Open a message window with the Ptolemy bitmap and grab the focus.
-# The user cannot do anything until the window is dismissed.
+# Open a message window with the Ptolemy bitmap.
+# This is actually the main window for the application.
+# It gets iconified, not destroyed, when dismissed.
+# Only on the first call does it configure the window
+# with version information.
 #
-proc ptkStartupMessage {pigiVersion pigiFilename} {
-    set w .ptkStartupMessage
-    ptkSafeDestroy $w
-    toplevel $w
-    wm title $w "Ptolemy Message"
-    wm iconname $w "Ptolemy Message"
+set ptkStartupMessageCreated 0
 
-    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
-    frame $w.f -relief raised -bd 5
-    frame $w.f.msg
-    message $w.f.msg.msg1 -font [option get . bigfont Pigi] \
+proc ptkStartupMessage {pigiVersion pigiFilename} {
+    global ptkStartupMessageCreated
+    if {$ptkStartupMessageCreated} {
+	wm deiconify .
+	return
+    }
+    set ptkStartupMessageCreated 1
+    wm title . "Ptolemy Welcome Window"
+    wm iconname . "Ptolemy Welcome Window"
+
+    pack [button .mainok -text "OK <Return>" -command "wm iconify ."] \
+	-side bottom -fill x -expand 1
+    pack [frame .version -relief raised -bd 5] \
+	-side top -fill both -expand 1
+    pack [frame .version.msg] \
+	-side right -fill both -expand 1
+
+    message .version.msg.msg1 -font [option get . bigfont Pigi] \
+	-font [option get . mediumfont Pigi] \
 	-justify center -foreground [ptkColor firebrick] -width 20c -text { \
 Ptolemy Interactive Graphical Interface }
+
     append text $pigiVersion {
 } {
 Ptolemy executable you are running:
@@ -131,35 +145,36 @@ Copyright \251 1990-1994 Regents of the University of California
 - All rights reserved -
 For copyright notice, limitation of liability,
 and disclaimer of warranty provisions, push the button below. "
-    message $w.f.msg.msg2 -justify center -text $text -width 20c
-    frame $w.f.msg.at -class Attention
-    button $w.f.msg.at.copyright -command "ptkDisplayCopyright" \
+
+    message .version.msg.msg2 -justify center -text $text -width 20c \
+	-font [option get . mediumfont Pigi]
+
+    pack .version.msg.msg1 .version.msg.msg2 -fill x
+
+    pack [frame .version.msg.at -class Attention] -side bottom -fill x
+
+    button .version.msg.at.copyright -command "ptkDisplayCopyright" \
 	-text {more information} \
 	-background [ptkColor burlywood1] \
 	-font [option get . mediumfont Pigi]
-    pack append $w.f.msg.at $w.f.msg.at.copyright {bottom fillx}
+    pack .version.msg.at.copyright -side bottom -fill x
 
-    pack append $w.f.msg $w.f.msg.msg1 {top fillx} $w.f.msg.msg2 {top} \
-	$w.f.msg.at {bottom fillx}
-
-    canvas $w.f.bm -width 6c -height 7.5c -bg [ptkColor bisque]
+    pack [canvas .version.bm -width 6c -height 7.5c -bg [ptkColor bisque]] \
+	-side left
     global ptolemy
-    $w.f.bm create bitmap 3c 3.75c -bitmap @$ptolemy/tcl/lib/Ptolemy.xbm
-    pack append $w.f $w.f.bm {left} $w.f.msg {right fill expand}
-    pack append $w $w.f {top fill expand} $w.ok {top fill expand}
+    .version.bm create bitmap 3c 3.75c -bitmap @$ptolemy/tcl/lib/Ptolemy.xbm
 
-    wm geometry $w +200+300
-    tkwait visibility $w
-    focus $w
-    bind $w <Button> "ptkSafeDestroy $w"
-    bind $w.f.msg <Button> "ptkSafeDestroy $w"
-    bind $w.f.msg.msg1 <Button> "ptkSafeDestroy $w"
-    bind $w.f.msg.msg2 <Button> "ptkSafeDestroy $w"
-    bind $w.f.bm <Button> "ptkSafeDestroy $w"
-    bind $w <Key> "ptkSafeDestroy $w"
-    bind $w.f <Key> "ptkSafeDestroy $w"
-    grab $w
-    tkwait window $w
+    wm geometry . +200+300
+    tkwait visibility .
+    focus .
+    bind . <Button> "wm iconify ."
+    bind .version.msg <Button> "wm iconify ."
+    bind .version.msg.msg1 <Button> "wm iconify ."
+    bind .version.msg.msg2 <Button> "wm iconify ."
+    bind .version.bm <Button> "wm iconify ."
+    bind . <Key> "wm iconify ."
+    bind .version <Key> "wm iconify ."
+    grab .
 }
 
 ###################################################################
