@@ -27,17 +27,7 @@
 # src/tcltk/makefile
 # Makefile to build and install tcl/tk
 
-# This file will do several things for you:
-# 1) Build itcl2.0 (which contains tcl and tk). Generic build with static libs
-# 2) Build itcl2.0 with shared libraries
-# 3) Build tcl7.5a2, tk4.1a2
-#
-# The default action is to build itcl2.0 with static libraries
-# To build itcl2.0 with shared libraries, do 'make all_shared'
-# To build tcl7.5a2, tk4.1a2, do 'make all_tcltk'.  To get this to work
-#   right, you may need edit this makefile and change whether 
-#   $PTOLEMY/tcltk/tcl.$PTARCH and $PTOLEMY/tcltk/tk.$PTARCH are links
-#   or directories.
+# The default action is to build itcl2.1 with shared libraries
 
 # You should not need to edit this file, merely set the
 # PTARCH and PTOLEMY environment variables, for example:
@@ -65,74 +55,30 @@ TCLTK_SRC=$(PTOLEMY)/src/tcltk
 # Location of the architecture specific build directory.
 TCLTK_OBJ=$(PTOLEMY)/obj.$(PTARCH)/tcltk
 
-# Location of the architecture specific build directory for shared libraries
-TCLTK_SHARED_OBJ=$(PTOLEMY)/obj.$(PTARCH)/tcltk.shared
-
 # where to install binaries
 BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 
 # No changes should be necessary below this line
 #---------------------------------------------------------
+ENABLE_GCC =		--enable-gcc
+ENABLE_SHARED =		--enable-shared
 
-# Version numbers
-#TCL_MAJOR_VERSION = 	tcl7.4
-#TCL_VERSION =		tcl7.4p1
-#TK_MAJOR_VERSION = 	tk4.0
-#TK_VERSION =		tk4.0p1
+# Used to find the itcl source directory
+ITCL_VERSION =		itcl2.1
+ITCL_TCL_MAJOR_VERSION_NUMBER =	7.5
+ITCL_TK_MAJOR_VERSION_NUMBER =	4.1
+ITCL_MAJOR_VERSION_NUMBER =	2.1
+IWIDGETS_MAJOR_VERSION_NUMBER =	2.1.0
 
-TCL_MAJOR_VERSION = 	tcl7.5
-TCL_VERSION =		tcl7.5b1
-TK_MAJOR_VERSION = 	tk4.1
-TK_VERSION =		tk4.1b1
-# Between tcl7.4 and tcl7.5, the location of the unix sources moved.
-TCL_7_5_HACK=		/unix
-ENABLE_GCC =		--enable-gcc --disable-load
-
-ITCL_MAJOR_VERSION =	itcl2.0
-ITCL_MAJOR_VERSION_NUMBER = 2.0
-ITCL_MAJOR_VERSION_INT = 2
-ITCL_VERSION =		itcl2.0plus
-
-IWIDGETS_VERSION =	iwidgets2.0.1
-
-# Version of tcl and tk shipped with itcl
-ITCL_TCL_MAJOR_VERSION_NUMBER =	7.4
-ITCL_TK_MAJOR_VERSION_NUMBER =	4.0
-# Location of the tcl source
-TCL_SRC =	$(TCLTK_SRC)/$(TCL_VERSION)$(TCL_7_5_HACK)
-# Location of the tk source
-TK_SRC =	$(TCLTK_SRC)/$(TK_VERSION)$(TCL_7_5_HACK)
 # Location of the itcl source
 ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION)
 
-# Location of the tcl only object files
-#TCL_OBJ =	$(TCLTK_OBJ)/tcl
-TCL_OBJ =	$(TCLTK_OBJ)/$(TCL_VERSION)$(TCL_7_5_HACK)
-# Location of the tk only object files
-#TK_OBJ =	$(TCLTK_OBJ)/tk
-TK_OBJ =	$(TCLTK_OBJ)/$(TK_VERSION)$(TCL_7_5_HACK)
 # Location of the itcl only object files
-#ITCL_OBJ =	$(TCLTK_OBJ)/itcl
 ITCL_OBJ =	$(TCLTK_OBJ)/$(ITCL_VERSION)
-
-# Destination of tcl only machine dependent files
-TCL_DEST =	$(TCLTK_DEST)/tcl.$(PTARCH)
-#TCL_DEST =	$(TCLTK_DEST)/$(TCL_VERSION).$(PTARCH)
-# Destination of the machine independent tcl files
-TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/tcl
-#TCL_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TCL_VERSION)
-
-# Destination of tk only machine dependent files
-TK_DEST =	$(TCLTK_DEST)/tk.$(PTARCH)
-#TK_DEST =	$(TCLTK_DEST)/$(TK_VERSION).$(PTARCH)
-# Destination of the machine independent tk files
-TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
-#TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
 ITCL_DEST_BASE =	itcl.$(PTARCH)
 ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_DEST_BASE)
-#ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_VERSION).$(PTARCH)
 
 # Location of itcl bin directory relative to Ptolemy bin directory
 # Can't use absolute path name here, or we will create a distribution that
@@ -143,15 +89,10 @@ REL_ITCL_BINDIR =	../tcltk/$(ITCL_DEST_BASE)/bin
 
 # Destination of the machine independent itcl files
 ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
-#ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/$(ITCL_VERSION)
 
 ITCL_DEST_LIB = $(ITCL_DEST)/lib
 
-# Directory to make shared libraries in
-ITCL_SHARED_OBJ =	$(TCLTK_OBJ)/$(ITCL_VERSION).shared
-ITCL_SHARED_DEST_LIB = 	$(ITCL_DEST)/lib/shared
-
-# itcl2.0 contains its own custom tcltk
+# itcl2.1 contains its own custom tcltk
 all: 		configure itcl
 configure:	$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
 bin:		itcl
@@ -159,133 +100,26 @@ install:	install_itcl
 clean:		clean_itcl
 realclean:	clean_itcl
 
-all_shared:	configure_shared itcl_shared
-configure_shared: $(ITCL_SHARED_OBJ)/config.status
-bin_shared:		itcl_shared
-install_shared:		install_itcl_shared
-clean_shared:		clean_itcl_shared
-realclean_shared:	clean_itcl_shared
-
-# Rules to build non-itcl tcltk
-# Note that pigiRpc requires itcl, these rules are left in only for testing
-# To build pigiRpc w/o itcl, you will need to compile pigilib/ptkTkSetup.c
-# and ptcl/ptclAppInit.cc with -DPT_NO_ITCL.  You can avoid needing libitcl
-# if you do 'make install ITCL_LIBSPEC= ITK_LIBSPEC='
-#
-# If you are trying to install a non-itcl tcltk, you will need to do:
-#    mkdir $PTOLEMY/tcltk/{tcl,tk}.$PTARCH $PTOLEMY/tcltk/{tcl,tk}
-# or else the tcl.$PTARCH and tk.$PTARCH directories that this makefile 
-# creates for you will be only links into the itcl tree.
-
-all_tcltk: 		configure_tcltk tcl tk
-configure_tcltk:	$(TCL_OBJ)/config.status $(TK_OBJ)/config.status \
-			$(TCLTK_OBJ)/makefile
-bin_tcltk:		tcl tk
-install_tcltk:	install_tcl install_tk
-	(cd $(TCL_DEST)/lib; ln -s . shared)
-	(cd $(TK_DEST)/lib; ln -s . shared)
-	(cd $(TCL_INDEPENDENT_DEST)/lib; ln -s $(TCL_MAJOR_VERSION) tcl)
-	(cd $(TK_INDEPENDENT_DEST)/lib; ln -s $(TK_MAJOR_VERSION) tcl)
-
-clean_tcltk:		clean_tcl clean_tk
-realclean_tcltk:	clean_tcl clean_tk
-
-.PHONY:	tcl tk itcl configure install_tcl install_tk install_itcl \
-		clean_tcl clean_tk clean_itcl realclean 
-
-# Configure tcl
-$(TCL_OBJ)/config.status: $(TCLTK_OBJ) $(TCL_OBJ)
-	@echo "Configuring tcl"
-	(cd $(TCL_OBJ); $(TCL_SRC)/configure -v --srcdir=$(TCL_SRC) --prefix=$(TCL_INDEPENDENT_DEST) --exec-prefix=$(TCL_DEST) $(ENABLE_GCC))
-	-(cd $(TCL_OBJ); ln -s $(TCL_SRC)/install-sh .)
-
-$(TCL_OBJ): 
-	mkdir -p $@
-
-$(BINDIR)/tclsh:
-	rm -f $@
-	ln -s $(TCL_DEST)/bin/tclsh $@ 
-
-# Build tcl
-tcl: $(TCL_OBJ)/libtcl.a
-$(TCL_OBJ)/libtcl.a: $(TCL_OBJ)
-	@echo "Making all in tcl"
-	(cd  $(TCL_OBJ); $(MAKE) all)
-
-# Install tcl
-install_tcl: $(TCL_DEST)/lib/libtcl.a $(BINDIR)/tclsh
-$(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
-	(cd  $(TCL_OBJ); $(MAKE) install)
-	if [ ! -f $(TCL_DEST)/lib/libtcl.a ]; then \
-		cd $(TCL_DEST)/lib; rm -f libtcl.a; \
-		ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a; \
-	fi
-	# Don't overwrite this each time we install
-	chmod a-w $(TCL_INDEPENDENT_DEST)/include/tcl.h
-
-$(TCLTK_DEST):
-	mkdir $(TCLTK_DEST)
-
-clean_tcl:
-	(cd $(TCL_OBJ); $(MAKE) clean)
-
-######################################################################
-# Rules for tk
-#
-
-# Configure tk
-#	Need to make a link for tk.h so that we are sure it is installed
-#	Theoretically, GNU make should do the right thing, but . . .
-$(TK_OBJ)/config.status: $(TCLTK_OBJ) $(TK_OBJ) \
-			#$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION) $(TCLTK_OBJ)/$(TK_MAJOR_VERSION)
-	@echo "Configuring tk"
-	(cd $(TK_OBJ); $(TK_SRC)/configure -v --srcdir=$(TK_SRC) --prefix=$(TK_INDEPENDENT_DEST) --exec-prefix=$(TK_DEST) $(ENABLE_GCC))
-	-(cd $(TK_OBJ); ln -s $(TK_SRC)/tk.h tk.h)
-	-(cd $(TK_OBJ); ln -s $(TK_SRC)/install-sh .)
-$(TK_OBJ):
-	mkdir -p $(TK_OBJ)
-
-# Build tk
-tk: $(TK_OBJ)/libtk.a 
-$(TK_OBJ)/libtk.a: $(TK_OBJ) #$(TCLTK_OBJ)/$(TCL_MAJOR_VERSION)
-	@echo "Making all in tk"
-	(cd  $(TK_OBJ); $(MAKE) \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		all)
-
-# Install tk
-install_tk: $(TK_DEST)/lib/libtk.a
-$(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/lib $(TK_INDEPENDENT_DEST)
-	(cd  $(TK_OBJ); $(MAKE) \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		install)
-	if [ ! -f $(TK_DEST)/lib/libtk.a ]; then \
-		cd $(TK_DEST)/lib; rm -f libtk.a; \
-		ln -s lib$(TK_MAJOR_VERSION).a libtk.a; \
-	fi
-	# Don't overwrite this each time we install
-	chmod a-w $(TK_INDEPENDENT_DEST)/include/tk.h
-
-clean_tk:
-	(cd $(TK_OBJ); $(MAKE) clean)
-
 ######################################################################
 # Rules for itcl
 # itcl is an extension for tcl that provides tcl 'classes'
-# The itcl2.0 distribution contains tcl and tk
+# The itcl2.1 distribution contains tcl and tk
 
 # Configure itcl
 $(ITCL_OBJ)/config.status: config_itcl
 config_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)
 	@echo "Configuring itcl"
-	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
+	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; \
+	$(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) \
+		--prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
 $(TCLTK_OBJ): 
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
 
 $(ITCL_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
+
 
 itcl: $(ITCL_OBJ) $(ITCL_OBJ)/libitcl.a 
 $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ) 
@@ -297,71 +131,33 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 		all)
 
 # Install itcl
-install_itcl: $(ITCL_DEST_LIB)/libitcl.a
+install_itcl: $(ITCL_DEST_LIB)/libitcl.a fixlinks
 	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 
-$(ITCL_DEST_LIB)/libitcl.a: \
-		$(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) $(ITCL_DEST) \
-		$(ITCL_DEST_LIB) $(ITCL_INDEPENDENT_DEST) \
-		$(ITCL_DEST_LIB)/libtk.a \
-		$(ITCL_DEST_LIB)/libtcl.a \
-		$(ITCL_DEST_LIB)/libitk.a \
-		$(ITCL_DEST_LIB)/shared \
-		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
-		$(TK_DEST) $(TK_INDEPENDENT_DEST)
+$(ITCL_DEST_LIB)/libitcl.a:
+	@echo "Making install in itcl"
 	(cd  $(ITCL_OBJ); $(MAKE) \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
 		install)
-	-(cd $(ITCL_DEST_LIB); \
-		rm -f libitcl.a; \
-		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).a libitcl.a)
+fixlinks:
 	@echo "Create unversioned links for arch independent libraries"
-	-(cd $(TCL_INDEPENDENT_DEST)/lib; \
-		rm -f tcl; \
-		ln -s tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER) tcl)
-	-(cd $(TK_INDEPENDENT_DEST)/lib; \
-		rm -f tk; \
-		ln -s tk$(ITCL_TK_MAJOR_VERSION_NUMBER) tk)
-	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
-		rm -f itcl; \
-		ln -s itcl$(ITCL_MAJOR_VERSION_NUMBER) itcl)
-	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
-		rm -f itk; \
-		ln -s itk$(ITCL_MAJOR_VERSION_NUMBER) itk)
-	-(cd $(ITCL_INDEPENDENT_DEST)/lib; \
-		rm -f iwidgets; \
-		ln -s iwidgets$(ITCL_MAJOR_VERSION_NUMBER) iwidgets)
-	# make links be relative, not absolute so we can move the dist.
-	-(cd $(ITCL_DEST)/bin; rm -f itclsh itkwish tclsh wish; \
-		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh; \
-		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish; \
-		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh; \
-		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) wish)
-
-$(ITCL_DEST):
-	mkdir $@
-$(ITCL_DEST_LIB):
-	mkdir $@
-$(ITCL_INDEPENDENT_DEST):
-	mkdir $@
-
-# Links so that we don't have to change version numbers in lots of makefiles.
-$(ITCL_DEST_LIB)/libtcl.a:
-	(cd $(ITCL_DEST_LIB); \
-		rm -f libtcl.a; \
-		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER).a libtcl.a)
-$(ITCL_DEST_LIB)/libtk.a:
-	(cd $(ITCL_DEST_LIB); \
-		rm -f libtk.a; \
-		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER).a libtk.a)
-$(ITCL_DEST_LIB)/libitk.a:
-	(cd $(ITCL_DEST_LIB); \
-		rm -f libitk.a; \
-		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).a libitk.a)
-
+	-(cd $(ITCL_INDEPENDENT_DEST)/lib/itcl; \
+		rm -f tcl tk itcl itk iwidgets; \
+		ln -s tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER) tcl; \
+		ln -s tk$(ITCL_TK_MAJOR_VERSION_NUMBER) tk; \
+		ln -s itcl$(ITCL_MAJOR_VERSION_NUMBER) itcl; \
+		ln -s itk$(ITCL_MAJOR_VERSION_NUMBER) itk; \
+		ln -s iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER) iwidgets )
+	@echo "Create links for the itcl2.1 lib files in the directory"
+	@echo " where itcl2.0 lib files were"
+	-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
+	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
+	-(cd $(TCLTK_DEST); mkdir tcl tk; \
+		cd tcl; ln -s ../itcl/include/itcl include; \
+		cd ../tk; ln -s ../itcl/include/itcl include; \
+		cd ../itcl/include; ln -s itcl/*.h .)
 
 # Links so that older programs can find libs and includes.
 # Note that itcl contains its own tcl/tk so we have to make links
@@ -376,8 +172,6 @@ $(TCL_DEST)/lib:
 $(TK_DEST):
 	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tk.$(PTARCH))
 	#mkdir $@
-$(TK_DEST)/lib:
-	mkdir $@
 $(TK_INDEPENDENT_DEST):
 	(cd $(TCLTK_DEST); ln -s itcl tk)
 	#mkdir $@
@@ -388,113 +182,3 @@ clean_itcl:
 #######################
 $(TCLTK_OBJ)/makefile:
 	ln -s $(TCLTK_SRC)/makefile $@
-
-#######################
-# Produce shared libraries
-$(ITCL_SHARED_OBJ)/config.status: config_itcl_shared
-config_itcl_shared: $(TCLTK_OBJ) $(ITCL_SHARED_OBJ)
-	@echo "Configuring itcl"
-	(cd $(ITCL_SHARED_OBJ); PWD=$(ITCL_SHARED_OBJ); export PWD; $(ITCL_SRC)/configure --srcdir=$(ITCL_SRC) --prefix=$(ITCL_INDEPENDENT_DEST) --exec-prefix=$(ITCL_DEST)) 
-
-$(ITCL_SHARED_OBJ): $(TCLTK_OBJ)
-	@if [ ! -d $@ ]; then echo "Making $@"; mkdir $@; fi
-
-# Create all the shared libraries
-itcl_shared: $(ITCL_SHARED_OBJ) \
-		$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets \
-		$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX) \
-		$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX)
-	@echo "Done making all shared libraries in itcl"
-
-$(ITCL_SHARED_OBJ)/iwidgets/init.iwidgets:
-	(cd  $(ITCL_SHARED_OBJ)/$(IWIDGETS_VERSION); $(MAKE) all)
-
-$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX): 
-	(cd  $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER); $(MAKE) \
-	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		all)
-	(cd  $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER); \
-		 $(CSHARED_LIBRARY_COMMAND) libtcl.$(LIBSUFFIX) *.o)
-
-$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX): 
-	(cd  $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER); $(MAKE) \
-	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		all)
-	(cd  $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER); \
-		$(CSHARED_LIBRARY_COMMAND) libtk.$(LIBSUFFIX) *.o)
-
-$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX): 
-	(cd  $(ITCL_SHARED_OBJ)/itcl; $(MAKE) \
-	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		SHLIB_LD=ld \
-		shared)
-$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX): 
-	(cd  $(ITCL_SHARED_OBJ)/itk; $(MAKE) \
-	       CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS) $(C_SHAREDFLAGS)" \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		SHLIB_LD=ld \
-		shared)
-
-# Install itcl
-install_itcl_shared: $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT)
-	# make links be relative, not absolute so we can move the dist.
-	-(cd $(ITCL_DEST)/bin; rm -f itclsh itkwish tclsh wish; \
-		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh; \
-		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish; \
-		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh; \
-		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) wish)
-
-#		$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX)
-
-$(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT):
-		$(ITCL_DEST) $(ITCL_DEST_LIB) \
-		$(TCLTK_DEST) \
-		$(ITCL_SHARED_DEST_LIB) $(ITCL_INDEPENDENT_DEST) \
-		$(ITCL_SHARED_OBJ)/itcl/libitcl.$(LIBSUFFIX) \
-		$(ITCL_SHARED_DEST_LIB)/libtcl.$(LIBSUFFIX) \
-		$(ITCL_SHARED_DEST_LIB)/libtk.$(LIBSUFFIX) \
-		$(TCL_DEST) $(TCL_INDEPENDENT_DEST) \
-		$(TK_DEST) $(TCL_INDEPENDENT_DEST) 
-	(cd  $(ITCL_SHARED_OBJ); $(MAKE) \
-		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
-		X11_INCLUDES="$(X11_INCSPEC)" \
-		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
-		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
-		install)
-	#mv $(ITCL_DEST_LIB)/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX)
-	#chmod 555 $@
-
-
-
-# Hack to workaround shared libraries.  Eventually we will build them
-$(ITCL_SHARED_DEST_LIB):
-	(cd $(ITCL_DEST_LIB); ln -s . shared)
-	#mkdir $@
-
-
-
-# Links so that we don't have to change version numbers in lots of makefiles.
-$(ITCL_SHARED_DEST_LIB)/libtcl.$(LIBSUFFIX): \
-				$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX)
-	mv $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/libtcl.$(LIBSUFFIX) $@
-	chmod 555 $@
-$(ITCL_SHARED_DEST_LIB)/libtk.$(LIBSUFFIX): \
-				$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX) 
-	mv $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER)/libtk.$(LIBSUFFIX) $@
-	chmod 555 $@
-
-$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX): \
-				$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX) 
-	mv $(ITCL_DEST_LIB)/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) \
-		$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX)
-	chmod 555 $@
-
-clean_itcl_shared:
-	(cd $(ITCL_SHARED_OBJ); $(MAKE) clean)
