@@ -261,6 +261,7 @@ void SimControl::setPollFlag() {
         // (turn off signal blocking for a second to allow the signal
         //  to come through if it had been blocked)
 int SimControl::getPollFlag() {
+	CriticalSection region(gate);  // to make sure blocking restored
 	ptReleaseSig(SIGALRM);
         ptBlockSig(SIGALRM);
         return pollflag;
@@ -288,12 +289,12 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
         i.it_value.tv_usec = micro_seconds;
 	// Turn off the poll flag until the timer fires
 	pollflag = 0;
+	// Turn on the poll flag when the timer expires
+	signal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
 	// Make the signal safe from interrupting system calls
         ptSafeSig(SIGALRM);
 	// Block the signal so that it will not interrupt system calls
 	ptBlockSig(SIGALRM);
-	// Turn on the poll flag when the timer expires
-	signal(SIGALRM, (SIG_PF)&SimControl::setPollFlag);
 	// Start the timer
 	setitimer(ITIMER_REAL, &i, 0);
 }
