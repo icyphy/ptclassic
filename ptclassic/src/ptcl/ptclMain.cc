@@ -54,6 +54,10 @@ static void loadStartup(Tcl_Interp* interp);
 #include <tcl.h>
 #include <errno.h>
 
+#ifdef linux
+#include <fpu_control.h>
+#endif
+
 #ifndef linux
 /*
  * Declarations for various library procedures and variables (don't want
@@ -105,6 +109,11 @@ main(int argc, char **argv) {
     char buffer[1000], *cmd, *args, *fileName;
     int code, gotPartial, tty;
     int exitCode = 0;
+
+#ifdef linux
+    // Fix for DECalendarQueue SIGFPE under linux.
+    __setfpucw(_FPU_DEFAULT | _FPU_MASK_IM);
+#endif
 
     interp = Tcl_CreateInterp();
     Linker::init(argv[0]);	// initialize incremental link module
