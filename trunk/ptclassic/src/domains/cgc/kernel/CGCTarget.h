@@ -29,7 +29,6 @@ public:
 	Block* clone() const;
 	void headerCode();
 	int setup(Galaxy&);
-	int run();
 	void wrapup();
 	void beginIteration(int repetitions, int depth);
 
@@ -53,9 +52,12 @@ public:
 	// make public this method
 	StringList correctName(NamedObj& p) {return  sanitizedFullName(p); }
 
-	// provide the methods to be used at the wormhole interface
-	virtual void getDataToSend(EventHorizon*);
-	virtual void getDataToReceive(EventHorizon*);
+	// compile and run the code
+	int compileCode();
+	int runCode();
+
+	// generate code for a single processor in a multiprocessor target
+	StringList generateCode(Galaxy& g);
 
 protected:
 	char *schedFileName;
@@ -71,10 +73,15 @@ protected:
 	// code generation init routine; compute offsets, generate initCode
 	int codeGenInit(Galaxy&);
 
+	// redefine frameCode() method
+	void frameCode();
+
 	// states
 	StringState funcName;
 	StringState compileCommand;
-	StringState compileOption;
+	StringState compileOptions;
+	StringState linkOptions;
+	StringState saveFileName;
 
 private:
 	StringList includeFiles;
