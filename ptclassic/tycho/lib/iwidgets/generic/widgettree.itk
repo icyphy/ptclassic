@@ -133,7 +133,6 @@ class iwidgets::Widgettree {
     private variable _type      ;# Type of each widget, or "node"
     private variable _tag       ;# Mapping from widget path to tag
     private variable _row       ;# Grid row of each item
-    private variable _sel       ;# Currently selected items
     private variable _state     ;# State of each node: "open" or "closed"
     private variable _nextrow   ;# The next available row in each node
 
@@ -553,9 +552,6 @@ body iwidgets::Widgettree::delete {tag} {
 	    unset itk_component($tag)
 	    unset _type($tag)
 	    unset _row($tag)
-	}
-	if [::info exists _sel($tag)] {
-	    unset _sel($tag)
 	}
     }
     # Remove from parent list
