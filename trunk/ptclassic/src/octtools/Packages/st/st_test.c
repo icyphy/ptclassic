@@ -40,7 +40,10 @@ char *optProgName;		/* For errTrap package */
 char *usage = "? - help\ni name number - insert number under name\nl name - lookup name\nd name - delete name\np name - print table\nc - clear the table\n^D - exit\n";
 
 enum st_retval print_entry(), free_entry();
+int fetch();
 
+
+int
 main(argc, argv)
 int argc;
 char **argv;
@@ -134,7 +137,7 @@ char *name;
 char *record;
 int junk;
 {
-    (void) printf("%s is %d (%d)\n", name, record, junk);
+    (void) printf("%s is %lu (%d)\n", name, (unsigned long)record, junk);
     return ST_CONTINUE;
 }
 
@@ -145,7 +148,7 @@ char *name;
 char *record;
 int junk;
 {
-    (void) printf("Freeing %s (%d)\n", name, record);
+    (void) printf("Freeing %s (%lu)\n", name, (unsigned long)record);
     free(name);
     return ST_DELETE;
 }
