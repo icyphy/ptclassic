@@ -37,12 +37,19 @@ catch {delete class Glimpse}
 
 #######################################################################
 #### Glimpse
-# Description of class.
+# Glimpse "is an indexing and query system that allows you to search through
+# all your files very quickly"
 #
-# <p>
+# The glimpse binary is not shipped with Tycho, see
+# see <A HREF="http://glimpse.cs.arizona.edu">http://glimpse.cs.arizona.edu</A>
+#
+# In Tycho, $TYCHO/makefile contains a 'glimpse' rule that will build
+# $TYCHO/.glimpse_index
+#
 # Here is an example of how to use the Glimpse:
 # <tcl><pre>
-#     ::tycho::Glimpse .x ...
+# ::tycho::Glimpse .g
+# .g centerOnScreen
 # </pre></tcl>
 #
 class ::tycho::Glimpse {
@@ -50,7 +57,7 @@ class ::tycho::Glimpse {
 
     constructor {args} {}
     destructor {}
-    
+
     ###################################################################
     ####                            options                        ####
 
@@ -63,44 +70,9 @@ class ::tycho::Glimpse {
     # Call glimpse on the pattern and produce an index browser with the results
     method glimpseSearch {}
 
-    # One line description of the method
-    method NameB {}
-
     ###################################################################
-    ####                      public procs                         ####
-
-    # One line description procedure; listed in alphabetical order
-    proc NameA {anyargs} {}
-
-    ###################################################################
-    ####                   protected methods                       ####
-
-    # One line description of the method; listed in alphabetical order
-    protected method methodName {}
-
-    ###################################################################
-    ####                   protected variables                     ####
-
-    # Comments come before the variable declaration; variables listed
-    # in alphabetical order
-    protected variable variableName
-
-
-    ###################################################################
-    ####                   private methods                         ####
-
-    # One line description; listed in alphabetical order
-   #private method NameA {}
-
-    ###################################################################
-    ####                   private variables                       ####
-
-    # A comment before one or a group of private variables;
-    # alphabetical order unimportant
-    private variable variableName1
-    private variable variableName2
-
-    #private common variableName
+    ####                         private variables                 ####
+    private variable glimpseOutputFile {}
 }
 
 #######################################################################
@@ -124,7 +96,7 @@ body ::tycho::Glimpse::constructor {args} {
 
     eval itk_initialize $args
 
-   
+
     # If the findcommand option has not been set, set the default now.
     # This has to be done in the constructor rather than in the class
     # definition (as a default) because "$this" is known here.
@@ -142,6 +114,7 @@ body ::tycho::Glimpse::constructor {args} {
 #### destructor
 #
 body ::tycho::Glimpse::destructor {} {
+    ::tycho::rm -f $glimpseOutputFile
 }
 
 
@@ -152,8 +125,7 @@ body ::tycho::Glimpse::destructor {} {
 #####################################################################
 #### glimpseSearch
 # Use the glimpse command to generate an index.
-# Note that glimpse is not shipped with Tycho,
-# see http://glimpse.cs.arizona.edu
+
 #
 body tycho::Glimpse::glimpseSearch {} {
     global TYCHO
@@ -168,8 +140,8 @@ body tycho::Glimpse::glimpseSearch {} {
                 http://glimpse.cs.arizona.edu"
     } 
     # Open the temporary index file, write the header.
-    set glimpseIndexFile [::tycho::tmpFileName glimpse .idx]
-    set fd [open $glimpseIndexFile w]
+    set glimpseOutputFile [::tycho::tmpFileName glimpse .idx]
+    set fd [open $glimpseOutputFile w]
     puts $fd "# <h1>This is a Tycho index file.  Use tycho to view it.</h1>\
             <nothtml"
     puts $fd "{Glimpse $pattern}\n{"
@@ -179,7 +151,6 @@ body tycho::Glimpse::glimpseSearch {} {
     set glimpseOut [exec glimpse -n -H $glimpseIndexDir $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
-        puts $glimpseItem
         regsub {^.*/tycho/(.*)} $glimpseItem {$TYCHO/\1} shortGlimpseItem
         regexp {(^[^ :]*): ([0-9]*):(.*)} $shortGlimpseItem dummy \
                 filename linenum patternline
@@ -189,57 +160,10 @@ body tycho::Glimpse::glimpseSearch {} {
     puts $fd "}\n# >"
     close $fd
 
+    # Bring up the index browser
     set nm [::tycho::autoName .index]
     ::tycho::IndexBrowser $nm \
-            -file $glimpseIndexFile \
+            -file $glimpseOutputFile \
             -width 100
     $nm centerOnScreen
-
-    # Remove the temporary index file
-    tkwait window $nm
-    ::tycho::rm -f $glimpseIndexFile
 }
-
-
-#####################################################################
-#### NameB
-# Description.
-#
-body ::tycho::Glimpse::NameB {} {
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      public procedures                    ####
-
-#######################################################################
-#### NameA
-# Description.
-#
-body ::tycho::Glimpse::NameA {anyargs} {
-}
-
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### MethodName
-# Description.
-#
-body ::tycho::Glimpse::methodName {} {
-}
-
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####
-
-#######################################################################
-#### NameA
-# Description.
-#
-#body ::tycho::Glimpse::NameA {} {
-#}
-
-
