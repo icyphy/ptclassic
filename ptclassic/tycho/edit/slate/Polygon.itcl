@@ -28,7 +28,7 @@
 
 
 #######################################################################
-#### AsPolygon
+#### Polygon
 #
 # The shape of polygons. Items with
 # this shape include <I>polygon</I> and <I>Solid</I>.
@@ -56,7 +56,7 @@
 # <li><a href="../internals/shapes.html">Shape classes</a>.
 # </ul>
 #
-class ::tycho::AsPolygon {
+class ::tycho::Polygon {
     inherit ::tycho::Shape
 
     ###################################################################
@@ -89,7 +89,7 @@ class ::tycho::AsPolygon {
 # and <code>vertex-</code><i>n</i>, where _n_ is
 # between 0 and _length_ - 1.
 #
-body ::tycho::AsPolygon::aspect {id canvas slate args} {
+body ::tycho::Polygon::aspect {id canvas slate args} {
     set coords [$slate coords $id]
     set result {}
 
@@ -144,7 +144,7 @@ body ::tycho::AsPolygon::aspect {id canvas slate args} {
 # value -- for example, if the "e" (east) aspect is specified, it
 # is moved only by the _x_ amount.
 #
-body ::tycho::AsPolygon::reshape {id canvas slate x y args} {
+body ::tycho::Polygon::reshape {id canvas slate x y args} {
     # Get the coordinates of the line into an efficient-to-process form
     set i 0
     set indexes {}
@@ -191,7 +191,7 @@ body ::tycho::AsPolygon::reshape {id canvas slate x y args} {
 #######################################################################
 #### reshapeclick
 #
-body ::tycho::AsPolygon::reshapeclick {id canvas slate x y args} {
+body ::tycho::Polygon::reshapeclick {id canvas slate x y args} {
     getflag ghost args
 
     # Remember how I am now.
@@ -246,7 +246,7 @@ body ::tycho::AsPolygon::reshapeclick {id canvas slate x y args} {
 #######################################################################
 #### reshapedrag
 #
-body ::tycho::AsPolygon::reshapedrag {id canvas slate x y} {
+body ::tycho::Polygon::reshapedrag {id canvas slate x y} {
     # Get delta coordinates
     set deltaX [expr $x - $scratch($id.prevX)]
     set deltaY [expr $y - $scratch($id.prevY)]
@@ -278,7 +278,7 @@ body ::tycho::AsPolygon::reshapedrag {id canvas slate x y} {
 #######################################################################
 #### reshaperelease
 #
-body ::tycho::AsPolygon::reshaperelease {id canvas slate x y} {
+body ::tycho::Polygon::reshaperelease {id canvas slate x y} {
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
     if { [::info exists scratch($id.ghost)] } {
