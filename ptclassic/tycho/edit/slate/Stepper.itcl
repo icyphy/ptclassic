@@ -50,7 +50,7 @@ class ::tycho::Stepper {
     ####                         public methods                    ####
 
     # Start interaction sequence
-    method click {x y} {}
+    method click {x y args} {}
 
 }
 
@@ -64,8 +64,8 @@ class ::tycho::Stepper {
 # to quantize the cursor to the gridsize rather than to the actual
 # grid coordinates.
 #
-body ::tycho::Stepper::click {x y} {
-    ::tycho::Interactor::click $x $y
+body ::tycho::Stepper::click {x y args} {
+    eval ::tycho::Interactor::click $x $y $args
 
     set actualX $x
     set actualY $y
