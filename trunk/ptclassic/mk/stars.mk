@@ -129,7 +129,7 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 # -- If Matlab is installed, then set MATLABDIR accordingly
 #    and set MATLABEXT_LIB to the external library directory
 MATLABDIR := 	$(shell $(ROOT)/bin/matlabRootDir)
-ifeq ($MATLABDIR,)
+ifeq ("$(MATLABDIR)","")
 MATLABDIR= 		$(ROOT)/src/compat/matlab
 MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlab.$(LIBSUFFIX) 
 MATLABSTAR_LIB=		-lsdfnomatlabstars
