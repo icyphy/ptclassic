@@ -70,8 +70,25 @@ Programmer: J. T. Buck and E. A. Lee
 /* chars allowed in "identifier" */
 #define IDENTCHAR(c) (isalnum(c) || c == '.' || c == '_')
 
+
+int versionMode = 0;		/* flag if we are processing a version field */
+
 /* chars allowed in "url" */
-#define URLCHAR(c) (c == ':' || c == '/' || c == '$')
+int urlchar(int c) {
+	/* This is an evil hack that allows RCS version keywords in
+	 * the version field.
+	 * RCS version keywords use $, so when we are parsing the inside
+	 * of a version field, urlchar() does not match $ as a url
+	 * keyword.  If we are not parsing the inside of a version field,
+	 * then $ is matched as a url keyword.
+	 * For more information, see the ptolemy-hackers messages 
+	 * starting on 9/2/97. -cxh
+	 */
+	if (versionMode)
+		return (c == ':' || c == '/');
+	else
+		return (c == ':' || c == '/' || c == '$');
+}
 
 char yytext[BIGBUFSIZE];	/* lexical analysis buffer */
 int yyline = 1;			/* current input line */
@@ -80,6 +97,7 @@ int docMode = 0;		/* flag document bodies  */
 int descMode = 0;		/* flag descriptor bodies  */
 int codeMode = 0;		/* flag code block bodies  */
 int htmlOnly = 0;		/* If 1, then generate only .htm files */
+
 FILE* yyin;			/* stream to read from */
 
 char* progName = "ptlang";	/* program name */
@@ -315,7 +333,9 @@ gallist:galitem
 /* items allowed in both stars and galaxies */
 sgitem:
 	NAME '{' ident '}'		{ objName = $3;}
-|	VERSION '{' version '}'		{ }
+|	VERSION '{'			{ versionMode = 1;}
+		version '}'		{ versionMode = 0;}
+
 |	DESC '{' 			{ descMode = 1; docMode = 1;}
 		BODY			{ objDesc = $4;
 					  docMode = 0;
@@ -425,12 +445,12 @@ stdkey2:
 
 /* version identifier */
 version:
-        '$' IDENTIFIER ':' IDENTIFIER '$'
-   '$' IDENTIFIER ':' URL URL '$'
+        '$' URL IDENTIFIER '$'
+	'$' URL URL URL '$'
                 { char b[SMALLBUFSIZE];
-                  objVer = $4;
-                  sprintf(b, "\"%s %s\"", $9, $10);
                   objDate = save(b);
+                  objVer = $3;
+                  sprintf(b, "\"%s %s\"", $7, $8);
                 }
 |
         '$' IDENTIFIER '$' '$' IDENTIFIER '$'
@@ -440,10 +460,39 @@ version:
                   objVer = "?.?";
                   t = time((time_t *)0);
                   b[0] = QUOTE;
+                  b[1] = 0;
                   strncat(b,ctime(&t),24);
                   strcat(b,"\"");
                   objDate = save(b);
                 }
+|
+	'$' URL IDENTIFIER ',' IDENTIFIER IDENTIFIER URL URL
+	IDENTIFIER IDENTIFIER IDENTIFIER '$'
+		{ char b[SMALLBUFSIZE];
+		  objVer = $6;
+		  sprintf(b, "\"%s %s\"", $7, $8);
+		  objDate = save(b);
+		}
+|
+	'$' URL IDENTIFIER ',' IDENTIFIER IDENTIFIER URL URL
+	IDENTIFIER IDENTIFIER '$'
+		{ char b[SMALLBUFSIZE];
+		  objVer = $6;
+		  sprintf(b, "\"%s %s\"", $7, $8);
+		  objDate = save(b);
+		}
+|
+	'$' IDENTIFIER '$'
+		{ char b[SMALLBUFSIZE];
+		  long t;
+		  objVer = "?.?";
+		  t = time((time_t *)0);
+		  b[0] = QUOTE;
+		  b[1] = 0;
+		  strncat(b,ctime(&t),24);
+		  strcat(b,"\"");
+		  objDate = save(b);
+		}
 |
 	'@' '(' '#' ')' IDENTIFIER
 		IDENTIFIER
@@ -2142,7 +2191,7 @@ yylexNormal(pCurChar)
 	*pCurChar = 0;
 	yylval = save(yytext);
 	return STRING;
-    } else if (! IDENTCHAR(c) && ! URLCHAR(c)) {
+    } else if (! IDENTCHAR(c) && ! urlchar(c)) {
 	    yytext[0] = c;
 	    yytext[1] = 0;
 	    *pCurChar = 0;
@@ -2152,11 +2201,11 @@ yylexNormal(pCurChar)
 	 * digits and '.' allowed
 	 */
         do {
-	    if (URLCHAR(c))
+	    if (urlchar(c))
 		isurl = 1;
 	    *p++ = c;
 	    c = yyinput();
-        } while ( IDENTCHAR(c) || URLCHAR(c));
+        } while ( IDENTCHAR(c) || urlchar(c));
     }
     *p = 0;
     *pCurChar = c;
@@ -2172,7 +2221,7 @@ yylexNormal(pCurChar)
 /* #define input() ((c = getc(yyin))==10?(yyline++,c):c) */
 
 /* The lexical analyzer */
-int yylex () {
+int yylex() {
     static int	c = 0;
     if (c == EOF) return 0;
 
