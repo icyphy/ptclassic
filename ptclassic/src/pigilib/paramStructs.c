@@ -53,12 +53,13 @@ ParamListType *pListPtr;
 {
     if (pListPtr) {
         if (pListPtr->array) {
-            // Note that we can't necessarily free the array[i].name
-            // array[i].type, array[i].value strings, since
-	    // routines in compile.c and octIfc.c do not create
-	    // new copies of the name and value fields, but instead
-	    // are indices into a single string.
-	    // See also the comment at the top of  POct::DeletePList().
+	    /* Note that we can't necessarily free the array[i].name
+               array[i].type, array[i].value strings, since
+	       routines in compile.c and octIfc.c do not create
+	       new copies of the name and value fields, but instead
+	       are indices into a single string.
+	       See also the comment at the top of  POct::DeletePList().
+	     */
 	    free(pListPtr->array);
 	    pListPtr->length = 0;
 	    pListPtr->array = 0;
