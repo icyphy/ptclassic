@@ -35,16 +35,6 @@ provisions.
       desc { Right channel input }
     }
 
-    defstate {
-      name { interleave }
-      type { int }
-      default { FALSE }
-      desc {
-TRUE inputs interleaved audio samples through the left input;
-FALSE inputs separate audio samples through both the left and right inputs.}
-      attributes { A_CONSTANT|A_SETTABLE }
-	}
-
     constructor {
       encodingType.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
       encodingType.setInitValue("linear16");
@@ -53,13 +43,8 @@ FALSE inputs separate audio samples through both the left and right inputs.}
     }
 
     setup {
-      if (interleave) {
-	left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-      }
-      else {
-	left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-	right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-      }
+      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
 
     codeblock(globalDecl){
@@ -79,13 +64,8 @@ FALSE inputs separate audio samples through both the left and right inputs.}
       addInclude("<vis_types.h>"); 
       addGlobal(globalDecl,"CGCVISStereoOut_regoverlay");
       addDeclaration(mainDecl);
-      if (interleave) {
-	addDeclaration(declarations("short", int(blockSize)));
-      }
-      else{
-	/* Declare "buffer" to be of type short and blockSize/2 bytes */
-	addDeclaration(declarations("short", int(blockSize*2)));
-      }
+      /* Declare "buffer" to be of type short and blockSize/2 bytes */
+      addDeclaration(declarations("short", int(blockSize*2)));
       /* Open file for writing data */
       addCode(openFileForWriting);	
       /* audio_setup : to set encodingType, sampleRate and channels */
@@ -135,34 +115,13 @@ FALSE inputs separate audio samples through both the left and right inputs.}
       }
     }
 
-    codeblock (convert_interleave) {
-      /* Convert data in buffer to Output format */
-      {
-	int i, j;
-	for (i=0; i <($val(blockSize)/4); i++) {
-	  j = 4*i;
-	  $starSymbol(unpackleft).regvaluedbl = $ref(left,$val(blockSize)/4-1-i);
-
-	  $starSymbol(buffer)[j]   = $starSymbol(unpackleft).regvaluesh[0];
-	  $starSymbol(buffer)[j+1] = $starSymbol(unpackleft).regvaluesh[1];
-	  $starSymbol(buffer)[j+2] = $starSymbol(unpackleft).regvaluesh[2];
-	  $starSymbol(buffer)[j+3] = $starSymbol(unpackleft).regvaluesh[3];
-	}
-      }
-    }
-
     go {
       addCode(setbufptr);
-      if (interleave) {
-	addCode(convert_interleave);
-      }
-      else {
-	addCode(convert_separate);
-	addCode(write);
-	addCode(updatebufptr);
-	addCode(write);
-	addCode(updatebufptr);
-      }
+      addCode(convert_separate);
+      addCode(write);
+      addCode(updatebufptr);
+      addCode(write);
+      addCode(updatebufptr);
       addCode(write);
       addCode(updatebufptr);
       addCode(write);
