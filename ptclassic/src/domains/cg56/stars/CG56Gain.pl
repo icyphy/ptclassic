@@ -24,7 +24,7 @@ We eliminate ourselves from the circuit in that case.
 	}
 	setup {
 		double thegain = gain.asDouble();
-		if (thegain < -1.0 || gain > 1.0) {
+		if (thegain < -1.0 || thegain > 1.0) {
 		    Error::warn(*this, "gain is not in the range [-1,1]");
 		}
 		identity = (thegain >= CG56_ONE);
