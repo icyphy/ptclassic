@@ -17,6 +17,7 @@ Date of creation: 8/28/90
 defstar {
 	name {BlackHole}
 	domain {DE}
+	desc { "All inputs are consumed.  There are no outputs." }
 	inmulti {
 		name{input}
 		type{ANYTYPE}
