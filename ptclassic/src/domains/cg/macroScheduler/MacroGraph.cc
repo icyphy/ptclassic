@@ -132,8 +132,9 @@ DataFlowStar* MacroNode :: copyStar(CGTarget* t, int pid, int flag) {
 		strcpy(temp, foo);
 		int len = strlen(foo);
 		temp[len-4] = 0;
-		const char* sname = realS.className() +
-		strlen(realS.domain());
+		// Pointer arithmetic to strip off domain name in a star name
+		// if realS.className = "SDFRamp" than sname = "Ramp"
+		const char* sname = realS.className() + strlen(realS.domain());
 		newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
 	} else {
 		newS = (DataFlowStar*) realS.clone();
