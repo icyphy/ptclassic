@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "FSMStateStar.h"
+#include "Galaxy.h"
 #include "InfString.h"
 #include "PortHole.h"
 #include "Scheduler.h"
@@ -78,6 +79,9 @@ public:
     // Internal event name maps.       //--|
     InfString intlEventNames;          //  |--These will be set by Target.
     InfString intlEventTypes;          //--|
+
+    // The list with slaves shared across states.  
+    BlockList sharedSlaveList;
 
      // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
