@@ -328,4 +328,42 @@ group test \
                 -style doublearrowout -fill blue \
                 -tags output
     }
+    icon outs \
+            -slatetype IconFrame \
+            -label {All outputs} \
+            -text "Out! Damned spot!" \
+            -textanchor nw \
+            -graphics {
+        Frame 10 10 50 50 -color red
+        Frame 50 50 90 90 -color green -relief sunken
+    } \
+            -color green {
+        terminal out-0 -coords {0 50} -direction w \
+                -style arrowout -fill red -tags output
+        terminal out-1 -coords {50 0} -direction n \
+                -style arrowout -fill cyan -tags output
+        terminal out-2 -coords {100 50} -direction e \
+                -style arrowout -fill blue -tags output
+        terminal out-3 -coords {50 100} -direction s \
+                -style arrowout -fill blue -tags output
+    }
+    icon ins \
+            -slatetype IconFrame \
+            -label {All inputs} \
+            -text "In! Damned spot!" \
+            -textanchor nw \
+            -graphics {
+        Frame 10 10 50 50 -color red
+        Frame 50 50 90 90 -color green -relief sunken
+    } \
+            -color blue {
+        terminal in-0 -coords {0 50} -direction w \
+                -style circle -fill red -tags input
+        terminal in-1 -coords {50 0} -direction n \
+                -style circle -fill cyan -tags input
+        terminal in-2 -coords {100 50} -direction e \
+                -style circle -fill blue -tags input
+        terminal in-3 -coords {50 100} -direction s \
+                -style circle -fill blue -tags input
+    }
 }
