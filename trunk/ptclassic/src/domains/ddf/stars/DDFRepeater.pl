@@ -28,12 +28,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { ANYTYPE }
 		num { 0 }
 	}
-	method {
-		name { readTypeName }
-		access { public }
-		type { "const char *" }
-		code { return "UpSample"; }
-	}
 	constructor {
 		output.inheritTypeFrom(input);
 	}

@@ -86,12 +86,6 @@ necessary.
 		arglist { "()" }
 		code { return TRUE;}
 	}
-	method {
-		name { readTypeName }
-		access { public }
-		type { "const char*" }
-		code { return "Self"; }
-	}
 	constructor {
 		masterGal = 0;
 		myGal = 0;
