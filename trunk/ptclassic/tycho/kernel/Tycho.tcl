@@ -250,11 +250,20 @@ namespace ::tycho
 # the namespace ::tycho is not visible.  Apparently, only the local
 # namespace of the class and the global namespace are visible.
 # import add ::tycho
-
-# Files that we are going to need right away, so there is no
-# point in deferring them to auto-loading.
+#
 ::tycho::_announce "About to source FontManager.itcl"
 uplevel #0 {
+    # Source the preference manager and the default preferences.
+    # Might as well source needed files first
+    # Already loaded (?): source [file join $tychokernel Object.itcl]
+    source [file join $tychokernel Model.itcl]
+    source [file join $tychokernel NamedData.itcl]
+    source [file join $tychokernel TypedData.itcl]
+    source [file join $tychokernel WidgetPreferences.itcl]
+    ::tycho::_announce "Handled preferences"
+
+    # More files that we are going to need right away, so there
+    # is no point in deferring them to auto-loading.
     source [file join $tychokernel FontManager.itcl]
     source [file join $tychokernel ColorManager.itcl]
     source [file join $tychokernel CircularList.itcl]
@@ -262,31 +271,12 @@ uplevel #0 {
     source [file join $tychokernel Dialog.itcl]
     source [file join $tychokernel Message.itcl]
     source [file join $tychokernel ErrorMessage.itcl]
-}
-::tycho::_announce "Sourced ErrorMessage.itcl"
 
-uplevel #0 {
-    ## FIXME: This should be ~/.Tycho/preferences
-    global ::tychoprefs
-    set tychoprefs [file join $tycholib preferences]
-
-    # Create the tycho database
-    ::tycho::Parameters tychoData
-
-    # Add the preferences entry
-    tychoData add preferences UNKNOWN \
-	    -type data \
-	    -name tychoPreferences \
-	    -file [file join $tychoprefs _preferences.tcl] \
-	    -build [list uplevel #0 source [list \
-            [file join $tychokernel Defaults.tcl]]]
-
-    tychoData get preferences
+    ::tycho::_announce "Sourced ErrorMessage.itcl"
 
     # Load the library file
     source [file join $tychokernel Lib.tcl]
 }
-::tycho::_announce "Handled preferences"
 
 if {![info exists tychoWelcomeWindow]} {
     # If tychoWelcomeWindow is 0, then no 'Mr. Tycho' window is opened
