@@ -45,19 +45,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <udpam.h>
 #include <am.h>
+#include <transport.h>
 #include <misc.h>
-
-#define FindReply(replyEndpoint,bufID,seqNum,sender,replyElem) \
-        SeenRequest(replyEndpoint, bufID, seqNum, &sender, &replyElem)
-
-#define NO_ERRORS             0x0
 
 static Bool initialized = FALSE;  /* AM layer initialized? */
 
 /*
- * Send replying endpoint an unreliable hint(ack) to free up reply storage.
+ * static void ReplyACK(int sender, struct sockaddr_in receiver, 
+ *                      int buf_id, int seq_num)
+ *
+ * DESCRIPTION:  Send replying endpoint (receiver) an unreliable ACK (hint) to 
+ * free up reply storage.
  */
-static 
+inline static 
 void ReplyACK(int sender, struct sockaddr_in receiver, int buf_id, int seq_num)
 {
   UDPAM_ReplyACK_Pkt packet;
@@ -165,6 +165,29 @@ int EmptyReply(ea_t endpoint, struct sockaddr_in *err_requester, tag_t tag,
   }
   AddTimeout(endpoint, buf, packet->buf_id, packet->seq_num, err_requester);
   return(AM_OK);          
+}
+
+/*
+ * inline static void AM_GetRequestPacket(ea_t request_endpoint, int reply_endpoint,
+ *                                        UDPAM_Buf **buf)
+ * 
+ * DESCRIPTION:  Dequeues a UDPAM buffer from request_endpoint's send queue and 
+ * adjusts the number of credits for destination endpoint reply_endoint.
+ */
+inline static 
+void AM_GetRequestPacket(ea_t request_endpoint, int reply_endpoint, UDPAM_Buf **buf)
+{
+  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
+    UnlockEP(request_endpoint);
+    AM_Poll(request_endpoint->bundle);
+    LockEP(request_endpoint);
+  }
+  request_endpoint->translation_table[reply_endpoint].wsize--;  
+  while ((*buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
+    UnlockEP(request_endpoint);
+    AM_Poll(request_endpoint->bundle);    
+    LockEP(request_endpoint);
+  } 
 }
 
 /*
@@ -346,10 +369,10 @@ op_t ReplyErrorCheck(ea_t requestEndpoint, int type, tag_t pktTag,
       (requestEndpoint->tag == AM_NONE))
     return(EBADTAG);
   else 
-  if ((((pktHandler < 0) && (pktHandler != UDPAM_EMPTY_HANDLER)) || 
-       (pktHandler >= requestEndpoint->num_handlers) ||
-       (requestEndpoint->handler_table[pktHandler] == abort)) &&
-      (pktHandler != UDPAM_EMPTY_HANDLER)) 
+  if (((pktHandler < 0) && (pktHandler != UDPAM_EMPTY_HANDLER)) || 
+	   (pktHandler >= requestEndpoint->num_handlers) ||
+	   (requestEndpoint->handler_table[pktHandler] == abort) &&
+	   (pktHandler != UDPAM_EMPTY_HANDLER)) 
     return(EBADHANDLER);
   else if (((type == UDPAM_REPLY_LONG_4) || (type == UDPAM_REPLY_LONG_8)) && 
 	   ((destOffset < 0) || (destOffset > requestEndpoint->length)))
@@ -400,8 +423,8 @@ int AM_GetXferReply4(void *token, int source_offset, handler_t handler,
   if ((dest_addr == (char *)NULL) || (nbytes > AM_MaxLong())) 
     return(AM_ERR_BAD_ARG);
 */
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = ((Token *)(token))->source_port;
+  dest_sockaddr.sin_family      = AF_INET;
+  dest_sockaddr.sin_port        = ((Token *)(token))->source_port;
   dest_sockaddr.sin_addr.s_addr = ((Token *)(token))->source_ip_addr;
 
   buf = (UDPAM_Buf *)Dequeue(source_ep);  
@@ -409,16 +432,9 @@ int AM_GetXferReply4(void *token, int source_offset, handler_t handler,
 
   buf->type = UDPAM_GET_XFER_REPLY_4;
   packet = &(buf->packet.udpam_getxferreply4_pkt);
-  packet->type = UDPAM_GET_XFER_REPLY_4;
-  packet->tag = ((Token *)(token))->tag;         /* Destination's (Requester) tag */
-  packet->src_tag = source_ep->tag;              /* "Replying" EP's tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */ 
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_GET_XFER_REPLY_4, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3);
   packet->source_offset = source_offset;
   packet->nbytes = nbytes;
   /* Copy data from replying endpoints VM segment at offset source_offset */
@@ -466,25 +482,13 @@ int AM_GetXferReply8(void *token, int source_offset, handler_t handler,
 
   buf->type = UDPAM_GET_XFER_REPLY_8;
   packet = &(buf->packet.udpam_getxferreply8_pkt);
-  packet->type = UDPAM_GET_XFER_REPLY_8;
-  packet->tag = ((Token *)(token))->tag;
-  packet->src_tag = source_ep->tag;              /* "Replying" EP's tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */ 
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_GET_XFER_REPLY_8, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3, 
+		    arg4, arg5, arg6, arg7);
   packet->source_offset = source_offset;
   packet->nbytes = nbytes;
-/*  memcpy(packet->data, dest_addr, nbytes); */
-  memcpy(packet->data, (caddr_t)(source_ep->start_addr) + source_offset, 
-	 nbytes);
+  memcpy(packet->data, (caddr_t)(source_ep->start_addr) + source_offset, nbytes);
   packet->dest_offset = dest_offset;
   while (sendto(source_ep->socket, (const char *)packet, 
 		sizeof(*packet), 0, 
@@ -500,17 +504,34 @@ int AM_GetXferReply8(void *token, int source_offset, handler_t handler,
 }
 
 /*
+ * void ThreadExitHandler(int sig)
+ *
+ * DESCRIPTION:  SIGTERM signal handler routine to make threads go 
+ * away correctly.
+ */
+void ThreadExitHandler(int sig)
+{
+  thr_exit(0);
+}
+
+/*
  * Active Message API 
  */
 int AM_Init()
-{
+{ 
+  struct sigaction action;
+
   initialized = TRUE;
+  /* Make threads go away correctly */
+  action.sa_handler = ThreadExitHandler;
+  (void)sigemptyset(&action.sa_mask);
+  (void)sigaction(SIGTERM, &action, NULL); 
   return(AM_OK);
 }
  
 int AM_Terminate()
 {
-  initialized = FALSE;  /* AM disabled */
+  initialized = FALSE;
   return(AM_OK);
 }
 
@@ -528,34 +549,14 @@ int AM_Request4(ea_t request_endpoint, int reply_endpoint, handler_t handler,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;  
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
-  buf->type = UDPAM_REQUEST_4;    
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
+  buf->type = UDPAM_REQUEST_4; 
   packet = &(buf->packet.udpam_short4_pkt);
-  packet->type = UDPAM_REQUEST_4;
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->buf_id = buf->buf_id;    /* Set Request Buf ID */
-  packet->seq_num = buf->seq_num;  /* Set Request Buf SeqNum */
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_REQUEST_4, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3);
   while (sendto(request_endpoint->socket, (const char *)packet,
 		sizeof(*packet), 0, (struct sockaddr *)&dest_sockaddr, 
 		SOCKADDR_IN_SIZE) < 0) {
@@ -585,39 +586,14 @@ int AM_Request8(ea_t request_endpoint, int reply_endpoint, handler_t handler,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
-
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
   buf->type = UDPAM_REQUEST_8;     
   packet = &(buf->packet.udpam_short8_pkt);
-  packet->type = UDPAM_REQUEST_8;
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->buf_id = buf->buf_id;    
-  packet->seq_num = buf->seq_num;  
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_REQUEST_8, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
   while (sendto(request_endpoint->socket, (const char *)packet, 
 		sizeof(*packet), 0, (struct sockaddr *)&dest_sockaddr, 
 		SOCKADDR_IN_SIZE) < 0) {
@@ -647,37 +623,16 @@ int AM_RequestI4(ea_t request_endpoint, int reply_endpoint,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
-
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
   buf->type = UDPAM_REQUEST_MEDIUM_4;     
   packet = &(buf->packet.udpam_medium4_pkt);
-  packet->type = UDPAM_REQUEST_MEDIUM_4;
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->buf_id = buf->buf_id;    
-  packet->seq_num = buf->seq_num;    
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_REQUEST_MEDIUM_4, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3);
   packet->nbytes = nbytes;
-  memcpy(packet->data, source_addr, nbytes);     
+  memcpy(packet->data, source_addr, nbytes);
   packet->source_addr = source_addr;
   while (sendto(request_endpoint->socket, (const char *)packet,
 		sizeof(*packet) - (UDPAM_MAX_MEDIUM - nbytes), 0, 
@@ -710,39 +665,14 @@ int AM_RequestI8(ea_t request_endpoint, int reply_endpoint,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
-
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);  
   buf->type = UDPAM_REQUEST_MEDIUM_8;     
   packet = &(buf->packet.udpam_medium8_pkt);
-  packet->type = UDPAM_REQUEST_MEDIUM_8;
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->buf_id = buf->buf_id;    
-  packet->seq_num = buf->seq_num;    
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_REQUEST_MEDIUM_8, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
   packet->nbytes = nbytes;
   memcpy(packet->data, source_addr, nbytes);     
   packet->source_addr = source_addr;
@@ -761,29 +691,13 @@ int AM_RequestI8(ea_t request_endpoint, int reply_endpoint,
   return(AM_OK);            
 }
 
-int AM_RequestMediumAsync4(ea_t request_endpoint, int reply_endpoint,
-			   handler_t handler, void *source_addr, int nbytes,
-			   int arg0, int arg1, int arg2, int arg3)
-{
-  return(AM_RequestMedium4(request_endpoint, reply_endpoint, handler, 
-			   source_addr, nbytes, arg0, arg1, arg2, arg3));
-}
-
-int AM_RequestMediumAsync8(ea_t request_endpoint, int reply_endpoint,
-			   handler_t handler, void *source_addr, int nbytes,
-			   int arg0, int arg1, int arg2, int arg3,
-			   int arg4, int arg5, int arg6, int arg7)
-{
-  return(AM_RequestMedium8(request_endpoint, reply_endpoint, handler, 
-			   source_addr, nbytes, arg0, arg1, arg2, arg3, arg4, 
-			   arg5, arg6, arg7));
-}
-
 int AM_RequestXfer4(ea_t request_endpoint, int reply_endpoint,
 		    int dest_offset, handler_t handler, 
 		    void *source_addr, int nbytes,
 		    int arg0, int arg1, int arg2, int arg3)
 {
+  int                segsize;
+  caddr_t            segstartaddr;
   UDPAM_Buf          *buf;
   UDPAM_Long4_Pkt    *packet;
   struct sockaddr_in dest_sockaddr;
@@ -796,36 +710,15 @@ int AM_RequestXfer4(ea_t request_endpoint, int reply_endpoint,
     return(AM_ERR_BAD_ARG);
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
-  LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
 
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
   buf->type = UDPAM_REQUEST_LONG_4;
   packet = &(buf->packet.udpam_long4_pkt);
-  packet->type = UDPAM_REQUEST_LONG_4;
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->buf_id = buf->buf_id;   
-  packet->seq_num = buf->seq_num;  
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_REQUEST_LONG_4, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3);
   packet->dest_offset = dest_offset;
   packet->nbytes = nbytes;
   memcpy(packet->data, source_addr, nbytes);
@@ -851,6 +744,8 @@ int AM_RequestXfer8(ea_t request_endpoint, int reply_endpoint,
 		    int arg0, int arg1, int arg2, int arg3,
 		    int arg4, int arg5, int arg6, int arg7)
 {
+  int                 segsize;
+  caddr_t             segstartaddr;
   UDPAM_Buf           *buf;
   UDPAM_Long8_Pkt     *packet;
   struct sockaddr_in  dest_sockaddr;
@@ -864,39 +759,15 @@ int AM_RequestXfer8(ea_t request_endpoint, int reply_endpoint,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
 
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
   buf->type = UDPAM_REQUEST_LONG_8;
   packet = &(buf->packet.udpam_long8_pkt);
-  packet->type = UDPAM_REQUEST_LONG_8;
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->buf_id = buf->buf_id;    
-  packet->seq_num = buf->seq_num;  
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_REQUEST_LONG_8, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
   packet->dest_offset = dest_offset;
   packet->nbytes = nbytes;
   memcpy(packet->data, source_addr, nbytes);     
@@ -952,39 +823,17 @@ int AM_GetXfer4(ea_t request_endpoint, int reply_endpoint, int source_offset,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  }
-
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
   buf->type = UDPAM_GET_XFER_4;
   packet = &(buf->packet.udpam_getxfer4_pkt);
-  packet->type = UDPAM_GET_XFER_4;
-  packet->seq_num = buf->seq_num;  /* Set Get (request) Buf SeqNum */
-  packet->buf_id = buf->buf_id;    /* Set Get (request) Buf ID */
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_GET_XFER_4, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3);
   packet->dest_offset = dest_offset;
   packet->nbytes = nbytes;
   packet->source_offset = source_offset;
-
   while (sendto(request_endpoint->socket, (const char *)packet,
 		sizeof(*packet), 0, (struct sockaddr *)&dest_sockaddr, 
 		SOCKADDR_IN_SIZE) < 0) {
@@ -1015,43 +864,17 @@ int AM_GetXfer8(ea_t request_endpoint, int reply_endpoint, int source_offset,
 
   ASSERT(request_endpoint->translation_table[reply_endpoint].wsize >= 0);
   LockEP(request_endpoint);
-  while (request_endpoint->translation_table[reply_endpoint].wsize == 0) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);
-    LockEP(request_endpoint);
-  }
-  request_endpoint->translation_table[reply_endpoint].wsize--;
-  while ((buf = (UDPAM_Buf *)Dequeue(request_endpoint)) == (UDPAM_Buf *)NULL) {
-    UnlockEP(request_endpoint);
-    AM_Poll(request_endpoint->bundle);    
-    LockEP(request_endpoint);
-  } 
-
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = 
-    request_endpoint->translation_table[reply_endpoint].name.port;
-  dest_sockaddr.sin_addr.s_addr = 
-    request_endpoint->translation_table[reply_endpoint].name.ip_addr;
+  AM_GetRequestPacket(request_endpoint, reply_endpoint, &buf);
+  DEST_SOCKADDR_SET(dest_sockaddr, request_endpoint, reply_endpoint);
   buf->type = UDPAM_GET_XFER_8;
   packet = &(buf->packet.udpam_getxfer8_pkt);
-  packet->type = UDPAM_GET_XFER_8;
-  packet->seq_num = buf->seq_num;  /* Set Get (request) Buf SeqNum */
-  packet->buf_id = buf->buf_id;    /* Set Get (request) Buf ID */
-  packet->tag = request_endpoint->translation_table[reply_endpoint].tag;
-  packet->src_tag = request_endpoint->tag;
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_GET_XFER_8, buf->seq_num, buf->buf_id, 
+		    request_endpoint->tag, 
+		    request_endpoint->translation_table[reply_endpoint].tag,
+		    handler, arg0, arg1, arg2, arg3, arg4, arg5, arg6, arg7);
   packet->dest_offset = dest_offset;
   packet->nbytes = nbytes;
   packet->source_offset = source_offset;
-
   while (sendto(request_endpoint->socket, (const char *)packet,
 		sizeof(*packet), 0, (struct sockaddr *)&dest_sockaddr, 
 		SOCKADDR_IN_SIZE) < 0) {
@@ -1065,12 +888,6 @@ int AM_GetXfer8(ea_t request_endpoint, int reply_endpoint, int source_offset,
   UnlockEP(request_endpoint);
   return(AM_OK);            
 }
-
-#define AM_GetXferAsynch4(request_endpoint,reply_endpoint,source_offset,handler,dest_addr,nbytes,arg0,arg1,arg2,arg3) \
-   AM_GetXfer4(request_endpoint,reply_endpoint,source_offset,handler,dest_addr,nbytes,arg0,arg1,arg2,arg3) 
-
-#define AM_GetXferAsynch8(request_endpoint,reply_endpoint,source_offset,handler,dest_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) \
-   AM_GetXfer8(request_endpoint,reply_endpoint,source_offset,handler,dest_addr,nbytes,arg0,arg1,arg2,arg3,arg4,arg5,arg6,arg7) 
  
 int AM_Reply4(void *token, handler_t handler, int arg0, 
 	      int arg1, int arg2, int arg3)
@@ -1084,8 +901,8 @@ int AM_Reply4(void *token, handler_t handler, int arg0,
     return(AM_ERR_NOT_INIT); 
 
   source_ep = ((Token *)(token))->dest_ep;
-  dest_sockaddr.sin_family = AF_INET;
-  dest_sockaddr.sin_port = ((Token *)(token))->source_port;
+  dest_sockaddr.sin_family      = AF_INET;
+  dest_sockaddr.sin_port        = ((Token *)(token))->source_port;
   dest_sockaddr.sin_addr.s_addr = ((Token *)(token))->source_ip_addr;
 
   /*
@@ -1098,19 +915,11 @@ int AM_Reply4(void *token, handler_t handler, int arg0,
   ExitRaceHack(source_ep);
   buf = (UDPAM_Buf *)Dequeue(source_ep);  
   ASSERT(buf != NULL);
-
   buf->type = UDPAM_REPLY_4;  
   packet = &(buf->packet.udpam_short4_pkt);
-  packet->type = UDPAM_REPLY_4;
-  packet->tag = ((Token *)(token))->tag;         /* Dest (Requster) Tag */
-  packet->src_tag = source_ep->tag;              /* Src (Replier) Tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Request Buf */
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_REPLY_4, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3);
   while (sendto(source_ep->socket, (const char *)packet, 
 		sizeof(*packet), 0, 
 		(struct sockaddr *)&dest_sockaddr, 
@@ -1140,7 +949,6 @@ int AM_Reply8(void *token, handler_t handler, int arg0, int arg1, int arg2,
   dest_sockaddr.sin_family = AF_INET;
   dest_sockaddr.sin_port = ((Token *)(token))->source_port;
   dest_sockaddr.sin_addr.s_addr = ((Token *)(token))->source_ip_addr;
-
   LockEP(source_ep);
   ExitRaceHack(source_ep);
   buf = (UDPAM_Buf *)Dequeue(source_ep);  /* Should always succeed */
@@ -1148,20 +956,10 @@ int AM_Reply8(void *token, handler_t handler, int arg0, int arg1, int arg2,
 
   buf->type = UDPAM_REPLY_8;  
   packet = &(buf->packet.udpam_short8_pkt);
-  packet->type = UDPAM_REPLY_8;
-  packet->tag = ((Token *)(token))->tag;
-  packet->src_tag = source_ep->tag;              /* Src (Replyer) Tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_REPLY_8, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, 
+		    arg3, arg4, arg5, arg6, arg7);
   while (sendto(source_ep->socket, (const char *)packet, 
 		sizeof(*packet), 0, 
 		(struct sockaddr *)&dest_sockaddr, 
@@ -1203,16 +1001,9 @@ int AM_ReplyI4(void *token, handler_t handler,
 
   buf->type = UDPAM_REPLY_MEDIUM_4;  
   packet = &(buf->packet.udpam_medium4_pkt);
-  packet->type = UDPAM_REPLY_MEDIUM_4;
-  packet->tag = ((Token *)(token))->tag;
-  packet->src_tag = source_ep->tag;              /* Src (Replyer) Tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_REPLY_MEDIUM_4, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3);
   memcpy(packet->data, source_addr, nbytes);     
   packet->source_addr = source_addr;
   packet->nbytes = nbytes;
@@ -1257,20 +1048,10 @@ int AM_ReplyI8(void *token, handler_t handler,
 
   buf->type = UDPAM_REPLY_MEDIUM_8;  
   packet = &(buf->packet.udpam_medium8_pkt);
-  packet->type = UDPAM_REPLY_MEDIUM_8;
-  packet->tag = ((Token *)(token))->tag;
-  packet->src_tag = source_ep->tag;              /* Src (Replyer) Tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_REPLY_MEDIUM_8, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3, 
+		    arg4, arg5, arg6, arg7);
   memcpy(packet->data, source_addr, nbytes);     
   packet->source_addr = source_addr;
   packet->nbytes = nbytes;
@@ -1292,7 +1073,9 @@ int AM_ReplyXfer4(void *token, int dest_offset,
 		  handler_t handler, void *source_addr, int nbytes, 
 		  int arg0, int arg1, int arg2, int arg3)
 {
+  int                 segsize;
   ea_t                source_ep;
+  caddr_t             segstartaddr;
   UDPAM_Buf           *buf;
   UDPAM_Long4_Pkt     *packet;
   struct sockaddr_in  dest_sockaddr;
@@ -1314,16 +1097,9 @@ int AM_ReplyXfer4(void *token, int dest_offset,
 
   buf->type = UDPAM_REPLY_LONG_4;
   packet = &(buf->packet.udpam_long4_pkt);
-  packet->type = UDPAM_REPLY_LONG_4;
-  packet->tag = ((Token *)(token))->tag;
-  packet->src_tag = source_ep->tag;              /* Src (Replyer) Tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */ 
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
+  UDPAM_PACKET4_SET(packet, UDPAM_REPLY_LONG_4, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3);
   packet->dest_offset = dest_offset;
   packet->nbytes = nbytes;
   memcpy(packet->data, source_addr, UDPAM_MAX_LONG);
@@ -1347,7 +1123,9 @@ int AM_ReplyXfer8(void *token, int dest_offset,
 		  int arg0, int arg1, int arg2, int arg3,
 		  int arg4, int arg5, int arg6, int arg7)
 {
+  int                   segsize;
   ea_t                  source_ep;
+  caddr_t               segstartaddr;
   UDPAM_Buf             *buf;
   UDPAM_Long8_Pkt       *packet;
   struct sockaddr_in    dest_sockaddr;
@@ -1369,20 +1147,10 @@ int AM_ReplyXfer8(void *token, int dest_offset,
 
   buf->type = UDPAM_REPLY_LONG_8;
   packet = &(buf->packet.udpam_long8_pkt);
-  packet->type = UDPAM_REPLY_LONG_8;
-  packet->tag = ((Token *)(token))->tag;
-  packet->src_tag = source_ep->tag;              /* Src (Replyer) Tag */
-  packet->buf_id = ((Token *)(token))->buf_id;   /* Buffer ID of Request */
-  packet->seq_num = ((Token *)(token))->seq_num; /* Seq Num of Req. Buf */ 
-  packet->handler = handler;
-  packet->arg0 = arg0;
-  packet->arg1 = arg1;
-  packet->arg2 = arg2;
-  packet->arg3 = arg3;
-  packet->arg4 = arg4;
-  packet->arg5 = arg5;
-  packet->arg6 = arg6;
-  packet->arg7 = arg7;
+  UDPAM_PACKET8_SET(packet, UDPAM_REPLY_LONG_8, ((Token *)(token))->seq_num, 
+		    ((Token *)(token))->buf_id, source_ep->tag, 
+		    ((Token *)(token))->tag, handler, arg0, arg1, arg2, arg3, 
+		    arg4, arg5, arg6, arg7);
   packet->dest_offset = dest_offset;
   packet->nbytes = nbytes;
   memcpy(packet->data, (void *)source_addr, UDPAM_MAX_LONG);
@@ -1467,7 +1235,7 @@ int AM_Poll(eb_t bundle)
 	  if (errno == EWOULDBLOCK) {     /* Nothing left in sockbuf */
 	    FD_CLR(endpoint->socket, &tempFdset); 
 	    n--;
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    goto end;
 	  }
 	  else {
@@ -1494,7 +1262,7 @@ int AM_Poll(eb_t bundle)
 	 */
 	if ((type & REQUEST) && (endpoint->txfree.num_elements == 0)) {
 	  DPRINTF(("No space for reply.  Dropping request\n"));
-	  UnlockEP(endpoint);
+	  /* UnlockEP(endpoint); */
 	  goto end;
 	}
 
@@ -1528,7 +1296,7 @@ int AM_Poll(eb_t bundle)
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
  	  }
 	  else {
 	    /* 
@@ -1550,7 +1318,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1571,13 +1339,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->arg7, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REQUEST_8, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else {
 	    EnterRaceHack(endpoint);
@@ -1593,7 +1361,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /*UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1614,13 +1382,13 @@ int AM_Poll(eb_t bundle)
 			  0, 0, 0, 0, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, 
 			  AM_REQUEST_MEDIUM_4, errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else {
 	    EnterRaceHack(endpoint);
@@ -1636,7 +1404,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1658,13 +1426,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->arg7, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, 
 			  AM_REQUEST_MEDIUM_8, errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /*UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /*UnlockEP(endpoint); */
 	  }
 	  else {
 	    EnterRaceHack(endpoint);
@@ -1681,7 +1449,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1705,13 +1473,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, 
 			  AM_REQUEST_LONG_4, errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else {
 	    memcpy((caddr_t)(endpoint->start_addr) +  packetPtr->dest_offset, 
@@ -1719,7 +1487,8 @@ int AM_Poll(eb_t bundle)
 	    EnterRaceHack(endpoint);
 	    UnlockEP(endpoint);
 	    ((HandlerLong4)(endpoint->handler_table[packetPtr->handler]))(
-			   (void *)&token, packetPtr->dest_offset, 
+			   (void *)&token, 
+			   &((char *)(endpoint->start_addr))[packetPtr->dest_offset], 
 			   packetPtr->nbytes, packetPtr->arg0, 
                            packetPtr->arg1, packetPtr->arg2, 
 			   packetPtr->arg3);
@@ -1730,7 +1499,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1754,13 +1523,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, 
 			  AM_REQUEST_LONG_8, errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else {
 	    memcpy((caddr_t)(endpoint->start_addr) + packetPtr->dest_offset, 
@@ -1768,7 +1537,9 @@ int AM_Poll(eb_t bundle)
 	    EnterRaceHack(endpoint);
 	    UnlockEP(endpoint);
 	    ((HandlerLong8)(endpoint->handler_table[packetPtr->handler]))(
-			   (void *)&token, packetPtr->dest_offset, packetPtr->nbytes,
+			   (void *)&token, 
+			   &((char *)(endpoint->start_addr))[packetPtr->dest_offset],
+			   packetPtr->nbytes,
 			   packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
 			   packetPtr->arg3, packetPtr->arg4, packetPtr->arg5, 
 			   packetPtr->arg6, packetPtr->arg7);
@@ -1779,7 +1550,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1804,13 +1575,13 @@ int AM_Poll(eb_t bundle)
 			  0, 0, 0, 0, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REPLY_4, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else { 
 	    /* Increment Window Size */
@@ -1828,7 +1599,7 @@ int AM_Poll(eb_t bundle)
 	    }
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1848,13 +1619,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->arg7, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REPLY_8, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else { 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
@@ -1869,7 +1640,7 @@ int AM_Poll(eb_t bundle)
 	    }
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  break;
 	}
@@ -1889,13 +1660,13 @@ int AM_Poll(eb_t bundle)
 			  0, 0, 0, 0, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REPLY_MEDIUM_4, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	    break;	    
 	  }
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else { 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
@@ -1911,7 +1682,7 @@ int AM_Poll(eb_t bundle)
 	    }
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -1932,13 +1703,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->arg7, packetPtr->buf_id, packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REPLY_MEDIUM_8, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	    break;	    
 	  }
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else { 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
@@ -1954,7 +1725,7 @@ int AM_Poll(eb_t bundle)
 	    }
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  break;
 	}
@@ -1976,13 +1747,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REPLY_LONG_4, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	    break;	    
 	  }
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else { 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
@@ -1993,13 +1764,15 @@ int AM_Poll(eb_t bundle)
 
 	    if (packetPtr->handler != UDPAM_EMPTY_HANDLER) {	    
 	      ((HandlerLong4)(endpoint->handler_table[packetPtr->handler]))(
-		    (void *)&token, packetPtr->dest_offset, packetPtr->nbytes,
+		    (void *)&token, 
+		    &((char *)(endpoint->start_addr))[packetPtr->dest_offset], 
+		    packetPtr->nbytes,
 		    packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
 		    packetPtr->arg3);
 	    }
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  break;
 	}
@@ -2022,13 +1795,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->seq_num);
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_REPLY_LONG_8, 
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	    break;	    
 	  }
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else { 
 	    endpoint->translation_table[sourceEndpoint].wsize++;
@@ -2038,14 +1811,17 @@ int AM_Poll(eb_t bundle)
 		   &(packetPtr->data), packetPtr->nbytes); 
 
 	    if (packetPtr->handler != UDPAM_EMPTY_HANDLER) {	    
-	      ((HandlerLong4)(endpoint->handler_table[packetPtr->handler]))(
-		    (void *)&token, packetPtr->dest_offset, packetPtr->nbytes,
+	      ((HandlerLong8)(endpoint->handler_table[packetPtr->handler]))(
+		    (void *)&token, 
+		    &((char *)(endpoint->start_addr))[packetPtr->dest_offset], 
+		    packetPtr->nbytes,
 		    packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
-		    packetPtr->arg3);
+		    packetPtr->arg3, packetPtr->arg4, packetPtr->arg5, 
+		    packetPtr->arg6, packetPtr->arg7);
 	    }
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  break;
 	}
@@ -2069,13 +1845,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->seq_num); 
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_GET_XFER_4,
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);  */
 	    break;	    
 	  }	  
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  else {  /* Have lock */
 	    if (AM_GetXferReply4(&token, packetPtr->source_offset,
@@ -2091,7 +1867,7 @@ int AM_Poll(eb_t bundle)
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
 	    }
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  break;
 	}	  
@@ -2117,13 +1893,13 @@ int AM_Poll(eb_t bundle)
 			  packetPtr->seq_num); 
 	    BounceMessage(endpoint, sender, packetPtr->src_tag, AM_GET_XFER_8,
 			  errorCode, &argblock);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	    break;	    
 	  }	  
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else {
 	    if (AM_GetXferReply8(&token, packetPtr->source_offset,
@@ -2140,7 +1916,7 @@ int AM_Poll(eb_t bundle)
 			  sender, replyElem) == 0) 
 	      EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 			 packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}
@@ -2158,30 +1934,22 @@ int AM_Poll(eb_t bundle)
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else { 
-	    /* For sol2.5 cc4.0:
-	     * The compiler just needs to know what '+' means.
-	     * Recall that in pointer arithmetic, ptr + int means
-	     * ptr + int*sizeof(*ptr).  It needs to know what the
-	     * size is.  This is why ptr++ always works right in C.
-	     */
-	    memcpy((char *)endpoint->start_addr + packetPtr->dest_offset, 
+	    memcpy(endpoint->start_addr + packetPtr->dest_offset, 
 		   packetPtr->data, packetPtr->nbytes);
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
 	    Enqueue(endpoint, &(endpoint->txpool[packetPtr->buf_id])); 
 	    ((HandlerGet4)(endpoint->handler_table[packetPtr->handler]))(
-                            (void *)&token,
-			    (char *)endpoint->start_addr + 
-				   packetPtr->dest_offset,
-                            packetPtr->nbytes,
+                           (void *)&token, endpoint->start_addr + 
+			    packetPtr->dest_offset, packetPtr->nbytes,
                             packetPtr->arg0, packetPtr->arg1, packetPtr->arg2, 
 			    packetPtr->arg3);
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  break;
 	}	  
@@ -2199,16 +1967,10 @@ int AM_Poll(eb_t bundle)
 	  if (SeenReply(endpoint, packetPtr->buf_id, packetPtr->seq_num)) {
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint); */
 	  }
 	  else { 
-	    /* For sol2.5 cc4.0:
-	     * The compiler just needs to know what '+' means.
-	     * Recall that in pointer arithmetic, ptr + int means
-	     * ptr + int*sizeof(*ptr).  It needs to know what the
-	     * size is.  This is why ptr++ always works right in C.
-	     */
-	    memcpy((char *)endpoint->start_addr + packetPtr->dest_offset, 
+	    memcpy(endpoint->start_addr + packetPtr->dest_offset, 
 		   packetPtr->data, packetPtr->nbytes);
 	    endpoint->translation_table[sourceEndpoint].wsize++;
 	    RemoveTimeout(endpoint, &(endpoint->txpool[packetPtr->buf_id]));
@@ -2220,7 +1982,7 @@ int AM_Poll(eb_t bundle)
                             packetPtr->arg6, packetPtr->arg7);
 	    ReplyACK(endpoint->socket, sender, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	  }
 	  break;
 	}
@@ -2238,7 +2000,7 @@ int AM_Poll(eb_t bundle)
 	    RemoveTimeout(endpoint, replyElem->message); 
 	    Enqueue(endpoint, buf);
 	  }
-	  UnlockEP(endpoint);  
+	  /* UnlockEP(endpoint);   */
 	  break;
 	}
 	case UDPAM_ERROR: {
@@ -2256,7 +2018,7 @@ int AM_Poll(eb_t bundle)
 	  if (SeenRequest(endpoint, packetPtr->buf_id, packetPtr->seq_num, 
 			  &sender, &dupElem)) {
 	    ResendReply(endpoint, dupElem);
-	    UnlockEP(endpoint);
+	    /* UnlockEP(endpoint);*/
 	    break;
 	  }
 	  /* 
@@ -2285,7 +2047,7 @@ int AM_Poll(eb_t bundle)
 	   */
 	  EmptyReply(endpoint, &sender, packetPtr->src_tag, packetPtr->buf_id, 
 		     packetPtr->seq_num);
-	  UnlockEP(endpoint);     /* Hmm...*/
+	  /* UnlockEP(endpoint); */    /* Hmm...*/
 	  ((ErrorHandler)(endpoint->handler_table[0]))(packetPtr->error_type, 
   		          packetPtr->mesg_type, (void *)&(packetPtr->argblock));
 	  break;
@@ -2293,11 +2055,13 @@ int AM_Poll(eb_t bundle)
         default:
 	    DPRINTF(("Bad packet received...throwing it on the floor\n"));
 	    break;
-	  }  /* switch(...) */
+        
+	}  /* switch(...) */
       }
 end:
+      UnlockEP(endpoint);
       listElem = listElem->next;  /* Next endpoint elem */
-    }
+    } /* for (i = 0; i < bundle->num_eps; i++) */
   }
   UnlockBundle(bundle);
   return(AM_OK);
