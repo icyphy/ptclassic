@@ -45,6 +45,8 @@ OCT_CC =	gcc -fwritable-strings
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 GPPFLAGS = -g -Wall -Wcast-qual -Wsynth $(MEMLOG)
 CFLAGS = -g
+# Itcl-2.0 need -fwritable-strings, or tclsh will segv in ItclFollowNamespPath
+WRITABLE_STRINGS_CFLAGS = -fwritable_strings
 
 # $PTOLEMY/src/domains/ipus/kernel uses this.
 NO_IMPLICIT_TEMPLATES = -fno-implicit-templates
