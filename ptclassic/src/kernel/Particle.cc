@@ -36,7 +36,7 @@ Particle& IntSample :: operator = (const Particle& p)
 			);
 }
 
-IntSample :: operator char* ()
+IntSample :: operator StringList ()
 	{ return form("%d",data);}
 
 	////////////////////////////////////////
@@ -56,7 +56,7 @@ Particle& FloatSample :: operator = (const Particle& p)
                         );
 }
 
-FloatSample :: operator char* ()
+FloatSample :: operator StringList ()
         { return form("%g",data);}
 
 	////////////////////////////////////////
@@ -91,7 +91,8 @@ Particle* Plasma :: get()
 				);
 			}
         else {
-                p = Stack::popTop();
+		// need the cast to avoid a warning
+                p = (Particle *)Stack::popTop();
 		p->initialize();
 	}
 
