@@ -11,8 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location	{ SDF image library }
 	desc {
-Accept a black-and-white input grayimage represented by a float matrix 
-and generate output in PGM format.
+Accept a black-and-white input gray-level image represented by a
+floating-point matrix and generate output in PGM (portable graymap) format.
 Send the output to a user-specified command (by default, "xv" is used).
 
 The user can set the root filename of the displayed image (which will
