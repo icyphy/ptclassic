@@ -23,10 +23,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(outputStepNumber) {
-; The quantization level is r4 - r5 - 1
-	move	(r4)-	r5,y0
+; Register usage
+; x0 = address of threshold levels block
+; r4 = one address beyond threshold level used (leftover from above)
+; The quantization level index is r4 - 1 - x0 = r4 - (x0 + 1)
+	move	#>$addr(levels)+1,x0
 	move	r4,a
-	sub	y0,a
+	sub	x0,a			; compute threshold level index
 	move	a,$ref(stepNumber)
 	}
 
