@@ -443,7 +443,7 @@ void UniProcessor :: simRunSchedule() {
 		//    Generate code
 		/////////////////////////////////////
 
-StringList UniProcessor :: generateCode() {
+StringList& UniProcessor :: generateCode() {
 	targetPtr->generateCode();
 	
 	// revert wormholes

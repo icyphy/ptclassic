@@ -170,7 +170,7 @@ public:
 	void prepareCodeGen();
 
 	// generate code
-	StringList generateCode(); 
+	StringList& generateCode(); 
 
 	// generate code to the given target
 	int genCodeTo(Target* t);
