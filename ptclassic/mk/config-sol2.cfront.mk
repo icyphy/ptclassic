@@ -147,9 +147,9 @@ SYSLIBS =	$(CSYSLIBS) -lc -L/usr/ucblib -lucb
 
 # Can't use -Bstatic here, or we won't be able to find -ldl, and
 # dynamic linking will not work.
-LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):/usr/ucblib
+LINKFLAGS=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl:/usr/ucblib
 # link flags if debugging symbols are to be left
-LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):/usr/ucblib	
+LINKFLAGS_D=-L$(LIBDIR) -R $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(X11_LIBDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl:/usr/ucblib	
 
 #
 # Directories to use
