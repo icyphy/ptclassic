@@ -62,6 +62,9 @@ extern boolean IsGalFacet ARGS((octObject *facetPtr));
 extern boolean IsPalFacet ARGS((octObject *facetPtr));
 extern boolean IsUnivFacet ARGS((octObject *facetPtr));
 extern char *AkoName ARGS((char *master));
+extern boolean SetParamProp ARGS((octObject *galFacetPtr,
+				  ParamListType *pListPtr,
+				  char* propname));
 extern boolean SetFormalParams ARGS((octObject *galFacetPtr,
 				     ParamListType *pListPtr));
 extern boolean GetFormalParams ARGS((octObject *galFacetPtr,
