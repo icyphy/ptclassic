@@ -26,7 +26,7 @@ $Id$
 
 **************************************************************************/
 
-const char* ComplexArrayState :: type() { return "ComplexArray";}
+const char* ComplexArrayState :: type() const { return "ComplexArray";}
 
 ComplexArrayState :: ~ComplexArrayState () {
 	// ? no Complex destructor: do we want delete [] val, or delete val?
@@ -58,9 +58,9 @@ void ComplexArrayState  :: initialize() {
 		case T_EOF:
 			break;
 		case '[':
-			t = getParseToken(lexer);
+			t = evalIntExpression(lexer);
 			if (t.tok != T_Int) {
-				parseError ("expected int after '['");
+				parseError ("expected integer expression after '['");
 				return;
 			}
 			numRepeats = t.intval - 1;
