@@ -44,6 +44,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "KnownTarget.h"
 #include "miscFuncs.h"
 
+// constructor: set name and domain
+InterpUniverse::InterpUniverse (const char* name, const char* dom) :
+Runnable((Target*)0, dom, this), InterpGalaxy(name,dom), targName(0)
+{ setBlock(name,NULL);}
+
 const char* InterpUniverse :: targetName() const {
 	return targName ? targName : KnownTarget::defaultName(type);
 }
@@ -53,7 +58,7 @@ int InterpUniverse :: newTarget(const char* newTargName) {
 		LOG_DEL; delete target;
 		target = 0;
 	}
-	type = KnownBlock::domain();
+	type = domain();
 	targName = newTargName;
 	target = KnownTarget::clone (targetName());
 	return target != 0;
