@@ -1,10 +1,10 @@
 static const char file_id[] = "CalendarQueue.cc";
 /**************************************************************************
 Version identification:
- $Id$ $Revision$
+ $Id$
 
 WANRNING experimental version
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -340,7 +340,7 @@ CqLevelLink* CalendarQueue :: NextEvent()
 //  new bucket array is now the opposite end of the array 
 void CalendarQueue :: Resize(int newSize)
 {
-    double newInterval, NewInterval();
+    double newInterval;
     int i;
     int oldBucketNum;
     CqLevelLink *currentEvent, **oldBucket;
