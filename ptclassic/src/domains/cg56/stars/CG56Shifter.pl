@@ -82,22 +82,3 @@ Negative values of N implies right shifting.
 }
 
 
-//for N>0
-//; runtime code for 56shifter1 -- ako of 56shifter
-
-
-//for N=0
-//; runtime code for 56shifter1 -- ako of 56shifter
-//        move    x:1,a
-//        move    a,x:2
-//
-//for N<0
-//
-//; runtime code for 56shifter1 -- ako of 56shifter
-//        move    x:1,a
-//        asr     a
-//        move    a,x:2
-//
-//for sat not yes
-//
-//      move    a1,x:2
