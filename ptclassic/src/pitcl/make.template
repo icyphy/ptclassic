@@ -83,7 +83,7 @@ PTINY_PTCL_MODS = 	$(OBJS) $(PTINY_STARS) $(PTINY_TARGETS) $(PTINY_LIBS)
 PTCL_MODS = 		$(OBJS) $(ALLSTARS) $(ALLTARGETS) $(LIBS)
 
 # Sources
-SRCS =			PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc ptclGantt.cc
+SRCS =			PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc ptclGantt.cc ptclInvokeInterp.cc
 
 # Header files
 HDRS =			PTcl.h ganttChart.h
