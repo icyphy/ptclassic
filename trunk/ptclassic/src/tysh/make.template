@@ -173,7 +173,10 @@ SRCS = \
   TyTcl.cc \
   TclObj.cc \
   TclStarIfc.cc \
-  XYPlot.cc
+  XYPlot.cc \
+  SetSigHandle.cc \
+  SigHandle.c
+
 
 # Header files
 HDRS = \
@@ -184,14 +187,19 @@ HDRS = \
   sol2compat.h \
   TclObj.h \
   TclStarIfc.h \
-  XYPlot.h
+  XYPlot.h \
+  SetSigHandle.h \
+  SigHandle.h \
+  SigHandle_c.h 
+  
+TMPSRCS=$(SRCS:.cc=.o)
 
 # Used by make checkjunk
 OTHERSRCS = \
   README
 
 # Objects
-OBJS =			$(SRCS:.cc=.o)
+OBJS = $(TMPSRCS:.c=.o)
 
 all:	makefile tycho
 
