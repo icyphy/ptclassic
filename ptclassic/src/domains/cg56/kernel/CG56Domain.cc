@@ -60,8 +60,8 @@ public:
 	// new node (geodesic)
 	Geodesic& newNode() { LOG_NEW; return *new AsmForkNode;}
 
-	// constructor
-	CG56Domain() : Domain("CG56") {}
+	// constructor (also allow AnyAsm stars)
+	CG56Domain() : Domain("CG56") {subDomains += "AnyAsm";}
 };
 
 // declare a prototype
