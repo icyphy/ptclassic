@@ -30,6 +30,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "ACSCorona.h"
 
 // The following is defined in ACSDomain.cc -- this forces that module

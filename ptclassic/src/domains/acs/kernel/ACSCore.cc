@@ -30,6 +30,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 ***********************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "ACSCore.h"
 
 // constructor takes a reference to a Corona
