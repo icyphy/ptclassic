@@ -256,6 +256,45 @@ proc ::tycho::lsubset {l1 l2} {
 }
 
 ##########################################################################
+#### lsubstring l
+#
+# Return a string that is a substring of all elements of l from left to right.
+# Idea is that if it's sorted and the first and last elements match from
+# left to right, all will.
+#
+proc ::tycho::lsubstring {l} {
+    set llength [llength $l]
+
+    if {$llength == 1} {
+        return [lindex $l 0]
+    }
+    
+    # sort the list
+    set l [lsort $l]
+
+    # get first and last sorted items
+    set first [lindex $l 0]
+    set last [lindex $l end]
+
+    # get the length of the smallest one
+    set firstl [string length $first]
+    set lastl [string length $last]
+    set slength [expr ($firstl < $lastl)?$firstl:$lastl]
+
+    for {set index 0} {$index < $slength} {incr index} {
+        if {[string match [string range $first 0 $index]* $last] == 0} {
+            break
+        }
+    }
+    
+    if {$index == 0} {
+        return {}
+    } else {
+        return [string range $first 0 [expr $index - 1]]
+    }
+}
+
+##########################################################################
 #### lsubtract l1 l2
 #
 # Return the difference of two lists: _l1_ - _l2_. Example:
