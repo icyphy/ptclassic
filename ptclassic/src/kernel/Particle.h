@@ -35,15 +35,15 @@ class Particle
 {
 public:
 	// Identify what type of Particle this is
-	virtual dataType readType() = 0;
+	virtual dataType readType() const = 0;
 
 	// Cast this Particle to an int, float, Complex
-	virtual operator int () = 0;
-	virtual operator float () = 0;
-	virtual operator Complex () = 0;
+	virtual operator int () const = 0;
+	virtual operator float () const = 0;
+	virtual operator Complex () const = 0;
 
 	// print Particle
-	virtual char* print () = 0;
+	virtual char* print () const = 0;
 
 	// Zero or initialize this Particle
 	virtual void initialize() = 0;
@@ -62,7 +62,9 @@ protected:
 	// Before copying Particles, always compare their types
 	// Otherwise the user could always copy Particles of
 	//  incompatible types between an input and output PortHole
-	int compareType(Particle& p) {return (readType()==p.readType());}
+	int compareType(const Particle& p) const {
+		return (readType()==p.readType());
+	}
 };
 
 /***************************************************************
@@ -86,14 +88,14 @@ class IntSample : public Particle
 {
 public:
 	// Tell this world this Particle contains an int
-	dataType readType() {return INT;}
+	dataType readType() const {return INT;}
 
 	// Cast to an int, float, and Complex
-	operator int () {return data;}
-	operator float () {return (float)data;}
-	operator Complex () {return Complex(data);}
+	operator int () const {return data;}
+	operator float () const {return (float)data;}
+	operator Complex () const {return Complex(data);}
 
-	char* print();
+	char* print() const;
 
 	// Initialize
 	IntSample(int i) {data=i;}
@@ -122,14 +124,14 @@ class FloatSample : public Particle
 {
 public:
         // Tell this world this Particle contains an float
-        dataType readType() {return FLOAT;}
+        dataType readType() const {return FLOAT;}
  
         // Cast to an int, float, and Complex
-        operator int () {return (int)data;}
-        operator float () {return data;}
-	operator Complex () {return Complex(data);}
+        operator int () const {return (int)data;}
+        operator float () const {return data;}
+	operator Complex () const {return Complex(data);}
 
-	char* print();
+	char* print() const;
  
         // Initialize
         FloatSample(float f) {data=f;}
@@ -157,14 +159,14 @@ class ComplexSample : public Particle
 {
 public:
         // Tell this world this Particle contains an float
-        dataType readType() {return COMPLEX;}
+        dataType readType() const {return COMPLEX;}
  
         // Cast to an int, float, Complex
-        operator int () {return (int)data.real();}
-        operator float () {return (float)data.real();}
-	operator Complex () {return data;}
+        operator int () const {return (int)data.real();}
+        operator float () const {return (float)data.real();}
+	operator Complex () const {return data;}
 
-	char* print();
+	char* print() const;
  
         // Initialize
         ComplexSample(Complex c) {data=c;}
