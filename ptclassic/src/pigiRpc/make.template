@@ -61,11 +61,11 @@ TK=1
 
 PT_DEPEND +=	pigiMain.o
 
-ADD_OBJS =	version.o palettes.$(PIGI).o
+ADD_OBJS =	palettes.$(PIGI).o
 
 PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
 
-LIBS += 	-L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist \
+LIBS += 	version.o -L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist \
 			-ltr -lutility -lst -lerrtrap -luprintf -lport
 
 LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
