@@ -36,6 +36,7 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
+#include "Galaxy.h"
 #include "PNTarget.h"
 #include "PNScheduler.h"
 
@@ -70,6 +71,7 @@ void PNTarget::wrapup()
     delSched();
 }
 
-const char* PNTarget::domain() {
+const char* PNTarget::domain()
+{
     return galaxy() ? galaxy()->domain() : "PN";
 }
