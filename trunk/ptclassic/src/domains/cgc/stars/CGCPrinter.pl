@@ -37,9 +37,9 @@ the same line, separated by tabs.
 	}
 	initCode {
 	    const char *fn = fileName;
-	    fileOutput = fn==NULL 
+	    fileOutput = ! ( fn==NULL
 	      || strcmp(fn, "cout")==0 || strcmp(fn, "stdout")==0
-	      || strcmp(fn, "<cout>")==0 || strcmp(fn, "<stdout>")==0;
+	      || strcmp(fn, "<cout>")==0 || strcmp(fn, "<stdout>")==0);
 	    if(fileOutput) {
 		StringList s =
 			processCode(CodeBlock("FILE *$starSymbol(fp);\n"));
