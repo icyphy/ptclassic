@@ -53,6 +53,8 @@ obj.$(ARCH) obj.$(ARCH)/octtools: MAKEARCH
 bootstrap: obj.$(ARCH) install_gnu install_tcltk install_octtools install_xv \
 			install
 
+bootstrap_clean: clean_gnu clean_tcltk clean_octtools clean_xv clean
+
 .PHONY:	install_gnu install_tcltk install_octtools install
 
 # The gcc INSTALL file says:
@@ -74,6 +76,8 @@ install_hpgnu:
 
 install_tcltk:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_all
+clean_tcltk:
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) tcltk_clean
 
 # Usually rebuilding vem and the octtools library is not done everytime.
 # Note that the octtools source is distributed as a separate tar file.
@@ -87,3 +91,5 @@ clean_octtools:
 
 install_xv:
 	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_all
+clean_xv:
+	$(MAKE) -f mk/scratch-srcs.mk $(MFLAGS) xv_clean
