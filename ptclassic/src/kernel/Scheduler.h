@@ -51,6 +51,9 @@ public:
 
 	// read the halt flag
 	static int haltRequested() { return haltRequestFlag;}
+
+	// current time of the schedule
+	float currentTime;
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
