@@ -1,5 +1,5 @@
 defstar {
-	name { XCSBase }
+	name { XCSynchComm }
 	domain { CG56 }
 	desc { S56X to CGC send/receive base star }
 	version { $Id$ }
@@ -37,11 +37,11 @@ limitation of liability, and disclaimer of warranty provisions.
  	}
 
 	header {
-	  class CGCXSBase;
+	  class CGCXSynchComm;
 	}
 
  	public {
-		CGCXSBase* cgcSide;
+		CGCXSynchComm* cgcSide;
 		int commCount;
 		int numXfer;
 		int pairNumber;

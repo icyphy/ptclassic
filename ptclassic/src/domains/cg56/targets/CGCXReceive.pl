@@ -1,8 +1,8 @@
 defstar {
-    name { XSReceive }
+    name { XReceive }
     domain { CGC }
     desc { Receive data synchronously from S56X to CGC }
-    derivedFrom { XSBase }
+    derivedFrom { XSynchComm }
     version { $Id$ }
     author { Jose Luis Pino }
     copyright { 

@@ -1,5 +1,5 @@
 defstar {
-    name { XABase }
+    name { XAsynchComm }
     domain { CGC }
     desc { Base star for Asynchronous CGC <-> S56X IPC }
     ccinclude { "CGCS56XTarget.h" }

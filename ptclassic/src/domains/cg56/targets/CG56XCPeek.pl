@@ -1,10 +1,10 @@
 defstar {
-	name { XCAReceive }
+	name { XCPeek }
 	domain { CG56 }
 	desc { CGC to S56X Asynchronous Receive star }
 	version { $Id$ }
 	author { Jose Luis Pino }
- 	derivedFrom {XCABase}
+ 	derivedFrom {XCAsynchComm}
 	copyright {
 Copyright (c) 1994,1993 The Regents of the University of California.
 All rights reserved.

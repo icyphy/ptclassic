@@ -1,8 +1,8 @@
 defstar {
-    name { XSSend }
+    name { XSend }
     domain { CGC }
     desc { Send data synchronously from CGC to S56X }
-    derivedFrom { XSBase }
+    derivedFrom { XSynchComm }
     version { $Id$ }
     author { Jose Luis Pino }
 
