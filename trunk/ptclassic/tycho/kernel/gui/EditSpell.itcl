@@ -270,6 +270,14 @@ body ::tycho::EditSpell::recheck {} {
 	    set errs [lreplace $errs $idx $idx]
 	}
     }
+    # remove single letter words
+    set idx 0
+    foreach error $errs {
+        if {[string length $error] == 1} {
+            set errs [lreplace $errs $idx $idx]
+        }
+        incr idx
+    }
     if {$errs == {}} {
 	safeEval ::tycho::inform "Spelling OK."
 	return
@@ -335,16 +343,10 @@ body ::tycho::EditSpell::readDictionary {} {
 	    close $fd
 	    return $dict
 	} {
-	    safeEval ::tycho::warn "Personal dictionary file, $dictfile,\
-		    is not readable"
-	}
-    } else {
-        # create list of single letters to become proto-dictionary
-        set alpha {A B C D E F G H I J K L M N O P Q R S T U V W X Y Z \
-                a b c d e f g h i j k l m n o p q r s t u v w x y z}
-        set dict [join $alpha \n]
-        return $dict
-    }
+            safeEval ::tycho::warn "Personal dictionary file, $dictfile,\
+                    is not readable"
+        }
+    } 
     return {}
 }
 
