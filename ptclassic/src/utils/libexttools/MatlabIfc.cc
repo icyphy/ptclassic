@@ -357,28 +357,32 @@ int MatlabIfc :: EvaluateUserCommand(char* command) {
     return merror;
 }
 
+// ChangeMatlabDirectory:  expand the pathname given by the data member
+// scriptDirectory, and if it is a valid directory, change to dirs to it
 int MatlabIfc :: ChangeMatlabDirectory() {
 
-    // expand the pathname and check its existence
-    static InfString lastdirname;
-    int retval = 0;
+    // Keep track of the last directory name in 'lastdirname' only for
+    // the purposes of suppressing multiple error messages.
+    // Initialize 'lastdirname' to an empty string; otherwise, it
+    // will return a null pointer when cast to char* or const char*
+    static InfString lastdirname = "";
+
+    int retval = FALSE;
     if ( scriptDirectory && *scriptDirectory ) {
 	struct stat stbuf;
 	if ( stat(scriptDirectory, &stbuf) == -1 ) {
-	    if ( strcmp((char*) lastdirname, scriptDirectory) != 0 ) {
+	    if ( strcmp(lastdirname, scriptDirectory) != 0 ) {
 		errorString = "Cannot access the directory ";
 		errorString << scriptDirectory;
 		lastdirname = scriptDirectory;
 	    }
-	    retval = 0;
+	    retval = FALSE;
 	}
 	else {
-	    char* changeDirCommand = new char[strlen(scriptDirectory) + 4];
-	    strcpy(changeDirCommand, "cd ");
-	    strcat(changeDirCommand, scriptDirectory);
+	    InfString changeDirCommand = "cd ";
+	    changeDirCommand << scriptDirectory;
 	    EvaluateOneCommand(changeDirCommand);
-	    delete [] changeDirCommand;
-	    retval = 1;
+	    retval = TRUE;
 	}
     }
     return retval;
