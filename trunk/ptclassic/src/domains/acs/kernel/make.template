@@ -63,7 +63,9 @@ HDRS= \
 	ACSFixSimCore.h \
 	ACSCGCore.h \
 	ACSCGCCore.h \
-	ACSGeodesic.h
+	ACSGeodesic.h \
+	ACSFPCGCCore.h \
+	ACSForkNode.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) ACSDomain.cc
@@ -80,10 +82,6 @@ install:	makefile $(LIBDIR)/$(LIB)
 include $(ROOT)/mk/common.mk
 
 # Commands to make some sources from templates
-
-ACSDomain.cc :	$(KERNDIR)/XDomain.ccP
-	cd $(VPATH); rm -f ACSDomain.cc; \
-	sed 's/<T>/ACS/g' $(KERNDIR)/XDomain.ccP > ACSDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
