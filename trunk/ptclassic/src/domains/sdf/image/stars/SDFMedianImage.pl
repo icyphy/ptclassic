@@ -41,6 +41,8 @@ Pixels at the image boundaries are copied and not median filtered.
 	ccinclude { "GrayImage.h", <std.h> }
 
 	code {
+#define INT_DIVIDE_BY_TWO(d) ((d) >> 1)
+
 		// Function to sort unsigned char's.
 		// These types and casts are required to satisfy cfront's
 		// ridiculously strict rules.
@@ -78,9 +80,13 @@ Pixels at the image boundaries are copied and not median filtered.
 		code {
 			// Copy data to buf.
 			int cnt = 0;
-			for(int i = pi-size/2; i <= pi+size/2; i++) {
-				for(int j = pj-size/2; j <= pj+size/2; j++) {
-					buf[cnt++] = p[i*width+j];
+			int halfsize = INT_DIVIDE_BY_TWO(size);
+			int maxi = pi + halfsize;
+			int maxj = pj + halfsize;
+			for (int i = pi - halfsize; i <= maxi; i++) {
+				int rowloc = i * width;
+				for (int j = pj - halfsize; j <= maxj; j++) {
+					buf[cnt++] = p[rowloc + j];
 				}
 			}
 
@@ -113,12 +119,12 @@ Pixels at the image boundaries are copied and not median filtered.
 		GrayImage* outImage = (GrayImage*) inImage->clone(1);
 		unsigned char* outP = outImage->retData();
 		unsigned const char* inP = inImage->constData();
-		int halfsize = size / 2;
-		for (int i = halfsize; i < height; i++) {
+		int halfsize = INT_DIVIDE_BY_TWO(size);
+		for (int i = 0; i < height; i++) {
 		    int rowloc = i * width;
 		    for (int j = 0; j < width; j++) {
 			if ( (halfsize <= i) && (i < height - halfsize) &&
-			     (halfsize <= i) && (j < width - halfsize) ) {
+			     (halfsize <= j) && (j < width - halfsize) ) {
 			    outP[j + rowloc] = retMedian(inP, i, j);
 			}
 			// Do not apply median definition at boundaries
