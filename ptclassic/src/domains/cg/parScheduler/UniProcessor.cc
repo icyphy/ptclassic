@@ -334,7 +334,6 @@ void UniProcessor :: convertSchedule() {
 	while ((n = schedIter.nextNode()) != 0) {
 		if (n->getType() > 0) continue;
 		SDFStar* s = n->getCopyStar();
-		s->setTarget(targetPtr);
 		sched.append(*s);
 	}
 	targetPtr->copySchedule(sched);

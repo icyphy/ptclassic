@@ -90,6 +90,7 @@ void UniProcessor :: createSubGal() {
 			smallest = (ParNode*) smallest->getNextInvoc();
 
 		SDFStar* copyS = cloneStar(org);
+		copyS->setTarget(targetPtr);
 
 		ParNode* prevN = 0;
 		smallest->setCopyStar(copyS, prevN);
@@ -144,8 +145,8 @@ void UniProcessor :: makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* farS,
 				     SequentialList& touchedStars) {
 
 	if (touchedStars.member(farS)) {
-	 	// make connection if it is input
-		if (p->isItInput()) {
+	 	// make connection if it is output
+		if (p->isItOutput()) {
 			PortHole* destP = clonedPort(farS, p->far());
 			clonedPort(org, p)->connect(*destP, p->numTokens());
 		}
@@ -541,6 +542,7 @@ UniProcessor :: makeReceive(int pindex, PortHole* rP, int delay, ParNode* n,
 	
 	// create target specific Receive star
 	SDFStar* newR = mtarget->createReceive(pindex,myId(),numSample);
+	newR->setTarget(targetPtr);
 	subGal->addBlock(*newR,newName(2));
 
 	// make connection
@@ -574,6 +576,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 	
 	// create target specific Send star
 	SDFStar* newS = mtarget->createSend(myId(), pindex, numSample);
+	newS->setTarget(targetPtr);
 	subGal->addBlock(*newS,newName(3));
 
 	// make connection
@@ -609,6 +612,7 @@ void UniProcessor :: makeSend(int pindex, PortHole* sP, ParNode* n,EGGate* g) {
 
 SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 	LOG_NEW; SDFStar* newSpread =  new CGSpread;
+	newSpread->setTarget(targetPtr);
 	subGal->addBlock(*newSpread,newName(1));
 	int numTok;
 	if (sN)
@@ -624,6 +628,7 @@ SDFStar* UniProcessor :: makeSpread(PortHole* srcP, ParNode* sN) {
 
 SDFStar* UniProcessor :: makeCollect(PortHole* destP, ParNode* dN) {
 	LOG_NEW; SDFStar* newCollect = new CGCollect;
+	newCollect->setTarget(targetPtr);
 	subGal->addBlock(*newCollect,newName(0));
 	int numTok;
 	if (dN)
