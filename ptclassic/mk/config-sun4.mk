@@ -138,7 +138,8 @@ SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 # Directories to use
 #
 X11_INCSPEC =	-I/usr/X11/include
-X11_LIBSPEC =	-L/usr/X11/lib -lX11
+# Statically link X11 so we can ship something that works
+X11_LIBSPEC =	$(CC_STATIC) -L/usr/X11/lib -lX11 $(LD_DYNAMIC)
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 X11EXT_LIBSPEC=-lXext -lSM -lICE
