@@ -7,7 +7,7 @@
 <h1><A NAME="Testing Tycho">Testing Tycho</A></h1>
 <HR>
 This page is primarily for Tycho Developers.  Some of the commands
-mentioned below are not included in Tycho.
+mentioned below are not included in the Tycho distribution.
  <P>Contents:
 <MENU>
 <LI> <A HREF="#test suite">Test Suite</A>
@@ -17,7 +17,7 @@ mentioned below are not included in Tycho.
 
 <H2><A NAME="test suite">Test Suite</A></H2>
 
-We have included recursion tests for some of the code.  Usually, 
+We have included regression tests for some of the code.  Usually, 
 wherever there is a Itcl file, the tests are in the <CODE>test</CODE>
 directory.
 
@@ -256,21 +256,24 @@ test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
 	
 <H3>Using <CODE>event generate</CODE></H3>
 
-The <CODE>event generate</CODE> command is very handy for testing
-widgets The tests below are doing an <CODE>&lt;Enter&gt;</CODE> and
+The Tk <CODE>event generate</CODE> command is very handy for testing
+widgets by generating an event in a window as if it had come from the
+window system.
+
+ <P>The tests below are doing an <CODE>&lt;Enter&gt;</CODE> and
 <CODE>&lt;Leave&gt;</CODE> of a button and checking the text placed
 into a status bar:
 
 <PRE>
 update
 test ButtonBox-3.3 {Enter button and check status bar} {
-    event generate [.bb component buttonfoo] <Enter>
+    event generate [.bb component buttonfoo] &lt;Enter&gt;
     .sb get
 } {The Foo button}
 
 update
 test ButtonBox-3.4 {Leave the button} {
-    event generate [.bb component buttonfoo] <Leave>
+    event generate [.bb component buttonfoo] &lt;Leave&gt;
     .sb get
 } {}
 </PRE>
@@ -314,7 +317,7 @@ Htmlchek is another tool that tells the user about html errors.
 <CODE>htmlchek</CODE> also checks for bad links.  The
 <CODE>htmlchek</CODE> output is a little hard to read, so we tend to
 use <CODE>weblint</CODE> for checking individual files.
-<CODE>htmlchek</CODE> cat be obtained from
+<CODE>htmlchek</CODE> can be obtained from
 <A HREF="ftp://ftp.cs.buffalo.edu/pub/htmlchek/"><CODE>ftp://ftp.cs.buffalo.edu/pub/htmlchek/</CODE></A>
 
 <P> The best way to run <CODE>htmlchek</CODE> is to create a sample
@@ -367,11 +370,13 @@ grep mystring `find . -name "*.html" -print`
 </PRE>
 
 <H3>Spellchecking</H3>
-Checking the spelling in the HTML files can be done with:
+Checking the spelling in all the HTML files can be done with:
 <PRE>
 cd $TYCHO
 spell `find . -name "*.html" -print`
 </PRE>
+You can spell check an individual HTML file by using the HTML
+editor built-in spell checker under the <CODE>Edit</CODE> menu.
 
 <H3>Checking Embedded Tcl</H3>
 
