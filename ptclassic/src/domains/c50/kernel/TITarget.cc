@@ -119,7 +119,6 @@ void TITarget::beginIteration(int repetitions, int) {
     else{
       // iterate finitely
       int loopAddr = 99951 + loopCounter;
-      loopCounter;
 	*defaultStream << "\tlar\tar0,#" << repetitions << "\n"
 	       << targetNestedSymbol.push("LOOP") << "\tsmmr\tar0,#"
 	       << loopAddr <<"\n";
