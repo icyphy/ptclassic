@@ -10,7 +10,7 @@
 
 # SRCDIR is the directory containing the Ptolemy kernel source.
 SRCDIR = /usr/tools/ptolemy/src/kernel
-GFLAGS = -g -I$(SRCDIR)
+GPPFLAGS = -g -I$(SRCDIR)
 GNU = g++
 GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include
 
@@ -19,20 +19,32 @@ DESTDIR = /usr/tools/ptolemy/lib/sdf
 
 .SUFFIXES: .cc
 .cc.o:
-	$(GNU) $(GFLAGS) -c  $<
+	$(GNU) $(GPPFLAGS) -c  $<
 
 SRCS=BlackHole.cc CheatGain.cc ComplexDC.cc ComplexProduct.cc ComplexSum.cc \
  FloatDC.cc FloatGain.cc FloatProduct.cc FloatRamp.cc FloatSum.cc Fork.cc \
- Gaussian.cc IntRamp.cc Printer.cc Sin.cc Xgraph.cc
+ Gaussian.cc IntRamp.cc Printer.cc Sin.cc Xgraph.cc \
+ AdaptFilter.cc FIR.cc IIR.cc
 
 OBJS=BlackHole.o CheatGain.o ComplexDC.o ComplexProduct.o ComplexSum.o \
  FloatDC.o FloatGain.o FloatProduct.o FloatRamp.o FloatSum.o Fork.o \
- Gaussian.o IntRamp.o Printer.o Sin.o Xgraph.o
+ Gaussian.o IntRamp.o Printer.o Sin.o Xgraph.o \
+ AdaptFilter.o FIR.o IIR.o
+
+HDRS=BlackHole.h CheatGain.h ComplexDC.h ComplexProduct.h ComplexSum.h \
+ FloatDC.h FloatGain.h FloatProduct.h FloatRamp.h FloatSum.h Fork.h \
+ Gaussian.h IntRamp.h Printer.h Sin.h Xgraph.h \
+ AdaptFilter.h FIR.h IIR.h
 
 all:		makefile $(OBJS)
 
 install:	makefile $(OBJS)
 		mv -f $(OBJS) $(DESTDIR)
+
+sources:	$(SRCS) $(HDRS) make.template
+
+clean:
+		rm -f *.o core *~ *#
 depend:
 		makedepend $(GNUINCLUDE) $(SRCS)
 
