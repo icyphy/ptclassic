@@ -147,7 +147,7 @@ DataFlowStar* farEndMaster();
 int farEndInvocation();
 \end{example}
 
-The above methods querry information about the other side of the connection:
+The above methods query information about the other side of the connection:
 EGGate, EGNode, the original DataFlowStar that the EGNode points to, and
 the invocation number of the EGNode. 
 
@@ -360,7 +360,7 @@ int alreadyVisited();
 \end{example}
 
 The above methods manipulates a flag for traversal algorithms: resets to 0,
-sets to 1, or querries the flag.
+sets to 1, or queries the flag.
 
 \begin{example}
 void claimSticky();
@@ -370,7 +370,7 @@ int sticky();
 These methods manipulates another flag to indicate that the invocations
 of the same DataFlowStar may not be scheduled into different processors
 since there is a strong interdependency between them. The first method
-sets the flag and the second querries the flag.
+sets the flag and the second queries the flag.
 
 \node class EGNodeList
 \subsection{EGNodeList}
@@ -748,7 +748,7 @@ int isOSOP();
 
 After scheduling is performed, we set a flag to indicate whether all
 invocations of a star are assigned to the same processor or not, using the
-first method. The second method querries the flag. Note that only the
+first method. The second method queries the flag. Note that only the
 \emph{first} invocation has the valid information.
 
 \begin{example}
@@ -2860,7 +2860,7 @@ int getIntact();
 These methods indicate whether the cluster, or its subclusters, was broken
 into its components in the scheduling stage (3) of DeclustScheduler.
 The first method indicates that it happens while the second method
-querries whether it happens or not.
+queries whether it happens or not.
 
 \begin{example}
 int getScore();
@@ -3064,7 +3064,7 @@ DCUniProc* getSchedule(int \var{index});
 \end{example}
 
 The above methods return pointer to the component DCUniProc with given index.
-The second method is a type-casted version of the first method.
+The second method is a type-cast version of the first method.
 
 There is one protected method:
 
@@ -3478,7 +3478,7 @@ The public method
 Stringlist symbol(const char*)
 \end{example}
 
-makes a unique symbol from the supplied argument by adding the seperator and
+makes a unique symbol from the supplied argument by adding the separator and
 a unique number to the argument string.
 
 Now, class SymbolList is privately derived from class BaseSymbolList with
@@ -3599,7 +3599,7 @@ virtual int* CGTarget::symbolCounter();
 virtual char CGTarget::separator();
 \end{example}
 
-return symbolCounter and seperator respectively.
+return symbolCounter and separator respectively.
 
 \node Resource Management
 \section{Resource Management}
@@ -3657,7 +3657,7 @@ virtual void forkInit(CGPortHole& input, CGPortHole& output);
 \end{example}
 
 Only the second method is public while others are protected. The first two
-methods declare and querry that the star is a Fork star. If it is,
+methods declare and query that the star is a Fork star. If it is,
 we call either one of the last two methods, based on whether the output
 is a MultiPortHole or not. In those methods, we shift delays from a Fork's
 input port to the output ports, and set the \code{forkSrc} pointer of
@@ -4063,7 +4063,7 @@ Both methods set the Geodesic pointer to the argument \var{g}. There is a flag
 to indicate that this port switched Geodesic or not. The first method
 sets the flag while the second method resets the flag. Both are virtual since
 in the derived classes we may need to save the original Geodesic.
-The flag is querried by
+The flag is queried by
 
 \begin{example}
 int switched() const;
@@ -4704,7 +4704,7 @@ int overrideSchedule();
 void setOSOPreq(int \var{i});
 \end{example}
 
-The first three methods querry the current value of the states. The last
+The first three methods query the current value of the states. The last
 method sets the current value of \code{oneStarOneProc} state to the
 argument value.
 
@@ -5955,8 +5955,8 @@ CGCGeodesic& geo();
 const CGCGeodesic& geo() const;
 \end{example}
 
-Return the geodesic connected to this PortHole, type casted. The second 
-is the \code{const} version of the first method.
+Return the geodesic connected to this PortHole, type cast.
+The second is the \code{const} version of the first method.
 
 \begin{example}
 Geodesic* allocateGeodesic();
@@ -5998,7 +5998,7 @@ are all protected.
 CGCTarget* targ();
 \end{example}
 
-Returns the target pointer, type casted to CGCTarget.
+Returns the target pointer, type cast to CGCTarget.
 
 \begin{example}
 StringList expandRef(const char* \var{name});
