@@ -139,7 +139,7 @@ $label(AndLoop)
 	}
 
 	codeblock(logicXorOpAndLoad,"int numinputs") {
-	do	#@numinputs-1, $label(Xor)
+	do	#@numinputs-1,$label(Xor)
 	not	a	a,y0		; save a in y0 and invert a
 	tst	b	x:(r0)+,b	; test input and read next input
 	teq	y0,a			; restore a if input != 0
