@@ -116,17 +116,20 @@ class ::tycho::DataModel {
     #################################################################
     ####                   protected methods                     ####
 
+    # Return a description of a single item
+    protected method _describeitem {context type tail name {prefix {}}}
+    
     # Create a header string
     protected method _header {}
 
-    #################################################################
-    ####                   protected procs                       ####
-
     # Define a new type of item
-    protected proc definetype {type args}
+    protected method definetype {type args}
 
     #################################################################
     ####                  protected variables                    ####
+
+    # The path of the currently-parsed model
+    protected common _object_ {}
 
     # The name of the currently-parsed model
     protected common _current_ {}
@@ -137,9 +140,9 @@ class ::tycho::DataModel {
     #################################################################
     ####                    private methods                      ####
 
-    # Return a description of a single item
-    private method _describeitem {name {prefix {}}}
-    
+    # Generate a parsing procedure
+    private method _mkparseproc {type args}
+
     # Verify that an item exists
     private method _verify {name}
 
@@ -147,17 +150,12 @@ class ::tycho::DataModel {
     private method _verifynot {name}
 
     #################################################################
-    ####                    private procs                        ####
-
-    # Generate a parsing proc
-    private proc _mkparseproc {scope type args}
-    
-    #################################################################
     ####                  private variables                    ####
 
     private common defaulttypeoptions {
         -describe {}
         -leafonly 0
+        -override 0
     	-strict 0
     	-valued 0
     }
@@ -178,14 +176,15 @@ class ::tycho::DataModel {
     #    _typeinfo($type,defaults)    -> Default attribute values
     #    _typeinfo($type,describe)    -> Script to describe this item
     #    _typeinfo($type,leafonly)    -> Must be a leaf?
+    #    _typeinfo($type,override)    -> Use a method to parse items?
     #    _typeinfo($type,strict)      -> Are attributes checked strictly?
     #    _typeinfo($type,valued)      -> Has a value?
     # </pre>
     private common _typeinfo
 
-   # Debugging only
+    # Debugging only
     method debug {args} {
-	eval $args
+        eval $args
     }
 }
 
@@ -216,8 +215,10 @@ body ::tycho::DataModel::constructor {args} {
 # Return the undo command.
 #
 body ::tycho::DataModel::add {name args} {
+    _verifynot $name
+
     # Extract type field
-    regexp {([^.]*.)?([^:]+):(.*)$} $name _ _ type
+    regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Extract contents
     if { [llength $args] & 1 } {
@@ -226,12 +227,12 @@ body ::tycho::DataModel::add {name args} {
     } else {
     	set contents {}
     }
-    # Set the data
-    global _current_ _context_
-    global $_current_
-    set [set _current_]($_context_.$type:$name) $args
-    global  $_current_.$type
-    lappend $_current_.$type($_context_) $name
+
+    # Store the data of this item
+    @scope $scope set [set modelname]($name) $args
+
+    # Add it to the list of children of its parent
+    @scope $scope lappend [set modelname].[set type]($context) $tail
 
     # Parse contents
     if { $contents != "" } {
@@ -239,7 +240,7 @@ body ::tycho::DataModel::add {name args} {
         $safeinterp eval [list @scope $scope $contents]
     }
     # Return undo command
-    list [delete $name]
+    list delete $name
 }
 
 ########################################################################
@@ -274,7 +275,7 @@ body ::tycho::DataModel::children {type {context {}}} {
 #
 body ::tycho::DataModel::clear {} {
     @scope $scope unset $modelname
-    foreach type $_typeinfo($modelname) {
+    foreach type $_typeinfo($scope) {
         @scope $scope unset $modelname.$type
     }
     # Not undoable
@@ -289,11 +290,11 @@ body ::tycho::DataModel::clear {} {
 # as well. Return the undo command.
 #
 body ::tycho::DataModel::delete {name} {
-    _verify $type $name
-    regexp {([^.]*.)?([^:]+):(.*)$} $name _ context type tail
+    _verify $name
+    regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Get a description for the undo command
-    set desc [_describeitem $name]
+    set desc [_describeitem $context $type $tail $name]
     
     # Remove from the parent list
     @scope $scope set [set modelname].[set type]($context)] \
@@ -322,25 +323,27 @@ body ::tycho::DataModel::delete {name} {
 body ::tycho::DataModel::describe {{name {}} {prefix {}}} {
     if { $name!= "" } {
         _verify $name
-        _describeitem $name $prefix
+        regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
+        _describeitem $context $type $tail $name $prefix
         
     } else {
         set string "# -*- [_header] -*-\n"
-        foreach type $_typeinfo($modelname) {
+        foreach type $_typeinfo($scope) {
             # Get the root items of this type
             set items [children $type]
             
             # Append a description of each to the result string
-            if { $_typeinfo($modelname,$type,describe) != "" } {
+            if { $_typeinfo($scope,$type,describe) != "" } {
                 # Call external script to get description
                 foreach n $items {
                     append string [uplevel #0 \
-                            $_typeinfo($modelname,$type,describe) \
-                            [list $name.$type:$n $prefix]
+                            $_typeinfo($scope,$type,describe) \
+                            [list $type:$n $prefix]
                 }
             } else {
                 foreach n $items {
-                    append string [_describeitem $name.$type:$n $prefix]
+                    append string [_describeitem {} $type $n $type:$n \
+                            $prefix]
                 }
             }
         }
@@ -408,12 +411,12 @@ body ::tycho::DataModel::itemcget {name {attribute {}}} {
 #
 body ::tycho::DataModel::itemconfigure {name args} {
     _verify $name
-    regexp {([^.]*.)?([^:]+):(.*)$} $name _ context type
+    regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Get defaults as an array
-    array set opts $_typeinfo($modelname,$type,defaults)
+    array set opts $_typeinfo($scope,$type,defaults)
     
-    if { ! $_typeinfo($modelname,$type,strict) } {
+    if { ! $_typeinfo($scope,$type,strict) } {
         # If checking is turned off, just add the new attributes
         array set opts $args
     } else {
@@ -456,14 +459,17 @@ body ::tycho::DataModel::names {{pattern {}}} {
 # if it is a valued type, then attributes, and then nested items
 # within curly braces. This method can be called even if the model
 # already contains data -- however, an error will be generated if data
-# with the same name as existing data is added.
+# with the same name as existing data is added. This method is not
+# undoable.
 #
 body ::tycho::DataModel::parse {data} {
-    global _current_ _context_
+    global _current_ _context_ _object_
     set _current_ $modelname
     set _context_ {}
+    set _object_ $this
  
     $safeinterp eval [list @scope $scope $data]
+    return ""
 }
 
 ########################################################################
@@ -478,7 +484,7 @@ body ::tycho::DataModel::parse {data} {
 # FIXME: Error-checking
 #
 body ::tycho::DataModel::sort {type {context {}} args} {
-    regexp {([^.]*.)?([^:]+):(.*)$} $name _ context type
+    regexp {^(([^.]*)\.)?([^:]+):(.*)$} $name _ _ context type tail
 
     # Sort the child list
     set var [set modelname].[set type]($context)
@@ -488,6 +494,70 @@ body ::tycho::DataModel::sort {type {context {}} args} {
 #####################################################################
 #####################################################################
 ####                     protected methods                       ####
+
+########################################################################
+#### _describeitem
+#
+# Return a string describing the item given by _name_
+# in the TIM format. This method performs no error-checking, so
+# the item must exist or an obscure Tcl error will be raised.
+# The _prefix_, if supplied, is prepended to each line.
+# Subclasses can override this method if they don't like the
+# way that items are printed.
+#
+body ::tycho::DataModel::_describeitem {context type tail name {prefix {}}} {
+    # Start string with type followed by local name
+    set string $prefix$type
+    lappend string $tail
+
+    # If this type has a value, append that
+    if { $_typeinfo($scope,$type,valued) } {
+        array set t [@scope $scope set [set modelname]($name)]
+        lappend string $data(-value)
+        unset t(-value)
+        set attributes [array get t]
+    } else {
+    	set attributes [@scope $scope set [set modelname]($name)]
+    }
+
+    # Get default attributes
+    array set dflt $_typeinfo($scope,$type,defaults)
+
+    # Print my attributes
+    foreach {opt val} $attributes {
+        if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+            lappend string $opt $val
+            # FIXME: Add line wrapping here
+        }
+    }
+    
+    # Print children if I have any    
+    if !$_typeinfo($scope,$type,leafonly) {
+        set haschildren 1
+        foreach t $_typeinfo($scope) {
+            if ![@scope $scope ::info exists [set modelname].[set t]($name)] {
+                set haschildren 0
+                break
+            }
+        }
+
+        # If I have children, print enclosing braces and child items
+        if $haschildren {
+            set childprefix $prefix
+            append childprefix "    "
+            append string " \{\n"
+            foreach t $_typeinfo($scope) {
+                foreach child [names $t $name] {
+                    append string \
+                            [_describeitem $name $t $child $name.$t:$child \
+                            $childprefix]
+                }
+            }
+            append string "$prefix\}"
+        }
+    }
+    return $string\n
+}
 
 ########################################################################
 #### _header
@@ -507,10 +577,6 @@ body ::tycho::DataModel::_header {} {
     return $header
 }
 
-#####################################################################
-#####################################################################
-####                     protected procs                         ####
-
 ########################################################################
 #### definetype
 #
@@ -529,6 +595,10 @@ body ::tycho::DataModel::_header {} {
 # a leaf item -- that is, they cannot contain nested items. This should
 # be set in any situation where a type can only be a leaf, since
 # parsing is more efficient. The default is false.
+# <li><b>-override</b> _bool_: If true, items of this type will
+# be parsed by calling a method with the same name as _type_
+# on the target object. This can be used if models need to do
+# additional processing when items are parsed.
 # <li><b>-strict</b> _bool_: If true, the attributes of this type
 # are limited to those that are declared with definetype{}.
 # If not true, any attributes can be given to items of this type.
@@ -548,35 +618,31 @@ body ::tycho::DataModel::_header {} {
 # will be raised if the type already exists.
 #
 body ::tycho::DataModel::definetype {type args} {
-    # Get the caller's namespace and name
-    set scope [uplevel info class]
-    set name [uplevel set modelname]
-
     # Ignore if already exists
     if { [@scope $scope ::info procs __parse_$type] != "" } {
         return
     }
-    lappend _typeinfo($name) $type
+    lappend _typeinfo($scope) $type
 
     array set opts $defaulttypeoptions
     array set opts $args
 
     # Set special attributes
-    set _typeinfo($name,$type) $type
+    set _typeinfo($scope,$type) $type
     foreach {a _} $defaulttypeoptions {
-        set _typeinfo($name,$type,[string trim $a "-"]) $opts($a)
+        set _typeinfo($scope,$type,[string trim $a "-"]) $opts($a)
         unset opts($a)
     }
     
     # Set defaults
-    set _typeinfo($name,$type,defaults) [array get opts]
+    set _typeinfo($scope,$type,defaults) [array get opts]
 
     # Create and define the parsing proc
-    puts [list @scope $scope eval [eval _mkparseproc $scope $type $args]]
-    @scope $scope eval [eval _mkparseproc $scope $type $args]
+    # puts [list @scope $scope eval [eval _mkparseproc $type $args]]
+    @scope $scope eval [eval _mkparseproc $type $args]
 
     # Link the proc into the safe interpreter
-    puts [list $safeinterp alias $scope::$type $scope::__parse_$type]
+    # puts [list $safeinterp alias $scope::$type $scope::__parse_$type]
     $safeinterp alias $scope::$type $scope::__parse_$type
 }
 
@@ -585,66 +651,79 @@ body ::tycho::DataModel::definetype {type args} {
 ####                       private methods                       ####
 
 ########################################################################
-#### _describeitem
+#### _mkparseproc
 #
-# Return a string describing the item given by _name_
-# in the TIM format. This method performs no error-checking, so
-# the item must exist or an obscure Tcl error will be raised.
-# The _prefix_, if supplied, is prepended to each line.
+# Create a proc to parse an item
 #
-body ::tycho::DataModel::_describeitem {name {prefix {}}} {
-    regexp {([^.]*.)?([^:]+):(.*)$} $name _ context type tail
+body ::tycho::DataModel::_mkparseproc {type args} {
+    # Get options
+    array set opts $defaulttypeoptions
+    array set opts $args
 
-    # Start string with type followed by local name
-    set string $prefix$type
-    lappend string $tail
-
-    # If this type has a value, append that
-    if { $_typeinfo($modelname,$type,valued) } {
-        array set t [@scope $scope set [set modelname]($name)]
-        lappend string $data(-value)
-        unset t(-value)
-        set attributes [array get t]
+    # Proc header
+    set proc "proc $scope::__parse_$type "
+    if $opts(-override) {
+        append proc "{args}"
+    } elseif $opts(-valued) {
+        append proc "{name value args}"
     } else {
-    	set attributes [@scope $scope set [set modelname]($name)]
+        append proc "{name args}"
     }
+    append proc " \{\n"
 
-    # Get default attributes
-    array set dflt $_typeinfo($modelname,$type,defaults)
+    # Proc body
+    append proc "    set type $type\n"
 
-    # Print my attributes
-    foreach {opt val} $attributes {
-        if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
-            lappend string $opt $val
-            # FIXME: Add line wrapping here
+    # If the override option is set, call a method on the
+    # object.
+    if $opts(-override) {
+        append proc {
+            global _object_
+            global $_object_
+            eval $_object_ $type $args
         }
-    }
-    
-    # Print children if I have any    
-    if !$_typeinfo($modelname,$type,leafonly) {
-        set haschildren 1
-        foreach t $_typeinfo($modelname) {
-            if ![@scope $scope ::info exists [set modelname].[set t]($name)] {
-                set haschildren 0
-                break
-            }
-        }
-
-        # If I have children, print enclosing braces and child items
-        if $haschildren {
-            set childprefix $prefix
-            append childprefix "    "
-            append string " \{\n"
-            foreach t $_typeinfo($modelname) {
-                foreach child [names $t $name] {
-                    append string \
-                            [_describeitem $name.[set t]:$child $childprefix]
+    } else {
+        # Extract contents
+        if !$opts(-leafonly) {
+            append proc {
+                if { [llength $args] & 1 } {
+                    set contents [lindex $args end]
+                    set args [lreplace $args end end]
+                } else {
+                    set contents {}
                 }
             }
-            append string "$prefix\}"
+        }
+        # Set the data
+        append proc {
+            global _current_ _context_
+            global $_current_
+            set [set _current_]($_context_.$type:$name) $args
+            global   $_current_.$type
+            lappend [set _current_].[set type]($_context_) $name
+        }
+        # Set the value
+        if $opts(-valued) {
+            append proc {
+                lappend [set _current_]($_context_.$type:$name) value $value
+            }
+        }
+        # Parse contents
+        if !$opts(-leafonly) {
+            set t {
+                set saved $_context
+                set _context_ $_context_.$type:$name
+            }
+            append t "$safeinterp eval [list @scope $scope \$contents]\n"
+            append t {
+                set _context_ $saved
+            }
+            append proc {if { $contents != "" }}
+            append proc " \{$t\}"
         }
     }
-    return $string\n
+    # Complete proc and return
+    append proc "\}"
 }
 
 ########################################################################
@@ -669,70 +748,4 @@ body ::tycho::DataModel::_verifynot {name} {
     if [@scope $scope ::info exists [set modelname]($name)] {
     	error "An item \"$name\" already exists in $modelname"
     }
-}
-
-#####################################################################
-#####################################################################
-####                       private procs                         ####
-
-########################################################################
-#### _mkparseproc
-#
-# Create a proc to parse an item
-#
-body ::tycho::DataModel::_mkparseproc {scope type args} {
-    # Get options
-    array set opts $defaulttypeoptions
-    array set opts $args
-
-    # Proc header
-    if $opts(-valued) {
-        set parseproc "proc $scope::__parse_$type {name value args} \{\n"
-    } else {
-        set parseproc "proc $scope::__parse_$type {name args} \{\n"
-    }
-
-    # Proc body
-    append parseproc "set type $type\n"
-
-    # Extract contents
-    if !$opts(-leafonly) {
-        append parseproc {
-            if { [llength $args] & 1 } {
-                set contents [lindex $args end]
-                set args [lreplace $args end end]
-            } else {
-                set contents {}
-            }
-        }
-    }
-    # Set the data
-    append parseproc {
-        global _current_ _context_
-        global $_current_
-        set [set _current_]($_context_.$type:$name) $args
-        global   $_current_.$type
-        lappend [set _current_].[set type]($_context_) $name
-    }
-    # Set the value
-    if $opts(-valued) {
-        append parseproc {
-            lappend [set _current_]($_context_.$type:$name) value $value
-        }
-    }
-    # Parse contents
-    if !$opts(-leafonly) {
-        set t {
-            set saved $_context
-            set _context_ $_context_.$type:$name
-        }
-        append t "$safeinterp eval [list @scope $scope \$contents]\n"
-        append t {
-            set _context_ $saved
-        }
-        append parseproc {if { $contents != "" }}
-        append parseproc " \{$t\}"
-    }
-    # Complete body and return
-    append parseproc "\}"
 }
