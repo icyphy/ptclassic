@@ -37,6 +37,7 @@ Routines for talking to the Gantt chart display
 
 // Do the right thing for sol2 boolean defs.  compat.h must be included
 // first so sys/types.h is included correctly.
+#include "compat.h"
 #include "sol2compat.h"
 
 #include "PTcl.h"
