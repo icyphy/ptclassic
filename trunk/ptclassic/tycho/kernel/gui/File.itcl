@@ -506,12 +506,12 @@ body ::tycho::File::constructor {args} {
         $myMenubar add "Guide to $myclass widget" Help -underline 0 \
                 -command "$this help"
         
-        $myMenubar add "Concept Index" Help -underline 0 \
+        $myMenubar add "Concept Index..." Help -underline 0 \
                 -command {::tycho::File::openContext \
 		[file join \$TYCHO lib idx tycho.idx]}
         
         set nm [::tycho::autoName .index]
-        $myMenubar add "Code Index" Help -underline 0 \
+        $myMenubar add "Code Index..." Help -underline 0 \
                 -command "::tycho::IndexBrowser $nm \
                 -file [file join \$TYCHO lib idx codeDoc.idx] \
                 -width 80; $nm centerOnScreen"
@@ -524,6 +524,12 @@ body ::tycho::File::constructor {args} {
                 set w [::tycho::autoName .glimpse]; \
                 ::tycho::Glimpse $w -geometry +0+0;\
                 wm deiconify $w}
+
+	# Add the Preferences menu. This is probably the wrong place
+	# for it, but it will do until we figure out a good menu to
+	# put it in that doesn't keep disappearing...
+        $myMenubar add "Preferences..." Help -underline 0 \
+		-command { ::tycho::preferencedialog }
     }
 
     # The following initialize options and then invoke any
