@@ -39,13 +39,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCTarget.h"
 #include "SDFScheduler.h"
 
+
+// This target allows for the creation of target specific code generation
+// wormholes to simulation.  It can be used stand-alone, for CGC inside of
+// simulation wormholes, or as a helper target such as 
+// $PTOLEMY/src/domains/cg56/targets/S56XTargetWH.{h,cc} for target specific
+// simulation wormholes.
+
+/* The ideas behind the implementation of CG wormholes is document in:
+      J.L. Pino, T.M. Parks and E.A. Lee, "Automatic Code Generation for 
+      Heterogeneous Multiprocessors," Proceedings of the IEEE International
+      Conference on Acoustics, Speech, and Signal Processing, vol. 2, 
+      pp. 445-448, Adelaide, Australia, April 1994.
+
+   available on-line: 
+http://ptolemy.eecs.berkeley.edu/papers/autoMultiCodeGen/www/proceedings_1.html
+*/
+
 // This structure represents a communication star pair.  This target
 // can function as a helper target to allow for simulation wormholes.  The
-// outer star is optional -- it is the CGCStar which will receives
-// the communication from the inner CGStar.  This outer star is NULL iff
-// the inner star is a CGC star.  In other words, the outer star is
-// optional when this target is used standalone, not as a helper
-// target.
+// outer star is optional --  if specified, it is target specific CGC 
+// communication star which receives the communication from an inner CGStar.
+// This outer star is NULL iff the inner star is a CGC star.  
+// In other words, the outer star is optional when this target is used 
+// standalone, not as a helper target.
 //
 //             Wormhole
 //          |-------------|
@@ -63,7 +80,13 @@ public:
     CGStar* inner;
 };
 
-typedef CommPair (*CommPairF) (PortHole&,int);
+// A simple method to fire a target-generated linear SDF schedule. 
+void fireSDFSchedule(SDFSchedule&,CGTarget&);
+
+// Each target that uses this target as a helper target must define
+// two functions (NOT methods) of the type CommPairF.  These functions
+// must return a send/receive communication pair.
+typedef CommPair (*CommPairF) (PortHole&,int,CGTarget&);
 
 class CGCTargetWH : public CGCTarget {
 public:
@@ -89,15 +112,34 @@ public:
     int linkFiles();
     
     // This method allows CGCTargetWH to be used as a helper target to
-    // another wormhole target.
+    // another wormhole target.  It contains all of the code that splices
+    // in the new communication stars and creates the wormhole communication
+    // schedules.  The 'inputs' and 'outputs' schedules are for the 
+    // wormhole input ports and output ports respectively.  The function
+    // pointers "incoming" and "outgoing" return the target specific
+    // communcation star pairs.
     int prepareCGCWorm(SDFSchedule& inputs, SDFSchedule& outputs,
-		       CommPairF incoming, CommPairF outgoing, Galaxy&);
+		       CommPairF incoming, CommPairF outgoing, CGTarget&);
+
+    // This string list collects the include directory locations (in
+    // the form of "-I<directory name >"
+    StringList starIncludeDirs;
+
+    // This string list collects the libraries needed at link time to link
+    // in the replacement SDF worm star
+    StringList starLinkOptions;
+
 protected:
-    int connectStar(Galaxy& galaxy);
+    // method to connect the new SDF star
+    int connectStar();
 
     /*virtual*/ void mainLoopCode();
 private:
+
+    // Schedule containing the CGC stars that receive input from SDF
     SDFSchedule wormInputStars;
+
+    // Schedule containing the CGC stars that send output to SDF
     SDFSchedule wormOutputStars;
 
     // We may leave graph in broken state if an Error::abortRun is
@@ -106,8 +148,14 @@ private:
     // star, the graph is marked as ok.
     int dirty;
 
+    // Codestream that collects all of the SDF porthole definitions
     CodeStream starPorts;
+
+    // Codestream that collects the setSDFParams instructions
     CodeStream starSetup;
+
+    // Pointer to wormhole that I am replacing
+    Block* wormhole;
 };
 
 #endif
