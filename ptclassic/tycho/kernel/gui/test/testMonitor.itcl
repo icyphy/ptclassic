@@ -34,3 +34,40 @@
 if {[string compare test [info procs test]] == 1} then { 
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
+
+# NOTE: All of the Monitor tests are very dependent on the machine
+# that is being run. Currently, we are assuming to be on UNIX system
+# where common commands like "ls" exists.
+
+test Monitor-1.1 {example on creating monitor, make sure closing is correct} {
+    set monitor \
+            [::tycho::view Monitor -toolbar 1 -command {} -autostart 0]
+    set ok 0
+    after 1500 "set ok 1"
+    tkwait variable ok
+
+    after 2000 [$monitor statusbar cget -closecommand]
+    update idletasks
+    # This should be killed!
+    info exists $monitor
+} {0}
+
+test Monitor-1.2 {test autostart on ls, make sure output of monitor=history} {
+    set monitor \
+            [::tycho::view Monitor -toolbar 1 -command {ls} -autostart 1]
+    # Make sure ls is done
+    set ok 0
+    after 2500 "set ok 1"
+    tkwait variable ok
+
+    regexp -nocase {(Normally)} [$monitor getHistory] ret
+    update idletasks
+
+    after 5000 [$monitor statusbar cget -closecommand]
+    set ret
+} {Normally}
+
+
+
+
+
