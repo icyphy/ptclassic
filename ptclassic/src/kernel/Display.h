@@ -83,7 +83,7 @@ private:
 	const char* ttl;
 	int ng, index;
 	FILE *strm[MAX_NO_GRAPHS];
-	const char* tmpFileNames[MAX_NO_GRAPHS];
+	char* tmpFileNames[MAX_NO_GRAPHS];
 	int nIgnore;
 	int count[MAX_NO_GRAPHS];
 };
