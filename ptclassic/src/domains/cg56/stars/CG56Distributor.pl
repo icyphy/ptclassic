@@ -9,6 +9,7 @@ One input, two output distributor.
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Ir "alternating data streams"
 Distributes an input signal among two outputs, alternating samples.
 	}
 	input {

@@ -9,6 +9,8 @@ Interleaves the two input signals.
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Ir "interleaving data streams"
+.Ir "combining data streams"
 Takes N input streams and synchronously combines them into one output stream,
 where N is the number of inputs.  It consumes N input particles from each
 input, and produces N*B particles on the output, where B = blockSize.

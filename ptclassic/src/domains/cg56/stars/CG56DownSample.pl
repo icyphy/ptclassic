@@ -12,7 +12,7 @@ default.
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-
+.Ir "decimation"
 	}
 	input {
 		name {input}
