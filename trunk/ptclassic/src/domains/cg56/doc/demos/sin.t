@@ -11,5 +11,5 @@ A sine wave generator using the double integrator method.
 .pp
 .Id "sine generator"
 This system uses a double integrator method to generate a sine wave.
-in the s56x demo sinToHost, a Tone star is used to generate the sin wave.
+In the s56x demo sinToHost, \fBCG56Tone\fR is used to generate the sine wave.
 .ES

@@ -24,7 +24,7 @@ phase jitter frequency
 phase jitter amplitude
 .TE
 .PP
-Noise is generated using the CG56IIDGaussian star,
+Noise is generated using the \fBCG56IIDGaussian\fR star,
 which simply averages a number of uniform random numbers.
 This is much less expensive than the Box-Muller approach,
 which will produce better Gaussians.
