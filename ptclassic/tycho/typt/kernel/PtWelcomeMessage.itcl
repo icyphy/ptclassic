@@ -32,16 +32,20 @@
 
 ##########################################################################
 #### ptkStartupMessage
-# For convenience, a procedure to create a Tycho welcome message.
+# For convenience, a procedure to create a Ptolemy welcome message.
 #
 proc ptkStartupMessage {{version ""} {binary ""}} {
-    set nm [::tycho::autoName .ptwelcome]
-    uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
-	    -version $version \
-	    -executable $binary \
-	    -persistent 0]
-    $nm centerOnScreen
+    # Only bring up the welcomeWindow if the user has not disabled it.
+    if {[::tycho::stylesheet get interaction welcomeWindow]} { 
+	set nm [::tycho::autoName .ptwelcome]
+	uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
+		-version $version \
+		-executable $binary \
+		-persistent 0]
+	$nm centerOnScreen
+    }
 }
+
 
 ##########################################################################
 #### PtWelcomeMessage
@@ -71,9 +75,9 @@ class ::tycho::PtWelcomeMessage {
 body ::tycho::PtWelcomeMessage::constructor {args} {
 
     global ::TYCHO ::PTOLEMY
-    set slowNetwork [stylesheet get system slowNetwork]
 
-    if {$slowNetwork == 0} {  
+    # If the user is on a slow network, then don't show the image
+    if {![::tycho::stylesheet get system slowNetwork] } {
 	# An option -palette 3/3/2 below restricts the palette,
 	# but it is better to restrict it in the source.
 	if {!$ptgifexists} {
