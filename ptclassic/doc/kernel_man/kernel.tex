@@ -4833,7 +4833,7 @@ older style of linking present in Ptolemy0.5 and earlier.
 2. The second type of implementation uses the System V Release 4
 \code{dlopen()} call to load in shared objects (.so files).
 SunOS4.1.x, Solaris2.x and Irix5.x support this style of dynamic
-linking.  In Ptolemy0.5.1, only the sol2, sol2.cfront and irix5 ARCHs
+linking.  In Ptolemy0.6, only the sol2, sol2.cfront, and hppa architectures
 support dynamic linking of shared objects.
 
 The interface to both styles of linking is very similar, though there
@@ -5033,7 +5033,7 @@ dependent parts of the implementation.
 To turn on debugging, compile \file{Linker.cc} with the DEBUG flag
 defined.  One way to do this would be:
 \begin{example}
-cd $PTOLEMY/obj.$ARCH/kernel; rm -f Linker.o; make OPTIMIZER=-DDEBUG
+cd $PTOLEMY/obj.$PTARCH/kernel; rm -f Linker.o; make OPTIMIZER=-DDEBUG
 \end{example}
 
 The Linker class currently uses ``ld -A'' style dynamic linking on the
@@ -5105,7 +5105,7 @@ linked in.  The \file{.so} file is created in /tmp.
 
 Do a \code{dlopen()} on the shared object.
 
-Most ARCHs use \code{nm} to search for constructors, which are then
+Most architectures use \code{nm} to search for constructors, which are then
 invoked.  Currently, sol2.cfront does not need to search for, or
 invoke constructors.  gcc-2.5.8 has patches that allow similar
 functionality, but apparently these patches are not in gcc-2.6.0.
