@@ -25,7 +25,8 @@ INCL = -I$(KERNDIR)
 LIB=libsdf.a
 
 # Header files
-HDRS= SDFPortHole.h SDFScheduler.h SDFStar.h SDFWormhole.h \
+HDRS= DynDFScheduler.h EGGate.h EGNode.h ExpandedGraph.h \
+ SDFPortHole.h SDFScheduler.h SDFStar.h SDFWormhole.h \
  SDFCluster.h SDFTarget.h
 
 # Library sources
