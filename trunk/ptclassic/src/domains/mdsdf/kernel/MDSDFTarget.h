@@ -1,7 +1,4 @@
 /**********************************************************************
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -29,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  Mike J. Chen
  Date of creation: 9/1/93
+ Version: $Id$
 
  Declaration for MDSDFTarget, the default target to be used in the MDSDF
  domain.
@@ -54,12 +52,13 @@ public:
 	// destructor
 	~MDSDFTarget();
 
-	void setup();
-
+	// return a copy of itself
 	/*virtual*/ Block* makeNew() const;
 
 	// return the domain of the galaxy if it exists or "MDSDF" otherwise
 	/*virtual*/ const char* domain();
+
+	void setup();
 
 protected:
 	StringState logFile;
