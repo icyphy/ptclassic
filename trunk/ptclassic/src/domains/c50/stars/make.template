@@ -55,6 +55,7 @@ PL_SRCS= \
  C50Distributor.pl \
  C50DivByInt.pl \
  C50DownSample.pl \
+ C50Expr.pl \
  C50FixToCx.pl \
  C50FixToInt.pl \
  C50Fork.pl \
