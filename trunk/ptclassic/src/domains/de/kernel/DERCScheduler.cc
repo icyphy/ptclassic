@@ -1,7 +1,6 @@
 static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
-Version identification:
-@(#)DERCScheduler.cc	$Id$
+Version identification:  	$Id$
  
 Author: Mudit Goel
         Neil Smyth
@@ -238,7 +237,7 @@ int DERCScheduler :: run () {
 	    DERCEvent* pEvent = (DERCEvent*)(f->e);
 	    DERCStar* pStar = (DERCStar*)(pEvent->src);
             pStar->arrivalTime = level;
-           // interruptQ.putFreeLink(f);
+            interruptQ.putFreeLink(f);
             pStar->resourcePointer->newEventFromInterruptQ(pEvent,currentTime); 
 	}
         //A new event, never seen before
@@ -246,7 +245,7 @@ int DERCScheduler :: run () {
 	    DERCEvent* pEvent = (DERCEvent*)(f->e);
 	    DERCStar* pStar = (DERCStar*)(f->dest);
             pStar->arrivalTime = level;
- 	 //   eventQ.putFreeLink(f);
+ 	    eventQ.putFreeLink(f);
              pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime);
          }
         else {
@@ -289,7 +288,7 @@ int DERCScheduler :: run () {
 		ds->startNewPhase();
 	    }
 	    // put the LinkList into the free pool for memory management.
-	//    eventQ.putFreeLink(f);
+	   eventQ.putFreeLink(f);
             
 	    // Check if there is another event launching onto the
 	    // same star with the same time stamp (not the same port)...
@@ -321,14 +320,14 @@ int DERCScheduler :: run () {
 		    if (tl) {
 		        int success = ((InDEPort*) tl)->getFromQueue(ee->p);
 		        if (success) {
-		//	    eventQ.putFreeLink(h);
+		           eventQ.putFreeLink(h);
 			}
 		        else {
 			    h->next = store;
 			    store = h;
 		        }
 		    } else if (!tl) {
-		   //     eventQ.putFreeLink(h);
+		         eventQ.putFreeLink(h);
 		    } 
 	        } else {
 		    // need to put back since we did a get
@@ -384,7 +383,7 @@ int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal)
             // if same destination star with same time stamp..
             if (tl == p) {
                 if (tl->getFromQueue(ent->p)){
-             //       eventQ.putFreeLink(h);
+                    eventQ.putFreeLink(h);
                 }
                 else
                     eventQ.pushBack(h);
