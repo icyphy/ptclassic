@@ -39,9 +39,9 @@ This file contains definitions of DDF-specific PortHole classes.
 
 #include "DFPortHole.h"
 
-        //////////////////////////////////////////
-        // class DDFPortHole
-        //////////////////////////////////////////
+	//////////////////////////////////////////
+	// class DDFPortHole
+	//////////////////////////////////////////
 
 // Contains all the special features required for
 //   dynamic dataflow (DDF)
@@ -50,24 +50,27 @@ class DDFPortHole : public DFPortHole
 {
 	friend class MultiDDFPort;
 
-	int varying;	// flag to be set if dynamic
-
 public:
 	DDFPortHole() : varying(0) {}
 
-        // The setPort function is redefined to take one more optional
-        // argument, the number of Particles consumed/generated
-        PortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,
+	// The setPort function is redefined to take one more optional
+	// argument, the number of Particles consumed/generated
+	PortHole& setPort(const char* portName,
+			  Block* parent,
+			  DataType type = FLOAT,
 			  // Number Particles consumed/generated
-                          unsigned numTokens = 1,
+			  unsigned numTokens = 1,
 			  // Maximum delay the Particles are accessed
 			  unsigned delay = 0);
 
 	int isDynamic() const { return varying ;}
 
-	// function to alter only numTokens.
+	// Redefine to set the "varying" member.
+	PortHole& setSDFParams(unsigned numTokens, unsigned maxPctValue);
+
+	// Function to alter the numberTokens member, which indicates the
+	// number of tokens produced or consumed, or 0 if not known.
+	// This is really just another name for setSDFParams.
 	void setDDFParams(unsigned numTokens = 1);
 
 	// FIXME: I find this exceedingly ugly -- JTB
@@ -75,9 +78,15 @@ public:
 	// Since DDFStars will not be heavily used in a system, we 
 	// include them in this base class.
 	void imageConnect();			// connect with imagePort
-	virtual void moveData();	// move them to imagePort
+
+	// Move particles to the imagePort.  Returns the number of particles
+	// actually transferred.  Used for recursion only.
+	virtual int moveData();
 	Geodesic* imageGeo;
 	PortHole* imagePort;
+
+protected:
+	int varying;	// flag to be set if dynamic
 };
 
 	///////////////////////////////////////////
@@ -92,8 +101,9 @@ public:
 	// Get Particles from input Geodesic
 	void receiveData();
 
-	// for special case
-	void moveData();
+	// Move particles to the imagePort.  Returns the number of particles
+	// actually transferred.  Used for recursion only.
+	int moveData();
 };
 
 	////////////////////////////////////////////
@@ -103,7 +113,7 @@ public:
 class OutDDFPort : public DDFPortHole
 {
 public:
-        int isItOutput () const; // {return TRUE; }
+	int isItOutput () const; // {return TRUE; }
 
 	void increment();
 
@@ -116,60 +126,57 @@ public:
 	// DDFScheduler sendData()
 	void sendData();
 
-	// for special case
-	void moveData();
+	// Move particles to the imagePort.  Returns the number of particles
+	// actually transferred.  Used for recursion only.
+	int moveData();
 };
 
-        //////////////////////////////////////////
-        // class MultiDDFPort
-        //////////////////////////////////////////
+	//////////////////////////////////////////
+	// class MultiDDFPort
+	//////////////////////////////////////////
  
 // Dynamic dataflow MultiPortHole
  
-class MultiDDFPort : public MultiPortHole {
+class MultiDDFPort : public MultiDFPort {
 protected:
 	// add the DDFPortHole to my portlist.
-	// Used by MultiInDDFPort and MultiOutDDFPort.
+	// Used by MultiInDDFPort and MultiOutDDFPort, but defined
+	// here because MultiDDFPort is a friend of DDFPortHole.
 	PortHole& finishNewPort(DDFPortHole&);
 public:
-        // The number of Particles consumed
-        unsigned numberTokens;
- 
-        // The setPort function is redefined to take one more optional
-        // argument, the number of Particles produced
-        MultiPortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,        // defaults to FLOAT
-                          unsigned numTokens = 1);      // defaults to 1
+	// Function to alter the numberTokens member, which indicates the
+	// number of tokens produced or consumed, or 0 if not known.
+	// This is really just another name for setSDFParams.
+	void setDDFParams(unsigned numTokens = 1);
 };
 
-        //////////////////////////////////////////
-        // class MultiInDDFPort
-        //////////////////////////////////////////
-        
+	//////////////////////////////////////////
+	// class MultiInDDFPort
+	//////////////////////////////////////////
+	
 // MultiInDDFPort is an DDF input MultiPortHole
  
 class MultiInDDFPort : public MultiDDFPort {
 public:
-        int isItInput () const; // {return TRUE; }
+	int isItInput () const; // {return TRUE; }
  
-        // Add a new physical port to the MultiPortHole list
-        PortHole& newPort();
+	// Add a new physical port to the MultiPortHole list
+	PortHole& newPort();
 };
  
  
-        //////////////////////////////////////////
-        // class MultiOutDDFPort
-        //////////////////////////////////////////
+	//////////////////////////////////////////
+	// class MultiOutDDFPort
+	//////////////////////////////////////////
 
 // MultiOutDDFPort is an DDF output MultiPortHole  
 
 class MultiOutDDFPort : public MultiDDFPort {     
 public:
-        int isItOutput () const; // {return TRUE; }
+	int isItOutput () const; // {return TRUE; }
 
-        // Add a new physical port to the MultiPortHole list
-        PortHole& newPort();
+	// Add a new physical port to the MultiPortHole list
+	PortHole& newPort();
 };
 
 // Iterators for MultiDDFPorts -- they aren't required but make coding

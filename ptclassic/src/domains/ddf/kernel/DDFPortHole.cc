@@ -44,7 +44,7 @@ Code for DDF-type portholes and multiportholes.
 
 **************************************************************************/
 
-void DDFPortHole :: moveData() {}
+int DDFPortHole :: moveData() {}
 
 int InDDFPort :: isItInput () const { return TRUE;}
 
@@ -61,13 +61,13 @@ int MultiOutDDFPort :: isItOutput () const { return TRUE;}
 
 PortHole& DDFPortHole :: setPort (
 			     const char* s,
-                             Block* parent,
-                             DataType t,
-                             unsigned numTokens,
+			     Block* parent,
+			     DataType t,
+			     unsigned numTokens,
 			     unsigned delay)
 {
 	// Initialize PortHole
-        PortHole::setPort(s,parent,t);
+	PortHole::setPort(s,parent,t);
 
 	// Based on the delay, we allocate a Buffer assuming no
 	// past Particles are allocated
@@ -84,7 +84,7 @@ PortHole& DDFPortHole :: setPort (
 	//		delay past Particles
 	bufferSize = numberTokens + delay;
 
-        return *this;
+	return *this;
 }
 
 void DDFPortHole :: imageConnect()
@@ -97,15 +97,26 @@ void DDFPortHole :: imageConnect()
 	imageGeo = realPort.geo();
 }
 
-void DDFPortHole :: setDDFParams(unsigned numTokens)
-{
-	numberTokens = numTokens;
-	bufferSize = numberTokens;
-	if (myBuffer && myBuffer->size() != bufferSize)
-		initialize();
+PortHole& DDFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
+	if (numTokens == 0) varying = TRUE;
+	else varying = FALSE;
+	return DFPortHole::setSDFParams(numTokens,delay);
 }
 
-void InDDFPort :: moveData() 
+void DDFPortHole :: setDDFParams(unsigned numTokens)
+{
+	setSDFParams(numTokens,0);
+}
+
+void MultiDDFPort :: setDDFParams(unsigned numTokens)
+{
+	setSDFParams(numTokens,0);
+}
+
+// Returns the number of data samples transfered, which is (for now)
+// simply numberTokens.  We aren't supporting varying inputs for
+// recursion constructs at this time.
+int InDDFPort :: moveData() 
 {
 	Particle** p;
 
@@ -115,34 +126,50 @@ void InDDFPort :: moveData()
 
 	// sending copies to imageGeo
 	for (i = numberTokens; i > 0; i--) {
-		p = myBuffer->next();
-		Particle* pp = myPlasma->get();
-		*pp = **p;
-		imageGeo->put(pp);
+	    p = myBuffer->next();
+	    if (*p == NULL) {
+		Error::abortRun(*this,"Attempt to read from an empty Geodesic");
+		return 0;
+	    }
+	    Particle* pp = myPlasma->get();
+	    *pp = **p;
+	    imageGeo->put(pp);
 	}
+	return numberTokens;
 }
-	
-void OutDDFPort :: moveData() 
+
+// Returns the number of data samples transfered.
+int OutDDFPort :: moveData() 
 {
-	// get data from imageGeo
+    int number = 0;
+    // get data from imageGeo
+    if(!varying) {
+	// produce a pre-specified number of tokens
 	for (int i = numberTokens; i > 0; i--) {
 		Particle** p = myBuffer->next();
 		(*p)->die();
 		*p = imageGeo->get();
+		number++;
 	}
-}
-
-MultiPortHole& MultiDDFPort :: setPort (const char* s,
-                             Block* parent,
-                             DataType t,
-                             unsigned numTokens) {
-        MultiPortHole::setPort(s,parent,t);
-	numberTokens = numTokens;
-        return *this;
+    } else {
+	// produce a however many tokens are available in the image geodesic
+	Particle* tp;
+	while (tp = imageGeo->get()) {
+		Particle** p = myBuffer->next();
+		(*p)->die();
+		*p = tp;
+		number++;
+	}
+    }
+    return number;
 }
 
 // common code for making a new DDFPortHole in a DDFMultiPortHole.
 // called by MultiInDDFPort::newPort and MultiOutDDFPort::newPort.
+// This is a method of MultiDDFPort because MultiDDFPort is a friend
+// of DDFPortHole.  Hence it can set the protected members
+// numberTokens and varying.
+//
 PortHole& MultiDDFPort :: finishNewPort(DDFPortHole& p) {
 	if (numberTokens == 0) {
 		p.numberTokens = 1;
@@ -154,7 +181,7 @@ PortHole& MultiDDFPort :: finishNewPort(DDFPortHole& p) {
 	}
 	return installPort(p);
 }
- 
+
 PortHole& MultiInDDFPort :: newPort () {
 	LOG_NEW; DDFPortHole& p = *new InDDFPort;
 	return finishNewPort(p);
@@ -164,5 +191,3 @@ PortHole& MultiOutDDFPort :: newPort () {
 	LOG_NEW; DDFPortHole& p = *new OutDDFPort;
 	return finishNewPort(p);
 }
-
-
