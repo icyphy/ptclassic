@@ -454,9 +454,6 @@ int CGTarget :: allSendWormData() {
 
 int CGTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
-	cout << "sending " << cp.bufSize() << " values to worm port " 
-	     << cp.fullName() << "\n";
-	cout.flush();
 	// data are discarded
 	cp.forceGrabData();
 	return TRUE;
@@ -475,9 +472,6 @@ int CGTarget :: allReceiveWormData() {
 int CGTarget :: receiveWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	int size = cp.bufSize();
-	cout << "receiving " << size <<
-		" values from worm port " << p.fullName() << "\n";
-	cout.flush();
 	// insert zero-valued particles onto cp's geodesic
 	for (int i = 0; i < size; i++)
 		cp%i << 0;
