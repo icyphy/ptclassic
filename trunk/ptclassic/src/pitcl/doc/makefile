@@ -40,10 +40,13 @@ include $(CONFIG)
 
 EXTRA_SRCS = #index.html
 
-MISC_FILES =	usersGuides codeDoc #internals
+MISC_FILES =	usersGuides #internals
+
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES =	codeDoc
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = 	codeDoc/*
 
 # Sub directories to run make in.
 DIRS =		 usersGuides #internals
