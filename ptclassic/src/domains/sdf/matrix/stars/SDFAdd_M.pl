@@ -21,13 +21,13 @@ defstar {
 	defstate {
 		name { numRows }
 		type { int }
-		default { 8 }
+		default { 2 }
 		desc { The number of rows in the input matrices }
 	}
 	defstate {
 		name { numCols }
 		type { int }
-		default { 8 }
+		default { 2 }
 		desc { The number of columns in the input matrices }
 	}
         ccinclude { "Matrix.h" }
