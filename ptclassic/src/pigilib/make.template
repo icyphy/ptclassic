@@ -123,8 +123,8 @@ LIBCPPSRCS    = kernelCalls.cc \
 		TclStarIfc.cc \
 		BarGraph.cc \
 		XYPlot.cc \
-		ganttChart.cc
-
+		ganttChart.cc \
+		pigiInvokeInterp.cc
 
 
 
