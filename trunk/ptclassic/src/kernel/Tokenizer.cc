@@ -36,24 +36,28 @@ Tokenizer::init() {
 	depth = 0;
 	ungot = 0;
 	line_num = 1;
-	whitespace = " \n\t";
 	comment_char = '#';
 	quote_char = '\"';
 	escape_char = '\\';
 }
 
 // This one reads from a file
-Tokenizer::Tokenizer(istream& input,char *spec="()") {
+Tokenizer::Tokenizer(istream& input,const char *spec, const char* w=defWhite) {
 	special = spec;
 	strm = &input;
+	whitespace = w;
 	curfile = "?";
 	init ();
 }
 
 // This one reads from a text buffer
-Tokenizer::Tokenizer(char* buffer,char* spec) {
+Tokenizer::Tokenizer(const char* buffer,const char* spec,const char* w = defWhite) {
 	special = spec;
-	strm = new istream(strlen(buffer), buffer);
+	whitespace = w;
+// istream constructor calls the second argument "char" even though it
+// is not changed.  A cast to get around this.
+	char* p = (char*) buffer;
+	strm = new istream(strlen(p), p);
 	curfile = "<mem>";
 	init ();
 }
@@ -62,6 +66,7 @@ Tokenizer::Tokenizer(char* buffer,char* spec) {
 Tokenizer::Tokenizer() {
 	special = "()";
 	strm = cin;
+	whitespace = defWhite;
 	curfile = "<stdin>";
 	init ();
 }
@@ -70,11 +75,11 @@ Tokenizer::Tokenizer() {
 // file being read from
 
 struct TokenContext {
-	char* filename;
+	const char* filename;
 	istream* savestrm;
 	int line_num;
 	TokenContext* link;
-	TokenContext(char* f,istream* s,int ln, TokenContext* l)
+	TokenContext(const char* f,istream* s,int ln, TokenContext* l)
 		: filename(f), savestrm(s), line_num(ln), link(l) {}
 };
 
@@ -96,8 +101,7 @@ Tokenizer::push(istream* s,const char* f) {
 // save existing context on stack
 	stack = new TokenContext(curfile,strm,line_num,stack);
 // save filename in dynamic memory, and set curfile to it.
-	curfile = new char[strlen(f)+1];
-	strcpy (curfile,f);
+	curfile = strcpy (new char[strlen(f)+1], f);
 	strm = s;
 	line_num = 1;
 	depth++;
