@@ -18,10 +18,12 @@
 
 % The \syncodeindex command does not work, so use \synindex instead.
 \synindex{pg}{cp}
-\synindex{fn}{cp}
 \synindex{vr}{cp}
-\synindex{tp}{cp}
 \synindex{ky}{cp}
+
+% Keep the data type and function index entries separate.
+% \synindex{fn}{cp}
+% \synindex{tp}{cp}
 
 \begin{document}
 
@@ -64,20 +66,18 @@ A User's Guide to Ptolemy 0.5}
 \maketitle
 \end{ifinfo}
 
+\include{other}
+
 \c number of the previous chapter
 \cleardoublepage
 \setcounter{chapter}{41}
-
 \include{cp}
 
 \c number of the previous chapter
 \cleardoublepage
 \setcounter{chapter}{9}
-
 \include{cgc}
 
-\include{other}
-
-\include{index}
+\c \include{index}
 
 \end{document}
