@@ -27,15 +27,22 @@ $Id$
 // porthole start writing from offset 0, and the input porthole
 // start reading from the (maxBuf - offset).
 int CGCPortHole :: initOffset() {
-	if (isItOutput()) return TRUE;
+	if (isItOutput()) {
+		offset = numXfer() - 1;
+		return TRUE;
+	}
 	int del = cgGeo().forkDelay();
 	if (!del) del = numTokens();
-	if (!del) offset = 0;
-	else offset = maxBufReq() - del;
-	if (offset < 0) {
+	if (!del) offset = numXfer() - 1;
+	else {
+		offset = numXfer() - del - 1;
+		if (offset < 0)  offset += maxBufReq();
+	}
+	if (del > maxBufReq()) {
 		Error :: abortRun(*this, " delay is too large\n");
 		return FALSE;
 	}
+	offset = offset + numXfer() - 1;
 	return TRUE;
 }
 

@@ -22,7 +22,7 @@ $Id$
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
-	CGCPortHole() : maxBuf(1), prevOffset(0) {}
+	CGCPortHole() : maxBuf(1) {}
 
 	CGCPortHole* getForkSrc() { return (CGCPortHole*) forkSrc; }
 
@@ -65,16 +65,11 @@ public:
 	// initialize offset
 	int initOffset();
 
-	// set and get prevOffset
-	void setPrevOffset() { prevOffset = bufPos(); }
-	int wrapAround() { return (bufPos() < prevOffset); }
-
 	// determine the buffer size finally
 	void finalBufSize();
 
 private:
 	int maxBuf;
-	int prevOffset;
 
 	SequentialList& myDest() { return forkDests; }
 };

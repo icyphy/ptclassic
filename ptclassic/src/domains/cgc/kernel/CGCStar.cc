@@ -83,23 +83,13 @@ StringList CGCStar::getRef2(const char* name, const char* offset) {
 		if (cp->maxBufReq() > 1) {
 			out += "[(";
 			out += ((CGCTarget*)myTarget())->offsetName(cp);
-			out += " + (";
+			out += " - (";
 			if (s) out += offVal;
 			else out += offset;
-
-			// The maximum possible value of the offset is limited
-			// by the maximum buffer size.
-			if ((!s) || cp->bufPos() > 0 || offVal < 0) {
-				if ((!s) || (offVal < 0)) {
-					out += " + ";
-					out += cp->maxBufReq();
-				}
-				out += ")) % ";
-				out += cp->maxBufReq();
-			} else {
-				out += "))";
-			}
-
+			out += ") + ";
+			out += cp->maxBufReq();
+			out += ") % ";
+			out += cp->maxBufReq();
 		} else {
 			return out;
 		}
@@ -203,7 +193,6 @@ int CGCStar::fire() {
 			code2 += ") % ";
 			code2 += p->maxBufReq();
 			code2 += ";\n";
-			p->setPrevOffset();
 		}
 	}
 	code2 += "\t}\n";
