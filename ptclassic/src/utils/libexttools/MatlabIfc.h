@@ -54,7 +54,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define PTOLEMY_MATLAB_DIRECTORY "$PTOLEMY/lib/matlab"
 #define MATLAB_SET_FIGURES       "PtSetStarFigures"
 #define MATLAB_CLOSE_FIGURES     "PtCloseStarFigures"
-#define MATLAB_UNIX_COMMAND      "matlab"
 
 class MatlabIfc {
 public:
@@ -103,7 +102,7 @@ public:
 	int EvaluateOneCommand(char* command);
 
 	// C. highest-level interface to the Matlab process
-	int StartMatlab();
+	int StartMatlab(char* command = 0);
 	int MatlabIsRunning();
 	int EvaluateUserCommand();
 	int EvaluateUserCommand(char* command);
