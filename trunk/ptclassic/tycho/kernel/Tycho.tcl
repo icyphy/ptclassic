@@ -286,7 +286,7 @@ uplevel #0 {
     source [file join $tychokernel Path.tcl]
     source [file join $tychokernel Object.itcl]
     source [file join $tychokernel Interchange.itcl]
-    source [file join $tychokernel Model.itcl]
+    source [file join $tychokernel OldModel.itcl]
     source [file join $tychokernel WidgetPreferences.itcl]
     ::tycho::_announce "Handled preferences"
 
