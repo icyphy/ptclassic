@@ -215,9 +215,10 @@ Pointer ListIter::next() {
 	    p = 0;
 	}
     }
-    else
+    else {
+	if (list->lastNode == ref) ref = 0;
 	p = ref ? (ref = ref->next, ref->e) : 0;
-    if (ref == list->lastNode) ref = 0;
+    }
     return p;
 }
 
