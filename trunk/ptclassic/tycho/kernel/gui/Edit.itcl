@@ -105,7 +105,7 @@ class ::tycho::Edit {
     # Insert a close parenthesis, bracket, or brace and highlight.
     method closeParen {closeParen}
 
-    # Return the current insertion point in a form usable by seePoint.
+    # Return the current insertion point in a form usable by seeFragment.
     method currentPoint {}
 
     # Give the text window the focus.
@@ -208,7 +208,7 @@ class ::tycho::Edit {
     method searchQuery {backwards nochange}
 
     # Go to the specified point in the file.
-    method seePoint {point}
+    method seeFragment {point}
 
     # Select everything in the specified range.
     method selectRange {start stop}
@@ -500,9 +500,9 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Control-c><Control-g> \
 	    "%Q gotoLine; break"
     bind $itk_component(text) <Escape><less> \
-	"%Q seePoint {range 1.0 1.0}; break"
+	"%Q seeFragment {range 1.0 1.0}; break"
     bind $itk_component(text) <Escape><greater> \
-        "%Q seePoint {range end-1c end-1c}; break"
+        "%Q seeFragment {range end-1c end-1c}; break"
 
     # The fillSelection commands
     bind $itk_component(text) <Meta-q> "%Q busy fillSelection; break"
@@ -766,7 +766,7 @@ body ::tycho::Edit::copy {} {
 
 ###################################################################
 #### currentPoint
-# Return the current insertion point in a form usable by seePoint.
+# Return the current insertion point in a form usable by seeFragment.
 #
 body ::tycho::Edit::currentPoint {} {
     set idx [$itk_component(text) index insert]
@@ -1329,7 +1329,7 @@ body ::tycho::Edit::gotoLine {} {
 	::tycho::inform "You must enter an integer."
 	return
     }
-    seePoint "line $number"
+    seeFragment "line $number"
 }
 
 ###################################################################
@@ -1618,7 +1618,7 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 }
 
 #####################################################################
-#### seePoint
+#### seeFragment
 # Go to the specified point in the text, moving the insertion cursor
 # to that point, and adjusting the view so that the point is in view.
 # The point can be specified in any of three ways:
@@ -1636,7 +1636,7 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 # is used and the two indices are equal.  As a side effect, the selection
 # (if there is one) is cleared.
 #
-body ::tycho::Edit::seePoint {point} {
+body ::tycho::Edit::seeFragment {point} {
     set text $itk_component(text)
     if {[llength $point] == 2 && [lindex $point 0] == {line}} {
         # First form: A line number.

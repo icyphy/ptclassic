@@ -125,7 +125,7 @@ class ::tycho::TopLevel {
     # Center the window on the screen.
     method centerOnScreen {}
 
-    # In derived classes, return the current point in a form usable by seePoint.
+    # In derived classes, return the current point in a form usable by seeFragment.
     method currentPoint {} {return {}}
 
     # Give the window or a subwindow the focus.
@@ -383,11 +383,11 @@ body ::tycho::TopLevel::freezeWindowSize {} {
 #####################################################################
 #### hyperJump
 # Open a file and go to its internal point identified by name. If the
-# filename is the empty string, just call <code>seePoint</code>,
+# filename is the empty string, just call <code>seeFragment</code>,
 # passing it the second argument. Otherwise, the
 # file is opened  with <code>::tycho::File::openContext</code>,
 # which will choose an editor based on the filename extension.
-# Invoke <code>seePoint</code> to view the specified point within the
+# Invoke <code>seeFragment</code> to view the specified point within the
 # file. The format for the <i>point</i> argument depends on the type of
 # file being opened. For HTML files, it will normally be the name of an
 # anchor in the file. For text files, it will normally be either "{line
@@ -399,12 +399,12 @@ body ::tycho::TopLevel::hyperJump {file {point {}}} {
     if {$file != {}} {
         set obj [uplevel #0 [list ::tycho::File::openContext $file]]
         if {$point != {}} {
-            # The seePoint call is postponed to give time for the widget
+            # The seeFragment call is postponed to give time for the widget
             # to be created. The catch is in case it is immediately deleted.
-            after 200 [list catch [list $obj seePoint $point]]
+            after 300 [list catch [list $obj seeFragment $point]]
         }
     } {
-        seePoint $point
+        seeFragment $point
     }
 }
 
