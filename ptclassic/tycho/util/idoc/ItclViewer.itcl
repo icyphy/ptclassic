@@ -104,7 +104,7 @@ body ::tycho::ItclViewer::docFile {classname} {
         return [$this cget -file]
     }
     
-    set docname "[info namespace tail $classname].itclclass"
+    set docname "[info namespace tail $classname].idoc"
     
     lappend dirs {$TYCHO/kernel}
     lappend dirs {$TYCHO/editors/textedit}

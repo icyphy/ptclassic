@@ -49,9 +49,9 @@
 # The bottom HTML widget holds specific information relating to
 # constructs the user selects in the Panel on the left. 
 #
-# Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.itclclass">
+# Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.idoc">
 # ::tycho::Class</a> model. The model is in turn generated from the code.
-# (See <a href="ClassViewerSys.itclclass">::tycho::IdocSys</a> for
+# (See <a href="ClassViewerSys.idoc">::tycho::IdocSys</a> for
 # information about generation.)
 # 
 # ClassViewer supports any language that can be encoded into a ::tycho::Class
@@ -569,7 +569,7 @@ body ::tycho::ClassViewer::generateHtml {} {
       append html [_generateHtmlBody]
       append html "</body>\n</html>\n"
       
-      # Save it as blah_i.html where the current file is blah.itclclass
+      # Save it as blah_i.html where the current file is blah.idoc
       set htmlFile [file root [docFile $_currentclass]]_i.html
       set fp [open $htmlFile w]
       puts $fp $html
@@ -692,6 +692,7 @@ body ::tycho::ClassViewer::insertData {data} {
     # get the related file, if it exists
     set relfile [relFile $_currentclass]
     if {$relfile != {}} {
+.
         set _classmodels(related) \
         		[::tycho::ClassModel [::tycho::autoName class]]
         set fd [open $relfile]
@@ -747,7 +748,7 @@ body ::tycho::ClassViewer::putHtml {class data {top 1}} {
 # to get the _rel.idoc name.
 # 
 body ::tycho::ClassViewer::relFile {classname} {
-    set relname "[info namespace tail $classname]_rel.itclclass"
+    set relname "[info namespace tail $classname]_rel.idoc"
 
     lappend dirs {$TYCHO/kernel}
     lappend dirs {$TYCHO/editors/textedit}
@@ -1162,10 +1163,11 @@ body ::tycho::ClassViewer::_initializeMenubar {menubar} {
     $menubar command inherit special \
             -label Inherit \
             -underline 0 -command "$this inheritAll"
-    
-    $menubar command generateHtml special \
-            -label "Generate HTML" \
-            -underline 0 -command "$this generateHtml"
+
+    # FIXME: disabled until the new scanner and formatter are ready
+    #$menubar command generateHtml special \
+    #        -label "Generate HTML" \
+    #        -underline 0 -command "$this generateHtml"
     
     # FIXME: add in when generalized place is working in displayer
     #        $menubar command GenDAG Special \
