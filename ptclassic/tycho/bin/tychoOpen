@@ -6,10 +6,8 @@
 # 	All Rights Reserved.
 #
 # usage: tychoOpen file1 file2 file3 ....
-
-if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?PTARCH ) setenv PTARCH `$PTOLEMY/bin/ptarch`
-
 foreach file ($argv)
-    $PTOLEMY/bin.$PTARCH/itkwish -f $PTOLEMY/tycho/lib/tychoSend.tcl "File::openContext $file"
+   echo "File::openContext $file"| perl -pe 's/(.*)#(\d+)/[$1] setInsert $2/g' >> /tmp/tychoOpen$$
 end
+tychoSend /tmp/tychoOpen$$
+rm /tmp/tychoOpen$$
