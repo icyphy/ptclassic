@@ -985,9 +985,8 @@ int POct::ptkSetSeed (int aC, char** aV) {
         usage ("ptkSetSeed <Seed>");
 
     // Convert the seed string into an integer
-    char *seedString = aV[1];
     int seed;
-    if (Tcl_GetInt (interp, seedString, &seed) != TCL_OK) { 
+    if (Tcl_GetInt (interp, aV[1], &seed) != TCL_OK) { 
         Tcl_AppendResult(interp, "Seed must be an integer", 
                          (char *) NULL);
         return TCL_ERROR;
@@ -1625,7 +1624,7 @@ int POct::ptkGetRunLength (int aC, char** aV) {
 
     // Read number-of-iterations from the Oct facet and convert to a string
     // If no number-of-iterations has been specified, use a default value
-    int IterationNumber;
+    int IterationNumber = PIGI_DEFAULT_ITERATIONS;
     if (GetIterateProp(facet, &IterationNumber) == -1) {
       IterationNumber = PIGI_DEFAULT_ITERATIONS;
     }
@@ -1647,8 +1646,12 @@ int POct::ptkSetRunLength (int aC, char** aV) {
         return TCL_ERROR;
     }
 
-    int IterationNumber;
-    Tcl_GetInt(interp, aV[2], &IterationNumber);
+    int IterationNumber = PIGI_DEFAULT_ITERATIONS;
+    if (Tcl_GetInt(interp, aV[2], &IterationNumber) != TCL_OK) {
+        Tcl_AppendResult(interp, "Number of iterations must be an integer", 
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
     SetIterateProp(facet, IterationNumber);
     return TCL_OK;
 }
