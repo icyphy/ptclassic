@@ -122,7 +122,6 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
     append html "<h1><a href=$PTOLEMY/doc/html/index.html>" \
 	    {Introduction to Ptolemy</a></h1>}
 
-    configure -size 0
     configure -textwidth 60
     configure -textheight 17
     configure -data $html
