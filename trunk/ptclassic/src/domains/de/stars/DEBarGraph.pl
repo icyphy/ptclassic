@@ -61,7 +61,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		int *firstPointFlags;
 		int numports;
 	}
+	constructor {
+		lastDataValues = 0;
+		firstPointFlags = 0;
+	}
 	setup {
+		LOG_DEL; delete [] lastDataValues;
+		LOG_DEL; delete [] firstPointFlags;
 		numports = input.numberPorts();
 		LOG_NEW; lastDataValues = new float[ numports + 1 ];
 		LOG_NEW; firstPointFlags = new int[ numports + 1];
@@ -97,6 +103,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		for ( int port = 1; port <= numports; port++ )
 		  graph.addPoint(port, arrivalTime, lastDataValues[port]);
 		graph.terminate();
+	}
+	destructor {
 		LOG_DEL; delete [] lastDataValues;
 		LOG_DEL; delete [] firstPointFlags;
 	}
