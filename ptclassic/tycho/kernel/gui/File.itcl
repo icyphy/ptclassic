@@ -473,7 +473,7 @@ body ::tycho::File::constructor {args} {
     set fileObjects($this) $this
 
     # reload runs after constructors are done
-    whenConstructed $this reload
+    whenConstructed "$this reload"
 
     # Initiate the auto-save loop
     autoSave
