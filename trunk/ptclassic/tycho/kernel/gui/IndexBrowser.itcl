@@ -152,6 +152,14 @@ body ::tycho::IndexBrowser::constructor {args} {
 	    -height height
 }
 
+###################################################################
+#### destructor
+# Unsubscribe from all preferences
+#
+body ::tycho::IndexBrowser::destructor {} {
+    # Unsubscribe from all preferences
+    preference unsubscribe indexbrowser $this
+}
 
     ##################################################################
     ##################################################################

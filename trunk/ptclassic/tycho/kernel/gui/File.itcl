@@ -534,7 +534,7 @@ body ::tycho::File::constructor {args} {
     eval itk_initialize $args
 
     # Subscribe to the preference set
-    preference subscribe global $this \
+    preference subscribe misc $this \
 	    -autosaveinterval autoSaveInterval
 
     # Identify the object for crash recovery
@@ -576,6 +576,9 @@ body ::tycho::File::destructor {} {
 	unset fileObjects($this)
     }
     
+    # Unsubscribe from all preferences
+    preference unsubscribe misc $this
+ 
     # Do not get rid of the backup files.  This should be done
     # only on a successful save.
     # removeBackupFiles

@@ -255,10 +255,10 @@ body ::tycho::HTML::constructor {args} {
 
     # Subscribe to the preference set
     preference subscribe htmlview $this \
-	    -textfont textfont \
+	    -textfont textFont \
 	    -textforeground textForeground \
 	    -textbackground textBackground \
-	    -relief textrelief \
+	    -relief textRelief \
 	    -textwidth textWidth \
 	    -textheight textHeight
 
