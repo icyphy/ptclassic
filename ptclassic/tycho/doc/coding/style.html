@@ -146,24 +146,29 @@ Java exception classes that are part of the <CODE>pt</CODE> package
 in <A HREF="../../java/pt"><CODE>$TYCHO/java/pt</CODE></A> should
 follow these conventions.
 <MENU>
-<LI> All <CODE>pt</CODE> package exceptions should implement
+<LI> All <CODE>pt</CODE> package exceptions should extend
 <A HREF="../../java/pt/kernel/PtolemyException.java">PtolemyException</A>
 so that we can catch these exceptions at runtime.  By having a hierarchy
 of exceptions, we can differentiate between generic Java exceptions and
 exceptions that the pt package has thrown.
 
-<LI> Exceptions should be defined in the same package as the classes that throw them.  The exceptions in java.lang follow this convention.
+<LI> Exceptions should be defined in the same package as the classes
+that throw them.  The exceptions in java.lang follow this convention.
 
-<LI> Each exception should have two constructors, one with no detail
-message, one with a detail message.
+<LI> In Java, most Exceptions have two constructors, a nullary constructor
+and a constructor that takes a String detail argument.
+ <br> In the Ptolemy II kernel, Exceptions have these two constructors
+as well as constructors that take one or two NamedObj arguments.
+The purpose of the NamedObj arugments is to provide a uniform interface
+and look and feel to exception messages.
 
 
 <LI> When throwing an exception, it is best if the detail message is
 a complete sentence that includes a string that describes to object
 that caused the exception.  For example
 <PRE>
-throw MyException("The list already contains an element named `" + 
-	getName() +"'.");
+throw MyException(this, "The list already contains an element named `" + 
+	getElementName() +"'.");
 </PRE>
 
 </MENU>
