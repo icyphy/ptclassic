@@ -61,9 +61,9 @@ InterpGalaxy::connect(char *srcStar,char *srcPipe,char *dstStar,char *dstPipe,
 	if (srcP == NULL || dstP == NULL) return;
 
 	srcPipe = srcP->readName();
-	srcStar = srcP->blockIamIn->readName();
+	srcStar = srcP->parent()->readName();
 	dstPipe = dstP->readName();
-	dstStar = dstP->blockIamIn->readName();
+	dstStar = dstP->parent()->readName();
 // add the action to the list
 	actionList += "C";
 	actionList += srcStar;
@@ -94,7 +94,7 @@ InterpGalaxy::alias(char *galportname,char *starname,char *portname) {
 	PortHole *ph = findPortHole (starname, portname);
 	if (ph == NULL) return;
 	portname = ph->readName();// safe copy
-	starname = ph->blockIamIn->readName();// safe copy
+	starname = ph->parent()->readName();// safe copy
 // create new galaxy port, add to galaxy, do the alias
 	if (ph->isItInput()) {
 		actionList += "I";
