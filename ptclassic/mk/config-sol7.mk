@@ -29,6 +29,7 @@
 # 						COPYRIGHTENDKEY
 #		       
 
-ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -D_PTHREAD_1003_1c
+# PTSOL7 is read in src/compat/ptolemy/compat.h
+ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -DPTSOL7 -D_PTHREAD_1003_1c
 
 include $(ROOT)/mk/config-sol2.mk
