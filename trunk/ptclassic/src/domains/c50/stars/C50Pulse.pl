@@ -66,7 +66,7 @@ as the control varies between -1.0 and 1.0.
 		if (temp >= 0)	{
 			iOnVal = int(32768*temp + 0.5);
 		} else {
-			iOnVal = int(32768*(1-temp) + 0.5);
+			iOnVal = int(32768*(2+temp) + 0.5);
 		}
 
 		temp = offVal.asDouble();
@@ -74,7 +74,7 @@ as the control varies between -1.0 and 1.0.
 		if ( temp >= 0) {
 			iOffVal = int(32768*temp + 0.5);
 		}else{
-			iOffVal = int(32768*(1-temp) + 0.5);
+			iOffVal = int(32768*(2+temp) + 0.5);
 		}
 	}
 	
