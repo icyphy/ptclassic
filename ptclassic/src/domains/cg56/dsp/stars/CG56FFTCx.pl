@@ -61,8 +61,9 @@ initCode {
 	StringList twcos, twsin;
 	for(int i = 0; i < int(halfOrder); i++) {
 		double dtwcos,dtwsin;
-		dtwcos = -1*cos (i*2.0*M_PI/double(order));
-		dtwsin = double(direction)* -1*sin(i*2.0*M_PI/double(order));
+		dtwcos = -1*cos (i*2.0*M_PI/double( (int (order))));
+		dtwsin = double(direction)* -1* 
+		  sin(i*2.0*M_PI/double(int(order)));
 		twcos << "	dc	"<< dtwcos << "\n";
 		twsin << "	dc	"<< dtwsin << "\n";
 	}
