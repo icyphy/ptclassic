@@ -10,8 +10,14 @@ $Id$
  Baseclass for all single-processor code generation targets.
 
 *******************************************************************/
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "CGTarget.h"
 #include "Error.h"
+#include "UserOutput.h"
 #include "SDFScheduler.h"
 
 // constructor
@@ -24,7 +30,7 @@ void CGTarget :: initialize() {
 }
 
 void CGTarget :: start() {
-	if (!sched) sched = new SDFScheduler;
+	if (!sched && !parent()) sched = new SDFScheduler;
 	headerCode();
 }
 
@@ -37,12 +43,20 @@ void CGTarget :: addCode(const char* code) {
 }
 
 void CGTarget :: headerCode () {
-	addCode("/* generated code */\n");
+	StringList code = "/* generated code for target ";
+	code += readFullName();
+	code += " */\n";
+	addCode(code);
 }
 
 void CGTarget :: wrapup() {
 	Target :: wrapup();
 	Error::message((const char*)myCode);
+}
+
+void CGTarget :: writeCode(UserOutput& o) {
+	o << myCode;
+	o.flush();
 }
 
 CGTarget :: ~CGTarget() { delete sched;}
