@@ -48,7 +48,11 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pttycho tywish tyshell
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
+	basic \
+	pttycho \
+	tywish \
+	tyshell
 
 MISC_FILES = README.txt
 
