@@ -22,6 +22,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	default { "0" }
 	desc { The constant value }
     }
+    setup {
+	noInternalState();
+    }
     go {
 	output.emit() << int(level);
     }
