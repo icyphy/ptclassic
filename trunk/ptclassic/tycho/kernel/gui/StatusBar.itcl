@@ -56,7 +56,7 @@ class ::tycho::StatusBar {
     itk_option define -scrollbarpad scrollbarPad ScrollbarPad 0
 
     # The font to use for the close button
-    itk_option define -font font Font 8x13
+    itk_option define -font font Font [::tycho::font screen]
 
     ###################################################################
     ####                         public methods                    ####
@@ -200,7 +200,8 @@ body ::tycho::StatusBar::constructor {args} {
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
+		-foreground -highlightcolor -highlightbackground \
+		-padx -pady
     }
     pack $itk_component(closeButton) -side right
 
@@ -209,11 +210,10 @@ body ::tycho::StatusBar::constructor {args} {
     itk_component add mainStatus {
 	label $itk_interior.mainStatus \
 		-anchor w -justify left \
-		-font [::tycho:font helvetica 12] \
 		-borderwidth 1 \
 		-relief raised
     } {
-	keep -background -cursor
+	keep -background -cursor -font
     }
     pack $itk_component(mainStatus) \
 	    -fill both -expand on \
