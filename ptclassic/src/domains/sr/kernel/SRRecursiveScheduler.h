@@ -84,7 +84,7 @@ protected:
 
   virtual int computeSchedule( Galaxy & );
 
-  int mincost( Set &, int, SRRecursiveSchedule &, int );
+  int mincost( Set &, int, SRRecursiveSchedule &, int, int );
 
 private:
 

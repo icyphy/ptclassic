@@ -89,7 +89,7 @@ void SRRecursiveScheduler::setup()
     if (!galaxy()) {
 	Error::abortRun(domain(), " scheduler has no galaxy.");
 	return;
-    }
+    }    
 
     galaxy()->initialize();
 
@@ -189,7 +189,7 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
 
   //  cout << "There are " << Set::setcount() << " sets to begin with\n";
 
-  int mc = mincost( wholeGraph, INT_MAX, schedule, 0);
+  int mc = mincost( wholeGraph, INT_MAX, schedule, 0, 0);
 
   if ( mc == INT_MAX ) {
     cout << "No schedule met the bound\n";
@@ -197,6 +197,10 @@ int SRRecursiveScheduler::computeSchedule( Galaxy & g )
     cout << "mincost is " << mc << "\n";
     cout << "best schedule was " << schedule.print() << '\n';
   }
+
+  int cost = schedule.cost();
+
+  assert( cost == mc );
 
   // cout << "There are " << Set::setcount() << " sets finally\n";
 
@@ -338,13 +342,16 @@ void SRRecursiveScheduler::bDFSVisit( int vertex,
 //
 // @Description Returns the cost of the minimum schedule that is
 // less than or equal to m, or INT_MAX if the bound cannot be met.
+// If SRPart::ignoreSimple is true and the subgraph is a single SCC and
+// depth > 1, then INT_MAX is returned immediately.
 
 int
 SRRecursiveScheduler::mincost(
-  Set & subgraph /* Vertices in the subgraph being scheduled */,
-  int max /* Maximum allowable cost */,
-  SRRecursiveSchedule & schedule /* The optimal schedule */,
-  int scheduleIndex /* Where to put the subgraph in the schedule */ )
+  Set & subgraph	/* Vertices in the subgraph being scheduled */,
+  int max		/* Maximum allowable cost */,
+  SRRecursiveSchedule & schedule	/* The best schedule found */,
+  int scheduleIndex	/* Where to put the subgraph in the schedule */,
+  int depth		/* Depth of recursion */ )
 {
 
   // cout << "mincost called on " << subgraph.print() << " with bound " << max
@@ -354,12 +361,20 @@ SRRecursiveScheduler::mincost(
 
   SequentialList * SCCs = SCCsOf( subgraph );
 
-  // Compute a rough bound on the cost by summing a rough bound on each SCC
-  // and save the size of each SCC for later use
-
   int numSCCs = SCCs->size();
 
   // cout << "Found " << numSCCs << " SCCs\n";
+
+  // Check for a single SCC if necessary
+
+  if ( depth > 1 && SRPart::ignoreSimple() && numSCCs == 1
+       && subgraph.cardinality() > 1 ) {
+    destroySCCs( SCCs );
+    return INT_MAX;
+  }
+
+  // Compute a rough bound on the cost by summing a rough bound on each SCC
+  // and save the size of each SCC for later use
 
   int SCCsize[ numSCCs ];
 
@@ -390,7 +405,9 @@ SRRecursiveScheduler::mincost(
   next.reset();
   while( (SCC = (Set *)next++ ) != NULL ) {
 
-    // cout << "Working with SCC " << SCC->print() << "\n";
+    // if ( depth < 2 ) {
+    //   cout << "Working with SCC " << SCC->print() << "\n";
+    // }
 
     // Compute a bound for this component by removing a best-case cost
     // of all the unscheduled SCCs from the remaining cost
@@ -428,10 +445,20 @@ SRRecursiveScheduler::mincost(
 
       int maxpartition;
       Set * partition;
-      while ( maxpartition = (bound - SCCsize[i]) / ( SCCsize[i] - 1 ),
-	      ( partition = part.next(maxpartition) ) != NULL ) {
 
-	// cout << "Attempting partition " << partition->print() << "\n";
+      while (1) {
+
+	maxpartition = (bound - SCCsize[i]) / ( SCCsize[i] - 1 );
+	partition = part.next(maxpartition);
+
+	if ( partition == NULL ) {
+	  break;
+	}
+
+	// if ( depth < 2 ) {
+	//   for ( int k = depth ; --k >= 0 ; ) { cout << " "; }
+	//   cout << "Part: " << partition->print() << "\n";
+	// }
 
 	int psize = partition->cardinality();
 
@@ -440,11 +467,12 @@ SRRecursiveScheduler::mincost(
 	remaining -= *partition;
 
 	// cout << "Remaining function " << remaining.print() << "\n";
-
+	  
 	int trycost = mincost( remaining,
 			       (bound - psize*psize) / (psize + 1),
 			       trialSchedule,
-			       scheduleIndex + psize );
+			       scheduleIndex + psize,
+			       depth + 1 );
 
 	if ( trycost < INT_MAX ) {
 	  int found = psize * psize + (psize + 1) * trycost;
@@ -452,21 +480,24 @@ SRRecursiveScheduler::mincost(
 	    actual = found;
 	  }
 	  if ( actual <= bound ) {
-	    // cout << "Met the bound " << bound << " with a cost of " << actual
-	    //	 << "\n";
+	    //	    if ( depth < 2 ) {
+	    //  cout << "Met the bound " << bound << " with a cost of " << actual
+	    //   << "\n";
+	    // }
 
 	    // Get the optimal schedule for the subgraph and
 	    // wrap the first partition around it
-
+	    
 	    schedule.getSection( scheduleIndex + psize, SCCsize[i] - psize,
 				 trialSchedule );
 	    schedule.addPartition( scheduleIndex, SCCsize[i], *partition );
-
+	    
 	    bound = actual - 1;
 	  }
 	}
-
+	
 	delete partition;
+
       }
 
       if ( actual == INT_MAX ) {

@@ -50,8 +50,7 @@ class Set;
 
   <P> For example, the schedule
   <PRE>
-     _ _    _         _
-    (1 2 3 (4 5 6) 7 (8 9))
+    (1 2 . 3 (4 . 5 6) 7 (8 . 9))
   </PRE>
   corresponds to the sequence
 
@@ -78,6 +77,8 @@ public:
 
   void getSection( int, int, SRRecursiveSchedule & );
 
+  int cost() const;
+
 private:
   // The dependency graph for which this schedule is computed
   SRDependencyGraph * mygraph;
@@ -92,6 +93,8 @@ private:
   int * directSize;
 
   int printOnePartition(int, StringList & ) const;
+
+  int partitionCost( int & ) const;
 
   //  void scheduleOnePartition(int, StringList & ) const;
   

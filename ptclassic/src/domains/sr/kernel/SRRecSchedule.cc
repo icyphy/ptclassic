@@ -56,6 +56,36 @@ SRRecursiveSchedule::~SRRecursiveSchedule()
   delete [] directSize;
 }
 
+// Return the cost of the schedule
+int SRRecursiveSchedule::cost() const
+{
+  int total = 0;
+  int v = 0 ;
+  while ( v < mygraph->vertices() ) {
+    total += partitionCost( v );
+  }
+  return total;
+}
+
+// Return the cost of one partition
+int SRRecursiveSchedule::partitionCost( int & v ) const
+{
+  if ( partSize[v] == 1 ) {
+    v++;
+    return 1;
+  }
+
+  int ds = directSize[v];
+  int lv = partSize[v] + v;
+  v += directSize[v];
+  int t = 0;
+  while ( v < lv ) {
+    t += partitionCost( v );
+  }
+  return ds*ds + (ds+1) * t;
+  
+}
+
 // Return a compact printed form of the schedule
 StringList SRRecursiveSchedule::print() const
 {
