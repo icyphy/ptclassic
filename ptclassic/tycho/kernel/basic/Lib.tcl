@@ -86,6 +86,9 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {.itcl .itk} \
             {::tycho::view EditItcl {-file {%s}}} \
             {Itcl editor}
+    ::tycho::File::registerExtensions {.java} \
+            {::tycho::view EditJava {-file {%s}}} \
+            {Java editor}
     ::tycho::File::registerExtensions .tcl \
             {::tycho::view EditTcl {-file {%s}}} \
             {Tcl editor}
