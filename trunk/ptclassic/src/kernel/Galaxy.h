@@ -167,7 +167,7 @@ public:
 
         // empty all the blocks from the galaxy - they are not
         // deallocated. 
-        inline void empty();
+        void empty();
     
 	// Move blocks to parent(default) or specified galaxy and
         // We can optionally remove and delete the

@@ -55,15 +55,15 @@ class Scheduler;
  **********************************************************************/
 class ClusterPort : public GalPort {
 public:
-    inline ClusterPort(GenericPort&);
-    inline ~ClusterPort();
+    ClusterPort(GenericPort&);
+    ~ClusterPort();
     
     // Called after the galaxy is first converted to a clustering
     // hierarchy.  The inner-most ports are initialized first.
-    inline virtual void initializeClusterPort();
+    virtual void initializeClusterPort();
 
     // Called after a merge/absorb operation
-    inline virtual void update();
+    virtual void update();
 };
 
 class Cluster : public DynamicGalaxy {
@@ -89,7 +89,7 @@ public:
 	return new ClusterPort(p);
     }
     // Calls makeNewPort and adds it to this cluster
-    inline ClusterPort* addNewPort(PortHole&);
+    ClusterPort* addNewPort(PortHole&);
     
     /******************************************************************
 			Absorb & Merge methods
@@ -133,14 +133,14 @@ public:
     
     // Make sure a merge/absorb operation will not yield atomic actors
     // at the current clustering hierarchy level.  
-    inline void makeNonAtomic();
+    void makeNonAtomic();
     /******************************************************************
 		      Cluster scheduler methods
      ******************************************************************/
     // Return the internal scheduler for the cluster if there is any
     /*virtual*/ Scheduler* scheduler() const { return sched; }
 
-    inline void setScheduler(Scheduler*);
+    void setScheduler(Scheduler*);
 
     /*virtual*/ int setTarget(Target*);
     
@@ -184,7 +184,7 @@ private:
 class ClusterIter: private GalTopBlockIter {
 public:
     inline ClusterIter(Galaxy& g):GalTopBlockIter(g),prnt(g) {};
-    inline Cluster* next();
+    Cluster* next();
     inline Cluster* operator++(POSTFIX_OP) { return next();}
     GalTopBlockIter::reset;
     GalTopBlockIter::remove;
@@ -196,7 +196,7 @@ class SuccessorClusterIter: private SuccessorIter {
 public:
     inline SuccessorClusterIter(Block&b):SuccessorIter(b),prnt(b.parent()) {};
     inline virtual ~SuccessorClusterIter() {};
-    inline Cluster* next();
+    Cluster* next();
     inline Cluster* operator++(POSTFIX_OP) { return next();}
     SuccessorIter::reset;
 private:
@@ -205,11 +205,11 @@ private:
 
 class PredecessorClusterIter: private PredecessorIter {
 public:
-    inline PredecessorClusterIter(Block&b):
+    PredecessorClusterIter(Block&b):
     PredecessorIter(b),prnt(b.parent()) {};
     
     inline virtual ~PredecessorClusterIter() {};
-    inline Cluster* next();
+    Cluster* next();
     inline Cluster* operator++(POSTFIX_OP) { return next();}
     PredecessorIter::reset;
 private:
@@ -241,8 +241,8 @@ public:
     inline ClusterPort* operator++(POSTFIX_OP) {
 	return ClusterOutputIter::next();
     }
-    BlockPortIter::reset;
-    BlockPortIter::remove;
+    BlockOutputIter::reset;
+    BlockOutputIter::remove;
 };
 
 class ClusterInputIter: private BlockInputIter {
@@ -254,8 +254,8 @@ public:
     inline ClusterPort* operator++(POSTFIX_OP) {
 	return ClusterInputIter::next();
     }
-    BlockPortIter::reset;
-    BlockPortIter::remove;
+    BlockInputIter::reset;
+    BlockInputIter::remove;
 };
 
 /**********************************************************************

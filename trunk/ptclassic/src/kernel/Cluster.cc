@@ -202,10 +202,10 @@ int Cluster::merge(Cluster& clusterToEmpty, int removeFlag) {
 
 void Cluster::makeNonAtomic(){
     if (numberBlocks() == 1) {
-	GalTopBlockIter blocks(*this);
-	Block* block = blocks++;
+	GalTopBlockIter clusterBlocks(*this);
+	Block* block = clusterBlocks++;
 	if (block->isItAtomic()) {
-	    blocks.remove();
+	    clusterBlocks.remove();
 	    Cluster* cluster = convertStar(block->asStar());
 	    addBlock(*cluster,cluster->name());
 	    ClusterPortIter nextPort(*cluster);
