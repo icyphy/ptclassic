@@ -1,4 +1,4 @@
-# Definition of a basic viewer widget with an interface to the file system.
+y# Definition of a basic viewer widget with an interface to the file system.
 #
 # @Author: Edward A. Lee
 # @Contributors: Joel King, Farhana Sheikh, Christopher Hylands
@@ -930,12 +930,22 @@ body ::tycho::File::saveQuery { {useSaveAs 0}} {
 #
 body ::tycho::File::toggleReadOnly {} {
     global tcl_platform
-    # This method will only work under Unix, as it uses the chmod command
-    # (Actually, Windows might have a third party chmod command, but
-    # we can't assume that).
-    if {$tcl_platform(platform) != "unix"} {
-	return
+    # If we are under Unix, continue, if we are under Windows, look for
+    # chmod, if we are on the Mac, return.
+    switch $tcl_platform(platform)  {
+        unix {}
+        windows {
+            # See if there is a chmod command installed.  If there is
+	    # no chmod command, return
+            if { [::tycho::pathEnvSearch chmod.exe] == {}} {
+                return
+            }    
+        }
+        macintosh {
+            return
+        }
     }
+
 
     set revclass [::tycho::RevControl::whichRevClass $this]
     if {$revclass != {}} {
