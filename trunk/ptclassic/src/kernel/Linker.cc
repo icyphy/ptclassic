@@ -75,6 +75,10 @@ void DebugMessage(char *str1, char *str2)
   sprintf("%s %s\n",str1, str2);
   Error::message(buf);
 }
+// Use this macro for debugging.
+#define D(x) x
+#else DEBUG
+#define D(x)
 #endif //DEBUG
 
 // static data objects
@@ -174,11 +178,61 @@ int Linker::multiLink (const char* args, int perm) {
 	return status;
 }
 
-	
+#ifdef USE_DLOPEN
+#define PATHNAME_LENGTH 1024
+// Create a .so file from a .o file
+// Really, we should call make here, and have better error messages
+static char *generateSharedObject( char* objName, int maxsize)
+{
+  StringList command = SHARED_OBJECT_COMMAND;
+  char sharedObjName[PATHNAME_LENGTH];
+  struct stat sharedObjstbuf, objstbuf;
+
+  strcpy(sharedObjName, objName);
+  sharedObjName[strlen(objName) - 1 ] = '\0';
+  strcat(sharedObjName,"so");
+  if (stat (objName, &objstbuf) == -1) {
+    Error::abortRun("Error creating shared object, .o file does not exist.");
+    return (char *) NULL;
+  }
+
+  if (stat(sharedObjName, &sharedObjstbuf) == -1 ||
+      objstbuf.st_mtime > sharedObjstbuf.st_mtime) {
+    // Shared object file does not exist, or it is older than the .o
+    // file, attempt to create the shared object.
+    command << " " << sharedObjName << " " << objName;
+#ifdef DEBUG
+    {
+      char buf[4*PATHNAME_LENGTH];
+      sprintf(buf, "command to create shared object: %s",
+	      (const char *)command);
+      Error::message(buf);
+    }
+#endif // DEBUG
+
+    if (system (command)) {
+      Error::abortRun(
+		      "Error in creating shared object, command failed: ",
+		      command);
+      return (char *) NULL;
+    }
+  }
+
+  if (strlen(sharedObjName) > maxsize) {
+    Error::abortRun("Error in creating shared object, pathname too long.");
+    return (char *) NULL;
+  }
+  strncpy(objName, sharedObjName, maxsize);
+  return objName;
+}
+
+#endif
+
 // link in multiple files.  Arglist is char** and not const char**
 // to permit easy interfacing with Tcl.
 
 int Linker::multiLink (int argc, char** argv) {
+        void *dlhandle = (void *)NULL; 
 	if (linkingNotSupported) {
 		Error::abortRun ("Sorry, incremental linking is not yet ",
 				 "supported on this architecture");
@@ -189,18 +243,29 @@ int Linker::multiLink (int argc, char** argv) {
 		return FALSE;
 	}
 	TFile tname;
-
+	
 #ifdef USE_DLOPEN
-	if (dlopen(argv[1],RTLD_NOW) == NULL) {
+	char objName[PATHNAME_LENGTH];
+	strcpy(objName,argv[1]);
+	// If the file ends in .so, then just load it, otherwise try
+	// to create a .so.  If the file ends in .so, we don't check
+	// to see if it exists or anything.  A user could use a
+	// makefile to generate a .so file, and then call link foo.so
+	if ( strncmp(argv[1]+strlen(argv[1])-3, ".so", 3) != 0 )
+	  if (generateSharedObject(objName, PATHNAME_LENGTH) == (char
+								 *)NULL)
+	    return FALSE;
+	if ( (dlhandle = dlopen(objName, RTLD_NOW)) == NULL) {
 	  char buf[1024];
 	  sprintf(buf,"Error linking file: dlopen: %s", dlerror());
 	  Error::abortRun(buf);
 	  return FALSE;
 	}
+
 // flag for permanent-link or not
 	int perm = (argv[0][0] == 'p');	// KLUDGE!
 
-	int nCalls = invokeConstructors(argv[1]);
+	int nCalls = invokeConstructors(argv[1], dlhandle);
 #else //USE_DLOPEN
 // round up to be on a page boundary
 	adjustMemory();
@@ -214,9 +279,7 @@ int Linker::multiLink (int argc, char** argv) {
 	// DYNLIB is hppa specific
 	sprintf (command, "%s %s -A %s %s %x %s -o ",
 		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem, DYNLIB);
-#ifdef DEBUG
-	Error::message(command);
-#endif
+	D( Error::message(command); )
 	StringList cmd = command;
 	cmd << tname;
 	for (int i = 1; i < argc; i++) {
@@ -248,7 +311,7 @@ int Linker::multiLink (int argc, char** argv) {
 
 // invoke constructors in the newly read in code
 	if (!perm) activeFlag = TRUE;	// indicate dynamically linked objects
-	int nCalls = invokeConstructors(tname);
+	int nCalls = invokeConstructors(tname, dlhandle);
 #endif //USE_DLOPEN
 	int status = (nCalls >= 0);
 
@@ -329,7 +392,10 @@ static void debugInvokeConstructors(char *symbol,long addr, const
 #endif
 
 int
-Linker::invokeConstructors (const char* objName) {
+Linker::invokeConstructors (const char* objName, void * dlhandle) {
+#ifdef NO_INVOKECONSTRUCTORS
+  return 1;
+#else //NO_INVOKECONSTRUCTORS  
 #ifdef USE_NM_GREP
 // On the hppa a symbol can have the same name in the code and
 // an entry segments.  nm -p cannot differentiate between the
@@ -343,6 +409,7 @@ Linker::invokeConstructors (const char* objName) {
 	StringList command = NM_PROGRAM;
 	command << " " << objName << " | grep " << grepPattern;
 #else //USE_NM_GREP
+	char instring[BUFSIZ];
 // Open a pipe to "nm" to get symbol information
 	StringList command = NM_PROGRAM;
 	command << " " << NM_OPTIONS << " " << objName;
@@ -381,9 +448,7 @@ Linker::invokeConstructors (const char* objName) {
 
 	  addr = atol( p_addr );
 
-#ifdef DEBUG
-	  debugInvokeConstructors(symbol, addr, objName);
-#endif
+	  D( debugInvokeConstructors(symbol, addr, objName); )
 
 	  if (addr >= (size_t) availMem && addr <= memoryEnd)
 	  {
@@ -403,21 +468,40 @@ Linker::invokeConstructors (const char* objName) {
 	memoryEnd=0xffffffff;
 #endif //USE_DLOPEN
 
-	while (fscanf(fd, "%lx %s %s", &addr, type, symbol) == 3) {
+	while( fgets(instring, BUFSIZ,fd) == instring ) {
+	  D( printf("%s",instring); )
+	  /* Optionally skip a few characters */
+	  if (sscanf(instring + NM_ADDR_OFFSET,
+		     "%lx %s %s", &addr, type, symbol) == 3) {
 		if (addr >= (size_t)availMem && addr <= memoryEnd &&
 		    strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
-			// it is a constructor, call it:
-#ifdef DEBUG
-		  debugInvokeConstructors(symbol, addr, objName);
-#endif
+		  // it is a constructor, call it:
+		  D( debugInvokeConstructors(symbol, addr, objName);)
+#ifdef USE_DLSYM
+		  PointerToVoidFunction fn;
+		  if ((fn =
+		       (PointerToVoidFunction)dlsym(dlhandle,symbol))
+		      == NULL) {
+		    char buf[1024];
+		    sprintf(buf,"Error linking file: dlsym:%s", dlerror());
+		    Error::abortRun(buf);
+		    return 0;
+		  }
+		  D( printf("debug: InvokeConstructors: fn=0x%x\n",fn); )
+		  fn();
+		  nCalls++;
+#else // USE_DLSYM
 		  	PointerToVoidFunction fn = (PointerToVoidFunction)addr;
 			fn();
 			nCalls++;
+#endif // USE_DLSYM
 		}
 	}
+      }
 #endif //USE_NM_GREP
 	pclose (fd);
 	return nCalls;
+#endif //NO_INVOKECONSTRUCTORS
 }
 
 size_t Linker::readInObj(const char* objName) {
