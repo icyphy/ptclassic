@@ -68,7 +68,6 @@ limitation of liability, and disclaimer of warranty provisions.
             int argc;                           /* Number of arguments. */
             char **argv;                        /* Argument strings. */
         {
-	    audio_info_t info;
 	    static char buf[20];
 	    int position;
             if(sscanf(argv[1], "%d", &position) != 1) {
@@ -77,10 +76,9 @@ limitation of liability, and disclaimer of warranty provisions.
             }
 	    /* conveying the value changes of volume to audio device */
 	    $ref(volume) = (int) position/10;
-	    AUDIO_INITINFO(&info);
-	    ioctl($starSymbol(file), AUDIO_GETINFO,(caddr_t)(&info));
-	    info.play.gain = AUDIO_MAX_GAIN*$ref(volume)/10;
-	    ioctl($starSymbol(file), AUDIO_SETINFO, (caddr_t)(&info));
+	    $sharedSymbol(CGCStereoBase,set_parameters)
+	      ($starSymbol(file), "$val(outputPort)", $ref(volume),
+	       $ref(balance), 0);
 
 	    sprintf(buf, "%d", $ref(volume));
 	    displaySliderValue(".high", "$starSymbol(scale1)", buf);
@@ -99,7 +97,6 @@ limitation of liability, and disclaimer of warranty provisions.
             int argc;                           /* Number of arguments. */
             char **argv;                        /* Argument strings. */
         {
-	    audio_info_t info;
 	    static char buf[20];
 	    int tkbalance;
             if(sscanf(argv[1], "%d", &tkbalance) != 1) {
@@ -108,11 +105,10 @@ limitation of liability, and disclaimer of warranty provisions.
             }
 	    $ref(balance) = ((int)tkbalance/5) - 10;
 	    /* conveying the value changes of balance to audio device */
-	    AUDIO_INITINFO(&info);
-	    ioctl($starSymbol(file), AUDIO_GETINFO, (caddr_t)(&info));
-	    info.play.balance = AUDIO_MID_BALANCE*($ref(balance)+10)/10;
-	    ioctl($starSymbol(file), AUDIO_SETINFO, (caddr_t)(&info));
-	    
+	    $sharedSymbol(CGCStereoBase,set_parameters)
+	      ($starSymbol(file), "$val(outputPort)", $ref(volume),
+	       $ref(balance), 0);
+
 	    sprintf(buf, "%d", $ref(balance));
 	    displaySliderValue(".low", "$starSymbol(scale2)", buf);
 
