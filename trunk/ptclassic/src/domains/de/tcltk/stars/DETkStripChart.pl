@@ -44,7 +44,7 @@ string "default", then it uses the name of the porthole connected to the
 corresponding input.  Alternatively, it can specify one label for each 
 input, with the labels separated by spaces.
     }
-    location { DE tcltk library }
+    location { DE Tcl/Tk library }
     defstate {
 	name { title }
 	type { string }

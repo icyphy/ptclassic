@@ -11,14 +11,14 @@ bars for the two inputs will be plotted together
 only if the events are simultaneous.
 	}
 	version { $Id$ }
-	author { B. L. Evans }
+	author { Brian L. Evans }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	hinclude { "ptk.h" }
 	hinclude { "BarGraph.h" }
 	inmulti {

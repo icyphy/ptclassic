@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	desc {
 Invoke a Tcl script that can optionally define a procedure that is
 invoked every time the star fires.

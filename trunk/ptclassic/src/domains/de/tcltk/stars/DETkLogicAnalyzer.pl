@@ -46,7 +46,7 @@ The \fIheight_cm\fR parameter specifies the vertical height of each plot
 in cm.
 .pp
 	}
-	location { DE tcltk library }
+	location { DE Tcl/Tk library }
 	defstate {
 		name { title }
 		type { string }
