@@ -36,10 +36,10 @@
 #
 # The click, drag, and release methods are still used in this interactor,
 # for dragging out a region of text.
-#
-# FIXME: Dragging is not implemented.
-#
 # In addition, the method key{} is used to insert a character.
+#
+# FIXME: Change the cursor to the insertion cursor while editing
+# an item.
 #
 class ::tycho::Editor {
     inherit ::tycho::Interactor
@@ -54,34 +54,52 @@ class ::tycho::Editor {
 
 
     ###################################################################
+    ####                         public methods                    ####
+
+    # Stop editing an item
+    method stop {}
+
+    # Insert a key
+    method key {key keysym state args}
+
+
+    ###################################################################
     ####                        protected methods                  ####
 
     # Attach the interactor to the current picture
-    protected method activate {t x y}
+    protected method activate {t x y args}
 
     # Click on a position in the text item.
     protected method click {x y args}
 
+    # Double-click on the text item.
+    protected method dbclick {}
+
     # Remove the interactor from the current picture
-    protected method deactivate {}
+    protected method deactivate {args}
 
     # Drag the mouse to select.
     protected method drag {x y}
 
     # Adjust the cursor position
-    protected method icursor {mode}
+    #protected
+    method icursor {mode}
 
     # Release the mouse from the item.
     protected method release {}
 
     # Adjust the selection in the text item
-    protected method select {mode args}
+    #protected 
+    method select {mode args}
 
     ###################################################################
-    ####                       protected variables                 ####
+    ####                        private  variables                 ####
 
     # The "anchor" of the selection
     protected variable anchor
+
+    # A flag to indicate word-dragging mode
+    protected variable wordmode 0
 }
 
 
@@ -90,10 +108,11 @@ class ::tycho::Editor {
 #
 # Activate the interactor on a picture object.
 # 
-body ::tycho::Editor::activate {t x y} {
-
-    # Remember the tag/object, for use in deactivate
-    set tag $t
+body ::tycho::Editor::activate {t x y args} {
+    # If already editing another item, deactivate from it first
+    if { $target != "" } {
+	deactivate
+    }
 
     # Set the target. The client can modify its options later
     # with -activatecommand if desired. If the target argument is
@@ -112,33 +131,27 @@ body ::tycho::Editor::activate {t x y} {
     $slate focus $target
 
     # Create the binding to insert keys
-    ::bind $slate <Key> "$this key %A %K %s"
+    ::bind $slate <Key> "$this key %A %K %s $args"
 
     # Execute the user-specified activation command
-    # execute $activatecommand $x $y
+    execute $activatecommand $x $y $args
 
-    # Set up the mouse bindings for drag-selecting. Note that the
-    # bindings for click are changed so that future clicks only move
-    # the cursor
-    foreach b $button {
-	$slate bind $tag \
-		[::tycho::Interactor::event Press -button $b ] \
-		[list @scope [info class] "$this click %x %y"]
-	$slate bind $tag \
-		[::tycho::Interactor::event Motion -button $b] \
-		[list @scope [info class] "$this drag %x %y"]
-	$slate bind $tag \
-		[::tycho::Interactor::event Release -button $b] \
-		[list @scope [info class] "$this release"]
-    }
+    # Set up the mouse bindings for drag-selecting. This uses
+    # the default button (button  1, and any other button that
+    # has no more specific binding), NOT the button used to activate this
+    # interactor. This could be parameterised with an option, but
+    # I doubt it's necessary.
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Click] \
+	    [list @scope [info class] "$this click %x %y $args"]
 
-    # If there's a proxy, tell it about the current target
-    if { $proxy != "" } {
-	$proxy target $target
-    }
+    # Also a binding to detect a double-click, for word-dragging
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event DoubleClick] \
+	    [list @scope [info class] "$this dbclick"]
 
     # Start the interaction sequence
-    eval click $x $y $options
+    eval click $x $y $args
 }
 
 
@@ -156,10 +169,42 @@ body ::tycho::Editor::click {x y args} {
     # Move the insertion cursor
     $slate icursor $target @$x,$y
 
+    # Create the motion events
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion] \
+	    [list @scope [info class] "$this drag %x %y"]
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release] \
+	    [list @scope [info class] "$this release"]
+
     # Forward to a proxy if there is one
     if { $proxy != "" } {
 	@scope [$proxy info class] "eval $proxy click $x $y $args"
     }
+}
+
+
+#######################################################################
+#### dbclick
+#
+# Double-click on a text item. This selects the word underneath
+# and sets the mode for word-dragging.
+#
+body ::tycho::Editor::dbclick {} {
+    # Set this for word-mode dragging
+    set wordmode 1
+
+    # Select the word underneath the  cursor
+    icursor -word
+    select adjust +char
+
+    # For some reason, it is necessary to make the motion bindings again...
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion] \
+	    [list @scope [info class] "$this drag %x %y"]
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release] \
+	    [list @scope [info class] "$this release"]
 }
 
 
@@ -169,7 +214,7 @@ body ::tycho::Editor::click {x y args} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 # 
-body ::tycho::Editor::deactivate {} {
+body ::tycho::Editor::deactivate {args} {
     # Remove the focus
     focus {}
     $slate focus ""
@@ -178,12 +223,20 @@ body ::tycho::Editor::deactivate {} {
     # Clear the selection
     select clear
 
-    # Change the bindings so that future clicks activate
-    foreach b $button {
-	$slate bind $tag \
-		[::tycho::Interactor::event Press -button $b ] \
-		[list @scope [info class] "$this activate $tag %x %y"]
-    }
+    # Remove the text drag-selection bindings
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Click] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event DoubleClick] {}
+
+    # Reset the original activation bindings in case they changed
+    $this enable
+
+    # Call the deactivation command. This must follow the above bindings!
+    execute $deactivatecommand
+
+    # Clear the target
+    target {}
 }
 
 
@@ -197,7 +250,7 @@ body ::tycho::Editor::drag {x y} {
 
     # Forward to a proxy if there is one
     if { $proxy != "" } {
- 	@scope [$proxy info class] "eval $proxy drag $x $y"
+	@scope [$proxy info class] "eval $proxy drag $x $y"
     }
     # execute $dragcommand $x $y
 }
@@ -235,12 +288,12 @@ body ::tycho::Editor::icursor {mode} {
 	}
 	"/+word" {
 	    set str [$slate itemcget $target -text]
-	    $slate icursor $target [string wordend $str \
+	    $slate icursor $target [wordright $str \
 		    [$slate index $target insert]]
 	}
 	"/-word" {
 	    set str [$slate itemcget $target -text]
-	    $slate icursor $target [string wordstart $str \
+	    $slate icursor $target [wordleft $str \
 		    [$slate index $target insert]]
 	}
 	default {
@@ -255,7 +308,7 @@ body ::tycho::Editor::icursor {mode} {
 # Process a key press. If the key is a return, terminate the
 # interaction.
 #
-body ::tycho::Editor::key {key keysym state} {
+body ::tycho::Editor::key {key keysym state args} {
 
     # Get flags to indicate modifiers
     set shift   [expr $state & 1]
@@ -279,20 +332,29 @@ body ::tycho::Editor::key {key keysym state} {
 		$slate dchars $target insert
 	    }
 	    "Left" {
-		select clear
-		icursor -word
+		# Move the cursor. Adjust the selection if shift.
+		if { $shift } {
+		    select adjust -word
+		} else {
+		    select clear
+		    icursor -word
+		}
 	    }
 	    "Right" {
-		select clear
-		icursor +word
+		# Move the cursor. Adjust the selection if shift.
+		if { $shift } {
+		    select adjust +word
+		} else {
+		    select clear
+		    icursor +word
+		}
 	    }
 	}
     } elseif { $meta || $alt } {
 	return
     } else {
-	# Process regular keys. Unfortunately, we get an event
-	# even for control keys etc, so we have to filter them out so
-	# that the index doesn't get upset
+	# Process regular keys. We get an event even for control
+	# keys and the like, so we have to filter them out...
 	switch -exact $keysym {
 	    "Control_L" -
 	    "Control_R" -
@@ -301,11 +363,47 @@ body ::tycho::Editor::key {key keysym state} {
 	    "Alt_L" -
 	    "Alt_R" -
 	    "Meta_L" -
-	    "Meta_R" {
-		return
+	    "Meta_R" -
+	    "Caps_Lock" -
+	    "Multi_key" -
+	    "Mode_switch" -
+	    "F1" -
+	    "F2" -
+	    "F3" -
+	    "F4" -
+	    "F5" -
+	    "F6" -
+	    "F7" -
+	    "F8" -
+	    "F9" -
+	    "F10" -
+	    "F11" -
+	    "F12" -
+	    "Prior" -
+	    "Next" -
+	    "Up" -
+	    "Down" -
+	    "Pause" -
+	    "KP_Insert" -
+	    "KP_Prior" -
+	    "KP_Next" -
+	    "KP_End" -
+	    "KP_Up" -
+	    "KP_Right" -
+	    "KP_Down" -
+	    "KP_Left" -
+	    "KP_Home" {
+ 		return
+	    }
+	    "Escape" {
+		eval $this deactivate $args
 	    }
 	    "Return" {
-		$this deactivate
+		# If there's a selection, then delete it
+		select delete
+
+		# Insert the character
+		$slate insert $target insert "\n"
 	    }
 	    "BackSpace" {
 		# If there's a selection then delete it
@@ -314,6 +412,15 @@ body ::tycho::Editor::key {key keysym state} {
 		} else {
 		    # If not, then delete the previous character
 		    icursor -char
+		    $slate dchars $target insert
+		}
+	    }
+	    "Delete" {
+		# If there's a selection then delete it
+		if { [select exists] } {
+		    select delete
+		} else {
+		    # If not, then delete the next character
 		    $slate dchars $target insert
 		}
 	    }
@@ -327,12 +434,21 @@ body ::tycho::Editor::key {key keysym state} {
 		}
 	    }
 	    "Right" {
+		# Move the cursor. Adjust the selection if shift.
 		if { $shift } {
 		    select adjust +char
 		} else {
 		    select clear
 		    icursor +char
 		}
+	    }
+	    "End" {
+		select clear
+		icursor 0
+	    }
+	    "Home" {
+		select clear
+		icursor end
 	    }
 	    default {
 		# If there's a selection, then delete it
@@ -343,17 +459,29 @@ body ::tycho::Editor::key {key keysym state} {
 	    }
 	}
     }
-    #    eval $this resize [$this boxsize]
 }
 
 
 #######################################################################
 #### release
 #
-# Releasing the mouse doesn't actually do anything.
-#
 body ::tycho::Editor::release {} {
-    ;# do nothing
+    set wordmode 0
+
+    # Clear the motion and double-click events
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Motion] {}
+    $slate bind $target \
+	    [eval ::tycho::Interactor::event Release] {}
+}
+
+#######################################################################
+#### stop
+#
+body ::tycho::Editor::stop {} {
+    if { $target != "" } {
+	$this deactivate
+    }
 }
 
 #######################################################################
@@ -373,15 +501,35 @@ body ::tycho::Editor::select {mode args} {
 		$slate select from $target $anchor
 	    }
 
-	    # Move the cursor and set the end of the selection there
-	    if { [$slate index $target insert] > $anchor } {
-		icursor -char
-		icursor $index
-		$slate select to $target insert
-		icursor +char
-	    } else {
-		icursor $index
-		$slate select to $target insert
+	    # Move the cursor
+	    icursor $index
+
+	    # Adjust the selection
+ 	    if { [$slate index $target insert] == $anchor } {
+ 		$slate select clear
+ 	    } else {
+		if { ! $wordmode } {
+		    # Adjust in character mode
+		    if { [$slate index $target insert] > $anchor } {
+			icursor -char
+			$slate select to $target insert
+			icursor +char
+		    } else {
+			$slate select to $target insert
+		    }
+		} else {
+		    # Adjust in word mode
+		    # FIXME: this is not quite right...
+		    if { [$slate index $target insert] > $anchor } {
+			icursor +word
+			icursor -char
+			$slate select to $target insert
+			icursor +char
+		    } else {
+			icursor -word
+			$slate select to $target insert
+		    }
+		}
 	    }
 	}
 	"clear" {
