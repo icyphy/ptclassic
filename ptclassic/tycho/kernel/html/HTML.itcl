@@ -1005,7 +1005,7 @@ proc HMcurrent_tags {win} {
 #   val:    The variable to put the value into (use key as default)
 
 proc HMextract_param {param key {val ""}} {
-    
+
     if {$val == ""} {
         upvar $key result
     } else {
@@ -1029,8 +1029,11 @@ proc HMextract_param {param key {val ""}} {
     # I should strip out name=value pairs, so we don't end up with "name"
     # inside the "value" part of some other key word - some day
     
-    set bad \[^a-zA-Z\]+
+    set bad \[^=a-zA-Z\]+
     # NOTE: Fixed to ignore if there is an "=".  EAL
+    # FIXME: There is a case where this will fail.  If you have
+    # <tag key1=value key2>, where key2 is valueless tag, the valueless
+    # tag will not be identified.
     if {[regexp -nocase  "^\[^=\]*$bad$key$bad" -$param-]} {
         return 1
     } else {
