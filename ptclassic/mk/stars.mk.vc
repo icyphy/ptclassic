@@ -888,9 +888,9 @@ PIGI =1
 # Program to test the ptolemy libraries, see standalone.mk
 !ifdef  PIGI
 !ifdef  PITCL
-LIBS = $(LIBS) version.obj libpitcl.lib
+LIBS = $(LIBS) version.obj $(OBJDIR)\pitcl\ptclInvokeInterp.obj libpitcl.lib
 !else
-LIBS = $(LIBS) version.obj libptcl.lib
+LIBS = $(LIBS) version.obj $(OBJDIR)\ptcl\ptclInvokeInterp.obj libptcl.lib
 !endif
 !endif
 
