@@ -3,7 +3,6 @@
 .SD
 The butterfly curves.
 .DE
-.IE XYgraph
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
@@ -16,6 +15,7 @@ $theta$ by the equation
 r ~=~ e sup { cos ( theta ) } ~-~ 2 cos ( 4 theta ) ~+~
 sin sup 5 ( theta / 12) ~.
 .EN
+.Se XYgraph
 .UH REFERENCE
 .ip [1]
 T. Fay, "The Butterfly Curve," \fIAmerican Math. Monthly,\fR 96(5), pp. 442-443.

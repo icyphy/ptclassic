@@ -7,7 +7,8 @@ Demonstrate the use of lattice filters.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
-.Ie "whitening filters"
+.Ie "whitening filter"
+.Ie "filter, whitening"
 .Ie "lattice filter"
 .Ie "filter, lattice"
 This demo generates an auto-regressive (AR) random process by filtering

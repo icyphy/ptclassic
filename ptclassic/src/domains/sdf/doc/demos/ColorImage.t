@@ -10,7 +10,6 @@ A universe that displays a color image.
 .Ir "image, color"
 .Ie "image format, RGB"
 .Ie "image format, YUV"
-.Se ColorImage
 .Se ReadRgb
 .Se Rgb2Yuv
 .Se Yuv2Rgb
