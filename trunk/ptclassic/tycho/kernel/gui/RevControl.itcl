@@ -268,7 +268,7 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
 		set default $type
 	    }
 	}
-	$dlg addButton no -text "No <Esc>"
+	$dlg addButton no -text "No <Esc>" -command "destroy $dlg"
 	bind $dlg <Escape> "destroy $dlg"
 	$dlg centerOnScreen
     } else {
