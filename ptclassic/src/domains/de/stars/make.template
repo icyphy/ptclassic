@@ -26,6 +26,7 @@ DEArbitrate.pl \
 DEBarGraph.pl \
 DEBeep.pl \
 DEBlackHole.pl \
+DEBusFork.pl \
 DECase.pl \
 DECellLoad.pl \
 DECellRoute.pl \
