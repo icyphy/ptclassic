@@ -123,11 +123,14 @@ const char* fileName;
 }
 
 /*
-Inputs:
+MkStar() inputs:
     name = name of star
     domain = domain of star
     dir = src directory of star, which contains .pl file
     palette = directory to store the star's icon into
+Check to see if the domain exists, then check to see if the star name
+is known.  If it not, then try to compile and load it in.
+
 */
 boolean
 MkStar(name, domain, dir, palette)
@@ -135,24 +138,30 @@ char *name, *domain, *dir, *palette;
 {
     char *iconDir;
 
-    if (!KcSetKBDomain(domain)) {
-	ErrAdd("Unknown domain: ");
-	ErrAdd(domain);
-	return FALSE;
-    }
-
-    /* If we don't know about the star, try to load it. */
-    /* Get the corresponding class name.  */
-    if (!KcIsKnown(name)) {
-	const char *base = callParseClass(name);
-	if (!base) return FALSE;
-	PrintDebug("Star not known, trying to load it");
-	if (!KcCompileAndLink (base, domain, dir, FALSE, NULL)) return FALSE;
-	PrintDebug("Load complete");
-	if (!KcIsKnown(name)) {
-	    ErrAdd("Load completed, but star is still undefined?!?");
+    /* If the domain is a domain other than NODOMAIN, check the domain
+     * and load the star. NODOMAIN is used to create icons for html files.
+     */
+    if (strcmp(domain,NODOMAIN)) {
+        if (!KcSetKBDomain(domain)) {
+	    ErrAdd("Unknown domain: ");
+	    ErrAdd(domain);
 	    return FALSE;
         }
+
+	/* If we don't know about the star, try to load it. */
+	/* Get the corresponding class name.  */
+	if (!KcIsKnown(name)) {
+	   const char *base = callParseClass(name);
+	   if (!base) return FALSE;
+	   PrintDebug("Star not known, trying to load it");
+	   if (!KcCompileAndLink (base, domain, dir, FALSE, NULL))
+	       return FALSE;
+	   PrintDebug("Load complete");
+	   if (!KcIsKnown(name)) {
+	       ErrAdd("Load completed, but star is still undefined?!?");
+	       return FALSE;
+	   }
+	}
     }
 
     ERR_IF1(!CodeDirToIconDir(dir, &iconDir));
