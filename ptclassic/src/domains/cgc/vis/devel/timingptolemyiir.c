@@ -87,7 +87,6 @@ taps1 = (vis_d64 *) memalign(sizeof(double),sizeof(double)*5);
   taps0[2] = (short) SCALETAPS/scaledown*numtaps[0];
   taps0[3] = (short) SCALETAPS/scaledown*numtaps[1];
   taps0[4] = (short) SCALETAPS/scaledown*numtaps[2];
-  printf("%i %i %i %i\n",taps0[0],taps0[3],taps0[1],taps0[4]);
 
   taps1[0] = dentaps[0];
   taps1[1] = dentaps[1];
