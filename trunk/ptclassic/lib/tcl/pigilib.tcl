@@ -48,6 +48,9 @@ proc pigilib_init_env {} {
 
 pigilib_init_env
 
+# Load the help system for ptcl
+source $ptolemy/lib/tcl/ptcl_help.tcl
+
 # A procedure to return the rgb value of all color names used in Pigi.
 source $ptolemy/lib/tcl/ptkColor.tcl
 
