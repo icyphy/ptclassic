@@ -1,7 +1,6 @@
 /*******************************************************************
 Define a main window object.  This object has a Tcl interpreter
 with PTcl extensions associated with it, created by the constructor.
-This main window will be converted to a console window by Lib.tcl.
 
 $Id$
 Programmer: E. A. Lee
@@ -100,18 +99,13 @@ TyConsole::TyConsole(int argc, char **argv) {
     tyExit(1);
   }
 
-  // Load the startup file Lib.tcl
+  // Load the startup file Tycho.tcl
   char *pt = getenv("PTOLEMY");
   InfString command = pt ? pt : "~ptolemy";
-#if ITCL_MAJOR_VERSION
-  // itcl-2.0
-  command << "/tycho/kernel_itk/Lib.tcl";
-#else
-  command << "/tycho/kernel/Lib.tcl";
-#endif
+  command << "/tycho/kernel/Tycho.tcl";
   if (Tcl_EvalFile(interp, (char*)command) != TCL_OK) {
     fprintf(stderr,
-	"Unable to load Lib.tcl startup file: %s\n ", interp->result);
+	"Unable to load Tycho.tcl startup file: %s\n ", interp->result);
     tyExit(1);
   }
 
