@@ -18,25 +18,13 @@ include $(CONFIG)
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 IMAGE = $(ROOT)/src/domains/sdf/image
-INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE) -I$(VPATH)
-
-# rule for compiling C++ programs
-.SUFFIXES: .o .cc .h .pl
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c $<
+INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
 
 # Library name
 LIB=libsdfstars.a
 
-# Make sure we always run the preprocessor in the source directory
-.pl.cc:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
-
-.pl.h:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
-
 # source files for all stars, using preprocessor
-SRCS= \
+PL_SRCS= \
  SDFAutocor.pl \
  SDFAverage.pl \
  SDFBiQuad.pl \
@@ -150,46 +138,27 @@ SRCS= \
  SDFYuv2Rgb.pl
 
 # The .cc files
-CCSRCS=$(SRCS:.pl=.cc)
+SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.pl=.o)
+OBJS= $(SRCS:.cc=.o)
 
 # header files for all stars
-HDRS= $(SRCS:.pl=.h)
+HDRS= $(SRCS:.cc=.h)
 
-all:		$(CCSRCS) makefile $(LIB)
-
-$(LIB):	$(OBJS)
-	rm -f $(LIB)
-	ar cq $(LIB) $(OBJS)
-	ranlib $(LIB)
+all:		$(SRCS) makefile $(LIB)
 
 # install library for use by code generation domains
 install:	all $(LIBDIR)/$(LIB)
 		@echo Installation complete.
 
-$(LIBDIR)/$(LIB):	$(LIB)
-			rm -f $(LIBDIR)/$(LIB)
-			cp $(LIB) $(LIBDIR)
-			ranlib $(LIBDIR)/$(LIB)
+EXTRA_SRCS=sdfstars.mk $(PL_SRCS)
 
 
-sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template sdfstars.mk
+# include common definitions, rules
+include $(ROOT)/common.mk
 
-clean:
-		rm -f *.o core *~ *#
-depend:
-		cd $(VPATH); \
-		$(DEPEND) $(INCL) $(CCSRCS) |\
-			 cat make.template - > makefile.n; \
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+

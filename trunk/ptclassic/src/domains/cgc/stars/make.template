@@ -20,53 +20,36 @@ CGCDIR = $(ROOT)/src/domains/cgc/kernel
 CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(VPATH)
-.SUFFIXES: .o .cc .h .pl
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -c  $<
-
-# Make sure we always run the preprocessor in the source directory
-.pl.cc:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
-
-.pl.h:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # source files for all stars, using preprocessor
-SRCS= \
+PL_SRCS= \
  CGCFloatRamp.pl \
  CGCFork.pl \
  CGCPrinter.pl
 
 # The .cc files
-CCSRCS=$(SRCS:.pl=.cc)
+SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.pl=.o)
+OBJS= $(SRCS:.cc=.o)
 
 # header files for all stars
-HDRS= $(SRCS:.pl=.h)
+HDRS= $(SRCS:.cc=.h)
 
-all:		$(CCSRCS) makefile $(OBJS)
+EXTRA_SRCS=cgcstars.mk $(PL_SRCS)
+
+all:		$(SRCS) makefile $(OBJS)
 
 # nothing to install -- use it where it lies
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template cgcstars.mk
+LIB=none	# required by common.mk
 
-clean:
-		rm -f *.o core *~ *#
-depend:
-		cd $(VPATH); \
-		$(DEPEND) $(INCL) $(CCSRCS)|cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+

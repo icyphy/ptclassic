@@ -3,9 +3,9 @@
 #				All Rights Reserved.
 # Special SDF targets.
 
-LIBSOURCES =	CompiledUniverse.cc CompiledError.cc
-SOURCES =	$(LIBSOURCES) CompileTarget.cc
-HEADERS =	
+LIBSRCS =	CompiledUniverse.cc CompiledError.cc
+SRCS =	$(LIBSRCS) CompileTarget.cc
+HDRS =	
  
 # Root of Ptolemy directory
 ROOT=../../../..
@@ -19,46 +19,22 @@ include $(CONFIG)
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
+INCL =-I$(SDFKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
 
-INC =-I$(SDFKERNEL) -I$(KERNDIR) -I$(CGKERNEL)
-.SUFFIXES: .cc 
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INC) -c $<
-
-OBJS = $(SOURCES:.cc=.o)
-LIBOBJS = $(LIBSOURCES:.cc=.o)
+OBJS = $(LIBSRCS:.cc=.o)
 LIB = libcompileSDF.a
 
-all:	makefile $(OBJS) $(LIB)
-
-$(LIB):		$(LIBOBJS)
-		rm -f $(LIB)
-		ar cq $(LIB) $(LIBOBJS)
-		ranlib $(LIB)
+all:	makefile $(LIB) CompileTarget.o
 
 # "make install" does nothing extraordinary
 install:	all $(LIBDIR)/$(LIB)
 		@echo Installation complete.
 
-$(LIBDIR)/$(LIB):       $(LIB)
-		rm -f $(LIBDIR)/$(LIB)
-		cp $(LIB) $(LIBDIR)
-		ranlib $(LIBDIR)/$(LIB)
 
-clean:
-		rm -f *.o core *~ *#
+# include common definitions, rules
+include $(ROOT)/common.mk
 
-sources:	$(SOURCES) make.template
 
-depend:		$(SOURCES)
-		cd $(VPATH); \
-		$(DEPEND) $(INC) $(SOURCES) |\
-		 cat make.template - > makefile.n; mv -f makefile.n makefile
-
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
-
+# Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
+

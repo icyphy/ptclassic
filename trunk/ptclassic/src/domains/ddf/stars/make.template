@@ -24,25 +24,14 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(DDFDIR) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
 
-.SUFFIXES: .o .cc .h .pl
-.cc.o:
-	$(GNU) $(GPPFLAGS) $(INCL) -I$(VPATH) -c  $<
-
-.pl.cc:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
-
-.pl.h:
-	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
-
-
-SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelf.pl \
+PL_SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelf.pl \
  DDFCase.pl DDFEndCase.pl
 
-CCS=$(SRCS:.pl=.cc)
+SRCS=$(PL_SRCS:.pl=.cc)
 
-OBJS=$(SRCS:.pl=.o)
+OBJS=$(SRCS:.cc=.o)
 
-HDRS=$(SRCS:.pl=.h)
+HDRS=$(SRCS:.cc=.h)
 
 all:		makefile $(OBJS)
 
@@ -50,23 +39,13 @@ all:		makefile $(OBJS)
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(CCS) $(HDRS) make.template
+EXTRA_SRCS=ddfstars.mk $(PL_SRCS)
 
-clean:
-		rm -f *.o core *~ *#
-depend:
-		cd $(VPATH); \
-		$(DEPEND) $(INCL) $(CCS) | cat make.template - > makefile.n;\
-		mv -f makefile.n makefile
+LIB=none	# required by common.mk
 
-makefile:	make.template
-		cd $(VPATH); make -f make.template sources depend
-		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
-		@echo makefile remade -- you must rerun make.
-		exit 1
+# include common definitions, rules
+include $(ROOT)/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
-
 
