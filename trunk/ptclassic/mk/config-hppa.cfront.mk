@@ -81,7 +81,7 @@ X11_LIBSPEC =	-L/usr/sww/X11R6/lib -lX11
 #X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
-X11EXT_LIBSPEC=-lXext -lSM -lICE
+X11EXT_LIBSPEC=	-L/usr/sww/X11R6/lib -lXext -lSM -lICE
 #X11EXT_LIBSPEC=-lXext
 
 
