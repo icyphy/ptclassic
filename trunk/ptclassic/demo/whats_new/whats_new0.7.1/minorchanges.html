@@ -55,7 +55,17 @@
 
 For complete details, see
 <a href="http://ptolemy.eecs.berkeley.edu/ptolemy0.7/patches/reimer/index.html"><CODE>http://ptolemy.eecs.berkeley.edu/ptolemy0.7/patches/reimer/index.html</CODE></a>
+
+<li> VHDL Environment variable changes - Mike Williamson
+
+ <br> Brian Evans reported a bug where SimVSSTarget sets environment
+variables even when they are blank, and whatever it sets overrides the
+user's shell environment settings.  A further problem was that the
+target sets them when it's a child target.  Child target parameters
+are not editable from pigi, so if the defaults were wrong, the user could not fix them.
 </menu>
+
+
 
 </dl>
 
@@ -69,8 +79,10 @@ For complete details, see
 	Tcl8.0, so we can't use Tcl Blend yet.
 	</menu>
 
-<li> CGDDF files have been removed.  CGDDF was never well integrated into
+<li> CGCDDF files have been removed.  CGCDDF was never well integrated into
 the Ptolemy tree, it required a rebuild.
+The affected stars are <CODE>CGCSelf</CODE>, <CODE>CGCRepeater</CODE>,
+<CODE>CGCLastOfN</CODE>, <CODE>CGCEndCase</CODE>, <CODE>CGCDownCounter</CODE>, <CODE>CGCCase</CODE>.
 
 </menu>
 
