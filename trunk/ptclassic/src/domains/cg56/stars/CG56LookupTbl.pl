@@ -11,6 +11,8 @@ defstar {
 The input accesses a lookup table.  More generally, this star defines
 a function which maps input values between -1 and +1-2^-23 into
 user-specified output values.
+.Id "table lookup"
+.Id "lookup table"
 .PP
 The basic function is given by a table of constants which specify
 values of the function at certain fixed points; the constants are

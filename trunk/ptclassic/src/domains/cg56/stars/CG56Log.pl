@@ -1,7 +1,7 @@
 defstar {
 	name { Log }
 	domain { CG56 }
-	desc { Logorithm }
+	desc { Base two logarithm }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
@@ -9,6 +9,7 @@ defstar {
         explanation {
 This star computes the base two logarithm of its input divided by 32,
 using polynomial approximation with eight bits of accuracy.
+.Id "logarithm"
         }
         input {
                 name { input }

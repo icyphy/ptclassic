@@ -8,7 +8,9 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-Input and output  are assumed to be integers (right-justified in word).
+.Id "multiplication, integer"
+.Id "integer multiplication"
+Input and output are assumed to be integers (right-justified in word).
 }
 
 	input {

@@ -7,7 +7,8 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-The input is moved into accumlator "a", where the "abs" instruction is applied.
+.Id "negation"
+The input is moved into accumlator "a", where the "neg" instruction is applied.
 	}
 	execTime {
 		return 3;

@@ -7,6 +7,7 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Id "hard limiter"
 The star hard limits input samples to keep the range of 
 (\fIbottom, top\fR).
 	}
