@@ -2,8 +2,11 @@
 .NA allPole
 .SD
 Two realizations of an all-pole filter are shown to be equivalent.
-One uses an FIR filter in a feedback path, and the other uses the
-BlockAllPole star.
+One uses an
+.c FIR
+filter in a feedback path, and the other uses the
+.c BlockAllPole
+star.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
