@@ -55,7 +55,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdlib.h>
 #include <unistd.h>
 //#include "../../kernel/miscFuncs.h"
+#if ! defined(PTSOL7)
 inline long random() { return lrand48();}
+#endif /* !PTSOL7 */
 inline void srandom(int seed) { srand48(seed);}
 #else
 // SunOS4.1 CC
