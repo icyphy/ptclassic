@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,7 +20,6 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
     Author:	T.M. Parks
@@ -41,9 +40,6 @@ static const char file_id[] = "$RCSfile$";
 
 extern const char MTDFdomainName[];
 
-// Master PtGate object for mutual exclusion.
-LwpMonitor masterMonitor;
-
 // Constructor.
 MTDFScheduler::MTDFScheduler() : starThreads(), monitor(), start(monitor)
 {
@@ -55,11 +51,13 @@ MTDFScheduler::MTDFScheduler() : starThreads(), monitor(), start(monitor)
     const int stackSize = 0x4000;
     MTDFThread::initStackCache(stackSize);
     MTDFThread::setMaxPriority(MTDFThread::minPriority()+1);
+
+    // Prevent preemption of the current thread.
     thread = MTDFThread::currentThread();
     thread->setPriority(MTDFThread::maxPriority());
 
     // Enable all registered PtGates before additional threads are created.
-    GateKeeper::enableAll(masterMonitor);
+    GateKeeper::enableAll(LwpMonitor::prototype);
 }
 
 // Destructor.
@@ -101,6 +99,12 @@ void MTDFScheduler::setup()
 // Run (or continue) the simulation.
 int MTDFScheduler::run()
 {
+    if (SimControl::haltRequested())
+    {
+	Error::abortRun(*galaxy(), " cannot continue.");
+	return FALSE;
+    }
+
     // Lower priority to allow other threads to run.
     thread->setPriority(MTDFThread::minPriority());
 
@@ -137,7 +141,12 @@ void MTDFScheduler::starThread(MTDFStar* star)
 // Thread for source Stars.
 void MTDFScheduler::sourceThread(MTDFStar* star)
 {
-    MTDFScheduler& sched = *(MTDFScheduler*)star->scheduler();
+    MTDFScheduler& sched = *(MTDFScheduler*)(star->parent()->scheduler());
+    if (sched.domain() != MTDFdomainName)
+    {
+	Error::abortRun(sched.domain(), "Scheduler is not MTDF");
+	return;
+    }
 
     // Wait for notification from the Scheduler, then fire the Star.
     do
@@ -179,19 +188,27 @@ void MTDFScheduler::deleteThreads()
     starThreads.initialize();
 }
 
+// Get the stopping time.
+double MTDFScheduler::getStopTime()
+{
+    return stopTime;
+}
+
 // Set the stopping time.
 void MTDFScheduler::setStopTime(double limit)
 {
     stopTime = limit;
 }
 
-double MTDFScheduler::getStopTime()
+// Set the stopping time when inside a Wormhole.
+void MTDFScheduler::resetStopTime(double limit)
 {
-    return stopTime;
+    // Allow Scheduler to run for one schedule period.
+    stopTime = limit;
+    currentTime = stopTime - schedulePeriod;
 }
 
-TimeVal MTDFScheduler::delay(TimeVal when)
+double MTDFScheduler::delay(double when)
 {
-    TimeVal zero;
-    return zero;
+    return 0.0;
 }

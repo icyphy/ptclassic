@@ -1,5 +1,8 @@
+#ifndef _MTDFStar_h
+#define _MTDFStar_h
+
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,16 +23,13 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	6 February 1992
+    Author:	T. M. Parks
+    Created:	6 February 1992
 
 */
 
-#ifndef _MTDFStar_h
-#define _MTDFStar_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -37,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SDFStar.h"
 #include "MTDFPortHole.h"
-#include "TimeVal.h"
 
 class MTDFThread;
 
@@ -60,10 +59,10 @@ public:
     MTDFThread& thread();
 
     // Timing constraint specification.
-    TimeVal lag;
-    TimeVal period;
+    double lag;
+    double period;
 
-    void sleepUntil(TimeVal);
+    void sleepUntil(double);
 
 protected:
     MTDFThread* myThread;

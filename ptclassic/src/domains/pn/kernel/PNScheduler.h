@@ -1,5 +1,8 @@
+#ifndef _MTDFScheduler_h
+#define _MTDFScheduler_h
+
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,15 +23,11 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Author:	T.M. Parks
+    Author:	T. M. Parks
     Created:	7 February 1992
 */
-
-#ifndef _MTDFScheduler_h
-#define _MTDFScheduler_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -37,7 +36,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Scheduler.h"
 #include "MTDFThreadList.h"
 #include "LwpMonitor.h"
-#include "TimeVal.h"
 
 class MTDFStar;
 class MTDFThread;
@@ -60,11 +58,14 @@ public:
     // Run the simulation.
     /*virtual*/ int run();
 
+    // Get the stopping time.
+    /*virtual*/ double getStopTime();
+
     // Set the stopping time.
     /*virtual*/ void setStopTime(double);
 
-    // Get the stopping time.
-    /*virtual*/ double getStopTime();
+    // Set the stopping time when inside a Wormhole.
+    /*virtual*/ void resetStopTime(double);
 
     // Create threads and build ThreadList.
     void createThreads();
@@ -73,14 +74,14 @@ public:
     void deleteThreads();
 
     // Duration of one schedule period or iteration.
-    TimeVal schedulePeriod;
+    double schedulePeriod;
 
     // Delay used for sleeping Threads.
-    virtual TimeVal delay(TimeVal);
+    virtual double delay(double);
 
 protected:
     // Stopping time.
-    TimeVal stopTime;
+    double stopTime;
 
     // Thread in which this scheduler is running.
     MTDFThread* thread;

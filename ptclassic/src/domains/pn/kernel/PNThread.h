@@ -1,5 +1,8 @@
+#ifndef _MTDFThread_h
+#define _MTDFThread_h
+
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,15 +23,11 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Programmer:		T.M. Parks
-    Date of creation:	14 February 1992
+    Author:	T. M. Parks
+    Created:	14 February 1992
 */
-
-#ifndef _MTDFThread_h
-#define _MTDFThread_h
 
 #ifdef __GNUG__
 #pragma interface
@@ -37,7 +36,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "LwpThread.h"
 
 class MTDFStar;
-class TimeVal;
 
 class MTDFThread : public LwpThread
 {
@@ -46,7 +44,7 @@ public:
     MTDFThread(int priority, void (*thread)(MTDFStar*), MTDFStar*);
 
     // Disable Thread for the specified time.
-    int sleep(TimeVal);
+    int sleep(double);
 
     // New MTDFThread object corresponding to the current thread.
     static MTDFThread* currentThread();
