@@ -94,7 +94,7 @@ protected:
 	// The following virtual methods return the substitution strings
 	// for the ref macros.
 	virtual StringList getRef(const char* name);
-	virtual StringList getRef2(const char* name, int offset);
+	virtual StringList getRef2(const char* name, const char* offset);
 
 	// Look up the value of state and return it as a StringList.
 	// A zero-length StringList is returned if there is no such State.

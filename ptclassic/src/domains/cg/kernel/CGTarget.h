@@ -37,6 +37,8 @@ protected:
 public:
 	CGTarget(const char* name, const char* starclass, const char* desc);
 	void initialize();
+	// The setup method should not be invoked if the stars are not
+	// CGStars or their portHoles are not CGPortHoles.
 	int setup(Galaxy&);
 	void start();
 	int run();
