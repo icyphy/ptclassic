@@ -57,12 +57,13 @@ TITarget(src.name(), src.descriptor(), src.starType(),
 	 src.getAssociatedDomain()) {
 }
 
-int C50Target :: compileCode() {
-      StringList assembleCmds;
-      assembleCmds << "assembl " << filePrefix << ".asm";
-      if (systemCall(assembleCmds, "Errors in assembly") != 0) return FALSE;
-      return TRUE;
-}
+// default-C50 target should just generate code.
+//int C50Target :: compileCode() {
+//      StringList assembleCmds;
+//      assembleCmds << "assembl " << filePrefix << ".asm";
+//      if (systemCall(assembleCmds, "Errors in assembly") != 0) return FALSE;
+//      return TRUE;
+//}
 
 static const char memoryMapInitString[] =
 "	.mmregs		; Include memory map reg\n"
