@@ -343,7 +343,9 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #define READOBJ_FAIL 1
 #define OBJ_SIZE 0
 #define READOBJ_FAIL 1
+#if ! defined(SOL2)
 inline int getpagesize() { return 4096;}
+#endif // ! SOL2
 // ugly hack to get around a bug in the popen prototype for Alpha/OSF
 #define ALPHAFIX (char*)(const char*)
 #else
