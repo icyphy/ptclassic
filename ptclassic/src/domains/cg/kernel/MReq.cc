@@ -55,6 +55,17 @@ void MReqList::zero() {
 	}
 }
 
+int MPortReq::circ() {
+	return myport.circAccess();
+}
+
+int MStateReq::circ() {
+	return (mystate.attributes() & AB_CIRC) != 0;
+}
+
+void MStateReq::assign(ProcMemory& proc, unsigned addr) {
+	((AsmStar*)(mystate.parent()))->addEntry(mystate,proc,addr);
+}
 
 void MConsecStateReq::assign(ProcMemory& proc, unsigned addr) {
 	MReqListIter next(lis);
