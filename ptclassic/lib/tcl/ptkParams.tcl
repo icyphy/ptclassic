@@ -1215,7 +1215,7 @@ proc ptkEditText {title cmd string} {
     pack [frame $w.f -bd 2 -relief sunken] -side top -fill x -expand true
     $w.tframe.text insert 0.0 $string
     ptkOkCancelButtons $w.f \
-	"ed_EditTextExec \"$cmd\" $w.tframe.text; destroy $w" \
+	"ed_EditTextExecute \"$cmd\" $w.tframe.text; destroy $w" \
 	"destroy $w"
 }    
 
