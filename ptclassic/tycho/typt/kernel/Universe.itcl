@@ -163,10 +163,10 @@ body ::ptolemy::Universe::createBlock {ptblockname master} {
                 universe: $fullname"
     }
     # Can't use localeval here because the universe doesn't exist yet.
-    set savegal [::pitcl::curgalaxy]
+    set savegal [::pitcl::currentGalaxy]
 
     # Create an empty universe
-    ::pitcl::addUniverse $ptblockname
+    ::pitcl::addUniverse $ptblockname [::pitcl::getDomain]
 
     # Fill it in.
     if {$master != {}} {
@@ -174,7 +174,7 @@ body ::ptolemy::Universe::createBlock {ptblockname master} {
     }
 
     # Restore the current galaxy
-    ::pitcl::curgalaxy $savegal
+    ::pitcl::currentGalaxy $savegal
 }
 
 #####################################################################
