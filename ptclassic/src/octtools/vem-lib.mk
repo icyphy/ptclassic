@@ -1,5 +1,5 @@
 # Version Identification:
-# @(#)vem-lib.mk	1.12	9/1/94
+# $Id$
 # Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
@@ -49,7 +49,7 @@ install: makefile $(OCTLIBDIR)/$(LIB) ${OCTTOOLS}/include/${EXPHDR}
 # Not all libraries have tests
 tests::
 
-C_INCL= -I../../include $(X11_INCSPEC)
+C_INCL= -I../../include $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -C$(basename $(LIB) ) -u -I$(OCTTOOLS)/include $^ > lint
