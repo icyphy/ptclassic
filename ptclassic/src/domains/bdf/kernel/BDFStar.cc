@@ -87,23 +87,28 @@ int BDFStar :: run () {
 	BDFStarPortIter nextPort(*this);
 	BDFPortHole *p;
 
-	// step 1: process unconditional inputs.
+	// step 1: process unconditional inputs that haven't already
+	// been read.
 
 	while ((p = nextPort++) != 0) {
-		if (p->isItOutput() || p->isDynamic()) continue;
+		if (p->isItOutput() || p->isDynamic() ||
+		    p->alreadyRead()) continue;
 		if (p->far() && p->numTokens() < p->numXfer())
 			return handleWait(*p);
-		else p->receiveData();
+		else
+			p->receiveData();
 	}
 
 	// step 2: process conditional inputs.  Assumption: control
 	// ports always move one integer, and previous processing
 	// in step 1 has fetched the control token.
+	// again, we skip ports that have already been read.
 
 	DFPortHole* ctlp = 0;
 	nextPort.reset();
 	while ((p = nextPort++) != 0) {
-		if (p->isItOutput() || !p->isDynamic()) continue;
+		if (p->isItOutput() || !p->isDynamic() ||
+		    p->alreadyRead()) continue;
 		ctlp = p->assoc();
 		int ctl_is_t = (*ctlp)%0;
 		int read_on_t = (p->assocRelation() == BDF_TRUE);
@@ -112,7 +117,8 @@ int BDFStar :: run () {
 		if (ctl_is_t == read_on_t) {
 			if (p->far() && p->numTokens() < p->numXfer())
 				return handleWait(*p);
-			else p->receiveData();
+			else
+				p->receiveData();
 		}
 	}
 
@@ -125,10 +131,14 @@ int BDFStar :: run () {
 	// step 4: do sendData calls for conditional outputs.
 	// we do conditionals first so that we can still access any
 	// output control booleans.
+	// while we are at it, the read flags of input ph's are cleared.
 
 	nextPort.reset();
 	while ((p = nextPort++) != 0) {
-		if (p->isItInput() || !p->isDynamic()) continue;
+		if (p->isItInput() || !p->isDynamic()) {
+			p->clearReadFlag();
+			continue;
+		}
 		ctlp = p->assoc();
 		int ctl_is_t = (*ctlp)%0;
 		int write_on_t = (p->assocRelation() == BDF_TRUE);
