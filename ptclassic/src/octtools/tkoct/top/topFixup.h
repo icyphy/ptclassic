@@ -37,7 +37,8 @@
  * These appear to be missing on most systems.
  */
 extern int strncasecmp TOP_ARGS((const char *s1, const char *s2, size_t n));
-extern int strcasecmp TOP_ARGS((const char *s1, const char *s2));
+/* Now defined in compat.h */
+/*extern int strcasecmp TOP_ARGS((const char *s1, const char *s2));*/
 
 #if defined(__sun__) && ! defined(__svr4__)
 
