@@ -3,7 +3,7 @@
 # @Author: Edward A. Lee, John Reekie
 # @Version: $Id$
 #
-# Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -63,12 +63,12 @@ proc ::tycho::xfont {family {size 12} {weight medium} {style r} {shift 0}} {
 # something.
 # <li>If that fails, it trys different weights and sizes.
 # <li>As a last resoty, it returns the "fixed" font.
-# <ul>
+# </ul>
 # <p>
 # Unfortunately, fonts are a major weak point in the X window system,
 # since there is only one font that is guaranteed to be installed on
 # all systems: "fixed". This font is the fallback font of the
-# <code>findFont</code> procedure, which always returns a valid font.
+# <code>getFont</code> procedure, which always returns a valid font.
 #
 class ::tycho::FontManager {
 
@@ -83,18 +83,11 @@ class ::tycho::FontManager {
     # Return a valid font size
     proc size {{proposed {}} {shift 0}}
  
-    # Check whether a font specification is valid
-    # FIXME
-    # proc checkFont {family args}
-
-    # Check whether an X font is valid
+    # Check whether a system-dependent font description is valid
     proc checkXFont {font}
 
     # Given a partial font specification, return a legal system-specific font
     proc getFont {family {size 12} {style roman} {shift 0}}
-
-    # Given a symbolic X font specification, return a legal X font name.
-    proc getXFont {family {size 12} {weight medium} {style r} {shift 0}}
 
     # Set or return "preferred"  font families
     proc family {{type {}} {family {}} args}
@@ -102,18 +95,21 @@ class ::tycho::FontManager {
     ##########################################################################
     ####                       private procedures                         ####
 
+    # Given a symbolic X font specification, return a legal X font name.
+    proc getXFont {family {size 12} {weight medium} {style r} {shift 0}}
+
     # Given a complete font specification, return a font name or
     # an empty string.
-    proc tryFont {family size weight style}
+    private proc tryFont {family size weight style}
 
     # Given a complete font specification, return a font name in this
     # or related families, or an empty string.
-    proc trySimilarFamilies {family size weight style} 
+    private proc trySimilarFamilies {family size weight style} 
 
     # Given a complete font specification, return a font name in this
     # or related families, possibly using a different style, or an
     # empty string.
-    proc trySimilarStyles {family size weight style} 
+    private proc trySimilarStyles {family size weight style} 
 
     ##########################################################################
     ####                      private common variables                    ####
@@ -290,7 +286,7 @@ body ::tycho::FontManager::family {{type {}} {family {}} args} {
 		$constantwidthFamilies]
     } elseif { $family == "" } {
 	# Return preferred fonts of a given type
-	return ${type}Families
+	return [set ${type}Families]
     } else {
 	if { $family == "replace" } {
 	    # Clear the font list
