@@ -477,12 +477,7 @@ void param_dump()
 }
 
 
-/* Sun has this in its standard library in a file that also defines
- * other functions that X uses!  Yuk!
- * Define stricmp if we are under solaris2 (PTSOL2 is defined in compat.h)
- */
-#if defined(sun)  &&  !defined(PTSOL2)
-#else
+#ifdef NEED_STRICMP
 int stricmp(a, b)
 register char *a, *b;
 /*
@@ -504,7 +499,7 @@ register char *a, *b;
 
     return value;
 }
-#endif
+#endif /*NEED_STRICMP*/
 
 static int strihash(string, modulus)
 register char *string;
