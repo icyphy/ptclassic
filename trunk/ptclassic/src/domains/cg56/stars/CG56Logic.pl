@@ -104,8 +104,9 @@ non-zero integer (not necessarily 1).
 	codeblock(twoInputAnd) {
 	move	$ref(input#1),x0			; read input#1 into register x0
 	move	$ref(input#2),x1			; read input#2 into register x1
-	mpy	x0,x1,a			; a = x0 * x1
-	asr	a			; a is integer mult
+	mpy	x0,x1,a			#255,y0		; a = x0 * x1, y0=TRUE
+	tst	a					; test a
+	tne	y0,a					; if (a != 0) a = TRUE
 	}
 
 	// General cases
@@ -163,9 +164,10 @@ $label(Xor)
 	}
 
         codeblock(invertAccumulator) {
-	tst	a	#$$04,y1	; mask for Z bit in status register
-	movec   sr,a			; save status register (condition codes)
-	and	y1,a			; returns true if zero (test Z bit)
+	clr	b			; b = FALSE
+	tst	a	#255,x0		; x0 = TRUE
+	teq	x0,a			; if (a == FALSE) a = x0
+	tne	b,a			; if (a != FALSE) a = FALSE
 	}
 
         codeblock(saveResult) {
@@ -251,24 +253,24 @@ $label(Xor)
 		    break;
 
 		  case NANDID:
-		    pairsOfCycles += 3;
+		    pairsOfCycles += 4;
 		    // fall through
 		  case ANDID:
-		    if (numinputs == 2) pairsOfCycles += 3;
+		    if (numinputs == 2) pairsOfCycles += 5;
 		    else if (pairsOfCycles > 2) pairsOfCycles += 2*numinputs+2;
 		    break;
 
 		  case NORID:
-		    pairsOfCycles += 3;
+		    pairsOfCycles += 4;
 		    // fall through
 		  case ORID:
 		    pairsOfCycles += numinputs;
 		    break;
 
-		  case XORID:
-		    pairsOfCycles += 3;
-		    // fall through
 		  case XNORID:
+		    pairsOfCycles += 4;
+		    // fall through
+		  case XORID:
 		    pairsOfCycles += 3*numinputs;
 		    break;
 		}
