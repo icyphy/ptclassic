@@ -83,19 +83,47 @@ public:
 	int useStaticBuffering() { return int(staticBuffering); }
 
 	// incrementally add a star to the code
-	/* virtual */ int incrementalAdd(CGStar* s);
+	/* virtual */ int incrementalAdd(CGStar* s, int flag = 1);
 
 	// incremental addition of a Galaxy code
 	/* virtual */ int insertGalaxyCode(Galaxy* g, SDFScheduler* s);
+
+	// have these methods for CGCDDFTarget.
+	// Later, CGCDDFTarget will be merged into this CGCTarget. Then,
+	// remove these methods.
+	CodeStream* removeStream(const char* n) { 
+		CodeStream* cs = getStream(n);
+		codeStringLists.remove(n);
+		return cs;
+	}
+	void putStream(const char* n, CodeStream* cs) { addStream(n, cs); }
+	
+	// return TRUE if a function is being defined.
+	int makingFunc() { return (getStream("mainInit") != &mainInit); }
 
 protected:
 	char *schedFileName;
 
 	// code strings
+	// "mainClose" is separated because when we insert a galaxy code
+	// by insertGalaxyCode(), we need to put wrapup code at the end
+	// of the body. 
+	// "galStruct" is separated since we need to this
+	// declaration inside a function call if we need to make a function
+	// from a galaxy or a star while global variable is put outside 
+	// of a function.
+	// "commInit" is separated to support recursion construct.
+	// Some wormhole codes are put into several set of processor
+	// groups. Since commInit code is inserted by pairSendReceive()
+	// method of the parent target, we need to able to copy this code.
+	// stream.
+
 	CodeStream globalDecls;
+	CodeStream galStruct;
 	CodeStream include;
 	CodeStream mainDecls;
 	CodeStream mainInit;
+	CodeStream commInit;
 	CodeStream wormIn;
 	CodeStream wormOut;
 	CodeStream mainClose;
@@ -149,7 +177,7 @@ protected:
 	virtual void starDataStruct(CGCStar* block, int level=0);
 
 	// make a comment explaining the following code.
-	StringList sectionComment(StringList s);
+	StringList sectionComment(const char* s);
 
 private:
 	// assign the variable for each geodesic (connection).
