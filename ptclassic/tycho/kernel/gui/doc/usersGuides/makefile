@@ -40,7 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	BuildDialogHelp.html \
+	BuilderDialogHelp.html \
 	ColorBrowserHelp.html \
 	EditHelp.html \
 	ExecHelp.html \
