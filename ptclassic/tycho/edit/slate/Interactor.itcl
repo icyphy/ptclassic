@@ -218,14 +218,14 @@ class ::tycho::Interactor {
     # Aliases for event names to reduce my memory load!
     private common eventName
     array set eventName {
-        "button"        ButtonPress
-	"press"         ButtonPress
-	"click"         ButtonPress
-	"buttonpress"   ButtonPress
-	"double"        Double-ButtonPress
-	"doubleclick"   Double-ButtonPress
-	"triple"        Triple-ButtonPress
-	"tripleclick"   Triple-ButtonPress
+        "button"        Button
+	"press"         Button
+	"click"         Button
+	"buttonpress"   Button
+	"double"        Double-Button
+	"doubleclick"   Double-Button
+	"triple"        Triple-Button
+	"tripleclick"   Triple-Button
 	"release"       ButtonRelease
 	"buttonrelease" ButtonRelease
 	"drag"          Motion
@@ -233,9 +233,9 @@ class ::tycho::Interactor {
 	"motion"        Motion
         "enter"         Enter
 	"leave"         Leave
-	"key"           KeyPress
-	"keypress"      KeyPress
-	"keydown"       KeyPress
+	"key"           Key
+	"keypress"      Key
+	"keydown"       Key
 	"keyup"         KeyRelease
 	"keyrelease"    KeyRelease
     }
@@ -243,15 +243,15 @@ class ::tycho::Interactor {
     # Event class determines how to add extra stuff
     private common eventClass
     array set eventClass {
-        ButtonPress        button
-        Double-ButtonPress button
-	Triple-ButtonPress button
-        ButtonRelease      button
-        Motion             fussybutton
-        Enter              simple
-	Leave              simple
-	KeyPress           key
-	KeyRelease         key
+        Button        button
+        Double-Button button
+	Triple-Button button
+        ButtonRelease button
+        Motion        fussybutton
+        Enter         simple
+	Leave         simple
+	Key           key
+	KeyRelease    key
     }       
 
     # Debugging only
@@ -421,7 +421,7 @@ body ::tycho::Interactor::disable {} {
     foreach {ix options} $temp {
         eval $this unbind [lindex $ix 0] $options
     }
-    array set _bindings [array get temp]
+    array set _bindings $temp
 }
 
 #######################################################################
@@ -612,9 +612,7 @@ body ::tycho::Interactor::event {type args} {
 	}
 	"key" {
 	    if { $opt(-key) != "" } {
-		set i "KeyPress-$opt(-key)"
-	    } else {
-		set i "KeyPress"
+		set event "$event-$opt(-key)"
 	    }
 	}
     }
