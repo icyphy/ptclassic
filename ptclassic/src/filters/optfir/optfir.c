@@ -2,7 +2,6 @@
 Version identification:
 $Id$
 
-/*
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -27,7 +26,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
-*/
 
 Converted from Fortran by f2c, cleaned up by Christopher Hylands
 ********************************************************************/
