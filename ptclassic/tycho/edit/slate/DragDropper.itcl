@@ -97,7 +97,6 @@ class ::tycho::DragDropper {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
-
 	eval configure $args
     }
     destructor {}
@@ -187,8 +186,7 @@ body ::tycho::DragDropper::drag {x y} {
 
     # Call -dragcommand
     if { $dragcommand != "" } {
-	uplevel \#0 ::tycho::apply \
-		[list $dragcommand $this $item $x $y]
+	uplevel \#0 $dragcommand [list $item] $x $y
     }
 }
 
@@ -198,8 +196,7 @@ body ::tycho::DragDropper::drag {x y} {
 # Move over a bound item. Highlight the item.
 #
 body ::tycho::DragDropper::enter {} {
-    set current [$slate find withtag current]
-    $slate highlight $current
+    $slate highlight [$slate find withtag current]
 }
 
 #######################################################################
@@ -208,8 +205,7 @@ body ::tycho::DragDropper::enter {} {
 # Move mouse away from a bound item.
 #
 body ::tycho::DragDropper::leave {} {
-    set current [$slate find withtag current]
-    $slate unhighlight $current
+    $slate unhighlight [$slate find withtag current]
 }
 
 #######################################################################

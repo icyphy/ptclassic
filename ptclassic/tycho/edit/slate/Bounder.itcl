@@ -97,11 +97,9 @@ class ::tycho::Bounder {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
-
 	eval configure $args
     }
     destructor {}
-
 
     ###################################################################
     ####                            options                        ####
@@ -122,7 +120,6 @@ class ::tycho::Bounder {
 
     # Continue interaction sequence
     method drag {x y} {}
-
 
     ###################################################################
     ####                    private variables                      ####
@@ -183,7 +180,7 @@ body ::tycho::Bounder::click {x y args} {
     set y1 [expr $y1 + ($y - $b1)]
 
     # Click on target
-    eval ::tycho::Interactor::click $x $y $args
+    eval chain click $x $y $args
 
     # Remember where we are
     set actualX $x
@@ -227,10 +224,10 @@ body ::tycho::Bounder::drag {x y} {
 
     # Move it, constraining diagonal movement if necessary
     if { $constrain == "negative" } {
-	::tycho::Interactor::drag $actualX [expr $startY+($actualX-$startX)]
+	chain $actualX [expr $startY+($actualX-$startX)]
     } elseif { $constrain == "positive" } {
-	::tycho::Interactor::drag $actualY [expr $startY-($actualY-$startX)]
+	chain $actualY [expr $startY-($actualY-$startX)]
     } else {
-	::tycho::Interactor::drag $actualX $actualY
+	chain $actualX $actualY
     }
 }

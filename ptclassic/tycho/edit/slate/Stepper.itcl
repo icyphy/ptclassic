@@ -83,7 +83,6 @@ class ::tycho::Stepper {
     constructor {{s {}} {c {}} args} {
 	set slate $s
 	set canvas $c
-
 	eval configure $args
     }
     destructor {}
@@ -137,7 +136,7 @@ body ::tycho::Stepper::click {x y args} {
 	}
 	
 	# Forward the click
-    eval ::tycho::Interactor::click $actualX $actualY $args
+    eval chain $actualX $actualY $args
 }
 
 #######################################################################
@@ -145,8 +144,8 @@ body ::tycho::Stepper::click {x y args} {
 #
 # Continue an interaction sequence. If the mouse has moved more than
 # step size (if not in gridded mode) or over a grid line (if in gridded
-# mode) in either axis, then forward the drag command to the proxy
-# with some multiple of the step size as the movement.
+# mode) in either axis, then forward the drag command to the cascaded
+# interactor with some multiple of the step size as the movement.
 #
 body ::tycho::Stepper::drag {x y} {
 	# By default, we don't move in either axis
@@ -183,6 +182,6 @@ body ::tycho::Stepper::drag {x y} {
 		set actualX [expr $actualX + $moveX]
 		set actualY [expr $actualY + $moveY]
 
-		::tycho::Interactor::drag $actualX $actualY
+		chain $actualX $actualY
     }
 }

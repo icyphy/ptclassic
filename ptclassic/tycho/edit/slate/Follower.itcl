@@ -89,7 +89,7 @@ class ::tycho::Follower {
     method activate {t x y args}
 
     # Remove the interactor from the current picture
-    method deactivate {args}
+    method deactivate {x y args}
 }
 
 #######################################################################
@@ -116,7 +116,9 @@ body ::tycho::Follower::activate {t x y args} {
 	    "$this release %x %y; $this deactivate %x %y $args"
 
     # Execute the user-specified activation command
-    execute $activatecommand $x $y $args
+    if { $activatecommand != "" } {
+    	uplevel #0 $activatecommand $target $x $y
+    }
 
     # Start the interaction sequence
     eval click $x $y $args
@@ -128,12 +130,14 @@ body ::tycho::Follower::activate {t x y args} {
 # Deactivate the interactor from the target. This method must be called
 # by the script bound to the release event.
 # 
-body ::tycho::Follower::deactivate {args} {
+body ::tycho::Follower::deactivate {x y args} {
     # Remove bindings from the current tag
-    $slate bind $target\
-	    [eval ::tycho::Interactor::event Motion $args] {}
+    $slate bind $target \
+            [eval ::tycho::Interactor::event Motion $args] {}
     $slate bind $target \
 	    [eval ::tycho::Interactor::event Release $args] {}
 
-    execute $deactivatecommand $args
+    if { $deactivatecommand != "" } {
+        uplevel #0 $deactivatecommand $target $x $y
+    }
 }

@@ -235,8 +235,8 @@ class ::tycho::Selector {
 #
 body ::tycho::Selector::activate {tag x y args} {
     # Process depending on whether this is toggle mode or not
-    ::tycho::getflag toggle args
-    if { $toggle } {
+    array set opt [concat -toggle 0 $args]
+    if { $opt(-toggle) } {
     	set selectmode "toggle"
     } else {
     	set selectmode "select"
@@ -454,7 +454,9 @@ body ::tycho::Selector::drag {x y} {
     # set covered $candidates
 
     # Execute the client-specified update command
-    execute $dragcommand $x $y
+    if { $dragcommand != "" } {
+        uplevel #0 $dragcommand $target $x $y
+    }
 }
 
 #######################################################################
@@ -467,8 +469,9 @@ body ::tycho::Selector::itemclick {tag x y args} {
     set current [$slate find withtag current]
 
     # Process depending on whether this is toggle mode or not
+    array set opt [concat -toggle 0 $args]
     ::tycho::getflag toggle args
-    if { ! $toggle } {
+    if { ! $opt(-toggle) } {
 	# Select it if it isn't already
 	if { ! [$slate hastag $current "sel"] } {
 	    # Deselect all currently selected objects
