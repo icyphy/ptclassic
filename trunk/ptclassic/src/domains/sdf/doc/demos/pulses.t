@@ -2,7 +2,7 @@
 .NA pulses
 .SD
 Generate raised cosine and square-root raised cosine pulses
-and demonstrates matched filtering with the square-root raised
+and demonstrate matched filtering with the square-root raised
 cosine pulse.
 .EQ
 delim off
