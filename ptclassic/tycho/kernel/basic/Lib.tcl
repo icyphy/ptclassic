@@ -55,7 +55,6 @@ uplevel #0 {
     source $tychokernel/Dismiss.itcl
     source $tychokernel/DialogWindow.itcl
     source $tychokernel/FontManager.itcl
-    source $tychokernel/Options.tcl
     source $tychokernel/Message.itcl
     source $tychokernel/ErrorMessage.itcl
 }
