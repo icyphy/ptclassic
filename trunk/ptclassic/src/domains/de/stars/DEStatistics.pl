@@ -68,6 +68,7 @@ the next input arrives.
 		startTime = -1.0;
 	}
 	go {
+		int flag = 0;
 		// on demand input
 		if (demand.dataNew) {
 			demand.dataNew = FALSE;
@@ -76,6 +77,7 @@ the next input arrives.
 			double span = arrivalTime - completionTime;
 			sum += previous * span;
 			squareSum += previous*previous*span;
+			flag = 1;
 			// output
 			if (leng) {
 			   double t1 = sum/leng;
@@ -93,7 +95,7 @@ the next input arrives.
 		while (input.dataNew) {
 			if (startTime < 0) {
 			      startTime = arrivalTime;
-			} else {
+			} else if (!flag) {
 			   	double span = arrivalTime - completionTime;
 			 	sum += previous * span;
 			     	squareSum += previous * previous * span;
