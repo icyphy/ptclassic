@@ -79,7 +79,6 @@ $(DE_STAR_LIB): $(KERNEL_LIB) $(DE_LIB)
 	cd $(PTOLEMY)\src\domains\de\stars
 	nmake -f makefile.vc install
 
-# SDF does not work yet, we are using DE to test because it is simpler
 SDF_LIB=$(PTOLEMY)\src\domains\sdf\kernel\libsdf.lib
 SDF_DEP=$(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB) 
 $(SDF_LIB): $(SDF_DEP)
@@ -90,6 +89,12 @@ SDF_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfstars.lib
 SDF_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
 $(SDF_STAR_LIB): $(SDF_STAR_DEP)
 	cd $(PTOLEMY)\src\domains\sdf\stars
+	nmake -f makefile.vc
+
+SDF_DSP_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfdspstars.lib
+SDF_DSP_STAR_DEP=$(SDF_DEP) $(SDF_LIB) $(SDF_LS_LIB)
+$(SDF_DSP_STAR_LIB): $(SDF_DSP_STAR_DEP)
+	cd $(PTOLEMY)\src\domains\sdf\dsp\stars
 	nmake -f makefile.vc
 
 SDF_LS_LIB=$(PTOLEMY)\src\domains\sdf\loopScheduler\libLS.lib
@@ -107,7 +112,7 @@ $(PTCL_LIB): $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LI
 
 
 ptcl.p:$(PTCL_PTINY)
-$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB) $(SDF_STAR_LIB) $(SDF_LS_LIB)
+$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB) $(SDF_STAR_LIB) $(SDF_DSP_STAR_LIB) $(SDF_LS_LIB)
 	cd $(PTOLEMY)\src\ptcl
 	touch override.mk.vc
 	nmake -f makefile.vc ptcl.ptiny
