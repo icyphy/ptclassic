@@ -52,6 +52,7 @@ be a parameter.
 	constructor {
 		strm = NULL;
 		delFile = FALSE;
+		fileName = 0;
 	}
 	start {
 		const char* sf = saveFile;
