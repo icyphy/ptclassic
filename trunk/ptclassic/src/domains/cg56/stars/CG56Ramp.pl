@@ -37,9 +37,9 @@ with step size "step" (default 0.001).
         codeblock (main) {
 	move	$ref(sum),a
 	move	#$val(step),x0
-        move    a,$ref(output)
+        move    a1,$ref(output)
 	add	x0,a
-        move    a,$ref(sum)
+        move    a1,$ref(sum)
 	}
 	
 	start {
