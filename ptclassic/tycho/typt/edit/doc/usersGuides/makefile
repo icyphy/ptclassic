@@ -30,25 +30,17 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../..
+ROOT =		../../../..
 
 # True source directory
-VPATH =		$(ROOT)/kernel/doc/usersGuides
+VPATH =		$(ROOT)/typt/editors/doc/usersGuides
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	EditHelp.html \
-	FileBrowserHelp.html \
-	FileHelp.html \
-	FontManagerHelp.html \
-	HTMLHelp.html \
-	IndexBrowserHelp.html \
-	ListBrowserHelp.html \
-	TclConsoleHelp.html \
-	contents.html
+	RetargetHelp.html
 
 MISC_FILES =
 
