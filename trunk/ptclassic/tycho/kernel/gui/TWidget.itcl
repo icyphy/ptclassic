@@ -352,13 +352,15 @@ body ::tycho::TWidget::configureContextMenu {} {
     # Clear the menu
     contextmenu clear
 
-    contextmenu add [list Guide to the [info class] widget] \
+    contextmenu command usersguide \
+            -label "Guide to the [info class] widget" \
 	    -command "$this help"
 
     # Entries for developer information
     # FIXME: could be much more useful
-    contextmenu add [list Name of this [info class] widget...] -command \
-	    "::tycho::post $this"
+    contextmenu command widgetname \
+            -label "Name of this [info class] widget..." \
+            -command "::tycho::post $this"
 }
 
 #####################################################################
