@@ -157,6 +157,18 @@ CqLevelLink* MutableCalendarQueue :: levelput(Pointer a, double v, double fv, St
     return newLink;
 }
 
+// This method is used primarily by CQScheduler.resortEvents()
+void MutableCalendarQueue :: InsertCqLevelLink( CqLevelLink *newLink ) {
+    double v = newLink->level;
+    int i = (int) (v / cq_interval);    // find virtual bucket
+    i = i % cq_bucketNum;       // find actual bucket
+    InsertEventInBucket(&cq_bucket[i], newLink);
+    if ((cq_resizeEnabled) &&
+        (cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
+            Resize(2 * cq_bucketNum);
+    return;
+}
+
 void MutableCalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *link)
 {
     register CqLevelLink *current = NULL;
