@@ -50,6 +50,9 @@ void ParScheduler::setup() {
     	// compute repetitions, schedule (by calling computeSchedule)
     	SDFScheduler::setup();
 
+        // if numProcs == 1, use simple SDF scheduling in computeSchedule
+	if (numProcs == 1) return;
+	
 	// targetPtr setup for each processor
 	mapTargets();
 
