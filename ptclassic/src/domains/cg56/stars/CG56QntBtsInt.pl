@@ -1,5 +1,5 @@
 defstar {
-	name { QuantBitsInt }
+	name { QntBtsInt }
 	domain { CG56 }
 	desc { Integer quantizer with adjustable offset. }
 	version { $Id$ }

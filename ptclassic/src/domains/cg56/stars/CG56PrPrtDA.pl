@@ -1,5 +1,5 @@
 defstar {
-	name { ProPortDA }
+	name { PrPrtDA }
 	domain { CG56 }
 	desc { An input/output star for the Ariel ProPort }
 	version { $Id$ }
@@ -35,7 +35,7 @@ and the following error code will be left in register y0:
 .ip "\fB123061\fP"
 An interrupt occurred and the output buffer was empty.
 	}
-        seealso { ProPortAD, ProPortADDA }
+        seealso { PrPrtAD, PrPrtADDA }
 	input {
 		name {input1}
 		type {FIX}

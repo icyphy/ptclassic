@@ -69,12 +69,12 @@ PL_SRCS= \
  CG56Neg.pl \
  CG56Pad.pl \
  CG56PrPrtAD.pl \
- CG56ProPortADDA.pl \
- CG56ProPortDA.pl \
+ CG56PrPrtADDA.pl \
+ CG56PrPrtDA.pl \
  CG56Pulse.pl \
  CG56Quant.pl \
- CG56QuantBitsInt.pl \
- CG56QuantBitsLin.pl \
+ CG56QntBtsInt.pl \
+ CG56QntBtsLin.pl \
  CG56QuantRange.pl \
  CG56Ramp.pl \
  CG56ReadFile.pl \
@@ -100,8 +100,8 @@ PL_SRCS= \
  CG56VarQuasar.pl \
  CG56WasteCycles.pl \
  CG56WaveForm.pl \
- CG56WriteFile.pl \
- CG56WriteFileInt.pl \
+ CG56WrtFile.pl \
+ CG56WrtFileInt.pl \
  CG56Xgraph.pl \
  CG56Xor.pl
 
