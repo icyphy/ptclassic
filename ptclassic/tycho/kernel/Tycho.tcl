@@ -223,11 +223,6 @@ if {[info exists argv]} {
 	}
     }
 }
-if {$tclscripttosource!={} } {
-    uplevel #0 {source $tclscripttosource}
-}
-unset tclscripttosource sawDashE
-
 # Retrieve binary and version info. If the two variables already exist,
 # then we must be in a tysh binary we they are set by SetVersionInfo
 # which is in TyConsole.cc. Otherwise we are being called from itkwish,
@@ -258,6 +253,11 @@ if {$tychoOpenFiles == 0} {
 	wm deiconify .mainConsole
     }
 }
+
+if {$tclscripttosource!={} } {
+    uplevel #0 {source $tclscripttosource}
+}
+unset tclscripttosource sawDashE
 
 tk appname tycho
 
