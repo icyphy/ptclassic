@@ -1306,6 +1306,7 @@ void genDef ()
 	char fullClass[SMALLBUFSIZE];
 	char descriptString[MEDBUFSIZE];
         char *derivedSimple;
+	char *startp, *copyrightStart; 
 
 /* temp, until we implement this */
 	if (galDef) {
@@ -1507,126 +1508,6 @@ void genDef ()
 	}
 	(void) fclose(fp);
 
-/**************************************************************************
-		CREATE THE TROFF DOCUMENTATION FILE
-*/
-
-	sprintf (fname, "%s.t", fullClass);
-	if ((fp = fopen (fname, "w")) == 0) {
-		perror (fname);
-		exit (1);
-	}
-
-	/* Turn eqn delimitters off */
-	fprintf (fp, ".EQ\ndelim off\n.EN\n");
-
-	fprintf (fp, ".\\\" documentation file generated from %s by %s\n",
-		 inputFile, progName);
-
-/* copyright */
-	if (objCopyright) {
-		char* p = objCopyright;
-		while (*p) {
-			/* make each line a comment */
-			fprintf (fp, ".\\\" ");
-			while (*p && *p != NEWLINE) fputc(*p++,fp);
-			if (*p == NEWLINE) fputc(*p++,fp);
-		}
-		fputc(NEWLINE,fp);
-	}
-
-/* Name */
-	fprintf (fp, ".NA \"%s\"\n", objName);
-
-/* short descriptor */
-	fprintf (fp, ".SD\n");
-	if (objDesc) {
-		/*
-		 * print descriptor with "\n" replaced with NEWLINE,
-		 * and "\t" replaced with a tab.
-		 * Any other escaped character will be printed as is.
-		 */
-		if(unescape(descriptString, objDesc, MEDBUFSIZE))
-		    yywarn("warning: Descriptor too long. May be truncated.");
-		fprintf (fp, "%s\n", descriptString);
-	}
-	fprintf (fp, ".SE\n");
-
-/* location */
-	if (objLocation)
-		fprintf (fp, ".LO \"%s\"\n",objLocation);
-
-/* base class and domain */
-	/* For stars, we append the domain name to the beginning of the name,
-	   unless it is already there */
-	if (derivedFrom) {
-		if (domain &&
-		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
-			sprintf (baseClass, "%s%s", galDef ? "" : domain,
-				 derivedFrom);
-		}
-		else
-			(void) strcpy (baseClass, derivedFrom);
-	}
-	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
-	else if (galDef)
-		(void)strcpy (baseClass, "Galaxy");
-	else
-		sprintf (baseClass, "%sStar", domain);
-
-	fprintf (fp, ".DM %s %s\n", domain, baseClass);
-
-/* version */
-	if (objVer && objDate)
-		fprintf (fp, ".SV %s %s\n", objVer, objDate);
-
-/* author */
-	if (objAuthor)
-		fprintf (fp, ".AL \"%s\"\n", objAuthor);
-
-/* acknowledge */
-	if (objAcknowledge)
-		fprintf (fp, ".AC \"%s\"\n", objAcknowledge);
-
-/* inputs */
-	if ((int)strlen(inputDescriptions) > 0)
-		fprintf (fp, ".IH\n%s.PE\n", inputDescriptions);
-
-/* outputs */
-	if ((int)strlen(outputDescriptions) > 0)
-		fprintf (fp, ".OH\n%s.PE\n", outputDescriptions);
-
-/* inouts */
-	if ((int)strlen(inoutDescriptions) > 0)
-		fprintf (fp, ".BH\n%s.PE\n", inoutDescriptions);
-
-/* states */
-	if ((int)strlen(stateDescriptions) > 0)
-		fprintf (fp, ".SH\n%s.ET\n", stateDescriptions);
-
-/* explanation */
-	/* Turn eqn delimitters on */
-	fprintf (fp, ".EQ\ndelim $$\n.EN\n");
-	if (objExpl)
-		fprintf (fp, ".LD\n%s\n", objExpl);
-
-/* ID block (will appear in .h and .cc files only. */
-
-/* See Also list */
-	if (nSeeAlso > 0) fprintf (fp, ".SA\n");
-	if (nSeeAlso > 2) {
-	    checkSeeAlsos(nSeeAlso);
-	    for (i = 0; i < (nSeeAlso - 2); i++)
-		fprintf (fp, "%s,\n", seeAlsoList[i]);
-	}
-	if (nSeeAlso > 1) fprintf (fp, "%s and\n", seeAlsoList[nSeeAlso-2]);
-	if (nSeeAlso > 0) fprintf (fp, "%s.\n", seeAlsoList[nSeeAlso-1]);
-
-/* end the final entry */
-	fprintf (fp, ".ES\n");
-
-/* close the file */
-	(void) fclose (fp);
 
 /**************************************************************************
 		CREATE THE HTML DOCUMENTATION FILE
@@ -1686,7 +1567,8 @@ void genDef ()
                 fprintf (fp, "<b>Derived from:</b> Galaxy<br>\n");
         } else {
 		sprintf (baseClass, "%sStar", domain);
-                fprintf (fp, "<b>Derived from:</b> %sStar<br>\n", domain);
+                fprintf (fp, "<b>Derived from:</b> <a href=\"$PTOLEMY/src/domains/%s/kernel/%sStar.cc\">%sStar</a><br>\n",
+			cvtToLower(domain), domain, domain);
         }
 
 /* location */
@@ -1733,7 +1615,7 @@ void genDef ()
 /* ID block (will appear in .h and .cc files only. */
 
 /* See Also list */
-	if (nSeeAlso > 0) fprintf (fp, "<p><b>See also:</b>");
+	if (nSeeAlso > 0) fprintf (fp, "<p><b>See also:</b> ");
 	if (nSeeAlso > 2) {
 	    checkSeeAlsos(nSeeAlso);
 	    for (i = 0; i < (nSeeAlso - 2); i++) {
@@ -1761,18 +1643,24 @@ void genDef ()
  * 'foo facet, XXX users' depending on whether there is one or more users
  */
 	fprintf (fp,
-		 "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s facet, %s user\"> %s users</a>\n",
+		 " <a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s facet, %s user\">%s users</a>\n",
 		 cvtToLower(domain), objName, cvtToUpper(domain), objName);
 
 /* copyright */
 	if (objCopyright) {
-		char* p = objCopyright;
                 fprintf (fp, "<p><hr><p>\n");
-		while (*p) {
-			while (*p && *p != NEWLINE) fputc(*p++,fp);
-			if (*p == NEWLINE) fputc(*p++,fp);
+		if ( (startp = strstr(objCopyright,"$PTOLEMY/copyright"))) {
+			/* Substitute in a hyperlink */
+			copyrightStart = strdup(objCopyright);
+			copyrightStart[startp-objCopyright] = '\0';
+
+			fprintf(fp, "%s<a href=\"$PTOLEMY/copyright\">$PTOLEMY/copyright</a>%s\n",
+				copyrightStart,
+				startp+strlen("$PTOLEMY/copyright"));
+			free(copyrightStart);
+		} else {
+			fprintf(fp, "%s\n", objCopyright);
 		}
-		fputc(NEWLINE,fp);
 	}
 
 /* close the file */
