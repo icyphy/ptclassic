@@ -32,11 +32,12 @@ if ( ! $?OCTTOOLS ) then
     setenv OCTTOOLS ~ptolemy/octtools
 endif
 
-if ( ! $?ARCH ) then
-    setenv ARCH snake
+if ( ! $?PTARCH ) then
+    setenv PTARCH ` $PTOLEMY/bin/ptarch`
+
 endif
 
-set path=(. $PTOLEMY/bin.$ARCH $PTOLEMY/bin $PTOLEMY/octtools/bin.$ARCH $path)
+set path=(. $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path)
 
 # if ( ! $?USER ) then setenv USER bush endif
 
