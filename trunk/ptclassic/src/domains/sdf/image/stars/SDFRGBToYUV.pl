@@ -18,10 +18,11 @@ No downsampling is performed on the U and V signals.
 	}
 	explanation {
 The YUV format, which is a linear mapping of the RGB format, is used
-in broadcast television to maintain compability with black-and-white
-televisions [1].
-In essence, Y is the luminance of the image, and U and V represent the
+in broadcast television to maintain compability between color and
+black-and-white televisions [1].
+Y is the luminance (intensity) of the image, and U and V represent the
 chrominance (hue and saturation).
+The YUV format is based on how the eyes perceive color.
 .Id "format conversion, RGB to YUV"
 .Id "image format conversion, RGB to YUV"
 .Ir "image format, red-green-blue (RGB)"
@@ -29,7 +30,7 @@ chrominance (hue and saturation).
 .Id "Pratt, W."
 .UH REFERENCES
 .ip [1]
-W. Pratt, \fIDigital image processing\fR,
+W. Pratt, \fIDigital Image Processing\fR,
 Wiley & Sons: New York.  1991.  2nd ed.
 	}
 
@@ -70,9 +71,9 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		GrayImage* greenI = (GrayImage*) envp2.writableCopy();
 		GrayImage* blueI = (GrayImage*) envp3.writableCopy();
 
-		if (redI->fragmented() || redI->processed() ||
-				greenI->fragmented() || greenI->processed() ||
-				blueI->fragmented() || blueI->processed()) {
+		if ( redI->fragmented() || redI->processed() ||
+		     greenI->fragmented() || greenI->processed() ||
+		     blueI->fragmented() || blueI->processed()) {
 			LOG_DEL; delete redI; LOG_DEL; delete greenI;
 			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
@@ -82,9 +83,9 @@ Wiley & Sons: New York.  1991.  2nd ed.
 		const int width = redI->retWidth();
 		const int height = redI->retHeight();
 		if ((greenI->retWidth() != width) ||
-				(greenI->retHeight() != height) ||
-				(blueI->retWidth() != width) ||
-				(blueI->retHeight() != height)) {
+		    (greenI->retHeight() != height) ||
+		    (blueI->retWidth() != width) ||
+		    (blueI->retHeight() != height)) {
 			LOG_DEL; delete redI; LOG_DEL; delete greenI;
 			LOG_DEL; delete blueI;
 			Error::abortRun(*this,
