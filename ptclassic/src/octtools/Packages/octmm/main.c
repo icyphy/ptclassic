@@ -62,7 +62,7 @@ int argc;
 char **argv;
 {
     extern char *optarg;
-    extern int optind;
+    extern int octoptind;
     int option;
     char *out_view, *scale, *filename;
     extern void process();
@@ -103,13 +103,13 @@ char **argv;
     /*
      *  Finish the command line argument parsing 
      */
-    if (optind + 1 != argc) {
+    if (octoptind + 1 != argc) {
 	optUsage();
     }
 
     VOVbegin( argc, argv );
     ohUnpackDefaults(&facet, "a", ":physical:contents");
-    if (ohUnpackFacetName(&facet, argv[optind]) != OCT_OK) {
+    if (ohUnpackFacetName(&facet, argv[octoptind]) != OCT_OK) {
 	optUsage();
     }
 
