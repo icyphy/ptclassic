@@ -45,6 +45,7 @@ static ivWhichItem itemPtr[] = {
     {"Pin", 1}
 };
 
+int
 main()
 {
     double 	a = 100.0, c = 12.67, d = 1999999e12; /* test variables */
@@ -52,11 +53,11 @@ main()
     double 	aa = 120.1;
     XEvent 	theEvent;
     Display 	*display;
-    char 		*theString;
+    char	*theString;
     int		exitFlag = 0;
     int		destroy = 0;
     int		destroyed = 0;
-    int  		selected;
+    int 	selected = 0;
     IVWindow 	*IVwin;
     IVWindow	*IVexitWindow;
     int enable = 0;
@@ -154,12 +155,13 @@ main()
 	iv_FreeWindow( IVwin );
     }
     (void) printf("Selected : %d\n", selected);
-    (void) printf("Variable A: %lf\n", a);
-    (void) printf("Variable C: %lf\n", c);
-    (void) printf("Variable D: %lf\n", d);
+    (void) printf("Variable A: %f\n", a);
+    (void) printf("Variable C: %f\n", c);
+    (void) printf("Variable D: %f\n", d);
     (void) printf("Integer N: %d\n", n);
     (void) printf("Boolean var: %d\n", b);
     (void) printf("string:'%s'\n", theString);
     (void) printf("exit flag: %d\n", exitFlag); 
+    return 0;
 }
 
