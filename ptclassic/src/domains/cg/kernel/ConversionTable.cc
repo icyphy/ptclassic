@@ -60,7 +60,7 @@ ConversionTable::~ConversionTable() {
 int ConversionTable::tblRow(DataType src, DataType dst, const char* star) {
   int status;
   if (rowToInitialize >= rows) {
-    cout << "Attempting to add to many rows to table\n";
+    cout << "Attempting to add too many rows to table\n";
     status = 0;
   } else {
     table[rowToInitialize].src = src;
