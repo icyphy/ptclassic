@@ -73,6 +73,7 @@ CCS_WITH_H_FILES=\
  NamedObj.cc \
  Particle.cc \
  ParticleQueue.cc \
+ Plasma.cc \
  PriorityQueue.cc \
  PtGate.cc \
  Scheduler.cc \
@@ -110,7 +111,6 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  ConstIters.h \
  Linker.sysdep.h \
  ParticleStack.h \
- Plasma.h \
  SimAction.h \
  dataType.h \
  isa.h \
