@@ -110,8 +110,7 @@ int MatlabTcl::init() {
 // support evaluation of a Matlab command
 int MatlabTcl::evaluate(char* command, int outputBufferFlag) {
     sethandle();
-    matlabInterface->AttachMatlabFigureIds();
-    int merror = matlabInterface->EvaluateOneCommand(command);
+    int merror = matlabInterface->EvaluateUserCommand(command);
     if (outputBufferFlag || merror) {
 	Tcl_AppendResult(tclinterp, matlabInterface->GetOutputBuffer(), 0);
     }
