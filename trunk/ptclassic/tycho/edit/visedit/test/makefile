@@ -41,10 +41,11 @@ include $(CONFIG)
 
 TCL_SRCS = 	
 
-ITCL_SRCS = \
-	createForest.itcl \
+GRAPHICAL_TESTS = \
 	testEditForest.itcl \
 	testFiles.itcl
+
+ITCL_SRCS = $(GRAPHICAL_TESTS)
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
@@ -53,9 +54,9 @@ MISC_FILES =	sample.fst sample.gfk
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: $(ITCL_SRCS) $(MISC_FILES)
-	tycho -e testEditForest.itcl
-	tycho -e testFiles.itcl
+tests:: alltests.itcl
+	tycho -e alltests.itcl
+
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
