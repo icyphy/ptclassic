@@ -205,7 +205,7 @@ proc html2ps {filelist} {
     foreach file $filelist {
 	# count down to 0 to give the user something to look at
 	puts -nonewline " $numfiles" 
-	incr $numfiles -1
+	incr numfiles -1
 	flush stdout
 
 	# If the file starts with 'http', then just open it
