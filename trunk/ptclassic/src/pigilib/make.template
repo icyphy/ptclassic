@@ -15,8 +15,9 @@
 #
 # Change PTOLEMY to point to the correct directory
 # in your system (no tilde-user allowed!).
-PTOLEMY	      = /usr/tools/ptolemy
-
+PTOLEMY	      = ../..
+# VPATH points to the "real" source directory
+VPATH         = $(PTOLEMY)/src/pigiRpc
 # Octtools root directory
 OCTTOOLS      = /usr/tools/octtools
 
@@ -25,12 +26,12 @@ CFLAGS        = -g -I$(OCTTOOLS)/include
 
 # C++ compiler variables
 GXX	      = g++
-GXXFLAGS      = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
+GPPFLAGS      = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
 GNUINCLUDE    = /usr/gnu/lib/g++-include
 
 # Linker variables
 LINKER        = g++
-LDFLAGS	      = -L$(OCTTOOLS)/lib -L$(PTOLEMY)/lib
+LDFLAGS	      = -L$(OCTTOOLS)/lib -L$(PTOLEMY)/lib.$(ARCH)
 LIBS	      = -lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
 		-lerrtrap -luprintf -lport -lX11 -lm
 
@@ -92,12 +93,14 @@ SRCS	      = main.c \
 
 TARGET	      = pigiRpc
 
-$(TARGET): makefile $(OBJS) $(PTOLEMY)/lib/libptolemy.a 
+all:	$(TARGET)
+
+$(TARGET): makefile $(OBJS) $(PTOLEMY)/lib.$(ARCH)/libptolemy.a 
 	$(LINKER) $(LDFLAGS) $(OBJS) \
-	    $(PTOLEMY)/lib/sdf/*.o \
+	    $(PTOLEMY)/obj.$(ARCH)/stars/sdf/*.o \
 	    $(LIBS) -o $(TARGET)
 
-INSTALLED     = $(PTOLEMY)/bin/$(TARGET)
+INSTALLED     = $(PTOLEMY)/bin.$(ARCH)/$(TARGET)
 install: $(INSTALLED)
 
 $(INSTALLED):	$(TARGET)
@@ -119,8 +122,9 @@ depend:
 
 makefile:	make.template
 		rm -f makefile
-		cp make.template makefile
-		make -f make.template sources depend # use new SRCS list
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		ln -s $(VPATH)/makefile makefile
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
@@ -134,7 +138,7 @@ TAGS:	$(SRCS)
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
-	$(GXX) $(GXXFLAGS) -c  $<
+	$(GXX) $(GPPFLAGS) -c  $<
 
 # print out source file names
 printsrcs:;	@echo "$(SRCS)"
