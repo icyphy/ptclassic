@@ -29,6 +29,18 @@ all install clean sources realclean checkjunk sccsinfo:
 	    fi ; \
 	done
 
+TAGS:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		  echo making $@ in domains/$(ME)/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../../../src/domains/$(ME)/$$x $@ ; \
+		) \
+	    fi ; \
+	done
+	-cat -s $(DIRS:%=%/TAGS) > $@
+
 depend:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
