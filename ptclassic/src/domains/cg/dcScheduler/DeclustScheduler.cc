@@ -43,7 +43,11 @@ Date of last revision: 5/92
 // function to display the schedule
 StringList DeclustScheduler::displaySchedule() {
 	StringList out;
-	out += bestSchedule->display(galaxy());
+	// bestSchedule may be NULL if there is manual assignment
+	if (assignManually())
+	    out += myProcs()->display(galaxy());
+	else
+	    out += bestSchedule->display(galaxy());
 	return out;
 }
 
