@@ -117,7 +117,7 @@ void CGCTclTkTarget :: mainLoopCode() {
 	       << ") {\n";
 	myCode += wormIn;
 
-        if (inWormHole()) wormInputCode();
+        if (inWormHole()) allWormInputCode();
 	myCode += mainLoopInit;
 #ifndef PTOLEMY04
 	compileRun((SDFScheduler*) scheduler());
@@ -125,7 +125,7 @@ void CGCTclTkTarget :: mainLoopCode() {
 #ifdef PTOLEMY04
         scheduler()->compileRun();
 #endif
-        if (inWormHole()) wormOutputCode();
+        if (inWormHole()) allWormOutputCode();
         endIteration(iterations,0);
 	myCode += mainLoopTerm;
 
