@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without
@@ -50,6 +50,19 @@
 # In the above example, we bring up the Exec window and then wait  
 # until the user closes it.
 #
+# In this example, we automatically start up the subprocess, and then
+# close the window if the subprocess completed without an error
+# <tcl><pre>
+#     set win [::tycho::autoName .execExample]
+#     ::tycho::Exec $win &#92
+#        -command {make all} &#92
+#        -autostart 1 &#92
+#        -autodestroy 1
+#     $win centerOnScreen
+# </pre></tcl>
+# If the make in the above example had returned an error, then the window
+# would not have been destroyed.
+#
 class ::tycho::Exec {
     inherit ::tycho::Query
     constructor {args} {}
@@ -57,6 +70,12 @@ class ::tycho::Exec {
     
     ###################################################################
     ####                            options                        ####
+
+    # If non-zero, close widget if the subprocess exits with an ok status.
+    itk_option define -autodestroy autodestroy Autodestroy 0
+
+    # If non-zero, start the subprocess automatically
+    itk_option define -autostart autostart Autostart 0
 
     # Command to be executed.
     itk_option define -command command Command "make"
@@ -90,6 +109,19 @@ class ::tycho::Exec {
 
     # The value of the cursor before we set it to the busy cursor.
     private variable oldCursor
+
+}
+
+#######################################################################
+#### -autodestroy configuration
+# If non-zero, destroy the widget if the process exits with an 'ok'
+# status
+configbody ::tycho::Exec::autodestroy {
+    if {$itk_option(-autodestroy) == 0} {
+        insert autoDestroy No
+    } else {
+        insert autoDestroy Yes
+    }
 }
 
 #######################################################################
@@ -120,6 +152,7 @@ body ::tycho::Exec::constructor {args} {
     configure -queries [list \
             {line commandToExec {Command to Exec:} make} \
             {line dirToExecFrom {Directory to Exec from:} {}} \
+            {radio autoDestroy {Close window automatically:} {Yes No} No} \
     ]
 
     eval itk_initialize $args
@@ -136,9 +169,32 @@ body ::tycho::Exec::constructor {args} {
 	    -text {Exec <Ret>} \
 	    -command "$this execProcess"
 
+    $itk_component(bbox) buttonconfigure cancel \
+	    -text {Close <Esc>}
+
     $itk_component(bbox) add help \
 	    -text "Help" \
 	    -command "$this help"
+    if {![info exists itk_component(history)] || \
+            ![winfo exists $itk_component(history)]} {
+        # We have not yet created the history window, so do so now.
+        itk_component add history {
+            ::tycho::Edit $itk_component(hull).history -textheight 15
+        } {
+            keep -readonly -textwidth -background \
+                    -highlightbackground -highlightcolor -selectforeground \
+                \
+                -cursor -insertbackground -textforeground -textfont \
+                -textbackground
+        }
+        pack $itk_component(history) -expand yes -fill both
+        $itk_component(history) configure -readonly 1
+    }
+
+    # If autostart is not equal to zero, then start the subprocess
+    if {$itk_option(-autostart) != 0} {
+        $this execProcess
+    }
 }
 
 #######################################################################
@@ -185,8 +241,11 @@ body ::tycho::Exec::execProcess {} {
     ::tycho::safeUpdate $this
 
     # Open a non-blocking pipe from the command
+    # FIXME: Unixism - Brent Welch says to use '|& cat' here to get standard
+    # error.  However, this presupposes that 'cat' is a command, which might
+    # not be true under Windows or Macintosh.
     if [catch {set fd [open \
-	    [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]} errMsg] {
+	    [concat "|[get commandToExec] |& cat"] {RDONLY NONBLOCK}]} errMsg] {
         config -cursor $oldCursor
 	error "$errMsg"
     }
@@ -230,33 +289,29 @@ body ::tycho::Exec::help {} {
 # things in the global scope.
 #
 body ::tycho::Exec::readOrClose {fd} {
-    if {![info exists itk_component(history)] || \
-            ![winfo exists $itk_component(history)]} {
-        # We have not yet created the history window, so do so now.
-        itk_component add history {
-            ::tycho::Edit $itk_component(hull).history -textheight 15
-        } {
-            keep -readonly -textwidth -background \
-                    -highlightbackground -highlightcolor -selectforeground \
-                \
-                -cursor -insertbackground -textforeground -textfont \
-                -textbackground
-        }
-        pack $itk_component(history) -expand yes -fill both
-        $itk_component(history) configure -readonly 1
-    }
     $itk_component(history) configure -readonly 0
     $itk_component(history) insertData "[gets $fd]\n"
+    $itk_component(history) center
     $itk_component(history) configure -readonly 1
 
     # If we are at the end of the file, close the descriptor.
     # See the man page for the fileevent tcl command.
     if [eof $fd] {
         config -cursor $oldCursor
-        close $fd
+        if ![catch {close $fd} errMsg] {
+            $itk_component(history) configure -readonly 0
+            $itk_component(history) insertData "<<Process exited Normally>>\n"
+            $itk_component(history) configure -readonly 1
+            if {[get autoDestroy] == "Yes" } {
+                after 500 delete object $this
+            }
+        } else {
+            $itk_component(history) configure -readonly 0
+            $itk_component(history) insertData "<<Process exited Abnormally>>\n"
+            $itk_component(history) configure -readonly 1
+        }
     }
 }
-
 
     ###################################################################
     ###################################################################
@@ -265,7 +320,8 @@ body ::tycho::Exec::readOrClose {fd} {
 #####################################################################
 #### execWidgetIsSupported
 # Return 1 if the Exec widget will work on the current platform, otherwise
-# return 0
+# return 0.
+#
 body ::tycho::Exec::execWidgetIsSupported {} {
     global tcl_platform
     global tcl_platform
