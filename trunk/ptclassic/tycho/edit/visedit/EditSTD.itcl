@@ -72,8 +72,8 @@ class ::tycho::EditSTD {
     method lookInside {nodeOrArc w}
     method insideValue {typeInfo nodeOrArc w}
     method insideValueDone {typeInfo nodeOrArc w}
-    method insideAction {typeInfo nodeOrArc w}
-    method getNewAction {typeInfo nodeOrArc w}
+    method insideMachine {typeInfo nodeOrArc w}
+    method getNewMachine {w}
 
     # The following are methods used by the Special menu commands.
     # To set the names of the I/O ports
@@ -144,6 +144,7 @@ body ::tycho::EditSTD::constructor {args} {
     # Initialize the io portNames array elements.
     set portNames(in)  ""
     set portNames(out) ""
+    set portNames(internal) ""
 
     # Setup menu hot key and mouse binding
     bind $canvas <Key-e> "$this editItem selected"
@@ -155,7 +156,7 @@ body ::tycho::EditSTD::constructor {args} {
 
     # Need to load the startup file here again, otherwise
     # the member variables of this derived class will be lost,
-    # such as portNames(in) and portNames(out).
+    # such as portNames(in), portNames(out) and portNames(internal).
     $this reload
 
     # If no machine type is specified yet, initialize it.
@@ -163,6 +164,8 @@ body ::tycho::EditSTD::constructor {args} {
 	set w [$this windowName].editMachineType
 	::tycho::DialogWindow $w -title "Edit the Machine Type"\
 		-text "Press button to choose the machine type:"
+	$w addButton mixed -text "Mixed"\
+		-command "$this setMachineType Mixed; destroy $w"
 	$w addButton moore -text "Moore"\
 		-command "$this setMachineType Moore; destroy $w"
 	$w addButton mealy -text "Mealy"\
@@ -275,6 +278,8 @@ body ::tycho::EditSTD::saveText {} {
     append text "set portNames(in) \"$portNames(in)\"\n"
     append text "# OutPort names\n"
     append text "set portNames(out) \"$portNames(out)\"\n"
+    append text "# Internal event names\n"
+    append text "set portNames(internal) \"$portNames(internal)\"\n"
 
     # Step through all the nodes in the canvas.
     append text "\n### Creating the nodes\n"
@@ -292,24 +297,31 @@ body ::tycho::EditSTD::saveText {} {
 		[$canvas coords $nodeInfo($node,label)] -fill black"
 	set label [$canvas itemcget $nodeInfo($node,label) -text]
 	if {$label != {}} {
-	    append text " -text $label"
+	    append text " -text \{$label\}"
 	}
 	append text "\]\n"
 
-	if {$machineType == "Moore"} {
+	if {$machineType == "Mixed"} {
+	    # Internal machine
+	    if "[info exists nodeInfo($node,machine)]" {
+		append text "# Internal machine:\n"
+		append text "set nodeInfo(\$node$node,machine)\
+			[list $nodeInfo($node,machine)]\n"
+	    }
+	} elseif {$machineType == "Moore"} {
 	    # Output choice
-	    if "[info exists nodeInfo($node,output)]" {
-		append text "# Output choice: Value, Action or None.\n"
-		append text "set nodeInfo(\$node$node,output)\
-			[list $nodeInfo($node,output)]\n"
+	    if "[info exists nodeInfo($node,outputBy)]" {
+		append text "# Output choice: Value, Machine or None.\n"
+		append text "set nodeInfo(\$node$node,outputBy)\
+			[list $nodeInfo($node,outputBy)]\n"
 
-		if {$nodeInfo($node,output) == "Action"} {
-		    # Output by an action
-		    if [info exists nodeInfo($node,action)] {
-			append text "set nodeInfo(\$node$node,action)\
-				[list $nodeInfo($node,action)]\n"
+		if {$nodeInfo($node,outputBy) == "Machine"} {
+		    # Output by an machine
+		    if [info exists nodeInfo($node,machine)] {
+			append text "set nodeInfo(\$node$node,machine)\
+				[list $nodeInfo($node,machine)]\n"
 		    }
-		} elseif {$nodeInfo($node,output) == "Value"} {
+		} elseif {$nodeInfo($node,outputBy) == "Value"} {
 		    # Output by fixed values
 		    foreach outName $portNames(out) {
 			if [info exists nodeInfo($node,value,$outName)] {
@@ -390,20 +402,45 @@ body ::tycho::EditSTD::saveText {} {
 		    [list $edgeInfo($arc,guard)]\n"
 	}
 
-	if {$machineType == "Mealy"} {
-	    # Output choice
-	    if "[info exists edgeInfo($arc,output)]" {
-		append text "# Output choice: Value, Action or None.\n"
-		append text "set edgeInfo(\$arc,output)\
-			[list $edgeInfo($arc,output)]\n"
+	if {$machineType == "Mixed"} {
+	    if [info exists edgeInfo($arc,preemptive)] {
+		append text "set edgeInfo(\$arc,preemptive)\
+			$edgeInfo($arc,preemptive)\n"
+	    }
 
-		if {$edgeInfo($arc,output) == "Action"} {
-		    # Output by an action
-		    if [info exists edgeInfo($arc,action)] {
-			append text "set edgeInfo(\$arc,action)\
-				[list $edgeInfo($arc,action)]\n"
+	    if [info exists edgeInfo($arc,entryType)] {
+		append text "set edgeInfo(\$arc,entryType)\
+			$edgeInfo($arc,entryType)\n"
+	    }
+
+	    foreach outName $portNames(out) {
+		if [info exists edgeInfo($arc,output,$outName)] {
+		    append text "set edgeInfo(\$arc,output,$outName)\
+			    [list $edgeInfo($arc,output,$outName)]\n"
+		}
+	    }
+
+	    foreach internalName $portNames(internal) {
+		if [info exists edgeInfo($arc,action,$internalName)] {
+		    append text "set edgeInfo(\$arc,action,$internalName)\
+			    [list $edgeInfo($arc,action,$internalName)]\n"
+		}
+	    }
+
+	} elseif {$machineType == "Mealy"} {
+	    # Output choice
+	    if "[info exists edgeInfo($arc,outputBy)]" {
+		append text "# Output choice: Value, Machine or None.\n"
+		append text "set edgeInfo(\$arc,outputBy)\
+			[list $edgeInfo($arc,outputBy)]\n"
+
+		if {$edgeInfo($arc,outputBy) == "Machine"} {
+		    # Output by an machine
+		    if [info exists edgeInfo($arc,machine)] {
+			append text "set edgeInfo(\$arc,machine)\
+				[list $edgeInfo($arc,machine)]\n"
 		    }
-		} elseif {$edgeInfo($arc,output) == "Value"} {
+		} elseif {$edgeInfo($arc,outputBy) == "Value"} {
 		    # Output by fixed values
 		    foreach outName $portNames(out) {
 			if [info exists edgeInfo($arc,value,$outName)] {
@@ -483,13 +520,27 @@ body ::tycho::EditSTD::editState {node} {
 		-text $title -queries [list $labelQuery]\
 		-okcommand "$this editStateDone $node $w"
 
-	if {$machineType == "Moore"} {
-	    if "![info exists nodeInfo($node,output)]" {
-		set nodeInfo($node,output) "Value"
+	if {$machineType == "Mixed"} {
+	    if "![info exists nodeInfo($node,machine)]" {
+		set nodeInfo($node,machine) ""
 	    }
-	    $w addRadioQuery output {Output} {Value Action None} \
-		    $nodeInfo($node,output) 
+	    $w addQuery machine {Internal Machine:} $nodeInfo($node,machine)
+
+ 	    $w addButton lookInside -text {Look Inside}\
+		    -command "$this insideMachine nodeInfo $node $w"
+
+	} elseif {$machineType == "Moore"} {
+	    if "![info exists nodeInfo($node,outputBy)]" {
+		set nodeInfo($node,outputBy) "Value"
+	    }
+	    $w addRadioQuery outputBy {Output by} {Value Machine None} \
+		    $nodeInfo($node,outputBy) 
 	    
+	    if "![info exists nodeInfo($node,machine)]" {
+		set nodeInfo($node,machine) ""
+	    }
+	    $w addQuery machine {Machine:} $nodeInfo($node,machine)
+
 	    $w addButton lookInside -text {Look Inside}\
 		    -command "$this lookInside $node $w"
 	}
@@ -509,10 +560,22 @@ body ::tycho::EditSTD::editStateDone {node w} {
 	$this markModified
     }
 
-    if {$machineType == "Moore"} {
-	set newOutput [$w get output]
-	if {$nodeInfo($node,output) != $newOutput} {
-	    set nodeInfo($node,output) $newOutput
+    if {$machineType == "Mixed"} {
+	set newMachine [$w get machine]
+	if {$nodeInfo($node,machine) != $newMachine} {
+	    set nodeInfo($node,machine) $newMachine
+	    $this markModified	
+	}
+    } elseif {$machineType == "Moore"} {
+	set newOutputBy [$w get outputBy]
+	if {$nodeInfo($node,outputBy) != $newOutputBy} {
+	    set nodeInfo($node,outputBy) $newOutputBy
+	    $this markModified	
+	}
+
+	set newMachine [$w get machine]
+	if {$nodeInfo($node,machine) != $newMachine} {
+	    set nodeInfo($node,machine) $newMachine
 	    $this markModified	
 	}
     }
@@ -542,16 +605,51 @@ body ::tycho::EditSTD::editArc {arc} {
 	}
 	set guardQuery [list guard {Guard:} $edgeInfo($arc,guard)]
 
-	::tycho::EntryQuery $w -title "STD Edit $machineType Arc" \
+	::tycho::EntryQuery $w -title "STD Edit $machineType Arc"\
 		-text $title -queries [list $labelQuery $guardQuery]\
 		-okcommand "$this editArcDone $arc $w"
 
-	if {$machineType == "Mealy"} {
-	    if "![info exists edgeInfo($arc,output)]" {
-		set edgeInfo($arc,output) "Value"
+	if {$machineType == "Mixed"} {
+	    if "![info exists edgeInfo($arc,preemptive)]" {
+		set edgeInfo($arc,preemptive) NO
+	    } 
+	    $w addRadioQuery preemptive {Preemptive} {NO YES}\
+		    $edgeInfo($arc,preemptive)
+
+	    if "![info exists edgeInfo($arc,entryType)]" {
+		set edgeInfo($arc,entryType) History
+	    } 
+	    $w addRadioQuery entryType {Entry Type} {History Default}\
+		    $edgeInfo($arc,entryType)
+
+	    foreach outName $portNames(out) {
+		if "![info exists edgeInfo($arc,output,$outName)]" {
+		    set edgeInfo($arc,output,$outName) 0
+		} 
+		$w addQuery outputFor$outName "Output for \"${outName}\":"\
+			$edgeInfo($arc,output,$outName)
 	    }
-	    $w addRadioQuery output {Output} {Value Action None} \
-		    $edgeInfo($arc,output) 
+
+	    foreach internalName $portNames(internal) {
+		if "![info exists edgeInfo($arc,action,$internalName)]" {
+		    set edgeInfo($arc,action,$internalName) 0
+		} 
+		$w addQuery actionFor$internalName "Action for\
+			\"$internalName\":" \
+			$edgeInfo($arc,action,$internalName)
+	    }
+
+	} elseif {$machineType == "Mealy"} {
+	    if "![info exists edgeInfo($arc,outputBy)]" {
+		set edgeInfo($arc,outputBy) "Value"
+	    }
+	    $w addRadioQuery outputBy {Output by} {Value Machine None} \
+		    $edgeInfo($arc,outputBy) 
+
+	    if "![info exists edgeInfo($arc,machine)]" {
+		set edgeInfo($arc,machine) ""
+	    }
+	    $w addQuery machine {Machine:} $edgeInfo($arc,machine)
 
 	    $w addButton lookInside -text {Look Inside}\
 		-command "$this lookInside $arc $w"
@@ -575,17 +673,52 @@ body ::tycho::EditSTD::editArcDone {arc w} {
 	$this markModified
     }
 
-    if {$machineType == "Mealy"} {
-	set newOutput [$w get output]
-	if {$edgeInfo($arc,output) != $newOutput} {
-	    set edgeInfo($arc,output) $newOutput
+    if {$machineType == "Mixed"} {
+	set newPreemptive [$w get preemptive]
+	if {$edgeInfo($arc,preemptive) != $newPreemptive} {
+	    set edgeInfo($arc,preemptive) $newPreemptive
+	    $this markModified	
+	}
+
+	set newEntryType [$w get entryType]
+	if {$edgeInfo($arc,entryType) != $newEntryType} {
+	    set edgeInfo($arc,entryType) $newEntryType
+	    $this markModified	
+	}
+
+	foreach outName $portNames(out) {
+	    set newValue [$w get outputFor$outName]
+	    if {$edgeInfo($arc,output,$outName) != $newValue} {
+		set edgeInfo($arc,output,$outName) $newValue
+		$this markModified
+	    }
+	}
+
+	foreach internalName $portNames(internal) {
+	    set newValue [$w get actionFor$internalName]
+	    if {$edgeInfo($arc,action,$internalName) != $newValue} {
+		set edgeInfo($arc,action,$internalName) $newValue
+		$this markModified
+	    }
+	}
+
+    } elseif {$machineType == "Mealy"} {
+	set newOutputBy [$w get outputBy]
+	if {$edgeInfo($arc,outputBy) != $newOutputBy} {
+	    set edgeInfo($arc,outputBy) $newOutputBy
+	    $this markModified	
+	}
+
+	set newMachine [$w get machine]
+	if {$edgeInfo($arc,machine) != $newMachine} {
+	    set edgeInfo($arc,machine) $newMachine
 	    $this markModified	
 	}
     }
 }
 
 ###################################################################
-#### lookInside, insideValue, insideValueDone, insideAction and getNewAction
+#### lookInside, insideValue, insideValueDone, insideMachine and getNewMachine
 # Look inside a state/arc depending on whether it's a Moore/Mealy machine.
 #
 body ::tycho::EditSTD::lookInside {nodeOrArc w} {
@@ -597,9 +730,9 @@ body ::tycho::EditSTD::lookInside {nodeOrArc w} {
 	set typeInfo edgeInfo
     }
 
-    if {[$w get output] == "Action"} {
-	$this insideAction $typeInfo $nodeOrArc $w
-    } elseif {[$w get output] == "Value"} {
+    if {[$w get outputBy] == "Machine"} {
+	$this insideMachine $typeInfo $nodeOrArc $w
+    } elseif {[$w get outputBy] == "Value"} {
 	$this insideValue $typeInfo $nodeOrArc $w
     }
 }
@@ -617,8 +750,6 @@ body ::tycho::EditSTD::insideValue {typeInfo nodeOrArc w} {
     ::tycho::EntryQuery $w -title "STD Edit Output Values" -text $title\
 	    -okcommand "$this insideValueDone $typeInfo $nodeOrArc $w"
 
-    set numOutPorts [llength $portNames(out)]
-
     foreach outName $portNames(out) {
 	if "![info exists [set typeInfo]($nodeOrArc,value,$outName)]" {
 	    set [set typeInfo]($nodeOrArc,value,$outName) 0
@@ -633,27 +764,25 @@ body ::tycho::EditSTD::insideValue {typeInfo nodeOrArc w} {
 body ::tycho::EditSTD::insideValueDone {typeInfo nodeOrArc w} {
     foreach outName $portNames(out) {
 	set newValue [$w get $outName]
-	if "$[set typeInfo]($nodeOrArc,value,$outName) != $newValue" {
+	if "$[set typeInfo]($nodeOrArc,value,$outName) != \$newValue" {
 	    set [set typeInfo]($nodeOrArc,value,$outName) $newValue
 	    $this markModified
 	}
     }
 }
 
-body ::tycho::EditSTD::insideAction {typeInfo nodeOrArc w} {
+body ::tycho::EditSTD::insideMachine {typeInfo nodeOrArc w} {
 
-    if "[info exists [set typeInfo]($nodeOrArc,action)]" {
-	eval set filename $[set typeInfo]($nodeOrArc,action)
+    eval set filename $[set typeInfo]($nodeOrArc,machine)
+    if {$filename != ""} {
 	set filename [::tycho::expandPath $filename]
-    } else {
-	set filename ""
     }
 
     if [file exists $filename] {
 	if [file isdirectory $filename] {
 	    # filename is a directory, then consider it as a Oct facet.
 	    if [catch {ptkOpenFacet $filename}] {
-		error "Can't open action file.\
+		error "Can't open a Oct file for the machine.\
 			This needs Ptolemy to exist. "
 	    }
 	    
@@ -663,14 +792,14 @@ body ::tycho::EditSTD::insideAction {typeInfo nodeOrArc w} {
 	    ::tycho::File::openContext $filename
 	}
     } else {
-	set tmpW $w.insideActionWithName
+	set tmpW $w.insideMachineWithName
 	::tycho::DialogWindow $tmpW\
-		-title "Inside Action Galaxy"\
-		-text "Specified action galaxy does not exist,\
-		\nor no action galaxy is specified yet."
+		-title "Inside Machine"\
+		-text "Specified galaxy for the machine does not exist,\
+		\nor no galaxy for the machine is specified yet."
 	$tmpW addButton create -text {Create New}\
 		-command "destroy $tmpW;\
-		$this getNewAction $typeInfo $nodeOrArc $w"
+		$this getNewMachine $w"
 	$tmpW addButton ignore -text {Ignore} -command "destroy $tmpW"
 	$tmpW default create
 	$tmpW centerOnScreen
@@ -680,7 +809,7 @@ body ::tycho::EditSTD::insideAction {typeInfo nodeOrArc w} {
     }
 }
 
-body ::tycho::EditSTD::getNewAction {typeInfo nodeOrArc w} {
+body ::tycho::EditSTD::getNewMachine {w} {
 
     dialog.openFacet
     # This is not a clean way to set non-modal window,
@@ -691,17 +820,17 @@ body ::tycho::EditSTD::getNewAction {typeInfo nodeOrArc w} {
     if "$openDialogGlobal(response)" { 
 	set filename $openDialogGlobal(dialogLastOpened)
 	if {$filename != ""} {
-	    set [set typeInfo]($nodeOrArc,action) $filename
-	    $this markModified
+	    $w clear machine
+	    $w insert machine $filename
 	}
     }
 
 if 0 {## Following code is used after Tycho replaces VEM
-    set tmpW $w.getNewActionFile
+    set tmpW $w.getNewMachineFile
     set filename [::tycho::DialogWindow::newModal FileBrowser $tmpW]
 
     if {$filename != ""} {
-	set nodeInfo($node,action) $filename
+	set nodeInfo($node,machine) $filename
 	$this markModified
 	???pvOpenWindow [ptkOpenFacet $filename]???
     }
@@ -730,6 +859,12 @@ body ::tycho::EditSTD::ioPortNames {} {
 		-text $titleLabel -queries [list $inPortQuery $outPortQuery]\
 		-okcommand "$this ioPortNamesDone $w"
 
+	if {$machineType == "Mixed"} {
+	    # Mixed machine.
+	    $w addQuery internalEvents {Internal event names:}\
+		    $portNames(internal)
+	}
+
 	$w centerOnScreen
     }
 }
@@ -750,6 +885,15 @@ body ::tycho::EditSTD::ioPortNamesDone {w} {
 	set portNames(out) $newOutPortNames
 	$this markModified
     }
+
+    if {$machineType == "Mixed"} {
+	set newInternalEvents [$w get internalEvents]
+	if {$portNames(internal) != $newInternalEvents} {
+	    set portNames(internal) $newInternalEvents
+	    $this markModified
+	}	
+    }
+
 }
 
 ##############################################################
@@ -830,6 +974,13 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    append outPorts \"$outName\"
 	}
 	targetparam outputNameMap $outPorts
+	if {$machineType == "Mixed"} {
+	    set internalEvents "";
+	    foreach internalName $portNames(internal) {
+		append internalEvents \"$internalName\"
+	    }
+	    targetparam internalNameMap $internalEvents
+	}
         targetparam machineType $machineType
         
         # Setup In/Out Ports
@@ -879,82 +1030,142 @@ body ::tycho::EditSTD::ptkCompile {} {
 	    }
 	    setstate [set star$node] conditions $conditions
 	 
-	    if {$machineType == "Moore"} {
+	    if {$machineType == "Mixed"} {
+		# Mixed machine.
+		if { ![info exists nodeInfo($node,machine)] } {
+		    setstate [set star$node] inMachNm ""
+		    setstate [set star$node] where_is_defined ""
+		} else {
+		    set inMachNm [file tail $nodeInfo($node,machine)]
+		    setstate [set star$node] inMachNm $inMachNm
+		    set dirname [file dirname $nodeInfo($node,machine)]
+		    setstate [set star$node] where_is_defined $dirname
+		}
+
+		set preemptive ""
+		set entryType ""
+		set actions ""
+		foreach arc $nodeInfo($node,outEdges) {
+		    if "![info exists edgeInfo($arc,preemptive)]" {
+			set edgeInfo($arc,preemptive) NO
+		    }
+		    if {$edgeInfo($arc,preemptive) == "NO"} {
+			append preemptive "0\ "
+		    } elseif {$edgeInfo($arc,preemptive) == "YES"}  {
+			append preemptive "1\ "
+		    } else {
+			error "Unrecognized preemptive! "
+		    }
+
+		    if "![info exists edgeInfo($arc,entryType)]" {
+			set edgeInfo($arc,entryType) History
+		    }
+		    if {$edgeInfo($arc,entryType) == "History"} {
+			append entryType "0\ "
+		    } elseif {$edgeInfo($arc,entryType) == "Default"}  {
+			append entryType "1\ "
+		    } else {
+			error "Unrecognized entryType! "
+		    }
+
+		    append actions "\{"
+		    foreach outName $portNames(out) {
+			if "![info exists edgeInfo($arc,output,$outName)]" {
+			    set edgeInfo($arc,output,$outName) 0
+			}
+			append actions \"$edgeInfo($arc,output,$outName)\"
+		    }
+		    foreach internalName $portNames(internal) {
+			if "![info exists edgeInfo($arc,action,$internalName)]" {
+			    set edgeInfo($arc,action,$internalName) 0
+			}
+			append actions \"$edgeInfo($arc,action,$internalName)\"
+		    }
+		    append actions "\}"
+		}
+		setstate [set star$node] preemptive $preemptive
+		setstate [set star$node] entryType $entryType
+		setstate [set star$node] actions $actions
+
+	    } elseif {$machineType == "Moore"} {
 		# Moore machine.
-		setstate [set star$node] outputBy $nodeInfo($node,output)
-		if {$nodeInfo($node,output) == "Value"} {
+		setstate [set star$node] outputBy $nodeInfo($node,outputBy)
+		if {$nodeInfo($node,outputBy) == "Value"} {
 		    # Output by fixed values
 		    set value ""
 		    foreach outName $portNames(out) {
 			if {![info exists nodeInfo($node,value,$outName)]} {
-			    append value "0\ "
+			    append value \"0\"
 			} else {
-			    append value "$nodeInfo($node,value,$outName)\ "
+			    append value \"$nodeInfo($node,value,$outName)\"
 			}
 		    }
-		    setstate [set star$node] actionOrValue $value
+		    setstate [set star$node] machineOrValue $value
 
-		} elseif {$nodeInfo($node,output) == "Action"} {
-		    # Output by an action
-		    if { ![info exists nodeInfo($node,action)] ||\
-			    $nodeInfo($node,action) == "" } {
-			error "Output is by Action. An action is required. "
+		} elseif {$nodeInfo($node,outputBy) == "Machine"} {
+		    # Output by an machine
+		    if { ![info exists nodeInfo($node,machine)] ||\
+			    $nodeInfo($node,machine) == "" } {
+			error "Output is by Machine. An Galaxy for the\
+				machine is required. "
 		    } else {
-			set action [file tail $nodeInfo($node,action)]
-			setstate [set star$node] actionOrValue $action
-			set dirname [file dirname $nodeInfo($node,action)]
+			set machine [file tail $nodeInfo($node,machine)]
+			setstate [set star$node] machineOrValue $machine
+			set dirname [file dirname $nodeInfo($node,machine)]
 			setstate [set star$node] where_is_defined $dirname
 		    }
 		}
 
-	    } else {
+	    } elseif {$machineType == "Mealy"}  {
 		# Mealy machine.
 		set outputBy ""
-		set actionOrValue ""
+		set machineOrValue ""
 		set where_is_defined ""
 		foreach arc $nodeInfo($node,outEdges) {
-		    if "![info exists edgeInfo($arc,output)]" {
-			set edgeInfo($arc,output) "Value"
+		    if "![info exists edgeInfo($arc,outputBy)]" {
+			set edgeInfo($arc,outputBy) "Value"
 		    }
-		    append outputBy "$edgeInfo($arc,output)\ "
+		    append outputBy "$edgeInfo($arc,outputBy)\ "
 
-		    if {$edgeInfo($arc,output) == "Value"} {
+		    if {$edgeInfo($arc,outputBy) == "Value"} {
 			# Output by fixed values
 			set value ""
 			foreach outName $portNames(out) {
 			    if {![info exists edgeInfo($arc,value,$outName)]} {
-				append value "0\ "
+				append value \"0\"
 			    } else {
-				append value "$edgeInfo($arc,value,$outName)\ "
+				append value \"$edgeInfo($arc,value,$outName)\"
 			    }
 			}
-			append actionOrValue \"$value\"
-			append where_is_defined \"\"
+			append machineOrValue \{$value\}
+			append where_is_defined \{\}
 
-		    }  elseif {$edgeInfo($arc,output) == "Action"} {
-			# Output by an action
-			if { ![info exists edgeInfo($arc,action)] ||\
-			    $edgeInfo($arc,action) == "" } {
-			    error "Output is by Action.\
-				    An action is required. "
+		    }  elseif {$edgeInfo($arc,outputBy) == "Machine"} {
+			# Output by an machine
+			if { ![info exists edgeInfo($arc,machine)] ||\
+			    $edgeInfo($arc,machine) == "" } {
+			    error "Output is by Machine.\
+				    An Galaxy for the machine is required. "
 		        } else {
-			    set action [file tail $edgeInfo($arc,action)]
-			    append actionOrValue \"$action\"
-			    set dirname [file dirname $edgeInfo($arc,action)]
-			    append where_is_defined \"$dirname\"
+			    set machine [file tail $edgeInfo($arc,machine)]
+			    append machineOrValue \{$machine\}
+			    set dirname [file dirname $edgeInfo($arc,machine)]
+			    append where_is_defined \{$dirname\}
 			}
-		    }  elseif {$edgeInfo($arc,output) == "None"} {
-			append actionOrValue \"\"
-			append where_is_defined \"\"
+		    }  elseif {$edgeInfo($arc,outputBy) == "None"} {
+			append machineOrValue \{\}
+			append where_is_defined \{\}
 		    }  else {
 			error "Unrecognized output type:\
-				$edgeInfo($arc,output). "
+				$edgeInfo($arc,outputBy). "
 		    }
 		}
 		setstate [set star$node] outputBy $outputBy
-		setstate [set star$node] actionOrValue $actionOrValue
+		setstate [set star$node] machineOrValue $machineOrValue
 		setstate [set star$node] where_is_defined $where_is_defined
 
+	    } else {
+		error "Unrecognized machine type: $machineType. "
 	    }
 	}
 
