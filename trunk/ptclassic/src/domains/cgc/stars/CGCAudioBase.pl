@@ -1,8 +1,8 @@
 defstar {
-    name { PCM }
+    name { AudioBase }
     domain { CGC }
     desc {
-Base class for reading and writing mu-law encoded pulse code modulated data.
+Base star for reading and writing audio data.
     }
     version { $Id$ }
     author { T. M. Parks }
