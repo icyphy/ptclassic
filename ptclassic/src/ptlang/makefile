@@ -38,7 +38,7 @@ all:	ptlang
 
 ptlang:	ptlang.o
 	rm -f ptlang
-	$(CC) ptlang.o -o ptlang
+	$(CC) ptlang.o -o ptlang $(PTLANGLIB)
 
 ptlang.o:	ptlang.c
 
