@@ -163,19 +163,18 @@ proc ptkProcessPragmas {facet parentname instance starname} {
 #
 #
 
-# This procedure makes buttons function in the same manner as the scrollbar
-#  widget.  It configures the buttons according to the position and view in
-#  the entry widget and checks for overflow.  This procedure takes as the
+# This procedure enables or disables the buttons depending on whether
+#  there is anything to be scrolled to.  This procedure takes as the
 #  first argument a frame containing the entry and buttons created by
-#  ed_MkEntryButton
+#  ed_MkEntryButton.  The second and third arguments are the starting and
+#  ending visible positions in the widget, as fractions from 0 to 1
+#  (standard Tk 4.0 -xscrollcommand convention).
 #
 
-proc ed_SetEntryButtons \
-     {frame {numStor 1} {numPossVis ""} {leftIdx 0} {rightIdx 0}} {
-  $frame.left config -fg black
-  if {$leftIdx > 0} {
+proc ed_SetEntryButtons {frame startFrac endFrac} {
+  if {$startFrac > 0} {
     $frame.left config -state normal -fg black
-    bind $frame.left <Button-1> "tkButtonDown %W
+    bind $frame.left <Button-1> "
         $frame.entry xview \[expr \[$frame.entry index @0\]-1\]
         after 200 ed_ShiftButtonViewLeft %W $frame.entry"
   } else {
@@ -184,9 +183,9 @@ proc ed_SetEntryButtons \
         -disabledforeground $bgColor
     bind $frame.left <Button-1> "ed_Dummy"
   }
-  if {$rightIdx < [expr $numStor-1]} {
+  if {$endFrac < 1} {
     $frame.right config -state normal -fg black
-    bind $frame.right <Button-1> "tkButtonDown %W
+    bind $frame.right <Button-1> "
         $frame.entry xview \[expr \[$frame.entry index @0\]+1\]
         after 200 ed_ShiftButtonViewRight %W $frame.entry"
   } else {
@@ -197,8 +196,8 @@ proc ed_SetEntryButtons \
   }
 }
 
-# This procedure is called when the left bitmap button is pressed
-#  to shift the view in the entry
+# These procedures implement "auto repeat" on the left-shift and right-shift
+# buttons: keep scrolling as long as the button is down.
 
 proc ed_ShiftButtonViewLeft {button entry} {
   if {[lindex [$button config -relief] 4] == "sunken"} {
@@ -207,9 +206,6 @@ proc ed_ShiftButtonViewLeft {button entry} {
   }
 }
 
-# This procedure is called when the right bitmap button is pressed
-#  to shift the view in the entry
-
 proc ed_ShiftButtonViewRight {button entry} {
   if { [lindex [$button config -relief] 4] == "sunken" } {
     $entry xview [expr [$entry index @0]+1]
@@ -217,8 +213,8 @@ proc ed_ShiftButtonViewRight {button entry} {
   }
 }
 
-# Given an empty frame, this procedure creates an entry widget and two
-#  bitmap "arrow" buttons within.
+# Given a frame name, this procedure creates a frame containing
+# a label, an entry widget and two bitmap "arrow" buttons.
 
 proc ed_MkEntryButton {frame label} {
   global ptolemy ed_MaxEntryLength
@@ -229,21 +225,8 @@ proc ed_MkEntryButton {frame label} {
             -command ed_Dummy -relief flat] right \
     [button $frame.left -bitmap @$ptolemy/lib/tcl/left.xbm \
             -command ed_Dummy -relief flat] right
-  $frame.right config -fg [lindex [$frame.right config -bg] 4]
-  $frame.left config -fg [lindex [$frame.left config -bg] 4]
-  bind $frame.left <Button-1> "tkButtonDown %W
-    $frame.entry xview \[expr \[$frame.entry index @0\]-1\]
-    after 200 ed_ShiftButtonViewLeft %W $frame.entry"
-  bind $frame.right <Button-1> "tkButtonDown %W
-    $frame.entry xview \[expr \[$frame.entry index @0\]+1\]
-    after 200 ed_ShiftButtonViewRight %W $frame.entry"
-  bind $frame.left <ButtonRelease-1> "catch {tkButtonUp %W}"
-  bind $frame.right <ButtonRelease-1> "catch {tkButtonUp %W}"
-# FIXME: The last command (pack) exhibits different behavior in Tk 4.0
-# due to the change in the scroll command for entry widgets; in Tk 3.6,
-# ed_SetEntryButtons gets called with five arguments which give the
-# status of the cursor in the entry widget; no such arguments are passed
-# for Tk 4.0
+  # initially configure the buttons as deactivated.
+  ed_SetEntryButtons $frame 0 1
   pack before $frame.left \
     [entry $frame.entry -xscrollcommand "ed_SetEntryButtons \"$frame\"" \
            -relief sunken -width $ed_MaxEntryLength] {right}
