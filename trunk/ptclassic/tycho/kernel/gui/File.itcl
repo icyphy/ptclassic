@@ -1174,11 +1174,22 @@ body ::tycho::File::isFileOpen {filename} {
 # is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
 #
-# The optional argument is the name of the megawidget that this proc
-# is being invoked from.  Usually, openWin is called from a keystroke binding,
-# and the megaWidget argument is %Q.  See TopLevel for an example
+# The optional argument is the name of the widget that this proc
+# is being invoked from.  Usually, openWin is called from a
+# keystroke binding, and the megaeidget argument is %W.  See
+# TopLevel for an example. (Note: do not use %Q as the argument:
+# Itk puts in a "???" if the binding is matched by a
+# megawidget hull instead of one of its components.)
 #
 body ::tycho::File::openWin {{megawidget {}}} {
+    # Get the megawidget corresponding to the widget
+    if { $megawidget != {} } {
+        set mw [winfo megawidget $megawidget]
+        if { $mw != "" } {
+            set megawidget $mw
+        }
+        set megawidget [winfo command $megawidget]
+    }
     if { $megawidget == {} || [$megawidget isa ::tycho::File] != 1} {
         ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
                 -command "::tycho::File::openContext " \
