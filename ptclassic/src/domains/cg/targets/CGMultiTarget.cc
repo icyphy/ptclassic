@@ -57,8 +57,10 @@ void CGFullConnect::start() {
 			Target* t = createChild();
 			if (!t) return;
 			addChild(*t);
-			t->initialize();
 		}
+	   }
+	   for (int i = 0; i < nChildrenAlloc; i++) {
+		child(i)->initialize();
 	   }
 	}
 	//choose the right scheduler
