@@ -41,8 +41,10 @@ public:
 	void setupForkDests();
 
 	// return the buffer requirements for static buffering.
+	// return 1 if on the wormhole boundary
 	int maxBufReq() const
-		{ return isItOutput()? maxBuf: realFarPort()->maxBufReq(); }
+		{ if (isItOutput() == far()->isItOutput()) return 1;
+		return isItOutput()? maxBuf: realFarPort()->maxBufReq(); }
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
@@ -71,7 +73,7 @@ public:
 	// Set the maxBuf manually. In finalBufSize() method, we will
 	// compare this manual value with what the current scheduler
 	// calculates. If this manual value is smaller, signal an error.
-	void requestBuf(int i) { maxBuf = i; manualFlag = TRUE; }
+	void requestBufSize(int i) { maxBuf = i; manualFlag = TRUE; }
 
 private:
 	int maxBuf;
