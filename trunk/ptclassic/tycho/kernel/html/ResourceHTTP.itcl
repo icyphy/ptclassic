@@ -99,6 +99,9 @@ class ::tycho::ResourceHTTP {
     ###################################################################
     ####                           public procs                    ####
 
+    # Get a cached copy of the data
+    method cachefile {}
+
     # Change the permissions of a resource
     proc chmod {permissions path}
 
@@ -262,6 +265,28 @@ body ::tycho::ResourceHTTP::destructor {} {
 #########################################################################
 #########################################################################
 ####                      public methods                             ####
+
+#####################################################################
+#### cachefile
+# Get a cached copy of the contents of the file. This is provided
+# to work around Tcl's lack of binary data handling.
+#
+body ::tycho::ResourceHTTP::cachefile {} {
+    set url [path]
+    while { [::info exists _forwarding($url)] } {
+	set url $_forwarding($url)
+    }
+    if ![::info exists _cachefile($url)] {
+	if ![isopen] {
+	    open "r"
+	    read
+	    close
+	} else {
+	    read
+	}
+    }
+    return $_cachefile($url)
+}
 
 #####################################################################
 #### close
@@ -530,14 +555,14 @@ body ::tycho::ResourceHTTP::query {url option} {
 	    }
 	    # Otherwise we have to work it out. Currently, we say
 	    # that a URL is a directory if a) it does not have a file
-	    # extension or b) its content type is text/html.
+	    # extension and b) its content type is text/html.
 	    set isdir 0
 	    if [exists $url] {
 		while { [::info exists _forwarding($url)] } {
 		    set url $_forwarding($url)
 		}
 		if { [::tycho::url extension $url] == "" \
-			|| $opt(type) == "text/html" } {
+			&& $opt(type) == "text/html" } {
 		    set isdir 1
 		}
 		set oldcode {
