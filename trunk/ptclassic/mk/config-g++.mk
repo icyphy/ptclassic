@@ -48,11 +48,14 @@ CRT0=
 SYSLIBS=-lg++ -lm
 # link flags (tell linker to strip out debug symbols)
 # -static prevents use of shared libraries when building ptolemy
-# shared libraries interfere with incremental linking of stars
-# -x requests that only global symbols be left in the executable.
+# shared libraries interfere with incremental linking of stars.
 # -Xlinker specifies that the next argument should be passed verbatim to
 # the linker
-LINKFLAGS=-L$(LIBDIR) -Xlinker -x -static
+# -x requests that only global symbols be left in the executable.
+# -S requests that the executable be stripped.
+# It would see that these two conflict, but using just -x with the gnu
+# linker results in a huge executable.
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) -static
 
