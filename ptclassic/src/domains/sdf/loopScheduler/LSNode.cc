@@ -93,12 +93,11 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 			int samples = g->samples();
 
 			// remove this intercluster arc
-			// LOG_DEL; delete g->farGate();
+			LOG_DEL; delete g->farGate();
 			LOG_DEL; delete g;
 
 			// insert a link to this outside node
-			// FIXME: memory leak
-			EGGate* newNode = outNode->makeArc(cnode,samples,0);
+			outNode->makeArc(cnode, samples, 0);
 		}
 	}
 
@@ -112,12 +111,11 @@ void LSNode :: updateOutsideConnections(LSNode* cnode) {
 			int samples = g->samples();
 
 			// remove this intercluster arc
-			// LOG_DEL; delete g->farGate();
+			LOG_DEL; delete g->farGate();
 			LOG_DEL; delete g;
 
 			// insert a link to this outside node
-			// FIXME: memory leak
-			EGGate* newNode = cnode->makeArc(outNode,samples,0);
+			cnode->makeArc(outNode,samples,0);
 		}
 	}
 }
