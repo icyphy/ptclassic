@@ -143,6 +143,7 @@ static int drawAxes(interp,plotPtr)
     ptkPlotWin *plotPtr;
 {
 #if TCL_MAJOR_VERSION < 8
+    int intTmp;
     static XFontStruct *fontPtr;
     static XCharStruct bbox;
 #else
@@ -152,7 +153,7 @@ static int drawAxes(interp,plotPtr)
     Tk_Window *win, canvWin;
     char *identifier;
     char *xTitle, *yTitle;
-    int intTmp;
+
     int canvWidth, canvHeight;
     char *name;
     int xExp, yExp;          /* exponent factor of x and y-axes scales, resp. */
@@ -195,6 +196,7 @@ static int drawAxes(interp,plotPtr)
     nh = (bbox.ascent + bbox.descent);
 #else
     Tk_GetFontMetrics(fontPtr,&bbox);
+    nw = Tk_TextWidth(fontPtr,"8", 1);
     /*nw = (bbox.rbearing - bbox.lbearing);*/
     nh = bbox.linespace;
 #endif
