@@ -43,6 +43,27 @@ if { [lsearch -exact $auto_path $env(PTII_LIBRARY)] == -1 } {
     lappend auto_path $env(PTII_LIBRARY)
 }
 
+#####
+## FIXME FIXME HACK HACK HACK
+if ![info exists env(PTII)] {
+    puts "!!!!Yo you, ya gotta set your PTII to make me go!!!!"
+}
+set env(CLASSPATH) $env(PTII)
+
+# Ahem
+puts -nonewline "Loading java"
+update
+set v [package require java]
+puts "JDK [java::call System getProperty java.version], Tcl Blend $v, "
+
+# Java is too stupid to understand environment variables
+# We would like to do this but it doesn't work in 1.1:
+# java::call System setProperty "PTII" $env(PTII)
+#
+# Instead, do this:
+java::call ptolemy.schematic.DomainLibrary setPTIIRoot $env(PTII)
+
+# Load other stuff
 if [info exists tk_version] {
     ### Stylesheets
     ::tycho::register stylesheet "ptII" \
