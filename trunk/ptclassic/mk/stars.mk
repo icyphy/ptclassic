@@ -22,8 +22,9 @@
 # SDF tcl stars are omitted because they do.
 
 # Stub files that pull in the stars.
-SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfimagestars.o \
- 	   $(LIBDIR)/sdfdspstars.o $(LIBDIR)/sdfmatrixstars.o
+PTINY_SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfdspstars.o \
+	$(LIBDIR)/sdfmatrixstars.o
+SDFSTARS = $(PTINY_SDFSTARS) $(LIBDIR)/sdfimagestars.o
 CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
 CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
 CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
@@ -58,6 +59,11 @@ MATLABEXT_LIB= -lmat
 endif
 
 # Library files reqd by stars.  Note that libptolemy.a is not included.
+PTINY_LIBFILES=\
+$(LIBDIR)/libdestars.a $(LIBDIR)/libde.a \
+$(LIBDIR)/libsdfdspstars.a $(LIBDIR)/libsdfmatrixstars.a \
+$(LIBDIR)/libsdfstars.a $(LIBDIR)/libLS.a $(LIBDIR)/libsdf.a \
+
 STAR_LIBFILES=\
 $(LIBDIR)/libcgcstars.a $(LIBDIR)/libcgctcltk.a $(LIBDIR)/libcgc.a \
 $(LIBDIR)/libcg96dspstars.a \
@@ -89,6 +95,14 @@ ATM_LIBFILES = $(LIBDIR)/libmq.a $(LIBDIR)/libmqstars.a \
 
 # CG-DDF no longer supported
 #$(LIBDIR)/libcgddfstars.a $(LIBDIR)/libcgddf.a \
+
+
+# Library switches reqd by stars for a ptiny ptolemy. Note that we don't
+# include the sdf image stars.  Need -lImage for the de ATM stars
+PTINY_STAR_LIBS=\
+-ldestars -lde \
+-lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
+$(MATLABLIBDIR) $(MATLABEXT_LIB) \
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
