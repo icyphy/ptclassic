@@ -339,10 +339,10 @@ linkObject (const char* ofile, int permB, const char *linkArgs) {
 }
 
 // tables for suffixes and preprocessors
-const int N_PREPROCS = 2;
+const int N_PREPROCS = 3;
 
-static const char *preprocSuffix[] = { "", "pl", "chdl" };
-static const char *preprocProg[] = { "", "ptlang", "pepp" };
+static const char *preprocSuffix[] = { "", "pl", "chdl", "is" };
+static const char *preprocProg[] = { "", "ptlang", "pepp", "islang" };
 
 // Here is the function that loads in a star!
 // name = username of the star
