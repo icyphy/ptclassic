@@ -144,7 +144,10 @@ class ::tycho::Layout {
 ########################################################################
 #### constructor
 #
-body ::tycho::Layout::constructor {args} {	
+body ::tycho::Layout::constructor {args} {
+    # Items can have arbitrary attributes
+    configure -strictoptions 0
+
     # Evaluate options
     eval configure $args
 
@@ -325,7 +328,7 @@ body ::tycho::Layout::itemget {item} {
     set local [lindex $splut end]
 
     _verify item $cntxt $local
-    _cget item $cntxt $local $option
+    _get item $cntxt $local
 }
 
 ########################################################################
@@ -445,7 +448,7 @@ body ::tycho::Layout::moverelease {tag x y} {
 # Reshape an item by name.
 #
 body ::tycho::Layout::reshape {name x y args} {
-    if { ! [::info exists _value($tag)] } {
+    if { ! [::info exists _value($name)] } {
     	error "Item \"$name\" does not exists in [_dataname]"
     }
     concat reshape [list $name] [expr -$x] [expr -$y] $args
@@ -457,7 +460,7 @@ body ::tycho::Layout::reshape {name x y args} {
 # Start moving an item specified by name.
 #
 body ::tycho::Layout::reshapeclick {name x y args} {
-    if { ! [::info exists _value($tag)] } {
+    if { ! [::info exists _value($name)] } {
     	error "Item \"$name\" does not exist in [_dataname]"
     }
     # Just remember where we are, and don't record in the history
