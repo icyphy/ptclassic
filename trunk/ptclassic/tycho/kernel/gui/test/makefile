@@ -75,7 +75,7 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 
 # These tests require a graphics terminal
 test_graphics: $(TCL_SRCS) $(ITCL_SRCS)
-	test -e testRevControl.itcl
+	tycho -e testRevControl.itcl
 	tycho -e testWidgets.itcl
 
 # We don't include common.mk since we don't use the compiler here
