@@ -254,27 +254,6 @@ ifdef CGFULL
 	CGPAR = 1
 endif
 
-ifdef DDF
-	# star icons
-	PALETTES += PTOLEMY/src/domains/ddf/icons/ddf.pal
-	# There are many DDF code generators and schedulers
-	# (HuScheduler, dcScheduler, ddfScheduler, dlScheduler, etc.)
-	# but none are currently being built.  When they are, add
-	# ifdef CG
-	#	LIBS +=
-	#	LIBFILES +=
-	# endif
-
-	# kernel and stars
-	CUSTOM_DIRS += $(DDFDIR)/kernel $(DDFDIR)/stars 
-	STARS += $(LIBDIR)/ddfstars.o
-	LIBS += -lddfstars -lddf
-	LIBFILES += $(LIBDIR)/libddfstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libddf.$(LIBSUFFIX)
-	# dependencies
-	SDFLIB = 1
-endif
-
 ifdef VHDL
 	# star icons
 	PALETTES += PTOLEMY/src/domains/vhdl/icons/vhdl.pal
@@ -371,9 +350,29 @@ ifdef PN
 	SDFLIB = 1
 endif
 
-# We can't include the ipus domain since the non-tk ipus stars need 
-# Blackboard* symbols, which are defined in the tk ipus stars.
-# Set up definitions for stars.mk
+ifdef DDF
+	# star icons
+	PALETTES += PTOLEMY/src/domains/ddf/icons/ddf.pal
+	# There are many DDF code generators and schedulers
+	# (HuScheduler, dcScheduler, ddfScheduler, dlScheduler, etc.)
+	# but none are currently being built.  When they are, add
+	# ifdef CG
+	#	LIBS +=
+	#	LIBFILES +=
+	# endif
+
+	# kernel and stars
+	CUSTOM_DIRS += $(DDFDIR)/kernel $(DDFDIR)/stars 
+	STARS += $(LIBDIR)/ddfstars.o
+	LIBS += -lddfstars -lddf
+	LIBFILES += $(LIBDIR)/libddfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libddf.$(LIBSUFFIX)
+	# dependencies
+	SDFLIB = 1
+endif
+
+# We must have TK present to include the IPUS domain since the non-tk IPUS
+# stars need Blackboard* symbols, which are defined in the Tk IPUS stars.
 
 ifdef IPUS
 	ifdef TK
