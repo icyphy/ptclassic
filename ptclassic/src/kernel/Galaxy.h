@@ -41,8 +41,18 @@ protected:
 	// Add blocks to the list
 	void addBlock(Block& b) {blocks.put(&b);}
 
-	// Connect sub-blocks
-	void connect(PortHole& source, PortHole& destination);
+	// Connect sub-blocks.
+	// Returns a reference to the Geodesic it created.
+	Geodesic& connect(PortHole& source, PortHole& destination);
+
+	// Connect sub-blocks with a zero-valued delay
+	Geodesic& connect(PortHole& source, PortHole& destination,
+			  int numberDelays);
+
+	// Connect sub-blocks with a given-valued delay
+	// NOT IMPLEMENTED YET
+	// Geodesic& connect(PortHole& source, PortHole& destination,
+			// int numberDelays, Particle& delayValue);
 
 	// Connect a Galaxy PortHole to a PortHole of a sub-block
 	alias(PortHole& galPort, PortHole& blockPort) {
