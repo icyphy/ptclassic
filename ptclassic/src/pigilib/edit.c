@@ -61,6 +61,9 @@ octObject *facetPtr, *instPtr;
     ParamType *place;
     dmTextItem *items;
 
+/* set domain corresponding to the instance */
+    setCurDomainInst(instPtr);
+
     ERR_IF1(!GetOrInitSogParams(instPtr, &pList));
 
     if (pList.length == 0) {
@@ -212,14 +215,6 @@ long userOptionWord;
     if (octGetById(&facet) != OCT_OK) {
 	PrintErr(octErrorString());
     	ViDone();
-    }
-
-    /* Set the current domain.  Note that the old domain need not be
-       restored later, so it is not saved */
-    KcSetKBDomain(DEFAULT_DOMAIN);
-    if(setCurDomainF(&facet) == NULL) {
-        PrintErr("Domain error in facet.");
-        ViDone();
     }
 
     /* get name of instance under cursor */
