@@ -25,10 +25,10 @@ include $(CONFIG)
 
 # The following variables will eventually be in the config file
 # Directory containing Tcl/Tk include files
-TCL_H_DIR=/usr/tools/tcl/include
+TCL_H_DIR=$(ROOT)/tcl/include
 
 # Directory containing Tcl/Tk libraries
-TCL_LIBDIR=/usr/tools/tcl/lib
+TCL_LIBDIR=$(ROOT)/tcl/lib.$(ARCH)
 
 INCL=-I$(KERNDIR) -I$(TCL_H_DIR)
 
