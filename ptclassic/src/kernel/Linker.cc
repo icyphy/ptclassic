@@ -312,11 +312,14 @@ size_t Linker::readInObj(const char* objName) {
 	if (availMem + size > memBlock + LINK_MEMORY) {
 		Error::abortRun("Linker: insufficient space to read in new code");
 		size = 0;
-	}
+	} else {
+		// clear out all the existing memory (mainly for bss)
+		memset( availMem, 0, size);
 // this macro does whatever seeks and reads are necessary to read in the code.
-	else if (READOBJ_FAIL) {
-		Error::abortRun("Linker: Error reading object file!");
-		size = 0;
+		if (READOBJ_FAIL) {
+			Error::abortRun("Linker: Error reading object file!");
+			size = 0;
+		}
 	}
 	close(fd);
 	return size;
