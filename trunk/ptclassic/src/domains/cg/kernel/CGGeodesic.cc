@@ -220,12 +220,12 @@ void checkNumDelays(const char* values)
 
 	if (*values == '*')
 	{
-	    msg << "Use of variable delays may result in incorrect code.\n"
+	    msg << "Use of variable delays may result in the generation of incorrect code.\n"
 	        << "Please use a constant expression for the number of delays.";
 	}
 	else
 	{
-	    msg << "Use of initializable delays may result in incorrect code.\n"
+	    msg << "Use of initializable delays may result in the generation of incorrect code.\n"
 		<< "Please use non-initializable delays.";
 	}
 
