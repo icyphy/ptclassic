@@ -46,9 +46,6 @@ public:
 	VHDLBPortHole() {}
 	~VHDLBPortHole() {}
 
-	// Allocate a geodesic and give it a name
-	/* virtual */ Geodesic* allocateGeodesic();
-
 	VHDLBPortHole* getForkSrc() { return (VHDLBPortHole*) forkSrc; }
 
 	// const version
