@@ -112,8 +112,10 @@ SHELL=/bin/sh
 
 install_gnu:
 	@echo "Building gnu for $(PTARCH)";
+	# For HPUX, don't include CC=$(GNU_BUILD_CC), it causes problems
+	# building bison with the native /bin/cc
 	case $(PTARCH) in \
-	hppa*) 	$(MAKE) -f mk/scratch-srcs.mk CC=$(GNU_BUILD_CC) \
+	hppa*) 	$(MAKE) -f mk/scratch-srcs.mk \
 		$(MFLAGS) hpgnu_all;; \
 	irix5)	$(MAKE) -f mk/scratch-srcs.mk CC="$(IRIX5_GNU_BUILD_CC)" \
 		$(MFLAGS) irix5gnu_all;; \
