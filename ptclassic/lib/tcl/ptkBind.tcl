@@ -206,7 +206,7 @@
 
 proc ptkRecursiveBind {widget keySeq action} {
     bind $widget $keySeq \
-	"[bind [winfo class $widget] $keySeq]; $action"
+	"uplevel #0 bind [winfo class $widget] $keySeq; uplevel #0 $action"
     foreach child [winfo children $widget] {
 	ptkRecursiveBind $child $keySeq $action
     }
