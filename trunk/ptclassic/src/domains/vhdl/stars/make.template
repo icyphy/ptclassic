@@ -3,7 +3,7 @@
 # Version identification:
 # $Id$
 #
-# Copyright (c) 1991 The Regents of the University of California.
+# Copyright (c) 1991-%Q% The Regents of the University of California.
 #				All Rights Reserved.
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -12,21 +12,21 @@
 #	make depend
 # This will add the dependencies to the makefile.
 
-ROOT = ../../../..
+ROOT =	../../../..
 VPATH = $(ROOT)/src/domains/vhdl/stars
 
 # do this for Synopsys
-ARCH = $(PTARCH)
+ARCH =	$(PTARCH)
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG =	$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # VHDLDIR is the directory containing VHDL domain support
-VHDLDIR = $(ROOT)/src/domains/vhdl/kernel
-CGDIR = $(ROOT)/src/domains/cg/kernel
-CGCDIR = $(ROOT)/src/domains/cgc/kernel
-SDFDIR = $(ROOT)/src/domains/sdf/kernel
+VHDLDIR = 	$(ROOT)/src/domains/vhdl/kernel
+CGDIR = 	$(ROOT)/src/domains/cg/kernel
+CGCDIR = 	$(ROOT)/src/domains/cgc/kernel
+SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR)
 
@@ -34,10 +34,8 @@ INCL = -I$(VHDLDIR) -I$(CGDIR) -I$(CGCDIR) -I$(SDFDIR) -I$(KERNDIR)
 LIB=libvhdlstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
-PL_SRCS=\
- VHDLConst.pl \
+PL_SRCS = \
  VHDLAdd.pl \
- VHDLAddInt.pl \
  VHDLBlackHole.pl \
  VHDLCos.pl \
  VHDLExp.pl \
@@ -61,17 +59,17 @@ PL_SRCS=\
  VHDLCSend.pl \
 
 # The .cc files
-SRCS=$(PL_SRCS:.pl=.cc)
+SRCS =	$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.cc=.o)
+OBJS =	$(SRCS:.cc=.o)
 
 # header files for all stars
-HDRS= $(SRCS:.cc=.h)
+HDRS =	$(SRCS:.cc=.h)
 
-STAR_MK=vhdlstars
-DOMAIN=VHDL
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+STAR_MK =	vhdlstars
+DOMAIN =	VHDL
+EXTRA_SRCS =	$(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 
