@@ -397,7 +397,7 @@ body ::tycho::ResourceHTTP::eof {} {
 # <tt>http://ptolemy/~eal   -->   http://ptolemy/~eal/</tt>
 #
 body ::tycho::ResourceHTTP::forward {url} {
-    while { [::info exists _forwarding($url)] } {
+    while {[::info exists _forwarding($url)] && $_forwarding($url)!=$url} {
 	set url $_forwarding($url)
     }
     return $url
