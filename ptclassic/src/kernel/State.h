@@ -69,8 +69,8 @@ extern int errno;
 #else
 #if defined(PTNT)
 #include <errno.h>
-extern char *sys_errlist[];
-extern int sys_nerr;
+#define sys_errlist _sys_errlist
+#define sys_nerr _sys_nerr
 #else
 extern int sys_nerr;
 extern char *sys_errlist[];

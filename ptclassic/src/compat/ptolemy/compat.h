@@ -382,13 +382,19 @@ extern int errno;
 #include <stdlib.h>
 #include <errno.h>
 #else /* PT_NT4VC */
-extern int sys_nerr;
+#if defined  (__CYGWIN__)
+#define sys_nerr _sys_nerr
+#define sys_errlist _sys_errlist
+#include <errno.h>
+#else /* __CYGWIN__ */
 #if defined (__GLIBC__) && (__GLIBC__ >= 2)
 #include <errno.h>
 #else
+extern int sys_nerr;
 extern char *sys_errlist[];
 extern int errno;
 #endif /* (__GLIBC__) && (__GLIBC__ >= 2)*/
+#endif /* __CYGWIN__ */
 #endif /* PTNBSD_386 */
 #endif /* PT_NT4VC */
 #endif /* NEED_SYS_ERRLIST */
