@@ -128,9 +128,18 @@ int directive;
 
 
 
-#if defined(ultrix) || defined(hppa) || defined(sgi) || defined(SOL2) || defined(linux)
-#define NEED_STRICMP
-#endif
+/* 
+ * This following bit is pretty dumb.  Both OSF and Sun strings libraries
+ * provide "strcasecmp()" which does the right thing.  Unfortunately, I
+ * don't have access to the SGI or HP environments to do test a more
+ * correctly engineered fix (i.e. implement strcasecmp() here for those
+ * environments that don't have it, rather than stricmp(), and have the
+ * functions in tech.c call strcasecmp()).
+ *
+ *				kkissell@acri.fr
+ */
+
+/* compat.h optionally defines NEED_STRICMP */
 
 #ifdef NEED_STRICMP
 int stricmp(a, b)
