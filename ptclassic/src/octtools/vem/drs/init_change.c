@@ -30,6 +30,8 @@ static char SccsId[]="$Id$";
 #include "general.h"
 #include "message.h"
 #include "oct.h"
+#include "vemUtil.h"
+
 /*
   -------------------------------
   $Header$
