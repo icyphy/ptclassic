@@ -34,7 +34,7 @@ extern const char DEdomainName[] = "DE";
 	// displaySchedule
 	////////////////////////////
 
-StringList DEScheduler :: displaySchedule (Block& galaxy) {
+StringList DEScheduler :: displaySchedule () {
 	return "DE schedule is computed at run-time\n";
 }
 
