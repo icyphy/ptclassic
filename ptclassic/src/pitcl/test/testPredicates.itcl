@@ -68,7 +68,6 @@ test predicates-0 {create a test universe} {
 ######################################################################
 #### connect
 
-# FIXME: fails
 test predicates-1 {Check isWormhole} {
     ::pitcl::isWormhole .x.y
 } {1}
