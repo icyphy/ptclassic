@@ -55,6 +55,7 @@ public:
 	~FSMTarget();
 
 	void setup();
+	void begin();
 
 	// return a copy of itself
 	Block* makeNew() const;
