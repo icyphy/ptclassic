@@ -52,7 +52,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc img test tclIndex 
+MISC_FILES =		doc img test #tclIndex 
 
 # Sub directories to run make in.
 DIRS =			doc
@@ -63,7 +63,7 @@ REALCLEAN_STUFF =			tclIndex
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
-all install: tclIndex $(MISC_SRCS)
+all install: $(MISC_SRCS) #tclIndex 
 
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
