@@ -33,7 +33,7 @@ CG56Memory :: CG56Memory(unsigned x_addr, unsigned x_len, unsigned y_addr,
 CG56Target :: CG56Target(const char* nam, const char* desc,
 			 unsigned x_addr, unsigned x_len,
 			 unsigned y_addr, unsigned y_len) :
-	xa(x_addr), xl(x_len), ya(y_addr), yl(y_len),
+	xa(x_addr), xl(x_len), ya(y_addr), yl(y_len), inProgSection(0),
 	AsmTarget(nam,desc,"CG56Star")
 {
 	LOG_NEW; mem = new CG56Memory(x_addr,x_len,y_addr,y_len);
@@ -41,10 +41,9 @@ CG56Target :: CG56Target(const char* nam, const char* desc,
 }
 
 void CG56Target :: headerCode () {
-        StringList code = "; generated code for target ";
+        StringList code = "generated code for target ";
         code += readFullName();
-        code += "\n";
-        addCode(code);
+	outputComment (code);
 }
 
 void CG56Target :: wrapup () {
@@ -82,3 +81,46 @@ StringList CG56Target::endIteration(int repetitions, int) {
 		out = "label\n";
 	return out;
 }
+
+void CG56Target::codeSection() {
+	if (!inProgSection) {
+		addCode("\torg p:\n");
+		inProgSection = 1;
+	}
+}
+
+void CG56Target::orgDirective(const char* memName, unsigned addr) {
+	StringList out = "\torg\t";
+	out += memName;
+	out += ":";
+	out += int(addr);
+	out += "\n";
+	addCode(out);
+	inProgSection = 0;
+}
+
+void CG56Target::writeInt(int val) {
+	StringList out = "\tdc\t";
+	out += val;
+	out += "\n";
+	addCode(out);
+}
+
+void CG56Target::writeFix(double val) {
+	StringList out = "\tdc\t";
+	out += val;
+	out += "\n";
+	addCode(out);
+}
+
+void CG56Target::writeFloat(double val) {
+	StringList out = "; WARNING: the M56000 does not support floating point!\n";
+	out += "; perhaps this state was meant to be type FIX?\n";
+
+	out += "\tdc\t";
+	out += val;
+	out += "\n";
+	addCode(out);
+}
+
+
