@@ -1,4 +1,4 @@
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) 1990-$Date$ The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 #
 # Config file to build on Linux
 #
-# $Id$
+# @(#)config-linux.mk	1.29 05/28/96
 
 # Author:  Alberto Vignani, FIAT Research Center, TORINO
 # Modified by: 	Neal Becker (neal@ctd.comsat.com)
@@ -82,12 +82,9 @@ AS	=	/usr/i486-linuxaout/bin/as
 LD	=	/usr/i486-linuxaout/bin/ld -m i386linux
 CC	=	gcc -b i486-linuxaout
 OCT_CC	=	gcc -b i486-linuxaout -fwritable-strings
-CPP	=	gcc -E
 CPLUSPLUS = 	g++ -b i486-linuxaout
 endif
 endif
-
-DEPEND = $(CPLUSPLUS) -MM
 
 # where the Gnu library is
 # GNULIB = $(PTOLEMY)/gnu/$(PTARCH)/lib
@@ -96,12 +93,15 @@ GNULIB = /usr/lib
 # linker to use for pigi and interpreter.
 LINKER = $(CPLUSPLUS)
 
-# Location of GNU libg++ shared libraries
-SHARED_COMPILERDIR = $(GNULIB)
-SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
+ifeq ($(USE_SHARED_LIBS),yes)
+# Use Position Independent Code to build shared libraries
+C_SHAREDFLAGS =         -fpic
+CC_SHAREDFLAGS =        -fpic
+RANLIB =		true
+endif
 
 # Command to build C++ shared libraries
-SHARED_LIBRARY_COMMAND = $(CPLUSPLUS) -shared $(SHARED_COMPILERDIR_FLAG) -o
+SHARED_LIBRARY_COMMAND = $(CC) -shared $(SHARED_COMPILERDIR_FLAG) -o
  
 # Command to build C shared libraries
 CSHARED_LIBRARY_COMMAND = $(CC) -shared $(SHARED_COMPILERDIR_FLAG) -o
@@ -109,17 +109,6 @@ CSHARED_LIBRARY_COMMAND = $(CC) -shared $(SHARED_COMPILERDIR_FLAG) -o
 # linker for C utilities.  If we are using shared libraries, then
 # we want to avoid involving libg++.so, so we use gcc to link.
 CLINKER = $(CC)
-
-# These are the additional flags that we need when we are compiling code
-# which is to be dynamically linked into Ptolemy.  -shared is necessary
-# with gcc-2.7.0
-INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
- 
-# List of libraries to search, obviating the need to set LD_LIBRARY_PATH
-# See the ld man page for more information.  These path names must
-# be absolute pathnames, not relative pathnames.
-SHARED_LIBRARY_PATH = $(PTOLEMY)/lib.$(PTARCH):$(PTOLEMY)/octtools/lib.$(PTARCH):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib/shared:$(PTOLEMY)/tcltk/tk.$(PTARCH)/lib/shared/:$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/shared
-SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
 
 # domains/ipus/islang uses BISONFLEXLIBS
 BISONFLEXLIB =	-fl
@@ -142,7 +131,7 @@ BISONFLEXLIB =	-fl
 #	Don't use -m486, it's the default, except for those with the
 #	Pentium optimized compiler; for them -m486 makes things worse.
 #OPTIMIZER =	-g #-m486 -pipe
-OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
+OPTIMIZER =	-O2 -fomit-frame-pointer #-m486 -pipe
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
 WARNINGS =	-Wall -Wcast-align -Wsynth # -Wcast-qual 
@@ -161,14 +150,14 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # Variables for the linker
 #
 # system libraries for linking .o files from C files only
-CSYSLIBS =	-lieee -lm $(DLLIB)
+CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm $(DLLIB) #-lieee
 
 # system libraries (libraries from the environment)
-SYSLIBS =	$(CSYSLIBS) $(SHARED_COMPILERDIR_FLAG) -lg++
+SYSLIBS=$(CSYSLIBS) -lg++
 
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
-LINKSTRIPFLAGS=-Wl,-S,-x
+LINKSTRIPFLAGS=-Wl,-s
 
 #LINKFLAGS=-L$(LIBDIR) $(LINKSTRIPFLAGS)# -static
 #LINKFLAGS_D=-L$(LIBDIR) -g -static
@@ -177,6 +166,7 @@ LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) -g -rdynamic #-static
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
+CURSES_LIBSPEC = -lncurses
 
 #
 # Variables for miscellaneous programs
@@ -203,9 +193,10 @@ X11EXT_LIBSPEC=-lXext -lSM -lICE
 #
 # Slackware >=1.2 locations
 #
-X11_INCSPEC = -I/usr/X11/include
-X11INCL     = -I/usr/X11/include
-X11_LIBSPEC = -L/usr/X11/lib -lX11
+#X11INCL     = -I/usr/X11/include
+X11_INCSPEC = -I/usr/X11R6/include
+X11_LIBDIR  = /usr/X11R6/lib
+X11_LIBSPEC = -L$(X11_LIBDIR) -lX11
 
 # Flag that cc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
