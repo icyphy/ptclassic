@@ -115,7 +115,10 @@ tclexts: config_tclexts all_tclexts install_tclexts
 # Run configure
 # You can pass arguments to configure like so:
 # make tclexts CONFIGURE_ARGS=--with-tclsrc=/users/cxh/pt/src/tcltk/itcl2.2/tcl7.6
-config_tclexts: obj.$(PTARCH) src/configure
+config_tclexts: obj.$(PTARCH) src/configure mk/actcl.mk.in mk/acjava.mk.in \
+		src/makefile.in src/profile/makefile.in \
+		src/tyjava/makefile.in src/tyjava/eprintf/makefile.in \
+		src/tyjava/tcljava/makefile.in
 	(cd obj.$(PTARCH); ../src/configure --srcdir ../src $(CONFIGURE_ARGS))
 	(cd obj.$(PTARCH)/tyjava/tcljava; rm -f tcl; \
 		ln -s ../../../src/tyjava/tcljava/tcl .)
