@@ -34,14 +34,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Scheduler.h"
-#include "MTDFThreadList.h"
-#include "LwpMonitor.h"
+#include "MTDFMonitor.h"
 
-class MTDFStar;
-class MTDFThread;
+class MTDFCondition;
 
 class MTDFScheduler : public Scheduler
 {
+friend class MTDFSourceThread;
+
 public:
     // Constructor.
     MTDFScheduler();
@@ -67,12 +67,6 @@ public:
     // Set the stopping time when inside a Wormhole.
     /*virtual*/ void resetStopTime(double);
 
-    // Create threads and build ThreadList.
-    void createThreads();
-
-    // Delete Threads and clear the ThreadList.
-    void deleteThreads();
-
     // Duration of one schedule period or iteration.
     double schedulePeriod;
 
@@ -80,27 +74,17 @@ public:
     virtual double delay(double);
 
 protected:
+    // Create threads.
+    void createThreads();
+
     // Stopping time.
     double stopTime;
 
-    // Thread in which this scheduler is running.
-    MTDFThread* thread;
-
-    // List of Star Threads.
-    MTDFThreadList starThreads;
-
-    // Select thread function for a star.
-    virtual void (*selectThread(MTDFStar*))(MTDFStar*);
-
-    // Thread functions.
-    static void starThread(MTDFStar*);
-    static void sourceThread(MTDFStar*);
-
     // Monitor for guarding the Conditions used by the Scheduler.
-    LwpMonitor monitor;
+    MTDFMonitor monitor;
 
     // Condition variable for synchronizing the start of an iteration.
-    LwpCondition start;
+    MTDFCondition* start;
 };
 
 #endif

@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990-1993 The Regents of the University of California.
+Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,39 +35,24 @@ static const char file_id[] = "$RCSfile$";
 #include "MTDFScheduler.h"
 #include "MTDFStar.h"
 #include "MTDFThread.h"
-#include "MTDFThreadIter.h"
+#include "MTDFCondition.h"
 #include "GalIter.h"
 
 extern const char MTDFdomainName[];
 
 // Constructor.
-MTDFScheduler::MTDFScheduler() : starThreads(), monitor(), start(monitor)
+MTDFScheduler::MTDFScheduler() : monitor()
 {
+    start = 0;
     schedulePeriod = 1.0;
     setStopTime(0.0);
     setCurrentTime(0.0);
-
-    // Initialize the Lightweight Process library.
-    const int stackSize = 0x4000;
-    MTDFThread::initStackCache(stackSize);
-    MTDFThread::setMaxPriority(MTDFThread::minPriority()+1);
-
-    // Prevent preemption of the current thread.
-    thread = MTDFThread::currentThread();
-    thread->setPriority(MTDFThread::maxPriority());
-
-    // Enable all registered PtGates before additional threads are created.
-    GateKeeper::enableAll(LwpMonitor::prototype);
 }
 
 // Destructor.
 MTDFScheduler::~MTDFScheduler()
 {
-    deleteThreads();
-    LOG_DEL; delete thread;
-
-    // Disable all registered PtGates after other threads have been deleted.
-    GateKeeper::disableAll();
+    LOG_DEL; delete start;
 }
 
 // Domain identification.
@@ -85,14 +70,17 @@ void MTDFScheduler::setup()
 	return;
     }
 
+    // Any threads from the previous run that blocked on start
+    // will be deleted at this point.
+    LOG_DEL; delete start;
+    LOG_NEW; start = new MTDFCondition(monitor);
+
+    // Any threads from the previous run that are blocked on notEmpty
+    // will be deleted at this point.
     galaxy()->initialize();
 
-    // Delete any left-over threads before creating new ones.
-    deleteThreads();
-
-    if (!SimControl::haltRequested())
-	createThreads();
-
+    MTDFThread::setup();
+    createThreads();
     setCurrentTime(0.0);
 }
 
@@ -105,55 +93,25 @@ int MTDFScheduler::run()
 	return FALSE;
     }
 
-    // Lower priority to allow other threads to run.
-    thread->setPriority(MTDFThread::minPriority());
+    // Allow threads to start.
+    MTDFThread::go();
 
     while((currentTime < stopTime) && !SimControl::haltRequested())
     {
+	MTDFThread::stop();
 	// Notify all source threads to start.
 	{
-	    CriticalSection x(monitor);
-	    start.notifyAll();
+	    CriticalSection region(start->monitor());
+	    start->notifyAll();
 	}
+	MTDFThread::go();
 	currentTime += schedulePeriod;
     }
 
-    // Raise priority to prevent other threads from running.
-    thread->setPriority(MTDFThread::maxPriority());
+    // Prevent threads from running.
+    MTDFThread::stop();
 
     return !SimControl::haltRequested();
-}
-
-// Select thread function for a star.
-void (*MTDFScheduler::selectThread(MTDFStar* star))(MTDFStar*)
-{
-    if (star->isSource()) return sourceThread;
-    else return starThread;
-}
-
-// Thread for normal Stars.
-void MTDFScheduler::starThread(MTDFStar* star)
-{
-    // Fire the Star ad infinitum.
-    while(star->run());
-}
-
-// Thread for source Stars.
-void MTDFScheduler::sourceThread(MTDFStar* star)
-{
-    MTDFScheduler& sched = *(MTDFScheduler*)(star->parent()->scheduler());
-    if (sched.domain() != MTDFdomainName)
-    {
-	Error::abortRun(sched.domain(), "Scheduler is not MTDF");
-	return;
-    }
-
-    // Wait for notification from the Scheduler, then fire the Star.
-    do
-    {
-	CriticalSection x(sched.monitor);
-	sched.start.wait();
-    } while (star->run());
 }
 
 // Create threads and build ThreadList.
@@ -162,30 +120,19 @@ void MTDFScheduler::createThreads()
     GalStarIter starIter(*galaxy());
     MTDFStar* star;
     MTDFThread* t;
-    int p = MTDFThread::maxPriority();
 
     // Create Threads for all the Stars.
     while((star = (MTDFStar*)starIter++) != NULL)
     {
-	LOG_NEW; t = new MTDFThread(p, selectThread(star), star);
-	starThreads.append(t);
+        if (star->isSource())
+	{
+	    LOG_NEW; t = new MTDFSourceThread(*star, *start);
+	}
+	else
+	{
+	    LOG_NEW; t = new MTDFThread(*star);
+	}
     }
-}
-
-// Delete Threads and clear the ThreadList.
-void MTDFScheduler::deleteThreads()
-{
-    MTDFThreadIter threadIter(starThreads);
-    MTDFThread* t;
-
-    // Delete all Threads in the list.
-    while((t = threadIter++) != NULL)
-    {
-	LOG_DEL; delete t;
-    }
-
-    // Remove everything from the list.
-    starThreads.initialize();
 }
 
 // Get the stopping time.
