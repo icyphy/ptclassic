@@ -65,10 +65,6 @@ public:
     // Class identification.
     /*virtual*/ int isA(const char*) const;
 
-    // Perform initialization such as setting up the schedule.
-    // If within a WormHole, generate, compile, load, and run code.
-    /*virtual*/ void setup();
-
     // If within a WormHole, transfer data to the already running code.
     // Otherwise, generate code.
     /*virtual*/ int run();
@@ -76,6 +72,13 @@ public:
     // If within a WormHole, do nothing.
     // Otherwise, conditionally display, compile, load, and run the code.
     /*virtual*/ void wrapup();
+
+    // Methods used in stages of a run.
+    // The default versions do nothing.
+    // Return FALSE on error.
+    virtual int compileCode();
+    virtual int loadCode();
+    virtual int runCode();
 
     // Generate code.
     virtual void generateCode();
@@ -174,12 +177,9 @@ public:
 
 protected:
 
-    // Methods used in setup(), run(), and wrapup().
-    // The default versions do nothing.
-    // Return FALSE on error.
-    virtual int compileCode();
-    virtual int loadCode();
-    virtual int runCode();
+    // Additional initialization (invoked by initialize method).
+    // If within a WormHole, generate, compile, load, and run code.
+    /*virtual*/ void setup();
 
     // Initialization for code generation.
     // The default version does nothing.
