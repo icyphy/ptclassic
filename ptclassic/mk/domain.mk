@@ -46,7 +46,7 @@ endif
 $(ALLSTARIDXS): $(wildcard $(dir $@)/*.htm)
 	@echo "Updating $@";
 	@rm -f $@;
-	@echo "set TYCHO $(PTOLEMY)/tycho; \
+	echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
 		ptolemyStarHTMLIndex $(ME) \
 			$@  \
@@ -59,7 +59,7 @@ $(VPATH)/starHTML.idx: $(ALLSTARIDXS)
 	@rm -f $@
 	@echo "set TYCHO $(PTOLEMY)/tycho; \
 		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoVpathMergeIndices \"{$(ME) stars}\" \
+		tychoVpathMergeIndices \"$(ME) stars\" \
 			 $@ $(VPATH)/ $(ALLSTARIDXS)" | itclsh
 
 clean_indices:
