@@ -65,8 +65,8 @@ and the output consists of overlapping blocks input particles.
 		output.setSDFParams(int(nwrite),int(nwrite)-1);
 	}
         codeblock(main) {
-        move    #<$ref2(input,offset),r0
-        move    #<$addr(output),r1
+        move    #$addr(input,offset),r0
+        move    #$addr(output),r1
         }
         codeblock(write) {
         do      #$val(nwrite),$label(loop)
