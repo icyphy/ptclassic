@@ -475,14 +475,14 @@ KcGetTargetParams(char* name, ParamListType* pListPtr) {
 /* modify parameters of a target */
 extern "C" boolean
 KcModTargetParams(ParamListType* pListPtr) {
-	Target* t = universe->myTarget();
+	if (!galTarget) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
 		const char* n = pListPtr->array[i].name;
 		const char* v = pListPtr->array[i].value;
 		LOG << "\t(targetparam " << n << " \"" << v << "\")\n";
-		State* s = t->stateWithName(n);
+		State* s = galTarget->stateWithName(n);
 		if (s == 0) {
-			Error::abortRun (*t, "no target-state named ", n);
+			Error::abortRun (*galTarget, "no target-state named ", n);
 			return FALSE;
 		}
 		s->setValue(savestring(v));
@@ -680,7 +680,9 @@ Set the target for the universe
 extern "C" int
 KcSetTarget(const char* targetName) {
 	LOG << "(target " << targetName << ")\n";
-	return universe->newTarget (savestring(targetName));
+	int temp = universe->newTarget (savestring(targetName));
+	galTarget = universe->myTarget();
+	return temp;
 }
 
 /*
