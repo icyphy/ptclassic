@@ -107,17 +107,26 @@ void Galaxy :: initialize() {
 // this is separate so derived galaxies can have more control.
 void Galaxy :: initSubblocks() {
 	GalTopBlockIter next(*this);
-	Block *b,*b2;
-	b = next++;
-	// In the following, we carefully get the pointer to the next
-	// item in the iterator before calling the initialize(), in case
-	// as part of the initialization, the block deletes itself.
-	while (b && !Scheduler::haltRequested()) {
-		b2 = next++;
+	Block *b;
+	while ((b = next++) && !Scheduler::haltRequested()) {
 		b->initialize();
-		b = b2;
 	}
+	BlockListIter bdel(blocksToDelete);
+	Block *bd;
+	while (bd = bdel++) {
+	  removeBlock(*bd);
+	  LOG_DEL; delete bd;
+	}
+	blocksToDelete.initialize();
 }
+
+// Add a block to the list of blocks to be deleted after initialization
+void Galaxy::deleteBlockAfterInit(Block& b) {
+  // Check to make sure the block is not already there
+  if(!blocksToDelete.blockWithName(b.name()))
+     blocksToDelete.put(b);
+}
+
 
         ////////////////////////////////////
         // wrapup()
@@ -142,7 +151,7 @@ void Galaxy :: wrapup() {
 
 void Galaxy :: initState() {
         Block::initState();
-	initStateSubblocks();
+
 }
 
 // separate for additional control in derived galaxies.
