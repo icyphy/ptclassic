@@ -44,7 +44,7 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y
 
-test blocks.0 {create a test universe for blocks command} {
+test blocks-0 {create a test universe for blocks command} {
     namespace ::pitcl {
         defGalaxy y SDF {
             addBlock z Ramp
@@ -64,37 +64,37 @@ test blocks.0 {create a test universe for blocks command} {
 ######################################################################
 #### blocks
 
-test blocks.1 {get the top level blocks of a universe} {
+test blocks-1 {get the top level blocks of a universe} {
     ::pitcl::currentGalaxy .x
     ::pitcl::blocks
 } {a b c d}
 
-test blocks.2 {get the top level blocks of a galaxy by relative name} {
+test blocks-2 {get the top level blocks of a galaxy by relative name} {
     ::pitcl::currentGalaxy .x
     ::pitcl::blocks a
 } {z}
 
-test blocks.3 {get the top level blocks of a galaxy by absolute name} {
+test blocks-3 {get the top level blocks of a galaxy by absolute name} {
     ::pitcl::currentGalaxy .x
     ::pitcl::blocks .x.a
 } {z}
 
-test blocks.4 {get the top level blocks of a galaxy by dotted name} {
+test blocks-4 {get the top level blocks of a galaxy by dotted name} {
     ::pitcl::currentGalaxy .x
     ::pitcl::blocks .x.a
 } {z}
 
-test blocks.5 {get all stars of a universe} {
+test blocks-5 {get all stars of a universe} {
     ::pitcl::currentGalaxy .x
     ::pitcl::blocks -deep
 } {z b c d}
 
-test blocks.6 {get the full name of all stars of a universe} {
+test blocks-6 {get the full name of all stars of a universe} {
     ::pitcl::currentGalaxy .x
     ::pitcl::blocks -deep -fullname
 } {.x.a.z .x.b .x.c .x.d}
 
-test blocks.7 {get the names from another universe} {
+test blocks-7 {get the names from another universe} {
     ::pitcl::currentGalaxy .main
     ::pitcl::blocks -deep -fullname .x
 } {.x.a.z .x.b .x.c .x.d}

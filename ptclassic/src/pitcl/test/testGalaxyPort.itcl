@@ -45,7 +45,7 @@ set reallyExit 0
 # Naming convention: Galaxy masters: am, bm, ...,
 # Galaxy instances: a,b,c,...,  Stars: x,y,z.
 
-test galaxyPort.1 {galaxy port, relative naming} {
+test galaxyPort-1 {galaxy port, relative naming} {
     namespace ::pitcl {
         defGalaxy cm SDF {
             addBlock x Ramp
@@ -55,7 +55,7 @@ test galaxyPort.1 {galaxy port, relative naming} {
     }
 } {cm.x.output}
 
-test galaxyPort.2 {galaxy port, absolute naming} {
+test galaxyPort-2 {galaxy port, absolute naming} {
     ::pitcl::defGalaxy dm SDF {
         addBlock dm.x cm
         galaxyPort dm.o x.o

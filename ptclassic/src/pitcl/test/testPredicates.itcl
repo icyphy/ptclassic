@@ -44,7 +44,7 @@ set reallyExit 0
 #### setup
 # Create a hierarchical universe x with galaxy x.y and populate with blocks.
 
-test predicates.0 {create a test universe} {
+test predicates-0 {create a test universe} {
     namespace ::pitcl {
         defWormhole ym SDF DE {
             addBlock z PulseGen
@@ -69,47 +69,47 @@ test predicates.0 {create a test universe} {
 #### connect
 
 # FIXME: fails
-test predicates.1 {Check isWormhole} {
+test predicates-1 {Check isWormhole} {
     ::pitcl::isWormhole .x.y
 } {1}
 
-test predicates.2 {isWormhole on a star} {
+test predicates-2 {isWormhole on a star} {
     ::pitcl::isWormhole .x.b
 } {0}
 
-test predicates.3 {isWormhole on a galaxy} {
+test predicates-3 {isWormhole on a galaxy} {
     ::pitcl::isWormhole .x.z
 } {0}
 
-test predicates.4 {isGalaxy on a galaxy} {
+test predicates-4 {isGalaxy on a galaxy} {
     ::pitcl::isGalaxy .x.z
 } {1}
 
-test predicates.5 {isGalaxy on a star} {
+test predicates-5 {isGalaxy on a star} {
     ::pitcl::isGalaxy .x.b
 } {0}
 
-test predicates.6 {isGalaxy on a wormhole} {
+test predicates-6 {isGalaxy on a wormhole} {
     ::pitcl::isGalaxy .x.y
 } {0}
 
-test predicates.7 {isMultiPort on a simple port} {
+test predicates-7 {isMultiPort on a simple port} {
     ::pitcl::isMultiPort .x.b.output
 } {0}
 
-test predicates.8 {isMultiPort on a star multi port} {
+test predicates-8 {isMultiPort on a star multi port} {
     ::pitcl::isMultiPort .x.z.e.input
 } {1}
 
-test predicates.9 {isMultiPort on a port within a star multi port} {
+test predicates-9 {isMultiPort on a port within a star multi port} {
     ::pitcl::isMultiPort .x.z.e.input#1
 } {0}
 
-test predicates.10 {isMultiPort on a galaxy multi port} {
+test predicates-10 {isMultiPort on a galaxy multi port} {
     ::pitcl::isMultiPort .x.z.in
 } {1}
 
-test predicates.11 {isMultiPort on a galaxy simple port} {
+test predicates-11 {isMultiPort on a galaxy simple port} {
     ::pitcl::isMultiPort .x.y.out
 } {0}
 

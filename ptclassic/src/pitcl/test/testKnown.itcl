@@ -47,7 +47,7 @@ set reallyExit 0
 # The returned list depends on the executable we are running, so we
 # just check that there is at least one domain, SDF.
 
-test known.1 {check knownDomains} {
+test known-1 {check knownDomains} {
     namespace ::pitcl {
         if {[lsearch -exact [knownDomains] SDF] >= 0} {
             list OK
@@ -62,7 +62,7 @@ test known.1 {check knownDomains} {
 # The returned list depends on the executable we are running, so we
 # just check that there is at least one star.
 
-test known.1 {check knownBlocks} {
+test known-2 {check knownBlocks} {
     namespace ::pitcl {
         addUniverse .x SDF
         if {[lsearch -exact [knownBlocks] Ramp] >= 0} {
@@ -78,7 +78,7 @@ test known.1 {check knownBlocks} {
 # The returned list depends on what we've done so far, so
 # just check that at least the universe we created above is present.
 
-test known.1 {check knownUniverses} {
+test known-3 {check knownUniverses} {
     namespace ::pitcl {
         if {[lsearch -exact [knownUniverses] .x] >= 0} {
             list OK
