@@ -15,7 +15,10 @@ set path = ( /usr/kerb.local/bin \
 		$path \
 		/usr/sww/bin )
 
-if ( "$PTARCH" == sol2 || "$PTARCH" == "sol2.cfront" ) then
+
+# Setup that is specific to certain architectures is in this section
+
+if ( "$PTARCH" =~ sol2?* ) then
 	# Needed for SUN CC, may interfere with Synopsys
 	setenv LM_LICENSE_FILE /opt/lm/lmgrd.key
 
@@ -29,21 +32,15 @@ if ( "$PTARCH" == sol2 || "$PTARCH" == "sol2.cfront" ) then
 	set path = ( $path \
 		$SYNOPSYS/$SIM_ARCH/syn/bin \
                 $SYNOPSYS/$SIM_ARCH/sim/bin )
+
+	# Only include /usr/tools/bin in our path if we are running under
+	# Solaris otherwise the sun4 build will fail because
+	# /usr/tools/mathematica is Solaris 
+	set path = ($path /usr/tools/bin)
 endif
 
-# Modify the printer variable
-setenv PRINTER sp524
-
-# For FrameMaker
-setenv FRAMEUSERSD_HOST mho.eecs.berkeley.edu
-setenv FMHOME /usr/cluster/frame
-setenv FM_FLS_HOST mho.eecs.berkeley.edu
-set path = ($path $FMHOME/bin /usr/sww/urt/bin)
-
-
-if ( "$PTARCH" == hppa || "$PTARCH" == "hppa.cfront" ) then
+if ( "$PTARCH" =~ hppa?* ) then
 	# HPPA needs these
-	setenv PTX11DIR /usr/sww/X11
 	setenv PT_DISPLAY "xterm -e vi %s"
 else
 	# For Purify: allow 128 files to be open at the same time
@@ -51,10 +48,24 @@ else
 	limit descriptors 128
 endif
 
-# Only include /usr/tools/bin in our path if we are running under Solaris
-# otherwise the sun4 build will fail because /usr/tools/mathematica is Solaris
-if ( $PTARCH =~ sol?* ) set path = ($path /usr/tools/bin)
 
+# Setup that is generic to all platforms at UCB is below here
+
+if ($?prompt) then
+	# The alias below depends on stuff local to UCB, so it should
+	# not be shipped
+	if ($TERM == "xterm") then
+		alias cd 'cd \!* ; (echo -n "]2;ptuser:`$HOME/adm/ptuser/scwd`]1;PT:`$HOME/adm/ptuser/scwd short`" &)'
+	endif
+endif
+
+# Modify the printer variable
+setenv PRINTER sp524
+
+# For FrameMaker
+setenv FMHOME /opt/frame-5.1
+setenv FM_FLS_HOST dewitt.eecs.berkeley.edu
+set path = ($path $FMHOME/bin /usr/sww/urt/bin)
 
 # Needed for s56x demos
 setenv S56DSP /users/ptdesign/vendors/s56dsp
