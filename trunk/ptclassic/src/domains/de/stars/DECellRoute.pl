@@ -39,7 +39,7 @@ sources and routes them to the appropriate output.
 		InDEMPHIter inIter(input);
 		InDEPort* inPtr;
 		while ((inPtr = inIter++) != 0) {
-			if (inPtr->dataNew) {
+			while (inPtr->dataNew) {
 				Envelope theEnvp;
 				inPtr->get().getMessage(theEnvp);
 				TYPE_CHECK(theEnvp, "NetworkCell");
@@ -58,7 +58,9 @@ sources and routes them to the appropriate output.
 				OutDEPort* outPtr = outIter++;
 				for(int i = port; i > 0; i--) { outPtr = outIter++; }
 
-				outPtr->put(arrivalTime) << theEnvp;
+				outPtr->put(completionTime) << theEnvp;
+
+				inptr->getSimulEvent();
 		}	}
 	} // end go{}
 } //end defstar { CellRoute }
