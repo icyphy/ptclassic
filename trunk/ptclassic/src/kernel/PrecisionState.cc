@@ -394,12 +394,12 @@ Precision PrecisionState :: parsePrecisionString(Tokenizer& lexer)
 
 		// looks like a "n/m" expression,
 		// replace slash by colon
-		while (tp = (char*)titer++) {
+		while ( (tp = (char*)titer++) ) {
 			lexer.pushBack(!!strcmp("/", tp) ? tp : ":");
 			LOG_DEL; delete [] tp;
 		}
 	} else
-		while (tp = (char*)titer++) {
+		while ( (tp = (char*)titer++) ) {
 			lexer.pushBack(tp);
 			LOG_DEL; delete [] tp;
 		}
