@@ -881,7 +881,7 @@ body ::tycho::File::save {{name ""}} {
     }
     set ft [file tail $filename]
     if {$name == {} && \
-            [string match {#auto#*} $ft] || [string match {#crash#*} $ft]} {
+            ([string match {#auto#*} $ft] || [string match {#crash#*} $ft])} {
         # The file was automatically created.  Invoke saveAs in the
         # proper directory with the proper default.
         ::tycho::FileBrowser::setCWD [file dirname $filename]
