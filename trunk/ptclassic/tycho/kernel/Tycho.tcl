@@ -458,7 +458,8 @@ if {$tychoOpenFiles == 0} {
 		|| ![file exists [file join $TYCHO doc tychoClasses.dag]] \
 		|| ![file exists [file join $TYCHO lib idx tycho.idx]] \
 		|| ![file exists [file join $TYCHO lib idx codeDoc.idx]] } {
-	    ::tycho::BuilderDialog::checkFiles
+	    # I have commented this out because it is driving me nuts -- johnr
+	    # ::tycho::BuilderDialog::checkFiles
 	}
     }
 }
