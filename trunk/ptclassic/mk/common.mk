@@ -53,11 +53,12 @@ $(PTLANG_IN_OBJ):
 
 # Can't use mkdir -p here, it might not exist everywhere
 $(STARDOCDIR):
-	@if [ ! -d `dirname $(STARDOCDIR)` ]; then \
+	$(STARDOCRULE) 
+STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 		echo "Making directory `dirname $(STARDOCDIR)`"; \
 		mkdir `dirname $(STARDOCDIR)`; \
-	fi
-	@if [ ! -d $(STARDOCDIR) ]; then \
+	fi; \
+	if [ ! -d $(STARDOCDIR) ]; then \
 		echo "Making directory $(STARDOCDIR)"; \
 		mkdir $(STARDOCDIR); \
 	fi
@@ -67,10 +68,12 @@ $(STARDOCDIR):
 # note if there is no doc dir, the command continues despite the error.
 .pl.cc: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
+	@$(STARDOCRULE)
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 .pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
+	@$(STARDOCRULE)
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
 # Rule for the thor preprocessor
@@ -115,7 +118,8 @@ $(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
 		ln $(STAR_MK).o $(LIBDIR)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-#sources:	$(PTLANG_IN_OBJ) $(STARDOCDIR) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
+# Don't place $(STARDOCDIR) here, or the STARDOCDIR directory will be made
+# in non-star related directories.
 sources:	$(PTLANG_IN_OBJ) $(EXTRA_SRCS) $(SRCS) $(HDRS) make.template 
 CRUD=*.o core *~ *.bak ,* LOG*
 clean:
