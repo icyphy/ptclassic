@@ -1,7 +1,10 @@
 # Config to use for egcs.
 # This is not a complete config; it only overrides those options
-# specific to using egcs.  
-#
+# specific to using egcs.  This file is a copy of config-g++.mk 
+# The reason it is a copy instead of including config-g++.mk is
+# to avoid opening yet another file each time we run make.  This
+# might be a little silly :-)
+
 
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
