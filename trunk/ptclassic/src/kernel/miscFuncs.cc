@@ -37,6 +37,7 @@ static const char file_id[] = "miscImpl.cc";
 #include "ConstIters.h"
 #endif
 
+#include <stdio.h>		// Pick up sprintf under sol2 Sun CC
 #include "miscFuncs.h"
 
 // This function returns a new, unique temporary file name.
