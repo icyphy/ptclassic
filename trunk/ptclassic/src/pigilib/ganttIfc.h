@@ -56,4 +56,8 @@ extern int ClearFrames();
 extern int DestroyFrames();
 extern int Frame ARGS((char *stars[]));
 
+/* called by dmmSupport */
+extern char* incr();
+extern int RpcFindName();
+
 #endif /* _GANTTIFC_H */
