@@ -297,6 +297,7 @@ RPCSpot	*spot;
 lsList	cmdList;
 int	permB;
 {
+    int		linkCnt = 0;
     char	linkArgs[1024];
     octObject	inst;
     vemStatus	status;
@@ -304,13 +305,23 @@ int	permB;
 
     ViInit("load-star");
 
-
-
     /* see if any arguments were given */
     linkArgs[0] = '\0';
-    if ( (lsLastItem(cmdList, (lsGeneric *) &theArg, LS_NH) == VEM_OK)
-      && (theArg->argType == VEM_TEXT_ARG) ) {
-	strcpy( linkArgs, theArg->argData.string);
+    while ( lsDelBegin(cmdList, (lsGeneric *) &theArg) == VEM_OK ) {
+	switch ( theArg->argType ) {
+	case VEM_TEXT_ARG:
+	    strcpy( linkArgs, theArg->argData.string);
+	    strcat( linkArgs, " ");
+	    ++linkCnt;
+	    break;
+	case VEM_OBJ_ARG:
+	    PrintErr("Instance args not yet implemented");
+	    ViDone();
+	    break;
+	default:
+	    PrintErr("Only strings and instances allowed as link arguments");
+	    ViDone();
+	}
     }
 
     /* set the current domain */
