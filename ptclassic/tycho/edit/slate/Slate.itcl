@@ -100,7 +100,7 @@ proc ::tycho::slate {pathName args} {
 #
 # <ul>
 # <li><i>Picture</i> and subclasses.
-# These classes implement the functionailty needed by the slate to 
+# These classes implement the functionalty needed by the slate to 
 # actually create complex items. Subclasses of Picture includes things
 # like ``3D'' rectangles and
 # polygons, and ``smart'' objects like self-routing lines.
