@@ -21,7 +21,7 @@ Initialization code for pigiRpc.
 /* Global Vars */
 
 char *xDisplay;  /* display name passed by vem */
-char *version = "Pigi Version: 0.2";
+char *version = "Pigi Version: 0.2.1";
 
 
 static void
@@ -84,8 +84,7 @@ RPCFunction CommandArray[] = {
     {RpcCompileFacet, "Exec", "compile-facet"},
     {RpcMkSchemIcon, "Extend", "make-schem-icon","@",0},
     {RpcMkStar, "Extend", "make-star","*",0},
-    {RpcLoadStars, "Extend", "load-stars"},
-    {RpcLoad, "Extend", "load"},
+    {RpcLoadStar, "Extend", "load-star", "L", 0},
     {ERFilterDesign, "Filter", " equirriple FIR", "<", 0},
     {WFilterDesign, "Filter", " window FIR", ">", 0},
     {Man, "Other", "man"},
