@@ -69,10 +69,7 @@ lsList cmdList;			/* Argument list            */
 {
     octGenerator gen;
     octObject spot_facet, obj_facet, new_lyr, bag, seg, old_lyr;
-    struct octPoint pnts[2];
-    struct octBox bb;
     octId finalFctId;
-    int np = 2, i;
     octCoord new_width;
 
     seInit();
