@@ -39,9 +39,12 @@ small, this filter gives an estimate of the strongest sinusoidal component:
 .EQ
 a sub 1 = cos omega
 .EN
+In this implementation the taps are scaled by 1/2 to make the
+star behave like the CG56 version.  Thus the output of the filter is also
+scaled by 1/2.  To compensate for this scaling $mu$ is multiplied by 2. 
 This filter outputs the current value of $a sub 1$ on the \fIcosOmega\fR
 output port.  The initial value is $a sub 1 = 1$, that is, zero frequency,
-so the initial value of the second tap is -2.
+so the initial value of the second tap is -1(because of the 1/2 scaling).
 .PP
 For more information on the LMS filter implementation, see the description
 of the LMS star upon which this star derived.
@@ -79,18 +82,18 @@ The initial guess at the angle being estimated in radians.
 
 		// initialize the taps of the three-tap LMS FIR filter
 		taps.resize(3);
-		taps[0] =  1.0;
-		taps[1] = -2.0 * cos(double(initialOmega));
-		taps[2] =  1.0;
+		taps[0] =  0.5;
+		taps[1] = -1.0 * cos(double(initialOmega));
+		taps[2] =  0.5;
 
 		// call the LMS FIR filter setup method
 		CGCLMS :: setup();
 	}
 
 	codeblock(updateSecondTap,"int index") {
-	/* 1. Update the second tap = -2 a1[k]
-	      update:        a1[k] = a1[k] + 2 e[n] x[n-1]
-	      second tap: -2 a1[k] = -2 a1[k] - 4 mu e[n] x[n-1]
+	/* 1. Update the second tap = -a1[k]
+	      update:        a1[k] = a1[k]  + 4 mu e[n] x[n-1]
+	      second tap:   -a1[k] = -a1[k] - 4 mu e[n] x[n-1]
 	      new tap:      newtap = newtap - 4 mu e[n] x[n-1]   */
 	double mu = $val(stepSize);
 	double e = $ref(error);
@@ -100,7 +103,7 @@ The initial guess at the angle being estimated in radians.
 	}
 
 	codeblock(outputSecondTap) {
-	$ref(cosOmega) = -newSecondTap/2;
+	$ref(cosOmega) = -newSecondTap;
 	}
 
 	go {
@@ -119,3 +122,6 @@ The initial guess at the angle being estimated in radians.
 	}
 	// Inherit the wrapup method
 }
+
+
+
