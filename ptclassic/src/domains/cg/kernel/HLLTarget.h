@@ -45,7 +45,7 @@ protected:
 	// from the actual name.
 	StringList sanitize(const char* s) const;
 	StringList sanitizedName(const NamedObj &b) const;
-	StringList sanitizedFullName(const NamedObj &b) const;
+	virtual StringList sanitizedFullName(const NamedObj &b) const;
 };
 
 #endif
