@@ -46,7 +46,8 @@ int MotorolaTarget :: setup(Galaxy& g) {
 }
 
 void MotorolaTarget :: wrapup () {
-	myCode += procCode;
+	myCode << "\n\n;\n; Procedures Begin\n;\n" << procCode;
+	myCode << "\n\n;\n; Procedures End\n;\n";
 	procCode.initialize();
 	StringList map = mem->printMemMap(";","");
 	addCode (map);
