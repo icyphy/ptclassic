@@ -90,11 +90,13 @@ protected:
 	// Process the string and add it to the Target code.  If stream
 	// is NULL (default) code is added to the myCode stream.
 	// Name may be given for shared stream.
-	void addCode(const char*code, const char* stream=NULL, 
+	// Returns TRUE if code was actually added.
+	int addCode(const char*code, const char* stream=NULL, 
 		     const char* name = NULL);
 
 	// Add a procedure to the procedure stream.
-	void addProcedure(const char*code,const char* name=NULL);
+	// Returns TRUE if code was actually added.
+	int addProcedure(const char*code,const char* name=NULL);
 
 	// output a comment to a target stream, if stream name is
 	// null, output the comment to myCode stream.  Note: this will
