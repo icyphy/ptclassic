@@ -42,34 +42,45 @@ Misc CG routines.
 char* makeLower(const char* name);
 
 //////////////////////////////////////////////////////////////////////////
-//run command on hostname in specified directory.  if directory == NULL
-//then the command will be executed in the home directory.  Returns
-//the status flag of the system call.
+// Run command on hostname in specified directory.  If directory == NULL
+// then the command will be executed in the home directory.  Returns
+// the status flag of the system call.
 
-int rshSystem(const char* hostname,const char* command,const char* directory = NULL);
-
-//////////////////////////////////////////////////////////////////////////
-//write a string to a file in a specified directory on a given host.  If
-//the direcory does not exit, it will be created.  The code can be
-//optionally displayed.  If host is not the localhost, then this method
-//will use rcp to copy it.  If mode is not null, will execute a
-//chmod on the file with the given mode.  Returns TRUE if successful.
-
-int rcpWriteFile(const char* hname,const char* dir,const char* file,
-const char* text,int displayFlag = FALSE, int mode = -1);
+int rshSystem(const char* hostname, const char* command,
+	const char* directory = NULL);
 
 //////////////////////////////////////////////////////////////////////////
-//copy a file to a directory.  This will either perform a link system
-//call or do a rcp to copy a file over the network. Returns TRUE if
-//successful
+// Write a string to a file in a specified directory on a given host.  If
+// the direcory does not exit, it will be created.  The code can be
+// optionally displayed.  If host is not the localhost, then this method
+// will use rcp to copy it.  If mode is not null, will execute a
+// chmod on the file with the given mode.  Returns TRUE if successful.
+
+int rcpWriteFile(const char* hname, const char* dir, const char* file,
+        const char* text, int displayFlag = FALSE, int mode = -1);
+
+//////////////////////////////////////////////////////////////////////////
+// Copy a file to a directory.  This will either perform a link system
+// call or do a rcp to copy a file over the network. Returns TRUE if
+// successful
 
 int rcpCopyFile(const char* hname, const char* dir, const char* filePath,
-		int deleteOld = TRUE, const char* newFileName = NULL);
+	int deleteOld = TRUE, const char* newFileName = NULL);
 
 /////////////////////////////////////////////////////////////////////////
-//returns TRUE if hname is the machine Ptolemy is running on.  NULL, "\0"
-//and "localhost" all return TRUE as well.
+// Returns TRUE if hname is the machine Ptolemy is running on.  NULL, "\0"
+// and "localhost" all return TRUE as well.
 int onHostMachine(const char* hname);
 
+
+////////////////////////////////////////////////////////////////////////
+// Sanitize a string so that it is usable as a C/C++ identifier.  If
+// the string begins with a digit, the character 'x' is prepended.
+// Then, all the characters in the string that are not alphanumeric
+// are changed to '_'.  The returned (const char*) pointer points to
+// the resulting string in an internal buffer maintained by this
+// function, and is only valid until the next invocation of this
+// function.
+const char* ptSanitize(const char* string);
 
 #endif
