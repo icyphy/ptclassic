@@ -1,4 +1,5 @@
 /*
+@Version: $Id$
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.
 
@@ -24,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-// @(#)ACSGeodesic.h	1.3 03/18/98
+
 #ifndef _ACSGeodesic_h
 #define _ACSGeodesic_h
 

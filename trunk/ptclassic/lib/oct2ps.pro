@@ -2,7 +2,7 @@
 % PostScript prologue file for oct2ps
 %
 %   Rick L. Spickelmier
-%
+% Version: $Id$
 
 %
 % tile a box
