@@ -13,10 +13,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
         explanation {
-An allpass filter with one pole and one zero.
-The location of these is given by the polezero input.
-This is from fig. 1a of J.A. Moore, `About this 
-reverberation business', Computer Music. Journal, Vol 3, No.2 
+An all-pass filter with one pole and one zero.
+The location of these is given by the pole-zero input [1, fig. 1a].
+.UH REFERENCES
+.ip [1]
+J.A. Moore, "About this reverberation business",
+\fIComputer Music Journal\fR,
+vol. 3, no. 2, pp. 13-28, June, 1979.
 	}
 
         input  {
