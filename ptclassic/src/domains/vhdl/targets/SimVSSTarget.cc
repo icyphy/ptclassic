@@ -231,10 +231,11 @@ void SimVSSTarget :: frameCode() {
 
   StringList label = galName;
   label << "_proc";
-  topCompMapList.put(label, &mainPortMapList, &mainGenMapList,
-		     galName, &mainPortMapList, &mainGenMapList);
+  topCompDeclList.put(label, &mainPortMapList, &mainGenMapList,
+		      galName, &mainPortMapList, &mainGenMapList);
 
-  top_architecture << addComponentMappings(&topCompMapList);
+  //  top_architecture << addComponentMappings(&topCompMapList);
+  top_architecture << addComponentMappings(&topCompDeclList);
   top_architecture << "end ";
   top_architecture << "structure";
   top_architecture << ";\n";
@@ -406,33 +407,29 @@ void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const 
   
   VHDLGenericList* genMapList = new VHDLGenericList;
   VHDLPortList* portMapList = new VHDLPortList;
-  genMapList->initialize();
-  portMapList->initialize();
-  
-  genMapList->put("pairid", "", pairid);
-  genMapList->put("numxfer", "", numxfer);
-  portMapList->put("go", "", "", goName);
-  portMapList->put("data", "", "", dataName);
-  portMapList->put("done", "", "", doneName);
-  topCompMapList.put(label,  portMapList, genMapList, name, portMapList, genMapList);
+
+  genMapList->put("pairid", "INTEGER", "", pairid);
+  genMapList->put("numxfer", "INTEGER", "", numxfer);
 
   // Also add to port list of main.
-  mainPortList.put(goName, "OUT", "STD_LOGIC");
+  mainPortList.put(goName, "STD_LOGIC", "OUT", goName, NULL);
+  topSignalList.put(goName, "STD_LOGIC", NULL);
+  portMapList->put("go", "STD_LOGIC", "IN", goName, NULL);
   if (direction) {
-    mainPortList.put(dataName, "OUT", vtype);
+    mainPortList.put(dataName, vtype, "OUT", dataName, NULL);
+    topSignalList.put(dataName, vtype, NULL);
+    portMapList->put("data", "STD_LOGIC", "IN", dataName, NULL);
   }
   else {
-    mainPortList.put(dataName, "IN", vtype);
+    portMapList->put("data", "STD_LOGIC", "OUT", dataName, NULL);
+    topSignalList.put(dataName, vtype, NULL);
+    mainPortList.put(dataName, vtype, "IN", dataName, NULL);
   }
-  mainPortList.put(doneName, "IN", "STD_LOGIC");
-  // Also add to port map list of main.
-  mainPortMapList.put(goName, "", "", goName);
-  mainPortMapList.put(dataName, "", "", dataName);
-  mainPortMapList.put(doneName, "", "", doneName);
-  // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC");
-  topSignalList.put(dataName, vtype);
-  topSignalList.put(doneName, "STD_LOGIC");
+  portMapList->put("done", "STD_LOGIC", "OUT", doneName, NULL);
+  topSignalList.put(doneName, "STD_LOGIC", NULL);
+  mainPortList.put(doneName, "STD_LOGIC", "IN", doneName, NULL);
+
+  topCompDeclList.put(label,  portMapList, genMapList, name, portMapList, genMapList);
 }
 
 // Method to write out com file for VSS if needed.
@@ -483,7 +480,8 @@ void SimVSSTarget :: initVHDLObjLists() {
   mainGenMapList.initialize();
   mainPortMapList.initialize();
   topSignalList.initialize();
-  topCompMapList.initialize();
+  //  topCompMapList.initialize();
+  topCompDeclList.initialize();
 
   VHDLTarget::initVHDLObjLists();
 }
