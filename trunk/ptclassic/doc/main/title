@@ -1,22 +1,42 @@
 .\" $Id$
 .sz 60
 .(b C
-.sp 0.5i
 .sz 200
 \f61
 .sz 60
-.sp 1i
+.sp 0.5i
 \*(PT
 .)b
-.sp 1i
+.sz 12
+.(b C
 .hl
-.sz 14
 \f5This section describes the \*(PT kernel and user interfaces.
+.hl
 .sp
-.nf
 Department of Electrical Engineering and Computer Science
 University of California at Berkeley
 Berkeley, CA 94720
 .sp
-Copyright \(co 1990, 1991 Regents of the University of California
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+.)b
+.sp
+Permission is hereby granted, without written agreement and without
+license or royalty fees, to use, copy, modify, and distribute this
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
+.sp
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
+SUCH DAMAGE.
+.sp
+THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+ENHANCEMENTS, OR MODIFICATIONS.
 .fi
