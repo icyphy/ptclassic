@@ -29,12 +29,6 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { =input }
 		num { 0 }
 	}
-	method {
-		name { readTypeName }
-		access { public }
-		type { "const char *" }
-		code { return "Case"; }
-	}
 	go {
 		// get Particles from Geodesic
 		control.receiveData();

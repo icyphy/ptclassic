@@ -14,12 +14,6 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DDF library }
-	method {
-		name { readTypeName }
-		access { public }
-		type { "const char *" }
-		code { return "UpSample"; }
-	}
 	input {
 		name { input }
 		type { int }

@@ -33,12 +33,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 		int readyToGo;
 	}
-	method {
-		name { readTypeName }
-		access { public }
-		type { "const char *"}
-		code { return "EndCase";}
-	}
 
 	constructor {
 		input.inheritTypeFrom(output);
