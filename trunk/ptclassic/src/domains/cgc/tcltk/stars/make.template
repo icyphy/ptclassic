@@ -25,10 +25,10 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(CGCSTARDIR)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ CGCLMSTkPlot.pl \
  CGCTclScript.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
- CGCTkLMS.pl \
  CGCTkSlider.pl \
  CGCTkSunSound.pl
 
