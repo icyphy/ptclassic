@@ -180,7 +180,7 @@ body ::tycho::RevControl::constructor {args} {
 # and update the history information, if it is being viewed.
 #
 body ::tycho::RevControl::checkInAndUpdate {} {
-    $object saveQuery 1
+    $object saveQuery
     # Procs are not virtual. Itcl bug?
     [info class]::checkIn $object
     if {![isCheckedOut]} {
@@ -211,7 +211,7 @@ body ::tycho::RevControl::initializeRevControl {} {
     if {$file == {}} {
 	error "Revision control: no file specified"
     }
-    $object saveQuery 1
+    $object saveQuery
 }
 
 ###################################################################
@@ -247,7 +247,7 @@ body ::tycho::RevControl::checkIn {object} {
     if {$file == {}} {
 	error "checkIn: no file associated with the object $object"
     }
-    $object saveQuery 1
+    $object saveQuery
 }
 
 ###################################################################
