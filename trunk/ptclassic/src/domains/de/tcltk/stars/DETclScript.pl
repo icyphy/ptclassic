@@ -16,7 +16,7 @@ invoked every time the star fires.
 	}
 	explanation {
 .EQ
-nodelim
+delim off
 .EN
 The star reads a file containing Tcl commands.
 It can be used in a large variety of ways, including using Tk to animate
