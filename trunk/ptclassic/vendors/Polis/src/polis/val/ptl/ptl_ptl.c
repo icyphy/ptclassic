@@ -359,7 +359,7 @@ int compat, unittime;
   fprintf( fp, "  state {\n" );
   fprintf( fp, "    name { scheduler }\n" );
   fprintf( fp, "    type { string }\n" );
-  fprintf( fp, "    default { \"{NonPremptive }\n" );
+  fprintf( fp, "    default { \"{NonPremptive}\" }\n" );
   fprintf( fp, "    desc { Scheduler to be used for simulation }\n" );
   fprintf( fp, "    attributes { A_NONSETTABLE }\n" );
   fprintf( fp, "  }\n" );
