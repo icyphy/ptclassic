@@ -51,8 +51,11 @@ LIBSUFFIX =		so
 SHARED_COMPILERDIR =	$(PTOLEMY)/gnu/$(PTARCH)/lib/shared
 SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 
-# Command to build shared libraries (Not really supported yet)
+# Command to build C++ shared libraries
 SHARED_LIBRARY_COMMAND = g++ -shared $(SHARED_COMPILERDIR_FLAG) -o
+
+# Command to build C shared libraries
+CSHARED_LIBRARY_COMMAND = gcc -shared $(SHARED_COMPILERDIR_FLAG) -o
 
 # linker for C utilities.  If we are using shared libraries, then
 # we want to avoid involving libg++.so, so we use gcc to link.
