@@ -2,11 +2,11 @@ defstar {
   name      { Pack_M }
   domain    { SDF }
   desc      { 
-Produces a matrix with floating-point entries. The entries are
-read in from values in a sequence of floating-point particles
+Produce a matrix with floating-point entries constructed from
+floating-point input values.  The inputs are put in the matrix
 in rasterized order, e.g. for a MxN matrix, the first row is 
-filled from left to right using the first N values from the 
-first N particles. }
+filled from left to right using the first N input values.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
