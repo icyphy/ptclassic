@@ -25,7 +25,6 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 	input { name { input } type { message } }
 	output { name { output } type { message } }
 
-////// CODE
 	hinclude { <math.h>, "GrayImage.h", "DCTImage.h", "Error.h" }
 
 	protected {
@@ -34,14 +33,11 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		int blocksize;
 	}
 
-	constructor { cosData = (float*) NULL; }
+	constructor { cosData = 0; }
 
-	setup { wrapup(); firstTime = 1; }
+	setup { firstTime = 1; blocksize = 0; }
 
-	wrapup { LOG_DEL; delete [] cosData; cosData = (float*) NULL; }
-
-	destructor { wrapup(); }
-
+	destructor { LOG_DEL; delete [] cosData; }
 
 	method {
 		name { cosSet } // SAME as fwd DCT BASIS matrix.
@@ -60,7 +56,6 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 			}	}
 		}
 	} // end cosSet()
-
 
 	inline method { // Inverse DCT basis values (note transpose).
 		name { invD }
@@ -82,46 +77,57 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 	register int ndx, ndx2, cntr;
 	int ii, jj, i, j;
 
-// Do the VERTICAL transform. DCTImage to tmpbuf and copy back...
-	LOG_NEW; float* tmpbuf = new float[(inw > inh ? inw : inh)];
+	// Do the VERTICAL transform. DCTImage to tmpbuf and copy back...
+	LOG_NEW; float* tmpbuf = new float[(inw > inh ? inw : inh) + blocksize];
 	for(jj = 0; jj < inw; jj++) {
 		for(ii = 0; ii < inh; ii += blocksize) {
 			ndx = ii*inw + jj;
 			for(i = 0; i < blocksize; i++) {
-				tmpbuf[ii+i] = 0.0;
+				double sum = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
-					tmpbuf[ii+i] += invD(i, cntr) *
-							indata[ndx + cntr*inw];
-		}	}	}
+					sum += invD(i, cntr) *
+					       indata[ndx + cntr*inw];
+				}
+				tmpbuf[ii+i] = sum;
+			}
+		}
 
-// Copy data back to main buffer;
+		// Copy data back to main buffer;
 		for(i = 0; i < inh; i++) {
 			indata[i*inw + jj] = tmpbuf[i];
 		}
 	} // end for(jj)
 
-// Do HORIZONTAL xform. From indata to tmpbuf to outdata...
+	// Do HORIZONTAL xform. From indata to tmpbuf to outdata...
 	for(ii = 0; ii < outh; ii++) {
 		for(jj = 0; jj < inw; jj += blocksize) {
 			ndx = ii*inw + jj;
 			for(j = 0; j < blocksize; j++) {
-				tmpbuf[jj+j] = 0.0;
+				double sum = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
-					tmpbuf[jj+j] += invD(j, cntr) * indata[ndx+cntr];
-		}	}	}
+					sum += invD(j, cntr) * indata[ndx+cntr];
+				}
+				tmpbuf[jj+j] = sum;
+			}
+		}
 
-// Copy to "outdata".
+		// Copy to "outdata".
 		ndx2 = ii*outw;
 		for(j = 0; j < outw; j++) {
-			if (tmpbuf[j] < 0.5) outdata[ndx2+j] = (unsigned char) 0;
-			else if (tmpbuf[j] > 254.5) outdata[ndx2+j] =
-					(unsigned char) 255;
-			else outdata[ndx2+j] = (unsigned char) (tmpbuf[j] + 0.5);
+			if (tmpbuf[j] < 0.5) {
+				outdata[ndx2+j] = (unsigned char) 0;
+			}
+			else if (tmpbuf[j] > 254.5) {
+				outdata[ndx2+j] = (unsigned char) 255;
+			}
+			else {
+				outdata[ndx2+j] = (unsigned char) (tmpbuf[j] + 0.5);
+			}
 		}
 	} // end for(ii)
 
 	LOG_DEL; delete [] tmpbuf;
-		}
+	}
 	} // end doInvDCT()
 
 
@@ -132,6 +138,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		access { protected }
 		code {
 			blocksize = di->retBS();
+			LOG_DEL; delete [] cosData;
 			LOG_NEW; cosData = new float[blocksize*blocksize];
 			cosSet();
 		}
@@ -144,8 +151,8 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		(input%0).getMessage(inEnvp);
 		TYPE_CHECK(inEnvp, "DCTImage");
 
-// Need to call "writableCopy()" rather than "myData()" because the
-// doInvDCT function modifies "dctimage"!!
+		// Need to call "writableCopy()" rather than "myData()"
+		// because the doInvDCT function modifies "dctimage"!!
 		DCTImage* dctimage = (DCTImage*) inEnvp.writableCopy();
 		if (dctimage->fragmented() || dctimage->processed()) {
 			LOG_DEL; delete dctimage;
@@ -154,13 +161,14 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 			return;
 		}
 
+		// Set the value of blocksize and initialize cosData array
 		if (firstTime) { doFirst(dctimage); firstTime = 0; }
 
 		LOG_NEW;
 		GrayImage* grayout = new GrayImage((BaseImage&) *dctimage);
 		doInvDCT(grayout->retData(), dctimage->retData(),
-				grayout->retWidth(), grayout->retHeight(),
-				dctimage->fullWidth(), dctimage->fullHeight());
+			 grayout->retWidth(), grayout->retHeight(),
+			 dctimage->fullWidth(), dctimage->fullHeight());
 
 // Since we used writableCopy(), we own "dctimage".
 		LOG_DEL; delete dctimage;

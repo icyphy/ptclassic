@@ -30,7 +30,6 @@ and outputs a DCTImage particle.
 		desc	{ Block size of the DCT transform. }
 	}
 
-////// CODE
 	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h", "Error.h" }
 
 	protected {
@@ -38,20 +37,16 @@ and outputs a DCTImage particle.
 		int blocksize;
 	}
 
-	constructor { cosData = (float*) NULL; }
+	constructor { cosData = 0; }
 
 	setup {
-		wrapup();
-
 		blocksize = int(BlockSize);
+		delete [] cosData;
 		LOG_NEW; cosData = new float[blocksize*blocksize];
 		cosSet();
 	}
 
-	wrapup { LOG_DEL; delete [] cosData; cosData = (float*) NULL; }
-
-	destructor { wrapup(); }
-
+	destructor { LOG_DEL; delete [] cosData; }
 
 	method {
 		name { cosSet } // Fill DCT BASIS matrix
@@ -82,35 +77,41 @@ and outputs a DCTImage particle.
 	} // end fwdD()
 
 
-	method {
-		name { doDCT }
-		type { void }
-		arglist {	// can't break string across lines in cfront
+method {
+	name { doDCT }
+	type { void }
+	arglist {	// can't break string across lines in cfront
 "(float* out, unsigned const char* in, int outw, int outh, int inw, int inh)"
-		}
-		code {
+	}
+	code {
 	register int ndx, ndx2, cntr;
 	int ii, jj, i, j;
 
-// Do the HORIZONTAL transform. From input to out...
+	// Do the HORIZONTAL transform. From input to out...
 	for(ii = 0; ii < inh; ii++) {
 		for(jj = 0; jj < outw-blocksize; jj += blocksize) {
 			ndx = ii*outw + jj;
 			ndx2 = ii*inw + jj;
 			for(j = 0; j < blocksize; j++) {
-				out[ndx+j] = 0.0;
+				double sum = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
-					out[ndx+j] += fwdD(j, cntr) * in[ndx2+cntr];
-		}	}	}
+					sum += fwdD(j, cntr) * in[ndx2+cntr];
+				}
+				out[ndx+j] = sum;
+			}
+		}
 
-// Handle last (maybe partial) block at end of each row (i.e. zero-pad).
+	// Handle last (maybe partial) block at end of each row (i.e. zero-pad).
 		ndx = ii*outw + jj;
 		ndx2 = ii*inw + jj;
 		for(j = 0; j < blocksize; j++) {
-			out[ndx+j] = 0.0;
+			double sum = 0.0;
 			for(cntr = 0; cntr < 1 + ((inw-1)%blocksize); cntr++) {
-				out[ndx+j] += fwdD(j, cntr) * in[ndx2+cntr];
-	}	}	}
+				sum += fwdD(j, cntr) * in[ndx2+cntr];
+			}
+			out[ndx+j] = sum;
+		}
+	}
 
 // Handle rows at the bottom of the array.
 	for(ii = inh; ii < outh; ii++) {
@@ -122,16 +123,19 @@ and outputs a DCTImage particle.
 
 
 // Do the VERTICAL transform. From out to tmpbuf and copy back...
-	LOG_NEW; float* tmpbuf = new float[outh];
+	LOG_NEW; float* tmpbuf = new float[outh + blocksize];
 	for(jj = 0; jj < outw; jj++) {
-		for(ii = 0; ii < outh; ii+= blocksize) {
+		for(ii = 0; ii < outh; ii += blocksize) {
 			ndx = ii*outw + jj;
 			for(i = 0; i < blocksize; i++) {
-				tmpbuf[ii+i] = 0.0;
+				double sum = 0.0;
 				for(cntr = 0; cntr < blocksize; cntr++) {
-					tmpbuf[ii+i] += fwdD(i, cntr) *
-							out[ndx + cntr*outw];
-		}	}	}
+					sum += fwdD(i, cntr) *
+					       out[ndx + cntr*outw];
+				}
+				tmpbuf[ii+i] = sum;
+			}
+		}
 
 // Copy data back to main buffer;
 		for(i = 0; i < outh; i++) {
@@ -140,12 +144,12 @@ and outputs a DCTImage particle.
 	} // end for(jj)
 
 	LOG_DEL; delete [] tmpbuf;
-		}
+	}
+
 	} // end doDCT()
 
-
 	go {
-// Read input image.
+		// Read input image.
 		Envelope inEnvp;
 		(input%0).getMessage(inEnvp);
 		TYPE_CHECK(inEnvp,"GrayImage");
@@ -156,13 +160,13 @@ and outputs a DCTImage particle.
 			return;
 		}
 
-// Do transform.
+		// Do transform.
 		LOG_NEW; DCTImage* DCT = new DCTImage(*image, blocksize);
 		doDCT(DCT->retData(), image->constData(), DCT->fullWidth(),
-				DCT->fullHeight(), image->retWidth(),
-				image->retHeight());
+		      DCT->fullHeight(), image->retWidth(),
+		      image->retHeight());
 
-// Send output.
+		// Send output.
 		Envelope outEnvp(*DCT);
 		output%0 << outEnvp;
 	}
