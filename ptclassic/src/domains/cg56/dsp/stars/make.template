@@ -42,19 +42,16 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-all:		$(SRCS) makefile $(OBJS)
-
 STAR_MK=cg56dspstars
 DOMAIN=CG56DSP
 DOMAIN_2=CG56
-EXTRA_SRCS= $(STAR_MK).mk $(PL_SRCS)
+EXTRA_SRCS= $(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+LIB=libcg56dspstars.a
+
+all:		makefile stars_all
 
 # nothing to install -- use it where it lies
-install:	all
-		@echo Installation complete.
-
-LIB=none	# required by common.mk
-
+install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/common.mk

@@ -74,15 +74,12 @@ HDRS= $(SRCS:.cc=.h)
 
 DOMAIN=CGC
 STAR_MK=cgcstars
-EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
+LIB=libcgcstars.a
 
-all:		$(SRCS) makefile $(OBJS)
+all:		makefile stars_all
 
-# nothing to install -- use it where it lies
-install:	all
-		@echo Installation complete.
-
-LIB=none	# required by common.mk
+install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/common.mk

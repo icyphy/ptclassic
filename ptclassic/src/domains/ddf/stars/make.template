@@ -24,24 +24,27 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
 INCL = -I$(DDFDIR) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
 
-PL_SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelf.pl \
- DDFCase.pl DDFEndCase.pl
+PL_SRCS=\
+DDFCase.pl \
+DDFDownCounter.pl \
+DDFEndCase.pl \
+DDFLastOfN.pl \
+DDFRepeater.pl \
+DDFSelf.pl
+
+LIB =libddfstars.a
 
 SRCS=$(PL_SRCS:.pl=.cc)
-
 OBJS=$(SRCS:.cc=.o)
-
 HDRS=$(SRCS:.cc=.h)
 
-all:		makefile $(OBJS)
+DOMAIN=DDF
+STAR_MK=ddfstars
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
 
-# nothing to install -- use it where it lies
-install:	all
-		@echo Installation complete.
+all:		makefile stars_all
 
-EXTRA_SRCS=ddfstars.mk $(PL_SRCS)
-
-LIB=none	# required by common.mk
+install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/common.mk
