@@ -18,9 +18,11 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This two-pole, two-zero IIR filter has a transfer function of
 <pre>
-{n sub 0 ~+~ n sub 1 z sup -1 ~+~ n sub 2 z sup -2} over
-{1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2} ~.
+    n<sub>0</sub> + n<sub>1</sub>z<sup>-1</sup> + n<sub>2</sub>z<sup>-2</sup>
+   -------------------
+    1 + d<sub>1</sub>z<sup>-1</sup> + d<sub>2</sub>z<sup>-2</sup>
 </pre>
+<p>
 <a name="filter, biquad"></a>
 <a name="biquad filter"></a>
 <a name="filter, IIR"></a>
