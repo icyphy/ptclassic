@@ -133,6 +133,7 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
 		    $name != {RCS} && \
 		    $name != {adm} && \
 		    $name != {codeDoc} && \
+		    $name != {collections} && \
 		    $name != {devel} && \
 		    $name != {itclhtml} && \
 		    $name != {javahtml} && \
@@ -182,6 +183,7 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
 	    if {$name != {SCCS} && \
 		    $name != {RCS} && \
 		    $name != {adm} && \
+		    $name != {collections} && \
 		    $name != {devel} && \
 		    $name != {itclhtml} && \
 		    $name != {java} && \
