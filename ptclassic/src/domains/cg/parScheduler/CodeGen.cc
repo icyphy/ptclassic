@@ -150,9 +150,6 @@ void UniProcessor :: createSubGal() {
 			}
 		}
 	}
-
-	// galaxy initialize
-	subGal->initialize();
 }
 
 			////////////////////////////
