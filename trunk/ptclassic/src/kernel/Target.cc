@@ -148,6 +148,7 @@ int Target::schedulerSetup() {
 	}
 	sched->setGalaxy(*gal);
 	sched->setup();
+	if (SimControl::haltRequested()) return FALSE;
 	return TRUE;
 }
 
