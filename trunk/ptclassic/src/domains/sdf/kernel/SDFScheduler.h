@@ -28,23 +28,23 @@ $Id$
 	////////////////////////////
 
 // This class stores the constructed schedule for access at runtime.
-// For now it is simply a list of pointers to blocks.
+// For now it is simply a list of pointers to SDFStars.
 // Later, we will want it to be a list of lists, where each list
 // has an entry specifying the number of repetitions of its components.
 
 class SDFSchedule : SequentialList {
 public:
 	// Add an element to the end of the list
-	void append(Block* b) { SequentialList::put(b);}
+	void append(SDFStar& s) { SequentialList::put(&s);}
 
 	// Return the number of elements on the list
 	int size() {return SequentialList::size();}
 
 	// Return the next block on the list
-	Block& operator ++ () {return *(Block*) next(); }
+	SDFStar& operator ++ () {return nextStar(); }
 
 	// Same as operator ++, but alternative format
-	Block& nextBlock () {return *(Block*) next(); }
+	SDFStar& nextStar () {return *(SDFStar*) next(); }
 
 	// Reset the last reference pointer so that accesses start
 	// at the head of the list
@@ -55,6 +55,10 @@ public:
 
 	// Clear the data structure
 	void initialize() {SequentialList::initialize();}
+
+	// Must define destructor since baseclass is private
+	~SDFSchedule() {}
+
 };
 
 
@@ -125,6 +129,7 @@ public:
 	// for now, we assume each schedule interation takes 1.0
 	// time units.  (Argh).  Deal with roundoff problems.
 	void setStopTime (float limit) { numIters = int(limit + 0.001);}
+
 private:
 	// This is a kludge to help integrate SDFScheduler and
 	// DEScheduler together.  numIters says how many times
