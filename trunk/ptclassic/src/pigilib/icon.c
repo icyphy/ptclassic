@@ -180,11 +180,6 @@ long userOptionWord;
     ViInit("make-star");
     ErrClear();
 
-    if(setCurDomainS(spot) == NULL) {
-	PrintErr("Domain error in facet.");
-	ViDone();
-    }
-
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
                    " \"Make Star\" ",
                    " \"ptkSetMkStar %s \" ",
