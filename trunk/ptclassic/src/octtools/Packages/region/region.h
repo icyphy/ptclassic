@@ -131,7 +131,7 @@ extern regStatus regSegActuals();
    /* Finds actual terminals that intersect a segment */
 extern regStatus regFindImpl();
    /* Finds a terminal's implementation bounding box */
-extern regFindLyrImpl();
+extern regStatus regFindLyrImpl();
    /* Finds layers of terminal's implementation */
 extern regStatus regFindNet();
    /* Finds a major net associated with an object */
