@@ -43,11 +43,12 @@ Date of last revision:
 // setUpProcs
 /////////////////////////////
 
-void DLScheduler :: setUpProcs(int num) {
-	ParScheduler :: setUpProcs(num);
+ParProcessors* DLScheduler :: setUpProcs(int num) {
+	ParScheduler::setUpProcs(num);
 	LOG_DEL; if (parSched) delete parSched;
 	LOG_NEW; parSched = new DLParProcs(numProcs, mtarget);
 	parProcs = parSched;
+	return parProcs;
 }
 
 DLScheduler :: ~DLScheduler() {

@@ -155,10 +155,7 @@ void DLParProcs :: scheduleIPC (int destP) {
 void DLParProcs :: scheduleSmall(DLNode* pd)
 {
 	// examine candidate processors
-	if (pd->atBoundary()) {
-		candidate.truncate(1);
-		candidate.elem(0) = 0;
-	} else if (pd->sticky() && pd->invocationNumber() > 1) {
+	if (pd->sticky() && pd->invocationNumber() > 1) {
 		candidate.truncate(1);
 		ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
 		candidate.elem(0) = firstN->getProcId();

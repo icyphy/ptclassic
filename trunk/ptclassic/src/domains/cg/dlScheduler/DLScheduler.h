@@ -53,7 +53,7 @@ public:
 	~DLScheduler();
 
   	// set-up Processors
-  	void setUpProcs(int num);
+  	ParProcessors* setUpProcs(int num);
 
   	// display schedule with "numProcs" processors.
   	StringList displaySchedule();
