@@ -49,7 +49,6 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
-	Edit.itcl \
 	EditC.itcl \
 	EditCText.itcl \
 	EditCpp.itcl \
