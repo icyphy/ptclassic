@@ -129,13 +129,13 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
       newArc->type = port->dataType();
       newArc->lowWrite = tokenNum;
       newArc->highWrite = tokenNum;
-      newArc->lowRead = -(port->geo().numInit());
-      newArc->highRead = -(port->geo().numInit());
+      newArc->lowRead = port->geo().firstGet();
+      newArc->highRead = port->geo().firstGet();
     }
     else if (!strcmp(port->direction(),"IN")) {
       newArc->type = port->dataType();
-      newArc->lowWrite = 0;
-      newArc->highWrite = 0;
+      newArc->lowWrite = port->geo().firstPut();
+      newArc->highWrite = port->geo().firstPut();
       newArc->lowRead = tokenNum;
       newArc->highRead = tokenNum;
     }
@@ -221,6 +221,8 @@ void VHDLTarget :: headerCode() {
 void VHDLTarget :: trailerCode() {
   // Iterate through the arc list.  Track read/write refs made on each arc.
   // Determine which variables need to be "wrap-around" assigned.
+  myCode << "\n";
+  myCode << "-- wrap-around assignments\n";
   VHDLArcListIter nextArc(arcList);
   VHDLArc* arc;
   while ((arc = nextArc++) != 0) {
@@ -242,9 +244,7 @@ void VHDLTarget :: trailerCode() {
       }
       
       // sourceName is input to register, destName is output of register.
-//      connectRegister(sourceName, destName, "INTEGER");
       myCode << destName << " := " << sourceName << ";\n";
-      cout << "Connecting " << sourceName << " and " << destName << "\n";
       
       // Must also create variables for those lines which are neither read nor
       // written by a $ref() - e.g. if more delays than tokens read.
@@ -252,7 +252,6 @@ void VHDLTarget :: trailerCode() {
       // Will have created a system port input instead.
 
       // If no system port by the given name, go ahead and make the variable.
-//      if (sx < arc->lowWrite) {
       if (!(variableList.inList(sourceName))) {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
@@ -266,7 +265,6 @@ void VHDLTarget :: trailerCode() {
 	}
 	variableList.put(*newvar);
       }
-//      if (ix < arc->lowWrite) {
       if (!(variableList.inList(destName))) {
 	// Allocate memory for a new VHDLVariable and put it in the list.
 	VHDLVariable* newvar = new VHDLVariable;
@@ -619,7 +617,13 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, int tokenNum/*=-1*/) {
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = port->dataType();
-  newvar->initVal = "0.0";
+//  newvar->initVal = "0.0";
+  if (!strcmp(newvar->type,"INTEGER")) {
+    newvar->initVal = "0";
+  }
+  else {
+    newvar->initVal = "0.0";
+  }
   firingVariableList.put(*newvar);
 }
 
@@ -633,7 +637,13 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   VHDLVariable* newvar = new VHDLVariable;
   newvar->name = ref;
   newvar->type = sanitizeType(type);
-  newvar->initVal = "0.0";
+//  newvar->initVal = "0.0";
+  if (!strcmp(newvar->type,"INTEGER")) {
+    newvar->initVal = "0";
+  }
+  else {
+    newvar->initVal = "0.0";
+  }
   firingVariableList.put(*newvar);
 }
 

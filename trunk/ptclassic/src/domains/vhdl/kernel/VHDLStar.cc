@@ -35,13 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "VHDLGeodesic.h"
 #include "VHDLStar.h"
 #include "VHDLTarget.h"
-#include "ComplexState.h"
-#include "Tokenizer.h"
-#include <ctype.h>
-//#include <ostream.h>
 
 // The following is defined in VHDLDomain.cc -- this forces that module
 // to be included if any VHDL stars are linked in.
@@ -232,7 +227,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset) {
 
   // Check if it's a PortHole reference.
   // Expand PortHole reference with offset.
-  else if (port = (VHDLPortHole*) genPortWithName(portName)) {
+  else if ((port = (VHDLPortHole*) genPortWithName(portName)) != NULL) {
 
     // Error:  Referencing a MultiPortHole as if it were a single PortHole.
     if (multiPortWithName(portName)) {
@@ -407,9 +402,9 @@ void VHDLStar :: initialize() {
 int VHDLStar :: run() {
   int status = 0;
   firing++;
-  updateOffsets();
-  status = targ()->runIt(this);
 //  updateOffsets();
+  status = targ()->runIt(this);
+  updateOffsets();
   return status;
 }
 
