@@ -366,10 +366,10 @@ body ::tycho::EditDAG::constructor {args} {
     set linecolor   [eval ::tycho::color [preference get lineColor]]
 
     eval itk_initialize $args
-    eval preference exclude $this $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preferences
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -spacingx spacingx \
 	    -spacingy spacingy \
 	    -startx startx \
