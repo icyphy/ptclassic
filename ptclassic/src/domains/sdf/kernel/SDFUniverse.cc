@@ -9,10 +9,9 @@ SDFUniverse :: operator char* () {
 	out += "Descriptor: ";
 	out += readDescriptor();
 	out += "\n";
-	out += "CONTENTS:";
-	out += "\n";
+	out += "CONTENTS:\n";
 
-	out += *myTopology;
+	out += myTopology->operator char* ();
 
 	return out;
 }
