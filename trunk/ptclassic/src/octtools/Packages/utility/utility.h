@@ -62,46 +62,46 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "ansi.h"
 
-EXTERN long  util_cpu_time
+OCT_EXTERN long  util_cpu_time
 	NULLARGS;
-EXTERN char *util_path_search
+OCT_EXTERN char *util_path_search
 	ARGS((char *program));
-EXTERN char *util_file_search
+OCT_EXTERN char *util_file_search
 	ARGS((char *file, char *path, char *mode));
-EXTERN int   util_pipefork
+OCT_EXTERN int   util_pipefork
 	ARGS((char **argv, FILE **toCommand, FILE **fromCommand, int *pid));
-EXTERN int   util_csystem
+OCT_EXTERN int   util_csystem
 	ARGS((const char *command));
-EXTERN char *util_print_time
+OCT_EXTERN char *util_print_time
 	ARGS((long t));
-EXTERN char *util_strsav
+OCT_EXTERN char *util_strsav
 	ARGS((char *ptr));
-EXTERN FILE* util_tmpfile
+OCT_EXTERN FILE* util_tmpfile
         NULLARGS;
-EXTERN char *util_tilde_expand
+OCT_EXTERN char *util_tilde_expand
 	ARGS((char *filename));
-EXTERN char *util_tilde_compress
+OCT_EXTERN char *util_tilde_compress
 	ARGS((char *filename));
-EXTERN char *util_logical_expand
+OCT_EXTERN char *util_logical_expand
 	ARGS((char *filename));
-EXTERN char *util_logical_compress
+OCT_EXTERN char *util_logical_compress
 	ARGS((char *filename, char* varname ));
-EXTERN char *util_file_expand
+OCT_EXTERN char *util_file_expand
 	ARGS((char *filename));
 
-EXTERN void util_register_user
+OCT_EXTERN void util_register_user
 	ARGS((char *user, char *directory));
 
-EXTERN void util_setenv
+OCT_EXTERN void util_setenv
         ARGS(( char *name, char *value ));
-EXTERN void util_unsetenv
+OCT_EXTERN void util_unsetenv
         ARGS(( char *name ));
-EXTERN void util_printenv
+OCT_EXTERN void util_printenv
         ARGS(( FILE *fp ));
 
 
 /* Nicely format a double in engineering notation */
-EXTERN char *util_pretty_print
+OCT_EXTERN char *util_pretty_print
         ARGS( ( double v ) );
 
 

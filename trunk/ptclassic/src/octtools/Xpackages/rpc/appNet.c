@@ -69,7 +69,7 @@ extern int errno;
 #include "appNet.h"
 #include "ansi.h"
 
-EXTERN rpcInternalStatus RPCReceiveFunctionToken
+OCT_EXTERN rpcInternalStatus RPCReceiveFunctionToken
   ARGS((long *value, STREAM stream));
 rpcStatus RPCApplicationFunctionComplete();
 

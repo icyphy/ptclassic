@@ -56,100 +56,100 @@ extern char *tr_op_name[];
 
 #include "ansi.h"
 
-EXTERN tr_stack *tr_create
+OCT_EXTERN tr_stack *tr_create
 	NULLARGS;
 
-EXTERN void tr_free
+OCT_EXTERN void tr_free
 	ARGS((tr_stack *stack));
 
-EXTERN void tr_push
+OCT_EXTERN void tr_push
 	ARGS((tr_stack *stack));
 
-EXTERN void tr_pop
+OCT_EXTERN void tr_pop
 	ARGS((tr_stack *stack));
 
-EXTERN void tr_identity
+OCT_EXTERN void tr_identity
 	ARGS((tr_stack *stack));
 
-EXTERN void tr_do_op
+OCT_EXTERN void tr_do_op
 	ARGS((tr_stack *stack, int type, int add_after));
 
-EXTERN void tr_rotate_dir
+OCT_EXTERN void tr_rotate_dir
 	ARGS((tr_stack *stack, int32 x, int32 y, int add_after));
 
-EXTERN void tr_rotate_angle
+OCT_EXTERN void tr_rotate_angle
 	ARGS((tr_stack *stack, double angle, int add_after));
 
-EXTERN void tr_rotate_matrix
+OCT_EXTERN void tr_rotate_matrix
 	ARGS((tr_stack *stack, double matrix[2][2], int add_after));
 
-EXTERN void tr_scale
+OCT_EXTERN void tr_scale
 	ARGS((tr_stack *stack, double scale, int add_after));
 
-EXTERN void tr_add_transform
+OCT_EXTERN void tr_add_transform
 	ARGS((tr_stack *stack, struct octTransform *transform, int add_after));
 
-EXTERN void tr_translate
+OCT_EXTERN void tr_translate
 	ARGS((tr_stack *stack, int32 x, int32 y, int add_after));
 	
-EXTERN void tr_transform
+OCT_EXTERN void tr_transform
 	ARGS((tr_stack *stack, int32 *x_ptr, int32 *y_ptr));
 
-EXTERN void tr_inverse_transform
+OCT_EXTERN void tr_inverse_transform
 	ARGS((tr_stack *stack, int32 *x_ptr, int32 *y_ptr));
 
-EXTERN void tr_itransform
+OCT_EXTERN void tr_itransform
 	ARGS((tr_stack *stack, int32 *x_ptr, int32 *y_ptr));
 
-EXTERN void tr_scaler_transform
+OCT_EXTERN void tr_scaler_transform
 	ARGS((tr_stack *stack, int32 *scaler));
 
-EXTERN void tr_angle_transform
+OCT_EXTERN void tr_angle_transform
 	ARGS((tr_stack *stack, double *angle_ptr));
 
-EXTERN int tr_is_manhattan
+OCT_EXTERN int tr_is_manhattan
 	ARGS((tr_stack *stack));
 
-EXTERN int tr_is_mirrored
+OCT_EXTERN int tr_is_mirrored
 	ARGS((tr_stack *stack));
 
-EXTERN void tr_get_transform
+OCT_EXTERN void tr_get_transform
 	ARGS((tr_stack *stack, double matrix[2][2], int32 *trans_x, int32 *trans_y, int *type_ptr));
 
-EXTERN void tr_get_oct_transform
+OCT_EXTERN void tr_get_oct_transform
 	ARGS((tr_stack *stack, struct octTransform *transform));
 
-EXTERN void tr_get_angle
+OCT_EXTERN void tr_get_angle
 	ARGS((tr_stack *stack, double *angle_ptr, int *mirrored, double *scale));
 
-EXTERN void tr_oct_transform
+OCT_EXTERN void tr_oct_transform
 	ARGS((struct octTransform *transform, int32 *x_ptr, int32 *y_ptr));
 
-EXTERN void tr_oct_inverse_transform
+OCT_EXTERN void tr_oct_inverse_transform
 	ARGS((struct octTransform *transform, int32 *x_ptr, int32 *y_ptr));
 
-EXTERN void tr_oct_itransform
+OCT_EXTERN void tr_oct_itransform
 	ARGS((struct octTransform *transform, int32 *x_ptr, int32 *y_ptr));
 
-EXTERN void tr_oct_scaler_transform
+OCT_EXTERN void tr_oct_scaler_transform
 	ARGS((struct octTransform *transform, int32 *scaler));
 
-EXTERN void tr_oct_angle_transform
+OCT_EXTERN void tr_oct_angle_transform
 	ARGS((struct octTransform *transform, double *angle_ptr));
 
-EXTERN int tr_oct_is_manhattan
+OCT_EXTERN int tr_oct_is_manhattan
 	ARGS((struct octTransform *transform));
 
-EXTERN int tr_oct_is_mirrored
+OCT_EXTERN int tr_oct_is_mirrored
 	ARGS((struct octTransform *transform));
 
-EXTERN void tr_oct_get_angle
+OCT_EXTERN void tr_oct_get_angle
 	ARGS((struct octTransform *transform, double *angle_ptr, int *mirrored, double *scale));
 
-EXTERN void tr_get_inverse_transform
+OCT_EXTERN void tr_get_inverse_transform
 	ARGS((struct octTransform *tr, struct octTransform *inv));
 
-EXTERN void tr_delta_transform
+OCT_EXTERN void tr_delta_transform
 	ARGS((struct octTransform *oldTr, struct octTransform *newTr, struct octTransform *tr));
 
 #endif /* TR_INCLUDED */

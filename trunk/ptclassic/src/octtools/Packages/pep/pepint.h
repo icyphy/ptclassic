@@ -34,63 +34,63 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 /*  pepUtilities   */
-EXTERN void pepPathBB
+OCT_EXTERN void pepPathBB
  ARGS((octObject *path, pepBox *bb));
 
-EXTERN octStatus pepGenNextLayer
+OCT_EXTERN octStatus pepGenNextLayer
  ARGS((octObject *obj, octObject *layer, char *prevLayer));
 
-EXTERN int  pepDisjointBoxes
+OCT_EXTERN int  pepDisjointBoxes
   ARGS((pepBox  *bb1, pepBox  *bb2, octCoord margin));
 
 #define   SWAP(t,a,b)  {t x; x = a; a = b; b = x; }
 
-EXTERN double pepBoxCap
+OCT_EXTERN double pepBoxCap
   ARGS((pepBox    *box, octObject *layer));
 
-EXTERN octPoint pepCenterTerm
+OCT_EXTERN octPoint pepCenterTerm
  ARGS((octObject *term, double coord));
 
-EXTERN octStatus pepIsInArray
+OCT_EXTERN octStatus pepIsInArray
  ARGS((octObject *obj, octId *idArray));
 
 
 /*  Graph extraction and reduction */
 
-EXTERN octStatus pepGraphExtract
+OCT_EXTERN octStatus pepGraphExtract
 ARGS((octObject   *net));
 
-EXTERN octStatus pepReduce
+OCT_EXTERN octStatus pepReduce
 ARGS((octObject  *net));
 
-EXTERN octStatus pepInitGenerator
+OCT_EXTERN octStatus pepInitGenerator
  ARGS((octObject *net));
 
-EXTERN double pepGenerateRes
+OCT_EXTERN double pepGenerateRes
  ARGS((octObject  *net, octObject *term1, octObject *term2));
 
-EXTERN octStatus pepFreeGraph
+OCT_EXTERN octStatus pepFreeGraph
  ARGS((octObject *net));
 
 
 /*  Models  */
 
-EXTERN double pepModParallelLines
+OCT_EXTERN double pepModParallelLines
  ARGS(( octCoord   dist , octCoord  width , octObject *layer));
 
-EXTERN double pepModParallel
+OCT_EXTERN double pepModParallel
   ARGS((octCoord   dist,  octCoord   w1, octCoord w2, octCoord width, octObject *layer));
 
-EXTERN double pepModCrossing
+OCT_EXTERN double pepModCrossing
   ARGS((octCoord   w1, octCoord w2, octObject *layer1, octObject *layer2));
 
-EXTERN double pepModParallelDiffLayers
+OCT_EXTERN double pepModParallelDiffLayers
   ARGS((octCoord   spac, octCoord   w1, octCoord w2, octCoord side, octObject *layer1, octObject *layer2));
 
-EXTERN double pepModOverlapArea
+OCT_EXTERN double pepModOverlapArea
  ARGS(( octCoord area , octObject *layer1 , octObject *layer2));
 
-EXTERN double pepModFringe
+OCT_EXTERN double pepModFringe
   ARGS((octCoord wdt, octCoord dist, octObject *layer1, octObject *layer2));
 
 #endif

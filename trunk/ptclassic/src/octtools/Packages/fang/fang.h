@@ -151,114 +151,114 @@ struct fa_edge {
 #define   FA_HORIZONTAL 3
 
 /*	Basic operations on the fang `geo'	*/
-EXTERN void fa_init
+OCT_EXTERN void fa_init
   ARGS((fa_geometry *geo));
-EXTERN void fa_copy
+OCT_EXTERN void fa_copy
   ARGS((fa_geometry *geo, fa_geometry *outgeo));
-EXTERN void fa_add_geo
+OCT_EXTERN void fa_add_geo
   ARGS((fa_geometry *geo1, fa_geometry *geo2));
-EXTERN void fa_bb
+OCT_EXTERN void fa_bb
   ARGS((fa_geometry *geo, fa_box *bbox));
 
-EXTERN void fa_dump_geo
+OCT_EXTERN void fa_dump_geo
   ARGS((fa_geometry *geo));
-EXTERN void fa_free_geo
+OCT_EXTERN void fa_free_geo
   ARGS((fa_geometry *geo));
-EXTERN void fa_put_vertex
+OCT_EXTERN void fa_put_vertex
   ARGS((fa_geometry *outgeo, fa_coord x, fa_coord y, fa_vertex_type type));
 
-EXTERN int fa_count
+OCT_EXTERN int fa_count
   ARGS((fa_geometry *geo));
-EXTERN int fa_intersect_p
+OCT_EXTERN int fa_intersect_p
   ARGS((fa_geometry *geo1, fa_geometry *geo2));
 
 /*	Geometrical operations		*/
-EXTERN void fa_and
+OCT_EXTERN void fa_and
   ARGS((fa_geometry *geo1, fa_geometry *geo2, fa_geometry *outgeo));
-EXTERN void fa_or
+OCT_EXTERN void fa_or
   ARGS((fa_geometry *geo1, fa_geometry *geo2, fa_geometry *outgeo));
-EXTERN void fa_andnot
+OCT_EXTERN void fa_andnot
   ARGS((fa_geometry *geo1, fa_geometry *geo2, fa_geometry *outgeo));
-EXTERN void fa_invert
+OCT_EXTERN void fa_invert
   ARGS((fa_geometry *geo, fa_box *bbox, fa_geometry *outgeo));
 
-EXTERN void fa_grow
+OCT_EXTERN void fa_grow
   ARGS((fa_geometry *geo, int amount, fa_geometry *outgeo));
-EXTERN void fa_smooth
+OCT_EXTERN void fa_smooth
   ARGS((fa_geometry *geo, int min, fa_geometry *outgeo));
-EXTERN void fa_frame
+OCT_EXTERN void fa_frame
   ARGS((fa_geometry *geo, int grow, int shrink, fa_geometry *outgeo));
-EXTERN void fa_scale
+OCT_EXTERN void fa_scale
   ARGS((fa_geometry *geo, double scale_factor, fa_geometry *outgeo));
-EXTERN void fa_scale1
+OCT_EXTERN void fa_scale1
   ARGS((fa_geometry *geo, double scale_factor));
-EXTERN void fa_fill
+OCT_EXTERN void fa_fill
   ARGS((fa_geometry *geo, fa_geometry *outgeo));
 
 /*	Functions using the fa_box structure	*/
-EXTERN void fa_to_boxes
+OCT_EXTERN void fa_to_boxes
   ARGS((fa_geometry *geo, fa_box **outbox));
-EXTERN void fa_add_box
+OCT_EXTERN void fa_add_box
   ARGS((fa_geometry *geo, fa_coord left, fa_coord bottom, fa_coord right, fa_coord top));
 
-EXTERN void fa_print_boxes
+OCT_EXTERN void fa_print_boxes
   ARGS((fa_box *boxes, int scale, FILE *stream));
-EXTERN void fa_dump_boxes
+OCT_EXTERN void fa_dump_boxes
   ARGS((fa_box *boxes));
-EXTERN void fa_free_boxes
+OCT_EXTERN void fa_free_boxes
   ARGS((fa_box *box));
 
 /*	Functions using the `fa_region' structure	*/
-EXTERN void fa_to_regions
+OCT_EXTERN void fa_to_regions
   ARGS((fa_geometry *geo, fa_region **outregion));
-EXTERN void fa_add_regions
+OCT_EXTERN void fa_add_regions
   ARGS((fa_geometry *geo, fa_region *region));
-EXTERN void fa_regions_to_boxes
+OCT_EXTERN void fa_regions_to_boxes
   ARGS((fa_region *region, fa_box **outbox));
 
-EXTERN void fa_fill_regions1
+OCT_EXTERN void fa_fill_regions1
   ARGS((fa_region *region));
 
-EXTERN void fa_print_region
+OCT_EXTERN void fa_print_region
   ARGS((fa_region *region, FILE *stream));
-EXTERN void fa_print_regions
+OCT_EXTERN void fa_print_regions
   ARGS((fa_region *ptr, FILE *stream));
 
-EXTERN void fa_dump_region
+OCT_EXTERN void fa_dump_region
   ARGS((fa_region *region));
-EXTERN void fa_dump_regions
+OCT_EXTERN void fa_dump_regions
   ARGS((fa_region *list));
-EXTERN void fa_free_regions
+OCT_EXTERN void fa_free_regions
   ARGS((fa_region *region));
 
 /*	Functions using the `fa_edge' structure		*/
-EXTERN void fa_to_edges
+OCT_EXTERN void fa_to_edges
   ARGS((fa_geometry *geo, fa_edge **horiz_edges, fa_edge **vert_edges));
-EXTERN void fa_dump_edge
+OCT_EXTERN void fa_dump_edge
   ARGS((fa_edge *edge));
-EXTERN void fa_dump_edges
+OCT_EXTERN void fa_dump_edges
   ARGS((fa_edge *list));
-EXTERN void fa_free_edges
+OCT_EXTERN void fa_free_edges
   ARGS((fa_edge *list));
 
 /*	Functions not to be used by casual users	*/
-EXTERN void fa_sort
+OCT_EXTERN void fa_sort
   ARGS((fa_geometry *geo));
-EXTERN void fa_set_auto_merge
+OCT_EXTERN void fa_set_auto_merge
   ARGS((int threshold, double factor));
-EXTERN void fa_merge
+OCT_EXTERN void fa_merge
   ARGS((fa_geometry *geo, fa_geometry *outgeo));
-EXTERN void fa_merge1
+OCT_EXTERN void fa_merge1
   ARGS((fa_geometry *geo));
 
 /* Brian Lee's functions */
-EXTERN int fa_equal
+OCT_EXTERN int fa_equal
 	ARGS((fa_geometry *geo1, fa_geometry *geo2));
-EXTERN void fa_oct_transform
+OCT_EXTERN void fa_oct_transform
 	ARGS((fa_geometry *geo, octTransform *transform, fa_geometry *outgeo));
-EXTERN int fa_print_vertices
+OCT_EXTERN int fa_print_vertices
 	ARGS((fa_vertex *vertices, FILE *stream));
-EXTERN int fa_print_geo
+OCT_EXTERN int fa_print_geo
 	ARGS((fa_geometry *geo, FILE *stream));
 
 extern char fa_err_string[];	/* String containing error messages

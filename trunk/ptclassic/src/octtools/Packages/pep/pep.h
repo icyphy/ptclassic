@@ -52,25 +52,25 @@ typedef struct pepRes {
 
 #define PEP_PKG_NAME "pep"
 
-EXTERN octPoint pepCenterTerm
+OCT_EXTERN octPoint pepCenterTerm
   ARGS( (octObject *term, double coord) );
 
-EXTERN double pepCapacitance
+OCT_EXTERN double pepCapacitance
   ARGS( (octObject *obj ));
 
-EXTERN double pepCrossCapacitance
+OCT_EXTERN double pepCrossCapacitance
   ARGS( (octObject *obj1, octObject *obj2 ));
 
-EXTERN double pepResistance
+OCT_EXTERN double pepResistance
   ARGS( (octObject *source, octObject* target ));
 
-EXTERN pepRes *pepBranchResistance
+OCT_EXTERN pepRes *pepBranchResistance
   ARGS( (octObject *net, int *numberOfBranches ));
 
-EXTERN double pepPathRes
+OCT_EXTERN double pepPathRes
   ARGS( (octObject *path, octObject* t1, octObject* t2 ));
 
-EXTERN double pepTermCap
+OCT_EXTERN double pepTermCap
   ARGS((octObject  *term));
 
 #endif

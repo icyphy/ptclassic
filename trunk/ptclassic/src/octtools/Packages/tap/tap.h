@@ -39,13 +39,13 @@ extern char tapPkgName[];
 
 #define TAP_TECH_PROP_VAL		"<self>"
 
-EXTERN char *tapRootDirectory
+OCT_EXTERN char *tapRootDirectory
 	ARGS((char *name));
-EXTERN char *tapGetDefaultRoot
+OCT_EXTERN char *tapGetDefaultRoot
 	NULLARGS;
-EXTERN char *tapGetDirectory
+OCT_EXTERN char *tapGetDirectory
 	ARGS((octObject *obj));
-EXTERN int tapIsLayerDefined
+OCT_EXTERN int tapIsLayerDefined
 	ARGS((octObject *obj, char *name));
 
 
@@ -54,22 +54,22 @@ EXTERN int tapIsLayerDefined
 #define TAP_LAYER_PALETTE_NAME		"layer"
 #define TAP_CONNECTOR_PALETTE_NAME	"connector"
 
-EXTERN void tapListPalettes
+OCT_EXTERN void tapListPalettes
 	ARGS((octObject *obj, int *Npal, char ***names));
-EXTERN int tapOpenPalette
+OCT_EXTERN int tapOpenPalette
 	ARGS((octObject *obj, char *name, octObject *facet, char *mode));
-EXTERN void tapLayoutPalette
+OCT_EXTERN void tapLayoutPalette
 	ARGS((octGenerator *gen, octCoord pad, double aspect));
 
-EXTERN int tap_quantizeWidth
+OCT_EXTERN int tap_quantizeWidth
         ARGS(( int w ));
-EXTERN int tap_quantizeWidthDOWN
+OCT_EXTERN int tap_quantizeWidthDOWN
         ARGS(( int w ));
-EXTERN double tap_currentDensity
+OCT_EXTERN double tap_currentDensity
         ARGS(( octObject *layer ));
-EXTERN int tap_cDensityInit
+OCT_EXTERN int tap_cDensityInit
         ARGS(( octObject* facet ));
-EXTERN int tap_getWidthFromPeakCurrent
+OCT_EXTERN int tap_getWidthFromPeakCurrent
         ARGS(( double peakCurrent, octObject *layer ));
 
 
@@ -89,26 +89,26 @@ typedef struct tapLayerListElement {
 #define TAP_HORIZONTAL	(TAP_LEFT | TAP_RIGHT)
 #define TAP_VERTICAL	(TAP_TOP | TAP_BOTTOM)
 
-EXTERN int tapGetConnector
+OCT_EXTERN int tapGetConnector
 	ARGS((int Nlyr, tapLayerListElement *lyrs, octObject *inst));
-EXTERN int tapGetStrangeConnector
+OCT_EXTERN int tapGetStrangeConnector
 	ARGS((int Nlyr, tapLayerListElement *lyrs, octObject *inst));
 
 typedef int (*TGC)
 	ARGS((int Nlyr, tapLayerListElement *lyrs, octObject *inst));
-EXTERN void tapSetUserConnectorGenerator
+OCT_EXTERN void tapSetUserConnectorGenerator
 	ARGS((TGC));
 
 
     /* Property Stuff */
 
-EXTERN int tapGetProp
+OCT_EXTERN int tapGetProp
 	ARGS((octObject *obj, struct octProp *prop));
-EXTERN void tapSetProp
+OCT_EXTERN void tapSetProp
 	ARGS((octObject *obj, struct octProp *prop));
-EXTERN int tapGetLyrProp
+OCT_EXTERN int tapGetLyrProp
 	ARGS((int Nlyr, tapLayerListElement *lyrs, struct octProp *prop));
-EXTERN void tapSetLyrProp
+OCT_EXTERN void tapSetLyrProp
 	ARGS((int Nlyr, tapLayerListElement *lyrs, struct octProp *prop));
 
 #define tapGetPropInt(c, t, n) \
@@ -169,15 +169,15 @@ extern tapPropDescription tapKnownProperties[];
 #define TAP_RULE_ERROR		(-1)	/* XXX obsolete XXX */
 #define TAP_NO_RULE		(-2)
 
-EXTERN octCoord tapGetMinWidth
+OCT_EXTERN octCoord tapGetMinWidth
 	ARGS((octObject *lyr));
-EXTERN void tapSetMinWidth
+OCT_EXTERN void tapSetMinWidth
 	ARGS((octObject *lyr, octCoord width));
-EXTERN octCoord tapGetMaxWidth
+OCT_EXTERN octCoord tapGetMaxWidth
 	ARGS((octObject *lyr));
-EXTERN octCoord tapGetMinSpacing
+OCT_EXTERN octCoord tapGetMinSpacing
 	ARGS((octObject *lyr1, octObject *lyr2));
-EXTERN octCoord tapGetMinOverlap
+OCT_EXTERN octCoord tapGetMinOverlap
 	ARGS((octObject *lyr1, octObject *lyr2));
 
 
@@ -203,35 +203,35 @@ typedef struct tapStroke {
     int spacing;	/* in multiples of line width */
 } tapStroke;
 
-EXTERN void tapSetDisplayType
+OCT_EXTERN void tapSetDisplayType
 	ARGS((char *name, int chrome));
-EXTERN void tapGetDisplayInfo
+OCT_EXTERN void tapGetDisplayInfo
 	ARGS((octObject *lyr, int *prio, int *nCol, int *fill, int *bdr));
-EXTERN void tapGetDisplayColor
+OCT_EXTERN void tapGetDisplayColor
 	ARGS((octObject *lyr, int index, unsigned short int *r, unsigned short int *g, unsigned short int *b));
-EXTERN void tapGetDisplayPattern
+OCT_EXTERN void tapGetDisplayPattern
 	ARGS((octObject *lyr, int type, int *w, int *h, char **bits));
-EXTERN void tapGetDisplayStrokes
+OCT_EXTERN void tapGetDisplayStrokes
 	ARGS((octObject *lyr, int *count, tapStroke **ptr));
 
-EXTERN void tapSetDisplayInfo
+OCT_EXTERN void tapSetDisplayInfo
 	ARGS((octObject *lyr, int prio, int nCol, int fill, int bdr));
-EXTERN void tapSetDisplayColor
+OCT_EXTERN void tapSetDisplayColor
 #ifdef _IBMR2
 	();
 #else
 	ARGS((octObject *lyr, int index,  int r,  int g,  int b));
 #endif
-EXTERN void tapSetDisplayPattern
+OCT_EXTERN void tapSetDisplayPattern
 	ARGS((octObject *lyr, int type, int w, int h, char *bits));
 
     /* Not-usually-used Stuff */
 
-EXTERN octId tapGetFacetIdFromObj
+OCT_EXTERN octId tapGetFacetIdFromObj
 	ARGS((octObject *obj));
-EXTERN void tapFlushCache
+OCT_EXTERN void tapFlushCache
 	NULLARGS;
-EXTERN void tapOpenTechFacet
+OCT_EXTERN void tapOpenTechFacet
 	ARGS((char *tech, char *view, octObject *facet, char *mode));
 
 #endif /* TAP_H */

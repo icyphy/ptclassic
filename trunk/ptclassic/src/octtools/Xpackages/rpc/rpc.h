@@ -298,25 +298,25 @@ extern vemStatus vemCommand();	/* perform a vem command     */
 
 /* RPC Functions */
 
-EXTERN void RPCExit();
-EXTERN void RPCUserIO();
-EXTERN char *RPCXGetDefault();
-EXTERN void RPCExitVem();
+OCT_EXTERN void RPCExit();
+OCT_EXTERN void RPCUserIO();
+OCT_EXTERN char *RPCXGetDefault();
+OCT_EXTERN void RPCExitVem();
 
 /* Hack for pigilib/PVem.cc */
 #ifdef __cplusplus
 extern Window vemOpenWindow(octObject *facet, char *geo);
 #else /* __cplusplus */
-EXTERN Window vemOpenWindow();
+OCT_EXTERN Window vemOpenWindow();
 #endif /* __cplusplus*/
 
-EXTERN Window vemOpenRPCWindow();
-EXTERN void vemPrompt();
-EXTERN char *RPCVersionString();
-EXTERN void RPCRegisterDemon
+OCT_EXTERN Window vemOpenRPCWindow();
+OCT_EXTERN void vemPrompt();
+OCT_EXTERN char *RPCVersionString();
+OCT_EXTERN void RPCRegisterDemon
   ARGS(( octObject* changeList, void (*func)(octObject* changeList) ) );
 
-EXTERN FILE *RPCfopen
+OCT_EXTERN FILE *RPCfopen
   ARGS(( char* name, char* mode ));
 
 /*
@@ -336,10 +336,10 @@ EXTERN FILE *RPCfopen
  * window options
  */
 
-EXTERN vemStatus vemWnGetOptions();
-EXTERN vemStatus vemWnSetOptions();
-EXTERN vemStatus vemWnTurnOffLayer();
-EXTERN vemStatus vemWnTurnOnLayer();
+OCT_EXTERN vemStatus vemWnGetOptions();
+OCT_EXTERN vemStatus vemWnSetOptions();
+OCT_EXTERN vemStatus vemWnTurnOffLayer();
+OCT_EXTERN vemStatus vemWnTurnOnLayer();
 
 
 typedef struct win_options {

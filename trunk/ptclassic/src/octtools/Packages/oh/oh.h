@@ -38,77 +38,77 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "ansi.h"
 
-EXTERN void ohOctFailed
+OCT_EXTERN void ohOctFailed
 	ARGS((char *file, int line, char *why, octObject *offending_object));
-EXTERN void ohCreateSegment
+OCT_EXTERN void ohCreateSegment
 	ARGS((octObject *c, octObject *t, octCoord p1x, octCoord p1y, octCoord p2x, octCoord p2y, octCoord width));
-EXTERN octStatus ohBB
+OCT_EXTERN octStatus ohBB
 	ARGS((octObject *obj, octBox *bb));
-EXTERN octStatus ohTerminalBB
+OCT_EXTERN octStatus ohTerminalBB
 	ARGS((octObject *term, octBox *bb));
-EXTERN octStatus ohActualTerminalBB
+OCT_EXTERN octStatus ohActualTerminalBB
 	ARGS((octObject *aterm, octBox *bb));
-EXTERN octStatus ohFormalTerminalBB
+OCT_EXTERN octStatus ohFormalTerminalBB
 	ARGS((octObject *fterm, octBox *bb));
-EXTERN octStatus ohGetByNameContainer
+OCT_EXTERN octStatus ohGetByNameContainer
 	ARGS((octObject *contents, octObject *obj, int type, char *container_name));
-EXTERN char *ohGetName
+OCT_EXTERN char *ohGetName
 	ARGS((octObject *object));
-EXTERN octStatus ohPutName
+OCT_EXTERN octStatus ohPutName
 	ARGS((octObject *object, char *name));
-EXTERN char *ohTypeName
+OCT_EXTERN char *ohTypeName
 	ARGS((octObject *object));
-EXTERN char *ohFormatName
+OCT_EXTERN char *ohFormatName
 	ARGS((octObject *object));
-EXTERN void ohReplaceInstance
+OCT_EXTERN void ohReplaceInstance
 	ARGS((octObject *newInst, octObject *oldInst));
-EXTERN void ohAttachContents
+OCT_EXTERN void ohAttachContents
 	ARGS((octObject *src, octObject *dst, octObjectMask mask));
-EXTERN void ohAttachContainers
+OCT_EXTERN void ohAttachContainers
 	ARGS((octObject *src, octObject *dst, octObjectMask mask));
-EXTERN void ohAttachOnceContents
+OCT_EXTERN void ohAttachOnceContents
 	ARGS((octObject *src, octObject *dst, octObjectMask mask));
-EXTERN void ohAttachOnceContainers
+OCT_EXTERN void ohAttachOnceContainers
 	ARGS((octObject *src, octObject *dst, octObjectMask mask));
-EXTERN void ohDeleteContents
+OCT_EXTERN void ohDeleteContents
 	ARGS((octObject *container, octObjectMask mask));
-EXTERN void ohRecursiveDelete
+OCT_EXTERN void ohRecursiveDelete
 	ARGS((octObject *object, octObjectMask mask));
-EXTERN octStatus ohTerminalNet
+OCT_EXTERN octStatus ohTerminalNet
 	ARGS((octObject *fterm, octObject *net));
-EXTERN octStatus ohFindFormal
+OCT_EXTERN octStatus ohFindFormal
 	ARGS((octObject *fterm, octObject *aterm));
-EXTERN void ohGetPoints
+OCT_EXTERN void ohGetPoints
 	ARGS((octObject *object, int32 *num, octPoint **arr));
-EXTERN octStatus ohUnpackFacetName
+OCT_EXTERN octStatus ohUnpackFacetName
 	ARGS((octObject *facet, char *name));
-EXTERN void ohWorkFacet
+OCT_EXTERN void ohWorkFacet
 	ARGS((octObject *facet, char *inputname, char* outputname));
-EXTERN void ohInputFacet
+OCT_EXTERN void ohInputFacet
 	ARGS((octObject *facet, char *inputname ));
-EXTERN void ohUniqNames
+OCT_EXTERN void ohUniqNames
 	ARGS((octObject *container, octObjectMask mask));
-EXTERN int ohCountContents
+OCT_EXTERN int ohCountContents
 	ARGS((octObject *object, octObjectMask mask));
-EXTERN int ohCountContainers
+OCT_EXTERN int ohCountContainers
 	ARGS((octObject *object, octObjectMask mask));
-EXTERN void ohContentsToArray
+OCT_EXTERN void ohContentsToArray
 	ARGS((octObject *object, octObjectMask mask, octId **array, int *array_n));
-EXTERN octStatus ohFastGetByNetName
+OCT_EXTERN octStatus ohFastGetByNetName
 	ARGS((octObject *facet, octObject *net, char *name));
-EXTERN octStatus ohFastCreateNet
+OCT_EXTERN octStatus ohFastCreateNet
 	ARGS((octObject *facet, octObject *net, char *name));
-EXTERN octStatus ohFastGetOrCreateNet
+OCT_EXTERN octStatus ohFastGetOrCreateNet
 	ARGS((octObject *facet, octObject *net, char *name));
-EXTERN void ohFastReleaseStorage
+OCT_EXTERN void ohFastReleaseStorage
 	ARGS((void));
 
 #if OCT_LEVEL == 2
-EXTERN octStatus ohGetTerminal
+OCT_EXTERN octStatus ohGetTerminal
 	ARGS((octObject *container, int32 fxid, octObject *term));
-EXTERN void ohPrintInconsistent
+OCT_EXTERN void ohPrintInconsistent
 	ARGS((octObject *facet, FILE *stream));
-EXTERN octStatus ohBestName
+OCT_EXTERN octStatus ohBestName
 	ARGS((octObject *facet, octObject *instance, octObject *master));
 #endif
 
@@ -416,22 +416,22 @@ extern octStatus ohLastStatus;
     octOpenFacet(t))
 
 
-EXTERN int ohGetIntegerProp
+OCT_EXTERN int ohGetIntegerProp
   ARGS( (octObject *container, char *name ) );
-EXTERN double ohGetRealProp
+OCT_EXTERN double ohGetRealProp
   ARGS( (octObject *container, char *name ) );
-EXTERN char* ohGetStringProp
+OCT_EXTERN char* ohGetStringProp
   ARGS( (octObject *container, char *name ) );
 
 
-EXTERN void ohBoxCenter
+OCT_EXTERN void ohBoxCenter
   ARGS( (struct octBox *box, struct octPoint *center ));
 
-EXTERN octCoord ohBoxWidth
+OCT_EXTERN octCoord ohBoxWidth
   ARGS( (struct octBox *box ));
-EXTERN octCoord ohBoxHeight
+OCT_EXTERN octCoord ohBoxHeight
   ARGS( (struct octBox *box ));
-EXTERN octCoord ohBoxArea
+OCT_EXTERN octCoord ohBoxArea
   ARGS( (struct octBox *box ));
 
 #endif

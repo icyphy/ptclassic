@@ -45,7 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "ansi.h"
 
 extern char *uprintf_pkg_name;
-EXTERN char *uprintf
+OCT_EXTERN char *uprintf
   ARGS((char *buf, char *upf_fmt, va_list *ap));
 
 #endif /* UPRINTF */

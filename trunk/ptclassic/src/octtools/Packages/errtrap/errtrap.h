@@ -35,19 +35,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #define ERR_PKG_NAME	"errtrap"
 
-EXTERN void errProgramName
+OCT_EXTERN void errProgramName
 	ARGS((char *progName));
-EXTERN void errCore
+OCT_EXTERN void errCore
 	ARGS((int flag));
 typedef void (*EH)
 	ARGS((char *, int, char *));
-EXTERN void errPushHandler
+OCT_EXTERN void errPushHandler
 	ARGS((EH hndlr));
-EXTERN void errPopHandler
+OCT_EXTERN void errPopHandler
 	NULLARGS;
-EXTERN void errRaise
+OCT_EXTERN void errRaise
 	ARGS((char *pkgName, int code, char *format, ... ));
-EXTERN void errPass
+OCT_EXTERN void errPass
 	ARGS((char *format, ... ));
 
 #define ERR_IGNORE(expr)	\
@@ -59,11 +59,11 @@ EXTERN void errPass
 	errIgnPop();			\
     }
 extern jmp_buf errJmpBuf;
-EXTERN void errIgnPush
+OCT_EXTERN void errIgnPush
 	NULLARGS;
-EXTERN void errIgnPop
+OCT_EXTERN void errIgnPop
 	NULLARGS;
-EXTERN int errStatus
+OCT_EXTERN int errStatus
 	ARGS((char **pkgNamePtr, int *codePtr, char **messagePtr));
 
 #endif /* ERRTRAP_H */

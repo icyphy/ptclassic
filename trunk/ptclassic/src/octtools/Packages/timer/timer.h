@@ -44,26 +44,26 @@ struct dummy_timer {
 
 typedef struct dummy_timer *timer;
 
-EXTERN timer timerCreate
+OCT_EXTERN timer timerCreate
 	NULLARGS;
-EXTERN void timerReset
+OCT_EXTERN void timerReset
 	ARGS((timer tm));
-EXTERN void timerStart
+OCT_EXTERN void timerStart
 	ARGS((timer tm));
-EXTERN void timerContinue
+OCT_EXTERN void timerContinue
 	ARGS((timer tm));
-EXTERN void timerStop
+OCT_EXTERN void timerStop
 	ARGS((timer tm));
-EXTERN void timerPrint
+OCT_EXTERN void timerPrint
 	ARGS((timer tm, FILE *fp));
-EXTERN void timerFree
+OCT_EXTERN void timerFree
 	ARGS((timer tm));
 
-EXTERN double timerElapsedTime
+OCT_EXTERN double timerElapsedTime
 	ARGS((timer tm));
-EXTERN double timerUserTime
+OCT_EXTERN double timerUserTime
 	ARGS((timer tm));
-EXTERN double timerSystemTime
+OCT_EXTERN double timerSystemTime
 	ARGS((timer tm));
 
 #endif /* TIMER_H */

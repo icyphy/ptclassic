@@ -65,47 +65,47 @@ typedef enum _vovPlaceType {
 /*
 **  EXPORTED FUNCTION:
 */
-EXTERN int   VOVbegin
+OCT_EXTERN int   VOVbegin
   ARGS( ( int argc, char* argv[] ) );
 
-EXTERN int   VOVaffinity 
+OCT_EXTERN int   VOVaffinity 
   ARGS( (char* affinity ) );
 
-EXTERN int   VOVinput
+OCT_EXTERN int   VOVinput
   ARGS ( ( VovPlaceType type , char* name ) );
 
-EXTERN int   VOVoutput
+OCT_EXTERN int   VOVoutput
   ARGS( ( VovPlaceType type , char* name ) );
 
-EXTERN int   VOVdelete
+OCT_EXTERN int   VOVdelete
   ARGS( ( VovPlaceType type , char* name ) );
 
-EXTERN void  VOVmeasure
+OCT_EXTERN void  VOVmeasure
   ARGS( ( int placeId, char*  name, char* unit, int value ) );
 
-EXTERN void  VOVend
+OCT_EXTERN void  VOVend
   ARGS( ( int status ) );	/* Calls exit!! */
 
-EXTERN void  _VOVend
+OCT_EXTERN void  _VOVend
   ARGS( ( int status ) );	/* Does not exit */
 
-EXTERN int   VOVdisable
+OCT_EXTERN int   VOVdisable
   ARGS( () );			/* Disable all tracing fuctions for this process. */
 
-EXTERN void  VOVredirect
+OCT_EXTERN void  VOVredirect
   ARGS( (int f ) );		/* Set redirect flag to control stdout/stderr  */
 
-EXTERN FILE* VOVfopen
+OCT_EXTERN FILE* VOVfopen
   ARGS((char* name,char* mode)); /* Utility function, good to replace most fopen() */
 
 
 
 #ifdef OCT_H
 /* These functions are useful only if you use oct.h */
-EXTERN int   VOVinputFacet
+OCT_EXTERN int   VOVinputFacet
   ARGS( ( octObject* facet ) );
 
-EXTERN int   VOVoutputFacet
+OCT_EXTERN int   VOVoutputFacet
   ARGS ( ( octObject* facet ) );
 #endif 
 

@@ -52,17 +52,17 @@ extern int octoptind;
 extern char *optarg;
 extern char *optProgName;
 
-EXTERN int optGetOption
+OCT_EXTERN int optGetOption
 	ARGS((int argc, char **argv));
-EXTERN void optUsage
+OCT_EXTERN void optUsage
 	NULLARGS;
-EXTERN void optInit
+OCT_EXTERN void optInit
 	ARGS((char *progName, optionStruct options[], int rtnBadFlag));
-EXTERN void optAddOptions
+OCT_EXTERN void optAddOptions
 	ARGS((optionStruct options[]));
-EXTERN void optAddUnivOptions
+OCT_EXTERN void optAddUnivOptions
 	NULLARGS;
-EXTERN char *optUsageString
+OCT_EXTERN char *optUsageString
 	NULLARGS;
 
 #endif /* OPT_H */

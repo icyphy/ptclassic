@@ -71,39 +71,39 @@ typedef struct harListItem *harList;
 #define HAR_INFINITY		(-1)
 
 /* functions to convert from oct to fang */
-EXTERN void harAddObjectToFang
+OCT_EXTERN void harAddObjectToFang
 	ARGS((octObject *obj, fa_geometry *geo, octTransform *xfrm));
-EXTERN void harAddContentsToFang
+OCT_EXTERN void harAddContentsToFang
 	ARGS((octObject *cont, fa_geometry *geo, octTransform *xfrm));
-EXTERN void harAddFacetToFangList
+OCT_EXTERN void harAddFacetToFangList
 	ARGS((octObject *facet, harList *geos, octTransform *xfrm));
 
 /* functions to convert from fang to oct */
-EXTERN void harFangToContents
+OCT_EXTERN void harFangToContents
 	ARGS((fa_geometry *geo, octObject *cont, int objType));
-EXTERN void harBoxesToContents
+OCT_EXTERN void harBoxesToContents
 	ARGS((fa_box *boxes, octObject *cont));
-EXTERN void harRegionsToContents
+OCT_EXTERN void harRegionsToContents
 	ARGS((fa_region *reg, octObject *cont));
-EXTERN void harFangListToFacet
+OCT_EXTERN void harFangListToFacet
 	ARGS(( harList *geos, octObject *facet, int objType));
 
 /* functions to convert from fang to the perimList form */
-EXTERN void harFangToPerimList
+OCT_EXTERN void harFangToPerimList
 	ARGS((fa_geometry *geo, harList *perims, int ObjType));
-EXTERN void harBoxesToPerimList
+OCT_EXTERN void harBoxesToPerimList
 	ARGS((fa_box *boxes, harList *perims));
-EXTERN void harRegionsToPerimList
+OCT_EXTERN void harRegionsToPerimList
 	ARGS((fa_region *regs, harList *perims));
-EXTERN void harFacetToPerimList
+OCT_EXTERN void harFacetToPerimList
 	ARGS((octObject *facet, octCoord grow, octCoord minEdge, harList *perims));
 
 /* miscellaneous */
-EXTERN void harAddTransformedFang
+OCT_EXTERN void harAddTransformedFang
 	ARGS((fa_geometry *add, octTransform *xfrm, fa_geometry *sum));
-EXTERN fa_geometry *harGetNamedGeo
+OCT_EXTERN fa_geometry *harGetNamedGeo
 	ARGS((char *name, harList *list));
-EXTERN void harFreeList
+OCT_EXTERN void harFreeList
 	ARGS((harList *list));
 
 #endif /* HARPOON_H */
