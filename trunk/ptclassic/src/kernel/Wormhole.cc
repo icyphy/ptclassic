@@ -151,6 +151,11 @@ int Wormhole :: checkReady() const {
 	return flag;
 }
 
+// set scheduler stop time
+void Wormhole :: setStopTime() {
+	scheduler->resetStopTime(getStopTime());
+}
+
 // arrange things after run
 void Wormhole :: sumUp() {}
 
