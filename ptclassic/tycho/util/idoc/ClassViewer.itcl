@@ -111,10 +111,7 @@ class ::tycho::IDoc {
     ###################################################################
     ####                      protected variables                  ####
   
-    # Current document description
-    protected variable myIDoc
- 
-    # Current class name and html description
+    # Current ::tycho::Class
     protected variable myClass
    
     # Internal contents widget
@@ -123,21 +120,27 @@ class ::tycho::IDoc {
     # Internal HTML widget
     protected variable myHtml
 
+    # Language of current myClass
+    protected variable language
+
     ###################################################################
     ####                      private methods                      ####
 
-    # Add a record to the array of lists which describes the current idoc
-    private method add {args}
+    # Bind a description to <enter>ing a label.
+    private method binddesc {item label}
+  
+    # Bind an explanation to double clicking a label.
+    private method bindexpl {item label}
 
-    # Set the name of the current class.
-    private method setClass {args}
-    
-    # Display the contents of the myIDoc variable in text widget.
+    # Display the contents of myClass in contents widget.
     private method display {}
-    
-    # Verify that the argument is a properly formatted list.
-    private method verifycontents {contents}
 
+    # Display the proper methods/procedures in the contents widget.
+    private method displaymeth {protection}
+
+    # Display the proper variables in the contents widget.
+    private method displayvar {protection}
+    
 }
 #########################################################################
 #### -headfont configuration
@@ -167,7 +170,9 @@ configbody ::tycho::IDoc::bodyfont {
         }
     }
 }
+
 ###################################################################
+#### constructor
 #
 body ::tycho::IDoc::constructor {args} {
 
@@ -231,121 +236,235 @@ body ::tycho::IDoc::constructor {args} {
     # Something annoying inherited insists on creating this thing
     pack forget $itk_interior.childsite
     }
+
 ###########################################################################
-#### add
-# add a record to the array of lists which describes the current
-# idoc. myIDoc is arranged by type and contains a list of 
-# name contents pairs
-body ::tycho::IDoc::add {type name contents} {
-    # if it doesn't exist, lappend will still work
-    catch {set tmp [set myIDoc($type)]}
-    lappend tmp "$name $contents"
-    set myIDoc($type) $tmp   
+#### binddesc
+# bind to the enter and shift release events on the given label
+# the display of the description of the given item in the statusbar
+# if such a description exists
+#
+body ::tycho::IDoc::binddesc {item label} {
+    if ![catch {set desc [$myClass annotationget $item.description]}] {
+        $myContents bind $label <Enter> \
+                [code "$this putStatus \{$desc\}"]
+        $myContents bind $label <KeyRelease-Shift_L> \
+                [code "$this putStatus \{$desc\}"]
+        $myContents bind $label <KeyRelease-Shift_R> \
+                [code "$this putStatus \{$desc\}"]
+        $myContents bind $label <Leave> \
+                [code "$this putStatus {}"]
+    }   
 }
 
 ###########################################################################
-#### setClass
-# set the (single) name and HTML description of the current
-# class. Subsequent calls overwrite $myClass
-body ::tycho::IDoc::setClass {name html} {
-    set myClass(name) $name
-    set myClass(html) $html
+#### bindexpl
+# bind to the double click event on the given label
+# the display of the explanation of the given item in HTML
+# the explanation includes extra information besides the
+# actual explanation field of the item
+#
+body ::tycho::IDoc::bindexpl {item label} {
+ 
+    # format explanation
+    # set expl [formatexpl {$item}]
+    set expl "Noodles!"
+
+    # bind explanation to double click
+    $myContents bind $label <Double-Button-1> \
+            [code "$this putHtml {$expl}"]
 }
 
 ###########################################################################
 #### display
-# display the contents of the myidoc variable in text widget
+# display the contents of myClass in the myContents widget
+#
 body ::tycho::IDoc::display {} {
     
     # clear the contents widget
     $myContents clear
 
-    # insert the class name, if one exists
-    if {![catch {set myClass(name)}]} {
-        $myContents appendlabel class \
-                -text $myClass(name) \
-                -font [$this cget -headfont]
+    # insert the class name
+    $myContents appendlabel class \
+            -text [$myClass cget -name] \
+            -font [$this cget -headfont]
 
-        $myContents bind class <Double-Button-1> \
-                [code "$this putHtml {$myClass(html)}"]
+    $myContents bind class <Double-Button-1> \
+            [code "$this putHtml \{[$myClass annotationget explanation]\}"]
+
+    # Class description is optional
+    if ![catch {$myClass annotationget description}] {
+        $myContents bind class <Enter> [code \
+                "$this putStatus \{[$myClass annotationget description]\}"]
+        $myContents bind class <Leave> [code \
+                "$this putStatus {}"]
     }
 
-    # put in each type (Protected Method, etc.) by array order
-    foreach type [array names myIDoc] {
+    # FIXME in general, insert class parameters here
 
-        set subnames {}
+    # insert each type (Protected Method, etc.) by protection order
+    foreach protection {public protected private} {
 
-        foreach item [set myIDoc($type)] {
-            set name [lindex $item 0]
-            set contents [lrange $item 1 end]
-            
-            # keep track of names in a list for subpanel
-            lappend subnames $name
-            
-            # insert displayed text
-            $myContents appendlabel $name \
-                    -text $name \
-                    -font [$this cget -bodyfont]
-            switch -glob $type {
-                Protected* {$myContents subconfig $name -fg \
-                        [$this cget -protectedcolor]}
-                Private* {$myContents subconfig $name -fg \
-                        [$this cget -privatecolor]}
-                Public* {$myContents subconfig $name -fg \
-                        [$this cget -publiccolor]}
-                *Option {$myContents subconfig $name -fg \
-                        [$this cget -optioncolor]}
-            } 
-
-            # bind <enter> text
-            foreach {attr value} $contents {
-                if {$attr == "link"} {
-                    # When the pointer is over the tag
-                    $myContents bind $name <Enter> \
-                            [code "$this putStatus {$value}"]
-                    $myContents bind $name <KeyRelease-Shift_L> \        
-                            [code "$this putStatus {$value}"]
-                    $myContents bind $name <KeyRelease-Shift_R> \
-                            [code "$this putStatus {$value}"]
-                    $myContents bind $name <Leave> \
-                            [code "$this putStatus {}"]
-                }
-
-                if {$attr == "altlink"} {
-                    # Pointer is over and shift is pressed
-                    $myContents bind $name <Shift-Enter> \
-                            [code "$this putStatus {$value}"]
-                    $myContents bind $name <KeyPress-Shift_L> \
-                            [code "$this putStatus {$value}"]
-                    $myContents bind $name <KeyPress-Shift_R> \
-                            [code "$this putStatus {$value}"]
-                    $myContents bind $name <Leave> \
-                            [code "$this putStatus {}"]
-                }
-                
-                if {$attr == "html"} {
-                    # HTML to display after double click
-                    $myContents bind $name <Double-Button-1> \
-                            [code "$this putHtml {$value}"]
-                }
-            }
-        }
-        $myContents append $type "$subnames" \
-                -text $type \
-                -font [$this cget -headfont] 
+        # Variables        
+        displayvar $protection   
+        # Methods
+        displaymeth $protection   
     }
-
 }
 
-#######################################################################
-#### verifycontents
-# Verify that the argument is a properly formatted list.
+#####################################################################
+#### displaymeth
+# Display the methods/procedures of the given protection in the myContents
+# widget in according to the $language variable.
 #
-body ::tycho::IDoc::verifycontents {contents} {
-    if {$contents != {}} {
-        if [catch {array set foo $contents}] {
-            error "Contents are not formatted as a \
-                    {keyword item keyword item ...} list: $contents"
+body ::tycho::IDoc::displaymeth {protection} {
+
+    switch $language {
+        Itcl {
+            # Itcl uses -scope instance to signify a method
+            # and -scope class to signify a class
+            
+            # Methods
+            set subnames {}
+            foreach method [$myClass methods \
+                    -protection $protection -scope instance] {
+                puts "$protection Method $method"
+                # put label into contents widget
+                $myContents appendlabel $method\m \
+                        -text $method \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <Double-Click>
+                binddesc $method $method\m
+                bindexpl $method $method\m
+                lappend subnames $method\m
+            }
+            # insert panel if any methods found
+            if {$subnames != {}} {
+                $myContents append $protection\m "$subnames" \
+                        -text "$protection methods" \
+                        -font [$this cget -headfont]
+            }
+
+            # Procs
+            set subnames {}
+            foreach method [$myClass methods \
+                    -protection $protection -scope class] {
+                puts "$protection Proc $method"
+                # put label into contents widget
+                $myContents appendlabel $method\p \
+                        -text $method \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <Double-Click>
+                binddesc $method $method\p
+                bindexpl $method $method\p
+                lappend subnames $method\p
+            }
+            # insert panel if any procs found
+            if {$subnames != {}} {
+                $myContents append $protection\p "$subnames" \
+                        -text "$protection procs" \
+                        -font [$this cget -headfont]
+            }   
+        }
+        default {
+            set subnames {}
+            foreach method [$myClass methods \
+                    -protection $protection] {
+                # put label into contents widget
+                $myContents appendlabel $method\m \
+                        -text $method \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <Double-Click>
+                binddesc $method $method\p
+                bindexpl $method $method\p
+                lappend subnames $method\p
+            }
+            # insert panel if any methods found
+            if {$subnames != {}} {
+                $myContents append $protection\p "$subnames" \
+                        -text "$protection methods" \
+                        -font [$this cget -headfont]
+            }
+        }   
+    }
+}
+
+#####################################################################
+#### displayvar
+# Display the variables of the given protection in the myContents
+# widget in according to the $language variable.
+#
+body ::tycho::IDoc::displayvar {protection} {
+
+    switch $language {
+        Itcl {
+            # itcl uses -modifiers itk_option to signify an itk_option.
+            # check for itk_options
+            set subnames {}
+            foreach variable [$myClass variables \
+                    -protection $protection -modifiers itk_option] {
+                puts "itk_option $variable"
+                # put label into contents widget
+                $myContents appendlabel $variable\v \
+                        -text $variable \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <Double-Click>
+                binddesc $variable $variable\v
+                bindexpl $variable $variable\v
+                lappend subnames $variable\v
+            }
+            # insert panel if any itk_options found
+            if {$subnames != {}} {
+                $myContents append $protection\i "$subnames" \
+                        -text "itk_options" \
+                        -font [$this cget -headfont]
+            }
+            
+            # do other variables
+            set subnames {}
+            foreach variable [$myClass variables \
+                    -protection $protection -modifiers {}] {
+                puts "$protection Variable $variable"
+                # put label into contents widget   
+                $myContents appendlabel $variable\v \
+                        -text $variable \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <Double-Click>
+                binddesc $variable $variable\v
+                bindexpl $variable $variable\v
+                lappend subnames $variable\v
+            }
+            # insert panel if any variables found
+            if {$subnames != {}} {
+                $myContents append $protection\v "$subnames" \
+                        -text "$protection variables" \
+                        -font [$this cget -headfont]
+            }
+        }
+        default { 
+            set subnames {}
+            foreach variable [$myClass variables \
+                    -protection $protection] {
+                # put label into contents widget   
+                $myContents appendlabel $variable\v \
+                        -text $variable \
+                        -font [$this cget -bodyfont] \
+                        -fg [$this cget -$protection\color]
+                # setup bindings on <Enter> and <Double-Click>
+                binddesc $variable $variable\v
+                bindexpl $variable $variable\v
+                lappend subnames $variable\v
+            }
+            # insert panel if any variables found
+            if {$subnames != {}} {
+                $myContents append $protection\v "$subnames" \
+                        -text "$protection variables" \
+                        -font [$this cget -headfont]
+            }
         }
     }
 }
@@ -360,23 +479,18 @@ body ::tycho::IDoc::verifycontents {contents} {
 #
 body ::tycho::IDoc::insertData {data} {
     if [getReadOnly] {bell; return}
-    catch {unset myIDoc}
-    foreach command $data {
-        if [catch {
-            eval $this $command
-        } msg] {
-            global ::errorInfo
-            set saveErr $errorInfo
-            error "Invalid item: $data\n$msg" $saveErr
-        }
-    }
+    catch {delete object myClass}
+    set myClass [::tycho::Class [::tycho::autoName class]]
+    $myClass read string "$data"
+    set language [$myClass cget -language]
     display
-    putHtml $myClass(html)
+    putHtml [$myClass annotationget explanation]
 }
 
 #########################################################################
 #### putHtml
 # Load a portion of HTML into the $myHtml widget
+#
 body ::tycho::IDoc::putHtml {data} {
     $myHtml clear
     $myHtml insertData $data
