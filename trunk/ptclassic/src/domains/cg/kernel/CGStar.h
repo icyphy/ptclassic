@@ -37,6 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DynDFStar.h"
 #include "CGPortHole.h"
+#include "CGTarget.h"
 #include "CodeBlock.h"
 #include "SymbolList.h"
 #include "IntState.h"
@@ -64,7 +65,6 @@ class StringList;
 // don't know how generally it is available.
 extern "C" int strcasecmp(const char* s1, const char* s2);
 
-class CGTarget;
 class CGWormBase;
 class CodeStream;
 class Profile;
@@ -195,13 +195,11 @@ protected:
 	// Size of State or PortHole.
 	StringList expandSize(const char*);
 
-	// lookup a code CodeStream that is supported by the target.  If
-	// the stream does not exist, Error::abortRun is called.  The
-	// target should set up pointers that are set to the CodeStreams they
-	// need rather that allowing functions to call this routine directly.
-	// Initialize the pointers by overloading the star public member
-	// function void setTarget(Target* ).
-	CodeStream* getStream(const char* name);
+	// Lookup a CodeStream in the target.
+	CodeStream* getStream(const char* name=NULL)
+	{
+	    return myTarget()->getStream(name);
+	}
 
 	// create a new CodeStream with a given name.  It is legal to call this
 	// function multiple times with the same name.  In this case, only the
@@ -243,11 +241,6 @@ private:
 
 	// indicate if a fork star
 	int forkId;
-	
-	// Main code stream, the reference is set in the setTarget method.
-	CodeStream *myCode;
-	CodeStream *procedures;
-	
 };
 
 class CGStarPortIter : public BlockPortIter {

@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGTarget.h"
 #include "StringList.h"
 #include "CodeStream.h"
+#include "CodeBlock.h"
 #include <ctype.h>
 
 extern const Attribute A_GLOBAL = {AB_GLOBAL,0};
@@ -93,18 +94,6 @@ void CGStar::advance() {
 const int MAXLINELEN = 1024;
 const int TOKLEN = 80;
 
-// Find the CodeStream called name, if a CodeStream doesn't exist 
-// with the name name specified Error::abortRun is called.
-CodeStream* CGStar::getStream(const char* name) {
-	CodeStream* code = myTarget()->getStream(name);
-	if (code == NULL) {
-		StringList message;
-		message << "getStream: " << name
-		   << " does not exist. Maybe your target is wrong?";
-		Error::abortRun(*this,message);
-	}
-	return code;
-}
 
 // Create a new CodeStream called 'name' if it doesn't exist.  Return it's 
 // pointer.
@@ -132,17 +121,13 @@ void CGStar :: setTarget(Target* t)
 	codeblockSymbol.setCounter(myTarget()->symbolCounter());
 	starSymbol.setSeparator(myTarget()->separator);
 	starSymbol.setCounter(myTarget()->symbolCounter());
-	myCode = getStream(CODE);
-	procedures = getStream(PROCEDURE);
 }
 
 // Add a string to the Target code.
 // Expand macros in code and name.
 int CGStar::addCode (const char* string,const char* stream, const char* name)
 {
-	CodeStream* cs;
-	if (stream == NULL) cs = myCode;
-	else cs = getStream(stream);
+	CodeStream* cs = getStream(stream);
 	if (cs != NULL)
 	{
 	    StringList code = processCode(string);
@@ -162,21 +147,25 @@ int CGStar::addCode (const char* string,const char* stream, const char* name)
 // Add a procedure to the target procedure stream.
 int CGStar::addProcedure(const char* string, const char* name)
 {
-    StringList code = processCode(string);
-    if (name != NULL)
+    CodeStream* proc = getStream(PROCEDURE);
+    if (proc != NULL)
     {
-	StringList nm = processCode(name);
-	return procedures->put(code,nm);
+	StringList code = processCode(string);
+	if (name != NULL)
+	{
+	    StringList nm = processCode(name);
+	    return proc->put(code,nm);
+	}
+	else return proc->put(code);
     }
-    else return procedures->put(code);
+    else return FALSE;
 }
 
 // Add a comment to a target stream.
 void CGStar::outputComment (const char* msg,const char* stream)
 {
-	CodeStream* c;
-	if (stream == NULL) *myCode << myTarget()->comment(msg);
-	else if (c = getStream(stream)) *c << myTarget()->comment(msg);
+	CodeStream* cs = getStream(stream);
+	if (cs != NULL) *cs << myTarget()->comment(msg);
 }
 
 // Process a CodeBlock, expanding macros.
