@@ -53,7 +53,7 @@ int ParScheduler :: computeSchedule(Galaxy& galaxy)
 			return FALSE;
 		} 
 	} else {
-	       	if ( logFile && logFile != '\0' ) {
+	       	if ( logFile && *logFile != '\0' ) {
 			logstrm_real.open(logFile);
 			logstrm = &logstrm_real;
 		}
