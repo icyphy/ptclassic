@@ -6,6 +6,9 @@
 \batchmode	% Suppress all messages from now on.
 \pssilent	% Suppress messages from psfig.
 
+\newcommand{\PTOLEMY}{/users/ptdesign}
+\newcommand{\FIGURES}{\PTOLEMY/doc/figures}
+
 \newindex{cp}
 \newindex{pg}
 \newindex{fn}
@@ -20,7 +23,6 @@
 \synindex{tp}{cp}
 \synindex{ky}{cp}
 
-
 \begin{document}
 
 \date{$Date$}
@@ -34,7 +36,7 @@
 \centering
 \Huge\bsf
 The Almagest \\
-\psfig{figure=../figures/Ptolemy.ps,width=\textwidth}
+\comment \psfig{figure=\FIGURES/PtolemySmall.epsi,width=\textwidth}
 Volume \thevolume :  A User's Guide to Ptolemy 0.5
 \end{titlepage}
 
@@ -51,7 +53,7 @@ Volume \thevolume :  A User's Guide to Ptolemy 0.5
 \listoftables
 
 \clearpage
-\pagenumbering{arabic}
+\pagenumbering{Chapter}
 
 \end{iftex}
 
@@ -62,14 +64,20 @@ A User's Guide to Ptolemy 0.5}
 \maketitle
 \end{ifinfo}
 
-\begin{iftex}
-\setcounter{chapter}{0}
-\setcounter{page}{1}
-\end{iftex}
+\c number of the previous chapter
+\clearpage
+\setcounter{chapter}{41}
 
 \include{cp}
+
+\c number of the previous chapter
+\clearpage
+\setcounter{chapter}{9}
+
 \include{cgc}
+
 \include{other}
+
 \include{index}
 
 \end{document}
