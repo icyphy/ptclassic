@@ -81,8 +81,13 @@ void Wormhole :: buildEventHorizons () {
 			to.setPort(out, galp.readName(), this, &selfStar,
 				   type);
 			to.ghostConnect (from);
-			to.inheritTypeFrom (from);
-			realGalp.inheritTypeFrom (to);
+			if (type == ANYTYPE) {
+				to.inheritTypeFrom (from);
+				from.inheritTypeFrom (realGalp);
+			} else {
+				to.inheritTypeFrom (from);
+				realGalp.inheritTypeFrom (to);
+			}
 			galp.connect(to,0);
 		}
 	}
