@@ -449,8 +449,10 @@ void param_dump()
 
 /* Sun has this in its standard library in a file that also defines
  * other functions that X uses!  Yuk!
+ * Define stricmp if we are under solaris2 (SOL2 is defined in xgraph.h)
  */
-#ifndef sun
+#if defined(sun)  &&  !defined(SOL2)
+#else
 int stricmp(a, b)
 register char *a, *b;
 /*
