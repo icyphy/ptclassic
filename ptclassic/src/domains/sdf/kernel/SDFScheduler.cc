@@ -92,7 +92,19 @@ int SDFScheduler :: setup (Block& galaxy) {
    // initialize the SpaceWalk member
    alanShepard.setupSpaceWalk((Galaxy&)galaxy);
 
+   int i;
+
+   SDFStar* star;
    // Begin by setting the repetitions member of each component star
+   // to zero, to force it to be recomputed.
+   for (i = alanShepard.totalSize((Galaxy&)galaxy); i>0; i--) {
+	// Get the next atomic block and set its repetitions property
+	star = &(SDFStar&)alanShepard.nextBlock();
+
+	star->repetitions = 0;
+   }
+   alanShepard.setupSpaceWalk((Galaxy&)galaxy);
+
    // This computes the number of times each component star must be
    // run in one cycle of a periodic schedule.
    // The cast to Galaxy here assumes the Block being operated on
@@ -101,7 +113,6 @@ int SDFScheduler :: setup (Block& galaxy) {
 
    Block* atom;
    Block* dead;
-   int i;
    int passValue;
    int runResult;
 
