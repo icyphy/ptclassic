@@ -32,6 +32,7 @@ Note: all print functions append \n to string before printing.
 /* Includes */
 #include "local.h"
 #include <stdio.h>
+#include "compat.h"
 #include "rpc.h"
 #include "ptk.h"
 #include "err.h"
