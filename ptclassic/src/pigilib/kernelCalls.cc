@@ -21,13 +21,19 @@ static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 
 // Parse a classname
 // We allow classnames to be specified as, say
-// Printer:input=2
+// Printer.input=2
 // This means to make a Printer star and to create two portholes
 // within the MultiPortHole named "input".  For now, there may
 // be only one multiporthole name specified.
 //
 // The returned name and mphname are in static buffers and will be
 // overwritten by the next call.
+// First argument: pointer to the name to be parsed
+// Second argument: pointer to a char* that on return, will point
+//	to the name of the multiPortHole (mph).
+// Third argument: reference to an integer that on return will contain
+//	the number of multiPortHoles referenced.
+// Return value: pointer to the stem, or class name.
 
 static const char* parseClass (const char* name, const char** mph, int& nP) {
 	static char buf[128], buf2[128];
@@ -37,10 +43,10 @@ static const char* parseClass (const char* name, const char** mph, int& nP) {
 	nP = 0;
 
 	buf2[0] = 0;
-	while (*name && *name != ':') *p++ = *name++;
+	while (*name && *name != '.') *p++ = *name++;
 	*p = 0;
 	if (*name == 0) return buf;
-// we have a : field.
+// we have a . field.
 	name++;
 	p = buf2;
 	while (*name && *name != '=')
@@ -54,7 +60,14 @@ static const char* parseClass (const char* name, const char** mph, int& nP) {
 	return buf;
 }
 
-// Find a class.  Handle Printer:input=2.  Fail if the mphname is bogus.
+// Call parseClass from C, returning only the pointer to the class name.
+extern "C" char* callParseClass (char* name) {
+	const char* junkChar;
+	int junkInt;
+	return (char*) parseClass (name, &junkChar, junkInt);
+}
+
+// Find a class.  Handle Printer.input=2.  Fail if the mphname is bogus.
 inline static Block* findClass (const char* name) {
 	const char* mph;
 	int nP;
