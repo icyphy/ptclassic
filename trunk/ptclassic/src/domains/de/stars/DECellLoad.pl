@@ -41,17 +41,17 @@ outputs that Message in a NetworkCell.
 	hinclude { "NetworkCell.h" }
 
 	go {
-		if ( input.dataNew ) {
-			Envelope inEnvlp;
-			input.get().getMessage( inEnvlp );
-			const Message* toLoad = ( const Message* ) inEnvlp.myData();
+		if (input.dataNew) {
 			completionTime = arrivalTime;
+			Envelope inEnvlp;
+			input.get().getMessage(inEnvlp);
+			Message* toLoad = inEnvlp.writableCopy();
 			LOG_NEW; NetworkCell* shipItOut = new NetworkCell(
-					*toLoad, int( priority ), int(
-					destination ), int( mssgSize ), 0,
+					*toLoad, int( priority ), int( destination ),
+					int( mssgSize ), 0,
 					float( completionTime), 0 );
 			Envelope outEnvlp( *shipItOut );
 			output.put( completionTime ) << outEnvlp;
-		} // endif
+		} // end if
 	} // end go
 } // end defstar
