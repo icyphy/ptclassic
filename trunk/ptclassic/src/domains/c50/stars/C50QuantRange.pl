@@ -1,7 +1,8 @@
 defstar {
 	name { QuantRange }
 	domain { C50 }
-	desc { The star quantizes the input to one of N+1 possible output levels
+	desc {
+The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
 	version { $Id$ }
@@ -107,17 +108,16 @@ $label(term)
 	sach	*,1
         }
         setup {
-             if(levels.size() != thresholds.size()+1)
-                 Error::abortRun (*this,
-		 ": Must have 1 more level than threshold to quantize.");
+		if (levels.size() != thresholds.size()+1) {
+		    Error::abortRun(*this,
+			"Must have one more level than number of thresholds");
+		}
         }
 	go {
-                 X=thresholds.size();
+                 X = thresholds.size();
 
-                 if(thresholds.size()>1) 
-                     addCode(main);
-		 else
-	             addCode(other);
+                 if (thresholds.size()>1) addCode(main);
+		 else addCode(other);
 	}
 	exectime {
 	        return 15+7*int(thresholds.size());

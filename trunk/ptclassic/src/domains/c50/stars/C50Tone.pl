@@ -61,21 +61,19 @@ limitation of liability, and disclaimer of warranty provisions.
 		X = cos(twoPiF);
 		const char* p = calcType;
 		switch (*p) {
-		case 's':	// sine
+		    case 's':	// sine
 			state1 = 0.0;
 			state2 = amplitude.asDouble() * sin(twoPiF);
 			break;
-		case 'c':	// cosine
+		    case 'c':	// cosine
 			state1 = amplitude;
 			state2 = amplitude.asDouble() * cos(twoPiF);
 			break;
-		default:
+		    default:
 			Error::abortRun(*this, "calcType must be sin or cos");
 			return;
 		}
 	}
-	go { addCode(std); }
-	execTime { return 14;}
 	
 	codeblock (std) {
 	lar	AR1,#$addr(state1)		;Address state1 =>AR1
@@ -91,9 +89,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	bldd	*,#$addr(state1)		;val(state2) => addr(state1)
 	sach	*,1				;Accu => addr(state2)
 	}
+
+	go {
+		addCode(std);
+	}
+
+	execTime {
+		return 14;
+	}
 }
-
-
-
-
-
