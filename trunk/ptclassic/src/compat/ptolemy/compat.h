@@ -98,6 +98,13 @@ extern "C" {
 #endif
 #endif
 
+/* Volatile produces warnings under some cfront versions */
+#if defined(PTHPPA_CFRONT) || defined(PTSUN4_CFRONT)
+#define VOLATILE
+#else
+#define VOLATILE volatile
+#endif /* PTSUN4_CFRONT or PTHPPA_CFRONT */
+
 #ifndef PTLINUX
 #if defined(USG) && ! defined(PTHPPA)
 extern int sprintf();
