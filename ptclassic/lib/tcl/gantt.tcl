@@ -43,6 +43,7 @@ source $PTOLEMY/lib/tcl/ptkColor.tcl
 source $PTOLEMY/lib/tcl/ptkOptions.tcl
 source $PTOLEMY/lib/tcl/message.tcl
 source $PTOLEMY/lib/tcl/ptkGantt.tcl
+source $PTOLEMY/lib/tcl/utilities.tcl
 
 # Exit procedure
 proc ptkGanttExit {} {
