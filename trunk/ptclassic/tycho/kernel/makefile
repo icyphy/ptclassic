@@ -141,7 +141,7 @@ EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 MISC_FILES =		doc img test tclIndex Preferences.tim
 
 # Sub directories to run make in.
-DIRS =			doc test
+DIRS =			doc test styles
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
