@@ -38,11 +38,41 @@
 ##########################################################################
 
 
+## interval x y
+#
+# Return list of integers in the range _x_ to _y_. For example,
+#
+#    interval 2 5
+#
+# returns {2 3 4 5}.
+#
+proc interval {x y} {
+    set result {}
+
+    while { $x <= $y } {
+	lappend result $x
+	incr x +1
+    }
+
+    return $result
+}
+
+
+## spread n x y [-indented]
 #
 # Return list of n numbers in the range x to y. The -indented
 # option causes the first and list numbers to be more or less
 # the end points by half the interval between the reset of the
-# elements.
+# elements. For example,
+#
+#     spread 4 1 5
+#
+# returns {1.0 2.33333 3.66666 4.99999}, and
+#
+#     spread 4 1 5 -indented
+#
+# returns {1.5 2.5 3.5 4.5}. Note that there may be some rounding
+# errors, as in the first example above.
 #
 proc spread {n x y args} {
     getflag indented args
