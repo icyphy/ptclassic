@@ -59,7 +59,7 @@
 # </ul>
 #
 class ::tycho::Line {
-    inherit ::tycho::AsPolygon
+    inherit ::tycho::Polygon
 
     ###################################################################
     ####                         public procs                      ####
