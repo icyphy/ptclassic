@@ -15,16 +15,20 @@ clean:	$(CLEAN)
 	rm -f front.aux other.aux null.aux 
 	rm -f cgc.aux cgc.dvi
 
-cgc.dvi:	cgc.tex chapter.tex other.tex
-	$(ROOT)/doc/tex/mkchap $(TEX) cgc front,other 10
-	$(ROOT)/doc/tex/mkchap $(TEX) cgc null 10
-	mv -f chapter.dvi cgc.dvi
+# Pattern rule for formatting a single chapter.
+chapter%.dvi:
+	$(ROOT)/doc/tex/mkchap $(TEX) $(<:.tex=) front,other $*
+	$(ROOT)/doc/tex/mkchap $(TEX) $(<:.tex=) null $*
+	$(ROOT)/doc/tex/mktoc chapter $* > $(<:.tex=.contents)
+	$(ROOT)/doc/tex/mkindex chapter $* > $(<:.tex=.index)
 
-cgc.contents:	cgc.dvi
-	$(ROOT)/doc/tex/mktoc chapter 10 > cgc.contents
+chapter10.dvi:	cgc.tex
+cgc.dvi:	chapter10.dvi
+		mv -f chapter.dvi cgc.dvi
 
-cgc.index:	cgc.dvi
-	$(ROOT)/doc/tex/mkindex chapter 10 > cgc.index
+chapter9.dvi:	cp.tex
+cp.dvi:		chapter9.dvi
+		mv -f chapter.dvi cp.dvi
 
 # Update all of the Framemaker cross references.
 update_book: update.fmb
