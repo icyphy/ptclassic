@@ -25,7 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		StringList out = "\t$ref(output) = ";
 		for (int i = 1; i <= input.numberPorts(); i++) {
-			out << "$ref(input#" << i ")";
+			out << "$ref(input#" << i << ")";
 			if (i < input.numberPorts()) out << " + ";
 			else out << ";\n";
 		}
