@@ -72,13 +72,15 @@ proc ::tycho::filename {} {
 # in the current directory) is supported via the Tab key, as is
 # glob-style pattern matching. The file browser has a "Help" button and
 # a "New Directory" button. When the user selects a directory, the
-# listbox is updated to reflect the contents of that directory. When
-# the user has selected a file, the file browser self-destructs. If the
-# -command option is specified, then the value of the option is taken
-# as a command to execute before self destructing. The filename
-# selected by the user (with the complete path, and which may represent
-# a file that does not exist) is appended to the command as an
-# argument.
+# listbox is normally updated to reflect the contents of that
+# directory. However, if a Tycho editor has been registered by
+# contents, extension, or name, then that editor is invoked instead
+# (see the register commands in the File class). When the user has
+# selected a file, the file browser self-destructs. If the -command
+# option is specified, then the value of the option is taken as a
+# command to execute before self destructing. The filename selected by
+# the user (with the complete path, and which may represent a file that
+# does not exist) is appended to the command as an argument.
 # <p>
 # For example, the following command will query the user for a file name,
 # and then post that filename in top-level window:
@@ -265,7 +267,7 @@ body ::tycho::FileBrowser::processItem {filename} {
     } 
     
     # If the file does exist, and is a directory
-    if {[file isdir $file]} {
+    if {[file isdir $file] && [::tycho::File::registeredCommands $file] == {}} {
 	if {[file readable $file] && [file executable $file]} {
 	    
             set CWD [::tycho::expandPath $file]
@@ -280,7 +282,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    return 0
 	}
     } else {
-	# It's a plain file
+	# It's a plain file or a directory with a registered editor
 	if {[file readable $file]} {
 	    execCommand -command $file
 	    # Store last file opened
