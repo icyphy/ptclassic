@@ -4,14 +4,15 @@ ident
 Version identification:
 $Id$
 
- Copyright (c) 1990 The Regents of the University of California.
+ Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  Tom Parks
+ Programmer:  T. M. Parks
  Date of creation: 1/11/91
 
- This star delays its input by an amount given by either the "delay"
- parameter or the "newDelay" input.
+ This star delays its input by a variable amount.
+ The "delay" parameter gives the initial delay,
+ and the delay is changed using the "newDelay" input.
 
 **************************************************************************/
 }
@@ -20,17 +21,16 @@ defstar
 {
     name { VarDelay }
     domain { DE }
-    desc
+    derivedFrom { Delay }
+    descriptor
     {
-Delays its input by an amount given by either the "delay" parameter or
-the "newDelay" input.
+This star delays its input by a variable amount.
+The "delay" parameter gives the initial delay,
+and the delay is changed using the "newDelay" input.
     }
-
-    input
-    {
-	name { input }
-	type { anytype }
-    }
+    version { $Id$ }
+    author { T. M. Parks }
+    copyright { 1991 The Regents of the University of California }
 
     input
     {
@@ -38,38 +38,18 @@ the "newDelay" input.
 	type { float }
     }
 
-    output
-    {
-	name { output }
-	type { = input }
-    }
-
-    defstate
-    {
-	name { delay }
-	type { float }
-	default { 1.0 }
-	desc { Initial time delay. }
-	attributes { A_NONCONSTANT | A_SETTABLE }
-    }
-
     constructor
     {
-	delayType = TRUE;
+	// state is no longer constant
+	delay.clearAttributes(A_CONSTANT);
     }
 
     go
     {
 	if (newDelay.dataNew)
-	{
 	    delay = float(newDelay.get());
-	}
 
 	if (input.dataNew)
-	{
-	    completionTime = arrivalTime + double(delay);
-	    Particle& pp = input.get();
-	    output.put(completionTime) = pp;
-	}
+	    DEDelay::go();
     }
 }
