@@ -83,10 +83,10 @@ if {[info commands HMinit_win] == {}} {
 # This widget parses HTML using the library by Stephen Uhler and
 # displays it in a Tk text widget. Only local file accesses are
 # currently supported (no HTTP, FTP, etc). The HTML source can be
-# specified using the -data option or indirectly using the -file
+# specified using the insertData{} method or indirectly using the -file
 # option. If the HTML will have references to other files (such as
 # image files) that are relative, then the reference directory should
-# be specified using the -directory option if the -data option was
+# be specified using the -directory option if the insertData{} method was
 # used.  Otherwise, the directory is inferred from the -file option.
 # 
 class ::tycho::HTML {
@@ -259,6 +259,9 @@ class ::tycho::HTML {
     ###################################################################
     ####                     private variables                     ####
 
+    # The current HTML text (saved so re-rendering is possible)
+    private variable currentHTMLText
+    
     # Size modification for quick font changes  
     private variable fontOffset 0
     
@@ -890,6 +893,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 #
 body ::tycho::HTML::insertData {data} {
     stopRendering
+    set currentHTMLText $data
     # This is done in the background so that construction completes.
     # The time delays seems to be necessary to ensure that the window
     # gets mapped immediately.
@@ -1226,7 +1230,8 @@ body ::tycho::HTML::windowMenuRemoveAll {filename} {
 #### render
 # Render the given HTML text in the given <code>HTML</code> window.
 # If the given HTML text is not given or is a null string, then use the
-# value of the -data option for the given object as the text.
+# value of the data previously given with the insertData{} method for
+# the given object as the text.
 # This is a procedure rather than a method because the object it operates
 # on may be destroyed during the rendering process.  It should be invoked
 # in the background, using "after", not in the constructor!
@@ -1235,11 +1240,10 @@ body ::tycho::HTML::windowMenuRemoveAll {filename} {
 # in a constructor.
 #
 body ::tycho::HTML::render {obj {html {}}} {
-
     if {[info objects $obj] == {} || ![$obj isa ::tycho::HTML]} {return}
 
     if {$html == {}} {
-        set html [$obj cget -data]
+        set html $currentHTMLText
     }
     # Cancel previous rendering if necessary.
     if [$obj isRendering] {
@@ -1257,7 +1261,7 @@ body ::tycho::HTML::render {obj {html {}}} {
     
     # Remove all existing text in the widget.
     $tktext delete 1.0 end
-    
+
     # Put the insertion cursor at the top
     $tktext mark set insert 1.0
     $tktext mark gravity insert left
