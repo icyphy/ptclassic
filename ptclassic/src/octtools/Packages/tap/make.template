@@ -87,7 +87,7 @@ include $(VEMLIBCONFIG)
 tests:: $(DRIVER) tapvempat
 
 tapvempat: tapvempat.o $(OBJS) 
-	$(LINKER) $(LINKFLAGS) $^ -o $@ -L$(OCTLIBDIR) $(DRVRLIBS)
+	$(CLINKER) $(LINKFLAGS) $^ -o $@ -L$(OCTLIBDIR) $(DRVRLIBS)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -86,7 +86,7 @@ tests:: pep_test pep_test1
 	-pep_test1
 
 pep_test1: test1.o $(OBJS) 
-	$(LINKER) $(LINKFLAGS) $^ -o $@ -L$(OCTLIBDIR) $(DRVRLIBS)
+	$(CLINKER) $(LINKFLAGS) $^ -o $@ -L$(OCTLIBDIR) $(DRVRLIBS)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
