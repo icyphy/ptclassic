@@ -272,6 +272,18 @@ body ::tycho::DataModel::constructor {args} {
     $safeinterp eval namespace ::tycho
     $safeinterp eval namespace $scope
 
+    # Create a proc to parse the "modelconfigure" syntax
+    @scope $scope eval {
+        proc __parse_modelconfigure {args} {
+            global _object_
+            global $_object_
+            eval $_object_ modelconfigure $args
+        }
+    }
+ 
+    # Link it into the safe interpreter
+    $safeinterp alias $scope::modelconfigure $scope::__parse_modelconfigure
+
     # Evaluate options
     eval configure $args
 
@@ -302,7 +314,6 @@ body ::tycho::DataModel::destructor {} {
 # raise an error. Append to the history if recording.
 #
 body ::tycho::DataModel::add {name args} {
-puts [list add $name $args]
     if [@scope $scope ::info exists [set modelname]($name)] {
         error "An item \"$name\" already exists in $modelname"
     }
