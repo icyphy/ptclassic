@@ -20,27 +20,14 @@ You can get periodic signals with any period, and can halt a simulation
 at the end of the given waveform.  The following table summarizes the
 capabilities:
 <p>
-<table BORDER="1">
-<tr>
-<td><i><b><font color=blue>haltAtEnd</font></b></i></td>	
-<td><i><b><font color=blue>periodic</font></b></i></td>	
-<td><i><b><font color=blue>period</font></b></i></td>	
-<td><i><b><font color=blue>operation</font></b></i></td>
-</tr>
-<tr>
-<td>NO</td><td>YES</td><td>0</td><td>Period is the length of the waveform.</td>
-</tr>
-<tr>
-<td>NO</td><td>YES</td><td>N &gt 0</td><td>Period is N.</td>
-</tr>
-<tr>
-<td>NO</td><td>NO</td><td>anything</td><td>Output the waveform once, then zeros.</td>
-</tr>
-<tr>
-<td>YES</td><td>anything</td><td>anything</td><td>Halt the run at the end of
-the given data.</td>
-</tr>
-</table>
+<pre>
+  haltAtEnd  periodic   period     operation
+--------------------------------------------------------------------------------
+   NO        YES        0          Period is the length of the waveform.
+   NO        YES        N > 0      Period is N.
+   NO        NO         anything   Output the waveform once, then zeros.
+   YES       anything   anything   Halt the run at end of given data.
+</pre>
 <p>
 The first line of the table gives the default settings.
 <p>
