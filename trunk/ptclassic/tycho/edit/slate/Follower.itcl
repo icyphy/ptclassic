@@ -39,7 +39,10 @@
 # It seems like this class goes to a lot of trouble to perform a simple
 # function. However, its real power comes from inheritance, where
 # click-and-drag behavior can be customized for more sophisticated
-# interaction -- see the links below.
+# interaction. For example, 
+# <a href="Bounder.html">Bounder</a> constrains the region of mouse
+# movement, while <a href="Stepper.html">Stepper</a>
+# quantizes mouse movement.
 #
 # <p><b>Options</b>
 #
@@ -66,8 +69,8 @@
 # <ul>
 # <li><a href="../internals/interacting.html">How interactors work</a>.
 # <li><a href="../internals/interactors.html">Interactor classes</a>.
-# <li><a href="Stepper.html">Stepper</a>
-# <li><a href="Bounder.html">Bounder</a>
+# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="index.html">Class documentation index</a>
 # </ul>
 #
 class ::tycho::Follower {
