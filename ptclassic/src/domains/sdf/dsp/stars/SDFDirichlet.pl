@@ -54,7 +54,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		const double DELTA = 1.0e-9;
 		double x = input%0;
 		double sinInDenom = sin(x/2);
-		double length = double(N);
+		double length = double(int(N));
 		double dirichletValue;
 
 		if ( ( -DELTA < sinInDenom ) && ( sinInDenom < DELTA ) )
