@@ -93,7 +93,7 @@ extern char *sys_errlist[];
 
 // __hppa__ is not defined under hppa cfront
 #if defined(hppa)  || defined(__hppa__)
-#define ARCH "snake"
+#define ARCH "hppa"
 #endif
 
 // root of Ptolemy source/lib directory
