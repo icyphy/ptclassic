@@ -59,21 +59,18 @@ Kluwer Academic Publishers, Norwood, MA, 1996
 #define NODE_NUM flags[0]
 
 int isAcyclic(Galaxy* g, int ignoreDelayTags);
-void findSources(Galaxy* g, int flagLoc, SequentialList& sources,DataFlowStar* deletedNode=0);
-SequentialList findSinks(Galaxy* g, int flagLoc, DataFlowStar* deletedNode=0);
+void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode=0);
+void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode=0);
+
 
 // Set a bunch of pointers to 0 (that will be allocated later).
 AcyLoopScheduler :: AcyLoopScheduler()
 {
+    // NOTE: topSort is not allocated as an array; it is just a pointer.
+    // Hence, it is not deleted in the destructor.
     topSort = 0;
     topInvSort = 0;
     nodelist = 0;
-    incMatrix = 0;
-    reachMatrix = 0;
-    delMatrix = 0;
-    gcdMatrix = 0;
-    splitMatrix = 0;
-    costMatrix = 0;
     RPMCTopSort = 0;
     APGANTopSort = 0;
 }
@@ -82,16 +79,10 @@ AcyLoopScheduler :: AcyLoopScheduler()
 // Destroy a bunch of matrices and arrays used by the scheduler
 AcyLoopScheduler::~AcyLoopScheduler()
 {
-    delete [] RPMCTopSort;
-    delete [] APGANTopSort;
     delete [] topInvSort;
     delete [] nodelist;
-    delete incMatrix;
-    delete reachMatrix;
-    delete delMatrix;
-    delete gcdMatrix;
-    delete splitMatrix;
-    delete costMatrix;
+    delete [] RPMCTopSort;
+    delete [] APGANTopSort;
 }
 
 /****
@@ -99,21 +90,21 @@ AcyLoopScheduler::~AcyLoopScheduler()
 Create a reachability matrix; it is required by the APGAN function
 
 @Description 
-    // The reachability matrix R is an NxN matrix, where N = #of nodes
-    // in the SDF graph, such that R(i,j) = 1 iff there is a directed
-    // path from node i to node j in the SDF graph.  R(i,j) = 0 otherwise.
-    //
-    // We use a very simple algorithm to compute this matrix here; there
-    // are probably faster algorithms around (notably, Strassen's algorithm
-    // for multiplying 2 NxN matrices in O(N^2.81) time is asymptotically
-    // better than the O(N^3) algorithm used here).
-    // For each node i, we do a breadth-first search from i and set those
-    // entries R(i,j) to 1 for which j gets visted during the search.
-    // We do this for every node in the graph.  Since every node and edge
-    // could be visited during the search from i, the running time is
-    // O(N+E) for one node.  Since there are N nodes, the time is
-    // O(N(N+E)) = O(N^2 + N*E) = O(N^3) in the worst case.  However, most
-    // practical acyclic SDF graphs are sparse; hence, O(N^2) is more realistic.
+The reachability matrix R is an NxN matrix, where N = #of nodes
+in the SDF graph, such that R(i,j) = 1 iff there is a directed
+path from node i to node j in the SDF graph.  R(i,j) = 0 otherwise.
+<p>
+We use a very simple algorithm to compute this matrix here; there
+are probably faster algorithms around (notably, Strassen's algorithm
+for multiplying 2 NxN matrices in O(N^2.81) time is asymptotically
+better than the O(N^3) algorithm used here).
+For each node i, we do a breadth-first search from i and set those
+entries R(i,j) to 1 for which j gets visted during the search.
+We do this for every node in the graph.  Since every node and edge
+could be visited during the search from i, the running time is
+O(N+E) for one node.  Since there are N nodes, the time is
+O(N(N+E)) = O(N^2 + N*E) = O(N^3) in the worst case.  However, most
+practical acyclic SDF graphs are sparse; hence, O(N^2) is more realistic.
 
 @SideEffects Creates reachMatrix, a class data member.
 
@@ -123,8 +114,7 @@ void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
     DataFlowStar *s, *t, *u;
     GalTopBlockIter nextStar(gal);
     SequentialList nodesTobeVisited;
-    delete reachMatrix;
-    reachMatrix = new Matrix(graphSize, graphSize);
+    reachMatrix.resize(graphSize, graphSize);
 
     while ((s=(DataFlowStar*)nextStar++) != NULL) {
 	nodesTobeVisited.initialize();
@@ -132,14 +122,14 @@ void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
 	while ((t = (DataFlowStar*)nodesTobeVisited.getAndRemove()) != NULL) {
 	    SuccessorIter nextSucc(*t);
 	    while ((u=(DataFlowStar*)nextSucc++) != NULL) {
-		if (reachMatrix->m[u->NODE_NUM][s->NODE_NUM]) {
+		if (reachMatrix.m[u->NODE_NUM][s->NODE_NUM]) {
 			StringList message;
 			message << "Failed to create reachability matrix.";
 		    message << "Graph appears to be non-acyclic.";
 		    Error::abortRun(message);
 		    return;
 		}
-		reachMatrix->m[s->NODE_NUM][u->NODE_NUM] = 1;
+		reachMatrix.m[s->NODE_NUM][u->NODE_NUM] = 1;
 		nodesTobeVisited.append(u);
 	    }
 	}
@@ -179,18 +169,20 @@ void AcyLoopScheduler :: createEdgelist(Galaxy* gr)
 Create an incidence matrix representation of the universe
 
 @Description
-    // Create an incidence matrix representation.  This representation
-    // has the following form:  it is an NxN matrix Inc, where N is number
-    // of nodes.  The (i,j)th element of the matrix represents the numbe
-    // of tokens produced by node i on arc (i,j).
-    // If Inc(i,j) > 0, then i produces Inc(i,j) tokens per firing on arc (i,j).
-    // Del(i,j) is the number of delays on arc (i,j)
-    // We do not need
-    // the numbers consumed here since we already know the repetitions vector.
-    // Also, since we can have a multi-graph, we collapse multiple
-    // arcs into one arc here.  This is fine since this matrix is
-    // used to compute buffering costs so an equivalent arc with the
-    // correct numbers will be identical in cost to multiple arcs.
+Create an incidence matrix representation.  This representation
+has the following form:  it is an NxN matrix Inc, where N is number
+of nodes.  The (i,j)th element of the matrix represents the numbe
+of tokens produced by node i on arc (i,j).
+<p>
+If Inc(i,j) > 0, then i produces Inc(i,j) tokens per firing on arc (i,j).
+Del(i,j) is the number of delays on arc (i,j)
+<p>
+We do not need
+the numbers consumed here since we already know the repetitions vector.
+Also, since we can have a multi-graph, we collapse multiple
+arcs into one arc here.  This is fine since this matrix is
+used to compute buffering costs so an equivalent arc with the
+correct numbers will be identical in cost to multiple arcs.
 
 @SideEffects Creates incMatrix, delMatrix, and nodelist, three class data
 members
@@ -202,10 +194,8 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
     DFPortHole* starPort;
     int numP, numD;
     GalTopBlockIter nextStar(gal);
-    delete incMatrix;
-    delete delMatrix;
-    incMatrix = new Matrix(graphSize,graphSize);
-    delMatrix = new Matrix(graphSize,graphSize);
+    incMatrix.resize(graphSize,graphSize);
+    delMatrix.resize(graphSize,graphSize);
 
     // Holds the nodes in galaxy as an array
     delete [] nodelist;
@@ -234,8 +224,8 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
 	    // this is likely to be a rare event, in the buffer-computation
 	    // algorithms, we will make sure of this if the sum of the delays
 	    // happens to be greater.
-	    incMatrix->m[s->NODE_NUM][t->NODE_NUM] += numP;
-	    delMatrix->m[s->NODE_NUM][t->NODE_NUM] += numD;
+	    incMatrix.m[s->NODE_NUM][t->NODE_NUM] += numP;
+	    delMatrix.m[s->NODE_NUM][t->NODE_NUM] += numD;
 	}
     }   
 }
@@ -245,23 +235,23 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
 Copy the flag value of the first cluster inside this cluster to its flags
 
 @Description
-// The following function steps through each cluster inside gr and sets
-// flags[flagLocation] for that cluster by the value of flags[flagLocation]
-// for the head() of that cluster.  When all of the clusters in gr are
-// atomic; i.e, each has exactly one Star, this function's action simply
-// results in the flag value of the Star being propagated to its cluster
-// wrapper.  Hence, this function is usually called after a cluster hierarchy
-// has been set up using <code>Cluster::initializeForClustering</code>
-// so that things like node numbering can be kept consistent in the Cluster
-// hierarchy as well.
+The following function steps through each cluster inside gr and sets
+flags[flagLocation] for that cluster by the value of flags[flagLocation]
+for the head() of that cluster.  When all of the clusters in gr are
+atomic; i.e, each has exactly one Star, this function's action simply
+results in the flag value of the Star being propagated to its cluster
+wrapper.  Hence, this function is usually called after a cluster hierarchy
+has been set up using <code>Cluster::initializeForClustering</code>
+so that things like node numbering can be kept consistent in the Cluster
+hierarchy as well.
 
 @SideEffects <code>flags[flagLocation]</code> for each cluster in gr changes
 
 ****/
 void AcyLoopScheduler :: copyFlagsToClusters(Galaxy* gr, int flagLocation)
 {
-	// FIXME: Should we always check whether the Galaxy does in fact have
-	// AcyClusters inside?
+    // FIXME: Should we always check whether the Galaxy does in fact have
+    // AcyClusters inside?
     AcyCluster* c;
     AcyClusterIter nextClust(*gr);
     while ((c=nextClust++) != NULL) {
@@ -354,8 +344,8 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	rpmcDppo = DPPO();
 
 	// save results for rpmc
-	Matrix RPMCGcdMatrix = *gcdMatrix;
-	Matrix RPMCSplitMatrix = *splitMatrix;
+	SimpleIntMatrix RPMCGcdMatrix = gcdMatrix;
+	SimpleIntMatrix RPMCSplitMatrix = splitMatrix;
 
 	// Flatten everything for the second heuristic
 	dummy.initializeForClustering(gal);
@@ -375,8 +365,8 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	// Compare the two and use the better one.
 	if (rpmcDppo < apganDppo) {
 	    // use RPMC results
-	    *gcdMatrix = RPMCGcdMatrix;
-	    *splitMatrix = RPMCSplitMatrix;
+	    gcdMatrix = RPMCGcdMatrix;
+	    splitMatrix = RPMCSplitMatrix;
 	    topSort = RPMCTopSort;
 	}
     }
@@ -397,10 +387,10 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 Add a top level cluster under the galaxy.  So gal will have just one cluster.
 
 @Description
-// We do this by absorbing all of the clusters into one.
-// This function is essentially a hack to get around
-// a vexing problem with teh clustering process that leaves the
-// topmost level structure as a Galaxy instead of a Cluster.
+We do this by absorbing all of the clusters into one.
+This function is essentially a hack to get around
+a vexing problem with teh clustering process that leaves the
+topmost level structure as a Galaxy instead of a Cluster.
 
 @Returns Int: -1 if unsuccessful , 1 if successful.
 
@@ -417,8 +407,9 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 	c = nextClust++;
 	while ((b=nextClust++) != NULL) {
 	    if (b==c) continue;
-	    if (!c->absorb(*b)) return -1;
+	    if (!c->absorb(*b,0)) return -1;
 	}
+	cleanupAfterCluster(*gal);
 	if (gal->numberBlocks() != 1) {
 	    StringList message;
 	    message << "Bug in addTopLevelCluster; galaxy has more than";
@@ -447,18 +438,18 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 Cluster all spliced-stars together with their source or sink.
 
 @Description
-// The following function an unfortunate hack needed because in the CG
-// domains, type-conversion and LinToCirc/CircToLin stars get spliced in
-// BEFORE the schedule is computed.  We perform a clustering step here to
-// ensure that these stars stay together with their source/sink so that
-// they end up in the innermost loops of the looped schedule.  It turns out
-// that clustering two actors A(a)--->(b)B(b) where a=b does not harm the
-// objective of buffer minimization.  Since type conversion and LinToCirc/
-// CircToLin stars are like B, this preprocessing step will work for any
-// spliced star currently used.  Hence, the function below clusters together
-// actors like B (that produce and consume the same amount as the source
-// or sink that B is connected to) with their source/sink and does not need
-// to explicitly check for spliced-in stars (since they are like B).
+The following function an unfortunate hack needed because in the CG
+domains, type-conversion and LinToCirc/CircToLin stars get spliced in
+BEFORE the schedule is computed.  We perform a clustering step here to
+ensure that these stars stay together with their source/sink so that
+they end up in the innermost loops of the looped schedule.  It turns out
+that clustering two actors A(a)--->(b)B(b) where a=b does not harm the
+objective of buffer minimization.  Since type conversion and LinToCirc/
+CircToLin stars are like B, this preprocessing step will work for any
+spliced star currently used.  Hence, the function below clusters together
+actors like B (that produce and consume the same amount as the source
+or sink that B is connected to) with their source/sink and does not need
+to explicitly check for spliced-in stars (since they are like B).
 
 @Returns Int: TRUE or FALSE depending on whether the clustering was successfull.
 
@@ -499,6 +490,7 @@ int AcyLoopScheduler::clusterSplicedStars(AcyCluster* gr)
 	    }
 	}
     }
+    //cleanupAfterCluster(&gr);
     return TRUE;
 }
 
@@ -508,9 +500,11 @@ Recursive Partitioning by Minimum Cuts heuristic
 
 @Description This function constructs a topological sort by recursively
 creating cuts of the graph so that the amount of data crossing the cut
-is minimized.  <a href="#ClassAcyLoopScheduler>See the  book refered to in
+is minimized.
+<p>
+<a href="#ClassAcyLoopScheduler">See the  book refered to in
 the comments for the class for more details.</a>
-
+<p>
 <a href="http://ptolemy.eecs.berkeley.edu/papers/PganRpmcDppo/">
 Also see the first paper at this site.</a>
 
@@ -613,9 +607,10 @@ Acyclic Pairwise Grouping of Adjacent nodes heuristic
 
 @Description This algorithm builds up a schedule by repeatedly clustering
 pairs of actors according to a particular cost function.
-<a href="#ClassAcyLoopScheduler>See the  book refered to in
+<p>
+<a href="#ClassAcyLoopScheduler">See the  book refered to in
 the comments for the class for more details.</a>
-
+<p>
 <a href="http://ptolemy.eecs.berkeley.edu/papers/PganRpmcDppo/">
 Also see the second paper at this site.</a>
 
@@ -657,7 +652,7 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	    snk = (AcyCluster*)p->far()->parent();
 	    // first check whether this arc is part of a multiarc that
 	    // has already been clustered previously.
-	    if (reachMatrix->m[src->NODE_NUM][snk->NODE_NUM] == -1) {
+	    if (reachMatrix.m[src->NODE_NUM][snk->NODE_NUM] == -1) {
 		nextEdge.remove();
 		continue;
 	    }
@@ -666,8 +661,8 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	    // src can reach snk.
 	    flag = 1;
 	    for (i=0; i<graphSize; i++) {
-		if (reachMatrix->m[src->NODE_NUM][i] == 1 &&
-		    reachMatrix->m[i][snk->NODE_NUM] == 1) {flag=0; break;}
+		if (reachMatrix.m[src->NODE_NUM][i] == 1 &&
+		    reachMatrix.m[i][snk->NODE_NUM] == 1) {flag=0; break;}
 	    }
 	    if (flag) {
 		tmp = gcd(src->loopFactor(), snk->loopFactor());
@@ -710,21 +705,21 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	// as the OR of the rows (and columns) of the previous clusterSrc
 	// and clusterSnk.
 	for (i=0; i<graphSize; i++) {
-	    reachMatrix->m[clusterSrc->NODE_NUM][i] = 
-	       (reachMatrix->m[clusterSrc->NODE_NUM][i]==1) |
-	       (reachMatrix->m[clusterSnk->NODE_NUM][i]==1);
-	    reachMatrix->m[i][clusterSrc->NODE_NUM] =
-	       (reachMatrix->m[i][clusterSrc->NODE_NUM]==1) |
-	       (reachMatrix->m[i][clusterSnk->NODE_NUM]==1);
+	    reachMatrix.m[clusterSrc->NODE_NUM][i] = 
+	       (reachMatrix.m[clusterSrc->NODE_NUM][i]==1) |
+	       (reachMatrix.m[clusterSnk->NODE_NUM][i]==1);
+	    reachMatrix.m[i][clusterSrc->NODE_NUM] =
+	       (reachMatrix.m[i][clusterSrc->NODE_NUM]==1) |
+	       (reachMatrix.m[i][clusterSnk->NODE_NUM]==1);
 	       // The above update can cause self-loops to occur
 	       // in the reachability matrix since if i=clusterSrc->NODE_NUM,
 	       // then that entry will be 1 by the above test; hence, we
 	       // set it to 0 below.
-	    reachMatrix->m[i][i] = 0;
+	    reachMatrix.m[i][i] = 0;
 	}
 	for (i=0; i<graphSize; i++) {
-	    reachMatrix->m[clusterSnk->NODE_NUM][i] = -1;
-	    reachMatrix->m[i][clusterSnk->NODE_NUM] = -1;
+	    reachMatrix.m[clusterSnk->NODE_NUM][i] = -1;
+	    reachMatrix.m[i][clusterSnk->NODE_NUM] = -1;
 	}
     }
     // graph has been completely clustered now.  Build up the schedule
@@ -790,14 +785,14 @@ Dynamic Programming Post Optimization
 
 @Description Take a topological sort and create an optimal looping hierarchy.
 Uses 3 matrices to store data.
-
+<p>
 See
-<a href="ptolemy.eecs.berkeley.edu/papers/chainmemman.ps.Z">the Icassp 94 paper
+<a href="http://ptolemy.eecs.berkeley.edu/papers/chainmemman.ps.Z">the Icassp 94 paper
 </a> for details.
-
-<a href="#ClassAcyLoopScheduler>Also see the  book refered to in
+<p>
+<a href="#ClassAcyLoopScheduler">Also see the  book refered to in
 the comments for the class.</a>
-
+<p>
 <a href="http://ptolemy.eecs.berkeley.edu/papers/PganRpmcDppo/">
 Finally, the vlsi signal processing paper at this site has even more on this
 algorithm.</a>
@@ -827,23 +822,20 @@ int AcyLoopScheduler::DPPO()
     for (int j=0; j< N3; j++) costs[j] = 0;
     int* reps = new int[graphSize];
 
-    delete costMatrix;
-    delete splitMatrix;
-    delete gcdMatrix;
-    costMatrix = new Matrix(graphSize,graphSize);
-    splitMatrix = new Matrix(graphSize,graphSize);
-    gcdMatrix = new Matrix(graphSize,graphSize);
+    costMatrix.resize(graphSize,graphSize);
+    splitMatrix.resize(graphSize,graphSize);
+    gcdMatrix.resize(graphSize,graphSize);
     for (j=0; j<graphSize; j++) {
-	gcdMatrix->m[j][j] = nodelist[topSort[j]]->reps();
-	reps[j] = gcdMatrix->m[j][j];
+	gcdMatrix.m[j][j] = nodelist[topSort[j]]->reps();
+	reps[j] = gcdMatrix.m[j][j];
     }
     for (j = 0; j < graphSize-1; j++) {
 	for (i = 0; i < graphSize-1-j; i++) {
 	    ke = i + j + 1;
-	    costMatrix->m[i][ke] = (int)HUGE_VAL;
+	    costMatrix.m[i][ke] = (int)HUGE_VAL;
 	    costTmp = (int)HUGE_VAL;
-	    g = gcd(gcdMatrix->m[i][ke-1], reps[ke]);
-	    gcdMatrix->m[i][ke] = g;
+	    g = gcd(gcdMatrix.m[i][ke-1], reps[ke]);
+	    gcdMatrix.m[i][ke] = g;
 	    // Define these indices here to avoid computing in the
 	    // inner loop
 	    cur = N2*i + graphSize*ke;
@@ -851,10 +843,10 @@ int AcyLoopScheduler::DPPO()
 	    bottom = cur + N2;
 	    btmlft = bottom - graphSize;
 	    costij=0;
-	    tmpInc1 = incMatrix->m[topSort[i]][topSort[ke]];
-	    tmpInc2 = incMatrix->m[topSort[ke]][topSort[i]];
-	    tmpDel1 = delMatrix->m[topSort[i]][topSort[ke]];
-	    tmpDel2 = delMatrix->m[topSort[ke]][topSort[i]];
+	    tmpInc1 = incMatrix.m[topSort[i]][topSort[ke]];
+	    tmpInc2 = incMatrix.m[topSort[ke]][topSort[i]];
+	    tmpDel1 = delMatrix.m[topSort[i]][topSort[ke]];
+	    tmpDel2 = delMatrix.m[topSort[ke]][topSort[i]];
 	    if ( tmpInc1 > 0) {
 		costij = reps[i]*tmpInc1/g + tmpDel1;
 	    }
@@ -875,22 +867,22 @@ int AcyLoopScheduler::DPPO()
 		}
 	    }
 	    for (int k = i; k<ke; k++) {
-		cst = costs[left+ k] * gcdMatrix->m[i][ke-1];
-		cst += costs[bottom + k] * gcdMatrix->m[i+1][ke];
-		cst -= costs[btmlft + k] * gcdMatrix->m[i+1][ke-1];
+		cst = costs[left+ k] * gcdMatrix.m[i][ke-1];
+		cst += costs[bottom + k] * gcdMatrix.m[i+1][ke];
+		cst -= costs[btmlft + k] * gcdMatrix.m[i+1][ke-1];
 		cst = cst/g;
 		cst += costij;
 		costs[cur+k] = cst;
-		costMatrix->m[i][ke] = min(costMatrix->m[i][ke],
-			costMatrix->m[i][k]+ costMatrix->m[k+1][ke]+cst);
-		if (costMatrix->m[i][ke] != costTmp) splitMatrix->m[i][ke] = k;
-		costTmp = costMatrix->m[i][ke];
+		costMatrix.m[i][ke] = min(costMatrix.m[i][ke],
+			costMatrix.m[i][k]+ costMatrix.m[k+1][ke]+cst);
+		if (costMatrix.m[i][ke] != costTmp) splitMatrix.m[i][ke] = k;
+		costTmp = costMatrix.m[i][ke];
 	    }
 	}
     }
     delete [] reps;
     delete [] costs;
-    return costMatrix->m[0][graphSize-1];
+    return costMatrix.m[0][graphSize-1];
 }
 
 /****
@@ -909,12 +901,12 @@ void AcyLoopScheduler::fixBufferSizes(int i, int j) {
     // each arc based on the schedule computed by RPMC+DPPO
     // or APGAN+DPPO
     int N = j-i+1;
-    int g_ij = gcdMatrix->m[i][j];
+    int g_ij = gcdMatrix.m[i][j];
     int split, repsij;
     DataFlowStar *s, *t;
     DFPortHole *p;
     if (N > 1) {
-	split = splitMatrix->m[i][j];
+	split = splitMatrix.m[i][j];
 	// fix buffer sizes for all arcs crossing this split
 	for (int k=i; k<=split; k++) {
 	    s = nodelist[topSort[k]];
@@ -956,7 +948,7 @@ to the schedule.
 void AcyLoopScheduler::runOnce(int i, int j, int g)
 {
     int N = j-i+1;
-    int g_ij = gcdMatrix->m[i][j];
+    int g_ij = gcdMatrix.m[i][j];
     int loopFac = g_ij/g;
     int split;
     DataFlowStar* s;
@@ -968,7 +960,7 @@ void AcyLoopScheduler::runOnce(int i, int j, int g)
 	}
 	return;
     } else {
-	split = splitMatrix->m[i][j];
+	split = splitMatrix.m[i][j];
 	for (int k=0; k<loopFac; k++) {
 	    runOnce(i,split,g_ij);
 	    runOnce(split+1,j,g_ij);
@@ -988,7 +980,7 @@ void AcyLoopScheduler::compileRun()
 void AcyLoopScheduler::genCode(Target& t, int depth, int i, int j, int g)
 {
     int N = j-i+1;
-    int g_ij = gcdMatrix->m[i][j];
+    int g_ij = gcdMatrix.m[i][j];
     int loopFac = g_ij/g;
     int split;
     DataFlowStar *s;
@@ -998,7 +990,7 @@ void AcyLoopScheduler::genCode(Target& t, int depth, int i, int j, int g)
 	t.writeFiring(*s, depth+1);
 	if (loopFac > 1) t.endIteration(loopFac, depth);
     } else {
-	split = splitMatrix->m[i][j];
+	split = splitMatrix.m[i][j];
 	if (loopFac > 1) t.beginIteration(loopFac,depth);
 	genCode(t, depth+1, i, split, g_ij);
 	genCode(t, depth+1, split+1, j, g_ij);
@@ -1012,7 +1004,7 @@ void AcyLoopScheduler::genCode(Target& t, int depth, int i, int j, int g)
 ///////  is called in pigi or the "schedule" command is  ///////
 ///////  used in ptcl.
 
-// Display schedule in standard format; called by "schedule" command (pigi,ptcl)
+// Display schedule in standard format;called by "schedule" command (pigi,ptcl)
 StringList AcyLoopScheduler::displaySchedule()
 {
     StringList out;
@@ -1029,7 +1021,7 @@ StringList AcyLoopScheduler::dispNestedSchedules(int depth,int i,int j,int g)
     StringList sch;
     int split;
     int N = j-i+1;
-    int g_ij = gcdMatrix->m[i][j];
+    int g_ij = gcdMatrix.m[i][j];
     int loopFac = g_ij/g;
     if (N==1) {
 	sch << tab(depth);
@@ -1041,7 +1033,7 @@ StringList AcyLoopScheduler::dispNestedSchedules(int depth,int i,int j,int g)
 	    sch << tab(depth) << "}\n";
 	}
     } else {
-	split = splitMatrix->m[i][j];
+	split = splitMatrix.m[i][j];
 	if (loopFac > 1) {
 	    sch << tab(depth) << "{ repeat " << loopFac << " {\n";
 	    depth++;
@@ -1149,7 +1141,7 @@ void AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
     }
 }
 
-void findSources(Galaxy* g, int flagLoc, SequentialList& sources, DataFlowStar* deletedNode)
+void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode)
 {
     // A source node here is any node that has all of its input
     // nodes marked.  This method is used in order to simulate
@@ -1199,16 +1191,16 @@ void findSources(Galaxy* g, int flagLoc, SequentialList& sources, DataFlowStar* 
     }
 }
 
-SequentialList findSinks(Galaxy* g, int flagLoc, DataFlowStar* deletedNode)
+void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode)
 {
     // symmetric to findSources; see comments therein
     // FIXME: Make this like findSources above after everything's been debugged
-    SequentialList sinks;
     Block *succ, *node;
-    int notSink = 0;
+    int notSink;
     if (deletedNode) {
 	PredecessorIter nextNeigh(*deletedNode);
 	while ((node = nextNeigh++) != NULL) {
+	    notSink = 0;
 	    SuccessorIter nextSucc(*node);
 	    while ((succ=nextSucc++) != NULL) {
 		if (!succ->flags[flagLoc]) notSink = 1;
@@ -1218,6 +1210,7 @@ SequentialList findSinks(Galaxy* g, int flagLoc, DataFlowStar* deletedNode)
     } else {
 	GalTopBlockIter nextBlock(*g);
 	while ((node=nextBlock++) != NULL && !node->flags[flagLoc]) {
+	    notSink = 0;
 	    SuccessorIter nextSucc(*node);
 	    while ((succ=nextSucc++) != NULL) {
 		if (!succ->flags[flagLoc]) notSink = 1;
@@ -1225,5 +1218,4 @@ SequentialList findSinks(Galaxy* g, int flagLoc, DataFlowStar* deletedNode)
 	    if (!notSink) sinks.append(node);
 	}
     }
-    return sinks;
 }
