@@ -15,7 +15,7 @@ defstar{
     and data analysis stars.
     }
     location { The WiNeS-Library }   
-    hinclude { <iomanip.h>, <fstream.h>, <complex.h>, 
+    hinclude { <iostream.h>, <iomanip.h>, <fstream.h>, <complex.h>, 
     <string.h>, <math.h>, "DErrmanager_uldl.h", "DEpropag_uldl.h" }
     input {
         name { check }
