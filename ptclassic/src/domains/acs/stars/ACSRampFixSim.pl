@@ -6,7 +6,7 @@ defcore {
     desc { Generate a ramp signal, starting at "value" (default 0) and
 incrementing by step size "step" (default 1) on each firing.
     }
-    version { @(#)ACSRampFixSim.pl	1.6 09/08/99}
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 8/26/99
- Version: @(#)Directory.h      1.0     08/26/99
+ Version: $Id$
 ***********************************************************************/
 #ifndef DIRECTORY_H
 #define DIRECTORY_H

@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 8/26/99
- Version: @(#)Arch.cc      1.0     08/26/99
+ Version: $Id$
 ***********************************************************************/
 #include "Directory.h"
 

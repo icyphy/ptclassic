@@ -7,7 +7,7 @@ defcore {
 	    Swallows an input sample
 	    Only the first connection is used for hardware
 	}
-        version {@(#)ACSXMGraphCGFPGA.pl	1.2 09/08/99}
+        version {$Id$
         author { Ken Smith, Eric K. Pauer }
         copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

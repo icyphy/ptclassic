@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Swallows an input sample
 	}
-	version {@(#)ACSSinkCGFPGA.pl	1.2 09/08/99}
+	version {$Id$
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

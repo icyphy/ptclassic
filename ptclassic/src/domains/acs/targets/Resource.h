@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  Ken Smith
  Date of creation: 3/23/98
- Version: @(#)Resource.h      1.0     06/16/99
+ Version: $Id$
 ***********************************************************************/
 #ifndef RESOURCE_H
 #define RESOURCE_H
