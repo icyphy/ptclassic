@@ -651,7 +651,7 @@ ensemble ::tycho::url {
     # Convert a local name using url-style slashes into a platform
     # dependent name.
     option aslocal {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    error "Not a local name"
 	}
         # FIXME: Will this work reliably on the Mac???
@@ -659,7 +659,7 @@ ensemble ::tycho::url {
     }
     # Return the name excluding the last component.
     option dirname {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path == "" } {
@@ -677,7 +677,7 @@ ensemble ::tycho::url {
     }
     # Expand the name into a normalized version.
     option expand {name} {
-        if [regexp {^[a-z]+:/} $name] {
+        if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path != "" } {
@@ -699,7 +699,7 @@ ensemble ::tycho::url {
     }
     # Return the name extension.
     option extension {name} {
-	if [regexp {^[a-z]+:/} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path == "" } {
@@ -760,7 +760,7 @@ ensemble ::tycho::url {
     }
     # Return the path component of the name.
     option path {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
             if { $path == "" } {
@@ -775,17 +775,21 @@ ensemble ::tycho::url {
     }
     # Return the "type" of a path
     option pathtype {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    return "absolute"
-	} else {
+        } elseif [regexp {^\$.*} $name] {
+            # If it begins with $, then it's absolute. Currently ::file 
+            # doesn't take care of this case (ie. [file pathtype \$PTOLEMY])
+            return "absolute"
+        } else {
 	    # Local name
 	    file pathtype $name
 	}
     }
     #  Return the protocol component of the name.
     option protocol {name} {
-	if [regexp {^([a-z]+):+} $name _ protocol] {
+	if [regexp {^([a-z]+):/*} $name _ protocol] {
 	    # Network name
 	    return [string tolower $protocol]
 	} else {
@@ -795,7 +799,7 @@ ensemble ::tycho::url {
     }
     # Return the name up to the last period of the last component.
     option rootname {name} {
-	if [regexp {^[a-z]+:/} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    if { $path == "" } {
@@ -817,7 +821,7 @@ ensemble ::tycho::url {
     }
     # Return the server component of the name.
     option server {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?} $name _ protocol server
 	    return [string trimleft $server /]
@@ -828,7 +832,7 @@ ensemble ::tycho::url {
     }
     # Split a platform-dependent local name or a network name into a list
     option split {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//([^/]*))?(.*)$} $name \
                     _ protocol _ server path
@@ -845,7 +849,7 @@ ensemble ::tycho::url {
     }
     # Return the last component of the name
     option tail {name} {
-	if [regexp {^[a-z]+:/+} $name] {
+	if [regexp {^[a-z]+:/*} $name] {
 	    # Network name
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 	    lindex [split $path /] end
