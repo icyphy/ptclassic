@@ -335,8 +335,7 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	GenericPort *ph = findGenPort (starname, portname);
 	if (ph == NULL) return FALSE;
 // create new galaxy port, add to galaxy, do the alias
-	DataType res = ph->setResolvedType();
-	DataType dType = res ? res : ph->type();
+	DataType dType = ph->type();
 	if (ph->isItMulti()) {
 		LOG_NEW; GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
@@ -456,12 +455,16 @@ InterpGalaxy::addState (const char* statename, const char* stateclass, const cha
 }
 
 // change a value of a state of a block within the galaxy.
+// with blockname = "this", also works for states of the galaxy.
 int
 InterpGalaxy::setState (const char* blockname, const char* statename, const char* statevalue) {
         statevalue = hashstring (statevalue);
 	if(!strcmp(blockname, "this")) {
 		State *src = stateWithName(statename);
-		if (src == 0) return FALSE;
+		if (src == 0) {
+			noInstance (statename, name());
+			return FALSE;
+		}
 		Block::setState(statename,statevalue);
 	}
 	else {
@@ -784,15 +787,33 @@ void InterpGalaxy :: zero () {
 // so this is empty.
 InterpGalaxy :: ~InterpGalaxy () {}
 
+// preinitialize: redoes variable-parameter connections
+//
+// We formerly did this by overriding initialize(), but now we must do it
+// in preinitialize() so that bus widths are correct before HOF star
+// preinitialization runs.
+// NOTE: with nested galaxies it is possible for this to be called more
+// than once.  Thus we have to be sure that we will not undo anything
+// done by a HOF star.  This implies a couple of subtle interactions:
+// 1. A connection to a HOF star must not get remade.  We handle this
+//    correctly by silently ignoring any connections involving no-longer-
+//    extant stars.  Since Galaxy::preinitialize() destroys the HOF stars
+//    before exiting, a subsequent new preinitialize will not find them.
+// 2. Any delays etc. on connections made by HOF stars must be registered
+//    in my initList.  HOF stars are responsible for calling registerInit()
+//    to tell me about these.
 void
-InterpGalaxy::initialize () {
-	Block::initialize();
-	StringListIter next(initList);
+InterpGalaxy::preinitialize () {
 	int nacts = initList.numPieces();
+	// Initialize galaxy's states in case bus width/delay exprs need them
+	if (nacts > 0)
+	  initState();
+	StringListIter next(initList);
 	int err = 0;
 	// Note that while processing the initList, we ignore errors due to
 	// missing stars or portholes.  Such errors are caused by HOF stars
-	// that have been removed in the setup phase of a previous run.
+	// that have been removed in the preinit phase of a previous run
+	// (or perhaps even this run, if we are a subgalaxy).
 	// The err counter is kept in case it is needed for debugging.
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *initDelayValues, *action;
@@ -837,7 +858,7 @@ InterpGalaxy::initialize () {
 			{
 				Geodesic *g = nodes.nodeWithName(c);
 				if (g == 0) err++;
-				g->setDelay(0, initDelayValues);
+				else g->setDelay(0, initDelayValues);
 			}
 			nacts -= 5;
 			break;
@@ -845,7 +866,7 @@ InterpGalaxy::initialize () {
 			err++;
 		}
 	}
-	initSubblocks();
+	Galaxy::preinitialize();
 }
 
 // NodeList methods.  These could be inline except that that would
