@@ -297,18 +297,18 @@ body ::tycho::View::addSubview {subviewName type side args} {
 # </pre>
 #
 body ::tycho::View::busy {args} {
-    set oldCursor [lindex [component text config -cursor] end]
-    component text config -cursor {watch}
-    ::tycho::safeUpdate $this
+    set oldCursor [lindex [config -cursor] end]
+    config -cursor {watch}
+    ::tycho::safeUpdate $prefix
     # If we get here, then the object $this still exists.
     # Catch errors so that we can reset the cursor.
     if {[catch [code [concat $this $args]] msg] != 0} {
-	component text config -cursor $oldCursor
+        config -cursor $oldCursor
         global ::errorInfo
         set saveInfo $errorInfo
 	error $msg $saveInfo
     }
-    component text config -cursor $oldCursor
+    config -cursor $oldCursor
     return 1
 }
 
