@@ -259,7 +259,8 @@ body ::tycho::Glimpse::glimpseSearch {} {
 body ::tycho::Glimpse::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides GlimpseHelp.html]
+	    [file join $TYCHO util devtools doc usersGuides \
+	    GlimpseHelp.html] html
 }
 
 #####################################################################
