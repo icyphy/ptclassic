@@ -53,6 +53,9 @@ public:
     // Initialization.
     /* virtual */ void setup();
 
+    // Threads invoke the begin methods of the stars.
+    /* virtual */ void begin() {}
+
     // End simulation.
     /* virtual */ void wrapup();
 };

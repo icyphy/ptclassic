@@ -46,8 +46,8 @@ void DataFlowProcess::run()
     // Configure the star for dynamic execution.
     star.setDynamicExecution(TRUE);
 
-    // Fire the Star ad infinitum.
-    do
+    star.begin();
+    do	// Fire the Star ad infinitum.
     {
 	if (star.waitPort()) star.waitPort()->receiveData();
     } while(star.run());
@@ -60,8 +60,8 @@ void SyncDataFlowProcess::run()
     // Configure the star for dynamic execution.
     star.setDynamicExecution(TRUE);
 
-    // Fire the star ad infinitum.
-    do
+    star.begin();
+    do	// Fire the star ad infinitum.
     {
 	// Wait for notification to start.
 	{
