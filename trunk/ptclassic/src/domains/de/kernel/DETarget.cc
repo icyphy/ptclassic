@@ -47,8 +47,8 @@ Target("default-DE","DEStar","default DE target")
 	    "Relative time scale for interface with another timed domain"));
 	addState(syncMode.setState("syncMode",this,"YES",
 	"Enforce that the inner timed domain can not be ahead of me in time"));
-	addState(calQ.setState("calendar queue?", this, "NO",
-	    "Use the experimental CalendarQueue scheduler."));
+	addState(calQ.setState("calendar queue scheduler?", this, "YES",
+	    "Use the CalendarQueue scheduler."));
 }
 
 void DETarget :: setup()
