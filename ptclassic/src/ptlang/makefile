@@ -36,9 +36,20 @@ include $(CONFIG)
 
 all:	ptlang
 
+ifneq (,$(filter hppa%,$(PTARCH)))
+# We ship a ptlang.c that was created under Solaris2.4
+# Unfortunately, the solaris2.4 ptlang.c will not compile
+# under hppa or hppa.cfront (alloca problems), so we
+# recreate ptlang.c by hand here.
+ptlang:	ptlang.y
+	cd $(VPATH); yacc ptlang.y; mv y.tab.c ptlang.c
+	rm -f ptlang
+	$(CC) ptlang.o -o ptlang $(PTLANGLIB)
+else
 ptlang:	ptlang.o
 	rm -f ptlang
 	$(CC) ptlang.o -o ptlang $(PTLANGLIB)
+endif
 
 ptlang.o:	ptlang.c
 
