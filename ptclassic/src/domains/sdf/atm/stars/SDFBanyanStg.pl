@@ -74,18 +74,18 @@ Note the special processing required due to null packets.
     }
 
     constructor {
-      random = NULL;
+      random = 0;
     }
     
     destructor {
-      if (random) { LOG_DEL;  delete random; }
+      LOG_DEL; delete random;
     }
 
     setup {
-      if (random) { LOG_DEL;  delete random; }
-      LOG_NEW; random = new Uniform (0,1,gen);
+      LOG_DEL; delete random;
+      LOG_NEW; random = new Uniform(0,1,gen);
 
-      Envelope  dumEnv(*new VoiceData());
+      Envelope dumEnv(*new VoiceData());
       nEnv = dumEnv;
 
       queue1.initialize(int(capacity));
@@ -235,8 +235,6 @@ Note the special processing required due to null packets.
 
          }
 
-
     } // end go{}
 
 } // end defstar
-
