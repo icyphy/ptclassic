@@ -15,37 +15,21 @@ set usagestring = "usage: tycho [-debug] [-ptiny] [-bin tychobin] [-bak] [script
 set progname = `basename $0`
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-if ( ! $?PTARCH ) then
-    setenv PTARCH `$PTOLEMY/bin/arch`
-endif
-if ( ! $?USER ) then
-    setenv USER $LOGNAME
+
+# Set the commonly used environment variables
+source $PTOLEMY/bin/ptsetup.csh
+
+if ( ! $?DISPLAY ) then
+    echo "${0}: Your DISPLAY environment variable must be set"
+    exit 1
 endif
 
-if ( ! $?PTX11DIR ) then
-    switch ($PTARCH)
-	case sol2:
-	case sol2.cfront:
-	    setenv PTX11DIR /usr/openwin
-	    breaksw
-	case *:
-	    setenv PTX11DIR /usr/X11
-	    breaksw
-    endsw
-endif
-
-if ( ! $?LD_LIBRARY_PATH ) then
-    setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}:/usr/lib:${PTX11DIR}/lib
-endif
 
 # FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
 #	   $PTOLEMY/tycho/kernel/Lib.tcl
-setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4
-setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
-
-# Not all shells and platforms set $PWD, so we use our own
-setenv PTPWD `pwd`
+#setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4
+#setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
 
 # To get tcl/tk man pages before corresponding unix man pages,
 # and to guess about a reasonable manpath if none is set.
@@ -90,11 +74,6 @@ while ($#argv)
 	shift
 end
 
-if ( ! $?DISPLAY ) then
-    echo "${0}: Your DISPLAY environment variable must be set"
-    exit 1
-endif
-
 # For now, look for the executable in obj.$PTARCH, rather than bin.$ARCH.
 set bindir = $PTOLEMY/obj.$PTARCH
 
@@ -108,6 +87,26 @@ if ( ! $?prog ) then
 	    set prog = $prog.debug
 	endif
 	if ( $?tychobak ) then
+		if ( -d ${PTOLEMY}/lib.${PTARCH}.bak ) then
+			if ( $?S_LD_LIB_PATH ) then
+				# S_LD_LIB_PATH is set by ptsetup.csh
+				# if this script was called and LD_LIBRARY_PATH
+				# was not set.  If this was the case, then we
+				# setup user to use the backup libraries, if
+				# they exist.
+				setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:/usr/lib:${PTX11DIR}/lib
+			else
+				# The user set LD_LIBRARY_PATH, so we stick
+				# lib.$PTARCH.bak in front anyway, just
+				# to be sure that we get good libraries.
+				# This might be a mistake, since if
+				# LD_LIBRARY_PATH is set, we should assume
+				# the user knows what they want to do
+				setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:${LD_LIBRARY_PATH}
+			endif
+		else
+			echo "Warning: Can't find ${PTOLEMY}/lib.${PTARCH}.bak"
+		endif
 	    set prog = $prog.bak
 	endif
 endif
@@ -119,8 +118,6 @@ endif
 
 # FIXME: Should check starting palette/facet for validity.
 # FIXME: Should make the starting facet if needed.
-
-set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path )
 
 if (! -x $prog) then
     echo "Program does not exist: $prog"
