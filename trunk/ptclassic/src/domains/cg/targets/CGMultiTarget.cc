@@ -152,6 +152,7 @@ void CGMultiTarget::setup() {
     installDDF();
     Target :: setup();
 
+    if (SimControl::haltRequested()) return;
     writeSchedule();
     if (inWormHole()) {
 	adjustSampleRates();
