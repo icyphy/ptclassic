@@ -53,6 +53,8 @@ class VHDLReg : public VHDLFiring
  public:
   // Constructors.
   VHDLReg();
+  VHDLReg(const char* n, const char* t)
+    : type(t) { setName(n); }
 
   // Destructor.
   ~VHDLReg();
