@@ -12,9 +12,12 @@
  'upWidth' and 'upHeight' are the same as width and height, but ROUNDED
  UP to the nearest multiple of blocksize--if width (height) is already a
  multiple of blocksize, upWidth (upHeight) equals width (height).
+
+ With the setSize() function, fullSize can vary from
+ (fullWidth*fullHeight). This allows DCTImage picture data to be
+ compressed, etc.
  ****************************/
 
-#include <math.h>
 #include "BaseImage.h"
 
 class DCTImage: public BaseImage {
@@ -25,21 +28,22 @@ protected:
 	void init();
 
 public:
-	DCTImage(int, int, int, int, int); // width, height, frameId,
-					   // fullSize, blocksize
-	DCTImage(int, int, int, int = 8);  // width, height, frameId,
-					   // blocksize
+	DCTImage(int, int, int, int, int);	// width, height, frameId,
+										// fullSize, blocksize
+	DCTImage(int, int, int, int = 8);	// width, height, frameId,
+										// blocksize
 	DCTImage(const DCTImage&, int = 0); // copy params, maybe data
 	DCTImage(const BaseImage&, int = 8); // copy params, int = blocksize
 	virtual ~DCTImage();
 
 	virtual	BaseImage*	fragment(int, int);
 	virtual	void		assemble(const BaseImage*);
+	float*				retData();
+	void				setSize(const int);
 
-	inline	float* retData()		{ return DCTData; }
-	inline	int	retBS()				{ return blocksize; }
-	inline	int	fullWidth()			{ return upWidth; }
-	inline	int	fullHeight()		{ return upHeight; }
+	inline	int	retBS() const		{ return blocksize; }
+	inline	int	fullWidth() const	{ return upWidth; }
+	inline	int	fullHeight() const	{ return upHeight; }
 
 // PacketData-like stuff
 	virtual const char* dataType() const;

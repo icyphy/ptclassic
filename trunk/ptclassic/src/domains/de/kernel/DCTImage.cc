@@ -3,8 +3,12 @@
 // creation date:	7/11/91
 // SCCS info:		$Id$
 
-#include <math.h>
 #include "DCTImage.h"
+
+const char* DCTImage::dataType() const { return("DCTImage"); }
+PacketData* DCTImage::clone() const { return new DCTImage(*this); }
+PacketData* DCTImage::clone(int a) const {return new DCTImage(*this,a);}
+ISA_FUNC(DCTImage,BaseImage);
 
 
 void DCTImage::init()
@@ -48,6 +52,23 @@ DCTImage::~DCTImage()
 { delete DCTData; DCTData = (float*) NULL; }
 
 
+void DCTImage::setSize(const int a)
+{
+	if (size != fullSize) return;
+	if (a == fullSize) return;
+	delete DCTData;
+	DCTData = new float[a];
+	size = fullSize = a;
+} // end DCTImage::setSize()
+
+
+float* DCTImage::retData()
+{
+	if (size == fullSize) return DCTData;
+	return((float*) NULL);
+} // end DCTImage::retData()
+
+
 BaseImage* DCTImage::fragment(int cellSz, int Num)
 {
 	int arrSz = cellSz/4; // 4 == sizeof(float)
@@ -85,8 +106,3 @@ void DCTImage::assemble(const BaseImage* bi)
 	DCTImage* di = (DCTImage*) bi;
 	copy(di->size, DCTData+di->startPos, di->DCTData);
 } // end DCTData::assemble()
-
-const char* DCTImage::dataType() const { return("DCTImage"); }
-PacketData* DCTImage::clone() const { return new DCTImage(*this); }
-PacketData* DCTImage::clone(int a) const { return new DCTImage(*this, a); }
-ISA_FUNC(DCTImage,BaseImage);
