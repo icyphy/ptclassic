@@ -1,5 +1,18 @@
-// Domain.cc
-// $Id$
+/*******************************************************************
+SCCS Version identification :
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer: J. T. Buck
+ Date of creation: 6/29/90
+
+ The Domain class.  We declare one instance of each derived domain.
+ This class provides a way to get the proper types of various objects
+ for a domain, and allows Wormholes to be automatically generated.
+
+*******************************************************************/
 
 #include "Domain.h"
 #include "Star.h"

@@ -1,10 +1,16 @@
 #ifndef _Universe_h
 #define _Universe_h 1
 
-// SCCS version identification
-// $Id$
 
 /*******************************************************************
+SCCS version identification
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer: J. T. Buck
+
 	The generic Universe class.
 
 	A Universe is a Galaxy with a Scheduler.

@@ -4,10 +4,13 @@
 #include "DataStruct.h"
 #include "Output.h"
 
-// SCCS version identification
-// $Id$
-
 /****************************************************************
+SCCS version identification
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
 StringList stores a list of char* strings, and can then read
 them back one-by-one, or can concatinate them into a single
 char* string. A StringList can only grow; there is no way to

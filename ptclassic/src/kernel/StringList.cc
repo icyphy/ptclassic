@@ -1,11 +1,22 @@
+/**************************************************************************
+Version identification:
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
+
+ Programmer: J. T. Buck
+ (completely replaces a previous version by E. A. Lee and D. G. Messerschmitt)
+ Date of creation: 4/22/90
+
+ Methods for the StringList class
+*************************************************************************/
+
 #include <std.h>
 #include <stream.h>
 #include "StringList.h"
 
 #define SMALL_STRING 20
-
-// SCCS version identification
-// $Id$
 
 // Note: all components of a StringList are in dynamic memory,
 // and are deleted by the StringList destructor

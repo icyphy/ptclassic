@@ -4,10 +4,13 @@
 #include "Universe.h"
 #include "DEScheduler.h"
 
-// SCCS version identification
-// $Id$
 
 /*******************************************************************
+SCCS version identification
+$Id$
+
+ Copyright (c) 1990 The Regents of the University of California.
+                       All Rights Reserved.
 
 	Programmer : Soonhoi Ha
 	Description : DEUniverse is defined here.
