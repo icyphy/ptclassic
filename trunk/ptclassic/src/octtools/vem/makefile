@@ -98,7 +98,7 @@ OBJECTS=bags/bags.o buffers/bufinternal.o \
 	buffers/open.o buffers/save.o dialogs/vemDMhelp.o \
 	dispatch/commands.o dispatch/bindings.o \
 	drawing/attributes.o drawing/display.o drawing/polymod.o \
-	drs/init_change.o drs/undo.o main/browser.o main/version.o \
+	drs/init_change.o drs/undo.o main/browser.o \
 	main/vem.o main/cursors.o main/errors.o main/interface.o \
 	main/basic.o main/defaults.o main/message.o main/xvals.o \
 	options/opts.o options/layers.o options/util.o patterns/tech.o \
@@ -171,15 +171,31 @@ _vem:
 	done
 
 
-linkvem.debug: $(VEMOBJECTS)
-	$(CC) $(CC_STATIC) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem: $(VEMOBJECTS)
-	$(CC) $(CC_STATIC) -o vem $(OBJECTS) $(VEMLIBS)
+linkvem.cc.debug: $(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+ 		VPATH=../../../../src/octtools/vem/main version.o)
+	$(CC) $(CC_STATIC) -g -o vem.debug main/version.o $(OBJECTS) $(VEMLIBS)
 
-linkvem.debug.gcc: $(VEMOBJECTS)
-	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug $(OBJECTS) $(VEMLIBS)
-linkvem.gcc: $(VEMOBJECTS)
-	$(LINKER) $(LINKFLAGS) -o vem $(OBJECTS) $(VEMLIBS)
+linkvem.cc: $(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+ 		VPATH=../../../../src/octtools/vem/main version.o)
+	$(CC) $(CC_STATIC) -o vem main/version.o main/version.o \
+		$(OBJECTS) $(VEMLIBS)
+
+linkvem.debug:$(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+ 		VPATH=../../../../src/octtools/vem/main version.o)
+	$(LINKER) $(LINKFLAGS_D) -g -o vem.debug main/version.o \
+		$(OBJECTS) $(VEMLIBS)
+
+linkvem: $(VEMOBJECTS)
+	rm -f main/version.o
+	(cd main; $(MAKE) $(MFLAGS) $(MAKEVARS) \
+ 		VPATH=../../../../src/octtools/vem/main version.o)
+	$(LINKER) $(LINKFLAGS) -o vem main/version.o $(OBJECTS) $(VEMLIBS)
 
 OCTBINDIR =	$(OCTTOOLS)/bin.$(ARCH)
 DESTBIN =	$(OCTBINDIR)/vem
