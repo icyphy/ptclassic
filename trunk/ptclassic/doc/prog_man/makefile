@@ -40,11 +40,14 @@ update.fmb:
 	echo "Update prog_man.book" >> $@
 	chmod g+w $@
 
+# Script to convert Frame files to Postscript
+FMPRINT2PS =	$(PTOLEMY)/doc/bin/fmprint2ps
 # Update all the cross references and then Create postscript files
 # Script to fix up cg56.ps and cg96.ps postscript and to allow printing
 # on printers w/o the exact size of paper (A4 vs European)
-FIXFRAMEPS=/users/ptdesign/bin/fixframeps
+FIXFRAMEPS =	$(PTOLEMY)/bin/fixframeps
 fm2ps: update_book
-	fmprint2ps *.doc
+	$(FMPRINT2PS) *.doc
 	$(FIXFRAMEPS) *.ps
 	-chmod g+w *.ps
+	rm -f *.ps.bak
