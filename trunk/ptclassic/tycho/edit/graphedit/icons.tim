@@ -145,6 +145,36 @@ group miscellaneous {
         port out Terminal -anchor {0 50} -direction {-1 0} \
                 -type output -style arrow -fill blue
     }
+
+    icon Baz IconFrame {
+        -label {The Baz Icon}
+        -height 60
+        -width 100
+        -text Hello
+        -graphics {
+            line 20 70 50 100 80 70 -fill red  \
+                    -width 6 -smooth 1 -capstyle round
+            oval 27 15 42 38 -fill blue -outline ""
+            oval 58 15 73 38 -fill blue -outline ""
+            Solid 50 35 60 70 40 70 -color darkgrey  \
+                    -borderwidth 4 -color green
+            line 30 -10 80 0 130 30 -smooth 1 -width 6  \
+                    -capstyle round -fill purple
+            polygon 55 0  55 -10 70 -60 120 -40 110 20 110 20  \
+                    -smooth 1 -outline purple -fill purple
+        }
+        -color yellow
+        
+        port in Terminal \
+                -anchor {0 50} -direction {-1 0}  \
+                -type input -style blob -blobsize 5 \
+                -fill sienna -width 3
+        port out Terminal \
+                -anchor {100 50} -direction {1 0}  \
+                -type output -style arrow  \
+                -fill sienna -width 3 \
+                -arrowshape {8 12 5}
+    }
 }
 
 group sdf {
