@@ -1,6 +1,7 @@
 defstar {
 	name { MpyFix }
 	domain { SDF }
+	derivedFrom { SDFFix }
 	desc { Output the product of the inputs, as a fixed-point value. }
 	author { A. Khazeni }
 	copyright {
@@ -50,20 +51,6 @@ When the value of the product extends outside of the precision,
 the OverflowHandler will be called.
 		}
 	}
-	defstate {
-	        name { OverflowHandler }
-	        type { string }
-	        default { "saturate" }
-	        desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-	}
 	protected {
 		Fix fixIn, product;
 	}
@@ -73,6 +60,8 @@ The "warning" option will generate a warning message whenever overflow occurs.
 
 	        product = Fix( ((const char *) OutputPrecision) );
 	        product.set_ovflow( ((const char *) OverflowHandler) );
+		if ( product.invalid() )
+		  Error::abortRun( *this, "Invalid overflow handler" );
 	}
 	go {
 	        MPHIter nexti(input);
@@ -84,6 +73,7 @@ The "warning" option will generate a warning message whenever overflow occurs.
 		if ( p != 0 ) {
 	          fixIn = Fix((*p)%0);
 	          product = fixIn;
+		  checkOverflow(product);
 	          while ((p = nexti++) != 0) {
 		    if ( int(ArrivingPrecision) )
 		      product *= Fix((*p)%0);
@@ -91,11 +81,15 @@ The "warning" option will generate a warning message whenever overflow occurs.
 	              fixIn = Fix((*p)%0);
 		      product *= fixIn;
 		    }
+		    checkOverflow(product);
 		  }
 		}
 		else {			// 1.0 will overflow if the fixed-
 		  product = 1.0;	// representation has 0 integer bits
+		  checkOverflow(product);
 		}
 	        output%0 << product;
 	}
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }

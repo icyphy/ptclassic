@@ -1,6 +1,7 @@
 defstar {
 	name { AddFix }	
 	domain {SDF}
+	derivedFrom{ SDFFix }
 	desc {
 Output the sum of the fixed-point inputs as a fixed-point value.
 	}
@@ -50,20 +51,6 @@ When the value of the accumulation extends outside of the precision,
 the OverflowHandler will be called.
                 }
         }
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
         protected {
 		Fix fixIn, sum;
         }
@@ -73,13 +60,15 @@ The "warning" option will generate a warning message whenever overflow occurs.
 
 		sum = Fix( ((const char *) OutputPrecision) );
 		sum.set_ovflow( ((const char *) OverflowHandler) );
+		if ( sum.invalid() )
+		  Error::abortRun( *this, "Invalid overflow handler" );
         }
         go {
                 MPHIter nexti(input);
                 PortHole *p;
 
 		// Fixed-point class in Ptolemy 0.5 can always represent 0.0
-		sum = 0.0;
+		sum.setToZero();	// set to zero and clear error bits
                 while ((p = nexti++) != 0) {
                   if ( int(ArrivingPrecision) )
                     sum += Fix((*p)%0);
@@ -87,7 +76,10 @@ The "warning" option will generate a warning message whenever overflow occurs.
                     fixIn = Fix((*p)%0);
                     sum += fixIn;
 		  }
+		  checkOverflow(sum);
 		}
                 output%0 << sum;
         }
+	// a wrap-up method is inherited from SDFFix
+	// if you defined your own, you should call SDFFix::wrapup()
 }

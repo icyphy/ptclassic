@@ -1,6 +1,7 @@
 defstar {
 	name { GainFix }
 	domain { SDF }
+	derivedFrom { SDFFix }
 	desc { 
 This is an amplifier; the fixed-point output is the fixed-point input
 multiplied by the "gain" (default 1.0).
@@ -73,20 +74,6 @@ When the value of the product extends outside of the precision,
 the OverflowHandler will be called.
 		}
         }
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the output.
-If the result of the sum cannot be fit into the precision of the output,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameter.
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
         protected {
 		Fix fixIn, out;
         }
@@ -96,6 +83,8 @@ The "warning" option will generate a warning message whenever overflow occurs.
 
                 out = Fix( ((const char *) OutputPrecision) );
                 out.set_ovflow( ((const char *) OverflowHandler) );
+		if ( out.invalid() )
+		  Error::abortRun( *this, "Invalid overflow handler" );
         }
 	go {
 		// all computations should be performed with out since that
@@ -108,6 +97,9 @@ The "warning" option will generate a warning message whenever overflow occurs.
                   fixIn = Fix(input%0);
                   out *= fixIn;
 		}
+		checkOverflow(out);
 		output%0 << out;
 	}
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }
