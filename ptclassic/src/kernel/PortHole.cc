@@ -357,42 +357,36 @@ PortHole& PortHole :: setPort(const char* s,
 }
 
 // Print a Generic Port
-StringList
-GenericPort :: print (int) const {
-        StringList out;
+StringList GenericPort :: print (int) const {
+    StringList out;
  
-        if(isItInput())
-           out = "      Input ";
-        else if(isItOutput())
-           out = "      Output ";
+    if(isItInput())
+	out << "\tInput ";
+    else if(isItOutput())
+	out << "\tOutput ";
         
-        out << "PortHole: " << fullName();
-        
-        if(alias() != NULL)
-		out << "       Aliased to: " << realPort().fullName();
-	return out << "\n";
+    out << name();
+    
+    if(alias() != NULL)
+	out << "\t\tAliased to: " << realPort().fullName();
+
+    return out << "\n";
 }
 
-// 3/2/94 changed to add initDelayValues
-StringList
-PortHole :: print(int) const {
-	StringList out = GenericPort::print();
-	if (alias() == NULL) {
-		if (far() != NULL) {
-			out << "    Connected to port: "
-			    << far()->fullName();
-			if (myGeodesic->numInit() > 0)
-				out << "(delay = "
-				    << myGeodesic->numInit() << ")";
-			if (myGeodesic->initDelayValues())
-				out << "(initValues = "
-				    << myGeodesic->initDelayValues() << ")";
-			out += "\n";
-		}
-		else
-			out << "    Not connected.\n";
-        }
-        return out;
+StringList PortHole :: print(int) const {
+    StringList out = GenericPort::print();
+    if (alias() == NULL) {
+	if (far() != NULL) {
+	    out << "\tConnected to port: " << far()->fullName();
+	    if (myGeodesic->numInit() > 0)
+		out << "(delay = " << myGeodesic->numInit() << ")";
+	    if (myGeodesic->initDelayValues())
+		out << "(initValues = "<< myGeodesic->initDelayValues() << ")";
+	}
+	else
+	    out << "\tot connected.";
+    }
+    return out << "\n\n";
 }
 
 // sets the index values of each porthole of each star in the galaxy.
@@ -451,19 +445,16 @@ void MultiPortHole :: delPorts () {
 	}
 }
 
-StringList
-MultiPortHole :: print (int verbose) const {
-	StringList out;
-	out << "Multi " << GenericPort::print(verbose);
-	if (peerMPH) {
-		out += "bus connection to multiporthole ";
-		out += peerMPH->fullName();
-	}
-	out << "This MultiPortHole contains " <<numberPorts()
-	    <<" PortHoles.\n";
+StringList MultiPortHole :: print (int verbose) const {
+    StringList out;
+    out << GenericPort::print(verbose);
+    if (peerMPH) {
+	out << "\tbus connection to multiporthole " << peerMPH->fullName();
+    }
+    out << "This MultiPortHole contains " << numberPorts() <<" PortHoles.\n\n";
 // We don't add stuff on the PortList, since that will be printed
 // out by the enclosing Block::printPorts.
-	return out;
+    return out;
 }
 
 // define a marker value to prevent infinite recursion
