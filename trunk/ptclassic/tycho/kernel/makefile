@@ -30,15 +30,14 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# Root of Ptolemy directory
-ROOT =		../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../..
-# True source directory
-VPATH =		$(ROOT)/tycho/kernel
+# Root of Tycho directory
+ROOT =		..
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# True source directory
+VPATH =		$(ROOT)/kernel
+
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = \
@@ -97,20 +96,8 @@ REALCLEAN_STUFF =	tclIndex
 # Title for the tydoc index page
 TYDOC_DESC =	Index of classes in tycho/kernel
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
-
 # Do make sources so that we ensure that the subdirectories are checked out
 all install: sources $(MISC_SRCS) tclIndex
 
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
-
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
-

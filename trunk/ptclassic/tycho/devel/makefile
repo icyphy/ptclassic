@@ -29,28 +29,19 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
 
-# Root of Ptolemy directory
-ROOT =		../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../..
+# Root of Tycho directory
+ROOT =		..
+
 # True source directory
-VPATH =		$(ROOT)/tycho/devel
+VPATH =		$(ROOT)/devel
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 TCL_SRCS = 
   
-#	GanttView.itcl
-#	GanttVSM.itcl
-
 ITCL_SRCS = \
 	Displayer.itcl \
 	GanttView.itcl \
@@ -73,19 +64,8 @@ DIRS =			# doc
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
 
-# Include information on all stars and targets.
-include $(ROOT)/mk/stars.mk
-
 all install: $(MISC_SRCS) #tclIndex
-
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
 

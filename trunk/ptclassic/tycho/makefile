@@ -31,16 +31,17 @@
 
 DIRS = kernel editors lib domains slate devel doc #bin
 
-# Root of Ptolemy directory
-ROOT =		..
+# Root of Tycho directory
+ROOT =		.
 
-# get configuration info
-CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 MISC_FILES =	README.files copyright
 
-makefiles all install clean depend realclean checkjunk sccsinfo itcldocs:
+makefiles all install clean depend realclean checkjunk sccsinfo itcldocs \
+extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -82,9 +83,9 @@ tycho.idx: kernel/tychoMakeIndex.tcl \
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
-		echo "Running $(ITCL2_0_SH)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCL2_0_SH); \
+		echo "Running $(ISH)"; \
+		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ISH); \
 	else \
-		echo "Running $(ITCL2_0_SH)"; \
-		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCL2_0_SH); \
+		echo "Running $(ISH)"; \
+		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ISH); \
 	fi
