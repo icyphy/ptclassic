@@ -41,9 +41,10 @@ include $(CONFIG)
 
 EXTRA_SRCS =	\
 	index.html \
+	pitclStart.html \
 	pitcl.html
 
-MISC_FILES =
+MISC_FILES = 
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -53,3 +54,13 @@ DIRS =
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
+# pitcl.html is automagically generated from the PITcl.cc sources
+# by a script in $PTOLEMY/src/pitcl.
+pitcl.html:
+	@if [ -d $(PTOLEMY)/src/pitcl ]; then \
+		(cd $(PTOLEMY)/src/pitcl; make updatetychodocs); \
+	else \
+		echo "$(PTOLEMY)/src/pitcl does not exist, so we can't create pitcl.html"; \
+	fi
+
