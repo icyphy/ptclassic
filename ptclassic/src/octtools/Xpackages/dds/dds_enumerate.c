@@ -130,6 +130,7 @@ ddsData data;			/* Should be (ddsEnumerate *)         */
 		 "Items of type DDS_ENUMERATE must have a parent");
 	/*NOTREACHED*/
     }
+    return (ddsHandle)NULL;
 }
 
 
@@ -242,7 +243,7 @@ ddsEnumerate *new;		/* Desired state */
 	    /* Create new one */
 	    current->sub_items[i] =
 	      XtCreateManagedWidget(DDS_ENCHOICE_NAME, smeBSBObjectClass,
-				    current->sub_items, arg_list, arg_len);
+				    current->sub_items[0], arg_list, arg_len);
 	}
     }
     for (i = new->num_items;  i < old_num;  i++) {
@@ -281,6 +282,7 @@ ddsInternal *child;		/* New child     */
     errRaise(ddsPackageName, DDS_BAD_PARENT,
 	     "DDS_ENUMERATE components may not have child components");
     /*NOTREACHED*/
+    return (Widget)NULL;
 }
 
 /*ARGSUSED*/
