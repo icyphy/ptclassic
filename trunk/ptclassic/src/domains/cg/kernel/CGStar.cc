@@ -95,7 +95,8 @@ CodeStream* CGStar::getStream(const char* name) {
 	if (slist == NULL) 
 	{
 		StringList message;
-		message << "getStream: " << name << " does not exist";
+		message << "getStream: " << name
+		   << " does not exist. Maybe your target is wrong?";
 		Error::abortRun(*this,message);
 	}
 	return slist;
