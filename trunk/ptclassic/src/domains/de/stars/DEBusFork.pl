@@ -36,8 +36,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  completionTime = arrivalTime;
 	  InDEMPHIter nextin(input);
 	  OutDEMPHIter nextoutA(outputA), nextoutB(outputB);
-	  InDEPort *in;
-	  OutDEPort *outA = (OutDEPort *)NULL, *outB = (OutDEPort *)NULL;
+	  InDEPort* in;
+	  OutDEPort* outA = 0;
+	  OutDEPort* outB = 0;
 	  while (((in = nextin++) != 0) &&
 		 ((outA = nextoutA++) != 0) &&
 		 ((outB = nextoutB++) != 0)) {
