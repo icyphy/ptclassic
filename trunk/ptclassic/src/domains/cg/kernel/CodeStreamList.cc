@@ -59,14 +59,12 @@ CodeStream* CodeStreamList::newStream(const char* name) {
 }
 
 void CodeStreamList::deleteStreams() {
-	ListIter nextNode(myStreams);
 	NamedNode* node;
-	while((node = (NamedNode*)nextNode++) != 0) {
+	while((node = (NamedNode*)myStreams.getAndRemove()) != 0) {
 		CodeStream* csptr = (CodeStream*)node->object();
 		delete csptr;
+		delete node;
 	}
-	myStreams.initialize();
-	NamedList::initialize();
 }
 
 void CodeStreamList::initialize() {
