@@ -126,7 +126,10 @@ extern "C" {
 		StringList shellCommand = "matlab "; 
 		shellCommand << ((char *) options);
 		if ( matlabEnginePtr != 0 ) {
-		  engClose( matlabEnginePtr );
+		  if ( ! engClose( matlabEnginePtr ) ) {
+		    Error::warn(*this, "Error when terminating connection ",
+			        "to the Matlab kernel.");
+		  }
 		}
 		matlabEnginePtr = engOpen( ((char *) shellCommand) );
 		if ( matlabEnginePtr == 0 ) {
@@ -144,11 +147,11 @@ extern "C" {
 		  matlabInputMatrices =
 		    (Matrix **) malloc( numInputs * sizeof(Matrix *) );
 
-		  char *inputBaseName = ((char *) MatlabInputVarName);
 		  if ( matlabInputNames != 0 ) {
 		    LOG_DEL; delete [] matlabInputNames;
 		  }
 		  LOG_NEW; matlabInputNames = new StringList[numInputs];
+		  char *inputBaseName = ((char *) MatlabInputVarName);
 		  for ( i = 0; i < numInputs; i++ ) {
 		    sprintf(numstr, "%d", i+1);
 		    matlabInputNames[i] << inputBaseName << numstr;
@@ -165,11 +168,11 @@ extern "C" {
 		  matlabOutputMatrices =
 		    (Matrix **) malloc( numOutputs * sizeof(Matrix *) );
 
-		  char *outputBaseName = ((char *) MatlabOutputVarName);
 		  if ( matlabOutputNames != 0 ) {
 		    LOG_DEL; delete [] matlabOutputNames;
 		  }
 		  LOG_NEW; matlabOutputNames = new StringList[numOutputs];
+		  char *outputBaseName = ((char *) MatlabOutputVarName);
 		  for ( i = 0; i < numOutputs; i++ ) {
 		    sprintf(numstr, "%d", i+1);
 		    matlabOutputNames[i] << outputBaseName << numstr;
@@ -203,24 +206,23 @@ extern "C" {
 	go {
 		// allocate memory for Matlab matrices
 		MPHIter nexti(input);
-		PortHole *iportp;
 		for ( int i = 0; i < numInputs; i++ ) {
+		  // read a reference to the matrix on input port i
+		  PortHole *iportp = nexti++;
 		  Envelope Apkt;
-		  iportp = nexti++;
 		  ((*iportp)%0).getMessage(Apkt);
 		  const ComplexMatrix& Amatrix =
 			*(const ComplexMatrix *)Apkt.myData();
 
-		  // allocate Matlab matrices
+		  // allocate a Matlab matrix and name it
 		  int rows = Amatrix.numRows();
 		  int cols = Amatrix.numCols();
-		  matlabInputMatrices[i] = mxCreateFull(rows, cols, MXCOMPLEX);
-		  mxSetName( matlabInputMatrices[i],
-			     (char *) matlabInputNames[i]);
+		  Matrix *matlabMatrix = mxCreateFull(rows, cols, MXCOMPLEX);
+		  mxSetName( matlabMatrix, (char *) matlabInputNames[i]);
 
-		  // copy values in Ptolemy matrix to Matlab matrix
-		  double *realp = mxGetPr(matlabInputMatrices[i]);
-		  double *imagp = mxGetPi(matlabInputMatrices[i]);
+		  // copy values in the Ptolemy matrix to the Matlab matrix
+		  double *realp = mxGetPr( matlabMatrix );
+		  double *imagp = mxGetPi( matlabMatrix );
 		  for ( int irow = 0; irow < rows; irow++ ) {
 		    for ( int icol = 0; icol < cols; icol++ ) {
 		      Complex temp = Amatrix[irow][icol];
@@ -228,6 +230,12 @@ extern "C" {
 		      *imagp++ = imag(temp);
 		    }
 		  }
+
+		  // let the Matlab engine know about the new Matlab matrix
+		  engPutMatrix( matlabEnginePtr, matlabMatrix );
+
+		  // save the pointer to the new Matlab matrix for deallocation
+		  matlabInputMatrices[i] = matlabMatrix;
 		}
 
 		// evaluate the Matlab command (non-zero means error)
@@ -242,16 +250,15 @@ extern "C" {
 
 		// copy each Matlab output matrix to a Ptolemy matrix
 		MPHIter nextp(output);
-		PortHole* oportp;
 		for ( int j = 0; j < numOutputs; j++ ) {
-		  matlabOutputMatrices[j] =
+		  Matrix *matlabMatrix =
 			engGetMatrix( matlabEnginePtr,
 				      (char *) matlabOutputNames[j] );
 
-		  double *realp = mxGetPr(matlabOutputMatrices[j]);
-		  double *imagp = mxGetPi(matlabOutputMatrices[j]);
-		  int rows = mxGetM(matlabOutputMatrices[j]);
-		  int cols = mxGetN(matlabOutputMatrices[j]);
+		  double *realp = mxGetPr( matlabMatrix );
+		  double *imagp = mxGetPi( matlabMatrix );
+		  int rows = mxGetM( matlabMatrix );
+		  int cols = mxGetN( matlabMatrix );
 		  LOG_NEW;
 		  ComplexMatrix& Amatrix = *(new ComplexMatrix(rows, cols));
 		  for ( int jrow = 0; jrow < rows; jrow++ ) {
@@ -259,11 +266,17 @@ extern "C" {
 		      Amatrix[jrow][jcol] = Complex(*realp++, *imagp++);
 		    }
 		  }
-		  oportp = nextp++;
+
+		  // save the pointer to the new Matlab matrix for deallocation
+		  matlabOutputMatrices[j] = matlabMatrix;
+
+		  // Write the matrix to output port j
+		  // Do not delete Amatrix--- particle class will handle that
+		  PortHole* oportp = nextp++;
 		  ((*oportp)%0) << Amatrix;
 		}
 
-		// free Matlab memory-- assume Matlab is good with memory alloc
+		// free Matlab memory-- assume Matlab memory alloc is efficient
 		for ( int k = 0; k < numInputs; k++ ) {
 		  mxFreeMatrix(matlabInputMatrices[k]);
 		}
