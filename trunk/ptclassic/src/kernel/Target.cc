@@ -54,8 +54,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // constructor
 Target::Target(const char* nam, const char* starClass,const char* desc) :
-Block(nam,0,desc), sched(0), gal(0),
-children(0), link(0), nChildren(0), dirFullName(0) {
+Block(nam,0,desc),
+children(0), link(0), nChildren(0), sched(0), gal(0), dirFullName(0) {
 	starTypes = starClass;
 }
 
