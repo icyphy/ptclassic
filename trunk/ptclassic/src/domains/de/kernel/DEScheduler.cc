@@ -45,8 +45,10 @@ extern StringList checkConnect (Galaxy&);
 	////////////////////////////
 
 int DEScheduler :: setup (Block& b) {
-	Galaxy& galaxy = b.asGalaxy();
+	haltRequestFlag = 0;
 
+	Galaxy& galaxy = b.asGalaxy();
+	
 	// initialize the SpaceWalk member
 	alanShepard.setupSpaceWalk(galaxy);
 
@@ -81,7 +83,7 @@ int DEScheduler :: setup (Block& b) {
 	}
 
 	galaxy.initialize();
-	return TRUE;
+	return !haltRequestFlag;
 }
 
 	////////////////////////////
@@ -93,8 +95,11 @@ int DEScheduler :: setup (Block& b) {
 // Run until StopTime
 int
 DEScheduler :: run (Block& galaxy) {
-
-	while (eventQ.length() > 0) {
+	if (haltRequestFlag) {
+		errorHandler.error ("Can't continue after run-time error");
+		return FALSE;
+	}
+	while (eventQ.length() > 0 && !haltRequestFlag) {
 
 		// fetch the earliest event.
 		LevelLink* f   = eventQ.get();
@@ -139,6 +144,7 @@ DEScheduler :: run (Block& galaxy) {
 
  		// fire the star.
  L1 :		s->go();
+		if (haltRequestFlag) break;
 
 		// generate events after star execution.
   		for (int k = s->numberPorts(); k > 0; k--) {
@@ -148,4 +154,3 @@ DEScheduler :: run (Block& galaxy) {
 
 	} // end of while
 }
-
