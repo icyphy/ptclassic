@@ -122,7 +122,8 @@ int CGCTclTkTarget :: codeGenInit() {
 	globalDecls += ";\n";
 	globalDecls += "#include \"tkMain.c\"\n\n";
 
-	mainLoopInit += "while(Tk_DoOneEvent(TK_DONT_WAIT)) {};\n";
+	mainLoopInit += "if ( getPollFlag() ) processFlags();\n";
+	// If the system is paused, wait until Go is hit again
 	mainLoopInit += "while (runFlag == -1) Tk_DoOneEvent(0);\n";
 	mainLoopInit += "if (runFlag == 0) break;\n";
 
@@ -133,7 +134,8 @@ int CGCTclTkTarget :: codeGenInit() {
 
 void CGCTclTkTarget :: beginIteration(int repetitions, int depth) {
 	CGCTarget::beginIteration(repetitions, depth);
-	myCode += "Tk_DoOneEvent(1);\n";
+	// Note, unlike SimControl, the following does not support threaded computation
+	myCode += "if ( getPollFlag() ) processFlags();\n";
 }
 
 void CGCTclTkTarget :: mainLoopCode() {
