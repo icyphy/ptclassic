@@ -11,7 +11,7 @@ facets.  In Vem terminology, it defines the "colors" portion of the
 'ptolemy technology.' The colors can be changed, and users can define
 their own colors.
 
-See ~ptolemy/src/utils/installColors/README for information on
+See ~ptolemy/src/octtools/installColors/README for information on
 how to modify the colors.
 
 Unfortunately, you have to jump through hoops to get the "P"
