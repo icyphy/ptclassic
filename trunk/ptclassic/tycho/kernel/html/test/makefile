@@ -53,6 +53,7 @@ SIMPLE_TESTS = \
 # These tests are "graphical" only because ResourceRemote uses
 # tkwait{}. Too bad....
 GRAPHICAL_TESTS = \
+	testHTML.itcl \
 	testResourceFTP.itcl \
 	testResourceHTTP.itcl \
 	testResourceRemote.itcl
