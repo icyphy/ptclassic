@@ -6,8 +6,8 @@ voice-recovery technique such as zero-sample substitution in
 an ADPCM packet-switched network. 
 .SE
 .LO "~ptolemy/src/domains/de/demo"
-.SV 1.1 10/20/92
-.AL "GSWalter."
+.SV $Revision$	10/20/92
+.AL "G. S. Walter"
 .LD
  This demonstrations reads 8 kHz voice samples and converts
 them into a 32 kbps stream using Adaptive Differential
@@ -17,7 +17,8 @@ Pulse Code Modulation (ADPCM).
 .Ir "speech coding"
  The ADPCM coding is implemented using an
 .c LMS
-star.  The bits in the coder output stream are loaded into a
+star.
+ The bits in the coder output stream are loaded into a
 .c SeqATMCell
 in which sequence numbers will be set using a modulo-8
 numbering scheme.
