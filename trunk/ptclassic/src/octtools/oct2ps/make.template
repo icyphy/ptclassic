@@ -90,6 +90,9 @@ sources:
 lint:	$(SRCS)
 	lint -u $(C_INCL) $^ > lint
 
+# Some versions of make require us to set LIB if we are going to
+# include common.mk
+LIB=none
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
