@@ -45,6 +45,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <misc.h>
 #include <thread.h>
 
+#ifdef SOLARIS 
+/* For a complete discussion of gettimeofday under sol2.5,
+ * see /usr/include/sys/time.h
+ */
+#ifdef PTSOL2_5
+#define SOL2_5
+#else
+int gettimeofday(struct timeval *);
+#endif /* PTSOL2_5 */
+#endif /* SOLARIS */
+
 /*
  * Walk through endpoint's timeout list and resend messages that have 
  * timed out.  If a message has timed out too many times, invoke the error
@@ -62,7 +73,7 @@ void ScanTimeoutList(ea_t ea)
 
   num_elements = ea->txtimeout.num_elements;
   timeout_elem = ea->txtimeout.head;
-#ifdef SOL_2_5
+#ifdef SOL2_5
   gettimeofday(&curr_time, NULL);
 #elif SOLARIS
   gettimeofday(&curr_time);
