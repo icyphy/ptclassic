@@ -776,7 +776,8 @@ const char **domainPtr;
 const char *defaultDomain;
 {
     octObject prop = {OCT_UNDEFINED_OBJECT};
-    CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "domain", defaultDomain));
+    CK_OCT(GetOrCreatePropStr(facetPtr, &prop, "domain",
+			      (char *) defaultDomain));
     *domainPtr = HashString(prop.contents.prop.value.string);
     FreeOctMembers(&prop);
     return (TRUE);
@@ -922,7 +923,7 @@ int i;
 boolean
 GetOrCreatePropStr(c, t, s, s1)
 octObject *c,*t;
-const char *s, *s1;
+char *s, *s1;
 {
     t->type = OCT_PROP;
     t->objectId = 0;

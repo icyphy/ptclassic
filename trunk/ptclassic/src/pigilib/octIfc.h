@@ -103,7 +103,7 @@ extern boolean CreateOrModifyPropReal ARGS((octObject *c, octObject *t,
 extern boolean GetOrInitSogParams ARGS((octObject *instPtr,
 					ParamListType *pListPtr));
 extern boolean GetOrCreatePropStr ARGS((octObject *c, octObject *t,
-					const char *s, const char *s1));
+					char *s, char *s1));
 extern boolean GetOrCreatePropReal ARGS((octObject *c, octObject *t,
 					 char *s, double d));
 extern boolean OpenFacet ARGS((octObject *t, char *c, char *v,
