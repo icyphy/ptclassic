@@ -144,7 +144,7 @@ prusage_t $starSymbol(beginRecv);
 prusage_t $starSymbol(endRecv);
 #endif
 int $starSymbol(i);
-en_t $starSymbol(endname);
+en_t *$starSymbol(endname);
 ea_t $starSymbol(endpoint);
 	}
         codeblock (aminit) {
@@ -249,7 +249,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	for (i = 0; i < $val(numData); i++) {
 		while ($starSymbol(RecvData) == -0.001) {
-			if (AM_Poll($starSymbol(bundle)) != AM_OK) {
+			if (AM_Poll(bundle) != AM_OK) {
         			fprintf(stderr, "error: AM_Poll failed\n");
         			exit(1);
 			}
