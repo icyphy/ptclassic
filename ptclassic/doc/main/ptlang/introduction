@@ -24,7 +24,9 @@ per file, and the filename is of the form
 .c MyClass.pl
 where
 .c MyClass
-is the name of the class to be defined.
+is the name of the class to be defined (the dynamic linking code
+in Pigi searches for filenames of this form, so you might as well consider it
+mandatory to use this naming convention).
 The
 .c .t
 file is troff source for documentation.
@@ -140,7 +142,10 @@ it is normally used to insert #define statements in all
 .c .h
 and
 .c .cc
-files generated from a particular source file.
+files generated from a particular source file (the naming is
+historical; this section was originally used to generate identifying
+information in the output files, but it is no longer needed for
+this purpose).
 If it contains comments, they
 should be valid C++ comments.  The
 .IE defstar
