@@ -52,6 +52,10 @@ include $(CONFIG)
 
 -include override.mk
 
+ifndef PTCL
+	PTCL =	ptcl
+endif
+
 INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
 			$(PTCOMPAT_INCSPEC)
 # Sources
@@ -79,12 +83,14 @@ PIGI_OBJS += ptclMain.o
 
 INSTALL = $(LIBDIR)/$(LIB)
  
+# The all rule must be before we include ptbin.mk
+all:	makefile $(LIB) $(PTCL)
+
 include $(ROOT)/mk/ptbin.mk
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
-all:	makefile $(LIB) $(PTCL)
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
