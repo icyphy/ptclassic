@@ -137,8 +137,8 @@ private:
 	// General VHDLObjLists.
 	VHDLPortList systemPortList;
 	VHDLCompDeclList compDeclList;
-	VHDLSignalList signalList;
-	VHDLCompMapList compMapList;
+	VHDLSignalList mainSignalList;
+	VHDLCompMapList mainCompMapList;
 	VHDLStateList stateList;
 	VHDLClusterList clusterList;
 
@@ -250,12 +250,6 @@ private:
 
 	// Add in component declarations here from compDeclList.
 	void buildComponentDeclarations(int);
-
-	// Add in signal declarations here from signalList.
-	void buildSignalDeclarations(int);
-
-	// Add in component mappings here from compMapList.
-	void buildComponentMappings(int);
 
 	// Generate the architecture_body_closer.
 	void buildArchitectureBodyCloser(int);

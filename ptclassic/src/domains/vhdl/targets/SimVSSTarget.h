@@ -120,12 +120,6 @@ private:
 	VHDLSignalList topSignalList;
 	VHDLCompMapList topCompMapList;
 
-	// Add in signal declarations here from signalList.
-	StringList addSignalDeclarations(VHDLSignalList* signalList);
-
-	// Add in component mappings here from compMapList.
-	StringList addComponentMaps(VHDLCompMapList* compMapList);
-
 	// Register component mapping.
 	void registerCompMap(StringList name, StringList type,
 				     VHDLPortMapList* portMapList,

@@ -237,7 +237,7 @@ void SimVSSTarget :: frameCode() {
   label << "_proc";
   registerCompMap(label, galName, &mainPortMapList, &mainGenMapList);
 
-  top_architecture << addComponentMaps(&topCompMapList);
+  top_architecture << addComponentMappings(&topCompMapList);
   top_architecture << "end ";
   top_architecture << "structure";
   top_architecture << ";\n";
@@ -362,80 +362,6 @@ int SimVSSTarget :: runCode() {
 }
 
 ISA_FUNC(SimVSSTarget,VHDLTarget);
-
-// Add in signal declarations here from signalList.
-StringList SimVSSTarget :: addSignalDeclarations(VHDLSignalList* signalList) {
-  StringList all;
-  int level = 0;
-  VHDLSignalListIter nextSignal(*signalList);
-  VHDLSignal* signal;
-  while ((signal = nextSignal++) != 0) {
-    all << indent(level) << "signal " << signal->name << ": "
-	<< signal->type << ";\n";
-  }
-  return all;
-}
-
-// Add in component mappings here from compMapList.
-StringList SimVSSTarget :: addComponentMaps(VHDLCompMapList* compMapList) {
-  int level = 0;
-  StringList all;
-  VHDLCompMapListIter nextCompMap(*compMapList);
-  VHDLCompMap* compMap;
-  while ((compMap = nextCompMap++) != 0) {
-    level++;
-    all << indent(level) << compMap->name << ": "
-		       << compMap->type << "\n";
-
-    // Add in generic maps here from genMapList.
-    if (compMap->genMapList->head()) {
-      level++;
-      all << indent(level) << "generic map(\n";
-      VHDLGenericMapListIter nextGenMap(*(compMap->genMapList));
-      VHDLGenericMap* ngenmap;
-      int genCount = 0;
-      while ((ngenmap = nextGenMap++) != 0) {
-	level++;
-	if (genCount) {
-	  all << ",\n";
-	}
-	all << indent(level) << ngenmap->name << " => "
-			   << ngenmap->mapping;
-	genCount++;
-	level--;
-      }
-      all << "\n";
-      all << indent(level) << ")\n";
-      level--;
-    }
-
-    // Add in port maps here from portMapList.
-    if (compMap->portMapList->head()) {
-      level++;
-      all << indent(level) << "port map(\n";
-      VHDLPortMapListIter nextPortMap(*(compMap->portMapList));
-      VHDLPortMap* nportmap;
-      int portCount = 0;
-      while ((nportmap = nextPortMap++) != 0) {
-	level++;
-	if (portCount) {
-	  all << ",\n";
-	}
-	all << indent(level) << nportmap->name << " => "
-			   << nportmap->mapping;
-	portCount++;
-	level--;
-      }
-      all << "\n";
-      all << indent(level) << ")\n";
-      level--;
-    }
-    
-    all << indent(level) << ";\n";
-    level--;
-  }
-  return all;
-}
 
 // Register component mapping.
 void SimVSSTarget :: registerCompMap(StringList name, StringList type,
