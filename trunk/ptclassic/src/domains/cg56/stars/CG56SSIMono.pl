@@ -19,8 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
     constructor {
 	removePort(input2);
 	removePort(output2);
-    }
-    begin {
 	doRecv1 = TRUE;
 	doRecv2 = FALSE;
 	doXmit1 = TRUE;

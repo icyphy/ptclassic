@@ -59,7 +59,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref2(output,ix) = $ref(input);
 	}
 	codeblock (sendAll) {
-	int i;
 	for (int i = 0; i < $val(factor); i++) {
 		$ref2(output,i) = $val(fill);
 	}

@@ -5,7 +5,7 @@ defstar {
 Interleaves the two input signals.
  }
 	version { $Id$ }
-	author { Chih-Tsung Huang, ported from Gabriel }
+	author { Jose Luis Pino & Chih-Tsung Huang, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -37,42 +37,26 @@ the next B particles from the next input, etc.
                 default {1}
                 desc {Number of particles in a block.}
 	}
-        state  {
-                name { inputNum }
-                type { int }
-                default { 0 }
-                desc { input#() }
-                attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
         setup {
                 int n = input.numberPorts();
 		int bs = int(blockSize);
 		input.setSDFParams(bs,bs-1);
 		output.setSDFParams(n*bs,n*bs-1);
         }
-        codeblock (one) {
-        move    $ref(input#1),x0        ; just move data from in to out
-        move    x0,$ref(output)
-        }
-
- 	codeblock(main) {
+ 	codeblock(loadOutputAddress) {
         move    #$addr(output),r1
-	nop
         }
-        codeblock(loop) {
-        move    $ref(input#inputNum),x0
-        clr     a               x0,x:(r1)+
+        codeblock(moveBlock,"int inputNum") {
+@(int(blockSize)!= 1 ? "\tdo\t#$val(blockSize),$label(txBlock)\n":"")\
+        move    $ref(input#@inputNum),x0
+        move    x0,x:(r1)+\
+@(int(blockSize)!= 1 ? "\n$label(txBlock)":"")
 	}
 
 	go {
-                if (input.numberPorts() == 1) {
-                        addCode(one);
-                        return;
-                }
-		addCode(main);
+                addCode(loadOutputAddress);
                 for (int i = 1; i <= input.numberPorts(); i++) {
-                        inputNum=i;
-                        addCode(loop);
+                        addCode(moveBlock(i));
                 }
 	}
 	exectime {
