@@ -120,15 +120,15 @@ void SimVSSTarget :: setup() {
 
   synopsysString = "SYNOPSYS=";
   synopsysString << synopsys.currentValue();
-  const char* hashSynopsysString = hashstring(synopsysString);
+  char* saveSynopsysString = savestring(synopsysString);
 
   archString = "ARCH=";
   archString << arch.currentValue();
-  const char* hashArchString = hashstring(archString);
+  char* saveArchString = savestring(archString);
 
   simarchString = "SIM_ARCH=";
   simarchString << simarch.currentValue();
-  const char* hashSimarchString = hashstring(simarchString);
+  char* saveSimarchString = savestring(simarchString);
 
   // Under SunOS4.1.3, the man page for putenv() says:
   //    string points to a string of the form `name=value'  putenv()
@@ -139,9 +139,10 @@ void SimVSSTarget :: setup() {
   //    change  the  environment.   The  space  used by string is no
   //    longer used once a new string-defining  name  is  passed  to
   //    putenv().
-  putenv((char *)hashSynopsysString);
-  putenv((char *)hashArchString);
-  putenv((char *)hashSimarchString);
+
+  putenv(saveSynopsysString);
+  putenv(saveArchString);
+  putenv(saveSimarchString);
 
   writeCom = 1;
 
