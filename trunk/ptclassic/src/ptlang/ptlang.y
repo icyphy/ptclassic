@@ -195,6 +195,8 @@ char* objHTMLdoc;		/* long explanation for HTML formatting */
 char* objLocation;		/* location string */
 char* coreCategory;		/* core category (i.e. Fix) for this Core */
 char* coronaName;		/* name of the Corona of this Core */
+int   coreDef;			/* true if obj is a Core */
+int   coronaDef;		/* true if obj is a Corona */
 int   galDef;			/* true if obj is a galaxy */
 char* domain;			/* domain of object (if star) */
 char* portName;			/* name of porthole */
@@ -326,13 +328,15 @@ stardef:
 
 
 coronadef:
-	DEFCORONA { clearDefs(0);}
+	DEFCORONA			{ clearDefs(0);
+					  coronaDef = 1; }
 		'{' coronalist '}'	{ genDef();}
 ;
 
 
 coredef:
-	DEFCORE { clearDefs(0);}
+	DEFCORE				{ clearDefs(0);
+					  coreDef = 1; }
 		'{' corelist '}'	{ /* Make sure that corona was set */
 					  if (coronaName == (char *)NULL) {
 						yyerror("All cores must have"
@@ -673,8 +677,8 @@ coronaitem:
 /* core items */
 coreitem:
 	domainorderived
-|	CORONA '{' ident '}'		{ coronaName = $3;}
-|	CORECATEGORY '{' ident '}'		{ coreCategory = $3;}
+|	CORONA '{' ident '}'		{ coronaName = $3; }
+|	CORECATEGORY '{' ident '}'	{ coreCategory = $3; }
 |	sgitem
 |	codeblock
 ;
@@ -1638,12 +1642,26 @@ void genDef ()
 		fprintf (fp,
 			 "\n// %s is an abstract class: no KnownBlock entry\n",
 			 fullClass);
-	}
-	else {
+	} else if (coreDef) {
+		/* FIXME:, these are all the same */
+		fprintf (fp,
+			"\n// Core prototype instance for known block list\n");
+		fprintf (fp, "static %s proto;\n", fullClass);
+		fprintf (fp, 
+			"static RegisterBlock registerBlock(proto,\"%s\");\n",
+			objName);
+	} else if (coronaDef) {
+		fprintf (fp, "\n// Corona prototype instance for known block list\n");
+		fprintf (fp, "static %s proto;\n", fullClass);
+		fprintf (fp, 
+			"static RegisterBlock registerBlock(proto,\"%s\");\n",
+			objName);
+	} else {
 		fprintf (fp, "\n// prototype instance for known block list\n");
 		fprintf (fp, "static %s proto;\n", fullClass);
-		fprintf (fp, "static RegisterBlock registerBlock(proto,\"%s\");\n",
-			 objName);
+		fprintf (fp, 
+			"static RegisterBlock registerBlock(proto,\"%s\");\n",
+			objName);
 	}
 	(void) fclose(fp);
     }  /* htmlOnly */
