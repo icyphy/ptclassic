@@ -55,8 +55,12 @@ TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 	}
 	setup {
 		if (int(inputIsPower)) gain=10.0;
+	}
+
+	initCode {
 		addInclude("<math.h>");
 	}
+
 	codeblock(body) {
 	double f = $ref(input);
 	if (f <= 0.0) $ref(output) = $val(min);
