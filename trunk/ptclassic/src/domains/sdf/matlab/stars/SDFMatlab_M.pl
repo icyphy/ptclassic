@@ -229,7 +229,7 @@ extern "C" {
 
 		// evaluate the Matlab command (non-zero means error)
 		int mstatus = engEvalString( matlabEnginePtr, matlabCommand );
-		if ( mstatus == 0 ) {
+		if ( mstatus != 0 ) {
 		  char numstr[64];
 		  sprintf(numstr, "Matlab returned %d indicating ", mstatus);
 		  Error::abortRun( *this, numstr,
