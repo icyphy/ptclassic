@@ -39,6 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCGeodesic.h"
 #include "Tokenizer.h"
 #include "ComplexState.h"
+#include "FixState.h"
+#include "FixArrayState.h"
+#include "PrecisionState.h"
 #include <ctype.h>
 
 
@@ -67,7 +70,7 @@ const char* sanitize(const char* string)
 	i++;
     }
 
-    // Replace strange charachters.
+    // Replace strange characters.
     while (++i < MAX_LENGTH && *string)
     {
 	*c++ = isalnum(*string) ? *string : '_';
@@ -78,7 +81,27 @@ const char* sanitize(const char* string)
     return clean;
 }
 
+// substitute macros for fixed point variables
+StringList CGCStar::expandMacro(const char* func, const StringList& argList)
+{
+    // $precision(fix_variable)
+    if (matchMacro(func, argList, "precision",1)) {
+	StringListIter arg(argList);
+	return expandFixPrecisionMacro(arg++);
+    }
+    // $precision(fix_variable,offset)
+    else if (matchMacro(func, argList, "precision",2)) {
+	StringListIter arg(argList);
+	const char* arg0 = arg++;
+	return expandFixPrecisionMacro(arg0,arg++);
+    }
+
+    return CGStar::expandMacro(func, argList);
+}
+
 // Reference to State or PortHole.
+// For references to states or ports of type FIX the reference is replaced
+// by the triplet "length,intbits,fix_variable"
 StringList CGCStar::expandRef(const char* name)
 {
     StringList ref;
@@ -90,12 +113,49 @@ StringList CGCStar::expandRef(const char* name)
     if ((state = stateWithName(name)) != NULL)
     {
 	registerState(state);
+
+	// pass precision for fix types
+        if (state->isA("FixState") || state->isA("FixArrayState"))
+	{
+	    Precision prec;
+
+	    // precision() should be a virtual function here
+	    if (state->isArray())
+		 prec = ((FixArrayState*)state)->precision();
+	    else prec = ((FixState*)state)->precision();
+
+	    // note that the << operator below automatically appends a symbolic
+	    // expression for states with attribute A_VARPREC
+	    if (prec.isValid())
+	        ref << prec << ',';
+	    else {
+		codeblockError("unspecified or invalid precision for state ", name);
+		return ref;
+	    }
+	}
 	ref << starSymbol.lookup(state->name());
     }
 
     // Expand PortHole reference.
     else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
     {
+	DataType type = port->resolvedType();
+
+	// pass precision for fix ports
+	if (type == FIX)
+	{
+	    Precision prec = port->precision();
+
+	    // note that the << operator below automatically appends a symbolic
+	    // expression for ports with attribute A_VARPREC
+	    if (prec.isValid())
+	        ref << prec << ',';
+	    else {
+		codeblockError("unspecified or invalid precision for port ", name);
+		return StringList();
+	    }
+	}
+
 	ref << port->getGeoName();
 
 	// Use array notation for large buffers and for embedded buffers
@@ -119,6 +179,8 @@ StringList CGCStar::expandRef(const char* name)
 }
 
 // Reference to State or PortHole with offset.
+// For references to states or ports of type FIX the reference is replaced
+// by the triplet "length,intbits,fix_variable"
 StringList CGCStar::expandRef(const char* name, const char* offset)
 {
     StringList ref;
@@ -150,6 +212,22 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 	if (state->isArray())
 	{
 	    registerState(state);
+
+	    // pass precision for fix types
+	    if (state->isA("FixArrayState"))
+	    {
+		Precision prec = ((FixArrayState*)state)->precision();
+
+		// note that the << operator below automatically appends a symbolic
+		// expression for states with attribute A_VARPREC
+		if (prec.isValid())
+		    ref << prec << ',';
+		else {
+		    codeblockError("unspecified or invalid precision for state ", name);
+		    return ref;
+		}
+	    }
+
 	    ref << starSymbol.lookup(state->name()) << '[' << offset << ']';
 	}
 	else
@@ -162,6 +240,34 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
     // Expand PortHole reference with offset.
     else if (port = (CGCPortHole*)genPortWithName(portName))
     {
+	DataType type = port->resolvedType();
+
+	// pass precision for fix ports
+	if (type == FIX)
+	{
+	    Precision prec;
+
+	    // generate constant for index
+	    if (port->staticBuf() && (offsetState != NULL))
+	    {
+		int offset = *(IntState*)offsetState;
+		prec = (*port % offset).precision();
+	    }
+	    // generate expression for index
+	    else
+		prec = (*port % offset).precision();
+
+	    // note that the << operator below automatically appends a symbolic
+	    // expression for ports with attribute A_VARPREC
+
+	    if (prec.isValid())
+	        ref << prec << ',';
+	    else {
+		codeblockError("unspecified or invalid precision for port ", name);
+		return ref;
+	    }
+	}
+
 	ref << port->getGeoName();
 
 	// Use array notation for large buffers and for embedded buffers
@@ -177,7 +283,6 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 		ref << ( (port->bufPos() - offset + port->bufSize())
 			 % port->bufSize() );
 	    }
-
 	    // generate expression for index
 	    else
 	    {
@@ -198,12 +303,248 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
     return ref;
 }
 
+// expand $precision macro
+StringList CGCStar::expandFixPrecisionMacro(const char* name)
+{
+    StringList ref;
+    CGCPortHole* port;
+    State* state;
+    StringList portName = expandPortName(name);
+
+    // Expand State reference.
+    if ((state = stateWithName(name)) != NULL)
+    {
+        if (state->isA("FixState") || state->isA("FixArrayState"))
+	{
+	    // Return a reference to the associated fix_prec variable
+	    if (state->attributes() & AB_VARPREC)
+	    {
+		registerState(state);
+		ref << starSymbol.lookup(state->name()) << "p";
+	    }
+	    else
+		codeblockError("$precision macro references fix state",
+			" with attribute A_CONSTPREC");
+	}
+	else
+	    codeblockError("$precision requested for a non-fix type");
+    }
+
+    // Expand PortHole reference.
+    else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
+    {
+	if (port->resolvedType() == FIX)
+	{
+	    // Return a reference to the associated fix_prec variable
+	    if (port->attributes() & AB_VARPREC) {
+
+		// use the symbolic expressions returned from the port's
+		// precision method to derive a reference to a fix_prec
+		// structure;
+		// since we do not want to construct an expession for the
+		// reference here, we simply strip the ".len" tag from
+		// the symbolic length
+
+		const char* tp;  char* bp;
+		Precision p = port->precision();
+		const char* sym_len = p.symbolic_len();
+
+		if ((sym_len != NULL) &&
+		    ((tp = strrchr(sym_len,'.')) != NULL)) {
+
+		    LOG_NEW; bp = new char[tp-sym_len+1];
+		    strncpy(bp,sym_len,tp-sym_len) [tp-sym_len] = '\0';
+		    ref << bp;
+		    LOG_DEL; delete [] bp;
+		}
+		else
+		    codeblockError(
+			"internal error while expanding $precision macro");
+	    }
+	    else
+		codeblockError("$precision macro references fix port",
+			" with attribute A_CONSTPREC");
+	}
+	else
+	    codeblockError("$precision requested for a non-fix type");
+    }
+
+    // Could not find State or PortHole with given name.
+    else
+    {
+	codeblockError(name, " is not defined as a state or port");
+    }
+    return ref;
+}
+
+// expand $precision macro with offset specification
+StringList CGCStar::expandFixPrecisionMacro(const char* name, const char* offset)
+{
+    StringList ref;
+    CGCPortHole* port;
+    State *state, *offsetState;
+    StringList offsetVal;
+    StringList portName = expandPortName(name);
+
+    // Use State value as offset (if such a State exists).
+    if ((offsetState = stateWithName(offset)) != NULL)
+    {
+	// Get State value as a string.
+	if (offsetState->isA("IntState"))
+	{
+	    offsetVal = expandVal(offset);
+	    offset = offsetVal;
+	}
+	else
+	{
+	    codeblockError(offset, " is not an IntState");
+	    ref.initialize();
+	    return ref;
+	}
+    }
+
+    // Expand State reference.
+    if ((state = stateWithName(name)) != NULL)
+    {
+	if (state->isA("FixArrayState"))
+	{
+	    // Return a reference to the associated fix_prec variable
+	    if (state->attributes() & AB_VARPREC)
+	    {
+		registerState(state);
+		ref << starSymbol.lookup(state->name()) << "p";
+	    }
+	    else
+		codeblockError("$precision macro references fix state",
+			" with attribute A_CONSTPREC");
+	}
+	else
+	{
+	    codeblockError(name, " is not an fix array state");
+	    ref.initialize();
+	}
+    }
+
+    // Expand PortHole reference.
+    else if ((port = (CGCPortHole*)genPortWithName(portName)) != NULL)
+    {
+	if (port->resolvedType() == FIX)
+	{
+	    // return a reference to the associated fix_prec variable
+	    if (port->attributes() & AB_VARPREC) {
+
+		// use the symbolic expressions returned from the port's
+		// precision method to derive a reference to a fix_prec
+		// structure;
+		// since we do not want to construct an expession for the
+		// reference here, we simply strip the ".len" tag from
+		// the symbolic length
+
+		Precision p;
+
+		// generate constant for index
+		if (port->staticBuf() && (offsetState != NULL))
+		{
+		    int offset = *(IntState*)offsetState;
+		    p = (*port % offset).precision();
+		}
+		// generate expression for index
+		else
+		    p = (*port % offset).precision();
+
+		const char* tp;  char* bp;
+		const char* sym_len = p.symbolic_len();
+
+		if ((sym_len != NULL) &&
+		    ((tp = strrchr(sym_len,'.')) != NULL)) {
+
+		    LOG_NEW; bp = new char[tp-sym_len+1];
+		    strncpy(bp,sym_len,tp-sym_len) [tp-sym_len] = '\0';
+		    ref << bp;
+		    LOG_DEL; delete [] bp;
+		}
+		else
+		    codeblockError(
+			"internal error while expanding $precision macro");
+	    }
+	    else
+		codeblockError("$precision macro references fix port",
+			" with attribute A_CONSTPREC");
+	}
+	else
+	    codeblockError("$precision requested for a non-fix type");
+    }
+
+    // Could not find State or PortHole with given name.
+    else
+    {
+	codeblockError(name, " is not defined as a state or port");
+    }
+    return ref;
+}
+
+// redefine the setTarget method in order to set the symbolic precision
+// of fix states as soon as the symbol lists become fully initialized
+// we cannot leave this to the precision() method of the state classes
+// (as is done with portholes)  since the state classes know nothing
+// about their symbolic representation
+
+int CGCStar::setTarget(Target* t)
+{
+    // set the symbol counters of the symbol lists so that starSymbol.lookup()
+    // can construct symbol names
+    CGStar::setTarget(t);
+    
+    // iterate through all states of type FixState and FixArrayState
+    //  with variable precision, that is those with attribute A_VARPREC
+    BlockStateIter nextState(*this);
+    State* state;
+
+    while ((state = nextState++) != NULL) {
+
+	if (state->attributes() & AB_VARPREC) {
+
+	    if (state->isA("FixState")) {
+		FixState* fstate = (FixState*)state;
+		const Precision p = fstate->precision();
+
+		fstate->setPrecision(
+			newSymbolicPrecision(p.len(),p.intb(), state->name()),
+			/*overrideable =*/ FALSE);
+	    }
+
+       else if (state->isA("FixArrayState")) {
+		FixArrayState* fstate = (FixArrayState*)state;
+		const Precision p = fstate->precision();
+
+		fstate->setPrecision(
+			newSymbolicPrecision(p.len(),p.intb(), state->name()),
+			/*overrideable =*/ FALSE);
+	    }
+	}
+    }
+    return 1;
+}
+
+// private function for setTarget;
+// construct symbolic precision for state or port with given name
+Precision CGCStar :: newSymbolicPrecision(int length,int intBits, const char* name)
+{
+    const char* label = sanitize(starSymbol.lookup(name));
+
+    StringList sym_len, sym_intb;
+    sym_len  << label << "p.len";
+    sym_intb << label << "p.intb";
+
+    return Precision(length,intBits, sym_len,sym_intb);
+}
+
 // add a splice star to the spliceClust list.  If atEnd
 // is true, append it to the end, otherwise prepend it.
 void CGCStar :: addSpliceStar(CGCStar* s, int atEnd) {
-	if (spliceClust.member(s)) return;
-	if (atEnd) spliceClust.append(s);
-	else spliceClust.prepend(s);
+    if (spliceClust.member(s)) return;
+    if (atEnd) spliceClust.append(s);
+    else spliceClust.prepend(s);
 }
 
 void CGCStar::registerState(State* state)
@@ -340,26 +681,82 @@ void CGCStar :: moveDataBetweenShared() {
 	if (code.length() > 0) addCode(code);
 }
 
+
 void CGCStar :: updateOffsets()
 {
-	StringList code2;
+	StringList code;
 
 	BlockPortIter next(*this);
 	CGCPortHole* p;
 	while ((p = (CGCPortHole*) next++) != 0) {
 		int bs = p->bufSize();
+
 		if (bs > 1 && p->staticBuf() == FALSE) {
-			int nx = p->numXfer();
-			if (nx == bs) continue;
-			StringList pname = sanitize(starSymbol.lookup(p->name()));
-			code2 << "\t" << pname << " += ";
-			code2 << nx << ";\n\tif (" << pname << " >= ";
-			code2 << bs << ")\n\t\t";
-			code2 << pname << " -= " << bs << ";\n";
+		    int nx = p->numXfer();
+		    if (nx == bs) continue;
+
+		    StringList pname = sanitize(starSymbol.lookup(p->name()));
+		    const char* geoname = NULL;
+
+		    // determine label of fix_prec array for ports of type FIX
+		    if (p->attributes() & AB_VARPREC)
+			geoname = p->getGeoName();
+	       else if (p->realFarPort()->attributes() & AB_VARPREC)
+			geoname = ((CGCPortHole*)p->realFarPort())->getGeoName();
+
+		    // add the number of tokens transferred per execution;
+		    // substract buffer size if offset overruns buffer end
+
+		    if ((p->resolvedType() != FIX) ||
+			(geoname == 0))
+
+			code << '\t' << pname << " += " << nx << ";\n"
+			    "\tif (" << pname << " >= " << bs << ")\n"
+			    "\t\t" << pname << " -= " << bs << ";\n";
+		    else
+		    {
+			StringList label = geoname;
+			label << 'p';
+
+			// for fix ports with variable precision we must
+			// assign the precision of the buffer entries of
+			// the current run to those of the next;
+			// this code avoids generating a for loop if there
+			// is only a single entry to transfer
+
+			if (nx == 1)
+			    code << '\t' << pname << "++;\n"
+				"\tif (" << pname << " >= " << bs << ") {\n"
+				"\t\t" << pname << " -= " << bs << ";\n"
+				"\t\t" << label << '[' << pname << "] = "
+				       << label << '[' << pname << '+' << bs-nx << "];\n"
+				"\t} else\n"
+				"\t\t" << label << '[' << pname << "] = "
+				       << label << '[' << pname << '-' << nx << "];\n";
+			else {
+
+			    // macro to create a reference into the precision
+			    // array substracting the buffer size if the offset
+			    // becomes too large
+# define SYMBOLIC_EXPR(token) \
+	label << "[i+" << pname << token << " - " \
+	     "((i+" << pname << token << " >= " << bs << ") ? " << bs << " : 0)]"
+
+			    code << "\t{ int i;\n"
+				"\tfor (i=0;i<" << nx << ";i++)\n"
+			    	"\t\t" << SYMBOLIC_EXPR('+' << nx) <<
+				" = "  << SYMBOLIC_EXPR("") <<
+			    	"\n\t}\n";
+# undef SYMBOLIC_EXPR
+			    code << '\t' << pname << " += " << nx << ";\n"
+				"\tif (" << pname << " >= " << bs << ")\n"
+				"\t\t" << pname << " -= " << bs << ";\n";
+			}
+		    }
 		}
 	}
-	code2 << "\t}\n";
-	addCode(code2);
+	code << "\t}\n";
+	addCode(code);
 }
 
 // Compare.
@@ -450,19 +847,52 @@ StringList CGCStar::declareBuffer(const CGCPortHole* port)
 
 	if (type == INT) dec << "int";
 	else if (type == COMPLEX) dec << "complex";
+	else if (type == FIX) dec << "fix";
 	else dec << "double";
 
 	if (port->bufType() == EMBEDDED)
 	{
-	    dec << " *" << name << ";\n";        // declare a pointer
+	    dec << " *" << name;        // declare a pointer
 	}
 	else	// not embedded
 	{
 	    dec << " " << name;
 	    if (port->bufSize() > 1)	// declare as array
 		dec << '[' << port->bufSize() << ']';
-	    dec << ";\n";
 	}
+
+	// For fix types with variable precision declare an array of precision
+	// variables by adding a lower 'p' to the geodesic name;
+	// note that in contrast to the implementation of fix arrays, one prec-
+	// ision variable is declared for each element of the buffer;  this
+	// makes sure that the correct precision is used for older entries if
+	// the precision changes.
+
+	if (type == FIX) {
+	    const char* label = NULL;
+
+	    if (port->attributes() & AB_VARPREC)
+		label = name;
+       else if (port->realFarPort()->attributes() & AB_VARPREC)
+		label = ((const CGCPortHole*)port->realFarPort())->getGeoName();
+
+	    if (label) {
+		dec << ";  fix_prec ";
+
+		if (port->bufType() == EMBEDDED)
+		{
+		    dec << '*' << label << 'p'; // declare a pointer
+		}
+		else	// not embedded
+		{
+		    dec << label << 'p';
+		    if (port->bufSize() > 1)	// declare as array
+			dec << '[' << port->bufSize() << ']';
+		}
+	    }
+	}
+		
+	dec << ";\n";
     }
     return dec;
 }
@@ -495,31 +925,88 @@ StringList CGCStar::initCodeBuffer(CGCPortHole* port)
 	    code << name << " = &" << host->getGeoName();
 	    if (host->bufSize() > 1) code << '[' << loc << ']';
 	    code << ";\n";
+
+	    if (port->resolvedType() == FIX)
+	    {
+		// initialize pointer into fix_prec array for ports
+		// with attribute A_VARPREC
+		const char* label = NULL;
+
+		if (port->attributes() & AB_VARPREC)
+		    label = name;
+	   else if (port->realFarPort()->attributes() & AB_VARPREC)
+		    label = ((CGCPortHole*)port->realFarPort())->getGeoName();
+
+		if (label) {
+		    code << label << "p = &" << host->getGeoName() << 'p';
+		    if (host->bufSize() > 1) code << '[' << loc << ']';
+		    code << ";\n";
+		}
+	    }
 	}
 	else	// not embedded
 	{
 	    DataType type = port->resolvedType();
 	    int array = (port->bufSize() > 1);
 
-	    if (array)
-		code << "{int i; for(i=0;i<" << port->bufSize() << ";i++) ";
-	    code << name;
-	    if (array) code << "[i]";
-	    if (type == INT)
+	    if (type == FIX)
 	    {
-		code << " = 0;";
+		// assign fixed-point precision to the associated
+		// fix_prec structure
+		const char* label = NULL;
+
+		if (port->attributes() & AB_VARPREC)
+		    label = name;
+	   else if (port->realFarPort()->attributes() & AB_VARPREC)
+		    label = ((CGCPortHole*)port->realFarPort())->getGeoName();
+
+		if (label) {
+		    Precision p = port->precision();
+
+		    // initialize array of precision variables;
+		    // this is only necessary if the user references buffer
+		    // entries for which a bit value is not yet assigned
+		    if (array) {
+			if (p.len() == 0 && p.intb() == 0)
+			    code << "memset(" << label << "p,0, sizeof(" << label << "p));\n";
+			else
+			    code << "{int i; for(i=0;i<" << port->bufSize() << ";i++) "
+				 << label << "p[i].len  = " << p.len()  << ", "
+				 << label << "p[i].intb = " << p.intb() << "; }\n";
+		    }
+		    // otherwise initialize single fix_prec structure
+		    else
+			code << label << "p.len = "  << p.len()  << ", "
+			     << label << "p.intb = " << p.intb() << ";\n";
+		}
+
+		// clear bit representation once for all elements in buffer
+		code << "memset(" << name << ",0, sizeof(" << name << "));";
 	    }
-	    else if (type == COMPLEX)
+	    else
 	    {
-		code << ".real = " << name;
+		if (array)
+		    code << "{int i; for(i=0;i<" << port->bufSize() << ";i++) ";
+
+		code << name;
 		if (array) code << "[i]";
-		code << ".imag = 0.0;";
+		if (type == INT)
+		{
+		    code << " = 0;";
+		}
+		else if (type == COMPLEX)
+		{
+		    code << ".real = " << name;
+		    if (array) code << "[i]";
+		    code << ".imag = 0.0;";
+		}
+		else	// default to double
+		{
+		    code << " = 0.0;";
+		}
+
+		if (array) code << '}';
 	    }
-	    else	// default to double
-	    {
-		code << " = 0.0;";
-	    }
-	    if (array) code << '}';
 	    code << '\n';
 	}
     }
@@ -563,16 +1050,156 @@ StringList CGCStar::declareState(const State* state)
 	dec << "complex";
     else if (state->isA("StringState") || state->isA("StringArrayState"))
 	dec << "char*";
+    else if (state->isA("FixState") || state->isA("FixArrayState"))
+	dec << "fix";
+    else if (state->isA("PrecisionState"))
+	dec << "fix_prec";
     else dec << "double";
 
-    dec << " " << starSymbol.lookup(state->name());
+    const char* name = sanitize(starSymbol.lookup(state->name()));
+    dec << " " << name;
     if (state->isArray()) dec << "[" << state->size() << "]";
+
+    // for fix variables with variable precision declare a fix_prec variable
+    // by adding a lower 'p' to the state name
+    if ((state->isA("FixState") || state->isA("FixArrayState")) &&
+	(state->attributes() & AB_VARPREC))
+ 	dec << ";  fix_prec " << name << "p";
     dec << ";\n";
 
     return dec;
 }
 
 // Generate initialization code for State variable.
+
+    // initializer classes for method CGCStar::initCodeState() [JW 1994]
+    // these classes try to minimize the code for array initializations by
+    // initializing adjacent array elements with the same value in a loop
+
+    class StateInitializer {
+      protected:
+	int first, last;
+	char cur_value[256];
+	StringList& code;
+	const char* name;
+
+      public:
+	// constructor with StringList "code_stream" to append to
+	// and the variable name of the array
+	StateInitializer(StringList& code_stream, const char* array_name) : code(code_stream)
+	{
+		name  = array_name;
+		first = last = 0;  *cur_value = '\0';
+	}
+
+	// initialize the next element with the given value
+	void addInitialization(const char* value)
+	{
+	    if (strcmp(cur_value, value)) {
+		flush();
+		first = last;
+		strcpy(cur_value, value);
+	    }
+	    last++;
+	}
+
+	// add the initialization for the array elements with indices
+	// "first..last-1" to the code stream
+	virtual void flush()
+	{
+	    if (first < last) {
+		if (last - first <= 3) {
+		    char sym[16];
+		    for (int i=first; i<last; i++) {
+			sprintf(sym, "%d", i);
+			declare(sym, cur_value);
+			code << '\n';
+		    }
+		} else {
+		    code << "{int i; for(i=" << first << ";i<" << last << ";i++) ";
+		    declare("i", cur_value);
+		    code << "}\n";
+		}
+	    }
+	    first = last+1;
+	}
+
+      protected:
+	// do the actual initialization;
+	// the base class initializes integer or float values
+	virtual void declare(const char* index, const char* value)
+	{
+	    code << name << '[' << index << ']'
+		 << '=' << value << ";";
+	}
+    };
+
+    class StringInitializer : public StateInitializer {
+      public:
+	StringInitializer(StringList& code, const char* var) :
+		StateInitializer(code,var) {}
+
+      protected:
+    	/*virtual*/ void declare(const char* index, const char* value)
+	{
+	    code << name << '[' << index << ']'
+		 << "=\"" << value << "\";";
+	}
+    };
+
+    class ComplexInitializer : public StateInitializer {
+      public:
+	ComplexInitializer(StringList& code, const char* var) :
+		StateInitializer(code,var) {}
+
+      protected:
+    	/*virtual*/ void declare(const char* index, const char* value)
+	{
+	    ComplexState cxState;
+	    cxState.setInitValue(value);
+	    cxState.initialize();
+	    Complex x = cxState;
+
+	    code << name << '[' << index << ']'
+		 << ".real=" << x.real() << "; ";
+	    code << name << '[' << index << ']'
+		 << ".imag=" << x.imag() << ";";
+	}
+    };
+
+    class FixInitializer : public StateInitializer {
+	const Precision& precision;
+      public:
+	FixInitializer(StringList& code, const char* var, const Precision& p) :
+		StateInitializer(code,var), precision(p) { }
+
+	/*virtual*/ void flush()
+	{
+	    // if the value of the fix is zero, we can use a single memset
+	    // invocation instead of generating a loop
+	    if (first < last) {
+		double value;
+		if (sscanf(cur_value, "%lf", &value), value == 0.0) {
+		    code << "memset(" << name << '[' << first << "],0, ";
+		    if (last-first != 1)
+			 code << (last-first) << '*';
+		    code << "sizeof(fix));\n";
+		    first = last+1;
+		  return;
+		}
+	    }
+	    StateInitializer::flush();
+	}
+
+    	/*virtual*/ void declare(const char* index, const char* value)
+	{
+	    code << "FIX_DoubleAssign("
+		 << precision.len() << ',' << precision.intb() << ','
+		 << name << '[' << index << "], "  << value << ");";
+	}
+    };
+
+
 StringList CGCStar::initCodeState(const State* state)
 {
     StringList code;
@@ -587,39 +1214,61 @@ StringList CGCStar::initCodeState(const State* state)
 	   these separators.
 	*/
 
-	const char* special = "";
-	const char* white = "\n";
-	Tokenizer lexer(val, special, white);
-	char token[256];
+	// fix arrays are different
+	if (!state->isA("FixArrayState")) {
+	    const char* special = "";
+	    const char* white = "\n";
+	    Tokenizer lexer(val, special, white);
+	    char token[256];
 
-	lexer >> token;
-	for (int i = 0; *token != '\0'; i++, lexer >> token)
-	{
-	    code << name << '[' << i << ']';
-	    if (state->isA("ComplexArrayState"))
-	    {
-		ComplexState cxState;
-		cxState.setInitValue(token);
-		cxState.initialize();
-		Complex x = cxState;
+	    if (state->isA("ComplexArrayState")) {
+		ComplexInitializer initializer(code,name);
+		while (lexer >> token, *token != '\0')
+		    initializer.addInitialization(token);
+		initializer.flush();
+	    }
+       else if (state->isA("StringArrayState")) {
+		StringInitializer initializer(code,name);
+		while (lexer >> token, *token != '\0')
+		    initializer.addInitialization(token);
+		initializer.flush();
+	    }
+	    else {
+		StateInitializer initializer(code,name);
+		while (lexer >> token, *token != '\0')
+		    initializer.addInitialization(token);
+		initializer.flush();
+	    }
+	} else {
+	    // initialization of fix arrays;
+	    // the format of the initialization string is "(values, precision)"
+	    // therefore we cannot use the above scheme
+	
+	    // here casting is safe for we only need a non const reference
+	    // for the bracket operator of class FixArrayState
+	    FixArrayState& fa_state = *(FixArrayState*)state;
+	    const Precision p = fa_state.precision();
 
-		code << ".real=" << x.real() << ";\n";
-		code << name << '[' << i << ']';
-		code << ".imag=" << x.imag() << ";\n";
+	    int size = fa_state.size();
+
+	    // set fixed point precision;
+	    // it is assumed that it is the same for every element in the array
+	    if (state->attributes() & AB_VARPREC)
+		code << name << "p.len = "  << p.len()  << ", "
+		     << name << "p.intb = " << p.intb() << ";\n";
+	
+	    // initialize bit arrays
+	    FixInitializer initializer(code,name,p);
+
+	    for (int i = 0; i < size; i++) {
+		StringList value = (double)fa_state[i];
+		initializer.addInitialization(value);
 	    }
-	    else if (state->isA("StringArrayState"))
-	    {
-		code << '=' << '"' << token << '"' << ";\n";
-	    }
-	    else
-	    {
-		code << '=' << token << ";\n";
-	    }
+	    initializer.flush();
 	}
     }
     else	// Scalar initialization.
     {
-	code << name;
 	if (state->isA("ComplexState"))
 	{
 	    ComplexState cxState;
@@ -627,17 +1276,36 @@ StringList CGCStar::initCodeState(const State* state)
 	    cxState.initialize();
 	    Complex x = cxState;
 
+	    code << name;
 	    code << ".real=" << x.real() << ";\n";
 	    code << name;
 	    code << ".imag=" << x.imag() << ";\n";
 	}
 	else if (state->isA("StringState"))
 	{
-	    code << '=' << '"' << val << '"' << ";\n";
+	    code << name << '=' << '"' << val << '"' << ";\n";
+	}
+	else if (state->isA("FixState"))
+	{
+	    const FixState& f_state = *(const FixState*)state;
+	    const Precision p = f_state.precision();
+
+	    // initialize associated precision variable
+	    if (state->attributes() & AB_VARPREC)
+		code << name << "p.len = "  << p.len()  << ", "
+		     << name << "p.intb = " << p.intb() << ";\n";
+
+	    if (f_state.asDouble() == 0.0)
+		code << "FIX_SetToZero(" 
+		     << p.len() << ',' << p.intb() << ", " << name << ");\n";
+	    else
+		code << "FIX_DoubleAssign("
+		     << p.len() << ',' << p.intb() << ", " << name << ','
+		     << f_state.asDouble() << ");\n";
 	}
 	else
 	{
-	    code << '=' << val << ";\n";
+	    code << name << '=' << val << ";\n";
 	}
     }
     return code;
