@@ -57,14 +57,15 @@ is repeated inline so may not be efficient for large N.
     }
     initCode { addCode(init);}
     go {
-	if (n>1) addCode(setupC);
+	if (output.bufSize()>1) addCode(setupC);
 	for (int j = 0; j < n; j++) {
 	    if (input.resolvedType() == COMPLEX)
-		addCode(oneComplex(j,n==1?"$addr(output)":"(r0)+"));
+		addCode(oneComplex
+			(j,output.bufSize()==1?"$addr(output)":"(r0)+"));
 	    else
-		addCode(oneReal(j,n==1?"$addr(output)":"(r0)+"));
+		addCode(oneReal(j,output.bufSize()==1?"$addr(output)":"(r0)+"));
 	}
-	if (n>1) addCode(restore);
+	if (output.bufSize()>1) addCode(restore);
     }
     
     exectime {
