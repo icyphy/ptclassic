@@ -37,7 +37,7 @@
 # further happens in this thread of control until this dialog box is
 # dismissed).
 #
-proc tycho::askuser {question} {
+proc ::tycho::askuser {question} {
     return [DialogWindow::newModal YesNoQuery [autoName .yesno] \
 	    -text $question]
 }
@@ -50,9 +50,9 @@ proc tycho::askuser {question} {
 # command is executed can be obtained by creating the dialog box using
 # the procedure newModal rather than directly creating an instance.
 # This functionality can be accessed more simply through the procedure
-# "tycho::askuser".
+# "::tycho::askuser".
 #
-class tycho::YesNoQuery {
+class ::tycho::YesNoQuery {
     inherit DialogWindow
 
     # The command to execute on a yes response.
@@ -67,7 +67,7 @@ class tycho::YesNoQuery {
 ##########################################################################
 #### constructor
 #
-body tycho::YesNoQuery::constructor {args} {
+body ::tycho::YesNoQuery::constructor {args} {
 
     configure -bitmap question
 

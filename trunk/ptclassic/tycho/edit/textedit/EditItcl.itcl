@@ -52,7 +52,7 @@ class ::tycho::EditItcl {
 
 ###################################################################
 #
-body tycho::EditItcl::constructor {args} {
+body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
     eval configure $args
 

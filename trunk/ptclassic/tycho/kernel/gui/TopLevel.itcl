@@ -39,9 +39,9 @@
 # By convention, for a class named "Class", we would use the stem
 # ".class". Thus, the single argument should be ".class".
 # Note that if you invoke this outside the namespace "tycho", you
-# must call it "tycho::autoName".
+# must call it "::tycho::autoName".
 #
-namespace tycho {
+namespace ::tycho {
     proc autoName {stem} {
 	global autoNames
 	if {[info exists autoNames] && [info exists autoNames($stem)]} {
@@ -61,7 +61,7 @@ namespace tycho {
 # up to derived classes to map the window using either "wm deiconify"
 # or the method "centerOnScreen".
 #
-class tycho::TopLevel {
+class ::tycho::TopLevel {
 
     inherit itk::Toplevel
 
@@ -112,7 +112,7 @@ class tycho::TopLevel {
 
 #####################################################################
 #
-body tycho::TopLevel::constructor {args} {
+body ::tycho::TopLevel::constructor {args} {
     
     # The name of the window
     set prefix $itk_component(hull)
@@ -142,7 +142,7 @@ body tycho::TopLevel::constructor {args} {
 # after a window is deleted, the focus will be given up entirely by the
 # application.
 #
-body tycho::TopLevel::destructor {} {
+body ::tycho::TopLevel::destructor {} {
     set prev $topLevelWindows($prefix)
     unset topLevelWindows($prefix)
     
@@ -169,7 +169,7 @@ body tycho::TopLevel::destructor {} {
 # packing using an "after" command. This is allegedly done for speed
 # reasons, but seems like a bit of a hack to me.
 #
-body tycho::TopLevel::centerOnScreen {} {
+body ::tycho::TopLevel::centerOnScreen {} {
     # We used to withdraw the window here, but it appears unnecessary.
     update idletasks    
 
@@ -196,7 +196,7 @@ body tycho::TopLevel::centerOnScreen {} {
 # This method freezes the window at its current size, prohibiting
 # resizing by the user.
 #
-body tycho::TopLevel::freezeWindowSize {} {
+body ::tycho::TopLevel::freezeWindowSize {} {
     wm resizable $prefix 0 0
 }
 
@@ -204,7 +204,7 @@ body tycho::TopLevel::freezeWindowSize {} {
 #### nextWindow
 # Switch the focus to the next window listed in the array topLevelWindows.
 #
-body tycho::TopLevel::nextWindow {} {
+body ::tycho::TopLevel::nextWindow {} {
     
     # Since there is a recursive call here, as an extra cautious
     # safety check, if the array size gets to zero, just return,
@@ -242,7 +242,7 @@ body tycho::TopLevel::nextWindow {} {
 # Confirm exit with a dialog, then quit. The destructors will query
 # for save of any windows with modified data.
 #
-body tycho::TopLevel::exitprogram {} {
+body ::tycho::TopLevel::exitprogram {} {
     if [askuser "OK to exit the program?"] {
 	exit
     }

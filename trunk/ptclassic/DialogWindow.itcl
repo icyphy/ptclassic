@@ -59,7 +59,7 @@
 # distracting effect of mapping a partial window and then filling it
 # in.
 #
-class tycho::DialogWindow {
+class ::tycho::DialogWindow {
     inherit TopLevel
     constructor {args} {}
 
@@ -104,7 +104,7 @@ class tycho::DialogWindow {
 
 #####################################################################
 #
-body tycho::DialogWindow::constructor {args} {
+body ::tycho::DialogWindow::constructor {args} {
     #
     # Create a frame to contain the text of the dialog, but also to
     # have room for a bitmap, inserted in derived classes.
@@ -181,7 +181,7 @@ body tycho::DialogWindow::constructor {args} {
 #### title configuration
 # Set the window manager title and icon name.
 #
-configbody tycho::DialogWindow::title {
+configbody ::tycho::DialogWindow::title {
     wm title $prefix $itk_option(-title)
     wm iconname $prefix $itk_option(-title)
 }
@@ -190,7 +190,7 @@ configbody tycho::DialogWindow::title {
 #### bitmap configuration
 # If a non-null bitmap option is given, insert the bitmap left of the text.
 # 
-configbody tycho::DialogWindow::bitmap {
+configbody ::tycho::DialogWindow::bitmap {
     if {$itk_option(-bitmap) != "" && ![info exists itk_component(bitmap)]} {
 	if [info exists itk_component(bitmap)] {
 	    # Component already exists, so we just configure it.
@@ -211,7 +211,7 @@ configbody tycho::DialogWindow::bitmap {
 #########################################################################
 #### title configuration
 # 
-configbody tycho::DialogWindow::title {
+configbody ::tycho::DialogWindow::title {
     wm title $prefix $itk_option(-title)
 }
 
@@ -221,7 +221,7 @@ configbody tycho::DialogWindow::title {
 # -command, which specified the command to execute, and -width,
 # which specifies the desired width of the button.
 #
-body tycho::DialogWindow::addButton {args} {
+body ::tycho::DialogWindow::addButton {args} {
     eval [concat $itk_component(bbox) add $args]
 }
 
@@ -231,7 +231,7 @@ body tycho::DialogWindow::addButton {args} {
 # This button will have an extra frame around it.  It can be specified
 # either by the path name or a unique text or bitmap name.
 #
-body tycho::DialogWindow::default {id} {
+body ::tycho::DialogWindow::default {id} {
     eval [list $itk_component(bbox) default $id]
     bind $itk_component(hull) <Return> "$prefix invoke $id"
 }
@@ -244,7 +244,7 @@ body tycho::DialogWindow::default {id} {
 # button can be specified either by the path name or a unique text
 # or bitmap name.
 #
-body tycho::DialogWindow::invoke {args} {
+body ::tycho::DialogWindow::invoke {args} {
     eval [list $itk_component(bbox) invoke $args]
 }
 
@@ -264,7 +264,7 @@ body tycho::DialogWindow::invoke {args} {
 # The "scope" command forces "mymethod" to be invoked in the scope
 # of class that defining the button.
 #
-body tycho::DialogWindow::execCommand {option args} {
+body ::tycho::DialogWindow::execCommand {option args} {
     set retval ""
     global errorInfo
     set errorInfo ""
@@ -296,7 +296,7 @@ body tycho::DialogWindow::execCommand {option args} {
 # This will return 0 or 1.  The arguments after the class and instance
 # names are just passed directly to the constructor of the class.
 #
-body tycho::DialogWindow::newModal {class instance args} {
+body ::tycho::DialogWindow::newModal {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
     set commandResult($instance) ""
     eval $class $instance $args
@@ -323,7 +323,7 @@ body tycho::DialogWindow::newModal {class instance args} {
 # The arguments after the class and instance names are just passed
 # directly to the constructor of the class.
 #
-body tycho::DialogWindow::new {class instance args} {
+body ::tycho::DialogWindow::new {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
     eval $class $instance $args
     $instance centerOnScreen

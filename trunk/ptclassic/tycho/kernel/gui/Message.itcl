@@ -34,7 +34,7 @@
 #### warn
 # Warn the user, and return only after the user has acknowledged.
 #
-proc tycho::warn {msg} {
+proc ::tycho::warn {msg} {
     DialogWindow::newModal Message [autoName .message] \
 	    -text $msg -bitmap warning
 }
@@ -44,7 +44,7 @@ proc tycho::warn {msg} {
 # Issue an informational message to the user and return only after
 # the user has acknowledged.
 #
-proc tycho::inform {msg} {
+proc ::tycho::inform {msg} {
     DialogWindow::newModal Message [autoName .message] \
 	    -text $msg -bitmap info
 }
@@ -54,7 +54,7 @@ proc tycho::inform {msg} {
 # Post an informational message to the user in a window and return.
 # The name of the window is returned.
 #
-proc tycho::post {msg} {
+proc ::tycho::post {msg} {
     return [DialogWindow::new Message [autoName .message] -text $msg]
 }
 
@@ -63,21 +63,21 @@ proc tycho::post {msg} {
 # The window names in these arguments are ignored (since they bring
 # up modal dialogs, the window names are not important anyway).
 #
-proc ptkMessage {text} {tycho::inform $text}
-proc ptkInform {win text} {tycho::inform $text}
+proc ptkMessage {text} {::tycho::inform $text}
+proc ptkInform {win text} {::tycho::inform $text}
 
 ##########################################################################
 #### Message
 # Issue a message to the user. To warn the user about something in a
-# modal way, use the procedure "tycho::warn". "Modal" means that
+# modal way, use the procedure "::tycho::warn". "Modal" means that
 # nothing further will happen until the window is destroyed. To inform
-# the user of the something in a modal way, use "tycho::inform".
+# the user of the something in a modal way, use "::tycho::inform".
 # Otherwise, for non-modal uses, create an instance of this class
 # directly.  If you create an instance of the class directly,
 # you must map it explicitly by either calling "wm deiconify $name" or
 # "$name centerOnScreen", where "$name" is the name of the object.
 #
-class tycho::Message {
+class ::tycho::Message {
     inherit DialogWindow
 
     constructor {args} {}
@@ -86,7 +86,7 @@ class tycho::Message {
 ##########################################################################
 #### constructor
 #
-body tycho::Message::constructor {args} {
+body ::tycho::Message::constructor {args} {
 
     # Pack the OK button.
     addButton ok -text "OK <Ret>" -command "delete object $this"

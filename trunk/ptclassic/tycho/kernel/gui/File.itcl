@@ -51,7 +51,7 @@ option add *File.autoSaveInterval 5 widgetDefault
 # done transparently, as long as all derived classes define a "save"
 # method that can take an optional filename argument.
 #
-class tycho::File {
+class ::tycho::File {
     inherit Dismiss
 
     #### autoSaveInterval option
@@ -236,7 +236,7 @@ class tycho::File {
 # Change the window header to indicate that the file is read only.
 # FIXME: we should also note this in the dismiss button region.
 # 
-configbody tycho::File::readonly {
+configbody ::tycho::File::readonly {
     set bool $itk_option(-readonly)
     set file $itk_option(-file)
     if [winfo exists $prefix] {
@@ -254,7 +254,7 @@ configbody tycho::File::readonly {
 # Set or change the name of the file being edited. Set the window title
 # and icon name to match.
 #
-configbody tycho::File::file {
+configbody ::tycho::File::file {
     set file $itk_option(-file)
     set readOnly 0
     if {[winfo exists $prefix]} {
@@ -284,7 +284,7 @@ configbody tycho::File::file {
 
 ###################################################################
 #
-body tycho::File::constructor {args} {
+body ::tycho::File::constructor {args} {
 
     # Set up the menubar
     itk_component add menuFrame {
@@ -461,7 +461,7 @@ body tycho::File::constructor {args} {
 # If the modified flag is set, query the user to see whether the
 # file should be saved.
 #
-body tycho::File::destructor {} {
+body ::tycho::File::destructor {} {
     
     if {$modified} {
 	set title [file tail $file]
@@ -502,7 +502,7 @@ body tycho::File::destructor {} {
 # auto-save mechanism uses this same procedure, but passes a name to
 # use to save the file.  Derived classes should also call "markUnmodified".
 #
-body tycho::File::save {{name ""}} {
+body ::tycho::File::save {{name ""}} {
     # If the argument is present, this is probably a request to save
     # a backup file, so we should not delete backup files.
     if {$name != ""} {
@@ -528,7 +528,7 @@ body tycho::File::save {{name ""}} {
 # of the text window to that file.  Note that in the base class, this
 # will eventually fail because we don't know how to save.
 #
-body tycho::File::saveAs {} {
+body ::tycho::File::saveAs {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Save As File:"]
     return [saveAsFile $filename]
@@ -540,7 +540,7 @@ body tycho::File::saveAs {} {
 # Return 1 if the save is successful.  Return 0 or trigger an error
 # if the save is not successful.
 #
-body tycho::File::saveAsFile {filename} {
+body ::tycho::File::saveAsFile {filename} {
     if {[file exists $filename]} {
 	if [askuser "File \"$filename\" exists.  Overwrite?"] {
 	    removeBackupFiles
@@ -562,7 +562,7 @@ body tycho::File::saveAsFile {filename} {
 # Save a crash recovery file, which has a name constructed from the
 # true file name by prepending the prefix "#crash#".
 #
-body tycho::File::saveCrash {} {
+body ::tycho::File::saveCrash {} {
     if {$modified && $file != ""} {
 	set filename [file tail $file]
 	set filename [format "#crash#%s" $filename]
@@ -575,7 +575,7 @@ body tycho::File::saveCrash {} {
 #### markModified
 # Mark the window as containing modified data.
 #
-body tycho::File::markModified {} {
+body ::tycho::File::markModified {} {
     if {!$modified} {
 	$itk_component(dismiss) configure -text "DISMISS (modified)"
 	set modified 1
@@ -586,7 +586,7 @@ body tycho::File::markModified {} {
 #### markUnmodified
 # Mark the window as containing unmodified data.
 #
-body tycho::File::markUnmodified {} {
+body ::tycho::File::markUnmodified {} {
     if {$modified} {
 	$itk_component(dismiss) configure -text "DISMISS"
 	set modified 0
@@ -598,7 +598,7 @@ body tycho::File::markUnmodified {} {
 # Create a new window of the same class as whatever I am (which is
 # normally derived from File).
 #
-body tycho::File::new {} {
+body ::tycho::File::new {} {
     set name [autoName .file]
     [$this info class] $name
     wm deiconify $name
@@ -609,7 +609,7 @@ body tycho::File::new {} {
 # Open a file browser to query the user for a filename, and then
 # insert the contents of that file at the insertion cursor.
 #
-body tycho::File::insertFile {} {
+body ::tycho::File::insertFile {} {
     error "Don't know how to insert"
 }
 
@@ -617,7 +617,7 @@ body tycho::File::insertFile {} {
 #### print
 # Print the data.  The default behavior is an error.
 #
-body tycho::File::print {} {
+body ::tycho::File::print {} {
     error "Don't know how to print"
 }
 
@@ -625,7 +625,7 @@ body tycho::File::print {} {
 #### evaluate
 # Evaluate the data.  The default behavior is an error.
 #
-body tycho::File::evaluate {} {
+body ::tycho::File::evaluate {} {
     error "Don't know how to evaluate"
 }
 
@@ -633,7 +633,7 @@ body tycho::File::evaluate {} {
 #### revert
 # Revert to previously saved file.
 #
-body tycho::File::revert {} {
+body ::tycho::File::revert {} {
     error "Don't know how to revert"
 }
 
@@ -643,7 +643,7 @@ body tycho::File::revert {} {
 # identified by the name argument.  What this means depends on what
 # type of data is contained in the file.
 #
-body tycho::File::seename {name} {
+body ::tycho::File::seename {name} {
     error "Don't know how to find point $name"
 }
 
@@ -653,7 +653,7 @@ body tycho::File::seename {name} {
 # attempt to set its file option.
 # FIXME: Is this actually used?  It's not very elegant.
 #
-body tycho::File::source {filename} {
+body ::tycho::File::source {filename} {
     set retval [::source $filename]
     if {[::itcl::info objects $retval] != ""} {
 	catch {$retval configure -file $filename}
@@ -665,7 +665,7 @@ body tycho::File::source {filename} {
 # Open a window with help on the key bindings.
 # FIXME: We need a better help mechanism.
 #
-body tycho::File::keyBindingsHelp {} {
+body ::tycho::File::keyBindingsHelp {} {
     DialogWindow::new Message [autoName .tyMessage] \
 	    -geometry "-10+0" \
 	    -text "[$this keybindings]"
@@ -675,7 +675,7 @@ body tycho::File::keyBindingsHelp {} {
 #### keybindings
 # Return a string with the keybindings supported by this base class
 #
-body tycho::File::keybindings {} {
+body ::tycho::File::keybindings {} {
     return {
 Tycho uses emacs and shell style key bindings (mostly):
 
@@ -712,7 +712,7 @@ Keyboard traversal of the menu:
 #### mouseBindingsHelp
 # Open a help window with mouse bindings.
 #
-body tycho::File::mouseBindingsHelp {} {
+body ::tycho::File::mouseBindingsHelp {} {
     DialogWindow::new Message [autoName .tyMessage] \
 	    -geometry "-10+0" \
 	    -text "[$this mousebindings]"
@@ -722,7 +722,7 @@ body tycho::File::mouseBindingsHelp {} {
 #### mousebindings
 # Return a string with the mouse bindings
 #
-body tycho::File::mousebindings {} {
+body ::tycho::File::mousebindings {} {
     return {
 There are no meaningful mouse bindings in this class.
     }
@@ -735,7 +735,7 @@ There are no meaningful mouse bindings in this class.
 # is recognized.  Otherwise, the TyEdit class is used to open an
 # ordinary text editor.
 #
-body tycho::File::openwin {} {
+body ::tycho::File::openwin {} {
     DialogWindow::new FileBrowser [autoName .fileBrowser] \
 	    -command "File::openContext " \
 	    -text "Open File:"
@@ -746,7 +746,7 @@ body tycho::File::openwin {} {
 # Open a file browser, and then open a simple editor for the file,
 # ignoring the file extension.  Return the name of the editor object.
 #
-body tycho::File::opentext {} {
+body ::tycho::File::opentext {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Open Text File:"]
     set filename [checkForAutoSaveFiles $filename]
@@ -762,7 +762,7 @@ body tycho::File::opentext {} {
 # open a plain text editor.  Return the name of the editor object.
 # If a window already exists editing this file, simply raise it instead.
 #
-body tycho::File::openContext {filename} {
+body ::tycho::File::openContext {filename} {
     if {[info exists filesOpen] && \
 	    [info exists filesOpen($filename)] && \
 	    [winfo exists $filesOpen($filename)]} {
@@ -794,7 +794,7 @@ body tycho::File::openContext {filename} {
 # least to have a -file option. Note that the leading period is
 # considered part of the extension, as in ".itcl".
 #
-body tycho::File::registerEditor {extension editorClass} {
+body ::tycho::File::registerEditor {extension editorClass} {
     set editors($extension) $editorClass
 }
 
@@ -803,7 +803,7 @@ body tycho::File::registerEditor {extension editorClass} {
 # Check to see whether the object whose name is passed as an argument
 # exists and is a File object, and if so, call its autoSave method.
 #
-body tycho::File::callAutoSave {obj} {
+body ::tycho::File::callAutoSave {obj} {
     if {[::itcl::info objects $obj] != "" && [$obj isa File]} {
 	$obj autoSave
     }
@@ -814,7 +814,7 @@ body tycho::File::callAutoSave {obj} {
 # Call the saveCrash method for all existing objects that are of
 # class File, or are derived from class File.
 #
-body tycho::File::emergencySave {} {		
+body ::tycho::File::emergencySave {} {		
     foreach obj [array names fileObjects] {
 	$obj saveCrash
     }
@@ -825,7 +825,7 @@ body tycho::File::emergencySave {} {
 # Given a string of the form "filename" or "filename#name", open
 # the corresponding file, and call "seename name".
 #
-body tycho::File::hyperjump {filename point} {
+body ::tycho::File::hyperjump {filename point} {
     set win [File::openContext $filename]
     $win seename $point
 }
@@ -837,7 +837,7 @@ body tycho::File::hyperjump {filename point} {
 # to be called later again, with the time interval given by the option
 # -autosaveinterval.  A value of zero for this option disables auto-saving.
 #
-body tycho::File::autoSave {} {
+body ::tycho::File::autoSave {} {
     if {$modified && $file != ""} {
 	set filename [file tail $file]
 	set filename [format "#auto#%s" $filename]
@@ -857,7 +857,7 @@ body tycho::File::autoSave {} {
 #### removeBackupFiles
 # Remove the backup file that gets automatically created periodically.
 #
-body tycho::File::removeBackupFiles {} {
+body ::tycho::File::removeBackupFiles {} {
     set savefile [format "%s/#auto#%s" [file dirname $file] [file tail $file]]
     exec rm -f $savefile
     set savefile [format "%s/#crash#%s" [file dirname $file] [file tail $file]]
@@ -872,7 +872,7 @@ body tycho::File::removeBackupFiles {} {
 # crash recovery file, then the autosave file should be opened. Return
 # the name of the file that should be opened.
 #
-body tycho::File::checkForAutoSaveFiles {filename} {
+body ::tycho::File::checkForAutoSaveFiles {filename} {
 
     # Get the names of the backup and crash recovery files.
     set filetail [file tail $filename]

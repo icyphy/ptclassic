@@ -42,7 +42,7 @@
 # This class defines a window containing an EditTclText widget, which
 # provides an emacs-like editor specialized for editing Tcl files.
 #
-class tycho::EditTcl {
+class ::tycho::EditTcl {
     inherit Edit
 
     #### evaluate
@@ -67,7 +67,7 @@ class tycho::EditTcl {
 
 ###################################################################
 #
-body tycho::EditTcl::constructor {args} {
+body ::tycho::EditTcl::constructor {args} {
     
     eval itk_initialize $args
     eval configure $args
@@ -135,7 +135,7 @@ body tycho::EditTcl::constructor {args} {
 # Evaluate the contents of the text window as Tcl commands
 # in the global context.  Return the result of the evaluation.
 #
-body tycho::EditTcl::evaluate {} {
+body ::tycho::EditTcl::evaluate {} {
     return [$itk_component(text) evaluate]
 }
 
@@ -143,7 +143,7 @@ body tycho::EditTcl::evaluate {} {
 #### revert
 # Override the base-class revert to recolorize.
 #
-body tycho::EditTcl::revert {} {
+body ::tycho::EditTcl::revert {} {
     Edit::revert
     $itk_component(text) parse
 }

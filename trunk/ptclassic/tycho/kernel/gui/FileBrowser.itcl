@@ -41,7 +41,7 @@
 # </pre>
 # returns /usr/tools/ptolemy/tmp.
 #
-proc tycho::expandPath { path } {
+proc ::tycho::expandPath { path } {
     if {[string first \$ $path] == 0} {
         global env
         set slash [string first / $path]
@@ -54,14 +54,14 @@ proc tycho::expandPath { path } {
 }
 
 # COMPATIBILITY with pigi
-proc ptkExpandEnvVar { path } {tycho::expandPath $path}
+proc ptkExpandEnvVar { path } {::tycho::expandPath $path}
 
 ##########################################################################
 #### filename
 # Query the user for a filename and return it.  This procedure brings up
 # a file browser, and returns only when that file browser is dismissed.
 #
-proc tycho::filename {} {
+proc ::tycho::filename {} {
     return [DialogWindow::newModal FileBrower [autoName .file]]
 }
 
@@ -79,7 +79,7 @@ option add *FileBrowser.textBackground \
 # may represent a file that does not exist) is appended to the command
 # as an argument.
 #
-class tycho::FileBrowser {
+class ::tycho::FileBrowser {
     inherit DialogWindow
 
     # The command to execute on a file when one is identified
@@ -113,7 +113,7 @@ class tycho::FileBrowser {
 
 ######################################################################
 #
-body tycho::FileBrowser::constructor {args} {
+body ::tycho::FileBrowser::constructor {args} {
     
     # The text to insert at the top of the file browser
     configure -text "Select File:"
@@ -221,7 +221,7 @@ body tycho::FileBrowser::constructor {args} {
 #### ok
 # Open the file specified in the entry box.
 #
-body tycho::FileBrowser::ok {} {
+body ::tycho::FileBrowser::ok {} {
     open [$itk_component(entry) get]
 }
 
@@ -230,7 +230,7 @@ body tycho::FileBrowser::ok {} {
 # Raise the window so it is visible.  This should be called if a
 # dialog box already exists, rather than creating a new one.
 #
-body tycho::FileBrowser::raise {} {
+body ::tycho::FileBrowser::raise {} {
     if {[winfo exists $prefix] && [winfo ismapped $prefix]} {
 	wm deiconify $prefix
 	raise $prefix
@@ -241,7 +241,7 @@ body tycho::FileBrowser::raise {} {
 #### open
 # Open a file or directory.
 #
-body tycho::FileBrowser::open {name} {
+body ::tycho::FileBrowser::open {name} {
     update idletasks
     if [checkFile $name] {
 	delete object $this
@@ -253,7 +253,7 @@ body tycho::FileBrowser::open {name} {
 # Determine the file name in the listbox lb that is closest to the
 # mouse position ypos and insert its name in the entry box.
 #
-body tycho::FileBrowser::selectFile {lb ypos} {
+body ::tycho::FileBrowser::selectFile {lb ypos} {
     $lb selection clear @0,0 end
     $lb selection set [$lb nearest $ypos]
     $itk_component(entry) delete 0 end
@@ -266,7 +266,7 @@ body tycho::FileBrowser::selectFile {lb ypos} {
 # basis of directories and files. Directories are inserted at the top
 # and are arranged alphabetically.
 #
-body tycho::FileBrowser::updateListbox {} {
+body ::tycho::FileBrowser::updateListbox {} {
     
     # clear the list box
     $itk_component(listbox) delete 0 end
@@ -330,7 +330,7 @@ body tycho::FileBrowser::updateListbox {} {
 # string, then nothing is done and a zero is returned. If the specified
 # filename exists but is not readable, an error is triggered.
 #
-body tycho::FileBrowser::checkFile {filename} {
+body ::tycho::FileBrowser::checkFile {filename} {
 
     # In case the filename starts with an environment variable, expand
     set file [expandPath $filename]
