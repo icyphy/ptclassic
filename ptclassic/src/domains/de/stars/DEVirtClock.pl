@@ -13,11 +13,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	desc {
 This star reads in a NetworkCell. It identifies which virtual circuit
 number the cell belongs to and then computes the virtual time stamp for
-the cell by applying the (special!) Virtual Clock algorithm (see full
+the cell by applying the (special!) virtual clock algorithm (see the full
 manual page). It then outputs all cells in order of increasing
 virtual time stamp.
 
-Upon receiving a 'demand' input the cell with the smallest timestamp is
+Upon receiving a 'demand' input, the cell with the smallest timestamp is
 output. An output packet is generated for every demand input unless
 all of the queues are empty. Demand inputs arriving when all queues
 are empty are ignored.
@@ -118,8 +118,9 @@ scheduling with
 (1) a specific algorithm for picking due dates at each buffer
 .ti 5
 (2) a specific cell discard mechanism that ensures loss fairness
-.sp 2
-[1] Lixia Zhang, "VirtualClock: A New Traffic Control Algorithm for
+.UH Reference
+.ip [1]
+Lixia Zhang, "VirtualClock: A New Traffic Control Algorithm for
 Packet Switching Networks," \fISIGCOMM'90 Symposium\fR,
 Sept. 1990, Philadelphia, \fIComputer Communications Review\fR,
 vol. 20:4, Sept. 1990.

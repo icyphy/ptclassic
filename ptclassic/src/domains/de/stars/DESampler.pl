@@ -2,7 +2,11 @@ defstar {
 	name {Sampler}
 	domain {DE}
 	desc {
-Samples "input" at the times given by events on its "clock" input.
+Sample the input at the times given by events on the "clock" input.
+The data value of the "clock" input is ignored.
+If no input is available at the time of sampling, the latest input
+is used.  If there has been no input, then a "zero" particle is produced.
+The exact meaning of this depends on the particle type.
 	}
 	version { $Id$}
 	author { E. A. Lee and Soonhoi Ha }
@@ -13,14 +17,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
-This star samples its data input at the times given by events on
-its \fIclock\fR input.
-The data value of the \fIclock\fR input is ignored.
-If no input is available at the time of sampling, the latest input
-is used.  If there has been no input, then a "zero" particle is produced.
-The exact meaning of this depends on the particle type.
-	}
 	input {
 		name {input}
 		type {anytype}

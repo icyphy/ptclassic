@@ -4,7 +4,7 @@ defstar
     domain { DE }
     descriptor
     {
-Cooperates with a (possibly preemptive) arbitrator through the
+Cooperate with a (possibly preemptive) arbitrator through the
 "request" and "grant" controls.  "Input" particles are passed to
 "output", and an "ackIn" particle must be received before the next
 "output" can be sent.  This response is made available on "ackOut".

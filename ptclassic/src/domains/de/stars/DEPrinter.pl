@@ -2,10 +2,10 @@ defstar {
 	name { Printer }
 	domain { DE }
 	desc {
-Prints out one sample from each input port per line.  The "fileName"
-state specifies the file to be written; the special names <stdout>
-and <cout> (specifying the standard output stream), and <stderr> and <cerr>
-specifying the standard error stream, are also supported.
+Print the value of each arriving event, together with its time of arrival.
+The "fileName" parameter specifies the file to be written;
+the special names <stdout> and <cout> (specifying the standard output stream),
+and <stderr> and <cerr> specifying the standard error stream, are also supported.
 	}
 	version { $Id$}
 	author { Soonhoi Ha and J. Buck}
@@ -19,7 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 The input may be a particle of any type.  The print() method
 of the particle is used to generate the output.
-.pp
 If output is directed to a file, flushing does not occur until the
 wrapup method is called.  Before the first data are flushed, the file
 will not even exist.  This is normal.

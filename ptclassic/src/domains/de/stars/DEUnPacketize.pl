@@ -11,10 +11,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Convert a stream of packets into floating output data.  The "data"
-input feeds packets to the star.  Whenever a packet arrives, the
+Convert a stream of packets of type FloatVecData into floating output data.
+The "data" input feeds packets to the star.  Whenever a packet arrives, the
 previous packet, if any, is discarded; any remaining contents are
-thrown away.  The "demand" input requests output data.  If there is no
+discarded.  The "demand" input requests output data.  If there is no
 data left in the current packet, the last output datum is repeated
 (zero is used if there has never been a packet).  Otherwise the next
 data value from the current input packet is output.

@@ -12,7 +12,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Receiver for a shared medium when received type is float.
+This star receives floating-point particles transmitted to it by
+an EtherSend star.  The particle is produced at the output after
+some duration of transmission specified at the transmitter.
 	}
 	explanation {
 This star is derived from

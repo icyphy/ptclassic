@@ -2,8 +2,11 @@ defstar {
 	name { Xhistogram }
 	domain { DE }
 	desc {
-Generate a histogram with the xgraph program.  'binWidth' determines the
-bin width.  'options' passes extra options to xgraph.
+Generate a histogram with the xgraph program.  The parameter "binWidth" determines the
+width of a bin in the histogram.  The number of bins will depend on the range of
+values in the events that arrive. The time of arrival of events is ignored.
+This star is identical to the SDF Xhistogram, but is used often enough in the
+DE domain that it is provided here for convenience.
 	}
 	version { $Id$}
 	author { E. A. Lee }
@@ -14,13 +17,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
-Creates a histogram with the xgraph function.  It is assumed that "xgraph"
-is on your path, or this will not work!!!
-The time of arrival is ignored.  This star is identical to the SDF
-Xhistogram, but is used often enough in the DE domain that it is provided
-here for convenience.
-	}
 	input {
 		name { input }
 		type { anytype }

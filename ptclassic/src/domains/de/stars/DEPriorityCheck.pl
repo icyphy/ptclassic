@@ -15,7 +15,7 @@ This star reads in input "NetworkCell" packets
 from multiple input sources. If the priority of an input NetworkCell
 is less than the most recent "priority" input, then the cell is
 sent to the "discard" output. Otherwise it is sent to the "output"
-output.
+port.
 	}
 
 	input {		name { input }		type { message } }

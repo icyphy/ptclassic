@@ -11,10 +11,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-This star produces a ramp output when stimulated by an input.
-A ramp is simply a monotonically increasing signal.
-The time stamp of the output is the same as that of the input.
-The value of the input is ignored.
+Produce an output event with a monotic value when stimulated
+by an input event. The value of the output event starts at "value" and
+increases by "step" each time the star fires. The value of the input is ignored.
 	}
 	input {
 		name {input}

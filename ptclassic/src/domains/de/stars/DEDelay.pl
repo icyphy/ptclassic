@@ -11,7 +11,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Delays its input by an amount given by the delay parameter.
+Each input event is sent to the output with its time stamp
+incremented by an amount given by the "delay" parameter.
 	}
 	input {
 		name {input}

@@ -2,8 +2,9 @@ defstar {
 	name { StopTimer }
 	domain { DE }
 	desc {
-Generates an output at the stopTime of the
+Generate an output at the stopTime of the
 DEScheduler under which this block is running.
+This can be used to force actions at the end of a simulation.
 	}
 	version { $Id$}
 	author { Soonhoi Ha }

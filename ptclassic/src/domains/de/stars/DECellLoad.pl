@@ -12,8 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { DE main palette }
 
 	desc {
-Reads in an Envelope, extracts its Message, and
-outputs that Message in a NetworkCell.
+Read in an Envelope, extract its Message, and
+output that Message in a NetworkCell.
 	}
 
 	input {

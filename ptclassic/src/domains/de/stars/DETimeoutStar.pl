@@ -5,8 +5,8 @@ defstar
     domain { DE }
     descriptor
     {
- Base class for stars which check time-out conditions.
- The methods "set", "clear", and "expired" are provided for
+This is the base class for stars that check time-out conditions.
+The methods "set", "clear", and "expired" are provided for
 setting and testing the timer.
     }
     version { $Id$ }

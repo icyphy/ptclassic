@@ -11,14 +11,11 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	desc { Emulates a processor-sharing server.  }
-	explanation {
+	desc {
 This star emulates a deterministic, processor-sharing server.
-If input events arrive when it is not busy,
-it delays them by the nominal service time.
-If they arrive when it is busy, the server is shared.
-Hence prior arrivals that are still in service
-will be delayed by more than the nominal service time.
+If input events arrive when it is not busy, it delays them by the nominal service time.
+If they arrive when it is busy, the server is shared. Hence prior arrivals that are
+still in service will be delayed by more than the nominal service time.
 	}
 	input {
 		name {input}

@@ -12,13 +12,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
 	desc {
-Generates events according to a Poisson process.
-The first event comes out at time zero.
-	}
-	explanation {
-This star generates events according to a Poisson process.
-The mean inter-arrival time and magnitude of the events are
-given as parameters.
+Generate events according to a Poisson process. The first event comes out at time zero.
+The mean inter-arrival time and magnitude of the events are given as parameters.
 	}
 	output {
 		name {output}

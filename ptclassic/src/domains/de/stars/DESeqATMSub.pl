@@ -13,7 +13,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { DE main palette }
 	desc {
 This star reads in a sequence of SeqATMCells. It will
-check sequence numbers and if a SeqATMCell is found
+check sequence numbers, and if a SeqATMCell is found
 missing, the information bits of the previously arrived
 SeqATMCell will be output in its place.
 

@@ -2,7 +2,7 @@ defstar {
 	name { UDCounter }
 	domain { DE }
 	desc {
-This is up/down counter.
+This is an up/down counter.
 The processing order of the ports is: countUp -> countDown -> demand -> reset.
 Specifically, all simultaneous "countUp" inputs are processed.
 Then all simultaneous "countDown" inputs are processed.

@@ -2,8 +2,8 @@ defstar {
 	name {Router}
 	domain {DE}
 	desc {
-Randomly routes an input event to one of its outputs.
-Probability is equal for each output. The time delay is zero.
+Randomly route an input event to one of its outputs.
+The probability is equal for each output. The time delay is zero.
 	}
 	version { $Id$}
 	author { Soonhoi Ha and E. A. Lee}
