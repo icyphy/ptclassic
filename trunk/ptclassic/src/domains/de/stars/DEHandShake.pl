@@ -11,20 +11,20 @@ Cooperate with a (possibly preemptive) arbitrator through the
     }
     explanation
     {
-A \fI request \fP TRUE is generated in response to a new \fI input.\fP
-After a \fI grant \fP TRUE response is received, the \fI input \fP will
-be passed to the \fI output.\fP  After this \fI output \fP is
-acknowledged by an \fI ackIn \fP response, the next \fI input \fP is
-passed to the \fI output \fP if it is available, and the process
-repeats.  If no new \fI input \fP is available when the \fI ackIn \fP
-is received, a \fI request \fP FALSE is generated.  When the \fI grant \fP
+A \fI request </i> TRUE is generated in response to a new \fI input.</i>
+After a \fI grant </i> TRUE response is received, the \fI input </i> will
+be passed to the \fI output.</i>  After this \fI output </i> is
+acknowledged by an \fI ackIn </i> response, the next \fI input </i> is
+passed to the \fI output </i> if it is available, and the process
+repeats.  If no new \fI input </i> is available when the \fI ackIn </i>
+is received, a \fI request </i> FALSE is generated.  When the \fI grant </i>
 FALSE response is received, the star reverts to its original idle state.
 .lp
 Note that the star will not generate any spurious outputs on either \fI
-output \fP or \fI request \fP while it is waiting for a response on
-the \fI grant \fP or \fI ackIn \fP inputs.  Also, only those \fI ackIn \fP
-particles received in response to an \fI output \fP will be sent to \fI
-ackOut.\fP
+output </i> or \fI request </i> while it is waiting for a response on
+the \fI grant </i> or \fI ackIn </i> inputs.  Also, only those \fI ackIn </i>
+particles received in response to an \fI output </i> will be sent to \fI
+ackOut.</i>
     }
     version { $Id$ }
     author { T.M. Parks }
