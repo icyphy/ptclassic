@@ -380,10 +380,12 @@ int MathematicaIfc::InitXWindows(MLINK linkp) {
 }
 
 StringList MathematicaIfc::ReadPacketContents(MLINK linkp) {
-    char* returnString = 0;
+    const char* returnString = 0;
     MLGetString(linkp, &returnString);
     StringList contents = returnString ? returnString : "";
-    MLDisownString(linkp, returnString);
+    if (returnString) {
+        MLDisownString(linkp, returnString);
+    }
     MLNewPacket(linkp);
     return contents;
 }
