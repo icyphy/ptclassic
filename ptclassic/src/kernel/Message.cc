@@ -9,8 +9,8 @@ $Id$
  Date of creation: 2/20/91
 
  This file defines the Packet implementation of Ptolemy.  A Packet is
- an envelope for passing objects of type PacketData around.  A
- PacketSample is a type of Particle that transports Packets.
+ an envelope for passing objects derived from type PacketData around.
+ A  PacketSample is a type of Particle that transports Packets.
 
 ***************************************************************/
 #ifdef __GNUG__
@@ -59,6 +59,15 @@ int PacketData::errorConvert(const char* arg) const {
 	return 0;
 }
 
+// clone -- try to catch some errors for folks who don't redefine it.
+PacketData* PacketData::clone() const {
+	PacketData* p = new PacketData(*this);
+	if (strcmp(dataType(),p->dataType()) != 0)
+		Error::abortRun("PacketData class ",dataType(),
+				"doesn't redefine clone()!");
+	return p;
+}
+
 // The following is a permanent packet with contents "dummyPacket".
 static Packet dummy;
 
@@ -72,15 +81,28 @@ void Packet::unlinkData() {
 
 extern const dataType PACKET = "PACKET";
 
-// Packet error message generation
-StringList Packet::typeError(const char* expected) const {
-	StringList msg = " Expected packet type '";
-	msg += expected;
-	msg += "', got '";
-	msg += dataType();
-	msg += "'";
-	return msg;
+// Packet error message generation.  The message is in a static buffer.
+const char* Packet::typeError(const char* expected) const {
+	static char buf[80];
+	sprintf (buf, "Expected packet type '%s', got '%s'",expected,dataType());
+	return buf;
 }
+
+// generate a writable copy of the contents of a packet.
+// The writable copy always has reference count 0, in the packet
+// itself is modified to point to dummyPacket.
+PacketData* Packet::writableCopy() {
+	PacketData* result = d;
+	d->refCount--;
+	d = &dummyPacket;
+	if (result->refCount > 0) {
+		result = result->clone();
+		result->refCount = 0;
+	}
+	return result;
+}
+
+// *********************************************************** //
 
 static PacketSample pproto;
 static Plasma packetPlasma(pproto);
@@ -105,7 +127,12 @@ StringList PacketSample::print() const {
 	return data.print();
 }
 
-void PacketSample::getPacket (Packet& p) const { p = data;}
+// get the PacketData from the PacketSample, and replace it with the
+// dummy particle.
+void PacketSample::getPacket (Packet& p) {
+	p = data;
+	data = dummy;
+}
 
 void PacketSample::initialize() { data = dummy;}
 
@@ -156,7 +183,7 @@ void PacketSample::errorAssign(const char* argType) const {
 // Error catcher for attempts to retrieve a Packet from a different
 // type of particle
 
-void Particle::getPacket(Packet &) const {
+void Particle::getPacket(Packet &) {
 	Error::abortRun ("Attempt to getPacket from a non-packet Particle");
 }
 
