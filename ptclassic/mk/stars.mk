@@ -64,6 +64,9 @@ VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
 VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
 ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
 MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
+CPSTARS =	$(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
+PNSTARS =	$(LIBDIR)/pnstars.o
+
 
 # parallel scheduler libraries.
 PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
@@ -116,11 +119,37 @@ $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
-$(PN_LIBFILES) $(MATLABSTARS_LIBFILE)
+$(THREAD_STAR_LIBFILES) \
+$(MATLABSTARS_LIBFILE)
 
 ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
 	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
+
+# HOF stars can be used in pigiRpc but not ptcl.
+# The HOF base classes call Tk_DoOneEvent so that if you accidentally
+# specify an infinite recursion (easy to do with HOF), you can hit the
+# STOP button and abort the run.  But Tk is not linked into ptcl, so
+# this call cannot be done.
+HOFSTARS =	$(LIBDIR)/hofstars.o
+HOF_LIBS =	-lhofstars -lhof
+HOF_LIBFILES =	$(LIBDIR)/libhofstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libhof.$(LIBSUFFIX)
+
+# Tcl/Tk stars can be used in pigiRpc but not ptcl.
+PTINY_TCLSTARS = $(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o
+PTRIM_TCLSTARS = $(PTINY_TCLSTARS)
+TCLSTARS =	$(PTINY_TCLSTARS) $(LIBDIR)/mdsdftclstars.o
+
+PTINY_TCL_STAR_LIBS = -lsdftclstars -ldetclstars
+PTRIM_TCL_STAR_LIBS = $(PTINY_TCL_STAR_LIBS)
+TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars
+
+PTINY_TCL_STAR_LIBFILES =	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
+				$(LIBDIR)/libdetclstars.$(LIBSUFFIX)
+PTRIM_TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES)
+TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES) \
+			$(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX)
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
@@ -161,7 +190,7 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
-$(PN_LIBS)
+$(THREAD_STAR_LIBS)
 
 ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
 
@@ -199,28 +228,37 @@ CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
 
 #
+# Thread related definitions.
+#
+
+# PN domain.
+PN_LIBS =	-lpnstars -lpn
+PN_LIBFILES =	$(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
+
+# CP domain.
+# -laudio is for the Infopad stars in the CP domain
+CP_LIBS =	-lcpstars -lcpipstars -lcp -laudio
+CP_LIBFILES =	$(LIBDIR)/libcpstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcp.$(LIBSUFFIX)
+
+# Sun's Lightweight Process library.
+LWP_LIBS =		-llwpthread -llwp
+LWP_LIBFILES =		$(LIBDIR)/liblwpthread.$(LIBSUFFIX)
+
+# POSIX thread library from Florida State University.
+PTHREAD_LIBS =		-lposixthread -L$(ROOT)/thread/lib.$(ARCH) -lgthreads
+PTHREAD_LIBFILES =	$(LIBDIR)/libposixthread.$(LIBSUFFIX)
+
+#
 # Architecture dependent definitions.
 #
 
-# PN domain and Awesime supported on sun4 and mips architectures.
-ifneq (,$(filter sun% mips,$(ARCH)))
-# Temporarily commented out by cxh
-#PNSTARS = $(LIBDIR)/pnstars.o
-#PN_LIBS= -lpnstars -lpn
-#PN_LIBFILES= $(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
-#AWE_LIBS= -lawethread -lawe2
-#AWE_LIBFILES= $(LIBDIR)/libawethread.$(LIBSUFFIX) \
-#	$(LIBDIR)/libawe2.$(LIBSUFFIX)
+# Use POSIX threads for SunOS and Solaris.
+ifneq (,$(filter sun% sol%,$(ARCH)))
+THREAD_STARS =		$(PNSTARS)
+THREAD_STAR_LIBS =	$(PN_LIBS)
+THREAD_STAR_LIBFILES =	$(PN_LIBFILES)
+THREAD_LIBS =		$(PTHREAD_LIBS)
+THREAD_LIBFILES =	$(PTHREAD_LIBFILES)
 endif
-
-# CP domain and lwp supported on sun4 architectures.
-ifneq (,$(filter sun% cfront,$(ARCH)))
-# -laudio is for the Infopad stars in the CP domain
-CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
-CP_LIBS= -lcpstars -lcpipstars -lcp -laudio
-CP_LIBFILES= $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libcpipstars.$(LIBSUFFIX) $(LIBDIR)/libcp.$(LIBSUFFIX)
-LWP_LIBS= -llwpthread -llwp
-LWP_LIBFILES= $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
-endif
-
