@@ -201,6 +201,7 @@ DDFScheduler :: run (Block& block) {
 	   currentTime += schedulePeriod;
 
 	} /* outside while */
+	return TRUE;
 }
 
 int DDFScheduler :: isRunnable(Star& s) {
