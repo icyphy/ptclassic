@@ -188,7 +188,7 @@ proc ::tycho::mkdir { args } {
 # Search the user's PATH environment variable for filename
 # 
 proc ::tycho::pathEnvSearch {filename} {
-    global env 
+    global env tcl_platform
     if ![info exists env(PATH)] {
 	error "pathEnvSearch: \$PATH is not set!"
     }
