@@ -96,9 +96,6 @@ public:
 protected:
 	void setup();
 
-	// redefine 
-	Target* createChild();
-
 	// redefine
 	int sendWormData(PortHole&);
 	int receiveWormData(PortHole&);
