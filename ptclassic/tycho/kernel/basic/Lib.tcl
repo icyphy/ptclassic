@@ -77,7 +77,6 @@
 ::tycho::register extensions "esterel" .strl
 ::tycho::register extensions "forest" .fst
 ::tycho::register extensions "html" .html .htm .htl
-::tycho::register extensions "idoc" .idoc
 ::tycho::register extensions "image" .gif .ppm .pgm .xbm
 ::tycho::register extensions "itcl" .itcl .itk
 ::tycho::register extensions "java" .java
@@ -94,6 +93,11 @@
 ::tycho::register extensions "dfg" .dfg
 ::tycho::register extensions "std" .std
 ::tycho::register extensions "indexbrowser" .idx
+
+########### special viewing modes
+::tycho::register extensions "idoc" .idoc
+::tycho::register extensions "itclclass" .itclclass
+::tycho::register extensions "javaclass" .javaclass
 
 ########### tool modes
 ::tycho::register extensions "itclclasslist" .icl
@@ -327,6 +331,20 @@ if {$tcl_platform(platform) != "macintosh"} {
 	-command {::tycho::view IDoc -file {%s}} \
 	-viewclass ::tycho::IDoc \
 	-label {IDoc Viewer}  \
+	-category "html" \
+	-underline 0
+
+::tycho::register mode "itclclass" \
+	-command {::tycho::view ItclViewer -file {%s}} \
+	-viewclass ::tycho::ItclViewer \
+	-label {Itcl Class Viewer}  \
+	-category "html" \
+	-underline 0
+
+::tycho::register mode "javaclass" \
+	-command {::tycho::view JavaViewer -file {%s}} \
+	-viewclass ::tycho::JavaViewer \
+	-label {Java Class Viewer}  \
 	-category "html" \
 	-underline 0
 
