@@ -2,6 +2,7 @@
 #include "DEScheduler.h"
 #include "Output.h"
 #include "StringList.h"
+#include "KnownBlock.h"
 
 /**************************************************************************
 Version identification:
@@ -22,6 +23,7 @@ These are the methods for the discrete event scheduler.
 
 extern Error errorHandler;
 
+extern const char DEdomainName[] = "DE";
 
 /*******************************************************************
 		Main DE scheduler routines
@@ -55,7 +57,7 @@ int DEScheduler :: setup (Block& b) {
 	// stars to initialize the global event queue.
 	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
 		Star& s = alanShepard.nextStar();
-		if (strcmp (s.domain(), "DE") != 0) {
+		if (strcmp (s.domain(), DEdomainName) != 0) {
 			StringList msg = s.readFullName();
 			msg += " is not a DE star: domain = ";
 			msg += s.domain();
@@ -97,10 +99,9 @@ DEScheduler :: run (Block& galaxy) {
 
 		// Grab the Particle from the geodesic to the terminal.
 		// Record the arrival time, and flag existence of data.
-		terminal->grabData();
-		terminal->timeStamp = level;
-		
+
 		s->arrivalTime = level;
+		terminal->grabData();
 	
 		// Check if there is another event launching onto the
 		// same star with the same time stamp...
@@ -135,3 +136,7 @@ DEScheduler :: run (Block& galaxy) {
 
 	} // end of while
 }
+
+// Make an entry for KnownBlock
+static DEScheduler proto;
+static KnownBlock entry(proto,DEdomainName);
