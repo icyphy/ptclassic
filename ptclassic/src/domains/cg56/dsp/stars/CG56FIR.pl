@@ -254,7 +254,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         move    a,$ref(output)
         }    
         codeblock(equalTwo) {
-        clr     a         x:(r5)+,x1      y:(r0)-,y1
+        clr     a         x:(r5),x1       y:(r0)-,y1
         mac     x1,y1,a   x0,x:(r5)       y:(r0)-,y1
         macr    x0,y1,a 
         move    a,$ref(output)
