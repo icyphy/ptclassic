@@ -44,9 +44,7 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
-# Build a non-shared libptolemy.a for faster startup time
-# It would be nice if we built both
-LIBNONSHARED=libptmathematica.a
+LIB = 		libptmathematica.$(LIBSUFFIX)
 
 # Put the Ptolemy kernel directory in the include path
 INCL=-I$(KERNDIR) $(PTCOMPAT_INCSPEC) $(MATHEMATICA_INCSPEC)
@@ -65,10 +63,10 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h)
 # Library objects
 OBJS=$(SRCS:.cc=.o)
 
-all:	makefile $(LIBNONSHARED)
+all:	makefile $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIBNONSHARED)
+install:	makefile $(LIBDIR)/$(LIB)
 
 # mathematica.mk checks this var before traversing the path
 NEED_MATHEMATICADIR = 	1
