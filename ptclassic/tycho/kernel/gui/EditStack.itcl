@@ -50,8 +50,8 @@ class ::tycho::EditStack {
     ###################################################################
     ####                  protected methods                        ####
 
-    # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::EditStackText}
+    # Return the name of the type of text widget to use (EditStackText).
+    protected method textWidget {} {return ::tycho::EditStackText}
 }
 
 ###################################################################
