@@ -9,6 +9,7 @@
 #include "IntState.h"
 #include "Geodesic.h"
 #include "GalIter.h"
+#include "ConstIters.h"
 #include "defConstructs.h"
 #include <std.h>
 
@@ -71,12 +72,12 @@ static StringList msg;
 *******************************************************************/
 
 int isSource(const Star& s) {
-	BlockPortIter nextp(s);
-	PortHole* p;
+	CBlockPortIter nextp(s);
+	const PortHole* p;
 
 	while ((p = nextp++) != 0) {
 		if (p->isItInput()) {
-			int numP = p->myGeodesic->numInitialParticles;
+			int numP = p->myGeodesic->numInit();
 			if (!numP || p->numTokens() > numP)
 				return FALSE;
 		}
