@@ -20,10 +20,7 @@ It is useful for removing transients and studying steady-state effects.
 	}
 	output {
 		name {output}
-		type {anytype}
-	}
-	constructor {
-		input.inheritTypeFrom(output);
+		type {=input}
 	}
 	defstate {
 		name {threshold}
@@ -37,6 +34,5 @@ It is useful for removing transients and studying steady-state effects.
 	   if (arrivalTime >= double(threshold)) {
            	output.put(completionTime) = pp;
 	   }
-	   input.dataNew = FALSE;
 	}
 }
