@@ -132,9 +132,7 @@ namespace ::tycho {
     #        {Command shell} "tools"
 
     ::tycho::File::registerExtensions {} \
-            {set w [::tycho::autoName .builder]; \
-            ::tycho::BuilderDialog $w;\
-            $w centerOnScreen} \
+            {::tycho::view BuilderDialog} \
             {Build Tycho} "tools"
 
     if {$tcl_platform(platform) != "macintosh"} {
