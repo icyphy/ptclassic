@@ -14,11 +14,10 @@ be obtained by looking at the man page for audio.
   version { $Id$ }
   author { Sunil Bhave }
   copyright {
-Copyright (c) 1990-1996 The Regents of the University 
-of California. All rights reserved.
+Copyright (c) 1990-%Q% The Regents of the University of California.
+All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
-limitation of liability, and disclaimer of warranty 
-provisions.
+limitation of liability, and disclaimer of warranty provisions.
   }
   location { CGC main library }
   

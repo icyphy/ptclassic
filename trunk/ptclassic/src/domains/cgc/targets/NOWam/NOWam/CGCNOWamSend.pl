@@ -7,7 +7,10 @@ Send star between NOWam processors.
 	version { $Id$ }
 	author { Patrick O. Warner }
 	copyright {
-Copyright(c) 1995-%Q% The Regents of the University of California
+Copyright (c) 1995-%Q% The Regents of the University of California
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
         }
 	location { CGC NOW Active Message target library }
 	htmldoc {
