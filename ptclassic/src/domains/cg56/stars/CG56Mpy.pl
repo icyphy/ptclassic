@@ -7,6 +7,7 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Id "multiplication"
 The inputs are multiplied and the result is written on the output.
 	}
 	inmulti {

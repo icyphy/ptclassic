@@ -7,6 +7,7 @@ defstar {
     copyright { 1992 The Regents of the University of California }
     location { CG56 library }
     explanation {
+.Id "multiplication with shifting"
 Multiply inputs \fIfactor1\fP and \fIfactor2\fP together, and shift the
 result left by \fIshift\fP bits.  The \fIshift\fP input must be zero
 or positive; right (negative) shifts are not supported.

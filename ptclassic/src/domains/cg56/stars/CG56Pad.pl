@@ -1,20 +1,18 @@
 defstar {
 	name { Pad}
 	domain { CG56 }
-	desc { Fix pad }
+	desc { Fix pad
+On each execution, reads a block of "nread" samples (default 128) and writes
+a block of "nwrite" samples (default 256).  The first "offset" samples
+(default 0) have value "fill" (default 0.0), the next "nread" outputs
+samples have values taken from the inputs, and last "nwrite" -
+"nread" - "offset" samples have value "fill" again.
+	}
 	version { $Id$ }
 	author { Chih-Tsung Huang }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
-.PP
-On each execution, reads a block of "nread" samples (default 128)
-and writes a block of "nwrite" samples (default 256)
-The first "offset" samples (default 0) have value "fill"
-(default 0.0), the next "nread" outputs
-samples have values taken from the inputs, and last
-"nwrite" - "nread" - "offset" samples have value "fill" again.
-
 The star pads the input with fill values.
 An input block of length \fInread\fR is read in.
 The first \fIoffset\fR outputs will be zeros,

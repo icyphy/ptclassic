@@ -10,6 +10,11 @@ by the star that feeds the input. }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
+.Id "linear to circular buffer copy"
+.Ir "buffer, circular"
+.Ir "buffer, linear"
+.Ir "linear buffer"
+.Ir "circular buffer"
 This star is normally inserted automatically, as needed.  Data movement
 is repeated inline so may not be efficient for large N.
 	}
