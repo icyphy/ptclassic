@@ -4,6 +4,7 @@
 #include "Fraction.h"
 #include "Output.h"
 #include "StringList.h"
+#include "SDFWormhole.h"
 
 /**************************************************************************
 Version identification:
@@ -72,6 +73,7 @@ int SDFScheduler :: run (Block& galaxy) {
 		runOnce();
 		numItersSoFar++;
 	}
+	numItersSoFar = 0;
 }
 
 	////////////////////////////
@@ -92,9 +94,15 @@ void SDFScheduler :: runOnce () {
 
 		// Now call beforeGo(), go(), and afterGo() for each Star
 		// for each PortHole
-		currentStar.beforeGo();
+		for (int j = currentStar.numberPorts(); j > 0; j--) {
+			PortHole& port = currentStar.nextPort();
+			port.beforeGo();
+		}
 		currentStar.go();
-		currentStar.afterGo();
+		for (j = currentStar.numberPorts(); j > 0; j--) {
+			PortHole& port = currentStar.nextPort();
+			port.afterGo();
+		}
 	}
 }
 
@@ -283,7 +291,9 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 			errorHandler.error (msg);
 			invalid = TRUE;
 			return;
-		}
+		} else if (nearPort.isItInput() == nearPort.far()->isItInput())
+			// if the port is at the boundary of the wormhole.
+			continue;
 
 		PortHole& farPort = *(nearPort.far());
 		// recursively call this function on the farSideBlock,
@@ -510,11 +520,13 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 		// Look at the next port in the list
 		SDFPortHole& port = (SDFPortHole&)atom.nextPort();
 
-		if(port.isItInput() &&
-		   port.myGeodesic->numInitialParticles < port.numberTokens) {
+		if(port.isItInput() && port.far()->isItOutput()) {
+		   // If not in the interface of Wormhole
+		   if(port.myGeodesic->numInitialParticles<port.numberTokens){ 
 			// not enough data
 			v = 1;
 			break;
+		   }
 		}
 	}
 	return v;
