@@ -66,8 +66,14 @@ if [info exist env(TYCHO)] {
 if ![info exists FAILED] {
     set FAILED 0
 }
+if ![info exists KNOWN_FAILED] {
+    set KNOWN_FAILED 0
+}
 if ![info exists PASSED] {
     set PASSED 0
+}
+if ![info exists NEWLY_PASSED] {
+    set NEWLY_PASSED 0
 }
 if ![info exists VERBOSE] {
     set VERBOSE 0
@@ -76,41 +82,58 @@ if ![info exists TESTS] {
     set TESTS {}
 }
 
-proc print_verbose {test_name test_description contents_of_test code answer} {
-    global FAILED
-    global errorInfo 
+proc print_verbose {test_name test_description contents_of_test code answer {testtype "NORMAL"}} {
+    global FAILED KNOWN_FAILED errorInfo 
     puts "\n"
     puts "==== $test_name $test_description"
     puts "==== Contents of test case:"
     puts "$contents_of_test"
     if {$code != 0} {
-	incr FAILED
-        if {$code == 1} {
-            puts "==== Test generated error:"
-	    puts "$errorInfo"
-        } elseif {$code == 2} {
-            puts "==== Test generated return exception;  result was:"
-            puts $answer
-        } elseif {$code == 3} {
-            puts "==== Test generated break exception"
-        } elseif {$code == 4} {
-            puts "==== Test generated continue exception"
-        } else {
-            puts "==== Test generated exception $code;  message was:"
-            puts $answer
-        }
+	if {$testtype == "NORMAL"} {
+	    incr FAILED
+	    if {$code == 1} {
+		puts "==== Test generated error:"
+		puts "$errorInfo"
+	    } elseif {$code == 2} {
+		puts "==== Test generated return exception;  result was:"
+		puts $answer
+	    } elseif {$code == 3} {
+		puts "==== Test generated break exception"
+	    } elseif {$code == 4} {
+		puts "==== Test generated continue exception"
+	    } else {
+		puts "==== Test generated exception $code;  message was:"
+		puts $answer
+	    }
+	} else {
+	    incr KNOWN_FAILED
+	    if {$code == 1} {
+		puts "==== Test generated known error:"
+		puts "$errorInfo"
+	    } elseif {$code == 2} {
+		puts "==== Test generated return exception;  result was:"
+		puts $answer
+	    } elseif {$code == 3} {
+		puts "==== Test generated break exception"
+	    } elseif {$code == 4} {
+		puts "==== Test generated continue exception"
+	    } else {
+		puts "==== Test generated exception $code;  message was:"
+		puts $answer
+	    }
+	}
     } else {
         puts "==== Result was:"
         puts "$answer"
     }
 }
 
-proc test {test_name test_description contents_of_test passing_results} {
+proc test {test_name test_description contents_of_test passing_results {testtype "NORMAL"}} {
     global VERBOSE
     # Define TY_TESTING in the global context so that we can check to
     # see if it is set inside functions that use dialog boxes.
     global TY_TESTING
-    global TESTS PASSED FAILED
+    global TESTS PASSED FAILED KNOWN_FAILED NEWLY_PASSED
 
     # Set this so modal dialogs become -- ta-dah! -- non-modal
     set TY_TESTING 1
@@ -128,7 +151,7 @@ proc test {test_name test_description contents_of_test passing_results} {
     set code [catch {uplevel $contents_of_test} answer]
     if {$code != 0} {
         print_verbose $test_name $test_description $contents_of_test \
-                $code $answer
+                $code $answer $testtype
     } elseif {[string compare $answer $passing_results] == 0} then { 
         if $VERBOSE then {
             print_verbose $test_name $test_description $contents_of_test \
@@ -136,14 +159,27 @@ proc test {test_name test_description contents_of_test passing_results} {
             puts "++++ $test_name PASSED"
 
         }
+	if {$testtype != "NORMAL"} {
+            puts "!!!! $test_name was marked as failing, but now passes"
+	    incr NEWLY_PASSED
+	}
 	incr PASSED
     } else {
-        print_verbose $test_name $test_description $contents_of_test $code \
-                $answer 
-        puts "---- Result should have been:"
-        puts "$passing_results"
-        puts "---- $test_name FAILED" 
-	incr FAILED
+	if {$testtype == "NORMAL"} {
+	    print_verbose $test_name $test_description $contents_of_test \
+		    $code $answer $testtype
+	    puts "---- Result should have been:"
+	    puts "$passing_results"
+	    puts "---- $test_name FAILED" 
+	    incr FAILED
+	} else {
+	    print_verbose $test_name $test_description $contents_of_test \
+		    $code $answer $testtype
+	    puts "---- Known Failure, Result should have been:"
+	    puts "$passing_results"
+	    puts "---- $test_name Failed, but this is a known failure" 
+	    incr KNOWN_FAILED
+	}
     }
     update
 
@@ -222,8 +258,10 @@ proc openAllFiles {args} {
 # If reallyExit exists and is not set to 1, then don't exist
 #
 proc doneTests {args} {
-    global PASSED FAILED duration reallyExit
-    puts "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
+    global PASSED FAILED KNOWN_FAILED NEWLY_PASSED duration reallyExit
+    puts "Total: [expr $PASSED + $FAILED + $KNOWN_FAILED] \
+	    ((Passed: $PASSED, Newly Passed: $NEWLY_PASSED) \
+    Failed: $FAILED Known Failed: $KNOWN_FAILED)"
     flush stderr
     update
     if {![info exists reallyExit] || $reallyExit == 1} {
