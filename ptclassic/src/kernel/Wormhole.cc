@@ -157,7 +157,7 @@ int Wormhole :: checkReady() const {
 }
 
 // set scheduler stop time
-void Wormhole :: setStopTime() {
+void Wormhole :: setStopTime(float stamp) {
 	scheduler->resetStopTime(getStopTime());
 }
 
