@@ -538,20 +538,22 @@ body ::tycho::Selector::itemclick {tag x y args} {
 
     # Process depending on whether this is toggle mode or not
     if { ! $toggle } {
-	# Not toggle mode: select it if it isn't already
-	if { ! [$slate hastag $current "sel"] } {
-	    # Choose the delegation mode
-	    if { $prior == 0 } {
-		set post "0"
-            } elseif { $prior == 1 \
-                    && $current != [$slate find withtag "sel"] } {
-		set post "0"
-            } else {
-                set post "+"
-	    }
-	    # Deselect all currently selected objects
-	    _clear
+	if { [$slate hastag $current "sel"] } {
+            # This item is already selected. Don't change the selection,
+	    # and set the delegation mode according to number of
+	    # selected items.
+	    set post $prior
+        } else {
+	    # The item was not selected. Since the item is newly
+	    # selected and there is only one, the delegation mode
+	    # is always zero
+	    set post 0
 
+	    # Deselect all currently selected objects if there
+	    # were any
+	    if { $prior != 0 } {
+		_clear
+	    }
 	    # Select and highlight the current object
 	    _select $current
 
@@ -579,7 +581,7 @@ body ::tycho::Selector::itemclick {tag x y args} {
 	    _select $current
 	}
     }
-    # Now activate delegate interactor according to the "mode"
+    # Now activate a delegate interactor according to the "mode"
     if { $post != "" } {
 	eval _delegate $post $current $x $y $args
     }
