@@ -294,8 +294,48 @@ return TRUE;
 ////////////////////////////
 
 // fetch an event on request.
-int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) {
-return eventQ.fetchEvent(p, timeVal);
+int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) 
+{
+    cerr << "Entering DEScheduler ::fetchEvent" << p << "," << timeVal ;
+	CqLevelLink *store = NULL;
+	eventQ.DisableResize();
+	while (1)
+	{
+		CqLevelLink *h = eventQ.get();
+		if ((h == NULL) || (h->level > timeVal)) {
+			Error :: abortRun (*p, " has no more data.");
+			return FALSE;
+		}
+		InDEPort* tl = 0;
+                if (h->fineLevel != 0) {
+			Event* ent = (Event*) h->e;
+                        tl = (InDEPort*) ent->dest;
+
+                        // if same destination star with same time stamp..
+                        if (tl == p) {
+                                if (tl->getFromQueue(ent->p)){
+					eventQ.putFreeLink(h);
+    cerr << ":Extracting " << h->level << "," << h->fineLevel << "," << h->dest;
+				}
+				else
+					eventQ.pushBack(h);
+				while (store != NULL) {
+				      CqLevelLink *temp = store;
+				      store = store->next;
+				      eventQ.pushBack(temp);
+				}
+				eventQ.EnableResize();
+    cerr << '\n';
+                                return TRUE;
+                        }
+                }
+		store->next->before = h;
+		h->next = store;
+		h->before = NULL;
+		store = h;
+	}
+	Error :: abortRun (*p, " Should never get here.");
+	return FALSE;
 }
 
 // detect any delay-free loop which may potentially generate an
