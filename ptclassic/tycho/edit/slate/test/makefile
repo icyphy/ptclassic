@@ -44,23 +44,13 @@ TCL_SRCS =
   
 ITCL_SRCS = \
 	$(GRAPHICAL_TESTS) \
-	alltests.itcl all.itcl \
-	sample.itcl \
-	stars.itcl \
+	alltests.itcl \
+	all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES = \
-	bind.tcl \
-	constraint.tcl \
-	demo.itcl \
-	makefile \
-	mantra.gif \
-	pigi.itcl \
-	sample.itcl \
-	simple.tcl \
-	stars.itcl \
-	trace.itcl
+MISC_FILES =
+	makefile
 
 # If we get some SIMPLE_TESTS, then add $(SIMPLE_TESTS)
 # to ITCL_SRCS above.
