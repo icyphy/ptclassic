@@ -164,4 +164,15 @@ void PrintVersion ()
 	PrintErr(ErrGet());
 	exit(1);
     } 
+    /* Link the version and file name with tcl variables so that
+     * we can query them from tcl.
+     */  
+   TCL_CATCH_ERR(Tcl_LinkVar(ptkInterp,
+            strdup("pigi_version"),
+            (char *) &gVersion,
+            TCL_LINK_STRING|TCL_LINK_READ_ONLY));
+   TCL_CATCH_ERR(Tcl_LinkVar(ptkInterp,
+            strdup("pigi_filename"),
+            (char *) &pigiFilename,
+            TCL_LINK_STRING|TCL_LINK_READ_ONLY));
 }
