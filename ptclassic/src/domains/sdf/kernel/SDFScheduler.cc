@@ -278,7 +278,7 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 			*(SDFPortHole*)currentPort->farSidePort))
 	      // recursively call this function on the farSideBlock,
 	      // having determined that it has not previously been done.
-	      reptConnectedSubgraph (*(*currentPort->farSidePort).blockIamIn);
+	      reptConnectedSubgraph (*(*currentPort->farSidePort).parent());
 	}
 }
 
@@ -296,9 +296,9 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 
 int SDFScheduler :: reptArc (SDFPortHole& port1, SDFPortHole& port2){
 	Fraction& nearStarRepetitions =
-			((SDFStar*)(port1.blockIamIn))->repetitions;
+			((SDFStar*)(port1.parent()))->repetitions;
 	Fraction& farStarRepetitions =
-			((SDFStar*)(port2.blockIamIn))->repetitions;
+			((SDFStar*)(port2.parent()))->repetitions;
 	Fraction farStarShouldBe;
 	Fraction temp;
 
@@ -323,7 +323,7 @@ int SDFScheduler :: reptArc (SDFPortHole& port1, SDFPortHole& port2){
 	   // farStarRepetitions has been set, so test for equality
 	   if (!(farStarRepetitions == farStarShouldBe)) {
 		errorHandler.error("Inconsistent sample rate at:",
-				   (port1.blockIamIn)->readFullName());
+				   (port1.parent())->readFullName());
 		// MUST GIVE MORE INFORMATION HERE
 	   }
 	   return FALSE;
@@ -371,7 +371,7 @@ int SDFScheduler :: simRunStar (Block& atom,
 		if(port->isItOutput()) {
 
 		   // Is the destination star runnable?
-		   if(notRunnable(*(SDFStar*)port->farSidePort->blockIamIn)
+		   if(notRunnable(*(SDFStar*)port->farSidePort->parent())
 			== 0) {
 
 			// It is runnable.
@@ -384,7 +384,7 @@ int SDFScheduler :: simRunStar (Block& atom,
 			// scheduler can deadlock.
 			if(numDeferredBlocks < MAX_NUM_DEFERRED_BLOCKS) {
 			   deferredBlocks[numDeferredBlocks] =
-				port->blockIamIn;
+				port->parent();
 			   numDeferredBlocks += 1;
 			}
 
