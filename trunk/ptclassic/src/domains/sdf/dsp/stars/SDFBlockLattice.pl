@@ -84,14 +84,14 @@ signalIn samples should be processed for each set of coefficients.
 		// Forward prediction error
 		f[0] = double (signalIn%j);   // f(0)=x(n)
 		for (int i=1; i <= lastM; i++) {
-			k = reflectionCoefs[i-1];
+			k = - reflectionCoefs[i-1];
 			f[i] = k * b[i-1] + f[i-1];
 		}
 		signalOut%j << f[lastM];
 
 		// Backward:  Compute the w's for the next round
 		for (i = lastM-1; i >0 ; i--) {
-			k = reflectionCoefs[i-1];
+			k = - reflectionCoefs[i-1];
 			b[i] = k * f[i-1] + b[i-1];	
 		}
 		b[0] = double (signalIn%j);   // b[0]=x[n] 
