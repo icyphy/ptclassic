@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	seealso {LMS}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	defstate {
 		name {stepSizeLow}
 		type{float}

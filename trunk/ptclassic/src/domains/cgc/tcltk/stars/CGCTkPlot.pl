@@ -12,14 +12,14 @@ There are also buttons for zooming in and out, and for
 resizing the box to just fit the data in view.
 	}
 	version { $Id$ }
-	author { E. A. Lee }
+	author { Edward A. Lee }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC tcltk library }
+	location { CGC Tcl/Tk library }
 	explanation {
 The \fIpersistence\fR parameter specifies the number
 of points that are buffered, and hence the number that will
