@@ -73,8 +73,14 @@ protected:
 	// Internal event name maps
 	StringState internalNameMap;   
 
-        // type of this finite state machine.
+        // Machine type: Pure.
 	StringState machineType;
+
+	// Evaluation type: Strict or NonStrict.
+	StringState evaluationType;
+
+	// One-writer rule checking type: Compile Run None.
+	StringState oneWriterType;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;

@@ -1,21 +1,21 @@
 #ifndef _FSMPortHole_h
 #define _FSMPortHole_h
 
-/*  Version $Id$
+/* $Id$
 
-@Copyright (c) 1996-%Q% The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
-software and its documentation for any purpose, provided that the
-above copyright notice and the following two paragraphs appear in all
-copies of this software.
+software and its documentation for any purpose, provided that the above
+copyright notice and the following two paragraphs appear in all copies
+of this software.
 
-IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
-FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
-ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
-THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY 
+FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES 
+ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF 
+THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF 
 SUCH DAMAGE.
 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
@@ -24,9 +24,6 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-
-						PT_COPYRIGHT_VERSION_2
-						COPYRIGHTENDKEY
 
     Programmer:		Bilung Lee
     Date of creation:	3/3/96
@@ -38,54 +35,30 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "PortHole.h"
+#include "EventHorizon.h"
 
-class FSMPortHole : public PortHole
-{
+class FSMPortHole : public PortHole {
 public:
-    int dataNew;
-
-    // constructor.
-    FSMPortHole() : dataNew(FALSE) {};
-
     // Class identification.
     virtual int isA(const char* className) const;
 };
 
-class InFSMPort : public FSMPortHole
-{
+class InFSMPort : public FSMPortHole {
 public:
     // Get Particles from input Geodesic
     virtual void receiveData();
-
-    // operator to return a zero delayed Particle,
-    // which is same as operator % (0).
-    // reset dataNew = FALSE.
-    Particle& get();
-    
-    // Clear unused particles in myGeodesic.
-    virtual void sendData();
 
     // Input/output identification.
     virtual int isItInput() const;
 };
 
 
-class OutFSMPort : public FSMPortHole
-{
+class OutFSMPort : public FSMPortHole {
 public:
-    // Move the current Particle in the input buffer -- this
-    // method is invoked by the SDFScheduler before go()
+    // Initialize the current Particles in the PortHole.
     virtual void receiveData();
 
-    // operator to return a zero delayed Particle,
-    // which is same as operator % (0).
-    // set the dataNew = TRUE.
-    Particle& put();
-
-    // Put the Particles that were generated into the
-    // output Geodesic -- this method is invoked by the
-    // FSMcheduler after go()
+    // Put the Particles that were generated into the output Geodesic.
     virtual void sendData();
 
     // Input/output identification.
@@ -93,12 +66,9 @@ public:
 };
 
  
-class MultiFSMPort : public MultiPortHole
-{
-};
+class MultiFSMPort : public MultiPortHole {};
 
-class MultiInFSMPort : public MultiFSMPort
-{
+class MultiInFSMPort : public MultiFSMPort {
 public:
     // Input/output identification.
     virtual int isItInput() const;
@@ -107,8 +77,7 @@ public:
     virtual PortHole& newPort();
 };
  
-class MultiOutFSMPort : public MultiFSMPort
-{     
+class MultiOutFSMPort : public MultiFSMPort {     
 public:
     // Input/output identification.
     virtual int isItOutput() const;
