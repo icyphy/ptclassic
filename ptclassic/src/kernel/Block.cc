@@ -78,9 +78,12 @@ Block :: printVerbose ()
 void Block :: initialize()
 {
 	// Call initialize() for each PortHole, if not of Galaxy
+	// also do MultiPortHoles
 	if (isItAtomic()) {
 		for(int i = numberPorts(); i>0; i--)
 			nextPort().initialize();
+		for(i = multiports.size(); i>0; i--)
+			(multiports++).initialize();
 	}
         // initialize States
         initState();
@@ -202,4 +205,5 @@ void Block::initState () { states.initElements();}
 // destructor isn't really do-nothing because it calls destructors
 // for members
 Block::~Block () {}
+
 
