@@ -78,6 +78,7 @@ SRCS= \
  SDFReciprocal.pl \
  SDFRectPolar.pl \
  SDFRepeat.pl \
+ SDFSgn.pl \
  SDFSin.pl \
  SDFSqrt.pl \
  SDFUpSample.pl \
