@@ -33,25 +33,33 @@
 # Entry bindings augmenting and overwriting start-up bindings defined
 #  in tk.tcl: , , , ,  + various mouse-related bindings
 # All entries share the global variable ptkKillBuffer for kill storage space
+#
+#---------------------------------------------------------------------------
+# Emacs and shell style bindings
+#---------------------------------------------------------------------------
+#  For motion:
+#---------------------------------------------------------------------------
+#  C-F		|	Forward one character
+#  C-B		|	Backward one character
+#  C-A		|	Goto beginning of line
+#  C-E		|	Goto EOL
+#  M-F		|	Forward one word
+#  M-B		|	Backward one word
+#---------------------------------------------------------------------------
+#  For erasing:
+#---------------------------------------------------------------------------
+#  C-U		|	Kill line
+#  C-W		|	(Backward) Kill word
+#  C-K		|	Kill to EOL
+#  C-D		|	Delete insertion point character
+#  C-Y		|	Yank from Kill Buffer
+#  C-H		|	Backspace
+#  C-?		|	Backspace
+#  M-D		|	(Forward) Kill word
+#  <space>	|	Kill current selection/insert space character
+#		|	 depending on context
+#---------------------------------------------------------------------------
 
-# Emacs/shell type bindings include:
-
-# For motion:
-#   Forward one character
-#   Backward one character
-#   Goto beginning of line
-#   Goto EOL
-
-# For deletions:
-#   Kill line
-#   Kill word				Not stored in ptkKillBuffer variable
-#   Kill to EOL
-#   Delete insertion point character
-#   Undo kill
-#   Backspace
-#   Backspace
-#  <space>	Kill current selection/insert space character depending on
-#		 context
 
     bind Entry <Control-f> {
 	%W icursor [expr [%W index insert]+1]; tk_entrySeeCaret %W
@@ -87,7 +95,25 @@
 	}
     }
 
-# Appropriate?  Might need some refinement
+    # This line copied and modified from Tk3.6 (file "tk.tcl")
+    bind Entry <Control-w> {entry_BackWordAndSave %W; tk_entrySeeCaret %W}
+    # FIXME: consecutive Control-w's should cause kill buffer to grow
+    
+    bind Entry <Key-Escape><Key-d> {
+	entry_ForwardWordAndSave %W; tk_entrySeeCaret %W}
+
+    bind Entry <Key-Escape> {puts -nonewline ""}
+    bind Entry <Key-Escape><Key-b> {
+	set curs [expr [%W index insert]-1]
+	set x [entry_BackWordIdx %W $curs]
+	%W icursor $x
+    }
+
+    bind Entry <Key-Escape><Key-f> {
+	set curs [expr [%W index insert]+1]
+	set x [entry_ForwardWordIdx %W $curs]
+	%W icursor $x
+    }
 
     #bind third mouse button to scanning
     bind Entry <3> {%W scan mark %x}
@@ -131,4 +157,52 @@ proc ptkRecursiveBind {widget keySeq action} {
     foreach child [winfo children $widget] {
 	ptkRecursiveBind $child $keySeq $action
     }
+}
+
+# This procedure comes directly from tk_entryBackword
+#   (Tk3.6, file "entry.tcl")
+# It has been modified to save the deletion into ptkKillBuffer
+# FIXME: Allow the buffer to expand when this binding is invoked
+#  successively
+
+proc entry_BackWordIdx {w curs} {
+    set string [$w get]
+    if {$curs < 0} {return 0}
+    for {set x $curs} {$x > 0} {incr x -1} {
+        if {([string first [string index $string $x] " \t"] < 0)
+                && ([string first [string index $string [expr $x-1]] " \t"]
+                >= 0)} {
+            break
+	}
+    }
+    return $x
+}
+	
+proc entry_ForwardWordIdx {w curs} {
+    set string [$w get]
+    set length [string length $string]
+    if {$curs >= $length} {return $length}
+    for {set x $curs} {$x < $length} {incr x} {
+        if {([string first [string index $string $x] " \t"] >= 0)
+                && ([string first [string index $string [expr $x-1]] " \t"]
+                < 0)} {
+            break
+	}
+    }
+    return $x
+}
+
+proc entry_BackWordAndSave w {
+    global ptkKillBuffer
+    set curs [expr [$w index insert]-1]
+    set x [entry_BackWordIdx $w $curs]
+    set ptkKillBuffer [string range [$w get] $x $curs]
+    $w delete $x $curs
+}
+proc entry_ForwardWordAndSave w {
+    global ptkKillBuffer
+    set curs [$w index insert]
+    set x [entry_ForwardWordIdx $w [expr $curs+1]]
+    set ptkKillBuffer [string range [$w get] $curs $x]
+    $w delete $curs $x
 }
