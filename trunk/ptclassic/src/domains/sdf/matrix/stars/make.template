@@ -53,10 +53,6 @@ PL_SRCS= \
   SDFInverseFix_M.pl \
   SDFInverseInt_M.pl \
   SDFInverse_M.pl \
-  SDFMatrixAdd.pl \
-  SDFMatrixInv.pl \
-  SDFMatrixMult.pl \
-  SDFMatrixTran.pl \
   SDFMpyCx_M.pl \
   SDFMpyFix_M.pl \
   SDFMpyInt_M.pl \
