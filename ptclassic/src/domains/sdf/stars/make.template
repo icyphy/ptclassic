@@ -65,8 +65,7 @@ SRCS= \
  WaveForm.cc \
  XMgraph.cc \
  XYgraph.cc \
- Xgraph.cc \
- XMgraph.cc
+ Xgraph.cc
 
 # object files for all stars
 OBJS= $(SRCS:.cc=.o)
