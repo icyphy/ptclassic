@@ -183,6 +183,8 @@ void CGMultiTarget :: prepareChildren() {
 		 ->setInitValue(destDirectory.initValue());
 		t->stateWithName("display?")
                  ->setInitValue(displayFlag.initValue());
+		t->stateWithName("Looping Level")
+		 ->setInitValue(hashstring("0"));
 	    }
 	}
 	resourceInfo();
