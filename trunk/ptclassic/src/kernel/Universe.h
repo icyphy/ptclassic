@@ -46,7 +46,7 @@ public:
 	void endSimulation() {wrapupGal(gal);}
 
 	// set the stopping condition.  A hack.
-	void setStopTime(float limit) {scheduler->setStopTime(limit);}
+	virtual void setStopTime(float stamp);
 
 	// display schedule
 	StringList displaySchedule() {return scheduler->displaySchedule();}

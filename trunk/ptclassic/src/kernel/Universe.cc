@@ -33,6 +33,11 @@ Universe :: print (int recursive) {
 	return out;
 }
 
+// setting the stopping condition
+void Runnable :: setStopTime (float stamp) {
+	scheduler->setStopTime(stamp) ;
+}
+
 // complete the simulation
 void Runnable::wrapupGal (Galaxy& g) {
 	g.wrapup();
