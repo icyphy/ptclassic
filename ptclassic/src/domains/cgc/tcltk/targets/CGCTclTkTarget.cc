@@ -47,14 +47,14 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
 	funcName.setInitValue("go");
 	compileOptions.setInitValue(
-		  "-I$PTOLEMY/tcl/tk3.1/src -I$PTOLEMY/tcl/tcl6.6/src "
+		  "-I$PTOLEMY/tcl/tk/src -I$PTOLEMY/tcl/tcl/src "
 		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib");
 	linkOptions.setInitValue(
-		  "$PTOLEMY/tcl/tk3.1/lib/$ARCH.opt/libtk.a "
-		  "$PTOLEMY/tcl/tcl6.6/lib/$ARCH.opt/libtcl.a "
-		  "$PTOLEMY/lib.$ARCH/libptk.a "
-		  "-L$PTOLEMY/tcl/tk3.1/lib/$ARCH.opt "
-		  "-L/usr/X11/lib -lXpm -lX11 -lm");
+		  "-L$PTOLEMY/tcl/tk/lib/$ARCH.opt "
+		  "-L$PTOLEMY/tcl/tcl/lib/$ARCH.opt "
+		  "-L$PTOLEMY/lib.$ARCH "
+		  "-L$PTOLEMY/tcl/tk/lib/$ARCH.opt "
+		  "-L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm");
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
