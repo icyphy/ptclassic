@@ -1,11 +1,7 @@
 defstar {
   name { Transpose_M }
   domain { SDF }
-  desc {
-Transposes a matrix, using the Matrix class function.
-The input matrix has dimensions (numRows,numCols).
-The output matrix has dimensions (numCols,numRows).
-  }
+  desc { Transpose a floating-point matrix read as a single particle. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

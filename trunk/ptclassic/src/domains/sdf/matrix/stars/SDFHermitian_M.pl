@@ -2,10 +2,7 @@ defstar {
   name { Hermitian_M }
   domain { SDF }
   desc {
-Does a Hermitian Transpose (conjugate transpose) on the input matrix,
-using the Matrix class function.
-The input matrix has dimensions (numRows,numCols).
-The output matrix has dimensions (numCols,numRows).
+Perform a Hermitian transpose (conjugate transpose) on the input matrix.
   }
   version { $Id$ }
   author { Mike J. Chen }

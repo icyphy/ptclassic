@@ -1,7 +1,10 @@
 defstar {
   name      { PackFix_M }
   domain    { SDF }
-  desc      { Takes Fix inputs and produces FixMatrix messages. }
+  desc      { 
+This star reads a sequence of fixed-point particles and
+fills a fixed-point matrix with their values, row by row.
+  }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

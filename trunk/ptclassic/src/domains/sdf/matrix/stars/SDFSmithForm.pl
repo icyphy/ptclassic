@@ -2,10 +2,10 @@ defstar {
 	name { SmithForm }
 	domain { SDF }
 	desc {
-Decomposes an integer matrix $S$ into one of its Smith forms
-$S ~ = ~ U ~ D ~ V$, where $U$, $D$, and $V$ are simpler integer matrices.
-The Smith form decomposition for integer matrices is analogous to
-singular value decomposition for floating-point matrices.
+Decompose an integer matrix S into one of its Smith forms S = U D V,
+where U, D, and V are simpler integer matrices. The Smith form
+decomposition for integer matrices is analogous to singular
+value decomposition for floating-point matrices.
 	}
 	version { $Id$ }
 	author { Brian Evans }
@@ -60,7 +60,7 @@ video processing applications will not exceed integer precision.
 .Ir "McClellan, J."
 .Ir "Kaufmann, A."
 .Ir "Henry-Labordiere, A."
-.UH REFERENCES
+.UH References
 .ip [1]
 A. Guessoum,
 \fIFast Algorithms for the Multidimensional Discrete Fourier Transform\fR,

@@ -2,13 +2,11 @@ defstar {
   name { InverseInt_M }
   domain { SDF }
   desc {
-Invert a square matrix using the Matrix class function.
-The input matrix has dimensions (rowsCols,rowsCols).
-The output matrix has dimensions (rowsCols,rowsCols).
-NOTE: If A is the input Matrix and !A is the inverse, then
-      A * !A will not necessarily be the identity matrix unless
-      A has an inverse which can be represented by as an IntMatrix.
-      Many times this is not the case!
+Invert a square integer matrix, producing an integer matrix.
+Note: If A is the input Matrix and B is the inverse, then AB
+will not necessarily be the identity matrix unless A has an
+inverse that can be represented as an integer matrix.
+Usually this is not the case!
   }
   version { $Id$ }
   author { Mike J. Chen }
@@ -26,7 +24,7 @@ NOTE: If A is the input Matrix and !A is the inverse, then
     name { rowsCols }
     type { int }
     default { 8 }
-    desc { The number of rows/columns of the input square matrix. }
+    desc { The number of rows and columns of the input square matrix. }
   }
   ccinclude { "Matrix.h" }
   go {

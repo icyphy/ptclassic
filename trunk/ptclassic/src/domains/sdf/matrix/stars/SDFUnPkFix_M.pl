@@ -1,7 +1,7 @@
 defstar {
   name      { UnPkFix_M }
   domain    { SDF }
-  desc      { Takes FixMatrix messages and produces Fix particles. }
+  desc      { Read a fixed-point matrix and output its elements, row by row. }
   version   { $Id$ }
   author    { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

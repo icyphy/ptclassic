@@ -1,13 +1,7 @@
 defstar {
 	name { AddInt_M }
 	domain { SDF }
-	desc {
-Does a matrix addition of two input Int Matricies A and B to 
-produce matrix C.
-Matrix A has dimensions (numRows,numCols).
-Matrix B has dimensions (numRows,numCols).
-Matrix C has dimensions (numRows,numCols).
-	}
+	desc { Add two integer matrices. }
 	version { $Id$ }
 	author { Mike J. Chen }
 	copyright { 1993 The Regents of the University of California }
@@ -28,13 +22,13 @@ Matrix C has dimensions (numRows,numCols).
 		name { numRows }
 		type { int }
 		default { 8 }
-		desc { The number of rows in Matrix A and B}
+		desc { The number of rows in the input matrices. }
 	}
 	defstate {
 		name { numCols }
 		type { int }
 		default { 8 }
-		desc { The number of columns in Matrix A and B }
+		desc { The number of columns in the input matrices. }
 	}
         ccinclude { "Matrix.h" }
 	go {

@@ -1,11 +1,7 @@
 defstar {
   name { Conjugate_M }
   domain { SDF }
-  desc {
-Does a complex conjugate on the input matrix, using the Matrix class function.
-The input matrix has dimensions (numRows,numCols).
-The output matrix has dimensions (numCols,numRows).
-  }
+  desc { Conjugate a matrix. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }

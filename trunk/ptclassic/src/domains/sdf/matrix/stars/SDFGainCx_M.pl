@@ -1,9 +1,7 @@
 defstar {
   name { GainCx_M }
   domain { SDF }
-  desc {
-    Takes an input ComplexMatrix and multiplies it by a scalar gain value.
-  }
+  desc { Multiply a complex matrix by a complex scalar gain value. }
   version { $Id$ }
   author { Mike J. Chen }
   copyright { 1993 The Regents of the University of California }
