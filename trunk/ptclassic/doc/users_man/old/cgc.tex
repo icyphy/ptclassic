@@ -1,4 +1,8 @@
 \c Version $Id$
+
+\c Path to the CGC domain.
+\newcommand{\CGC}{\PTOLEMY/src/domains/cgc}
+
 \node CGC Domain
 \chapter{CGC Domain}
 
@@ -14,18 +18,18 @@ for the \code{C} programming language.
 \cindex{C code generation}
 \cindex{CGC domain}
 This domain supports both synchronous dataflow
-(\pxref{SDF Domain})
+(SDF, \pxref{SDF Domain})
 \cindex{synchronous dataflow}
 \cindex{dataflow, synchronous}
 and Boolean-controlled dataflow
-(\pxref{BDF Domain})
+(BDF, \pxref{BDF Domain})
 \cindex{Boolean-controlled dataflow}
 \cindex{dataflow, Boolean-controlled}
 models of computation.  The model 
 associated with a particular program graph is determined by
 which target is selected.  The \code{bdf-CGC} target supports the BDF
-model, while all other targets in the CGC domain support the more
-limited SDF model.  Code can be generated for both single-processor
+model, while all other targets in the CGC domain support only the
+SDF model.  Code can be generated for both single-processor
 and multi-processor computers.  The targets that support
 single processors include \code{default-CGC}, \code{TclTk_Target}, and
 \code{bdf-CGC}.  The multi-processor target is \code{unixMulti_C}.
@@ -36,7 +40,7 @@ single processors include \code{default-CGC}, \code{TclTk_Target}, and
 The targets of the CGC domain
 generate \code{C} code from dataflow program graphs.
 Code generation is controlled by the \var{host}, \var{directory}, and
-\var{file} parameters as described in \nxref{CG Single-Processor Targets}.
+\var{file} parameters as described in \nxref{CG Targets}.
 \vindex{host parameter}
 \vindex{directory parameter}
 \vindex{file parameter}
@@ -50,14 +54,14 @@ parameters.  Compilation and execution are controlled by the
 \vindex{display? parameter}
 \vindex{compile? parameter}
 \vindex{run? parameter}
-parameters, also described in \nxref{CG Single-Processor Targets}.
+parameters, also described in \nxref{CG Targets}.
 The other parameters common to all CGC targets are listed below.  Not
 all of these parameters are made available to the user by every
 target, and some targets define additional parameters.
 
 \begin{statelist}{parameter}
 \state{INT}{staticBuffering}{TRUE}
-If \samp{TRUE}, then attempt to static, compile-time addressing of data
+If \samp{TRUE}, then attempt to use static, compile-time addressing of data
 buffers between stars.  Otherwise, use dynamic, run-time addressing.
 
 \state{STRING}{funcName}{main}
@@ -97,11 +101,10 @@ List of abstract resources that the host computer has.
 
 The \code{default-CGC} target
 \tindex{default-CGC target}
-generates \code{C} code for a single
-processor from a SDF program graph.  The parameters available to the
-user are shown in table \ref{default-CGC-parameters}.  See \nxref{CG
-Single-Processor Targets}, and \nxref{CGC Targets} for detailed
-descriptions of these parameters.
+generates \code{C} code for a single processor from a SDF program
+graph.  The parameters available to the user are shown in
+table\tie\ref{default-CGC-parameters}.  \xref{CG Targets} , and
+\nxref{CGC Targets} for detailed descriptions of these parameters.
 
 The \code{TclTk_Target} target,
 \tindex{TclTk_Target target}
@@ -112,34 +115,33 @@ the program graph.  The parameters differ from those of the
 
 \begin{statelist}{parameter}
 
-\state{INT}{loopingLevel}{1}
+\state{INT}{Looping Level}{1}
 
 \state{STRING}{funcName}{go}
 
-\state{STRING}{compileOptions}{-I$PTOLEMY/tcl/tk/src \\
-    -I$PTOLEMY/tcl/tcl/src \\
-    -I$PTOLEMY/src/domains/cgc/tcltk/lib}
+\state{STRING}{compileOptions}{-I$PTOLEMY/tcltk/tk/include \\
+-I$PTOLEMY/tcltk/tcl/include \\
+-I$PTOLEMY/src/domains/cgc/tcltk/lib}
 
-\state{STRING}{linkOptions}{-L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
-    -L$PTOLEMY/tcl/tcl/lib/$ARCH.opt \\
-    -L$PTOLEMY/lib.$ARCH \\
-    -L$PTOLEMY/tcl/tk/lib/$ARCH.opt \\
-    -L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm}
+\state{STRING}{linkOptions}{-L$PTOLEMY/tcltk/tk.$ARCH/lib \\
+-L$PTOLEMY/tcltk/tcl.$ARCH/lib \\
+-L$PTOLEMY/lib.$ARCH \\
+-L$PTOLEMY/tcltk/tk.$ARCH/lib \\
+-L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm}
 
 \end{statelist}
 
-
 The \code{bdf-CGC} target
 \tindex{bdf-CGC target}
-supports the Boolean-controlled dataflow (BDF) model of
+supports the BDF model of
 computation.  It must be used when BDF stars are present in the program
 graph.  It can also be used with program graphs that contain only
-synchronous dataflow (SDF) stars.
+SDF stars.
 The \code{bdf-CGC} target has the same parameters as the
 \code{default-CGC} target with the exception that
 the \var{Looping Level} parameter is absent.  This is because a
 loop-generating algorithm is always used for scheduling.
-\xref{BDF Domain}, for details on the scheduling algorithm.
+\xref{BDF Domain} for details.
 
 \node CGC Multi-Processor Targets
 \subsection{Multi-Processor Targets}
@@ -161,19 +163,19 @@ loop-generating algorithm is always used for scheduling.
 \label{unixMultiC-parameters}
 \end{table}
 
-The supported multi-processor target in the CGC domain is \code{unixMulti_C}.
+The multi-processor target supported in the CGC domain is \code{unixMulti_C}.
 It generates code for multiple networked workstations, using a shared bus
 configuration for scheduling purposes.  In addition to the target
 parameters described in
-\nxref{CGC Targets}, and \nxref{CG Multi-Processor Targets},
+\nxref{CGC Targets}, and \nxref{CG Targets},
 this target defines the user parameters listed below.
-Table \ref{unixMultiC-parameters} gives the complete list of parameters for
+Table\tie\ref{unixMultiC-parameters} gives the complete list of parameters for
 the \code{unixMulti_C} target.
 
 \begin{statelist}{parameter}
 \state{INT}{portNumber}{7654}
 The starting port number used by send/receive stars.  The port number
-will be incremented for each send/receive pair.  It is the
+is incremented for each send/receive pair.  It is the
 responsibility of the user to ensure that the port number does not
 conflict with any that may already be in use.
 
@@ -193,47 +195,49 @@ a leading period, such as \samp{.berkeley.edu}.
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/main.pal.ps}
+\ \psfig{figure=\CGC/icons/main.pal.ps}
 \caption{Top-level palette of stars in the CGC domain.}
+\label{figure CGC stars}
 \end{figure}
+
+Figure\tie\ref{figure CGC stars} shows the top-level palette of CGC
+stars.  The stars are divided into categories:  sources, sinks,
+aritmetic functions, nonlinear functions, control, conversion, signal
+processing, boolean-controlled dataflow, and Tcl/Tk stars.  Many of the
+stars in the CGC domain have equivalent counterparts in the SDF
+domain.  \xref{SDF Star Overview} for brief descriptions of these
+stars.  Brief descriptions of the stars unique to the CGC domain are
+given in the following sections.  Refer to the Star Atlas for more
+detailed descriptions.
 
 \node CGC Source Stars
 \subsection{Source Stars}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/sources.pal.ps}
+\ \psfig{figure=\CGC/icons/sources.pal.ps}
 \caption{Source stars in the CGC domain.}
 \label{figure CGC source stars}
 \end{figure}
 
 Source stars have no inputs and only produce data on their outputs.
-Figure \ref{figure CGC source stars} shows the palette of CGC source
+Figure\tie\ref{figure CGC source stars} shows the palette of CGC source
 stars.  The following stars are equivalent to the SDF stars of the same
-name:
+name (\pxref{SDF Source Stars}):
 \code{Const},
 \code{IIDUniform},
 \code{Impulse},
 \code{Ramp},
 \code{singen},
-\code{TkSlider},
 \code{WaveForm}.
-Refer to \nxref{SDF Domain} for short descriptions of these stars.
 Stars that are unique to the CGC domain are described briefly below.
-Refer to the Almagest Star Atlas for a more detailed description.
 
 \begin{blocklist}{(CGC block)}
 
 \block{PCMread}
-Read \( \mu \)-law PCM from a file and convert to linear floating point.
+Read \(\mu\)-law PCM from a file and convert to linear floating point.
 The file can be the audio port \file{/dev/audio},
 if supported by the workstation.
-
-\block{TkEntry}
-Output a constant signal with value determined by a Tk entry box.
-
-\block{TkImpulse}
-Output an impulse when a button is pushed.
 
 \end{blocklist}
 
@@ -242,37 +246,36 @@ Output an impulse when a button is pushed.
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/sinks.pal.ps}
+\ \psfig{figure=\CGC/icons/sinks.pal.ps}
 \caption{Sink stars in the CGC domain.}
 \label{figure CGC sink stars}
 \end{figure}
 
 Sink stars have no outputs and only consume data on their inputs.
-Figure \ref{figure CGC sink stars} shows the palette of CGC sink stars.
-The following stars are equivalent to the SDF stars of the same name:
+Figure\tie\ref{figure CGC sink stars} shows the palette of CGC sink stars.
+The following stars are equivalent to the SDF stars of the
+same name (\pxref{SDF Sink Stars}):
 \code{BlackHole},
 \code{Printer},
 \code{Xgraph},
 \code{XMgraph},
 \code{Xscope},
 \code{XYgraph}.
-Refer to \nxref{SDF Domain} for short descriptions of these stars.
 Stars that are unique to the CGC domain are described briefly below.
-Refer to the Almagest Star Atlas for a more detailed description.
 
 \begin{blocklist}{(CGC block)}
 \block{PCMwrite}
-Convert input to \( \mu \) -law PCM and write it to a file.
+Convert input to \(\mu\)-law PCM and write it to a file.
 The file can be the audio port \file{/dev/audio},
 if supported by the workstation.
 
 \block{SunSound}
-Convert input to \( \mu \) -law PCM and write to the Sun audio port
+Convert input to \(\mu\)-law PCM and write to the Sun audio port
 \file{/dev/audio}.
 The input is expected to be in the range from -1.0 to 1.0.
 If the \var{aheadLimit} parameter is non-negative, then it specifies
 \vindex{aheadLimit parameter}
-the maximum number of samples that the program will be allowed to compute
+the maximum number of samples that the program is allowed to compute
 ahead of real time.
 
 \end{blocklist}
@@ -282,46 +285,37 @@ ahead of real time.
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/arithmetic.pal.ps}
+\ \psfig{figure=\CGC/icons/arithmetic.pal.ps}
 \caption{Arithmetic stars in the CGC domain.}
 \label{figure CGC aritmetic stars}
 \end{figure}
 
 Arithmetic stars perform simple functions.
-Figure \ref{figure CGC aritmetic stars} shows the palette of CGC
-aritmetic stars.
-The following stars are equivalent to the SDF stars
-of the same name:
+Figure\tie\ref{figure CGC aritmetic stars} shows the palette of CGC
+arithmetic stars.
+All of the stars are equivalent to the SDF stars
+of the same name (\pxref{SDF Arithmetic Stars}):
 \code{Add},
 \code{Gain},
 \code{Integrator},
 \code{Mpy},
 \code{Sub}.
-Refer to \nxref{SDF Domain} for short descriptions of these stars.
-Stars that are unique to the CGC domain are described briefly below.
-Refer to the Almagest Star Atlas for a more detailed description.
-
-\begin{blocklist}{(CGC block)}
-
-\block{Expr}
-General expression evaluation.  This star evaluates the expression
-given by the \var{expr} parameter and writes the result on
-\var{output}.  The default expression, which is \samp{$ref(in#1)}
-simply copies the first input to the output.
-
-\end{blocklist}
 
 \node CGC Nonlinear Stars
 \subsection{Nonlinear Stars}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/nonlinear.pal.ps}
+\ \psfig{figure=\CGC/icons/nonlinear.pal.ps}
 \caption{Nonlinear stars in the CGC domain.}
+\label{figure CGC nonlinear stars}
 \end{figure}
 
+Nonlinear stars perform simple functions.
+Figure\tie\ref{figure CGC nonlinear stars} shows the palette of CGC
+nonlinear stars.
 The following stars are equivalent to the SDF stars
-of the same name:
+of the same name (\pxref{SDF Nonlinear Stars}):
 \code{conj},
 \code{Cos},
 \code{Exp},
@@ -333,11 +327,15 @@ of the same name:
 \code{Sin},
 \code{Sqrt},
 \code{Table}.
-Refer to \nxref{SDF Domain} for short descriptions of these stars.
 Stars that are unique to the CGC domain are described briefly below.
-Refer to the Almagest Star Atlas for a more detailed description.
 
 \begin{blocklist}{(CGC block)}
+
+\block{Expr}
+General expression evaluation.  This star evaluates the expression
+given by the \var{expr} parameter and writes the result on
+\var{output}.  The default expression, which is \samp{$ref(in#1)}
+simply copies the first input to the output.
 
 \block{Thresh}
 Compares \var{input} values to \var{threshold}.  The \var{output} is
@@ -351,87 +349,147 @@ Compares \var{input} values to \var{threshold}.  The \var{output} is
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/control.pal.ps}
+\ \psfig{figure=\CGC/icons/control.pal.ps}
 \caption{Control stars in the CGC domain.}
+\label{figure CGC control stars}
 \end{figure}
 
-Fork
-DownSample
-UpSample
-Sleep
-Spread
-Collect
+Control stars are used for routing data and other control functions.
+Figure\tie\ref{figure CGC control stars} shows the palette of CGC
+control stars.
+The following stars are equivalent to the SDF stars
+of the same name (\pxref{SDF Control Stars}):
+\code{DownSample},
+\code{Fork},
+\code{UpSample}.
+Stars that are unique to the CGC domain are described briefly below.
+
+\begin{blocklist}{(CGC block)}
+
+\block{Sleep}
+Suspend execution for an interval (in milliseconds).
+The input is passed to the output when the process resumes.
+
+\block{Spread}
+Takes one input and produces multiple outputs.
+This star does not generate any code. In multiprocessor code generation,
+this star is automatically attached to a porthole whose
+outputs are passed to more than one destination (one ordinary block and
+one \code{Send} star, more than one \code{Send} star, and so on.)
+
+\block{Collect}
+Takes multiple inputs and produces one output.
+This star does not generate code. In multiprocessor code generation,
+it is automatically attached to a porthole if it has multiple sources
+Its role is just opposite to that of \code{Spread} star.
+
+\end{blocklist}
 
 \node CGC Conversion Stars
 \subsection{Conversion Stars}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/conversion.pal.ps}
+\ \psfig{figure=\CGC/icons/conversion.pal.ps}
 \caption{Type-conversion stars in the CGC domain.}
+\label{figure CGC conversion stars}
 \end{figure}
 
-CxToRect
-RectToCx
-RectToPolar
-PolarToRect
+Conversion stars are used to convert between complex and real numbers.
+Figure\tie\ref{figure CGC conversion stars} shows the palette of CGC
+conversion stars.
+All of the stars are equivalent to the SDF stars
+of the same name (\pxref{SDF Conversion Stars}):
+\code{CxToRect},
+\code{PolarToRect},
+\code{RectToCx},
+\code{RectToPolar}.
 
 \node CGC Signal Processing Stars
 \subsection{Signal Processing Stars}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/dsp.pal.ps}
+\ \psfig{figure=\CGC/icons/dsp.pal.ps}
 \caption{Signal processing stars in the CGC domain.}
+\label{figure CGC dsp stars}
 \end{figure}
 
-FIR
-LMS
-LMSTkPlot
-FFTCx
-DB
+Figure\tie\ref{figure CGC dsp stars} shows the palette of CGC
+signal processing stars.
+All of the stars are equivalent to the SDF stars
+of the same name (\pxref{SDF Signal Processing Stars}):
+\code{DB},
+\code{FFTCx},
+\code{FIR},
+\code{LMS},
+\code{LMSTkPlot}.
 
-\begin{ignore}
+\node CGC BDF Stars
+\subsection{BDF Stars}
 
-\node CGC Dynamic Dataflow Stars
-\subsection{Dynamic Dataflow Stars}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/nonsdf.pal.ps}
-\caption{Dynamic dataflow stars in the CGC domain.}
+\ \psfig{figure=\CGC/icons/bdf.pal.ps}
+\caption{BDF stars in the CGC domain.}
+\label{figure CGC BDF stars}
 \end{figure}
 
-\end{ignore}
+BDF stars are used for conditionally routing data.
+Figure\tie\ref{figure CGC BDF stars} show the palette of BDF stars in
+the CGC domain.  These stars require the use of the \code{bdf-CGC}
+target (\pxref{CGC Single-Processor Targets}).
+\tindex{bdf-CGC target}
 
-\node CGC Boolean-Controlled Dataflow Stars
-\subsection{Boolean-Controlled Dataflow Stars}
+\begin{blocklist}{(CGC Block)}
+\block{Select}
+This star requires a BDF scheduler.
+If the value on the \var{control} line is nonzero, \var{trueInput}
+is copied to the \var{output}; otherwise, \var{falseInput} is.
 
-\begin{figure}
-\centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/icons/bdf.pal.ps}
-\caption{Boolean-controlled dataflow stars in the CGC domain.}
-\end{figure}
+\block{Switch}
+This star requires a BDF scheduler.
+Switches \var{input} events to one of two outputs, depending on
+the value of the \var{control} input.  If \var{control} is true, the
+value is written to \var{trueOutput}; otherwise it is written to
+\var{falseOutput}.
 
-Select
-Switch
+\end{blocklist}
 
 \node CGC Tcl/Tk Stars
 \subsection{Tcl/Tk Stars}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/tcltk/icons/tcltk.pal.ps}
+\ \psfig{figure=\CGC/tcltk/icons/tcltk.pal.ps}
 \caption{Tcl/Tk stars in the CGC domain.}
+\label{figure CGC tcltk stars}
 \end{figure}
 
-Many of the stars in this palette also appear in other palettes.  The
-two that are unique to this palette are described briefly below.  Refer
-to the Almagest Star Atlas for a more detailed description.
+Tcl/Tk stars require the use of the \code{TclTk_Target} target.  They
+can be used to provide an interactive user interface with Tk widgets.
+Figure\tie\ref{figure CGC tcltk stars} shows the palette of Tcl/Tk
+stars available in the CGC domain.  Short descriptions of the stars are
+given below.
 
 \begin{blocklist}{(CGC block)}
+
+\block{TkEntry}
+Output a constant signal with value determined by a Tk entry box.
+
+\block{TkImpulse}
+Output an impulse when a button is pushed.
+
 \block{TclScript}
+Sends input values to a Tcl script.  Gets output values from a Tcl script.
+The star can communicate with Tcl either synchronously or asynchronously.
+
 \block{TkSunSound}
+Just like \code{SunSound} (\pxref{CGC Sink Stars}),
+except that a Tk slider is put in the master
+control panel to control the volume.
+
 \end{blocklist}
 
 \node CGC Demo Overview
@@ -439,69 +497,203 @@ to the Almagest Star Atlas for a more detailed description.
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/init.pal.ps}
+\ \psfig{figure=\CGC/demo/init.pal.ps}
 \caption{Top-level palette of demos in the CGC domain.}
+\label{figure CGC demos}
 \end{figure}
+
+Figure\tie\ref{figure CGC demos} shows the top-level palette of CGC
+demos.  The demos are divided into categories:  basic, multirate,
+signal processing, sound, Tcl/Tk, and BDF demos.  Many of the demos in
+the CGC domain have equivalent counterparts in the SDF or BDF domains.
+\xref{SDF Demo Overview} or \nxref{BDF Demo Overview} for brief
+descriptions of these demos.  Brief descriptions of the demos unique to
+the CGC domain are given in the following sections.  Refer to the Star
+Atlas for more detailed descriptions.
 
 \node CGC Basic Demos
 \subsection{Basic Demos}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/basic.pal.ps}
+\ \psfig{figure=\CGC/demo/basic.pal.ps}
 \caption{Basic CGC demos.}
 \end{figure}
+
+The following demos are equivalent to the SDF demos
+of the same name (\pxref{SDF Demo Overview}):
+\code{butterfly},
+\code{chaos},
+\code{integrator},
+\code{quantize}.
+The other demos in this palette are described briefly below.
+
+\begin{blocklist}{(CGC Demo)}
+
+\block{nonlinear}
+This simple system plots four nonlinear functions over the range
+1.0 to 1.99.  The four functions are exponential, natural logarithm,
+square root, and reciprocal.
+
+\block{typeConversion}
+This simple demo tests the automatic splicing in of type conversion stars.
+It only generates code and does not run.
+
+\end{blocklist}
 
 \node CGC Multirate Demos
 \subsection{Multirate Demos}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/multirate.pal.ps}
+\ \psfig{figure=\CGC/demo/multirate.pal.ps}
 \caption{Multirate CGC demos.}
 \end{figure}
+
+The following demos are equivalent to the SDF demos
+of the same name (\pxref{SDF Demo Overview}):
+\code{interp},
+\code{filterBank}.
+The other demos in this palette are described briefly below.
+
+\begin{blocklist}{(CGC Demo)}
+
+\block{upsample}
+This simple up-sample demo tests static buffering.
+Each invocation of the
+\code{XMgraph}
+star reads its input from a fixed buffer location
+since the buffer between the
+\code{UpSample}
+star and the
+\code{XMgraph}
+star is static.
+
+\block{loop}
+This demo demonstrates the code size reduction achieved with a loop-generating
+scheduling algorithm.
+
+\end{blocklist}
 
 \node CGC Signal Processing Demos
 \subsection{Signal Processing Demos}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/dsp.pal.ps}
+\ \psfig{figure=\CGC/demo/dsp.pal.ps}
 \caption{Signal processing demos in the CGC domain.}
 \end{figure}
+
+The following demos are equivalent to the SDF demos
+of the same name (\pxref{SDF Demo Overview}):
+\code{adaptFilter},
+\code{dft}.
+The \code{animatedLMS} demo is described in \nxref{CGC Tcl/Tk Demos}.
 
 \node CGC Sound-Making Demos
 \subsection{Sound-Making Demos}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/sound.pal.ps}
+\ \psfig{figure=\CGC/demo/sound.pal.ps}
 \caption{Sound-making demos in the CGC domain.}
+\label{figure CGC sound demos}
 \end{figure}
 
-\node CGC Dynamic Dataflow Demos
-\subsection{Dynamic Dataflow Demos}
+This palette contains only one demo.  Your workstation must be equipped
+with an audio device that can accept \(\mu\)-law encoded PCM for
+this demo to work.  Some other sound making demos can be found in the
+Tcl/Tk palette. \xref{CGC Tcl/Tk Demos}.
 
-\begin{figure}
-\centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/cgddf.pal.ps}
-\caption{Dynamic dataflow demos in the CGC domain.}
-\end{figure}
+\begin{blocklist}{(CGC Demo)}
+
+\block{sound}
+Generate a sound to play over the workstation speaker.
+
+\end{blocklist}
 
 \node CGC Tcl/Tk Demos
 \subsection{Tcl/Tk Demos}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/tcltk/demo/init.pal.ps}
+\ \psfig{figure=\CGC/tcltk/demo/init.pal.ps}
 \caption{Tcl/Tk demos in the CGC domain.}
+\label{figure CGC tcltk demos}
 \end{figure}
 
-\node CGC Boolean-Controlled Dataflow Demos
-\subsection{Boolean-Controlled Dataflow Demos}
+These demos show off the capabilities of the Tcl/Tk stars, which must
+be used with the \code{TclTk_Target} target.
+\tindex{TclTk_Target target}
+Graphical user interface widgets are used to control input parameters
+and to produce animation.  Many of these demos also produce sound on the
+workstation speaker with the \code{TkSunSound} star (\pxref{CGC Tcl/Tk Stars}).
+\tindex{TkSunSound (CGC Block)}
+Figure\tie\ref{figure CGC tcltk demos} shows the demos that are available.
+
+\begin{blocklist}{(CGC Demo)}
+
+\block{tremolo}
+This demo produces a tremolo (amplitude modulation) effect  on the
+workstation speaker.  You can adjust the pitch, modulation
+frequency, and volume in real time.
+
+\block{fm}
+This demo uses frequency modulation (FM) to synthesize a tone on the
+workstation speaker.  You can adjust the modulation index, pitch, and
+volume in real time.
+
+\block{animatedLMS}
+This demo is a simplified version of the SDF demo of the same name
+(\pxref{SDF Demo Overview}).
+
+\block{impulse}
+This demo generates tones on the workstation speaker with decaying
+amplitude envelopes using frequency modulation synthesis.  You can make
+tones by pushing a button. You can adjust the pitch, modulation index,
+and volume in real time.
+
+\block{synth}
+This demo generates sinusoidal tones on the workstation speaker.  You
+can control the pitch with a piano-like interface.
+
+\block{dtmf}
+This demo generates the same dual-tone multiple-frequency tones you
+hear when you dial your phone.  The interface resembles the keypad of a
+telephone.
+
+\block{scriptTest}
+This demo show the use of several kinds of Tk widgets for user input.
+Push buttons generate tones or noise, and sliders adjust the frequency
+and volume in real time.
+
+\block{ball}
+This demo exhibits sinusoidal motion with a ball moving back and forth.
+
+\block{ballAsync}
+This demo is the same as the \code{ball} demo except that animation is
+updated asynchronously.
+
+\block{universe}
+This demo shows the movements of the Sun, Venus, Earth, and Mars in a
+Ptolemaic (Earth centered) universe.
+
+\end{blocklist}
+
+\node CGC BDF Demos
+\subsection{BDF Demos}
 
 \begin{figure}
 \centering
-\ \psfig{figure=/users/ptdesign/src/domains/cgc/demo/bdf.pal.ps}
-\caption{Boolean-controlled dataflow demos in the CGC domain.}
+\ \psfig{figure=\CGC/demo/bdf.pal.ps}
+\caption{BDF demos in the CGC domain.}
+\label{figure CGC BDF demos}
 \end{figure}
+
+Figure\tie\ref{figure CGC BDF demos} shows the palette of universes
+that demonstrate the use of BDF stars in the
+CGC domain.  The \code{timing} demo is equivalent to the BDF demo of
+the same name.  The demos \code{bdf-if} and \code{bdf-doWhile} are
+equivalent to the BDF demos named \code{ifThenElse} and \code{loop}.
+\xref{BDF Demo Overview} for short descriptions of these demos.
+
