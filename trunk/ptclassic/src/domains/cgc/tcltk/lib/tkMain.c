@@ -151,7 +151,7 @@ static void ptReleaseSig ARGS((int SigNum)) {}
 
 #else 
 #if defined(PTHPPA)
-static void ptSafeSig ARGS(( int )) {}
+static void ptSafeSig ARGS(( int foo )) {}
 static long signalmask;
 /* Don't use prototypes since the cc distributed with hppa
  * won't work with them
