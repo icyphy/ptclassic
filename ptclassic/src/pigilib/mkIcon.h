@@ -59,12 +59,16 @@ extern boolean MkPalIcon(octObject *facetPtr, octObject *iconFacetPtr);
 extern boolean MkUnivIcon(octObject *facetPtr, octObject *iconFacetPtr);
 extern boolean MkGalIcon(octObject *galFacetPtr, octObject *iconFacetPtr);
 extern boolean MkStarIcon(char *name, char *dir, octObject *iconFacetPtr);
-
 extern boolean PutShape( /* octObject *containPtr, octObject *objPtr, Shape *shapePtr, struct octPoint *translatePtr */);
-#else
+
+#else /* __cplusplus */
+
 extern boolean MkPalIcon();
 extern boolean MkUnivIcon();
 extern boolean MkGalIcon();
 extern boolean MkStarIcon();
+extern boolean PutShape( /* octObject *containPtr, octObject *objPtr,
+			    Shape *shapePtr, 
+			    struct octPoint *translatePtr */); 
 #endif /* cplusplus */
 #endif /* MKICON_H */
