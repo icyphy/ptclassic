@@ -26,10 +26,10 @@ above are "setOutputs", "grabInputs", and "callTcl".
 The first thing the star does is to define the Tcl variable "uniqueSymbol"
 to equal the unique string.  This string specifies the prefix that makes
 the name unique.  Thus the full name for the three procedures
-is "{uniqueName}setOutputs", "{uniqueName}grabInputs", and
-"{uniqueName}callTcl".  The first two of these are defined internally
+is "{uniqueSymbol}setOutputs", "{uniqueSymbol}grabInputs", and
+"{uniqueSymbol}callTcl".  The first two of these are defined internally
 by the star.  The third should be defined by the user in the Tcl file
-that the star reads.  In this star, the "uniqueName" is "tclScriptN",
+that the star reads.  In this star, the "uniqueSymbol" is "tclScriptN",
 where "N" is an integer.
 .pp
 Two basic mechanisms can be used to control the behavior of the star.
@@ -110,8 +110,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		// when the .o file is loaded.
 		int SDFTclScript::unique = 0;
 	}
-	setup {
+	constructor {
+	    // doing this here ensures that for each instance of the star,
+	    // rather than for each run, the name will be unique.
 	    myUnique = unique++;
+	}
+	setup {
 	    sprintf(buf,"tclScript%d", myUnique);
 	    if(Tcl_SetVar(ptkInterp, "uniqueSymbol", buf, TCL_GLOBAL_ONLY)
 			== NULL) {
