@@ -51,15 +51,17 @@ CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
 
 // destructor: remove forklist references.
 CGPortHole :: ~CGPortHole() {
+	if (forkSrc) {
+		forkSrc->forkDests.remove(this);
+	}
+
 	ListIter next(forkDests);
 	OutCGPort* p;
 	while ((p = (OutCGPort*)next++) != 0) p->setForkSource(0);
-	if (forkSrc)
-		forkSrc->forkDests.remove(this);
+
 	// If myGeodesic is switched, the pointer is set to zero to prevent
-	// deleting the same geodesic multiple times. 
-	// Make sure that original geodesic is destroyed when switching
-	// geodesics
+	// deleting the same geodesic multiple times.  Make sure that
+	// original geodesic is destroyed when switching geodesics.
 	if (switched()) {
 		myGeodesic = 0;
 	}
