@@ -87,9 +87,7 @@ STR help_buf;			/* Help text              */
     };
     static int num_cons = sizeof(controls)/sizeof(ddsControl);
     ddsPosition pos;
-    ddsControl help_con;
-    static char **string_ring = (char **) 0;
-    static int string_count = 0;
+
     int i;
 
     if (!_vemdm_initialized) {
