@@ -1,8 +1,8 @@
 # Version Identification:
-# @(#)scratch-srcs.mk	1.31 3/3/95
+# $Id$
 # Build GNU binaries and tcl/tk from scratch for Ptolemy
 #
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -121,6 +121,7 @@ tcltk_configure: $(OBJARCH)/tcltk
 $(OBJARCH)/tcltk: $(OBJARCH) 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC=$(CC) \
+		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		configure)
@@ -128,6 +129,7 @@ $(OBJARCH)/tcltk: $(OBJARCH)
 tcltk_bin: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC=$(CC) \
+		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		bin)
@@ -135,6 +137,7 @@ tcltk_bin: $(OBJARCH)/tcltk
 tcltk_install: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC=$(CC) \
+		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		install)
