@@ -50,7 +50,7 @@ static const char file_id[] = "CGUtilities.cc";
 #include <string.h>
 #include "compat.h"
 
-#if defined(hpux) || defined(SYSV) || defined(SVR4) || defined(__svr4__) || defined(PTIRIX5_CFRONT) 
+#if defined(hpux) || defined(SYSV) || defined(SVR4) || defined(__svr4__) || defined(PTIRIX5_CFRONT) || defined(linux)
 #include <sys/stat.h>		// Pick up chmod declaration.
 #endif /* hpux SYSV SVR4 */
 
