@@ -153,8 +153,13 @@ id, geo, deswidth, desheight)
 }
 
 /*
+ * For maximal efficiency, there are several versions of the routines that
+ * set the bars in the bar graph.  Use the one most suited.
+ */
+
+/*
  *----------------------------------------------------------------------
- * Set the bars in a bar graph
+ * Set all the bars in a bar graph
  *----------------------------------------------------------------------
  *     interp: pointer to the tcl interpreter
  *     win: a pointer to a reference window (top level window)
@@ -202,6 +207,111 @@ int ptkSetBarGraph (interp, win, name, data, numTraces,
             if(Tcl_Eval(interp, command) != TCL_OK)
                 return 0;
 	}
+    }
+    return 1;
+}
+
+/*
+ *----------------------------------------------------------------------
+ * Set the a single bar in a bar graph
+ *----------------------------------------------------------------------
+ *     interp: pointer to the tcl interpreter
+ *     win: a pointer to a reference window (top level window)
+ *     name: name of the top level window
+ *     data: an array of arrays of data to be plotted
+ *     numBars: number of bars in the bar graph
+ *     top: top of the range of bar graph
+ *     bottom: bottom of the range of bar graph
+ *     id: an array of arrays of item IDs filled by makeBarChart
+ *     whichTrace: the number of the trace being updated
+ *     whichBar: the number of the bar to update
+ *
+ * Returns 1 if bar graph is successfully updated, 0 otherwise.
+ * This procedure queries the window for its actual current width.
+ */
+
+int ptkSetOneBar (interp, win, name, data, numTraces,
+	numBars, top, bottom, id, whichTrace, whichBar)
+    Tcl_Interp *interp;
+    Tk_Window *win;
+    char *name;
+    double **data;
+    int numTraces, numBars;
+    double top, bottom;
+    int **id;
+    int whichTrace, whichBar;
+{
+    int width, height;
+    int x0, y0, x1, y1;
+    Tk_Window plotwin;
+
+    /* Get the current plot window size */
+    sprintf(command, "%s.pf.plot", name);
+    plotwin = Tk_NameToWindow(interp,command,*win);
+    if (plotwin == 0) return 0;
+    width = Tk_Width (plotwin);
+    height = Tk_Height (plotwin);
+
+    ptkFigureBarEdges(&x0,&x1,&y0,&y1, whichBar, whichTrace,
+		      numTraces, numBars, width, height,
+		      top, bottom, data[whichTrace][whichBar]);
+
+    sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
+	    name, id[whichTrace][whichBar], x0, y0, x1, y1);
+    if(Tcl_Eval(interp, command) != TCL_OK)
+      return 0;
+    return 1;
+}
+/*
+ *----------------------------------------------------------------------
+ * Set the a family of bars in a bar graph (all traces, one bar)
+ *----------------------------------------------------------------------
+ *     interp: pointer to the tcl interpreter
+ *     win: a pointer to a reference window (top level window)
+ *     name: name of the top level window
+ *     data: an array of arrays of data to be plotted
+ *     numBars: number of bars in the bar graph
+ *     top: top of the range of bar graph
+ *     bottom: bottom of the range of bar graph
+ *     id: an array of arrays of item IDs filled by makeBarChart
+ *     whichBar: the number of the bar to update
+ *
+ * Returns 1 if bar graph is successfully updated, 0 otherwise.
+ * This procedure queries the window for its actual current width.
+ */
+
+int ptkSetOneFamily (interp, win, name, data, numTraces,
+	numBars, top, bottom, id, whichBar)
+    Tcl_Interp *interp;
+    Tk_Window *win;
+    char *name;
+    double **data;
+    int numTraces, numBars;
+    double top, bottom;
+    int **id;
+    int whichBar;
+{
+    int j;
+    int width, height;
+    int x0, y0, x1, y1;
+    Tk_Window plotwin;
+
+    /* Get the current plot window size */
+    sprintf(command, "%s.pf.plot", name);
+    plotwin = Tk_NameToWindow(interp,command,*win);
+    if (plotwin == 0) return 0;
+    width = Tk_Width (plotwin);
+    height = Tk_Height (plotwin);
+
+    for (j=0;j<numTraces;j++) {
+      ptkFigureBarEdges(&x0,&x1,&y0,&y1, whichBar, j,
+			numTraces, numBars, width, height,
+			top, bottom, data[j][whichBar]);
+
+      sprintf(command, "%s.pf.plot coords %d %d %d %d %d",
+	      name, id[j][whichBar], x0, y0, x1, y1);
+      if(Tcl_Eval(interp, command) != TCL_OK)
+	return 0;
     }
     return 1;
 }
