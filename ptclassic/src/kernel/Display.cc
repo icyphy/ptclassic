@@ -234,7 +234,8 @@ void XGraph :: newTrace(int dataSet) {
 }
 
 void XGraph :: terminate () {
-	for (int i = 0; i<ng; i++)
+        int i;
+	for (i = 0; i<ng; i++)
 	if (strm[i]) {
 		fclose(strm[i]);
 		strm[i] = 0;

@@ -124,8 +124,9 @@ int KnownBlock::validDomain(const char* newDom) {
 // we specified no adding.  For a null argument, we always return -1.
 
 int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
+        int i;
 	if (myDomain == 0) return -1;
-	for (int i = 0; i < numDomains; i++) {
+	for (i = 0; i < numDomains; i++) {
 		if (strcmp (domainNames[i], myDomain) == 0)
 			return i;
 	}
