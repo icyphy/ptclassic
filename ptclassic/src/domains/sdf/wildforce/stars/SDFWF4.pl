@@ -33,7 +33,7 @@ defstar
 	"wildforce.h",
 	"wf4errs.h",
 	"wf4api.h",
-	"IntArray.h",
+	"WFIntArray.h",
 	<time.h>
 	} 
 
@@ -60,8 +60,8 @@ defstar
 	static const char FIFO_FILENAME[]="FifoVal";
 
 	// WordCount Structures
-	IntArray* input_wordcounts;
-	IntArray* output_wordcounts;
+	WFIntArray* input_wordcounts;
+	WFIntArray* output_wordcounts;
 
 	// Defaults
 	static const char DEFAULT_PE[]="defaults/blank.bin";
@@ -200,7 +200,7 @@ defstar
 
     method {
 	name { ACSRetrieve_WordCounts }
-	arglist { "(const char* handler_file, IntArray* word_counts)" }
+	arglist { "(const char* handler_file, WFIntArray* word_counts)" }
 	access { public }
 	type { int }
 	code {
@@ -279,8 +279,8 @@ defstar
 
 
 	// Obtain word counts and assign to port holes
-	input_wordcounts=new IntArray;
-	output_wordcounts=new IntArray;
+	input_wordcounts=new WFIntArray;
+	output_wordcounts=new WFIntArray;
 
 	ACSRetrieve_WordCounts(INPUT_WC_FILENAME,input_wordcounts);
 	ACSRetrieve_WordCounts(OUTPUT_WC_FILENAME,output_wordcounts);
