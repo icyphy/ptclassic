@@ -1,8 +1,8 @@
 # Makefile for Ptolemy utilities.
 
 # Version Identification:
-# @(#)Makefile	1.8	10/17/95
-# Copyright (c) 1990-1995 The Regents of the University of California.
+# @(#)$Id$
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
