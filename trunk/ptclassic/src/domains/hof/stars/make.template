@@ -61,6 +61,7 @@ PL_SRCS= \
  HOFIfElse.pl \
  HOFBusDeinterleave.pl \
  HOFBusInterleave.pl \
+ HOFBusInterleave3.pl \
  HOFBusMerge.pl \
  HOFBusSplit.pl \
  HOFChain.pl \
