@@ -149,7 +149,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define MACHDEP_INCLUDED
 /* We have not included compat.h here yet so we cannot use PTALPHA */
 #if defined(vax) || defined(__alpha)
-typedef int int32;
+typedef long int32;		/* See kernel/Fix.h also */
 typedef short int16;
 #else
      /* Ansi-C promises that these definitions should always work */
@@ -331,7 +331,7 @@ extern VOID_HACK rewind();
 
 
 /* most machines don't give us a header file for these */
-#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(PTSOL2) || defined(PTHPPA)
+#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(PTSOL2) || defined(PTHPPA) || defined(PTIRIX5)
 #include <stdlib.h>
 #else
 
@@ -348,17 +348,7 @@ extern int abort();
 extern void free();
 extern void perror();
 #else /* SYSV */
-#ifdef PTIRIX5
-/* The vfork man page says:
- *   vfork is no longer supported in IRIX as of Release 4.0.  By default, IRIX 
- *   does not preallocate swap space and thus fork(2) provides the same
- *   performance advantages as vfork.
- */
-#define vfork() fork()
-extern VOID_HACK free();
-#else
 extern VOID_HACK abort(), free(), exit(), perror();
-#endif /* PTIRIX5 */
 #endif /* SYSV */
 #endif /* _IBMR2 */
 extern char *getenv();
@@ -524,5 +514,14 @@ extern int gethostname( char * name, int namelen);
 /*extern void qsort
 	ARGS((void *, size_t, size_t, int (*)(const void *, const void *)));*/
 #endif /* PTSOL2 */
+
+#ifdef PTIRIX5
+/* The vfork man page says:
+ *   vfork is no longer supported in IRIX as of Release 4.0.  By default, IRIX 
+ *   does not preallocate swap space and thus fork(2) provides the same
+ *   performance advantages as vfork.
+ */
+#define vfork() fork()
+#endif /* PTIRIX5 */
 
 #endif /* PORT_H */
