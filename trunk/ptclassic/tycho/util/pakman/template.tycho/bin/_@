@@ -30,6 +30,14 @@ if [catch {package require %package%}] {
 
 # If that didn't work, try the TYCHO environment variable.
 if !$ok {
+    if ![info exists env(TYCHO)] {
+	if [info exists env(PTOLEMY)] {
+	    # TYCHO is not set, but PTOLEMY is.
+	    if [file exists [file join $env(PTOLEMY) tycho]] {
+		set env(TYCHO) [file join $env(PTOLEMY) tycho]
+	    }
+	} 
+    }
     if [info exists env(TYCHO)] {
 	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
 	    lappend auto_path $env(TYCHO)
