@@ -59,6 +59,8 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
 MISC_FILES = 
 
+OPTIONAL_FILES = doc
+
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
