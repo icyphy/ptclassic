@@ -196,10 +196,10 @@ class ::tycho::AbstractGraph {
     ####                  protected variables                    ####
 
     # An array of cached lists of vertex parents
-    protected variable _parents ""
+    protected variable _parents
 
     # An array of cached lists of vertex children
-    protected variable _children ""
+    protected variable _children
 
     # A cached list of vertex names
     protected variable _vertices ""
