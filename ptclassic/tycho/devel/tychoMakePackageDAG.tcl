@@ -33,9 +33,65 @@
 source [ file join $TYCHO kernel Path.tcl]
 
 set classpackagelist { \
+::tycho::CacheManager     edit.html \
+::tycho::HTML             edit.html \
+::tycho::Resource         edit.html \
+::tycho::ResourceFTP      edit.html \
+::tycho::ResourceFile     edit.html \
+::tycho::ResourceHTTP     edit.html \
+::tycho::ResourceMail     edit.html \
+::tycho::ResourceRemote   edit.html \
+::tycho::ResourceWELD     edit.html \
+::tycho::Animator         edit.slate \
+::tycho::Axis             edit.slate \
+::tycho::Bounder          edit.slate \
+::tycho::ComplexItem      edit.slate \
+::tycho::DragDropper      edit.slate \
+::tycho::Follower         edit.slate \
+::tycho::Frame            edit.slate \
+::tycho::IconFrame        edit.slate \
+::tycho::IconItem         edit.slate \
+::tycho::IconOval         edit.slate \
+::tycho::IconRect         edit.slate \
+::tycho::IncrCanvas       edit.slate \
+::tycho::Interactor       edit.slate \
+::tycho::LabeledFrame     edit.slate \
+::tycho::LabeledItem      edit.slate \
+::tycho::LabeledLine      edit.slate \
+::tycho::LabeledOval      edit.slate \
+::tycho::LabeledRect      edit.slate \
+::tycho::Layout           edit.slate \
+::tycho::Line             edit.slate \
+::tycho::Oval             edit.slate \
+::tycho::Point            edit.slate \
+::tycho::Polygon          edit.slate \
+::tycho::Rectangle        edit.slate \
+::tycho::Repeater         edit.slate \
+::tycho::Selector         edit.slate \
+::tycho::Shades           edit.slate \
+::tycho::Shape            edit.slate \
+::tycho::Slate            edit.slate \
+::tycho::SlateView        edit.slate \
+::tycho::Slider           edit.slate \
+::tycho::SmartLine        edit.slate \
+::tycho::Solid            edit.slate \
+::tycho::Stepper          edit.slate \
+::tycho::Terminal         edit.slate \
+::tycho::TextItemEdit     edit.slate \
+::tycho::Edit             edit.text \
+::tycho::EditMail         edit.text \
+::tycho::EditSearch       edit.text \
+::tycho::EditSpell        edit.text \
+::tycho::EditBubbleAndArc edit.vis \
+::tycho::EditDAG          edit.vis \
+::tycho::EditForest       edit.vis \
+::tycho::EditPalette      edit.vis \
+::tycho::EditSTD          edit.vis \
+::tycho::Graphics         edit.vis \
+::tycho::HTMLExport       edit.vis \
+::tycho::ProfileTcl       edit.vis \
 ::tycho::BuilderDialog    guikernel \
 ::tycho::ButtonBox        guikernel \
-::tycho::CacheManager     guikernel \
 ::tycho::ColorBrowser     guikernel \
 ::tycho::ColorManager     guikernel \
 ::tycho::ColorPicker      guikernel \
@@ -43,16 +99,11 @@ set classpackagelist { \
 ::tycho::Dialog           guikernel \
 ::tycho::DirSearch        guikernel \
 ::tycho::Displayer        guikernel \
-::tycho::Edit             guikernel \
-::tycho::EditMail         guikernel \
-::tycho::EditSearch       guikernel \
-::tycho::EditSpell        guikernel \
 ::tycho::ErrorMessage     guikernel \
 ::tycho::File             guikernel \
 ::tycho::FileBrowser      guikernel \
 ::tycho::FontDialog       guikernel \
 ::tycho::FontManager      guikernel \
-::tycho::HTML             guikernel \
 ::tycho::HTMLMessage      guikernel \
 ::tycho::IndexBrowser     guikernel \
 ::tycho::ListBrowser      guikernel \
@@ -64,13 +115,6 @@ set classpackagelist { \
 ::tycho::PopupMenu        guikernel \
 ::tycho::Query            guikernel \
 ::tycho::Registry         guikernel \
-::tycho::Resource         guikernel \
-::tycho::ResourceFTP      guikernel \
-::tycho::ResourceFile     guikernel \
-::tycho::ResourceHTTP     guikernel \
-::tycho::ResourceMail     guikernel \
-::tycho::ResourceRemote   guikernel \
-::tycho::ResourceWELD     guikernel \
 ::tycho::SimpleView       guikernel \
 ::tycho::StatusBar        guikernel \
 ::tycho::StyleChooser     guikernel \
@@ -95,21 +139,21 @@ set classpackagelist { \
 ::tycho::RevControl       ide \
 ::tycho::RevControlRCS    ide \
 ::tycho::RevControlSCCS   ide \
-::tycho::EditC            idecpp \
-::tycho::EditCpp          idecpp \
-HTMLMap2DAG               idehtml \
-::tycho::EditHTML         idehtml \
-::tycho::CompileCTcl      ideitcl \
-::tycho::EditItcl         ideitcl \
-::tycho::EditTcl          ideitcl \
-::tycho::ItclClassList    ideitcl \
-::tycho::TclShell         ideitcl \
-::tycho::CompileJava      idejava \
-::tycho::EditJava         idejava \
-::tycho::EditEsterel      idemisc \
-::tycho::EditSDL          idemisc \
-::tycho::EditPtcl         ideptolemy \
-::tycho::EditPtlang       ideptolemy \
+::tycho::EditC            ide.cpp \
+::tycho::EditCpp          ide.cpp \
+HTMLMap2DAG               ide.html \
+::tycho::EditHTML         ide.html \
+::tycho::CompileCTcl      ide.itcl \
+::tycho::EditItcl         ide.itcl \
+::tycho::EditTcl          ide.itcl \
+::tycho::ItclClassList    ide.itcl \
+::tycho::TclShell         ide.itcl \
+::tycho::CompileJava      ide.java \
+::tycho::EditJava         ide.java \
+::tycho::EditEsterel      ide.misc \
+::tycho::EditSDL          ide.misc \
+::tycho::EditPtcl         ide.pt \
+::tycho::EditPtlang       ide.pt \
 List                      kernel \
 Loader                    kernel \
 Math                      kernel \
@@ -138,59 +182,21 @@ URLPath                   kernel \
 ::tycho::Stack            kernel \
 ::tycho::StarLibrary      kernel \
 ::tycho::Uninstantiable   kernel \
-::tycho::Animator         slate \
-::tycho::Axis             slate \
-::tycho::Bounder          slate \
-::tycho::ComplexItem      slate \
-::tycho::DragDropper      slate \
-::tycho::Follower         slate \
-::tycho::Frame            slate \
-::tycho::IconFrame        slate \
-::tycho::IconItem         slate \
-::tycho::IconOval         slate \
-::tycho::IconRect         slate \
-::tycho::IncrCanvas       slate \
-::tycho::Interactor       slate \
-::tycho::LabeledFrame     slate \
-::tycho::LabeledItem      slate \
-::tycho::LabeledLine      slate \
-::tycho::LabeledOval      slate \
-::tycho::LabeledRect      slate \
-::tycho::Layout           slate \
-::tycho::Line             slate \
-::tycho::Oval             slate \
-::tycho::Point            slate \
-::tycho::Polygon          slate \
-::tycho::Rectangle        slate \
-::tycho::Repeater         slate \
-::tycho::Selector         slate \
-::tycho::Shades           slate \
-::tycho::Shape            slate \
-::tycho::Slate            slate \
-::tycho::SlateView        slate \
-::tycho::Slider           slate \
-::tycho::SmartLine        slate \
-::tycho::Solid            slate \
-::tycho::Stepper          slate \
-::tycho::Terminal         slate \
-::tycho::TextItemEdit     slate \
-::tycho::ControlSubpanel  tycgc \
-::tycho::Scheduler        tycgc \
-::tycho::Class            tydoc \
-::tycho::ClassModel       tydoc \
-::tycho::ClassParser      tydoc \
-::tycho::ClassViewer      tydoc \
-::tycho::DocClass         tydoc \
-::tycho::DocComment       tydoc \
-::tycho::DocSys           tydoc \
-::tycho::HTMLDocSys       tydoc \
-::tycho::HierModel        tydoc \
-::tycho::ItclParser       tydoc \
-::tycho::ItclViewer       tydoc \
-::tycho::JavaParser       tydoc \
-::tycho::JavaViewer       tydoc \
-::tycho::ListDocSys       tydoc \
-::tycho::TyDoc            tydoc \
+::tycho::Class            lib.tydoc \
+::tycho::ClassModel       lib.tydoc \
+::tycho::ClassParser      lib.tydoc \
+::tycho::ClassViewer      lib.tydoc \
+::tycho::DocClass         lib.tydoc \
+::tycho::DocComment       lib.tydoc \
+::tycho::DocSys           lib.tydoc \
+::tycho::HTMLDocSys       lib.tydoc \
+::tycho::HierModel        lib.tydoc \
+::tycho::ItclParser       lib.tydoc \
+::tycho::ItclViewer       lib.tydoc \
+::tycho::JavaParser       lib.tydoc \
+::tycho::JavaViewer       lib.tydoc \
+::tycho::ListDocSys       lib.tydoc \
+::tycho::TyDoc            lib.tydoc \
 Profile                   typt \
 ::ptolemy::Block          typt \
 ::ptolemy::Galaxy         typt \
@@ -205,36 +211,34 @@ Profile                   typt \
 ::tycho::PtWelcomeMessage typt \
 ::tycho::Retarget         typt \
 ::tycho::ToneControl      typt \
-tychoMakeClassDAG         util \
-tychoMakeIndex            util \
-tychoMakePackageDAG       util \
-::tycho::EditBubbleAndArc vis \
-::tycho::EditDAG          vis \
-::tycho::EditForest       vis \
-::tycho::EditPalette      vis \
-::tycho::EditSTD          vis \
-::tycho::Graphics         vis \
-::tycho::HTMLExport       vis \
-::tycho::ProfileTcl       vis \
+::tycho::ControlSubpanel  typt.tycgc \
+::tycho::Scheduler        typt.tycgc \
+tychoMakeClassDAG         lib.util \
+tychoMakeIndex            lib.util \
+tychoMakePackageDAG       lib.util \
 }
 
 array set classpackagearray $classpackagelist
 
 array set packagecolor [list \
+	edit.html royalblue \
+	edit.slate darkslateblue \
+	edit.text slateblue \
+	edit.vis midnightblue \
 	guikernel red4 \
 	ide aquamarine \
-	idecpp aquamarine1 \
-	idehtml aquamarine2 \
-	ideitcl aquamarine3 \
-	idejava aquamarine4 \
-	idemisc mediumaquamarine \
-	ideptolemy seagreen1 \
+	ide.cpp aquamarine1 \
+	ide.html aquamarine2 \
+	ide.itcl aquamarine3 \
+	ide.java aquamarine4 \
+	ide.misc mediumaquamarine \
+	ide.pt seagreen1 \
 	kernel red1 \
-	slate slateblue \
-	tycgc darkseagreen3 \
-	tydoc yellow1 \
-        typt seagreen2 \
-	vis midnightblue \
+	lib.tydoc yellow1 \
+	lib.idoc yellow2 \
+	lib.util yello4 \
+        typt hotpink1 \
+	typt.tycgc lightpink1 \
 	{} black \
 	]
 
@@ -254,46 +258,39 @@ proc packageColor {nm} {
 }
 
 proc dumpPackageKey {fd} {
-    puts $fd "\
-{add ::typack::kernel {label {kernel Package}\n\
- color [packageColor kernel]} {}}\n\
-{add ::typack::guikernel {label {guikernelPackage}\n\
- color [packageColor guikernel]} {::typack::kernel}}\n\
-\n\
-{add ::typack::ide {label {ide Package}\n\
- color [packageColor ide]} {::typack::kernel}}\n\
-{add ::typack::idehtml {label {idehtml Package}\n\
- color [packageColor idehtml]} {::typack::html ::typack::ide}}\n\
-{add ::typack::ideitcl {label {ideitcl Package}\n\
- color [packageColor ideitcl]} {::typack::tclshell ::typack::ide}}
-{add ::typack::idejava {label {idejava Package}\n\
- color [packageColor idejava]} {::typack::ide}}\n\
-{add ::typack::ideptolemy {label {ideptolemy Package}\n\
- color [packageColor ideptolemy]} {::typack::ide}}\n\
-\n\
-{add ::typack::vis {label {vis Package}\n\
- color [packageColor vis]} {::typack::kernel}}\n\
-{add ::typack::textedit {label {textedit Package}\n\
- color [packageColor textedit]} {::typack::kernel}}\n\
-{add ::typack::html {label {html Package}\n\
- color [packageColor html]} {::typack::kernel}}\n\
-{add ::typack::ptolemy {label {ptolemy Package}\n\
- color [packageColor ptolemy]} {::typack::ideptolemy}}\n\
-{add ::typack::tycgc {label {tycgc Package}\n\
- color [packageColor tycgc]} {::typack::ptolemy}}\n\
-{add ::typack::tydoc {label {tydoc Package}\n\
- color [packageColor tydoc]} {::typack::kernel}}\n\
-{add ::typack::idoc {label {idoc Package}\n\
- color [packageColor idoc]} {::typack::tydoc}}\n\
-{add ::typack::slate {label {slate Package}\n\
- color [packageColor slate]} {::typack::kernel}}\n\
-{add ::typack::misc {label {misc Package}\n\
- color [packageColor misc]} {::typack::kernel}}\n\
-{add ::typack::weld {label {weld Package}\n\
- color [packageColor weld]} {::typack::kernel}}\n\
-"
-
+    set packagelist [list \
+	    {kernel {}} \
+	    {guikernel kernel} \
+	    {edit kernel} \
+	    {edit.html edit} \
+	    {edit.slate edit} \
+	    {edit.text edit} \
+	    {edit.vis edit} \
+	    {ide kernel} \
+	    {ide.cpp ide} \
+	    {ide.html ide} \
+	    {ide.itcl ide} \
+	    {ide.java ide} \
+	    {ide.misc ide} \
+	    {ide.pt ide} \
+	    {lib.tydoc kernel} \
+	    {lib.idoc kernel} \
+	    {lib.util kernel} \
+	    {typt kernel} \
+	    {typt.tycgc typt} \
+	    ]
+    foreach packageparentpair $packagelist {
+	set package [lindex $packageparentpair 0]
+	set parent [lindex $packageparentpair 1]
+	if { "$parent" != "" } {
+	    set parent "::typack::$parent"
+	}
+	puts $fd "\
+{add ::typack::$package {label {$package Package}\n\
+ color [packageColor $package]} $parent}\n"
+    }
 }
+
 #### tychoMkClassGraph
 # Make a class graph of the type displayed by the Tycho EditDAG class.
 # The first argument is the name of the graph. The second argument is
@@ -432,7 +429,10 @@ proc dumpClassDAG {title filename \
     puts $fd "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
     puts $fd "\{titleSet title \{$title\}\}"
     puts $fd "\{titleSet subtitle \{created:\
-            [clock format [clock seconds]]\}\}"
+            [clock format [clock seconds]]\n\
+	    The top tree is the package tree, the other trees are class\n\
+	    inheritance trees.  The colors in the inheritance tree\n\
+	    denote what package that class is a member of.\}\}"
     dumpPackageKey $fd
 
     foreach nm [array names classfile] {
@@ -484,7 +484,7 @@ proc dumpClassDAG {title filename \
             set html [file join $dirname doc codeDoc $basefile.html]
 	    set color "color [packageColor $nm]"
             puts $fd "\{add $nm \{label \{$sname\} altlink \{$nonClassFile\
-                \{\} $color\} link \{$html \{\}\}\}\
+                \{\}\} link \{$html \{\}\} $color\}\
             \{$nonClassDirectory($dirname)\}\}"
             # Save the current node in the slot for the current directory.
 	    # This makes the class diagram much wider
@@ -525,7 +525,7 @@ proc tychoStandardDAG {} {
     foreach file $files {
         lappend filesenv [file join "\$TYCHO" $file]
     }
-    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} [file join doc tychoPackage.dag] $filesenv ]
+    set retval [eval tychoMkClassGraph {{Tycho Class Hierarchy}} [file join devel tychoPackages.dag] $filesenv ]
     cd $olddir
     return $retval
 }
@@ -723,3 +723,11 @@ proc ptolemyStandardDAG {} {
     cd $olddir
     return $retval
 }
+
+# To run this, do:
+set TYCHO /users/cxh/pt/tycho
+cd $TYCHO
+#source devel/tychoMakePackageDAG.tcl
+tychoStandardDAG
+
+
