@@ -33,13 +33,13 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go
   {
-    double val;
+    double val = 0.0;			// quiet the cfront C++ compiler
 
     // method ReadVar() sets the value of val (passed by reference)
-    if ( !SDFSharedMem::ReadVar(name,val) )
-    {
-      val = initial;
+    if ( !SDFSharedMem::ReadVar(name, &val) ) {
+	val = initial;
     }
+
     out%0 << val;
   }
 }

@@ -17,11 +17,11 @@ limitation of liability, and disclaimer of warranty provisions.
     public:
       VarReg(): contents(0) {}
 
-      float GetContents() { return contents; }
-      void SetContents(float value) { contents= value; }
+      double GetContents() { return contents; }
+      void SetContents(double value) { contents= value; }
 
     private:
-      float contents;
+      double contents;
     };
 
   }
@@ -38,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
   method {
     name {ReadVar}
-    arglist { "(const char *name, float& value)" }
+    arglist { "(const char* name, double* value)" }
     type { int }
     code
     {
@@ -47,7 +47,7 @@ limitation of liability, and disclaimer of warranty provisions.
       if (regList.hasKey(name)) {
 	reg = (VarReg *) regList.lookup(name);
 
-	value = reg->GetContents();
+	*value = reg->GetContents();
 	return 1;
       }
       else
@@ -72,7 +72,7 @@ limitation of liability, and disclaimer of warranty provisions.
   method
   {
     name{ WriteVar }
-    arglist { "(const char *name, float value)" }
+    arglist { "(const char *name, double value)" }
     type { void }
     code
     {

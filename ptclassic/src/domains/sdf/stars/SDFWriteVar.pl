@@ -50,7 +50,8 @@ Write the value of the input to a floating-point variable in shared memory.
   }
   go
   {
-    float val = float(in%0);
+    double val = double(in%0);
+
     // Write val to register 'name' and create 'name' if it doesn't exist
     SDFSharedMem::WriteVar(name, val);
   }
