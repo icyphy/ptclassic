@@ -27,14 +27,15 @@
 #ifndef VEM_VEMRPC_H
 #define VEM_VEMRPC_H
 #include "ansi.h"
-/* These are probably for internal use to this directory */
+#include "commands.h"		/* Pick up vemPoint typedef */
 
+/* These are probably for internal use to this directory */
 vemStatus vemAltBindings
-	ARGS((Window theWin, STR host, STR name, int appNum, int
-	      count, STR paneStrs[], STR comStrs[], STR keyStrs[])); 
+	ARGS((Window theWin, STR host, STR name, int appNum, 
+	      int count, STR panes[], STR coms[], STR keyStrs[]));  
 
 vemStatus vemCommand
-	ARGS((STR cmdName, vemPoint *spot, lsList cmdList, long userOpt));
+	ARGS(( STR cmdName, vemPoint *foo, lsList cmdList, long userOpt));
 
 vemStatus vemCloseApplication
 	ARGS((STR host, STR name, int appNum));
