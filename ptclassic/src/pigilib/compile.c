@@ -95,6 +95,18 @@ octObject *galFacetPtr;
 }
 
 static boolean
+ProcessTargetParams(targName, galFacetPtr)
+char* targName;
+octObject *galFacetPtr;
+{
+    ParamListType pList;
+    if (targName[0] == '<') return TRUE;
+    ERR_IF1(!GetTargetParams(targName, galFacetPtr, &pList));
+    ERR_IF1(!KcModTargetParams(&pList));
+    return(TRUE);
+}
+
+static boolean
 ProcessSubGals(facetPtr)
 octObject *facetPtr;
 {
@@ -354,7 +366,7 @@ JoinToNode(termPtr, nodename)
 octObject *termPtr;
 char *nodename;
 {
-    octObject inst, fterm;
+    octObject inst;
 
     ERR_IF2(GetById(&inst, termPtr->contents.term.instanceId) != OCT_OK,
 	octErrorString());
@@ -564,6 +576,7 @@ octObject *galFacetPtr;
      * The following sets the new domain again.
      */
     ERR_IF1(!KcDefgalaxy(name,galDomain,galTarget));
+    ERR_IF1(!ProcessTargetParams(galTarget,galFacetPtr));
     ERR_IF2(!ProcessFormalParams(galFacetPtr), msg);
     ERR_IF2(!ProcessInsts(galFacetPtr), msg);
     ERR_IF2(!ConnectPass(galFacetPtr), msg);
@@ -611,6 +624,7 @@ octObject *facetPtr;
     PrintDebug("CompileUniv");
     KcClearUniverse(name);
     ERR_IF1(!KcSetTarget(target));
+    ERR_IF1(!ProcessTargetParams(target,facetPtr));
     ERR_IF1(!ProcessFormalParams(facetPtr));
     ERR_IF1(!ProcessInsts(facetPtr));
     ERR_IF1(!ConnectPass(facetPtr));
@@ -664,7 +678,7 @@ octObject *facetPtr;
 RPC function to compile facet
 */
 int 
-RpcCompileFacet(spot, cmdList, userOptionWord)
+RpcCompileFacet(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
