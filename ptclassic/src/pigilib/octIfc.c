@@ -312,8 +312,7 @@ GetOrInitSogParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
 {
-    octObject prop, galFacet;
-    char *starName;
+    octObject prop;
     ParamListType tempList;
     void MergeParams();
 
@@ -327,7 +326,7 @@ ParamListType *pListPtr;
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList))
 	return(FALSE);
-    MergeParams(pListPtr,tempList);
+    MergeParams(pListPtr,&tempList);
     return(TRUE);
 }
 
