@@ -1,16 +1,16 @@
 $Id$
 
+doc/kernel_man/README.kernel_man
+
 This directory contains the Ptolemy kernel manual, describing the
 kernel from a programmer's point of view.  ptk.texi is the source.
 The info files may be used by the Emacs "info" interactive help
 system.
 
-ptk.dvi is a TeX DVI file containing the output, and ptk.ps.Z is
-a compressed PostScript version of the document.  The document is
-122 pages long.
+ptk.info is may be used by the Emacs "info" interactive help
+system.
 
-If you have the xdvi previewer, we recommend
+ptk.ps.Z is a compressed PostScript version of the document.  The
+document is 122 pages long.
 
-"xdvi -s 3 ptk.dvi"
 
-for previewing.
