@@ -38,17 +38,16 @@
 #######################################################################
 #### ProfileTcl
 # A code profiler for Tcl and Itcl code, using the TclX extension.
-#
+# To start profiling a section of code, hit the "Start Profiling" button.
+# To display the call tree of the current profile, hit the "Display Profile"
+# button.  To cancel profiling without displaying the call tree,
+# hit the "Cancel Profile" button.
 # <p>
 # Here is an example of how to use the ProfileTcl:
 # <tcl><pre>
 #     ::tycho::ProfileTcl .p
 #     .p centerOnScreen   
 # </pre></tcl>
-# Then<br>
-# 1. Hit the "profile on" button.<br>
-# 2. Do something simple that you want to profile.<br>
-# 3. Then hit the "profile off" button and wait patiently
 #
 class ::tycho::ProfileTcl {
     inherit ::tycho::EditForest
@@ -57,50 +56,28 @@ class ::tycho::ProfileTcl {
     destructor {}
     
     ###################################################################
-    ####                            options                        ####
-
-    ###################################################################
     ####                         public methods                    ####
 
+    # Cancel ongoing profiling.
+    method profileCancel {}
+
     # Turn profiling off and report the results
-    method profileOff {}
+    method profileDisplay {}
 
     # Turn profiling on
-    method profileOn {}
+    method profileStart {}
 
     # Update the times displayed at the bottom.
     method updateTimes {}
-
-    ###################################################################
-    ####                      public procs                         ####
-
-    ###################################################################
-    ####                   protected methods                       ####
-
-    ###################################################################
-    ####                   protected variables                     ####
-
-    ###################################################################
-    ####                   private methods                         ####
-
-    ###################################################################
-    ####                   private variables                       ####
 }
-
-#######################################################################
-#### -xxxx configuration
-# Description of xxxx option.
-#
-#configbody ::tycho::ProfileTcl::xxxx {
-#}
-
 
 #######################################################################
 #### constructor
 #
 body ::tycho::ProfileTcl::constructor {args} {
-    addTool on -text {Profile On} -command "$this profileOn"
-    addTool off -text {Profile Off} -command "$this profileOff"
+    addTool on -text {Start Profiling} -command "$this profileStart"
+    addTool off -text {Display Profile} -command "$this profileDisplay"
+    addTool cancel -text {Cancel Profile} -command "$this profileCancel"
 
     # Add a display at the bottom for the profile stats.
     addInfo count {Call count} 0 10
@@ -108,13 +85,12 @@ body ::tycho::ProfileTcl::constructor {args} {
     addInfo cpu {CPU time} 0 10
     
     eval itk_initialize $args
-}
 
+    ::tycho::loadIfNotPresent profile tclx
 
-#######################################################################
-#### destructor
-#
-body ::tycho::ProfileTcl::destructor {} {
+    # Set up bindings to update the times.
+    set cvs [component graphics canvasName]
+    $cvs bind node <Enter> "$this updateTimes"
 }
 
 
@@ -123,10 +99,18 @@ body ::tycho::ProfileTcl::destructor {} {
     ####                      public methods                       ####
 
 #######################################################################
-#### profileOff
+#### profileCancel.
+# Turn profiling off and do not report the results.
+#
+body ::tycho::ProfileTcl::profileCancel {} {
+    profile off results
+}
+
+#######################################################################
+#### profileDisplay.
 # Turn profiling off and report the results.
 #
-body ::tycho::ProfileTcl::profileOff {} {
+body ::tycho::ProfileTcl::profileDisplay {} {
     clear
     profile off results
     set depth 1
@@ -174,19 +158,13 @@ body ::tycho::ProfileTcl::profileOff {} {
         incr depth
     }
     component graphics redrawForest
-
-    # Set up bindings to update the times.
-    set cvs [component graphics canvasName]
-    $cvs bind node <Enter> "$this updateTimes"
 }
 
 #######################################################################
-#### profileOn
+#### profileStart
 # Turn profiling on.
 #
-body ::tycho::ProfileTcl::profileOn {} {
-    ::tycho::loadIfNotPresent profile tclx
-
+body ::tycho::ProfileTcl::profileStart {} {
     profile -commands on
 }
 
@@ -207,37 +185,3 @@ body ::tycho::ProfileTcl::updateTimes {} {
     addInfo real {Real time} $real
     addInfo cpu {CPU time} $cpu
 }
-
-    ###################################################################
-    ###################################################################
-    ####                      public procedures                    ####
-
-#######################################################################
-#### NameA
-# Description.
-#
-#body ::tycho::ProfileTcl::NameA {anyargs} {
-#}
-
-
-    ###################################################################
-    ###################################################################
-    ####                      protected methods                    ####
-
-#######################################################################
-#### MethodName
-# Description.
-#
-#body ::tycho::ProfileTcl::methodName {} {
-#}
-
-    ###################################################################
-    ###################################################################
-    ####                      private methods                      ####
-
-#######################################################################
-#### NameA
-# Description.
-#
-#body ::tycho::ProfileTcl::NameA {} {
-#}
