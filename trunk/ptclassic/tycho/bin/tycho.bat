@@ -19,13 +19,20 @@ exit
 
 echo Starting Tycho with $TYCHO = "%tycho%"
 
-if not "%1" == "-java" goto itkw
+if not "%1" == "-java" goto jdb
 rem Run Java
 rem cd %tycho%\java\tycho
 java -classpath %classpath%;%java_home%\lib\classes.zip;%tycho%\java;%tycho%\java\tycho -Denv.PTOLEMY=%tycho% -Denv.TYCHO=/tycho0.2.1devel Tycho
 goto end
-:itkw
 
+:jdb
+if not "%1" == "-jdb" goto itkw
+rem Run Java Debugger (jdb)
+rem cd %tycho%\java\tycho
+jdb -classpath %classpath%;%java_home%\lib\classes.zip;%tycho%\java;%tycho%\java\tycho -Denv.PTOLEMY=%tycho% -Denv.TYCHO=/tycho0.2.1devel Tycho
+goto end
+
+:itkw
 rem Run a vanilla itkwish
 itkwish -f %tycho%/kernel/Tycho.tcl %1
 :end
