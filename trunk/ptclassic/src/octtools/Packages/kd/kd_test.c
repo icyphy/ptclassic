@@ -68,6 +68,7 @@ static void rand_box();
    ((b2)[KD_TOP] >= (b1)[KD_BOTTOM]))
 
 /*ARGSUSED*/
+int
 main(argc, argv)
 int argc;
 char *argv[];
