@@ -41,7 +41,8 @@ void SDFWormhole :: go() {
 
 	run();
 
-	// No time stamp setup is necessary for SDF system.
+	// Adjust currentTime for next invocation.
+	currentTime += messageProcessingTime;
 }
 
 // Constructor
@@ -49,7 +50,7 @@ SDFWormhole :: SDFWormhole(Galaxy& g) : Wormhole(*this,g)
 {
 	buildEventHorizons ();
 	addState(iterationPeriod.setState("iterationPeriod", this,
-		  "100.0", "simulated iteration Period of SDF system"));
+		  "10.0", "simulated iteration Period of SDF system"));
 	gal.addState(samplingPeriod.setState("samplingPeriod",&gal,"10.0",
 		     "time increment for sampling stars"));
 }
