@@ -209,7 +209,7 @@ class ::tycho::Graphics {
     method select {{append 0}}
 
     # Return a list of the ids of selected objects.
-    method selected {} {return [$slate select item]}
+    method selected {} {return [$slate find withtag "sel"]}
 
     # Clear the selection.
     method selectionClear {}
