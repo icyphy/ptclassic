@@ -43,7 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* This flag is necessary to allow inspectFacet to be callable from 
  * the attache executable or from another program that attache has been
  * linked into.  */
-extern attacheCalledFromMainP;
+extern int attacheCalledFromMainP;
 
 optionStruct optionList[] = {
     { OPT_RARG,	"cell:view[:facet]",
