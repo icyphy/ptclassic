@@ -69,6 +69,9 @@ class ::tycho::EditPtlang {
     # Run ptlang on filename, generate html documentation and display it.
     proc gendoc {filename}
 
+    # Search ptlang file.
+    proc getPtlangFile {domain star}
+
     ###################################################################
     ####                         protected methods                 ####
 
@@ -207,6 +210,23 @@ body ::tycho::EditPtlang::gendoc {filename} {
             { file delete -force "$root.h" "$root.cc" "$root.htm" "$root.t"; \
             exec ptlang $tail}] 
             
+}
+
+#####################################################################
+#### getPtlangFile
+# Search the absolute path of the ptlang file(s) for given domain and star
+# name. "star" can be specified using the pattern syntax of the glob 
+# command.
+#
+body ::tycho::EditPtlang::getPtlangFile {domain star} {
+    global PTOLEMY
+    global ::env
+    return [glob -nocomplain \
+            [file join $PTOLEMY src domains [string tolower $domain] \
+            stars $domain$star.pl] \
+            [file join $PTOLEMY src domains [string tolower $domain] \
+            * stars $domain$star.pl] \
+            $env(PWD)/$domain$star.pl]
 }
 
 ####################################################################
