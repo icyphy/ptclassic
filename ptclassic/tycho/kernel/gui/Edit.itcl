@@ -301,12 +301,16 @@ body ::tycho::Edit::altFile {} {
 	    $this save 
 	}
     }
+    set prevfile $itk_option(-file)
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Alternate file to load:"]
     if {$filename != {}} {
-	reload 0 $filename
+	$this reload 0 $filename
 	$itk_component(text) setInsert 1.0
-    }
+	windowMenuRemoveAll $prevfile
+	windowMenuAddAll $this $filename
+	set $itk_option(-file) $filename
+    } 
 }
 
 ###################################################################
