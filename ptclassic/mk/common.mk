@@ -109,15 +109,15 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 .pl.cc: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
-	if [ -w $(STARDOCDIR) ] ; then \
-		( -cd $(VPATH); mv -f $*.t $(STARDOCDIR)/. ) \
+	-if [ -w $(STARDOCDIR) ] ; then \
+		 ( cd $(VPATH); mv -f $*.t $(STARDOCDIR)/. ) \
 	fi ;
 
 .pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
-	if [ -w $(STARDOCDIR) ] ; then \
-		( -cd $(VPATH); mv -f $*.t $(STARDOCDIR)/. ) \
+	-if [ -w $(STARDOCDIR) ] ; then \
+		( cd $(VPATH); mv -f $*.t $(STARDOCDIR)/. ) \
 	fi ;
 
 # Rules for running the islang processor
