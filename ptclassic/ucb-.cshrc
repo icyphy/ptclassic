@@ -22,6 +22,8 @@ if ( "$PTARCH" == sol2 || "$PTARCH" == "sol2.cfront" ) then
 	# Synopsys needs these
 	setenv SYNOPSYS /usr/tools/synopsys
 	setenv SIM_ARCH sparcOS5
+	# vhdlan which is run in utils/ptvhdlsim requires that $ARCH be set
+	setenv ARCH $PTARCH
 
 	# Get Synopsys in path
 	set path = ( $path \
