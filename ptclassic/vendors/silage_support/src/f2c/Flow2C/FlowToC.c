@@ -40,9 +40,11 @@ st_table *Edgetable[MAXINDEXLEVEL];
 
 static st_table *GraphTable;
 
-FlowToC(l_flag,pl_flag)
+FlowToC(l_flag,pl_flag,highlevel,bittrue)
 bool l_flag;
 bool pl_flag;
+bool highlevel;
+bool bittrue;
 {
     printmsg(NULL, "\n\n\t\t\t*** STARTING CODE GENERATION ***\n\n");
     /* input commands first */
@@ -61,7 +63,7 @@ bool pl_flag;
     EnforceBoolType(Root);
     printmsg(NULL, "GENERATING INITIALIZATION CODE...\n\n");
 /*    DumpFlowGraph(Root, FALSE);  */
-    GenCode(l_flag,pl_flag); 
+    GenCode(l_flag,pl_flag,highlevel,bittrue); 
 }
 
 BuildRootGraph()
@@ -627,15 +629,17 @@ EdgePointer edge;
 	return(edge->Name);
 }
 
-GenCode(l_flag,pl_flag)
+GenCode(l_flag,pl_flag,highlevel,bittrue)
 bool l_flag;
 bool pl_flag;
+bool highlevel;
+bool bittrue;
 {
     /* Initialize Edgetable */
     indexlevel = 0;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
-    if (pl_flag == true) GenPtHeading();
+    if (pl_flag == true) GenPtHeading(highlevel,bittrue);
     else GenHeading();
     fprintf (CFD, "/* Delay structure definition goes here...*/\n\n");
     GenDelayStruct(Root,pl_flag);  /*  Process all hierarchy  */
@@ -703,7 +707,9 @@ GenHeading ()
    fprintf (CFD, "int CycleCount;\n\n");
 }
 
-GenPtHeading ()
+GenPtHeading (highlevel,bittrue)
+bool highlevel;
+bool bittrue;
 {
    long ct;
    time (&ct);
@@ -719,9 +725,12 @@ GenPtHeading ()
    fprintf (CFD, "limitation of liability, and disclaimer of warranty provisions. \n \t } \n");
    GenPtInputHeaders();
    GenPtOutputHeaders();
-   fprintf (CFD, "\t ccinclude { <stdio.h>, <math.h>, <sys/types.h>, <sys/times.h> } \n");
-   /* #ifdef HIGHLEVEL --- */
-   fprintf (CFD, "\t hinclude { \"highlevel.h\" } \n");
+   fprintf (CFD, "\t ccinclude { <stdio.h>, <math.h>, \
+<sys/types.h>, <sys/times.h>, \"Message.h\",\"FixLib.h\" } \n");
+   if(highlevel) 
+	fprintf (CFD, "\t hinclude { \"highlevel.h\", \"FixedPoint.h\" } \n");
+   else if(bittrue) 
+	fprintf (CFD, "\t hinclude { \"bittrue.h\", \"FixedPoint.h\" } \n"); 
    fprintf (CFD, "\t code { \n");
    fprintf (CFD, "#define at(d, i, m)  ((i+d)%%m)\n");
    fprintf (CFD, "#define _Min(a,b)  ((a) < (b) ? (a) : (b))\n");
@@ -735,8 +744,9 @@ GenPtInputHeaders()
    FILE *fp;
    char name[100];
    char inputName[100];
+   char prec[10];
    strcpy(name,Root->Name);
-   strcat(name,".inputs");
+   strcat(name,"Prec.inputs");
    fp = fopen(name,"r");
    if(fp == NULL) 
    {
@@ -745,16 +755,40 @@ GenPtInputHeaders()
    }
    while (fscanf(fp,"%s",inputName) == 1)
    {
+   fscanf(fp,"%s",prec);
    fprintf (CFD, "\tinput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",inputName);
    fprintf (CFD, " }\n");
    fprintf (CFD, "\t\ttype {");
-   fprintf (CFD, " float "); /* NEED TO GET THIS TOO LATER */
+   fprintf (CFD, " message "); /* NEED TO GET THIS TOO LATER */
    fprintf (CFD, "}\n");
    fprintf (CFD, "\t} \n");
+GenPtState(inputName,prec);
    }
    fclose(fp);
+}
+
+GenPtState(name,prec)
+char* name;
+char* prec;
+{
+/* need to generate the state with the precision per port for use with
+the .pl file like anyother fixedpoint star */ 
+   fprintf (CFD, "\tdefstate { \n");
+   fprintf (CFD, "\t\tname { ");
+   fprintf (CFD, "%sPrecision",name);
+   fprintf (CFD, " }\n");
+   fprintf (CFD, "\t\ttype {");
+   fprintf (CFD, " string "); 
+   fprintf (CFD, "}\n");
+   fprintf (CFD, "\t\tdefault {");
+   fprintf (CFD, " \"%s\" ",prec); 
+   fprintf (CFD, "}\n");
+   fprintf (CFD, "\t\tdesc {");
+   fprintf (CFD, " Precision for porthole \"%s\": left_BP.right_BP",name); 
+   fprintf (CFD, "}\n");
+   fprintf (CFD, "\t} \n");
 }
 
 GenPtOutputHeaders()
@@ -763,9 +797,10 @@ GenPtOutputHeaders()
    FILE *fq;
    char name[100];
    char outputName[100];
+   char prec[10];
    strcat(outputName,"");
    strcpy(name,Root->Name);
-   strcat(name,".outputs");
+   strcat(name,"Prec.outputs");
    fq = fopen(name,"r");
 
    if(fq == NULL) 
@@ -775,14 +810,16 @@ GenPtOutputHeaders()
    }
    while( (fscanf(fq,"%s",outputName) == 1 ) )
    {
+   fscanf(fq,"%s",prec);
    fprintf (CFD, "\toutput { \n");
    fprintf (CFD, "\t\tname { ");
    fprintf (CFD, "%s",outputName);
    fprintf (CFD, " }\n");
    fprintf (CFD, "\t\ttype {");
-   fprintf (CFD, " float "); /* NEED TO GET THIS TOO LATER */
+   fprintf (CFD, " message "); /* NEED TO GET THIS TOO LATER */
    fprintf (CFD, "}\n");
    fprintf (CFD, "\t} \n");
+GenPtState(outputName,prec);
    }
    fclose(fq);
 }
