@@ -71,6 +71,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    CGCLMS::setup();
 	}
 	initCode {
+	    // definite prototypes for ptkMakeBarGraph and ptkSetBarGraph
+	    addInclude("\"ptkBarGraph.h\"");
+
 	    addGlobal("int $starSymbol(invCount);");
 	    addGlobal("int $starSymbol(ids)[$val(tapSize)];");
 
