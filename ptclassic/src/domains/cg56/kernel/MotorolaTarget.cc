@@ -28,15 +28,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer: J. Buck, J. Pino, T. M. Parks
+ Programmer: Joseph T. Buck, Jose Luis Pino, Thomas M. Parks
 
  Base target for Motorola DSP assembly code generation.
+ Tracking memory usage in generated assembly code by Asawaree Kalavade
+ and Brian L. Evans.
 
 *******************************************************************/
 
 #ifdef __GNUG__
 #pragma implementation
 #endif
+
+#include <ctype.h>
+
+#include "StringList.h"
+#include "Error.h"
+#include "StringState.h"
+#include "IntState.h"
 
 #include "MotorolaTarget.h"
 #include "MotorolaAttributes.h"
@@ -57,12 +66,27 @@ MotorolaTarget :: MotorolaTarget (const char* nam, const char* desc,
 }
 
 void MotorolaTarget :: initStates() {
+	// Target parameters
+	addState(xMemMap.setState("xMemMap", this, "0-4095", "X memory map"));
+	addState(yMemMap.setState("yMemMap", this, "0-4095", "Y memory map"));
+	addState(subFire.setState("subroutines?", this, "-1",
+	    "Write star firings as subroutine calls."));
+	addState(reportMemoryUsage.setState(
+	    "show memory usage?", this, "NO",
+	    "Report program and data memory usage" ) );
+
+	// Initialize other data members
 	inProgSection = 0;
  	mem = 0;
-	addState(xMemMap.setState("xMemMap",this,"0-4095","X memory map"));
-	addState(yMemMap.setState("yMemMap",this,"0-4095","Y memory map"));
-	addState(subFire.setState("subroutines?",this,"-1",
-	    "Write star firings as subroutine calls."));
+	assemblerOptions = "-A -B -L";
+	resetMemoryUsage();
+}
+
+void MotorolaTarget :: resetMemoryUsage() {
+	// Memory usage data members
+	ProgramDataMemory = 0;
+	XDataMemory = 0;
+	YDataMemory = 0;
 }
 
 void MotorolaTarget :: setup() {
@@ -178,9 +202,8 @@ const char* end, const char* cont) {
 	else return CGTarget::comment(msg,begin,end,cont);
 }
 
-/* Determine whether or not the star firing can be implemented with
-   static code which could be enclosed in a loop or subroutine.
-*/
+// Determine whether or not the star firing can be implemented with
+// static code which could be enclosed in a loop or subroutine.
 int staticCode(CGStar& star)
 {
     BlockPortIter nextPort(star);
@@ -235,4 +258,104 @@ void MotorolaTarget::writeFiring(Star& s, int level)
     {
 	AsmTarget::writeFiring(s,level);
     }
+}
+
+#define PMEMORY_INDEX           0
+#define XMEMORY_INDEX           1
+#define YMEMORY_INDEX           2
+#define NOT_MEMORY_INDEX        -1
+
+#define MAXLINE	128
+
+// memoryRequirements
+// Parse the .lod file created by the Motorola assembler -A and -B options
+// from an assembly language file to compute the program and data memory usage
+static int memoryRequirements(const char* filename, int* words) {
+	int memTypeIndex = -1;
+	char buffer[MAXLINE];
+
+	FILE* fp = fopen(filename, "r");
+	if (fp == NULL) return(FALSE);
+
+	while (! feof(fp) && fgets(buffer, MAXLINE, fp) ) {
+	    buffer[MAXLINE - 1] = 0;		    /* null terminate string */
+	    if (buffer[0] == '_') {
+		if ( strncmp(buffer, "_DATA ", 6) == 0 ) {
+		    switch(buffer[6]) {
+		      case 'P':
+			memTypeIndex = PMEMORY_INDEX;
+			break;
+		      case 'X':
+			memTypeIndex = XMEMORY_INDEX;
+			break;
+		      case 'Y':
+			memTypeIndex = YMEMORY_INDEX;
+			break;
+		      default:
+			memTypeIndex = NOT_MEMORY_INDEX;
+		    }
+		}
+	    }
+	    else if (memTypeIndex != NOT_MEMORY_INDEX) {
+		int i = 0, dataflag = TRUE;
+		char* str = buffer;
+		while ( dataflag && *str && i < 6 ) {
+		    dataflag = isalnum(*str);
+		    i++;
+		    str++;
+		}
+		if ( dataflag ) {
+		    int length = strlen(buffer);
+		    words[memTypeIndex] += (length+1)/7;
+		}
+	    }
+	    buffer[0] = 0;
+	}
+
+	fclose(fp);
+	return(TRUE);
+}
+
+int MotorolaTarget::computeMemoryUsage() {
+        int words[3] = {0, 0, 0};
+	resetMemoryUsage();
+
+	// Figure out where the .lod file is
+	// If it is on a remote machine, then copy it over
+	int deleteFlag = FALSE;
+	StringList loadfilename;
+	loadfilename << filePrefix << ".lod";
+	StringList loadpathname =
+		findLocalFileName(targetHost, destDirectory,
+				  loadfilename, deleteFlag);
+	if ( loadpathname.length() == 0 ) return FALSE;
+
+	// Compute the memory requirements from the .lod file
+	int valid = memoryRequirements(loadpathname, words);
+	if (valid) {
+	    ProgramDataMemory = words[PMEMORY_INDEX];
+	    XDataMemory = words[XMEMORY_INDEX];
+	    YDataMemory = words[YMEMORY_INDEX];
+	}
+	else {
+	    Error::warn("Could not open ", loadpathname, " for reading");
+	}
+
+	if ( deleteFlag ) {
+	    StringList removeCommand = "rm ";
+	    removeCommand << loadpathname;
+	    StringList errmsg = "Could not remove ";
+	    errmsg << loadpathname;
+	    systemCall(removeCommand, errmsg);
+	}
+
+	return valid;
+}
+
+const char* MotorolaTarget::memoryUsageString() {
+	MemoryUsageString = "Motorola 56000 memory usage in words";
+	MemoryUsageString << ": program = " << programMemoryUsage()
+			  << ", x data = " << xdataMemoryUsage()
+			  << ", y data = " << ydataMemoryUsage();
+	return MemoryUsageString;
 }
