@@ -61,6 +61,7 @@ SDFCfft.pl \
 SDFConstCx1ofN.pl \
 SDFErrCnt.pl \
 SDFExpGen.pl \
+SDFFading.pl \
 SDFLMSArray.pl \
 SDFLMSArrayStO.pl \
 SDFMagSqr.pl \
