@@ -55,6 +55,7 @@ ITCL_SRCS = \
 	ButtonBox.itcl \
 	Builder.itcl \
 	BuilderDialog.itcl \
+	CacheManager.itcl \
 	CircularList.itcl \
 	Class.itcl \
 	ClassSchedule.itcl \
