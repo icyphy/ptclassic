@@ -23,6 +23,8 @@ $Id$
 #include "Galaxy.h"
 #include "GalIter.h"
 #include "Error.h"
+#include "ConstIters.h"
+#include "miscFuncs.h"
 #include <stdio.h>
 
 // default commTime method: only one processor, no time
@@ -115,9 +117,10 @@ void Target::initialize() {
 // It is protected to guard against abuse.
 
 Target& Target::copyStates(const Target& src) {
-	BlockStateIter nexts(src);
+	CBlockStateIter nexts(src);
 	BlockStateIter nextd(*this);
-	State *srcStatePtr, *destStatePtr;
+	const State* srcStatePtr;
+	State *destStatePtr;
 	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
 		destStatePtr->setValue(srcStatePtr->getInitValue());
 	return *this;
@@ -172,17 +175,16 @@ void Target::addChild(Target& newChild) {
 	nChildren++;
 }
 
-// inherit children 
+// inherit children
 void Target::inheritChildren(Target* father, int start, int stop) {
 	if (start < 0 || stop >= father->nProcs()) {
-		Error::abortRun(readName(), "inheritance fails due to indices \
-out of range");
+		Error::abortRun(readName(),
+			"inheritance fails due to indices out of range");
 		return;
 	}
 	children = father->child(start);
 	nChildren = stop - start + 1;
 }
-
 
 // delete all children; use only when children were dynamically created.
 void Target::deleteChildren() {
