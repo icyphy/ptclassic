@@ -32,8 +32,6 @@
 ##########################################################################
 #### Model
 #
-# <b>This class is in flux.</b>
-#
 # This class is the abstract superclass of Tycho's implementation of 
 # the _model_ component of the model-view user interface architecture.  
 # (The corresponding view class in Tycho is named _View_.) Sub-classes 
@@ -70,18 +68,9 @@
 # be undone and redone, and subscribers will be notified as the model
 # changes. The history mechanism is implemented by the <b>history</b>,
 # <b>mark</b>, <b>record</b>, <b>redo</b>, and <b>undo</b> methods.
-# <i>(Edward has pointed out the relation between persistence, undo,
-# and version control.  We need to work out a good abstraction
-# for these mechanisms.)</i>
 #
-# The _Model_ class is designed to be subclassed to provide models
-# with specific semantics. Subclasses either inherit directly
-# from Model, or from the PersistentModel subclass, which extends
-# Model with a type storage and I/O mechanism using the Interchange
-# class.
-# 
 class ::tycho::Model {
-    inherit ::tycho::Object ::tycho::Interchange
+    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
@@ -129,6 +118,9 @@ class ::tycho::Model {
     protected method sequence {cmdlist}
 
     #################################################################
+    ####               protected variables                       ####
+
+    #################################################################
     ####                  private methods                        ####
 
     # Append a command to the command history
@@ -166,6 +158,21 @@ class ::tycho::Model {
     }
 }
 
+#########################################################################
+#########################################################################
+####                          option configure                       ####
+
+#########################################################################
+#### -modelname configuration
+# Set the name of the model. This name can be used to provide models
+# with meaningful names. If no name is supplied when the model
+# is create, the name will be set to the tail of the object name.
+# Model names must be unique. The name should not be changed after the
+# model has been constructed.
+#
+configbody ::tycho::Model::modelname {
+    ;#
+}
 
 ########################################################################
 #### constructor
@@ -284,7 +291,7 @@ body ::tycho::Model::history {mode args} {
 	    eval _clearhistory $args
 	}
 	"compact" {
-	    if { [llength $args] < 2 !! [llength $args] > 4 } {
+	    if { [llength $args] < 2 || [llength $args] > 4 } {
 		error "wrong # args: should be \"history compact \
 			from to ?redo ?undo?\""
 	    }
