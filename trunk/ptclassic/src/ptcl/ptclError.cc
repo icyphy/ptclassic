@@ -38,13 +38,14 @@ Error :: error(cc* m1, cc* m2, cc* m3) {
 		p3(m1,m2,m3);
 		return;
 	}
-	if (!m2) m2 = "";
-	if (!m3) m3 = "";
-	int l = strlen(m1)+strlen(m2)+strlen(m3)+8;
-	LOG_NEW; char* msg = new char[l];
-	sprintf (msg, "ERROR: %s%s%s", m1, m2, m3);
+	char* res = PTcl::activeInterp->result;
+	StringList msg;
+	if (res && *res)
+		msg << res << "\n";
+	else
+		msg << "ERROR: ";
+	msg << m1 << (m2 ? m2 : "") << (m3 ? m3 : "");
 	Tcl_SetResult(PTcl::activeInterp, msg, TCL_VOLATILE);
-	LOG_DEL; delete msg;
 }
 
 void
