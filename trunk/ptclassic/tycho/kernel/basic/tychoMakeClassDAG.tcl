@@ -39,8 +39,9 @@ source $TYCHO/kernel/Path.tcl
 # The first argument is the name of the graph. The second argument is
 # the name of the graph file to create. The rest of the arguments are
 # any number of file names from which the graph should be created.
+# If any of these files is not readable, it is ignored.
 # These file names should be absolute (or relative to an environment
-# variable like TYCHO) that the resulting hyperlinks work from any
+# variable like TYCHO) so that the resulting hyperlinks work from any
 # directory. To create a graph for the entire Tycho tree, use the
 # procedure <code>tychoStandardClasses</code>.
 #
@@ -51,7 +52,11 @@ proc tychoMkClassGraph {name filename args} {
 	if {$file == {} } {
 	    continue
 	}
-	set fd [open [::tycho::expandPath $file] r]
+	set ffn [::tycho::expandPath $file]
+        if ![file readable $ffn] {
+            continue
+        }
+	set fd [open $ffn r]
  	if [catch {set contents [read $fd]} errMsg] {
             error "Error while reading $file:\n$errMsg"
         }
