@@ -19,7 +19,7 @@ sample tydoc output.
 	
 	<DT><CODE>tydoc</CODE>
 	<DD>A small standalone script that takes file names
-	as command line arguments and converts the files to html
+	as command line arguments and converts the files to HTML
 	output.  For example <CODE>tydoc TyDoc.itcl</CODE> would
 	convert <CODE>TyDoc.itcl</CODE>
 	into four files, one for each class in the
@@ -175,14 +175,14 @@ assume the above.
  <P>
 
 Constructs such as <CODE>proc</CODE>s that are not part of a class end
-up in a file named <I>ClassName</I><CODE>_out.html</CODE>, where
+up in a file named <I>ClassName</I><CODE>_rel.html</CODE>, where
 <I>ClassName</I> is the name of the class defined in the file.
 
 <H2>Tydoc output optimizations</H2>
 The <CODE>tydoc</CODE> script takes a <CODE>-v</CODE> argument which will 
 cause <CODE>tydoc</CODE> to generate output for all constructs in the file.
 If the <CODE>-v</CODE> option is not present, then the following constructs
-are <B>not</B> written to the html file:
+are <B>not</B> written to the HTML file:
 <MENU>
 <LI> All <CODE>private</CODE> constructs.  
 
@@ -196,7 +196,7 @@ adhoc system.
 have comments.
 
 </MENU>
-Another optimization that always happens is that only the first line of the <CODE>@copyright</CODE> doc comment is present in the html.
+Another optimization that always happens is that only the first line of the <CODE>@copyright</CODE> doc comment is present in the HTML file.
 
 <H2><A NAME="tydoc and codeDoc.idx">tydoc and codeDoc.idx</A></H2>
 
@@ -215,7 +215,10 @@ to fix cross references.  The following commands will do this for you:
 cd $TYCHO
 make install
 </PRE>
-
+ <P>
+The
+<A HREF="../../../kernel/doc/usersGuides/BuilderDialog.html">BuilderDialog </A>
+can also rebuild these indices.
  <P>
 <A
 HREF="../../../doc/index.html">Tycho Home Page</A>.
