@@ -77,18 +77,18 @@ PL_SRCS= \
  SDFZigZagImgInv.pl
 
 # The .cc files
-SRCS=$(PL_SRCS:.pl=.cc) rtvc.cc
+SRCS=$(PL_SRCS:.pl=.cc)
 
 # object files for all stars
 OBJS= $(SRCS:.cc=.o) 
 
 # header files for all stars
-HDRS= $(SRCS:.cc=.h) rtvc.h
+HDRS= $(SRCS:.cc=.h)
 
 STAR_MK=sdfimagestars
 DOMAIN=SDF_IMAGE
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) rtvc.cc rtvc.h
 
 all:		makefile stars_all
 
