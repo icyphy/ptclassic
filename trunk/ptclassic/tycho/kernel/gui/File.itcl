@@ -456,6 +456,7 @@ configbody ::tycho::File::file {
         windowMenuAddAll $file
 	set previousfile $file
     }
+    focusin
 }
 
 #########################################################################
