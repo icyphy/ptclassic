@@ -50,7 +50,8 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   ccinclude { <math.h> }
   code {
-    inline double sqr( double x ) {
+    /* hppa.cfront has a sqr(double x) in math.h, so use mySqr */
+    inline double mySqr( double x ) {
       return x * x;
     }
     inline double TodB( double x ) {
@@ -59,7 +60,7 @@ limitation of liability, and disclaimer of warranty provisions.
   }
   go {
     for( int i = int(BlockSize) - 1; i >= 0; i-- )
-      Sum = Sum * FeedbackGain + sqr(double(in%i));
+      Sum = Sum * FeedbackGain + mySqr(double(in%i));
     double output = Sum / double( TimeConstant );
     out%0 << ( int( dB ) ? TodB( output ) : output );
   }
