@@ -230,12 +230,12 @@ body ::tycho::CTSimulation::_construct {} {
         # Make the connection, dude
         debug "set $e \[ \
             \$univ {connect \
-            pt.kernel.IOPort pt.kernel.IOPort \
+            pt.actors.IOPort pt.actors.IOPort \
             String} \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"
         set result [_send "set $e \[ \
             \$univ {connect \
-            pt.kernel.IOPort pt.kernel.IOPort \
+            pt.actors.IOPort pt.actors.IOPort \
             String} \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"]
         debug " -> $result"
