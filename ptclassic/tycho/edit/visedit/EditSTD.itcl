@@ -302,16 +302,23 @@ body ::tycho::EditSTD::editState {node} {
 	set title "Edit \"$name\" State \"$nodeLabel\""
 	set labelQuery [list line label {Label:} $nodeLabel]
 
-	set cmd "$this editStateDone $node $w"
-
-	::tycho::Query $w -title "STD Edit State" \
-		-text $title -queries [list $labelQuery]\
-		-okcommand [list catch $cmd]
-
 	if "![info exists nodeInfo($node,slave)]" {
 	    set nodeInfo($node,slave) ""
 	}
-	$w line slave {Slave Process:} $nodeInfo($node,slave)
+	set slaveQuery [list line slave {Slave Process:} \
+	    $nodeInfo($node,slave)]
+
+	if "![info exists nodeInfo($node,slaveShared)]" {
+	    set nodeInfo($node,slaveShared) NO
+	}
+	set slaveSharedQuery [list radio slaveShared {Slave shared:} \
+	    {NO YES} $nodeInfo($node,slaveShared)]
+
+	set cmd "$this editStateDone $node $w"
+
+	::tycho::Query $w -title "STD Edit State" -text $title \
+	    -queries [list $labelQuery $slaveQuery $slaveSharedQuery]\
+	    -okcommand [list catch $cmd]
 
 	$w centerOnScreen
     }
@@ -331,6 +338,12 @@ body ::tycho::EditSTD::editStateDone {node w} {
     set newSlave [string trim [$w get slave]]
     if {$nodeInfo($node,slave) != $newSlave} {
 	set nodeInfo($node,slave) $newSlave
+	$this markModified	
+    }
+
+    set newSlaveShared [string trim [$w get slaveShared]]
+    if {$nodeInfo($node,slaveShared) != $newSlaveShared} {
+	set nodeInfo($node,slaveShared) $newSlaveShared
 	$this markModified	
     }
 }
@@ -609,6 +622,17 @@ body ::tycho::EditSTD::ptkCompile {} {
 		setstate [set star$node] slaveNm $slaveNm
 		set dirname [file dirname $nodeInfo($node,slave)]
 		setstate [set star$node] where_is_defined $dirname
+                
+                if "![info exists nodeInfo($node,slaveShared)]" {
+                    set nodeInfo($node,slaveShared) NO
+                }
+                setstate [set star$node] slaveShared \
+		    $nodeInfo($node,slaveShared)
+                #if {$nodeInfo($node,slaveShared) == "NO"} {
+                #    setstate [set star$node] slaveShared 0
+                #} else {
+                #    setstate [set star$node] slaveShared 1
+                #}
 	    }
 
 	    set events ""
@@ -690,13 +714,14 @@ body ::tycho::EditSTD::ptkCompile {} {
 		if "![info exists edgeInfo($arc,preemptive)]" {
 		    set edgeInfo($arc,preemptive) NO
 		}
-		if {$edgeInfo($arc,preemptive) == "NO"} {
-		    append preemptive "0\ "
-		} elseif {$edgeInfo($arc,preemptive) == "YES"}  {
-		    append preemptive "1\ "
-		} else {
-		    error "EditSTD: Unrecognized preemptive! "
-		}
+                append preemptive "$edgeInfo($arc,preemptive)\ "
+		#if {$edgeInfo($arc,preemptive) == "NO"} {
+		#    append preemptive "0\ "
+		#} elseif {$edgeInfo($arc,preemptive) == "YES"}  {
+		#    append preemptive "1\ "
+		#} else {
+		#    error "EditSTD: Unrecognized preemptive! "
+		#}
 
 		if "![info exists edgeInfo($arc,entryType)]" {
 		    set edgeInfo($arc,entryType) History
@@ -1053,7 +1078,11 @@ body ::tycho::EditSTD::saveText {} {
 	    append text "set nodeInfo(\$node$node,slave)\
 		    [list $nodeInfo($node,slave)]\n"
 	}
-
+        if "[info exists nodeInfo($node,slaveShared)]" {
+	    append text "set nodeInfo(\$node$node,slaveShared)\
+		    [list $nodeInfo($node,slaveShared)]\n"
+	}
+        
 	append text "\n"
     }
     

@@ -59,7 +59,7 @@ FSMStateStar::FSMStateStar ()
     addPort(stateIn.setPort("stateIn",this,FLOAT));
     addPort(stateOut.setPort("stateOut",this,FLOAT));
 
-    addState(isInitState.setState("isInitState",this,"FALSE","Is this an initial state?"));
+    addState(isInitState.setState("isInitState",this,"NO","Is this an initial state?"));
 
     addState(events.setState("events",this,"","The events to trigger the next transition state. Each event must be surrounded by a pair of curly-braces."));
     addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be surrounded by a pair of curly-braces."));
@@ -71,6 +71,7 @@ FSMStateStar::FSMStateStar ()
 
     addState(slaveNm.setState("slaveNm",this,"","The file name of an Galaxy to be the slave process."));
     addState(where_is_defined.setState("where_is_defined",this,"","The path name of the Galaxy of the slave process."));
+    addState(slaveShared.setState("slaveShared",this,"NO","Allow the slave to be shared?"));
 
     parsedEvents = NULL;
     parsedConditions = NULL;
@@ -91,8 +92,8 @@ void FSMStateStar::begin() {
     }
 }
 
-Star* FSMStateStar::createWormhole(const char *galname,
-				   const char* where_defined) {
+Star* FSMStateStar::createNewWormhole(const char *galname,
+                                      const char* where_defined) {
     // Compile the specified galaxy into kernel.
     const char* classname = ptkCompile(galname, where_defined);
     if (!classname) return 0;
@@ -146,16 +147,45 @@ Star* FSMStateStar::createWormhole(const char *galname,
 
     // Choose a name for the block
     StringList instancename = classname;
-    instancename << count++;
+    // Following line is commented out to use the same name as classname.
+    // instancename << count++; 
     const char* instance = hashstring(instancename);
-
-    // Is this needed?
-    KnownBlock::addEntry(*newWorm, instance, 1, "FSM");
 
     // Set the parent of the wormhole to be the parent of this star.
     newWorm->setBlock(instance,parent());
 
+    // Is this needed?
+    // KnownBlock::addEntry(*newWorm, instance, 1, "FSM");
+
     return newWorm;
+}
+
+Star* FSMStateStar::createWormhole(const char *galname,
+                                   const char* where_defined) {
+    if (int(slaveShared)) {
+        // if slave will be shared...
+
+        // check if there is already a slave with the same name in
+        // the "sharedSlaveList"
+        FSMScheduler *sched = (FSMScheduler *)scheduler();
+        Block *b = sched->sharedSlaveList.blockWithName(galname);
+        if (b != NULL) {
+            // if shared slave found, return it
+            return &(b->asStar());
+
+        } else {
+            // if no shared slave found, create a new one and put it
+            // into "sharedSlaveList".
+            Star *newWorm = createNewWormhole(galname,where_defined);
+            sched->sharedSlaveList.put(*newWorm);
+            return newWorm;
+        }
+        
+    } else {
+        // if slave will not be shared, create a new one anyway.
+        Star *newWorm = createNewWormhole(galname,where_defined);
+        return newWorm;
+    }
 }
 
 int FSMStateStar::execAction (int actNum) {

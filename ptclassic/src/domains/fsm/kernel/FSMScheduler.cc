@@ -1,7 +1,7 @@
 static const char file_id[] = "FSMScheduler.cc";
 
 /*
-Version $Id$
+$Id$
 
 @Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
@@ -217,6 +217,10 @@ void FSMScheduler::setup() {
     // "myInterp" will be passed to each state, so it should be created
     // before galaxy()->initialize()
     if (!setupTclInterp()) return;
+
+    // "sharedSlaveList" will be used in the states, so it should be created
+    // before galaxy()->initialize()
+    sharedSlaveList.initialize();
 
     galaxy()->initialize();
 
