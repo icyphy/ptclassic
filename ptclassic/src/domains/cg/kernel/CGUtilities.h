@@ -25,7 +25,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: J. Pino, J. Buck
+ Programmer: Jose L. Pino, J. Buck
 
 Misc CG routines.
 
@@ -37,12 +37,31 @@ Misc CG routines.
 #pragma interface
 #endif
 
-#include "StringList.h"
+#include "type.h"
 
 char* makeLower(const char* name);
 
+//////////////////////////////////////////////////////////////////////////
 //run command on hostname in specified directory.  if directory == NULL
-//then the command will be executed in the home directory
+//then the command will be executed in the home directory.  Returns
+//the status flag of the system call.
+
 int rshSystem(const char* hostname,const char* command,const char* directory = NULL);
+
+//////////////////////////////////////////////////////////////////////////
+//write a string to a file in a specified directory on a given host.  If
+//the direcory does not exit, it will be created.  The code can be
+//optionally displayed.  If host is not the localhost, then this method
+//will use rcp to copy it.  If mode is not null, will execute a
+//chmod on the file with the given mode.  Returns TRUE if successful.
+
+int rcpWriteFile(const char* hname,const char* dir,const char* file,
+const char* text,int displayFlag = FALSE, int mode = -1);
+
+/////////////////////////////////////////////////////////////////////////
+//returns TRUE if hname is the machine Ptolemy is running on.  NULL, "\0"
+//and "localhost" all return TRUE as well.
+int onHostMachine(const char* hname);
+
 
 #endif
