@@ -90,7 +90,7 @@ after processing the input is sent to the \fIsize\fR output.
 	input {
 		name {demand}
 		type {anytype}
-		desc { Demand an ouput. }
+		desc { Demand an output. }
 	}
 	inmulti {
 		name {inData}
@@ -173,7 +173,7 @@ Maximum total number of particles. If <0, capacity is infinite.
 
 	    // Iterate over the inputs, collecting new input data
 	    // All input data should be collected before any outputs are
-	    // produced so that priorites of the inputs will be observed.
+	    // produced so that priorities of the inputs will be observed.
 	    // Note that the queue size limitation will not be observed at
 	    // this point.  Only at the end of the firing will the queue
 	    // be truncated to capacity.
