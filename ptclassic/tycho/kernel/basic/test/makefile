@@ -47,9 +47,12 @@ DIRS =
 TCL_SRCS = 
 
 SIMPLE_TESTS = \
-	testPath.itcl
+	testPath.itcl \
+	testResource.itcl \
+	testURLPath.itcl
 
 GRAPHICAL_TESTS = \
+	testExec.itcl \
 	testLoader.itcl
 
 ITCL_SRCS = \
