@@ -50,7 +50,7 @@
 # interactors can be <i>bound</i> to the same picture; they can be
 # <i>cascaded</i> to modify each other's effects. Actions eventually
 # end up being given to a <a href="../../../kernel/doc/codeDoc/Picture.html">
-# <i>Picture</i> object, which then reacts according to its current
+# <i>Picture</i></a> object, which then reacts according to its current
 # ``behavior.''
 #
 class ::tycho::Interactor {
@@ -67,7 +67,7 @@ class ::tycho::Interactor {
     # be changed once the interactor has been bound.</i>
     public variable button 1
 
-    # A list of event modifiers for mouse events. <i>This option cannot
+    # A list of modifiers for mouse events. <i>This option cannot
     # be changed once the interactor has been bound.</i>
     public variable modifiers {}
 
@@ -94,7 +94,7 @@ class ::tycho::Interactor {
     ####                         public methods                    ####
 
     ## ``Bind'' an interactor to a picture.
-    method bind {t args} {}
+    method bind {tagOrID args} {}
 
     # Forward actions to a proxy.
     method cascade {that} {}
@@ -103,7 +103,7 @@ class ::tycho::Interactor {
     method target {args} {}
 
     # Remove a binding from the interactor to the target.
-    method unbind {t} {}
+    method unbind {tagOrID} {}
 
     # Stop cascading actions to a proxy.
     method uncascade {} {}
@@ -183,9 +183,10 @@ body ::tycho::Interactor::activate {args} {
 #### bind target
 #
 # <i>Abstract method</i>.
-# ``Bind'' an interactor to a picture. This creates a binding on
-# the specified picture so that, when the appropriate event occurs,
-# the interactor is ``activated'' on the target.
+# ``Bind'' an interactor to a picture or to a tag. This creates a binding
+# to the specified picture or tag so that, when the appropriate event
+# occurs on that picture or a picture withe the specified tags, the
+# interactor is ``activated'' on the target.
 #
 body ::tycho::Interactor::bind {t args} {
     abstractMethod Interactor bind
@@ -213,10 +214,10 @@ body ::tycho::Interactor::cascade {that} {
 #
 # Start an interaction sequence. The co-ordinates <i>x</i> and <i>y</i>
 # are the current mouse coordinates relative to the slate.
-# By default, this method simply forwards
-# a <code>click</code> to the target, or to the proxy interactor if there
+# By default, this method simply forwards a <code>click</code> action
+# to the target, or to the proxy interactor if there
 # is one. Sub-classes that over-ride this method should always call
-# this implementation to forward the click event.
+# this implementation to forward the click action.
 #
 body ::tycho::Interactor::click {x y} {
     if { $proxy != "" } {
@@ -260,9 +261,9 @@ body ::tycho::Interactor::deactivate {args} {
 # Continue an interaction sequence with a mouse move. The co-ordinates
 # <i>x</i> and <i>y</i> are the current mouse coordinates relative to
 # the slate. By default, this method simply forwards a <code>drag</code>
-# event to the target, or to the proxy interactor if there
+# action to the target, or to the proxy interactor if there
 # is one. Sub-classes that over-ride this method should always call
-# this implementation to forward the drag event.
+# this implementation to forward the drag action.
 #
 body ::tycho::Interactor::drag {x y} {
     if { $proxy != "" } {
@@ -306,9 +307,9 @@ body ::tycho::Interactor::proxy {args} {
 #
 # Terminate an interaction sequence. By default, this method
 # simply forwards a <code>release</code>
-# event to the target, or to the proxy interactor if there
+# action to the target, or to the proxy interactor if there
 # is one. Sub-classes that over-ride this method should always call
-# this implementation to forward the release event.
+# this implementation to forward the release action.
 #
 body ::tycho::Interactor::release {} {
     if { $proxy != "" } {
@@ -349,7 +350,7 @@ body ::tycho::Interactor::target {args} {
 #### unbind target
 #
 # <i>Abstract method</i>.
-# Remove a binding from the interactor to the target. This is useful
+# Remove a binding from the interactor to a picture or a tag. This is useful
 # when using interactors that bind to a slate rather to an individual
 # picture: all picture-specific interactions should be
 # unbound to prevent bizarre interactions in case of clicks that
