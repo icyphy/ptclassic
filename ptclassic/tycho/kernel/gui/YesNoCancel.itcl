@@ -64,8 +64,8 @@ body ::tycho::YesNoCancel::constructor {args} {
     # Change the keyboard accelerator for the No button.
     $itk_component(bbox) buttonconfigure no -text "No <Del>"
 
-    bind $prefix <Delete> "$this invoke no"
-    bind $prefix <Escape> "$this invoke cancel"
+    bind $prefix <Delete> "code $this invoke no"
+    bind $prefix <Escape> "code $this invoke cancel"
 
     # Explicitly handle configs that may have been ignored earlier.
     eval itk_initialize $args

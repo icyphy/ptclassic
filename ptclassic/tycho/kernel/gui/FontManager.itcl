@@ -181,7 +181,7 @@ body ::tycho::FontManager::constructor {args} {
     addButton cancel -text "Cancel <Esc>" -command \
 	    "$this clearFont; $this nextWindow; delete object $this"
 
-    bind $prefix <Escape> "$this invoke cancel"
+    bind $prefix <Escape> "code $this invoke cancel"
 
     # Set up the menubar
     itk_component add menuFrame {
