@@ -24,11 +24,35 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
-#include "copyright.h"
+#ifndef ATTACHE_IO_H
+#define ATTACHE_IO_H
+#include "ansi.h"
+
 extern char eraseChar;
 extern char wordEraseChar;
 extern char lineKillChar;
 extern int LINES;
 extern int COLS;
 
+extern void IOinit();
+extern void IOend();
+extern int IOgetchar();
+extern void IOputchar	ARGS((int ch));
+extern void IOputs	ARGS((char *str));
+extern void IOwrap	ARGS((char *str));
+extern void IOputcharSee	ARGS((int ch));
+extern void IOputsSee		ARGS((char *str));
+extern void IOhome();
+extern void IObotHome();
+extern void IOmove		ARGS((int y, int x));	
+extern void IOgetyx		ARGS((int *yPtr, int *xPtr));	
+extern void IOstandout();
+extern void IOstandend();
+extern void IOclearScreen();
+extern void IOforceClear();
+extern void IOclearLine();
+extern void IOrefresh();
+
 #define CNTRL(ch)	((ch) ^ 0100)
+
+#endif /* ATTACHE_IO_H */

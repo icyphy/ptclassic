@@ -27,7 +27,10 @@
 #ifndef ATTACHE_H
 #define ATTACHE_H
 
-void inspectFacet
-	ARGS((octObject *ofacet));
+void inspectFacet	ARGS((octObject *ofacet));
+void editFacet		ARGS((octObject *instPtr, octObject *facetPtr));
+void edit		ARGS((int drawFlag));
+
+int querySaveChanges();
 
 #endif
