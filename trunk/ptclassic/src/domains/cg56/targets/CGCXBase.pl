@@ -4,6 +4,7 @@ defstar {
     desc { Base star from  CGC to S56X Send Receive}
     version { $Id$ }
     author { Jose L. Pino }
+    ccinclude { "CGTarget.h" } 
     copyright { 
 Copyright (c) 1993 The Regents of the University of California.
 All rights reserved.
@@ -73,7 +74,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	const char *s56path = getenv("S56DSP");
 	if (s56path == NULL)
 		s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
-	addCode(downloadCode(myTarget()->stateWithName("file"),s56path));
+	const char* filePrefix = myTarget()->stateWithName("file")->currentValue();
+	addCode(downloadCode(filePrefix,s56path));
     }
     
 }
