@@ -45,7 +45,7 @@
 # can use this to process selected items; note, however, that this tag is
 # maintained by the Selector and the Slate, and must not be added to
 # or removed from items -- use the Slate's select{} method instead.
-# When an item is selected, it is highighted using the Slate's
+# When an item is selected, it is highlighted using the Slate's
 # highlight{} method.
 #
 # The Selector is bound to to items and tags with its bind{} method,
