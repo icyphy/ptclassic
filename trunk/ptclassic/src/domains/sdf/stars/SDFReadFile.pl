@@ -8,7 +8,7 @@ defstar
     location { SDF main library }
     descriptor { Read ASCII data from a file. }
 
-    hinclude { <stream.h> }
+    hinclude { "streamCompat.h" }
     ccinclude { "Scheduler.h" }
 
     output
@@ -53,12 +53,12 @@ defstar
     {
 	LOG_DEL; delete input; input = 0;
 	// open input file
-	int fd = open(expandPathName(fileName), 0);
+	int fd = open(expandPathName(fileName), O_RDONLY);
 	if (fd < 0) {
 		Error::abortRun(*this, "can't open file ", fileName);
 		return;
 	}
-	LOG_NEW; input = new istream(fd);
+	LOG_NEW; input = new ifstream(fd);
     }
 
     go
@@ -77,15 +77,15 @@ defstar
 			Error::abortRun(*this, "can't re-open file ", fileName);
 			return;
 		}
-		LOG_NEW; input = new istream(fd);
+		LOG_NEW; input = new ifstream(fd);
 		(*input) >> x;		// get next value
-		eatwhite(*input);
+		ws(*input);
 	    }
 	}
 	else			// get next value
 	{
 	    (*input) >> x;
-	    eatwhite(*input);
+	    ws(*input);
 	}
 	output%0 << x;
     }
