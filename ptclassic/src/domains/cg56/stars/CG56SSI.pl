@@ -6,7 +6,7 @@ defstar {
     author { Kennard White, Chih-Tsung Huang (ported from Gabriel) }
     acknowledge { Gabriel version by Jeff Bier, Phil Lapsley, Eric Guntvedt. }
 	copyright {
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -285,7 +285,10 @@ various ports (in order to make input-only, output-only, or mono stars).
 	int	doXmit1;
 	int	doXmit2;
     }
-
+    constructor {
+	doRecv1 = doRecv2 = TRUE;
+	doXmit1 = doXmit2 = TRUE;
+    }
     codeblock(ssiInit) {
 	movep	#$val(cra),x:m_cra
 	movep	#$val(crb),x:m_crb
@@ -580,11 +583,6 @@ $label(tx_done)
     //			CG: normal CG methods (start,initCode,go,wrapup)
     //
     ////////////////////////////////////////////////////////////////////////
-
-begin {
-	doRecv1 = doRecv2 = TRUE;
-	doXmit1 = doXmit2 = TRUE;
-}
 
     setup {
         saveReg.resize(3);
