@@ -3,7 +3,7 @@ defstar {
 	domain { SR }
         derivedFrom { SRItclStar }
 	desc { Does nothing }
-	version { $Id$ }
+	version { @(#)SRItcl.pl	1.1 4/25/96 }
 	author { S. A. Edwards }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

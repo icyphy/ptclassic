@@ -4,7 +4,7 @@ defstar {
     desc {
 In each instant, output a signal with value given by the ``level'' parameter.
 }
-    version { $Id$ }
+    version { @(#)SRConst.pl	1.3 4/19/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

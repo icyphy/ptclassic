@@ -2,7 +2,7 @@ defstar {
 	name {Nop}
 	domain {SR}
 	desc { Does nothing }
-	version {$Id$}
+	version {@(#)SRNop.pl	1.1 3/19/96}
 	author { E. A. Lee and D. Niehaus }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.

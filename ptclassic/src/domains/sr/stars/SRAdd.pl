@@ -4,7 +4,7 @@ defstar {
     desc {
 Add the two inputs.
 }
-    version { $Id$ }
+    version { @(#)SRAdd.pl	1.3 4/19/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

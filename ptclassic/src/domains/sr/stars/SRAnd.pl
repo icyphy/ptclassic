@@ -7,7 +7,7 @@ Lazy logical AND: output is true if both inputs are present and true,
 output is false if one is present and false, output is absent if both are
 absent
 }
-    version { $Id$ }
+    version { @(#)SRAnd.pl	1.1 4/25/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.

@@ -7,7 +7,7 @@ When the select input is true, copy trueInput to the output;
 when the select input is false, copy falseInput to the output;
 make the output absent when the select input is absent.
 }
-    version { $Id$ }
+    version { @(#)SRMux.pl	1.1 4/25/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
