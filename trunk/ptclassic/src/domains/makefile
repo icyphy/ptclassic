@@ -15,15 +15,7 @@ DIRS = sdf de ddf
 
 MAKEVARS = "ARCH=$(ARCH)"
 
-makefiles:
-	@for x in $(DIRS); do \
-		cd $$x ; \
-		echo Updating makefile in domains/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x makefile ;\
-		cd .. ; \
-	done
-
-all install clean:
+makefiles all install clean sources:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in domains/$$x ; \
