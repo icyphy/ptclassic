@@ -33,6 +33,21 @@
 
 ########################################################################
 
+### Global Class Bindings
+#
+bind Entry <Control-u> {
+    clipboard clear -displayof %W
+    clipboard append -displayof %W [%W get]
+    %W delete 0 end
+}
+
+bind Entry <Control-k> {
+    clipboard clear -displayof %W
+    clipboard append -displayof %W \
+	    [string range [%W get] [%W index insert] [%W index end]]
+    %W delete insert end
+}
+
 ### PROTOCOLS
 ::tycho::register protocol "file" \
 	-class ::tycho::ResourceFile \
