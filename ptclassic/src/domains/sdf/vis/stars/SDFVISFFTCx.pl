@@ -230,16 +230,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	    splitf_imin[i]=vis_read_lo(xtsaddytc);
 	  }
 	  //last stage of the fft
-	      N1=N2;
-	  N2=N2/2;
-	  ExpofW=twopi/N1;
-	  for(i=0;i<N;i+=N1){
-	    reinstmp=splits_rein[i+1]-splits_rein[i];
-	    imaginstmp=splits_imin[i+1]-splits_imin[i];
-	    splits_rein[i+1]=splits_rein[i]+splits_rein[i+1];
-	    splits_imin[i+1]=splits_imin[i]+splits_imin[i+1];
-	    splits_rein[i]=reinstmp;
-	    splits_imin[i]=imaginstmp;
+	  i=0;
+	  for(j=0;j<N/2;j++){
+	    i+=2;
+	    reinstmp=splits_rein[i-1]-splits_rein[i-2];
+	    imaginstmp=splits_imin[i-1]-splits_imin[i-2];
+	    splits_rein[i-1]=splits_rein[i-2]+splits_rein[i-1];
+	    splits_imin[i-1]=splits_imin[i-2]+splits_imin[i-1];
+	    splits_rein[i-2]=reinstmp;
+	    splits_imin[i-2]=imaginstmp;
 	  }	
 	  reorderfft(splits_rein,splits_imin,sizeoffft);
 	  //output the results
