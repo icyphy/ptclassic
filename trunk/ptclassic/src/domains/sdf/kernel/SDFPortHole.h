@@ -50,7 +50,7 @@ public:
         // argument, the number of Particles consumed/generated
         PortHole& setPort(const char* portName,
                           Block* parent,
-                          dataType type = FLOAT,
+                          DataType type = FLOAT,
 			  // Number Particles consumed/generated
                           unsigned numTokens = 1,
 			  // Maximum delay the Particles are accessed
@@ -68,7 +68,7 @@ public:
 	int isA(const char*) const;
 
 	// Services of PortHole that are often used:
-	// setPort(dataType d);
+	// setPort(DataType d);
 	// Particle& operator % (int);
 };
 
@@ -85,7 +85,7 @@ public:
 	void grabData();
 
         // Services of PortHole that are often used: 
-        // setPort(dataType d); 
+        // setPort(DataType d); 
         // Particle& operator % (int);
 };
 
@@ -110,7 +110,7 @@ public:
 	void sendData();
 
         // Services of PortHole that are often used: 
-        // setPort(dataType d); 
+        // setPort(DataType d); 
         // Particle& operator % (int);
 };
 
@@ -129,7 +129,7 @@ public:
         // argument, the number of Particles produced
         MultiPortHole& setPort(const char* portName,
                           Block* parent,
-                          dataType type = FLOAT,        // defaults to FLOAT
+                          DataType type = FLOAT,        // defaults to FLOAT
                           unsigned numTokens = 1);      // defaults to 1
 };
 
