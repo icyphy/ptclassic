@@ -83,7 +83,7 @@ ostream& operator<< (ostream& o, SDFClusterGal& g) {
 // constructor: builds a flat galaxy of SDFAtomCluster objects.
 
 SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
-: bagNumber(1), logstrm(log)
+: logstrm(log), bagNumber(1)
 {
 	int nports = setPortIndices(gal);
 	LOG_NEW; SDFClustPort** ptable = new SDFClustPort*[nports];
@@ -621,7 +621,7 @@ SDFCluster* SDFClusterGal::merge(SDFCluster* c1, SDFCluster* c2) {
 
 // constructor: make empty bag.
 SDFClusterBag :: SDFClusterBag()
-: owner(TRUE), exCount(0), sched(0), gal(0)
+: sched(0), gal(0), exCount(0), owner(TRUE)
 {}
 
 void SDFClusterBag :: createInnerGal() {
@@ -1052,7 +1052,7 @@ int SDFAtomCluster::myExecTime() {
 // constructor for SDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an SDFClusterBag.
 SDFClustPort::SDFClustPort(DFPortHole& port,SDFCluster* parent, int bp)
-: pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0)
+: pPort(port), pOutPtr(0), bagPortFlag(bp), feedForwardFlag(0)
 {
 	const char* name = bp ? port.name() : mungeName(port);
 	setPort(name,parent,INT);
