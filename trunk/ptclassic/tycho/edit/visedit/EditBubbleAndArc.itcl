@@ -461,6 +461,9 @@ body ::tycho::EditBubbleAndArc::editLabel {tag} {
 		-okcommand "$this editNodeLabelDone $item \
 		\[.query get onlytag\]"
 	.query centerOnScreen
+
+	# modal interaction
+	grab set .query
     } elseif {[lsearch -exact [$c gettags $item] arc] >= 0} {
 	# item is an arc
 	set onlyquery [list onlytag {Label:} \
@@ -470,6 +473,9 @@ body ::tycho::EditBubbleAndArc::editLabel {tag} {
 		-okcommand "$this editArcLabelDone $item \
 		\[.query get onlytag\]"
 	.query centerOnScreen
+
+	# modal interaction
+	grab set .query
     }
 }
     
