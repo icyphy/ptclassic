@@ -753,7 +753,7 @@ body ::tycho::Query::mediated {tag label default command args} {
         label $itk_component(querysite).label_$tag \
                 -text "$label"
     } {
-        keep -background -cursor
+        keep -background -cursor -font
 	rename -foreground labelcolor labelColor LabelColor
     }
     grid $itk_component(label_$tag) -column 0 -row $numentries -sticky e
