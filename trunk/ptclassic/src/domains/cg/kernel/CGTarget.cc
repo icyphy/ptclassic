@@ -321,7 +321,7 @@ void CGTarget :: chooseScheduler() {
     }
 }
 
-/*virtual*/ int CGTarget::schedulerSetup() {
+int CGTarget::schedulerSetup() {
     ProfileTimer schedulingTimer;
     int status = Target::schedulerSetup();
 
@@ -462,7 +462,6 @@ int CGTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 	return TRUE;
 }
 
-// virtual function
 void CGTarget :: compileRun(SDFScheduler* s) {
 	s->compileRun();
 }
