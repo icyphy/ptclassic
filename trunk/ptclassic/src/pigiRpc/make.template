@@ -65,7 +65,7 @@ ADD_OBJS =	palettes.$(PIGI).o
 
 PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
 
-LIBS += 	version.o -L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist \
+LIBS += 	-L$(OCTLIBDIR) -lpigi -lrpc -loh -lvov -lrpc -llist \
 			-ltr -lutility -lst -lerrtrap -luprintf -lport
 
 LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) $(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
