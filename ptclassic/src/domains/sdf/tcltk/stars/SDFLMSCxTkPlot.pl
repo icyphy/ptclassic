@@ -3,8 +3,8 @@ defstar {
 	domain {SDF}
 	derivedFrom { LMSCx }
 	desc { 
-Just like the LMSCx filter, but with an animated Tk display of
-the taps, plus associated controls.
+This is just like the LMSCx star, but with an animated
+Tk display of the taps, plus associated controls.
 	}
 	version { $Id$ }
 	author { E. A. Lee }

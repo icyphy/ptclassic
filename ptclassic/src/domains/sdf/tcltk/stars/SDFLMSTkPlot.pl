@@ -3,8 +3,8 @@ defstar {
 	domain {SDF}
 	derivedFrom { LMS }
 	desc { 
-Just like the LMS filter, but with an animated Tk display of
-the taps, plus associated controls.
+This star is just like the LMS star, but with an animated Tk
+display of the taps, plus associated controls.
 	}
 	version { $Id$ }
 	author { E. A. Lee }

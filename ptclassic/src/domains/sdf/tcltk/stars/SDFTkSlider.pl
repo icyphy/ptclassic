@@ -2,7 +2,7 @@ defstar {
 	name {TkSlider}
 	domain {SDF}
 	derivedFrom { TclScript }
-	desc { Output a value determined by a Tk scale slider. }
+	desc { Output a value determined by an interactive on-screen scale slider. }
 	version { $Id$ }
 	author { E. A. Lee }
 	copyright {
