@@ -1,22 +1,21 @@
-defstar
-{
+defstar {
     name { StereoOut }
     domain { CGC }
+    derivedFrom { AudioBase }
     descriptor {
-
-Writes Compact Disc audio format to a file. The file
-can be the audio port /dev/audio, if supported by the
-workstation.
+Writes Compact Disc audio format to a file given by "fileName".  The file
+can be the audio port /dev/audio, if supported by the workstation.  The
+star writes "blockSize" 16-bit samples at each invocation.  The block
+size should be a multiple of 4.
     }
     explanation {
-This code is based on the description of the audio
-driver which can be obtained by looking at the man page
-of audio.
+This code is based on the description of the audio driver which can be
+obtained by looking at the man page of audio.
     }
     version { $Id$ }
     author { Sunil Bhave }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University 
+Copyright (c) 1990-%Q% The Regents of the University 
 of California. All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty 
@@ -24,19 +23,16 @@ provisions.
     }
     location { CGC main library }
 
-    defstate {
-      name { fileName }
-      type { string }
-      default { "/dev/audio" }
-      desc { Output file for CD quality data. }
+    input {
+      name { left }
+      type { float }
+      desc { Left channel input }
     }
 
-    defstate {
-      name { blockSize }
-      type { int }
-      default { 8180 }
-      desc { Number of bytes to write. Defaulted to buffer size of
-	       audio driver. Should be a multiple of 4. }
+    input {
+      name { right }
+      type { float }
+      desc { Right channel input }
     }
 
     defstate {
@@ -87,28 +83,19 @@ provisions.
       attributes { A_GLOBAL }    
     }
 
+    constructor {
+      blockSize = 8180;
+    }
+
     protected {
       int standardOutput:1;
     }
 
-    input {
-      name { left }
-      type { float }
-      desc { Left channel input }
-    }
-
-    input {
-      name { right }
-      type { float }
-      desc { Right channel input }
-    }
-
-    codeblock (declarations) {
-      int $starSymbol(file);
+    codeblock (outDeclarations) {
       short $starSymbol(buffer)[$val(blockSize)/2];
       int $starSymbol(counter);
     }
-    
+
     codeblock (globals) {
       int $starSymbol(ctlfile);    
     }
@@ -161,20 +148,6 @@ provisions.
       }
     }
 
-    codeblock (openFile) {
-      /* Open file for writing */
-      $starSymbol(file) = open("$val(fileName)",O_WRONLY, 0666);
-      if ($starSymbol(file) == -1) {
-	perror("Error: cannot open output file: $val(fileName)");
-	exit(1);	
-      }
-    }
-    
-    codeblock (noOpen) {
-      /* Use standard output for writing */
-      $starSymbol(file) = 0;
-    }
-    
     codeblock (openCrtlfile) {
       /* Open control device */
       $starSymbol(ctlfile) = open("/dev/audioctl",O_RDWR, 0666);
@@ -183,7 +156,6 @@ provisions.
 	exit(1);
       }
     }
-
 
     codeblock (convert) {
       /* Take data from Input and put it in buffer */
@@ -199,25 +171,6 @@ provisions.
       }
     }
 
-    codeblock (write) {
-      /* Write data to a file */
-      if (write($starSymbol(file), $starSymbol(buffer),
-		$val(blockSize)) != $val(blockSize)){
-	perror("Error writing to file: $val(fileName)");
-	exit(1);
-      }
-    }
-
-
-    codeblock (closeFile) {
-      /* Close file */
-      if (close($starSymbol(file)) != 0)
-        {
-	  perror("Error in closing: $val(fileName)");
-	  exit(1);
-        }	
-    }
-
     codeblock (closeCrtlfile) {
       /* Close control device */
       if (close($starSymbol(ctlfile)) != 0) {
@@ -225,11 +178,9 @@ provisions.
 	exit(1);
       }
     }
-      
 
     setup {
-      fileName.clearAttributes(A_SETTABLE);
-      standardOutput = (strcmp(fileName,"") == 0);
+      CGCAudioBase::setup();
       left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
       right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
@@ -240,16 +191,18 @@ provisions.
       addInclude("<sys/ioctl.h>");
       addInclude("<math.h>");
       addInclude("<sys/audioio.h>");
-      addDeclaration(declarations);
+      CGCAudioBase::initCode();
+      addDeclaration(outDeclarations);
       addGlobal(globals);
-      
-      if (standardOutput) addCode(noOpen);
-      else
-	{
-	  addInclude("<fcntl.h>");
-	  addCode(openFile);
-	}
-      
+
+      if (standardIO) {
+	addCode(noOpen);
+      }
+      else {
+	addInclude("<fcntl.h>");            // Define O_WRONLY
+	addCode(openFileForWriting);
+      }
+
       addCode(openCrtlfile);
       addProcedure(set_parametersDef);
       
@@ -263,7 +216,7 @@ provisions.
     }
     
     wrapup {
-      if (!standardOutput) addCode(closeFile);
+      CGCAudioBase::wrapup();
       addCode(closeCrtlfile);
     }
     

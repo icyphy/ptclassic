@@ -1,16 +1,16 @@
-defstar
-{
+defstar {
     name { StereoIn }
     domain { CGC }
+    derivedFrom { AudioBase }
     descriptor {
-Reads Compact Disc audio format from a file. The file
-can be the audio port /dev/audio, if supported by the
-workstation.
+Reads Compact Disc audio format from a file given by "fileName". The file
+can be the audio port /dev/audio, if supported by the workstation.  The
+star reads "blockSize" 16-bit samples at each invocation.  The block
+size should be a multiple of 4.
     }
     explanation {
-This code is based on the description of the audio
-driver which can be obtained by looking at the man page
-of audio.
+This code is based on the description of the audio driver which can
+be obtained by looking at the man page of audio.
     }
     version { $Id$ }
     author { Sunil Bhave }
@@ -23,19 +23,16 @@ provisions.
     }
     location { CGC main library }
 
-    defstate {
-      name { fileName }
-      type { string }
-      default { "/dev/audio" }
-      desc { Input file for CD quality data. }
+    output {
+      name { left }
+      type { float }
+      desc { Left channel output }
     }
 
-    defstate {
-      name { blockSize }
-      type { int }
-      default { 8180 }
-      desc { Number of bytes to read. Defaulted to the size of the
-	       audio driver. Should be a multiple of 4. }
+    output {
+      name { right }
+      type { float }
+      desc { Right channel output }
     }
 
     defstate {
@@ -86,24 +83,11 @@ provisions.
       attributes { A_GLOBAL }    
     }
 
-    protected {
-      int standardInput:1;
+    constructor {
+	blockSize = 8180;
     }
 
-    output {
-      name { left }
-      type { float }
-      desc { Left channel output }
-    }
-
-    output {
-      name { right }
-      type { float }
-      desc { Right channel output }
-    }
-
-    codeblock (declarations) {
-      int $starSymbol(file);
+    codeblock (inDeclarations) {
       short $starSymbol(buffer)[$val(blockSize)/2];
       int $starSymbol(counter);
     }
@@ -160,34 +144,11 @@ provisions.
       }
     }
 
-    codeblock (openFile) {
-      /* Open file for reading */
-      $starSymbol(file) = open("$val(fileName)",O_RDONLY, 0666);
-      if ($starSymbol(file) == -1) {
-	perror("Error: cannot open input file: $val(fileName)");
-	exit(1);	
-      }
-    }
-    
-    codeblock (noOpen) {
-      /* Use standard input for reading */
-      $starSymbol(file) = 0;
-    }
-    
     codeblock (openCrtlfile) {
       /* Open control device */
       $starSymbol(ctlfile) = open("/dev/audioctl",O_RDWR, 0666);
       if ($starSymbol(ctlfile) == -1) {
 	perror("Error in opening audio control device: /dev/audioctl");
-	exit(1);
-      }
-    }
-    
-    codeblock (read) {
-      /* Read data from a file */
-      if (read($starSymbol(file), $starSymbol(buffer),
-	       $val(blockSize)) != $val(blockSize)) {
-	perror("Error reading from file: $val(fileName)");
 	exit(1);
       }
     }
@@ -206,15 +167,6 @@ provisions.
       }
     }
     
-    codeblock (closeFile) {
-      /* Close file */
-      if (close($starSymbol(file)) != 0)
-        {
-	  perror("Error in closing: $val(fileName)");
-	  exit(1);
-        }	
-    }
-
     codeblock (closeCrtlfile) {
       /* Close control device */
       if (close($starSymbol(ctlfile)) != 0) {
@@ -224,28 +176,27 @@ provisions.
     }
 
     setup {
-      fileName.clearAttributes(A_SETTABLE);
-      standardInput = (strcmp(fileName,"") == 0);
+      CGCAudioBase::setup();
       left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
       right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
     }
-      
+
     initCode {
       addInclude("<stdio.h>");
       addInclude("<unistd.h>");
       addInclude("<sys/ioctl.h>");
       addInclude("<math.h>");
       addInclude("<sys/audioio.h>");
-      addDeclaration(declarations);
+      CGCAudioBase::initCode();
+      addDeclaration(inDeclarations);
       addGlobal(globals);
-      
-      if (standardInput) addCode(noOpen);
-      else
-	{
-	  addInclude("<fcntl.h>");
-	  addCode(openFile);
-	}
-      
+      if (standardIO) {
+	addCode(noOpen);
+      }
+      else {
+	addInclude("<fcntl.h>");            // Define O_RDONLY
+	addCode(openFileForReading);
+      }
       addCode(openCrtlfile);
       addProcedure(set_parametersDef);
       
@@ -257,9 +208,9 @@ provisions.
       addCode(read);
       addCode(convert);
     }
-    
+
     wrapup {
-      if (!standardInput) addCode(closeFile);
+      CGCAudioBase::wrapup();
       addCode(closeCrtlfile);
     }
     
