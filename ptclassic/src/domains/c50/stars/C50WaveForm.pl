@@ -7,9 +7,9 @@ or truncating to period if necessary.  Setting period to 0 (default) output
 the value once.  The default value is 0.1 0.2 0.3 0.4.
         }
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
 	copyright {
-Copyright (c) 1990-%Q5 The Regents of the University of California.
+Copyright (c) 1990-%Q The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -70,13 +70,7 @@ limited to 20,000 samples.
                 desc {If greater than zero, gives the period of the waveform}
 		default { 0 }
 	}
-        state  {
-                name { X }
-                type { int }
-                default { 0 }
-                desc { internal }
-               attributes { A_NONCONSTANT|A_NONSETTABLE }
-        }
+
         state  {
                 name { firstVal }
                 type { fix }
@@ -99,6 +93,10 @@ limited to 20,000 samples.
                 attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
         }
 
+	protected {
+		int X,len;
+	}
+
         codeblock (org) {
 	.ds   	$addr(output)		; initialization of DC block
         }
@@ -112,51 +110,46 @@ limited to 20,000 samples.
 	mar	*,AR6				; impulse
 	lar 	AR7,#$addr(output)		;Address output		=> AR7
         lar     AR6,#$addr(value)		;Address value		=> AR6
-	lacc   	*,0,AR7				;Accu = value
-        sacl   	*,0,AR6				;output = value
-	zap					;clear P-Reg and Accu
-        sacl    *				;value = 0
+	lacl   	*,AR7				;Accu = value
+        sacl   	*,AR6				;output = value
+        sach    *,0				;value = 0
         }
-        codeblock (aperiodic) {
-        mar	*,AR2				; aperiodic value
-	lar	AR2,$addr(dataCirc)		;Address dataCirc	=> AR2
-        zap   					;clear P-Reg. and Accu
-	bldd	*,#$addr(output)		;output = dataCirc
-        sacl	*+				;dataCirc = 0     incr AR2
-        sar 	*,#$addr(dataCirc)		;store new dataCircle
-        }
-        codeblock (periodperiodicSequence) {
+
+	codeblock( initCircBuff,""){
+	lacc	#$addr(value)
+	samm	cbsr1
+	add	#@X
+	samm	cber1
+	lacl	#10				; setup circ buff with
+	samm	cbcr				; ar2 as circ buff pointer
+	}
+
+	codeblock (restoreCircBuff){
+	zap
+	samm	cbcr			; disable circ buff
+	}
+	 
+
+        codeblock (periodicSequence) {
+	lmmr	AR2,#$addr(dataCirc)		;Address dataCirc	=> AR2
 	mar 	*,AR2				; period periodic value
-        lar	AR2,#$addr(dataCirc)		;Address dataCirc	=> AR2
-        nop					;waste cycles
-	lacc	*				;waste cycles
         bldd    *+,#$addr(output)		;output = dataCirc incr AR2  
-        sar	*,#$addr(dataCirc)		;store new dataCircle
+        smmr	ar2,#$addr(dataCirc)		;store new dataCircle
         }    
-        codeblock (zeroPaddedSequence) {
-	mar	*,AR2				; Zero padded value
-	lmmr	ARCR,#$val(valueLen)		;valueLen => ARCR
-	lar     AR2,#$addr(dataCirc)		;Address dataCirc	=> AR2
-	lar	AR2,*
-        cmpr	2				;AR2 > ARCR
-        bcnd	$label(l29),NTC			;if no jump to label(l29)
-	lar	AR1,#0.0			;AR1 = zero
-	lmmr	ARCR,#$val(X)			;X  => ARCR
-        smmr   	AR2,#$addr(output)		;output zero as sample value
-        cmpr    2				;AR2 > ARCR
-    	adrk	#1				;AR2 = AR2 +1
-        bcnd    $label(l30),NTC			;if no jump to label(l130)
-	smmr	AR1,#$addr(dataCirc)		;dataCirc = 0
-        b     	$label(l28)			;jump label(l28)
-$label(l29)			
-	mar	*,AR2
-	adrk	#$addr(value)			;AR2 = AR2 + address from value
-        bldd	*+,#$addr(output)		;output =         incr AR2 
-	sbrk	#$addr(value)			;AR2 = AR2 - address from value
-$label(l30)
-        smmr	AR2,#$addr(dataCirc) 		;store incremented counter 
-$label(l28)
-        }
+
+        codeblock (zeroPaddedSequence,"") {
+	mar	*,ar2
+	lmmr	ar2,#$addr(dataCirc)
+	lacc	#$addr(value,@valueLen)
+	samm	arcr
+	cmpr	1	
+	lar	ar3,#$addr(output)
+	xc	1,TC
+	lacc	*,16
+	mar	*+,ar3
+	sach	*,0
+	smmr	ar2,#$addr(dataCirc)
+	}
 
         codeblock(makeblock) {
 	.ds	$addr(dataCirc)		; output sample count
@@ -192,13 +185,8 @@ $label(l28)
 			addCode(orgp);
 		}
 		else {
-			if ((int(period) == 0 && int(valueLen) > 1) ||
-			   (int(period) != 0 && int(period) <= int(valueLen))) {
-				addCode(initDataCirc);
-			}
-			else if (period > valueLen) {
-				addCode(makeblock);
-			}
+			addCode(initDataCirc);
+
 		}
 	}
 	go {
@@ -212,7 +200,7 @@ $label(l28)
 				addCode(impulse);
 			else {		// output general aperiodic value.
 				X = int(valueLen) - 1;
-				addCode(aperiodic);
+				addCode(zeroPaddedSequence());
 			}
 		}
 
@@ -220,24 +208,35 @@ $label(l28)
 		    int(period) != 0) {
 			//output periodic value-- use first period values.
 			X = int(period) - 1;
-			addCode(periodperiodicSequence);
+			addCode(initCircBuff());
+			addCode(periodicSequence);
+			addCode(restoreCircBuff);
 		}
 
 		if (int(period) > int(valueLen) && int(period) != 1 &&
 		    int(period) != 0) {
 			//output periodic value-- zero padded.
 			X = int(period) - 1;
-			addCode(zeroPaddedSequence);
+			addCode(initCircBuff());
+			addCode(zeroPaddedSequence());
+			addCode(restoreCircBuff);
 		}
 	}
 
 	execTime {
 		if (int(period) == 0) {
-			if (int(valueLen) == 1) return 7;
-			else return 8;
+			if (int(valueLen) == 1) return 6;
+			else return 6;
 		}
 		if (int(period) == 1) return 0;
-		if (int(period) <= int(valueLen)) return 8;
-		return 14;
+		if (int(period) <= int(valueLen)) return 12;
+		return 19;
 	}
 }
+
+
+
+
+
+
+

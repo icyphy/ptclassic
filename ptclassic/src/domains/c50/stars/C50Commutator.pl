@@ -5,7 +5,7 @@ defstar {
 Interleaves the two input signals.
  }
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { Luis Gutierrez, A. Baensch, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -31,48 +31,82 @@ the next B particles from the next input, etc.
 		name {output}
 		type {=input}
 	}
+
         state {
                 name {blockSize}
                 type {int}
                 default {1}
                 desc {Number of particles in a block.}
 	}
+
 	constructor {
 		noInternalState();
 	}
+	
+	protected {
+		// holds the effective blocksize(to allow for
+		// complex inputs
+		int effBlockSize;
+		// number of input ports
+		int numPorts;
+
+		}
+
         setup {
-                int n = input.numberPorts();
+		
+                numPorts = input.numberPorts();
 		int bs = int(blockSize);
+		if (output.resolvedType() == COMPLEX) effBlockSize = 2*bs;
+		else	effBlockSize = bs;
 		input.setSDFParams(bs,bs-1);
-		output.setSDFParams(n*bs,n*bs-1);
-        }
-        codeblock (one) {
-        mar	*,AR7				;
-	lar	AR7,#$addr(input#1)        	;just move data from in to out
-        bldd    *,#$addr(output)		;
+		output.setSDFParams(numPorts*bs,numPorts*bs-1);
         }
 
- 	codeblock(main) {
-        lar	AR0,#$addr(output)		;Address output		=> AR0
-	mar 	*,AR0				;
+        codeblock (one) {
+	lmmr	ar1,#$addr(input#1)
+	smmr	ar1,#$addr(output)
         }
-        codeblock(loop, "int i") {
-        bldd    #$addr(input#@i),*	;input values to output stream
-        }
+
+	codeblock(oneCx){
+	lmmr	ar1,#$addr(input#1,0)
+	lmmr	ar2,#$addr(input#1,1)
+	smmr	ar1,#$addr(output,0)
+	smmr	ar2,#$addr(output,1)
+	}
+	
+	codeblock(moveBlockInit){
+	mar	*,ar1
+	}
+
+	codeblock(moveBlock,"int Inum"){
+	lar	ar1,#$addr(input#@Inum)
+	rpt	#@(effBlockSize - 1)
+	bldd	*+,#$addr(output,@(effBlockSize*(Inum-1)))
+	}
 
 	go {
-                if (input.numberPorts() == 1) {
-                        addCode(one);
-                }
-		else {
-			addCode(main);
-                	for (int i = 1; i <= input.numberPorts(); i++) {
-				addCode(loop(i));
+
+		if ((numPorts == 1) && (effBlockSize == 2)) {
+			addCode(oneCx);
+		} else if ((numPorts == 1) && (effBlockSize == 1)) {
+			addCode(one);
+		} else {
+			addCode(moveBlockInit);
+                	for (int i = 1; i <= numPorts; i++) {
+				addCode(moveBlock(i));
                 	}
 		}
 	}
+
 	exectime {
-		return (2*(int(input.numberPorts()))+2) ;
+		if ((numPorts == 1) && (effBlockSize == 2)) {
+			 return 4;
+		} else if ((numPorts == 1) && (effBlockSize == 2)) {
+			return 2;
+		} else {
+			int onePortCost = effBlockSize + 2;
+			return (onePortCost*numPorts + 1) ;
+		}
 	}
 }
 

@@ -82,7 +82,7 @@ This is not currently handled.
 	    ptrInit<<i;
 	    ptrInit<<")\n";
 	  }
-	  ptrInit<<"\ttext:\n";
+	  ptrInit<<"\t.text\n";
 	  addCode(ptrInit);
 	}
 
@@ -91,21 +91,20 @@ This is not currently handled.
 	lar	ar1,#$addr(ptrarray)
 	mar	*,ar1
 	mar	*0+
-	lacl	*,0,ar2
+	nop
+	lacc	*,0,ar2
 	samm	ar2		; ar2 -> start of current input
 	}
 	
 	codeblock(moveInput,""){
-	.if	@iter		; if iter > 0 use block xfer
-	lacl	#$addr(output),0
-	samm	bmar
 	rpt	#@iter
-	bldd	*+,bmar
-	.else
+	bldd	*+,#$addr(output)
+	}
+	
+	codeblock(moveOne){
 	lacl	*,0
 	lar	ar2,#$addr(output)			
 	sacl	*,0
-	.endif		
 	}
 	
 	method {
@@ -133,7 +132,10 @@ This is not currently handled.
 	
 	go {
 		addCode(loadAddress());
-		addCode(moveInput());
+		if (iter) 
+			addCode(moveInput());
+		else 
+			addCode(moveOne);
 	}
 	exectime{
 		int time = 6;

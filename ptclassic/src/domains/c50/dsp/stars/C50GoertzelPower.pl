@@ -38,15 +38,16 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	// Inherit setup from GoertzelBase
 
 	codeblock(result) {
-	lar	ar3,#0013h
+	lar	ar3,#0014h
 	sach	*+,2
 	pac
 	sach	*,1
 	zap	
 	sqra	*-
-	sqra	*,ar6
-	bcndd	$starSymbol(cfe),UNC
 	lar	ar6,#$addr(output)
+	sqra	*
+	bcndd	$starSymbol(cfe),UNC
+	lta	*,ar6
 	sach	*,1
 	}
 	go {
@@ -54,6 +55,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 		// Compute the (real-valued) power of last (complex) sample
 		addCode(result);
+		addCode(C50GoertzelBase::coeffs);
 	}
 
 	exectime {

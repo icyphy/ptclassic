@@ -30,10 +30,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	zap	
 	sqra	*+
 	sqra	*,ar1
+	apac
 	sach	*,1
+	clrc	ovm
     }
     go {
 	addCode(magnitude);
     }
-    exectime { return 7; }
+    exectime { return 8; }
 }

@@ -32,7 +32,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	zap	
 	sqra	*+
 	sqra	*,ar1
-	sach	*,1
+	apac
+	sacl	*
     }
     go {
 	addCode(magnitude);

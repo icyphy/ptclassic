@@ -52,42 +52,44 @@ and when underflow occurs, \fIunderVal\fP is output.
 
     codeblock(cbSkew,"") {
 	setc	ovm		; set overflow mode
-	clearc	sxm		; clear sign xtension mode
+	clrc	sxm		; clear sign xtension mode
 	lar	ar0,#$addr(error)
 	lar	ar1,#$addr(accum)
 	lar	ar2,#$addr(output)
 	mar	*,ar2
 	sst	#0,*		; ov bit is not reset so one must
-	apl	#efffh,*	; clear ov bit befor accumulate
-	lst	#0,*,ar0	; so that it's set correctly after add.
-	lach	*,16,ar1	; accH = error
-	add	*,16,ar2	; accH = error + accum
+	apl	#61439,*	; clear ov bit befor accumulate
+	lst	#0,*		; so that it's set correctly after add.
+	mar	*,ar0
+	lacc	*,16,ar1	; accH = error
+	add	*,16		; accH = error + accum
 	lar	ar3,#0000h	; clear ar3
-@( (ioverflw > 255) ? "\txc\t2,ov,gt\n":"\txc\t1,ov,gt\n")\
+@( (ioverflw > 255) ? "\txc\t2,ov\n":"\txc\t1,ov\n")\
 	lar	ar3,#@ioverflw
-@( (iunderflw > 255) ? "\txc\t2,ov,gt\n":"\txc\t1,ov,gt\n")\
+@( (iunderflw > 255) ? "\txc\t2,lt\n":"\txc\t1,lt\n")\
 	lar	ar3,#@iunderflw
 	xc	2,lt
 	lacc	#8000h,15
 	xc	2,ov
 	lacc	#8000h,15
-	smmr	ar3,*,ar1		; output value
+	smmr	ar3,#$addr(output)	; output value
 	sach	*,0
 	setc	sxm			; restore sign xtension mode
+	clrc	ovm
 	}
 
     setup{
 		double temp = underflowVal.asDouble();
 		if (temp >= 0){
-			iunderflw = int(32768*temp);
+			iunderflw = int(32768*temp + 0.5);
 		} else {
-			iunderflw = int(32768*(1-temp));
+			iunderflw = int(32768*(1-temp) + 0.5);
 		}
 		temp = overflowVal.asDouble();
 		if (temp >= 0){
-			ioverflw = int(32768*temp);
+			ioverflw = int(32768*temp + 0.5 );
 		} else {
-			iunderflw = int(32768*(1-temp));
+			iunderflw = int(32768*(1-temp) + 0.5 );
 		}
 	}
  
@@ -96,7 +98,7 @@ and when underflow occurs, \fIunderVal\fP is output.
     }
 
     exectime{
-	return 23;
+	return 24;
    }
 }
 

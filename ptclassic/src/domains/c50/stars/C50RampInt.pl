@@ -55,10 +55,18 @@ integer if \fIsaturation\fR is "YES".
 			addCode(saturate);
 		}
 		addCode(accumulate);
+		if (int(saturation)) {
+			addCode(clearSaturation);
+		}
 	}
 
 	codeblock(saturate){
 	setc	ovm
+	}
+
+
+	codeblock(clearSaturation){
+	clrc	ovm
 	}
 
         codeblock(accumulate) {

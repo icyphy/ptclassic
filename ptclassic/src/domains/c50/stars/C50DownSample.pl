@@ -14,7 +14,7 @@ same sense as the phase parameter in the FIR star.
 .Ir "decimation"
 	}
 	version { $Id$ }
-	author { A. Baensch, ported from Gabriel }
+	author { A. Baensch, Luis Gutierrez, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -44,19 +44,47 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Downsample phase }
 		attributes { A_SETTABLE }
 	}
+	protected{
+		// effective offset from the begining of input buffer
+		int effOffset;
+		// eff size of input
+		int effSize;
+	}
+
 	setup {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, "phase must be < than factor");
+
+		if (output.resolvedType() == COMPLEX){
+			 effOffset = 2*int(phase);
+			 effSize = 2*int(factor);
+		} else	{
+			effOffset = int(phase);
+			effSize = int(factor);
+		}
+
 	}
-	codeblock (sendsample) {
-	splk	#$addr(input,phase),BMAR	;Address needed input Sample
-	bldd	BMAR,#$addr(output)		;Output = needed input sample
+	codeblock (sendCxSample,""){
+	lar	ar1,#$addr(output)
+	mar	*,ar1
+	rpt	#1
+	bldd	#$addr(input,@(effSize - effOffset - 2)),*+
 	}
+
+	codeblock (sendSample,"") {
+	lar	ar1,#$addr(output)
+	mar	*,ar1
+	bldd	#$addr(input,@(effSize - effOffset - 1)),*
+	}
+
 	go {
-		addCode(sendsample);
+		if (output.resolvedType() == COMPLEX) addCode(sendCxSample());
+		else addCode(sendSample());
 	}
+
 	execTime {
 		return 3;
 	}
 }
+

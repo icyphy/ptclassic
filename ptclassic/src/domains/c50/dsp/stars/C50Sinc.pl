@@ -58,7 +58,12 @@ the range $(-0.22, 1.0)$.
 	mpy	*,ar1			; p = 0.5*in^2(b+c*in^2)
 	pac				; acc = p
 	add	*,15,ar2		; acc = 0.5(a+in^2(b+c*in^2))
-	sach	*,2			; output = 4*acc
+	setc	ovm			; set overflow mode
+	sfl				; these inst are used
+	sacb				; to handle the case
+	addb				; where input = 0
+	clrc	ovm			; so that output = 0.999..
+	sach	*			; output = 4*acc
 	}
 	go {
 		addCode(sinc);

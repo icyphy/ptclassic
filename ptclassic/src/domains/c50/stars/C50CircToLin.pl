@@ -50,7 +50,8 @@ Data movement is repeated inline so may not be efficient for large N.
     }
 
     protected {
-	int n,bufferSize,xferType,time;
+	int n,xferType,time;
+	int inputBuffSize, outputBuffSize;
     }
 
 
@@ -60,17 +61,20 @@ Data movement is repeated inline so may not be efficient for large N.
 	arglist { "()" }
 	access { protected }
 	code {
-		bufferSize = input.bufSize();
+		inputBuffSize = input.bufSize();
+		outputBuffSize = output.bufSize();
 		xferType = 3;
-		time = 11 + bufferSize;
+		time = 11 + outputBuffSize;
 		if (input.resolvedType() == COMPLEX ){
-			if (bufferSize == 2){
+			if ((outputBuffSize == 2) && 
+			    (inputBuffSize == 2) ){
 				xferType = 2;
 				time = 4;
 				return;
 			}
 		} else {
-			if (bufferSize == 1){
+			if ((outputBuffSize == 1) &&
+			    (inputBuffSize == 1) ){
 				xferType = 1;
 				time = 2;
 				return;
@@ -116,7 +120,7 @@ Data movement is repeated inline so may not be efficient for large N.
 
     codeblock(init){
 	.ds	$addr(ptr)
-	.word	$addr(output)
+	.word	$addr(input)
 	.text
 	}
 
@@ -124,15 +128,15 @@ Data movement is repeated inline so may not be efficient for large N.
 	lmmr	ar0,#$addr(ptr)		; ar0 = start address
 	lacc	#$addr(input),0
 	samm	cbsr1			; set circ buff start addr
-	add	#@(bufferSize-1),0
+	add	#@(inputBuffSize-1),0
 	samm	cber1			; set circ buff end addr
-	lacl	#08
+	lacl	#8
 	samm	cbcr			; set ar0 = cir. buff reg.
 	mar	*,ar0			; arp -> ar0
     }
 
     codeblock(moveData,""){
-	rpt	#@(bufferSize - 1)
+	rpt	#@(outputBuffSize - 1)
 	bldd	*+,#$addr(output)
     }
 

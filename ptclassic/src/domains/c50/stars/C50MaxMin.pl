@@ -65,6 +65,7 @@ Also, the index of the output is provided (count starts at 0).
 
 
 	codeblock(compare,"" ){
+	setc	ovm
 	lar	ar0,#$addr(input,@(int(N)-1))
 	mar	*,ar0
 	ldp	#00h
@@ -81,8 +82,9 @@ Also, the index of the output is provided (count starts at 0).
 	.endif
 	lacc	*-,16
 	xc	1,C
-$starSymbol(lp)
 	lar	ar1,brcr
+$starSymbol(lp)
+	nop
 	}
 
 	codeblock(outIndex){
@@ -90,12 +92,15 @@ $starSymbol(lp)
 	}
 	
 	codeblock(out){
-	lar	ar0,#$addr(output)
-	exar	
-	sach	*,0
+	lamm	ar1
+	add	#$addr(input),0
+	samm	ar0
+	clrc	ovm
+	bldd	*,#$addr(output)
 	}
 
 	codeblock(compareMag,""){
+	setc	ovm
 	lar	ar0,#$addr(input,@(int(N)-1))
 	mar	*,ar0
 	ldp	#00h
@@ -115,8 +120,9 @@ $starSymbol(lp)
 	lacc	*-,16
 	abs
 	xc	1,C
-$starSymbol(lp)
 	lar	ar1,brcr
+$starSymbol(lp)
+	nop
 	}
 
 	codeblock(outMag){
@@ -124,6 +130,7 @@ $starSymbol(lp)
 	abs
 	lar	ar0,#$addr(output)
 	sach	*,0
+	clrc	ovm
 	}
 
 	codeblock(one){
@@ -134,6 +141,7 @@ $starSymbol(lp)
 	}
 
 	codeblock(oneMag){
+	setc	ovm
 	zap	
 	lar	ar0,#$addr(input)
 	lar	ar1,#$addr(output)
@@ -143,6 +151,7 @@ $starSymbol(lp)
 	lacc	*,16,ar1
 	abs
 	sach	*
+	clrc	ovm
 	}
 
  	go {
