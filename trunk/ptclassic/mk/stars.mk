@@ -426,7 +426,6 @@ ifdef ACS
 			$(ACST)/Delay.o \
 			$(ACST)/DoubleArray.o \
 			$(ACST)/Fpga.o \
-			$(ACST)/HWSchedule.o \
 			$(ACST)/HWTarget.o \
 			$(ACST)/ACSIntArray.o \
 			$(ACST)/Pipealign.o \
