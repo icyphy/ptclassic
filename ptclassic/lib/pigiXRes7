@@ -10,9 +10,10 @@ vem.snap:	25
 vem.technology:	~ptolemy/lib/technology
 
 ! Optional vem options:
-!vem*font: 9x15
-!vem.background.color: grey
-!vem.menu.item.background: lightgrey
+vem*font: 9x15
+vem.background.color: grey
+vem.menu.item.background: lightgrey
+vem*borderColor: red
 
 ! Ptolemy resources for xterm windows
 ptolemy_code*Background:	black
@@ -22,3 +23,9 @@ ptolemy_sim*Background:		black
 ptolemy_sim*Foreground: 	green
 ptolemy_man*Background:		black
 ptolemy_man*Foreground: 	orange
+
+! Resources for xgraph
+xgraph.BoundBox: on
+xgraph.Device: Postscript
+xgraph.Disposition: To Device
+xgraph.FileOrDev: lw
