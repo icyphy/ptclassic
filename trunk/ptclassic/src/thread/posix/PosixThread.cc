@@ -47,7 +47,7 @@ PosixThread::PosixThread()
 
     // Detached threads free up their resources as soon as they exit.
     // Non-detached threads can be joined.
-    int detach = 1;
+    int detach = 0;
     pthread_attr_setdetachstate(&attributes, &detach);
 
     // New threads inherit their priority and scheduling policy
@@ -58,7 +58,7 @@ PosixThread::PosixThread()
     pthread_attr_setstacksize(&attributes, 0x8000);
 
     // Create a thread.
-    pthread_create(&thread, &attributes, runThis, this);
+    pthread_create(&thread, &attributes, (pthread_func_t)runThis, this);
 
     // Discard temporary attribute object.
     pthread_attr_destroy(&attributes);
@@ -80,7 +80,8 @@ PosixThread::~PosixThread()
     pthread_cancel(thread);
 
     // Now wait.
-    // pthread_join(thread, NULL);
+    pthread_join(thread, NULL);
+    pthread_detach(&thread);
 }
 
 
@@ -180,8 +181,6 @@ PosixScheduler::PosixScheduler()
 PosixScheduler::~PosixScheduler()
 {
     LOG_DEL; delete threads;
-    // Let the threads terminate.
-    // run();
 }
 
 
