@@ -46,46 +46,46 @@ include $(CONFIG)
 
 PTCLHDRS = $(ROOT)/src/ptcl
 
-HDRS	      = compile.h \
+CHDRS	      = compile.h \
                 dmmSupport.h \
                 dmmSupportFunc.h \
 		edit.h \
 		err.h \
 		exec.h \
+		ganttIfc.h \
 		handle.h \
+		icon.h \
 		kernelCalls.h \
-		main.h \
 		local.h \
+		main.h \
+		misc.h \
+		mkIcon.h \
+		mkTerm.h \
+		octIfc.h \
+		octMacros.h \
+		options.h \
+		palette.h \
 		paramStructs.h \
+		pdmm.h \
+		pigiLoader.h \
+		poct.h \
+		ptcl.h \
+		ptk.h \
+		ptkNet.h \
+		ptkRegisterCmds.h \
+		ptkTclIfc.h \
+		ptkTkSetup.h \
+		pvem.h \
 		sol2compat.h \
 		util.h \
 		utilities.h \
 		vemInterface.h \
-		ganttIfc.h \
-		octIfc.h \
-		octObjectClass.h \
-		icon.h \
-		misc.h \
-		options.h \
-		mkTerm.h \
-		mkIcon.h \
-		palette.h \
-		pdmm.h \
-		octMacros.h \
-		ptcl.h \
-		ptk.h \
-		poct.h \
-		pvem.h \
-		ptkRegisterCmds.h \
-		ptkTclIfc.h \
-		ptkNet.h \
-		ptkTkSetup.h \
+		xfunctions.h
+
+CCHDRS        = octObjectClass.h \
 		TclObj.h \
 		POct.h \
-		PVem.h \
-		xfunctions.h \
-		pigiLoader.h \
-		pigidefine.h
+		PVem.h
 
 LIBCSRCS      = main.c \
 		util.c \
@@ -122,10 +122,13 @@ LIBCPPSRCS    = kernelCalls.cc \
 		ganttChart.cc \
 		pigiInvokeInterp.cc
 
+HDRS = $(CHDRS) $(CPPHDRS)
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
+
+EXTRA_SRCS = PDMM.h ptkRegisterCmds.cc ptkDMMRegisterCmds.cc
 
 OTHER_OBJS = ptkRegisterCmds.o ptkDMMRegisterCmds.o
 
@@ -150,7 +153,6 @@ C_INCL=-I$(OCTTOOLS)/include \
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $^ > lint
-
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
