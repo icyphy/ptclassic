@@ -789,8 +789,8 @@ body ::tycho::EditPtcl::_initializeMenubar {menubar} {
     $menubar delete specialsep2
  
     # Add my own menu entries
-    $menubar command retarget special \
-	    -label "Retarget" -underline 0 \
+    $menubar command retargetthisfile special \
+	    -label "Retarget This File" -underline 0 \
             -command "::tycho::view Retarget -edit $this -toolbar 1"
 
     if {[catch {::pitcl::knownDomains}] == 1 } {
