@@ -190,10 +190,10 @@ fixlinks:
 	#@echo " where itcl2.0 lib files were"
 	#-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
 	-(cd $(ITCL_DEST)/lib/itcl; \
-		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.so libtcl.so; \
-		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER)i.so libtk.so; \
-		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).so libitcl.so; \
-		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).so libitk.so)
+		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)i.$(LIBSUFFIX) libtcl.$(LIBSUFFIX); \
+		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER)i.$(LIBSUFFIX) libtk.$(LIBSUFFIX); \
+		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).$(LIBSUFFIX) libitcl.$(LIBSUFFIX); \
+		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).$(LIBSUFFIX) libitk.$(LIBSUFFIX))
 	@echo "Create a links for itclsh to ish"
 	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish itclsh)
 	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
