@@ -39,4 +39,4 @@ powertools/.* mailx -s "%s" powertools-cvs@gigascale.org
 panda/.* mailx -s "%s" kienhuis@eecs.berkeley.edu rijpkema@liacs.nl
 
 #testing
-gsrcwww/javapages/.* mailx -s "%{s}" allenh@eecs.berkeley.edu
+gsrcwww/javapages/.* mailx -s \"%{s}\" allenh@eecs.berkeley.edu
