@@ -139,6 +139,7 @@ DEScheduler :: run (Galaxy& g) {
 		Error::abortRun(g, "Can't continue after run-time error");
 		return FALSE;
 	}
+
 	while (eventQ.length() > 0 && !haltRequested()) {
 
 		int bFlag = FALSE;  // flag = TRUE when the terminal is on the
@@ -157,7 +158,7 @@ DEScheduler :: run (Galaxy& g) {
 			return TRUE;
 		// If the event time is less than the global clock,
 		// it is an error...
-		} else if (level < currentTime - 0.1) {
+		} else if (level < currentTime) {
 		    // The event is in the past!  Argh!
 		    // Try to give a good error message.
 			Event* ent = (Event*) f->e;
@@ -190,10 +191,10 @@ DEScheduler :: run (Galaxy& g) {
 			} else {
 				ds = (DEStar*) s;
 			 	ds->arrivalTime = level;
-			}
 
-			// start a new phase.
-			ds->startNewPhase();
+				// start a new phase.
+				ds->startNewPhase();
+			}
 
 			// Grab the Particle from the queue to the terminal.
 			// Record the arrival time, and flag existence of data.
