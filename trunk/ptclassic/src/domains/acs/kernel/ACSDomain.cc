@@ -27,15 +27,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-
- Programmer:  J. T. Buck
- Date of creation: 7/2/90
- Version: @(#)XDomain.ccP	1.15	07/30/96
-
- WARNING -- XDomain.ccP is a template file that is used to generate
- domain description modules.  If the name of this file is not XDomain.ccP,
- DO NOT EDIT IT!!!
-
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the ACS domain so the interpreter can generate them dynamically.
 
