@@ -36,21 +36,14 @@ static const char file_id[] = "TimeVal.cc";
 #endif
 
 #include "TimeVal.h"
-
-/* TV_USEC_TYPE and TV_SEC_TYPE are defined in compat.h, but we
- * include these defs for robustness
- */
-#ifndef TV_USEC_TYPE
-#define TV_USEC_TYPE	long int
-#endif
-
-#ifndef TV_SEC_TYPE
-#define TV_SEC_TYPE	long int
-#endif
+#include "compat.h"
 
 TimeVal::TimeVal()
 {
-    tv_sec = tv_usec = 0;
+    // HPPA10.20 CC: tv_sec might be an int, tv_usec might be a long
+    // so we set them to zero on separate lines to avoid warnings. 
+    tv_sec = 0;
+    tv_usec = 0;
 }
 
 TimeVal::TimeVal(double seconds)
