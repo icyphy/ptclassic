@@ -29,68 +29,6 @@ limitation of liability, and disclaimer	of warranty provisions.
     VHDLCSynchComm::setup();
   }
 
-  codeblock (V2Cinteger) {
---V2Cinteger.vhdl
-
-library SYNOPSYS,IEEE;
-use SYNOPSYS.ATTRIBUTES.all;
-use IEEE.STD_LOGIC_1164.all;
-
-entity V2Cinteger is
-	generic ( pairid	: INTEGER	;
-		  numxfer	: INTEGER	);
-	port	( go		: in STD_LOGIC	;
-		  data		: in INTEGER	;
-		  done		: out STD_LOGIC	);
-end V2Cinteger;
-
-architecture CLI of V2Cinteger is
-
-	attribute FOREIGN of CLI : architecture is "Synopsys:CLI";
-
-	attribute CLI_ELABORATE	of CLI	: architecture is "v2cinteger_open";
-	attribute CLI_EVALUATE	of CLI	: architecture is "v2cinteger_eval";
-	attribute CLI_ERROR	of CLI	: architecture is "v2cinteger_error";
-	attribute CLI_CLOSE	of CLI	: architecture is "v2cinteger_close";
-
-	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-
-begin
-end;
-  }
-
-  codeblock (V2Creal) {
---V2Creal.vhdl
-
-library SYNOPSYS,IEEE;
-use SYNOPSYS.ATTRIBUTES.all;
-use IEEE.STD_LOGIC_1164.all;
-
-entity V2Creal is
-	generic ( pairid	: INTEGER	;
-		  numxfer	: INTEGER	);
-	port	( go		: in STD_LOGIC	;
-		  data		: in REAL	;
-		  done		: out STD_LOGIC	);
-end V2Creal;
-
-architecture CLI of V2Creal is
-
-	attribute FOREIGN of CLI : architecture is "Synopsys:CLI";
-
-	attribute CLI_ELABORATE	of CLI	: architecture is "v2creal_open";
-	attribute CLI_EVALUATE	of CLI	: architecture is "v2creal_eval";
-	attribute CLI_ERROR	of CLI	: architecture is "v2creal_error";
-	attribute CLI_CLOSE	of CLI	: architecture is "v2creal_close";
-
-	attribute CLI_PIN	of go	: signal is CLI_ACTIVE;
-	attribute CLI_PIN	of data	: signal is CLI_PASSIVE;
-
-begin
-end;
-  }
-
   codeblock (V2CintegerComp) {
 component V2Cinteger
   generic ( pairid  : INTEGER ;
@@ -112,30 +50,36 @@ end component;
   }
 
   codeblock (V2CintegerConfig) {
-for all:V2Cinteger use entity work.V2Cinteger(CLI); end for;
+for all:V2Cinteger use entity PTVHDLSIM.V2Cinteger(CLI); end for;
   }
 
   codeblock (V2CrealConfig) {
-for all:V2Creal use entity work.V2Creal(CLI); end for;
+for all:V2Creal use entity PTVHDLSIM.V2Creal(CLI); end for;
   }
 
 // Called only once, after the scheduler is done
   begin {
+    // FIXME: This is a hack to get around unsynthesizable code.
+    if(!(targ()->isA("SynthTarget"))) {
+
     if (strcmp(input.resolvedType(), "INT") == 0) {
-      addCode(V2Cinteger, "cli_models", "v2cint");
       addCode(V2CintegerComp, "cli_comps", "v2cintcomp");
       addCode(V2CintegerConfig, "cli_configs", "v2cintconfig");
     }
     else if (strcmp(input.resolvedType(), "FLOAT") == 0) {
-      addCode(V2Creal, "cli_models", "v2creal");
       addCode(V2CrealComp, "cli_comps", "v2crealcomp");
       addCode(V2CrealConfig, "cli_configs", "v2crealconfig");
     }
     else
       Error::abortRun(*this, input.resolvedType(), ": type not supported");
+
+    }
   }
 
   go {
+    // FIXME: This is a hack to get around unsynthesizable code.
+    if(!(targ()->isA("SynthTarget"))) {
+
     // Added this in here instead of in begin().
     int direction = 1;
     targ()->registerComm(direction, int(pairNumber), numXfer,
@@ -155,6 +99,8 @@ for all:V2Creal use entity work.V2Creal(CLI); end for;
     }
     
     addCode(dataSynch);
+
+    }
   }
 
 }
