@@ -12,17 +12,19 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	location { SDF image library }
 	desc {
-Read a sequence of PGM-format images from different files and
-send them out in Envelopes (containing data of type GrayImage).
+Read a sequence of images in Portable GrayMap (PGM) format from
+different files and send them out in Envelopes (containing data
+of type GrayImage).
 
 If present, the character '#' in the 'fileName' state is replaced with
-the frame number to be read next. For example, if the 'frameId' state is
-set to 2 and if the 'fileName' state is 'dir.#/pic#' then the files that
+the frame number to be read next.
+For example, if the 'frameId' state is set to 2 and
+if the 'fileName' state is 'dir.#/pic#', then the files that
 are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
 	explanation {
 .Ir "PGM image format"
-.Ir "image format, PGM"
+.Ir "image format, portable graymap (PGM)"
 .Ir "image reading"
 	}
 

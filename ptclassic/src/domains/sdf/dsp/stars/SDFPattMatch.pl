@@ -12,15 +12,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp palette }
 	desc {
 This star accepts a template and a search window.
-The template is slid over the window one sample
-at a time, and cross correlations are calculated
-at each step.  The cross-correlations are output
-on the "values" output.  The "index" output is the
-value of the time-shift which gives the largest
-cross correlation.  This index refers to a position
-on the search window, beginning with 0, corresponding
-to the earliest arrived sample of the search window
-that is part of the "best match" with the template.
+The template is slid over the window one sample at a time, and
+cross-correlations are calculated at each step.
+The cross-correlations are output on the "values" output.
+The "index" output is the value of the time shift which gives the largest
+cross-correlation.
+This index refers to the position on the search window,
+beginning with 0, that corresponds to the earliest sample in
+the search window that is part of the "best match" with the template.
 	}
 
 	input { name { templ } type { float } }
