@@ -65,9 +65,6 @@ LIB=libdialogs.a
 
 all::	$(LIB)
 
-clean::
-	rm -f $(LIB) 
-
 # common makefile file for vem binary
 VEMBINCONFIG=../../vem-bin.mk
 include $(VEMBINCONFIG)
