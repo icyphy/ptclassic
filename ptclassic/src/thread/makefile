@@ -1,7 +1,7 @@
 # Copyright (C) 1990-%Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
-# Author:	T. M. Parks
+# Authors:	T. M. Parks, Christopher Hylands
 # $Id$
 #
 # Important!  Do not run this makefile while in ~ptolemy/src/thread.  Instead
@@ -10,6 +10,10 @@
 # maintained.
 
 ROOT = ../..
+
+# get configuration info (Need INCLUDE_GTHREADS)
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
+include $(CONFIG)
 
 DIRS =
 
@@ -73,6 +77,10 @@ GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
 		-DSRP -DC_INTERFACE
 GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
+# Only the gthreads_install and gthreads_clean rules are externally visible.
+# We build gthreads only on sol2 sol2.cfront and sun4
+
+ifeq ($(INCLUDE_GTHREADS),yes)
 # Install gthreads library and include files.
 gthreads_install: $(THREAD_ROOT) $(THREAD_LIB) $(THREAD_INCLUDE) \
 			gthreads_$(PTARCH)
@@ -80,6 +88,13 @@ gthreads_install: $(THREAD_ROOT) $(THREAD_LIB) $(THREAD_INCLUDE) \
 # Clean up.
 gthreads_clean: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src clean;
+
+else
+gthreads_install:
+	@echo "gthreads_install need not do anything for this architecture"
+gthreads_clean:
+	@echo "gthreads_install need not do anything for this architecture"
+endif
 
 # Build a shadow tree to hold object files.
 GT_OBJ_SUBDIRS =	include lib src
