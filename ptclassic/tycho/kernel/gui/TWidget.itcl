@@ -79,8 +79,8 @@ class ::tycho::TWidget {
     # If the named object exists, evaluate the arguments.
     proc evalIfExists {command args} {}
 
-    # Get the current contents of the local clipboard.
-    proc getClipboard {} {return $clipboard}
+    # Get the current contents of the Tk clipboard.
+    proc getClipboard {} {}
 
     # Set the current contents of the local and Tk clipboards.
     proc setClipboard {text} {}
@@ -106,7 +106,7 @@ class ::tycho::TWidget {
     ####                         protected variables               ####
 
     # A local Tycho clipboard that is mirrored in the Tk clipboard.
-    protected common clipboard {}
+    # protected common clipboard {}
 
     # Name of my context-sensitive popup menu
     protected variable myContextmenu {}
@@ -326,11 +326,24 @@ body ::tycho::TWidget::evalIfExists {command args} {
 }
 
 #####################################################################
+#### getClipboard
+# Get the current contents of the Tk clipboard.
+#
+body ::tycho::TWidget::getClipboard {} {
+    # return $clipboard
+    if ![catch {selection get -selection CLIPBOARD} cb] {
+        return $cb
+    } else {
+        return ""
+    }
+}
+
+#####################################################################
 #### setClipboard
 # Set the current contents of the local and Tk clipboards.
 #
 body ::tycho::TWidget::setClipboard {text} {
-    set clipboard $text
+    # set clipboard $text
     clipboard clear
     clipboard append -- $text
 }
