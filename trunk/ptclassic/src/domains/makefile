@@ -1,5 +1,5 @@
 # Makefile for all domains subdirectories
-# Copyright (c) 1990-1994 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
@@ -13,15 +13,18 @@
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
 
+# Include CP and PN domains on SunOS architectures.
 ifneq (,$(filter sun%,$(ARCH)))
 EXPDOMAINS = cp pn
 endif
 
+# Include CP domain for cfront.
 ifeq (cfront,$(ARCH))
 EXPDOMAINS = cp
 endif
 
-ifeq (mips,$(ARCH))
+# Include PN doman for mips and Solaris.
+ifneq (,$(filter mips sol%,$(ARCH)))
 EXPDOMAINS = pn
 endif
 
