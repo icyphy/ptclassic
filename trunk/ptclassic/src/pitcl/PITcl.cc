@@ -85,11 +85,16 @@ void PTcl::removeEntry() {
 
 /////////////////////////////////////////////////////////////////////
 
+// The default domain.  This must be defined somewhere else.
+
+extern char DEFAULT_DOMAIN[];
+
 // constructor
 PTcl::PTcl(Tcl_Interp* i) : interp(i), universe(0), currentGalaxy(0),
 currentTarget(0), definingGal(0), stopTime(0.0), lastTime(1.0)
 {
-	// perhaps default domain should be obtained some other way.
+	KnownBlock::setDefaultDomain(DEFAULT_DOMAIN);
+	// Start up in the default domain.
 	curDomain = KnownBlock::defaultDomain();
 	reset(1,0);
 	if (!interp) {
@@ -312,13 +317,13 @@ static const State* findState(const Block* b, const char* nm) {
 }
 
 // statevalue: return a state value
-// syntax: statevalue <block> <state> ?current/initial?
+// syntax: statevalue <block> <state> ?current|initial?
 // default is current value
 int PTcl::statevalue(int argc,char ** argv) {
 	if (argc < 3 || argc > 4 ||
 	    (argc == 4 && strcmp(argv[3], "current") != 0
 	     && strcmp(argv[3], "initial") != 0))
-		return usage ("statevalue <block> <state> ?current/initial?");
+		return usage ("statevalue <block> <state> ?current|initial?");
 	const Block* b = getBlock(argv[1]);
 	if (!b) return TCL_ERROR;
 	const State* s = findState(b, argv[2]);
@@ -393,7 +398,7 @@ int PTcl::schedule(int argc,char **) {
 int PTcl::schedtime(int argc,char **argv) {
 	int actualFlag = (argc == 2 && strcmp(argv[1], "actual") == 0);
 	if (argc > 2 || argc == 2 && !actualFlag)
-		return usage("schedtime [actual]");
+		return usage("schedtime ?actual?");
 	Scheduler *sch = universe->scheduler();
 	if (sch) {
 		double time = sch->now();
@@ -480,7 +485,7 @@ int PTcl::animation (int argc,char** argv) {
 	if (argc == 2) t = argv[1];
 	if (argc > 2 ||
 	    (argc == 2 && (c=strcmp(t,"on"))!=0 && strcmp(t,"off")!=0))
-		return usage ("animation ?on/off?");
+		return usage ("animation ?on|off?");
 	if (argc != 2) {
 		Tcl_SetResult(interp,
 			textAnimationState() ? "on" : "off",
@@ -499,7 +504,14 @@ int PTcl::knownlist (int argc,char** argv) {
 	if (argc > 2)
 		return usage ("knownlist ?<domain>?");
 	const char* dom = curDomain;
-	if (argc == 2) dom = argv[1];
+	if (argc == 2) {
+	    dom = argv[1];
+	    if (!KnownBlock::validDomain(dom)) {
+		Tcl_AppendResult(interp, "No such domain: ", dom,
+		  (char *) NULL);
+		return TCL_ERROR;
+	    }
+	}
 	KnownBlockIter nextB(dom);
 	const Block* b;
 	while ((b = nextB++) != 0)
@@ -527,7 +539,7 @@ int PTcl::topblocks (int argc,char ** argv) {
 // be given.  If the second argument is not given, block is current galaxy.
 int PTcl::listobjs (int argc,char ** argv) {
 	static char use[] =
-		"listobjs [states|ports|multiports] ?<block-or-classname>?";
+		"listobjs states|ports|multiports ?<block-or-classname>?";
 	if (argc > 3 || argc <= 1)
 		return usage (use);
 	const Block* b = getBlock(argv[2]);
@@ -556,7 +568,7 @@ int PTcl::listobjs (int argc,char ** argv) {
 
 int PTcl::reset(int argc,char** argv) {
 	if (argc > 2)
-		return usage ("reset ?<name>");
+		return usage ("reset ?<name>?");
 	const char* nm = "main";
 	if (argc == 2) nm = hashstring(argv[1]);
 	newUniv(nm, curDomain);
@@ -571,7 +583,7 @@ int PTcl::reset(int argc,char** argv) {
 
 int PTcl::newuniverse(int argc,char** argv) {
 	if (argc > 3)
-		return usage("newUniverse ?<name> ?<dom>");
+		return usage("newuniverse ?<name>? ?<dom>?");
 	if (argc == 3) curDomain = hashstring(argv[2]);
 	const char* nm = "main";
 	if (argc > 1) nm = hashstring(argv[1]);
@@ -579,13 +591,13 @@ int PTcl::newuniverse(int argc,char** argv) {
 	return TCL_OK;
 }
 
-// deluniverse <name>
+// deluniverse ?<name>?
 // Delete the named universe.  If argument is not given, delete the
 // current universe.
 
 int PTcl::deluniverse(int argc,char** argv) {
 	if (argc > 2)
-		return usage("delUniverse ?<name>");
+		return usage("deluniverse ?<name>?");
 	const char* nm = argv[1];
 	if (argc == 1) nm = universe->name();
 	delUniv(nm);
@@ -615,7 +627,7 @@ int PTcl::curuniverse(int argc,char** argv) {
 			return TCL_ERROR;
 		}
 	}
-	else return usage("curuniverse ?<name>");
+	else return usage("curuniverse ?<name>?");
 }
 
 // renameuniv <newname>: rename current univ to newname.
@@ -732,11 +744,18 @@ int PTcl::target(int argc,char ** argv) {
 int PTcl::targets(int argc,char** argv) {
 	if (argc > 2) return usage("targets ?<domain>?");
 	const char* domain;
-	if (argc == 2) domain = argv[1];
-	else domain = curDomain;
+	if (argc == 2) {
+	    domain = argv[1];
+	    if (!KnownBlock::validDomain(domain)) {
+		Tcl_AppendResult(interp, "No such domain: ", domain,
+		  (char *) NULL);
+		return TCL_ERROR;
+	    }
+	} else
+	    domain = curDomain;
 	const int MAX_NAMES = 40;
 	const char *names[MAX_NAMES];
-	int n = KnownTarget::getList (curDomain, names, MAX_NAMES);
+	int n = KnownTarget::getList (domain, names, MAX_NAMES);
 	for (int i = 0; i < n; i++)
 		addResult(names[i]);
 	return TCL_OK;
@@ -855,11 +874,11 @@ static TclActionList tclActionList;
 // "action_handle", which must be used to cancel the action using cancelAction.
 //
 int PTcl::registerAction(int argc,char ** argv) {
-    if(argc != 3) return usage("registerAction <pre or post> <command>");
+    if(argc != 3) return usage("registerAction pre|post <command>");
     int pre;
     if(strcmp("pre",argv[1]) == 0) pre = 1;
     else if(strcmp("post",argv[1]) == 0) pre = 0;
-    else return usage("registerAction <pre or post> <command>");
+    else return usage("registerAction pre|post <command>");
 
     TclAction *tclAction;
     LOG_NEW; tclAction = new TclAction;
