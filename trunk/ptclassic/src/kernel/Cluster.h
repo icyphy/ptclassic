@@ -39,33 +39,42 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "GalIter.h"
 #include "DynamicGalaxy.h"
-
 class Star;
 
 class Nebula {
     friend class NebulaIter;
 public:
 	// Constructor.
-	Nebula(Star& self, Block* master);
-	
-	// Destructor.
-	virtual ~Nebula();
+	Nebula(Star& self);
 
+	// set the master and build nebula
+	virtual void setMasterBlock(Block* master);
+	
 	// Set the scheduler of the Nebula
 	void setInnerSched(Scheduler* s) {sched = s;}
 
+	Galaxy* galaxy() { return &gal;}
+
 	// Generate the schedules of the nested Nebulas recursively.
 	int generateSchedule();
- 
+
+	void initMaster();
+
         Scheduler* outerSched() { return selfStar.scheduler(); }
 	Scheduler* innerSched() { return sched;} 
 
-	void merge(Nebula*);
-	void absorb(Nebula*);
+//	void merge(Nebula*);
+//	void absorb(Nebula*);
 
 	int run();
 
-	virtual PortHole* clonePort(const PortHole*) const  = 0;
+	virtual PortHole* clonePort(const PortHole*) = 0;
+
+	// unfortuanetly, we need this to return the nebula port side
+	// from a porthole pointer.  The derived class just needs to
+	// return the PortHole pointer casted to its repective NebulaPort
+	// hole class.  (ie DFNebulaPort for DFNebula)
+	virtual NebulaPort* nebulaPort(PortHole*) const = 0;
 	
 	virtual Nebula* newNebula(Block*) const = 0;
 
@@ -93,18 +102,19 @@ public:
 
 class NebulaPort {
 public:
-	NebulaPort(PortHole& self, const PortHole& p, const Nebula* parent);
-	PortHole& real() { return pPort; }
-	PortHole& asPort() { return selfPort;}
-	/*virtual*/ int isItInput() {
+	NebulaPort(PortHole& self, const PortHole& p, Nebula* parnetN);
+	const PortHole& real() const { return pPort; }
+	PortHole& asPort() const { return selfPort;}
+	int isItInput() const {
 		return pPort.isItInput();
 	}
-	/*virtual*/ int isItOutput() {
+	int isItOutput() const {
 		return pPort.isItOutput();
 	}
+
 private:
 	PortHole& selfPort;
-	PortHole& pPort;
+	const PortHole& pPort;
 };
 
 #endif

@@ -1,5 +1,5 @@
-#ifndef _SDFWormhole_h
-#define _SDFWormhole_h 1
+#ifndef _DFNebula_h
+#define _DFNebula_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -40,33 +40,35 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
-class DFNebulaPort : public NebulaPort, public DFPortHole {
+class DFNebulaPort : public DFPortHole, public NebulaPort{
 public:
-	DFNebulaPort(const PortHole* master,
-		     const Nebula* parent);
-	/*virtual*/ int isItInput() {
+	DFNebulaPort(const PortHole* master,Nebula* parent);
+	/*virtual*/ int isItInput() const {
 		return NebulaPort::isItInput();
 	}
-	/*virtual*/ int isItOutput() {
+	/*virtual*/ int isItOutput() const {
 		return NebulaPort::isItOutput();
 	}
+
 };
 
-class DFNebula : public Nebula, public DataFlowStar {
+class DFNebula : public DataFlowStar, public Nebula{
 public:
 	/*virtual*/ int run();
 
 	// Constructors
-	DFNebula(Block* g);
+	DFNebula();
 
-	/*virtual*/ PortHole*
-	clonePort(const PortHole* master) const {
-		return new DFNebulaPort(master,this);
+	/*virtual*/ PortHole* clonePort(const PortHole* master);
+	
+	/*virtual*/ Nebula* newNebula(Block* master) const;
+	/*virtual*/ NebulaPort* nebulaPort(PortHole* port) const {
+		return (DFNebulaPort*) port;
 	}
-
-	/*virtual*/ Nebula* newNebula(Block* master) const {
-		return new DFNebula(master);
-	}
+	
+	/*virtual*/ void initialize();
+	
+	/*virtual*/ int isSDFinContext() const;
 };
 #endif
 
