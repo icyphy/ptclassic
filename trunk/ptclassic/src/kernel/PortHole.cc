@@ -345,11 +345,14 @@ PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
                               DataType t,
 			      int nmv) {
-// zero my plasma if my type is being changed.
+	// zero my plasma if my type is being changed.
 	if (t != type()) deletePlasma();
 	GenericPort::setPort (s, parent, t);
 	numberTokens = nmv;
-	bufferSize = numberTokens;
+	// make sure that the buffer size is at least 1
+	// the dynamic dataflow domain uses nmv=0 to flag dynamic ports
+	if ( numberTokens <= 0 ) bufferSize = 1;
+	else bufferSize = numberTokens;
         return *this;
 }
 
