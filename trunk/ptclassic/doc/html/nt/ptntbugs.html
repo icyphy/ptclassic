@@ -39,6 +39,97 @@ The workaround is to use a non GNU tar tool such as Winzip.
 Sascha Schwarz <CODE>&lt;s_schwa@informatik.uni-kl.de&gt;</CODE>).
 
 
+<li>  Below is some information about
+<a name="mkgroup"><CODE>mkgroup</CODE></a>
+from Tim Kurzweg <CODE>&lt;tim@ee.pitt.edu&gt;</CODE>
+<BLOCKQUOTE>
+Note: We noticed that when creating the group
+file, this procedure isn't always perfect.  You should check to make
+sure that users are in the right groups.  
+
+<p>i.e. If someone should have administrative rights and the
+administrator group or Domain Administrator group in the <B>group</B>
+file says the group number is "512", the user's second number after
+their name in the passwd file should be "512".
+
+<p> It is important that the account which you are currently using
+have administrative rights so that you can install software onto the
+disk.  If not, you should change the group/passwd files so that you do
+have administrative rights or log out and then log back in using an
+account that does and is setup correctly in the group/passwd files.
+
+<p>Since this may be confusing, an example would seem necessary.
+As I perform the above steps on my computer, here is my <B>/etc/group</B> file:
+
+<pre>
+Domain Admins::512:
+Domain Guests::514:
+Domain Users::513:
+Levitan's VLSI::1036:
+MailServer-group::1039:
+SIGDA People::1004:
+None::513:
+Everyone::0:
+</pre>
+
+
+ <p>My machine participates in a Windows NT Domain and all groups
+listed above are from the Domain Controller.  Notice that the number
+after "Domain Admins" is "512".  This is the number that identifies
+this group.  If you are only using accounts from your local machine,
+you should look for the "Administrators" group and its identification
+number.  Next look at my <B>/etc/passwd</B> file:
+
+<pre>
+Administrator::500:513:::/bin/sh
+eric::1002:513:Eric N. Reiss::/bin/sh
+eric2::1014:513:Eric2::/bin/sh
+Guest::501:514:::/bin/sh
+IUSR_JAMAICA::1001:513:Internet Guest Account::/bin/sh
+kathy::1007:513:Kathy Preas::/bin/sh
+MailServer-user::1038:513:MailServer-user::/bin/sh
+Mcdonald::1037:513:Eric McDonald::/bin/sh
+mcgahey::1033:512:Bill McGahey::/bin/sh
+plusquellic::1034:513:Jim Plusquellic::/bin/sh
+rajon::1032:513:Rajon Gilmore::/bin/sh
+sigda::1003:513:Sigda Personnel::/bin/sh
+steve::1011:513:Steven Levitan::/bin/sh
+web-server::1017:513:Netscape Web Server::/bin/sh
+webadmin::1020:513:webadmin::/bin/sh
+Administrator::500:513:::/bin/sh
+Guest::501:513:::/bin/sh
+Administrators::544:0:::
+Backup Operators::551:0:::
+Guests::546:0:::
+Power Users::547:0:::
+Replicator::552:0:::
+Users::545:0:::
+</pre>
+
+
+
+Now, even though I used both the -d and -l switches to get the
+accounts above, a problem has occured.  All of the accounts listed at
+the top of the <B>passwd</B> file have "513" as the second number
+after their username except for the user with username "mcgahey", who
+has group id number "512".  This is wrong since a number of the users
+above have "Domain Admins" privileges including me with the account
+"eric".  So before I go any further, I am going to change the "513" on
+the line with the username "eric" so that it says "512".  Since I am
+currently logged in as "eric", I shouldn't have any permission
+problems after the change.
+
+ <p>If you are using just local accounts, then get the group id number for the 
+group "administrator" out of the <B>/etc/group</B> file and make sure you 
+have that number for the account you are using to install everything with.
+
+Note: If you are logged into your machine using a Domain account and
+you run <B>mkpasswd</B> and <B>mkgroup</B> with just <B>-l</B>, you
+may not get an "administrator" group.  You should be logged into the
+machine directly to run with the <B>-l</B> switch.
+
+
+</BLOCKQUOTE>
 
 </menu>
 
@@ -447,9 +538,15 @@ with the constructors etc.
  <p>The alternative to building a shared library version is to build
 a static version of pigiRpc, which is what is currently built under
 NT.  The problem with a static pigiRpc is that incremental linking is
-tricky.  We had it working under SunOS years ago, and it might work
-again.  I definitely need to poke around in the sources and see what
-the problem is.
+tricky.  We had it working under SunOS years ago with the BSD ld -a flag,
+but it looks like that is not supported  
+
+ <p>The binutils2-9.1/ld/TODO file says:
+<pre>
+Support the "traditional" BSD  -A flag (incremental loading).
+(There is a -A flag in ld now, but it is used to specify the
+architecture.  That should probably be changed.)
+</pre>
 
  <p>One workaround would be to avoid incrementally linking your stars
 and instead build a pigiRpc that had the stars built in.  The way
