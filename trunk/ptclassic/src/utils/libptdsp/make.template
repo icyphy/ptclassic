@@ -48,9 +48,9 @@ include $(CONFIG)
 
 C_INCL = $(PTCOMPAT_INCSPEC)
 
-HDRS = cephes.h
+HDRS = cephes.h PTDSPWindow.h
 
-LIBCSRCS = chbevl.c i0.c
+LIBCSRCS = chbevl.c i0.c PTDSPWindow.c
 
 SRCS = $(LIBCSRCS)
 
