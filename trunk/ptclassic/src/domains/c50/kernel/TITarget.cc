@@ -37,7 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "miscFuncs.h"
+#include <string.h>
 #include "Galaxy.h"
 #include "TITarget.h"
 #include "TIAttributes.h"
@@ -68,7 +68,6 @@ void TITarget :: initStates() {
 	addState(uMemMap.setState("uMemMap",this,"2432-6848","UD memory map"));
 	addState(subFire.setState("subroutines?",this,"-1",
 	    "Write star firings as subroutine calls."));
-	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/C50");
 	maxFixedPointValue = 1.0 - 1.0 / double(1 << (C50_BITS_IN_WORD - 1));
 	minFixedPointValue = -1.0;
 }
@@ -82,14 +81,13 @@ void TITarget :: setup() {
 
 	GalStarIter nextStar(*galaxy());
 	AsmStar* s;
-	int portSize;
 	while ((s = (AsmStar*)nextStar++) != 0){
 	    BlockPortIter next(*s);
 	    AsmPortHole * p;
 	    while((p = (AsmPortHole*) next++) != 0) {
 		// allocate complex numbers in 2 consecutive words of memory
 		if (p->resolvedType() == COMPLEX ){
-		    portSize = p->numXfer();
+		    int portSize = p->numXfer();
 		    portSize = 2*portSize;
 		    p->setSDFParams(portSize,portSize-1);
 		}
@@ -124,7 +122,7 @@ void TITarget::beginIteration(int repetitions, int) {
 	if (repetitions == -1) {		// iterate infinitely
 	    *defaultStream << targetNestedSymbol.push("LOOP") << "\n";
 	}
-	else {				// iterate finitely
+	else {					// iterate finitely
 	    *defaultStream << "\tlacc\t#" << repetitions << "\n"
 			   << targetNestedSymbol.push("LOOP") << "\tpush\n";
 	}
@@ -173,15 +171,13 @@ void TITarget::writeInt(int val) {
 }
 
 void TITarget::writeFix(double val) {
-
-// << (double) operator of StringList uses "%.g" to print
-// doubles so don't use it here.  "%.f" instead so that the 
-// number is always fixed point
-
-	char* buf = new char[32];
-	sprintf(buf,"%.15f",limitFix(val));
+	// The StringList << (double) uses "%.g" to convert doubles to
+	// strings, which puts small numbers in scientific notation.
+	// Scientific notation does not work with TI's Q15 format.  So,
+	// we use "%.f" instead so that the number is always fixed point.
+	char buf[32];
+	sprintf(buf, "%.15f", limitFix(val));
 	*defaultStream << "\t.q15\t" << buf << "\n";
-	delete [] buf;
 }
 
 void TITarget::writeFloat(double val) {
@@ -258,7 +254,8 @@ void TITarget::writeFiring(Star& s, int level) {
 	StringList label;
 	const char* classname = star.className();
 	int domainNameLength = strlen(star.domain());
-	char* starname = savestring(&classname[domainNameLength]);
+        char starname[C50_MAX_LABEL_LENGTH + 1];
+	strncpy(starname, &classname[domainNameLength], C50_MAX_LABEL_LENGTH);
 	starname[C50_MAX_LABEL_LENGTH] = 0;
 	label << starname << separator << star.index();
 
