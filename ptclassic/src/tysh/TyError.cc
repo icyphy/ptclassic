@@ -54,7 +54,7 @@ typedef const char cc;
 //
 static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
   CriticalSection region(gate);
-  InfString msg = warn ? "::tycho::warn " : "error ";
+  InfString msg = warn ? "Warning: " : "Error:: ";
   msg << "{";
   if (!m2) m2 = "";
   if (!m3) m3 = "";
