@@ -38,7 +38,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "pt_fstream.h"
 #include "Error.h"
-#include "CGDisplay.h"
 #include "CGCStar.h"
 #include "KnownTarget.h"
 #include "CGCDDFTarget.h"
