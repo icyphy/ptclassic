@@ -101,7 +101,7 @@ class ::tycho::Frame {
     set methodtable(relief)      ::tycho::Frame::relief
 
     #### Set option defaults
-    array set optionedefault [array get ::tycho::Picture::optiondefault]
+    array set optiondefault [array get ::tycho::Picture::optiondefault]
 
     set optiondefault(-color)       background
     set optiondefault(-borderwidth) 2
