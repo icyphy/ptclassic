@@ -284,6 +284,7 @@ body ::tycho::MultiPanel::clear {} {
     foreach element [$myList elements] {
         remove $element
     }
+    $myCanvas configure -scrollregion {0 0 0 0}
 }
 
 #####################################################################
