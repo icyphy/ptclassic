@@ -40,14 +40,14 @@ Error :: warn(cc* m1, cc* m2, cc* m3) {
 }
 
 void
-Error :: error (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: error (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList n = o.readFullName();
 	cerr << "ERROR: " << n << ": ";
 	p3(m1,m2,m3);
 }
 
 void
-Error :: warn (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList n = o.readFullName();
 	cerr << "Warning: " << n << ": ";
 	p3(m1,m2,m3);
@@ -59,7 +59,7 @@ Error :: message(cc* m1, cc* m2, cc* m3) {
 }
 
 void
-Error :: message (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: message (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	StringList n = o.readFullName();
 	cerr << n << ": ";
 	p3(m1,m2,m3);
@@ -72,11 +72,11 @@ Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 }
 
 void
-Error :: abortRun (NamedObj& o, cc* m1, cc* m2, cc* m3) {
+Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
 	Scheduler::requestHalt();
 }
 
 // marking is not supported in this implementation
 int Error :: canMark() { return 0;}
-void Error :: mark(NamedObj&) {}
+void Error :: mark(const NamedObj&) {}
