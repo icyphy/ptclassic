@@ -1,5 +1,5 @@
 # Makefile for all domains subdirectories
-# Copyright (c) 1990 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  J. T. Buck
@@ -13,7 +13,7 @@
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
 DOMAINS = sdf de ddf bdf thor cg sproc silage cgc cg56 cg96 vhdlf vhdlb \
-          cp mq $(EXPDOMAINS)
+          mq $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
