@@ -38,6 +38,8 @@ class ::tycho::CTTimePanel {
 
     constructor {args} {}
     destructor {}
+
+    method get {item}
 }
 
 ########################################################################
@@ -72,3 +74,13 @@ body ::tycho::CTTimePanel::constructor {args} {
     $itk_component(main) add entry main.step -label "Time step" \
 	    -initial 0.01 -width 8
 }
+
+########################################################################
+#### get
+#
+# Get a time parameter: one of "start," "stop," or "step."
+#
+body ::tycho::CTTimePanel::get {item} {
+    $itk_component(main) get $item
+}
+
