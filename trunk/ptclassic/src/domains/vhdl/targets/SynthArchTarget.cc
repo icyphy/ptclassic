@@ -63,7 +63,8 @@ static KnownTarget entry(proto,"SynthArch-VHDL");
 
 // Write the code to a file.
 void SynthArchTarget :: writeCode() {
-  writeFile(myCode,".vhdl",displayFlag);
+    //  writeFile(myCode,".vhdl",displayFlag);
+    ArchTarget::writeCode();
 
   // FIXME: Need to do this inside before code is generated instead.
   // Change all integers to 4-bit types to simplify synthesis.
@@ -88,13 +89,13 @@ void SynthArchTarget :: writeCode() {
 
 // Write the command script to a file.
 int SynthArchTarget :: compileCode() {
-  // Generate the Synopsys design_analyer command script file here.
+  // Generate the Synopsys synthesis command script file here.
 
   if (int(analyze)) {
     StringList comCode = "";
     comCode << headerComment("/* \n * ","\n */\n"," * ");
 
-    comCode << "/* Synopsys design_analyzer Command Script */\n";
+    comCode << "/* Synopsys Synthesis Command Script */\n";
 
     comCode << "\n";
     comCode << "/* Set default variables. */\n";
@@ -163,8 +164,10 @@ int SynthArchTarget :: compileCode() {
 	  comCode << "\n";
 	  comCode << "/* Generate reports on area and timing. */\n";
 	  comCode << "\n";
-	  comCode << "report_area" << "\n";
+	  comCode << "report_area > " << filePrefix << ".area.rep" << "\n";
 	  comCode << "report_timing -path full -delay max -max_paths 1 -nworst 1" << "\n";
+
+	  comCode << report_code;
 	}
       }
     }  
@@ -177,13 +180,46 @@ int SynthArchTarget :: compileCode() {
 // Run the code.
 int SynthArchTarget :: runCode() {
   if (analyze) {
-    // Startup Synopsys design_analyzer with the command script file here.
-    StringList command = "";
-    if (progNotFound("design_analyzer")) return FALSE;
-    command << "design_analyzer -f " << filePrefix << ".com" << " &";
-    StringList error = "";
-    error << "Could not analyze " << filePrefix << ".vhdl";
-    if (systemCall(command, error, targetHost)) return FALSE;
+    // If interactive, start Synopsys design_analyzer (with GUI).
+    // If not, start Synopsys dc_shell (shell).
+    if (interactive) {
+      // Startup Synopsys design_analyzer with the command script file here.
+      StringList command = "";
+      if (progNotFound("design_analyzer")) return FALSE;
+      //    command << "design_analyzer -f " << filePrefix << ".com" << " &";
+      command << "design_analyzer -f " << filePrefix << ".com";
+      StringList error = "";
+      error << "Could not analyze " << filePrefix << ".vhdl";
+      if (systemCall(command, error, targetHost)) return FALSE;
+    }
+    else {
+      // Startup Synopsys dc_shell with the command script file here.
+      StringList command = "";
+      if (progNotFound("dc_shell")) return FALSE;
+      //    command << "dc_shell -f " << filePrefix << ".com" << " &";
+      command << "dc_shell -f " << filePrefix << ".com";
+      StringList error = "";
+      error << "Could not analyze " << filePrefix << ".vhdl";
+      if (systemCall(command, error, targetHost)) return FALSE;
+    }
+
+    // Look at the report file, if there is one, and announce the area.
+    if (int(report)) {
+	/*
+      StringList fileName = "";
+      fileName << filePrefix << ".rep";
+      StringList command = "";
+      command << "cd " << (const char*) destDirectory;
+      command << " ; ";
+      // Note:  using sh shell.
+      // Must use case-sensitive input to grep.
+      // Use > output redirector, which in sh can overwrite existing file.
+      command << "grep Total " << fileName << " > " << "DOH";
+      StringList error = "";
+      error = "Problem looking at report file";
+      if (systemCall(command, error, targetHost)) return FALSE;
+      */
+    }
   }
   // Return TRUE indicating success.
   return TRUE;
