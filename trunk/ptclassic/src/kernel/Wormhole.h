@@ -12,9 +12,6 @@
  SCCS Version identification :
  $Id$
 
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
  Programmer : Soonhoi Ha
  Date of Creation : 3/19/90
  Date of Revision : 5/31/90
@@ -83,8 +80,8 @@ public:
 	// "start" may be redefined if we want to adjust the state values
 	// after the scheduling is done. "go" is usually redefined for
 	// timeStamping business on EventHorizon.
-	void setup() { initSched();} 
-	//	       checkSDF(); }
+	void setup() { initSched();
+			currentTime = 0.0;} 
 
 	// constructor.  We never use plain Wormholes, we always have
 	// class SDFWormhole : public Wormhole, public SDFStar
@@ -110,9 +107,6 @@ private :
 	// flag saying whether to zap event horizons in destructor
 	int dynamicHorizons;
 
-	// Restriction 1 : SDFDomain should consume one token/arc and
-	//		   generate one token/arc as an inside Domain.
-	// void checkSDF(); 
 };
 
 #endif
