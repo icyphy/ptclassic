@@ -53,6 +53,12 @@
 #   <li><b>-name</b>: The class name of the class. (i.e. ::tycho::Class)
 #   <li><b>-language</b>: The language in which the class was written.
 #       Default is a null string.
+#   <li><b>-package</b>: The name of the package this class belongs to. 
+#       Default is null.
+#   <li><b>-protection</b>: The protection level of the class. Usually,
+#       this includes "public" and "package". The default is "public".
+#   <li><b>-modifiers</b>: Other class modifiers. Possible values depend
+#       on the languages. The default is null.
 #   <li><b>-source</b>: The file in which the class resides.
 #   <li><b>-interface</b>: The file in which the class' interface resides.
 # </ul>
@@ -60,7 +66,11 @@
 # The model has the following entities:
 # <ul>
 # <li><b>parent</b> _name_: A parent of the current class. Parents can
-# appear only at the top level. 
+# appear only at the top level. Parents have the following attribute:
+#    <ul>
+#    <li><b>-inheritance</b>: The type of inheritance from this parent.
+#        Either "implementation" or "interface". Default is "implementation".
+#    </ul>
 # 
 # <li><b>Constructor</b> _name_: A constructor. Constructors should be named
 # according to the language. (See note following methods below.)
@@ -309,7 +319,10 @@ body ::tycho::Class::constructor {args} {
             -interface "" \
             -name "" \
             -language "" \
-            -source ""
+            -package "" \
+            -source "" \
+            -protection "public" \
+            -modifiers ""
 
     # Define the "annotation" entity
     defineEntityType annotation \
@@ -318,7 +331,8 @@ body ::tycho::Class::constructor {args} {
 
     # Define the "parent" entity
     defineEntityType parent \
-            -ordered 1 
+            -ordered 1 \
+            -inheritance "implementation"
 
     # Define the "Constructor" entity
     defineEntityType Constructor \
