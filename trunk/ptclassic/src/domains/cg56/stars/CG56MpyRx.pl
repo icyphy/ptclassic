@@ -62,29 +62,27 @@ The inputs are multiplied and the result is written on the output.
     setup {
 	int n = input_r.numberPorts();
 	if ( n != input_i.numberPorts() ) {
-	    Error::abortRun(*this,"must have same number of real & imag input ports");
+	    Error::abortRun(*this,
+			    "must have same number of real & imag input ports");
 	    return;
 	}
 	switch ( n ) {
-	case 0:
+	  case 0:
 	    runtime = 2;
 	    break;
-	case 1:
+	  case 1:
             {    
-	    char buf[256];
-	    sprintf( buf, "input_r#%d", 1); // this is absurd
-	    CGPortHole *pr = (CGPortHole*) genPortWithName( buf);
-	    forkInit( *pr, output_r);
-	    sprintf( buf, "input_i#%d", 1); // this is absurd
-	    CGPortHole *pi = (CGPortHole*) genPortWithName( buf);
+	    CGPortHole* pr = (CGPortHole*) genPortWithName("input_r#1");
+	    forkInit(*pr, output_r);
+	    CGPortHole *pi = (CGPortHole*) genPortWithName("input_i#1");
 	    forkInit( *pi, output_i);
 	    runtime = 0;
 	    break;
 	    }
-	case 2:
+	  case 2:
 	    runtime = 7;
 	    break;
-	default:
+	  default:
 	    Error::abortRun(*this,"more than two inputs not implemented yet");
 	    return;
 	}
@@ -96,13 +94,13 @@ The inputs are multiplied and the result is written on the output.
 	    addCode(cbZero);
 	    break;
 	case 1:
-	    ; /* fork'd */
+	    ; /* forked */
 	    break;
 	case 2:
 	    addCode(cbTwoInput);
 	    break;
 	default:
-	    ; // NOT IMP
+	    ; /* not implemented */
 	}
     }
     exectime {
