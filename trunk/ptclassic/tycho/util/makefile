@@ -31,8 +31,6 @@
 
 DIRS = notmake pakman obstcl devtools
 
-EXTRA_SRCS = pkgIndex.tcl
-
 # Root of Tycho directory
 ROOT =		..
 
@@ -45,5 +43,7 @@ VPATH =		$(ROOT)/$(ME)
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-# Include rules for directories that contain only subdirectories.
-include $(ROOT)/mk/tydir.mk
+EXTRA_SRCS = pkgIndex.tcl
+
+# Include rules for directories that don't compile
+include $(ROOT)/mk/no-compile.mk
