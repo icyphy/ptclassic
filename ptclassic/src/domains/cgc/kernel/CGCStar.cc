@@ -61,7 +61,7 @@ StringList CGCStar::getRef2(const char* name, const char* offset) {
 	registerState(name);
 	GenericPort *p = genPortWithName(name);
 	State* s = stateWithName(offset);
-	int offVal;
+	int offVal = 0;
 	if (s) {
 		if (!s->isA("IntState")) {
                         codeblockError(offset, " is not the name of an IntState"
@@ -89,7 +89,11 @@ StringList CGCStar::getRef2(const char* name, const char* offset) {
 
 			// The maximum possible value of the offset is limited
 			// by the maximum buffer size.
-			if (cp->bufPos() > 0) {
+			if ((!s) || cp->bufPos() > 0 || offVal < 0) {
+				if ((!s) || (offVal < 0)) {
+					out += " + ";
+					out += cp->maxBufReq();
+				}
 				out += ")) % ";
 				out += cp->maxBufReq();
 			} else {
