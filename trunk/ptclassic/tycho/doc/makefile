@@ -116,9 +116,7 @@ HTMLDIRS= $(TYCHO)/doc \
 	$(TYCHO)/typt/doc \
 	$(TYCHO)/typt/doc/internals \
 	$(TYCHO)/typt/doc/usersGuides \
-	$(TYCHO)/typt/editors/doc/usersGuides
-
-
+	$(TYCHO)/typt/edit/doc/usersGuides
 
 # Traverse all the html files (except the codedoc files) and produce PostScript
 tycho.ps: ../bin/html2ps
