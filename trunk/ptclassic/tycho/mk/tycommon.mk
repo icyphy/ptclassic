@@ -198,13 +198,14 @@ makefiles: makefile
 # Generate html files from itcl files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
-#TYDOC=$(ROOT)/util/tydoc/bin/tydoc
-TYDOC=$(ROOT)/lib/tydoc/tydoc
+TYDOC=$(ROOT)/util/tydoc/bin/tydoc
 itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
+		chmod a+x $(TYDOC); \
 		echo "$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
 	 	$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
 	else \
+		chmod a+x $(TYDOC); \
 		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
 		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
 	fi
