@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Create one or more instances of the named block connected in a chain.
 This is implemented by replacing the
 .c Chain
-star with instances of the named blocks at setup time.
+star with instances of the named blocks at preinitialization time.
 The replacement block(s) are connected as specified by
 <i>input_map</i>, <i>internal_map</i>, and <i>output_map</i>.
 Their parameters are determined by <i>parameter_map</i>.
@@ -64,13 +64,13 @@ The output data type is inherited from the input data type.
 		name {input}
 		type {anytype}
 		desc {
-Whatever is connected to these inputs will  be connected
+Whatever is connected to these inputs will be connected
 to the first named block inputs according to input_map.
                 }
 	}
 	outmulti {
 		name {output}
-		type {=input}
+		type {anytype}
 		desc {
 Whatever is connected to these outputs will be connected
 to the last named block outputs according to output_map.
@@ -107,8 +107,19 @@ to the last named block outputs according to output_map.
 		desc {If YES, put a delay on each internal connection}
 	}
 	ccinclude { "Galaxy.h" }
-	setup {
-            HOFBaseHiOrdFn::setup();
+	ccinclude { "SimControl.h" }
+
+	method {
+	  name { preinitialize }
+	  access { public }
+	  code {
+	    HOFBaseHiOrdFn::preinitialize();
+
+	    // Make sure we know the number of connections on the
+	    // input and output multiPortHoles.
+	    initConnections(input);
+	    initConnections(output);
+
 	    // Check that all maps are the right size
 	    int allsizes = input.numberPorts();
 	    if (input_map.size() != allsizes ||
@@ -147,18 +158,15 @@ to the last named block outputs according to output_map.
 
 	    // Create the rest of the blocks and the internal connections
 	    for (int instno = 1; instno < (int)chain_length; instno++) {
-		Block* newblock;
-		if(!(newblock = createBlock(*mom,
-				       (const char*)blockname,
-				       (const char*)where_defined)))
-		   return;
-		if(!(connectInternal(block,newblock))) return;
-
-		// The previous block is now fully connected.  Initialize it.
+		if (SimControl::haltRequested())
+		  return;
+		Block* newblock = createBlock(*mom,
+					      (const char*)blockname,
+					      (const char*)where_defined);
+		if (!newblock) return;
+		if(!connectInternal(block,newblock)) return;
+		// set params of prior block just before forgetting it
 		if(!setParams(block, instno)) return;
-		block->setTarget(target());
-		block->initialize();
-
 		block = newblock;
 	    }
 
@@ -170,20 +178,20 @@ to the last named block outputs according to output_map.
 		GenericPort *source;
 		if (!(source = block->genPortWithName(output_map[outputno++]))) {
 		    Error::abortRun(*this,
-			"maybe output_map contains unrecognized name: ",
+			"output_map contains unrecognized name: ",
 			output_map[outputno-1]);
 		    return;
 		}
 		if(!connectOutput(po,source)) return;
 	    }
 
-	    // The last block is now fully connected.  Initialize it.
+	    // set params of last block
 	    if(!setParams(block, (int)chain_length)) return;
-	    block->setTarget(target());
-	    block->initialize();
 
 	    mom->deleteBlockAfterInit(*this);
+	  }
 	}
+
 	method {
 	    name { connectInternal }
 	    type { int }
@@ -207,10 +215,8 @@ to the last named block outputs according to output_map.
 			    internal_map[i-1]);
 			return 0;
 		    }
-		    port1->connect(*port2,numdelays);
+		    connectPorts(*port1,*port2,numdelays,NULL);
 		}
-		// No need to initialize delays because block1 has not
-		// been initialized yet.
 		return 1;
 	    }
 	}
