@@ -41,7 +41,7 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(MATLABDIR)/extern/include
+INCL = -I$(SDFDIR) -I$(KERNDIR)
 
 # Library name
 LIB=libsdfmatrixstars.$(LIBSUFFIX)
@@ -86,9 +86,6 @@ PL_SRCS= \
   SDFInverseFix_M.pl \
   SDFInverseInt_M.pl \
   SDFInverse_M.pl \
-  SDFMatlab.pl \
-  SDFMatlab_M.pl \
-  SDFMatlabCx_M.pl \
   SDFMatrix.pl \
   SDFMatrixCx.pl \
   SDFMatrixFix.pl \
@@ -129,10 +126,6 @@ PL_SRCS= \
   SDFUnPkInt_M.pl \
   SDFUnPk_M.pl
 
-MATLAB_SRCS= \
-  PtCloseStarFigures.m \
-  PtSetStarFigures.m
-
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
 
@@ -145,7 +138,7 @@ HDRS= $(SRCS:.cc=.h)
 STAR_MK=sdfmatrixstars
 DOMAIN=SDF_MATRIX
 DOMAIN_2=SDF
-EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS) $(MATLAB_SRCS)
+EXTRA_SRCS=$(STAR_MK).c $(PL_SRCS)
 
 all:		$(SRCS) stars_all
 
