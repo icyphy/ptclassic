@@ -981,7 +981,12 @@ void describePort ()
 	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
             strcat(dest,str1);
 	    sprintf(str1,"<tr>\n<td><i><b><font color=%s>%s</font></b></i></td><td>%s</td>\n", color, portName,portType);
-            strcat(destHTML,str1);
+	
+            /* FIXME: Can't strcat to destHTML, it does not have enough space
+	     strcat(destHTML,str1);
+	     */
+            strcat(dest,str1);
+
 	}
 
 	if (portDesc) {
@@ -990,13 +995,20 @@ void describePort ()
 	    sprintf(str1,": %s\n",descriptString);
             strcat(dest,str1);
 	    sprintf(str1,"<td>%s</td>\n",descriptString);
+            /* FIXME: Can't strcat to destHTML, it does not have enough space
             strcat(destHTML,str1);
+	    */
+            strcat(dest,str1);
 	} else {
 	    sprintf(str1,"\n");
             strcat(dest,str1);
         }
         sprintf(str1,"</tr>\n");
+        /* FIXME: Can't strcat to destHTML, it does not have enough space
         strcat(destHTML,str1);
+        */
+        strcat(dest,str1);
+
 }
 
 /* set up for user-supplied method */
