@@ -50,6 +50,8 @@ PL_SRCS= \
  CG56IntegratorR.pl \
  CG56Limit.pl \
  CG56LinToCirc.pl \
+ CG56LinQuantBits.pl \
+ CG56LinQuantBitsInt.pl \
  CG56Log.pl \
  CG56LookupTbl.pl \
  CG56Magnavox.pl \
@@ -66,7 +68,6 @@ PL_SRCS= \
  CG56ProPortDA.pl \
  CG56Pulse.pl \
  CG56Quant.pl \
- CG56QuantInt.pl \
  CG56Ramp.pl \
  CG56ReadFile.pl \
  CG56ReadFileInt.pl \
