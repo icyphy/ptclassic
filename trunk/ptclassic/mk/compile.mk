@@ -215,7 +215,7 @@ checkjunk:
 # http://www.khoros.unm.edu/staff/neilb/weblint.html
 # weblint uses perl
 weblint:
-	weblint  -x Netscape *.htm* | grep -v 'empty container element <A>'
+	weblint  -x Netscape *.htm* | grep -v 'empty container element <[AP]>'
 
 
 # "check" does not print anything if nothing is being edited.
