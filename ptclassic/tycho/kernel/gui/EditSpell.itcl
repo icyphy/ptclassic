@@ -259,7 +259,8 @@ body ::tycho::EditSpell::recheck {} {
 
     set filename [::tycho::tmpFileName tychoSpell]
     if {[$tw busy $tw writeSpellText $filename] != ""} {return}
-    if {$tcl_platform(platform) == "unix" } {
+    if {$tcl_platform(platform) == "unix" \
+	    && $tcl_platform(os) != "CYGWIN32_NT"} {
 	set errs [exec spell $filename]
     } else {
 	# Windows
