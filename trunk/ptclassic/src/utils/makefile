@@ -34,7 +34,7 @@
 
 # libexttools must come before libptmatlab below because libexttools
 # generates files on which libptmatlab depends
-DIRS = libexttools libgslider libptdsp libptmatlab libptmathematica \
+DIRS = dumpexts libexttools libgslider libptdsp libptmatlab libptmathematica \
        ptplay ptvhdlsim rman-2.5a6 tkman-1.8b5
 
 # Need to have $PTOLEMY as an absolute pathname for wish
