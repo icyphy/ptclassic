@@ -32,11 +32,11 @@ The default filter is a linear-phase equiripple lowpass filter with its 3dB
 cutoff frequency at about 1/3 of the Nyquist frequency.
 	}
 	input {
-		name {input}
+		name {signalIn}
 		type {FIX}
 	}
 	output {
-		name {output}
+		name {signalOut}
 		type {FIX}
 	}
 	state {
@@ -45,7 +45,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		default {
 	"-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
 		}
-		desc { Filter tap values. }
+		desc { Filter tap values }
 		attributes { A_NONCONSTANT|A_UMEM|A_NOINIT }
 	}
 	state {
@@ -53,63 +53,59 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 		type {fixarray}
 		default {0}
 		desc {internal}
-                attributes {
-               A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT
-	        }
+                attributes {A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
 	}
         state {
                 name {oldsampleStart}
 	        type {int}
 	        default {0}
-                desc { pointer to oldsample }
+                desc {pointer to oldsample}
                 attributes {A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT}
         }	    
         state {
                 name {oldsampleSize}
 	        type {int}
 	        default {0}
-                desc { size of oldsample }
+                desc {size of oldsample}
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
-        }	
+        }
 	state {
                 name {oldsampleSpace}
 	        type {int}
 	        default {0}
-                desc { space for oldsample values in TMS320C5x }
+                desc {space for oldsample values in TMS320C5x}
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	        
         state {
                 name {tapsNum}
 	        type {int}
 	        default {8}
-                desc { internal }
+                desc {internal state for the number of filter taps}
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	    
        
 	setup {
-	      tapsNum=taps.size();
-	      int oldSampleNum = tapsNum;
-	      oldsample.resize(oldSampleNum);
+	      tapsNum = taps.size();
+	      oldsample.resize(int(tapsNum));
         }
+
         initCode {
 		int i = 0;
-		StringList tapInit;
-		tapInit = "\t.ds\t$addr(taps)\n";
+		StringList tapInit = "\t.ds\t$addr(taps)\n";
 		for (i = 0; i < taps.size() ; i++)
 			tapInit << "\t.q15\t" << double(taps[i]) << '\n';
 		tapInit << "\t.text\n";
 		addCode(tapInit);
 		oldsampleSize=oldsample.size();
 		oldsampleSpace=int(oldsampleSize)*16;
-		if (oldsampleSize>0) 
-                     addCode(block);
+		if (oldsampleSize > 0) addCode(block);
         }
-        
+
 	go {
                 addCode(must);
-	        if(tapsNum>2) addCode(greaterTwo);
-		if(tapsNum==2) addCode(equalTwo);
-		if(tapsNum<2) addCode(lessTwo);
+	        if (tapsNum > 2) addCode(greaterTwo);
+		else if (tapsNum == 2) addCode(equalTwo);
+		else if (tapsNum < 2) addCode(lessTwo);
 	}
 
 	codeblock(block) {
@@ -128,6 +124,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	lar	AR2,*,AR2 			;Address oldsample	=> AR2
 	lar	AR7,#$addr(output)		;Adress output   	=> AR7
         }    
+
         codeblock(greaterTwo) {
 	splk	#$addr(oldsample),CBSR1		;Startadress circular buffer 1
 	splk	#$addr(oldsample)+$val(oldsampleSize)-1,CBER1
@@ -142,7 +139,8 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	bldd	#$addr(input),*+,AR4		;Input => newSample in Buffer
 	sar	AR2,*   			;store new oldsampleStart addr
 	apl	#0fff7h,CBCR			;disable circ. buffer 1
-	 }    
+	}    
+
         codeblock(equalTwo) {
 	zap					;clear P-Reg. and Accu
 	lmmr	BMAR,#$addr(oldsampleStart)	;Adress oldsampleStart => BMAR
@@ -155,6 +153,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	sach	*-,1				;u(k-2) = u(k-1)
 	bldd	#$addr(input),*			;u(k-1) = input
         }
+
         codeblock(lessTwo) {
 	zap					;clear P_reg. and Accu
 	mar 	*,AR1
@@ -164,277 +163,12 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
 	sach	*,1				;Accu => output
         }
   
-execTime  {
-	if (tapsNum>1)  return 17+2*(tapsNum-2);
-	if (tapsNum==2) return 14;
-	if (tapsNum<2)  return 10;
-	return 0;
+	execTime  {
+		tapsNum = taps.size();
+		int cost = 0;
+		if (tapsNum > 2)  cost = 17+2*(tapsNum-2);
+		if (tapsNum == 2) cost = 14;
+		if (tapsNum < 2)  cost = 10;
+		return cost;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
