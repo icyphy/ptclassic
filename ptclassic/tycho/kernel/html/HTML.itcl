@@ -340,6 +340,9 @@ body ::tycho::HTML::constructor {args} {
 
     # Add myself to the list of open files. 
     windowMenuAddAll $file
+
+    # Disable auto-save.
+    configure -save 0
 }
 
 ###################################################################
