@@ -1,4 +1,4 @@
-.<!-- $Id$ -->
+<!-- $Id$ -->
 <html>
 <head>
 <title>Tycho under Unix</title>
@@ -34,8 +34,8 @@ best under that operating system.
 
 To <A NAME="setup">setup</A> Tycho under Unix, you will need to
 download Tycho from the Tycho home page at <A
-HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A>
-has a link to the download page that contains Tycho sources and Itcl
+HREF="http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html"><CODE>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</CODE></A>.
+The Tycho home page has a link to the download page that contains Tycho sources and Itcl
 binaries for certain Unix platforms.
 
 <p>Tycho0.2 will not work with versions of Itcl earlier than Itcl2.2,
@@ -102,15 +102,12 @@ output is directed to a file.
 This is particularly useful if you are running
 over a slow X connection (like a modem) and do not wish to waste
 the bandwidth.
-The <A NAME="slow network preference">slow network preference</A> can
-also be set to modify the behaviour of Tycho over a slow network.
+The <A NAME="slow network preference"><CODE>slow network</CODE> preference</A> 
+can also be set to modify the behaviour of Tycho over a slow network.
 <DT> <a name="-debug tycho option"><CODE>-debug</CODE></a>
 <DD> Start <CODE>itkwish</CODE> inside the Gnu <CODE>gdb</CODE> debugger.
-<DL>
 <DT> <A NAME="-tty tycho option"><CODE>-tty</CODE></A>
 <DD> Start a non-graphical version of Tycho that has a tty prompt.
-</DL>
-
 </DL>
 <p>
 <h2><a name="Ptolemy with Tycho">Executing Tycho with Ptolemy</a></h2>
@@ -187,7 +184,7 @@ user the option of opening it.
 
 <p> You can configure Tycho to execute some Tcl code on startup.
 Simply create a <a name=".Tycho directory"> directory called
-<CODE>.Tycho</CODE></a>in your home directory and a file called <a
+<CODE>.Tycho</CODE></a> in your home directory and a file called <a
 name="tychorc.tcl file"><CODE>tychorc.tcl</CODE> </a> in that
 directory.  That file will automatically be sourced on startup.  Note
 that the <CODE>.Tycho</CODE> directory is used to store other state
