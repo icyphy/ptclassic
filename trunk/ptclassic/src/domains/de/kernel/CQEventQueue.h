@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class Particle;
 class PortHole;
+class CQScheduler;
 
         //////////////////////////////////////////
         // class Event and EventQueue
@@ -45,6 +46,8 @@ class PortHole;
 
 class CQEventQueue : public CalendarQueue
 {
+	friend CQScheduler;
+
 public:
 	void pushHead(Particle* p, PortHole* ph, double v, double fv) {
             Event* temp = getEvent(p, ph);
@@ -66,7 +69,7 @@ public:
 
 
  // The following takes care of the case where levelput is called
- // directly without going thru pushHead. In that case it is called
+ // directly without going through pushHead. In that case it is called
  // with three arguments and dest must be internally calculated.
 
 	LevelLink* levelput(Pointer a, double v, double fv) {
