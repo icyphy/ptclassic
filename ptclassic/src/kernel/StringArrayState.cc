@@ -118,6 +118,85 @@ const int MAXLEN = 20000;
 // -- maximum size of each string element 
 const int MAXSTRINGLEN = 4096;
 
+int StringArrayState::repeatItem(Tokenizer& lexer, char** buf, int& i) {
+	char* saveValue = 0;
+	if ( i > 0 ) {
+		saveValue = buf[i-1];
+	}
+	if ( saveValue == 0 ) {
+		parseError ("no string to repeat ",
+			    "([ must appear after a string).");
+		return FALSE;
+	}
+	ParseToken t = evalIntExpression(lexer);
+	if (t.tok != T_Int) {
+		parseError ("expected integer expression after '['");
+		return FALSE;
+	}
+	int numRepeats = t.intval - 1;
+	if ( numRepeats < 0 ) {
+		parseError("cannot repeat a string a negative number of times.");
+		return FALSE;
+	}
+	if (i + numRepeats > MAXLEN) {
+		parseError ("too many strings while repeating ", saveValue);
+		return FALSE;
+	}
+	while ( numRepeats > 0) {
+		buf[i++] = savestring(saveValue);
+		numRepeats--;   
+	}
+	t = getParseToken(lexer);
+	if (t.tok != ']') {
+		parseError ("expected ']'");
+		return FALSE;
+	}
+	return TRUE;
+}
+
+int StringArrayState::expectParameterName(Tokenizer& lexer, char** buf, int& i) {
+	char parameterName[MAXSTRINGLEN];
+	char closeBraceBuf[MAXSTRINGLEN];
+
+	// look for state name followed by closed curly brace
+	lexer >> parameterName;
+	lexer >> closeBraceBuf;
+	const State* s = lookup(parameterName, parent()->parent());
+	if (s == 0 || closeBraceBuf[0] != '}' || closeBraceBuf[1]) {
+		lexer.pushBack(closeBraceBuf);
+		lexer.pushBack(parameterName);
+		return TRUE;
+	}
+
+	// By default, return TRUE
+	int retval = TRUE;
+
+	// String array state: copy element-by-element
+	if (s->isA("StringArrayState")) {
+		const StringArrayState *ss = (const StringArrayState*)s;
+		int numstrings = ss->size();
+		if (i + numstrings > MAXLEN) {
+			parseError("too many strings encountered while including the StringArrayState parameter ",
+			parameterName );
+			retval = FALSE;
+		}
+		else {
+			for (int j = 0; j < numstrings; j++)
+				buf[i++] = savestring(ss->val[j]);
+		}
+	}
+	else if (s->isArray()) {
+		parseError("StringArrayStates cannot substitute values of type ",
+			   s->type());
+		retval = FALSE;
+	}
+	// others: one string only
+	else {
+		buf[i++] = s->currentValue().newCopy();
+	}
+	return retval;
+}
+
 // Parse initValue to set value
 void StringArrayState  :: initialize() {
 	// free any old memory
@@ -136,6 +215,7 @@ void StringArrayState  :: initialize() {
 	char* buf[MAXLEN];
 	while(!lexer.eof() && i < MAXLEN && !err) {
 		char tokbuf[MAXSTRINGLEN];
+		int saveToken = FALSE;
 		lexer >> tokbuf;
 		char c = tokbuf[0];
 		if (c != 0 && tokbuf[1]) c = 0;
@@ -144,104 +224,30 @@ void StringArrayState  :: initialize() {
 
 		    case '<':
 			err = !mergeFileContents(lexer, tokbuf);
+			saveToken = TRUE;
 			break;
 
 		    case '[':
-		      {
-			char* saveValue = 0;
-			if ( i > 0 ) {
-				saveValue = buf[i-1];
-			}
-			if ( saveValue == 0 ) {
-				parseError ("no string to repeat ",
-				   "([ must appear after a string).");
-				err = TRUE;
-				break;
-			}
-			ParseToken t = evalIntExpression(lexer);
-			if (t.tok != T_Int) {
-				parseError ("expected integer expression after '['");
-				err = TRUE;
-				break;
-			}
-			int numRepeats = t.intval - 1;
-			if ( numRepeats < 0 ) {
-				parseError ("cannot repeat a string a negative number of times.");
-				err = TRUE;
-				break;
-			}
-			if (i + numRepeats > MAXLEN) {
-				parseError ("too many strings while repeating ",
-					    saveValue);
-				err = TRUE;
-				break;
-			}
-			while ( numRepeats > 0) {
-				buf[i++] = savestring(saveValue);
-				numRepeats--;   
-			}
-			t = getParseToken(lexer);
-			if (t.tok != ']') {
-				parseError ("expected ']'");
-				err = TRUE;
-			}
-		      }
-		      break;
+			err = !repeatItem(lexer, buf, i);
+			saveToken = FALSE;
+			break;
 
 		    case '{':
-		      {
-		        char parameterName[MAXSTRINGLEN];
-			char closeBraceBuf[MAXSTRINGLEN];
-
-			// look for state name followed by closed curly brace
-			lexer >> parameterName;
-			lexer >> closeBraceBuf;
-			const State* s =
-				lookup(parameterName, parent()->parent());
-			if (s == 0 ||
-			    closeBraceBuf[0] != '}' || closeBraceBuf[1]) {
-				lexer.pushBack(closeBraceBuf);
-				lexer.pushBack(parameterName);
-				break;
-			}
-
-			// String array state: copy element-by-element
-			if (s->isA("StringArrayState")) {
-				const StringArrayState *ss = 
-					(const StringArrayState*)s;
-				int numstrings = ss->size();
-				if (i + numstrings > MAXLEN) {
-					parseError("too many strings encountered while including the StringArrayState parameter ",
-						    parameterName );
-					err = TRUE;
-					break;
-				}
-				else {
-					for (int j = 0; j < numstrings; j++)
-					    buf[i++] = savestring(ss->val[j]);
-				}
-			}
-			else if (s->isArray()) {
-				parseError( "StringArrayStates cannot substitute values of type ",
-					   s->type());
-				err = TRUE;
-				break;
-			}
-			// others: one string only
-			else {
-				buf[i++] = s->currentValue().newCopy();
-			}
-		      }
-		      break;
+			err = !expectParameterName(lexer, buf, i);
+			saveToken = FALSE;
+			break;
 
 		    case '!':
 			err = !sendToInterpreter(lexer, tokbuf);
+			saveToken = TRUE;
 			break;
 
 		    default:
-			buf[i++] = savestring(tokbuf);
+			saveToken = TRUE;
 			break;
 		}
+
+		if (saveToken && !err) buf[i++] = savestring(tokbuf);
 		lexer.clearwhite();
 	}
 
