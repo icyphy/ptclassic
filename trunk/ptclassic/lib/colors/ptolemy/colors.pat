@@ -210,6 +210,12 @@
       (color 0 900 0)    (comment "green")
       (fillPattern 1 1 "1")
   )
+  (figureGroupDefault fixColor
+      (userData priority 5)
+      (width -2)
+      (color 1000 0 1000)	(comment "violet")
+      (fillPattern 1 1 "1")
+  )
 
   (comment "The following section is newer, and adds layers with various")
   (comment "priorities lower and higher than those in the original spec.")
