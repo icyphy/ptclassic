@@ -1,6 +1,6 @@
 /******************************************************************
 Version identification:
- $Id$
+$Id$
 
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
@@ -52,7 +52,8 @@ void Wormhole :: buildEventHorizons () {
 // them together.
 	for (int n = gal.numberPorts(); n>0; n--) {
 		PortHole& galp = gal.nextPort();
-		dataType type = galp.realPort().myType();
+		PortHole& realGalp = (PortHole&) galp.realPort();
+		dataType type = realGalp.myType();
 		if (galp.isItInput()) {
 			EventHorizon& to = outSideDomain->newTo();
 			EventHorizon& from = inSideDomain->newFrom();
@@ -63,8 +64,8 @@ void Wormhole :: buildEventHorizons () {
 				     type);
 			to.ghostConnect (from);
 			if (type == ANYTYPE) {
-				to.inheritTypeFrom (from);
-				from.inheritTypeFrom (galp);
+				realGalp.inheritTypeFrom (from);
+				from.inheritTypeFrom (to);
 			}
 			from.connect(galp,0);
 		}
@@ -75,13 +76,13 @@ void Wormhole :: buildEventHorizons () {
 			EventHorizon& to = inSideDomain->newTo();
 			EventHorizon& from = outSideDomain->newFrom();
 			from.setPort(out, galp.readName(), this, &selfStar,
-				     ANYTYPE);
+				     type);
 			selfStar.addPort(from);
 			to.setPort(out, galp.readName(), this, &selfStar,
-				   ANYTYPE);
+				   type);
 			to.ghostConnect (from);
 			to.inheritTypeFrom (from);
-			galp.inheritTypeFrom (to);
+			realGalp.inheritTypeFrom (to);
 			galp.connect(to,0);
 		}
 	}
