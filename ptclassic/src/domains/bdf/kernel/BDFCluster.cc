@@ -1428,6 +1428,7 @@ void BDFClusterBag::fixBufferSizes(int nReps) {
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0) {
 		BDFClustPort* in = p->inPtr();
+		if (!in) continue;
 		int n = p->maxArcCount();
 		in->setMaxArcCount(n);
 	}
