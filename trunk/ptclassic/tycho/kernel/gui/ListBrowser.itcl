@@ -312,6 +312,11 @@ body ::tycho::ListBrowser::clearselection {} {
 # Return 0 if no matching entry is found, 1 if one matching
 # entry is found, and 2 if more than one matching entry is found.
 #
+# If there is more than one matching entry, we increase the length of the
+# pattern to consist of all of the initial common characters of the matching
+# string.  For example, if the pattern is "Foo" and we have "FooBarBaz" and
+# "FooBarFrob", then the pattern is increased to "FooBar".
+#
 body ::tycho::ListBrowser::complete {{case 0}} {
     if {$uselastpattern} {
 	scroll 1 selection
@@ -339,6 +344,7 @@ body ::tycho::ListBrowser::complete {{case 0}} {
 	    }
 	    set foundone 1
 	    if {$firstone == -1} {set firstone $index}
+            lappend matches $name
 	    $itk_component(listbox) selection set $index
 	}
 	incr index
@@ -354,6 +360,36 @@ body ::tycho::ListBrowser::complete {{case 0}} {
     } {
 	# Found more than one.  Alert user that entry is not complete.
 	set uselastpattern 1
+
+        # Set the entry widget to the longest common string among all the
+        # matches. Start with the first match, and then slowly increase the
+        # length of the pattern until we find another match that is different.
+        set firstMatch [lindex $matches 0]
+        set matchFailed 0
+        for {set end [string length [get entry]]} \
+                { $end <= [string length $firstMatch]} \
+                { incr end} {
+            if !$case {
+                set testPattern [string tolower \
+                        [string range $firstMatch 0 $end]]
+            } else {
+                set testPattern [string range $firstMatch 0 $end]
+            }
+            foreach match $matches {
+                if !$case {
+                    set match [string tolower $match]
+                }
+                if  { "$testPattern" != "[string range $match 0 $end]"} {
+                    set matchFailed 1
+                    break
+                }
+            }
+            if { $matchFailed == 1 } {
+                incr end -1
+                break
+            }
+        }
+        setEntry [string range $firstMatch 0 $end]
 	bell
     }
     # The two commands below attempt to put the entire range in view,
