@@ -29,7 +29,7 @@ dnl
 # 						COPYRIGHTENDKEY
 
 dnl Process this file with autoconf to produce a configure script.
-AC_INIT(eprintf/eprintf.c)
+AC_INIT(tyjava/eprintf/_eprintf.c)
 
 dnl Checks for programs.
 AC_PROG_CC
@@ -39,7 +39,7 @@ AC_PROG_MAKE_SET
 # User specified location of the Ptolemy Tree
 #
 AC_ARG_WITH(tcl, [  --with-ptolemy=DIR          use Tcl/Tk from DIR],
-        _PTOLEMY=$withval, _PTOLEMY=/users/ptdesign)
+        _PTOLEMY=$withval, _PTOLEMY=$PTOLEMY)
 if test ! -d $_PTOLEMY; then
     AC_MSG_ERROR(Tcl directory $_PTOLEMY doesn't exist)
 fi
@@ -88,9 +88,30 @@ TCL_SHLIB_LD=$TCL_SHLIB_LD
 TCL_SHLIB_LD_LIBS=$TCL_SHLIB_LD_LIBS
 TCL_SHLIB_SUFFIX=$TCL_SHLIB_SUFFIX
 TCL_SHLIB_VERSION=$TCL_SHLIB_VERSION
+# Tcl7.6 defines TCL_SRC_DIR, Tcl7.5 does not.
+#TCL_SRC_DIR=$TCL_SRC_DIR
 TCL_DL_LIBS=$TCL_DL_LIBS
 TCL_LD_FLAGS=$TCL_LD_FLAGS
 TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
+
+#
+# User specified location of the tcl srcs.  The profile code uses tclInt.h
+#
+# We must set this arg after sourcing tclConfig.sh, as Tcl7.6 tclConfig.sh
+# sets TCL_SRC_DIR.  However, if you are using the automounter, then 
+# tclConfig.sh will probably have the wrong value.
+AC_ARG_WITH(tcl, [  --with-tclsrc=DIR          use Tcl srcs lib from DIR],
+        TCL_SRC_DIR=$withval, TCL_SRC_DIR=$_PTOLEMY/src/tcltk/itcl2.2/tcl7.6)
+#if test ! -d $TCL_SRC_DIR; then
+#    AC_MSG_ERROR(Tcl directory $TCL_SRC_DIR doesn't exist)
+#fi
+AC_MSG_CHECKING([for tclInt.h])
+if test -f $TCL_SRC_DIR/generic/tclInt.h; then 
+	AC_MSG_RESULT($TCL_SRC_DIR/generic/tclInt.h)
+else
+	AC_MSG_RESULT([Cannot find $TCL_SRC_DIR/tclInt.h, try --with-tclsr=DIR. tclInt.h is used in the profile command. ])
+fi
+
 
 
 #
@@ -178,6 +199,7 @@ AC_SUBST(TCL_DL_LIBS)
 AC_SUBST(JAVAHOME)
 AC_SUBST(TCL_LD_FLAGS)
 AC_SUBST(TCL_LD_SEARCH_FLAGS)
+AC_SUBST(TCL_SRC_DIR)
 AC_SUBST(TCL_LIB_SPEC)
 AC_SUBST(TK_LIB_SPEC)
 AC_SUBST(TCL_SHLIB_CFLAGS)
@@ -193,4 +215,6 @@ AC_SUBST(TK_XINCLUDES)
 AC_SUBST(TK_LIBS)
 AC_SUBST(TK_LIB_SPEC)
 
-AC_OUTPUT(tcljava/makefile makefile)
+AC_OUTPUT(makefile tcl.mk:../mk/actcl.mk.in java.mk:../mk/acjava.mk.in \
+	profile/makefile tyjava/makefile tyjava/tcljava/makefile \
+	tyjava/eprintf/makefile)
