@@ -174,7 +174,7 @@ body ::tycho::FileBrowser::constructor {args} {
 	label $itk_component(childsite).dir -text $localCWD -width 35 -anchor e
     } {
 	keep -background -cursor -foreground
-	rename -font -messagefont messageFont MessageFont
+	rename -font -messagefont messageFont Font
     }
     pack $itk_component(dir) -side top -fill x -after $itk_component(listscroll)
     
@@ -191,8 +191,7 @@ body ::tycho::FileBrowser::constructor {args} {
     # Subscribe to the preference set
     preference subscribe $this \
 	    -width  fileBrowserWidth \
-	    -height fileBrowserHeight \
-	    -messagefont messageFont
+	    -height fileBrowserHeight
 
     # In case updateListbox inserts into the entry; to avoid repetition
     clear entry
