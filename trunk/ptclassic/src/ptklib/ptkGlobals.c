@@ -35,5 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Tcl_Interp *ptkInterp;
 Tk_Window ptkW;
 
+#if TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION > 4
 /* we need this decl to prevent tkMain.o from being faulted in -- kennard */
 char *tcl_RcFileName = NULL;
+#endif
