@@ -67,11 +67,14 @@ class ::tycho::StatusBar {
     # Set the class type
     # method class {class} {}
     
+    # Get the most recent string written to the status bar
+    method get {}
+
     # Put a string to the status bar
-    method puts {string} {}
+    method puts {string}
 
     # Set the line and column display, and clear the status string
-    method lineColumn {line column} {}
+    method lineColumn {line column}
 
     ###################################################################
     ####                       private variables                   ####
@@ -183,7 +186,6 @@ configbody ::tycho::StatusBar::scrollbarpad {
     }
 }
 
-
 #######################################################################
 #### constructor
 #
@@ -231,14 +233,14 @@ body ::tycho::StatusBar::constructor {args} {
 	    -messagefont messageFont
 }
 
-
 #######################################################################
-#### class
+#### get
 #
-#body ::tycho::StatusBar::class {class} {
-#    $itk_component(class) configure -text "  $class  "
-#}
-
+# Get the most recent string written to the statusbar.
+#
+body ::tycho::StatusBar::get {} {
+    $itk_component(mainStatus) cget -text
+}
 
 #######################################################################
 #### helpFileStatus
@@ -257,8 +259,6 @@ body ::tycho::StatusBar::helpFileStatus {} {
     }
 }
 
-
-
 #######################################################################
 #### lineColumn
 #
@@ -266,7 +266,6 @@ body ::tycho::StatusBar::lineColumn {line column} {
     $itk_component(mainStatus) configure -text \
 	"  $line : $column"
 }
-
 
 #######################################################################
 #### puts
