@@ -51,6 +51,10 @@ set printoptions = "-me -tbl -eqn -P$PRINTER"
 set contentscmd = $PTOLEMY/doc/bin/contents
 set previewcommand = "xditview -"
 set psincludecommand = $PTOLEMY/doc/bin/ditpsinc
+set tempdir = /tmp
+set tempTroffFile = $tempdir/pt$$.t
+set tempIndexFile = $tempdir/index$$
+set tempPrintFile = $tempdir/prnr$$
 
 # Variables
 set indexonly = 0
@@ -93,37 +97,37 @@ endif
 
 
 soelim $dirheader/shared $dirheader/domain \
-	init overall > /tmp/pt$$
+	init overall > $tempTroffFile
 
 # Set troff icon printing flag: 0 if not printing icons, 1 if printing them.
 if ($icons) then
-	echo '.nr Ic 1' >> /tmp/pt$$
+	echo '.nr Ic 1' >> $tempTroffFile
 else
-	echo '.nr Ic 0' >> /tmp/pt$$
+	echo '.nr Ic 0' >> $tempTroffFile
 endif
 
 if ( -d targets ) then
         if (-e targettitle) then
                 # set type for this section
-                echo '.ds TY "target' >> /tmp/pt$$
-                cat targettitle >> /tmp/pt$$
+                echo '.ds TY "target' >> $tempTroffFile
+                cat targettitle >> $tempTroffFile
         endif
         cd targets
         # print all targets
-        cat -s * >> /tmp/pt$$
+        cat -s * >> $tempTroffFile
         cd ..
 endif
 
 if ( -d stars ) then
 	if (-e starstitle) then
 		# set type for this section
-		echo '.ds TY "star' >> /tmp/pt$$
-		cat starstitle >> /tmp/pt$$
+		echo '.ds TY "star' >> $tempTroffFile
+		cat starstitle >> $tempTroffFile
 	endif
 	cd stars
 	# print all stars, sorted in dictionary order
 	foreach file (`ls -1 -d * | sort -f -d`)
-		cat -s $file >> /tmp/pt$$
+		cat -s $file >> $tempTroffFile
 	end
 	cd ..
 endif
@@ -131,43 +135,43 @@ endif
 if ( -d demos ) then
 	if (-e demotitle) then
 		# set type for this section
-		echo '.ds TY "demo' >> /tmp/pt$$
-		cat demotitle >> /tmp/pt$$
+		echo '.ds TY "demo' >> $tempTroffFile
+		cat demotitle >> $tempTroffFile
 	endif
 	cd demos
 	# print all demos
-	cat -s * >> /tmp/pt$$
+	cat -s * >> $tempTroffFile
 	cd ..
 endif
 
 if ($indexonly) then
 	# if only generating index, add -t option and throw away the output
-	($printcommand $printoptions -t /tmp/pt$$ > /dev/null) >& /tmp/index$$
+	($printcommand $printoptions -t $tempTroffFile > /dev/null) >& $tempIndexFile
 else if ($preview) then
 	# if previewing, use either X windows or nroff
 	if ($?DISPLAY) then
-		$printcommand $printoptions -t /tmp/pt$$ | $previewcommand
+		$printcommand $printoptions -t $tempTroffFile | $previewcommand
 	else
-		(eqn /tmp/pt$$ | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
+		(eqn $tempTroffFile | tbl | nroff -me > /tmp/ptnr$$) >& /dev/null
 		more /tmp/ptnr$$
 	endif
 else if ($icons) then
 	# printing icons -- generates postscript
-	($printcommand $printoptions -t /tmp/pt$$ | $psincludecommand > \
-		/tmp/pt.$$.ps) >& /tmp/index$$
+	($printcommand $printoptions -t $tempTroffFile | $psincludecommand > \
+		/tmp/pt.$$.ps) >& $tempIndexFile
 	echo "printdom: generated postscript in /tmp/pt.$$.ps"
 else
 	# otherwise just print it out
-	$printcommand $printoptions /tmp/pt$$ >& /tmp/index$$
-	$contentscmd /tmp/index$$
+	$printcommand $printoptions $tempTroffFile >& $tempIndexFile
+	$contentscmd $tempIndexFile
 	$printcommand $printoptions $dirheader/shared title
 endif
-if (-r /tmp/index$$) cat /tmp/index$$ >>! $ALMAGEST_INDEX
-/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+if (-r $tempIndexFile) cat $tempIndexFile >>! $ALMAGEST_INDEX
+/bin/rm -f $tempTroffFile $tempIndexFile $tempPrintFile
 exit 0
 
 catch:
         # prevent the "no match" error message if there are no temporary files
         set nonomatch
-	/bin/rm -f /tmp/pt$$ /tmp/index$$ /tmp/prnr$$
+	/bin/rm -f $tempTroffFile $tempIndexFile $tempPrintFile
         exit 1
