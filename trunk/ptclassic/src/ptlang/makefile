@@ -16,7 +16,7 @@ all:	ptlang
 
 ptlang:	ptlang.o
 	rm -f ptlang
-	cc ptlang.o -o ptlang
+	$(CC) ptlang.o -o ptlang
 
 ptlang.o:	ptlang.c
 
