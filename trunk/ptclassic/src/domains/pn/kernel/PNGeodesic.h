@@ -39,7 +39,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "Geodesic.h"
-#include "LwpMonitor.h"
+
+class PtCondition;
 
 class MTDFGeodesic : public Geodesic
 {
@@ -62,9 +63,8 @@ public:
     /*virtual*/ void makeLock(const PtGate& master);
     /*virtual*/ void delLock();
 
-
 protected:
-    LwpCondition* notEmpty;
+    PtCondition* notEmpty;
 };
 
 #endif

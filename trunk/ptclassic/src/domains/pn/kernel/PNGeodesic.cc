@@ -34,6 +34,8 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
+#include "MTDFMonitor.h"
+#include "MTDFCondition.h"
 #include "MTDFGeodesic.h"
 #include "Error.h"
 
@@ -49,13 +51,13 @@ void MTDFGeodesic::makeLock(const PtGate& master)
     LOG_DEL; delete notEmpty;
     notEmpty = 0;
     Geodesic::makeLock(master);
-    if (!gate)
+    if (!isLockEnabled())
     {
 	Error::abortRun(*this, "makeLock failed!");
     }
     else
     {
-	LOG_NEW; notEmpty = new LwpCondition((LwpMonitor*)gate);
+	LOG_NEW; notEmpty = new MTDFCondition(*(MTDFMonitor*)gate);
     }
 }
 
@@ -69,24 +71,30 @@ void MTDFGeodesic::delLock()
 // Notify when not empty.
 void MTDFGeodesic::slowPut(Particle* p)
 {
+    // Avoid entering the gate more than once.
     CriticalSection region(gate);
-    Geodesic::slowPut(p);
+    pstack.putTail(p); sz++;
     if (notEmpty) notEmpty->notifyAll();
 }
 
 // Block util not empty.
 Particle* MTDFGeodesic::slowGet()
 {
+    // Avoid entering the gate more than once.
     CriticalSection region(gate);
-    if (size() < 1 && notEmpty) notEmpty->wait();
-    Particle* p = Geodesic::slowGet();
-    return p;
+    if (sz < 1 && notEmpty) notEmpty->wait();
+    if (sz > 0)
+    {
+	sz--; return pstack.get();
+    }
+    else return 0;
 }
 
 // Notify when not empty.
 void MTDFGeodesic::pushBack(Particle* p)
 {
+    // Avoid entering the gate more than once.
     CriticalSection region(gate);
-    Geodesic::pushBack(p);
-    if (gate && notEmpty) notEmpty->notifyAll();
+    pstack.put(p); sz++;
+    if (isLockEnabled() && notEmpty) notEmpty->notifyAll();
 }
