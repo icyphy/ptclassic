@@ -121,10 +121,9 @@ body ::tycho::ErrorMessage::constructor {args} {
 
     # In case there is a Ptolemy system running, halt it.
     # This is put in catch so that this code can be used outside of Ptolemy.
-    # To avoid losing information in the stack trace, we have to save it.
     set savestack $errorInfo
     catch {::tycho::halt}
-    uplevel #0 [list set errorInfo $savestack]
+    set errorInfo $savestack
     # Process any unevaluated arguments.
     eval itk_initialize $args
 }
