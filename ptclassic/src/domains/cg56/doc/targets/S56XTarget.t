@@ -29,7 +29,7 @@ S-56X card.
 This target is used for generating assembly code for the Ariel S-56X Sbus
 card.  To use it, select \fBS-56X\fR in the pigi \fBedit-target\fR menu.
 It is derived from \fBCG56Target\fR class, thus inheriting all of its
-states.  However, both CG56Target states \fIxMemMap\fR and \fIyMemMap\fB
+states.  However, both CG56Target states \fIxMemMap\fR and \fIyMemMap\fR
 have been hidden.
 .SA
 CG56Target
