@@ -210,6 +210,7 @@ if ( $?pigidebug ) then
 	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.xdb
 			breaksw
 		case sol2.cfront:
+		case sol2.5.cfront:
 	                setenv COMMAND $PTOLEMY/lib/pigiRpcDebug.dbx
 			breaksw
 		case *:
