@@ -67,7 +67,7 @@ MISC_FILES =
 
 # Sources that may or may not be present, but if they are present, we don't
 # want make checkjunk to barf on them.
-OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b all.itcl
+OPTIONAL_FILES =	rcstst sccstst Path-5.1a Path-5.1b alltests.itcl
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
@@ -80,21 +80,10 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 		$(ITCLSH)
 
 # These tests require a graphics terminal
-test_graphics: all.itcl
-	tycho -e all.itcl
+test_graphics: alltests.itcl
+	tycho -e alltests.itcl
 
 FORCE:
-
-all.itcl: FORCE
-	rm -f $@
-	echo "set reallyExit 0" > $@
-	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" >> $@
-	for x in $(GRAPHICAL_TESTS); do \
-		echo "puts stderr $$x" >> $@; \
-		echo "source $$x" >> $@; \
-	done
-	echo "set reallyExit 1" >> $@
-	echo "doneTests" >> $@
 
 test_exec_msg:
 	@echo "This message is used to test the Exec class"
