@@ -13,7 +13,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -36,10 +36,10 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  Soonhoi Ha
+ Programmer:  Soonhoi Ha, E. A. Lee
 
  Methods for the DDFClustSched: scheduler performing the clustering of
- SDF stars
+ SDF stars.
 
 **************************************************************************/
 
@@ -50,7 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DDFClustSched : public DDFScheduler {
 public:
-	// The setup function computes an DDF schedule
+	// The setup function computes a DDF schedule
 	// and initializes all the blocks.
 	void setup();
 
@@ -61,17 +61,18 @@ public:
 	DDFClustSched (const char* log = 0);
 	~DDFClustSched ();
 
-	// reset "restructured" flag for DDFSelf star
+	// reset "restructured" flag (used by DDFSelf star to
+	// to implement recursion.
 	void resetFlag() {
 		restructured = FALSE;
 		DynDFScheduler::resetFlags();
 	}
 
 protected:
+	// Create SDF clusters.
 	void initStructures();
 
-	// do not regard an actor with initial token on the feedback arc
-	// as a source. Back to the classical definition of the source.
+	// A source is a star with no inputs.
 	/* virtual */ int isSource(Star&); 
 
 private:
@@ -101,21 +102,37 @@ private:
 	void selectScheduler(SDFClusterGal&);
 
 	// modify the topology by clustering SDFStars.
+	//
 	int makeSDFClusters(SDFClusterGal&);
 	int expandCluster(SDFCluster*, SDFClusterGal*, SDFClusterBag*);
 
-	// type of actor
-	// if enabled and non-deferrable. return 1
-	// if non-source enabled and deferrable, return 2
-	// otherwise, return 0;
-	int typeOfActor(SDFCluster*);
+	// Check the input ports and return the state of the actor.
+	// If it is enabled and non-deferrable, return 1.
+	// If it is a non-source, enabled and deferrable, return 2.
+	// Otherwise, return 0.
+	// An actor is deferrable if all its output connections already
+	// have enough data to enable the downstream actor.
+	//
+	int enabledState(SDFCluster*);
 
-	// check the blocking condition at input
-	int blockAtInput(SDFCluster* );
+	// Check whether a star is blocked by missing inputs.
+	//
+	int blockedOnInput(SDFCluster* );
 	
 	// check whether output has enough tokens to fire the destination
 	// actor. If yes, deferrable.
 	int isOutputDeferrable(SDFCluster*);
+
+	// Check to see whether a hint is registered for the star associated
+	// with an atomic cluster.  If so, parse that hint and store it in
+	// the star.  Also, add a pointer to the star to the hintStars list.
+	int hintRegistered(SDFAtomCluster* as);
+
+	// List used to store pointers to the stars that have hints
+	// registered.  This allows for efficient access at runtime.
+	// Note that every element appended to this list must be a
+	// DataFlowStar*.
+	SequentialList hintStars;
 };
 
 #endif
