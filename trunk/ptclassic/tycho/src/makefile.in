@@ -90,9 +90,9 @@ LIBR = dummylibr
 
 $(LIBDIR):
 	mkdir $@
-$(LIBDIR)/tcl.mk:
+$(LIBDIR)/tcl.mk: tcl.mk
 	rm -f $@
-	ln -s tcl.mk $@
+	cp tcl.mk $@
 depend:
 	@echo "no dependencies in this directory"
 
