@@ -51,9 +51,10 @@ INCL = 		-I$(KERNDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC)
 include $(ROOT)/mk/stars.mk
 
 # libraries
-PTINY_LIBS =		$(PTINY_STAR_LIBS) -lptolemy $(TCL_LIBSPEC) \
+PTINY_LIBS =		$(PTINY_STAR_LIBS) -lgantt -lptolemy $(TCL_LIBSPEC) \
 			$(SYSLIBS) $(LIB_FLUSH_CACHE)
-LIBS = $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
+LIBS = $(STAR_LIBS) -lgantt -lptolemy $(TCL_LIBSPEC) $(SYSLIBS)\
+			$(LIB_FLUSH_CACHE)
 
 PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
 				$(LIBDIR)/libptolemy.$(LIBSUFFIX)  
