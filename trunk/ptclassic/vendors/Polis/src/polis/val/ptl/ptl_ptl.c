@@ -1,4 +1,4 @@
-/*************************************************************************
+ /*************************************************************************
 
   Copyright   [Copyright (c) 1994-1996 The Regents of the Univ. of California.
   All rights reserved.
@@ -419,7 +419,7 @@ static void pl_print_method( fp, node, autotick, unittime )
      * it is a dummy event.
      */
     fprintf( fp, "  method {\n" );
-    fprintf( fp, "    name { emitEvent }\n" );
+    fprintf( fp, "    name { emitEventToIntQ }\n" );
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    arglist { \"( int outputPort, double delay, int isDummy )\" }\n" );
     fprintf( fp, "    type { void }\n" );
@@ -447,28 +447,52 @@ static void pl_print_method( fp, node, autotick, unittime )
         if ( pvar == NULL ) pvar = isIntOutput( var, node );
         if ( pvar != NULL ) {
             strcpy( pvarst, util_make_valid_name( pvar ));
-            fprintf( fp, "          case c%s:\n", pvarst );
-            fprintf( fp, "            newEvent->dest = %s.far(); \n", pvarst); /* changed */
-            fprintf( fp, "            break;\n" );
+            fprintf( fp, "            case c%s:\n", pvarst );
+            fprintf( fp, "                newEvent->dest = %s.far(); \n", pvarst); /* changed */
+            fprintf( fp, "                newEvent->data = ");
+            assoc_var = net_var_assoc_var( var );
+            if ( assoc_var == NIL(net_var_t)) {
+                fprintf( fp, "1;\n" );
+            } else {
+                if ( !isIntOutput( var, node )) {
+                    fprintf( fp, "%s;\n", util_make_valid_name(
+                            net_var_parent_var( assoc_var, node )));
+                } else {
+                    fprintf( fp, "%s;\n", util_make_valid_name( assoc_var ));
+                }
+            }
+            fprintf( fp, "                break;\n" );
         }
     } end_foreach_net_node_fanout;
-    fprintf( fp, "          default:\n         printf(\"shouldn't reach here!!\");\n          break;\n" );
+    fprintf( fp, "            default:\n             printf(\"shouldn't reach here!!\");\n          break;\n" );
     fprintf( fp, "      }\n" );
-    fprintf( fp, "      if (!needResource) { \n");   
-    fprintf( fp, "        emitTime = now + (1/clkFreq); \n");   
-    fprintf( fp, "        ((CQEventQueue*)eventQ)->levelput(newEvent, emitTime, ((DEPortHole*)(newEvent->dest))->depth, &(newEvent->dest->parent()->asStar())); \n");
-    fprintf( fp, "      } else { \n");  
+    fprintf( fp, "      if (needResource) { \n");   
     fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
     fprintf( fp, "        newEvent->realTime = emitTime; \n");
     fprintf( fp, "        if (isDummy) { \n");
     fprintf( fp, "           // set fine level to -0.5 for scheduling in Q \n"); 
     fprintf( fp, "         interruptQ->levelput(newEvent, emitTime, -0.5, (DEStar*)this); \n");
-    fprintf( fp, "      } else { \n");
-    fprintf( fp, "         interruptQ->levelput(newEvent, emitTime, ((DEPortHole*)newEvent->dest)->depth, ((DEStar*)&newEvent->dest->parent()->asStar())); \n");
-    fprintf( fp, "      }\n");
-    fprintf( fp, "      emittedEvents->prepend(newEvent); \n");
-    fprintf( fp, "   }\n}\n}\n\n");
+    fprintf( fp, "        } else { \n");
+    fprintf( fp, "            interruptQ->levelput(newEvent, emitTime, ((DEPortHole*)newEvent->dest)->depth, ((DEStar*)&newEvent->dest->parent()->asStar())); \n");
+    fprintf( fp, "        }\n");
+    fprintf( fp, "        emittedEvents->prepend(newEvent); \n");
+    fprintf( fp, "     }\n");
+    fprintf( fp, "     else {/*Doesnt need Resource */ \n");
+    fprintf( fp, "          ((OutDEPort*)newEvent->dest->far())->put(now+1/clkFreq) << ");
+    fprintf( fp, " newEvent->data; \n");
+    fprintf( fp, "          newEvent->~PolisEvent(); \n");
+    fprintf( fp, "      } \n");
+    fprintf( fp, "   }\n  }\n\n");
     
+    fprintf( fp, "  method {\n");
+    fprintf( fp, "    name { emitEvent }\n");
+    fprintf( fp, "    access { public }\n" );
+    fprintf( fp, "    type { void }\n" );
+    fprintf( fp, "    arglist { \"(PolisEvent* event, double emitTime)\" }\n" );
+    fprintf( fp, "    code {\n" );
+    fprintf( fp, "      ((OutDEPort*)event->dest->far())->put(emitTime) << event->data; \n");
+    fprintf( fp, "      event->~PolisEvent(); \n");
+    fprintf( fp, "    }\n  }\n");
     fprintf( fp, "  method {\n" );
     fprintf( fp, "    name { getDelay }\n");
     fprintf( fp, "    access { public }\n" );
@@ -489,8 +513,8 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    }\n}\n\n");
 
     /*
-    * Clean up input events
-    */
+     * Clean up input events
+     */
     fprintf( fp, "  method {\n" );
     fprintf( fp, "    name { CleanUp }\n" );
     fprintf( fp, "    access { public }\n" );
@@ -558,12 +582,12 @@ static void pl_print_code( fp, root_node, node, option, trace, autotick, unittim
     foreach_net_node_fanout( node, var ) {
         if ( pvar = isOutputEvent( var, node )) {
             fprintf( fp, "#define emit_%s() ", util_make_valid_name( pvar ));
-            fprintf( fp, "%s%s_Star->emitEvent( %s, _delay, 0 )\n", model_name, 
+            fprintf( fp, "%s%s_Star->emitEventToIntQ( %s, _delay, 0 )\n", model_name, 
                     option, util_make_valid_name( pvar ));
         } else if ( pvar = isIntOutput( var, node )) {
             fprintf( fp, "#define emit_%s() ", 
                     util_make_valid_name( net_var_parent_var( pvar, node )));
-            fprintf( fp, "%s%s_Star->emitEvent( %s, _delay, 0 )\n", model_name, 
+            fprintf( fp, "%s%s_Star->emitEventToIntQ( %s, _delay, 0 )\n", model_name, 
                     option, util_make_valid_name( pvar ));
         }
     } end_foreach_net_node_fanout; 
@@ -984,7 +1008,7 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     fprintf( fp, "    nemitevent = 0;\n" );
     fprintf( fp, "    _delay = 1.0;\n" );
     fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
-    fprintf( fp, "    emitEvent(0, _delay, 1);   // emit dummy event \n");
+    fprintf( fp, "    emitEventToIntQ(0, _delay,1);// emit dummy event \n");
     fprintf( fp, "    timeOfArrival = -1;// reset this as have finished this firing \n");
     if ( trace ) {
         fprintf( fp, "    if ( debug ) {\n" );
