@@ -21,6 +21,8 @@ alias optlink \
 optmkdir bin.$ARCH
 optmkdir lib.$ARCH
 optmkdir obj.$ARCH
+optmkdir octtools
+optmkdir octtools/include
 optmkdir octtools/lib.$ARCH
 optmkdir octtools/bin.$ARCH
 
@@ -125,8 +127,8 @@ cd ../..
 foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	sdf/dsp/stars sdf/image/kernel sdf/image/stars sdf/tcltk/stars \
 	sdf/matrix/stars \
-	sdf/atm/stars \
-	de/atm/stars de/atm/kernel \
+	sdf/atm/kernel sdf/atm/stars \
+	de/atm/stars \
 	de/tcltk/stars \
 	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
 	optmkdir $x
