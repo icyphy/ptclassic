@@ -42,7 +42,6 @@ Produce code for inter-process communication (send-side)
 		desc { Host virtual node for server }
 		attributes { A_NONSETTABLE }
 	}
-	ccinclude { "StringList.h" }
 	hinclude { "CGCNOWamTarget.h" }
 
 	setup {
@@ -123,14 +122,14 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 	int i, pos, check;
 	double myData;
 	
-	#ifdef TIME_INFO
+#ifdef TIME_INFO
 	if (fd == -1) {
 		printf("couldn't open proc\n");
 	}
 	else if (ioctl(fd, PIOCUSAGE, &$starSymbol(beginSend)) == -1) {
 		printf("error getting time\n");
 	}
-	#endif
+#endif
 
 	for (i = 0; i < $val(numData); i++) {
 		pos = $val(numData) - 1 + i;
@@ -141,7 +140,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		}
 	}
 
-	#ifdef TIME_INFO
+#ifdef TIME_INFO
 	if (fd == -1) {
 		printf("couldn't open proc\n");
 	}
@@ -154,7 +153,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
                              $starSymbol(beginSend).pr_rtime.tv_nsec)) /
                              1000000000.0; 
 	printf("Cumulative time to send %lf seconds\n", $starSymbol(timeSend));
-	#endif
+#endif
 
 	}
 	go {
