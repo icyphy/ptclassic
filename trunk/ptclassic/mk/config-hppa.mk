@@ -43,9 +43,7 @@ include $(ROOT)/mk/config-g++.mk
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
 # Under HPUX9 you will probably want to comment this out.
-ifndef BUILD_STATIC_BINARIES
 include $(ROOT)/mk/config-g++.shared.mk
-endif
 
 # ptbin.mk uses this to decide whether to include the PN stars
 # If you are under HPUX10, then the PN domain requires DCE threads.
