@@ -30,6 +30,10 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
+# FIXME:
+# It takes an extraorindarily long time to start Matlab.  Why?
+# The machine is not kept busy.
+
 #######################################################################
 #### Matlab
 # A Matlab window contains a MatlabText widget, which accepts Matlab
@@ -39,7 +43,7 @@
 class ::tycho::Matlab {
     inherit ::tycho::Console
 
-    #### textwidget
+    #### textWidget
     # Return the name of the type of text widget to use.
-    method textwidget {} {return ::tycho::MatlabText}
+    method textWidget {} {return ::tycho::MatlabText}
 }

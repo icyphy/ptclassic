@@ -53,7 +53,7 @@ proc ::tycho::askuser {question} {
 # "::tycho::askuser".
 #
 class ::tycho::YesNoQuery {
-    inherit DialogWindow
+    inherit ::tycho::DialogWindow
 
     # The command to execute on a yes response.
     itk_option define -yescommand yescommand YesCommand "DialogWindow::answer 1"
@@ -75,9 +75,13 @@ body ::tycho::YesNoQuery::constructor {args} {
     # Pack the yes and no buttons.
     #
     addButton yes -text "Yes <Ret>" -command \
-	    "$this execCommand -yescommand; delete object $this"
+	    "$this execCommand -yescommand; \
+	    $this nextWindow; \
+	    delete object $this"
     addButton no -text "No <Esc>" -command \
-	    "$this execCommand -nocommand; delete object $this"
+	    "$this execCommand -nocommand; \
+	    $this nextWindow; \
+	    delete object $this"
     default yes
 
     bind $prefix <Return> "$this invoke yes"
@@ -87,7 +91,4 @@ body ::tycho::YesNoQuery::constructor {args} {
     # Explicitly handle configs that may have been ignored earlier.
     #
     eval itk_initialize $args
-
-    # Grab the focus.
-    focus $prefix
 }

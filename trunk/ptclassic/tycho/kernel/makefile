@@ -52,11 +52,14 @@ TCL_SRCS = \
 	Options.tcl
   
 ITCL_SRCS = \
+	CircularList.itcl \
 	Console.itcl \
 	ConsoleText.itcl \
 	DialogWindow.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
+	EditHTML.itcl \
+	EditHTMLText.itcl \
 	EditItcl.itcl \
 	EditItclText.itcl \
 	EditSearch.itcl \
@@ -77,6 +80,7 @@ ITCL_SRCS = \
 	Stack.itcl \
 	TopLevel.itcl \
 	Tycho.tcl \
+	WelcomeMessage.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
 

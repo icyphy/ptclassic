@@ -49,13 +49,21 @@ class ::tycho::HTML {
     # Open the HTML source
     method openSource {}
 
+    #### raiseWindow
+    # raise the HTML broswer window and the source window (if any).
+    method raiseWindow {}
+
     #### reload
     # Clear the current text and reload from the source file.
     method reload {}
 
-    #### seename
+    #### save
+    # Save HTML source to a file.
+    method save {{name ""}}
+
+    #### seeName
     # Follow a hypertext link within the file.
-    method seename {name}
+    method seeName {name}
 
     #### switchfile
     # Switch to a different HTML file.
@@ -64,9 +72,19 @@ class ::tycho::HTML {
     #########################################################################
     #### protected methods and variables
 
-    #### textwidget
+    #### textWidget
     # Return the name of the type of text widget to use.
-    method textwidget {} {return HTMLText}
+    method textWidget {} {return ::tycho::HTMLText}
+
+    #########################################################################
+    #### private methods and variables
+
+    # Keep track of the current source window for the current file.
+    private variable sourcewin
+
+    #### sourcewinIsMine
+    # Return 1 if the sourcewin window is a valid source window.
+    private method sourcewinIsMine {}
 }
 
 ###################################################################
@@ -75,7 +93,7 @@ body ::tycho::HTML::constructor {args} {
 
     # A frame for accelerator buttons
     itk_component add acc {
-	frame $itk_component(childsite).acc
+	frame $itk_component(childsite).acc -relief sunken
     } {
 	keep -background -cursor
     }
@@ -83,7 +101,7 @@ body ::tycho::HTML::constructor {args} {
 
     # The text widget.
     itk_component add text {
-	[textwidget] $itk_component(childsite).text
+	[textWidget] $itk_component(childsite).text
     } {
 	# FIXME: add all pertinent options from EditText
 	keep -text -readonly -font
@@ -92,8 +110,10 @@ body ::tycho::HTML::constructor {args} {
 
     # A button to move back in the stack
     itk_component add back {
+	global TYCHO
 	button $itk_component(acc).back \
 		-text Back \
+		-bitmap @$TYCHO/tycho/kernel/back.xbm \
 		-command "$itk_component(text) back"
     } {
 	keep -background -font -activebackground -cursor \
@@ -117,7 +137,6 @@ body ::tycho::HTML::constructor {args} {
     pack $itk_component(big) -side left
 
     eval itk_initialize $args
-    eval configure $args
 
     # Modify the menu commands appropriately.
     $itk_component(fileMenu) entryconfigure 2 \
@@ -139,17 +158,45 @@ body ::tycho::HTML::constructor {args} {
     $itk_component(text) configure -readonly 1
 }
 
+###################################################################
+# The destructor needs to ensure that after this object is gone, if the
+# corresponding source file is still open, that it will appear in the
+# Window menu.
+#
+body ::tycho::HTML::destructor {} {
+    if [sourcewinIsMine] {
+	windowMenuRemoveAll $file
+	windowMenuAddAll $sourcewin $file
+	set filesOpen($file) $sourcewin
+    }
+}
+
 #####################################################################
 #### openSource
 # Clear the current text and reload from the source file.
-# FIXME: This should be modified to open a context-sensitive editor
-# for HTML.
 #
 body ::tycho::HTML::openSource {} {
+    # If a source window already exists, just raise it.
+    if [sourcewinIsMine] {
+	$sourcewin raiseWindow
+	return
+    }
     set win [autoName .edit]
-    uplevel #0 "::tycho::Edit $win -file $file"
+    set obj [uplevel #0 ::tycho::EditHTML $win -file $file]
     wm deiconify $win
-    raise $win
+    set sourcewin "$obj"
+}
+
+#####################################################################
+#### raiseWindow
+# Overload the base class raiseWindow to raise the source window also,
+# if it is open.
+#
+body ::tycho::HTML::raiseWindow {} {
+    if [sourcewinIsMine] {
+	$sourcewin raiseWindow
+    }
+    ::tycho::TopLevel::raiseWindow
 }
 
 #####################################################################
@@ -163,13 +210,41 @@ body ::tycho::HTML::reload {} {
 }
 
 #####################################################################
-#### seename
+#### save
+# Save HTML source to a file. If no argument is given, the filename is
+# taken from the -file option for the class. If the value of the
+# -file option is "NoName" (the default), then saveAs is invoked.
+# Remove backup files (auto-save or crash-recovery). If an argument
+# is supplied, save the current data to a file with the given name
+# and do not remove the backup files. In either case, if the
+# specified file is not writable, trigger an error. Return 1 if the
+# write succeeds, 0 otherwise.
+#
+body ::tycho::HTML::save {{name ""}} {
+    if {$name == ""} {
+	set filename $file
+    } {
+	set filename $name
+    }
+    if {$filename != "" && $filename != "NoName"} {
+	set fd [open $filename w+]
+	puts -nonewline $fd [$itk_component(text) source]
+	close $fd
+    } {	
+	# The file has not been specified.  Invoke saveAs
+	if {[saveAs] == 0} {return 0}
+    }
+    return 1
+}
+
+#####################################################################
+#### seeName
 # Follow a hypertext link.  If the hypertext link is in this same file,
 # defer to the HTMLText widget.  Otherwise, check to see whether
 # the other referenced file is an HTML file.  If it is, read the other
 # file into this same text widget.  Otherwise, open a new window.
 #
-body ::tycho::HTML::seename {name} {
+body ::tycho::HTML::seeName {name} {
     if {![regexp {([^#]*)#(.+)} $name dummy fileref fragment]} {
 	set fileref $name
 	set fragment {}
@@ -177,7 +252,7 @@ body ::tycho::HTML::seename {name} {
 
     if {$fileref == {} && $fragment != {}} {
 	# A local reference within the same file
-	$itk_component(text) seename $fragment
+	$itk_component(text) seeName $fragment
 	return
     }
     # Got a reference to a file.
@@ -199,20 +274,69 @@ body ::tycho::HTML::seename {name} {
 
 #####################################################################
 #### switchfile
-# Switch to displaying another HTML file.
+# Switch to displaying another HTML file.  Special care is required
+# here because there might be a source file open for either the old
+# or the new file. If there is a source file for the old HTML file,
+# it should now appear in the Window menu.  If there is one for the
+# new file, it should now be removed from the Window menu (the HTML
+# browser widget will take its place).  This method essentially
+# accomplishes the same functions as configuring the -file option,
+# but specialized to this circustance.
 #
 body ::tycho::HTML::switchfile {filename} {
 
-    # Remove the old file from the list of open files.
-    if [info exists filesOpen($file)] {
-	catch {unset filesOpen($file)}
+    # If the destination file is already open, raise it.
+    if {[info exists filesOpen($filename)] && \
+	    [$filesOpen($filename) isa ::tycho::HTML]} {
+	$filesOpen($filename) raiseWindow
+	return
     }
+
+    # Remove the old file from the list of open files, and
+    # add its source file, if open, to the Window menu.
+    if [info exists filesOpen($file)] {
+	windowMenuRemoveAll $file
+	if [sourcewinIsMine] {
+	    windowMenuAddAll $sourcewin $file
+	    set filesOpen($file) $sourcewin
+	} {
+	    unset filesOpen($file)
+	}
+    }
+    if [info exists sourcewin] {
+	unset sourcewin
+    }
+
+    # Reclaim the source window, if it is open.
+    if {[info exists filesOpen($filename)]} {
+	windowMenuRemoveAll $filename
+	set sourcewin $filesOpen($filename)
+    }
+
     # Record the new filename in various places.
     set file $filename
-    set filesOpen($file) $prefix
+    set filesOpen($file) $this
     set previousfile $file
     wm iconname $prefix [file tail $file]
+    windowMenuAddAll $this $filename
 
     # Render the HTML file.
     $itk_component(text) readFile $file
 }
+
+#####################################################################
+#### sourcewinIsMine
+# Return 1 if the sourcewin window is the source window for the
+# currently open HTML text. Otherwise, return 0.
+#
+body ::tycho::HTML::sourcewinIsMine {} {
+    if {[info exists sourcewin] && \
+	    [uplevel #0 info objects $sourcewin] != {} && \
+	    [$sourcewin isa ::tycho::File] && \
+	    [$sourcewin filename] == $file} {
+	return 1
+    } {
+	return 0
+    }
+}
+

@@ -31,30 +31,32 @@
 #######################################################################
 
 #######################################################################
-# EditItcl
-# This class defines a window with an EditItclText widget in it,
-# providing an emacs-like editor with some context-specific
-# features for editing itcl files.
+#### EditItcl
+# This class defines a window for editing Itcl code.  Itcl, developed
+# by Michael McLennan, is an object-oriented extension to Tcl/Tk,
+# developed by John Ousterhout.  This editor colorizes the source
+# code for easy identification of class definitions, methods, procedures,
+# etc.  It also supports hyperlinks through the code, to a limited
+# degree.  Hyperlinks are obtained by the "Show Links" command.
 #
 class ::tycho::EditItcl {
-    inherit EditTcl
+    inherit ::tycho::EditTcl
 
     constructor {args} {}
     destructor {}
 
-    #########################################################################
-    #### protected methods
+    ###################################################################
+    ####                    protected methods                      ####
 
-    #### textwidget
+    #### textWidget
     # Return the name of the type of text widget to use.
-    method textwidget {} {return EditItclText}
+    method textWidget {} {return ::tycho::EditItclText}
 }
 
 ###################################################################
 #
 body ::tycho::EditItcl::constructor {args} {
     eval itk_initialize $args
-    eval configure $args
 
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file
