@@ -38,6 +38,10 @@ Intervals on an interval list are always sorted in increasing order,
 and they always have gaps between them.
 
 **************************************************************************/
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "IntervalList.h"
 #include <minmax.h>
 #include "streamCompat.h"
