@@ -81,9 +81,9 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 #TK_VERSION =		tk4.0p1
 
 TCL_MAJOR_VERSION = 	tcl7.5
-TCL_VERSION =		tcl7.5b2
+TCL_VERSION =		tcl7.5b1
 TK_MAJOR_VERSION = 	tk4.1
-TK_VERSION =		tk4.1b2
+TK_VERSION =		tk4.1b1
 # Between tcl7.4 and tcl7.5, the location of the unix sources moved.
 TCL_7_5_HACK=		/unix
 ENABLE_GCC =		--enable-gcc --disable-load
@@ -470,7 +470,7 @@ $(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX): \
 		install)
 	mv $(ITCL_DEST_LIB)/libitcl.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) \
 		$(ITCL_SHARED_DEST_LIB)/libitcl.$(LIBSUFFIX)
-
+	chmod 555 $@
 
 
 
@@ -485,14 +485,17 @@ $(ITCL_SHARED_DEST_LIB):
 $(ITCL_SHARED_DEST_LIB)/libtcl.$(LIBSUFFIX): \
 				$(ITCL_SHARED_OBJ)/tcl/libtcl.$(LIBSUFFIX)
 	mv $(ITCL_SHARED_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/libtcl.$(LIBSUFFIX) $@
+	chmod 555 $@
 $(ITCL_SHARED_DEST_LIB)/libtk.$(LIBSUFFIX): \
 				$(ITCL_SHARED_OBJ)/tk/libtk.$(LIBSUFFIX) 
 	mv $(ITCL_SHARED_OBJ)/tk$(ITCL_TK_MAJOR_VERSION_NUMBER)/libtk.$(LIBSUFFIX) $@
+	chmod 555 $@
+
 $(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX): \
 				$(ITCL_SHARED_OBJ)/itk/libitk.$(LIBSUFFIX) 
 	mv $(ITCL_DEST_LIB)/libitk.$(LIBSUFFIX).$(ITCL_MAJOR_VERSION_INT) \
 		$(ITCL_SHARED_DEST_LIB)/libitk.$(LIBSUFFIX)
-
+	chmod 555 $@
 
 clean_itcl_shared:
 	(cd $(ITCL_SHARED_OBJ); $(MAKE) clean)
