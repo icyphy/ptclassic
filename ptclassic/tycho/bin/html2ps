@@ -69,7 +69,10 @@ proc psConcat { outfile files} {
     set outfd [open $outfile w]
     foreach infile $files {
         set sawEndProlog 0
-        set infd [open $infile r]
+	if [catch {set infd [open $infile r]} errmsg] {
+	    puts "failed to open $infile:\n $errmsg"
+	    continue
+	}
         while {![eof $infd]} {
             set line [gets $infd]
             if !$haveHeader {
@@ -321,7 +324,7 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
         set line [gets $fd]
         # FIXME: this could be fooled if the <A is not on the same line
         # as the HREF.
-        if [regexp {<[Aa] [Hh][Rr][Ee][Ff]="([^\"]*)"} $line dummy tag ] {
+        if [regexp {<[Aa] [Hh][Rr][Ee][Ff]="([^\"#]*)[^\"]*"} $line dummy tag ] {
             switch -regexp -- $tag \
                     {^/} { lappend taglist [::tycho::expandPath $tag]} \
                     {^\.\.} { lappend taglist [::tycho::expandPath [file dirname $htmlfile]/$tag]} \
@@ -331,7 +334,10 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
     }
     close $fd
 
-    #puts "$htmlfile: $taglist"
+    #puts "dbg: $htmlfile: $taglist"
+
+    set codeDocRegexp {/codeDoc/}
+    #set codeDocRegexp {/snartlyfarbleblast/}
 
     foreach tag $taglist {
 	# Only search tags that we have not seen, are .html files
@@ -339,13 +345,13 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
 	if { [lsearch $filesSeen $tag] == -1 && \
 		[file extension $tag] == ".html" && \
 		[file readable $tag] && \
-		![regexp {/codeDoc/} $tag] } {
+		![regexp $codeDocRegexp $tag] } {
 	    if { $dagfd != {}} {
 		addToDAG $dagfd $htmlfile $tag
 	    }
 
 	    if $recurse {
-		#puts "About to call htmlLinks $tag"
+		#puts "dbg: About to call htmlLinks $tag"
 		lappend filesSeen $tag
 		incr depth
 		htmlLinks $tag $depth $dagfd $recurse
@@ -353,7 +359,7 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
 	    } {
 		if { [::tycho::expandPath [file dirname $htmlfile]] == \
 			[::tycho::expandPath [file dirname $tag]] } {
-		    #puts "About to call htmllinks $tag"
+		    #puts "dbg: About to call htmllinks $tag"
 		    lappend filesSeen [::tycho::expandPath $tag]
 		    htmlLinks $tag $depth $dagfd $recurse
 		}
@@ -375,6 +381,7 @@ proc htmlLinks {htmlfile {depth 0} {dagfd {}} {recurse 1}} {
 # </pre></tcl>
 #
 proc htmlTree2ps {indexfile psfile args} {
+    puts "dbg: htmlTree2ps: $indexfile $psfile $args"
     global filesSeen
     set filesSeen {}
     set startingDir [pwd]
