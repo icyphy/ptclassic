@@ -105,8 +105,8 @@ vol. 28, no. 2, pp. 574-587, April 1992.
     delete F;
   }
   constructor {
-    e = 0;
-    Vn = VnVnt = F = 0;
+    e = F = 0;
+    Vn = VnVnt = 0;
   }
   setup {
     nrows = int(numRows);
