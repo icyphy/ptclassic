@@ -493,10 +493,7 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    myCode += ", ";
 		    myCode += ((PortHole&)p->realPort()).numInitDelays();
 		    myCode += ", \"";
-		    const char* temp =
-		      ((PortHole&)p->realPort()).initDelayValues(); 
-		    if (temp) myCode += temp;
-		    else myCode += "\"\"";
+ 		    myCode += ((PortHole&)p->realPort()).initDelayValues();
 		    myCode += "\");\n";
 		}
 	    }
