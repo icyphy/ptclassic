@@ -220,7 +220,7 @@ class ::tycho::Model {
     method describe {{prefix {}}}
 
     # Add a new type of entity to the model
-    method defineEntity {type count args}
+    method defineEntity {type args}
     
     # Add a new type of link to the model
     method defineLink {type vcount acount args}
