@@ -28,11 +28,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		input.receiveData();
 
 		// generates output
-		int in = int (input%0);
-		for (int i = in - 1 ; i >= 0; i--) {
-			output%0 << i ;
+		// the output only has a buffer of length one, so
+		// we store one data token in the buffer and send it
+		int in = int(input%0);
+		for (int i = in - 1; i >= 0; i--) {
+			output%0 << i;
 			output.sendData();
 		}
 	}
 }
-
