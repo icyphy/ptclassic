@@ -31,7 +31,7 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		..
+ROOT =		../.. 
 
 # True source directory
 VPATH =		$(ROOT)/MVC
@@ -43,12 +43,9 @@ include $(CONFIG)
 TCL_SRCS =
 
 ITCL_SRCS = \
-	AbstractGraph.itcl \
 	DAG.itcl \
-	Digraph.itcl \
 	History.itcl \
 	HyperGraph.itcl \
-	Model.itcl \
 	MultiGraph.itcl \
 	NamedData.itcl \
 	TypedData.itcl \
