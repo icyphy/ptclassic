@@ -315,53 +315,17 @@ body ::tycho::EditItcl::getClassName {} {
 # then it is simply displayed, not regenerated.
 #
 body ::tycho::EditItcl::gendoc {} {
-    set filename [::tycho::expandPath [filename]]
-    set dir [file dirname $filename]
-    set tail [file tail $filename]
-    set root [file rootname $tail]
-    set docfile [file join doc codeDoc \
-	    [info namespace tail [getClassName]].html]
-    set fulldoc [file join $dir $docfile]
-    if {![file exists $fulldoc] || \
-	    [isModified] || \
-            [file mtime $filename] > [file mtime $fulldoc]} {
-        # Need to regenerate the doc.  Check permissions first.
-        # It is sufficient for the directory to be writable.
-        if {[file writable $dir]} {
-
-	    # Save the file if it has not been saved
-	    if {[isModified] == 1} {
-		if {[::tycho::askuser \
-			"File $filename has not been saved, Save it now?"]} {
-		    save
-		}
-	    }
-
-	    putStatus "About to generate documentation for $tail"
-
-            set savedir [pwd]
-            cd $dir
-
-	    # Not portable, so we comment this out
-            #exec rm -f $docfile
-
-	    # Generate the HTML file in doc/codedoc.  Don't generate index.html
-	    # To generate index.html, we should pass all the .itcl files 
-	    # in the current directory to generateHTML
-	    set verbose 0
-	    set debug 0
-	    set generateIndex 0
-	    ::tycho::HTMLDocSys::generateHTML \
-		    $verbose $debug $generateIndex {An Itcl Class} $tail
-            cd $savedir
-        } {
-            ::tycho::warn "The documentation file is out of date, \
-                    and you do not have permission to update it."
-        }
-    }
-    if [file exists $fulldoc] {
-        return [::tycho::File::openContext $fulldoc]
-    }
+    return [ ::tycho::EditProgram::gendoc \
+        [list set docfile [file join doc codeDoc \
+                [info namespace tail [getClassName]].html]] \
+    {
+        set verbose 0
+        set debug 0
+        set generateIndex 0
+        ::tycho::rm -f $docfile
+        ::tycho::HTMLDocSys::generateHTML \
+                $verbose $debug $generateIndex {An Itcl Class} $tail
+    }]
 }
 
 ###################################################################
