@@ -1664,8 +1664,8 @@ proc HMset_image {win handle src} {
         if {[string match /* $src]} {
             set image $src
         } else {     
-            # if it begins $PTOLEMY, $TYCHO, etc.
-            if {[string match \$* $src]} {
+            # if it begins $PTOLEMY, $TYCHO, ~eal, etc.
+            if {[string match \$* $src] || [string match ~* $src]} {
                 set image [::tycho::expandPath $src]
             } else {
                 set image [uplevel #0 $HTML lastDirectory]/$src
@@ -1683,9 +1683,6 @@ proc HMset_image {win handle src} {
         }
     }
 }
-# if {[string match $* $src} {
-    #    set image [::tycho::expandPath $src]
-    # } else {
 
 
 #######################################################################
