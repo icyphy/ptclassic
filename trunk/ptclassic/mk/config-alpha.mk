@@ -68,6 +68,7 @@ CC =		gcc
 OCT_CC =	gcc -fwritable-strings
 
 OPTIMIZER =	-O2
+# Under gcc-2.7.0, you will need to add -fno-for-scope to $WARNINGS
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # If you are not using gcc, then you might have problems with the WARNINGS flag

@@ -117,6 +117,7 @@ OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 # -Wsynth is new in g++-2.6.x, however 2.5.x does not support it
 # Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
 WARNINGS =	-Wall -Wcast-qual -Wcast-align # -Wsynth
+# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
 GPPFLAGS =	$(LINUXDEF) $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 

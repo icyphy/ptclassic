@@ -45,6 +45,7 @@ CC =		gcc
 OPTIMIZER =	-O2
 #-Wsynth is new in g++-2.6.x
 WARNINGS =	-Wall -Wcast-qual -Wsynth
+# Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
 CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
