@@ -517,6 +517,30 @@ proc lsubset {l1 l2} {
 }
 
 ##########################################################################
+#### lsubtract l1 l2
+#
+# Return the difference of two lists: _l1_ - _l2_. Example:
+# <pre><tcl>
+#     lsubtract {1 2 3 4 5} {2 4 6}
+# </tcl></pre>
+#
+proc lsubtract {l1 l2} {
+    set result {}
+
+    if { $l1 == $l2 } {
+	return ""
+    }
+
+    foreach i $l1 {
+	if {[lsearch -exact $l2 $i] == -1} {
+	    lappend result $i
+	}
+    }
+
+    return $result
+}
+
+##########################################################################
 #### subsets list
 #
 # Generate all non-empty subsets of a list. Subsets are not in
