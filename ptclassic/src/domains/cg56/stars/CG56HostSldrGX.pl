@@ -13,15 +13,15 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 io library }
-	explanation {
-.Ir "slider bar"
-.Ir "gxslider program"
+	htmldoc {
+<a name="slider bar"></a>
+<a name="gxslider program"></a>
 Host port slider.
-The parameters \fIhostMin\fR, \fIhostMax\fR, and \fIhostInitialValue\fR
+The parameters <i>hostMin</i></b>, <i>hostMax</i></b>, and <i>hostInitialValue</i></b>
 control the values that the slider is labeled with under X windows.
 They are mapped in a linear or decibel fashion into the range
-of the parameters \fIdspMin\fR and \fIdspMax\fR on the DSP,
-depending on whether \fIscale\fR is linear or log.
+of the parameters <i>dspMin</i></b> and <i>dspMax</i></b> on the DSP,
+depending on whether <i>scale</i></b> is linear or log.
 	}
 	output {
 		name {output}

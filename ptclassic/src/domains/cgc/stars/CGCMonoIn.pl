@@ -7,7 +7,7 @@ Reads mono(1 channel) data with either linear16 or ulaw8 encoding from
 a file given by "fileName". The file can be the audio port /dev/audio,
 if supported by the workstation.  
   }
-  explanation {
+	htmldoc {
 This code is based on the description of the audio driver which can
 be obtained by looking at the man page for audio.
 The ulaw algorithm is based on the description of the T1 system found

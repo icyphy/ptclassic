@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
-	explanation {
-.Ir "Motorola DSP56000 simulator"
-.Ir "simulator, Motorola DSP56000"
-.Id "file input"
+	htmldoc {
+<a name="Motorola DSP56000 simulator"></a>
+<a name="simulator, Motorola DSP56000"></a>
+<a name="file input"></a>
 Reads data from file for use by Motorola DSP56000 simulator.
 	}
 	execTime {

@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-        explanation {
-.Id "quantizer"
-Normally, the \fIoutput\fR is just the two's complement number
-given by the top \fInoBits\fR of the \fIinput\fR (for integer output).
+	htmldoc {
+<a name="quantizer"></a>
+Normally, the <i>output</i></b> is just the two's complement number
+given by the top <i>noBits</i></b> of the <i>input</i></b> (for integer output).
         }
 	input	{
 		name { input }

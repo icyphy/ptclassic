@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { BDF main library }
-	explanation {
+	htmldoc {
 This star is functionally identical to the SDF Fork star.  However,
 it indicates to the BDF scheduler that the various output signals
 are logically the same as the input signal, and this is necessary

@@ -16,91 +16,91 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 	location  { SDF matrix library }
-	explanation {
-.pp
+	htmldoc {
+<p>
 Smith forms are useful in making non-separable multidimensional 
 operations that rely on integer matrix parameters separable.
 Examples include multidimensional discrete Fourier transforms 
 on arbitrary sampling grids (hexagonal, etc.) [1],
 multidimensional non-separable up/downsampling [2], and 
 multidimensional non-uniform filter bank design [3-5].
-.pp
-This function returns one of the Smith forms of an integer matrix $S$ 
-by factoring $S$ into three simpler integer matrices such that
-$S ~ = ~ U ~ D ~ V$ [6].
-Here, $D$ is diagonal, and $U$ and $V$ have determinant of $+1$ or $-1$
-(and are called \fIregular unimodular\fR).
-Therefore, $|det ~ S| = |det ~ D|$.
-Note that $S$ is $m$ x $n$, so $U$ is $m$ x $m$, $D$ is $m$ x $n$, and
-$V$ is $n$ x $n$.
-Hence, $U$ and $V$ are always square.
-.pp
+<p>
+This function returns one of the Smith forms of an integer matrix <i>S</i> 
+by factoring <i>S</i> into three simpler integer matrices such that
+<i>S   </i>=<i>   U   D   V</i> [6].
+Here, <i>D</i> is diagonal, and <i>U</i> and <i>V</i> have determinant of <i>+</i>1<i></i> or <i>-</i>1<i></i>
+(and are called <i>regular unimodular</i></b>).
+Therefore, <i>|det   S| </i>=<i> |det   D|</i>.
+Note that <i>S</i> is <i>m</i> x <i>n</i>, so <i>U</i> is <i>m</i> x <i>m</i>, <i>D</i> is <i>m</i> x <i>n</i>, and
+<i>V</i> is <i>n</i> x <i>n</i>.
+Hence, <i>U</i> and <i>V</i> are always square.
+<p>
 Smith form decompositions are not unique [5-6].
-However, the canonical structure imposes structure on the form of $D$
-to make $D$ unique [6].
-The canonical form of $D$ is that each diagonal element is a factor of
+However, the canonical structure imposes structure on the form of <i>D</i>
+to make <i>D</i> unique [6].
+The canonical form of <i>D</i> is that each diagonal element is a factor of
 the next diagonal element.
-Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
+Even in the canonical form, however, the <i>U</i> and <i>V</i> matrices are not unique.
 This block will return the canonical form if the state
-\fISmithCanonicalForm\fR is \fITRUE\fR.
-.pp
+<i>SmithCanonicalForm</i></b> is <i>TRUE</i></b>.
+<p>
 The Smith form decomposition algorithm requires on the order of
-$[n + m]^4$ operations.
+<i>[n + m]^</i>4<i></i> operations.
 Converting the Smith form into canonical form requires on the order of
-$min(m, n)^2$ comparisons and $min(m, n)$ arithmetic operations [6].
+<i></i>min<i></i>(<i>m, n</i>)<i>^</i>2<i></i> comparisons and <i></i>min<i></i>(<i>m, n</i>)<i></i> arithmetic operations [6].
 Therefore, it takes the same order of operations to compute a Smith
 form or the Smith canonical form.
-.pp
+<p>
 The intermediate integral computations of the decomposition for integer
 matrices of large dimension and for matrices with large integer entries
 may exceed the integer precision of a given machine.
 Because we have chosen to implement the decomposition in the native integer
 format, this routine checks the decomposition at the end and flags an
-error if the quantity $U ~ D ~ V$ does not give the original matrix.
+error if the quantity <i>U   D   V</i> does not give the original matrix.
 The Smith form decomposition of integer matrices common in image and
 video processing applications will not exceed integer precision.
-.Ir "Guessoum, A."
-.Ir "Vaidyanathan, P."
-.Ir "Allebach, J."
-.Ir "Viscito, E."
-.Ir "Gardos, T."
-.Ir "Nayebi, K."
-.Ir "Mersereau, R."
-.Ir "Evans, B."
-.Ir "McClellan, J."
-.Ir "Kaufmann, A."
-.Ir "Henry-Labordiere, A."
-.UH References
-.ip [1]
+<a name="Guessoum, A."></a>
+<a name="Vaidyanathan, P."></a>
+<a name="Allebach, J."></a>
+<a name="Viscito, E."></a>
+<a name="Gardos, T."></a>
+<a name="Nayebi, K."></a>
+<a name="Mersereau, R."></a>
+<a name="Evans, B."></a>
+<a name="McClellan, J."></a>
+<a name="Kaufmann, A."></a>
+<a name="Henry-Labordiere, A."></a>
+<h3>References</h3>
+<p>[1]  
 A. Guessoum,
-\fIFast Algorithms for the Multidimensional Discrete Fourier Transform\fR,
+<i>Fast Algorithms for the Multidimensional Discrete Fourier Transform</i></b>,
 Ph. D. Thesis, Georgia Institute of Technology, Atlanta, GA, June, 1984.
-.ip [2]
+<p>[2]  
 P. P. Vaidyanathan,
 ``The Role of Smith-Form Decomposition of Integer Matrices
 in Multidimensional Multirate Systems,''
-\fIInt. Conf. on Acoustics, Speech, and Signal Processing\fR,
+<i>Int. Conf. on Acoustics, Speech, and Signal Processing</i></b>,
 Toronto, Canada, May, 1991, pp. 1777--1780.
-.ip [3]
+<p>[3]  
 E. Viscito and J. Allebach,
 ``The Analysis and Design of Multidimensional {FIR} Perfect
 Reconstruction Filter Banks For Arbitrary Sampling Lattices,''
-\fITransactions on Circuits and Systems\fR,
+<i>Transactions on Circuits and Systems</i></b>,
 vol. 38, no. 1, pp. 29-41, Jan., 1991.
-.ip [4]
+<p>[4]  
 T. Gardos, K. Nayebi, and R. Mersereau,
 ``Analysis and Design of Multi-Dimensional Non-Uniform Band Filter Banks,''
-\fIProc. SPIE Visual Communications and Image Processing\fR, vol. 1818,
+<i>Proc. SPIE Visual Communications and Image Processing</i></b>, vol. 1818,
 pp. 49-60, Nov., 1992, Boston, MA.
-.ip [5]
+<p>[5]  
 B. Evans, T. Gardos, and J. McClellan,
 ``Imposing Structure on Smith Form Decompositions of
 Rational Resampling Matrices,''
-\fITransactions on Signal Processing\fR,
+<i>Transactions on Signal Processing</i></b>,
 vol. 42, no. 4, pp. 970-973, April, 1994.
-.ip [6]
+<p>[6]  
 A. Kaufmann and A. Henry-Labordiere,
-\fIInteger and Mixed Programming: Theory and Applications\fR,
+<i>Integer and Mixed Programming: Theory and Applications</i></b>,
 Academic Press, New York, 1977.
 	}
 	input {

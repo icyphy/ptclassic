@@ -5,11 +5,11 @@ defstar {
 This is a base class containing utility methods shared by HOF stars,
 and defining their common functionality.
 	}
-	explanation {
-This star provides the base class for a family of \fIhigher-order
-functions\fR in Ptolemy.
+	htmldoc {
+This star provides the base class for a family of <i>higher-order
+functions</i></b> in Ptolemy.
 This star should not be used on its own.
-.IE "higher-order functions"
+<a name="higher-order functions"></a>
 A higher-order function is a function that takes a function as
 an argument and/or returns a function.
 Stars and galaxies in Ptolemy have two kinds of arguments:

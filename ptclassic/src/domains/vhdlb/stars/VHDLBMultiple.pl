@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-	explanation {
+	htmldoc {
 If the top input is an integer multiple of the bottom input (remainder of
 the division is zero), then the output is 1.  Otherwise output is zero.  Note
 that if the bottom input is zero, than the output is always zero.

@@ -15,28 +15,28 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 This star is an enhanced version of Xgraph.  It is identical
 except that it can plot multiple traces, like an oscilloscope.
 As for Xgraph,
-the \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
+the <i>title</i></b> parameter specifies a title for the plot.
+The <i>saveFile</i></b> parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
+The <i>options</i></b> string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
-.pp
-Multiple traces may be plotted by setting the \fItraceLength\fR
+<p>
+Multiple traces may be plotted by setting the <i>traceLength</i></b>
 state to a nonzero value.  In this case, a new plot (starting at
-x value zero) is started every \fItraceLength\fR samples.  The
-first \fIignore\fR samples are not plotted; this is useful for letting
-transients die away.  The \fIinitCount\fR parameter can be used to
+x value zero) is started every <i>traceLength</i></b> samples.  The
+first <i>ignore</i></b> samples are not plotted; this is useful for letting
+transients die away.  The <i>initCount</i></b> parameter can be used to
 offset the traces to control their alignment with respect to the
 edge of the plot.
-.Ir "xgraph program"
-.Id "oscilloscope, X window"
-.Id "graph, X window, multi-trace"
+<a name="xgraph program"></a>
+<a name="oscilloscope, X window"></a>
+<a name="graph, X window, multi-trace"></a>
 	}
 	defstate {
 		name {traceLength}

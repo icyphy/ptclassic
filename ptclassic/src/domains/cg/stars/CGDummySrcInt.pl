@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
+	htmldoc {
 The star is used to create connected galaxies (universes) without
 requiring any resources.  For example, it is used by the CGCostTarget  
 to create dummy universes to measure implementation costs of individual

@@ -29,68 +29,68 @@ The bits output on the 'window' and 'temp' outputs can be used by
 the 'PatternMatch' galaxy to implement lost-speech recovery.
 	}
 
-	explanation {
-.pp
+	htmldoc {
+<p>
 This star performs a specific function related to a
 voice-packet interpolation technique for PCM encoded
-data.  On its \fIinput\fR port, this star reads in
-.c SeqATMCell
+data.  On its <i>input</i></b> port, this star reads in
+<tt>SeqATMCell</tt>
 types which have a field containing a packet sequence
 number.  The sequence number is read and the star determines
 whether or not a packet has been dropped during network
 transmission.  If the missing packet is one of the
 first five
-.c SeqATMCell
+<tt>SeqATMCell</tt>
 s to be sent over the network, then this star will substitute
 all zero bits for the bits which were lost during
-transmission.  These bits are sent through the \fIoutput\fR
+transmission.  These bits are sent through the <i>output</i></b>
 port.  If the dropped packet was not one of the first
 five, a pattern matching technique is used to determine
 the proper bits to substitute for those lost.  This is
 performed as follows:
-.pp
+<p>
 Say the packet six was found to be missing by this
 star after it sees a
-.c SeqATMCell
+<tt>SeqATMCell</tt>
 numbered seven immediately following a
-.c SeqATMCell
+<tt>SeqATMCell</tt>
 numbered five.  This star will then output a string
-of bits on its \fItemp\fR port of size \fItempSize\fR
-* 8.  These bits describe the first \fItempSize\fR
+of bits on its <i>temp</i></b> port of size <i>tempSize</i></b>
+* 8.  These bits describe the first <i>tempSize</i></b>
 samples immediately preceding the missing packet.  Likewise,
-\fIsearchWindowSize\fR * 8 + \fInumInfoBits\fR bits
-are sent through the \fIwindow\fR port.  These bits describe
+<i>searchWindowSize</i></b> * 8 + <i>numInfoBits</i></b> bits
+are sent through the <i>window</i></b> port.  These bits describe
 the
-.c SeqATMCell
+<tt>SeqATMCell</tt>
 immediately preceding the lost packet as well as the
-previous \fIsearchWindowSize\fR samples before the lost packet.
+previous <i>searchWindowSize</i></b> samples before the lost packet.
 In this context of this example of a missing sixth packet, this means
-that the \fItemp\fR bits will come from the end of
-packet five and the \fIwindow\fR bits will include
+that the <i>temp</i></b> bits will come from the end of
+packet five and the <i>window</i></b> bits will include
 all of packets 5, 4, 3, 2, and a portion of the
-end of packet 1 (note the restriction on \fIsearchWindowSize\fR).
+end of packet 1 (note the restriction on <i>searchWindowSize</i></b>).
 These bits are converted to samples in an SDF domain
 wormhole and a cross-correlation is performed between the
-\fItemp\fR and the \fIwindow\fR to determine the best
+<i>temp</i></b> and the <i>window</i></b> to determine the best
 match, i.e., the one with largest cross-correlation value.  This SDF
-galaxy will take the \fInumInfoBits\fR / 8 samples
-from the \fIwindow\fR samples following the \fIwindow\fR's
-best match with the \fItemp\fR samples. These samples
+galaxy will take the <i>numInfoBits</i></b> / 8 samples
+from the <i>window</i></b> samples following the <i>window</i></b>'s
+best match with the <i>temp</i></b> samples. These samples
 are then encoded, loaded into a
-.c SeqATMCell
+<tt>SeqATMCell</tt>
 and sent back to the DE domain where they enter the
-\fIsubIn\fR port of this star.  This star unloads
+<i>subIn</i></b> port of this star.  This star unloads
 the bits from this
-.c SeqATMCell
-and outputs them in their proper order on the \fIoutput\fR
+<tt>SeqATMCell</tt>
+and outputs them in their proper order on the <i>output</i></b>
 port.  If more than one packet was missing, this star
 will repeat the derived packet enough times to fill the
 void.
-.UH REFERENCES
+<h3>References</h3>
 J. Goodman, G. LockHart, O. Wasem, and W. Wong,
 "Waveform Substitution Techniques for Recovering
 Missing Speech Segments in Packet Voice Communications,"
-\fIIEEE Trans. on Acoustics, Speech, and Signal Processing\fR,
+<i>IEEE Trans. on Acoustics, Speech, and Signal Processing</i></b>,
 vol ASSP-34, no. 6, pp. 1440-1448, December 1986.
 	}
 

@@ -11,28 +11,28 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
     location { CG56 library }
-    explanation {
+	htmldoc {
 This is a source star (like the
-.c Const
+<tt>Const</tt>
 star).
 The value(s) output by the star may be changed asynchronously by
 the host via the host port.
 This is intended as a base star for derivation; a derived star would provide
 some host-specific interface to this star.
-The \fIlabel\fR parameter is not directly used by the star; it is for the
+The <i>label</i></b> parameter is not directly used by the star; it is for the
 convenience of derived stars.
-.UH IMPLEMENTATION
-.pp
+<h3>IMPLEMENTATION</h3>
+<p>
 Since we may be followed by an up sampling operation, there may be
 an arbitrary number of memory locations corresponding to our output.
 Since we cannot expect the host to update all of these values, we
 cannot apply the trick used by the
-.c Const
+<tt>Const</tt>
 star to eliminate runtime code in all cases.
 More work must be done to identify the safe cases.
-.PP
-On each firing of the star, the \fIvalue\fR state is output.
-The host may modify the \fIvalue\fR state asynchronously.
+<p>
+On each firing of the star, the <i>value</i></b> state is output.
+The host may modify the <i>value</i></b> state asynchronously.
 Currently, the value state is referenced by explicit memory location; however,
 we might want to generate a symbolic name.
 Currently, only scalars may be output (not waveforms).

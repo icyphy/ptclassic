@@ -14,12 +14,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 demo library }
-    explanation {
-.Id "linear to circular buffer copy"
-.Ir "buffer, circular"
-.Ir "buffer, linear"
-.Ir "linear buffer"
-.Ir "circular buffer"
+	htmldoc {
+<a name="linear to circular buffer copy"></a>
+<a name="buffer, circular"></a>
+<a name="buffer, linear"></a>
+<a name="linear buffer"></a>
+<a name="circular buffer"></a>
 This star is normally inserted automatically, as needed.  Data movement
 is repeated inline so may not be efficient for large N.
     }

@@ -12,30 +12,30 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 control library }
-    explanation {
-.Id "multiplex"
-\fIblockSize\fP particles are consumed on each input.
+	htmldoc {
+<a name="multiplex"></a>
+<i>blockSize\fP particles are consumed on each input.
 But only one of these blocks of particles is copied to the output.
-The one copied is determined by the \fIcontrol\fP input.
-Integers from $0$ through $N-1$ are accepted at the \fIcontrol\fP input,
-where $N$ is the number of inputs.
-If the \fIcontrol\fR input is outside this range, random data (possibly
+The one copied is determined by the <i>control\fP input.
+Integers from <i></i>0<i></i> through <i>N-</i>1<i></i> are accepted at the <i>control\fP input,
+where <i>N</i> is the number of inputs.
+If the <i>control</i></b> input is outside this range, random data (possibly
 memory mapped devices) will be copied.
-.UH IMPLEMENTATION:
-.pp
+<h3>IMPLEMENTATION:</h3>
+<p>
 There are potentially very many special cases that could be handled
 for increased efficiency: looped vs. non-looped, circular vs. linear,
-and scalars vs vectors (\fIblockSize\fR > 1), uniform inputs vs. non-uniform
+and scalars vs vectors (<i>blockSize</i></b> &gt; 1), uniform inputs vs. non-uniform
 inputs (port.bufSize()).
 The current implementation handles only some of these cases.
 Use this star at your own risk.
-.pp
+<p>
 At compile time, the star constructs a table of pointers to each of the
 input blocks.
-The \fIcontrol\fP input is used to index this table, yielding a pointer
+The <i>control\fP input is used to index this table, yielding a pointer
 to the appropriate input block for the firing.
 This implementation assumes that all of its input ports reside in X memory.
-.pp
+<p>
 Currently we advance each of the pointers in the table on every firing.
 With some schedule the advancement is a nop; this case is handled.
 In other schedules the advancement is periodic over all inputs; in this

@@ -29,8 +29,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-.Id "filter, integrator"
+	htmldoc {
+<a name="filter, integrator"></a>
 	}
 	input {
 		name { data }

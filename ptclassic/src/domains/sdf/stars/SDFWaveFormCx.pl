@@ -8,13 +8,13 @@ The parameters work the same way as in the WaveForm star.
 This star may be used to read a file by simply setting "value" to
 something of the form "< filename".
 	}
-	explanation {
+	htmldoc {
 Since this star can be used to read a complex waveform from a file,
 there is no other star dedicated to this purpose.
-.IE "file read"
-.IE "complex waveform"
-.IE "reading from a file"
-.IE "halting a simulation"
+<a name="file read"></a>
+<a name="complex waveform"></a>
+<a name="reading from a file"></a>
+<a name="halting a simulation"></a>
 	}
 	version {$Id$ }
 	author { J. T. Buck and E. A. Lee }

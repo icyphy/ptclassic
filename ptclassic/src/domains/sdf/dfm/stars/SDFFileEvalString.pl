@@ -21,7 +21,7 @@ For example, if "command" is "set strout#1 foo", then the output
 filename is "foo".  If the "command" script does not set "strout#i"
 for a connected output "i", then a temporary filename is generated.
     }
-    explanation {
+	htmldoc {
 The idea of this star is to give the user more control over the
 produced filenames.  In particular, the filenames can be constructed
 on the fly by the "command" script.  But there are also trickier uses

@@ -13,17 +13,17 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 Motorola Sim I/O library }
-	explanation {
-The input signal is plotted using the \fIpxgraph\fR program.
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i></b> program.
+The <i>title</i></b> parameter specifies a title for the plot.
+The <i>saveFile</i></b> parameter optionally specifies a file for
 storing the data in a syntax acceptable to xgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the xgraph program
+The <i>options</i></b> string is passed directly to the xgraph program
 as command-line options.  See the manual section describing xgraph
 for a complete explanation of the options.
-.Ir "xgraph program, CG56"
-.Id "graph, X window, CG56"
+<a name="xgraph program, CG56"></a>
+<a name="graph, X window, CG56"></a>
 	}
 	derivedFrom { WrtFile }
 	defstate {

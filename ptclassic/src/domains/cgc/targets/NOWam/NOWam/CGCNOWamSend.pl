@@ -10,7 +10,7 @@ Send star between NOWam processors.
 Copyright(c) 1995-%Q% The Regents of the University of California
         }
 	location { CGC NOW Active Message target library }
-	explanation {
+	htmldoc {
 Produce code for inter-process communication (send-side)
 	}
 	private {

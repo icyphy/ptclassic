@@ -13,8 +13,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Id "multiplication"
+	htmldoc {
+<a name="multiplication"></a>
 The inputs are multiplied and the result is written on the output.
 This star is similar to the Mpy star.
 	}

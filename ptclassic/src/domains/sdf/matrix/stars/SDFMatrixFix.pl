@@ -4,12 +4,12 @@ defstar {
   desc      { 
 Generate a matrix with fixed-point entries.
   }
-  explanation {
+	htmldoc {
 The entries of the generated matrix are read from the array parameter
-\fIFixMatrixContents\fR in rasterized order: i.e. for an $M x N$ matrix,
-the first row is filled from left to right using the first $N$ values
+<i>FixMatrixContents</i></b> in rasterized order: i.e. for an <i>M x N</i> matrix,
+the first row is filled from left to right using the first <i>N</i> values
 from the array.  All entries have the same precision, as specified by
-the parameter \fIFixPrecision\fR.
+the parameter <i>FixPrecision</i></b>.
   }
   version   { $Id$ }
   author    { Mike J. Chen }

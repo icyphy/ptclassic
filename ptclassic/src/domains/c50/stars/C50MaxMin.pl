@@ -11,12 +11,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-If \fIcmpareMagnitude\fR is "no", the star finds from among
-the \fIinput\fR inputs the one with the maximum or minimum value;
-otherwise, it finds from among the \fIinput\fR inputs the one with
+	htmldoc {
+If <i>cmpareMagnitude</i></b> is "no", the star finds from among
+the <i>input</i></b> inputs the one with the maximum or minimum value;
+otherwise, it finds from among the <i>input</i></b> inputs the one with
 the maximum or minimum magnitude.
-if \fIoutputMagnitude\fR is "yes", the magnitude of the result is
+if <i>outputMagnitude</i></b> is "yes", the magnitude of the result is
 written to the output, else the result itself is written to the output.
 Returns maximum value among N (default 10) samples.
 Also, the index of the output is provided (count starts at 0).

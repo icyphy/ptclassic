@@ -14,13 +14,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 For inputs that are greater than zero, the output either
-$N log sub 10 (input)$ or \fImin\fR, whichever is larger, where
-$N ~=~ 10$ if \fIinputIsPower\fR is TRUE, and $N ~=~ 20$ otherwise.
-.Id "decibel"
-The default is $N ~=~ 20$.
-For inputs that are zero or negative, the output is \fImin\fR.
+<i>N </i>log<i> <sub></i>10<i></sub> </i>(<i>input</i>)<i></i> or <i>min</i></b>, whichever is larger, where
+<i>N  </i>=<i>  </i>10<i></i> if <i>inputIsPower</i></b> is TRUE, and <i>N  </i>=<i>  </i>20<i></i> otherwise.
+<a name="decibel"></a>
+The default is <i>N  </i>=<i>  </i>20<i></i>.
+For inputs that are zero or negative, the output is <i>min</i></b>.
 	}
 	input {
 		name{input}

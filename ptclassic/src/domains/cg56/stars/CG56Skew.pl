@@ -11,11 +11,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 library }
-    explanation {
-The \fIerror\fR input is accumulated.
+	htmldoc {
+The <i>error</i></b> input is accumulated.
 Normally the constant 0.0 is output.
-However, when overflow occurs, \fIoverVal\fP is output, 
-and when underflow occurs, \fIunderVal\fP is output.
+However, when overflow occurs, <i>overVal\fP is output, 
+and when underflow occurs, <i>underVal\fP is output.
     }
     seealso {SSISkew}
     input {

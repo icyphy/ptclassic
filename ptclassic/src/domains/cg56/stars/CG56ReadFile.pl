@@ -11,13 +11,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
-	explanation {
-.Ir "Motorola DSP56000 simulator"
-.Ir "simulator, Motorola DSP56000"
-.Id "file input"
-Reads one data value from the \fIfileName\fR for use with the
+	htmldoc {
+<a name="Motorola DSP56000 simulator"></a>
+<a name="simulator, Motorola DSP56000"></a>
+<a name="file input"></a>
+Reads one data value from the <i>fileName</i></b> for use with the
 Motorola DSP56000 simulator.
-The \fIinVal\fR is used as the storage location of the read data value.
+The <i>inVal</i></b> is used as the storage location of the read data value.
 	}
 	output {
 		name {output}

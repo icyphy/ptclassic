@@ -11,8 +11,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-.Id "square root"
+	htmldoc {
+<a name="square root"></a>
 	}
 	input {
 		name{input}

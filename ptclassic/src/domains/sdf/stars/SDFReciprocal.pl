@@ -15,10 +15,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-This star computes $1/x$, where $x$ is the input.
-If the \fImagLimit\fR parameter is not 0.0, then the output is
-$+- ~ max ( magLimit, ~ 1/x )$.  In this case, $x$ can be zero
+	htmldoc {
+This star computes <i></i>1<i>/x</i>, where <i>x</i> is the input.
+If the <i>magLimit</i></b> parameter is not 0.0, then the output is
+<i>+-   </i>max<i> </i>(<i> magLimit,   </i>1<i>/x </i>)<i></i>.  In this case, <i>x</i> can be zero
 without causing an floating exception.
 The sign of the output is determined by the sign of the input.
 	}

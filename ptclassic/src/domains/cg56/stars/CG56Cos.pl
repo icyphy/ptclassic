@@ -15,13 +15,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-.Id "cosine"
+	htmldoc {
+<a name="cosine"></a>
 This star computes the cosine of the input, which must be in the range
 (-1.0, 1.0).
-The output equals cos($pi$ $cdot$ \fIinput\fR), so the input range is 
-effectively ($-pi$, $pi$).
-The output is in the range $(-1.0, 1.0)$.
+The output equals cos(<i>pi</i> <i>cdot</i> <i>input</i></b>), so the input range is 
+effectively (<i>-pi</i>, <i>pi</i>).
+The output is in the range <i></i>(<i>-</i>1<i>.</i>0<i>, </i>1<i>.</i>0<i></i>)<i></i>.
 	}
 	input {
 		name {input}

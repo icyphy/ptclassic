@@ -18,16 +18,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
-.Id "adaptive filter with coefficient plotting"
-.Id "filter, adaptive, with coefficient plotting"
-.Id "filter, LMS, with coefficient plotting"
-.Id "LMS adaptive filter with coefficient plotting"
-The value of the \fIgraphTitle\fP parameter
-is used for the title of the plot; the value of \fIgraphOptions\fP
+	htmldoc {
+<a name="adaptive filter with coefficient plotting"></a>
+<a name="filter, adaptive, with coefficient plotting"></a>
+<a name="filter, LMS, with coefficient plotting"></a>
+<a name="LMS adaptive filter with coefficient plotting"></a>
+The value of the <i>graphTitle\fP parameter
+is used for the title of the plot; the value of <i>graphOptions\fP
 is handed to the xgraph program as option values on the command line.
-.lp
-If \fItrace\fP is YES, then there may not be more than 64 taps in the filter,
+<p>
+If <i>trace\fP is YES, then there may not be more than 64 taps in the filter,
 since this is the maximum number of plots that the xgraph program can handle.
 	}
 	seealso {LMS, XMgraph, LMSTkPlot, LMSPlotCx, LMSTkPlotCx}

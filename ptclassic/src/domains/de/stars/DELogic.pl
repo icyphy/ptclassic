@@ -16,20 +16,10 @@ The inputs are integers interpreted as Booleans,
 where zero is a FALSE and nonzero is a TRUE.
 The logical operations supported are {NOT AND NAND OR NOR XOR XNOR}.
 	}
-	explanation {
+	htmldoc {
 The NOT operation requires that there be only one input.
 The XOR operation with multiple inputs tests for an odd number
 of TRUEs among the inputs.  The other operations are self explanatory.
-.ir "logic"
-.ir "Boolean logic"
-.ir "not (logical operation)"
-.ir "and (logical operation)"
-.ir "exclusive or"
-.ir "xor (logical operation)"
-.ir "xnor (logical operation)"
-.ir "nand (logical operation)"
-.ir "or (logical operation)"
-.ir "nor (logical operation)"
 	}
 	inmulti {
 		name { input }

@@ -16,7 +16,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
+	htmldoc {
 The input may be a particle of any type.
 The print() method of the particle is used to generate the output.
 If output is directed to a file, flushing does not occur until the

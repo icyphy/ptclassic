@@ -18,75 +18,75 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 This star implements an FIR filter with
 a raised cosine or square-root raised cosine frequency response,
 with the excess bandwidth given
-by \fIexcessBW\fR and the symbol interval (in number of samples)
-of the application given by \fIsymbol_interval\fP.
-The length of the filter (the number of taps) is given by \fIlength\fP.
-.pp
+by <i>excessBW</i></b> and the symbol interval (in number of samples)
+of the application given by <i>symbol_interval\fP.
+The length of the filter (the number of taps) is given by <i>length\fP.
+<p>
 For the ordinary raised cosine response,
 the impulse response of the filter would ideally be
-.EQ
+<pre>
 h(n) ~=~ left ( { sin ( pi n / T ) } over { pi n / T } right )
 left ( { cos ( alpha pi n / T ) } over { 1 ~-~ (2 alpha n / T) sup 2 } right )
-.EN
-where $alpha$ is \fIexcessBW\fR and $T$ is the \fIsymbol_interval\fR.
+</pre>
+where <i>alpha</i> is <i>excessBW</i></b> and <i>T</i> is the <i>symbol_interval</i></b>.
 However, this pulse is centered at zero, and we can only implement causal
 filters in the SDF domain in Ptolemy.  Hence, the impulse response is
 actually
-.EQ
+<pre>
 g(n) ~=~ h(n - M)
-.EN
-where $M ~=~ length/2$ if $length$ is even, and $M ~=~ (length+1)/2$ if
-$length$ is odd.
+</pre>
+where <i>M  </i>=<i>  length/</i>2<i></i> if <i>length</i> is even, and <i>M  </i>=<i>  </i>(<i>length+</i>1<i></i>)<i>/</i>2<i></i> if
+<i>length</i> is odd.
 The impulse response is simply truncated outside this range, so
-the impulse response will generally not be symmetric if $length$ is even
+the impulse response will generally not be symmetric if <i>length</i> is even
 because it will have one more sample to the left than to the right of center.
 Unless this extra sample is zero, the filter will not have linear phase
-if $length$ is even.
-.pp
+if <i>length</i> is even.
+<p>
 For some applications, you may wish to apply a window function to
 this impulse response.  To do this, feed an impulse into this star,
-multiply the output by the output of the \fBWindow\fR star, and
+multiply the output by the output of the <b>Window</i></b> star, and
 store the resulting windowed impulse response in a file. Then, use
-the \fBFIR\fR star to implement the filter.
-.pp
+the <b>FIR</i></b> star to implement the filter.
+<p>
 For the ordinary raised cosine response, the
 distance (in number of samples) from the center
-to the first zero crossing is given by \fIsymbol_interval\fP.
+to the first zero crossing is given by <i>symbol_interval\fP.
 For the square-root raised cosine response, a cascade of two identical
 square-root raised cosine filters would be equivalent to a single
 ordinary raised cosine filter.
-.pp
+<p>
 The impulse response of the square-root raised cosine pulse is given by
-.EQ
+<pre>
 h(n) ~=~ {4 alpha} over {pi sqrt T} cdot
 { cos ( (1 ~+~ alpha ) pi n / T ) ~+~
 { T sin ((1 ~-~ alpha ) pi n/T) } over {4 alpha n/T}} over
 {1 ~-~ (4 alpha n/T) sup 2 } ~.
-.EN
+</pre>
 This impulse response convolved with itself will, in principle, be equal
 to a raised cosine pulse.  However, because of the abrupt rectangular
 windowing of the pulse, with low excess bandwidth, this ideal is not
 closely approximated except for very long filters.
-.pp
-The output sample rate is \fIupsample\fP times the input.
+<p>
+The output sample rate is <i>upsample\fP times the input.
 This is set by default to 16 because in digital communication systems
 this pulse is used for the line coding of symbols, and upsampling is necessary.
-Typically, the value of \fIupsample\fP is the same as that of
-\fIsymbol_interval\fR.
+Typically, the value of <i>upsample\fP is the same as that of
+<i>symbol_interval</i></b>.
 The star is derived from the FIR star.
-.Id "raised cosine pulse"
-.Id "square-root raised cosine pulse"
-.Id "Nyquist pulse"
-.UH REFERENCES
-.ip [1]
+<a name="raised cosine pulse"></a>
+<a name="square-root raised cosine pulse"></a>
+<a name="Nyquist pulse"></a>
+<h3>References</h3>
+<p>[1]  
 E. A. Lee and D. G. Messerchmitt,
-\fIDigital Communication,\fR Kluwer Academic Publishers, Boston, 1988.
-.ip [2]
-I. Korn, \fIDigital Communications\fR, Van Nostrand Reinhold, New York, 1985.
+<i>Digital Communication,</i></b> Kluwer Academic Publishers, Boston, 1988.
+<p>[2]  
+I. Korn, <i>Digital Communications</i></b>, Van Nostrand Reinhold, New York, 1985.
 	}
 	seealso {FIR, Window, pulses}
 	ccinclude { "ptdspRaisedCosine.h" }

@@ -14,12 +14,12 @@ limitation of liability, and disclaimer of warranty provisions.
 This star takes a float matrix input and does inverse
 discrete cosine transform (DCT) coding and outputs a float matrix.
 	}
-	explanation {
-.Id "DCT inverse"
-.Id "discrete cosine transform inverse"
-.Id "image, discrete cosine transform inverse"
-.Id "inverse discrete cosine transform"
-.Id "inverse DCT"
+	htmldoc {
+<a name="DCT inverse"></a>
+<a name="discrete cosine transform inverse"></a>
+<a name="image, discrete cosine transform inverse"></a>
+<a name="inverse discrete cosine transform"></a>
+<a name="inverse DCT"></a>
 }
 
 	input { name { input } type { FLOAT_MATRIX_ENV } }

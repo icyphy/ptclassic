@@ -16,11 +16,11 @@ If the "past" input is not a Float Matrix, pass the "input"
 directly to the "output". Otherwise, subtract the "past" from the
 "input" (with leakage factor alpha) and send the result to "output".
   }
-  explanation {
-.Id "image DPCM"
-.Id "image compression"
-.Id "DPCM, image"
-.Id "compression, image"
+	htmldoc {
+<a name="image DPCM"></a>
+<a name="image compression"></a>
+<a name="DPCM, image"></a>
+<a name="compression, image"></a>
   }
 
   hinclude { "Matrix.h", "Error.h" }

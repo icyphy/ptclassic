@@ -18,19 +18,19 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
-	explanation {
+	htmldoc {
 The output of the FIR filter is given by:
-.EQ
+<pre>
         y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] ~ x[N-i] }
-.EN
+</pre>
 where N is the order of the filter given by the number of coefficients in
-\fItaps\fP.
+<i>taps\fP.
 c[i], i = 0..N-1 are the tap coefficients; and x[T-i] is the input i samples
 before the current input.
-.PP
-The parameters \fIdecimation\fR and \fIinterpolation\fR enable this star
+<p>
+The parameters <i>decimation</i></b> and <i>interpolation</i></b> enable this star
 to perform downsampling or upsampling.
-.PP
+<p>
 The default filter is a linear-phase equiripple lowpass filter with its 3dB
 cutoff frequency at about 1/3 of the Nyquist frequency.
 	}

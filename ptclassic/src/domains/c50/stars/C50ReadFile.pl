@@ -11,13 +11,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Ir "TI DSK320C5x simulator"
-.Ir "simulator, TI DSK320C5x"
-.Id "file input"
-Reads one value data from the \fIfileName\fR for use with
+	htmldoc {
+<a name="TI DSK320C5x simulator"></a>
+<a name="simulator, TI DSK320C5x"></a>
+<a name="file input"></a>
+Reads one value data from the <i>fileName</i></b> for use with
 Texas Instruments DSK320C5x simulator.
-The \fIinVal\fR is used as the storage location of the read data value.
+The <i>inVal</i></b> is used as the storage location of the read data value.
 	}
 	output {
 		name {output}

@@ -11,36 +11,36 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
-        explanation {
-.PP
-.Id "Gaussian noise"
-.Id "noise, Gaussian"
+	htmldoc {
+<p>
+<a name="Gaussian noise"></a>
+<a name="noise, Gaussian"></a>
 This star generates a sequence of random output samples with a Gaussian
 distribution (mean = 0, standard deviation = 0.1).
-.PP
-.Ir "central limit theorem"
+<p>
+<a name="central limit theorem"></a>
 According to the central limit theorem, the sum of N random variables
 approaches a Gaussian distribution as N approaches infinity.
-This star generates an output number by summing \fInoUniforms\fR uniform
+This star generates an output number by summing <i>noUniforms</i></b> uniform
 random variables.
-.PP
-The parameters \fIseed\fR and \fImultiplier\fR control the generation of the
+<p>
+The parameters <i>seed</i></b> and <i>multiplier</i></b> control the generation of the
 random number. 
-.UH BUGS:
-.LP
+<h3>BUGS:</h3>
+<p>
 This needs to be filled in.  For now, there is no seed and multiplier
 parameter; the default seed parameter from Gabriel is always used.
 We'd really need to use a 48-bit integer to get the same functionality.
 This can be done with g++ (type "long long"), but it isn't portable.
-.LP
+<p>
 The Gabriel version used l:aa addressing for the accum address.
 This failed when the accumulator is not :aa addressable (high memory), 
 so it now moves the address into a register and uses l:(rn) addressing.
-.LP
+<p>
 The loop that calculates the series of uniform variables should really
 be pipelined better and should keep the accum value in register instead
 of flushing and reloading to/from memory every iteration.
-.LP
+<p>
 Incorrect code will probably be generated generated if the number of uniform
 variables used is less than 2 or 3.
 	}

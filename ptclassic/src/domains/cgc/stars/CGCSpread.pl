@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star does not generate any code. In multiprocessor code generation
 domain, this star will be automatically attached to a porthole whose
 outputs are passed to more than one destination (one ordinary block and

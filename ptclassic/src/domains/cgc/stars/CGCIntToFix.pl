@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
 	desc { Convert a floating-point input to an fixed-point output. }
-	explanation {
+	htmldoc {
 This star converts a int value to a fix value with the specified precision.
 If the output precision is not specified, the precision is determined at
 runtime according to the incoming int value.

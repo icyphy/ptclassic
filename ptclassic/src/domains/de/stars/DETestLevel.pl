@@ -19,22 +19,22 @@ the input exceeds the threshold.  When "crossingsOnly" is FALSE,
 then this star outputs TRUE if the input exceeds the "threshold"
 and FALSE otherwise.  Output values are 1 for TRUE and 0 for FALSE.
 	}
-	explanation {
-This star detects threshold crossings if \fIcrossingsOnly\fR is TRUE.
+	htmldoc {
+This star detects threshold crossings if <i>crossingsOnly</i></b> is TRUE.
 Otherwise, it simply compares the input against the "threshold".
-.lp
+<p>
 If "crossingsOnly" is TRUE, then: 
-.ip 1)
+<p>1)  
 A TRUE is output when the input particle exceeds or
-equals the \fIthreshold\fR value, having been previously smaller.
-.ip 2)
+equals the <i>threshold</i></b> value, having been previously smaller.
+<p>2)  
 A FALSE is output when the input particle is smaller than
-\fIthreshold\fR having been previously larger.
-.lp
+<i>threshold</i></b> having been previously larger.
+<p>
 Otherwise, no output is produced.
-.pp
-If \fIcrossingsOnly\fR is FALSE, then a TRUE is output whenever any
-input particle greater than or equal to \fIthreshold\fR is received,
+<p>
+If <i>crossingsOnly</i></b> is FALSE, then a TRUE is output whenever any
+input particle greater than or equal to <i>threshold</i></b> is received,
 and a FALSE is sent otherwise.
 Output values are always 1 for TRUE and 0 for FALSE.
 	}

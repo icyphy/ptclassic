@@ -22,10 +22,10 @@ For example, if the 'frameId' state is set to 2 and
 if the 'fileName' state is 'dir.#/pic#', then the files that
 are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 	}
-	explanation {
-.Id "image reading"
-.Ir "PPM image format"
-.Ir "image format, portable pixmap (PPM)"
+	htmldoc {
+<a name="image reading"></a>
+<a name="PPM image format"></a>
+<a name="image format, portable pixmap (PPM)"></a>
 	}
 
 	ccinclude { "Matrix.h", <std.h>, <stdio.h>, "Error.h", "StringList.h", "miscFuncs.h" }

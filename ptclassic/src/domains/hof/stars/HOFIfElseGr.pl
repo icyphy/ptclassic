@@ -10,9 +10,9 @@ replacement blocks.
 The HOFNop stars are the only exception: they may be used in addition to the
 two replacement blocks in order to control the order of connection.
 	}
-	explanation {
+	htmldoc {
 See the documentation for the
-.c IfElse
+<tt>IfElse</tt>
 star, from which this is derived, for background information.
 The parameter values for the replacement blocks are set directly
 by editing the parameters of the block.

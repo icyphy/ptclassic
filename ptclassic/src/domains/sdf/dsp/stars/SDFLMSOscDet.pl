@@ -20,36 +20,36 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 The initial taps of this LMS filter are 1, -2, and 1.  The second tap
 is adapted while the others are held fixed.  The second tap is equal
-to $-2 a sub 1$, and its adaptation has the form
-.EQ
+to <i>-</i>2<i> a <sub></i>1<i></sub></i>, and its adaptation has the form
+<pre>
 y[n] = x[n] - 2 a sub 1[k] x[n-1] + x[n - 2]
 a sub 1[k] = a sub 1 [k-1] + 2 mu e[n] x[n-1]
-.EN
-where $y[n]$ is the output of this filter which can be used as the
-error signal.  The step size term $mu$ is fixed by the value of
-the \fIstepSize\fR parameter.  You can effectively vary the step size
+</pre>
+where <i>y[n]</i> is the output of this filter which can be used as the
+error signal.  The step size term <i>mu</i> is fixed by the value of
+the <i>stepSize</i></b> parameter.  You can effectively vary the step size
 by attenuating the error term as
-.EQ
+<pre>
 e[n] = {{y[n]} over {k}}
-.EN
+</pre>
 assuming that k = 1, 2, 3, and so forth.  When the error becomes relatively
 small, this filter gives an estimate of the strongest sinusoidal component:
-.EQ
+<pre>
 a sub 1 = cos omega
-.EN
+</pre>
 In this implementation the taps are scaled by 1/2 to make the
 star behave like the CG56 version.  Thus the output of the filter is also
-scaled by 1/2.  To compensate for this scaling $mu$ is multiplied by 2. 
-This filter outputs the current value of $a sub 1$ on the \fIcosOmega\fR
-output port.  The initial value is $a sub 1 = 1$, that is, zero frequency,
+scaled by 1/2.  To compensate for this scaling <i>mu</i> is multiplied by 2. 
+This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i></b>
+output port.  The initial value is <i>a <sub></i>1<i></sub> </i>=<i> </i>1<i></i>, that is, zero frequency,
 so the initial value of the second tap is -1(because of the 1/2 scaling).
-.PP
+<p>
 For more information on the LMS filter implementation, see the description
 of the LMS star upon which this star derived.
-.Id "Direct Adaptive Frequency Estimation"
+<a name="Direct Adaptive Frequency Estimation"></a>
 	}
 	seealso {FIR, LMS}
 	output {

@@ -25,22 +25,20 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { C50 dsp library }
-    explanation {
-.PP
+	htmldoc {
+<p>
 This star implements an infinite impulse response filter of arbitrary order
 in a direct form II [1] realization.
-The parameters of the star specify $H(z)$, the $Z$-transform of an
-impulse response $h(n)$.
-The output of the star is the convolution of the input with $h(n)$.
-.PP
+The parameters of the star specify <i>H</i>(<i>z</i>)<i></i>, the <i>Z</i>-transform of an
+impulse response <i>h</i>(<i>n</i>)<i></i>.
+The output of the star is the convolution of the input with <i>h</i>(<i>n</i>)<i></i>.
+<p>
 Note that the numerical finite precision noise increases with the filter order.
 To minimize this distortion, it is often desirable to expand the filter
 into a parallel or cascade form.
-.ID "Schafer, R. W."
-.ID "Oppenheim, A. V."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
     }
     seealso { FIR, Biquad }

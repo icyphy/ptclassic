@@ -21,17 +21,17 @@ limitation of liability, and disclaimer of warranty provisions.
 }
        location { DE ATM library }
 
-       explanation {
+	htmldoc {
 To be placed after an SDF compiled galaxy switch and before a
-.c DENullRemove
+<tt>DENullRemove</tt>
 star.  The SDF switch, for each time slot, issues an
 actual packet for a line if it is active, and a "null" packet if
-idle.  This star passes the packets received on its \fIinput\fR MPH
-through to its \fIoutput\fR MPH, and when triggered on \fIdemand\fR
+idle.  This star passes the packets received on its <i>input</i></b> MPH
+through to its <i>output</i></b> MPH, and when triggered on <i>demand</i></b>
 port, produces a figure corresponding to the avg. throughput over
 each line as well as one for the avg. throughput over all
 lines considered as a whole.  (Packets are of type
-.c VoiceData
+<tt>VoiceData</tt>
 )
        }
 

@@ -11,8 +11,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 control library }
-        explanation {
-A delay star of \fItotalDelay\fR unit time delays.
+	htmldoc {
+A delay star of <i>totalDelay</i></b> unit time delays.
 }
 
         input  {

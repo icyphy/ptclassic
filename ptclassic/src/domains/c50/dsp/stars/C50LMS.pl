@@ -12,24 +12,24 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
-.pp
+	htmldoc {
+<p>
 This star implements an adaptive filter using the LMS algorithm.
 The initial coefficients determine the order of the filter.
 The default coefficients specify
 an eighth order, equiripple, linear-phase, lowpass filter,
-the same as the default coefficients of the \fIFIR\fP star.
-.PP
-The \fIstepSize\fP parameter specifies the rate of adaptation.
-.PP
-The \fIerrorDelay\fP parameter specifies the relative delay between the
+the same as the default coefficients of the <i>FIR\fP star.
+<p>
+The <i>stepSize\fP parameter specifies the rate of adaptation.
+<p>
+The <i>errorDelay\fP parameter specifies the relative delay between the
 output samples and the input error samples.  There must be at least
 a delay of one (you must add the delay in your system) because
 the path from the output to the error forms a closed feedback loop.
 You can insert more delays if you wish (you may have to decrease
-\fIstepSize\fP to keep the algorithm stable), but be sure to
-adjust the \fIerrorDelay\fP parameter accordingly.
-.PP
+<i>stepSize\fP to keep the algorithm stable), but be sure to
+adjust the <i>errorDelay\fP parameter accordingly.
+<p>
 	}
         
 	// FIXME: Should be derived from the FIR star

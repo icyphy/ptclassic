@@ -13,19 +13,19 @@ limitation of liability, and disclaimer of warranty provisions.
     desc        {
 Put a sequence of fixed-point samples into a rectangular Toeplitz matrix.
     }
-    explanation {
-.Ir "Toeplitz matrix"
+	htmldoc {
+<a name="Toeplitz matrix"></a>
 Generate a fixed-point data matrix X, with dimensions
-\fInumRows\fR x \fInumCols\fR, from a stream of
-\fInumRows\fR + \fInumCols\fR - 1 input particles.
+<i>numRows</i></b> x <i>numCols</i></b>, from a stream of
+<i>numRows</i></b> + <i>numCols</i></b> - 1 input particles.
 The data matrix is a Toeplitz matrix such that the first row is
 [ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(1) ],
 and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ], where
-\fInumRows\fR = $N-M+1$ and \fInumCols\fR = $M$.
-.Ir "singular-value decomposition"
+<i>numRows</i></b> = <i>N-M+</i>1<i></i> and <i>numCols</i></b> = <i>M</i>.
+<a name="singular-value decomposition"></a>
 This is the form of the matrix that is required by the singular-value
 decomposition star,
-.c SVD_M ,
+<tt>SVD_M ,</tt>
 among others.
     } 
     defstate {

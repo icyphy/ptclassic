@@ -11,8 +11,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-This star outputs the bitwise exclusive-or of \fIinput1\fR and \fIinput2\fR.
+	htmldoc {
+This star outputs the bitwise exclusive-or of <i>input1</i></b> and <i>input2</i></b>.
 	}
 	execTime {
 		return 4;

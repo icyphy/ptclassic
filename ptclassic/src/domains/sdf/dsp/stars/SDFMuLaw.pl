@@ -18,17 +18,17 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	version { $Id$ }
-	explanation {
-.Id "Mu law compression"
-.Id "compression, Mu law"
+	htmldoc {
+<a name="Mu law compression"></a>
+<a name="compression, Mu law"></a>
 The conversion formula is
-.EQ
+<pre>
 output ~=~ log (1 + mu | input | ) / log( 1 ~+~ mu ) ~.
-.EN
+</pre>
 so this star always produces non-negative output.
-.UH REFERENCES
-.IP 1
-Simon Haykin, \fICommunication Systems\fR, John Wiley Sons,
+<h3>References</h3>
+<p>1  
+Simon Haykin, <i>Communication Systems</i></b>, John Wiley Sons,
 3rd ed., 1994, ISBN 0-471-57176-8, page 380.
 	}
 	input {

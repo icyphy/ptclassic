@@ -16,22 +16,22 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
-This pulse generator is similiar to the \fIRect\fR star, except
+	htmldoc {
+This pulse generator is similiar to the <i>Rect</i></b> star, except
 that it is complex-valued and supports several additional options
 for Doppler effects.  This star was initially intended for radar
 simulations.
-.pp
+<p>
 The magnitude of the height of the pulse is equal to
-.EQ
+<pre>
 SqrPthn 10 sup {{SNRn} over {20}}
-.EN
+</pre>
 The phase of the height of the pulse is equal to
-.EQ
+<pre>
 Pi ( {{2 Fpor (count - sdelay)} over {Fsimu}} -
 {{bandwidth (count - sdelay)^2} over {Te Fsimu^2}} +
 {{4 dopplercount Fe Tp vn} over {c}} )
-.EN
+</pre>
 	}
 	location { SDF main library }
 	defstate {

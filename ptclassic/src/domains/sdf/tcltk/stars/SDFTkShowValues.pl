@@ -17,7 +17,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { SDF Tcl/Tk library }
-    explanation {
+	htmldoc {
 This star uses the "print()" method of the input particles to create
 the display.
 The width of the display window is appropriate for integer, float, and

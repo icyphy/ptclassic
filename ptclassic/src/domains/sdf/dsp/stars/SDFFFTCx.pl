@@ -18,34 +18,32 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
-A number of input samples given by the parameter \fIsize\fR will
-be consumed at the input, zero-padded if necessary to make $2 sup order$
+	htmldoc {
+A number of input samples given by the parameter <i>size</i></b> will
+be consumed at the input, zero-padded if necessary to make <i></i>2<i> <sup>order</sup></i>
 samples, and transformed using a fast Fourier transform algorithm.
-.Id "FFT, complex"
-.Id "fast Fourier transform, complex"
-.Id "Fourier transform, fast, complex"
-If \fIdirection\fR is 1, then the forward Fourier transform is computed.
-If \fIdirection\fR is -1, then the inverse Fourier transform is computed.
-.lp
-Note a single firing of this star consumes \fIsize\fR inputs
-and produces $2 sup order$ outputs.
+<a name="FFT, complex"></a>
+<a name="fast Fourier transform, complex"></a>
+<a name="Fourier transform, fast, complex"></a>
+If <i>direction</i></b> is 1, then the forward Fourier transform is computed.
+If <i>direction</i></b> is -1, then the inverse Fourier transform is computed.
+<p>
+Note a single firing of this star consumes <i>size</i></b> inputs
+and produces <i></i>2<i> <sup>order</sup></i> outputs.
 This must be taken into account when determining for how many iterations
 to run a universe.
 For example, to compute just one FFT, only one iteration should be run.
-.lp
-\fBBugs\fR: the routine currently used (from Gabriel) recomputes trig
-.Ir "Gabriel"
+<p>
+<b>Bugs</i></b>: the routine currently used (from Gabriel) recomputes trig
+<a name="Gabriel"></a>
 functions for each term, instead of using a table.
 Instead, FFTCx::setup() should compute a table of appropriate size
 in order to save time.
 This approach does not offer any improvement, obviously, if only
 one transform is performed.
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	input {

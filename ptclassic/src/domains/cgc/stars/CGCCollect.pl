@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star does not generate codes. In multiprocessor code generation domain,
 it will be automatically attached to a porthole if the sources of the porthole
 is more than one. Its role is just opposite to that of Spread star.

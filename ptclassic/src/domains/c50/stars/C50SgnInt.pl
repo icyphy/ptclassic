@@ -14,9 +14,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}	
 	location { C50 main library }
-	explanation { 
+	htmldoc {
 This star outputs the signum of its input.
-.Id "signum"
+<a name="signum"></a>
 The output is either 0 or 1
 	}
 	execTime {

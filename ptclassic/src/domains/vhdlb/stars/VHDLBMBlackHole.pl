@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
         }
         location { New_Stars directory }
-        explanation {
+	htmldoc {
 Simply ignores all incoming data (integers) from the multi-port.
         }
 	hinclude { "ConstIters.h" }

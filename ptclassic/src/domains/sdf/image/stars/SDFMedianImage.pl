@@ -21,12 +21,12 @@ It also smooths out textures, so it is a useful pre-processing step
 before edge detection.  It removes inter-field flicker quite well
 when displaying single frames from a moving sequence.
 	}
-	explanation {
-The \fIFilterWidth\fR parameter must be an odd, positive integer.
+	htmldoc {
+The <i>FilterWidth</i></b> parameter must be an odd, positive integer.
 Pixels at the image boundaries are copied and not median filtered.
-.Id "filter, median"
-.Id "image, median filter"
-.Id "median filtering"
+<a name="filter, median"></a>
+<a name="image, median filter"></a>
+<a name="median filtering"></a>
 	}
 
 	constructor {

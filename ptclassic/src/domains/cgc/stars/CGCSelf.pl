@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This is a star for recursion.  At runtime, it appears to contain
 a clone of the galaxy whose name is given by "recurGal".
 That galaxy is supplied with the input particles and executed.

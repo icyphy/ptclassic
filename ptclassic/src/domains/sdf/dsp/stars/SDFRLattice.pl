@@ -16,11 +16,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
-.pp
+	htmldoc {
+<p>
 This star implements a recursive lattice filter.
 To load filter coefficients from a file,
-simply replace the default coefficients with the string "<filename".
+simply replace the default coefficients with the string "&lt;filename".
 It is not advisable to use an absolute path name as part of the file name.
 Instead, the path name should be relative to a known directory,
 such as the user's home directory referenced by the tilde character
@@ -28,42 +28,40 @@ or another known directory referenced by an environment variable.
 This will allow the RLattice filter to work as expected regardless of
 the directory in which Ptolemy actually runs and regardless of
 future file system reorganizations.
-.pp
-.nf
-.na
+<p>
+<pre>
+<pre>
 The structure is as follows:
-.cs R 18
 
      y[0]          y[1]                 y[n-1]           y[n]
-X(n) ---(+)->--o-->----(+)->--o--->-- ... ->--(+)->--o--->---o--->  Y(n)
-          \\   /          \\   /                  \\   /        |
+X(n) ---(+)-&gt;--o--&gt;----(+)-&gt;--o---&gt;-- ... -&gt;--(+)-&gt;--o---&gt;---o---&gt;  Y(n)
+          \   /          \   /                  \   /        |
          +Kn /        +Kn-1 /                  +K1 /         |
             X              X                      X          |
-         -Kn \\        -Kn-1 \\                  -K1 \\         V
-          /   \\          /   \\                  /   \\        |
-        (+)-<--o--[z]--(+)-<--o--[z]- ... -<--(+)-<--o--[z]--/    
+         -Kn \        -Kn-1 \                  -K1 \         V
+          /   \          /   \                  /   \        |
+        (+)-&lt;--o--[z]--(+)-&lt;--o--[z]- ... -&lt;--(+)-&lt;--o--[z]--/    
                w[1]           w[2]                   w[n]
 
-.cs R
-.fi
+</pre>
 where the [z] are unit delays and the (+) are adders
 and "y" and "z" are defined in the code.
-.ad
-.pp
+</pre>
+<p>
 The reflection (or PARCOR) coefficients should be specified
 left to right, K1 to Kn as above.
 Using exactly the same coefficients in the
-.c Lattice
+<tt>Lattice</tt>
 star will result in precisely the inverse transfer function.
 The default reflection coefficients give the following transfer function:
-.EQ
+<pre>
 H(z) ~=~ 1 over { 1 ~-~ 2 z sup -1 ~+~ 1.91z sup -2 ~-~ 0.91z sup -3 ~+~
 0.205z sup -4 } ~.
-.EN
+</pre>
 Hence, the same coefficients in the
-.c Lattice
-star will give transfer function $H sup -1 (z)$.
-.pp
+<tt>Lattice</tt>
+star will give transfer function <i>H <sup>-</i>1<i></sup> </i>(<i>z</i>)<i></i>.
+<p>
 Note that the definition of reflection coefficients is not quite universal
 in the literature.  The reflection coefficients in references [2] and [3]
 are the negative of the ones used by this star, which
@@ -72,15 +70,15 @@ and to the definition of partial-correlation (PARCOR)
 coefficients in the statistics literature.
 The signs of the coefficients used in this star are appropriate for values
 given by the LevDur and Burg stars.
-.UH References
-.ip [1]
+<h3>References</h3>
+<p>[1]  
 J. Makhoul, "Linear Prediction: A Tutorial Review",
-\fIProc. IEEE\fR, Vol. 63, pp. 561-580, Apr. 1975.
-.ip [2]
-S. M. Kay, \fIModern Spectral Estimation: Theory & Application\fR,
+<i>Proc. IEEE</i></b>, Vol. 63, pp. 561-580, Apr. 1975.
+<p>[2]  
+S. M. Kay, <i>Modern Spectral Estimation: Theory & Application</i></b>,
 Prentice-Hall, Englewood Cliffs, NJ, 1988.
-.ip [3]
-S. Haykin, \fIModern Filters\fR, MacMillan Publishing Company,
+<p>[3]  
+S. Haykin, <i>Modern Filters</i></b>, MacMillan Publishing Company,
 New York, 1989.
 	}
 	seealso { IIR, Lattice }

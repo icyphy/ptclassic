@@ -20,16 +20,8 @@ TRUE only when the outcome of the test changes from TRUE to FALSE or FALSE
 to TRUE.  In this case, the first output is always TRUE.  This star outputs
 0 on FALSE and 1 on TRUE.
 	}
-	explanation {
-To implement the tests "<" or "<=", simply reverse the inputs.
-.ir "comparison"
-.ir "Boolean test"
-.ir "equals"
-.ir "not equals"
-.ir "less than"
-.ir "less than or equals"
-.ir "greater than"
-.ir "greater than or equals"
+	htmldoc {
+To implement the tests "&lt;" or "&lt;=", simply reverse the inputs.
 	}
 	input {
 		name { upper }

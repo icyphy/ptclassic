@@ -24,9 +24,9 @@ This star can be used as a base class to implement slightly different
 motion compensation algorithms. For example, synchronization techniques
 can be added or reduced-search motion compensation can be performed.
   }
-  explanation {
-.Id "motion compensation"
-.Id "image, motion compensation"
+	htmldoc {
+<a name="motion compensation"></a>
+<a name="image, motion compensation"></a>
   }
 
   hinclude { "Matrix.h", "Error.h" }

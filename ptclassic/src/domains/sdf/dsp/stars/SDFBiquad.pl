@@ -14,29 +14,27 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
-.lp
+	htmldoc {
+<p>
 This two-pole, two-zero IIR filter has a transfer function of
-.EQ
+<pre>
 {n sub 0 ~+~ n sub 1 z sup -1 ~+~ n sub 2 z sup -2} over
 {1 ~+~ d sub 1 z sup -1 ~+~ d sub 2 z sup -2} ~.
-.EN
-.Id "filter, biquad"
-.Id "biquad filter"
-.Id "filter, IIR"
-.Id "IIR filter"
+</pre>
+<a name="filter, biquad"></a>
+<a name="biquad filter"></a>
+<a name="filter, IIR"></a>
+<a name="IIR filter"></a>
 It is implemented in direct form II [1].
 The default coefficients give a Butterworth filter with a
 cutoff of 0.1 times sampling frequency.
-.Ir "filter, Butterworth"
-.Ir "Butterworth filter"
-.lp
-\fBThis star will eventually be replaced by a general IIR star.\fR
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+<a name="filter, Butterworth"></a>
+<a name="Butterworth filter"></a>
+<p>
+<b>This star will eventually be replaced by a general IIR star.</i></b>
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	input {

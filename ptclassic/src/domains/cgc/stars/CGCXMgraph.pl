@@ -11,14 +11,14 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
-The input signal is plotted using the \fIpxgraph\fR program.
+	htmldoc {
+The input signal is plotted using the <i>pxgraph</i></b> program.
 This program must be in your path, or this star will not work!
-The \fItitle\fR parameter specifies a title for the plot.
-The \fIsaveFile\fR parameter optionally specifies a file for
+The <i>title</i></b> parameter specifies a title for the plot.
+The <i>saveFile</i></b> parameter optionally specifies a file for
 storing the data in a syntax acceptable to pxgraph.
 A null string prevents any such storage.
-The \fIoptions\fR string is passed directly to the pxgraph program
+The <i>options</i></b> string is passed directly to the pxgraph program
 as command-line options.  See the manual section describing pxgraph
 for a complete explanation of the options.
 	}

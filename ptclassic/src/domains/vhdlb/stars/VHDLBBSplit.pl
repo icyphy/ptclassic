@@ -13,7 +13,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow the user to easily "split" a bus (a multi-port),
 this star is written to allow the user to send a portion of a bus into one
 destination while the remaining portion of the same bus to another destination.

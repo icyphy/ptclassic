@@ -22,14 +22,14 @@ limitation of liability, and disclaimer of warranty provisions.
 
        location { DE ATM library }
 
-       explanation {
+	htmldoc {
 An SDF-in-DE wormhole, in order to fire, requires at least one message
 on each of its input ports.  When connecting a DE networking star to
 an SDF-in-DE wormhole describing a packet switch and triggered on its
-\fIdemand\fR input, this star will accept the first message on each of its
+<i>demand</i></b> input, this star will accept the first message on each of its
 inputs and pass them through to their respective outputs.  For inputs
 without messages, this star produces a null
-.c VoiceData
+<tt>VoiceData</tt>
 message to send on the corresponding outputs.  Thus, execution requirements
 of the wormhole will always be satisfied.
        }

@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
+	htmldoc {
 Each input is copied to every output.  This is done by the way the buffers
 are laid out; no code is required.
 	}

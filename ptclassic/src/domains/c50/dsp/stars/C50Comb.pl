@@ -12,8 +12,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
-.pp
+	htmldoc {
+<p>
 A comb filter with a one-pole lowpass filter
 in the delay loop.  The pole location is given
 by the pole parameter.  The reverberation time

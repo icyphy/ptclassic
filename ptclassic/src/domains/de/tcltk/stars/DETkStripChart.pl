@@ -16,29 +16,29 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    explanation {
+	htmldoc {
 This star is derived from DETclScript, and does little more than
 document the functionality of the script and specify the script file
 to be loaded.
-.pp
-The \fIyRange\fR parameter specifies the vertical range of each plot.
+<p>
+The <i>yRange</i></b> parameter specifies the vertical range of each plot.
 Each range is specified as a pair of number in the form (low,high).
 If only one range is specified, then it applied to all plots.  If more
 than one range is specified, then one range should be specified for each 
 input.  I.e., then number of ranges specified should equal the number of 
 inputs.
-.pp
-The \fITimeWindow\fR parameter specifies the amount of simulated time
+<p>
+The <i>TimeWindow</i></b> parameter specifies the amount of simulated time
 that can be viewed at one time in the window.  In other words, it is
 the time represented by the width of the plot window.
-.pp
-The \fIPlotStyle\fR parameter determines the plotting style.
+<p>
+The <i>PlotStyle</i></b> parameter determines the plotting style.
 There are currently three styles: zero order hold,
 connected lines, and unconnected dots.
 These are specified by the strings "hold", "dot", or "connect".
 The PlotStyle can be different for each input porthole.
-.pp
-The \fIPlotLabels\fR parameter specifies labels for each plot.
+<p>
+The <i>PlotLabels</i></b> parameter specifies labels for each plot.
 It can take any of three forms.  If it is empty, or has just the single 
 string "default", then it uses the name of the porthole connected to the
 corresponding input.  Alternatively, it can specify one label for each 

@@ -8,7 +8,7 @@ Receive star between Unix processors.
 	author { Soonhoi Ha }
 	copyright { 1991 The Regents of the University of California }
 	location { CGC local library }
-	explanation {
+	htmldoc {
 Produce code for inter-process communication (receive-side)
 	}
 	private {

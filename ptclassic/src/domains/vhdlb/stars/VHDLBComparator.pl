@@ -12,7 +12,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 This star simply compares the two floating point numbers at the input.  If the
 two numbers are equal then a logical high (1) is passed to the output.  Other-
 wise a logical low (0) is passed to the output.  The output is changed when-

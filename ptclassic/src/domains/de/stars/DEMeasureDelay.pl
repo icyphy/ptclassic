@@ -15,18 +15,18 @@ Measure the time difference between the first arrival
 and the second arrival of an event with the same value.
 The second arrival and the time difference are each sent to outputs.
 	}
-	explanation {
+	htmldoc {
 This star measures the time difference of the first and second arrival of
 particles with the same value on the same input.
 When the first particle with a particular data value
 arrives, it is stored.
 When the second particle with a particular data value arrives,
 it is matched to the first arrival in storage, and
-a \fItimeDiff\fR
+a <i>timeDiff</i></b>
 output is generated with value equal to the arrival time difference.
 The data value itself is also
-sent to the \fIoutput\fR port upon the second arrival.
-.pp
+sent to the <i>output</i></b> port upon the second arrival.
+<p>
 Packets are only considered to have the "same value" if they are copied
 from a common source (so that each packet shares the same common PacketData
 structure).  This suffices for common uses of MeasureDelay where the

@@ -19,7 +19,7 @@ output integer will always be non-negative.
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CGC demo library }
-    explanation {
+	htmldoc {
     }
     input {
 	name {input}

@@ -38,7 +38,7 @@ If the inputs are fields, then the first field should contain
 frame lines 1, 3, 5, etc. and the second field should contain
 lines 0, 2, 4, 6, etc
   }
-  explanation {
+	htmldoc {
 At the end of a simulation this star pops up an X window and
 loads in a sequence of video frames for display.
 Pressing the left or right mouse buttons inside the window plays
@@ -52,38 +52,38 @@ The shift key and right mouse button loops through the video
 sequence alternately forwards and backwards.
 To end a loop playback, press any mouse button in the video window.
 To close the window type "q" inside.
-.pp
-This star uses programs from the \fIUtah Raster Toolkit\fR
+<p>
+This star uses programs from the <i>Utah Raster Toolkit</i></b>
 to display moving video in an X window.
 The Utah Raster Toolkit is a collection of software tools from the
 University of Utah.
 These programs are available free via anonymous ftp.
 To get the software:
-.sp
-unix> ftp cs.utah.edu
-.sp
-ftp name> anonymous
-.br
-ftp passwd> YOUR EMAIL ADDRESS
-.br
-ftp> binary
-.br
-ftp> cd pub
-.br
-ftp> get urt-3.0.tar.Z
-.br
-ftp> quit
-.sp
-unix> uncompress urt-3.0.tar.Z
-.br
-unix> tar xvf urt-3.0.tar
-.sp
+<p>
+unix&gt; ftp cs.utah.edu
+<p>
+ftp name&gt; anonymous
+<br>
+ftp passwd&gt; YOUR EMAIL ADDRESS
+<br>
+ftp&gt; binary
+<br>
+ftp&gt; cd pub
+<br>
+ftp&gt; get urt-3.0.tar.Z
+<br>
+ftp&gt; quit
+<p>
+unix&gt; uncompress urt-3.0.tar.Z
+<br>
+unix&gt; tar xvf urt-3.0.tar
+<p>
 Then, change directories to the new urt_3.0 directory and build the
 software.
 To use the software, put the name of the directory with the URT
-executable files into the definition of the \fIpath\fR variable
+executable files into the definition of the <i>path</i></b> variable
 inside the .cshrc file in your home directory.
-.pp
+<p>
 These instructions are appropriate as of December 1992 but 
 may have changed.
   }

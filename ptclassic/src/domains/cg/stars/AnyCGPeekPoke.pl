@@ -12,30 +12,30 @@ limitation of liability, and disclaimer of warranty provisions.
 }
 location { CG Star Directory }
 ccinclude { "Galaxy.h","EventHorizon.h","MultiTarget.h"  }
-explanation {
+	htmldoc {
 This star allows for peek/poke communications as was described in, currently
 this is only supported in multitargets.
-.pp
+<p>
 J.L. Pino, T.M. Parks and E.A. Lee, "Mapping Multiple Independent Synchronous
-Dataflow Graphs onto Heterogeneous Multiprocessors," \fIProc. of IEEE Asilomar
-Conf. on Signals, Systems, and Computers\fR, Pacific Grove, CA,
+Dataflow Graphs onto Heterogeneous Multiprocessors," <i>Proc. of IEEE Asilomar
+Conf. on Signals, Systems, and Computers</i></b>, Pacific Grove, CA,
 Oct. 31 - Nov. 2, 1994.
-<http://ptolemy.eecs.berkeley.edu/papers/hierStaticSched-asilomar-95>
-.pp
+&lt;http://ptolemy.eecs.berkeley.edu/papers/hierStaticSched-asilomar-95&gt;
+<p>
 The peek/poke facilities implement only a limited part of the
 functionality described in the Asilomar paper.
-.pp
-The first two user settable states are the \fIPoke_procId\fR and
-\fIPeek_procId\fR.  These must be set to the processor id where the poke
+<p>
+The first two user settable states are the <i>Poke_procId</i></b> and
+<i>Peek_procId</i></b>.  These must be set to the processor id where the poke
 actor and peek actor are to be mapped to.
-.pp
-The next user settable state is \fIblockSize\fR.  With this state a
-peek/poke link can transfer \fIblockSize\fR number of consequtive
+<p>
+The next user settable state is <i>blockSize</i></b>.  With this state a
+peek/poke link can transfer <i>blockSize</i></b> number of consequtive
 samples.
-.pp
-The final user settable state is \fIupdateRate\fR.  This state can be
+<p>
+The final user settable state is <i>updateRate</i></b>.  This state can be
 considered as a nondeterminate downsample factor for the link.
-The link will be updated at most once every \fIupdateRate\fR number of
+The link will be updated at most once every <i>updateRate</i></b> number of
 iterations of one of the two disconnected SDF graphs.  The side which
 this effects is determined by the specific peek/poke implementation.
 }

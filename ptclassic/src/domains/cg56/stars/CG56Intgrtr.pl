@@ -15,13 +15,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 nonlinear functions library }
-	explanation {
-.Id "filter, integrator"
-Leakage is controlled by the \fIfeedbackGain\fR state (default 1.0).
+	htmldoc {
+<a name="filter, integrator"></a>
+Leakage is controlled by the <i>feedbackGain</i></b> state (default 1.0).
 The output is the data input plus feedbackGain*state, where state is the
 previous output.
-.pp
-Overflow is controlled by the \fIonOverflow\fR state (default wrap around).
+<p>
+Overflow is controlled by the <i>onOverflow</i></b> state (default wrap around).
 The integrator can either be set to wrap around (default), saturate or reset.
 	}
 	input {

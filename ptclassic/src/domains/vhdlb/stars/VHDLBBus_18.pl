@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 Since ptolemy doesn't allow the user to explicitly extract individual data
 out of a bus (a multi-port), this star is written to allow the user
 to convert an 8-bit-wide bus into 8 explicit wires.  If the output bus is not

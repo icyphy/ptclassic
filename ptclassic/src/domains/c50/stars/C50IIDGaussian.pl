@@ -11,20 +11,20 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.PP
-.Id "Gaussian noise"
-.Id "noise, Gaussian"
+	htmldoc {
+<p>
+<a name="Gaussian noise"></a>
+<a name="noise, Gaussian"></a>
 This star generates a sequence of random output samples with a Gaussian
 distribution (mean = 0, standard deviation = 0.1).
-.PP
-.Ir "central limit theorem"
+<p>
+<a name="central limit theorem"></a>
 According to the central limit theorem, the sum of N random variables
 approaches a Gaussian distribution as N approaches infinity.
-This star generates an output number by summing \fInoUniforms\fR uniform
+This star generates an output number by summing <i>noUniforms</i></b> uniform
 random variables.
-.PP
-The parameters \fIseed\fR and \fImultiplier\fR control the generation of the
+<p>
+The parameters <i>seed</i></b> and <i>multiplier</i></b> control the generation of the
 random number. 
 	}
 

@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 Outputs absolute value of the input.
-.Id "absolute value"
+<a name="absolute value"></a>
 	}
 	input {
 		name { input }

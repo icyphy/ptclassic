@@ -16,25 +16,25 @@ Wireless Channel - Equivalent Complex Baseband Channel.
 This model takes multipath propagation into account.
 	}
 
-        explanation {
+	htmldoc {
 The Wireless Channel Star assumes complex baseband input.
-The two "most" important parameters are \fIRMSDelaySpread\fR and
-the \fISymbolRate\fR (sample rate).
-Symbol \fIPeriods\fR (1/\fISymbolRate\fR) which are not significantly
-less than the \fIRMSDelaySpread\fR will result in an environment
+The two "most" important parameters are <i>RMSDelaySpread</i></b> and
+the <i>SymbolRate</i></b> (sample rate).
+Symbol <i>Periods</i></b> (1/<i>SymbolRate</i></b>) which are not significantly
+less than the <i>RMSDelaySpread</i></b> will result in an environment
 that is essentially not a multipath channel.
 
 We make the following assumptions.
 First, that the signal velocity is equal to the speed of light.
 Second, the signal propagation distance varies about the
-\fIMeanSeparationDistance\fR random phase variation.
+<i>MeanSeparationDistance</i></b> random phase variation.
 Note that this Star does not consider shadowing effects.
 
 This star is designed primarily for modeling indoor wireless 
 channels but can be adapted to outdoor mobile communication
-channels by changing the \fIChannelType\fR parameter from the 
+channels by changing the <i>ChannelType</i></b> parameter from the 
 default of "Indoor" to "Outdoor."
-Given this change, the \fIDopplerSpread\fR (which is otherwise unused)
+Given this change, the <i>DopplerSpread</i></b> (which is otherwise unused)
 will be incorporated via the coherence bandwidth to model the degree
 of time variation within the channel.
 One problem with this scheme is that high symbol rates will require

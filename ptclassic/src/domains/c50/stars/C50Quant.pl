@@ -14,16 +14,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-The star quantizes the input to one of $N+1$ possible output levels
-using $N$ thresholds.
-For an input less than or equal to the $N$th threshold,
+	htmldoc {
+The star quantizes the input to one of <i>N+</i>1<i></i> possible output levels
+using <i>N</i> thresholds.
+For an input less than or equal to the <i>N</i>th threshold,
 but larger than all previous thresholds,
-the output will be the $N$th level.
+the output will be the <i>N</i>th level.
 If the input is greater than all thresholds,
-the output is the $(N+1)$th level.
-The \fIlevels\fR parameter must be one greater than the number
-of \fIthresholds\fR.
+the output is the <i></i>(<i>N+</i>1<i></i>)<i></i>th level.
+The <i>levels</i></b> parameter must be one greater than the number
+of <i>thresholds</i></b>.
 	}
 	input {
 		name {input}

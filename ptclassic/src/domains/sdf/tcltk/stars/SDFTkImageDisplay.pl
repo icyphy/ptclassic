@@ -16,8 +16,7 @@ limitation of liability, and disclaimer of warranty provisions.
 Invoke a Tcl/Tk script to render an image by adapting to the state
 of the color map for robust image rendering.
 	}
-	explanation { 
-.IR "image rendering"
+	htmldoc {
 When the star has one input port, the star treats inputs matrices as
 black-and-white images.  When the star has three input ports, the
 star treats the matrices as given the red, green, blue intensities,

@@ -17,7 +17,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This FIR filter produces fast code by eliminating the need for a 
 Circular buffer.
 	}

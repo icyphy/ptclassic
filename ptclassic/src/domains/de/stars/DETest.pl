@@ -19,22 +19,14 @@ If "crossingsOnly" parameter is TRUE, then an output event is generated only
 when the value of the output changes.  Hence, the output events will always
 alternate between TRUE and FALSE.  This star outputs 0 on FALSE and 1 on TRUE.
 	}
-	explanation {
+	htmldoc {
 Like all DE stars, this star will fire when it gets an event on either input.
 If no event has arrived on the other input, then the value of the other input
 is assumed to be zero.
-.pp
+<p>
 Even if "crossingsOnly" is TRUE, the first test result will always be sent
 to the output.  That first test result occurs when the first event arrives
 on either input.
-.ir "comparison"
-.ir "Boolean test"
-.ir "equals"
-.ir "not equals"
-.ir "less than"
-.ir "less than or equals"
-.ir "greater than"
-.ir "greater than or equals"
 	}
 	input {
 		name { upper }

@@ -11,7 +11,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
+	htmldoc {
 This star outputs the bit-wise exclusive-or of input1 and input2.
 	}
 	input {

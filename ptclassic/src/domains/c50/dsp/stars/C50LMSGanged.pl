@@ -12,7 +12,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-        explanation {
+	htmldoc {
 Coefficients from the adaptive filter are used for the FIR filter in parallel.
 The order is determined from the number of initial coefficients.
 Initial coefficients default to a lowpass filter of order 8.

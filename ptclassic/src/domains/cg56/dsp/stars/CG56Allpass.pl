@@ -12,13 +12,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
-        explanation {
+	htmldoc {
 An all-pass filter with one pole and one zero.
 The location of these is given by the pole-zero input [1, fig. 1a].
-.UH REFERENCES
-.ip [1]
+<h3>References</h3>
+<p>[1]  
 J.A. Moore, "About this reverberation business",
-\fIComputer Music Journal\fR,
+<i>Computer Music Journal</i></b>,
 vol. 3, no. 2, pp. 13-28, June, 1979.
 	}
 

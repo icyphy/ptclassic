@@ -14,9 +14,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
+	htmldoc {
 We make no attempt to be heroic and handle all cases as was done with Gabriel.
-The only special case is for a \fIgain\fR of 1.
+The only special case is for a <i>gain</i></b> of 1.
 We eliminate ourselves from the circuit in that case.
 	}
 	protected {

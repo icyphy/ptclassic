@@ -19,8 +19,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
-.Ir "decimation"
+	htmldoc {
+<a name="decimation"></a>
 	}
 	input {
 		name{input}

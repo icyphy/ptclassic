@@ -18,11 +18,11 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
+	htmldoc {
 Once enabled by an input event,
 this star generates an output at the stopTime of the DEScheduler controlling 
 the star.  It is useful, for example, to clock the
-.c Statistics
+<tt>Statistics</tt>
 star in order to observe its final outputs at the end
 of a simulation.
 It also has interesting uses within a wormhole.
@@ -33,11 +33,11 @@ Suppose, for example, that a DE subsystem is used within an SDF
 system.  The DE subsystem is required to produce output particles,
 so that the SDF model of computation is obeyed.
 The
-.c StopTimer
+<tt>StopTimer</tt>
 star can be used to produce the output events,
 or to trigger production of those output events, by
 clocking the
-.c Sampler
+<tt>Sampler</tt>
 star for example.
 	}
 	input {

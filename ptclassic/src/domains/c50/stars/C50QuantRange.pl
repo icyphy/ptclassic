@@ -14,8 +14,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.PP
+	htmldoc {
+<p>
 The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 For an input less than or equal to the Nth threshold,

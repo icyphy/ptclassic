@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG demo library }
-	explanation {
+	htmldoc {
 This star exists only for demoing the generic CG domain.
 It outputs lines of comments, instead of code.
 	}

@@ -11,9 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location  { SDF ATM library }
-    explanation {  
+	htmldoc {
 This star maintains a routing table which is updated by the
-.c MQControl
+<tt>MQControl</tt>
 star.
 For input packets, they have their headers reassigned according
 to the table's data.

@@ -15,8 +15,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
-.Id "phase unwrapping"
+	htmldoc {
+<a name="phase unwrapping"></a>
 This is not a very sophisticated phase unwrapper, but for many applications,
 it does the job.
 	}

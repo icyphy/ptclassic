@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, an ddisclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-Generates an integer ramp signal, starting at \fIvalue\fR (default 0)
-with step size \fIstep\fR (default 1) saturating upon reaching largest
-integer if \fIsaturation\fR is "YES".
+	htmldoc {
+Generates an integer ramp signal, starting at <i>value</i></b> (default 0)
+with step size <i>step</i></b> (default 1) saturating upon reaching largest
+integer if <i>saturation</i></b> is "YES".
 	}
 	output {
 		name { output }

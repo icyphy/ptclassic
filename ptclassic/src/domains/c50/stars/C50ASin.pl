@@ -11,10 +11,10 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Id "arcsine"
-.Id "sine, inverse"
-.Id "inverse sine"
+	htmldoc {
+<a name="arcsine"></a>
+<a name="sine, inverse"></a>
+<a name="inverse sine"></a>
 The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 }
 	seealso { ACos, Cos, Sin }

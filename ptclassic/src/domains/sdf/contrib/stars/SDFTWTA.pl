@@ -5,7 +5,7 @@ defstar {
   version { $Id$ }
   location { SDF user contribution library }
   author { N. Becker }
-  explanation {
+	htmldoc {
 A TWTA amplifier is modeled by its transfer characteristic.
 Data points for output backoff (dB) vs. input backoff (dB) and
 phase (degree) vs. input backoff are supplied in three arrays.

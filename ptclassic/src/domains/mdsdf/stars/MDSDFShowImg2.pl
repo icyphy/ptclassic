@@ -29,10 +29,10 @@ can choose whether or not the image file is saved or deleted.
 The image frame number is appended to the root filename to form the
 complete filename of the displayed image.
   }
-  explanation {
-.Id "image display"
-.Ir "PGM image format"
-.Ir "image format, PGM"
+	htmldoc {
+<a name="image display"></a>
+<a name="PGM image format"></a>
+<a name="image format, PGM"></a>
   }
   ccinclude {
     "SubMatrix.h" , <std.h> , <stdio.h>, "Error.h"

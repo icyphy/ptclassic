@@ -14,17 +14,17 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 Creates a histogram with the xgraph program.  It is assumed that "xgraph"
 is on your path, or this will not work!
-The \fIbinWidth\fR parameter specifies how wide histogram
+The <i>binWidth</i></b> parameter specifies how wide histogram
 bin will be.  The number of bins is determined automatically from
 the input data.
-.pp
-By default, the xgraph program gets the options ``-bar -nl -brw \fIhalfw\fR''
-where \fIhalfw\fR is half the bin width.
-.Ir "xgraph program"
-.Id "histogram, X window"
+<p>
+By default, the xgraph program gets the options ``-bar -nl -brw <i>halfw</i></b>''
+where <i>halfw</i></b> is half the bin width.
+<a name="xgraph program"></a>
+<a name="histogram, X window"></a>
 	}
 	input {
 		name { input }

@@ -11,12 +11,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
+	htmldoc {
 Repeat repeats each input Particle the specified number of times
-(\fInumTimes\fR) on the output.  Note that this is a sample rate
+(<i>numTimes</i></b>) on the output.  Note that this is a sample rate
 change, and hence affects the number of invocations of downstream
 stars.
-.UH IMPLEMENTATION
+<h3>IMPLEMENTATION</h3>
 We must be careful to avoid large interrupt latencies.  To be optimal
 this requires the aid of the target.  For now, we just assume the
 worst case.

@@ -20,76 +20,76 @@ The replacement block(s) are connected as specified by "input_map"
 and "output_map", using the existing connections to the Map star.
 Their parameters are determined by "parameter_map".
 	}
-	explanation {
+	htmldoc {
 See the documentation for the
-.c BaseHiOrdFn
+<tt>BaseHiOrdFn</tt>
 star, from which this is derived, for background information.
 The star is replaced by one or more instances of the block with
-name given by \fIblockname\fR at setup time, before the scheduler is invoked.
-.UH "Number of replacement blocks"
-.pp
+name given by <i>blockname</i></b> at setup time, before the scheduler is invoked.
+<h3>Number of replacement blocks</h3>
+<p>
 The number of instances of the replacement block
 is determined by the number of input or
 output connections that have been made to the
-.c Map
+<tt>Map</tt>
 star.
 Suppose the
-.c Map
-star has $M sub I$ inputs and $M sub O$ outputs connected to it.
-Suppose further that the replacement block has $B sub I$ input
-ports and $B sub O$ output ports.
+<tt>Map</tt>
+star has <i>M <sub>I</sub></i> inputs and <i>M <sub>O</sub></i> outputs connected to it.
+Suppose further that the replacement block has <i>B <sub>I</sub></i> input
+ports and <i>B <sub>O</sub></i> output ports.
 Then
-.EQ
+<pre>
 N ~=~ {M sub I} over {B sub I} ~=~ {M sub O} over {B sub O}
-.EN
+</pre>
 is the number of instances that will be created.
 It is an error for this second equality not to be satisfied.
-.UH "How the inputs and outputs are connected"
-.pp
-The first $B sub I$ connections to the
-.c Map
+<h3>How the inputs and outputs are connected</h3>
+<p>
+The first <i>B <sub>I</sub></i> connections to the
+<tt>Map</tt>
 star will be connected to the inputs of the first instance of the
 replacement blocks.
 The names of the inputs to the replacement block should be listed
-in the \fIinput_map\fR parameter in the order in which they should
+in the <i>input_map</i></b> parameter in the order in which they should
 be connected.
-There should be exactly $B sub I$ names in the \fIinput_map\fR list.
-The next $B sub I$ connections will be connected to the next
-replacement block, again using the ordering specified in \fIinput_map\fR.
+There should be exactly <i>B <sub>I</sub></i> names in the <i>input_map</i></b> list.
+The next <i>B <sub>I</sub></i> connections will be connected to the next
+replacement block, again using the ordering specified in <i>input_map</i></b>.
 Similarly for the outputs.
 If there are no inputs at all, then the number of instances
 is determined by the outputs, and vice versa.
-.UH "Substituting blocks with multiple inputs or outputs"
-.pp
+<h3>Substituting blocks with multiple inputs or outputs</h3>
+<p>
 When the replacement block has a multiple input port or a multiple
 output port, the name given in the input_map parameter should be
 the name of the multiple port, repeated for however many instances
 of the port are desired.
 For example, the
-.c Add
+<tt>Add</tt>
 block has a multiple input port named "input".
 If we want the replacement block(s) to have two inputs,
-then \fIinput_map\fR should be "input input".
+then <i>input_map</i></b> should be "input input".
 If we want three inputs in each replacement block, then
-\fIinput_map\fR should be "input input input".
-.UH "A note about data types"
-.pp
+<i>input_map</i></b> should be "input input input".
+<h3>A note about data types</h3>
+<p>
 In this star, the output data type is ANYTYPE, and the type
 will be derived from the type of the input(s).
 This creates a problem when there are no inputs.
 Thus, the zero-input version of this star is implemented as a
 family of derived stars called
-.c ParSource
+<tt>ParSource</tt>
 stars, each with a particular type of output.
 There are other problems as well with this mechanism, in that
 when type resolution is done, before the block substitution occurs,
 there is no information about the substitution block.
 It is best, therefore, when using the
-.c Map
+<tt>Map</tt>
 star, to make all type conversions explicit.
-.UH "Bugs"
-.pp
-Repeated names in the \fIinput_map\fR or \fIoutput_map\fR
+<h3>Bugs</h3>
+<p>
+Repeated names in the <i>input_map</i></b> or <i>output_map</i></b>
 for non-multiple inputs are an error.
 However, this is not detected.
 Results could be unexpected.

@@ -14,29 +14,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
     location { CG56 io library }
     hinclude { <minmax.h> }
-    explanation {
-.Ir "slider bar"
-.Ir "scale"
+	htmldoc {
+<a name="slider bar"></a>
+<a name="scale"></a>
 This is an asynchronous source star (like the Const star) with
 a particular X windows graphical interface on the host.
 It is indended that this star be used with a graphical target monitor
 (.e.g., qdm_s56x).
-.LP
-The \fBslider\fR widget presents the user with a "ruler" along which
+<p>
+The <b>slider</i></b> widget presents the user with a "ruler" along which
 the user may slide a marker.  The value output corresponds to the
 current location of the slider.
-The \fIdspMin\fR and \fIdspMax\fR states control the range of values
+The <i>dspMin</i></b> and <i>dspMax</i></b> states control the range of values
 that will be output on the DSP.
-The \fIhostMin\fR and \fIhostMax\fR states control the range of values
+The <i>hostMin</i></b> and <i>hostMax</i></b> states control the range of values
 the user sees (the limits of the "ruler"),
-and \fIhostInitVal\fR is the initial value in the host coordinate set.
-The host values are \fBalways\fR linearly mapped onto the dsp values.
-The \fIscale\fR parameter controls how host values are displayed to
+and <i>hostInitVal</i></b> is the initial value in the host coordinate set.
+The host values are <b>always</i></b> linearly mapped onto the dsp values.
+The <i>scale</i></b> parameter controls how host values are displayed to
 the user (linear,logrithmic,db10,db20).  It is important to note that
 this controls only the values displayed and not the mapping from host
 values to dsp values.
-.UH IMPLEMENTATION
-.pp
+<h3>IMPLEMENTATION</h3>
+<p>
 This is a Ptolemy replacement for Gabriel host slider system.
 Unlike the Gabriel system, there is no need to specify a "command" to execute
 to bring up the slider bars, since Ptolemy targets automatically arrange for

@@ -12,8 +12,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 library }
-    explanation {
-This derived star adds an additional \fIerror\fR input used to control
+	htmldoc {
+This derived star adds an additional <i>error</i></b> input used to control
 the skew.
 The error value is added to an internal accumulator.
 
@@ -33,9 +33,9 @@ More sophisticated applications will probably want to control skewing
 of input and output independently; this would require the SSI star to
 be operating in dual-buffer mode.
 
-When the parameter \fIinternalAccum\fR is false, it is assumed that
-the \fIerror input\fR is the output from an
-.c SSISkew
+When the parameter <i>internalAccum</i></b> is false, it is assumed that
+the <i>error input</i></b> is the output from an
+<tt>SSISkew</tt>
 star.
 A positive value is treated as an overflow, and a negative value is treated
 an underflow.

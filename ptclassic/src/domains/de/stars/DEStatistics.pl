@@ -18,12 +18,12 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
+	htmldoc {
 Calculate the time average and variance of the input values that have
 arrived since the last reset.  The execution order of the inputs is
-demand->reset->input.  Multiple simultaneous demand/reset inputs are
+demand-&gt;reset-&gt;input.  Multiple simultaneous demand/reset inputs are
 ignore except one.
-.pp
+<p>
 The computation is performed based on the zero-th order interpolation.
 When an input data enters, we assume that the data value is hold until
 the next input arrives.

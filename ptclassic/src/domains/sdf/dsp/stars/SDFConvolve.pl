@@ -14,7 +14,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 This star convolves two causal finite input sequences.
 In the current implementation, you should set the truncation
 depth larger than the number of output samples of interest.

@@ -10,7 +10,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The real-valued output of this star starts at zero and increments by
 "step" at every rising edge of the synchronization clock.
         }

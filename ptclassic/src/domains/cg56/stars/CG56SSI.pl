@@ -12,21 +12,21 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 io library }
-    explanation {
-.PP
+	htmldoc {
+<p>
 This star is a generic star to provide input/output for the 560001's
 SSI (Synchronous Serial Interface) port.
-.Ir "SSI port (Motorola DSP56001)"
-.Ir "synchronous serial interface (Motorola DSP56001)"
-.Ir "serial interface, synchronous (Motorola DSP56001)"
-.Ir "DSP56001 SSI port"
-.Ir "Motorola DSP56001 SSI port"
-.Ir "real-time I/O"
-.Ir "I/O, real-time"
+<a name="SSI port (Motorola DSP56001)"></a>
+<a name="synchronous serial interface (Motorola DSP56001)"></a>
+<a name="serial interface, synchronous (Motorola DSP56001)"></a>
+<a name="DSP56001 SSI port"></a>
+<a name="Motorola DSP56001 SSI port"></a>
+<a name="real-time I/O"></a>
+<a name="I/O, real-time"></a>
 It can implement both a synchronous, in-line interface based on polling,
 and an interrupt-driven interface.
-.Ir "interrupt-driven I/O"
-.Ir "polling I/O"
+<a name="interrupt-driven I/O"></a>
+<a name="polling I/O"></a>
 The star inputs one sample from each of the two input channels
 and outputs one sample to each of the two output channels each
 time it fires.
@@ -34,42 +34,42 @@ The samples from the star's two input ports are transmitted out the SSI port,
 and samples received from the SSI port are available on the star's two outputs.
 The star could be modified to support different sample rates on input
 and output.
-.PP
+<p>
 This star is commonly used as a base class for the Ariel Proport A/D and D/A
-.Ir "Ariel Proport"
-.Ir "Proport, Ariel"
+<a name="Ariel Proport"></a>
+<a name="Proport, Ariel"></a>
 converter and the modified Magnavox CD player.
-.Ir "Magnavox CD player"
-.Ir "CD player, Magnavox"
-.PP
+<a name="Magnavox CD player"></a>
+<a name="CD player, Magnavox"></a>
+<p>
 If the star is repeated in a schedule (for example, if it is
 connected to a star that consumes more than one sample each time
 it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the SSI and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the buffer size non-zero.
-The interrupt buffer holds at least \fIqueueSize\fR samples; the length
+The interrupt buffer holds at least <i>queueSize</i></b> samples; the length
 of the queue will be adjusted upward according to the number of schedule
 repetitions of the star.
-If \fIqueueSize\fR is negative, the negative of \fIqueueSize\fR is used
+If <i>queueSize</i></b> is negative, the negative of <i>queueSize</i></b> is used
 directly without adjusting it for the number of star repetitions.
 If stereo activity is occurring, the queue length will be doubled.
-.PP
-.Ir "realtime violation"
-If a realtime violation occurs and the parameter \fIabortOnRealtimeError\fR
+<p>
+<a name="realtime violation"></a>
+If a realtime violation occurs and the parameter <i>abortOnRealtimeError</i></b>
 is TRUE, execution will abort and one of the following error codes will
 be left in register y0:
-.ip "\fB123062\fR"
+<p><b>123062</i></b>  
 An interrupt occurred and the receive buffer was full.
-.ip "\fB123063\fR"
+<p><b>123063</i></b>  
 An interrupt occurred and the transmit buffer was empty.
-.UH "INTERRUPTS and QUEUES:"
-.pp
+<h3>INTERRUPTS and QUEUES:</h3>
+<p>
 When using interrupt-based code, the SSI port generates interrupts
 that are handled by an interrupt service routine (ISR).
-.Id "interrupt buffers"
-.Id "buffers, interrupt"
-.Id "queues, interrupt"
+<a name="interrupt buffers"></a>
+<a name="buffers, interrupt"></a>
+<a name="queues, interrupt"></a>
 The ISR transmits samples
 out of a xmit queue, and stores received samples in a recv queue.
 The synchronous star code transfers data between these queues
@@ -79,32 +79,32 @@ in time, a slot is either full (has a valid sample) or is empty.
 If a slot has valid data in it, bit #0 is cleared, otherwise it is set.
 There are two approaches to managing the memory and synchronization of
 these queues; these are described below.
-.UH "INTERRUPTS and DUAL-BUFFER QUEUEING:"
-.pp
+<h3>INTERRUPTS and DUAL-BUFFER QUEUEING:</h3>
+<p>
 Two buffers are maintained:
-.Id "dual-buffer queuing"
-.Id "queuing, dual-buffer"
+<a name="dual-buffer queuing"></a>
+<a name="queuing, dual-buffer"></a>
 a recv buffer and an xmit buffer.
 The interrupt handler reads from the SSI port, placing
 the word in the recv buffer and clears the bit; it then takes a word
 from the xmit buffer, sets bit #0 in the slot, and writes it to the SSI.
-.PP
+<p>
 The only reason to use dual-buffering is to support different recv and xmit
 rates.
 In this case two independent buffers are required with independent pointers
 for each stream.
 Note also that the SDF parameters of the star must correspond to the relative
 recv and xmit rates, or buffer overflow/underrun will occur.
-.PP
+<p>
 This star was originally written to use dual buffers, but has never
 (and still doesn't) support differing recv and xmit rates.
 The code preserves this style for future use, but in general it should
 not be used, because it is less efficient than symmetric queuing,
 described below.
-.UH "SYMMETRIC QUEUEING:"
-.pp
-.Id "symmetric queuing"
-.Id "queuing, symmetric"
+<h3>SYMMETRIC QUEUEING:</h3>
+<p>
+<a name="symmetric queuing"></a>
+<a name="queuing, symmetric"></a>
 Symmetric buffer queuing may be used only when the recv and xmit samples rates
 are the same.
 In this case, we can always access the recv and xmit samples in pairs.
@@ -114,7 +114,7 @@ the queues instead of two parallel pointers.
 Semaphoring of slots filled/empty status is easier: only one slot of the
 (recv/xmit) pair need be marked.
 If bit #0 is set in the recv sample, the slot is empty and next slot is full.
-.PP
+<p>
 To implement synchronized recv and xmit on the 56001, we used symmetric memory,
 taking advantage of the fact that we have independent X: and Y: memory.
 This is not an intrinsic requirement: instead, we could have interleaved
@@ -122,13 +122,13 @@ the recv and xmit buffers together with an xmit slot following each recv slot.
 The only difficulty would be holding off semaphoring the recv slot in
 the star code: this would require using an extra register to preserve
 the address until after the xmit had been taken care of.
-.UH BUGS:
-.pp
+<h3>BUGS:</h3>
+<p>
 The bulk of the this star should really be implemented as a
 realtime, memory mapped I/O port star, with this star just providing
 the specific information about the SSI port.
 This would be particularly useful when doing data acquisition via the Xylinx.
-.PP
+<p>
 This star should be improved to support disabling (or hiding) or the
 various ports (in order to make input-only, output-only, or mono stars).
     }

@@ -15,8 +15,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 main library }
-	explanation {
-.Id "table lookup"
+	htmldoc {
+<a name="table lookup"></a>
 	}
 	input {
 		name { input }

@@ -10,14 +10,14 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	explanation {
+	htmldoc {
 Compute the inner product of two vectors; one given by two angles in
 spherical components, the other in cartesian components.
-.EQ
-<R,U> = [Rx, Ry, Rz]*[cos(sn)*sin(gn), sin(sn), cos(sn)*cos(gn)]'
-.EN
-.Id "Compute the inner product of two vectors"
-.Id "format conversion, spherical to cartesian"
+<pre>
+&lt;R,U&gt; = [Rx, Ry, Rz]*[cos(sn)*sin(gn), sin(sn), cos(sn)*cos(gn)]'
+</pre>
+<a name="Compute the inner product of two vectors"></a>
+<a name="format conversion, spherical to cartesian"></a>
 	}
 	location { SDF main library }
 	output {

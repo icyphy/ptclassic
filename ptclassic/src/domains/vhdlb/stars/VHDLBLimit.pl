@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { New_Stars directory }
-        explanation {
+	htmldoc {
 The real-valued output is bound by the "top" and "bottom" parameters.  A
 ptolemy error is caused if the "top" parameter is set lower than the "bottom"
 parameter.

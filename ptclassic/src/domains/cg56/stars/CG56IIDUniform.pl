@@ -14,9 +14,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
-	explanation {
-.Id "uniform noise"
-.Id "noise, uniform"
+	htmldoc {
+<a name="uniform noise"></a>
+<a name="noise, uniform"></a>
 This needs to be filled in.  For now, there is no seed parameter; the
 default seed parameter from Gabriel is always used.  We'd really need
 to use a 48-bit integer to get the same functionality.  This can be

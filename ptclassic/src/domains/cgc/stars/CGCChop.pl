@@ -17,16 +17,16 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star reads a block of particles of any type, and writes a block
 of particles that somehow overlaps the input block.
-The number of input particles consumed is given by \fInread\fR,
-and the number of output particles produced is given by \fInwrite\fR.
-The \fIoffset\fR parameter (default 0) specifies where the output
+The number of input particles consumed is given by <i>nread</i></b>,
+and the number of output particles produced is given by <i>nwrite</i></b>.
+The <i>offset</i></b> parameter (default 0) specifies where the output
 block should start, relative to the beginning of the input block.
 To avoid trying to read samples that have not yet been consumed,
-it is required that $nwrite ~+~ offset ~<=~ nread$.
-Hence, if $nwrite ~>~ nread$, \fIoffset\fR must be negative,
+it is required that <i>nwrite  +  offset  &lt;</i>=<i>  nread</i>.
+Hence, if <i>nwrite  &gt;  nread</i>, <i>offset</i></b> must be negative,
 and the output consists of overlapping blocks input particles.
 	}
 	input {

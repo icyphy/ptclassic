@@ -17,10 +17,10 @@ limitation of liability, and disclaimer of warranty provisions.
 }
 	location { DE ATM library }
 
-	explanation {
-This star is used to print to <stdout> the progress of a simulation
-running in the DE domain, the state \fIstep\fR indicates that for the particle
-passing into the star's input at integral multiples of \fIstep\fR, a message
+	htmldoc {
+This star is used to print to &lt;stdout&gt; the progress of a simulation
+running in the DE domain, the state <i>step</i></b> indicates that for the particle
+passing into the star's input at integral multiples of <i>step</i></b>, a message
 will be printed to indicate that system time has reached that point.
         }
 

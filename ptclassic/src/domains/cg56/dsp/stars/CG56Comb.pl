@@ -12,15 +12,15 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
-        explanation {
-.pp
+	htmldoc {
+<p>
 A comb filter with a one-pole lowpass filter in the delay loop.
 The pole location is given by the pole parameter.
 The reverberation time is given by the time input [1, fig. 5].
-.UH REFERENCES
-.ip [1]
+<h3>References</h3>
+<p>[1]  
 J.A. Moore, "About this reverberation business",
-\fIComputer Music Journal\fR,
+<i>Computer Music Journal</i></b>,
 vol. 3, no. 2, pp. 13-28, June, 1979.
 	}
 

@@ -5,9 +5,9 @@ defstar {
 This star works the same way as the VHDLWaveForm star,
 only using complex types instead of float types.
 	}
-	explanation {
+	htmldoc {
 This star may be used to read a file by simply setting "value" to
-something of the form "< filename".  The file will be read completely
+something of the form "&lt; filename".  The file will be read completely
 and its contents stored in an array.
 	}
 	version { $Id$ }

@@ -16,7 +16,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 dsp library }
-	explanation {
+	htmldoc {
 See the SDFRaisedCos star.
 	}
 	seealso { FIR, Window }

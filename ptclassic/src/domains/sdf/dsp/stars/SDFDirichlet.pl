@@ -21,15 +21,13 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF dsp library }
-	explanation {
+	htmldoc {
 The Dirichlet kernel (a.k.a. the aliased sinc function) is the
 discrete-time Fourier transform (DTFT) of a sampled pulse function.
-The parameter $N$ is the length of the pulse [1].
-.ID "Oppenheim, A. V."
-.ID "Schafer, R. W."
-.UH REFERENCES
-.ip [1]
-A. V. Oppenheim and R. W. Schafer, \fIDiscrete-Time Signal Processing\fR,
+The parameter <i>N</i> is the length of the pulse [1].
+<h3>References</h3>
+<p>[1]  
+A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i></b>,
 Prentice-Hall: Englewood Cliffs, NJ, 1989.
 }
 	seealso { Sinc }

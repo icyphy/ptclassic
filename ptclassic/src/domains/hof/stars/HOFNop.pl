@@ -9,7 +9,7 @@ lines or combine individual lines into a bus.
 It is also used to break out multi-inputs
 and multi-outputs into individual ports.
 	}
-	explanation {
+	htmldoc {
 Normally, the number of input connections must equal the number of
 output connections.
 But, a special feature of this star supports a particularly convenient

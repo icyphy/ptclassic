@@ -22,78 +22,74 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	explanation {
+	htmldoc {
 This star reads a sequence of input particles of any type, and writes a
 sequence of particles constructed from the input sequence (and possibly
-zeros).  The number of input particles consumed is given by \fInread\fR,
-and the number of output particles produced is given by \fInwrite\fR.
-The \fIoffset\fR parameter (default 0) specifies where in the output
+zeros).  The number of input particles consumed is given by <i>nread</i></b>,
+and the number of output particles produced is given by <i>nwrite</i></b>.
+The <i>offset</i></b> parameter (default 0) specifies where in the output
 block the first (oldest) input should go.
-.pp
+<p>
 A simple use of this star is to pad a block of inputs with zeros.
-Set \fIoffset\fR to zero and use \fInwrite > nread\fR.
-.IE "zero-padding"
-.IE "padding"
+Set <i>offset</i></b> to zero and use <i>nwrite &gt; nread</i></b>.
+<a name="zero-padding"></a>
+<a name="padding"></a>
 Another simple use is to obtain overlapping windows from
 an input stream.
-Set \fIuse_past_inputs\fR to YES, use \fInwrite > nread\fR,
-and set \fIoffset\fR equal to \fInwrite - nread\fR.
-.IE "overlapping windows"
-.IE "windowing"
-.pp
+Set <i>use_past_inputs</i></b> to YES, use <i>nwrite &gt; nread</i></b>,
+and set <i>offset</i></b> equal to <i>nwrite - nread</i></b>.
+<a name="overlapping windows"></a>
+<a name="windowing"></a>
+<p>
 The general operation is illustrated with the following examples.
 If offset is positive,
 there two possible scenarios, illustrated by the following examples:
-.lp
-.nf
-.na
-.cs R 18
+<p>
+<pre>
+<pre>
      iiiiii                  nread = 6
-      \\    \\                 offset = 2
+      \    \                 offset = 2
      ppiiiiii00              nwrite = 10
-.sp
+<p>
      iiiiii                  nread = 6
-      \\ \\  \\                 offset = 2
+      \ \  \                 offset = 2
      ppiii                   nwrite = 5
-.cs R
-.fi
-.ad
-.lp
+</pre>
+</pre>
+<p>
 The symbol "i" refers to any input particle.
 The leftmost symbol refers to the oldest input particle of the ones
 consumed in a given firing.
 The symbol "p" refers to a particle that is either zero
-(if \fIuse_past_inputs\fR is NO) or is equal to a previously
-consumed input particle (if \fIuse_past_inputs\fR is YES).
+(if <i>use_past_inputs</i></b> is NO) or is equal to a previously
+consumed input particle (if <i>use_past_inputs</i></b> is YES).
 The symbol "0" refers to a zero-valued particle.
 In the first of the above examples, the entire input block is
 copied to the output, and then filled out with zeros.
 In the second example, only a portion of the input block fits.
 The remaining input particles are discarded.
-.pp
-When the \fIoffset\fR is negative, the corresponding scenarios are
+<p>
+When the <i>offset</i></b> is negative, the corresponding scenarios are
 shown below:
-.lp
-.nf
-.na
-.cs R 18
+<p>
+<pre>
+<pre>
      iiiiii                  nread = 6
     / /  /                   offset = -2
      iiii000000              nwrite = 10
-.sp
+<p>
      iiiiii                  nread = 6
     / / //                   offset = -2
      iii                     nwrite = 3
-.cs R
-.fi
-.ad
-.lp
+</pre>
+</pre>
+<p>
 In the first of these examples, the first two input particles are
 discarded.  In the second example, the first two and the last input
 particle are discarded.
-.pp
+<p>
 The zero-valued particles are constructed using the
-.c initialize()
+<tt>initialize()</tt>
 method of the appropriate particle class.  This returns a
 floating point zero, an integer zero, a complex zero, and so forth,
 for numerically valued particles.  However, if the particle

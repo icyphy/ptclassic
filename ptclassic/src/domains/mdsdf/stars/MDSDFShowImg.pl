@@ -29,10 +29,10 @@ can choose whether or not the image file is saved or deleted.
 
 This star does not support frame numbers.  See ShowImg2.
   }
-  explanation {
-.Id "image display"
-.Ir "PGM image format"
-.Ir "image format, PGM"
+	htmldoc {
+<a name="image display"></a>
+<a name="PGM image format"></a>
+<a name="image format, PGM"></a>
   }
   ccinclude {
     "SubMatrix.h" , <std.h> , <stdio.h>, "Error.h"

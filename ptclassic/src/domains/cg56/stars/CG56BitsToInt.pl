@@ -11,13 +11,13 @@ defstar {
 	limitation of liability, and disclaimer of warranty provisions.
     }
     location { CG56 demo library }
-    explanation {
+	htmldoc {
 The integer input sequence is interpreted as a bit stream in which any nonzero
 value is interpreted as to mean a "one" bit.
-This star consumes \fInBits\fR successive bits from the input,
+This star consumes <i>nBits</i></b> successive bits from the input,
 packs them into an integer, and outputs the resulting integer.
 The first received bit becomes the most significant bit of the output.
-If \fInBits\fR is smaller than the word size minus one, then the
+If <i>nBits</i></b> is smaller than the word size minus one, then the
 output integer will always be non-negative.
     }
     input {

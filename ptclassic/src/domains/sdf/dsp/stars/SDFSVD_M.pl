@@ -17,38 +17,38 @@ and V' represents the transpose of V.
 W is a diagonal matrix composed of the singular values of A, and
 the columns of U and V are the left and right singular vectors of A.
     } 
-    explanation {
-.pp
+	htmldoc {
+<p>
 The singular-value decomposition is performed on a data matrix, which
 is usually provided by the
-.c
+<tt></tt>
 Data_M
 star.
 The dimensions of the input data matrix is given by the
-\fIrows\fR and \fIcols\fR parameters to the star.
+<i>rows</i></b> and <i>cols</i></b> parameters to the star.
 The outputs are the three matrices: the vector of singular values,
 the matrix of right singular vectors, and the matrix of left singular vectors.
 The terminals for each output is labeled on the star's icon as
 S, R, and L respectively.
-.pp
-The \fIthreshold\fR parameter gives the smallest floating point number
+<p>
+The <i>threshold</i></b> parameter gives the smallest floating point number
 that the algorithm will represent.
 Anything smaller is considered zero.
-The \fImax_iterations\fR parameter allows the user to control the number of
+The <i>max_iterations</i></b> parameter allows the user to control the number of
 iterations that the SVD algorithm will be allowed to run before stopping.
 Normally, the SVD algorithm should converge before this value but this
 parameter is provided to prevent non-convergent matrices from causing
 the star from running too long.
-.pp
+<p>
 The user can also speed up the execution of the star by optionally
 specifying that the matrices of the left and/or right singular vectors 
 should not be generated.
 Not generating those matrices will speed up the execution.
 The vector of singular values is always generated.
-.Id "Haykin, S."
-.UH "References"
-.ip [1]
-S. Haykin, \fIModern Filters\fR, pp. 333-335,
+<a name="Haykin, S."></a>
+<h3>References</h3>
+<p>[1]  
+S. Haykin, <i>Modern Filters</i></b>, pp. 333-335,
 Macmillan Publishing Company, New York, 1989.
     }
     seealso { Data_M }

@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	explanation {
+	htmldoc {
 This star prints its input, which may be any supported type.
 There may be multiple inputs: all inputs are printed together on
 the same line, separated by tabs.
