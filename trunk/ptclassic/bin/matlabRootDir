@@ -39,7 +39,7 @@ done
 #
 #  Search an alternate path:  all bin sub-directories of /usr
 #
-if [ -z $matpath ]
+if [ "$matpath" = "" ]
 then
   if [ -x /usr/bin -a -r /usr/bin -a -d /usr/bin ]
   then
@@ -63,7 +63,7 @@ fi
 #     directory which contains the external interface sub-directories
 #     extern/include and extern/lib
 #
-if [ -z $matpath ]
+if [ "$matpath" = "" ]
 then
   echo ""
 else

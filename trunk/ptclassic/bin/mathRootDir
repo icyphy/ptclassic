@@ -39,7 +39,7 @@ done
 #
 #  Search an alternate path:  all bin sub-directories of /usr
 #
-if [ -z $mmapath ]
+if [ "$mmapath" = "" ]
 then
   if [ -x /usr/bin -a -r /usr/bin -a -d /usr/bin ]
   then
@@ -60,7 +60,7 @@ fi
 #  2. make sure that the mathdir setting is valid:  the mathdir should
 #     have Source/Includes and Bin/MathLink sub-directories
 #
-if [ -z $mmapath ]
+if [ "$mmapath" = "" ]
 then
   echo ""
 else
