@@ -1,4 +1,4 @@
- Makefile for tycho standalone distribution
+# Makefile for tycho standalone distribution
 #
 # Version identification:
 # $Id$
