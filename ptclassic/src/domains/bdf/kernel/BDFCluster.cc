@@ -47,7 +47,7 @@ static const char file_id[] = "BDFCluster.cc";
 #include "GalIter.h"
 #include "Geodesic.h"
 #include "Target.h"
-#include "streamCompat.h"
+#include "pt_fstream.h"
 #include "Error.h"
 
 // A BDFClusterGal is a Galaxy, built from another galaxy.
@@ -105,7 +105,7 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 			// to do redundant settings -- the relations are
 			// transitive -- hence the test.
 			BDFClustPort* assoc = ptable[a->index()];
-			int r = realP.assocRelation();
+			BDFRelation r = (BDFRelation)realP.assocRelation();
 			if (!SorC(r) || r != curCP->relType())
 				curCP->setRelation((BDFRelation)r, assoc);
 
@@ -122,9 +122,6 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 			curCP->connect(*in,delay);
 			curCP->initGeo();
 		}
-	}
-	if (logstrm) {
-		*logstrm << "Initial universe:\n" << *this << "\n";
 	}
 	LOG_DEL; delete ptable;
 }
@@ -313,7 +310,7 @@ int BDFClusterGal::parallelLoopMergePass() {
 			if (logstrm)
 				*logstrm <<
 				 "Trying parallel loop merge of " <<
-				 c->readName() << " and " << c2->readName();
+				 c->name() << " and " << c2->name();
 			// merge if no indirect paths in either direction.
 			if (indirectPath(c,c2) || indirectPath(c2,c)) {
 				if (logstrm) *logstrm <<
@@ -380,8 +377,6 @@ int BDFClusterGal::findPath(BDFCluster* start, BDFCluster* dst) {
 	return FALSE;
 }
 
-static ostream& operator<<(ostream& o, BDFClustPort& p);
-
 // This routine marks all feed-forward delays on a clusterGal to
 // enhance the looping capability without hazard of dead-lock condition.
 // We suggest that this method be called after the initial clustering is
@@ -440,12 +435,14 @@ int BDFClusterGal::loopPass() {
 	while ((c = nextClust++) != 0) {
 		BDFRelation rel;
 		int fac;
-		BDFClustPort* cond = c->tryIfClause(rel,logstrm);
-		if (cond) changes = TRUE;
+		BDFClustPort* cond = c->ifFactor(rel);
+		if (cond) {
+			c->ifIze(cond,rel,logstrm);
+		}
 		else if ((fac = c->loopFactor()) > 1) {
 				c->loopBy(fac);
 			if (logstrm)
-				*logstrm << "looping " << c->readName()
+				*logstrm << "looping " << c->name()
 					<< " by " << fac <<"\n";
 			changes = TRUE;
 		}
@@ -458,47 +455,33 @@ int BDFClusterGal::loopPass() {
 	return changes;
 }
 
-BDFClustPort* BDFCluster::tryIfClause(BDFRelation& rel,ostream* logstrm) {
+// see if we should create an "if".  We want to have no fixed rate changes
+// on any arcs -- we are looking for an arc where my end is unconditional
+// and the far end is conditional.  We will never do if-ing if the reverse
+// is true, which means the other end should be surrounded by an if.
+
+BDFClustPort* BDFCluster::ifFactor(BDFRelation& rel) {
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort *p;
 	BDFClustPort *cond = 0;
 	while ((p = nextPort++) != 0) {
+		if (p->selfLoop()) continue;
 		BDFClustPort* pFar = p->far();
 		if (p->numTokens() > 0 || p->numIO() != pFar->numIO() ||
 		    condMatch(p,pFar))
 			return 0;
 		// we are looking for: my end unconditional, far end is
-		// conditional.
-		if (!TorF(p->relType()) && TorF(pFar->relType())) {
+		// conditional.  If we see the reverse, the other end
+		// should loop instead, so we return false.
+		if (!cond && !TorF(p->relType()) && TorF(pFar->relType())) {
 			// conditional: if a previous one was also,
 			// this must be the same condition.
-			BDFClustPort* ncond = pFar->assoc();
-			BDFRelation nrel = pFar->relType();
-			if (cond) {
-				BDFRelation r = sameSignal(cond,ncond);
-				if (r == BDF_NONE ||
-				    (r == BDF_SAME && nrel != rel) ||
-				    (r == BDF_COMPLEMENT && nrel == rel)) {
-					if (logstrm)
-						*logstrm << readName()
-				    << ": condition mismatch, cannot ifIze\n";
-					return 0;
-				}
-			}
-			else {
-				cond = ncond;
-				rel = nrel;
-			}
+			cond = pFar->assoc();
+			rel = pFar->relType();
 		}
-	}
-	if (cond) {
-		if (logstrm)
-			*logstrm << readName() <<
-				" conditional: execute if " <<
-				cond->readName() << " is " <<
-				(rel == BDF_TRUE ? "true\n" : "false\n");
-		// at this point, create the loop
-		ifIze(cond,rel,logstrm);
+		else if (TorF(p->relType()) && !TorF(pFar->relType())) {
+			return 0;
+		}
 	}
 	return cond;
 }
@@ -519,11 +502,15 @@ void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 		// condition is not available here -- create a new connection
 		if (logstrm)
 			*logstrm << "Creating a boolean arc to pass "
-				 << cond->readName() << " to " << readName()
+				 << cond->name() << " to " << name()
 				 << "\n";
 		cond = connectBoolean(cond,rel);
 		r = BDF_SAME;
 	}
+	else if (logstrm)
+		*logstrm << "Making " << name() << " conditional on "
+			 << p->name() << "\n";
+
 	pCond = cond;
 	if (r == BDF_COMPLEMENT) rel = reverse(rel);
 	pType = (rel == BDF_TRUE ? DO_IFTRUE : DO_IFFALSE);
@@ -540,6 +527,7 @@ void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 
 		p->setRelation(rel,cond);
 	}
+	cond->setControl(TRUE);
 	if (logstrm)
 		*logstrm << "After ifIzing: " << *this << "\n";
 }
@@ -581,36 +569,18 @@ BDFClustPort* BDFCluster::connectBoolean(BDFClustPort* cond,
 			}
 		}
 	}
-	BDFCluster* cpar = cond->parentClust();
 	// create a new port in the far cluster
 	BDFClustPort *a = createDupPort(cond,pseudoName());
 	// create it in the near cluster -- name matches original
 	// condition
 	LOG_NEW; BDFClustPort *b = new BDFClustPort(*cond,this);
-	b->setPort(cond->readName(),this,INT);
+	b->setPort(cond->name(),this,INT);
 	addPort(*b);
 	b->setRelation(BDF_NONE);
 	b->connect(*a,0);
 	b->initGeo();
 	return b;
 }
-
-// find the gcd of two integers.  Should be in a more-readily-accessible
-// place.  Uses Euclid algorithm.
-static int gcd(int a, int b) {
-	if (a < b) {
-		int t = a; a = b; b = t;
-	}
-	// now b is less.  Check for zero
-	if (b <= 0) return 0;
-	while (1) {
-		int rem = a % b;
-		if (rem == 0) return b;
-		a = b;
-		b = rem;
-	}
-}
-
 
 // This version only does non-integral rate conversions (e.g. 2->3 or
 // 3->2) when there are only two clusters.
@@ -640,8 +610,8 @@ int BDFClusterGal::nonIntegralRateChange() {
 	c1->loopBy(n2/g);
 	c2->loopBy(n1/g);
 	if (logstrm)
-		*logstrm << "looping " << c1->readName() << " by "
-			 << n2/g << " and " << c2->readName() << " by "
+		*logstrm << "looping " << c1->name() << " by "
+			 << n2/g << " and " << c2->name() << " by "
 			 << n1/g << "\n";
 	return TRUE;
 }
@@ -666,6 +636,7 @@ int BDFCluster::loopFactor() {
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0) {
+		if (p->selfLoop()) continue;
 		BDFClustPort* pFar = p->far();
 		int myIO = p->numIO();
 		int peerIO = pFar->numIO();
@@ -702,7 +673,7 @@ ostream& BDFCluster::printPorts(ostream& o) {
 // loop a cluster.  Adjust repetitions and token counts.
 void BDFCluster::loopBy(int fac) {
 	pLoop *= fac;
-	repetitions.numerator /= fac;
+	repetitions *= Fraction(1,fac);
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0)
@@ -714,7 +685,7 @@ void BDFCluster::loopBy(int fac) {
 int BDFCluster::unloop() {
 	int fac = pLoop;
 	pLoop = 1;
-	repetitions.numerator *= fac;
+	repetitions *= Fraction(fac,1);
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
 	while ((p = nextPort++) != 0)
@@ -733,7 +704,7 @@ const char* BDFClusterGal::genBagName() {
 // basically the distinction between atomic and non-atomic clusters.
 
 BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
-	int fac = 1;
+//	int fac = 1;
 
 // if a bag has a loop factor we treat it as an atom for merging
 // purposes (put it inside another bag instead of combining bags).
@@ -749,8 +720,8 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 //	}
 
 	if (logstrm)
-		*logstrm << "merging " << c1->readName() << " and " <<
-			c2->readName() << "\n";
+		*logstrm << "merging " << c1->name() << " and " <<
+			c2->name() << "\n";
 
 	BDFClusterBag* c1Bag = c1->looped() ? 0 : c1->asBag();
 	BDFClusterBag* c2Bag = c2->looped() ? 0 : c2->asBag();
@@ -799,6 +770,12 @@ void BDFClusterBag :: createInnerGal() {
 		gal->dupStream((BDFClusterGal*)parent());
 }
 
+// test for a pair of ports that are connected
+inline int ctlDelay(BDFClustPort* p,BDFClustPort* pfar) {
+	return (p->numTokens() > 0 &&
+		(p->isControl() || pfar->isControl()));
+}
+
 // This function absorbs an atomic cluster into a bag.
 
 void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
@@ -808,15 +785,17 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 	}
 // move c from its current galaxy to my galaxy.
 	par->removeBlock(*c);
-	gal->addBlock(*c,c->readName());
+	gal->addBlock(*c,c->name());
 // adjust the bag porthole list.  Some of c's ports will now become
 // external ports of the cluster, while some external ports of the
 // cluster that connnect to c will disappear.
+// exception: we do not zap external ports if they are control ports
+// with delay; we make them self-loops.
 	BDFClustPortIter next(*c);
 	BDFClustPort* cp;
 	while ((cp = next++) != 0) {
 		BDFClustPort* pFar = cp->far();
-		if (pFar->parent() == this) {
+		if (pFar->parent() == this && !ctlDelay(cp,pFar)) {
 			// the far side of this guy is one of my bag pointers.
 			// zap it and connect directly.
 			BDFClustPort* p = pFar->inPtr();
@@ -847,11 +826,19 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	BDFClustPortIter nextbp(*this);
 	BDFClustPort* p;
 	SequentialList zap;
-	while ((p = nextbp++) != 0)
-		if (p->far()->parent() == b) zap.put(p);
+
 	// zap is the list of connections between the two clusters.  These
 	// become internal connections so we zap them from both bags' lists
-	// of external pointers.
+	// of external pointers.  Exception: do not zap control ports with
+	// delay
+
+	while ((p = nextbp++) != 0) {
+		BDFClustPort *pFar = p->far();
+		if (pFar->parent() == b && !ctlDelay(p,pFar)) zap.put(p);
+	}
+
+	// now zap those that become internal
+
 	ListIter nextZap(zap);
 	while ((p = (BDFClustPort*)nextZap++) != 0) {
 		BDFClustPort* near = p->inPtr();
@@ -866,11 +853,11 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	BDFClusterBagIter nextC(*b);
 	BDFCluster* c;
 	while ((c = nextC++) != 0) {
-		gal->addBlock(*c,c->readName());
+		gal->addBlock(*c,c->name());
 	}
 	BDFClustPortIter nextP(*b);
 	while ((p = nextP++) != 0) {
-		p->setNameParent(p->readName(),this);
+		p->setNameParent(p->name(),this);
 		addPort(*p);
 	}
 // get rid of b.
@@ -896,6 +883,8 @@ void BDFClusterBag::adjustAssociations() {
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* bagp;
 	while ((bagp = nextPort++) != 0) {
+		// control bits are turned back on in a subsequent pass
+		bagp->setControl(FALSE);
 		BDFRelation r = bagp->inPtr()->relType();
 		if (r == BDF_NONE) continue;
 		BDFClustPort* lower = bagp->inPtr()->assoc();
@@ -917,10 +906,8 @@ void BDFClusterBag::adjustAssociations() {
 				Error::abortRun(*bagp,msg);
 				bagp->setRelation(BDF_NONE);
 			}
-			else {
+			else
 				bagp->setRelation(r, upper);
-				upper->setControl(TRUE);
-			}
 			continue;
 		}
 		// handle BDF_SAME and BDF_COMPLEMENT now.
@@ -945,6 +932,12 @@ void BDFClusterBag::adjustAssociations() {
 				bagp->setRelation(r, upper);
 		}
 		else bagp->setRelation(BDF_NONE);
+	}
+	// mark arcs that are now control arcs.
+	nextPort.reset();
+	while ((bagp = nextPort++) != 0) {
+		if (TorF(bagp->relType()))
+			bagp->assoc()->setControl(TRUE);
 	}
 }
 
@@ -980,7 +973,9 @@ int BDFClusterBag::genSched() {
 	BDFCluster* c;
 	while ((c = nextClust++) != 0)
 		if (!c->genSched()) return FALSE;
-	return (sched->setup(*gal));
+	sched->setGalaxy(*gal);
+	sched->setup();
+	return (!Scheduler::haltRequested());
 }
 
 // indent by depth tabs.
@@ -1013,10 +1008,10 @@ StringList BDFClusterBag::displaySchedule(int depth) {
 }
 
 // run the cluster, taking into account the loop factor
-int BDFClusterBag::fire() {
+int BDFClusterBag::run() {
 	if (!sched) return FALSE;
 	sched->setStopTime(loop()+exCount);
-	sched->run(*gal);
+	sched->run();
 	exCount += loop();
 	return !Scheduler::haltRequested();
 }
@@ -1072,7 +1067,7 @@ static BDFClustPort* remapControl (BDFClustPort *ctlP, BDFRelation& r) {
 	BDFCluster *you = pFar->parentClust();
 	BDFCluster *cl;
 
-	// we can return FALSE if none of the ports of "me" that are
+	// we can return ourself (no remapping needed) if no arc
 	// controlled by ctlP will end up external.
 
 	BDFClustPortIter nextPort(*me);
@@ -1117,7 +1112,8 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 		BDFClustPort *pRemap;
 		BDFClustPort *pFail = 0;
 		BDFRelation r;
-		if (pFar->parentClust() != dest) continue;
+		if (pFar->parentClust() != dest || p->numTokens() > 0)
+			continue;
 		if (p->isControl()) {
 			pRemap = remapControl(p,r);
 			if (!pRemap) pFail = p;
@@ -1128,10 +1124,12 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 		}
 		if (pFail) {
 			if (logstrm) {
-				*logstrm << "Can't merge " << src->readName()
-					<< " and " << dest->readName() <<
+				*logstrm << "Can't merge " << src->name()
+					<< " and " << dest->name() <<
 					": would bury a control arc:\n"
 					<< *pFail << "\n";
+				if (p->numTokens() > 0)
+					*logstrm << "But there is delay!  Eventually self-loop!\n";
 			}
 			return TRUE;
 		}
@@ -1152,20 +1150,25 @@ BDFCluster* BDFCluster::mergeCandidate() {
 	while ((p = nextPort++) != 0) {
 		BDFClustPort* pFar = p->far();
 		BDFCluster* peer = pFar->parentClust();
+		// selfloop test
+		if (peer == this) continue;
+
 		int myIO = p->numIO();
 		int peerIO = pFar->numIO();
 		// a connection is ok to use for merging if there are
-		// no delays and no sample rate changes, and if neither
-		// end of the connection is conditional
+		// no delays and no sample rate changes, and if any
+		// conditions on the two ends match
 
 		int ok = (!p->fbDelay() && myIO==peerIO && condMatch(p,pFar));
 
 		// we cannot merge a control arc unless it can be "remapped"
-		// or nothing it controls is external.  Since this is the
-		// fast merge pass, we do not try to merge control arcs here.
+		// or nothing it controls is external or it has a delay.
+		// Since this is the fast merge pass, we do not try to 
+		// remap merge control arcs here.
 		// fullSearchMerge will attempt it, though.
 
-		if (p->isControl() || pFar->isControl()) {
+		if (p->numTokens() == 0 &&
+		    (p->isControl() || pFar->isControl())) {
 			ok = FALSE;
 
 			// there may be multiple ports connecting two
@@ -1197,7 +1200,7 @@ BDFCluster* BDFCluster::mergeCandidate() {
 // function to create names for atomic clusters and portholes.
 // This is a static class function.
 const char* BDFCluster::mungeName(NamedObj& o) {
-	StringList name = o.readFullName();
+	StringList name = o.fullName();
 	const char* cname = strchr (name, '.');
 	if (cname == 0) return "top";
 	cname++;
@@ -1250,9 +1253,9 @@ ostream& BDFCluster::printBrief(ostream& o) {
 			o << pLoop << "*";
 	}
 	else {
-		o << do_conds[pType] << pCond->readName() << ")";
+		o << do_conds[pType] << pCond->name() << ")";
 	}
-	return o << readName();
+	return o << name();
 }
 
 ostream& BDFAtomCluster::printOn(ostream& o) {
@@ -1267,14 +1270,14 @@ StringList BDFAtomCluster::displaySchedule(int depth) {
 		sch += loop();
 		sch += "*";
 	}
-	sch += real().readFullName();
+	sch += real().fullName();
 	sch += "\n";
 	return sch;
 }
 
-int BDFAtomCluster::fire() {
+int BDFAtomCluster::run() {
 	for (int i = 0; i < loop(); i++) {
-		if (!pStar.fire()) return FALSE;
+		if (!pStar.run()) return FALSE;
 	}
 	return TRUE;
 }
@@ -1294,17 +1297,8 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	// log file stuff.
 	const char* file = logFile;
 	ostream* logstrm = 0;
-	if (file && *file) {
-		if (strcmp(file,"cerr") == 0 ||
-		    strcmp(file,"stderr") == 0)
-			logstrm = &cerr;
-		else {
-			int fd = creat(expandPathName(file), 0666);
-			if (fd < 0)
-				Error::warn(gal, "Can't open log file ",file);
-			else logstrm = new ofstream(fd);
-		}
-	}
+	if (file && *file)
+		logstrm = new pt_ofstream(file);
 
 	// do the clustering.
 	cgal = new BDFClusterGal(gal,logstrm);

@@ -55,10 +55,10 @@ public:
 	int nextValue();
 	void nput(int,int);
 	int nget(int);
-	static IntSample proto;
+	static IntParticle proto;
 };
 
-IntSample SimGeo::proto;
+IntParticle SimGeo::proto;
 
 void SimGeo::put(int newv) {
 	// make a new particle, put the value into it.
@@ -128,7 +128,7 @@ void BDFScheduler :: runOnce () {
 		ListIter next(preamble);
 		Star* s;
 		while ((s = (Star*)next++) != 0) {
-			s->fire();
+			s->run();
 			if (haltRequested()) return;
 		}
 		inPreamble = FALSE;
@@ -137,17 +137,17 @@ void BDFScheduler :: runOnce () {
 	mySchedule->run(*this);
 }
 
-int BDFScheduler::prepareGalaxy(Galaxy& galaxy) {
+int BDFScheduler::prepareGalaxy() {
 	// initialize galaxy and all contents.
-	galaxy.initialize();
-	galSize = setStarIndices(galaxy);
-	nPorts = setPortIndices(galaxy);
+	galaxy()->initialize();
+	galSize = setStarIndices(*galaxy());
+	nPorts = setPortIndices(*galaxy());
 	// turn on debugging if there is a state named debug
-	if (galaxy.stateWithName("debug")) debug = TRUE;
+	if (galaxy()->stateWithName("debug")) debug = TRUE;
 	return TRUE;
 }
 
-int BDFScheduler::checkStars(Galaxy& galaxy) {
+int BDFScheduler::checkStars() {
 // Allocate space for the SchedInfo structures.  Check the stars
 // for BDF-ness or SDF-ness, and set up the structures.
 	LOG_DEL; delete starInfo;
@@ -155,7 +155,7 @@ int BDFScheduler::checkStars(Galaxy& galaxy) {
 	LOG_NEW; starInfo = new BDFStarSchedInfo[galSize];
 	LOG_NEW; portInfo = new BDFPortSchedInfo[nPorts];
 
-	GalStarIter nextStar(galaxy);
+	GalStarIter nextStar(*galaxy());
 	Star* s;
 	// initialize scheduling information for all stars.
 	// make sure they are of the right domain.
@@ -181,7 +181,7 @@ int BDFScheduler::computeSchedule(Galaxy& galaxy) {
 		cout << "Repetition counts:\n";
 		nextStar.reset();
 		while ((s = nextStar++) != 0) {
-			cout << s->readFullName() << ": " <<
+			cout << s->fullName() << ": " <<
 				info(*s).reps << "\n";
 		}
 	}
@@ -326,7 +326,7 @@ int BDFScheduler::addIfWeCan (Star& star, int defer) {
 	// repetitions
 	////////////////////////////
 
-int BDFScheduler :: repetitions (Galaxy& galaxy) {
+int BDFScheduler :: repetitions () {
 
 	// Initialize the least common multiple, which after all the
 	// repetitions properties have been set, will equal the lcm
@@ -338,7 +338,7 @@ int BDFScheduler :: repetitions (Galaxy& galaxy) {
 	// Note that for a connected universe, this iteration would
 	// entirely unnecessary.  Is there some way to get rid of it?
 	// Should we allow disconnected universes?
-	GalStarIter next(galaxy);
+	GalStarIter next(*galaxy());
 	Star* s;
 	while ((s = next++) != 0) {
 		// First check to see whether a repetitions property has
@@ -424,9 +424,9 @@ int BDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	BoolFraction farShouldBe;
 
 	if (debug) {
-		cout << "reptArc: nearPort = " << nearPort.readFullName();
+		cout << "reptArc: nearPort = " << nearPort.fullName();
 		cout <<  ", nearReps = " << nearReps;
-		cout << "; farPort = " << farPort.readFullName();
+		cout << "; farPort = " << farPort.fullName();
 		cout << "\n nearNumTok = " << numTok(nearPort);
 		cout <<  ", farNumTok = " << numTok(farPort) << "\n";
 	}
@@ -455,9 +455,9 @@ int BDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 			ratio /= farShouldBe;
 			ratio.simplify();
 			StringList msg = "Sample rate problem between ";
-			msg += nearPort.parent()->readFullName();
+			msg += nearPort.parent()->fullName();
 			msg += " and ";
-			msg += farPort.parent()->readFullName();
+			msg += farPort.parent()->fullName();
 			msg += ": ";
 			msg += ratio.num();
 			msg += " != ";
@@ -528,7 +528,7 @@ int BDFScheduler :: simRunStar (Star& atom, int deferFiring) {
 // Read all input values.  This simplified code will only handle
 // related booleans if a single value is read!
 
-	if (debug) cout << "Running " << atom.readName() << ":\n";
+	if (debug) cout << "Running " << atom.name() << ":\n";
 	BlockPortIter nextp(atom);
 	while ((port = nextp++) != 0) {
 		BDFPortSchedInfo& pinfo = info(*port);
@@ -536,7 +536,7 @@ int BDFScheduler :: simRunStar (Star& atom, int deferFiring) {
 			continue;
 		pinfo.lastRead = pinfo.geo->nget (pinfo.nmove);
 
-		if (debug) cout << port->readName() << "(" << pinfo.nmove
+		if (debug) cout << port->name() << "(" << pinfo.nmove
 			<< ")-> " << chtok[pinfo.lastRead] << " ";
 	}
 
@@ -551,7 +551,7 @@ int BDFScheduler :: simRunStar (Star& atom, int deferFiring) {
 		pinfo.geo->nput (vwrite, pinfo.nmove);
 
 		if (debug) cout << chtok[vwrite] << "(" << pinfo.nmove <<
-			")-> " << port->readName() << " ";
+			")-> " << port->name() << " ";
 	}
 
 	if (debug) cout << "\n";
@@ -574,7 +574,7 @@ StringList BDFScheduler :: displaySchedule() {
 		ListIter next(preamble);
 		Block* b;
 		while ((b = (Block*)next++) != 0) {
-			out += b->readFullName();
+			out += b->fullName();
 			out += "\n";
 		}
 		out += "--- main schedule ---\n";
@@ -601,8 +601,8 @@ int BDFScheduler :: valueToWrite (const PortHole& port) {
 	int srcval = srcinfo.geo->nextValue();
 	if (srcval == UNKNOWN) return UNKNOWN;
 	if (srcval != TRUE && srcval != FALSE) {
-		StringList nm = port.readFullName();
-		StringList anm = pinfo.assoc->readFullName();
+		StringList nm = port.fullName();
+		StringList anm = pinfo.assoc->fullName();
 		cout << "port: " << (const char*) nm <<
 			" assoc: " << (const char*) anm <<
 				" bad srcval: " << srcval << "!\n";
@@ -706,7 +706,7 @@ const char* nrstatus[] = { "RUNNABLE", "NOT READY", "COMPLETED",
 "WRITES BOOLEAN: Not allowed in preamble" };
 
 int BDFScheduler :: notRunnable (Star& atom, int useKnownBools) {
-	StringList atomName = atom.readFullName();
+	StringList atomName = atom.fullName();
 	if (debug) cout << "notRunnable(" << (const char*)atomName << "): ";
 	int i, v = 0;
 	BlockPortIter nextp(atom);
@@ -743,7 +743,7 @@ int BDFScheduler :: notRunnable (Star& atom, int useKnownBools) {
 }
 
 // function to allow wormholes to determine timing.
-int BDFScheduler::repetitions (Star& s) {
+int BDFScheduler::reps (Star& s) {
 	return info(s).reps.num().constTerm;
 }
 
@@ -847,9 +847,9 @@ void BDFScheduler::saveBooleans(Star& s) {
 	PortHole *p;
 	while ((p = next++) != 0) {
 		if (p->isItOutput()) {
-			Particle* bv = p->myGeodesic->get();
+			Particle* bv = p->geo()->get();
 			info(*p).lastRead = int(*bv);
-			p->myGeodesic->pushBack(bv);
+			p->geo()->pushBack(bv);
 		}
 	}
 }

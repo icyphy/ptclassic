@@ -36,9 +36,8 @@ protected:
 
 public:
 	BDFTarget();
-	void start();
-	int setup(Galaxy&);
-	Block* clone() const;
+	void setup();
+	Block* makeNew() const;
 	~BDFTarget();
 };
 #endif

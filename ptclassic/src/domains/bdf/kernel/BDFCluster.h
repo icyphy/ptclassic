@@ -160,9 +160,6 @@ public:
 	void setVisit(int i) { visitFlag = i; }
 	int  visited() { return visitFlag; }
 
-	// repetitions value
-	int reps() const { return repetitions.numerator;}
-
 	// return true if my sample rate matches that of all my neighbors
 	int matchNeighborRates();
 
@@ -178,17 +175,16 @@ public:
 	// return some other cluster that can merge with me
 	BDFCluster* mergeCandidate();
 
-	// return an appropriate loop factor
+	// return an appropriate loop factor: 0 if none.
 	int loopFactor();
 
 	// change the loop value of the cluster, changing repetitions,
 	// token numbers
 	void loopBy(int);
 
-	// create an "if", if possible.  If successful, return the
-	// condition.
-
-	BDFClustPort* tryIfClause(BDFRelation&,ostream*);
+	// return an appropriate if factor.  Return null if none, otherwise
+	// return the boolean condition and relation (BDF_TRUE or BDF_FALSE).
+	BDFClustPort* ifFactor(BDFRelation&);
 
 	// convert the cluster to a conditional cluster, to be executed
 	// only on the given condition.
@@ -245,8 +241,8 @@ public:
 	DataFlowStar& real() { return pStar;}
 
 	// "pass-along" functions
-	int fire();
-	void go() { fire();}
+	int run();
+	void go() { run();}
 	int myExecTime();
 
 	// print me
@@ -265,9 +261,9 @@ public:
 class BDFBagScheduler : public BDFScheduler {
 protected:
 	// we permit disconnected galaxies.
-	int checkConnectivity(Galaxy&) { return TRUE;}
+	int checkConnectivity() { return TRUE;}
 	// galaxy is already "prepared".
-	int prepareGalaxy(Galaxy&) { return TRUE;}
+	int prepareGalaxy() { return TRUE;}
 public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
@@ -323,10 +319,10 @@ public:
 
 	// run the cluster, the number of times indicated by the loop
 	// factor.
-	int fire();
+	int run();
 
 	// a synonym
-	void go() { fire();}
+	void go() { run();}
 
 	// do additional clustering on internal cluster (merge parallel
 	// loops, for example)

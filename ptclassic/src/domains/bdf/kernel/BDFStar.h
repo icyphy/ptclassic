@@ -19,7 +19,7 @@ $Id$
 #endif
 
 #include "SDFStar.h"
-#include "BDFConnect.h"
+#include "BDFPortHole.h"
 #include "Particle.h"
 
 	////////////////////////////////////
@@ -29,11 +29,13 @@ $Id$
 class BDFStar : public DataFlowStar  {
 
 public:
+	BDFStar();
+
 	// my domain
 	const char* domain() const;
 
 	// domain specific initialization
-	void prepareForScheduling();
+	void initialize();
 
 	// functions for schedule generation
 	int notRunnable();
@@ -41,7 +43,12 @@ public:
 	int deferrable();
 	// identification
 	int isSDF() const;
+	int isSDFinContext() const;
 	int isA(const char*) const;
+protected:
+	short sdfCtx;
+private:
+	short sdf;
 };
 
 class BDFStarPortIter : public BlockPortIter {
@@ -49,16 +56,6 @@ public:
 	BDFStarPortIter(BDFStar& s) : BlockPortIter(s) {}
 	BDFPortHole* next() { return (BDFPortHole*)BlockPortIter::next();}
 	BDFPortHole* operator++() { return next();}
-};
-
-// I want to put the following into SDFStar.h eventually.
-
-class DFStarPortIter : public BlockPortIter {
-public:
-	DFStarPortIter(DataFlowStar& s) 
-	: BlockPortIter(s) {}
-	DFPortHole* next() { return (DFPortHole*)BlockPortIter::next();}
-	DFPortHole* operator++() { return next();}
 };
 
 #endif

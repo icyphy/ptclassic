@@ -63,7 +63,7 @@ StringList BDFSList::print(int indent) {
 
 StringList BDFStarNode::print(int indent) {
 	StringList out = tab(indent);
-	out += star.readFullName();
+	out += star.fullName();
 	out += "\n";
 	return out;
 }
@@ -76,7 +76,7 @@ StringList BDFTestNode::print(int indent) {
 	out += myTab;
 	out += "if (";
 	out += notOp;
-	out += port.readFullName();
+	out += port.fullName();
 	out += ") {\n";
 	if (ifTrue.size()) out += ifTrue.print(indent+1);
 	else out += ifFalse.print(indent+1);
@@ -182,7 +182,7 @@ BDFTreeNode::~BDFTreeNode() {
 // See how we run
 
 void BDFStarNode::run(BDFScheduler& sch) {
-	star.fire();
+	star.run();
 	if (writesBooleans)
 		sch.saveBooleans(star);
 }

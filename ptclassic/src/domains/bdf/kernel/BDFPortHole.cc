@@ -1,6 +1,6 @@
-static const char file_id[] = "BDFConnect.cc";
+static const char file_id[] = "BDFPortHole.cc";
 #include "Block.h"
-#include "BDFConnect.h"
+#include "BDFPortHole.h"
 #include "CircularBuffer.h"
 
 /**************************************************************************

@@ -172,7 +172,7 @@ BoolFraction& BoolFraction::simplify() {
 // print a BoolSignal
 StringList& operator+=(StringList& msg, const BoolSignal& b) {
 	if (b.negated) msg += "!";
-	msg += b.p.readFullName();
+	msg += b.p.fullName();
 	return msg;
 }
 

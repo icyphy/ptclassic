@@ -18,7 +18,7 @@ $Id$
 #pragma interface
 #endif
 
-#include "Connect.h"
+#include "PortHole.h"
 
 class StringList;
 

@@ -19,8 +19,6 @@ $Id$
 #include "BDFTarget.h"
 #include "KnownTarget.h"
 #include "BDFWormhole.h"
-#include "BDFConnect.h"
-#include "BDFWormConnect.h"
 #include "AutoForkNode.h"
 
 extern const char BDFdomainName[] = "BDF";
@@ -31,12 +29,6 @@ public:
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		return *new BDFWormhole(innerGal,innerTarget);
 	}
-
-	// new input porthole
-	PortHole& newInPort() { return *new InBDFPort;}
-
-	// new output porthole
-	PortHole& newOutPort() { return *new OutBDFPort;}
 
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() { return *new BDFfromUniversal;}
@@ -58,3 +50,4 @@ static BDFDomain proto;
 
 static BDFTarget defaultBDFtarget;
 static KnownTarget entry(defaultBDFtarget,"default-BDF");
+

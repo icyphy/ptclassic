@@ -28,7 +28,7 @@ BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 : pPort(port), bagPortFlag(bp), pOutPtr(0), feedForwardFlag(0),
   ctlFlag(0)
 {
-	const char* name = bp ? port.readName() : BDFCluster::mungeName(port);
+	const char* name = bp ? port.name() : BDFCluster::mungeName(port);
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
 	numberTokens = port.numXfer();
@@ -100,7 +100,7 @@ BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
 		reset();
 		setDebug();
 		cerr << "BDFClustPortRelIter error: starting at "
-		     << start->readFullName() << ":\n";
+		     << start->fullName() << ":\n";
 		for (int i = 0; i < DEBUG_LIMIT; i++)
 			next(r);
 		return 0;
@@ -119,7 +119,7 @@ BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
 		rel = BDF_SAME;
 		if (pos == start) return 0;
 		if (debug())
-			cerr << pos->readFullName() << ":S\n";
+			cerr << pos->fullName() << ":S\n";
 		return pos;
 	}
 	// if we hopped over but there are no links on this side,
@@ -138,7 +138,7 @@ BDFClustPort* BDFClustPortRelIter :: next(BDFRelation& rel) {
 	if (pos == start) return 0;
 	else {
 		if (debug())
-			cerr << pos->readFullName() <<
+			cerr << pos->fullName() <<
 				(rel == BDF_SAME ? ":S\n" : "C\n");
 		return pos;
 	}
@@ -190,13 +190,15 @@ static const char* labels[] = { "<ifFalse:", "<ifTrue:", "<Same:", "<Compl:" };
 
 // fn to print a single port of a cluster
 ostream& operator<<(ostream& o, BDFClustPort& p) {
-	o << p.parent()->readName() << "." << p.readName();
+	if (p.selfLoop()) o << "SelfLoop:";
+
+	o << p.parent()->name() << "." << p.name();
 
 	// print BDF control information
 	if (p.isControl()) o << "[C]";
 	BDFRelation r = p.relType();
 	BDFClustPort* a = p.assoc();
-	if (a && r != BDF_NONE) o << labels[r] << a->readName() << ">";
+	if (a && r != BDF_NONE) o << labels[r] << a->name() << ">";
 
 	// print connectivity
 	BDFClustPort* pFar = p.far();
@@ -205,7 +207,7 @@ ostream& operator<<(ostream& o, BDFClustPort& p) {
 	else
 		o << "<=";
 	if (!pFar) o << "0";
-	else o << pFar->parent()->readName() << "." << pFar->readName();
+	else o << pFar->parent()->name() << "." << pFar->name();
 	if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
 	return o;
 }
