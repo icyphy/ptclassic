@@ -184,7 +184,9 @@ body ::tycho::EditC::compileAndLoad {} {
     #set compiler [::tycho::CompileCTcl [::tycho::autoName .editC]]
     #$compiler configure -view $this
     evaluate
-    $compiler compileAndLoad [list [filename]]
+    if {$compiler != {}} {
+	$compiler compileAndLoad [list [filename]]
+    }
     #delete object $compiler
 }
 
