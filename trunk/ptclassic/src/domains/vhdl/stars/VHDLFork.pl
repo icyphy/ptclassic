@@ -20,7 +20,11 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { output }
 		type { = input }
 	}
+	setup {
+		forkInit(input,output);
+	}
         constructor {
+	        noInternalState();
                 output.setForkBuf(input);
 //		setForkId();
         }
