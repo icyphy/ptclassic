@@ -122,7 +122,16 @@ otpCvtPropToStrDelay( octObject *pProp) {
     case OCT_REAL:
 	return memStrSaveFmt("%g",pProp->contents.prop.value.real);
     case OCT_STRING:
-	return pProp->contents.prop.value.string;
+	/* Ok, this is really gross, but if the value is a string
+	 * with a length of one, then print a warning and prepend a '*'
+	 */
+	if (strlen(pProp->contents.prop.value.string) == 1) {
+	  fprintf(stderr,
+	  "oct2ptcl: warning: delay is a string `%s', prepending a `*'\n",
+		pProp->contents.prop.value.string);
+	  return memStrSaveFmt("*%s",pProp->contents.prop.value.string);
+	} else
+	  return pProp->contents.prop.value.string;
     default: ;
     }
     errRaise(SPKG,-1,"Cannot convert prop type %d to string.",
