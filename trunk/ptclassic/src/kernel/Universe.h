@@ -70,18 +70,18 @@ private:
 class Universe : public Galaxy, public Runnable {
 public:
 	// print methods
-	StringList printVerbose() {return print(0);}
-	StringList printRecursive() {return print(1);}
+	StringList printVerbose() const {return print(0);}
+	StringList printRecursive() const {return print(1);}
 
 	// constructor
 	Universe(Scheduler* s,const char* typeDesc) :
 		Runnable(s,typeDesc,this) {}
 
 	// return my scheduler
-	Scheduler* mySched() { return scheduler ;}
+	Scheduler* mySched() const { return scheduler ;}
 
 protected:
 	// print, possibly recursively
-	StringList print(int recursive);
+	StringList print(int recursive) const;
 };
 #endif
