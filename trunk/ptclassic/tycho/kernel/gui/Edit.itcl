@@ -105,23 +105,14 @@ class ::tycho::Edit {
     # Insert a close parenthesis, bracket, or brace and highlight.
     method closeParen {closeParen}
 
-    # Return the current insertion point in a form usable by seeFragment.
-    method currentPoint {}
-
-    # Give the text window the focus.
-    method focusin {}
-
-    # Query the user for a line number, and then go to that line number. 
-    method gotoLine {}
-
-    # Open a help window.
-    method help {}
-
     # Save the selection to the clipboard.
     method copy {}
 
     # Remove the selection and save it to the clipboard.
     method cut {}
+
+    # Return the current insertion point in a form usable by seeFragment.
+    method currentPoint {}
 
     # Print the status of the undo information (for debugging).
     method debugUndo {}
@@ -150,11 +141,20 @@ class ::tycho::Edit {
     # Find the next pattern, word, or character sequence in the text.
     method findOne {case backwards regexp wholeword pattern start end tags}
 
+    # Give the text window the focus.
+    method focusin {}
+
     # Get text from the text window.
     method get {args}
 
     # Return the selection if it is mine, otherwise return a null string.
     method getSelection {}
+
+    # Query the user for a line number, and then go to that line number. 
+    method gotoLine {}
+
+    # Open a help window.
+    method help {}
 
     # Indicate whether or not modifications are allowed in the displayed text.
     method indicateReadOnly {bool}
@@ -167,6 +167,9 @@ class ::tycho::Edit {
 
     # Remove text from the insertion pointer to the end of the line.
     method killToEndOfLine {}
+
+    # Convert the selection to lower case.
+    method lowerCase {}
 
     # Insert text from the selection if the mouse has not moved.
     method mouseStuff {xpos ypos}
@@ -236,6 +239,9 @@ class ::tycho::Edit {
 
     # Unselect everything in the specified range.
     method unselectRange {start stop}
+
+    # Convert the selection to upper case.
+    method upperCase {}
 
     # Write to the specified file any text that should be spell checked.
     method writeSpellText {filename}
@@ -643,6 +649,14 @@ body ::tycho::Edit::constructor {args} {
         
         $myMenubar add "Set Fill Prefix" Format -underline 1 \
                 -accelerator "C-x ." -command "$this queryFillPrefix"
+
+        $myMenubar addSeparator Format
+
+        $myMenubar add "Lower Case" Format -underline 0 \
+                -accelerator "" -command "$this lowerCase"
+
+        $myMenubar add "Upper Case" Format -underline 1 \
+                -accelerator "" -command "$this upperCase"
     }
 
     insertInDisplay
@@ -1398,6 +1412,20 @@ body ::tycho::Edit::killToEndOfLine {} {
     }
 }
 
+#####################################################################
+#### lowerCase
+# Convert the selection to lower case.
+#
+body ::tycho::Edit::lowerCase {} {
+    
+    if $readOnly {bell; return}
+    
+    if {[set sel [getSelection]] != {}} {
+	deleteRange sel.first sel.last
+        insertString insert [string tolower $sel]
+    }
+}
+
 #########################################################################
 #### mouseStuff
 # Insert text from the selection if the mouse has not moved since it
@@ -1833,6 +1861,20 @@ body ::tycho::Edit::undoBoundary {} {
 #
 body ::tycho::Edit::unselectRange {start stop} {
     $itk_component(text) tag remove sel $start $stop
+}
+
+#####################################################################
+#### upperCase
+# Convert the selection to upper case.
+#
+body ::tycho::Edit::upperCase {} {
+    
+    if $readOnly {bell; return}
+    
+    if {[set sel [getSelection]] != {}} {
+	deleteRange sel.first sel.last
+        insertString insert [string toupper $sel]
+    }
 }
 
 #####################################################################
