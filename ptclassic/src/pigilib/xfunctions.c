@@ -467,6 +467,7 @@ open_msg_type(msg, type)
 	wmhints.initial_state = NormalState;
 	XSetWMHints(msgDisplay, w, &wmhints);
 
+#ifdef PBaseSize		/* basically "#if X11R4" */
 	hints.flags = PBaseSize|PPosition|USPosition|PSize|PMinSize;
 	hints.x = window_x;
 	hints.y = window_y;
@@ -476,6 +477,7 @@ open_msg_type(msg, type)
 	hints.min_height = hints.height = window_h;
 
 	XSetWMNormalHints(msgDisplay, w, &hints);
+#endif
 	    
 	XSelectInput(msgDisplay, w, ExposureMask);
 	XMapWindow(msgDisplay, w);      /* Map the window */
