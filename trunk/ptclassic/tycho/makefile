@@ -64,7 +64,7 @@ subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 indices:
 	(cd lib/idx; $(MAKE))
 
-makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
+makefiles all clean depend realclean checkjunk sccsinfo sccsclean itcldocs \
 	tests extraclean weblint:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
