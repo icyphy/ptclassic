@@ -5,7 +5,15 @@
 </head>
 <body bgcolor="#faf0e6">
 <h1><a name="release notes 0.2">Tycho 0.2 Release Notes</a></h1>
-<p>
+Contents:
+<MENU>
+<LI> <A HREF="#tycho 0.2 overview">Tycho 0.2 Overview </A> 
+
+<LI> <A HREF="#tycho 0.2 changes">Changes between Tycho 0.1.1 and Tycho 0.2</A>
+</MENU>
+
+ <hr>
+<H2><A NAME="tycho 0.2 overview">Tycho 0.2 Overview</A></H2>
 Tycho is an object-oriented <em>syntax manager</em> with
 an underlying heterogeneous <a href="rationale.html">technical rationale</a>.
 It provides a number of editors and graphical widgets
@@ -17,9 +25,12 @@ Editors for visual syntaxes will be more diverse.
 	
 The system documentation is integrated, using a hypertext
 system compatible with the worldwide web.
-Tycho has been designed primarily for use with the
-Ptolemy system, a heterogeneous design environment
-from U.C. Berkeley, but it is also useful on its own.
+Tycho is designed to provide the user interface for other programs.
+At Berkeley, it is used with the Ptolemy system, a
+heterogeneous design environment. It is also useful on its own
+as a software development environment.  The development of Tycho
+has proceeded almost entirely within the Tycho environment since
+its very early days.
 <p>
 Version 0.2 is the third public release of Tycho as a standalone system.
 It runs under the vanilla Itcl 2.2 with no changes to the executable.
@@ -34,7 +45,7 @@ Tycho0.2 can be obtained from
 <code>http://ptolemy.eecs.berkeley.edu/tycho/Tycho.html</code></a>
 <p>
 Here is a summary of the capabilities:
-<h2>Tycho Kernel</h2>
+<h3>Tycho Kernel</h3>
 <ul>
 <li>
 A family of dialog windows, including basic message windows
@@ -68,13 +79,12 @@ selecting fonts.
 <li> 
 A user preferences system.
 <li>
-A Glimpse index browser.
+An interface to the Glimpse index browser, which can rapidly search
+large directory trees for textual patterns.
 <li>
 Error handling with a stack display.
 <li>
-Auto-save and crash recovery (although the crash recovery
-will only work with modifications to the executable, currently
-only available with the Ptolemy distribution).
+Auto-save
 <li>
 Some elementary data structures: Stack, CircularList, Graph,
 DirectedAcyclicGraph, Forest.
@@ -101,27 +111,29 @@ The editors and shells included in release 0.2 are:
 	hyperlinks.
 
 	<li> HTML viewer.  This viewer is based on Stephen Uhler's
-	html_library3.0, but has been tuned for performance.  The HTML
-	viewer will start netscape if it is passed a non-local URL.
+	html_library3.0, but has been tuned for performance.
+	The HTML viewer current starts netscape if it is passed a URL,
+	although future versions of Tycho will directly support HTTP.
 	
 	<li> Itcl and Tcl editors.  These editors color and fill
 	comments, handle indentation, and color class, procedure, and
-	method names.  They also support "evaluate" commands, where
-	either a selected region or the entire file can be evaluated.
-	
+	method names. 
+	They also support "evaluate" commands, where a selected region,
+	a method or procedure body, or the entire file can be evaluated.
+
+	<li> Java editor.  It includes a menu choice that will run
+	<CODE>appletviewer</CODE>.
+
 	<li> Makefile editor.  This editor colors comments, variable
 	definitions, variable references, rules, and various
 	directives.
 	
-	<li> Ptlang editor.  This is an editor for designing blocks in
-	Ptolemy.
+	<li> Ptlang editor.  This is an editor for designing new functional
+	elements (stars) for the Ptolemy system.
 	
 	<li> Ptlang editor.  This is an editor for designing universes in
 	Ptolemy.
 
-	<li> Java editor.  It includes a menu choice that will run
-	<CODE>appletviewer</CODE>.
-	
 	<li> Esterel editor. 
 	
 	<li> Matlab and Mathematica consoles.  These will only appear
@@ -136,9 +148,10 @@ The editors and shells included in release 0.2 are:
 	<li> EditForest - Forest Editor (a forest is a collection of trees)
 	<li> EditPalette - Prototype of a Ptolemy Palette editor
 	<li> EditSTD - State Transition Diagram editor
-	<li> GanttView - Gantt Chart Viewer (Not included in Tycho0.2)
-	<li> ProfileTcl - Tcl Profiler that uses the TclX profiler.
-	<li> SlateView - Slate viewer
+	<li> Slate - Object oriented extension to the Tk Canvas
+	<li> ProfileTcl - Tcl Profiler that uses the TclX profiler and
+	displays the results graphically.
+
 </ul>
 	
 <h3><code>tydoc</code> - The Tycho documentation system</h3>
@@ -146,55 +159,40 @@ The editors and shells included in release 0.2 are:
 Tycho 0.2 also includes <code>tydoc</code>, a script that converts
 itcl to html.
 
-<H2>Changes between Tycho 0.1.1 and Tycho 0.2</H2>
-<UL>
+<H2><A HREF="tycho 0.2 changes">Changes between Tycho 0.1.1 and Tycho 0.2</A></H2>
 
-<LI> Tycho0.2 includes Sun <CODE>tcljava</CODE> interface.
+There were many changes between Tycho 0.1.1 and Tycho 0.2, we only
+discuss some of the important changes.
+ <P>Widget changes
+<UL>
+<LI> The Slate graphical system was rewritten and documented
+
+<LI> Improvements to the <A HREF="../kernel/doc/usersGuides/PreferencesHelp.html">Preferences</A> system that use a Model/View system.
+
+<LI> Compiling C,C++ and Java files from within Tycho is now better
+supported.
+
+<LI> New editors for file diffs, System Description Language (SDL) files.
+
+
+<LI> The Monitor widget replaces the graphical Exec widget.
+
 </UL>
-
-<H2>Changes between Tycho 0.1 and Tycho 0.1.1</H2>
-
+ <P>Infrastructure changes
 <UL>
-<li> 0.1.1 has the following new functionality in the Tycho kernel:
-	<UL>
-	
-	<li> View/Displayer In this architecture, the Display always
-	provides the top-level window, the View provides a widget that
-	displays or edits data, and a Filter connects a view to the
-	underlying data structures.
-	
-	<li> Pop-up menus
-	<li> Menubar
-	<li> Glimpse Index Browser
-	<li> Graphical Itcl Class browser
-	<li> Preferences
-	<li> Exec class which can be used to run remote programs like
-	 <CODE>make</CODE>
-	<li> Print Dialog
-	</UL>
+<LI> Infrastructure to easily <A HREF="coding/buildtclexts.html">configure and build </A> Tcl C extensions.
 
+<LI> Tycho 0.2 includes the Sun 
+<A HREF="../java/tycho/doc/internals/tcljava.html"><CODE>tcljava</CODE></A>
+interface.  <CODE>tycho -java</CODE> will bring up Tycho running
+within Java.
 
-<li> 0.1.1 includes Slate, an infrastructure for visual programming.
-<li> 0.1.1 includes Graphical editors.
+<LI> Tycho can run a scheduler that allows C tasks to be interleaved.
 
-<li> The following text editors are new in 0.1.1:
-	<UL>
-	<li> CommandShell - A prototype of a shell interface
-	<li> Java mode
-	</UL>
+<LI> Ptolemy 0.7 can generate systems that Tycho can load as C files.
 
-
-<li> The HTML viewer has been tuned for performance.
-	
-<li> 0.1.1 has been modified to be less Unix-centric.
-	Tycho 0.1.1 runs under NT, but not all features work under NT.
-	0.1.1 has been started up on the Mac, but the Itcl2.1 port
-	to the Mac is substantially incomplete.
-	
-<li> 0.1.1 can handle hierarchical index, so a key in an index can have more
-	than one hyperlink.
-	
-<li> 0.1.1 has more tests.
+<LI> More complete tests and <A HREF="coding/testing.html">documentation</A>
+about the test system.
 </UL>
 
 <H2>Backward compatibility issues between 0.1.1 and 0.2</H2>
@@ -202,12 +200,19 @@ itcl to html.
 <UL>
 
 <LI> Tycho 0.2 requires Itcl 2.2.
-<LI> Tycho 0.2 uses the newer <CODE>pitcl</CODE> interface, which is not
-backward compatible with <CODE>ptcl</CODE>.  In Ptolemy 0.6,
-<CODE>tycho -ptiny</CODE> understood <CODE>ptcl</CODE> commands.
-In Ptolemy 0.7, <CODE>tycho -ptiny</CODE> does not understand
-<CODE>ptcl</CODE> commands.  See the <A HREF="../typt/kernel/internals/pitcl.html">pitcl</A> page for details.
 
+<LI> Tycho 0.2 works with the 0.7 version of Ptolemy.  It cooperates with
+(but does not yet replace) the graphical user interface of Ptolemy
+(called <CODE>pigi</CODE>).  It also provides a non-graphical interface to the
+Ptolemy kernel called <CODE>pitcl</CODE>.  This interface is not backward
+compatible with ptcl, the previous Tcl-based non-graphical interface
+to the Ptolemy kernel.
+See the
+<A HREF="../typt/kernel/internals/pitcl.html">pitcl</A> page for details.
+
+
+<LI> The <CODE>Exec</CODE> class is now non-graphical, see the
+<CODE>Monitor</CODE> class for a graphical version.
 </UL>
 
 <p>
