@@ -83,10 +83,20 @@ body ::tycho::ProfileTcl::constructor {args} {
     disableTool cancel
 
     # Add a display at the bottom for the profile stats.
-    addInfo count {Call count} 0 10
-    addInfo real {Real time} 0 10
-    addInfo cpu {CPU time} 0 10
-    
+    addInfo count {Call count} 0 10 \
+            "Number of times the function under the cursor was called."
+    addInfo real {Real time} 0 10 \
+            "Amount of Real time in milliseconds the function under the \
+            cursor consumed."
+    addInfo realPercent {Real %} 0 8 \
+            "Percentage of the total Real time in milliseconds the function \
+            under the cursor"
+    addInfo cpu {CPU time} 0 10 \
+            "Amount of CPU time in milliseconds the function under the \
+            cursor consumed"
+    addInfo cpuPercent {CPU %} 0 8 \
+            "Percentage of the total CPU time in milliseconds the function \
+            under the cursor"
     eval itk_initialize $args
 
     ::tycho::loadIfNotPresent profile tclx
@@ -188,9 +198,31 @@ body ::tycho::ProfileTcl::profileStart {} {
 body ::tycho::ProfileTcl::updateTimes {} {
     set node [component graphics current]
     if {$node == {}} {return}
+    set root [[component graphics graph] roots]
     set fst [component graphics graph]
+
+    # Determine the total about of Real and CPU time 
+    array set contents [$fst contents $root]
+    set totalReal $contents(real)
+    set totalCPU $contents(cpu)
+
     array set contents [$fst contents $node]
-    addInfo count {Call count} $contents(count)
-    addInfo real {Real time} $contents(real)
-    addInfo cpu {CPU time} $contents(cpu)
+    addInfo count {Call count} $contents(count) 10 \
+            "Number of times the function under the cursor was called."
+    addInfo real {Real time} $contents(real) 10 \
+            "Amount of Real time in milliseconds the function under the \
+            cursor consumed."
+    addInfo realPercent {Real %} \
+            [format "%5.3f" [expr {$contents(real) / ($totalReal + 0.0) *100}]] \
+            8 \
+            "Percentage of the total Real time in milliseconds the function \
+            under the cursor"
+    addInfo cpu {CPU time} $contents(cpu) 10 \
+            "Amount of CPU time in milliseconds the function under the \
+            cursor consumed."
+    addInfo cpuPercent {CPU %} \
+            [format "%5.3f" [expr {$contents(cpu) / ($totalCPU + 0.0) *100}]] \
+            8 \
+            "Percentage of the total CPU time in milliseconds the function \
+            under the cursor"
 }
