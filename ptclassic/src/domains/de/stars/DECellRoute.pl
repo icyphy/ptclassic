@@ -21,7 +21,7 @@ sources and routes them to the appropriate output.
 		name { RoutingTable }
 		type { intarray }
 		default { "0 1 2 3" }
-		desc { Cell destinaton address to output port number map. }
+		desc { Cell destination address to output port number map. }
 	}
 
 	hinclude { "NetworkCell.h" }
