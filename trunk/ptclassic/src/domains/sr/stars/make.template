@@ -31,6 +31,7 @@ PL_SRCS= \
 	SRAdd.pl \
 	SRAnd.pl \
 	SRConst.pl \
+	SRIntToString.pl \
 	SRItcl.pl \
 	SRItclCounter.pl \
 	SRItclDisplay.pl \
@@ -40,11 +41,13 @@ PL_SRCS= \
 	SRItclInOut.pl \
 	SRItclModeSelect.pl \
 	SRItclOut.pl \
+	SRMIDIin.pl \
 	SRMux.pl \
 	SRNop.pl \
 	SRPre.pl \
 	SRPrinter.pl \
 	SRSub.pl \
+	SRStringToInt.pl \
 	SRWhen.pl
 
 # The .cc files
