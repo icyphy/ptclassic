@@ -157,11 +157,31 @@ use <CODE>weblint</CODE> for checking individual files.
 <CODE>htmlchek</CODE> cat be obtained from
 <A HREF="ftp://ftp.cs.buffalo.edu/pub/htmlchek/"><CODE>ftp://ftp.cs.buffalo.edu/pub/htmlchek/</CODE></A>
 
-<P> To run <CODE>htmlchek</CODE>:
+<P> The best way to run <CODE>htmlchek</CODE> is to create a sample
+distribution, create the codeDoc files and then run <CODE>htmlchek</CODE>
+
+<OL>
+<LI> Create the test distribution:
 <PRE>
-cd $TYCHO
-make htmlchek
+cd /users/ptdesign/adm/gen-latest; make clean; make
 </PRE>
+
+<LI> Reset <CODE>TYCHO</CODE> to point to the test distribution:
+<PRE>
+setenv TYCHO /users/ptdesign/adm/dists/tycho-latest
+cd $TYCHO
+</PRE>
+
+<LI> Run <CODE>make install</CODE>.  This will make the itcldocs twice, which
+will populate the <CODE>doc/codeDoc</CODE> directories.  You need to make
+the itcldocs twice so that the cross references are correct
+
+<LI> Run <CODE>make htmlchek</CODE>
+
+</OL>
+
+
+
 The output ends up in five files
 <MENU>
 <LI> <CODE>htmlchekout.ERR</CODE> - HTML usage errors
