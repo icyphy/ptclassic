@@ -49,7 +49,7 @@
 #    foo add a {}
 #    foo add c {} a
 #    foo add d {} a
-#    ::tycho::post [foo describe]
+#    foo describe
 # </pre></tcl>
 # The description that is posted in the last line will be:
 # {{a {} {}} {c {} a} {d {} a}}, which is a list of nodes
