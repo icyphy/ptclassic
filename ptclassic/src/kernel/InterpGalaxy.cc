@@ -336,6 +336,8 @@ InterpGalaxy :: numPorts (const char* star, const char* port, int num) {
 // modify the domain within the galaxy (for wormholes)
 int
 InterpGalaxy::setDomain (const char* name) {
+	actionList += "D";
+	actionList += savestring (name);
 	myDomain = savestring (name);
 	// if we're already in the given domain, do nothing and return true
 	if (strcmp (name, KnownBlock::domain()) == 0) return TRUE;
@@ -344,8 +346,6 @@ InterpGalaxy::setDomain (const char* name) {
 		return FALSE;
 	}
 	if (!KnownBlock::setDomain (name)) return FALSE;
-	actionList += "D";
-	actionList += savestring (name);
 	return TRUE;
 }
 
@@ -491,7 +491,8 @@ InterpGalaxy::addToKnownList(const char* outerDomain) {
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate
 // type of wormhole, add it to the list, and change back to outerDomain
-	if (strcmp (outerDomain, KnownBlock::domain()) != 0) {
+	if ((Domain::named(outerDomain)->isGalWorm() == TRUE) ||
+	   (strcmp (outerDomain, KnownBlock::domain()) != 0)) {
 		Star& s = Domain::named(outerDomain)->newWorm(*this);
 		setBlock (myName, &s);
 		KnownBlock::addEntry (s, myName, 1);
