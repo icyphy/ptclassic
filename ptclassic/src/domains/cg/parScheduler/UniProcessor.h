@@ -8,7 +8,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -144,7 +144,7 @@ public:
 	StringList displaySubUniv() { return subGal->print(1); }
 
 	// write Gantt chart
-	int writeGantt(ostream&);
+	int writeGantt(const char* universe, int numProcs, int span);
 
 	// get the total idle time including the idle time at the end.
 	// This method should be called after "display" method.
