@@ -118,8 +118,8 @@ void CGCMultiTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 	CGCUnixReceive* cr = (CGCUnixReceive*) r;
 
 	// for each child_target
-	CGCTarget* ts = (CGCTarget*) cs->myTarget();
-	CGCTarget* tr = (CGCTarget*) cr->myTarget();
+	CGCTarget* ts = (CGCTarget*) cs->cgTarget();
+	CGCTarget* tr = (CGCTarget*) cr->cgTarget();
 
 	// set the IPC handler names
 	// for sender
@@ -149,11 +149,11 @@ void CGCMultiTarget :: setMachineAddr(CGStar* s, CGStar* r) {
 	CGCUnixSend* cs = (CGCUnixSend*) s;
 	CGCUnixReceive* cr = (CGCUnixReceive*) r;
 
-	CGTarget* tg = cr->myTarget();
+	CGTarget* tg = cr->cgTarget();
 	if (replicateFlag && mapArray) {
 		int six = -1;
 		int rix = -1;
-		CGTarget* sg = cs->myTarget();
+		CGTarget* sg = cs->cgTarget();
 		int numMatch = 0;
 		for (int i = 0; i < mapArray->size(); i++) {
 			CGTarget* temp = (CGTarget*) child(mapArray->elem(i));

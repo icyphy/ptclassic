@@ -53,7 +53,7 @@ void HOFWormhole :: go() {
 }
 
 void HOFWormhole :: wrapup() {
-	target->wrapup();
+	myTarget()->wrapup();
 }
 
 HOFWormhole :: ~HOFWormhole() { freeContents();}
@@ -76,12 +76,12 @@ StringList HOFWormhole :: printRecursive() const {
 // cloner -- clone the inside and make a new wormhole from that.
 Block* HOFWormhole :: clone() const {
 	LOG_NEW; return new HOFWormhole(gal.clone()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 Block* HOFWormhole :: makeNew() const {
 	LOG_NEW; return new HOFWormhole(gal.makeNew()->asGalaxy(),
-					target->cloneTarget());
+					myTarget()->cloneTarget());
 }
 
 // return stop time

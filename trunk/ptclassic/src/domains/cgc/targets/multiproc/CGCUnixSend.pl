@@ -89,7 +89,7 @@ Produce code for inter-process communication (send-side)
 	initCode {
 		// obtain the hostAddr state from parent MultiTarget.
 		// Note that this routine should be placed here.
-		CGCMultiTarget* t = (CGCMultiTarget*) myTarget()->parent();
+		CGCMultiTarget* t = (CGCMultiTarget*) cgTarget()->parent();
 		t->setMachineAddr(this, partner);
 		hostAddr.initialize();
 

@@ -87,7 +87,7 @@ protected:
 
 	// access to target (cast is safe: always a CGCTarget)
 	CGCTarget* targ() {
-		return (CGCTarget*)myTarget();
+		return (CGCTarget*)target();
 	}
 
 	// Virtual functions. Expand State or PortHole reference macros.

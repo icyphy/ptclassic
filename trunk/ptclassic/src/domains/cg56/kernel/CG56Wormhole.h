@@ -62,7 +62,7 @@ public:
 	~CG56Wormhole();
 
 	// return my scheduler
-	Scheduler* scheduler() const { return target->scheduler() ;}
+	Scheduler* scheduler() const { return myTarget()->scheduler() ;}
 
 	// execution time which is the average of the workload inside 
 	// the wormhole with 1 processor.

@@ -90,7 +90,7 @@ for a complete explanation of the options.
                 addDeclaration("    FILE* $starSymbol(fp);");
                 addInclude("<stdio.h>");
 		StringList w = "    if(!($starSymbol(fp) = fopen(\"";
-		w << targetPtr->name() << "_$starSymbol(temp)";
+		w << target()->name() << "_$starSymbol(temp)";
 		w << "\",\"w\")))";
 		addCode(w);
 		addCode(err);
@@ -126,7 +126,7 @@ codeblock(closeFile) {
 		const char* sf = saveFile;
 		if (sf != NULL && *sf != 0) {
 			cmd << "/bin/cat ";
-			cmd << targetPtr->name(); 
+			cmd << target()->name(); 
 			cmd << "_$starSymbol(temp)" << " >> ";
 			cmd << sf << "; /bin/echo \"\" >> " << sf << "; ";
 		}
@@ -154,10 +154,10 @@ codeblock(closeFile) {
 		}
 
 		// put file name
-		cmd << targetPtr->name() << "_$starSymbol(temp)";
+		cmd << target()->name() << "_$starSymbol(temp)";
 
 		// remove temporary files
-		cmd << "; /bin/rm -f " << targetPtr->name();
+		cmd << "; /bin/rm -f " << target()->name();
 		cmd << "_$starSymbol(temp)";
 
 		cmd << ") &";
