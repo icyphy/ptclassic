@@ -53,7 +53,8 @@ OPTIMIZER =	-m486 -pipe -g
 #OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
 #LINUXDEF =	-Dlinux -DNO_RAND_OPTIMIZE #-D_GNU_SOURCE -D_BSD_SOURCE
 
-WARNINGS =	-Wall -Wcast-qual -Wcast-align
+# -Wsynth is new in g++-2.6.x
+WARNINGS =	-Wall -Wcast-qual -Wcast-align -Wsynth
 GPPFLAGS =	$(LINUXDEF) $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 
