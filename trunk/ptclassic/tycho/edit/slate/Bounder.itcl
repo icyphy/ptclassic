@@ -180,7 +180,7 @@ body ::tycho::Bounder::click {x y args} {
     set y1 [expr $y1 + ($y - $b1)]
 
     # Click on target
-    eval chain click $x $y $args
+    eval chain $x $y $args
 
     # Remember where we are
     set actualX $x
