@@ -1,4 +1,4 @@
-# Package index for the Tycho TextEdit package
+# Package index for the Tycho tycho.edit.textedit package
 #
 # @Author: John Reekie
 #
@@ -30,5 +30,5 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-package ifneeded TextEdit 0.1 \
+package ifneeded tycho.edit.textedit 2.0 \
 	[list source [file join $dir textedit.tcl]]
