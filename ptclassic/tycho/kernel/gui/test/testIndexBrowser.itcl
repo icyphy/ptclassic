@@ -76,14 +76,48 @@ proc testIndexBrowserSetup {} {
     }
 }
 
+proc testIndexBrowserCloseFile {filename} {
+    set displayer [::tycho::File::isFileOpen $filename]
+    if {$displayer != {}} {
+        delete object [$displayer displayer]
+    }
+}
+
+######################################################################
+#### 
+#
+test IndexBrowser-1.1 {Bring up a index, select an simple node} {
+    testIndexBrowserSetup
+    set tychoHomePage [file join $TYCHO doc index.html]
+    testIndexBrowserCloseFile $tychoHomePage
+    update idletasks
+    set retval1 [::tycho::File::isFileOpen $tychoHomePage]
+
+    # Bring up the browser, open the home page
+    set win [::tycho::File::openContext IndexBrowser.idx]
+    $win clearSelection
+    $win goto 0
+    # It would be nice if we could some how get the return value here.
+    $win ok
+
+    # Did we open the home page?
+    set retval2 [expr {[::tycho::File::isFileOpen $tychoHomePage] != {}}]
+
+    testIndexBrowserCloseFile [file join $TYCHO doc index.html]
+    list $retval1 $retval2
+} {{} 1}
+
 ######################################################################
 #### 
 # 
-test IndexBrowser-1.1 {Bring up a index, select an hierarchichal index} {
+test IndexBrowser-1.2 {Bring up a index, select an hierarchichal index} {
     testIndexBrowserSetup
+
+    # Bring up the browser, open the home page
     set win [::tycho::File::openContext IndexBrowser.idx]
     $win clearSelection
     $win goto 1
     # It would be nice if we could some how get the return value here.
     $win ok
+
 } {}
