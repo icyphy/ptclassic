@@ -59,7 +59,7 @@ H(z) =  --------------------------------------
 <p>
 Hence, the same coefficients in the
 <tt>Lattice</tt>
-star will give transfer function <i>H <sup>-</i>1<i></sup> </i>(<i>z</i>)<i></i>.
+star will give transfer function <i>H <sup>-</i>1<i></sup> </i>(<i>z</i>).
 <p>
 Note that the definition of reflection coefficients is not quite universal
 in the literature.  The reflection coefficients in references [2] and [3]

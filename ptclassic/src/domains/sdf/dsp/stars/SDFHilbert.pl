@@ -19,7 +19,7 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="Hilbert filter"></a>
 <a name="filter, Hilbert"></a>
 The exact Hilbert transform cannot be realized; instead, we just truncate
-the response symmetrically at <i>-N/</i>2<i></i> and <i>N/</i>2<i></i> [1].
+the response symmetrically at <i>-N/</i>2 and <i>N/</i>2 [1].
 This is accurate enough for some applications, but for high accuracy we
 suggest the use of the Parks-McClellan algorithm [2] to design a Hilbert
 transformer filter with the desired characteristics [1,3].

@@ -17,7 +17,7 @@ limitation of liability, and disclaimer of warranty provisions.
 \fIblockSize\fP particles are consumed on each input.
 But only one of these blocks of particles is copied to the output.
 The one copied is determined by the \fIcontrol\fP input.
-Integers from <i></i>0<i></i> through <i>N-</i>1<i></i> are accepted at the \fIcontrol\fP input,
+Integers from 0 through <i>N-</i>1 are accepted at the \fIcontrol\fP input,
 where <i>N</i> is the number of inputs.
 If the \fIcontrol\fR input is outside this range, random data (possibly
 memory mapped devices) will be copied.

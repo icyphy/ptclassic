@@ -28,7 +28,7 @@ multidimensional non-uniform filter bank design [3-5].
 This function returns one of the Smith forms of an integer matrix <i>S</i> 
 by factoring <i>S</i> into three simpler integer matrices such that
 <i>S   </i>=<i>   U   D   V</i> [6].
-Here, <i>D</i> is diagonal, and <i>U</i> and <i>V</i> have determinant of <i>+</i>1<i></i> or <i>-</i>1<i></i>
+Here, <i>D</i> is diagonal, and <i>U</i> and <i>V</i> have determinant of <i>+</i>1 or <i>-</i>1
 (and are called <i>regular unimodular</i>).
 Therefore, <i>|det   S| </i>=<i> |det   D|</i>.
 Note that <i>S</i> is <i>m</i> &#215; <i>n</i>, so <i>U</i> is <i>m</i> &#215; <i>m</i>, <i>D</i> is <i>m</i> &#215; <i>n</i>, and

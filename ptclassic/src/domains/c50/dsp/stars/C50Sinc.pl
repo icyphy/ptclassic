@@ -20,8 +20,8 @@ This star computes the sinc of the input, which must be in the range
 <pre>
 sin(pi cdot input) over {pi cdot input}
 </pre>
-so the input range is effectively <i></i>(<i>-pi, pi</i>)<i></i>.  The output is in
-the range <i></i>(<i>-</i>0<i>.</i>22<i>, </i>1<i>.</i>0<i></i>)<i></i>.
+so the input range is effectively (<i>-pi, pi</i>).  The output is in
+the range (<i>-</i>0<i>.</i>22<i>, </i>1<i>.</i>0).
 	}
 	input{
 		name { input }

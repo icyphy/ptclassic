@@ -21,7 +21,7 @@ This star computes the cosine of the input, which must be in the range
 (-1.0, 1.0).
 The output equals cos(<i>pi</i>&#183<i>input</i>), so the input range is 
 effectively (<i>-pi</i>, <i>pi</i>).
-The output is in the range <i></i>(<i>-</i>1<i>.</i>0<i>, </i>1<i>.</i>0<i></i>)<i></i>.
+The output is in the range (<i>-</i>1<i>.</i>0<i>, </i>1<i>.</i>0).
 	}
 	input {
 		name {input}

@@ -63,8 +63,8 @@ parameter and the output sample rate.
 <a name="filter, multirate"></a>
 In particular, considerable care must be taken to avoid aliasing.
 Specifically, if the input sample rate is f,
-then the filter stopband should begin before <i>f/</i>2<i></i>.
-If the interpolation ratio is <i>i</i>, then <i>f/</i>2<i></i> is a fraction <i></i>1<i>/</i>(<i></i>2<i> i</i>)<i></i>
+then the filter stopband should begin before <i>f/</i>2.
+If the interpolation ratio is <i>i</i>, then <i>f/</i>2 is a fraction 1<i>/</i>(2<i> i</i>)
 of the sample rate at which you must design your filter.
 <p>
 The <i>decimationPhase</i> parameter is somewhat subtle.

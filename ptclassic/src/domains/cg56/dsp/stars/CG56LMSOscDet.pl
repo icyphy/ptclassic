@@ -42,7 +42,7 @@ small, this filter gives an estimate of the strongest sinusoidal component:
 a<sub>1</sub> = cos(omega)
 </pre>
 This filter outputs the current value of <i>a <sub></i>1<i></sub></i> on the <i>cosOmega</i>
-output port.  The initial value is <i>a <sub></i>1<i></sub> </i>=<i> </i>1<i></i>, that is, zero frequency,
+output port.  The initial value is <i>a <sub></i>1<i></sub> </i>=<i> </i>1, that is, zero frequency,
 so the initial value of the second tap is -2.
 <p>
 For more information on the LMS filter implementation, see the description

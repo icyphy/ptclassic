@@ -25,7 +25,7 @@ as follows:
 <li> e = -E
 </ul>
 <p>
-This only works if a, b, c, d, and e are in the range <i></i>(<i>-</i>1<i>, +</i>1<i></i>)<i></i>.
+This only works if a, b, c, d, and e are in the range (<i>-</i>1<i>, +</i>1).
 The transfer function realized by the filter is:
 <pre>
 H(z) = a + bz<sup>-1</sup> + cz<sup>-2</sup>

@@ -28,9 +28,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This star implements an infinite impulse response filter of arbitrary order
 in a direct form II [1] realization, using fixed-point arithmetic.
-The parameters of the star specify <i>H</i>(<i>z</i>)<i></i>, the <i>Z</i>-transform of an
-impulse response <i>h</i>(<i>n</i>)<i></i>.
-The output of the star is the convolution of the input with <i>h</i>(<i>n</i>)<i></i>.
+The parameters of the star specify <i>H</i>(<i>z</i>), the <i>Z</i>-transform of an
+impulse response <i>h</i>(<i>n</i>).
+The output of the star is the convolution of the input with <i>h</i>(<i>n</i>).
 <p>
 Note that the numerical finite precision noise increases with the filter order.
 To minimize this distortion, it is often desirable to expand the filter
