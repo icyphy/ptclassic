@@ -196,7 +196,7 @@ body ::tycho::ClassParser::generateIDoc {debug generateIndex title filelist} {
     set retval ""
     foreach filename $filelist {
         set generator [generator $filename]
-        if {[info command $ClassParser] != {}} {
+        if {$ClassParser != "" && [infoWhich $ClassParser] != {}} {
             if ![$ClassParser isa $generator] {
                 delete object $ClassParser
                 set ClassParser [$generator [::tycho::autoName ClassParser]]
@@ -206,7 +206,7 @@ body ::tycho::ClassParser::generateIDoc {debug generateIndex title filelist} {
             set ClassParser [$generator [::tycho::autoName ClassParser]]
         }
 
-        if ![$generator::modCheck $filename] {
+        if ![${generator}::modCheck $filename] {
             # file does not need to be redocumented if not modified
             if $debug {
               #  puts "$filename <not modified>"
@@ -288,7 +288,7 @@ body ::tycho::ClassParser::getClassesInSource {filename} {
     set generator [generator $filename]
 
     if {$generator != {}} {
-        return [$generator::getClassesInSource]
+        return [${generator}::getClassesInSource]
     }
 
     error "Unsupported extension."
@@ -315,7 +315,7 @@ body ::tycho::ClassParser::modCheck {filename} {
     set generator [generator $filename]
 
     if {$generator != {}} {
-        return [$generator::modCheck $filename]
+        return [${generator}::modCheck $filename]
     }
 
     return 1
@@ -335,7 +335,7 @@ body ::tycho::ClassParser::idocUpdate {obj} {
     if {$obj == {}} {return}
     # NOTE: Formerly used
     #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
-    if {[info which -command $obj] == {}} {
+    if {[infoWhichCommand $obj] == {}} {
         # If you are having trouble with safeUpdate, uncomment the line below
         # error "::tycho::safeUpdate: command aborted: $obj does not exist"
         

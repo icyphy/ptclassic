@@ -168,7 +168,7 @@ body ::tycho::ItclParser::generateSingleFileIDoc {filename} {
         # puts $class
         # puts [$_classmodels($class) describe]
         if {$class != "related"} {
-            set docFile [info namespace tail $class].idoc
+            set docFile [namespaceTail $class].idoc
             ::tycho::rmIfNotWritable $docFile
             set fd [open $docFile "w"]
 	    puts $fd [$model describe]
@@ -439,7 +439,7 @@ body ::tycho::ItclParser::modCheck {filename} {
             continue
         }
         set docFile [file join doc codeDoc \
-                [info namespace tail $class].idoc]
+                [namespaceTail $class].idoc]
         if ![file exists $docFile] {
             # There is no documentation.
             return 1
@@ -496,8 +496,8 @@ body ::tycho::ItclParser::addArgs {class name arguments} {
 #
 body ::tycho::ItclParser::addBody {name arguments expl} {
     # assumes the method or proc already exists
-    set class [info namespace qualifiers $name]
-    set name [info namespace tail $name]
+    set class [namespaceQualifiers $name]
+    set name [namespaceTail $name]
     if { $name == "constructor" } {
         set fullname constructor
     } elseif { $name == "destructor" } {
@@ -556,8 +556,8 @@ body ::tycho::ItclParser::addCommon {class name protection desc {default {}}} {
 #
 body ::tycho::ItclParser::addConfigBody {name expl} {
     # assumes the itk_option already exists
-    set class [info namespace qualifiers $name]
-    set name [info namespace tail $name]
+    set class [namespaceQualifiers $name]
+    set name [namespaceTail $name]
  
     # Tcl allows either tycho::crap or ::tycho::crap
     if ![info exists _classmodels($class)] {

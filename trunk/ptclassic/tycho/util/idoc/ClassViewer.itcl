@@ -509,7 +509,7 @@ body ::tycho::ClassViewer::generateDAG {} {
     }
     if ![info exists _classdag] {
         set _classdag [::tycho::EditDAG $this.[::tycho::autoName dag]]
-        set _classdag [info namespace tail $_classdag]
+        set _classdag [namespaceTail $_classdag]
         # FIXME: does not place anywhere!
     }
     foreach parent "$_currentclass $_heritage" {
@@ -521,7 +521,7 @@ body ::tycho::ClassViewer::generateDAG {} {
         set parents [concat \
         	[$_classmodels($parent) cget -inherits] \
         	[$_classmodels($parent) cget -implements]]
-        lappend DAGinfo "add $parent \{label [info namespace tail $parent] \
+        lappend DAGinfo "add $parent \{label [namespaceTail $parent] \
                 link $source altlink $docfile\} \{$parents\}"
     }
     $_classdag clear
@@ -551,8 +551,8 @@ body ::tycho::ClassViewer::generateHtml {} {
     switch [$_classmodels($_currentclass) cget -language] {
         Itcl {
             append html "\
-                    <a name = \"[info namespace tail $className] \
-                    class documentation ([info namespace qualifiers \
+                    <a name = \"[namespaceTail $className] \
+                    class documentation ([namespaceQualifiers \
                     $className] namespace)\">\
                     $className</a></h1>\n"
         }
@@ -570,7 +570,8 @@ body ::tycho::ClassViewer::generateHtml {} {
       append html "</body>\n</html>\n"
       
       # Save it as blah_i.html where the current file is blah.idoc
-      set htmlFile [file root [docFile $_currentclass]]_i.html
+      # set htmlFile [file root [docFile $_currentclass]]_i.html
+      set htmlFile [file root [docFile $_currentclass]].html
       set fp [open $htmlFile w]
       puts $fp $html
       close $fp
@@ -652,7 +653,8 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
             lappend _heritage $parent
 
             set _classmodels($parent) \
-            		[::tycho::ClassModel [::tycho::autoName class]]
+            		[uplevel #0 ::tycho::ClassModel \
+                            [::tycho::autoName class]]
             putStatus "Loading $parent"
             ::tycho::safeUpdate $this
             set fd [open $parentFile]
@@ -683,7 +685,7 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
 body ::tycho::ClassViewer::insertData {data} {
     if [getReadOnly] {bell; return}
     _deleteClasses
-    set tempClass [::tycho::ClassModel [::tycho::autoName class]]
+    set tempClass [uplevel #0 ::tycho::ClassModel [::tycho::autoName class]]
     $tempClass parse "$data"
     set language [$tempClass cget -language]
     set _currentclass [$tempClass cget -classname]
@@ -693,7 +695,7 @@ body ::tycho::ClassViewer::insertData {data} {
     set relfile [relFile $_currentclass]
     if {$relfile != {}} {
         set _classmodels(related) \
-                [::tycho::ClassModel [::tycho::autoName class]]
+                [uplevel #0 ::tycho::ClassModel [::tycho::autoName class]]
         set fd [open $relfile]
         $_classmodels(related) parse [read $fd]
         close $fd    
@@ -747,7 +749,7 @@ body ::tycho::ClassViewer::putHtml {class data {top 1}} {
 # to get the _rel.idoc name.
 # 
 body ::tycho::ClassViewer::relFile {classname} {
-    set relname "[info namespace tail $classname]_rel.idoc"
+    set relname "[namespaceTail $classname]_rel.idoc"
 
     lappend dirs {$TYCHO/kernel/basic}
     lappend dirs {$TYCHO/kernel/model}
@@ -1073,7 +1075,7 @@ body ::tycho::ClassViewer::_initializeBars {menubar statusbar toolbar} {
 
     # Bindings
     # font size control
-    set myDisplayer [info namespace tail [displayer]]
+    set myDisplayer [namespaceTail [displayer]]
     if {$myDisplayer != {}} {
         bind $myDisplayer <Control-equal> "$this upSize; break"
         bind $myDisplayer <Control-plus> "$this upSize; break"
@@ -1167,10 +1169,9 @@ body ::tycho::ClassViewer::_initializeMenubar {menubar} {
             -label Inherit \
             -underline 0 -command "$this inheritAll"
 
-    # FIXME: disabled until the new scanner and formatter are ready
-    #$menubar command generateHtml special \
-    #        -label "Generate HTML" \
-    #        -underline 0 -command "$this generateHtml"
+    $menubar command generateHtml special \
+            -label "Generate HTML" \
+            -underline 0 -command "$this generateHtml"
     
     # FIXME: add in when generalized place is working in displayer
     #        $menubar command GenDAG Special \
@@ -1264,4 +1265,3 @@ body ::tycho::ClassViewer::_setupHandles {} {
         %Q ghostHandle 1 0
     }
 }
-
