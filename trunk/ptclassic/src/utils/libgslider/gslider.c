@@ -1,3 +1,4 @@
+/* $Id$ */
 /*
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -24,10 +25,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
-
-#if !defined(lint) && !defined(SABER)
-static	char	SccsId[] = "$Id$";
-#endif /* not lint and not saber */
 
 #include <stdio.h>
 #include <malloc.h>
