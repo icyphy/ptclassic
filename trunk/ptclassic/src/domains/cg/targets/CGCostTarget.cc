@@ -66,7 +66,7 @@ time estimates will be reported.
 CGCostTarget::CGCostTarget(const char* nam, const char* startype,
 			   const char* desc, const char* assocDomain) :
 CGTarget(nam, startype, desc, assocDomain) {
-    addState(userTargetList.setState("targets?", this, "sim-CG56",
+    addState(userTargetList.setState("targets", this, "sim-CG56",
 	"List of targets to use to generate implementation cost information"));
     tempBlockList.initialize();
     ptclTarget = 0;
@@ -74,6 +74,11 @@ CGTarget(nam, startype, desc, assocDomain) {
 
 CGCostTarget::~CGCostTarget() {
     delete ptclTarget;
+}
+
+Block* CGCostTarget::makeNew() const {
+    LOG_NEW; return new CGCostTarget(name(), starType(), descriptor(),
+				     getAssociatedDomain());
 }
 
 // For each target specified by the user, generate the implementation costs
@@ -110,7 +115,8 @@ int CGCostTarget::run() {
 	else if (userTarget->canComputeMemoryUsage() ||
 		 userTarget->canComputeExecutionTime() ) {
 	    // FIXME: Should we close the target before using it?
-	    costInfoForOneTarget(userTarget);
+	    userTarget->clearGalaxy();
+	    costInfoForOneTarget(userTarget, userTarget->domain());
 	}
 	else {
 	    Error::warn(userTargetName, " is a valid code generation target, ",
@@ -154,34 +160,52 @@ void CGCostTarget::disconnectAllStars(Galaxy& parent) {
     }
 }
 
-// Generate implementation cost information for each star in the galaxy
-// Iterate over all blocks in the galaxy and ignore non-atomic blocks
+// Generate implementation cost information for each star in the galaxy.
+// Iterate over all blocks in the galaxy and ignore non-atomic blocks.
+// When the method exits, the userTarget will have no galaxy attached it.
 // FIXME: Should write the cost information to a file
-int CGCostTarget::costInfoForOneTarget(CGTarget* userTarget) {
+int CGCostTarget::costInfoForOneTarget(
+		CGTarget* userTarget, const char* domain) {
     // For each star in the original galaxy, create a child galaxy which
     // consists of the star plus dummy inputs and outputs.  The child
     // is run to generate implementation cost information
     GalStarIter nextStar(*galaxy());
     Star* star;
+    userTarget->clearGalaxy();		// disassociate any attached galaxies
     while ((star = nextStar++) != 0) { 
+	// Locate the star in the new domain
+	const char* starName = star->name();
+	const Block* retargettedStar = KnownBlock::find(starName, domain);
+	if (retargettedStar == 0) {
+	    StringList msg = "Cannot retarget star ";
+	    msg << starName << " to the " << domain << " domain";
+	    Error::warn(msg);
+	    continue;
+	}
+
+	// Keep track of errors
+	int errorFlag = FALSE;
+
 	// Create a child galaxy
 	Galaxy* childGalaxy = new Galaxy;
 	childGalaxy->setName("Child");
-	int errorFlag = FALSE;
+	childGalaxy->setDomain(domain);
 
 	// Make a copy of the current star
-	Block* localChildBlock = star->clone();
+	Block* localChildBlock = retargettedStar->clone();
 	addTempBlock(localChildBlock);
 	Star& localChildStar = localChildBlock->asStar();
-	childGalaxy->addBlock(localChildStar, star->name()); 
+	childGalaxy->addBlock(localChildStar, starName); 
 
         // Connect a dummy star to each input and output port of the star
 	BlockPortIter nextPort(localChildStar);
 	PortHole* port;
 	while ((port = nextPort++) != 0) {
 	    if (!selectConnectStarBlock(childGalaxy, port)) {
-		Error::warn("CGCostTarget cannot build a standalone ",
-			    "universe for the star ", star->name());
+		StringList msg = "CGCostTarget cannot build a standalone ";
+		msg << "universe for the star" << starName
+		    << " in the domain " << domain;
+		Error::warn(msg);
 		errorFlag = TRUE;
 		continue;
 	    }
@@ -204,6 +228,7 @@ int CGCostTarget::costInfoForOneTarget(CGTarget* userTarget) {
 	delete childGalaxy;
 	deleteTempBlocks();
     }
+
     return TRUE;
 }
 
@@ -245,7 +270,7 @@ int CGCostTarget::selectConnectStarBlock(
 }  
 
 // Find the code generation target corresponding to a target name
-CGTarget* findCodeGenTarget(const char* userTargetName) {
+CGTarget* CGCostTarget::findCodeGenTarget(const char* userTargetName) {
     // Check to make sure that the target exists and is a CG target
     const Target* userTarget = KnownTarget::find(userTargetName);
     if (userTarget && userTarget->isA("CGTarget")) {
