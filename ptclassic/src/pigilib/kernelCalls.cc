@@ -720,7 +720,11 @@ realGetParams(const Block* block, ParamListType* pListPtr,
 	       to pListPtr->array.
 	    */
 	    if (j) {
-		LOG_NEW; pListPtr->array = new ParamStruct[j];
+	        // Don't use new to create pListp->array, use calloc so that we
+	        // can easily free this from within C.
+	        // See FreeFlatPList(pListPtr) in paramStructs.c should be
+	        // called to free pListp->array.
+	        pListPtr->array = (ParamType *) calloc(j, sizeof(ParamType));
 		if (!pListPtr->array) { // out of memory error
 		    return FALSE;
 		}
