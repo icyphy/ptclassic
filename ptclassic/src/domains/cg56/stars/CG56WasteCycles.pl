@@ -1,4 +1,4 @@
-`defstar {
+defstar {
 	name { WasteCycles }
 	domain { CG56 }
 	desc {
