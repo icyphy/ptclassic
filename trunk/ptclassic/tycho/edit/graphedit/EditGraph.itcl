@@ -69,9 +69,6 @@ class ::tycho::EditGraph {
     # Create another editor.
     method clone {}
 
-    # Call the model
-    method model {method args}
-
     # Start creating a new edge
     method newclick {item x y}
 
@@ -90,8 +87,14 @@ class ::tycho::EditGraph {
     # Move mouse away from a port
     method portleave {}
 
+    # Redo the most recent command
+    method redo {}
+
     # Update the layout model
     method updateLayout {}
+
+    # Undo the most recent command
+    method undo {}
 
     # Make a new vertex
     method vertex {name x y}
@@ -99,7 +102,10 @@ class ::tycho::EditGraph {
     # Start moving a vertex
     method vertexclick {tag x y args}
 
-    # Continue moving a vertex item
+    # Delete a vertex
+    method vertexdelete {vertex}
+
+    # Continue moving a vertex
     method vertexdrag {tag x y}
 
     # Stop moving a vertex
@@ -111,11 +117,11 @@ class ::tycho::EditGraph {
     #################################################################
     ####                  protected methods                      ####
     
-    # Add a tag to all indicated vertices and edges.
+    # Add a tag to all indicated items.
     protected method _addtag {tag args}
 
     # Clear data from this editor (Note: not the viewer)
-    method _clear {}
+    protected method _clear {}
 
     # Remove an item from the selection
     protected method _deselect {name}
@@ -123,8 +129,17 @@ class ::tycho::EditGraph {
     # Delete a tag from all items.
     protected method _dtag {tag}
 
-    # Add a new edge
-    protected method _edge {name spec args}
+    # Add a new item
+    protected method _item {name spec args}
+
+    # Delete an edge
+    protected method _itemdelete {name}
+
+    # Configure an item
+    protected method _itemconfigure {name args}
+    
+    # Add a nested item
+    protected method _itemin {context name spec args}
 
     # Move an item
     protected method _move {tag x y}
@@ -137,9 +152,6 @@ class ::tycho::EditGraph {
 
     # Stop moving an item
     protected method _moverelease {tag x y}
-
-    # Add a new port to a vertex
-    protected method _portin {context name coords args}
 
     # Reshape an item
     protected method _reshape {name x y args}
@@ -159,25 +171,16 @@ class ::tycho::EditGraph {
     # Clear the selection
     protected method _selectionclear {foo}
 
-    # Add a new vertex to the view
-    protected method _vertex {name coords args}
-
-    # Configure a vertex
-    protected method _vertexconfigure {name args}
-    
     # Add an icon to a menu
     protected method addIconEntry {menu icons index}
 
     #################################################################
     ####                 protected variables                     ####
     
-    # The mapping from vertex and edge names to item IDs
+    # The mapping from item names to item IDs
     protected variable _itemID
 
-    # The mapping from item IDs to vertex and edge names
-    protected variable _itemname
-
-    # The interactor to connect things around
+    # The interactor to move things around
     protected variable follower
 
     # The interactor to connect edges
@@ -224,10 +227,9 @@ body ::tycho::EditGraph::constructor {args} {
     # If there is not already a layout model, create one
     if { $itk_option(-layout) == "" } {
 	configure -layout \
-                [uplevel #0 ::tycho::GraphLayout \
+                [uplevel #0 ::tycho::Layout \
                 [::tycho::autoName layout] \
-                -primaryview $this \
-                -graph $itk_option(-graph)]
+                -primaryview $this]
     }
 
     # If there is not already an icon index, create one
@@ -245,6 +247,10 @@ body ::tycho::EditGraph::constructor {args} {
         # method because Itcl (2.2) has virtual private methods!
         ::tycho::EditGraph::initializeMenubar
     }
+
+    # Key bindings
+    bind $slate <Meta-Key-z> "$this undo"
+    bind $slate <Meta-Key-r> "$this redo"
 
     # Make a more pronounced highlight
     $slate configure -highlightcolor azure2 -highlightwidth 4
@@ -302,14 +308,13 @@ body ::tycho::EditGraph::clone {} {
     set clone [::tycho::view EditGraph \
             -layout $itk_option(-layout) \
             -graph $itk_option(-graph)]
-    $clone loadLayout
 }
 
 ########################################################################
 #### deselect
 #
 body ::tycho::EditGraph::deselect {id} {
-    $itk_option(-layout) publish deselect $_itemname($id)
+    $itk_option(-layout) publish deselect [$slate itemcget $id -name]
 }
 
 ########################################################################
@@ -322,26 +327,29 @@ body ::tycho::EditGraph::loadLayout {} {
     _clear
 
     # Make sure the layout is up to date
-    updateLayout
+    [$itk_option(-layout) cget -primaryview] updateLayout
 
-    # Get vertices and edges and create
+    # Create vertices
     foreach vertex [$itk_option(-graph) vertices] {
-        eval [list _vertex \
-                [$itk_option(-layout) vertexget $vertex]] \
-                [$itk_option(-layout) vertexget $vertex]
+        eval [list _item \
+		$vertex \
+                [$itk_option(-layout) itemget $vertex]] \
+                [$itk_option(-layout) itemattrs $vertex]
+	# Create port terminals
+	foreach port [$itk_option(-graph) keys $vertex] {
+	    eval [list _itemin \
+		$vertex $port \
+                [$itk_option(-layout) itemget $vertex.$port]] \
+                [$itk_option(-layout) itemattrs $vertex.$port]
+	}
     }
-}
-
-########################################################################
-#### model
-#
-# Call the model. Note that this does not call the command to
-# the model via Model::publish{}, so commands that are to be published
-# should explitly be called via publish{}.
-#
-body ::tycho::EditGraph::model {method args} {
-    if { $itk_option(-layout) !=  "" } {
-	eval $itk_option(-layout) $method $args
+    # Create edges
+    foreach {v0 k0 v1 k1} [$itk_option(-graph) edges] {
+	set edge [list $v0 $k0 $v1 $k1]
+        eval [list _item \
+		$edge \
+                [$itk_option(-layout) itemget $edge]] \
+                [$itk_option(-layout) itemattrs $edge]
     }
 }
 
@@ -352,11 +360,10 @@ body ::tycho::EditGraph::model {method args} {
 # it.
 #
 body ::tycho::EditGraph::newclick {item x y} {
-puts 1
     # First we make sure that we clear the selection, since the
     # DragDropper is too dumb to do this...
     selectionclear
-puts 2
+
     # Create the connection line
     set coords [$slate aspect $item terminal]
     set _scratch(line) [eval $slate create SmartLine $coords $x $y]
@@ -423,16 +430,18 @@ body ::tycho::EditGraph::newrelease {x y} {
 	set dest [$slate itemcget $_scratch(dest) -name]
 
 	# Add an edge to the graph
-	$itk_option(-graph) edge $srcpar $source $dstpar $dest
+	$itk_option(-graph) publish edge $srcpar $source $dstpar $dest
+
+	# Give the edge a name
+	$slate itemconfigure $line -name [list $srcpar $source $dstpar $dest]
 
 	# Add an edge to the layout model
-	# FIXME: more options need to be propagated!!!
 	set attrs {}
 	foreach {opt x y z val} [eval concat [$slate itemconfigure $line]] {
 	    lappend attrs $opt $val
 	}
 	# Inform all views _except_ this one
-	eval [list $this model update $this edge \
+	eval [list $itk_option(-layout) update $this item \
 		[list $srcpar $source $dstpar $dest] \
 		[concat [$slate type $line] [$slate coords $line]]] \
 		$attrs
@@ -450,10 +459,20 @@ body ::tycho::EditGraph::notify {method args} {
 }
 
 ########################################################################
+#### redo
+#
+# Redo the most recent command
+#
+body ::tycho::EditGraph::redo {} {
+    eval $itk_option(-layout) redo
+    eval $itk_option(-graph) redo
+}
+
+########################################################################
 #### select
 #
 body ::tycho::EditGraph::select {id} {
-    $itk_option(-layout) publish select $_itemname($id)
+    $itk_option(-layout) publish select [$slate itemcget $id -name]
 }
 
 ########################################################################
@@ -464,6 +483,16 @@ body ::tycho::EditGraph::selectionclear {} {
 }
 
 ########################################################################
+#### undo
+#
+# Undo the most recent command
+#
+body ::tycho::EditGraph::undo {} {
+    set foo [eval $itk_option(-layout) undo]
+    set bar [eval $itk_option(-graph) undo]
+}
+
+########################################################################
 #### updateLayout
 #
 #  Update the layout with current coordinates.
@@ -471,7 +500,12 @@ body ::tycho::EditGraph::selectionclear {} {
 body ::tycho::EditGraph::updateLayout {} {
     foreach vertex [$itk_option(-graph) vertices] {
         set coords [$slate coords $_itemID($vertex)]
-        eval [list $itk_option(-layout) vertexcoords $vertex] $coords
+        eval [list $itk_option(-layout) coords $vertex] $coords
+    }
+    foreach {v0 k0 v1 k1} [$itk_option(-graph) edges] {
+	set edge [list $v0 $k0 $v1 $k1]
+        set coords [$slate coords $_itemID($edge)]
+        eval [list $itk_option(-layout) coords $edge] $coords
     }
 }
 
@@ -481,7 +515,12 @@ body ::tycho::EditGraph::updateLayout {} {
 body ::tycho::EditGraph::vertex {icon x y} {
     set name [::tycho::autoName vertex]
     set graph $itk_option(-graph)
+    set layout $itk_option(-layout)
     set icons $itk_option(-icons)
+
+    # Mark the graph and the layout
+    $graph mark vertex
+    $layout mark vertex
 
     # Add a vertex to the graph
     $graph publish vertex $name -type $icon
@@ -489,47 +528,176 @@ body ::tycho::EditGraph::vertex {icon x y} {
     # Add a vertex to the layout model
     set type  [$icons type $icon]
     set attrs [$icons iconattrs $icon]
-    eval [list $this model publish vertex $name [list $type $x $y]] $attrs \
-	    -tags vertex
+    set undo [eval [list $layout publish item \
+	    $name [list $type $x $y]] $attrs \
+	    -tags vertex]
 
-    # Add its ports to the graph
+    # Remember the undo commands. FIXME!!!
+    set undograph [$graph getUndo current]
+    set undolayout [$layout getUndo current]
+
+    # Add ports to the graph.
     foreach port [$icons children port $icon] {
-	$graph publish keyin $name $port
+        $graph publish keyin $name $port
     }
 
     # Add the ports to the layout model
     foreach port [$icons children port $icon] {
-	set type  [$icons type $icon.$port]
-	set attrs [$icons portattrs $icon.$port]
-	
-	# When creating the port item, give it a tag which is the same
-	# as its type -- that is, "input" or "output". Give it a
-	# name which is the same as its name in the icon model
-	eval [list $this model publish portin $name $port $type] $attrs \
-		-tags [$icons portcget $icon.$port -type] \
+        set type  [$icons type $icon.$port]
+        set attrs [$icons portattrs $icon.$port]
+		
+        # When creating the port item, give it a tag which is the same
+        # as its type -- that is, "input" or "output". Give it a
+        # name which is the same as its name in the icon model.
+        #set cmd [concat [list itemin $name $port [list $type 0 0]] $attrs \
+        #        -tags [$icons portcget $icon.$port -type] \
+        #        -name $port]
+        #eval $layout $cmd
+        #eval $layout notify $cmd
+	eval [list $layout publish itemin $name $port [list $type 0 0]] \
+		$attrs \
+                -tags [list [$icons portcget $icon.$port -type]] \
 		-name $port
     }
+
+    # Compact the commands into a single one
+    $graph compactHistory vertex current 1
+    $layout compactHistory vertex current 1
+
+    # Do this kludge to overwrite the undo command
+    $graph setUndo current $undograph
+    $layout setUndo current $undolayout
 }
+
 
 ########################################################################
 #### vertexclick
 #
+# Start a move interaction on vertices. The argument is a tag which
+# must be attached only to vertices to be moved. Get the names of
+# edges that are fully connected to these vertices and tag
+# all vertices and those edges. Also get the names of edges
+# that have one end connected to one of these vertices and
+# remember who they are.
+#
 body ::tycho::EditGraph::vertexclick {tag x y args} {
-    eval $itk_option(-layout) vertexclick $tag $x $y $args
+    set layout $itk_option(-layout)
+    set graph  $itk_option(-graph)
+
+    # Get the vertices, and start a move sequence on them
+    set vertices [withtag $tag]
+    set _scratch(movevertices) $vertices
+
+    # Notify views that these items are about to move
+    $layout publish moveclick $tag $x $y
+
+    # Get completely-connected and partially-connected edges
+    set _scratch(moveedges) [eval $graph subgraphEdges $vertices]
+    set _scratch(inputedges) [eval $graph subgraphInputs $vertices]
+    set _scratch(outputedges) [eval $graph subgraphOutputs $vertices]
+    
+    # Start a move or reshape sequence on found edges
+    if { $_scratch(moveedges) != "" } {
+	eval $layout publish addtag $this.edge $_scratch(moveedges)
+	$layout publish moveclick $this.edge $x $y
+    }
+    foreach edge $_scratch(inputedges) {
+        $layout publish reshapeclick $edge $x $y end
+    }
+    foreach edge $_scratch(outputedges) {
+        $layout publish reshapeclick $edge $x $y start
+    }
+}
+
+########################################################################
+#### vertexdelete
+#
+# Delete a vertex and all connected edges.
+#
+body ::tycho::EditGraph::vertexdelete {vertex} {
+    set layout $itk_option(-layout)
+    set graph  $itk_option(-graph)
+
+    # Get connected edges
+    set edges [concat \
+	    [$graph subgraphEdges $vertex] \
+	    [$graph subgraphInputs $vertex]]
+    
+    # Mark the layout history
+    $layout mark vertex
+    
+    # Delete the vertex and connected edges
+    $layout publish itemdelete $_itemID($vertex)
+    foreach edge $edge {
+    	$layout publish itemdelete $_itemID($edge)
+    }
+    
+    # Merge the deletion commands into one
+    if { $edges != "" } {
+    	$layout compactHistory vertex current 1
+    }
+    
+    # Delete the vertex form the graph model. This automatically
+    # deletes connected edges
+    $graph publish vertexdelete $vertex
 }
 
 ########################################################################
 #### vertexdrag
 #
+# Continue a move interaction on vertices. The
+# vertices and edges are moved and reshaped as appropriate.
+#
 body ::tycho::EditGraph::vertexdrag {tag x y} {
-    $itk_option(-layout) vertexdrag $tag $x $y
+    set layout $itk_option(-layout)
+
+    # Move the vertices and fully-connected edges
+    $layout publish movedrag $tag $x $y
+    if { $_scratch(moveedges) != "" } {
+	$layout publish movedrag $this.edge $x $y
+    }
+    # Reshape the partially-connected edges.
+    foreach edge $_scratch(inputedges) {
+	$layout publish reshapedrag $edge $x $y
+    }
+    foreach edge $_scratch(outputedges) {
+	$layout publish reshapedrag $edge $x $y
+    }	
 }
 
 ########################################################################
 #### vertexrelease
 #
+# Terminate a move interaction on vertices and add an undo and
+# redo command to the history of the layout model.
+#
 body ::tycho::EditGraph::vertexrelease {tag x y} {
-    $itk_option(-layout) vertexrelease $tag $x $y
+    set layout $itk_option(-layout)
+    
+    # Because the following will record a bunch of commands that we
+    # want merged into a single undo/redo command, set a mark
+    $layout mark vertex
+
+    # Terminate move of vertices and fully-connected edges
+    $layout publish moverelease $tag $x $y
+    if { $_scratch(moveedges) != "" } {
+	$layout publish moverelease $this.edge $x $y
+	$layout publish dtag $this.edge
+    }
+    # Terminate the reshape of partially-connected edges
+    foreach edge $_scratch(inputedges) {
+	$layout publish reshaperelease $edge $x $y
+    }
+    foreach edge $_scratch(outputedges) {
+	$layout publish reshaperelease $edge $x $y
+    }
+
+    # Now merge all those commands into a single one
+    $layout compactHistory vertex current 1
+
+    # Finally (and importantly!), add a null command to the graph
+    # model to match this command
+    $itk_option(-graph) appendHistory {} {} 0
 }
 
 ########################################################################
@@ -540,7 +708,7 @@ body ::tycho::EditGraph::vertexrelease {tag x y} {
 body ::tycho::EditGraph::withtag {tag} {
     set result {}
     foreach id [$slate find withtag $tag] {
-	lappend result $_itemname($id)
+	lappend result [$slate itemcget $id -name]
     }
     return $result
 }
@@ -563,10 +731,9 @@ body ::tycho::EditGraph::_addtag {tag args} {
 ########################################################################
 #### _clear
 #
-# Celar the displayed graph.
+# Clear the displayed graph.
 #
 body ::tycho::EditGraph::_clear {} {
-    catch {unset _itemname}
     catch {unset _itemID}
     $slate delete all
 }
@@ -590,56 +757,88 @@ body ::tycho::EditGraph::_dtag {tag} {
 }
 
 ########################################################################
-#### _edge
+#### _item
 #
-# Add a new edge to the view. This method must be called only
-# by the model.
+# Add a new item to the view.
 #
-body ::tycho::EditGraph::_edge {name spec args} {
+body ::tycho::EditGraph::_item {name spec args} {
     set id [eval $slate create $spec $args -name $name]
     set _itemID($name) $id
-    set _itemname($id) $name
+}
+
+########################################################################
+#### _itemdelete
+#
+# Delete an item.
+#
+body ::tycho::EditGraph::_itemdelete {name} {
+    $slate delete $_itemID($name)
+    unset _itemID($name)
+}
+
+########################################################################
+#### _itemconfigure
+#
+# Configure an item.
+#
+body ::tycho::EditGraph::_itemconfigure {name args} {
+    eval $slate itemconfigure $_itemID($name) $args
+}
+
+########################################################################
+#### _itemin
+#
+# Add a nested item. The item is created as a "root" child so that
+# it responds to events.
+#
+body ::tycho::EditGraph::_itemin {context name spec args} {
+    set parent $_itemID($context)
+    set id [eval $slate createrootchild $parent $spec $args -name $name]
+    set _itemID($name) $id
 }
 
 ########################################################################
 #### _move
 #
 body ::tycho::EditGraph::_move {tag x y} {
-    $slate move $tag $x $y
+    if { [::info exists _itemID($tag)] } {
+        $slate move $_itemID($tag) $x $y
+    } else {
+        $slate move $tag $x $y
+    }
 }
 
 ########################################################################
 #### _moveclick
 #
 body ::tycho::EditGraph::_moveclick {tag x y} {
-    eval $slate moveclick $tag $x $y args
+    if { [::info exists _itemID($tag)] } {
+        eval $slate moveclick $_itemID($tag) $x $y
+    } else {
+        eval $slate moveclick $tag $x $y
+    }
 }
 
 ########################################################################
 #### _movedrag
 #
 body ::tycho::EditGraph::_movedrag {tag x y} {
-    $slate movedrag $tag $x $y
+    if { [::info exists _itemID($tag)] } {
+        $slate movedrag $_itemID($tag) $x $y
+    } else {
+        $slate movedrag $tag $x $y
+    }
 }
 
 ########################################################################
 #### _moverelease
 #
 body ::tycho::EditGraph::_moverelease {tag x y} {
-    $slate moverelease $tag $x $y
-}
-
-########################################################################
-#### _portin
-#
-# Add a new port to the view. This method must be called only
-# by the model.
-#
-body ::tycho::EditGraph::_portin {context name type args} {
-    set parent $_itemID($context)
-    set id [eval $slate createrootchild $parent $type 0 0 $args -name $name]
-    set _itemID($name) $id
-    set _itemname($id) $name
+    if { [::info exists _itemID($tag)] } {
+        $slate moverelease $_itemID($tag) $x $y
+    } else {
+        $slate moverelease $tag $x $y
+    }
 }
 
 ########################################################################
@@ -688,28 +887,6 @@ body ::tycho::EditGraph::_selectionclear {foo} {
     $slate select clear
 }
 
-########################################################################
-#### _vertex
-#
-# Add a new vertex to the view. This method must be called only
-# by the model.
-#
-body ::tycho::EditGraph::_vertex {name spec args} {
-    set id [eval $slate create $spec $args -name $name]
-    set _itemID($name) $id
-    set _itemname($id) $name
-}
-
-########################################################################
-#### _vertexconfigure
-#
-# Configure a vertex. This method must be called only
-# by the model.
-#
-body ::tycho::EditGraph::_vertexconfigure {name args} {
-    eval $slate itemconfigure $_itemID($name) $args
-}
-
 #####################################################################
 #### addIconEntry
 # Add an icon entry to the menus
@@ -749,10 +926,10 @@ body ::tycho::EditGraph::initializeMenubar {} {
     # Add an Edit menu before the Window menu
     $myMenubar addMenu Edit -before Window -underline 0
     
-    $myMenubar command {Undo} Edit -accelerator "C-x u" \
+    $myMenubar command {Undo} Edit -accelerator "M-z" \
 	    -underline 0 -command "$this undo"
     
-    $myMenubar command {Redo} Edit -accelerator "C-x r" \
+    $myMenubar command {Redo} Edit -accelerator "M-r" \
 	    -underline 0 -command "$this redo"
     
     $myMenubar addSeparator Edit
@@ -776,21 +953,19 @@ body ::tycho::EditGraph::initializeMenubar {} {
 
     # Build a menu if icons from the icon index
     if { $itk_option(-icons) != "" } {
-	menubar addMenu Icons -underline 0
+	$myMenubar addMenu Icons -underline 0
 	addIconEntry Icons $itk_option(-icons) {}
     }
 
     # Add a Devel menu for development use
-    menubar addMenu Devel -underline 0
-    menubar command {Clone} Devel \
+    $myMenubar addMenu Devel -underline 0
+    $myMenubar command {Clone} Devel \
             -command "$this clone"
 
-    menubar addSeparator Devel
+    $myMenubar addSeparator Devel
 
-    menubar command {Show layout} Devel \
-	    -command "::tycho::post \[\[$this cget -layout\] describe\]"
-    menubar command {Show graph} Devel \
+    $myMenubar command {Show layout} Devel \
+		    -command "::tycho::post \[\[$this cget -layout\] describe\]"
+    $myMenubar command {Show graph} Devel \
             -command "::tycho::post \[\[$this cget -graph\] describe\]"
-
 }
-
