@@ -19,6 +19,19 @@ The <a name="EditJava class">EditJava class</a> is derived from the
 therefore inherits all of its features, such as invoking <CODE>make</CODE>.
 The EditJava class colors certain Java constructs, such as comments.
  <P>
+<H2>Compiling and Running Java</H2>
+
+The <CODE>Evaluate</CODE> menu choice under the <CODE>File</CODE> menu
+will compile and optionally run the Java file currently being edited.
+The <A
+HREF="../../../../kernel/doc/codeDoc/CompileJava.html"><CODE>CompileJava</CODE></A>
+class documentation discusses the details.
+ <P> 
+The Tycho <CODE>classPath</CODE> preference is used to set the
+<CODE>CLASSPATH</CODE> environment variable before the various Java tools
+are run.
+
+<H2>'Special' Menu choices</H2>
 The <A NAME="Java Editor Body Template"><CODE>Body Template</CODE>
 command</A> in the <CODE>Special</CODE>
 menu places a body template at the current point in the buffer.
@@ -38,7 +51,7 @@ The <CODE>appletview</CODE> choice in the <CODE>Special</CODE> menu
 brings up the <CODE>appletviewer</CODE> program and loads the file being
 edited into <CODE>appletviewer</CODE>
 
-<H2><A NAME="java file template subsitution">Java file template
+<H2><A NAME="java file template substitution">Java file template
 substitution</A></H2>
 When the Java template file is substituted into a Java editor, certain
 substitions occur.
