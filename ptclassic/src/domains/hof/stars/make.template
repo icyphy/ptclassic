@@ -22,7 +22,7 @@ OPTIMIZER  =
 HOFDIR = $(ROOT)/src/domains/hof/kernel
 PIGIDIR = $(ROOT)/src/pigilib
 INCL = -I$(HOFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(TCL_INCDIR) \
- -I$(TK_INCDIR)
+ -I$(TK_INCDIR) $(X11_INCSPEC)
 
 # Library name
 LIB=libhofstars.a
