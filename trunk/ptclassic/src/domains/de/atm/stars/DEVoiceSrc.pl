@@ -113,7 +113,7 @@ been completed, an End-of-Transmission (EOT) packet is sent.
                   
                     if (!input.dataNew)  {
                         //  leftover feedback event is possible
-                        feedbackIn.get();
+                        feedbackIn->get();
                         return;
                     }
 

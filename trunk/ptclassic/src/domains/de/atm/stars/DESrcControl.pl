@@ -187,7 +187,7 @@ stars.
                            return;
                        }
 
-                       feedbackIn.get();
+                       feedbackIn->get();
 
                        if (feedbacksLeft != 0)  {
                            // this situation indicates that there are leftover events
