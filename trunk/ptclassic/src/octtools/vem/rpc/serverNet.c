@@ -543,7 +543,7 @@ int application;
 				   src/compat/ptolemy/compat.h */ 
     extern time_t time();
 #else
-#ifndef PTALPHA
+#if !defined(PTALPHA) && !defined(PTHPUX10)
     extern long time();
 #endif /* PTALPHA */
 #endif
@@ -594,7 +594,7 @@ long userOptionWord;
 				   src/compat/ptolemy/compat.h */ 
     extern time_t time();
 #else
-#ifndef PTALPHA
+#if !defined(PTALPHA) && !defined(PTHPUX10)
     extern long time();
 #endif /* PTALPHA */
 #endif
