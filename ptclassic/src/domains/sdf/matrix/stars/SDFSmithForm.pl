@@ -9,7 +9,12 @@ value decomposition for floating-point matrices.
 	}
 	version { $Id$ }
 	author { Brian Evans }
-	copyright { 1993 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990-1994 The Regents of the University of California.
+All rights reserved.
+See the file $PTOLEMY/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+}
 	location  { SDF matrix library }
 	explanation {
 .pp
@@ -36,15 +41,17 @@ to make $D$ unique [6].
 The canonical form of $D$ is that each diagonal element is a factor of
 the next diagonal element.
 Even in the canonical form, however, the $U$ and $V$ matrices are not unique.
-This block will return the canonical form if the field
+This block will return the canonical form if the state
 \fISmithCanonicalForm\fR is \fITRUE\fR.
 .pp
 The Smith form decomposition algorithm requires on the order of
 $[n + m]^4$ operations.
 Converting the Smith form into canonical form requires on the order of
-min($m$, $n$) extra operations [6].
+$min(m, n)^2$ comparisons and $min(m, n)$ arithmetic operations [6].
+Therefore, it takes the same order of operations to compute a Smith
+form or the Smith canonical form.
 .pp
-The intermediate integer computations of the decomposition for integer
+The intermediate integral computations of the decomposition for integer
 matrices of large dimension and for matrices with large integer entries
 may exceed the integer precision of a given machine.
 Because we have chosen to implement the decomposition in the native integer
@@ -73,7 +80,7 @@ P. P. Vaidyanathan,
 ``The Role of Smith-Form Decomposition of Integer Matrices
 in Multidimensional Multirate Systems,''
 \fIInt. Conf. on Acoustics, Speech, and Signal Processing\fR,
-Toronto, Canada, May, 1991, pp. 1777--1780,
+Toronto, Canada, May, 1991, pp. 1777--1780.
 .ip [3]
 E. Viscito and J. Allebach,
 ``The Analysis and Design of Multidimensional {FIR} Perfect
@@ -83,8 +90,8 @@ vol. 38, no. 1, pp. 29-41, Jan., 1991.
 .ip [4]
 T. Gardos, K. Nayebi, and R. Mersereau,
 ``Analysis and Design of Multi-Dimensional Non-Uniform Band Filter Banks,''
-\fISPIE Proc. Visual Communications and Image Processing\fR,
-Nov., 1992, pp. 49-60.
+\fIProc. SPIE Visual Communications and Image Processing\fR, vol. 1818,
+pp. 49-60, Nov., 1992, Boston, MA.
 .ip [5]
 B. Evans, T. Gardos, and J. McClellan,
 ``Imposing Structure on Smith Form Decompositions of
@@ -218,25 +225,26 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 	  }
 
 	  // initialize the local variables
-	  int entry, mincol, minrow, minabsvalue, minvalue, quotient, r, sum;
-	  int endflag;
-
 	  int m = mat->numRows();	// number of rows in input matrix
 	  int n = mat->numCols();	// number of columns in input matrix
 
-	  int *mVector = new int[m];
-	  int *nVector = new int[n];
-
 	  // initialize the matrices u, d, and v
-
+	  // do not delete them because they will be sent through the
+	  // output ports and they will deleted automatically later
 	  IntMatrix& d = *(new IntMatrix(*mat));
 	  IntMatrix& u = *(new IntMatrix(m, m));
 	  u.identity();
 	  IntMatrix& v = *(new IntMatrix(n, n));
 	  v.identity();
 
+	  // local variables for Smith form decomposition
+	  int entry, mincol, minrow, minabsvalue, minvalue, quotient, sum;
+	  int endflag;
+
 	  // perform the basic Smith form decomposition
-	  r = intmin(m, n);
+	  int mVector[m];
+	  int nVector[n];
+	  int r = intmin(m, n);
 	  for ( int dim = 0; dim < r - 1; dim++ ) {
 	    endflag = FALSE;
 	    while ( ! endflag ) {
@@ -333,8 +341,8 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 	  //     so that G and H move D closer to canonical form
 
 	  if ( int(SmithCanonicalForm) ) {
-	    IntMatrix ginv = IntMatrix(m, m);
-	    IntMatrix hinv = IntMatrix(n, n);
+	    IntMatrix ginv(m, m);
+	    IntMatrix hinv(n, n);
 	    int i, j;
 
 	    // (1) pull out negative signs
@@ -350,7 +358,7 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 
 	    // (2) sort diagonal elements
 	    for ( i = 0; i < r; i++ ) {
-	      int jend = r - i;
+	      int jend = r - i - 1;
 	      for ( j = 0; j < jend; j++ ) {
 		if ( d[j][j] > d[j+1][j+1] ) {
 		  int temp;
@@ -362,9 +370,9 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 	    }
 
 	    // (3) shuffle factors along the diagonal
-	    int lastd = d[1][1];
-	    int lasti = 1; 
-	    //  begin processing with the second diagonal element
+	    int lastd = d[0][0];
+	    int lasti = 0; 
+	    //  process second to last diagonal elements, i = 1 ... r-1
 	    for ( i = 1; i < r; i++ ) {
 	      int lcmvalue, lambda, mu;
 	      int di = d[i][i];
@@ -374,18 +382,17 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 		lasti = i;
 		continue;
 	      }
-
-	      ginv.identity();
-	      hinv.identity();
 	      lcmvalue = lcm(lastd, di);
 
 	      // define the G^-1 matrix
+	      ginv.identity();
 	      ginv[lasti][lasti] = lambda * lastd / gcdvalue;
 	      ginv[lasti][i] = -1;
 	      ginv[i][lasti] = mu * di / gcdvalue;
 	      ginv[i][i] = 1;
 
 	      // define the H^-1 matrix 
+	      hinv.identity();
 	      hinv[lasti][lasti] = lastd / gcdvalue;
 	      hinv[lasti][i] = di / gcdvalue;
 	      hinv[i][lasti] = -mu;
@@ -393,12 +400,13 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 
 	      // shuffle factors on the diagonal matrix D
 	      d[lasti][lasti] = gcdvalue;
-	      d[i][i] = lastd = lcmvalue;
+	      d[i][i] = lcmvalue;
 
 	      // update U and V matrices
 	      u = u * ginv;
 	      v = hinv * v;
 
+	      lastd = lcmvalue;
 	      lasti = i;
 	    }
 	  }
@@ -412,10 +420,6 @@ int extendedGCD( int a, int b, int *alpha, int *beta)
 			     "may have exceed machine precision." );
 	    return;
 	  }
-
-	  // free memory 
-	  delete [] mVector;
-	  delete [] nVector;
 
 	  // output the Smith form matrices
 	  U%0 << u;
