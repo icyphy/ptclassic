@@ -1,12 +1,12 @@
  defstar{
 	name { DTMFPostTest }
 	domain { CG56 }
+	version { $Id$ }
 	desc { 
 Returns whether or not a valid dual-tone modulated-frequency has
 been correctly detected based on the last three detection results.
         }
-	version { @(#)CG56DTMFPostTest.pl 1.17 1/29/96 }
-	acknowledge { }
+	author { Luis J. Gutierrez and Brian L. Evans }
 	explanation{
 The assumption is that the 100 msec DTMF interval has been split into
 roughly four parts.  This star looks at the last three detection results,
@@ -24,9 +24,8 @@ Electronic Data News, March 21, 1985.  Reprinted in
 \fIDigital Signal Processing Applications with the TMS320 Family\fR,
 Texas Instruments, 1986.
 	}
-	author { Luis Gutierrez }
 	copyright { 
-Copyright (c) 1990- The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -70,20 +69,21 @@ is set to an integer that does not represent a DTMF digit.
 	}
 
 	codeblock(block){
-		clr b                  #$val(initialLastInput),a1
-		move $ref(valid),y0
-		cmp y0,b               $ref(last),x0
-		jeq $label(not_valid)
-		move $ref(secondToLast),b
-		cmp x0,b               $ref(input),a
-		jeq $label(not_valid)
-		cmp x0,a
-		jne $label(not_valid)
-		move y0,b0
+; Register usage:
+; a = input (from x memory)     y0 = last input (from y memory)
+; b = valid (from x memory)     y1 = second-to-last input (from y memory)
+; x0 = output (either TRUE or FALSE); initially assume a value of zero (FALSE)
+	clr	a	$ref(valid),b		$ref(last),y0
+	tst	b	$ref(input),a		a,x0
+	jeq	$label(not_valid)
+	cmp	y0,a	$ref(secondToLast),y1
+	jeq	$label(not_valid)
+	cmp	y1,a
+	jne	$label(not_valid)
+	move	#$$FF,x0		; output is TRUE
 $label(not_valid)
-		move b0,$ref(output)
-		move a1,$ref(last)
-		move x0,$ref(secondToLast)
+	move	x0,$ref(output)		y0,$ref(secondToLast)
+	move	a0,$ref(last)
 	}
 	setup {
 		secondToLast = int(initialLastInput);
@@ -95,5 +95,5 @@ $label(not_valid)
 	}
 
 	// Return an execution estimate in pairs of cycles
-	exectime{ return 16; }
+	exectime{ return 13; }
 }
