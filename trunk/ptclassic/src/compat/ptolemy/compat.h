@@ -253,6 +253,13 @@ extern int sscanf (const char *, const char *, ...);
 extern int socket(int, int, int); /* thor/kernel/rpc.c uses socket() */
 extern int symlink(const char *, const char *);	/* CGCTarget.cc */
 
+extern int unlink(const char *);
+
+/* End of common missing function prototypes */
+#endif /* __GNUC__ */
+
+
+
 #ifdef NEED_SYS_ERRLIST
 #ifdef PTNBSD_386
 extern const char *const sys_errlist[];
@@ -262,13 +269,6 @@ extern char *sys_errlist[];
 extern int sys_nerr;
 extern int errno;
 #endif /* NEED_SYS_ERRLIST */
-
-extern int unlink(const char *);
-
-/* End of common missing function prototypes */
-#endif /* __GNUC__ */
-
-
 
 
 /* Here we define common types that differ by platform */
