@@ -13,10 +13,13 @@ lpr -P$PRINTER xgraph.ps
 lpr -P$PRINTER vem.ps
 lpr -P$PRINTER documents.ps
 lpr -P$PRINTER vhdl.ps
+lpr -P$PRINTER c50.ps
 lpr -P$PRINTER cg56.ps
 lpr -P$PRINTER cgc.ps
 lpr -P$PRINTER cg.ps
 lpr -P$PRINTER de.ps
+lpr -P$PRINTER fsm.ps
+lpr -P$PRINTER sr.ps
 lpr -P$PRINTER pn.ps
 lpr -P$PRINTER bdf.ps
 lpr -P$PRINTER ddf.ps
