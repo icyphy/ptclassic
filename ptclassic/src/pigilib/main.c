@@ -21,7 +21,7 @@ Initialization code for pigiRpc.
 /* Global Vars */
 
 char *xDisplay;  /* display name passed by vem */
-char *version = "Pigi Version: 0.0";
+char *version = "Pigi Version: 0.1";
 
 
 static void
@@ -128,7 +128,18 @@ RPCFunction **array;
     CompileInit();
     *array = CommandArray;
     PrintVersion();
+    welcome_window ();
     PrintConLog("PIGI is running");
     vemPrompt();
     return(sizeof(CommandArray) / sizeof(RPCFunction));
+}
+
+welcome_window ()
+{
+	open_display (xDisplay);
+	accum_string ("Ptolemy Interactive Graphics Interface\n");
+	accum_string (version);
+	accum_string ("\nCopyright 1990 Regents of the University of California");
+	accum_string ("\nAll rights reserved.");
+	pr_accum_string ();
 }
