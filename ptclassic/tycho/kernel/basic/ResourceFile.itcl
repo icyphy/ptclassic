@@ -57,9 +57,6 @@ class ::tycho::ResourceFile {
     # Close the resource
     method close {}
 
-    # Return the content type of the resource
-    method contenttype {}
-
     # Return the end of file status
     method eof {}
 
@@ -92,6 +89,9 @@ class ::tycho::ResourceFile {
 
     # Change the permissions of a resource
     proc chmod {path permissions}
+
+    # Return the content type of the resource
+    proc contenttype {path}
 
     # Delete a resource
     proc delete {path}
@@ -163,18 +163,6 @@ body ::tycho::ResourceFile::close {} {
     }
     set fileid ""
     set fileIsOpen 0
-}
-
-#####################################################################
-#### contenttype
-# Return the content type of the open file.
-body ::tycho::ResourceFile::contenttype {} {
-    if !$fileIsOpen {
-	error "File \"$this\" is not open"
-    }
-    # For now, just return "text/plain". Later on, look at the
-    # file extension and/or contents.
-    return "text/plain"
 }
 
 #####################################################################
@@ -272,6 +260,20 @@ body ::tycho::ResourceFile::chmod {path permissions} {
     # NOTE: Unix-dependent implementation
     regsub {^file:} $path {} path
     exec chmod $permissions $path
+}
+
+#####################################################################
+#### contenttype
+# Return the content type of the open file.
+body ::tycho::ResourceFile::contenttype {path} {
+    # For now, just return "text/plain".
+    # return "text/plain"
+
+    if {[::file isdirectory $path]} {
+        return "directory"
+    }
+    # Look at file extension and/or contents.
+    return [::tycho::Resource::contenttype $path]
 }
 
 #####################################################################
