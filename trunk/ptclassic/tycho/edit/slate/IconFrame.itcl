@@ -69,10 +69,11 @@ namespace ::tycho {
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   .t.s create IconFrame 80 80 &#92
+#   .t.s create IconFrame 100 100 &#92
 #       -inputs {0 50 50 0} &#92
 #       -outputs 2 &#92
 #       -color green &#92
+#       -graphics {line 20 20 80 80} &#92
 #       -tags moveable &#92
 #       -intype {Terminal -type input -style blob -fill red} &#92
 #       -outtype {Terminal -type output -style doublearrow -fill blue}
@@ -128,7 +129,7 @@ class ::tycho::IconFrame {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+    array set methodtable [array get ::tycho::Connectible::methodtable]
     array set methodtable [@scope ::tycho::LabeledFrame array get methodtable]
 
     set methodtable(_height)   ::tycho::IconFrame::_height
@@ -139,7 +140,7 @@ class ::tycho::IconFrame {
     set methodtable(highlight)   ::tycho::IconFrame::highlight
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+    array set optiondefault [array get ::tycho::Connectible::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledFrame \
             array get optiondefault]
     set optiondefault(-height) 40
@@ -220,10 +221,5 @@ body ::tycho::IconFrame::coords {id canvas slate args} {
 # which looks a bit rough.
 #
 body ::tycho::IconFrame::highlight {id canvas slate args} {
-    # No args: just return coordinates
-    if { $args == "" } {
-        ::tycho::assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-        return [list [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]]
-    }
     eval $canvas create rectangle [$canvas bbox $primary($id)] $args
 }

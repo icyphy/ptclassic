@@ -92,6 +92,9 @@ class ::tycho::LabeledOval {
     ###################################################################
     ####                         public procs                      ####
 
+    # Create a new item with options already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
     # Update the *-fill* option
     proc _fill {id canvas slate fill}
 
@@ -168,14 +171,9 @@ body ::tycho::LabeledOval::_width {id canvas slate width} {
 }
 
 ##########################################################################
-#### construct
+#### _construct
 #
-body ::tycho::LabeledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
-    # Initialize the options
-    foreach {opt val} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $val
-    }
-
+body ::tycho::LabeledOval::_construct {id canvas slate tags x0 y0 x1 y1} {
     # Create the primary component. This is the displayed oval.
     set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 \
 	    -fill $option(fill$id) -outline $option(outline$id) \
@@ -184,6 +182,18 @@ body ::tycho::LabeledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
     # Create the graphics and text label -- do not change the order!
     _text     $id $canvas $slate $option(text$id)
     _graphics $id $canvas $slate $option(graphics$id)
+}
+
+##########################################################################
+#### construct
+#
+body ::tycho::LabeledOval::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt val} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $val
+    }
+    # Call the proc to do the real work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
 }
 
 ##########################################################################

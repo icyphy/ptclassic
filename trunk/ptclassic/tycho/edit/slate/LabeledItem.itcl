@@ -182,7 +182,7 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
 
     # Get my hierarchy tags
     set htags [$canvas gettags $primary($id)]
-
+puts "htags = $htags"
     # Draw each item at full scale
     set tags [concat graphics.$id [$canvas gettags $primary($id)]]
     foreach spec [split $graphics ";\n"] {
@@ -190,7 +190,7 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
     }
 
     # Move and scale them to fit into this item
-    ::tycho::assign x0 y0 x1 y1 [$slate coords $id]
+    ::tycho::assign x0 y0 x1 y1 [$slate region $id]
     $slate move graphics.$id $x0 $y0
     $slate scale graphics.$id $x0 $y0 \
     		[expr ($x1-$x0)/100.0] \

@@ -51,9 +51,9 @@ namespace ::tycho {
 # and <a href="LabeledOval">LabeledOval</a>. In addition, it has the options:
 #
 # <ul>
-# <li><b>-height</b>
+# <li><b>-vsize</b>
 # The height of the oval, in pixels.
-# <li><b>-width</b>
+# <li><b>-hsize</b>
 # The width of the oval, in pixels.
 #
 # </ul>
@@ -72,7 +72,7 @@ namespace ::tycho {
 #   .t.s create IconOval 80 80 &#92
 #       -inputs {0 50 50 0} &#92
 #       -outputs 1 &#92
-#       -fill white &#92
+#       -fill green &#92
 #       -graphics {line 20 50 80 50 -width 4; line 50 20 50 80 -width 4} &#92
 #       -tags moveable &#92
 #       -intype {Terminal -type input -style blob -fill red} &#92
@@ -95,11 +95,11 @@ class ::tycho::IconOval {
     ###################################################################
     ####                         public procs                      ####
 
-    # Update the *-height* option
-    proc _height {id canvas slate height}
+    # Update the *-vsize* option
+    proc _vsize {id canvas slate vsize}
 
-    # Update the *-width* option
-    proc _width {id canvas slate width}
+    # Update the *-hsize* option
+    proc _hsize {id canvas slate hsize}
 
     # Create a new item
     proc construct {id canvas slate tags x y args}
@@ -129,38 +129,38 @@ class ::tycho::IconOval {
     ####                       class initialization                ####
 
     #### Set method table
-    array set methodtable [array get ::tycho::ComplexItem::methodtable]
+    array set methodtable [array get ::tycho::Connectible::methodtable]
     array set methodtable [@scope ::tycho::LabeledOval array get methodtable]
 
-    set methodtable(_height)   ::tycho::IconOval::_height
-    set methodtable(_width)    ::tycho::IconOval::_width
+    set methodtable(_vsize)   ::tycho::IconOval::_vsize
+    set methodtable(_hsize)    ::tycho::IconOval::_hsize
 
     set methodtable(construct)   ::tycho::IconOval::construct
     set methodtable(coords)      ::tycho::IconOval::coords
     set methodtable(highlight)   ::tycho::IconOval::highlight
 
     #### Set option defaults
-    array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
+    array set optiondefault [array get ::tycho::Connectible::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledOval \
             array get optiondefault]
-    set optiondefault(-height) 30
-    set optiondefault(-text)   ""
-    set optiondefault(-width)  30
+    set optiondefault(-vsize) 50
+    set optiondefault(-text)  ""
+    set optiondefault(-hsize) 50
 }
 
 ##########################################################################
-## -height option configuration
+## -vsize option configuration
 #
-body ::tycho::IconOval::_height {id canvas slate height} {
-    set option(height$id) $height
+body ::tycho::IconOval::_vsize {id canvas slate vsize} {
+    set option(vsize$id) $vsize
     eval _coords $id $canvas $slate [coords $id $canvas $slate]
 }
 
 ##########################################################################
-## -width option configuration
+## -hsize option configuration
 #
-body ::tycho::IconOval::_width {id canvas slate width} {
-    set option(width$id) $width
+body ::tycho::IconOval::_hsize {id canvas slate hsize} {
+    set option(hsize$id) $hsize
     eval _coords $id $canvas $slate [coords $id $canvas $slate]
 }
 
@@ -170,7 +170,7 @@ body ::tycho::IconOval::_width {id canvas slate width} {
 body ::tycho::IconOval::_coords {id canvas slate x y} {
     # Alter the coordinates of the oval
     set coords [eval ::tycho::Rectangle::stretch $x $y $x $y \
-        [expr $option(width$id)/2] [expr $option(height$id)/2]]
+        [expr $option(hsize$id)/2] [expr $option(vsize$id)/2]]
     eval ::tycho::Oval::coords $id $canvas $slate $coords
 
     # Move the inputs and outputs
@@ -188,7 +188,7 @@ body ::tycho::IconOval::construct {id canvas slate tags x y args} {
 
     # Figure out the coordinates of the bounding Oval
     set coords [::tycho::Rectangle::stretch $x $y $x $y \
-        [expr $option(width$id)/2] [expr $option(height$id)/2]]
+        [expr $option(hsize$id)/2] [expr $option(vsize$id)/2]]
 
     # Create the Oval.
     eval ::tycho::LabeledOval::_construct \
