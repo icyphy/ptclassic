@@ -23,8 +23,6 @@ used for X window displays, such as classes that invoke xgraph.
 #include "miscFuncs.h"
 #include <stdio.h>
 
-#define MAX_NO_GRAPHS 64
-
 class Block;
 
 	//////////////////////////////////////
@@ -76,15 +74,18 @@ protected:
 	void zapFiles();
 private:
 	void fcheck(double v,int set = 1);
-	Block* blockIamIn;
-	const char* opt;
-	const char* sf;
-	const char* ttl;
-	int ng, index;
-	FILE *strm[MAX_NO_GRAPHS];
-	char* tmpFileNames[MAX_NO_GRAPHS];
-	int nIgnore;
-	int count[MAX_NO_GRAPHS];
+
+	Block* blockIamIn;	// owner Block, for error messages
+	const char* opt;	// options for xgraph program
+	const char* sf;		// file for saving data
+	const char* ttl;	// title for graph
+	int index;		// index for x-axis = 0,1,2,...
+	short ng;		// number of graph traces
+	short ascii;		// flag for saving data in ASCII
+	FILE **strm;		// file descriptors for graph traces
+	char** tmpFileNames;	// file names for graph traces
+	int* count;		// counts of # values on each stream
+	int nIgnore;		// # of initial points to ignore
 };
 
 #endif
