@@ -2,6 +2,7 @@ defstar {
 	name {Queue}
 	domain {DE}
 	desc {
+THIS STAR IS OBSOLETE.  USE FIFOQueue.
 FIFO queue with finite or infinite length.
 Events on the "demand" input trigger "outData" if the Queue is not empty.
 If the queue is empty, then a "demand" event enables the next future
