@@ -32,13 +32,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/time.h>
 #include <signal.h>
 
-#ifdef linux
-#define sigvec		sigaction
-#define sv_mask		sa_mask
-#define sv_flags	sa_flags
-#define sv_handler	sa_handler
-#endif
-
 #if defined(__sparc) && !defined(__svr4__)  && defined (__GNUC__)
 /* SunOS4.1.3 under gcc. */
 extern int sigvec(int, struct sigvec *, struct sigvec *);
