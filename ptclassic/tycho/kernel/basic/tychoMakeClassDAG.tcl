@@ -425,6 +425,12 @@ proc cppDAG {title filename args} {
         }
     }
 
+    if ![info exists files] {
+        ::tycho::warn "No .h files found in `$args'.  Current directory was `[pwd]'"
+        cd $olddir
+        ::tycho::silentError
+        return -1
+    }
     set retval [eval cppMkClassGraph $title $filename $files ]
     cd $olddir
     return $retval
