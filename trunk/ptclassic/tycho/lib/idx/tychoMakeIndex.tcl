@@ -46,11 +46,15 @@ proc tychoCompareFirst {first second} {
 # The second argument is the name of the index file to create.
 # The fourth argument generates a one-level hierarchy if true.
 # The rest of the arguments are any number of file names
-# from which the index should be created.
+# from which the index should be created.  If any of these files
+# is missing or is not readable, then that file is ignored.
 #
 proc tychoMkIndex {name filename prependTYCHO nested args } {
     #puts "name=$name, filename=$filename files=$args"
-    foreach file $args {
+    foreach file $args {        
+        if ![file readable $file] {
+            continue
+        }
 	set fd [open $file r]
 	set contents [read $fd]
 	close $fd
