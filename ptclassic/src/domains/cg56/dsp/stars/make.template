@@ -49,14 +49,14 @@ INCL = -I$(CG56DIR) -I$(CGDIR) -I$(KERNDIR) -I$(CG56SDIR)
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, listing base stars first
 PL_SRCS= \
+ CG56FIR.pl \
  CG56Allpass.pl \
  CG56Biquad.pl \
  CG56BiquadDSPlay.pl \
  CG56Comb.pl \
  CG56FFTCx.pl \
- CG56FIR.pl \
  CG56LMS.pl \
  CG56LMSRx.pl \
  CG56LMSGanged.pl \
