@@ -398,7 +398,7 @@ proc mkWinFit {top sd} {
 
   menu $top.mBar.file.m 
   $top.mBar.file.m add command -label "Print" \
-                       -command "ptkPrintXYPlot $top \"Logic Analyzer\" "
+                       -command "tkPrintLogicAnalyzer $top"
   menu $top.mBar.input.m
   for {set t 0} {$t<$n} {incr t} {
     $top.mBar.input.m add radiobutton -label "input #[expr $t+1]" \
@@ -608,7 +608,7 @@ proc tkDrawXYCoord { canv curN wd k} {
 proc tkPrintLogicAnalyzer { top } {
     global In
 
-    ptkPrintXYPlot $top.d$In.c$In "Logic Analyzer"
+    ptkPrintXYPlot $top $top.d$In.c$In "Logic Analyzer"
 
 }
 
