@@ -86,6 +86,7 @@ ITCL_SRCS = \
 	IconIndex.itcl \
 	Index.itcl \
 	IndexBrowser.itcl \
+	Install.itcl \
 	Interchange.itcl \
 	KeyedDigraph.itcl \
 	ListBrowser.itcl \
