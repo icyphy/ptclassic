@@ -2,7 +2,7 @@ defstar {
 	name { Clock }
 	domain {VHDLB}
 	desc {
-Output a signal which alternates between 0 and 1.
+Output a signal which alternates between 0 and 1 with the given period.
 	}
         version { $Id$ }
 	author { M. C. Williamson }
@@ -17,6 +17,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		name { output }
 		type { int }
 	}
+        defstate {
+                name { period }
+	        type { int }
+                default { 1 }
+                desc { The clock period, in nsec }
+        }
 	go {
 	}
 }

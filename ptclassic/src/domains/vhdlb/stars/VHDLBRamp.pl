@@ -29,6 +29,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { 1 }
 		desc { The constant stepsize. }
 	}
+	defstate {
+		name { interval }
+		type { int }
+		default { 1 }
+		desc { The interval between output transactions, in nsec }
+	}
 	go {
 	}
 }
