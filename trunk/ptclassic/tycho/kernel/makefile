@@ -66,6 +66,8 @@ ITCL_SRCS = \
 	EditHTMLText.itcl \
 	EditItcl.itcl \
 	EditItclText.itcl \
+	EditMake.itcl \
+	EditMakeText.itcl \
 	EditProgram.itcl \
 	EditProgramText.itcl \
 	EditPtlang.itcl \
