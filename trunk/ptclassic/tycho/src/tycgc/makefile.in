@@ -89,4 +89,4 @@ depend:
 include $(ROOT)/mk/tycommon.mk
 
 makefile: $(srcdir)/makefile.in
-	(cd ../..; ./config.status)
+	(cd ..; ./config.status)
