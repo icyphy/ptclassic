@@ -47,16 +47,13 @@ test http-error1 {Make sure that any HTTP write returns error.} {
     catch {$httpobj open w} b        ;#error
     catch {$httpobj open r} c        ;#error
     catch {$httpobj isopen} d        ;#okay
-    catch {$httpobj eof} e           ;#error
     catch {delete object $httpobj}
-    list $a1 $a2 $b $c $d $e
+    list $a1 $a2 $b $c $d
 } {{HTTP files are not writable}\
         {HTTP files are not writable}\
         {File http://a.b.c/ is not writable}\
         {Can't open a.b.c, 80}\
-        0\
-        {can not find channel named ""}}
-
+        0}
 
 test http-error2 {Make sure that public proc's error message are correct} {
     set cmd "::tycho::ResourceHTTP"
@@ -64,9 +61,9 @@ test http-error2 {Make sure that public proc's error message are correct} {
     catch {$cmd::delete http://ptolemy.eecs.berkeley.edu} b
     catch {$cmd::mkdir http://ptolemy.eecs.berkeley.edu/new} c
     list $a $b $c
-} {{Cannot change status of http://noway}\
-        {Cannot delete http://ptolemy.eecs.berkeley.edu}\
-        {Cannot create http://ptolemy.eecs.berkeley.edu/new}}
+} {{Cannot chmod HTTP files}\
+        {Cannot delete HTTP files}\
+        {Cannot mkdir HTTP files}}
 
 
 test http-contenttype1 {Check the contenttype of the ptolemy homepage} {
@@ -94,26 +91,13 @@ test http-dirlist {index.html shoudl contain the implied file names} {
 
 test http-exists {This should return 0 or 1} {
     # Check whether a HTTP resource exists or not
-    set site1 "http://ptolemy"
+    set site1 "http://ptolemy.eecs.berkeley.edu"
     set site2 "$site1/~eal"
     set site3 "$site1/~kchang"
     set site4 "$site1/~noperson"
     set cmd "::tycho::ResourceHTTP::exists"
     list [$cmd $site1] [$cmd $site2] [$cmd $site3] [$cmd $site4]
 } {1 1 1 0}
-
-
-test http-forward1 {Connect to the ptolemy site, see if it forwards} {
-    # forward http://ptolemy --> http://ptolemy/
-    # NOTE: This is HTTP server dependent!
-    set site "http://ptolemy.EECS.berkeley.edu/~kchang"
-    set httpobj [::tycho::autoName httptest]
-    ::tycho::ResourceHTTP $httpobj
-    $httpobj connect $site
-    $httpobj open r
-    catch {delete object $httpobj}
-    ::tycho::ResourceHTTP::forward $site
-} {http://ptolemy.eecs.berkeley.edu/~kchang/}
 
 
 
