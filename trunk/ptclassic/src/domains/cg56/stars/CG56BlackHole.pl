@@ -16,4 +16,12 @@ Does nothing.  Input is ignored.
 		name {input}
 		type {ANYTYPE}
 	}
+	start {
+		// mark portholes as P_CIRC
+		PortHole* p;
+		MPHIter nextp(input);
+		while ((p = nextp++) != 0) {
+			p->setAttributes(P_CIRC);
+		}
+	}
 }
