@@ -39,9 +39,9 @@ int MultiOutSDFPort :: isItOutput () const { return TRUE;}
 PortHole& SDFPortHole :: setPort (
 			     const char* s,
                              Block* parent,
-                             dataType t = FLOAT,
-                             unsigned numTokens = 1,
-			     unsigned delay = 0)
+                             DataType t,
+                             unsigned numTokens,
+			     unsigned delay)
 {
 	// Initialize PortHole
         PortHole::setPort(s,parent,t);
@@ -69,8 +69,8 @@ PortHole& SDFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
 
 MultiPortHole& MultiSDFPort :: setPort (const char* s,
                              Block* parent,
-                             dataType t = FLOAT,
-                             unsigned numTokens = 1) {
+                             DataType t,
+                             unsigned numTokens) {
         MultiPortHole::setPort(s,parent,t);
         numberTokens = numTokens;
         return *this;
