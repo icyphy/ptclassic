@@ -53,20 +53,14 @@ Target("default-DE","DEStar","default DE target")
 
 void DETarget :: setup()
 {
-	if (!scheduler())
-	{
-	    if (calQ)
-	    {
-		LOG_NEW; CQScheduler* sched = new CQScheduler;
-		setSched(sched);
-	    }
-	    else
-	    {
-		LOG_NEW; DEScheduler* sched = new DEScheduler;
-		setSched(sched);
-	    }
+	DEBaseSched* dSched;
+	if (calQ) {
+		LOG_NEW; dSched = new CQScheduler;
+	} else {
+		LOG_NEW; dSched = new DEScheduler;
 	}
-	DEBaseSched* dSched = (DEBaseSched*) scheduler();
+	// setSched deletes the old scheduler.
+	setSched(dSched);
 	dSched->setGalaxy(*galaxy());
 	dSched->relTimeScale = timeScale;
 	dSched->syncMode = syncMode;
