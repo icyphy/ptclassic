@@ -67,7 +67,7 @@ StringList
 SDFSchedule :: printVerbose () const {
 	StringList out;
 	SDFSchedIter next(*this);
-	for (int i = size(); i>0; i--) {
+	for (int i = size(); i > 0; i--) {
 		out << "  { fire " << (next++)->fullName() << " }\n";
 	}
 	return out;
@@ -85,19 +85,20 @@ SDFSchedule :: printVerbose () const {
 // runs the number of times indicated by numIters.
 int SDFScheduler :: run () {
         if (! galaxy()) {
+	    invalid = TRUE;
             Error::abortRun("SDF Scheduler has no galaxy to run");
             return FALSE;
         }
-	if (haltRequested()) {
-            Error::abortRun(*galaxy(), "Can't continue after run-time error");
-	    return FALSE;
-	}
 	if (invalid) {
-	    Error::abortRun(*galaxy(),
-	            "Can't run because the setup is invalid");
+	    Error::abortRun("Cannot run because the setup is invalid");
 	    return FALSE;
 	}
-	while (numItersSoFar < numIters && !haltRequested()) {
+	if (SimControl::haltRequested()) {
+            Error::abortRun("Cannot continue after run-time error");
+	    return FALSE;
+	}
+
+	while (numItersSoFar < numIters && !SimControl::haltRequested()) {
 		runOnce();
 		currentTime += schedulePeriod;
 		numItersSoFar++;
@@ -132,15 +133,18 @@ extern int warnIfNotConnected (Galaxy&);
 	////////////////////////////
 
 void SDFScheduler :: setup () {
-	if (! galaxy()) {
-		Error::abortRun("SDF Scheduler has no galaxy defined");
-		return;
-	}
-
+	// These initializations must go before the error checking
+	// since there is no constructor for this class
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
 	invalid = FALSE;
+
+	if (! galaxy()) {
+		invalid = TRUE;
+		Error::abortRun("SDF Scheduler has no galaxy defined");
+		return;
+	}
 
 	// Check to see if the original user galaxy is connected
         if (!checkConnectivity()) return;
@@ -179,15 +183,19 @@ void SDFScheduler :: setup () {
 
 int SDFScheduler::prepareGalaxy()
 {
-	if (! galaxy()) return FALSE;
+	if (! galaxy()) invalid = TRUE;
+	if (invalid) return FALSE;
+
 	galaxy()->initialize();
 	return TRUE;
 }
 
 int SDFScheduler::checkConnectivity()
 {
-	if (! galaxy()) return FALSE;
-	if (warnIfNotConnected (*galaxy())) {
+	if (! galaxy()) invalid = TRUE;
+	if (invalid) return FALSE;
+
+	if (warnIfNotConnected(*galaxy())) {
                 invalid = TRUE;
                 return FALSE;
 	}
@@ -206,7 +214,8 @@ int SDFScheduler::checkConnectivity()
 
 int SDFScheduler::checkStars()
 {
-	if (! galaxy()) return FALSE;
+	if (! galaxy()) invalid = TRUE;
+	if (invalid) return FALSE;
 
 	DFGalStarIter nextStar(*galaxy());
 	DataFlowStar* s;
@@ -239,7 +248,8 @@ int SDFScheduler::checkStars()
 // wormhole boundary is restrained to transfer only one sample at a time.
 
 void SDFScheduler::adjustSampleRates() {
-	if (! galaxy()) return;
+	if (! galaxy()) invalid = TRUE;
+	if (invalid) return;
 
 	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
@@ -272,9 +282,7 @@ int SDFScheduler::computeSchedule(Galaxy& g)
 	do {
                 passValue = 2;
 		deferredStar = 0;
-		int numAddedThisPass;
-
-		numAddedThisPass = 0;
+		int numAddedThisPass = 0;
                 nextStar.reset();
                 while ((s = nextStar++) != 0) {
                         int runResult;
@@ -353,7 +361,8 @@ int SDFScheduler::addIfWeCan (DataFlowStar& star, int defer) {
 	////////////////////////////
 
 int SDFScheduler :: repetitions () {
-	if (! galaxy()) return FALSE;
+	if (! galaxy()) invalid = TRUE;
+	if (invalid) return FALSE;
 
 	// The following iteration occurs exactly as many times as
 	// there are blocks in the universe.  This way we can step
@@ -543,7 +552,7 @@ void SDFScheduler::compileRun () {
 
     SDFSchedIter nextStar(mySchedule);
     DataFlowStar* star;
-    while ((star = nextStar++) != 0 && !haltRequested()) {
+    while ((star = nextStar++) != 0 && !SimControl::haltRequested()) {
 	// Fire the next star in the list
 	tar.writeFiring(*star, 1);
     }
@@ -555,7 +564,7 @@ void SDFScheduler::compileRun () {
 void SDFScheduler :: copySchedule(SDFSchedule& s) {
 
 	// calculate repetition properties of the galaxy
-	invalid = 0;
+	invalid = FALSE;
 	repetitions();
 
 	// main copying routine.
