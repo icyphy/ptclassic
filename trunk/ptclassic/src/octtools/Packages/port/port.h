@@ -144,7 +144,8 @@
 /* XXX hack */
 #ifndef MACHDEP_INCLUDED
 #define MACHDEP_INCLUDED
-#ifdef vax
+/* We have not included compat.h here yet so we cannot use PTALPHA */
+#if defined(vax) || defined(__alpha)
 typedef int int32;
 typedef short int16;
 #else
@@ -193,7 +194,7 @@ typedef int int16;
 #include <stdio.h>
 #include <ctype.h>
 
-#ifdef SOL2
+#ifdef PTSOL2
 /* Solaris2.3 defines type boolean as an enum, which is a no no.
  * see also pigilib/compat.h
  */
@@ -202,12 +203,12 @@ typedef int int16;
 #undef boolean
 #else
 #include <sys/types.h>
-#endif /*SOL2*/
+#endif /* PTSOL2 */
 
 #ifndef TYPEDEF_BOOLEAN
 #define TYPEDEF_BOOLEAN 1
 typedef int boolean;
-#endif /*TYPEDEF_BOOLEAN*/
+#endif /* TYPEDEF_BOOLEAN */
 
 #ifndef TRUE
 #define TRUE 1
@@ -257,7 +258,7 @@ extern double trunc();
 
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(__hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(linux) || defined(__STDC__) || defined(SOL2)
+#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(aiws) || defined(apollo) || defined(AIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -301,46 +302,46 @@ extern double trunc();
 extern FILE *popen(), *tmpfile();
 extern int pclose();
 #ifndef clearerr	/* is a macro on many machines, but not all */
-#if defined(__sgi) || defined(sgi)
+#if defined(PTIRIX5)
 #if defined(__SYSTYPE_SVR4) || defined(SYSTYPE_SVR4)
 /* SGI irix5 */
 extern void	clearerr(FILE *);
 #endif /* SVR4 */
-#else  /* sgi */
+#else  /* PTIRIX5 */
 extern VOID_HACK clearerr();
-#endif /* sgi */
+#endif /* PTIRIX5 */
 #endif /* clearerr */
 #ifndef _IBMR2
 #ifndef rewind
-#ifndef sgi
-#if !defined(SOL2) && !defined(__GNUC__)
+#ifndef PTIRIX5
+#if !defined(PTSOL2) && !defined(__GNUC__)
 extern VOID_HACK rewind();
-#endif /* SOL2*/
-#endif /*sgi*/
+#endif /* PTSOL2 */
+#endif /* PTIRIX5 */
 #endif /* rewind */
 #endif /* _IBMR2 */
 #endif /* __STDC__ */
 
 
 /* most machines don't give us a header file for these */
-#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(SOL2)
+#if defined(__STDC__) || defined(sprite) || defined(__cplusplus) || defined(PTSOL2) || defined(PTHPPA)
 #include <stdlib.h>
 #else
 
-#if defined(hpux) || defined(__hpux)
+#if defined(PTHPPA)
 extern int abort();
 extern void free(), exit(), perror();
 #else
 #if defined(_IBMR2) 
 extern int abort(), exit();
 extern void free(), perror();
-#else /*_IBMR2*/
+#else /* _IBMR2 */
 #if defined(SYSV)
 extern int abort();
 extern void free();
 extern void perror();
-#else /*SYSV*/
-#ifdef sgi
+#else /* SYSV */
+#ifdef PTIRIX5
 /* The vfork man page says:
  *   vfork is no longer supported in IRIX as of Release 4.0.  By default, IRIX 
  *   does not preallocate swap space and thus fork(2) provides the same
@@ -350,9 +351,9 @@ extern void perror();
 extern VOID_HACK free();
 #else
 extern VOID_HACK abort(), free(), exit(), perror();
-#endif /*sgi*/
-#endif /*SYSV*/
-#endif /*_IBMR2*/
+#endif /* PTIRIX5 */
+#endif /* SYSV */
+#endif /* _IBMR2 */
 extern char *getenv();
 #if defined(ultrix4) || defined(SYSV)
 /* Hack for Ptolemy pigilib/local.h:  skip this if we've seen local.h
@@ -365,13 +366,13 @@ extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
 
-#if defined(hpux) || defined (__hpux) || defined(aiws) || defined(linux) ||(defined(SOL2) && ! defined(BSD))
+#if defined(PTHPPA) || defined(aiws) || defined(PTLINUX) ||(defined(PTSOL2) && ! defined(BSD))
 extern int sprintf();
 #else
 #ifndef _IBMR2
-#ifndef sgi
+#ifndef PTIRIX5
 extern char *sprintf();
-#endif /*sgi*/
+#endif /* PTIRIX5 */
 #endif
 #endif
 extern int system();
@@ -384,7 +385,7 @@ extern int sscanf();
 
 
 /* some call it strings.h, some call it string.h; others, also have memory.h */
-#if defined(__STDC__) || defined(sprite) || defined(hpux) || defined(__cplusplus) || defined(linux)
+#if defined(__STDC__) || defined(sprite) || defined(PTHPPA) || defined(__cplusplus) || defined(PTLINUX)
 #include <string.h>
 #else
 /* ANSI C string.h -- 1/11/88 Draft Standard */
@@ -394,13 +395,13 @@ extern int sscanf();
 extern char *strcpy(), *strncpy(), *strcat(), *strncat(), *strerror();
 extern char *strpbrk(), *strtok(), *strchr(), *strrchr(), *strstr();
 extern int strcoll(), strncmp();
-#ifndef sgi
-#ifndef SOL2
+#ifndef PTIRIX5
+#ifndef PTSOL2
 #if !(defined(sun) && defined(__GNUC__))
 extern int strxfrm(), strlen(), strspn(), strcspn();
 #endif
-#endif /*SOL2*/
-#endif /*sgi*/
+#endif /* PTSOL2 */
+#endif /* PTIRIX5 */
 extern char *memmove(), *memccpy(), *memchr(), *memcpy(), *memset();
 extern int memcmp(), strcmp();
 #endif /* ultrix4 */
@@ -410,7 +411,7 @@ extern int memcmp(), strcmp();
 #undef putc			/* correct lint '_flsbuf' bug */
 #endif /* lint */
 
-#ifdef linux
+#ifdef PTLINUX
 #undef srandom
 #undef random
 #undef bzero
@@ -418,18 +419,20 @@ extern int memcmp(), strcmp();
 
 /* a few extras */
 #if ! defined(_std_h)
-#ifdef hpux
+#ifdef PTHPPA
 extern VOID_HACK srand48();
 extern long lrand48();
 #define random() lrand48()
 #define srandom(a) srand48(a)
 #define bzero(a,b) memset(a, 0, b)
 #else
+#if !defined(PTALPHA)
 /* Sun CC 2.1 requires the __cplusplus below */
-#if !defined(sgi) && !defined(__cplusplus)
+#if !defined(PTIRIX5) && !defined(__cplusplus)
 extern VOID_HACK srandom();
 #endif
 extern long random();
+#endif /* ! PTALPHA */
 #endif
 #endif /* _std_h */
 
@@ -467,7 +470,7 @@ extern VOID_HACK sleep();
 #endif
 
 /* handle various limits */
-#if defined(__STDC__) || defined(POSIX) || defined(linux)
+#if defined(__STDC__) || defined(POSIX) || defined(PTLINUX)
 #include <limits.h>
 #else
 #ifndef _IBMR2
@@ -486,7 +489,7 @@ extern VOID_HACK sleep();
 #define SIG_FLAGS(s)    (s).sv_flags
 #endif
 
-#ifdef SOL2
+#ifdef PTSOL2
 /* gcc-2.5.8 under Solaris2.3 with Openwindows3.3 prints warning
    messages while compiling Maxport.c. 
    message was: warning: cast discards `const' from pointer target type
@@ -516,6 +519,6 @@ extern int gethostname( char * name, int namelen);
 #include <stdlib.h>
 /*extern void qsort
 	ARGS((void *, size_t, size_t, int (*)(const void *, const void *)));*/
-#endif
+#endif /* PTSOL2 */
 
 #endif /* PORT_H */
