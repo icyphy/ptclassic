@@ -186,7 +186,9 @@ body ::tycho::LabeledItem::_graphics {id canvas slate graphics} {
     # Draw each item at full scale
     set tags [concat graphics.$id [$canvas gettags $primary($id)]]
     foreach spec [split $graphics ";\n"] {
-	eval [list $slate createchild* $id $htags graphics.$id] $spec
+	if { [string trim $spec " \t"] != "" } {
+	    eval [list $slate createchild* $id $htags graphics.$id] $spec
+	}
     }
 
     # Move and scale them to fit into this item
