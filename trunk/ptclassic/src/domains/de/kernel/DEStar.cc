@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "assert.h"
+#include <assert.h>
 #include "DEScheduler.h"
 #include "DEStar.h"
 #include "DEWormhole.h"
