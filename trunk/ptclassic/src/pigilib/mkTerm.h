@@ -66,7 +66,7 @@ extern boolean MkTermInit ARGS((octObject *CurrentFacetPtr));
 extern boolean PutShape ARGS((octObject *containPtr, octObject *objPtr,
 			Shape *shapePtr, struct octPoint *translatePtr,
 			boolean thick));
-extern boolean MkTerm ARGS((char *name, boolean input, char *type,
+extern boolean MkTerm ARGS((char *name, boolean input, const char *type,
 			    boolean multiple, int position, int totalNumber));
 
 #endif  /* _MKTERM_H */
