@@ -48,7 +48,7 @@ class Profile {
 
 public:
 	// Constructor
-	Profile() : makespan(0), maxPeriod(0), assignedId(0) {}
+	Profile() :  assignedId(0), makespan(0), maxPeriod(0) {}
 	Profile(int n);
 	~Profile();
 
