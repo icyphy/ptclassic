@@ -234,6 +234,12 @@ void CompileCGSubsystems::pairSendReceive(DataFlowStar* oldSend,
     CGSharedBus::pairSendReceive(newSend,newReceive);
 }
 
+void CompileCGSubsystems::generateCode() {
+    if (haltRequested()) return;
+    if (inWormHole()) CGSharedBus::begin();
+    CGSharedBus::generateCode();
+}
+
 int CompileCGSubsystems::runCode() {	
     // FIXME - assumes cgc target is child 0
     return cgChild(0)->runCode();

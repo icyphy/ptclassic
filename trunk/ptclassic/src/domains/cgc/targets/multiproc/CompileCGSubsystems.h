@@ -59,7 +59,7 @@ public:
     /*virtual*/ void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
     /*virtual*/ int runCode();
     /*virtual*/ void wormPrepare();
-
+    /*virtual*/ void generateCode();
 protected:
     /*virtual*/ void prepareChildren();
 private:
