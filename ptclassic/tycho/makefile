@@ -41,8 +41,6 @@ include $(CONFIG)
 
 MISC_FILES =	README README.files copyright
 
-INDICES = 	tycho.idx codeDoc.idx
-
 makefiles all clean depend realclean checkjunk sccsinfo itcldocs \
 extraclean:
 	@for x in $(DIRS); do \
@@ -84,38 +82,3 @@ subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 		) \
 	    fi ; \
 	done
-
-# Creat all the indexes
-indices: $(INDICES)
-
-FORCE:
-
-# Create a tycho index file.
-# We could use the GNU make $(wildcard) extension here, but that would
-# force users to have GNU make.
-tycho.idx: FORCE
-	@echo "You should be sure to run 'make itcldocs' before updating $@"
-	@echo "Updating $@"
-	rm -f $@
-	@if [ "$(TYCHO)" = "" ]; then \
-		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
-		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
-	else \
-		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
-	fi
-
-# Create a tycho code index file
-codeDoc.idx: FORCE
-	@echo "You should be sure to run 'make itcldocs' before updating $@"
-	@echo "Updating $@"
-	rm -f $@
-	@if [ "$(TYCHO)" = "" ]; then \
-		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
-		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
-	else \
-		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoCodeDocIndex" | $(ITCLSH); \
-	fi
