@@ -83,6 +83,11 @@ public:
 		return double(myNum)/double(myDen);
 	}
 
+	// Cast to type int:
+	operator int() const {
+	  return myDen == 1 ? myNum : myNum/myDen;
+	}
+
 	// Assignment operators
 	Fraction& operator += (const Fraction& f);
 	Fraction& operator -= (const Fraction& f);
