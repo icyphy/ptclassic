@@ -57,7 +57,7 @@ all::	 makefile oct2ps
 LIBS	= -L$(OCTLIBDIR) -llel$(DBGFLAG) -lda$(DBGFLAG) -ltap$(DBGFLAG) \
 	-loh$(DBGFLAG) -lvov$(DBGFLAG) -loptions$(DBGFLAG) \
 	-llist$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) -lst$(DBGFLAG) \
-	-lutility$(DBGFLAG) $(OCTTOOLS_MM_LIB) -lerrtrap$(DBGFLAG) \
+	-lutility$(DBGFLAG) -lerrtrap$(DBGFLAG) \
 	-luprintf$(DBGFLAG) -lport$(DBGFLAG) 
 
 

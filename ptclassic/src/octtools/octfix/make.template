@@ -52,7 +52,7 @@ all::	 makefile octfix
 
 LIBS	= -L$(OCTLIBDIR) -loh$(DBGFLAG) -lvov$(DBGFLAG) \
 	-loptions$(DBGFLAG) -loct$(DBGFLAG) -ltr$(DBGFLAG) \
-	-lutility$(DBGFLAG) -lst$(DBGFLAG) $(OCTTOOLS_MM_LIB) \
+	-lutility$(DBGFLAG) -lst$(DBGFLAG) \
 	-lerrtrap$(DBGFLAG) -luprintf$(DBGFLAG) -lport$(DBGFLAG)   
 
 octfix:	$(OBJS)
