@@ -127,8 +127,16 @@ TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/tk
 #TK_INDEPENDENT_DEST =	$(TCLTK_DEST)/$(TK_VERSION)
 
 # Destination of itcl only machine dependent files
-ITCL_DEST =	$(TCLTK_DEST)/itcl.$(PTARCH)
+ITCL_DEST_BASE =	itcl.$(PTARCH)
+ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_DEST_BASE)
 #ITCL_DEST =	$(TCLTK_DEST)/$(ITCL_VERSION).$(PTARCH)
+
+# Location of itcl bin directory relative to Ptolemy bin directory
+# Can't use absolute path name here, or we will create a distribution that
+# will not work if $PTOLEMY != /users/ptolemy
+# Since itcl2.0 places the tcl, tk, and itcl binaries in one directory,
+# we get everything in one swoop here.
+REL_ITCL_BINDIR =	../tcltk/$(ITCL_DEST_BASE)/bin
 
 # Destination of the machine independent itcl files
 ITCL_INDEPENDENT_DEST =		$(TCLTK_DEST)/itcl
@@ -272,6 +280,7 @@ $(ITCL_OBJ)/libitcl.a: $(ITCL_OBJ)
 
 # Install itcl
 install_itcl: $(ITCL_DEST_LIB)/libitcl.a
+	(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
 
 $(ITCL_DEST_LIB)/libitcl.a: \
 		$(ITCL_OBJ)/libitcl.a $(TCLTK_DEST) $(ITCL_DEST) \
