@@ -125,13 +125,22 @@ proc tychoFindAllHTML { {dirname .} {depth 0}} {
     foreach name [exec ls] {
 	if [file isdirectory $name] {
 	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
+	    # Skip pn/lang
+	    # The list of directories to avoid should be the same as
+	    # the list in tychoFindCodeDocHTML, except here we 
+	    # skip codeDoc too.
 	    if {$name != {SCCS} && \
 		    $name != {RCS} && \
 		    $name != {adm} && \
-		    $name != {test} && \
 		    $name != {codeDoc} && \
-		    $name != $objdir && \
-		    $name != {junk} } {
+		    $name != {devel} && \
+		    $name != {itclhtml} && \
+		    $name != {javahtml} && \
+		    $name != {junk} && \
+		    $name != {lang} && \
+		    $name != {src} && \
+		    $name != {test} && \
+		    $name != $objdir } {
 		set subfiles [tychoFindAllHTML [file join $dirname $name] \
 			[expr $depth + 1]]
 		cd $dirname
@@ -166,14 +175,23 @@ proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
     foreach name [exec ls] {
 	if [file isdirectory $name] {
 	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
+	    # Skip pn/lang
+	    # The list of directories to avoid should be the same as
+	    # the list in tychoFindAllHTML, except here we don't
+	    # skip codeDoc.
 	    if {$name != {SCCS} && \
 		    $name != {RCS} && \
 		    $name != {adm} && \
-		    $name != {test} && \
+		    $name != {devel} && \
+		    $name != {itclhtml} && \
 		    $name != {java} && \
+		    $name != {javahtml} && \
+		    $name != {junk} && \
+		    $name != {lang} && \
+		    $name != {test} && \
+		    $name != {src} && \
 		    $name != {tyjava} && \
-		    $name != $objdir && \
-		    $name != {junk} } {
+		    $name != $objdir } {
 		set subfiles [tychoFindCodeDocHTML [file join $dirname $name] \
 			[expr $depth + 1]]
 		cd $dirname
