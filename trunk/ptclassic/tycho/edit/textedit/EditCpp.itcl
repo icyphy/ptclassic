@@ -30,30 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-#
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditCpp.textWidth 80 widgetDefault
-option add *EditCpp.textHeight 40 widgetDefault
-option add *EditCpp.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditCpp.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditCpp.fillMaxLineLength 70 widgetDefault
-option add *EditCpp.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditCpp.textfont [.tychoFonts defaultFont fixed]
-option add *EditCpp.relief raised widgetDefault
-option add *EditCpp.selectColor [ptkColor yellow white] widgetDefault
-option add *EditCpp.commentColor [ptkColor firebrick black] widgetDefault
-option add *EditCpp.fixmeColor [ptkColor red black] widgetDefault
-option add *EditCpp.stringColor [ptkColor gray50 black] widgetDefault
-
-# new options
-
-option add *EditCpp.procColor [ptkColor blue black] widgetDefault
-
 
 #######################################################################
 #### EditCpp

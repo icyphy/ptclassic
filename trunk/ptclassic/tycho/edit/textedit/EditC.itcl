@@ -36,30 +36,6 @@
 # - This editor only handles indenting and comments.  Needs much more.
 # 
 
-#######################################################################
-#### options
-#
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditC.textWidth 80 widgetDefault
-option add *EditC.textHeight 40 widgetDefault
-option add *EditC.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditC.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditC.fillMaxLineLength 70 widgetDefault
-option add *EditC.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditC.textfont [.tychoFonts defaultFont fixed]
-option add *EditC.relief raised widgetDefault
-option add *EditC.selectColor [ptkColor yellow white] widgetDefault
-option add *EditC.commentColor [ptkColor firebrick black] widgetDefault
-option add *EditC.fixmeColor [ptkColor red black] widgetDefault
-option add *EditC.stringColor [ptkColor gray50 black] widgetDefault
-
-# new options
-
-option add *EditC.procColor [ptkColor blue black] widgetDefault
-
 
 #######################################################################
 #### EditC
@@ -190,9 +166,9 @@ body ::tycho::EditC::parseNow {start stop} {
 
     # Set the visual characteristics of the tagged text
     $text tag configure ccomment -foreground \
-	    [option get $itk_component(hull) commentColor EditC]
+	    [preference get textedit commentColor]
     $text tag configure fixme -foreground \
-	    [option get $itk_component(hull) fixmeColor EditC]
+	    [preference get textedit fixmeColor]
 }
 
 #####################################################################

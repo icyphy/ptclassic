@@ -34,29 +34,6 @@
 # send me mail at eal@eecs.berkeley.edu.
 
 #######################################################################
-#### options
-#
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditEsterel.textWidth 80 widgetDefault
-option add *EditEsterel.textHeight 40 widgetDefault
-option add *EditEsterel.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditEsterel.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditEsterel.fillMaxLineLength 70 widgetDefault
-option add *EditEsterel.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditEsterel.textfont [.tychoFonts defaultFont fixed]
-option add *EditEsterel.relief raised widgetDefault
-option add *EditEsterel.selectColor [ptkColor yellow white] widgetDefault
-option add *EditEsterel.fixmeColor [ptkColor red black] widgetDefault
-option add *EditEsterel.stringColor [ptkColor gray50 black] widgetDefault
-option add *EditEsterel.commentColor [ptkColor firebrick black] \
-	widgetDefault
-option add *EditEsterel.keywordColor [ptkColor blue black] \
-	widgetDefault
-
-#######################################################################
 #### EditEsterel
 # This class defines a text widget with an emacs-like editor with some
 # context-specific features for editing Esterel files. The editor

@@ -33,27 +33,8 @@
 #######################################################################
 #### options
 #
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditPtlang.textWidth 80 widgetDefault
-option add *EditPtlang.textHeight 40 widgetDefault
-option add *EditPtlang.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditPtlang.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditPtlang.fillMaxLineLength 70 widgetDefault
-option add *EditPtlang.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditPtlang.textfont [.tychoFonts defaultFont fixed]
-option add *EditPtlang.relief raised widgetDefault
-option add *EditPtlang.selectColor [ptkColor yellow white] widgetDefault
-option add *EditPtlang.commentColor [ptkColor firebrick black] widgetDefault
-option add *EditPtlang.fixmeColor [ptkColor red black] widgetDefault
-option add *EditPtlang.stringColor [ptkColor gray50 black] widgetDefault
-
-# new options
-
-option add *EditPtlang.ptkeywordColor [ptkColor coral black] \
-	widgetDefault
+# Add an option for PtLang keywords.
+preference add textedit ptkeywordColor [ptkColor coral black]
 
 
 #######################################################################
@@ -209,7 +190,7 @@ body ::tycho::EditPtlang::parseNow {start stop} {
     }
 
     $text tag configure ptkeyword -foreground \
-	    [option get $itk_component(hull) ptkeywordColor EditPtlang]
+	    [preference get textedit ptkeywordColor]
 
     # To get C++ parsing
     EditCpp::parseNow $start $stop

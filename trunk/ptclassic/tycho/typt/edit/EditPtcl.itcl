@@ -30,36 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-# Define colors for the Ptcl context-sensitive editor. These are done
-# as options so that they can be overridden by the user. Other colors
-# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
-# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
-#
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditPtcl.textWidth 80 widgetDefault
-option add *EditPtcl.textHeight 40 widgetDefault
-option add *EditPtcl.parenColor \
-	[ptkColor lightskyblue white] widgetDefault
-option add *EditPtcl.targetColor \
-	[ptkColor lightskyblue white] widgetDefault
-option add *EditPtcl.fillMaxLineLength 70 widgetDefault
-option add *EditPtcl.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditPtcl.textfont [.tychoFonts defaultFont fixed]
-option add *EditPtcl.relief raised widgetDefault
-option add *EditPtcl.selectColor [ptkColor yellow white] widgetDefault
-option add *EditPtcl.commentColor [ptkColor firebrick black] widgetDefault
-option add *EditPtcl.fixmeColor [ptkColor red black] widgetDefault
-option add *EditPtcl.stringColor [ptkColor gray50 black] widgetDefault
-
-# new options
-
-option add *EditPtcl.procColor [ptkColor blue black] widgetDefault
-
 
 #######################################################################
 #### EditPtcl

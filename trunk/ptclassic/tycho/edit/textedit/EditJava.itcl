@@ -30,37 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#######################################################################
-#### options
-# Define colors for the Tcl context-sensitive editor. These are done
-# as options so that they can be overridden by the user. Other colors
-# that work reasonably well are: forestGreen, chocolate3, DarkOrange,
-# coral, OrangeRed, DeepPink, maroon, magenta, and DarkOrchid.
-#
-# NOTE: Unfortunately, itcl appears to require that all options
-# from the base class be repeated here with the new class name.
-# Otherwise, they are not recognized.
-option add *EditJava.textWidth 80 widgetDefault
-option add *EditJava.textHeight 40 widgetDefault
-option add *EditJava.parenColor [ptkColor lightskyblue white] widgetDefault
-option add *EditJava.targetColor [ptkColor lightskyblue white] widgetDefault
-option add *EditJava.fillMaxLineLength 70 widgetDefault
-option add *EditJava.textBackground \
-	[ptkColor antiqueWhite white] widgetDefault
-option add *EditJava.textfont [.tychoFonts defaultFont fixed]
-option add *EditJava.relief raised widgetDefault
-option add *EditJava.selectColor [ptkColor yellow white] widgetDefault
-option add *EditJava.commentColor [ptkColor firebrick black] widgetDefault
-option add *EditJava.fixmeColor [ptkColor red black] widgetDefault
-option add *EditJava.stringColor [ptkColor gray50 black] widgetDefault
-
-
-# New options for this class:
-
-option add *EditJava.classColor [ptkColor blue black] startupFile
-option add *EditJava.methodColor [ptkColor purple black] startupFile
-option add *EditJava.variableColor [ptkColor forestGreen black] startupFile
-#option add *EditJava.optionColor [ptkColor DeepPink black] startupFile
 
 #######################################################################
 #### EditJava
