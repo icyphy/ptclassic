@@ -1,4 +1,4 @@
-# Makefile for ptolemy language processor
+# Makefile for ptvhdlsim, a interface between Synopsys and Ptolemy
 # Version identification:
 # $Id$
 # Copyright (c) 1990-1995 The Regents of the University of California.
@@ -26,6 +26,13 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 
+# ptvhdlsim is a socket based interface between Synopsys and Ptolemy
+# To use this tool you must have Synopsys installed locally.  You will
+# need to do something like:
+# setenv SYNOPSYS /usr/tools/synopsys
+# setenv SIM_ARCH sparcOS5
+# set path = (	$SYNOPSYS/$SIM_ARCH/syn/bin $SYNOPSYS/$SIM_ARCH/sim/bin $path)
+
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/ptvhdlsim
 BINDIR = $(ROOT)/bin.$(PTARCH)
@@ -38,44 +45,66 @@ EXTRA_SRCS = CLISocket.c CLISocket.h \
 	V2Cinteger.c C2Vinteger.c V2Creal.c C2Vreal.c \
 	V2Cinteger.vhdl C2Vinteger.vhdl V2Creal.vhdl C2Vreal.vhdl
 
+OBJS = 	V2Cinteger.o C2Vinteger.o V2Creal.o C2Vreal.o
+
 # common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
 LIB = foo
 
+# .cli* files seem to be some sort of cache for the cli program
+KRUFT = 	.cli* *.mra *.sim *.a ptvhdlsim vhdlsim
+
+
+# If the SYNOPSYS shell environment variable is defined, then build
 ifdef SYNOPSYS
 all: makefile ptvhdlsim
 install: ptvhdlsim $(BINDIR)/ptvhdlsim
 else
 all install: makefile
-	@echo "SYNOPSYS is not present (\$SYNOPSYS not defined)"
-	@echo " no need to build ptvhdlsim"
+	@echo "SYNOPSYS is not present (\$$SYNOPSYS not defined)"
+	@echo "	so there is no need to build ptvhdlsim"
 endif
+
 
 # Commonly used routines in a central place
 CLISocket.o: CLISocket.c CLISocket.h
-	$(CC) CLISocket.c -c -I$(SYNOPSYS)/$(SIM_ARCH)/sim/lib
+	$(CC) $< -c -I$(SYNOPSYS)/$(SIM_ARCH)/sim/lib
 
-v2cinteger: V2Cinteger.c
+
+# cli is too stupid to handle VPATH, so we make local links
+v2cinteger: V2Cinteger.c ./CLISocket.h
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv V2Cinteger V2Cinteger
 c2vinteger: C2Vinteger.c
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv C2Vinteger C2Vinteger
 v2creal: V2Creal.c
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv V2Creal V2Creal
 c2vreal: C2Vreal.c
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	@if [ ! -f CLISocket.h ]; then ln -s $(VPATH)/CLISocket.h .; fi
 	cli -nc -add -cv C2Vreal C2Vreal
 
 C2VINTEGER.sim: C2Vinteger.vhdl
-	vhdlan -nc C2Vinteger.vhdl
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	vhdlan -nc $<
 V2CINTEGER.sim: V2Cinteger.vhdl
-	vhdlan -nc V2Cinteger.vhdl
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	vhdlan -nc $<
 C2VREAL.sim: C2Vreal.vhdl
-	vhdlan -nc C2Vreal.vhdl
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	vhdlan -nc $<
 V2CREAL.sim: V2Creal.vhdl
-	vhdlan -nc V2Creal.vhdl
+	@if [ ! -f $(notdir $<) ]; then echo "ln -s $< ."; ln -s $< .; fi
+	vhdlan -nc $<
 
 libsynsock.a: CLISocket.o
 	ar cr libsynsock.a CLISocket.o
 	$(RANLIB) libsynsock.a
-	touch V2Cinteger.o C2Vinteger.o V2Creal.o C2Vreal.o
+	touch $(OBJS)
 
 # Build the new simulator with our extra CLI modules linked in
 vhdlsim: v2cinteger c2vinteger v2creal c2vreal V2CINTEGER.sim C2VINTEGER.sim \
