@@ -58,8 +58,6 @@ EXTRA_SRCS =	\
 	EditJavaHelp.html \
 	EditMakeHelp.html \
 	EditProgramHelp.html \
-	EditPtclHelp.html \
-	EditPtlangHelp.html \
 	EditSDLHelp.html \
 	EditTclHelp.html \
 	ItclClassListHelp.html \
