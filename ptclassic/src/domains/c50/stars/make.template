@@ -43,6 +43,7 @@ PL_SRCS= \
  C50Delay.pl \
  C50Distributor.pl \
  C50DownSample.pl \
+ C50Fork.pl \
  C50Gain.pl \
  C50IIDGaussian.pl \
  C50IIDUniform.pl \
