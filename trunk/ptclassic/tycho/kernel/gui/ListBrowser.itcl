@@ -38,7 +38,7 @@ option add *ListBrowser*entryForeground \
 	[ptkColor black black] widgetDefault
 option add *ListBrowser*textBackground \
 	[ptkColor antiqueWhite white] widgetDefault
-option add *ListBrowser.textForeground \
+option add *ListBrowser*textForeground \
 	[ptkColor black black] widgetDefault
 option add *ListBrowser.entryfont \
 	[.tychoFonts defaultFont fixed] widgetDefault
