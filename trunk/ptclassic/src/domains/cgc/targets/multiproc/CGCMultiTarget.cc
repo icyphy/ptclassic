@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "pt_fstream.h"
 #include "Error.h"
-#include "CGDisplay.h"
+#include "CGUtilities.h"
 #include "CGCStar.h"
 #include "KnownTarget.h"
 #include "CGCMultiTarget.h"
@@ -64,12 +64,6 @@ static pt_ofstream feedback;
 // -----------------------------------------------------------------------------	
 CGCMultiTarget::CGCMultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGSharedBus(name,starclass,desc) {
-
-	addState(doCompile.setState("doCompile",this,"NO",
-		"disallow compiling during development stage"));
-
-	addState(doRun.setState("doRun",this,"NO",
-		"disallow running before compiling is succeeded."));
 
 	// port_number
 	addState(portNumber.setState("portNumber",this,"7654",
@@ -282,14 +276,6 @@ int CGCMultiTarget :: identifyMachines() {
 	return TRUE;
 }
 
-			///////////////////
-			// wrapup
-			///////////////////
-
-void CGCMultiTarget :: wrapup() {
-	if (galaxy()->parent() == 0)	 wormLoadCode();
-}
-
 void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
 	StringList code = s;
 	StringList fileName;
@@ -298,29 +284,9 @@ void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
 	} else {
 		fileName << galaxy()->name() << ".c";
 	}
-	char* codeFileName = writeFileName((const char*) fileName);
-	display(code,codeFileName);
-	LOG_DEL; delete codeFileName;
+	rcpWriteFile("",destDirectory,fileName,code,displayFlag);
 }
 
-// -----------------------------------------------------------------------------
-			///////////////////
-			// wormLoadCode
-			///////////////////
-
-int CGCMultiTarget::wormLoadCode() {
-
-	if(Scheduler::haltRequested()) return FALSE;
-
-	if (int(doCompile) == 0) return TRUE;
-	if (compileCode()) {
-		if (int(doRun)) runCode();
-	}
-
-	// done
-	if(Scheduler::haltRequested()) return FALSE;
-	return TRUE;
-}
 // -----------------------------------------------------------------------------
 			///////////////////
 			// compile and run

@@ -59,7 +59,6 @@ public:
 	CGCMultiTarget(const char* name, const char* starclass, const char* desc);
 	~CGCMultiTarget();
 
-	void wrapup();
 	Block* makeNew() const;
 	int isA(const char*) const;
 
@@ -100,15 +99,7 @@ protected:
 	int sendWormData(PortHole&);
 	int receiveWormData(PortHole&);
 
-	// The following method downloads code for the inside of a wormhole
-	// and starts it executing.
-	int wormLoadCode();
-
 private:
-	// state to disallow compiling code.
-	IntState doCompile;
-	IntState doRun;
-
 	// states indicate which machines to use.
 	StringState machineNames;
 	StringState nameSuffix;
