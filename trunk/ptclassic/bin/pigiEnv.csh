@@ -1,5 +1,5 @@
 #! /bin/csh -f
-# usage: pigi [-bw] [-cp] [-debug] [-console] [-help]
+# usage: pigi [-bw] [-cp] [-debug] [-console] [-help] [-ptiny]
 #	[-rpc rpcname] [-xres resname ] [cell_name]
 
 # pigi - Ptolemy Interactive Graphics Interface
@@ -8,12 +8,15 @@
 # This is a modified version to support a PTOLEMY environment variable.
 #
 # Version: $Id$
-# Copyright (c) 1990,1991,1992 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # 	All Rights Reserved.
 #
 
 # On interrupt, remove temporary files
 onintr catch
+
+# If 'ptiny' is a link to this script, then we just use ptinyRpc
+set progname = `basename $0`
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?OCTTOOLS ) setenv OCTTOOLS $PTOLEMY
@@ -24,8 +27,13 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
-if ( ! $?PIGIRPC ) setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
-
+if ( ! $?PIGIRPC ) then
+	if ( "$progname" == "ptiny" ) then
+		setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
+	else
+		setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
+	endif
+endif
 set cell = init.pal
 set resfile = pigiXRes9
 
@@ -63,9 +71,12 @@ while ($#argv)
 		case -cp:
 			set resfile = pigiXRes9.cp
 			breaksw
+		case -ptiny:
+			setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
+			breaksw
 		case -*:
 			echo Bad option: $argv[1]
-			echo "usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
+			echo "usage: $progname [-bw] [-cp] [-debug] [-console] [-help] [-ptiny]"
 			echo "	[-rpc rpcname] [-xres resname ] [cell_name]"
 			exit 1
 			breaksw
