@@ -247,6 +247,9 @@ class ::tycho::ControlPanel {
     ###################################################################
     ####                   protected methods                       ####
 
+    # Initialize the menu/status/tool bars associated with this widget.
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
     ###################################################################
     ####                   protected variables                     ####
 
@@ -319,9 +322,6 @@ body ::tycho::ControlPanel::constructor {args} {
 
     # Initialize args
     eval itk_initialize $args
-
-    # Disable file status display
-    statusbar configure -filestatus none
 
     # Set the command name
     set cmd ::tycho::$itk_option(-taskname)
@@ -595,6 +595,23 @@ body ::tycho::ControlPanel::starConnect {galaxy star control callback} {
     ###################################################################
     ####                      protected methods                    ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::ControlPanel::initialize {{menubar {}} \
+        {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    # Disable file status display
+    statusbar configure -filestatus none
+}
 
     ###################################################################
     ###################################################################

@@ -94,6 +94,9 @@ class ::tycho::EditDiff {
 
     ####################################################################
     ####           protected methods and variables                  ####
+    
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
     # Keep track of the type of the diff
     private common difftypeName
@@ -130,15 +133,22 @@ class ::tycho::EditDiff {
     # Keep track where we can insert in the text. This is added for
     # concurency with seeFragment during insertion.
     public variable textLineCount 1
+    
+    ####################################################################
+    ####                     private methods                        ####
+
+    # Initialize the toolbar
+    private method initializeToolbar {toolbar}
 }
 
 ######################################################################
 #### -filename1 configuration
 #
 configbody ::tycho::EditDiff::filename1 {
-    if {[toolbar exists filename1]} {
-        $this toolbar clear filename1
-        $this toolbar insert filename1 $itk_option(-filename1)
+    # toolbar exists will return {} if there is no toolbar
+    if {[toolbar exists filename1] == 1} {
+        toolbar clear filename1
+        toolbar insert filename1 $itk_option(-filename1)
     }
 }
 
@@ -146,9 +156,10 @@ configbody ::tycho::EditDiff::filename1 {
 #### -filename2 configuration
 #
 configbody ::tycho::EditDiff::filename2 {
-    if {[toolbar exists filename2]} {
-        $this toolbar clear filename2
-        $this toolbar insert filename2 $itk_option(-filename2)
+    # toolbar exists will return {} if there is no toolbar
+    if {[toolbar exists filename2] == 1} {
+        toolbar clear filename2
+        toolbar insert filename2 $itk_option(-filename2)
     }
 }
 
@@ -161,69 +172,11 @@ body ::tycho::EditDiff::constructor {args} {
     set linecolor2 [list red {}]
 
     set execDiff ""
-    configure -readonly 1
-
-    toolbar button prevdiff \
-            -text {Prev Difference} \
-            -description {Jump to the previous difference} \
-            -command "$this jumpDifference -1"
-
-    toolbar button nextdiff \
-            -text {Next Difference} \
-            -description {Jump to the next difference} \
-            -command "$this jumpDifference 1"
-
-    toolbar button compare \
-            -text Compare \
-            -description {Read in both files, and start parsing} \
-            -command "$this compareFile"
-
-    toolbar entry filename1 "File 1 name: " {} "$this entryCommand 1 " \
-            -foreground [lindex $linecolor1 0] \
-            -command "$this insertSelectedFileName 1"
-           
-    toolbar entry filename2 "File 2 name: " {} "$this entryCommand 2 " \
-            -foreground [lindex $linecolor2 0] \
-            -command "$this insertSelectedFileName 2"
 
     eval itk_initialize $args
 
-    if {$myMenubar != {}} {
-        $myMenubar disable {Compare To...}
-        $myMenubar disable {Undo/Redo}
-        $myMenubar disable {Cut}
-        $myMenubar disable {Paste}
-        $myMenubar disable "Font..."
-        # Delete all in Edit
-        $myMenubar delete "Undo/Redo"
-        $myMenubar delete "Cut"
-        $myMenubar delete "Paste"
-        # Delete all the formats
-        $myMenubar delete "Fill Region"
-        $myMenubar delete "Right Fill Column"
-        $myMenubar delete "Set Fill Prefix"
-        $myMenubar delete "Lower Case"
-        $myMenubar delete "Upper Case"
-        $myMenubar delete "Capitalize"
-
-        $myMenubar delete "Insert..."
-        $myMenubar delete "Save"
-        $myMenubar delete "SaveAs..."
-        $myMenubar delete "Evaluate"
-        $myMenubar delete "Revision Control..."
-        $myMenubar delete "Toggle Read-Only"
-    }
-
     # Center the screen.
     bind $itk_component(text) <Control-L> "$this compareFile"
-
-    if {$itk_option(-filename1) != {}} {
-        insertFileName 1 $itk_option(-filename1)
-    }
-    if {$itk_option(-filename2) != {}} {
-        insertFileName 2 $itk_option(-filename2)
-    }
-    displayer configure -title "File Differ"
 }
 
 
@@ -572,3 +525,90 @@ body ::tycho::EditDiff::hyperJump {filename line} {
 ####################################################################
 ####                    protected methods                       ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditDiff::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    configure -readonly 1
+
+    # Insert items in the tool bar. This is faster in a seperate
+    # method.
+    if {$toolbar != {}} {
+        # We have to qualify the call to this supposed-ly private
+        # method because Itcl (2.2) has virtual private methods!
+        ::tycho::EditDiff::initializeToolbar $toolbar
+    }
+
+    if {$menubar != {}} {
+        $menubar disable {Compare To...}
+        $menubar disable {Undo/Redo}
+        $menubar disable {Cut}
+        $menubar disable {Paste}
+        $menubar disable "Font..."
+        # Delete all in Edit
+        $menubar delete "Undo/Redo"
+        $menubar delete "Cut"
+        $menubar delete "Paste"
+        # Delete all the formats
+        $menubar delete "Fill Region"
+        $menubar delete "Right Fill Column"
+        $menubar delete "Set Fill Prefix"
+        $menubar delete "Lower Case"
+        $menubar delete "Upper Case"
+        $menubar delete "Capitalize"
+
+        $menubar delete "Insert..."
+        $menubar delete "Save"
+        $menubar delete "SaveAs..."
+        $menubar delete "Evaluate"
+        $menubar delete "Revision Control..."
+        $menubar delete "Toggle Read-Only"
+    }
+
+    if {$itk_option(-filename1) != {}} {
+        insertFileName 1 $itk_option(-filename1)
+    }
+    if {$itk_option(-filename2) != {}} {
+        insertFileName 2 $itk_option(-filename2)
+    }
+    displayer configure -title "File Differ"
+}
+
+#####################################################################
+#### initializeToolbar
+# Initialize the tool bar. Adds entries specific to this class.
+#
+body ::tycho::EditDiff::initializeToolbar {toolbar} {
+
+    $toolbar button prevdiff \
+            -text {Prev Difference} \
+            -description {Jump to the previous difference} \
+            -command "$this jumpDifference -1"
+
+    $toolbar button nextdiff \
+            -text {Next Difference} \
+            -description {Jump to the next difference} \
+            -command "$this jumpDifference 1"
+
+    $toolbar button compare \
+            -text Compare \
+            -description {Read in both files, and start parsing} \
+            -command "$this compareFile"
+
+    $toolbar entry filename1 "File 1 name: " {} "$this entryCommand 1 " \
+            -foreground [lindex $linecolor1 0] \
+            -command "$this insertSelectedFileName 1"
+           
+    $toolbar entry filename2 "File 2 name: " {} "$this entryCommand 2 " \
+            -foreground [lindex $linecolor2 0] \
+            -command "$this insertSelectedFileName 2"
+}

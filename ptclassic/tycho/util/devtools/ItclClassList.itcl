@@ -73,6 +73,12 @@ class ::tycho::ItclClassList {
     method updateClassDiagram {}
 
     ###################################################################
+    ####                  protected methods                        ####
+
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+
+    ###################################################################
     ####                   private methods                         ####
 
     # Insert files into the classListFile.
@@ -89,46 +95,11 @@ class ::tycho::ItclClassList {
 #### constructor
 #
 body ::tycho::ItclClassList::constructor {args} {
-    toolbar button includeTychoClasses  \
-            -text {Include Tycho} \
-            -command "$this includeTychoClasses" \
-            -description {Insert all Tycho classes into the \
-                   current file.}
-
-    toolbar button includeDirectoryClasses \
-            -text {Include Directory} \
-            -command "$this includeDirectoryClasses" \
-            -description {Choose a file in a directory, and then \
-                insert all the *.itcl and *.itk files \
-                into the current file.}
-
-    toolbar button clearClassList \
-            -text Clear \
-            -command "$this deleteRange 0.0 end" \
-            -description {Clear the contents of the current file}
-
-    toolbar button browseClassDiagram \
-            -text {Diagram File Name} \
-            -command "$this browseClassDiagram" \
-            -description {Choose a filename for the class \
-                diagram output to go into.}
-
-    toolbar button updateClassDiagram \
-            -text {Update Class Diagram}\
-            -command "$this updateClassDiagram" \
-            -description {Generate a class diagram from the files \
-                listed in the current file.}
-
     eval itk_initialize $args
 
     if {$classDiagramFile == "classDiagram.dag"} {
 	set classDiagramFile [file join [file dirname $file] classDiagram.dag]
     }
-
-    focusin
-
-    # Add myself to the list of open files. 
-    windowMenuAddAll $file
 }
 
     ###################################################################
@@ -242,7 +213,59 @@ body ::tycho::ItclClassList::updateClassDiagram {} {
     }
     return [::tycho::File::openContext $classDiagramFile]
 }
+    ###################################################################
+    ###################################################################
+    ####                    protected methods                      ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::ItclClassList::initialize \
+        {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    if {$toolbar != {}} {
+        $toolbar button includeTychoClasses  \
+                -text {Include Tycho} \
+                -command "$this includeTychoClasses" \
+                -description {Insert all Tycho classes into the \
+                current file.}
+        
+        $toolbar button includeDirectoryClasses \
+                -text {Include Directory} \
+                -command "$this includeDirectoryClasses" \
+                -description {Choose a file in a directory, and then \
+                insert all the *.itcl and *.itk files \
+                into the current file.}
+        
+        $toolbar button clearClassList \
+                -text Clear \
+                -command "$this deleteRange 0.0 end" \
+                -description {Clear the contents of the current file}
+        
+        $toolbar button browseClassDiagram \
+                -text {Diagram File Name} \
+                -command "$this browseClassDiagram" \
+                -description {Choose a filename for the class \
+                diagram output to go into.}
+        
+        $toolbar button updateClassDiagram \
+                -text {Update Class Diagram}\
+                -command "$this updateClassDiagram" \
+                -description {Generate a class diagram from the files \
+                listed in the current file.}
+    }
+
+    # Add myself to the list of open files. 
+    windowMenuAddAll $file
+}
     ###################################################################
     ###################################################################
     ####                      private methods                      ####

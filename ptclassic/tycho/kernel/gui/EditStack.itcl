@@ -55,6 +55,9 @@ class ::tycho::EditStack {
 
     ##########################################################################
     ####                       protected methods                          ####
+   
+    # Initialize the menu/status/tool bars
+    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
     # Access the "stacktrace" preferences
     protected method preference {mode args}
@@ -66,24 +69,6 @@ body ::tycho::EditStack::constructor {args} {
 
     eval itk_initialize $args
 
-    displayer configure -title "Stack Trace"
-
-    markUnmodified
-
-    # Remove irrelevant capabilities from the menus.
-    menubar delete  "Switch File..."
-    menubar delete  "Insert..."
-    menubar delete  "Save"
-    menubar delete  "Reload"
-    menubar delete  "Revision Control..."
-
-    menubar delete "Undo/Redo"
-    menubar delete "Cut"
-    menubar delete "Paste"
-
-    menubar delete "Fill Region"
-    menubar delete "Right Fill Column"
-    menubar delete "Set Fill Prefix"
     
     # The default fill prefix works for Tcl and shell scripts.
     set fillPrefix "#"
@@ -211,6 +196,40 @@ body ::tycho::EditStack::parseNow {start stop} {
 #####################################################################
 ####                     protected methods                       ####
 
+#####################################################################
+#### initialize
+# Initialize the menu, status, and toolbars associated with this widget.
+# The root (view) class sets up the menubar methods in it's initialize
+# via the chain command, which should always be the first command in
+# this method.
+# 
+# This method is called by it's displayer when attachView is called (usually
+# in ::tycho::view
+#
+body ::tycho::EditStack::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+    chain $menubar $statusbar $toolbar
+
+    displayer configure -title "Stack Trace"
+
+    markUnmodified
+
+    if {$menubar != {}} {
+        # Remove irrelevant capabilities from the menus.
+        $menubar delete  "Switch File..."
+        $menubar delete  "Insert..."
+        $menubar delete  "Save"
+        $menubar delete  "Reload"
+        $menubar delete  "Revision Control..."
+        
+        $menubar delete "Undo/Redo"
+        $menubar delete "Cut"
+        $menubar delete "Paste"
+        
+        $menubar delete "Fill Region"
+        $menubar delete "Right Fill Column"
+        $menubar delete "Set Fill Prefix"
+    }
+}
 
 #####################################################################
 #### preference
