@@ -106,7 +106,7 @@ TyConsole::TyConsole(int argc, char **argv) {
     // I removed this to allow for killing of Tycho with ^C. - jking -
   }
   Tcl_SetVar(tyInterp, "tcl_interactive",
-	     (tty) ? "1" : "0", TCL_GLOBAL_ONLY);
+	     (char *) ((tty) ? "1" : "0"), TCL_GLOBAL_ONLY);
 
   // Set version/binary info variables
   SetVersionInfo(tyInterp, argv[0]);
