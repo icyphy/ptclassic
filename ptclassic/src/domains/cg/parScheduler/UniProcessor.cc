@@ -328,7 +328,10 @@ int UniProcessor :: getStartTime() {
 		//    Generate code
 		/////////////////////////////////////
 
-StringList UniProcessor :: generateCode() {
+void UniProcessor :: prepareCodeGen() {
+	// galaxy initialize
+	subGal->initialize();
+
 	// convert a processor schedule to a SDF schedule
 	// for child target.
 	targetPtr->setGalaxy(*subGal);
@@ -336,10 +339,6 @@ StringList UniProcessor :: generateCode() {
 
 	// simulate the schedule
 	simRunSchedule();
-
-	// now, call the child target routines to generate code
-	// as well as memory assignment
-	return targetPtr->generateCode();
 }
 	
 void UniProcessor :: convertSchedule() {

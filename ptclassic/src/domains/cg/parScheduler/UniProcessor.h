@@ -153,8 +153,15 @@ public:
 	NodeSchedule* getNodeSchedule(ParNode* n);
 	NodeSchedule* getCurSchedule() { return curSchedule; }
 
+	// prepare code-generation: galaxy initialization,
+	// copy schedule and simulate the schedule.
+	void prepareCodeGen();
+
 	// generate code
-	StringList generateCode();
+	StringList generateCode() {
+		StringList foo = targetPtr->generateCode();
+		return foo;
+	}
 
 
 protected:
