@@ -41,7 +41,7 @@ It outputs lines of comments, instead of code.
 // RateChange star
 	}
 	go {
-		gencode(block);
+		addCode(block);
 	}
 }
 

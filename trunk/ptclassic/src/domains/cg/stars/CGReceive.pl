@@ -38,7 +38,7 @@ It outputs lines of comments, instead of code.
 // CGReceive Block
 	}
 	go {
-		gencode(block);
+		addCode(block);
 		StringList out;
 		out += "// ";
 		out += "From processor ";
