@@ -97,13 +97,13 @@ extern int warnIfNotConnected (Galaxy&);
 	////////////////////////////
 
 void DynDFScheduler :: setup () {
-	if (!galaxy()) {
-		Error::abortRun("DynDFScheduler: no galaxy!");
-		return;
+
+	if (! galaxy()) {
+	    Error::abortRun("DynDFScheduler has no galaxy defined");
+	    return;
 	}
+
 	clearHalt();
-
-
 	numFiring = 0;
 
 	// check connectivity
@@ -113,10 +113,9 @@ void DynDFScheduler :: setup () {
 
 	if (!checkBlocks()) return;
 
-	galaxy()->initialize();
-
 	// If an error occured while initializing the galaxy,
 	// then it is not safe to continue.
+	galaxy()->initialize();
 	if (SimControl::haltRequested()) return;
 
 	// The galaxy may have changed after galaxy()->initialize() due
@@ -135,6 +134,8 @@ void DynDFScheduler :: setup () {
 }
 
 int DynDFScheduler::checkBlocks() {
+	if (! galaxy()) return FALSE;
+
 	DFGalStarIter nextStar(*galaxy());
 	// star initialize.  Stars must be derived from DataFlowStar.
 	// (for example, SDF, DDF).  Also compute the size.
@@ -155,6 +156,8 @@ int DynDFScheduler::checkBlocks() {
 }
 
 void DynDFScheduler::initStructures() {
+	if (! galaxy()) return;
+
 	GalStarIter nextStar(*galaxy());
 	// initialize lists of sourceBlocks and nonSourceBlocks
 	sourceBlocks.initialize();
@@ -194,13 +197,16 @@ void DynDFScheduler :: reportArcOverflow(PortHole* p, int maxToken) {
 int
 DynDFScheduler :: run () {
 
-	if (!galaxy()) {
-	    Error::abortRun("No galaxy to run");
+	// Process pending events and check for halt
+	// If the user hit the DISMISS button in the run control panel,
+	// then the universe referenced by galaxy() will return a null pointer
+	int haltFlag = SimControl::haltRequested();
+	if (! galaxy()) {
+	    Error::abortRun("DynDFScheduler has no galaxy to run");
 	    return FALSE;
-        }
-
-	if (haltRequested()) {
-	    Error::abortRun(*galaxy(), ": Can't continue after run-time error");
+	}
+	if (haltFlag) {
+	    Error::abortRun(*galaxy(), "Cannot continue after run-time error");
 	    return FALSE;
 	}
 
