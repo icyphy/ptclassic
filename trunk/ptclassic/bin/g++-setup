@@ -30,15 +30,15 @@ endif
 # These variables are needed by the compiler
 
 
-setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.27/
+setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.29/
 
 # C_INCLUDE_PATH must be set or CGC TclTk demos will fail to compile
-setenv C_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.27/include
+setenv C_INCLUDE_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.29/include
 
 # Needed to compile c++ programs so we can find stream.h
-setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/common/include/g++:$PTOLEMY/gnu/$PTARCH/$PTARCH/include:$PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.27/include
+setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/common/include/g++:$PTOLEMY/gnu/$PTARCH/$PTARCH/include:$PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.29/include
 
-#setenv COMPILER_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.27/
+#setenv COMPILER_PATH $PTOLEMY/gnu/$PTARCH/lib/gcc-lib/$PTARCH/egcs-2.90.29/
 #setenv GCC_INCLUDE_DIR $PTOLEMY/gnu/$PTARCH/lib/gcc-lib
 
 # HPUX9.x requires that $PTOLEMY/gnu/$PTARCH/lib
