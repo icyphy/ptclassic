@@ -13,13 +13,17 @@ When a new interval is added to the list, it is merged to a predefined
 interval if possible or added as a new interval.  Each interval is
 represented by the origin and the length of the interval.
 
+The Interval objects in an IntervalList are always sorted in increasing
+order, and there are always gaps between intervals.
+
 **************************************************************************/
 #ifndef _IntervalList_h
 #define _IntervalList_h 1
 
 #include "type.h"
-#include "StringList.h"
  
+class istream;
+class ostream;
 
 	//////////////////////////////////////
 	// class Interval
@@ -27,54 +31,61 @@ represented by the origin and the length of the interval.
 
 class Interval {
 	friend class IntervalList;
-	friend class MemoryList;
-	unsigned origin, length;
+	friend class IntervalListIter;
+	friend class CIntervalListIter;
+
+	// i/o functions
+	friend istream& operator>>(istream&,Interval&);
+	friend ostream& operator<<(ostream&,const Interval&);
+	friend istream& operator>>(istream&,IntervalList&);
+	friend ostream& operator<<(ostream&,const IntervalList&);
+
+
+	// implementation
+	unsigned pOrigin, pLength;
 	Interval* next;
-	Interval(unsigned o=0, unsigned l=0, Interval* nxt = NULL) :
-		origin(o), length(l), next(nxt) {};
-	Interval(Interval& i1) : origin(i1.origin), length(i1.length), 
-		next(NULL) {};
+public:
+	Interval(unsigned o=0, unsigned l=0, Interval* nxt = 0) :
+		pOrigin(o), pLength(l), next(nxt) {};
+	Interval(const Interval& i1) : pOrigin(i1.pOrigin),
+		pLength(i1.pLength), next(0) {};
+	Interval(const Interval& i1,Interval* nxt) :
+		pOrigin(i1.pOrigin), pLength(i1.pLength), next(nxt) {};
+
+	unsigned origin() const { return pOrigin;}
+	unsigned length() const { return pLength;}
 
 	// isAfter returns true if current interval begins after
 	// interval i1.
-	int isAfter(Interval i1);
-
-	// isBefore returns true if current interval comes before
-	// interval i1.
-//	int isBefore(Interval i1);
+	int isAfter(const Interval &i1) const;
 
 	// endsBefore returns true if current interval ends before
-	// the origin of interval i1.
-	int endsBefore(Interval i1);
+	// the pOrigin of interval i1.
+	int endsBefore(const Interval &i1) const;
 
-	// extendsBefore returns true if the current interval
-	// can be be 'fused' to the beginning of interval i1.
-	// Two intervals can be fused together only if the intervals
-	// are right next to each other or they intersect.
-//	int extendsBefore(Interval i1);
+	// completelyBefore returns true if endsBefore is true and there
+	// is space between the intervals (they cannot be merged)
+	int completelyBefore(const Interval &i1) const;
 
-	// extendsAfter returns true if the current interval
-	// can be 'fused' to the end of interval i1.
-//	int extendsAfter(Interval i1);
+	// mergeableWith returns true if two intervals overlap or are
+	// adjacent, so that their union is also an interval.
+	int mergeableWith(const Interval& i1) const;
 
-	// contains returns true if the current interval contains i1.
-//	int contains(Interval);
-	
-	// doesIntersect returns true if the current interval intersects i1.
-//	int doesIntersect(Interval);
+	// intersects returns true if two intervals have a non-null
+	// intersection.
+	int intersects(const Interval& i1) const;
 
-	// return the end location of the interval + 1.
-	const unsigned end();
+	// merge alters the interval to the result of merging it with i1.
+	void merge(const Interval& i1);
 
-	// return pointer to next interval, if no more intervals return NULL
-	Interval* operator++ ();
+	// return the end location of the interval.
+	unsigned end() const;
 
-	Interval operator=(Interval&);
-	Interval operator&=(Interval&);
-	friend Interval operator&(Interval&, Interval&);
-
-	~Interval();
+	Interval& operator=(const Interval&);
+	Interval& operator&=(const Interval&);
 };
+
+Interval operator&(const Interval&, const Interval&);
 
 	//////////////////////////////////////
 	// class IntervalList
@@ -82,6 +93,12 @@ class Interval {
 
 class IntervalList
 {
+	friend class IntervalListIter;
+	friend class CIntervalListIter;
+
+	// I/O functions
+	friend istream& operator>>(istream&,IntervalList&);
+	friend ostream& operator<<(ostream&,const IntervalList&);
 
 	// Remove all Intervals.
 	void zero();
@@ -93,9 +110,9 @@ protected:
 	Interval* head;
 	
 public:
- 	IntervalList(unsigned origin,unsigned length) {
-		INC_LOG_NEW; head = new Interval(origin,length);
-	}
+	IntervalList() : head(0) {}
+
+ 	IntervalList(unsigned origin,unsigned length);
 
 	// copy constructor
 	IntervalList(const IntervalList& src) { copy(src);}
@@ -110,20 +127,58 @@ public:
 	// destructor
 	~IntervalList() { zero();}
 
-	// Take the union of two interval lists.
-	friend IntervalList operator|(IntervalList&,IntervalList&);
+	// contains: return 0 if no part of i1 is in the IntervalList,
+	// 1 if i1 is completely contained in the IntervalList, and
+	// -1 if i1 is partially contained (has a non-null intersection)
+	int contains(const Interval& i1) const;
 
 	// Add a new interval to the interval list.
-	IntervalList& operator|=(Interval i1);
+	IntervalList& operator|=(const Interval& i1);
 
 	// Set current IntervalList to the union of itself and src 
-	IntervalList& operator|=(IntervalList& src);
+	IntervalList& operator|=(const IntervalList& src);
 
-	// print (debug)
-	StringList print();
+	// intersection (nondestructive)
+	IntervalList operator&(const IntervalList&) const;
+
 };
 
-#define MAX(A, B)	((A) > (B) ? (A) : (B))
-#define MIN(A, B)	((A) < (B) ? (A) : (B))
+// Take the union of two interval lists.
+inline IntervalList operator|(const IntervalList& a,const IntervalList& b) {
+	IntervalList tmp(a);
+	return tmp |= b;
+}
+
+class IntervalListIter {
+private:
+	IntervalList& ref;
+	Interval* p;
+public:
+	IntervalListIter(IntervalList& list) : ref(list),p(list.head) {}
+	void reset() { p = ref.head;}
+	Interval* next() {
+		Interval* tmp = p;
+		if (p) p = p->next;
+		return tmp;
+	}
+	Interval* operator++() { return next();}
+};
+
+class CIntervalListIter {
+private:
+	const IntervalList& ref;
+	Interval* p;
+public:
+	CIntervalListIter(const IntervalList& list)
+		: ref(list),p(list.head) {}
+	void reset() { p = ref.head;}
+	const Interval* next() {
+		const Interval* tmp = p;
+		if (p) p = p->next;
+		return tmp;
+	}
+	const Interval* operator++() { return next();}
+};
+
 
 #endif
