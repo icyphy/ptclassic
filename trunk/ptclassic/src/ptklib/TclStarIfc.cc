@@ -301,11 +301,15 @@ void TclStarIfc::setAllNewInputFlags (int flag) {
 
 // Load the local buffer outputValues[] with values supplied by Tcl
 void TclStarIfc::setOneOutput (int outNum, double outValue) {
-	if (outNum >= outputArraySize) {
+	if ( outNum >= outputArraySize ) {
 	    Error::warn(*myStar, "Too many outputs supplied by Tcl");
+	}
+	else if ( outNum < 0 ) {
+	    Error::warn(*myStar, "Negative output port number");
 	}
 	else {
 	    outputValues[outNum] = outValue;
+	    outputNewFlags[outNum] = TRUE;
 	}
 }
 
