@@ -50,6 +50,17 @@ will be delayed by more than the nominal service time.
 		numberInService = 0;
 		tokensInService.initialize();
 	}
+	wrapup {
+		// remove any remaining tokens.
+		while (numberInService > 0) {
+			token* t = (token*)tokensInService.getAndRemove();
+			LOG_DEL; delete t;
+			numberInService--;
+		}
+	}
+	destructor {
+		wrapup();
+	}
 	go {
 	   token* t;
 
