@@ -62,7 +62,6 @@ PL_SRCS = \
 EXTRA_SRCS = $(PL_SRCS)
 
 SRCS = \
- TkSchedTarget.cc \
  StructTarget.cc \
  ArchTarget.cc \
  SynthTarget.cc \
