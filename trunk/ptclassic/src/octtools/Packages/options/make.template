@@ -1,3 +1,4 @@
+# Octtools options - option parsing and usage message package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -47,7 +48,7 @@ LIBCSRCS	= dfltoptions.c \
 		dfltvov.c \
 		options.c
 
-MISCSRCS	= options-test.c
+OTHERSRCS	= options-test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -57,9 +58,25 @@ LIB = 		liboptions.$(LIBSUFFIX)
 
 EXPHDR =	options.h
 
+DRIVER =	options-test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	options-test.c
+
+DRVRLIBS =	-lport -lerrtrap -luprintf
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	-$(DRIVER) -j > sample.test 2>&1; true
+	diff sample.test $(VPATH)/options-test.usage
+
+# Don't include dfltoptions.o
+#options-test: options-test.o dflttap.o dfltvov.o options.o 
+#	$(CC) -g $^ -o $@ -L$(OCTLIBDIR) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

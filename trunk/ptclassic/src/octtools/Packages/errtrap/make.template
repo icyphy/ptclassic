@@ -1,3 +1,4 @@
+# Octtools errtrap - error handling package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -42,8 +43,8 @@ include $(CONFIG)
 
 HDRS		= errtrap.h
 
-LIBCSRCS	= errtrap-test.c \
-		errtrap.c
+LIBCSRCS	= errtrap.c
+OTHERSRCS	= errtrap-test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +54,20 @@ LIB = 		liberrtrap.$(LIBSUFFIX)
 
 EXPHDR =	errtrap.h
 
+DRIVER =	errtrap_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	errtrap-test.o
+
+DRVRLIBS =	-lport -luprintf
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) 
+	$(DRIVER) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

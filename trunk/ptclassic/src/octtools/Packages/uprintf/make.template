@@ -1,6 +1,7 @@
+# Octtools uprintf - portable scanf style parser
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -44,7 +45,7 @@ HDRS		= uprintf.h
 
 LIBCSRCS	= uprintf.c
 
-MISCSRCS	= utest.c
+OTHERSRCS	= utest.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -54,9 +55,22 @@ LIB = 		libuprintf.$(LIBSUFFIX)
 
 EXPHDR =	uprintf.h
 
+DRIVER =	uprintf_test
+
+KRUFT =		$(DRIVER) utest.out
+
+DRVROBJ =	utest.o
+
+DRVRLIBS =	-lport
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	rm -f utest.out
+	$(DRIVER) > utest.out 2>&1
+	diff utest.out $(VPATH)/utest.test	
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

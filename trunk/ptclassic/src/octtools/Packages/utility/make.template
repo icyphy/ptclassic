@@ -1,6 +1,7 @@
+# Octtools utility - Provides commonly used functions and macros
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,8 +53,9 @@ LIBCSRCS	= cpu_time.c \
 		setenv.c \
 		strsav.c \
 		texpand.c \
-		tmpfile.c \
-		uttest.c
+		tmpfile.c
+
+OTHERSRCS =	uttest.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -63,9 +65,20 @@ LIB = 		libutility.$(LIBSUFFIX)
 
 EXPHDR =	utility.h
 
+DRIVER = 	utility_test
+
+KRUFT = 	$(DRIVER)
+
+DRVROBJ =	uttest.o
+
+DRVRLIBS =	-ltr -lport -lerrtrap -luprintf -lst -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	csh -c 'setenv OCTTOOLS-TRANSLATIONS "first-translation:/first,second-translation:/second,third-translation:/third"; $(DRIVER)'
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

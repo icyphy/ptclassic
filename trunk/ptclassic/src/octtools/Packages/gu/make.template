@@ -1,3 +1,4 @@
+# Octtools gu - Geometric Updates for Oct
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -42,8 +43,9 @@ include $(CONFIG)
 
 HDRS		= gu.h
 
-LIBCSRCS	= driver.c \
-		gu.c
+LIBCSRCS	= gu.c
+
+OTHERSRCS	= driver.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -53,9 +55,21 @@ LIB = 		libgu.$(LIBSUFFIX)
 
 EXPHDR =	gu.h
 
+DRIVER =	gu_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ = 	driver.o
+
+DRVRLIBS =	-loh -lvov -lgu -loct -ltr -lkd -lutility -lport -lerrtrap -luprintf -lst -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests::	$(DRIVER)
+	$(DRIVER) $(VPATH)/gu_t_cell:physical
+	$(DRIVER) $(VPATH)/gu_inst:physical
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

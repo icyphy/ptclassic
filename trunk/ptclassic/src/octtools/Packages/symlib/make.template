@@ -1,6 +1,7 @@
+# Octtools symlib - Oct Symbolic Policy Package
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -52,8 +53,9 @@ LIBCSRCS	= error.c \
 		property.c \
 		putConst.c \
 		route.c \
-		segment.c \
-		test.c
+		segment.c
+
+OTHERSRCS = 	test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -63,9 +65,24 @@ LIB = 		libsymlib.$(LIBSUFFIX)
 
 EXPHDR =	symlib.h
 
+DRIVER =	symlib_test
+
+KRUFT =		$(DRIVER) 
+
+DRVRDIR =	bob
+
+DRVRLIBS =	-lregion -loh -ltap -lgu -loptions -loct -ltr -lkd -lutility -lport -lerrtrap -luprintf -lst -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests::	$(DRIVER) $(DRVRDIR) 
+	@echo "These tests use the directory 'bob', but we can't get them "
+	@echo " to work, so we use the Ptolemy directory"
+	#$(DRIVER) | cmp -s - sample.out
+	csh -c "setenv OCTTOOLS $(PTOLEMY); $(DRIVER) -c -p ptolemy schematic" > test.out 2>&1
+	diff $(VPATH)/test.old test.out 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -1,3 +1,4 @@
+# Octtools port - Insulate tool/package from OS/Machine dependencies
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1994 The Regents of the University of California.
@@ -67,8 +68,9 @@ LIBCSRCS	= dummy.c \
 		strrchr.c \
 		strspn.c \
 		strstr.c \
-		strtok.c \
-		tester.c
+		strtok.c
+
+OTHERSRCS =	tester.c 	
 
 SRCS =		$(LIBCSRCS)
 
@@ -77,6 +79,14 @@ OBJS =		$(LIBCSRCS:.c=.o)
 LIB = 		libport.$(LIBSUFFIX)
 
 EXPHDR =	port.h
+
+DRIVER = 	port_test
+
+KRUFT = 	$(DRIVER) 
+
+DRVROBJ =	tester.o
+
+DRVRLIBS =	
 
 # pigilib needs the octtools copyright.h and ansi.h
 header:: $(OCTTOOLS)/include/copyright.h $(OCTTOOLS)/include/ansi.h \
@@ -105,6 +115,9 @@ $(OCTTOOLS)/include/ansi.h: ansi.h
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests::	$(DRIVER) 
+	-$(DRIVER) 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

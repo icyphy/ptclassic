@@ -1,6 +1,7 @@
+# Octtools harpoon - interface between fang and oct
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -47,8 +48,9 @@ LIBCSRCS	= error.c \
 		fang2oct.c \
 		listutil.c \
 		oct2fang.c \
-		perim.c \
-		testperim.c
+		perim.c
+
+OTHERSRCS =	testperim.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -58,9 +60,23 @@ LIB = 		libharpoon.$(LIBSUFFIX)
 
 EXPHDR =	harpoon.h
 
+DRIVER =	harpoon_test
+
+KRUFT =		$(DRIVER) 
+
+DRVROBJ =	testperim.o
+
+DRVRLIBS =	-lfang -loh -lvov -loct -ltr -lutility -lport -lerrtrap -luprintf -lst -lm
+
+DRVRDIR =	sample
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)  sample
+	$(DRIVER)  40 sample:physical > /dev/null
+	cmp -s sample/single/contents* sample/single/good-contents*
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

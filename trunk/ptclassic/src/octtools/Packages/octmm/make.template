@@ -1,3 +1,4 @@
+# Octtools octmm - oct mask modification tool/package
 # Version Identification:
 # $Id$
 # Copyright (c) 1990-1993 The Regents of the University of California.
@@ -49,10 +50,11 @@ HDRS		= hackterm.h \
 LIBCSRCS	= flat.c \
 		flatten.c \
 		hackterm.c \
-		main.c \
 		process.c \
 		squares.c \
 		termlabs.c
+
+OTHERSRCS =	main.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -62,9 +64,30 @@ LIB = 		liboctmm.$(LIBSUFFIX)
 
 EXPHDR =	octmm.h
 
+DRIVER =	octmm_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	main.o lex.o yacc.o
+
+DRVRLIBS =	-lharpoon -lfang -loh -ltap -lvov -loptions -loct -ltr -lst -lport -lutility -lerrtrap -luprintf -lm
+
+DRVRDIR = 	cycle
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER) cycle
+	@echo "This first test fails, I don't know why"
+	#($(DRIVER) -f to-boxes -o:boxes cycle:physical)
+	($(DRIVER) -o:boxes cycle:physical)
+	(cmp -s cycle/boxes/contents* cycle/good-boxes/contents*)
+	($(DRIVER) -s 120 -o:scale cycle:physical)
+	(cmp -s cycle/scale/contents* cycle/good-scale/contents*)
+
+lex.o: lex.c
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(C_INCL) -I$(VPATH) $^ -c 
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

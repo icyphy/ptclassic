@@ -1,6 +1,7 @@
+# Octtools nle - Octtools Netlist Flattening Package
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1993 The Regents of the University of California.
+# Copyright (c) 1990-1994 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -47,8 +48,9 @@ LIBCSRCS	= nleErrors.c \
 		nleFlat.c \
 		nleInstSubs.c \
 		nleMerge.c \
-		nleMisc.c \
-		test.c
+		nleMisc.c
+
+OTHERSRCS =	test.c
 
 SRCS =		$(LIBCSRCS)
 
@@ -58,9 +60,21 @@ LIB = 		libnle.$(LIBSUFFIX)
 
 EXPHDR =	nle.h
 
+DRIVER =	nle_test
+
+KRUFT =		$(DRIVER)
+
+DRVROBJ =	test.o
+
+DRVRLIBS = 	-lvulcan -lharpoon -lfang -loh -lvov -ltap -loptions -loct -ltr -lst -llist -lport -lutility -lerrtrap -luprintf -lm
+
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
 include $(VEMLIBCONFIG)
+
+tests:: $(DRIVER)
+	@echo "This test fails because we don't have the proper directories"
+	-csh -c "setenv OCTTOOLS /users/ptdesign; nle_test ptolemy"
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
