@@ -47,6 +47,6 @@ CG56STARS = \
  $(CG56)/CG56Tone.o \
  $(CG56)/CG56UpSample.o \
  $(CG56)/CG56WriteFile.o \
- $(CG56)/CG56WriteFileInt.o
+ $(CG56)/CG56WriteFileInt.o \
  $(CG56)/CG56ZeroHld.o
 
