@@ -66,8 +66,18 @@ time estimates will be reported.
 CGCostTarget::CGCostTarget(const char* nam, const char* startype,
 			   const char* desc, const char* assocDomain) :
 CGTarget(nam, startype, desc, assocDomain) {
+    // Override the default value of the destination directory
+    // to be $HOME/PTOLEMY_SYSTEMS/CG/CostTarget
+    destDirName = (const char*) destDirectory;
+    destDirName << "/" << "CostTarget";
+    destDirectory.setInitValue(destDirName);
+
+    // Add a state for the user to list the targets to use to generate
+    // implementation costs
     addState(userTargetList.setState("targets", this, "sim-CG56",
 	"List of targets to use to generate implementation cost information"));
+
+    // Initalization of other data members
     tempBlockList.initialize();
     ptclTarget = 0;
 }
@@ -114,13 +124,15 @@ int CGCostTarget::run() {
 	}
 	else if (userTarget->canComputeMemoryUsage() ||
 		 userTarget->canComputeExecutionTime() ) {
-	    // FIXME: Should we close the target before using it?
+	    // In order to get the domain associated with the userTarget,
+	    // we need to clear the galaxy associated with the userTarget
+	    // so that the domain method returns getAssociatedDomain
 	    userTarget->clearGalaxy();
 	    costInfoForOneTarget(userTarget, userTarget->domain());
 	}
 	else {
-	    Error::warn(userTargetName, " is a valid code generation target, ",
-		"but it cannot generate implementation cost information");
+	    Error::warn(userTargetName, " is a valid code generation target ",
+		"but cannot generate implementation cost information");
 	}
     }
 
@@ -284,11 +296,15 @@ int CGCostTarget::convertGalaxyToPtcl(Galaxy* localGalaxy) {
     if (ptclTarget == 0) {
 	ptclTarget = new SDFPTclTarget("SDFPTclTarget", "PTcl code generator");
     }
+    ptclTarget->clearGalaxy();
+    localGalaxy->setDomain("SDF");
     ptclTarget->setGalaxy(*localGalaxy);
+    ptclTarget->setState("loopScheduler(DEF,CLUST,ACYLOOP)", loopingLevel);
     ptclTarget->initialize();
     ptclTarget->begin();
     ptclTarget->run();
     ptclTarget->wrapup();
+    ptclTarget->clearGalaxy();
     return TRUE;
 }
 
