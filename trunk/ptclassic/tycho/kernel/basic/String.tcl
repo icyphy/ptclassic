@@ -104,3 +104,71 @@ proc stringSubtract {args} {
 	}
     }
 }
+
+
+## wordleft
+#
+# Return the index of the start of the word immediately to the
+# left of the cursor. The behaviour is more useful than "string
+# wordstart" for cursor movement operations.
+#
+proc wordleft {string index} {
+    if { $index <= 0 } {
+	return 0
+    }
+
+    # Move left one character
+    incr index -1
+
+    # Move left until past space
+    while { [string match "\[ \t\n\]" [string index $string $index]] } {
+	if { $index == 0 } {
+	    return 0
+	}
+	incr index -1
+    }
+
+    # Move left until space is reached
+    while { ! [string match "\[ \t\n\]" [string index $string $index]] } {
+	if { $index == 0 } {
+	    return 0
+	}
+	incr index -1
+    }
+    incr index 1
+
+    return $index
+}
+
+
+## wordright
+#
+# Return the index of the start of the word immediately to the
+# rightof the cursor. The behaviour is more useful than "string
+# wordend" for cursor movement operations.
+#
+proc wordright {string index} {
+    set length [string length $string]
+    if { $index > $length } {
+	return $length
+    }
+
+    # Move right until in space
+    while { ! [string match "\[ \t\n\]" [string index $string $index]] } {
+	if { $index == $length } {
+	    return $length
+	}
+	incr index 1
+    }
+
+    # Move right until past space
+    while { [string match "\[ \t\n\]" [string index $string $index]] } {
+	if { $index == $length } {
+	    return $length
+	}
+	incr index 1
+    }
+
+    return $index
+}
+
