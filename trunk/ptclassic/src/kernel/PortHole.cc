@@ -1049,6 +1049,18 @@ Particle& PortHole ::  operator % (int delay)
         return **p;
 }
 
+// Return a StringList describing the current data in the port buffer.
+// The format and contents of this list depends on the domain.
+// NOTE: I would prefer to call this "getData", but this conflicts
+// with getData in EventHorizon.
+StringList PortHole :: getDataAsStrings () {
+    StringList out;
+    for (int i = bufferSize-1; i>=0; i--) {
+        out << ((*this)%i).print();
+    }
+    return out;
+}
+
 MultiPortHole& MultiPortHole :: setPort(const char* s,
                               Block* parent,
                               DataType t) {
