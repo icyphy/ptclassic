@@ -37,18 +37,22 @@ Defines the signal handlers for Tycho.
 
 #include <sys/types.h>
 #include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <signal.h>
 #include <stdlib.h>
+#include <signal.h>
 #include <stdio.h>
 #include <string.h>
 #include <unistd.h>		
-#include <tcl.h>
-#include <ptsignals.h>
+#include "compat.h"
+#include "tcl.h"
+#include "ptsignals.h"
 
 /****************************************************************************/
 
+#ifdef PTHPPA
+typedef void (*SIG_PF)(int);
+#endif
+
+/****************************************************************************/
 
 extern Tcl_Interp *ptkInterp; /* Used so we can call emergencySave. */
 extern "C" char **environ;/* An array of pointers to strings containing the */
@@ -69,7 +73,7 @@ static void DoTychoSave(void);
 /***** This function sets the signal handler function for each of the   *****/
 /***** signals that we want to intercept.                               *****/
 
-extern "C" int 
+int 
 setHandlers(SIG_PF sigHandler)
 {
     if (ptSignal(SIGBUS, sigHandler) != 0) {
@@ -99,12 +103,14 @@ setHandlers(SIG_PF sigHandler)
     if (ptSignal(SIGTRAP, sigHandler) != 0) {
         return 9;
     }
+#ifndef PTHPPA
     if (ptSignal(SIGXCPU, sigHandler) != 0) {
         return 10;
     }
     if (ptSignal(SIGXFSZ, sigHandler) != 0) {
         return 11;
     }
+#endif // PTHPPA
     return 0;
 }
 
@@ -116,7 +122,7 @@ setHandlers(SIG_PF sigHandler)
 /***** know that a fatal error occured, then exit.                      *****/
 
 void 
-signalHandlerRelease(int signo)
+signalHandlerRelease(void)
 {
 
     /*** FIX ME - Should not guess at size of path. ***/

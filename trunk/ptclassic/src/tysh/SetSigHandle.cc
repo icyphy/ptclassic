@@ -63,14 +63,14 @@ setSignalHandlers(void)
     {
         if (setCoreLimitRelease() != 0) 
             returnValue = 1; 
-        if (setHandlers(signalHandlerRelease) != 0)
+        if (setHandlers((SIG_PF) signalHandlerRelease) != 0)
 	    returnValue = 2;
     }
     else
     {
         if (setCoreLimitDebug() != 0) 
             returnValue = 3; 
-        if (setHandlers(signalHandlerDebug) != 0)
+        if (setHandlers((SIG_PF) signalHandlerDebug) != 0)
 	    returnValue = 4;
     }
 
@@ -86,6 +86,8 @@ setSignalHandlers(void)
 int
 setCoreLimitDebug(void) 
 {
+
+#ifndef PTHPPA
 
     struct rlimit coreLimit;
 
@@ -106,6 +108,8 @@ setCoreLimitDebug(void)
         return 1; /* rlimit struct.                                         */
     }
 
+#endif // PTHPPA
+
     return 0;  
   
 }
@@ -119,6 +123,8 @@ setCoreLimitDebug(void)
 int
 setCoreLimitRelease(void) 
 {
+
+#ifndef PTHPPA
 
     struct rlimit coreLimit;
 
@@ -134,6 +140,8 @@ setCoreLimitRelease(void)
     {             /* setrlimit sets system values to the information in     */
         return 1; /* rlimit struct.                                         */
     }
+
+#endif // PTHPPA
 
     return 0;  
   
