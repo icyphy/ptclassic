@@ -105,6 +105,7 @@ DEPulseGen.pl \
 DEQueue.pl \
 DERamp.pl \
 DERanGen.pl \
+DEResetableChannel.pl \
 DERouter.pl \
 DESampler.pl \
 DESeqATMSub.pl \
