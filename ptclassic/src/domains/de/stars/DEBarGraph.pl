@@ -1,7 +1,13 @@
 defstar {
 	name { BarGraph }
 	domain { DE }
-	desc { Generate bar chart plots with the xgraph program. }
+	desc {
+Generate a plot with the xgraph program that uses
+a zero-order hold to interpolate between event values.
+Two points are plotted for each event, one when the event
+first occurs, and the second when the event is supplanted
+by a new event.  A horizontal line then connects the two points.
+	}
 	version { $Id$ }
 	author { Brian Evans and Edward Lee }
 	copyright {
@@ -11,10 +17,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { DE main library }
-	explanation {
-Draws one or more bar graphs with the xgraph function.
-It is assumed that "xgraph" is on your path, or this will not work!!!
-	}
 	seealso {Xgraph XMgraph xgraph Xhistogram }
 	inmulti {
 		name { input }
