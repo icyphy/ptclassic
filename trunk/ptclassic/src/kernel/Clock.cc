@@ -37,6 +37,7 @@ static const char file_id[] = "$RCSfile$";
 
 #include "Clock.h"
 #include "type.h"
+#define NEED_TIMEVAL //compat.h reads this
 #include "compat.h"
 
 #if !defined(PTSOL2_4) && !defined(PTSOL2_5) && !defined(PTHPUX10)
