@@ -5,7 +5,7 @@ A universe that upsamples a signal by a ratio of 5/2.
 .DE
 .IE FIR
 .SV $Revision$ "October 15, 1990"
-.AL "Edward A. Lee"
+.AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This universe generates a sine wave using the
