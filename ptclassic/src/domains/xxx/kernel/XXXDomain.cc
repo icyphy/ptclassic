@@ -1,9 +1,9 @@
 static const char file_id[] = "XXXDomain.cc";
 /**********************************************************************
 Version identification:
-@(#)XDomain.ccP	1.12	6/27/95 (XXXDomain.cc)
+$Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
