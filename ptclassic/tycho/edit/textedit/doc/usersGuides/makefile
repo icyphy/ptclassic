@@ -54,6 +54,7 @@ EXTRA_SRCS =	\
 	EditItclHelp.html \
 	EditMakeHelp.html \
 	EditProgramHelp.html \
+	EditPtclHelp.html \
 	EditPtlangHelp.html \
 	EditTclHelp.html \
 	MathematicaHelp.html \
