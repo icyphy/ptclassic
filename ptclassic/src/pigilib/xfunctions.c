@@ -133,19 +133,19 @@ pr_accum_string()
    Pop up the opening message and version identification
 
 */
-extern char *pigiVersion;
+extern char *gVersion;
 char *pigiFilename = NULL;      /* initialized by pigiMain */
 
 void PrintVersion ()
 {
     char buf[200];
 
-    PrintCon(pigiVersion);
+    PrintCon(gVersion);
     if ( pigiFilename == NULL )
         pigiFilename = "pigiRpc";
     sprintf( buf, "Running %s, %d", pigiFilename, (int)getpid());
     PrintCon(buf);
 
-    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", pigiVersion, "} {",
+    Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "} {",
       pigiFilename, "}", NULL);
 }
