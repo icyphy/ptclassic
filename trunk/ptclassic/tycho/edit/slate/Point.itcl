@@ -67,7 +67,7 @@ class ::tycho::Point {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    proc _aspect {id canvas slate x y args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -91,17 +91,24 @@ class ::tycho::Point {
 #
 # Return the value of an aspect. The only valid aspect is "origin."
 #
-body ::tycho::Point::_aspect {id canvas slate args} {
+body ::tycho::Point::_aspect {id canvas slate x y args} {
+    array set opts {-aspects {}}
+    array set opts $args
+
     set coords [$slate coords $id]
+    if { [llength $coords] != 2 } {
+    	# Not really a point -- get center of bbox instead
+    	set coords [eval ::tycho::Rectangle::aspect [$slate bbox $id] c]
+    }
     set result {}
 
-    if { $args == "" } {
-    	return [list "origin"]
+    if { $opts(-aspects) == "" } {
+    	return "origin"
     } else {
-	foreach aspect $args {
+	foreach aspect $opts(-aspects) {
 	    switch -exact $aspect {
 		"origin" {
-		    eval lappend result $coords
+		    set result $coords
 		}
 		default {
 		    error "Invalid aspect \"$aspect\" of line shape"

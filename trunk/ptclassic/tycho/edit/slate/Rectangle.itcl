@@ -80,7 +80,7 @@ class ::tycho::Rectangle {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    proc _aspect {id canvas slate x y args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -155,11 +155,14 @@ class ::tycho::Rectangle {
 #######################################################################
 #### _aspect aspect
 #
-body ::tycho::Rectangle::_aspect {id canvas slate args} {
-    if { $args == "" } {
+body ::tycho::Rectangle::_aspect {id canvas slate x y args} {
+    array set opts {-aspects {}}
+    array set opts $args
+    
+    if { $opts(-aspects) == "" } {
 	return {c n s e w ne nw se sw}
     } else {
-	return [eval aspect [$slate region $id] $args]
+	return [eval aspect [$slate region $id] $opts(-aspects)]
     }
 }
 
@@ -267,7 +270,11 @@ body ::tycho::Rectangle::_grapple {id canvas slate interactor args} {
 #### _reshape
 #
 body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
-    eval $slate region $id [eval reshape [$slate region $id] $x $y $args]
+    array set opts {-aspects {}}
+    array set opts $args
+
+    eval $slate region $id \
+	    [eval reshape [$slate region $id] $x $y $opts(-aspects)]
 }
 
 #######################################################################
@@ -280,44 +287,51 @@ body ::tycho::Rectangle::_reshape {id canvas slate x y args} {
 # runs, this strategy may no longer be necessary.
 #
 body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
     # Extract options
-    array set opts [concat {-ghost 0 -aspects {}} $args]
+    array set opts {-ghost 0 -aspects {}}
+    array set opts $args
     if { $opts(-aspects) == "" } {
         error "Empty aspect list"
     }
 
     # Remember how I am now.
     ::tycho::assign \
-	    scratch($id.w) \
-	    scratch($id.n) \
-	    scratch($id.e) \
-	    scratch($id.s) [$slate region $id]
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+	    scratch(w.$unique) \
+	    scratch(n.$unique) \
+	    scratch(e.$unique) \
+	    scratch(s.$unique) [$slate region $id]
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # For each direction, see if it is present in the aspects list,
     # and if it is, add it to the drag script
     set script ""
     if { [lsearch $opts(-aspects) "*w"] >= 0 } {
-    	append script {; set scratch($id.w) [expr $scratch($id.w) + $deltaX]}
+    	append script {; set scratch(w.$unique) \
+    		[expr $scratch(w.$unique) + $deltaX]}
     }
     if { [lsearch $opts(-aspects) "*e"] >= 0 } {
-    	append script {; set scratch($id.e) [expr $scratch($id.e) + $deltaX]}
+    	append script {; set scratch(e.$unique) \
+    		[expr $scratch(e.$unique) + $deltaX]}
     }
     if { [lsearch $opts(-aspects) "n*"] >= 0 } {
-    	append script {; set scratch($id.n) [expr $scratch($id.n) + $deltaY]}
+    	append script {; set scratch(n.$unique) \
+    		[expr $scratch(n.$unique) + $deltaY]}
     }
     if { [lsearch $opts(-aspects) "s*"] >= 0 } {
-    	append script {; set scratch($id.s) [expr $scratch($id.s) + $deltaY]}
+    	append script {; set scratch(s.$unique) \
+    		[expr $scratch(s.$unique) + $deltaY]}
     }
-    set scratch($id.script) $script
+    set scratch(script.$unique) $script
 
     # If the -ghost flag is set, draw the ghost box.
     if { $opts(-ghost) } {
 	$slate ghost $id
-	set scratch($id.ghost) 1
+	set scratch(ghost.$unique) 1
     } else {
-	set scratch($id.ghost) 0
+	set scratch(ghost.$unique) 0
     }
 }
 
@@ -325,24 +339,28 @@ body ::tycho::Rectangle::_reshapeclick {id canvas slate x y args} {
 #### _reshapedrag
 #
 body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # Get delta coordinates
-    set deltaX [expr $x - $scratch($id.prevX)]
-    set deltaY [expr $y - $scratch($id.prevY)]
+    set deltaX [expr $x - $scratch(prevX.$unique)]
+    set deltaY [expr $y - $scratch(prevY.$unique)]
 
     # Remember the current coordinates
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
     
     # Evaluate the drag script to update coordinates
-    eval $scratch($id.script)
+    eval $scratch(script.$unique)
 
     # If there's a ghost, reshape it. Otherwise reshape the item.
-    if $scratch($id.ghost) {
-	$slate region ghost \
-		$scratch($id.w) $scratch($id.n) $scratch($id.e) $scratch($id.s)
+    if $scratch(ghost.$unique) {
+	$slate region ghost.$id \
+		$scratch(w.$unique) $scratch(n.$unique) \
+		$scratch(e.$unique) $scratch(s.$unique)
     } else {
 	$slate region $id  \
-		$scratch($id.w) $scratch($id.n) $scratch($id.e) $scratch($id.s)
+		$scratch(w.$unique) $scratch(n.$unique) \
+		$scratch(e.$unique) $scratch(s.$unique)
     }
 }
 
@@ -350,23 +368,25 @@ body ::tycho::Rectangle::_reshapedrag {id canvas slate x y} {
 #### _reshaperelease
 #
 body ::tycho::Rectangle::_reshaperelease {id canvas slate x y} {
+	set unique $id.[$slate uniqueid]
+
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
-    if { $scratch($id.ghost) } {
+    if { $scratch(ghost.$unique) } {
 	# Reshape the item
-	eval $slate coords $id [$slate coords ghost]
-	$canvas delete ghost
+	eval $slate region $id [$slate coords ghost.$id]
+	$canvas delete ghost.$id
     }
 
     # General cleaning up
-    unset scratch($id.ghost)
-    unset scratch($id.prevX)
-    unset scratch($id.prevY)
-    unset scratch($id.w)
-    unset scratch($id.n)
-    unset scratch($id.e)
-    unset scratch($id.s)
-    unset scratch($id.script)
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
+    unset scratch(w.$unique)
+    unset scratch(n.$unique)
+    unset scratch(e.$unique)
+    unset scratch(s.$unique)
+    unset scratch(script.$unique)
 }
 
 ##########################################################################

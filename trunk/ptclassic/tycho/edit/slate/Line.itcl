@@ -69,7 +69,7 @@ class ::tycho::Line {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc _aspect {id canvas slate args}
+    proc _aspect {id canvas slate x y args}
 
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
@@ -111,10 +111,12 @@ class ::tycho::Line {
 #######################################################################
 #### _aspect
 #
-body ::tycho::Line::_aspect {id canvas slate args} {
+body ::tycho::Line::_aspect {id canvas slate x y args} {
+    array set opts {-aspects {}}
+    array set opts $args
     set coords [$slate coords $id]
 
-    if { $args == "" } {
+    if { $opts(-aspects) == "" } {
 	set result {length start end}
 	foreach n [::tycho::linterval 0 \
 		[expr [llength $coords] / 2 - 1]] {
@@ -122,7 +124,7 @@ body ::tycho::Line::_aspect {id canvas slate args} {
 	}
 	return $result
     } else {
-	return [eval aspect [list $coords] $args]
+	return [eval aspect [list $coords] $opts(-aspects)]
     }
 }
 
@@ -130,48 +132,54 @@ body ::tycho::Line::_aspect {id canvas slate args} {
 #### _reshape
 #
 body ::tycho::Line::_reshape {id canvas slate x y args} {
+    array set opts {-aspects {}}
+    array set opts $args
+
     eval $slate coords $id \
-	    [eval reshape [list [$slate coords $id]] $x $y $args]
+	    [eval reshape [list [$slate coords $id]] $x $y $opts(-aspects)]
 }
 
 #######################################################################
 #### _reshapeclick
 #
 body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
+    set unique $id.[$slate uniqueid]
+
     # Extract options
-    array set opts [concat {-ghost 0 -aspects {}} $args]
+    array set opts {-ghost 0 -aspects {}}
+    array set opts $args
     if { $opts(-aspects) == "" } {
         error "Empty aspect list"
     }
 
     # Remember how I am now.
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # Get the coordinates of the line into an efficient-to-process form
     set i 0
-    set scratch($id.indexes) {}
+    set scratch(indexes.$unique) {}
     foreach {a b} [$slate coords $id] {
-	set scratch($id.$i.x) $a
-	set scratch($id.$i.y) $b
-	lappend scratch($id.indexes) $i
+	set scratch(x.$i.$unique) $a
+	set scratch(y.$i.$unique) $b
+	lappend scratch(indexes.$unique) $i
 	incr i
     }
 
     # Figure out the vertices that will be changed
-    set scratch($id.vertices) {}
+    set scratch(vertices.$unique) {}
     foreach aspect $opts(-aspects) {
 	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
 	    "start" {
-		lappend scratch($id.vertices) 0
+		lappend scratch(vertices.$unique) 0
 	    }
 	    "end" {
-		lappend scratch($id.vertices) \
-			[lindex $scratch($id.indexes) end]
+		lappend scratch(vertices.$unique) \
+			[lindex $scratch(indexes.$unique) end]
 	    }
 	    "vertex" {
-		lappend scratch($id.vertices) $n
+		lappend scratch(vertices.$unique) $n
 	    }
 	    "length" {
 		error "Cannot set the \"length\" aspect of a line"
@@ -182,14 +190,14 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 	}
     }
     # Make sure there are no duplicates
-    set scratch($id.vertices) [::tycho::lnub $scratch($id.vertices)]
+    set scratch(vertices.$unique) [::tycho::lnub $scratch(vertices.$unique)]
 
     # If the -ghost flag is set, draw the ghost line.
     if { $opts(-ghost) } {
 	$slate ghost $id
-	set scratch($id.ghost) 1
+	set scratch(ghost.$unique) 1
     } else {
-	set scratch($id.ghost) 0
+	set scratch(ghost.$unique) 0
     }
 }
 
@@ -197,29 +205,31 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 #### _reshapedrag
 #
 body ::tycho::Line::_reshapedrag {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # Get delta coordinates
-    set deltaX [expr $x - $scratch($id.prevX)]
-    set deltaY [expr $y - $scratch($id.prevY)]
+    set deltaX [expr $x - $scratch(prevX.$unique)]
+    set deltaY [expr $y - $scratch(prevY.$unique)]
 
     # Remember the current coordinates
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch(prevX.$unique) $x
+    set scratch(prevY.$unique) $y
 
     # Add the delta coordinates to the vertices
-    foreach v $scratch($id.vertices) {
-    	set scratch($id.$v.x) [expr $scratch($id.$v.x) + $deltaX]
-    	set scratch($id.$v.y) [expr $scratch($id.$v.y) + $deltaY]
+    foreach v $scratch(vertices.$unique) {
+    	set scratch(x.$v.$unique) [expr $scratch(x.$v.$unique) + $deltaX]
+    	set scratch(y.$v.$unique) [expr $scratch(y.$v.$unique) + $deltaY]
     }
 
     # Rebuild the coordinates list and change coordinates
     set coords {}
-    foreach i $scratch($id.indexes) {
-	lappend coords $scratch($id.$i.x) $scratch($id.$i.y)
+    foreach i $scratch(indexes.$unique) {
+	lappend coords $scratch(x.$i.$unique) $scratch(y.$i.$unique)
     }
 
     # If there's a ghost, reshape it. Otherwise reshape the item.
-    if $scratch($id.ghost) {
-	eval $canvas coords ghost $coords
+    if $scratch(ghost.$unique) {
+	eval $canvas coords ghost.$id $coords
     } else {
 	eval $slate coords $id $coords
     }
@@ -229,25 +239,27 @@ body ::tycho::Line::_reshapedrag {id canvas slate x y} {
 #### _reshaperelease
 #
 body ::tycho::Line::_reshaperelease {id canvas slate x y} {
+    set unique $id.[$slate uniqueid]
+
     # If there's a ghost, reshape the item to its shape
     # and then delete the ghost.
-    if $scratch($id.ghost) {
+    if $scratch(ghost.$unique) {
 	# Reshape the item
-	eval $slate coords $id [$slate coords ghost]
-	$canvas delete ghost
+	eval $slate coords $id [$slate coords ghost.$id]
+	$canvas delete ghost.$id
     }
 
     # General cleaning up
-    unset scratch($id.ghost)
-    unset scratch($id.prevX)
-    unset scratch($id.prevY)
+    unset scratch(ghost.$unique)
+    unset scratch(prevX.$unique)
+    unset scratch(prevY.$unique)
 
-    foreach v $scratch($id.indexes) {
-    	unset scratch($id.$v.x)
-    	unset scratch($id.$v.y)
+    foreach v $scratch(indexes.$unique) {
+    	unset scratch(x.$v.$unique)
+    	unset scratch(y.$v.$unique)
     }
-    unset scratch($id.vertices)
-    unset scratch($id.indexes)
+    unset scratch(vertices.$unique)
+    unset scratch(indexes.$unique)
 }
 
 #######################################################################
