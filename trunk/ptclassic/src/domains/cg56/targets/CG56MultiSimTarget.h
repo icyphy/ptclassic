@@ -76,6 +76,11 @@ protected:
 	int sendWormData(PortHole&);
 	int receiveWormData(PortHole&);
 
+	// C++ hiding rule requires that since we do the above,
+	// we do the following as well (boo, hiss)
+	int sendWormData() { return CGMultiTarget::sendWormData();}
+	int receiveWormData() { return CGMultiTarget::receiveWormData();}
+
 	// The following method downloads code for the inside of a wormhole
 	// and starts it executing.
 	int wormLoadCode();
