@@ -2,7 +2,7 @@ defstar {
 	name { XYgraph }
 	derivedFrom { Xgraph }
 	domain { DE }
-	version { 1.0 6/22/97 }
+	version { $Id$ }
 	author { J. Voigt }
 	copyright { copyright (c) 1997 Dresden University of Technology
                     Mobile Communications Systems
