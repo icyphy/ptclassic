@@ -242,19 +242,6 @@ INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim \
 	$(BASENAME).acs.debug.purify $(BASENAME).acs.debug.quantify \
 	$(BASENAME).acs.debug.purecov
 
-# You might find it helpful to use the PTDEPEND rule to debug dependencies:
-# make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
-# First, find out what the submake command is that build the binary:
-#   cxh@carson 153% make pigiRpc.acs
-#   make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS \
-# 	  pigiRpc.acs 
-#
-# Then use those same settings, but use the PTDEPEND target: 
-#   cxh@carson 154% make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
-#
-PTDEPEND:
-	echo $(PT_DEPEND)
-
 # The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
 # else we must have all the libs installed to build ptrim and ptiny, even
 # though ptrim and ptiny do not use all the libs.
@@ -358,3 +345,17 @@ echo_every_binary:
 
 # Build as many as 12 binaries
 everything: $(REALCLEAN_STUFF)
+
+# You might find it helpful to use the PTDEPEND rule to debug dependencies:
+# make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
+# First, find out what the submake command is that build the binary:
+#   cxh@carson 153% make pigiRpc.acs
+#   make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS \
+# 	  pigiRpc.acs 
+#
+# Then use those same settings, but use the PTDEPEND target: 
+#   cxh@carson 154% make ACSBIN=1 BASENAME=pigiRpc DEFAULT_DOMAIN=ACS PTDEPEND
+#
+PTDEPEND:
+	echo $(PT_DEPEND)
+
