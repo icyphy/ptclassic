@@ -3,9 +3,9 @@
 .SD
 Demonstrates a DDF Wormhole whose inside domain is SDF.
 .DE
+.LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 This rather trivial demo illustrates the use of a wormhole.
 .Ie "wormhole, SDF in DDF"

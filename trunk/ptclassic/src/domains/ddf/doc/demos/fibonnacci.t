@@ -3,9 +3,9 @@
 .SD
 Demonstrates the Self star.
 .DE
+.LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "S. Ha and E. A. Lee"
-.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 This demo shows how the
 .c Self

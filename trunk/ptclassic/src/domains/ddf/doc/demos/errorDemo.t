@@ -3,9 +3,9 @@
 .SD
 An example of an inconsistent DDF system.
 .DE
+.LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "S. Ha"
-.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 An inconsistent DDF program is one where the long term
 average number of particles produced on an arc is not the same

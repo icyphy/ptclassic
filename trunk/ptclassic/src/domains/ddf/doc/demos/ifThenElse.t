@@ -3,9 +3,9 @@
 .SD
 If-then-else construct in an SDF Wormhole.
 .DE
+.LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 .Ir "if-then-else"
 This demo illustrates the use of an SDF wormhole to implement

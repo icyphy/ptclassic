@@ -3,9 +3,9 @@
 .SD
 Demonstrates the Repeater star.
 .DE
+.LO "~ptolemy/src/domains/ddf/demo"
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/ddf/demo"
 .LD
 .Se Repeater
 This demo shows what the
