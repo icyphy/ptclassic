@@ -57,6 +57,9 @@ class ::tycho::PtTimePanel {
     # Get the value of a parameter
     method get {item}
 
+    # Load parameters
+    method loadParameters {javaDirector}
+
     # Set the Java director that controls the simulation
     method setDirector {domain director}
 
@@ -134,6 +137,16 @@ body ::tycho::PtTimePanel::setDirector {domain director} {
     $simulation setDirector $javaDirector
     $simulation setDirectorName $director
 
+    loadParameters $javaDirector
+}
+
+
+########################################################################
+#### loadParameters
+#
+# Load the director parameters
+#
+body ::tycho::PtTimePanel::loadParameters {javaDirector} {
     catch {unset _parameters}
     set iterator [$javaDirector getAttributes]
     while { [$iterator hasMoreElements] } {
