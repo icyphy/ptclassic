@@ -100,6 +100,19 @@ void Block :: initialize()
 	start();
 }
 
+// This method returns a GenericPort corresponding to the given name.
+GenericPort *
+Block::genPortWithName (const char* name) {
+	GenericPort* g;
+	BlockGenPortIter gpi(*this);
+	while ((g = gpi++) != 0) {
+		if (strcmp (name, g->readName()) == 0)
+			return g;
+	}
+	// Not found, return NULL
+	return NULL;
+}
+
 // This method returns a PortHole corresponding to the given name.
 // If the name refers to a MultiPortHole, a new PortHole is created.
 // The real port is always returned (no need to check for aliases).
