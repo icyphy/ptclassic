@@ -96,7 +96,8 @@ proc _done {} {
 
 
 ############################################################################
-#### Define a proc to simulate an interaction sequence
+#### Define a proc to simulate an interaction sequence,
+# calling Shape classes directly.
 #
 proc _interact {prefix tag xinc yinc n args} {
     set x 100
@@ -111,6 +112,26 @@ proc _interact {prefix tag xinc yinc n args} {
 	incr n -1
     }
     eval ${prefix}release $tag .s.canvas .s $x $y
+    .s coords $tag
+}
+
+############################################################################
+#### Define a proc to simulate an interaction sequence,
+# calling via the slate.
+#
+proc _interactslate {prefix tag xinc yinc n args} {
+    set x 100
+    set y 100
+    eval .s ${prefix}click $tag $x $y $args
+    update idletasks
+    while { $n > 0 } {
+	set x [expr $x + $xinc]
+	set y [expr $y + $yinc]
+	eval .s ${prefix}drag $tag $x $y
+	update idletasks
+	incr n -1
+    }
+    eval .s ${prefix}release $tag $x $y
     .s coords $tag
 }
 
