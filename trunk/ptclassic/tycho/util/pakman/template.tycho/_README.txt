@@ -1,5 +1,5 @@
 README.txt
-$Id$
+%percentW%percent %percentG%percent
 
 This is the README.txt file for the Tycho
 package %Package%.

@@ -2,7 +2,7 @@
 #
 # @Author: %author%
 #
-# @Version: $Id$
+# @Version: %percentW%percent %percentG%percent
 #
 %copyright%
 

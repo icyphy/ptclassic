@@ -2,7 +2,7 @@
 # Command-line program for the %Package% utility \
     exec itclsh "$0" "$@"
 
-# $Id$
+# %percentW%percent %percentG%percent
 # Author: %author%
 
 # If the %PKG%_LIBRARY variable is set, add it to the auto_path
@@ -12,27 +12,43 @@ if [info exists env(%PKG%_LIBRARY)] {
     }
 }
 
-# Same for the TYCHO environment variable
-if [info exists env(TYCHO)] {
-    if { [lsearch -exact $auto_path $env(TYCHO)] }  {
-	lappend auto_path $env(TYCHO)
+# Require the %Package% package. If this fails, try with the
+# TCL_PACKAGES variable.
+set ok 0
+if [catch {package require %package%}] {
+    if [info exists env(TCL_PACKAGES)] {
+	if { [lsearch -exact $auto_path $env(TCL_PACKAGES)] == -1 }  {
+	    lappend auto_path $env(TCL_PACKAGES)
+	    if ![catch {package require %package%}] {
+		set ok 1
+	    }
+	}
     }
+} else {
+    set ok 1
 }
 
-# Require the %Package% package. If this fails, require the Tycho
-# package first, since that may make the %Package% package visible
-if [catch {package require %Package%}] {
-    if [catch {package require Tycho}] {
-	puts "Cannot find %Package% or Tycho. You can\n\
-		1. Set the TYCHO variable to point to your \
-		Tycho installation\n\
-		2. Set the %PKG%_LIBRARY variable to point to the \
-		%package% directory\n\
-		3. Install %Package% in a subdirectory of your Tcl library"
-	exit
-    } else {
-	package require %Package%
+# If that didn't work, try the TYCHO environment variable.
+if !$ok {
+    if [info exists env(TYCHO)] {
+	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
+	    lappend auto_path $env(TYCHO)
+	    if ![catch {package require %package%}] {
+		set ok 1
+	    }
+	}
     }
+}
+if !$ok {
+    puts "Cannot find \"%Package%\". You can\n\
+	    1. Install %Package% in a subdirectory of your Tcl library\n\
+	    2. Install %Package% in the directory given by the TCL_PACKAGES \
+	    variable.\n\
+	    3. Set the %PKG%_LIBRARY variable to point to the \
+	    %pkg% directory\n\
+	    4. Set the TYCHO variable to point to your \
+	    Tycho installation\n"
+    exit
 }
 
 # Print startup sig
