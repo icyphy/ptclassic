@@ -483,6 +483,35 @@ DEScheduler :: run () {
 	// Miscellanies
 	////////////////////////////
 
+/* 
+Resort events according to new fine levels. The resorted
+events end up in eventQ (though during this process they will
+temporarily be stored in resortQ). This method is necessary
+after a mutation occurs which might impact the porthole depths.
+*/
+void DEScheduler::resortEvents() {
+	EventQueue resortQ;
+
+	if( eventQ.length() == 0 ) {
+	    return;
+	}
+	resortQ.initialize();
+	while( eventQ.length() != 0 ) {
+	    LevelLink *levelLink = eventQ.get();
+	    if( ((Event *)(levelLink->e))->dest->isA("DEPortHole") ) {
+		levelLink->fineLevel = 
+		    ((DEPortHole *)((Event *)(levelLink->e))->dest)->depth;
+	    }
+	    resortQ.pushBack(levelLink);
+	}
+
+	while( resortQ.length() != 0 ) {
+	    LevelLink *levelLink = resortQ.get();
+	    eventQ.pushBack(levelLink);
+	}
+}
+
+
 // fetch an event on request.
 int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) {
 
