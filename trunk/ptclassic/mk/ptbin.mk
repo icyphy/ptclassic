@@ -71,7 +71,6 @@ ifdef FULL
 	VERSION_DESC =	'With All Common Domains'
 	BDF =		1
 	CG56 =		1
-	CG96 =		1
 	CGCFULL =	1
 	CGFULL =	1
 	CODESIGN =	1
@@ -87,10 +86,7 @@ ifdef FULL
 		PN =		1
 	endif
 	SDFFULL =	1
-	SILAGE =	1
-	THOR =		1
 	VHDL =		1
-	VHDLF =		1
 	VHDLB =		1
 endif
 
@@ -121,15 +117,6 @@ ifdef PTRIM
 	SDFFULL =	1
 endif
 
-ifdef PTCP
-	PIGI =		$(BASENAME).ptcp
-	VERSION_DESC =	'With DE, and CP domain only, on the sun4 only'
-	DEFAULT_DOMAIN = CP
-	DE =		1
-	HOF =		1
-	CP =		1
-endif
-
 include $(ROOT)/mk/stars.mk
 
 # matlab.mk and mathematica.mk check these vars before traversing the path
@@ -145,9 +132,7 @@ EVERY_BINARY= $(PIGI_BINARIES) \
 		$(PIGI).ptiny $(PIGI).ptiny.debug $(PIGI).ptiny.debug.purify \
 		$(PIGI).ptiny.debug.quantify $(PIGI).ptiny.debug.purecov \
 		$(PIGI).ptrim $(PIGI).ptrim.debug $(PIGI).ptrim.debug.purify \
-		$(PIGI).ptrim.debug.quantify $(PIGI).ptrim.debug.purecov \
-		$(PIGI).ptcp $(PIGI).ptcp.debug $(PIGI).ptcp.debug.purify \
-		$(PIGI).ptcp.debug.quantify $(PIGI).ptcp.debug.purecov
+		$(PIGI).ptrim.debug.quantify $(PIGI).ptrim.debug.purecov
 REALCLEAN_STUFF =	$(EVERY_BINARY)
 
 ####################################################################
@@ -239,8 +224,6 @@ $(BASENAME).ptrim: $(PT_DEPEND)
 $(BASENAME).ptiny: $(PT_DEPEND)
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
 
-$(BASENAME).ptcp: $(PT_DEPEND)
-	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BASENAME).ptcp
 
 $(BASENAME).debug: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
@@ -250,9 +233,6 @@ $(BASENAME).ptrim.debug: $(PT_DEPEND)
 
 $(BASENAME).ptiny.debug: $(PT_DEPEND)
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
-
-$(BASENAME).ptcp.debug: $(PT_DEPEND)
-	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BASENAME).ptcp.debug
 
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
@@ -274,9 +254,6 @@ $(BASENAME).ptrim.debug.quantify: $(PT_DEPEND)
 $(BASENAME).ptiny.debug.quantify: $(PT_DEPEND)
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
-$(BASENAME).ptcp.debug.quantify: $(PT_DEPEND)
-	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BASENAME).ptcp.debug.quantify
-
 
 $(BASENAME).debug.purecov: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
@@ -287,9 +264,6 @@ $(BASENAME).ptrim.debug.purecov: $(PT_DEPEND)
 $(BASENAME).ptiny.debug.purecov: $(PT_DEPEND)
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
-$(BASENAME).ptcp.debug.purecov: $(PT_DEPEND)
-	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BASENAME).ptcp.debug.purecov
-
 
 $(BINDIR)/$(BASENAME): $(BASENAME) 
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME)
@@ -299,9 +273,6 @@ $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim
 
 $(BINDIR)/$(BASENAME).ptiny: $(BASENAME).ptiny 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptiny
-
-$(BINDIR)/$(BASENAME).ptcp: $(BASENAME).ptcp 
-	$(MAKE) PTCP=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptcp
 
 endif #ALLBINARIES
 
