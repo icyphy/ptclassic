@@ -345,7 +345,7 @@ void CGCTarget :: setupForkDests(Galaxy& g) {
 int CGCTarget :: codeGenInit() {
 
 	// call initialization code.
-	switchCodeStream(galaxy(), getStream("mainInit"));
+	defaultStream = &mainInit;
 	GalStarIter nextStar(*galaxy());
 	CGCStar* s;
 	while ((s = (CGCStar*) nextStar++) != 0) {
@@ -527,7 +527,7 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 
 	if (!flag) {
 		// run the star
-		switchCodeStream(cs, getStream(CODE));
+		defaultStream = &myCode;
 		writeFiring(*cs, 1);
 		return TRUE;
 	}
@@ -556,17 +556,17 @@ int CGCTarget :: incrementalAdd(CGStar* s, int flag) {
 	// because running the Star modifies the PortHole indices.
 	mainInit << cs->initCodePortHoles();
 
-	switchCodeStream(cs, getStream("mainInit"));
+	defaultStream = &mainInit;
 	cs->initCode();
 
 	// run the star
-	switchCodeStream(cs, getStream(CODE));
+	defaultStream = &myCode;
 
 	writeFiring(*cs, 1);
 
-	switchCodeStream(cs, getStream("mainClose"));
+	defaultStream = &mainClose;
 	cs->wrapup();
-	switchCodeStream(cs, getStream(CODE));
+	defaultStream = &myCode;
 
 	declareStar(cs);
 	return TRUE;
@@ -586,9 +586,9 @@ int CGCTarget :: insertGalaxyCode(Galaxy* g, SDFScheduler* s) {
 
 // redefine compileRun to switch code stream of stars
 void CGCTarget :: compileRun(SDFScheduler* s) {
-	switchCodeStream(galaxy(), getStream(CODE));
+	defaultStream = &myCode;
 	s->compileRun();
-	switchCodeStream(galaxy(), getStream("mainClose"));
+	defaultStream = &mainClose;
 }
 
 /////////////////////////////////////////

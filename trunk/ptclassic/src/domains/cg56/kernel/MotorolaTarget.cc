@@ -198,9 +198,10 @@ void MotorolaTarget::writeFiring(Star& s, int level)
 	{
 	    procedures << label << '\n';
 
-	    switchCodeStream(&star, &procedures);
+	    CodeStream* previous = defaultStream;
+	    defaultStream = &procedures;
 	    AsmTarget::writeFiring(star, level);
-	    switchCodeStream(&star, &mainLoop);
+	    defaultStream = previous;
 
 	    // Some instructions are not allowed to preceed rts
 	    // so insert a nop to be safe.
