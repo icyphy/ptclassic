@@ -53,7 +53,7 @@ other star dedicated to this purpose.
 		pos = 0;
 	}
 	go {
-		if (int(haltAtEnd) && (pos >= value.size() - 1))
+		if (int(haltAtEnd) && (pos >= value.size()))
 			Scheduler::requestHalt();
 		if (pos >= value.size())
 			output%0 << 0.0;
