@@ -299,22 +299,15 @@ char* AsmTarget :: fileName(char* base, const char* suffix=NULL)
 	return bname;
 }
 
-int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix=NULL, const char* mode=NULL)
+int AsmTarget::genDisFile(StringList& stuff,char* base,const char* suffix=NULL)
 {
 	char* name = fullFileName(base,suffix);
 	int status = display(stuff,name);
-	if (mode != NULL) {
-		StringList command = "chmod ";
-		command += mode;
-		command += " ";
-		command += name;
-		system(command);
-	}
 	LOG_DEL; delete name;
 	return status;
 }
 
-int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix=NULL, const char* mode=NULL)
+int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix=NULL)
 {
 	int status;
 	char* fullName = fullFileName(base, suffix);
@@ -328,13 +321,6 @@ int AsmTarget :: genFile(StringList& stuff,char* base,const char* suffix=NULL, c
 		o << stuff;
 		o.flush();
 		status = TRUE;
-	}
-	if (mode != NULL) {
-		StringList command = "chmod ";
-		command += mode;
-		command += " ";
-		command += fullName;
-		system(command);
 	}
 	LOG_DEL; delete fullName;
 	return status;
@@ -380,5 +366,6 @@ void AsmTarget :: wrapup() {
 	else
 		if (!genFile(myCode,uname,asmSuffix())) return;
 	if (int(runFlag))
-		if (!compileTarget()) runTarget();
+		if (compileCode()) 
+			if (loadCode()) runCode();
 }
