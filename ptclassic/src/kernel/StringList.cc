@@ -1,7 +1,12 @@
 #include <std.h>
+#include <stdio.h>		// temp
 #include "StringList.h"
 
 #define SMALL_STRING 20
+#define LIMIT 100000
+static hey() {
+	fprintf (stderr, "Huge string!!!\n");
+}
 
 // SCCS version identification
 // $Id$
@@ -12,15 +17,18 @@
 // Add another StringList to the StringList
 StringList&
 StringList :: operator += (StringList& l) {
+// Modified version: always consolidate left arg.
+	if (l.size() == 0) return *this;
+	if (l.size() > 1)
+		l.consolidate();
 	l.reset();
-
-	for(int i = l.size(); i > 0; i--) {
-		char* s = l.next();
-		char* n = new char[strlen(s)+1];
-		strcpy(n,s);
-		put(n);
-	}
+// Only one string to process
+	char* s = l.next();
+	char* n = new char[strlen(s)+1];
+	strcpy(n,s);
+	put(n);
 	totalSize += l.totalSize;
+	if (totalSize > LIMIT) hey();
 	return *this;
 }
 
@@ -32,6 +40,7 @@ StringList :: operator += (const char* s) {
 	strcpy(n,s);
 	put(n);
 	totalSize+=nadd;
+	if (totalSize > LIMIT) hey();
 	return *this;
 }
 
@@ -69,12 +78,26 @@ StringList :: consolidate () {
 	for(int i = size(); i > 0; i--) {
 		char* ss = next();
 		strcpy(s+totalSoFar,ss);
-		delete ss;
 		totalSoFar += strlen(ss);
+		delete ss;
 	}
 	initialize();
 	put(s);
-	totalSize = totalSoFar;
+// error check
+	if (totalSize != totalSoFar) {
+		fprintf (stderr, "Inconsistency in StringList::consolidate:"
+			 " totalSize = %d, totalSoFar = %d\n",
+			 totalSize, totalSoFar);
+		exit (1);
+	}
 	return s;
+}
+
+// destructor: delete all substrings
+// we don't delete the nodes because the base class destructor does that.
+
+StringList::~StringList() {
+	for (int i=size(); i > 0; i--)
+		delete next();
 }
 
