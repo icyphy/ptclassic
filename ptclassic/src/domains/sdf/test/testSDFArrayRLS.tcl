@@ -37,6 +37,8 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $env(PTOLEMY) src domains sdf test testSDFDefs.tcl]
 } {}
 
+# We don't include testSDFArrayRLS.tcl because the output
+# varies by OS and compiler
 
 # Define the galaxies we will use
 proc defSDFArrayRLSGals {} {
