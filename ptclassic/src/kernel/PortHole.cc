@@ -73,6 +73,10 @@ Particle** CircularBuffer :: previous(int i) const
         return buffer + ((current - i) % dimen);
 }
 
+// Attributes for portholes
+extern const Attribute P_HIDDEN(PB_HIDDEN,0);
+extern const Attribute P_VISIBLE(0,PB_HIDDEN);
+
 // Small virtual methods
 int GenericPort :: isItInput () const { return FALSE;}
 int GenericPort :: isItOutput () const { return FALSE;}
