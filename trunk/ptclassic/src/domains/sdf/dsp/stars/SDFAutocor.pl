@@ -14,6 +14,25 @@ $Id$
  is twice the number of lags requested.  This makes the output almost
  symmetric (discard the last sample to get a perfectly symmetric output).
 
+If the parameter \fIunbiased\fR is zero (the default), then
+the autocorrelation estimate is
+.EQ
+r hat (k) ~=~ 1 over N sum from n=0 to N-1-k x(n)x(n+k)
+.EN
+for $k ~=~ 0, ... , p$, where $N$ is the number of inputs to average
+(\fInoInputsToAvg\fR) and $p$ is the number of lags to estimate (\fInoLags\fR).
+This estimate is biased because the outermost lags have fewer than $N$
+terms in the summation, and yet the summation is still normalized by $N$.
+.pp
+If the parameter \fIunbiased\fR is non-zero, then the estimate is
+.EQ
+r hat (k) ~=~ 1 over N-k sum from n=0 to N-1-k x(n)x(n+k) ~.
+.EN
+In this case, the estimate is unbiased.
+However, note that the unbiased estimate does not guarantee
+a positive definite sequence, so a power spectral estimate based on this
+autocorrelation estimate may have negative components.
+
 **************************************************************************/
 }
 
@@ -41,6 +60,12 @@ defstar {
 		default {"64"}
 		desc {"Number of autocorrelation lags to output"}
 	}
+	defstate {
+		name {unbiased}
+		type {int}
+		default {"0"}
+		desc {"If non-zero, the estimate will be unbiased"}
+	}
 	start {
 	    if ( int(noInputsToAvg) <= int(noLags)) {
 		Error::abortRun(*this,
@@ -55,7 +80,10 @@ defstar {
 		float sum = 0.0;
 		for(int j = 0; j < (int(noInputsToAvg)-i); j++)
 		   sum += double(input%j) * double(input%(j+i));
-		output%(i+int(noLags)) << sum/(int(noInputsToAvg) -i);
+		if (unbiased)
+		    output%(i+int(noLags)) << sum/(int(noInputsToAvg) -i);
+		else
+		    output%(i+int(noLags)) << sum/int(noInputsToAvg);
 	    }
 	    // Now output the second half, which by symmetry is just
 	    // identical to what was just output.
