@@ -62,7 +62,9 @@ GNU_PREFIX=$(GNU_DEST)/common
 # references to the current version, along with
 # $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=egcs-2.91.60
+GCC_VERSION=gcc-2.91.60
+
+GCC_SRC=$(GNU_SRC)/gcc
 
 # If you are trying to build GNU for Linux, you may want to uncomment
 # the next line and comment out the following line
@@ -85,11 +87,11 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 all: configure bin install
 .PHONY:	configure bin install
 
-MACH=`$(GNU_SRC)/egcs/gcc/config.guess`
+MACH=`$(GCC_SRC)/gcc/config.guess`
 
 SHAREDLIB_CONFIGURE_FLAGS = --enable-shared
-# gnu make and egcs
-configure: $(GNU_OBJ) configure_make configure_egcs 
+# gnu make and gcc
+configure: $(GNU_OBJ) configure_make configure_gcc
 
 configure_make: $(GNU_OBJ)
 	-mkdir $(GNU_OBJ)/make
@@ -103,12 +105,27 @@ configure_make: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
 	@echo "Now configure gcc"
 
+configure_gcc: $(GNU_OBJ)
+	-mkdir $(GNU_OBJ)/gcc
+	(cd $(GNU_OBJ)/gcc; \
+	$(GCC_SRC)/configure --srcdir=$(GCC_SRC) \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS))
+
+configure_libstdc++: $(GNU_OBJ)
+	-mkdir $(GNU_OBJ)/libstdc++
+	(cd $(GNU_OBJ)/libstdc++; \
+	CC=$(PTOLEMY)/gnu/$(PTARCH)/bin/gcc \
+		$(GNU_SRC)/libstdc++/configure --srcdir=$(GNU_SRC)/libstdc++ \
+		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
+		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
+
 # DEC make can't seem to handle VPATH very well
 #GMAKE= `if [ -f $(GNU_OBJ)/make/make ]; \
 #	 then echo $(GNU_OBJ)/make/make ; \
 #	 else echo make; fi`
 
-bin: bin_make bin_egcs
+bin: bin_make bin_gcc
 
 bin_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) )
@@ -123,13 +140,25 @@ bin_gcc:
 			MAKE=$(GNU_OBJ)/make/make \
 			CC=$(CC) bootstrap)
 
+bin_libstdc++:
+	(cd $(GNU_OBJ)/libstdc++; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make)
+
 install_make:
 	(cd $(GNU_OBJ)/make; $(MAKE) install)
+
 install_gcc: $(BINDIR) install_make
 	(cd $(GNU_OBJ)/gcc; \
-		$(GNU_OBJ)/make/make 
+		$(GNU_OBJ)/make/make \
 			MAKE=$(GNU_OBJ)/make/make \
 			install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
+
+install_libstdc++:
+	(cd $(GNU_OBJ)/libstdc++; \
+		$(GNU_OBJ)/make/make \
+			MAKE=$(GNU_OBJ)/make/make install CC=$(CC))
+
 
 install_gcc_links: $(BINDIR)
 	#@echo "Install c++filt, the g++ name demangler"
@@ -138,6 +167,9 @@ install_gcc_links: $(BINDIR)
 	-(cd $(GNU_DEST)/$(PTARCH); ln -s $(MACH) $(PTARCH) )
 	-(cd $(GNU_DEST)/$(PTARCH)/lib/gcc-lib; ln -s $(MACH) $(PTARCH) )
 	-(cd $(BINDIR); ln -s $(REL_GNU_BINDIR)/* .)
+	@echo "Copy _G_config.h"_
+	-cp $(GNU_DEST)/$(PTARCH)/$(MACH)/include/_G_config.h \
+		$(GNU_DEST)/$(PTARCH)/lib/gcc-lib/$(MACH)/include
 
 bin_libg++:
 	(cd $(GNU_OBJ)/libg++; \
@@ -148,7 +180,8 @@ bin_libg++:
 			CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
 			LDFLAGS=-B$(GNU_OBJ)/gcc/ )
 
-install: install_make install_egcs install_gcc_links
+install: install_make install_gcc install_gcc_links libstdc++
+libstdc++: configure_libstdc++ bin_libstdc++ install_libstdc++
 
 ####################
 # FSF gcc-2.8.1 - Ptolemy 0.7.1 does not use gcc-2.8.1 because
@@ -243,7 +276,7 @@ install_fsf: $(BINDIR)
 			$(FSF_OBJ)/make/make info install-info)
 
 ############################################################
-# Build the GNU tools and egcs for HP machines
+# Build the GNU tools and gcc for HP machines
 #
 # See src/gnu/INSTALL for the details, but basically, we install a special
 # GNU assembler so the the -g flag will work.
@@ -271,23 +304,23 @@ hp_configure: $(GNU_OBJ)
 	$(GNU_SRC)/make/configure --srcdir=$(GNU_SRC)/make \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-	@echo "Now configure egcs with -with-gnu-as"
-	-mkdir $(GNU_OBJ)/egcs
-	(cd $(GNU_OBJ)/egcs; \
-	$(GNU_SRC)/egcs/configure --srcdir=$(GNU_SRC)/egcs \
+	@echo "Now configure $(GNU_SRC) with -with-gnu-as"
+	-mkdir $(GNU_OBJ)/$(GNU_SRC)
+	(cd $(GNU_OBJ)/$(GNU_SRC); \
+	$(GNU_SRC)/$(GNU_SRC)/configure --srcdir=$(GNU_SRC)/$(GNU_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) \
 		--with-gnu-as $(MACH) )
 
 hp_pregcc_install: $(GNU_DEST)/$(PTARCH)
 	if [ ! -d $(GNU_OBJ)/gas ]; then mkdir $(GNU_OBJ)/gas; fi
-	(cd $(GNU_OBJ)/egcs/gcc; $(MAKE) installdirs)
+	(cd $(GNU_OBJ)/$(GNU_SRC)/gcc; $(MAKE) installdirs)
 	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/binutils/gas/as
-	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/egcs/gcc/as
+	-ln -s $(GNU_OBJ)/binutils/gas/as.new $(GNU_OBJ)/$(GNU_SRC)/gcc/as
 	-chmod a+x $(GNU_OBJ)/binutils/gas/as.new
 	-ln -s $(GNU_EXEC_PREFIX)/bin/as  $(GNU_EXEC_PREFIX)/lib/gcc-lib/$(MACH)/$(GCC_VERSION)/as
 
-hp_bin: bin_make hp_bin_binutils hp_install_gas bin_egcs
+hp_bin: bin_make hp_bin_binutils hp_install_gas bin_$(GNU_SRC)
 
 hp_bin_bison:
 	(cd $(GNU_OBJ)/bison; 
@@ -380,41 +413,6 @@ irix5_configure: $(GNU_OBJ)
 	$(GNU_SRC)/libg++/configure --srcdir=$(GNU_SRC)/libg++ \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) $(MACH) )
-
-############################################################
-# egcs - experimental gnu compiler
-# See http://www.cygnus.com/egcs
-EGCS_OBJ = $(GNU_OBJ)/egcs
-EGCS_SRC = $(GNU_SRC)/egcs
-EGCS_DEST = $(PTOLEMY)/gnu
-EGCS_PREFIX=$(EGCS_DEST)/common
-EGCS_EXEC_PREFIX=$(EGCS_DEST)/$(PTARCH)
-all_egcs: configure_egcs bin_egcs install_egcs
-configure_egcs: $(EGCS_OBJ)
-	(cd $(EGCS_OBJ); \
-	$(EGCS_SRC)/configure --srcdir=$(EGCS_SRC) \
-		--prefix=$(EGCS_PREFIX) --exec-prefix=$(EGCS_EXEC_PREFIX) \
-		$(SHAREDLIB_CONFIGURE_FLAGS))
-bin_egcs:
-	(cd $(EGCS_OBJ); \
-		$(GNU_OBJ)/make/make \
-			MAKE=$(GNU_OBJ)/make/make \
-			bootstrap)
-install_egcs: $(EGCS_DEST) $(EGCS_PREFIX) $(EGCS_EXEC_PREFIX)
-	(cd $(EGCS_OBJ); \
-		$(GNU_OBJ)/make/make \
-			MAKE=$(GNU_OBJ)/make/make \
-			install)
-
-$(EGCS_OBJ): $(GNU_OBJ) 
-	-mkdir "$(EGCS_OBJ)"
-$(EGCS_DEST):
-	-mkdir "$(EGCS_DEST)"
-$(EGCS_PREFIX): $(EGCS_DEST)
-	-mkdir "$(EGCS_PREFIX)"
-# Use the $(GNU_DEST)/$(PTARCH) rule above
-#$(EGCS_EXEC_PREFIX):  $(EGCS_DEST)
-#	-mkdir "$(EGCS_EXEC_PREFIX)"
 
 ############################################################
 # dejaGNU
