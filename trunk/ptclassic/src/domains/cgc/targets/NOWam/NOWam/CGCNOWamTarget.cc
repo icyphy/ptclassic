@@ -1,33 +1,33 @@
 static const char file_id[] = "CGCNOWamTarget.cc";
 /******************************************************************
 Version identification:
-$Id$
-
-Copyright (c) 1991-%Q%  The Regents of the University of California.
+@(#)CGCNOWamTarget.cc   1.2 1/30/96
+ 
+Copyright (c) 1991-1996  The Regents of the University of California.
 All Rights Reserved.
-
+ 
 Permission is hereby granted, without written agreement and without
 license or royalty fees, to use, copy, modify, and distribute this
 software and its documentation for any purpose, provided that the above
 copyright notice and the following two paragraphs appear in all copies
 of this software.
-
+ 
 IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
 FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
 ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
 THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
 SUCH DAMAGE.
-
+ 
 THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
 INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
 MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
-
+                                                        COPYRIGHTENDKEY
+ 
  Programmer: Patrick Warner
-
+ 
 *******************************************************************/
 
 
@@ -49,6 +49,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <ctype.h>
 #include <stdio.h>
 #include <sys/types.h>
+#include <netdb.h>
+#include <netinet/in.h>
 
 // stream for logging information.  It is opened by the setup method.
 
@@ -107,6 +109,10 @@ void CGCNOWamTarget :: pairSendReceive(DataFlowStar* s, DataFlowStar* r) {
 		<< "\n"; feedback.flush();
 	CGCNOWamSend* cs = (CGCNOWamSend*) s;
 	CGCNOWamRecv* cr = (CGCNOWamRecv*) r;
+
+	// for each child_target
+	CGCTarget* ts = (CGCTarget*) cs->cgTarget();
+	CGCTarget* tr = (CGCTarget*) cr->cgTarget();
 
 	// set the IPC handler names
 	// for sender
@@ -224,7 +230,6 @@ int CGCNOWamTarget :: identifyMachines() {
 		mname << (const char*) nameSuffix;
 		machineInfo[i].nm = hashstring((const char*) mname);
 		// internet address calculation
-		/*
 		struct hostent* hp;
 		if ((hp = gethostbyname((const char*) mname)) == NULL) {
 			StringList errMsg;
@@ -233,8 +238,7 @@ int CGCNOWamTarget :: identifyMachines() {
 			return FALSE;
 		}
 		struct in_addr* ptr = (struct in_addr*) hp->h_addr_list[0];
-		machineInfo[i].inetAddr = hashstring(inet_ntoa(*ptr));
-		*/
+		machineInfo[i].inetAddr = inet_addr(hashstring(inet_ntoa(*ptr)));
 		machineInfo[i].virtNode = i;
 
 		// monitoring.
