@@ -27,7 +27,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  J. T. Buck, Christopher Hylands
+# Programmer:  J. T. Buck, Neal Becker, Christopher Hylands
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
@@ -37,6 +37,10 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Note that hppa does support shl_load() style dynamic linking, see
+# $(PTOLEMY)/src/kernel/Linker.sysdep.h for more information.
+# You may need to get the latest HP linker patch for shl_load to work.
+# As of 4/95 the linker patch was PHSS_5083*
 #
 # Programs to use
 #
@@ -78,7 +82,8 @@ STRIP_DEBUG =	/bin/strip -x
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
 # If you are trying out the shl_load feature, then remove -static
-LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static
+# and add -Xlinker -E
+LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
 LINKFLAGS_D = 	-L$(LIBDIR) -g -static
 
 
