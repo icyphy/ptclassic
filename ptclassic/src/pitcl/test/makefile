@@ -87,10 +87,18 @@ test_simple: $(EXTRA_SRCS)
 test_graphics: $(EXTRA_SRCS)
 	tycho -ptiny -noconsole -nowelcome -e alltests.itcl
 
-FORCE:
 
-test_exec_msg:
-	@echo "This message is used to test the Exec class"
+# Purecov binary to use
+PURECOV_BINARY = $(PTOLEMY)/obj.$(PTARCH)/pitcl/pitcl.ptiny.debug.purecov
+
+# Run the tests under purecov
+test_purecov: $(PURECOV_BINARY)
+	echo "set TYCHO $$TYCHO; source alltests.itcl; exit" | $^
+
+$(PURECOV_BINARY):
+	(cd $(PTOLEMY)/obj.$(PTARCH)/pitcl; make pitcl.ptiny.debug.purecov)
+
+FORCE:
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
