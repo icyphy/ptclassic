@@ -14,8 +14,6 @@ VPATH = ../../src/pxgraph
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-CC=gcc
-
 OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
  st.o params.o
 
