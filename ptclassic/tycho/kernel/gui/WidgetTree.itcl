@@ -1,0 +1,485 @@
+# Widget that implements an unfolding tree of widgets. 
+# 
+# @Author: John Reekie, based on a widget by Farhana Sheikh
+#
+# @Version: $Id$
+# 
+# @Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+#######################################################################
+#### Widgettree
+# This class implements an unfolding tree of widgets. At each
+# level of the tree, the client can insert widgets or additional
+# levels of the tree. The widget provides commands and options that
+# enable this widget to be used for a wide range of applications.
+# 
+# <b>Options</b>
+# <ul>
+# <li><b>-closedbitmap</b> _bitmap_: The bitmap displayed by nodes
+# when closed.
+# <li><b>-openedbitmap</b> _bitmap_: The bitmap displayed by nodes
+# when open.
+# <li><b>-createcommand</b> _script_: A Tcl script that is executed
+# the first time a node is opened. The name of the widget which this
+# script should call to add new items at this level is appended.
+# <li><b>-index</b> _indent_: The minimum indent of each level of
+# the tree. If the *-openedbitmap* or *-closedbitmap* is larger,
+# then they will increase the ident where displayed.
+# <li><b>-opencommand</b> _script_: Once a node has been opened,
+# opening it again will call this script with the widget at this
+# level appended.
+# <li><b>-closecommand</b> _script_: This script is called when
+# a node is closed. The name of the widget that this script
+# should call to add new items at this level is appended.
+# </ul>
+# 
+# Each instance of this widget in fact implements just one level
+# of the tree. Each item can have the following options:
+# <ul>
+# <li><b>-text</b> _string_: The label that is displayed for this item.
+# <li><b>-state</b> _state_: The state of this item. If _disabled_, it
+# cannot be opened or closed (nodes) or edited (leaves). If
+# _normal_, it can.
+# <li><b>-open</b> _bool_: The flag that controls whether this node
+# is open or closed.
+# <li><b>-closedbitmap</b> _bitmap_: The bitmap displayed by this
+# node when closed. The default is the value of the widget preference.
+# <li><b>-openedbitmap</b> _bitmap_: The bitmap displayed by this node
+# when open. The default is the value of the widget preference.
+# </ul>
+#
+class iwidgets::Widgettree { 
+    inherit itk::Widget
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    # The bitmap to use as the closed icon
+    public variable closedbitmap @arrowclose.xbm
+
+    # The name of the procedure to execute when closing a node
+    public variable closecommand ""
+
+    # The name of the procedure to execute when opening a new node
+    public variable createcommand ""
+
+    # The minimum indent at each level
+    public variable indent 24
+
+    # The bitmap to use as the open icon
+    public variable openedbitmap @arrowopen.xbm
+
+    # The script to execute when a previously-opened node is opened
+    public variable opencommand ""
+
+    ###################################################################
+    ####                        public methods                     ####
+
+    # Add a new widget to a node of the tree
+    method add {type tag args}
+
+    # Close a node.
+    method close {tag}
+
+    # Create a new widget and make it a complete node
+    method create {type tag args}
+
+    # Unconditionally close a node.
+    method hide {tag}
+
+    # Open a node.
+    method open {tag}
+
+    # Given a path, return the tk widget path for that component
+    method path {tag}
+
+    # Place a widget into the tree as a node
+    method place {tag widget}
+
+    # Get the widget associated with a tag.
+    method widget {}
+
+    ###################################################################
+    ####                        protected methods                  ####
+
+    ###################################################################
+    ####                       private variables                   ####
+    
+    # The type of each item
+    private variable _type
+
+    # The row of each item
+    private variable _row
+
+    # The open/closed state of each node
+    private variable _state
+    
+    # The widget contained in all descendent nodes
+    private variable _widget
+    
+    # The next available row in each frame
+    private variable _nextrow
+
+    method debug {args} {
+        eval $args
+    }
+}
+
+#
+# Provide a lowercase access method for the widgettree class
+#
+proc ::iwidgets::widgettree { args } {
+    uplevel ::iwidgets::Widgettree $args
+}
+
+#######################################################################
+#### -closedbitmap configuration
+# 
+configbody iwidgets::Widgettree::closedbitmap {
+    foreach tag [array names _type] {
+        if { $_type($tag) == "node"  && $_state($tag) == "closed" } {
+            $itk_component(${tag}button) configure \
+                    -bitmap $closedbitmap
+        }
+    }
+}
+
+#######################################################################
+#### -openedbitmap configuration
+# 
+configbody iwidgets::Widgettree::openedbitmap {
+    foreach tag [array names _type] {
+        if { $_type($tag) == "node" && $_state($tag) == "open" } {
+            $itk_component(${tag}button) configure \
+                    -bitmap $openedbitmap
+        }
+    }
+}
+
+#######################################################################
+#### constructor
+#
+body iwidgets::Widgettree::constructor {args} {
+    # The counter for top-level items
+    set _nextrow() 0
+
+    # Set the grid column options for the top level frame
+    grid columnconfigure $itk_interior 0 -minsize $indent -weight 0
+    grid columnconfigure $itk_interior 1 -weight 1
+
+    # Configure options
+    eval itk_initialize $args
+}
+
+    ###################################################################
+    ###################################################################
+    ####                      public methods                       ####
+
+
+#######################################################################
+#### add
+# Add a new widget to the tree. The first argument is its tag,
+# and the second is its type. If the type is "node" then
+# another level is added to the tree and optional arguments
+# are passed to the Tk label widget. If the type is anything
+# else then it is assumed to be the type of the widget
+# to create, all optional arguments are passed to the constructor
+# of that widget, except for a *-options* option, which is passed
+# as the second argument to <code>itk_component add</code>. The
+# default value of the *-options* option is
+# <pre>
+#   keep -cursor -background
+# </pre>
+# In either case, if the tag is a top-level tag hierarchical
+# tag, then the item is added to another instance of the widget
+# tree at the correct level in the tree. The node in which the
+# item is added must already exist.
+#
+body iwidgets::Widgettree::add {type tag args} {
+    # Decompose the tag
+    regexp {^((([^\.]+)?.*)?\.)?([^\.]+)$} $tag _ _ parent _ tail
+
+    # This is a hierarchical tag. If the parent is a button
+    # in this widget but there is no parent frame, create one
+    if { $parent != "" } {
+        if ![::info exists _widget($parent)] {
+            if [::info exists _row($parent)] {
+                create frame $parent -options {
+                    keep -cursor -background
+                }
+		# Configure column size/weight
+		grid columnconfigure $itk_component($parent) 0 \
+			-minsize $indent -weight 0
+		grid columnconfigure $itk_component($parent) 1 \
+			-weight 1
+            } else {
+                error "Parent doesn't exist: $parent"
+            }
+        } elseif { $_type($parent) != "node" } {
+            # Check that the parent is actually a node.
+            error "Cannot add to type $_type($parent)"
+        }
+    }
+
+    # Process according to type
+    if { $type == "node" } {
+	# Create the open/close button and the label
+	itk_component add ${tag}button {
+	    button $itk_interior${tag}button \
+		    -command "$this open $tag" \
+		    -borderwidth 1 \
+		    -bitmap $closedbitmap
+	} {
+	    keep -cursor -background -foreground
+	}
+	grid $itk_component(${tag}button) \
+                -row $_nextrow($parent) \
+                -column 0
+	
+	# Create the accompanying label
+	itk_component add ${tag}label {
+	    eval label $itk_interior${tag}label $args
+	} {
+	    keep -background -font -foreground -cursor
+	}
+	grid $itk_component(${tag}label) \
+                -row $_nextrow($parent) \
+                -column 1 \
+                -sticky nw
+        
+
+	# Remember the parameters for this node
+	set _nextrow($tag) 0
+   	set _row($tag) $_nextrow($parent)
+        set _state($tag) closed
+        set _type($tag) node
+
+	# Update the row counter. Note that we increment it by
+	# two so that when the button is opened, the new widget
+	# can be placed in the intervening row
+	incr _nextrow($parent) 2
+
+    } else {
+        # Extract the -options option
+        array set opts {-options {keep -background -cursor}}
+        array set opts $args
+        set options $opts(-options)
+        unset opts(-options)
+        set args [array get opts]
+
+        # Create the component
+	itk_component add $tag {
+	    eval $type $itk_interior$tag $args
+	} $options
+        # Grid it
+	grid $itk_component($tag) \
+                -row $_nextrow($parent) \
+                -column 1 \
+                -sticky nw
+
+	# Remember the parameters for this item
+	set _row($tag) $_nextrow($parent)
+        set _type($tag) $type
+
+	# Update the row counter
+	incr _nextrow($parent)
+    }
+}
+
+#######################################################################
+#### close
+# Close a node of the tree. If the *-closecommand* option is
+# not null, it is evaluated with the tag appended, and the
+# node is _not_ closed. The close command can choose to perform
+# any action it likes (such as user confirmation), and must
+# explicitly close the node with the hide{} method. If the
+# *-closecommand* option is not null, the node is just closed.
+#
+body iwidgets::Widgettree::close {tag} {
+    set _state($tag) closed
+
+    if { $closecommand != "" } {
+        # If there's a command, execute it
+        uplevel #0 $closecommand $tag
+    } else {
+        # Otherwise just close the node
+        hide $tag
+    }
+}
+
+#######################################################################
+#### create
+# Create a new node widget. The _type_ argument is the
+# Tk widget type, and _tag_ is the tag of the widget. Optional
+# arguments are passed to the constructor of the widget,
+# except for a *-options* option, which is passed
+# as the second argument to <code>itk_component add</code>. The
+# default value of the *-options* option is
+# <pre>
+#   keep -cursor -background
+# </pre>
+#
+body iwidgets::Widgettree::create {type tag args} {
+    # Extract the -options option
+    array set opts {-options {keep -background -cursor}}
+    array set opts $args
+    set options $opts(-options)
+    unset opts(-options)
+    set args [array get opts]
+
+    # Create the widget
+     itk_component add $tag {
+        eval $type $itk_interior$tag $args
+    } $options
+
+    # Remember it
+    set _widget($tag) $itk_component($tag)
+
+    # If the parent is open, display the widget
+    if { $_state($tag) == "open" } {
+        grid $itk_component($tag) \
+                -row [expr $_row($tag)+1] \
+                -column 1 \
+                -sticky nw
+    }
+}
+
+#######################################################################
+#### hide
+# Unconditionally close a node of the tree. This
+# should normally be called only from within the *-closecommand*
+# option.
+#
+body iwidgets::Widgettree::hide {tag} {
+    # Hide the widget, making sure it exists first
+    if [::info exists _widget($tag)] {
+        grid forget $itk_component($tag)
+    }
+    # Change the button
+    $itk_component(${tag}button) configure \
+            -bitmap $closedbitmap \
+            -command "$this open $tag"
+
+    # Make sure state is correct
+    set _state($tag) closed
+}
+
+#######################################################################
+#### open
+# Open a node of the tree and display a widget there. If a widget
+# doesn't exist for this node and *-createcommand* is not null,
+# call it with the tag of this widget appended. *-createcommand*
+# can sensibly do one of two things:
+# <ol>
+# <li>Call add{} with the widget tag supplied as the *-in* option.
+# This will cause another level of the tree to be created below
+# this one, and each call to add{} will ads an item to that level.
+# <li>Call create{} with the widget tag as the first argument.
+# This will cause the specified widget to be created as the single
+# widget at this level of the tree.
+# <li>Call path{} to get the correct widget name, create a widget,
+# and then call place{} to put the new widget into the tree.
+# (The widget doesn't actually _have_ to have the same name
+# as returned by path{}, but does have to be a child of
+# the megawidget ($this).)
+# </ol>
+#
+# If the widget already exists, then *-opencommand* is called with
+# the widget path appended. *-opencommand* can manipulate the widget
+# any way it likes -- including deleting it and creating a new
+# one as for *-createcommand*. Then the widget is displayed in
+# the widget hierarchy.
+#
+body iwidgets::Widgettree::open {tag} {
+    # Before doing anything, set the state so that any
+    # calls back to the widget know to display components
+    set _state($tag) open
+
+    # If the widget doesn't exist, execute *-createcommand*.
+    if ![::info exists _widget($tag)] {
+        if { $createcommand != "" } {
+            uplevel #0 $createcommand $tag
+        }
+    } else {
+        if { $opencommand != "" } {
+            uplevel #0 $opencommand $tag
+        }
+        grid $itk_component($tag) \
+                -row [expr $_row($tag)+1] \
+                -column 1 \
+                -sticky nw
+    }
+    # Configure the button
+    $itk_component(${tag}button) configure \
+	    -bitmap $openedbitmap \
+	    -command "$this close $tag"
+}
+
+#######################################################################
+#### path
+# Given a path into the tree, return the Tk widget path of that
+# component. The path doesn't depend on any widget actually
+# existing there, so this can be used to find the name with
+# which to create widgets in the tree.
+#
+body iwidgets::Widgettree::path {tag} {
+    # return $itk_interior[join [split $tag $itk_option(-separator)] "."]
+    return $itk_interior$tag
+}
+
+#######################################################################
+#### place
+# Place a widget into a node of the tree. The widget must be
+# a child of the mega-widget. Usually, the easiest way to get this
+# name is to call path{}, but this is not required in order
+# to make it possible to move nodes of the tree around.
+# An error is raised if there is already a widget in that
+# node of the tree.
+#
+body iwidgets::Widgettree::place {tag widget} {
+puts $widget
+    # Add the widget as a component
+    itk_component add $tag {
+        set widget
+    } {
+        keep -cursor -background
+    }
+    # Remember it
+    set _widget($tag) $itk_component($tag)
+    set _type($tag) leaf
+
+    # If the parent is open, display the widget
+    if { $_state($tag) == "open" } {
+        grid $itk_component($tag) \
+                -row [expr $_row($tag)+1] \
+                -column 1 \
+                -sticky nw
+    }
+}
