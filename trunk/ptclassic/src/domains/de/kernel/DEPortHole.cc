@@ -64,20 +64,16 @@ DEPortHole :: DEPortHole() : timeStamp(0.0), dataNew(FALSE), depth(-1) {}
 // (does nothing extra, but avoids out-of-line versions from cfront)
 DEPortHole :: ~DEPortHole() {}
 
-PortHole& DEPortHole :: setPort (
-			     const char* s,
-                             Block* parent,
-                             DataType t)
+// The initialize function is redefined to set DE-specific members.
+void DEPortHole :: initialize()
 {
 	// Initialize PortHole
-        PortHole::setPort(s,parent,t);
+	PortHole::initialize();
 
 	// Initialize the DE-specific members
 	timeStamp = 0.0;
 	dataNew = FALSE;
 	depth = -1;
-
-        return *this;
 }
 
 Particle& InDEPort :: get() 
