@@ -18,13 +18,18 @@ CONFIG=$(ROOT)/config-$(ARCH).mk
 include $(CONFIG)
 
 SDF=$(OBJDIR)/domains/sdf/stars
+SDF_DSP=$(OBJDIR)/domains/sdf/dsp/stars
+SDF_IMAGE=$(OBJDIR)/domains/sdf/image/stars
 
 SDFSRC=$(ROOT)/src/domains/sdf/stars
+SDF_DSP_SRC=$(ROOT)/src/domains/sdf/dsp/stars
+SDF_IMAGE_SRC=$(ROOT)/src/domains/sdf/image/stars
 
 SDFKERSRC=$(ROOT)/src/domains/sdf/kernel
 
 # libraries
-LIBS=-lsdfstars -lLS -lEG -lsdf -lImage -lcompileSDF -lptolemy \
+LIBS=-lsdfstars -lsdfdspstars -lsdfimagestars \
+	-lLS -lEG -lsdf -lImage -lcompileSDF -lptolemy \
 	$(SYSLIBS)
 
 LIBFILES=\
