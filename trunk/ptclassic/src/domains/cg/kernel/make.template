@@ -34,6 +34,7 @@ LIB=libcg.a
 # .h files with matching cc files
 H_WITH_MATCH= \
 AsmConnect.h \
+AsmForkNode.h \
 AsmGeodesic.h \
 AsmStar.h \
 AsmTarget.h \
