@@ -48,8 +48,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // initialize DDF specific members
 void DDFStar :: initialize() {
-	waitPort = NULL;
-	waitNum = 0;
+	clearWaitPort();
 	DataFlowStar::initialize();
 	// special care for DDFSelf star (recursion)
 	// adjust numberTokens
@@ -66,19 +65,6 @@ void DDFStar :: initialize() {
 	}
 }
 
-// set the waiting condition for execution
-void DDFStar :: waitFor(PortHole& p, int num) {
-	// check p is input, if not, error.
-	if (p.isItInput()) {
-		waitPort = &p;
-		waitNum = num;
-	} else {
-		Error::mark(*this);
-		Error::abortRun("waiting port should be input for ", 
-			fullName());
-	}
-}
-			
 int DDFStar :: run() { return Star :: run(); }
 		
 // The following is defined in DDFDomain.cc -- this forces that module
@@ -94,4 +80,4 @@ DDFWormhole* DDFStar :: myWorm() { return NULL; }
 
 const char* DDFStar :: readTypeName () { return "unspecified method";}
 
-ISA_FUNC(DDFStar,DataFlowStar);
+ISA_FUNC(DDFStar,DynDFStar);

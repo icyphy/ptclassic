@@ -41,7 +41,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer:  Soonhoi Ha
+ Programmer:  Soonhoi Ha, J. Buck
  Date of creation: 8/9/90
 	 revision: 1/21/91  Detect special construct (case, for, dowhile,
 			    recursion) for efficient scheduling.
@@ -56,63 +56,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	////////////////////////////
 
 class DDFScheduler : public Scheduler {
-
-friend class DDFTarget;
-
-	// explicit stopping condition
-	int stopTime;
-
-	// check whether a star is runnable. Also enable lazy evaluation.
-	int isRunnable(Star&);
-
-	// lazy evaluation
-	int lazyEval(Star*);
-	int checkLazyEval(Star *);
-
-	// list of source blocks.
-	SequentialList sourceBlocks;
-
-	// the number of firing all sources so far
-	int numFiring;
-
-	// number of overlapped execution allowed.
-	int numOverlapped;
-
-	// capacity of arc
-	int maxToken;
-
-	// number of stars in the galaxy
-	int galSize;
-
-// Advanced features ......................
-	// candidate domain
-	int canDom;
-
-	// real scheduler for other constructs
-	Scheduler* realSched;
-
-	// list of newly created wormholes of SDF domain.
-	SequentialList sdfWorms;
-
-	// cruft used for generating names for SDF galaxies.
-	static int nW;
-	const char* wormName();
-
-	// decide the type of the construct.
-	void detectConstruct(Galaxy&);
-
-	// select scheduler
-	void selectScheduler(Galaxy&);
-
-	// modify the topology
-	void makeSDFWormholes(Galaxy&);
-
-	// flag to be set when restructured.
-	int restructured;
-
-// End of Advanced features ..................
-
 public:
+	// set parameters for scheduler
+	void setParams(int numOver, double pd, int maxbsize, int restructure) {
+		numOverlapped = numOver;
+		schedulePeriod = pd;
+		maxToken = maxbsize;
+		restructured = !restructure;
+		if (restructured) canDom = DDF;
+	}
 	// my domain
 	const char* domain() const ;
 
@@ -142,6 +94,67 @@ public:
 
 	// reset "restructured" flag for DDFSelf star
 	void resetFlag();
+private:
+	// explicit stopping condition
+	int stopTime;
+
+	// check whether a star is runnable. Also enable lazy evaluation.
+	int isRunnable(DataFlowStar&);
+
+	// lazy evaluation
+	int lazyEval(DataFlowStar*);
+	int checkLazyEval(DataFlowStar *);
+
+	// list of source blocks.
+	SequentialList sourceBlocks;
+
+	// the number of firing all sources so far
+	int numFiring;
+
+	// number of overlapped execution allowed.
+	int numOverlapped;
+
+	// capacity of arc
+	int maxToken;
+
+	// number of stars in the galaxy
+	int galSize;
+
+	// recursion depth for lazy evaluation
+	int lazyDepth;
+
+	// string for error msgs
+	StringList msg;
+
+// Advanced features ......................
+	// candidate domain
+	int canDom;
+
+	// real scheduler for other constructs
+	Scheduler* realSched;
+
+	// list of newly created wormholes of SDF domain.
+	SequentialList sdfWorms;
+
+	// cruft used for generating names for SDF galaxies.
+	static int nW;
+	const char* wormName();
+
+	// decide the type of the construct.
+	void detectConstruct(Galaxy&);
+
+	// select scheduler
+	void selectScheduler(Galaxy&);
+
+	// modify the topology
+	void makeSDFWormholes(Galaxy&);
+
+	// flag to be set when restructured.
+	short restructured;
+
+// End of Advanced features ..................
+	// flag for arc overflow
+	short overFlow;
 };
 
 #endif
