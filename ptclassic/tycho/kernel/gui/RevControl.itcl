@@ -211,12 +211,16 @@ configbody ::tycho::RevControl::object {
 body ::tycho::RevControl::constructor {args} {
     eval itk_initialize $args
     
-    addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
-    addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"
-    addButton unedit -text "Unedit <u>" -command "$this unedit"
-    addButton help -text "Help <h>" -command "$this help"
-    addButton cancel -text "Close <Esc>" -command \
-            "$this prevWindow; delete object $this"
+    addButton checkin -text "Checkin" -underline 5 \
+            -command "$this checkInAndUpdate"
+    addButton checkout -text "Checkout" -underline 5 \
+            -command "$this checkOutAndUpdate"
+    addButton unedit -text "Unedit" -underline 0 \
+            -command "$this unedit"
+    addButton help -text "Help" -underline 0 \
+            -command "$this help"
+    addButton cancel -text "Close" -underline 0 \
+            -command "$this prevWindow; delete object $this"
 
     # This contains frame for the help panel and the history log
     itk_component add historyframe {
@@ -234,8 +238,14 @@ body ::tycho::RevControl::constructor {args} {
                 -textbackground
         # textfont
     }
-    $itk_component(history) configure -readonly 1
-    $itk_component(history) markUnmodified
+    set hsttext $itk_component(history)
+    $hsttext configure -readonly 1
+    $hsttext markUnmodified
+    bind $hsttext <i> "$this invoke checkin"
+    bind $hsttext <o> "$this invoke checkout"
+    bind $hsttext <u> "$this invoke unedit"
+    bind $hsttext <h> "$this invoke help"
+    bind $hsttext <c> "$this invoke cancel"
 
     itk_component add historybutton {
         ::tycho::ButtonBox $itk_component(historyframe).historybutton \
@@ -244,11 +254,10 @@ body ::tycho::RevControl::constructor {args} {
         keep -background -cursor -font -padx -pady
     }
     $itk_component(historybutton) add diffcheckedfiles \
-            -text "Diff Checked Files" \
+            -text "Diff Checked Files" -underline 0 \
             -command "$this compareVersion"
-    # FIXME: should change the names.
     $itk_component(historybutton) add undolastcheckin \
-            -text "Undo Last Checkin" \
+            -text "Undo Last Checkin" -underline 5 \
             -command "$this fixRecentAndUpdate"
 
     pack \
@@ -257,18 +266,21 @@ body ::tycho::RevControl::constructor {args} {
 
     itk_component add historypanel {
 	::tycho::Subpanel $itk_component(hull).pan \
-		-text "View History <v>" \
+		-text "View History" -underline 0 \
 		-childwidget $itk_component(historyframe) \
 		-execute "$this viewHistory"
     } {}
     pack $itk_component(historypanel) -anchor nw
 
-    bind $itk_component(hull) <i> "$this invoke checkin"
-    bind $itk_component(hull) <o> "$this invoke checkout"
-    bind $itk_component(hull) <v> "$itk_component(historypanel) open"
-    bind $itk_component(hull) <u> "$this invoke unedit"
-    bind $itk_component(hull) <h> "$this help"
-    bind $itk_component(hull) <Escape> "$this invoke cancel"
+    bind $hsttext <v> "$itk_component(historypanel) toggle; break"
+    bind $itk_component(hull) <d> \
+            "if \{\[$itk_component(historypanel) cget -state\] == \{open\}\} \
+            \{$itk_component(historybutton) invoke diffcheckedfiles\}"
+    bind $itk_component(hull) <l> \
+            "if \{\[$itk_component(historypanel) cget -state\] == \{open\}\} \
+            \{$itk_component(historybutton) invoke undolastcheckin\}"
+    bind $hsttext <d> "$itk_component(historybutton) invoke diffcheckedfiles"
+    bind $hsttext <l> "$itk_component(historybutton) invoke undolastcheckin"
 }
 
 ###################################################################
