@@ -43,7 +43,7 @@ HDRS= $(SRCS:.cc=.h)
 
 STAR_MK=bdfstars
 DOMAIN=BDF
-EXTRA_SRCS=bdfstars.mk $(STAR_MK).c $(PL_SRCS)
+EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)
 
 all:		makefile stars_all
 
