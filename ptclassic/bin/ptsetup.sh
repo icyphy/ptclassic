@@ -15,31 +15,34 @@
 
 # Find out the name that we are being called as
 # Check if $0 is set so we can source this from the csh prompt for testing.
-if [ $?0 ]; then
+if [ $# = 0 ]; then
     progname=`basename $0`
 else
     progname=ptsetup.csh
 fi
 
 ptarch=`$PTOLEMY/bin/ptarch`
-if [ ! $?PTARCH ]; then
+if [ -z "$PTARCH" ]; then
     PTARCH=$ptarch
     export PTARCH
 else 
     # check that the basic architecture is set correctly
-    if [ "$PTARCH" !~ "$ptarch"* ]; then
-	echo ${progname}: Warning: \$PTARCH == $PTARCH,
-	echo "        "but \$PTOLEMY/bin/ptarch returns ${ptarch}.
-    fi
+    case $PTARCH in
+	$ptarch*);;
+	*)
+	    echo ${progname}: Warning: \$PTARCH == $PTARCH,
+	    echo "        "but \$PTOLEMY/bin/ptarch returns ${ptarch}.
+	    ;;
+    esac
     # check that a makefile for this $PTARCH exists
-    if [ ! -e "$PTOLEMY/mk/config-${PTARCH}.mk" ]; then
-	echo ${progname}: Warning: \$PTARCH == $PTARCH,
-	echo "        "but there is no makefile for this architecture.
+    if [ ! -r "$PTOLEMY/mk/config-$PTARCH.mk" ]; then
+	echo "${progname}: Warning: \$PTARCH == $PTARCH,"
+	echo "        but there is no makefile for this architecture."
     fi
 fi
 unset ptarch
 
-if [ ! $?USER ]; then
+if [ -z "$USER" ]; then
     USER=$LOGNAME
     export USER
 fi
@@ -77,8 +80,8 @@ fi
 
 
 # Used by cg56/targets/CGCXBase.pl
-if [ ! $?QCKMON ]; then
-    case [$PTARCH) in
+if [ -z "$QCKMON" ]; then
+    case $PTARCH in
 	sol2) QCKMON=qckMon5
 	    export QCKMON;;
 	sun4) QCKMON=qckMon
@@ -86,7 +89,7 @@ if [ ! $?QCKMON ]; then
     esac
 fi
 
-if [ ! $?S56DSP ]; then
+if [ -z "$S56DSP" ]; then
     S56DSP=/users/ptdesign/vendors/s56dsp
     export S56DSP
 fi
@@ -101,23 +104,25 @@ if [ -x "$matlabdir/bin/util/arch.sh" ]; then
     TMPLD_LIBRARY_PATH=${TMPLD_LIBRARY_PATH}:${matlablibdir}
 fi
 
-if [$PTARCH =~ hppa*]; then
-    if [ ! $?SHLIB_PATH ]; then
-	SHLIB_PATH=$TMPLD_LIBRARY_PATH
-	export SHLIB_PATH
-    else
-	SHLIB_PATH=${TMPLD_LIBRARY_PATH}:${SHLIB_PATH}
-	export SHLIB_PATH
-    fi
-else
-    if [ ! $?LD_LIBRARY_PATH ]; then
-	LD_LIBRARY_PATH=$TMPLD_LIBRARY_PATH
-	export LD_LIBRARY_PATH
-    else
-	LD_LIBRARY_PATH=${TMPLD_LIBRARY_PATH}:${LD_LIBRARY_PATH}
-	export LD_LIBRARY_PATH
-    fi
-fi
+case $PTARCH in
+    hppa*)
+	if [ -z "$SHLIB_PATH" ]; then
+	    SHLIB_PATH=$TMPLD_LIBRARY_PATH
+	    export SHLIB_PATH
+	else
+	    SHLIB_PATH=${TMPLD_LIBRARY_PATH}:${SHLIB_PATH}
+	    export SHLIB_PATH
+	fi;;
+    *)	
+	if [ -z "$LD_LIBRARY_PATH" ]; then
+	    LD_LIBRARY_PATH=$TMPLD_LIBRARY_PATH
+	    export LD_LIBRARY_PATH
+	else
+	    LD_LIBRARY_PATH=${TMPLD_LIBRARY_PATH}:${LD_LIBRARY_PATH}
+	    export LD_LIBRARY_PATH
+	fi;;
+esac
+
 unset TMPLD_LIBRARY_PATH
 
 TCL_LIBRARY="$PTOLEMY/tcltk/itcl/lib/itcl/tcl"
@@ -138,10 +143,10 @@ sp=1
 oldifs="$IFS"; IFS=":"
 for i in $PATH
 do
-    if [ "$PTOLEMY/bin.$PTARCH" == "$i" ]; then
+    if [ "$PTOLEMY/bin.$PTARCH" = "$i" ]; then
 	bp=1
     fi 	
-    if [ "$PTOLEMY/bin" == "$i" ); then
+    if [ "$PTOLEMY/bin" = "$i" ]; then
 	sp=1
     fi	
 done	
