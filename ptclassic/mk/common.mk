@@ -49,7 +49,7 @@ PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
 
 # Build the ptlang binary if necessary
 $(PTLANG_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(ARCH)/ptlang; $(MAKE) )
+	(cd $(PTOLEMY)/obj.$(ARCH)/ptlang; $(MAKE) VPATH=../../src/ptlang)
 
 # Can't use mkdir -p here, it might not exist everywhere
 $(STARDOCDIR):
