@@ -105,7 +105,7 @@ public:
 	// Get particles from global queue and set the timeStamp.
 	// At A TIME INSTANCE, the first call of this method returns TRUE,
 	// afterwards return FALSE.
-	int getFromQueue(Particle* p);
+	virtual int getFromQueue(Particle* p);
 
 	// operator to return a zero delayed Particle,
 	// which is same as operator % (0).
@@ -132,7 +132,7 @@ public:
 	}
 
 	// clean itself before a new phase of firing.
-	void cleanIt(); 
+	virtual void cleanIt(); 
 
 	// constructor and destructor
 	InDEPort() : complete(TRUE), triggerList(0), beforeP(0), inQue(0) {}
