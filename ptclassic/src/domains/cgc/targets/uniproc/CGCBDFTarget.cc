@@ -69,32 +69,32 @@ void CGCBDFTarget::setup() {
 void CGCBDFTarget :: beginIf(PortHole& cond, int truthdir,
 			    int depth, int /*haveElsePart*/) {
 	CGCPortHole* realCond = (CGCPortHole*)&cond;
-	myCode << indent(depth);
+	*defaultStream << indent(depth);
 	const char* tflag = truthdir ? "" : "!";
-	myCode << "if (" << tflag;
-	myCode << realCond->getGeoName() << ") {\n";
+	*defaultStream << "if (" << tflag;
+	*defaultStream << realCond->getGeoName() << ") {\n";
 }
 
 void CGCBDFTarget :: beginElse(int depth) {
-	myCode << indent(depth);
-	myCode << "} else {\n";
+	*defaultStream << indent(depth);
+	*defaultStream << "} else {\n";
 }
 
 void CGCBDFTarget :: endIf(int depth) {
-	myCode << indent(depth);
-	myCode << "}\n";
+	*defaultStream << indent(depth);
+	*defaultStream << "}\n";
 }
 
 void CGCBDFTarget :: beginDoWhile(int depth) {
-	myCode << indent(depth);
-	myCode << "do {\n";
+	*defaultStream << indent(depth);
+	*defaultStream << "do {\n";
 }
 
 void CGCBDFTarget :: endDoWhile(PortHole& cond,int truthdir,int depth) {
 	const char* tflag = truthdir ? "" : "!";
 	CGCPortHole* realCond = (CGCPortHole*)&cond;
-	myCode << indent(depth);
-	myCode << "} while (" << tflag << realCond->getGeoName() 
+	*defaultStream << indent(depth);
+	*defaultStream << "} while (" << tflag << realCond->getGeoName() 
 	       << ");\n";
 }
 
