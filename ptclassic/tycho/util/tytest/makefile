@@ -44,7 +44,8 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	bin demo doc test
 
-TCL_SRCS = 
+TCL_SRCS = \
+	testDefs.tcl
 
 ITCL_SRCS = 
 
