@@ -62,6 +62,10 @@ endif
 endif
 endif
 
+ifdef PTCL
+	TK =
+endif
+
 ifdef FULL
 	PIGI = 		$(BASENAME)
 	VERSION_DESC =	'With All Common Domains'
