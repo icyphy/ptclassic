@@ -45,17 +45,21 @@ test remote-method {Make sure that the interface to methods are intact!} {
     ::tycho::ResourceRemote $remoteobj
     set status {}
 
+    # Exception: source
     set methods {\
-            {cachefile {(should be redefined)}}\
+            {cachefile {(is abstract)}}\
             {close {(is not open)}}\
+            {{connect non} {non}}\
             {eof {(is not open)}}\
             {gets {(is not open)}}\
             {isopen {(0)}}\
-            {{puts HELLO} {(should be redefined)}}\
+            {open {(is abstract)}}\
+            {path {non}}\
+            {progress {}}\
+            {{puts HELLO} {(is abstract)}}\
             {read {(is not open)}}\
             {streamable {(1)}} \
-            {progress {(should be redefined)}}\
-            {{write HELLO} {(should be redefined)}}}
+            {{write HELLO} {(is abstract)}}}
 
     foreach method $methods {
         catch "$remoteobj [lindex $method 0]" msg
@@ -70,22 +74,16 @@ test remote-method {Make sure that the interface to methods are intact!} {
     }
     delete object $remoteobj
     list $status
-} {{{should be redefined} {is not open} {is not open} {is not open} 0 {should be redefined} {is not open} 1 {should be redefined} {should be redefined}}}
+} {{{is abstract} {is not open} non {is not open} {is not open} 0 {is abstract} non 1.0 {is abstract} {is not open} 1 {is abstract}}}
 
 test remote-procs {Make sure that the interface to procs are intact!} {
     set status {}
 
     # The exceptions are "initialize" and "new"
     set procs {\
-            {{chmod a+r non} {(should be redefined)}} \
-            {{contenttype non} {(should be redefined)}} \
-            {{delete non} {(should be redefined)}} \
-            {{dirlist non} {(should be redefined)}} \
-            {{exists non} {(should be redefined)}} \
-            {{forward non} {(should be redefined)}} \
-            {{mkdir non} {(should be redefined)}} \
-            {{query non option} {(should be redefined)}} \
-            {{stat non vars} {(should be redefined)}}}
+            {{contenttype non} {(is abstract)}} \
+            {{forward non} {non}} \
+            {{isremote non} {(1)}}}
             
     foreach procname $procs {
         catch "::tycho::ResourceRemote::[lindex $procname 0]" msg
@@ -99,5 +97,4 @@ test remote-procs {Make sure that the interface to procs are intact!} {
         }
     }
     list $status
-} {{{should be redefined} {should be redefined} {should be redefined} {should be redefined} {should be redefined} non {should be redefined} {should be redefined} {should be redefined}}}
-
+} {{{is abstract} non 1}}
