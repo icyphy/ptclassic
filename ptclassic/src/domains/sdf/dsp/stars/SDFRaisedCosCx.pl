@@ -17,7 +17,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { SDF dsp library }
 	explanation {
 This star outputs a complex raised cosine pulse with excess bandwidth given
-by \fIexcessbw\fR and pulse width (distance from center to first
+by \fIexcessBW\fR and pulse width (distance from center to first
 zero crossing) given by \fIP\fP.  The length of the filter (number
 of taps) is \fIN\fP, and the output sample rate is \fIupsample\fP
 times the input.  This star is implemented by deriving from the ComplexFIR
