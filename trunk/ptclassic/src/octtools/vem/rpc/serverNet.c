@@ -65,6 +65,7 @@ static char SccsId[]="$Id$";
 #include "message.h"
 #include "commands.h"
 #include "rpcServer.h"
+#include "serverUtils.h"
 
 /* maximum number of rpc applications */
 int RPCMaxApplications = 0;
@@ -86,6 +87,10 @@ extern char *getnodename();
 #else
 #define RemoteShell "rsh"
 #endif
+
+/* Forward declarations */
+static int RPCAddApplication
+	ARGS((char *host, char *name));
 
 /*
  * wait for RPC Events
@@ -527,8 +532,8 @@ int application;
 
     app = &(RPCApplication[application]);
 
-    (void) sprintf(buffer, "Elapsed time is %d seconds\nvem> ",
-	    time((long *) 0) - app->startingTime);
+    (void) sprintf(buffer, "Elapsed time is %ld seconds\nvem> ",
+	    (long)(time((long *) 0) - app->startingTime));
     vemMessage(buffer, MSG_NOLOG|MSG_DISP);
 
     stream = app->ReceiveStream;
@@ -635,7 +640,7 @@ long userOptionWord;
 	pointer = (long *) number;
 
 	if (app->user == NIL(char)) {
-	    (void) sprintf(remoteUser, "");
+	    remoteUser[0]='\0';
 	} else {
 	    (void) sprintf(remoteUser, "-l %s", app->user);
 	}
@@ -646,7 +651,7 @@ long userOptionWord;
 		|| (strlen(remoteUser) > 0))
 	    /* then build up a backgrounded r-shell with stdin disconnected */
             (void) sprintf(command,
-			   "%s %s %s -n %s %s %s %d %s %d %d %d %d %d &",
+			   "%s %s %s -n %s %s %s %d %s %d %d %d %d %ld &",
 			   RemoteShell,
 			   app->host,
 			   remoteUser,
@@ -658,7 +663,7 @@ long userOptionWord;
 			   number[0], number[1], number[2], number[3],
 			   *pointer);
 	    /* else build up a backgrounded shell with stdin disconnected */
-	    else (void) sprintf(command, "%s %s %s %d %s %d %d %d %d %d &",
+	    else (void) sprintf(command, "%s %s %s %d %s %d %d %d %d %ld &",
 				app->name,
 				DisplayString(xv_disp()),
 				app->localhost,
@@ -744,16 +749,16 @@ int application;
     app = &(RPCApplication[application]);
 
     if (app->user == NIL(char)) {
-	(void) sprintf(remoteUser, "");
+	remoteUser[0]='\0';
     } else {
 	(void) sprintf(remoteUser, "-l %s", app->user);
     }
 
-    (void) sprintf(command, "rsh %s %s kill -%d %d",
+    (void) sprintf(command, "rsh %s %s kill -%d %ld",
 		     app->host,
 		     remoteUser,
 		     RPC_KILL_SIGNAL,
-		     app->pid);
+		     (long)app->pid);
 
     if (system(command) < 0) {
 	vemMessage("RPC Warning: can't execute the kill\n", MSG_DISP);
