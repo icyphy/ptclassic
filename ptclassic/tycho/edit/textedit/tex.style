@@ -1,0 +1,18 @@
+#
+# %Q%  $Id$
+#
+# The "tex" master style-sheet
+#
+configure -title "TeX colors"
+configure -description {
+    Additional color settings for makefile editors.
+}
+
+style default \
+	-label "Default"  {
+    parameter environmentColor green3 -type color -label "?environmentColor?"
+    parameter labelColor red -type color -label "?labelColor?"
+    parameter mathColor orangered3 -type color -label "?mathColor?"
+    parameter sectionColor DeepPink -type color -label "?sectionColor?"
+    parameter subsectionColor purple -type color -label "?subsectionColor?"
+}
