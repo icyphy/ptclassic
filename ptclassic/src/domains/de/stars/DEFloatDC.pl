@@ -1,28 +1,14 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  S. Ha
- Date of creation: 8/31/90
- Converted to use preprocessor, 9/29/90, by E. A. Lee
-
- This star produces a DC output (default value is zero) when stimulated
- by an input.  The time stamp of the output is the same as that of the
- input.
-
-**************************************************************************/
-}
 defstar {
 	name {FloatDC}
 	domain {DE}
+	version { $Id$}
+	author { Soonhoi Ha }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	desc {
-		"Produces a DC output (default value is zero) when stimulated\n"
- 		"by an input.  The time stamp of the output is the same as\n"
-		"that of the input. The value of the input is ignored."
+Produces a DC output (default value is zero) when stimulated
+by an input.  The time stamp of the output is the same as
+that of the input. The value of the input is ignored.
 	}
 	input {
 		name {input}
@@ -36,7 +22,7 @@ defstar {
 		name {value}
 		type {float}
 		default {"0.0"}
-		desc { "Value of output events" }
+		desc { Value of the output particles. }
 	}
 
 	go {

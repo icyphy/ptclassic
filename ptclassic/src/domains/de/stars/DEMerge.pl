@@ -1,24 +1,11 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/29/90
-
- This star merges input streams, outputing events in temporal order
-
-**************************************************************************/
-}
 defstar {
 	name {Merge}
 	domain {DE}
-	desc {
-	   "Merge input events, keeping temporal order"
-	}
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	desc { Merge input events, keeping temporal order.  }
 	inmulti {
 		name {input}
 		type {anytype}

@@ -1,26 +1,14 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 9/29/90
-
- This star switches input events to one of two outputs, depending on
- the last received control input.
-
-**************************************************************************/
-}
 defstar {
 	name {Switch}
 	domain {DE}
 	desc {
-	   "Switches input events to one of two outputs, depending on\n"
-	   "the last received control input."
+Switches input events to one of two outputs, depending on
+the last received control input.
 	}
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
 	input {
 		name {input}
 		type {anytype}

@@ -1,29 +1,19 @@
-ident {
-/**************************************************************************
-Version identification:
-$Id$
-
- Copyright (c) 1990 The Regents of the University of California.
-                       All Rights Reserved.
-
- Programmer:  E. A. Lee
- Date of creation: 10/21/90
-
- This star emulates a deterministic, processor-sharing server.
- If input events arrive when it is not busy,
- it delays them by the nominal service time.
- If they arrive when it is busy, the server is shared.
- Hence prior arrivals that are still in service
- will be delayed by more than the nominal service time.
-
-**************************************************************************/
-}
 defstar {
 	name {PSServer}
 	derivedFrom { RepeatStar }
 	domain {DE}
-	desc {
-	   "This star emulates a processor-sharing server"
+	version { $Id$}
+	author { E. A. Lee }
+	copyright { 1991 The Regents of the University of California }
+	location { DE main library }
+	desc { Emulates a processor-sharing server.  }
+	explanation {
+This star emulates a deterministic, processor-sharing server.
+If input events arrive when it is not busy,
+it delays them by the nominal service time.
+If they arrive when it is busy, the server is shared.
+Hence prior arrivals that are still in service
+will be delayed by more than the nominal service time.
 	}
 	input {
 		name {input}
