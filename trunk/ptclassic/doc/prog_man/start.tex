@@ -1,43 +1,58 @@
-\c Version $Id$
-\node Getting Started
-\chapter{Getting Started}
-\Author{T. M. Parks}
-\date{$Date$}
-If you want to extend Ptolemy by modfying or
-adding a new scheduler, target, or
-even an entire domain, it is recommended that you create a duplicate
-directory hierarchy.  This allows you to experiment with and fully test
-any changes before incorporating them into the ``official'' version of
-Ptolemy.  It also means that all of the existing makefiles will work
-without modification because all of the paths specified are relative to
-the root of the hierarchy.
+% Version $Id$
 
-The most direct way to do this is to copy the entire
-Ptolemy hierarchy.  This could be done with a command such as:
+\begin{ifhtml}
+\documentstyle{article}
+\htmldirectory{.}
+\htmlname{tree}
+\htmldepth{3}
+\htmltitle{Managing a Personal Ptolemy Tree}
+\begin{document}
+\topnode{Managing a Personal Ptolemy Tree}
+\end{ifhtml}
+
+\begin{iftex}
+\chapter{Managing a Personal Ptolemy Tree}
+\end{iftex}
+If you want to extend Ptolemy by modfying or adding a new scheduler,
+target, or even an entire domain, it is recommended that you create a
+duplicate directory hierarchy.  This allows you to experiment with and
+fully test any changes before incorporating them into the ``official''
+version of Ptolemy.  It also means that all of the existing makefiles
+will work without modification because all of the paths specified are
+relative to the root of the hierarchy.
+
+The most direct way to do this is to copy the entire Ptolemy
+hierarchy.  This could be done with a command such as:
 \begin{example}
-cp -r ~ptolemy ~/ptolemy
+cp -r \sim{}ptdesign \sim{}/Ptolemy
 \end{example}
 which would create a copy of the hierarchy in your home directory.
 Because this method requires excessive disk space, many developers
 prefer to use symbolic links when creating a duplicate hierarchy.
 
-\node Aliases for Managing Symbolic Links
-\section{Aliases for Managing Symbolic Links}
+%Instead of making copies of all the files, you could set up a shadow
+%tree with copies of all the \emph{directories}, but symbolic links for
+%all the files.  You can do this with a simple commands such as:
+%\begin{example}
+%lndir \sim{}ptdesign \sim{}/Ptolemy
+%\end{example}
 
-Below are several \code{csh} aliases that can be helpful when managing a
-duplicate hierarchy that is implemented with symbolic links:
+\htmlmenu{6}
+
+\section{Aliases for Managing Symbolic Links}
+Below are several \code{csh} aliases that can be helpful when managing
+a duplicate hierarchy that is implemented with symbolic links:
 \begin{example}
 alias obj 'echo $cwd | sed s:/src:/obj.$\{ARCH\}:'
 alias src 'echo $cwd | sed s:/obj.$\{ARCH\}:/src:'
 alias pt  'echo $cwd | sed s:$\{HOME\}/Ptolemy:$\{PTOLEMY\}:'
 alias ptl 'ln -s `pt`/* .'
-alias sw  'mv \back !^ swap$$; mv .\back !^ \back !^; mv swap$$ .\back !^'
-alias exp 'mkdir .\back !^; sw \back !^; cd \back !^; ptl'
-alias rml '\back rm -f `\back ls -F \back !* | sed -n s/@\back $//p`'
+alias sw  'mv \back{}!^ swap$$; mv .\back{}!^ \back{}!^; mv swap$$ .\back{}!^'
+alias exp 'mkdir .\back{}!^; sw \back{}!^; cd \back{}!^; ptl'
+alias rml '\back{}rm -f `\back{}ls -F \back{}!* | sed -n s/@\back{}$//p`'
 alias mkl 'rml make*; ln -s `vpath`/make* .'
 \end{example}
 
-\node The obj and src Aliases
 \subsection{The \protect\code{obj} and \protect\code{src} Aliases}
 
 The \code{obj} alias gives the name of the object-file directory
@@ -54,7 +69,6 @@ cd `src`
 vi SDFStar.h
 \end{example}
 
-\node The pt Alias
 \subsection{The \protect\code{pt} Alias}
 
 The \code{pt} alias gives the name of the ``official''
@@ -63,7 +77,7 @@ that you have the environment variable \code{$PTOLEMY} set to the root
 directory of
 the ``official'' version of Ptolemy,
 and that your
-private version is in \file{~/Ptolemy}.  If this is not the case, then
+private version is in \file{\sim{}/Ptolemy}.  If this is not the case, then
 you should make suitable modifications to the \code{pt} alias.  This
 alias is useful when you want to make a symbolic link to or otherwise
 access the ``official'' version of a file:
@@ -71,8 +85,8 @@ access the ``official'' version of a file:
 ln -s `pt`/SCCS .
 \end{example}
 
-\node The ptl Alias
 \subsection{The \protect\code{ptl} Alias}
+\label{ptl.alias}
 
 The \code{ptl} alias uses the \code{pt} alias to create, in the current
 directory, symbolic links to all the files in the corresponding
@@ -85,7 +99,6 @@ cd stars
 ptl
 \end{example}
 
-\node The sw Alias
 \subsection{The \protect\code{sw} Alias}
 The \code{sw} alias, which was used above, swaps a file \var{filename}
 with another file \var{.filename}.  The period at the beginning of the
@@ -94,16 +107,16 @@ option of the \code{ls} command.  If you use the \samp{-F} option of
 the \code{ls} command, then it is easy to see which files in a
 directory are symbolic links.
 
-\node The exp Alias
 \subsection{The \protect\code{exp} Alias}
-The \code{exp} aliases combines the functions of the \code{ptl} and \code{sw}
-aliases into one, making the common task of expanding a branch in the
-directory hierarchy easy.  It invokes the same set of commands shown in the
-example for the \code{ptl} alias (\pxref{The ptl Alias}),
-leaving you in the new
-directory ready to issue another \code{exp} command.
+The \code{exp} aliases combines the functions of the \code{ptl} and
+\code{sw} aliases into one, making the common task of expanding a
+branch in the directory hierarchy easy.  It invokes the same set of
+commands shown in the example for the
+\link{\code{ptl} alias}[,described in section~\Ref,]{ptl.alias}
+leaving you in the new directory ready to issue another \code{exp}
+command.
 \begin{example}
-cd ~/Ptolemy
+cd \sim{}/Ptolemy
 exp src
 exp domains
 exp sdf
@@ -111,7 +124,6 @@ exp dsp
 exp stars
 \end{example}
 
-\node The rml Alias
 \subsection{The \protect\code{rml} Alias}
 The \code{rml} alias removes symbolic links in the current directory.
 Without an argument, it removes all the visible symbolic links.  Any
@@ -127,7 +139,6 @@ links:
 rml *.o
 \end{example}
 
-\node Creating a Duplicate Hierarchy
 \section{Creating a Duplicate Hierarchy}
 
 Let's look at an example to see how these aliases can be used.  Suppose
@@ -141,12 +152,12 @@ the graphical interface \code{pigiRpc}.
 \noindent
 First, create the root directory for your duplicate hierarchy.
 \begin{example}
-mkdir ~/Ptolemy
+mkdir \sim{}/Ptolemy
 \end{example}
 Then go into that directory and create symbolic links to all files in the
 corresponding ``official'' Ptolemy directory.
 \begin{example}
-cd ~/Ptolemy
+cd \sim{}/Ptolemy
 ptl
 \end{example}
 You will want to have a private version of the
@@ -154,7 +165,7 @@ You will want to have a private version of the
 so that you won't modify the ``official'' version of any library or
 object files.
 \begin{example}
-cd ~/Ptolemy
+cd \sim{}/Ptolemy
 exp lib.$ARCH
 \end{example}
 You will also want a private
@@ -163,7 +174,7 @@ for the same
 reason.  In this example, the tree is expanded down to the \file{sdf}
 directory.
 \begin{example}
-cd ~/Ptolemy
+cd \sim{}/Ptolemy
 exp obj.$ARCH
 exp domains
 exp sdf
@@ -191,15 +202,21 @@ exp stars
 mkl
 \end{example}
 Because of the way symbolic links work, it is important to remove the
-links for the \file{.o} and \file{.a} files in the directories you have
-just created.  You can do this by issuing a \samp{make realclean}
-command in the \file{obj.$ARCH/domains/sdf} directory.  This will
-recursively clean out all the subdirectories.  You could also do this
+links for the \file{.o} and \file{.a} files in the directories you
+have just created.  You can do this by issuing a \samp{make realclean}
+command in the \file{obj.$ARCH} directory. This will recursively clean
+out all your private subdirectories.  It will not clean out
+directories where you do not have write permission, such as the links
+to the ``official'' Ptolemy directories.  You could also do this
 manually by issuing a \samp{rml *.o *.a} command in each directory.
+\begin{example}
+cd \sim{}/Ptolemy/obj.$ARCH
+make realclean
+\end{example}
 
 You will also need a private version of the \file{src} directory.
 \begin{example}
-cd ~/Ptolemy
+cd \sim{}/Ptolemy
 exp src
 exp domains
 exp sdf
@@ -207,9 +224,21 @@ exp kernel
 \end{example}
 
 At any point after this, it is possible to switch back and forth
-between private and
-``official'' versions of these directories with the \code{sw} alias.
-In fact, you just used it (as part of the \code{exp} alias) to
-switch to the private versions of the
+between private and ``official'' versions of directories or files with
+the \code{sw} alias.  In fact, you just used it (as part of the
+\code{exp} alias) to switch to the private versions of the
 \file{obj.$ARCH}, \file{lib.$ARCH}, and \file{src} directories.
+For example, once you have finished your changes in the
+\file{sdf/kernel} directory and installed them in the ``official''
+Ptolemy tree, you will probably want to switch parts of your tree back
+to the ``official'' versions.
+\begin{example}
+cd \sim{}/Ptolemy/src/domains
+sw sdf
+cd `obj`
+sw sdf
+\end{example}
 
+\begin{ifhtml}
+\end{document}
+\end{ifhtml}

@@ -1,50 +1,50 @@
-\c Version $Id$
-\node CGC Domain
+% Version $Id$
 \chapter{CGC Domain}
+\label{CGC Domain}
 
 \Author{Joseph T. Buck \\
 Soonhoi Ha \\
 Edward A. Lee \\
 Thomas M. Parks}
-\cindex{Buck, J. T.}
-\cindex{Ha, S.}
-\cindex{Lee, E. A.}
-\cindex{Parks, T. M.}
+\index{Buck, J. T.}
+\index{Ha, S.}
+\index{Lee, E. A.}
+\index{Parks, T. M.}
 
 \Contrib{Kennard White}
-\cindex{White, K.}
-\date{$Date$}
+\index{White, K.}
+%\date{$Date$}
 
 The \dfn{CGC domain} generates code for the \code{C} programming
-language.  Chapter\tie\ref{Code Generation} describes the features
+language.  Chapter~\ref{Code Generation} describes the features
 common to all code generation domains.
 The basic principles of writing code generation stars are explained in
-\nxref{Writing code generation stars}.  You will find explanations for
+\link{section}[~\Ref]{Writing code generation stars}.  You will find explanations for
 codeblocks, macros, and attributes there.
 This chapter explains features
 specific to the CGC domain.  Refer to the CGC domain chapter in the
 user's manual for an introduction to this domain.
 
-\begin{ignore}
-\comment The P_GLOBAL and P_LOCAL attributes are not used at this time.
+\begin{ifhtml}
+% The P_GLOBAL and P_LOCAL attributes are not used at this time.
 
-\node CGC Attributes
 \section{Attributes}
+\label{CGC Attributes}
 
-The attributes \code{P_GLOBAL} and \code{P_LOCAL} are defined for use
-with the \code{CGCPortHole}\tindex{CGCPortHole class} class.  They are
-the counterparts of the \code{A_GLOBAL}\vindex{A_GLOBAL attribute} and
-\code{A_LOCAL}\vindex{A_LOCAL attribute} attributes for states.  They
+The attributes \code{P\_GLOBAL} and \code{P\_LOCAL} are defined for use
+with the \code{CGCPortHole}\index{CGCPortHole class} class.  They are
+the counterparts of the \code{A\_GLOBAL}\index{A\_GLOBAL attribute} and
+\code{A\_LOCAL}\index{A\_LOCAL attribute} attributes for states.  They
 control whether the buffer associated with a port is declared as a
 global variable or a local variable.
 
 \begin{indexlist}{ attribute}
 
-\variable{const Attribute}{P_GLOBAL}
+\variable{const Attribute}{P\_GLOBAL}
 Declare the buffer associated with a port as a global variable, which
 can be accessed outside the main function.
 
-\variable{const Attribute}{P_LOCAL}
+\variable{const Attribute}{P\_LOCAL}
 Declare the buffer associated with a port as a local variable within the
 main function.
 
@@ -54,7 +54,7 @@ By default, all
 buffers are declared as local variables within the main function.  This
 allows compilers to make optimizations that would not be possible if
 the buffers had been declared as global variables.  If the buffers must
-be accessed outside the main function, then use the \code{P_GLOBAL}
+be accessed outside the main function, then use the \code{P\_GLOBAL}
 attribute as shown in the following example.
 
 \begin{example}
@@ -62,135 +62,136 @@ output
 \{
     name \{ out \}
     type \{ float \}
-    attributes \{ P_GLOBAL \}
+    attributes \{ P\_GLOBAL \}
 \}
 \end{example}
 
-\end{ignore}
+\end{ifhtml}
 
-\node CGC Code Generation Methods
 \section{Code Generation Methods}
+\label{CGC Code Generation Methods}
 
 The \code{addCode} method is context sensitive so that it will ``do the
 right thing'' when invoked from within the \code{initCode}, \code{go},
-and \code{wrapup} methods of \code{CGCStar}.  Refer to \nxref{Writing
-code generation stars} for documentation on \code{addCode}, including
+and \code{wrapup} methods of \code{CGCStar}.  Refer to
+\link{section}[~\Ref]{Writing code generation stars}
+for documentation on \code{addCode}, including
 context sensitive actions and conditional code generation.  There are
 several additional code-generation methods defined in the CGC domain.
-The \code{addInclude} method is used to generate \samp{#include
+The \code{addInclude} method is used to generate \samp{\#include
 \var{file}} directives.  The \code{addDeclaration} method is used to
 declare local variables within the main function.  The \code{addGlobal}
 method is used to declare global variables outside the main function.
 As with \code{addCode}, these methods return \samp{TRUE} if code was
 generated for the appropriate stream and \samp{FALSE} otherwise.  These
-methods are member functions of the \code{CGCStar}\tindex{CGCStar
+methods are member functions of the \code{CGCStar}\index{CGCStar
 class} class.
 
 \begin{indexlist}{CGCStar}
 
 \method{int}{addInclude}{(const char* \var{file})}
-Generate the directive \samp{#include \var{file}} in the
-\code{include}\vindex{include!CGCTarget member} stream.  The string
+Generate the directive \samp{\#include \var{file}} in the
+\code{include}\index{include!CGCTarget member} stream.  The string
 \var{file} must include quotation marks ( ``name'' ) or angle brackets
 ( <name> ) around the name of the file to be included.  Only one
-\samp{#include \var{file}} directive will be generated for the file,
+\samp{\#include \var{file}} directive will be generated for the file,
 even if \code{addInclude} is invoked multiple times with the same
 argument.  Return \samp{TRUE} if a new directive was generated.
 
 \method{int}{addDeclaration}{(const char* \var{text}, const char* \var{name} = NULL)}
-Add \var{text} to the \code{mainDecls}\vindex{mainDecls!CGCTarget
+Add \var{text} to the \code{mainDecls}\index{mainDecls!CGCTarget
 member} stream.  Use \var{name} as the identifying key for the code
 fragment if it is provided, otherwise use \var{text} itself as the
 key.  Code will be added to the stream only the first time that a
 particular key is used.
 
 \method{int}{addGlobal}{(const char* \var{text}, const char* \var{name} = NULL)}
-Add \var{text} to the \code{globalDecls}\vindex{globalDecls!CGCTarget
+Add \var{text} to the \code{globalDecls}\index{globalDecls!CGCTarget
 method} stream.  Use \var{name} as the identifying key for the code
 fragment if it is provided, otherwise use \var{text} itself as the
 key.  Code will be added to the stream only the first time that a
 particular key is used.
 
-\begin{ignore}
-\comment addCode will add to the mainInit stream when called from initCode.
+\begin{ifhtml}
+% addCode will add to the mainInit stream when called from initCode.
 
 \method{int}{addMainInit}{(const char* \var{text}, const char* \var{name} = NULL)}
-Add \var{text} to the \code{mainInit}\vindex{mainInit!CGCTarget member}
+Add \var{text} to the \code{mainInit}\index{mainInit!CGCTarget member}
 stream.  If \var{name} is not \samp{NULL}, then use it as the
 identifying key for the code fragment, which is added conditionally.
 
-\end{ignore}
+\end{ifhtml}
 
 \end{indexlist}
 
 The following streams, which are used by the code generation methods
 just described, are defined as members of the
-\code{CGCTarget}\tindex{CGCTarget class} class in addition to the
-streams defined by the \code{CGTarget}\tindex{CGTarget class} class.
+\code{CGCTarget}\index{CGCTarget class} class in addition to the
+streams defined by the \code{CGTarget}\index{CGTarget class} class.
 
 \begin{indexlist}{CGCTarget}
 
-\begin{ignore}
-\comment These streams are not used when writing stars.
+\begin{ifhtml}
+% These streams are not used when writing stars.
 
 \member{CodeStream}{commInit}
-This stream is used by the \code{CGCMultiTarget}\tindex{CGCMultiTarget
-class} class (\pxref{CGCMultiTarget}) for the initialization code
+This stream is used by the \code{CGCMultiTarget}\index{CGCMultiTarget
+class} class (\link{see section}[~\Ref]{CGCMultiTarget}) for the initialization code
 associated with send and receive stars.
 
 \member{CodeStream}{wormIn}
 This stream is used by the
-\code{wormInputCode}\findex{wormInputCode!CGCTarget method} method.
+\code{wormInputCode}\index{wormInputCode!CGCTarget method} method.
 
 \member{CodeStream}{wormOut}
 This stream is used by the
-\code{wormOutputCode}\findex{wormOutputCode!CGCTarget method} method.
+\code{wormOutputCode}\index{wormOutputCode!CGCTarget method} method.
 
-\end{ignore}
+\end{ifhtml}
 
 \member{CodeStream}{include}
 Include directives are added to this stream by the
-\code{addInclude}\findex{addInclude!CGCStar method} method of
+\code{addInclude}\index{addInclude!CGCStar method} method of
 \code{CGCStar}.
 
 \member{CodeStream}{mainDecls}
 Local declarations for variables are added to this stream by the
-\code{addDeclaration}\findex{addDeclaration!CGCStar method} method of
+\code{addDeclaration}\index{addDeclaration!CGCStar method} method of
 \code{CGCStar}.
 
 \member{CodeStream}{globalDecls}
 Global declarations for variables and functions are added to this
-stream by the \code{addGlobal}\findex{addGlobal!CGCStar method} method
+stream by the \code{addGlobal}\index{addGlobal!CGCStar method} method
 of \code{CGCStar}.
 
 \member{CodeStream}{mainInit}
 Initialization code is added to this stream when the
-\code{addCode}\findex{addCode!CGStar method} method is invoked from
-within the \code{initCode}\findex{initCode!Star method} method.
+\code{addCode}\index{addCode!CGStar method} method is invoked from
+within the \code{initCode}\index{initCode!Star method} method.
 
 \member{CodeStream}{mainClose}
-Code generated when the \code{addCode}\findex{addCode!CGStar method}
-method is invoked from within the \code{wrapup}\findex{wrapup!Star
+Code generated when the \code{addCode}\index{addCode!CGStar method}
+method is invoked from within the \code{wrapup}\index{wrapup!Star
 method} method of stars is placed in this stream.
 
 \end{indexlist}
 
-\node CGC Buffer Embedding
 \section{Buffer Embedding}
+\label{CGC Buffer Embedding}
 
 Although many of the methods related to buffer embedding are actually
 implemented in the CG domain, only the CGC domain makes use of them at
 this time.  The following function is defined as a method of the
-\code{CGPortHole}\tindex{CGPortHole class} class.
+\code{CGPortHole}\index{CGPortHole class} class.
 
 \begin{indexlist}{CGPortHole}
-\method{void}{embed}{(CGPortHole& \var{port}, int \var{location} = -1)}
+\method{void}{embed}{(CGPortHole\& \var{port}, int \var{location} = -1)}
 Embed the buffer of \var{port} in the buffer of this porthole with
 offset \var{location}.  The default \var{location} of \samp{-1}
 indicates that the offset is not yet determined.
 
-\begin{ignore}
-\comment These methods are not used when writing a star.
+\begin{ifhtml}
+% These methods are not used when writing a star.
 
 \method{CGPortHole*}{embedded}{()}
 Return a pointer to the porthole where this porthole's buffer is embedded.
@@ -209,12 +210,12 @@ it is embedded.
 Set the offset of this porthole's buffer with respect to the buffer in which it
 is embedded to \var{location}.
 
-\end{ignore}
+\end{ifhtml}
 
 \end{indexlist}
 
 For example, the following statements appear in the \code{setup} method
-of the \code{Switch}\tindex{Switch!CGC block} block.  This causes the
+of the \code{Switch}\indexStarRef{Switch!CGC block} block.  This causes the
 buffers of \var{trueOutput} and \var{falseOutput} to be embedded within
 the buffer of \var{input}.
 
@@ -223,13 +224,13 @@ input.embed(trueOutput,0);
 input.embed(falseOutput,0);
 \end{example}
 
-\node CGC BDF Stars
 \section{BDF Stars}
+\label{CGC BDF Stars}
 
-Because the class \code{CGCPortHole}\tindex{CGCPortHole class} is not
-derived from \code{BDFPortHole}\tindex{BDFPortHole class}, the
-\code{setBDFParams}\findex{setBDFParams!BDFPortHole method} method
-described in chapter\tie\ref{BDF Domain} is not available for code
+Because the class \code{CGCPortHole}\index{CGCPortHole class} is not
+derived from \code{BDFPortHole}\index{BDFPortHole class}, the
+\code{setBDFParams}\index{setBDFParams!BDFPortHole method} method
+described in chapter~\ref{BDF Domain} is not available for code
 generation stars.  Use the \code{setRelation} method of
 \code{DynDFPortHole} instead.
 
@@ -239,41 +240,41 @@ generation stars.  Use the \code{setRelation} method of
 Specify the \var{relation} of this port with the associated porthole
 \var{assoc}.  There are five possible values for \var{relation}:
 \begin{description}
-\item[DF_NONE] no relationship.
-\item[DF_TRUE] produces/consumes data only when \var{assoc}
+\item[DF\_NONE] no relationship.
+\item[DF\_TRUE] produces/consumes data only when \var{assoc}
 has a \samp{TRUE} particle.
-\item[DF_FALSE] produces/consumes data only when \var{assoc}
+\item[DF\_FALSE] produces/consumes data only when \var{assoc}
 has a \samp{FALSE} particle.
-\item[DF_SAME] signal is logically the same as \var{assoc}.
-\item[DF_COMPLEMENT] signal is the logical complement of \var{assoc}.
+\item[DF\_SAME] signal is logically the same as \var{assoc}.
+\item[DF\_COMPLEMENT] signal is the logical complement of \var{assoc}.
 \end{description}
 
 \end{indexlist}
 
 For example, the following statements describe the relationships among
-the portholes of the \code{Switch}\tindex{Switch!CGC block} block.
+the portholes of the \code{Switch}\indexStarRef{Switch!CGC block} block.
 
 \begin{example}
-trueOutput.setRelation(DF_TRUE, &control);
-falseOutput.setRelation(DF_FALSE, &control);
+trueOutput.setRelation(DF\_TRUE, \&control);
+falseOutput.setRelation(DF\_FALSE, \&control);
 \end{example}
 
-\node CGC Tcl/Tk Stars
 \section{Tcl/Tk Stars}
+\label{CGC Tcl/Tk Stars}
 
 The \code{CGCTclTkTarget} class defines the
-\code{tkSetup}\vindex{tkSetup!CGCTclTkTarget stream for Tcl/Tk stars.
+\code{tkSetup}\index{tkSetup!CGCTclTkTarget stream for Tcl/Tk stars.
 member}.  There is no special code generation function for this stream,
-so its name must be used with \code{addCode}\findex{addCode!CGStar
+so its name must be used with \code{addCode}\index{addCode!CGStar
 method}.  This is usually done from within the
-\code{initCode}\findex{initCode!CGStar method} method.
+\code{initCode}\index{initCode!CGStar method} method.
 
 \begin{example}
 addCode(\var{codeblock}, "tkSetup");
 \end{example}
 
 The following functions, which are defined in the file
-\file{tkMain.c}\pindex{tkMain.c}, can be used within codeblocks of
+\file{tkMain.c}\index{tkMain.c}, can be used within codeblocks of
 Tcl/Tk stars in the CGC domain.
 
 \begin{sloppypar}
@@ -283,29 +284,29 @@ Tcl/Tk stars in the CGC domain.
 This functions creates a pop-up window containing \var{message}.
 
 \function{void}{makeEntry}{(char* \var{window}, char* \var{name},
-char* \var{desc}, char*  \var{initValue}, Tcl_CmdProc* \var{callback})}
+char* \var{desc}, char*  \var{initValue}, Tcl\_CmdProc* \var{callback})}
 This function creates an entry box in a \var{window}.  The \var{name}
 of the entry box must be unique (e.g. derived from the star name).  The
 description of the entry box is \var{desc}.  The initial value in the
 entry box is \var{initValue}.
 
 A \var{callback} function is called whenever the user enters a
-\key{RET} in the box.  The argument to the \var{callback} function
+\kbd{RET} in the box.  The argument to the \var{callback} function
 will be the value that the user has put in the entry box.  The return
-value of the \var{callback} function should be \samp{TCL_OK}.
+value of the \var{callback} function should be \samp{TCL\_OK}.
 
 \function{void}{makeButton}{(char* \var{window}, char* \var{name},
-char* \var{desc}, Tcl_CmdProc* \var{callback})}
+char* \var{desc}, Tcl\_CmdProc* \var{callback})}
 This function creates a push button in a \var{window}.  The \var{name}
 of the push button must be unique (e.g. derived from the star name).  The
 description of the push button is \var{desc}.
 
 A \var{callback} function is called whenever the user pushes the
 button.  The return value of the \var{callback} function should be
-\samp{TCL_OK}.
+\samp{TCL\_OK}.
 
 \function{void}{makeScale}{(char* \var{window}, char* \var{name},
-char* \var{desc}, int \var{position}, Tcl_CmdProc* \var{callback})}
+char* \var{desc}, int \var{position}, Tcl\_CmdProc* \var{callback})}
 This function creates a scale (with slider) in a \var{window}.  The
 \var{name} of the scale must be unique (e.g. derived from the star
 name).  The description of the push button is \var{desc}.  The initial
@@ -315,7 +316,7 @@ A \var{callback} function is called whenever the user moves the slider
 in the scale.  The argument to the \var{callback} function will be the
 current position of the slider, which can range from \samp{0} to
 \samp{100}.  The return value of the \var{callback} function should be
-\samp{TCL_OK}.
+\samp{TCL\_OK}.
 
 \function{void}{displaySliderValue}{(char* \var{window}, char* \var{name},
 char* \var{value})}

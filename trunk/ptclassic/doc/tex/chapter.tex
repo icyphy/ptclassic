@@ -1,8 +1,11 @@
 % Version $Id$
-% Author:	T. M. Parks
-% Created:	11 February 1994
+% Author:       T. M. Parks
+% Created:      11 February 1994
 
-\documentstyle[12pt,psfig,elisp,ptinfo,Almagest]{book}
+%\documentclass[12pt,Almagest]{Ptolemy}
+%\usepackage{psfig}
+\documentstyle[12pt,psfig,Almagest]{Ptolemy}
+
 \typein[\fileName]{}
 \typeout{\fileName .tex}
 \typein[\otherInclude]{}
@@ -10,18 +13,15 @@
 \typein[\chapterNumber]{}
 \typeout{\chapterNumber}
 \includeonly{\fileName,\otherInclude}
-\batchmode
-\pssilent	% Suppress messages from psfig.
+
+\htmldirectory{.}
+
+% \batchmode
 
 \newcommand{\PTOLEMY}{/users/ptdesign}
 \newcommand{\FIGURES}{\PTOLEMY/doc/figures}
 
-\newindex{cp}
-\newindex{pg}
-\newindex{fn}
-\newindex{vr}
-\newindex{tp}
-\newindex{ky}
+\makeindex
 
 \begin{document}
 
@@ -38,3 +38,4 @@
 \include{other}
 
 \end{document}
+

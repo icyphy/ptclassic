@@ -1,18 +1,18 @@
-\c Version $Id$
-\node CP Domain
+% Version $Id$
 \chapter{CP Domain}
+\label{CP Domain}
 
 \Author{Seungjun Lee}
-\cindex{Lee, S.}
+\index{Lee, S.}
 \Contrib{Sangjin Hong \\
 Thomas M. Parks}
-\cindex{Hong, S.}
-\cindex{Parks, T.}
+\index{Hong, S.}
+\index{Parks, T.}
 
-\date{$Date$}
+%\date{$Date$}
 
-\node Execution Model
 \section{Execution Model}
+\label{Execution Model}
 
 When the simulation starts, the \code{go} method of each block is
 converted into a separate process that runs independently.  A process
@@ -58,8 +58,8 @@ out the \var{result} through the \var{output} porthole.  The execution
 blocks until it is sent successfully and \code{msgSend} returns.  This
 whole sequence is repeated indefinitely.
 
-\node Writing CP Stars
 \section{Writing CP Stars}
+\label{Writing CP Stars}
 
 A CP star can be viewed as a process that executes independently
 once the simulation starts.  Hence, the behavior of a block is usually
@@ -114,9 +114,9 @@ modeling stochastic behavior.
 Suspend the current process until \var{delay} units of simulated time
 have elapsed.
 
-\method{int}{msgReceive}{(int& \var{data}, InCPPort& \var{port}, double \var{timeout} = -1)}
-\code{(float& \var{data}, InCPPort& \var{port}, double \var{timeout} = -1)} \\
-\code{(Envelope& \var{data}, InCPPort& \var{port}, double \var{timeout} = -1)} \\
+\method{int}{msgReceive}{(int\& \var{data}, InCPPort\& \var{port}, double \var{timeout} = -1)}
+\code{(float\& \var{data}, InCPPort\& \var{port}, double \var{timeout} = -1)} \\
+\code{(Envelope\& \var{data}, InCPPort\& \var{port}, double \var{timeout} = -1)} \\
 Receive \var{data} through a \var{port}.  Multiple versions are
 available to support different types of \var{data}.  Return immediately
 if the protocol is either \samp{PREVIOUS} or \samp{IGNORE}.  If the
@@ -125,12 +125,12 @@ complete or \var{timeout} units of simulated time have elapsed.  The
 default \var{timeout} of \samp{-1} corresponds to an infinite amount of
 time.
 
-\method{int}{msgReceive}{(MultiInCPPort& \var{ports})}
+\method{int}{msgReceive}{(MultiInCPPort\& \var{ports})}
 Clear out received data from a set of input \var{ports}.
 
-\method{int}{msgSend}{(int \var{data}, OutCPPort& \var{port}, double \var{timeout} = -1)}
-\code{(float \var{data}, OutCPPort& \var{port}, double \var{timeout} = -1)} \\
-\code{(Envelope \var{data}, OutCPPort& \var{port}, double \var{timeout} = -1)} \\
+\method{int}{msgSend}{(int \var{data}, OutCPPort\& \var{port}, double \var{timeout} = -1)}
+\code{(float \var{data}, OutCPPort\& \var{port}, double \var{timeout} = -1)} \\
+\code{(Envelope \var{data}, OutCPPort\& \var{port}, double \var{timeout} = -1)} \\
 Send \var{data} through an output \var{port}.  Multiple versions are
 available to support different types of \var{data}.  Return immediately
 if the protocol is either \samp{OVERWRITE} or \samp{IGNORE}.  If the
@@ -139,9 +139,9 @@ complete or \var{timeout} units of simulated time have elapsed.  The
 default \var{timeout} of \samp{-1} corresponds to an infinite amount of
 time.
 
-\method{int}{msgSend}{(int \var{data}, MultiOutCPPort& \var{ports})}
-\code{(float \var{data}, MultiOutCPPort& \var{ports})} \\
-\code{(Envelope \var{data}, MultiOutCPPort& \var{ports})} \\
+\method{int}{msgSend}{(int \var{data}, MultiOutCPPort\& \var{ports})}
+\code{(float \var{data}, MultiOutCPPort\& \var{ports})} \\
+\code{(Envelope \var{data}, MultiOutCPPort\& \var{ports})} \\
 Broadcast \var{data} through a set of output \var{ports}.  Multiple
 versions are available to support different types of \var{data}.  Return
 immediately if the protocol is either \samp{OVERWRITE} or
@@ -196,7 +196,7 @@ of two-input adder:
 \begin{example}
 go \{
     while (TRUE) \{
-        waitAll(2, &in1, &in2);
+        waitAll(2, \&in1, \&in2);
         msgReceive(x1, in1);
         msgReceive(x2, in2);
         waitFor(delay);
@@ -212,7 +212,7 @@ determine which portholes are ready.
 \begin{example}
 go \{
     while (TRUE)\{
-        waitAny(2, &in1, &in2);
+        waitAny(2, \&in1, \&in2);
         if (transReady(in1)) msgReceive(data, in1);
         if (transReady(in2)) msgReceive(data, in2);
         msgSend(data, out);
@@ -236,7 +236,7 @@ the clock restarts from the moment the \var{reset} signal is asserted.
 go \{
     while (TRUE)\{
         msgSend(data, output);
-        if (TWaitAny(delay, 1, &reset)) msgReceive(data, reset);
+        if (TWaitAny(delay, 1, \&reset)) msgReceive(data, reset);
     \}
 \}
 \end{example}
