@@ -18,16 +18,14 @@ limitation of liability, and disclaimer of warranty provisions.
     output {
 	name {output}
 	type {INT}
+	attributes { P_NOINIT }
     }
     constructor {
 	noInternalState();
     }
-    codeblock(convert) {
-	lmmr	ar0,#$addr(input)
-	smmr	ar0,#$addr(output)
+    setup{
+	forkInit(input,output);
     }
-    go {
-	addCode(convert);
-    }
-    exectime { return 2; }
+
+    exectime { return 0; }
 }
