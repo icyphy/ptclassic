@@ -46,6 +46,13 @@ namespace ::tycho {
 # <p><b>Options</b>:
 # 
 # <ul>
+# <li><b>-anchor</b>. The position on its parent item that the terminal
+# attaches to. If null, the terminal will remain at the location
+# at which its coords make it. If a pair, these two elements are
+# taken to be the relative _x_ and _y_ locations on the parent,
+# where 0 it the top or left and 100 is the bottom or right.
+# If a compass point, than that point on the parent is used.
+# 
 # <li><b>-direction</b>. The direction of the terminal away from its 
 # origin (the point at which it "connects" to something), as a unit 
 # vector. The "unit vector" is a Tcl list of two elements (x and y). The 
@@ -104,6 +111,9 @@ class ::tycho::Terminal {
     ###################################################################
     ####                         public procs                      ####
 
+    # Update the *-anchor* option
+    proc _anchor {id canvas slate anchor}
+    
     # Update the *-direction* option
     proc _direction {id canvas slate direction}
     
@@ -143,6 +153,7 @@ class ::tycho::Terminal {
     #### Set method table
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
+    set methodtable(_anchor)     ::tycho::Terminal::_anchor
     set methodtable(_direction)  ::tycho::Terminal::_direction
     set methodtable(_fill)       ::tycho::Terminal::_fill
     set methodtable(_length)     ::tycho::Terminal::_length
@@ -161,6 +172,26 @@ class ::tycho::Terminal {
     set optiondefault(-type)      input
     set optiondefault(-style)     arrow
     set optiondefault(-fill)      black
+}
+
+##########################################################################
+#### -anchor option configuration
+#
+body ::tycho::Terminal::_anchor {id canvas slate anchor} {
+    set option(anchor$id) $anchor
+
+    # Move the item according to the anchor. Do nothing if null.
+    if { [llength $anchor] == 1 } {
+	# Assume a compass point
+	eval coords $id $canvas $slate \
+		[$slate aspect [$slate parent $id] $anchor]
+    } elseif { [llength $anchor] == 2 } {
+	# Assume relative x and y positions
+	::tycho::assign x0 y0 x1 y1 [$slate region [$slate parent $id]]
+	coords $id $canvas $slate \
+		[expr $x0 + [expr ($x1-$x0)/100.0] * [lindex $anchor 0]] \
+		[expr $y0 + [expr ($y1-$y0)/100.0] * [lindex $anchor 1]]
+    }
 }
 
 ##########################################################################
@@ -343,6 +374,9 @@ body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
     set style $option(style$id)
     set option(style$id) {}
     _style $id $canvas $slate $style
+
+    # Move to correct anchor position
+    _anchor $id $canvas $slate $option(anchor$id)
 }
 
 ##########################################################################
