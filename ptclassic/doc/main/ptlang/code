@@ -981,6 +981,88 @@ to change the default value, and
 and
 .c clearAttributes
 to modify attributes.
+.H2 "Using random numbers"
+.pp
+Ptolemy uses the GNU library routines for the random number generation.
+Refer to Volume II of the Art of Computer Programming
+by Knuth for details about the method.  There are built-in classes
+for some popular distributions: uniform, exponential, geometric, 
+discrete uniform, normal, log-normal, and so on.  These classes use a
+common basic random number generation routine which is realized in the
+\fBACG\fR class.  Here are some examples of using random numbers.
+.pp
+The first example is the part of the DE Poisson star preprocessor file.
+.(c        
+        hinclude { <NegativeExpntl.h> }
+        ccinclude { <ACG.h> }
+        protected {
+                NegativeExpntl *random;
+        }
+// declare the static random-number generator in the .cc file
+        code {
+                extern ACG* gen;
+        }
+        constructor {
+                random = NULL;
+        }
+        destructor {
+                if(random) delete random;
+        }
+        start {
+                if(random) delete random;
+                random = new NegativeExpntl(double(meanTime),gen);
+                DERepeatStar :: start();
+        }
+        go {
+	   ......
+           // Generate an exponential random variable.
+           double p = (*random)();
+	   ......
+	}
+.)c
+The built-in class for an exponentially distributed random numbers is
+\fBNegativeExpntl\fR.  We include appropriate header files .h and .cc files.  
+The common basic random number generation is
+enforced by declaring the static \fBACG\fR class pointer in the .cc file.
+We define a member of \fBNegativeExpntl\fR class and create
+an instance in the \fBstart()\fR
+method, not in the constructor since Ptolemy allows you to change the
+seed of the random number.  
+Finally, we can read a random number of the specific type by calling 
+operator \fB()\fR of the \fBNegativeExpnl\fR class.
+.pp
+This example uses a uniformly distributed random number.
+.(c
+        hinclude { <Uniform.h> }
+        ccinclude { <ACG.h> }
+        protected {
+                Uniform *random;
+        }
+// declare the extern random-number generator in the .cc file
+        code {
+                extern ACG* gen;
+        }
+        constructor {
+                random = NULL;
+        }
+        destructor {
+                if(random) delete random;
+        }
+        start {
+                if(random) delete random;
+                random = new Uniform(0,double(output.numberPorts()),gen);
+        }
+
+        go {
+           ......
+           double p = (*random)();
+	   ......
+	}
+.)c
+You may notice that the two examples above are very similar in nature.
+You can get another kind of distribution for the random numbers, by including
+the appropriate library file in .h file and by creating the instance
+with the right parameters in the \fBstart()\fR method.
 .H2 "Programming examples"
 .pp
 The following star has no inputs, just an output.
