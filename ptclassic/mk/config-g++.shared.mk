@@ -48,7 +48,7 @@ LIBSUFFIX =		so
 #endif
 
 # Location of GNU libg++ shared libraries
-SHARED_COMPILERDIR =	$(PTOLEMY)/gnu/$(PTARCH)/lib
+SHARED_COMPILERDIR = $(GNULIB)
 SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
 
 # Command to build C++ shared libraries
