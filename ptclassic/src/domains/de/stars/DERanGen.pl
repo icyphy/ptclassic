@@ -37,7 +37,7 @@ Distributions currently supported : uniform(u), exponential(e), normal(n).
 		desc { Variance or lower value. }
 	}
 	hinclude { <Random.h> }
-	ccinclude { <ACG.h>, <Uniform.h>, <Normal.h>, <NegativeExpntl.h> }
+	ccinclude { <ACG.h>, <Uniform.h>, <Normal.h>, <NegExp.h> }
 	protected {
 		Random *random;
 	}
