@@ -17,11 +17,13 @@ $Id$
 #endif
 
 #include "CGTarget.h"
+#include "CGSymbol.h"
 #include "CGStar.h"
 #include "GalIter.h"
 #include "Error.h"
 #include "UserOutput.h"
 #include "SDFScheduler.h"
+#include "SDFCluster.h"
 #include "CGDisplay.h"
 #include "miscFuncs.h"
 
@@ -40,8 +42,20 @@ int CGTarget :: codeGenInit(Galaxy& g) { return TRUE; }
 
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
-		   const char* desc, char sep = '_') : Target(name,starclass,desc) {
+		   const char* desc, char sep = '_')
+: Target(name,starclass,desc), schedFileName(0)
+{
 	separator = sep;
+	addState(destDirectory.setState("destDirectory",this,"PTOLEMY_SYSTEMS",
+			"Directory to write to"));
+	addState(loopScheduler.setState("loopScheduler",this,"NO",
+			"Specify whether to use loop scheduler."));
+}
+
+// destructor
+CGTarget::~CGTarget() {
+	delSched();
+	LOG_DEL; delete schedFileName;
 }
 
 void CGTarget :: initialize() {
@@ -67,27 +81,32 @@ int CGTarget::setup(Galaxy& g) {
 }
 
 void CGTarget :: start() {
+	LOG_DEL; delete dirFullName;
+	dirFullName = writeDirectoryName(destDirectory);
 	if (!mySched() && !parent()) {
-		LOG_NEW; setSched (new SDFScheduler);
+		if(int(loopScheduler)) {
+			schedFileName = writeFileName("schedule.log");
+			LOG_NEW; setSched(new SDFClustSched(schedFileName));
+		} else {
+			LOG_NEW; setSched(new SDFScheduler);
+		}
 	}
 	headerCode();
 }
 
 int CGTarget :: run() {
-	// Sorry about the following horrible cast.
-	// Design of kernel Scheduler makes it very difficult to avoid
-	int iters = ((SDFScheduler*)mySched())->getStopTime();
-	StringList startIter = beginIteration(iters,1);
-	addCode(startIter);
-	mySched()->setStopTime(1);
-	int i = Target::run();
-	StringList endIter = endIteration(iters,1);
-	addCode(endIter);
-	return i;
+	// Note that stopTime in an SDF scheduler is always integral
+	int iters = (int)mySched()->getStopTime();
+	beginIteration(iters,0);
+	mySched()->compileRun();
+	endIteration(iters,0);
+	return !Scheduler::haltRequested();
 }
 
 Block* CGTarget :: clone() const {
-	LOG_NEW; return new CGTarget(readName(),starType(),readDescriptor());
+	LOG_NEW; CGTarget*t= new CGTarget(readName(),starType(),readDescriptor());
+	t->copyStates(*this);
+	return t;
 }
 
 void CGTarget :: addCode(const char* code) {
@@ -95,10 +114,21 @@ void CGTarget :: addCode(const char* code) {
 }
 
 void CGTarget :: headerCode () {
-	StringList code = "/* generated code for target ";
+	StringList code = "generated code for target ";
 	code += readFullName();
-	code += " */\n";
-	addCode(code);
+	outputComment(code);
+}
+
+void CGTarget :: beginIteration(int reps, int depth) {
+	myCode << "REPEAT " << reps << " TIMES { /* depth " << depth << "*/\n";
+}
+
+void CGTarget :: endIteration(int reps, int depth) {
+	myCode << "} /* end repeat, depth " << depth << "*/\n";
+}
+
+void CGTarget :: writeFiring(Star& s,int) { // depth parameter ignored
+	s.fire();
 }
 
 void CGTarget :: wrapup() {
@@ -113,60 +143,9 @@ void CGTarget :: writeCode(UserOutput& o) {
 
 ISA_FUNC(CGTarget,Target);
 
-CGTarget :: ~CGTarget() { delSched();}
-
 void CGTarget :: outputComment (const char* msg) {
 	StringList code = "/* ";
         code += msg;
         code += " */\n";
         addCode(code);
 }
-
-Symbol::Symbol (CGTarget* target=0) {
-	initialize();
-	myTarget = target;
-}
-	
-// Lookup unique symbol, if one doesn't exist, create new symbol.
-// Symbols are stored in pairs: key, symbol.
-StringList Symbol::lookup(const char* name) {
-	StringListIter next(symbols);
-	const char* p;
-    	StringList s;
-    	while ((p = next++) != 0) {
-		s = next++;
-		if(!strcmp(name,p)) return s;
-   	}
-   	// name is not on the list.  add it.
-  	symbols += name;
-  	s = name;
-	s += myTarget->separator;
-    	s += myTarget->numLabels++;
-    	// add the new symbol as well
-   	symbols += s;
-    	return s;
-}
-	
-
-NestedSymbol::NestedSymbol (CGTarget* target=0) {
-	initialize();
-	myTarget = target;
-}
-	
-const char* NestedSymbol::push(const char* name="L") {
-	StringList s;
-   	s = name;
-	s += myTarget->separator;
-    	s += myTarget->numLabels++;
-	const char* temp = s;
-   	symbols.push(temp);
-    	return savestring(temp);
-}
-
-const char* NestedSymbol::pop() {
-	if(depth()==0) return 0;
-	return symbols.pop();
-
-}
-	
-
