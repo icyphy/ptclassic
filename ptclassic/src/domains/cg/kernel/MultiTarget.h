@@ -30,10 +30,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Scheduler-independent Baseclass for all multi-processor code generation
  targets.
 
- Virtual methods may be provided for proper wormhole interface.
- If there is no wormhole interface stuff, inherited CGTarget class alone
- should be enough as the scheduler-indepedent Baseclass.
-
 *******************************************************************/
 
 #ifndef _MultiTarget_h
@@ -88,12 +84,6 @@ public:
         // Inform how many processors are available.
         void setTargets(int);
 
-	// Enforce inheritance of targets inside wormholes (e.g. CGDDFWormhole)
-	void enforceInheritance() { inheritProcessors.setInitValue(1); }
-
-	// Return true, if it inherits the child targets from the parent.
-	int inherited() { return int(inheritProcessors); }
-
 	// get the OSOP requirement flag : all invocations of a star
 	// should be assigned to the same processor
 	int getOSOPreq() { return int(oneStarOneProc); }
@@ -104,6 +94,13 @@ public:
 
 	// get the adjustSchedule parameter
 	int overrideSchedule() { return int(adjustSchedule); }
+
+// to support CGDDF domains
+	// Enforce inheritance of targets inside wormholes (e.g. CGDDFWormhole)
+	void enforceInheritance() { inheritProcessors.setInitValue(1); }
+
+	// Return true, if it inherits the child targets from the parent.
+	int inherited() { return int(inheritProcessors); }
 
         // Inherit the child targets from a given MultiTarget.
         // If the number of child targets is greater than that of a given
@@ -135,6 +132,8 @@ public:
         // Argument specifies the profile index, the invocation number,
 	// and profile.
         virtual int downLoadCode(int, int, Profile*);
+
+// End of CGDDF support
 
 	// Add processor code to the multiprocessor target
 	virtual void addProcessorCode(int pid, const char*);
