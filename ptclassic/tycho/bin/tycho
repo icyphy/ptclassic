@@ -166,9 +166,10 @@ else
 	# However, itkwish need not have these set
 	# FIXME: Hardwired in tk4.0
 	#	   $PTOLEMY/tycho/kernel/Lib.tcl
-	setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
-	setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
-
+	if ( -r $PTOLEMY/tcltk/itcl/lib/itcl/tk/tk.tcl ) then
+		setenv TCL_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/tcl
+		setenv TK_LIBRARY $PTOLEMY/tcltk/itcl/lib/itcl/tk
+	endif
 	# To get tcl/tk man pages before corresponding unix man pages,
 	# and to guess about a reasonable manpath if none is set.
 	if (! $?MANPATH ) then
