@@ -71,7 +71,7 @@ JSCLASSPATH = 	/users/ptdesign/vendors/sun/JavaScope/JavaScope.zip
 JAVAC = 	$(JAVAHOME)/bin/javac
 
 # Flags to pass to javac.
-JFLAGS = 	-g
+JFLAGS = 	-g -depend
 
 # The 'javadoc' program
 JAVADOC = 	$(JAVAHOME)/bin/javadoc
