@@ -113,13 +113,6 @@ private:
 	int MakePList( char* , ParamListType* );
 
 public:
-	// Converts an oct Facet Pointer into a string "handle" that
-	// can be used by a TCL interpreter
-	void ptkOctObj2Handle( octObject*, char* );
-
-	// Converts a string "handle" into an oct Facet Pointer
-	int ptkHandle2OctObj( char*, octObject* );
-
 	// the active Tcl interpreter, for error reporting.
 	static Tcl_Interp* activeInterp;
 
