@@ -248,7 +248,7 @@ itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 # Generate idoc files from itcl and java files, requires itclsh and tycho
 # Note that $(ROOT) here is relative to the tycho directory, not
 # the Ptolemy directory.
-IDOC=$(ROOT)/lib/tydoc/idoc
+IDOC=$(ROOT)/util/tydoc/idoc
 idocs: $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS)
 	@if [ "$(TYDOC_DESC)" = "" ] ; then \
 		echo "$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS) $(JSRCS)"; \
