@@ -42,6 +42,9 @@ DLScheduler :: ~DLScheduler() {
 
 int DLScheduler :: scheduleIt()
 {
+	// temporal hack
+	wormFlag = FALSE;
+
   	parSched->initialize(myGraph);
 
   	// reset the graph for the new parallel schedule
@@ -60,6 +63,10 @@ int DLScheduler :: scheduleIt()
 
 	   // check the atomicity of the star
 	   if (obj->isItWormhole()) {
+
+		// hack
+		wormFlag = TRUE;
+
 	   	CGWormhole* worm = obj->myWormhole();
 
 	   	// determine the pattern of processor availability.
@@ -97,6 +104,21 @@ int DLScheduler :: scheduleIt()
 		Error::abortRun("Parallel scheduler is deadlocked!");
 		return FALSE;
 	}
+  
+  // By dynamic level scheduling, we obtain a schedule for a system
+  // which overlaps communication with computation.
+  // In case there is no wormhole inside, and we set the flag saying
+  // NO overlapComm, then we do additional list scheduling at the end
+  // based on the processor assignment determined by the dynamic level
+  // scheduling algorithm.
+  if ((!wormFlag) && noOverlap) {
+	mtarget->clearCommPattern();
+	myGraph->resetGraph();
+	parSched->initialize(myGraph);
+	parSched->listSchedule(myGraph);
+  }
+  mtarget->saveCommPattern();
+	
   return TRUE;
 }
 
@@ -115,3 +137,6 @@ StringList DLScheduler :: displaySchedule() {
 	return out;
 }
 
+void DLScheduler :: createSubGals() {
+	if (!wormFlag) ParScheduler :: createSubGals();
+}
