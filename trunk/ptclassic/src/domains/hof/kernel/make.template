@@ -67,9 +67,9 @@ include $(ROOT)/mk/common.mk
 
 # Commands to make some sources from templates
 
-HOFDomain.cc :	$(KERNDIR)/XDomain.ccP
-	cd $(VPATH); rm -f HOFDomain.cc; \
-	sed 's/<T>/HOF/g' $(KERNDIR)/XDomain.ccP > HOFDomain.cc
+# HOFDomain.cc :	$(KERNDIR)/XDomain.ccP
+#	cd $(VPATH); rm -f HOFDomain.cc; \
+# 	sed 's/<T>/HOF/g' $(KERNDIR)/XDomain.ccP > HOFDomain.cc
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
