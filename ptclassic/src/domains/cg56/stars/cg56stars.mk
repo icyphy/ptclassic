@@ -20,8 +20,7 @@ CG56STARS = \
  $(CG56)/CG56DownSample.o \
  $(CG56)/CG56Fork.o \
  $(CG56)/CG56Gain.o \
- $(CG56)/CG56DummySource.o \
- $(CG56)/CG56DummySink.o \
+ $(CG56)/CG56HostSlider.o \
  $(CG56)/CG56HostIn.o \
  $(CG56)/CG56HostOut.o \
  $(CG56)/CG56IIDUniform.o \
@@ -32,9 +31,9 @@ CG56STARS = \
  $(CG56)/CG56Limit.o \
  $(CG56)/CG56LocateMax.o \
  $(CG56)/CG56Log.o \
+ $(CG56)/CG56Magnavox.o \
  $(CG56)/CG56Mult.o \
  $(CG56)/CG56Neg.o \
- $(CG56)/CG56Parent.o \
  $(CG56)/CG56Peak.o \
  $(CG56)/CG56Pickmin.o \
  $(CG56)/CG56PickminVal.o \

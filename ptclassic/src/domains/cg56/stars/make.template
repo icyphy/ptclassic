@@ -38,8 +38,7 @@ PL_SRCS= \
  CG56Fork.pl \
  CG56Gain.pl \
  CG56DownSample.pl \
- CG56DummySource.pl \
- CG56DummySink.pl \
+ CG56HostSlider.pl \
  CG56HostIn.pl \
  CG56HostOut.pl \
  CG56IIDUniform.pl \
@@ -50,9 +49,9 @@ PL_SRCS= \
  CG56Limit.pl \
  CG56LocateMax.pl \
  CG56Log.pl \
+ CG56Magnavox.pl \
  CG56Mult.pl \
  CG56Neg.pl \
- CG56Parent.pl \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
