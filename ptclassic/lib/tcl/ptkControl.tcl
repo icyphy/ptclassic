@@ -173,7 +173,14 @@ proc ptkRunControl { name octHandle } {
 
     set olduniverse [curuniverse]
     newuniverse $name
-    ptkCompile $octHandle
+    if {[catch {ptkCompile $octHandle} msg] == 1} {
+	# An error has occurred.
+	ptkClearRunFlag $name $octHandle
+	# Mark an error
+	set ptkRunFlag($name) ERROR
+	ptkImportantMessage .error $msg
+    }
+
     curuniverse $olduniverse
 
     bind $ptkControlPanel.iter.entry <Return> \
