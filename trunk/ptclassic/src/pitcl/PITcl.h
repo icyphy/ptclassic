@@ -2,7 +2,7 @@
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1997 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -27,12 +27,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 		       
- Programmer:  J. T. Buck
- Date of creation: 3/4/92
+ Programmer:  J. T. Buck, Brian Evans, and E. A. Lee
+ Date of creation: 2/97
 
-This file implements a class that adds Ptolemy-specific Tcl commands to
-a Tcl interpreter.  Commands are designed to resemble those of the earlier
-interpreter.
+This file implements a class that adds Ptolemy-specific Itcl commands to
+an Itcl interpreter.  Commands are designed to resemble those of the Ptolemy
+kernel, mostly.  These commands are defined in the ::pitcl namespace.
+Normally, these commands should not be used directly.  Use instead the
+class interface defined in the ::ptolemy namespace.
 
 **************************************************************************/
 
@@ -54,11 +56,13 @@ class InterpGalaxy;
 class Target;
 class Block;
 class StringList;
+class InfString;
 
 /////////////////////////////////////////////////////////////////////
-// IUList is a list of InterpUniverses.  The destructor deletes
+//// IUList
+// A list of InterpUniverses.  The destructor deletes
 // all universes on the list.
-
+//
 class IUList : private NamedObjList {
     friend class IUListIter;
 public:
@@ -75,7 +79,10 @@ public:
 	NamedObjList::deleteAll;
 };
 
-// an iterator for IUList
+/////////////////////////////////////////////////////////////////////
+//// IUListIter
+// an iterator for IUList.
+//
 class IUListIter : private NamedObjListIter {
 public:
 	IUListIter(IUList& sl) : NamedObjListIter (sl) {}
@@ -87,9 +94,10 @@ public:
 };
 
 /////////////////////////////////////////////////////////////////////
-//				Action handling
-// TclAction is a simple class that contains the relevant information
+//// TclAction 
+// A simple class that contains the relevant information
 // about an action that has been registered via Tcl.
+//
 class TclAction {
 public:
 	char* name;
@@ -101,7 +109,9 @@ public:
 	~TclAction();
 };
 
-// TclActionList is a list of pre or post actions that have been
+/////////////////////////////////////////////////////////////////////
+//// TclActionList
+// A list of pre or post actions that have been
 // registered via Tcl.  Each action has a name that can be used to
 // refer to it from Tcl.
 //
@@ -129,7 +139,10 @@ public:
 	int remove(TclAction* o) { return SequentialList::remove(o);}
 };
 
-// an iterator for NamedObjList
+/////////////////////////////////////////////////////////////////////
+//// TclActionListIter
+// An iterator for TclActionList.
+//
 class TclActionListIter : private ListIter {
 public:
         TclActionListIter(TclActionList& sl);
@@ -139,167 +152,211 @@ public:
 };
 
 
-/////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////
+//// PTcl
+// This class is the main interface between the Ptolemy kernel and Itcl.
+// Commands in this class should not be used directly.  Instead, the
+// classes defined in the ::ptolemy namespace should be used.
+// Because interaction with Itcl is not as rich as it might be, this
+// implementation preserves from its predecessor the notion of a current
+// galaxy and current universe.  This seems to be the simplest approach,
+// and is hidden from the user by the classes in the ::ptolemy namespace.
+// For commands that operate on a block, the block can be a star, galaxy,
+// universe, wormhole, or target.  Name conflicts are resolved in that order.
+// Moreover, the name can be absolute or relative to the current galaxy.
+// See the documentation with the *getBlock* method for details.
+//
 class PTcl {
 
-// Used in pigilib's kernel calls, so must be public - aok
-public:
-	// the current Ptolemy universe
-	InterpUniverse* universe;
+public:    
+    // Constructor takes a Tcl interpreter as an optional argument.
+    PTcl(Tcl_Interp* interp = 0);
+    
+    // Destructor.
+    ~PTcl();
 
-	// current galaxy being built
-	InterpGalaxy* currentGalaxy;
+    ///////////////////////////////////////////////////////////////////////
+    ////                Itcl callable public methods                   ////
 
-	// target for the current galaxy
-	Target* currentTarget;
+    // These methods are actually called by the dispatcher method, which
+    // is registered repeatedly in Itcl under a procedure name matching
+    // the method name below.  The ClientData field of the registered
+    // procedure is used to tell this dispatcher which method is intended.
+    // Each method returns TCL_OK or TCL_ERROR, and may set the Tcl result to
+    // return a string using Tcl_SetResult, Tcl_AppendElement, or any
+    // of several auxiliary methods provided below.
 
-	// the current domain
-	const char* curDomain;
+    int abort(int argc,char** argv);
+    int alias(int argc,char** argv);
+    int animation(int argc,char** argv);
+    int block(int argc,char** argv);
+    int blocks(int argc,char** argv);
+    int busconnect(int argc,char** argv);
+    int cancelAction(int argc,char** argv);
+    int connect(int argc,char** argv);
+    int cont(int argc,char** argv);
+    int curgalaxy(int argc,char** argv);
+    int defgalaxy(int argc,char** argv);
+    int delnode(int argc,char** argv);
+    int disconnect(int argc,char** argv);
+    int domain(int argc,char** argv);
+    int domains(int argc,char** argv);
+    int exit(int argc,char** argv);
+    int getClassName(int argc,char** argv);
+    int getDescriptor(int argc,char** argv);
+    int getFullName(int argc,char** argv);
+    int halt(int argc,char** argv);
+    int initialize(int argc,char** argv);
+    int isgalaxy(int argc,char** argv);
+    int iswormhole(int argc,char** argv);
+    int knownlist(int argc,char** argv);
+    int link(int argc,char** argv);
+    int listobjs(int argc,char** argv);
+    int matlab(int argc,char** argv);
+    int mathematica(int argc,char** argv);
+    
+    // added to support tycho - eal
+    int monitorOff(int argc,char** argv);
+    int monitorOn(int argc,char** argv);
+    int monitorPtcl(int argc,char** argv);
+    
+    int multilink(int argc,char** argv);
+    int newstate(int argc,char** argv);
+    int newuniverse(int argc,char** argv);
+    int node(int argc,char** argv);
+    int nodeconnect(int argc,char** argv);
+    int numports(int argc,char** argv);
+    int pragma(int argc,char** argv);
+    int pragmaDefaults(int argc,char** argv);
+    int ports(int argc,char** argv);
+    int remove(int argc,char** argv);
+    int renameuniv(int argc,char** argv);
+    int registerAction(int argc,char** argv);
+    int reset(int argc,char** argv);
+    int run(int argc,char** argv);
+    int stoptime(int argc,char** argv);
+    int schedtime(int argc,char** argv);
+    int schedule(int argc,char** argv);
+    int seed(int argc,char** argv);
+    int setstate(int argc,char** argv);
+    int statevalue(int argc,char** argv);
+    int target(int argc,char** argv);
+    int targetparam(int argc,char** argv);
+    int targets(int argc,char** argv);
+    int univlist(int argc,char** argv);
+    int wrapup(int argc,char** argv);
 
-private:
-	// the Tcl interpreter
-	Tcl_Interp* interp;
 
-	// runtime control
-	double stopTime;
-	double lastTime;
+    ////////////////////////////////////////////////////////////////////////
+    ////                   auxiliary public methods                     ////
 
-	// flag set while defining a galaxy
-	short definingGal;
+    // The active Tcl interpreter associated with the PTcl object.
+    static Tcl_Interp* activeInterp;
 
-	// flag to indicate that interp is owned by me
-	short myInterp;
+    // Dispatch the methods called from Tcl.
+    static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
+    
+    // Given a Tcl interpreter, return the associated PTcl object.
+    static PTcl* findPTcl(Tcl_Interp*);
+    
+    // Return the full name of the specified block with a leading period.
+    static InfString fullName(const Block*);
 
-	// the list of known universes
-	IUList univs;
-
-	// function to register extensions with the Tcl interpreter
-	void registerFuncs();
-
-	// function to check error/abort status
-	int checkErrorAbort();
-
-	// This is added to support tycho - eal
-	// The following flag determines whether ptcl will call the tcl
-	// procedure monitorPtcl every time a ptcl command is invoked.
-	// This procedure can be redefined in Tcl to monitor all commands
-	// executed.
-	static int monitor;
-
+    // If there is a universe by the given name in this PTcl object,
+    // return it.  Otherwise return NULL.
+    InterpUniverse* univWithName(const char* name)
+           { return univs.univWithName(name); }
+    
 protected:
-	// these two functions are used to associate PTcl objects
-	// with interpreters.
-	void makeEntry();
-	void removeEntry();
 
-	// create a new universe with name nm and domain dom.
-	void newUniv(const char* nm, const char* dom);
+    ////////////////////////////////////////////////////////////////////////
+    ////                       protected methods                        ////
 
-	// reset -- for backward compatibility
-	void resetUniverse() { reset(1,0);}
+    // Append a string to the Tcl result as a list element.
+    void addResult(const char*);
+    
+    // Compute the schedule for the current universe.
+    int computeSchedule();
 
-	// delete the universe named nm.  return FALSE if no such univ.
-	int delUniv(const char* nm);
+    // Iterate over the blocks inside a galaxy, adding names to the result.
+    void galTopBlockIter (const Block* b, int deep, int fullname);
 
-	// return a usage error
-	int usage(const char*);
+    // Return a pointer to a block given its name.
+    const Block* getBlock(const char*);
+    
+    // Add this object to the table of PTcl objects.
+    void makeEntry();
 
-	// find blocks for info-showing commands
-	const Block* getBlock(const char*);
+    // Create a new universe with the specified name and domain.
+    void newUniv(const char* nm, const char* dom);
+    
+    // Remove this object from the table of PTcl objects.
+    void removeEntry();
+    
+    // Return a const char* or a StringList result to Tcl.
+    int result(const char* str);
+    
+    // Return a static string (quoted constant) to Tcl.
+    int staticResult(const char*);
+    
+    // Return a usage error in standard form.
+    int usage(const char*);
+    
+private:
 
-	// return a const char* or a StringList result to Tcl
-	int result(const char* str);
+    ////////////////////////////////////////////////////////////////////////
+    ////                       private methods                          ////
 
-	// return a "static result" to Tcl.  Don't give this one a StringList!
-	int staticResult(const char*);
+    // Function to check error/abort status.
+    int checkErrorAbort();
+    
+    // Recursively descend within the galaxy to get a block with dotted name.
+    const Block* getSubBlock(const char*, const Block*);
 
-	// append a value to the result, using Tcl_AppendElement.
-	void addResult(const char*);
+    // Function to register extensions with the Tcl interpreter.
+    void registerFuncs();
+    
+    ////////////////////////////////////////////////////////////////////////
+    ////                       private variables                        ////
 
-	// compute the schedule
-	int computeSchedule();
+    // NOTE:  Annoyingly, C++ requires that these appear in the order in
+    // which they will be initialized, which is not alphabetical.
 
-public:
-	// This function is used to associate PTcl objects
-	// with interpreters.
-	static PTcl* findPTcl(Tcl_Interp*);
+    // the current Ptolemy universe
+    InterpUniverse* universe;
 
-	// the active Tcl interpreter, for error reporting.
-	static Tcl_Interp* activeInterp;
+    // The current domain.
+    const char* curDomain;
+    
+    // The current galaxy or universe.
+    InterpGalaxy* currentGalaxy;
+    
+    // Target for the current galaxy or universe.
+    Target* currentTarget;
+    
+    // The Tcl interpreter associated with this object.
+    Tcl_Interp* interp;
+    
+    // The time at which we want the current execution to terminate.
+    double stopTime;
 
-	PTcl(Tcl_Interp* interp = 0);
-	~PTcl();
+    // FIXME: What is this?
+    double lastTime;
 
-	// If there is a universe by the given name in this PTcl object,
-	// return it.  Else return NULL.
-	InterpUniverse* univWithName(const char* name)
-	  { return univs.univWithName(name); }
+    // Flag set while defining a galaxy.  FIXME: needed?
+    short definingGal;
 
-	// dispatcher is called by Tcl to handle all extension commands.
-	static int dispatcher(ClientData,Tcl_Interp*,int,char*[]);
+    // The following are not initialized by the constructor.
 
-// the following are the Tcl-callable functions.  Each returns TCL_OK
-// or TCL_ERROR, and may set the Tcl result to return a string using
-// Tcl_SetResult, Tcl_AppendElement, PTcl::result or PTcl::staticResult.
-	int abort(int argc,char** argv);
-	int alias(int argc,char** argv);
-	int animation(int argc,char** argv);
-	int busconnect(int argc,char** argv);
-	int cancelAction(int argc,char** argv);
-	int connect(int argc,char** argv);
-	int cont(int argc,char** argv);
-	int curuniverse(int argc,char** argv);
-	int defgalaxy(int argc,char** argv);
-	int delnode(int argc,char** argv);
-	int delstar(int argc,char** argv);
-	int deluniverse(int argc,char** argv);
-	int descriptor(int argc,char** argv);
-	int description(int argc,char** argv);
-	int disconnect(int argc,char** argv);
-	int domain(int argc,char** argv);
-	int domains(int argc,char** argv);
-	int exit(int argc,char** argv);
-	int halt(int argc,char** argv);
-	int initialize(int argc,char** argv);
-	int isgalaxy(int argc,char** argv);
-	int iswormhole(int argc,char** argv);
-	int knownlist(int argc,char** argv);
-	int link(int argc,char** argv);
-	int listobjs(int argc,char** argv);
-	int matlab(int argc,char** argv);
-	int mathematica(int argc,char** argv);
+    // If set, call the tcl procedure monitorPtcl every time a ptcl
+    // command is invoked.
+    static int monitor;
 
-	// added to support tycho - eal
-	int monitorOff(int argc,char** argv);
-	int monitorOn(int argc,char** argv);
-	int monitorPtcl(int argc,char** argv);
-
-	int multilink(int argc,char** argv);
-	int newstate(int argc,char** argv);
-	int newuniverse(int argc,char** argv);
-	int node(int argc,char** argv);
-	int nodeconnect(int argc,char** argv);
-	int numports(int argc,char** argv);
-	int pragma(int argc,char** argv);
-	int pragmaDefaults(int argc,char** argv);
-	int print(int argc,char** argv);
-	int renameuniv(int argc,char** argv);
-	int registerAction(int argc,char** argv);
-	int reset(int argc,char** argv);
-	int run(int argc,char** argv);
-        int stoptime(int argc,char** argv);
-	int schedtime(int argc,char** argv);
-	int schedule(int argc,char** argv);
-	int seed(int argc,char** argv);
-	int setstate(int argc,char** argv);
-	int star(int argc,char** argv);
-	int statevalue(int argc,char** argv);
-	int target(int argc,char** argv);
-	int targetparam(int argc,char** argv);
-	int targets(int argc,char** argv);
-	int topblocks(int argc,char** argv);
-	int univlist(int argc,char** argv);
-	int wrapup(int argc,char** argv);
+    // Flag to indicate that interp is owned by me.
+    short myInterp;
+    
+    // The list of known universes.
+    IUList univs;
 };
 
 #endif
