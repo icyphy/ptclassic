@@ -1,0 +1,311 @@
+# Definition of an TeX context-sensitive editor.
+#
+# @Author: Edward A. Lee
+#
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+#######################################################################
+
+# FIXME: Undo doesn't work for anything...
+
+#######################################################################
+#### EditTeX
+# This class defines a text exitor with some
+# context-specific features for editing TeX files.
+#
+class ::tycho::EditTeX {
+    inherit ::tycho::Edit
+
+    constructor {args} {}
+    destructor {}
+
+    ###################################################################
+    ####                            options                        ####
+
+    ###################################################################
+    ####                         public methods                    ####
+
+    # Bracket a copy of the final arguments with the specified text.
+    method appendBracket {left right original}
+
+    # Apply the specified function to the selection.
+    method apply {args}
+
+    # Bracket the final arguments with the specified text.
+    method bracket {left right original}
+
+    # Bracket the final arguments and edit for equation syntax.
+    method bracketEqn {left right original}
+
+    # Specialized function.
+    method fixSetReferences {original}
+
+    # Replace characters that appear to be in the symbol set with TeX.
+    method fixSymbolChars {original}
+
+    # Modify the selection to convert lines into paragraphs.
+    method linesToParagraphs {}
+
+    # Given a key, do pairwise substitution of text.
+    method pairwiseSubstitute {original key}
+
+    # Returns a list of tags to use when checking the spelling.
+    method spellCheckTags {} {return {text}}
+
+    ####################################################################
+    ####                  protected methods and variables           ####
+
+    # Initialize the menu/status/tool bars
+    protected method _initializeBars {menubar statusbar toolbar}
+}
+
+###################################################################
+#
+body ::tycho::EditTeX::constructor {args} {
+    eval itk_initialize $args
+}
+
+#####################################################################
+#### appendBracket
+# Bracket the final argument with the first two, append to the final
+# argument, and return the result.
+#
+body ::tycho::EditTeX::appendBracket {left right original} {
+    return "$original$left$original$right"
+}
+
+#####################################################################
+#### apply
+# Apply the specified function to the selection and replace the selection
+# with its return value.  The specified function may include arguments.
+# The data in the selection is appended to the argument list at the end.
+# If there is no selection, then the function is applied to an empty
+# string.
+#
+body ::tycho::EditTeX::apply {args} {
+    if $readOnly {bell; return}
+    resetUndo
+    set text $itk_component(text)
+    set savetext [getSelection]
+    if {$savetext != {}} {
+        deleteSelection
+    }
+    insertString insert [eval $args [list $savetext]]
+}
+
+#####################################################################
+#### bracket
+# Bracket the final argument with the first two and return the result.
+#
+body ::tycho::EditTeX::bracket {left right original} {
+    return $left$original$right
+}
+
+#####################################################################
+#### bracketEqn
+# Bracket the final argument with the first two and perform
+# editing defined by fixSymbolChars and fixSetReferences.
+#
+body ::tycho::EditTeX::bracketEqn {left right original} {
+    set i2 [fixSymbolChars $original]
+    set i3 [fixSetReferences $i2]
+    return $left$i3$right
+}
+
+###################################################################
+#### fixSetReferences
+# NOTE: Specialized function inserted to help the author write a book.
+# FIXME: This should be in some user-extension.
+#
+body ::tycho::EditTeX::fixSetReferences {original} {
+    return [pairwiseSubstitute $original { \
+            {{Comps} {\set{Comps}}} \
+            {{Ints} {\set{Ints}}} \
+            {{Reals} {\set{Reals}}} \
+            {{Time} {\set{Time}}} \
+        }]
+}
+
+###################################################################
+#### fixSymbolChars
+# Modify the argument by replacing characters that are assumed to be
+# in the symbol character set with their TeX math-mode equivalents.
+# This is useful for correcting copied text from Microsoft Word files.
+#
+body ::tycho::EditTeX::fixSymbolChars {original} {
+    return [pairwiseSubstitute $original { \
+            {{®} {\to}} \
+            {{Î} {\in}} \
+            {{"} {\forall \ }} \
+            {{·} {\circ}} \
+            {{Ð} {\angle}} \
+            {{…} {\cdots}} \
+            {{¹} {\neq}} \
+            {{³} {\ge}} \
+            {{£} {\le}} \
+            {{cos} {\cos}} \
+            {{sin} {\sin}} \
+            {{È} {\cup}} \
+            {{¥} {\infty}} \
+            {{:} {\colon }} \
+            {{´} {\times}} \
+            {{Ì} {\subset}} \
+            {{Þ} {\Longrightarrow}} \
+            {{Ä} {\ast\hspace{-9pt}\odot}} \
+            {{×} {\times }} \
+        }]
+}
+
+###################################################################
+#### pairwiseSubstitute
+# Modify the first argument by replacing each instance of the first item
+# in each pair in the argument with an instance of the second.
+#
+body ::tycho::EditTeX::pairwiseSubstitute {original key} {
+    # Perform simple pairwise substitutions.
+    foreach pair $key {
+        set target [lindex $pair 0]
+        set newString [lindex $pair 1]
+        regsub -all -- $target $original $newString original
+    }
+    return $original
+}
+
+###################################################################
+#
+# Modify the selection by converting lines into paragraphs.
+# A blank line is inserted between each original line of text, and the
+# lines of text are filled.
+#
+body ::tycho::EditTeX::linesToParagraphs {} {
+    if $readOnly {bell; return}
+    resetUndo
+    set text $itk_component(text)
+    set start 1.0
+    set end end
+    if {[getSelection] != {}} {
+        set start [$text index sel.first]
+        set end [$text index sel.last]
+    }
+
+    # Replace every end of line with an extra return, then fill
+    # each paragraph.
+    set ind $start
+    set safety 0
+    while {[$text compare $ind <= "$end linestart"]} {
+        if {[incr safety] > 1000} {
+            ::tycho::warn {Too many lines}
+            break
+        }
+        # Skip if it's already a blank line
+        if {[$text get "$ind linestart" "$ind lineend"] != {}} {
+            $text insert "$ind lineend" "\n"
+        }
+        set ind [$text index "$ind + 2 lines"]
+    }
+    fillSelection
+}
+
+#####################################################################
+#####################################################################
+#####################################################################
+####                    protected methods                        ####
+
+#####################################################################
+#### _initializeBars
+# Initialize the menu, status, and toolbars associated with this widget.
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
+#
+body ::tycho::EditTeX::_initializeBars {menubar statusbar toolbar} {
+    chain $menubar $statusbar $toolbar
+
+    if {$menubar != {}} {
+	# Set up menus.
+        
+        menubar command inlineeq special \
+                -label "In-Line Equation" \
+                -underline 8 \
+                -command "$this apply bracketEqn {$} {$}"
+
+        menubar command fixsets special \
+		-label "Fix Set References" -underline 0 \
+                -command "$this apply fixSetReferences"
+
+        menubar command linetopp special \
+		-label "Lines to Paragraphs" -underline 1 \
+                -command "$this linesToParagraphs"
+
+        menubar add separator formatsep4 special
+        menubar add cascade blocks special -label "Blocks" -underline 0
+
+        menubar command bold blocks -label "Bold" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\textbf\{\" \"\}\""
+
+        menubar command definition blocks -label "Definition" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\defn\{\" \"\}\""
+
+        menubar command equation blocks -label "Equation" \
+                -underline 0 \
+                -command "$this apply bracketEqn {$$} {$$}"
+
+        menubar command index blocks -label "Index" \
+                -underline 4 \
+                -command "$this apply appendBracket \"\\\\index\{\" \"\}\""
+
+        menubar command italics blocks -label "Italics" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\textit\{\" \"\}\""
+
+        menubar command section blocks -label "Section" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\section\{\" \"\}\n\""
+
+        menubar command subsection blocks -label "Subsection" \
+                -underline 1 \
+                -command "$this apply bracket \"\\\\subsection\{\" \"\}\n\""
+
+        menubar command typewriter blocks -label "Typewriter" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\texttt\{\" \"\}\""
+
+        menubar add separator formatsep5 special
+        menubar add cascade environments special -label "Environments" \
+                -underline 1
+
+        menubar command enumerate environments -label "Enumerate" \
+                -underline 1 \
+                -command "$this apply bracket \"\\\\begin\{enumerate\}\n\" \"\n\\\\end\{enumerate\}\""
+
+        menubar command figure environments -label "Figure" \
+                -underline 0 \
+                -command "$this apply bracket \"\\\\begin\{figure\}\\\[btp\\\]\n\\\\centering\n\\\\includegraphics\{FIXME\}\n\\\\caption\{\" \"\}\n\\\\label\{FIXME\}\n\\\\end\{figure\}\""
+    }
+}
