@@ -409,17 +409,30 @@ body ::tycho::IDoc::insertData {data} {
 
 #########################################################################
 #### putHtml
-# Load a portion of HTML into the proper HTML widget
+# Load a portion of HTML into the proper HTML widget. Add tags to format
+# properly.
 #
 body ::tycho::IDoc::putHtml {data {top 1}} {
     switch $top {
         1 {
             $myHtmlTop clear
-            $myHtmlTop insertData "<html>$data</html>"
+            $myHtmlTop insertData "
+               <head>
+               <title>Class [$myClass modelcget -name]</title>
+               </head>
+               <body bgcolor=\"#faf0e6\">
+               $data
+               </body>
+               </html>"
         }
         0 {
             $myHtmlBottom clear
-            $myHtmlBottom insertData "<html>$data</html>"
+            $myHtmlBottom insertData "
+               <html>
+               <body bgcolor=\"#faf0e6\">
+               $data
+               </body>
+               </html>"
         }
     }
 }
