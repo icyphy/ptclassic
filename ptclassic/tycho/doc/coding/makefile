@@ -47,6 +47,7 @@ EXTRA_SRCS =	buildtclexts.html \
 		itclfilebody.html \
 		newfiles.html \
 		performance.html \
+		rating.html \
 		scope.html \
 		style.html \
 		template.html \
