@@ -38,7 +38,7 @@ is on your path, or this will not work!!!
 		XGraph graph;
 	}
 	start {
-		graph.initialize(1, (const char*) options,
+		graph.initialize(this, 1, (const char*) options,
 				    (const char*) title,
 				    (const char*) saveFile);
 	}

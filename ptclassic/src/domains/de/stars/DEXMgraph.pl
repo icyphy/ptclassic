@@ -40,7 +40,7 @@ maximum number of inputs determined in the definition of the XGraph class.
 		XGraph graph;
 	}
 	start {
-		graph.initialize(input.numberPorts(),
+		graph.initialize(this, input.numberPorts(),
 				(const char*) options,
 				(const char*) title,
 				(const char*) saveFile);
