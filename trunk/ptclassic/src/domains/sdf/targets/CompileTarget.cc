@@ -192,6 +192,7 @@ int CompileTarget::run() {
     myCode += ");\n";
     myCode += "Star *s;\n";
     myCode += "while ((s = nextStar++) != 0) s->begin();\n";
+    myCode += "if (SimControl::haltRequested()) return;\n";
     myCode += "}\n";
 
     myCode += "\n// MAIN LOOP\n";
