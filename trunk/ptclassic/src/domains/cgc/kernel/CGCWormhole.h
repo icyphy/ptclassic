@@ -6,7 +6,7 @@
 
 
 #include "StringList.h"
-#include "Wormhole.h"
+#include "CGWormBase.h"
 #include "EventHorizon.h"
 #include "CGCStar.h"
 
@@ -41,6 +41,57 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of Creation : 12/1/92
 	
 ********************************************************************/
+
+        //////////////////////////////
+        // CGCWormhole
+        //////////////////////////////
+
+class CGCWormhole : public CGWormBase, public CGCStar {
+
+public:
+	void setup();
+	void go();
+	void wrapup() { /* target->wrapup(); */ }
+
+	// Constructor
+	CGCWormhole(Galaxy& g, Target* t = 0);
+	~CGCWormhole();
+
+	// return my scheduler
+	Scheduler* scheduler() const { return target->scheduler() ;}
+
+	// execution time which is the average of the workload inside
+	// the wormhole with 1 processor.
+	int myExecTime() { return execTime; }
+
+	// print methods
+	StringList print(int verbose = 0) const {
+		return Wormhole::print(verbose);
+	}
+	
+	// clone -- allows interpreter/pigi to make copies
+	Block* clone() const;
+
+	// identify myself as a wormhole
+	int isItWormhole() const { return TRUE;}
+
+	// use statelist for inner galaxy for stateWithName
+	State* stateWithName (const char* name) {
+		return gal.stateWithName(name);
+	}
+
+	// state initialize
+	void initState() { gal.initState() ;}
+
+	// return myself
+	CGWormBase* myWormhole();
+
+	// FIXME: what should this do?
+	double getStopTime() { return 0.0;}
+
+	// Redefine: return the profile when "pNum" processors are assigned.
+	Profile* getProfile(int pNum);
+};
 
         //////////////////////////////////////////
         // class CGCtoUniversal
