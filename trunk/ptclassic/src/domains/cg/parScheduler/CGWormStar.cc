@@ -53,7 +53,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // And set the profileIndex to indicate which inside processor is 
 // associated with this star.
 CGWormStar :: CGWormStar(CGStar* s, int pix, int invoc, int flag): 
-	profileIndex(pix), invocNum(invoc) {
+        invocNum(invoc), profileIndex(pix) {
 
 	if (pix < 0) {
 		Error::abortRun(*s, "wrong profile index for CGWormStar");
