@@ -62,7 +62,7 @@ INCLUDE = \
 	$(TCL_INCLUDES)
 
 SRCS = 		cgctest.c
-HDRS =		cgctest.h
+HDRS =		
 
 EXTRA_SRCS =	makefile.in test.tcl
 
