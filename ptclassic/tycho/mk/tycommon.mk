@@ -527,7 +527,10 @@ alltests.itcl: makefile
 		done; \
 	fi
 	echo "catch {doneTests}" >> $@
-	echo "exit" >> $@
+	echo "# IMPORTANT: DON'T CALL exit HERE." >> $@
+	echo "# If exit is present, then the Builder will exit Tycho" >> $@
+	echo "# whenever the tests are run" >> $@ 
+	echo "#exit" >> $@
 
 # alljtests.tcl is used to source all the tcl files that use Java
 alljtests.tcl: makefile
