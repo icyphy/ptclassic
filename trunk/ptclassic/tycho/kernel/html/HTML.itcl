@@ -1298,6 +1298,44 @@ proc HMtag_/color {win param text} {
 }
 
 #######################################################################
+#### HMtag_dt
+# Modify the original to permanently remove the indent introduced by
+# tag_dl.  NOTE: This assumes well-structured definition lists.
+# I'm not sure what will happen with badly constructed HTML.
+#
+proc HMtag_dt {win param text} {
+	upvar #0 HM$win var
+	upvar $text data
+        # The depth of the indent is determined by depth of the "indent" stack.
+        HMstack $win {/} "indent {}"
+	incr var(level) -1
+	set level $var(level)
+	$win insert $var(S_insert) "$data" \
+		"hi [lindex $var(list) end] indent$level $var(font)"
+	set data {}
+}
+
+#######################################################################
+#### HMtag_dd
+# Modify the original to reinsert the indent removed by
+# tag_dt.  This indent will be removed later by tag_/dd.
+# NOTE: This assumes well-structured definition lists.
+# I'm not sure what will happen with badly constructed HTML.
+#
+proc HMtag_dd {win param text} {
+	upvar #0 HM$win var
+	upvar $text data
+        # The depth of the indent is determined by depth of the "indent" stack.
+        # The value "1" is irrelevant, but some value is needed.
+        HMstack $win {} "indent 1"
+	incr var(level) 1
+	set level $var(level)
+	$win insert $var(S_insert) "$data" \
+		"hi [lindex $var(list) end] indent$level $var(font)"
+	set data {}
+}
+
+#######################################################################
 #### HMtag_font
 # The following is modified from surfit.
 #
@@ -1321,6 +1359,16 @@ proc HMtag_/font {win param text} {
     upvar #0 HM$win var
     HMstack $win "/" [list size {}]
     HMstack $win "/" [list Tcolor black]
+}
+
+#######################################################################
+#### HMtag_menu
+# Use a simple "-" rather than "->".
+#
+proc HMtag_menu {win param text} {
+	upvar #0 HM$win var
+	set var(menu) -
+	set var(compact) 1
 }
 
 #######################################################################
