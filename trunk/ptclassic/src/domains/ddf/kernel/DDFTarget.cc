@@ -31,7 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDFTarget, the default target to be used in the DDF
  domain.  This used to be declared elsewhere.
 
- If restructure is 1, auto-wormholization is performed (default).
+ If restructure is 1, auto-wormholization is performed.
+ This is an experimental facility that automatically creates SDF wormholes
+ for subsystems that consist entirely of SDF stars.  It is disabled by
+ default.
 
 ***********************************************************************/
 static const char file_id[] = "DDFTarget.cc";
@@ -46,14 +49,14 @@ DDFTarget::DDFTarget() :
 Target("default-DDF","DataFlowStar","default DDF target")
 {
 	LOG_NEW; setSched(new DDFScheduler);
-	addState(restructure.setState("restructure",this,"NO",
-		"perform auto-wormholization?"));
 	addState(maxBufferSize.setState("maxBufferSize",this,"1024",
-	    "capacity of arc. For the runtime detection of unbounded arc."));
+	    "capacity of an arc. For the runtime detection of unbounded arc."));
 	addState(numOverlapped.setState("numOverlapped",this,"1",
 	    "number of iteration cycles to be overlapped for execution."));
 	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
-		"schedulePeriod for interface with a timed domain."));
+		"schedulePeriod for interface with a timed domains."));
+	addState(restructure.setState("restructure",this,"NO",
+		"perform auto-wormholization?"));
 }
 
 Block* DDFTarget::makeNew() const {
