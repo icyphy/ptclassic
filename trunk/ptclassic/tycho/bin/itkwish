@@ -63,7 +63,7 @@ progname=`basename $0`
 
 if [ -f $ITCLDIR/itcl/lib/itcl/itcl/itcl.tcl ]; then
     case "$PTARCH" in
-    hppa?*) if [ "$SHLIB_PATH" ]; then
+    hppa*) if [ "$SHLIB_PATH" ]; then
 	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl:${SHLIB_PATH}
 	else
 	    SHLIB_PATH=$ITCLDIR/itcl.$PTARCH/lib/itcl
