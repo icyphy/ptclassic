@@ -159,7 +159,7 @@ static STR bdFindAlias();
 static void append_key();
 static void append_menu();
 static void append_ali();
-static int getline();
+static int pt_getline();
 static int getword();
 static int doRemote();
 static int doCopy();
@@ -486,7 +486,7 @@ STR fileName;		/* Bindings file name */
 
     /* Fill the tables */
     linecount = 1;
-    while (getline(bindFile, Line, &linecount) != EOF) {  /* Line is global */
+    while (pt_getline(bindFile, Line, &linecount) != EOF) {/* Line is global */
 	ptrIndex = Line;
 	if (!getword(&ptrIndex, field)) {
 	    sprintf(errMsgArea, "  Missing first field on line %d\n",
@@ -610,7 +610,7 @@ STR fileName;		/* Bindings file name */
 
 
 
-static int getline(file, area, lc)
+static int pt_getline(file, area, lc)
 FILE *file;			/* Stream opened for read */
 char *area;			/* Line to put text into  */
 int *lc;			/* Current line count     */
@@ -631,7 +631,7 @@ int *lc;			/* Current line count     */
     }
     area[count] = '\0';
     if (area[0] == COMCHAR) {
-	return getline(file, area, lc);
+	return pt_getline(file, area, lc);
     } else {
 	*lc += 1;
 	return 0;
