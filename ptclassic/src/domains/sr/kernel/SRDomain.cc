@@ -30,10 +30,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
 
- WARNING -- XDomain.ccP is a template file that is used to generate
- domain description modules.  If the name of this file is not XDomain.ccP,
- DO NOT EDIT IT!!!
-
  A device to produce the correct portholes, wormholes, event horizons,
  etc, for the SR domain so the interpreter can generate them dynamically.
 
@@ -43,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Target.h"
 #include "KnownTarget.h"
 #include "SRScheduler.h"
+#include "SRStaticScheduler.h"
 #include "SRWormhole.h"
 
 extern const char SRdomainName[] = "SR";
@@ -85,3 +82,22 @@ protected:
 
 static SRTarget defaultSRtarget;
 static KnownTarget entry(defaultSRtarget,"default-SR");
+
+// declare the static Target object
+
+class SRStaticTarget : public Target {
+public:
+  SRStaticTarget() : Target("static-SR", "SRStar",
+			    "SR target with static scheduling") {}
+  Block* makeNew() const { LOG_NEW; return new SRStaticTarget;}
+  ~SRStaticTarget() { delSched();}
+  
+protected:
+  void setup() {
+    if (!scheduler()) { LOG_NEW; setSched(new SRStaticScheduler); }
+    Target::setup();
+  }
+};
+
+static SRStaticTarget staticSRtarget;
+static KnownTarget secondEntry(staticSRtarget,"static-SR");
