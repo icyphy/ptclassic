@@ -141,8 +141,8 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   }
   else {
     noSuchArc = 0;
-// Search through the arc list for an arc with the given name.
-// If one is found, update it's low/high write/read markers.
+    // Search through the arc list for an arc with the given name.
+    // If one is found, update it's low/high write/read markers.
     VHDLArc* arc = arcList.arcWithName(name);
     {
       {
@@ -162,19 +162,18 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
     }
   }
   
-// If no arc with the given name is in the list, then create one.
+  // If no arc with the given name is in the list, then create one.
   if (noSuchArc) {
     VHDLArc* newArc = new VHDLArc;
     newArc->setName(name);
+    newArc->setType(port->dataType());
     if (hashDirec == hashOUT) {
-      newArc->type = port->dataType();
       newArc->lowWrite = tokenNum;
       newArc->highWrite = tokenNum;
       newArc->lowRead = port->geo().firstGet();
       newArc->highRead = port->geo().firstGet();
     }
     else if (hashDirec == hashIN) {
-      newArc->type = port->dataType();
       newArc->lowWrite = port->geo().firstPut();
       newArc->highWrite = port->geo().firstPut();
       newArc->lowRead = tokenNum;
