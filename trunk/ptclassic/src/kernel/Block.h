@@ -115,7 +115,7 @@ public:
 	// and false otherwise.
 	virtual int isItWormhole () const; // {return FALSE;}
 
-	// Method to true "false" if the block is a Cluster
+	// Method to reply "false" if the block is a Cluster
         // and false otherwise.
         virtual int isItCluster () const; // {return FALSE;}
 
