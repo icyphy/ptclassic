@@ -144,7 +144,7 @@ ParseToken ComplexArrayState :: evalExpression(Tokenizer& lexer) {
 	return t;
 }
 
-StringList ComplexArrayState :: currentValue() {
+StringList ComplexArrayState :: currentValue() const {
 	StringList s; 
 	s =  "\n";
 	for(int i = 0; i<size(); i++) 

@@ -80,7 +80,7 @@ public:
 	int isA(const char*) const;
 
         // the value as a string
-        StringList currentValue();
+        StringList currentValue() const;
 
 	// Parse initValue to set Value
 	void initialize();
