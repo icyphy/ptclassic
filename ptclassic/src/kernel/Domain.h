@@ -57,6 +57,8 @@ const int NUMDOMAINS = 30;		// maximum # of domains
 class Domain {
 public:
 	Domain (const char* domname);
+        virtual ~Domain() {}
+
 	// method for creating new wormholes
 	virtual Star& newWorm(Galaxy& innerGal,Target* innerTarget = 0);
 

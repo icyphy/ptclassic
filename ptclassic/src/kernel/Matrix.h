@@ -537,7 +537,9 @@ class IntMatrix: public PtMatrix {
 class MatrixEnvParticle : public Particle {
  public:
   // constructor
-  MatrixEnvParticle()  {};
+  MatrixEnvParticle() {}
+
+  virtual ~MatrixEnvParticle() {}
 
   // All these conversions return as an error.
   operator int () const;

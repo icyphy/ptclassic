@@ -187,6 +187,7 @@ private:
 // A Particle class to transmit Messages (which are enclosed in Envelopes)
 class MessageParticle : public Particle {
 public:
+        virtual ~MessageParticle() {}
 	DataType type() const;
 
 	operator int () const;

@@ -71,6 +71,7 @@ the same thread, no lock is needed.
 class Plasma : public ParticleStack {
     friend class PlasmaGate;
 public:
+        virtual ~Plasma () {};
 	// constructor.  By default, we make global Plasmas.  If globalP
 	// is non-null, we are making a local Plasma and globalP is the
 	// corresponding global Plasma.
