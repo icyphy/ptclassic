@@ -269,15 +269,14 @@ body ::tycho::FileBrowser::processItem {filename} {
    
     if { "$tcl_platform(platform)" == "windows" } {
 	if ![regexp {^[A-Za-z]:} $filename] {
-	    set file $localCWD/$filename
+	    set file [file join $localCWD $filename]
 	} {
 	    set file $filename
 	}
     } else {
 	# If the name is relative, prepend with current path.
-	set char [string index $filename 0]
-	if {$char != "/" && $char != "~" && $char != "\$"} {
-	    set file $localCWD/$filename
+	if [::tycho::isRelative $filename] {
+	    set file [file join $localCWD $filename]
 	} {
 	    set file $filename
 	}
@@ -292,7 +291,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	    error "Cannot expand $filename"
 	}
     } else {
-	if {[string index $file 0] != "/"} {
+	if [::tycho::isRelative $file] {
 	    error "Cannot expand $filename"
 	}
     }
@@ -352,7 +351,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     $itk_component(listbox) delete 0 end
     
     # Get a list of filenames in the current working directory
-    set files [glob -nocomplain $localCWD/*]
+    set files [glob -nocomplain [file join $localCWD *]]
     
     # Split the filename list into directories and plain files
     set dirList ""
