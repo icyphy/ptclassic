@@ -60,6 +60,7 @@ ITCL_SRCS = \
 	LabeledLine.itcl \
 	LabeledOval.itcl \
 	LabeledRect.itcl \
+	Layout.itcl \
 	Line.itcl \
 	Oval.itcl \
 	Point.itcl \
