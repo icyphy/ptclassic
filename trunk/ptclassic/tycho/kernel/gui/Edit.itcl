@@ -639,6 +639,10 @@ body ::tycho::Edit::constructor {args} {
     set maxLineLength \
             [preference get fillColumn]
 
+    if [preference get slowNetwork] {
+	$itk_component(text) configure -insertofftime 0
+    }
+
     # Create the context-sensitive popup menu
     contextmenu create $itk_component(text) 
 }
