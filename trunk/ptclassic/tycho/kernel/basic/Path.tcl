@@ -489,9 +489,9 @@ proc ::tycho::pathSeparator {} {
 #
 # Parse the given header string and set the elements of
 # the passed array, with each index being the name of a headed
-# variable. Returns the mode if successful, or null
-# if the header was malformed. The header format is the same
-# as the emacs mode string, either being:
+# variable. Returns 1 if successful, or zero if the header was
+# malformed. The header format is the same as the emacs mode string,
+# either being:
 # <pre>
 #   -*- _mode_ -*-
 # </pre>
@@ -500,30 +500,34 @@ proc ::tycho::pathSeparator {} {
 #   -*- mode: _mode_ { ; _name_: _value_ } -*-
 # </pre>
 #
+# Because Tycho uses a number of variables in the header, we allow
+# it be multi-line, with each line being of the second form above.
+#
 proc ::tycho::parseHeaderString {string var} {
     upvar $var v
-	
-    # Remove delimiters and space
+    set result 0
+
+    # Remove delimiters and leading and trailing space
     regsub -all -- {-\*-} $string {} string
     set string [string trim $string " \t;"]
 
     # Try for just the mode
     if [regexp {^[^:;]+$} $string mode] {
         set v(mode) $mode
-        return $mode
+        return 1
     }
 
-    # Parse name-value
-    while { [regexp "^(\[^:; \t\]+)\[ \t\]*:\[ \t\]*(\[^:; \t\]+)(.*)\$" \
-            $string _ name value string] } {
-        set v($name) $value
-        set string [string trimleft $string " \t;"]
+    # Parse name-value in each line
+    foreach line [split $string "\n"] {
+        set line [string trim $line " \t;"]
+        while { [regexp "^(\[^: \t\]+)\[ \t\]*:\[ \t\]*(\[^;\]+)(.*)\$" \
+                $line _ name value line] } {
+            set v($name) [string trim $value " \t"]
+            set line [string trimleft $line " \t;"]
+            set result 1
+        }
     }
-    if [::info exists v(mode)] {
-        return $v(mode)
-    } else {
-        return {}
-    }
+    return $result
 }
 
 ##############################################################################
