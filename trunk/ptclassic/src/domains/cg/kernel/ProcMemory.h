@@ -220,7 +220,7 @@ public:
 	void reset();
 
 	// Destructor
-	~DualMemory() { reset();}
+	~DualMemory();
 
 	// Log a request for memory, to be allocated later.
 	// Returns TRUE if the attributes of the state or port match the
