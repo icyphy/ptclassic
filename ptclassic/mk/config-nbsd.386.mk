@@ -45,7 +45,7 @@ RANLIB =	ranlib
 CC =		gcc
 
 OCTTOOLS_MM_LIB=
-OCT_CC =	gcc -traditional $(OCTTOOLS_MM_LIB)
+OCT_CC =	gcc $(OCTTOOLS_MM_LIB)
 
 # In config-$PTARCH.mk, we set the following variables.  We need to 
 # use only the following variables so that we can use them elsewhere, say
@@ -96,10 +96,12 @@ CC_STATIC = 	-static
 CSYSLIBS =	-lm
 
 # system libraries (libraries from the environment)
-SYSLIBS=	-lg++ $(CSYSLIBS)
+# -lstdc++ needed for iostream
+# -lcompat needed for cuserid
+SYSLIBS=	-lg++ -lstdc++ -lcompat $(CSYSLIBS)
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
-LINKFLAGS_D=-L$(LIBDIR) -g -static
+LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x
+LINKFLAGS_D=-L$(LIBDIR) -g 
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
@@ -111,9 +113,9 @@ COMPATLIB = -lcompat
 #
 # Directories to use
 #
-X11_INCSPEC = -I/usr/X11/include
-X11INCL     = -I/usr/X11/include
-X11_LIBSPEC = -L/usr/X11/lib -lX11
+X11_INCSPEC = -I/usr/X11R6/include
+X11INCL     = -I/usr/X11R6/include
+X11_LIBSPEC = -L/usr/X11R6/lib -lX11
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
 X11EXT_LIBSPEC=-lXext -lSM -lICE
