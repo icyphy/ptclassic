@@ -193,7 +193,8 @@ configbody ::tycho::Displayer::master {
 
 ###################################################################
 #### -toolbar configuration
-# FIXME
+# If the value of this option is "1", show the toolbar for each widget.
+# Otherwise, hide the toolbar.
 #
 configbody ::tycho::Displayer::toolbar {
     if $itk_option(-toolbar) {
