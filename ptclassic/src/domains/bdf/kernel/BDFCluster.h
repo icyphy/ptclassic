@@ -2,9 +2,6 @@
 #define _BDFCluster_h 1
 
 /**************************************************************************
-Version identification:
-$Id$
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -30,8 +27,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  J. Buck
- Date of creation: 7/6/92
+Author:  J. Buck
+Created: 7/6/92
+Version: $Id$
 
 (for now, this is a modified copy of SDFCluster.h.  We will try
 to merge the two later.)
@@ -89,29 +87,13 @@ public:
 	: logstrm(log), bagNumber(-1), urateFlag(FALSE) {}
 
 	// inherit virtual destructor, which zaps inherited data members
-	virtual ~BDFClusterGal();
-
-	// override addBlock
-	inline void addBlock(Block& b, const char* bname) {
-		dynamicClusterList.append(&b);
-		DynamicGalaxy::addBlock(b, bname);
-	}
-	inline void addBlock(Block& b) {
-		dynamicClusterList.append(&b);
-		DynamicGalaxy::addBlock(b);
-	}
-
-	// override removeBlock
-	inline int removeBlock(Block& b) {
-		dynamicClusterList.remove(&b);
-		return DynamicGalaxy::removeBlock(b);
-	}
+	/* virtual */ ~BDFClusterGal();
 
         // remove all blocks in this galaxy without deallocating the blocks
 	void orphanBlocks();
 
 	// how many?
-	int numberClusts() const { return numberBlocks();}
+	inline int numberClusts() const { return numberBlocks();}
 
 	// this is it!  The main clustering routine Returns TRUE
 	// if any clustering is performed.
@@ -120,8 +102,7 @@ public:
 	// return TRUE if all member clusters have the same rate
 	int uniformRate();
 
-	// I would prefer for these to be protected rather than
-	// public.
+	// I would prefer for these to be protected rather than public.
 
 	// do a loop pass.  Return TRUE if a change was made
 	int loopPass();
@@ -132,9 +113,8 @@ public:
 	// merge any "parallel loops".  Return TRUE if a change was made
 	int parallelLoopMergePass();
 
-	// set log stream member to match that of another (parent)
-	// galaxy
-	void dupStream(BDFClusterGal *pgal) { logstrm = pgal->logstrm;}
+	// set log stream member to match that of another (parent) galaxy
+	inline void dupStream(BDFClusterGal* pgal) { logstrm = pgal->logstrm; }
 
 	// generate schedules for interior clusters
 	void genSubScheds();
@@ -200,8 +180,6 @@ protected:
 	BDFClustPort* connectBoolean(BDFCluster* c,BDFClustPort* cond,
 				     BDFRelation& rel);
 
-	SequentialList dynamicClusterList;
-
 private:
 	int bagNumber;			// number for generating bag names
 	SequentialList stopList;	// list used by fullSearchMerge.
@@ -222,12 +200,13 @@ public:
 		BDFClusterGal(g,log), sched(0) {}
 
 	// destructor
-	/* virtual */ ~BDFTopGal() {}
+	/* virtual */ ~BDFTopGal() {};
 
 	Scheduler* scheduler() const { return sched;}
 	inline void setSched(Scheduler* s) { sched = s;}
 
 private:
+	// not allocated by TopGal
 	Scheduler* sched;
 };
 
@@ -249,10 +228,10 @@ public:
 
 	// make destructor virtual so that delete p works properly when
 	// p can be either a BDFCluster* or a pointer to child of BDFCluster
-	/* virtual */ ~BDFCluster() { deleteAllGenPorts(); }
+	virtual ~BDFCluster() { deleteAllGenPorts(); }
 
-	void setVisit(int i) { visitFlag = i; }
-	int  visited() { return visitFlag; }
+	inline void setVisit(int i) { visitFlag = i; }
+	inline int  visited() { return visitFlag; }
 
 	// return true if my sample rate matches that of all my neighbors
 	int matchNeighborRates();
@@ -347,16 +326,15 @@ inline ostream& operator<<(ostream& o, BDFCluster& cl) {
 // An atomic cluster surrounds a DataFlowStar, allowing a parallel hierarchy
 // to be built up.
 class BDFAtomCluster : public BDFCluster {
-private:
-	DataFlowStar& pStar;
 public:
 	// The constructor turns the DataFlowStar into an atomic cluster.
 	BDFAtomCluster(DataFlowStar& s,Galaxy* parent = 0);
+
 	// destructor
-	~BDFAtomCluster();
+	/* virtual */ ~BDFAtomCluster();
 
 	// return my insides
-	DataFlowStar& real() { return pStar;}
+	inline DataFlowStar& real() { return pStar; }
 
 	// execute the cluster's "inside" (called by BDFCluster::go)
 	// the number of times indicated by loop().
@@ -383,15 +361,15 @@ public:
 
 	// set buffer sizes
 	void fixBufferSizes(int nReps);
+
+private:
+	DataFlowStar& pStar;
 };
 
 // An BDFBagScheduler is a modified BDFScheduler that lives in
 // a BDFClusterBag.
 
 class BDFBagScheduler : public SDFScheduler {
-protected:
-	// we permit disconnected galaxies.
-	int checkConnectivity() { return TRUE;}
 public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
@@ -401,6 +379,10 @@ public:
 
 	// code generation
 	virtual void genCode(Target&, int depth);
+
+protected:
+	// we permit disconnected galaxies.
+	int checkConnectivity() { return TRUE;}
 };
 
 // An BDFClusterBag is a composite object.  In some senses it is like
@@ -411,6 +393,7 @@ class BDFClusterBag : public BDFCluster {
 public:
 	// constructor: makes an empty bag
 	BDFClusterBag();
+
 	// destructor
 	/* virtual */ ~BDFClusterBag();
 
@@ -428,10 +411,10 @@ public:
 	void merge(BDFClusterBag*,BDFClusterGal*);
 
 	// asBag returns myself, since I am a bag
-	BDFClusterBag* asBag() { return this;}
+	inline BDFClusterBag* asBag() { return this; }
 
 	// return my galaxy.
-	BDFClusterGal& myGal() { return *gal; }
+	inline BDFClusterGal& myGal() { return *gal; }
 
 	// print me
 	ostream& printOn(ostream&);
@@ -521,6 +504,7 @@ public:
 	// constructor and destructor
 	BDFClustSched(const char* log = 0, int canDoDyn = TRUE,
 		      int constCheck = FALSE);
+
 	/* virtual */ ~BDFClustSched();
 
 	// return the schedule
