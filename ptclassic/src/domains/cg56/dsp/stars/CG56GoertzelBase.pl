@@ -3,7 +3,7 @@ defstar {
 	domain { CG56 }
 	version { $Id$ }
 	desc {
-Base class for Goertzel algorithm stars.
+Base class for Goertzel algorithm stars
 	}
 	author { Brian L. Evans }
 	copyright {
@@ -36,74 +36,65 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { amount of data to read (N <= size) }
 	}
 	defstate {
-		name { d1 }
+		name { WnReal }
 		type { fix }
 		default { "0.0" }
 		desc {
-first-order feedback coefficient which is a function of k and N }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+internal state for the storage of the real part of the twiddle factor, 
+which is a function of k and N
+		}
+		attributes { A_XMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
-		name { state1 }
+		name { WnImag }
 		type { fix }
 		default { "0.0" }
-		desc { internal state. does not persist across invocations. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
+		desc {
+internal state for the storage of the imaginary part of the twiddle factor,
+which is a function of k and N
+		}
+		attributes { A_YMEM|A_NONCONSTANT|A_NONSETTABLE }
 	}
-	defstate {
-		name { state2 }
-		type { fix }
-		default { "0.0" }
-		desc { internal state. does not persist across invocations. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
-	}
-	defstate {
-		name { halfd1 }
-		type { fix }
-		default { "0.0" }
-		desc { internal state. does not persist across invocations. }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
-	}
-	protected {
+	protected{
 		double theta;
 	}
-	constructor {
+	constructor{
 		noInternalState();
 		theta = 0.0;
 	}
 	ccinclude { <math.h> }
 
-	method {
-	    name {CheckParameterValues}
-	    arglist { "()" }
+	method{
+	    name{CheckParameterValues}
+	    arglist{  "()" }
 	    type { void }
 	    code {
-		if ( int(k) < 0 ) {
+	    	if ( int(k) < 0 ) {
 		  Error::abortRun(*this,
-			"The value for state k must be nonnegative.");
+		  	"The value for state k must be nonnegative.");
 		  return;
 		}
 		if ( int(N) <= 0 ) {
-		   Error::abortRun(*this,
-			"The value for state N must be positive.");
-		   return;
+		  Error::abortRun(*this,
+		  	"The value for state N must be positive.");
+		  return;
 		}
 		if ( int(size) <= 0 ) {
-		   Error::abortRun(*this,
-			"The value for state size must be positive.");
-		   return;
+		  Error::abortRun(*this,
+		  	"The value for state size must be positive.");
+		  return;
 		}
 		if ( int(k) >= int(N) ) {
-		   Error::abortRun(*this,
-			"The DFT coefficient k must be less than the ",
+		  Error::abortRun(*this,
+		  	"The DFT coefficient k must be less than the ",
 			"DFT length N.");
-		   return;
+		  return;
 		}
 		if ( int(N) > int(size) ) {
-		   Error::abortRun(*this,
-			"The DFT length N must be less than or equal to the ",
+		  Error::abortRun(*this,
+		  	"The DFT lenght N must be less that or equal to the ",
 			"number of data samples read, given by state size.");
-		   return;
+		  return;
 		}
 	    }
 	}
@@ -112,54 +103,56 @@ first-order feedback coefficient which is a function of k and N }
 		// FIXME: Parameters are not always resolved properly
 		// before setup but should be.  For now, check parameters
 		// in go method and guard against division by N = 0
-		// CheckParameterValues();
+		CheckParameterValues();
 		// double Nd = double(int(N));
 		double Nd = double(int(N) ? int(N) : 1);
 		double kd = double(int(k));
-		theta = -2.0 * M_PI * kd / Nd;
-		double cosTheta = cos(theta);
-		halfd1 = cosTheta;
-		d1 = 2.0 * cosTheta;		// can't reuse halfd1, a fix
+		theta = 2.0 * M_PI * kd / Nd;
+		WnReal= double(cos(theta));
+		WnImag  = double(sin(theta));
 		input.setSDFParams(int(size), int(size)-1);
-	}
+	
 
-	codeblock(init) {
-; Goertzel algorithm relies on one feedback coefficient d1 = 2 cos(theta)
-; such that theta = 2 Pi k / N for the kth coefficient of an N-point DFT.
-; Register usage:
-; r0: base address for the block of input samples
-; x0: value of one-sample delay (state1)
-; x1: value of two-sample delay (state2)
-; y0: feedback coefficient d1 divided by 2
-; y1: ith input value
-	clr	a	#$addr(input),r0		; a = 0
-	clr	b	a,x1	$ref(halfd1),y0		; x1 = 0 and y0 = d1/2
-	move	x:(r0)+,a
-	}
+		}
 
-	codeblock(loop,"int len") {
-; Begin loop for Goertzel algorithm: run all-pole section for @len iterations
-	do	#@len,$label(_GoertzelBase)
-	sub	x1,a		b,x0            ; a = x[n]-y[n-2] and x0=y[n-1]
-	mpyr	y0,x0,b		x0,x1		; b = y[n-1]*cos()  x1=y[n-1]
-	addl	a,b		x:(r0)+,a	; b = x[n]-y[n-2]+2*cos()*y[n-1]=y[n] and a=x[n+1]
-$label(_GoertzelBase)
+	codeblock(initialize){
+;initialize:
+;b=x0=y0=0
+;x1=WnReal
+;y1=WnImag
+;r0=r4=address of input
+;a = real part of first input
+	clr	a		#$addr(input),r0
+	clr	b		$ref(WnReal),x1	a,y0
+	clr	a		b,x0				$ref(WnImag),y1
+	move 	x:(r0)+,a
+	}	
+
+	codeblock(loop,"int len"){
+;x0=real part of previous output 
+;x1=WnReal
+;y0=imaginary part of previous output
+;y1=WnImag
+;a=real part of this output
+;b=imaginary part of this output
+;r0->real part of input
+;r4->imaginary part of imput
+	do	#@len,$label(_GoertzelLoop)
+	macr	x1,x0,a		b,y0	
+	macr	-y1,y0,a		#0,b		
+	macr	x0,y1,b		a,x0
+	macr	x1,y0,b		x:(r0)+,a
+$label(_GoertzelLoop)
+;when the loop ends the real coeff. is stored in x0
+;the imaginary coeff is stored in b
 	}
 
 	go {
-		CheckParameterValues();
-
 		int dftLength = int(N);
-
-		// Run all-pole section of Goertzel's algorithm N iterations.
-		// Only one multiplier (d1) in iteration.
-		// Zero the IIR state for each DFT calculation; otherwise,
-		// the filter output could grow without bound.
-		// state1 and state2 are states and not local variables
-		// ONLY to pass their values to derived stars
-
-		addCode(init);
-		addCode(loop(dftLength+1));
+  		// Initialize registers
+		addCode(initialize);
+		// Compute kth coeff discarding all but last sample
+		addCode(loop(dftLength + 1));
 	}
 
 	exectime {
@@ -167,7 +160,6 @@ $label(_GoertzelBase)
 		// oscillator cycles because that's the way it was done in
 		// Gabriel: they simply counted the number of instructions.
 
-		// However, the do command takes 3 pairs of oscillator cycles
-		return (3 + 3 + 3*int(N));
+		return ( 4 + 3 + 4*(int(N)+1) );
 	}
 }
