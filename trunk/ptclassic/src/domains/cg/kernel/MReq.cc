@@ -67,6 +67,13 @@ void MStateReq::assign(ProcMemory& proc, unsigned addr) {
 	((AsmStar*)(mystate.parent()))->addEntry(mystate,proc,addr);
 }
 
+// state returns the first state on the list
+const State* MConsecStateReq::state() {
+	MReqListIter next(lis);
+	MReq* m = next++;
+	return m ? m->state() : 0;
+}
+
 void MConsecStateReq::assign(ProcMemory& proc, unsigned addr) {
 	MReqListIter next(lis);
 	MReq* m;
