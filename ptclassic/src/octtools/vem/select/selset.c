@@ -175,7 +175,7 @@ char *pat;			/* Pattern itself                        */
     
     /* Build line style from old line style */
     if (len > 0) {
-	char buf[32];
+	char buf[33];
 	int i;
 
 	for (i = len-1;  i >= 0;  i--) {
@@ -183,6 +183,7 @@ char *pat;			/* Pattern itself                        */
 	    else buf[i] = '0';
 	    lineStyle >>= 1;
 	}
+	buf[len] = 0; /* flNewPattern wants properly null-terminated string */
 	lpat = flNewPattern(len, 1, buf);
     } else {
 	lpat = (flPattern) 0;
