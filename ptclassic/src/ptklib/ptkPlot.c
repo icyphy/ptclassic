@@ -142,11 +142,16 @@ static int drawAxes(interp,plotPtr)
     Tcl_Interp *interp;
     ptkPlotWin *plotPtr;
 {
+#if TCL_MAJOR_VERSION < 8
     static XFontStruct *fontPtr;
+    static XCharStruct bbox;
+#else
+    static Tk_Font fontPtr;
+    static Tk_FontMetrics bbox;
+#endif
     Tk_Window *win, canvWin;
     char *identifier;
     char *xTitle, *yTitle;
-    static XCharStruct bbox;
     int intTmp;
     int canvWidth, canvHeight;
     char *name;
@@ -175,26 +180,49 @@ static int drawAxes(interp,plotPtr)
     canvHeight = Tk_Height(canvWin);
 
     /* Get the font size information for the standard font */
+#if TCL_MAJOR_VERSION < 8
     fontPtr = Tk_GetFontStruct(interp,*win,Tk_GetUid(STD_FONT));
+#else
+    fontPtr = Tk_GetFont(interp,*win,Tk_GetUid(STD_FONT));
+#endif
     if (fontPtr == NULL) {
         errmsg = "Cannot retrieve font";
 	return 0;
     }
+#if TCL_MAJOR_VERSION < 8
     XTextExtents(fontPtr, "8", strlen("8"),&intTmp,&intTmp,&intTmp,&bbox);
     nw = (bbox.rbearing - bbox.lbearing);
     nh = (bbox.ascent + bbox.descent);
-    Tk_FreeFontStruct(fontPtr);
+#else
+    Tk_GetFontMetrics(fontPtr,&bbox);
+    /*nw = (bbox.rbearing - bbox.lbearing);*/
+    nh = bbox.linespace;
+#endif
+
 
     /* Get the font size information for the title font */
+#if TCL_MAJOR_VERSION < 8
+    Tk_FreeFontStruct(fontPtr);
     fontPtr = Tk_GetFontStruct(interp,*win,Tk_GetUid(TITLE_FONT));
+#else
+    Tk_FreeFont(fontPtr);
+    fontPtr = Tk_GetFont(interp,*win,Tk_GetUid(TITLE_FONT));
+#endif
     if (fontPtr == NULL) {
         errmsg = "Cannot retrieve font";
 	return 0;
     }
+#if TCL_MAJOR_VERSION < 8
     XTextExtents(fontPtr, "8", strlen("8"),&intTmp,&intTmp,&intTmp,&bbox);
+#else
+    Tk_GetFontMetrics(fontPtr,&bbox);
+#endif
     nhTitle = (bbox.ascent + bbox.descent);
+#if TCL_MAJOR_VERSION < 8
     Tk_FreeFontStruct(fontPtr);
-
+#else
+    Tk_FreeFont(fontPtr);
+#endif
     doubleNum = MAX(fabs(plotPtr->yMax),fabs(plotPtr->yMin));
 
     /* From David Harrison's Xgraph source, modified to remove memory leaks */
