@@ -29,16 +29,10 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
 ROOT =		../../..
-# Path (absolute or relative) to the object directory root
-OBJDIR =	../../..
+
 # True source directory
 VPATH =		$(ROOT)/tycho/editors/slate
 
@@ -52,29 +46,31 @@ ITCL_SRCS = \
 	sample.itcl \
 	stars.itcl
 
-EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
+EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc img test #tclIndex 
-
-# Sub directories to run make in.
-DIRS =			doc
+MISC_FILES =		OLD \
+	748.gif \
+	900ss.gif \
+	australia.gif \
+	bind.tcl \
+	con.tcl \
+	demo.itcl \
+	makefile \
+	mantra.gif \
+	pigi.itcl \
+	sample.itcl \
+	simple.tcl \
+	stars.itcl \
+	trace.itcl
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =			tclIndex
+REALCLEAN_STUFF =
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
-all install: $(MISC_SRCS) #tclIndex
-
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 $(ITCL_LIBDIR)]; auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)' | $(ITCL2_0_SH)
+all install: $(MISC_SRCS)
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
-
-# Don't add anything after the next line; makedepend will zap it.
-# DO NOT DELETE THIS LINE -- make depend depends on it.
 
