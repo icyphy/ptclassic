@@ -386,7 +386,8 @@ void UniProcessor :: simRunSchedule() {
 		DFStarPortIter piter(*copyS);
 		CGPortHole* p;
 		while ((p = (CGPortHole*) piter++) != 0) {
-			if (p->atBoundary()) continue;
+			if (p->far() == NULL) continue;
+			else if (p->atBoundary()) continue;
 			// in case of embedding
 			if (p->embedded() || p->embedding()) continue;
 			CGPortHole* pFar = (CGPortHole*) p->far();
