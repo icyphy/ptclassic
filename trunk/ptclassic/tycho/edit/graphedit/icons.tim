@@ -11,11 +11,11 @@ group arithmetic {
             line 50 20 50 80 -width 4
         }
 
-        port in0 Terminal -anchor {0 50} -direction {-1 0} \
+        port input-0 Terminal -anchor {0 50} -direction {-1 0} \
                 -type input -style blob -fill red
-        port in1 Terminal -anchor {50 0} -direction {0 -1} \
+        port input-1 Terminal -anchor {50 0} -direction {0 -1} \
                 -type input -style blob -fill red
-        port out Terminal -anchor {100 50} -direction {1 0} \
+        port output Terminal -anchor {100 50} -direction {1 0} \
                 -type output -style arrow -fill blue
     }
     icon Multiply IconOval {
@@ -90,7 +90,6 @@ group uncommitted {
         port out Terminal -anchor {100 50} -direction {1 0} \
                 -type output -fill green2
     }
-    -label {Uncommitted Icons}
     icon two-two IconFrame {
         -label {Two in, two out}
         -text NoName
@@ -145,5 +144,25 @@ group miscellaneous {
                 -type input -style blob
         port out Terminal -anchor {0 50} -direction {-1 0} \
                 -type output -style arrow -fill blue
+    }
+}
+
+group sdf {
+    -label {SDF Icons}
+    icon Ramp IconFrame {
+        -label {Ramp}
+        -text Ramp
+        -color lightsteelblue
+
+        port output Terminal -anchor {100 50} -direction {1 0} \
+                -type output -fill green2
+    }
+    icon Xgraph IconFrame {
+        -label {Xgraph}
+        -text Xgraph
+        -color lightsteelblue
+
+        port input Terminal -anchor {0 50} -direction {-1 0} \
+                -type input -style blob
     }
 }
