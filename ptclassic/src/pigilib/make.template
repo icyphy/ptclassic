@@ -123,6 +123,9 @@ tags:	$(SRCS)
 TAGS:	$(SRCS)
 	etags $(SRCS)
 
+lint:	$(LIBCSRCS)
+	lint -u -I$(OCTTOOLS)/include $(LIBCSRCS) > lint
+
 # Rule for compiling with g++
 .SUFFIXES: .cc
 .cc.o:
