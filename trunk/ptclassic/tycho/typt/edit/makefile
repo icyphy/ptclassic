@@ -47,6 +47,7 @@ ITCL_SRCS = \
 	EditPtlang.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
+	README.txt \
 	edit.tcl \
 	pkgIndex.tcl
 
