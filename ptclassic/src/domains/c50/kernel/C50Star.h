@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-Programmer: Andreas Baensch
+Programmer: Andreas Baensch and Guner Arslan
 Date of creation: 28 January 1994
 
 Modeled after code by E. A. Lee and J. T. Buck.
@@ -58,7 +58,18 @@ public:
 
 	// class identification
 	int isA(const char*) const;
+
+protected:
+	// State or PortHole reference.
+	virtual StringList expandRef(const char*);
+
+	// State or PortHole reference with offset.
+	virtual StringList expandRef(const char* name, const char* offset);
+
+	virtual StringList expandMacro(const char* func, const StringList& argList);
 };
+
+
 
 #endif
 
