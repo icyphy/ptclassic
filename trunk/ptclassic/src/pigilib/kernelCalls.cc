@@ -345,14 +345,18 @@ realGetParams(const char* name, ParamListType* pListPtr)
 		return FALSE;
 	}
 	int n = block->numberStates();
-	pListPtr->length = n;
 	pListPtr->array = new ParamStruct[n];
 	BlockStateIter nexts(*block);
+	int j = 0;
 	for (int i = 0; i < n; i++) {
 		State& s = *nexts++;
-		pListPtr->array[i].name = s.readName();
-		pListPtr->array[i].value = s.getInitValue();
+		// Only return settable states
+		if (s.attributes() & A_SETTABLE) {
+		    pListPtr->array[j].name = s.readName();
+		    pListPtr->array[j++].value = s.getInitValue();
+		}
 	}
+	pListPtr->length = j;
 	return TRUE;
 }
 
