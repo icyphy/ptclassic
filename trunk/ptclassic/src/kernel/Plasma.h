@@ -51,7 +51,7 @@ public:
 			p->initialize();
 			return p;
 		}
-		return head->useNew();
+		else return head->useNew();
 	}
 	DataType type() { return head->readType();}
 
