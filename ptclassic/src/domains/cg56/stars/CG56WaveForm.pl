@@ -179,76 +179,72 @@ $label(l28)
 	setup {
 		firstVal = value[0];
 		valueLen = value.size();
-		if (!(int (haltAtEnd)) &&int (periodic) && period == 0)
+		if (!(int(haltAtEnd)) && int(periodic) && int(period) == 0)
 			period = valueLen;
-		if (!(int (haltAtEnd)) &&!(int (periodic)))
+		if (!(int(haltAtEnd)) && !(int(periodic)))
 			period = 0;
-		if (period == 1) 
+		if (int(period) == 1) 
 			output.setAttributes(P_NOINIT);
-		if ((period > valueLen) || (period == 0))
-			value.resize(int (valueLen));
+		if ((int(period) > int(valueLen)) || (int(period) == 0))
+			value.resize(int(valueLen));
 		else
-			value.resize(int (period));
+			value.resize(int(period));
 	}
 	initCode {
-		if (period == 1) {
-			//special case, reproduce DC star.
-				addCode(org);
+		if (int(period) == 1) {
+			// special case, reproduce Const star.
+			addCode(org);
 			for (int i = 0; i < output.bufSize(); i++)
 				addCode(dc);
 			addCode(orgp);
 		}
-		if (period != 1) {
-			if ((period == 0 && valueLen > 1) ||
-			   (period != 0 && period <= valueLen)) {
+		else {
+			if ((int(period) == 0 && int(valueLen) > 1) ||
+			   (int(period) != 0 && int(period) <= int(valueLen))) {
 				addCode(initDataCirc);
-			} else {
-				if (period > valueLen)
-					addCode(makeblock);
+			}
+			else if (int(period) > int(valueLen)) {
+				addCode(makeblock);
 			}
 		}
 	}
 	go {
-                if (int(haltAtEnd))
-                        Scheduler::requestHalt();
-		if (period == 1)
-			return;
-		//special case, output stored at compile time.
-			if (period == 0) {
-			if (valueLen == 1)
+                if (int(haltAtEnd)) Scheduler::requestHalt();
+
+		// special case, output stored at compile time.
+		if (int(period) == 1) return;
+
+		if (int(period) == 0) {
+			if (int(valueLen) == 1)		// output impulse.
 				addCode(impulse);
-			//output impulse.
-				else {
-				X = valueLen - 1;
+			else {		// output general aperiodic value.
+				X = int(valueLen) - 1;
 				addCode(aperiodic);
-				//output general aperiodic value.
 			}
 		}
-		if (period <= valueLen && period != 1 && period != 0) {
-			//output periodic value-- use first period values.
-				X = period - 1;
+
+		if (int(period) <= int(valueLen) && int(period) != 1 &&
+		    int(period) != 0) {
+			// output periodic value-- use first period values.
+			X = int(period) - 1;
 			addCode(periodperiodicSequence);
 		}
-		if (period > valueLen && period != 1 && period != 0) {
-			//output periodic value-- zero padded.
-				X = period - 1;
+		if (int(period) > int(valueLen) && int(period) != 1 &&
+		    int(period) != 0) {
+			// output periodic value-- zero padded.
+			X = int(period) - 1;
 			addCode(zeroPaddedSequence);
 		}
 	}
 
 	execTime {
-		if (int (period) == 0)
-			if (int (valueLen) == 1)
-				return 3;
-			else
-				return 9;
-		if (int (period) == 1)
-			return 0;
-		if (int (period) <= int (valueLen))
-			return 9;
+		if (int(period) == 0) {
+			if (int (valueLen) == 1) return 3;
+			else return 9;
+		}
+		if (int(period) == 1) return 0;
+		if (int(period) <= int(valueLen)) return 9;
 		return 19;
 
 	}
 }
-
-

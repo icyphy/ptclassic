@@ -3,7 +3,7 @@ defstar {
 	domain { C50 }
 	desc {
 A star to stall the flow of data for parameter cycles to waste cycles.
-        }
+	}
 	version { $Id$ }
 	author { A. Baensch, ported from Gabriel }
 	copyright {
@@ -13,14 +13,14 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 control library }
-        explanation {
+	explanation {
 A star to stall the flow of data for parameter cycles to waste cycles.
-        }
-        input {
-                name { input }
-                type { fix }
-        }	    
-        output {
+	}
+	input {
+		name { input }
+		type { fix }
+	}	    
+	output {
 		name { output }
 		type { fix }
 	}
@@ -42,13 +42,13 @@ A star to stall the flow of data for parameter cycles to waste cycles.
 	lar	AR6,#$addr(input)		;Address input		=> AR6
 	lar 	AR7,#$addr(output)		;Address output		=> AR7
 	lacc	*,15,AR7			;Accu = input
-        rpt     #$val(X)			;number of cycles to waste
-         nop					;waste cycles
-        sach	*,1				;output = input
+	rpt     #$val(X)			;number of cycles to waste
+	 nop					;waste cycles
+	sach	*,1				;output = input
 	} 
-        go {
-                X=cyclesToWaste-5;
-                addCode(std);
+	go {
+		X = int(cyclesToWaste) - 5;
+		addCode(std);
 	}
 	execTime { 
 		return int(cyclesToWaste);
