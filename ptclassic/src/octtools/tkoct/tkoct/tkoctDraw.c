@@ -127,7 +127,7 @@ _xpGedAllocLayerGC( XPGed *pGed, XPGedLayer *pLI) {
 	since it is no longer needed.
 	*** POTENTIAL INCOMPATIBILITY ***
 	*/
-	pLI->fgColor = Tk_GetColorByValue( pGed->tkwin, None, &fgc);
+	pLI->fgColor = Tk_GetColorByValue( pGed->tkwin, &fgc);
 #else
 	pLI->fgColor = Tk_GetColorByValue( pGed->ip, pGed->tkwin, None,
 	  &fgc);
