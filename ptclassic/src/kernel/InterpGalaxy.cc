@@ -173,12 +173,12 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	if (ph->isItMulti()) {
 		LOG_NEW; GalMultiPort *p = new GalMultiPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
-		p->setAlias(*ph);
+		p->GenericPort::setAlias(*ph);
 	}
 	else {
 		LOG_NEW; GalPort *p = new GalPort(*ph);
 		addPort(p->setPort(galportname,this,dType));
-		p->setAlias(*ph);
+		p->GenericPort::setAlias(*ph);
 	}
 // add action to list
 	actionList += "A";

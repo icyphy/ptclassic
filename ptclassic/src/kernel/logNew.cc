@@ -1,3 +1,4 @@
+static const char file_id[] = "logNew.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -109,7 +110,6 @@ void operator delete(void *p) {
 			 ccfile, hfile, sLine, p);
 		mode = 0;
 	}
-	free(p);
+	// cast to char* needed for Sun port of cfront.  Gack.
+	free((char *)p);
 }
-
-		
