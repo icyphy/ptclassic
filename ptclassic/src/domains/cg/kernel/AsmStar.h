@@ -125,6 +125,10 @@ protected:
 	// Reset the state entry list.
 	void zapStateEntries();
 
+	// Special method for limiting and printing fixedpoint values
+	// baseclass method does not limit.
+	virtual StringList printFixValue(double) const;
+
 private:
 	// State entry list.  This stores the addresses allocated to each
 	// State.
