@@ -275,7 +275,7 @@ SDFPlayAIFF2::WriteLONG(long item)
 
    for(i=0;  i<4;  i++)
    {
-      b[3-i] = item & 0xff;
+      b[3-i] = (unsigned char) (item & 0xff);
       item >>= 8;
    }
 
@@ -298,7 +298,7 @@ SDFPlayAIFF2::WriteULONG(unsigned long item)
 
    for(i=0;  i<4;  i++)
    {
-      b[3-i] = item & 0xff;
+      b[3-i] = (unsigned char)(item & 0xff);
       item >>= 8;
    }
 
