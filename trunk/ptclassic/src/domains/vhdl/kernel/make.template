@@ -54,7 +54,7 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libvhdl.$(LIBSUFFIX)
+PTLIB=libvhdl.$(LIBSUFFIX)
 
 # Header files
 HDRS= \
@@ -87,10 +87,10 @@ OBJS= $(HDRS:.h=.o) VHDLDomain.o
 # Library sources
 SRCS= $(OBJS:.o=.cc)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

@@ -51,7 +51,7 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libcg56.$(LIBSUFFIX)
+PTLIB=libcg56.$(LIBSUFFIX)
 
 # Header files
 HDRS= CG56PortHole.h CG56Wormhole.h CG56Star.h CG56Target.h \
@@ -65,10 +65,10 @@ MotorolaAttributes.o MotorolaPortHole.o MotorolaTarget.o MotorolaSimTarget.o \
 # Library sources
 SRCS= $(OBJS:.o=.cc)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

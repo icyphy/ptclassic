@@ -48,7 +48,7 @@ HDRS=$(SRCS:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
-LIB=none	# required by common.mk
+PTLIB=none	# required by common.mk
 
 all:		makefile $(OBJS)
 # "make install" puts things in the official place

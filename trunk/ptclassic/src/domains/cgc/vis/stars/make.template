@@ -49,7 +49,7 @@ CGCSTAR = $(ROOT)/src/domains/cgc/stars
 INCL = -I$(CGCSTAR) -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) 
 
 # Library name
-LIB=libcgcvisstars.$(LIBSUFFIX)
+PTLIB=libcgcvisstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # put base stars first

@@ -76,12 +76,12 @@ ifeq ($(USE_SHARED_LIBS),yes)
 
 # If we are building shared libraries, then we can put all the targets in
 # a shared library.
-LIB = 		libcgcmultitargets.$(LIBSUFFIX)
-all:		$(SRCS) makefile $(OBJS) $(LIB)
-install:	all $(LIBDIR)/$(LIB)
+PTLIB = 		libcgcmultitargets.$(LIBSUFFIX)
+all:		$(SRCS) makefile $(OBJS) $(PTLIB)
+install:	all $(LIBDIR)/$(PTLIB)
 
 else
-LIB=none	# required by common.mk
+PTLIB=none	# required by common.mk
 all:		makefile $(OBJS)
 # "make install" puts things in the official place
 install:	all

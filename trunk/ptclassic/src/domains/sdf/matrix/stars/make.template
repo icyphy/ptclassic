@@ -45,7 +45,7 @@ SDFSTARDIR = $(ROOT)/src/domains/sdf/stars
 INCL = -I$(SDFSTARDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(ROOT)/src/utils/libptdsp
 
 # Library name
-LIB=libsdfmatrixstars.$(LIBSUFFIX)
+PTLIB=libsdfmatrixstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \

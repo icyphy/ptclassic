@@ -46,7 +46,7 @@ CGDIR = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(C50DIR) -I$(CGDIR) -I$(KERNDIR)  -I$(SDFDIR)
 
-LIB = libc50stars.$(LIBSUFFIX)
+PTLIB = libc50stars.$(LIBSUFFIX)
 STAR_MK=c50stars
 DOMAIN=C50
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS)

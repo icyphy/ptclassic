@@ -52,7 +52,7 @@ INCL = $(PTCOMPAT_INCSPEC) -I$(SDFDIR) -I$(KERNDIR) \
        $(MATLAB_INCSPEC) $(MATLABIFC_INCSPEC)
 
 # Library name
-LIB=libsdfmatlabstars.$(LIBSUFFIX)
+PTLIB=libsdfmatlabstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \

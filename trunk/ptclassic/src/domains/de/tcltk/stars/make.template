@@ -52,7 +52,7 @@ INCL = -I$(DEDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 TCL_SCRIPT_DIR = $(ROOT)/src/domains/sdf/tcltk/stars
 
 # Library name
-LIB=libdetclstars.$(LIBSUFFIX)
+PTLIB=libdetclstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 # list base stars first

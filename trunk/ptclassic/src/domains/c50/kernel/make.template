@@ -53,7 +53,7 @@ CGDIR=$(ROOT)/src/domains/cg/kernel
 INCL = -I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 
 # Library name
-LIB=libc50.$(LIBSUFFIX)
+PTLIB=libc50.$(LIBSUFFIX)
 
 # Library sources
 SRCS= C50PortHole.cc C50Target.cc C50Star.cc C50Wormhole.cc \
@@ -66,10 +66,10 @@ HDRS= C50PortHole.h C50Target.h C50Star.h C50Wormhole.h  \
 # Library objects
 OBJS= $(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+all:	makefile $(PTLIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(PTLIB)
 
 # include common definitions, rules
 include $(ROOT)/mk/common.mk

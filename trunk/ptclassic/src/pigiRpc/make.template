@@ -70,8 +70,8 @@ ADD_OBJS =	palettes.$(PIGI).o
 
 PIGI_OBJS +=	pigiMain.o $(ADD_OBJS)
 
-# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
-LIB = foo
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(PTLIB)
+PTLIB = foo
 
 # 'make clean' should remove these derived files
 KRUFT = $(wildcard palettes.*.c) version.c *_linklog

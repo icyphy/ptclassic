@@ -54,7 +54,7 @@ DDFRepeater.pl \
 DDFSelf.pl \
 DDFThresh.pl
 
-LIB =libddfstars.$(LIBSUFFIX)
+PTLIB =libddfstars.$(LIBSUFFIX)
 
 SRCS=$(PL_SRCS:.pl=.cc)
 OBJS=$(SRCS:.cc=.o)
