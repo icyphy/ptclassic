@@ -45,9 +45,9 @@ Find the average squared error between two input sequences of matrix.
   }
   go {
     Envelope inpkt1;
-    FloatMatrix& matrix1 = *(new FloatMatrix);
+    FloatMatrix& matrix1 = *(new FloatMatrix(int(numRows),int(numCols)));
     Envelope inpkt2;
-    FloatMatrix& matrix2 = *(new FloatMatrix);
+    FloatMatrix& matrix2 = *(new FloatMatrix(int(numRows),int(numCols)));
 
     FloatMatrix& result  = *(new FloatMatrix(int(numRows),int(numCols)));
     double sqrErr = 0;
