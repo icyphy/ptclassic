@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -20,11 +20,12 @@ MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
 PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
 CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
-							COPYRIGHTENDKEY
 */
 /*  Version $Id$
-    Author:	T.M. Parks
+    Author:	T. M. Parks
     Created:	7 January 1993
+
+    Real-time scheduler for multi-threaded dataflow.
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -33,11 +34,11 @@ static const char file_id[] = "$RCSfile$";
 #pragma implementation
 #endif
 
-#include "RTDFScheduler.h"
+#include "RTScheduler.h"
 #include "MTDFStar.h"
 
 // Run (or continue) the simulation.
-int RTDFScheduler::run()
+int RTScheduler::run()
 {
     // Force current time to be startTime.
     {
@@ -73,7 +74,7 @@ int RTDFScheduler::run()
 }
 
 // Select thread function for a star.
-void (*RTDFScheduler::selectThread(MTDFStar* star))(MTDFStar*)
+void (*RTScheduler::selectThread(MTDFStar* star))(MTDFStar*)
 {
     if (star->period > 0.0) return periodicThread;
     else if (star->isSource()) return sourceThread;
@@ -81,10 +82,10 @@ void (*RTDFScheduler::selectThread(MTDFStar* star))(MTDFStar*)
 }
 
 // Thread for periodic Stars.
-void RTDFScheduler::periodicThread(MTDFStar* star)
+void RTScheduler::periodicThread(MTDFStar* star)
 {
     MTDFScheduler& sched = *(MTDFScheduler*)star->scheduler();
-    TimeVal wake = star->lag;
+    double wake = star->lag;
     
     do
     {
@@ -94,15 +95,15 @@ void RTDFScheduler::periodicThread(MTDFStar* star)
 }
 
 // Thread for (non-periodic) source Stars.
-void RTDFScheduler::sourceThread(MTDFStar* star)
+void RTScheduler::sourceThread(MTDFStar* star)
 {
-    RTDFScheduler& sched = *(RTDFScheduler*)star->scheduler();
+    RTScheduler& sched = *(RTScheduler*)star->scheduler();
 
     while( (sched.now() < sched.getStopTime()) && star->run() );
 }
 
 // Set current time.
-void RTDFScheduler::setCurrentTime(double time)
+void RTScheduler::setCurrentTime(double time)
 {
     CriticalSection x(monitor);
     startTime = time;
@@ -110,7 +111,7 @@ void RTDFScheduler::setCurrentTime(double time)
 }
 
 // Current time.
-double RTDFScheduler::now()
+double RTScheduler::now()
 {
     CriticalSection x(monitor);
     TimeVal t = startTime + clock.elapsedTime();
@@ -118,8 +119,8 @@ double RTDFScheduler::now()
 }
 
 // Delay used for sleeping Threads.
-TimeVal RTDFScheduler::delay(TimeVal when)
+double RTScheduler::delay(double when)
 {
     CriticalSection x(monitor);
-    return when - (startTime + clock.elapsedTime());
+    return when - now();
 }
