@@ -24,26 +24,50 @@ $Id$
  There are some restrictions:
 
  1. The linked-in code must not call any functions that are not already
- part of the executable program.
+ part of the executable program.  If other library functions are needed,
+ then switches like -L and -l can be supplied explicitly to multilink.
+ No libraries will be searched by default.
 
  2. The linked-in code must have at least one global or static object
  with a constructor.  Since the only access to the code that is loaded
  consists of calling these constructors, this is vital.
 
+A future version will provide a "permalink" feature, allowing .o files
+to become a permanent part of the system.
+
 **************************************************************************/
-#ifndef hpux
 #include "Linker.sysdep.h"
-#endif
 #include "Linker.h"
 #include "Error.h"
 #include "miscFuncs.h"
 #include "StringList.h"
-#include "streamCompat.h"
+#include "pt_fstream.h"
 
 // static data objects
 int Linker::activeFlag = 0;
-int Linker::pid = 0;
 const char* Linker::ptolemyName = 0;
+const char* Linker::symTableName = 0;
+char* Linker::memBlock = 0;
+char* Linker::availMem = 0;
+
+const size_t LINK_MEMORY = (size_t)(1024L * 1024L);
+
+// This routine creates the memory block if needed, and aligns it
+// to a page boundary.
+
+void Linker::adjustMemory() {
+	if (!memBlock) {
+		memBlock = new char[LINK_MEMORY];
+		availMem = memBlock;
+	}
+	else {
+		// bump availMem up to the next page boundary
+		size_t t = (size_t) availMem;
+		size_t ps = getpagesize();
+		size_t t2 = (t / ps) * ps;
+		if (t2 < t) t = t2 + ps;
+	}
+}
 
 const char*
 pathSearch (const char* name, const char* path) {
@@ -68,224 +92,204 @@ void Linker::init (const char* myName) {
 // locate the ptolemy binary that is currently running.
 // main should call this with argv[0] as an argument.
 // We believe argv[0] without checking if it begins with '/'
-	pid = getpid();
 	ptolemyName = pathSearch (myName, getenv("PATH"));
 	if (!ptolemyName)
 		Error::abortRun (
 "Cannot locate the running binary! Incremental linking disabled");
+// initially we use the executable as the symbol table
+	symTableName = ptolemyName;
 	return;
 }
 
 typedef void (*PointerToVoidFunction) ();
-const int HEADSIZE = 2 * sizeof (PointerToVoidFunction);
 
-int Linker::linkObj (const char* objName) {
-#ifdef hpux
-	Error::abortRun ("Incremental linking not yet supported for HP-UX");
-	return FALSE;
+// This one is for backward compatibility.
+int Linker::linkObj(const char* objName) {
+	char* argv[3];
+	argv[0] = "link";
+	argv[1] = savestring(objName);
+	argv[2] = 0;
+	int status = multiLink(2, argv);
+	LOG_DEL; delete [] argv[1];
+	return status;
 }
-#else
-	if (!ptolemyName)
+
+// class for use in generating a temporary file name that is cleaned
+// up when the object is deleted.
+class TFile {
+public:
+	TFile() : tname(tempFileName()) {}
+	~TFile() {
+		unlink(tname);
+		LOG_DEL; delete tname;
+	}
+	operator const char*() const { return tname;}
+private:
+	char* tname;
+};
+
+// link in multiple files.  Arglist is char** and not const char**
+// to permit easy interfacing with Tcl.
+
+int Linker::multiLink (int argc, char** argv) {
+	if (!symTableName) {
 		Error::abortRun ("Incremental linking disabled");
-// here, objName is the pathname of the .o file.
-	objName = expandPathName (objName);
-	char tname[20];
-	strcpy (tname, "/tmp/hack.XXXXXX");
-	mktemp (tname);
-
-// first, read the object file
-	int fd;
-	if ((fd = open (objName, O_RDONLY, 0)) < 0) {
-		Error::error("Linker: Can't open file ", objName);
 		return FALSE;
 	}
-#ifdef COFF
-	filehdr h1;
-	aouthdr h2;
-	if (read (fd, (char*) &h1, sizeof h1) <= 0 ||
-	    read (fd, (char*) &h2, sizeof h2) <= 0) {
-		Error::error("Linker: Can't read header from ", objName);
-		return FALSE;
-	}
-	int size = h2.tsize + h2.dsize + h2.bsize + HEADSIZE;
-#else
-	exec header;
-
-	if (read (fd, (char*) &header, sizeof(header)) <= 0) {
-		Error::error("Linker: Can't read header from ", objName);
-		return FALSE;
-	}
-	int size = header.a_text + header.a_data + header.a_bss + HEADSIZE;
-#endif
-	close (fd);
-
-	int pagsiz = getpagesize();
-
-	if (size < pagsiz) size = pagsiz;
-	LOG_NEW; void* codeBlock = new char[size+pagsiz];
-	size_t init_fn = (size_t) codeBlock;
+	TFile tname;
 
 // round up to be on a page boundary
-	init_fn += pagsiz-1;
-	init_fn &= ~(pagsiz-1);
-	int availSpace = size + pagsiz - (init_fn - (size_t)codeBlock);
-
-// generate the header.  The first word is a pointer to the initialization
-// function, the second to the termination function.
-	char* headerName = genHeader (objName);
-	if (!headerName) return FALSE;
+	adjustMemory();
 
 // generate the loader command.  The switches mean:
 // -A: incremental loading, using symbols from the ptolemy binary.
-// -T: specify starting address of text segment at init_fn.
+// LOC_OPT (-T or -R): specify starting address of text segment.
 // Other switches are in LOADOPTS, from Linker.sysdep.h
 
-	char command[512], *cmd = command;
-	sprintf (cmd, "%s %s -A %s -T %x %s %s -o %s",
-		 LOADER, LOADOPTS, ptolemyName, init_fn,
-		 headerName, objName, tname);
-
+	char command[512];
+	sprintf (command, "%s %s -A %s %s %x -o ",
+		 LOADER, LOADOPTS, symTableName, LOC_OPT, availMem);
+	StringList cmd = command;
+	cmd << tname;
+	for (int i = 1; i < argc; i++) {
+		const char* objName = expandPathName(argv[i]);
+		cmd << " " << objName;
+	}
 	if (system (cmd)) {
 		Error::abortRun("Error in linking file");
-		LOG_DEL; delete codeBlock;
-		unlink (tname);
-		return FALSE;
-	}
-	else {
-		// clean up
-		unlink (headerName);
-		LOG_DEL; delete (char*)headerName;
-	}
-	fd = open (tname, O_RDWR, 0);
-// unix lets us do this: the file actually disappears when closed.
-	unlink (tname);
-
-#ifdef COFF
-	if (fd < 0 || read (fd, (char*) &h1, sizeof h1) <= 0 ||
-	    read (fd, (char*) &h2, sizeof h2) <= 0) {
-		Error::abortRun("Can't read header from incremental link output");
-		LOG_DEL; delete codeBlock;
-		close (fd);
-		return FALSE;
-	}
-	long seekpos = N_TXTOFF(h1, h2);
-	lseek (fd, seekpos, 0);
-#else
-	if (fd < 0 || read (fd, (char*) &header, sizeof(header)) <= 0) {
-		Error::abortRun("Can't read header from incremental link output");
-		LOG_DEL; delete codeBlock;
-		close (fd);
 		return FALSE;
 	}
 
-	// we should not need this checking but better safe than sorry
-	int nsize = header.a_text + header.a_data + header.a_bss;
-	if (nsize > size && nsize > availSpace) {
-		// code will not fit
-		Error::abortRun ("Linker: code size unexpectedly large");
-		close (fd);
+	size_t size = readInObj(tname);
+
+	if (size == 0) {
 		return FALSE;
 	}
-	size = nsize;
-#endif
-
-	read (fd, (char*) init_fn, size);
-	close (fd);
 
 // makeExecutable is a do-nothing on many systems.
-	if (makeExecutable(size,pagsiz,init_fn) != 0) {
+	if (makeExecutable(size,pagsiz,availMem) != 0) {
 		Error::error ("Linker: Can't make code executable");
-		LOG_DEL; delete codeBlock;
 		return FALSE;
 	}
-// get the first word, use it as a function pointer and call it.
 
-	PointerToVoidFunction fn = *(PointerToVoidFunction*)init_fn;
-	activeFlag = TRUE;	// indicate dynamically linked objects
+// flag for permanent-link or not
+	int perm = (argv[0][0] == 'p');	// KLUDGE!
 
-// the following line calls the constructors in the dynamically loaded
-// routine.  activeFlag tells the KnownBlock class that any objects added
-// to the known list are dynamically linked.
+// invoke constructors in the newly read in code
+	if (!perm) activeFlag = TRUE;	// indicate dynamically linked objects
+	int nCalls = invokeConstructors(tname);
+	int status = (nCalls >= 0);
 
-	(*fn) ();
+	if (nCalls == 0 && !perm) {
+		Error::abortRun("Linker: no constructors in linked-in code!");
+		status = FALSE;
+	}
 
 	activeFlag = FALSE;	// turn off the indication.
-	return TRUE;
+	if (status) {
+// we do not bump the memory pointer until now; this makes it official
+		availMem += size;
+// if this is a "permalink", make tfile the new symbol file
+		if (perm) installTable(tname);
+	}
+	return status;
 }
 
-// find the first occurrence of subString in line.
-static char* match(char* line, const char* subString) {
-	if (*subString == 0) return line;
-	char* p = line;
-	int ltail = strlen(subString) - 1;
-	while (1) {
-		p = index(p, *subString);
-		if (p == 0) return 0;
-		if (strncmp (p+1, subString+1, ltail) == 0)
-			return p;
-		p++;
+void Linker::installTable(const char* newTable) {
+	if (ptolemyName == symTableName) {
+		symTableName = getenv("PTOLEMY_SYM_TABLE");
+		if (!symTableName) symTableName =
+			hashstring(expandPathName("~/.pt_symtable"));
+	}
+	ifstream in(newTable);
+	ofstream out(symTableName, ios::out, 0600);
+	if (!in || !out) {
+		Error::abortRun("Error installing new symbol table: ",
+				"Further dynamic linking disabled");
+		symTableName = 0;
+	}
+	else {
+		char ch;
+		while (in.get(ch)) out.put(ch);
 	}
 }
 
-const int LINELEN = 128;
+// This function scans the symbol table of the code that is to be
+// read into Ptolemy, invoking any constructor functions that are
+// in the section of code just read in (between bottom and top).
+// The "nm" program is used to find the constructors.
+// It returns the number of constructors called, -1 on error.
 
-// This function contains a bit of hackery.  It scans an object file
-// looking for a global symbol of a particular form, and creates a
-// small assembly language model that refers to that name.  This
-// technique of providing a hook to call the constructor works for
-// g++ and for Sun's port of cfront.  For compilers that use a
-// completely different method, you'll need to reimplement this.
-
-// The nm command is used to search for a symbol of the right form.
-
-char*
-Linker::genHeader (const char* objName) {
+int
+Linker::invokeConstructors (const char* objName) {
 // Open a pipe to "nm" to get symbol information
-	char command[256];
-	char* sym = 0;
-	sprintf (command, "%s -g %s", NM_PROGRAM, objName);
+	StringList command = NM_PROGRAM;
+	command << " " << NM_OPTIONS << " " << objName;
 	FILE* fd = popen (command, "r");
 	if (fd == 0) {
-		Error::abortRun("Linker: can't exec '/bin/nm' command");
-		return 0;
+		Error::abortRun("Linker: can't exec ", NM_PROGRAM);
+		return -1;
 	}
-// read the output from nm, searching for GLOBAL
-	char line[LINELEN];
-	while (fgets (line, LINELEN, fd) &&
-	       (sym = match (line, CONS_PREFIX)) == 0)
-		;
+// read the output from nm, searching for GLOBAL symbols with
+// value > base.
+	int nCalls = 0;
+	long addr;
+	char symbol[256], type[20];
+	size_t memoryEnd = (size_t)memBlock + LINK_MEMORY;
+
+	while (fscanf(fd, "%lx %s %s", &addr, type, symbol) == 3) {
+		if (addr >= (size_t)availMem && addr <= memoryEnd &&
+		    strncmp(symbol, CONS_PREFIX, CONS_LENGTH) == 0) {
+			// it is a constructor, call it:
+			PointerToVoidFunction fn = (PointerToVoidFunction)addr;
+			fn();
+			nCalls++;
+		}
+	}
 	pclose (fd);
-	if (sym == 0) {
-		Error::abortRun("Linker::genHeader: no constructors in ",
-				objName);
-		return 0;
-	}
-// trim trailing whitespace from sym
-	char* p = sym + strlen(sym) - 1;
-	while (*p <= ' ') p--;
-	*(p+1) = 0;
-
-	char aname[32], oname[32];
-	sprintf (aname, "/tmp/ptlink.%d.s", pid);
-	sprintf (oname, "/tmp/ptlink.%d.o", pid);
-	fd = fopen (aname, "w");
-// output some assembler stuff
-	fprintf (fd, "\t%s\n", TEXT_DIR);
-	fprintf (fd, "\t%s %s\n", ADDR_WORD, sym);
-	sym[ID_POS] = DEST_CHAR;
-	fprintf (fd, "\t%s %s\n", ADDR_WORD, sym);
-	fclose (fd);
-// assemble the file
-
-	sprintf (command, "%s %s -o %s", ASSEMBLER, aname, oname);
-	int status = system (command);
-	unlink (aname);
-	if (status) {
-		Error::abortRun ("Linker::genHeader: error in dynamic link");
-		unlink (oname);
-		return 0;
-	}
-	return savestring(oname);
+	return nCalls;
 }
 
-#endif /* hp-ux */
+size_t Linker::readInObj(const char* objName) {
+	STRUCT_DEFS;		// macro, defines sys-dependent header structs
+	size_t size;
+
+	int fd = open(objName, O_RDWR, 0);
+	if (fd < 0) return 0;
+
+// the following macro reads headers into the structures defined above,
+// returning true if there is a failure.
+	if (READHEAD_FAIL) {
+		Error::abortRun("Linker: Can't read header from incremental link output");
+		close (fd);
+		return 0;
+	}
+// a macro to set the size.
+	size = OBJ_SIZE;
+	if (availMem + size > memBlock + LINK_MEMORY) {
+		Error::abortRun("Linker: insufficient space to read in new code");
+		size = 0;
+	}
+// this macro does whatever seeks and reads are necessary to read in the code.
+	else if (READOBJ_FAIL) {
+		Error::abortRun("Linker: Error reading object file!");
+		size = 0;
+	}
+	close(fd);
+	return size;
+}
+
+// helper class to clean things up -- frees memory and zaps the
+// symbol table file.
+
+class Linker_Cleanup {
+public:
+	Linker_Cleanup() {}
+	~Linker_Cleanup() {
+		delete [] Linker::memBlock;
+		if (Linker::ptolemyName != Linker::symTableName)
+			unlink(Linker::symTableName);
+	}
+};
+
+static Linker_Cleanup linkerCleanup;
