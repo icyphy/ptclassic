@@ -6,51 +6,51 @@
 
 termstyle 2-1-north-east {
     terminal in-0 -coords {0 50} \
-            -direction {-1 0} \
+            -direction w \
             -style circle
     terminal in-1 -coords {50 0} \
-            -direction {0 -1} \
+            -direction n \
             -style circle
     terminal out -coords {100 50} \
-            -direction {1 0} \
+            -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-1-east {
-    terminal in-0 -coords {0 25} -direction {-1 0} -style circle
-    terminal in-1 -coords {0 75} -direction {-1 0} -style circle
-    terminal out -coords {100 50} -direction {1 0} \
+    terminal in-0 -coords {0 25} -direction w -style circle
+    terminal in-1 -coords {0 75} -direction w -style circle
+    terminal out -coords {100 50} -direction e \
             -style arrowout -fill green2 -tags output
 }
 
 termstyle 1-0-east {
-    terminal in -coords {0 50} -direction {-1 0} -style circle
+    terminal in -coords {0 50} -direction w -style circle
 }
 
 termstyle 0-1-east {
     terminal out -coords {100 50} \
-            -direction {1 0} \
+            -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 1-1-east {
     terminal in -coords {0 50} \
-            -direction {-1 0} \
+            -direction w \
             -style circle
     terminal out -coords {100 50} \
-            -direction {1 0} \
+            -direction e \
             -style arrowout \
             -tags output
 }
 
 termstyle 2-2-east {
-    terminal in-0 -coords {0 25} -direction {-1 0} -style circle
-    terminal in-1 -coords {0 75} -direction {-1 0} -style circle
-    terminal out-0 -coords {100 25} -direction {1 0} \
+    terminal in-0 -coords {0 25} -direction w -style circle
+    terminal in-1 -coords {0 75} -direction w -style circle
+    terminal out-0 -coords {100 25} -direction e \
             -style arrowout -fill green2 -tags output
-    terminal out-1 -coords {100 75} -direction {1 0} \
+    terminal out-1 -coords {100 75} -direction e \
             -style arrowout -fill green2 -tags output
 }
 
@@ -138,13 +138,13 @@ group miscellaneous \
         Frame 50 50 90 90 -color green -relief sunken
     } \
             -color green {
-        terminal in-0 -coords {0 50} -direction {-1 0} \
+        terminal in-0 -coords {0 50} -direction w \
                 -style circle -fill red
-        terminal in-1 -coords {50 0} -direction {0 -1} \
+        terminal in-1 -coords {50 0} -direction n \
                 -style circle -fill cyan
-        terminal out-0 -coords {100 50} -direction {1 0} \
+        terminal out-0 -coords {100 50} -direction e \
                 -style doublearrowout -fill blue -tags output
-        terminal out-1 -coords {50 100} -direction {0 1} \
+        terminal out-1 -coords {50 100} -direction s \
                 -style doublearrowout -fill blue -tags output
     }
     
@@ -159,8 +159,8 @@ group miscellaneous \
         oval 10 10 90 90 -fill yellow
     } \
             -color blue {
-        terminal in -coords {100 50} -direction {1 0} -style circle
-        terminal out -coords {0 50} -direction {-1 0} \
+        terminal in -coords {100 50} -direction e -style circle
+        terminal out -coords {0 50} -direction w \
                 -style arrowout -fill blue
     }
     
@@ -183,10 +183,10 @@ group miscellaneous \
                 -smooth 1 -outline purple -fill purple
     } \
             -color yellow {
-        terminal in -coords {0 50} -direction {-1 0}  \
+        terminal in -coords {0 50} -direction w  \
                 -style rectangle -size 5 \
                 -fill sienna -width 3
-        terminal out -coords {100 50} -direction {1 0}  \
+        terminal out -coords {100 50} -direction e  \
                 -style arrowout  \
                 -fill sienna -width 3 \
                 -arrowshape {8 12 5} -tags output
@@ -202,7 +202,7 @@ group sdf -label {SDF Icons} {
             -graphics {
         polygon 20 80 80 80 80 20 -fill orange -outline ""
     } {
-        terminal output -coords {100 50} -direction {1 0} \
+        terminal output -coords {100 50} -direction e \
                 -style arrowout -fill blue -tags output
     }
     icon xgraph \
@@ -217,7 +217,7 @@ group sdf -label {SDF Icons} {
         oval 15 80 25 94 -outline red
         oval 75 80 85 94 -outline red
     } {
-        terminal input -coords {0 50} -direction {-1 0} \
+        terminal input -coords {0 50} -direction w \
                 -style circle -fill red
     }
     icon printer \
@@ -230,7 +230,7 @@ group sdf -label {SDF Icons} {
                 -fill red -outline red
         line 50 10 50 45 -width 10 -arrow last
     } {
-        terminal input -coords {0 50} -direction {-1 0} \
+        terminal input -coords {0 50} -direction w \
                 -style circle -fill red
     }
 }
@@ -246,7 +246,7 @@ group test \
             -graphics {
         Frame 20 20 80 80 -color green -relief sunken -borderwidth 3
     } {
-        terminal out -coords {100 50} -direction {1 0} \
+        terminal out -coords {100 50} -direction e \
                 -style doublearrowout -fill blue \
                 -tags output
     }

@@ -30,12 +30,12 @@
 
 
 ##########################################################################
-#### editdfg
+#### foo
 #
-# Procedure to create graph editor
+# Procedure to create a test graph editor
 #
-proc ::tycho::editdfg {file} {
-    set nm [::tycho::view EditDFG -file $file]
+proc ::tycho::foo {} {
+    set nm [::tycho::view EditDFG]
 
     # FIXME FIXME
     # Load stars and icons
@@ -88,6 +88,9 @@ class ::tycho::EditDFG {
 
     # Test if an item is a suitable target for a connection
     method connecttarget {id}
+
+    # Process a click on an edge to produce a junction
+    method junctionclick {id x y args}
 
     # Place a star
     method newstar {libname starname}
@@ -145,6 +148,9 @@ class ::tycho::EditDFG {
 
     # The interactor to connect edges
     protected variable dropper
+
+    # The interactor to split edges
+    protected variable splitter
 
     # The item selector
     protected variable selector
@@ -213,6 +219,11 @@ body ::tycho::EditDFG::constructor {args} {
     $selector bind edge -button 1 \
             -modifiers shift -toggle 1
 
+    # Enable grapple selection with button 2; shift-click toggles
+    $selector bind grapple -button 2
+    $selector bind grapple -button 2 \
+            -modifiers shift -toggle 1
+
     # Create the interactor to move selected items
     set follower [$_slate interactor Follower]
     $selector delegate $follower vertex -button 1
@@ -247,8 +258,30 @@ body ::tycho::EditDFG::constructor {args} {
 	    -dragcommand "$this connectdrag" \
 	    -deactivatecommand "$this connectrelease"
 
+    # Create another DragDropper to make split edges with junctions
+    set splitter [$_slate interactor DragDropper]
+    $splitter configure \
+	    -startwhen distance \
+	    -sourcehalo 6 \
+	    -targethalo 6 \
+	    -targettags {input output} \
+            -targetpredicate "$this connecttarget" \
+	    -activatecommand "$this connectclick" \
+	    -dragcommand "$this connectdrag" \
+	    -deactivatecommand "$this connectrelease"
+
+    # Activate it if clicked on an edge that is the only selected
+    # item
+    $selector delegate $splitter edge -button 1 -mode {0 1}
+    $selector delegate $splitter edge -button 1 \
+            -modifiers shift -mode {0 1}
+
     # Is this needed?
     # $_slate configure -exportselection 0
+    # Experiment: move disconnected edges
+    $selector delegate $follower disconnected -button 1
+    $selector delegate $follower disconnected -button 1 \
+            -modifiers shift    
 }
 
 ########################################################################
@@ -287,8 +320,51 @@ body ::tycho::EditDFG::connectbegin {x y} {
             set id $_scratch(terminal)
 
            # The "direction" of the terminal
-            set dir [eval ::tycho::Shape::compassFromVector \
-                    [$_slate itemcget $id -direction]]
+            set dir [$_slate itemcget $id -direction]
+
+            # Figure out whether we are connecting from an output or input,
+            # and act accordingly
+            if { [lsearch -exact [$_slate gettags $id] output] >= 0 } {
+            	set edgeattr "from"
+                set _scratch(aspect) end
+                set _scratch(targettag) input
+                set coords [concat [$_slate aspect $id terminal] $x $y]       
+            } else {
+            	set edgeattr "to"
+                set _scratch(aspect) start
+                set _scratch(targettag) output
+                set coords [concat $x $y [$_slate aspect $id terminal]]
+                set dir [::tycho::Shape::compass $dir "rev"]
+            }
+            # Get a name for the edge
+            while [$_graph exists [set name [::tycho::autoName edge]]] {}
+            
+            # Create the new net
+            $_layout publish add item $name \
+                    -slatetype SmartLine \
+                    -coords [concat $coords $x $y] \
+                    -start $dir \
+                    -end $dir \
+                    -tags "edge"
+            
+            set _scratch(line) [slateid $name]
+
+            # Create the new edge
+            $_graph publish add edge $name -$edgeattr [itemname $id]
+
+            # Remember parameters
+            set _scratch(source) $id
+            set _scratch(target) ""
+            set _scratch(attributes) ""
+            set _scratch(name) $name
+            set _scratch(targetdirection) $dir
+        }
+        "junction" {
+            # Create a new junction
+            set id $_scratch(terminal)
+
+           # The "direction" of the terminal
+            set dir [$_slate itemcget $id -direction]
 
             # Figure out whether we are connecting from an output or input,
             # and act accordingly
@@ -363,29 +439,37 @@ body ::tycho::EditDFG::connectbegin {x y} {
 # Process the click that may create a new edge.
 #
 body ::tycho::EditDFG::connectclick {id x y} {
-    # puts "connectclick [$_slate type $id] ([$_slate gettags $id]) $id $x $y"
+    puts "connectclick [$_slate type $id] ([$_slate gettags $id]) $id $x $y"
 
     # Figure out if we are clicking on a terminal or a grapple
     if [$_slate hastag $id "grapple"] {
         set _scratch(mode) grapple
+    } elseif [$_slate hastag $id "edge"] {
+        set _scratch(mode) junction
     } else {
         set _scratch(mode) terminal
     }
     set _scratch(moving) 0
-
+puts $_scratch(mode)
     # Process according to mode
     switch -exact $_scratch(mode) {
         "terminal" {
-            # Set up to create a new line. First clear the selection
-            # FIXME: Should this be an event?
-            $_layout notify data select clear
+            # Set up to create a new line. Clear the selection
+            select clear
 
             # Remember the source item
             set _scratch(terminal) $id
         }
         "grapple" {
- 			# Remember the grapple
+            # Remember the grapple
             set _scratch(grapple) $id
+        }
+        "edge" {
+            # Set up to create a new line. Clear the selection
+            select clear
+            
+            # Remember the edge
+            set _scratch(edge) $id
         }
     }
 }
@@ -401,7 +485,7 @@ body ::tycho::EditDFG::connectclick {id x y} {
 # line to the right connection point.
 #
 body ::tycho::EditDFG::connectdrag {id x y} {
-    # puts [list connectdrag $id $x $y]
+    puts [list connectdrag $id $x $y]
 
     # If first time, call for initial processing
     if !$_scratch(moving) {
@@ -421,8 +505,7 @@ body ::tycho::EditDFG::connectdrag {id x y} {
 
 	# If the line direction does not match the terminal
 	# direction, change the line
-        set dir [eval ::tycho::Shape::compassFromVector \
-                [$_slate itemcget $id -direction]]
+        set dir [$_slate itemcget $id -direction]
         if { $aspect == "end" } {
             set dir [::tycho::Shape::compass $dir "rev"]
         }
@@ -466,10 +549,17 @@ body ::tycho::EditDFG::connectrelease {args} {
     if { $_scratch(target) == "" } {
         # The line is not connected. Leave it, and make the grapple sticky
         if [::info exists _scratch(grapple)] {
-            puts $_scratch(grapple)
+            # puts $_scratch(grapple)
             $_slate itemconfigure $_scratch(grapple) -sticky 1
+
+            # If it's completely disconnected, make it moveable
+            if { [$_graph attrget $name -from] == "" && \
+                    [$_graph attrget $name -to] == "" } {
+puts "$_slate addtag disconnected withtag $line"
+                $_slate addtag disconnected withtag $line
+            }
         } else {
-puts "select add $_scratch(name)"
+            # puts "select add $_scratch(name)"
             select add $line
             if { $_scratch(aspect) == "end" } {
                 $_slate itemconfigure "vertex-1.$line" -sticky 1
@@ -480,11 +570,14 @@ puts "select add $_scratch(name)"
     } else {
         # The line is connected. If there's a grapple, make it unsticky
         if [::info exists _scratch(grapple)] {
-puts "$_slate itemconfigure $_scratch(grapple) -sticky 0"
+            # puts "$_slate itemconfigure $_scratch(grapple) -sticky 0"
             $_slate itemconfigure $_scratch(grapple) -sticky 0
         }
         # Make it the current selection
         select add $line
+
+        # Remove the disconnected tag
+        $_slate dtag $line disconnected
 
         # Set the -from or -to attribute of the edge
         if { $_scratch(aspect) == "end" } {
@@ -507,13 +600,7 @@ body ::tycho::EditDFG::connectsource {id} {
 
     # Get connections from the graph model
     # FIXME: won't work with multiports...
-    # FIXME: handle grapples properly
     set name [itemname $id]
-
-    puts $name
-    puts ![$_graph edges $name]
-    puts @[$_graph edges * $name]
-
     if [::info exists _scratch(grapple)] {
         # We're already grappling something.
         return 0
