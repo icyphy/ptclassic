@@ -476,11 +476,11 @@ body ::tycho::ItclParser::addArgs {class name arguments} {
 	if { [llength $arg] == 2 } {
 	    set argname [lindex $arg 0]
 	    set default [lindex $arg 1]
-            $classModel add [concat $name argument:$argname] \
+            $classModel add argument [concat $name $argname] \
                     -optional 1 \
 		    -default $default
         } else {
-            $classModel add [concat $name argument:$arg]
+            $classModel add argument [concat $name $arg]
         }
     }
 }
@@ -499,11 +499,11 @@ body ::tycho::ItclParser::addBody {name arguments expl} {
     set class [info namespace qualifiers $name]
     set name [info namespace tail $name]
     if { $name == "constructor" } {
-        set fullname constructor:constructor
+        set fullname constructor
     } elseif { $name == "destructor" } {
-        set fullname destructor:destructor
+        set fullname destructor
     } else {
-        set fullname method:$name
+        set fullname m:$name
     }
 
     # Tcl allows either tycho::crap or ::tycho::crap
@@ -539,7 +539,7 @@ body ::tycho::ItclParser::addClassComment {class expl} {
 body ::tycho::ItclParser::addCommon {class name protection desc {default {}}} {
     # Commons are variables of classwide scope in Itcl
     set classModel $_classmodels($class)
-    $classModel add variable:$name \
+    $classModel add variable v:$name \
             -protection $protection \
 	    -scope class \
 	    -default $default \
@@ -568,10 +568,10 @@ body ::tycho::ItclParser::addConfigBody {name expl} {
         set classModel $_classmodels($class) 
         set expl [formatExpl "$expl"]
         if {$expl != {}} {
-            if ![$classModel exists variable:$name] {
+            if ![$classModel exists v:$name] {
                 set name -$name
             }
-            $classModel attrset variable:$name -explanation $expl
+            $classModel attrset v:$name -explanation $expl
         } 
     }
 }
@@ -583,8 +583,8 @@ body ::tycho::ItclParser::addConfigBody {name expl} {
 #
 body ::tycho::ItclParser::addConstructor {class arguments desc} {
     set classModel $_classmodels($class)
-    $classModel add constructor:constructor -description [formatDesc $desc]
-    addArgs $class constructor:constructor $arguments    
+    $classModel add constructor constructor -description [formatDesc $desc]
+    addArgs $class constructor $arguments    
 }
 
 #####################################################################
@@ -594,7 +594,7 @@ body ::tycho::ItclParser::addConstructor {class arguments desc} {
 #
 body ::tycho::ItclParser::addDestructor {class desc} {
     set classModel $_classmodels($class)
-    $classModel add destructor:destructor -description [formatDesc $desc]
+    $classModel add destructor destructor -description [formatDesc $desc]
 }
 
 #####################################################################
@@ -606,11 +606,11 @@ body ::tycho::ItclParser::addInsideProc {class name protection \
         arguments desc} {
     # Procs are methods of classwide scope in Itcl
     set classModel $_classmodels($class)
-    $classModel add method:$name \
+    $classModel add method m:$name \
 	    -protection $protection \
 	    -scope class \
 	    -description [formatDesc $desc]
-    addArgs $class method:$name $arguments
+    addArgs $class m:$name $arguments
 }    
 
 #####################################################################
@@ -621,11 +621,11 @@ body ::tycho::ItclParser::addInsideProc {class name protection \
 body ::tycho::ItclParser::addMethod {class name protection arguments desc} {
     # Methods are methods of instance scope in Itcl
     set classModel $_classmodels($class)
-    $classModel add method:$name \
+    $classModel add method m:$name \
 	    -protection $protection \
 	    -scope instance \
 	    -description [formatDesc $desc]
-    addArgs $class method:$name $arguments
+    addArgs $class m:$name $arguments
 }
 
 #####################################################################
@@ -636,7 +636,7 @@ body ::tycho::ItclParser::addMethod {class name protection arguments desc} {
 body ::tycho::ItclParser::addItk_Option {class name desc {default {}}} {
     # Itk_options have the modifier flag set to itk_option in Itcl
     set classModel $_classmodels($class)
-    $classModel add variable:$name \
+    $classModel add variable v:$name \
             -protection public \
 	    -modifiers itk_option \
 	    -default $default \
@@ -652,7 +652,7 @@ body ::tycho::ItclParser::addItk_Option {class name desc {default {}}} {
 body ::tycho::ItclParser::addOutsideProc {name arguments expl} {
     # add to $_classmodels(related)
     set classModel $_classmodels(related)
-    $classModel add method:$name \
+    $classModel add method m:$name \
 	    -protection public \
 	    -scope class \
 	    -explanation [formatExpl $expl] \
@@ -669,7 +669,7 @@ body ::tycho::ItclParser::addVariable \
 	{class name protection desc {default {}}} {
     # Variables are variables of instance scope in Itcl
     set classModel $_classmodels($class)
-    $classModel add variable:$name \
+    $classModel add variable v:$name \
             -protection $protection \
 	    -scope instance \
 	    -default $default \

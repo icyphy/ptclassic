@@ -420,7 +420,7 @@ body ::tycho::JavaParser::addArgs {class context arguments} {
                 append type \]
             } elseif {$token == ","} {
                 # next token is type
-	            $classModel add [concat $context argument:$name] -type $type
+		$classModel add argument [concat $context $name] -type $type
                 set type ""
                 set name ""
                 set istype 1
@@ -511,9 +511,8 @@ body ::tycho::JavaParser::addMethod {class protection modifiers others comment} 
 
     if {$isConstructor} {
         # Constructors are special
-        set methodName constructor:$methodName 
-        $classModel add $methodName \
-        		-protection $protection \
+        $classModel add constructor $methodName \
+		-protection $protection \
                 -modifiers $modifiers \
                 -exceptions $exceptions \
                 -description $desc \
@@ -521,24 +520,23 @@ body ::tycho::JavaParser::addMethod {class protection modifiers others comment} 
 
     } elseif {$methodName == "finalize"} {
         # So are destructors
-        set methodName destructor:$methodName
-        $classModel add $methodName \
-        		-protection $protection \
+        $classModel add destructor $methodName \
+		-protection $protection \
                 -modifiers $modifiers \
                 -exceptions $exceptions \
                 -description $desc \
                 -explanation $expl
 
     } else {
-    	set methodName method:$methodName
-        $classModel add $methodName \
-        		-protection $protection \
-        		-scope $scope \
+        $classModel add method m:$methodName \
+		-protection $protection \
+		-scope $scope \
                 -type $type \
                 -modifiers $modifiers \
                 -exceptions $exceptions \
                 -description $desc \
                 -explanation $expl
+	set methodName m:$methodName
     }
     addArgs $class $methodName $arguments
 }
@@ -605,9 +603,9 @@ body ::tycho::JavaParser::addVariable \
     # Create the variable entry
     set desc [shortDesc $comment]
     set expl [formatExpl $comment]
-    $classModel add variable:$varName \
-    		-modifiers $modifiers \
-    		-scope $scope \
+    $classModel add variable v:$varName \
+	    -modifiers $modifiers \
+	    -scope $scope \
             -protection $protection \
             -type $type \
             -default $default \

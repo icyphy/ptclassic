@@ -142,8 +142,8 @@ body ::tycho::ItclViewer::_displayConstructors {} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass constructor:$constructor $constructor\c
-	_bindExpl $_currentclass constructor:$constructor $constructor\c
+	_bindDesc $_currentclass constructor $constructor $constructor\c
+	_bindExpl $_currentclass constructor $constructor $constructor\c
 	lappend subnames $constructor\c
     }
     
@@ -176,8 +176,8 @@ body ::tycho::ItclViewer::_displayDestructors {} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass destructor:$destructor $destructor\d
-	_bindExpl $_currentclass destructor:$destructor $destructor\d
+	_bindDesc $_currentclass destructor $destructor $destructor\d
+	_bindExpl $_currentclass destructor $destructor $destructor\d
 	lappend subnames $destructor\d
     }
     
@@ -209,15 +209,16 @@ body ::tycho::ItclViewer::_displayMethods {protection} {
     # Methods
     set subnames {}
     foreach method [$classModel match method \
-    		-protection $protection -scope instance] {
-	# put label into contents widget
-	$itk_component(contents) appendlabel $method\m \
-		-text $method \
+            -protection $protection -scope instance] {
+        # put label into contents widget
+        regexp {^m:(.*)$} $method _ label
+        $itk_component(contents) appendlabel $method\m \
+		-text $label \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass method:$method $method\m
-	_bindExpl $_currentclass method:$method $method\m
+	_bindDesc $_currentclass method $method $method\m
+	_bindExpl $_currentclass method $method $method\m
 	lappend subnames $method\m
     }
     # check for inherited methods
@@ -225,17 +226,18 @@ body ::tycho::ItclViewer::_displayMethods {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach method [$currentModel methods \
+	    foreach method [$currentModel match method \
 		    -protection $protection -scope instance] {
 		# put label into contents widget if not there
+                regexp {^m:(.*)$} $method _ label
 		if {[lsearch -exact $currLabels "$method\m"] == -1} {
 		    $itk_component(contents) appendlabel $method\m \
-			    -text $method \
+			    -text $label \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class method:$method $method\m
-		    _bindExpl $class method:$method $method\m
+		    _bindDesc $class method $method $method\m
+		    _bindExpl $class method $method $method\m
 		    lappend subnames $method\m
 		}
 	    }
@@ -254,15 +256,16 @@ body ::tycho::ItclViewer::_displayMethods {protection} {
     # Procs
     set subnames {}
     foreach method [$classModel match method \
-	    -protection $protection -scope class] {
+            -protection $protection -scope class] {
 	# put label into contents widget
+        regexp {^m:(.*)$} $method _ label
 	$itk_component(contents) appendlabel $method\p \
-		-text $method \
+		-text $label \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass method:$method $method\p
-	_bindExpl $_currentclass method:$method $method\p
+	_bindDesc $_currentclass method $method $method\p
+	_bindExpl $_currentclass method $method $method\p
 	lappend subnames $method\p
     }
     # check for inherited procs
@@ -270,17 +273,18 @@ body ::tycho::ItclViewer::_displayMethods {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach method [$currentModel methods \
+	    foreach method [$currentModel match method \
 		    -protection $protection -scope class] {
 		# put label into contents widget if not there
+                regexp {^m:(.*)$} $method _ label
 		if {[lsearch -exact $currLabels "$method\p"] == -1} {
 		    $itk_component(contents) appendlabel $method\p \
-			    -text $method \
+			    -text $label \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class method:$method $method\p
-		    _bindExpl $class method:$method $method\p
+		    _bindDesc $class method $method $method\p
+		    _bindExpl $class method $method $method\p
 		    lappend subnames $method\p
 		}
 	    }
@@ -314,8 +318,8 @@ body ::tycho::ItclViewer::_displayExternal {} {
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -publiccolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc related method:$method $method\r
-	_bindExpl related method:$method $method\r
+	_bindDesc related method $method $method\r
+	_bindExpl related method $method $method\r
 	lappend subnames $method\r
     }
     # insert panel if any procs found
@@ -343,13 +347,14 @@ body ::tycho::ItclViewer::_displayVariables {protection} {
     foreach variable [$classModel match variable \
 	    -protection $protection -modifiers itk_option] {
 	# put label into contents widget
+        regexp {^v:(.*)$} $variable _ label
 	$itk_component(contents) appendlabel $variable\v \
-		-text $variable \
+		-text $label \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -optioncolor]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass variable:$variable $variable\v
-	_bindExpl $_currentclass variable:$variable $variable\v
+	_bindDesc $_currentclass variable $variable $variable\v
+	_bindExpl $_currentclass variable $variable $variable\v
 	lappend subnames $variable\v
     }
     
@@ -358,17 +363,18 @@ body ::tycho::ItclViewer::_displayVariables {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach variable [$currentModel variables \
+	    foreach variable [$currentModel match variable \
 		    -protection $protection -modifiers itk_option] {
 		# put label into contents widget if not there
+                regexp {^v:(.*)$} $variable _ label
 		if {[lsearch -exact $currLabels "$variable\v"] == -1} {
 		    $itk_component(contents) appendlabel $variable\v \
-			    -text $variable \
+			    -text $label \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class variable:$variable $variable\v
-		    _bindExpl $class variable:$variable $variable\v
+		    _bindDesc $class variable $variable $variable\v
+		    _bindExpl $class variable $variable $variable\v
 		    lappend subnames $variable\v
 		}
 	    }
@@ -389,13 +395,14 @@ body ::tycho::ItclViewer::_displayVariables {protection} {
     foreach variable [$classModel match variable \
 	    -protection $protection -modifiers {}] {
 	# put label into contents widget   
+        regexp {^v:(.*)$} $variable _ label
 	$itk_component(contents) appendlabel $variable\v \
-		-text $variable \
+		-text $label \
 		-font [$this cget -bodyfont] \
 		-fg [$this cget -$protection\color]
 	# setup bindings on <Enter> and <B1-Click>
-	_bindDesc $_currentclass variable:$variable $variable\v
-	_bindExpl $_currentclass variable:$variable $variable\v
+	_bindDesc $_currentclass variable $variable $variable\v
+	_bindExpl $_currentclass variable $variable $variable\v
 	lappend subnames $variable\v
     }
 
@@ -404,17 +411,18 @@ body ::tycho::ItclViewer::_displayVariables {protection} {
 	foreach class $_heritage {
 	    set currLabels [$itk_component(contents) labels]
 	    set currentModel $_classmodels($class)
-	    foreach variable [$currentModel variables \
+	    foreach variable [$currentModel match variable \
 		    -protection $protection -modifiers {}] {
 		# put label into contents widget if not there
+                regexp {^v:(.*)$} $variable _ label
 		if {[lsearch -exact $currLabels "$variable\v"] == -1} {
 		    $itk_component(contents) appendlabel $variable\v \
-			    -text $variable \
+			    -text $label \
 			    -font [$this cget -bodyfont] \
 			    -fg [$this cget -inheritcolor]
 		    # setup bindings on <Enter> and <B1-Click>
-		    _bindDesc $class variable:$variable $variable\v
-		    _bindExpl $class variable:$variable $variable\v
+		    _bindDesc $class variable $variable $variable\v
+		    _bindExpl $class variable $variable $variable\v
 		    lappend subnames $variable\v
 		}
 	    }
@@ -445,21 +453,24 @@ body ::tycho::ItclViewer::_displayVariables {protection} {
 body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
     set classModel $_classmodels($class)
 
-    set expl [$classModel attrget $type:$item -explanation]
+    set expl [$classModel attrget $item -explanation]
     if { $expl == "" } {
-        set expl [$classModel attrget $type:$item -description]
+        set expl [$classModel attrget $item -description]
     }
 
     set other {}
 
+    set label $item
     if {$type == "method" || $type == "constructor"} {
+        if {$type == "method" } {
+            regexp {^m:(.*)$} $item _ label
+        }
 
 	# Get method parameters and their defaults
 	# NOTE: Itcl destructors don't have parameters
 	set arglist {}
-	foreach arg [$classModel match argument $type:$item] {
-	    set default [$classModel attrget \
-	    		[concat $type:$item argument:$arg] -default]
+	foreach arg [$classModel match argument $item] {
+	    set default [$classModel attrget [concat $item $arg] -default]
 	    if {$default == {}} {
 		lappend arglist $arg
 	    } else {
@@ -470,23 +481,24 @@ body ::tycho::ItclViewer::_formatExpl {class item type {extern 0}} {
 	    set other $arglist
 	}
     } elseif {$type == "variable"} {
-	
+        regexp {^v:(.*)$} $item _ label
+
 	# Get the variable's default value
-	set default [$classModel attrget variable:$item -default]
+	set default [$classModel attrget $item -default]
 	if {$default != {}} {
 	    set other $default
 	}
     }
 
     # Create hyperLink to source
-    set item [_hyperLink $class $item $type]
+    set label [_hyperLink $class $label $type]
     
     # Format HTML
     if {$extern} {
-	set html "<dt><b>$item $other</b>\
+	set html "<dt><b>$label $other</b>\
 		\n<dd>$expl"
     } else {
-	set html "<b>$item</b> <i>$other</i><p> $expl"
+	set html "<b>$label</b> <i>$other</i><p> $expl"
     }
 
     # Add footer for inherited items
@@ -750,8 +762,7 @@ body ::tycho::ItclViewer::_generateHtmlContents {} {
 # field as the link text, if it's given (otherwise use item). This will
 # not work if the source is formatted differently.
 #
-body ::tycho::ItclViewer::_hyperLink \
-	{class item type {text {}} {itemtype {}}} {
+body ::tycho::ItclViewer::_hyperLink {class item type {text {}} {itemtype {}}} {
     set classModel $_classmodels($class)
 
     if {$text == {}} {
@@ -763,8 +774,8 @@ body ::tycho::ItclViewer::_hyperLink \
 	set text "<a href = \
 		\"[$classModel cget -sourcefile]#body [$classModel \
 		cget -classname]::$item\">$text</a>"
-    } elseif {$type == "variable" && [$classModel attrget \
-	    variable:$item -modifiers] != "itk_option"} { 
+    } elseif {$type == "variable" \
+            && [$classModel attrget v:$item -modifiers] != "itk_option"} { 
 	set text "<a href = \
 		\"[$classModel cget -sourcefile]#variable $item\">\
 		$text</a>"

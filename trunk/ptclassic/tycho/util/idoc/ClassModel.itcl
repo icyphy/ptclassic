@@ -283,8 +283,11 @@ class ::tycho::ClassModel {
     # The class name of the class. (i.e. ::tycho::ClassModel)
     public variable classname ""
 
-    # The short description of the class.
-    # public variable description ""
+    # Contributor
+    public variable contributor {}
+
+    # Copyright notice
+    public variable copyright {}
 
     # Exceptions thrown by this class
     public variable exceptions {}
@@ -330,17 +333,19 @@ body ::tycho::ClassModel::constructor {args} {
 
     # Add the new options to the "printable" list
     lappend printable \
-            -interfacefile \
             -classname \
-            -language  \
-            -package \
-            -sourcefile \
-            -protection \
-            -modifiers \
+            -contributor \
+            -copyright \
             -exceptions \
+	    -explanation \
+            -implements \
 	    -inherits \
-	    -implements \
-	    -explanation 
+            -interfacefile \
+            -language \
+            -modifiers \
+            -package \
+            -protection \
+            -sourcefile
 
     # Define the "argument" entity
     type define argument \
