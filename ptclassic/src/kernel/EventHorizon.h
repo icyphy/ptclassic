@@ -5,9 +5,6 @@
 #include "DataStruct.h"
 #include "Connect.h"
 
-#define grabData beforeGo
-#define sendData afterGo
-
 enum inOutType {IN, in, OUT, out};
 class Star;
 class Wormhole;
@@ -92,18 +89,6 @@ public:
 	// redefine initialize()
 	void initialize(); 
 
-	// for timed domain, it returns the next global time of the 
-	// outside domain. This value is used to set the stop time
-	// of the inside "timed" domain.
-	// for untimed domain, it gives the value when to stop the
-	// inside "timed" domain.
-	virtual float getNextStamp() = 0;
-
-	// flag to check that the inner domain finishes its scheduling
-	// before deadlocked. For untimed domain, they are always FALSE.
-	// But for timed domains, it varies at runtime.
-	int outputBeforeDeadlocked;
-			   
 };
 
         //////////////////////////////////////////
