@@ -46,7 +46,7 @@ all:
 	@echo " see $$PTOLEMY/src/pxgraph/README.txt"
 	cd pxgraph; $(MAKE) CC="$(CC)" CFLAGS="$(CFLAGS)"
 
-install: $(BINDIR)/pxgraph.x11 $(BINDIR)/pxgraph 
+install: sources $(BINDIR)/pxgraph.x11 $(BINDIR)/pxgraph 
 
 $(BINDIR)/pxgraph: $(ROOT)/tycho/java/ptolemy/plot/pxgraph
 	rm -f $@
