@@ -44,6 +44,7 @@ EXTRA_SRCS =	abbreviations.html \
 		bindings.html \
 		bugs0.1.html \
 		documentation.html \
+		htmlTemplate.html \
 		index.html \
 		introduction.html \
 		overview.html \
