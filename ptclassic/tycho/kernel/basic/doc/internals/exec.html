@@ -10,11 +10,11 @@ Tycho includes a few different ways of
 <A NAME="running a subprocess">running</A> <A NAME="subprocesses, running">subprocesses</A>.  
 <DL>
 <DT> <CODE>::tycho::tyexec</CODE> <I>args</I>
-<DD> The <A HREF="../codeDoc/Exec_rel.html#tyexec Proc associated with ::tycho:;Exec class">tyexec procedure</A>
+<DD> The <A HREF="../codeDoc/Exec_rel.html#tyexec Proc associated with ::tycho:;Exec class"><CODE>tyexec</CODE> procedure</A>
 will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
 
-<DT> <CODE>::tycho::Exec</CODE>
-<DD> The <A HREF="../usersGuides/ExecHelp.html">Exec Class</A>
+<DT> <CODE>::tycho::Monitor</CODE>
+<DD> The <A HREF="../usersGuides/MonitorHelp.html">Monitor Class</A>
  brings up a dialog widget that allows the user to type
 in a command and view the output.
 
@@ -48,7 +48,9 @@ calls <CODE>exec</CODE> should be disabled on the Macintosh.  In the
 example below, from <A
 HREF="../../Edit.itcl"><CODE>$TYCHO/kernel/Edit.itcl</CODE></A>, we
 check the <CODE>tcl_platform</CODE> variable and disable the menu item
-if we are on the Mac <PRE> body ::tycho::Edit::constructor {args} {
+if we are on the Mac.
+<PRE>
+body ::tycho::Edit::constructor {args} {
     global tcl_platform
     # . . .
 
