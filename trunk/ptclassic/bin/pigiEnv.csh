@@ -1,5 +1,5 @@
 #! /bin/csh -f
-# usage: pigi [-bw] [-cp] [-debug] [-console] [-help] [-ptiny]
+# usage: pigi [-bw] [-cp] [-debug] [-console] [-help] [-ptiny] [-ptrim]
 #	[-rpc rpcname] [-xres resname ] [cell_name]
 
 # pigi - Ptolemy Interactive Graphics Interface
@@ -8,7 +8,7 @@
 # This is a modified version to support a PTOLEMY environment variable.
 #
 # Version: $Id$
-# Copyright (c) 1990-1994 The Regents of the University of California.
+# Copyright (c) 1990-1995 The Regents of the University of California.
 # 	All Rights Reserved.
 #
 
@@ -41,13 +41,22 @@ if ( ! $?LD_LIBRARY_PATH ) then
     setenv LD_LIBRARY_PATH /usr/lib:${PTX11DIR}/lib
 endif
 
+setenv PIGIBASE pigiRpc
 if ( ! $?PIGIRPC ) then
-	if ( "$progname" == "ptiny" ) then
-		setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
-	else
-		setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc
-	endif
+     switch ($progname)
+	case ptiny:  
+		setenv PIGIBASE ptinyRpc
+		breaksw
+	case ptrim:
+		setenv PIGIBASE ptrimRpc
+		breaksw
+	case *:
+		setenv PIGIBASE pigiRpc
+		breaksw
+     endsw
+     setenv PIGIRPC $PTOLEMY/bin.$ARCH/pigiRpc/$PIGIBASE
 endif
+
 set cell = init.pal
 set resfile = pigiXRes9
 
@@ -59,7 +68,7 @@ while ($#argv)
 	switch ($argv[1])
 		case -help:
 			echo "usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
-			echo "	[-rpc rpcname] [-xres resname ] [-display display] [cell_name]"
+			echo "  [-ptiny] [-ptrim] [-rpc rpcname] [-xres resname ] [-display display] [cell_name]"
 			exit 0
 		case -rpc:
 			setenv PIGIRPC $argv[2]
@@ -86,12 +95,17 @@ while ($#argv)
 			set resfile = pigiXRes9.cp
 			breaksw
 		case -ptiny:
+			setenv PIGIBASE ptinyRpc
 			setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptinyRpc
+			breaksw
+		case -ptrim:
+			setenv PIGIBASE ptrimRpc
+			setenv PIGIRPC $PTOLEMY/bin.$ARCH/ptrimRpc
 			breaksw
 		case -*:
 			echo Bad option: $argv[1]
-			echo "usage: $progname [-bw] [-cp] [-debug] [-console] [-help] [-ptiny]"
-			echo "	[-rpc rpcname] [-xres resname ] [cell_name]"
+			Echo "usage: $progname [-bw] [-cp] [-debug] [-console] [-help]"
+			echo "  [-ptiny] [-ptrim] [-rpc rpcname] [-xres resname ] [-display display] [cell_name]"
 			exit 1
 			breaksw
 		case *:
@@ -107,9 +121,21 @@ if ( ! $?DISPLAY ) then
     exit 1
 endif
 
-if ($?pigidebug && -x $PIGIRPC.debug ) setenv PIGIRPC $PIGIRPC.debug
-
+if ($?pigidebug && -x $PIGIRPC.debug ) then
+	setenv PIGIRPC $PIGIRPC.debug
 endif
+
+if ( ! -e $PIGIRPC ) then
+	echo "$PIGIRPC does not exist."
+	if ( -e $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE ) then
+		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/$PIGIBASE
+		echo "Using $PIGIRPC instead"
+	else
+		echo "$program: exiting"
+		exit 4
+	endif
+endif
+
 
 if ( "$1" =~ "-*" ) then
     echo "${0}: Bad option: $1"
