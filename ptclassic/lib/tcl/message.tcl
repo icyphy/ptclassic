@@ -96,6 +96,32 @@ proc ptkImportantMessage {w text} {
     focus $prevFocus
 }
 
+###################################################################
+# Procedure to open a message window and leave it open until dismissed
+#
+set ptkMessageWindowNum 0
+
+proc ptkMessage {text} {
+    # generate unique window name
+    global ptkMessageWindowNum
+    set w .message$ptkMessageWindowNum
+    incr ptkMessageWindowNum
+    ptkSafeDestroy $w
+    toplevel $w
+    wm title $w "Ptolemy Message"
+    wm iconname $w "Ptolemy Message"
+
+    button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
+    message $w.msg -width 25c -text $text -justify left
+    pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
+
+    wm geometry $w +200+200
+    tkwait visibility $w
+    bind $w <Key> "ptkSafeDestroy $w"
+    bind $w <ButtonPress> "ptkSafeDestroy $w"
+    bind $w.msg <Button> "ptkSafeDestroy $w"
+}
+
 
 ###################################################################
 # Procedure to display whatever is in the global variable errorInfo
