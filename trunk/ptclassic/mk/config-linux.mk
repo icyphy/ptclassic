@@ -28,7 +28,7 @@
 # $Id$
 
 # Author: Alberto Vignani, FIAT Research Center, TORINO
-
+# Modified by: Neal Becker (neal@ctd.comsat.com)
 #
 # --------------------------------------------------------------------
 # |  Please note that Linux is moving to the ELF object file format, |
@@ -78,10 +78,11 @@ CC	=	gcc
 OCT_CC	=	gcc
 CPLUSPLUS =	g++
 LD	=	ld -m elf_i386
+DLLIB	=	-ldl
 CPP	=	gcc -E -D__ELF__
 OBJDUMP	=	objdump
 OBJDUMP_FLAGS =	-k -q 
-LDFLAGS	=	-e startup_32 
+LDFLAGS	=	#-e startup_32 
 else
 AS	=	/usr/i486-linuxaout/bin/as
 LD	=	/usr/i486-linuxaout/bin/ld -m i386linux
@@ -118,17 +119,19 @@ OPTIMIZER =	-O2 #-fomit-frame-pointer #-m486 -pipe
 # Slackware is using 2.5.x, so we leave -Wsynth out for the time being.
 WARNINGS =	-Wall -Wcast-qual -Wcast-align # -Wsynth
 # Under gcc-2.7.0, you will need -fno-for-scope for GPPFLAGS
-GPPFLAGS =	$(LINUXDEF) $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
+GPPFLAGS =	$(LINUXDEF) -fno-for-scope $(WARNINGS) $(OPTIMIZER) $(MEMLOG)
 CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 
 #
 # Variables for the linker
 #
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lieee -lm
+SYSLIBS=-lg++ -lieee -lm $(DLLIB)
 
-LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x # -static
-LINKFLAGS_D=-L$(LIBDIR) -g -static
+#LINKFLAGS=-L$(LIBDIR) Xlinker -S -Xlinker -x # -static
+#LINKFLAGS_D=-L$(LIBDIR) -g -static
+LINKFLAGS=-L$(LIBDIR) -Xlinker -x -rdynamic # -static
+LINKFLAGS_D=-L$(LIBDIR) -g -rdynamic #-static
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
