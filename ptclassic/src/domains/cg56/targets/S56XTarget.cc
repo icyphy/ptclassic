@@ -17,20 +17,17 @@ $Id$
 #endif
 
 #include "S56XTarget.h"
-#include "UserOutput.h"
-#include "CG56Star.h"
 #include "KnownTarget.h"
-#include <sys/param.h>
-#include <sys/stat.h>
+#include "MotorolaTarget.h"
 
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
-	CG56Target(nam,desc)
+	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star")
 {
 	initStates();
 }
 
 S56XTarget::S56XTarget(const S56XTarget& arg) :
-	CG56Target(arg)
+	CG56Target(arg),MotorolaTarget(arg)
 {
 	initStates();
 	copyStates(arg);
@@ -118,20 +115,24 @@ void S56XTarget :: wrapup () {
 	CG56Target::wrapup();
 }
 
-int S56XTarget :: compileTarget() {
+int S56XTarget :: compileCode() {
 	StringList assembleCmds = "asm56000 -b -l -A -oso ";
 	assembleCmds += uname;
 	if (!genFile(miscCmds , uname,".aio")) return FALSE;
-	return systemCall(assembleCmds,"Errors in assembly");
+	return !systemCall(assembleCmds,"Errors in assembly");
 }
 
-int S56XTarget :: runTarget() {
+int S56XTarget :: loadCode() {
 	StringList downloadCmds = "load_s56x ";
 	downloadCmds += fullFileName(uname,".lod\n");
-	downloadCmds += runCmds;
-	if (!genFile(downloadCmds,uname)) return FALSE;
+	return !hostSystemCall(downloadCmds,
+		"Problems loading code onto S56X");
+}
+
+int S56XTarget :: runCode() {
+	if (!genFile(runCmds,uname)) return FALSE;
 	chmod(fullFileName(uname),S_IRWXU);	//group execute permission;
-	return hostSystemCall(uname,"Problems loading code onto S56X");
+	return !hostSystemCall(uname,"Problems loading code onto S56X");
 }
 
 

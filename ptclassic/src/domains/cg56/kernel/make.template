@@ -33,11 +33,11 @@ LIB=libcg56.a
 
 # Header files
 HDRS= CG56Connect.h CG56Star.h CG56Target.h CG56WormConnect.h \
- MotorolaAttributes.h MotorolaConnect.h MotorolaTarget.h
+ MotorolaAttributes.h MotorolaConnect.h MotorolaTarget.h MotorolaSimTarget.h
 
 # Library objects
 OBJS= CG56Connect.o CG56Star.o CG56Domain.o CG56Target.o CG56WormConnect.o \
- MotorolaAttributes.o MotorolaConnect.o MotorolaTarget.o
+ MotorolaAttributes.o MotorolaConnect.o MotorolaTarget.o MotorolaSimTarget.o
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)
