@@ -45,7 +45,7 @@
 
 whatToBuild:	all
 
-.SUFFIXES:	.o .cc .h .pl .chdl
+.SUFFIXES:	.o .cc .h .pl .chdl .is
 
 # Rule for compiling C++ files
 .cc.o:
@@ -63,15 +63,25 @@ whatToBuild:	all
 
 # ptlang binary in the obj directory
 PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/ptlang/ptlang
+ISLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/islang/islang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
 PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
 	then echo $(PTLANG_IN_OBJ) ; \
 	else echo ptlang; fi`
 
+# Use either the islang binary in the obj directory or just use islang
+ISLANG= `if [ -f $(ISLANG_IN_OBJ) ]; \
+	then echo $(ISLANG_IN_OBJ) ; \
+	else echo $(ISLANG_IN_OBJ); fi`
+
 # Build the ptlang binary if necessary
 $(PTLANG_IN_OBJ):
 	(cd $(PTOLEMY)/obj.$(ARCH)/ptlang; $(MAKE) VPATH=../../src/ptlang)
+
+# Build the islang binary if necessary
+$(ISLANG_IN_OBJ):
+	(cd $(PTOLEMY)/obj.$(ARCH)/islang; $(MAKE) VPATH=../../src/islang)
 
 # Rule to build the ../doc/star directory
 # Can't use mkdir -p here, it might not exist everywhere
@@ -103,6 +113,20 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 
 .pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
 	cd $(VPATH); $(PTLANG) $< 
+	@$(STARDOCRULE)
+	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
+
+# Rules for running the islang processor
+# Make sure we always run the preprocessor in the source directory
+# the "mv" part moves the documentation to the doc dir.
+# note if there is no doc dir, the command continues despite the error.
+.is.cc: $(ISLANG_IN_OBJ) $(STARDOCDIR)
+	cd $(VPATH); $(ISLANG) $<
+	@$(STARDOCRULE)
+	-cd $(VPATH)
+
+.is.h: $(ISLANG_IN_OBJ) $(STARDOCDIR)
+	cd $(VPATH); $(ISLANG) $<
 	@$(STARDOCRULE)
 	-cd $(VPATH); mv $*.t $(STARDOCDIR)/.
 
