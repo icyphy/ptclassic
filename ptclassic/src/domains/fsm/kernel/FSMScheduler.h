@@ -86,9 +86,16 @@ public:
      // Return my own Tcl interp.
     Tcl_Interp* interp() { return myInterp; }
 
-   // Reset current state to be the initial state.
+    // Reset current state to be the initial state.
     // This needs to be invoked while hierarchical entry is initial entry.
     void resetInitState();
+
+    // Let outside domain know whether to refire.
+    /*virtual*/ int selfFiringRequested();
+	
+    // If selfFiringRequested returns TRUE, return the time at which
+    // this firing is requested.
+    /*virtual*/ double nextFiringTime();
 
 protected:
     // Check all stars.
@@ -116,8 +123,11 @@ protected:
     // Keep the entry type of last transition that enters current state.
     int curEntryType;
 
-    // Next transition state.
+    // Next state.
     FSMStateStar* nextState;
+
+    // Previous state.
+    FSMStateStar* preState;
 
     // The domain name outside of this FSM.
     const char* outerDomain;	 
