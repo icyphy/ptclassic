@@ -40,7 +40,7 @@ ROOT =		../..
 # Path (absolute or relative) to the object directory root
 OBJDIR =	../..
 # True source directory
-VPATH =		$(ROOT)/tycho/kernel_itk
+VPATH =		$(ROOT)/tycho/kernel
 
 # get configuration info
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
