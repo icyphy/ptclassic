@@ -126,7 +126,7 @@ body ::tycho::Transition::_entry {id canvas slate entry} {
     set endx   [lindex $coords [expr $len-2]]
     set endy   [lindex $coords [expr $len-1]]
 
-    if {$option(entry$id) == "history"} {
+    if {$option(entry$id) == "default"} {
         set radius 7.0
         set angle  $option(iangle$id)
 
@@ -143,26 +143,26 @@ body ::tycho::Transition::_entry {id canvas slate entry} {
             eval $canvas coords $component(entry$id) $pCoords
             $canvas coords $component(entryLabel1$id) \
                     [expr $centx-1] [expr $centy-2] \
-                    [expr $centx-1] [expr $centy+3]
+                    [expr $centx+2] [expr $centy-2]
             $canvas coords $component(entryLabel2$id) \
-                    [expr $centx-1] $centy [expr $centx+1] $centy
+                    $centx [expr $centy-2] $centx [expr $centy+2]
             $canvas coords $component(entryLabel3$id) \
-                    [expr $centx+1] [expr $centy-2] \
-                    [expr $centx+1] [expr $centy+3]
+                    [expr $centx-1] [expr $centy+2] \
+                    [expr $centx+2] [expr $centy+2]
         } else {
             # Create a small circle and label
             set component(entry$id) [eval $canvas create oval $pCoords \
                     [list -fill white -tags [$canvas gettags $primary($id)]]]
             set component(entryLabel1$id) [$canvas create line \
                     [expr $centx-1] [expr $centy-2] \
-                    [expr $centx-1] [expr $centy+3] \
+                    [expr $centx+2] [expr $centy-2] \
                     -tags [$canvas gettags $primary($id)]]
             set component(entryLabel2$id) [$canvas create line \
-                    [expr $centx-1] $centy [expr $centx+1] $centy \
+                    $centx [expr $centy-2] $centx [expr $centy+2] \
                     -tags [$canvas gettags $primary($id)]]
             set component(entryLabel3$id) [$canvas create line \
-                    [expr $centx+1] [expr $centy-2] \
-                    [expr $centx+1] [expr $centy+3] \
+                    [expr $centx-1] [expr $centy+2] \
+                    [expr $centx+2] [expr $centy+2] \
                     -tags [$canvas gettags $primary($id)]]
             
         }
