@@ -196,7 +196,10 @@ Window win;
 {
     xtb_data data;
 
-    if (!XFindContext(t_disp, win, h_context, (XPointer*)&data)) {
+    /* If he 4th arg of XFindContext is Xpointer *, then pxgraph won't
+     * compile under X11R4 or OW3.0
+     */
+    if (!XFindContext(t_disp, win, h_context, (caddr_t *)&data)) {
 	return ((struct h_info *) data)->info;
     } else {
 	return (xtb_data) 0;
