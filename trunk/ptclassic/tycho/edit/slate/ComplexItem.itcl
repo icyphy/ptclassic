@@ -41,10 +41,10 @@ class ::tycho::Picture {
     ###################################################################
     ####                         public procs                      ####
 
-    proc coords {id canvas args}
-    proc draw   {id canvas args}
-    proc ghost  {id canvas}
-    proc update {id canvas}
+    proc coords    {id canvas args}
+    proc draw      {id canvas args}
+    proc ghost     {id canvas}
+    proc update    {id canvas}
 
     ###################################################################
     ####                         protected variables               ####
@@ -61,6 +61,9 @@ class ::tycho::Picture {
     # The "shape" of pictures of this class -- rectangle by default
     common shape "rectangle"
 
+    # The list of valid components
+    common components {}
+    
     ###################################################################
     ####                       class initialization                ####
 
@@ -86,7 +89,6 @@ body ::tycho::Picture::construct {id tags canvas x0 y0 x1 y1 args} {
     set primary($id) [$canvas create rectangle $x0 $y0 $x1 $y1 \
 	    -outline "" -tags $tags]
 }
-
 
 ##########################################################################
 #### destruct
