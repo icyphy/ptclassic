@@ -1,6 +1,7 @@
 defstar {
         name {IIRFix}
         domain {SDF}
+	derivedFrom { SDFFix }
         desc {
 An infinite impulse response (IIR) filter implemented in direct form II,
 using fixed-point arithmetic.  The transfer function is of the form
@@ -164,9 +165,15 @@ The input particles are only cast to this precision if the parameter
 	    LOG_NEW; fwdCoefs = new Fix[numState];
 	    LOG_DEL; delete [] state;
 	    LOG_NEW; state = new Fix[numState];
-    
+
+	    // Local variables
 	    Fix coef( CoefPrecision );
+	    if ( coef.invalid() )
+	      Error::abortRun( *this, "Invalid CoefPrecision" );
+
 	    Fix st( StatePrecision );
+	    if ( st.invalid() )
+	      Error::abortRun( *this, "Invalid StatePrecision" );
 
 	    coef.set_rounding(TRUE);
 	    st.set_rounding(TRUE);
@@ -182,12 +189,29 @@ The input particles are only cast to this precision if the parameter
 	        fdbckCoefs[i] = coef;
 	    }
 
-	    // Set the precision of various variables
+	    // Set the precision of various fixed-point variables
 	    fixIn = Fix( (const char*) InputPrecision );
-	    fdbckAccum = Fix ( (const char*) AccumPrecision );
-	    fwdAccum = Fix ( (const char*) AccumPrecision );
-	    out = Fix ( (const char*) OutputPrecision );
+	    if ( fixIn.invalid() )
+	      Error::abortRun( *this, "Invalid InputPrecision" );
 
+	    fdbckAccum = Fix ( (const char*) AccumPrecision );
+	    if ( fdbckAccum.invalid() )
+	      Error::abortRun( *this, "Invalid AccumPrecision" );
+	    fwdAccum = Fix ( (const char*) AccumPrecision );
+
+	    out = Fix ( (const char*) OutputPrecision );
+	    if ( out.invalid() )
+	      Error::abortRun( *this, "Invalid OutputPrecision" );
+
+	    // Set the overflow handlers for assignments/computations
+	    fixIn.set_ovflow( OverflowHandler );
+	    if ( fixIn.invalid() )
+	      Error::abortRun( *this, "Invalid OverflowHandler" );
+	    fdbckAccum.set_ovflow( OverflowHandler );
+	    fwdAccum.set_ovflow( OverflowHandler );
+	    out.set_ovflow( OverflowHandler );
+
+	    // Set all fixed-point assignments/computations to use rounding
             fixIn.set_rounding(TRUE);
 	    fdbckAccum.set_rounding(TRUE);
 	    fwdAccum.set_rounding(TRUE);
@@ -195,33 +219,46 @@ The input particles are only cast to this precision if the parameter
 	}
         go {
             if ( numState == 1 ) {
-                // actually, this means no state; just feed through
+                // Actually, this means no state; just feed through
 		if ( int(ArrivingPrecision) )
 		    out = fwdCoefs[0] * Fix(signalIn%0);
 		else {
 		    fixIn = Fix(signalIn%0);
 		    out = fwdCoefs[0] * fixIn;
 		}
+		checkOverflow(out);
 		signalOut%0 << out;
             } else {
 		fdbckAccum = 0.0;
 		fwdAccum = 0.0;
 		for ( int i=1; i < numState; i++) {
-		    fdbckAccum = fdbckAccum + state[i] * fdbckCoefs[i];
-		    fwdAccum = fwdAccum + state[i] * fwdCoefs[i];
+		    fdbckAccum += state[i] * fdbckCoefs[i];
+		    fwdAccum += state[i] * fwdCoefs[i];
 		}
+		checkOverflow(fdbckAccum);
+		checkOverflow(fwdAccum);
 		if ( int(ArrivingPrecision) )
-		    fdbckAccum = fdbckAccum + Fix(signalIn%0);
+		    fdbckAccum += Fix(signalIn%0);
 		else {
 		    fixIn = Fix(signalIn%0);
-		    fdbckAccum = fdbckAccum + fixIn;
+		    fdbckAccum += fixIn;
 		}
+		checkOverflow(fdbckAccum);
 		for ( i=numState-1; i > 1; i--) {
 		    state[i] = state[i-1];
 		}
 		state[1] = fdbckAccum;
-		out = fdbckAccum * fwdCoefs[0] + fwdAccum;
+		// Split up out = fdbckAccum * fwdCoefs[0] + fwdAccum;
+		// in order to test for overflow at each computation
+		out = fdbckAccum;
+		checkOverflow(out);
+		out *= fwdCoefs[0];
+		checkOverflow(out);
+		out += fwdAccum;
+		checkOverflow(out);
 		signalOut%0 << out;
 	     }
 	 }
+        // A wrap-up method is inherited from SDFFix
+        // If you defined your own, you should call SDFFix::wrapup()
 }
