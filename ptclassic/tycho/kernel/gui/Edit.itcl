@@ -257,7 +257,7 @@ body ::tycho::Edit::focusin {} {
 #
 body ::tycho::Edit::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/doc/EditHelp.html
+    ::tycho::File::openContext $TYCHO/kernel/doc/EditHelp.html
 }
 
 ###################################################################
