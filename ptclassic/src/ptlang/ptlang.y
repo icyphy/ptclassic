@@ -75,7 +75,9 @@ Programmer: J. T. Buck and E. A. Lee
 int versionMode = 0;		/* flag if we are processing a version field */
 
 /* chars allowed in "url" */
-int urlchar(int c) {
+int urlchar(c)
+int c;
+{
 	/* This is an evil hack that allows RCS version keywords in
 	 * the version field.
 	 * RCS version keywords use $, so when we are parsing the inside
