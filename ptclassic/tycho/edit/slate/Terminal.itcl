@@ -92,13 +92,22 @@ namespace ::tycho {
 # <p><b>Example</b>: Create some terminals:
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   foreach {x y opts} {
-#    	100 50  {}
-#    	100 100 {-fill red}
-#    	100 150 {-style circle  -fill blue}
-#    	100 200 {-direction {1 1} -style doublearrowin}
+#   set x 0
+#   set y 0
+#   $slate create line 0 0 320 200 -fill grey
+#   foreach options {
+#    	{}
+#    	{-style plain -fill red}
+#    	{-style arrowin -fill red -arrowshape {10 15 3}}
+#    	{-style arrowout -fill green -length 60 -direction {-1 0}} 
+#    	{-style circle -fill blue -direction {0 -1}}
+#    	{-style rectangle -fill magenta -width 2 -direction {-1 1}}
+#    	{-style doublearrowin -direction {1 1}}
+#    	{-style doublearrowout -direction {-1 0.5}}
 #   } {
-#    	eval $slate create Terminal $x $y $opts -tags moveable
+#       incr x 40
+#       incr y 25
+#    	eval $slate create Terminal $x $y $options -tags moveable
 #   }
 # </pre></tcl>
 #
