@@ -256,6 +256,11 @@ body ::tycho::EditMake::genVCMakefile {makefile} {
     global TYCHO
     saveQuery
 
+    if ![ file readable $makefile] {
+	warn "Cannot generate Microsoft Visual C++ nmake style makefile:\n\
+		`$makefile' is not readable or does not exist."
+	return
+    }
     set fdin [open $makefile r]
     set outfile $makefile.vc
     set fdout [open $outfile "w"]
