@@ -107,23 +107,29 @@ class ::tycho::StatusBar {
     # Draw the progress bar
     private method _drawprogress {progress {color blue}}
 
+    # Lock the current display mode
+    private method _lock {}
+
     # Set the current display mode
     private method _setmode {mode}
+
+    # Unlock the current display mode
+    private method _unlock {}
 
     ###################################################################
     ####                       private variables                   ####
 
+    # The current mode lock
+    private variable _lock 0
+
+    # The current mode: "message" or "progress" or "entry"
+    private variable _mode "message"
+
     # The delay between updates (in psuedo-milliseconds)
-    private variable updateInterval 250
-
-    # The current file status setting
-    private variable filestatus "readwrite"
-
-    # The current mode: "status" or "progress" or "entry"
-    private variable currentMode ""
+    private variable _updateInterval 250
 
     # The command to get the current progress
-    private variable progressCommand ""
+    private variable _progressCommand ""
 }
 
 
@@ -264,9 +270,6 @@ body ::tycho::StatusBar::constructor {args} {
     # The feedback column with the status expands
     grid columnconfigure $itk_component(status) 1 -weight 1
 
-    # Set up the display
-    _setmode "status"
-
     # Initialise options
     eval itk_initialize $args
 
@@ -282,7 +285,7 @@ body ::tycho::StatusBar::constructor {args} {
 #
 body ::tycho::StatusBar::_entrycommand {command} {
     # Make sure we're in the right mode and the widget still exists
-    if { $currentMode != "entry" \
+    if { $_mode != "entry" \
 	    || ![::info exists itk_component(feedback)] } {
         return
     }
@@ -313,8 +316,9 @@ body ::tycho::StatusBar::_filestatushelp {} {
 #######################################################################
 #### entry
 #
-# Create an entry field in the status bar. The first argument is
-# a string to display to the left of thr entry field; following
+# Create an entry field in the status bar. If the progress bar
+# is currently active, do nothing. The first argument is
+# a string to display to the left of the entry field; following
 # arguments are an option-value list, and can be any of:
 # <ul>
 # <li><b>-command</b>: The command to execute when the user hits
@@ -334,7 +338,9 @@ body ::tycho::StatusBar::_filestatushelp {} {
 # to control file completion.
 #
 body ::tycho::StatusBar::entry {label args} {
-    _setmode "entry"
+    if ![_setmode "entry"] {
+	return
+    }
 
     # Extract args
     array set opts {-command {} -keycommand {} -default {}}
@@ -379,52 +385,81 @@ body ::tycho::StatusBar::get {} {
 #######################################################################
 #### progress
 #
-# Start or update the progress bar. If the command argument
-# is supplied, then the progress bar is set to zero,
-# the command remembered, and an after{} callback set up
-# to this method with no argument. If the _command_ argument
-# is not supplied, then the remembered command is evaluated
-# at the global scope and the return value used to set the
-# status bar display. The returned value is expected to be
-# between 0.0 and 1.0. Another callback is generated if
-# the command does not throw an error and the returned
-# value is less than 1.0. The update rate of
-# the progress bar is set to about 5 times per second.
+# Start or update the progress bar. If the _label_ argument
+# is supplied, then the status display is changed to show the
+# progress bar, with _label_ displayed to the left of the
+# bar and the bar set to show zero progress. _command_ is a
+# callback that will be used in future calls to this method
+# to update the amount of progress shown in the bar. An after{}
+# callback is set up to this method to start a series
+# of progress bar updates at regular intervals.
+#
+# If _label__ argument is not supplied (which is how this method
+# is called in the after{} callbaks), then the command supplied
+# by a previous call to this method is evaluated at the global
+# scope and the return value used to set proportion of the
+# progress bar display. The returned value is expected to be
+# between 0.0 and 1.0 -- values outside this range will be
+# limited to 0.0 or 1.0. If the value is less than 1.0, another
+# after{} callback will be generated in order that the progress
+# bar will update again after a short period of time. If the 
+# If the command raises an error, the progress bar will be
+# displayed in red and no further callbacks generated.
+# The update rate of the progress bar is set to about 5 times
+# per second.
 #
 body ::tycho::StatusBar::progress {{label {}} {command {}}} {
-    _setmode "progress"
-    if { $command == "" } {
-	if { $progressCommand != "" } {
-	    if ![catch {uplevel #0 $progressCommand} progress] {
-		# Redraw the progress bar
-		_drawprogress $progress
-		if { $progress < 1.0 } {
-                    # Catch, since widget could be deleted before the progress
-		    after $updateInterval [list catch "$this progress"]
-		}
+    if { $label != "" } {
+	if { $command == "" } {
+	    error "wrong # args: should be \"$this progress label command\""
+	}
+	# Set up for progress display
+	if ![_setmode "progress"] {
+	    # Oops, someone else has locked it
+	    return
+	}
+	# Lock the mode
+	_lock
+
+	# Display the label and draw the progress bar
+	$itk_component(message) configure -text $label:
+	_drawprogress 0
+
+	# Remember the command and create the callback.
+	set _progressCommand $command
+        after $_updateInterval [list catch "$this progress"]
+    } else {
+	# Evaluate the progress command
+	if [catch {uplevel \#0 $_progressCommand} progress] {
+	    # The evaluation failed: display the bar in red
+	    _drawprogess 1 red
+	} else {
+	    # Draw the progress bar with the returned value
+	    _drawprogress $progress
+
+	    # If the returned value is less then one, schedule another callback
+	    if { $progress < 1.0 } {
+		after $_updateInterval [list catch "$this progress"]
 	    } else {
-                # There's a terrible error! Display the bar fully
-                # filled in red!
-                _drawprogess 1 red
+		# If not, then we're done: make sure we unlock the mode!
+		_unlock
 	    }
 	}
-    } else {
-	$itk_component(message) configure -text $label:
-	set progressCommand $command
-	_drawprogress 0
-        # Catch, since widget could be deleted before the progress updates
-        after $updateInterval [list catch "$this progress"]
     }
 }
 
 #######################################################################
 #### puts
 #
-# Put an arbitrary string to the status bar. To enforce
-# wrap-around, set the wrap-length of the label to its current width.
+# Put an arbitrary string to the status bar.  If the progress bar
+# is currently active, do nothing. The label can be any
+# arbitrary length, and it will be forced to wrap around in
+# the available space.
 #
 body ::tycho::StatusBar::puts {string} {
-    _setmode "status"
+    if ![_setmode "message"] {
+	return
+    }
     # Set the wrap length of the label to the length of
     # the containing frame less a fudge factor, to prevent
     # long messages from making the window resize
@@ -460,15 +495,41 @@ body ::tycho::StatusBar::_drawprogress {progress {color blue}} {
 }
 
 #######################################################################
+#### _lock
+#
+# Lock the current mode. This is required by feedback widgets
+# such as the progress bar, that require that they don't have
+# other modes interfering until they're good and ready.
+#
+body ::tycho::StatusBar::_lock {} {
+    set _lock 1
+}
+
+#######################################################################
 #### _setmode
 #
-# Set up the display according to the current mode
+# Change the display mode to _mode_. The mode can be:
+# <ul>
+# <li><b>progress</b>: Display the progress bar.
+# <li><b>entry</b>: Display the entry widget.
+# <li><b>message</b>: Display just a plain label.
+# </ul>
+# If _mode_ is not one of these, raise an error.
+# If the mode is locked, then the mode will not be changed
+# and this method returns 0. Otherwise, if _mode_ is the same
+# as the current mode, do nothing and return 1. Otherwise
+# change the mode and the display accordingly, and return 1.
 #
 body ::tycho::StatusBar::_setmode {mode} {
-    if { $mode == $currentMode } {
-	return
+    # If locked, return 0
+    if $_lock {
+	return 0
     }
-    set currentMode $mode
+    # If the mode is the same as the current mode, return 1
+    if { $mode == $_mode } {
+	return 1
+    }
+    set _mode $mode
 
     # Whatever is in the feedback column, forget and delete
     if [::info exists itk_component(feedback)] {
@@ -479,21 +540,8 @@ body ::tycho::StatusBar::_setmode {mode} {
 
     # Create a new feedback widget if needed
     switch $mode {
-	"progress" {
-            # Create the progress display bar. We just set it
-            # to a fixed height because if you try and make
-            # it a fraction of the status bar height it gets
-            # zero if invoked before the window is mapped. Same
-            # old samo Tk nonsense... -- hjr
-            itk_component add feedback {
-                canvas $itk_interior.status.feedback \
-                        -height 10 \
-                        -borderwidth 2 \
-                        -relief sunken
-            } {
-                keep -background -cursor
-            }
-            grid $itk_component(feedback) -row 0 -column 1 -sticky nsew
+	"idle" {
+	    # Do nothing, but just set the mode flag
 	}
 	"entry" {
             # Create the entry widget
@@ -512,11 +560,38 @@ body ::tycho::StatusBar::_setmode {mode} {
                     -sticky nsew \
                     -padx 4
 	}
-	"status" {
+	"progress" {
+            # Create the progress display bar. We just set it
+            # to a fixed height because if you try and make
+            # it a fraction of the status bar height it gets
+            # zero if invoked before the window is mapped. Same
+            # old samo Tk nonsense... -- hjr
+            itk_component add feedback {
+                canvas $itk_interior.status.feedback \
+                        -height 10 \
+                        -borderwidth 2 \
+                        -relief sunken
+            } {
+                keep -background -cursor
+            }
+            grid $itk_component(feedback) -row 0 -column 1 -sticky nsew
+	}
+	"message" {
             # Nothing needs to be done
 	}
 	default {
 	    error "Unknown mode $mode"
 	}
     }
+    return 1
 }
+
+#######################################################################
+#### _unlock
+#
+# Unlock the current mode. This allows the mode to be changed.
+#
+body ::tycho::StatusBar::_unlock {} {
+    set _lock 0
+}
+
