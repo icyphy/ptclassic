@@ -44,6 +44,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern StringList CG56ONE;
 
+class Galaxy;
 class CG56Target : public virtual MotorolaTarget {
 protected:
 	void writeFloat(double);
@@ -60,4 +61,7 @@ public:
 	int compileCode();
 };
 
+// Adds the galaxy parameter ONE.  This should be called by any multiprocessor
+// target that contains a CG56 child target.
+void addCG56One(Target *target, Galaxy *g);
 #endif
