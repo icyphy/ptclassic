@@ -146,7 +146,7 @@ body ::tycho::DirSearch::ok {} {
     puts $fd "\{Egrep `$regexp'\}\n\{"
 
     foreach egrepItem $egrepList {
-        regexp {(^[^ :]*): ([0-9]*):(.*)} $egrepItem dummy \
+        regexp {(^[^ :]*): *([0-9]*):(.*)} $egrepItem dummy \
                 filename linenum patternline
         if ![info exists filename] {
             puts "Internal DirSearch error: regexp `$egrepItem' failed!\n\
