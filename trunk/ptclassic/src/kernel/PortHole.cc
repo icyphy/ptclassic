@@ -199,14 +199,16 @@ void GenericPort :: connect(GenericPort& destination, int numberDelays,
 	// newConnection is a virtual function that does the right
 	// thing for all types of PortHoles.
 	// create Geodesic, wire it up.
-	PortHole* realSource = &newConnection();
-	Geodesic* geo = realSource->allocateGeodesic();
+	PortHole& realSource = newConnection();
+	PortHole& realDestination = destination.newConnection();
+	Geodesic* geo = realSource.allocateGeodesic();
+	if (geo == NULL) geo = realDestination.allocateGeodesic();
 	if (geo != NULL)
 	{
-	    geo->setSourcePort(*realSource, numberDelays, initDelayValues);
-	    geo->setDestPort(destination);
+	    geo->setSourcePort(realSource, numberDelays, initDelayValues);
+	    geo->setDestPort(realDestination);
 	}
-	else Error::abortRun(*realSource,
+	else Error::abortRun(realSource,
 		"could not allocate geodesic for connection.");
 	return;
 }
