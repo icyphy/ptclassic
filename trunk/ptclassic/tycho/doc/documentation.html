@@ -1,0 +1,123 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Tycho Documentation</title>
+</head>
+<body>
+<a name="documentation">
+<h1>Tycho Integrated Documentation</h1>
+</a>
+<p>
+In Tycho, documentation and design are integrated.
+Hyperlinks can bind pretty much anything to anything.
+For formatted text, Tycho uses <a name=HTML>HTML</a>,
+the hypertext markup language of the internet.
+Formatted text can appear in any Tycho widget.
+<p>
+<h2>Contents</h2>
+<p>
+<ul>
+<li><a href="#HTML conventions">HTML Conventions</a>
+<li><a href="#HTML extensions">HTML Extensions</a>
+<li><a href="#indexing documents">Indexing Documents</a>
+</ul>
+<p>
+<a name="HTML conventions">
+<H2>HTML Conventions</H2>
+</a>
+<p>
+The HTML widget in Tycho is based on the
+<a href="../lib/html_library/html/help.html">HTML library</a>
+written by Stephen Uhler of Sun Microsystems, which supports all the
+features of HTML 2.0.
+There is currently no support in Tycho for
+<a name=HTTP>HTTP</a> hyperlink references, so you cannot
+within Tycho directly read documents on the internet.
+A <a href="../lib/html_library/html/sample.html">sample document</a>
+illustrates the HTML tags that are supported.
+<p>
+In Tycho, documentation files are kept small.
+This helps the response time of parser (which is really quite slow)
+and keeps information modular.  Hyperlinks are used extensively
+throughout.
+An <a href="../editors/textedit/doc/usersGuides/EditHTMLHelp.html">
+HTML editor</a> provides support for hyperlinks, including a utility
+for checking their validity.
+<p>
+<a name="HTML extensions">
+<h2>HTML Extensions</h2>
+</a>
+<p>
+One key extension to HTML provided by Tycho allows
+<a name="Tcl extension to HTML">embedding Tcl
+scripts into a document</a> in such a manner that if the user double
+clicks on the script, the script will be executed.
+The HTML source for such a script is surrounded by
+by the delimitters &lt;tcl&gt; and &lt;/tcl&gt;.
+For example, the HTML source
+<pre>
+    &lt;pre&gt;&lt;tcl&gt;
+    ::tycho::post "hello world"
+    &lt;/pre&gt;&lt;/tcl&gt;
+</pre>
+appears as follows in a document:
+<pre><tcl>
+    ::tycho::post "hello world"
+</pre></tcl>
+Double clicking on this script will execute it if you are
+viewing the document under Tycho.
+<p>
+<a name="indexing documents">
+<h2>Indexing Documents</h2>
+</a>
+<p>
+A major feature of the Tycho integrated documentation system is
+its ability to automatically generate and maintain indexes.
+Effective use of this feature requires some discipline in writing
+the HTML documents in the first place.
+<p>
+Index entries are constructed from <a name=anchors>anchors</a>
+with a <a name="name attribute">name attribute</a>.
+For example, the source for the previous sentence is
+<pre>
+    Index entries are constructed from &lt;a name=anchors&gt;anchors&lt;/a&gt;
+    with a &lt;a name="name attribute"&gt;name attribute&lt;/a&gt;.
+</pre>
+When an index is created from this document, the value of the name
+attribute will appear in the index with a pointer to precisely
+this point in the document.  Thus, for example, the Tycho master
+index has a pointer to the above sentence under both "anchors"
+and "name attribute".  Try it:
+<pre><tcl>
+    ::tycho::File::openContext $TYCHO/tycho.idx
+</tcl></pre>
+Notice that the name attribute can (an often should) have spaces in it.
+It must be surrounded by quotation marks if it has spaces in it.
+<p>
+Given one or more HTML documents, you can create an index for them
+using the <code><a name="tychoMkIndex">tychoMkIndex</a></code> Tcl command
+(you can invoke this in the console window).
+This command takes three or more arguments.
+The first argument is the name of the index, which will appear at the
+top of the index browser.
+The second argument is the name of the index file to create.
+This file should have the extension ".idx" so that it will be recognized
+as an index file.
+The rest of the arguments are any number of HTML file names
+from which the index should be created.
+Instead of listing many files, you can use glob patterns like "*.html"
+for the file names. A glob pattern can contain
+wildcards like "*", which match zero or more characters of any type.
+<p>
+Once you have created an index and stored it in a file with the
+extension <a name=".idx extension">".idx"</a>, that file will be opened using an
+<a href="../kernel/doc/usersGuides/IndexBrowserHelp.html"> index browser</a>.
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

@@ -1,0 +1,135 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Running Tycho</title>
+</head>
+<body>
+<h1><a name="running Tycho">Running Tycho</a></h1>
+<OL>
+<LI><a href="#setup">Setup</a>
+<LI><a href="#standalone execution">Stand-alone Execution</a>
+<LI><a href="#Ptolemy with Tycho">Executing Tycho with Ptolemy</a>
+<LI><a href="#debugging Tycho with Ptolemy">Debugging Tycho with Ptolemy</a>
+</OL>
+<p>
+Tycho is designed to be used as a stand-alone program or on conjunction
+with the Ptolemy system.  The Ptolemy system is a heterogeneous
+design environment developed at U.C. Berkeley.
+<a name="setup">
+<h2>Setup</h2>
+</a>
+<p>
+If you are set up to run Ptolemy version 0.6 or higher, then
+you are already set up to run Tycho.
+If you do not have Ptolemy installed
+on your system, or are not set up to run Ptolemy,
+then you must have the program <a name=itkwish>"itkwish"</a> in your path.
+This program is a generic Itcl shell.
+You must be running Itcl version 2.0 or higher.
+<!-- FIXME: Need pointers here to how to get it, and instructions -->
+<!-- on how to check the version. -->
+In addition, you will need to set an
+<a name="environment variables">environment variable</a>
+<a name="TYCHO environment variable">TYCHO</a>
+to point to the installation directory for Tycho.
+For example, if Tycho is installed in /usr/tools/tycho,
+then you could put the following line in your .cshrc file:
+<pre>
+    setenv TYCHO /usr/tools/tycho
+</pre>
+This environment variable can also be used to control which of
+several versions of Tycho you run, if you have more than one
+version installed on your system.
+<p>
+<a name="standalone execution">
+<h2>Standalone Execution</h2>
+</a>
+<p>
+To use Tycho standalone (independent of Ptolemy),
+the command-line syntax is:
+<pre>
+    tycho [-nowelcome] [-noconsole] [file...]
+</pre>
+All arguments and options are optional.
+One or more file names may be optionally specified as arguments.
+If you specify one or more files, those files will be opened by Tycho.
+Tycho will exit when you close all windows.
+If you do not specify any files, Tycho opens with a Tcl
+<a name="console window">console window</a>.
+You can type Tcl, Tk, or Itcl commands into this console window.
+You may also open other files from this window.
+Exiting this console window will exit the program.
+This console window also captures
+<a name="standard output">standard output</a> generated with the
+Tcl <a name="puts command">puts command</a>, unless that output is
+directed to a file.
+If you give the -nowelcome option, then you will not get the startup
+<a name="welcome window">welcome window</a>.
+This is particularly useful if you are running
+over a slow X connection (like a modem) and do not wish to waste
+the bandwidth.
+<p>
+<h2><a name="Ptolemy with Tycho">Executing Tycho with Ptolemy</a></h2>
+<p>
+If you are running Ptolemy version 0.6 or higher, then
+Tycho is already running when you run the user interface "pigi".
+You can obtain a Tycho console window with the key binding "y".
+You can also run Tycho with the Ptolemy textual interpreter, ptcl.
+The command-line syntax for this is:
+<pre>
+    tycho [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] &#92
+          [-nowelcome] [-noconsole] [file...]
+</pre>
+All options and arguments are optional.
+The options are interpreted as follows:
+<dl>
+<b><dt>-debug</b><dd>
+Start a version of Ptolemy with debugging symbols, if one is available.
+<b><dt>-ptiny</b><dd>
+Start a minimal version of Ptolemy with only the SDF, DE, and HOF domains.
+<b><dt>-ptrim</b><dd>
+Start an intermediate version of Ptolemy with a few of the most useful
+domains (SDF, BDF, DDF, DE, CGC, and HOF).
+<b><dt>-pigi</b><dd>
+Start a large version of Ptolemy with all domains.
+<b><dt>-bin tychobin</b><dd>
+Start a particular, specified executable.
+<b><dt>-nowelcome</b><dd>
+Do not open the initial welcome window.
+<b><dt>-noconsole</b><dd>
+Do not open a console window.
+<b><dt>file...</b><dd>
+Open the specified files after starting the program.
+</dl>
+<p>
+Notice that the -ptiny, -ptrim, -pigi, and -bin options are mutually
+exclusive.
+If no files are specified, then the program opens with a Tcl console
+window into which you can type Tcl, Tk, or Itcl commands.
+Exiting this console window will exit the program (after confirmation).
+If you do specify files, then closing all open windows will exit
+the program.
+In either case, you can also exit the program with the "Quit"
+command in any File menu.
+<a name="debugging Tycho with Ptolemy">
+<h2>Debugging Tycho with Ptolemy</h2>
+</a>
+<p>
+Since Ptolemy is a fundamentally extensible system,
+Tycho running with Ptolemy has special features to allow
+experimentation and debugging.  One feature is that it traps
+segmentation faults and related errors that cause the program
+to crash, and attempts to save any unsaved work before exiting.
+Of course, there is no guarantee that this will work, so
+files are saved with the prefix "#crash#". When the file is 
+reopened Tycho will check to see if a #crash# file exists, and if 
+it does, give the user the option of opening it.
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>tycho@eecs.berkeley.edu</author>

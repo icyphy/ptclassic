@@ -1,0 +1,118 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Release Notes 0.1</title>
+</head>
+<body>
+<h1><a name="release notes 0.1">Release Notes 0.1</a></h1>
+<p>
+Version 0.1 is the first public release of Tycho as a stand-alone system.
+It runs under the vanilla Itcl 2.0 with no changes to the executable.
+It also runs under the Ptolemy system, a design environment distributed
+by the same group that developed Tycho.
+<p>
+The editor capabilities are currently limited to textual syntaxes; although
+we have considerable work in progress on graphical editors, that code
+is not ready for release yet.
+<p>
+Here is a summary of the capabilities:
+<h3>Tycho Kernel</h3>
+<ul>
+<li>
+A family of dialog windows, including basic message windows
+(both modal and non-modal), yes-no queries, queries for text entry,
+and queries with radio buttons.
+<li>
+A list browser and derived file browser and index browser.
+These browsers support pattern-based search.
+<li>
+An Emacs-like text editing widget that significantly extends
+the capabilities of the Tk text widget, including a sophisticated
+search capability, undo/redo, text filling, and carefully designed menus
+and key bindings.
+<li>
+A shell-like console for interacting with Tcl with a thorough
+history mechanism fashioned after the Unix tcsh.
+<li>
+An integrated documentation system based on HTML with automatic
+index generation and an index search mechanism.
+<li>
+Support for hyperlinks from any Tycho editor or display to any other Tycho
+editor or display.
+<li>
+A context-sensitive spelling checker (for example, it checks the spelling
+only in comments when editing code).
+<li>
+Interfaces to SCCS and RCS revision control systems.
+<li>
+A font management system that includes an interactive dialog for
+selecting fonts.
+<li>
+Error handling with a stack display.
+<li>
+Auto-save and crash recovery (although the crash recovery
+will only work with modifications to the executable, currently
+only available with the Ptolemy distribution).
+<li>
+Some elementary data structures: Stack, CircularList.
+</ul>
+<p>
+<h3>Editors and Shells</h3>
+<p>
+In addition to the basic emacs-like text editor described above
+and the Tcl shell, a number of additional editors and shells have been designed.
+The editors provide capabilities similar to those of emacs modes,
+although the potential goes beyond what emacs can do because of
+the future inclusion of graphical elements.
+<p>
+The editors and shells included in release 0.1 are:
+<p>
+<ul>
+<li>
+C and C++ editors.  These 
+color and fill comments and handle indentation.
+<li>
+HTML editor.  This editor parses HTML commands, supports
+hyperlinks, and provides a command to check the validity of hyperlinks.
+<li>
+Itcl and Tcl editors.
+These editors color and fill comments, handle indentation, and color class,
+procedure, and method names.  They also support "evaluate" commands,
+where either a selected region or the entire file can be evaluated.
+<li>
+Makefile editor.
+This editor colors comments, variable definitions, variable
+references, rules, and various directives.
+<li>
+Ptlang editor.
+This is an editor for designing blocks in Ptolemy.
+<li>
+Matlab and Mathematica consoles.  These will only appear if
+the appropriate Tcl extensions for interaction with Matlab and
+Mathematica have been installed.
+</ul>
+<p>
+<h3>Key Limitations</h3>
+<ul>
+<li>Lack of infrastructure for graphical editors.
+<li>The HTML parser is too slow on most machines.
+<li>HTTP is not supported, so hyperlinks can only be to local files.
+<li>Crash recovery code only works with Ptolemy binaries.
+<li>Lack of a preference manager.  X window resources are used.
+<li>Lack of a color manager.
+<li>The undo in the text widgets is only one level deep.
+<li>Several of the editors are not fully developed, containing
+only rudimentary syntax-directed features.
+<li>Editors are too closely allied with their top-level windows, so that
+if you place multiple editors in a single window, you will have to carefully
+design your menus to be able to interact with all subwindows.
+</ul>
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>tycho@eecs.berkeley.edu</author>

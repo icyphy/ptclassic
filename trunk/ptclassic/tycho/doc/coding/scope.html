@@ -1,0 +1,260 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Scope in Itcl</title>
+</head>
+<body>
+<h1><a name="scope in Itcl">Scope in Itcl</a></h1>
+<ol>
+<li><a href="#scoping problems">Scoping problems</a>
+<li><a href="#bind command">Using the "bind" command</a>
+<li><a href="#this variable">Using the variable "this"</a>
+<li><a href="#info which command">Using "info which command"</a>
+<li><a href="#code command">Using the "code" command</a>
+</ol>
+<p>
+<h3><a name="scoping problems">Scoping problems</a></h3>
+<p>
+One of the trickiest parts about using Itcl is to properly
+manage namespaces and scope.
+A key problem that arises repeatedly is how to construct
+a command that is bound to an event (like a key press),
+bound to a button, executed in the background using "after,"
+or executed in some scope different from where the command
+is defined.  In general, the problem is that a command
+has a namespace context.  There are two
+ways in Itcl that this namespace context can be represented:
+<pre>
+    ::namespace::commandname
+    {@scope ::namespace commandname}
+</pre>
+Either of these can be executed as a command.
+(One of the unfortunately features of Itcl is that there are
+several ways to accomplish just about everything related to
+namespaces and scope, and the subtle differences between them
+are not always clear.)
+<p>
+Within an Itcl object, the variable "this"
+has the first of these two forms, as a fully qualified command name.
+The "info which" command can be used to obtain the first form for any
+command ("this" only works for an object).
+The "code" or the "scope" commands can be used to obtain the second form.
+<p>
+In Itcl, all commands that are executed as a consequence of a keyboard
+or window event are executed at the global scope (in namespace "::").
+Also, commands executed in the background using "after" are executed
+at the global scope.  To verify this, we can use the
+<a name="info context command">"info context" command</a>,
+which returns a null string at the global scope.
+For example:
+<tcl><pre>
+namespace foo {
+   ::tycho::inform "Inside context: [info context]"
+   after idle {
+      ::tycho::inform "after context: [info context]"
+   }
+}
+</tcl></pre>
+Above, we find that the context inside the namespace is
+reported as "::foo", but in the "after" command, it is reported
+as an empty string, meaning the global context.
+Button commands work similarly:
+<tcl><pre>
+namespace foo {
+   catch {destroy .x}
+   toplevel .x
+   button .x.b -text pushme -command {
+      ::tycho::inform "button context: [info context]"
+      destroy .x
+   }
+   pack .x.b
+}
+</tcl></pre>
+Again, the button command executes at the global scope.
+Thus, the challenge when building Itcl objects within namespaces
+is to be sure that commands that will execute at global scope can
+in fact execute at global scope.
+There are a number of ways to do this.
+<p>
+<h3><a name="bind command">Using the "bind" command</a></h3>
+<p>
+Bindings to key or mouse events, like the button presses above,
+execute at the global scope.  Itcl has provided two particularly
+useful additions to the special symbols that the bind command
+understands:
+<dl>
+<dt>%q<dd>Returns the fully-qualified command name of object receiving
+the event.
+<dt>%Q<dd>Returns the fully-qualified command name of megawidget
+receiving the event
+</dl>
+<p>
+These can be used as in the following example:
+<tcl><pre>
+namespace foo {
+   catch {delete class bar}
+   class bar {
+      inherit ::itk::Toplevel
+      constructor {args} {
+         itk_component add f {
+            canvas $itk_interior.f
+         } {}
+         pack $itk_component(f)
+         bind $itk_component(hull) &lt;a&gt; &#92
+            {::tycho::inform "expansion of %%q: %q"}
+         bind $itk_component(hull) &lt;b&gt; &#92
+            {delete object %q}
+      }
+   }
+   bar .y   
+}
+</tcl></pre>
+Here, we define a class "bar" inside namespace "foo" derived from
+an Itk top-level window class.  In the constructor, we pack
+into the window a canvas widget.
+We bind the key "a" to simply report the expansion for "%q",
+which will be "::foo::.y".
+The key "b" uses this expansion to delete the object.
+Notice that the window specified for the bindings is
+"$itk_component(hull)", which will be the top-level window.
+<p>
+The "%Q" directive is similar, except that the full
+expanded name of an Itk megawidget will
+be reported.
+<p>
+The <a name="winfo command command">"winfo command windowname"</a>
+command returns the fully-qualified command name of
+an object given a Tk top-level window name.
+For example, if the canvas window from the above example is still
+present, try:
+<tcl><pre>
+    ::tycho::inform [winfo command .y]
+</pre></tcl>
+Notice that this can execute in the global scope.
+The window name ".y" is visible to Tk in any scope because Tk
+has only a flat name space.  The Itk object ".y", however, is
+not visible in the global scope.
+<p>
+The <a name="winfo megawidget windowname">"winfo megawidget windowname"</a>
+command is similar, except that it returns the name of an Itk megawidget
+rather than a top-level window object.
+The specified window name can be any window inside the megawidget.
+<p>
+<h3><a name="this variable">Using the variable "this"</a></h3>
+<p>
+The variable "this" inside a class context has as its value
+the fully qualified command name associated with the object
+(yes, it could have been used instead of %q in the above example).
+Consider the following:
+<tcl><pre>
+namespace foo {
+   catch {delete class bar}
+   class bar {
+      constructor {args} {
+         ::tycho::inform "Constructing object: $this"
+         ::tycho::inform "Current context: [info context]"
+         after idle "$this x"
+      }
+      method x {} {::tycho::inform {works}}
+   }
+   bar y
+}
+</tcl></pre>
+The value of the variable "this" is reported as "::foo::y", which is the
+fully qualified command name associated with the object "y".
+The context inside the constructor is "::foo::bar", a namespace
+associated with the class.
+The command "$this x" or "::foo::y x" can be executed at the global
+scope, so the "after" directive works.
+Notice that it would not have worked to say:
+<pre>
+         after idle {$this x}
+</pre>
+because the "$this" will not be evaluated until the "after" command
+triggers, and this will happen at the global scope where no variable
+"this" is defined.
+<p>
+<h3><a name="info which command">Using "info which command"</a></h3>
+<p>
+The "info which" command
+takes one argument, which is the name of a command in the
+current scope, and returns a fully qualified command with namespace
+information. Thus, for example,
+<tcl><pre>
+namespace foo {
+   proc x {} {::tycho::inform {works}}
+   ::tycho::inform [info which x]
+   after idle [info which x]
+}
+</tcl></pre>
+The first line defines a procedure "x", the second informs
+us of its fully qualified name "::foo::x", and the third executes the fully
+qualified name as a command at the global scope.
+The following, by contrast, yields an error:
+<tcl><pre>
+namespace foo {
+   proc x {} {::tycho::inform {works}}
+   after idle "x"
+}
+</tcl></pre>
+The same principle can be used in class definitions.
+Consider the following:
+<tcl><pre>
+namespace foo {
+   catch {delete class bar}
+   class bar {
+      constructor {args} {
+         ::tycho::inform "Scheduling command: [info which z]"
+         after idle [info which z]
+      }
+      proc z {} {::tycho::inform {works}}
+   }
+   bar y
+}
+</tcl></pre>
+Notice that "z" here is a procedure, not a method.
+A procedure does not need an instance of an object to be invoked.
+Indeed, the command that we schedule using "after" is "::foo::bar::z",
+which does not make any reference to any particular instance of the class "bar".
+Thus, "info which" should not be used to access methods, but can be used
+to access procedures.
+<p>
+<h3><a name="code command">Using the "code" command</a></h3>
+<p>
+The "code" command returns a scoped reference in the second form
+described above, beginning with "@scope".
+For example:
+<tcl><pre>
+namespace foo {
+   proc x {} {::tycho::inform {works}}
+   ::tycho::inform [code x]
+   after idle [code x]
+}
+</tcl></pre>
+In this case, the "[code x]" directive returns the list
+"@scope ::foo x", which can be executed as a command at the global
+scope.  It can also be used in class definitions.
+For example:
+<tcl><pre>
+namespace foo {
+   catch {delete class bar}
+   class bar {
+      constructor {args} {
+         ::tycho::inform "Scheduling command: [code z]"
+         after idle [code z]
+      }
+      proc z {} {::tycho::inform {works}}
+   }
+   bar y
+}
+</tcl></pre>
+The command that is scheduled by "after" is
+"@scope ::foo::bar z".
+<p>
+<a href="../../doc/index.html">Tycho Home Page</a><br>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

@@ -1,0 +1,257 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Tycho Key Bindings</title>
+</head>
+<body>
+<h1><a name="key bindings">Tycho Key Bindings</a></h1>
+<p>
+Text interfaces (entry boxes and text editors)
+in Tycho use emacs conventions (for the most part)
+for key <a name=bindings>bindings</a>.
+<p>
+<ul>
+<li><a href="#generic key bindings">Generic Bindings</a>
+<li><a href="#entry box bindings">Bindings for Entry Boxes and Dialogs</a>
+<li><a href="#text editor bindings">Bindings for Text Editors</a>
+<li><a href="#mouse navigation">Mouse Navigation</a>
+</ul>
+<p>
+<a name="generic key bindings">
+<h2>Generic Bindings</h2>
+</a>
+<p>
+The following key bindings apply to virtually all interactive
+text widgets in Tycho, including entry boxes in dialogs and
+text widgets in editors.
+<p>
+<h3>Navigation</h3>
+<p>
+<dl COMPACT>
+<b><dt>C-a</b><dd>go to the beginning of the line
+<b><dt>C-b</b><dd>backward one character
+<b><dt>M-b</b><dd>backward one word
+<b><dt>C-e</b><dd>go to the end of the line
+<b><dt>C-f</b><dd>forward one character
+<b><dt>M-f</b><dd>forward one word
+</dl>
+<p>
+<h3>Modifying text</h3>
+<p>
+Delete, C-h, and Backspace all erase the previous character,
+unless there is a selection, in which case they erase the selection.
+M-Delete, M-C-h, and M-Backspace behave the same way, except that
+they erase a word at a time.  In addition, the following bindings apply:
+<dl COMPACT>
+<b><dt>C-d</b><dd>delete the next character
+<b><dt>M-d</b><dd>forward erase one word
+<b><dt>C-k</b><dd>erase to the end of the line (save to clipboard)
+<b><dt>C-w</b><dd>erase the selection
+<b><dt>M-w</b><dd>copy the selection to the clipboard
+<b><dt>C-y</b><dd>yank from the clipboard and insert at cursor
+<b><dt>C-/</b><dd>select the entire contents
+<b><dt>C-&#92;</b><dd>clear any selection
+</dl>
+<p>
+Commands that delete characters will save them to the
+clipboard, so they can be recovered with C-y.
+Any set of contiguous character deletions are collected
+in the clipboard.
+<p>
+<a name="entry box bindings">
+<h2>Bindings for Entry Boxes and Dialogs</h2>
+</a>
+<p>
+Entry boxes have all the
+<a href="#generic key bindings">generic bindings</a> plus one more:
+<dl COMPACT>
+<b><dt>C-u</b><dd>delete all the text in the entry box
+</dl>
+In addition, most dialog boxes support the following:
+<dl COMPACT>
+<b><dt>Escape</b><dd>dismiss the dialog, ignoring it
+<b><dt>Return</b><dd>dismiss the dialog, executing whatever
+<b><dt>Space</b><dd>invoke a button
+<b><dt>Tab</b><dd>move from one item to another
+</dl>
+<p>
+<a name="text editor bindings">
+<h2>Bindings for Text Editors</h2>
+</a>
+<p>
+Text editors (any multi-line editable text widget)
+have all the <a href="#generic key bindings">generic bindings</a>
+plus a few more.
+
+<h3>Changing Text</h3>
+
+<dl COMPACT>
+<b><dt>C-o</b><dd>open a line of text below the insert cursor
+<b><dt>C-x u</b><dd>undo the last change
+<b><dt>M-q</b><dd>fill selected region or current paragraph
+<b><dt>C-x f</b><dd>change the right column used for the fill
+<b><dt>C-x .</b><dd>change the prefix characters used by the fill
+</dl>
+<p>
+The fill capability requires some explanation.
+<a name="filling text">
+<h3>Filling Text</h3>
+</a>
+<p>
+The "Fill Region" command fills text so that the lines
+are approximately of equal length and line breaks occur
+on word boundaries.  It can optionally add a prefix to
+each filled line (for example a comment character), and
+typically does so in language-specific editors, which are derived
+from the basic editor. If a
+region of text has been selected, then it fills that
+region.  Otherwise, it fills the paragraph that contains
+the insertion cursor.  A paragraph is bounded by a blank
+line before and after, or possibly a line with only the comment
+character.
+<p>
+<h3>Navigation</h3>
+<p>
+The emacs-like bindings for moving around in a multi-line
+text widget are:
+<dl COMPACT>
+<b><dt>C-l</b><dd>center the insert cursor on the screen
+<b><dt>C-n</b><dd>down one line
+<b><dt>C-p</b><dd>up one line
+<b><dt>C-r</b><dd>search backwards
+<b><dt>C-s</b><dd>search forwards
+<b><dt>C-v</b><dd>forward one page
+<b><dt>M-v</b><dd>backward one page
+<b><dt>M-&lt;</b><dd>move to the top of the document
+<b><dt>M-&gt;</b><dd>move to the bottom of the document
+</dl>
+<p>
+Other capabilities for moving around in a text document are
+simply those implemented in the text widget in Tk.
+Thus, the following documentation
+is copied from the Tk text man page, written by John
+Ousterhout, with only minor modifications.
+Note that it is fairly common to redefine
+some of these bindings in the window manager to perform
+window manager functions.  In this case, Tycho will never
+see the bindings, and they will not appear to work.
+<p>
+"The  Left  and Right keys move the insertion cursor one
+character to the left or right;  they  also  clear  any
+selection  in the text.  If Left or Right is typed with
+the Shift key down, then the insertion cursor moves and
+the selection is extended to include the new character.
+Control-Left and Control-Right move the insertion  cursor
+by  words,  and  Control-Shift-Left  and  Control-Shift-Right
+move the insertion cursor by words and also
+extend  the  selection.
+<p>
+The Up and Down keys move the insertion cursor one line
+up or down and clear any selection in the text.  If  Up
+or  Right  is  typed  with the Shift key down, then the
+insertion cursor moves and the selection is extended to
+include the new lines.  Control-Up and Control-Down
+move the insertion  cursor  by  paragraphs  (groups  of
+lines  separated  by blank lines), and Control-Shift-Up
+and Control-Shift-Down move  the  insertion  cursor  by
+paragraphs  and  also  extend the selection.
+<p>
+The  Next (Page up) and Prior (Page down) keys move the
+insertion cursor forward or backwards by one  screenful
+and clear any selection  in the text.  If the Shift key
+is  held  down  while  Next or Prior is typed, then the
+selection  is  extended to include  the new pages.
+<p>
+Home  and  Control-a  move  the insertion cursor to the
+beginning of its line and clear any  selection  in  the
+widget.   Shift-Home  moves the insertion cursor to the
+beginning of the line and also extends the selection to
+that point.
+<p>
+End  and Control-e move the insertion cursor to the end
+of the line and clear  any  selection  in  the  widget.
+Shift-End  moves  the cursor to the end of the line and
+extends the selection to that point.
+<p>
+Control-Home  and  Meta-<  move the insertion cursor to
+the beginning of the text and clear  any  selection  in
+the  widget.   Control-Shift-Home  moves  the insertion
+cursor to the beginning of the text  and  also  extends
+the selection to that point.
+<p>
+Control-End and Meta-> move the insertion cursor to the
+end of the text and clear any selection in the  widget.
+Control-Shift-End  moves  the  cursor to the end of the
+text and extends the selection to that point.
+<p>
+The F16 key (labeled Copy on many Sun workstations) or
+Meta-w copies the selection in the widget to the  clipboard,
+if there is a selection.
+<p>
+The  F20 key (labeled Cut on many Sun workstations) or
+Control-w copies the selection in  the  widget  to  the
+clipboard  and  deletes  the selection.  If there is no
+selection in the widget then these keys have no effect.
+<p>
+The  F18  key (labeled Paste on many Sun workstations)
+or Control-y inserts the contents of the  clipboard  at
+the position of the insertion cursor."
+<p>
+<a name="mouse navigation">
+<h2>Mouse Navigation</h2>
+</a>
+<p>
+The interaction of the mouse with text is simply that
+implemented in the text widget in Tk.  Thus, the following
+documentation is again copied from the man page for
+the text widget, written by John Ousterhout, with minor
+editing.
+<p>
+"Pressing mouse button 1 in an text positions the insertion
+cursor  just  before the character underneath the
+mouse cursor and sets the input focus to this widget.
+Dragging with mouse button 1 strokes  out  a  selection
+between  the  insertion  cursor and the character under
+the mouse.
+<p>
+If you double-click mouse button 1 then the word  under
+the mouse cursor will be selected, the insertion cursor
+will be positioned at the beginning of  the  word,  and
+dragging  the  mouse  will stroke out a selection whole
+words at a time.
+[Note that in some derived classes, double clicking
+activates a hypertext link.]
+<p>
+If you triple-click mouse button 1 then the line  under
+the mouse cursor will be selected, the insertion cursor
+will be positioned at the beginning of  the  line,  and
+dragging  the  mouse  will stroke out a selection whole
+line at a time.
+<p>
+The ends of the selection can be adjusted  by  dragging
+with  mouse button 1 while the shift key is down;  this
+will adjust the end of the selection that  was  nearest
+to  the mouse cursor when button 1 was pressed.  If the
+button is double-clicked before dragging then the selection
+will be adjusted in units of whole words; if it is
+triple-clicked, then the selection will be adjusted  in
+units of whole lines.
+<p>
+Clicking  mouse button 1 with the Control key down will
+reposition the insertion cursor without  affecting  the
+selection.
+<p>
+The view in the widget can be adjusted by dragging with
+mouse button 2.  If mouse button 2 is  clicked  without
+moving the mouse, the selection is copied into the text
+at the position of the insertion cursor. The Insert key
+also inserts the selection.
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>

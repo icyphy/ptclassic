@@ -1,0 +1,111 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Technical Rationale for Tycho</title>
+</head>
+<body>
+<h1><a name="technical rationale">Technical Rationale</a></h1>
+<p>
+Theoreticians typically strive for simplicity, looking for the smallest
+set of primitives on which they can build a general methodology.
+In computer science theory, for example, numerous languages have
+been devised that reflect this ideal by providing in a few primitives
+an expressive power at least equivalent to Turing machines.
+Practitioners view such efforts the way they view Turing machines: they
+make an interesting abstraction, but they don't tell us much about how
+to build systems. To a practitioner, the value of a language lies in
+its utility, and both excessive simplicity and excessive complexity can
+interfere with its utility.
+<p>
+This tension between theorists and practitioners is healthy, and the
+best solutions emerge from compromise. But a major risk in compromise
+is "creeping featurism." In an effort to win the broadest support,
+features and options are added to a language until all semblance of
+simplicity has been lost. Usually, however, these features have
+merit. Their advocates can cite numerous applications, and win their
+acceptance through compelling arguments about the utility of the
+features.
+<p>
+A reasonable way to balance the pressures of breadth and simplicity is
+to support heterogeneity. Failure to do so has doomed some otherwise
+laudable efforts. For example, Common Lisp did not initially
+define a "foreign
+function interface," presumably because everything could be done in
+Lisp. Practitioners, who built Common Lisp systems, realized that this
+was not a practical approach, and built their own, mutually
+incompatible foreign function interfaces. As a result, Lisp systems
+were only interchangeable if programs used no foreign functions. And
+few significant programs qualified. Standardization failed.
+<p>
+Small, specialized languages and tools are useful. For example, the
+programming language embodied in a typical spreadsheet program is
+extremely useful. But it is certainly not general, in that there are
+many applications for which it is inappropriate. Such tools are
+therefore most useful if they can be combined with other specialized
+tools. Each tool is developed independently, making the development
+effort manageably small. But by embedding the tool in an environment
+with appropriate interfaces between tools, the utility of the tool is
+greatly magnified. 
+<p>
+Looser integration of diverse capabilities has numerous advantages:
+<p>
+<ul>
+
+<li>Existing, familiar tools do not need to be discarded in favor of a
+new, all-encompassing tool. This is particularly valuable when
+expertise with complex tools has built up over time.
+
+<li>Capabilities can come in "bite sized" modules, making them easier
+to learn, and rendering them more acceptable a conservative clientele.
+
+<li>Tools from different vendors can be mixed, drawing from the
+strengths of each.
+
+<li>Competition among vendors is enhanced because fewer customers are
+"locked in". This results in better tools at lower prices.
+
+<li>Innovative tools with specialized capabilities have a market. They
+do not need to be all-encompassing to be salable. So innovation is
+encouraged.
+</ul>
+<p>
+There are also significant disadvantages:
+<p>
+<ul>
+
+<li>User interfaces are likely to be different with different tools,
+making them more difficult to learn.
+
+<li>Integration may not be complete. For example, once a design is
+migrated from one tool to another, without tight integration, it may be
+difficult to back annotate the original design. More basic failures of
+interoperability are also likely.
+</ul> 
+<p>
+
+We believe that with system level design problems, the advantages
+outweigh the disadvantages. The Ptolemy project aims to ameliorate the
+disadvantages. The Ptolemy software system, which has been under
+development at U.C. Berkeley since 1990, addresses the problem of
+mixing "models of computation", or semantic models. The Tycho software
+system, under development since 1995 as a part of the Ptolemy project,
+addresses the problem of mixing syntactic models. For example, while
+Ptolemy can support mixtures of discrete-event and dataflow modeling,
+Tycho can support mixtures of textual and graphical syntaxes.
+
+<p>
+
+In both Ptolemy and Tycho, the goals are accomplished through a
+strict and carefully designed object-oriented software architecture.
+A key principal is that of "information hiding".  Objects should
+be able to interact with one another without knowing about either
+their internal semantic or syntactic models.
+<p>
+<a href="index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>tycho@eecs.berkeley.edu</author>
