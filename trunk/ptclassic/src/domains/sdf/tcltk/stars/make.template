@@ -51,9 +51,6 @@ INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(PIGIDIR) -I$(PTKLIB) \
 # Library name
 LIB=libsdftclstars.$(LIBSUFFIX)
 
-# Where star doc files go
-STARDOCDIR = ../../doc/stars
-
 # source files for all stars, using preprocessor, putting base stars first
 # note that SDFTclScript must be made before stars that depend on it
 PL_SRCS= \

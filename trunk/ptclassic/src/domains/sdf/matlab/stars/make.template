@@ -54,9 +54,6 @@ INCL = $(PTCOMPAT_INCSPEC) -I$(SDFDIR) -I$(KERNDIR) \
 # Library name
 LIB=libsdfmatlabstars.$(LIBSUFFIX)
 
-# Where star doc files go
-STARDOCDIR = ../../doc/stars
-
 # source files for all stars, using preprocessor
 PL_SRCS= \
   SDFMatlab.pl \
