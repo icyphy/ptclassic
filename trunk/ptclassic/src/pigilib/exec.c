@@ -12,6 +12,8 @@ $Id$
 #include "vemInterface.h"
 #include "compile.h"
 #include "octIfc.h"
+#include "oh.h"
+#include "edit.h"
 #include "err.h"
 #include "util.h"
 
@@ -46,6 +48,19 @@ int *nPtr;
     return (TRUE);
 }
 
+/* Run a facet through a pre-specified number of iterations */
+static boolean
+RunN(facetPtr,N)
+octObject *facetPtr;
+int N;
+{
+    lastFacet = *facetPtr;
+    ERR_IF1(!CompileFacet(facetPtr));
+    ERR_IF1(!KcRun(N));
+    return (TRUE);
+}
+    
+
 static boolean
 Run(facetPtr)
 octObject *facetPtr;
@@ -58,6 +73,47 @@ octObject *facetPtr;
     ERR_IF1(!KcRun(n));
     return (TRUE);
 }
+
+int
+RunUniverse(name, iterations)
+char* name;
+int iterations;
+{
+	octObject facet;
+	octStatus status;
+	int editStatus;
+	Window newWindow;
+
+	ViInit(name);
+	ErrClear();
+
+	if( ohOpenFacet(&facet, name, "schematic", "contents", "r") <= 0) {
+		PrintErr(octErrorString());
+		ViDone();
+	}
+
+	if (!IsUnivFacet(&facet)) {
+		PrintErr("Schematic is not a universe");
+		ViDone();
+	}
+	if(! KcSetKBDomain(DEFAULT_DOMAIN)) {
+		PrintErr("Failed to set default domain.");
+		ViDone();
+	}
+
+	if (!(editStatus = EditFormalParams(&facet))) {
+	    PrintErr(ErrGet());
+            ViDone();
+        }
+
+	if(editStatus == 1) {
+		RunN(&facet, iterations);
+	} else if (editStatus == 2) {
+		PrintCon("Aborted entry");
+	}
+	ViDone();
+}
+
     
 /* 11/7/89 4/24/88
 */
