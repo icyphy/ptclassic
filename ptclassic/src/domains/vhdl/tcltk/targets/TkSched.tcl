@@ -29,6 +29,8 @@
 # 						COPYRIGHTENDKEY
 # 
 # This is a Tcl/Tk helper app for the VHDL domain's TkSchedTarget.
+# It is used to display a graphical representation of the schedule
+# and hardware resource planning for an application.
 
 # Procedure to mark a node when it is selected.
 proc NodeMark { w x y } {
@@ -43,14 +45,10 @@ proc NodeMark { w x y } {
     set dot($w,textID) $dot($node,textID)
     set dot($w,x) $x
     set dot($w,y) $y
+    set dot($w,nodeName) $dot($node,name)
 
     # Highlight the node
     $w itemconfig $dot($w,nodeID) -fill red
-
-    # Set the label text
-    set theText [$w itemcget $dot($w,textID) -text]
-#    puts "theText:  $theText"
-    set dot($w,nodeName) $theText
 }
 
 # Procedure to drop a node when the button is released.
@@ -75,7 +73,8 @@ proc NodeDrop { w x y } {
 
     # Calculate where I am and call setProc accordingly.
 #    puts "X-position:  $cx"
-    set procnum [expr ($cx - (($cx - 62) % 100)) / 100]
+#    set procnum [expr ($cx - (($cx - 62) % 100)) / 100]
+    set procnum [XToProc $x]
     # Check that the procnum is within bounds
     set nprocs $dot($w,nprocs)
     if { $procnum < 0 } {
@@ -85,22 +84,15 @@ proc NodeDrop { w x y } {
 	set procnum [expr $nprocs - 1]
     }
 
-#    puts "procnum:  $procnum"
-    set theText [$w itemcget $dot($w,textID) -text]
-#    puts "textID:  $theText"
-
-    setProc $theText $procnum
+    setProc $dot($node,name) $procnum
 
     set newx [expr ($procnum * 100) + 100 + ($x - $leftX)]
 
     # Figure out the bounds of this node based on its input
     # and output arcs.  Don't allow it to move outside its
     # precedence constraints.
-    set topBound [expr $dot($w,canvasTop) + 50]
-    set bottomBound [expr $dot($w,canvasBottom) - 50]
-
-    set topBound $dot(startline)
-    set bottomBound $dot(deadline)
+    set topBound [TimeToY $dot(startline)]
+    set bottomBound [TimeToY $dot(deadline)]
 
     foreach conn $dot($node,inConns) {
 	set connID $dot($conn,connID)
@@ -147,6 +139,9 @@ proc NodeDrop { w x y } {
     set dot($w,node) {}
     set dot($w,nodeID) {}
     set dot($w,textID) {}
+
+    PrintIntervals
+    UpdateStats
 }
 
 # Procedure to drag a node to a new location.
@@ -155,26 +150,40 @@ proc NodeDrag { w x y } {
 
     if { $dot($w,active) == 0 } { return }
 
-    set dx [expr $x - $dot($w,x)]
-    set dy [expr $y - $dot($w,y)]
+    # Determine the x and y deltas based on last canvas coordinates.
+    set dx [expr int($x - $dot($w,x))]
+    set dy [expr int($y - $dot($w,y))]
 
-    $w move $dot($w,nodeID) $dx $dy
-    $w move $dot($w,textID) $dx $dy
-    MoveArcs $w $dot($w,node) $x $y
-
+    # Update the canvas coordinates.
     set dot($w,x) $x
     set dot($w,y) $y
 
-    # Extra steps to set the start, end times of the node.
-    set nodeID $dot($w,nodeID)
-    set inOutCoords [NodeInOutCoords $w $nodeID]
-    set startTime [expr int([lindex $inOutCoords 1])]
-    set endTime [expr int([lindex $inOutCoords 3])]
+    # Move the node.
+    $w move $dot($w,nodeID) $dx $dy
+    $w move $dot($w,textID) $dx $dy
+    MoveArcs $w $dot($w,node)
 
-#    puts "startTime: $startTime  endTime: $endTime"
-    set node $dot($nodeID,node)
-    set dot($node,startTime) $startTime
-    set dot($node,endTime) $endTime
+    # Determine the new start, end, and proc of the node.
+    set node $dot($w,node)
+    set oldStart $dot($node,startTime)
+    set oldEnd $dot($node,endTime)
+    set oldproc $dot($node,procnum)
+    set newStart [expr $oldStart + $dy]
+    set newEnd [expr $oldEnd + $dy]
+    set newproc [XToProc $x]
+
+#    puts "Oldproc: $oldproc Newproc: $newproc"
+#    ChangeProcs $oldproc $newproc $node
+#    ChangeTimes $oldStart $oldEnd $newStart $newEnd $node
+
+    # Update the node data.
+    set dot($node,startTime) $newStart
+    set dot($node,endTime) $newEnd
+    set dot($node,procnum) $newproc
+
+    # Update the interval lists.
+    MoveIntervalTemporal $oldproc $oldStart $oldEnd $newStart $newEnd
+    MoveIntervalSpatial $oldproc $newproc $newStart $newEnd
 }
 
 # Procedure to return the input and output arc attachment coordinates.
@@ -220,7 +229,7 @@ proc NodeInOutCoords { w nodeID } {
 }
 
 # Procedure to move the arcs attached to a given node.
-proc MoveArcs { w node x y } {
+proc MoveArcs { w node } {
     global dot
 
     set nodeID $dot($node,nodeID)
@@ -271,8 +280,8 @@ proc ReadFile { f } {
     set iterConnList {}
 
     # Establish a default value for the startline, deadline
-    set dot(startline) 50
-    set dot(deadline) 600
+    set dot(startline) 0
+    set dot(deadline) 550
 
     # Open the file and get its file ID
     set fileId [open $f RDONLY]
@@ -408,7 +417,7 @@ proc DisplayGraph {} {
     set dot(.view.c,nprocs) $nprocs
 
     set initWidth [expr $nprocs*100 + 113]
-    set initHeight [expr $dot(deadline) - $dot(startline) + 100]
+    set initHeight [expr $dot(deadline) - $dot(startline) + 150]
 
     set dot(.view.c,canvasLeft) $canvasLeft
     set dot(.view.c,canvasTop) $canvasTop
@@ -432,9 +441,18 @@ proc DisplayGraph {} {
 
     set dot(.view.c,nodeName) "No node selected"
     label .view.nodeName -textvariable dot(.view.c,nodeName)
+    set dot(.view.c,procsUsed) ""
+    label .view.procsUsed -textvariable dot(.view.c,procsUsed)
+    set dot(.view.c,lastFinish) ""
+    label .view.lastFinish -textvariable dot(.view.c,lastFinish)
+    set dot(.view.c,throughput) ""
+    label .view.throughput -textvariable dot(.view.c,throughput)
 
 #    pack .view.new -side right -fill both -expand true
     pack .view.nodeName -side bottom -fill x
+    pack .view.procsUsed -side bottom -fill x
+    pack .view.lastFinish -side bottom -fill x
+    pack .view.throughput -side bottom -fill x
     pack .view.xscroll -side bottom -fill x
     pack .view.c -side left -fill both -expand true
     pack .view.yscroll -side right  -fill y
@@ -446,6 +464,7 @@ proc DisplayGraph {} {
 
     # Initialize each node
     foreach node $dot(nodeList) {
+	set dot($node,name) $node
 	set dot($node,inConns) {}
 	set dot($node,outConns) {}
 	set dot($node,level) -1
@@ -523,43 +542,66 @@ proc DisplayGraph {} {
 
     incr xxs -87
     set rightMost $xxs
-	set connID [.view.c create line $xxs $yys $xxs $yyd \
-		-width 2 ]
+    set connID [.view.c create line $xxs $yys $xxs $yyd \
+	    -width 2 ]
 
 
     set xxs 50
     set xxd $rightMost
-    set yys 50
+    set yys [expr [TimeToY $dot(startline)]]
     set connID [.view.c create line $xxs $yys $xxd $yys \
 	    -width 2 -fill red]
-    set yys $dot(deadline)
+    set yys [expr [TimeToY $dot(deadline)]]
     set connID [.view.c create line $xxs $yys $xxd $yys \
 	    -width 2 -fill red]
+
+    set xpos 113
+    # Draw total times and utilizations under each proc's column.
+    for { set procnum 0 } { $procnum < [expr $nprocs] } { incr procnum 1 } {
+	# Draw a num-tasks text item.
+	set dot($procnum,numTasks) 0
+	set textID [.view.c create text [expr $xpos] \
+		[expr [TimeToY $dot(deadline)] + 40] \
+		-anchor n -text $dot($procnum,numTasks)]
+	set dot($procnum,numTasksID) $textID
+	# Draw a total-time text item.
+	set dot($procnum,totTime) 0
+	set textID [.view.c create text [expr $xpos] \
+		[expr [TimeToY $dot(deadline)] + 60] \
+		-anchor n -text $dot($procnum,totTime)]
+	set dot($procnum,totTimeID) $textID
+	# Draw a utilization text item.
+	set dot($procnum,util) 0
+	set textID [.view.c create text [expr $xpos] \
+		[expr [TimeToY $dot(deadline)] + 80] \
+		-anchor n -text "$dot($procnum,util)%"]
+	set dot($procnum,utilID) $textID
+	# Calculate the next drawing point.
+	incr xpos 100
+    }
 
     # Draw a time scale on the left and the right.
     set timeIncr 50
     set time 0
-    for { set y $dot(startline) } { $y <= $dot(deadline) } \
-	    { incr y $timeIncr } {
+    for { set time $dot(startline) } { $time <= $dot(deadline) } \
+	    { incr time $timeIncr } {
+	set y [TimeToY $time]
 	set x [expr $leftMost - 3]
 	set textID [.view.c create text [expr $x] [expr $y - 5] \
 		-anchor ne -text $time]
 	set x [expr $rightMost + 3]
 	set textID [.view.c create text [expr $x] [expr $y - 5] \
 		-anchor nw -text $time]
-	incr time $timeIncr
     }
 
     # Draw tokens at both top and bottom.
     set xt 112
     foreach topToken $dot(topTokenList) {
-	set yt [expr $dot(startline) - 10]
-	# Calculate where to place it
+	set yt [expr [TimeToY $dot(startline)] - 10]
 	# Draw the topToken
 	DrawToken $topToken $xt $yt "top"
 
-	set yt [expr $dot(deadline) + 10]
-	# Calculate where to place it
+	set yt [expr [TimeToY $dot(deadline)] + 10]
 	# Draw the topToken
 	DrawToken $topToken $xt $yt "bottom"
 
@@ -567,12 +609,12 @@ proc DisplayGraph {} {
     }
 
     foreach bottomToken $dot(bottomTokenList) {
-	set yt [expr $dot(startline) - 10]
+	set yt [expr [TimeToY $dot(startline)] - 10]
 	# Calculate where to place it
 	# Draw the bottomToken
 	DrawToken $bottomToken $xt $yt "top"
 
-	set yt [expr $dot(deadline) + 10]
+	set yt [expr [TimeToY $dot(deadline)] + 10]
 	# Calculate where to place it
 	# Draw the bottomToken
 	DrawToken $bottomToken $xt $yt "bottom"
@@ -580,33 +622,21 @@ proc DisplayGraph {} {
 	set xt [expr $xt + 100]
     }
 
+    set startTime 0
     foreach node $dot(nodeList) {
-	# Calculate the next coordinate set
-	if { $x2 >= [expr 100*$nprocs] || $dot($node,level) > $level } {
-	    set x1 0
-	    set x2 25
-	    set y1 [expr $y1+50]
+	# Calculate the next location.
+	if { $dot($node,level) > $level } {
+	    set startTime [expr $startTime + 50]
 	}
 	set level $dot($node,level)
-
-#	set y2 [expr $y1 + 25]
-	set y2 [expr $y1 + $dot($node,latency)]
-
-#	set x1 [expr $x1+100]
-#	set x2 [expr $x2+100]
-#	set procnum [XToProc $x1]
-
-	# procnum is set in the graph file.
+	set endTime [expr $startTime + $dot($node,latency)]
+	# dot($node,procnum) is set in the graph file.
 	set procnum $dot($node,procnum)
-	set x1 [ProcToX $procnum]
-	set x2 [expr $x1 + 25]
 
-	DrawNode $node $x1 $y1 $x2 $y2
+	DrawNode $node $procnum $startTime $endTime
 
-	# Set the initial proc placements
-	set textID $dot($node,textID)
-	set theText [.view.c itemcget $textID -text]
-	setProc $theText $procnum
+	# Register the initial proc placements
+	setProc $dot($node,name) $procnum
     }
 
     foreach conn $dot(connList) {
@@ -615,6 +645,8 @@ proc DisplayGraph {} {
     foreach iterConn $dot(iterConnList) {
 	CreateIterConn $iterConn
     }
+
+    UpdateStats
 }
 
 # Procedure to recursively determine the level of a node in the graph.
@@ -642,7 +674,9 @@ proc Level { node } {
     set level [expr $maxPredLevel + 1]
 
     set dot($node,level) $level
-#    puts "LEVEL: $node $level"
+
+    puts "Level: NODE: $dot($node,name)   LEVEL: $node $level"
+
     return $level
 }
 
@@ -670,18 +704,22 @@ proc UpPack { node } {
 	}
     }
     set level [expr $maxPredLevel]
+    set oldStart $dot($node,startTime)
+    set oldEnd $dot($node,endTime)
+    # Now make sure that you don't overrun the occupied intervals.
+    set proc [ProcOfNode $node]
+    set latest [LatestOcc $proc $oldStart]
+    if { $latest > $level } {
+	set level $latest
+    }
+
+#    puts "UpPack: NODE: $dot($node,name)   LEVEL: $level"
 
     set newStart $level
     set dy [expr $newStart - $dot($node,startTime)]
+    set newEnd [expr $oldEnd + $dy]
 
-    set dot($node,startTime) $level
-    set dot($node,endTime) [expr $level + $dot($node,latency)]
-
-    $w move $dot($node,nodeID) 0 $dy
-    $w move $dot($node,textID) 0 $dy
-    MoveArcs $w $node 0 0
-#    puts "StartTime: $node $dot($node,startTime)"
-    return
+    ChangeTimes $oldStart $oldEnd $newStart $newEnd $node
 }
 
 # Procedure to recursively move a node and its predecessors to pack down.
@@ -708,28 +746,43 @@ proc DownPack { node } {
 	}
     }
     set level [expr $minSuccLevel]
+    set oldStart $dot($node,startTime)
+    set oldEnd $dot($node,endTime)
+    # Now make sure that you don't overrun the occupied intervals.
+    set proc [ProcOfNode $node]
+    set soonest [SoonestOcc $proc $oldEnd]
+    if { $soonest < $level } {
+	set level $soonest
+    }
+
+#    puts "DownPack: NODE: $dot($node,name)   LEVEL: $level"
 
     set newEnd $level
     set dy [expr $newEnd - $dot($node,endTime)]
+    set newStart [expr $oldStart + $dy]
 
-    set dot($node,endTime) $level
-    set dot($node,startTime) [expr $level - $dot($node,latency)]
-
-    $w move $dot($node,nodeID) 0 $dy
-    $w move $dot($node,textID) 0 $dy
-    MoveArcs $w $node 0 0
-#    puts "EndTime: $node $dot($node,endTime)"
-    return
+    ChangeTimes $oldStart $oldEnd $newStart $newEnd $node
 }
 
 # Return the procnum based on the x-coordinate.
 proc XToProc { x } {
-    return [expr int((int($x)-100)/100)]
+    return [expr int((int($x)-63)/100)]
 }
 
 # Return the x-coordinate based on the procnum.
+# Note that this returns the x-coordinate of the left side of a task.
 proc ProcToX { proc } {
     return [expr int((int($proc)*100)+100)]
+}
+
+# Return the time based on the y-coordinate.
+proc YToTime { y } {
+    return [expr int(int($y)-50)]
+}
+
+# Return the y-coordinate based on the time.
+proc TimeToY { time } {
+    return [expr int(int($time)+50)]
 }
 
 # Print out all the intervals occupied for each resource.
@@ -746,32 +799,210 @@ proc PrintIntervals {} {
     puts {}
 }
 
+# Update the values of the performance statistics and display them.
+proc UpdateStats {} {
+    global dot
+
+    set w .view.c
+    set nprocs $dot($w,nprocs)
+
+    # Recalculate the totTime and util for each proc.
+    for { set procnum 0 } { $procnum < $nprocs } { incr procnum 1 } {
+	set dot($procnum,numTasks) [NumTasks $procnum]
+	if { $dot($procnum,numTasks) == 1 } {
+	    .view.c itemconfig $dot($procnum,numTasksID) \
+		    -text "$dot($procnum,numTasks) task"
+	} else {
+	    .view.c itemconfig $dot($procnum,numTasksID) \
+		    -text "$dot($procnum,numTasks) tasks"
+	}
+	set dot($procnum,totTime) [TotTime $procnum]
+	.view.c itemconfig $dot($procnum,totTimeID) \
+		-text "$dot($procnum,totTime) nsec"
+	set dot($procnum,util) [Util $procnum]
+	.view.c itemconfig $dot($procnum,utilID) \
+		-text "$dot($procnum,util)% util"
+    }
+
+    set dot($w,procsUsed) "Procs Used: [ProcsUsed]"
+    set lastFinish [LastFinish]
+    # Don't allow zero, since throughput would be infinite.
+    # (divide by zero would occur)
+    if { $lastFinish == 0 } {
+	set lastFinish 1
+    }
+    set dot($w,lastFinish) "Last Finish: $lastFinish nsec"
+    # If LastFinish is in nanoseconds, then throughput
+    # will be in MHz.  Do a calculation:
+    set throughput [expr 1000.0/$lastFinish]
+    # Round it to two decimal places.
+    set throughput [expr int(100.0*$throughput)/100.0]
+    set dot($w,throughput) "Max Throughput: $throughput MHz"
+}
+
+# Return the finish time of the last interval to finish.
+proc LastFinish {} {
+    global dot
+
+    set w .view.c
+    set nprocs $dot($w,nprocs)
+
+    set lastFinish 0
+    # Recalculate the lastFinish for each proc.
+    for { set procnum 0 } { $procnum < $nprocs } { incr procnum 1 } {
+	foreach interval $dot($procnum,intervals) {
+	    set finish [lindex $interval 1]
+	    if { $finish > $lastFinish } {
+		set lastFinish $finish
+	    }
+	}
+    }
+
+    return $lastFinish
+}
+
+# Return the number of procs utilized.
+proc ProcsUsed {} {
+    global dot
+
+    set w .view.c
+    set nprocs $dot($w,nprocs)
+
+    set numUsed 0
+    # Recalculate the number of procs used.
+    for { set procnum 0 } { $procnum < $nprocs } { incr procnum 1 } {
+	set used 0
+	foreach interval $dot($procnum,intervals) {
+	    set used 1
+	}
+	incr numUsed $used
+    }
+
+    return $numUsed
+}
+
+# Return the total number of tasks for the given proc.
+proc NumTasks { procnum } {
+    global dot
+
+    set total 0
+    foreach interval $dot($procnum,intervals) {
+	# One interval per task.
+	incr total 1
+    }
+    return $total
+}
+
+# Return the total time occupied for the given proc.
+proc TotTime { procnum } {
+    global dot
+
+    set total 0
+    foreach interval $dot($procnum,intervals) {
+	# Calculate the interval length
+	set iStart [lindex $interval 0]
+	set iEnd [lindex $interval 1]
+	set length [expr $iEnd - $iStart + 1]
+	incr total $length
+    }
+    return $total
+}
+
+# Return the utilization for the given proc.
+proc Util { procnum } {
+    global dot
+
+    # Util is a percentage figure of utilization.
+    set runLength [expr $dot(deadline) - $dot(startline)]
+    set util [expr int((100*$dot($procnum,totTime))/$runLength)]
+    return $util
+}
+
+# Test if a resource is occupied anywhere within the given interval.
+proc Unoccupied { procnum start end } {
+    set unoccupied 1
+    if { [Occupied $procnum $start $end] } {
+	set unoccupied 0
+    }
+    return $unoccupied
+}
+
 # Test if a resource is occupied anywhere within the given interval.
 proc Occupied { procnum start end } {
     global dot
 
     set occupied 0
-#    puts "Occupied? Procnum: $procnum"
-#    puts "Occupied? Intervals: $dot($procnum,intervals)"
     foreach interval $dot($procnum,intervals) {
-#	puts "Occupied?   Interval: $interval"
 	set iStart [lindex $interval 0]
 	set iEnd [lindex $interval 1]
-	# If the start falls in the interval, it's occupied.
-	if { $iStart <= $start && $start <= $iEnd } {
+	# Screen out cases where one falls inside the other,
+	# but not those which just overlap at one end.
+	# If the input start falls in the interval, it's occupied.
+	if { $iStart < $start && $start < $iEnd } {
 	    set occupied 1
 	}
-	# If the end falls in the interval, it's occupied.
-	if { $iStart <= $end && $end <= $iEnd } {
+	# If the input end falls in the interval, it's occupied.
+	if { $iStart < $end && $end < $iEnd } {
 	    set occupied 1
 	}
-	# If the start and end subsume the interval, it's occupied.
-	if { $start <= $iStart && $iEnd <= $end } {
-	    puts "Start: $start  iStart: $iStart  iEnd: $iEnd  End: $end"
+	# If the interval start falls in the input interval, it's occupied.
+	if { $start < $iStart && $iStart < $end } {
+	    set occupied 1
+	}
+	# If the interval end falls in the input interval, it's occupied.
+	if { $start < $iEnd && $iEnd < $end } {
+	    set occupied 1
+	}
+	# If the two intervals coincide, it's occupied.
+	if { $start == $iStart && $end == $iEnd } {
 	    set occupied 1
 	}
     }
     return $occupied
+}
+
+# Return the soonest time after the given time
+# at which the given resource is occupied.
+proc SoonestOcc { procnum time } {
+    global dot
+
+    set soonest $dot(deadline)
+    foreach interval $dot($procnum,intervals) {
+	set iStart [lindex $interval 0]
+	set iEnd [lindex $interval 1]
+	# Ignore zero-length intervals
+	if { $iStart != $iEnd } {
+	    # Consider intervals that start at or after the input time.
+	    if { $time <= $iStart } {
+		if { $iStart < $soonest } {
+		    set soonest $iStart
+		}
+	    }
+	}
+    }
+    return $soonest
+}
+
+# Return the latest time before the given time
+# at which the given resource is occupied.
+proc LatestOcc { procnum time } {
+    global dot
+
+    set latest $dot(startline)
+    foreach interval $dot($procnum,intervals) {
+	set iStart [lindex $interval 0]
+	set iEnd [lindex $interval 1]
+	# Ignore zero-length intervals
+	if { $iStart != $iEnd } {
+	    # Consider intervals that end before or at the input time.
+	    if { $iEnd <= $time } {
+		if { $latest < $iEnd } {
+		    set latest $iEnd
+		}
+	    }
+	}
+    }
+    return $latest
 }
 
 # Return the proc of the given node.
@@ -804,10 +1035,10 @@ proc LeftPack { node } {
     }
 
     # Find the leftmost unoccupied proc.
-    set newproc 0
-    while { $newproc < $oldproc && \
- 	    [Occupied $newproc $startTime $endTime] } {
-	incr newproc 1
+    set newproc $oldproc
+    while { $newproc > 0 && \
+ 	    [Unoccupied [expr $newproc-1] $startTime $endTime] } {
+	incr newproc -1
     }
 
     # Don't bother if can't find a suitable newproc.
@@ -835,10 +1066,10 @@ proc RightPack { node } {
     }
 
     # Find the rightmost unoccupied proc.
-    set newproc [expr $nprocs-1]
-    while { $newproc > $oldproc && \
- 	    [Occupied $newproc $startTime $endTime] } {
-	incr newproc -1
+    set newproc $oldproc
+    while { $newproc < [expr $nprocs-1] && \
+ 	    [Unoccupied [expr $newproc+1] $startTime $endTime] } {
+	incr newproc 1
     }
 
     # Don't bother if can't find a suitable newproc.
@@ -859,31 +1090,64 @@ proc ChangeProcs { oldproc newproc node } {
     set textID $dot($node,textID)
     set startTime $dot($node,startTime)
     set endTime $dot($node,endTime)
-    set box [$w coords $nodeID]
-    set oldx [lindex $box 0]
+    set oldx [ProcToX $oldproc]
     set newx [ProcToX $newproc]
     set dx [expr $newx - $oldx]
 
-    # move it over to the new proc
+    # Move it over to the new proc
     $w move $nodeID $dx 0
     $w move $textID $dx 0
-    MoveArcs $w $node 0 0
-    # Set the proc placement.
-    set theText [.view.c itemcget $textID -text]
-    setProc $theText $newproc
+    MoveArcs $w $node
+
+    # Callback the C++ target to set the proc placement.
+    setProc $dot($node,name) $newproc
+
+    # Update the node data.
+    set dot($node,procnum) $newproc
 
     # Update the interval lists.
-    MoveInterval $oldproc $newproc $startTime $endTime
+    MoveIntervalSpatial $oldproc $newproc $startTime $endTime
+}
+
+# Move the given node from the old times to the new times.
+proc ChangeTimes { oldStart oldEnd newStart newEnd node } {
+    global dot
+
+    set w .view.c
+
+    set nodeID $dot($node,nodeID)
+    set textID $dot($node,textID)
+    set proc [ProcOfNode $node]
+    set dy [expr $newStart - $oldStart]
+
+    # Move it to the new time.
+    $w move $nodeID 0 $dy
+    $w move $textID 0 $dy
+    MoveArcs $w $node
+
+    # Update the node data.
+    set dot($node,startTime) $newStart
+    set dot($node,endTime) $newEnd
+
+    # Update the interval lists.
+    MoveIntervalTemporal $proc $oldStart $oldEnd $newStart $newEnd
 }
 
 # Add the interval to the new proc and delete it from the old proc.
-proc MoveInterval { oldproc newproc startTime endTime } {
+proc MoveIntervalSpatial { oldproc newproc startTime endTime } {
     # Add the interval to the new proc's intervals.
     AddInterval $newproc $startTime $endTime
     # Delete the interval from the old proc's intervals.
     DelInterval $oldproc $startTime $endTime
+}
 
-    PrintIntervals
+# Add the new interval to the proc and delete the old one from the proc.
+proc MoveIntervalTemporal { proc oldStartTime oldEndTime newStartTime \
+	newEndTime } {
+    # Add the new interval to the proc's intervals.
+    AddInterval $proc $newStartTime $newEndTime
+    # Delete the old interval from the proc's intervals.
+    DelInterval $proc $oldStartTime $oldEndTime
 }
 
 # Add the interval to the new proc's intervals.
@@ -891,7 +1155,7 @@ proc AddInterval { proc startTime endTime } {
     global dot
 
     set intervals $dot($proc,intervals)
-    set newIntervals [ladduniq $intervals "$startTime $endTime"]
+    set newIntervals [ladd $intervals "$startTime $endTime"]
     set dot($proc,intervals) $newIntervals
 }
 
@@ -905,8 +1169,13 @@ proc DelInterval { proc startTime endTime } {
 }
 
 # Procedure to create and draw a firing node.
-proc DrawNode { node x1 y1 x2 y2 } {
+proc DrawNode { node procnum startTime endTime } {
     global dot
+
+    set x1 [ProcToX $procnum]
+    set x2 [expr $x1+25]
+    set y1 [TimeToY $startTime]
+    set y2 [TimeToY $endTime]
 
     # Create a rect for the node
     set nodeID [.view.c create rect $x1 $y1 $x2 $y2 -fill green \
@@ -924,13 +1193,11 @@ proc DrawNode { node x1 y1 x2 y2 } {
     set dot($node,topNodeID) $nodeID
     set dot($node,bottomNodeID) $nodeID
 
-    # Set the initial start and end times.
-    set startTime [expr int($y1)]
-    set endTime [expr int($y2)]
+    # Set the initial startTime, endTime, and procnum. 
     set dot($node,startTime) $startTime
     set dot($node,endTime) $endTime
+    set dot($node,procnum) $procnum
 
-    set procnum [XToProc $x1]
     # Add the interval to the proc's intervals.
     AddInterval $procnum $startTime $endTime
 }
@@ -1045,14 +1312,21 @@ proc setAllTimes {} {
 # Return a list which is the argument list appended with
 # the given value, if that value is not already in the list.
 # Else return the list unchanged.
-proc ladduniq { inputList value } {
+#proc ladduniq { inputList value } {
+##    puts "Value: $value"
+#    set ix [lsearch $inputList $value]
+#    if { $ix >= 0 } {
+#	return $inputList
+#    } else {
+#	return [lappend inputList $value]
+#    }
+#}
+
+# Return a list which is the argument list appended with
+# the given value, even if that value is already in the list.
+proc ladd { inputList value } {
 #    puts "Value: $value"
-    set ix [lsearch $inputList $value]
-    if { $ix >= 0 } {
-	return $inputList
-    } else {
-	return [lappend inputList $value]
-    }
+    return [lappend inputList $value]
 }
 
 # Return a list which is the argument list minus the first instance
@@ -1092,54 +1366,65 @@ proc SpreadAll {} {
 	    continue
 	}
 
-	set newx [ProcToX $procnum]
-	set dx [expr $newx - $oldx]
-	$w move $nodeID $dx 0
-	$w move $textID $dx 0
-	MoveArcs $w $node 0 0
-
-	# Set the proc placement.
-	set theText [.view.c itemcget $textID -text]
-	setProc $theText $procnum
-
-	MoveInterval $oldproc $newproc $startTime $endTime
+	ChangeProcs $oldproc $newproc $node
     }
+    UpdateStats
 }
 
 # procedure to move UpPack all nodes.
 proc UpPackAll {} {
     global dot
-
     foreach node $dot(nodeList) {
 	UpPack $node
     }
+    UpdateStats
 }
 
 # procedure to move DownPack all nodes.
 proc DownPackAll {} {
     global dot
-
     foreach node $dot(nodeList) {
 	DownPack $node
     }
+    UpdateStats
 }
 
-# procedure to move DownPack all nodes.
+# procedure to move LeftPack all nodes.
 proc LeftPackAll {} {
     global dot
 
-    foreach node $dot(nodeList) {
-	LeftPack $node
+    set w .view.c
+    set nprocs $dot($w,nprocs)
+
+    # Go through procs from left to right and
+    # go through the nodes on each proc.
+    for { set procnum 0 } { $procnum < $nprocs } { incr procnum 1 } {
+	foreach node $dot(nodeList) {
+	    if { $procnum == [ProcOfNode $node] } {
+		LeftPack $node
+	    }
+	}
     }
+    UpdateStats
 }
 
-# procedure to move DownPack all nodes.
+# procedure to move RightPack all nodes.
 proc RightPackAll {} {
     global dot
 
-    foreach node $dot(nodeList) {
-	RightPack $node
+    set w .view.c
+    set nprocs $dot($w,nprocs)
+
+    # Go through procs from right to left and
+    # go through the nodes on each proc.
+    for { set procnum [expr $nprocs-1] } { $procnum > -1 } { incr procnum -1 } {
+	foreach node $dot(nodeList) {
+	    if { $procnum == [ProcOfNode $node] } {
+		RightPack $node
+	    }
+	}
     }
+    UpdateStats
 }
 
 # Top-level script to set up and display the graph.
@@ -1150,6 +1435,7 @@ button .leftPack -text LeftPack -command "LeftPackAll"
 button .rightPack -text RightPack -command "RightPackAll"
 button .setAll -text Times -command "setAllTimes"
 button .done -text Done -command "requestExit"
+pack .done -side bottom
 ReadFile $GRAPH_FILE
 DisplayGraph
 pack .spread -side left
@@ -1158,6 +1444,5 @@ pack .downPack -side left
 pack .leftPack -side left
 pack .rightPack -side left
 pack .setAll -side left
-pack .done -side left
 
 # END
