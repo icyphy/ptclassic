@@ -22,13 +22,13 @@ $Id$
 #include "MotorolaTarget.h"
 
 Sim56Target :: Sim56Target(const char* nam, const char* desc) :
-	CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star")
+	MotorolaTarget(nam,desc,"CG56Star"),CG56Target(nam,desc),MotorolaSimTarget(nam,desc,"CG56Star")
 {
 	initStates();
 }
 
 Sim56Target::Sim56Target(const Sim56Target& arg) :
-	CG56Target(arg),MotorolaTarget(arg)
+	MotorolaTarget(arg),CG56Target(arg),MotorolaSimTarget(arg)
 {
 	initStates();
 	copyStates(arg);

@@ -131,7 +131,7 @@ int S56XTarget :: loadCode() {
 
 int S56XTarget :: runCode() {
 	if (!genFile(runCmds,uname)) return FALSE;
-	chmod(fullFileName(uname),S_IRWXU);	//group execute permission;
+	chmod(fullFileName(uname),0755);	//make executable
 	return !hostSystemCall(uname,"Problems loading code onto S56X");
 }
 
