@@ -1,7 +1,3 @@
-ident {
-#define MAXORDER 1024
-}
-
 defstar {
 	name { BlockFIR }
 	domain { SDF }
@@ -23,8 +19,6 @@ The same interpolation and decimation of the FIR star is supported.
 Unfortunately, it proves not too convenient to derive this star from FIR
 because of the changes in the way the inputs and outputs are handled.
 Hence, much of the code here is quite similar to that in the FIR star.
-The maximum filter order (currently 1024) is defined in the source code,
-and can be changed, at the expense of recompiling.
 	}
 	seealso { FIR }
 	input {
@@ -71,12 +65,26 @@ and can be changed, at the expense of recompiling.
 	}
 	protected {
 		int phaseLength;
-		double taps[MAXORDER];
+		double *taps;
+		int lastM;
+	}
+	constructor {
+		lastM = 0;
+		taps = 0;
+	}
+	destructor {
+		delete taps;
 	}
 	start {
 	    int d = decimation;
 	    int i = interpolation;
 	    int dP = decimationPhase;
+
+	    if (lastM != int(order)) {
+		delete taps;
+		lastM = int(order);
+		taps = new double[lastM];
+	    }
 
 	    // Then set the SDF Params to account for the block processing
 	    signalIn.setSDFParams(d*int(blockSize),
@@ -100,7 +108,7 @@ and can be changed, at the expense of recompiling.
 	    // first read in new tap values
 	    int index = 0;
 	    for (int cCount = int(order)-1; cCount >=0; cCount--)
-		taps[index++] = float(coefs%cCount);
+		taps[index++] = coefs%cCount;
 	
 	    // Iterate for each block
 	    for (int j = int(blockSize)-1; j >= 0; j--) {
@@ -125,7 +133,7 @@ and can be changed, at the expense of recompiling.
 			else
 			    tap = taps[tapsIndex];
 			out += tap
-			    * float(signalIn%(int(decimation) - inC + i
+			    * double(signalIn%(int(decimation) - inC + i
 				+ int(decimation)*j));
 		   }
 		   // note: output%0 is the last output chronologically

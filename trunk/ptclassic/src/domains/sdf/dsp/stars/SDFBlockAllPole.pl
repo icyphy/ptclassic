@@ -1,7 +1,3 @@
-ident {
-#define MAXORDER 1024
-}
-
 defstar {
 	name { BlockAllPole }
 	domain { SDF }
@@ -31,8 +27,6 @@ Then $d sub i$ is the $i sup th$ coefficient supplied on the
 \fIcoefs\fR input.
 .pp
 No decimation or interpolation is supported.
-The maximum filter order (currently 1024) is defined in the source code,
-and can be changed, at the expense of recompiling.
 	}
 	seealso { FIR BlockFIR }
 	input {
@@ -61,17 +55,31 @@ and can be changed, at the expense of recompiling.
 		desc { Number of new coefficients to read each time. }
 	}
 	protected {
-		double taps[MAXORDER];
-		double fdbkDelayLine[MAXORDER];
+		double *taps;
+		double *fdbkDelayLine;
+		int M;
 		int writeIndex;
 	}
+	constructor {
+	    taps = 0;
+	    M = 0;
+	}
+	destructor {
+	    delete taps;
+	}
 	start {
+	    if (int(order) != M) {
+		delete taps;
+		M = int(order);
+		taps = new double[M];
+		fdbkDelayLine = new double[M];
+	    }
 	    // set the SDF Params to account for the block processing
 	    signalIn.setSDFParams(int(blockSize), int(blockSize)-1);
-	    coefs.setSDFParams(int(order), int(order) - 1);
+	    coefs.setSDFParams(M, M - 1);
 	    signalOut.setSDFParams(int(blockSize), int(blockSize) - 1);
 	    writeIndex = 0;
-	    for (int i = 0; i < int(order); i++) {
+	    for (int i = 0; i < M; i++) {
 		fdbkDelayLine[i]=0.0;
 	    }
 	}
@@ -80,24 +88,24 @@ and can be changed, at the expense of recompiling.
 
 	    // first read in new tap values
 	    int index = 0;
-	    for (int cCount = int(order)-1; cCount >=0; cCount--)
-		taps[index++] = float(coefs%cCount);
+	    for (int cCount = M-1; cCount >=0; cCount--)
+		taps[index++] = coefs%cCount;
 	
 	    // Iterate for each block
 	    for (int j = int(blockSize)-1; j >= 0; j--) {
 
 		   out = 0.0;
 		   // Compute the inner product.
-		   for (int i = 0; i < int(order); i++) {
+		   for (int i = 0; i < M; i++) {
 			out += taps[i]
-			    * fdbkDelayLine[(writeIndex + i) % int(order)];
+			    * fdbkDelayLine[(writeIndex + i) % M];
 		   }
 		   // Get the input and add to the inner product output
 		   out += float(signalIn%j);
 
 		   // Feed output back to the delay line:
 		   writeIndex--;
-		   if(writeIndex < 0) writeIndex = int(order) - 1;
+		   if(writeIndex < 0) writeIndex = M - 1;
 		   fdbkDelayLine[writeIndex] = out;
 
 		   // note: output%0 is the last output chronologically

@@ -1,13 +1,13 @@
-ident {
-#define MAXORDER 256
-#define MAXNOINPUTS 1024
-}
 defstar {
 	name {Burg}
 	domain {SDF}
 	version {$Id$}
-	desc { Burg's algorithm. }
-	author { E. A. Lee }
+	desc {
+Burg's algorithm.  The lp output receives the linear prediction coefficients
+and the refl output receives reflection coefficients.  The errPower output
+gets the power of the prediction error at each stage.
+	}
+	author { E. A. Lee and J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF dsp library }
 	explanation {
@@ -78,16 +78,29 @@ New York, 1989.
 		default {64}
 		desc { The number of inputs used to estimate the model.}
 	}
+	protected {
+		double *f, *b, *aOrig, *aPrime;
+		int N, M;
+	}
+	constructor {
+		f = b = aOrig = aPrime = 0;
+		N = M = 0;
+	}
+	destructor {
+		delete f; delete b; delete aOrig; delete aPrime;
+	}
 	start {
-		if (int(order) > MAXORDER) {
-			Error::abortRun(*this,
-				": Maximum order in Burg algorithm exceeded");
-			return;
+		if (N != int(numInputs)) {
+			delete f; delete b;
+			N = int(numInputs);
+			f = new double[N];
+			b = new double[N];
 		}
-		if (int(numInputs) > MAXNOINPUTS) {
-			Error::abortRun(*this,
-				": Maximum number of inputs in Burg exceeded");
-			return;
+		if (M != int(order)) {
+			delete aOrig; delete aPrime;
+			M = int(order);
+			aOrig = new double[M+1];
+			aPrime = new double[M+1];
 		}
 		refl.setSDFParams (int(order), int(order)-1);
 		lp.setSDFParams (int(order), int(order)-1);
@@ -95,10 +108,6 @@ New York, 1989.
 		input.setSDFParams (int(numInputs), int(numInputs)-1);
 	}
 	go {
-	    double f[MAXNOINPUTS];	// forward predictor error estimates
-	    double b[MAXNOINPUTS];	// backward predictor error estimates
-	    double aOrig[MAXORDER];	// FIR predictor coefficients
-	    double aPrime[MAXORDER];	// FIR predictor coefficients
 	    // Define pointers so that the arrays can be swapped
 	    double* a = aOrig;
 	    double* aP = aPrime;
@@ -108,38 +117,39 @@ New York, 1989.
 	    // and the prediction error power estimate
 	    int count = 0;
 	    double ep = 0.0;	// error power estimate
-	    for (int i = int(numInputs)-1; i >= 0; i--) {
-		f[count] = input%i;
-		b[count++] = input%i;
-		ep += float(input%i) * (float(input%i));
+	    for (int i = N-1; i >= 0; i--) {
+		double x = input%i;
+		f[count] = x;
+		b[count++] = x;
+		ep += x * x;
 	    }
-	    ep = ep/int(numInputs);
+	    ep = ep/N;
 	    // output the zeroth order prediction error, which is simply
 	    // the power estimate of the input
-	    errPower%(int(order)) << ep;
+	    errPower%M << ep;
 
 	    // Iterate on the predictor order
-	    for (int m = 1; m <= int(order); m++ ) {
+	    for (int m = 1; m <= M; m++ ) {
 	        // Compute the reflection coefficients, and output them
 		nsum = 0.0;
 		dsum = 0.0;
-		for (i = m; i < int(numInputs); i++) {
+		for (i = m; i < N; i++) {
 		    nsum += f[i]*b[i-1];
 		    dsum += f[i]*f[i] + b[i-1]*b[i-1];
 		}
 		gamma = -2*nsum/dsum;
-		refl%(int(order)-m) << - gamma;
+		refl%(M-m) << - gamma;
 
 		// update the forward and backward predictor errors
-		for (i = int(numInputs)-1; i >= m; i--) {
-		    float tempf = f[i];
+		for (i = N-1; i >= m; i--) {
+		    double tempf = f[i];
 		    f[i] = tempf + gamma*b[i-1];
 		    b[i] = b[i-1] + gamma*tempf;
 		}
 
 		// update the prediction error power estimate
 		ep = (1 - gamma*gamma) * ep;
-		errPower%(int(order)-m) << ep;
+		errPower%(M-m) << ep;
 
 		// Update the FIR predictor coefficient estimates
 		for (i = 1; i < m; i++) {
@@ -153,8 +163,8 @@ New York, 1989.
 		aP = temp;
 	    }
 	    // generate the lp outputs
-	    for (m = 1; m <= int(order); m++ ) {
-		lp%(int(order)-m) << -a[m];
+	    for (m = 1; m <= M; m++ ) {
+		lp%(M-m) << -a[m];
 	    }
 	}
 }
