@@ -54,15 +54,16 @@ sources::	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 depend:
 	@echo "no dependencies in this directory"
 
+# "check" does not print anything if nothing is being edited.
 sccsinfo:
-	sccs info
+	@sccs check || true
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
 		    if [ -w $$x ] ; then \
 			( cd $$x ; \
 			echo making $@ in $$x ; \
-			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			@sccs check || true ; \
 			) \
 		    fi ; \
 		done ; \
