@@ -59,12 +59,10 @@ FSMStateStar::FSMStateStar ()
     addPort(stateIn.setPort("stateIn",this,FLOAT));
     addPort(stateOut.setPort("stateOut",this,FLOAT));
 
-    addState(isInitState.setState("isInitState",this,"NO","Is this an initial state?"));
-
     addState(events.setState("events",this,"","The events to trigger the next transition state. Each event must be surrounded by a pair of curly-braces."));
     addState(conditions.setState("conditions",this,"","The conditions to determine the next transition state. Each condition must be surrounded by a pair of curly-braces."));
-    addState(actEvents.setState("actEvents",this,"","The sets of output events to be emitted for all possible next transitions (outgoing arcs). Each set of output events for one transition must be surrounded by a pair of curly-braces, and each event in that set must be surrounded by a pair of double-quotes"));
-    addState(actExprs.setState("actExprs",this,"","The sets of expressions to be evaluated corresponding to the sets of output events to be emitted for all possible next transitions (outgoing arcs). Each set of expressions for one transition must be surrounded by a pair of curly-braces, and each expression in that set must be surrounded by a pair of double-quotes"));
+    addState(actEvents.setState("actEvents",this,"","The sets of output events to be emitted for all possible next transitions (outgoing arcs). Each set of output events for one transition must be surrounded by a pair of curly-braces, and each event in that set must be surrounded by a pair of double-quotes."));
+    addState(actExprs.setState("actExprs",this,"","The sets of expressions to be evaluated corresponding to the sets of output events to be emitted for all possible next transitions (outgoing arcs). Each set of expressions for one transition must be surrounded by a pair of curly-braces, and each expression in that set must be surrounded by a pair of double-quotes."));
 
     addState(entryType.setState("entryType",this,"","Specify the entry type for each possible transition out of this state. Available choices are 0 (History) or 1 (Initial). Note that the # of specified types should be equal to the # of outgoing arcs."));
     addState(preemptive.setState("preemptive",this,"","Specify that each possible transition is preemptive or not. Note that the # of YES/NO should be equal to the # of outgoing arcs."));
@@ -72,6 +70,13 @@ FSMStateStar::FSMStateStar ()
     addState(slaveNm.setState("slaveNm",this,"","The file name of an Galaxy to be the slave process."));
     addState(where_is_defined.setState("where_is_defined",this,"","The path name of the Galaxy of the slave process."));
     addState(slaveShared.setState("slaveShared",this,"NO","Allow the slave to be shared?"));
+
+    addState(isInitState.setState("isInitState",this,"NO","Is this an initial state?"));
+
+    addState(initEvent.setState("initEvent",this,"","The event to determine whether this is the selected initial state when there are multiple initial states."));
+    addState(initCondition.setState("initCondition",this,"","The condition to determine whether this is the selected initial state when there are multiple initial states."));
+    addState(initActEvents.setState("initActEvents",this,"","The set of output events to be emitted when this is the selected initial state. Each event must be surrounded by a pair of double-quotes."));
+    addState(initActExprs.setState("initActExprs",this,"","The set of expressions to be evaluated corresponding to the set of output events to be emitted when this is the selected initial state. Each expression must be surrounded by a pair of double-quotes"));
 
     parsedEvents = NULL;
     parsedConditions = NULL;
@@ -246,46 +251,110 @@ Star* FSMStateStar::createWormhole(const char *galname,
     }
 }
 
+// Emit an "event" with an "expression" to Tcl interp.
+int FSMStateStar::emitEventToInterp(const char* event, const char* expr) {
+     // Set status of event to 1 (present).
+    InfString buf = event;
+    buf << "(s)";
+    Tcl_SetVar(myInterp,buf,"1",TCL_GLOBAL_ONLY);
+	    
+    if (!strcmp(expr,"")) {
+      // When expression is an empty string, set the value of event
+      // to 1. (In order to be able to represent "present" in SDF.
+      buf = event;
+      buf << "(v)";
+      Tcl_SetVar(myInterp,buf,"1",TCL_GLOBAL_ONLY);
+	      
+    } else {
+      buf = expr;
+      if (Tcl_ExprString(myInterp,buf) != TCL_OK) {
+	Error::abortRun(*this,"Tcl_ExprString failed: ",
+			myInterp->result) ;
+	return FALSE;
+      }
+      buf = event;
+      buf << "(v)";
+      Tcl_SetVar(myInterp,buf,myInterp->result,TCL_GLOBAL_ONLY);
+    }
+
+    return TRUE;
+}
+
+int FSMStateStar::evalInitGuard () {
+    int result;
+
+    // Evaluate the trigger event.
+    InfString buf = (const char*)initEvent;
+    if ( !strcmp(buf,"") ) {
+      // If the event is empty, consider it is TRUE.
+      result = TRUE;
+    } else {
+      // If the event is not empty, evaluate it.
+      if (Tcl_ExprBoolean(myInterp, (char*)buf, &result) != TCL_OK) {
+	    buf = "Cannot evaluate the trigger event ";
+	    buf << " of the initial transition in state ";
+	    buf << this->name();
+	    buf << ". The error message in Tcl : ";
+	    buf << myInterp->result;
+	    Error::abortRun(*this,(char*)buf);
+	    return FALSE;
+      }
+    }
+
+    if (!result) {
+      return FALSE;
+    } else {
+      // If trigger event is TRUE, evaluate the trigger condition.
+      buf = (const char*)initCondition;
+      if ( !strcmp(buf,"") ) {
+        // If the condition is empty, consider it is TRUE.
+	result = 1;
+      } else {
+        // If the condition is not empty, evaluate it.
+	if (Tcl_ExprBoolean(myInterp, (char*)buf, &result) != TCL_OK) {
+	  buf = "Cannot evaluate the trigger condition ";
+	  buf << " of the initial transition in state ";
+	  buf << this->name();
+	  buf << ". The error message in Tcl : ";
+	  buf << myInterp->result;
+	  Error::abortRun(*this,(char*)buf);
+	  return FALSE;
+	}
+      }
+    }
+    
+    return result;
+}
+
 int FSMStateStar::execAction (int actNum) {
     if (actNum != -1) {
       StringListIter nextEvent(parsedActEvents[actNum]);
       StringListIter nextExpr(parsedActExprs[actNum]);
       const char* event;
       const char* expr;
-      InfString buf;
-
       int numEvents = parsedActEvents[actNum].numPieces();
+
       for (int indx=0; indx<numEvents; indx++) {
         event = nextEvent++;
         expr = nextExpr++;
-
-        // Set status of event to 1 (present).
-	buf = event;
-	buf << "(s)";
-	Tcl_SetVar(myInterp,buf,"1",TCL_GLOBAL_ONLY);
-	    
-	if (!strcmp(expr,"")) {
-	  // When expression is an empty string, set the value of event
-	  // to 1. (In order to be able to represent "present" in SDF.
-	  buf = event;
-	  buf << "(v)";
-	  Tcl_SetVar(myInterp,buf,"1",TCL_GLOBAL_ONLY);
-	      
-	} else {
-	  buf = expr;
-	  if (Tcl_ExprString(myInterp,buf) != TCL_OK) {
-	    Error::abortRun(*this,"Tcl_ExprString failed: ",
-                            myInterp->result) ;
-	    return FALSE;
-	  }
-	  buf = event;
-	  buf << "(v)";
-	  Tcl_SetVar(myInterp,buf,myInterp->result,TCL_GLOBAL_ONLY);
-	}
-
+	if (!emitEventToInterp(event,expr)) return FALSE;
       } // end of for (int indx=0; indx<numEvents; indx++) 
     }   // end of if (actNum != -1)
       
+    return TRUE;
+}
+
+int FSMStateStar::execInitAction () {
+    const char* event;
+    const char* expr;
+    int numEvents = initActEvents.size();
+
+    for (int indx=0; indx<numEvents; indx++) {
+        event = initActEvents[indx];
+        expr  = initActExprs[indx];
+	if (!emitEventToInterp(event,expr)) return FALSE;
+    } // end of for (int indx=0; indx<numEvents; indx++)
+
     return TRUE;
 }
 
@@ -363,7 +432,7 @@ FSMStateStar * FSMStateStar::nextState (int& transNum, int preemption) {
 	    result[indx] = 1;
 	  } else if (Tcl_ExprBoolean(myInterp, (char*)buf, &(result[indx]))
 		     != TCL_OK) {
-	    buf = "Cannot evaluate the triggering event #";
+	    buf = "Cannot evaluate the trigger event #";
 	    buf << indx;
 	    buf << " in ";
 	    buf << this->name();
@@ -375,14 +444,14 @@ FSMStateStar * FSMStateStar::nextState (int& transNum, int preemption) {
 	  }
 	  
 	  if (result[indx] == 1) {
-	    // If evaluation of triggering event is TRUE,
-	    // then evaluate triggering condition.
+	    // If evaluation of trigger event is TRUE,
+	    // then evaluate trigger condition.
 	    buf = parsedConditions[indx];
 	    if ( !strcmp(buf,"") ) {
 	      result[indx] = 1;
 	    } else if (Tcl_ExprBoolean(myInterp, (char*)buf, &(result[indx]))
 		       != TCL_OK) {
-	      buf = "Cannot evaluate the triggering condition #";
+	      buf = "Cannot evaluate the trigger condition #";
 	      buf << indx;
 	      buf << " in ";
 	      buf << this->name();
@@ -392,7 +461,7 @@ FSMStateStar * FSMStateStar::nextState (int& transNum, int preemption) {
 	      delete [] result;
 	      return NULL;
 	    }
-	    // When both triggering event and condition are TRUE,
+	    // When both trigger event and condition are TRUE,
 	    // the transition is supposed to be triggered.
 	    if (result[indx] == 1) checkResult++;
 	  }
@@ -622,7 +691,6 @@ void FSMStateStar::setup() {
       slave->initialize();
 
       slaveInnerDomain = slave->scheduler()->domain();
-
     } // end of if (strcmp(slaveNm,""))
 
 } // end of setup()  
@@ -656,9 +724,13 @@ int FSMStateStar::setupGeodesic (Star* worm, Block* parent) {
 	if ( strcmp(pp->type(), wp->type()) ) {
 	  // When they are NOT the same:
 	  if (!strcmp(wp->type(),"ANYTYPE")) {
-	    // If wp of the Wormhole is ANYTYPE, force it have same
-	    // type as pp of the FSM galaxy.
-	    wp->setPort(wp->name(), wp->parent(), pp->type());
+	    if (wp->isItInput()) {
+	      // If wp of the Wormhole is ANYTYPE, force it have same
+	      // type as pp of the FSM galaxy. This need to be done ONLY
+	      // when wp is INPUT somehow.
+	      wp->setPort(wp->name(), wp->parent(), pp->type());
+	      wp->initialize();
+	    }
 
 	  } else {
 	    // Otherwise, consider it as an error.
@@ -683,15 +755,53 @@ int FSMStateStar::setupGeodesic (Star* worm, Block* parent) {
 	// check whether it is an internal event.
 	FSMScheduler *sched = (FSMScheduler *)scheduler();
 	StringListIter nextName(sched->intlEventNames);
+	StringListIter nextType(sched->intlEventTypes);
 	const char* name;
-	while ((name = nextName++) != NULL) {
+	const char* type;
+	int numEvents = sched->intlEventNames.numPieces();
+
+	for (int indx=0; indx<numEvents; indx++) {
+	  name = nextName++;
+	  type = nextType++;
 	  if (!strcmp(name,wp->name()))    break;
-	}
+	} // end of for (int indx=0; indx<numEvents; indx++) 
+
 	if (name == NULL) {
 	  Error::abortRun(*this, "NO matched I/O port or internal event ",
 			  "in FSM galaxy corresponding to the name: ",
 			  wp->name());
 	  return FALSE;
+	}
+
+	// check whether they both have the same data types.
+	// printf("\nname=%s,intl event=%s,worm=%s",name,type,wp->type());
+	if ( strcmp(type, wp->type()) ) {
+	  // When they are NOT the same:
+	  if (!strcmp(wp->type(),"ANYTYPE")) {
+	    if (wp->isItInput()) {
+	      // If wp of the Wormhole is ANYTYPE, force it have same
+	      // type as the internal event of the FSM galaxy.
+	      // This need to be done ONLY when wp is INPUT somehow.
+	      wp->setPort(wp->name(), wp->parent(), type);
+	      wp->initialize();
+	    }
+
+	  } else {
+	    // Otherwise, consider it as an error.
+	    InfString buf = "The internal event with name ";
+	    buf << name;
+	    buf << " is ";
+	    buf << type;
+	    buf << " for FSM galaxy ";
+	    buf << parent->name();
+	    buf << " but ";
+	    buf << wp->type();
+	    buf << " for wormhole in state ";
+	    buf << this->name();
+	    buf << ".";
+	    Error::abortRun(*this,buf);
+	    return FALSE;
+	  } 
 	}
       }
 
@@ -767,4 +877,24 @@ void FSMStateStar::printInfo() {
 	printf("\n");
     }
 
+    if (int(isInitState)) {
+      printf("\ninitial event = %s",(const char*)initEvent);
+      printf("\ninitial condition = %s",(const char*)initCondition);
+      printf("\ninitial action events (%d) = ",initActEvents.size());
+      for (indx = 0; indx < initActEvents.size(); indx++) {
+	if (strcmp(initActEvents[indx],"")) {
+	  printf(" %s",initActEvents[indx]);
+	} else {
+	  printf(" ~");
+	}
+      }
+      printf("\ninitial action expressions (%d) = ",initActExprs.size());
+      for (indx = 0; indx < initActExprs.size(); indx++) {
+	if (strcmp(initActExprs[indx],"")) {
+	  printf(" %s",initActExprs[indx]);
+	} else {
+	  printf(" ~");
+	}
+      }
+    }
 }

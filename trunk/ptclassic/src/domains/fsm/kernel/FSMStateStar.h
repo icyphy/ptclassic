@@ -47,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntArrayState.h"
 #include "IntState.h"
 #include "StringState.h"
+#include "StringArrayState.h"
 #include "Wormhole.h"
 #include "tcl.h"
 
@@ -66,8 +67,17 @@ public:
     // and the triggered action indexed by "actNum".
     virtual int clearIntlEvent (int actNum);
 
+    // Emit an "event" with an "expression" to Tcl interp.
+    virtual int emitEventToInterp(const char* event, const char* expr);
+
+    // Evaluate the guard of initial transition
+    virtual int evalInitGuard();
+
     // Execute the action.
     virtual int execAction(int actNum);
+
+    // Execute the action of initial transition.
+    virtual int execInitAction();
 
     // Execute the internal machine.
     virtual int execSlave(int curEntryType);
@@ -89,16 +99,22 @@ public:
     }
 
 protected:
-    IntState isInitState;
     StringState events;
     StringState conditions;
     StringState actEvents;
     StringState actExprs;
     IntArrayState entryType;
     IntArrayState preemptive;
+
     StringState slaveNm;
     StringState where_is_defined;
     IntState slaveShared;
+
+    IntState isInitState;
+    StringState initEvent;
+    StringState initCondition;
+    StringArrayState initActEvents;
+    StringArrayState initActExprs;
 
     int numTrans;
     char** parsedEvents;
