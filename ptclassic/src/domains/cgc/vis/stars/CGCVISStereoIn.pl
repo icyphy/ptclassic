@@ -51,13 +51,13 @@ provisions.
       for ($starSymbol(counter)=0; $starSymbol(counter) <($val(blockSize)/8);
 	   $starSymbol(counter)++) {
 	$starSymbol(packit).regvaluesh[0] =
-	  $starSymbol(buf)[2*$starSymbol(counter)];
+	  $starSymbol(buf)[4*$starSymbol(counter)];
 	$starSymbol(packit).regvaluesh[1] =
-	  $starSymbol(buf)[2*$starSymbol(counter)+1];
+	  $starSymbol(buf)[4*$starSymbol(counter)+1];
 	$starSymbol(packit).regvaluesh[2] =
-	  $starSymbol(buf)[2*$starSymbol(counter)+2];
+	  $starSymbol(buf)[4*$starSymbol(counter)+2];
 	$starSymbol(packit).regvaluesh[3] =
-	  $starSymbol(buf)[2*$starSymbol(counter)+3];
+	  $starSymbol(buf)[4*$starSymbol(counter)+3];
 
 	$ref(leftright,$starSymbol(counter)) = $starSymbol(packit).regvaluedbl;	
       }

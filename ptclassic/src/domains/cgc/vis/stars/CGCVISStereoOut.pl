@@ -1,5 +1,5 @@
 defstar {
-    name { StereoOut }
+    name { VISStereoOut }
     domain { CGC }
     derivedFrom { StereoBase }
     descriptor {
@@ -24,17 +24,10 @@ provisions.
     location { CGC main library }
     
     input {
-      name { left }
+      name { leftright }
       type { float }
-      desc { Left channel input }
+      desc { Left and Right channel input }
     }
-
-    input {
-      name { right }
-      type { float }
-      desc { Right channel input }
-    }
-	
 
     defstate {
       name { outputPort }
@@ -52,26 +45,37 @@ provisions.
     protected {
       int standardOutput:1;
     }
-
+    codeblock(globalDecl){
+      union $sharedSymbol(CGCVISStereoOut,regoverlay) {
+	vis_d64 regvaluedbl;
+	vis_s16 regvaluesh[4];
+      };
+    }
+    codeblock(mainDecl){
+      union $sharedSymbol(CGCVISStereoOut,regoverlay) $starSymbol(unpackit);
+    }
     codeblock (convert) {
 	/* Take data from Input and put it in buffer */
 	/* Data in buffer is alternate left and right channels */
-	for ($starSymbol(counter) = 0; $starSymbol(counter) < ($val(blockSize)/2); $starSymbol(counter) += 2) {
-		$starSymbol(buf)[$starSymbol(counter)] = 
-			ceil($ref(left,$starSymbol(counter)/2)*32768.0);
-		$starSymbol(buf)[$starSymbol(counter)+1] = 
-			ceil($ref(right,$starSymbol(counter)/2)*32768.0);
+	for ($starSymbol(counter) = 0; $starSymbol(counter) <
+	       ($val(blockSize)/8); $starSymbol(counter) ++) {
+	  $starSymbol(unpackit).regvaluedbl = $ref(leftright,$starSymbol(counter));
+	  $starSymbol(buf)[4*$starSymbol(counter)] = $starSymbol(unpackit).regvaluesh[0];
+	  $starSymbol(buf)[4*$starSymbol(counter)+1] = $starSymbol(unpackit).regvaluesh[1];
+	  $starSymbol(buf)[4*$starSymbol(counter)+2] = $starSymbol(unpackit).regvaluesh[2];
+	  $starSymbol(buf)[4*$starSymbol(counter)+3] = $starSymbol(unpackit).regvaluesh[3];
 	}
     }
 
     setup {
       CGCStereoBase::setup();
-      left.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
-      right.setSDFParams(int(blockSize/4), int(blockSize/4)-1);
+      leftright.setSDFParams(int(blockSize/8), int(blockSize/8)-1);
     }
       
     initCode {
       CGCStereoBase::initCode();
+      addGlobal(globalDecl,"CGCVISStereoOut_globalDecl");
+      addDeclaration(mainDecl);
       if (standardIO) {
 	addCode(noOpen);
       }
