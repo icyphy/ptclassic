@@ -27,7 +27,7 @@ cosine transform (DCT) and outputs a DCTImage.
 	}
 
 // CODE
-	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h" }
+	hinclude { <math.h>, "GrayImage.h" ,"DCTImage.h", "Error.h" }
 
 	protected {
 		float* cosData;
@@ -136,6 +136,11 @@ cosine transform (DCT) and outputs a DCTImage.
 		(input%0).getPacket(inPacket);
 		TYPE_CHECK(inPacket,"GrayImage");
 		const GrayImage* image = (const GrayImage*) inPacket.myData();
+		if (image->fragmented() || image->processed()) {
+			Error::abortRun(*this,
+					"Can't DCT fragmented or processed image.");
+			return;
+		}
 
 // Do transform.
 		LOG_NEW; DCTImage* DCT = new DCTImage(*image, blocksize);

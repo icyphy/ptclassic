@@ -34,17 +34,22 @@ individual pixels.
 		int np;
 	}
 	start {
-		np = int(width)*int(height);
-		output.setSDFParams(np,np-1);
+		np = int(width) * int(height);
+		output.setSDFParams(np, np-1);
 	}
 	go {
 		Packet pkt;
 		(input%0).getPacket(pkt);
-		TYPE_CHECK(pkt,"GrayImage");
-		const GrayImage* imD = (const GrayImage*)pkt.myData();
+		TYPE_CHECK(pkt, "GrayImage");
+		const GrayImage* imD = (const GrayImage*) pkt.myData();
 		if (imD->retWidth() != int(width) ||
-		    imD->retHeight() != int(height)) {
-			Error::abortRun(*this,"Got packet with wrong size");
+			imD->retHeight() != int(height)) {
+			Error::abortRun(*this, "Got image with wrong size");
+			return;
+		}
+		if (imD->fragmented() || imD->processed()) {
+			Error::abortRun(*this,
+					"Can't process fragmented or processed images.");
 			return;
 		}
 		unsigned const char* p = imD->constData();

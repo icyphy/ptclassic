@@ -3,31 +3,22 @@ defstar {
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
-	copyright	{ 1991 The Regents of the University of California }
+	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-For the first input image, copy the image unchanged to the output.
-For all other inputs, add the past frame to the new difference frame
-and send the result to the output.
-
-The 'alpha' parameter should be set to the same value as the 'alpha'
-parameter in the corresponding DPCM star.  If alpha is 0, no
-differencing is done.  If alpha is 1, standard DPCM is done.  For
-alpha values between 0 and 1, "leaky DPCM" is done, which helps correct
-for errors in the transmission of the difference frames.
+If the 'past' input is not a GrayImage or has size 0, pass the 'diff'
+directly to the 'output'. Otherwise, add the 'past' to the
+'diff' (with leak factor 'alpha') and send the result to 'output'.
 	}
+	seealso { Dpcm }
 
 	hinclude { "GrayImage.h", "Error.h" }
 
 //////// I/O AND STATES.
-	input {
-		name { input }
-		type { packet }
-	}
-	output {
-		name { output }
-		type { packet }
-	}
+	input { name { diff } type { packet } }
+	input { name { past } type { packet } }
+	output { name { output } type { packet } }
+
 	defstate {
 		name { alpha }
 		type { float }
@@ -35,79 +26,48 @@ for errors in the transmission of the difference frames.
 		desc { Leak value to aid error recovery. }
 	}
 
-////// CODE.
-	protected {
-		Packet storPkt;
-		int firstTime; // True if we have not received any inputs yet.
-		int width, height;
-		float leak;
-	}
+	protected { float leak; }
+	start { leak = float(double(alpha)); }
 
-	start { firstTime = 1; leak = float(double(alpha)); }
-
-	method {
+	inline method {
 		name { quant }
 		type { "unsigned char" }
 		access { protected }
-		arglist { "(float val)" }
+		arglist { "(const float dif, const float prv)" }
 		code {
-			return ((unsigned char) (val - 127.5));
-		}
-	}
-
-	method {
-		name { getInput }
-		type { "GrayImage*" }
-		access { protected }
-		code {
-			Packet pkt;
-			(input%0).getPacket(pkt);
-			if (badType(*this,pkt,"GrayImage")) {
-				return NULL;
-			}
-			return( (GrayImage*) pkt.writableCopy() );
-		}
-	} // end getInput()
-
-	method {
-		name	{ doFirstImage }
-		access	{ protected }
-		type	{ "void" }
-		arglist	{ "(GrayImage* inImage)" }
-		code {
-			width  = inImage->retWidth();
-			height = inImage->retHeight();
-			firstTime = 0;
-
-			Packet pkt(*inImage);
-			storPkt = pkt;		// store for use next time.
-			output%0 << pkt;	// write first input unchanged.
-		}
-	} // end doFirstImage()
+			return ((unsigned char) (dif + 0.5 + leak * (prv-128.0)));
+	}	}
 
 	go {
 // Read data from input.
-		GrayImage* inImage = getInput();
+		Packet diffPkt, pastPkt;
+		(diff%0).getPacket(diffPkt);
+		(past%0).getPacket(pastPkt);
+		TYPE_CHECK(diffPkt, "GrayImage");
+		GrayImage* inImage = (GrayImage*) diffPkt.writableCopy();
 
-// Initialize if this is the first input image.
-		if (firstTime) {
-			doFirstImage(inImage);
+// Resynchronize if 'past' of wrong type.
+		if(!pastPkt.typeCheck("GrayImage")) {
+			Packet tmp(*inImage); output%0 << tmp;
+			return;
+		}
+		const GrayImage* pastImage =
+				(const GrayImage*) pastPkt.myData();
+
+// Resynchronize because past.size() = 0
+		if (!pastImage->retSize()) {
+			Packet tmp(*inImage); output%0 << tmp;
 			return;
 		}
 
-// If we reached here, we already have read one image.
-// Put the difference into the past image (which we won't need after
-// this go{} call), and then send the past image to the output.
-		unsigned char *cur = inImage->retData();
-		unsigned const char *prev =
-				((const GrayImage*) storPkt.myData())->constData();
-		for(int travel = 0; travel < width*height; travel++) {
-			cur[travel] = quant(cur[travel] + leak*float(prev[travel]));
+		unsigned char* dif = inImage->retData();
+		unsigned const char* prev = pastImage->constData();
+		for(int travel = inImage->retWidth() * inImage->retHeight() - 1;
+				travel >= 0; travel--) {
+			dif[travel] = quant(dif[travel], prev[travel]);
 		}
 
 // Send the outputs on their way.
-		Packet outPkt(*inImage);
-		storPkt = outPkt; // Forcing out storPkt's old contents.
-		output%0 << outPkt;
-	} // end go{}
+		Packet outPkt(*inImage); output%0 << outPkt;
+	}
 } // end defstar { DpcmInv }

@@ -9,12 +9,12 @@ defstar {
 Accept a black-and-white image from an input packet, median-filter the
 image, and send the result to the output.
 
-Filter widths of 1, 3, 5 work well.  Any length longer than five will
+Filter widths of 1, 3, 5 work well. Any length longer than five will
 take a long time to run.
 
 Median filtering is useful for removing impulse-type noise from images.
 It also smooths out textures, so it is a useful pre-processing step
-before edge detection.  It removes inter-field flicker quite well
+before edge detection. It removes inter-field flicker quite well
 when displaying single frames from a moving sequence.
 	}
 
@@ -39,19 +39,17 @@ when displaying single frames from a moving sequence.
 ////// CODE.
 
 	code {
-	// Function to sort unsigned char's.
-	// These types and casts are required to satisfy cfront's
-	// ridiculously strict rules.
-	extern "C" {
-	static int sortUC(const void* aV,const void* bV) {
-		unsigned const char* a = (unsigned const char*)aV;
-		unsigned const char* b = (unsigned const char*)bV;
-		if (*a < *b) return -1;
-		else if (*a == *b) return 0;
-		else return 1;
-	}
-	}
-	}
+// Function to sort unsigned char's.
+// These types and casts are required to satisfy cfront's
+// ridiculously strict rules.
+		extern "C" {
+			static int sortUC(const void* aV,const void* bV) {
+				unsigned const char* a = (unsigned const char*)aV;
+				unsigned const char* b = (unsigned const char*)bV;
+				if (*a < *b) return -1;
+				else if (*a == *b) return 0;
+				else return 1;
+	}	}	}
 
 	protected {
 		int width, height, size;
@@ -80,7 +78,7 @@ when displaying single frames from a moving sequence.
 			for(i = pi-size/2; i <= pi+size/2; i++) {
 				for(j = pj-size/2; j <= pj+size/2; j++) {
 					buf[cnt++] = p[i*width+j];
-			}   }
+			}	}
 
 		// Sort data and return result.
 			qsort(buf, size*size, sizeof(unsigned char), sortUC);
@@ -94,6 +92,11 @@ when displaying single frames from a moving sequence.
 		(inData%0).getPacket(inPkt);
 		TYPE_CHECK(inPkt,"GrayImage");
 		const GrayImage* inImage = (const GrayImage*) inPkt.myData();
+		if (inImage->fragmented() || inImage->processed()) {
+			Error::abortRun(*this,
+					"Need a full-sized input image.");
+			return;
+		}
 		width = inImage->retWidth();
 		height = inImage->retHeight();
 
@@ -107,11 +110,10 @@ when displaying single frames from a moving sequence.
 		for(i = size/2; i < height-size/2; i++) {
 			for(j = size/2; j < width-size/2; j++) {
 				outP[j + i*width] = retMedian(inP, i, j);
-		}   }
+		}	}
 
 // Send the output on its way.
 		Packet outPkt(*outImage);
 		outData%0 << outPkt;
 	} // end go{}
-
 } // end defstar { MedianImage }

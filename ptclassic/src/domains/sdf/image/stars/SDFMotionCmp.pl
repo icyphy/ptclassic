@@ -3,132 +3,92 @@ defstar {
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
-	copyright	{ 1991 The Regents of the University of California }
-	location	{ SDF image library }
+	copyright	{ 1992 The Regents of the University of California }
+	location	{ SDF image palette }
 	desc {
-For the first input image, copy the image unchanged to the diffOut
-output and send a null field of motion vectors to the mvOut output.
+If the 'past' input is not a GrayImage (e.g. 'nullPacket'), copy
+the 'input' image unchanged to the 'diffOut' output and send a null
+field of motion vectors to the 'mvOut' output. This should usually
+happen only on the first firing of the star.
 
 For all other inputs, perform motion compensation and write the
 difference frames and motion vector frames to the corresponding outputs.
 
 This star can be derived from, to implement slightly different motion
 compensation algorithms. For example, synchronization techniques
-can be added.
+can be added or reduced-search motion compensation can be performed.
 }
 
 	hinclude { "GrayImage.h", "MVImage.h", "Error.h" }
 
 //////// I/O AND STATES.
 	input {		name { input }		type { packet } }
+	input {		name { past }		type { packet } }
 	output {	name { diffOut }	type { packet } }
 	output {	name { mvOut }		type { packet } }
 
 	defstate {
-		name	{ blockSize }
+		name	{ BlockSize }
 		type	{ int }
 		default { 8 }
 		desc	{ Size of blocks on which to do motion comp. }
 	}
 
-////// CODE.
-	protected {
-		Packet storPkt;
-		int firstTime; // True if we have not received any inputs yet.
-		int width, height, blocksize;
-	}
-
-
-	start {
-		firstTime = 1;
-		blocksize = int(blockSize);
-	}
-
-
-	method {
-		name { getInput }
-		type { "const GrayImage*" }
-		access { protected }
-		arglist { "(Packet& inPkt)" }
-		code {
-			(input%0).getPacket(inPkt);
-			if (badType(*this, inPkt, "GrayImage")) {
-				return NULL;
-			}
-			return( (const GrayImage*) inPkt.myData());
-		}
-	} // end getInput()
-
+	protected { int blocksize; }
+	start { blocksize = int(BlockSize); }
 
 	virtual method {
-		name	{ doFirstImage }
-		access	{ protected }
-		type	{ "void" }
-		arglist	{ "(const GrayImage* inp)" }
+		name { doSyncImage }
+		access { protected }
+		arglist { "(const GrayImage* inp)" }
+		type { "void" }
 		code {
-			width	= inp->retWidth();
-			height	= inp->retHeight();
-			if ( (width != blocksize * (width/blocksize)) ||
-					(height	!= blocksize * (height/blocksize)) ) {
-				Error::abortRun(*this, "block vs. image size error.");
-				return;
-			}
-
 			LOG_NEW; MVImage* mv = new MVImage;
 			Packet pkt(*inp), empty(*mv);
-			diffOut%0 << pkt;	// write first input unchanged.
+			diffOut%0 << pkt;
 			mvOut%0 << empty;
-			firstTime = 0;
-		}
-	} // end doFirstImage()
-
-
-	virtual method { // don't do thresholding, use wrap-around.
-		name { quant }
-		access { protected }
-		type { "unsigned char" }
-		arglist { "(const float inp)"}
-		code { return((unsigned char) (inp + 128.5)); }
-	}
-
+	}	}
 
 	method {
 		name { doMC }
 		type { "void" }
-		access { protected }
-		arglist { "(unsigned char* diff, unsigned const char* cur,
-			unsigned const char* prev, char* horz, char* vert)" }
+		access { private }
+		arglist { "(unsigned char* diff, unsigned const char* cur, \
+				unsigned const char* prev, char* horz, char* vert, \
+				const int width, const int height)" }
 		code {
 			int ii, jj, xvec, yvec;
-	
+
 			// Do top row.
 			for(jj = 0; jj < width; jj += blocksize) {
-				DoOneBlock(*horz, *vert, diff, cur, prev, 0, jj, 0, 0);
+				DoOneBlock(*horz, *vert, diff, cur, prev, 0, jj, 0, 0,
+						width);
 				horz++; vert++;
 			}
-	
+
 			// Do middle rows.
 			for(ii = blocksize; ii < height-blocksize; ii+=blocksize) {
-				DoOneBlock(*horz, *vert, diff, cur, prev, ii, 0, 0, 0);
+				DoOneBlock(*horz, *vert, diff, cur, prev, ii, 0, 0, 0,
+						width);
 				horz++; vert++;
-	
+
 				for(jj = blocksize; jj < width-blocksize;
 						jj += blocksize) {
-					FindMatch(cur, prev, ii, jj, xvec, yvec);
+					FindMatch(cur, prev, ii, jj, xvec, yvec, width);
 					DoOneBlock(*horz, *vert, diff, cur, prev, ii, jj,
-							xvec, yvec);
+							xvec, yvec, width);
 					horz++; vert++;
 				}
-	
+
 				DoOneBlock(*horz, *vert, diff, cur, prev, ii,
-						width-blocksize, 0, 0);
+						width-blocksize, 0, 0, width);
 				horz++; vert++;
 			} // end middle rows
-	
+
 			// Do bottom row.
 			for(jj = 0; jj < width; jj += blocksize) {
 				DoOneBlock(*horz, *vert, diff, cur, prev,
-						height-blocksize, jj, 0, 0);
+						height-blocksize, jj, 0, 0, width);
 				horz++; vert++;
 			}
 		} // end code{}
@@ -138,8 +98,9 @@ can be added.
 	virtual method {
 		name { FindMatch }
 		type { "void" }
-		arglist { "(unsigned const char* cur, unsigned const char* prev,
-				const int ii, const int jj, int& xvec, int& yvec)" }
+		arglist { "(unsigned const char* cur, \
+				unsigned const char* prev, const int ii, const int jj, \
+				int& xvec, int& yvec, const int width)" }
 		access { protected }
 		code {
 			int i, j, deli, delj, *diffArr, bs2 = 2 * blocksize;
@@ -178,10 +139,10 @@ can be added.
 		name { DoOneBlock }
 		access { protected }
 		type { "void" }
-		arglist { "(char& horz, char& vert, unsigned char* diff,
-				unsigned const char* cur, unsigned const char* prev,
-				const int ii, const int jj, const int xvec,
-				const int yvec)" }
+		arglist { "(char& horz, char& vert, unsigned char* diff, \
+				unsigned const char* cur, unsigned const char* prev, \
+				const int ii, const int jj, const int xvec, \
+				const int yvec, const int width)" }
 		code { // Set diff frame and mvects.
 			int i, j, tmp1, tmp2;
 			for(i = 0; i < blocksize; i++) {
@@ -197,20 +158,52 @@ can be added.
 		}
 	} // end DoOneBlock{}
 
+	inline virtual method { // don't do thresholding, use wrap-around.
+		name { quant }
+		access { protected }
+		type { "unsigned char" }
+		arglist { "(const float inp)"}
+		code { return((unsigned char) (inp + 128.5)); }
+	}
+
+	method {
+		name	{ inputsOk }
+		access	{ private }
+		type	{ "int" }
+		arglist	{ "(const GrayImage& one, const GrayImage& two)" }
+		code {
+			const int w = one.retWidth();
+			const int h = one.retHeight();
+			int retval = (w == two.retWidth());
+			retval &= (h == two.retHeight());
+			retval &= (w == (blocksize * (w / blocksize)));
+			retval &= (h == (blocksize * (h / blocksize)));
+			retval &= !one.fragmented();
+			retval &= !one.processed();
+			retval &= !two.fragmented();
+			retval &= !two.processed();
+			return(retval);
+		}
+	} // end inputsOk()
 
 	go {
-// Read data from input.
-		Packet prevPkt = storPkt; // Holds data from last iteration.
+// Read inputs.
+		Packet pastPkt, curPkt;
+		(past%0).getPacket(pastPkt);
+		(input%0).getPacket(curPkt);
+		TYPE_CHECK(curPkt, "GrayImage");
 		const GrayImage* inImage =
-				getInput(storPkt); // New data in storPkt.
-		if (inImage == NULL) {
-			Error::abortRun(*this, "Can not read input image.");
+				(const GrayImage*) curPkt.myData();
+
+// Initialize if this is the first input image.
+		if (!pastPkt.typeCheck("GrayImage")) {
+			doSyncImage(inImage);
 			return;
 		}
 
-// Initialize if this is the first input image.
-		if (firstTime) {
-			doFirstImage(inImage);
+		const GrayImage* prvImage = (const GrayImage*) pastPkt.myData();
+		if (!inputsOk(*inImage, *prvImage)) {
+			Error::abortRun(*this, "Problem with input images.");
 			return;
 		}
 
@@ -219,19 +212,17 @@ can be added.
 // clone() is overloaded, so if inImage is of a type DERIVED from
 // GrayImage, outImage will be of the same derived type.
 // Use clone(int) rather than clone() so we don't copy image data.
-		GrayImage*	outImage	= (GrayImage*) inImage->clone(1);
-		const GrayImage* prvImage = (const GrayImage*) prevPkt.myData();
-		LOG_NEW; MVImage*	mvImage		= new MVImage(*outImage, blocksize);
+		GrayImage* outImage = (GrayImage*) inImage->clone(1);
+		LOG_NEW; MVImage* mvImage = new MVImage(*outImage, blocksize);
 
 ////// Do the motion compensation.
 		doMC(outImage->retData(), inImage->constData(),
 				prvImage->constData(), mvImage->retHorz(),
-				mvImage->retVert());
+				mvImage->retVert(), outImage->retWidth(),
+				outImage->retHeight());
 
 // Send the outputs on their way.
 		Packet diffPkt(*outImage); diffOut%0 << diffPkt;
-		Packet mvPkt(*mvImage);	mvOut%0 << mvPkt;
-// pastPkt goes out of scope, and its contents' reference count is
-// decremented now.
+		Packet mvPkt(*mvImage); mvOut%0 << mvPkt;
 	} // end go{}
 } // end defstar { MotionCmp }

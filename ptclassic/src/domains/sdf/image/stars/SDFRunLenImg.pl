@@ -36,7 +36,7 @@ pieces.
 	protected { int thresh; }
 	start { thresh = int(Thresh); }
 
-	method {
+	inline method {
 		name { gt }
 		type { "int" }
 		access { protected }
@@ -55,12 +55,13 @@ pieces.
 		arglist { "(GrayImage* inImage)" }
 		code {
 // Do the run-length coding.
-			int size = inImage->retWidth() * inImage->retHeight();
+			const int size = inImage->retWidth() * inImage->retHeight();
 			unsigned char* ptr1 = inImage->retData();
 
 // The biggest blowup we can have is the string "01010101...".
 // This gives a blowup of 33%, so 1.34 is ok.
-			LOG_NEW; unsigned char* ptr2 = new unsigned char[int(1.34*size + 1)];
+			LOG_NEW;
+			unsigned char* ptr2 = new unsigned char[int(1.34*size + 1)];
 
 			int indx1 = 0, indx2 = 0;
 			while (indx1 < size) {
@@ -91,11 +92,18 @@ pieces.
 // Read input.
 		Packet inPkt;
 		(input%0).getPacket(inPkt);
-		TYPE_CHECK(inPkt,"GrayImage");
+		TYPE_CHECK(inPkt, "GrayImage");
+
 // Do processing and send out.
 		GrayImage* inImage = (GrayImage*) inPkt.writableCopy();
+		if (inImage->fragmented() || inImage->processed()) {
+			delete inImage;
+			Error::abortRun(*this,
+					"Need unfragmented and unprocessed input image.");
+			return;
+		}
 		doRunLen(inImage);
 		Packet outPkt(*inImage);
 		outData%0 << outPkt;
-	} // end go{}
+	}
 } // end defstar { RunLen }

@@ -67,8 +67,14 @@ See SDFrunLen.
 
 // Do processing and send out.
 		GrayImage* inImage = (GrayImage*) inPkt.writableCopy();
+		if (inImage->fragmented()) {
+			delete inImage;
+			Error::abortRun(*this,
+					"Need unfragmented input image.");
+			return;
+		}
 		invRunLen(inImage);
 		Packet outPkt(*inImage);
 		outData%0 << outPkt;
-	} // end go{}
+	}
 } // end defstar { RunLenInv }

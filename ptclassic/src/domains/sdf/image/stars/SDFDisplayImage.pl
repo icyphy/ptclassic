@@ -18,7 +18,9 @@ The image frame number is appended to the root filename to form the
 complete filename of the displayed image.
 	}
 
-	ccinclude { "GrayImage.h" , <std.h> , <stdio.h>, "UserOutput.h" }
+	ccinclude {
+		"GrayImage.h" , <std.h> , <stdio.h>, "UserOutput.h", "Error.h"
+	}
 
 // INPUT AND STATES.
 
@@ -50,14 +52,19 @@ complete filename of the displayed image.
 // Read data from input.
 		Packet pkt;
 		(inData%0).getPacket(pkt);
-		TYPE_CHECK(pkt,"GrayImage");
-		const GrayImage* imD = (const GrayImage*) pkt.myData();
+		TYPE_CHECK(pkt, "GrayImage");
+		const GrayImage* image = (const GrayImage*) pkt.myData();
+		if (image->fragmented() || image->processed()) {
+			Error::abortRun(*this,
+					"Can't display fragmented or processed image.");
+			return;
+		}
 
 // Set filename and save values.
 		const char* saveMe = saveImage;
 		int del = !((saveMe[0] == 'y') || (saveMe[0] == 'Y'));
 
-		char fileName[256];		fileName[0] = '\000';
+		char fileName[256]; fileName[0] = '\000';
 		if ((const char*) imageName) {
 			strcpy(fileName, (const char*) imageName);
 		}
@@ -67,21 +74,21 @@ complete filename of the displayed image.
 			LOG_DEL; delete nm;
 		}
 		char numstr[16];
-		sprintf(numstr, ".%d", imD->retId());
+		sprintf(numstr, ".%d", image->retId());
 		strcat(fileName, numstr);
 
-		FILE* fd = fopen(fileName, "w");
-		if (fd == (FILE*) NULL) {
+		FILE* fptr = fopen(fileName, "w");
+		if (fptr == (FILE*) NULL) {
 			Error::abortRun(*this, "can not create: ", fileName);
 			return;
 		}
 
 // Write the PGM header and the data, and then run.
-		fprintf (fd, "P5\n %d %d 255\n", imD->retWidth(),
-				imD->retHeight());
-		fwrite((const char*)imD->constData(), sizeof(unsigned char),
-			(unsigned) imD->retWidth() * imD->retHeight(), fd);
-		fclose(fd);
+		fprintf (fptr, "P5\n %d %d 255\n", image->retWidth(),
+				image->retHeight());
+		fwrite((const char*)image->constData(), sizeof(unsigned char),
+			(unsigned) image->retWidth() * image->retHeight(), fptr);
+		fclose(fptr);
 
 		char cmdbuf[256];
 		sprintf (cmdbuf, "(%s %s", (const char*) command, fileName);

@@ -3,26 +3,22 @@ defstar {
 	domain		{ SDF }
 	version		{ $Id$ }
 	author		{ Paul Haskell }
-	copyright	{ 1991 The Regents of the University of California }
+	copyright	{ 1992 The Regents of the University of California }
 	location	{ SDF image library }
 	desc {
-For the first input image, copy the image unchanged to the output.
-For all other inputs, subtract the past frame from the new frame
-and send the difference to the output.
+If the 'past' input is not a GrayImage or has size 0, pass the 'input'
+directly to the 'output'. Otherwise, subtract the 'past' from the
+'input' (with leak factor 'alpha') and send the result to 'output'.
 	}
 
 	hinclude { "GrayImage.h", "Error.h" }
 
 
 //////// I/O AND STATES.
-	input {
-		name { input }
-		type { packet }
-	}
-	output {
-		name { output }
-		type { packet }
-	}
+	input { name { input } type { packet } }
+	input { name { past } type { packet } }
+	output { name { output } type { packet } }
+
 	defstate {
 		name { alpha }
 		type { float }
@@ -30,95 +26,77 @@ and send the difference to the output.
 		desc { Leak value for error-recovery. }
 	}
 
-////// CODE.
-	protected {
-		Packet storPkt;
-		int firstTime; // True if we have not received any inputs yet.
-		int width, height;
-		float leak;
-	}
-
-	start { firstTime = 1; leak = float(double(alpha)); }
-
-	method {
-		name { getInput }
-		type { "const GrayImage*" }
-		access { protected }
-		arglist { "(Packet& inPkt)" }
-		code {
-			(input%0).getPacket(inPkt);
-			if (badType(*this,inPkt,"GrayImage")) {
-				return NULL;
-			}
-			return( (const GrayImage*) inPkt.myData() );
-		}
-	} // end getInput()
-
-	method {
+	protected { float leak; }
+	start { leak = float(double(alpha)); }
 
 // This star code uses "wraparound" to represent negative values
-// using unsigned char's.  Suppose unsigned char a = 3 and unsigned
-// char b = 4.  Then unsigned char (a-b) == 255.  BUT, (a-b) + b == 3,
-// which is what we need.  Note that the quant() function does not
+// using unsigned char's. Suppose unsigned char a = 3 and unsigned
+// char b = 4. Then unsigned char (a-b) == 255. BUT, (a-b) + b == 3,
+// which is what we need. Note that the quant() function does not
 // do thresholding for negative floating-point values.
 // The '128' is so this star's output can be compressed with the DCT.
 // Without the '128', the values +1 and -1 are represented as 1 and 255.
 // The DCT can't compress very well then.
-
+	inline method {
 		name { quant }
 		access { protected }
 		type { "unsigned char" }
-		arglist { "(float val)" }
+		arglist { "(float inp, float pst)" }
 		code {
-			return((unsigned char) (val + 128.5));
-		}
-	}
+			return((unsigned char) (inp + 0.5 + leak * (128.0 - pst)));
+	}	}
 
 	method {
-		name	{ doFirstImage }
-		access	{ protected }
-		type	{ "void" }
-		arglist	{ "(const GrayImage* inImage)" }
+		name { inputsOk }
+		type { "int" }
+		access { private }
+		arglist { "(const GrayImage& one, const GrayImage& two)" }
 		code {
-			width  = inImage->retWidth();
-			height = inImage->retHeight();
-			firstTime = 0;
-
-// write first input unchanged.
-			Packet pkt( *inImage );
-			output%0 << pkt;
-		}
-	} // end doFirstImage()
+			int retval = !one.fragmented();
+			retval &= !one.processed();
+			retval &= !two.fragmented();
+			retval &= !two.processed();
+			retval &= (one.retWidth() == two.retWidth());
+			retval &= (one.retHeight() == two.retHeight());
+			return(retval);
+	}	}
 
 	go {
 // Read data from input.
-		Packet pastPkt = storPkt;
-		const GrayImage* inImage = getInput(storPkt);
+		Packet curPkt, pastPkt;
+		(input%0).getPacket(curPkt);
+		(past%0).getPacket(pastPkt);
+		TYPE_CHECK(curPkt, "GrayImage");
+		GrayImage* inImage = (GrayImage*) curPkt.writableCopy();
 
-// Initialize if this is the first input image.
-		if (firstTime) {
-			doFirstImage(inImage);
+// Resynchronize because of non-GrayImage input.
+		if (!pastPkt.typeCheck("GrayImage")) {
+			Packet tmp(*inImage); output%0 << tmp;
+			return;
+		}
+		const GrayImage* pastImage =
+				(const GrayImage*) pastPkt.myData();
+
+// Resynchronize because of size=0 input.
+		if (!pastImage->retSize()) {
+			Packet tmp(*inImage); output%0 << tmp;
 			return;
 		}
 
-// If we reached here, we already have read one image.
-// Put the difference into the past image (which we won't need after
-// this go{} call), and then send the past image to the output.
-// Call clone(int) rather than clone() to avoid copying data.
-		GrayImage* diffImage = (GrayImage*) inImage->clone(1);
-		unsigned char* dif = diffImage->retData();
-		unsigned const char* cur = inImage->constData();
-		unsigned const char* prv =
-			((const GrayImage*) pastPkt.myData())->constData();
-
-		for(int travel = 0; travel < width*height; travel++) {
-			dif[travel] = quant(cur[travel] - leak*float(prv[travel]));
+		if(!inputsOk(*inImage, *pastImage)) {
+			delete inImage;
+			Error::abortRun(*this, "Problem with input images.");
+			return;
 		}
 
-// Send the outputs on their way, and save new input for next time.
-		Packet outPkt(*diffImage);
-		output%0 << outPkt;
-// pastPkt goes out of scope now, decrementing its contents' reference
-// count.
-	} // end go{}
+// Handle real valid inputs...
+		unsigned char* dif = inImage->retData();
+		unsigned const char* prv = pastImage->constData();
+		for(int travel = inImage->retWidth() * inImage->retHeight() - 1;
+				travel >= 0; travel--) {
+			dif[travel] = quant(dif[travel], prv[travel]);
+		}
+
+		Packet outPkt(*inImage); output%0 << outPkt;
+	}
 } // end defstar { Dpcm }
