@@ -26,8 +26,12 @@ proc pftUsage { {msg} "Usage Information" } {
     puts stderr "a replacement cell.  The facet will be fixed using octmvlib."
 
     puts stderr "\nTypical usage would be:"
+    puts stderr "\tptfixtree chirp modulate"
+    puts stderr "or"
     puts stderr "\tptfixtree -within '\$PTOLEMY' -within '~me' chirp modulate"
-    puts stderr "where chirp and modulate are ptolemy facets."
+    puts stderr "where chirp and modulate are ptolemy facets.  The second form"
+    puts stderr "would be used to verify that no cells in obscure directories"
+    puts stderr "are referenced."
 
     puts stderr "\nAdditional (rarely used) options:"
     puts stderr "\t-octls path\tSpecifies location of octls binary"
@@ -40,7 +44,6 @@ proc pftUsage { {msg} "Usage Information" } {
     exit 1
 }
 
-source ~ptolemy/tcl/lib/topgetopt.tcl
 
 proc pftGetFullFacet { facet } {
     if { "$facet"=="" } {
@@ -353,17 +356,6 @@ proc pftProcessArgs { } {
 #puts stdout "WithinPaths: ``$within_paths''"
     pftAddCheckCells $argCells
 
-    if ![info exist env(PTOLEMY)] {
-	set env(PTOLEMY) [glob ~ptolemy]
-    }
-    if ![info exist env(ARCH)] {
-	if { [catch {exec /bin/arch} arch] } {
-	    if { [catch {exec /bin/machine} arch] } {
-		pftUsage "Unknown ARCH"
-	    }
-	}
-	set env(ARCH) $arch
-    }
 #        set path_octmvlib $env(PTOLEMY)/octtools/bin.$env(ARCH)/octmvlib
     if { $path_octmvlib == "" } {
         set path_octmvlib $env(PTOLEMY)/bin.$env(ARCH)/octfix
@@ -384,8 +376,28 @@ proc pftProcessArgs { } {
     }
 }
 
-puts stdout "Ptolemy Fix Tree (ptfixtree version 0.1)"
-pftProcessArgs
-pftMainLoop
+proc pftMain { } {
+    global env
 
+    puts stdout "Ptolemy Fix Tree (ptfixtree version 0.1)"
+
+    if ![info exist env(PTOLEMY)] {
+	set env(PTOLEMY) [glob ~ptolemy]
+    }
+    if ![info exist env(ARCH)] {
+	if { [catch {exec /bin/arch} arch] } {
+	    if { [catch {exec /bin/machine} arch] } {
+		pftUsage "Unknown ARCH"
+	    }
+	}
+	set env(ARCH) $arch
+    }
+
+    uplevel #0 source $env(PTOLEMY)/tcl/lib/topgetopt.tcl
+
+    pftProcessArgs
+    pftMainLoop
+}
+
+pftMain
 destroy .
