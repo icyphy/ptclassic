@@ -75,7 +75,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
     # but it is better to restrict it in the source.
     if {!$ptgifexists} {
 	image create photo ptgif \
-		-file $TYCHO/typt/lib/ptolemyWelcome.gif
+		-file $TYCHO/typt/kernel/img/ptolemyWelcome.gif
     }
     configure -image ptgif
 
