@@ -76,6 +76,7 @@ public:
 	// pass along baseclass methods.
 	NamedObjList::size;
 	NamedObjList::deleteAll;
+	SequentialList::initialize;
 };
 
 ///////////////////////////////////////////
