@@ -271,7 +271,7 @@ body ::tycho::IconLibrary::draw {icon slate x y args} {
     foreach t [match termstyle $icon] {
         lappend termstyles [concat $icon $t]
     }
-    eval lappend termstyles $attrs(-termstyles)
+    set termstyles [concat $termstyles $attrs(-termstyles)]
     unset attrs(-slatetype)
     unset attrs(-termstyles)
 
