@@ -36,13 +36,13 @@
 #
 
 #######################################################################
-#### Classname
+#### ClassName
 # Description of class.
 #
 # <p>
-# Here is an example of how to use the Classname:
+# Here is an example of how to use the ClassName:
 # <tcl><pre>
-#     ::tycho::Classname .x ...
+#     ::tycho::ClassName .x ...
 # </pre></tcl>
 #
 class ::tycho::ClassName {
