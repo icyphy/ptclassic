@@ -35,7 +35,7 @@
 #######################################################################
 #### ClassParser
 # ClassParser is the superclass of all classes that parse source
-# cpde files to generate class models (of class <a href = 
+# code files to generate class models (of class <a href = 
 # "../../../../kernel/doc/codeDoc/ClassModel.idoc">::tycho::ClassModel
 # </a>).
 #
