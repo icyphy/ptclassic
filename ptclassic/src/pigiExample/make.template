@@ -139,6 +139,8 @@ palettes.$(PIGI).c: $(PT_DEPEND)
 	echo "char* defaultPalettes(){ return \"$(subst PTOLEMY,\$$PTOLEMY,$(subst pal ,pal:,$(sort $(PALETTES)))):./user.pal:./init.pal\";}" > palettes.$(PIGI).c
 	$(CC) -c palettes.$(PIGI).c	
 
+sources: make.template $(PL_SRCS)
+
 # Include rules to build stars
 include $(ROOT)/mk/userstars.mk
 
