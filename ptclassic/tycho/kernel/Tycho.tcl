@@ -138,7 +138,7 @@ if {[uplevel #0 info namespace all pitcl] == "pitcl"} {
 # ptclpresent is set to 1 if the ptcl commands are present,
 # which indicates that we have access to the ptolemy kernel
 # via the older ptcl interface
-if {[uplevel #0 info namespace all pitcl] != "pitcl"} {
+if {[uplevel #0 info commands domains] !=  {}} {
     set ptolemyfeature(ptcl) 1
 } {
     set ptolemyfeature(ptcl) 0
