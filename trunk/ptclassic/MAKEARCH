@@ -29,7 +29,7 @@ optmkdir lib.$ARCH
 optmkdir obj.$ARCH
 optmkdir octtools
 optmkdir octtools/include
-if ( $ARCH != "sun4.opt" && $ARCH != "cfront" && $ARCH != "hppa.cfront" ) then
+if ( $ARCH != "sun4.debug" && $ARCH != "cfront" && $ARCH != "hppa.cfront" ) then
 	optmkdir octtools/lib.$ARCH
 	optmkdir octtools/bin.$ARCH
 else
@@ -37,13 +37,13 @@ else
 	# the other-src file necessary to create special versions of octtools
 	# and tcltk.  Further more, currently octtools can only be compiled
 	# with cc, not with gcc
-	if ( $ARCH == "sun4.opt" ) then
+	if ( $ARCH == "sun4.debug" ) then
 		cd octtools
-		optdifflink lib.sun4 lib.sun4.opt
-		optdifflink bin.sun4 bin.sun4.opt
+		optdifflink lib.sun4 lib.sun4.debug
+		optdifflink bin.sun4 bin.sun4.debug
 		cd ../tcltk
-		optdifflink tcl.sun4 tcl.sun4.opt
-		optdifflink tk.sun4 tk.sun4.opt
+		optdifflink tcl.sun4 tcl.sun4.debug
+		optdifflink tk.sun4 tk.sun4.debug
 		cd ..
 	else if ($ARCH == "cfront" ) then
 		cd octtools
