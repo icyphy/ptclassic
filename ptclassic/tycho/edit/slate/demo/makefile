@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/edit/slate/demos
+VPATH =		$(ROOT)/edit/slate/demo
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
