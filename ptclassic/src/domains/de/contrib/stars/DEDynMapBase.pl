@@ -113,7 +113,7 @@ directly. But, Tom Lane changed the HOF-stars. So, I copied the older code
 directly into this file, having the advantage of being independent of further 
 changes in HOF now. MutableCQScheduler incorporated by John S. Davis II}
     location { $PTOLEMY/src/domains/de/contrib/stars }
-    hinclude { "checkConnect.h", "MutableCQScheduler.h", "CQScheduler.h", "DEScheduler.h", "DERepeatStar.h", "DEDynMerge.h", "DETarget.h", "KnownBlock.h", "InfString.h", <list.h>, <stack.h> }
+    hinclude { "checkConnect.h", "MutableCQScheduler.h", "CQScheduler.h", "DEScheduler.h", "DERepeatStar.h", "DEDynMerge.h", "DETarget.h", "KnownBlock.h", "InfString.h"}
     ccinclude { "ptk.h" }
     defstate {
         name { blockname }
@@ -320,8 +320,8 @@ changes in HOF now. MutableCQScheduler incorporated by John S. Davis II}
             // get the block from the list and remove it from the list
             // first check whether or not the list exists
             if (!list_t) {
-                Error::abortRun(*this,"No DynBlock exists, so I can't 
-                delete one");
+                Error::abortRun(*this,
+                    "No DynBlock exists, so I can't delete one");
                 return;
             }
             else {
@@ -452,9 +452,9 @@ changes in HOF now. MutableCQScheduler incorporated by John S. Davis II}
         arglist { "(Block *block_p)" }
         code {
             for ( int i = 0; i < parameter_map.size()-1; i++ ) {
-                const char *name = parameter_map[i++];
+                const char *myName = parameter_map[i++];
                 const char *value = parameter_map[i];
-                block_p->setState(name, value);
+                block_p->setState(myName, value);
             }
             return;
         }
