@@ -509,6 +509,14 @@ int PTcl::link(int argc,char ** argv) {
 	return TCL_OK;
 }
 
+// Link multiple files.  If invoked as "permlink", the link will
+// be permanent.
+
+int PTcl::multilink(int argc,char ** argv) {
+	if (argc == 1) return usage("multilink <file1> [<file2>...]");
+	return Linker::multiLink(argc,argv) ? TCL_OK : TCL_ERROR;
+}
+
 // Override tcl exit function with one that does cleanup of the universe.
 int PTcl::exit(int argc,char ** argv) {
 	int estatus = 0;
@@ -536,6 +544,9 @@ struct InterpTableEntry {
 
 #define ENTRY(verb) { quote(verb), PTcl::verb }
 
+// synonyms or overloads on argv[0]
+#define ENTRY2(verb,action) { quote(verb), PTcl::action }
+
 // Here is the table.  Make sure it ends with "0,0"
 static InterpTableEntry funcTable[] = {
 	ENTRY(alias),
@@ -553,10 +564,12 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(exit),
 	ENTRY(knownlist),
 	ENTRY(link),
+	ENTRY(multilink),
 	ENTRY(newstate),
 	ENTRY(node),
 	ENTRY(nodeconnect),
 	ENTRY(numports),
+	ENTRY2(permlink,multilink),
 	ENTRY(printVerbose),
 	ENTRY(reset),
 	ENTRY(run),
