@@ -5,19 +5,13 @@ defstar {
     author	{ Mike J. Chen }
     location    { SDF matrix library }
     descriptor	{
-Generate a fixed-point data matrix X from a stream of input particles
-organized as shown below:
-
-        X = [   [ x(M-1)      x(M-1)  ...     x(0)    ]
-                [ x(M)        x(M)    ...     x(1)    ]
-                .
-                .
-                .
-                [ x(N-1)      x(N-2)  ...     x(N-M)] ]
-
-This Toeplitz matrix is the form of the matrix that is required by the SVD_M star,
+Generate a fixed-point data matrix X from a stream of input particles.
+The data matrix is a Toeplitz matrix such that the first row is
+[ x(M-1) x(M-2) ... x(0) ], the second row is [ x(M) x(M-1) x(M-2) ... x(2) ],
+and so forth until the last row, which is [ x(N-1) x(N-2) ... x(N-M) ].
+This is the form of the matrix that is required by the SVD_M star,
 among others.
-	} 
+    } 
     defstate {
 	name 	{ numRows }
 	type 	{ int }
