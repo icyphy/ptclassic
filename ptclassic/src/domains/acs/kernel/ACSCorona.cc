@@ -35,11 +35,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "ACSCorona.h"
+#include "ACSKnownCategory.h"
+#include "KnownBlock.h"
+
+extern "C" int
+KcCompileAndLink (const char* name, const char* idomain, const char* srcDir,
+  int permB, const char* linkArgs);
 
 // The following is defined in ACSDomain.cc -- this forces that module
 // to be included if any ACS stars are linked in.
 extern const char ACSdomainName[];
 
+// my domain.
 const char* ACSCorona :: domain () const { return ACSdomainName;}
 
 // isA
@@ -59,3 +66,37 @@ int ACSCorona::registerCore(ACSCore &core, const char* implementationName)
   // store pointer to core in the CoreList
   return 0;
 }
+
+// This method must be called in the default constructors of the derrived
+// corona classes.
+void ACSCorona::addCores() { 
+	StringList categories = getCoreCategories();
+	StringListIter next(categories);
+	StringList coreName;
+	const char* coronaName;
+	const char* domainName;
+	const char* category;
+	ACSCore* core;
+	const char* srcdir = getSrcDirectory();
+
+	initCoreFlag = 1;
+
+	
+	while ((category=next++) != 0) {
+		coronaName = className();
+		domainName = domain();
+		coronaName += strlen(domainName);
+		coreName << coronaName << category;
+		if ( (core =(ACSCore *)KnownBlock::find(coreName,domainName)) != NULL ) {
+			coreList.put(core->makeNew(*this));
+		} else {
+			if(!KcCompileAndLink(coreName, domainName, srcdir, 0, 0)) continue;
+			if ((core = (ACSCore *) KnownBlock::find(coreName,domainName)) != NULL ) {
+				coreList.put(core->makeNew(*this));
+				continue;
+			}
+			Error::warn("ACSCorona::addCores(): core compiled ok but still not known.");	
+		}
+	}
+}
+	
