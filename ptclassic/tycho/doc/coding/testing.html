@@ -426,7 +426,11 @@ constructors, and superclass.
 so that if the Java class definition changes, then the test will fail.
 This will hopefully prompt the developer to write a test for the
 changed feature.
-
+ <P>If a test fails because of changes in the values returned by
+<CODE>getJavaInfo</CODE>, then the way to fix the test is to run 
+the test and grab the strings actually returned and substitute it back
+into the test file.  Of course, you should write tests that cover any 
+changes reported by <CODE>getJavaInfo</CODE>.
 <HR>
 <H2><A NAME="testing documentation">Testing Documentation</A></H2>
 
