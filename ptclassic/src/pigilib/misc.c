@@ -120,7 +120,9 @@ long userOptionWord;
 	/* delay or palette inst is under cursor */
 	PrintErr("Cursor must be over a star");
     } else if (IsStar(&inst)) {
-	if (!KcProfile(AkoName(inst.contents.instance.master))) {
+	    /* autoload the star if necessary */
+	if (!AutoLoadCk(&inst) ||
+	    !KcProfile(AkoName(inst.contents.instance.master))) {
 	    PrintErr(ErrGet());
 	}
     } else {
