@@ -517,6 +517,7 @@ octObject *galFacetPtr;
 
     name = BaseName(galFacetPtr->contents.facet.cell);
     if (DupSheetIsDup(&traverse, name)) {
+	KcSetKBDomain(oldDomain);
 	return(TRUE);
     }
     ERR_IF2(!ProcessSubGals(galFacetPtr), msg);
@@ -547,6 +548,7 @@ octObject *galFacetPtr;
     if (!xferedBool) {
 	ERR_IF2(!DupSheetAdd(&xfered, name), msg);
     }
+    KcSetKBDomain(oldDomain);
     return (TRUE);
 }
 
