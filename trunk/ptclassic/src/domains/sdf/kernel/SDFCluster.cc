@@ -921,7 +921,8 @@ SDFAtomCluster::SDFAtomCluster(DataFlowStar& star,Galaxy* parent) : pStar(star)
 	DFPortHole* p;
 	while ((p = nextPort++) != 0) {
 		// do not make a port in the cluster if it is a "loopback" port
-		if (p->far()->parent() == &star) continue;
+		// also don't make a port for a wormhole connection.
+		if (p->atBoundary() || p->far()->parent() == &star) continue;
 		LOG_NEW; SDFClustPort *cp = new SDFClustPort(*p,this);
 		addPort(*cp);
 		cp->numIO();	// test
