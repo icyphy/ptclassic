@@ -1,8 +1,5 @@
 static const char file_id[] = "<T>Domain.cc";
 /**********************************************************************
-Version identification:
-$Id$ (<T>Domain.cc)
-
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
@@ -29,6 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmer:  J. T. Buck
  Date of creation: 7/2/90
+ Version: $Id$
 
  WARNING -- XDomain.ccP is a template file that is used to generate
  domain description modules.  If the name of this file is not XDomain.ccP,
@@ -41,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Domain.h"
 #include "Target.h"
+#include "Galaxy.h"
 #include "KnownTarget.h"
 #include "<T>Scheduler.h"
 #include "<T>Wormhole.h"
@@ -49,6 +48,9 @@ extern const char <T>domainName[] = "<T>";
 
 class <T>Domain : public Domain {
 public:
+	// constructor
+	<T>Domain() : Domain(<T>domainName) {}
+
 	// new wormhole
 	Star& newWorm(Galaxy& innerGal,Target* innerTarget)  {
 		LOG_NEW; return *new <T>Wormhole(innerGal,innerTarget);
@@ -59,9 +61,6 @@ public:
 
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new <T>toUniversal;}
-
-	// constructor
-	<T>Domain() : Domain("<T>") {}
 };
 
 // declare a prototype
@@ -71,13 +70,22 @@ static <T>Domain proto;
 
 class <T>Target : public Target {
 public:
-	<T>Target() : Target("default-<T>","<T>Star","default <T> target"){}
-	Block* makeNew() const { LOG_NEW; return new <T>Target;}
+	// Constructor
+	<T>Target() : Target("default-<T>", "<T>Star", "default <T> target"){}
+
+	// Destructor
 	~<T>Target() { delSched();}
 
+	// Return a copy of itself
+	/*virtual*/ Block* makeNew() const { LOG_NEW; return new <T>Target;}
+
+	// Return the domain of the galaxy if it exists and "<T>" otherwise
+	/*virtual*/ const char* domain() {
+		return galaxy() ? galaxy()->domain() : <T>domainName;
+	}
+
 protected:
-	void setup()
-	{
+	void setup() {
 		if (!scheduler()) { LOG_NEW; setSched(new <T>Scheduler); }
 		Target::setup();
 	}
