@@ -95,6 +95,8 @@ vis_d64 $sharedSymbol(CGCVISStereoBiquad,mult2x2d)(vis_f32 mult1,vis_f32 mult2) 
 	}
         initCode{
 	  CGCVISBase::initCode();
+	  addInclude("<vis_types.h>");
+	  addInclude("<vis_proto.h>");
 	  addProcedure(quadmult,"CGCVISStereoBiquad_mult2x2d");
           addDeclaration(mainDecl);
 	  addCode(settapDef);
