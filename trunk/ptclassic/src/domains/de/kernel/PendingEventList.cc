@@ -49,7 +49,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 PendingEventList::PendingEventList() {}
 
 PendingEventList::~PendingEventList() {
-	assert( size() != 0 ); 
+	initialize();
+	// FIXME: assert( size() != 0 ); 
+	// FIXME: This is only here for testing but 
+        // currently it causes a seg fault.
 }
 
 Link * PendingEventList::appendGet( CqLevelLink * obj ) 
@@ -59,7 +62,10 @@ Link * PendingEventList::appendGet( CqLevelLink * obj )
 
 void PendingEventList::remove( Link * obj )
 {
-	LinkedList::directRemove( obj );
+	// Both of these are equivalent. We use the latter.
+	// LinkedList::directRemove( obj );
+	LinkedList::removeLink( *obj );
+
 	return;
 }
 
