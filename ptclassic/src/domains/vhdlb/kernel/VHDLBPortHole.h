@@ -46,6 +46,9 @@ public:
 	VHDLBPortHole() {}
 	~VHDLBPortHole() {}
 
+	// Allocate a geodesic and give it a name
+	/* virtual */ Geodesic* allocateGeodesic();
+
 	VHDLBPortHole* getForkSrc() { return (VHDLBPortHole*) forkSrc; }
 
 	// const version
@@ -77,8 +80,8 @@ public:
 	const char* getGeoName() const;
 
 	// Return the geodesic connected to this PortHole.
-	// This is typesafe because allocateGeodesic
-	// makes myGeodesic of this type.
+	// This is typesafe because allocateGeodesic has been
+	// redefined to make myGeodesic of type VHDLFGeodesic.
 	VHDLBGeodesic& geo() { return *(VHDLBGeodesic*)myGeodesic;}
 
 	// const version
