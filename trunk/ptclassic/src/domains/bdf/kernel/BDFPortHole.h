@@ -54,6 +54,8 @@ enum BDFRelation {
 class BDFPortHole : public DynDFPortHole
 {
 public:
+	BDFPortHole() : alreadyReadFlag(0) {}
+
 	// cast is safe because of restrictions on setting of assocPort
 	BDFPortHole* assoc() { return (BDFPortHole*)assocPort();}
 
@@ -95,8 +97,15 @@ public:
 		return setBDFParams(numTokens,&assocBool,relation,delay);
 	}
 
+	// fns for the "already read" flag, for dynamic execution.
+	// flag is set by receiveData in input portholes.
+	int alreadyRead() const { return alreadyReadFlag;}
+	void clearReadFlag() { alreadyReadFlag = FALSE;}
+
 	// table for use of "reversals" function
 	static BDFRelation reversals[4];
+protected:
+	int alreadyReadFlag;
 };
 
 	///////////////////////////////////////////

@@ -26,6 +26,7 @@ int InBDFPort :: isItInput () const { return TRUE;}
 // associated booleans, an arc is not to consume or produce tokens.
 void InBDFPort :: receiveData () {
 	getParticle();
+	alreadyReadFlag = TRUE;
 }
 
 int OutBDFPort :: isItOutput () const { return TRUE;}
@@ -55,6 +56,7 @@ PortHole& BDFPortHole :: setBDFParams(unsigned num,BDFPortHole* assoc,
 				      BDFRelation sense, int delay) {
 	numberTokens = num;
 	bufferSize = numberTokens + delay;
+	alreadyReadFlag = FALSE;
 	setRelation(sense,assoc);
 	if (myBuffer && myBuffer->size() != bufferSize)
 		initialize();
