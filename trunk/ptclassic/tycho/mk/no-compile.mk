@@ -79,7 +79,7 @@ endif
 
 # Generate html files from itcl files, requires itclsh and tycho
 itcldocs:
-	@if [ $(TYDOC_DESC) = "" ] ; then \
+	@if [ "$(TYDOC_DESC)" = "" ] ; then \
 		echo "$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS)"; \
 	 	$(ROOT)/tycho/lib/tydoc/tydoc $(ITCL_SRCS); \
 	else \
