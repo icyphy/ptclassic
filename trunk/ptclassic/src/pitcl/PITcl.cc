@@ -708,6 +708,61 @@ int PTcl::matlab(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// isGalaxy
+// Return 1 if the specified block is a galaxy.  Return 0 otherwise.
+// A wormhole is not galaxy for these purposes, since normally you cannot
+// see inside.
+//
+int PTcl::isGalaxy (int argc,char ** argv) {
+    if (argc != 2)
+    return usage ("isGalaxy <blockname>");
+    const Block* b = getBlock(argv[1]);
+    if (!b) return TCL_ERROR;
+    if (b->isItAtomic()) {
+        result("0");
+    } else {
+        result("1");
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// isMultiPort
+// Return 1 if the specified port is a multiport.  Return 0 otherwise.
+// A multiport in Ptolemy is a port that contains any number of other ports.
+//
+int PTcl::isMultiPort (int argc,char ** argv) {
+    if (argc != 2)
+    return usage ("isMultiPort <portname>");
+    GenericPort* b = getPort(argv[1]);
+    if (!b) return TCL_ERROR;
+    if (b->isItMulti()) {
+        result("1");
+    } else {
+        result("0");
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
+//// isWormhole
+// Return 1 if the specified block is a Wormhole.  Return 0 otherwise.
+// A Wormhole in Ptolemy is a star that contains a galaxy.
+//
+int PTcl::isWormhole (int argc,char ** argv) {
+    if (argc != 2)
+    return usage ("isWormhole <blockname>");
+    const Block* b = getBlock(argv[1]);
+    if (!b) return TCL_ERROR;
+    if (b->isItWormhole()) {
+        result("1");
+    } else {
+        result("0");
+    }
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// mathematica
 // FIXME: Documentation.
 // we make mathematicatcl a static instance of the MathematicaTcl class
@@ -790,6 +845,44 @@ int PTcl::ports(int argc,char** argv) {
 }
 
 /////////////////////////////////////////////////////////////////////////////
+//// portsContained
+// Return a list of ports contained by the given multiport. If the
+// -deep option is given, then return the lowest level ports in the alias
+// chain, which are always star ports.  Otherwise, the returned ports
+// may be galaxy ports.  It is an error if the named port is not a multiport.
+//
+int PTcl::portsContained(int argc,char** argv) {
+    int deep=0;
+    char* portname=NULL;
+    for (int i=1; i < argc; i++) {
+        if (strcmp(argv[i],"-deep") == 0) deep = 1;
+        else if (portname != NULL) {
+            return usage ("portsContained ?-deep? <portname>");
+        } else portname = argv[i];
+    }
+    if (portname == NULL) return usage ("connected ?-deep? <portname>");
+
+    GenericPort* gp = getPort(portname);
+    if (!gp) return TCL_ERROR;
+
+    // Translate aliases downward if necessary.
+    if (deep) {
+        while (gp->alias()) gp = gp->alias();
+    }
+    if (!gp->isItMulti()) {
+        InfString msg = portname;
+        msg << " is not a multiport.";
+        result(msg);
+        return TCL_ERROR;
+    }
+    // Cast is safe as port is multi.
+    MPHIter next(*((MultiPortHole*) gp));
+    PortHole* ph;
+    while ((ph = next++) != 0) addResult(fullName(ph));
+    return TCL_OK;
+}
+
+/////////////////////////////////////////////////////////////////////////////
 //// remove
 // Delete the specified block.
 //
@@ -851,6 +944,7 @@ int PTcl::remove(int argc,char** argv) {
 //// univlist
 // Return a list of the names of the known universes.
 // Each name begins with a dot, and hence is absolute.
+// FIXME: rename.
 //
 int PTcl::univlist(int argc,char **) {
     if (argc > 1) return usage("univlist");
@@ -1064,11 +1158,13 @@ const Block* PTcl::getParentBlock(const char* name) {
     }
     // Copy all but the last dot and name into a buffer.
     // The input buffer is always long enough.
-    char buf[strlen(name)];
+    char* buf = new char[strlen(name)];
     int n = p - name;
     strncpy (buf, name, n);
     buf[n] = 0;
-    return (getBlock(buf));
+    const Block* b = getBlock(buf);
+    delete [] buf;
+    return (b);
 }
 
 /////////////////////////////////////////////////////////////////////////////
@@ -1623,32 +1719,6 @@ int PTcl::knownlist (int argc,char** argv) {
     return TCL_OK;
 }
 
-int PTcl::isgalaxy (int argc,char ** argv) {
-    if (argc != 2)
-    return usage ("isgalaxy <block>");
-    const Block* b = getBlock(argv[1]);
-    if (!b) return TCL_ERROR;
-    if (b->isItAtomic()) {
-        result("0");
-    } else {
-        result("1");
-    }
-    // empty value returned for atomic blocks
-    return TCL_OK;
-}
-
-int PTcl::iswormhole (int argc,char ** argv) {
-    if (argc != 2)
-    return usage ("iswormhole <block>");
-    const Block* b = getBlock(argv[1]);
-    if (!b) return TCL_ERROR;
-    if (b->isItWormhole()) {
-        result("1");
-    } else {
-        result("0");
-    }
-    return TCL_OK;
-}
 
 // return the list of states, ports, or multiports in the given block.
 // The first argument, specifying states, ports, or multiports, must
@@ -1735,6 +1805,8 @@ static int legalTarget(const char* domName, const char* targetName) {
 // display or change the domain.  If on top level, the existing target
 // is not legal for the new domain, it reverts to to the default for the
 // new domain.
+// NOTE: This changes the current domain globally.
+// FIXME: Probably defgalaxy should restore the domain after it is done.
 
 int PTcl::domain(int argc,char ** argv) {
     if (argc > 2)
@@ -2142,8 +2214,9 @@ static InterpTableEntry funcTable[] = {
     ENTRY(getParent),
     ENTRY(halt),
     ENTRY(initialize),
-    ENTRY(isgalaxy),
-    ENTRY(iswormhole),
+    ENTRY(isGalaxy),
+    ENTRY(isMultiPort),
+    ENTRY(isWormhole),
     ENTRY(knownlist),
     ENTRY(link),
     ENTRY(listobjs),
@@ -2157,6 +2230,7 @@ static InterpTableEntry funcTable[] = {
     ENTRY(pragma),
     ENTRY(pragmaDefaults),
     ENTRY(ports),
+    ENTRY(portsContained),
     ENTRY(remove),
     ENTRY(renameuniv),
     ENTRY(registerAction),
