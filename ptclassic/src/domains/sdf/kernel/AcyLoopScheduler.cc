@@ -1555,7 +1555,7 @@ int AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
 // this is called from SDFScheduler::run
 void AcyLoopScheduler::runOnce()
 {
-    runOnce(0,graphSize-1,1);
+    (void)runOnce(0,graphSize-1,1);
 }
 
 /****
@@ -1566,7 +1566,7 @@ This <code>runOnce(int,int,int)</code> actually does the work.
 to the schedule.
 
 ****/
-void AcyLoopScheduler::runOnce(int i, int j, int g)
+int AcyLoopScheduler::runOnce(int i, int j, int g)
 {
     int N = j-i+1;
     int g_ij = gcdMatrix.m[i][j];
@@ -1577,16 +1577,16 @@ void AcyLoopScheduler::runOnce(int i, int j, int g)
 	s = nodelist[topSort[i]];
 	for (int k = 0; k < loopFac; k++) {
 	    invalid = !s->run();
-	    if (invalid) break;
+	    if (invalid) return FALSE;
 	}
-	return;
+	return TRUE;
     } else {
 	split = splitMatrix.m[i][j];
 	for (int k = 0; k < loopFac; k++) {
-	    runOnce(i,split,g_ij);
-	    runOnce(split+1,j,g_ij);
+	    if(!runOnce(i,split,g_ij)) return FALSE;
+	    if(!runOnce(split+1,j,g_ij)) return FALSE;
 	}
-	return;
+	return TRUE;
     }
 }
 
