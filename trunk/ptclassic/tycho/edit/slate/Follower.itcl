@@ -96,18 +96,17 @@ body ::tycho::Follower::activate {t x y} {
     if { [string match {_*} $t] || [string match {[0-9]*} $t] } {
 	target $t
     } else {
-	# FIXME: current{} is not implemented!
-	target [current]
+	target [$slate find withtag current]
     }
 
     # Set up the bindings. Note: the bindings are set to the tag,
-    # not to the current object.
+    # not to the current object. -- WHY???
     foreach b $button {
 	$slate bind $tag \
-		[::tycho::Interactor::event Motion -button $b ] \
+		[::tycho::Interactor::event Motion -button $b] \
 		[list @scope [info class] "$this drag %x %y; update idletasks"]
 	$slate bind $tag \
-		[::tycho::Interactor::event Release -button $b ] \
+		[::tycho::Interactor::event Release -button $b] \
 		[list @scope [info class] "$this release; $this deactivate"]
     }
 

@@ -37,9 +37,12 @@ uplevel #0 {
 
     array set Solid [array get Picture]
 
-    set Solid(construct) ::tycho::Solid::construct
-    set Solid(coords)    ::tycho::Solid::coords
-    set Solid(ghost)     ::tycho::Solid::ghost
+    set Solid(borderwidth) ::tycho::Solid::borderwidth
+    set Solid(color)       ::tycho::Solid::color
+    set Solid(construct)   ::tycho::Solid::construct
+    set Solid(coords)      ::tycho::Solid::coords
+    set Solid(ghost)       ::tycho::Solid::ghost
+    set Solid(relief)      ::tycho::Solid::relief
 }
 
 
@@ -48,7 +51,7 @@ uplevel #0 {
 # A 3D polygon. This accepts all "standard" relief options: flat,
 # raised, sunken, ridge, and groove. Because
 # of some funnies with Tk's coordinates, the last two don't work too
-# well with sharp angles ( < 25 or so), but with moderate angles
+# well with sharp angles (< 25 or so), but with moderate angles
 # they look fine.
 #
 class ::tycho::Solid {
