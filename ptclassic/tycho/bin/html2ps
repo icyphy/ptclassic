@@ -150,15 +150,19 @@ proc htmlDir2ps {indexfile psfile} {
     update
 
     eval ::tycho::rm -f $pslist
-
-
-    html2ps $filesSeen
     
     puts "About to generate postscript"
     flush stdout
     update
+    html2ps $filesSeen
 
+    puts "About to generate concat PostScript into one file"
+    flush stdout
+    update
     psConcat $psfile $pslist
+
+    eval ::tycho::rm -f $pslist
 }
 
 htmlDir2ps $TYCHO/doc/index.html $TYCHO/doc/tycho.ps
+::tycho::TopLevel::exitProgram 0
