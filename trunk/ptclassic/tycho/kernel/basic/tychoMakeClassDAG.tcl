@@ -71,9 +71,9 @@ proc tychoMkClassGraph {name filename args} {
 
     # Put in titles and a reasonable default size.
     puts $fd "\{configure -canvasheight 600\} \{configure -canvaswidth 800\}"
-    puts $fd "\{centeredText \{$name\} title \{\} black \{\{helvetica 24 bold i\} \{times 24 bold i\}\}\}"
+    puts $fd "\{titleSet title \{Tycho Class Hierarchy\}\}"
     # NOTE: Unix-only implementation:
-    puts $fd "\{centeredText \{created: [exec date]\} subtitle title firebrick \{\{helvetica 16 bold i\} \{times 16 bold i\}\}\}"
+    puts $fd "\{titleSet subtitle \{created: [exec date]\}\}"
     foreach nm [array names classfile] {
         set pnt $parent($nm)
         set rxp "\[ \t\]*class\[ \t\]+$nm"
