@@ -1,4 +1,4 @@
-/**************************************************************************
+/******************************************************************
 Version identification:
 $Id$
 
@@ -35,16 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // get size_t definition
 #include <sys/types.h>
+#include "compat.h"		/* Pickup PTSOL2 etc. */
 
-#if defined(__sparc) && defined(__svr4__)
-#define SOL2
-#endif
-
-#if defined(__sparc) && ! defined (__svr4__) && defined(__GNUG__)
-#define SUN4
-#endif
-
-#if defined(__alpha)
+#ifdef PTALPHA
 #define LINKING_NOT_SUPPORTED
 #endif
 
@@ -65,36 +58,36 @@ const int linkingNotSupported =
 // dlopen() style linking works under sun4, but if you try and load a
 // star that has undefined symbols, pigiRpc or ptcl will exit.
 
-#if defined(__sgi) || defined(SOL2)
+#if defined(PTIRIX5) || defined(PTSOL2)
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
 
 // Don't use RTLD_GLOBAL, or if you reload a star, you won't see the changes
-#if defined(__sgi)
+#ifdef PTIRIX5
 // Under sgi, don't use sgidladd, or you won't see changes
 #define DLOPEN dlopen
 #define DLOPEN_FLAGS RTLD_NOW
-#endif // __sgi
+#endif // PTIRIX5
 
-#if defined(SOL2) || defined(SUN4)
+#if defined(PTSOL2) || defined(PTSUN4)
 #define DLOPEN dlopen
-#if defined(SOL2)
+#ifdef PTSOL2
 #define DLOPEN_FLAGS RTLD_NOW
 #else
 // defined(sun)
 #define DLOPEN_FLAGS RTLD_LAZY
-#endif // SOL2
-#endif // SOL2 || SUN4
+#endif // PTSOL2
+#endif // PTSOL2 || PTSUN4
 
-#if defined(__GNUG__)
-#if defined(SOL2) || defined (sgi)
+#ifdef __GNUG__
+#if defined(PTSOL2) || defined (PTIRIX5)
 #define SHARED_OBJECT_COMMAND "g++ -shared -o"
 #else
-#if defined(SUN4)
+#ifdef PTSUN4
 #define SHARED_OBJECT_COMMAND "ld -z -o"
-#endif // SUN4
-#endif // SOL2
+#endif // PTSUN4
+#endif // PTSOL2
 #else // __GNUG__
 #define SHARED_OBJECT_COMMAND "CC -G -o"
 #endif // __GNUG__
@@ -102,39 +95,39 @@ const int linkingNotSupported =
 
 // The loader should do incremental linking; use a 4.3/Sun-style loader
 // or use the Gnu loader.
-#if defined(__sgi) || defined (sgi) || defined (__linux)
+#if defined(PTIRIX5) || defined (PTIRIX5) || defined (PTLINUX)
 // For USE_DLOPEN, we need ld so we can process .o files into .so files
 #define LOADER "/usr/bin/ld"
 #else
-#if defined(SOL2)
+#ifdef PTSOL2
 #define LOADER "/usr/ccs/bin/ld"
 #else
 #define LOADER "/bin/ld"
-#endif // SOL2
-#endif // sgi
+#endif // PTSOL2
+#endif // PTIRIX5
 
 // Full pathname of the "nm" program; it reads symbol names from a .o
 // file.  Do NOT use a "demangling" version such as gnu nm.
 
-#if defined(__sgi) || defined (sgi) || defined (__linux)
+#if defined(PTIRIX5) || defined (PTIRIX5) || defined (PTLINUX)
 #define NM_PROGRAM "/usr/bin/nm"
 #else
-#if defined(SOL2)
+#ifdef PTSOL2
 #define NM_PROGRAM "/usr/ccs/bin/nm"
 #else
 #define NM_PROGRAM "/bin/nm"
-#endif // SOL2
-#endif // sgi
+#endif // PTSOL2
+#endif // PTIRIX5
 
 // Options to give the loader.  We also give it "-T hex-addr" to specify
 // the starting address and "-A ptolemy-name" to get the symbols for the
 // running executable.
 // linux note: this should be OK for binutils-1.9, but new versions will
 // use different flags :( neal@ctd.comsat.com ):
-#ifdef hpux
+#ifdef PTHPPA
 #define LOADOPTS "-N -x -a archive"
 #define LOC_OPT "-R"
-#else  // !hpux
+#else  // !PTHPPA
 #define LOC_OPT "-T"
 #ifdef mips
 #define __mips 1
@@ -142,13 +135,13 @@ const int linkingNotSupported =
 #else // mips
 #define LOADOPTS "-N -x"
 #endif // !mips
-#endif // !hpux
+#endif // !PTHPPA
 
-#ifdef hpux
+#ifdef PTHPPA
 #define DYNLIB "/lib/dyncall.o"
-#else // !hpux
+#else // !PTHPPA
 #define DYNLIB ""
-#endif // hpux
+#endif // PTHPPA
 
 // The assembler to use
 #define ASSEMBLER "as"
@@ -157,21 +150,21 @@ const int linkingNotSupported =
 #define TEXT_DIR ".text"
 
 // This directive should declare an address word
-#if defined(mips) || defined(hpux)
+#if defined(PTULTRIX) || defined(PTHPPA)
 #define ADDR_WORD ".word"
 #else
 #define ADDR_WORD ".long"
 #endif
 
 // hp-ux does not provide this function; may need to be changed
-#ifdef hpux
+#ifdef PTHPPA
 inline size_t getpagesize() { return 4096;}
 #else
-#ifdef __linux
+#if defined(PTLINUX) || defined(PTALPHA)
 #include <unistd.h>
-#else /* __linux */
+#else /* PTLINUX || PTALPHA */
 #ifdef __GNUG__
-#if defined(__sgi) || defined(sgi)
+#ifdef PTIRIX5
 #if defined(__SYSTYPE_SVR4) || defined(SYSTYPE_SVR4)
 /* SGI irix5 */
 extern "C" int getpagesize(void);
@@ -183,7 +176,7 @@ extern "C" size_t getpagesize(void);
 #endif
 #endif
 
-#if defined(SOL2) && ! defined(__GNUG__)
+#if defined(PTSOL2) && ! defined(__GNUG__)
 // Don't call InvokeConstructors if gcc-2.5.8 has Ron Guilmette's SVR4
 // patches, or if we are using CC.  Right now we only use this code
 // with CC. gcc-2.6.0 seems to require that InvokeConstructors be run.
@@ -214,17 +207,17 @@ extern "C" size_t getpagesize(void);
 #if ! defined(NO_INVOKECONSTRUCTORS)
 // Prefix for constructor-calling symbols
 // This is an attempt to support both g++ and cfront.
-#if defined(__GNUG__)
-#if defined(mips) || defined(hpux)
-#if defined(__sgi) || defined(sgi)
+#ifdef __GNUG__
+#if defined(mips) || defined(PTHPPA)
+#if defined(PTIRIX5) || defined(PTIRIX5)
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else
 #define CONS_PREFIX "_GLOBAL_$I$"
 #define CONS_LENGTH 11
-#endif // sgi
-#else /* g++, nonmips & nonhpux */
-#if defined(SOL2)
+#endif // PTIRIX5
+#else /* g++, nonmips & nonPTHPPA */
+#ifdef PTSOL2
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else /*SOL2*/
@@ -233,33 +226,33 @@ extern "C" size_t getpagesize(void);
 #endif/*SOL2*/
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
-#if defined(hpux) || defined(SOL2)
+#if defined(PTHPPA) || defined(PTSOL2)
 
 // These definitions also work with Sun Solaris2.3 CC3.0, but not
 // with CC4.0.  Sol2 CC4.0 uses ctv as a constructor suffix
 #define CONS_PREFIX "__sti"
 #define CONS_LENGTH 5
-#else // hpux || sol2
+#else // PTHPPA || sol2
 #define CONS_PREFIX "___sti"
 #define CONS_LENGTH 6
-#endif // hpux || SOL2
+#endif // PTHPPA || SOL2
 #endif
 #endif // NO_INVOKECONSTRUCTORS
 
-#if defined(hpux) || defined(__sgi) || defined(sgi) || defined(SOL2)
+#if defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2)
 // -p print easily parsable, terse output
 // -h don't print the output heading data
 // -x print in hex rather than decimal
 #define NM_OPTIONS "-phx"
 #else
-#ifdef __linux
+#ifdef PTLINUX
 #define NM_OPTIONS "-g --no-cplus"
 #else
 #define NM_OPTIONS "-g"
 #endif
 #endif
 
-#if defined(hpux)
+#ifdef PTHPPA
 // On the hppa a symbol can have the same name in the code and an
 // entry segments.  nm -p cannot differentiate between the two, so we
 // define a separate method of checking for symbols
@@ -281,7 +274,7 @@ extern "C" size_t getpagesize(void);
 struct flock;
 
 extern "C" {
-#ifdef hpux
+#ifdef PTHPPA
 #include <a.out.h>
 #else
 #ifdef mips
@@ -294,21 +287,21 @@ extern "C" {
 #endif
 }
 
-#if defined(hpux) || defined(SOL2) || defined(SYSV) || defined(SVR4)
+#if defined(PTHPPA) || defined(PTSOL2) || defined(SYSV) || defined(SVR4)
 #include <fcntl.h>
 #endif
 
-#if defined(SOL2)
+#ifdef PTSOL2
 #include <unistd.h>
 #endif
 
 // Sun4: don't include nlist.h after a.out.h, or nlist will be
 // multiply defined.
-#ifdef hpux
+#ifdef PTHPPA
 #include <nlist.h>
 #include <stdlib.h>
 extern "C" {int nlist(char *, struct nlist *);};
-#endif //hpux
+#endif //PTHPPA
 
 #include <std.h>
 #ifndef mips
@@ -343,7 +336,7 @@ inline void makeExecutable(size_t size, int pagsiz, char* init_fn) {
 // macros to read in the object file -- too tightly coupled with
 // variables in readInObj, but...
 
-#ifdef hpux
+#ifdef PTHPPA
 extern "C" { void flush_cache(void *, size_t);};
 #define INITIALIZE() \
   (memset((void *) (h2.exec_dmem + h2.exec_dsize), 0, (size_t) (h2.exec_bsize)))
@@ -355,7 +348,7 @@ extern "C" { void flush_cache(void *, size_t);};
 #define FLUSH_CACHE() /* nothing */
 #endif
 
-#ifdef hpux
+#ifdef PTHPPA
 #define READOBJ_FAIL \
 (lseek (fd, (off_t) h2.exec_tfile, SEEK_SET) < 0 ||\
  read (fd, (void *) h2.exec_tmem, (size_t) h2.exec_tsize) < h2.exec_tsize ||\
@@ -371,7 +364,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #define OBJ_SIZE (size_t)((h2.exec_dmem - h2.exec_tmem) \
 			 + h2.exec_dsize + h2.exec_bsize)
 
-#endif /* hpux */
+#endif /* PTHPPA */
 
 #ifdef COFF
 #define STRUCT_DEFS filehdr h1;	aouthdr h2
@@ -386,7 +379,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 
 #endif
 
-#if defined(sun) || defined(vax)
+#if defined(PTSUN4) || defined(PTSOL2) || defined(vax)
 #if !defined(USE_DLOPEN)
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
@@ -396,7 +389,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 #endif
 
-#ifdef __linux
+#ifdef PTLINUX
 #define STRUCT_DEFS exec header
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
 #define OBJ_READ_SIZE ((size_t)(header.a_text + header.a_data))
@@ -407,7 +400,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif
 
 
-#if defined(LINKING_NOT_SUPPORTED) || defined(SOL2)
+#if defined(LINKING_NOT_SUPPORTED) || defined(PTSOL2)
 #define STRUCT_DEFS
 #define READHEAD_FAIL 1
 #define READOBJ_FAIL 1
@@ -416,7 +409,7 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
 #endif // LINKING_NOT_SUPPORTED
 
 // alpha stuff
-#if defined(__alpha)
+#ifdef PTALPHA
 inline int getpagesize() { return 4096;}
 // ugly hack to get around a bug in the popen prototype for Alpha/OSF
 #define ALPHAFIX (char*)(const char*)
