@@ -25,6 +25,12 @@ directory.
 There are several ways to run the tests
 <OL>
 
+
+<LI> The <A
+HREF="../../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
+has a <CODE>Test</CODE> menu which has choices for the tests arranged
+by directory.
+
 <LI> Open a test file such as <A
 HREF="../../kernel/test/testStack.itcl"><CODE>$TYCHO/kernel/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
 the <CODE>Evaluate</CODE> choice from the <CODE>File</CODE> menu (<CODE>C-x C-r</CODE>.
@@ -76,7 +82,11 @@ with the command: <CODE>make tests</CODE>
 <H3>Writing your own tests</H3>
 
 The test suite infrastructure is based on the Itcl test suite code,
-which is in turn based on the Tcl test suite code.
+which is in turn based on the Tcl test suite code.  The 
+<A HREF="../../editors/textedit/doc/usersGuides/EditItclHelp.html">Itcl Editor</A> has a <CODE>Test Template</CODE> under the <CODE>Special</CODE>
+menu.  This menu choice loads the file
+<A HREF="../../editors/textedit/templates/testTemplate.itcl"><CODE>$TYCHO/editors/textedit/templates/testTemplate</CODE></A> into the Itcl editor.
+
 
  <P>The file <A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A> defines the tcl proc <CODE>test</CODE>.
 
