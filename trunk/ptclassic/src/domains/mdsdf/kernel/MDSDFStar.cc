@@ -68,7 +68,7 @@ void MDSDFStar::initialize() {
   initPortCounts();  // defined in DataFlowStar
 }
 
-int MDSDFStar::simRunStar(int rIndex, int cIndex, int deferFiring) {
+int MDSDFStar::simRunStar(int rIndex, int cIndex, int /*deferFiring*/) {
   if(!okSDF()) return FALSE;  // might want to change to MDSDF specific check
   rowIndex = rIndex;
   colIndex = cIndex;
