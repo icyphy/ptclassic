@@ -107,8 +107,7 @@ proc tydoc {args} {
 	    set verbose 1
 	    incr switchCount
 	} 
-	if { [ lindex $args
- $n] == "-d" } {
+	if { [ lindex $args $n] == "-d" } {
 	    set debug 1
 	    incr switchCount
 	}
