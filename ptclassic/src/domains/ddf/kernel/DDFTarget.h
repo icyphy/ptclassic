@@ -89,11 +89,24 @@ public:
 	// firings in one iteration. A value of zero is interpreted
 	// as "don't care".
 	StringList hint () { return "firingsPerIteration INT 0"; }
+
+	// To determine the value of all hints that have been
+	// specified for a particular block, call this method.
+	// It returns a list of "name value" pair, separated by spaces,
+	// or an empty string if there is no hint for this block.
 	StringList hint (const char* blockname);
+
+	// To determine the value of a hint of a particular type
+	// that has been specified for a particular block, call this
+	// method. It returns a value or an empty string.
 	StringList hint (const char* blockname, const char* hintname);
+
+	// To specify a hint to a target, call this method.
+	// The return value is always a null string.
 	StringList hint (const char* blockname,
-			 const char* name,
-			 const char* value);
+		   const char* name,
+		   const char* value);
+
 private:
 	TextTable firings;
 };
