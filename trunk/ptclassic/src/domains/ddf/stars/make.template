@@ -15,18 +15,19 @@ VPATH = $(ROOT)/src/domains/ddf/stars
 KERNDIR = $(ROOT)/src/kernel
 # DDFDIR is the directory containing DDF domain support
 DDFDIR = $(ROOT)/src/domains/ddf/kernel
+DYCONDIR = $(ROOT)/src/domains/ddf/constructs
 # SDFDIR is the directory containing SDF domain support (also needed)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
 GPPFLAGS = -g
 GNU = g++
-INCL = -I$(DDFDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(DDFDIR) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
 GNULIB = /usr/gnu/lib
 GNUINCLUDE = $(GNULIB)/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(DDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
+	$(GNU) $(GPPFLAGS) $(INCL) -I$(VPATH) -c  $<
 
 .pl.cc:
 	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
