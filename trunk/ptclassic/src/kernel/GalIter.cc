@@ -45,7 +45,7 @@ at every level.
 // This private class is a stack of GalTopBlockIter iterators.
 
 class IterContext {
-	friend GalAllBlockIter;
+	friend class GalAllBlockIter; // gcc-3.0 friend decl requires class-key
 
 	GalTopBlockIter* iter;
 	IterContext* link;
@@ -108,7 +108,7 @@ void GalAllBlockIter::remove() {
 }
 
 class CIterContext {
-	friend CGalAllBlockIter;
+	friend class CGalAllBlockIter; //gcc-3.0 friend decl requires class-key
 
 	CGalTopBlockIter* iter;
 	CIterContext* link;
