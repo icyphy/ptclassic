@@ -1,6 +1,7 @@
 defstar {
 	name { TkImageDisplay }
 	domain { SDF }
+	derived { TclScript }
 	version { $Id$ }
 	author { Mei Xiao }
 	copyright {
@@ -21,13 +22,6 @@ black-and-white images.  When the star has three input ports, the
 star treats the matrices as given the red, green, blue intensities,
 respectively, of a color image.
 	}
-	inmulti {
-		name { input }
-		type { FLOAT_MATRIX_ENV }
-		desc {
-It is used to get raw image data from the Matrix star immediately before.
-		}
-	}
 	state {
 		name { ptimage_name }
 		type { string }
@@ -37,31 +31,15 @@ The base name given to create a ptimage image for the image data in memory
 		}
 		attributes { A_CONSTANT|A_NONSETTABLE }
 	}
-	state { 
-		name { tcl_script }
-		type { string }
-		default {"$PTOLEMY/src/domains/sdf/tcltk/stars/tkImageDisplay.tcl"}
-		desc {
-File from which to read the Tk script, where Tcl procedures such as
-goTcl_$dispStarID and wrapup_$dispStarID, etc. could be defined, and
-the windows' display could get more tuned by user.
-		}
-		attributes { A_CONSTANT|A_NONSETTABLE }
-	}
-
 	hinclude { "Matrix.h", "InfString.h" }
-	ccinclude { <stdlib.h>, "ptkTclCommands.h" }
 	header {
 extern "C" {
-#include "tk.h"
-extern Tcl_Interp *ptkInterp;		/* FIXME: should be #include "ptk.h" */
 #include "ptkImage.h"
 }
 
 #define GRAYSCALE 1
 #define FULLCOLOR 2
-
-// maximum # of color entries in colormap, 256 for PseudoColor Visual
+/* maximum # of color entries in colormap, 256 for PseudoColor Visual */
 #define NUM_COLORCELLS 256
 	}
 
@@ -98,37 +76,29 @@ extern Tcl_Interp *ptkInterp;		/* FIXME: should be #include "ptk.h" */
 	}
 
 	constructor {
+		// Reset data type of input port to be floating-point matrix
+		input.setPort("output", this, FLOAT_MATRIX_ENV);
+
 		dispStarID = "Display";
 		dispStarID += ++starSuffix;
 	}
 
 	destructor {
-		if (!ptkInterp) return;
-
-		// Invoke the Tcl destructor procedure, if defined
-
-		InfString command = "info procs destructorTcl_";
-		command << dispStarID;
-		if (Tcl_GlobalEval(ptkInterp, (char *)command) == TCL_OK &&
-		    strlen(ptkInterp->result) != 0)
-		    callTclProc("destructorTcl");
-
-		// Delete Tcl commands created for this star
-		command = "goTcl_"; command += dispStarID;
-		Tcl_DeleteCommand(ptkInterp, (char *)command);
-		command = "wrapupTcl_"; command += dispStarID;
-		Tcl_DeleteCommand(ptkInterp, (char *)command);
-		command = "destructorTcl_"; command += dispStarID;
-		Tcl_DeleteCommand(ptkInterp, (char *)command);
-		Tcl_UnsetVar(ptkInterp, (char *)dispStarID, TCL_GLOBAL_ONLY);
-		Tcl_UnsetVar(ptkInterp, (char *)frameID, TCL_GLOBAL_ONLY);
-	   
-		// Reset memeber starSuffix back to zero so that things don't
+		// Reset member starSuffix back to zero so that things don't
 		// go wrong in next simulation
 		starSuffix = 0;
 	}
  
+	setup {
+		if (output.numberPorts() > 0) {
+		    Error::abortRun(*this, "Outputs not supported");
+		    return;
+		}
+	}
+
 	begin {
+		tcl_file = "$PTOLEMY/src/domains/sdf/tcltk/stars/tkImageDisplay.tcl";
+
 		// Make sure the image has a unique ID when this run starts
 		frameID = "_Frame";
 		frameID += ++frameSuffix;
@@ -186,17 +156,10 @@ extern Tcl_Interp *ptkInterp;		/* FIXME: should be #include "ptk.h" */
 		    return;
 		}
 
-		// III -- now source the Tcl script
-		command = "source ";
-		command += tcl_script;
-
-		if (Tcl_GlobalEval(ptkInterp, (char *)command) == TCL_ERROR) {
-		    char tkErrorCmd[sizeof(PTK_DISPLAY_ERROR_INFO)];
-		    strcpy(tkErrorCmd, PTK_DISPLAY_ERROR_INFO);
-		    Tcl_GlobalEval(ptkInterp, tkErrorCmd);
-		    Error::abortRun(*this, "Cannot source Tcl script");
-		    return;
-		}
+		// The base star TclScript assumes floating point inputs
+		// and outputs which are inappropriate here, so we
+		// claim no input and no outputs
+		tcl.setup(this, 0, 0, (const char*)tcl_file);
 	}
  
 	go {
@@ -376,15 +339,8 @@ extern Tcl_Interp *ptkInterp;		/* FIXME: should be #include "ptk.h" */
 		    strlen(ptkInterp->result) != 0)
 		    // then a goTcl_dispStarID procedure is defined
 		    callTclProc("goTcl");
-	}
 
-	wrapup {
-		InfString command = "info procs wrapupTcl_";
-		command += dispStarID;
-		if ( Tcl_GlobalEval(ptkInterp, command) == TCL_OK &&
-		     strlen(ptkInterp->result) != 0)
-		    // then a wrapupTcl_dispStarID procedure is defined
-		    callTclProc("wrapupTcl");
+		tcl.go();
 	}
 
 	// It is for invoking a Tcl procedure *procnm_dispStarID, which is
@@ -402,11 +358,9 @@ extern Tcl_Interp *ptkInterp;		/* FIXME: should be #include "ptk.h" */
 			command += " ";
 			command += frameID;
 			if (Tcl_GlobalEval(ptkInterp, command) != TCL_OK) {
-			    char tkErrorCmd[sizeof(PTK_DISPLAY_ERROR_INFO)];
-			    strcpy(tkErrorCmd, PTK_DISPLAY_ERROR_INFO);
-			    Tcl_GlobalEval(ptkInterp, tkErrorCmd);
 			    Error::abortRun(*this,
-					    "Failed to run Tcl procedure");
+					    "Failed to run Tcl procedure ",
+					    command);
 			}
 			return;
 	       }
