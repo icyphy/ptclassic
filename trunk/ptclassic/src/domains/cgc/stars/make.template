@@ -24,6 +24,8 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ CGCBlackHole.pl \
+ CGCCos.pl \
  CGCDownSample.pl \
  CGCFIR.pl \
  CGCFloatDiff.pl \

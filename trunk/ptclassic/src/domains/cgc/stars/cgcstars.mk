@@ -6,6 +6,8 @@
 # for the stars.
 
 CGCSTARS = \
+ $(CGC)/CGCBlackHole.o \
+ $(CGC)/CGCCos.o \
  $(CGC)/CGCDownSample.o \
  $(CGC)/CGCFIR.o \
  $(CGC)/CGCFloatDiff.o \
