@@ -191,11 +191,15 @@ class ::tycho::Graphics {
     # Edit the specified items, or if none, the selected items.
     method edit {{ids {}}}
 
+    # Open a dialog to export the canvas contents in one of various formats.
+    method export {}
+
     # Generate a GIF file with the contents of the canvas.
     method exportGif {filename}
 
-    # Generate a postscript file with the contents of the canvas.
-    method exportPs {win}
+    # Generate an encapsulated postscript file with the contents of the canvas.
+    method exportEps \
+            {filename {orientation portrait} {colormode color} {pwidth {}}}
 
     # Generate an X window dump file with the contents of the canvas.
     method exportXwd {filename}
@@ -218,8 +222,11 @@ class ::tycho::Graphics {
     # Insert from the clipboard.
     method paste {}
 
-    # Print the contents of the canvas, using conversion to postscript.
+    # Open a print dialog to print the contents of the canvas.
     method print {}
+
+    # Complete the printing of the canvas started with the print method.
+    method printOut {win}
 
     # Redo using the current redo buffer.
     method redo {}
@@ -297,6 +304,12 @@ class ::tycho::Graphics {
     # An object that manages dragging and selecting of items
     protected variable dragselector
 
+    # An array of commands that will export the graphic some file format.
+    protected variable fileformats
+
+    # The default file format for the export command.
+    protected variable fileformatdefault eps
+
     # Flag indicating whether undo and automatic updates are enabled.
     protected variable interactiveEnabled 0
 
@@ -326,9 +339,6 @@ class ::tycho::Graphics {
 
     # An array of commands used to edit items.
     private variable itemEdit
-
-    # A list of the currently selected objects.
-#    private variable selection {}    
 
     # The redo buffer
     private variable redoCommands {}
@@ -435,6 +445,10 @@ body ::tycho::Graphics::constructor {args} {
     pack $itk_component(info) -expand no -fill x
 
     # Create and configure the widget's menu bar
+
+    menubar insertMenuItem {Export} {Print...} File -underline 1 \
+            -command "$this export"
+
     menubar addMenu Edit left Window -underline 0
 
     menubar addMenuItem {Undo} Edit -underline 0 -accelerator "M-z" \
@@ -549,6 +563,13 @@ body ::tycho::Graphics::constructor {args} {
 
     # Using the drag-selector deactivates the text editor
     $dragselector configure -activatecommand "$lineeditor stop"
+
+    # Set up export commands
+    array set fileformats {
+        eps exportEps
+        gif exportGif
+        xwd exportXwd
+    }
 }
 
 #######################################################################
@@ -992,6 +1013,32 @@ body ::tycho::Graphics::edit {{ids {}}} {
 }
 
 #######################################################################
+#### export
+# Open a print dialog for exporting the contents of the canvas in various
+# formats.
+#
+body ::tycho::Graphics::export {} {
+    set win $prefix.export
+    if [winfo exists $win] {
+        $win raiseWindow
+        return
+    }
+    ::tycho::EntryQuery $win \
+            -queries {{filename {Export to file:} {~/}}}
+
+    $win addRadioQuery format {File format} \
+            [array names fileformats] $fileformatdefault
+
+    set result [::tycho::DialogWindow::centerAndWait $win $prefix]
+    set filename [lindex [lindex $result 0] 1]
+    set format [lindex [lindex $result 1] 1]
+
+    # Eps has additional options.  Rather than invoking another method,
+    # we just query the user here for those formats.
+    # FIXME:
+}
+
+#######################################################################
 #### exportGif
 # Generate a GIF file with the contents of the canvas.
 # NOTE: Unix-only implementation.  Also, depends on the programs
@@ -1009,66 +1056,50 @@ body ::tycho::Graphics::exportGif {filename} {
 }
 
 #######################################################################
-# Generate a postscript file and print it.
-# FIXME: This method needs major rework.  It should only create the postscript
-# file.
+#### exportEps
+# Generate an encapsulated postscript file. The first argument (the
+# only one required) is the name of a file into which to write the
+# postscript. The second argument specifies the orientation, and should
+# be either "normal" (the default) or "rotated" (by 90 degrees). The
+# third argument specifies the color mode and should have value color
+# (the default, for full color output), gray (convert all colors to
+# their gray-scale equivalents) or mono (convert all colors to black or
+# white). The final argument optionally specifies the width of the
+# postscript image. It consists of a floating-point number followed by
+# c for centime- ters, i for inches, m for millimeters, or p or nothing
+# for printer's points (1/72 inch). If it is not given, then the image
+# size is the same as on the screen.
+# <p>
+# NOTE: Currently postscript is generated for the entire image in a single
+# file.  It would be good to be able to break it down into subimages.
+# <p>
+# NOTE: It would be nice to take advantage of the colormap option
+# in the canvas postscript command to be able to map colors for monochrome
+# printing.
 #
-body ::tycho::Graphics::exportPs {win} {
-    set height [winfo height [canvasName]]
-    if {$height == 1} {
-        # Canvas has not been mapped yet
-        set height [cget -canvasheight]
-    }
-    set width [winfo width [canvasName]]
-    if {$width == 1} {
-        # Canvas has not been mapped yet
-        set width [cget -canvaswidth]
-    }
-
-    set pageheight [$win.page.pageheight.entry get]
-    set pagewidth [$win.page.pagewidth.entry get]
-    set pagey [$win.page.pagey.entry get]
-    set pagex [$win.page.pagex.entry get]
-
-    set printCmd [$win.command.entry get]
-
-    set rotate [set [scope $itk_component(hull)_rotate]]
-    if {$rotate == "Landscape"} {
+body ::tycho::Graphics::exportEps \
+        {filename {orientation portrait} {colormode color} {width {}}} {
+    if {$orientation != "portrait"} {
 	set rotate 1
     } else {
 	set rotate 0
     }
+    set bbox [[canvasName] bbox all]
+    set cheight [expr [lindex $bbox 3]-[lindex $bbox 1]]
+    set cwidth [expr [lindex $bbox 2]-[lindex $bbox 0]]
 
-    # Adjust the offset.
-    set pagey [expr $pageheight/2+$pagey]
-    set pagex [expr $pagewidth/2+$pagex]
-
-    set color [set [scope $itk_component(hull)_color]]
-
-    set ps [ [canvasName] postscript\
-	     -height $height -width $width\
-	     -pageheight ${pageheight}i -pagewidth ${pagewidth}i\
-	     -rotate $rotate -colormode $color]
-
-    if [set [scope $itk_component(hull)_tofile]] {
-	set fileID [open [$win.tofile.entry get] w]
-	puts $fileID $ps
-	close $fileID
-
-    } else {
-	set tmpFile [file join /tmp [$this windowName]]
-	catch {exec "rm -f $tmpFile"}
-
-	set fileID [open $tmpFile w]
-	puts $fileID $ps
-	close $fileID
-
-	eval exec "$printCmd $tmpFile"
-
-	catch {exec "rm -f $tmpFile"}
+    if {$width != {}} {
+        set wopt "-pagewidth $width"
+    } {
+        set wopt {}
     }
-
-    destroy $win
+    eval [canvasName] postscript \
+            -file $filename \
+            -width $cwidth \
+            -height $cheight \
+            -rotate $rotate \
+            -colormode $colormode \
+            $wopt
 }
 
 #######################################################################
@@ -1150,85 +1181,41 @@ body ::tycho::Graphics::modify {args} {
 
 #######################################################################
 #### print
-# Print out the graph in the canvas.
-# FIXME: This should be reimplimented as a print manager class.
+# Open a print dialog for printing the contents of the canvas.
 #
 body ::tycho::Graphics::print {} {
-    set w [$this windowName].print
-
-    if [winfo exists $w] {
-	wm deiconify $w
-	raise $w
-
-    } else {
-	toplevel $w
-        wm title $w "Print Graphics"
-        wm iconname $w "Print Graphics"
-
-	label $w.title -text "Print Graphics"
-	frame $w.rotate -relief groove -bd 3
-	frame $w.page
-	frame $w.color -relief groove -bd 3
-	frame $w.command
-	frame $w.tofile
-	frame $w.buttons
-	pack $w.title $w.rotate $w.page $w.color $w.command $w.tofile\
-		$w.buttons -side top -padx 1 -pady 3 -expand 1 -fill both
-
-	radiobutton $w.rotate.portrait -text Portrait -value Portrait\
-		-variable [scope $itk_component(hull)_rotate]
-	radiobutton $w.rotate.landscape -text Landscape -value Landscape\
-		-variable [scope $itk_component(hull)_rotate]
-	set [scope $itk_component(hull)_rotate] Portrait
-	pack $w.rotate.portrait $w.rotate.landscape -side left
-
-	frame $w.page.pageheight
-	frame $w.page.pagewidth
-	frame $w.page.pagey
-	frame $w.page.pagex
-	pack $w.page.pageheight $w.page.pagewidth $w.page.pagey $w.page.pagex
-
-	label $w.page.pageheight.label -text {Max. height (inches):}
-	label $w.page.pagewidth.label -text {Max. width (inches) :}
-	label $w.page.pagey.label -text {Verticle offset     :}
-	label $w.page.pagex.label -text {Horizontal offset   :}
-
-	foreach name {pageheight pagewidth pagey pagex} {
-	    entry $w.page.${name}.entry -relief sunken -bd 2 -width 6 
-	    pack $w.page.${name}.label $w.page.${name}.entry -side left
-	}
-
-	$w.page.pageheight.entry insert 0 "14.0"
-	$w.page.pagewidth.entry insert 0 "8.0"
-	$w.page.pagey.entry insert 0 "0.0"
-	$w.page.pagex.entry insert 0 "0.0"
-
-	label $w.command.label -text "Print Command:"
-	entry $w.command.entry -relief sunken -bd 2 -width 15
-	pack $w.command.label $w.command.entry -side left
-	$w.command.entry insert 0 "lpr "
-
-	radiobutton $w.color.mono -text "Black & White" -value mono\
-		-variable [scope $itk_component(hull)_color]
-	radiobutton $w.color.gray -text Gray -value gray\
-		-variable [scope $itk_component(hull)_color]
-	radiobutton $w.color.color -text Color -value color\
-		-variable [scope $itk_component(hull)_color]
-	set [scope $itk_component(hull)_color] mono
-	pack $w.color.mono $w.color.gray $w.color.color -side left
-
-	checkbutton $w.tofile.button -text "To file only:"\
-		-variable [scope $itk_component(hull)_tofile]
-	entry $w.tofile.entry -relief sunken -bd 2 -width 35
-	pack $w.tofile.button $w.tofile.entry -side top -anchor w
-	$w.tofile.entry insert 0 "[file rootname $file].ps"
-
-	button $w.buttons.print -text "Print"\
-		-command "$this printPs $w" -relief groove -bd 8
-	button $w.buttons.cancel -text "Cancel" -command "destroy $w" -bd 5
-	pack $w.buttons.print $w.buttons.cancel -fill both -expand 1\
-		-side left -padx 2 -pady 2
+    set win $prefix.print
+    if [winfo exists $win] {
+        $win raiseWindow
+        return
     }
+    ::tycho::EntryQuery $win -okcommand \
+            "$this printOut $win" \
+            -queries {{width {Width (plus i or c)} {}} \
+            {cmd {Print command} {lpr}}}
+    $win addRadioQuery color {Color mode} {color gray mono} color
+    $win addRadioQuery orient {Orientation} {normal rotated} normal
+    # FIXME: Use centerAndWait
+    $win centerOnScreen
+}
+
+#######################################################################
+#### printOut
+# Given the name of a print dialog opened by the <code>print</code>
+# method, execute the print command to complete the printing.
+#
+body ::tycho::Graphics::printOut {win} {
+
+    set color [$win get color]
+    set orient [$win get orient]
+    set width [$win get width]
+    set cmd [$win get cmd]
+
+    set tmpFile [::tycho::tmpFileName typr .eps]
+    exportEps $tmpFile $orient $color $width
+    eval ::tycho::invoke $cmd $tmpFile
+
+    destroy $win
 }
 
 #######################################################################
