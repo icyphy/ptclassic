@@ -134,6 +134,9 @@ class ::tycho::HTML {
     # Return 1 if rendering is in progress, and 0 otherwise.
     method isRendering {} {return $isrendering}
 
+    # Return 1 if the slowNetwork preference is set.
+    method isSlowNetwork {} {return [preference get slowNetwork]}
+
     # Return the reference directory.
     method lastDirectory {}
 
@@ -1272,10 +1275,10 @@ proc HMrender {win tag not param text} {
 # call back to library for display.
 #
 proc HMset_image {win handle src} {
-
     # Get the name of the HTML widget.
     set HTML [uplevel #0 winfo command [winfo megawidget $win]]
 
+    if {[$HTML isSlowNetwork] == 0} {
     if {[string match /* $src]} {
 	set image $src
     } else {
@@ -1290,6 +1293,7 @@ proc HMset_image {win handle src} {
 	if {[file extension $image] == ".bmp"} {set type bitmap}
 	catch {image create $type $image -file $image} image
 	HMgot_image $handle $image
+    }
     }
 }
 
