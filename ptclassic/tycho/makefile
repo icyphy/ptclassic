@@ -38,6 +38,37 @@ ROOT =		..
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+makefiles all install clean depend realclean checkjunk sccsinfo itcldocs:
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in tycho/lib/$$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+
+TAGS:
+	echo "Making tags makes no sense in the tycho directory"
+
+# "make sources" will do SCCS get on anything where SCCS file is newer.
+# You probably don't want to add $(SRCS) to this, rather, change
+# the makefile that includes this one to use $(EXTRA_SRCS)
+sources:: subsources tycho.idx makefile
+
+# We use a subtarget here so that we do make sources in the subdirs
+# before trying to update tycho.idx
+subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile 
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making sources in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) sources ;\
+		) \
+	    fi ; \
+	done
+
+# Create a tycho index file
 tycho.idx: kernel/tychoMakeIndex.tcl \
 	    $(wildcard kernel/doc/*.html \
 		    kernel/doc/usersGuides/*.html \
@@ -55,10 +86,3 @@ tycho.idx: kernel/tychoMakeIndex.tcl \
 		echo "Running $(ITCL2_0_SH)"; \
 		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCL2_0_SH); \
 	fi
-
-# We don't include common.mk since we don't use the compiler here
-include $(ROOT)/mk/no-compile.mk
-
-# This rule must be after include no-compile.mk so that get any sources
-# in the subdirs before generating the index
-sources:: tycho.idx
