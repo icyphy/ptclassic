@@ -1,11 +1,252 @@
+\newcommand{\CP}{\PTOLEMY/src/domains/cp}
+\newcommand{\IP}{\CP/infopad}
+
 \node CP Domain
 \chapter{CP Domain}
-\Author{Seungjun Lee \\
-Thomas M. Parks}
+\Author{Seungjun Lee}
+\cindex{Lee, S.}
+\Contrib{Thomas M. Parks}
+\cindex{Parks, T.}
+
 \date{$Date$}
+
+The Communicating Processes (CP) domain in Ptolemy is a
+process-oriented domain.  The model of computation is an extension of
+\emph{Communicating Sequential Processes(CSP)} proposed by Hoare
+\cite{Hoare78}.  In the CP domain, a system is modeled as a set of
+processes that execute concurrently and interact with each other by
+message-passing.  Stars represent autonomous processes.  Each star is
+converted into an independent process once the simulation begins, and
+the process keeps running until the end of simulation.  The CP domain
+is a timed domain, i.e. it has the notion of time.  The scheduler
+maintains the global clock and manages the execution of stars to be
+synchronized with the clock.
+
+The major application of the CP domain is system modeling at an early
+design stage where the system is partitioned into large subblocks with
+complex behavior.  Consequently, a CP star tends to show very
+complicated and application-specific behavior, and a user is expected
+to write his own models for his application except for the signal
+sources and monitoring stars, which are  provided in the library.  Many
+useful constructs are provided to ease the task of describing the
+complex behavior of big stars.
+
+\node The CP Scheduler
+\section{The Scheduler}
+
+The ordinary role of the scheduler in Ptolemy is to determine the order
+of execution of each star.  But in the CP domain all the stars are
+presumably running all the time so that there is no need of scheduling
+in that sense.  The task of the CP scheduler, instead, is to synchronize
+the execution of concurrent processes while they compete with each
+other for the CPU.  It keeps the global clock and waiting list of
+suspended processes, and manages all the processes to proceed in
+lock-step fashion.
+
+\node Process Scheduling
+\subsection{Process Scheduling}
+
+Process scheduling in the CP domain is based on priority and is
+preemptive.   The scheduler is just another process with higher
+priority than stars.  When the simulation starts, the scheduler
+converts each star into a process.  All the processes are created with
+the same priority.  After that, the scheduler voluntarily relinquishes
+the CPU and goes to sleep.
+
+The stars execute one at a time until the execution is either blocked
+or suspended.  While stars are executing, the scheduler sleeps and the
+global clock doesn't advance.  Hence, all the execution of stars is
+considered to happen instantaneously.  When there are no more runnable
+process, the scheduler wakes up and regains the CPU.  It fetches the
+next earliest suspended process from the waiting list and advances the
+global clock.  If the global clock is past the end time, the scheduler
+returns and the simulation ends.  Otherwise, the scheduler resumes all
+the suspended processes scheduled at that time slot and goes back to
+sleep.
+
+\node Simultaneous Events and Non-Determinism
+\subsection{Simultaneous Events and Non-Determinism}
+
+Handling simultaneous events in a consistent and predictable way is not
+an easy task for event-driven simulation.  When there are simultaneous
+events, they have to be handled sequentially in a uni-processor
+environment.  The result may show non-deterministic behavior depending
+on the order they are processed.  The problem stems from the existence
+of zero-delay blocks.  This problem has been thought out in the
+implementation of DE scheduler, and many schemes have been devised to
+help a user avoid unexpected behavior.
+
+The CP domain provides no special scheme to handle simultaneous events
+because zero delay blocks would be very rare in this domain.  But the
+existence of zero-delay blocks is not completely ruled out, which may
+result in non-deterministic behavior of the system.   A zero-delay
+path from an input to an output within a block is equally dangerous.
+
+\section{Inter-Process Communication}
+
+Stars communicate with each other by passing messages through
+portholes.  Each star may have several input and output portholes.  A
+channel connects an output porthole to an input porthole.  Only
+one-to-one connections are allowed.  That implies \emph{auto-forking}
+is not supported in this domain.
+
+\subsection{Communication Channels}
+
+Channels can be either buffered or unbuffered.  A buffered channel
+is implemented as a FIFO queue and the capacity of the queue can be
+either finite or infinite.  The default action of connecting an output
+porthole to an input porthole is to create an unbuffered channel, and
+the communication through that connection becomes synchronous.  
+
+Two types of queue object are available in the library to implement
+buffered channel.  One is a simple FIFO queue and the other is a FIFO
+queue with a monitor.  The monitor records the variation of the queue
+size versus time, and shows it in an \code{Xgraph} when the simulation
+is finished.  The maximum capacity of the queue is parameterized so
+that it can be arbitrarily set at run-time.   The capacity of -1 is
+interpreted as an infinite buffer.  In that case the queue can grow
+without limit, and the sender to this queue will never block.
+
+\subsection{Communication Protocols}
+
+A porthole is characterized by a data type it carries and a port
+protocol.  The port protocol specifies the behavior when a channel is
+full or empty.  Four different protocols are supported for each input
+and output porthole.  For an output porthole, it can be \emph{block on
+full, block on full with timeout, overwrite on full,} and \emph{ignore
+on full}.  For an input porthole, it can be \emph{block on empty,
+block on empty with timeout, previous on empty,} and \emph{ignore on
+empty}.  The default protocol is \emph{block on full/empty}.
+
+\section{An Overview of CP Stars}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=\CP/icons/cp.pal.ps}
+\end{center}
+\caption{Top-level palette of stars in the CP domain.}
+\label{figure CP stars}
+\end{figure}
+
+\subsection{Basic Stars}
+
+\begin{blocklist}{(CP block)}
+
+\block{Customer}
+Model customers with exponential interarrival intervals.
+
+\block{Qserver}
+Model server with exponential service time.
+
+\block{QueueMon}
+Fifo queue with finite or infinite length.
+
+\end{blocklist}
+
+\subsection{InfoPad Stars}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=\IP/icons/infopad.pal.ps}
+\end{center}
+\caption{Palette of InfoPad stars in the CP domain.}
+\label{figure CP infopad stars}
+\end{figure}
+
+\begin{blocklist}{(CP block)}
+
+\block{IPAudioBlock}       
+The primitive description of the audio block.
+It receives compressed audio data, decompresses them, 
+and generates sound.
+
+\block{IPBaseStation}
+The Base Station sends video and audio packets.
+
+\block{IPDecompress}       
+It receives compressed video data, decompresses
+them, and send it for display on an X window.
+
+\block{IPFastChannel}      
+It models a wireless channel.
+It receives a data packet, introduces some random noise, 
+and send the corrupted data.
+
+\block{IPImage}            
+The Image block receives video data and displays 
+the image on an X window.
+
+\block{IPRouter}           
+The Router block receives packets from the base workstation
+and distribute it according to the packet type.
+As an initial version, only video and sound packet are 
+handled.
+
+\block{IPRouter3}
+The Router block receives packets from the base workstation
+and distribute it according to the packet type.
+
+\block{IPSoundGen}
+The SoundGen block receives digital sound data and generates sound.
+
+\block{IPVideoBlock}
+The primitive description of the video block.
+It receives compressed video data, decompresses
+them, and displays the image on an X window.
+
+\block{IPVideoDisplay}
+The VideoDisplay block receives compressed video data and displays 
+the image on an X window.
+
+\end{blocklist}
+
+\section{An Overview of CP Demos}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=\CP/demo/init.pal.ps}
+\end{center}
+\caption{Top-level palette of demos in the CP domain.}
+\label{figure CP demos}
+\end{figure}
+
+\subsection{Basic Demos}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=\CP/demo/basic.pal.ps}
+\end{center}
+\caption{Palette of basic demos in the CP domain.}
+\label{figure CP basic demos}
+\end{figure}
+
+\begin{blocklist}{(CP demo)}
+\block{MM1Queue}
+The first M means the invervals between arriving processes
+follows Poisson distribution, i.e. \( p[x > t] = e^{-at} \)
+(exponentially distributed).  The second M means the service time, and
+the last argument is the nember of the servers.
+\end{blocklist}
+
+\subsection{InfoPad Demos}
+
+\begin{figure}
+\begin{center}
+\ \psfig{figure=\IP/demo/init.pal.ps}
+\end{center}
+\caption{Palette of InfoPad demos in the CP domain.}
+\label{figure CP infopad demos}
+\end{figure}
+
+\begin{blocklist}{(CP demo)}
+\block{level0}
+\block{level1}
+\block{IPFastChannel}
+\end{blocklist}
 
 \node Installing the CP Domain
 \section{Installing the CP Domain}
+
 By default, the CP domain is not compiled into the Ptolemy
 \code{pigiRpc} and \code{ptcl} programs.
 \pindex{pigiRpc}
@@ -34,12 +275,10 @@ LIBS=     $(STAR_LIBS) $(CP_LIBS) -lsdftclstars \back
           $(LWP_LIBS) $(OCTLIBS)
 \end{example}
 
-\begin{sloppypar}
 Modify the definition of \code{LIBFILES} to include
 \samp{$(CP_LIBFILES)} and \samp{$(LWP_LIBFILES)}.  This change sets up
 the proper dependencies so that \code{pigiRpc} will be considered
 out-of-date if any of the required library files are more recent.
-\end{sloppypar}
 
 \begin{example}
 LIBFILES=  $(STAR_LIBFILES) $(CP_LIBFILES) $(LWP_LIBFILES) \back
@@ -64,3 +303,9 @@ to the definition of \code{defaultPalettes}.  If you wish, you may also
 remove references to the palettes of unused domains, but this is not
 necessary.  Also modify the value of \code{DEFAULT_DOMAIN} to refer to
 a domain that will be included in  \code{pigiRpc}, such as CP.
+
+\unnumbered{References}
+C. A. R. Hoare,
+"Communicating Sequential Processes",
+\emph{Communications of the ACM},
+August 1978.
