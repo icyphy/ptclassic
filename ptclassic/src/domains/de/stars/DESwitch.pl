@@ -2,6 +2,7 @@ defstar {
 	name {Switch}
 	domain {DE}
 	desc {
+THIS STAR IS OBSOLETE.  Use Case.
 Switch input events to one of two outputs, depending on
 the last received control input.
 	}
