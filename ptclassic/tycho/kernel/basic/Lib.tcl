@@ -164,6 +164,13 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {} \
             {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
             {Tcl profiler} "tools"
+
+    if {[info namespace all pitcl] != "pitcl"} {
+	::tycho::File::registerExtensions {} \
+                {::tycho::view Retarget -file {%s}} \
+                {Ptolemy Retargeter} "tools"
+    }
+
     ::tycho::File::registerExtensions {} \
             {::tycho::view TclShell -file {%s}} \
             {Tcl shell} "tools"
