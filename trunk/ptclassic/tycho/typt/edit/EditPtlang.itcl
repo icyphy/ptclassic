@@ -245,22 +245,33 @@ body ::tycho::EditPtlang::initialize \
 body ::tycho::EditPtlang::initializeMenubar {menubar} {
     global PTOLEMY
 
-    # Stuff for the special menu
-    $menubar addSeparator Special
+    # Delete menus from the parent classes, they don't make sense
+    $menubar delete tclinit
+    $menubar delete specialsep1
+    $menubar delete bodytemplate
+    $menubar delete cctemplate
+    $menubar delete htemplate
 
-    $menubar add "Generate doc" Special -underline 0 \
+    # Stuff for the special menu
+    $menubar command generatedoc special \
+	    -label "Generate doc" -underline 0 \
             -command "$this gendocBuffer"
 
     # Stuff for the help menu
-    $menubar add "Ptolemy Universes" Help -underline 0 \
+    # Moved to the special menu -- johnr
+    $menubar separator specialsep5 special
+    $menubar command ptuniverses special \
+	    -label "Ptolemy Universes" -underline 0 \
             -command "::tycho::File::openContext \
 	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
 
-    $menubar add "Star/Demo Xref" Help -underline 11 \
+    $menubar command starxref special \
+	    -label "Star/Demo Xref" -underline 11 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
-    $menubar add "Ptolemy stars" Help -underline 0 \
+    $menubar command ptstars special \
+	    -label "Ptolemy stars" -underline 0 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY src domains starHTML.idx.fst]"
 }

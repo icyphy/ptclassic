@@ -549,29 +549,26 @@ body ::tycho::EditDiff::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     }
 
     if {$menubar != {}} {
-        $menubar disable {Compare To...}
-        $menubar disable {Undo/Redo}
-        $menubar disable {Cut}
-        $menubar disable {Paste}
-        $menubar disable "Font..."
-        # Delete all in Edit
-        $menubar delete "Undo/Redo"
-        $menubar delete "Cut"
-        $menubar delete "Paste"
-        # Delete all the formats
-        $menubar delete "Fill Region"
-        $menubar delete "Right Fill Column"
-        $menubar delete "Set Fill Prefix"
-        $menubar delete "Lower Case"
-        $menubar delete "Upper Case"
-        $menubar delete "Capitalize"
+        # Delete entries from the File menu
+        $menubar delete insert
+        $menubar delete save
+        $menubar delete saveas
+        $menubar delete evaluate
+        $menubar delete revisioncontrol
+        $menubar delete togglereadonly
+        $menubar delete switchfile
+        $menubar delete reload
+        $menubar delete compareto
 
-        $menubar delete "Insert..."
-        $menubar delete "Save"
-        $menubar delete "SaveAs..."
-        $menubar delete "Evaluate"
-        $menubar delete "Revision Control..."
-        $menubar delete "Toggle Read-Only"
+        # Delete entries from the Edit menu
+        $menubar delete undoredo
+	$menubar delete editsep1
+        $menubar delete cut
+        $menubar delete paste
+        $menubar delete spelling
+
+        # Delete the whole Format menu
+	$menubar delete format
     }
 
     if {$itk_option(-filename1) != {}} {

@@ -570,12 +570,14 @@ body ::tycho::TCanvas::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
-        $menubar insert {Export} {Print...} -underline 1 \
+        $menubar insert command export print \
+		-label "Export" -underline 1 \
                 -command "$this export"
         
-        $menubar addMenu Format -underline 1
+        $menubar addMenu format -label Format -underline 1
         
-        $menubar add {Scrollbars...} Format -underline 0 \
+        $menubar command scrollbars format \
+		-label "Scrollbars..." -underline 0 \
                 -command "$this scrollQuery"
     }
 }

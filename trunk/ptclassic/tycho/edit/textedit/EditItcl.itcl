@@ -487,26 +487,32 @@ body ::tycho::EditItcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 #
 body ::tycho::EditItcl::initializeMenubar {menubar} {
  
-    $menubar add "Body Template" Special -underline 0 \
+    $menubar command bodytemplate special \
+	    -label "Body Template" -underline 0 \
             -command "$this bodyTemplate"
     
-    $menubar add "File Template" Special -underline 0 \
+    $menubar command filetemplate special \
+	    -label "File Template" -underline 0 \
             -command "$this fileTemplate $itk_option(-filetemplate) \
             \[$this getClassName\]"
 
-    $menubar add "Test Template" Special -underline 0 \
+    $menubar command testtemplate special \
+	    -label "Test Template" -underline 0 \
             -command "$this fileTemplate $itk_option(-testtemplate) \
             \[$this getClassName\]"
 
-    $menubar addSeparator Special
+    $menubar add separator specialsep1 special
     
-    $menubar add "Generate doc" Special -underline 0 \
+    $menubar command generatedoc special \
+	    -label "Generate HTML Documentation" -underline 0 \
             -command "$this gendocBuffer"
         
-    $menubar add "Generate idoc" Special -underline 9 \
+    $menubar command generateidoc special \
+	    -label "Generate Idoc Documentation" -underline 9 \
             -command "$this genidocBuffer"
 
-    $menubar add "Generate class diagram" Special -underline 9  \
+    $menubar command generateclassdiagram special \
+	    -label "Generate class diagram" -underline 9  \
             -command "::tycho::view ItclClassList \
             -file [file join [file dirname [$this filename]] classList.icl] \
             -toolbar 1"

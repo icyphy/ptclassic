@@ -280,11 +280,6 @@ class ::tycho::File {
     # Check for auto-save or crash-recovery files, and return the file to open.
     private proc checkForAutoSaveFiles {filename} {}
 
-    # Given a class name, if it is not fully qualified, qualify it.
-    # REMOVED because it's not used anywhere. What's it doing in
-    # this file anyhow??? -- hjr
-    # private proc normalizeClassname {classname}
-
     ##########################################################################
     ####                         private variables                        ####
 
@@ -1080,28 +1075,33 @@ body ::tycho::File::windowMenuAppend {obj label {type {}}} {
     if {$label != {NoName} && $label != {}} {
 	switch -exact $type {
 	    "text" {
-		menubar command $label {Open text editors} \
+		menubar command $label opentext \
+			-label $label \
 			-command "$obj raiseWindow"
-		menubar enable {Open text editors}
+		menubar enable opentext
 	    }
 	    "html" {
-		menubar command $label {Open HTML viewers} \
+		menubar command $label openhtml \
+			-label $label \
 			-command "$obj raiseWindow"
-		menubar enable {Open HTML viewers}
+		menubar enable openhtml
 	    }
 	    "graphics" {
-		menubar command $label {Open graphics editors} \
+		menubar command $label opengraphics \
+			-label $label \
 			-command "$obj raiseWindow"
-		menubar enable {Open graphics editors}
+		menubar enable opengraphics
 	    }
 	    "tools" {
-		menubar command $label {Open tools} \
+		menubar command $label opentools \
+			-label $label \
 			-command "$obj raiseWindow"
 		menubar enable {Open tools}
 	    }
 	    default {
 		# Add to the end of the main menu
-		menubar command $label Window -command "$obj raiseWindow"
+		menubar command $label window \
+			-label $label -command "$obj raiseWindow"
 	    }
 	}
     }
@@ -1143,11 +1143,11 @@ body ::tycho::File::indicateReadOnly {bool} {
     ::tycho::View::indicateReadOnly $bool
     
     if {$bool} {
-        menubar disable {Insert...}
-        menubar disable Save
+        menubar disable insert
+        menubar disable save
     } {
-        menubar enable {Insert...}
-        menubar enable Save
+        menubar enable insert
+        menubar enable save
     }
 }
 
@@ -1438,7 +1438,7 @@ body ::tycho::File::windowMenuRemoveAll {filename} {
 	    # NOTE: the catch is in case due to an error $fileobj
             # doesn't exist.
 	    catch {
-		set menuname [$fileobj menubar menuname $filename]
+		set menuname [$fileobj menubar inmenu $filename]
 		$fileobj menubar delete $filename
 		# Disable the submenu if it's empty
 		if { [$fileobj menubar empty $menuname] } {
@@ -1538,59 +1538,71 @@ body ::tycho::File::initializeMenubar {menubar} {
     global tcl_platform
 
     # Construct the menus
-    $menubar addMenu File -underline 0
-    $menubar addMenu Window -underline 0
-    $menubar addMenu Help -side right -underline 0
+    $menubar addMenu file   -label File -underline 0
+    $menubar addMenu window -label Window -underline 0
+    $menubar addMenu help   -label Help -side right -underline 0
 
     # File menu contents
     # Note that <Control-x><Control-f> is actually bound in TopLevel.
-    $menubar add {Open...} File -underline 0 \
-	    -accelerator "C-x C-f" \
-	    -command "$this openWinMethod"
+    $menubar command open file \
+	    -label "Open..." -underline 0 \
+	    -accelerator "C-x C-f" -command "$this openWinMethod"
     
-    $menubar command "Switch File..." File -underline 4 \
+    $menubar command switchfile file \
+	    -label "Switch File..." -underline 4 \
 	    -accelerator "C-x C-v" -command "$this altFile"
     
-    $menubar command {Insert...} File -underline 0 \
+    $menubar command insert file \
+	    -label "Insert..." -underline 0 \
 	    -accelerator "C-x i" -command "$this insertFile"
     
-    $menubar command Save File -underline 0 -accelerator "C-x C-s" \
-	    -command "$this save"
+    $menubar command save file \
+	    -label "Save" -underline 0 \
+	    -accelerator "C-x C-s" -command "$this save"
     
-    $menubar command {SaveAs...} File -underline 4 \
+    $menubar command saveas file \
+	    -label "SaveAs..." -underline 4 \
 	    -accelerator "C-x C-w" -command "$this saveAs"
     
-    $menubar command {Print...} File -underline 0 \
+    $menubar command print file \
+	    -label "Print..." -underline 0 \
 	    -accelerator "C-x p" -command "$this print"
     
-    $menubar command Evaluate File -underline 0 \
+    $menubar command evaluate file \
+	    -label "Evaluate" -underline 0 \
 	    -accelerator "C-x C-r" -command "$this evaluate"
     
-    $menubar command {Compare To...} File -underline 2 \
+    $menubar command compareto file \
+	    -label "Compare To..." -underline 2 \
             -command "$this compareTo "
 
-    $menubar command Reload File -underline 0 \
+    $menubar command reload file \
+	    -label "Reload" -underline 0 \
 	    -command "$this reload"
     
-    $menubar command "Toggle Read-Only" File -underline 0 \
+    $menubar command togglereadonly file \
+	    -label "Toggle Read-Only" -underline 0 \
 	    -accelerator "C-x C-q" -command "$this toggleReadOnly"
 
-    $menubar command "Revision Control..." File -underline 2 \
+    $menubar command revisioncontrol file \
+	    -label "Revision Control..." -underline 2 \
 	    -accelerator "C-x v" -command "$this revisionControl"
 
     # Windows might have a chmod and RCS.
     if {$tcl_platform(platform) == "macintosh"} {
-	$menubar disable "Toggle Read-Only"
-	$menubar disable "Revision Control..."
+	$menubar disable togglereadonly
+	$menubar disable revisioncontrol
     }
 
-    $menubar addSeparator File
+    $menubar separator filesep1 file
     
-    $menubar command Close File -underline 0 -accelerator "C-x k" \
+    $menubar command close file \
+	    -label "Close" -underline 0 -accelerator "C-x k" \
 	    -command "[displayer] nextWindow; delete object [displayer]"
-    
+
     if {[::tycho::Displayer::normalExit] == 1} {
-	$menubar command Quit File -underline 0 \
+	$menubar command quit file \
+		-label "Quit" -underline 0 \
 		-accelerator "C-x C-c" \
 		-command "::tycho::TopLevel::exitProgram"
     }
@@ -1598,9 +1610,12 @@ body ::tycho::File::initializeMenubar {menubar} {
     # Window menu contents
     
     # Create the submenus for blank editors
-    $menubar add {Text editors} Window -type cascade
-    $menubar add {Graphics editors} Window -type cascade
-    $menubar add {Tools} Window -type cascade
+    $menubar add cascade texteditors window \
+	    -label "Text Editors"
+    $menubar add cascade graphicseditors window \
+	    -label "Graphics Editors"
+    $menubar add cascade tools window \
+	    -label "Tools"
 
     # Construct menu entries for registered editors.
     foreach entry $windowMenuEntries {
@@ -1611,46 +1626,56 @@ body ::tycho::File::initializeMenubar {menubar} {
 	# Add to a menu
 	switch -exact $class {
 	    "text" {
-		$menubar command $desc {Text editors} -command $command
+		$menubar command $desc texteditors \
+			-label $desc \
+			-command $command
 	    }
 	    "graphics" {
-		$menubar command $desc {Graphics editors} -command $command
+		$menubar command $desc graphicseditors \
+			-label $desc \
+			-command $command
 	    }
 	    "tools" {
-		$menubar command $desc {Tools} -command $command
+		$menubar command $desc tools \
+			-label $desc \
+			-command $command
 	    }
 	    default {
 		# Add to the end of the main menu
-		$menubar command $desc Window -command $command
+		$menubar command $desc window \
+			-label $desc \
+			-command $command
 	    }
 	}
     }
-    $menubar addSeparator Window
+    $menubar separator windowsep1 window
 
     # Create the submenus for open files
-    $menubar add {Open HTML viewers} Window -type cascade -state disabled
-    $menubar add {Open text editors} Window -type cascade -state disabled
-    $menubar add {Open graphics editors} Window -type cascade\
-	    -state disabled
-    $menubar add {Open tools} Window -type cascade -state disabled
+    $menubar add cascade openhtml window \
+	    -label "Open HTML Viewers" -state disabled
+    $menubar add cascade opentext window \
+	    -label "Open Text Editors" -state disabled
+    $menubar add cascade opengraphics window \
+	    -label "Open Graphics Editors" -state disabled
+    $menubar add cascade opentools window \
+	    -label "Open Tools" -state disabled
 
     # use the filesOpen variable to construct menu entries for all open
     # files.
     foreach filename [array names filesOpen] {
-	# FIXME: Temporary check for Itcl bug.
-	if {$filename != {junktychofileforitclbogosity}} {
-	    windowMenuAppend $filesOpen($filename) \
-		    $filename $filesOpenTypes($filename)
-	}
+	windowMenuAppend $filesOpen($filename) \
+		$filename $filesOpenTypes($filename)
     }
     
     # Help menu contents
     
-    $menubar command "About Tycho" Help -underline 0 -command \
+    $menubar command about help \
+	    -label "About Tycho" -underline 0 -command \
 	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
     
     global ::TYCHO
-    $menubar command "Tycho Home Page" Help -underline 0 -command \
+    $menubar command homepage help \
+	    -label "Tycho Home Page" -underline 0 -command \
 	    {::tycho::File::openContext \
 	    [file join $TYCHO doc index.html]}
 
@@ -1658,38 +1683,46 @@ body ::tycho::File::initializeMenubar {menubar} {
     # on a global basis without modifying this file.
     global ptolemyfeature
     if $ptolemyfeature(ptolemy) {
-        $menubar command "About Ptolemy" Help -underline 0 -command \
+        $menubar command ptabout help \
+		-label "About Ptolemy" -underline 0 -command \
                 ptkStartupMessage
         global ::PTOLEMY
-        $menubar command "Ptolemy Home Page" Help -underline 0 -command \
+        $menubar command pthomepage help \
+		-label "Ptolemy Home Page" -underline 0 -command \
                 {::tycho::File::openContext \
                 [file join $PTOLEMY doc html index.html]}
     }
  
-    $menubar command "Guide to $myclass widget" Help -underline 0 \
+    $menubar command usersguide help \
+	    -label "Guide to $myclass Widget" -underline 0 \
             -command "$this help"
     
-    $menubar command "Concept Index..." Help -underline 8 \
+    $menubar command conceptindex help \
+	    -label "Concept Index..." -underline 8 \
 	    -command {::tycho::File::openContext \
 	    [file join \$TYCHO lib idx tycho.idx]}
     
-    $menubar command "Code Index..." Help -underline 0 \
+    $menubar command codeindex help \
+	    -label "Code Index..." -underline 0 \
 	    -command {set _nmBogosity [::tycho::autoName .index]; \
             ::tycho::IndexBrowser $_nmBogosity \
 	    -file [file join \$TYCHO lib idx codeDoc.idx] \
 	    -width 80; $_nmBogosity centerOnScreen}
     
-    $menubar command "Class Diagram" Help -underline 6 -command \
+    $menubar command classdiagram help \
+	    -label "Class Diagram" -underline 6 -command \
 	    {::tycho::File::openContext \
 	    [file join \$TYCHO doc tychoClasses.dag]}
 
-    $menubar command "Itcl man pages" Help -underline 0 \
+    $menubar command itclmanpages help \
+	    -label "Itcl Man Pages" -underline 0 \
 	    -command "$this ::tycho::File::openItclHTMLPage"
 
     # Add the Preferences menu. This is probably the wrong place
     # for it, but it will do until we figure out a good menu to
     # put it in that doesn't keep disappearing...
-    $menubar command "Preferences..." Help -underline 0 \
+    $menubar command preferences help \
+	    -label "Preferences..." -underline 0 \
 	    -command { ::tycho::preferencedialog }
 }
 
@@ -1787,23 +1820,4 @@ body ::tycho::File::checkForAutoSaveFiles {filename} {
 
     # The original file is the file to open.
     return $filename
-}
-
-#####################################################################
-#### normalizeClassname
-# Given a class name, if it is not fully qualified, qualify it.
-# That is, if it begins with "::", then return it unchanged.
-# Otherwise, prepend "::tycho::" and return the modified classname.
-#
-# Since this private and not called in this file, I guess we can
-# get rid of it... -- hjr 5/27/97
-#
-set bogusjunkstuff {
-    body ::tycho::File::normalizeClassname {classname} {
-	if [string match {::*} $classname] {
-	    return $classname
-	} {
-	    return "::tycho::$classname"
-	}
-    }
 }

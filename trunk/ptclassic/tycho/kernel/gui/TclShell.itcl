@@ -558,17 +558,15 @@ body ::tycho::TclShell::help {} {
 body ::tycho::TclShell::indicateReadOnly {bool} {
     if [winfo exists $prefix] {
 	if {$bool} {
-	    menubar disable {Insert...}
-	    menubar disable Save
-            menubar disable {Undo/Redo}
-            menubar disable Cut
-            menubar disable Paste
+	    # Currently doesn't do anything, as this just
+	    # doesn't seem right... -- hjr
+	    # menubar disable insert
+	    # menubar disable save
+            # menubar disable undoredo
 	} {
-	    menubar enable {Insert...}
-	    menubar enable Save
-            menubar enable {Undo/Redo}
-            menubar enable Cut
-            menubar enable Paste
+	    # menubar enable insert
+	    # menubar enable save
+            # menubar enable undoredo
 	}
     }
 }
@@ -809,25 +807,36 @@ body ::tycho::TclShell::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     
     if {$menubar != {}} {
         # Remove the unneeded menu items.
-        $menubar delete "Reload"
-        $menubar delete "Switch File..."
-        $menubar delete "Toggle Read-Only"
-        $menubar delete "Revision Control..."
-        $menubar delete "Goto Line..."
+        $menubar delete reload
+        $menubar delete switchfile
+	$menubar delete save
+        $menubar delete togglereadonly
+        $menubar delete revisioncontrol
+        $menubar delete evaluate
+        $menubar delete compareto
+        $menubar delete gotoline
+        $menubar delete spelling
+
+	# Leave these these but disable them
+	$menubar disable cut
+	$menubar disable paste
 
         # Remove the Format menu altogether
-        $menubar delete Format
-            
-        # Add a Special menu
-        $menubar addMenu Special -underline 0
+	$menubar delete format
 
-        $menubar add "Edit history" Special -underline 0 \
+	# Add history commands
+        $menubar separator specialsep1 special
+
+        $menubar command edithistory special \
+		-label "Edit History" -underline 0 \
                 -command "$this displayHistory"
         
-        $menubar add "Clear history" Special -underline 0 \
+        $menubar command clearhistory special \
+		-label "Clear History" -underline 0 \
                 -command "$this clearHistory"
 
-        $menubar add "Set namespace" Special -underline 0 \
+        $menubar command setnamespace special \
+		-label "Set Namespace..." -underline 0 \
                 -command "$this queryNamespace"    
     }
 

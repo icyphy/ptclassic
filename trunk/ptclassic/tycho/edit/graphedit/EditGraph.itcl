@@ -1123,60 +1123,75 @@ body ::tycho::EditGraph::_selectionclear {foo} {
 #
 body ::tycho::EditGraph::initializeMenubar {menubar} {
     # Add an Edit menu before the Window menu
-    $menubar addMenu Edit -before Window -underline 0
+    $menubar addMenu edit -label Edit -before window -underline 0
     
-    $menubar command {Undo} Edit -accelerator "M-z" \
+    $menubar command undo edit \
+	    -label "Undo" -accelerator "M-z" \
 	    -underline 0 -command "$this undo"
     
-    $menubar command {Redo} Edit -accelerator "M-r" \
+    $menubar command redo edit \
+	    -label "Redo" -accelerator "M-r" \
 	    -underline 0 -command "$this redo"
     
-    $menubar addSeparator Edit
+    $menubar separator editsep1 edit
     
-    $menubar command Cut Edit -underline 0 -accelerator "C-w" \
+    $menubar command cut edit \
+	    -label "Cut" -underline 0 -accelerator "C-w" \
 	    -command "$this cut"
     
-    $menubar command Copy Edit -underline 1 -accelerator "M-w" \
+    $menubar command copy edit \
+	    -label "Copy" -underline 1 -accelerator "M-w" \
 	    -command "$this copy"
     
-    $menubar command Paste Edit -underline 0 -accelerator "C-y" \
+    $menubar command paste edit \
+	    -label "Paste" -underline 0 -accelerator "C-y" \
 	    -command "$this paste"
     
-    $menubar addSeparator Edit
+    $menubar separator editsep2 edit
     
-    $menubar command "Select All" Edit -underline 0 \
+    $menubar command selectall edit \
+	    -label "Select All" -underline 0 \
 	    -accelerator "C-/" -command "$this selectRange 1.0 end"
     
-    $menubar command "Unselect" Edit -underline 0 \
+    $menubar command unselect edit \
+	    -label "Unselect" -underline 0 \
 	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
 
     # Build a menu for stars
-    $menubar addMenu Stars -underline 0
+    $menubar addMenu stars -label Stars -underline 0
 
     # Add a Devel menu for development use
-    $menubar addMenu Devel -underline 0
-    $menubar command {Clone} Devel \
+    $menubar addMenu devel -label Devel -underline 0
+    $menubar command clone devel \
+	    -label "Clone" \
             -command "$this clone"
 
-    $menubar addSeparator Devel
+    $menubar add separator develsep1 devel
 
-    $menubar command {Show layout} Devel \
+    $menubar command showlayout devel \
+	    -label "Show layout" \
             -command "::tycho::post \[\[$this cget -layout\] describe\]"
-    $menubar command {Show graph} Devel \
+
+    $menubar command showgraph devel \
+	    -label "Show graph" \
             -command "::tycho::post \[\[$this cget -graph\] describe\]"
 
-    $menubar addSeparator Devel
+    $menubar add separator develsep2 devel
 
-    $menubar command {Run Ptolemy} Devel \
+    $menubar command runptolemy devel \
+	    -label "Run Ptolemy" \
             -command "$this runPtolemy"
 
-    $menubar command {Run Remote Ptolemy} Devel \
+    $menubar command runremoteptolemy devel \
+	    -label "Run Remote Ptolemy" \
             -command "$this runRemotePtolemy"
 
-    $menubar command {Generate Ptolemy Script} Devel \
+    $menubar command generatescript devel \
+	    -label "Generate Ptolemy Script" \
             -command "$this writePitcl"
 
-    $menubar command {Show Ptolemy Script} Devel \
+    $menubar command showscript devel \
+	    -label "Show Ptolemy Script" \
             -command "::tycho::post \[$this createPitcl\]"
 }
 

@@ -215,19 +215,19 @@ body ::tycho::EditStack::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 
     if {$menubar != {}} {
         # Remove irrelevant capabilities from the menus.
-        $menubar delete  "Switch File..."
-        $menubar delete  "Insert..."
-        $menubar delete  "Save"
-        $menubar delete  "Reload"
-        $menubar delete  "Revision Control..."
+        $menubar delete  switchfile
+        $menubar delete  insert
+        $menubar delete  save
+        $menubar delete  reload
+        $menubar delete  revisioncontrol
         
-        $menubar delete "Undo/Redo"
-        $menubar delete "Cut"
-        $menubar delete "Paste"
+        $menubar delete undoredo
+        $menubar delete cut
+        $menubar delete paste
         
-        $menubar delete "Fill Region"
-        $menubar delete "Right Fill Column"
-        $menubar delete "Set Fill Prefix"
+        $menubar delete fillregion
+        $menubar delete rightfillcolumn
+        $menubar delete setfillprefix
     }
 }
 

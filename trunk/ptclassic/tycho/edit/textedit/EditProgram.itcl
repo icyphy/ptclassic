@@ -486,20 +486,20 @@ body ::tycho::EditProgram::indentSelection {} {
 # file can be modified.  To control the file, use <code>toggleReadOnly</code>.
 #
 body ::tycho::EditProgram::indicateReadOnly {bool} {
-    ::tycho::Edit::indicateReadOnly $bool
+    chain $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disable {Comment Out Region}
-            menubar disable {Uncomment Region}
-            menubar disable {Indent Line}
-            menubar disable {Indent Region}
-            menubar disable {Tab}
+            menubar disable commentregion
+            menubar disable uncommentregion
+            menubar disable indentline
+            menubar disable indentregion
+            menubar disable tab
 	} {
-            menubar enable {Comment Out Region}
-            menubar enable {Uncomment Region}
-            menubar enable {Indent Line}
-            menubar enable {Indent Region}
-            menubar enable {Tab}
+            menubar enable commentregion
+            menubar enable uncommentregion
+            menubar enable indentline
+            menubar enable indentregion
+            menubar enable tab
 	}
     }
 }
@@ -800,31 +800,34 @@ body ::tycho::EditProgram::initialize \
 # Initialize the menu bar. Adds entries specific to this class.
 #
 body ::tycho::EditProgram::initializeMenubar {menubar} {
-    # Create the Special menu for file templates and so on
-    $menubar addMenu Special -underline 0
-        
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
-    $menubar addSeparator Format
+    $menubar add separator formatsep3 format
         
-    $menubar command "Comment Out Region" Format -underline 8 \
+    $menubar command commentregion format \
+	    -label "Comment Out Region" -underline 8 \
             -command "$this commentSelection"
     
-    $menubar command "Uncomment Region" Format -underline 1 \
+    $menubar command uncommentregion format \
+	    -label "Uncomment Region" -underline 1 \
             -command "$this uncommentSelection"
     
-    $menubar addSeparator Format
+    $menubar add separator formatsep4 format
     
-    $menubar command "Recolorize" Format -underline 0 -accelerator "C-L" \
+    $menubar command recolorize format \
+	    -label "Recolorize" -underline 0 -accelerator "C-L" \
             -command "$this parseRegion 1.0 end"
     
-    $menubar command "Indent Line" Format -underline 0 -accelerator "Tab" \
+    $menubar command indentline format \
+	    -label "Indent Line" -underline 0 -accelerator "Tab" \
             -command "$this indentLine"
     
-    $menubar command "Tab" Format -underline 0 -accelerator "C-q Tab" \
+    $menubar command tab format \
+	    -label "Tab" -underline 0 -accelerator "C-q Tab" \
             -command "$this insertString insert {\t}"
     
-    $menubar command "Indent Region" Format -underline 2 \
+    $menubar command indentregion format \
+	    -label "Indent Region" -underline 2 \
             -accelerator "M-C-\\" \
             -command "$this busy $this indentSelection"   
 }

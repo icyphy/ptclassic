@@ -213,15 +213,20 @@ body ::tycho::EditCpp::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
-        $menubar add "Body Template" Special -underline 0 \
+	$menubar separator specialsep2 special
+
+        $menubar command bodytemplate special \
+		-label "Body Template" -underline 0 \
                 -command "$this bodyTemplate"
         
-        $menubar add ".cc File Template" Special -underline 4 \
+        $menubar command cctemplate special \
+		-label ".cc File Template" -underline 4 \
                 -command "$this fileTemplate \
                 $itk_option(-filetemplate) \
                 \[$this getClassName\]"
 
-        $menubar add ".h File Template" Special -underline 1 \
+        $menubar command htemplate special \
+		-label ".h File Template" -underline 1 \
                 -command "$this fileTemplate \
                 $itk_option(-hfiletemplate) \
                 \[$this getClassName\]"

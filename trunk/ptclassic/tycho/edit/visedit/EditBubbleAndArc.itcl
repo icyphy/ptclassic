@@ -207,9 +207,9 @@ body ::tycho::EditBubbleAndArc::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disable {Delete}
+            menubar disable delete
 	} {
-            menubar enable {Delete}
+            menubar enable delete
 	}
     }
 }
@@ -1310,32 +1310,46 @@ body ::tycho::EditBubbleAndArc::setUpCanvasBindings {} {
 body ::tycho::EditBubbleAndArc::initializeMenubar {menubar} {
 
     # Disable and remove items in Edit menu
-    $menubar disable "Cut"
-    $menubar disable "Copy"
-    $menubar disable "Paste"
-    $menubar disable "Edit Item"
+    $menubar disable cut
+    $menubar disable copy
+    $menubar disable paste
+    $menubar disable edititem
 
     # Renew items in Edit menu
-    $menubar add {Delete} Edit -underline 0 \
+    $menubar command delete edit \
+	    -label "Delete" -underline 0 \
             -command "$this deleteItem selected"
 
     # Add an Special menu
-    $menubar addMenu Special -after Format -underline 0
-    $menubar add {Smooth Toggle} Special -underline 0 \
+    $menubar addMenu special -label Special -after format -underline 0
+
+    $menubar command smoothtoggle special \
+	    -label "Smooth Toggle" -underline 0 \
 	    -command "$this smoothToggleArc selected"
-    $menubar add {Add Point Downstream} Special -underline 0 \
+
+    $menubar command addpoint special \
+	    -label "Add Point Downstream" -underline 0 \
 	    -command "$this addPoint"
-    $menubar add {Delete Point} Special -underline 0 \
+
+    $menubar command deletepoint special \
+	    -label "Delete Point" -underline 0 \
 	    -command "$this deletePoint"
-    $menubar addSeparator Special
-    $menubar add "Get Info" Special -underline 0 \
+
+    $menubar separator specialsep1 special
+
+    $menubar command getinfo special \
+	    -label "Get Info" -underline 0 \
             -command "$this getInfo"
 
     # Add new commands into Edit menu.
-    $menubar addSeparator Edit
-    $menubar add {New Node} Edit -underline 4 -accelerator "N" \
+    $menubar separator editsep4 edit
+
+    $menubar command newnode edit \
+	    -label "New Node" -underline 4 -accelerator "N" \
 	    -command "$this newNode"
-    $menubar add {New Arc} Edit -underline 4 -accelerator "A" \
+
+    $menubar command newarc edit \
+	    -label "New Arc" -underline 4 -accelerator "A" \
 	    -command "$this newArc"
 
 }

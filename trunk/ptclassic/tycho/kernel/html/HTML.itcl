@@ -1429,41 +1429,44 @@ body ::tycho::HTML::configureContextMenu {} {
 # Initialize the menu bar.  Adds entries specific to this class.
 #
 body ::tycho::HTML::initializeMenubar {menubar} {
-    $menubar disable {Undo/Redo}
-    $menubar disable {Cut}
-    $menubar disable {Paste}
-    $menubar disable "Font..."
-    $menubar delete "Fill Region"
-    $menubar delete "Right Fill Column"
-    $menubar delete "Set Fill Prefix"
-    $menubar delete "Lower Case"
-    $menubar delete "Upper Case"
-    $menubar delete "Capitalize"
+    # Remove items from File
+    $menubar delete reload
+    $menubar delete switchfile
+    $menubar delete togglereadonly
+    $menubar delete revisioncontrol
+    $menubar delete gotoline
+    $menubar delete insert
+    $menubar delete save
+    $menubar delete evaluate
+    $menubar delete compareto
 
-    $menubar insert "Open Source" "Switch File..." \
+    # Remove items from Edit
+    $menubar delete undoredo
+    $menubar delete editsep1
+
+    # Leave but disable
+    $menubar disable cut
+    $menubar disable paste
+
+    # Remove the Format menu altogether
+    $menubar delete format
+
+    $menubar insert command opensource saveas \
+	    -label "Open Source" \
             -underline 1 -accelerator {C-x s} \
             -command "$this openSource"
 
-    # delete entire Format bar (to remove Separators)
+    # Delete entire Format menu
     $menubar delete Format
 
-    # then re-create it
-    $menubar addMenu Format -underline 1
- 
-    # with font size control
-    $menubar command "Bigger Font" Format -underline 0\
-            -accelerator "C-+" -command "$this upSize"
-    $menubar command "Smaller Font" Format -underline 0\
-            -accelerator "C--" -command "$this downSize"
-
     # Setup Special menu
-    $menubar addMenu Special -underline 0
-    
-    $menubar add "Appletviewer" Special -underline 0 \
+    $menubar separator specialsep1 special
+    $menubar command appletviewer special \
+	    -label "Appletviewer" -underline 0 \
             -command "$this appletViewer"
     global tcl_platform
     if {$tcl_platform(platform) == "macintosh"} {
-        $menubar disable Appletviewer
+        $menubar disable appletviewer
     }
 }
 
