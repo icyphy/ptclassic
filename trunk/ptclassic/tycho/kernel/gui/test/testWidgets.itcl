@@ -30,22 +30,8 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# A number of windows will be created, and then some time after, destroyed.
-# You should just watch.  Do not push any buttons, or you could trigger
-# spurious errors.  If no errors occur during the test, there will be no
-# windows left at the end.  Currently, windows are left open for 4 seconds.
-# Run from within tycho (can just source this file and execute it).
-#
-# Limitations:
-#  - Modal dialogs are not tested so that the test can proceed automatically.
-#  - This is assumed to be run in $TYCHO/kernel
-#  - The tests are by no means complete.
-#
-# The modal dialogs are adequately tested by the demo script.
-
-
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
 #set VERBOSE 1
