@@ -276,13 +276,11 @@ SRRecursiveSchedule::printVerboseBlock(
 
   for ( i = indent; --i >= 0 ; ) out << " ";
   s = mygraph->star(vertex[v]);
-  out << "{ fire " << s->name() << "\n";
+  out << "{ fire " << s->name();
 
   for ( int j = parSize[v] ; --j >= 0 ; ) {
 
-    for ( i = indent + 2; --i >= 0 ; ) out << " ";    
-
-    out << "{ output ";
+    out << " { output ";
 
     // All the vertices in this parallel block should be on the same star
     assert( s == mygraph->star(vertex[v]) );
@@ -293,14 +291,13 @@ SRRecursiveSchedule::printVerboseBlock(
       out << "(fictitious)";
     }
 
-    out << " }\n";   
+    out << " }";   
 
     v++;
   
   }
 
-  for ( i = indent; --i >= 0 ; ) out << " ";
-  out << "}\n";
+  out << " }\n";
   
 }
 
