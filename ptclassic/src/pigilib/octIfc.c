@@ -444,7 +444,7 @@ LoadTheStar(instPtr, permB, linkArgs)
 /* find a parameter name in a ParamListType. */
 ParamType*
 findParam(name, pListp)
-char* name;
+const char* name;
 ParamListType *pListp;
 {
     int i;
@@ -519,9 +519,7 @@ ParamListType *pListPtr;
 
     /* Free dynamic memory */
     FreeFlatPList(&tempList);			/* allocated by PStrToPList */
-    if (prop.contents.prop.type == OCT_STRING) {
-	free(prop.contents.prop.value.string);	/* allocated by octGetByName */
-    }
+    free(prop.contents.prop.value.string);	/* allocated by octGetByName */
 
     return(retval);
 }
@@ -564,9 +562,7 @@ ParamListType *pListPtr;
 
     /* Deallocate dynamic memory */
     FreeFlatPList(&tempList);			/* allocated by PStrToPList */
-    if (prop.contents.prop.type == OCT_STRING) {
-	free(prop.contents.prop.value.string);	/* allocated by octGetByName */
-    }
+    free(prop.contents.prop.value.string);	/* allocated by octGetByName */
 
     return(retval);
 }
