@@ -95,7 +95,9 @@ char *f, *m;
     t->contents.facet.version = OCT_CURRENT_VERSION;
     t->contents.facet.mode = m;
     CK_OCT(octOpenRelative(&rfacet, t, OCT_SIBLING));
-    FreeOctMembers(&rfacet);
+
+    /* Do not free rfacet */
+
     return (TRUE);
 }
 
@@ -262,7 +264,7 @@ octObject *facetPtr;
     int status = FALSE;
 
     octInitGenContentsSpecial(facetPtr, OCT_INSTANCE_MASK, &gen);
-    while (octGenerate(&gen, &inst) == OCT_OK && !status) {
+    while (!status && octGenerate(&gen, &inst) == OCT_OK) {
 	status = IsCursor(&inst) || IsUniv(&inst) || IsPal(&inst);
 	FreeOctMembers(&inst);
     }
@@ -440,70 +442,6 @@ LoadTheStar(instPtr, permB, linkArgs)
     return (TRUE);
 }
 
-/* GetOrInitSogParams
-Get sog params if it exists or else init them first then return params.
-Inputs:
-    instPtr = adr of instance object to define params for
-    pListPtr = adr of an empty ParamList 
-Outputs: return = TRUE if successful, else FALSE.
-*/
-boolean
-GetOrInitSogParams(instPtr, pListPtr)
-octObject *instPtr;
-ParamListType *pListPtr;
-{
-    octObject prop = {OCT_UNDEFINED_OBJECT};
-    ParamListType tempList;
-    void MergeParams();
-
-    ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
-    prop.type = OCT_PROP;
-    prop.contents.prop.name = "params";
-    if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
-	/* no parameters: use default list */
-	ERR_IF1(!SetSogParams(instPtr, pListPtr));
-	return(TRUE);
-    }
-    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
-	return(FALSE);
-    FreeOctMembers(&prop);
-    MergeParams(pListPtr,&tempList);
-    return(TRUE);
-}
-
-/* GetOrInitTargetParams
-Get targetparams property if it exists or else init them first
-then return targetparams.
-Inputs:
-    targName = name of target
-    facetPtr = adr of facet to define targetparams for
-    pListPtr = adr of an empty ParamList 
-Outputs: return = TRUE if successful, else FALSE.
-*/
-boolean
-GetTargetParams(targName, facetPtr, pListPtr)
-char* targName;
-octObject *facetPtr;
-ParamListType *pListPtr;
-{
-    octObject prop = {OCT_UNDEFINED_OBJECT};
-    ParamListType tempList;
-    void MergeParams();
-
-    ERR_IF1(!KcGetTargetParams(targName, pListPtr));
-    prop.type = OCT_PROP;
-    prop.contents.prop.name = "targetparams";
-    if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
-	/* no parameters: return default list */
-	return(TRUE);
-    }
-    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
-	return(FALSE);
-    FreeOctMembers(&prop);
-    MergeParams(pListPtr,&tempList);
-    return(TRUE);
-}
-
 /* find a parameter name in a ParamListType. */
 ParamType*
 findParam(name, pList)
@@ -524,7 +462,7 @@ ParamListType *pList;
  * parameters).
  */
 void
-MergeParams(pListDef,pListInst)
+MergeParams(pListDef, pListInst)
 ParamListType *pListDef, *pListInst;
 {
     int i;
@@ -536,6 +474,76 @@ ParamListType *pListDef, *pListInst;
 	curr++;
     }
     return;
+}
+
+/* GetOrInitSogParams
+Get sog params if it exists or else init them first then return params.
+Inputs:
+    instPtr = adr of instance object to define params for
+    pListPtr = adr of an empty ParamList 
+Outputs: return = TRUE if successful, else FALSE.
+*/
+boolean
+GetOrInitSogParams(instPtr, pListPtr)
+octObject *instPtr;
+ParamListType *pListPtr;
+{
+    octObject prop = {OCT_UNDEFINED_OBJECT};
+    ParamListType tempList = {0, 0};
+
+    ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
+    prop.type = OCT_PROP;
+    prop.contents.prop.name = "params";
+    if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
+	/* no parameters: use default list */
+	ERR_IF1(!SetSogParams(instPtr, pListPtr));
+	return(TRUE);
+    }
+    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
+	return(FALSE);
+    FreeOctMembers(&prop);
+    MergeParams(pListPtr, &tempList);
+    if ( tempList.array ) {
+        free(tempList.array->name);
+        free(tempList.array);
+    }
+    return(TRUE);
+}
+
+/* GetOrInitTargetParams
+Get targetparams property if it exists or else init them first
+then return targetparams.
+Inputs:
+    targName = name of target
+    facetPtr = adr of facet to define targetparams for
+    pListPtr = adr of an empty ParamList 
+Outputs: return = TRUE if successful, else FALSE.
+*/
+boolean
+GetTargetParams(targName, facetPtr, pListPtr)
+char* targName;
+octObject *facetPtr;
+ParamListType *pListPtr;
+{
+    octObject prop = {OCT_UNDEFINED_OBJECT};
+    ParamListType tempList = {0, 0};
+
+    ERR_IF1(!KcGetTargetParams(targName, pListPtr));
+    prop.type = OCT_PROP;
+    prop.contents.prop.name = "targetparams";
+    if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
+	/* no parameters: return default list */
+	return(TRUE);
+    }
+    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
+	return(FALSE);
+    FreeOctMembers(&prop);
+    MergeParams(pListPtr, &tempList);
+    if ( tempList.array ) {
+        free(tempList.array->name);
+        free(tempList.array);
+    }
+    return(TRUE);
 }
 
 /* GetDefaultParams
