@@ -136,7 +136,7 @@ SRRecursiveSchedule::printOneBlock( int & v /* first index of the block */,
       out << vertex[v] << " ";
       v++;
     }
-    out << "]";
+    out << "] ";
   } 
 }
 
@@ -203,6 +203,7 @@ SRRecursiveSchedule::addPartition( int i,
   SetIter next(s);
   while ( (v = next++) >= 0 ) {
     vertex[j] = v;
+    partSize[j] = parSize[j] = headSize[j] = repCount[j] = 0;
     j++;
   }
 
@@ -319,7 +320,7 @@ SRRecursiveSchedule::findRange( int v /* the vertex to find */,
 
       // A simple parallel block -- check its contents
 
-      for ( int k = 0 ; k < parSize[j] ; k++ ) {
+      for ( int k = 0 ; k < parSize[i + j] ; k++ ) {
 	if ( vertex[i + j + k] == v ) {
 
 	  // The vertex is in the tail of this partition, so the push
@@ -351,7 +352,7 @@ SRRecursiveSchedule::findRange( int v /* the vertex to find */,
 int
 SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
 {
-  cout << "Merging vertex " << v << '\n';
+  // cout << "Merging vertex " << v << '\n';
 
   // Find the push range for this vertex
 
@@ -360,12 +361,12 @@ SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
   int index;
 
   if ( !findPushRange(v, start, end, index) ) {
-    cout << "Empty push range\n";
+    // cout << "Empty push range\n";
     return 0;
   }
 
-  cout << "The range is " << start << ".." << end << '\n';
-  cout << "The vertex was located at " << index << '\n';
+  // cout << "The range is " << start << ".." << end << '\n';
+  // cout << "The vertex was located at " << index << '\n';
 
   // Try to push the vertex to the left as far as possible
 
@@ -397,7 +398,7 @@ SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
 
   }
 
-  cout << "Pushed it as far left as " << bestIndex << '\n';
+  // cout << "Pushed it as far left as " << bestIndex << '\n';
 
   SRStar * outputStar = mygraph->star(vertex[index]);
 
@@ -413,15 +414,180 @@ SRRecursiveSchedule::mergeVertex(int v /* the vertex to be merged */)
   assert ( bestIndex <= end );
 
   if ( bestIndex == end ) {
-    cout << "Couldn't find anything on the same star to the right\n";
+    // cout << "Couldn't find anything on the same star to the right\n";
     return 0;
   }
 
-  cout << "Found a matching star at " << bestIndex << '\n';
+  // cout << "Found a matching star at " << bestIndex << '\n';
 
-  cout << "Matched " << mygraph->star(vertex[index])->name() << " and "
-       << mygraph->star(vertex[bestIndex])->name() << '\n';
+  // cout << "Matched " << mygraph->star(vertex[index])->name() << " and "
+  //     << mygraph->star(vertex[bestIndex])->name() << '\n';
+
+  // cout << "Deleted Schedule: ";
+
+  if ( deleteIndex( index ) ) {
+
+    // cout << print() << '\n';
+
+    if ( index < bestIndex ) {
+      bestIndex--;
+    }
+    
+    // cout << "Inserted Schedule: ";
+
+    insertVertexAtIndex( v, bestIndex );
+
+    cout << print() << '\n';
+
+  }
+
+  return 1;
+}
+
+// Remove an index from the schedule
+//
+// @Description This leaves the schedule in a "broken" form that must
+// be corrected with a matching insertIndex.
+int
+SRRecursiveSchedule::deleteIndex( int index /* Index to be deleted */)
+{
+
+  if ( headSize[index] == 1 ) {
+    // Attempting to delete the only index in a head -- fail
+    return 0;
+  }
+
+  int oldVertex = vertex[index];
+
+  for ( int i = 0 ; i < index ; i++ ) {
+
+    // If the index falls within the partition, head, or parallel block,
+    // decrease each of these as appropriate
+
+    if ( index < i + partSize[i] ) partSize[i]--;
+    if ( index < i + headSize[i] ) headSize[i]--;
+    if ( index < i + parSize[i] ) parSize[i]--;
+  }
+
+  // i is now at the index -- remove the node as necessary
+
+  if ( i < mygraph->vertices()-1 ) {
+
+    // i is not at the end of the schedule
+
+    vertex[i] = vertex[i+1];
+    
+    if ( parSize[i] > 1 ) {
+      // The node was at the beginning of a larger parallel block -- fix it
+      parSize[i]--;
+    } else {
+      parSize[i] = parSize[i+1];
+    }
+
+    if ( partSize[i] > 1 ) {
+      // The node was at the beginning of a larger partition -- fix it
+      partSize[i]--;
+    } else {
+      partSize[i] = partSize[i+1];
+    }
+
+    if ( headSize[i] > 1 ) {
+      // The node was at the beginning of a larger head -- fix it
+      headSize[i]--;
+    } else {
+      headSize[i] = headSize[i+1];
+      repCount[i] = repCount[i+1];
+    }
+
+  }
+
+  i++;
+  
+  // Move the remaining schedule back one
+
+  for ( ; i < mygraph->vertices() - 1; i++ ) {
+    vertex[i] = vertex[i+1];
+    partSize[i] = partSize[i+1];
+    headSize[i] = headSize[i+1];
+    parSize[i] = parSize[i+1];
+    repCount[i] = repCount[i+1];
+  }
+
+  // Tack the vertex onto the end
+
+  i = mygraph->vertices() - 1;
+  vertex[i] = oldVertex;
+  partSize[i] = 1;
+  headSize[i] = 0;
+  parSize[i] = 1;
+  repCount[i] = 0;
 
   return 1;
 
+}
+
+// Insert the given vertex before the given index
+int
+SRRecursiveSchedule::insertVertexAtIndex(
+  int v /* vertex to be inserted */,
+  int index /* insert before this index */ )
+{
+
+  int i;
+
+  for ( i = 0 ; i < index ; i++ ) {
+    // If the new index falls within the partition, head, or parallel block,
+    // increase each of these as appropriate
+
+    if ( index < i + partSize[i] ) partSize[i]++;
+    if ( index < i + headSize[i] ) headSize[i]++;
+    if ( index < i + parSize[i] ) parSize[i]++;
+
+  }
+
+  // make space for everything beyond the index
+
+  for ( i = mygraph->vertices() ; --i > index ; ) {   
+    vertex[i] = vertex[i-1];
+    partSize[i] = partSize[i-1];
+    headSize[i] = headSize[i-1];
+    parSize[i] = parSize[i-1];
+    repCount[i] = repCount[i-1];
+  }
+
+  // i is now at the index -- insert the vertex as necessary
+
+  // If the index was previously a partition, head, or parallel block,
+  // insert this vertex at the beginning.
+
+  vertex[i+1] = vertex[i];
+  vertex[i] = v;
+
+  if ( partSize[i] > 0 ) {
+    partSize[i]++;
+    partSize[i+1] = 0;
+  } else {
+    partSize[i+1] = partSize[i];
+    partSize[i] = 1;
+  }
+
+  if ( headSize[i] > 0 ) {
+    headSize[i]++;
+    headSize[i+1] = 0;
+    repCount[i+1] = 0;
+  } else {
+    headSize[i+1] = headSize[i];
+    headSize[i] = 0;
+    repCount[i+1] = repCount[i];
+  }
+
+  if ( parSize[i] > 0 ) {
+    parSize[i]++;
+    parSize[i+1] = 0;
+  } else {
+    parSize[i+1] = parSize[i];
+    parSize[i] = 1;
+  }
+
+  return 1;
 }
