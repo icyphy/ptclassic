@@ -33,18 +33,6 @@ ARCHFLAGS =	-DPTSOL2_5 -DPTSOL2_6 -D_PTHREAD_1003_1c
 
 include $(ROOT)/mk/config-sol2.mk
 
-CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
-
-# We must pase -DPT_EGCS so that make depend works properly.  Otherwise
-# we get messages like:
-# ../../src/compat/cfront/std.h:65: warning: No include path in which
-#        to find sysent.h 
-CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
-
-# system libraries (libraries from the environment)
-# No need to include -lg++ under egcs
-SYSLIBS=$(CSYSLIBS)
-
 # Build gthreads
 INCLUDE_GTHREADS =	no
 
