@@ -312,17 +312,17 @@ body ::tycho::Frame::constructor {x0 y0 x1 y1 args} {
     set	a1 [expr $x1 - $borderwidth]
     set	b1 [expr $y1 - $borderwidth]
 
-    lappend itemspecs [list "lit" [list polygon \
+    lappend itemspecs [list "lit" polygon \
 	    $x0 $y1 $x0 $y0 $x1 $y0 $a1 $b0 $a0 $b0 $a0 $b1 \
-	    -fill [$colorObject light]]]
+	    -fill [$colorObject light]]
 
-    lappend itemspecs [list "shaded" [list polygon \
+    lappend itemspecs [list "shaded" polygon \
 	    $x0 $y1 $x1 $y1 $x1 $y0 $a1 $b0 $a1 $b1 $a0 $b1 \
-	    -fill [$colorObject dark]]]
+	    -fill [$colorObject dark]]
 
-    lappend itemspecs [list "surface" [list rectangle \
+    lappend itemspecs [list "surface" rectangle \
 	    $a0 $b0 $a1 $b1 \
-	    -outline {} -fill [$colorObject matt]]]
+	    -outline {} -fill [$colorObject matt]]
 
     #
     # Create the items with the itemspces list.
