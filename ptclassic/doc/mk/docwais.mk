@@ -19,6 +19,36 @@
 # Some of the links in the index and toc don't work
 #
 
+# How to create PostScript, PDF and HTML versions of the docs
+#
+# 1) Regenerate the html for both the programmer's and kernel manual.
+#	As ptuser:
+#	cd ~ptdesign/doc/prog_man
+#	rm -f wmwork/*
+#	
+#	Then start up wpublish and regenerate the html
+#
+#	Do the same for kernel_man
+#
+#2) Run 'make tars' in both directories.
+#	You should probably quickly check out the html version of the
+#	manual and make sure it looks ok.
+#
+#3) Print the manual as single sided pages
+#	Work on hubble, so you can see the printer.
+#	Check the output as it comes out, so that you are sure there
+#	are not printing duplex etc.
+#	
+#	setenv PRINTER lwc524
+#	Remove the duplexer from the printer, put lots of paper in it,
+#	Send email saying that you will be printing it.
+#	Run print_prog_man in the prog_man directory
+#	Look for missing chapters
+#	If it prints out ok, do:
+#	Run print_kernel_man in the kernel_man directory
+#	Look for missing chapters
+
+
 # Before including this makefile, be sure to set the following variables
 # in your makefile.
 # For example for the programmers manual
@@ -85,7 +115,6 @@ CHARS= captau.gif eta.gif epsilon.gif capalpha.gif lambda.gif alpha.gif \
 
 fix_wmwork: wmwork/search.html
 	-cp $(ROOT)/doc/lib/buttons/*.gif wmwork
-	-cp $(ROOT)/doc/lib/search.html wmwork
 	/users/ptdesign/doc/bin/addtoc $(DOCS)
 	(cd wmwork; rm -f idx.html; ln -s $(DOC_NAME)IX.doc.html idx.html)
 	rm -f wmwork/content.html
@@ -110,16 +139,17 @@ addtoc:
 	/users/ptdesign/doc/bin/addtoc $(DOCS)
 
 wmwork/search.html:
+	@echo "Generating $@ for $(DOC_DESCRIPTION)"
 	@echo "<html>" >> $@
 	@echo "<head>" >> $@
-	@echo "<title>Search $(DOC_DESCRIPTOR)<title>" >> $@
-	@echo "<body bgcolor=\"#faf0e6\">" >> $@
-	@echo "<h1>Search $(DOC_DESCRIPTOR)<h1>" >> $@
+	@echo "<title>Search $(DOC_DESCRIPTOR)</title>" >> $@
+	@echo "<body bgcolor=\"#eef7ff\">" >> $@
+	@echo "<h1>Search $(DOC_DESCRIPTOR)</h1>" >> $@
 	@echo "Click on the link below to go to the search page." >> $@
 	@echo "<p>" >> $@
-	@echo "<A HREF=\"http://ptolemy.eecs.berkeley.edu/cgi-bin/$(DOC_NAME)-wais.pl"><IMG ALIGN = BOTTOM SRC="search.gif" ALT=\"Search\"></a>" >> $@
-	@echo "<body>" >> $@
-	@echo "<html>" >> $@
+	@echo "<A HREF=\"http://ptolemy.eecs.berkeley.edu/cgi-bin/$(DOC_NAME)-wais.pl\"><IMG ALIGN = BOTTOM SRC=\"search.gif\" ALT=\"Search\"></a>" >> $@
+	@echo "</body>" >> $@
+	@echo "</html>" >> $@
 
 ####################################################
 # Build tar files for the PostScript, PDF and HTML
@@ -127,13 +157,16 @@ wmwork/search.html:
 tars:	ps.tar pdf.tar html.tar
 ps.tar:
 	$(MAKE) fm2ps
-	(cd ..; gtar -zcf $(DOC_NAME)/$(DOC_NAME).tar.gz $(DOC_NAME)/*.ps \
+	rm -f *LOM*.ps
+	(cd ..; gtar -zcf $(DOC_NAME)/$(DOC_NAME)$(VERSION).tar.gz \
+		$(DOC_NAME)/*.ps \
 		$(DOC_NAME)/print_$(DOC_NAME)ual)
 
 pdf.tar:
 	$(MAKE) fm2ps
+	rm -f *LOM*.ps
 	distill *.ps
-	(cd ..; gtar -zcf $(DOC_NAME)/$(DOC_NAME).pdf.tar.gz $(DOC_NAME)/*.pdf)
+	(cd ..; gtar -zcf $(DOC_NAME)/$(DOC_NAME)$(VERSION).pdf.tar.gz $(DOC_NAME)/*.pdf)
 
 html.tar:
 	@echo "We are assuming that you ran wpublish and converted the frame files"
