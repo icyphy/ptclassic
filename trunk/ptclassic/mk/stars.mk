@@ -165,7 +165,7 @@ ifdef CG56
 			$(CG56T)/CGCXBase.o  
 	endif
 	# Window and RaisedCosine stars in cg56/dsp/stars need Cephes Library
-	CEPHESLIB = 1
+	PTDSPLIB = 1
 	# CG56 targets need CGCStar
 	CGCLIB = 1
 endif
@@ -192,7 +192,7 @@ ifdef C50
 			$(CG56T)/SubC50Target.o
 	endif
 	# Window and RaisedCosine star in c50/dsp/stars need Cephes Library
-	CEPHESLIB = 1
+	PTDSPLIB = 1
 	# C50 targets need CGCStar
 	# CGCLIB = 1
 endif
@@ -273,7 +273,7 @@ ifdef VHDL
 	endif
 
 	# Window star in vhdl/stars needs the Cephes Library
-	CEPHESLIB = 1
+	PTDSPLIB = 1
 endif
 
 ifdef VHDLB
@@ -451,7 +451,7 @@ ifdef CGC
 	LIBFILES += $(LIBDIR)/libcgcdspstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcgcstars.$(LIBSUFFIX)
 	# Window and RaisedCos DSP stars need the Cephes Library
-	CEPHESLIB = 1
+	PTDSPLIB = 1
 endif
 
 ifdef CGCLIB
@@ -562,7 +562,7 @@ ifdef SDF
 		LIBS += -lsdfdspstars
 		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
 		# Cephes library is used by the Window and RaiseCosine stars
-		CEPHESLIB = 1
+		PTDSPLIB = 1
 	endif
 	ifdef SDFMATRIX 
 		CUSTOM_DIRS += $(SDFDIR)/matrix/stars
@@ -617,7 +617,7 @@ ifdef ATM
 	LIBFILES += $(LIBDIR)/libatm.$(LIBSUFFIX)
 endif
 
-ifdef CEPHESLIB
+ifdef PTDSPLIB
 	CUSTOM_DIRS += $(CROOT)/src/utils/libptdsp
 	LIBS += -lptdsp
 	LIBFILES += $(LIBDIR)/libptdsp.$(LIBSUFFIX)
