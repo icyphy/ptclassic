@@ -825,7 +825,7 @@ body ::tycho::Graphics::redo {} {
         eval $this $cmd
     }
     set redoCommands {}
-    menubar disable Redo
+    menubar disable redo
     markModified
 }
 
@@ -868,13 +868,13 @@ body ::tycho::Graphics::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disable {Edit Item}
-            menubar disable {Cut}
-            menubar disable {Paste}
+            menubar disable edititem
+            menubar disable cut
+            menubar disable paste
 	} {
-            menubar enable {Edit Item}
-            menubar enable {Cut}
-            menubar enable {Paste}
+            menubar enable edititem
+            menubar enable cut
+            menubar enable paste
 	}
     }
 }
@@ -978,7 +978,7 @@ body ::tycho::Graphics::undo {} {
     }
     set undoing 0
     set undoCommands {}
-    menubar disable Undo
+    menubar disable undo
     markModified
 }
 
@@ -993,10 +993,10 @@ body ::tycho::Graphics::undo {} {
 body ::tycho::Graphics::undoAppend {command} {
     if !$interactiveEnabled {return}
     if $undoing {
-        menubar enable Redo
+        menubar enable redo
         lappend redoCommands $command
     } {
-        menubar enable Undo
+        menubar enable undo
         lappend undoCommands $command
     }
 }
@@ -1010,10 +1010,10 @@ body ::tycho::Graphics::undoAppend {command} {
 body ::tycho::Graphics::undoBoundary {} {
     if !$interactiveEnabled {return}
     if $undoing {
-        menubar disable Redo
+        menubar disable redo
         set redoCommands {}
     } {
-        menubar disable Undo
+        menubar disable undo
         set undoCommands {}
     }
 }
@@ -1029,10 +1029,10 @@ body ::tycho::Graphics::undoBoundary {} {
 body ::tycho::Graphics::undoPrepend {command} {
     if !$interactiveEnabled {return}
     if $undoing {
-        menubar enable Redo
+        menubar enable redo
         set redoCommands [concat [list $command] $redoCommands]
     } {
-        menubar enable Undo
+        menubar enable undo
         set undoCommands [concat [list $command] $undoCommands]
     }
 }
@@ -1287,34 +1287,42 @@ body ::tycho::Graphics::saveText {} {
 #
 body ::tycho::Graphics::initializeMenubar {menubar} {
 
-    $menubar addMenu Edit -before Window -underline 0
-
-    $menubar add {Undo} Edit -underline 0 -accelerator "z" \
-            -command "$this undo"
-
-    $menubar add {Redo} Edit -underline 0 -accelerator "d" \
-	    -command "$this redo"
-
-    $menubar addSeparator Edit
-
-    $menubar add Cut Edit -underline 0 -accelerator "x" \
-	    -command "$this modify cut"
+    # Add an Edit menu before the Window menu
+    $menubar addMenu edit -label Edit -underline 0 -before window
     
-    $menubar add Copy Edit -underline 1 -accelerator "c" \
+    $menubar command undo edit \
+	    -label "Undo" -accelerator "M-z" \
+	    -underline 0 -command "$this undo"
+    
+    $menubar command redo edit \
+	    -label "Redo" -accelerator "M-r" \
+	    -underline 0 -command "$this redo"
+    
+    $menubar separator editsep1 edit
+    
+    $menubar command cut edit \
+	    -label "Cut" -underline 0 -accelerator "C-w" \
+	    -command "$this cut"
+    
+    $menubar command copy edit \
+	    -label "Copy" -underline 1 -accelerator "M-w" \
 	    -command "$this copy"
     
-    $menubar add Paste Edit -underline 0 -accelerator "v" \
-	    -command "$this modify paste"
+    $menubar command paste edit \
+	    -label "Paste" -underline 0 -accelerator "C-y" \
+	    -command "$this paste"
     
-    $menubar addSeparator Edit
-
-    $menubar add {Title...} Edit -underline 0 -accelerator "T" \
+    $menubar separator editsep2 edit
+    
+    $menubar command title edit \
+	    -label "Title..." -underline 0 -accelerator "T" \
             -command "$this titleAdd"
 
-    $menubar add {Edit Item} Edit -underline 0 -accelerator "e" \
+    $menubar command edititem edit \
+	    -label "Edit Item" -underline 0 -accelerator "e" \
 	    -command "$this edit"
 
     # Undo and Redo menu start out disabled
-    $menubar disable Undo
-    $menubar disable Redo
+    $menubar disable undo
+    $menubar disable redo
 }

@@ -451,46 +451,56 @@ body ::tycho::EditPtcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 body ::tycho::EditPtcl::initializeMenubar {menubar} {
     global PTOLEMY
 
-    #$menubar addMenu Special -underline 0
     # Delete these menus from the parent EditItcl class, they make no sense.
-    $menubar delete "Body Template"
-    $menubar delete "File Template"
-    $menubar delete "Test Template"
-    $menubar delete "Generate doc"
-    $menubar delete "Generate idoc"
-    $menubar delete "Generate class diagram"
-
-    $menubar add "Retarget" Special -underline 0 \
+    $menubar delete bodytemplate
+    $menubar delete filetemplate
+    $menubar delete testtemplate
+    $menubar delete generatedoc
+    $menubar delete generateidoc
+    $menubar delete generateclassdiagram
+ 
+    # Add my own menu entries
+    $menubar command retarget special \
+	    -label "Retarget" -underline 0 \
             -command "::tycho::view Retarget -edit $this -toolbar 1"
 
     if {[catch {::pitcl::knownDomains}] == 1 } {
-	$menubar disable Retarget
+	$menubar disable retarget
     }
-    $menubar add "List Domain(s)" Special -underline 5 \
+    $menubar command listdomains special \
+	    -label "List Domain(s)" -underline 5 \
             -command "::tycho::inform \
-        \"Domain(s) used: \[$this domains\]\""
+	    \"Domain(s) used: \[$this domains\]\""
 
-    $menubar add "List Stars" Special -underline 5 \
+    $menubar command liststars special \
+	    -label "List Stars" -underline 5 \
             -command "::tycho::inform \
-        \"Stars used: \[$this stars\]\""
+	    \"Stars used: \[$this stars\]\""
 
-    $menubar add "Universe Name" Special -underline 0 \
+    $menubar command universename special \
+	    -label "Universe Name" -underline 0 \
             -command "::tycho::inform \
             \" Universe: \[$this universeName\]\""
 
-    $menubar add "Open Facet" File -underline 0 \
+    $menubar command openfacet file \
+	    -label "Open Facet" -underline 0 \
 	    -command "$this openFacet"
 
     # Stuff for the help menu
-    $menubar add "Ptolemy Universes" Help -underline 0 \
+    # Moved to the special menu -- johnr
+    $menubar separator specialsep2 special
+    $menubar command ptuniverses special \
+	    -label "Ptolemy Universes" -underline 0 \
             -command "::tycho::File::openContext \
 	    [file join $PTOLEMY tycho typt lib PtolemyFacets.fst]"
 
-    $menubar add "Star/Demo Xref" Help -underline 11 \
+    $menubar command starxref special \
+	    -label "Star/Demo Xref" -underline 11 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY doc star-demo-index index.html]"
 
-    $menubar add "Ptolemy stars" Help -underline 0 \
+    $menubar command ptstars special \
+	    -label "Ptolemy stars" -underline 0 \
             -command "::tycho::File::openContext \
-	    [file join $PTOLEMY src domains starHTML.idx.fst]"
+            [file join $PTOLEMY src domains starHTML.idx.fst]"
 }

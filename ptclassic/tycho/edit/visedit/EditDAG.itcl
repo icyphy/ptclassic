@@ -799,11 +799,11 @@ body ::tycho::EditDAG::setReadOnly {bool} {
     ::tycho::Graphics::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            menubar disable {New Root}
-            menubar disable {New Child}
+            menubar disable newroot
+            menubar disable newchild
 	} {
-            menubar enable {New Root}
-            menubar enable {New Child}
+            menubar enable newroot
+            menubar enable newchild
 	}
     }
 }
@@ -1119,24 +1119,30 @@ body ::tycho::EditDAG::verifycontents {contents} {
 # Initialize the menu bar.  Adds entries specific to this class.
 #
 body ::tycho::EditDAG::initializeMenubar {menubar} {
-    $menubar addSeparator Edit
+    $menubar separator editsep19 edit
 
-    $menubar add {New Root} Edit -underline 4 -accelerator "R" \
+    $menubar command newroot edit \
+	    -label "New Root" -underline 4 -accelerator "R" \
 	    -command "$this addRoot"
 
-    $menubar add {New Child} Edit -underline 4 -accelerator "C" \
+    $menubar command newchild edit \
+	    -label "New Child" -underline 4 -accelerator "C" \
 	    -command "$this addChild"
 
-    $menubar add {New Arc} Edit -underline 4 -accelerator "A" \
+    $menubar command newarc edit \
+	    -label "New Arc" -underline 4 -accelerator "A" \
 	    -command "$this addArc"
 
-    $menubar add {Transpose} Format -underline 0 \
+    $menubar command tranpose format \
+	    -label "Transpose" -underline 0 \
             -command "$this transpose"
 
-    $menubar add {Alternate Layout} Format -underline 0 \
+    $menubar command alternatelayout format \
+	    -label "Alternate Layout" -underline 0 \
             -command "$this toggleLayout"
 
-    $menubar add {Scale} Format -underline 1 \
+    $menubar command scale edit \
+	    -label "Scale" -underline 1 \
             -command "$this setSpacing"
 }
 

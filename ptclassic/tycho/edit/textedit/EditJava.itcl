@@ -579,27 +579,34 @@ body ::tycho::EditJava::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 body ::tycho::EditJava::initializeMenubar {menubar} {
     global tcl_platform
 
-    $menubar delete ".cc File Template"
-    $menubar delete ".h File Template"
+    $menubar delete cctemplate
+    $menubar delete htemplate
+    $menubar delete tclinit
+    $menubar delete specialsep2
 
-    $menubar add "File Template" Special -underline 0 \
+    $menubar command filetemplate special \
+	    -label "File Template" -underline 0 \
 	    -command "$this fileTemplate \[$this getClassName\]"
 
-    $menubar addSeparator Special
+    $menubar separator specialsep2 special
 
-    $menubar add "Generate doc" Special -underline 0 \
+    $menubar command generatedoc special \
+	    -label "Generate HTML Documentation" -underline 0 \
             -command "$this gendocBuffer"
 
-    $menubar add "Generate idoc" Special -underline 9 \
+    $menubar command generateidoc special \
+	    -label "Generate Idoc Documentation" -underline 9 \
             -command "$this genidocBuffer"
 
-    $menubar add "Appletviewer" Special -underline 0 \
+    $menubar command appletviewer special \
+	    -label "Appletviewer" -underline 0 \
             -command "$this execProcess appletviewer"
 
     if {$tcl_platform(platform) == "macintosh"} {
-	$menubar disable "Generate doc"
-	$menubar disable Appletviewer
+	$menubar disable generatedoc
+	$menubar disable appletviewer
     }
-    $menubar insert "Java Documentation" {Preferences...} -underline 0 \
+    $menubar insert command javadocumentation preferences \
+	    -label "Java Documentation" -underline 0 \
 	    -command "$this ::tycho::EditJava::openJavaHTMLPage"
 }

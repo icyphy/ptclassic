@@ -420,18 +420,20 @@ body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     if {$menubar != {}} {
         # Add to the format menu commands to comment and uncomment
         # the regions defined by the selection.
-        menubar addSeparator Format
+        menubar add separator formatsep3 format
         
-        menubar command "Recolorize" Format -underline 0 \
+        menubar command recolorize format \
+		-label "Recolorize" -underline 0 \
                 -command "$this parseRegion 1.0 end"
         
-        menubar addSeparator Edit
+        menubar add separator editsep3 edit
         
-        menubar command "Check Links" Edit -underline 6 \
+        menubar command checklinks edit \
+		-label "Check Links" -underline 6 \
                 -command "$this busy $this checkLinks"
         
-        menubar addMenu Special -underline 0
-        menubar command "File Template" Special -underline 0 \
+        menubar command filetemplate special \
+		-label "File Template" -underline 0 \
                 -command "$this fileTemplate"
     }
 }

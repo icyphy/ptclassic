@@ -127,8 +127,9 @@ body ::tycho::EditPalette::initialize \
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
-        $menubar addMenu Special -underline 0
-        $menubar add "Show Ptcl" Special -underline 0 \
+        $menubar addMenu special -label Special -underline 0
+        $menubar command showptcl special \
+		-label "Show Ptcl" -underline 0 \
                 -command "::tycho::view EditPtcl -facet $itk_option(-facet)"
 
         #menubar add "Retarget" Special -underline 0 \

@@ -1419,30 +1419,30 @@ body ::tycho::Edit::help {} {
 # whether modifications are allowed on the buffer.
 #
 body ::tycho::Edit::indicateReadOnly {bool} {
-    ::tycho::File::indicateReadOnly $bool
+    chain $bool
     if [winfo exists $prefix] {
 	if {$bool} {
             $itk_component(text) config -cursor {}
-            menubar disable {Undo/Redo}
-            menubar disable Cut
-            menubar disable Paste
-            menubar disable {Fill Region}
-            menubar disable {Right Fill Column}
-            menubar disable {Set Fill Prefix}
-            menubar disable {Capitalize}
-            menubar disable {Lower Case}
-            menubar disable {Upper Case}
+            menubar disable undoredo
+            menubar disable cut
+            menubar disable paste
+            menubar disable fillregion
+            menubar disable rightfillcolumn
+            menubar disable setfillprefix
+            menubar disable capitalize
+            menubar disable lowercase
+            menubar disable uppercase
 	} {
             $itk_component(text) config -cursor xterm
-            menubar enable {Undo/Redo}
-            menubar enable Cut
-            menubar enable Paste
-            menubar enable {Fill Region}
-            menubar enable {Right Fill Column}
-            menubar enable {Set Fill Prefix}
-            menubar enable {Capitalize}
-            menubar enable {Lower Case}
-            menubar enable {Upper Case}
+            menubar enable undoredo
+            menubar enable cut
+            menubar enable paste
+            menubar enable fillregion
+            menubar enable rightfillcolumn
+            menubar enable setfillprefix
+            menubar enable capitalize
+            menubar enable lowercase
+            menubar enable uppercase
 	}
     }
 }
@@ -2175,84 +2175,98 @@ body ::tycho::Edit::initializeMenubar {menubar} {
     global tcl_platform
 
     # Insert items in the menu bar.
-#    $menubar insert "Compile" "Evaluate" -underline 2 \
-#	    -command "$this execProcess make"
-    
     if {$tcl_platform(platform) == "macintosh"} {
-	$menubar disable Compile
+	$menubar disable compile
     }
 
     # Add an Edit menu
-    $menubar addMenu Edit -before Window -underline 0
+    $menubar addMenu edit -label Edit -before window -underline 0
     
-    $menubar command {Undo/Redo} Edit -accelerator "C-x u" \
+    $menubar command undoredo edit \
+	    -label "Undo/Redo" -accelerator "C-x u" \
 	    -underline 0 -command "$this undo"
     
-    $menubar addSeparator Edit
+    $menubar separator editsep1 edit
     
-    $menubar command Cut Edit -underline 0 -accelerator "C-w" \
+    $menubar command cut edit \
+	    -label "Cut" -underline 0 -accelerator "C-w" \
 	    -command "$this cut"
     
-    $menubar command Copy Edit -underline 1 -accelerator "M-w" \
+    $menubar command copy edit \
+	    -label "Copy" -underline 1 -accelerator "M-w" \
 	    -command "$this copy"
     
-    $menubar command Paste Edit -underline 0 -accelerator "C-y" \
+    $menubar command paste edit \
+	    -label "Paste" -underline 0 -accelerator "C-y" \
 	    -command "$this paste"
     
-    $menubar addSeparator Edit
+    $menubar separator editsep2 edit
     
-    $menubar command "Select All" Edit -underline 0 \
+    $menubar command selectall edit \
+	    -label "Select All" -underline 0 \
 	    -accelerator "C-/" -command "$this selectRange 1.0 end"
     
-    $menubar command "Unselect" Edit -underline 0 \
+    $menubar command unselect edit \
+	    -label "Unselect" -underline 0 \
 	    -accelerator "C-\\" -command "$this unselectRange 1.0 end"
     
-    $menubar command "Find/Change..." Edit -underline 0 \
+    $menubar command findchange edit \
+	    -label "Find/Change..." -underline 0 \
 	    -accelerator "C-s" -command "$this search"
     
-    $menubar command "Spelling..." Edit -underline 2 \
+    $menubar command spelling edit \
+	    -label "Spelling..." -underline 2 \
 	    -accelerator "M-$" -command "$this spellCheck"
     if {$tcl_platform(platform) == "macintosh"} {
-	$menubar disable "Spelling..."
+	$menubar disable spelling
     }
 
-    $menubar command {Goto Line...} Edit -underline 0 \
+    $menubar command gotoline edit \
+	    -label "Goto Line..." -underline 0 \
 	    -accelerator "C-c C-g" -command "$this gotoLine"
     
     # Add a Format menu
-    $menubar addMenu Format -underline 1
+    $menubar addMenu format -label Format -underline 1
     
-    $menubar addSeparator Format
+    # $menubar separator formatsep0 format
 
-    $menubar command "Fill Region" Format -underline 2 \
+    $menubar command fileregion format \
+	    -label "Fill Region" -underline 2 \
 	    -accelerator "M-q" -command "$this busy $this fillSelection"
     
-    $menubar command "Right Fill Column" Format -underline 2 \
+    $menubar command rightfill format \
+	    -label "Right Fill Column" -underline 2 \
 	    -accelerator "C-x f" -command "$this queryFillColumn"
     
-    $menubar command "Set Fill Prefix" Format -underline 1 \
+    $menubar command setfillprefix format \
+	    -label "Set Fill Prefix" -underline 1 \
 	    -accelerator "C-x ." -command "$this queryFillPrefix"
 
-    $menubar addSeparator Format
+    $menubar separator formatsep1 format
 
-    $menubar command "Capitalize" Format -underline 0 \
+    $menubar command capitalize format \
+	    -label "Capitalize" -underline 0 \
 	    -accelerator "M-C" -command "$this capitalize"
 
-    $menubar command "Lower Case" Format -underline 0 \
+    $menubar command lowercase format \
+	    -label "Lower Case" -underline 0 \
 	    -accelerator "M-l" -command "$this lowerCase"
 
-    $menubar command "Upper Case" Format -underline 0 \
+    $menubar command uppercase format \
+	    -label "Upper Case" -underline 0 \
 	    -accelerator "M-u" -command "$this upperCase"
 
-    $menubar addSeparator Format
+    # Add a Special menu for file templates and so on
+    $menubar addMenu special -label Special -underline 0
     
     # Add font size control
-    $menubar command "Bigger Font" Format -underline 0\
+    $menubar command biggerfont special \
+	    -label "Bigger Font" -underline 0\
             -accelerator "C-+" -command "$this upSize"
 
-    $menubar command "Smaller Font" Format -underline 0\
+    $menubar command smallerfont special \
+	    -label "Smaller Font" -underline 0\
             -accelerator "C--" -command "$this downSize"
-
 }
 
 #####################################################################

@@ -188,57 +188,71 @@ body ::tycho::BuilderDialog::initializeMenubar {menubar} {
     displayer configure -title "Tycho Build Manager" \
 	    -menupadx 10
 
-    $menubar addMenu Build -underline 0
+    $menubar addMenu build -label Build -underline 0
 
-    $menubar add {Check} Build -underline 0 \
+    $menubar command check build \
+	    -label {Check} -underline 0 \
 	    -command "$this busy ::tycho::BuilderDialog::checkFiles 1"
 
-    $menubar add {Full (10 Minutes)} Build -underline 0 \
+    $menubar command full build \
+	    -label {Full (10 Minutes)} -underline 0 \
 	    -command "$this busy ::tycho::Builder::build"
 
-    $menubar addSeparator Build
+    $menubar separator buildsep1 build
 
-    $menubar add {'make all'} Build -underline 0 \
+    $menubar command makeall build \
+	    -label {'make all'} -underline 0 \
 	    -command "$this busy ::tycho::Builder::all"
 
-    $menubar addSeparator Build
-    $menubar add {Class Diagram Only} Build -underline 0 \
+    $menubar separator buildsep2 build
+
+    $menubar command buildclassdiagram build \
+	    -label {Class Diagram Only} -underline 0 \
 	    -command "$this busy ::tycho::Builder::classDiagram"
 
-    $menubar add {Glimpse} Build -underline 0 \
+    $menubar command buildglimpse build \
+	    -label {Glimpse} -underline 0 \
 	    -command "$this busy ::tycho::Builder::glimpse"
 
-    $menubar add {Itcl HTML Only (4 Minutes)} Build -underline 5 \
+    $menubar command builditclhtml build \
+	    -label {Itcl HTML Only (4 Minutes)} -underline 5 \
 	    -command "$this busy ::tycho::Builder::itcldocs"
 
-    $menubar add {Itcl IDocs Only} Build -underline 6 \
+    $menubar command builditclidocs build \
+	    -label {Itcl IDocs Only} -underline 6 \
             -command "$this busy ::tycho::Builder::idocs"
 
-    $menubar add {Indices Only} Build -underline 0 \
+    $menubar command buildindices build \
+	    -label {Indices Only} -underline 0 \
 	    -command "$this busy ::tycho::Builder::indices"
 
-    $menubar add {Tcl Extensions} Build -underline 0 \
+    $menubar command tclextensions build \
+	    -label {Tcl Extensions} -underline 0 \
 	    -command "$this busy ::tycho::Builder::tclexts"
 
     global PTOLEMY
     if [ file writable [file join $PTOLEMY src domains] ] { 
-        $menubar addSeparator Build
-	$menubar add {Domain Index} Build -underline 0 \
-	    -command "$this busy ::tycho::Builder::ptDomainIndex"
-	$menubar add {Ptolemy Facets Forest} Build -underline 0 \
-	    -command "$this busy ::tycho::Builder::ptolemyFacetsForest"
+        $menubar separator buildsep3 build
+	$menubar command domainindex build \
+		-label {Domain Index} -underline 0 \
+		-command "$this busy ::tycho::Builder::ptDomainIndex"
+	$menubar command ptfacets build \
+		-label {Ptolemy Facets Forest} -underline 0 \
+		-command "$this busy ::tycho::Builder::ptolemyFacetsForest"
     }
 
-    $menubar addMenu Test -underline 0
+    $menubar addMenu test -label Test -underline 0
 
-    $menubar add {Run All Tests} Test -underline 0 \
+    $menubar command runalltests test \
+	    -label {Run All Tests} -underline 0 \
 	    -command "$this busy ::tycho::Builder::testAll"
 
-    $menubar add {Testing Help} Test -underline 0 \
+    $menubar command testinghelp test \
+	    -label {Testing Help} -underline 0 \
 	    -command "::tycho::File::openContext \
             [file join $TYCHO doc coding testing.html]"
 
-    $menubar addSeparator Test
+    $menubar separator testsep1 test
 
     initializeTestSubmenu $menubar {Kernel Tests} \
             [file join $TYCHO kernel test]
@@ -255,84 +269,111 @@ body ::tycho::BuilderDialog::initializeMenubar {menubar} {
     # If Ptolemy is present, then we can run some tests.
     global ptolemyfeature
     if { $ptolemyfeature(pitcl) || $ptolemyfeature(ptcl) } {
-        $menubar addSeparator Test
-        $menubar add {Tycho/Ptolemy Kernel Tests} Test -underline 0 \
+        $menubar separator testsep2 test
+        $menubar command kerneltests test \
+		-label {Tycho/Ptolemy Kernel Tests} -underline 0 \
                 -command "$this busy ::tycho::Builder::testDir \
                 [file join $TYCHO typt kernel test]"
 
-        $menubar add {Tycho/Ptolemy Editor Tests} Test -underline 0 \
+        $menubar command editortests test \
+		-label {Tycho/Ptolemy Editor Tests} -underline 0 \
                 -command "$this busy ::tycho::Builder::testDir \
                 [file join $TYCHO typt editors test]"
 
     }
 
     if [file writable [::tycho::Builder::getDistBuildDir]] {
-        $menubar addMenu Distribute -underline 0
+        $menubar addMenu distribute -label Distribute -underline 0
 
-        $menubar add {Full Distribution} Distribute -underline 0 \
+        $menubar command fulldist distribute \
+		-label {Full Distribution} -underline 0 \
                 -command "$this busy ::tycho::Builder::distFull"
     }
 
     if { $tcl_platform(platform) == "macintosh" } {
-	$menubar disable {Tcl Extensions}
+	$menubar disable tclextensions
     }
 
 #### Start FIXME
 # FIXME: this code was duplicated from File, we need to rehack view
 # so that it has a help menu.    
-    $menubar addMenu Help -side right -underline 0
-
     # Help menu contents
     
-    $menubar command "About Tycho" Help -underline 0 -command \
+    $menubar addMenu help   -label Help -side right -underline 0
+
+    $menubar command about help \
+            -label "About Tycho" -underline 0 -command \
 	    {::tycho::welcomeMessage $TychoBinaryInfo $TychoVersionInfo}
     
     global ::TYCHO
-    $menubar command "Tycho Home Page" Help -underline 0 -command \
+    $menubar command homepage help \
+	    -label "Tycho Home Page" -underline 0 -command \
 	    {::tycho::File::openContext \
 	    [file join $TYCHO doc index.html]}
 
-    $menubar command "Guide to [info class] widget" Help -underline 0 \
-	    -command "$this help"
+    # FIXME: We should be able to easily add and subtract Help items
+    # on a global basis without modifying this file.
+    global ptolemyfeature
+    if $ptolemyfeature(ptolemy) {
+        $menubar command ptabout help \
+		-label "About Ptolemy" -underline 0 -command \
+                ptkStartupMessage
+        global ::PTOLEMY
+        $menubar command pthomepage help \
+		-label "Ptolemy Home Page" -underline 0 -command \
+                {::tycho::File::openContext \
+                [file join $PTOLEMY doc html index.html]}
+    }
+ 
+    $menubar command usersguide help \
+	    -label "Guide to BuilderDialog Widget" -underline 0 \
+            -command "$this help"
     
-    $menubar command "Concept Index..." Help -underline 8 \
+    $menubar command conceptindex help \
+	    -label "Concept Index..." -underline 8 \
 	    -command {::tycho::File::openContext \
 	    [file join \$TYCHO lib idx tycho.idx]}
     
-    $menubar command "Code Index..." Help -underline 0 \
+    $menubar command codeindex help \
+	    -label "Code Index..." -underline 0 \
 	    -command {set _nmBogosity [::tycho::autoName .index]; \
             ::tycho::IndexBrowser $_nmBogosity \
 	    -file [file join \$TYCHO lib idx codeDoc.idx] \
 	    -width 80; $_nmBogosity centerOnScreen}
     
-    $menubar command "Class Diagram" Help -underline 6 -command \
+    $menubar command classdiagram help \
+	    -label "Class Diagram" -underline 6 -command \
 	    {::tycho::File::openContext \
 	    [file join \$TYCHO doc tychoClasses.dag]}
 
-    $menubar command "Itcl man pages" Help -underline 0 \
+    $menubar command itclmanpages help \
+	    -label "Itcl Man Pages" -underline 0 \
 	    -command "$this ::tycho::File::openItclHTMLPage"
 
     # Add the Preferences menu. This is probably the wrong place
     # for it, but it will do until we figure out a good menu to
     # put it in that doesn't keep disappearing...
-    $menubar command "Preferences..." Help -underline 0 \
+    $menubar command preferences help \
+	    -label "Preferences..." -underline 0 \
 	    -command { ::tycho::preferencedialog }
-####end FIXME
-
 }
 
 #####################################################################
 #### initializeTestSubmenu
-# Initialize a test menu submenu will all the .itcl files in that dir.
+# Initialize a test menu submenu with all the .itcl files in that dir.
 #
 body ::tycho::BuilderDialog::initializeTestSubmenu {menubar menuname dir} {
-    $menubar add $menuname Test -underline 0 -type cascade
-    $menubar command "Run All $menuname" $menuname -underline 0 \
+    set menutag [string tolower [join $menuname _]]
+    $menubar add cascade $menutag test -label $menuname -underline 0
+    $menubar command runall$menutag $menutag \
+	    -label "Run All $menuname" -underline 0 \
 	    -command "$this busy ::tycho::Builder::testDir $dir"
-    $menubar addSeparator $menuname
+    $menubar separator sep$menutag $menutag
     foreach file [glob -nocomplain [file join $dir *.tcl] \
 	    [file join $dir *.itcl]] {
-	$menubar command [::tycho::simplifyPath $file {TYCHO}] $menuname\
+	set path [::tycho::simplifyPath $file {TYCHO}]
+	$menubar command $menutag$path $menutag \
+		-label $path \
                 -command "::tycho::File::openContext $file"
     }
 }

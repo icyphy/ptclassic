@@ -815,11 +815,11 @@ body ::tycho::EditSTD::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-	    menubar disable {Edit Item}
-            menubar disable {Delete}
+	    menubar disable edititem
+            menubar disable delete
 	} {
-	    menubar enable {Edit Item}
-            menubar enable {Delete}
+	    menubar enable edititem
+            menubar enable delete
 	}
     }
 }
@@ -1124,27 +1124,34 @@ body ::tycho::EditSTD::transGuard {guard} {
 #
 body ::tycho::EditSTD::initializeMenubar {menubar} {
     # Add items into File menu
-    $menubar insert "Look Inside" "Close" \
+    $menubar insert command lookinside close \
+	    -label "Look Inside" \
 	    -underline 5 -accelerator "i" -command "$this lookInside selected"
-    $menubar insertSeparator "Close"
+    $menubar insert separator stdsep1 close
 
     # Enable items in Edit menu
-    $menubar enable "Edit Item"
+    $menubar enable edititem
 
     # Change command of items in Edit menu
-    $menubar entryconfigure {Edit Item} \
+    $menubar entryconfigure edititem \
 	    -command "$this editItem selected"
 
     # Add items into Special menu
-    $menubar insert "I/O Port Names..." "Smooth Toggle" \
+    $menubar insert command ioports smoothtoggle \
+	    -label "I/O Port Names..." \
 	    -underline 0 -command "$this ioPortNames"
-    $menubar insert "Set Initial State" "Smooth Toggle" \
-	    -underline 0 -command "$this setInitialState selected"
-    $menubar insertSeparator "Smooth Toggle"
 
-    $menubar insert "Make Icon..." "Get Info" -underline 0 \
+    $menubar insert command setinitial smoothtoggle \
+	    -label "Set Initial State" \
+	    -underline 0 -command "$this setInitialState selected"
+    
+    $menubar insert separator stdsep2 smoothtoggle
+
+    $menubar insert command makeicon getinfo \
+	    -label "Make Icon..." -underline 0 \
             -command "$this makeIcon"
 
-    $menubar insert "Options..." "Make Icon..." -underline 0 \
+    $menubar insert command options makeicon \
+	    -label "Options..." -underline 0 \
             -command "$this modifyOptions"
 }

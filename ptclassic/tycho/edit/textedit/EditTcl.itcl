@@ -364,10 +364,12 @@ body ::tycho::EditTcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
-        menubar insert "Select Body" "Unselect"  \
+        $menubar insert command selectbody unselect \
+		-label "Select Body"  \
                 -command "$this selectConstruct"
         
-        menubar insert "Evaluate Body" "Reload" \
+        $menubar insert command evaluatebody reload \
+		-label "Evaluate Body" \
                 -accelerator "C-x C-R" \
                 -command "$this evaluateConstruct"
     }

@@ -242,29 +242,17 @@ body ::tycho::EditMail::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     }
 
     if {$menubar != {}} {
-        $menubar disable {Compare To...}
-        $menubar disable {Undo/Redo}
-        $menubar disable {Cut}
-        $menubar disable {Paste}
-        $menubar disable "Font..."
-        # Delete all in Edit
-        $menubar delete "Undo/Redo"
-        $menubar delete "Cut"
-        $menubar delete "Paste"
-        # Delete all the formats
-        $menubar delete "Fill Region"
-        $menubar delete "Right Fill Column"
-        $menubar delete "Set Fill Prefix"
-        $menubar delete "Lower Case"
-        $menubar delete "Upper Case"
-        $menubar delete "Capitalize"
-
-        $menubar delete "Insert..."
-        $menubar delete "Save"
-        $menubar delete "SaveAs..."
-        $menubar delete "Evaluate"
-        $menubar delete "Revision Control..."
-        $menubar delete "Toggle Read-Only"
+	# Delete menu entries from the File menu
+        $menubar delete compareto
+        $menubar delete insert
+        $menubar delete save
+        $menubar delete saveas
+        $menubar delete evaluate
+        $menubar delete revisioncontrol
+        $menubar delete togglereadonly
+	$menubar delete reload
+	$menubar delete compareto
+	$menubar delete switchfile
     }
 
     if {$itk_option(-subject) != {}} {
