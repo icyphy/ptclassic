@@ -599,57 +599,26 @@ void MatlabIfc :: NameMatlabMatrix(Matrix* matrixPtr, const char *name) {
     mxSetName(matrixPtr, name);
 }
 
-Matrix* MatlabIfc :: SetVariable(const char* name,
-				 int numrows, int numcols,
-				 Real* realPart, Real* imagPart) {
-    int realOrComplex = (imagPart) ? MXCOMPLEX : MXREAL;
-    Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
-
-    // check for memory allocation error
-    if ( newMatlabMatrixPtr == 0 ) return 0;
-
-    // copy real part over to new Matlab matrix
-    // Matlab stores values in column-major order like Fortran
-    Real* realp = mxGetPr(newMatlabMatrixPtr);
-    for ( int jcol = 0; jcol < numcols; jcol++ ) {
-	for ( int jrow = 0; jrow < numrows; jrow++ ) {
-	    realp[jrow * numrows + jcol] = *realPart++;
-	}
-    }
-
-    // copy imag part over to new Matlab matrix (if complex)
-    // Matlab stores values in column-major order like Fortran
-    if ( realOrComplex == MXCOMPLEX ) {
-	Real* imagp = mxGetPi(newMatlabMatrixPtr);
-	for ( int jcol = 0; jcol < numcols; jcol++ ) {
-	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
-		imagp[jrow * numrows + jcol] = *imagPart++;
-	    }
-	}
-    }
-
-    mxSetName(newMatlabMatrixPtr, name);
-    MatlabEnginePutMatrix(newMatlabMatrixPtr);
-
-    return newMatlabMatrixPtr;
-}
-
-Matrix* MatlabIfc :: SetVariable(const char* name,
-				 int numrows, int numcols,
-				 char** realPartStrings,
-				 char** imagPartStrings) {
+// MatlabSetVariable
+int MatlabIfc :: MatlabSetVariable(const char* name,
+				   int numrows, int numcols,
+				   char** realPartStrings,
+				   char** imagPartStrings) {
     int realOrComplex = (imagPartStrings) ? MXCOMPLEX : MXREAL;
     Matrix* newMatlabMatrixPtr = mxCreateFull(numrows, numcols, realOrComplex);
 
     // check for memory allocation error
-    if ( newMatlabMatrixPtr == 0 ) return 0;
+    if ( newMatlabMatrixPtr == 0 ) return FALSE;
 
     // copy real part over to new Matlab matrix
     // Matlab stores values in column-major order like Fortran
     Real* realp = mxGetPr(newMatlabMatrixPtr);
     for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	int index = jcol;
 	for ( int jrow = 0; jrow < numrows; jrow++ ) {
-	    realp[jrow * numrows + jcol] = atof(*realPartStrings++);
+	    // index = jrows * numrows + jcol
+	    realp[index] = atof(*realPartStrings++);
+	    index += numrows;
 	}
     }
 
@@ -658,44 +627,29 @@ Matrix* MatlabIfc :: SetVariable(const char* name,
     if ( realOrComplex == MXCOMPLEX ) {
 	Real* imagp = mxGetPi(newMatlabMatrixPtr);
 	for ( int jcol = 0; jcol < numcols; jcol++ ) {
+	    int index = jcol;
 	    for ( int jrow = 0; jrow < numrows; jrow++ ) {
-		imagp[jrow * numrows + jcol] = atof(*imagPartStrings++);
+		// index = jrows * numrows + jcol
+		imagp[index] = atof(*imagPartStrings++);
+		index += numrows;
 	    }
 	}
     }
 
     mxSetName(newMatlabMatrixPtr, name);
     MatlabEnginePutMatrix(newMatlabMatrixPtr);
+    mxFreeMatrix(newMatlabMatrixPtr);
 
-    return newMatlabMatrixPtr;
+    return TRUE;
 }
 
-Matrix* MatlabIfc :: GetVariable(char* name,
-				 int* numrows, int* numcols,
-				 Real** realPart, Real** imagPart) {
-    Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
+// MatlabGetVariable
+int MatlabIfc :: MatlabGetVariable(char* name,
+				   int* numrows, int* numcols,
+				   char*** realPartStrings,
+				   char*** imagPartStrings) {
 
-    if ( matlabMatrix ) {
-	*numrows = mxGetM(matlabMatrix);
-	*numcols = mxGetN(matlabMatrix);
-	*realPart = mxGetPr(matlabMatrix);
-	*imagPart = mxGetPi(matlabMatrix);
-    }
-    else {
-	*numrows = 0;
-	*numcols = 0;
-	*realPart = 0;
-	*imagPart = 0;
-    }
-
-    return matlabMatrix;
-}
-
-Matrix* MatlabIfc :: GetVariable(char* name,
-				 int* numrows, int* numcols,
-				 char*** realPartStrings,
-				 char*** imagPartStrings) {
-
+    int retval = TRUE;
     Matrix* matlabMatrix = MatlabEngineGetMatrix(name);
 
     if ( matlabMatrix ) {
@@ -707,27 +661,29 @@ Matrix* MatlabIfc :: GetVariable(char* name,
 	*realPartStrings = new (char*) [numelements];
 	if ( imagp ) *imagPartStrings = new (char*) [numelements];
 	else *imagPartStrings = 0;
-	int element = 0;
 	for ( int jcol = 0; jcol < *numcols; jcol++ ) {
+	    int index = jcol;
 	    for ( int jrow = 0; jrow < *numrows; jrow++ ) {
 		StringList realstring = *realp++;
-		(*realPartStrings)[element] = savestring(realstring);
+		(*realPartStrings)[index] = savestring(realstring);
 		if ( imagp ) {
 		    StringList imagstring = *imagp++;
-		    (*imagPartStrings)[element] = savestring(imagstring);
+		    (*imagPartStrings)[index] = savestring(imagstring);
 		}
-		element++;
+		index += *numrows;
 	    }
 	}
+	mxFreeMatrix(matlabMatrix);
     }
     else {
+	retval = FALSE;
 	*numrows = 0;
 	*numcols = 0;
 	***realPartStrings = 0;
 	***imagPartStrings = 0;
     }
 
-    return matlabMatrix;
+    return retval;
 }
 
 void MatlabIfc :: FreeStringArray(char** strarray, int numstrings) {
