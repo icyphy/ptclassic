@@ -226,7 +226,7 @@ body ::tycho::ToolBar::entry {tag label default command args} {
     }
     grid $itk_component(tag_$tag) -column 1 -row $numentries -sticky ew
     # The following ensures that the column takes up available space.
-    grid columnconfigure $itk_component(entrysite) 1 -weight 1.0
+    grid columnconfigure $itk_component(entrysite) 1 -weight 1
 
     $itk_component(tag_$tag) insert insert $default
     bind $itk_component(tag_$tag) <Return> \
