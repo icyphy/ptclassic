@@ -34,7 +34,9 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+package require tycho.kernel.basic
 package provide tycho.kernel.html 2.0
+
 global env auto_path
 set env(HTML_LIBRARY) [file dirname [info script]]
 if { [lsearch -exact $auto_path $env(HTML_LIBRARY)] == -1 } {
