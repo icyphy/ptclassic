@@ -163,7 +163,7 @@ void CG56Target::disableInterrupts() {
 
 void CG56Target::enableInterrupts() {
 	codeSection();
-	addCode("	andi	#00,mr	;enable interrupts\n");
+	addCode("	andi	#$fc,mr	;enable interrupts\n");
 }
 
 void CG56Target::saveProgramCounter() {
