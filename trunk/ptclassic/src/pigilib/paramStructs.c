@@ -48,6 +48,7 @@ Updates: 4/14/89 to PStrToPList()
 
 /* PStrToPList  11/14/88 4/18/88
 Converts a param str to a ParamList.
+Use FreeFlatList to deallocate the ParamList allocated by PStrToPList.
 Inputs:
     pStr = param string (can be empty, ex: "0").  pStr is not changed.
     pListPtr = the address of a ParamListType node
@@ -63,6 +64,20 @@ Updates:
 	the end for EditFormalParams().  (Kludgy fix, but it works.)
 */
 #define CTLA 1			/* control-A */
+
+void
+FreeFlatPList(pListPtr)
+ParamListType *pListPtr;
+{
+	if (pListPtr) {
+	    if (pListPtr->array) {
+		if (pListPtr->array->name) {
+		    free((char *)pListPtr->array->name);
+		}
+		free(pListPtr->array);
+	    }
+	}
+}
 
 boolean
 PStrToPList(pStr, pListPtr)
