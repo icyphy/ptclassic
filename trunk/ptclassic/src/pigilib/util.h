@@ -70,7 +70,6 @@ typedef DupSheetNode *DupSheet;
 extern boolean UMalloc ARGS((char **outPtr, int bytes));
 extern boolean StrDup ARGS((char **outPtr, char *in));
 extern char *DupString ARGS((char *string));
-extern void TildeExpand ARGS((char *input, char *buffer));
 extern char *SkipWhite ARGS((char *s));
 extern char *BaseName ARGS((char *name));
 extern char *DirName ARGS((char *buf));
