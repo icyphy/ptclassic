@@ -48,7 +48,7 @@ HDRS =	am.h misc.h udpam.h
 
 OBJS = 	$(SRCS:.c=.o)
 
-LIB =	libudpam.$(LIBSUFFIX)
+LIBNONSHARED = libudpam.a
 
 MISC_FILES = Makefile.dist
 
@@ -70,9 +70,9 @@ include $(ROOT)/mk/common.mk
 
 # sol2 and sol2.cfront
 ifneq (,$(filter sol%,$(PTARCH)))
-all: makefile $(CLIB)
+all: makefile $(LIBNONSHARED)
 
-install: makefile $(LIBDIR)/$(CLIB)
+install: makefile $(LIBDIR)/$(LIBNONSHARED)
 else
 # Non solaris platforms
 all: makefile
