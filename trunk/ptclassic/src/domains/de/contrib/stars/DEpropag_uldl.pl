@@ -240,7 +240,7 @@ method {
    double 	Tuerbog[5];
    
   
-   ifstream in("/users/voigtje/demo/stars/topo.dxf");
+   ifstream in("$PTOLEMY/src/domains/de/contrib/stars/topo.dxf");
    if (!in) {
 	Error::abortRun(*this, "can't open dxf-file");
 	}
