@@ -2,7 +2,7 @@ defstar{
     name { DynFork }
     domain { DE }
     author { J. Voigt }
-    version { 1.0 8/26/97 
+    version { $Id$
    	    }   
     copyright { copyright (c) 1997 Dresden University of Technology
                 WiNeS-Project }
