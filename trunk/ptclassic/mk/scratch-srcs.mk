@@ -115,7 +115,6 @@ $(OBJARCH)/tcltk: $(OBJARCH)
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
-		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		configure)
 
@@ -123,7 +122,6 @@ tcltk_bin: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
-		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		bin)
 
@@ -131,45 +129,10 @@ tcltk_install: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC="$(CC)" \
 		CFLAGS="$(CFLAGS)" \
-		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		install)
 tcltk_clean: 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) clean)
-
-#
-# Build and install tcl tools with shared libraries
-#
-tcltk_all_shared: tcltk_configure_shared tcltk_bin_shared tcltk_install_shared
-
-#.PHONY: tcltk_configure_shared tcltk_bin_shared tcltk_install_shared
-
-tcltk_configure_shared: $(OBJARCH)/tcltk.shared
-$(OBJARCH)/tcltk.shared: $(OBJARCH) 
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC="$(CC)" \
-		CFLAGS="$(CFLAGS) $(C_SHARED_FLAGS)" \
-		RANLIB=$(RANLIB) \
-		TCLTK_DEST=$(TCLTK_DEST) \
-		configure_shared)
-
-tcltk_bin_shared: $(OBJARCH)/tcltk.shared
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC="$(CC)" \
-		CFLAGS="$(CFLAGS)" \
-		RANLIB=$(RANLIB) \
-		TCLTK_DEST=$(TCLTK_DEST) \
-		bin_shared)
-
-tcltk_install_shared: $(OBJARCH)/tcltk.shared
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
-		CC="$(CC)" \
-		CFLAGS="$(CFLAGS)" \
-		RANLIB=$(RANLIB) \
-		TCLTK_DEST=$(TCLTK_DEST) \
-		install_shared)
-tcltk_clean_shared: 
-	(cd $(PTOLEMY)/src/tcltk; $(MAKE) clean_shared)
 
 #
 # Build and install xv
