@@ -126,9 +126,6 @@ namespace ::tycho {
 class ::tycho::Frame {
     inherit ::tycho::ComplexItem
 
-    # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-
     ###################################################################
     ####                         public procs                      ####
 
@@ -140,6 +137,12 @@ class ::tycho::Frame {
     
     # Update the *-relief* option
     proc _relief {id canvas slate relief}
+
+    # Create a new item with arguments already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     # Set or get the item's coordinates
     proc coords {id canvas slate args}
@@ -341,14 +344,9 @@ body ::tycho::Frame::_relief {id canvas slate relief} {
 }
 
 ##########################################################################
-#### construct
+#### _construct
 #
-body ::tycho::Frame::construct {id canvas slate tags x0 y0 x1 y1 args} {
-    # Initialize the options
-    foreach {opt value} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $value
-    }
-
+body ::tycho::Frame::_construct {id canvas slate tags x0 y0 x1 y1} {
     # This object is used to get the shades of color
     set variable(color$id) [::tycho::Shades::new $option(color$id)]
     
@@ -393,6 +391,17 @@ body ::tycho::Frame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     }
 }
 
+##########################################################################
+#### construct
+#
+body ::tycho::Frame::construct {id canvas slate tags x0 y0 x1 y1 args} {
+    # Initialize the options
+    foreach {opt value} [concat [array get optiondefault] $args] {
+	set option([string trimleft $opt -]$id) $value
+    }
+    # Call the proc that does the work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
+}
 
 ##########################################################################
 #### coords

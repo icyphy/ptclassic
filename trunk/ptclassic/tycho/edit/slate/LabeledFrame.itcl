@@ -48,28 +48,26 @@ namespace ::tycho {
 #
 # <p><b>Options</b>
 #
-# <dl>
-# <dt><dd>
-# <dl>
-# <dt><b>-anchor</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <ul>
+# <li><b>-anchor</b>
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-borderwidth</b>
-# <dd>See <a href="Frame.html">Frame</a>
+# <li><b>-borderwidth</b>
+# See <a href="Frame.html">Frame</a>
 #
-# <dt><b>-color</b>
-# <dd>See <a href="Frame.html">Frame</a>
+# <li><b>-color</b>
+# See <a href="Frame.html">Frame</a>
 #
-# <dt><b>-graphics</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <li><b>-graphics</b>
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# <dt><b>-relief</b>
-# <dd>See <a href="Frame.html">Frame</a>
+# <li><b>-relief</b>
+# See <a href="Frame.html">Frame</a>
 #
-# <dt><b>-text</b>
-# <dd>See <a href="LabeledItem.html">LabeledItem</a>.
+# <li><b>-text</b>
+# See <a href="LabeledItem.html">LabeledItem</a>.
 #
-# </dl></dl>
+# </ul>
 #
 # <p><b>Bugs</b>: (none)
 #
@@ -94,11 +92,14 @@ namespace ::tycho {
 class ::tycho::LabeledFrame {
     inherit ::tycho::LabeledItem
 
-    # Create a new item
-    proc construct {id canvas slate tags x0 y0 x1 y1 args}
-
     ###################################################################
     ####                         public procs                      ####
+
+    # Create a new item with options already set
+    proc _construct {id canvas slate tags x0 y0 x1 y1}
+
+    # Create a new item
+    proc construct {id canvas slate tags x0 y0 x1 y1 args}
 
     # Set or get the item's coordinates
     proc coords {id canvas slate args}
@@ -126,8 +127,21 @@ class ::tycho::LabeledFrame {
     set methodtable(coords)    ::tycho::LabeledFrame::coords
 
     #### Set option defaults
-    array set optiondefault [@scope ::tycho::Frame array get optiondefault]
     array set optiondefault [array get ::tycho::LabeledItem::optiondefault]
+    array set optiondefault [@scope ::tycho::Frame array get optiondefault]
+}
+
+##########################################################################
+#### _construct
+#
+body ::tycho::LabeledFrame::_construct {id canvas slate tags x0 y0 x1 y1} {
+    # Create the Frame
+    eval ::tycho::Frame::_construct \
+    	$id $canvas $slate [list $tags] $x0 $y0 $x1 $y1
+
+    # Create the graphics and text label -- do not change the order!
+    _text     $id $canvas $slate $option(text$id)
+    _graphics $id $canvas $slate $option(graphics$id)
 }
 
 ##########################################################################
@@ -138,14 +152,8 @@ body ::tycho::LabeledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     foreach {opt val} [concat [array get optiondefault] $args] {
         set option([string trimleft $opt -]$id) $val
     }
-
-    # Create the Frame
-    eval ::tycho::Frame::construct \
-    	$id $canvas $slate [list $tags] $x0 $y0 $x1 $y1 $args
-
-    # Create the graphics and text label -- do not change the order!
-    _text     $id $canvas $slate $option(text$id)
-    _graphics $id $canvas $slate $option(graphics$id)
+    # Call the proc to do the real work
+    _construct $id $canvas $slate $tags $x0 $y0 $x1 $y1
 }
 
 ##########################################################################
