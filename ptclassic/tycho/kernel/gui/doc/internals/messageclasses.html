@@ -18,10 +18,9 @@ They also serve as base classes for more elaborate dialogs.
 <p>
 <h2><a name="Message class">Message Class</a></h2>
 <p>
-Many messages require an "OK" button that has the effect of dismissing
-the message.  The Message class is derived from
-<a href="dialog.html">Dialog</a> and adds
-this feature.
+Many messages require an <CODE>OK</CODE> button that has the effect of
+dismissing the message.  The Message class is derived from <a
+href="dialog.html">Dialog</a> and adds this feature.
 <tcl><pre>
 ::tycho::Message .x -text {A simple message window}
 wm deiconify .x
@@ -36,7 +35,7 @@ Of course, you can also add buttons to this using the
 <p>
 The class ErrorMessage is derived from
 <a href="#Message class">Message</a> and simply adds the
-"<a name="stack trace">Stack Trace</a>" button.
+"<a name="stack trace"><CODE>Stack Trace</CODE></a>" button.
 <tcl><pre>
 ::tycho::ErrorMessage .xx -text {An error message}
 wm deiconify .xx
