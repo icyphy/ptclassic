@@ -44,15 +44,17 @@ special routines to generate the sub universes.
 #include "Geodesic.h"
 #include "ConstIters.h"
 #include "CGWormStar.h"
+#include <string.h>
 
 static void copyActualStates(const Block& src, Block& dest) {
 	CBlockStateIter nexts(src);
 	BlockStateIter nextd(dest);
 	const State* srcStatePtr;
 	State *destStatePtr;
-	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0)
-		destStatePtr->setInitValue(
-			hashstring(srcStatePtr->currentValue()));
+	while ((srcStatePtr = nexts++) != 0 && (destStatePtr = nextd++) != 0) {
+		StringList temp = srcStatePtr->currentValue();
+		destStatePtr->setInitValue(hashstring(temp));
+	}
 }
 
 PortHole* clonedPort(DataFlowStar* s, PortHole* p) {
@@ -72,7 +74,24 @@ DataFlowStar* UniProcessor :: cloneStar(ParNode* n) {
 		return newS;
 	}
 		
-	newS = (DataFlowStar*) org->clone();
+	if (!target()->support(org)) {
+		const char* foo = target()->starType();
+		char temp[15];
+		strcpy(temp, foo);
+		int len = strlen(foo);
+		temp[len-4] = 0;
+		if (!KnownBlock :: setDomain(temp)) {
+			Error :: abortRun(temp, ": bad domain name");
+			newS = (DataFlowStar*) org->clone();
+		} else {
+			const char* sname = org->className() + 
+				strlen(org->domain());
+			newS = (DataFlowStar*) KnownBlock :: clone(sname);
+		}
+	} else {
+		newS = (DataFlowStar*) org->clone();
+	}
+
 	copyActualStates(*org, *newS);
 	if (org->numberMPHs() <= 0) return newS;
 	
