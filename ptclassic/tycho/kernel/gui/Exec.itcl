@@ -356,11 +356,13 @@ body ::tycho::Exec::execProcess { {cmd {}} {dir {}} {maxline {999999}} } {
 		[concat "|$commandToExec |& cat"] {RDONLY NONBLOCK}]} \
 		errMsg] {
 	    addHistory "$errMsg\n"
-	    error "$errMsg"   ;#This exits this procedure
-	}
-
-	# Register our file event handler
-	fileevent $fd readable "$this readOrClose $fd"
+            # The following will hang Monitor
+	    #error "$errMsg"
+            ::tycho::inform "$errMsg"
+            return
+        }
+        # Execution is okay, so register our file event handler
+        fileevent $fd readable "$this readOrClose $fd"
     } else {
 	# There is no NONBLOCK I/O under windows, so we just
 	# run the process and hang the UI while it is running and then
