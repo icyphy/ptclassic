@@ -75,16 +75,18 @@ void StringState :: initialize() {
 	// -- Substitute parameters that fall in between curly braces {}
 	// -- Zero out the white space characters so string info is unaltered
 	const char* specialChars = "{}";
-	Tokenizer lexer(initString, specialChars);
-	lexer.clearwhite();
-	StringList parsedString = "";
+	const char* whiteSpace = "";
+	Tokenizer lexer(initString, specialChars, whiteSpace);
+	StringList parsedString;
+	int saveString = FALSE;
 	while (TRUE) {
         	ParseToken t = getParseToken(lexer, T_STRING);
 		if (t.tok == T_EOF || t.tok == T_ERROR) break;
+		saveString = TRUE;
 		parsedString << t.sval;
 		delete [] t.sval;
 	}
-	val = savestring(parsedString);
+	if (saveString) val = savestring(parsedString);
 }
 
 StringState& StringState :: operator=(const char* newStr) {
