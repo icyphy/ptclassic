@@ -133,9 +133,11 @@ StringList :: operator << (const StringList& l) {
 // Add in a char*
 StringList&
 StringList :: operator << (const char* s) {
-	put(savestring(s));
-	totalSize+=strlen(s);
-	return *this;
+  if (s) {
+    put(savestring(s));
+    totalSize+=strlen(s);
+  }
+  return *this;
 }
 
 // Add in a char: uses the above method
