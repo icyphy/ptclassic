@@ -52,7 +52,8 @@
 # <dl>
 # <dt><b>-command</b>
 # <dd>The script that is executed repeatedly as long as the
-# mouse button is held down.
+# mouse button is held down. Each time, the current mouse
+# coordinates are appended to the command.
 #
 # <dt><b>-delay</b>
 # <dd>The time delay between the first and second clicks.
@@ -159,7 +160,9 @@ body ::tycho::Repeater::activate {t x y args} {
 	    "$this motion %x %y"
     
     # Execute the user-specified command
-    execute $command $x $y
+    if { $command != "" } {
+        uplevel #0 $command $x $y
+    }
 
     # Set up the delayed call to reactivate{}. Use catch in case
     # something catastrophic happens and the interactor has disappeared.
@@ -206,9 +209,10 @@ body ::tycho::Repeater::motion {x y} {
 # call this again after the time specified by the *-interval* option.
 #
 body ::tycho::Repeater::reactivate {x y} {
-    # Execute the user-specified activation command
-    execute $command $x $y
-
+    # Execute the user-specified command
+    if { $command != "" } {
+        uplevel #0 $command $x $y
+    }
     # Set up another delayed call
     set afterid [after $interval \
 	    [list catch \
