@@ -385,7 +385,7 @@ void
 SRRecursiveSchedule::runOneBlock(int & v /* first index of the block */) const
 {
   SRStar * s = mygraph->star(vertex[v]);
-  cout << "Firing " << s->name() << "\n";
+  // cout << "Firing " << s->name() << "\n";
   s->run();
   v += parSize[v];
 }
