@@ -4,15 +4,15 @@ defstar {
 
   desc {
 In each instant, print the value of the input to the filename in the
-``fileName'' state.  The special names <stdout> <cout> <stderr> <cerr> may
-also be used.
+``fileName'' state.  The special names &lt;stdout&gt; &lt;cout&gt;
+&lt;stderr&gt; &lt;cerr&gt; may also be used.
   }
 
-  version { @(#)SRPrinter.pl	1.3 4/19/96 }
+  version { $Id$ }
   author { S. A. Edwards }
 
   copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
