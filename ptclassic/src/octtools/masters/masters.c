@@ -60,10 +60,10 @@ char *def;                      /* Default value */
 {
     static char pmt_buf[INPUT_LEN];
 
-    if (def && (strlen(def) > 0)) {
+    if (def && ((int)strlen(def) > 0)) {
         PRINTF("%s [%s]: ", pmt, def); /* fflush(stdout); */
         (void) gets(pmt_buf);
-        if (strlen(pmt_buf) > 0) return strsave(pmt_buf);
+        if ((int)strlen(pmt_buf) > 0) return strsave(pmt_buf);
         else if (def) return strsave(def);
         else return NULL;
     } else {
