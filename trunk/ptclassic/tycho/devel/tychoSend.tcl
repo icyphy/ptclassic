@@ -6,6 +6,8 @@
 #
 # usage: tychoSend tychoCommand
 
+tk appname tySend
+
 set tclProgs [winfo interps]
 if { [expr ![regexp {tycho} $tclProgs]] } {
     exec tycho &
@@ -13,11 +15,12 @@ if { [expr ![regexp {tycho} $tclProgs]] } {
 	set tclProgs [winfo interps]
     }
 }
+
 foreach prog $tclProgs {
     if {[regexp {tycho} $prog]} {
 	break
     }
 }
-set sendCommand "send {$prog} $argv"
-eval $sendCommand
+
+send $prog source $argv
 exit
