@@ -248,7 +248,7 @@ body ::tycho::Edit::constructor {args} {
     # configuration options, assuming there are options specified.
     eval itk_initialize $args
 
-    $this loadFile $file
+    loadFile $file
 
     markUnmodified
 }
@@ -359,10 +359,7 @@ body ::tycho::Edit::loadFile {loadfile} {
     if {$loadfile != {NoName} && $loadfile != {}} {
 	if [file exists $loadfile] {
 	    if [file readable $loadfile] {
-		set savereadonly [$itk_component(text) cget -readonly]
-		$itk_component(text) configure -readonly 0
-		$itk_component(text) readFile $loadfile
-		$itk_component(text) configure -readonly $savereadonly
+		$itk_component(text) initFile $loadfile
 	    } else {
 		# FIXME: This error does not cause the object to be
 		# properly deleted.  This window will remain in existence,
