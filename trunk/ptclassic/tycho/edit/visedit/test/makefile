@@ -1,6 +1,6 @@
 # Makefile for Ptolemy Tycho system, editors/visedit/test directory.
 #
-# @(#)$Id$
+# $Id$
 # Author: Christopher Hylands
 #
 # Copyright (c) 1996-%Q% The Regents of the University of California.
@@ -58,9 +58,10 @@ OPTIONAL_FILES =	alltests.itcl
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-tests:: alltests.itcl
-	tycho -e alltests.itcl
+tests:: test_graphics
 
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
+	tycho -noconsole -e alltests.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
