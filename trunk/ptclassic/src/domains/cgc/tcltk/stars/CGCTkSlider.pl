@@ -56,7 +56,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	    /* compute the initial position of the slider */
 	    position = 0.5 + 100*($val(value)
-			- $val(low))/($val(high)-$val(low));
+			- $val(low))/($val(high) - $val(low));
 
 	    makeScale(".low",			/* position in control panel */
 	              "$starSymbol(scale)",	/* name of the scale pane */
@@ -86,7 +86,7 @@ limitation of liability, and disclaimer of warranty provisions.
                     errorReport("Invalid value");
                     return TCL_ERROR;
                 }
-		$ref(value) = $val(low)+($val(high)-$val(low))*(position/100.0);
+		$ref(value) = $val(low)+($val(high) - $val(low))*(position/100.0);
 		/* set the value display */
 		sprintf(buf, "%.4f", $ref(value));
 		displaySliderValue(".low", "$starSymbol(scale)", buf);
