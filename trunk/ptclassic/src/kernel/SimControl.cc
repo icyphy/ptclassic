@@ -56,7 +56,9 @@ for example.
 #endif
 
 #ifdef __GNUG__
+#ifndef sgi /* For use with cc -cckr Irix4.0.5H */
 typedef void (*SIG_PF)(int);
+#endif /*sgi*/
 #else
 #include <std.h>
 #endif
