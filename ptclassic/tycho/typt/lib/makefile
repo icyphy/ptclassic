@@ -43,7 +43,8 @@ include $(CONFIG)
 ITCL_SRCS =
 
 TCL_SRCS = \
-	makeFacetForest.tcl
+	makeFacetForest.tcl \
+	ptlangTroffToHTML.tcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
