@@ -7,10 +7,10 @@ When the select input is true, copy trueInput to the output;
 when the select input is false, copy falseInput to the output;
 make the output absent when the select input is absent.
 }
-    version { @(#)SRMux.pl	1.1 4/25/96 }
+    version { $Id$ }
     author { S. A. Edwards }
     copyright {
-Copyright (c) 1990-1996 The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
