@@ -165,6 +165,7 @@ foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
 	cg56/dsp cg96/dsp \
 	sdf/atm sdf/contrib sdf/dsp sdf/image sdf/matrix \
+	cgc/rtlib \
 	mdsdf/tcltk de/atm cg/multiScheduler $EXPEXTRAS )
 	optmkdir $x
 	cd $x
@@ -188,8 +189,7 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	mdsdf/tcltk/stars \
 	de/atm/stars \
 	de/tcltk/stars \
-	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets \
-	cgc/rtlib )
+	cgc/targets/main cgc/targets/cm5 cgc/tcltk/stars cgc/tcltk/targets )
 	optmkdir $x
 	cd $x
 	optlink ../../../../../src/domains/$x make.template
