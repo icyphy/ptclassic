@@ -30,29 +30,29 @@
 ##########################################################################
 
 #######################################################################
-## preferencedialog
+## stylechooser
 #
-# Open a preferences dialog box. If there already is one, bring it
-# to the top.
+# Open a dialog for choosing style preferences. If there already
+# is one, bring it to the top.
 #
-proc ::tycho::preferencedialog {} {
-    if { [::info which -command .tychoPreferences] != "" } {
-	raise .tychoPreferences
+proc ::tycho::stylechooser {} {
+    if { [::info which -command .styles] != "" } {
+	raise .styles
     } else {
-	uplevel #0 [list ::tycho::PreferenceDialog .tychoPreferences \
-		-title {Tycho preferences}]
-	wm deiconify .tychoPreferences
+	uplevel #0 [list ::tycho::StyleChooser .styles \
+		-title "Tycho Style Preferences"]
+	wm deiconify .styles
     }
 }
 
 
 #######################################################################
-#### PreferenceDialog
+#### StyleChooser
 #
 # A window that controls a set of preference editors.
 #
-class ::tycho::PreferenceDialog {
-    inherit ::tycho::Query
+class ::tycho::StyleChooser {
+    inherit ::tycho::Dialog
 
     constructor {args} {}
     destructor {}
@@ -61,106 +61,76 @@ class ::tycho::PreferenceDialog {
     ###################################################################
     ####                            options                        ####
 
-
+    # The font to use in labels 
+    itk_option define -labelfont labelFont Font [::tycho::font helvetica]
 
     ###################################################################
     ####                         public methods                    ####
 
-    # Open an editor for the specified preference set
-    method edit {set}
+    # Change to a new style -- callback
+    method _changestyle {stylesheet}
 
-    # Redo the last undone change
-    method redo {}
+    # Display styles
+    method _displaystyles {{mode {}}}
 
-    # Undo the last change
-    method undo {}
+    # Raise this window and all child editors
+    method _raise {visibility}
 
-    # Notify (from preference editor) that preferences have been edited
-    method notify {args}
-
-    # Revert to system defaults
-    method revert {}
-
-    # Update changed preferences
-    method update {args}
-
-    ###################################################################
-    ####                         private procs                     ####
-
-    # Compare two lists by element 1
-    private proc cmp {a b} {
-	string compare [lindex $a 1] [lindex $b 1]
-    }
+    # Close this window, querying if any styles have changed
+    method close {}
 
     ###################################################################
     ####                       private variables                   ####
 
-    # Open preferences editors
-    private variable editors {}
-
-    # Changed preferences that I have to update -- group, preference
-    private variable changed {}
+    # Mapping from {stylesheet label} to style id
+    private variable _stylemap
 }
 
 
 #######################################################################
 #### constructor
 #
-body ::tycho::PreferenceDialog::constructor {args} {
-    # Collect groups and their labels
-    set groups {}
-    foreach tag [::tycho::preference group] {
-	set label [::tycho::preference cget $tag -label]
-	if { $label != "" } {
-	    lappend groups [list $tag $label]
-	}
+body ::tycho::StyleChooser::constructor {args} {
+    # Create the labelled grid. Give it a columnspan of just 2
+    itk_component add items {
+	iwidgets::Labeledgrid $itk_component(childsite).items \
+                -columnspan 2 -childcolumnspan 1 \
+                -labelforeground blue
+    } {
+	keep -background -cursor -font -labelfont
     }
-    # Sort the groups by label
-    set groups [eval concat [lsort -command ::tycho::PreferenceDialog::cmp \
-	    $groups]]
+    pack $itk_component(items) -fill both -expand on -padx 8 -pady 8
 
-    # Create a button for each group
-    foreach {tag label} $groups {
-	itk_component add $tag {
-	    button $itk_component(childsite).$tag -text $label \
-		    -command "$this edit $tag" \
-		    -highlightthickness 0
-	} {
-	    keep -background -cursor -font
-	}
-	pack $itk_component(childsite).$tag -fill x -expand on
-    }
+    # Give the option menus a minimum width
+    # FIXME: Make accessible from labeledgrid.itk
+    # FIXME: Get from a style sheet
+    grid columnconfigure [$itk_component(items) component hull] 1 \
+            -minsize 150
 
-    # Add an apply button
-    addButton apply -row 1 -column 0 \
-	    -text "Apply <M-a>" -command "$this update"
-    configure -okcommand "$this update"
+    # Display the styles
+    _displaystyles
 
-    # Meta-a performs update
-    bind $itk_component(hull) <Meta-a> \
-	    "$this update; break"
+    # Add the buttons to the bottom
+    # FIXME: Add help
+    set bbox [component bbox]
+    $bbox add close \
+            -text "Close" \
+            -command "$this close" \
+            -column 1
+    $bbox default close
 
-    # Add a help button
-    addButton help -text "Help" -row 1 -column 1 \
-	    -command { \
-	    ::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides PreferencesHelp.html] }
-
-    # Add undo and redo commands
-    addButton undo -text "Undo" -row 2 -column 0 -command "$this undo"
-    addButton redo -text "Redo" -row 2 -column 1 -command "$this redo"
-
-    # Disable the buttons if there is no history.
-    if { [::tycho::preference model compareMarks "first" == "current"] } {
-	component bbox buttonconfigure undo -state disabled
-    }
-    if { [::tycho::preference model compareMarks "last" == "current"] } {
-	component bbox buttonconfigure redo -state disabled
+    if { [llength [::tycho::stylesheet stylesheets]] \
+            != [llength [::tycho::stylesheet stylesheets all]] } {
+        $bbox add loadall \
+                -text "Load all" \
+                -command "$this _displaystyles all" \
+                -column 0
     }
 
-    # Add a button to revert to defaults
-    addButton defaults -text "Defaults" -row 3 -column 0 \
-	    -command "$this revert"
+    # If we raise this window, raise all style windows
+    # Bind to a component, not the top-level window, to avoid
+    # a call for each component!
+    bind [component bbox] <Visibility> "$this _raise %s"
 
     # Register this window so it appears on the menus
     ::tycho::register window Preferences $this \
@@ -169,134 +139,193 @@ body ::tycho::PreferenceDialog::constructor {args} {
 
     # Initialise options
     eval itk_initialize $args
+
+    # Subscribe to styles
+    # FIXME: Add entry font? main font?
+    stylesheet subscribe \
+            -labelfont fonts labelFont
 }
 
 #######################################################################
 #### destructor
 #
-body ::tycho::PreferenceDialog::destructor {} {
-    # Delete open preference editors
-    foreach e $editors {
-	catch {delete object $e}
-    }
-
-    # Save the whole bag of preferences
-    ::tycho::preference model save
-
-    # Save preferences that are different from the default
-    # in ~/.Tycho/preferences
-    set fd [open [::tycho::expandPath \
-	    [file join [::tycho::tychoDir] preferences]] "w"]
-    if { $fd != "" } {
-	puts $fd "# User preference settings\n"
-	foreach {group preference value} \
-		[::tycho::preference model different] {
-	    set string "catch \{::tycho::preference model assign"
-	    lappend string $group $preference $value
-	    append string "\}"
-	    puts $fd $string
-	}
-	close $fd
-    }
+body ::tycho::StyleChooser::destructor {} {
     # Deregister this window
     ::tycho::deregister window Preferences $this
 }
 
 #######################################################################
-#### edit
+#### _changestyle
 #
-body ::tycho::PreferenceDialog::edit {set} {
-    if { [::info which -command .$set] != "" } {
-	raise .$set
+body ::tycho::StyleChooser::_changestyle {stylesheet} {
+    # Figure out what the style is
+    set label [$itk_component(items) get $stylesheet]
+    set style $_stylemap([list $stylesheet $label])
+
+    # Change it
+    ::tycho::profile registerstyle $stylesheet $style
+
+    # Update all subscribers
+    # FIXME: I can't help feeling that this should really be
+    # happening using the subscription mechanism in UserProfile...
+    foreach {subscriber oldstyle} [::tycho::stylesheet style $stylesheet] {
+
+        # Avoid non-existent subscribers
+        if { [::info which -command $subscriber] == "" } {
+            continue
+        }
+        # Get the style -- note that it won't necessrily change,
+        # because the subscriber may have an override.
+        set style [::tycho::profile getstyle $stylesheet $subscriber]
+
+        # If it's different, update it
+        if { $style != $oldstyle } {
+            ::tycho::stylesheet style $stylesheet $subscriber $style
+        }
+    }
+}
+
+#######################################################################
+#### _displaystyles
+#
+# Display styles into the display. If _mode_ is "all", display
+# all styles, otherwise just currently loaded styles.
+# 
+body ::tycho::StyleChooser::_displaystyles {{mode {}}} {
+    # Get style sheets
+    # Only process the difference between gotten ones and loaded ones
+    set sheets [::tycho::stylesheet stylesheets $mode]
+    set sheets [::tycho::lsubtract $sheets [component items names]]
+    if { $sheets == "" } {
+        return
+    }
+    
+    # Collect their labels, choices,
+    # and current global style preference
+    foreach stylesheet $sheets {
+	set model [::tycho::stylesheet access $stylesheet]
+	set master [$model cget -master]
+
+	# Get label -- ignore if no label
+	set label [$master modelcget -label]
+	if { $label == "" } {
+	    continue
+	}
+	set index($label) $model
+	set sheet($label) $stylesheet
+    }
+    # Process in alphabetical order
+    foreach l [lsort [array names index]] {
+	set model $index($l)
+	set stylesheet $sheet($l)
+        set labels {}
+
+	# Get styles and their labels, from the stylesheet and its master
+        foreach m [list [$model cget -master] $model] {
+            foreach s [$m match style] {
+                set label [$m itemcget style:$s -label]
+                if { $label == "" } {
+                    continue
+                }
+                set _stylemap([list $stylesheet $label]) $s
+                lappend labels $label
+            }
+        }
+    
+	# Get current preference
+	set current [::tycho::profile getstyle $stylesheet]
+
+	# Create the entry
+	$itk_component(items) add optionmenu $stylesheet \
+		-label $l \
+		-entries [lsort $labels] \
+                -initial [$model dfltcget style:$current -label] \
+                -command "$this _changestyle $stylesheet"
+        
+        # If it has only one entry, disable it
+        if { [llength $labels] == 1 } {
+            $itk_component(items) disable $stylesheet
+        }
+
+        # Add an edit button for it
+        # FIXME
+        itk_component add edit$stylesheet {
+            button $itk_component(items).edit$stylesheet \
+                    -text Edit \
+                    -command "::tycho::styleeditor $stylesheet" \
+                    -pady 3 -padx 8
+        }
+        array set gridinfo \
+                [grid info [$itk_component(items) component $stylesheet]]
+        grid $itk_component(edit$stylesheet) \
+                -row $gridinfo(-row) \
+                -column 2
+    }
+
+    # Disable the load-all button
+    if { $mode == "all" } {
+        component bbox disable loadall
+    }
+}
+
+#######################################################################
+#### _raise
+#
+# Raise children of this window, but not above the window itself.
+# 
+body ::tycho::StyleChooser::_raise {visibility} {
+    if { $visibility == "VisibilityUnobscured" } {
+        foreach sheet [::tycho::stylesheet stylesheets] {
+            if { [info which -command .styles.$sheet] != "" } {
+                lower .styles.$sheet .styles
+            }
+        }
+    }
+}
+
+#######################################################################
+#### close
+#
+# Close the style chooser. If any styles have changed, query on whether
+# to save them.
+# 
+body ::tycho::StyleChooser::close {} {
+    set save {}
+    foreach sheet [::tycho::stylesheet stylesheets] {
+        set model [::tycho::stylesheet access $sheet]
+        if { [lsearch -exact [$model mark names] saved] == -1 } {
+            $model mark set saved first
+        }
+        if [$model mark compare current > saved] {
+            lappend save $sheet $model
+        }
+    }
+    # If there's at least one changed, offer to save it. Note that
+    # this is a little dense: it thinks that a style has been changed
+    # even if a parameter was changed once, and then changed back to
+    # the default.
+    if { $save != "" } {
+        set nm [::tycho::autoName .yeahyeahyeah]
+        set text    "The following style-sheets have been changed.\n"
+        append text "Do you want to save the changes permanently?\n\n"
+        foreach {sheet model} $save {
+            append text "[[$model cget -master] modelcget -label]\n"
+        }
+        ::tycho::YesNoCancel $nm -text $text
+        set answer [::tycho::Dialog::wait $nm]
+        if { $answer == 1 } {
+            foreach {sheet model} $save {
+                set file [::tycho::stylesheet register $sheet]
+                set fd [open $file "w"]
+                puts $fd [$model describe]
+                ::close $fd
+                $model mark set saved current
+            }
+        }
+        if { $answer == 0 || $answer == 1 } {
+            delete object $this
+        }
     } else {
-	set ed [uplevel #0 \
-		::tycho::PreferenceEditor .$set \
-		-preferences $set \
-		-parentdialog $this]
-	wm deiconify $ed
-	lappend editors $ed
+        delete object $this
     }
-}
-
-#######################################################################
-#### notify
-#
-body ::tycho::PreferenceDialog::notify {args} {
-    # Enable the undo button and disable the redo button
-    component bbox buttonconfigure undo -state normal
-    component bbox buttonconfigure redo -state disabled
-
-    # Remember changed preferences for saving later
-    eval lappend changed $args
-}
-
-#######################################################################
-#### redo
-#
-body ::tycho::PreferenceDialog::redo {} {
-    # Call preferences manager to redo
-    ::tycho::preference model redo
-
-    # If there's no more redo, disable the redo button
-    if { [::tycho::preference model compareMarks "last" == "current"] } {
-	component bbox buttonconfigure redo -state disabled
-    }
-
-    # Enable the undo button
-    component bbox buttonconfigure undo -state normal
-}
-
-#######################################################################
-#### revert
-#
-body ::tycho::PreferenceDialog::revert {} {
-    foreach group [::tycho::preference groups] {
-	foreach preference [::tycho::preference preferences $group] {
-	    set current [::tycho::preference get $group $preference]
-	    set default [::tycho::preference cget $group $preference -default]
-	    if { $current != $default } {
-		::tycho::preference model publish assign $group $preference $default
-	    }
-	}
-    }
-    # Clear the undo history
-    ::tycho::preference model clearHistory
-
-    # Disable the undo and redo buttons
-    component bbox buttonconfigure undo -state disabled
-    component bbox buttonconfigure redo -state disabled
-}
-
-#######################################################################
-#### undo
-#
-body ::tycho::PreferenceDialog::undo {} {
-    # Call preferences manager to undo
-    ::tycho::preference model undo
-
-    # If there's no more undo, disable the undo button
-    # If there's no more redo, disable the redo button
-    if { [::tycho::preference model compareMarks "first" == "current"] } {
-	component bbox buttonconfigure undo -state disabled
-    }
-
-    # Enable the redo button
-    component bbox buttonconfigure redo -state normal
-}
-
-#######################################################################
-#### update
-#
-body ::tycho::PreferenceDialog::update {} {
-    # Update each open editor
-    foreach e $editors {
-	if { [::info which -command $e] != "" } {
-	    $e update
-	} else {
-	    set editors [::tycho::ldelete $editors $e]
-	}
-    }
-
-    # Enable the undo button
-    component bbox buttonconfigure undo -state normal
 }
