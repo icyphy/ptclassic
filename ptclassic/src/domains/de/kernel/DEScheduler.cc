@@ -122,6 +122,7 @@ void DEScheduler :: setup () {
 	}
 
 	galaxy()->initialize();
+	if (SimControl::haltRequested()) return;
 	
 	// Fire source stars to initialize the global event queue.
 	initialFire();
