@@ -393,6 +393,13 @@ extern int errno;
 #define USE_GETRLIMIT
 #endif
 
+/* Is char* environ defined? See octtools/Packages/vov/lib.c */
+#if defined(PTHPPA) || defined(PTLINUX)
+/* Under PTHPPA and PTLINUX, don't need environ declaration. */
+#else
+#define NEED_ENVIRON_DECL
+#endif
+
 /* End of octtools specific defines */
 
 #ifdef __cplusplus
