@@ -40,6 +40,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventHorizon.h"
 #include "SRPortHole.h"
 
+/**********************************************************************
+
+  The wormhole for the SR domain
+
+  @Description This wormhole makes other universes appear as strict SR
+  stars (i.e., all of their inputs must be known before the go()
+  method is called).
+
+ **********************************************************************/
 class SRWormhole : public Wormhole, public SRStar {
 public:
 
