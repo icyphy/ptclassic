@@ -19,8 +19,8 @@ This is a simple target that is used to generate subroutines to be called
 from code written outside of \*(PT environment. To use it, select 
 \fBSub-CG56\fR in the pigi \fBedit-target\fR.  This target defines no additional 
 states of its own, and inherits all of \fBCG56Target\fR's states. This 
-target an example of redefinition of the \fImainLoopCode\fR CGTarget 
-method. 
+target is an example of where the \fImainLoopCode\fR CGTarget 
+method is redefined. 
 .Ie "mainLoopCode, redefinition"
 .SA
 CG56Target
