@@ -123,7 +123,7 @@ endif
 
 include $(ROOT)/mk/stars.mk
 
-PIGI_OBJS += $(STARS) $(TARGETS)
+PIGI_OBJS += $(STARS) $(TARGETS) $(MISC_OBJS)
 
 PIGI_BINARIES = 	$(PIGI) $(PIGI).debug $(PIGI).debug.purify \
 			$(PIGI).debug.quantify $(PIGI).debug.purecov
