@@ -50,26 +50,7 @@ class CQScheduler : public DEBaseSched {
 	// stoping condition of the scheduler
 	double stopTime;
 
-	// detect the delay-free loop
-	int checkLoop(PortHole* p, DEStar* s);
-
-	// set the depth of the DEStars.
-	int setDepth(PortHole* p, DEStar* s);
-
-	// report delay-free-loop
-	int errorDelayFree(PortHole* p);
-	void errorUndefined(PortHole* p);
-
-	// check deley free loop
-	int checkDelayFreeLoop();
-
-	// compute depth of all portholes
-	int computeDepth();
-
 public:
-	// my domain
-	const char* domain() const;
-
 	// The global event queue is implemented as a calendar queue
 	// in this DE scheduler.
 
@@ -107,11 +88,6 @@ public:
 
 	// output the stopTime
 	double whenStop() { return stopTime ;}
-
-	// synchronization mode. It is set by default.
-	// If reset, the execution of the process star can be optimized.
-	// Only knowledgeable user may reset this flag!
-	int syncMode;
 
 	// fetch an event on request.
 	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
