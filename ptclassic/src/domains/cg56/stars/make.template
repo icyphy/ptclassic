@@ -116,7 +116,7 @@ HDRS= $(SRCS:.cc=.h)
 
 all:		$(SRCS) makefile $(OBJS)
 
-STAR_MK=cg56stars.mk
+STAR_MK=cg56stars
 DOMAIN=CG56
 EXTRA_SRCS= $(STAR_MK) $(PL_SRCS)
 
