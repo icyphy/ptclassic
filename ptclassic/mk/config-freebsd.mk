@@ -70,8 +70,15 @@
 #      operand of the .type assembler directive.  Different svr4 assemblers
 # 
 # Library: libg++-2.7.1 directly from prep.  It configures and installs with
-# no problems.  I'll look at installing a FreeBSD port for this.
-# 
+# no problems.
+#
+# Make: gmake 3.74 from the FreeBSD ports collection, installed in the
+# search path as make.  Hopefully next time around we'll set it up
+# so "gmake MAKE=gmake" will work properly.
+#  
+# Note that Ptolemy0.6 uses itcl2.0 for the tycho editor and the gantt chart
+# viewer, so you will probably want to install itcl from the 
+# Ptolemy other.src tar file
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
