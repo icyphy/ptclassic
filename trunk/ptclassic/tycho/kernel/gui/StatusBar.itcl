@@ -787,7 +787,7 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 #######################################################################
 #### putMessage
 #
-# Display a messsage in the status bar.  If the message display
+# Display a message in the status bar.  If the message display
 # widget has not been mapped to the screen yet (for example, during
 # construction of the window that contains this status bar), defer
 # the message display until the widget is mapped. If the progress bar

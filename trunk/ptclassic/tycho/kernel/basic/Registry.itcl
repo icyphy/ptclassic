@@ -977,7 +977,7 @@ body ::tycho::Registry::registerMode {mode args} {
 #
 # <li><b>-class</b> _class_: The class that implements the protocol.
 # The class must be a subclass of the <code>::tycho::Resource</code>
-# class. (The class name msust include the <code>::tycho</code>
+# class. (The class name must include the <code>::tycho</code>
 # namespace.) Although an "option," this option must
 # currently always be supplied.
 #
