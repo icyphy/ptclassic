@@ -31,3 +31,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 */
 #include "../tytimer/tytimer.h"
+
+void
+connectControl (char *starname, char *ctrlname, Tcl_CmdProc *callback);
+
+ 
