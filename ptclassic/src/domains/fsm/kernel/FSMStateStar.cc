@@ -756,8 +756,8 @@ int FSMStateStar::setupGeodesic (Star* worm, Block* parent) {
 	FSMScheduler *sched = (FSMScheduler *)scheduler();
 	StringListIter nextName(sched->intlEventNames);
 	StringListIter nextType(sched->intlEventTypes);
-	const char* name;
-	const char* type;
+	const char* name = NULL;
+	const char* type = NULL;
 	int numEvents = sched->intlEventNames.numPieces();
 
 	for (int indx=0; indx<numEvents; indx++) {
