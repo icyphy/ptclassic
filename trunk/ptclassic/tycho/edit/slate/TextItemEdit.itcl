@@ -193,6 +193,9 @@ class ::tycho::TextItemEdit {
     ###################################################################
     ####                        protected methods                  ####
 
+    # Redraw the highlight background
+    protected method highlight {}
+
     # Adjust the cursor position
     protected method icursor {mode}
 
@@ -207,9 +210,6 @@ class ::tycho::TextItemEdit {
 
     # A flag to indicate word-dragging mode
     private variable wordmode 0
-
-    # A flag saying whether to rehighlight when done
-    private variable rehighlight 0
 }
 
 #######################################################################
@@ -235,11 +235,8 @@ body ::tycho::TextItemEdit::activate {t x y args} {
     # Focus on the target
     $slate focus $target
 
-    # Highlight in the right color
-    set rehighlight [expr {[$slate find withtag highlight.$t] != ""}]
-    $slate highlight $target \
-	    -highlightcolor $highlightcolor \
-	    -highlightfill  $highlightfill
+    # Make the background highlight
+    highlight
 
     # Create the binding to insert keys
     # FIXME: Can this be bound to the individual item?
@@ -337,10 +334,8 @@ body ::tycho::TextItemEdit::deactivate {args} {
         return
     }
 
-    # Rehighlight the item with its default highlight
-    if $rehighlight {
-	$slate highlight $target
-    }
+    # Remove the text editing highlight
+    $canvas delete texthighlight.$target
 
     # Remove the text drag-selection bindings
     $slate bind $target \
@@ -378,53 +373,6 @@ body ::tycho::TextItemEdit::drag {x y} {
     # Call the drag command
     if { $dragcommand != "" } {
         uplevel #0 $dragcommand $target $x $y
-    }
-}
-
-#######################################################################
-#### icursor
-#
-# Manipulate the insertion cursor in useful ways. This proc only
-# works correctly if there is no selection. (Use the select{}
-# proc if there is a selection.)
-#
-# <ul>
-# <li><b>start</b>: Move to the start of the item
-# <li><b>end</b>: Move to the end of the item
-# <li><b>+char</b>: Move forward one character
-# <li><b>-char</b>: Move back one character
-# <li><b>+word</b>: Move forward one word
-# <li><b>-word</b>: Move back one word
-# <li><i>index</i>: Move to <i>index</i>
-# </ul>
-#
-body ::tycho::TextItemEdit::icursor {mode} {
-    switch -exact /$mode {
-	"/start" {
-	    $slate icursor $target 0
-	}
-	"/end" {
-	    $slate icursor $target end
-	}
-	"/+char" {
-	    $slate icursor $target [expr [$slate index $target insert] + 1]
-	}
-	"/-char" {
-	    $slate icursor $target [expr [$slate index $target insert] - 1]
-	}
-	"/+word" {
-	    set str [$slate itemcget $target -text]
-	    $slate icursor $target [::tycho::wordright $str \
-		    [$slate index $target insert]]
-	}
-	"/-word" {
-	    set str [$slate itemcget $target -text]
-	    $slate icursor $target [::tycho::wordleft $str \
-		    [$slate index $target insert]]
-	}
-	default {
-	    $slate icursor $target $mode
-	}
     }
 }
 
@@ -541,9 +489,7 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		    $slate dchars $target insert
 		}
                 # Adjust the highlight
-                $slate highlight $target \
-			-highlightcolor $highlightcolor \
-			-highlightfill  $highlightfill
+		highlight
 	    }
 	    "Delete" {
 		# If there's a selection then delete it
@@ -554,9 +500,7 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		    $slate dchars $target insert
 		}
                 # Adjust the highlight
-                $slate highlight $target \
-			-highlightcolor $highlightcolor \
-			-highlightfill  $highlightfill
+                highlight
             }
 	    "Left" {
 		# Move the cursor. Adjust the selection if shift.
@@ -592,9 +536,7 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 		$slate insert $target [$slate index $target insert] $key
 
                 # Adjust the highlight
-                $slate highlight $target \
-			-highlightcolor $highlightcolor \
-			-highlightfill  $highlightfill
+                highlight
 	    }
 	}
     }
@@ -619,6 +561,83 @@ body ::tycho::TextItemEdit::release {} {
 body ::tycho::TextItemEdit::stop {} {
     if { $target != "" } {
 	$this deactivate
+    }
+}
+
+#####################################################################
+#####################################################################
+####                     protected methods                       ####
+
+#######################################################################
+#### highlight
+#
+# Draw or redraw the highlight background of the object being
+# edited. This is needed because the slate selection is deleted
+# when a text selection is created.
+#
+body ::tycho::TextItemEdit::highlight {} {
+    if { $target == "" } {
+	return
+    }
+    set highlight [$slate find withtag texthighlight.$target]
+    if { $highlight == "" } {
+	set highlight [eval $canvas create rectangle \
+		[$canvas bbox $target] \
+		[list -width $highlightwidth \
+		-outline $highlightcolor \
+		-fill $highlightfill -tags "texthighlight.$target"]]
+	# Lower the box to just below the item
+	$canvas lower texthighlight.$target $target
+    } else {
+	# Already highlighted, so change the coordinates
+	eval $canvas coords texthighlight.$target [$canvas bbox $target]
+    }
+}
+
+#######################################################################
+#### icursor
+#
+# Manipulate the insertion cursor in useful ways. This proc only
+# works correctly if there is no selection. (Use the select{}
+# proc if there is a selection.)
+#
+# <ul>
+# <li><b>start</b>: Move to the start of the item
+# <li><b>end</b>: Move to the end of the item
+# <li><b>+char</b>: Move forward one character
+# <li><b>-char</b>: Move back one character
+# <li><b>+word</b>: Move forward one word
+# <li><b>-word</b>: Move back one word
+# <li><i>index</i>: Move to <i>index</i>
+# </ul>
+#
+body ::tycho::TextItemEdit::icursor {mode} {
+    switch -exact /$mode {
+	"/start" {
+	    $slate icursor $target 0
+	}
+	"/end" {
+	    $slate icursor $target end
+	}
+	"/+char" {
+	    $slate icursor $target [expr [$slate index $target insert] + 1]
+	}
+	"/-char" {
+	    $slate icursor $target [expr [$slate index $target insert] - 1]
+	}
+	"/+word" {
+	    set str [$slate itemcget $target -text]
+	    $slate icursor $target [::tycho::wordright $str \
+		    [$slate index $target insert]]
+	}
+	"/-word" {
+	    set str [$slate itemcget $target -text]
+	    $slate icursor $target [::tycho::wordleft $str \
+		    [$slate index $target insert]]
+	}
+	default {
+	    $slate icursor $target $mode
+	}
     }
 }
 
@@ -681,9 +700,7 @@ body ::tycho::TextItemEdit::select {mode args} {
 		$slate dchars $target sel.first sel.last
 		$slate select clear
                 # Adjust the highlight
-                $slate highlight $target \
-			-highlightcolor $highlightcolor \
-			-highlightfill  $highlightfill
+		highlight
 	    }
 	}
 	"exists" {
