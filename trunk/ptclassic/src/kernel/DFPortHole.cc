@@ -112,14 +112,21 @@ MultiPortHole& MultiDFPort :: setPort (const char* s,
 }
 
 PortHole& MultiDFPort :: installPort(PortHole& p) {
-	ports.put(p);
-	parent()->addPort(p.setPort(newName(), parent(), type(),numberTokens));
+        // We need this cast or else ddf demos give bogus results
+        // This problems is probably a results of the virtualization of
+        // installPort().  The real fix would probably be to have
+        // both version of setPort have the same args and then make
+        // it virtual.
+        DFPortHole &dp = (DFPortHole &)p;
+	ports.put(dp);
+	parent()->addPort(dp.setPort(newName(), parent(),
+				     type(), numberTokens));
  // for ANYTYPE multiportholes, all ports are resolved to be the same type.
 	if (type() == ANYTYPE)
-		p.inheritTypeFrom(*this);
+		dp.inheritTypeFrom(*this);
 	// we can do the following as a friend function
-	letMeKnownToChild(p);
-	return p;
+	letMeKnownToChild(dp);
+	return dp;
 }
 
 // Function to alter only numTokens and delay.
