@@ -99,15 +99,16 @@ proc tydoc {args} {
     set debug 0
     set switchCount 0
     for {set n 0} {$n < $argc} {incr n} {
-	if { [ lindex $argc $n] == "-t" } {
+	if { [ lindex $args $n] == "-t" } {
 	    set title [lindex $argc [incr n]]
 	    incr switchCount 2
 	}
-	if { [ lindex $argc $n] == "-v" } {
+	if { [ lindex $args $n] == "-v" } {
 	    set verbose 1
 	    incr switchCount
 	} 
-	if { [ lindex $argc $n] == "-d" } {
+	if { [ lindex $args
+ $n] == "-d" } {
 	    set debug 1
 	    incr switchCount
 	}
