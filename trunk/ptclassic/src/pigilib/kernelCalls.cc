@@ -19,6 +19,7 @@ Programmer: E. Goei, J. Buck
 #include "Target.h"
 #include "KnownTarget.h"
 #include "Animate.h"
+#include "ConstIters.h"
 #include <ACG.h>
 #include <signal.h>
 
@@ -79,19 +80,30 @@ static const char* parseClass (const char* name, const char** mph, int& nP) {
 }
 
 // Call parseClass from C, returning only the pointer to the class name.
-extern "C" char* callParseClass (char* name) {
+extern "C" const char* callParseClass (char* name) {
 	const char* junkChar;
 	int junkInt;
-	return (char*) parseClass (name, &junkChar, junkInt);
+	return parseClass (name, &junkChar, junkInt);
 }
 
+// const version of Block::multiPortWithName
+static const MultiPortHole* findMPH(const Block* b,const char* name) {
+	CBlockMPHIter next(*b);
+	const MultiPortHole* m;
+	while ((m = next++) != 0) {
+		if (strcmp (name, m->readName()) == 0)
+			return m;
+	}
+	return NULL;
+};
+
 // Find a class.  Handle Printer.input=2.  Fail if the mphname is bogus.
-inline static const Block* findClass (const char* name) {
+static const Block* findClass (const char* name) {
 	const char* mph;
 	int nP;
 	const Block* b = KnownBlock::find (parseClass (name, &mph, nP));
 	if (!b || nP == 0) return b;
-	return b->multiPortWithName (mph) ? b : 0;
+	return findMPH(b,mph) ? b : 0;
 }
 
 // This function writes the domain to the log file, if and only if
@@ -106,14 +118,14 @@ static void logDomain() {
 
 // Return the domain of an object: note, it may not be the current
 // domain (e.g. SDF in DDF)
-extern "C" char *
+extern "C" const char *
 KcDomainOf(char* name) {
 	const Block* b = findClass (name);
 	if (!b) {
 		ErrAdd("Unknown block");
 		return NULL;
 	}
-	return (char *)b->domain();
+	return b->domain();
 }
 
 // Delete the universe and make another
@@ -206,9 +218,9 @@ KcSetKBDomain(const char* domain) {
 /* 9/22/90, by eal
 Return the name of the current domain in KnownBlock
 */
-extern "C" char*
+extern "C" const char*
 curDomainName() {
-        return (char*) KnownBlock::domain();
+        return KnownBlock::domain();
 }
 
 // start a galaxy definition
@@ -303,21 +315,13 @@ KcGetTerms(char* name, TermList* terms)
 	if ((block = findClass(name)) == 0) {
 		return FALSE;
 	}
-	char *names[TERM_ARR_MAX];
+	const char *names[TERM_ARR_MAX];
 	const char *types[TERM_ARR_MAX];
 	int isOut[TERM_ARR_MAX];
 
-	int n = block->portNames(names, isOut, TERM_ARR_MAX);
-// fill in datatypes
-	for (int i = 0; i < n; i++) {
-		PortHole* p = block->portWithName (names[i]);
-		if (p) types[i] = p->myType();
-	}
-	int nm = block->multiPortNames(names+n, isOut+n, TERM_ARR_MAX-n);
-	for (i = 0; i < nm; i++) {
-		MultiPortHole* p = block->multiPortWithName (names[n+i]);
-		if (p) types[n+i] = p->myType();
-	}
+	int n = block->portNames(names, types, isOut, TERM_ARR_MAX);
+	int nm = block->multiPortNames(names+n, types+n,
+				       isOut+n, TERM_ARR_MAX-n);
 	if (npspec) {
 		if (nm == 0 || nm == 1 && strcmp (names[n], mphname) != 0) {
 			char buf[80];
@@ -331,7 +335,7 @@ KcGetTerms(char* name, TermList* terms)
 			return FALSE;
 		}
 		else {
-			char* mphname = names[n];
+			const char* mphname = names[n];
 			int dir = isOut[n];
 			const char* mphtype = types[n];
 			for (int i = 1; i <= npspec; i++) {
@@ -347,7 +351,7 @@ KcGetTerms(char* name, TermList* terms)
 	}
 	terms->in_n = 0;
 	terms->out_n = 0;
-	for (i=0; i < n + nm; i++) {
+	for (int i=0; i < n + nm; i++) {
 		if (isOut[i]) {
 			terms->out[terms->out_n].name = names[i];
 			terms->out[terms->out_n].type = types[i];
@@ -606,9 +610,9 @@ numberOfDomains() {
 /* 9/22/90, by eal
 Return the name of the nth domain in the list of known domains
 */
-extern "C" char*
+extern "C" const char*
 nthDomainName(int n) {
-        return (char*) Domain::nthDomainName(n);
+        return Domain::nthDomainName(n);
 }
 
 // add a node with the given name
