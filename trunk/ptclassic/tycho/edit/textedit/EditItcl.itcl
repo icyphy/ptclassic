@@ -152,7 +152,7 @@ body ::tycho::EditItcl::constructor {args} {
 #
 body ::tycho::EditItcl::bodyTemplate {} {
 
-    set template "#####################################################################\n#### myMethod \n# \n#\n body [getClassName]::myMethod {} {\n\n}\n"
+    set template "#####################################################################\n#### myMethod \n# \n#\nbody [getClassName]::myMethod {} {\n\n}\n"
 
     insertData $template
     markModified
