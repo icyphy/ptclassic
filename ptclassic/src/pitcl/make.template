@@ -52,7 +52,39 @@ include $(CONFIG)
 
 -include override.mk
 
-include $(ROOT)/mk/ptcl.mk
+INCL = 		-I$(KERNDIR) -I$(ITCL_INCDIR) -I$(TCL_INCDIR) \
+			$(PTCOMPAT_INCSPEC)
+# Sources
+SRCS =		PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc ptclGantt.cc \
+		ptclInvokeInterp.cc
+
+# Header files
+HDRS =		PTcl.h ganttChart.h
+
+# Objects
+OBJS =		$(SRCS:.cc=.o)
+
+LIB =		libptcl.$(LIBSUFFIX)
+
+ifndef BASENAME
+ifndef PIGI
+	ALLBINARIES=1
+	BASENAME=ptcl
+endif
+endif
+
+PT_DEPEND = ptclMain.o
+
+PIGI_OBJS = ptclMain.o -lptcl 
+
+INSTALL = $(LIBDIR)/$(LIB)
+ 
+include $(ROOT)/mk/ptbin.mk
+
+# include common definitions, rules
+include $(ROOT)/mk/common.mk
+
+all:	makefile $(LIB) $(PTCL)
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
