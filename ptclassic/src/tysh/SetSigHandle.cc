@@ -55,8 +55,10 @@ setSignalHandlers(void)
 
     isDevelop = getenv("PT_DEVELOP"); /* getenv(char *) returns a pointer to*/
                                       /* environmental variable or returns  */
-                                      /* NULL if it does not exist.         */
-
+                                      /* NULL if it does not exist. This is */
+                                      /* used to get value of PT_DEVELOP if */
+                                      /* it exists.                         */
+         
     if (isDevelop == 0 || isDevelop[0] == '0') 
     {
         if (setCoreLimitRelease() != 0) 
@@ -99,8 +101,6 @@ setCoreLimitDebug(void)
                                              /* prevent a core file from    */
                                              /* being made.                 */
 
-    printf("Size: %i", coreLimit.rlim_cur);
- 
     if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) 
     {             /* setrlimit sets system values to the information in     */
         return 1; /* rlimit struct.                                         */
