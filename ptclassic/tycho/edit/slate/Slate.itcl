@@ -149,6 +149,10 @@ class ::tycho::Slate {
     # The fill color of the highlight box
     itk_option define -highlightfill highlightFill HighlightFill ""
 
+    # Highlight the selection if this flag is true
+    itk_option define -highlightselection highlightSelection \
+	    HighlightSelection 1
+
     # The width of the highlight box
     itk_option define -highlightwidth highlightWidth HighlightWidth 1
 
@@ -157,9 +161,6 @@ class ::tycho::Slate {
 
     ###################################################################
     ####                         public methods                    ####
-
-    # Manipulate the selection -- low level
-    method _selection {option {id {}} {index {}}}
 
     # Animate movement of an item
     method animate {mode {tagOrID {}} {x {}} {y {}} args}
@@ -170,8 +171,8 @@ class ::tycho::Slate {
     # Delete items
     method delete {args}
 
-    # Return a representation of an item
-    method describe {id args}
+    # Return a representation of items
+    method describe {args}
 
     # Create a "ghost" of one or more items
     method ghost {tag args}
@@ -219,10 +220,7 @@ class ::tycho::Slate {
     method reshapeto {tag x y aspect args}
 
     # Manipulate the selection
-    method selection {option {id {}} {index {}}}
-
-    # Access the slate's selector object
-    method selector {args}
+    method select {option {id {}} args}
 
     # Return an item's shape
     method shape {id}
@@ -266,9 +264,6 @@ class ::tycho::Slate {
     # A list of active Animator objects
     private variable animators ""
 
-    # The slate's selector
-    private variable selector
-
     # An array of current shapes used during interaction
     private variable shapeClass
 
@@ -287,7 +282,7 @@ body ::tycho::Slate::constructor {args} {
     eval itk_initialize $args
 
     # Create the selection handler
-    ::selection handle [::info namespace tail $this] "$this select describe"
+    ::selection handle [::info namespace tail $this] "$this select get"
 }
 
 #######################################################################
@@ -295,34 +290,6 @@ body ::tycho::Slate::constructor {args} {
 #
 body ::tycho::Slate::destructor {} {
     catch {delete object $animator}
-    catch {delete object $selector}
-}
-
-#######################################################################
-#### _selection
-#
-# Manipulate the selection. For use by the Selector object.
-#
-body ::tycho::Slate::_selection {mode {id {}} {index {}}} {
-    switch -exact $mode {
-	"add" {
-	    $canvas select clear
-	    addtag "sel" withtag $id
-	    highlight $id -tags highlight.sel
-	}
-	"clear" {
-	    unhighlight "sel"
-	    dtag "sel"
-	    $canvas select clear
-        }
-	"remove" {
-	    unhighlight $id
-	    dtag $id "sel"
-	}
-        default {
-            error "Invalid mode $mode"
-        }
-    }
 }
 
 #######################################################################
@@ -480,7 +447,7 @@ body ::tycho::Slate::delete {args} {
 #######################################################################
 #### describe
 #
-# Return a description of an item on the canvas. This description will
+# Return a description of items on the canvas. This description will
 # be understood by recreate{} so that the item can be recreated or
 # duplicated later in various forms. <i>Do not make any assumptions
 # about the contents of the string returned by this method.</i>
@@ -491,33 +458,36 @@ body ::tycho::Slate::delete {args} {
 #
 # FIXME: Rethink the describe/recreate implementation
 #
-body ::tycho::Slate::describe {id args} {
-    # Item type
-    set description [$this type $id]
+body ::tycho::Slate::describe {args} {
+    set description ""
 
-    # Coordinates
-    eval lappend description [$this coords $id]
+    foreach id $args {
+        # Item type
+        lappend description [$this type $id]
 
-    # Add options only if they differ from the default. The -tags
-    # options is treated specially, to filter out hierarchy tags.
-    foreach {option x y default value} \
-	    [eval concat [$this itemconfigure $id]] {
-	if { $option == "-tags" } {
-	    set tags {}
-	    foreach tag $value {
-		if { ! [string match {[!_]*} $tag] } {
-		    lappend tags $tag
-		}
-	    }
-	    if { $tags != "" } {
-		lappend description -tags $tags
-	    }
-	} elseif { $default != $value } {
-	    lappend description $option $value
-	}
+        # Coordinates
+        eval lappend description [$this coords $id]
+
+        # Add options only if they differ from the default. The -tags
+        # options is treated specially, to filter out hierarchy tags.
+        foreach {option x y default value} \
+                [eval concat [$this itemconfigure $id]] {
+            if { $option == "-tags" } {
+                set tags {}
+                foreach tag $value {
+                    if { ! [string match {[!_]*} $tag] } {
+                        lappend tags $tag
+                    }
+                }
+                if { $tags != "" } {
+                    lappend description -tags $tags
+                }
+            } elseif { $default != $value } {
+                lappend description $option $value
+            }
+        }
+        append description "\n"
     }
-
-    # Return 
     return $description
 }
 
@@ -999,106 +969,135 @@ body ::tycho::Slate::reshapeto {tag x y aspect args} {
 }
 
 #######################################################################
-#### selection
+#### select
 #
-# Manipulate the selection. This methods extends the canvas mechanism
-# to allow multiple items to be selected. In particular, the "item"
-# mode returns a list of selected items. Selected items are tagged with
-# the tag "sel." Several new modes are added:
-# <ul>
-# <li><b>add</b> _tagorid_: Add the items specified by _tagorid_
-# to the selection. If the selection is currently inside an item, that
-# selection is cleared.
-# <li><b>remove</b> _tagorid_: Remove the items specified by
-# _tagorid_ from the selection.
-# <li><b>describe</b>: Return a string describing the items
-# in the selection.
-# <li><b>exists</b>: Test if an item is in the selection.
-# <li><b>claimsel</b>: Claim the X selection. For use by the Selector
-# class only.
-# </ul>
+# Manipulate the selection. This method extends the superclass
+# method to allow the selection to be whole items (the superclass
+# only allows text with a text item to be the selection). These
+# are called a _text selection_ and an _item selection_. Text
+# selection and item selection are mutually exclusive: you can either
+# select text within an item that supports text (the canvas text
+# item or any complex item that has a <b>select</b> method), or you
+# can select multiple items. Each item in the item selection is tagged
+# woth the tag <b>sel</b>. This method has several forms, depending
+# on the value of the _mode_ argument. For more details on indexes,
+# see the Tk canvas documentation.
 #
-# Any command that changes the selection causes the slate to
-# claim the X selection if the option *-exportselection* is true.
+# <dl>
+# <dt><b>add</b> ?_id_ ...?
+# <dd>
+# Clear the text selection if there is one, and add all of the
+# given items to the item selection. Each item is given the
+# tag <b>sel</b> and highlighted with the highlight() method
+# if <b>highlightselection</b> is true. Claim the X selection if
+# <b>-exportselection</b> is true.
 #
-# FIXME: there is a small problem here: the add and remove modes
-# will not in fact update the interactor bindings that are
-# managed by the selector object. If called directly, this
-# will result in incorrect behaviour.
+# <dt><b>adjust</b> _tagOrId_ _index_
+# <dd>
+# Clear the item selection and adjust the end of the text selection
+# to be at the specified _index_. Claim the X selection if
+# <b>-exportselection</b> is true.
 #
-body ::tycho::Slate::selection {mode {id {}} {index {}}} {
+# <dt><b>clear</b>
+# <dd>
+# Clear both the item selection and the text selection.
+#
+# <dt><b>from</b> _tagOrId_ _index_
+# <dd>
+# Clear the item selection and and set the text selection anchor point
+# to just before _index_. Claim the X selection if <b>-exportselection</b>
+# is true.
+#
+# <dt><b>get</b>
+# <dd>
+# Return a description of the selection. If there is a text selection
+# just return the selected text; if there is an item selection return
+# the result of calling <b>describe</b> on the selected items.
+#
+# <dt><b>item</b>
+# <dd>
+# If there is a text selection in this slate, return the item
+# containing it. Otherwise return null. (Note: to find the
+# item selection, use <b>find withtag sel</b>.)
+# 
+# <dt><b>remove</b> ?_id_ ...?
+# <dd>
+# Remove all of the given items from the item selection. Each item
+# has the tag <b>sel</b> removed from its tag list and is unhighlighted
+# if it is highlighted. Claim the X selection if <b>-exportselection</b>
+# is true.
+#
+# <dt><b>to</b> _tagOrId_ _index_
+# <dd>
+# Clear the item selection and and set the end of the text selection
+# to just before _index_. Claim the X selection if <b>-exportselection</b>
+# is true.
+#
+# </dl>
+#
+body ::tycho::Slate::select {mode {id {}} args} {
     switch -exact $mode {
+	"add" {
+	    # Add to the item selection
+	    $canvas select clear
+	    foreach id [concat $id $args] {
+		if { ! [hastag $id sel] } {
+		    addtag "sel" withtag $id
+		    if $itk_option(-highlightselection) {
+			highlight $id -tags highlight.sel
+		    }
+		}
+	    }
+	    claimSelection
+	}
+	"adjust" {
+	    # Adjust the text selection
+	    unhighlight "sel"
+	    dtag "sel"
+	    eval chain adjust $id $args
+	    claimSelection
+	}
 	"clear" {
+	    # Clear the text and item selection
 	    unhighlight "sel"
 	    dtag "sel"
 	    $canvas select clear
-	    # Update interactor bindings
-	    selector refresh
+	}
+	"from" {
+	    # Adjust the text selection anchor
+	    unhighlight "sel"
+	    dtag "sel"
+	    eval chain from $id $args
+	}
+	"get" {
+	    # Get the selection
+	    if { [$canvas select item] != "" } {
+		chain get
+	    } else {
+		eval describe [find withtag "sel"]
+	    }
 	}
 	"item" {
-	    set items [find withtag "sel"]
-	    if { $items == "" } {
-		return [$canvas select item]
-	    } else {
-		return $items
-	    }
-	}
-	"exists" {
-	    return [hastag $id sel]
-	}
-	"add" {
-	    $canvas select clear
-	    # Only add to the selection if it is not already
-	    if { ! [hastag $id sel] } {
-		addtag "sel" withtag $id
-		highlight $id -tags highlight.sel
-	    }
-	    # Update interactor bindings
-	    selector refresh
-	    claimSelection
+	    # Get the item with the text selection
+	    find withtag [$canvas select item]
 	}
 	"remove" {
-	    unhighlight $id
-	    dtag $id "sel"
-	    # Update interactor bindings
-	    selector refresh
-	}
-	"describe" {
-	    set description ""
-	    foreach item [find withtag "sel"] {
-		append description [describe $item] "\n"
+	    # Remove items from the selection
+	    foreach id [concat $id $args] {
+		unhighlight $id
+		dtag $id "sel"
 	    }
-	    return $description
+	}
+	"to" {
+	    # Adjust the end of the text selection
+	    unhighlight "sel"
+	    dtag "sel"
+	    eval chain to $id $args
 	}
 	default {
-	    error "Sorry, I think this is bogus"
-            # eval chain $mode $id $index
-	    # claimSelection
+	    error "Invalid option \"$mode\": Must be one of add, adjust,\
+		    clear, from, get, item, remove, or to"
 	}
-    }
-}
-
-#######################################################################
-#### selector
-#
-# Access the slate's selector interactor. If the slate does not
-# have a selector, create it. With no arguments, return the
-# selector interactor; with arguments, call the selector with
-# the first argument as method name and remaining arguments as
-# its arguments.
-#
-body ::tycho::Slate::selector {args} {
-    # If there's no selector, create one. Note that some options
-    # are given directly to the selector.
-    if { ! [::info exists selector] } {
-	set selector [interactor Selector]
-    }
-
-    # Return the selector or evaluate a command on it
-    if { $args == "" } {
-	return $selector
-    } else {
-    	uplevel #0 $selector $args
     }
 }
 
@@ -1265,7 +1264,7 @@ body ::tycho::Slate::unhighlight {tag} {
 # selection is not empty.
 #
 body ::tycho::Slate::claimSelection {} {
-    if { $itk_option(-exportselection) && [select item] != "" } {
+    if { $itk_option(-exportselection) } {
 	::selection own -command "$this select clear" \
 		[::info namespace tail $this]
     }
