@@ -21,7 +21,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	explanation {
 The output of the FIR filter is given by:
 .EQ
-        y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] x[N-i] }
+        y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] ~ x[N-i] }
 .EN
 where N is the order of the filter given by the number of coefficients in
 \fItaps\fP.
