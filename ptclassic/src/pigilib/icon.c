@@ -296,10 +296,10 @@ GetTildePath(facetPtr, tPath)
 
     /*
      * try ptolemy user's directory tree: ~ptolemy/remainPath
+     * it is not an error if there is no such account.
      */
-    ERR_IF2((pwent = getpwnam(UToolName)) == NULL,
-	"GetTildePath: Cannot get password entry");
-    if ( IsSubPathB( fullName, pwent->pw_dir, &remainPath) ) {
+    pwent = getpwnam(UToolName);
+    if (pwent && IsSubPathB( fullName, pwent->pw_dir, &remainPath)) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, remainPath);
 	return TRUE;
     }

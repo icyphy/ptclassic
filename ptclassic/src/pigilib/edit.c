@@ -512,32 +512,6 @@ long userOptionWord;
 int numberOfDomains();
 char* nthDomainName();
 
-#ifdef BUG_FIXED		/* comment out for now */
-/* This function builds the default palettes list.  It has one entry
- * for each domain, plus the user.pal and init.pal palettes and */
-static char *defaultPalettes () {
-    static char buf[1024];
-    char line[128];
-    int i, j, nDomains = numberOfDomains();
-    buf[0] = 0;
-    for (i = 0; i < nDomains; i++) {
-	char* dn = nthDomainName(i);
-	/* convert domain name to lowercase */
-	char* ldn;
-	for (j = 0; dn[j]; j++) {
-		char c = dn[j];
-		if (c >= 'A' && c <= 'Z') c += 'a' - 'A';
-		ldn[j] = c;
-	}
-	ldn[j] = 0;
-	sprintf (line, "~ptolemy/src/domains/%s/icons/%s.pal:", ldn, ldn);
-	strcat (buf, line);
-    }
-    strcat (buf, "./user.pal:./init.pal");
-    return buf;
-}
-#endif
-
 int
 RpcEditDomain(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
