@@ -225,9 +225,9 @@ void CGCTychoTarget :: frameCode() {
     << "static char *scriptFile = \""
     << (const char *)scriptFile << "\";\n\n"
     << comment("Loop counters")
-      << "int numIterations = "
+      << "static int numIterations = "
       << int(scheduler()->getStopTime()) << ";\n"
-      << "int iterationCounter;\n"
+      << "static int iterationCounter;\n"
       << "static int sdfLoopCounter;\n\n"
       << comment("Tcl interface data")
 	<< "static char tclcountername[40];\n"
