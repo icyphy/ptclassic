@@ -44,8 +44,9 @@ static char SccsId[]="$Id$";
 #include "tr.h"
 #include "nle.h"
 #include "nleCommon.h"
+#include "nleMisc.h"
 
-
+int
 countObjectsInContainer(ContainerP,mask)
 octObject *ContainerP;
 int    mask;
