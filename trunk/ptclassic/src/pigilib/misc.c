@@ -13,6 +13,7 @@ $Id$
 #include "octIfc.h"
 #include "octMacros.h"
 #include "err.h"
+#include "main.h"
 
 #define dmWidth 80
 
@@ -37,6 +38,45 @@ long userOptionWord;
     }
     ViDone();
 }
+
+int
+ERFilterDesign(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    char buf[512];
+
+    ViInit("equirriple FIR design");
+    ErrClear();
+    sprintf(buf, "xterm -display %s -name Equirriple_FIR_design -e optfir &",
+                xDisplay);
+    PrintDebug(buf);
+    if (util_csystem(buf)) {
+        PrintErr(sprintf(buf, "Error invoking optfir program."));
+    }
+    ViDone();
+}
+
+int
+WFilterDesign(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    char buf[512];
+
+    ViInit("window FIR design");
+    ErrClear();
+    sprintf(buf, "xterm -display %s -name Equirriple_FIR_design -e wfir &",
+                xDisplay);
+    PrintDebug(buf);
+    if (util_csystem(buf)) {
+        PrintErr(sprintf(buf, "Error invoking wfir program."));
+    }
+    ViDone();
+}
+
 
 int 
 Profile(spot, cmdList, userOptionWord)
