@@ -118,9 +118,9 @@ static Pixmap make_stipple(disp, able, bits, width, height)
 Display *disp;
 Drawable able;
 char *bits;
-int width, height;
+unsigned int width, height;
 {
-    int w, h;
+    unsigned int w, h;
     Pixmap stipple;
     int bitmap_pad;
     GC image_gc;
