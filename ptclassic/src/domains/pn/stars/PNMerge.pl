@@ -51,12 +51,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	if (getB) b.receiveData();
 	getA = getB = FALSE;
 
-	if (a%0 < b%0)
+	if (int(a%0) < int(b%0))
 	{
 	    output%0 = a%0;
 	    getA = TRUE;
 	}
-	else if (a%0 > b%0)
+	else if (int(a%0) > int(b%0))
 	{
 	    output%0 = b%0;
 	    getB = TRUE;
