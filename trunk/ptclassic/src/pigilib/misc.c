@@ -118,7 +118,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Star name", 1, 80, NULL, NULL};
+    static dmTextItem item = {"Star or Target name", 1, 40, NULL, NULL};
     octObject facet, inst;
     vemStatus status;
 
