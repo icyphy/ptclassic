@@ -1599,7 +1599,8 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 		BDFClustPort *pFar = p->far();
 		if (pFar == 0) continue;
 		BDFCluster *peer = pFar->parentClust();
-		if (peer == src || peer == dest || !TorF(p->relType()))
+		if (!TorF(p->relType())) continue;
+		if ((peer == src || peer == dest) && !leaveSelfLoop(p,pFar))
 			continue;
 		// OK, p remains an external port and is conditional.
 		// See if its control port gets buried.
@@ -1868,8 +1869,9 @@ int BDFAtomCluster::myExecTime() {
 
 // methods for BDFClustSched, the clustering scheduler.
 
-BDFClustSched::BDFClustSched(const char* log , int canDoDyn)
-: cgal(0), logFile(log), dynamicAllowed(canDoDyn), dynSched(0) {}
+BDFClustSched::BDFClustSched(const char* log , int canDoDyn, int scc)
+: cgal(0), logFile(log), dynamicAllowed(canDoDyn), dynSched(0),
+  strongConstCheck(scc) {}
 
 BDFClustSched::~BDFClustSched() {
 	LOG_DEL; delete cgal;
