@@ -28,6 +28,7 @@ static char SccsId[]="$Id$";
 #include "port.h"
 #include "internal.h"
 #include "geo.h"
+#include "bb.h"
 
   /*
    * This implements operations that are shared between all geometric objects.
@@ -39,7 +40,7 @@ extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
 struct object_desc oct_geo_desc;
 
-
+void
 oct_init_geo_desc()
 {
     oct_geo_desc = *super;
