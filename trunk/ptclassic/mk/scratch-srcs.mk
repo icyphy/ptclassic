@@ -52,9 +52,10 @@ XPM_DEFINES="-DZPIPE"
 # Should not have to change below here
 GNU_DEST=	$(PTOLEMY)/gnu
 TCLTK_DEST=	$(PTOLEMY)/tcltk
+XV_DEST= 	$(PTOLEMY)
 OBJARCH=	$(PTOLEMY)/obj.$(ARCH)
-all: gnu_all tcltk_all
-install: gnu_all tcltk_all
+all: gnu_all tcltk_all xv_all
+install: gnu_all tcltk_all xv_all
 .PHONY: gnu_all tcltk_all
 
 #
@@ -96,6 +97,48 @@ tcltk_bin: stats $(OBJARCH)/tcltk
 tcltk_install: stats $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) TCLTK_DEST=$(TCLTK_DEST) install)
 
+#
+# Build and install xv
+#
+xv_all: xv_configure xv_bin xv_install
+
+.PHONY: xv_configure xv_bin xv_install
+
+xv_configure: $(OBJARCH)/xv \
+		$(OBJARCH)/xv/jpeg $(OBJARCH)/xv/jpeg/Makefile \
+		$(OBJARCH)/xv/tiff $(OBJARCH)/xv/tiff/Makefile	\
+		$(OBJARCH)/xv/Imakefile
+	(cd $(OBJARCH)/xv; xmkmf)
+
+$(OBJARCH)/xv:
+	if [ ! -d $(OBJARCH) ]; then mkdir $(OBJARCH); fi
+	mkdir $(OBJARCH)/xv
+$(OBJARCH)/xv/Imakefile:
+	-(cd $(OBJARCH)/xv; ln -s $(PTOLEMY)/src/xv/* .)	
+
+$(OBJARCH)/xv/jpeg:
+	mkdir $(OBJARCH)/xv/jpeg
+$(OBJARCH)/xv/jpeg/Makefile:
+	(cd $(OBJARCH)/xv/jpeg; ln -s ../../../src/xv/jpeg/* .)
+$(OBJARCH)/xv/tiff:
+	mkdir $(OBJARCH)/xv/tiff
+$(OBJARCH)/xv/tiff/Makefile:
+	(cd $(OBJARCH)/xv/tiff; ln -s ../../../src/xv/tiff/* .)
+
+xv_bin: $(OBJARCH)/xv
+	(cd $(OBJARCH)/xv; \
+		$(MAKE) $(MFLAGS) \
+		EXTRA_LDOPTIONS=-Bstatic \
+		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
+
+xv_install: $(OBJARCH)/xv
+	(cd $(PTOLEMY)/src/xv; \
+		$(MAKE) $(MFLAGS) \
+		VPATH=../../src/xv \
+		EXTRA_LDOPTIONS=-Bstatic \
+		BINDIR=$(XV_DEST)/bin.$(ARCH)  install)
+	strip $(PTOLEMY)/bin.$(ARCH)/xv
+	ldd $(PTOLEMY)/bin.$(ARCH)/xv
 
 $(OBJARCH):
 	mkdir $@ 
