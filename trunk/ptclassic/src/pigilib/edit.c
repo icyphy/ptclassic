@@ -667,7 +667,7 @@ long userOptionWord;
     octObject facet;
     char buf[MSG_BUF_MAX];
     char *target, *defaultTarget;
-    int i, which, nTargets, galFlag = 0;
+    int i, which, nTargets, galFlag = 0, nChoices;
     char *targetNames[MAX_NUM_TARGETS];
 
     ViInit("edit-target");
@@ -686,24 +686,24 @@ long userOptionWord;
 	ViDone();
     }
 
-    /* init data structure for dialog box... */
-    items = (dmWhichItem *) malloc(nTargets * sizeof(dmWhichItem));
+    /* for a galaxy, add "<parent>" as an option */
 
-    for (i = 0; i < nTargets; i++) {
+    if (IsGalFacet(&facet)) {
+	    galFlag = 1;
+	    targetNames[nTargets] = defaultTarget = "<parent>";
+    }
+    else defaultTarget = KcDefTarget();
+
+    nChoices = nTargets + galFlag;
+
+    /* init data structure for dialog box... */
+    items = (dmWhichItem *) malloc(nChoices * sizeof(dmWhichItem));
+
+    for (i = 0; i < nChoices; i++) {
         items[i].itemName = targetNames[i];
         items[i].userData = NULL;
         items[i].flag = 0;
     }
-
-    /* for a galaxy, add "<parent>" as an option */
-
-    if (IsGalFacet(&facet)) {
-	items[nTargets].itemName = defaultTarget = "<parent>";
-	items[nTargets].userData = NULL;
-	items[nTargets].flag = 0;
-	galFlag = 1;
-    }
-    else defaultTarget = KcDefTarget();
     
     if (!GOCTargetProp(&facet, &target, defaultTarget)) {
         PrintErr(ErrGet());
@@ -712,13 +712,13 @@ long userOptionWord;
 
     sprintf(buf, "target = '%s'", target);
 /* put current target in "0" position, because of the way dmWhichOne works */
-    for (i = 1; i < nTargets+galFlag; i++) {
-	    if (strcmp(items[i].itemName, target) == 0) {
-		    items[i].itemName = items[0].itemName;
-		    items[0].itemName = target;
-	    }
+    for (i = 1; i < nChoices; i++) {
+	if (strcmp(items[i].itemName, target) == 0) {
+	    items[i].itemName = items[0].itemName;
+	    items[0].itemName = target;
+	}
     }
-    if (dmWhichOne(buf, nTargets+galFlag, items, &which, NULL, NULL) != VEM_OK
+    if (dmWhichOne(buf, nChoices, items, &which, NULL, NULL) != VEM_OK
         || which == -1) {
         PrintCon("Aborted entry");
         ViDone();
