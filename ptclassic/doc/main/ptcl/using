@@ -304,29 +304,25 @@ if the user of the galaxy does not change it
 command described shortly).
 The
 .i default-value
-specifies the initial value of the state, and can be an expression.
-Some examples are:
-.(c
-(state count int 3)
-(state level float 1.0)
-(state title string "This is a title")
-(state myfreq float galaxyfreq)
-.)c
-The
-.i default-value
-can also be an arbitrary arithmetic expression involving
-constant values and other
+specifies the initial value of the state, and can be an arbitary
+expression involving constant values and other
 .c State
-names (enclosed in quotes); this expression is evaluated when the
+names; this expression is evaluated when the
 simulation starts.  The following state names are predefined:
 YES, NO, TRUE, FALSE, PI.  YES and TRUE have value 1; NO and
 FALSE have value 0; PI has the value 3.14159... .  Example:
+Some examples are:
 .(c
-(state angularFreq "2*PI*freq")
+newstate count int 3
+newstate level float 1.0
+newstate title string "This is a title"
+newstate myfreq float galaxyfreq
+newstate angularFreq "2*PI*freq"
 .)c
 .pp
-The full syntax of state initial value strings is explained in the
-manual section for the graphical interface (pigi).
+The full syntax of state initial value strings depends on the type of
+state, and is explained in the manual section for the graphical interface
+(pigi).
 .H3 "Setting the Value of States
 .pp
 The
@@ -390,7 +386,7 @@ is the new value for the
 The syntax for
 .i value
 is the same as described in the
-.c state
+.c newstate
 command.
 However, the expression for
 .i value
@@ -536,7 +532,7 @@ defgalaxy SinGen {
 	descriptor "Generate a sine wave (default frequency 0.05)"
 
 	# The frequency of the sine wave is a state
-	state freq float "0.05"
+	newstate freq float "0.05"
 
 	star ramp Ramp
 	# The ramp advances by 2*pi each sample
@@ -639,11 +635,12 @@ simulation.
 The
 .c schedule
 .IE "schedule command"
-command generates and prints the schedule (the order in
+command generates and returns the schedule (the order in
 which
 .c Star s
-are invoked).  For the DE interpreter, this command
-is not implemented (since there is no "compile time"
+are invoked).  For domains such as DE, this command
+returns a not-implemented message
+(since there is no "compile time"
 DE schedule as there is for SDF).  Syntax:
 .(c
 schedule
@@ -933,6 +930,7 @@ The
 command, which takes no arguments, returns a list of the top-level
 blocks in the current galaxy.
 .H3 "Examining states"
+.pp
 The
 .c statevalue
 command takes the form
@@ -979,7 +977,8 @@ is printed.
 .H2 "Limitations of the Interpreter"
 .pp
 There should be many more commands returning information on the
-simulation, to permit better exploitation of the full power of ptcl.
+simulation, to permit better exploitation of the full power of the
+Tcl language.
 .H2 "A Wormhole example"
 .pp
 .IE "wormholes in the interpreter"
@@ -1007,34 +1006,32 @@ the
 command that appears inside the galaxy definition.
 .pp
 .(c
-domain SDF
-
-defgalaxy WormGuts {
-	domain DE
-	descriptor "A DE in SDF Wormhole to discard samples randomly")
-	star discard Discard
-	star server UniformDelay
-	star sampler Sampler
-
-	connect discard output server input
-	connect server output sampler input
-
-	input keep discard keep
-	input input discard input
-	alias output sampler output
+# create the wormhole
+domain DE
+defgalaxy wormGuts {
+	domain SDF
+	descriptor "An example of a wormhole"
+	star add Add; numports add input 2
+	star IIDGaussian1 IIDGaussian
+	alias out add output
+	alias in add "input#1"
+	connect IIDGaussian1 output add "input#2"
 }
+reset
 
-star ramp Ramp
-star worm WormGuts
-star flip CoinFlip
-star graph Xgraph
-setstate graph title "A demo of a DE in SDF Wormhole"
+# Creating the main universe.
+domain DE
+star wormGuts1 wormGuts
+star Poisson1 Poisson; star graf XMgraph
+numports graf input 2
+setstate graf title "Noisy Poisson Process"
+setstate graf options "-P -0 original -1 noisy"
+node node1
+nodeconnect Poisson1 output node1
+nodeconnect wormGuts1 in node1
+nodeconnect XMgraph.input=21 "input#1" node1
+connect wormGuts1 out graf "input#2"
 
-connect ramp output worm input
-connect flip output worm keep
-connect worm output graph input
-
-run 100
+run 40
 wrapup
-
 .)c
