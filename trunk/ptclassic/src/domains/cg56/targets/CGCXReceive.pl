@@ -21,57 +21,33 @@ limitation of liability, and disclaimer of warranty provisions.
 	type {ANYTYPE}
 }
 
-codeblock(receiveData,"int numXfer,const char* command") {
-    char buffer[@(numXfer*3)];
-    int status;
-    int i;
-    /* blocking read */
-    printf("Reading @numXfer tokens from the DSP\n");
-    status = read(dsp->fd,buffer,@(numXfer*3));
-    if (status == 0) {
-	perror("DSP read ioctl premature EOF");
-	exit(1);
-    }
-    if (status == -1) {
-	perror("DSP read ioctl timeout");
-	exit(1);
-    }
-    for (i = 0; i < @numXfer; i++) {
-	int value = (buffer[3*i]<<16)+ (buffer[3*i+1]<<8)+ buffer[3*i+2];
-	if (value & 0x00800000) value |= 0xff000000;
-        @command;
-    }
-}
-
-setup {
-        CGCS56XBase::setup();
-	PortHole* input = s56xSide->portWithName("input");
-	DataType inputType = input->setResolvedType();
-	if (strcmp(inputType,FIX) == 0) {
-		output.setPort("output",this,FLOAT,output.numXfer());
+codeblock(receiveData,"int pairNumber, int numXfer, int semaphorePtr, int bufferPtr, const char* command") {
+	int i, semaphoreMask = 1<<@(pairNumber%24);
+	/* wait for dsp buffer to be full */
+	while ( ~s56xSemaphores[@(pairNumber/24)] & semaphoreMask );
+	for(i = 0 ; i<@numXfer ; i ++) {
+		int value;
+ 		if ((value = qckGetY(dsp,@bufferPtr+i)) == -1) { 
+			fprintf(stderr, "Receive Data Failed, Pair @pairNumber:	%s\n", qckErrString);
+			exit(1);
+		}
+		if (value & 0x00800000) value |= 0xff000000;
+		@command;
+	}
+	s56xSemaphores[@(pairNumber/24)] &= !semaphoreMask;
+	if (qckPutY(dsp,@(semaphorePtr+pairNumber/24),s56xSemaphores[@(pairNumber/24)]) == -1) { 
+		fprintf(stderr, "Semaphore update failed, Pair @pairNumber:	%s\n", qckErrString);
+		exit(1);
 	}
 }
 
-codeblock(STARTR,"const char* filePrefix"){
-	dspParams.startRead= qckLodGetIntr(dsp->prog,"STARTR");
-        if (dspParams.startRead == -1) {
-                perror("No STARTR label in @filePrefix.lod");
-                exit(1);
-        }
-}
-
-initCode {
-	CGCS56XBase::initCode();
-	addCode(STARTR(S56XFilePrefix),"S56XRoutines","STARTR");
-}
-
-    go {
-	CGCS56XBase::go();
+go {
 	const char* intReceive = "$ref(output,i) = value";
 	const char* fixReceive = "$ref(output,i) = (double)value/(1<<23)";
 	if (strcmp(output.resolvedType(),INT)==0) 
-	    addCode(receiveData(output.numXfer(),intReceive));
+	    addCode(receiveData(pairNumber,output.numXfer(),semaphorePtr,bufferPtr,intReceive));
 	else
-	    addCode(receiveData(output.numXfer(),fixReceive));
-    }
+	    addCode(receiveData(pairNumber,output.numXfer(),semaphorePtr,bufferPtr,fixReceive));
+}
+
 }
