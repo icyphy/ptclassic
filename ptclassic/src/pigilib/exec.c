@@ -100,7 +100,7 @@ boolean now;
 {
     int n;
     char* name;
-    char octHandle[64];
+    char octHandle[16];
 
     lastFacet = *facetPtr;
     ptkOctObj2Handle(facetPtr,octHandle);
@@ -170,5 +170,13 @@ void
 PigiErrorMark(objName)
 char *objName;
 {
-    FindAndMarkError(&lastFacet, objName);
+    FindAndMark(&lastFacet, objName,0);
+}
+
+/* mark stars with a pattern given the full name */
+void
+PigiMark(objName)
+char *objName;
+{
+    FindAndMark(&lastFacet, objName,1);
 }
