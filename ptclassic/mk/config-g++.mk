@@ -92,3 +92,17 @@ OCTTOOLS_MM_LIB=
 # Used by cgwork.mk
 INC_LINK_FLAGS =	-fPIC
 
+# The optimizer in g++-2.7.2 has a bug that we workaround by turning
+# off the optimizer.  The problem is that when the optimizer is turned on, 
+# certain files end up needing  operator= or a copy constructor from 
+# a parent class.  Unfortunately, the parent class does not define what
+# is needed
+#
+# The following files use these two rules:
+#  de/tcltk/stars/make.template
+#  de/stars/make.template
+#  cg56/stars/make.template
+#  sdf/matlab/stars/make.template
+UNOPTIMIZED_WARNING_MESSAGE = @echo "DANGER: gcc-2.7.2 optimizer workaround here, see $$PTOLEMY/mk/config-g++.mk"
+
+UNOPTIMIZED_COMPILE_RULE = 	$(CPLUSPLUS) $(CC_SHAREDFLAGS) -DUSG -g $(WARNINGS) -I$(VPATH) $(INCL) -c 
