@@ -62,7 +62,7 @@ public:
         void terminate();
 
 private:
-	void fcheck(float);
+	void fcheck(double);
 	Block* blockIamIn;
 	const char* opt;
 	const char* sf;
