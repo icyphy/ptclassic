@@ -84,6 +84,9 @@ BarGraph::BarGraph () {
 
 // destructor
 BarGraph::~BarGraph() {
+	// avoid core dump if interpreter did not set up right
+	if (!ptkInterp) return;
+
 	InfString buf;
 
 	// Delete Tcl commands created by this object
