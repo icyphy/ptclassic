@@ -21,23 +21,26 @@ set ed_ToplevelNumbers(ed_Num) 0
 #  in tk.tcl: , , , ,  + various mouse-related bindings
 # Old bindings if any are overwritten
 
+# Useless bindings:
+#    bind Entry <Control-Key> "+ [bind Entry <Any-Key>]"
 #    bind Entry <Control-t> {ed_AddScroll %W}
-    bind Entry <Control-f> {
+
+    bind Entry <Control-f> {+
 	%W icursor [expr [%W index insert]+1]; tk_entrySeeCaret %W
     }
-    bind Entry <Control-b> {
+    bind Entry <Control-b> {+
 	%W icursor [expr [%W index insert]-1]; tk_entrySeeCaret %W
     }
-    bind Entry <Control-a> {
+    bind Entry <Control-a> {+
 	%W icursor 0; tk_entrySeeCaret %W
-    } 
-    bind Entry <Control-e> {
+    }
+    bind Entry <Control-e> {+
 	%W icursor end; tk_entrySeeCaret %W
     }
-    bind Entry <Control-k> {
+    bind Entry <Control-k> {+
 	%W delete insert end; tk_entrySeeCaret %W
     }
-    bind Entry <Control-d> {
+    bind Entry <Control-d> {+
 	%W delete insert; tk_entrySeeCaret %W
     }
 
@@ -63,6 +66,42 @@ set ed_ToplevelNumbers(ed_Num) 0
 proc ed_RestoreParam {facet number} {
     global paramBAKArray
     ptkSetParams $facet $number $paramBAKArray($facet,$number)
+}
+
+# **proc ed_SetEntryButtons
+# Procedure to make buttons function in the same manner as the scrollbar
+#  widget.  Configures the buttons according to the position and view in the
+#  entry widget.  Takes a frame containing the entry and buttons as the first
+#  argument.
+
+proc ed_SetEntryButtons {frame numStor numPossVis leftIdx rightIdx} {
+    if {$leftIdx > 0} {
+	$frame.left config -fg black
+    } else { $frame.left config -fg [lindex [$frame.left config -bg] 4] }
+    if {$rightIdx < [expr $numStor-1]} {
+	$frame.right config -fg black
+    } else { $frame.right config -fg [lindex [$frame.right config -bg] 4] }
+}	
+
+proc ed_MkEntryButton {frame label} {
+	global ed_MaxEntryLength
+	pack append [frame $frame -bd 2] \
+	   [label $frame.label -text "$label:  " -anchor w] left \
+[button $frame.right -bitmap @~whuang/but_entry/right -relief flat -command \
+	     "$frame.entry view \[expr \[$frame.entry index @0\]+1\]"] right \
+[button $frame.left -bitmap @~whuang/but_entry/left -relief flat -command \
+	     "$frame.entry view \[expr \[$frame.entry index @0\]-1\]"] right
+	pack before $frame.left \
+	   [entry $frame.entry -scroll "ed_SetEntryButtons $frame" \
+		-relief sunken -width $ed_MaxEntryLength] {right}
+
+# Try a percentage:
+#
+#	bind $frame.right <3> \
+#	     "$frame.entry view \[expr \[$frame.entry index @0\]+1\]"
+#	bind $frame.left <3> \
+#	     "$frame.entry view \[expr \[$frame.entry index @0\]-1\]"
+
 }
 
 # Procedure to check whether the entry has overflowed.  Appends a '*' to the
@@ -96,32 +135,32 @@ proc ed_UpdateParam {facet number name args} {
    global paramArray
    if {[llength $args] == 2} {
 	set value [lindex $args 1]
-	set type [lindex $args 0]
+	set type [list [lindex $args 0]]
    } else {
 	set value [lindex $args 0]
    }
    set count 0
    foreach param $paramArray($facet,$number) {
-        if {[string match [lindex $param 0] $name]} {
-                if {[string compare [lindex $param 2] $value]} {
+        if {[lindex $param 0] == $name} {
+                if {[lindex $param 2] != $value} {
 		   set okay 1
 		} else {set okay 0}
 		if {[llength $args] == 2} {
-		   if [string compare [lindex $param 1] $type] {
+		   if {[lindex $param 1] != $type} {
 			set okay 1
 		   }
 		} else { set type [lindex $param 1] }
 		if {$okay} {
-		   set param [lreplace $param 1 2 $type $value]
-		   set paramArray($facet,$number) \
-                   [lreplace $paramArray($facet,$number) $count $count $param]
-                   ptkSetParams $facet $number $paramArray($facet,$number)
+		 set param [lreplace $param 1 2 $type $value]
+#                 puts "**$paramArray($facet,$number)\n$count $count $param"
+		 set paramArray($facet,$number) \
+                 [lreplace $paramArray($facet,$number) $count $count "$param"]
+                 ptkSetParams $facet $number $paramArray($facet,$number)
 		}
                 return
 	}
         incr count
    }
-
 }
 
 # **ed_AddParamDialog 
@@ -225,38 +264,34 @@ proc ed_AddParam {facet number name type value} {
     set f $top.f.c.f
     set overWriteParam 0
 
-    set count $ed_ToplevelNumbers($facet,$number,n_$name)
-    if [winfo exists $f.par.f$count] {
-	if [ed_YesNoDialog "Parameter: \"$name\" exists.  Overwrite?"] {
-		destroy $f.par.f$name
-		set overWriteParam 1
-	} else {
-		return
-	}
-    }
+    set count $ed_ToplevelNumbers($facet,$number,count)
+    incr ed_ToplevelNumbers($facet,$number,count)
 
-    frame $f.par.f$count -bd 2
-    label $f.par.f$count.l -text "$name: " -anchor w
-#    if {[string length $name] > 15} {
-#            set paramArray(addBorder) 1
+    set ed_ToplevelNumbers($facet,$number,$count) $name
+#    if [winfo exists $f.par.f$count] {
+#	if [ed_YesNoDialog "Parameter: \"$name\" exists.  Overwrite?"] {
+#		destroy $f.par.f$name
+#		set overWriteParam 1
+#	} else {
+#		return
+#	}
 #    }
-    entry $f.par.f$count.e -width $ed_MaxEntryLength -relief sunken
-#    bind $f.par.f$count.e <Configure> "ed_CheckForChange %W"
-    bind $f.par.f$count.e <Any-Leave> \
-	"ed_UpdateParam $facet $number $name \[%W get\]"
-    bind $f.par.f$count.e <Return> \
-	"ed_UpdateParam $facet $number $name \[%W get\]"
-    $f.par.f$count.e insert 0 "$value"
-    pack append $f.par.f$count \
-	$f.par.f$count.l {left expand fillx} \
-	$f.par.f$count.e {right expand fillx}
+
+    ed_MkEntryButton $f.par.f$count $name
+    
+    bind $f.par.f$count.entry <Any-Leave> \
+	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+    bind $f.par.f$count.entry <Return> \
+	"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+    $f.par.f$count.entry insert 0 "$value"
+
     pack append $f.par $f.par.f$count {top expand fillx pady 1m}
-    ed_AddScroll $f.par.f$count.e
     if {$overWriteParam} {
-	ed_UpdateParam $facet $number $name $type $value
+	ed_UpdateParam $facet $number [list $name] $type $value
     } else {
-	lappend paramArray($facet,$number) [list $name $type $value]
+	lappend paramArray($facet,$number) [list "$name" "$type" "$value"]
 	ptkSetParams $facet $number $paramArray($facet,$number)
+#            puts "**$paramArray($facet,$number)\n$count"
     }
 }
 
@@ -347,10 +382,11 @@ proc ed_RemoveParam {facet number top button} {
 # Signals that removal has occurred by setting ed_EntryDestroyFlag to 1
 
 proc ed_Remove {facet number winName} {
-    global ed_EntryDestroyFlag paramArray
-    regsub {^(.*\.f[^\.]+)((\.(e|l|s))|)$} $winName {\1} name
-    destroy $name
-    regsub {^.*\.f([^\.]+)$} $name {\1} name
+    global ed_EntryDestroyFlag paramArray ed_ToplevelNumbers
+    regsub {^(.*\.f[^\.]+)((\.entry)|)$} $winName {\1} window
+    destroy $window
+    regsub {^.*\.f([^\.]+)$} $window {\1} countd
+    set name $ed_ToplevelNumbers($facet,$number,$countd)
     set count 0
     foreach param $paramArray($facet,$number) {
 	if {[string match [lindex $param 0] $name]} {
@@ -390,10 +426,15 @@ proc ptkEditParams {facet number} {
 #    set paramArray(addBorder) 0
 
     set ed_GetResult [ptkGetParams $facet $number]
+
 #    regsub -all {(\})(\{)} $ed_GetResult {\1 \2} ed_GetResult
     if {$ed_GetResult == ""} {
 	ptkImportantMessage .error "ed_GetParams returns {}"
 	return
+    }
+    if {$ed_GetResult == "NIL"} {
+        # This instance cannont have parameters
+        return
     }
     set editType [lindex $ed_GetResult 0]
     if {[string compare [lindex $editType 0] Edit]} {
@@ -407,7 +448,8 @@ proc ptkEditParams {facet number} {
     } elseif {[ptkIsDelay $number]} {
 	set editType Delay
     } else {
-	set editType "[lindex $editType 1] Parameters"
+	set editType "Parameters"
+#	set editType "[lindex $editType 1] Parameters"
     }
 
     toplevel $top
@@ -415,7 +457,8 @@ proc ptkEditParams {facet number} {
     wm iconname $top "Edit Params"
     wm minsize $top 0 0
 
-    bind $top <Destroy> "unset ed_ToplevelNumbers($facet,$number); destroy %W"
+    bind $top <Destroy> "catch \"unset ed_ToplevelNumbers($facet,$number\"
+							 destroy %W"
 
     frame $top.f -relief raised -bd 2
     label $top.header -font -Adobe-times-medium-r-normal--*-180* \
@@ -463,6 +506,7 @@ proc ptkEditParams {facet number} {
 		"Error: Star has no parameters"
 	return
     }
+
     foreach param $paramList {
 	set name [lindex $param 0]
 	if [string match NIL $name] {
@@ -470,41 +514,34 @@ proc ptkEditParams {facet number} {
 			destroy $top
 			ptkImportantMessage .error \
 				"Error: Star of galaxy has no parameters"
+			return
 		} else { 
 			set paramArray($facet,$number) {}
 			wm title $top "Edit Params: $facet"
 			break
 		}
 	}
-	if [info exist ed_ToplevelNumbers($facet,$number,n_$name)] {
-		ptkImportantMessage .error \
-		"Warning: Parameter \"$name\" is listed more than once."
-	}
+#	if [info exist ed_ToplevelNumbers($facet,$number,"n_$name")] {
+#		ptkImportantMessage .error \
+#		"Warning: Parameter \"$name\" is listed more than once."
+#	}
 	set count $ed_ToplevelNumbers($facet,$number,count)
 	incr ed_ToplevelNumbers($facet,$number,count)
+
+	set ed_ToplevelNumbers($facet,$number,$count) $name
 	set value [lindex $param 2]
-	frame $f.par.f$count -bd 2
-	label $f.par.f$count.l -text "$name: " -anchor w
-#	if {[string length $name] > 15} {
-#		set paramArray(addBorder) 1
-#	}
-	entry $f.par.f$count.e -width $ed_MaxEntryLength \
-		-relief sunken
-#	bind $f.par.f$count.e <Configure> "ed_CheckForChange %W"
-	bind $f.par.f$count.e <Any-Leave> \
-		"ed_UpdateParam $facet $number $name \[%W get\]"
-	bind $f.par.f$count.e <Return> \
-		"ed_UpdateParam $facet $number $name \[%W get\]"
-	$f.par.f$count.e insert 0 "$value"
-	pack append $f.par.f$count \
-		$f.par.f$count.l {left expand fillx} \
-		$f.par.f$count.e {right expand fillx}
+
+	ed_MkEntryButton $f.par.f$count $name
+	bind $f.par.f$count.entry <Any-Leave> \
+		"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+	bind $f.par.f$count.entry <Return> \
+		"ed_UpdateParam $facet $number [list $name] \[%W get\]"
+	$f.par.f$count.entry insert 0 "$value"
 	pack append $f.par $f.par.f$count {top fillx expand \
 		pady  1m}
-	ed_AddScroll $f.par.f$count.e
     }
-    grab $top
-    if [info exists $f.par.f0.e] {focus $f.par.f0.e}
+#    grab $top
+    if [winfo exists $f.par.f0.e] {focus $f.par.f0.e}
     $c create window 0 0 -anchor nw -window $f -tags frameWindow
     set mm [winfo fpixels $c 1m]
 #    bind $c <Configure> "ed_ConfigFrame $top"
