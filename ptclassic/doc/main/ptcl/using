@@ -415,20 +415,6 @@ with the
 or
 .c dump
 commands.
-.H3 "Setting a Descriptor
-.pp
-Every block in \*(PT has a
-.i descriptor ,
-which is a string that briefly describes the purpose of that block.
-The
-.c descriptor
-command changes the descriptor for the current galaxy,
-.IE "descriptor command"
-which is
-by default "An interpreted galaxy".  Example:
-.(c
-descriptor "This galaxy generates a sine wave"
-.)c
 .H3 "Setting the Number of Ports to a Star
 .pp
 Some
@@ -515,22 +501,20 @@ the commands described above \-
 .c star ,
 .c galaxy ,
 .c connect ,
+.c busconnect ,
 .c node ,
 .c nodeconnect ,
 .c input ,
 .c output ,
 .c numports ,
-.c state ,
-.c setstate ,
+.c newstate ,
 or
-.c descriptor .
+.c setstate.
 The defined class is added to the known list, and you can then create
 instances of it and add them to other galaxies.
 An example is:
 .(c
 defgalaxy SinGen {
-	descriptor "Generate a sine wave (default frequency 0.05)"
-
 	# The frequency of the sine wave is a state
 	newstate freq float "0.05"
 
@@ -1009,7 +993,6 @@ command that appears inside the galaxy definition.
 domain DE
 defgalaxy wormGuts {
 	domain SDF
-	descriptor "An example of a wormhole"
 	star add Add; numports add input 2
 	star IIDGaussian1 IIDGaussian
 	alias out add output
@@ -1028,7 +1011,7 @@ setstate graf options "-P -0 original -1 noisy"
 node node1
 nodeconnect Poisson1 output node1
 nodeconnect wormGuts1 in node1
-nodeconnect XMgraph.input=21 "input#1" node1
+nodeconnect graf "input#1" node1
 connect wormGuts1 out graf "input#2"
 
 run 40
