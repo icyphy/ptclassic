@@ -94,23 +94,26 @@ X11_LIBSPEC= -lX11
 X11EXT_LIBSPEC = -lXext
 #X11EXT_LIBSPEC = -L/usr/X11/lib -lXext
 
+TCL_VERSION=tcl7.4p1
+TK_VERSION=tk4.0p1
+
 TCL_ROOT=$(ROOT)/tcltk
 
 # Directory containing Tcl include files
-TCL_INCDIR=$(TCL_ROOT)/tcl/include
+TCL_INCDIR=$(TCL_ROOT)/tcl.$(TCL_VERSION)/include
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(TCL_VERSION).$(PTARCH)/lib -ltcl
 
 # Directory containing Tk include files
 TK_INCDIR=$(TCL_ROOT)/tk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(PTARCH)/lib -ltk #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(TK_VERSION).$(PTARCH)/lib -ltk #-lXpm
 
 # Location of the itcl_sh binary
-ITCL_SH=$(ROOT)/tcltk/itcl.$(PTARCH)/bin/itcl_sh
+ITCL_SH=$(ROOT)/tcltk/itcl.$(TK_VERSION).$(PTARCH)/bin/itcl_sh
 
 # Location of the itcl library, needed for itcl_mkindex
 ITCL_LIBDIR=$(ROOT)/tcltk/itcl/library
