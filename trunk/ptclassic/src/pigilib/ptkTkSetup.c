@@ -232,6 +232,7 @@ ptkTkSetup(funcArray, size)
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
     if (Tcl_EvalFile(ptkInterp, buf) != TCL_OK) {
         ErrAdd("Unable to load ptk startup file: ");
+        ErrAdd(buf);
         ErrAdd(ptkInterp->result);
 	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
 	PrintErr(ErrGet());
