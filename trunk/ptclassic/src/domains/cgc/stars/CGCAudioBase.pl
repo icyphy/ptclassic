@@ -139,7 +139,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	routine with different parameters, then the parameters
 	corresponding to the most recent call will be used!
 	*/
-      static void $sharedSymbol(CGCAudio,audio_setup)
+      static void $sharedSymbol(CGCAudioBase,audio_setup)
 	(int fd, char* encodingType, int sampleRate, int channels) {
 	audio_info_t info;
 
@@ -190,7 +190,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	balance: range -1.0 to 1.0 (double)
 	recordFlag: record = 1, play = 0
 	*/
-      static void $sharedSymbol(CGCAudio,audio_control)
+      static void $sharedSymbol(CGCAudioBase,audio_control)
 	(int fd, char* portType, double volume, double balance, 
 	 int recordFlag) {
 	audio_info_t info;
@@ -236,7 +236,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	volume: range 0.0 - 1.0 (double)
 	recordFlag: record = 1, play = 0
 	*/
-      static void $sharedSymbol(CGCAudio,audio_gain)
+      static void $sharedSymbol(CGCAudioBase,audio_gain)
 	(int fd, double volume, int recordFlag) {
 	audio_info_t info;
 	audio_prinfo_t *audioStatusPtr;
@@ -259,7 +259,7 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	balance: range -1.0 to 1.0 (double)
 	*/
-      static void $sharedSymbol(CGCAudio,audio_balance)
+      static void $sharedSymbol(CGCAudioBase,audio_balance)
 	(int fd, double balance) {
 	audio_info_t info;
 
@@ -286,10 +286,10 @@ limitation of liability, and disclaimer of warranty provisions.
       /* Define audio driver : HACK: This is Sun Specific */
       addInclude("<sys/audioio.h>");
       addGlobal(globals);
-      addProcedure(audio_setupDef,   "CGCAudio_audio_setup");
-      addProcedure(audio_controlDef, "CGCAudio_audio_control");
-      addProcedure(audio_gainDef,    "CGCAudio_audio_gain");
-      addProcedure(audio_balanceDef, "CGCAudio_audio_balance");
+      addProcedure(audio_setupDef,   "CGCAudioBase_audio_setup");
+      addProcedure(audio_controlDef, "CGCAudioBase_audio_control");
+      addProcedure(audio_gainDef,    "CGCAudioBase_audio_gain");
+      addProcedure(audio_balanceDef, "CGCAudioBase_audio_balance");
     }
 
     wrapup {
