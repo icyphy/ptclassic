@@ -74,13 +74,13 @@ EGGate* ExpandedGraph::connect_invocations(SDFStar* src, int i, SDFStar* dest,
 
 #if EGDEBUG
 	printf("    -> connect invocations : %s{%d} to %s{%d}; %d %d\n",
-		src->readName(),i,dest->readName(),j, n_sam, n_d);
+		src->readName(),i,dest->readName(),j, n_sam, n_d*n_sam);
 #endif
 
 	EGNode* source = src->myMaster()->getInvocation(i);
 	EGNode* destination = dest->myMaster()->getInvocation(j);
 	if ((!source) || (!destination)) return FALSE;
-	return makeArc(source, destination, n_sam, n_d);
+	return makeArc(source, destination, n_sam, n_d*n_sam);
 }
 
 // Identify which port and which sample is assigned to each gate.
@@ -244,19 +244,16 @@ int ExpandedGraph::ExpandArc(SDFStar* src, PortHole* src_port,
 
 int ExpandedGraph::SelfLoop(SDFStar& s)
 { 
-	if ( StateExists(s) || PastPortsUsed(s)) {
+	if ( enforcedSelfLoop || s.hasInternalState() || StateExists(s) || PastPortsUsed(s)) {
 
 		// connect successive invocations of the star as a chain of 
-		// precedences with an arc of delay 1 inserted from the 
-		//last invocation to the first.
+		// precedences.
 
 		int repNum = s.repetitions;
 		for (int i = 1; i< repNum; i++) 
 			if (!connect_invocations(&s,i,&s,i+1,0,0)) 
 				return FALSE;
     
-		if (repNum > 1) 
-			return int(connect_invocations(&s,repNum,&s,1,0,1)); 
     		return(TRUE); 
   	}
 	return(TRUE);
@@ -266,13 +263,14 @@ int ExpandedGraph::SelfLoop(SDFStar& s)
 
 ////  constructor for creating the expanded graph from a galaxy /////
 
-int ExpandedGraph::createMe(Galaxy& galaxy)
+int ExpandedGraph::createMe(Galaxy& galaxy, int selfLoopFlag)
 {
 	SDFStar *dest, *source;
 	SDFPortHole *dest_port, *source_port;
 	GalStarIter nextStar(galaxy);
 
 	myGal = &galaxy;
+	enforcedSelfLoop = selfLoopFlag;
 
 	initialize(); 
 
@@ -333,7 +331,8 @@ void ExpandedGraph::removeArcsWithDelay()
 	while ((p=nextNode++)!=0) {
 		EGGateLinkIter preciter(p->ancestors);
 		while ((q=preciter++) != 0) 
-			if (q->delay() > 0) q->removeMyArc(); 
+			if (q->delay() > 0) 
+				q->hideMe(); 
 	}
 }
 
