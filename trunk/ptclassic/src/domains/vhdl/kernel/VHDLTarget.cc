@@ -62,7 +62,7 @@ HLLTarget(name, starclass, desc) {
   initCodeStreams();
 
   // Initialize lists.
-  firingVariableList.initialize();
+//  firingVariableList.initialize();
   variableList.initialize();
 
   // Make states defined in CGTarget settable.
@@ -121,7 +121,9 @@ void VHDLTarget :: initCodeStreams() {
 // Register a read or write to an arc and the offset.
 void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   StringList direction = port->direction();
+  const char* pDirec = hashstring(direction);
   StringList name = port->getGeoName();
+  const char* pName = hashstring(name);
   int noSuchArc = 1;
   
   // Search through the arc list for an arc with the given name.
@@ -130,15 +132,18 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   VHDLArc* arc;
   while ((arc = nextArc++) != 0) {
 //    if (!strcmp(arc->name, name)) {
-    if (hashstring(arc->name) == hashstring(name)) {
+// Assume that if the arc is in the list, it's name's already hashed
+//    if (hashstring(arc->name) == hashstring(name)) {
+//    if (arc->name == hashstring(name)) {
+    if (arc->name == pName) {
       noSuchArc = 0;
 //      if (!strcmp(port->direction(),"OUT")) {
-      if (hashstring(direction) == hashstring("OUT")) {
+      if (pDirec == hashstring("OUT")) {
 	if (tokenNum < arc->lowWrite) arc->lowWrite = tokenNum;
 	if (tokenNum > arc->highWrite) arc->highWrite = tokenNum;
       }
 //      else if (!strcmp(port->direction(),"IN")) {
-      else if (hashstring(direction) == hashstring("IN")) {
+      else if (pDirec == hashstring("IN")) {
 	if (tokenNum < arc->lowRead) arc->lowRead = tokenNum;
 	if (tokenNum > arc->highRead) arc->highRead = tokenNum;
       }
@@ -151,9 +156,9 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
   // If no arc with the given name is in the list, then create one.
   if (noSuchArc) {
     VHDLArc* newArc = new VHDLArc;
-    newArc->name = hashstring(name);
+    newArc->name = pName;
 //    if (!strcmp(port->direction(),"OUT")) {
-    if (hashstring(direction) == hashstring("OUT")) {
+    if (pDirec == hashstring("OUT")) {
       newArc->type = port->dataType();
       newArc->lowWrite = tokenNum;
       newArc->highWrite = tokenNum;
@@ -161,7 +166,7 @@ void VHDLTarget :: registerArcRef(VHDLPortHole* port, int tokenNum) {
       newArc->highRead = port->geo().firstGet();
     }
 //    else if (!strcmp(port->direction(),"IN")) {
-    else if (hashstring(direction) == hashstring("IN")) {
+    else if (pDirec == hashstring("IN")) {
       newArc->type = port->dataType();
       newArc->lowWrite = port->geo().firstPut();
       newArc->highWrite = port->geo().firstPut();
@@ -189,13 +194,13 @@ int VHDLTarget :: runIt(VHDLStar* s) {
   StringList code = "\n\t-- Star ";
   code << s->fullName() << " (class " << s->className() << ") \n";
   myCode << code;
-  // Initialize lists for new firing.
-  firingVariableList.initialize();
+//  // Initialize lists for new firing.
+//  firingVariableList.initialize();
   // process action; running star modifies myCode.
   int status = ((CGStar*) s)->CGStar::run();
 
-  VHDLVariableList* varList = firingVariableList.newCopy();
-  mergeVariableList(varList);
+//  VHDLVariableList* varList = firingVariableList.newCopy();
+//  mergeVariableList(varList);
   
   if (!status) return status;
   if (s->isItFork()) {
@@ -393,7 +398,7 @@ void VHDLTarget :: frameCode() {
   myCode = code;
   
   // Initialize lists.
-  firingVariableList.initialize();
+//  firingVariableList.initialize();
   variableList.initialize();
 }
 
@@ -529,31 +534,31 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
   }
 }
   
-// Merge the Star's variable list with the Target's variable list.
-void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
-  VHDLVariableListIter starVariableNext(*starVariableList);
-  VHDLVariable* nStarVariable;
-  // Scan through the list of variables from the star firing.
-  while ((nStarVariable = starVariableNext++) != 0) {
-/*
-    // Search for a match from the existing list.
-    int isNewVariable = 1;
-
-    if (variableList.inList(nStarVariable)) isNewVariable = 0;
-    
-    if (isNewVariable) {
-      // Allocate memory for a new VHDLVariable and put it in the list.
-      VHDLVariable* newVariable = new VHDLVariable;
-      newVariable = nStarVariable->newCopy();
-      variableList.put(*newVariable);
-    }
-    */
-    // Allocate memory for a new VHDLVariable and put it in the list.
-    VHDLVariable* newVariable = new VHDLVariable;
-    newVariable = nStarVariable->newCopy();
-    variableList.put(*newVariable);
-  }
-}
+//// Merge the Star's variable list with the Target's variable list.
+//void VHDLTarget :: mergeVariableList(VHDLVariableList* starVariableList) {
+//  VHDLVariableListIter starVariableNext(*starVariableList);
+//  VHDLVariable* nStarVariable;
+//  // Scan through the list of variables from the star firing.
+//  while ((nStarVariable = starVariableNext++) != 0) {
+///*
+//    // Search for a match from the existing list.
+//    int isNewVariable = 1;
+//
+//    if (variableList.inList(nStarVariable)) isNewVariable = 0;
+//    
+//    if (isNewVariable) {
+//      // Allocate memory for a new VHDLVariable and put it in the list.
+//      VHDLVariable* newVariable = new VHDLVariable;
+//      newVariable = nStarVariable->newCopy();
+//      variableList.put(*newVariable);
+//    }
+//    */
+//    // Allocate memory for a new VHDLVariable and put it in the list.
+//    VHDLVariable* newVariable = new VHDLVariable;
+//    newVariable = nStarVariable->newCopy();
+//    variableList.put(*newVariable);
+//  }
+//}
 
 // Clean up the code by wrapping around long lines as separate lines.
 void VHDLTarget :: wrapAround(StringList* codeList) {
@@ -653,7 +658,8 @@ void VHDLTarget :: registerState(State* state, const char* varName,
   newvar->name = hashstring(ref);
   newvar->type = stateType(state);
   newvar->initVal = initVal;
-  firingVariableList.put(*newvar);
+//  firingVariableList.put(*newvar);
+  variableList.put(*newvar);
 }
 
 // Register PortHole reference.
@@ -689,7 +695,8 @@ void VHDLTarget :: registerPortHole(VHDLPortHole* port, const char* varName,
   else {
     newvar->initVal = "0.0";
   }
-  firingVariableList.put(*newvar);
+//  firingVariableList.put(*newvar);
+  variableList.put(*newvar);
 }
 
 // Register the temporary storage reference.
@@ -709,7 +716,8 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   else {
     newvar->initVal = "0.0";
   }
-  firingVariableList.put(*newvar);
+//  firingVariableList.put(*newvar);
+  variableList.put(*newvar);
 }
 
 // Register the constant storage reference.
@@ -724,7 +732,8 @@ void VHDLTarget :: registerDefine(const char* define, const char* type,
   newvar->name = hashstring(ref);
   newvar->type = sanitizeType(type);
   newvar->initVal = init;
-  firingVariableList.put(*newvar);
+//  firingVariableList.put(*newvar);
+  variableList.put(*newvar);
 }
 
 // Return the assignment operator for States.

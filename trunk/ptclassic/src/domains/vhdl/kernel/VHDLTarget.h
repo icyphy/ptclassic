@@ -153,7 +153,7 @@ protected:
 
 private:
 	// The following is for keeping track of variables.
-	VHDLVariableList firingVariableList;
+//	VHDLVariableList firingVariableList;
 	VHDLVariableList variableList;
 
 	// Assign names for each geodesic according to port connections.
@@ -162,8 +162,8 @@ private:
 	// Return the VHDL type corresponding to the given const char*.
 	virtual StringList sanitizeType(const char*);
 
-	// Merge the Star's variable list with the Target's variable list.
-	virtual void mergeVariableList(VHDLVariableList*);
+//	// Merge the Star's variable list with the Target's variable list.
+//	virtual void mergeVariableList(VHDLVariableList*);
 
 	// virtual function to add additional codeStreams.
 	virtual void addCodeStreams();
