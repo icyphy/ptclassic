@@ -245,7 +245,7 @@ void SRStaticScheduler::SCCDecompose( Galaxy & g )
 
 int SRStaticScheduler::SCCVisit( SRStar * s, Stack & stack, int & index )
 {
-  //  cout << "Visiting " << s->name() << " with index " << index << "\n";
+  cout << "Visiting " << s->name() << " with index " << index << "\n";
 
   int min = index;
   s->flags[sccDepth] = index++;
@@ -263,6 +263,8 @@ int SRStaticScheduler::SCCVisit( SRStar * s, Stack & stack, int & index )
     far = near->far();
     if ( far != NULL ) {
       farStar = (SRStar *)(far->parent());
+
+      cout << " has far star " << farStar->name() << '\n';
 
       int m;
       if ( (m = farStar->flags[sccDepth]) == 0 ) {
