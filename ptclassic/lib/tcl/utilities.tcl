@@ -60,10 +60,9 @@ proc ptkTychoLoadFSM { file } {
     set winName [::tycho::File::isFileOpen $file]
     if {$winName == ""} {
       	# File is not open yet , then open a new window.
-	set wname [::tycho::autoName .view]
-	uplevel #0 eval ::tycho::Displayer $wname
-	uplevel #0 eval ::tycho::EditSTD $wname.v -file $file
-        set winName $wname.v
+	# Look ::tycho::view in "Displayer.itcl" to see how to
+	# create a window for a file name.
+        set winName [::tycho::view EditSTD -file $file -withdrawn 1]
     }
 
     $winName ptkCompile
