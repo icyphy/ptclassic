@@ -64,6 +64,9 @@
 class ::tycho::ListBrowser {
     inherit ::tycho::Query
 
+    # A flag that says whether to close the window after choosing.
+    itk_option define -closewindow closeWindow CloseWindow 1
+
     # Specify the command to execute on an item when one is chosen.
     itk_option define -command command Command "::tycho::Dialog::answer"
 
@@ -419,7 +422,7 @@ body ::tycho::ListBrowser::select {name} {
         set saveInfo $errorInfo
         error $msg $saveInfo
     }
-    if $complete {
+    if { $complete && $itk_option(-closewindow) } {
         nextWindow
         delete object $this
         return
