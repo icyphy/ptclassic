@@ -75,6 +75,7 @@ CCS_WITH_H_FILES=\
  Error.cc \
  EventHorizon.cc \
  FileMessage.cc \
+ FileParticle.cc \
  Fix.cc \
  FixArrayState.cc \
  FixState.cc \
