@@ -157,11 +157,10 @@ body ::tycho::ColorBrowser::help {} {
 
 ######################################################################
 #### setContents
-# Construct the list box contents from the ptkColorList array.
+# Construct the list box contents from the color manager.
 #
 body ::tycho::ColorBrowser::setContents {} {
-    global ::ptkColorList
-    set colors [lsort [array names ptkColorList]]
+    set colors [lsort [::tycho::ColorManager::colorList]]
     configure -items $colors
 }
 
