@@ -28,6 +28,7 @@ $Id$
 */
 
 extern int RpcMkStar();
+extern int MkStar();
 extern int RpcMkSchemIcon();
 extern int RpcLookInside();
 extern int RpcShowName();
