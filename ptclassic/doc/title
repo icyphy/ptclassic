@@ -10,3 +10,14 @@ Almagest
 Manual for \*(PT
 version \*(PV
 .)b
+.bp
+.sz 25
+.(b
+.sp 1i
+\f61. Main \*(PT Manual
+2. SDF Domain
+3. DDF Domain
+4. DE Domain
+5. Capsim Domain
+6. MQ Domain
+.)b
