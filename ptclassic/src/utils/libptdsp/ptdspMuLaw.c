@@ -115,6 +115,13 @@ Ptdsp_PCMMuLawToLinear(unsigned char ulawbyte) {
 }
 
 
+/* SunOS4.1.3 does not define SEEK_SET in stdio.h */
+#ifndef SEEK_SET 
+#define	SEEK_SET	0
+#define	SEEK_CUR	1
+#define	SEEK_END	2
+#endif /* SEEK_SET */
+
 /* Size of a Sun mulaw header */
 #define SUNMULAW_HEADER_SIZE 24
 
