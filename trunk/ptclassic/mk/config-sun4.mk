@@ -41,11 +41,12 @@ X11_INCSPEC =	-I/usr/X11/include
 X11_LIBSPEC =	-L/usr/X11/lib -lX11
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.2/ld
+COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.3/ld
 
 PURELINK =	purelink $(COLLECTOR)
 PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
+PURECOV = 	purecov $(COLLECTOR)
 
 # Variable for the Ariel DSP56000 board
 S56DIR =	$(ROOT)/vendors/s56dsp
