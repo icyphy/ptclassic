@@ -69,8 +69,11 @@ class ::tycho::RevControl {
     # Diff the most recent files. This is just a macro (quick button)
     method diffRecent {text} {}
 
+    # Check out the most recent version, and delete it from history
+    method fixRecentAndUpdate {} {}
+
     # Put the file under revision control.
-    method initializeRevControl {} 
+    method initializeRevControl {} {}
 
     # Unedit the file, reverting to the previously checked in version.
     method unedit {}
@@ -81,8 +84,14 @@ class ::tycho::RevControl {
     # Open the file corresponding to the check buttons.
     method openFile {} {}
 
+    # Remove the file from history
+    method removeRecentAndUpdate {} {}
+
     # Takes a format as input, and outputs a version number
     method returnVersion {line} {}
+
+    # return the most recent version in either SCCS or RCS
+    method returnRecentVersion {} {return [returnVersion [lindex $filelist 1]]}
 
     # Get the specified version.
     method retrieveVersion {version} {error "Not in base class!"}
@@ -154,7 +163,7 @@ class ::tycho::RevControl {
     protected proc getComments {} {}
 
     ###################################################################
-    ####                  protected variables                      ####
+    ####              protected/public variables                   ####
 
     # The text widget object that we are associated with.
     protected variable textobject {}
@@ -210,12 +219,11 @@ body ::tycho::RevControl::constructor {args} {
     
     addButton checkin -text "Checkin <i>" -command "$this checkInAndUpdate"
     addButton checkout -text "Checkout <o>" -command "$this checkOutAndUpdate"
-    #addButton history -text "History <h>" -command "$this viewHistory"
     addButton unedit -text "Unedit <u>" -command "$this unedit"
     addButton cancel -text "Close <Esc>" -command \
             "$this nextWindow; delete object $this"
 
-
+    # This contains frame for the help panel and the history log
     itk_component add historyframe {
         frame $itk_component(hull).historyframe
     } {
@@ -235,42 +243,56 @@ body ::tycho::RevControl::constructor {args} {
 
 
     itk_component add historybutton {
-        ::tycho::ButtonBox $itk_component(historyframe).historybutton
+        ::tycho::ButtonBox $itk_component(historyframe).historybutton \
+                -spacingx 1 -spacingy 1 -buttonwidth 12
     } {
-        #FIXME: Which ones do I keep?
+        keep -background -cursor -font -padx -pady
     }
-    $itk_component(historybutton) add startdiff -text "Diff Two Files" \
-            -command "$this compareVersion"
-    $itk_component(historybutton) add diffrecent -text \
-            "Diff Recent" \
+    $itk_component(historybutton) add diffrecent -text "Diff Recent" \
             -command "$this diffRecent [$itk_component(history) textWinName]"
-    $itk_component(historybutton) add openfile -text "Open File(s)" \
+    $itk_component(historybutton) add startdiff -text "Diff Checked" \
+            -command "$this compareVersion"
+    $itk_component(historybutton) add fixversion -text "Fix Recent" \
+            -command "$this fixRecentAndUpdate"
+    $itk_component(historybutton) add rmrecent -text "Remove Recent" \
+            -command "$this removeRecentAndUpdate"
+    $itk_component(historybutton) add openfile -text "Open Version(s)" \
             -command "$this openFile"
 
-
-    itk_component add historyinstruction {
-        ::tycho::Edit $itk_component(historyframe).historyinstruction
+    itk_component add help {
+        ::tycho::Edit $itk_component(historyframe).help \
+                -textwidth 75 -relief flat
+        #text $itk_component(historyframe).help -relief flat
     } {
-        keep -textwidth -background \
-                -highlightbackground -highlightcolor -selectforeground \
-                -cursor -insertbackground -textforeground \
-                -textbackground
+        keep -background \
+                 -highlightbackground -highlightcolor -selectforeground \
+                 -cursor -insertbackground -textforeground \
+                 -textbackground
     }
     set text \
             " To diff two files, check the buttons to the left of the file\n\
             version, then press Diff Two Files to compare them. To diff\n\
             the most recent files, press Diff Recent. To open the file(s)\n\
             corresponding to the check buttons, press OpenFile."
-    $itk_component(historyinstruction) configure -textheight \
-            [llength [split $text \n]]
-    $itk_component(historyinstruction) insertData $text
-    $itk_component(historyinstruction) configure -readonly 1
-    $itk_component(historyinstruction) markUnmodified
-    
-    pack $itk_component(historybutton) $itk_component(historyinstruction) \
-            $itk_component(history)
+    $itk_component(help) configure -textheight [llength [split $text \n]]
+    $itk_component(help) configure -textwidth \
+            [expr [string length [lindex [split $text \n] 0]] + 2]
+    $itk_component(help) insertData $text
+    $itk_component(help) configure -readonly 1
+    $itk_component(help) markUnmodified
+    pack $itk_component(help)
 
-    #pack $itk_component(history) -expand yes -fill both
+    itk_component add helppanel {
+        ::tycho::Subpanel $itk_component(historyframe).helppanel \
+                -text "Help on buttons" \
+                -childwidget $itk_component(help)
+    } {}
+
+    pack \
+            $itk_component(historybutton) \
+            $itk_component(helppanel) \
+            $itk_component(history) -anchor nw
+
     itk_component add historypanel {
 	::tycho::Subpanel $itk_component(hull).pan \
 		-text "View History" \
@@ -313,6 +335,28 @@ body ::tycho::RevControl::checkOutAndUpdate {} {
     [info class]::checkOut $object
     if [isCheckedOut] {
         enableButton checkin
+        updateHistory
+    }
+}
+
+body ::tycho::RevControl::fixRecentAndUpdate {} {
+    if {[::tycho::askuser \
+            "You are going to check out the latest\
+            revision([returnRecentVersion]),\
+            then delete it from the history log. Proceed?"]} {
+        [info class]::fixRecent $object [returnRecentVersion]
+        if [isCheckedOut] {
+            enableButton checkin
+            updateHistory
+        } 
+    }
+}
+
+body ::tycho::RevControl::removeRecentAndUpdate {} {
+    if {[::tycho::askuser \
+            "You are going to delete the latest\
+            revision([returnRecentVersion]). Proceed?"]} {
+        [info class]::removeRecent $object [returnRecentVersion]
         updateHistory
     }
 }
@@ -705,8 +749,6 @@ body ::tycho::RevControl::parseHistory {history text} {
     set commentColor [preference get commentColor]
     set versionColor [preference get versionColor]
     
-    $text insert insert "Double click the underlined text to view versions.\n" 
-
     # Diff list is currently empty (nothing in revision control yet)
     set filelist {}
     set uniqueID [join [split [string tolower $basefile] .] ""]
