@@ -78,6 +78,12 @@ proc connectControl {starname ctrlname callback} {
     $customControlPanel connect $starname $ctrlname $callback
 }
 
+proc connectControl2 {starname ctrlname callback} {
+    global customControlPanel
+    puts "$starname $ctrlname $callback"
+    $customControlPanel connect2 $starname $ctrlname $callback
+}
+
 
 
 # Source the files that define custom control panels
