@@ -912,10 +912,12 @@ int ptkCreatePlot(interp,plotPtr,win,name,identifier,
       setPtr->color = i+1;
       setPtr->color = (i%NUMBER_OF_COLORS)+1;
 
-      if ((setPtr->xvec = (double *)malloc(persistence*(sizeof(double)))) == NULL ||
-	  (setPtr->yvec = (double *)malloc(persistence*(sizeof(double)))) == NULL ||
-	  (setPtr->id = (int *)malloc(persistence*(sizeof(int)))) == NULL ||
-	  (setPtr->connect = (int *)malloc(persistence*(sizeof(int)))) == NULL) {
+      /* Use calloc instead of malloc to silence Purify warnings */
+      /* about reading from uninitialized memory */
+      if ((setPtr->xvec = (double *)calloc(persistence, sizeof(double))) == NULL ||
+	  (setPtr->yvec = (double *)calloc(persistence, sizeof(double))) == NULL ||
+	  (setPtr->id = (int *)calloc(persistence, sizeof(int))) == NULL ||
+	  (setPtr->connect = (int *)calloc(persistence, sizeof(int))) == NULL) {
 	errmsg = "ptkCreateDataset: Cannot allocate memory for dataset";
 	return 0;
       }
