@@ -106,14 +106,34 @@ int Resource :: getSchedPolicy(const char* n)
 int * Resource :: registerPriority(const char *prkey)
 {
     int * intPointer;
+    char prkeyfixed[] = "0";
     
+    if (schedPolicy == DE_ROUNDROBIN || schedPolicy == DE_FIFO) prkey = prkeyfixed;
     if (lastFired.hasKey(prkey)) {
         intPointer = (int *) lastFired.lookup(prkey);
         *intPointer = 0;
         return(intPointer);
     }
     intPointer = new int(0);
+    lastFired.insert(prkey, (Pointer) intPointer);
     return(intPointer);
+}
+
+////////////////////////////////////////////////////////////////
+// Registers the clock frequency (check if same for all stars)
+////////////////////////////////////////////////////////////////
+
+void Resource :: registerClock(double clock)
+{
+    char st[256];
+    
+    if (clkfreq == 0.0) {
+        clkfreq = clock;
+    } else if (clkfreq != clock) {
+        strcpy(st, name);;
+        strcat(st, ": stars with different clock frequencies");
+        Error::abortRun( st );
+    }
 }
 
 /////////////////////////////////////////////////////////////////////////
@@ -129,7 +149,8 @@ int * Resource :: registerPriority(const char *prkey)
 /////////////////////////////////////////////////////////////////////////
 
 int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
-    double nextTry;    
+    double nextTry, updateDelay = 0;
+    int access;
 
     // Each link contains an event, the destination star of the event, and
     // the time of the event. In the following code we refer to links and
@@ -176,7 +197,7 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
     // feedbackIn port. If so, then the event is signaling that one
     // of the events stored in the star is ready to be emitted.
     if ((dimen == 1) &&  (((Event*)sortArray[0]->e)->dest == getDERCStar(sortArray[0])->feedbackIn)) {
-        if ( int(*((((Event*)link->e)->p))) == 0 ) {
+        if ( int(*((((Event*)sortArray[0]->e)->p))) == 0 ) {
             // fire the star. This firing is signifying that an event is ready 
             // for output
             DERCStar* starUsingResource = getDERCStar(sortArray[0]);
@@ -202,7 +223,7 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
         // set the timeOfArrival parameter of each Star if it is 
         // not already set
         for (i=0 ; i<dimen ; i++){
-            if (getDERCStar(link)->timeOfArrival == -1) {
+            if (getDERCStar(sortArray[i])->timeOfArrival == -1) {
                 getDERCStar(sortArray[i])->timeOfArrival = now;	
             }
         }     
@@ -290,7 +311,8 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
 
         // Now have the current link which should get the resource
         // See if this link can access the Resource
-        if (canAccessResource(topLink)) {
+        access = canAccessResource(topLink);
+        if (access) {
             // Can access Resource!
             // Need to make available any other Events for the Star
             
@@ -329,66 +351,73 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             // Fire the star. The Star will store its output events 
             if (!starUsingResource->run()) return FALSE;
             // Now update the Resources SequentialList of executing stars
-            double updateDelay = starUsingResource->getDelay();
+            updateDelay = starUsingResource->getDelay();
         
-            // First update stars waiting to use this resource with the 
-            // delay of the current Star
-            ListIter oldStarList(*intStarList);
-            ResLLCell* p;
-            while ((p = (ResLLCell*)oldStarList++) != 0) {
-                double oldTime = p->ECT;
-                p->ECT = oldTime + updateDelay;
-                // Update also all the output events of the
-                // preempted star.
-                ListIter listEvents(*((p->star)->emittedEvents));
-                StarLLCell *q;
-                while (( q = (StarLLCell*)listEvents++) != 0 ) {
-                    q->time = q->time + updateDelay;
-                }
-            }    
-            this->timeWhenFree = now + updateDelay;
+            if (updateDelay > 0.0) {
+                // First update stars waiting to use this resource with the 
+                // delay of the current Star
+                ListIter oldStarList(*intStarList);
+                ResLLCell* p;
+                while ((p = (ResLLCell*)oldStarList++) != 0) {
+                    double oldTime = p->ECT;
+                    p->ECT = oldTime + updateDelay;
+                    // Update also all the output events of the
+                    // preempted star.
+                    ListIter listEvents(*((p->star)->emittedEvents));
+                    StarLLCell *q;
+                    while (( q = (StarLLCell*)listEvents++) != 0 ) {
+                        q->time = q->time + updateDelay;
+                    }
+                }    
+                this->timeWhenFree = now + updateDelay;
 
-            // now add the firing star to the resources list of executing stars
-            p = new ResLLCell(starUsingResource, (now+updateDelay), starUsingResource->priority);
-            intStarList->prepend(p);
+                // now add the firing star to the resources list of executing stars
+                p = new ResLLCell(starUsingResource, (now+updateDelay), starUsingResource->priority);
+                intStarList->prepend(p);
+            }
         }
 
-        // At this point at least one star should be using the Resource
-        assert(intStarList->size() != 0);
-
         // Now reschedule the links remained in the sorted Array
-        for (i=0; i<dimen; i++) {
-            // Events which have been already delivered are marked with 0
-            if (sortArray[i] != 0) {
-                // Reschedule each event at the appropriate time by 
-                // looking at the Resources Linked List to see all 
-                // the interrupted Stars ahead of it
-                nextTry = -1;
-                switch (schedPolicy) {
-                    case DE_FIFO:
-                    case DE_FIFONONPREEMPTIVE:
-                    case DE_ROUNDROBIN:
-                    case DE_NONPREEMPTIVE:
-                        nextTry = ((ResLLCell*) intStarList->head())->ECT;
-                        break;
-                    case DE_FIFOPREEMPTIVE:
-                    case DE_PREEMPTIVE:
-                        ListIter getAppECT(*intStarList);
-                        ResLLCell* p;
-                        while ((p = (ResLLCell*) getAppECT++) != 0) {
-                            if (p->priority >= getDERCStar(sortArray[i])->priority) {
-                                nextTry = p->ECT;
-                            } else {
-                                break;
-                            }
-                            if (nextTry == -1) {
-                                Error::abortRun("SW Event never got rescheduled in NewEventFromEventQ()");
-                                return FALSE;
-                            }
-                        }
+        if (access && updateDelay == 0.0) {
+            for (i=0; i<dimen; i++) {
+                if (sortArray[i] != 0) {
+                    eventQ->pushBack(sortArray[i]);
                 }
-                sortArray[i]->level = nextTry;
-                eventQ->pushBack(sortArray[i]);
+            }
+        } else {
+            for (i=0; i<dimen; i++) {
+                // Events which have been already delivered are marked with 0
+                if (sortArray[i] != 0) {
+                    // Reschedule each event at the appropriate time by 
+                    // looking at the Resources Linked List to see all 
+                    // the interrupted Stars ahead of it
+                    nextTry = -1;
+                    switch (schedPolicy) {
+                        case DE_FIFO:
+                        case DE_FIFONONPREEMPTIVE:
+                        case DE_ROUNDROBIN:
+                        case DE_NONPREEMPTIVE:
+                            nextTry = ((ResLLCell*) intStarList->head())->ECT;
+                            break;
+                        case DE_FIFOPREEMPTIVE:
+                        case DE_PREEMPTIVE:
+                            ListIter getAppECT(*intStarList);
+                            ResLLCell* p;
+                            while ((p = (ResLLCell*) getAppECT++) != 0) {
+                                if (p->priority >= getDERCStar(sortArray[i])->priority) {
+                                    nextTry = p->ECT;
+                                } else {
+                                    break;
+                                }
+                                if (nextTry == -1) {
+                                    Error::abortRun("SW Event never got rescheduled in NewEventFromEventQ()");
+                                    return FALSE;
+                                }
+                            }
+                    }
+                    sortArray[i]->level = nextTry;
+                    eventQ->pushBack(sortArray[i]);
+                }
             }
         }
     } else {

@@ -119,10 +119,10 @@ SequentialList* DERCScheduler :: getResources() {
 	
     SequentialList* resList = new SequentialList();
     while ((star = (DEStar*) nextStar++) != 0) {
-	    if (star->isRCStar) {
+	    if (star->isRCStar && ((DERCStar*)star)->needsSharedResource < 2) {
 	        rcStar = (DERCStar*)star;
 	        newResourceName = rcStar->resource;
-            if (strcmp(newResourceName, "HW")) {	 //Not a HW star
+            if (rcStar->needsSharedResource) {	 //Not a HW star
 		        found = 0;
 		        ListIter nextResource(*resList);
 		        while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
@@ -214,7 +214,7 @@ int DERCScheduler :: run () {
 	currentTime = level;
        
         //A new event, never seen before
-	if (((DEStar*)f->dest)->isRCStar) {
+	if (((DEStar*)f->dest)->isRCStar && ((DERCStar*)f->dest)->needsSharedResource < 2) {
             DERCStar* pStar = (DERCStar*)(f->dest);
             //pStar->arrivalTime = level;
             //printf("updating arrivalTime of Star  %s, to time %f\n", ((Event*)f->e)->dest->parent()->asStar().name(), level);fflush(0);

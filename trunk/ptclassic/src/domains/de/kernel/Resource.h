@@ -115,6 +115,9 @@ class Resource {
     // Register priority so that lastFired can be updated
     int * registerPriority(const char *prkey);
  
+    // Register clock frequency for resource
+    void registerClock(double clock);
+
     const char* name;
     int schedPolicy;
     double timeWhenFree; // set to ECT of last event in LL, or else -1
@@ -130,7 +133,9 @@ class Resource {
     // Added by Claudio Passerone 09/24/1998
     // indexValue of last fired star
     HashTable lastFired;
-//    int lastFired;
+
+    // Clock frequency of the resource
+    double clkfreq;
 };
 
 
