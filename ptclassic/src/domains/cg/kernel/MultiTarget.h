@@ -35,6 +35,11 @@ class BaseMultiTarget : public CGTarget {
 public:
         BaseMultiTarget(const char* name, const char* starclass, const char* desc);
 
+	// redefine the run() function
+	int run();
+
+	int getIters() { return iters; }
+
 	// set current child.
 	void setCurChild(int i) { curChild = i; }
 
@@ -98,5 +103,7 @@ protected:
 	IntState sendTime;
 	int curChild;
 	int nChildrenAlloc;
+private:
+	int iters;
 };
 #endif
