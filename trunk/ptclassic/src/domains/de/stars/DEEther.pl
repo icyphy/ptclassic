@@ -76,6 +76,15 @@ the derived star
 .c EtherSend
 assumes the receivers will have non-negative integers for addresses.
 But another implementation might use arbitrary ASCII strings.
+.pp
+The medium is reset in the
+.c wrapup() method of the star.
+.Ie wrapup
+Note that this does not get invoked if an error occurs during the run.
+Thus, if an error occurs, the star should be destroyed
+and recreated.  Pigi takes care of this automatically,
+but if the star is run under ptcl, then it is up to the
+user to do this.
 	}
 	defstate {
 		name {medium}
@@ -180,7 +189,11 @@ But another implementation might use arbitrary ASCII strings.
 	wrapup {
 	    // Indicate that receivers should be reinitialized on the
 	    // next run.
-	    // FIXME: this does not get invoked if an error occurs.
+	    // Note that this does not get invoked if an error occurs.
+	    // Thus, if an error occurs, the star should be destroyed
+	    // and recreated.  Pigi takes care of this automatically,
+	    // but if the star is run under ptcl, then it is up to the
+	    // user to do this.
 	    med->receiversInitialized = 0;
 	}
 	destructor {
