@@ -53,6 +53,7 @@ void MotorolaSimTarget :: initStates(
 	addStream("simulatorCmds", &simulatorCmds);
 	addStream("shellCmds", &shellCmds);
 	assemblerOptions = "-A -B -L";
+	costInfoString.initialize();
 }
 
 int MotorolaSimTarget::compileCode() {
@@ -105,7 +106,7 @@ void MotorolaSimTarget::writeCode() {
 		// Search the simulation state file for the pattern 'cyc:' e.g.
 		// ^Break #1 pc>=$ff0 h ;dev:0 pc:0ff0 cyc:439131
 		realcmds << "\n\n# Extract the number of cycles executed\n";
-		realcmds << "grep 'cyc:' " << filePrefix << ".sim |"
+		realcmds << "grep 'cyc:' " << filePrefix << ".sim | "
 			 << "sed -e 's/^.*cyc:\\([0-9]*\\)$/\\1/' >"
 			 << filePrefix << ".cyc\n";
 	}
@@ -162,10 +163,10 @@ int MotorolaSimTarget::computeImplementationCost() {
 }
 
 const char* MotorolaSimTarget::printImplementationCost() {
-	StringList costInfoString = MotorolaTarget::printImplementationCost();
 	ImplementationCost* costInfoPtr = implementationCost();
+	costInfoString = MotorolaTarget::printImplementationCost();
 	if ( costInfoPtr ) {
-	    costInfoString << " execution time = "
+	    costInfoString << ", execution time = "
 			   << costInfoPtr->executionTime()
 			   << " cycles";
 	}
