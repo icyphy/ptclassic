@@ -48,6 +48,7 @@ PL_SRCS= \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
+ SDFFix.pl \
  SDFFixToCx.pl \
  SDFFixToFloat.pl \
  SDFFixToInt.pl \
