@@ -2,13 +2,15 @@ defstar {
 	name { LinQuantIdx }
 	domain { SDF }
 	desc {
-The input is quantized to the number of levels given by the "levels" parameter.
-The quantization levels are uniformly spaced between "low" and "high" inclusive.
-Rounding down is performed, so that output level will equal "high" only if the input
-level equals or exceeds "high". If the input is below "low", then the quantized
-output will equal "low". The quantized value is output to the "amplitude" port,
-while the index of the quantization level is output to the "stepNumber" port.
-This integer output is useful for stars that need an integer input, such as Thor stars.
+The input is quantized to the number of levels given by the "levels"
+parameter.  The quantization levels are uniformly spaced between "low"
+and "high" inclusive.  Rounding down is performed, so that output level
+will equal "high" only if the input level equals or exceeds "high".
+If the input is below "low", then the quantized output will equal "low".
+The quantized value is output to the "amplitude" port, while the index
+of the quantization level is output to the "stepNumber" port.  This
+integer output is useful for stars that need an integer input, such as
+Thor stars.
 	}
 	author { Asawaree Kalavade }
 	copyright {
@@ -48,16 +50,28 @@ limitation of liability, and disclaimer of warranty provisions.
 		default {"3.0"}
 		desc {upper limit of signal excursion }
 	}
-	protected {
-		double height;
+	defstate {
+		name {height}
+		type {float}
+		default {"1.0"}
+		desc {
+height of each quantization step, which is determined by the states
+high, low, and levels.
+		}
+		attributes {A_NONSETTABLE|A_CONSTANT}
 	}
+
 	setup {
-		if (double(high) > double(low)) {
-		    height = (double(high) - double(low))/(int(levels)-0);
+		if (int(levels) <= 0 ) {
+		    Error::abortRun(*this, "levels must be positive");
+		}
+		else if (double(high) <= double(low)) {
+		    Error::abortRun(*this,
+				    "quantization range incorrectly ",
+				    "specified: high <= low");
 		}
 		else {
-		    Error::abortRun(*this,
-				    "quantization range incorrectly specified");
+		    height = (double(high) - double(low))/(int(levels) - 0);
 		}
 	}
 	go {
@@ -74,9 +88,9 @@ limitation of liability, and disclaimer of warranty provisions.
                     stepNumber%0 << 0;
 		}
 		else {
-		    int step = int((in - lowvalue)/height);
+		    int step = int((in - lowvalue)/double(height));
 		    stepNumber%0 << step;
-        	    amplitude%0 << double(lowvalue + step*height);
+        	    amplitude%0 << double(lowvalue + step * double(height));
 		}
 	}
 }
