@@ -168,7 +168,7 @@ public:
 
 class ClusterPort {
 public:
-    ClusterPort(PortHole& self, const PortHole& p, Star* parent);
+    ClusterPort(PortHole& self, PortHole& p, Star* parent);
     PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
