@@ -16,6 +16,17 @@ modify what stars and libraries are linked into the executable.  You
 may also need (or want) to edit the variables ROOT, OBJDIR, and VERSION
 in the makefile.  Then run "make" and you're in business.
 
+Specifically, the variable ROOT should point to the ptolemy home directory,
+and the variable OBJDIR to the root of the ptolemy object tree for the
+current architecture.  For example:
+
+ROOT          = /usr/users/ptolemy
+OBJDIR        = $(ROOT)/obj.$(ARCH)
+VPATH         = .
+
+The latter value assumes you will run make in the source directory
+and want the object files stored in the same directory.
+
 To make a version of pigi that has debugging enabled, do "make pigiRpc.debug"
 and start things up with "pigiDebug" instead of pigi.  Warning: if you
 don't have a lot of memory on your workstation, this will be extremely
@@ -24,5 +35,14 @@ slow.
 WARNING: make sure to modify the place where "make install" puts the
 completed executable, or it will attempt to overwrite the official
 pigiRpc, and people may be upset at you if you succeed in doing that.
+Simplest thing to do is to replace the line:
+
+install: makefile $(DESTBIN)
+
+with:
+
+install: makefile pigiRpc
+
+This will leave the pigiRpc in whatever directory you make it.
 
 Joe Buck
