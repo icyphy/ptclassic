@@ -103,7 +103,7 @@ public:
     CGClusterIter(Cluster& n):ClusterIter(n) {};
     CGCluster* next() { return (CGCluster*)ClusterIter::next(); }
     CGCluster* operator++(POSTFIX_OP) { return next();}
-    GalStarIter::reset;
+    ClusterIter::reset;
 };
 
 #endif
