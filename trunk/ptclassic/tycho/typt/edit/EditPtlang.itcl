@@ -45,6 +45,14 @@ class ::tycho::EditPtlang {
     constructor {args} {}
     destructor {}
 
+    ###################################################################
+    ####                            options                        ####
+
+    itk_option define -star star Star {SDF Fork}
+
+    ###################################################################
+    ####                         public methods                    ####
+
     # Open a help window.
     method help {}
 
@@ -55,9 +63,32 @@ class ::tycho::EditPtlang {
     protected method textWidget {} {return ::tycho::EditPtlangText}
 }
 
+#######################################################################
+#### -star configuration
+# The argument to -star should be a two element list that consists
+# of a domain name and a star name.  The domain name should be capitalized.
+# for example, the following code will open up the SDF Cosine .pl file 
+# <tcl><pre>
+#  ::tycho::EditPtlang .e -star {SDF Cos}
+#  .e centerOnScreen
+# </pre><tcl>
+configbody ::tycho::EditPtlang::star {
+    global PTOLEMY
+    set domainStarList $itk_option(-star)
+    set domain [lindex $domainStarList 0]
+    set star [lindex $domainStarList 1]
+    set file [file join $PTOLEMY src domains [string tolower $domain] \
+            stars $domain$star.pl]
+    configure -file $file
+}
+
 ###################################################################
 #
 body ::tycho::EditPtlang::constructor {args} {
+    global PTOLEMY
+    addMenuItem {Star/Demo Xref} File -underline 11 -accelerator "C-x C-x" \
+            -command "::tycho::File::openContext \
+            [file join $PTOLEMY public_html star-demo-index index.html]"
     eval itk_initialize $args
 }
 
