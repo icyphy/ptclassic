@@ -38,11 +38,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCStar.h"
 #include "CGCTarget.h"
 #include "CGCGeodesic.h"
+#include "Tokenizer.h"
 
 // The following is defined in CGCDomain.cc -- this forces that module
 // to be included if any CGC stars are linked in.
 extern const char CGCdomainName[];
-extern const char* whichType(DataType);
 
 const char* CGCStar :: domain () const { return CGCdomainName;}
 
@@ -337,6 +337,31 @@ void CGCStar :: updateOffsets() {
 	addCode(code2);
 }
 
+// Convert from PortHole type to C data type.
+const char* ctype(PortHole& p)
+{
+    DataType t = p.resolvedType();
+
+    if (t == INT) return "int";
+    else if (t == COMPLEX) return "complex";
+    else return "double";
+}
+
+// Convert from State type to C data type.
+const char* ctype(State& state)
+{
+    const char* t = state.type();
+
+    if (strcmp(t, "INT") == 0 || strcmp(t, "INTARRAY") == 0)
+        return "int";
+    else if (strcmp(t, "COMPLEX") == 0 || strcmp(t, "COMPLEXARRAY") == 0)
+        return "complex";
+    else if (strcmp(t, "STRING") == 0 || strcmp(t, "STRINGARRAY") == 0)
+        return "char*";
+    else
+        return "double";
+}
+
 	/////////////////////////////////////////////
 	// porthole declarations and initializations
 	/////////////////////////////////////////////
@@ -348,7 +373,7 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 		emptyFlag = FALSE;
 		int dimen = p->bufSize();
 
-		out << "    " << whichType(p->resolvedType());
+		out << ctype(*p);
 
 		// if embedded properly, do not allocate the buffer.
 		if (p->bufType() == EMBEDDED) {
@@ -366,23 +391,26 @@ StringList CGCStar :: declarePortHole(CGCPortHole* p) {
 	return out;
 }
 
-// static function to initialize porthole data structure.
-StringList typelessPortInit(const char* typeName, const char* pName,
-			int dim = 1, double realVal = 0, double imagVal = 0) {
-	StringList out;
-	if (strcmp(typeName, COMPLEX) == 0) {
-		out << pName;
-		if (dim > 0) out << "[i]";
-		out << ".real = " << realVal << ";\n\t";
-		out << pName;
-		if (dim > 0) out << "[i]";
-		out << ".imag = " << imagVal << ";\n";
-	} else {
-		out << pName;
-		if (dim > 0) out << "[i]";
-		out << " = " << realVal << ";\n";
-	}
-	return out;
+// Type-specific initialization for PortHole data structures.
+StringList typeInit(CGCPortHole& port, int dim = 1,
+	double realVal = 0.0, double imagVal = 0.0)
+{
+    DataType typeName = port.resolvedType();
+    const char* pName = port.getGeoName();
+
+    StringList out;
+    out << pName;
+    if (dim > 0) out << "[i]";
+
+    if (typeName == COMPLEX)
+    {
+	out << ".real = " << realVal << ";\n\t";
+	out << pName;
+	if (dim > 0) out << "[i]";
+	out << ".imag = " << imagVal << ";\n";
+    }
+    else out << " = " << realVal << ";\n";
+    return out;
 }
 
 // Initialize the porthole
@@ -421,8 +449,7 @@ StringList CGCStar :: initializeBuffer(CGCPortHole* p) {
 	// for owner buffer
 	if (p->bufSize() > 1) {
 		// initialize output buffer
-		StringList init =
-			typelessPortInit(p->resolvedType(),p->getGeoName());
+		StringList init = typeInit(*p);
 
 		out << "    { int i;\n    for (i = 0; i < ";
 		out << p->bufSize() << "; i++) {\n\t" << init << "    }}\n";
@@ -461,95 +488,118 @@ StringList CGCStar :: initializeOffset(const CGCPortHole* p) {
 	// declare and initialize states
 	////////////////////////////////////
 
-#define SMALL_STRING 20
+// Type-specific initialization for State data structures.
+StringList typeInit(const State& state, const char* val)
+{
+    const char* typeName = state.type();
 
-// static function to initialize state data structure.
-StringList typelessStateInit(const char* typeName, const char* val) {
-	StringList out;
-	if (strcmp(typeName,COMPLEX) && strcmp(typeName,"COMPLEXARRAY"))
-		out << val;
-	else {
-		out << '{';
-		char wval[SMALL_STRING];
-		char* wc = wval;
-		char c = *val++;
-		while (c != '(') c = *val++;
-		c = *val++;
-		while (c != ',') {
-			*wc++ = c; c = *val++;
-		}
-		*wc = 0;
-		out << wval << ", ";		// write real part
-		wc = wval; c = *val++;
-		while (c != ')') {
-			*wc++ = c; c = *val++;
-		}
-		*wc = 0;
-		out << wval << "}";		// write imaginary part.
-	}
-	return out;
+    StringList out;
+    if ( (strcmp(typeName, "COMPLEX") == 0)
+	|| (strcmp(typeName, "COMPLEXARRAY") == 0) )
+    {
+	const char* special = "(,)";
+	Tokenizer lexer(val,special);
+	char* token;
+
+	do	// find token following '('
+	{
+	    lexer >> token;
+	} while (*token != '(');
+
+	lexer >> token;		// real part
+	out << "{ " << token << ", ";
+
+	do	// find token following ','
+	{
+	    lexer >> token;
+	} while (*token != ',');
+
+	lexer >> token;		// imaginary part
+	out << token << " }";
+    }
+    else if ( (strcmp(typeName, "STRING") == 0)
+	|| (strcmp(typeName, "STRINGARRAY") == 0) )
+    {
+	out << '"' << val << '"';
+    }
+    else	// simple type
+    {
+	out << val;
+    }
+    return out;
 }
 
 // declare and initialize state
 // Note: no automatic aggregate initialization is possibile inside
-// function.
+// functions.
 
-StringList CGCStar :: declareState(const State* s) {
-	int flag = targ()->makingFunc();
+StringList CGCStar :: declareState(const State* s)
+{
+    StringList dec;	// declaration
+    StringList code;	// initialization code
 
-	StringList sname = targ()->correctName(*s);
-	StringList out;
-	out << "    " << whichType(s->type()) <<  " " << sname;
+    int insideMain = targ()->makingFunc();
+    StringList sname = targ()->correctName(*s);
 
-	if (s->size() > 1) {
-		StringList initS;
+    dec << "    " << ctype(*s) << " " << sname;
+    if (s->isArray()) dec << "[" << s->size() << "]";
 
-		out << "[" << s->size();
+    if (s->isArray())	// initialize each element
+    {
+	/* By convention, array States separate each value by a
+	   carriage return character, '\n'.  Scan through the
+	   StringList returned by State::currentValue() looking for
+	   these separators. (Wouldn't it be easier if each value were
+	   simply in a separate string of the StringList?  Then it
+	   would be possible to iterate through the StringList to get
+	   these values. tmp)
+	*/
 
-		if (flag) out << "];\n";
-		else out <<  "] = {\n";
+	const char* special = "";
+	const char* white = "\n";
+	StringList val = s->currentValue();
+	Tokenizer lexer(val, special, white);
+	char* token;
 
-		StringList temp = s->currentValue();
-		const char* sval = temp;
-		int leng = 0;
-		int maxIndex = s->size() - 1;
-		for (int i = 0; i <= maxIndex; i++) {
-			char wval[SMALL_STRING];
-			char* wc = wval;
-			char c = *sval++;
-			while ((c != 0) && (c != '\n')) {
-				*wc++ = c;
-				c = *sval++;
-			}
-			*wc = 0;
-			StringList sinit = typelessStateInit(s->type(),wval);
+	if (insideMain) dec << ";\n";
+	else dec << " = {\n";
 
-			if (flag) {
-				initS << "\t" << sname;
-				initS << "[" << i << "] = " << sinit << ";\n";
-			} else {
-				leng += strlen(wval) + 3;
-				if (leng > 80) {
-					out << "\n";
-					leng = strlen(wval) + 3;
-				}
-				out << sinit;
-				if (i != maxIndex)  out << ",  ";
-			}
-		}
-		if (flag) {
-			addMainInit(initS);
-		} else {
-			out << " };\n";
-		}
-	} else {
-		StringList temp = s->currentValue();
-		StringList it = typelessStateInit(s->type(),temp);
-		out << " = " << it << ";\n";
+	lexer >> token;
+	for (int i = 0; *token != '\0'; i++, lexer >> token)
+	{
+	    StringList init = typeInit(*s, token);
+	    if (insideMain)
+	    {
+		code << sname << "[" << i << "] = " << init << ";\n";
+	    }
+	    else
+	    {
+		// separator before all but first
+		if (i != 0) dec << ",\n";
+		dec << "\t" << init;
+	    }
 	}
-	emptyFlag = FALSE;
-	return out;
+	if (!insideMain) dec << " };\n";
+    }
+    else	// not an array
+    {
+	StringList val = s->currentValue();
+	StringList init = typeInit(*s, val);
+	if (insideMain)
+	{
+	    dec << ";\n";
+	    code << sname << " = " << init << ";\n";
+	}
+	else
+	{
+	    dec << " = " << init << ";\n";
+	}
+    }
+    if (insideMain) addMainInit(code);
+    emptyFlag = FALSE;
+    return dec;
 }
+
 
 	////////////////////////////////////
 	// code stream management
