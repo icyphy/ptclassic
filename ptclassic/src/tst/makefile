@@ -72,3 +72,5 @@ makefiles:
 
 VPATH=../../src/tst
 
+README: tst.html
+	lynx -dump $^ > $@
