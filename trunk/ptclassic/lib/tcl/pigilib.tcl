@@ -36,15 +36,11 @@ proc pigilib_init_env {} {
 	set env(PTOLEMY) [glob ~ptolemy]
     }
     set ptolemy $env(PTOLEMY)
-    if { ![info exist env(TCL_LIBRARY)] } {
-	set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl7.1/lib
-    }
-    if { ![info exist env(TK_LIBRARY)] } {
-	set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
-    }
+    set env(TCL_LIBRARY) $env(PTOLEMY)/tcl/tcl[info tclversion]/lib
+    set env(TK_LIBRARY) $env(PTOLEMY)/tcl/tk$tk_version/lib
     set tk_library $env(TK_LIBRARY)
-    uplevel #0 source $env(PTOLEMY)/tcl/tcl7.1/lib/init.tcl
-    uplevel #0 source $env(PTOLEMY)/tcl/tk3.4/lib/tk.tcl
+    uplevel #0 source $env(PTOLEMY)/tcl/tcl[info tclversion]/lib/init.tcl
+    uplevel #0 source $env(PTOLEMY)/tcl/tk$tk_version/lib/tk.tcl
 
     set tcl_prompt1 "puts -nonewline stdout {pigi> }"
     set tcl_prompt2 "puts -nonewline stdout {pigi? }"
@@ -54,8 +50,10 @@ pigilib_init_env
 
 # A procedure to return the rgb value of all color names used in Pigi.
 source $ptolemy/lib/tcl/ptkColor.tcl
+
 # Set the Defaults for fonts, colors, etc. for the Pigi Windows.
 source $ptolemy/lib/tcl/ptkOptions.tcl
+
 # Other Pigi procedures
 source $ptolemy/lib/tcl/message.tcl
 source $ptolemy/lib/tcl/utilities.tcl
