@@ -28,6 +28,7 @@ Programmer: Joseph Buck
 Version: $Id$
 */
 
+#include <math.h>
 #include "PTDSPfft_rif.h"
 
 /*
