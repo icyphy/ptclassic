@@ -44,10 +44,8 @@ typedef void (*SIG_PT)(int);
 
 // Function prototypes
 int setHandlers(SIG_PT sigHandler);
-void signalHandlerRelease(void);
-void signalHandlerDebug(int signo);
+void signalHandler(int signo);
 void abortHandling();
-void setReleaseStrings(void); 
-void setDebugStrings(void) ;
+void setStrings(void) ;
 
 #endif

@@ -53,8 +53,7 @@ Some refinement by Brian Evans.
 #define SH_ITCLTK_PROG "itkwish"
 
 // Sub-directory of $PTOLEMY that contains itcl files to source plus file names
-#define SH_ITCLTK_DEBUG_SCRIPT "/tycho/kernel/CoreDebug.itcl"
-#define SH_ITCLTK_RELEASE_SCRIPT "/tycho/kernel/CoreRelease.itcl"
+#define SH_ITCLTK_SCRIPT "/tycho/kernel/CoreError.itcl"
 
 // Used so we can call the Tcl procedure emergencySave
 extern Tcl_Interp *ptkInterp;
@@ -64,10 +63,9 @@ extern Tcl_Interp *ptkInterp;
 extern "C" char **environ;
 
 // Use execle to execute the Unix command "$signalPath $signalScript 
-// -name Tycho" where
+// where, 
 //   signalPath = $PTOLEMY/bin.$PTARCH/itkwish
-//   signalScript = $PTOLEMY/tycho/kernel/TyCoreRelease.itcl, or
-//   signalScript = $PTOLEMY/tycho/kernel/TyCoreDebug.itcl
+//   signalScript = $PTOLEMY/tycho/kernel/TyCoreError.itcl
 // signalMsg is used by abortHandling() to inform user of the error.
 // Cannot use dynamic memory since malloc and new are not reentrant.
 static char *signalPath = NULL, *signalScript = NULL, *signalMsg = NULL;
@@ -134,101 +132,13 @@ int setHandlers(SIG_PT sigHandler)
     return 0;
 }
 
-// setReleaseStrings
+// setStrings
 //
 // This function sets the value of path and script for release mode, 
 // since this cannot be done dynamically in the signal handler because 
 // new and malloc are not reentrant.
 
-void setReleaseStrings(void) 
-{
-
-    // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
-    // file name, e.g., "/bin.sol2/itkwish"
-    InfString itcl_path = "/bin.";
-    const char* ptarch = getenv("PTARCH");
-    if (ptarch == 0)
-    {
-        itcl_path << PTARCH;
-    }
-    else
-    {
-        itcl_path << ptarch;
-    }  
-    itcl_path << "/";
-    itcl_path << SH_ITCLTK_PROG;
-
-    // 1. Find the value of the PTOLEMY environment variable
-    const char* ptolemy = getenv("PTOLEMY");
-    if (ptolemy == 0) {
-        ptolemy = "~ptolemy";
-    }
-
-    // 2. Define the path of [incr tk] and tcltk script to source
-    InfString tempPath = ptolemy;
-    tempPath << itcl_path;
-
-    InfString tempScript = ptolemy;
-    tempScript << SH_ITCLTK_RELEASE_SCRIPT;
-
-    InfString tempMsg = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
-
-    // These values don't change for the life of the program. So if the 
-    // environment changes during execution those changes will not be 
-    // reflected until program in launched again.
-    signalPath = tempPath.newCopy();
-    signalScript = tempScript.newCopy();
-    signalMsg = tempMsg.newCopy();
-    signalMsgSize = strlen(signalMsg);
-
-}
-
-// signalHandlerRelease
-//
-// This function defines the way that a signal that is received will be
-// handled when PT_DEVELOP is not defined, or 0.  The action of this
-// function is to issue an error message letting the user know that a
-// fatal error occured, then exit.
-
-void signalHandlerRelease(void)
-{
-
-    // We check this in case the call to DoTychoSave bombs 
-    // out and generates another signal. 
-    static int times = 0;
-    if (times == 0) {               
-        times++;
-	DoTychoSave();
-    }
-
-    if (signalPath == NULL || signalScript == NULL) {
-        abortHandling();
-    }
-
-    switch(fork()) 
-    {
-        case -1:		// fork() return value for error. 
-	    abortHandling();
-
-	case 0:			// fork() return value for child. 
-	    sleep(1);		// Allow time for core file to be generated.   
-	    execle(signalPath, SH_ITCLTK_PROG, signalScript, "-name", \
-"Tycho", (char *)0, environ);
-	    abortHandling();	// If you make it this far something went wrong
-    }
-
-    // We are now in the parent process. Kill off parent.
-    exit(0);
-
-}
-
-// setDebugStrings
-//
-// This function sets the value of path and script for release mode, 
-// since this cannot be done dynamically in the signal handler because 
-// new and malloc are not reentrant.
-
-void setDebugStrings(void) 
+void setStrings(void) 
 {
 
     // Sub-directory of $PTOLEMY that contains the itcl binary plus binary
@@ -258,7 +168,7 @@ void setDebugStrings(void)
     tempPath << itcl_path;
 
     InfString tempScript = ptolemy;
-    tempScript << SH_ITCLTK_DEBUG_SCRIPT;
+    tempScript << SH_ITCLTK_SCRIPT;
 
     InfString tempMsg = "\n\nFatal error occured. Tycho was not able to intercept the error signal and deal with it appropriately.\n";
 
@@ -272,14 +182,14 @@ void setDebugStrings(void)
 
 }
 
-// signalHandlerDebug
+// signalHandler
 //
-// This function defines the way that a signal that is received will
-// be handled when PT_DEVELOP is defined to be non-zero.  The action
-// of this function is to inform the user that a fatal error occured,
-// then call the debugger, if requested, to view the core file.
+// This function defines the way that a fatal signal that is received
+// will be handled. The action of this function is to inform the user
+// that a fatal error occured, then give the user the option of running
+// GDB on the core file, starting another Tycho session, or exiting.
 
-void signalHandlerDebug(int signo)
+void signalHandler(int signo)
 {
     // We check this in case the call to DoTychoSave bombs 
     // out and generates another signal. 
@@ -300,8 +210,8 @@ void signalHandlerDebug(int signo)
       
 	case 0:			// fork() return value for child. 
 	    sleep(1);		// Allow core file to be generated.  
-	    execle(signalPath, SH_ITCLTK_PROG, signalScript, "-name", \
-"Tycho", (char *)0, environ);
+	    execle(signalPath, SH_ITCLTK_PROG, signalScript, \
+		   (char *)0, environ);
 	    abortHandling();	// If you make it this far something went wrong
     }
 

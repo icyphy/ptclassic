@@ -70,33 +70,22 @@ int setSignalHandlers(void)
 
 #endif
 
-    // get environment variable PT_DEVELOP
-    char *isDevelop = getenv("PT_DEVELOP");
     int returnValue = 0;
-
-    if (isDevelop == 0 || isDevelop[0] == '0') {
-        setCoreLimitRelease();
-        if (setHandlers((SIG_PT) signalHandlerRelease) != 0)
-	    returnValue = 1;
-	setReleaseStrings();
-    }
-    else {
-        setCoreLimitDebug();
-        if (setHandlers((SIG_PT) signalHandlerDebug) != 0)
-	    returnValue = 2;
-	setDebugStrings();
-    }
+    setCoreLimit();
+    if (setHandlers((SIG_PT) signalHandler) != 0)
+	returnValue = 1;
+    setStrings();
 
     return returnValue;
 
 }
 
-// setCoreLimitDebug
+// setCoreLimit
 //
 // This function sets the value of the maximum size of core file 
 // allowed.                                                      
 
-int setCoreLimitDebug(void) 
+int setCoreLimit(void) 
 {
 
 #if !defined(PTHPPA)
@@ -125,35 +114,5 @@ int setCoreLimitDebug(void)
   
 }
 
-// setCoreLimitRelease
-//
-// This function sets the value of the maximum size of core file 
-// allowed.                                                     
-
-int setCoreLimitRelease(void) 
-{
-
-#if !defined(PTHPPA)
-
-    struct rlimit coreLimit;
-
-    // Set RLIMIT 0. This prevents core file from being generated.
-    // This is included just in case an error occurs in the setting of the
-    // signal handlers, and the user continues.  n normal operation, however,
-    // any signals that could cause a core dump are intercepted so 
-    // that a core file would never be generated.
-    coreLimit.rlim_cur = 0;
-    coreLimit.rlim_max = 0;
-
-    // setrlimit sets system values to the information in rlimit struct
-    if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) {
-        return 1;
-    }
-
-#endif // PTHPPA
-
-    return 0;  
-  
-}
 
 
