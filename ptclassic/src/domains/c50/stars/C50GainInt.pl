@@ -43,7 +43,10 @@ the circuit.
 	}
 	setup {
 		identity = (int(gain) == 1);
-		if (identity) forkInit(input,output);
+		if (identity){
+			 output.setAttributes(P_NOINIT);
+			 forkInit(input,output);
+		}
 	}
 	codeblock(cbNeg) {
 	lar	ar0,#$addr(input)
@@ -53,10 +56,11 @@ the circuit.
 	setc	ovm
 	neg
 	sach	*,0
+	clrc	ovm
 	}
 
 	codeblock(cbOne) {
-; A gain of one has been removed from the system
+* a gain of one has been removed from system
 	}
 
 	codeblock(cbPowTwo,"int shift"){
