@@ -1571,6 +1571,7 @@ body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
     }
 
     # Blank lines are a new paragraph
+    # FIXME: we don't want this inside <pre> ... </pre>!
     regsub -all "\n\[ \t\]*\n" $comment "\n<p>" comment
 
     # Underscores delimit italicized text. Because of the way regsub
