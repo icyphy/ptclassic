@@ -238,7 +238,25 @@ body tycho::DialogWindow::invoke {args} {
 # defined, and set the commandResult to the value returned by that
 # command. Any arguments beyond the option name to use are passed to
 # the command as arguments. Notice that normally, the option argument
-# begins with a dash "-".
+# begins with a dash "-".  The command is executed in the scope of
+# of the DialogWindow object.  Note that this means that if you create
+# other widgets as a side effect of your command, those widgets will
+# be destroyed when the DialogWindow object is destroyed.  To avoid
+# this, just create your widgets at the global scope, or in some
+# other namespace.  For example,
+# <pre>
+# YesNoQuery .yesno \
+#	-text "Either button should bring up another dialog" \
+# 	-yescommand {
+#     	    namespace tycho {
+# 		YesNoQuery .another -text {Another dialog}
+# 		.another centerOnScreen
+# 	    }
+# 	} \
+# 	-nocommand "askuser {Are you sure not?}"
+# .yesno centerOnScreen
+# </pre>
+# The yescommand creates another dialog box in the namespace "tycho".
 #
 body tycho::DialogWindow::execCommand {option args} {
     set retval ""
