@@ -146,12 +146,15 @@ static int channelAlreadyOpen()
 
 static SIGNAL_FN trapChildHandler( ) /* All args are ignored */
 {
+  int pid;
 #ifdef SYSV
     int	status;
+    if ( (pid = waitpid((pid_t) -1, &status, 0)) == -1)
+      perror("waitpid");
 #else
     union wait status;
+    pid = wait3( &status, 0, 0 );
 #endif
-    int pid = wait3( &status, 0, 0 );
     
     if ( pid == channelPid ) {
 	errRaise( "VOV", 1, "Channel died" );
@@ -494,7 +497,12 @@ void  VOVend( status )
 	    fflush( stderr );
 	    _VOVend( status );
 	    do {
+#ifdef SYSV
+	      if ((w = waitpid((pid_t) -1, &s, 0)) == -1)
+		perror("waitpid");
+#else
 		w = wait3( &s, 0, 0 );
+#endif
 	    } while ( w!= channelPid );
 	    exit( status );		/*  */
 	} else {

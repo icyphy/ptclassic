@@ -51,7 +51,7 @@ FILE **fromCommand;			/* pointer to the reading stream */
 int *pid;
 {
 #ifdef unix
-    int forkpid, waitpid;
+    int forkpid, waitPid;
     int topipe[2], frompipe[2];
     char buffer[1024];
 #if defined(hpux) || defined(SYSV)
@@ -87,10 +87,15 @@ int *pid;
 	*pid = forkpid;
     }
 
-    waitpid = wait3(&status, WNOHANG, 0);
+#ifdef SYSV
+    if (waitpid((pid_t) -1, &status, WNOHANG) == -1)
+      perror("waitPid");
+#else
+    waitPid = wait3(&status, WNOHANG, 0);
+#endif
 
     /* parent here, use slimey vfork() semantics to get return status */
-    if (waitpid == forkpid && WIFEXITED(status)) {
+    if (waitPid == forkpid && WIFEXITED(status)) {
 	return 0;
     }
     if ((*toCommand = fdopen(topipe[1], "w")) == NULL) {
