@@ -56,6 +56,7 @@ LIB=libsdfdmmstars.$(LIBSUFFIX)
 PL_SRCS= \
  SDFFileEval.pl \
  SDFFileEvalControl.pl \
+ SDFFileEvalString.pl \
  SDFFileSource.pl \
  SDFFileShow.pl
 
