@@ -59,6 +59,7 @@ static char SccsId[] = "$Id$";
 
 #include "oct2ptcl.h"
 
+int octoptind = 0;
 /*global*/ char _OtpPackage[] = "otp";
 #define SPKG _OtpPackage
 
