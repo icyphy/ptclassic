@@ -668,6 +668,7 @@ body ::tycho::File::altFile {} {
 	configure -file $filename
 	windowMenuRemoveAll $prevfile
     }
+    focusin
 }
 
 #####################################################################
