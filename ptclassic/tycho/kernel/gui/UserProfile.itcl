@@ -82,20 +82,17 @@ ensemble ::tycho::userprofile {
 	    $profile parse [read $fd]
 	    close $fd
 	}
-
-	# Remember the profile object
-	@scope ::tycho::UserProfile set _profile $profile
     }
 
     # Register a style preference
     option registerstyle {stylesheet style {class {}}} {
-	[@scope ::tycho::UserProfile set _profile] \
+	[::tycho::UserProfile::instance] \
 		registerstyle $stylesheet $style $class
     }
 
     # Get the preferred style of a widget
     option getstyle {stylesheet {widget {}}} {
-	[@scope ::tycho::UserProfile set _profile] \
+	[::tycho::UserProfile::instance] \
 		getstyle $stylesheet $widget
     }
 }
