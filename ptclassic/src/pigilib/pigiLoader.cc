@@ -58,6 +58,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "miscFuncs.h"
 #include "StringList.h"
 #include "pt_fstream.h"
+#include "ptk.h"
 
 #if defined(PTHPPA_CFRONT) || defined(PTSOL2) || defined(SVR4) || defined(SYSV) || !defined(PTIRIX5_CFRONT)
 #include <fcntl.h>		// For open().
@@ -360,10 +361,12 @@ linkObject (const char* ofile, int permB, const char *linkArgs) {
 }
 
 // tables for suffixes and preprocessors
-const int N_PREPROCS = 3;
+const int N_PREPROCS = 4;
 
-static const char *preprocSuffix[] = { "", "pl", "chdl", "is" };
-static const char *preprocProg[] = { "", "ptlang", "pepp", "islang" };
+static const char *preprocSuffix[] = { "", "pl", "chdl", "is", "std" };
+static const char *preprocProg[] = { "", "ptlang", "pepp", "islang", "" };
+static const char *preprocTclFun[] = {"", "", "", "", "ptkTychoLoadFSM" };
+static const int domSpec[] = { 1, 1, 1, 1, 0 };
 
 // Here is the function that loads in a star!
 // name = username of the star
@@ -372,6 +375,28 @@ static const char *preprocProg[] = { "", "ptlang", "pepp", "islang" };
 static int
 compileAndLink (const char* name, const char* idomain, const char* srcDirStr,
 		int preproc, int permB, const char* linkArgs) {
+
+	if (!domSpec[preproc])  {
+	  // If not domain-specific, don't check domain.
+	  const int BUFLEN = 512;
+	  char buf[BUFLEN];
+
+	  if (strcmp(preprocTclFun[preproc],"")) {
+	    // With tcl function, use it to compile.
+	    sprintf (buf,"%s {%s/%s.%s}",preprocTclFun[preproc],
+		     srcDirStr,name,preprocSuffix[preproc]);
+	    if (Tcl_GlobalEval(ptkInterp, buf) != TCL_OK) {
+	      sprintf(buf, "Cannot compile in '%s'", name);
+	      ErrAdd(buf);
+	      return (FALSE);
+	    }
+	    return (TRUE);
+
+	  } else {
+	    // No processor specified.
+	    return (FALSE);
+	  }
+	}
 
 	// Determine and save the source and object directory names
 	char* expandedSrcDir = expandPathName(srcDirStr);
@@ -474,6 +499,10 @@ FindStarSourceFile(const char* dir,const char* dom,const char* base,
 		sprintf (buf, "%s/%s%s.%s", dir, dom, base,
 			 preprocSuffix[i]);
 		if (exists(buf)) return i;
+
+		// Check if it's non domain-specific.
+		sprintf (buf, "%s/%s.%s", dir, base, preprocSuffix[i]);
+		if (exists(buf)) return i;
 	}
 	sprintf (buf, "%s/%s%s.cc", dir, dom, base);
 	return (exists(buf) ? 0 : -1);
@@ -515,7 +544,9 @@ KcLoad (const char* iconNameStr, int permB, const char* linkArgs) {
 		ErrAdd ("Loader disabled");
 		return FALSE;
 	}
+	// base, domain, dir and preproc are needed to call compileAndLink
 	char codeName[512], base[128], domain[64], dir[512];
+	int preproc = 0;
 
 	char* iconName = expandPathName(iconNameStr);
 	int retval = IconFileToSourceFile(iconName, codeName, domain);
@@ -528,38 +559,56 @@ KcLoad (const char* iconNameStr, int permB, const char* linkArgs) {
 	DirName(dir);		// strip off the tail
 	char* b = BaseName(codeName);
 
-	// now basename is the domain concatenated with the star name.
-	// check that domain is prefix of basename.
-	int domainlen = strlen(domain);
-	if (strncmp(b, domain, domainlen) != 0) {
-		StringList msg = "Loader: ";
-		msg += domain;
-		msg += " is not a prefix of ";
-		msg += b;
-		ErrAdd(msg);
-		return FALSE;
+	char* suffix = strrchr (b, '.');
+	preproc = 0;
+	if (suffix) {
+	  // Find the preproc # for the suffix.
+	  for (int i = 1; i <= N_PREPROCS; i++) {
+	    if (strcmp(suffix+1, preprocSuffix[i]) == 0) {
+	      preproc = i;
+	      break;
+	    }
+	  }
 	}
 
-	// b has a suffix ".pl", ".chdl", or ".cc"; zap it;
-	// tell KcCompileAndLink which one.
-	strcpy (base, b + domainlen);
-	char* p = strrchr (base, '.');
-	int preproc = 0;
-	if (p) {
-		for (int i = 1; i <= N_PREPROCS; i++) {
-			if (strcmp(p+1, preprocSuffix[i]) == 0) {
-				preproc = i;
-				break;
-			}
-		}
+	if (!domSpec[preproc])  {
+	  // If not domain-specific, don't check domain.
+
+	  // b has a suffix ".std"; zap it;
+	  *suffix = 0;
+	  // Get the base name.
+	  strcpy(base,b);
+
+	  // Suppose the domain of it is current domain because it's 
+	  // not domain-specific.
+	  strcpy(domain,curDomainName());
+
+	} else {
+	  // now basename is the domain concatenated with the star name.
+	  // check that domain is prefix of basename.
+	  int domainlen = strlen(domain);
+	  if (strncmp(b, domain, domainlen) != 0) {
+	    StringList msg = "Loader: ";
+	    msg += domain;
+	    msg += " is not a prefix of ";
+	    msg += b;
+	    ErrAdd(msg);
+	    return FALSE;
+	  }
+
+	  // b has a suffix ".pl", ".chdl", or ".cc"; zap it;
+	  // tell KcCompileAndLink which one.
+	  strcpy (base, b + domainlen);
+	  char* p = strrchr (base, '.');
+	  if (p && preproc == 0 && strcmp (p, ".cc") != 0) {
+	    StringList msg = "Loader: unknown file type: ";
+	    msg += base;
+	    ErrAdd (msg);
+	    return FALSE;
+	  }
+	  *p = 0;
 	}
-	if (p && preproc == 0 && strcmp (p, ".cc") != 0) {
-		StringList msg = "Loader: unknown file type: ";
-		msg += base;
-		ErrAdd (msg);
-		return FALSE;
-	}
-	*p = 0;
+
 	const char* curdom = curDomainName();
 
 	// If the star's domain is different from the current domain, then
@@ -568,7 +617,7 @@ KcLoad (const char* iconNameStr, int permB, const char* linkArgs) {
 	if (strcmp(curdom, domain) != 0) {
 		KcSetKBDomain(domain);
 	}
-	if (KcIsCompiledInStar(base)) {
+	if (domSpec[preproc] && KcIsCompiledInStar(base)) {
 		StringList msg = "star '";
 		msg << base
 		    << "' is a compiled-in star of domain "
