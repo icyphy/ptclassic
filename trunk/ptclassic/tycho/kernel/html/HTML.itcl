@@ -522,6 +522,8 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 
             configure -directory [file dirname $filename]
             configure -file $filename
+            toolbar clear location
+            toolbar insert location $filename
             # Reset the insertion cursor to the origin, or else we will
             # try to preserve the point in the file.
             $itk_component(text) mark set insert 1.0
