@@ -14,7 +14,7 @@ PTOLEMY=${PTOLEMY:-~/ptolemy}
 PTARCH=`$PTOLEMY/bin/ptarch`
 tclscript=$PTOLEMY/bin/ptfixtree.tcl
 ptolemytcl=$PTOLEMY/tcltk/itcl.$PTARCH/bin/ish
-echo 'expect a message about: invalid command name "destroy"'
+
 exec $ptolemytcl $tclscript \
 	-within '$PTOLEMY' \
 	$PTOLEMY/src/domains/*/icons/*.pal \
