@@ -117,34 +117,15 @@ PEPP= `if [ ! -f $(PEPP_IN_OBJ) ]; \
 $(PEPP_IN_OBJ):
 	(cd $(PEPP_OBJ_DIR); $(MAKE) VPATH=$(PEPP_VPATH) pepp)
 
-# Rule to build the ../doc/star directory
-# Can't use mkdir -p here, it might not exist everywhere
-# Run 'exit 0' as the last command if the directories already exist.
-#  (Otherwise the mips PTARCH will produce make error message like:
-#  'make: *** [DETest.cc] Error 2' because the if [] statement is returning
-#  non-zero if the directory exists.  sigh.)
-
-$(STARDOCDIR):
-	$(STARDOCRULE) 
-STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
-		echo "Making directory `dirname $(STARDOCDIR)`"; \
-		mkdir `dirname $(STARDOCDIR)`; \
-	fi; \
-	if [ ! -d $(STARDOCDIR) ]; then \
-		echo "Making directory $(STARDOCDIR)"; \
-		mkdir $(STARDOCDIR); \
-	else exit 0; \
-	fi
-
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
 # the "mv" part moves the documentation to the doc dir.
 # note if there is no doc dir, the command continues despite the error.
-.pl.cc: $(PTLANG_IN_OBJ) $(STARDOCDIR)
+.pl.cc: $(PTLANG_IN_OBJ)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
 
-.pl.h: $(PTLANG_IN_OBJ) $(STARDOCDIR)
+.pl.h: $(PTLANG_IN_OBJ)
 	cd $(VPATH); $(PTLANG) $< 
 	@$(STARDOCRULE)
 
@@ -152,11 +133,11 @@ STARDOCRULE=if [ ! -d `dirname $(STARDOCDIR)` ]; then \
 # Make sure we always run the preprocessor in the source directory
 # the "mv" part moves the documentation to the doc dir.
 # note if there is no doc dir, the command continues despite the error.
-.is.cc: $(ISLANG_IN_OBJ) $(STARDOCDIR)
+.is.cc: $(ISLANG_IN_OBJ)
 	cd $(VPATH); $(ISLANG) $<
 	@$(STARDOCRULE)
 
-.is.h: $(ISLANG_IN_OBJ) $(STARDOCDIR)
+.is.h: $(ISLANG_IN_OBJ)
 	cd $(VPATH); $(ISLANG) $<
 	@$(STARDOCRULE)
 
