@@ -51,33 +51,49 @@ class EventHorizon;
 
 class Target : public Block {
 public:
-	Target(const char* nam, const char* starClass,const char* desc = "");
+	// Constructor
+	Target(const char* nam, const char* starClass, const char* desc = "",
+	       const char* assocDom = 0);
+
+	// Destructor
 	~Target();
 
-	/* virtual */ StringList print(int verbose = 0) const;
+	// Print the full name, descriptor, and state names and values
+	/*virtual*/ StringList print(int verbose = 0) const;
+
+	// Return the domain of the galaxy if it exists 
+	/*virtual*/ const char* domain() const;
 
 	// Invoke the begin methods of the constituent stars
 	virtual void begin();
 
-	const char* starType() const { return starTypes.head();}
+	// Invoke the go methods of the constituent stars
+	virtual int run();
 
-	Scheduler* scheduler() const { return sched;}
+	// Invoke the wrapup methods of the constituent stars
+	virtual void wrapup();
+
+	// Return the starClass passed in the constructor 
+	const char* starType() const { return starTypes.head(); }
+
+	// Return the scheduler currently associated with this target
+	Scheduler* scheduler() const { return sched; }
 
 	// this function makes for cleaner code: clone() is derived
 	// from Block and returns a duplicate obj so this cast is
 	// always safe.  Redefine clone(), not cloneTarget!
+	Target* cloneTarget() const { return (Target*)clone(); }
 
-	Target* cloneTarget() const { return (Target*)clone();}
-
+	// Ask the scheduler to display its schedule
 	virtual StringList displaySchedule();
 
-	// A Target may understand certain annotations in blocks
-	// called "Pragmas".  This method returns the list of
-	// pragmas that a particular target understands.
-	// In derived classes, each item in the list is a three
-	// part string, "name type value", separated by spaces.
-	// The default implementation returns a StringList
-	// with only a single zero-length string in it.
+	// Return list of supported pragmas (annotations) as "name type value"
+        // A Target may understand certain annotations in blocks called
+	// "Pragmas".  This method returns the list of pragmas that a
+	// particular target understands.  In derived classes, each item
+	// in the list is a three part string, "name type value", separated
+	// by spaces.  The default implementation returns a StringList with
+        // only a single zero-length string in it.
 	virtual StringList pragma () const { return ""; }
 
 	// To determine the value of all pragmas that have been
@@ -87,7 +103,9 @@ public:
 	// returns an empty string. The parentname is the name
 	// of the parent class (universe or galaxy master name).
 	virtual StringList pragma (const char* /*parentname*/,
-				   const char* /*blockname*/) const {return "";}
+				   const char* /*blockname*/) const {
+	    return "";
+	}
 
 	// To determine the value of a pragma of a particular type
 	// that has been specified for a particular block, call this
@@ -104,98 +122,97 @@ public:
 	virtual StringList pragma (const char* /*parentname*/,
 				   const char* /*blockname*/,
 				   const char* /*name*/,
-				   const char* /*value*/) { return ""; }
+				   const char* /*value*/) {
+	    return "";
+	}
 
 	// return the nth child Target, null if no children.
 	virtual Target* child(int n);
 
 	// return the nth target, where I count as #0 if no children
 	Target* proc(int n) {
-		if (n == 0 && nChildren == 0)
-			return this;
+		if (n == 0 && nChildren == 0) return this;
 		else return child(n);
 	}
 
 	// return number of processors
-	int nProcs() const { return children ? nChildren : 1;}
+	int nProcs() const { return children ? nChildren : 1; }
 
-	// determine whether this target has the necessary resources
-	// to run the given star.  virtual in case later necessary.
-	// default implemenation uses "resources" states of the target
-	// and the star.
-	virtual int hasResourcesFor(Star& s,const char* extra=0);
+	// Does this target have the necessary resources to run the star?
+	virtual int hasResourcesFor(Star& s, const char* extra = 0);
 
-	// determine whether a particular child target has resources
-	// to run the given star.  virtual in case later necessary.
-	virtual int childHasResources(Star& s,int childNum);
+	// Does a child target have the necessary resource to run the star?
+	virtual int childHasResources(Star& s, int childNum);
 
-	// initialize the target, given a galaxy.
-	virtual void setGalaxy(Galaxy& g); // default: { gal = &g; }
+	// Initialize the target, given a galaxy. default: { gal = &g; }
+	virtual void setGalaxy(Galaxy& g);
 
+	// Zero the pointer to the current galaxy
         void clearGalaxy() { gal = 0; }
 
-        // set the stopping condition.
+        // Set the stopping condition.
 	virtual void setStopTime(double);
 
-	// reset the stopping condition (why different?)
+	// Reset the stopping condition (why different?)
 	virtual void resetStopTime(double);
 
-	// set the current time
+	// Set the current time
 	virtual void setCurrentTime(double);
-
-	// run
-	virtual int run();
-
-	// wrapup
-	virtual void wrapup();
 
 	// Routines for writing code: schedulers may call these
 	// The depth normally just helps with indentations, but can
 	// be used for other purposes.
 
-	// Function called to begin an iteration (default version
-	// does nothing)
+	// Generate code to begin an iteration
 	virtual void beginIteration(int repetitions, int depth);
 
-	// Function called to end an iteration (default version
-	// does nothing)
+	// Generate code to end an iteration
 	virtual void endIteration(int repetitions, int depth);
 
-	// Function called to generate code for the star the way
-	// this target wants (default version does nothing)
-
+	// Generate code for the star the way this target wants
 	virtual void writeFiring(Star& s, int depth);
 
-	// Functions to generate loop initialization and termination code
-	// (default versions do nothing)
+	// Generate code to initialize loops
 	virtual void genLoopInit(Star& s, int reps);
+
+	// Generate code to terminate loops
 	virtual void genLoopEnd(Star& s);
 
-	// Functions for generation of conditional constructs
-	// default versions do nothing
-	virtual void beginIf(PortHole& cond,int truthdir,int depth,int haveElsePart);
+	// Generate code to begin an if/then/else conditional construct
+	virtual void beginIf(PortHole& cond, int truthdir, int depth,
+			     int haveElsePart);
+
+	// Generate code to continue an if/then/else conditional construct
 	virtual void beginElse(int depth);
+
+	// Generate code to end an if/then/else conditional construct
 	virtual void endIf(int depth);
+
+	// Generate code to begin a while conditional construct
 	virtual void beginDoWhile(int depth);
+
+	// Generate code to end a while conditional construct
 	virtual void endDoWhile(PortHole& cond,int truthdir,int depth);
 
-        // resource management
+        // Resource management
         virtual int commTime(int sender,int receiver,int nUnits, int type);
 
-	// class identification
+	// Is the string a name of an ancestor of the current target?
 	int isA(const char*) const;
+
+	// Class identification
 	const char* className() const;
 
-	// return true if the target has (or can have) a child for which
-	// isA(argument) would be true
+	// Is the string a name of an ancestor of a child of the current target?
 	virtual int childIsA(const char*) const;
 
-	Galaxy* galaxy() { return gal;}
+	// Return the pointer to the current galaxy
+	Galaxy* galaxy() const { return gal; }
     
-	// star classes supported
+	// Star classes supported
 	StringList starTypes;
 	
-	// virtual method: do I support the given star type?
+	// Do I support the given star type?
 	virtual int support(Star* s); 
 
         // With these methods, we enable a scheduler or a target to
@@ -204,19 +221,17 @@ public:
 	// InterpGalaxy::reset for more details
 	void requestReset();
 	int resetRequested();
-protected:
 
-	// initialization for the target (called by initialize)
-	// we here run the checkStars() and the computeSchedule() methods
+protected:
+	// Run galaxySetup and schedulerSetup
 	virtual void setup();
 
-	// setup the galaxy, i.e. check star types and set target pointers
+	// Setup the galaxy, i.e. check star types and set target pointers
 	virtual int galaxySetup();
 
-	// setup the scheduler
+	// Call setSched and compute the schedule
 	virtual int schedulerSetup();
 
-	// check
 	// The following sets the scheduler and tells it which target belongs
 	void setSched(Scheduler* sch);
 
@@ -231,41 +246,29 @@ protected:
 	// delete all the "children" (for when they are created dynamically)
 	void deleteChildren();
 
-	// Method returns a directory name for writing.
-	// If the directory does not exist, it attempts create it.
-	// Returns the fully expanded pathname (which is saved by
-	// the target).
-
-	const char* writeDirectoryName(const char* dirName = 0);
-
-	// this fn returns it.
-	const char* workingDirectory() const { return dirFullName;}
-
-	// Method to set a file name for writing.
-	// Prepends dirFullName (which was set by writeDirectoryName)
-	// to fileName with "/" between.
-	// Always returns a pointer to a string in new memory.
-	// It is up to the user to delete the memory when no longer needed.
-	// If dirFullName or fileName is NULL then it returns a
-	// pointer to a new copy of the string "/dev/null"
-	char* writeFileName(const char* fileName = 0);
+	// domain associated with the target
+	const char* getAssociatedDomain() const { return associatedDomain; }
 
 private:
         // reset target/galaxy flag
         int resetFlag;
-	// name of class of star this target supports
-	const char* supportedStarClass;
+
 	// points to a linked list of children
 	Target* children;
+
 	// points to the next sibling (child of same parent)
 	Target* link;
+
 	// number of children
 	int nChildren;
+
 	// scheduler for the target
 	Scheduler* sched;
+
 	// galaxy of stars to be run on the target
 	Galaxy* gal;
-	// Store a directory name for writing
-	char* dirFullName;
+
+	// domain associated with the parent target
+	const char* associatedDomain;
 };
 #endif
