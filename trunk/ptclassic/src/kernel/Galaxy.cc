@@ -6,20 +6,7 @@ $Id$
                        All Rights Reserved.
 
  Programmer:  E. A. Lee and D. G. Messerschmitt
- Date of creation: 1/17/89
- Revisions:
- 	3/19/90 - J. Buck
-	Add method BlockList::blockWithName
-	Use newConnection method in Galaxy::connect: we no longer have
-	to know at compile time whether an argument is a PortHole or
-	MultiPortHole.
-
-	5/26/90 - I. Kuroda 
-	Add method Galaxy::initState
-
-	5/29/90 - J. Buck
-	Change operator StringList to printVerbose.  Galaxy::connect
-	is gone; it is now done by GenericPort class instead.
+ Date of creation: 1/17/90
 
 Methods for class Galaxy
 ***************************************************************************/
@@ -44,7 +31,7 @@ Galaxy :: ~ Galaxy () {}
 	////////////////////////////////////
 
 StringList
-Galaxy :: printRecursive () {
+Galaxy :: printRecursive () const {
 	StringList out;
 	out = "GALAXY: ";
 	out += readFullName();
@@ -58,8 +45,10 @@ Galaxy :: printRecursive () {
 	out += printPorts("Galaxy");
 	out += printStates("Galaxy");
 	out += "Blocks in the Galaxy:----------------------------------\n";
-	for(int i = numberBlocks(); i>0; i--)
-		out += nextBlock().printRecursive();
+	Block* b;
+	GalTopBlockIter next(*this);
+	while ((b = next++) != 0)
+		out += b->printRecursive();
 	return out;
 }
 
@@ -68,7 +57,7 @@ Galaxy :: printRecursive () {
 	////////////////////////////////////
 
 StringList
-Galaxy :: printVerbose () {
+Galaxy :: printVerbose () const {
 	StringList out;
 	out = "GALAXY: ";
 	out += readFullName();
@@ -77,9 +66,11 @@ Galaxy :: printVerbose () {
 	out += readDescriptor();
 	out += "\n";
 	out += "Contained blocks: ";
-	for (int i = numberBlocks(); i>0; i--) {
-		out += nextBlock().readName();
-		if (i > 1) out += ", ";
+	Block* b;
+	GalTopBlockIter next(*this);
+	while ((b = next++) != 0) {
+		out += b->readName();
+		out += " ";
 	}
 	out += "\n";
 	out += printPorts("Galaxy");
@@ -97,8 +88,10 @@ Galaxy :: printVerbose () {
 
 void Galaxy :: initialize() {
 	Block::initialize();
-	for(int i=blocks.size(); i>0; i--)
-		blocks++.initialize();
+	GalTopBlockIter next(*this);
+	Block* b;
+	while ((b = next++) != 0)
+		b->initialize();
 }
 
         ////////////////////////////////////
@@ -109,8 +102,10 @@ void Galaxy :: initialize() {
 
 void Galaxy :: initState() {
         Block::initState();
-        for(int i=blocks.size(); i>0; i--)
-		blocks++.initState();
+	GalTopBlockIter next(*this);
+	Block* b;
+	while ((b = next++) != 0)
+		b->initState();
 }
 
         ////////////////////////////////////
@@ -119,15 +114,21 @@ void Galaxy :: initState() {
 
 // return ptr to sub-block with given name, NULL if not found
 Block *
-BlockList::blockWithName (const char* ident) {
-	Block *p;
-	for (int i = size();i>0;i--) {
-		p = (Block *)next();
-		if (strcmp(ident,p->readName()) == 0)
-			return p;
+Galaxy::blockWithName(const char* name) const {
+	Block* b;
+	GalTopBlockIter next(*this);
+	while ((b = next++) != 0) {
+		if (strcmp(name,b->readName()) == 0)
+			return b;
 	}
-	return NULL;
+	// not found
+	return 0;
 }
+
+        ////////////////////////////////////
+        // const char* domain()
+        ////////////////////////////////////
+
 
 // return myDomain if set, else use domain of first sub-block.
 const char*
