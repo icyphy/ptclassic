@@ -31,8 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class Galaxy;
 class SRStar;
 class OutSRPort;
-// #include "SRStar.h"
-// #include "SRPortHole.h"
+class StringList;
 
 /***********************************************************************
 
@@ -53,6 +52,8 @@ public:
   // Return the destination vertex of an edge
   int destination(int v, int e) const { return fEdge[v][e]; }
 
+  StringList displayGraph() const;
+
 private:
 
   // Galaxy from which this graph was derived
@@ -62,9 +63,16 @@ private:
   int numvertices;
 
   // Array of pointers to the star of each vertex
+  //
+  // @Description These are the stars at the top-level, so they may
+  // include galaxies.
   SRStar ** stars;
 
   // Array of pointers to the port of each vertex
+  //
+  // @Description These are the ports on the lowest-level stars.
+  // Calling undoAliases() on these gives the ports actually connected
+  // to the stars in stars.  Use doAliases() on those to get back.
   OutSRPort ** ports;
 
   // Forward edge counts

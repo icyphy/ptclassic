@@ -65,6 +65,16 @@ public:
 
   virtual Particle & get() const;
 
+  PortHole& newConnection ();
+
+  void connect(GenericPort &, int, const char* = 0);
+
+  SRPortHole * undoAliases();
+
+  SRPortHole * doAliases();
+
+protected:
+  virtual void setFarPort( SRPortHole * p );
 };
 
 
@@ -82,7 +92,10 @@ public:
 
   int known() const;
   int absent() const;
-  int present() const;
+  int present() const;  
+
+protected:
+  void setFarPort( SRPortHole * );
   
 };
 
