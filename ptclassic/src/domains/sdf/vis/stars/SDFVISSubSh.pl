@@ -32,12 +32,13 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
+        ccinclude {<vis_proto.h>}
 	go {
 
 	  double diff =0.0;
 	  
 	  /*calculate the difference*/
-	  diff = vis_fpsub16(InA,InB);
+	  diff = vis_fpsub16(double(InA%0),double(InB%0));
 
           Out%0 << diff;
       	}

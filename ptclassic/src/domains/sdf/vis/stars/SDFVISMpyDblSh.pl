@@ -32,13 +32,14 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
+        ccinclude {<vis_proto.h>}
 	go {
 
 	  double resultu, resultl, result;
 
 	  /*calculate the partial products*/
-	  resultu = vis_fmul8sux16(InA,InB);
-	  resultl = vis_fmul8ulx16(InA,InB);
+	  resultu = vis_fmul8sux16(double(InA%0),double(InB%0));
+	  resultl = vis_fmul8ulx16(double(InA%0),double(InB%0));
 
 	  /*calculate the final product*/
 	  result = vis_fpadd16(resultu,resultl);

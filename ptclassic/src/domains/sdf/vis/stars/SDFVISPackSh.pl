@@ -25,6 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
 		desc { Output float type }
 	}
+        ccinclude {<vis_proto.h>}
 	defstate {
 	        name { scale }
 		type { float }
@@ -59,9 +60,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	  /*check bounds of the input and cast each float to short*/
 	  for (i=NumIn;i>0;i--){
 	  if (intmp[i-1] <= double(LowerBound))
-	    packedout.sreg16[i-1] = LowerBound;
+	    packedout.sreg16[i-1] = double(LowerBound);
 	  else if (intmp[i-1] >= double(UpperBound))
-	    packedout.sreg16[i-1] = UpperBound;
+	    packedout.sreg16[i-1] = double(UpperBound);
 	  else 
 	    packedout.sreg16[i-1] = short(intmp[i-1]);
 	  }
