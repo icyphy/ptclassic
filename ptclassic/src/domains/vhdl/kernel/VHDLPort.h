@@ -45,6 +45,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class VHDLSignal;
 class VHDLFiring;
+class VHDLToken;
 
 class VHDLPort : public VHDLTypedObj
 {
@@ -52,7 +53,7 @@ class VHDLPort : public VHDLTypedObj
   // Constructors.
   VHDLPort();
   VHDLPort(const char* n, const char* t, const char* d, const char* m, VHDLSignal* s, VHDLVariable* v = NULL,
-	   VHDLFiring* f = NULL) : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s), variable(v), firing(f) {}
+	   VHDLFiring* f = NULL, VHDLToken* tok = NULL) : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s), variable(v), firing(f), token(tok) {}
 
   // Destructor.
   ~VHDLPort();
@@ -67,6 +68,8 @@ class VHDLPort : public VHDLTypedObj
   VHDLVariable* variable;
   // Parent firing.
   VHDLFiring* firing;
+  // Associated data token.
+  VHDLToken* token;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -81,6 +84,10 @@ class VHDLPort : public VHDLTypedObj
   VHDLVariable* getVar() { return variable; }
   void setFire(VHDLFiring* newFire) { firing = newFire; }
   VHDLFiring* getFire() { return firing; }
+  void setToken(VHDLToken* newToken) { token = newToken; }
+  VHDLToken* getToken() { return token; }
+  int isItInput() { return !strcmp(direction,"IN"); }
+  int isItOutput() { return !strcmp(direction,"OUT"); }
 
   void connect(VHDLSignal*);
 
@@ -120,7 +127,8 @@ class VHDLPortList : public VHDLTypedObjList
 
   // Allocate memory for a new VHDLPort and put it in the list.
   void put(StringList, StringList, StringList, StringList="",
-	   VHDLSignal* =NULL, VHDLVariable* =NULL, VHDLFiring* =NULL);
+	   VHDLSignal* =NULL, VHDLVariable* =NULL, VHDLFiring* =NULL,
+	   VHDLToken* =NULL);
 };
 
 class VHDLPortListIter : public VHDLTypedObjListIter {
