@@ -108,12 +108,11 @@ void CGCTarget::declareStar(CGCStar* star)
     // States must be declared after the Star has been run.
     // Running the Star builds the list of referenced States.
 
-    StringList cmnt;
-    cmnt << "Declarations for " << star->fullName();
-    mainDecls << comment(cmnt);
+    globalDecls << star->declareStates(A_GLOBAL);
+    globalDecls << star->declarePortHoles(P_GLOBAL);
 
-    mainDecls << star->declareStates();
-    mainDecls << star->declarePortHoles();
+    mainDecls << star->declareStates(A_LOCAL);
+    mainDecls << star->declarePortHoles(P_LOCAL);
 
     mainInit << star->initCodeStates();
 }

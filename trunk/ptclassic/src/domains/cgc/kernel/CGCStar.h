@@ -37,9 +37,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+
 #include "CGStar.h"
 #include "CGCPortHole.h"
 class CGCTarget;
+
+// Attributes.
+const bitWord AB_GLOBAL = 0x20;
+extern const Attribute A_GLOBAL;	// declare State at global scope
+extern const Attribute A_LOCAL;		// declare State at local scope
+const Attribute ANY = {0,0};
 
 class CGCStar : public CGStar {
 public:
@@ -59,12 +66,13 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	// Generate declarations and initialization code for
-	// PortHoles and States.
-	StringList declarePortHoles();
-	StringList declareStates();
-	StringList initCodePortHoles();
-	StringList initCodeStates();
+	// Generate declarations and initialization code for PortHoles
+	StringList declarePortHoles(Attribute a=ANY);
+	StringList initCodePortHoles(Attribute a=ANY);
+
+	// Generate declarations and initialization code for States
+	StringList declareStates(Attribute a=ANY);
+	StringList initCodeStates(Attribute a=ANY);
 
 	// add a splice star to the spliceClust list.  If atEnd
 	// is true, append it to the end, otherwise prepend it.

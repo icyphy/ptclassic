@@ -38,6 +38,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGPortHole.h"
 
+const bitWord PB_GLOBAL = 0x20;
+extern const Attribute P_GLOBAL;
+extern const Attribute P_LOCAL;
+
 // three different types of buffer.
 // If owner, this porthole owns buffer.
 // If embedded, no physical buffer is assigned to that porthole.
