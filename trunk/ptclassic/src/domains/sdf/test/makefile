@@ -45,6 +45,7 @@ TCL_SRCS = testSDFDefs.tcl
 SIMPLE_TESTS = \
 	testSDFStars.tcl \
 	testSDFArith.tcl \
+	testSDFContrib.tcl \
 	testSDFConv.tcl \
 	testSDFDSP.tcl \
 	testSDFFourier.tcl \
