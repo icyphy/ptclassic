@@ -63,6 +63,7 @@ Block* FSMTarget::makeNew() const {
 FSMTarget::~FSMTarget() { delSched(); }
 
 void FSMTarget::setup() {
+  int i;
   FSMScheduler* fsmSched = new FSMScheduler;
 
   // setSched deletes the old scheduler.
@@ -75,11 +76,11 @@ void FSMTarget::setup() {
   }
   
   fsmSched->intlEventNames.initialize();
-  for (int i=0; i<intlEventNames.size(); i++)
+  for (i=0; i<intlEventNames.size(); i++)
       fsmSched->intlEventNames << intlEventNames[i];
 
   fsmSched->intlEventTypes.initialize();
-  for (int i=0; i<intlEventTypes.size(); i++)
+  for (i=0; i<intlEventTypes.size(); i++)
       fsmSched->intlEventTypes << intlEventTypes[i];
 
 //	fsmSched->schedulePeriod = schedulePeriod;
