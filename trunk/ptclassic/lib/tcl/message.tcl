@@ -81,14 +81,20 @@ proc ptkImportantMessage {w text} {
     wm iconname $w "Ptolemy Message"
 
     button $w.ok -text "OK <Return>" -command "ptkSafeDestroy $w"
-    message $w.msg -width 25c -text $text -justify left
-    pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
+    text $w.t -width 80 -yscrollcommand "$w.s set"
+    scrollbar $w.s -relief flat -command "$w.t yview"
+    $w.t insert 0.0 "$text"
+    $w.t configure -state disabled
+    pack append $w \
+      $w.ok {bottom fillx} \
+      $w.s {right filly } \
+      $w.t {expand fill}
 
     wm geometry $w +200+200
     tkwait visibility $w
     bind $w <Key> "ptkSafeDestroy $w"
     bind $w <ButtonPress> "ptkSafeDestroy $w"
-    bind $w.msg <Button> "ptkSafeDestroy $w"
+    bind $w.t <Button> "ptkSafeDestroy $w"
     set prevFocus [focus]
     focus $w
     grab $w
