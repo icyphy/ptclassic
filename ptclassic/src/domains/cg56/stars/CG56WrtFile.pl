@@ -46,7 +46,7 @@ Writes data to a file, for use with the Motorola DSP56000 simulator.
         initCode {
 		StringList logOut = "output $ref(outVal) ";
 		if (fileName.null()) 
-			logOut << "$starSymbol(/tmp/cgwritefile) ";
+			logOut << "$starSymbol(cgwritefile) ";
 		else
 			logOut << "$val(fileName) ";
 		logOut << (strcmp(input.resolvedType(),INT)?"-RF":"-RD");
