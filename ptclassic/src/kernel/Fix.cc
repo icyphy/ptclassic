@@ -594,7 +594,7 @@ Fix operator * (const Fix& x, const Fix& y)
   if (post_scale != 0) {
       // here we effectively scale down X and Y.
       // we will scale up later.
-      if (x.intBits > (uint16)post_scale) X.intBits = x.intBits - post_scale;
+      if ((int)(x.intBits) > post_scale) X.intBits = x.intBits - post_scale;
       else {
 	  X.intBits = 1;
 	  Y.intBits = new_intBits - 2;
