@@ -50,6 +50,7 @@ ITCL_SRCS = \
 	EditSTD.itcl \
 	Graphics.itcl \
 	HTMLExport.itcl \
+	ProfileJava.itcl \
 	ProfileTcl.itcl 
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
