@@ -461,8 +461,14 @@ proc ::tycho::startGui {args} {
     if !$tychofeatures(-nopackages) {
 	package require tycho.kernel.gui
 	
-	foreach pkg {\
-		tycho.kernel.html tycho.edit.textedit tycho.edit.visedit} {
+	# FIXME: this is too many
+	foreach pkg {
+	    tycho.kernel.html
+	    tycho.edit.textedit
+	    tycho.edit.visedit
+	    tycho.edit.graphedit
+	    tycho.util.devtools
+	} {
 	    if { [lsearch -exact [package names] $pkg] != -1 } {
 		uplevel #0 package require $pkg
 	    }
