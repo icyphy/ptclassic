@@ -73,6 +73,8 @@ public:
 
     /*virtual*/ void prepareCodeGen();
 
+    /*virtual*/ int dagNodes() const;
+
 private:
     CGCluster* topCluster;
     ParScheduler& topScheduler;
