@@ -83,6 +83,27 @@ void StringState  :: initialize() {
 	val = savestring (buf);
 }
 
+StringState& StringState :: operator=(const char* newStr) {
+	LOG_DEL; delete []val;
+	val = savestring(newStr);
+	return *this;
+}
+
+StringState& StringState :: operator=(StringList& newStrList) {
+	// Strictly speaking this is not required, but I dont
+	// really trust two much automatic type conversion.
+	// Note that we might modify newStrList in the call below
+	const char *newStr = newStrList;
+	return (*this = newStr);
+}
+
+StringState& StringState :: operator=(const State& newState) {
+	// Strictly speaking this is not required, but I dont
+	// really trust two much automatic type conversion.
+	StringList newStrList = newState.currentValue();
+	return (*this = newStrList);
+}
+
 StringList StringState :: currentValue() const {
 	StringList res;
 	if (val) res = val;
