@@ -26,6 +26,7 @@ $Id$
 #include "Geodesic.h"
 #include "miscFuncs.h"
 #include "Domain.h"
+#include "Plasma.h"
 
 // Report an error: no such star or porthole
 
@@ -151,13 +152,15 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 	portname = savestring (portname);
 	starname = savestring (starname);
 // create new galaxy port, add to galaxy, do the alias
+	Plasma* pla = ph->setPlasma();
+	DataType dType = pla ? pla->type() : ph->myType();
 	if (ph->isItMulti()) {
 		GalMultiPort *p = new GalMultiPort(*ph);
-		addPort(p->setPort(galportname,this,ph->myType()));
+		addPort(p->setPort(galportname,this,dType));
 	}
 	else {
 		GalPort *p = new GalPort(*ph);
-		addPort(p->setPort(galportname,this,ph->myType()));
+		addPort(p->setPort(galportname,this,dType));
 	}
 // add action to list
 	actionList += "A";
