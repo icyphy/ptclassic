@@ -46,6 +46,7 @@ proc ${uniqueSymbol}callTcl {} {
 	set y1 [expr {$yin-$ballRadius}]
 	set x2 [expr $x1+2*$ballRadius]
 	set y2 [expr $y1+2*$ballRadius]
-	after 30
+#	after 30
+#	update
 	$c coords $ballId ${x1}c ${y1}c ${x2}c ${y2}c
 }
