@@ -61,6 +61,26 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# Get the g++ definitions for shared libraries; we override some below.
+# Comment the next line out if you don't want shared libraries.
+ifndef BUILD_STATIC_BINARIES
+SHMAJOR =	7
+SHMINOR =	0
+include $(ROOT)/mk/config-g++.shared.mk
+LIBSUFFIX =		so.$(SHMAJOR).$(SHMINOR)
+LINKSHAREDFLAGS =
+endif
+
+# Command to build C++ shared libraries
+SHARED_LIBRARY_COMMAND = ld /usr/lib/c++rt0.o -Bshareable -o 
+ 
+# Command to build C shared libraries
+CSHARED_LIBRARY_COMMAND =ld -Bshareable -o 
+
+# You may want to override the "-g" in LOCALCCFLAGS for a true
+# production environment - the link time and program output are large.
+
+
 # You may want to override the "-g" in LOCALCCFLAGS for a true
 # production environment - the link time and program output are large.
 
@@ -121,8 +141,8 @@ CSYSLIBS =	-lm -lc -lcompat
 SYSLIBS =	-lg++ -lstdc++  $(CSYSLIBS)
 
 LINKSTRIPFLAGS=-Wl,-s
-LINKFLAGS =	-L$(LIBDIR)  $(LINKSTRIPFLAGS)
-LINKFLAGS_D =	-L$(LIBDIR) -g
+LINKFLAGS =	-L$(LIBDIR)  $(LINKSTRIPFLAGS) $(LINKSHAREDFLAGS)
+LINKFLAGS_D =	-L$(LIBDIR) -g $(LINKSHAREDFLAGS)
 
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
