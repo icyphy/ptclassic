@@ -182,15 +182,11 @@ output.
     for(int i = 0; i < indxDc; i++) {
       dcImage.entry(i) = outDc[i];
     }
-    delete [] outDc;
-    outDc = 0;
 
     FloatMatrix& acImage = *(new FloatMatrix(1,indxAc));
     for(int j = 0; j < indxAc; j++) {
       acImage.entry(j) = outAc[j];
     }
-    delete [] outAc;
-    outAc = 0;
 
     float comprRatio = dcImage.numRows() * dcImage.numCols() +
                        acImage.numRows() * acImage.numCols();
