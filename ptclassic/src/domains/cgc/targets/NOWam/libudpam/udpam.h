@@ -31,7 +31,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: Brent Chun 
  Creation Date: Sat Nov  4 17:25:01 PST 1995
 */
-
 #ifndef _UDPAM_H
 #define _UDPAM_H "$Id$";
 
@@ -40,9 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netinet/in.h>
-#ifdef SOLARIS 
 #include <thread.h>
-#endif /* SOLARIS */
 
 /*
  * AM Specified values 
@@ -132,8 +129,8 @@ typedef struct {
   tag_t     tag, src_tag;
   handler_t handler;                
   int       arg0, arg1, arg2, arg3;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_MEDIUM];
+  int       nbytes;
+  double    data[UDPAM_MAX_MEDIUM/sizeof(double)];
   caddr_t   source_addr;
 } UDPAM_Medium4_Pkt;
 
@@ -143,8 +140,8 @@ typedef struct {
   handler_t handler;                
   int       arg0, arg1, arg2, arg3;
   int       arg4, arg5, arg6, arg7;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_MEDIUM];
+  int       nbytes;
+  double    data[UDPAM_MAX_MEDIUM/sizeof(double)];
   caddr_t   source_addr;
 } UDPAM_Medium8_Pkt;
 
@@ -155,7 +152,7 @@ typedef struct {
   int       arg0, arg1, arg2, arg3;
   int       dest_offset;
   int       nbytes;
-  char      data[UDPAM_MAX_LONG];  
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
   caddr_t   source_addr;
 } UDPAM_Long4_Pkt;
 
@@ -166,8 +163,8 @@ typedef struct {
   int       arg0, arg1, arg2, arg3;
   int       arg4, arg5, arg6, arg7;
   int       dest_offset;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_LONG];
+  int       nbytes;
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
   caddr_t   source_addr;
 } UDPAM_Long8_Pkt;
 
@@ -198,8 +195,8 @@ typedef struct {
   handler_t handler;                
   int       arg0, arg1, arg2, arg3;
   int       source_offset;
-  int       nbytes;                 
-  char      data[UDPAM_MAX_LONG];
+  int       nbytes;  
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
   int       dest_offset;
 } UDPAM_GetXferReply4_Pkt;
 
@@ -211,7 +208,7 @@ typedef struct {
   int       arg4, arg5, arg6, arg7;
   int       source_offset;
   int       nbytes;                 
-  char      data[UDPAM_MAX_LONG];
+  double    data[UDPAM_MAX_LONG/sizeof(double)];
   int       dest_offset;
 } UDPAM_GetXferReply8_Pkt;
 
@@ -249,7 +246,6 @@ typedef struct {
     UDPAM_GetXfer8_Pkt      udpam_getxfer8_pkt;
     UDPAM_GetXferReply4_Pkt udpam_getxferreply4_pkt;
     UDPAM_GetXferReply8_Pkt udpam_getxferreply8_pkt;
-    UDPAM_ReplyACK_Pkt      udpam_replyack_pkt;  /* Eh? */
     UDPAM_Error_Pkt         udpam_error_pkt;
   } packet;
 } UDPAM_Buf;
@@ -352,9 +348,7 @@ typedef struct _ea_t {
   void      *start_addr;           /* Start address of VM segment */
   int       length;                /* Length of VM segment */ 
   tag_t     tag;                   /* Endpoint tag */
-#ifdef SOLARIS 
   mutex_t   lock;                  /* Mutex lock for locking EP */
-#endif /* SOLARIS */
   int       socket;                /* UDP Socket for Request/Replies */
   struct sockaddr_in sockaddr;     /* Socket Address for EP(i.e. global name) */ 
   struct _eb_t *bundle;            /* Bundle that contains this EP */
@@ -370,11 +364,9 @@ typedef struct _eb_t {
     struct ep_elem  *next;      /* Pointer to next element on the list */    
   } *head;                      /* Head of bundle's list of endpoints */
   int            num_eps;       /* Number of endpoints in this bundle */
-#ifdef SOLARIS
   mutex_t        lock;          /* Mutex lock for locking EP */
   sema_t         synch_var;     /* Synchronization variable */
   cond_t         event_cv;      /* CV to inform tout thread to select() */
-#endif /* SOLARIS */
   int            mask;          /* Event mask */
   int            type;          /* Shared or local bundle */
   fd_set         fdset;         /* Set of socket descriptors to select() on */
