@@ -29,7 +29,7 @@ optmkdir octtools/bin.$ARCH
 
 cd obj.$ARCH
 optlink ../src makefile
-foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib utils vem)
+foreach x (domains interp ptcl kernel pigiRpc pigilib libgantt ptlang xgraph ptklib octtools)
 	optmkdir $x
 	cd $x
 	optlink ../../src/$x makefile
@@ -126,37 +126,26 @@ foreach x ( cg56/dsp/stars cg96/dsp/stars \
 	cd ../../..
 end
 
-# Start of utils section
-cd ../utils
-foreach x ( installColors libgslider masters octfix octls)
-	optmkdir $x
-	cd $x
-	optlink ../../../src/utils/$x make.template
-	optlink ../../../src/utils/$x makefile
-	cd ..
-end
-
-# Start of vem section
-# Handle vem and octtools
-cd ../vem
+# Start of octtools section
+cd ../octtools
 
 foreach x (include vem-bin.mk vem-lib.mk)
-	optlink ../../src/vem	$x
+	optlink ../../src/octtools	$x
 end
 
 foreach x ( Packages Xpackages attache vem)
 	optmkdir $x
 	cd $x
-	#optlink ../../../src/vem/$x make.template
-	optlink ../../../src/vem/$x makefile
+	#optlink ../../../src/octtools/$x make.template
+	optlink ../../../src/octtools/$x makefile
 	cd ..
 end
 
-foreach x ( oct2ps octmvlib)
+foreach x ( installColors masters octfix octls oct2ps octmvlib)
 	optmkdir $x
 	cd $x
-	optlink ../../../src/vem/$x make.template
-	optlink ../../../src/vem/$x makefile
+	optlink ../../../src/octtools/$x make.template
+	optlink ../../../src/octtools/$x makefile
 	cd ..
 end
 
@@ -168,29 +157,29 @@ foreach x (  avl cp da errtrap fang fc gu harpoon kd lel list mm nle oct \
 	tr uprintf utility vov vulcan)
 	optmkdir $x
 	cd $x
-	optlink ../../../../src/vem/Packages/$x make.template
-	optlink ../../../../src/vem/Packages/$x makefile
+	optlink ../../../../src/octtools/Packages/$x make.template
+	optlink ../../../../src/octtools/Packages/$x makefile
 	cd ..
 end
 cd ../Xpackages
 foreach x (Maxport Table Tgl dds fb iv rpc ts xg xpa)
 	optmkdir $x
 	cd $x
-	optlink ../../../../src/vem/Xpackages/$x make.template
-	optlink ../../../../src/vem/Xpackages/$x makefile
+	optlink ../../../../src/octtools/Xpackages/$x make.template
+	optlink ../../../../src/octtools/Xpackages/$x makefile
 	cd ..
 end
 cd ../vem
 
-optlink ../../../src/vem/vem include
-optlink ../../../src/vem/vem bitmaps
+optlink ../../../src/octtools/vem include
+optlink ../../../src/octtools/vem bitmaps
 foreach x (bags buffers dialogs dispatch doc drawing drs lib main \
 	options patterns physical properties rpc schematic select strings \
 	symbolic utility windows)
 	optmkdir $x
 	cd $x
-	optlink ../../../../src/vem/vem/$x make.template
-	optlink ../../../../src/vem/vem/$x makefile
+	optlink ../../../../src/octtools/vem/$x make.template
+	optlink ../../../../src/octtools/vem/$x makefile
 	cd ..
 end
 
@@ -199,11 +188,11 @@ foreach x (Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm \
 	folder.bm hisetDot hisetMark hiunsetDot hiunsetMark \
 	newcell.bm other.bm physical.bm schematic.bm setDot setMark \
 	symbolic.bm unsetDot unsetMark vem.bindings) 
-	optlink ../../../../src/vem/vem/lib $x
+	optlink ../../../../src/octtools/vem/lib $x
 end
 
 cd ../../
-# End of vem section
+# End of octtools section
 
 # This is for the makefile
 cd ../..
