@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "VHDLStar.h"
 #include "VHDLTarget.h"
+#include <fstream.h>
 
 // The following is defined in VHDLDomain.cc -- this forces that module
 // to be included if any VHDL stars are linked in.
@@ -184,6 +185,15 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset,
 		     " is a MultiPortHole referenced as a single PortHole");
       ref.initialize();
       return ref;
+    }
+
+    // Check for embedded buffering.
+    if (port->embedded()) {
+      cout << "Port " << port->name() << " is embedded\n";
+      cout << " in " << port->embedded()->name() << "\n";
+      // Take a dare:
+      port = (VHDLPortHole*)port->embedded();
+
     }
 
     ref << port->getGeoName();
