@@ -117,7 +117,7 @@ class ::tycho::Node {
     proc coords {id canvas slate args}
     
     # Access a component
-    proc component {id canvas slate{name {}}}
+    proc component {id canvas slate {name {}}}
 
     ###################################################################
     ####                         picture components                ####
@@ -299,7 +299,7 @@ body ::tycho::Node::_intype {id canvas slate intype} {
 ##########################################################################
 #### -name option configuration
 #
-body ::tycho::Node::_name {id canvas name} {
+body ::tycho::Node::_name {id canvas slate name} {
     set _name($id) $name
     $canvas itemconfigure $textitem($id) -text $name
 }
@@ -359,7 +359,7 @@ body ::tycho::Node::_outputs {id canvas slate outputs} {
 	}
     }
     # Now move/draw the terminals
-    redrawoutputs $id $canvas $positions
+    redrawoutputs $id $canvas $slate $positions
 }
 
 ##########################################################################
@@ -399,8 +399,8 @@ body ::tycho::Node::construct {id canvas slate tags x0 y0 x1 y1 args} {
 	    -tags [list $tags]]
 
     # Create the input and output ports
-    _inputs  $id $canvas $_inputs($id)
-    _outputs $id $canvas $_outputs($id)
+    _inputs  $id $canvas $slate $_inputs($id)
+    _outputs $id $canvas $slate $_outputs($id)
 }
 
 
@@ -566,7 +566,7 @@ body ::tycho::Node::redrawinputs {id canvas slate positions} {
 ##########################################################################
 #### redrawoutputs
 #
-body ::tycho::Node::redrawoutputs {id canvas positions} {
+body ::tycho::Node::redrawoutputs {id canvas slate positions} {
     if { ! [::info exists outports($id)] } {
 	set outports($id) {}
     }
