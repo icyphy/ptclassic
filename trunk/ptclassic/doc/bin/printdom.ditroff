@@ -1,12 +1,9 @@
 #! /bin/csh -f
 # $Id$
 
-# Print documentation for a Ptolemy domain.  Assumed to be started in
-# the "doc" subdirectory of a domain.
-
-# Command uses printer defined by environmental variable $PRINTER
-# User .cshrc file must contain "setenv PRINTER whatever"
-
+# Print documentation for a Ptolemy domain.
+# Assumed script is started in the "doc" sub-directory of a domain.
+#
 # Command line options:
 #
 #	-index		Generate an index only, print nothing.
@@ -21,19 +18,22 @@
 #			only be used at Ptolemy Headquarters in Berkeley.
 #
 # Remaining arguments are taken to be files to print options.
+# Command uses printer defined by environment variable $PRINTER
+# User .cshrc file must contain "setenv PRINTER whatever"
 #
-# An implicit header file, $PTOLEMY/doc/headers/shared, is prepended.
-
-# The following files are assumed to present in the documentation directory:
-#	overall	  - The main documentation section.
-#		    It may source other files with .so.
-#	startitle - The title page for the stars section.
-#	stars	  - A directory with star documentation
-#	demotitle - The title page for the demo section
-#	demos	  - A directory with demo documentation.
-#	targettitle - The title page for the target section.
-#	targets   - The directory with the target documentation.
-
+# The documentation consists of a concatenation of the following files:
+#
+#   $PTOLEMY/doc/headers/shared - macro definitions
+#   overall - introduction to the domain
+#   targettitle - title page for the target section
+#   targets/*.t - target troff documentation
+#   startitle - title page for the stars section
+#   stars/*.t - star troff documentation files
+#   demotitle - title page for the demo section
+#   demos/*.t- demo troff documentation.
+#
+# Any troff file may include other troff files with the .so command
+#
 # Index information is appended to the file $HOME/Almagest.index,
 # or to whatever ALAMAGEST_INDEX is set to.
 
@@ -44,7 +44,10 @@ if (!($?PTOLEMY)) then
 	setenv PTOLEMY ~ptolemy
 endif
 
-# File structure information:
+# File structure information
+# -- If the menus don't exist when previewing the documentation, then you
+#    are likely running the OpenWindows version of xditview without having
+#    OpenWindows running: use "which xditview" to see which xditview it is
 set dirheader = $PTOLEMY/doc/headers
 set printcommand = ditroff
 set printoptions = "-me -tbl -eqn -P$PRINTER"
@@ -55,6 +58,7 @@ set tempdir = /tmp
 set tempTroffFile = $tempdir/pt$$.t
 set tempIndexFile = $tempdir/index$$
 set tempPrintFile = $tempdir/prnr$$
+set troffFileNames = "*.t"
 
 # Variables
 set indexonly = 0
@@ -114,7 +118,7 @@ if ( -d targets ) then
         endif
         cd targets
         # print all targets
-        cat -s * >> $tempTroffFile
+        cat -s $troffFileNames >> $tempTroffFile
         cd ..
 endif
 
@@ -126,7 +130,7 @@ if ( -d stars ) then
 	endif
 	cd stars
 	# print all stars, sorted in dictionary order
-	foreach file (`ls -1 -d * | sort -f -d`)
+	foreach file (`ls -1 -d $troffFileNames | sort -f -d`)
 		cat -s $file >> $tempTroffFile
 	end
 	cd ..
@@ -140,7 +144,7 @@ if ( -d demos ) then
 	endif
 	cd demos
 	# print all demos
-	cat -s * >> $tempTroffFile
+	cat -s $troffFileNames >> $tempTroffFile
 	cd ..
 endif
 
