@@ -39,7 +39,8 @@ CC =		gcc
 #endif
 
 OPTIMIZER =	-O2
-WARNINGS =	-Wall -Wcast-qual
+#-Wsynth is new in g++-2.6.x
+WARNINGS =	-Wall -Wcast-qual -Wsynth
 MULTITHREAD =	-D_REENTRANT
 GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
