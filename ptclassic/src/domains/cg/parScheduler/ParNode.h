@@ -86,14 +86,13 @@ public:
 	void removeAncs(ParNode* n) { tempAncs.remove(n); waitNum--; }
 
 	CGStar* myStar() { return (CGStar*) myMaster(); }
+	virtual const char* readRealName();
 
-	// check if myStar() is at the wormhole boundary
+	// check if myStar() is at the boundary
 	int atBoundary() { return atBoundaryFlag; }
 
 	// Is it correponds to a atomic CG star?
 	int amIBig() { return myStar()->isParallel(); }
-	Profile* profile() { return pf; }
-	void withProfile(Profile* p) { pf = p; }
 
 	// Functions for assigning and obtaining the StaticLevel.
 	void assignSL( int SL ) { StaticLevel = SL; }
@@ -135,6 +134,8 @@ public:
 
 // set informations for sub-universe generation
 // should be called in the increasing order of the invocation number.
+	virtual DataFlowStar* copyStar(CGTarget* t, int pid, int flag);
+
 	void setCopyStar(DataFlowStar* s, ParNode* prevN);
 
 	DataFlowStar* getCopyStar() { return clonedStar; }
@@ -171,18 +172,13 @@ protected:
 	EGNodeList tempAncs;
 	EGNodeList tempDescs;
 
-private:
-	// If it is a parallel node, it should be associated with
-	// a "Profile" and a processor ids to indicate assignment
-	// assignedId[i] = j means that (i+1)th profile is assigned to the
-	// (j+1)th processor.
-	Profile* pf;
+	DataFlowStar* clonedStar;
 
+private:
 	// If the origin star lies at the boundary of a wormhole
 	int atBoundaryFlag;
 
 	// necessary information for sub universe generation
-	DataFlowStar* clonedStar;
 	ParNode* nextNode;	// next invoc. assigned to the same processor
 	ParNode* firstNode;	// the earliest invoc. assigned.
 	int numCopied;		// number of invoc. assigned

@@ -42,6 +42,9 @@ Date of last revision:
 #include "ParGraph.h"
 #include "SDFPortHole.h"
 #include "CGStar.h"
+#include "KnownBlock.h"
+#include "ConstIters.h"
+#include "CGTarget.h"
 #include "Error.h"
 
                         ///////////////////////
@@ -57,9 +60,8 @@ ParNode::ParNode(DataFlowStar* s, int invoc_no) : EGNode(s, invoc_no)
 	waitNum = 0;
 	origin = 0;
 	partner = 0;
-	pf = 0;
 
-	// check whether it lies in the wormhole boundary or not.
+	// check whether it lies in the boundary or not.
 	if (invoc_no == 1) {
 		atBoundaryFlag = FALSE;
 		DFStarPortIter nextPort(*s);
@@ -67,7 +69,7 @@ ParNode::ParNode(DataFlowStar* s, int invoc_no) : EGNode(s, invoc_no)
 		while ((p = nextPort++) != 0) {
 			if (p->atBoundary()) {
 				if (((CGStar*) s)->isParallel()) {
-					Error::abortRun("a parallel star can not be at the wormhole boundary");
+					Error::abortRun("a parallel star can not be at the boundary");
 					return; 
 				}
 				atBoundaryFlag = TRUE;
@@ -99,7 +101,6 @@ ParNode::ParNode(int t) : EGNode(0,0) {
 	waitNum = 0;
 	origin = 0;
 	partner = 0;
-	pf = 0;
 	atBoundaryFlag = 0;
 }
 
@@ -119,6 +120,12 @@ StringList ParNode::print() {
 	out += ")\n";
 	return out;
 }
+
+const char* ParNode::readRealName() {
+	if (!myStar()) return 0;
+	return myStar()->name();
+}
+
 
                         /////////////////////
                         ///  copyAncDesc  ///
@@ -157,6 +164,42 @@ void ParNode::copyAncDesc(ParGraph* g, int flag) {
 	}
 }
 
+// clone a star
+DataFlowStar* ParNode :: copyStar(CGTarget* t, int pid, int) {
+	DataFlowStar* org = myMaster();
+	DataFlowStar* newS;
+                 
+	if (!t->support(org)) {
+		// FIXME: need documentation.  Are we remapping the
+		// star into a different domain here?
+		// FIXME: assumes t->starType() ends in "Star"
+		// and is preceded by the domain.
+		// This needs to be fixed!
+		const char* foo = t->starType();
+		// FIXME: assumes 30-letter max starType name!!!
+		char temp[30];
+		strcpy(temp, foo);
+		int len = strlen(foo);
+		temp[len-4] = 0;
+		const char* sname = org->className() +
+			strlen(org->domain());
+		newS = (DataFlowStar*) KnownBlock :: clone(sname,temp);
+	} else {
+		newS = (DataFlowStar*) org->clone();
+	}
+ 
+	CBlockStateIter nexts(*org);
+	const State* srcStatePtr;
+	State *destStatePtr;
+	while ((srcStatePtr = nexts++) != 0) {
+		destStatePtr = newS->stateWithName(srcStatePtr->name());
+		StringList temp = srcStatePtr->currentValue();
+		destStatePtr->setInitValue(hashstring(temp));
+	}
+
+	return newS;
+}
+   
 // set informations for sub-universe generation
 void ParNode :: setCopyStar(DataFlowStar* s, ParNode* prevN) {
 	clonedStar = s;
