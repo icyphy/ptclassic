@@ -38,14 +38,23 @@
 # handle all background errors in Tk.  Therefore, within the tycho
 # namespace and within classes it should be sufficient to simply
 # call the Tcl command <code>error</code>, rather than calling this
-# directly.
+# directly. If the *oneWindow* preference in the *stacktrace*
+# preference group is true, then only one stack trace window will
+# be used; otherwise, a new stack trace window will be created
+# for each error.
 #
 proc ::tkerror {msg} {
     # Handle the blank message case
     if {$msg == ""} {set msg "Tcl reports an error"}
     set nm [::tycho::autoName .error]
-    uplevel #0 [list ::tycho::ErrorMessage $nm \
-	    -text $msg -bitmap error]
+    if [::tycho::preference get stacktrace oneWindow] {
+        uplevel #0 [list ::tycho::ErrorMessage $nm \
+                -text $msg -bitmap error \
+                -stackwindow .stacktrace]
+    } else {
+        uplevel #0 [list ::tycho::ErrorMessage $nm \
+                -text $msg -bitmap error]
+    }        
     ::tycho::Dialog::wait $nm
 }
 
@@ -117,8 +126,20 @@ class ::tycho::ErrorMessage {
 
     constructor {args} {}
 
+    ###################################################################
+    ####                            options                        ####
+
+    # The name of the stack trace window to create
+    itk_option define -stackwindow stackWindow StackWindow ""
+
+    ###################################################################
+    ####                         public methods                    ####
+
     # Show the stack trace in a window, if there is one.
-    method stackTrace {} {}
+    method stackTrace {}
+
+    ###################################################################
+    ####                      private variables                    ####
 
     # Store the error information locally.
     private variable localErrorInfo {}
@@ -153,19 +174,44 @@ body ::tycho::ErrorMessage::constructor {args} {
 # Note that this stack trace is that associated with the most recent error.
 # That error may be one that was caught, and that therefore was never seen
 # by the user.  Normally, this method should only be invoked after an error
-# that the user should see.
+# that the user should see. If the *-stackwindow* option is not null
+# and a window with that name already exists, then the stack trace
+# is inserted into that window; if it doesn't exist, then
+# a window with that name is created; if *-stackwindow* is null,
+# than a new window with an automatically-generated name is
+# created.
 #
 body ::tycho::ErrorMessage::stackTrace {} {
-    if {$localErrorInfo != ""} {
-	set nm [::tycho::view EditStack \
-		-prefix .stack \
-		-text "The most recent stack trace found is:\n$localErrorInfo"\
-                -readonly 1 \
-		-withdrawn 1]
-        [winfo toplevel $nm] centerOnScreen
-    } {
-	safeEval ::tycho::warn "No stack trace found"
+    # If a name is supplied and the window exists, insert
+    # the trace in that window
+    set name $itk_option(-stackwindow)
+    if { $name != "" && [::info which -command $name] != "" } {
+	set trace $name.v
+	$trace configure -readonly 0
+	$trace clear
+	$trace insertData \
+		"The most recent stack trace found is:\n$localErrorInfo"
+	$trace markUnmodified
+	$trace configure -readonly 1
+	raise $name
+    } else {
+	# Otherwise, create a new window with the name
+	# given by -stackwindow if not null
+	if { $name == "" } {
+	    set name [::tycho::autoName .stacktrace]
+	}
+	if {$localErrorInfo != ""} {
+	    ::tycho::view EditStack \
+		    -name $name \
+		    -text "The most recent stack trace found is:\n$localErrorInfo" \
+		    -readonly 1 \
+		    -withdrawn 1
+	    $name centerOnScreen
+	} {
+	    safeEval ::tycho::warn "No stack trace found"
+	}
     }
+
     # NOTE: I'm not sure why this has to be delayed.
     # NOTE: I took this out, because a) it doesn't work and b) the
     # Displayer has already given the focus to the stack window. But
