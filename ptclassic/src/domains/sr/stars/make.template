@@ -57,14 +57,6 @@ PL_SRCS= \
 	SRConst.pl \
 	SREnvelopeGen.pl \
 	SRIntToString.pl \
-	SRItclCounter.pl \
-	SRItclDisplay.pl \
-	SRItclDatabase.pl \
-	SRItclEditor.pl \
-	SRItclIn.pl \
-	SRItclInOut.pl \
-	SRItclModeSelect.pl \
-	SRItclOut.pl \
 	SRMIDIin.pl \
 	SRMux.pl \
 	SRPre.pl \
@@ -74,6 +66,15 @@ PL_SRCS= \
 	SRStringToInt.pl \
 	SRSynthControl.pl \
 	SRWhen.pl
+# hack: waiting to be ported to Itcl3.0, Itcl stars are temporarily deactivated
+#	SRItclCounter.pl \
+	SRItclDisplay.pl \
+	SRItclDatabase.pl \
+	SRItclEditor.pl \
+	SRItclIn.pl \
+	SRItclInOut.pl \
+	SRItclModeSelect.pl \
+	SRItclOut.pl
 
 # Itcl star script files
 SCRIPTS = \
