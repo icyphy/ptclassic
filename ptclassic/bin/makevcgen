@@ -63,7 +63,7 @@ s/^[ 	]*else/!else/
 s/^[ 	]*endif/!endif/
 
 # Rather than setting a variable to nothing, undefine it
-s/^[ 	]*\([A-Za-z0-9_]+\)[	 ]*=[ 	]*$/!undef \1/
+s/^[ 	]*\([A-Za-z0-9_]*\)[	 ]*=[ 	]*$/!undef \1/
 
 # Globally convert dependency rules that refer to .o to .obj
 s/\.o/.obj/g
@@ -74,7 +74,7 @@ s/^[	 ]+\([A-Za-z0-9_]+\)[ 	]*=/\1 =/
 s/^[	]*\([A-Za-z0-9_]+\)[ 	]*\+=/\1 = $(\1)/
 
 # If we include any makefiles, then append .vc to the name.
-s/^[- 	]*include\(.*\)$/!include \1/
+s/^[- 	]*include\(.*\)$/!include \1.vc/
 
 '  < $infile >> $outfile
 
