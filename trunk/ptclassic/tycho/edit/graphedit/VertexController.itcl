@@ -90,15 +90,24 @@ class ::tycho::VertexController {
     # Input edges to the subgraph
     protected variable _inputedges ""
     
-    # Edges within to the subgraph
+    # Edges within the subgraph
     protected variable _moveedges ""
     
     # The tag of items being moved
     protected variable _movetag
     
+    # The vertices being moved
+    protected variable _vertices
+    
     # Output edges from the subgraph
     protected variable _outputedges ""
     
+    #################################################################
+    ####                   private variables                     ####
+    
+    # The starting coordinates of the vertex
+    private variable _initcoords
+
 }
 
 ########################################################################
@@ -155,6 +164,10 @@ body ::tycho::VertexController::add {libname starname} {
         # FIXME
         error "No icon for $starname"
     }
+
+    # Notify views that the data has been modified
+    $layout notify event "modified"
+    $graph notify event "modified"
 }
 
 ########################################################################
@@ -169,19 +182,22 @@ body ::tycho::VertexController::add {libname starname} {
 #
 body ::tycho::VertexController::click {tag x y args} {
     # Get the vertices, and start a move sequence on them
-    set vertices [$slateview find withtag $tag]
+    set _vertices [$slateview find withtag $tag]
 
     # Get the item name or the same tag
     set name [itemname $tag]
     set _movetag $name
 
+    # Remember the coordinates of the first vertex
+    set _initcoords [$slateview coords [lindex $_vertices 0]]
+
     # Notify views that these items are about to move
     $layout publish moveclick $name $x $y
 
     # Get completely-connected and partially-connected edges
-    set _moveedges [eval $graph subgraphEdges $vertices]
-    set _inputedges [eval $graph subgraphInputs $vertices]
-    set _outputedges [eval $graph subgraphOutputs $vertices]
+    set _moveedges [eval $graph subgraphEdges $_vertices]
+    set _inputedges [eval $graph subgraphInputs $_vertices]
+    set _outputedges [eval $graph subgraphOutputs $_vertices]
 
     # Start a move or reshape sequence on found edges
     if { $_moveedges != "" } {
@@ -241,13 +257,17 @@ body ::tycho::VertexController::delete {vertex} {
     # Compact the histories
     $layout history compact vertex current
     $graph history compact vertex current
+
+    # Notify views that the data has modified
+    $layout notify event "modified"
+    $graph notify event "modified"
 }
 
 ########################################################################
 #### drag
 #
-# Continue a move interaction on vertices. The
-# vertices and edges are moved and reshaped as appropriate.
+# Continue a move interaction on vertices. The vertices and
+# edges are moved and reshaped as appropriate.
 #
 body ::tycho::VertexController::drag {tag x y} {
     # Move the vertices and fully-connected edges
@@ -307,18 +327,23 @@ body ::tycho::VertexController::release {tag} {
 
     # Terminate the reshape of partially-connected edges
     foreach edge $_inputedges {
-		$layout publish reshaperelease $edge
+	$layout publish reshaperelease $edge
     }
     foreach edge $_outputedges {
-		$layout publish reshaperelease $edge
+	$layout publish reshaperelease $edge
     }
-
     # Now merge all those commands into a single one
     $layout history compact vertex current
 
     # Finally (and importantly!), add a null command to the graph
     # model to match this command
     $graph history append {} {}
+
+    # Even more finally, figure out if the vertex actually moved.
+    # and if it did, tell all views that the layout was modified
+    if { $_initcoords != [$slateview coords [lindex $_vertices 0]] } {
+	$layout notify event "modified"
+    }
 }
 
 
