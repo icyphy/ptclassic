@@ -725,29 +725,33 @@ ensemble ::tycho::url {
             # if the name also contains server and path parts
 	    regexp {^([a-z]+:)(//[^/]*)?(.*)$} $name _ protocol server path
 
-	    # Mess about according to how much was specified in the
-	    # first argument.... there must be an easier way...
-            if { $server == "" && $path == "" } {
-                if { [lindex $args 0] != "" } {
-                    set server //[string trimright [lindex $args 0] /]
-                }
-                if { [llength $args] > 1 } {
-                    set path /[join [lreplace $args 0 0] /]
-                }
-            } elseif { $server != "" && $path == "" } {
-		set server [string trimright $server /]
-                if { [llength $args] > 0 } {
-		    set path /[join $args /]
-                }
-            } elseif { $server != "" && $path != "" } {
-		set server [string trimright $server /]
-                set path [string trimright $path /]
-                set path [join [concat [list $path] $args] /]
-            }
-            if { $server == "" } {
-                return $protocol$path
+            # Get the correct server name
+            if { $server == "" && $args != "" } {
+                set server [string trim [lindex $args 0] /]
+                set args [lreplace $args 0 0]
             } else {
-                return $protocol$server$path
+                set server [string trim $server /]
+            }
+
+            # Get a list representing the path (only)
+            set plist [split [string trim $path /] /]
+
+            # Process additional args to add to plist
+            foreach a $args {
+                if [regexp {^(/|~)} $a] {
+                    # Absolute, so dump the path so far
+                    set plist [list [string trim $a /]]
+                } else {
+                    # Relative, so append to path
+                    lappend plist [string trim $a /]
+                }
+            }
+
+            # Reconstruct the name and return it
+            if { $server == "" } {
+                return $protocol/[join $plist /]
+            } else {
+                return $protocol//$server/[join $plist /]
             }
 	} else {
 	    # Local name
