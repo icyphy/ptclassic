@@ -1,6 +1,7 @@
 defstar {
     name { XBase }
     domain { CGC }
+    derivedFrom { Fix }
     desc { Base star from CGC <-> S56X IPC }
     version { $Id$ }
     author { Jose Luis Pino }
@@ -71,10 +72,12 @@ codeblock(startDSP) {
 }
 
 initCode {
+	CGCFix::initCode();
         addInclude("<errno.h>");
 	addInclude("<unistd.h>");
         addCompileOption("-I$S56DSP/include");
-        addLinkOption("-L$S56DSP/lib -l$QCKMON");
+        addLinkOption("-L$S56DSP/lib");
+	addLinkOption("-l$QCKMON");
 	addInclude("<sys/types.h>");
 	addInclude("<sys/uio.h>");
 	addInclude("<signal.h>");
@@ -92,17 +95,15 @@ initCode {
 	    s56path = expandPathName("$PTOLEMY/vendors/s56dsp");
 	    newmemory = TRUE;
 	}
-	addMainInit(downloadCode(s56path),"s56load");
-	addMainInit(signalSOL2,"s56signal");
+	addMainInit(downloadCode(s56path), "s56load");
+	addMainInit(signalSOL2, "s56signal");
 	if ( newmemory) delete [] s56path;
 }
 
 wrapup {
+	CGCFix::wrapup();
 	addMainInit(startDSP,"s56start");
 	addCode("qckDetach($val(S56XFilePrefix)_dsp);$val(S56XFilePrefix)_dsp=0;\n","mainClose","qckDetach");
 }
 
 }
-
-
-
