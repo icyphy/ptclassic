@@ -92,19 +92,12 @@ public:
 	// Nodes with more than one ancestor
 	DCNodeList MergeNodes;
 
-	// A list of the initially runnable DCNodes
-	DCNodeList InitNodes;
-
 	// Destructor
 	~DCGraph() {}
 
 	// generate the name of the clusters
 	// If type = 0, elementary cluster, otherwise, macro cluster.
 	const char* genClustName(int type);
-
-	// Replenish tempAncs and tempDescs for each node 
-	// If flag = 1, reverse direction. default = 0.
-	void replenish(int flag);
 
 	// Display the graph
 	StringList display();
