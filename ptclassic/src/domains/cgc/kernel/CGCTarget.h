@@ -110,6 +110,9 @@ public:
 				   const char* name,		
 				   const char* value);		
 
+	// Return the galaxy's domain if it's defined or "CGC" otherwise
+	/*virtual*/ const char* domain();
+
 protected:
 
 	/*virtual*/ void setup();
