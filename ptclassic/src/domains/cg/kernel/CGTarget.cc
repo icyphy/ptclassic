@@ -45,7 +45,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFScheduler.h"
 #include "EventHorizon.h"
 #include "LoopScheduler.h"
-#include "SDFMultiScheduler.h"
 #include "SDFCluster.h"
 #include "miscFuncs.h"
 #include "CGUtilities.h"
@@ -157,9 +156,6 @@ void CGTarget::setup() {
 		delete [] schedFileName;
 		schedFileName = writeFileName("schedule.log");
 		LOG_NEW; setSched(new LoopScheduler(schedFileName));
-		break;
-	    case 3:
-		LOG_NEW; setSched(new SDFMultiScheduler);
 		break;
 	    default:
 		Error::abortRun(*this,"Unknown scheduler");
