@@ -78,36 +78,39 @@ configbody ::tycho::StatusBar::closecommand {
 #
 body ::tycho::StatusBar::constructor {args} {
 
+    # A tiny bit of padding to the left of the status bar.
+    itk_component add leftpacking {
+	frame $itk_interior.leftpacking -width 2
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(leftpacking) -side left
+
     # Create the file status display
     itk_component add fileStatus {
-	label $itk_interior.fileStatus -width 3
+	label $itk_interior.fileStatus -width 3 \
+		-borderwidth 1 \
+		-relief raised
     } {
 	keep -background -cursor
     }
-    pack $itk_component(fileStatus) -side left
+    pack $itk_component(fileStatus) \
+	    -side left -fill y \
+	    -padx 0 -pady 2 \
+	    -side left
 
-    # Create the status output display
-    itk_component add mainStatus {
-	label $itk_interior.mainStatus -anchor w \
-		-font [.tychoFonts getFont Helvetica 12]
+    # Create the empty space under the scroll bar
+    # FIXME: Need a better way of getting the scroll bar width
+    itk_component add packing {
+	frame $itk_interior.packing -width 23
     } {
 	keep -background -cursor
     }
-    pack $itk_component(mainStatus) -fill both -expand on -side left
-
-    # Create the class display
-    itk_component add class {
-	label $itk_interior.class -anchor w \
-		-font [.tychoFonts getFont Helvetica 12] \
-		-width 20
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(mainStatus) -fill both -expand on -side left
+    pack $itk_component(packing) -fill y -side right
 
     # Create the close button
     itk_component add closeButton {
-	button $itk_interior.closeButton
+	button $itk_interior.closeButton -text Close -pady 2
     } {
 	keep -background -font -activebackground -cursor \
 		-highlightthickness -activeforeground \
@@ -115,8 +118,40 @@ body ::tycho::StatusBar::constructor {args} {
     }
     pack $itk_component(closeButton) -side right
 
+    # Create the class display
+    itk_component add class {
+	label $itk_interior.class -anchor w \
+		-font [.tychoFonts getFont Helvetica 10] \
+		-borderwidth 1 \
+		-relief raised
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(class) \
+	    -fill y \
+	    -padx 0 -pady 2 \
+	    -side left
+
+    # Create the status output display
+    itk_component add mainStatus {
+	label $itk_interior.mainStatus \
+		-anchor w -justify left \
+		-font [.tychoFonts getFont Helvetica 10] \
+		-borderwidth 1 \
+		-relief raised
+    } {
+	keep -background -cursor
+    }
+    pack $itk_component(mainStatus) \
+	    -fill both -expand on \
+	    -padx 0 -pady 2 \
+	    -side left
+
     # Initialise options
     eval itk_initialize $args
+
+    # EXPERIMENTAL
+    bind $itk_component(packing) <B1-Motion> {puts "%X %Y"}
 }
 
 
@@ -125,8 +160,7 @@ body ::tycho::StatusBar::constructor {args} {
 #### class
 #
 body ::tycho::StatusBar::class {class} {
-    $itk_component(class) configure -text \
-	"$class"
+    $itk_component(class) configure -text "  $class  "
 }
 
 
@@ -163,15 +197,18 @@ body ::tycho::StatusBar::fileStatus {status} {
 #
 body ::tycho::StatusBar::lineColumn {line column} {
     $itk_component(mainStatus) configure -text \
-	"$line : $column"
+	"  $line : $column"
 }
 
 
 #######################################################################
 #### puts
 #
+# Put an arbitrary string to the status bar. To enforce
+# wrap-around, set the wrap-length of the label to its current width
+#
 body ::tycho::StatusBar::puts {string} {
-    $itk_component(mainStatus) configure -text $string
+    $itk_component(mainStatus) configure -wraplength \
+	    [expr [winfo width $itk_component(mainStatus)] - 4]
+    $itk_component(mainStatus) configure -text "$string"
 }
-
-
