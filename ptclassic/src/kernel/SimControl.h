@@ -110,7 +110,7 @@ public:
 	// if we are to halt.
 	inline static int doPreActions(Star * which) {
 		return (nPre > 0) ? internalDoActions(preList,which)
-			: !haltRequested();
+			: 1;
 	}
 
 	// same, but do postactions.
