@@ -2,7 +2,7 @@
 # Version: $Id$
 # Author: John Reekie, Edward A. Lee
 #
-# Copyright (c) 1996 The Regents of the University of 'California'.
+# Copyright (c) 1996-1997 The Regents of the University of 'California'.
 #  rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -50,28 +50,17 @@
 # as the ``Observer'' pattern in books such as Gamma _et al's_ `Design 
 # Patterns.'' It also incorporates two additional factors not essential 
 # to, but very useful to, the model abstraction: standard data
-# interchange formats, persistence and a 
-# command history.
+# interchange formats, persistence and a command history.
 #
 # Multiple views can _subscribe_ to the same model -- when any view 
 # changes the data in the model, the other subscribed views are notified 
-# of the change.  (Note: I always use ``notify'' instead of ``update'' to 
+# of the change.  (Note: I use ``notify'' instead of ``update'' to 
 # avoid possible confusion with Tk's update{} procedure.) The notification 
 # model is what is known as the ``push'' model: when data is changed, the 
 # subscribers are informed of the type of the change _and_ the changed 
-# data.  Some subclasses may choose to implement instead a ``pull'' model, 
-# in which subscribers query the model for changed information.  All data 
-# is accessed by means of an _index_.  Depending on the functionality 
-# implemented by specific subclasses, this index could a simple integer or 
-# string key, or something more complex: a region of a file between two 
-# positions, a regular expression indicating the text associated with a 
-# particular method, or some other symbolic representation of a portion of 
-# or position within the data contained by one of these objects.  
-# Different subclasses support subscription of varying complexity -- for 
-# example, an object may be able to subscribe to changes only of a certain 
-# type.  By default, subscription and notification uses glob-style 
-# pattern-matching to provide flexible and reasonably-efficient (in Tcl) 
-# access to indexes.
+# data.  When a view subscribes, it specified a value that is used to
+# decide when to notify the view. Views can subscribe to all changes,
+# changes to a single item of data, or changes that match a pattern.
 #
 # Persistent data is an important aspect of information models: the user 
 # opens and closes windows, but the information model, representing the 
@@ -103,25 +92,19 @@
 # and version control. We need to work out a good abstraction for
 # these mechanisms.)</i>
 #
-# An alternative (better?) class structure is certainly possible: split 
-# the undo history into a separate class.  (This would make it an instance 
-# of the ``CommandServer'' pattern of Buschmann et al's _A System of 
-# Patterns_.) This would be more flexible -- for example, substituting a 
-# tree-structured history for the linear history would be straightforward.  
-# There is some close coupling between the history and the persistence 
-# (the history is saved in the state) which makes it convenient to combine 
-# them into one class.  Perhaps after some usage this issue should be 
-# examined to see whether to split the history out.
+# <i>(A tree-structured</i> undo facility would be very interesting
+# to explore. This would be easier to implement if we split the
+# history facilities of this class into a separate class -- this
+# would make it an instance of the ``CommandServer'' pattern of
+# Buschmann et al's _A System of Patterns_.)
 #
-# The methods in the _Model_ classes fall into six groups:
+# A model generally contains six groups of methods:
 #
 # <ul>
 # <li>Change commands: add{}, replace{}, dataconfigure{}, delete{}, 
 #     execute{}, and so on.
 #     These are the commands that are available for undo/redo
-#     and publishing. In this abstract superclass, only the execute{} 
-#     command (which executes a list of commands) is implemented: other 
-#     commands must be provided by subclasses. Suggested commands are :
+#     and publishing. Suggested commands are :
 #    
 #     <ul>
 #     <li>*add* _index_ _data_ _args_: Add new data at the given index.
@@ -159,7 +142,8 @@
 #     widgets require).
 #    
 # <li>Access commands: These comands get values of the data. Examples
-#     might include get{}, match{}, names{}. Most subclasses will define a 
+#     might include get{}, match{}, names{}. These must be implemented
+#     by subclasses. Most will define a 
 #     function called datacget{} or something similar, which can be used
 #     to access configuration options of data.
 #    
@@ -167,7 +151,8 @@
 #     read{}, write{}, describe{}. load{} and save{} must never be overridden; 
 #     the others usually are.
 #    
-# <li>Publish-subscribe commands: subscribe{}, unsubscribe{}, and publish{}.
+# <li>Publish-subscribe commands: subscribe{}, unsubscribe{}, publish{},
+#     and update{}.
 #     None of these must ever be overridden (except in special
 #     circumstances, such as the _Publisher_ and _WidgetPreferences_ 
 #     classes).
@@ -178,14 +163,10 @@
 #     ways. None of these must ever be overridden (except in special
 #     circumstances, such as the _Publisher_ and _WidgetPreferences_ 
 #     classes).
-#
-# <li>Protected methods: notify{}, and writeData{}. All 
-#     of these do sensible things by default, although subclasses may
-#     choose to override them to change behavior or for efficiency.
 # </ul>
 #
 class ::tycho::Model {
-    inherit ::tycho::Object
+    inherit ::tycho::Object ::tycho::Interchange
 
     constructor {args} {}
     destructor {}
@@ -193,17 +174,14 @@ class ::tycho::Model {
     #################################################################
     ####                        options                          ####
 
-    # If true, options are checked, otherwise any are allowed
-    public variable checkoptions 1
-
-    # The name of this data object
-    public variable dataname ""
+    # The name of this model
+    public variable modelname ""
 
     # The file that this data is based on
     public variable datafile {}
 
     # How to match when looking for subscribers to notify. Can be
-    # "exact," (the default) "glob", "all"
+    # "exact," "glob", "regexp"
     public variable notifymode "exact"
 
     # A script that changes the default notification mechanism
@@ -211,10 +189,6 @@ class ::tycho::Model {
 
     # A script saying how to parse data from a "source" file
     public variable parsescript {}
-
-    # The separator character for hierarchical models. If 
-    # null, do not execute code that assumes hierarchy.
-    public variable separator ""
 
     # The immutable file that this data is based on
     public variable sourcefile {}
@@ -288,77 +262,14 @@ class ::tycho::Model {
     #################################################################
     ####                  protected methods                      ####
 
-    # Parse arguments of an item
-    protected method _args {class type context defaults data}
-    
-    # Add a new association to the model
-    protected method _association {type name args}
-
-    # Get all attributes of an entity or association
-    protected method _attributes {class index}
-
-    # Get an attribute of an entity or association
-    protected method _cget {class index attr}
-
-    # Return the children of an entity and a given type
-    protected method _children {index type}
-
-    # Configure attributes of an entity or association
-    protected method _configure {class type index args}
-
-    # Add a new entity to the model
-    protected method _entity {type name args}
-
-    # Return the parent of the entry
-    protected method _parent {index}
-    
-    # Parse data into the model
-    protected method _parse {class type context defaults data}
-    
-    # Return the root of the entry
-    protected method _root {index}
-    
-    # Return the root entities of the given types.
-    protected method _roots {type}
-
-    # Return the type of the named entity
-    protected method _type {index}
-
-    # Return a description of an associations
-    protected method describeAssociation {type index prefix}
-
-    # Return a description of an entity
-    protected method describeEntity {type index prefix}
-
     # Notify the subscribers of a change in data
     protected method notify {subscriber command pattern args}
 
+    # Return the "name" to print in error messages
+    method _dataname {}
+    
     #################################################################
     ####                  protected variables                    ####
-
-    # The value of associations
-    protected variable _assnvalue
-
-    # The options of associations
-    protected variable _assnattrs
-
-    # The links of associations
-    protected variable _assnlinks
-
-    # The value of entities
-    protected variable _entyvalue
-
-    # The options of entities
-    protected variable _entyattrs
-
-    # The type of an entity or association
-    protected variable _type
-
-    # For each association, the value, link count, and default options
-    protected variable _associations
-
-    # For each entity, the value count, and default options
-    protected variable _entities
 
     # The marks in the redo/undo history
     protected variable historyMark
@@ -383,6 +294,10 @@ class ::tycho::Model {
     
     # Evaluate code in this object's context
     private method evalInSpecificContext {args} {eval $args}
+
+    method debug {args} {
+	eval $args
+    }
 }
 
 
@@ -406,9 +321,9 @@ body ::tycho::Model::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # If there is no dataname, supply a default
-    if { $dataname == "" } {
-	set dataname [::info namespace tail $this]
+    # If there is no modelname, supply a default
+    if { $modelname == "" } {
+	set modelname [::info namespace tail $this]
     }
 }
 
@@ -432,13 +347,9 @@ body ::tycho::Model::destructor {} {
 # Following arguments are option names and their default values.
 #
 body ::tycho::Model::association {type vcount acount args} {
-    if { [::info exists _associations($type)] } {
-	error "Association type $type already exists"
-    }
-
-    set _associations($type) [concat $vcount $acount $args]
+    eval _declareassociation $type $vcount $acount $args
 }
-    
+
 ########################################################################
 #### clearHistory
 #
@@ -464,10 +375,10 @@ body ::tycho::Model::association {type vcount acount args} {
 body ::tycho::Model::clearHistory {{from first} {to last}} {
     # Get the indexes corresponding to the marks
     if { ! [info exists historyMark($from)] } {
-	error "Unknown mark $from in $dataname"
+	error "Unknown mark $from in $modelname"
     }
     if { ! [info exists historyMark($to)] } {
-	error "Unknown mark $to in $dataname"
+	error "Unknown mark $to in $modelname"
     }
     if { ! [string match {[0-9]*} $from] } {
 	set fromindex $historyMark($from)
@@ -544,17 +455,17 @@ body ::tycho::Model::compactHistory \
 
     # Get the indexes corresponding to the marks
     if { ! [info exists historyMark($from)] } {
-	error "Unknown mark $from in $dataname"
+	error "Unknown mark $from in $modelname"
     }
     if { ! [info exists historyMark($to)] } {
-	error "Unknown mark $to in $dataname"
+	error "Unknown mark $to in $modelname"
     }
     set fromindex $historyMark($from)
     set toindex   $historyMark($to)
 
     # Flag an error if from is not earlier than to
     if { $fromindex >= $toindex } {
-	error "Cannot compact from $from ($fromindex) to $to ($toindex) in $dataname"
+	error "Cannot compact from $from ($fromindex) to $to ($toindex) in $modelname"
     }
     
     # Build composite commands if not supplied
@@ -588,10 +499,10 @@ body ::tycho::Model::compactHistory \
 #
 body ::tycho::Model::compareMarks {mark1 operator mark2} {
     if { ! [::info exists historyMark($mark1)] } {
-	error "Unknown mark $mark1 in $dataname"
+	error "Unknown mark $mark1 in $modelname"
     }
     if { ! [::info exists historyMark($mark2)] } {
-	error "Unknown mark $mark2 in $dataname"
+	error "Unknown mark $mark2 in $modelname"
     }
     # FIXME: Will this work with the Tcl8.0 byte-compiler?
     expr $historyMark($mark1) $operator $historyMark($mark2)
@@ -600,42 +511,11 @@ body ::tycho::Model::compareMarks {mark1 operator mark2} {
 ########################################################################
 #### describe
 #
-# Return a string that describes the model. The data format is exactly
-# that generated by the write{} method -- note that it is 
-# _not_ a well-formed Tcl list. The _prefix_ argument, if present,
-# is a string to place at the start of each line.
-# By default, this method produces correctly
-# formed output for the data of any properly-written model subclass.
-# Subclasses may need to override (and chain) to produce 
-# additional attributes in the output.
+# Return a string that describes the model.
+# See the <a href="Interchange.html"> Interchange</a> class.
 #
 body ::tycho::Model::describe {{prefix {}}} {
-    set string ""
-
-    if { $separator != "" } {
-	append string "configure -separator $separator\n"
-    }
-    foreach type [array names _entities] {
-	append string $prefix
-	append string "entity $type $_entities($type)"
-	append string "\n"
-    }
-    foreach type [array names _associations] {
-	append string $prefix
-	append string "association $type $_associations($type)"
-	append string "\n"
-    }
-    foreach type [array names _entities] {
-	foreach r [_roots $type] {
-	    append string [describeEntity $type $r $prefix]
-	}
-    }
-    foreach type [array names _associations] {
-	foreach r [_roots $type] {
-	    append string [describeAssociation $type $r $prefix]
-	}
-    }
-    return $string
+    _describe $prefix
 }
 
 ########################################################################
@@ -647,11 +527,7 @@ body ::tycho::Model::describe {{prefix {}}} {
 # Following arguments are option names and their default values.
 #
 body ::tycho::Model::entity {type count args} {
-    if { [::info exists _entities($type)] } {
-	error "Entity type $type already exists"
-    }
-
-    set _entities($type) [concat $count $args]
+    eval _declareentity $type $count $args
 }
 
 ########################################################################
@@ -671,65 +547,18 @@ body ::tycho::Model::entity {type count args} {
 # and *array set* commands.
 #
 body ::tycho::Model::externalize {fd {nohistory {}}} {
-    puts $fd "# Tycho model state file for $dataname\n\n"
-    if { $nohistory == "" || ! $nohistory } {
-	puts $fd "# Undo/redo history\n"
-	puts $fd "array set undoCommands [list [array get undoCommands]]\n"
-	puts $fd "array set redoCommands [list [array get redoCommands]]\n"
-	puts $fd "array set publishable  [list [array get publishable]]\n"
-	puts $fd "array set historyMark  [list [array get historyMark]]\n"
-    }
-
-    # Write the model's data to the file
-    puts $fd "\n\n# Entity and association types\n\n"
-    puts $fd "array set _type \{[array get _type]\}\n"
-
-    puts $fd "\n\n# Entity values\n\n"
-    puts $fd "array set _entyvalue \{[array get _entyvalue]\}\n"
-    puts $fd "\n\n# Entity attributes\n\n"
-    puts $fd "array set _entyattrs \{[array get _entyattrs]\}\n"
-
-    puts $fd "\n\n# Associationvalues\n\n"
-    puts $fd "array set _assnvalue \{[array get _assnvalue]\}\n"
-    puts $fd "\n\n# Association attributes\n\n"
-    puts $fd "array set _assnattrs \{[array get _assnattrs]\}\n"
-    puts $fd "\n\n# Association links\n\n"
-    puts $fd "array set _assnlinks \{[array get _assnlinks]\}\n"
-
-    return ""
+    puts $fd "# Tycho model state file for $modelname\n\n"    
+    eval _externalize $fd $nohistory
 }
 
 ########################################################################
 #### internalize
 #
-# Load a class-dependent description of the data. If the _type_ argument
-# is "string" then _data_ is a string that can be evaluated in the
-# object context to load the data. If it is "file", then _data_ is
-# the _name_ (note: not the descriptor) of a file that can be sourced
-# to load the data.
-#
-# <b>Important</b>: Subclasses generally do not need to override
-# this method. However, they _must_ provide a method called
-# <i>evalInSpecificContext</i>, which just evals its args.
-# This is needed so that the scoping of variables
-# is correct: since the file sets variables in the superclass, it
-# must be executed within that scope. There appears to be no way around
-# this even using @scope.
+# Load a class-dependent description of the data.
+# See the <a href="Interchange.html"> Interchange</a> class.
 #
 body ::tycho::Model::internalize {type data} {
-    if { $type == "file" } {
-	# Evaluate in object-specific context. To make sure the correct
-	# method exists, qualify the call. To access the method (since
-	# it's private to prevent general use) use @scope.
-	@scope [info class] [list \
-		$this [info class]::evalInSpecificContext source $data]
-    } elseif { $type == "string" } {
-	@scope [info class] [list \
-		$this [info class]::evalInSpecificContext $data]
-    } else {
-	error "Invalid type $type"
-    }
-    return ""
+    _internalize $type $data
 }
 
 ########################################################################
@@ -871,7 +700,7 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 	unset historyMark($markname)
     } else {
 	if { ! [::info exists historyMark($position)] } {
-	    error "Mark $position unknown in $dataname"
+	    error "Mark $position unknown in $modelname"
 	}
 	# Set a mark
 	set historyMark($mark) $historyMark($position)
@@ -898,27 +727,12 @@ body ::tycho::Model::publish {command index args} {
 ########################################################################
 #### read
 #
-# Read data from a data file or from a string. If the _type_ argument
-# is "string" then _data_ is a string; if it is "file", then _data_ is
-# the _name_ (note: not the descriptor) of a file that contains the
-# data. By default, the file format is taken to be executable Tcl
-# that calls methods. Subclasses can override for more sophisticated
-# behavior.
+# Read data from a data file or from a string.
+# See the <a href="Interchange.html">
+# Interchange</a> class.
 #
 body ::tycho::Model::read {type data} {
-    if { $type == "file" } {
-	# Evaluate in object-specific context. To make sure the correct
-	# method exists, qualify the call. To access the method (since
-	# it's private to prevent general use) use @scope.
-	@scope [info class] [list \
-		$this [info class]::evalInSpecificContext source $data]
-    } elseif { $type == "string" } {
-	@scope [info class] [list \
-		$this [info class]::evalInSpecificContext $data]
-    } else {
-	error "Invalid type $type"
-    }
-    return ""
+    _read $type $data
 }
 
 ########################################################################
@@ -972,7 +786,7 @@ body ::tycho::Model::redo {{distance 1}} {
     if { ! [string match {[0-9]*} $distance] } {
 	# Check that the mark exists
 	if { ! [::info exists historyMark($distance)] } {
-	    error "Unknown mark $distance in $dataname"
+	    error "Unknown mark $distance in $modelname"
 	}
 	set distance [expr $historyMark($distance) - $historyMark($current)]
     }
@@ -1075,24 +889,23 @@ body ::tycho::Model::save {args} {
 ########################################################################
 #### subscribe
 #
-# Subscribe to data that matches an index pattern. The first argument
-# is the name of the subscriber; the second is a pattern to match against
-# the symbolic index of changed data to determine whether to notify
-# this subscriber. By default, when data is published, the
+# Subscribe to the model. The first argument
+# is the name of the subscriber. The second is a pattern that 
+# says which data the subscriber want to be kept informed
+# about. The mode of pattern-matching depends on the value of
+# *-notifymatch* option. (Note that the glob-style and
+# regular expression matching is slow and should be avoided
+# if the model has many (dozens) of subscribers.) The special
+# string "all" can be specified to request that the subscriber
+# be notified of all changes.  See the notify{} method for
+# a description of the matching process.
+#
+# By default, when data is published, the
 # subscriber's publish{} method is called with the data change
 # command (add, replace, dataconfigure, or delete) and its arguments
 # as arguments. If the third argument is supplied, it is applied
 # (at the global context) to four arguments: the subscriber, the
 # command name, the index, and the remaining arguments. 
-#
-# Note that the index is
-# not necessarily the same as the index used when the data is 
-# subscribed to: for example, a subscriber could subscribe to
-# all the data in a text data object, but would be notified
-# on every character insertion. See the notify{} method for
-# a description of the matching process.
-#
-# To subscribe to all changes, simply use the pattern "*".
 #
 body ::tycho::Model::subscribe {subscriber pattern {whattodo {}}} {
     set subscriptions($subscriber,$pattern) $whattodo
@@ -1118,7 +931,7 @@ body ::tycho::Model::undo {{distance 1}} {
     if { ! [string match {[0-9]*} $distance] } {
 	# Check that the mark exists
 	if { ! [::info exists historyMark($distance)] } {
-	    error "Unknown mark $distance in $dataname"
+	    error "Unknown mark $distance in $modelname"
 	}
 	set distance [expr $historyMark($current) - $historyMark($distance)]
     }
@@ -1209,520 +1022,46 @@ body ::tycho::Model::update {subscriber command index args} {
 ########################################################################
 #### write
 #
-# Write data to a data file. The first argument is a file descriptor
-# so that multiple objects can be streamed to a single file. The
-# second argument, if present, is a string to place at the start
-# of each line. By default, this method produces correctly
-# formed output for the data of any properly-written model subclass.
-# Subclasses may need to override (and chain) to write additional
-# attributes to the output.
+# Write data to a data file. See the <a href="Interchange.html>
+# Interchange</a> class.
 #
 body ::tycho::Model::write {fd {prefix {}}} {
-    if { $separator != "" } {
-	puts $fd "configure -separator $separator"
-    }
-    foreach type [array names _entities] {
-	puts $fd "${prefix}entity $type $_entities($type)"
-    }
-    foreach type [array names _associations] {
-	puts $fd "${prefix}association $type $_associations($type)"
-    }
-    foreach type [array names _entities] {
-	foreach r [_roots $type] {
-	    puts $fd [describeEntity $type $r $prefix]
-	}
-    }
-    foreach type [array names _associations] {
-	foreach r [_roots $type] {
-	    puts $fd [describeAssociation $type $r $prefix]
-	}
-    }
+    _write $fd $prefix
 }
 
 ########################################################################
 ########################################################################
-####                     protected methods
-
-
-########################################################################
-#### _args
-#
-# Process optional arguments of a declaration.
-#
-body ::tycho::Model::_args {class type name defaults args} {
-    # Figure out whether this is a nested entity or not
-    if { $args == "" || [string index [lindex $args 0] 0] == "-" } {
-	# This just has a simple attribute list, so set the
-	# options here
-	if { ! $checkoptions } {
-	    # If checking is turned off, don't even remove duplicates
-	    # from the option list. It won't matter, since the
-	    # option handling code all works anyway.
-	    set _[set class]attrs($name) [concat $defaults $args]
-	} else {
-	    # Get defaults as an array
-	    array set temp $defaults
-
-	    # Set given options. Flag an error
-	    # if a given option is not in the defaults
-	    foreach {attribute value} $args {
-		if { ! [::info exists temp($attribute)] } {
-		    # Error: clean up before exit
-		    catch {unset _type($name)}
-		    catch {unset _[set class]value($name)}
-		    catch {unset _[set class]links($name)}
-		    error "Unknown attribute $attribute in $dataname"
-		}
-		set temp($attribute) $value
-	    }
-	    set _[set class]attrs($name) [array get temp]
-	}
-    } else {
-	# Otherwise, it's a nested entity, so call the _parse
-	# routine to process it
-	_parse $class $type $name $defaults [lindex $args 0]
-    }
-}
+####                       protected methods                        ####
 
 ########################################################################
-#### _association
+#### _dataname
 #
-# Add a new association to the graph. The first of the optional arguments
-# is a value if the association has been declared to have a value
-# associated with it (with association{}). This method will usually
-# be called by subclasses that define methods for each particular
-# type of association. It performs no checking.
+# Return a name to use in printing error messages and the 
+# like. Returns the *-modelname* option.
 #
-body ::tycho::Model::_association {type name args} {
-    set descriptor $_entities($type)
-
-    # Remember its type
-    set _type($name) $type
-
-    # Look in the entity description to see if it has a value
-    if { [lindex $descriptor 0] } {
-	# Yes: set it
-	set _assnvalue($name) [lindex $args 0]
-	set args [lreplace $args 0 0]
-    }
-
-    # Look in the entity description to see how many links to read
-    set numlinks [lindex $descriptor 1]
-    if { $numlinks == 1 } {
-	# One. Unusual! (Impossible?)
-	set _assnlinks($name) [lindex $args 0]
-	set args [lreplace $args 0 0]
-    } elseif { $numlinks > 1 } {
-	# Several
-	set _assnlinks($name) [lreplace $args $numlinks end]
-	set args [lrange $args $numlinks end]
-    }
-
-    # Call the shared _args routine to process remaining arguments
-    eval [list _args "assn" $type $name [lreplace $descriptor 0 1]] $args
-
-    # Return the undo command
-    return [list delete$type $name]
-}
-
-########################################################################
-#### _attributes
-#
-# Return a list containing the options of the entity or
-# association as a flat option-value list.
-#
-body ::tycho::Model::_attributes {class index} {
-    return [set _[set class]optns($index)]
-}
-
-########################################################################
-#### _cget
-#
-# Get an attribute of an entity or association. Assumes the
-# item exists. _class_ is either "assn" or "enty".
-#
-body ::tycho::Model::_cget {class index attr} {
-    array set temp [set _[set class]attrs($index)]
-    if { ! [::info exists temp($attr)] } {
-	error "Unknown attribute $attr in $dataname"
-    }
-    return $temp($attr)
-}
-
-########################################################################
-#### _children
-#
-# Return the children of the given entity which have the given type.
-# (Note: associations cannot be hierarchical!)
-#
-body ::tycho::Model::_children {parent type} {
-    # First check if parent is null, and if so, return roots
-    if { $parent == "" } {
-	eval roots $type
-    }
-    # If there's no separator, noone has any children
-    if { $separator == "" } {
-	return ""
-    }
-    
-    # Find descendents and select out the children based on the
-    # length of their "path" and their type
-    set children {}
-    set len [expr [llength [split $parent $separator]] + 1]
-    foreach item [array names _type $parent$separator*] {
-	if { [llength [split $item $separator]] == $len \
-		&& $_type($item) == $type } {
-	    lappend children [lindex [split $item $separator] 1]
-	}
-    }
-    return $children
-}
-
-########################################################################
-#### _configure
-#
-# Configure the given item.  The argument list
-# is a flat list of option-value pairs. If there are arbitrary
-# options, the undo command will not delete options
-# that have not already been set, although it will change
-# back existing options that are changed. Assumes that the
-# item exists.
-#
-body ::tycho::Model::_configure {class type index args} {
-    set inverse [list [set type]configure $index]
-    if { $class == "enty" } {
-	set defaults [lrange $_entities($type) 1 end]
-    } else {
-	set defaults [lrange $_associations($type) 1 end]
-    }
-
-    if { ! $checkoptions } {
-	# If checking is turned off, don't even remove duplicates
-	# from the option list. It won't matter, since the
-	# option handling code all works anyway.
-	lappend _[set class]attrs($name) $args
-    } else {
-	# Get defaults as an array
-	array set temp $defaults
-
-	# Set given attributes. Flag an error
-	# if a given attribute is not in the defaults
-	foreach {attribute value} $args {
-	    if { ! [::info exists temp($attribute)] } {
-		# Error
-		error "Unknown attribute $attribute in $dataname"
-	    }
-	    set temp($attribute) $value
-	}
-    }
-    return $inverse
-}
-
-########################################################################
-#### _entity
-#
-# Add a new entity to the graph. The first of the optional arguments
-# is a value if the entity has been declared to have a value
-# associated with it (with entity{}). This method will usually
-# be called by subclasses that define methods for each particular
-# type of entity. It performs no checking.
-#
-body ::tycho::Model::_entity {type name args} {
-    set descriptor $_entities($type)
-
-    # Remember its type
-    set _type($name) $type
-
-    # Look in the entity description to see if it has a value
-    if { [lindex $descriptor 0] } {
-	# Yes: set it
-	set _entyvalue($name) [lindex $args 0]
-	set args [lreplace $args 0 0]
-    }
-
-    # Call the shared _args routine to process remaining arguments
-    eval [list _args "enty" $type $name [lreplace $descriptor 0 0]] $args
-
-    # Return the undo command
-    return [list delete$type $name]
-}
-
-########################################################################
-#### _parent
-#
-# Return the parent of the entry.
-# To get the type of the parent, use type{}.
-#
-body ::tycho::Model::_parent {index} {
-    if { $separator == "" } {
-	error "Model $dataname is not hierarchical"
-    }
-    if { ! [::info exists _type($index)] } {
-	error "Unknown entry $index in $dataname"
-    }
-    join [lreplace [split $index $separator] end end]
-}
-
-########################################################################
-#### _parse
-#
-# Parse a string which represents a complete entity. This 
-# method is here to support hierarchical models. Attributes are first,
-# and can be one or more per line. Entities and associations follow. The
-# syntax parsed is
-# <pre>
-#   entity     = {attribute value ["\n"]} {entitydecl "\n"}
-#   entitydecl = type name value "{" entity "}"
-#              | type name value {attribute value}
-# </pre>
-#
-# (FIXME: This doesn't allow for associations yet.)
-#
-# The _type_ argument is the type of entity: for example, "entry"
-# or "vertex." _context_ is its assigned name, and is used to place
-# nested entities in the correct context in the model being built.
-# _string_ is the string being parsed.
-#
-body ::tycho::Model::_parse {class type context defaults data} {
-    # Remove leading white space
-    regsub "^\[ \t\n\]*" $data {} data
-
-    # Get the default options in an array
-    array set temp $defaults
-
-    # Scan the string by dropping lines.
-    while { $data != "" } {
-	if { [string match {#*} $data] } {
-	    # Discard comment line and white space
-	    regsub "^\[^\n\]*\[ \t\n\]*" $data {} data
-
-	} elseif { [string match {-*} $data] } {
-	    # Collect a attributes
-	    set attribute [lindex $data 0]
-	    set value [lindex $data 1]
-	    set data [lreplace $data 0 1]
-	    if { $checkoptions && ! [::info exists temp($attribute)] } {
-		# Error: clean up before exit
-		catch {unset _type($name)}
-		catch {unset _[set class]value($name)}
-		catch {unset _[set class]links($name)}
-		error "Unknown attribute $attribute in $dataname"
-	    } else {
-		set temp($attribute) $value
-	    }
-
-	    # Skip white space
-	    regsub "^\[ \t\n\]*" $data {} data
-
-	} else {
-	    # The line is an entity creation command. Figure out if 
-	    # it's hierarchical. First get a line.
-	    regexp "^\[^\n\]*" $data line
-	    set type [lindex $line 0]
-	    set name [lindex $line 1]
-	    set value [lindex $line 2]
-
-	    # Need a catch here since the line may have more open braces
-	    # than close braces.
-	    if { ! [catch {llength $line}] && ([llength $line] == 3 \
-		    || ( [llength $line] > 3 \
-		    && [string index [lindex $line 3] 0] == "-" )) } {
-
-		# Not hierarchical: evaluate this line
-		eval [list $this $type $context$separator$name $value] \
-			[lreplace $line 0 2]
-
-		# Dump the line and following white space
-		regsub "^\[^\n\]*\[ \t\n\]*" $data {} data
-
-	    } else {
-
-		# Must be hierarchical. Get the nested stuff using list
-		# indexing
-		$this $type $context$separator$name $value [lindex $data 3]
-
-		# Drop the first four elements and skip white space
-		set data [lreplace $data 0 3]
-		regsub "^\[ \t\n\]*" $data {} $data
-	    }
-	}
-    }
-    # Set the collected attributes
-    set _[set class]attrs($context) [array get temp]
-}
-
-########################################################################
-#### _root
-#
-# Return the root of the entry.
-#
-body ::tycho::Model::_root {index} {
-    if { $separator == "" } {
-	error "Model $dataname is not hierarchical"
-    }
-    if { ! [::info exists _type($index)] } {
-	error "Unknown entry $index in $dataname"
-    }
-    lindex [split $index $separator] 0
-}
-
-########################################################################
-#### _roots
-#
-# Return the root entities of the given type.
-#
-body ::tycho::Model::_roots {type} {
-    set roots {}
-    if { $separator == "" } {
-	# No separator, so all entities are roots
-	foreach item [array names _type] {
-	    if { $_type($item) == $type } {
-		lappend roots $item
-	    }
-	}
-    } else {
-	# Entities are roots only if they have no separator
-	foreach item [array names _type] {
-	    if { [llength [split $item $separator]] == 1 \
-		    && $_type($item) == $type } {
-		lappend roots $item
-	    }
-	}
-    }
-    return $roots
-}
-
-########################################################################
-#### _type
-#
-# Return the type of the named entity. Error if it doesn't 
-# exist.
-#
-body ::tycho::Model::_type {index} {
-    if { ! [::info exists _type($index)] } {
-	error "Unknown item $index in $dataname"
-    }
-    return $_type($index)
-}
-
-########################################################################
-#### describeAssociation
-#
-# Return a string describing the association of type _type_ named 
-# _index_. The _prefix_ is prepended to each line.
-#
-body ::tycho::Model::describeAssociation {type index prefix} {
-    # Get default options
-    set hasvalue [lindex $_associations($type) 0]
-    set numlinks [lindex $_associations($type) 1]
-    set defaults [lrange $_associations($type) 2 end]
-    array set dflt $defaults
-
-    # Start string with type
-    set string "$prefix $type"
-
-    # Append the tail of the name
-    if { $separator == "" } {
-    	lappend string $index
-    } else {
-    	lappend string [lindex [split $index $separator] end]
-    }
-
-    # If this type has a value, append that
-    if { $hasvalue } {
-	lappend string $_assnvalue($index)
-    }
-
-    # Append the associations
-    eval lappend string $_assnlinks($index)
-
-    # Because associations have no children, print attributes only
-    # FIXME: Later, we may want to make this better formatted.
-    foreach {opt val} $_assnattrs($index) {
-	if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
-	    lappend string $opt $val
-	}
-    }
-    return $string"\n"
-}
-
-########################################################################
-#### describeEntity
-#
-# Return a string describing the entity of type _type_ named 
-# _index_. The _prefix_ is prepended to each line.
-#
-body ::tycho::Model::describeEntity {type index prefix} {
-    # Get default options
-    set hasvalue [lindex $_entities($type) 0]
-    set defaults [lrange $_entities($type) 1 end]
-    array set dflt $defaults
-
-    # Start string with type
-    set string "$prefix $type"
-
-    # Append the tail of the name
-    if { $separator == "" } {
-    	lappend string $index
-    } else {
-    	lappend string [lindex [split $index $separator] end]
-    }
-
-    # If this type has a value, append that
-    if { $hasvalue } {
-	lappend string $_entyvalue($index)
-    }
-
-    # If I have no children, print my attributes only
-    if { [array names _type $index$separator*] == "" } {
-	foreach {opt val} $_entyattrs($index) {
-	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
-       	        lappend string $opt $val
-	    }
-	}
-    } else {
-	# If I have children, then print enclosing braces, then
-	# attributes, then each child
-	set childprefix $prefix
-	append childprefix "    "
-	append string " \{"
-
-	# Output attributes
-	foreach {opt val} $_entyattrs($index) {
-	    if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
-       	        append string "\n" $childprefix
-       	        lappend string $opt $val
-            }
-	}
-	# Output children: entities
-	foreach etype [array names _entities] {
-	    foreach child [_children $index $etype] {
-            	append string \
-            		"\n" [describeEntity \
-			       $etype $index$separator$child $childprefix]
-            }
-	}
-	# Output children: associations
-	foreach atype [array names _associations] {
-	    foreach child [_children $index $atype] {
-            	append string \
-            		"\n" [describeAssociation \
-			       $atype $index$separator$child $childprefix]
-            }
-	}
-	append string "\n\}\n"
-    }
-    return $string
-}
+body ::tycho::Model::_dataname {} {
+    return $modelname
+}    
 
 ########################################################################
 #### notify
 #
 # Notify subscribers except _subscriber_ with the given change in data.
-# How subscribers are found depends 
-# Matching is done using glob-style pattern-matching. The
-# default notification method is very direct: if _index_ matches an
-# index pattern to which the subscriber is subscribed, the given command
+# How subscribers are found depends on the *-notifymode* option:
+# <ul>
+# <li><b>exact</b>: Subscribers are notified only if they have subscribed
+# with a pattern exactly matching _index_.
+# <li><b>glob</b>: Subscribers are notified only if _index_ matches
+# a pattern they subscribed with. Matching is done with *string match*.
+# <li><b>regexp</b>: Subscribers are notified only if _index_ matches
+# a pattern they subscribed with. Matching is done with *regexp*. Note
+# that the match will succees if the regexp matches anywhere in the
+# index -- to require matching against the whole index, be sure
+# to include <b>^</b> and <b>$</b> in the pattern.
+# </ul>
+#
+# The default notification method is very direct: if a subscriber
+# matches the index, the given command
 # is called directly in the subscriber. This behavior can be changed by
 # setting the *-notifyscript* option, which must be a function-script
 # that can be applied to four arguments: the subscriber, the command name,
@@ -1737,6 +1076,13 @@ body ::tycho::Model::describeEntity {type index prefix} {
 #
 body ::tycho::Model::notify {subscriber command index args} {
     set subscribers {}
+
+    # Get subscribers to "all"
+    foreach subindex [array names subscriptions *,all] {
+	lappend subscribers [lindex [split $subindex ","] 0] \
+		$index $subscriptions($subindex)
+    }
+
     # Scan for subscribers with a pattern that matches the index
     switch -exact $notifymode {
 	"exact" {
@@ -1755,36 +1101,36 @@ body ::tycho::Model::notify {subscriber command index args} {
 		}
 	    }
 	}
-	"all" {
+	"regexp" {
 	    foreach subindex [array names subscriptions] {
-		eval lappend subscribers [split $subindex ","] \
-			[list $subscriptions($subindex)]
+		set si [split $subindex ","]
+		set sub [lindex $si 0]
+		set idx [lindex $si 1]
+		if { [regexp $index *,$pattern] } {
+		    lappend subscribers $sub $idx $subscriptions($subindex)
+		}
 	    }
 	}
     }
-
     # Process each subscriber
     foreach {sub index script} $subscribers {
 	# Don't notify the caller
-	if { $sub == $subscriber } {
+	if { $sub != "" && $sub == $subscriber } {
 	    continue
 	}
 	# Unsubscribe the subscriber if it no longer exists!
-	if { [::info which -command $sub] == "" } {
+	if { $sub != "" && [::info which -command $sub] == "" } {
 	    unsubscribe $sub
 	    continue
 	}
-
 	if { $script != "" } {
 	    # if there's a script supplied by the subscriber, apply it
-	    # FIXME: should $args be inside the list?
 	    uplevel #0 ::tycho::apply \
-		    [list $script $sub $command $index] $args
+		    [list $script $sub $command $index $args]
 	} elseif { $notifyscript != "" } {
 	    # Or if there's a global script, apply that
-	    # FIXME: should $args be inside the list?
 	    uplevel #0 ::tycho::apply \
-		    [list $notifyscript $sub $command $index] $args
+		    [list $notifyscript $sub $command $index $args]
 	} else {
 	    # By default, call the subscriber directly
 	    uplevel #0 $sub $command [list $index] $args
