@@ -22,10 +22,6 @@ It outputs lines of comments, instead of code.
 		name {input}
 		type {FLOAT}
 	}
-	output {
-		name {output}
-		type {FLOAT}
-	}
 	method {
 		name { registerProcs }
 		access { public }
