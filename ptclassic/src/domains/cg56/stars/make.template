@@ -73,6 +73,9 @@ PL_SRCS= \
  CG56Peak.pl \
  CG56Pickmin.pl \
  CG56PickminVal.pl \
+ CG56ProPortAD.pl \
+ CG56ProPortADDA.pl \
+ CG56ProPortDA.pl \
  CG56Pulse.pl \
  CG56Quantizer.pl \
  CG56QuasarChgPd.pl \

@@ -55,6 +55,9 @@ CG56STARS = \
  $(CG56)/CG56Peak.o \
  $(CG56)/CG56Pickmin.o \
  $(CG56)/CG56PickminVal.o \
+ $(CG56)/CG56ProPortAD.o \
+ $(CG56)/CG56ProPortADDA.o \
+ $(CG56)/CG56ProPortDA.o \
  $(CG56)/CG56Pulse.o \
  $(CG56)/CG56Quantizer.o \
  $(CG56)/CG56QuasarChgPd.o \
