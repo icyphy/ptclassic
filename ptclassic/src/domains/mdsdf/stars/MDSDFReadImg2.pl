@@ -1,5 +1,5 @@
 defstar {
-  name  	{ ReadImage2 }
+  name  	{ ReadImg2 }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ Mike J. Chen, derived from SDFReadImage by Paul Haskell }
@@ -151,4 +151,4 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
     frameId = int(frameId) + 1; // increment frame id
     delete floatIdOut;
   } // end go{}
-} // end defstar{ ReadImage2 }
+} // end defstar{ ReadImg2 }
