@@ -111,7 +111,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 		}
 	} // end for(ii)
 
-	LOG_DEL; delete tmpbuf;
+	LOG_DEL; delete [] tmpbuf;
 		}
 	} // end doInvDCT()
 
@@ -129,7 +129,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 
 	start { firstTime = 1; }
 
-	wrapup { LOG_DEL; delete cosData; }
+	wrapup { LOG_DEL; delete [] cosData; }
 
 	go {
 // Read input image.
@@ -141,7 +141,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 // doInvDCT function modifies "dctimage"!!
 		DCTImage* dctimage = (DCTImage*) inPacket.writableCopy();
 		if (dctimage->fragmented() || dctimage->processed()) {
-			delete dctimage;
+			LOG_DEL; delete dctimage;
 			Error::abortRun(*this,
 					"Can't decode a fragmented or processed image.");
 			return;
@@ -156,7 +156,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 				dctimage->fullWidth(), dctimage->fullHeight());
 
 // Since we used writableCopy(), we own "dctimage".
-		delete dctimage;
+		LOG_DEL; delete dctimage;
 		Packet temp(*grayout);
 		output%0 << temp;
 	}
