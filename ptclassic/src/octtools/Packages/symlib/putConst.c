@@ -62,6 +62,7 @@ static char* sideConstraintBag( facet, bag, side )
 	constraintBag( facet, bag, SYM_VERTICAL );
 	return "BOTTOM";
     }
+    return "Error: sideContraintBag";
 }
 
 
@@ -183,7 +184,7 @@ static char* printName( inst )
     return buf;
 }
 
-int symPrintConstraints( facet, dir)
+void symPrintConstraints( facet, dir)
     octObject* facet;
     char* dir;
 {
@@ -309,7 +310,7 @@ int symActiveSideConstraint( side, inst1, inst2  )
 }
 
 
-int symPrintAllConstraints( facet )
+void symPrintAllConstraints( facet )
     octObject* facet;
 {
     symPrintConstraints( facet, "X" );
