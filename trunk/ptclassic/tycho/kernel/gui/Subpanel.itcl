@@ -94,7 +94,7 @@ option add *Subpanel.labelMargin 2 widgetDefault
 #     return .x.b
 # }
 # ::tycho::Displayer .x
-# ::tycho::Subpanel .x.s -text "Button"
+# ::tycho::Subpanel .x.s -text "Button" -openbm back.xbm -closebm back.xbm
 # .x.s configure -opencallback nb
 # .x.s configure -closecallback "destroy .x.b"
 # pack .x.s -anchor w
@@ -129,6 +129,12 @@ class ::tycho::Subpanel {
 
     # Specify the text to be inserted in the subpanel label
     itk_option define -text subpanelTitle SubpanelTitle ""
+
+    # Specify the bitmap to use as the open icon. Not updated by config.
+    itk_option define -openbm openBitmap OpenBitmap arrowopen.xbm
+    
+    # Specify the bitmap to use as the closed icon. Not updated by config.
+    itk_option define -closebm closeBitmap CloseBitmap arrowclose.xbm
 
     ###################################################################
     ####                        public methods                     ####
@@ -211,13 +217,15 @@ configbody ::tycho::Subpanel::state {
     switch $itk_option(-state) {
 	closed {
 	    $itk_component(arrow) configure \
-		    -bitmap [file join @$TYCHO kernel img arrowclose.xbm] \
+		    -bitmap [file join @$TYCHO kernel img \
+                       $itk_option(-closebm)] \
 		    -justify center \
 		    -command [code "$this open"]
 	}
 	open {
 	    $itk_component(arrow) configure \
-		    -bitmap [file join @$TYCHO kernel img arrowopen.xbm] \
+		    -bitmap [file join @$TYCHO kernel img \
+                       $itk_option(-openbm)] \
 		    -justify center \
 		    -command [code "$this close"]
 
@@ -289,7 +297,7 @@ body ::tycho::Subpanel::constructor {args} {
     
     # create the arrow up or down button
     itk_component add arrow {
-	button $itk_component(arrowFrame).arrow -height 13 -width 13
+	button $itk_component(arrowFrame).arrow
     } {
 	keep -cursor
     }
