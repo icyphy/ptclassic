@@ -221,6 +221,9 @@ body ::tycho::TopLevel::constructor {args} {
 
     # Bind the file-open command.
     bind $prefix <Control-x><Control-f> "File::openWin; break"
+
+    # Prevent the window manager delete function from exiting.
+    wm protocol $prefix WM_DELETE_WINDOW "$this nextWindow; delete object $this"
 }
 
 #####################################################################
