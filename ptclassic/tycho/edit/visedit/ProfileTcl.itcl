@@ -105,17 +105,17 @@ body ::tycho::ProfileTcl::constructor {args} {
     set packagePathList {}
 
     if {[info exists env(PTARCH)]} {
-	# Look in tycho/lib/profile/obj.$PTARCH
-	if [file exists [file join $tycho lib profile obj.$env(PTARCH)]] {
+	# Look in tycho/lib.$PTARCH
+	if [file exists [file join $tycho lib.$env(PTARCH)]] {
 	    lappend packagePathList [list tclXprofile \
-		    [file join $tycho lib profile obj.$env(PTARCH)]]
+		    [file join $tycho lib.$env(PTARCH)]]
 	}
-	# Look in /users/ptdesign/tycho/lib/profile/obj.$PTARCH
+	# Look in /users/ptdesign/tycho/lib.$PTARCH
 	if [file exists [file join \
-		/ users ptdesign tycho lib profile obj.$env(PTARCH)]] {
+		/ users ptdesign tycho lib.$env(PTARCH)]] {
 	    lappend packagePathList [list tclXprofile \
 		    [file join \
-		    / users ptdesign tycho lib profile obj.$env(PTARCH)]] 
+		    / users ptdesign tycho lib.$env(PTARCH)]] 
 	}
     }
     ::tycho::loadIfNotPresent profile tclx $packagePathList
