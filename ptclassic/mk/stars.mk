@@ -441,15 +441,15 @@ ifdef CG
 	ifdef CGPAR
 		CUSTOM_DIRS += $(CGDIR)/HuScheduler $(CGDIR)/ddfScheduler \
 			$(CGDIR)/macroScheduler $(CGDIR)/dcScheduler  \
-			$(CGDIR)/dlScheduler $(CGDIR)/multiScheduler \
+			$(CGDIR)/dlScheduler $(CGDIR)/hierScheduler \
 			$(CGDIR)/parScheduler
-		LIBS += -lMacro -lDC -lHu -lDL -lMSH -lcgddf -lPar -lcg
+		LIBS += -lMacro -lDC -lHu -lDL -lHier -lcgddf -lPar -lcg
 		TARGETS += $(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o 
 		LIBFILES += $(LIBDIR)/libDC.$(LIBSUFFIX) \
 			$(LIBDIR)/libHu.$(LIBSUFFIX) \
 			$(LIBDIR)/libMacro.$(LIBSUFFIX) \
 			$(LIBDIR)/libDL.$(LIBSUFFIX) \
-			$(LIBDIR)/libMSH.$(LIBSUFFIX) \
+			$(LIBDIR)/libHier.$(LIBSUFFIX) \
 			$(LIBDIR)/libcgddf.$(LIBSUFFIX) \
 			$(LIBDIR)/libPar.$(LIBSUFFIX)
 	endif
