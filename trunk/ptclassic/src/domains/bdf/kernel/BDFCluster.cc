@@ -1564,11 +1564,11 @@ void BDFClusterBag::wrapup() {
 	while ((c = nextClust++) != 0) c->wrapup();
 }
 
-// destroy the bag.
+// destroy the bag
+// dynamic cluster ports are deallocated by the BDFCluster base class.
 BDFClusterBag::~BDFClusterBag() {
 	delete gal;
 	delete sched;
-	deleteAllGenPorts();
 }
 
 // This function, given a BDFClustPort, tries to find another port that
@@ -1794,14 +1794,14 @@ BDFAtomCluster::BDFAtomCluster(DataFlowStar& star,Galaxy* parent) : pStar(star)
 	repetitions = pStar.repetitions;
 }
 
-// destroy an atomic cluster.  Main job: delete the BDFClustPorts.
+// destroy an atomic cluster.
+// dynamic cluster ports are deallocated by the BDFCluster base class.
 BDFAtomCluster::~BDFAtomCluster() {
 	BlockPortIter nextPort(*this);
 	PortHole* p;
 	while ((p = nextPort++) != 0) {
 		// avoid removal from parent list.
 		p->setNameParent("",0);
-		delete p;
 	}
 }
 
@@ -2245,8 +2245,4 @@ void BDFWhileLoop::fixArcs(BDFCluster* x,BDFCluster* y) {
 			np->setRelation(BDF_NONE);
 		}
 	}
-}
-
-BDFWhileLoop::~BDFWhileLoop() {
-	deleteAllGenPorts();
 }
