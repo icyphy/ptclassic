@@ -27,15 +27,18 @@ CFLAGS        = -g -I$(OCTTOOLS)/include
 # C++ compiler variables
 GXX	      = g++
 GPPFLAGS      = -g -fminimal-debug -I$(ROOT)/src/kernel
-GNUINCLUDE    = /usr/gnu/lib/g++-include
+GNULIB	      = /usr/gnu/lib
+GNUINCLUDE    = $(GNULIB)/g++-include
 
 # Linker variables
-LINKER        = g++
+LINKER        = $(GNULIB)/gcc-ld
+LINKOPTS      = -S
 LDIR          = $(ROOT)/lib.$(ARCH)
-LDFLAGS	      = -L$(OCTTOOLS)/lib.$(ARCH) -L$(LDIR) -u_UserMain
-LIBS	      = -lsdf -lddf -lde \
-		-lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
-		-lerrtrap -luprintf -lport -lX11 -lm
+LDFLAGS	      = $(LINKOPTS) -e start -dc -dp -Bstatic /lib/crt0.o \
+		-L$(OCTTOOLS)/lib.$(ARCH) -L$(LDIR) -u_UserMain
+LIBS	      = -lsdf -lddf -lde -lptolemy \
+		-lg++ -loh -lrpc -llist -ltr -lutility -lst -lerrtrap \
+		-luprintf -lport -lX11 -lm $(GNULIB)/gcc-gnulib -lc
 
 HDRS	      = compile.h \
 		edit.h \
@@ -76,13 +79,116 @@ LIBCSRCS      = main.c \
 		options.c
 
 
-LIBCPPSRCS    = kernelCalls.cc XOutput.cc
+LIBCPPSRCS    = kernelCalls.cc XOutput.cc pigiLoader.cc
 
 
 LIBSRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
 SRCS = 	$(LIBSRCS) defpalettes.c
 LIBOBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
+
+# Star definitions
+SDF=../domains/sdf/stars
+DDF=../domains/ddf/stars
+DE =../domains/de/stars
+
+SDFSTARS= \
+ $(SDF)/SDFAutocor.o \
+ $(SDF)/SDFBiQuad.o \
+ $(SDF)/SDFBlackHole.o \
+ $(SDF)/SDFBurg.o \
+ $(SDF)/SDFCommutator.o \
+ $(SDF)/SDFComplexDC.o \
+ $(SDF)/SDFComplexFFT.o \
+ $(SDF)/SDFComplexFIR.o \
+ $(SDF)/SDFComplexPower.o \
+ $(SDF)/SDFComplexProduct.o \
+ $(SDF)/SDFComplexReal.o \
+ $(SDF)/SDFComplexSum.o \
+ $(SDF)/SDFCos.o \
+ $(SDF)/SDFCut.o \
+ $(SDF)/SDFDB.o \
+ $(SDF)/SDFDistributor.o \
+ $(SDF)/SDFDownSample.o \
+ $(SDF)/SDFExp.o \
+ $(SDF)/SDFFIR.o \
+ $(SDF)/SDFFloatDC.o \
+ $(SDF)/SDFFloatDiff.o \
+ $(SDF)/SDFFloatGain.o \
+ $(SDF)/SDFFloatImpulse.o \
+ $(SDF)/SDFFloatProduct.o \
+ $(SDF)/SDFFloatRamp.o \
+ $(SDF)/SDFFloatRect.o \
+ $(SDF)/SDFFloatSum.o \
+ $(SDF)/SDFFloatThresh.o \
+ $(SDF)/SDFFloor.o \
+ $(SDF)/SDFFork.o \
+ $(SDF)/SDFIIDGaussian.o \
+ $(SDF)/SDFIIDUniform.o \
+ $(SDF)/SDFIntRamp.o \
+ $(SDF)/SDFIntegrator.o \
+ $(SDF)/SDFLMS.o \
+ $(SDF)/SDFLevDur.o \
+ $(SDF)/SDFLimit.o \
+ $(SDF)/SDFLog.o \
+ $(SDF)/SDFPlay.o \
+ $(SDF)/SDFPolarRect.o \
+ $(SDF)/SDFPrinter.o \
+ $(SDF)/SDFRealComplex.o \
+ $(SDF)/SDFReciprocal.o \
+ $(SDF)/SDFRectPolar.o \
+ $(SDF)/SDFRepeat.o \
+ $(SDF)/SDFSin.o \
+ $(SDF)/SDFSqrt.o \
+ $(SDF)/SDFUpSample.o \
+ $(SDF)/SDFWaveForm.o \
+ $(SDF)/SDFXMgraph.o \
+ $(SDF)/SDFXYgraph.o \
+ $(SDF)/SDFXgraph.o \
+ $(SDF)/SDFXhistogram.o
+
+DESTARS= \
+ $(DE)/DEBlackHole.o \
+ $(DE)/DEBlockingAccept.o \
+ $(DE)/DEBlockingAsk.o \
+ $(DE)/DEClock.o \
+ $(DE)/DEDelay.o \
+ $(DE)/DEDiscard.o \
+ $(DE)/DEExpDelay.o \
+ $(DE)/DEExpServer.o \
+ $(DE)/DEFilter.o \
+ $(DE)/DEFloatDC.o \
+ $(DE)/DEFloatRamp.o \
+ $(DE)/DEFork.o \
+ $(DE)/DEImpulse.o \
+ $(DE)/DEMeasureDelay.o \
+ $(DE)/DEMerge.o \
+ $(DE)/DENull.o \
+ $(DE)/DEPSServer.o \
+ $(DE)/DEPoisson.o \
+ $(DE)/DEPrQueue.o \
+ $(DE)/DEPrinter.o \
+ $(DE)/DERanGen.o \
+ $(DE)/DERouter.o \
+ $(DE)/DESampler.o \
+ $(DE)/DEServer.o \
+ $(DE)/DEStatistics.o \
+ $(DE)/DEStopTimer.o \
+ $(DE)/DESwitch.o \
+ $(DE)/DEUDCounter.o \
+ $(DE)/DEUniDelay.o \
+ $(DE)/DEUniServer.o \
+ $(DE)/DEXMgraph.o \
+ $(DE)/DEXgraph.o \
+ $(DE)/DEXhistogram.o
+
+DDFSTARS= \
+ $(DDF)/DDFSelf.o \
+ $(DDF)/DDFDownCounter.o \
+ $(DDF)/DDFLastOfN.o \
+ $(DDF)/DDFRepeater.o \
+ $(DDF)/DDFSelect.o \
+ $(DDF)/DDFSwitch.o
 
 all:	makefile libpigi.a pigiRpc
 
@@ -92,11 +198,10 @@ libpigi.a:	$(LIBOBJS)
 	ranlib libpigi.a
 
 pigiRpc:	defpalettes.o libpigi.a $(LDIR)/libptolemy.a \
-		$(LDIR)/libsdf.a $(LDIR)/libddf.a $(LDIR)/libde.a
+		$(LDIR)/libsdf.a $(LDIR)/libddf.a $(LDIR)/libde.a \
+		$(SDFSTARS) $(DESTARS) $(DDFSTARS)
 	$(LINKER) $(LDFLAGS) defpalettes.o \
-	    ../domains/ddf/stars/*.o \
-	    ../domains/de/stars/*.o \
-	    ../domains/sdf/stars/*.o \
+		$(SDFSTARS) $(DESTARS) $(DDFSTARS) \
 	    libpigi.a $(LIBS) -o pigiRpc
 
 DESTLIB = $(ROOT)/lib.$(ARCH)/libpigi.a
@@ -112,7 +217,6 @@ $(DESTBIN):	pigiRpc
 		@echo Installing pigiRpc
 		rm -f $(DESTBIN)
 		cp pigiRpc $(DESTBIN)
-		strip $(DESTBIN)
 
 install: makefile $(DESTLIB) $(DESTBIN)
 
