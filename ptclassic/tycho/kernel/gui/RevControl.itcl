@@ -297,6 +297,7 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
     wm deiconify $editorWin.revcontrol
     after 1 $editorWin.revcontrol focusin
     $editorWin.revcontrol focusin
+    return $editorWin.revcontrol
 }
 
 ###################################################################
@@ -305,6 +306,9 @@ body ::tycho::RevControl::makeRev {type editorWin editorObj} {
 # the top-level editor window and the name of the editor object, which
 # must be an instance of <code>::tycho::File</code> or a class derived
 # from that.
+#
+# This proc returns the name of the dialog box that is created so we
+# can access it for testing.
 #
 body ::tycho::RevControl::setup {editorWin editorObj} {
 
@@ -344,10 +348,9 @@ body ::tycho::RevControl::setup {editorWin editorObj} {
                 [code "$dlg nextWindow; delete object $dlg"]
 	bind $dlg <Escape> \
                 [code "$dlg nextWindow; delete object $dlg"]
-	::tycho::Dialog::wait $dlg
-	puts "bar"
+	return [::tycho::Dialog::wait $dlg]
     } else {
-	::tycho::RevControl::makeRev $revclass $editorWin $editorObj
+	return [::tycho::RevControl::makeRev $revclass $editorWin $editorObj]
     }
 }
 
