@@ -42,8 +42,13 @@
 # <p>
 # Here is an example of how to use the ProfileTcl:
 # <tcl><pre>
-#     ::tycho::ProfileTcl .x ...
+#     ::tycho::ProfileTcl .p
+#     .p centerOnScreen   
 # </pre></tcl>
+# Then<br>
+# 1. Hit the "profile on" button.<br>
+# 2. Do something simple that you want to profile.<br>
+# 3. Then hit the "profile off" button and wait patiently
 #
 class ::tycho::ProfileTcl {
     inherit ::tycho::EditForest
@@ -180,12 +185,9 @@ body ::tycho::ProfileTcl::profileOff {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileOn {} {
-    # "info procs" does not work in itcl, so we use "info which"
-    if {[info which -command profile] == {}} {
-        # TclX is not loaded.  Load it.
-        # FIXME: Hardwired path here.
-        load /users/cxh/pt/tcltk/tclX.sol2/lib/libtclx.so
-    }
+    ::tycho::Loader .myLoader
+    .myLoader loadIfNotPresent profile tclx
+
     profile -commands on
 }
 
