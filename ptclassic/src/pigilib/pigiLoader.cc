@@ -59,7 +59,7 @@ extern "C" {
 	int util_csystem (const char*);
 	void win_msg(const char*);
 	void ErrAdd(const char*);
-	void KcLog();
+	void KcLog(const char*);
 	int KcIsCompiledInStar(const char*);
 	int KcIsKnown(const char*);
 	const char* curDomainName();
