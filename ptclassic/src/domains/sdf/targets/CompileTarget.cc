@@ -106,11 +106,15 @@ int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
 		writeGalDef(b->asGalaxy(), sanitize(b->className()));
     }
 
-    // prepare the output file for writing
-    // Use the original class name, not the sanitized class name
+    // Prepare the output file for writing
+    // -- use the original class name, not the sanitized class name
+    // -- destructor for pt_ofstream will close the file automatically
     StringList galFileName = galaxy.className();
     galFileName += ".h";
-    char* codeFileName = writeFileName(galFileName);
+    char* codeWriteFileName = writeFileName(galFileName);
+    char codeFileName[strlen(codeWriteFileName) + 1];
+    strcpy(codeFileName, codeWriteFileName);
+    delete [] codeWriteFileName;
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return FALSE;
 
@@ -206,17 +210,23 @@ int CompileTarget::run() {
 }
 
 void CompileTarget::wrapup() {
-    char* codeFileName = writeFileName("code.cc");
-    if(Scheduler::haltRequested()) return;
+    if (Scheduler::haltRequested()) return;
+
+    // Open code.cc
+    char* codeWriteFileName = writeFileName("code.cc");
+    char codeFileName[strlen(codeWriteFileName) + 1];
+    strcpy(codeFileName, codeWriteFileName);
+    delete [] codeWriteFileName;
     pt_ofstream codeFile(codeFileName);
     if (!codeFile) return;
+
+    // Write code to code.cc
     codeFile << myCode;
     codeFile.flush();
 
-    // Invoke the compiler
-    StringList cmd;
     // Check to see whether makefile is present, and if not, copy it in.
-
+    // The makefile will invoke the compiler
+    StringList cmd;
     cmd = "cd ";
     cmd += (const char*)destDirectory;
     cmd += "; if (test -r make.template) then ";
