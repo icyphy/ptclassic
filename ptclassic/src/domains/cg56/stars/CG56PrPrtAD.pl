@@ -24,9 +24,9 @@ it fires), interrupt-based code will be generated.
 If the star is not repeated, it will generate code
 that polls the Proport and busy waits if samples are not available.
 Interrupt-based code can be forced by setting the string
-parameter <i>forceInterrupts\fP to "yes".
+parameter <i>forceInterrupts</i> to "yes".
 The interrupt buffer will be the minimum required size if the
-parameter <i>interruptBufferSize\fP is "default".
+parameter <i>interruptBufferSize</i> is "default".
 If this parameter is a number, it will be used for the length
 (in words) of the interrupt buffer.
 <p>

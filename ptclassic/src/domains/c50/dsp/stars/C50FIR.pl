@@ -22,7 +22,7 @@ The output of the FIR filter is given by:
         y(n) ~ = ~ sum from { i = 0 } to { N - 1 } { c[i] x[N-i] }
 </pre>
 where N is the order of the filter given by the number of coefficients in
-<i>taps\fP.
+<i>taps</i>.
 c[i], i = 0..N-1 are the tap coefficients; and x[T-i] is the input i samples
 before the current input.
 <p>

@@ -9,12 +9,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	desc {
 Compute the complex FFT.
-\fIInputSize\fR is number of input samples.
-\fIfftSize\fR is the size of FFT.
+<i>InputSize</i> is number of input samples.
+<i>fftSize</i> is the size of FFT.
 Zero padding is used if
 fftSize > InputSize
-Inverse FFT is used if \fIInverse\fR is 1.
-Use Hamming window if \fIUseWindow\fR is true.
+Inverse FFT is used if <i>Inverse</i> is 1.
+Use Hamming window if <i>UseWindow</i> is true.
 	}
 	author { N. Becker }
 	location { SDF user contribution library }

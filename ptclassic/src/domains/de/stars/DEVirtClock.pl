@@ -31,38 +31,36 @@ cell may or may not be the new arrival. If 'MaxSize' is zero or
 negative, then infinitely many cells can be stored.
 	} // end description
 
-	explanation {
+	htmldoc {
 The (new, improved) virtual clock buffer service discipline used by
 this star works like this:
-.pp
+<p>
 Each connection through a buffer is assigned a rate Ri.
 Let Di = (1/Ri), the minimum allowable inter-cell time duration.
-.pp
+<p>
 The virtual "current time" is the timestamp of the most recently
 served cell.
-.pp
+<p>
 The first cell from the first established connection through a
 buffer is given virtual timestamp 0.0.
 The first cells from other connections are stamped with the
 virtual "current time".
 Cells from a connection i other than the first cell are stamped with
 the later (i.e. maximum) of
-.ti 5
-(1) the current time
-.ti 5
-(2) Di + the timestamp of the most recent enqueued OR served cell
+<blockquote>(1) the current time</blockquote>
+<blockquote>(2) Di + the timestamp of the most recent enqueued OR served cell</blockquote>
 from stream i.
-.pp
+<p>
 Note that the timestamp for each new cell is AT LEAST Di time units
 later than the timestamps of all other cells on the same virtual
 circuit.
-.pp
+<p>
 When a cell arrives at a full buffer, it is assigned a timestamp as
 usual.
 The cell with the biggest timestamp is discarded.
 If the discarded cell is not the just-arrived cell, the just-arrived
 cell is enqueued using the just-freed memory.
-.pp
+<p>
 This buffer control policy (i.e. buffer service and buffer access
 policies) is fair, work-conserving, and buffer-conserving.
 Fairness is guaranteed because, in the presence of competing traffic,
@@ -72,14 +70,14 @@ is active, the buffer never remains idle when there are
 cells available to serve.
 The controls is buffer-conserving because cells are discarded only
 when the buffer is full.
-.pp
+<p>
 This buffer control strategy simplifies Zhang's proposed
 Virtual Clock control discipline [1].
 Zhang's discipline requires that network users and networks agree
 on a "monitoring interval" in addition to an average service rate.
 If a source is found to violate the agreed data rate over any monitoring
 interval, some unspecified action must be taken.
-.pp
+<p>
 The discipline presented here does not use a monitoring interval;
 it only performs buffer admission control when the buffer is full.
 Also, this discipline makes explicit the action taken when a
@@ -88,8 +86,7 @@ It discards the cell with the "most future" virtual timestamp.
 This control penalizes the virtual circuit that deserves it the
 most, but it still guarantees that penalized virtual circuits
 receive
-.ul
-at least
+<em>at least</em>
 their requested bandwidth allocation.
 This buffer control strategy thus eliminates the "flooding" problem
 inherent in Zhang's Virtual Clock discipline.
@@ -100,26 +97,20 @@ much larger than the current virtual time.
 Thus, arrivals from other sources
 can bump out cells from the misbehaving source.
 Every source is
-.ul
-guaranteed
+<em>guaranteed</em>
 service at its average rate
-.ul
-without loss
+<em>without loss</em>
 assuming:
-.ti 5
-(1) the buffer size is at least as large as the number of sources
-.ti 5
-(2) the buffer output rate is at least as large as the sum of the
+<blockquote>(1) the buffer size is at least as large as the number of sources</blockquote>
+<blockquote>(2) the buffer output rate is at least as large as the sum of the</blockquote>
 source input rates
-.pp
+<p>
 This discipline ends up being a flavor of Earliest Due Date
 scheduling with
-.ti 5
-(1) a specific algorithm for picking due dates at each buffer
-.ti 5
-(2) a specific cell discard mechanism that ensures loss fairness
-.UH Reference
-.ip [1]
+<blockquote>(1) a specific algorithm for picking due dates at each buffer</blockquote>
+<blockquote>(2) a specific cell discard mechanism that ensures loss fairness</blockquote>
+<h3>Reference</h3>
+<p>[1]  
 Lixia Zhang, "VirtualClock: A New Traffic Control Algorithm for
 Packet Switching Networks," \fISIGCOMM'90 Symposium\fR,
 Sept. 1990, Philadelphia, \fIComputer Communications Review\fR,

@@ -11,8 +11,8 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { C50 main library }
-	explanation {
-.Id "bit shifter"
+	htmldoc {
+<a name="bit shifter"></a>
 Scale by shifting left \fIleftShifts\fP bits.
 Negative values of N implies right shifting.
 Arithmetic shifts are used.

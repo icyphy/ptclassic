@@ -14,10 +14,10 @@ limitation of liability, and disclaimer of warranty provisions.
     location { CG56 control library }
 	htmldoc {
 <a name="multiplex"></a>
-<i>blockSize\fP particles are consumed on each input.
+<i>blockSize</i> particles are consumed on each input.
 But only one of these blocks of particles is copied to the output.
-The one copied is determined by the <i>control\fP input.
-Integers from <i></i>0<i></i> through <i>N-</i>1<i></i> are accepted at the <i>control\fP input,
+The one copied is determined by the <i>control</i> input.
+Integers from <i></i>0<i></i> through <i>N-</i>1<i></i> are accepted at the <i>control</i> input,
 where <i>N</i> is the number of inputs.
 If the <i>control</i></b> input is outside this range, random data (possibly
 memory mapped devices) will be copied.
@@ -32,7 +32,7 @@ Use this star at your own risk.
 <p>
 At compile time, the star constructs a table of pointers to each of the
 input blocks.
-The <i>control\fP input is used to index this table, yielding a pointer
+The <i>control</i> input is used to index this table, yielding a pointer
 to the appropriate input block for the firing.
 This implementation assumes that all of its input ports reside in X memory.
 <p>

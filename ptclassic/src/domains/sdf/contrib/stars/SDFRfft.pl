@@ -3,11 +3,11 @@ defstar {
 	domain {SDF}
 	desc {
 Compute the FFT of a real input, using the '2-channel trick'.
-\fIInputSize\fR is number of input samples and
-\fIfftSize\fR is the size of FFT.
-Zero padding is used if \fIfftSize\fR > \fIInputSize\fR.
-The inverse FFT is taken if \fIInverse\fR is non-zero.
-Apply a Hamming window to the data if \fIUseWindow\fR is non-zero.
+<i>InputSize</i> is number of input samples and
+<i>fftSize</i> is the size of FFT.
+Zero padding is used if <i>fftSize</i> > <i>InputSize</i>.
+The inverse FFT is taken if <i>Inverse</i> is non-zero.
+Apply a Hamming window to the data if <i>UseWindow</i> is non-zero.
 The output is half the size of the input.
 	}
 	author { N. Becker }

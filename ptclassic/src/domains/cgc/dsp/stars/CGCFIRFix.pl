@@ -44,7 +44,7 @@ It is best to use tilde characters in the filename to reference them to
 the home directory of the user.
 This way, future file system reorganizations will have minimal effect.
 <p>
-When the <i>decimation\fP (<i>interpolation\fP)
+When the <i>decimation</i> (<i>interpolation</i>)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
@@ -67,7 +67,7 @@ then the filter stopband should begin before <i>f/</i>2<i></i>.
 If the interpolation ratio is <i>i</i>, then <i>f/</i>2<i></i> is a fraction <i></i>1<i>/</i>(<i></i>2<i> i</i>)<i></i>
 of the sample rate at which you must design your filter.
 <p>
-The <i>decimationPhase\fP parameter is somewhat subtle.
+The <i>decimationPhase</i> parameter is somewhat subtle.
 It is exactly equivalent the phase parameter of the DownSample star.
 Its interpretation is as follows; when decimating,
 samples are conceptually discarded (although a polyphase structure
