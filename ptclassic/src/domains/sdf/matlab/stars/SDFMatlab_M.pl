@@ -99,10 +99,10 @@ The values of the input ports will be passed as arguments to this function.
 		delete [] matlabOutputMatrices;
 		matlabOutputMatrices = 0;
 
-		freeStringArray(matlabInputNames, numInputs);
+		matlabInterface.FreeStringArray(matlabInputNames, numInputs);
 		delete [] matlabInputNames;
 		matlabInputNames = 0;
-		freeStringArray(matlabOutputNames, numOutputs);
+		matlabInterface.FreeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
 		matlabOutputNames = 0;
 
@@ -193,25 +193,10 @@ The values of the input ports will be passed as arguments to this function.
 						   numOutputs);
 		delete [] matlabOutputMatrices;
 
-		freeStringArray(matlabInputNames, numInputs);
+		matlabInterface.FreeStringArray(matlabInputNames, numInputs);
 		delete [] matlabInputNames;
-		freeStringArray(matlabOutputNames, numOutputs);
+		matlabInterface.FreeStringArray(matlabOutputNames, numOutputs);
 		delete [] matlabOutputNames;
-	}
-
-	method {
-	  name { freeStringArray }
-	  access { protected }
-	  type { void }
-	  arglist { "(char *strarray[], int numstrings)" }
-	  code {
-		// Do not free the strarray itself
-		if ( strarray ) {
-		  for ( int k = 0; k < numstrings; k++ ) {
-		    delete [] strarray[k];
-		  }
-		}
-	  }
 	}
 
 	// Returns 1 for Failure and 0 for Success
