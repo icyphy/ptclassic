@@ -1,0 +1,3 @@
+#!/bin/csh
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+$PTOLEMY/bin.$ARCH/wish -f $PTOLEMY/bin/ptfixtree.tk $*
