@@ -111,8 +111,8 @@ ifdef USE_CORE_STATIC_LIBS
 	LIBNONSHARED =		libpitcl.a
 	INSTALL = $(LIBDIR)/$(LIBNONSHARED)
 else
-	LIB =		libpitcl.$(LIBSUFFIX)
-	INSTALL = $(LIBDIR)/$(LIB)
+	LIBR =		libpitcl.$(LIBSUFFIX)
+	INSTALL = $(LIBDIR)/$(LIBR)
 endif
 
 PT_DEPEND += $(NON_LIB_SRCS:.cc=.o)
@@ -143,17 +143,17 @@ updatetychodocs: docs
 #
 # The depend, makefile and makefiles rules are from compile.mk
 
-ifeq ($(strip $(LIB)),)
-LIB=dummylib
+ifeq ($(strip $(LIBR)),)
+LIBR=dummylib
 endif
 
-ifeq ($(strip $(LIB_DEBUG)),)
-LIB_DEBUG=dummydebuglib
+ifeq ($(strip $(LIBR_DEBUG)),)
+LIBR_DEBUG=dummydebuglib
 endif
 
 # Rule for building a C++ library
 # We use a GNU make conditional here
-$(LIB):	$(OBJS)
+$(LIBR):	$(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes) 
 	rm -f $@
 	$(SHARED_LIBRARY_COMMAND) $@ $(OBJS) 
@@ -175,7 +175,7 @@ $(LIBDIR)/$(LIBNONSHARED):	$(LIBNONSHARED) $(EXP)
 	ln $(LIBNONSHARED) $(LIBDIR)
 
 # AIX used EXP for export lists
-$(EXP): $(LIB)
+$(EXP): $(LIBR)
 
 
 DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
