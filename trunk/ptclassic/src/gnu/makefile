@@ -323,9 +323,9 @@ configure_egcs: $(EGCS_OBJ)
 		--prefix=$(EGCS_PREFIX) --exec-prefix=$(EGCS_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS))
 bin_egcs:
-	(cd $(EGCS_OBJ); $(MAKE) bootstrap)
+	(cd $(EGCS_OBJ); $(GNU_OBJ)/make/make bootstrap)
 install_egcs: $(EGCS_DEST) $(EGCS_PREFIX) $(EGCS_EXEC_PREFIX)
-	(cd $(EGCS_OBJ); $(MAKE) install)
+	(cd $(EGCS_OBJ);  $(GNU_OBJ)/make/make install)
 
 $(EGCS_OBJ): $(GNU_OBJ) 
 	-mkdir "$(EGCS_OBJ)"
