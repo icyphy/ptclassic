@@ -561,7 +561,7 @@ when the logarithmic option is selected.\n");
 xtb_hret del_func(win, bval, info)
 Window win;			/* Button window    */
 int bval;			/* Button value     */
-char *info;			/* User information */
+void *info;			/* User information */
 /*
  * This routine is called when the `Close' button is pressed in
  * an xgraph window.  It causes the window to go away.
@@ -586,7 +586,7 @@ char *info;			/* User information */
 xtb_hret hcpy_func(win, bval, info)
 Window win;			/* Button Window    */
 int bval;			/* Button value     */
-char *info;			/* User Information */
+void *info;			/* User Information */
 /*
  * This routine is called when the hardcopy button is pressed
  * in an xgraph window.  It causes the output dialog to be

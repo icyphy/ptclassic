@@ -95,9 +95,9 @@ typedef enum {FALSE, TRUE} Bool;
 #define DPRINTF(string)        printf string;  \
                                fflush(stdout);
 
-#define ASSERT(n)   \
-  if (!(n)) { \
-    fprintf(stderr, "\nAssertion Failed: %s, Line %d\n", __FILE__, __LINE__); \
+#define ASSERT(condition)   \
+  if (!(condition)) { \
+    fprintf(stderr, "\nAssertion Failed: %s Line %d\n", __FILE__, __LINE__); \
     fflush(stderr); \
     abort(); \
   }
