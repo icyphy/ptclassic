@@ -32,9 +32,9 @@ The <i>inVal</i> is used as the storage location of the read data value.
 		}
 	}
 	state {
-		name { inVal}
+		name { inVal }
 		type { fix }
-		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM|A_NOINIT }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_UMEM }
 		default { "0"}
 	}
 
