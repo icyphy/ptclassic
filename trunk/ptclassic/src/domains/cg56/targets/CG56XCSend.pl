@@ -2,10 +2,10 @@ defstar	{
 
 name { S56XCGCSend }
 domain { CG56 }
-desc { S56X	to CGC send	star }
-version	{ $Id$	}
+desc { S56X to CGC send	star }
+version	{ $Id$ }
 author { Jose Pino }
-derivedFrom	{ S56XCGCBase }
+derivedFrom { S56XCGCBase }
 
 copyright {
 Copyright (c) 1993 The Regents of the University of	California.
@@ -48,11 +48,14 @@ setup {
 }
 	
 go {
-	if (input.far()->parent()->isA("CG56Spread")) {
+/* This is commented out because CG56Spread stars are not implemented yet.
+   Furthermore, this will not compile under cfront go is protected.... it
+   should probably be run.
+  if (input.far()->parent()->isA("CG56Spread")) {
 		if (addCode("",NULL,input.far()->parent()->name())) {
 			((CGStar*)input.far()->parent())->go();
 		}
-	}
+	} */
 	addCode(sendData(pairNumber,numXfer));
 	addCode(interruptHost(pairNumber));
 }
