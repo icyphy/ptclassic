@@ -30,6 +30,7 @@ protected:
 public:
 	void start() {Wormhole :: setup() ;}
 	void go();
+	void wrapup() { endSimulation();}
 
 	// Constructor
 	SDFWormhole(Galaxy& g);
