@@ -31,7 +31,7 @@
 # limitation of liability, and disclaimer of warranty provisions.
 
 if {$argc < 2} {
-    puts "Usage: esterel2pl domain file(s) [options]"
+    puts "Usage: esterel2pl domain file(s) \[options\]"
     exit 1
 }
 
