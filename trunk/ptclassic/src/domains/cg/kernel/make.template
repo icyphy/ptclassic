@@ -74,6 +74,7 @@ CodeBlock.h \
 CodeStream.h \
 CodeStreamList.h \
 ConversionTable.h \
+ImplementationCost.h \
 IntArray.h \
 MReq.h \
 MemMap.h \
@@ -82,7 +83,7 @@ ProcMemory.h \
 Profile.h \
 RepStateList.h \
 SymbolList.h \
-UniqueStringList.h \
+UniqueStringList.h
 
 # Header files
 HDRS= $(H_WITH_MATCH) 
