@@ -127,9 +127,10 @@ So far, we have created a galaxy and used it in another
 universe.  But, we could also have used our galaxy within another
 galaxy.  In this way, large systems can be broken up into smaller
 more manageable pieces.
-.H2 "Galaxy Parameters"
+.H2 "Galaxy and Universe Parameters"
 .pp
 .IE "galaxy parameters"
+.IE "universe parameters"
 One of the problems with the ``singen'' galaxy that we just created
 is that it generates sine waves with a fixed frequency.  We would
 like to make the frequency of the generator parameterizable.  That
@@ -149,7 +150,14 @@ Place the cursor in the ``singen:schematic'' window but away
 from any instance,
 i.e., in the grey background of the facet.
 .LE
-Execute \fIedit-params\fR (``e'') to get a dialog box with three blanks
+Execute \fIedit-params\fR (``e'')
+.IE "edit-params"
+and a message will appear indicating that the Galaxy has no
+parameters.
+To add parameters to the galaxy, execute
+\fIdefine-params\fR (``+'') anywhere in the galaxy
+to get a dialog box with three blanks
+.IE "define-params"
 .(c
 New name:
 New type:
@@ -176,11 +184,13 @@ it is usually easier to cancel the dialog and start over.
 .LE
 We just created a new formal parameter called ``freq'' with a
 default value of ``PI/50''.  Additional parameters may be added or
-old ones changed simply by invoking \fIedit-params\fP again.  Notice
-that the action of \fIedit-params\fP changes depending on where the
-cursor is.  If the cursor is over an instance, it edits the actual
-parameters of that instance.  If no instance is under the cursor,
-it edits formal parameters.
+old ones changed simply by invoking \fIdefine-params\fP again.  The
+value of a formal parameter can be changed by executing
+\fIedit-params\fR in the background of the galaxy, or 
+on the icon representing the galaxy.
+.pp
+Exactly the same procedure can be used to attach formal
+parameters to a universe.
 .BU
 Link formal parameters to actual parameters:
 .LE
