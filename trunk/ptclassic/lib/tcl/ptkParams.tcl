@@ -985,8 +985,7 @@ proc ptkFormatCmd {cmd radioVarName} {
 #############################################################################
 # Given a list of name-value arguments, this procedure lets the
 # user modify values.
-# Author: Wei-Jen Huang
-#         with Alan Kamas
+# Author: Wei-Jen Huang and Alan Kamas
 #
 # The argument "instr" is a label (anchored west) used to decorate the
 #  top of the window and can be used as an instruction.
@@ -1000,7 +999,7 @@ proc ptkFormatCmd {cmd radioVarName} {
 # if a final arguement has the value "Params" then name/value pairs
 # are output.  Otherwise, only the values are output.
 
-proc ptkEditStrings {instr cmd pairs args} {
+proc ptkEditStrings {instr cmd editList args} {
    global unique
   
    set w .ptkEditStrings$unique
@@ -1012,6 +1011,15 @@ proc ptkEditStrings {instr cmd pairs args} {
    wm title $w ptolemyWindow
    wm iconname $w ptolemyWindow
 
+   # if we have a "Params" type editlist, convert it to a pairs format
+   if {$args == "Params"} {
+      set pairs ""
+      foreach edit_entry $editList {
+         lappend pairs [list [lindex $edit_entry 0] [lindex $edit_entry 2] ] 
+      }
+   } else {
+      set pairs $editList
+   }
    set nmFrame [frame $w.f -bd 3 -relief raised]
    pack [label $w.label -text $instr -relief raised \
         -font [option get . mediumfont Pigi]] \
@@ -1029,7 +1037,7 @@ proc ptkEditStrings {instr cmd pairs args} {
 
    if {$args == "Params"} {
       ptkOkCancelButtons [frame $w.okcancel -bd 1] \
-        "ed_GetAndExecuteNames \"$cmd\" $nmFrame [list $pairs]; destroy $w"\
+        "ed_GetAndExecuteParams \"$cmd\" $nmFrame [list $editList]; destroy $w"\
         "destroy $w"
    } else {
       ptkOkCancelButtons [frame $w.okcancel -bd 1] \
@@ -1050,12 +1058,13 @@ proc ptkEditStrings {instr cmd pairs args} {
 # This procedure is used within ptkEditStrings for retrieving values
 #  given a list of names.
 
-proc ed_GetAndExecuteNames {cmd frame pairs} {
+proc ed_GetAndExecuteParams {cmd frame paramList} {
    set newList ""
-   foreach arg $pairs {
-        set name [lindex $arg 0]
+   foreach param $paramList {
+        set name [lindex $param 0]
+        set type [lindex $param 1]
         lappend newList \
-                "[list $name] [list [$frame.name_$name.entry get]]"
+            "[list $name] [list $type] [list [$frame.name_$name.entry get]]"
    }
    eval [format $cmd $newList]
 }
