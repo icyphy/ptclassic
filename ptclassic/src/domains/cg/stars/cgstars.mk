@@ -6,6 +6,9 @@
 # for the stars.
 
 CGSTARS= \
+ $(CG)/CGRateChange.o \
+ $(CG)/CGMultiIn.o \
+ $(CG)/CGMultiOut.o \
  $(CG)/CGSource.o \
  $(CG)/CGThrough.o \
  $(CG)/CGSink.o
