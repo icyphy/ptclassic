@@ -3,7 +3,7 @@
 <head>
 <title>Tycho Directory Layout</title>
 </head>
-<body bgcolor=#faf0e6>
+<body bgcolor="#faf0e6">
 <h1><a name="tycho directory layout">Tycho directory layout</a></h1>
 <p>
 Tycho has a certain directory structure that you need to know about
@@ -19,7 +19,7 @@ if you are planning on extending tycho.
 </MENU>
 
 <HR>
-<H3><A NAME="tylndir and private trees"></A><CODE>tylndir</CODE></H3>
+<H3><A NAME="tylndir and private trees"><CODE>tylndir</CODE></A></H3>
 
 The script 
 <A HREF="../../bin/tylndir"><CODE>$TYCHO/bin/tylndir</CODE></A>
@@ -38,16 +38,16 @@ the sources in <CODE>~ptdesign/tycho</CODE>, do the following:
 
 <LI> Set your <CODE>TYCHO</CODE> environment to <CODE>~/ty</CODE>.
 If you are running the C shell, you would type:
-<LISTING>
+<PRE>
 setenv TYCHO ~/ty
-</LISTING>
+</PRE>
 You could place the above line in your <CODE>.cshrc</CODE> file so that
 it is set each time you log in.
 
 <LI> Place <CODE>$TYCHO/bin</CODE> in your path:
-<LISTING>
+<PRE>
 set path = ($TYCHO/bin $path)
-</LISTING>
+</PRE>
 
 <LI> Start tycho with files in your private tree by typing <CODE>tycho</CODE>.
 
@@ -82,23 +82,23 @@ For example, <A
 HREF="../../kernel/makefile"><CODE>$TYCHO/kernel/makefile</CODE></A>
  contains:
 
-<LISTING>
+<PRE>
 # Root of Tycho directory
 ROOT =		..
 
 # True source directory
 VPATH =		$(ROOT)/kernel
-</LISTING>
+</PRE>
 
 <LI> A section that includes <A
 HREF="../../mk/tycho.mk"><CODE>$TYCHO/mk/tycho.mk</CODE></A>, which is
 a makefile that sets common makefile variables.  For example:
 
-<LISTING>
+<PRE>
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
-</LISTING>
+</PRE>
 
 
 <LI> A section that sets makefile variables to files in the current
@@ -140,9 +140,9 @@ any <CODE>README</CODE> files that might be present.
 
 <LI> The next section consists of any rules.  Usually there is only
 a <CODE>all</CODE> and <CODE>install</CODE> rule:
-<LISTING>
+<PRE>
 all install: sources $(MISC_SRCS) tclIndex
-</LISTING>
+</PRE>
 
 
 <LI> The final section includes the makefile that has rules that are
@@ -242,7 +242,6 @@ before release.
 </DL>
 
 <P>
-<P>
 <a href="../index.html">Tycho Home Page</a><br>
 <HR>
 Copyright &#169 1996, The Regents of the University of California.
@@ -250,3 +249,5 @@ All rights reserved.
 <br>
 Last updated: 96/08/31,
 comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
