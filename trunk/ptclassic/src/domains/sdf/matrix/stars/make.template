@@ -93,7 +93,7 @@ PL_SRCS= \
   SDFSubMxInt_M.pl \
   SDFSubMx_M.pl \
   SDFSub_M.pl \
-  SDFTableCx_M.p \
+  SDFTableCx_M.pl \
   SDFTableInt_M.pl \
   SDFTable_M.pl \
   SDFTransposeCx_M.pl \
