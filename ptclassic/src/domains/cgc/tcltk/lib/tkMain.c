@@ -7,8 +7,8 @@
  * Version: $Id$
  */
 
-#include "tkConfig.h"
-#include "tkInt.h"
+#include "tk.h"
+#include "tcl.h"
 #define COMMANDSIZE 512
 #define REPORT_TCL_ERRORS 1
 
@@ -20,8 +20,6 @@ static Tk_Window w;             /* The main window for the application.  If
                                  * NULL then the application no longer
                                  * exists. */
 static Tcl_Interp *interp;      /* Interpreter for this application. */
-static Tcl_CmdBuf buffer;       /* Used to assemble lines of terminal input
-                                 * into Tcl commands. */
 static char command[COMMANDSIZE];
 
 
@@ -55,14 +53,14 @@ char *message;
 {
     char *msg;
     sprintf(command, "popupMessage .error {%s}", message);
-    Tcl_Eval(interp, command, 0, (char**)NULL);
+    Tcl_Eval(interp, command);
 #if REPORT_TCL_ERRORS
     msg = Tcl_GetVar(interp, "errorInfo", TCL_GLOBAL_ONLY);
     if (msg == NULL) {
         msg = interp->result;
     }
     sprintf(command, "popupMessage .error {%s}", msg);
-    if(Tcl_Eval(interp, command, 0, (char **)NULL) != TCL_OK)
+    if(Tcl_Eval(interp, command) != TCL_OK)
         fprintf(stderr, "%s\n", msg);
 #endif
 }
@@ -90,7 +88,7 @@ goCmd(dummy, interp, argc, argv)
 
 	/* First make sure Tcl grabs the latest number */
 	/* of iterations from the control panel        */
-	if(Tcl_Eval(interp,"updateIterations", 0, (char*)NULL) != TCL_OK) {
+	if(Tcl_Eval(interp,"updateIterations") != TCL_OK) {
 		runFlag = 0;
 		return TCL_ERROR;
 	}
@@ -103,7 +101,7 @@ goCmd(dummy, interp, argc, argv)
 	}
 
 	go();
-	Tcl_Eval(interp,".go configure -relief raised", 0, (char*)NULL);
+	Tcl_Eval(interp,".go configure -relief raised");
 	runFlag = 0;
 	return TCL_OK;
 }
@@ -180,7 +178,7 @@ void makeEntry (win, name, desc, initValue, callback)
 	    (ClientData) 0, (void (*)()) NULL);
     sprintf(command, "makeEntry %s %s \"%s\" \"%s\" %sCallback",
 		win, name, desc, initValue, name);
-    if(Tcl_Eval(interp, command, 0, (char*)NULL) != TCL_OK) {
+    if(Tcl_Eval(interp, command) != TCL_OK) {
         errorReport("Cannot make entry box in control panel.");
     }
 }
@@ -213,7 +211,7 @@ void makeButton (win, name, desc, callback)
     Tcl_CreateCommand(interp, command, callback, (ClientData) 0, NULL);
     sprintf(command, "makeButton %s %s \"%s\" %sCallback",
 	win, name, desc, name);
-    if(Tcl_Eval(interp, command, 0, (char*)NULL) != TCL_OK) {
+    if(Tcl_Eval(interp, command) != TCL_OK) {
         errorReport("Cannot make button in control panel.");
     }
 }
@@ -264,7 +262,7 @@ void makeScale (win, name, desc, position, callback)
     sprintf(command,
 	"makeScale %s %s \"%s\" %d %sCallback",
 	win, name, desc, position, name);
-    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+    if(Tcl_Eval(interp, command) != TCL_OK)
         errorReport("Cannot make slider scale in control panel");
 }
 
@@ -278,7 +276,7 @@ void displaySliderValue (win, name, value)
 {
     sprintf(command, "%s.%s.value configure -text \"%.6s \"",
 	win, name, value);
-    if(Tcl_Eval(interp, command, 0, (char**)NULL) != TCL_OK)
+    if(Tcl_Eval(interp, command) != TCL_OK)
         errorReport("Cannot update slider display");
 }
 
@@ -344,23 +342,21 @@ main() {
     Tcl_CreateCommand(interp, "pauseCmd", pauseCmd, (ClientData) w,
             (void (*)()) NULL);
     sprintf(command,"set applicationName \"%s\"", name);
-    if(Tcl_Eval(interp, command, 0, (char **) NULL) != TCL_OK) goto error;
+    if(Tcl_Eval(interp, command) != TCL_OK) goto error;
     sprintf(command, "set numIterations %d", numIterations);
-    if(Tcl_Eval(interp, command, 0, (char **) NULL) != TCL_OK) goto error;
-    if(Tcl_Eval(interp, initCmd, 0, (char **) NULL) != TCL_OK) goto error;
-    buffer = Tcl_CreateCmdBuf();
-    (void) Tcl_Eval(interp, "update", 0, (char **) NULL);
+    if(Tcl_Eval(interp, command) != TCL_OK) goto error;
+    if(Tcl_Eval(interp, initCmd) != TCL_OK) goto error;
+    (void) Tcl_Eval(interp, "update");
     tkSetup();
 
     Tk_MainLoop();
 
     Tcl_DeleteInterp(interp);
-    Tcl_DeleteCmdBuf(buffer);
     exit(0);
 
 error:
     errorReport("Error in main loop");
-    Tcl_Eval(interp, "destroy .", 0, (char **) NULL);
+    Tcl_Eval(interp, "destroy .");
     exit(1);
     return 0;                   /* Needed only to prevent compiler warnings. */
 }
