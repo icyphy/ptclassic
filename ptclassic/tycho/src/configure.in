@@ -48,7 +48,7 @@ fi
 # User specified location of the tcl include
 #
 AC_ARG_WITH(tclinclude, [  --with-tclinclude=DIR     use Tcl includes from DIR],
-        TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/itcl/include/itcl)
+        TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/tcl/include)
 if test ! -d $TCL_INCLUDE_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_INCLUDE_DIR doesn't exist)
 fi
@@ -58,7 +58,7 @@ if test -f $TCL_INCLUDE_DIR/tcl.h; then
 	AC_MSG_RESULT($TCL_INCLUDE_DIR/tcl.h)
 else
 	# Itcl3.0 has tcl.h in a different place
-	TMP_TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/itcl/include
+	TMP_TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/tcl/include
 	if test -f $TMP_TCL_INCLUDE_DIR/tcl.h; then 
 		TCL_INCLUDE_DIR=$TMP_TCL_INCLUDE_DIR
 		AC_MSG_RESULT($TCL_INCLUDE_DIR/tcl.h)
@@ -71,10 +71,10 @@ fi
 # User specified location of the tcl lib
 #
 AC_ARG_WITH(tcllib, [  --with-tcllib=DIR         use Tcl lib from DIR],
-        TCL_LIB_DIR=$withval, TCL_LIB_DIR=$_PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl)
+        TCL_LIB_DIR=$withval, TCL_LIB_DIR=$_PTOLEMY/tcltk/tcl.$PTARCH/lib)
 if test ! -d $TCL_LIB_DIR; then
 	# Look for the Itcl3.0 directory
-	TMP_TCL_LIB_DIR=$_PTOLEMY/tcltk/itcl.$PTARCH/lib
+	TMP_TCL_LIB_DIR=$_PTOLEMY/tcltk/tcl.$PTARCH/lib
     	if test ! -d $TMP_TCL_LIB_DIR; then
 	    AC_MSG_ERROR(Tcl directory $TCL_LIB_DIR doesn't exist)
 	else 
