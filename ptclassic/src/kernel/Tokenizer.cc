@@ -41,6 +41,10 @@ The tokenizer can also switch to reading files on request.
 There is an until-end-of-line comment character (default #)
 and a quote character for strings.
 *******************************************************************/
+#ifdef __GNUG_
+#pragma implementation
+#endif
+
 #include "Tokenizer.h"
 #include <std.h>
 #include <stdio.h>
