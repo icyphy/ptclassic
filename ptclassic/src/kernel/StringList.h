@@ -1,6 +1,10 @@
 #include <std.h>
 #include "DataStruct.h"
 
+
+// SCCS version identification
+// $Id$
+
 /****************************************************************
 StringList stores a list of char* strings, and can then read
 them back one-by-one, or can concatinate them into a single

@@ -1,6 +1,9 @@
 #include "Block.h"
 #include "StringList.h"
 
+// SCCS version identification
+// $Id$
+
 char* Block :: readFullName () {
 	StringList out;
 	if(blockIamIn != NULL) {

@@ -3,6 +3,10 @@
 
 #include "Connect.h"
 
+// SCCS version identification
+// $Id$
+
+
 class Block
 {
 public:

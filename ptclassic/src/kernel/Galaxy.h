@@ -6,6 +6,10 @@
 #include "Block.h"
 #include "Star.h"
 
+
+// SCCS version identification
+// $Id$
+
 	////////////////////////////////////
 	// class BlockList
 	////////////////////////////////////

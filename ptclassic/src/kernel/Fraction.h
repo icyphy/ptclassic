@@ -1,6 +1,10 @@
 #ifndef _Fraction_h
 #define _Fraction_h 1
 
+
+// SCCS version identification
+// $Id$
+
 /*
  Programmer:  Edward A. Lee
  Date: 12/7/89

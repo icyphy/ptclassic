@@ -1,6 +1,10 @@
 #include "Star.h"
 #include "StringList.h"
 
+
+// SCCS version identification
+// $Id$
+
 Star :: operator char* () {
 	StringList out;
 	out = "Star: ";

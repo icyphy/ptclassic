@@ -6,6 +6,10 @@
 #include "Block.h"
 #include "Output.h"
 
+
+// SCCS version identification
+// $Id$
+
 /*
 This header includes everything needed by a class implementing
 the Star function

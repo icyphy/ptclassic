@@ -2,6 +2,10 @@
 // EECS Dept., UC Berkeley
 // Jan. 5, 1990
 
+// SCCS version identification
+// $Id$
+
+
 #include "type.h"
 #include "Scheduler.h"
 #include "Fraction.h"

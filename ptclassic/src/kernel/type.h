@@ -1,6 +1,10 @@
 #ifndef _type_h
 #define _type_h 1
 
+
+// SCCS version identification
+// $Id$
+
 typedef void* Pointer;
 
 // Types of data stored in queues between stars
