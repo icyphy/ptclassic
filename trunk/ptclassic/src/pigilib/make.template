@@ -123,9 +123,14 @@ clean:
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(SRCS) $(HDRS) make.template
 
+UI=/usr/include
 depend:	
 		makedepend -I$(GNUINCLUDE) -I$(ROOT)/src/kernel \
 			   -I$(OCTTOOLS)/include $(SRCS)
+# Get rid of Sun-specific system files
+		sed -e 's?$(UI)/vm/faultcode.h??' \
+		    -e 's?$(UI)/sys/fcntlcom.h??' makefile > makefile.n
+		mv -f makefile.n makefile
 
 makefile:	make.template
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
