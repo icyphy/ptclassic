@@ -119,6 +119,10 @@ protected:
 	// mark feed-forward delays
 	int markFeedForwardDelayArcs();
 
+	// interior portions of loop pass
+	int integralLoopPass(int doAnyLoop);
+	int nonIntegralLoopPass();
+
 private:
 	int bagNumber;		// number for generating bag names
 	SequentialList stopList;// this list is used by fullSearchMerge.
@@ -168,8 +172,11 @@ public:
 	// return some other cluster that can merge with me
 	SDFCluster* mergeCandidate();
 
-	// return an appropriate loop factor
-	int loopFactor();
+	// return an appropriate loop factor.  If doAnyLoop is 0,
+	// it will apply heuristics to avoid large loop factors so
+	// that loops will nest better.  If doAnyLoop is 1, it
+	// will perform any legal looping.
+	int loopFactor(int doAnyLoop);
 
 	// change the loop value of the cluster, changing repetitions,
 	// token numbers
