@@ -9,6 +9,9 @@
 #
 include $(ROOT)/mk/config-default.mk
 
+#
+# Programs to use
+#
 RANLIB =	ranlib
 # C++ compiler to use.
 CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
@@ -20,14 +23,18 @@ CDEBUGFLAGS =
 
 # flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
 # is not needed for 3.0.
-GPPFLAGS =	-g -DUSG $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP=
-CFLAGS =	-g -DUSG $(CDEBUGFLAGS) 
+GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG) -DPOSTFIX_OP=
+CFLAGS =	-DUSG $(CDEBUGFLAGS) 
 DEPEND =	CC -M
 
-# where libraries are
-LIBDIR =	$(ROOT)/lib.hppa.cfront
-# where to install binaries
-BINDIR =	$(ROOT)/bin.hppa.cfront
+#
+# Variables for the linker
+#
+
+# Binaries that are shipped should be statically linked.
+# Note that currently vem is built with cc, not gcc, so vem uses
+# this flag. See also config-g++.mk
+CC_STATIC = 	-Wl,-a,archive
 
 # where the Gnu library and linker is
 GNULIB =
@@ -55,20 +62,25 @@ LINKFLAGS =	+A -L$(LIBDIR)
 # In cfront, this will result in a 69Mb pigiRpc
 LINKFLAGS_D =	+A -L$(LIBDIR)
 
-X11_INCSPEC = 	-I$(ROOT)/src/compat
-X11_LIBSPEC = 	-L/usr/lib/X11R5 -lX11
+#
+# Directories to use
+#
+X11_INCSPEC =	-I$(ROOT)/src/compat
+X11_LIBSPEC =	-L/usr/lib/X11R5 -lX11
 X11EXT_LIBSPEC = -L/usr/lib/X11R5 -lXext
 
-# Used by xv
-XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
-XV_INSTALL=bsdinst
-
 # Ptolemy will not build the s56dsp files under sun cfront or on the hppa
-#S56DIR= 	$(ROOT)/vendors/s56dsp
-S56DIR=
+S56DIR =
+
+#
+# Variables for miscellaneous programs
+#
+# Used by xv
+XV_RAND =	RAND="-DNO_RANDOM -Drandom=rand"
+XV_INSTALL =	bsdinst
 
 # Used to flush the cache on the hppa.  (source is in the kernel/ directory)
-FLUSH_CACHE = flush_cache.o
+FLUSH_CACHE =	flush_cache.o
 # Destination of flush_cache.  Can't just subsitute $(LIBDIR)/flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o

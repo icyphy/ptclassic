@@ -1,5 +1,5 @@
 #
-# Config file to build on sun4 processor (SparcStation)
+# Config file to build on sun4 processor (SparcStation) running SunOS4.1x
 #
 # $Id$
 
@@ -8,35 +8,41 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
+# Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
 #
-# Directories to use
+# Programs to use
 #
-X11_INCSPEC = -I/usr/X11/include
-X11_LIBSPEC = -L/usr/X11/lib -lX11
-
 RANLIB =	ranlib
 # Use gcc everywhere _except_ in octtools
-CC=		gcc
-OPTIMIZER=	-O2
-GPPFLAGS =	-g -Wall -Wcast-qual -Wcast-align $(MEMLOG) $(OPTIMIZER)
-# If you don't use gcc, then these Warning options probably won't work
-CFLAGS =	-g -Wall -Wcast-qual -Wcast-align $(OPTIMIZER)
+CC =		gcc
+OPTIMIZER =	-O2
+WARNINGS =	-Wall -Wcast-qual -Wcast-align
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
+CFLAGS =	-g $(OPTIMIZER)
+
+#
+# Variables for the linker
+#
 
 # Flag that cc expects to create statically linked binaries.
 # Binaries that are shipped should be statically linked.
 # Note that currently vem is built with cc, not gcc, so vem uses
 # this flag. See also config-g++.mk
-CC_STATIC = -Bstatic
+CC_STATIC = 	-Bstatic
+
+#
+# Directories to use
+#
+X11_INCSPEC =	-I/usr/X11/include
+X11_LIBSPEC =	-L/usr/X11/lib -lX11
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = -collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sun4/2.5.8/ld
-# cfront users will need a different value here
-#COLLECTOR =
+COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sun4/2.5.8/ld
 
-PURELINK = purelink $(COLLECTOR)
-PURIFY = purelink $(COLLECTOR) purify
-QUANTIFY = purelink $(COLLECTOR) quantify
+PURELINK =	purelink $(COLLECTOR)
+PURIFY =	purelink $(COLLECTOR) purify
+QUANTIFY =	purelink $(COLLECTOR) quantify
 
-S56DIR= $(ROOT)/vendors/s56dsp
+S56DIR =	$(ROOT)/vendors/s56dsp
