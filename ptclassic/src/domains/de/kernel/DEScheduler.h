@@ -3,7 +3,6 @@
 
 #include "type.h"
 #include "Galaxy.h"
-#include "SpaceWalk.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
 #include "Scheduler.h"
