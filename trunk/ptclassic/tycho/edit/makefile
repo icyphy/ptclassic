@@ -1,6 +1,6 @@
 # Makefile for Tycho's editors package directory
 #
-# @(#)makefile	1.17 04/29/98
+# $Id$
 # Author: Christopher Hylands
 #
 # Copyright (c) 1998 The Regents of the University of California.
