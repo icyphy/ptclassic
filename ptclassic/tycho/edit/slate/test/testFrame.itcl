@@ -107,12 +107,13 @@ _clean
 
 #### -relief
 
+set i 0
 _frame
 foreach r {flat raised sunken} \
 	c {{green3 green3 green3} {green1 green3 green4} \
 	{green4 green3 green1}} {
     incr i
-    test Frame-options-$i "Check coloring for relief $r" {
+    test Frame-relief-$i "Check coloring for relief $r" {
 	.s itemconfigure $f -relief $r
 	list \
 		[.s component $f lit itemcget -fill] \
@@ -141,11 +142,12 @@ foreach r {ridge groove} \
     
 #### -borderwidth
 
+set i 0
 _frame
 foreach b {0 1 2} \
 	c {{40.0 40.0 81.0 81.0} {41.0 41.0 80.0 80.0} {42.0 42.0 79.0 79.0}} {
     incr i
-    test Frame-options-$i "Check border width $b" {
+    test Frame-borderwidth-$i "Check border width $b" {
 	.s itemconfigure $f -borderwidth $b
 	.s component $f surface coords
     } $c
@@ -154,10 +156,11 @@ foreach b {0 1 2} \
     
 #### -color
 
+set i 0
 _frame
 foreach c {red blue yellow} {
     incr i
-    test Frame-options-$i "Check coloring change to $c" {
+    test Frame-color-$i "Check coloring change to $c" {
 	.s itemconfigure $f -color $c
 	.s component $f surface itemcget -fill
     } ${c}3
