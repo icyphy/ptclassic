@@ -1,97 +1,147 @@
-FIXME: needs lots of work.
-
 Release Notes for the 0.4 release of Ptolemy
 
-This file discusses differences between the 0.3 and 0.4 distributions
-of Ptolemy.
+Ptolemy 0.4 has quite a few new features.  Most notable are the addition
+of several code generation domains that can be used to synthesize lean C
+programs or assembly code programs for certain programmable DSPs.  These
+enable real-time implementation.  In particular, almost all capabilities
+from Gabriel have been ported to Ptolemy, so there is no longer any reason
+to use Gabriel.  Please note, however, that the new code generation
+domains are experimental domains and should be treated as such.  See below
+for details of these new domains. 
 
-ADDITIONS:
+Some changes made in Ptolemy 0.4 are not compatible with version 0.3.1.
+After much deliberation, we opted to give higher priority to the overall
+quality of the design than to maintaining compatibility.  As a
+consequence, you may need to make some changes to code you have added to
+Ptolemy (like new domains), to stars you have written, and to applications
+you have developed using Ptolemy 0.3.1.  The changes you need to make are
+explained below.
 
-In addition to the domains included in 0.3.1, there are new domains
-CG56 and CG96 for code generation on the Motorola 56000 and 96000
-DSP chips, and CGC for C code generation.  The CG domain now provides
-a base for development of a variety of assembly-language or higher
-level language code generation domains.
 
-There are many new stars and new demos in all domains.
+ADDITIONS:  New Features in Ptolemy 0.4
 
-The incremental linking facility is more powerful; it can link in
-multiple modules at a time, and can link in code either temporarily
-(so it can be replaced) or permanently (so subsequent links can
-build on it).
+CGC: A C-code generation domain (CGC) has been added.  The stars in this
+domain are all compatible with stars in the SDF domains, so many SDF
+applications can be converted to C code simply by changing the domain and
+specifying a Target.  However, at this time, not all SDF stars have been
+included in the CGC domain.  Note that this, like the other code
+generation domains, is experimental and unfinished.  These domains are
+provided in the release solely for the purpose of demonstration.
 
-There is a new interpreter based on John Ousterhout's extendable
-interpreter Tcl.
+CG56 and CG96: Two assembly code generation domains, CG56 and CG96.  These
+synthesize assembly code for the Motorola DSP56001 and DSP96001.  Most of
+the stars were ported from Gabriel, and many have not been thoroughly
+tested yet.  We decided to include them in the release anyway, but be
+advised that you may run into problems.
 
-There is now a programmer's manual that describes the Ptolemy kernel
-in detail.
+CGDDF:  A code generation of the DDF domain.  This domain is also
+experimental.
 
-CHANGES:
+CG: The CG domain now provides a base for development of a variety of
+assembly-language or higher level language code generation domains.
 
-A ptolemy account is no longer required; the PTOLEMY environment
-variable may be used instead to specify the location of the PTOLEMY
-directory tree.
+Target: A class 'Target' has been defined. This class contains information
+specific to an implementation of a Ptolemy application. In all domains,
+the default target simply invokes a simulation of the application on the
+workstation. Alternative targets, however, can map the application onto a
+particular parallel processor, onto a programmable DSP, or just change the
+way the program is invoked. See the CG section of the Almagest for more
+details.
 
-Many stars have been renamed to provide a more consistent naming
-scheme across domains.
+Stars: Many new stars have been added to previously existing domains. The
+palettes for accessing these stars have been rearranged hierarchically.
 
-Many member function names have been changed to provide a more
-uniform interface.
+Demos: Many new demo programs have been added. The palettes for accessing
+demos have also been rearranged hierarchically.
 
-Converting stars from 0.3.1 to 0.4
+Linking: The incremental linking facility is more powerful.  It can link
+in multiple modules at a time, and can link in code either temporarily (so
+it can be replaced) or permanently (so subsequent links can build on it).
 
-The change most likely to affect the casual star writer is that
-the UserOutput class is gone.  We recommend using the new
-classes pt_ifstream and pt_ofstream instead.  These are derived
-from the standard iostreams classes ifstream and ofstream.  They
-are "real streams", not fake streams like UserOutput (which had
-an << operator but was otherwise not a stream).  These classes
-are defined in ~ptolemy/src/kernel/pt_fstream.h.
+Ptcl: There is a new interpreter user interface for Ptolemy, ptcl, based
+on John Ousterhout's extendable interpreter Tcl.
 
-Where a UserOutput object was used before, simply substitute a
-pt_ofstream object.  There are some differences: a UserOutput
-object writes to standard output by default.  A pt_ofstream must
-be opened, or else a filename must be given as the constructor
-argument.
+Kernel Documentation: There is now a programmer's manual that describes
+the Ptolemy kernel in detail.
+
+Icons: The icons have a new look, with a white background, and shadows for
+icons without terminals.  Old icons are still displayed unchanged,
+although it is easy to give old icons the new look.
+
+Colors: The color palette (obtained with the "P" command) now has all
+colors available at five levels of priority, so that you can consistently
+layer the colors in your icon designs.
+
+Masters: A utility called "masters" replaces "octmvlib" to manage moving 
+or copying oct facets. It is much easier to use.
+
+
+CHANGES:  From the 0.3 version to the 0.4 version of Ptolemy
+
+A ptolemy account is no longer required; the PTOLEMY environment variable
+may be used instead to specify the location of the PTOLEMY directory tree.
+Note that this change is reflected in the documentation.  References to
+this file in the 0.3 document would be: "~ptolemy/doc/RELEASE_NOTES_0.4"
+but in the new 0.4 document would be "$PTOLEMY/doc/RELEASE_NOTES_0.4"
+
+Several stars that were included in the 0.3.1 have been renamed. The
+objective was to adopt a consistent naming policy across all domains. One
+major benefit of this is the ability to migrate universes and galaxies
+from one domain to another. A consequence, however, is that some of your
+universes and galaxies will have inconsistencies (they will point to icons
+that no longer exist in 0.4).  Please see the file
+"$PTOLEMY/lib/rename/README."  This file explains how to upgrade your
+universes and galaxies to 0.4.
+
+Many member function names have been changed to provide a more uniform
+interface.
+
+Converting stars from 0.3.1 to 0.4:
+
+The change most likely to affect the casual star writer is that the
+UserOutput class is gone.  We recommend using the new classes pt_ifstream
+and pt_ofstream instead.  These are derived from the standard iostreams
+classes ifstream and ofstream.  They are "real streams", not fake streams
+like UserOutput (which had an << operator but was otherwise not a stream).
+These classes are defined in ~ptolemy/src/kernel/pt_fstream.h.
+
+Where a UserOutput object was used before, simply substitute a pt_ofstream
+object.  There are some differences: a UserOutput object writes to
+standard output by default.  A pt_ofstream must be opened, or else a
+filename must be given as the constructor argument.
 
 Other changes likely to affect the star writer:
 
 The classes Packet and PacketData have become Envelope and Message,
-respectively.  This was done at the insistence of users who simulate
-data networks.  Portholes that have type packet should change to
-type message.  The getPacket and accessPacket methods of Packet
-have become getMessage and accessMessage methods of class Envelope.
+respectively.  This was done at the insistence of users who simulate data
+networks.  Portholes that have type packet should change to type message.
+The getPacket and accessPacket methods of Packet have become getMessage
+and accessMessage methods of class Envelope.
 
-The member functions readDescriptor(), readName(),
-readFullName(), and readClassName() have had their read
-prefixes dropped, and are now descriptor(), name(),
-fullName(), and className().
+The member functions readDescriptor(), readName(), readFullName(), and
+readClassName() have had their read prefixes dropped, and are now
+descriptor(), name(), fullName(), and className().
 
-The start() function of stars is now named setup().
-The fire() function of stars is now renamed run(), and it
-returns TRUE for success and FALSE for failure.
+The start() function of stars is now named setup().  The fire() function
+of stars is now renamed run(), and it returns TRUE for success and FALSE
+for failure.  In ptlang, start { ... } is still permitted for backward
+compatibility, but it generates a setup() member function.  We recommend
+use of setup, as it is less confusing.
 
-The clone() function of blocks has been replaced by two functions,
-clone() and makeNew().  The latter function makes an object of
-identical type, but does not necessarily copy all information.
-clone(), on the other hand, copies state values from the original
-object to the new copy.
+The clone() function of blocks has been replaced by two functions, clone()
+and makeNew().  The latter function makes an object of identical type, but
+does not necessarily copy all information.  clone(), on the other hand,
+copies state values from the original object to the new copy.
 
-The setValue() and getInitValue() functions of States have been
-renamed to setInitValue() and initValue(), respectively.
+The setValue() and getInitValue() functions of States have been renamed to
+setInitValue() and initValue(), respectively.
 
-The myType() function of PortHole and MultiPortHole is now type().
-The grabData() function of PortHole is now receiveData().
+The myType() function of PortHole and MultiPortHole is now type().  The
+grabData() function of PortHole is now receiveData().
 
 The tup() function of SequentialList is now prepend().
 
-The readType() function of Particle is now type().  The
-getPacket and accessPacket functions are now getMessage, accessMessage.
-Methods that took an argument of type Packet now want an Envelope
-argument.
-
-In ptlang, start { ... } is still permitted for backward compatibility,
-but it generates a setup() member function.  We recommend use of setup,
-as it is less confusing.
-
+The readType() function of Particle is now type().  The getPacket and
+accessPacket functions are now getMessage, accessMessage.  Methods that
+took an argument of type Packet now want an Envelope argument.
 
