@@ -63,8 +63,11 @@ public:
 		LOG_NEW; return *(new CGCtoUniversal);
 	}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new CGCForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new CGCForkNode;}
+		else { LOG_NEW; return *new CGCGeodesic;}
+	}
 
 	// constructor
 	CGCDomain() : Domain("CGC") {}
