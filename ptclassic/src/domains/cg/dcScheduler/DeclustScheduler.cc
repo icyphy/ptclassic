@@ -52,13 +52,14 @@ StringList DeclustScheduler::displaySchedule() {
 }
 
 // set up processors
-void DeclustScheduler :: setUpProcs(int num) {
-	ParScheduler :: setUpProcs(num);
+ParProcessors* DeclustScheduler :: setUpProcs(int num) {
+	ParScheduler::setUpProcs(num);
 	LOG_DEL; delete schedA;
 	LOG_DEL; delete schedB;
 	LOG_NEW; schedA = new DCParProcs(num, mtarget);
 	LOG_NEW; schedB = new DCParProcs(num, mtarget);
 	parProcs = schedA;	// temporal set for manual scheduling.
+	return parProcs;
 }
 
 // destructor

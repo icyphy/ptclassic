@@ -84,11 +84,7 @@ void HuParProcs :: scheduleSmall(DLNode* node)
 	int canProc = -1;
 	int earliest;
 	int targetTime = pd->availTime();
-        if (pd->atBoundary()) {
-		earliest = costAssignedTo(pd, 0, targetTime);
-                if (earliest == targetTime) canProc = 0;
-
-        } else if (pd->sticky() && pd->invocationNumber() > 1) {
+	if (pd->sticky() && pd->invocationNumber() > 1) {
                 ParNode* firstN = (ParNode*) pd->myMaster()->myMaster();
                 int pix = firstN->getProcId();
 		earliest = costAssignedTo(pd, pix, targetTime);
