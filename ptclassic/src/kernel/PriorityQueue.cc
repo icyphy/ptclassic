@@ -263,9 +263,10 @@ void PriorityQueue :: put (Pointer a, float v)
 
         if (lastNode)  {
           // list not empty
-          lastNode->next = getFreeLink()->setLink (a, v, 1.0, lastNode->next,
+	  LevelLink* tmp = getFreeLink()->setLink (a, v, 1.0, lastNode->next,
                                                  lastNode);
-          lastNode = lastNode->next;
+          lastNode->next = tmp;
+          lastNode = tmp;
           lastNode->next->before = lastNode;
         }
         else  {
