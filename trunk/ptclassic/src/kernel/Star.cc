@@ -112,6 +112,9 @@ int setStarIndices(Galaxy& g) {
 	return cnt;
 }
 
+// return NULL
+Wormhole* Star::asWormhole() { return NULL; }
+
 const char* Star::className() const {return "Star";}
 
 ISA_FUNC(Star,Block);
