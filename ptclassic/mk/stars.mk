@@ -822,8 +822,8 @@ endif
 
 ifdef SDFLIB
 	CUSTOM_DIRS += $(SDFDIR)/kernel $(SDFDIR)/loopScheduler
-	LIBS += -lLS -lsdf
-	LIBFILES += $(LIBDIR)/libLS.$(LIBSUFFIX) \
+	LIBS += -lls -lsdf
+	LIBFILES += $(LIBDIR)/libls.$(LIBSUFFIX) \
 		    $(LIBDIR)/libsdf.$(LIBSUFFIX)
 	ifneq ($(USE_SHARED_LIBS),yes) 
 		TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o
