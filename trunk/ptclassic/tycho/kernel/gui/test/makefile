@@ -56,6 +56,7 @@ GRAPHICAL_TESTS = \
 	testExec.itcl \
 	testFile.itcl \
 	testIndexBrowser.itcl \
+	testMenuSupport.itcl \
 	testRevControl.itcl \
 	testToolBar.itcl \
 	testWidgets.itcl \
@@ -64,6 +65,8 @@ ITCL_SRCS =	\
 	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
 	alltychotests.tcl \
 	DirectedAcyclicGraph.itcl \
+	FileTester.itcl \
+	MenuSupportTester.itcl \
 	alltests.itcl all.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
