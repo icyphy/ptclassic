@@ -18,7 +18,8 @@ CPLUSPLUS = g++
 OCT_CC =	gcc -fwritable-strings
 
 # Compiler flags
-GPPFLAGS = -g -Wall -Wcast-qual $(MEMLOG)
+# -Wsynth is new in g++-2.6.x
+GPPFLAGS = -g -Wall -Wcast-qual -Wsynth $(MEMLOG)
 CFLAGS = -g
 DEPEND= $(CPLUSPLUS) -MM
 
