@@ -308,10 +308,6 @@ body ::tycho::TclShell::constructor {args} {
     # Add a Special menu
     menubar addMenu Special -underline 0
 
-    # Since the Format menu is gone, we put the Font command here.
-    menubar add "Font..." Special -underline 0 \
-	    -command "$this setFont"
-
     menubar add "Edit history" Special -underline 0 \
 	    -command "$this displayHistory"
 
