@@ -162,20 +162,16 @@ body ::tycho::StyleSheet::constructor {args} {
     # Define the stylesheet type
     type define stylesheet \
             -label {} \
-            -description {} \
-            -rootonly 1
+            -description {}
     
     # Define the group type
     type define group \
             -label {} \
-            -description {} \
-            -nonroot 1
+            -description {}
 
     # Define the preference type
     type define preference \
-            -valued 1 \
-            -leaf 1 \
-            -nonroot 1 \
+            -leafonly 1 \
             -label {} \
             -description {} \
             -type string \
