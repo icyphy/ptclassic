@@ -191,6 +191,18 @@ else
 	AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
 fi
 
+#
+# User specified Java architecture, used to find the jdk include files
+#
+AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR          use Java arch dependent includes from DIR],
+        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$JAVAHOME/include/solaris")
+if test ! -d $JAVA_ARCH_INCLUDE; then
+    AC_MSG_ERROR(Java directory $JAVA_ARCH_INCLUDE doesn't exist)
+fi
+if test ! -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
+    AC_MSG_ERROR(There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;  use the --with-javaarchinclude= configure flag to specify the location of the architecture dependent include files in the (JDK) )
+fi
+
 dnl Checks for libraries.
 
 dnl Checks for header files.
@@ -214,6 +226,7 @@ AC_MSG_RESULT($TCL_SHLIB_LD)
 
 dnl Substitute the following variables in the Makefile (in alphabetical order)
 AC_SUBST(JAVAHOME)
+AC_SUBST(JAVA_ARCH_INCLUDE)
 AC_SUBST(TCL_CC)
 AC_SUBST(TCL_CFLAGS)
 AC_SUBST(TCL_DL_LIBS)
