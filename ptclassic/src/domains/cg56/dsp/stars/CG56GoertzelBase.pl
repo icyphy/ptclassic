@@ -154,10 +154,10 @@ $label(_GoertzelLoop)
 		addCode(initialize);
 
 		// Compute kth coeff discarding all but last sample
-		addCode(loop(dftLength + 1));
+		addCode(loop(dftLength));
 	}
 
 	exectime {
-		return (4 + 3 + 4*(int(N)+1));
+		return (4 + 3 + 4*(int(N)));
 	}
 }
