@@ -88,25 +88,20 @@ class ::tycho::IDoc {
     ##########################################################################
     ####                            options                               ####
 
+    # The background color of the HTML documents.
+    itk_option define -bgcolor bgColor BgColor white
+
     # The color of Itcl options.
-    itk_option define -optioncolor optionColor OptionColor \
-            [::tycho::preference get edittext textForeground] {
-    }
+    itk_option define -optioncolor optionColor OptionColor black
   
     # The color of public constructs.
-    itk_option define -publiccolor publicColor PublicColor \
-            [::tycho::preference get edittext textForeground] {
-    }
+    itk_option define -publiccolor publicColor PublicColor black
     
     # The color of protected constructs.
-    itk_option define -protectedcolor protectedColor ProtectedColor \
-            [::tycho::preference get edittext textForeground] {
-    }
+    itk_option define -protectedcolor protectedColor ProtectedColor black
     
     # The color of private constructs.
-    itk_option define -privatecolor privateColor PrivateColor \
-            [::tycho::preference get edittext textForeground] {
-    }
+    itk_option define -privatecolor privateColor PrivateColor black 
 
     # The default head font -- an X font which should be made symbolic in Tk 8.0
     itk_option define -headfont headFont Font [::tycho::font \
@@ -386,7 +381,7 @@ body ::tycho::IDoc::constructor {args} {
     preference subscribeoptions $this \
             -headfont displayFont \
             -bodyfont entryFont
-
+    
     # Configure the handles
     setupHandles
 
@@ -472,7 +467,7 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
                <head>
                <title>Class [$myClass modelcget -name]</title>
                </head>
-               <body bgcolor=\"#faf0e6\">
+               <body bgcolor=\"$itk_option(-bgcolor)\">
                $data
                </body>
                </html>"
@@ -481,7 +476,7 @@ body ::tycho::IDoc::putHtml {data {top 1}} {
             $myHtmlBottom clear
             $myHtmlBottom insertData "
                <html>
-               <body bgcolor=\"#faf0e6\">
+               <body bgcolor=\"$itk_option(-bgcolor)\">
                $data
                </body>
                </html>"
@@ -755,7 +750,7 @@ body ::tycho::IDoc::formatExpl {item} {
             lappend paramlist "$parameter $default"
         }
     }
-    set html "$item <i>$paramlist</i><p> $expl"
+    set html "<b>$item</b> <i>$paramlist</i><p> $expl"
 }
 
 #####################################################################
