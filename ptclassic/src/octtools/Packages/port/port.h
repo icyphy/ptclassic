@@ -265,7 +265,7 @@ extern double trunc();
 
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(AIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PNBSD_386)
+#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(PTAIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PNBSD_386)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -392,7 +392,7 @@ extern int sscanf();
 
 
 /* some call it strings.h, some call it string.h; others, also have memory.h */
-#if defined(__STDC__) || defined(sprite) || defined(PTHPPA) || defined(__cplusplus) || defined(PTLINUX) || defined(PTNBSD_386)
+#if defined(__STDC__) || defined(sprite) || defined(PTHPPA) || defined(__cplusplus) || defined(PTLINUX) || defined(PTNBSD_386) || defined(PTAIX)
 #include <string.h>
 #else
 /* ANSI C string.h -- 1/11/88 Draft Standard */
