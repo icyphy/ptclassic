@@ -72,7 +72,7 @@ Error :: error(cc* m1, cc* m2, cc* m3) {
 	msg << m1 << (m2 ? m2 : "") << (m3 ? m3 : "");
 	char* msgc = msg.newCopy();
 	Tcl_SetResult(PTcl::activeInterp, msgc, TCL_VOLATILE);
-	LOG_DEL; delete msgc;
+	LOG_DEL; delete [] msgc;
 }
 
 void
