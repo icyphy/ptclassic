@@ -34,12 +34,86 @@ if {[string compare test [info procs test]] == 1} then {
     source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
-test Resource-1.1 {} {
+test http-error1 {Make sure that any HTTP write returns error.} {
+    # Test error generators in public procs in ResourceHTTP.
+    # Warning: These tests are very dependent on the syntax of error
+    # messages!
+    set site "http://a.b.c/"
+    set httpobj [::tycho::autoName httptest]
+    ::tycho::ResourceHTTP $httpobj
+    $httpobj connect $site
+    catch {$httpobj puts "Hello"} a1 ;#error
+    catch {$httpobj write "Hi"}   a2 ;#error
+    catch {$httpobj open w} b        ;#error
+    catch {$httpobj open r} c        ;#error
+    catch {$httpobj isopen} d        ;#okay
+    catch {$httpobj eof} e           ;#error
+    catch {delete object $httpobj}
+    list $a1 $a2 $b $c $d $e
+} {{HTTP files are not writable}\
+        {HTTP files are not writable}\
+        {File http://a.b.c/ is not writable}\
+        {Can't open a.b.c, 80}\
+        0\
+        {can not find channel named ""}}
 
-} {normal {}}
+
+test http-error2 {Make sure that public proc's error message are correct} {
+    set cmd "::tycho::ResourceHTTP"
+    catch {$cmd::chmod a+rx http://noway} a
+    catch {$cmd::delete http://ptolemy.eecs.berkeley.edu} b
+    catch {$cmd::mkdir http://ptolemy.eecs.berkeley.edu/new} c
+    list $a $b $c
+} {{Cannot change status of http://noway}\
+        {Cannot delete http://ptolemy.eecs.berkeley.edu}\
+        {Cannot create http://ptolemy.eecs.berkeley.edu/new}}
 
 
+test http-contenttype1 {Check the contenttype of the ptolemy homepage} {
+    set site1 "http://ptolemy.eecs.BERKELEY.edu"
+    set site2 "$site1/image/ptolemySmall.gif"
+    set site3 "$site1/___notexists___"
+    set cmd "::tycho::ResourceHTTP::contenttype"
+    catch {$cmd $site1} a
+    catch {$cmd $site2} b
+    catch {$cmd $site3} c
+    list $a $b $c
+} {text/html\
+        image/gif\
+        {URL http://ptolemy.eecs.BERKELEY.edu/___notexists___ does not exist}}
 
+
+test http-dirlist {index.html shoudl contain the implied file names} {
+    # FIXME: This is not done yet. Need to elaborate this method.
+    # NOTE: This is also Ptolemy http server dependent
+    set site "http://PtoLeMy.eecs.berkeley.edu/icons/"
+    set cmd "::tycho::ResourceHTTP::dirlist"
+    $cmd $site
+} {back.xbm ball.xbm binary.xbm blank.xbm char/ ftp.xbm image.xbm index.xbm menu.xbm movie.xbm sound.xbm telnet.xbm text.xbm unknown.xbm}
+
+
+test http-exists {This should return 0 or 1} {
+    # Check whether a HTTP resource exists or not
+    set site1 "http://ptolemy"
+    set site2 "$site1/~eal"
+    set site3 "$site1/~kchang"
+    set site4 "$site1/~noperson"
+    set cmd "::tycho::ResourceHTTP::exists"
+    list [$cmd $site1] [$cmd $site2] [$cmd $site3] [$cmd $site4]
+} {1 1 1 0}
+
+
+test http-forward1 {Connect to the ptolemy site, see if it forwards} {
+    # forward http://ptolemy --> http://ptolemy/
+    # NOTE: This is HTTP server dependent!
+    set site "http://ptolemy.EECS.berkeley.edu/~kchang"
+    set httpobj [::tycho::autoName httptest]
+    ::tycho::ResourceHTTP $httpobj
+    $httpobj connect $site
+    $httpobj open r
+    catch {delete object $httpobj}
+    ::tycho::ResourceHTTP::forward $site
+} {http://ptolemy.eecs.berkeley.edu/~kchang/}
 
 
 
