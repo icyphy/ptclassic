@@ -58,13 +58,15 @@ bool bittrue;
    FILE *fp;
    FILE *fq;
    char fInName[100], fOutName[100], inputName[100], outputName[100];
-   char inputTyp[10], inputPrec[10], inArrSz[10];
-   char outputTyp[10], outputPrec[10], outArrSz[10];
+   char inputTyp[10], inputPrec[10];
+   int inArrSz;
+   char outputTyp[10], outputPrec[10];
+   int outArrSz;
    struct listOfIO {
         char name[100];
 	char typ[10];
 	char prec[10];
-	char arrSz[10];
+	int arrSz;
    };
    struct listOfIO inputList[10];       /* max num of inputs */
    struct listOfIO outputList[10];      /* max num of outputs */
@@ -93,16 +95,16 @@ if( pl_flag && (Graph == Root) )
 	{
 		strcpy(inputList[numIn].prec,"2.0"); 
 		strcpy(inputList[numIn].typ,inputTyp); 
-		strcpy(inputList[numIn].arrSz,""); 
+		inputList[numIn].arrSz = 1;
 	}
    	else 
 	{
 		fscanf(fp,"%s",inputPrec);
 		strcpy(inputList[numIn].typ,inputTyp); 
 		strcpy(inputList[numIn].prec,inputPrec); 
-		if(strcmp(inputTyp,"fixArray") == 0) fscanf(fp,"%s",inArrSz);
-		else strcpy(inArrSz,"");
-		strcpy(inputList[numIn].arrSz,inArrSz); 
+		if(strcmp(inputTyp,"fixArray") == 0) fscanf(fp,"%d",&inArrSz);
+		else inArrSz = 1;
+		inputList[numIn].arrSz = inArrSz; 
 	}
 	numIn++; 
    }
@@ -116,16 +118,16 @@ if( pl_flag && (Graph == Root) )
 	{
 		strcpy(outputList[numOut].prec,"2.0"); 
 		strcpy(outputList[numOut].typ,outputTyp); 
-		strcpy(outputList[numOut].arrSz,""); 
+		outputList[numOut].arrSz = 1; 
 	}
    	else 
 	{
 		fscanf(fq,"%s",outputPrec);
 		strcpy(outputList[numOut].typ,outputTyp); 
 		strcpy(outputList[numOut].prec,outputPrec); 
-		if(strcmp(outputTyp,"fixArray") == 0) fscanf(fq,"%s",outArrSz);
-		else strcpy(outArrSz,"");
-		strcpy(outputList[numOut].arrSz,outArrSz); 
+		if(strcmp(outputTyp,"fixArray") == 0) fscanf(fq,"%d",&outArrSz);
+		else outArrSz = 1;
+		outputList[numOut].arrSz = outArrSz; 
 	}
 	numOut++; 
    }
@@ -209,11 +211,17 @@ to pass the data type to the signal */
    	{ 
 		if(strcmp(inputList[k].typ,"bool") == 0) 
 		fprintf(CFD, "int* r_%s_%s, ",Graph->Name,inputList[k].name); 
+		else if(strcmp(inputList[k].typ,"fixArray") == 0)
+		fprintf(CFD,"float r_%s_%s[%d], ",Graph->Name,
+				inputList[k].name,inputList[k].arrSz); 
 		else
 		fprintf(CFD, "float* r_%s_%s, ",Graph->Name,inputList[k].name); 
 	}
 	if(strcmp(inputList[numberIn-1].typ,"bool") == 0) 
 	fprintf(CFD, "int* r_%s_%s, ",Graph->Name,inputList[numberIn-1].name); 
+	else if(strcmp(inputList[numberIn-1].typ,"fixArray") == 0)
+   	fprintf(CFD,"float r_%s_%s[%d]",Graph->Name,
+		inputList[numberIn-1].name, inputList[numberIn-1].arrSz);
 	else
    	fprintf(CFD, "float* r_%s_%s",Graph->Name,inputList[numberIn-1].name);
 
@@ -222,11 +230,17 @@ to pass the data type to the signal */
    	{ 
 		if(strcmp(outputList[k].typ,"bool") == 0)
 		fprintf(CFD, "int* s_%s_%s,",Graph->Name,outputList[k].name); 
+		else if(strcmp(outputList[k].typ,"fixArray") == 0)
+		fprintf(CFD, "float s_%s_%s[%d],",Graph->Name,
+			outputList[k].name, outputList[k].arrSz); 
 		else
 		fprintf(CFD, "float* s_%s_%s,",Graph->Name,outputList[k].name); 
 	}
 	if(strcmp(outputList[numberOut-1].typ,"bool") == 0)
    	fprintf(CFD, "int* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
+	else if(strcmp(outputList[numberOut-1].typ,"fixArray") == 0)
+   	fprintf(CFD,"float s_%s_%s[%d]",Graph->Name,
+		outputList[numberOut-1].name, outputList[numberOut-1].arrSz);
 	else
    	fprintf(CFD, "float* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
 	} /* !bittrue */
@@ -237,11 +251,17 @@ to pass the data type to the signal */
    	{ 
 	if(strcmp(inputList[k].typ,"bool") == 0) 
 	fprintf(CFD, "int* r_%s_%s, ",Graph->Name,inputList[k].name); 
+	else if(strcmp(inputList[k].typ,"fixArray") == 0)
+	fprintf(CFD,"Sig_Type r_%s_%s[%d], ",Graph->Name,inputList[k].name,
+				inputList[k].arrSz); 
 	else
 	fprintf(CFD,"Sig_Type* r_%s_%s, ",Graph->Name,inputList[k].name); 
 	}
 	if(strcmp(inputList[numberIn-1].typ,"bool") == 0) 
 	fprintf(CFD, "int* r_%s_%s, ",Graph->Name,inputList[numberIn-1].name); 
+	else if(strcmp(inputList[numberIn-1].typ,"fixArray") == 0)
+   	fprintf(CFD,"Sig_Type r_%s_%s[%d]",Graph->Name,
+		inputList[numberIn-1].name, inputList[numberIn-1].arrSz);
 	else
    	fprintf(CFD,"Sig_Type* r_%s_%s",Graph->Name,inputList[numberIn-1].name);
 
@@ -250,11 +270,17 @@ to pass the data type to the signal */
    	{ 
 	if(strcmp(outputList[k].typ,"bool") == 0)
 	fprintf(CFD, "int* s_%s_%s,",Graph->Name,outputList[k].name); 
+	else if(strcmp(outputList[k].typ,"fixArray") == 0)
+	fprintf(CFD, "Sig_Type s_%s_%s[%d],",Graph->Name,
+			outputList[k].name, outputList[k].arrSz); 
 	else
 	fprintf(CFD, "Sig_Type* s_%s_%s,",Graph->Name,outputList[k].name); 
 	}
 	if(strcmp(outputList[numberOut-1].typ,"bool") == 0)
    	fprintf(CFD, "int* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
+	else if(strcmp(outputList[numberOut-1].typ,"fixArray") == 0)
+   	fprintf(CFD,"Sig_Type s_%s_%s[%d]",Graph->Name,
+		outputList[numberOut-1].name, outputList[numberOut-1].arrSz);
 	else
    	fprintf(CFD,"Sig_Type* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
 	} /* bittrue */
@@ -266,6 +292,7 @@ if(pl_flag) fprintf(CFD, ")\n{\n");
 
 /* Generate declarations for local variables used, fixedtype and int */
     GenDeclLocalVars(Graph);
+    fprintf(CFD,"    Sig_Type in1_conv, in2_conv;\n"); /* for the CastAndGen.*/
 
 /* Generate initializations for local delay variables */
 /* GenInitDelayVars(Graph);   */
@@ -477,6 +504,7 @@ GraphPointer Graph;
 	}
     }
     fprintf(CFD, ";\n");
+    fprintf(CFD,"    int %s_cnt;\n",Graph->Name);
 }
 
 GenIterIndex(Graph)
@@ -689,6 +717,9 @@ EdgePointer List;
 bool pl_flag;
 {
     register EdgePointer edge;
+    char label[STRSIZE], value[STRSIZE], *lowstr, *highstr, *strtok();
+    int high,low;
+    int i = 0;
 
     for(edge = List; edge != NULL; edge = edge->Next) {
   	if(!pl_flag)
@@ -705,8 +736,29 @@ bool pl_flag;
 		if (HasAttribute(edge->Attributes, "IsDisplay")) 
 		{
 			if(IsArray(edge))
-				fprintf(CFD,"/* arrays not handled yet */\n");
-			if(HasAttribute(edge->Attributes, "delay"))
+			{
+			/* array and delay not handled yet */
+    			sprintf(label, "index%d", i);
+			strcpy(value, (char *)GetAttribute(edge->Arguments, 
+								label));
+        		if (isnumber(value))
+                		high = atoi(value) + 1;
+            		else {
+                		lowstr = strtok(value, "..");
+                		highstr = strtok(NULL, "..");
+                		high = atoi(highstr);
+                		low = atoi(lowstr);
+				if(high<low) high = low;
+			}
+			fprintf(CFD,"for(%s_cnt = 0; %s_cnt <= %d; %s_cnt++)\n",
+				Graph->Name, Graph->Name, high,Graph->Name);
+				fprintf(CFD,"s_%s_",Graph->Name);
+    				GenEdgeName(edge);
+				fprintf(CFD,"[%s_cnt] = ",Graph->Name);
+    				GenEdgeName(edge);
+				fprintf(CFD,"[%s_cnt];\n",Graph->Name);
+			}
+			else if(HasAttribute(edge->Attributes, "delay"))
 			{
 				fprintf(CFD,"*s_%s_",Graph->Name);
     				GenEdgeName(edge);
@@ -716,7 +768,7 @@ bool pl_flag;
         			GenEdgeName(edge);
         			fprintf(CFD, "_C]");
 				fprintf(CFD,";\n");
-/* SA GenEdgeDelay */
+				/* SA GenEdgeDelay */
 			} 	/* for outputs on delay lines */
 			else 
 			{
