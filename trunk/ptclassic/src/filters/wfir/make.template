@@ -55,7 +55,8 @@ EXTRA_DESTS= 	wfir-fortran
 
 OBJS = $(SRCS:.c=.o)
 
-LIB = 
+# common.mk wants this, otherwise we get multiple targets for $(LIBDIR)/$(LIB)
+LIB = foo
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
 
