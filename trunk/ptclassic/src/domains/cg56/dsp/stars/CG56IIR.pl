@@ -138,7 +138,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 	else {
 		addCode(init);
-		addCode(do_filter(numLoops));
+		addCode(doFilter(numLoops));
 		addCode(end);
 	}
     }
@@ -154,7 +154,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	move	$ref(signalIn),a
 	clr	b	x:(r0),x0	y:(r4)+,y0
     }
-    codeblock(do_filter, "int numLoops"){
+    codeblock(doFilter, "int numLoops"){
 	do #@numLoops,$label(end_loops)
 	mac	y0,x0,a		x1,x:(r0)+	y:(r4)+,y1
 	move	x0,x1						; delay 
