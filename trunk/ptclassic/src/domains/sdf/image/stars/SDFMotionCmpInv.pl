@@ -76,9 +76,9 @@ write the result to 'output'.
 		}
 	} // end doInvMC()
 
-	method {
+	virtual method {
 		name { BlockIsLost }
-		access { private }
+		access { protected }
 		arglist{ "(unsigned const char* ptr, const int ii, 
 				const int jj, const int blocksize, const int width)" }
 		type { "int" }
