@@ -132,7 +132,8 @@ doc/codeDoc/pitcl.html: PITcl.cc gendoc.tcl
 	(cd $(VPATH); \
 	  echo "set PTOLEMY $(PTOLEMY); source $(VPATH)/gendoc.tcl" | $(ISH))
 
-updatetychodocs: ../../tycho/typt/doc/internals: doc/codeDoc/pitcl
+updatetychodocs: ../../tycho/typt/doc/internals
+../../tycho/typt/doc/internals: doc/codeDoc/pitcl
 	cp doc/codeDoc/pitcl.html ../../tycho/typt/doc/internals
 # tycommon.mk does not include a rule to build make.template, so 
 # we add a rule here.  We can't just use common.mk as it will no
