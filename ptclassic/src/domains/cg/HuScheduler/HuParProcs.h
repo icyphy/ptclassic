@@ -49,6 +49,10 @@ private:
 
 	// set the processor index for big blocks.
 	void setIndex(int v);
+
+	// fire a node and add runnable descendants into the list.
+	void fireNode(QSNode*, int);
+
 public:
 	// constructor
 	QSParProcs(int pNum, BaseMultiTarget* t);

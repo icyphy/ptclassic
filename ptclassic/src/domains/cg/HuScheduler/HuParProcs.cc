@@ -138,17 +138,7 @@ void QSParProcs :: advanceClock(int ix)
 				temp->setAssignedFlag();
 			}
 			if (temp->alreadyAssigned()) {
-				EGGateLinkIter nextKid(temp->descendants);
-				EGGate* d;
-				while ((d = nextKid++) != 0) {
-					QSNode* pd = (QSNode*) d->farEndNode();
-					if (pd->fireable()) {
-						pd->setAssignedFlag();
-						myGraph->sortedInsert(
-						myGraph->runnableNodes,pd,1);
-						pd->setProcId(pIndex[k]);
-					}
-				}
+				fireNode(temp,k);
 			}
 		}
 		k++;
@@ -156,6 +146,20 @@ void QSParProcs :: advanceClock(int ix)
 	} while (k < numProcs && clock >= proc->getTimeFree());
 }
 			
+// fire a node and add runnable descendants into the list.
+void QSParProcs :: fireNode(QSNode* n, int preferredProc) {
+	EGGateLinkIter nextKid(n->descendants);
+	EGGate* d;
+	while ((d = nextKid++) != 0) {
+		QSNode* pd = (QSNode*) d->farEndNode();
+		if (pd->fireable()) {
+			pd->setAssignedFlag();
+			myGraph->sortedInsert(myGraph->runnableNodes,pd,1);
+			pd->setProcId(pIndex[preferredProc]);
+		}
+	}
+}
+
 void QSParProcs :: checkPreferredProc(int pNum) 
 {
 	QSUniProc* proc = getSchedule(pNum);
@@ -205,6 +209,8 @@ void QSParProcs :: scheduleSmall(QSNode* pd)
 
 	// schedule the node on the first available processor
 	assignNode(pd, pd->myExecTime(), pIndex[0]);
+
+	if (pd->myExecTime() == 0) fireNode(pd,0);
 
 	// renew the states of the graph
 	myGraph->decreaseNodes();
