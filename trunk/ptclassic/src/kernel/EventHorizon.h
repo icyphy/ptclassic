@@ -58,8 +58,8 @@ public:
 	Wormhole* wormhole;
 
 	// is it Input or Output? -- depends on the location.
-	int isItInput();
-	int isItOutput();
+	int isItInput() const;
+	int isItOutput() const;
 
 	// set ports
 	PortHole& setPort(inOutType inOut, const char* portName, 
