@@ -150,17 +150,14 @@ clean_ftp_txt:
 	clean_TROUBLE_SHOOTING
 
 #FTPSITE=/vol/ptolemy/pt0/ftp/pub/ptolemy/ptolemy$(VERSION)
-FTPSITE=/vol/babbage/babbage2/tst/pub/ptolemy/ptolemy$(VERSION)
+FTPSITE=/vol/ptolemy/pt0/ftp/pub/ptolemy/ptolemy$(VERSION)
 diff_OBTAINING_PTOLEMY: $(OBTAINING_PTOLEMY) 
 	diff $(FTPSITE)/$(OBTAINING_PTOLEMY) $(OBTAINING_PTOLEMY) 
 diff_INSTALL: $(INSTALL) 
 	-diff $(FTPSITE)/$(INSTALL) $(INSTALL) 
 diff_TROUBLE_SHOOTING: $(TROUBLE_SHOOTING)
 	-diff $(FTPSITE)/$(TROUBLE_SHOOTING) $(TROUBLE_SHOOTING) 
-diff_ftp_txt:
-	diff_OBTAINING_PTOLEMY
-	diff_INSTALL
-	diff_TROUBLE_SHOOTING
+diff_ftp_txt:	diff_OBTAINING_PTOLEMY	diff_INSTALL	diff_TROUBLE_SHOOTING
 
 update_OBTAINING_PTOLEMY:
 	cp $(OBTAINING_PTOLEMY) $(FTPSITE)/$(OBTAINING_PTOLEMY) 
