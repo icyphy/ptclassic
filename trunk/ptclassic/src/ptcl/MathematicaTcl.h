@@ -41,11 +41,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "tcl.h"
 #include "StringList.h"
 #include "MathematicaIfc.h"
+#include "InstanceManager.h"
 
 class MathematicaTcl {
 
 public:
-    // Consturctor
+    // Constructor
     MathematicaTcl();
 
     // Destructor
@@ -74,7 +75,7 @@ protected:
     // Display an error message in the Tcl interpreter
     int error(const char* msg);
 
-    // Start a Matlab process if one is not running
+    // Start a Mathematica process if one is not running
     int init();
 
     // Evaluate a Mathematica command
@@ -86,6 +87,8 @@ protected:
     // The interface to the Mathematica kernel
     MathematicaIfc* mathematicaInterface;
 
+    // object to control the Tcl/Mathematica interface
+    InstanceManager manager;
 };
 
 #endif
