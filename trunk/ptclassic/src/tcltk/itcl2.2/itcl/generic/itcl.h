@@ -93,7 +93,7 @@ typedef struct Itcl_HierIter {
 } Itcl_HierIter;
 
 
-#if defined(__WIN32__) && !defined(CYGWIN32)
+#if defined(__WIN32__) && !defined(__CYGWIN32__)
 #   define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
 #   undef WIN32_LEAN_AND_MEAN
