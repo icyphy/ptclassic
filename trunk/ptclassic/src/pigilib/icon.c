@@ -20,23 +20,6 @@ $Id$
 
 #define dmWidth 80  /* dialog entry width */
 
-/*  5/8/90
-Takes an absolute icon pathname (facet cellname) and converts it
-to it's corresponding Ptolemy source file name.
-*/
-static boolean
-IconToCode(icon, codeFile)
-char *icon, **codeFile;
-{
-    char dir[512], buf[512], *base;
-
-    strcpy(dir, icon);
-    DirName(dir);
-    base = BaseName(icon);
-    sprintf(buf, "%s/../src/%s.cc", dir, base);
-    ERR_IF1(!StrDup(codeFile, buf));
-    return (TRUE);
-}
 
 /*  5/9/90
 Takes the code directory of a star and returns it's icon directory.
@@ -55,22 +38,44 @@ char *codeDir, **iconDir;
 }
 
 /* 5/8/90
-Open a window and display a code file.
+Open a window and run vi on a file.
+Does not run in the background.
+This routine does not return until vi is exited.
 */
 static boolean
-EditCode(codeFile)
-char *codeFile;
+EditFile(fileName)
+char *fileName;
 {
     char buf[612];
 
     sprintf(buf, "xterm -display %s -name ptolemy_code -e vi %s",
-	xDisplay, codeFile);
+	xDisplay, fileName);
     PrintDebug(buf);
     if (util_csystem(buf)) {
-	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", codeFile));
+	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
     }
     return (TRUE);
 }
+
+/* 8/3/90
+Open a window and run vi on a file.
+Runs in the background and returns immediately.
+*/
+static boolean
+LookAtFile(fileName)
+char *fileName;
+{
+    char buf[612];
+
+    sprintf(buf, "xterm -display %s -name ptolemy_code -e vi %s &",
+	xDisplay, fileName);
+    PrintDebug(buf);
+    if (util_csystem(buf)) {
+	ErrAdd(sprintf(buf, "Cannot edit Ptolemy code file '%s'", fileName));
+    }
+    return (TRUE);
+}
+
 
 /*
 Inputs:
@@ -122,7 +127,7 @@ It also needs to be modified for Ptolemy.
 		PrintDebug(buf);
 		ERR_IF2(util_csystem(buf), "chmod failed");
 	    }
-	    EditCode(file);
+	    EditFile(file);
 	    PrintDebug(buf);
 	    ERR_IF2(util_csystem(buf), "Cannot edit file");
 	}
@@ -332,7 +337,7 @@ long userOptionWord;
 {
     octObject mFacet, inst;
     vemStatus status;
-    char *fullName, *codeFile;
+    char *fullName, dir[512], codeFile[512], *base;
 
     ViInit("look-inside");
     ErrClear();
@@ -359,8 +364,19 @@ long userOptionWord;
 		ViDone();
 	    }
 	    octFullName(&mFacet, &fullName);
-	    ERR_IF1(!IconToCode(fullName, &codeFile));
-	    ERR_IF1(!EditCode(codeFile));
+
+	    /* Figure out file names */
+	    strcpy(dir, fullName);
+	    DirName(dir);
+	    base = BaseName(fullName);
+
+	    /* First the .h file */
+	    sprintf(codeFile, "%s/../src/%s.h", dir, base);
+	    ERR_IF1(!LookAtFile(codeFile));
+
+	    /* Then the .cc file */
+	    sprintf(codeFile, "%s/../src/%s.cc", dir, base);
+	    ERR_IF1(!LookAtFile(codeFile));
 	    ViDone();
 	}
     }
