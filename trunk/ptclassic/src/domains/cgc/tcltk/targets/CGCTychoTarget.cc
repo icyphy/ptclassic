@@ -286,7 +286,7 @@ void CGCTychoTarget :: frameCode() {
     <<"(Tcl_Interp *interp) {\n"
         << "/* Adds a single interface command */\n"
         <<"Tcl_CreateCommand(interp, "
-	<<"\""
+	<<"\"::tycho::"
 	<< galaxy()->name()
 	<<"\", tclinterface, (ClientData) NULL, (Tcl_CmdDeleteProc *) NULL);\n"
 	<<"return TCL_OK;\n}\n";
