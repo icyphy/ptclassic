@@ -33,6 +33,8 @@
 #	FINISHED		finished a run
 #	STOP_PENDING		pending stop requested
 
+# Need a dummy value in ptkRunFlag(main) for startup
+set ptkRunFlag(main) IDLE
 
 #######################################################################
 # Set the ptkRunFlag to IDLE, indicating the run is over, and pop up the
