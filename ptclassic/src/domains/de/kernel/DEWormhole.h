@@ -42,6 +42,9 @@ public:
 		buildEventHorizons ();
 	}
 
+	// destructor
+	~DEWormhole() { freeContents();}
+
 	// return my scheduler
 	Scheduler* mySched() const { return target->mySched();}
 

@@ -53,6 +53,9 @@ public:
 	// Constructor
 	SDFWormhole(Galaxy& g,Target* t = 0);
 
+	// Destructor
+	~SDFWormhole() { freeContents();}
+
 	// return my scheduler
 	Scheduler* mySched() const { return target->mySched();}
 
