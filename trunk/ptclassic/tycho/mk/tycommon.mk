@@ -2,7 +2,7 @@
 #
 # Version Identification:
 # $Id$
-# Copyright (c) 1990-1996 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,11 +28,71 @@
 # 						COPYRIGHTENDKEY
 
 # Please don't use GNU make extensions in this file, such as 'ifdef'.
+# If you really must use an GNU make extension, please label it.
+
+# This file should not include any Ptolemy specific rules, such as rules
+# to create stars etc. Ptolemy rules should be in 'common.mk'
+
+# External makefile variables that this file uses
+#
+# Directories:
+# DIRS		Subdirectories to run make in. 
+# LIBDIR	The destination directory for any libraries created.
+#			Usually this is an architecture dependent library.
+#
+# Files:
+# SRCS 		Files that are compiled, such as .c, .cc and .java files.
+# EXTRA_SRCS	Files that are not compiled, such as .tcl and .itcl files.
+# HTMLS		HTML files
+# ITCL_SRCS	.itcl files
+# TCL_SRCS	.tcl files
+# HDRS		.h files.
+# JSRCS		.java files
+# JCLASSES	.class files
+# OBJS		.o files
+# LIB		The name of the library being created.
+# EXP		???
+# MISC_FILES	Non-source files such as README files.
+# OPTIONAL_FILES Files that are derived from other files, but we don't
+#			want 'make checkjunk' to complain about
+
+# Variables used by cleaning rules:
+# KRUFT		Files to be removed by 'make clean'
+# REALCLEAN_STUFF Files to be removed by 'make realclean'
+#
+# Variables used by tests:
+# SIMPLE_TESTS	Itcl tests that don't require a graphical front end
+# GRAPHICAL_TESTS	Itcl tests that do require a graphical front end
+#
+# Scripts:
+# TYDOC		The Tycho Tydoc script, see $TYCHO/lib/tydoc.
+# ITCLSH	The Itcl 'itclsh' binary 
+#
+# C and C++ Compiler variables:
+# CC		The C Compiler
+# CPLUSPLUS	The C++ Compiler
+# C_SHAREDFLAGS CC_SHAREDFLAGS  Flags to build shared objects for C and C++
+# CFLAGS GPPFLAGS  	The C and C++ Compiler Flags
+# C_INCL INCL		The C and C++ Include Flags
+#
+# Java Variables
+# JAVAHOME	The home of the Java Developer's Kit (JDK)
+# JAVAC		The 'javac' compiler.
+# JFLAGS	Flags to pass to javac.
+# JAVADOC	The 'javadoc' program
+# JDOCFLAGS	Flags to pass to javadoc.
+# JTESTHTML	Test html file for a java class.
+
+##############
+# Under no circumstances should this makefile include 'all', 'install'
+# or 'depend' rules.  These rules should go in the makefile that 
+# includes this makefile, or into no-compile.mk
+# The reason is that we want to avoid duplicate 'all', 'install' 
+# and 'depend' rules without using the possibly unportable double-colon
+# makefile convention.
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
-# You probably don't want to add $(SRCS) to this, rather, change
-# the makefile that includes this one to use $(EXTRA_SRCS)
-sources::	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
+sources::	$(SRCS) $(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
@@ -45,17 +105,8 @@ sources::	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 		done ; \
 	fi
 
-depend:
-	@echo "no dependencies in this directory"
-
-# Rule for installing a C++ library
-$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
-		rm -f $@
-		ln $(LIB) $(LIBDIR)
-
 # "check" does not print anything if nothing is being edited.
 sccsinfo:
-	@sccs check || true
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
@@ -68,6 +119,7 @@ sccsinfo:
 		    fi ; \
 		done ; \
 	fi
+	@sccs check || true
 
 makefiles: makefile
 	@if [ "x$(DIRS)" != "x" ]; then \
@@ -82,6 +134,84 @@ makefiles: makefile
 		done ; \
 	fi
 
+##############
+# Rules for Itcl/Tcl
+
+# Generate html files from itcl files, requires itclsh and tycho
+# Note that $(ROOT) here is relative to the tycho directory, not
+# the Ptolemy directory.
+TYDOC=$(ROOT)/lib/tydoc/tydoc
+itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
+	@if [ "$(TYDOC_DESC)" = "" ] ; then \
+		echo "$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
+	 	$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
+	else \
+		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
+		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
+	fi
+
+# Create tclIndex from .tcl and .itcl files
+# This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
+# that includes this makefile.  tclIndex should depend on the makefile
+# in case we edit the makefile and move a tcl file to another location.
+# We print the errorInfo stack in case there is a missing close brace
+# in one of the tcl files.
+tclIndex: $(TCL_SRCS) $(ITCL_SRCS) makefile
+	@echo "Updating tclIndex"
+	rm -f $@
+	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; if [catch {auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)} errMsg] {puts $$errorInfo}' | $(ITCLSH)
+
+##############
+# Rules for compiling
+
+# Rule for installing a C++ library
+$(LIBDIR)/$(LIB):	$(LIB) $(EXP)
+	rm -f $@
+	ln $(LIB) $(LIBDIR)
+
+# Rule for compiling C++ files
+.cc.o:
+	$(CPLUSPLUS) $(CC_SHAREDFLAGS) $(GPPFLAGS) $(CCFLAGS) \
+	$(OTHERCCFLAGS) $(USER_CCFLAGS) \
+	-I$(VPATH) $(INCL) -c $<
+
+# Rule for compiling with cc
+.c.o:
+	$(CC) $(C_SHAREDFLAGS) $(CFLAGS) $(OTHERCFLAGS) $(USER_CFLAGS) \
+	$(C_INCL) -c $<
+
+##############
+# Java rules
+
+# I think %.class is a GNU extension
+.SUFFIXES: .class .java
+%.class: %.java
+	CLASSPATH=$(CLASSPATH) $(JAVAC) $(JFLAGS) $<
+
+# Build all the Java class files.
+jclass:	$(JSRCS) $(JCLASS) 
+
+# Build the Java documentation.
+jhtml:	$(JSRCS)
+	if [ ! -d html ]; then mkdir html; fi
+	CLASSPATH=$(CLASSPATH) $(JAVADOC) $(JDOCFLAGS) -d html $(JCLASSES)
+	perl -pi \
+	-e "s|<a href=\"java|<a href=\"$(JAVAHOME)/doc/api/java|g;" \
+	-e "s|<img src=\"images/|<img src=\"$(JAVAHOME)/doc/api/images/|g;" \
+	html/*.html
+
+# Bring up the appletviewer on a test file.
+jtest: $(JTESTHTML) $(JCLASS)
+	CLASSPATH=$(CLASSPATH) appletviewer $(TESTHTML)
+
+htest-netscape: $(JTESTHTML) $(JCLASS)
+	CLASSPATH=$(CLASSPATH) netscape $(TESTHTML)
+
+##############
+# Rules for testing 
+# Most users will not run these rules.
+
+# Run all the tests
 tests:: makefile
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
@@ -94,6 +224,7 @@ tests:: makefile
 		    fi ; \
 		done ; \
 	fi
+
 
 FORCEIT:
 alltests.itcl: FORCEIT
@@ -112,18 +243,6 @@ alltests.itcl: FORCEIT
 	echo "doneTests" >> $@
 
 # Generate html files from itcl files, requires itclsh and tycho
-# Note that $(ROOT) here is relative to the tycho directory, not
-# the Ptolemy directory.
-TYDOC=$(ROOT)/lib/tydoc/tydoc
-itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
-	@if [ "$(TYDOC_DESC)" = "" ] ; then \
-		echo "$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
-	 	$(TYDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
-	else \
-		echo "$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
-		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
-	fi
-
 # We use a GNU make extension here
 HTMLS=$(filter %.html,  $(EXTRA_SRCS))
 # weblint finds problems with html pages
@@ -156,9 +275,6 @@ htmlchek:
 	sh $(HTMLCHEK)/runachek.sh `pwd` $(HTMLCHEKOUT) `pwd` \
 		map=1 netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR
 
-# You probably don't want to add $(SRCS) here, since really $(SRCS)
-# get compiled and have dependencies.  Instead, modify the makefile
-# that includes this one and have it set $(EXTRA_SRCS)
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(MISC_FILES) \
 		$(OPTIONAL_FILES) $(JSRCS) makefile SCCS \
@@ -174,6 +290,9 @@ checkjunk:
 		    fi ; \
 		done ; \
 	fi
+
+##############
+# Rules for cleaning
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
 	config.cache config.log config.status $(KRUFT)  
@@ -192,6 +311,11 @@ clean:
 		done ; \
 	fi
 
+# Cleaner than 'make clean'
+# Remove the stuff in the parent directory after processing
+# the child directories incase something in the child depends on
+# something we will be removing in the parent
+# REALCLEAN_STUFF - Files to be removed by 'make realclean'
 realclean:
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
@@ -204,11 +328,8 @@ realclean:
 		    fi ; \
 		done ; \
 	fi
-	# Remove the stuff in the parent directory after processing
-	# the child directories incase something in the child depends on
-	# something we will be removing in the parent
-	rm -f $(CRUD) configure $(REALCLEAN_STUFF)
-	rm -rf doc/codeDoc/* $(HTMLCHEKOUT)*
+	rm -f $(CRUD) configure $(REALCLEAN_STUFF) 
+	rm -rf doc/codeDoc/* $(OPTIONAL_FILES) $(HTMLCHEKOUT)*
 
 
 
@@ -227,14 +348,3 @@ extraclean:
 		    fi ; \
 		done ; \
 	fi
-
-# Create tclIndex from .tcl and .itcl files
-# This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
-# that includes this makefile.  tclIndex should depend on the makefile
-# in case we edit the makefile and move a tcl file to another location.
-# We print the errorInfo stack in case there is a missing close brace
-# in one of the tcl files.
-tclIndex: $(TCL_SRCS) $(ITCL_SRCS) makefile
-	@echo "Updating tclIndex"
-	rm -f $@
-	echo 'set auto_path [linsert $$auto_path 0 [info library] ]; if [catch {auto_mkindex . $(TCL_SRCS) $(ITCL_SRCS)} errMsg] {puts $$errorInfo}' | $(ITCLSH)
