@@ -1,5 +1,5 @@
 .\" $Id$
-.H1 "wfir \- FIR filter design using the window method"
+.H1 "wfir \(em window method FIR filter design"
 .pp
 Wfir is a Fortran program performing classical FIR filter design
 using the window method.  There is nothing unusual
