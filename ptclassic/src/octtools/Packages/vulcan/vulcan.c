@@ -35,6 +35,7 @@ static char SccsId[]="$Id$";
 #include "harpoon.h"
 #include "st.h"
 #include "tap.h"
+#include "ansi.h"
 #include "vulcan.h"
 
 /*
@@ -62,6 +63,8 @@ static char SccsId[]="$Id$";
 char vulcanPkgName[] = "vulcan";
 static int vulcanDepth = 0;
 static char *vulcanRoutine = "<no routine>";
+
+
 static void vulcanHandler();
 
 static st_table *framedFacets;		/* table of all completed frames */
@@ -128,6 +131,78 @@ typedef struct instTrans {
 #define OCT_PHYSGEO_MASK	(OCT_BOX_MASK | OCT_POLYGON_MASK | \
 					OCT_CIRCLE_MASK | OCT_PATH_MASK)
 
+/* Forward references */
+static void doFrame
+	ARGS((frameDesc *framePtr));
+static frameDesc *getMasterFrame
+	ARGS((frameDesc *parentFramePtr, octObject *instPtr));
+static void doFrameMaster
+	ARGS((char *userStr, frameDesc *framePtr, octObject *instPtr, frameDesc *parentFramePtr));
+static void getEquivTerm
+	ARGS((octObject *oldTermPtr, octObject *newTermPtr, octObject *facetPtr));
+static void handleTermConnectivity
+	ARGS((octObject *oldTermPtr, octObject *newTermPtr, octObject *outputFacetPtr));
+static void handlePromotedTerminal
+	ARGS((octObject *actualPtr, termDesc *termDescPtr, frameDesc *framePtr));
+static void handleNetGroup
+	ARGS((octObject *netBagPtr, octObject *facetPtr));
+static int handleNet
+	ARGS((octObject *netPtr, octObject *facetPtr, octObject *objPtr));
+
+static void handleFormalTerminal
+	ARGS((octObject *termPtr, frameDesc *framePtr));
+static void collectTerminalGeo
+	ARGS((octObject *termPtr, termDesc *termDescPtr, frameDesc *framePtr));
+
+static void buildSubcellTable
+	ARGS((frameDesc *framePtr));
+static void setProps
+	ARGS((frameDesc *framePtr));
+static void collectFormalTerminals
+	ARGS((frameDesc *framePtr));
+static void doProtectionFrames
+	ARGS((frameDesc *framePtr));
+static int getSize
+	ARGS((octObject *objPtr));
+static int getTechBasedGrowth
+	ARGS((frameDesc *framePtr, octObject *techFacetPtr, char *layerName));
+static int makeLayerFrame
+	ARGS((frameDesc *framePtr, harList geoList, int grow, fa_geometry *newGeoPtr));
+
+static int cutbackMakeLayerFrame
+	ARGS((frameDesc *framePtr, harList geoList, int grow, int techGrow, fa_geometry *newGeoPtr));
+static void reportUnreachableTerm
+	ARGS((frameDesc *framePtr, char *layerName, fa_geometry *frameGeoPtr));
+static fa_geometry *getExistingNamedGeo
+	ARGS((char *name, harList *geoListPtr));
+static void makeGlobalFrame
+	ARGS((frameDesc *framePtr));
+static void buildFrames
+	ARGS((frameDesc *framePtr));
+static void freeFrame
+	ARGS((frameDesc *framePtr));
+static void debugDumpFrame
+	ARGS((frameDesc *framePtr));
+static void debugDumpGeos
+	ARGS((harList geoList));
+int masterCmp
+	ARGS((CONST char *a, CONST char *b));
+static int masterHash
+	ARGS((char *val, int mod));
+static void spillExcessError();
+static void errAddString
+	ARGS((char *str));
+static void errAddNumber
+	ARGS((int num));
+static void addTransformedGeoList
+	ARGS((harList *geoListPtr, struct octTransform *transformPtr, harList *newGeoListPtr));
+static void andNotGeoList
+	ARGS((harList *geoListPtr, harList *cutGeoListPtr));
+
+
+static void message
+	ARGS((...));
+
 /*
  *	vulcanParameterized -- full form of interface generator
  */
@@ -218,7 +293,7 @@ void (*handler)();
     }
 }
 
-static doFrame(framePtr)
+static void doFrame(framePtr)
     frameDesc *framePtr;		/* frame structure to be filled in */
 {
     framePtr->frameGeos = HAR_EMPTY_LIST;
@@ -260,7 +335,7 @@ static doFrame(framePtr)
     }
 }
 
-static buildSubcellTable(framePtr)
+static void buildSubcellTable(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     octGenerator instanceGen;	/* generator for running through instances */
@@ -269,10 +344,8 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     masterEntry *masterEntPtr;	/* new masterEntry structure */
     char **slotPtr;		/* place to put masterEntPtr in hash table */
     instTrans *transPtr;	/* new instTrans structure */
-    frameDesc *getMasterFrame();
-    int masterCmp(), masterHash();
 
-    framePtr->masters = st_init_table(masterCmp, masterHash);
+    framePtr->masters = st_init_table(masterCmp, masterHash) ;
     framePtr->instances = st_init_table(octIdCmp, octIdHash);
 
     /* Generate through the instances, adding each into masterTable */
@@ -370,7 +443,7 @@ octObject *instPtr;		/* instance we want frame for */
     return(framePtr);
 }
 
-static doFrameMaster(userStr, framePtr, instPtr, parentFramePtr)
+static void doFrameMaster(userStr, framePtr, instPtr, parentFramePtr)
 char *userStr;			/* user message */
 frameDesc *framePtr;		/* frame structure to be filled in */
 octObject *instPtr;		/* instance of master to be framed */
@@ -424,7 +497,7 @@ frameDesc *parentFramePtr;	/* instantiating cell's frame */
 *	CELLCLASS	"MODULE" if contents has instances; else "LEAF"
 *	EDITSTYLE	"PHYSICAL"
 */
-static setProps(framePtr)
+static void setProps(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     octObject prop;		/* the property being added to ouputFacet */
@@ -451,7 +524,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
 }
 
     /* Copy formal terminals to output and collect all terminal geometry */
-static collectFormalTerminals(framePtr)
+static void collectFormalTerminals(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     octObject bag;		/* the JOINEDTERMS bag */
@@ -474,7 +547,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     OCT_ASSERT(genStatus);
 }
 
-static handleFormalTerminal(termPtr, framePtr)
+static void handleFormalTerminal(termPtr, framePtr)
 octObject *termPtr;		/* formal terminal under consideration */
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
@@ -544,7 +617,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
 *  as *oldTermPtr, and puts it into *newTermPtr.  It bitches and exits
 *  if it can't find the terminal.
 */
-static getEquivTerm(oldTermPtr, newTermPtr, facetPtr)
+static void getEquivTerm(oldTermPtr, newTermPtr, facetPtr)
 octObject *oldTermPtr;
 octObject *newTermPtr;
 octObject *facetPtr;
@@ -568,7 +641,7 @@ octObject *facetPtr;
 *	Get all the implementation for *termPtr, and put it into the
 *  harGeoList in *termDescPtr.  *framePtr gives us the subcell info we need.
 */
-static collectTerminalGeo(termPtr, termDescPtr, framePtr)
+static void collectTerminalGeo(termPtr, termDescPtr, framePtr)
 octObject *termPtr;		/* formal terminal in contents facet */
 termDesc *termDescPtr;		/* description of terminal implementation */
 frameDesc *framePtr;		/* frame structure to be filled in */
@@ -601,7 +674,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     OCT_ASSERT(genStatus);
 }
 
-static handlePromotedTerminal(actualPtr, termDescPtr, framePtr)
+static void handlePromotedTerminal(actualPtr, termDescPtr, framePtr)
 octObject *actualPtr;		/* actual terminal that implements formal */
 termDesc *termDescPtr;		/* formal terminal being implemented */
 frameDesc *framePtr;		/* frame structure to be filled in */
@@ -645,7 +718,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     }
 }
 
-static handleTermConnectivity(oldTermPtr, newTermPtr, outputFacetPtr)
+static void handleTermConnectivity(oldTermPtr, newTermPtr, outputFacetPtr)
 octObject *oldTermPtr;
 octObject *newTermPtr;
 octObject *outputFacetPtr;
@@ -682,7 +755,7 @@ octObject *outputFacetPtr;
     }
 }
 
-static handleNetGroup(netBagPtr, facetPtr)
+static void handleNetGroup(netBagPtr, facetPtr)
 octObject *netBagPtr;		/* bag of connected nets */
 octObject *facetPtr;		/* output facet to put connectivity info */
 {
@@ -721,7 +794,7 @@ octObject *facetPtr;		/* output facet to put connectivity info */
     OCT_ASSERT(status);
 }
 
-static handleNet(netPtr, facetPtr, objPtr)
+static int handleNet(netPtr, facetPtr, objPtr)
 octObject *netPtr;		/* net in input facet */
 octObject *facetPtr;		/* output facet to put connectivity info */
 octObject *objPtr;		/* NIL or place to copy term or JOINED bag */
@@ -773,7 +846,7 @@ octObject *objPtr;		/* NIL or place to copy term or JOINED bag */
     return(joinCount);
 }
 
-static doProtectionFrames(framePtr)
+static void doProtectionFrames(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     st_generator *gen;		/* generates through master table */
@@ -922,10 +995,12 @@ fa_geometry *newGeoPtr;		/* place to put frame */
     while (st_gen(gen, &key, &value)) {
 	masterFramePtr = ((masterEntry *) value)->master;
 	fa_init(&geo1);
-	if (geoPtr = getExistingNamedGeo(layerName,&masterFramePtr->frameGeos)){
+	if ( (geoPtr = getExistingNamedGeo(layerName, 
+					   &masterFramePtr->frameGeos))){
 	    fa_add_geo(&geo1, geoPtr);
 	}
-	if (geoPtr = getExistingNamedGeo(layerName, &masterFramePtr->cutGeos)) {
+	if (( geoPtr = getExistingNamedGeo(layerName, 
+					   &masterFramePtr->cutGeos))) {
 	    fa_add_geo(&geo1, geoPtr);
 	}
 	if (fa_count(&geo1) > 0) {
@@ -945,7 +1020,7 @@ fa_geometry *newGeoPtr;		/* place to put frame */
 
     fa_grow(newGeoPtr, -grow, &geo1);
     fa_free_geo(newGeoPtr);
-    if (geoPtr = getExistingNamedGeo(layerName, &framePtr->cutGeos)) {
+    if ( (geoPtr = getExistingNamedGeo(layerName, &framePtr->cutGeos)) ) {
 	fa_andnot(&geo1, geoPtr, newGeoPtr);
 	fa_free_geo(&geo1);
 
@@ -971,7 +1046,6 @@ fa_geometry *newGeoPtr;		/* place to put frame */
     fa_geometry grownTermGeo;	/* terminal geometry grown by `techGrow' */
     fa_geometry geo1, geo2;	/* temporary geometry */
     int status;			/* did we succeed? */
-    fa_geometry *getExistingNamedGeo();
 
     termGeoPtr = getExistingNamedGeo(harFirstName(geoList), &framePtr->cutGeos);
     if (termGeoPtr) {
@@ -1002,7 +1076,7 @@ fa_geometry *newGeoPtr;		/* place to put frame */
     }
 }
 
-static reportUnreachableTerm(framePtr, layerName, frameGeoPtr)
+static void reportUnreachableTerm(framePtr, layerName, frameGeoPtr)
 frameDesc *framePtr;		/* frame structure we're working on */
 char *layerName;		/* layer that unreachable term is on */
 fa_geometry *frameGeoPtr;	/* protection frame for layer */
@@ -1042,7 +1116,7 @@ harList *geoListPtr;
     return(NIL(fa_geometry));
 }
 
-static addTransformedGeoList(geoListPtr, transformPtr, newGeoListPtr)
+static void addTransformedGeoList(geoListPtr, transformPtr, newGeoListPtr)
 harList *geoListPtr;
 struct octTransform *transformPtr;
 harList *newGeoListPtr;
@@ -1059,7 +1133,7 @@ harList *newGeoListPtr;
     }
 }
 
-static andNotGeoList(geoListPtr, cutGeoListPtr)
+static void andNotGeoList(geoListPtr, cutGeoListPtr)
 harList *geoListPtr, *cutGeoListPtr;
 {
     harList geoList = *cutGeoListPtr;
@@ -1075,7 +1149,7 @@ harList *geoListPtr, *cutGeoListPtr;
 }
 
     /* Create global frame on PLACE layer */
-static makeGlobalFrame(framePtr)
+static void makeGlobalFrame(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     harList frameList;		/* steps through frame geo list */
@@ -1116,7 +1190,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     debugDumpFrame(framePtr);
 }
 
-static buildFrames(framePtr)
+static void buildFrames(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     octGenerator layerGen;	/* layer generator */
@@ -1172,7 +1246,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     }
 }
 
-static freeFrame(framePtr)
+static void freeFrame(framePtr)
 frameDesc *framePtr;		/* frame to be freed */
 {
     termDesc *termPtr, *nextTermPtr;
@@ -1191,7 +1265,7 @@ frameDesc *framePtr;		/* frame to be freed */
     }
 }
 
-static debugDumpFrame(framePtr)
+static void debugDumpFrame(framePtr)
 frameDesc *framePtr;		/* frame structure to be filled in */
 {
     termDesc *termPtr;		/* walks list of terminal implementations */
@@ -1209,7 +1283,7 @@ frameDesc *framePtr;		/* frame structure to be filled in */
     message(VULCAN_DEBUGGING, "\n");
 }
 
-static debugDumpGeos(geoList)
+static void debugDumpGeos(geoList)
 harList geoList;		/* list of named geometries */
 {
     while (geoList != HAR_EMPTY_LIST) {
@@ -1219,21 +1293,23 @@ harList geoList;		/* list of named geometries */
     }
 }
 
-static masterCmp(a,b)
-    char *a,*b;
+int masterCmp(a,b)
+     CONST char *a;
+     CONST char *b;
 {
-    struct octInstance *one = &((octObject *) a)->contents.instance,
-		       *two = &((octObject *) b)->contents.instance;
-    int retval;
+    struct octInstance *one = &((CONST octObject *) a)->contents.instance,
+		       *two = &((CONST octObject *) b)->contents.instance;
+    int retval=0;
 
-    (retval = strcmp(one->master, two->master)) ||	/* SUPPRESS 255 */
-	(retval = strcmp(one->view, two->view)) ||
-	(retval = strcmp(one->version, two->version));
+	/* SUPPRESS 255 */
+    (void)((retval = strcmp(one->master, two->master)) ||
+	   (retval = strcmp(one->view, two->view)) ||
+	   (retval = strcmp(one->version, two->version)));
 
     return(retval);
 }
 
-static masterHash(val, mod)
+static int masterHash(val, mod)
     char *val;
     int mod;
 {
@@ -1252,7 +1328,7 @@ static char errorBuffer[ERR_BUF_SIZE + 20];	/* enough extra for any %d */
 static char *errBufPtr = errorBuffer;
 
 /*VARARGS*/
-static message(va_alist)
+static void message(va_alist)
 va_dcl
 {
     vulcanMessageType type;
@@ -1307,7 +1383,7 @@ va_dcl
     }
 }
 
-static spillExcessError()
+static void spillExcessError()
 {
     if (errBufPtr >= &errorBuffer[ERR_BUF_SIZE]) {
 	(*messageHandler)(VULCAN_PARTIAL, errorBuffer);
@@ -1315,7 +1391,7 @@ static spillExcessError()
     }
 }
 
-static errAddString(str)
+static void errAddString(str)
 char *str;
 {
     while (*str != '\0') {
@@ -1324,7 +1400,7 @@ char *str;
     }
 }
 
-static errAddNumber(num)
+static void errAddNumber(num)
 int num;
 {
     (void) sprintf(errBufPtr, "%d", num);
@@ -1336,6 +1412,9 @@ vulcanMessageType type;
 char *message;
 {
     switch (type) {
+	case VULCAN_FATAL:
+	    (void) fprintf(stderr, "vulcan library FATAL ERROR: %s", message);
+	    break;
 	case VULCAN_SEVERE:
 	    (void) fprintf(stderr, "vulcan library SEVERE ERROR: %s", message);
 	    break;
