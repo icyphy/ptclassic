@@ -44,14 +44,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
-#include "SetSigHandle.h"
+#include "SigHandle.h"
 
 /****************************************************************************/
 
 int setSignalHandlers(void);
 int setCoreLimitDebug(void);
 int setCoreLimitRelease(void);
-void setSignalError(void);
 
 /****************************************************************************/
 
