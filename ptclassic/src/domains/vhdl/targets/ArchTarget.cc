@@ -219,32 +219,6 @@ void ArchTarget :: headerCode() {}
 
 // Trailer code (done last).
 void ArchTarget :: trailerCode() {
-  // Iterate through all firings and all ports.
-  // Create input signals and muxes for input ports.
-  // Create output signals for output ports.
-  {
-    VHDLFiringListIter nextFiring(masterFiringList);
-    VHDLFiring* firing;
-    while ((firing = nextFiring++) != 0) {
-      VHDLPortListIter nextPort(*(firing->portList));
-      VHDLPort* port;
-      while ((port = nextPort++) != 0) {
-	VHDLSignal* newSignal = new VHDLSignal(port->getName(), port->getType(), 0);
-	signalList.put(*newSignal);
-	port->connect(newSignal);
-	// If it's an input, also add a mux.
-	if (port->isItInput()) {
-	  StringList muxName = firing->getName();
-	  muxName << "_" << port->getName();
-	  VHDLMux* newMux = new VHDLMux(muxName, port->getType());
-	  newMux->setOutput(newSignal);
-	  newMux->setControl(newSignal);
-	  muxList.put(*newMux);
-	}
-      }
-    }
-  }
-
   // Control signals referred to later.
   VHDLSignal* feedback_clock = new VHDLSignal("feedback_clock", "BOOLEAN", 0);
   signalList.put(*feedback_clock);
@@ -253,7 +227,54 @@ void ArchTarget :: trailerCode() {
   VHDLSignal* iterClockSignal = new VHDLSignal("start_clock", "BOOLEAN", 0);
   signalList.put(*iterClockSignal);
 
-  // Iterate through tokenList and create registers for each token.
+  extract_ports();
+  extract_tokens();
+  extract_states();
+  extract_arcs();
+
+  /////////////////////////////////////////////////////////////////////
+  // Mux control signals:
+  // Generate the correct control signals in the correct order.
+  // In the case of simply firing single firings one by one,
+  // we just assert that each token is ready after it is ready.
+  // This doesn't do much for ports that have single-input muxs.
+  // But for state inputs, the assertion of FIRST_ITER_DONE matters.
+  //  assertClock("FIRST_ITER_DONE", 1);
+  //  assertClock("tokenXready", hashfunction(tokenXname));
+  //  assertClock(ctlSignal->getName(), ctlSignal->getControlValue());
+
+  construct_regs();
+  construct_muxs();
+}
+
+// Iterate through all firings and all ports.
+// Create input signals and muxes for input ports.
+// Create output signals for output ports.
+void ArchTarget :: extract_ports() {
+  VHDLFiringListIter nextFiring(masterFiringList);
+  VHDLFiring* firing;
+  while ((firing = nextFiring++) != 0) {
+    VHDLPortListIter nextPort(*(firing->portList));
+    VHDLPort* port;
+    while ((port = nextPort++) != 0) {
+      VHDLSignal* newSignal = new VHDLSignal(port->getName(), port->getType(), 0);
+      signalList.put(*newSignal);
+      port->connect(newSignal);
+      // If it's an input, also add a mux.
+      if (port->isItInput()) {
+	StringList muxName = firing->getName();
+	muxName << "_" << port->getName();
+	VHDLMux* newMux = new VHDLMux(muxName, port->getType());
+	newMux->setOutput(newSignal);
+	newMux->setControl(newSignal);
+	muxList.put(*newMux);
+      }
+    }
+  }
+}
+
+// Iterate through tokenList and create registers for each token.
+void ArchTarget :: extract_tokens() {
   VHDLTokenListIter nextToken(tokenList);
   VHDLToken* token;
   while ((token = nextToken++) != 0) {
@@ -263,23 +284,21 @@ void ArchTarget :: trailerCode() {
     newReg->setOutput(newSignal);
 
     VHDLSignal* clockSignal = signalList.vhdlSignalWithName(token->clockName);
+    VHDLSignal* feedback_clock = signalList.vhdlSignalWithName("feedback_clock");
     if (!clockSignal) { clockSignal = feedback_clock; }
     newReg->setClock(clockSignal);
 
-    // Connect the reg of the token to
-    // the signal from the port of the source firing of the token.
-    VHDLFiring* sourceFiring;
-    sourceFiring = token->getSourceFiring();
+    // If the token has a source firing, connect the reg of the token to
+    // the signal from the port of the source firing.
+    VHDLFiring* sourceFiring = token->getSourceFiring();
     if (sourceFiring) {
-      // Now get the real firing out of the firing list.
+      // Get the real firing out of the firing list.
       sourceFiring = masterFiringList.vhdlFiringWithName(sourceFiring->getName());
       // Get the real port from the firing's port list.
       StringList tokenOutPortName = token->getName();
       tokenOutPortName << "_OUT";
       VHDLPort* realPort = (sourceFiring->portList)->vhdlPortWithName(tokenOutPortName);
-      if (realPort) {
-	newReg->setInput(realPort->signal);
-      }
+      if (realPort) { newReg->setInput(realPort->signal); }
       else {
 	Error::error(sourceFiring->getName(),
 		     ": has no port with name ", tokenOutPortName);
@@ -295,7 +314,7 @@ void ArchTarget :: trailerCode() {
     VHDLFiringListIter nextFiring(*destFiringList);
     VHDLFiring* destFiring;
     while ((destFiring = nextFiring++) != 0) {
-      // Now get the real firing out of the firing list.
+      // Get the real firing out of the firing list.
       destFiring = masterFiringList.vhdlFiringWithName(destFiring->getName());
       // Get the real port from the firing's port list.
       StringList tokenInPortName = token->getName();
@@ -320,31 +339,24 @@ void ArchTarget :: trailerCode() {
       }
     }
   }
+}
 
-  // Iterate through the state list and connect registers and
-  // initial value multiplexors for each referenced state.
+// Iterate through the state list and connect registers and
+// initial value multiplexors for each referenced state.
+void ArchTarget :: extract_states() {
   VHDLStateListIter nextState(stateList);
   VHDLState* state;
   while ((state = nextState++) != 0) {
+    StringList initName = state->name;
+    initName << "_INIT";
+    VHDLSignal* initSignal = new VHDLSignal(initName, state->type, 0);
+    connectSource(state->initVal, initSignal);
+
     // If its a constant source, need to do things a bit differently:
     // only have a source with a signal, feedback of state.
     if (state->constant) {
-      StringList initName = state->name;
-      initName << "_INIT";
-      signalList.put(initName, state->type);
-      VHDLSignal* initSignal = signalList.vhdlSignalWithName(initName);
-      if (initSignal) {
-	connectSource(state->initVal, initSignal);
-      }
-      else {
-	Error::abortRun(initName,
-			": no such signal with this name in signalList");
-	return;
-      }
-
       // Need to connect the signal from the constant state's source
-      // to all firings that input the constant state, and not just
-      // the first one.
+      // to all firings that input the constant state.
       StringListIter nextName(state->constRefFiringList);
       const char* refFiringName;
       while ((refFiringName = nextName++) != 0) {
@@ -353,6 +365,7 @@ void ArchTarget :: trailerCode() {
 	StringList muxName = refFiringName;
 	muxName << "_" << stateRefPortName;
 	VHDLMux* stateRefMux = muxList.vhdlMuxWithName(muxName);
+
 	if (!stateRefMux) {
 	  Error::abortRun(muxName, ": no such mux in muxList");
 	  return;
@@ -360,17 +373,14 @@ void ArchTarget :: trailerCode() {
 	else {
 	  stateRefMux->addInput(initSignal);
 	}
+	VHDLSignal* firstIterDone = signalList.vhdlSignalWithName("FIRST_ITER_DONE");
 	stateRefMux->setControl(firstIterDone);
       }
-      initSignal->setControlValue(0);
-      signalList.put(*initSignal);
     }
+
     // If firings change state, need to connect a reg and a mux
     // between the lastRef to the state and the firstRef to the state.
     if (!(state->constant)) {
-      StringList initName = state->name;
-      initName << "_INIT";
-      VHDLSignal* initSignal = new VHDLSignal(initName, state->type, 0);
       VHDLSignal* lastRefSignal = signalList.vhdlSignalWithName(state->lastRef);
       VHDLReg* firstRefReg = regList.vhdlRegWithName(state->firstRef);
 
@@ -379,6 +389,7 @@ void ArchTarget :: trailerCode() {
       StringList muxName = state->firstFiringName;
       muxName << "_" << firstRefPortName;
       VHDLMux* firstRefMux = muxList.vhdlMuxWithName(muxName);
+
       if (!lastRefSignal) {
 	Error::abortRun(state->lastRef, ": no such signal in signalList");
 	return;
@@ -394,7 +405,6 @@ void ArchTarget :: trailerCode() {
       else {
 	firstRefReg->setInput(lastRefSignal);
 	firstRefMux->addInput(initSignal);
-	connectSource(state->initVal, initSignal);
       }
 
       // Add a dependency over iterations between
@@ -402,11 +412,10 @@ void ArchTarget :: trailerCode() {
       VHDLDependency* dep = new VHDLDependency;
       StringList lastFiringName = state->lastFiringName;
       VHDLFiring* lastFiring = masterFiringList.vhdlFiringWithName(lastFiringName);
-      if (lastFiring) {
-	dep->source = lastFiring;
-      }
+      if (lastFiring) {	dep->source = lastFiring; }
       else {
 	Error::error(lastFiringName, ":  Couldn't find a firing with this name");
+	return;
       }
       dep->sink = firstRefReg;
       // Need dep to have unique name before putting into list.
@@ -415,15 +424,19 @@ void ArchTarget :: trailerCode() {
       dep->setName(depName);
       dependencyList.put(*dep);
 
+      VHDLSignal* iterClockSignal = signalList.vhdlSignalWithName("start_clock");
       firstRefReg->setClock(iterClockSignal);
+      VHDLSignal* firstIterDone = signalList.vhdlSignalWithName("FIRST_ITER_DONE");
       firstRefMux->setControl(firstIterDone);
-      initSignal->setControlValue(0);
-      signalList.put(*initSignal);
     }
+    initSignal->setControlValue(0);
+    signalList.put(*initSignal);
   }
+}
 
-  // Iterate through the arc list.
-  // Track the read/write references made on each arc.
+// Iterate through the arc list.
+// Track the read/write references made on each arc.
+void ArchTarget :: extract_arcs() {
   VHDLArcListIter nextArc(arcList);
   VHDLArc* arc;
   while ((arc = nextArc++) != 0) {
@@ -444,6 +457,7 @@ void ArchTarget :: trailerCode() {
       signalList.put(*destSignal);
 
       // FIXME: feedback_clock and first_iter_done should be merged.
+      VHDLSignal* feedback_clock = signalList.vhdlSignalWithName("feedback_clock");
       VHDLSignal* clockSignal = feedback_clock;
       VHDLReg* sourceReg = regList.vhdlRegWithName(sourceName);
       if (sourceReg) {
@@ -528,31 +542,25 @@ void ArchTarget :: trailerCode() {
       if (ix < arc->lowWrite) {	signalList.put(destName, arc->type); }
     }
   }
+}
 
-  // Mux control signals:
-  // Generate the correct control signals in the correct order.
-  // In the case of simply firing single firings one by one,
-  // we just assert that each token is ready after it is ready.
-  // This doesn't do much for ports that have single-input muxs.
-  // But for state inputs, the assertion of FIRST_ITER_DONE matters.
-  //  assertClock("FIRST_ITER_DONE", 1);
-  //  assertClock("tokenXready", hashfunction(tokenXname));
-  //  assertClock(ctlSignal->getName(), ctlSignal->getControlValue());
-
-  // Iterate through regList and connect registers for each one.
+// Iterate through regList and connect registers for each one.
+void ArchTarget :: construct_regs() {
   VHDLRegListIter nextReg(regList);
   VHDLReg* reg;
   while ((reg = nextReg++) != 0) {
+    // Create a dummy clock if the register doesn't have one.
     if (!reg->getClock()) {
-      // Create a dummy clock if the register doesn't have one.
       VHDLSignal* newSignal = new VHDLSignal("DummyClock", "BOOLEAN", 0);
       signalList.put(*newSignal);
       reg->setClock(newSignal);
     }
     connectRegister(reg->getInput(), reg->getOutput(), reg->getClock());
   }
+}
 
-  // Iterate through muxList and connect muxes for each one.
+// Iterate through muxList and connect muxes for each one.
+void ArchTarget :: construct_muxs() {
   VHDLMuxListIter nextMux(muxList);
   VHDLMux* mux;
   while ((mux = nextMux++) != 0) {
@@ -701,19 +709,26 @@ void ArchTarget :: frameCode() {
   }
 
   int level = 0;
+
   firegroup_code << addFiregroupCode(&firegroupList, level);
+
   buildEntityDeclaration(level);
   buildArchitectureBodyOpener(level);
+
   component_declarations << addComponentDeclarations(&mainCompDeclList, level);
   component_declarations << addComponentDeclarations(&sourceCompDeclList, level);
   component_declarations << addComponentDeclarations(&muxCompDeclList, level);
   component_declarations << addComponentDeclarations(&regCompDeclList, level);
+
   signal_declarations << addSignalDeclarations(&signalList, level);
+
   component_mappings << addComponentMappings(&mainCompDeclList, level);
   component_mappings << addComponentMappings(&sourceCompDeclList, level);
   component_mappings << addComponentMappings(&muxCompDeclList, level);
   component_mappings << addComponentMappings(&regCompDeclList, level);
+
   buildArchitectureBodyCloser(level);
+
   configuration_declarations << addConfigurationDeclarations(&mainCompDeclList, level);
   configuration_declarations << addConfigurationDeclarations(&sourceCompDeclList, level);
   configuration_declarations << addConfigurationDeclarations(&muxCompDeclList, level);
@@ -721,10 +736,12 @@ void ArchTarget :: frameCode() {
 
   // Combine all sections of code.
   StringList code = headerComment();
+
   myCode << "\n-- firegroup_code\n";
   myCode << "\n" << firegroup_code;
   myCode << "\n-- mux_declarations\n";
   myCode << "\n" << mux_declarations;
+
   if (systemClock()) { myCode << clockGenCode(); }
   if (registerInts()) { myCode << regCode("INTEGER"); }
   if (registerReals()) { myCode << regCode("REAL"); }
@@ -732,6 +749,7 @@ void ArchTarget :: frameCode() {
   if (multiplexorReals()) { myCode << muxCode("REAL"); }
   if (sourceInts()) { myCode << sourceCode("INTEGER"); }
   if (sourceReals()) { myCode << sourceCode("REAL"); }
+
   myCode << "\n-- entity_declaration\n";
   myCode << "\n" << entity_declaration;
   myCode << "\n-- architecture_body_opener\n";
@@ -747,6 +765,7 @@ void ArchTarget :: frameCode() {
   myCode << "\n" << architecture_body_closer;
   //  myCode << "\n-- configuration_declarations\n";
   //  myCode << "\n" << configuration_declarations;
+
   // Prepend the header, declarations, and initialization.
   prepend(code, myCode);
 }
