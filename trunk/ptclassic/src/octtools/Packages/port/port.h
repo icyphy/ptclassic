@@ -205,6 +205,10 @@ typedef int int16;
 #include <sys/types.h>
 #endif /* PTSOL2 */
 
+#ifdef PTHPPA
+#include <unistd.h>
+#endif
+
 #ifndef TYPEDEF_BOOLEAN
 #define TYPEDEF_BOOLEAN 1
 typedef int boolean;
