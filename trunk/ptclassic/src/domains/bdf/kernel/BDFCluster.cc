@@ -870,7 +870,7 @@ BDFClustPort* BDFClusterGal::connectBoolean(
 // see if this condition is available already in this cluster.
 	BDFClustPortIter nextPort(*c);
 	BDFClustPort *p;
-	BDFRelation r;
+	BDFRelation r = BDF_NONE;
 	while ((p = nextPort++) != 0 && (r = sameSignal(cond,p)) == BDF_NONE)
 		;
 	if (p) {
@@ -951,7 +951,7 @@ int BDFClusterGal::nonIntegralRateChange() {
 	// and that a sample rate change is needed.
 	BDFClustPortIter nextPort(*c1);
 	BDFClustPort* p;
-	int n1, n2;
+	int n1 = 0, n2 = 0;
 	while ((p = nextPort++) != 0) {
 		n1 = p->numIO();
 		n2 = p->far()->numIO();
