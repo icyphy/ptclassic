@@ -85,7 +85,7 @@ are read and output are 'dir.2/pic2', 'dir.3/pic3', etc.
 			Error::abortRun(*this, fullName,": not in 8-bit format.");
 			return;
 		}
-		GrayImage* imgData = new GrayImage(width, height, int(frameId));
+		LOG_NEW; GrayImage* imgData = new GrayImage(width, height, int(frameId));
 		frameId = int(frameId) + 1; // increment frame id
 		fread((char*)imgData->retData(), sizeof(unsigned char),
 				unsigned(width*height), fp);

@@ -96,15 +96,16 @@ New York, 1989.
 		ORD = 0;
 	}
 	destructor {
-		delete aOrig; delete aPrime;
+		LOG_DEL; delete aOrig; LOG_DEL; delete aPrime;
 	}
 	start {
 		if (int(order) != ORD) {
-			delete aOrig; delete aPrime;
+			LOG_DEL; delete aOrig;
+			LOG_DEL; delete aPrime;
 			ORD = int(order);
-			aOrig = new double[ORD+1];
-			aPrime = new double[ORD+1];
-			r = new double[ORD+1];
+			LOG_NEW; aOrig = new double[ORD+1];
+			LOG_NEW; aPrime = new double[ORD+1];
+			LOG_NEW; r = new double[ORD+1];
 		}
 		refl.setSDFParams (ORD, ORD-1);
 		lp.setSDFParams (ORD, ORD-1);

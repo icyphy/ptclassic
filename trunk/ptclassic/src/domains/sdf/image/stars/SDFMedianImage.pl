@@ -62,10 +62,10 @@ when displaying single frames from a moving sequence.
 		size = int(FilterWidth);
 		if (size <= 0) size = 3;
 		size = 1 + 2*(size/2); // an odd number for sure
-		buf = new unsigned char[size*size];
+		LOG_NEW; buf = new unsigned char[size*size];
 	}
 
-	wrapup { delete buf; }
+	wrapup { LOG_DEL; delete buf; }
 
 	method {
 		name	{ retMedian }

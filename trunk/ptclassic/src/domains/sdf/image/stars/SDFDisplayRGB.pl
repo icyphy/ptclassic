@@ -93,7 +93,7 @@ to produce the full filename of the displayed image.
 		unsigned const char* gfp = tempuD->constData();
 		unsigned const char* bfp = tempvD->constData();
 
-		unsigned char* rgbfp= new unsigned char[3*Width*Height];
+		LOG_NEW; unsigned char* rgbfp= new unsigned char[3*Width*Height];
 
 		int i, j, temp1, temp2, temp3;
 		for (i = 0; i < Height; i++) {

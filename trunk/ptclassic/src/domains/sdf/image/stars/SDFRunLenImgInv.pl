@@ -33,7 +33,7 @@ See SDFrunLen.
 			int size = inImage->retSize();
 			unsigned char* ptr1 = inImage->retData();
 
-			unsigned char* ptr2 = new unsigned char[
+			LOG_NEW; unsigned char* ptr2 = new unsigned char[
 					int(inImage->retWidth() * inImage->retHeight())];
 
 			int indx1 = 0, indx2 = 0, count;
@@ -55,7 +55,7 @@ See SDFrunLen.
 			for(indx1 = 0; indx1 < indx2; indx1++) {
 				ptr1[indx1] = ptr2[indx1];
 			}
-			delete ptr2;
+			LOG_DEL; delete ptr2;
 		} // end { invRunLen }
 	}
 

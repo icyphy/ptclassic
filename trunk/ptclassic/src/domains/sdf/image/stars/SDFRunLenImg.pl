@@ -60,7 +60,7 @@ pieces.
 
 // The biggest blowup we can have is the string "01010101...".
 // This gives a blowup of 33%, so 1.34 is ok.
-			unsigned char* ptr2 = new unsigned char[int(1.34*size + 1)];
+			LOG_NEW; unsigned char* ptr2 = new unsigned char[int(1.34*size + 1)];
 
 			int indx1 = 0, indx2 = 0;
 			while (indx1 < size) {
@@ -83,7 +83,7 @@ pieces.
 			for(indx1 = 0; indx1 < indx2; indx1++) {
 				ptr1[indx1] = ptr2[indx1];
 			}
-			delete ptr2;
+			LOG_DEL; delete ptr2;
 		} // end { doRunLen }
 	}
 

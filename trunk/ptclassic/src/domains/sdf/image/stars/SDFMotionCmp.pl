@@ -74,7 +74,7 @@ can be added.
 				return;
 			}
 
-			MVImage* mv = new MVImage;
+			LOG_NEW; MVImage* mv = new MVImage;
 			Packet pkt(*inp), empty(*mv);
 			diffOut%0 << pkt;	// write first input unchanged.
 			mvOut%0 << empty;
@@ -144,7 +144,7 @@ can be added.
 		code {
 			int i, j, deli, delj, *diffArr, bs2 = 2 * blocksize;
 			register int tmp1, tmp2, tmp3;
-			diffArr = new int[bs2*bs2];
+			LOG_NEW; diffArr = new int[bs2*bs2];
 
 		// Set difference values for each offset
 			for(deli = 0; deli < bs2; deli++) {
@@ -169,7 +169,7 @@ can be added.
 						mini = i; minj = j;
 			}	}	}
 			yvec = mini - blocksize; xvec = minj - blocksize;
-			delete diffArr;
+			LOG_DEL; delete diffArr;
 		}
 	} // end FindMatch{}
 
@@ -221,7 +221,7 @@ can be added.
 // Use clone(int) rather than clone() so we don't copy image data.
 		GrayImage*	outImage	= (GrayImage*) inImage->clone(1);
 		const GrayImage* prvImage = (const GrayImage*) prevPkt.myData();
-		MVImage*	mvImage		= new MVImage(*outImage, blocksize);
+		LOG_NEW; MVImage*	mvImage		= new MVImage(*outImage, blocksize);
 
 ////// Do the motion compensation.
 		doMC(outImage->retData(), inImage->constData(),

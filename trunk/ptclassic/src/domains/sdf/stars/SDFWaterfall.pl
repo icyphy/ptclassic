@@ -79,7 +79,7 @@ Turns on or off display of the plane where y=0.
 		nTracesSoFar = 0;
 		graph.setIgnore(0);
 		xval = double(xInit);
-		highestValue = new double [int(traceLength)];
+		LOG_NEW; highestValue = new double [int(traceLength)];
 		inBreak = FALSE;
 	}
 	method {

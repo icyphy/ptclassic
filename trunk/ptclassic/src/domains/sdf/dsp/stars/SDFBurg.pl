@@ -87,20 +87,23 @@ New York, 1989.
 		N = M = 0;
 	}
 	destructor {
-		delete f; delete b; delete aOrig; delete aPrime;
+		LOG_DEL; delete f;
+		LOG_DEL; delete b;
+		LOG_DEL; delete aOrig;
+		LOG_DEL; delete aPrime;
 	}
 	start {
 		if (N != int(numInputs)) {
-			delete f; delete b;
+			LOG_DEL; delete f; LOG_DEL; delete b;
 			N = int(numInputs);
-			f = new double[N];
-			b = new double[N];
+			LOG_NEW; f = new double[N];
+			LOG_NEW; b = new double[N];
 		}
 		if (M != int(order)) {
-			delete aOrig; delete aPrime;
+			LOG_DEL; delete aOrig; LOG_DEL; delete aPrime;
 			M = int(order);
-			aOrig = new double[M+1];
-			aPrime = new double[M+1];
+			LOG_NEW; aOrig = new double[M+1];
+			LOG_NEW; aPrime = new double[M+1];
 		}
 		refl.setSDFParams (int(order), int(order)-1);
 		lp.setSDFParams (int(order), int(order)-1);

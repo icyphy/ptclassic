@@ -73,7 +73,7 @@ Hence, much of the code here is quite similar to that in the FIR star.
 		taps = 0;
 	}
 	destructor {
-		delete taps;
+		LOG_DEL; delete taps;
 	}
 	start {
 	    int d = decimation;
@@ -81,9 +81,9 @@ Hence, much of the code here is quite similar to that in the FIR star.
 	    int dP = decimationPhase;
 
 	    if (lastM != int(order)) {
-		delete taps;
+		LOG_DEL; delete taps;
 		lastM = int(order);
-		taps = new double[lastM];
+		LOG_NEW; taps = new double[lastM];
 	    }
 
 	    // Then set the SDF Params to account for the block processing

@@ -41,11 +41,11 @@ This Star uses the GNU library <Normal.h>
 		random = NULL;
 	}
 	destructor {
-		if(random) delete random;
+		LOG_DEL; delete random;
 	}
 	start {
-		if(random) delete random;
-		random = new Normal(double(mean),double(variance),gen);
+		LOG_DEL; delete random;
+		LOG_NEW; random = new Normal(double(mean),double(variance),gen);
 	}
         go {
 		output%0 << (float)(*random)();
