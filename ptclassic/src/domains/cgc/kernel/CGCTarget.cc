@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include <unistd.h>		// Pick up R_OK for SunOS4.1 cfront
+#include <ctype.h>		// Pick up isspace
 #include "CGCTarget.h"
 #include "CGUtilities.h"
 #include "CGCStar.h"
@@ -342,8 +343,36 @@ void CGCTarget :: frameCode () {
 void CGCTarget :: writeCode()
 {
     writeFile(myCode, ".c", displayFlag);
-    if (!onHostMachine(targetHost))
-	rcpCopyFile(targetHost, destDirectory, (const char*) remoteFilesStream);
+    if (!onHostMachine(targetHost)) {
+	// FIXME: The rcpCopyFile method only works for one filename.
+	// We need to copy over a list of files to a remote machine,
+	// so we must call rcpCopyFile with one file at a time even
+	// though rcp supports multiple files.
+	// Because the remoteFilesStream is globally accessible, we
+	// are not guaranteed that it is a list of files.  Since
+	// CodeStreams are derived from StringLists, the internal
+	// representation could have been altered by a const char* cast.
+	// Maybe there should be a new rcpCopyFiles method in CGUtilties?
+	if (remoteFilesStream.length() > 0) {
+	    char* fileList = savestring(remoteFilesStream);
+	    char* lastString;
+	    char* curString;
+	    int notAtEndOfString;
+	    lastString = fileList;
+	    curString = lastString;
+	    do {
+	        while (*curString && !isspace(*curString)) curString++;
+		notAtEndOfString = *curString;
+		if (lastString != curString) {
+		    *curString = 0;
+		    rcpCopyFile(targetHost, destDirectory, lastString);
+		    if (notAtEndOfString) curString++;
+		    lastString = curString;
+		}
+	    } while (notAtEndOfString);
+	    delete [] fileList;
+	}
+    }
 }
 
 int CGCTarget::compileCode()
