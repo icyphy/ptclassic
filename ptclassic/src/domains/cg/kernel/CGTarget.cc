@@ -196,6 +196,13 @@ void CGTarget::setup() {
 
 	// This only initializes the streams owned by 'codeStringLists'
 	codeStringLists.initialize();
+
+	// This will be phased out.  Use either CGTarget::writeFile
+	// or CGUtilities.h rpcWriteFile.
+	// NOTE: writeDirectoryName should be called before writeFileName;
+	// otherwise writeFileName will return /dev/null.
+	writeDirectoryName(destDirectory);
+
 	if (!scheduler()) {
 	    switch (int(loopingLevel)) {
 	    case 0:
@@ -225,9 +232,6 @@ void CGTarget::setup() {
 	if (haltRequested()) return;
 	if (filePrefix.null() && galaxy()) filePrefix = galaxy()->name();
 	
-	// This will be phased out.  Use either CGTarget::writeFile
-	// or CGUtilities.h rpcWriteFile.
-	writeDirectoryName(destDirectory);
 
 	// Reset the symbol lists.
 	counter = 0;
