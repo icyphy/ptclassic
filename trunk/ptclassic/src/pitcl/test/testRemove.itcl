@@ -83,13 +83,13 @@ test remove.3 {remove a galaxy by absolute name} {
     ::pitcl::blocks .x
 } {c d}
 
-set univlist [::pitcl::univlist]
+set univlist [::pitcl::knownUniverses]
 set loc [lsearch -exact $univlist .x]
 set newunivlist [lreplace $univlist $loc $loc]
 test remove.4 {remove a universe} {
     ::pitcl::currentGalaxy .x
     ::pitcl::remove .x
-    list [::pitcl::univlist] [::pitcl::currentGalaxy]
+    list [::pitcl::knownUniverses] [::pitcl::currentGalaxy]
 } [list $newunivlist .main]
 
 test remove.5 {attempt to remove main} {
