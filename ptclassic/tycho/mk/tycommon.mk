@@ -279,6 +279,8 @@ alltests.itcl: makefile
 			echo "source $$x" >> $@; \
 		done; \
 	fi
+	echo "# automatically exit" >> $@ 
+	echo "::tycho::preference assign misc confirmOnExit 0" >> $@
 	echo "set reallyExit 1" >> $@
 	echo "doneTests" >> $@
 
