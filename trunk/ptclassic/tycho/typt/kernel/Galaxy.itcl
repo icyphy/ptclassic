@@ -348,7 +348,7 @@ body ::ptolemy::Galaxy::localEval {args} {
     # The current galaxy and current universe may not be the same.
     set savegal [::pitcl::currentGalaxy]
     ::pitcl::currentGalaxy $fullname
-puts "executing $args, with curgalaxy [::pitcl::currentGalaxy]"
+    # puts "executing $args, with curgalaxy [::pitcl::currentGalaxy]"
     if {[catch {set result [uplevel #0 $args]} msg] != 0} {
         global ::errorInfo
         set saveInfo $errorInfo
