@@ -961,21 +961,46 @@ ostream& BDFClusterBag::printOn(ostream& o) {
 	return printPorts(o);
 }
 
-// generate the bag's schedule.  Also make schedules for "the bags within".
-// Does nothing for an empty bag.
+// FORCE is a special input that causes the cluster to simulate execution
+// even if it has already been executed "enough times"
+static const int FORCE = 2;
+
+// simulate the execution of the bag cluster.  We do not generate its
+// internal schedule until it becomes runnable, so that the "real stars"
+// will be executed in the right order (since simRunStar is called to
+// generate the schedule).
+
+// ? what about conditionals ?
+
+int BDFClusterBag::simRunStar(int deferFiring) {
+	// handle FORCE input
+	if (deferFiring == FORCE)
+		noTimes = 0;
+	int status = DataFlowStar::simRunStar(deferFiring);
+	if (status == 0) {
+		int nRun = loop();
+		if (sched == 0) {
+			genSched();
+			nRun -= 1;
+		}
+		if (nRun == 0) return status;
+		SDFSchedIter nextStar(*sched);
+		for (int i = 0; i < nRun; i++) {
+			nextStar.reset();
+			DataFlowStar* s;
+			while ((s = nextStar++) != 0)
+				s->simRunStar(FORCE);
+		}
+	}
+	return status;
+}
+
 int BDFClusterBag::genSched() {
-	if (size() == 0) return TRUE;
-
-	// create scheduler
-	createScheduler();
-
-	BDFClusterBagIter nextClust(*this);
-	BDFCluster* c;
-	while ((c = nextClust++) != 0)
-		if (!c->genSched()) return FALSE;
+	if (sched) return TRUE;
+	LOG_NEW; sched = new BDFBagScheduler;
 	sched->setGalaxy(*gal);
 	sched->setup();
-	return (!Scheduler::haltRequested());
+	return !Scheduler::haltRequested();
 }
 
 // indent by depth tabs.
@@ -986,11 +1011,11 @@ static const char* tab(int depth) {
 	return (tabs + 20 - depth);
 }
 
+static const char* do_conds[] = { 0, "if(", "if(!", "until(", "until(!" };
+
 // return the bag's schedule.
 StringList BDFClusterBag::displaySchedule(int depth) {
-	if (sched == 0) {
-		return "schedule has not been computed";
-	}
+	if (sched == 0) genSched();
 	StringList sch;
 	if (loop() > 1) {
 		sch += tab(depth);
@@ -998,8 +1023,12 @@ StringList BDFClusterBag::displaySchedule(int depth) {
 		sch += "*{\n";
 		depth++;
 	}
+	else if (pType != DO_ITER) {
+		sch << do_conds[pType] << pCond->name() << ") {";
+		depth++;
+	}
 	sch += sched->displaySchedule(depth);
-	if (loop() > 1) {
+	if (loop() > 1 || pType != DO_ITER) {
 		depth--;
 		sch += tab(depth);
 		sch += "}\n";
@@ -1244,8 +1273,6 @@ BDFAtomCluster::~BDFAtomCluster() {
 	}
 }
 
-static const char* do_conds[] = { 0, "if(", "if(!", "until(", "until(!" };
-
 // print functions.
 ostream& BDFCluster::printBrief(ostream& o) {
 	if (pType == DO_ITER) {
@@ -1269,6 +1296,9 @@ StringList BDFAtomCluster::displaySchedule(int depth) {
 	if (loop() > 1) {
 		sch += loop();
 		sch += "*";
+	}
+	else if (pType != DO_ITER) {
+		sch << do_conds[pType] << pCond->name() << ") ";
 	}
 	sch += real().fullName();
 	sch += "\n";
@@ -1303,23 +1333,12 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	// do the clustering.
 	cgal = new BDFClusterGal(gal,logstrm);
 	cgal->cluster();
-
-	if (logstrm) {
-		*logstrm << "Rest not done yet\n";
-		logstrm->flush();
-		LOG_DEL; delete logstrm;
-	}
-	Error::abortRun("Rest of algorithm not yet implemented");
-	invalid = TRUE;
-	return FALSE;
-#if 0
-// generate subschedules
-	if (!cgal->genSubScheds()) {
-		invalid = TRUE; return FALSE;
-	}
-
-// generate top-level schedule
-	if (BDFScheduler::computeSchedule(*cgal)) {
+	cgal->initialize();
+	setGalaxy(*cgal);
+// recompute top-level repetitions.
+	SDFScheduler::repetitions();
+// generate schedule -- this assumes top level is SDF.  FIXME
+	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm) {
 			*logstrm << "Schedule:\n" << displaySchedule();
 			LOG_DEL; delete logstrm;
@@ -1327,29 +1346,26 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 		return TRUE;
 	}
 	else return FALSE;
-#endif
 }
 
 // display the top-level schedule.
 StringList BDFClustSched::displaySchedule() {
 	StringList sch;
-//	BDFSchedIter next(mySchedule);
-//	BDFCluster* c;
-//	while ((c = (BDFCluster*)next++) != 0) {
-//		sch += c->displaySchedule(0);
-//	}
-	sch << "BDFClustSched::displaySchedule not yet implemented\n";
+	SDFSchedIter next(*this);
+	BDFCluster* c;
+	while ((c = (BDFCluster*)next++) != 0) {
+		sch += c->displaySchedule(0);
+	}
 	return sch;
 }
 
 StringList BDFBagScheduler::displaySchedule(int depth) {
 	StringList sch;
-//	BDFSchedIter next(mySchedule);
-//	BDFCluster* c;
-//	while ((c = (BDFCluster*)next++) != 0) {
-//		sch += c->displaySchedule(depth);
-//	}
-	sch << "BDFBagScheduler::displaySchedule not yet implemented\n";
+	SDFSchedIter next(*this);
+	BDFCluster* c;
+	while ((c = (BDFCluster*)next++) != 0) {
+		sch += c->displaySchedule(depth);
+	}
 	return sch;
 }
 
@@ -1394,4 +1410,18 @@ void BDFBagScheduler::genCode(Target& t, int depth) {
 //	}
 }
 
-
+// return true if star can be scheduled data-independently, because
+// all condtional ports have conditions and rates that match neighbors.
+int BDFCluster::dataIndependent() {
+	BDFClustPortIter nextp(*this);
+	BDFClustPort *p;
+	while ((p = nextp++) != 0) {
+		if (TorF(p->relType())) {
+			BDFClustPort* pFar = p->far();
+			if (pFar && (pFar->numIO() != p->numIO() ||
+				     !condMatch(p,pFar)))
+				return FALSE;
+		}
+	}
+	return TRUE;
+}

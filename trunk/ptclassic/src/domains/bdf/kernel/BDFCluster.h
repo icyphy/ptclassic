@@ -150,6 +150,7 @@ protected:
 	BDFClustPort* pCond;	// condition
 	BDFLoopType pType;	// type of "loop"
 	short visitFlag;	// visit flag
+	int dataIndependent();
 public:
 	// constructor: looping is 1 by default
 	BDFCluster() : pLoop(1), pType(DO_ITER), pCond(0), visitFlag(0) {}
@@ -258,12 +259,10 @@ public:
 // An BDFBagScheduler is a modified BDFScheduler that lives in
 // a BDFClusterBag.
 
-class BDFBagScheduler : public BDFScheduler {
+class BDFBagScheduler : public SDFScheduler {
 protected:
 	// we permit disconnected galaxies.
 	int checkConnectivity() { return TRUE;}
-	// galaxy is already "prepared".
-	int prepareGalaxy() { return TRUE;}
 public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
@@ -310,6 +309,9 @@ public:
 
 	// generate my schedule
 	int genSched();
+
+	// simulate execution, used during schedule generation
+	int simRunStar(int deferFiring);
 
 	// print my schedule
 	StringList displaySchedule(int depth);

@@ -46,7 +46,7 @@ BDFTarget::~BDFTarget() {
 }
 
 void BDFTarget::setup() {
-	BDFScheduler* s;
+	SDFScheduler* s;
 	if (int(loopScheduler)) {
 		LOG_NEW; s = new BDFClustSched(logFile);
 	} else {
