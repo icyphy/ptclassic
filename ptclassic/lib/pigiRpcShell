@@ -17,6 +17,8 @@
 #
 # check if we have an environment-passing file
 #
+# SysV uses LOGNAME instead of USER
+USER=${USER-$LOGNAME}
 cmdfile=/tmp/pigiCmds.$USER
 if [ -r $cmdfile ] ; then
     . $cmdfile
@@ -24,11 +26,11 @@ fi
 libdir=`dirname $0`
 PTOLEMY=${PTOLEMY-`dirname $libdir`}
 HOME=${HOME-.}
-ARCH=${ARCH-`(/bin/arch || /bin/machine) 2> /dev/null`}
+ARCH=${ARCH-`(/bin/arch || /bin/machine || $PTOLEMY/bin/arch ) 2> /dev/null`}
 PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$ARCH/pigiRpc}
 COMMAND=${COMMAND-$PIGIRPC}
 DISPLAY=${DISPLAY-'unix:0'}
 TAILARGS=${TAILARGS-''}
 export PTOLEMY HOME ARCH PIGIRPC DISPLAY
-chdir $HOME
+cd $HOME
 exec $COMMAND $* $TAILARGS
