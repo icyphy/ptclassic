@@ -24,7 +24,6 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 
 GPPFLAGS = -g
 GNU = g++
-GNUINCLUDE = /usr/gnu/lib/g++-include
 
 # Rule for compiling with g++
 .SUFFIXES: .cc
@@ -35,13 +34,13 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 LIB=libcg.a
 
 # Header files
-HDRS= CGConnect.h CGGeodesic.h CGScheduler.h CGStar.h CGUniverse.h \
-AsmArch.h AsmConnect.h AsmGeodesic.h AsmStar.h ProcMemory.h MReq.h
+HDRS= CGConnect.h CGGeodesic.h CGStar.h CGTarget.h \
+AsmTarget.h AsmConnect.h AsmGeodesic.h AsmStar.h ProcMemory.h MReq.h
  
 
 # Library objects
-OBJS= CGConnect.o CGStar.o CGDomain.o CGScheduler.o \
- AsmArch.o AsmConnect.o AsmGeodesic.o AsmStar.o ProcMemory.o MReq.o
+OBJS= CGConnect.o CGStar.o CGDomain.o CGTarget.o \
+ AsmTarget.o AsmConnect.o AsmGeodesic.o AsmStar.o ProcMemory.o MReq.o
 
 # Library sources
 SRCS= $(OBJS:.o=.cc)
