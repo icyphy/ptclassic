@@ -50,6 +50,9 @@ class ::tycho::CTSimulation {
     ###################################################################
     ####                         public methods                    ####
 
+    # Start the simulation server
+    method startServer {}
+
     ###################################################################
     ####                      protected methods                    ####
 
@@ -63,6 +66,16 @@ class ::tycho::CTSimulation {
 body ::tycho::CTSimulation::constructor {args} {
     # Initialize options
     eval configure $args
+
+}
+
+#######################################################################
+#### startServer
+#
+# Start the simulation server.
+#
+body ::tycho::CTSimulation::startServer {} {
+    chain
 
     # Create the universe
     _send {
@@ -78,6 +91,9 @@ body ::tycho::CTSimulation::constructor {args} {
 # Construct a simulation from the current graph.
 #
 body ::tycho::CTSimulation::_construct {} {
+    puts CTSimulation::_construct
+    update
+    
     # Generate the stars from vertices
     foreach v [$_graph vertices] {
         # Is it a junction or a vertex? Currently, we can
@@ -95,6 +111,19 @@ body ::tycho::CTSimulation::_construct {} {
             debug "set $v \[java::new $type \$univ $type\]"
             set result [_send "set $v \[java::new $type \$univ $v\]"]
             debug " -> $result"
+
+	    # Set its parameters.
+	    # FIXME: Currently, we look at the case of the parameter
+	    # to tell whether it is a parameter that is understood
+	    # by the star. This is sooooo fragile...
+	    foreach {attr val} [$_graph attrset $v] {
+		if [string match {-[A-Z]*} $attr] {
+		    debug "\$[set v] set[string trim $attr -] $val"
+		    set result [_send \
+			    "\$[set v] set[string trim $attr -] $val"]
+		    debug " -> $result"
+		}
+	    }
         }
     }
 
@@ -132,6 +161,7 @@ body ::tycho::CTSimulation::_construct {} {
             # Link the first edge (the only input!)
             set fromvertex [lindex $from 0]
             set fromport [lindex $from 1]
+	    set fromport [lindex [split $fromport -] 0]
 
             debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
             set result [_send "set $fromname \[\$[set fromvertex] \
@@ -167,6 +197,8 @@ body ::tycho::CTSimulation::_construct {} {
                 set toname [join $to .]
                 set tovertex [lindex $to 0]
                 set toport [lindex $to 1]
+		set toport [lindex [split $toport -] 0]
+
                 debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
                 set result [_send "set $toname \[\$[set tovertex] \
                         getIOPort $toport\]"]
@@ -182,9 +214,11 @@ body ::tycho::CTSimulation::_construct {} {
         # Otherwise, we are creating a simple link
         set fromvertex [lindex $from 0]
         set fromport [lindex $from 1]
+	set fromport [lindex [split $fromport -] 0]
 
         set tovertex [lindex $to 0]
         set toport [lindex $to 1]
+	set toport [lindex [split $toport -] 0]
 
         # Get the actual port names
         debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
