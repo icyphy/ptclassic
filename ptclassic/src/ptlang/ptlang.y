@@ -10,7 +10,7 @@
  it doesn't support compiled-in galaxies yet and the language may
  still change slightly.  Caveat hacker.
 
- Programmer: J. T. Buck
+ Programmer: J. T. Buck and E. A. Lee
 
 ************************************************************************/
 
@@ -32,11 +32,14 @@
 
 #define FLEN 256
 #define NINC 10
+#define NSEE 30
 #define NSTR 20
 
 char yytext[BIGBUFSIZE];	/* lexical analysis buffer */
 int yyline = 1;			/* current input line */
 int bodyMode = 0;		/* special lexan mode flag to read bodies  */
+int docMode = 0;		/* flag document bodies  */
+int descMode = 0;		/* flag descriptor bodies  */
 FILE* yyin;			/* stream to read from */
 
 char* progName = "ptlang";	/* program name */
@@ -49,6 +52,9 @@ char consStuff[BIGBUFSIZE];
 char publicMembers[MEDBUFSIZE];
 char protectedMembers[MEDBUFSIZE];
 char privateMembers[MEDBUFSIZE];
+char inputDescriptions[MEDBUFSIZE];
+char outputDescriptions[MEDBUFSIZE];
+char stateDescriptions[MEDBUFSIZE];
 char ccCode[BIGBUFSIZE];
 char miscCode[BIGBUFSIZE];
 
@@ -86,7 +92,13 @@ int   stateTypeClass();
 char* inputFile;		/* input file name */
 char* idBlock;			/* ID block */
 char* objName;			/* name of star or galaxy class being decld  */
+char* objVer;			/* sccs version number */
+char* objDate;			/* date of last update */
 char* objDesc;			/* descriptor of star or galaxy */
+char* objAuthor;		/* author of star or galaxy */
+char* objCopyright;		/* copyright */
+char* objExpl;			/* long explanation */
+char* objLocation;		/* location string */
 int   galDef;			/* true if obj is a galaxy */
 char* domain;			/* domain of object (if star) */
 char* derivedFrom;		/* class obj is derived from */
@@ -94,6 +106,7 @@ char* portName;			/* name of porthole */
 char* portType;			/* dataType of porthole */
 char* portInherit;		/* porthole for inheritTypeFrom */
 char* portNum;			/* expr giving # of tokens */
+char* portDesc;			/* port descriptor */
 int   portOut;			/* true if porthole is output */
 int   portMulti;		/* true if porthole is multiporthole */
 char* stateName;		/* name of state */
@@ -119,6 +132,8 @@ char* hInclude[NINC];		/* include files in .h file */
 int   nHInclude;		/* number of such files */
 char* ccInclude[NINC];		/* include files in .cc file */
 int   nCcInclude;		/* number of such files */
+char* seeAlsoList[NSEE];	/* list of pointers to other manual sections */
+int   nSeeAlso;			/* number of such pointers */
 char* stringBuf[NSTR];		/* bufs for multi-line descriptors */
 int   nStrings;			/* # of strings */
 
@@ -135,6 +150,7 @@ typedef char * STRINGVAL;
 %token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB
+%token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION
 %%
 /* a file consists of a series of definitions. */
 file:
@@ -167,9 +183,30 @@ gallist:galitem
 /* items allowed in both stars and galaxies */
 sgitem:
 	NAME '{' ident '}'		{ objName = $3;}
-|	DESC '{' desc '}'		{ objDesc = $3;}
-|	DEFSTATE { clearStateDefs();}
-		'{' dstatelist '}'	{ genState();}
+|	VERSION '{' version '}'		{ }
+|	DESC '{' 			{ descMode = 1; docMode = 1;}
+		BODY			{ objDesc = $4;
+					  docMode = 0;
+					  descMode = 0;}
+|	AUTHOR '{' 			{ bodyMode = 1; docMode = 1;}
+		BODY			{ objAuthor = $4;
+					  docMode = 0;
+					  bodyMode = 0;}
+|	COPYRIGHT '{'			{ bodyMode = 1; docMode = 1;}
+		BODY			{ objCopyright = $4;
+					  docMode = 0;
+					  bodyMode = 0;}
+|	LOCATION '{'			{ bodyMode = 1; docMode = 1;}
+		BODY			{ objLocation = $4;
+					  docMode = 0;
+					  bodyMode = 0;}
+|	EXPLANATION '{'			{ bodyMode = 1; docMode = 1;}
+		BODY			{ objExpl = $4;
+					  bodyMode = 0;
+					  docMode = 0;}
+|	SEEALSO '{' seealso '}'		{ }
+|	DEFSTATE 			{ clearStateDefs();}
+		'{' dstatelist '}'	{ genState(); describeState();}
 |	constructor BODY		{ consCode = $2; bodyMode = 0;}
 |	destructor BODY			{ destCode = $2; bodyMode = 0;}
 |	start BODY			{ startCode = $2; bodyMode = 0;}
@@ -187,12 +224,26 @@ sgitem:
 |	error '}'			{ yyerror ("bad sgitem");}
 ;
 
+/* version identifier */
+version:
+	IDENTIFIER IDENTIFIER '/' IDENTIFIER '/' IDENTIFIER
+		{ char b[SMALLBUFSIZE];
+		  objVer = $1;
+		  sprintf(b, "\"%s/%s/%s\"", $2, $4, $6);
+		  objDate = save(b);
+		}
+|	'%' IDENTIFIER '%' '%' IDENTIFIER '%'	
+		{ objVer = "?.?"; objDate = "\"checked out\""; }
+;
+
+
 /* star items */
 staritem:
 	sgitem
 |	DOMAIN '{' ident '}'		{ domain = $3;}
 |	DERIVED '{' ident '}'		{ derivedFrom = $3;}
-|	portkey '{' portlist '}'	{ genPort();}
+|	portkey '{' portlist '}'	{ genPort();
+					  describePort(); }
 |	go BODY				{ goCode = $2; bodyMode = 0;}
 ;
 
@@ -282,6 +333,10 @@ portitem:
 |	TYPE '{' ident '}'		{ portType = portDataType($3);}
 |	TYPE '{' '=' ident '}'		{ portInherit = $4;} 
 |	NUM '{' expval '}'		{ portNum = $3;}
+|	DESC '{' 			{ descMode = 1; docMode = 1;}
+		BODY			{ portDesc = $4;
+					  docMode = 0;
+					  descMode = 0;}
 ;
 
 /* state info (for defining) */
@@ -297,18 +352,30 @@ dstateitem:
 					  stateClass = stateClasses[tc];
 					}
 |	DEFAULT '{' defval '}'		{ stateDef = $3;}
-|	DESC '{' desc '}'		{ stateDesc = $3;}
+|	DESC '{' 			{ descMode = 1; docMode = 1;}
+		BODY			{ stateDesc = $4;
+					  docMode = 0;
+					  descMode = 0;}
 |	attrib BODY			{ stateAttrib = $2; bodyMode=0;}
 ;
 
 attrib:	ATTRIB '{'			{ bodyMode=1;}
 
-/* allow single token as a default value */
-defval:	STRING				{ $$ = $1;}
+/* allow single token, a string, or a sequence of strings as a default value */
+defval:	stringseq			{ $$ = $1;}
 |	IDENTIFIER			{ char b[SMALLBUFSIZE];
 					  sprintf (b, "\"%s\"", $1);
 					  $$ = save(b);
 					}
+;
+
+stringseq: STRING			{ char* b = malloc(MEDBUFSIZE);
+					  strcpy(b, $1);
+					  $$ = b;
+					}
+|	stringseq STRING		{ strcat($1," ");
+					  strcat($1,$2);
+					  $$ = $1; }
 ;
 
 /* inverse of defval: we strip the quotes */
@@ -318,16 +385,6 @@ expval:	IDENTIFIER			{ $$ = $1;}
 					  b[strlen($1)-2] = 0;
 					  $$ = save(b);
 					}
-;
-
-desc:	descstart desclist		{ $$ = combineStrings();}
-;
-
-descstart:/* nothing */			{ nStrings = 0;}
-;
-
-desclist:/* nothing */
-|	desclist STRING			{ stringBuf[nStrings++] = $2;}
 ;
 
 starinstlist:
@@ -354,6 +411,11 @@ cclist: /* nothing */
 |	cclist optcomma STRING		{ ccInclude[nCcInclude++] = $3;}
 ;
 
+/* see also list */
+seealso: /* nothing */
+|	seealso optcomma IDENTIFIER	{ seeAlsoList[nSeeAlso++] = $3;}
+;
+
 hlist:	/* nothing */
 |	hlist optcomma STRING		{ hInclude[nHInclude++] = $3;}
 ;
@@ -367,8 +429,9 @@ optcomma:/* nothing */
 ident:	IDENTIFIER|DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
 |DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
-|PRIVATE|METHOD|ARGLIST|CODE|ACCESS
-/* also allow strings; strip parenths */
+|PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
+|SEEALSO|LOCATION
+/* also allow strings; strip quotation marks */
 |STRING					{ $$ = stripQuotes ($1);}
 ;
 
@@ -383,9 +446,12 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objDesc = domain = derivedFrom = consCalls = NULL;
+	objName = objVer = objDesc = domain = derivedFrom = consCalls =
+		objAuthor = objCopyright = objExpl = objLocation = NULL;
 	consStuff[0] = ccCode[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
+	inputDescriptions[0] = outputDescriptions[0] = stateDescriptions[0] = 0;
+	nCcInclude = nHInclude = nSeeAlso = 0;
 }
 
 /* Generate a state definition */
@@ -452,6 +518,8 @@ char* nameArg;
 genState ()
 {
 	char buf[128];
+	char* stateDescriptor;
+	char* stateDefault;
 	/* test that all fields are known */
 	if (stateName == NULL) {
 		yyerror ("state name not defined");
@@ -462,14 +530,16 @@ genState ()
 		return;
 	}
 	if (stateDef == NULL)
-		stateDef = "\"\"";
-	if (stateDesc == NULL) {
-		sprintf (buf, "%c%s%c", QUOTE, stateName, QUOTE);
-		stateDesc = buf;
-	}
+		stateDefault = "\"\"";
+	else
+		stateDefault = stateDef;
+	if (stateDesc == NULL)
+		stateDescriptor = stateName;
+	else
+		stateDescriptor = stateDesc;
 	sprintf (str1,"\t%s %s;\n", stateClass, stateName);
-	sprintf (str2,"\taddState(%s.setState(\"%s\",this,%s,%s",
-		 stateName, stateName, stateDef, stateDesc);
+	sprintf (str2,"\taddState(%s.setState(\"%s\",this,%s,\"%s\"",
+		 stateName, stateName, stateDefault, stateDescriptor);
 	if (stateAttrib) {
 		strcat (str2, ",\n");
 		strcat (str2, stateAttrib);
@@ -479,13 +549,33 @@ genState ()
 	strcat (consStuff, str2);
 }
 
+/* describe the states */
+describeState ()
+{
+	char* descriptString[MEDBUFSIZE];
+
+	sprintf(str1,".NE\n\\fI%s\\fR (%s)",stateName,stateClass);
+	strcat(stateDescriptions,str1);
+	if (stateDesc) {
+	    if(unescape(descriptString, stateDesc, MEDBUFSIZE))
+		yywarn("warning: Descriptor too long. May be truncated.");
+	    sprintf(str1,": %s\n",descriptString);
+	} else
+	    sprintf(str1,"\n");
+	strcat(stateDescriptions,str1);
+	if (stateDef) {
+		sprintf(str1,".DF %s\n",stateDef);
+	}
+	strcat(stateDescriptions,str1);
+}
+
 /* set up for port definition */
 initPort (out, multi)
 int out, multi;
 {
 	portOut = out;
 	portMulti = multi;
-	portName = portNum = portInherit = NULL;
+	portName = portNum = portInherit = portDesc = NULL;
 	portType = "ANYTYPE";
 }
 
@@ -518,6 +608,31 @@ genPort ()
 			 portInherit);
 		strcat (consStuff, str2);
 	}
+}
+
+describePort ()
+{
+	char *dest, *m;
+	char descriptString[MEDBUFSIZE];
+	if(portOut)
+	    /* describe an output port */
+	    dest = outputDescriptions;
+	else
+	    /* describe an input port */
+	    dest = inputDescriptions;
+	if (portMulti)
+	    sprintf(str1,".NE\n\\fI%s\\fR (multiple), (%s)",portName,portType);
+	else
+	    sprintf(str1,".NE\n\\fI%s\\fR (%s)",portName,portType);
+	strcat(dest,str1);
+
+	if (portDesc) {
+	    if(unescape(descriptString, portDesc, MEDBUFSIZE))
+		yywarn("warning: Descriptor too long. May be truncated.");
+	    sprintf(str1,": %s\n",descriptString);
+	} else
+	    sprintf(str1,"\n");
+	strcat(dest,str1);
 }
 
 /* set up for user-supplied method */
@@ -596,16 +711,17 @@ genDef ()
 {
 	FILE *fp;
 	int i;
-	char hname[FLEN], ccname[FLEN];
+	char fname[FLEN], hname[FLEN], ccname[FLEN];
 	char baseClass[SMALLBUFSIZE];
 	char fullClass[SMALLBUFSIZE];
+	char descriptString[MEDBUFSIZE];
+	char *d;
 
 /* temp, until we implement this */
 	if (galDef) {
 		fprintf (stderr, "Sorry, galaxy definition is not yet supported.\n");
 		exit ();
 	}
-/* First, make the .h file */
 	if (objName == NULL) {
 		yyerror ("No class name defined");
 		return;
@@ -615,6 +731,10 @@ genDef ()
 		return;
 	}
 	sprintf (fullClass, "%s%s", galDef ? "" : domain, objName);
+
+/***************************************************************************
+			CREATE THE .h FILE
+*/
 	sprintf (hname, "%s.h", fullClass);
 	if ((fp = fopen (hname, "w")) == 0) {
 		perror (hname);
@@ -624,6 +744,10 @@ genDef ()
 	fprintf (fp, "#ifndef _%s_h\n#define _%s_h 1\n", fullClass, fullClass);
 	fprintf (fp, "// header file generated from %s by %s\n",
 		 inputFile, progName);
+/* copyright */
+	if (objCopyright)
+		fprintf (fp, "/*\n * copyright (c) %s\n */", objCopyright);
+
 /* ID block */
 	if (idBlock)
 		fprintf (fp, "%s\n", idBlock);
@@ -679,7 +803,9 @@ genDef ()
 	fprintf (fp, "#endif\n");
 	(void) fclose (fp);
 
-/* Now do the .cc file */
+/**************************************************************************
+		CREATE THE .cc FILE
+*/
 	sprintf (ccname, "%s.cc", fullClass);
 	if ((fp = fopen (ccname, "w")) == 0) {
 		perror (ccname);
@@ -687,6 +813,10 @@ genDef ()
 	}
 	fprintf (fp, "// .cc file generated from %s by %s\n",
 		 inputFile, progName);
+/* copyright */
+	if (objCopyright)
+		fprintf (fp, "/*\n * copyright (c) %s\n */\n", objCopyright);
+
 /* ID block */
 	if (idBlock)
 		fprintf (fp, "%s\n", idBlock);
@@ -701,7 +831,7 @@ genDef ()
 		fprintf (fp, " :\n\t%s", consCalls);
 	fprintf (fp, "\n{\n");
 	if (objDesc)
-		fprintf (fp, "\tdescriptor = %s;\n", objDesc);
+		fprintf (fp, "\tdescriptor = \"%s\";\n", objDesc);
 	if (!consCode) consCode = "";
 	fprintf (fp, "%s\n%s\n}\n", consStuff, consCode);
 	if (startCode)
@@ -718,6 +848,103 @@ genDef ()
 	fprintf (fp, "static %s proto;\n", fullClass);
 	fprintf (fp, "static KnownBlock entry(proto,\"%s\");\n", objName);
 	(void) fclose(fp);
+
+/**************************************************************************
+		CREATE THE DOCUMENTATION FILE
+*/
+
+	sprintf (fname, "%s.t", fullClass);
+	if ((fp = fopen (fname, "w")) == 0) {
+		perror (fname);
+		exit (1);
+	}
+
+	fprintf (fp, ".\\\" documentation file generated from %s by %s\n",
+		 inputFile, progName);
+
+/* Name */
+	fprintf (fp, ".NA \"%s\"\n", objName);
+
+/* short descriptor */
+	fprintf (fp, ".SD\n");
+	if (objDesc) {
+		/*
+		 * print descriptor with "\n" replaced with NEWLINE,
+		 * and "\t" replaced with a tab.
+		 * Any other escaped character will be printed as is.
+		 */
+		if(unescape(descriptString, objDesc, MEDBUFSIZE))
+		    yywarn("warning: Descriptor too long. May be truncated.");
+		fprintf (fp, "%s\n", descriptString);
+	}
+	fprintf (fp, ".SE\n");
+
+/* location */
+	if (objLocation)
+		fprintf (fp, ".LO \"%s\"\n",objLocation);
+
+/* base class and domain */
+	/* For stars, we append the domain name to the beginning of the name,
+	   unless it is already there */
+	if (derivedFrom) {
+		if (domain &&
+		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
+			sprintf (baseClass, "%s%s", galDef ? "" : domain,
+				 derivedFrom);
+		}
+		else
+			(void) strcpy (baseClass, derivedFrom);
+	}
+	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
+	else if (galDef)
+		(void)strcpy (baseClass, "Galaxy");
+	else
+		sprintf (baseClass, "%sStar", domain);
+
+	fprintf (fp, ".DM %s %s\n", domain, baseClass);
+
+/* version */
+	fprintf (fp, ".SV %s %s\n", objVer, objDate);
+
+/* author */
+	if (objAuthor)
+		fprintf (fp, ".AL \"%s\"\n", objAuthor);
+
+/* copyright */
+	if (objCopyright)
+		fprintf (fp, ".CO \"%s\"\n", objCopyright);
+
+/* inputs */
+	if (strlen(inputDescriptions) > 0)
+		fprintf (fp, ".IH\n%s.PE\n", inputDescriptions);
+
+/* outputs */
+	if (strlen(outputDescriptions) > 0)
+		fprintf (fp, ".OH\n%s.PE\n", outputDescriptions);
+
+/* states */
+	if (strlen(stateDescriptions) > 0)
+		fprintf (fp, ".SH\n%s.ET\n", stateDescriptions);
+
+/* explanation */
+	if (objExpl)
+		fprintf (fp, ".LD\n%s\n", objExpl);
+
+/* ID block (will appear in .h and .cc files only. */
+
+/* See Also list */
+	if (nSeeAlso > 0) fprintf (fp, ".SA\n");
+	if (nSeeAlso > 2)
+	    for (i = 0; i < (nSeeAlso - 2); i++)
+		fprintf (fp, "%s,\n", seeAlsoList[i]);
+	if (nSeeAlso > 1) fprintf (fp, "%s and\n", seeAlsoList[nSeeAlso-2]);
+	if (nSeeAlso > 0) fprintf (fp, "%s.\n", seeAlsoList[nSeeAlso-1]);
+
+/* end the final entry */
+	fprintf (fp, ".ES\n");
+
+/* close the file */
+	(void) fclose (fp);
 }
 
 
@@ -734,12 +961,14 @@ struct tentry keyTable[] = {
 	"arglist", ARGLIST,
 	"attrib", ATTRIB,
 	"attributes", ATTRIB,
+	"author", AUTHOR,
 	"ccinclude", CCINCLUDE,
 	"class", CLASS,
 	"code", CODE,
 	"conscalls", CONSCALLS,
 	"consCalls", CONSCALLS,
 	"constructor", CONSTRUCTOR,
+	"copyright", COPYRIGHT,
 	"default", DEFAULT,
 	"defstar", DEFSTAR,
 	"defstate", DEFSTATE,
@@ -750,12 +979,14 @@ struct tentry keyTable[] = {
 	"descriptor", DESC,
 	"destructor", DESTRUCTOR,
 	"domain", DOMAIN,
+	"explanation", EXPLANATION,
 	"galaxy", GALAXY,
 	"go", GO,
 	"hinclude", HINCLUDE,
 	"ident", ID,
 	"inmulti", INMULTI,
 	"input", INPUT,
+	"location", LOCATION,
 	"method", METHOD,
 	"name", NAME,
 	"num", NUM,
@@ -765,12 +996,15 @@ struct tentry keyTable[] = {
 	"outmulti", OUTMULTI,
 	"output", OUTPUT,
 	"private", PRIVATE,
+	"programmer", AUTHOR,
 	"protected", PROTECTED,
 	"public", PUBLIC,
+	"seealso", SEEALSO,
 	"star", STAR,
 	"start", START,
 	"state", DEFSTATE,
 	"type", TYPE,
+	"version", VERSION,
 	"wrapup", WRAPUP,
 	0, 0,
 };
@@ -783,32 +1017,42 @@ yylex () {
 	int key;
 	char* p = yytext;
 	if (c == EOF) return 0;
-	if (!c) input();
-/* bodyMode causes a whole function body to be returned as a single token.*/
+/* bodyMode causes a whole function or document
+ * body to be returned as a single token.
+ * Leading and trailing spaces are removed
+ */
+	while (!c || isspace(c)) {
+		input();
+	}
 	if (bodyMode) {
 		int brace = 1;
 		int inQuote = 0;
-/* put a "#line" directive in the token */
-		sprintf (yytext, "# line %d \"%s\"\n", yyline, inputFile);
-		p = yytext + strlen (yytext);
+/* if !docMode, put a "#line" directive in the token */
+		if (!docMode) {
+		   sprintf (yytext, "# line %d \"%s\"\n", yyline, inputFile);
+		   p = yytext + strlen (yytext);
+		}
 
 		while (brace > 0) {
-			*p++ = input();
-			if (c == ESC) {
+			*p++ = c;
+			switch (c) {
+			case ESC:
 				c = getc(yyin);
 				*p++ = c;
-				continue;
-			}
-			else if (c == QUOTE)
+				break;
+			case QUOTE:
 				inQuote = !inQuote;
-			else if (c == EOF) {
-				yyerror ("Unexpected EOF in method!");
+				break;
+			case EOF:
+				yyerror ("Unexpected EOF in body!");
 				exit (1);
+			default:
+				if (!inQuote) {
+				   if (c == '{') brace++;
+				   else if (c == '}') brace--;
+				}
 			}
-			else if (!inQuote) {
-				if (c == '{') brace++;
-				else if (c == '}') brace--;
-			}
+			input();
 		}
 /* The BODY token does not include the closing '}' though it is removed
  * from the input.
@@ -822,6 +1066,62 @@ yylex () {
 		yylval = save(yytext);
 		return BODY;
 	}
+
+/* descMode causes a whole descriptor body to be returned as a single token
+ * in the form of a string with newlines indicated as "\n" and quotes
+ * escaped (\").
+ */
+	if (descMode) {
+		int brace = 1;
+		int inQuote = 0;
+		while (brace > 0) {
+			*p++ = c;
+			switch (c) {
+			case ESC:
+				c = getc(yyin);
+				*p++ = c;
+				break;
+			case QUOTE:
+				/* escape the quote */
+				--p;
+				*p++ = ESC;
+				*p++ = QUOTE;
+				inQuote = !inQuote;
+				break;
+			case NEWLINE:
+				/* replace with "\n" */
+				--p;
+				*p++ = ESC;
+				*p++ = 'n';
+				break;
+			case EOF:
+				yyerror ("Unexpected EOF in descriptor!");
+				exit (1);
+			default:
+				if (!inQuote) {
+				  if (c == '{') brace++;
+				  else if (c == '}') brace--;
+				}
+				break;
+			}
+			input();
+		}
+/* The BODY token does not include the closing '}' though it is removed
+ * from the input.
+ */
+		--p;
+/* trim trailing whitespace or '\n' */
+		--p;
+		while (isspace(*p) || *p == 'n')
+			if( (*p == 'n') && (*(p-1) == ESC) )
+				p -= 2;
+			else --p;
+		p[1] = 0;
+		c = 0;
+		yylval = save(yytext);
+		return BODY;
+	}
+
 /* regular code (not BODY mode) */
 
 /* loop to eat up blanks and comments.  A comment starts with // and
@@ -829,9 +1129,6 @@ yylex () {
  * loop a '/' token is returned.
  */
 	while (1) {
-		while (isspace(c)) {
-			input();
-		}
 		if (c != '/') break;
 		else {
 			input();
@@ -843,8 +1140,12 @@ yylex () {
 			/* comment -- eat rest of line */
 			while (input() != NEWLINE);
 		}
+		while (isspace(c)) { input(); }
 	}
-	/* STRING token includes surrounding quotes */
+	/*
+	 * STRING token includes surrounding quotes
+	 * If the STRING includes a NEWLINE, a warning is issued.
+	 */
 	if (c == QUOTE) {
 		p = yytext;
 		*p++ = c;
@@ -858,7 +1159,7 @@ yylex () {
 				*p++ = input();
 			}
 			else if (c == NEWLINE) {
-				yyerror ("warning: multi-line string");
+				yywarn ("warning: multi-line string");
 			}
 			else if (c == EOF) {
 				yyerror ("Unexpected EOF in string");
@@ -923,19 +1224,6 @@ char* in;
 	return strcpy(out,in);
 }
 
-/* combine multi-strings for descriptors */
-char* combineStrings () {
-	int i;
-	if (nStrings == 0) return "\"\"";
-	if (nStrings == 1) return stringBuf[0];
-	strcpy (str1, stringBuf[0]);
-	for (i = 1; i < nStrings; i++) {
-		strcat (str1, "\n\t");
-		strcat (str1, stringBuf[i]);
-	}
-	return save (str1);
-}
-
 /* strip quotes, save token in dynamic memory */
 char* stripQuotes(in)
 char* in;
@@ -954,6 +1242,44 @@ char* in;
 	if (*in != LPAR || in[strlen(in)-1] != RPAR)
 		yyerror ("Invalid argument list");
 	return in;
+}
+
+/*
+ * copy one string into another, replacing the pattern "\n" with
+ * NEWLINE, "\t" with tab, and "\x" with x for any other x.
+ * The third argument is the size of the destination, which will not
+ * be exceeded.
+ */
+int unescape(destination, source, dsize)
+char* destination;
+char* source;
+int dsize;
+{
+	char* d = destination;
+	char* s = source;
+	int i = 1;
+	while (*s != NULL) {
+	    if (*s == ESC) {
+		switch (*(s+1)) {
+		    case 'n':
+			*d++ = '\n';
+			break;
+		    case 't':
+			*d++ = '\t';
+			break;
+		    default:
+			*d++ = *(s+1);
+		}
+		s += 2;
+	    } else
+		*d++ = *s++;
+	    if(i++ >= dsize) {
+		*d = NULL; /* terminate the string */
+		return(1);
+	    }
+	}
+	*d = NULL; /* terminate the string */
+	return(0);
 }
 
 /* main program, just calls parser */
@@ -986,5 +1312,12 @@ char *s;
 {
 	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
 	nerrs++;
+	return;
+}
+
+yywarn(s)
+char *s;
+{
+	fprintf (stderr, "\"%s\", line %d: %s\n", inputFile, yyline, s);
 	return;
 }
