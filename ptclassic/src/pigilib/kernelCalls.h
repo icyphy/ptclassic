@@ -32,20 +32,3 @@ struct ParamListStruct {
     ParamType *array; /* points to first element */
 };
 typedef struct ParamListStruct ParamListType;
-
-// An InterpUniverse is an Universe with an interpreted galaxy
-// in it.  This is accomplished by making it Runnable and an InterpGalaxy.
-
-class InterpUniverse : public InterpGalaxy, public Runnable {
-public:
-        InterpUniverse (const char* name) : Runnable(KnownBlock::newSched(),
-                                     KnownBlock::domain(),this)
-        { setBlock(name,NULL);}
-        void newSched() {
-                delete scheduler;
-                scheduler = KnownBlock::newSched();
-                type = KnownBlock::domain();
-        }
-
-	Scheduler* mySched() { return scheduler;}
-};
