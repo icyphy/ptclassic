@@ -32,19 +32,24 @@
 # Written by: Christopher Hylands
 
 PTOLEMY=\users\ptolemy
+BINDIR=$(PTOLEMY)\bin.$(PTARCH)
 LIBDIR=$(PTOLEMY)\lib.$(PTARCH)
-BINDIR = $(PTOLEMY)\bin.$(PTARCH)
+
 
 PTCL_PTINY=$(PTOLEMY)\src\ptcl\ptcl.ptiny.exe
-all: $(BINDIR) $(PTCL_PTINY) 
+all: $(BINDIR) $(LIBDIR) $(PTCL_PTINY) 
 
 $(BINDIR):
+	-mkdir $@
+
+$(LIBDIR):
 	-mkdir $@
 
 # Tcl script that converts Unix makefiles to MSVC++ nmake files
 MAKEVCGEN=$(PTOLEMY)\bin\makevcgen
 
 KERNEL_LIB=$(PTOLEMY)\src\kernel\libptolemy.lib
+$(LIBDIR)\libptolemy.lib: $(KERNEL_LIB)
 $(KERNEL_LIB): $(PTOLEMY)\src\kernel\makefile.vc
 	cd $(PTOLEMY)\src\kernel
 	nmake -f makefile.vc install
@@ -78,23 +83,25 @@ $(DE_STAR_LIB): $(KERNEL_LIB) $(DE_LIB)
 #SDF_LIB=$(PTOLEMY)\src\domains\sdf\kernel\libsdf.lib
 #SDF_DEP=$(KERNEL_LIB) $(PTCL_DESCRIPTION_LIB) 
 #$(SDF_LIB): $(SDF_DEP)
-#	cd $(PTOLEMY)/src/domains/sdf/kernel
+#	cd $(PTOLEMY)\src\domains\sdf\kernel
 #	nmake -f makefile.vc install
 #SDF_STAR_LIB=$(PTOLEMY)\src\domains\sdf\stars\libsdfstars.lib
 #SDF_STAR_DEP=$(SDF_DEP) $(SDF_LIB)
 #$(SDF_STAR_LIB): $(SDF_STAR_DEP)
-#	cd $(PTOLEMY)/src/domains/sdf/stars
+#	cd $(PTOLEMY)\src\domains\sdf\stars
 #	nmake -f makefile.vc
 
 ptcl:$(PTCL_LIB)
 PTCL_LIB=$(PTOLEMY)\src\ptcl\libptcl.lib
-$(PTCL_LIB): $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
-	cd $(PTOLEMY)/src/ptcl
+$(PTCL_LIB): $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
+	cd $(PTOLEMY)\src\ptcl
+	touch override.mk.vc
 	nmake -f makefile.vc install
 
 
-$(PTCL_PTINY):  $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
-	cd $(PTOLEMY)/src/ptcl
+$(PTCL_PTINY):  $(LIBDIR)\libptolemy.lib $(KERNEL_LIB) $(EXTTOOLS_LIB) $(DE_STAR_LIB)
+	cd $(PTOLEMY)\src\ptcl
+	touch override.mk.vc
 	nmake -f makefile.vc ptcl.ptiny
 
 
