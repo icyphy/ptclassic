@@ -17,56 +17,61 @@ represented by the origin and the length of the interval.
 **************************************************************************/
 #include "IntervalList.h"
 
-int Interval::isBefore(Interval* i1) { 
-	return (origin <= end() < i1->origin); 
+/*
+int Interval::isBefore(Interval i1) { 
+	return (origin <= end() < i1.origin); 
+}
+*/
+
+int Interval::isAfter(Interval i1) { 
+	return (origin >= i1.end()); 
 }
 
-int Interval::isAfter(Interval* i1) { 
-	return (origin >= i1->end()); 
+int Interval::endsBefore(Interval i1) {
+	return (end() < i1.origin);
 }
 
-int Interval::endsBefore(Interval *i1) {
-	return (end() < i1->origin);
+/****
+
+int Interval::extendsBefore(Interval i1) { 
+	return (i1.origin <= end() <= i1.end());
 }
 
-int Interval::extendsBefore(Interval *i1) { 
-	return (i1->origin <= end() <= i1->end());
+int Interval::extendsAfter(Interval i1) {
+	return (i1.origin <= origin <= i1.end()) ;
 }
 
-int Interval::extendsAfter(Interval *i1) {
-	return (i1->origin <= origin <= i1->end()) ;
+int Interval::contains(Interval i1) {
+	return (i1.origin <= origin && i1.end() <= end());
 }
 
-int Interval::contains(Interval *i1) {
-	return (i1->origin <= origin && i1->end() <= end());
+int Interval::doesIntersect(Interval i1) {
+	return ( (i1.origin < end() <= i1.end()) ||
+		 (i1.origin <= origin < i1.end()) );
 }
+********/ 
 
-int Interval::doesIntersect(Interval *i1) {
-	return ( (i1->origin < end() <= i1->end()) ||
-		 (i1->origin <= origin < i1->end()) );
-}
-
-Interval& Interval::operator=(Interval *i1) {
-	origin = i1->origin;
-	length = i1->length;
-	next = i1->next;
-	return next;
+Interval Interval::operator=(Interval& i1) {
+	origin = i1.origin;
+	length = i1.length;
+	next = NULL;
+	return *this;
 }
 	
-Interval& Interval::operator&=(Interval *i1) {
-	unsigned end = MIN(i1->end(),this->end());
-	origin = MAX(origin,i1->origin);
+Interval Interval::operator&=(Interval& i1) {
+	unsigned end = MIN(i1.end(),this->end());
+	origin = MAX(origin,i1.origin);
 	length = MAX(end-origin,0);
-	return this;
+	return *this;
 }
 
 Interval operator&(Interval& i1,Interval& i2) {
 	Interval intersection = Interval(i1);
-	i1 &= &i2;
+	i1 &= i2;
 	return intersection;
 }
 
-unsigned Interval::end() { 
+const unsigned Interval::end() { 
 	return origin+length;
 }
 
@@ -118,13 +123,13 @@ void IntervalList::zero() {
 	}
 }
 
-IntervalList& IntervalList::operator|=(Interval* i1) {
+IntervalList& IntervalList::operator|=(Interval i1) {
 	Interval* current = this->head;
 	Interval* previous = NULL;
 	Interval* input;
 	LOG_NEW; input = new Interval(i1);
 	input->next = NULL;
-	while (input->isAfter(current) && current != NULL) {
+	while (current == NULL ? FALSE:input->isAfter(*current)) {
 		previous = current;
 		current++;
 	}
@@ -138,9 +143,9 @@ IntervalList& IntervalList::operator|=(Interval* i1) {
 			previous->next = input;
 			input->next = current;
 		}
-		while (!input->endsBefore(current) && current != NULL) {
+		while (current==NULL ? FALSE:!input->endsBefore(*current)) {
 			input->length = MAX(input->end(),current->end()) - 
-					i1->origin;
+					i1.origin;
 			input->next = current->next;
 			current->~Interval();
 			current = input->next;
@@ -151,7 +156,7 @@ IntervalList& IntervalList::operator|=(Interval* i1) {
  
 IntervalList& IntervalList::operator|=(IntervalList& src) {
 	Interval* current=src.head;
-	while (current++ != NULL) operator|=(current);
+	while (current++ != NULL) operator|=(*current);
 	return *this;
 }
 
