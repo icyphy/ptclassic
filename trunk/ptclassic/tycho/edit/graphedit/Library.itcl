@@ -145,11 +145,11 @@
 #    pack .mb
 #    raise .
 #    wm deiconify .
-#    .mb addMenu Foo
+#    .mb addMenu foo -label Foo
 #    $library menu .mb Foo ::tycho::inform
 # </pre></tcl>
 #
-# Create an editing widget on the sample.Add item
+# Create an editing widget on the sample.
 # <tcl quiet><pre>
 #    $library edit sample.Add "::tycho::inform \[$library describe\]"
 # </pre></tcl>
@@ -238,10 +238,9 @@ body ::tycho::Library::constructor {args} {
 body ::tycho::Library::edit {item command} {
     regsub -all {\.} $item "_" nm
     set nm .$nm
-    #catch {delete object .bar}
-    #set nm .bar
     if { [::info which -command $nm] != "" } {
         # Already exists
+        wm deiconify $nm
         raise $nm
      } else {
         uplevel #0 [list ::tycho::ParameterEdit $nm -command $command]
@@ -319,28 +318,26 @@ body ::tycho::Library::item {name args} {
 body ::tycho::Library::menu {menubar menuname prefix {context {}}} {
     if { $context == "" } {
 	foreach g [names group] {
-            $menubar add [_cget group $context $g -label] $menuname \
-                    -type cascade
-	    menu $menubar [_cget group $context $g -label] $prefix $g
+            $menubar add cascade $g $menuname \
+                    -label [_cget group $context $g -label]
+	    menu $menubar $g $prefix $g
 	}
         foreach i [names item] {
-            $menubar command \
-                    [_cget item {} $i -label] \
-                    $menuname \
+            $menubar command $i $menuname \
+                    -label [_cget item {} $i -label] \
                     -command [concat $prefix $i]
 	}
     } else {
 	foreach g [names group $context] {
-            $menubar add [_cget group $context $g -label] $menuname \
-                    -type cascade
-	    menu $menubar [_cget group $context $g -label] \
-                    $prefix $context.$g
+            $menubar add cascade $g $menuname \
+                    -label [_cget group $context $g -label]
+	    menu $menubar $g $prefix $context.$g
 	}
 	foreach i [names item $context] {
-            $menubar command \
-		    [_cget item $context $i -label] \
-		    $menuname \
+            $menubar command $i $menuname \
+		    -label [_cget item $context $i -label] \
 		    -command [concat $prefix $context.$i]
+            puts [concat $prefix $context.$i]
         }
     }
 }
