@@ -487,17 +487,18 @@ body ::tycho::EditGraph::runPtolemy {} {
 
     # Create a new universe
     set universe [::tycho::autoName .universe]
+    ::pitcl::addUniverse .x SDF
     ::ptolemy::Universe $universe {}
 
     # Create blocks
     foreach vertex [$graph vertices] {
-	puts "$universe addBlock $vertex [$layout itemcget $vertex -label]"
+	# puts "$universe addBlock $vertex [$layout itemcget $vertex -label]"
 	$universe addBlock $vertex [$layout itemcget $vertex -label]
     }
 
     # Create edges
     foreach {v0 k0 v1 k1} [$graph edges] {
-puts "$universe connect $universe.$v0.$k0 $universe.$v1.$k1"
+	# puts "$universe connect $universe.$v0.$k0 $universe.$v1.$k1"
 	$universe connect $universe.$v0.$k0 $universe.$v1.$k1
     }
 
@@ -505,9 +506,9 @@ puts "$universe connect $universe.$v0.$k0 $universe.$v1.$k1"
     foreach {_ iterations} \
 	    [::tycho::query Answer {{line n {Number of Iterations} 100}}] {}
 
-    puts $iterations
-
+    # puts "$universe run $iterations"
     $universe run $iterations
+    # puts "$universe wrapup"
     $universe wrapup
 }
 
