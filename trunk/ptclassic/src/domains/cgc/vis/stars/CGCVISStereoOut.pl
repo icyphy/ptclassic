@@ -117,7 +117,7 @@ provisions.
       addCode("if ($starSymbol(numbytes) >= 8180){");
       addCode(write);
       addCode("$starSymbol(numbytes) -= 8180;");
-      addCode("if ($starSymbol(numwrites) == 4) {");
+      addCode("if ($starSymbol(numwrites) > 3) {");
       addCode(setbufptr);
       addCode("$starSymbol(numwrites) = 1;");
       addCode("}else {");
