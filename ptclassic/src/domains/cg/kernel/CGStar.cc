@@ -147,7 +147,8 @@ StringList CGStar::processCode(CodeBlock& block)
 
 StringList CGStar::processCode(const char* text)
 {
-    StringList out;
+    StringList out="";
+    if (text == NULL) return out;
     char line[MAXLINELEN], *o = line, c;
     const char* t = text;
 
