@@ -96,7 +96,8 @@ void SynDFClusterPort :: update()
 	    Error::abortRun(*(parent()), message);
 	    return;
 	}
-	numberTokens = farSidePort->numXfer() * farClustLoopFac/myClustLoopFac;
+	numberTokens = (farSidePort->numXfer() * farClustLoopFac) / 
+			myClustLoopFac;
     }
 }
 
