@@ -184,10 +184,11 @@ protected:
 	// run one iteration of the SDF schedule
 	virtual void runOnce();
 
-private:
+protected:
 	int numIters;
 	int numItersSoFar;
 
+private:
 	/******************************************************
 		Members used in computing the repetitions
 	*******************************************************/
@@ -200,11 +201,12 @@ private:
 	// a connection.  Called by reptConnectedSubgraph().
 	int reptArc(PortHole& port1, PortHole& port2);
 
+protected:
 	// least common multiple of the denominators of the repetitions
 	// member of a connected subgraph
 	int lcmOfDenoms;
 
-
+private:
 	/******************************************************
 		Members used in computing the schedule
 	*******************************************************/
