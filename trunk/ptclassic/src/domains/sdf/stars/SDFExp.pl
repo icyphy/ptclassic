@@ -12,7 +12,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	htmldoc {
-<b>Bugs:</i> Overflow is not handled well.
+<b>Bugs</b>: Overflow is not handled well.
 <a name="exponential"></a>
 	}
 	input {

@@ -33,7 +33,7 @@ cutoff of 0.1 times sampling frequency.
 <a name="filter, Butterworth"></a>
 <a name="Butterworth filter"></a>
 <p>
-<b>This star will eventually be replaced by a general IIR star.</i>
+<b>This star will eventually be replaced by a general IIR star.</b>
 <h3>References</h3>
 <p>[1]  
 A. V. Oppenheim and R. W. Schafer, <i>Discrete-Time Signal Processing</i>,
