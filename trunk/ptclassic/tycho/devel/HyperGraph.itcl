@@ -217,30 +217,30 @@ class ::tycho::HyperGraph {
 
     # Connects cannot be nested
     protected method connectin {context vertex key edge args} {
-    	_nesterror connect $context [list $vertex $key $edge]
+	_nesterror connect $context [list $vertex $key $edge]
     }
 
     # Edges cannot be nested
     method hyperedgein {context name args} {
-    	_nesterror hyperedge $context $name
+	_nesterror hyperedge $context $name
     }
 
     # Keys cannot be created at the top level
     method key {key args} {
-    	_toplevelerror key $context [list $vertex $key]
-	}
+	_toplevelerror key $context [list $vertex $key]
+    }
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::HyperGraph::constructor {args} {
-	# Key names are a list 
-	configure -separator " "
-	
+    # Key names are a list 
+    configure -separator " "
+    
     # Define the "hyperedge" entity: no value, no default attributes
     defineLink hyperedge \
-    	-valued 0
+	    -valued 0
 
     # Define the "key" entity: no value, no default attributes
     defineEntity key
@@ -259,8 +259,8 @@ body ::tycho::HyperGraph::constructor {args} {
 # Return the children of a vertex. An error will result
 # if the vertex does not exist.
 #
-body ::tycho::Digraph::children {vertex} {
-	return $_adjacency($vertex,children) 
+body ::tycho::HyperGraph::children {vertex} {
+    return $_adjacency($vertex,children) 
 }
 
 ########################################################################
@@ -272,26 +272,26 @@ body ::tycho::Digraph::children {vertex} {
 # in which case this is an "out" connection. An error will result
 # if the vertex does not exist.
 #
-body ::tycho::Digraph::connect {vertex key hyperedge} {
-	_verify key [list $vertex $key]
-	_verify hyperedge $hyperedge
-	_verifynot connect [list $vertex $key $hyperedge]
+body ::tycho::HyperGraph::connect {vertex key hyperedge} {
+    _verify key [list $vertex $key]
+    _verify hyperedge $hyperedge
+    _verifynot connect [list $vertex $key $hyperedge]
 
-	# Record the connection
-	set inverse [_link connect [list $vertex $key $hyperedge] {}]
+    # Record the connection
+    set inverse [_link connect [list $vertex $key $hyperedge] {}]
 
-	# Add links to the adjacency matrix
-	if { [_type $vertex] == "vertex" } {
-		# An in connection
-		foreach {v k} [connected $hyperedge out] {
-			_adjacencyadd $vertex $v
-		}
-	} else {
-		# An in connection
-		foreach {v k} [connected $hyperedge in] {
-			_adjacencyadd $v $vertex
-		}
+    # Add links to the adjacency matrix
+    if { [_type $vertex] == "vertex" } {
+	# An in connection
+	foreach {v k} [connected $hyperedge out] {
+	    _adjacencyadd $vertex $v
 	}
+    } else {
+	# An in connection
+	foreach {v k} [connected $hyperedge in] {
+	    _adjacencyadd $v $vertex
+	}
+    }
     # Clear any cached structural information
     catch {unset _cache}
 
@@ -308,12 +308,12 @@ body ::tycho::Digraph::connect {vertex key hyperedge} {
 # in which case this is an "out" connection. An error will result
 # if the connection does not exist.
 #
-body ::tycho::Digraph::connectdelete {vertex key hyperedge} {
-	_verify key [list $vertex $key]
-	_verify hyperedge $hyperedge
-	_verify connect [list $vertex $key $hyperedge]
+body ::tycho::HyperGraph::connectdelete {vertex key hyperedge} {
+    _verify key [list $vertex $key]
+    _verify hyperedge $hyperedge
+    _verify connect [list $vertex $key $hyperedge]
 
-   # FIXME
+    # FIXME
 }
 
 ########################################################################
@@ -325,9 +325,9 @@ body ::tycho::Digraph::connectdelete {vertex key hyperedge} {
 # already exists, but not if any of the connected vertices do
 # not exist. 
 #
-body ::tycho::Digraph::hyperedge {name args} {
-	_verifynot hyperedge $name
-	_entity hyperedge {} $name $args
+body ::tycho::HyperGraph::hyperedge {name args} {
+    _verifynot hyperedge $name
+    _entity hyperedge {} $name $args
 }
 
 ########################################################################
@@ -337,8 +337,8 @@ body ::tycho::Digraph::hyperedge {name args} {
 # attribute-value list. An error will result if the hyperedge does
 # not exist.
 #
-body ::tycho::Digraph::hyperedgeattrs {name} {
-	_verify hyperedge $name
+body ::tycho::HyperGraph::hyperedgeattrs {name} {
+    _verify hyperedge $name
     _attributes hyperedge $name
 }
 
@@ -348,8 +348,8 @@ body ::tycho::Digraph::hyperedgeattrs {name} {
 # Get an attribute of a hyperedge. An error will occur if the hyperedge does not
 # exist or the attribute does not exist.
 #
-body ::tycho::Digraph::hyperedgecget {name attribute} {
-	_verify hyperedge $name
+body ::tycho::HyperGraph::hyperedgecget {name attribute} {
+    _verify hyperedge $name
     _cget hyperedge $name $attribute
 }
 
@@ -360,8 +360,8 @@ body ::tycho::Digraph::hyperedgecget {name attribute} {
 # occur if the hyperedge does not exist. The argument list
 # is a flat list of attribute-value pairs.
 #
-body ::tycho::Digraph::hyperedgeconfigure {name args} {
-	_verify hyperedge $name
+body ::tycho::HyperGraph::hyperedgeconfigure {name args} {
+    _verify hyperedge $name
     _configure hyperedge $name $args
 }
 
@@ -371,19 +371,19 @@ body ::tycho::Digraph::hyperedgeconfigure {name args} {
 # Remove a hyperedge from the graph, and return the inverse command. This
 # default method works for simple directed graphs.
 #
-body ::tycho::Digraph::deletehyperedge {name} {
-	_verify hyperedge $name
+body ::tycho::HyperGraph::deletehyperedge {name} {
+    _verify hyperedge $name
 
-	# Delete it from the adjacency list
-	# FIXME
-	# _adjacencydelete $vertex1 $vertex2
+    # Delete it from the adjacency list
+    # FIXME
+    # _adjacencydelete $vertex1 $vertex2
 
     # Clear any cached structural information
     catch {unset _cache}
 
-	# Delete the data and return the inverse command
-	# FIXME: delete connections too
-	_delete hyperedge $name
+    # Delete the data and return the inverse command
+    # FIXME: delete connections too
+    _delete hyperedge $name
 }
 
 ########################################################################
@@ -396,11 +396,11 @@ body ::tycho::Digraph::deletehyperedge {name} {
 # target vertices as the arguments and compare the result with the empty
 # list.
 #
-body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
+body ::tycho::HyperGraph::edges {{pattern1 *} {pattern2 *}} {
     set result {}
     foreach quad [array names _info \
-    		[list hyperedge * * [list $pattern1 $pattern2]]] {
-		eval lappend result [lindex $quad 3]
+	    [list hyperedge * * [list $pattern1 $pattern2]]] {
+	eval lappend result [lindex $quad 3]
     }
     return $result
 }
@@ -412,8 +412,8 @@ body ::tycho::Digraph::edges {{pattern1 *} {pattern2 *}} {
 # attribute-value list. An error will result if the key does
 # not exist.
 #
-body ::tycho::KeyedDigraph::keyattrs {vertex key} {
-	_verify     key [list $vertex $key]
+body ::tycho::HyperGraph::keyattrs {vertex key} {
+    _verify     key [list $vertex $key]
     _attributes key [list $vertex $key]
 }
 
@@ -423,8 +423,8 @@ body ::tycho::KeyedDigraph::keyattrs {vertex key} {
 # Get an attribute of a key. An error will occur if the key does not
 # exist or the attribute does not exist.
 #
-body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
-	_verify key [list $vertex $key]
+body ::tycho::HyperGraph::keycget {vertex key attribute} {
+    _verify key [list $vertex $key]
     _cget   key [list $vertex $key] $attribute
 }
 
@@ -434,8 +434,8 @@ body ::tycho::KeyedDigraph::keycget {vertex key attribute} {
 # Configure the key and return the inverse command. The argument list
 # is a flat list of attribute-value pairs.
 #
-body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
-	_verify    key [list $vertex $key]
+body ::tycho::HyperGraph::keyconfigure {vertex key args} {
+    _verify    key [list $vertex $key]
     _configure key [list $vertex $key] $args
 }
 
@@ -444,23 +444,23 @@ body ::tycho::KeyedDigraph::keyconfigure {vertex key args} {
 #
 # Remove a key from the graph, and return the inverse command.
 #
-body ::tycho::KeyedDigraph::keydelete {vertex key} {
-	_verify key [list $vertex $key]
+body ::tycho::HyperGraph::keydelete {vertex key} {
+    _verify key [list $vertex $key]
 
-	# Delete it from the adjacency list
-	adjacencydelete $vertex1 $vertex2
+    # Delete it from the adjacency list
+    adjacencydelete $vertex1 $vertex2
 
     # Clear any cached structural information
     catch {unset _cache}
 
-	# Delete the data and get the inverse command
-	set inverse [_delete key [list $vertex $key]]
-	
-	# If there are still keys between the same vertices, add
-	# back to the adjacency list
+    # Delete the data and get the inverse command
+    set inverse [_delete key [list $vertex $key]]
+    
+    # If there are still keys between the same vertices, add
+    # back to the adjacency list
     if { [array names _info \
-    		[list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
-    	adjacencyadd $vertex1 $vertex2
+	    [list $type * * [list $vertex1 * $vertex2 *]]] != "" } {
+	adjacencyadd $vertex1 $vertex2
     }
     return $inverse
 }
@@ -470,13 +470,13 @@ body ::tycho::KeyedDigraph::keydelete {vertex key} {
 #
 # Add a new key to a vertex, and return the inverse command.
 #
-body ::tycho::KeyedDigraph::keyin {vertex key args} {
-	_verifynot key [list $vertex $key]
-	
-	# Record the key
-	set inverse [_link key [list $vertex $key] $args]
+body ::tycho::HyperGraph::keyin {vertex key args} {
+    _verifynot key [list $vertex $key]
+    
+    # Record the key
+    set inverse [_link key [list $vertex $key] $args]
 
-	# Add links to the adjacency matrix
+    # Add links to the adjacency matrix
     adjacencyadd $vertex1 $vertex2
 
     # Clear any cached structural information
@@ -493,11 +493,11 @@ body ::tycho::KeyedDigraph::keyin {vertex key args} {
 # is given, it is a glob-style pattern to be used to match against
 # key names.
 #
-body ::tycho::KeyedDigraph::keys {vertex {key *}} {
+body ::tycho::HyperGraph::keys {vertex {key *}} {
     set result {}
     foreach quad [array names _info \
-    		[list key $vertex $key *]] {
-		eval lappend result [lindex $quad 2]
+	    [list key $vertex $key *]] {
+	eval lappend result [lindex $quad 2]
     }
     return $result
 }
@@ -507,7 +507,7 @@ body ::tycho::KeyedDigraph::keys {vertex {key *}} {
 #
 # Return the "leaves" of the graph.
 #
-body ::tycho::Digraph::leaves {} {
+body ::tycho::HyperGraph::leaves {} {
     _leaves
 }
 
@@ -517,8 +517,8 @@ body ::tycho::Digraph::leaves {} {
 # Return the parents of a vertex. An error will result
 # if the vertex does not exist.
 #
-body ::tycho::Digraph::parents {vertex} {
-	return $_adjacency($vertex,parents) 
+body ::tycho::HyperGraph::parents {vertex} {
+    return $_adjacency($vertex,parents) 
 }
 
 ########################################################################
@@ -526,6 +526,6 @@ body ::tycho::Digraph::parents {vertex} {
 #
 # Return the roots of the graph.
 #
-body ::tycho::Digraph::roots {} {
+body ::tycho::HyperGraph::roots {} {
     _graphroots
 }
