@@ -143,7 +143,7 @@ double lastTime)
 CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
 					Star* dest)
 {
-//    cerr << "Enterring CalendarQueue ::levelput" << v << "," << fv << "," << dest;
+//    cerr << "CQ: Entering CalendarQueue ::levelput" << v << "," << fv << "," << dest << "\n";
     CqLevelLink* newLink = getFreeLink();
 
     newLink->setLink(a, v, fv, dest, 0, 0);
@@ -153,7 +153,6 @@ CqLevelLink* CalendarQueue :: levelput(Pointer a, double v, double fv,
     if ((cq_resizeEnabled) &&
 	(cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS))
 	    Resize(2 * cq_bucketNum);
-//    cerr << '\n';
     return newLink;
 }
 
@@ -439,7 +438,7 @@ double CalendarQueue :: NewInterval()
     if (validSeparationNum && totalSeparation) {
 	resultInterval = (double)(3*totalSeparation/validSeparationNum);
 	if (resultInterval < MINI_CQ_INTERVAL) {
-	    printf("interval:%f, eventNumber:%d\n", resultInterval, cq_eventNum);
+	    // printf("interval:%f, eventNumber:%d\n", resultInterval, cq_eventNum);
 	    return((double)MINI_CQ_INTERVAL);
 	} else
 	    return((double)resultInterval);
