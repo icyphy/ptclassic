@@ -100,6 +100,7 @@ ITCL_SRCS = \
 	MenuSupport.itcl \
 	Message.itcl \
 	Model.itcl \
+	OldModel.itcl \
 	Monitor.itcl \
 	MultiPanel.itcl \
 	Object.itcl \
