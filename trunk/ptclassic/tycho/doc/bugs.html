@@ -1,4 +1,4 @@
-<!-- $Id$ -->
+	<!-- $Id$ -->
 <html>
 <head>
 <Title>Tycho Bugs</title>
@@ -18,6 +18,8 @@ Contents:
 <li><a href="#bugs in text editors">Bugs in text editors</a>
 <li><a href="#bugs in visual editors">Bugs in visual editors</a>
 <li><a href="#bugs in gendoc">Bugs in the documentation generator</a>
+<li><a href="#bugs in java">Bugs in the Tycho/Java environment</a>
+<li><a href="#bugs in Ptolemy/Tycho">Ptolemy/Tycho bugs</a>
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
@@ -240,9 +242,24 @@ won't help much.
 
 </ul>
 
-<H2><A NAME="bugs, Ptolemy/Tycho docs">Ptolemy/Tycho bugs </A></H2>
+<H2><a name="bugs in java">Bugs in the Tycho/Java environment</a></H2>
 <OL>
+<LI> The prebuilt Itcl binaries will only work with TclJava
+if they are installed in <CODE>/users/ptolemy/tcltk</CODE>.
 
+
+<LI> The Tycho/Java interface is built on top of the TclJava
+interface.  The Tycho/Java interface uses the Reflect class, which is
+only available in JDK1.1 and later.  As of 5/22/97, JDK1.1.1 was only
+available from
+<A HREF="http://www.javasoft.com"><CODE>www.javasoft.com</CODE></A>
+for Solaris2.x on Sparc and x86 and for Windows96/NT.  If you are
+running under a platform such as HPUX10.20, which only has JDK1.0.2,
+you probably won't be able to get the Tycho/Java interface to compile.
+</OL>
+
+<H2><A NAME="bugs in Ptolemy/Tycho">Ptolemy/Tycho bugs </A></H2>
+<OL>
 <LI> If you start <CODE>tycho -ptiny</CODE> and put it in the
 background, the Matlab interface might not start up on SystemV
 operating systems such as Solaris and HPUX.  This workaround is to
