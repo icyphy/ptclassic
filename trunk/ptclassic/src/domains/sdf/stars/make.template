@@ -1,4 +1,4 @@
-# Makefile for Ptolemy stars
+# Makefile for Ptolemy SDF stars
 # $Id$
 #
 # If this file's name is "make.template" and there is no makefile in
@@ -14,6 +14,9 @@ GFLAGS = -g -I$(SRCDIR)
 GNU = g++
 GNUINCLUDE = -I$(SRCDIR) -I/usr/gnu/lib/g++-include
 
+# Where to install
+DESTDIR = /usr/tools/ptolemy/lib/sdf
+
 .SUFFIXES: .cc
 .cc.o:
 	$(GNU) $(GFLAGS) -c  $<
@@ -26,10 +29,19 @@ OBJS=AdaptFilter.o FIR.o FloatFork.o FloatPrinter.o FloatRamp.o \
 	Fork.o Gaussian.o IIR.o IntFork.o IntPrinter.o IntRamp.o Printer.o \
 	CheatGain.o Sin.o Xgraph.o
 
-all:		$(OBJS)
+all:		makefile $(OBJS)
 
+install:	makefile $(OBJS)
+		mv -f $(OBJS) $(DESTDIR)
 depend:
 		makedepend $(GNUINCLUDE) $(SRCS)
+
+makefile:	make.template
+		rm -f makefile
+		cp make.template makefile
+		makedepend $(GNUINCLUDE) $(SRCS)
+		@echo makefile remade -- you must rerun make.
+		exit 1
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
