@@ -59,10 +59,10 @@ public:
 
 protected:
 	char *schedFileName;
-	CodeStream globalDecls(SHARE);
-	CodeStream include(SHARE);
-	CodeStream mainDecls(SHARE);
-	CodeStream mainInit(SHARE);
+	CodeStream globalDecls;
+	CodeStream include;
+	CodeStream mainDecls;
+	CodeStream mainInit;
 	CodeStream wormIn;
 	CodeStream wormOut;
 
