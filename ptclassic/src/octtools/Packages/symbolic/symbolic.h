@@ -49,7 +49,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * Connector support
  */
 
-EXTERN int symContactP
+OCT_EXTERN int symContactP
   ARGS((octObject *obj));
   /* Returns a non-zero status if `obj' is a connector or connector terminal */
 
@@ -68,13 +68,13 @@ typedef struct sym_con_func_defn {
 extern symConFunc *symDefConFunc;
    /* Exported default connector function */
 
-EXTERN void symConnector
+OCT_EXTERN void symConnector
   ARGS((octObject *parent, octCoord x, octCoord y,
 	int ne, tapLayerListElement elems[], symConFunc *confun,
 	octObject *connector));
   /* Makes a new connector */
 
-EXTERN int symUpgrade
+OCT_EXTERN int symUpgrade
   ARGS((octObject *term, tapLayerListElement *elem,
 	symConFunc *confun, octObject *new_conn));
   /* Examines connector terminal for possible upgrade */
@@ -91,7 +91,7 @@ typedef struct sym_copy_item_defn {
     char *data;			/* User supplied data */
 } symCopyItemFunc;
 
-EXTERN void symCopyObjects
+OCT_EXTERN void symCopyObjects
   ARGS((octObject *facet, octObject *set, struct octTransform *transform,
 	octObject *result, symConFunc *confun, symCopyItemFunc *ci));
 
@@ -107,7 +107,7 @@ typedef struct sym_del_item_func_defn {
     char *data;			/* User data        */
 } symDelItemFunc;
 
-EXTERN void symDeleteObjects
+OCT_EXTERN void symDeleteObjects
   ARGS((octObject *delSetBag, symDelItemFunc *del_func));
 
 
@@ -123,7 +123,7 @@ typedef struct sym_term_func_defn {
     char *data;			/* User data        */
 } symTermFunc;
 
-EXTERN void symNewFormal
+OCT_EXTERN void symNewFormal
   ARGS((octObject *facet, octObject *fterm, octObject *implBag,
 	char *termtype, char *termdir, symTermFunc *term_func));
   /* Creates a new symbolic formal terminal */
@@ -131,7 +131,7 @@ EXTERN void symNewFormal
 #define SYM_TERM_TYPE	"TERMTYPE"
 #define SYM_TERM_DIR	"DIRECTION"
 
-EXTERN int symGetTermProp
+OCT_EXTERN int symGetTermProp
   ARGS((octObject *term, octObject *prop));
   /* Finds property annotations on formal terminals */
 
@@ -147,11 +147,11 @@ typedef struct sym_gen_func_defn {
     char *data;			/* User data           */
 } symGenFunc;
 
-EXTERN void symSetGenFunc
+OCT_EXTERN void symSetGenFunc
   ARGS((symGenFunc *newObj, symGenFunc *old));
   /* Sets the interface generation function */
 
-EXTERN void symInterface
+OCT_EXTERN void symInterface
   ARGS((octObject *inst, octObject *interface));
   /* Opens or makes an interface */
 
@@ -167,18 +167,18 @@ typedef struct sym_lyr_alt_defn {
     char *data;			/* User data */
 } symLyrAltFunc;
 
-EXTERN void symSetLyrAltFunc
+OCT_EXTERN void symSetLyrAltFunc
   ARGS((symLyrAltFunc *newObj, symLyrAltFunc *old));
 
-EXTERN int symInstanceP
+OCT_EXTERN int symInstanceP
   ARGS((octObject *obj));
   /* Returns a non-zero status if object is real instance or instance term */
 
-EXTERN void symInstance
+OCT_EXTERN void symInstance
   ARGS((octObject *fct, octObject *inst));
   /* Creates a new symbolic instance or connector - no terminal maintenence */
 
-EXTERN void symReconnect
+OCT_EXTERN void symReconnect
   ARGS((octObject *inst, symConFunc *confun, symDelItemFunc *del_func));
   /* Reconnects and existing instance by examining abutting elements */
 
@@ -194,7 +194,7 @@ typedef struct sym_jumpname_defn {
     char *data;			/* User data passed to function */
 } symJumpNameFunc;
 
-EXTERN void symSetJumpNameFunc
+OCT_EXTERN void symSetJumpNameFunc
   ARGS((symJumpNameFunc *newObj, symJumpNameFunc *old));
   /* Sets the global/local net naming function */
 
@@ -210,7 +210,7 @@ typedef struct sym_move_item_func_defn {
     char *data;			/* Extra data       */
 } symMoveItemFunc;
 
-EXTERN void symMoveObjects
+OCT_EXTERN void symMoveObjects
   ARGS((octObject *set, struct octTransform *transform,
 	symMoveItemFunc *move_func));
   /* Moves a set of items to a new location - doesn't change connectivity */
@@ -227,15 +227,15 @@ typedef struct sym_merge_func_defn {
     char *data;			/* User data        */
 } symMergeFunc;
 
-EXTERN void symSetMergeFunc
+OCT_EXTERN void symSetMergeFunc
   ARGS((symMergeFunc *newObj, symMergeFunc *old));
   /* Set the merging function */
 
-EXTERN int symLocNet
+OCT_EXTERN int symLocNet
   ARGS((octObject *obj, octObject *net));
   /* Finds net associated with object */
 
-EXTERN int symHumanNamedNetP
+OCT_EXTERN int symHumanNamedNetP
   ARGS((octObject *net));
   /* Returns non-zero if net is human named */
 
@@ -243,14 +243,14 @@ EXTERN int symHumanNamedNetP
  * Replacing instances
  */
 
-EXTERN void symReplaceInst
+OCT_EXTERN void symReplaceInst
   ARGS((octObject *fct, octObject *old, octObject *newObj));
 
 /*
  * Adding and modifying segments
  */
 
-EXTERN void symSegments
+OCT_EXTERN void symSegments
   ARGS((octObject *facet, octObject *first, octObject *last,
 	int np, struct octPoint *points,
 	int nl, octObject layers[],
@@ -258,16 +258,16 @@ EXTERN void symSegments
 	symConFunc *confun));
   /* Creates a series of new symbolic segments */
 
-EXTERN void symSegChange
+OCT_EXTERN void symSegChange
   ARGS((octObject *fct, octObject *seg, octObject *new_lyr,
 	octCoord new_width, symConFunc *confun));
   /* Changes the layer or width of an existing segment */
 
-EXTERN void symSegDesc
+OCT_EXTERN void symSegDesc
   ARGS((octObject *seg, struct octPoint *ref, tapLayerListElement *elem));
   /* Returns description for segment */
 
-EXTERN int symSegConnP
+OCT_EXTERN int symSegConnP
   ARGS((octObject *term, tapLayerListElement *elem));
   /* Returns non-zero if a segment described by `elem' can connect to `term' */
 
@@ -281,15 +281,15 @@ typedef struct term_dummy_defn {
 
 typedef term_dummy *symTermGen;
 
-EXTERN void symInitTerm
+OCT_EXTERN void symInitTerm
   ARGS((octObject *a_term, symTermGen *t_gen));
   /* Initializes generation of terminal implementations */
 
-EXTERN int symNextTerm
+OCT_EXTERN int symNextTerm
   ARGS((symTermGen gen, octObject *lyr, octObject *geo));
   /* Returns next implementation geometry in sequence */
 
-EXTERN void symEndTerm
+OCT_EXTERN void symEndTerm
   ARGS((symTermGen gen));
   /* Ends sequence of terminal generation */
 
@@ -301,14 +301,14 @@ typedef struct area_dummy_defn {
     int dummy;
 } *symAreaGen;
 
-EXTERN void symAreaInit
+OCT_EXTERN void symAreaInit
   ARGS((octObject *fct, octObjectMask mask, struct octBox *area,
 	symAreaGen *gen));
 
-EXTERN int symAreaNext
+OCT_EXTERN int symAreaNext
   ARGS((symAreaGen gen, octObject *obj));
 
-EXTERN void symAreaEnd
+OCT_EXTERN void symAreaEnd
   ARGS((symAreaGen gen));
 
 
@@ -326,7 +326,7 @@ typedef struct sym_warn_func_defn {
     char *data;			/* User data        */
 } symWarnFunc;
 
-EXTERN void symSetWarnFunc
+OCT_EXTERN void symSetWarnFunc
   ARGS((symWarnFunc *newObj, symWarnFunc *old));
   /* Sets the warning/message function for symbolic */
 

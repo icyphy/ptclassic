@@ -33,49 +33,49 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define TH_PKG_NAME "th"
 
 
-EXTERN void thTechnology
+OCT_EXTERN void thTechnology
   ARGS( (octObject *obj ));
 
-EXTERN void thVerbose
+OCT_EXTERN void thVerbose
   ARGS( (int flag ));
 
     
-EXTERN int thGetPropInteger
+OCT_EXTERN int thGetPropInteger
   ARGS( ( char* name ) );
-EXTERN double  thGetPropReal
+OCT_EXTERN double  thGetPropReal
   ARGS( ( char* name ) );
-EXTERN char* thGetPropString
+OCT_EXTERN char* thGetPropString
   ARGS( ( char* name ) );
 
 #define  thCoordSize() thGetPropReal("COORD-SIZE")
 #define  thLambda()    thGetPropInteger("LAMBDA")
 
 
-EXTERN double thGetLayerPropReal
+OCT_EXTERN double thGetLayerPropReal
   ARGS((octObject* layer, char* name ));
 
-EXTERN double thGetLayerLayerPropReal
+OCT_EXTERN double thGetLayerLayerPropReal
   ARGS((octObject* layer1, octObject* layer2, char* name ));
 
-EXTERN double thGetAreaCap
+OCT_EXTERN double thGetAreaCap
   ARGS((octObject* layer ));
 
-EXTERN double thGetPerimCap
+OCT_EXTERN double thGetPerimCap
   ARGS((octObject* layer ));
 
-EXTERN double thGetSheetResistance
+OCT_EXTERN double thGetSheetResistance
   ARGS((octObject* layer ));
 
-EXTERN double thGetSheetInductance
+OCT_EXTERN double thGetSheetInductance
   ARGS((octObject* layer ));
 
-EXTERN double thGetContactResistance
+OCT_EXTERN double thGetContactResistance
   ARGS((octObject* layer ));
 
-EXTERN double thGetThickness
+OCT_EXTERN double thGetThickness
   ARGS((octObject* layer ));
 
-EXTERN char*  thGetLayerClass
+OCT_EXTERN char*  thGetLayerClass
   ARGS((octObject* layer ));
 
 #endif

@@ -72,62 +72,62 @@ struct _st_generator {
 
 enum st_retval {ST_CONTINUE, ST_STOP, ST_DELETE};
 
-EXTERN st_table *st_init_table_with_params
+OCT_EXTERN st_table *st_init_table_with_params
   ARGS((int (*compare)(const char *x, const char *y), int (*hash)(char *x, int modulus), int size, int density,
 	double grow_factor, int reorder_flag));
 
-EXTERN st_table *st_init_table
+OCT_EXTERN st_table *st_init_table
   ARGS((int (*compare)(const char *x, const char *y), int (*hash)(char *x, int modulus)));
 
-EXTERN void st_free_table
+OCT_EXTERN void st_free_table
   ARGS((st_table *table));
 
-EXTERN int st_lookup
+OCT_EXTERN int st_lookup
   ARGS((st_table *table, char *key, char **value));
 
-EXTERN int st_insert
+OCT_EXTERN int st_insert
   ARGS((st_table *table, char *key, char *value));
 
-EXTERN void st_add_direct
+OCT_EXTERN void st_add_direct
   ARGS((st_table *table, char *key, char *value));
 
-EXTERN int st_find_or_add
+OCT_EXTERN int st_find_or_add
   ARGS((st_table *table, char *key, char ***slot));
 
-EXTERN int st_find
+OCT_EXTERN int st_find
   ARGS((st_table *table, char *key, char ***slot));
 
-EXTERN st_table *st_copy
+OCT_EXTERN st_table *st_copy
   ARGS((st_table *old_table));
 
-EXTERN int st_delete
+OCT_EXTERN int st_delete
   ARGS((st_table *table, char **keyp, char **value));
 
-EXTERN int st_foreach
+OCT_EXTERN int st_foreach
   ARGS((st_table *table, enum st_retval (*func)(), char *arg));
 
-EXTERN int st_strhash
+OCT_EXTERN int st_strhash
   ARGS((char *string, int modulus));
 
-EXTERN int st_numhash
+OCT_EXTERN int st_numhash
   ARGS((char *x, int size));
 
-EXTERN int st_ptrhash
+OCT_EXTERN int st_ptrhash
   ARGS((char *x, int size));
 
-EXTERN int st_numcmp
+OCT_EXTERN int st_numcmp
   ARGS((const char *x, const char *y));
 
-EXTERN int st_ptrcmp
+OCT_EXTERN int st_ptrcmp
   ARGS((const char *x, const char *y));
 
-EXTERN st_generator *st_init_gen
+OCT_EXTERN st_generator *st_init_gen
   ARGS((st_table *table));
 
-EXTERN int st_gen
+OCT_EXTERN int st_gen
   ARGS((st_generator *gen, char **key_p, char **value_p));
 
-EXTERN void st_free_gen
+OCT_EXTERN void st_free_gen
   ARGS((st_generator *gen));
 
 #define ST_DEFAULT_MAX_DENSITY 5

@@ -57,42 +57,42 @@ typedef struct symSegment {
 } symSegment;
 
 
-EXTERN void symOpenFacet
+OCT_EXTERN void symOpenFacet
   ARGS((octObject *facet, char *mode, char *technology));
-EXTERN void symCreateFormalTerm
+OCT_EXTERN void symCreateFormalTerm
   ARGS((octObject *fct, octObject *term, char *name));
-EXTERN void symImplementFormalTerm
+OCT_EXTERN void symImplementFormalTerm
   ARGS((octObject *ft, octObject *at));
-EXTERN void symCreateNet
+OCT_EXTERN void symCreateNet
   ARGS((octObject *fct, octObject *net));
-EXTERN void symNameObject
+OCT_EXTERN void symNameObject
   ARGS((octObject *object, char *name));
-EXTERN void symAddTermToNet
+OCT_EXTERN void symAddTermToNet
   ARGS((octObject *term, octObject *net));
-EXTERN void symCreateInstance
+OCT_EXTERN void symCreateInstance
   ARGS((octObject *facet, octObject *inst));
-EXTERN void symReplaceInstance
+OCT_EXTERN void symReplaceInstance
   ARGS((octObject *old, octObject *newObj));
-EXTERN void symCreateSegment
+OCT_EXTERN void symCreateSegment
   ARGS((octObject *layer, struct octPoint *pt1, octObject *term1, int type1, struct octPoint *pt2, octObject *term2, int type2, octCoord width, int dir));
 
 typedef void (*MNF)
   ARGS((octObject *net1, octObject *net2, octObject *keep, octObject *merge));
-EXTERN void symSetMergeFunction
+OCT_EXTERN void symSetMergeFunction
   ARGS((MNF func));
 
-EXTERN void symGetNet
+OCT_EXTERN void symGetNet
   ARGS((octObject *term, octObject *net));
-EXTERN void symRoute
+OCT_EXTERN void symRoute
   ARGS((symSegment *array, int count));
 
-EXTERN void symInitInstanceGen
+OCT_EXTERN void symInitInstanceGen
   ARGS((octObject *facet, int type, octGenerator *gen));
-EXTERN void symInitPropertyGen
+OCT_EXTERN void symInitPropertyGen
   ARGS((octObject *object, octGenerator *gen));
-EXTERN octStatus symGetProperty
+OCT_EXTERN octStatus symGetProperty
   ARGS((octObject *object, octObject *prop, char *name));
-EXTERN int symConnectorp
+OCT_EXTERN int symConnectorp
   ARGS((octObject *object));
 
 
@@ -111,15 +111,15 @@ EXTERN int symConnectorp
 #define SYM_PUT_CONST_LEFT	2
 #define SYM_PUT_CONST_RIGHT	3
 
-EXTERN int symNormalConstraint
+OCT_EXTERN int symNormalConstraint
   ARGS((int direction, octObject *oInst1, octObject *oInst2, int min, int max));
-EXTERN int symSideConstraint
+OCT_EXTERN int symSideConstraint
   ARGS((octObject *oInst, int side, int min, int max));
-EXTERN int symActiveConstraint
+OCT_EXTERN int symActiveConstraint
   ARGS(( int direction, octObject *inst1, octObject *inst2, octObject *inst3, octObject *inst4 ));
-EXTERN int symActiveSideConstraint
+OCT_EXTERN int symActiveSideConstraint
   ARGS( (int side, octObject *inst1, octObject *inst2 ));
-EXTERN int symCleanAllConstraints
+OCT_EXTERN int symCleanAllConstraints
   ARGS((octObject *facet));
 
 #endif /* SYMLIB_H */

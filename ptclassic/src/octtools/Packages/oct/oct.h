@@ -396,144 +396,144 @@ typedef struct octTransform octTransform;
 #define octOpenMaster compatOctOpenMaster
 #endif
 
-EXTERN void octBegin
+OCT_EXTERN void octBegin
 	NULLARGS;
-EXTERN void octEnd
+OCT_EXTERN void octEnd
 	NULLARGS;
-EXTERN void octError
+OCT_EXTERN void octError
 	ARGS((char *));
-EXTERN char *octErrorString
+OCT_EXTERN char *octErrorString
 	NULLARGS;
 
-EXTERN octStatus octBB
+OCT_EXTERN octStatus octBB
 	ARGS((octObject *object, octBox *box));
-EXTERN octStatus octOpenFacet
+OCT_EXTERN octStatus octOpenFacet
 	ARGS((octObject *facet));
-EXTERN octStatus octOpenMaster
+OCT_EXTERN octStatus octOpenMaster
 	ARGS((octObject *instance, octObject *master));
-EXTERN octStatus octWriteFacet
+OCT_EXTERN octStatus octWriteFacet
 	ARGS((octObject *newf, octObject *old));
-EXTERN octStatus octCopyFacet
+OCT_EXTERN octStatus octCopyFacet
 	ARGS((octObject *newf, octObject *old));
-EXTERN octStatus octCloseFacet
+OCT_EXTERN octStatus octCloseFacet
 	ARGS((octObject *facet));
-EXTERN octStatus octFlushFacet
+OCT_EXTERN octStatus octFlushFacet
 	ARGS((octObject *facet));
-EXTERN octStatus octFreeFacet
+OCT_EXTERN octStatus octFreeFacet
 	ARGS((octObject *facet));
-EXTERN octStatus octCreateOrModify
+OCT_EXTERN octStatus octCreateOrModify
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octGetById
+OCT_EXTERN octStatus octGetById
 	ARGS((octObject *object));
-EXTERN octStatus octGetByName
+OCT_EXTERN octStatus octGetByName
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octGetContainerByName
+OCT_EXTERN octStatus octGetContainerByName
 	ARGS((octObject *container, octObject *object));
-EXTERN void octGetFacet
+OCT_EXTERN void octGetFacet
 	ARGS((octObject *object, octObject *facet));
-EXTERN octStatus octGetOrCreate
+OCT_EXTERN octStatus octGetOrCreate
 	ARGS((octObject *container, octObject *object));
 
-EXTERN octStatus octGetPoints
+OCT_EXTERN octStatus octGetPoints
 	ARGS((octObject *object, int32 *num_points, struct octPoint *points));
-EXTERN octStatus octPutPoints
+OCT_EXTERN octStatus octPutPoints
 	ARGS((octObject *object, int32 num_points, struct octPoint *points));
 
-EXTERN octStatus octScaleAndModifyGeo
+OCT_EXTERN octStatus octScaleAndModifyGeo
 	ARGS((octObject *object, double scale));
-EXTERN void octScaleGeo
+OCT_EXTERN void octScaleGeo
 	ARGS((octObject *object, double scale));
-EXTERN octStatus octTransformAndModifyGeo
+OCT_EXTERN octStatus octTransformAndModifyGeo
 	ARGS((octObject *object, struct octTransform *transform));
-EXTERN void octTransformGeo
+OCT_EXTERN void octTransformGeo
 	ARGS((octObject *object, struct octTransform *transform));
-EXTERN void octTransformPoints
+OCT_EXTERN void octTransformPoints
 	ARGS((int num_points, struct octPoint *points, struct octTransform *transform));
 
-EXTERN octStatus octPrintObject
+OCT_EXTERN octStatus octPrintObject
 	ARGS((FILE *outfile, octObject *object, int));
 
-EXTERN octStatus octUnDetach
+OCT_EXTERN octStatus octUnDetach
 	ARGS((struct octObject *container, struct octObject *object));
-EXTERN octStatus octAttach
+OCT_EXTERN octStatus octAttach
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octAttachOnce
+OCT_EXTERN octStatus octAttachOnce
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octUnattach
+OCT_EXTERN octStatus octUnattach
 	ARGS((struct octObject *container, struct octObject *object));
-EXTERN octStatus octDetach
+OCT_EXTERN octStatus octDetach
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octIsAttached
+OCT_EXTERN octStatus octIsAttached
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octCreate
+OCT_EXTERN octStatus octCreate
 	ARGS((octObject *container, octObject *object));
-EXTERN octStatus octUnCreate
+OCT_EXTERN octStatus octUnCreate
 	ARGS((octObject *object));
-EXTERN int oct_do_undelete
+OCT_EXTERN int oct_do_undelete
 	ARGS((octObject *container, octObject *object, int32 old_xid,
 	      int32 old_id));
-EXTERN octStatus octDelete
+OCT_EXTERN octStatus octDelete
 	ARGS((octObject *object));
-EXTERN octStatus octModify
+OCT_EXTERN octStatus octModify
 	ARGS((octObject *object));
-EXTERN octStatus octUnModify
+OCT_EXTERN octStatus octUnModify
 	ARGS((octObject *object));
 
-EXTERN octStatus octGenFirstContainer
+OCT_EXTERN octStatus octGenFirstContainer
 	ARGS((octObject *object, octObjectMask mask, octObject *container));
-EXTERN octStatus octGenFirstContent
+OCT_EXTERN octStatus octGenFirstContent
 	ARGS((octObject *container, octObjectMask mask, octObject *object));
-EXTERN octStatus octInitGenContainers
+OCT_EXTERN octStatus octInitGenContainers
 	ARGS((octObject *object, octObjectMask mask, octGenerator *gen));
-EXTERN octStatus octInitGenContents
+OCT_EXTERN octStatus octInitGenContents
 	ARGS((octObject *object, octObjectMask mask, octGenerator *gen));
-EXTERN octStatus octInitGenContentsWithOffset
+OCT_EXTERN octStatus octInitGenContentsWithOffset
 	ARGS((octObject *obj, octObjectMask mask, octGenerator *gen, octObject *offset));
-EXTERN octStatus octFreeGenerator
+OCT_EXTERN octStatus octFreeGenerator
 	ARGS((octGenerator *gen));
 
-EXTERN octStatus octGetByExternalId
+OCT_EXTERN octStatus octGetByExternalId
 	ARGS((octObject *container, int32 xid, octObject *object));
-EXTERN void octExternalId
+OCT_EXTERN void octExternalId
 	ARGS((octObject *object, int32 *xid));
-EXTERN octStatus octInitGenContents
+OCT_EXTERN octStatus octInitGenContents
 	ARGS((octObject *object, octObjectMask mask, octGenerator *generator));
-EXTERN octStatus octInitUserGen
+OCT_EXTERN octStatus octInitUserGen
         ARGS((char *user_state,octStatus (*gen_func)(),octStatus (*free_func)(),octGenerator *gen));
-EXTERN octStatus octInitBackwardsGenContents
+OCT_EXTERN octStatus octInitBackwardsGenContents
 	ARGS((octObject *object, octGenerator *generator));
 
-EXTERN void octWriteStats
+OCT_EXTERN void octWriteStats
 	ARGS((octObject *object, FILE *file));
-EXTERN octStatus octGetFacetInfo
+OCT_EXTERN octStatus octGetFacetInfo
 	ARGS((octObject *object, struct octFacetInfo *info));
-EXTERN int octIsTemporary
+OCT_EXTERN int octIsTemporary
 	ARGS((octObject *object));
-EXTERN void octMarkTemporary
+OCT_EXTERN void octMarkTemporary
 	ARGS((octObject *object));
-EXTERN void octUnmarkTemporary
+OCT_EXTERN void octUnmarkTemporary
 	ARGS((octObject *object));
-EXTERN octStatus octOpenRelative
+OCT_EXTERN octStatus octOpenRelative
 	ARGS((octObject *robj, octObject *fobj, int location));
-EXTERN void octFullName
+OCT_EXTERN void octFullName
 	ARGS((octObject *facet, char **name));
 
-EXTERN int octIdsEqual
+OCT_EXTERN int octIdsEqual
 	ARGS((octId id1, octId id2));
-EXTERN int octIdIsNull
+OCT_EXTERN int octIdIsNull
 	ARGS((octId id));
-EXTERN char *octFormatId
+OCT_EXTERN char *octFormatId
 	ARGS((octId id));
 
 /* for use with the `st' package */
 
-EXTERN int octIdCmp
+OCT_EXTERN int octIdCmp
 	ARGS((const char *id1, const char *id2));
-EXTERN int octIdHash
+OCT_EXTERN int octIdHash
 	ARGS((char *id1, int mod));
 
 /* From change_record.c */
-EXTERN octStatus oct_make_change_record_marker
+OCT_EXTERN octStatus oct_make_change_record_marker
 	ARGS((octId clid));
 
 /* From gen.c */
