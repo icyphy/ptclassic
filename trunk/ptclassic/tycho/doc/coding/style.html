@@ -10,12 +10,12 @@ The following programming style will be followed in the Tycho project.
 Please submit comments or suggestions to eal@eecs.berkeley.edu.
 <ol>
 <li><a href="#indentation">Indentation</a>
-<li><a href="#comments">Comments</a>
-<li><a href="#names">Names</a>
-<li><a href="#global">Global</a>
-<li><a href="#documentation">Documentation</a>
-<li><a href="#copyright">Copyright and acknowledgements</a>
-<li><a href="#proofread">Proofread</a>
+<li><a href="#comment conventions">Comment conventions</a>
+<li><a href="#naming conventions">Nameing conventions</a>
+<li><a href="#global variables">Global variables</a>
+<li><a href="#documentation conventions">Documentation conventions</a>
+<li><a href="#copyright conventions">Copyright and acknowledgements</a>
+<li><a href="#proofreading">Proofreading </a>
 </ol>
 
 <h2><a name="indentation">Indentation</a></h2>
@@ -26,7 +26,7 @@ Nested statements should be indented 4 characters, as in:
 itcl_class MyClass {
     inherit MyParent
     constructor {config} {
-        Oneline constructor command
+        One line constructor command
     }
 }
 </pre>
@@ -65,22 +65,13 @@ introduces a space in the output.
              lines"
 </pre>
 
-<h2><a name="comments">Comments</a></h2>
 
- <P>The <A HREF="../../lib/tydoc/doc/index.html"><CODE>tydoc</CODE></A>
-system automatically generates html documentation from the source
-code file, so the comments should follow the <CODE>tydoc</CODE>
-<A HREF="../../lib/tydoc/doc/overview.html#comment format conventions">comment format conventions</A>.
+<h2><a name="comment conventions">Comment conventions</a></h2>
 
-The <a href="../../editors/textedit/templates/ItclTemplate.itcl">Itcl
-template</a> file contains a template of an itcl file with the
-appropriate copyright and comment formats.
+Itcl <A HREF="itclfilebody.html#itcl comment conventions"> comment
+conventions</A> are described elsewhere.  However, in general,
+comments should follow the guidelines below.
 
-The Itcl editor has a
-<A
-HREF="../../editors/textedit/doc/usersGuides/EditItclHelp.html#Itcl
-Editor File Template">file template menu choice</A>
-that will insert the Itcl template file
 
 <MENU>
 <LI> Comments should include honest information about the limitations of
@@ -89,10 +80,9 @@ the object definition.
 <LI> Comments should be complete sentences and complete thoughts.
 
 </MENU>
-The Itcl editor contains a menu choice
-that will create a <A HREF="../../editors/textedit/doc/usersGuides/EditItclHelp.html#Itcl Editor Body Template">Itcl body template</A>.
 
-<h2><a name="names">Names</a></h2>
+
+<h2><a name="naming conventions">Naming conventions</a></h2>
 
 All programming languages have a global namespace.  In itcl, it's class
 names, global variables, and procedure names.  Choose names carefully.
@@ -118,17 +108,17 @@ Classname #auto ?options?
 </pre>
 
 If the class defines a top-level window (i.e. it eventually inherits
-GTopLevel), then you should use the syntax
+the <CODE>TopLevel</CODE> class ), then you should use the syntax
 
 <pre>
-Classname [autoname .classname] ?options?
+Classname [::tycho::autoname .classname] ?options?
 </pre>
 
-The autoname procedure is defined in Tycho and returns a class
-name that is constructed by appending to the single argument
-an underscore and an integer that ensures that the name will be unique.
+The <CODE>autoname</CODE> procedure is defined in Tycho and returns a
+class name that is constructed by appending to the single argument an
+underscore and an integer that ensures that the name will be unique.
 
-<h2><a name="global">Global Variables</a></h2>
+<h2><a name="global variables">Global Variables</a></h2>
 
 Global variables are almost entirely unnecessary in itcl.
 If you need a global variable, use a "common" variable in a class.
@@ -144,25 +134,15 @@ The name of the global variable should begin with "ty",
 and its existence should be documented, as explained
 <a href="#names">above</a>.
 
-<h2><a name="documentation">Documentation</a></h2>
+<h2><a name="documentation conventions">Documentation conventions</a></h2>
 
-Tycho documentation will be entirely in html and will be designed
-primarily for use on-line.  Documentation for the code
-(analogous to the Ptolemy Kernel Manual) will be generated
-automatically from the comments in the code.
-You may anticipate this by inserting HTML formatting in these
-comments.  However, do not do this at the expense of readability.
-We can automate a certain amount of formatting, such as blank
-lines turning into paragraph breaks.
-<p>
-User documentation for your objects should be written
-in HTML.  We should devise a strategy to keep that documentation
-together with the code it is documenting.
+The Tycho documentation layout and conventions are discussed in <A
+HREF="../documentation.html">$TYCHO/doc/documentation.html</A>
 
-<h2><a name="copyright">Copyright and Acknowledgements</a></h2>
+<h2><a name="copyright conventions">Copyright and Acknowledgements</a></h2>
 
 We would prefer to be able to release Tycho with the 
-<A HREF="../../copyright">standard UCB copyright</A>,
+<A HREF="../../copyright">standard UC Berkeley copyright</A>,
 which allows for subsequent commercialization.
 However, this is a large project, and we should use existing
 code as much as possible.  The following scenarios are possible:
@@ -196,6 +176,9 @@ If it is Tcl/Tk code, it <em>must</em> be ported to Tk 4.0
 (a nontrivial task).  If it is not itcl code, it should
 be carefully searched for namespace violations.
 
+ <P>If your file is based on a file that has non-UC Berkeley
+copyrights, then you should be sure to include the copyrights.
+
 <h3><a name="SCCS and copyrights">SCCS and copyrights</a></h3>
 
 Currently we are using the &#37Q&#37 sccs
@@ -216,6 +199,9 @@ file, you can do:
 sccs admin -fq1995 SCCS mynewfile.cc
 </pre>
 
+If your file is a rewrite of a previously copyrighted file from UC
+Berkeley, then you should include the date from that file.
+
 <h3><a name="copyright for Itcl files">Copyright for Itcl files</a></h3>
 
 The <a href="../../editors/textedit/templates/ItclTemplate.itcl">Itcl
@@ -227,7 +213,7 @@ HREF="../../editors/textedit/doc/usersGuides/EditItclHelp.html#Itcl
 Editor File Template">file template menu choice</A>
 that will insert the Itcl template file
 
-<h2><a name="proofread">Proofread</a></h2>
+<h2><a name="proofreading">Proofreading</a></h2>
 
 Software has become a publication medium.  People will read your code.
 Your name is on it, so you want to be proud of it.  It seems that most
