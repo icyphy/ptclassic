@@ -94,8 +94,8 @@ int LinProcMemory::allocReq(AsmPortHole& p) {
 	if (!match(p)) return FALSE;
 	if (p.localBufSize() == 0) return TRUE;
 	LOG_NEW; MPortReq* r = new MPortReq(p);
-	if (p.circAccess()) circ.appendSorted(*r);
-	else lin.appendSorted(*r);
+	if (r->circ())	circ.appendSorted(*r);
+	else		lin.appendSorted(*r);
 	return TRUE;
 }
 

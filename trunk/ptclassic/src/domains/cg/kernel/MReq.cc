@@ -56,7 +56,11 @@ void MReqList::zero() {
 }
 
 int MPortReq::circ() {
-	return myport.circAccess();
+	if ( myport.circAccess() )
+		return TRUE;
+	if ( ((AsmPortHole*)(myport.far()))->circAccess() )
+		return TRUE;
+	return FALSE;
 }
 
 StringList MPortReq::print() {
