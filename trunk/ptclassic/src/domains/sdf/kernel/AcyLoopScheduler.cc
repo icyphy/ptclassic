@@ -313,6 +313,7 @@ void AcyLoopScheduler :: createIncidenceMatrix(Galaxy& gal)
 	SynDFClusterPortIter nextPort(*s);
 	while ((clustPort = nextPort++) != NULL) {
 	    if (clustPort->isItInput()) continue;
+	    if (!clustPort->far() || !clustPort->far()->parent()) continue;
 	    t = (SynDFCluster*)clustPort->far()->parent();
 	    numP = clustPort->numXfer();
 	    numD = clustPort->numInitDelays();
@@ -427,6 +428,7 @@ hierarchy, and several class data members are created.
 ****/
 int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 {
+    AcyCluster* clusterGraph;
     Block *d;
     int i = 0, rpmc, apgan, rpmcDppo=-1, apganDppo=-1;
     SequentialList wellOrderedList;
@@ -462,6 +464,19 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 
     graphSize = gal.numberBlocks();
 
+    // Add a top level cluster inside the galaxy to hold all the
+    // clusters inside.  This is needed because gal is of type
+    // galaxy and everything inside is of type cluster.  Since
+    // RPMC works recursively from the top, it doesn't
+    // make sense to have a dichotomy between the top level and everything
+    // below it.
+
+    if (!addTopLevelCluster(&gal)) return FALSE;
+
+    clusterGraph = (AcyCluster*)(gal.head());
+    clusterGraph->settnob(-1);
+    PARTITION(clusterGraph) = 0;
+
     delete [] RPMCTopSort;
     RPMCTopSort = new int[graphSize];
 
@@ -473,16 +488,16 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 
     // Number the blocks in galaxy at flags[0].  NOTE: This will only
     // number the cluster wrappers, not the stars inside.
-    numberBlocks(gal,NODE_NUM_FLAG_LOC);
+    numberBlocks(*clusterGraph,NODE_NUM_FLAG_LOC);
 
     // this function will also propgate the cluster numbering to the
     // star inside.
-    if (!createNodelist(gal)) return FALSE;
+    if (!createNodelist(*clusterGraph)) return FALSE;
 
     // createIncidenceMatrix requires the above node numbering
-    createIncidenceMatrix(gal);
+    createIncidenceMatrix(*clusterGraph);
 
-    if (isWellOrdered(&gal, wellOrderedList)) {
+    if (isWellOrdered(clusterGraph, wellOrderedList)) {
 	// Means the graph is well ordered; hence, just fill up the
 	// topSort array and call DPPO on it.
 	i = 0;
@@ -507,20 +522,27 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	SimpleIntMatrix RPMCGcdMatrix;
 	SimpleIntMatrix RPMCSplitMatrix;
 
+	// The complicated control structure below is designed to be
+	// error tolerant.  In particular, even if one of RPMC or APGAN
+	// fails, the scheduler won't give up; it will only give up
+	// if both fail.
+
 	// First of the two heuristics
-	rpmc = callRPMC(gal);
+	rpmc = callRPMC(clusterGraph);
 	if (rpmc >= 0) {
             if (logstrm)
 	    	*logstrm << "RPMC cost (w/out DPPO) is " << rpmc << ".\n";
 
 	    rpmcDppo = DPPO();
 	    if (rpmcDppo >= 0) {
+		schedSuccess = 1;
 	    	if (logstrm)
 		    *logstrm << "RPMC+DPPO schedule:\n" << displaySchedule();
 
 	    	// save results for rpmc
 	    	RPMCGcdMatrix = gcdMatrix;
 	    	RPMCSplitMatrix = splitMatrix;
+		schedSuccess = 0;
 	    } else {
 		if (logstrm) *logstrm << "DPPO failed on RPMC schedule.\n";
 	    }
@@ -537,9 +559,11 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	    apganDppo = DPPO();
 	    if (apganDppo >= 0) {
 
+		schedSuccess = 1;
 		if (logstrm)
 		    *logstrm << "APGAN+DPPO schedule:\n" << displaySchedule();
 
+		schedSuccess = 0;
 	    } else {
 		if (logstrm) *logstrm << "DPPO failed on APGAN schedule.\n";
 	    }
@@ -603,27 +627,14 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 }
 
 // This function just sets up executes everything needed to run RPMC.
-int AcyLoopScheduler :: callRPMC(Galaxy& gal)
+int AcyLoopScheduler :: callRPMC(AcyCluster* clusterGraph)
 {
     int rpmc;
-    AcyCluster* clusterGraph=0;
-
-    // Add a top level cluster inside the galaxy to hold all the
-    // clusters inside.  This is needed because gal is of type
-    // galaxy and everything inside is of type cluster.  Since
-    // RPMC works recursively from the top, it doesn't
-    // make sense to have a dichotomy between the top level and everything
-    // below it.
-
-    if (!addTopLevelCluster(&gal)) return -1;
-
-    clusterGraph = (AcyCluster*)(gal.head());
-    clusterGraph->settnob(-1);
-    PARTITION(clusterGraph) = 0;
 
     // The following function is a hack needed by RPMC; see its
     // comments for more information.
     if (!clusterSplicedStars(clusterGraph)) return -1;
+
 
     // topSort should point to RPMCTopSort
     topSort = RPMCTopSort;
@@ -644,29 +655,39 @@ int AcyLoopScheduler :: callRPMC(Galaxy& gal)
 int AcyLoopScheduler :: callAPGAN(Galaxy& gal)
 {
     int apgan;
-    AcyCluster* superOmega;
+    AcyCluster *superOmega, *clusterGraph;
 
     // Flatten everything
     AcyCluster dummy;
     dummy.initializeForClustering(gal);
-    GALAXY_PARTITION(gal) = 0;
 
+    // Even though APGAN is not recursive, and does not require a
+    // cluster as an argument, we add a top level cluster for 2 reasons:
+    // 1) It is safe because we cannot mistakenly cross wormhole boundaries,
+    // 2) It makes this code symmetric to callRPMC.
+
+    if (!addTopLevelCluster(&gal)) return -1;
+
+    clusterGraph = (AcyCluster*)(gal.head());
+    clusterGraph->settnob(-1);
+    PARTITION(clusterGraph) = 0;
+    
     // APGAN requires the node numbers in the clusters as well; hence,
     // copy those numbers to the constituent clusters.  RPMC did not
     // want this so wasn't done before.
-    copyFlagsToClusters(&gal,0);
+    copyFlagsToClusters(clusterGraph,0);
 
     // Reachability matrix is needed by APGAN.  Note that copyFlagsToClusters
     // should be invoked before this since the following function depends
     // on the clusters having the node numbers.
-    if (!createReachabilityMatrix(gal)) return -1;
+    if (!createReachabilityMatrix(*clusterGraph)) return -1;
 
     topSort = APGANTopSort;
-    apgan = APGAN(&gal);
+    apgan = APGAN(clusterGraph);
     if (apgan < 0) return -1;
 
-    // Since apgan >= 0, gal has just one cluster when APGAN finishes.
-    superOmega = (AcyCluster*)(gal.head());
+    // Since apgan >= 0, clusterGraph has just one cluster when APGAN finishes.
+    superOmega = (AcyCluster*)(clusterGraph->head());
     if (!buildTopsort(superOmega, 0)) return -1;
 
     if (!checkTopsort()) return -1;
@@ -1089,7 +1110,10 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	rho = 0;
 	ListIter nextEdge(edgelist);
 	while ((p=(SynDFClusterPort*)nextEdge++) != NULL) {
-	    if (p->DELETE) {
+	    if (p->DELETE || !p->far() || !p->far()->parent()) {
+		// If output port is unconnected for some reason (could
+		// be that it is a galaxy port going out of this
+		// galaxy), just delete it from the list here.
 		nextEdge.remove();
 		continue;
 	    }
@@ -1202,15 +1226,22 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 
 	// first check that all clusters are maximal connected components
 	while ((c1=nextClust++) != NULL) {
-	    // Note: it might be more robust to allow numberPorts() to be
-	    // non-zero but check that each port is unconnected.  However,
-	    // that situation is a bug anyway which might indicate other
-	    // problems.
 	    if (c1->numberPorts() != 0) {
-		message << "Did not cluster properly; "
-			<< "there is a bug in the routine.\n";
-		Error::warn(message);
-		return -1;
+		// Check for unconnected ports here since one non-bug
+		// situation where it can happen is with wormholes:
+		// a galaxy port can be connected to a wormhole; it
+		// looks unconnected from inside a cluster.
+		SynDFClusterPortIter nextPort(*c1);
+		flag=0;
+		while((p=nextPort++) != NULL) {
+		    if (p->far() && p->far()->parent()) {flag=1;break;}
+		}
+		if (flag) {
+		    message << "Did not cluster properly; "
+			    << "there is a bug in the routine.\n";
+		    Error::warn(message);
+		    return -1;
+		}
 	    }
 	    connComps.append(c1);
 	}
