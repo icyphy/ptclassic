@@ -46,8 +46,10 @@ include $(CONFIG)
 
 EXTRA_SRCS = pkgIndex.tcl
 
+MISC_FILES =  $(DIRS)
+
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS) tclIndex
+all: sources $(MISC_SRCS)
 
 install: all
 
