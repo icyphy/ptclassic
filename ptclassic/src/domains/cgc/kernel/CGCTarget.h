@@ -50,8 +50,8 @@ public:
 	int compileCode();
 	int runCode();
 
-	// generate code for a single processor in a multiprocessor target
-	void generateCode();
+	// redefine writeCode: default file is "code.c"
+	void writeCode(const char* name = NULL);
 
 	// static buffering option can be set by parent target
 	void wantStaticBuffering() { staticBuffering = TRUE; }
@@ -78,6 +78,9 @@ protected:
 	// redefine frameCode() method
 	void frameCode();
 
+	// redefine, compile and run code
+	int wormLoadCode();
+
 	// Redefine:
 	// Add wormInputCode after iteration declaration and before the
 	// iteration body, and wormOutputCode just before the closure of
@@ -91,6 +94,7 @@ protected:
 
 	// states
 	IntState staticBuffering;
+	IntState doCompile;
 	StringState funcName;
 	StringState compileCommand;
 	StringState compileOptions;
