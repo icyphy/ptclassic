@@ -10,7 +10,7 @@
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/arch`
+    setenv ARCH `$PTOLEMY/bin/ptarch`
 endif
 
 exec $PTOLEMY/bin.$ARCH/optfir $*
