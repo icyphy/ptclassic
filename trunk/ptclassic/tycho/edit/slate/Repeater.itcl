@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -64,21 +64,12 @@
 #
 # <p><b>Bugs</b>
 #
-# The bindings used by this editor will interfere with
-# bindings to the Slate if they overlap.
+# (None.)
 #
 # <p><b>Enhancements</b>
 #
 # <ol>
-# <li>This interactor should probably be renamed
-# <i>LineEditor</i>.
-# <li>Double-click and dragging does not quite work: 
-# the selection moves from the start of the first selected word, not 
-# from the farthest end.
-# <li>The up and down cursors should be made to 
-# work in multi-line items.
-# <li>The cursor should change to the insertion cursor while
-# over an item being edited.
+# <li> (None)
 # </ol>
 #
 # <p><b>Links</b>
@@ -108,7 +99,7 @@ class ::tycho::Repeater {
     # The command to execute repeatedly.
     public variable command ""
 
-    # The time delay before next execution.
+    # The time delay between first and second execution.
     public variable delay 400
 
     # The time interval between executions.
@@ -119,16 +110,16 @@ class ::tycho::Repeater {
     ####                         public methods                    ####
 
     # Attach the interactor to the current item
-    method activate {t x y args} {}
+    method activate {t x y args}
 
     # Remove the interactor from the current item
-    method deactivate {args} {}
+    method deactivate {args}
 
     # Record a mouse movement
-    method motion {x y} {}
+    method motion {x y}
 
     # Reinvoke the activation command
-    method reactivate {x y} {}
+    method reactivate {x y}
 
 
     ###################################################################
@@ -139,7 +130,7 @@ class ::tycho::Repeater {
     ####                       private variables                   ####
 
     # The id of the "after" script, so it can be cancelled
-    protected variable afterid
+    private variable afterid
 
     # The current mouse position
     private variable currentX
