@@ -318,20 +318,14 @@ proc ed_AddParamDialog {facet number} {
 
   pack append $ask.b.okfr \
     [button $ask.b.okfr.f -text "  OK  " -command \
-      "ed_AddParam $facet $number \
-        \[$ask.fname.entry get\] \
-        \[$ask.ftype.entry get\] \
-        \[$ask.fvalue.entry get\]
-        destroy $ask"] {expand fill}
+      "ed_AddParam $facet $number $ask"] {expand fill}
 
   pack append $ask $ask.m {top fillx} $ask.fname {top fillx} \
     $ask.ftype {top fillx} $ask.fvalue {top fillx} $ask.b {top fillx}
+
   ptkRecursiveBind $ask <Return> \
-    "ed_AddParam $facet $number \
-      \[$ask.fname.entry get\] \
-      \[$ask.ftype.entry get\] \
-      \[$ask.fvalue.entry get\]
-      destroy $ask"
+    "ed_AddParam $facet $number $ask"
+
   ptkRecursiveBind $ask <M-Delete> "destroy $ask"
 
   focus $ask.fname.entry
@@ -377,8 +371,13 @@ proc ed_YesNoDialog {mesg} {
 #  It checks to make sure that parameters with the same name aren't
 #  overwritten
 
-proc ed_AddParam {facet number name type value} {
-  if {[string match $name ""] || [string match $type ""]} {
+proc ed_AddParam {facet number askwin} {
+
+  set name [$askwin.fname.entry get]
+  set type [$askwin.ftype.entry get]
+  set value [$askwin.fvalue.entry get]
+
+  if {$name == "" || $type == ""} {
     ptkImportantMessage .error "You have not entered sufficient information"
     return
   }
@@ -392,14 +391,21 @@ proc ed_AddParam {facet number name type value} {
   incr ed_ToplevelNumbers($facet,$number,count)
 
   set ed_ToplevelNumbers($facet,$number,$count) $name
-#  if [winfo exists $f.par.f$count] {
-#    if [ed_YesNoDialog "Parameter: \"$name\" exists.  Overwrite?"] {
-#        destroy $f.par.f$name
-#        set overWriteParam 1
-#    } else {
-#        return
-#    }
-#  }
+
+  # FIXME: Currently, if a parameter with this name already exists,
+  # we just create another one with the same name.  The following code
+  # was intended to correct this, but doesn't work because the "count"
+  # variable is just a numeric count rather than what it should be,
+  # probably, the name of the parameter.
+  # if [winfo exists $f.par.f$count] {
+  # if [ed_YesNoDialog "Parameter: \"$name\" exists.  Overwrite?"] {
+  #     destroy $f.par.f$name
+  #     set overWriteParam 1
+  # } else {
+  #	destroy $askwin
+  #     return
+  # }
+  #}
 
   ed_MkEntryButton $f.par.f$count $name
   ptkRecursiveBind $f.par.f$count <Return> \
@@ -413,12 +419,14 @@ proc ed_AddParam {facet number name type value} {
   $f.par.f$count.entry insert 0 "$value"
 
   pack append $f.par $f.par.f$count {top expand fillx pady 1m}
+
   if { $overWriteParam } {
     ed_UpdateParam $facet $number [list $name] $type $value
   } else {
     lappend ed_Parameters($facet,$number) [list "$name" "$type" "$value"]
     ed_WriteParam $ed_Parameters($facet,$number) $facet $number
   }
+  destroy $askwin
 }
 
 
@@ -501,6 +509,7 @@ proc ed_RemoveParam {facet number top button} {
   }
   ed_RestoreCursor $top.f.c.f
   set ed_EntryDestroyFlag 0
+  grab release $top
 }
 
 # This procedure removes the relevant parameter
