@@ -24,23 +24,24 @@ This star implements a finite-impulse response filter with multirate capability.
 .Id "filter, FIR"
 .Id "FIR filter"
 The default coefficients correspond to an eighth-order, equiripple,
-linear-phase, lowpass filter.  The 3dB cutoff frequency is at approximately
-1/3 of the Nyquist frequency.  To load the filter coefficients from a file,
-simply replace the default coefficients with the string "<filename".
+linear-phase, lowpass filter.
+The 3 dB cutoff frequency is at approximately $1/3$ of the Nyquist frequency.
 .pp
+To load the filter coefficients from a file, simply replace the default
+coefficients with the string "<filename".
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the FIR filter to work as expected regardless of
 the directory in which the ptolemy process actually runs.
 It is best to use tilde characters in the filename to reference them to
-the user's home directory.  This way, future file system reorganizations
-will have minimal effect.
+the user's home directory.
+This way, future file system reorganizations will have minimal effect.
 .pp
 When the \fIdecimation\fP (\fIinterpolation\fP)
 state is different from unity, the filter behaves exactly
 as it were followed (preceded) by a DownSample (UpSample) star.
 However, the implementation is much more efficient than
-it would be using UpSample and DownSample stars;
+it would be using UpSample and DownSample stars because
 a polyphase structure is used internally, thereby avoiding the
 unnecessary memory locations and multiplication by zero.
 Arbitrary sample rate conversions by rational factors can
@@ -71,9 +72,19 @@ the latest (most recent) samples are the ones selected.
 The decimationPhase must be strictly less than
 the decimation ratio.
 .pp
-For more information about polyphase filters, see F. J. Harris,
-"Multirate FIR Filters for Interpolating and Desampling", in
+For more information about polyphase filters, see [1-2].
+.Id "Harris, F. J."
+.Id "Vaidyanathan, P. P."
+.UH REFERENCES
+.ip [1]
+F. J. Harris,
+``Multirate FIR Filters for Interpolating and Desampling'', in
 \fIHandbook of Digital Signal Processing\fR, Academic Press, 1987.
+.ip [2]
+P. P. Vaidyanathan,
+``Multirate Digital Filters, Filter Banks, Polyphase
+Networks, and Applications: A Tutorial'',
+\fIProc. of the IEEE\fR, vol. 78, no. 1, pp. 56-93, Jan. 1990.
         }
         seealso { FIRCx, Biquad, UpSample, DownSample,
                   firDemo, interp, multirate }
@@ -92,10 +103,12 @@ For more information about polyphase filters, see F. J. Harris,
         "-.040609 -.001628 .17853 .37665 .37665 .17853 -.001628 -.040609"
                 }
                 desc {
-Filter tap values. The precision of these taps
-in bits by default is 1.24.  Currently if a different precision is desired,
-then the cast to the new precision must be written explicitly in the go
-method of the star as is implemented in this star. }
+Filter tap values.
+The default precision on these numbers is 1.23
+(i.e., 1 sign bit and 23 fractional bits).
+During computation of filter outputs, the precision of the filter taps
+is converted to the precision contained in the "TapsPrecision" parameter.
+		}
         }
         defstate {
                 name {decimation}
@@ -122,47 +135,52 @@ method of the star as is implemented in this star. }
                 desc {
 Flag indicating whether or not to use the arriving particles as they are:
 YES keeps the same precision, and NO casts them to the precision specified
-by the parameter "InputPrecision". }
+by the parameter "InputPrecision".
+		}
         }
         defstate {
                 name { InputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc {
-Precision of the input in bits.  The input particles are only cast
-to this precision if the parameter "ArrivingPrecision" is set to NO.}
+Precision of the input in bits.
+The input particles are only cast to this precision if the parameter
+"ArrivingPrecision" is set to NO.
+		}
         }
         defstate {
                 name { TapPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc { Precision of the taps in bits. }
         }
         defstate {
                 name { AccumulationPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc { Precision of the accumulation in bits. }
         }
         defstate {
                 name { OutputPrecision }
                 type { string }
-                default { "2.14" }
+                default { "4.14" }
                 desc { Precision of the output in bits. } 
         }
+        defstate {
+                name { OverflowHandler }
+                type { string }
+                default { "saturate" }
+                desc {
+Overflow characteristic for the accumulator.
+If the result of the sum cannot be fit into the precision of the accumulator,
+then overflow occurs and the overflow is taken care of by the method
+specified by this parameter.
+The keywords for overflow handling methods are:
+"saturate" (the default), "zero_saturate", "wrapped", and "warning".
+		}
+        }
         protected {
-                const char* IP;
-                const char* TP;
-                const char* AP;
-                const char* OP;
-                int In_len;
-                int In_intBits;
-                int Tap_len;
-                int Tap_intBits;
-                int Accum_len;
-                int Accum_intBits;
-                int Out_len;
-                int Out_intBits;
+		Fix Accum, fixIn, out, tap;
                 int phaseLength;
         }
         setup {
@@ -180,28 +198,39 @@ to this precision if the parameter "ArrivingPrecision" is set to NO.}
                 phaseLength = taps.size() / i;
                 if ((taps.size() % i) != 0) phaseLength++;
 
-                IP = InputPrecision;
-                TP = TapPrecision;
-                AP = AccumulationPrecision;
-                OP = OutputPrecision;
-                In_len = Fix::get_length (IP);
-                In_intBits = Fix::get_intBits (IP);
-                Tap_len = Fix::get_length (TP);
-                Tap_intBits = Fix::get_intBits (TP);
-                Accum_len = Fix::get_length (AP);
-                Accum_intBits = Fix::get_intBits (AP);
-                Out_len = Fix::get_length (OP);
-                Out_intBits = Fix::get_intBits (OP);
+		if ( ! int(ArrivingPrecision) ) {
+                  const char* IP = InputPrecision;
+                  int In_len = Fix::get_length(IP);
+                  int In_intBits = Fix::get_intBits(IP);
+		  fixIn = Fix(In_len, In_intBits);
+		}
+
+                const char* TP = TapPrecision;
+                int Tap_len = Fix::get_length(TP);
+                int Tap_intBits = Fix::get_intBits(TP);
+		tap = Fix(Tap_len, Tap_intBits);
+
+                const char* AP = AccumulationPrecision;
+                int Accum_len = Fix::get_length(AP);
+                int Accum_intBits = Fix::get_intBits(AP);
+		Accum = Fix(Accum_len, Accum_intBits);
+
+		// Set the overflow characteristic of the accumulator
+		const char* OV = OverflowHandler;
+		Accum.set_ovflow(OV);
+
+                const char* OP = OutputPrecision;
+                int Out_len = Fix::get_length(OP);
+                int Out_intBits = Fix::get_intBits(OP);
+		out = Fix(Out_len, Out_intBits);
         }
         go {
             int phase, tapsIndex;
             int Interp = interpolation;
             int Decim = decimation;
-            int outCount = Interp-1;
-            Fix out(Out_len, Out_intBits), tap(Tap_len, Tap_intBits);
-            Fix Accum(Accum_len, Accum_intBits), fixIn(In_len, In_intBits);
+            int outCount = Interp - 1;
 
-            // phase keeps track of which phase of the filter coefficients are used.
+            // phase keeps track of which phase of filter coefficients are used
             // Starting phase depends on the decimationPhase state.
             phase = Decim - int(decimationPhase) - 1;
 
@@ -212,18 +241,19 @@ to this precision if the parameter "ArrivingPrecision" is set to NO.}
                 while (phase < Interp) {
                    Accum = 0.0;
                    // Compute the inner product.
-                   for (int i = 0; i < phaseLength; i++) {
+                   for ( int i = 0; i < phaseLength; i++ ) {
                         tapsIndex = i * Interp + phase;
                         if (tapsIndex >= taps.size())
                             tap = 0.0;
                         else 
                             tap = taps[tapsIndex];
         
-                        if(int(ArrivingPrecision)) 
+                        if ( int(ArrivingPrecision) )
                             Accum += tap * Fix(signalIn%(Decim - inC + i));
                         else {
-                            fixIn =  Fix(signalIn%(Decim - inC + i));
-                            Accum += tap * fixIn;}
+                            fixIn = Fix(signalIn%(Decim - inC + i));
+                            Accum += tap * fixIn;
+			}
                    }
                    out = Accum;
                    // note: output%0 is the last output chronologically
