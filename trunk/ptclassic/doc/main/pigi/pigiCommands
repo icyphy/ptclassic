@@ -36,12 +36,6 @@ If no target architectures are defined for the current domain, an
 error message will be issued.
 T}
 .sp 0.5
-edit-comment	;	T{
-A comment is simply text associated with an object.
-This command adds or modifies comments.
-Comments do not affect the operation of the system.
-T}
-.sp 0.5
 find-name	\0	T{
 Some error messages give the name of the offending instance of a block.
 This command will cause that block to be highlighted, given its name.
@@ -75,7 +69,7 @@ displaying the facet.  Pigi commands can be executed from
 this window.
 T}
 .sp 0.5
-edit-icon		T{
+edit-icon	I	T{
 Opens the facet containing the icon data for
 the instance under the cursor.
 T}
@@ -111,6 +105,7 @@ compile-facet		T{
 Compiles the schematic which is under the
 cursor.  The compile is recursive and so if the schematic
 contains sub-galaxies, each sub-galaxy schematic gets compiled also.
+Average users will not need this command.
 T}
 .TE
 .)b
@@ -132,6 +127,14 @@ T}
 make-star	*	T{
 Make an icon for a new star.
 T}
+.sp 0.5
+load-stars	*	T{
+Load all stars defined in a given directory.
+T}
+.sp 0.5
+load	*	T{
+Load a particular star.
+T}
 .TE
 .)b
 .sp
@@ -148,7 +151,7 @@ equirriple FIR	<	T{
 This is a provisional filter design capability, which simply
 invokes a public domain Fortran program in its own window
 for designing FIR filters using the Parks-McClellan algorithm.
-More complete documentation is in the \fBoptfir\fP section of the Almagest.
+More complete documentation is in the filter section of the Almagest.
 Note that this program starts in your home directory, so filenames
 should be given relative to the home directory.
 T}
@@ -158,7 +161,7 @@ Like the equirriple FIR,
 this is a provisional filter design capability, which simply
 invokes a public domain Fortran program in its own window.
 It designs FIR filters using the windowing technique.
-More complete documentation is in the \fBwfir\fP section of the Almagest.
+More complete documentation is in the filter section of the Almagest.
 Note that this program starts in your home directory, so filenames
 should be given relative to the home directory.
 T}
