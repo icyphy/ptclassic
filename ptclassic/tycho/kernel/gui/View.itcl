@@ -292,14 +292,14 @@ body ::tycho::View::addSubview {subviewName type side args} {
 #### busy
 # Change the cursor in the interior of this widget to the "watch"
 # cursor (to indicate that the object is busy), execute the arguments
-# as a method invocation this object, and change the cursor back to
+# and then change the cursor back to
 # whatever it was before. In order for the cursor to actually change,
 # the method calls "update", during which time the object may be deleted.
 # If the object is deleted, this method never returns (it unwinds the stack
 # by triggering a silent error).
 # A typical invocation is as follows:
 # <pre>
-#     busy methodname arg1 arg2]
+#     busy $this methodname arg1 arg2
 # </pre>
 #
 body ::tycho::View::busy {args} {
@@ -308,14 +308,14 @@ body ::tycho::View::busy {args} {
     ::tycho::safeUpdate $prefix
     # If we get here, then the object $this still exists.
     # Catch errors so that we can reset the cursor.
-    if {[catch [code [concat $this $args]] msg] != 0} {
+    if {[catch {eval $args} msg] != 0} {
         config -cursor $oldCursor
         global ::errorInfo
         set saveInfo $errorInfo
 	error $msg $saveInfo
     }
     config -cursor $oldCursor
-    return 1
+    return $msg
 }
 
 #########################################################################
