@@ -95,7 +95,7 @@ first-order feedback coefficient which is a function of k and N }
 		double kd = int(k);
 		double Nd = int(N);
 		theta = -2.0 * M_PI * kd / Nd;
-		d1 = -2.0 * cos(theta);
+		d1 = 2.0 * cos(theta);
 		input.setSDFParams(int(size), int(size)-1);
 	}
 	go {

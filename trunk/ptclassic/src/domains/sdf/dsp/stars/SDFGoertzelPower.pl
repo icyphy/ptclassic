@@ -68,8 +68,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 		//     state2*state2*cos^2(theta) + state2*state2*sin^2(theta)
 		//   z z* = state1*state1 - state1*state2*2*cos(theta) +
 		//          state2*state2
-		// where -2*cos(theta) = d1, by definition.
-		double acc = double(state1)*double(state1) +
+		// where 2*cos(theta) = d1, by definition.
+		double acc = double(state1)*double(state1) -
 			     double(state1)*double(state2)*double(d1) +
 		             double(state2)*double(state2);
 		output%0 << acc;
