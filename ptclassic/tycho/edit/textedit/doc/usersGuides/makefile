@@ -54,6 +54,7 @@ EXTRA_SRCS =	\
 	EditEsterelHelp.html \
 	EditHTMLHelp.html \
 	EditItclHelp.html \
+	EditJavaHelp.html \
 	EditMakeHelp.html \
 	EditProgramHelp.html \
 	EditPtclHelp.html \
