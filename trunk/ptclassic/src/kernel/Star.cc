@@ -19,7 +19,7 @@ $Id$
 #include "Star.h"
 #include "StringList.h"
 #include "GalIter.h"
-#include "Animate.h"
+#include "SimControl.h"
 
 /*******************************************************************
 
@@ -46,14 +46,12 @@ Star :: printVerbose () const {
 // default go does nothing
 void Star :: go () {}
 
-// default fire() function
-void Star :: fire() {
-	if(Animate::enabledFlag) {
-		Animate::highlight(*this);
-		go();
-		Animate::clearHighlight(*this);
-	} else
-		go();
+// default fire() function.  Returns TRUE if everything OK, false if
+// a halt condition arises.
+int Star :: fire() {
+	if (!SimControl::doPreActions(this)) return FALSE;
+	go();
+	return SimControl::doPostActions(this);
 }
 
 // return myself as a Star.
