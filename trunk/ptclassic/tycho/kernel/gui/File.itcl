@@ -246,6 +246,9 @@ class ::tycho::File {
     # Insert the contents of a file specified via a file browser.
     method insertFile {}
 
+    # Return 1 if the text has been modified since the last save, 0 otherwise.
+    method isModified {}
+
     # Mark the window as containing modified data.
     method markModified {}
 
@@ -845,6 +848,13 @@ body ::tycho::File::insertFile {} {
 	    ::tycho::warn "File does not exist: $filename"
 	}
     }
+}
+
+###################################################################
+#### isModified
+#
+body ::tycho::File::isModified {} {
+    return $modified
 }
 
 #####################################################################
