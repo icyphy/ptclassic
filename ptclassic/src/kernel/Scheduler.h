@@ -60,7 +60,7 @@ public:
 	void append(Block* b) { SequentialList::put(b);}
 
 	// Return the number of elements on the list
-	int size() {SequentialList::size();}
+	int size() {return SequentialList::size();}
 
 	// Return the next block on the list
 	Block& operator ++ () {return *(Block*) next(); }
