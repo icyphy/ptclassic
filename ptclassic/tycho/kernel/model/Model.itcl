@@ -829,7 +829,7 @@ body ::tycho::Model::load {args} {
 	}
     }
     if { $file == "" } {
-	error "No file found to load"
+	error "No Model file found to load."
     }
 
     # Remember this position
