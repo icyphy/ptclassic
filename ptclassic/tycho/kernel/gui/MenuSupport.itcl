@@ -392,16 +392,18 @@ body ::tycho::MenuSupport::exists {tag} {
 
 #####################################################################
 #### index
-# Given an entry tag, get its Tk index. This is mainly used
-# internal but may also be useful for testing.
+# Given an entry tag, get its Tk index. Thsi method takes into account
+# the value of the -tearoff option of the parent menu, since Tk
+# unhelpfully gives the tearoff itself index 0 if -tearoff is set.
 #
 body ::tycho::MenuSupport::index {tag} {
     # Check validity
     if { ! [::info exists parentmenu($tag)] } {
 	error "$tag is not a menu entry"
     }
-    # Get the index
-    lsearch -exact $menuentries($parentmenu($tag)) $tag
+    # Get the index and adjust for -tearoff
+    set index [lsearch -exact $menuentries($parentmenu($tag)) $tag]
+    expr {$index + [$parentmenu($tag) cget -tearoff]}
 }
 
 #####################################################################
@@ -588,3 +590,4 @@ body ::tycho::MenuSupport::unpost {tag} {
     # Unpost it
     tkMenuUnpost $menupath($tag)
 }
+
