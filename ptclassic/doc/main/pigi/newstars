@@ -112,13 +112,12 @@ see the section below on editing icons.
 An important note: whenever the definition of a star is changed so that
 the new definition has different I/O ports, the icon must be updated as
 well.  You can do this by calling \fImake-star\fP again to replace
-the old icon with a new one.  Furthermore, whenever you update the
-formal parameters of a star or create a new icon for a star, you must
-also re-instantiate the icon in all facets that refer to it.  This
-insures that data will be consistent.
+the old icon with a new one.  It no longer necessary, however, to
+delete and recreate instances when you change the formal parameters
+of a star (this restriction from earlier versions of Ptolemy has been
+removed).
 .pp
-An important note for users of the dynamic linking feature: if you
-modify the code for your dynamically loaded star while Pigi is running,
-the only way to reload it at present is to exit Pigi and start again
-(Pigi cannot yet redefine stars that have been loaded).  This will
-be changed in a future version.
+If you modify the code for a dynamically loaded star and wish to load
+the new definition, execute the \fIload-star\fR command while pointing
+to an instance of the star (or type ``L'').
+
