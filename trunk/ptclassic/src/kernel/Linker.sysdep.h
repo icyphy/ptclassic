@@ -1,6 +1,5 @@
 /******************************************************************
-Version identification:
-$Id$
+Version identification: $Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -61,7 +60,8 @@ const int linkingNotSupported =
 // dlopen() style linking works under sun4, but if you try and load a
 // star that has undefined symbols, pigiRpc or ptcl will exit.
 
-#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF) || defined(PTSVR4) || defined(PTNT) && !defined(PT_NT4VC)
+#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA) || defined(PTLINUX_ELF) || defined(PTSVR4) 
+// defined(PTNT) && !defined(PT_NT4VC)
 #define PTSVR4_STYLE_LINKING
 #include <dlfcn.h>
 #include <sys/stat.h>
@@ -126,7 +126,11 @@ const int linkingNotSupported =
 #if defined(PTSOL2) || defined(PTSVR4)
 #define LOADER "/usr/ccs/bin/ld"
 #else
+#if defined(PTNT) && !defined(PT_NT4VC)
+#define LOADER "ld"
+#else
 #define LOADER "/bin/ld"
+#endif
 #endif // PTSOL2
 #endif // PTIRIX5
 
@@ -175,6 +179,10 @@ const int linkingNotSupported =
 #define LOADOPTS "-N -x -a archive"
 #define LOC_OPT "-R"
 #else  // !PTHPPA
+#ifdef PTNT
+#define LOADOPTS "-N -x"
+#define LOC_OPT "-Ttext"
+#else //!PTNT
 #define LOC_OPT "-T"
 #ifdef mips
 #define __mips 1
@@ -182,6 +190,7 @@ const int linkingNotSupported =
 #else // mips
 #define LOADOPTS "-N -x"
 #endif // !mips
+#endif // !PTNT
 #endif // !PTHPPA
 
 #ifdef PTHPPA
@@ -336,7 +345,7 @@ extern "C" {
 #define COFF
 #include <aouthdr.h>
 #endif
-#if !defined(SOL2) && !defined(PTNT)
+#if !defined(SOL2) //&& !defined(PTNT)
 #include <a.out.h>
 #endif /*SOL2*/
 #endif
@@ -455,6 +464,14 @@ read (fd, (void *) &h2, sizeof h2) <= 0)
  (lseek(fd, N_TXTOFF(header), 0) < 0 \
    || read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
 #define OBJ_SIZE (size_t)(header.a_text + header.a_data + header.a_bss)
+#endif
+
+#if defined(PTNT)
+#define STRUCT_DEFS AOUTHDR header
+#define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
+#define OBJ_READ_SIZE ((size_t)(header.tsize + header.dsize))
+#define READOBJ_FAIL (read (fd, availMem, OBJ_READ_SIZE) < OBJ_READ_SIZE)
+#define OBJ_SIZE (size_t)(header.tsize + header.dsize + header.bsize)
 #endif
 
 
