@@ -53,6 +53,7 @@ DEPSServer.pl \
 DEPacketize.pl \
 DEPoisson.pl \
 DEPrQueue.pl \
+DEPriorityQueue.pl \
 DEPrinter.pl \
 DEQueue.pl \
 DEQueueBase.pl \
