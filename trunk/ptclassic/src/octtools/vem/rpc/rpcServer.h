@@ -167,7 +167,6 @@ extern int RPCMaxApplications;
 extern void		rpcInit(); /* Called in main/vem.c */
 
 /* handle connection/network operations */
-extern rpcStatus	RPCAddApplication();
 extern void		RPCServerEnd();
 
 extern int		RPCGetEvent();
