@@ -48,6 +48,10 @@ SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
 VHDLTarget(name,starclass,desc) {
   addState(synopsys.setState("$SYNOPSYS",this,"/usr/tools/synopsys",
 			    "value for SYNOPSYS environment variable."));
+  // Needed by the "gvan" vhdl code analyzer.
+  addState(arch.setState("$ARCH",this,"sparcOS5",
+			    "value for ARCH environment variable."));
+  // Needed by the "(pt)vhdlsim" vhdl simulator.
   addState(simarch.setState("$SIM_ARCH",this,"sparcOS5",
 			    "value for SIM_ARCH environment variable."));
   addState(analyze.setState("analyze",this,"YES",
@@ -107,44 +111,29 @@ void SimVSSTarget :: setup() {
 //  printf("Setup Method of SimVSSTarget called\n");
 
   synopsys.initialize();
+  arch.initialize();
   simarch.initialize();
 
   StringList synopsysString;
+  StringList archString;
   StringList simarchString;
 
   synopsysString = "SYNOPSYS=";
   synopsysString << synopsys.currentValue();
   const char* hashSynopsysString = hashstring(synopsysString);
 
+  archString = "ARCH=";
+  archString << arch.currentValue();
+  const char* hashArchString = hashstring(archString);
+
   simarchString = "SIM_ARCH=";
   simarchString << simarch.currentValue();
   const char* hashSimarchString = hashstring(simarchString);
 
   putenv(hashSynopsysString);
+  putenv(hashArchString);
   putenv(hashSimarchString);
 
-/*
-  const char* returnString;
-  returnString = getenv("SYNOPSYS");
-  if (returnString)
-    {
-      printf("$SYNOPSYS = %s\n", returnString);
-    }
-  else
-    {
-      printf("$SYNOPSYS unset\n");
-    }
-  returnString = getenv("SIM_ARCH");
-  if (returnString)
-    {
-      printf("$SIM_ARCH = %s\n", returnString);
-    }
-  else
-    {
-      printf("$SIM_ARCH unset\n");
-    }
-    */
-  
   writeCom = 1;
 
 // Don't init code streams here because it clobbers VHDLCSend,Receive
