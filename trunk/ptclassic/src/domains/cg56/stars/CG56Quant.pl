@@ -1,63 +1,97 @@
 defstar {
 	name { Quant }
 	domain { CG56 }
-	desc { Linear fractional with adjustable offset. }
+	desc { Polynomial evaluation for real numbers}
 	version { $Id$ }
-	acknowledge { Gabriel version by E. A. Lee }
-	author { Chih-Tsung Huang, ported from Gabriel }
+	author { Chih-Tsung Huang }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
-        explanation {
-.Id "quantizer"
-Normally, the output is just the two's complement number
-given by the top noBits of the input, but
-an optional offset can be added to shift the output levels up or down.
+	explanation {
+.PP
+The star quantizes the input to one of N+1 possible output levels
+using N thresholds.
+For an input less than or equal to the Nth threshold,
+but larger than all previous thresholds,
+the output will be the Nth level.
+If the input is greater than all thresholds,
+the output is the (N+1)th level.
+There must be one more level than thresholds.
+	}
+	input {
+		name {input}
+		type {fix}
+	}
+	output {
+		name {output}
+		type {fix}
+	}
+        state  {
+                name { thresholds }
+                type { fixarray }
+                default { "0.1 0.2 0.3 0.4" }
+                desc { threshold file }
+                attributes { A_NONCONSTANT|A_XMEM }
         }
-	input	{
-		name { input }
-		type { fix }
-		}
-        output {
-		name { output }
-		type { fix }
-	}
-	state {
-		name { noBits }
-		type { int }
-		desc { Number of Bits. }
-		default { 4 }
-	}
-	state {
-		name { offset }
-		type { fix }
-		desc { amount of shift.  }
-		default { 0 }
-	}
- 	state  {
-		name { X }
-		type { fix }
-		desc { internal }
-		default { 0 }
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
-	}
-        codeblock(std) {
-	move	$ref(input),x0
-	move	#-$val(X),a
- 	move	#$val(offset),x1
-	and	x0,a
-	add	x1,a
-	move	a1,$ref(output)
-	}
-  	ccinclude {<math.h>}
+        state  {
+                name { levels }
+                type { fixarray }
+                default { "0.05 0.15 0.25 0.35 0.45" }
+                desc { levels file }
+                attributes { A_NONCONSTANT|A_YMEM }
+        }
+        state  {
+                name { X }
+                type { int }
+                default { 4 }
+                desc { internal }
+                attributes { A_NONCONSTANT|A_NONSETTABLE }
+        }
 
-        go { 
-		
-                double a = pow(2,1-double(noBits));
-   		X=a;
- 		addCode(std);
- 	}
-
-	execTime { 
-		return 6;
+	codeblock (main) {
+        move    #<$addr(thresholds),r0
+        move    #>$addr(levels),r4
+        move    $ref(input),x0
+        move    x:(r0)+,a    y:(r4)+,b
+        do      #$val(X)-1,$label(lab)
+        cmp	x0,a
+        jlt	$label(again)
+        enddo
+        jmp     $label(term)
+$label(again)
+        move    x:(r0)+,a    y:(r4)+,b
+$label(lab)
+        cmp	x0,a
+        jge	$label(term)
+        move    y:(r4),b
+$label(term)
+        move    b,$ref(output)
 	}
- }
+
+        codeblock(other) {
+        move    #<$addr(thresholds),r0
+        move    #>$addr(levels),r4
+        move    $ref(input),x0
+        move    x:(r0),a     y:(r4)+,b
+        cmp	x0,a
+        jge	$label(term)
+        move    y:(r4),b
+$label(term)
+        move    b,$ref(output)
+        }
+        start {
+             if(levels.size() != thresholds.size()+1)
+                 Error::abortRun (*this,
+		 ": Must have 1 more level than threshold to quantize.");
+        }
+	go {
+                 X=thresholds.size();
+
+                 if(thresholds.size()>1) 
+                     addCode(main);
+		 else
+	             addCode(other);
+	}
+	exectime {
+	        return 7+4*int(thresholds.size());
+	}
+}
