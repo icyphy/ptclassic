@@ -93,7 +93,19 @@ OTHERSRCS = \
 # Objects
 OBJS =		$(SRCS:.cc=.o)
 
-LIB =		libtysh.$(LIBSUFFIX)
+# HPUX has a hard time handling symbols that are defined both in a static
+# library and in a shared library, so, since we have different Error::
+# functions for pigiRpc, ptcl and tycho, we need to be sure that
+# libpigi, libptcl and libtycho are all static on the hppa.
+ifdef USE_CORE_STATIC_LIBS
+	LIBNONSHARED =		libtysh.a
+	PT_DEPEND += 	$(LIBDIR)/$(LIBNONSHARED)
+	INSTALL += 	$(LIBDIR)/$(LIBNONSHARED)
+else
+	LIB =		libtysh.$(LIBSUFFIX)
+	PT_DEPEND += 	$(LIBDIR)/$(LIB)
+	INSTALL += 	$(LIBDIR)/$(LIB)
+endif
 
 ifndef BASENAME
 ifndef PIGI
@@ -103,14 +115,11 @@ ifndef PIGI
 endif
 endif
 
-
 TK = 		1
-
-PT_DEPEND += 	$(LIBDIR)/$(LIB)
 
 PIGI_OBJS += 	-ltysh
 
-INSTALL += 	$(LIBDIR)/$(LIB)
+
  
 # ptbin.mk has the default rule that creates a binary and the all: rule
 include $(ROOT)/mk/ptbin.mk
