@@ -2,7 +2,7 @@
 .\" If you edit this document, PLEASE BE SURE TO MANUALLY CHANGE THE DATE
 .\" BELOW, to indicate a new version.  Be sure you have properly checked
 .\" out this file with SCCS (the version number should not be a number below):
-.VR 0.$Revision$ "October 10, 1990"
+.VR 0.$Revision$ "%D%"
 .TI "An Overview of \*(PT"
 .AU
 Joseph Buck
@@ -42,7 +42,7 @@ The result is a unified software environment that extends the
 philosophy of mixed-mode circuit simulation up to the design
 and simulation of complex systems.
 .pp
-\*(PT is an outgrowth of
+This work is an outgrowth of
 two previous generations of design environments,
 Blosim and Gabriel, that were aimed at digital signal processing applications.
 .IE Blosim
@@ -268,14 +268,14 @@ configured to run ptolemy.  All the .files in the home directory
 are set up according to the tastes of the \*(PT authors,
 and according the standard use of windowing software in the \*(PT
 development group.
-.H2 ""Troubleshooting"
+.H2 "Troubleshooting"
 .ip "\fBPermission denied.\fR
 If when you start pigi you get the message "permission denied"
 and the \*(PT greeting window fails to pop up, then Vem was
 unable to start pigiRpc, the associated \*(PT process.
 This process is started using the Unix "rsh" command.
 This command can fail if your workstation does not have
-networking enabled, or the users .rhosts file does not include
+networking enabled, or the user's .rhosts file does not include
 the name of the workstation on which you are running.
 The following simple test checks your networking and .rhosts configuration:
 .(c
