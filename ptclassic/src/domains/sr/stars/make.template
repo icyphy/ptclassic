@@ -1,5 +1,5 @@
 # Makefile for Ptolemy SR stars
-# $Id$
+# @(#)make.template	1.4   4/25/96
 #
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do

@@ -4,7 +4,7 @@ defstar {
     desc {
 Subtract input2 from input1
 }
-    version { $Id$ }
+    version { @(#)SRSub.pl	1.1 4/25/96 }
     author { S. A. Edwards }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
