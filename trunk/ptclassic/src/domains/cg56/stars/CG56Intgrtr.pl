@@ -7,17 +7,11 @@ input samples are simply accumulated, and the running sum is the
 output.  If there is an overflow, the integrator will wrap around.
 	}
 	version { $Id$ }
-	author { J. Pino, ported from Gabriel }
+	author { Kennard, J. Pino (ported from Gabriel) }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
 	explanation {
 .Id "filter, integrator"
-Limits are controlled by the \fItop\fP and \fIbottom\fP parameters.
-If top <= bottom, no limiting is performed (default).
-Otherwise, the output is kept between \fIbottom\fP and \fItop\fP.
-If \fIsaturate\fP = YES, saturation is performed.
-If \fIsaturate\fP = NO, wrap-around is performed (default).
-Limiting is performed before output.
 .pp
 Leakage is controlled by the \fPfeedbackGain\fP state (default 1.0).
 The output is the data input plus feedbackGain*state, where state is the
@@ -41,6 +35,13 @@ reset.
 		default {ONE}
 		desc { The gain on the feedback path.}
 	}
+	state {
+		name {unityGainB}
+		type {INT}
+		default {0}
+		desc { "Boolean: is the feedbackGain unity?" }
+		attributes { A_NONSETTABLE|A_NONCONSTANT }
+	}
  	state {
 		name {onOverflow}
 		type {string}
@@ -60,70 +61,72 @@ reset.
 		desc { An internal state.}
 		attributes { A_NONSETTABLE|A_YMEM|A_NONCONSTANT }
 	}
- 	start {
-		sum = initialValue;
-	}
-	codeblock (setLeakage) {
-	move	#$val(feedbackGain),x0
-	}
-	codeblock (setUp) {
+
+
+
+    codeblock (cbSetup) {
 	move	$ref(input),a
 	move	$ref(sum),y0
-	}
-	codeblock (noLeakageNotReset) {
-	add	y0,a
-	}
-	codeblock (leakageNotReset) {
-	macr	x0,y0,a
-	}
-	codeblock (noLeakageWithReset) {
-	add	y0,a	#$val(initialValue),y0
-	}
-	codeblock (leakageWithReset) {
-	macr	x0,y0,a	#$val(initialValue),y0
-	}
-	codeblock (resetWrapUp) {
-; If the Extension bit is set, replace with initial value
-	tes	y0,a
+    }
+    codeblock(cbCoreReset) {
+	IF	$val(unityGainB)
+	  add	y0,a	#$val(initialValue),y0
+	ELSE
+	  move	#$val(feedbackGain),x0
+	  macr	x0,y0,a	#$val(initialValue),y0
+	ENDIF
+	tes	y0,a	 ; If the Extension bit is set, replace with init value
  	move	a,$ref(output)
 	move	a,$ref(sum)
-	}
-	codeblock (saturateWrapUp) {
+    }
+
+    codeblock(cbCoreSat) {
+	IF	$val(unityGainB)
+	  add	y0,a
+	ELSE
+	  move	#$val(feedbackGain),x0
+	  macr	x0,y0,a
+	ENDIF
 	move	a,$ref(output)
 	move	a,$ref(sum)
-	}
-	codeblock (wrapAroundWrapUp) {
+    }
+
+    codeblock(cbCoreWrap) {
+	IF	$val(unityGainB)
+	  add	y0,a
+	ELSE
+	  move	#$val(feedbackGain),x0
+	  macr	x0,y0,a
+	ENDIF
 	move	a1,$ref(output)
 	move	a1,$ref(sum)
+    }
+
+    start {
+	sum = initialValue;
+	unityGainB = double(feedbackGain) >= CG56_ONE;
+    }
+    go {
+	addCode(cbSetup);
+	const char *p = onOverflow;
+	switch (p[0]) {
+	case('r'):		//Reset on overflow
+		addCode(cbCoreReset);
+		break;
+	case('s'):		//Saturate on overflow
+		addCode(cbCoreSat);
+		break;
+	case('w'):		//Wrap around on overflow
+		addCode(cbCoreWrap);
+		break;
+	default:
+		Error::abortRun(*this,"Unrecognized onOverflow option in CG56Integrator.");
+		break;
 	}
-	go {
-		if (feedbackGain != 1) addCode(setLeakage);
-		addCode(setUp);
-		const char *p = onOverflow;
-		switch (p[0]) {
-		case('r'):		//Reset on overflow
- 			if (feedbackGain == 1) addCode(noLeakageWithReset);
-			else addCode(leakageWithReset);
-			addCode(resetWrapUp);
-			break;
-		case('s'):		//Saturate on overflow
-			if (feedbackGain == 1) addCode(noLeakageNotReset);
-			else addCode(leakageNotReset);
-			addCode(saturateWrapUp);
-			break;
-		case('w'):		//Wrap around on overflow
-			if (feedbackGain == 1) addCode(noLeakageNotReset);
-			else addCode(leakageNotReset);
-			addCode(wrapAroundWrapUp);
-			break;
-		default:
-			Error::abortRun(*this,"Unrecognized onOverflow option in CG56Integrator.");
-			break;
-		}
-	}
-	execTime {
-		const char *p = onOverflow;
-		if (p[0]=='r') return 11;
-		else return 9;
-	}
+    }
+    execTime {
+	const char *p = onOverflow;
+	if (p[0]=='r') return 11;
+	else return 9;
+    }
 }
