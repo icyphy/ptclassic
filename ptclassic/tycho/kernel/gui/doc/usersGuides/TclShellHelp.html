@@ -12,7 +12,9 @@ the Tcl interpreter.  Note that Tk and Itcl are understood by
 this interpreter, as are, of course, all Tycho commands.
 If you are running a version of Tycho with Ptolemy attached,
 the ptcl commands are also understood.
-Commands are executed at the global scope.
+By default, commands are executed at the global scope (namespace "::"),
+but this can be changed by invoking the "Set namespace"
+command in the "Special" menu.
 A shell windows is derived from the <a href="EditHelp.html">Edit window</a>,
 and therefore inherits all of its features.
 This page documents the additional features provided.
@@ -55,6 +57,7 @@ it easier to experiment with Tcl scripts.  Foremost among
 these is the <a name=history>history</a>
 mechanism, which keeps a record of previously
 executed commands.  A "Special" menu provides two commands related to this:
+<p>
 <dl>
 <dt><CODE>Edit history</CODE><dd>
 Open a window that contains the history (previously executed commands)
