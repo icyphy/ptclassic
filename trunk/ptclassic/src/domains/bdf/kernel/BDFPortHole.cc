@@ -24,13 +24,13 @@ int InBDFPort :: isItInput () const { return TRUE;}
 
 // note: grabData and sendData shouldn't be called if, based on
 // associated booleans, an arc is not to consume or produce tokens.
-void InBDFPort :: grabData () {
+void InBDFPort :: receiveData () {
 	getParticle();
 }
 
 int OutBDFPort :: isItOutput () const { return TRUE;}
 
-void OutBDFPort :: grabData () {
+void OutBDFPort :: receiveData () {
 	clearParticle();
 }
 

@@ -21,6 +21,7 @@ static const char file_id[] = "BDFClustPort.cc";
 #include "BDFCluster.h"
 #include "Plasma.h"
 #include "Geodesic.h"
+#include <iostream.h>
 
 // constructor for BDFClustPort, port for use in cluster.
 // if bp is set it's a "bag port" belonging to an BDFClusterBag.
@@ -32,12 +33,18 @@ BDFClustPort::BDFClustPort(DFPortHole& port,BDFCluster* parent, int bp)
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
 	numberTokens = port.numXfer();
+	// a DUP_IN port is always an input.
+	if (bp == BCP_DUP_IN) {
+		inFlag = TRUE;
+		bagPortFlag = BCP_DUP;
+	}
+	else inFlag = port.isItInput();
 }
-
-#include <iostream.h>
 
 // destructor
 BDFClustPort::~BDFClustPort() {
+	if (isBagPort())
+		inPtr()->pOutPtr = 0;
 	if (pOutPtr) {
 		cerr << fullName() << " has an outPtr!\n";
 	}
@@ -47,7 +54,8 @@ void BDFClustPort::initGeo() { myGeodesic->initialize();}
 
 // return true if port has same rate as its neighbor.
 int BDFClustPort::sameRate() {
-	return (numIO() == far()->numIO() && condMatch(this,far()));
+	BDFClustPort* pFar = far();
+	return (pFar && numIO() == pFar->numIO() && condMatch(this,pFar));
 }
 
 // This method is called on a cluster porthole to create a connection
@@ -216,7 +224,7 @@ ostream& operator<<(ostream& o, BDFClustPort& p) {
 		o << "<=";
 	if (!pFar) o << "0";
 	else o << pFar->parent()->name() << "." << pFar->name();
-	if (p.numTokens() > 0) o << "[" << p.numTokens() << "]";
+	if (pFar && p.numTokens() > 0) o << "[" << p.numTokens() << "]";
 	return o;
 }
 

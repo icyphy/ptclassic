@@ -37,6 +37,9 @@ public:
 	// domain specific initialization
 	void initialize();
 
+	// system run function
+	int run();
+
 	// functions for schedule generation
 	int notRunnable();
 	int simRunStar(int deferFiring);

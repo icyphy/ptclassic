@@ -44,10 +44,11 @@ class BDFPortSchedInfo {
 	friend BDFScheduler;
 	int num;		// number of tokens produced
 	PortHole* assoc;	// associated boolean signal (0 if none)
-	int relation;		// relation between signal and assoc
+	short relation;		// relation between signal and assoc
+	unsigned char neg;	// if true, "real boolean" is complement
+	unsigned char inFlag;	// if true, is input
 	PortHole* finalAssoc;	// fully traced back associated boolean
 				// (0 if none)
-	int neg;		// if true, "real boolean" is complement
 	int relDelay;		// relative delay
 	SimGeo* geo;		// simulated geodesic
 	int nmove;

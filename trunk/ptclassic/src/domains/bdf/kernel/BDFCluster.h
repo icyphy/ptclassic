@@ -212,6 +212,10 @@ public:
 	// generate the schedule (does nothing except for bags)
 	virtual int genSched() { return TRUE;}
 
+	// return true if condition is satisfied -- this is for
+	// simulation runs.
+	int condSatisfied();
+
 	// return the schedule
 	virtual StringList displaySchedule(int depth) = 0;
 
@@ -350,6 +354,8 @@ protected:
 	const char* logFile;
 	// this one does the main work.
 	int computeSchedule (Galaxy&);
+	// run schedule
+	void runOnce();
 public:
 	// constructor and destructor
 	BDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
