@@ -66,9 +66,6 @@ extern "C" int Ptcl_Init _ANSI_ARGS_((Tcl_Interp *interp));
 
 #ifdef PT_PTCL_WITH_TK
 #include "ptk.h"
-// Functions to initialize TK
-EXTERN void		TkConsoleCreate(void);
-EXTERN int		TkConsoleInit(Tcl_Interp *interp);
 
 Tk_Window ptkW;
 #else
@@ -207,7 +204,7 @@ int Tcl_AppInit(Tcl_Interp *interp)
     if (Tk_Init(interp) == TCL_ERROR) {
 	return TCL_ERROR;
     }
-    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_SafeInit);
+    Tcl_StaticPackage(interp, "Tk", Tk_Init, Tk_Init);
     ptkW = Tk_MainWindow(ptkInterp);
 
     /*
