@@ -1,0 +1,4 @@
+#!/bin/sh
+if [ $PTARCH != sun4 ]; then
+	echo --enable-shared
+fi
