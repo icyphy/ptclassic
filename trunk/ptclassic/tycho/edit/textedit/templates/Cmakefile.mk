@@ -30,13 +30,27 @@
 ##########################################################################
 
 # Root of Tycho directory
-ROOT =		../../..
+# We use the TYCHO environment variable here, rather than a relative path
+# so that we can more easily generate this file from within Tycho.
+ROOT =		$(TYCHO)
 # True source directory
-VPATH =		$(ROOT)/editors/textedit/template
+#VPATH =		$(ROOT)/editors/textedit/template
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
+
+OTHERCFLAGS =
+
+include $(TYCHO)/obj.$(PTARCH)/java.mk
+include $(TYCHO)/obj.$(PTARCH)/tcl.mk
+
+# Tycho substitutes in our filename in the line below
+BASENAME = %basename%
+
+SRCS =	$(BASENAME).c
+OBJS =	$(BASENAME).o
+LIB =	$(BASENAME)$(TCL_SHLIB_SUFFIX)
 
 EXTRA_SRCS =
 
@@ -45,9 +59,28 @@ MISC_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
+INCLUDE = \
+	-I./ \
+	-I$(srcdir) \
+	$(TCL_INCLUDES)
+
+
 # Sub directories to run make in.
 DIRS =
 
+$LIBPATH = \
+	-L$(TCL_LIB_DIR) \
+	-L$(TK_LIB_DIR)
 
+all: $(LIB) $(MISC_SRCS) 
 
+install: $(LIBDIR)/$(LIB)
 
+$(LIB) : $(OBJS)	
+	$(TCL_SHLIB_LD) $(OBJS) -o $@ $(TCL_LD_SEARCH_FLAGS) $(LIBS)
+
+depend:
+	@echo "no dependencies in this directory"
+
+# Get the rest of the rules
+include $(ROOT)/mk/tycommon.mk
