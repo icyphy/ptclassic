@@ -19,6 +19,12 @@ VPATH = 	$(ROOT)/src/domains/cg/ddfScheduler
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
+ifeq ($(OPTIMIZER),-O2)
+	# Purify 3.0.1 under Solaris2.4 with gcc-2.7.0/libg++-2.7
+	# fails to process libcgddf.so if it is compiled with -O2
+	OPTIMIZER =	-O
+endif
+
 # CG directory
 CGDIR =		$(ROOT)/src/domains/cg/kernel
 SDFDIR = 	$(ROOT)/src/domains/sdf/kernel
