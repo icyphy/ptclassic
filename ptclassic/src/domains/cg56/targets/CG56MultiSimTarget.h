@@ -65,11 +65,12 @@ public:
 	void pairSendReceive(DataFlowStar* s, DataFlowStar* r);
 
 	// allocate the shared memory
-	/* virtual */ void prepareCodeGen();
+	/* virtual */ 
+	void prepareCodeGen();
 
 protected:
 	// redefine 
-	Target* createChild();
+	Target* createChild(int);
 
         // AsmTargets always support "AnyAsmStar" stars.
         const char* auxStarClass() const;
