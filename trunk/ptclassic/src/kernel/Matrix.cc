@@ -953,6 +953,46 @@ FixMatrix::FixMatrix(const FixMatrix& src) {
     data[i] = src.data[i];
 }
 
+// special conversion copy constructors
+FixMatrix::FixMatrix(const ComplexMatrix& src, int ln, int ib, 
+                     mask_func_pointer mask) {
+  nRows = src.nRows;
+  nCols = src.nCols;
+  totalDataSize = src.totalDataSize;
+  LOG_NEW; data = new Fix[totalDataSize];
+
+  for(int i = 0; i < totalDataSize; i++) {
+    data[i].Set_MASK(mask);
+    data[i] = (double)abs(src.entry(i));
+  }
+}
+
+FixMatrix::FixMatrix(const FloatMatrix& src, int ln, int ib, 
+                     mask_func_pointer mask) {
+  nRows = src.nRows;
+  nCols = src.nCols;
+  totalDataSize = src.totalDataSize;
+  LOG_NEW; data = new Fix[totalDataSize];
+
+  for(int i = 0; i < totalDataSize; i++) {
+    data[i].Set_MASK(mask);
+    data[i] = src.entry(i);
+  }
+}
+
+FixMatrix::FixMatrix(const IntMatrix& src, int ln, int ib, 
+                     mask_func_pointer mask) {
+  nRows = src.nRows;
+  nCols = src.nCols;
+  totalDataSize = src.totalDataSize;
+  LOG_NEW; data = new Fix[totalDataSize];
+
+  for(int i = 0; i < totalDataSize; i++) {
+    data[i].Set_MASK(mask);
+    data[i] = (double)src.entry(i);
+  }
+}
+
 // Copy Constructor, copying only a submatrix of the original.  Needs
 // the starting row and col to copy from the original, as well as the
 // dimensions of the submatrix.  Undefined if the dimensions of the submatrix
