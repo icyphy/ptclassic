@@ -59,6 +59,7 @@ ITCL_SRCS = \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	DAG.itcl \
+	DFSchedule.itcl \
 	Dialog.itcl \
 	Digraph.itcl \
 	Displayer.itcl \
