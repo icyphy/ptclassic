@@ -35,36 +35,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
-extern "C" {
-#include <unistd.h>
-#include <sys/types.h>
-#include <sys/wait.h>
-#include <sys/time.h>
-#include <sys/resource.h>
-#include <signal.h>
-#include <stdlib.h>
-#include <stdio.h>
-#include <string.h>
-}
-
-/****************************************************************************/
-
-extern "C" {
-extern char **environ; /* An array of pointers to strings containing the    */
-                       /* environmental variables. This is needed by the    */
-                       /* execle() function, as an argument to setup the    */
-                       /* environment for the process that its launching.   */
-}
-
-/****************************************************************************/
-
-extern "C" {
-int setReleaseHandlers(void);
-int setDebugHandlers(void);
-void signalHandlerRelease(int);
-void signalHandlerDebug(int);
-void abortHandling(int at);
-}
+int setHandlers(SIG_PF sigHandler);
+void signalHandlerRelease(int signo);
+void signalHandlerDebug(int signo);
 
 /****************************************************************************/
 
