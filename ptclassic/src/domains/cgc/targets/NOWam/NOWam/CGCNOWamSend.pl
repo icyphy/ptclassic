@@ -121,6 +121,7 @@ void error_handler(int status, op_t opcode, void *argblock)
         }
         codeblock (amdecls) {
 en_t global;
+eb_t bundle;
         }
         codeblock (timedecls) {
 #ifdef TIME_INFO
@@ -137,12 +138,21 @@ double $starSymbol(timeSend);
 prusage_t $starSymbol(beginSend);
 prusage_t $starSymbol(endSend);
 #endif
-eb_t $starSymbol(bundle);
+en_t $starSymbol(endname);
 ea_t $starSymbol(endpoint);
 int $starSymbol(i);
         }
         codeblock (aminit) {
 AM_Init();
+if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
+        fprintf(stderr, "error: AM_AllocateBundle failed\n");
+        exit(1);
+}
+if (AM_SetEventMask(bundle, AM_NOTEMPTY) != AM_OK) {
+        fprintf(stderr, "error: AM_SetEventMask error\n");
+        exit(1);
+}
+
         }
         codeblock (timeinit) {
 #ifdef TIME_INFO
@@ -153,16 +163,7 @@ timeRun = 0.0;
 #ifdef TIME_INFO
 $starSymbol(timeSend) = 0.0;
 #endif
-if (AM_AllocateBundle(AM_PAR, &$starSymbol(bundle)) != AM_OK) {
-        fprintf(stderr, "error: AM_AllocateBundle failed\n");
-        exit(1);
-}
-if (AM_SetEventMask($starSymbol(bundle), AM_EMPTYTONOT ) != AM_OK) {
-        fprintf(stderr, "error: AM_SetEventMask error\n");
-        exit(1);
-}
-
-if (AM_AllocateKnownEndpoint($starSymbol(bundle), &$starSymbol(endpoint), HARDPORT + $val(pairNumber)) != AM_OK) {
+if (AM_AllocateKnownEndpoint(bundle, &$starSymbol(endpoint), &$starSymbol(endname), HARDPORT + $val(pairNumber)) != AM_OK) {
 
         fprintf(stderr, "error: AM_AllocateKnownEndpoint failed\n");
         exit(1);
