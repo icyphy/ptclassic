@@ -41,6 +41,7 @@ PL_SRCS= \
  CGCDB.pl \
  CGCDelay.pl \
  CGCDeMux.pl \
+ CGCDeScrambler.pl \
  CGCDistributor.pl \
  CGCDownSample.pl \
  CGCExp.pl \
