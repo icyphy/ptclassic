@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) -%Q% The Regents of the University of California.
+# @Copyright (c) 1996 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -107,7 +107,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 		$itk_option(-executable)
     }
     append html "<p>" \
-	    "Copyright \251 -%Q%, " \
+	    "Copyright \251 -1996, " \
 	    {Regents of the University of California<br>} \
 	    {- All rights reserved -<br>} \
 	    "<a href=$TYCHO/copyright>See the copyright notice, " \
@@ -118,9 +118,9 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 	    {Introduction to Ptolemy</a></h1>}
 
     configure -size 0
-    configure -htmlwidth 60
-    configure -htmlheight 15
-    configure -html $html
+    configure -textwidth 60
+    configure -textheight 15
+    configure -data $html
     configure -scrollbar 0
 }
 
