@@ -1694,7 +1694,6 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 		    -backwards $backwards \
 		    -nochange $nochange \
 		    -geometry +0+0 \
-		    -before $itk_component(hull) \
 		    -title $tlname
 	    wm deiconify $tl.search
 	"
@@ -1799,7 +1798,6 @@ body ::tycho::Edit::spellCheck {} {
 		    -edit $this \
 		    -nochange $readOnly \
 		    -geometry +0+0 \
-		    -before $itk_component(hull) \
 		    -title $tlname
 	    wm deiconify $tl.spell
 	"
