@@ -40,16 +40,30 @@
 # A simple grouping of Subpanel widgets, MultiPanel allows addition and
 # removal of Subpanel and label widgets in a megawidget FIXME: with 
 # scrollbars. 
+#
+# Subpanels are added using the <code>append</code> command and can
+# contain any number of optional arguments that a subpanel widget will
+# accept.
+#
+# Labels are added using the <code>appendlabel</code> command and can
+# contain any number of optional arguments that a label widget will accept.
+#
+# MultiPanel uses a circular list to keep track of nodes:
+# either subpanels or labels. The actual widget names 
+# are stored in an array indexed by the node names and are chosen
+# and handled automatically.
+#
 # <p>
 # Here is an example of how to use the MultiPanel:
 # <tcl><pre>
 # catch {destroy .y}
 # ::tycho::Displayer .y
-# ::tycho::MultiPanel .y.m
-# pack .y.m
-# .y.m appendlabel x -text Label!
-# .y.m appendlabel z -text Child!
-# .y.m append y {z} -text Panel!
+# set mp [::tycho::MultiPanel .y.m]
+# pack $mp
+# $mp appendlabel x -text Label
+# $mp appendlabel z -text Child
+# $mp append y {z} -text Panel
+# $mp bind z &lt;Enter&gt; {puts Child!}
 # pack forget .y.childsite
 # .y centerOnScreen
 # </pre></tcl>
@@ -68,6 +82,9 @@ class ::tycho::MultiPanel {
 
     # Append a new label
     method appendlabel {element args}
+
+    # Bind to a subpanel
+    method bind {element args}
 
     # Reinitialize the multipanel
     method clear {}
@@ -171,6 +188,20 @@ body ::tycho::MultiPanel::appendlabel {element args} {
     set myData($element) $newLabel
 }
 
+#####################################################################
+#### bind
+# Bind events to internal subpanel widgets. Identical to global bind.
+#
+body ::tycho::MultiPanel::bind {element args} {
+
+    # get name of widget from internal array
+    if {[catch {set elname $myData($element)}] == 1} {
+        error "MultiPanel::bind: Can't find element: $element"
+    } 
+    # bind the subpanel/label
+    uplevel "bind $elname $args"
+}
+
 
 #####################################################################
 #### clear
@@ -197,7 +228,6 @@ body ::tycho::MultiPanel::elementinfo {args} {
     foreach element $args {
         if {[catch {lappend temp $myData($element)}] == 1} {
             error "MultiPanel::elementinfo: Can't find element: $element"
-            return {}
         }
     }
     return "$temp"
@@ -209,9 +239,9 @@ body ::tycho::MultiPanel::elementinfo {args} {
 #
 body ::tycho::MultiPanel::remove {element} {
 
+    # get name of widget from internal array
     if {[catch {set elname $myData($element)}] == 1} {
         error "MultiPanel::remove: Can't find element: $element"
-        return {}
     }
     unset myData($element)
     $myList remove $element
