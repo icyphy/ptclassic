@@ -142,7 +142,7 @@ realclean:
 	rm -f $(CRUD) $(PL_SRCS:.pl=.h) $(PL_SRCS:.pl=.cc) $(PL_SRCS:.pl=.t) \
 	$(REALCLEAN_STUFF)
 
-DEPEND_INCL=$(INCL) $(C_INCL)
+DEPEND_INCL=$(INCL) $(C_INCL) $(SYSTEM_DEPEND_INCL)
 
 depend:		$(SRCS) $(HDRS)
 		cd $(VPATH); \

@@ -86,7 +86,8 @@ CFLAGS = 	-DSYSV -DSOL2 $(OPTIMIZER) $(CDEBUGFLAGS) $(LOCALFLAGS)
 DEPEND =	makedepend
 # common.mk looks for USE_MAKEDEPEND
 USE_MAKEDEPEND =	yes
-
+# Location of C++ includes like fstream.h.  Needed by makedepend
+SYSTEM_DEPEND_INCL =	-I/opt/SUNWspro/SC3.0/include/CC
 #
 # Variables for the linker
 #
