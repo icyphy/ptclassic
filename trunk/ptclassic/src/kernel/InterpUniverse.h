@@ -37,6 +37,7 @@ public:
         InterpUniverse (const char* name = "mainGalaxy") :
 		Runnable((Target*)0, KnownBlock::domain(),this), targName(0)
         { setBlock(name,NULL);}
+	~InterpUniverse();
         int newTarget(const char* newTargName = 0);
 	const char* targetName() const;
 	Scheduler* mySched() const;
