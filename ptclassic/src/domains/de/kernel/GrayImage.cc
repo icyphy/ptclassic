@@ -88,6 +88,6 @@ void GrayImage::assemble(const BaseImage* bi)
 	}
 
 // Do the merge
-	GrayImage* gi = (GrayImage*) bi;
+	const GrayImage* gi = (const GrayImage*) bi;
 	copy(gi->size, grayData + gi->startPos, gi->grayData);
 } // end GrayData::assemble()

@@ -47,8 +47,14 @@ public:
 	virtual	BaseImage*	fragment(int, int);
 	virtual	void		assemble(const BaseImage*);
 
-	inline	char*	retHorz()				{ return horzData; }
-	inline	char*	retVert()				{ return vertData; }
+	inline	char*	retHorz() { return horzData; }
+	inline	char*	retVert() { return vertData; }
+
+	// versions for const packets
+	inline	const char* constHorz() const { return horzData; }
+	inline	const char* constVert() const { return vertData; }
+
+
 	inline	int		retBlockSize() const	{ return blocksize; }
 	inline	int		bsMatch(MVImage* mv) const
 			{ return (blocksize == mv->blocksize); }

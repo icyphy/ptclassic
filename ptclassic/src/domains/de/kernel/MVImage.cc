@@ -100,11 +100,11 @@ void MVImage::assemble(const BaseImage* bi)
 	}
 
 // Do the merge
-	MVImage* mi = (MVImage*) bi;
+	const MVImage* mi = (const MVImage*) bi;
 	copy(mi->size, (unsigned char*) horzData+mi->startPos,
-			(unsigned char*) mi->horzData);
+			(unsigned const char*) mi->horzData);
 	copy(mi->size, (unsigned char*) vertData+mi->startPos,
-			(unsigned char*) mi->vertData);
+			(unsigned const char*) mi->vertData);
 } // end MVImage::assemble()
 
 const char* MVImage::dataType() const { return("MVImage"); }

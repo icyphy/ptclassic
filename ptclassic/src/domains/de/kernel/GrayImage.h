@@ -29,7 +29,16 @@ public:
 
 	virtual BaseImage*	fragment(int, int);
 	virtual void		assemble(const BaseImage*);
+	// retData gives a pointer you can write with
 	unsigned char*		retData();
+
+	// constData gives you a pointer you cannot write with;
+	// it works for a const object
+	unsigned const char*	constData() const {
+		if (size == fullSize) return grayData;
+		return 0;
+	}
+
 	void			setSize(int);
 
 // PacketData-like stuff
