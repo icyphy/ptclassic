@@ -240,4 +240,9 @@ public:
 	BlockMPHIter(Block& b) : MPHListIter (b.multiports) {}
 };
 
+class RegisterBlock {
+public:
+	RegisterBlock(Block& prototype, const char* classname);
+};
+
 #endif
