@@ -61,21 +61,17 @@ when displaying single frames from a moving sequence.
 		unsigned char* buf;
 	}
 
-	constructor { buf = (unsigned char*) NULL; }
+	constructor { buf = 0; }
 
 	setup {
-		wrapup();
-
 		size = int(FilterWidth);
 		if (size <= 0) { size = 3; }
 		size = 1 + 2*(size/2); // an odd number for sure
+		delete [] buf;
 		LOG_NEW; buf = new unsigned char[size*size];
 	}
 
-	wrapup { LOG_DEL; delete [] buf; buf = (unsigned char*) NULL; }
-
-	destructor { wrapup(); }
-
+	destructor { delete [] buf; }
 
 	method {
 		name	{ retMedian }
