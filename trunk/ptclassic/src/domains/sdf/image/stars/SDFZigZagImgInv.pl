@@ -24,7 +24,7 @@ This star inverse zig-zag scans a DCTImage.
 	method { // invert zig-zag scan. "imData" holds output.
 		name { ziginv }
 		type { "void" }
-		access { private }
+		access { protected }
 		arglist { "(float* imData, const float* fData, const int i,
 				const int j, const int width, const int blockSize)" }
 		code {
@@ -97,7 +97,7 @@ This star inverse zig-zag scans a DCTImage.
 		name { copy }
 		type { void }
 		arglist { "(const int c, float* to, const float* from)" }
-		access { private }
+		access { protected }
 		code {
 			for(int i = 0; i < c % 5; i++) { *to++ = *from++; }
 

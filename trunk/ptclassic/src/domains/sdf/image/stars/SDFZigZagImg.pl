@@ -98,7 +98,7 @@ This is useful before quantization.
 		name { copy }
 		type { void }
 		arglist { "(const int c, float* to, const float* from)" }
-		access { private }
+		access { protected }
 		code {
 			for(int i = 0; i < c % 5; i++) { *to++ = *from++; }
 
