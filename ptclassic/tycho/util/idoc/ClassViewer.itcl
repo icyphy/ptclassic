@@ -99,6 +99,9 @@ class ::tycho::IDoc {
     
     # The color of protected constructs.
     itk_option define -protectedcolor protectedColor ProtectedColor black
+
+    # The color of package protection constructs.
+    itk_option define -packagecolor packageColor PackageColor black
     
     # The color of private constructs.
     itk_option define -privatecolor privateColor PrivateColor black 
@@ -767,6 +770,7 @@ body ::tycho::IDoc::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
             -width width \
             -publiccolor publicColor \
             -protectedcolor protectedColor \
+            -packagecolor packageColor \
             -privatecolor privateColor \
             -optioncolor optionColor  \
             -inheritcolor inheritColor 
@@ -929,7 +933,7 @@ body ::tycho::IDoc::display {} {
     }
     
     # insert each type (Protected Method, etc.) by protection order
-    switch {$language} {
+    switch $language {
         "Java" {set protections "public protected package private"}
         default {set protections "public protected private"}
     }
