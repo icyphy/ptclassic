@@ -23,6 +23,20 @@ if ( ! $?USER ) then
     setenv USER $LOGNAME
 endif
 
+if ( ! $?TYCHO ) then
+	if ( $?PTOLEMY ) then
+		setenv TYCHO "$PTOLEMY/tycho"
+	else
+		setenv TYCHO ~ptolemy/tycho
+		if ( -d "$TYCHO" ) then
+			echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
+		else
+		    echo 'You must set $TYCHO or $PTOLEMY for tycho to work'
+		    echo " See tycho/doc/running.html for further information"
+		endif
+	endif
+endif
+
 # Used by cg56/targets/CGCXBase.pl
 if ( ! $?QCKMON ) then
     switch ($PTARCH)

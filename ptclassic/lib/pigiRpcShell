@@ -25,6 +25,7 @@ if [ -r $cmdfile ] ; then
 fi
 libdir=`dirname $0`
 PTOLEMY=${PTOLEMY-`dirname $libdir`}
+TYCHO=${TYCHO-$PTOLEMY/tycho}
 HOME=${HOME-.}
 ARCH=${PTARCH-`(/bin/arch || /bin/machine || $PTOLEMY/bin/arch ) 2> /dev/null`}
 PIGIRPC=${PIGIRPC-$PTOLEMY/bin.$PTARCH/pigiRpc}
@@ -35,6 +36,6 @@ TCL_LIBRARY=${TCL_LIBRARY-$PTOLEMY/tcltk/tcl/lib/tcl}
 TK_LIBRARY=${TK_LIBRARY-$PTOLEMY/tcltk/tk/lib/tk}
 PTPWD=${PTPWD-.}
 LD_LIBRARY_PATH=${LD_LIBRARY_PATH-/usr/lib:/usr/X11/lib}
-export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD LD_LIBRARY_PATH
+export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD LD_LIBRARY_PATH TYCHO
 cd $HOME
 exec $COMMAND $* $TAILARGS
