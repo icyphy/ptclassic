@@ -31,6 +31,50 @@
 #######################################################################
 
 #######################################################################
+#### source
+#
+# Source a file as Tcl, from anywhere on the network.
+#
+proc ::tycho::source {path} {
+    set resource [::tycho::openResource $path]
+    $resource source
+    $resource close
+    delete object $resource
+}
+
+#####################################################################
+#### openResource
+# Open a new resource. Returns the new resource object if successful,
+# or null if it failed. Note that some errors in opening the resource
+# may cause a stack trace, but others (like time-outs) will just
+# cause a null string to be returned.
+#
+proc ::tycho::openResource {path {mode "r"}} {
+    if { [regexp {^http://} $path] } {
+	set new [::tycho::ResourceHTTP [::tycho::autoName http]]
+    } else {
+	set new [::tycho::ResourceFile [::tycho::autoName file]]
+    }
+    if { ! [$new open $path $mode] } {
+	delete object $new
+	return ""
+    }
+    return $new
+}
+
+#######################################################################
+#### write
+#
+# Write data to a resource file.
+#
+proc ::tycho::write {path data} {
+    set resource [::tycho::openResource $path "w+"]
+    $resource write $data
+    $resource close
+    delete object $resource
+}
+
+#######################################################################
 #### Resource
 #
 # The Resource class abstracts the notion of files and (t some extent)
@@ -54,6 +98,9 @@ class ::tycho::Resource {
     ###################################################################
     ####                         public methods                    ####
 
+    # Change the permissions
+    method chmod {permissions {path {}}}
+
     # Close the resource
     method close {}
 
@@ -65,6 +112,9 @@ class ::tycho::Resource {
 
     # Delete a resource
     method delete {path}
+
+    # Test if a file is executable
+    method executable {path}
 
     # Test if a given resource exists
     method exists {path}
@@ -124,7 +174,7 @@ class ::tycho::Resource {
     ####                           public procs                    ####
 
     # Create and open a new resource
-    proc openResource {path}
+    proc openResource {path {mode "r"}}
 
     ###################################################################
     ####                         protected methods                 ####
@@ -132,14 +182,11 @@ class ::tycho::Resource {
     ###################################################################
     ####                        protected variables                ####
 
-    # The access mode
-    protected variable accessMode
-
     # The full name of the current file (or directory)
-    protected variable currentFile
+    protected variable currentFile ""
 
     # True if a file is open
-    protected variable fileIsOpen
+    protected variable fileIsOpen 0
 
     ###################################################################
     ####                         private variables               ####
@@ -165,6 +212,12 @@ body ::tycho::Resource::destructor {} {
 ####                      public methods                             ####
 
 #####################################################################
+#### chmod
+body ::tycho::Resource::chmod {permissions {path {}}} {
+    ::tycho::abstractMethod chmod
+}
+
+#####################################################################
 #### close
 body ::tycho::Resource::close {} {
     ::tycho::abstractMethod close
@@ -186,6 +239,12 @@ body ::tycho::Resource::copy {source target args} {
 #### delete
 body ::tycho::Resource::delete {path} {
     ::tycho::abstractMethod delete
+}
+
+#####################################################################
+#### executable
+body ::tycho::Resource::executable {path} {
+    return 0
 }
 
 #####################################################################
@@ -251,7 +310,7 @@ body ::tycho::Resource::open {path {mode "r"}} {
 #####################################################################
 #### path
 body ::tycho::Resource::path {} {
-    return $currentPath
+    return $currentFile
 }
 
 #####################################################################
@@ -305,18 +364,6 @@ body ::tycho::Resource::write {data} {
 #########################################################################
 #########################################################################
 ####                        public procs                             ####
-
-#####################################################################
-#### openResource
-body ::tycho::Resource::openResource {path} {
-    if { [regexp {$http://} $path] } {
-	set new [::tycho::HTTPFile [::tycho::autoName httpfile]]
-    } else {
-	set new [::tycho::LocalFile [::tycho::autoName localfile]]
-    }
-    $new open $path 
-    return $new
-}
 
 #########################################################################
 #########################################################################
