@@ -29,6 +29,9 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "geo.h"
 
+#include "bb.h"
+#include "change_record.h"
+#include "oct_utils.h"
 
 octStatus
 octGetPoints(object, num_points, points)
