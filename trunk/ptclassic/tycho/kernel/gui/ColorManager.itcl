@@ -37,9 +37,9 @@
 # hue-saturation-value color space, where _hue_ is one of the
 # available hues (by default,  _red_, _orange_, _yellow_, _green_, _cyan_,
 # _blue_, _purple_, _magenta_, and _crimson_), _saturation_
-# is one of the available sturation values (by default, _verypale_,
+# is one of the available saturation values (by default, _verypale_,
 # _pale_, _medium_, and _rich_), and _value is one of the
-# abailable color values, or brightness (by default, _verydark_,
+# available color values, or brightness (by default, _verydark_,
 # _dark_, _medium_, and _light_.  In addition to the standard hues,
 # the special names _black_, _white_, and _grey_ will be recognized.
 # For the first two, _saturation_ and _value_ are ignored;
@@ -55,7 +55,7 @@
 # is set, then use the _saturation_ argument (if it is present). All
 # names are converted to lower case before looking them up.
 #
-# If the first argument is neither of these flags, then the behaviour
+# If the first argument is neither of these flags, then the behavior
 # is the same as if <b>-lookup</b> were specified. In either
 # case, the returned value is an RGB value in the form required
 # by Tk -- for example, <code>#80efdd</code>. If the _hue_ is already
@@ -66,7 +66,7 @@
 # and is provided for convenience.
 #
 proc ::tycho::color {flag {hue {}} {saturation {}} {value {}}} {
-    eval ::tycho::ColorManager::getColor $flag $hue $saturation $value
+    ::tycho::ColorManager::getColor $flag $hue $saturation $value
 }
 
 ###########################################################################
@@ -227,11 +227,11 @@ proc ::tycho::resetTkPalette {{style grey}} {
 
 #########################################################################
 #### ColorManager
-# Manage color selection. This is a "non-instantiable" #class.
+# Tycho's color manager. This is a "non-instantiable" class.
 # It provides a collection of utilities procedures for dealing
 # with color and color names. It supports two ways of using
 # color. First, colors can be accessed by name -- for example,
-# as "red" #and "floralwhite." #The color manager provides a
+# as "red" and "floralwhite." The color manager provides a
 # fairly long list of these names and will convert them into
 # RGB values. The front-end procedure <b>::tycho::color</b>
 # should always be used to convert symbolic color names into
@@ -253,16 +253,14 @@ proc ::tycho::resetTkPalette {{style grey}} {
 # The HSV color scheme is deliberately limited to a fairly small
 # selection of choices, in order to both minimize the number
 # of colors used by Tycho and to make it easier for the user
-# to rapidly choose colors without getting overwhelmded by
+# to rapidly choose colors without getting overwhelmed by
 # choice. The hues available are (in order around the color
 # spectrum) _red_, _orange_, _yellow_, _green_, _cyan_,
 # _blue_, _purple_, _magenta_, and _crimson_. For each
 # hue, there are four levels of saturation and value
 # provided. For saturation, these are named _verypale_,
-# _pale_, _medium_, and _rich_ (the corresponding saturation values
-# of saturation are 0.1, 0.25, 0.5, and 1.0). For value, these
-# are named _verydark_, _dark_, _medium_, and _light_ (the
-# corresponding values are 0.5, 0.65, 0.78, and 1.0).
+# _pale_, _medium_, and _rich_. For values, these
+# are named _verydark_, _dark_, _medium_, and _light_
 # 
 class ::tycho::ColorManager {
     inherit ::tycho::Uninstantiable
@@ -306,7 +304,7 @@ class ::tycho::ColorManager {
     # The available hues. Values are the position of each hue around
     # the color wheel. Note that the hues are not evenly spaced, but
     # are chosen to give a useful set of colors with good variation
-    # with saturtion and lightness. In some cases, this has meant that
+    # with saturation and lightness. In some cases, this has meant that
     # pure colors are in fact shifted -- blue and green, for example,
     # are not at the 120 and 240 degrees for the pure colors.
     private common _hue
@@ -327,7 +325,7 @@ class ::tycho::ColorManager {
     array set _saturation {
         verypale 0.1
         pale 0.25
-        medium 0.5
+        medium 0.45
         rich 1.0
     }
 
@@ -1031,9 +1029,9 @@ body ::tycho::ColorManager::convertColor {rgb} {
 # hue-saturation-value color space, where _hue_ is one of the
 # available hues (by default,  _red_, _orange_, _yellow_, _green_, _cyan_,
 # _blue_, _purple_, _magenta_, and _crimson_), _saturation_
-# is one of the available sturation values (by default, _verypale_,
+# is one of the available saturation values (by default, _verypale_,
 # _pale_, _medium_, and _rich_), and _value is one of the
-# abailable color values, or brightness (by default, _verydark_,
+# available color values, or brightness (by default, _verydark_,
 # _dark_, _medium_, and _light_. The default saturation and
 # value are _rich_ and _light_. In addition to the standard hues,
 # the special names _black_, _white_, and _grey_ will be recognized.
@@ -1050,7 +1048,7 @@ body ::tycho::ColorManager::convertColor {rgb} {
 # is set, then use the _saturation_ argument (if it is present). All
 # names are converted to lower case before looking them up.
 #
-# If the first argument is neither of these flags, then the behaviour
+# If the first argument is neither of these flags, then the behavior
 # is the same as if <b>-lookup</b> were specified. In either
 # case, the returned value is an RGB value in the form required
 # by Tk -- for example, <code>#80efdd</code>. If the _hue_ is already
@@ -1103,6 +1101,13 @@ body ::tycho::ColorManager::getColor \
             } else {
                 set v [::tycho::ColorManager::value $value]
             }
+            # Figure out a fudge factor to prevent low saturation/value from
+            # getting too grey
+            set fudge [expr pow(1-$s,2) * pow(1-$v,2)]
+            set s [expr $s + $fudge]
+            set v [expr $v + $fudge]
+
+            # Get the RGB value
             set rgb [::tycho::ColorManager::HSVtoRGB $h $s $v]
         }
         eval format "#%02x%02x%02x" $rgb
