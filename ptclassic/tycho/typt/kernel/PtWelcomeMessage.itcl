@@ -32,20 +32,27 @@
 
 ##########################################################################
 #### ptkStartupMessage
-# For convenience, a procedure to create a Ptolemy welcome message.
+# If the user has not disable the welcomeWindow, then display it.
 #
 proc ptkStartupMessage {{version ""} {binary ""}} {
     # Only bring up the welcomeWindow if the user has not disabled it.
     if {[::tycho::stylesheet get interaction welcomeWindow]} { 
-	set nm [::tycho::autoName .ptwelcome]
-	uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
-		-version $version \
-		-executable $binary \
-		-persistent 0]
-	$nm centerOnScreen
+	ptkStartupMessageAlways $version $binary
     }
 }
 
+##########################################################################
+#### ptkStartupMessageAlways
+# Ignore the user's preferences and bring up the welcomeWindow.
+#
+proc ptkStartupMessageAlways {{version ""} {binary ""}} {
+    set nm [::tycho::autoName .ptwelcome]
+    uplevel #0 [list ::tycho::PtWelcomeMessage $nm \
+	    -version $version \
+	    -executable $binary \
+	    -persistent 0]
+    $nm centerOnScreen
+}
 
 ##########################################################################
 #### PtWelcomeMessage
