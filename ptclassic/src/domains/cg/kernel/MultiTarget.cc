@@ -63,6 +63,7 @@ SDFStar* BaseMultiTarget :: createReceive(int from, int to, int num) {
 void BaseMultiTarget :: pairSendReceive(SDFStar*, SDFStar*) {}
 
 void BaseMultiTarget :: setProfile(Profile*) {}
+void BaseMultiTarget :: prepareCodeGen() {}
 
 int BaseMultiTarget :: totalWorkLoad() { return -1; }		// undefined...
 

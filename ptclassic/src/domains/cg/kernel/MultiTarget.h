@@ -117,6 +117,10 @@ public:
 	// just before the argument node on the same communication resource.
 	virtual ParNode* backComm(ParNode*);
 
+	// prepare code generation of child targets
+	// by default, do nothing.
+	virtual void prepareCodeGen();
+
 protected:
 	IntState nprocs;		// number of processors
 	IntState inheritProcessors;	// Inside the wormhole, use the
