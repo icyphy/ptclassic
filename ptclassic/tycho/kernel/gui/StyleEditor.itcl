@@ -41,7 +41,7 @@ proc ::tycho::styleeditor {stylesheet {style {}}} {
     if { $style == "" } {
         set style [::tycho::userprofile getstyle $stylesheet]
     }
-    if { [::info which -command .styles.$stylesheet] != "" } {
+    if { [::infoWhichCommand .styles.$stylesheet] != "" } {
         if [winfo ismapped .styles.$stylesheet] {
             raise .styles.$stylesheet
         } else {

@@ -40,11 +40,20 @@ proc ::tycho::slateLoadSuper {class} {
     global tcl_version env
 
     if { $tcl_version >= 8.0 } {
-	namespace eval ::tycho [subst -nocommands {
-	    if { [::info classes ::tycho::$class] == "" } {
-		uplevel #0 "source $env(SLATE_LIBRARY)/${class}.itcl"
-	    }
-	}]
+	if { $::itcl::version >= 3.0 } {
+	    puts [::itcl::find classes ::tycho::$class]
+	    namespace eval ::tycho [subst -nocommands {
+		if { [::itcl::find classes ::tycho::$class] == "" } {
+		    uplevel #0 "source $env(SLATE_LIBRARY)/${class}.itcl"
+		}
+	    }]
+	} else {
+	    namespace eval ::tycho [subst -nocommands {
+		if { [::info classes ::tycho::$class] == "" } {
+		    uplevel #0 "source $env(SLATE_LIBRARY)/${class}.itcl"
+		}
+	    }]
+	}
     } else {
 	namespace ::tycho [subst -nocommands {
 	    if { [::info classes $class] == "" } {

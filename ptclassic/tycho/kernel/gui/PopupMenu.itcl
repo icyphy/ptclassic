@@ -52,7 +52,7 @@ class ::tycho::PopupMenu {
     ####                         public methods                    ####
 
     # Add a menu entry to a menu
-    method add {type tag inMenu args}
+    method add {type tag  {inMenu {}} args}
 
     # Add a command menu entry to a menu
     method command {tag inMenu args}

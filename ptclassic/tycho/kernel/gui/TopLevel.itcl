@@ -80,7 +80,7 @@ proc ::tycho::safeUpdate {obj} {
     if {$obj == {}} {return}
     # NOTE: Formerly used
     #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
-    if {[info which -command $obj] == {}} {
+    if {[infoWhichCommand $obj] == {}} {
 	# If you are having trouble with safeUpdate, uncomment the line below
         # error "::tycho::safeUpdate: command aborted: $obj does not exist"
         ::tycho::silentError
@@ -440,7 +440,7 @@ body ::tycho::TopLevel::nextWindow {{raise 0}} {
     if {$nw != $prefix} {
 	if {[winfo exists $nw] && \
 		[winfo ismapped $nw] && \
-		[uplevel #0 info which -command $nw] != {} && \
+		[uplevel #0 infoWhichCommand $nw] != {} && \
 		[$nw isa ::tycho::TopLevel]} {
             # Deferred version overrides wm focus change due to window
             # exposure.
@@ -468,7 +468,7 @@ body ::tycho::TopLevel::prevWindow {{raise 0}} {
 	if {$win == $prefix} {continue}
 	if {[winfo exists $win] && \
 		[winfo ismapped $win] && \
-		[uplevel #0 info which -command $win] != {} && \
+		[uplevel #0 infoWhichCommand $win] != {} && \
 		[$win isa ::tycho::TopLevel]} {
             # Deferred version overrides wm focus change due to window
             # exposure.
@@ -527,7 +527,7 @@ body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
 	if {[catch {
 	    foreach win [$topLevelWindows elements] {
 		# Make sure the window exists...
-		if { [::info which -command $win] != "" } {
+		if { [::infoWhichCommand $win] != "" } {
 		    # Also, defer destruction of any master windows
 		    # until later.
 		    if { ! [$win cget -master] } {
@@ -543,7 +543,7 @@ body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
 	    }
 	    # Now repeat for master windows
 	    foreach win [$topLevelWindows elements] {
-		if { [::info which -command $win] != "" } {
+		if { [::infoWhichCommand $win] != "" } {
 		    delete object $win
 		}
 	    }

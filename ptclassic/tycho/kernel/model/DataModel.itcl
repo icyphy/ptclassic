@@ -135,7 +135,7 @@ class ::tycho::DataModel {
     method parse {data {context {}}}
     
     # Re-order items in a given context
-    method reorder {type {context {}} list}
+    method reorder {type {context {}} {list {}}}
 
     # Search for items with regexp or glob-style matching
     method search {args}
@@ -248,7 +248,7 @@ class ::tycho::DataModel {
 #
 body ::tycho::DataModel::constructor {args} {
     # Create the namespace for this object's data
-    set dataspace ${scope}::[info namespace tail $this]
+    set dataspace ${scope}::[namespaceTail $this]
     namespaceEval $dataspace
 
     # Make sure the namespaces exist in the safe interpreter
@@ -271,10 +271,17 @@ body ::tycho::DataModel::constructor {args} {
     # Create a proc to parse the "configure" syntax
     @scope $scope eval {
  	if { $tcl_version >= 8.0 } {
-	    proc __parse_configure {args} {
-		variable _object_
-		global $_object_
-		eval $_object_ configure $args
+	    if { $::itcl::version >= 3.0 } {
+		proc __parse_configure {args} {
+		    eval [set [namespace current]::_object_] configure $args
+		}
+	    } else {
+		# This worked for tcl++... delete?
+		proc __parse_configure {args} {
+		    variable _object_
+		    global $_object_
+		    eval $_object_ configure $args
+		}
 	    }
 	} else {
 	    proc __parse_configure {args} {
@@ -1379,10 +1386,17 @@ body ::tycho::DataModel::_mkparseproc {type} {
     if $_override($type) {
 	# FIXME: Itcl3.0
 	if { $tcl_version >= 8.0 } {
-	    append proc {
-		variable _object_
-		global $_object_
-		eval $_object_ _add$type $args
+	    if { $::itcl::version >= 3.0 } {
+		append proc {
+		    eval [set [namespace current]::_object_] _add$type $args
+		}
+	    } else {
+		# This for tcl++
+		append proc {
+		    variable _object_
+		    global $_object_
+		    eval $_object_ _add$type $args
+		}
 	    }
 	} else {
 	    append proc {

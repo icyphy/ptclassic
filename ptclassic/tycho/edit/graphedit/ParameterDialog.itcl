@@ -296,7 +296,7 @@ body ::tycho::ParameterDialog::editcolor {parameter label current} {
     set dialog [string trimleft $this.$parameter ":"]
 
     # If there's already one of these, just raise it
-    if { [::info which -command $dialog] != "" } {
+    if { [infoWhichCommand $dialog] != "" } {
 	raise $dialog
 	return $current
     }
@@ -337,7 +337,7 @@ body ::tycho::ParameterDialog::editfont {parameter label current} {
     set name $libraryItem$separator$parameter
 
     # If there's already one of these, just raise it
-    if { [::info which -command $dialog] != "" } {
+    if { [infoWhichCommand $dialog] != "" } {
 	raise $dialog
 	return $current
     }

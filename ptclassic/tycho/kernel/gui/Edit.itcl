@@ -1847,7 +1847,7 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 	$tl.search focusin
     } {
 	if {$tl != {} &&  \
-		[uplevel #0 info objects $tl] != {} && \
+		[uplevel #0 infoObjects $tl] != {} && \
 		[$tl isa ::tycho::File]} {
 	    set tlname [$tl filename]
 	} {
@@ -1971,7 +1971,7 @@ body ::tycho::Edit::spellCheck {} {
 	$tl.spell focusin
     } {
 	if {$tl != {} &&  \
-		[uplevel #0 info objects $tl] != {} && \
+		[uplevel #0 infoObjects $tl] != {} && \
 		[$tl isa ::tycho::File]} {
 	    set tlname [$tl filename]
 	} {

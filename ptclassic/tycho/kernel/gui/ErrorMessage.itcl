@@ -188,7 +188,7 @@ body ::tycho::ErrorMessage::stackTrace {} {
     # If a name is supplied and the window exists, insert
     # the trace in that window
     set name $itk_option(-stackwindow)
-    if { $name != "" && [::info which -command $name] != "" } {
+    if { $name != "" && [::infoWhichCommand $name] != "" } {
 	set trace $name.v
 	$trace configure -readonly 0
 	$trace clear

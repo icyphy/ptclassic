@@ -207,12 +207,12 @@ body ::tycho::TArchetype::constructor {args} {
     #
     #  Create a hull with the same name as this object -- from itk::Widget
     # 
-    set itk_hull [info namespace tail $this]
+    set itk_hull [namespaceTail $this]
     set itk_interior $itk_hull
     set prefix $itk_hull
  
     itk_component add hull {
-        [_hulltype] $itk_hull -class [info namespace tail [info class]]
+        [_hulltype] $itk_hull -class [namespaceTail [info class]]
     } {
         keep -background -cursor
     }
@@ -415,7 +415,7 @@ body ::tycho::TArchetype::itk_initialize {args} {
 
     # If called from the most specific class, execute the
     # post-construction commands.
-    if { [uplevel info context] == [info class] } {
+    if { [uplevel infoContext] == [info class] } {
         foreach {scope cmd} $_whenConstructed {
             @scope $scope $cmd
         }
@@ -577,7 +577,7 @@ body ::tycho::TArchetype::whenConstructed {command} {
     if $_isConstructed {
         uplevel $command
     } else {
-        lappend _whenConstructed [uplevel info context] $command
+        lappend _whenConstructed [uplevel infoContext] $command
     }
 }
 
@@ -604,10 +604,10 @@ body ::tycho::TArchetype::whenMapped {component command} {
     if [winfo ismapped $w] {
         uplevel $command
     } else {
-        lappend _whenMapped($component) [uplevel info context] $command
+        lappend _whenMapped($component) [uplevel infoContext] $command
 
         # Make the binding to the component
-        bind $w <Map> "@scope [info context] $this _notifymapped $component"
+        bind $w <Map> "@scope [infoContext] $this _notifymapped $component"
     }
 }
 
@@ -639,7 +639,7 @@ body ::tycho::TArchetype::_notifymapped {component} {
         foreach {scope cmd} $local_copy {
             @scope $scope $cmd
         }
-        if { [::info which -command $w] != "" } {
+        if { [::infoWhichCommand $w] != "" } {
             bind $w <Map> {}
         }
     }

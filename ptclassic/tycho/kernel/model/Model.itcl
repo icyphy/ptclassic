@@ -215,7 +215,7 @@ body ::tycho::Model::constructor {args} {
     eval configure $args
 
     # Supply the default model name
-    set modelname [::info namespace tail $this]
+    set modelname [namespaceTail $this]
 }
 
 ########################################################################
@@ -605,7 +605,7 @@ body ::tycho::Model::notify {mode args} {
             continue
         }
         # Unsubscribe the subscriber if it no longer exists
-        if { [::info which -command $sub] == "" } {
+        if { [::infoWhichCommand $sub] == "" } {
             unsubscribe $mode $sub
             continue
         }
@@ -785,7 +785,7 @@ body ::tycho::Model::subscribe {mode {subscriber {}} {command {}}} {
     }
 
     # Check for valid subscriber
-    set s [::info which -command $subscriber]
+    set s [::infoWhichCommand $subscriber]
     if { $s != "" } {
         set subscriber $s
     } else {
@@ -902,7 +902,7 @@ body ::tycho::Model::unsubscribe {mode subscriber} {
     }
     
     # Get subscriber command if it exists
-    set s [::info which -command $subscriber]
+    set s [::infoWhichCommand $subscriber]
     if { $s != "" } {
         set subscriber $s
     }

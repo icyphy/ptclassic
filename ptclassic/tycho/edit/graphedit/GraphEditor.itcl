@@ -377,7 +377,7 @@ body ::tycho::GraphEditor::_iconpalette {libname context} {
 
     # Raise the window if it already exists
     if [::info exists _palettes($palettename)] {
-        if { [info which -command $_palettes($palettename)] != "" } {
+        if { [infoWhichCommand $_palettes($palettename)] != "" } {
             raise [winfo toplevel $_palettes($palettename)]
             return
         } else {
@@ -743,7 +743,7 @@ body ::tycho::GraphEditor::_initializeMenubar {menubar} {
     #### FIXME FIXME
     # For now, load a sample library if this class is being
     # instantiated
-    if { [info class] == [info context] } {
+    if { [info class] == [infoContext] } {
 	library load [file join edit graphedit stars.tim]
 	library addtomenu stars stars \
 		-command "$this newstar stars" \

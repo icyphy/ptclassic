@@ -182,7 +182,7 @@ body ::tycho::TWidget::raiseWindow {} {
 # </pre>
 #
 body ::tycho::TWidget::evalIfExists {command args} {
-    if {[info which -command $command] != {}} {
+    if {[infoWhichCommand $command] != {}} {
         eval $command $args
     }
 }

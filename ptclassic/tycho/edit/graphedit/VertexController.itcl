@@ -88,7 +88,7 @@ class ::tycho::VertexController {
     method release {tag}
 
     # Set the termstyle of an icon
-    method termstyle {vertex style}
+    method termstyle {vertex {style {}}}
 
     #################################################################
     ####                  protected methods                      ####
@@ -332,7 +332,7 @@ body ::tycho::VertexController::editparameters {tag} {
         regsub -all {\.} $baz "_" nm
         set dialogname [$slateview component hull].$nm
 
-        if { [::info which -command $dialogname] != "" } {
+        if { [infoWhichCommand $dialogname] != "" } {
             # Already exists
             wm deiconify $dialogname
             raise $dialogname

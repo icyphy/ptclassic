@@ -287,7 +287,7 @@ body ::tycho::Slate::constructor {args} {
     eval itk_initialize $args
 
     # Create the selection handler
-    ::selection handle [::info namespace tail $this] "$this select get"
+    ::selection handle [namespaceTail $this] "$this select get"
 }
 
 #######################################################################
@@ -772,7 +772,7 @@ body ::tycho::Slate::highlight {tag args} {
 #
 body ::tycho::Slate::interactor {class args} {
     uplevel #0 ::tycho::$class #auto \
-	    [::info namespace tail $this] $canvas $args
+	    [namespaceTail $this] $canvas $args
 }
 
 #######################################################################
@@ -1394,6 +1394,6 @@ body ::tycho::Slate::unhighlight {tag} {
 body ::tycho::Slate::claimSelection {} {
     if { $itk_option(-exportselection) } {
 	::selection own -command "$this select clear" \
-		[::info namespace tail $this]
+		[namespaceTail $this]
     }
 }

@@ -235,12 +235,12 @@ body ::tycho::EditItcl::evaluate {} {
 		match junk1 space junk2 junk3 class] {
 	    if {$space != {}} {
 		namespace $space "
-		    if {\[info classes $class\] != {}} {
+		    if {\[infoClasses $class\] != {}} {
 			delete class $class
 		    }
 		"
 	    } {
-                if {[uplevel #0 info classes $class] != {}} {
+                if {[uplevel #0 infoClasses $class] != {}} {
                     uplevel #0 delete class $class
                 }
 	    }
@@ -275,7 +275,7 @@ body ::tycho::EditItcl::gendocBuffer {} {
 
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
-                [info namespace tail [getClassName]].html]] \
+                [namespaceTail [getClassName]].html]] \
     {
         set verbose 0
         set debug 0
@@ -297,7 +297,7 @@ body ::tycho::EditItcl::genidocBuffer {} {
 
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
-                [info namespace tail [getClassName]].idoc]] \
+                [namespaceTail [getClassName]].idoc]] \
     {
         set debug 0
         set generateIndex 0
@@ -426,7 +426,7 @@ body ::tycho::EditItcl::parseNow {start stop} {
 body ::tycho::EditItcl::gendoc {filename} {
     return [ ::tycho::EditProgram::gendocFileInternal $filename\
             [list set docfile [file join doc codeDoc \
-            [info namespace tail [file tail [file rootname $filename].html]]]] \
+            [namespaceTail [file tail [file rootname $filename].html]]]] \
             {
         set verbose 0
         set debug 0
@@ -446,8 +446,7 @@ body ::tycho::EditItcl::gendoc {filename} {
 body ::tycho::EditItcl::genidoc {filename} {
     return [ ::tycho::EditProgram::gendocFileInternal $filename\
             [list set docfile [file join doc codeDoc \
-            [info namespace tail \
-	    [file tail [file rootname $filename].idoc]]]] \
+            [namespaceTail [file tail [file rootname $filename].idoc]]]] \
             {
         set debug 0
         set generateIndex 0

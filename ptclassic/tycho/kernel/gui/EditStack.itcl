@@ -170,7 +170,7 @@ body ::tycho::EditStack::parseNow {start stop} {
         if {[regexp {(method|class|procedure) "([^"]+)".* line ([0-9]+)} \
                 $line match _ meth lnum]} { ;#"
             # WARNING: This is TclIndex dependent.
-            set classnm [::info namespace qualifiers $meth]
+            set classnm [namespaceQualifiers $meth]
             if { [uplevel #0 "info exists auto_index($meth)"] } {
                 # Get the file directly from the auto_index array
                 set fname [lindex [uplevel #0 "set auto_index($meth)"] 1]
