@@ -117,7 +117,7 @@ body ::tycho::Retarget::constructor {args} {
     toolbar button newDomains {Compare Domains} \
             -text {Compare Domains} -command "$this compareDomains"
     toolbar button domainAButton "Change Domain A: $domainA" \
-            -text "Change DomainA: $domain A" -command "$this changeDomainA"
+            -text "Change DomainA: $domainA" -command "$this changeDomainA"
     toolbar button domainBButton "Change Domain B: $domainB" \
             -text "Change Domain B: $domainB" -command "$this changeDomainB"
 
@@ -137,17 +137,11 @@ body ::tycho::Retarget::constructor {args} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainA {} {
-   set arglist [DialogWindow::newModal EntryQuery .e2 -queries "
-       {domainA {Domain A:} $domainA}" ]
-
-    foreach arg $arglist {
-        set [lindex $arg 0] [lindex $arg 1]
-    }
+    set domainA [::tycho::queryinfo "Domain A" $domainA]
     clear
     set dirtyCompareDomains 1
     catch {delete object [graph]}
-    #toolbar button domainAButton -text "Change Domain A: $domainA" 
-    #        -command "$this changeDomainA"
+    toolbar insert domainAButton "Change Domain A: $domainA" 
     modifyAfterDomainChange
 }
 
@@ -156,17 +150,11 @@ body ::tycho::Retarget::changeDomainA {} {
 # Change the name of one of the domains that we are going to compare
 #
 body ::tycho::Retarget::changeDomainB {} {
-    set arglist [DialogWindow::newModal EntryQuery .e2 -queries "
-       {domainB {Domain B:} $domainB}" ]
-
-    foreach arg $arglist {
-        set [lindex $arg 0] [lindex $arg 1]
-    }
+    set domainB [::tycho::queryinfo "Domain B" $domainB]
     clear
     set dirtyCompareDomains 1
     catch {delete object [graph]}
-    #toolbar button domainBButton -text "Change Domain B: $domainB" \
-    #        -command "$this changeDomainB"
+    toolbar insert domainBButton "Change Domain B: $domainB" 
     modifyAfterDomainChange
 }
 
@@ -272,7 +260,7 @@ body ::tycho::Retarget::compareDomains { {universeName {}} \
             [llength [knownlist $domainB]] \
             [llength [knownlist $domainA]]
 
-    [graph] redrawGraph
+    #[graph] redrawGraph
     set dirtyCompareDomains 0
 }
 
@@ -341,17 +329,15 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
         }
     "
 
-    set retargWin [::tycho::HTMLMessage .retarget#auto -html "
+    ::tycho::htmlmessage "
         <H1>$starName star in domains $domainA and $domainB</H1>
         $relationMessage
 
         <tcl><pre>
-        ::tycho::EditPtlang .ptlangA -star {$domainA $starName}
-        .ptlangA centerOnScreen
+        ::tycho::view EditPtlang -star {$domainA $starName}
         </pre></tcl>
         <tcl><pre>
-        ::tycho::EditPtlang .ptlangB -star {$domainB $starName}
-        .ptlangB centerOnScreen
+        ::tycho::view EditPtlang -star {$domainB $starName}
         </pre></tcl>
         <H2>$domainA Domain</H2>
         <pre>
@@ -361,9 +347,7 @@ body ::tycho::Retarget::printStars { starName relation domainA domainB} {
         <pre>
         $domainBPrint
         </pre>
-    "]
-
-    $retargWin centerOnScreen
+    "
 }
     ###################################################################
     ###################################################################
