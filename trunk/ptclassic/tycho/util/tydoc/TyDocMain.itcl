@@ -370,6 +370,9 @@ class ::tycho::DocSys {
     ###################################################################
     ####                   protected methods                       ####
 
+    # Safe update, local copy so we can run this in a script w/o Tycho.
+    protected method tydocUpdate {obj}
+
     # When we find a construct call the appropriate method below
     # Child classes of this class often redefine these methods
     protected method arrayClause { comment access argList} {
@@ -485,7 +488,7 @@ body ::tycho::DocSys::readFile {file} {
     set fd [open $file]
     while {![eof $fd]} {
 	gets $fd lineIn
-
+	tydocUpdate $this
 	if [ regexp {^[	 ]*# (.*)$} $lineIn dummy commentText ] {
 	    if { ! [regexp {^# --+[ 	]*$} $lineIn ]} {
 		# Filter out comment lines like the ones in iwidgets:
@@ -537,6 +540,7 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
 
 
     foreach item "$fileAsList" {
+	tydocUpdate $this
 	if {$item == "#"} {
 	    set inComment 1
 	    if $wasInComment {
@@ -665,6 +669,34 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
     }
 } 
 
+
+    ###################################################################
+    ###################################################################
+    ####                      protected methods                    ####
+
+#######################################################################
+#### tydocUpdate
+# Safe update, local copy so we can run this in a script w/o Tycho.
+# This is a copy of ::tycho::safeUpdate, see kernel/TopLevel.itcl.
+#
+body ::tycho::DocSys::tydocUpdate {obj} {
+    update
+    if {$obj == {}} {return}
+    # NOTE: Formerly used
+    #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
+    if {[info which -command $obj] == {}} {
+	# If you are having trouble with safeUpdate, uncomment the line below
+        # error "::tycho::safeUpdate: command aborted: $obj does not exist"
+
+        #::tycho::silentError
+	set savetkerror [info body ::tkerror]
+	proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+	error silent
+
+    }
+    return 0
+
+}
 
 ########################################################################
 #### ListDocSys
@@ -1135,6 +1167,7 @@ class ::tycho::HTMLDocSys {
 #
 body ::tycho::HTMLDocSys::generateClassHTML {} {
     foreach class [lrange $classList $currentClassIndex end] {
+	tydocUpdate $this
 	$class mergeAllConstructs
 
 	set className [$class getClassName]
@@ -1201,7 +1234,7 @@ body ::tycho::HTMLDocSys::generateClassHTML {} {
 #
 body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
     foreach class [lrange $classList $currentClassIndex end] {
-	
+	tydocUpdate $this
 	if {[needToOutputOutsideConstructs $class]} {
 	    set className [$class getClassName]
 	    if {$className == {}} {
@@ -1241,6 +1274,7 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 	    foreach construct $allConstructs {
 		set constructListList [$class cget -$construct]
 		foreach constructList $constructListList {
+		    tydocUpdate $this
 		    set shortConstruct \
 			    [capitalize [string range $construct 7 end]]
 		    if {$contentsCount >= 1 } {
@@ -1265,6 +1299,7 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 		set printedConstructHeader 0
 		set constructListList [$class cget -$construct]
 		foreach constructList $constructListList {
+		    tydocUpdate $this
 		    set shortConstruct \
 			    [capitalize [string range $construct 7 end]]
 		    if !$printedConstructHeader {
@@ -1339,6 +1374,7 @@ body ::tycho::HTMLDocSys::generateHTMLIndex { {title {"Index of classes"}}} {
     # the files here by name, but we can't just lsort the list, since
     # the classnames are down inside the list elements.
     foreach class $classList {
+	tydocUpdate $this
 	set className [$class getClassName]
 	# FIXME: Since we create a dummy class to pick up objects outside
 	# of a class, there is the possibility that a class might not 
@@ -1486,6 +1522,8 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 	if ![file readable $filename] {
 	    set retval "$retval\nWarning: generateHTML: $filename is not readable"
 	} else {
+	    # Ok to call Update, this is a proc, not a method
+	    update
             if ![$HTMLDocSys modCheck $filename] {
                 # It doesn't need to be regenerated.
                 if !{$generateIndex} {
@@ -1644,6 +1682,7 @@ body ::tycho::HTMLDocSys::generateNonClassHTML {class} {
 	    set printedConstructHeader 0
 	    set constructListList [$class cget -$construct]
 	    foreach constructList $constructListList {
+		tydocUpdate $this
 		set shortConstruct \
 			[capitalize [string range $construct 7 end]]
 		if !$printedConstructHeader {
@@ -1684,6 +1723,8 @@ body ::tycho::HTMLDocSys::generateNonClassHTML {class} {
 # print the description
 #
 body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
+    tydocUpdate $this
+
     set descTag [getDocCommentTag $construct -desc]
     set explTag [getDocCommentTag $construct -expl]
 
@@ -1733,6 +1774,7 @@ body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
 # Generate a html definition 
 #
 body ::tycho::HTMLDocSys::putsDefinition {fd xref name arglist} {
+    tydocUpdate $this
     puts $fd " <DT>$xref<CODE>\n $name</CODE></A><CODE> $arglist</CODE>"
     puts -nonewline $fd " <DD>"
 }
@@ -1742,6 +1784,7 @@ body ::tycho::HTMLDocSys::putsDefinition {fd xref name arglist} {
 # Generate a html definition for a configuration option
 #
 body ::tycho::HTMLDocSys::putsOption {fd xref name arglist} {
+    tydocUpdate $this
     puts $fd " <DT>$xref<CODE>\n$name</CODE></A><CODE>"
     if { [llength $arglist] > 1 } {
 	puts $fd "\{$arglist\}"
@@ -1848,6 +1891,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 # Generate a table of contents for this class
 #
 body ::tycho::HTMLDocSys::putsClassContents {fd class} {
+    tydocUpdate $this
     set contentsCount 0
     set className [$class getClassName]
 
@@ -1884,6 +1928,7 @@ body ::tycho::HTMLDocSys::putsClassContents {fd class} {
     puts $fd " Contents:" 
 
     foreach construct { itk_option option constructor destructor} {
+	tydocUpdate $this
 	set constructListList [$class cget -$construct]
 	# We only are interested in finding if there are more than 0
 	# constructs of this type, so we don't need to parse the entire list
@@ -1929,6 +1974,7 @@ body ::tycho::HTMLDocSys::putsClassContents {fd class} {
     }
     foreach access $allAccesses {
 	foreach construct { method proc variable common } {
+	    tydocUpdate $this
 	    set constructListList [$class cget -$construct]
 	    # If we have a match incr the constructCount.
 	    # We use this later to figure out pluralization in headers.
@@ -1967,7 +2013,7 @@ body ::tycho::HTMLDocSys::putsClassContents {fd class} {
 # Generate a construct documentation for this class
 #
 body ::tycho::HTMLDocSys::putsClassConstructs {fd class} {
-
+    tydocUpdate $this
     set className [$class getClassName]
 
     puts $fd "<HR>"
@@ -1979,6 +2025,7 @@ body ::tycho::HTMLDocSys::putsClassConstructs {fd class} {
         set printedConstructHeader 0
 	set constructListList [$class cget -$construct]
 	foreach constructList $constructListList {
+	    tydocUpdate $this
 	    if {[printConstructorDestructor $construct $constructList ] || \
 		    [printOptionAdd $construct $constructList ] } {
 		# Don't print option add
@@ -2049,6 +2096,7 @@ body ::tycho::HTMLDocSys::putsClassConstructs {fd class} {
 	set printedConstructHeader 0
 	foreach construct { method proc variable common } {
 	    set constructListList [$class cget -$construct]
+	    tydocUpdate $this
 	    # If we have a match incr the constructCount.
 	    # We use this later to figure out pluralization in headers.
 	    set constructCount 0
@@ -2061,6 +2109,7 @@ body ::tycho::HTMLDocSys::putsClassConstructs {fd class} {
 	    # construct/access pairs that exist in this class
 	    set printedAccessHeader 0
 	    foreach constructList $constructListList {
+		tydocUpdate $this
 		if {[lindex $constructList 1] == $access } {
 		    if !$printedConstructHeader {
 			puts $fd "<HR>\n\n<H2>[capitalize $access]\
