@@ -176,7 +176,7 @@ class ::tycho::Frame {
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
     set optiondefault(-color)       background
-    set optiondefault(-borderwidth) 2
+    set optiondefault(-borderwidth) 4
     set optiondefault(-relief)      raised
 }
 

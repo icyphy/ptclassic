@@ -64,6 +64,8 @@ namespace ::tycho {
 # 
 # <li><b>-length</b>. The length of the line representing the terminal. 
 # 
+# <li><b>-width</b>. The width of the line. 
+# 
 # <li><b>-style</b>.  The "style" of terminal: <i>arrow</i>, 
 # <i>doublearrow</i>, or <i>blob</i>.  If <i>arrow</i>, the terminal is 
 # just a simple arrow; if <i>doublearrow</i>, the arrow has two heads; if 
@@ -72,6 +74,8 @@ namespace ::tycho {
 # <li><b>-type</b>. The "type" of the terminal: <i>input</i> or 
 # <i>output</i>. This is mainly used to control the appearance of the 
 # terminal.
+# 
+# <li><b>-width</b>. The width of the line.
 # 
 # </ul>
 # 
@@ -114,6 +118,12 @@ class ::tycho::Terminal {
     # Update the *-anchor* option
     proc _anchor {id canvas slate anchor}
     
+    # Update the *-arrowshape* option
+    proc _arrowshape {id canvas slate arrowshape}
+    
+    # Update the *-blobsize* option
+    proc _blobsize {id canvas slate blobsize}
+    
     # Update the *-direction* option
     proc _direction {id canvas slate direction}
     
@@ -128,6 +138,9 @@ class ::tycho::Terminal {
     
     # Update the *-type* option
     proc _type {id canvas slate type}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
 
     # Get an aspect
     proc aspect {id canvas slate args}
@@ -154,11 +167,14 @@ class ::tycho::Terminal {
     array set methodtable [array get ::tycho::ComplexItem::methodtable]
 
     set methodtable(_anchor)     ::tycho::Terminal::_anchor
+    set methodtable(_arrowshape) ::tycho::Terminal::_arrowshape
+    set methodtable(_blobsize)   ::tycho::Terminal::_blobsize
     set methodtable(_direction)  ::tycho::Terminal::_direction
     set methodtable(_fill)       ::tycho::Terminal::_fill
     set methodtable(_length)     ::tycho::Terminal::_length
     set methodtable(_style)      ::tycho::Terminal::_style
     set methodtable(_type)       ::tycho::Terminal::_type
+    set methodtable(_width)      ::tycho::Terminal::_width
 
     set methodtable(aspect)      ::tycho::Terminal::aspect
     set methodtable(construct)   ::tycho::Terminal::construct
@@ -168,11 +184,14 @@ class ::tycho::Terminal {
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
     set optiondefault(-anchor)    {50 50}
+    set optiondefault(-arrowshape) {}
+    set optiondefault(-blobsize)  5
     set optiondefault(-direction) {1 0}
-    set optiondefault(-length)    25
-    set optiondefault(-type)      input
-    set optiondefault(-style)     arrow
     set optiondefault(-fill)      black
+    set optiondefault(-length)    40
+    set optiondefault(-style)     arrow
+    set optiondefault(-type)      input
+    set optiondefault(-width)     2
 }
 
 ##########################################################################
@@ -193,6 +212,28 @@ body ::tycho::Terminal::_anchor {id canvas slate anchor} {
 		[expr $x0 + [expr ($x1-$x0)/100.0] * [lindex $anchor 0]] \
 		[expr $y0 + [expr ($y1-$y0)/100.0] * [lindex $anchor 1]]
     }
+}
+
+##########################################################################
+#### -arrowshape option configuration
+#
+body ::tycho::Terminal::_arrowshape {id canvas slate arrowshape} {
+    set option(arrowshape$id) $arrowshape
+    if { $arrowshape != "" } {
+	$canvas itemconfigure $primary($id) -arrowshape $arrowshape
+    }
+}
+
+##########################################################################
+#### -blobsize option configuration
+#
+body ::tycho::Terminal::_blobsize {id canvas slate blobsize} {
+    set option(blobsize$id) $blobsize
+
+    # Update the style, forcing an update.
+    set style $option(style$id)
+    set option(style$id) {}
+    _style $id $canvas $slate $style
 }
 
 ##########################################################################
@@ -309,7 +350,7 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 		[::tycho::Rectangle::stretch \
 		[lindex $coords 2] [lindex $coords 3] \
 		[lindex $coords 2] [lindex $coords 3] \
-		3] \
+		$option(blobsize$id)] \
 		-fill $option(fill$id) -outline $option(fill$id) \
 		-tags [list [$canvas gettags $id]]]
     }
@@ -328,6 +369,15 @@ body ::tycho::Terminal::_type {id canvas slate type} {
     set option(style$id) {}
     _style $id $canvas $slate $style
 }
+
+##########################################################################
+#### -width option configuration
+#
+body ::tycho::Terminal::_width {id canvas slate width} {
+    set option(width$id) width
+   $canvas itemconfigure $primary($id) -width $width
+}
+
 
 ##########################################################################
 #### aspect
@@ -369,7 +419,12 @@ body ::tycho::Terminal::construct {id canvas slate tags x0 y0 args} {
 
     # The primary component is also the line.
     set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
-	    -tags $tags -fill $option(fill$id)]
+	    -tags $tags -fill $option(fill$id) \
+	    -width $option(width$id)]
+    if { $option(arrowshape$id) != "" } {
+	$canvas itemconfigure $primary($id) \
+		-arrowshape $option(arrowshape$id)
+    }
 
     # Update the style, forcing an update.
     set style $option(style$id)

@@ -143,9 +143,9 @@ class ::tycho::IconFrame {
     array set optiondefault [array get ::tycho::Connectible::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledFrame \
             array get optiondefault]
-    set optiondefault(-height) 40
+    set optiondefault(-height) 80
     set optiondefault(-text) "NoName"
-    set optiondefault(-width) 70
+    set optiondefault(-width)  120
 }
 
 ##########################################################################

@@ -143,9 +143,9 @@ class ::tycho::IconOval {
     array set optiondefault [array get ::tycho::Connectible::optiondefault]
     array set optiondefault [@scope ::tycho::LabeledOval \
             array get optiondefault]
-    set optiondefault(-vsize) 50
+    set optiondefault(-vsize) 100
     set optiondefault(-text)  ""
-    set optiondefault(-hsize) 50
+    set optiondefault(-hsize) 100
 }
 
 ##########################################################################

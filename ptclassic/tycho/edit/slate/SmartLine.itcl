@@ -99,6 +99,9 @@ namespace ::tycho {
 # duplicate lines, since a line between two given points may be drawn
 # in different ways.
 #
+# <li><b>-width</b>:
+# The width of the line.
+#
 # </ul>
 #
 # <p><b>Components</b>
@@ -181,6 +184,9 @@ class ::tycho::SmartLine {
 
     # Update the *-state* option
     proc _state {id canvas slate start}
+
+    # Update the *-width* option
+    proc _width {id canvas slate width}
 
     # Create a new item
     proc construct {id canvas slate tags x0 y0 x1 y1 args}
@@ -437,6 +443,7 @@ class ::tycho::SmartLine {
     set optiondefault(-smooth)    off
     set optiondefault(-start) 	  "e"
     set optiondefault(-state) 	  0
+    set optiondefault(-width) 	  2
 }
 
 
@@ -505,6 +512,14 @@ body ::tycho::SmartLine::_state {id canvas slate state} {
 }
 
 ##########################################################################
+## -width option configuration
+#
+body ::tycho::SmartLine::_width {id canvas slate width} {
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $option(width$id)
+}
+
+##########################################################################
 #### construct
 #
 body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
@@ -520,7 +535,8 @@ body ::tycho::SmartLine::construct {id canvas slate tags x0 y0 x1 y1 args} {
 
     # Create the "segments" component which is the visible line.
     set component(segments$id) [$canvas create line $x0 $y0 $x1 $y1 \
-	    -fill $option(fill$id) -arrow $option(arrow$id) -tags $tags]
+	    -fill $option(fill$id) -arrow $option(arrow$id) -tags $tags \
+	    -width $option(width$id)]
 
     # Call redraw to do the work
     redraw $id $canvas $slate
