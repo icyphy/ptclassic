@@ -358,14 +358,14 @@ body ::tycho::PreferenceEditor::update {args} {
 	set group $itk_option(-preferences)
 	foreach {tag val} [$this get] {
 	    if { $val != [::tycho::preference get $group $tag] } {
-		::tycho::preference model publish assign $group.$tag $val
+		::tycho::preference model publish assign $group $tag $val
 		lappend updated $group $tag
 	    }
 	}
     } else {
 	# Update all specified entries
 	foreach tag $args {
-	    ::tycho::preference model publish assign $group.$tag [get $tag]
+	    ::tycho::preference model publish assign $group $tag [get $tag]
 	    lappend updated $group $tag
 	}
     }
