@@ -190,6 +190,7 @@ provisions.
       addInclude("<sys/ioctl.h>");
       addInclude("<math.h>");
       addInclude("<sys/audioio.h>");
+      CGCAudioBase::initCode();
       addDeclaration(declarations("short", int(blockSize)/2));
       addDeclaration(outDeclarations);
       addGlobal(globals);

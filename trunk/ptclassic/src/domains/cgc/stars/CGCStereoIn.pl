@@ -84,16 +84,16 @@ provisions.
     }
 
     constructor {
-      	blockSize = 8180;
+      blockSize.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
+      blockSize.setInitValue(8180);
     }
 
     codeblock (inDeclarations) {
-      short $starSymbol(buf)[$val(blockSize)/2];
-      int $starSymbol(counter);
+	int $starSymbol(counter);
     }
     
     codeblock (globals) {
-      int $starSymbol(ctlfile);    
+	int $starSymbol(ctlfile);    
     }
 
     codeblock (set_parametersDef) {
@@ -188,6 +188,7 @@ provisions.
       addInclude("<math.h>");
       addInclude("<sys/audioio.h>");
       CGCAudioBase::initCode();
+      addDeclaration(declarations("short", int(blockSize)/2));
       addDeclaration(inDeclarations);
       addGlobal(globals);
       if (standardIO) {
