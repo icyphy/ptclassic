@@ -27,6 +27,12 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "internal.h"
+#include "attach.h"
+#include "bb.h"
+#include "master.h"
+#include "oct_utils.h"
+
+#include "facet.h"
 
 extern struct object_desc oct_default_desc;
 static struct object_desc *super = &oct_default_desc;
@@ -35,6 +41,7 @@ static octStatus facet_detach();
 static octStatus facet_unattach();
 static octStatus facet_bb();
 
+void
 oct_facet_desc_set(object_desc)
 struct object_desc *object_desc;
 {
