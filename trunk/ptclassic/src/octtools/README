@@ -1,4 +1,4 @@
--*-Mode: text-*- -[Thu Aug  3 14:45:11 1995 by cxh]-
+-*-Mode: text-*- -[Tue Dec  5 13:50:45 1995 by cxh]-
 Version: $Id$ %Q%
 
 octtools/README
@@ -17,69 +17,60 @@ The main differences between vem from 8.1 and vem from 8.2:
         encumbered by a restrictive distribution policy.  See
         COPYRIGHT for more information
 
-How to debug Ptolemy/vem problems
----------------------------------
+Debugging Vem
+-------------
+$PTOLEMY/octtools/bin.$PTARCH should contain two binaries, vem and vem.debug. 
 
-    $PTOLEMY/octtools/bin.$PTARCH should contain two binaries, vem and
-    vem.debug.
+I've modified the pigiEnv.csh script so that you can determinie which
+vem is run by setting an environment variable, VEMBINARY.
 
-    I've modified the pigiEnv.csh script so that you can determinie
-    which vem is run by setting an environment variable, VEMBINARY.
+Usually pigiEnv.csh will run $PTOLEMY/bin.$PTARCH/vem. To run a debug
+version of vem, set the VEMBINARY variable with:
 
-    Usually pigiEnv.csh will run $PTOLEMY/bin.$PTARCH/vem.  
-    To run a debug version of vem, set the VEMBINARY variable with:
+setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem.debug
 
-	setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem.debug
-    
-    And then start up pigi.
+And then start up pigi. 
 
-    Formerly a binary had to be named 'vem' to get the proper
-    bindings.  I believe that this is no longer a problem.  If you do
-    have problems with bindings, try making a private link from
-    from vem to vem.debug:
-	cd ~/bin
-	ln -s $PTOLEMY/octtools/bin.$PTARCH/vem.debug vem
-    
-    The vem 8.1 binaries are available as:
-    	setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem-8.1
-    and
-	setenv VEMBINARY $PTOLEMY/octtools/bin.$PTARCH/vem-8.1.debug
+If you are having problems with bindings or fonts while running
+vem.debug, then you may need to rename the vem.debug binary to vem to
+get the right resources. You could try making a private link from from
+vem to vem.debug:
 
-    Looking at core files
-    ---------------------
-    If you create a core file with vem.debug, use gdb to get a
-    backtrace:
+cd ~/bin
+ln -s $PTOLEMY/octtools/bin.$PTARCH/vem.debug vem
 
-	gdb $PTOLEMY/octtools/bin.$PTARCH/vem.debug core
+One potential fix to this would be to change the Xresource defaults
+from vem* to Vem*
 
-    You may find it helpful to use the 'dir' command inside gdb to set
-    the path that gdb looks for sources with:
+Looking at vem core files
+-------------------------
 
-	dir ~ptdesign/src/octtools/vem
-	
-    vem bug reports
-    ---------------
-    Currently there is no one person responsible for tracking down vem
-    bugs.
+If you create a core file with vem.debug, use gdb to get a backtrace: 
 
-    	1) You should try to replicate the bug in the ptuser
-        environment.  
+gdb $PTOLEMY/octtools/bin.$PTARCH/vem.debug core
 
-	2) You should try to replicate the bug in the older, released
-        version of ptolemy (~ptolemy).
+You may find it helpful to use the 'dir' command inside gdb to set the
+path that gdb looks for sources with:
 
-	3) You should try and include a gdb stack backtrace in your
-	message to ptdesign.   
+dir ~ptdesign/src/octtools/vem
 
-	4) You should include step-by-step instructions about how to
-	reproduce the bug.  Don't be afraid of including to much
-	information.  Your instructions should include:
-		what user you were running as
-		what binaries you were running
-		what directory you started from
-		EXACTLY what you typed and moused on.
-	Bugs that can be reproduced quickly are much more likely to be
-	fixed.
+vem bug reports
+---------------
+
+1.You should try to replicate the bug in the ptuser environment. 
+2.You should try to replicate the bug in the older, released version
+of ptolemy (~ptolemy).  
+3.You should try and include a gdb stack backtrace in your message to
+ptdesign.  
+4.You should include step-by-step instructions about how to
+reproduce the bug. Don't be afraid of including 
+too much information. Your instructions should include: 
+        what user you were running as 
+        what binaries you were running 
+        what directory you started from 
+        EXACTLY what you typed and moused on. 
+5.Bugs that can be reproduced quickly are much more likely to be fixed. 
+
     
 Vem and gcc
 ----------- 
