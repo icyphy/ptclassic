@@ -1,7 +1,12 @@
- defstar {
+defstar {
 	name { MaxMin }
 	domain { SDF }
-	desc { Finds maximum or minimum, value or magnitude. }
+	desc {
+Finds maximum or minimum, value or magnitude, of a fixed number of data
+values on the input.  If you want to use this star to operate over
+multiple data streams, then preceed this star with a Commutator and
+set the state N accordingly.
+	}
 	version { $Id$ }
 	author { Brian L. Evans }
 	acknowledge { Chih-Tsung Huang }
