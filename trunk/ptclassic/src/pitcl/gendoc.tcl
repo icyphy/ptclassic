@@ -51,9 +51,17 @@ proc convertline {line} {
     }
 }
 
-cd $PTOLEMY/src/pitcl
+cd [file join $PTOLEMY src pitcl]
 set ifd [open PITcl.cc]
-set ofd [open pitcl.html w]
+
+# Place the output in the doc/codeDoc directory.
+# Create the directory if it does not exist
+if { [file  isdirectory [file join doc codeDoc]] != 1 } {
+    file mkdir [file join doc codeDoc]
+}
+
+set ofd [open [file join doc codeDoc pitcl.html] w]
+
 puts $ofd {<!-- Automatically generated from PITcl.cc -->}
 puts $ofd {<html>}
 puts $ofd {<head>}
