@@ -162,13 +162,13 @@ install: $(BINDIR)
 		ln -s libg++.so.$(LIBGPLUSPLUS_VERSION) libg++.so; \
 		ln -s libstdc++.so.$(LIBGPLUSPLUS_VERSION) libstdc++.so)
 	# Create links in libio for info files
-	-(cd $(GNU_OBJ)/libg++/libio; \
-		ln -s $(GNU_SRC)/libg++/libio/*.info* .)
-	-(cd $(GNU_OBJ)/libg++/libg++; \
-		ln -s $(GNU_SRC)/libg++/libg++/*.info* .)
-	-(cd $(GNU_OBJ)/libg++/libg++/gperf; \
-		ln -s $(GNU_SRC)/libg++/libg++/gperf/*.info* .)
-	-(cd $(GNU_OBJ)/libg++; $(GNU_OBJ)/make/make install-info)
+	#-(cd $(GNU_OBJ)/libg++/libio; \
+	#	ln -s $(GNU_SRC)/libg++/libio/*.info* .)
+	#-(cd $(GNU_OBJ)/libg++/libg++; \
+	#	ln -s $(GNU_SRC)/libg++/libg++/*.info* .)
+	#-(cd $(GNU_OBJ)/libg++/libg++/gperf; \
+	#	ln -s $(GNU_SRC)/libg++/libg++/gperf/*.info* .)
+	-(cd $(GNU_OBJ)/libg++; $(GNU_OBJ)/make/make info install-info)
 
 ############################################################
 # Build the GNU tools for HP machines
