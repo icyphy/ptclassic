@@ -14,7 +14,7 @@ be obtained by looking at the man page for audio.
   version { $Id$ }
   author { Sunil Bhave }
   copyright {
-Copyright (c) 1990-1996 The Regents of the University 
+Copyright (c) 1990-1997 The Regents of the University 
 of California. All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty 
@@ -104,9 +104,10 @@ provisions.
     CGCAudioBase::initCode();
 
     /* variable for the sync codeblock below */
-    addDeclaration(syncCounter);
-    addCode("$starSymbol(count) = 0;");
-
+    if ((int)aheadLimit >= 0 ) {
+    	addDeclaration(syncCounter);
+	addCode("$starSymbol(count) = 0;");
+       }
     /* Declare "buffer" to be of type short and blockSize/2 bytes */
     addDeclaration(declarations("short", int(blockSize)/2));
     /* Open file for writing data */

@@ -16,7 +16,7 @@ in: Simon Haykin, "Communication Systems," section 8.2 (Wiley 1983).
   version { $Id$ }
   author { T. M. Parks and Sunil Bhave }
   copyright {
-Copyright (c) 1990-1996 The Regents of the University 
+Copyright (c) 1990-1997 The Regents of the University 
 of California. All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty 
@@ -85,9 +85,11 @@ provisions.
     CGCAudioBase::initCode();
 
     /* variable for the sync codeblock below and its initialization */
-    addDeclaration(syncCounter);
-    addCode("$starSymbol(count) = 0;");
-      
+    if ((int)aheadLimit >= 0 ) 
+       {
+	addDeclaration(syncCounter);
+	addCode("$starSymbol(count) = 0;");
+       }
     /* Declare buffer type and size depending on the encoding */
     if (strcasecmp(encodingType, "linear16") == 0){
       addDeclaration(declarations("short", int(blockSize)/2));
