@@ -74,15 +74,16 @@ class ::tycho::ProfileTcl {
 #### constructor
 #
 body ::tycho::ProfileTcl::constructor {args} {
-    toolbar addButton on {Start collecting profiling data} \
+    global env tycho
+    toolbar button on {Start collecting profiling data} \
             -text "Start" -command "$this profileStart"
-    toolbar addButton off {Display profile as a call tree} \
+    toolbar button off {Display profile as a call tree} \
             -text Display -command "$this busy $this profileDisplay"
-    toolbar addButton cancel {Cancel profile, discarding collected data} \
+    toolbar button cancel {Cancel profile, discarding collected data} \
             -text Cancel -command "$this profileCancel"
 
-    toolbar disableButton off
-    toolbar disableButton cancel
+    toolbar buttonDisable off
+    toolbar buttonDisable cancel
 
     # Add a display at the bottom for the profile stats.
     addInfo count {Call count} 0 10 \
@@ -101,7 +102,23 @@ body ::tycho::ProfileTcl::constructor {args} {
             under the cursor"
     eval itk_initialize $args
 
-    ::tycho::loadIfNotPresent profile tclx
+    set packagePathList {}
+
+    if {[info exists env(PTARCH)]} {
+	# Look in tycho/lib/profile/obj.$PTARCH
+	if [file exists [file join $tycho lib profile obj.$env(PTARCH)]] {
+	    lappend packagePathList [list tclXprofile \
+		    [file join $tycho lib profile obj.$env(PTARCH)]]
+	}
+	# Look in /users/ptdesign/tycho/lib/profile/obj.$PTARCH
+	if [file exists [file join \
+		/ users ptdesign tycho lib profile obj.$env(PTARCH)]] {
+	    lappend packagePathList [list tclXprofile \
+		    [file join \
+		    / users ptdesign tycho lib profile obj.$env(PTARCH)]] 
+	}
+    }
+    ::tycho::loadIfNotPresent profile tclx $packagePathList
 
     # Set up bindings to update the times.
     $slate bind node <Enter> "$this updateTimes"
@@ -127,9 +144,9 @@ body ::tycho::ProfileTcl::help {} {
 #
 body ::tycho::ProfileTcl::profileCancel {} {
     profile off results
-    toolbar disableButton off
-    toolbar disableButton cancel
-    toolbar enableButton on
+    toolbar buttonDisable off
+    toolbar buttonDisable cancel
+    toolbar buttonEnable on
 }
 
 #######################################################################
@@ -190,9 +207,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
         array donesearch results $id
         incr depth
     }
-    toolbar disableButton off
-    toolbar disableButton cancel
-    toolbar enableButton on
+    toolbar buttonDisable off
+    toolbar buttonDisable cancel
+    toolbar buttonEnable on
     redrawGraph
 }
 
@@ -201,9 +218,9 @@ body ::tycho::ProfileTcl::profileDisplay {} {
 # Turn profiling on.
 #
 body ::tycho::ProfileTcl::profileStart {} {
-    toolbar enableButton off
-    toolbar enableButton cancel
-    toolbar disableButton on
+    toolbar buttonEnable off
+    toolbar buttonEnable cancel
+    toolbar buttonDisable on
     profile -commands on
 }
 
