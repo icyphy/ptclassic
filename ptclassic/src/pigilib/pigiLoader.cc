@@ -56,6 +56,10 @@ $Id$
 #define EXTRAOPTS ""
 #endif
 
+#ifdef __hppa__
+#define ARCH "snake"
+#endif
+
 // root of Ptolemy source/lib directory
 static const char* ptolemyRoot;
 // a temporary file name for compiler errors
