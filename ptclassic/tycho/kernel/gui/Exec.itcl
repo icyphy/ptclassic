@@ -333,6 +333,11 @@ body ::tycho::Exec::execProcess {} {
     # Set the busy cursor
     set oldCursor [lindex [config -cursor] end]
     config -cursor {watch}
+    $itk_component(history) configure -readonly 0
+    $itk_component(history) insertData "<<Running: [get commandToExec]>>\n"
+    $itk_component(history) center
+    $itk_component(history) configure -readonly 1
+
     ::tycho::safeUpdate $this
 
     # Open a non-blocking pipe from the command
