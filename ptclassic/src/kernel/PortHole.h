@@ -403,6 +403,9 @@ public:
 	// Argument is the delay in the past
         virtual Particle& operator % (int); // changed to virtual for MDSDF
 
+        // return a StringList describing the current data in the port.
+        virtual StringList getDataAsStrings ();
+
 	// return the "resolved type", the type that the pair of connected
 	// portholes have agreed to use.  This will never be ANYTYPE.
 	// The result will be 0 (a null pointer) if type resolution has
