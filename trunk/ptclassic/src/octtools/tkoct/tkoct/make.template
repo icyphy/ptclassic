@@ -24,9 +24,11 @@ HDRS =		tkoct.h tkoctInt.h tkh.h toct.h
 
 all:	makefile tkoct
 
-TKOCT_LIBS = -L../tkgraph -ltkgraph -L../top -ltop -L$(OCTLIBDIR) \
+TKOCT_LIBS =  -L../tkgraph -ltkgraph -L../top -ltop \
+	$(TK_LIBSPEC)$(TCL_LIBSPEC) \
+	-L$(OCTLIBDIR)\
 	-lregion -lkd -lgu -ltap -loh -loct -ltr -lst \
-	-lutility -lerrtrap -luprintf -lport $(TK_LIBSPEC) $(TCL_LIBSPEC)
+	-lutility -lerrtrap -luprintf -lport
 
 # Use the $(LINKER) so the binary is statically linked for distribution.
 # On suns, cc takes -Bstatic, gcc takes -static, so we can't just add a flag
