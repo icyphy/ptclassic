@@ -21,6 +21,7 @@ where the parent is a Block (a specific type of NamedObj).
 #include "NamedObj.h"
 #include "StringList.h"
 #include "Block.h"
+#include <ctype.h>
 
 StringList NamedObj :: readFullName () const
 {
@@ -49,3 +50,35 @@ void NamedObj::initialize() {}
 StringList NamedObj::printRecursive() const { return printVerbose ();}
 
 NamedObj::~NamedObj() {}
+
+
+// This method creates a name derived from the name of the object
+// where all characters in the name that are not alphanumeric are
+// changed to '_' so that the resulting name is a legitimate C++
+// identifier.  The particular way the name is changed may be different
+// in the future, to accomodate future code generators.
+StringList NamedObj :: sanitizedName () const {
+	const char *s = name;
+	char *snm = new char [strlen(s) + 1];
+	char *n = snm;
+	while (*s != 0) {
+	    if(isalnum(*s)) *(n++) = *(s++);
+	    else { *(n++) = '_'; s++; }
+	}
+	*n = 0;
+	StringList out(snm);
+	delete snm;
+	return out;
+}
+
+StringList NamedObj :: sanitizedFullName () const {
+	StringList out;
+	if(blockIamIn != NULL) {
+		out = blockIamIn->sanitizedFullName();
+		out += ".";
+		out += sanitizedName();
+	} else {
+		out = sanitizedName();
+	}
+	return out;
+}
