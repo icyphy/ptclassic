@@ -62,42 +62,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "HashTable.h"
 
 class DDFTarget : public Target {
-protected:
-
-	// The user can specify the maximum buffer size on each arc.
-	// Unbounded arc is detected at runtime by comparing the arc size
-	// and this limit.
-	IntState maxBufferSize;
-
-	// schedulePeriod for interface with a timed domain.
-	FloatState schedulePeriod;
-
-	// If this is nonzero, either of the new schedulers
-	// (but not the fast scheduler) will run until deadlock
-	// in a single iteration.  This is sometimes useful for
-	// wormholes that are DDF on the inside.
-	IntState runUntilDeadlock;
-
-	// Specify whether or not to use the experimental automatic
-	// restructuring of DDF systems.  This facility identifies
-	// SDF subsystems and creates SDF clusters that are scheduled
-	// by the SDF scheduler.
-	IntState restructure;
-
-	// Use the original (0.5.2 version) DDF scheduler.
-	IntState useFastScheduler;
-
-	// For the original DDF scheduler, it defines the number of
-	// execution cycles to be overlapped in execution.
-	IntState numOverlapped;
-
-	StringState logFile;
 
 public:
+	// constructor
 	DDFTarget();
-	Block* makeNew() const;
-	void setup();
+
+	// destructor
 	~DDFTarget();
+
+	// return a copy of itself
+	/*virtual*/ Block* makeNew() const;
+
+	void setup();
+
 	// class identification
 	int isA(const char*) const;
 	const char* className() const;
@@ -130,7 +107,40 @@ public:
 
 	// Need to redefine clone() to copy the firings table
 	// (a private member, see below).
-	/* virtual */ Block* clone () const;
+	/*virtual*/ Block* clone () const;
+
+	// Return the domain of the galaxy if it exists and "DDF" otherwise
+	/*virtual*/ const char* domain();
+
+protected:
+	// The user can specify the maximum buffer size on each arc.
+	// Unbounded arc is detected at runtime by comparing the arc size
+	// and this limit.
+	IntState maxBufferSize;
+
+	// schedulePeriod for interface with a timed domain.
+	FloatState schedulePeriod;
+
+	// If this is nonzero, either of the new schedulers
+	// (but not the fast scheduler) will run until deadlock
+	// in a single iteration.  This is sometimes useful for
+	// wormholes that are DDF on the inside.
+	IntState runUntilDeadlock;
+
+	// Specify whether or not to use the experimental automatic
+	// restructuring of DDF systems.  This facility identifies
+	// SDF subsystems and creates SDF clusters that are scheduled
+	// by the SDF scheduler.
+	IntState restructure;
+
+	// Use the original (0.5.2 version) DDF scheduler.
+	IntState useFastScheduler;
+
+	// For the original DDF scheduler, it defines the number of
+	// execution cycles to be overlapped in execution.
+	IntState numOverlapped;
+
+	StringState logFile;
 
 private:
 	// The following table is used to keep track of pragmas.
