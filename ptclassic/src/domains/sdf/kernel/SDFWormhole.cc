@@ -60,7 +60,7 @@ double SDFWormhole :: getStopTime() {
 double SDFWormhole :: getArrivalTime() {
 	// At the very first call, we initialize "arrivalTime".
 	if (!mark) {
-		SDFScheduler* sched = (SDFScheduler*) parent()->scheduler();
+		SDFScheduler* sched = (SDFScheduler*) outerSched();
 		arrivalTime = sched->now();
 		space = sched->schedulePeriod / double(repetitions) ;
 		mark = 1;
@@ -116,7 +116,7 @@ void SDFtoUniversal :: receiveData ()
 
 	} else {
 		// 2. annul increment of currentTime at the end of run.
-		SDFScheduler* sched = (SDFScheduler*) parent()->scheduler();
+		SDFScheduler* sched = (SDFScheduler*) innerSched();
 		timeMark = sched->now() - sched->schedulePeriod;
 	}
 
