@@ -34,12 +34,14 @@ all::	makefile $(OBJS)
 ifeq ($(USE_SHARED_LIBS),yes)
 # Rule to install libdialogs and librpcserver for hppa
 $(OCTLIBDIR)/$(LIB_INSTALL): $(LIB_INSTALL) 
-		ln $(LIB_INSTALL) $(OCTLIBDIR)
+		rm -f $@
+		ln $^ $(OCTLIBDIR)
 else
 # Rule to install libdialogs and librpcserver for sol2, non-shared
 $(OCTLIBDIR)/$(LIB_INSTALL): $(LIB_INSTALL) 
-		ln $(LIB_INSTALL) $(OCTLIBDIR)
-		$(RANLIB) $(OCTLIBDIR)/$(LIB_INSTALL)
+		rm -f $@
+		ln $^ $(OCTLIBDIR)
+		$(RANLIB) $@
 endif
 install: makefile $(OCTLIBDIR)/$(LIB_INSTALL)
 
