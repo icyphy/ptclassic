@@ -34,8 +34,7 @@ Probability is equal for each output. The time delay is zero.
 	}
 	start {
 		if(random) delete random;
-		random = new Uniform(0,1,gen);
-		random->high(double(output.numberPorts()));
+		random = new Uniform(0,double(output.numberPorts()),gen);
 	}
 
 	go {
