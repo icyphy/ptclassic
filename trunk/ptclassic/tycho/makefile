@@ -83,9 +83,9 @@ tycho.idx: kernel/tychoMakeIndex.tcl \
 	rm -f $@
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
-		echo "Running $(ISH)"; \
-		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ISH); \
+		echo "Running $(ITCLSH)"; \
+		echo "set TYCHO $(PTOLEMY)/tycho; source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
 	else \
-		echo "Running $(ISH)"; \
-		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ISH); \
+		echo "Running $(ITCLSH)"; \
+		echo "set TYCHO $(TYCHO); source kernel/tychoMakeIndex.tcl; tychoStandardIndex" | $(ITCLSH); \
 	fi
