@@ -304,15 +304,27 @@ body ::tycho::MenuBar::entries {{tag {}}} {
 
 #####################################################################
 #### post
-# Post a menu or cascade-menu.
+# Post a menu or cascade-menu and make it active so that
+# menu traversal can then be used on it. This method uses the
+# tkMbPost{} procedure from the Tk library to post a top-level menu,
+# in order that menu traversal then works correctly. This is
+# unfortunate, since these procs are apparently not
+# documented... The menu will not be posted if it's
+# corresponding entry is disabled. If the menu is a top-level
+# menu, raise the containing top-level window, since having
+# menus pop up without being connected to a window looks really stupid.
+# (Note: this can still happen if using Tk's menu traversal...)
+# Return 1 is the menu posted, zero if not.
 #
 body ::tycho::MenuBar::post {tag} {
     if { [::info exists itk_component(button$tag)] } {
 	# Post a top-level menu
-	set button $itk_component(button$tag)
-	$itk_component(menu$tag) post \
-		[winfo rootx $button] \
-		[expr [winfo rooty $button] + [winfo height $button]]
+	if { [$itk_component(button$tag) cget -state] == "disabled" } {
+	    return 0
+	}
+        raise [winfo toplevel $itk_component(hull)]
+	tkMbPost $itk_component(button$tag)
+	return 1
     } else {
 	chain $tag
     }
@@ -324,9 +336,8 @@ body ::tycho::MenuBar::post {tag} {
 #
 body ::tycho::MenuBar::unpost {tag} {
     if { [::info exists itk_component(button$tag)] } {
-	# Post a top-level menu
-	set button $itk_component(button$tag)
-	$itk_component(menu$tag) unpost
+	# Unpost a top-level menu
+	tkMenuUnpost $itk_component(menu$tag)
     } else {
 	chain $tag
     }
