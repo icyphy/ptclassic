@@ -1,5 +1,5 @@
 defstar {
-	name { QuadAdd16 }
+	name { VISAddSh }
 	domain { CGC }
 	version { $Id$ }
 	author { William Chen }

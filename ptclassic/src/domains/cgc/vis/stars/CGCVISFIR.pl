@@ -1,5 +1,5 @@
 defstar {
-	name { QuadFir }
+	name { VISFIR }
 	domain { CGC }
 	version { $Id$ }
 	author { William Chen }

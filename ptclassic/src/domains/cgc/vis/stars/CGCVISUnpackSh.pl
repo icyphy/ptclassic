@@ -1,5 +1,5 @@
 defstar {
-	name { UnpackVis64 }
+	name { VISUnpackSh }
 	domain { CGC }
 	version { $Id$ }
 	author { William Chen }

@@ -1,5 +1,5 @@
 defstar {
-	name { QuadBiquad }
+	name { VISBiquad }
 	domain { CGC }
 	version { $Id$ }
 	author { William Chen }
