@@ -181,7 +181,7 @@ body ::tycho::Exec::execProcess {} {
 
     # Open a non-blocking pipe from the command
     if [catch {set fd [open \
-	    [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]} errMsg {
+	    [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]} errMsg] {
         config -cursor $oldCursor
 	error "$errMsg"
     }
