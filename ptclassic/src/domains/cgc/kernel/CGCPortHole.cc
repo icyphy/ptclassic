@@ -50,7 +50,7 @@ extern const Attribute P_GLOBAL = {PB_GLOBAL,0};
 extern const Attribute P_LOCAL = {0,PB_GLOBAL};
 
 CGCPortHole :: ~CGCPortHole() {
-	LOG_DEL; delete bufName;
+	LOG_DEL; delete [] bufName;
 }
 
 void CGCPortHole :: initialize() {
@@ -267,7 +267,8 @@ const CGCPortHole* CGCPortHole :: realFarPort() const {
 }
 
 void CGCPortHole :: setGeoName(char* n) {
-	if (myGeodesic == 0) bufName = n;
+	delete [] bufName;
+	if (myGeodesic == 0) bufName = savestring(n);
 	else geo().setBufName(n);
 }
 
