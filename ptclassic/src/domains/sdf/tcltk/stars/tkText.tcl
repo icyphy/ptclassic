@@ -17,20 +17,17 @@ set s $ptkControlPanel.label_$starID
 
 if {![winfo exists $s]} {
 
-    proc tkTextMakeWindow {win label numInputs univ wait starID} {
-	global ptkControlPanel
+    proc ptkTextMakeWindow {win label numInputs univ wait starID} {
         toplevel $win
         wm title $win "Text Display"
         wm iconname $win "Text Display"
-
-	tkwait visibility $win
 
         frame $win.f
         message $win.msg -width 12c -text $label
 
 	# The following flag is used if the waitBetweenOutputs parameter is set
-	global $starID
-	set ${starID}(tkTextWaitTrig) 0
+	upvar #0 $starID param
+	set param(tkTextWaitTrig) 0
         for {set i 0} {$i < $numInputs} {incr i} {
     	    frame $win.f.m$i
     	    text $win.f.m$i.t -relief raised -bd 2 -width 40 -height 10 \
@@ -46,7 +43,7 @@ if {![winfo exists $s]} {
 	if {$wait} {
 	    # The following flag is used if the wait_between_outputs
 	    # parameter is set
-	    set ${starID}(tkTextWaitTrig) 0
+	    set param(tkTextWaitTrig) 0
 	    button $win.cont -relief raised -width 40 -bg AntiqueWhite \
                 -command "incr ${starID}(tkTextWaitTrig)" -text CONTINUE
             pack append $win $win.cont {top fillx}
@@ -56,51 +53,46 @@ if {![winfo exists $s]} {
         pack append $win $win.ok {top fillx}
     }
 
-    tkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
+    ptkTextMakeWindow $s [set ${starID}(label)] [set ${starID}(numInputs)] \
 		[curuniverse] [set ${starID}(wait_between_outputs)] $starID
-
-    proc tkTextSetValues {starID numInputs win numLines} {
-        set c $win.f
-        set inputVals [grabInputs_$starID]
-	for {set i 0} {$i < $numInputs} {incr i} {
-            set in [lindex $inputVals $i]
-            $win.f.m$i.t yview -pickplace end
-            $win.f.m$i.t insert end $in
-            $win.f.m$i.t insert end "\n"
-	}
-	global $starID
-	incr ${starID}(lineCount)
-	if {[set ${starID}(lineCount)] >= $numLines} {
-	    incr ${starID}(lineCount) -1
-	    for {set i 0} {$i < $numInputs} {incr i} {
-		$win.f.m$i.t delete 1.0 2.0
-	    }
-	}
-        update
-    }
-
-    proc tkTextWait {flag starID numInputs win} {
-	if {$flag} {
-	    $win.cont configure -bg {orange1}
-	    $win.cont configure -activebackground {tan3}
-	    global $starID
-	    set ${starID}(tkTextWaitTrig) 0
-	    tkwait variable ${starID}(tkTextWaitTrig)
-	    $win.cont configure -bg {AntiqueWhite}
-	    $win.cont configure -activebackground {burlywood}
-	}
-    }
 
     global $starID
     set ${starID}(lineCount) 0
 
+    # Store the window name in the star data structure
+    set ${starID}(win) $s
+
     # In the following definition, the value of starID and
     # numInputs is evaluated when the file is sourced.
-    proc callTcl_$starID {starID} "
-        tkTextSetValues $starID [set ${starID}(numInputs)] $s \
-		[set ${starID}(number_of_past_values)]
-	tkTextWait [set ${starID}(wait_between_outputs)] $starID \
-		[set ${starID}(numInputs)] $s
-    "
+    proc callTcl_$starID {starID} {
+
+	# define a shorthand for referring to parameters
+	upvar #0 $starID param
+
+        set c $param(win).f
+        set inputVals [grabInputs_$starID]
+	for {set i 0} {$i < $param(numInputs)} {incr i} {
+            set in [lindex $inputVals $i]
+            $param(win).f.m$i.t yview -pickplace end
+            $param(win).f.m$i.t insert end $in
+            $param(win).f.m$i.t insert end "\n"
+	}
+	incr param(lineCount)
+	if {$param(lineCount) >= $param(number_of_past_values)} {
+	    incr param(lineCount) -1
+	    for {set i 0} {$i < $param(numInputs)} {incr i} {
+		$param(win).f.m$i.t delete 1.0 2.0
+	    }
+	}
+
+	if {$param(wait_between_outputs)} {
+	    $param(win).cont configure -bg {orange1}
+	    $param(win).cont configure -activebackground {tan3}
+	    set param(tkTextWaitTrig) 0
+	    tkwait variable param(tkTextWaitTrig)
+	    $param(win).cont configure -bg {AntiqueWhite}
+	    $param(win).cont configure -activebackground {burlywood}
+	}
+    }
 }
 unset s
