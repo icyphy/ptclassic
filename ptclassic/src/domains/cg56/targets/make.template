@@ -45,6 +45,7 @@ S56WHO= S56XTargetWH.o
 S56WHI= -I$(S56DIR)/include
 endif
 
+COMPAT= $(ROOT)/src/compat/ptolemy
 S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
 		CGCXBase.pl CGCXSynchComm.pl CGCXAsynchComm.pl \
 		CG56XCSend.pl CG56XCReceive.pl \
@@ -53,7 +54,8 @@ S56PL_SRCS = 	CG56XCAsynchComm.pl CG56XCSynchComm.pl \
 		CGCXPoke.pl CGCXPeek.pl
 
 INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
-     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) $(S56WHI)
+     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) -I$(CGCDIR) $(S56WHI) \
+     -I$(COMPAT)
 
 # stars to make
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
