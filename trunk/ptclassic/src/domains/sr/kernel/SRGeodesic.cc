@@ -65,12 +65,22 @@ SRGeodesic::~SRGeodesic()
   destinationPort = NULL;
 }
 
-// Set this Geodesic's driver
+// Set this Geodesic's driver (node-style)
+//
+// @Description Used for node-style connections.  Calls newConnection before
+// calling setOldSourcePort
+
+PortHole * SRGeodesic::setSourcePort( GenericPort & p, int d, const char * )
+{
+  return setOldSourcePort( p.newConnection(), d );
+}
+
+// Set this Geodesic's driver (point-to-point)
 //
 // @Description Used for both point-to-point and node-style connections.
 // Disconnect the old driver if necessary.
 
-PortHole * SRGeodesic::setSourcePort( GenericPort & p, int, const char * )
+PortHole * SRGeodesic::setOldSourcePort( GenericPort & p, int, const char * )
 {
   //  cout << "SRGeodesic::setSourcePort called on " << name() << " to "
   //       << p.parent()->name() << " " << p.name() << "\n";
@@ -88,9 +98,20 @@ PortHole * SRGeodesic::setSourcePort( GenericPort & p, int, const char * )
 
 // Add a receiver to the list of receivers in this Geodesic
 //
-// @Description Used for both point-to-point and node-style connections.
+// @Description Used exclusively for node-style connections.  Calls
+// newConnection before calling setOldDestPort
 
 PortHole * SRGeodesic::setDestPort( GenericPort & p )
+{
+  return setOldDestPort( p.newConnection() );
+}
+
+
+// Add a receiver to the list of receivers in this Geodesic
+//
+// @Description Used for both node and point-to-point connections.
+
+PortHole * SRGeodesic::setOldDestPort( GenericPort & p )
 {
   //  cout << "SRGeodesic::setDestPort called on " << name() << " to "
   //       << p.parent()->name() << " " << p.name() << "\n";
