@@ -6,7 +6,13 @@ The only difference is in the
 .c reorderQ
 wormhole, which introduces queueing.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD

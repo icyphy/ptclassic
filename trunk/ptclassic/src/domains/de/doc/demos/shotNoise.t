@@ -9,7 +9,13 @@ process into a
 .c Filter
 star.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

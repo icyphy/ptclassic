@@ -11,7 +11,13 @@ and compared to the output of the communication network.
 Plots are given in the time and frequency domain of the sinusoid before and
 after the network.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD

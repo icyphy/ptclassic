@@ -8,7 +8,13 @@ Events are generated at two different rates to count up and down.
 The up rate is faster than the down rate, so the trend is upwards.
 The value of the count is displayed every time it changes.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "S. Ha"
 .LD

@@ -5,7 +5,13 @@ This demonstration shows how embedded-ADPCM with
 LSB dropping may be used in an ATM network to
 prevent mistracking between the coder and decoder.
 .SE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "G. S. Walter."
 .LD
@@ -57,5 +63,5 @@ Suzuki, J. and Taka, M.,
 \fIIEEE J. on Sel. Areas in Comm.\fR,
 June 1989, vol. 7, no. 5, pp. 707-717.
 .SA
-ADPCMMissTrack
+ADPCMMissTrack.
 .ES

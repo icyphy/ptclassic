@@ -8,7 +8,13 @@ A counting process with regular arrivals at intervals of 5.0
 is sampled at regular intervals of 1.0.
 As expected, this produces 5 samples for each level of the counting process.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

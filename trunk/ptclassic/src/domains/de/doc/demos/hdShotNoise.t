@@ -4,7 +4,13 @@
 Generate a high-density shot noise process and verify its
 approximately Gaussian distribution by displaying a histogram.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD

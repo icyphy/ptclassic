@@ -12,7 +12,13 @@ two distinct media, radio and infrared.
 The communication is implemented using shared data structures between
 the stars.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee and T. Parks"
 .LD

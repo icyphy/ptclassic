@@ -22,7 +22,13 @@ one, the more precise the timing of the
 .c Synchronize
 outputs are.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Id$ $Revision$
 .AL "Tom Parks"
 .LD

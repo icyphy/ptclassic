@@ -4,7 +4,13 @@
 Randomly route an irregular but monotonic signal (a Poisson counting process)
 through two channels with random delay, and merge the channel outputs.
 .DE
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/de/demo"
+.EQ
+delim $$
+.EN
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
