@@ -57,6 +57,7 @@ ITCL_SRCS = \
 	BuilderDialog.itcl \
 	CircularList.itcl \
 	Class.itcl \
+	ClassSchedule.itcl \
 	ColorBrowser.itcl \
 	ColorManager.itcl \
 	Compile.itcl \
