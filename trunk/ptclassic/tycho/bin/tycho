@@ -9,23 +9,18 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
-set usagestring = "usage: tycho [-debug] [-ptiny] [-tyed] [-bin tychobin] [-bak] [scriptfile]"
+set usagestring = "usage: tycho [-debug] [-ptiny|-ptrim|-pigi] [-bin tychobin] [-bak] [scriptfile]"
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
 # Set the commonly used environment variables
 source $PTOLEMY/bin/ptsetup.csh
 
-set tyed = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho)
-
 switch ($progname) 
 	case tycho.ptiny:
 		# If 'tycho.ptiny' is a link to this script,
 		# then we just use tysh.ptiny
 		set progname = tysh.ptiny
-		breaksw
-	case tyed:
-		set prog = ($tyed)
 		breaksw
 endsw	
 
@@ -56,7 +51,8 @@ while ($#argv)
 			echo "$usagestring"
 			echo " -debug         Bring up in debug mode"
 			echo " -ptiny         Smaller version, fewer domains"
-			echo " -tyed	      Run w/o ptolemy, as an editor"
+			echo " -ptrim         Small version, more domains"
+			echo " -pigi         Big version, many domains"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -bak           Run a .bak binary"
 			echo " scriptfile     Exec itcl(?) script"
@@ -67,8 +63,11 @@ while ($#argv)
 		case -ptiny:
 			set tychoptiny
 			breaksw
-		case -tyed:
-			set prog = ($tyed)
+		case -ptrim:
+			set tychoptrim
+			breaksw
+		case -pigi:
+			set tychopigi
 			breaksw
 		case -bin:
 			set prog = $argv[2]
@@ -96,9 +95,20 @@ if ( ! $?prog ) then
 	if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
 	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
 	else
-	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
+		if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
+		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptrim
+		else 
+			if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
+			    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
+			else
+			    set tychoedit
+			    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho)
+			endif
+		endif
+
 	endif
-	if ( $?tychodebug ) then
+	if ( ! $?tychoedit && $?tychodebug ) then
+	    # There is no debug version of itkwish yet.
 	    set prog = $prog.debug
 	endif
 	if ( $?tychobak ) then
