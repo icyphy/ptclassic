@@ -175,8 +175,8 @@ public:
         // Retrieve the State with the given name
         virtual State *stateWithName(const char* name);
 
-        // Re-Define setState -- returns false if no state named stateName
-	int setState(const char* stateName, const char* expression);
+        // Set the value of a state - returns false if no state named stateName
+	virtual int setState(const char* stateName, const char* expression);
 
 	// Return reference to Block as a Star.  Error if it's not.
 	virtual const Star& asStar() const;
