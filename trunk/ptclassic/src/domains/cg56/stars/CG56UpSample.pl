@@ -15,9 +15,6 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 demo library }
-	explanation {
-
-	}
 	input {
 		name {input}
 		type {anytype}
