@@ -25,12 +25,15 @@ SDFDIR=$(ROOT)/src/domains/sdf/kernel
 
 # CG directory
 CGDIR=$(ROOT)/src/domains/cg/kernel
+CGSTARDIR=$(ROOT)/src/domains/cg/stars
+
 
 # CGC directory
 CGCDIR=$(ROOT)/src/domains/cgc/kernel
 
 # CG56 kernel support
 CG56DIR=$(ROOT)/src/domains/cg56/kernel
+CG56STARDIR=$(ROOT)/src/domains/cg56/stars
 
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
@@ -45,8 +48,8 @@ S56PL_SRCS = CG56S56XCGCBase.pl CGCS56XBase.pl \
 	     CGCS56XSend.pl CGCS56XReceive.pl 
 endif
 
-INCL=-I$(CG56DIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) \
-     -I$(PARDIR) -I$(CGTARDIR) $(S56WHI)
+INCL=-I$(CG56DIR) -I$(CGDIR) -I$(CGSTARDIR) -I$(SDFDIR) -I$(KERNDIR) \
+     -I$(PARDIR) -I$(CGTARDIR) -I$(CG56STARDIR) $(S56WHI)
 
 # stars to make
 PL_SRCS = CG56MultiSimReceive.pl CG56MultiSimSend.pl $(S56PL_SRCS)
