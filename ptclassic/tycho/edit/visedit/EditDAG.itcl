@@ -245,7 +245,13 @@ class ::tycho::EditDAG {
     ####                   protected variables                     ####
 
     # The default font name
-    protected variable defaultfont {}
+    protected variable defaultfont
+
+    # The color of hyperlinks
+    protected variable linkcolor
+
+    # The color of lines
+    protected variable linecolor
 
     # The default http path name for image map files
     protected variable defaultipath {http://ptolemy.eecs.berkeley.edu/}
@@ -368,6 +374,8 @@ body ::tycho::EditDAG::constructor {args} {
     # The following is done once in the constructor because it's fairly
     # expensive.
     set defaultfont [eval ::tycho::font [preference get defaultFont]]
+    set linkcolor   [eval ::tycho::color [preference get linkColor]]
+    set linecolor   [eval ::tycho::color [preference get lineColor]]
 
     eval itk_initialize $args
     eval preference exclude $this $args
@@ -954,8 +962,7 @@ body ::tycho::EditDAG::drawNode {node xcoord ycoord} {
     }
     set color [::tycho::color $cnt(color) black]
     if {$cnt(link) != {} && $cnt(altlink) != {} && $cnt(color) == {black}} {
-        # FIXME: cache the option for efficiency.
-	set color [preference get linkColor]
+	set color $linkcolor
     }
 
     # Since we are only creating a top-level item, we can call the
@@ -1022,7 +1029,6 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
     } {
         set parents $parent
     }
-    set linecolor [preference get lineColor]
     foreach par $parents {
         set bbox [$mygraph attribute bbox $par]
         set x1 [lindex $bbox 0]
@@ -1054,7 +1060,7 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
 # "diagram" preferences.
 #
 body ::tycho::EditDAG::preference {mode args} {
-    eval ::preference $mode "diagram" $args
+    eval ::tycho::preference $mode "diagram" $args
 }
 
 #######################################################################
