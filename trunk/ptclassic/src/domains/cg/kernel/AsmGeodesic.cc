@@ -22,7 +22,23 @@ $Id$
 #include "AsmGeodesic.h"
 #include <builtin.h>
 
+PortHole* AsmGeodesic::setSourcePort (GenericPort & sp, int delay) {
+	AsmPortHole* p = (AsmPortHole*)Geodesic::setSourcePort (sp, delay);
+	if (p->forkSource()) {
+		forkType |= F_DEST;
+		src = p->forkSource();
+	}
+}
+
+PortHole* AsmGeodesic::setDestPort (GenericPort& dp) {
+	AsmPortHole* p = (AsmPortHole*)Geodesic::setDestPort (dp);
+	if (p->fork()) {
+		forkType |= F_SRC;
+	}
+}
+
 void AsmGeodesic :: initialize() {
+	Geodesic :: initialize();
 	maxNumParticles = size();
 }
 
@@ -39,7 +55,7 @@ int AsmGeodesic :: internalBufSize() const {
 	case F_DEST:
 		return 0;
 	default:{
-		ListIter next(dests);
+		ListIter next(src->forkDests);
 		int omax = 0;
 		AsmGeodesic *d;
 		while ((d = (AsmGeodesic*)next++) != 0)
@@ -47,6 +63,18 @@ int AsmGeodesic :: internalBufSize() const {
 		return omax + maxNumParticles;
 		}
 	}
+}
+
+// return the number of delays on all geodesics that are outputs of forks
+// in the path back to the fork buffer.
+int AsmGeodesic :: forkDelay() {
+	int n = 0;
+	AsmGeodesic *s = this;
+	while (s->srcGeo()) {
+		n += s->numInitialParticles;
+		s = s->srcGeo();
+	}
+	return n;
 }
 
 int AsmGeodesic :: bufSize() const {
@@ -57,12 +85,12 @@ int AsmGeodesic :: bufSize() const {
 // Return the address assigned to the geodesic.
 // if I am a fork destination, my address is that of my source.
 unsigned AsmGeodesic::address() const {
-	return (forkType & F_DEST) ? src->address() : addr;
+	return (forkType & F_DEST) ? srcGeo()->address() : addr;
 }
 
 
 ProcMemory* AsmGeodesic::memory() const {
-	return (forkType & F_DEST) ? src->memory() : mem;
+	return (forkType & F_DEST) ? srcGeo()->memory() : mem;
 }
 
 ISA_FUNC(AsmGeodesic,Geodesic);
