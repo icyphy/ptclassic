@@ -95,8 +95,17 @@ class ::tycho::EditGraph {
     # Redo the most recent command
     method redo {}
 
+    # Create a Ptolemy script
+    method createPitcl {{iterations {}}}
+
     # Run as a Ptolemy Universe
     method runPtolemy {}
+
+    # Run as a Ptolemy Universe o a remote server
+    method runRemotePtolemy {}
+
+    # Generate Pitcl to a file
+    method writePitcl {}
 
     # Update the layout model
     method updateLayout {}
@@ -202,6 +211,32 @@ class ::tycho::EditGraph {
 
     # Initialize the menubar
     private method initializeMenubar {menubar}
+
+    #################################################################
+    ####                  FIXME FIXME FIXME                      ####
+
+    # FIXME: temporary
+
+    # Clear all data
+    method clear {}
+
+    # Insert the specified data
+    method insertData {data}
+
+    # Return the data to be saved
+    protected method saveText {}
+
+    # The current number of iterations
+    private variable iterationCount 100
+
+   # The current remote Tycho server
+    private variable remoteServer "yoyodyne.eecs.berkeley.edu"
+
+    # The current port of the remote server
+    private variable remotePort 7010
+
+    # The java object used to talk to the server
+    private variable javaClient ""
 }
 
 #####################################################################
@@ -325,8 +360,10 @@ body ::tycho::EditGraph::loadLayout {} {
     # Clear all data here
     _clear
 
-    # Make sure the layout is up to date
-    [$itk_option(-layout) cget -primaryview] updateLayout
+    # Make sure the layout is up to date - ?
+    # FIXME: taken out so load and save works, but cloning is
+    # now broken....
+    # [$itk_option(-layout) cget -primaryview] updateLayout
 
     # Create vertices
     foreach vertex [$itk_option(-graph) vertices] {
@@ -464,6 +501,10 @@ body ::tycho::EditGraph::newrelease {ignore x y} {
 #
 body ::tycho::EditGraph::notify {method args} {
     eval _$method $args
+    # Assume any notification means a modification...
+    # (This is too agrresive -- even selecting an item
+    # cause the view to be marked modified...)
+    markModified
 }
 
 ########################################################################
@@ -477,39 +518,135 @@ body ::tycho::EditGraph::redo {} {
 }
 
 ########################################################################
-#### runPtolemy
+#### createPitcl
 #
-# Run the graph as a Ptolemy universe
+# Create a Pitcl string that will run the graph. If an argument is
+# given, run that many times, otherwise query the user.
 #
-body ::tycho::EditGraph::runPtolemy {} {
+body ::tycho::EditGraph::createPitcl {{iterations {}}} {
     set graph $itk_option(-graph)
     set layout $itk_option(-layout)
+    set result ""
 
-    # Create a new universe
-    set universe [::tycho::autoName .universe]
-    ::pitcl::addUniverse .x SDF
-    ::ptolemy::Universe $universe {}
-
-    # Create blocks
-    foreach vertex [$graph vertices] {
-	# puts "$universe addBlock $vertex [$layout itemcget $vertex -label]"
-	$universe addBlock $vertex [$layout itemcget $vertex -label]
-    }
-
-    # Create edges
-    foreach {v0 k0 v1 k1} [$graph edges] {
-	# puts "$universe connect $universe.$v0.$k0 $universe.$v1.$k1"
-	$universe connect $universe.$v0.$k0 $universe.$v1.$k1
-    }
+    append result "# This bogosity to make ptcl know what domain to use\n"
+    append result "catch \{::pitcl::addUniverse .x SDF\}\n"
 
     # Ask the user how long to run
-    foreach {_ iterations} \
-	    [::tycho::query Answer {{line n {Number of Iterations} 100}}] {}
+    if { $iterations == "" } {
+        foreach {_ iterations} \
+                [::tycho::query "Number of iterations" \
+                [list [list line n {Number of Iterations} $iterationCount]]] {}
+    }
+    set iterationCount $iterations
 
-    # puts "$universe run $iterations"
-    $universe run $iterations
-    # puts "$universe wrapup"
-    $universe wrapup
+    # Create a new universe
+    append result "\n# Create a new universe\n"
+    append result "set universe \[::tycho::autoName .universe\]\n"
+    append result "::ptolemy::Universe \$universe \{\}\n"
+
+    # Create blocks
+    append result "\n# Create blocks\n"
+    foreach vertex [$graph vertices] {
+        append result "\$universe addBlock $vertex \
+                [$layout itemcget $vertex -label]\n"
+
+        # FIXME: HACK HACK HACK
+        # Set their parameters
+        if { [$layout itemcget $vertex -label] == "Printer" } {
+            append result "\n# Set their parameters\n"
+            append result \
+                    "::pitcl::setState \$universe.$vertex.fileName <stdout>\n"
+        }
+    }
+
+   # Create edges
+    append result "\n# Create edges\n"
+    foreach {v0 k0 v1 k1} [$graph edges] {
+        append result \
+                "\$universe connect \$universe.$v0.$k0 \$universe.$v1.$k1\n"
+    }
+
+    append result "\n# Run and wrapup\n"
+    append result "\$universe run $iterations\n"
+    append result "\$universe wrapup\n"
+}
+
+########################################################################
+#### runPtolemy
+#
+# Run the graph as a Ptolemy universe. Only works if this is
+# running in tycho -ptiny or tycho -ptrim.
+#
+body ::tycho::EditGraph::runPtolemy {} {
+    uplevel #0 [createPitcl]
+}
+
+########################################################################
+#### runRemotePtolemy
+#
+# Run the graph as a Ptolemy universe. Only works if this
+# is running in tycho -java.
+#
+body ::tycho::EditGraph::runRemotePtolemy {} {
+    set script [createPitcl]
+
+    set nm [::tycho::autoName .runPtolemy]
+    ::tycho::Query $nm
+    $nm line server "Host name" $remoteServer
+    $nm line port "Port number" $remotePort
+    array set info [::tycho::Dialog::wait $nm 0]
+
+    set remoteServer $info(server)
+    set remotePort $info(port)
+    
+    # Now create the Java client object
+    if { $javaClient == "" } {
+        set javaClient [uplevel #0 ::java::new weld.client.TclClient \
+                [::tycho::autoName client]]
+    }
+    # Setup up parameters
+    putStatus "Contacting Tycho server $remoteServer:$remotePort"
+    ::tycho::safeUpdate $this
+    $javaClient setServer $remoteServer
+    $javaClient setPort $remotePort
+
+    # For some reason, tycho -ptiny -tty -s doesn't exit
+    # when it's done, so add some crap to the script
+    append script "\n# Put this bogosity in to force Tycho to exit\n"
+    append script "::exit\n"
+
+    # And run it!
+    set result [$javaClient invoke $script]
+    putStatus "Received result from $remoteServer"
+    ::tycho::safeUpdate $this
+
+    # Display the data
+    set view [::tycho::view Edit]
+    $view insertData $result
+    $view markUnmodified
+    # FIXME
+    [winfo toplevel $view] configure -title "Data from $remoteServer"
+}
+
+#######################################################################
+#### writePitcl
+#
+# Write Pitcl to a file
+#
+body ::tycho::EditGraph::writePitcl {} {
+    # Get the script
+    set script [createPitcl]
+
+    # Get the file to write
+    set filename [::tycho::queryfilename "File to write"]
+    
+    # For some reason, tycho -ptiny -tty -s doesn't exit
+    # when it's done, so add some crap to the script
+    append script "\n# Put this bogosity in to force Tycho to exit\n"
+    append script "::exit\n"
+
+    # Write the file
+    ::tycho::resource write $filename $script
 }
 
 ########################################################################
@@ -1007,6 +1144,80 @@ body ::tycho::EditGraph::initializeMenubar {menubar} {
     $menubar command {Show graph} Devel \
             -command "::tycho::post \[\[$this cget -graph\] describe\]"
 
+    $menubar addSeparator Devel
+
     $menubar command {Run Ptolemy} Devel \
             -command "$this runPtolemy"
+
+    $menubar command {Run Remote Ptolemy} Devel \
+            -command "$this runRemotePtolemy"
+
+    $menubar command {Generate Ptolemy Script} Devel \
+            -command "$this writePitcl"
+
+    $menubar command {Show Ptolemy Script} Devel \
+            -command "::tycho::post \[$this createPitcl\]"
+}
+
+
+#########################################################################
+#########################################################################
+####                            TEMPORARY                          ####
+
+
+#####################################################################
+#### clear
+# Clear the data.
+#
+body ::tycho::EditGraph::clear {} {
+    # OK, the easiest way to do this is to just delete the
+    # two models. Obviously this won't work with multiple
+    # subscribers so models should really have a clear method!
+    # $itk_option(-graph) clear
+    # $itk_option(-layout) clear
+    delete object $itk_option(-graph)
+    configure -graph \
+            [uplevel #0 ::tycho::KeyedDigraph \
+            [::tycho::autoName graph] \
+            -strictoptions 0]
+
+    delete object $itk_option(-layout)
+    configure -layout \
+            [uplevel #0 ::tycho::Layout \
+            [::tycho::autoName layout] \
+            -primaryview $this]
+    
+    # Clean the slate
+    $slate delete all
+}
+
+#####################################################################
+#### insertData
+# Insert the specified data. For now, this is a two-list containing
+# a description of the graph and the layout respectively.
+# Note that data cannot be just inserted: it will always
+# be cleared too.
+#
+body ::tycho::EditGraph::insertData {data} {
+    # Delete all data
+    clear
+    # Load the new data into the models
+    $itk_option(-graph) read string [lindex $data 0]
+    $itk_option(-layout) read string [lindex $data 1]
+    # Load the new data into this view
+    loadLayout
+}
+
+#####################################################################
+#### saveText
+# Return the text to save. For now, this is a two-list containing
+# a description of the graph and the layout respectively.
+#
+body ::tycho::EditGraph::saveText {} {
+    set result "\{\n"
+    append result [$itk_option(-graph) describe]
+    append result "\}\n\{\n"
+    append result [$itk_option(-layout) describe]
+    append result "\}\n"
+    return $result
 }
