@@ -55,3 +55,18 @@ Block* CG56Target :: clone () const {
 	LOG_NEW; return new CG56Target(readName(),readDescriptor(),xa,xl,ya,yl);
 }
 
+StringList CG56Target::beginIteration(int repetitions, int) {
+	StringList out;
+	out = "\tmove ";
+	out += repetitions;
+	out += "r\n";
+	out += "\trep ";
+	out += "lable\n";
+	return out;
+}
+
+StringList CG56Target::endIteration(int, int) {
+	StringList out;
+	out = "lable:\n";
+	return out;
+}
