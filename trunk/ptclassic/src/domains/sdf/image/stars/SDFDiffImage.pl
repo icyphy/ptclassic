@@ -32,9 +32,8 @@ and pass the result to the output.
 		desc	{ Amount by which to scale the image difference. }
 	}
 
-// CODE.
 	go {
-// Read inputs.
+		// Read inputs.
 		Envelope inEnvp1, inEnvp2;
 		(input1%0).getMessage(inEnvp1);
 		(input2%0).getMessage(inEnvp2);
@@ -43,16 +42,18 @@ and pass the result to the output.
 		GrayImage* img1 = (GrayImage*) inEnvp1.writableCopy();
 		const GrayImage* img2 = (const GrayImage*) inEnvp2.myData();
 
-// Calc the difference.
-		int width, height = 0;
-		if (((width = img1->retWidth()) != img2->retWidth()) ||
-				((height = img1->retHeight()) != img2->retHeight())) {
+		// Calculate the difference between the images
+		int width = img1->retWidth();
+		int height = img1->retHeight();
+
+		if ((width != img2->retWidth()) ||
+		    (height != img2->retHeight())) {
 			delete img1;
 			Error::abortRun(*this, "Image sizes do not match.");
 			return;
 		}
 		if (img1->fragmented() || img1->processed() ||
-				img2->fragmented() || img2->processed()) {
+		    img2->fragmented() || img2->processed()) {
 			delete img1;
 			Error::abortRun(*this,
 					"Can't handle fragmented or processed images.");
@@ -61,17 +62,23 @@ and pass the result to the output.
 
 		unsigned char* ptr1 = img1->retData();
 		unsigned const char* ptr2 = img2->constData();
-		float diff;
 		double scale = Scale;
-		for(int travel = 0; travel < width*height; travel++) {
-			diff = float(ptr1[travel]) - float(ptr2[travel]);
-			diff = fabs(diff*scale);
-			if (diff < 0.5)		ptr1[travel] = (unsigned char) 0;
-			else if (diff > 254.5) ptr1[travel] = (unsigned char) 255;
-			else ptr1[travel] = (unsigned char) (diff + 0.5);
+		unsigned int maxindex = width*height;
+		for (unsigned int travel = 0; travel < maxindex; travel++) {
+			// take absolute value of scaled difference
+			double diff;
+			diff = scale * ( double(*ptr1) - double(*ptr2) );
+			if (diff < 0.0) diff = -diff;
+
+			// map the intensity values into the range [0, 255]
+			if (diff < 0.5)	*ptr1 = (unsigned char) 0;
+			else if (diff > 254.5) *ptr1 = (unsigned char) 255;
+			else *ptr1 = (unsigned char) (diff + 0.5);
+			ptr1++;
+			ptr2++;
 		}
 
-// Send the result.
+		// Send the result.
 		Envelope outEnvp(*img1);
 		(outData%0) << outEnvp;
 	} // end go{}
