@@ -3,8 +3,8 @@ $Id$
 
 In this structure listing, wherever ARCH appears, replace it by
 "sun3" if you're running on a Sun 3, "sun4" if you're running on
-a Sun 4, and "vax" if you're running on a Vax.  Soon there will
-also be "mips" for DecStations based on the MIPS RISC chips.
+a Sun 4, "vax" if you're running on a Vax, or "mips" for DecStations
+based on the MIPS RISC chips.
 
 If you're on a mixed cluster, more than one version may exist (say, one
 containing Sun 3 objects and binaries, and one containing those
@@ -13,6 +13,9 @@ should be set to "sun3" or sun4" (whichever is appropriate).  If
 this is done, just typing "make" from the top level directory will
 build and install everything.  The top level directory should be
 the home directory of the user "ptolemy".
+
+Either the SunOS or GNU version of make is required to successfully
+make Ptolemy; the Ultrix versions lack some features we need.
 
 MAKEARCH
 	a script to build architecture-specific directories for
@@ -35,6 +38,8 @@ bin.ARCH/
 		Ptolemy language preprocessor
 	xgraph
 		Program for drawing graphs under X11
+	optfir, wfir
+		Filter design programs
 demo/
 	Directory containing pigi and interpreter demos.
 doc/
@@ -49,7 +54,7 @@ lib/
 	technology/
 		Directory containing "system facets" for pigi
 	vem.bindings.7-3
-	vem.bindings.8-0
+	vem.bindings.8-1
 		VEM bindings files for use with pigi
 lib.ARCH/
 	interpmain.o
@@ -60,8 +65,6 @@ lib.ARCH/
 		The "Ptolemy kernel" library
 	libpigi.a
 		Library routines for Pigi
-	libcapsim.a, libbl.a, libblstar.a, libblsub.a
-		Libraries for the CAPSIM environment
 makefile
 	The top level makefile for Ptolemy -- it builds everything
 obj.ARCH/
@@ -92,14 +95,15 @@ domains/
 	de/
 	sdf/
 		Support for DDF, DE, SDF domains (see below)
-	capsim/
-		Support for running CAPSIM under Ptolemy
-	mq/
-		The message queue domain (not done yet)
+	Other experimental domains (with the same structure)
+	may live here as well.
+
 	makefile
 		Makefile for domain support
 example/
 	Example of how the user can make a customized interpreter
+filters/
+	Some filter design programs
 interp/
 	Stuff to build the interpreter with
 kernel/
@@ -112,8 +116,6 @@ pigiRpc/
 	Sources for pigi (actually, for the pigiRpc program)
 preproc/
 	The Ptolemy language preprocessor
-tests/
-	Tests of the Ptolemy kernel (and some SDF)
 xgraph/
 	The xgraph program
 
@@ -123,11 +125,15 @@ That directory has the following structure:
 demo/
 	Pigi demos for the domain
 doc/
-	Documentation for the domain
+	Documentation for the domain, with subdirectories:
+	demos/
+		Documents demos for the domain
+	stars/
+		Documents stars in the doman.
 icons/
 	Pigi icons for stars in the domain
 kernel/
-	Enhancements to the kernel to support the domain (sources and
+	Extensions to the kernel to support the domain (sources and
 	include files)
 makefile
 	makefile; makes stuff in kernel/ and stars/
