@@ -8,8 +8,8 @@ $Id$
  Programmer:  Soonhoi Ha
  Date of creation: 5/30/90
 
- Revised 10/2/90 -- DERepeatStar and DEPriorityStar now have their
- own .h files.
+ Revised 10/2/90 -- DERepeatStar now have its own .h files.
+ Revised 11/6/90 -- add two properties : depth, delayType.
 
 *******************************************************************/
 #ifndef _DEStar_h
@@ -29,6 +29,15 @@ class PriorityQueue;
 	////////////////////////////////////
 
 class DEStar : public Star {
+friend class DEScheduler;
+protected:
+	// Flag to indicate whether it is a delay-type star or not.
+	// If a star simulates the latency, it is called delay-type.
+	// Examples : Delay, UniDelay, Server, etc...
+	// The proper place to set this flag will be "constructor".
+	// For wormhole case, it is set in the start() method depending on
+	// whether the inside domain is timed or untimed.
+	int delayType;
 
 public:
 	// initialize domain-specific members
@@ -60,6 +69,14 @@ public:
 	// initialize().
 	PriorityQueue *eventQ;
 
+	// The depth is the longest path from a star to any terminating star.
+	// Terminating stars are those that have no output PortHoles, or
+	// delay-type Stars, or those that are connected to the output
+	// of the Wormhole.  To use depth as a fineLevel for PriorityQueue,
+	// we do sign-reversal : depth = - longest path.  Therefore,
+	// stars with smallest depth has the highest priority for scheduling
+	// at the same global time.
+ 	int depth;
 };
 
 #endif
