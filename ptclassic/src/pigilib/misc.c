@@ -75,7 +75,7 @@ long userOptionWord;
 	      inst = {OCT_UNDEFINED_OBJECT, 0},
 	      facet = {OCT_UNDEFINED_OBJECT, 0};
     vemStatus status;
-    char *fullName, codeFile[512], domain[64], *base, *period;
+    char *fullName, codeFile[512], domain[64];
 
     ViInit("Man");
     ErrClear();
@@ -111,8 +111,9 @@ long userOptionWord;
                     ViDone();
                 }
 
-                Tcl_VarEval ("::tycho::EditPtlang::gendoc ",
-                        codeFile, (char*) NULL);
+                TCL_CATCH_ERR( Tcl_VarEval (ptkInterp,
+                        "::tycho::EditPtlang::gendoc ",
+                        codeFile, (char*) NULL) );
             } else {
                 PrintErr("The Man command is currently only supported for Stars.");
                 ViDone();
