@@ -80,26 +80,22 @@ will be stored there after the run has completed.
 		addInclude("<stdio.h>");
 	}
 	go {
-		gencode(bodyDecl);
-		gencode(update1);
-		gencode(CodeBlock("\t{\n"));
-		gencode(update2);
-		gencode(CodeBlock("\t}\n"));
-		filterBody();		// from FIR
+		gencode(bodyDecl);	// from FIR
+		gencode(update);
+		gencode(body);		// from FIR
 	}
 
-   codeblock(update1) {
+   codeblock(update) {
 	int ix;
 	/* First update the taps */
 	double e = $ref(error);
-	int index = $val(errorDelay)*$val(decimation) + $val(decimationPhase);
+	int index = $val(decimation) - 1 - $val(errorDelay)*$val(decimation) - $val(decimationPhase);
 
-	for (ix = 0; ix < $val(tapSize); ix++) 
-   }
-   codeblock(update2) {
+	for (ix = 0; ix < $val(tapSize); ix++) {
 		$ref2(taps,ix) = $ref2(taps,ix) +
 			e * $ref2(signalIn,index) * $val(stepSize);
-		index++;
+		index--;
+	}
    }
 
 	wrapup {
@@ -114,12 +110,13 @@ will be stored there after the run has completed.
    codeblock(save) {
     FILE* fp;
     int i;
-    if (!(fp = fopen(saveFileName,"w"))) 
+    if (!(fp = fopen(saveFileName,"w"))) {
 	/* File cannot be opened */
 	fprintf(stderr,"ERROR: Cannot open saveTapsFile for writing:\n");
-    if (!fp) exit(1);
+    	exit(1);
+    }
     for (i = 0; i < $val(tapSize); i++)
 	fprintf(fp, "%d %g\n", i, $ref2(taps,i));
     fclose(fp);
-    }
+   }
 }
