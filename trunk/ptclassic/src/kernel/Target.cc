@@ -111,9 +111,9 @@ int Target::galaxySetup() {
 // do I support a given star
 int Target :: support(Star* star) {
     // First check for target supported stars
-    int supportFlag = NULL;
+    int supportFlag = (int)NULL;
     StringListIter types(starTypes);
-    const char* starType;
+    const char* starType = (const char*)NULL;
     while (!supportFlag && ((starType = types++) != 0))
 	supportFlag = star->isA(starType);
 
@@ -127,7 +127,7 @@ int Target :: support(Star* star) {
 	    return FALSE;
 	}
 	StringListIter subdomains(dom->subDomains);
-	const char* sub;
+	const char* sub = (const char *)NULL;
 	while (!supportFlag && ((sub = subdomains++) != 0))
 	    supportFlag = (strcmp(sub,star->domain()) == 0);
     }
