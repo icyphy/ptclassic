@@ -955,24 +955,24 @@ KcCatchSignals() {
 
 ///////////////////////////////////////////////////////////////////////
 // functions for enabling and disabling the run-time Tk event loop
-extern "C" void processEvents(Star*, const char*);
+extern int runEventsOnTimer();
 
-static SimAction* saveAction = 0;
+static int EventLoopState = FALSE;
 
 extern "C" int KcEventLoopActive() {
-	return (saveAction != 0);
+	return (EventLoopState);
 }
 
 extern "C" void KcSetEventLoop(int on) {
-	if (on) {
-	    if (!saveAction)
-		saveAction = SimControl::registerAction(processEvents,0);
-	}
-	else if (saveAction) {
-		SimControl::cancel(saveAction);
-		saveAction = 0;
-	}
+        if (on) {
+            SimControl::setPollAction(runEventsOnTimer);
+	    EventLoopState = TRUE;
+        } else {
+            SimControl::setPollAction(NULL);
+	    EventLoopState = FALSE;
+        }
 }
+
 
 ///////////////////////////////////////////////////////////////////////
 // interface to hashstring function.
