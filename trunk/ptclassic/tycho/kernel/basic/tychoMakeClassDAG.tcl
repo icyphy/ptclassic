@@ -48,12 +48,17 @@ source $TYCHO/kernel/Path.tcl
 proc tychoMkClassGraph {name filename args} {
     set entries {}
     set retval {}
+    set classexp "\n\[ \t\]*class\[ \t\]+(\[^\{ \t\n\]*)"
+    set inheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^\n\]*)"
+    set procexp "\n\[ \t\]*proc\[ \t\]+"
+    set nonClassFileList {}
+
     foreach file $args {
 	if {$file == {} } {
 	    continue
 	}
 	set ffn [::tycho::expandPath $file]
-        if ![file readable $ffn] {
+        if {![file readable $ffn] || [file isdirectory $ffn]} {
             continue
         }
 	set fd [open $ffn r]
@@ -61,9 +66,6 @@ proc tychoMkClassGraph {name filename args} {
             error "Error while reading $file:\n$errMsg"
         }
 	close $fd
-
-	set classexp "\n\[ \t\]*class\[ \t\]+(\[^\{ \t\n\]*)"
-	set inheritexp "\n\[ \t\]*inherit\[ \t\]+(\[^\n\]*)"
 
         set nm {}
 	set classEnd 0
@@ -136,6 +138,15 @@ proc tychoMkClassGraph {name filename args} {
 		}
 	    }
         }
+	if {$classEnd == 0 } {
+	    # If we are here, then this file does not define a class,
+	    # so we check to see if it defines any procs.  If it does
+	    # we add it to the list of files that define procs but not classes.
+	    
+	    if {[regexp $procexp $contents] != 0} {
+		lappend nonClassFileList $file
+	    }
+	}
     }
         
     set fd [open $filename w]
@@ -161,6 +172,45 @@ proc tychoMkClassGraph {name filename args} {
 
         puts $fd "\{add $nm \{label \{$sname\} altlink \{$classfile($nm) \{$rxp\}\} link \{$htmlfile \{\}\}\} \{$pnt\}\}"
     }
+
+    # Dump the files that don't define classes, but do define procs
+
+    # Build the parent node
+    puts $fd "\{add nonClassFilesNode \{label \{Non-Class Files\} \} \{\}\}"
+    set pnt "nonClassFilesNode"
+
+    # Traverse the list, and determine what directories have non-class files
+    # in them.  Then create child nodes with the directory names.
+
+    set nonClassDirectory(dummy) dummy
+    foreach nonClassFile [lsort $nonClassFileList] {
+	set dirname [file dirname $nonClassFile]
+	if ![info exists nonClassDirectory($dirname)] {
+	    set label [::tycho::simplifyPath $dirname]
+	    # If the label is more than 32 chars, only print out the last 32
+	    if {[string length $label] > 32} {
+		set label "...[string range $label \
+			[expr {[string length $label]-32}] end]"
+	    }
+	    puts $fd "\{add \{$label\} \{label \{$label\} \} \{$pnt\}\}"
+	    set nonClassDirectory($dirname) "$label"
+	}
+    }
+
+    foreach nonClassFile [lsort $nonClassFileList] {
+	set nm [file tail [file rootname $nonClassFile]]
+	set sname $nm
+	set path [file split $nonClassFile]
+	set htmlfile [join [lreplace [split [lindex $path end] .] \
+		end end "html"] .]
+	set htmlfile [eval file join \
+		[lreplace $path end end doc codeDoc $htmlfile]]
+	set dirname [file dirname $nonClassFile]
+	puts $fd "\{add $nm \{label \{$sname\} altlink \{$nonClassFile \{\}\} link \{$htmlfile \{\}\}\} \{$nonClassDirectory($dirname)\}\}"
+	# Save the current node in the slot for the current directory.
+	# This makes the class diagram much wider
+	#set nonClassDirectory($dirname) $nm
+    }
     close $fd
     return $retval
 }
@@ -180,11 +230,14 @@ proc tychoStandardDAG {} {
             [file join editors slate] \
             [file join typt editors ] \
             [file join typt kernel ] \
+            [file join lib idx ] \
             [file join lib tydoc ] \
+            [file join lib util ] \
+            [file join lib widgets ] \
     ]
 
     foreach dir $dirs {
-        eval lappend files [glob [file join $dir {*.itcl}]]
+        eval lappend files [glob [file join $dir {{*.itcl,*.tcl,*.tk,*.itk}}]]
     }
     foreach file $files {
         lappend filesenv [file join "\$TYCHO" $file]
