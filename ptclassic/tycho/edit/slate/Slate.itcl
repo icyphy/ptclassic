@@ -1091,7 +1091,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
 	} else {
 	    # If we can't get it from the item class, then get it
 	    # from the shape class
-	    return ::tycho::As[capitalize $shape]::$method
+	    return ::tycho::[capitalize $shape]::$method
 	}
     }
 }
