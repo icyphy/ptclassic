@@ -1,6 +1,6 @@
 # Procedure to make an index to a set of HTML documents.
 #
-# @Author: Edward A. Lee
+# @Authors: Edward A. Lee, Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -76,17 +76,61 @@ proc tychoMkIndex {name filename args} {
 #### tychoFindAllHTML
 # Search the current directory and recursively all subdirectories
 # for files with the extension .html, and return a list of all the file
-# names relative to the current directory.
+# names relative to the current directory.  Note that we skip
+# html files in the codeDoc directory.
 #
-proc tychoFindAllHTML {} {
+# Note that we don't cd down into directories and then cd back up
+# because if we do, and the directory is a link, we end up somewhere
+# else.
+#
+proc tychoFindAllHTML { {dirname .} {depth 0}} {
+    cd $dirname
     set files [glob -nocomplain {*.html}]
     foreach name [exec ls] {
 	if [file isdirectory $name] {
-	    # Skip SCCS and RCS directories and anything called "junk"
-	    if {$name != {SCCS} && $name != {RCS} && $name != {junk} } {
-		cd $name
-		set subfiles [tychoFindAllHTML]
-		cd ..
+	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
+	    if {$name != {SCCS} && \
+		    $name != {RCS} && \
+		    $name != {adm} && \
+		    $name != {test} && \
+		    $name != {codeDoc} && \
+		    $name != {junk} } {
+		set subfiles [tychoFindAllHTML $dirname/$name \
+			[expr $depth + 1]]
+		cd $dirname
+		foreach file $subfiles {
+		    lappend files "$name/$file"
+		}
+	    }
+	}
+    }
+    return $files
+}
+
+#### tychoFindCodeDocHTML
+# Search the current directory and recursively all subdirectories
+# for files with the extension .html, and return a list of all the file
+# names relative to the current directory.  We only return html files in
+# the codeDoc directory.
+#
+# Note that we don't cd down into directories and then cd back up
+# because if we do, and the directory is a link, we end up somewhere
+# else.
+#
+proc tychoFindCodeDocHTML { {dirname .} {depth 0}} {
+    cd $dirname
+    set files [glob -nocomplain {codeDoc/*.html}]
+    foreach name [exec ls] {
+	if [file isdirectory $name] {
+	    # Skip SCCS, RCS, adm, test directories and anything called "junk"
+	    if {$name != {SCCS} && \
+		    $name != {RCS} && \
+		    $name != {adm} && \
+		    $name != {test} && \
+		    $name != {junk} } {
+		set subfiles [tychoFindCodeDocHTML $dirname/$name \
+			[expr $depth + 1]]
+		cd $dirname
 		foreach file $subfiles {
 		    lappend files "$name/$file"
 		}
@@ -106,9 +150,27 @@ proc tychoStandardIndex {} {
     set olddir [pwd]
     cd $TYCHO
 
-    set files [tychoFindAllHTML]
+    set files [tychoFindAllHTML $TYCHO]
     # cd back in case we have followed links in tychoFindAllHTML
     cd $TYCHO
     eval tychoMkIndex {{Tycho index}} tycho.idx $files
+    cd $olddir
+}
+
+#### tychoCodeDocIndex
+# Update the Tycho code index.
+# All files in the codeDoc directories with the extension .html in the
+# tree rooted at the environment.
+# variable TYCHO are included.
+#
+proc tychoCodeDocIndex {} {
+    global TYCHO
+    set olddir [pwd]
+    cd $TYCHO
+
+    set files [tychoFindCodeDocHTML $TYCHO]
+    # cd back in case we have followed links in tychoFindAllHTML
+    cd $TYCHO
+    eval tychoMkIndex {{Tycho Itcl Code Index}} codeDoc.idx $files
     cd $olddir
 }
