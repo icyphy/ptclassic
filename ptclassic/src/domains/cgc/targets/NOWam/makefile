@@ -10,6 +10,9 @@
 # (through the symbolic link) -- that way a separate directory containing,
 # say, Sun-3 and Sun-4 objects can be maintained.
 
+# subdomain.mk reads MYVPATH
+MYVPATH = ../../../../../../
+
 include ../../../../../mk/subdomain.mk
 
 DIRS = NOWam libudpam
