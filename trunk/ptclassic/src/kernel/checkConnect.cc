@@ -48,11 +48,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "GalIter.h"
 #include "checkConnect.h"
 
+// The maximum number of 'not connected' errors we will display
+// If this number is too large, then we won't see the message
+// at the end about the total number of errors, as the
+// error messages get truncated in the log.
+#define MAX_NOT_CONNECTED_ERRORS 10
+
 // checkConnect checks a Galaxy to see if it is completely connected.
 StringList checkConnect(Galaxy& g) {
 	GalStarIter next(g);
 	StringList msg;
-
+	int errorCount = 0;
 	// iterate over every star to make sure each is connected
 	Star* s;
 	while ((s = next++) != 0) {
@@ -63,11 +69,18 @@ StringList checkConnect(Galaxy& g) {
 		PortHole* p;
 		while ((p = nextp++) != 0) {
 			if (!p->far()) {
-				msg += p->fullName();
-				msg += " is not connected\n";
-				Error::mark(*p->parent());
+			        if (errorCount++ < MAX_NOT_CONNECTED_ERRORS) {
+				    msg += p->fullName();
+				    msg += " is not connected\n";
+				    Error::mark(*p->parent());
+				} 
 			}
 		}
+	}
+	if (errorCount > MAX_NOT_CONNECTED_ERRORS) {
+	  msg << "Saw " << errorCount << " `not connected' errors, "
+	    << "but only marked the first " << MAX_NOT_CONNECTED_ERRORS
+	    << " errors.";
 	}
 	return msg;
 }
