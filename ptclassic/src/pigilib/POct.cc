@@ -307,12 +307,13 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
     pListp->dynamic_memory = 0;
     pListp->flat_plist_flag = FALSE;
 
-    if (strcmp(parameterList, "NIL") == 0) {
+    if (parameterList == 0 || *parameterList == 0 ||
+        strcmp(parameterList, "NIL") == 0) {
         return TRUE;
     }
 
-    int aC;
-    char **aV;
+    int aC = 0;
+    char** aV = 0;
     if (Tcl_SplitList(interp, parameterList, &aC, &aV) != TCL_OK) {
 	Error::error("Cannot parse parameter list: ", parameterList); 
 	return FALSE;
@@ -322,21 +323,20 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
     pListp->array = new ParamType[aC];
 
     int ErrorFound = FALSE;
-    ParamType *pElement;
-    for (int i=0; i< pListp->length; i++) {
+    for (int i = 0; i < pListp->length; i++) {
 
-        int Element_aC;
-        char **Element_aV;
+        int Element_aC = 0;
+        char** Element_aV = 0;
         if (Tcl_SplitList(interp, aV[i], &Element_aC, &Element_aV) != TCL_OK) {
             Error::error("Error in parsing parameter list element: ", aV[i]);
             // Keep going, and then clear it all out of memory when done.
             ErrorFound = TRUE;
         }
 
-        pElement = &pListp->array[i];
+        ParamType* pElement = &pListp->array[i];
         if (Element_aC != 3 ){
-            Error::error("Parameter list element ", aV[i], 
-                         " does not have 3 elements.");
+           Error::error("Parameter list element ", aV[i], 
+                        " does not have 3 elements.");
            ErrorFound = TRUE;
            pElement->name = NULL;
            pElement->type = NULL;
@@ -355,15 +355,16 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
     // Free the memory used by aV as it is no longer needed
     // Only a single call to free is needed (see Ousterhout, p. 317)
     free((char *) aV);
+    aV = 0;
+    aC = 0;
 
     // If an error was encountered while parsing the list, free pList
     // and return FALSE
     if (ErrorFound) {
         DeletePList(pListp);
         return FALSE;
-    } else {
-        return TRUE;
     }
+    return TRUE;
 }
 
 
@@ -586,13 +587,15 @@ int POct::ptkSetParams (int aC, char** aV) {
                                  " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
             }
-        } else {
+        }
+	else {
             ErrorFound = TRUE;
             Tcl_AppendResult(interp,
                              "Not a Star, Galaxy, Universe.",
                              (char *) NULL);
         }
-    } else {
+    }
+    else {
         // There was a valid instance passed
         octObjectClass instance;
         if (!ptkHandle2OctObj(aV[2], instance)) {
@@ -601,8 +604,7 @@ int POct::ptkSetParams (int aC, char** aV) {
             Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
 			     aV[0], (char *) NULL);
         }
-
-        if ( IsDelay(instance) || IsDelay2(instance)) {
+        else if ( IsDelay(instance) || IsDelay2(instance)) {
             // Set Delay Parameters from the pList
             if (SetDelayParams(instance, &pList) == 0) {
                 ErrorFound = TRUE;
@@ -610,7 +612,8 @@ int POct::ptkSetParams (int aC, char** aV) {
 				 " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
             }
-        } else if (IsBus(instance)) {
+        }
+	else if (IsBus(instance)) {
             // Set Bus Parameters from the pList
             if (SetBusParams(instance, &pList) == 0) {
                 ErrorFound = TRUE;
@@ -619,7 +622,8 @@ int POct::ptkSetParams (int aC, char** aV) {
                                  ErrGet(), (char *) NULL);
             }
 
-        } else if (IsGal(instance) || IsStar(instance)) {
+        }
+	else if (IsGal(instance) || IsStar(instance)) {
             // Must be a star or Galaxy
 	    // Set the domain to be that of the instance
 	    if (!setCurDomainInst(instance)) {
@@ -633,7 +637,8 @@ int POct::ptkSetParams (int aC, char** aV) {
                                  " Could not save parameters to Oct. ",
                                  ErrGet(), (char *) NULL);
             }
-        } else {
+        }
+	else {
             ErrorFound = TRUE;
             Tcl_AppendResult(interp, 
                              "Not a star, galaxy, bus, or delay instance.",
@@ -1014,7 +1019,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
     }
 
     // Read domain from facet
-    const char *domain;		// not dynamic memory: returned via HashString
+    const char* domain = 0;	// not dynamic memory: returned via HashString
     if (!GOCDomainProp(facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
         return TCL_ERROR;
@@ -1068,8 +1073,9 @@ int POct::ptkSetDomain (int aC, char** aV) {
     octObjectClass facet;
 
     // Error checking: number of arguments, oct facet file
-    if (aC != 3) return
-      usage ("ptkSetDomain <OctObjectHandle> <DomainName>");
+    if (aC != 3) {
+	return usage ("ptkSetDomain <OctObjectHandle> <DomainName>");
+    }
     if (!ptkHandle2OctObj(aV[1], facet)) {
         Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
                          (char *) NULL);
