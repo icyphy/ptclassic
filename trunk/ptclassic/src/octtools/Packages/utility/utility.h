@@ -27,6 +27,20 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 */
++ 
+#ifdef PTSVR4
+/* 
+* Yeah, this is ugly, but it's the only way to keep
+* /usr/X/include/X11/memutil.h from overriding them. 
+*/
+
+#define REALLOC(type, obj, num)	\
+    (obj) ? ((type *) realloc((char *) obj, sizeof(type) * (num))) : \
+	    ((type *) malloc(sizeof(type) * (num)))
+#define FREE(obj)		\
+    if ((obj)) { (void) free((char *) (obj)); (obj) = 0; }
+#endif /* PTSVR4 */
+
 #ifndef UTILITY_H
 #define UTILITY_H
 
