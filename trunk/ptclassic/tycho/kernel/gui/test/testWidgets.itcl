@@ -247,3 +247,19 @@ test YesNoQuery-1.1 {Test YesNoQuery} {
     list {Done}
 } {Done}
 
+test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
+    set TY_TEST_SCRIPT {
+        %0 invoke yes
+        unset TY_TEST_SCRIPT
+    }
+    ::tycho::askuser "Are you awake?"
+} 1
+
+test YesNoQuery-2.2 {Test the modal ::tycho::askuser proc} {
+    set TY_TEST_SCRIPT {
+        %0 invoke no
+        unset TY_TEST_SCRIPT
+    }
+    ::tycho::askuser "Are you awake?"
+} 0
+
