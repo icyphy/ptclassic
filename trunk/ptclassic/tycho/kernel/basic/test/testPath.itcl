@@ -73,4 +73,44 @@ test Path-1.3 { tilde expand a user that does exist (Unix only)} {
     list $rootHome
 } {/etc/passwd}
 
+test Path-2.1 { Test out uniqueFileName } {
+    set file1 [::tycho::uniqueFileName]
+    set file2 [::tycho::uniqueFileName]
+    set file3 [::tycho::uniqueFileName myfile]
+    set file4 [::tycho::uniqueFileName myfile]
+    set file5 [::tycho::uniqueFileName myfile .itcl]
+    set file6 [::tycho::uniqueFileName myfile .itcl]
+    list [expr {$file1 == $file2}] [expr {$file3 == $file4}] \
+	    [expr {$file5 == $file6}]
+} {0 0 0}
+
+test Path-2.2 { Test out tmpFileName } {
+    set file1 [::tycho::tmpFileName]
+    set file2 [::tycho::tmpFileName]
+    set file3 [::tycho::tmpFileName myfile]
+    set file4 [::tycho::tmpFileName myfile]
+    set file5 [::tycho::uniqueFileName myfile .itcl]
+    set file6 [::tycho::uniqueFileName myfile .itcl]
+    if [info exists env(TMPDIR)] {
+	set oldTMPDIR $env(TMPDIR)
+    }
+    set env(TMPDIR) $env(HOME)
+    set file7 [::tycho::tmpFileName]
+    set file8 [::tycho::tmpFileName]
+    if [info exists env(TMPDIR)] {
+	set env(TMPDIR) $oldTMPDIR
+    }
+
+    list [expr {$file1 == $file2}] [expr {$file3 == $file4}] \
+	    [expr {$file5 == $file6}] [expr {$file7 == $file8}]
+} {0 0 0 0}
+
+test Path-3.1 {Test out mkdir and rm} {
+    set myTmpDir [::tycho::tmpFileName myTmpDir .dir]
+    ::tycho::mkdir  $myTmpDir
+    set shouldExist [file isdirectory $myTmpDir]
+    ::tycho::rm -rf $myTmpDir
+    set shouldNotExist [file isdirectory $myTmpDir]
+    list $shouldExist $shouldNotExist
+} {1 0}
 doneTests
