@@ -606,7 +606,11 @@ body ::tycho::SmartLine::_construct {id canvas slate tags args} {
 #### construct
 #
 body ::tycho::SmartLine::construct {id canvas slate tags args} {
-    ::tycho::getalloptions options args
+    # Split coordinates and options
+    if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
+	set options [lrange $args $t end]
+	set args [lreplace $args $t end]
+    }
 
     # Initialize the options
     foreach {opt val} [concat [array get optiondefault] $options] {

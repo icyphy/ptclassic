@@ -285,7 +285,11 @@ body ::tycho::LabeledLine::_text {id canvas slate text} {
 #### construct
 #
 body ::tycho::LabeledLine::construct {id canvas slate tags args} {
-    ::tycho::getalloptions options args
+    # Split coordinates and options
+    if { [set t [lsearch -glob $args {-[a-zA-Z]*}]] != -1 } {
+	set options [lrange $args $t end]
+	set args [lreplace $args $t end]
+    }
 
     # Initialize the options
     foreach {opt val} [concat [array get optiondefault] $options] {

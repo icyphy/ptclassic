@@ -2,7 +2,7 @@
 # @Version: $Id$
 # @Author: H. John Reekie
 #
-# @Copyright (c) 1996-%Q% The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -111,7 +111,6 @@
 # </ul>
 #
 class ::tycho::Interactor {
-    inherit ::tycho::Object
 
     constructor {} {}
     destructor {}
@@ -199,9 +198,6 @@ class ::tycho::Interactor {
 
     # The tags or items to which this item has been bound and arguments
     protected variable _bindings
-
-    # The tags unbound from items
-    protected variable _debound
 
     # The canvas on which this interactor resides.
     protected variable canvas ""
