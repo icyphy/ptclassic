@@ -90,7 +90,13 @@ MATLABLIBDIR =
 # Used by xv
 #XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL =
-XV_CC =		gcc -traditional
+
+# -DATT is needed so we don't try and include sys/dir.h
+XV_CC =		gcc -traditional -I/usr/openwin/include -L/usr/openwin/lib \
+		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY
+XV_RAND = 	-DNO_RANDOM
+
+# Under sol2, xmkmf is not compatible with gcc, so we don't use it
 XMKMF =		/usr/openwin/bin/xmkmf
 
 # Used by tcltk to build the X pixmap extension
