@@ -34,7 +34,7 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/typt/editors
+VPATH =		$(ROOT)/typt/edit
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
