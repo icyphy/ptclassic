@@ -177,47 +177,41 @@ void CGMultiTarget::setup() {
     }
 }
 
-int recursiveModifyGalaxy(Galaxy& gal) {
-    GalStarIter nextStar(gal);
-    CGStar* s;
-    while ((s = (CGStar*)nextStar++) != 0) {
-	if (s->isItWormhole()) {
-	    Target* innerTarget = s->asWormhole()->myTarget();
-	    if (!innerTarget->isA("CGTarget")) continue;
-	    CGTarget* cgTarget = (CGTarget*) innerTarget;
-	    Galaxy& innerGalaxy = s->asWormhole()->insideGalaxy();
-	    cgTarget->setGalaxy(innerGalaxy);
-	    if (!cgTarget->modifyGalaxy()) return FALSE;
- 	    cgTarget->clearGalaxy();
-	    if (!recursiveModifyGalaxy(innerGalaxy)) return FALSE;
-	}
-    }
-    return TRUE;
-}
-
-class DummyGalaxy:public Galaxy {
-public:
-    DummyGalaxy(Galaxy& g):gal(g) {};
-    /*virtual*/ const char* domain() const {return gal.domain();}
-private:	
-    Galaxy& gal;
-};
-
-int CGMultiTarget::modifyGalaxy() {
+int CGMultiTarget::recursiveModifyGalaxy(Galaxy& gal) {
+    if (SimControl::haltRequested()) return FALSE;
+    
     StringList topStarType;
-    topStarType << galaxy()->domain() << "Star";
+    topStarType << gal.domain() << "Star";
     int i;
-    for (i = 0 ; i < nProcs() ; i++) {
+    for (i = 0 ; i < nChildrenAlloc ; i++) {
 	if (strcmp(child(i)->starType(),topStarType) == 0) {
 	    if (cgChild(i)) {
-		cgChild(i)->setGalaxy(*galaxy());
-		galaxy()->setTarget(cgChild(i));
+		cgChild(i)->setGalaxy(gal);
+		gal.setTarget(cgChild(i));
 		if (!cgChild(i)->modifyGalaxy()) return FALSE;
 		cgChild(i)->clearGalaxy();
 		break;
 	    }
 	}
     }
+    if (i == nChildrenAlloc) {
+	Error::abortRun(*this,"Could not find child target to modify "
+			"the galaxy named: ", gal.name());
+    }
+    
+    GalStarIter nextStar(gal);
+    CGStar* s;
+    while ((s = (CGStar*)nextStar++) != 0) {
+	if (s->isItWormhole()) {
+	    Galaxy& innerGalaxy = s->asWormhole()->insideGalaxy();
+	    if (!recursiveModifyGalaxy(innerGalaxy)) return FALSE;
+	}
+    }
+    return TRUE;
+}
+
+int CGMultiTarget::modifyGalaxy() {
+    if (!galaxy()) return FALSE;
     return recursiveModifyGalaxy(*galaxy());
 }
 
