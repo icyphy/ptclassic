@@ -560,7 +560,10 @@ int CGCTarget :: allocateMemory() {
 	setupForkDests(g);
 	
 	int statBuf = useStaticBuffering();
-	if (int(loopingLevel)) statBuf = 0;
+	const char* loopLevel = (const char*)(loopingLevel);
+	if (!(strcasecmp(loopLevel,"DEF")==0 || strcmp(loopLevel,"0")==0 ||
+	     strcasecmp(loopLevel,"NO") == 0))
+	  statBuf = 0;
 
 	// (1) determine the buffer size
 	GalStarIter nextStar(g);
