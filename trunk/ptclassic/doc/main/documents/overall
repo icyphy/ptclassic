@@ -75,6 +75,19 @@ For instance, to print the whole manual,
 .)c
 As of this writing, you must have write permission in
 the doc subdirectories for this to work.
+To print only section 1 of the manual, which contains this section,
+.(c
+% cd ~ptolemy/doc/main
+% make print
+.)c
+You can pass options to ditroff.  For instance, suppose you wish
+to print only pages 48 through the end of section 1.
+Then use
+.(c
+make OPTIONS=-o48- print
+.)c
+Any set of ditroff options may be passed this way.
+.IE "ditroff options"
 To print only the pigi document,
 .(c
 % cd ~ptolemy/doc/main/pigi
@@ -297,7 +310,7 @@ In both cases, the syntax of the document source files is as follows:
 	Short descriptor
 	.SE
 	.SV %\&I\&% "date"
-	.AL "Author list, separated by commas, terminated with a period."
+	.AL "Author list, with commas, and a period."
 	.LO "Location of the galaxy or demo definition"
 	.LD
 	Long descriptor.
@@ -437,7 +450,8 @@ as in the following example:
 .)c
 .H2 "Restricted filenames in domain documents"
 .pp
-The following filenames have special functions, as explained above:
+The following filenames in an XXX/doc directory,
+where XXX is the domain directory, have special functions, as explained above:
 .(c
 index
 title
