@@ -71,7 +71,7 @@ octObject *facetPtr, *instPtr;
     for (i = 0; i < pList.length; i++) {
 	items[i].itemPrompt = place->name;
 	items[i].rows = 1;
-	items[i].cols = 100;
+	items[i].cols = dmWidth;
 	items[i].value = place->value;
 	items[i].userData = NULL;
 	place++;
@@ -343,7 +343,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    static dmTextItem item = {"Comment", 1, 100, NULL, NULL};
+    static dmTextItem item = {"Comment", 1, 80, NULL, NULL};
     char *comment;
     octObject facet, obj;
     vemStatus status;
