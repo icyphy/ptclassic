@@ -532,7 +532,7 @@ verticalScale(fullScale, interp, argc, argv)
     int argc;
     char **argv;
 {
-    float temp;
+    double temp;
     if(sscanf(argv[1], "%4f", &temp) != 1) {
 	errorReport("Cannot reset full scale in bar chart");
 	return TCL_ERROR;
