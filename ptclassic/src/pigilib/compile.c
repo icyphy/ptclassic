@@ -1028,7 +1028,8 @@ octObject *galFacetPtr;
     }
 
     /* We have to compile, so log it */
-    if (strcmp(oldDomain,galDomain) != 0)
+    if (strcmp(oldDomain, galDomain) != 0 ||
+	(galTarget && strcmp(galTarget, "<parent>") != 0))
 	sprintf(msg, "CompileGal: facet = %s, %s inside %s wormhole",
 		name, galDomain, oldDomain);
     else sprintf(msg, "CompileGal: facet = %s, %s galaxy", name, galDomain);
@@ -1083,7 +1084,7 @@ octObject *facetPtr;
 	PrintErr(msg);
 	return FALSE;
     }
-    sprintf(msg, "reset\ndomain %s\n", domain);
+    sprintf(msg, "reset ___empty___\ndomain %s\n", domain);
     KcLog(msg);
     TCL_CATCH_ERR1(Tcl_Eval(ptkInterp, msg));
 
