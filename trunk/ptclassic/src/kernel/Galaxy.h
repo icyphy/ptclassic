@@ -89,6 +89,7 @@ protected:
 
 	// class identification
 	int isA(const char*) const;
+	const char* readClassName() const {return "Galaxy";}
 public:
 
 	// Constructor
@@ -101,6 +102,9 @@ public:
 	// redefine initialize; they should write a start() method
 	// to do any class-specific startup.
 	void initialize();
+
+	// system wrapup method.  Recursively calls wrapup in subsystems
+	void wrapup();
 
         // Define States of component Blocks by States of this Block
         void stateAlias(Block& b, char* stateName, char* expression)  {
