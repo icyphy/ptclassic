@@ -4,7 +4,7 @@ defstar {
 	derivedFrom { Chop }
 	author { S. Ha }
 	version { $Id$ }
-	location { CGC control palette }
+	location { CGC main library }
 	copyright { 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
