@@ -188,20 +188,27 @@ otpXlateParams( octObject *pInst, char *instName, OTPFacetType which,
 	    /*Tcl_DStringAppendEls(pStr,"trysetstate", instName, stateName,
 	      stateVal, NULL); */
 	    Tcl_DStringAppends(pStr,"<property name=\"", stateName, "\"\n",
+                    "\t          class=\"ptolemy.data.expr.Parameter\"\n",
                     "\t          value=\"", stateVal, "\">\n",
-                    "\t          class=\"ptolemy.data.expr.Parameter\">\n",
                     "\t</property>",
                     NULL);
 	    break;
 	case OTP_FtGalaxy:
 	case OTP_FtUniverse:
+            /*
 	    Tcl_DStringAppendEls(pStr,"    <!-- newstate", stateName,
 	      stateType, stateVal, "-->", NULL);
+            */
+	    Tcl_DStringAppends(pStr,"<property name=\"", stateName, "\"\n",
+                    "\t          class=\"ptolemy.data.expr.Parameter\"\n",
+                    "\t          value=\"",  stateVal,  "\">\n",
+                    "\t</property>",
+                    NULL);
 	    break;
 	case OTP_FtTarget:
 	    Tcl_DStringAppends(pStr,"<property name=\"", stateName, "\"\n",
+                    "\t          class=\"ptolemy.data.expr.Parameter\"\n",
                     "\t          value=\"",  stateVal,  "\">\n",
-                    "\t          class=\"ptolemy.data.expr.Parameter\">\n",
                     "\t</property>",
                     NULL);
 	    break;
@@ -522,8 +529,23 @@ _otpXlateNet( OTPNetInfo *pInfo, Tcl_DString *pStr) {
 		  formName, "I/O nets must be scalars");
 		return OCT_ERROR;
 	    }
-	    Tcl_DStringAppendEls(pStr,"alias",
-	      formName, pFar->instName, pFar->portName, NULL);
+            /*
+	    Tcl_DStringAppendEls(pStr,"<!-- alias",
+	      formName, pFar->instName, pFar->portName, "-->", NULL);
+            */
+	  Tcl_DStringAppends(pStr, "\t<port name=\"", pFar->portName,
+                  "\" class=\"ptolemy.actor.TypedIOPort\">\n",
+                  "\t    <property name=\"", formName, "\"/>\n",
+                  "\t</port>\n", NULL);
+          
+          Tcl_DStringAppends(pStr,"<relation name=\"", pFar->portName,
+                  "\" class=\"ptolemy.actor.TypedIORelation\"></relation>\n",
+                  NULL);
+
+          Tcl_DStringAppends(pStr, "    <link port=\"",
+                  pFar->instName, ".",
+                  pFar->portName,
+                  "\" relation=\"", pInfo->netName, "\"/>\n", NULL);
 	} else {
 	    /* 1-1, no i/o connectors: use connect or busconnect */
 	    if ( pInfo->widthExpr == NULL ) {
@@ -534,8 +556,8 @@ _otpXlateNet( OTPNetInfo *pInfo, Tcl_DString *pStr) {
 		  pInfo->inPorts[0].instName, pInfo->inPorts[0].portName,
 		  pInfo->delayExpr, NULL);
                 */
-                pInfo->netName = memStrSaveFmt( "tRelation%d", (pInfo->sn)++);
-                Tcl_DStringAppends(pStr,"<relation =\"", pInfo->netName,
+                //pInfo->netName = memStrSaveFmt( "_R%d", (pInfo->sn)++);
+                Tcl_DStringAppends(pStr,"<relation name=\"", pInfo->netName,
                         "\" class=\"ptolemy.actor.TypedIORelation\"></relation>\n",
                 NULL);
 
@@ -570,8 +592,8 @@ _otpXlateNet( OTPNetInfo *pInfo, Tcl_DString *pStr) {
 	      pInfo->inPorts[0].instName, pInfo->inPorts[0].portName,
 	      pInfo->delayExpr, NULL);
             */
-            pInfo->netName = memStrSaveFmt( "tRelation%d", (pInfo->sn)++);
-            Tcl_DStringAppends(pStr,"<relation =\"", pInfo->netName,
+            //pInfo->netName = memStrSaveFmt( "_R%d", (pInfo->sn)++);
+            Tcl_DStringAppends(pStr,"<relation name=\"", pInfo->netName,
                 "\" class=\"ptolemy.actor.TypedIORelation\"></relation>\n",
                 NULL);
             Tcl_DStringAppends(pStr, "    <link port=\"",
@@ -586,7 +608,7 @@ _otpXlateNet( OTPNetInfo *pInfo, Tcl_DString *pStr) {
     } else if ( pInfo->numIn > 1 && pInfo->numOut == 1 ) {
 	/* auto-fork the single output to all the inputs */
 	/*Tcl_DStringAppendEls(pStr,"node", pInfo->netName, NULL);*/
-	Tcl_DStringAppends(pStr,"<relation =\"", pInfo->netName,
+	Tcl_DStringAppends(pStr,"<relation name=\"", pInfo->netName,
                 "\" class=\"ptolemy.actor.TypedIORelation\"></relation>",
                 NULL);
 	for (i=0; i < pInfo->numOut; i++) {
@@ -712,6 +734,38 @@ _otpProcessMarker( OTPFacetInfo *facetInfo, octObject *pFacet,
     return OCT_OK;
 }
 
+struct starActorMap {
+    char *star;
+    char *actor;
+};
+
+typedef struct starActorMap starActorMap;
+
+/* Map old Ptolemy Classic stars to new Ptolemy II actors */
+starActorMap old2new[] = {
+    {"Add", "ptolemy.actor.lib.AddSubtract"},
+    {"Cos", "ptolemy.actor.lib.Expression"},
+    {"Gain", "ptolemy.actor.lib.Scale"},
+    {"Mpy", "ptolemy.actor.lib.MultiplyDivide"},
+    {"Ramp", "ptolemy.actor.lib.Ramp"},
+    {"Sin", "ptolemy.actor.lib.Expression"},
+    {"XYgraph", "ptolemy.actor.gui.XYPlotter"},
+};
+
+/* Given the old Ptolemy Classic star, return either then new
+ * Ptolemy II actor, or the name that was passed in
+ */
+static char *
+_otpOldStarToNewActor(char *star) {
+    int i;
+    for (i=0; i < (sizeof(old2new)/sizeof(starActorMap)); i++) {
+        if (!strcmp(star, old2new[i].star)) {
+            return old2new[i].actor;
+        }
+    }
+    return star;
+}
+
 /**
     Ptolemy allows a star or galaxy to be "subclassed" by creating
     an OCT facet that is a special case of a real star or galaxy.
@@ -767,9 +821,16 @@ _otpXlateInstBindings( char *instName, OTPFacetInfo *masterInfo,
 	 */
 	strtol(valBuf,&numericConversion,10);
 	if (valBuf != numericConversion) {
+          /*
 	  Tcl_DStringAppend(pStr,"\t",-1);
 	  Tcl_DStringAppendEls(pStr,"numports",instName,nameBuf,valBuf,NULL);
 	  Tcl_DStringAppend(pStr,"\n",-1);
+          */
+	  Tcl_DStringAppends(pStr, "\t<port name=\"", instName,
+                  "\" class=\"ptolemy.actor.TypedIOPort\">\n",
+                  "\t    <property name=\"", nameBuf, "\"/>\n",
+                  "\t    <property name=\"multiport\"/>\n",
+                  "\t</port>\n", NULL);
 	}
     }
     return OCT_OK;
@@ -814,8 +875,13 @@ otpXlateInsts( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr) {
 	  NULL);
 	Tcl_DStringAppend(pStr,"\n",-1);
         */
+
+        /* FIXME: right here is where we could map old stars to
+           new actors
+        */
+
 	Tcl_DStringAppends(pStr,"<entity name=\"", instName, "\" class=\"",
-                mInfo->starName, "\">\n", NULL);
+                _otpOldStarToNewActor(mInfo->starName), "\">\n", NULL);
 
 	if ( _otpXlateInstBindings( instName, mInfo, pStr) != OCT_OK )
 	    return OCT_ERROR;
@@ -1138,12 +1204,12 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
 
             Tcl_DStringAppends(pStr,
                     "    <director name=\"director\" class=\"ptolemy.domains.",
-                    downCaseDomain, "kernel.", pFInfo->outerDomain,
-                    ".Director\">\n",
+                    downCaseDomain, ".kernel.", pFInfo->outerDomain,
+                    "Director\">\n",
                     "\t<property name=\"iterations\"\n ",
                     "\t          class=\"ptolemy.data.expr.Parameter\"\n",
-                    "\t          value=\"",
-                    iterCntPtr, "\">\n\t</property>", NULL);
+                    "\t          value=\"", iterCntPtr, "\">\n",
+                    "\t</property>", NULL);
 	}
         /*
         Tcl_DStringAppendEls(pStr,"defgalaxy", pFInfo->facetName, NULL);
@@ -1151,7 +1217,7 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
         Tcl_DStringAppend(pStr,"\n",-1);
         */
           
-        Tcl_DStringAppendEls(pStr,"<class name=\"", pFInfo->facetName, 
+        Tcl_DStringAppends(pStr,"<class name=\"", pFInfo->facetName, 
                 "\" extends=\"ptolemy.actor.TypedCompositeActor\">", NULL);
 	break;
     case OTP_FtUniverse:
@@ -1160,7 +1226,9 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
         Tcl_DStringAppendEls(pStr,"newuniverse", pFInfo->facetName, NULL);
         Tcl_DStringAppend(pStr,"\n",-1);
         */
-        Tcl_DStringAppends(pStr,"<model name=\"", pFInfo->facetName, 
+        /* If the facet does not have a name, call it toplevel */
+        Tcl_DStringAppends(pStr,"<model name=\"",
+                strcmp(pFInfo->facetName, "") ? pFInfo->facetName : "toplevel", 
                 "\" class=\"ptolemy.actor.TypedCompositeActor\">\n", NULL);
 	break;
     case OTP_FtPalette:
@@ -1191,12 +1259,12 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
 
             Tcl_DStringAppends(pStr,
                     "    <director name=\"director\" class=\"ptolemy.domains.",
-                    downCaseDomain, "kernel.", pFInfo->curDomain,
-                    ".Director\">\n",
+                    downCaseDomain, ".kernel.", pFInfo->curDomain,
+                    "Director\">\n",
                     "\t<property name=\"iterations\"\n",
                     "\t          class=\"ptolemy.data.expr.Parameter\"\n",
-                    "\t          value=\"",
-                    iterCntPtr, "\">\n\t</property>", NULL);
+                    "\t          value=\"", iterCntPtr, "\">\n",
+                    "\t</property>", NULL);
 
 	Tcl_DStringAppend(pStr,"\n",-1);
     }
@@ -1233,6 +1301,8 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
         Tcl_DStringEndSublist(pStr);
         Tcl_DStringAppend(pStr,"\n",-1);
     }
+    /*
+     Don't run this, we get the interation at the top of the moml file
     if ( pFInfo->type == OTP_FtUniverse 
       && (pFInfo->designInfo->flags & OTP_DsgnF_Go) ) {
 	if ( _otpXlateUnivGo( pFInfo, pFacet, pStr) != OCT_OK ) {
@@ -1240,6 +1310,7 @@ _otpXlateFacetCore( OTPFacetInfo *pFInfo, octObject *pFacet, Tcl_DString *pStr){
 	    sts = OCT_ERROR;
 	}
     }
+    */
     return sts;
 }
 
@@ -1308,7 +1379,7 @@ otpXlateDesign( octObject *pFacet, int flags, Tcl_DString *pStr) {
 static char _OtpDesignProlog[] =
     "<?xml version=\"1.0\" standalone=\"no\"?>\n"
     "<!DOCTYPE model PUBLIC \"-//UC Berkeley//DTD MoML 1//EN\"\n"
-    "\"http://ptolemy.eecs.berkeley.edu/xml/dtd/MoML_1.dtd\"\n>";
+    "    \"http://ptolemy.eecs.berkeley.edu/xml/dtd/MoML_1.dtd\">\n";
 
 octStatus
 otpXlateDesignByName( char *facetName, int flags) {
