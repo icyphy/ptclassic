@@ -35,7 +35,7 @@
 #	numBars		number of bars in the bar graph
 #	barGraphWidth	width in centimeters
 #	barGraphHeight	height in centimeters
-proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
+proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight univ} {
     catch {destroy $w}
     toplevel $w
     wm title $w "$desc"
@@ -64,7 +64,7 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
     frame $w.middle -bd 10
     frame $w.low -bd 10
 
-    button $w.quit -text "QUIT" -command "destroy $w"
+    button $w.quit -text "DISMISS" -command "ptkStop $univ; destroy $w"
     pack append $w $w.msg {top fillx } \
 		$w.cntr {top fillx} \
 		$w.pf {top fill expand } \
