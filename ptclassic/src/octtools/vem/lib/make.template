@@ -66,21 +66,23 @@ BMS	= $(OCTTOOLS)/lib/vem/checkoff.bm \
 	  $(OCTTOOLS)/lib/vem/symbolic.bm
 
 # Applications defaults
-ADS	= Vem
+# Don't install the 'Vem' file, we don't use it anyway, and it
+# causes problems when extracting the tar files under NT
+ADS	= #Vem
 
-MISC_FILES =	Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm folder.bm hisetDot hisetMark hiunsetDot hiunsetMark newcell.bm other.bm physical.bm schematic.bm setDot setMark symbolic.bm unsetDot unsetMark vem.bindings
+MISC_FILES =	Vem checkoff.bm checkoffhi.bm checkon.bm checkonhi.bm folder.bm hisetDot hisetMark hiunsetDot hiunsetMark newcell.bm other.bm physical.bm schematic.bm setDot setMark symbolic.bm unsetDot unsetMark vem.bindings Vem
 
 all:
-install:  makefile $(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) $(OCTTOOLS)/lib/$(ADS)
+install:  makefile $(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem.bindings.$(VERSION) $(BMS) #$(OCTTOOLS)/lib/$(ADS)
 
 $(OCTTOOLS)/lib/vem.bindings.$(VERSION):	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem vem.bindings
 	cp vem.bindings $(OCTTOOLS)/lib/vem/vem.bindings.$(VERSION)
 
-$(OCTTOOLS)/lib/$(ADS): $(ADS)
-	cp $(ADS) $(OCTTOOLS)/lib/$(ADS)
-
-$(XAPP)/$(ADS):	$(ADS)
-	-cp $(ADS) $(XAPP)/$(ADS)
+#$(OCTTOOLS)/lib/$(ADS): $(ADS)
+#	cp $(ADS) $(OCTTOOLS)/lib/$(ADS)
+#
+#$(XAPP)/$(ADS):	$(ADS)
+#	-cp $(ADS) $(XAPP)/$(ADS)
 
 $(OCTTOOLS)/lib/vem/checkoff.bm:	$(OCTTOOLS)/lib $(OCTTOOLS)/lib/vem checkoff.bm
 	cp checkoff.bm $(OCTTOOLS)/lib/vem/checkoff.bm
