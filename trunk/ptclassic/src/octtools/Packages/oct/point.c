@@ -34,12 +34,16 @@ static char SccsId[]="$Id$";
 #include "geo.h"
 #include "io.h"
 
+#include "io_procs.h"
+
+#include "point.h"
 
 static octStatus point_read_fields(), point_write_fields(), point_bb();
 
 extern struct object_desc oct_geo_desc;
 static struct object_desc *super = &oct_geo_desc;
 
+void
 oct_point_desc_set(object_desc)
 struct object_desc *object_desc;
 {
