@@ -501,7 +501,7 @@ body ::tycho::Edit::constructor {args} {
     # it for menu traversal
     #bind $text <Alt-Key> { }
     # FIXME: should this be here, or in TopLevel or in Displayer?
-    bind all <Alt-Key> {tkTraverseToMenu %W %A;	 tkMenuUnpost {}}   
+    bind $text <Alt-Key> {tkTraverseToMenu %W %A;	 tkMenuUnpost {}}   
 
     # Bindings to highlight parenthesized regions
     bind $text <Key-parenright> \
