@@ -5,6 +5,7 @@
 #   13 characters.  Linux has this problem with GNU ar.
 # * If the name of the current directory, print out the names of any icons 
 #   that don't have contents; or schematics; 
+# * print out the names of files not in SCCS
 
 set res = 0
 set prefix = ""
@@ -19,6 +20,13 @@ foreach x ($*)
 	if (-r $x) set files = ($files $x)
 end
 
+
+# Check for files not in sccs
+if ( ! -d SCCS ) then
+	echo "No $cwd/SCCS directory"
+else
+	echo $files | checksccs 
+endif
 
 # Check for filenames that are not unique in the first 13 chars
 # gfold is GNU fold
@@ -76,8 +84,6 @@ if ( "$thisdir" == "stars" ) then
 		rm -f $badiconfile
 	endif
 endif
-
-
 
 ls . > /tmp/cj1$$
 
