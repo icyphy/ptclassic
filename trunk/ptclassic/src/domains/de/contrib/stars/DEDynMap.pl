@@ -257,8 +257,7 @@ However, we have to be careful with deleting the input-portholes of <tt>DEDynMer
 		    defarside_p = (DEPortHole *)farside_p;
 		}
 		else {
-		    Error::abortRun("Attempting to disconnect 
-			non-DE PortHole of DynMerge Star");
+		    Error::abortRun("Attempting to disconnect non-DE PortHole of DynMerge Star");
 		}
 
                 // are we fully connected?
