@@ -271,7 +271,7 @@ alltests.itcl: makefile
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
-	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; cd \"\$$savedir\"; source \$$i}}" >> $@
+	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; cd \"\$$savedir\"; if [ file exists \$$i ] {source \$$i}}}" >> $@
 	if [ "x$(GRAPHICAL_TESTS)" != "x" ]; then \
 		for x in $(GRAPHICAL_TESTS); do \
 			echo "puts stderr $$x" >> $@; \
