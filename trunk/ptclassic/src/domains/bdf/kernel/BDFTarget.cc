@@ -73,8 +73,8 @@ BDFTarget::~BDFTarget() {
 
 void BDFTarget::setup() {
 	LOG_NEW; BDFClustSched* s = new BDFClustSched(logFile,allowDynamic,
-						      requireStronglyConsistent);
+					      requireStronglyConsistent);
 	setSched(s);
-	s->schedulePeriod = schedulePeriod;
+	s->schedulePeriod = double(schedulePeriod);
 	Target::setup();
 }
