@@ -20,7 +20,7 @@ Overflow is controlled by the onOverflow state (default wrap around.
 The integrator can either be set to wrap around (default), saturate or
 reset.
 	}
-	version { $Id$ }
+	version { @(#)CG56Integrator.pl	1.3	5/21/92 }
 	author { J. Pino, ported from Gabriel }
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
