@@ -17,7 +17,7 @@ output in PGM format. Send the output to a user-specified command
 .EQ
 delim off
 .EN
-"$PTOLEMY/bin.$ARCH/xv"
+"xv"
 .EQ
 delim $$
 .EN
@@ -58,7 +58,7 @@ This star does not support frame numbers.  See ShowImg2.
   defstate {
     name { command }
     type { string }
-    default { "$PTOLEMY/bin.$ARCH/xv" }
+    default { "xv" }
     desc { Program to run on PGM data }
   }
   defstate {
