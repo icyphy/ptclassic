@@ -63,7 +63,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif  /* CRAY */
 
 #ifndef MAXFLOAT
-#define MAXFLOAT	HUGE
+#define MAXFLOAT	HUGE_VAL
 #endif
 
 #define BIGINT		0xfffffff
@@ -163,6 +163,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #define DEF_COL_ZEROSTYLE	"1"
 #define DEF_COL_FOREGROUND	"black"
 #define DEF_COL_FIRSTSTYLE	"1"
+
+#if defined(MSDOS) || defined(OS2) || defined(__CYGWIN32__)
+#define PT_FOPEN_WRITE_BINARY "wb"
+#define PT_FOPEN_READ_BINARY "rb"
+#else
+#define PT_FOPEN_WRITE_BINARY "w"
+#define PT_FOPEN_READ_BINARY "r"
+#endif    
 
 /* Default line styles */
 static char *defStyle[MAXATTR] = {
@@ -335,7 +343,7 @@ char *argv[];
     llx = lly = MAXFLOAT;
     urx = ury = -MAXFLOAT;
     for (idx = 0;  idx < numFiles;  idx++) {
-	strm = fopen(inFileNames[idx], "r");
+	strm = fopen(inFileNames[idx], PT_FOPEN_READ_BINARY);
 	if (!strm) {
 	    (void) fprintf(stderr, "Warning:  cannot open file `%s'\n",
 			   inFileNames[idx]);
