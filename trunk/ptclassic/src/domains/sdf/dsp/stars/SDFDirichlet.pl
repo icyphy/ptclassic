@@ -4,9 +4,10 @@ defstar {
 	desc {
 This star computes the normalized Dirichlet kernel (also called the aliased
 sinc function):
-
+<pre>
 d(x) = sin(N x / 2) / (N sin(x/2))
-
+</pre>
+<p>
 The value of the normalized Dirichlet kernel at x = 0 is always 1, and the
 normalized Dirichlet kernel oscillates between -1 and +1.
 The normalized Dirichlet kernel is periodic in x with a period of either
