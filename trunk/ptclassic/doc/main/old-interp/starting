@@ -14,7 +14,9 @@ on the MIPS architecture).
 .IE path
 Now type
 .c interpreter
-to invoke the Ptolemy interpreter.
+to invoke the Ptolemy interpreter.  It is also possible to specify a file
+of interpreter commands as a command line argument; see the section ``Loading
+Commands from a File'' for details.
 .pp
 As a more advanced user, you will probably want to
 write some of your own
