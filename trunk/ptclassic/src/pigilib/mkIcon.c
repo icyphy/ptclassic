@@ -50,13 +50,48 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "util.h"
 #include "vemInterface.h"
 #include "compile.h"
-#include "kernelCalls.h"	/* define callParseClass */
+#include "kernelCalls.h"	/* define callParseClass and KcCheckTerms */
 
 #define ERRBUF_MAX 1000
 
 static octObject starBoxLayer = {OCT_UNDEFINED_OBJECT, 0},
 	         galBoxLayer = {OCT_UNDEFINED_OBJECT, 0},
 		 iconBackgrLayer = {OCT_UNDEFINED_OBJECT, 0};
+
+/*
+MkGetTerms
+4/25/96
+Split off from KcGetTerms from kernelCalls.cc in order to make
+kernelCalls independent of oct.
+*/
+boolean
+MkGetTerms(const char* name, TermList* terms) {
+	int i, newNameCount = 0, numOrdPorts = 0;
+	char *newNames[MAX_NUM_TERMS];
+	const char *newTypes[MAX_NUM_TERMS];
+	int newIsOut[MAX_NUM_TERMS];
+
+	if ( !KcCheckTerms(name, newNames, newTypes, newIsOut,
+			   &numOrdPorts, &newNameCount) ) {
+	    return FALSE;
+	}
+
+	terms->in_n = 0;
+	terms->out_n = 0;
+	for (i = 0; i < newNameCount; i++) {
+	    if (newIsOut[i]) {
+		terms->out[terms->out_n].name = newNames[i];
+		terms->out[terms->out_n].type = newTypes[i];
+		terms->out[terms->out_n++].multiple = (i >= numOrdPorts);
+	    }
+	    else {
+		terms->in[terms->in_n].name = newNames[i];
+		terms->in[terms->in_n].type = newTypes[i];
+		terms->in[terms->in_n++].multiple = (i >= numOrdPorts);
+	    }
+	}
+	return TRUE;
+}
 
 /* 8/24/89
 Check to see if icon already exists.
@@ -388,7 +423,7 @@ octObject *galFacetPtr, *iconFacetPtr;
 
     ERR_IF1(!AskAboutIcon(galFacetPtr->contents.facet.cell));
     ERR_IF1(!CompileGalStandalone(galFacetPtr));
-    ERR_IF1(!KcGetTerms(name, &terms));
+    ERR_IF1(!MkGetTerms(name, &terms));
     if (terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
     else maxNumTerms = terms.in_n;
     if (maxNumTerms <= 5) size = 4;
@@ -436,7 +471,7 @@ octObject *iconFacetPtr;
     PrintDebug(buf);
     ERR_IF1(!ConcatDirName(dir, nameplus, &fileName));
     ERR_IF1(!AskAboutIcon(fileName));
-    ERR_IF1(!KcGetTerms(nameplus, &terms));
+    ERR_IF1(!MkGetTerms(nameplus, &terms));
     ERR_IF1(!MkStarConFacet(&iconConFacet, fileName, &terms));
     if (terms.in_n < terms.out_n) maxNumTerms = terms.out_n;
     else maxNumTerms = terms.in_n;
