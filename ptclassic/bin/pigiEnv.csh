@@ -29,6 +29,16 @@ if ( ! $?DISPLAY ) then
 endif
 
 
+# On DEC Alpha, do not print unaligned access message (vem)
+switch ($PTARCH)
+        case alpha:
+        case alpha4:
+                uac p noprint
+                breaksw
+        case *:
+                breaksw
+endsw
+
 # If the user has set PIGIRPC, check to see if it exists
 # We don't try and do anything smart if the user has set $PIGIRPC
 # and it does not exist.
