@@ -44,6 +44,7 @@ extern char *sprintf();
 
 #ifdef __GNUC__
 /* Alphabetical, please */
+#include <stdio.h>		/* Get the decl for FILE.  sigh. */
 extern int fclose (FILE *);
 extern int fflush (FILE *);
 extern int fprintf (FILE *, const char *, ...);
