@@ -54,9 +54,8 @@ void Linker::init (const char* myName) {
 // We believe argv[0] without checking if it begins with '/'
 	pid = getpid();
 #ifdef mips
-	const char* msg = "Sorry, dynamic linking doesn't work yet\n"
-			 "on the MIPS (or DecStation) architecture";
-	Error::abortRun (msg);
+// not yet implemented
+	ptolemyName = 0;
 #else
 	ptolemyName = pathSearch (myName, getenv("PATH"));
 	if (!ptolemyName)
