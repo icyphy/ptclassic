@@ -100,6 +100,9 @@ XPM_DEFINES =	-DZPIPE -DSYSV $(X11_INCSPEC)
 XMKMF =		/usr/openwin/bin/xmkmf
 # -Xs is needed for the varargs code in xv/tiff
 # -w turns of warnings.  xv/bitmaps.h causes _lots_ of warnings
+# -R/usr/openwin/lib is need so we can find the X libs at runtime,
+#	otherwise, we will need to set LD_LIBRARY_PATH
 XV_CC =		cc -Xs -w -I/usr/openwin/include \
-		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY -L/usr/openwin/lib
+		-DSVR4 -DSYSV -DDIRENT -DATT -DNO_BCOPY \
+		-L/usr/openwin/lib -R/usr/openwin/lib
 XV_RAND = 	-DNO_RANDOM
