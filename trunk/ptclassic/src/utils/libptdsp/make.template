@@ -46,11 +46,10 @@ VPATH         = $(ROOT)/src/utils/libptdsp
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-# Library name
-# Hack to be sure we don't build a shared version of libptdsp.
-# If we do have a shared libptdsp, then we need to be sure to include
+# This is a C library, not a C++ library
+# If we do build this as a C++ library, then we need to be sure to include
 # -lg++ when building cgc binaries.
-LIBNONSHARED = libptdsp.a
+CLIB = 		libptdsp.$(LIBSUFFIX)
 
 C_INCL = $(PTCOMPAT_INCSPEC)
 
@@ -77,9 +76,9 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-all: makefile $(LIBNONSHARED)
+all: makefile  $(CLIB)
 
-install: makefile $(LIBNONSHARED) $(LIBDIR)/$(LIBNONSHARED)
+install: makefile  $(CLIB) $(LIBDIR)/$(CLIB)
 
 lint:	$(LIBCSRCS)
 	lint -u $(INCL) $(LIBCSRCS) > lint
