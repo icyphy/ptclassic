@@ -155,7 +155,6 @@ PL_SRCS= \
  CGCSubFix.pl \
  CGCSubInt.pl \
  CGCSumOfN.pl \
- CGCSunSound.pl \
  CGCSwitch.pl \
  CGCTable.pl \
  CGCTableCx.pl \
