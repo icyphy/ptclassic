@@ -77,6 +77,7 @@ const int MAX_NO_GRAPHS = 64;
 #include <fcntl.h>
 #include <unistd.h>	// unlink()
 #include <stdlib.h>	// system()
+#include "compat.h"     // PT_FOPEN_WRITE_BINARY
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () : blockIamIn(0), ng(0), strm(0), tmpFileNames(0), count(0),
@@ -141,7 +142,8 @@ void XGraph :: initialize(Block* parent,
 	    tmpFileNames[i] = tempFileName();
 	    count[i] = 0;
 	    // open and make sure the file is writable
-	    if ((strm[i] = fopen(tmpFileNames[i], "w")) == NULL) {
+	    if ((strm[i] = fopen(tmpFileNames[i], PT_FOPEN_WRITE_BINARY))
+                    == NULL) {
 		StringList msg = "Can't open temporary file for writing: ";
 		msg << tmpFileNames[i];
 		Error::abortRun(*blockIamIn, msg);
