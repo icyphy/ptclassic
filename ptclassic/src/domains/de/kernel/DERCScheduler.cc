@@ -1,11 +1,11 @@
 static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
-Version identification:  	@(#)DERCScheduler.cc	1.6 03/02/98
+Version identification:  	$Id$
  
 Author: Mudit Goel
         Neil Smyth
 
-Copyright (c) 1997- The Regents of the University of California.
+Copyright (c) 1997-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -237,7 +237,7 @@ int DERCScheduler :: run () {
 	    DERCEvent* pEvent = (DERCEvent*)(f->e);
 	    DERCStar* pStar = (DERCStar*)(pEvent->src);
             pStar->arrivalTime = level;
-            interruptQ.putFreeLink(f);
+            // interruptQ.putFreeLink(f);
             pStar->resourcePointer->newEventFromInterruptQ(pEvent,currentTime); 
 	}
         //A new event, never seen before
@@ -245,7 +245,7 @@ int DERCScheduler :: run () {
 	    DERCEvent* pEvent = (DERCEvent*)(f->e);
 	    DERCStar* pStar = (DERCStar*)(f->dest);
             pStar->arrivalTime = level;
- 	    eventQ.putFreeLink(f);
+ 	    // eventQ.putFreeLink(f);
              pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime);
          }
         else {
@@ -288,7 +288,7 @@ int DERCScheduler :: run () {
 		ds->startNewPhase();
 	    }
 	    // put the LinkList into the free pool for memory management.
-	   eventQ.putFreeLink(f);
+	   // eventQ.putFreeLink(f);
             
 	    // Check if there is another event launching onto the
 	    // same star with the same time stamp (not the same port)...
@@ -320,14 +320,14 @@ int DERCScheduler :: run () {
 		    if (tl) {
 		        int success = ((InDEPort*) tl)->getFromQueue(ee->p);
 		        if (success) {
-		           eventQ.putFreeLink(h);
+		           // eventQ.putFreeLink(h);
 			}
 		        else {
 			    h->next = store;
 			    store = h;
 		        }
 		    } else if (!tl) {
-		         eventQ.putFreeLink(h);
+		         // eventQ.putFreeLink(h);
 		    } 
 	        } else {
 		    // need to put back since we did a get
@@ -372,6 +372,7 @@ int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal)
     while (1) {
         CqLevelLink *h = eventQ.get();
         if ((h == NULL) || (h->level > timeVal)) {
+            printf("in DERCSchedulker %f %f\n", h->level, timeVal);fflush(0);
             Error :: abortRun (*p, " has no more data.");
             return FALSE;
         }
@@ -383,7 +384,7 @@ int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal)
             // if same destination star with same time stamp..
             if (tl == p) {
                 if (tl->getFromQueue(ent->p)){
-                    eventQ.putFreeLink(h);
+                    // eventQ.putFreeLink(h);
                 }
                 else
                     eventQ.pushBack(h);
