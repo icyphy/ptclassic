@@ -46,8 +46,10 @@ ITCL_SRCS = \
 	PtEdit.itcl \
 	RunPanel.itcl \
 	RunWindow.itcl \
+	SampleSliderPanel.itcl \
 	Simulation.itcl \
-	SliderPanel.itcl
+	SliderPanel.itcl \
+	TimePanel.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 	ptII.style \

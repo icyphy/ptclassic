@@ -1,4 +1,4 @@
-# Package load file for the graphedit package
+# Package load file for the PtII editor
 #
 # @Author: John Reekie
 #
@@ -34,7 +34,7 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
-package require tycho.kernel.graphedit
+package require tycho.edit.graphedit
 package provide tycho.edit.ptII 1.0
 
 global env auto_path
@@ -46,7 +46,7 @@ if { [lsearch -exact $auto_path $env(PTII_LIBRARY)] == -1 } {
 if [info exists tk_version] {
     ### Stylesheets
     ::tycho::register stylesheet "ptII" \
-	    [file join $env(PTO\II_LIBRARY) ptII.style] \
+	    [file join $env(PTII_LIBRARY) ptII.style] \
 	    [file join ~ .Tycho styles ptII.style]
 
     ### MODE MAPPINGS
@@ -57,8 +57,8 @@ if [info exists tk_version] {
 
     # Basic graph viewer
     ::tycho::register mode "ptII" \
-	    -command {::tycho::view PtEditor -file {%s}} \
-	    -viewclass ::tycho::PtEditor \
+	    -command {::tycho::view PtEdit -file {%s}} \
+	    -viewclass ::tycho::PtEdit \
 	    -label {Ptolemy II}  \
 	    -category "graphics" \
 	    -underline 0
