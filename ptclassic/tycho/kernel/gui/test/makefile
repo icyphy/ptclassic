@@ -41,7 +41,12 @@ include $(CONFIG)
 
 TCL_SRCS =
 
-ITCL_SRCS =	RCS.itcl test.tcl
+ITCL_SRCS =	\
+  DirectedAcyclicGraph.itcl \
+  Graph.itcl \
+  Forest.itcl \
+  RCS.itcl \
+  test.tcl
 
 EXTRA_SRCS =	$(ITCL_SRCS)
 
