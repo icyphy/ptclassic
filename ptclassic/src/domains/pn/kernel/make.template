@@ -1,7 +1,7 @@
 # Makefile for PN domain kernel
 # Version $Id$
-# Copyright 1992 The Regents of the University of California.
-#                       All Rights Reserved.
+# Copyright 1990-%Q% The Regents of the University of California.
+# All Rights Reserved.
 # Author:	T. M. Parks
 # Created:	6 February 1992
 
@@ -13,11 +13,11 @@ VPATH=$(ROOT)/src/domains/pn/kernel
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-AWESIME=$(ROOT)/src/thread/Awesime/include.$(ARCH)
-THREADDIR=$(ROOT)/src/thread/awe
+INCL_THREADS=-I$(ROOT)/thread/include.$(ARCH) -I$(ROOT)/src/thread/posix
 SDFDIR=$(ROOT)/src/domains/sdf/kernel
+COMPAT=$(ROOT)/src/compat/ptolemy
 
-INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR) -I$(AWESIME)
+INCL=-I$(COMPAT) -I$(KERNDIR) -I$(SDFDIR) $(INCL_THREADS)
 
 # Library name
 LIB=libpn.a
@@ -29,13 +29,12 @@ CC_WITH_H=\
 	PNPortHole.cc PNGeodesic.cc PNForkNode.cc\
 	PNThread.cc
 
+# Source files
 SRCS=	$(CC_WITH_H)\
 	PNDomain.cc
 
 # Header files
-HDRS=	$(CC_WITH_H:.cc=.h)\
-	PNMonitor.h \
-	PNCondition.h
+HDRS=	$(CC_WITH_H:.cc=.h)
 
 # Library objects
 OBJS = $(SRCS:.cc=.o)
