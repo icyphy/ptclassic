@@ -160,6 +160,9 @@ public:
 	// Initialize the State
         virtual void initState();
 
+        // Initialize the PortHoles
+        virtual void initPorts();
+
         // Return number of states 
         int numberStates() const {return states.size();}
 
