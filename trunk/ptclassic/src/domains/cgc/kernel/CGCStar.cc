@@ -720,9 +720,9 @@ StringList CGCStar :: declareState(const State* s) {
 	////////////////////////////////////
 
 // Add lines to be put at the beginning of the code file
-void CGCStar :: addInclude(const char* decl) {
+int CGCStar :: addInclude(const char* decl) {
 	StringList temp = "#include ";
 	temp << decl << "\n";
-	addCode(temp, "include", decl);
+	return addCode(temp, "include", decl);
 }
 
