@@ -60,13 +60,6 @@ proc ptkPlotMotion {w x y} {
 }
 
 proc ptkCreateXYPlot {w title geo univ} {
-
-    # Make sure that Tycho has started, and use it to get a decent
-    # button font. This minimizes problems with buttons disappearing
-    # because of Tk using an unnecessarily large font.
-    ptkStartTycho
-    set buttonFont [.tychoFonts getFont Helvetica 12 bold]
-    
     # Create the top-level window
     catch {destroy $w}
     toplevel $w
@@ -80,19 +73,19 @@ proc ptkCreateXYPlot {w title geo univ} {
 
     pack [frame $w.mbar -bd 2 -relief raised] -side top -fill x
     pack [button $w.mbar.pr -text "  Print  " \
-	    -command "ptkPrintXYPlot $w \"$title\"" -font $buttonFont] \
+	    -command "ptkPrintXYPlot $w \"$title\""] \
 	    -side left
     pack [button $w.mbar.zf -text "Zoom Fit (f)" \
-	    -command "ptkXYPlotZoomFit$w" -font $buttonFont] \
+	    -command "ptkXYPlotZoomFit$w"] \
 	    -side right
     pack [button $w.mbar.zo -text "Zoom Out (Z)" \
-	    -command "ptkXYPlotZoom$w 1.5" -font $buttonFont] \
+	    -command "ptkXYPlotZoom$w 1.5"] \
 	    -side right
     pack [button $w.mbar.zi -text "Zoom In (z)"\
-	    -command "ptkXYPlotZoom$w 0.75" -font $buttonFont] \
+	    -command "ptkXYPlotZoom$w 0.75"] \
 	    -side right
     pack [button $w.mbar.zor -text "Zoom Original (o)" \
-	    -command "ptkXYPlotZoomOriginal$w" -font $buttonFont] \
+	    -command "ptkXYPlotZoomOriginal$w"] \
 	    -side right
 
     # The Dismiss button is created and packed _before_ the canvas,
