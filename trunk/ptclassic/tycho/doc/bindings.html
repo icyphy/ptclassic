@@ -12,7 +12,8 @@ for key <a name=bindings>bindings</a>.
 <p>
 <ul>
 <li><a href="#generic key bindings">Generic Bindings</a>
-<li><a href="#entry box bindings">Bindings for Entry Boxes and Dialogs</a>
+<li><a href="#entry box bindings">Bindings for Entry Boxes</a>
+<li><a href="#dialog box bindings">Bindings for Dialogs</a>
 <li><a href="#text editor bindings">Bindings for Text Editors</a>
 <li><a href="#mouse navigation">Mouse Navigation</a>
 <li><a href="../kernel/doc/usersGuides/FileHelp.html#bindings, file access">File access bindings</a>
@@ -58,19 +59,24 @@ clipboard, so they can be recovered with C-y.
 Any set of contiguous character deletions are collected
 in the clipboard.
 <p>
-<h2><a name="entry box bindings">Bindings for Entry Boxes and Dialogs</a></h2>
+<h2><a name="entry box bindings">Bindings for Entry Boxes</a></h2>
 <p>
 Entry boxes have all the
 <a href="#generic key bindings">generic bindings</a> plus one more:
 <dl COMPACT>
 <b><dt>C-u</b><dd>delete all the text in the entry box
 </dl>
-In addition, most dialog boxes support the following:
+<p>
+<h2><a name="dialog box bindings">Bindings for Dialogs</a></h2>
+<p>
 <dl COMPACT>
-<b><dt>Escape</b><dd>dismiss the dialog, ignoring it
-<b><dt>Return</b><dd>dismiss the dialog, executing whatever
+<b><dt>Escape</b><dd>dismiss the dialog, cancelling the command
+<b><dt>Return</b><dd>dismiss the dialog, completing the command
+<b><dt>M-Return</b><dd>dismiss the dialog, completing the command (used when
+the dialog need Return for text entries).
 <b><dt>Space</b><dd>invoke a button
 <b><dt>Tab</b><dd>move from one item to another
+<b><dt>C-Tab</b><dd>move from one item to another
 </dl>
 <p>
 <h2><a name="text editor bindings">Bindings for Text Editors</a></h2>
@@ -84,14 +90,18 @@ plus a few more.
 <dl COMPACT>
 <b><dt>C-o</b><dd>open a line of text above the insert cursor
 <b><dt>C-x u</b><dd>undo the last change
+<b><dt>M-C</b><dd>capitalize the selection or the current word
+<b><dt>M-l</b><dd>make the selection or current word lower case
+<b><dt>M-u</b><dd>make the selection or current word upper case
+</dl>
+<h3><a name="filling text">Filling Text</a></h3>
+<dl COMPACT>
 <b><dt>M-q</b><dd>fill selected region or current paragraph
 <b><dt>C-x f</b><dd>change the right column used for the fill
 <b><dt>C-x .</b><dd>change the prefix characters used by the fill
 </dl>
 <p>
 The fill capability requires some explanation.
-<h3><a name="filling text">Filling Text</a></h3>
-<p>
 The "Fill Region" command fills text so that the lines
 are approximately of equal length and line breaks occur
 on word boundaries.  It can optionally add a prefix to
@@ -193,7 +203,13 @@ the position of the insertion cursor."
 <p>
 <h2><a name="mouse navigation">Mouse Navigation</a></h2>
 <p>
-The interaction of the mouse with text is simply that
+The <a name="right mouse button">right mouse button
+</a> brings up a context-sensitive pop-up
+menu that usually gives access to documentation for the current
+widget.  It often also contains a command that will report
+the name of the widget (an Itcl object name).
+<p>
+The interaction of the mouse with text is otherwise that
 implemented in the text widget in Tk.  Thus, the following
 documentation is again copied from the man page for
 the text widget, written by John Ousterhout, with minor
