@@ -88,13 +88,13 @@ configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/make; ln -s $(GNU_SRC)/make/*.c .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.h .)
 	-(cd $(GNU_OBJ)/make/glob; ln -s $(GNU_SRC)/make/glob/*.c .)
-	@echo "Now configure gcc with -with-gnu-as"
+	@echo "Now configure gcc"
 	-mkdir $(GNU_OBJ)/gcc
 	(cd $(GNU_OBJ)/gcc; \
 	$(GNU_SRC)/gcc/configure --srcdir=$(GNU_SRC)/gcc \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
 		$(SHAREDLIB_CONFIGURE_FLAGS) \
-		--with-gnu-as $(MACH) )
+		$(MACH) )
 	@echo "Now configure libg++"
 	-mkdir $(GNU_OBJ)/libg++
 	(cd $(GNU_OBJ)/libg++; \
