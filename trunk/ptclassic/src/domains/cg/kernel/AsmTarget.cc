@@ -38,7 +38,7 @@ AsmTarget::setup(Galaxy& g) {
 // do all initCode methods.
 	nextStar.reset();
 	while ((s = (AsmStar*)nextStar++) != 0)
-		s->initCode();
+		doInitialization(*s);
 	return TRUE;
 }
 
@@ -69,5 +69,35 @@ AsmTarget::allocReq(AsmStar& star) {
 		}
 	}
 	return TRUE;
+}
+
+void AsmTarget :: outputComment (const char* msg) {
+	outputLineOrientedComment ("; ", msg, 80);
+}
+
+void AsmTarget :: outputLineOrientedComment(const char* prefix,
+					    const char* msg,
+					    int lineLen) {
+	int plen = strlen(prefix);
+	LOG_NEW; char* line = new char[lineLen-plen+1];
+	strcpy (line, prefix);
+	char* p = line + plen;
+	int curlen = plen;
+	while (*msg) {
+		char c = *msg++;
+		*p++ = c;
+		if (c == '\t') curlen = ((curlen/8)+1)*8;
+		else curlen++;
+		if (curlen >= lineLen || c == '\n') {
+			*p = 0;
+			addCode(line);
+			curlen = plen;
+			p = line + plen;
+		}
+	}
+	*p++ = '\n';
+	*p = 0;
+	addCode(line);
+	LOG_DEL; delete line;
 }
 

@@ -30,6 +30,9 @@ protected:
 
 	// Request memory for all structures in a Star
 	int allocReq(AsmStar&);
+
+	virtual void doInitialization(AsmStar&);
+
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0) :
@@ -41,6 +44,30 @@ public:
 	// Then allocate memory for all stars.
 	int setup(Galaxy&);
 
+	// output a directive that switches to the code section
+	virtual void codeSection() = 0;
+
+	// output an "org" directive that switches to the specified
+	// memory and address
+	virtual void orgDirective(const char* mem, unsigned addr) = 0;
+
+	// output an integer
+	virtual void writeInt (int) = 0;
+
+	// output a fixed-point value, passed as a double argument.
+	virtual void writeFix (double) = 0;
+
+	// output a floating-point value.
+	virtual void writeFloat (double) = 0;
+
+	// output a comment.  Default form uses "outputLineOrientedComment"
+	// to make comments beginning with semicolons.
+	virtual void outputComment (const char*);
+
+	// useful function for comment generation
+	void outputLineOrientedComment(const char* prefix,
+				       const char* msg,
+				       int lineLen);
 };
 
 #endif
