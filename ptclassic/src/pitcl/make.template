@@ -84,7 +84,7 @@ LIB_CSRCS = 	displayFile.c
 NON_LIB_SRCS =	ptclAppInit.cc
 TCL_SRCS =	gendoc.tcl
 # SRCS are used by make depend, so they should be C/C++ files
-SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS) ptclInvokeInterp.cc
+SRCS =		$(LIB_SRCS) $(LIB_CSRCS) $(NON_LIB_SRCS)
 
 EXTRA_SRCS =	$(TCL_SRCS) make.template
 
@@ -115,7 +115,7 @@ else
 	INSTALL = $(LIBDIR)/$(LIBR)
 endif
 
-PT_DEPEND += $(NON_LIB_SRCS:.cc=.o) ptclInvokeInterp.o
+PT_DEPEND += $(NON_LIB_SRCS:.cc=.o)
 
 PIGI_OBJS += $(NON_LIB_SRCS:.cc=.o) 
 
