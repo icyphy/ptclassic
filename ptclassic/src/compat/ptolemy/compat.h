@@ -36,12 +36,12 @@ extern "C" {
 /***************************************************************************/
 /* Define #defines for each Ptolemy architecture. (Alphabetical, please) */
 
-#if defined(hpux)
+#if defined(hpux) || defined(__hpux)
 /* HP PA, cfront or g++ */
 #define PTHPPA
 #endif
 
-#if defined(hpux) && ! defined(__GNUC__)
+#if defined(PTHPPA) && ! defined(__GNUC__)
 /* HP PA, cfront only, not g++ */
 #define PTHPPA_CFRONT
 #endif
@@ -105,6 +105,7 @@ extern int sprintf();
 #ifndef PTIRIX5
 #ifndef PTSOL2
 #ifndef PTULTRIX
+#ifndef PTHPPA
 #if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
 #if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2)
 /* SunOS4.1.3 Sun Cfront */	
@@ -112,6 +113,7 @@ extern int sprintf();
 extern char *sprintf();
 #endif
 #endif /*sun && __GNUC__*/
+#endif /* PTHPPA */
 #endif /* PTULTRIX */
 #endif /* PTSOL2 */
 #endif /* PTIRIX5 */
@@ -205,6 +207,13 @@ extern int printf (const char *, ...);
 extern int putenv (char *);
 #endif
 extern int puts (const char *);
+
+#if defined(PTSUN4) || defined(PTULTRIX)
+/* This should have been defined in sys/time.h.  kernel/SimControl.cc
+   uses it.
+ */
+extern int setitimer( int, struct itimerval *, struct itimerval *);
+#endif /* PTSUN4 || PTULTRIX */
 
 extern void setpwent();		/* octtools/Packages/fc/fc.c and
 				   octtools/Packages/utility/texpand.c */
