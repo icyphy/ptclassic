@@ -6,7 +6,7 @@ Demonstrates the EndCase star.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE EndCase
+.Se EndCase
 This rather trivial demo shows what the
 .c EndCase
 star with two data inputs does.

@@ -6,7 +6,7 @@ If-then-else construct in an SDF Wormhole.
 .SV $Revision$ $Date$
 .AL "E. A. Lee"
 .LD
-.IE "if-then-else"
+.Ir "if-then-else"
 This demo illustrates the use of an SDF wormhole to implement
 a dynamically scheduled construct using the DDF domain.
 An if-then-else is such a dynamically scheduled construct.
@@ -24,7 +24,10 @@ a pair of
 .c Case
 and
 .c EndCase
-stars.  The \fIfalse\fR and \fItrue\fR arms have different gain factors:
+stars.
+.Se Case
+.Se EndCase
+The \fIfalse\fR and \fItrue\fR arms have different gain factors:
 1.0 and 2.0 respectively.  The \fIcontrol\fR boolean is provided by
 the threshold device, which remains true once the input value
 exceeds 0.5.  Thus, for the first 6 inputs, the false arm is
