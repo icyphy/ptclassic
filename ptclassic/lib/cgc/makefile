@@ -38,3 +38,9 @@ MISC_FILES = CGCrtlib.c CGCrtlib.h makefile_C.mk
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
+
+CGCrtlib.c:
+	ln -s ../../src/domains/cgc/rtlib/$@ .
+CGCrtlib.h:
+	ln -s ../../src/domains/cgc/rtlib/$@ .
+
