@@ -53,7 +53,7 @@ when the run panel in the graphical interface is closed.
 	}
 
 
-	hinclude { <sys/types.h>, <sys/stat.h>, "miscFuncs.h", "InfString.h" }
+	hinclude { <sys/types.h>, <sys/stat.h>, <ctype.h>, "miscFuncs.h", "InfString.h" }
 
 	header{
 // Matlab interface library and Matlab data types (clash with COMPLEX)
@@ -157,13 +157,23 @@ extern "C" {
 	  type { void }
 	  arglist { "(InfString& commandString, InfString matlabInputNames[], int numInputs, const char *matlabFunction, InfString matlabOutputNames[], int numOutputs)" }
 	  code {
-		// replace pound signs in matlabFunction with underscores
 		int length = strlen(matlabFunction);
+
+		// replace pound signs in matlabFunction with underscores
 		char *matlabFragment = new char[length + 1];
 		strcpy(matlabFragment, matlabFunction);
-		for (int i = 0; i < length; i++ ) {
+		for ( int i = 0; i < length; i++ ) {
 		  if ( matlabFragment[i] == '#' ) {
 		    matlabFragment[i] = '_';
+		  }
+		}
+
+		// see if the Matlab command is terminated by a semicolon
+		int endingSemicolonPresent = FALSE;
+		for ( int j = length - 1; j >= 0; j-- ) {
+		  if ( ! isspace(matlabFragment[j]) ) {
+		    endingSemicolonPresent = ( matlabFragment[j] == ';' );
+		    break;
 		  }
 		}
 
@@ -191,8 +201,9 @@ extern "C" {
 		  }
 		}
 
-		// suppress textual output by adding a semicolon at the end
-		if ( strchr(matlabFragment, ';') == 0 ) {
+		// add a semicolon at the end of the command if one is
+		// not present in order to suppress textual output
+		if ( ! endingSemicolonPresent ) {
 		  commandString << ";";
 		}
 
