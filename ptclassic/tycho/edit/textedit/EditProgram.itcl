@@ -66,6 +66,17 @@
 # strings "FIXME" and "NOTE", provides infrastructure for tagging and
 # coloring keywords, and provides a method for commenting out a region.
 #
+# Note that there is both a procedure and a method that will generate
+# documentation. The <CODE>gendoc</CODE> procedure can be used to
+# generate documentation for any file, and the file does not have to be
+# currently opened by tycho. <CODE>gendoc</CODE> is used by the Ptolemy
+# man command. The <CODE>gendocBuffer</CODE> method is used to generate
+# documentation for the current contents of a editor.  <CODE>gendoc</CODE>
+# and <CODE>gendocBuffer</CODE> both call internal functions 
+# (<CODE>gendocFileInternal</CODE> and <CODE>gendocBufferInternal</CODE>
+# that do the real work.  Child classes will usually redefine 
+# <CODE>gendoc</CODE> and <CODE>gendocBuffer</CODE>.
+# 
 class ::tycho::EditProgram {
     inherit ::tycho::Edit
 
@@ -136,8 +147,8 @@ class ::tycho::EditProgram {
     # Fill the set of lines identified by the selection, make comments.
     method fillSelection {}
 
-    # Generate documentation.  Not all derived classes can do this.
-    method gendoc { genDocFile genCommand}
+    # Generate and display a docfile from the current file.
+    method gendocBuffer {}
 
     # Open a help window.  This should be redefined in derived classes.
     method help {}
@@ -164,10 +175,23 @@ class ::tycho::EditProgram {
     method uncommentSelection {}
 
     ####################################################################
+    ####           public procedures                                ####
+
+    # Generate documentation for an arbitrary file.
+    proc gendoc {file}
+
+    # Helper proc for gendoc.
+    proc gendocFileInternal { file genDocFile genCommand}
+
+    ####################################################################
     ####           protected methods and variables                  ####
 
     # Return the regular expression used to find line-oriented comments.
     protected method commentRegexp {}
+
+    # Generate documentation.  Not all derived classes can do this.
+    protected method gendocBufferInternal { genDocFile genCommand}
+
 
     # Change this to 0 in derived classes if keywords are not case sensitive.
     protected variable caseSensitiveKeywords 1
@@ -288,55 +312,19 @@ body ::tycho::EditProgram::fillSelection {} {
     parseRegion $fillStart insert
 }
 ###################################################################
-#### gendoc
-# Generate and display a doc file.
+#### gendocBuffer
+# Generate and display a doc file from the current file.
 # If the doc file already exists and is newer than the source file,
 # then it is simply displayed, not regenerated.
 #
-# This method takes two arguments, both of which are eval'd.
-# <MENU>
-# <LI> The <CODE>setdocCommand</CODE> argument should contain the tcl
-# command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
-# which contains the filename of the generated doc file.
-# <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
-# command(s) to evaluate to actually generate the doc file.  Usually
-# this command refers to <CODE>$tail</CODE>
-# </MENU>
-#
-# In the example below, we open the makefile and then sort it.
-# <TCL><PRE>
-# set w [::tycho::EditProgram [::tycho::autoName .ep] -file makefile]
-# $w gendoc {set docfile $root.sort} {exec sort $tail > $docfile}
-# </PRE></TCL>
-#
-body ::tycho::EditProgram::gendoc {setDocCommand genCommand} {
-    set filename [::tycho::expandPath $file]
-    set dir [file dirname $filename]
-    set tail [file tail $filename]
-    set root [file rootname $tail]
-    eval $setDocCommand
-    set fulldoc [file join $dir $docfile]
-    if {![file exists $fulldoc] || \
-            [file mtime $filename] > [file mtime $fulldoc] } {
-        # Need to regenerate the doc.  Check permissions first.
-        # It is sufficient for the directory to be writable.
-        if {[file writable $dir]} {
-            # If necessary, save the file
-            saveQuery
-            set savedir [pwd]
-            cd $dir
-            eval $genCommand
-            cd $savedir
-        } {
-            ::tycho::warn "The documentation file is out of date, \
-                    and you do not have permission to update it."
-        }
-    }
-    if [file exists $fulldoc] {
-        return [::tycho::File::openContext $fulldoc]
-    }
-}
+# This is a dummy implementation, it merely copies the current file into
+# a .htm file and displays it.  Child classes will probably redefine this
+# method
+body ::tycho::EditProgram::gendocBuffer {} {
+   return [gendocBufferInternal {set docfile $root.htm} \
+            {exec cp $tail $docfile}]
 
+}
 ###################################################################
 #### help
 # Open a window with help on the current widget.
@@ -607,6 +595,68 @@ body ::tycho::EditProgram::uncommentSelection {} {
 
 ####################################################################
 ####################################################################
+####                    public procedures                       ####
+
+#####################################################################
+#### gendoc
+# Generate documentation for <CODE>file</CODE>.
+# This procedure will probably be redefined in child classes
+#
+body ::tycho::EditProgram::gendoc {file} {
+    return [::tycho::EditProgram::gendocFileInternal $file \
+            {set docfile $root.htm} \
+            {exec cp $tail $docfile}]
+}
+
+###################################################################
+#### gendocFile
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+# This is a procedure so that we can generate documentation for arbitrary
+# files that are not necessarily being edited.  
+#
+# This method takes three arguments, the last two are are eval'd.
+# <MENU>
+# <LI> The <CODE>file</CODE> argument is the name of the file to generate
+# documentation for
+# <LI> The <CODE>setdocCommand</CODE> argument should contain the tcl
+# command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
+# which contains the filename of the generated doc file.
+# <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
+# command(s) to evaluate to actually generate the doc file.  Usually
+# this command refers to <CODE>$tail</CODE>
+# </MENU>
+#
+# In the example below, we open the makefile and then sort it.
+# <TCL><PRE>
+# set w [::tycho::EditProgram [::tycho::autoName .ep] -file makefile]
+# $w gendoc {set docfile $root.sort} {exec sort $tail > $docfile}
+# </PRE></TCL>
+#
+
+body ::tycho::EditProgram::gendocFileInternal { file setDocCommand genCommand} {
+    set filename [::tycho::expandPath $file]
+    set dir [file dirname $filename]
+    set tail [file tail $filename]
+    set root [file rootname $tail]
+    eval $setDocCommand
+    set fulldoc [file join $dir $docfile]
+    if {![file exists $fulldoc] || \
+            [file mtime $filename] > [file mtime $fulldoc] } {
+            set savedir [pwd]
+            cd $dir
+            eval $genCommand
+            cd $savedir
+    }
+    if [file exists $fulldoc] {
+        return [::tycho::File::openContext $fulldoc]
+    }
+}
+
+####################################################################
+####################################################################
 ####                    protected methods                       ####
 
 #####################################################################
@@ -623,3 +673,54 @@ body ::tycho::EditProgram::commentRegexp {} {
 
     return "$safeFillPrefix\.*\$"
 }
+
+###################################################################
+#### gendocBufferInternal
+# Generate and display a doc file.
+# If the doc file already exists and is newer than the source file,
+# then it is simply displayed, not regenerated.
+#
+# This method takes two arguments, both of which are eval'd.
+# <MENU>
+# <LI> The <CODE>setdocCommand</CODE> argument should contain the tcl
+# command(s) to evaluate to set the <CODE>docfile</CODE> tcl variable,
+# which contains the filename of the generated doc file.
+# <LI> The <CODE>genCommand</CODE> argument should contain the tcl 
+# command(s) to evaluate to actually generate the doc file.  Usually
+# this command refers to <CODE>$tail</CODE>
+# </MENU>
+#
+# In the example below, we open the makefile and then sort it.
+# <TCL><PRE>
+# set w [::tycho::EditProgram [::tycho::autoName .ep] -file makefile]
+# $w gendoc {set docfile $root.sort} {exec sort $tail > $docfile}
+# </PRE></TCL>
+#
+body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
+    set filename [::tycho::expandPath $file]
+    set dir [file dirname $filename]
+    set tail [file tail $filename]
+    set root [file rootname $tail]
+    eval $setDocCommand
+    set fulldoc [file join $dir $docfile]
+    if {![file exists $fulldoc] || \
+            [file mtime $filename] > [file mtime $fulldoc] } {
+        # Need to regenerate the doc.  Check permissions first.
+        # It is sufficient for the directory to be writable.
+        if {[file writable $dir]} {
+            # If necessary, save the file
+            saveQuery
+            set savedir [pwd]
+            cd $dir
+            eval $genCommand
+            cd $savedir
+        } {
+            ::tycho::warn "The documentation file is out of date, \
+                    and you do not have permission to update it."
+        }
+    }
+    if [file exists $fulldoc] {
+        return [::tycho::File::openContext $fulldoc]
+    }
+}
+
