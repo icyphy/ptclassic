@@ -79,9 +79,9 @@ body ::tycho::CTSimulation::startServer {} {
 
     # Create the universe
     _send {
-	set univ [java::new pt.domains.ct.kernel.CTUniverse]
-	$univ setName Universe
-        set exec [$univ getExecutor]
+	set univ [java::new pt.domains.ct.kernel.CTSystem]
+	$univ setName System
+        set exec [$univ getDirector]
     }
 }
 
@@ -102,26 +102,29 @@ body ::tycho::CTSimulation::_construct {} {
 
         } else {
             # Otherwise assume it represents a star. Get the class name.
-            set type pt.domains.ct.stars.CT[$_graph attrget $v -class]
+            set type pt.domains.ct.actors.CT[$_graph attrget $v -class]
 
             # Create the star
             debug "set $v \[java::new $type \$univ $type\]"
             set result [_send "set $v \[java::new $type \$univ $v\]"]
             debug " -> $result"
 
-	    # Set its parameters.
-	    # FIXME: Currently, we look at the case of the parameter
-	    # to tell whether it is a parameter that is understood
-	    # by the star. This is sooooo fragile...
-	    foreach {attr val} [$_graph attrset $v] {
-		if [string match {-[A-Z]*} $attr] {
-		    debug "\$[set v] set[string trim $attr -] $val"
-		    set result [_send \
-			    "\$[set v] set[string trim $attr -] $val"]
-		    debug " -> $result"
-		}
-	    }
-        }
+	    # Set its parameters. Get the star master.
+            set m [split [$_graph attrget $v -master] #]
+            set libname [lindex $m 0]
+            set starname [split [lindex $m 1] "."]
+            set library [::tycho::model dereference \
+                    [::tycho::model locate $libname]]
+            
+            # Get the attributes of the star and set them
+            foreach attr [$library match attribute $starname] {
+                set val [$_graph attrget $v -$attr]
+                debug "\$[set v] setParam [string trim $attr -] $val"
+                set result [_send \
+                        "\$[set v] setParam [string trim $attr -] $val"]
+                debug " -> $result"
+            }
+        }   
     }
 
     # Generate the edges
@@ -160,9 +163,9 @@ body ::tycho::CTSimulation::_construct {} {
             set fromport [lindex $from 1]
 	    set fromport [lindex [split $fromport -] 0]
 
-            debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
+            debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
             set result [_send "set $fromname \[\$[set fromvertex] \
-                    getIOPort $fromport\]"]
+                    getPort $fromport\]"]
             debug " -> $result"
 
             debug "\$\{[set fromname]\} link \$[set rname]"
@@ -196,9 +199,9 @@ body ::tycho::CTSimulation::_construct {} {
                 set toport [lindex $to 1]
 		set toport [lindex [split $toport -] 0]
 
-                debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
+                debug "set $toname \[\$[set tovertex] getPort $toport\]"
                 set result [_send "set $toname \[\$[set tovertex] \
-                        getIOPort $toport\]"]
+                        getPort $toport\]"]
                 debug " -> $result"
 
                 debug "\$\{[set toname]\} link \$[set rname]"
@@ -218,25 +221,21 @@ body ::tycho::CTSimulation::_construct {} {
 	set toport [lindex [split $toport -] 0]
 
         # Get the actual port names
-        debug "set $fromname \[\$[set fromvertex] getIOPort $fromport\]"
+        debug "set $fromname \[\$[set fromvertex] getPort $fromport\]"
         set result [_send "set $fromname \
-            \[\$[set fromvertex] getIOPort $fromport\]"]
+            \[\$[set fromvertex] getPort $fromport\]"]
         debug " -> $result"
 
-        debug "set $toname \[\$[set tovertex] getIOPort $toport\]"
-        set result [_send "set $toname \[\$[set tovertex] getIOPort $toport\]"]
+        debug "set $toname \[\$[set tovertex] getPort $toport\]"
+        set result [_send "set $toname \[\$[set tovertex] getPort $toport\]"]
         debug " -> $result"
 
         # Make the connection, dude
         debug "set $e \[ \
-            \$univ {connect \
-            pt.actors.IOPort pt.actors.IOPort \
-            String} \$\{[set fromname]\} \$\{[set toname]\} \
+            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"
         set result [_send "set $e \[ \
-            \$univ {connect \
-            pt.actors.IOPort pt.actors.IOPort \
-            String} \$\{[set fromname]\} \$\{[set toname]\} \
+            \$univ connect \$\{[set fromname]\} \$\{[set toname]\} \
             $e\]"]
         debug " -> $result"
     }
