@@ -5,10 +5,12 @@ defstar {
 Demultiplexes one input onto any number of output streams.
 The star consumes B particles from the input, where B is the blockSize.
 These B particles are copied to exactly one output,
-determined by the "control" input.  The other outputs get 0.0.
+determined by the "control" input.  The other outputs get a zero of the
+appropriate type.
+
 Integers from 0 through N-1 are accepted at the "control"
 input, where N is the number of outputs.  If the control input is
-outside this range, all outputs get 0.0.
+outside this range, all outputs get zero.
 	}
 	version {$Id$}
 	author { E. A. Lee }
@@ -16,7 +18,7 @@ outside this range, all outputs get 0.0.
 	location { SDF main library }
 	input {
 		name {input}
-		type {float}
+		type {anytype}
 	}
 	input {
 		name {control}
@@ -24,7 +26,7 @@ outside this range, all outputs get 0.0.
 	}
 	outmulti {
 		name {output}
-		type {float}
+		type {anytype}
 	}
 	defstate {
 		name {blockSize}
@@ -34,10 +36,7 @@ outside this range, all outputs get 0.0.
 	}
 	start {
 		input.setSDFParams(int(blockSize),int(blockSize)-1);
-		MPHIter nexto(output);
-		PortHole* p;
-		while((p = nexto++) != 0)
-		   ((SDFPortHole*)p)->setSDFParams(int(blockSize),int(blockSize)-1);
+		output.setSDFParams(int(blockSize),int(blockSize)-1);
 	}
 	go {
 	    int n = int(control%0);
@@ -51,7 +50,7 @@ outside this range, all outputs get 0.0.
 		        (*p)%j = input%j;
 		else
 		    for (j = int(blockSize)-1; j >= 0; j--)
-		        (*p)%j << 0.0;
+			(*p)%j.initialize();
 	    }
 	}
 }
