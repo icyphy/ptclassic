@@ -77,7 +77,6 @@ ITCL_SRCS = \
 	Forest.itcl \
 	Glimpse.itcl \
 	Graph.itcl \
-	History.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
 	HyperGraph.itcl \
