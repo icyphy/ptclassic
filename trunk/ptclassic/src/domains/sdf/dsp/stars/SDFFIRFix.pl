@@ -1,6 +1,7 @@
 defstar {
         name {FIRFix}
         domain {SDF}
+	derivedFrom { SDFFix }
         desc {
 A finite impulse response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are specified by the "taps" parameter.
@@ -167,20 +168,6 @@ The input particles are only cast to this precision if the parameter
                 default { "4.14" }
                 desc { Precision of the output in bits. } 
         }
-        defstate {
-                name { OverflowHandler }
-                type { string }
-                default { "saturate" }
-                desc {
-Overflow characteristic for the accumulatoXX
-If the result of the sum cannot be fit into the precision of the accumulator,
-then overflow occurs and the overflow is taken care of by the method
-specified by this parameteXX
-The keywords for overflow handling methods are:
-"saturate" (the default), "zero_saturate", "wrapped", and "warning".
-The "warning" option will generate a warning message whenever overflow occurs.
-		}
-        }
         protected {
 		Fix Accum, fixIn, out, tap;
                 int phaseLength;
@@ -192,21 +179,30 @@ The "warning" option will generate a warning message whenever overflow occurs.
                 signalIn.setSDFParams(d, d+1+(taps.size()/i));
                 signalOut.setSDFParams(i, i-1);
                 if (dP >= d) {
-                        Error::abortRun (*this, ": decimationPhase too large");
-                        return;
+                  Error::abortRun (*this, ": decimationPhase too large");
+                  return;
                 }
                 // The phaseLength is ceiling(taps.size/interpolation)
                 // It is a protected instance variable.
                 phaseLength = taps.size() / i;
                 if ((taps.size() % i) != 0) phaseLength++;
 
-		if ( ! int(ArrivingPrecision) )
+		if ( ! int(ArrivingPrecision) ) {
 		  fixIn = Fix( ((const char *) InputPrecision) );
+		  if ( fixIn.invalid() )
+		    Error::abortRun( *this, "Invalid InputPrecision" );
+		}
 
 		tap = Fix( ((const char *) TapPrecision) );
+		if ( tap.invalid() )
+		  Error::abortRun( *this, "Invalid TapPrecision" );
 
 		Accum = Fix( ((const char *) AccumulationPrecision) );
+		if ( Accum.invalid() )
+		  Error::abortRun( *this, "Invalid AccumulationPrecision" );
 		Accum.set_ovflow( ((const char *) OverflowHandler) );
+		if ( Accum.invalid() )
+		  Error::abortRun( *this, "Invalid overflow handler" );
 
 		out = Fix( ((const char *) OutputPrecision) );
         }
@@ -249,4 +245,6 @@ The "warning" option will generate a warning message whenever overflow occurs.
                 phase -= Interp;
             }
         }
+        // a wrap-up method is inherited from SDFFix
+        // if you defined your own, you should call SDFFix::wrapup()
 }
