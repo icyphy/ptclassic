@@ -44,6 +44,47 @@ if { [lsearch -exact $auto_path $env(PTKERNEL_LIBRARY)] == -1 } {
 
 ### PTOLEMY-SPECIFIC INITIALIZATION
 
+if [info exist env(TYCHO)] {
+    set tycho $env(TYCHO)
+    set TYCHO $env(TYCHO)
+}
+
+if [info exist env(PTOLEMY)] {
+    set ptolemy $env(PTOLEMY)
+    set PTOLEMY $env(PTOLEMY)
+    if {![info exists tycho]} {
+	set tycho [file join $ptolemy tycho]
+	set TYCHO [file join $ptolemy tycho]
+    }
+}
+
+if {![info exists tycho]} {
+    # Neither environment variable is set.
+    # See whether there is a ~ptolemy or ~ptdesign user, in that order,
+    # that has tycho installed.
+    if [file exists [glob [file join ~ptolemy tycho]]] {
+	set tycho [glob [file join ~ptolemy tycho]]
+	set TYCHO $tycho
+    } {
+	if [file exists [glob [file join ~ptdesign tycho]]] {
+	    set tycho [glob [file join ~ptdesign tycho]]
+	    set TYCHO $tycho
+	}
+    }
+}
+
+if {![info exists tycho] || ![file exists $tycho]} {
+    # All of the above failed, give up
+    error {To run tycho, set your environment variable TYCHO to the tycho home}
+}
+
+# If the ptolemy variables are not yet set, set them relative to tycho.
+if {![info exists ptolemy]} {
+    set ptolemy [file join $tycho ..]
+    set PTOLEMY $ptolemy
+}
+
+
 global ::ptolemyfeature
 
 # ptolemyfeature(ptolemy) is set to 1 if ptolemy is present
