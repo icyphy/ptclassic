@@ -1314,7 +1314,8 @@ body ::tycho::AbstractGraph::vertices {{pattern *}} {
 #### _adjacencyadd
 #
 # Add an edge to the adjacency matrix. If it already exists,
-# do nothing.
+# the edge will be added again -- subclasses should make sure
+# that this doesn't happen.
 #
 # This and the associated method _adjacencydelete{} build the
 # internal topology of the graph independent of complexities
@@ -1335,27 +1336,24 @@ body ::tycho::AbstractGraph::vertices {{pattern *}} {
 # as fast as possible.
 #
 body ::tycho::AbstractGraph::_adjacencyadd {vertex1 vertex2} {
-    if { [lsearch -exact $_adjacency($vertex1,children) $vertex2] == -1 } {
-	lappend _adjacency($vertex1,children) $vertex2
-	lappend _adjacency($vertex2,parents)  $vertex1
-    }
+    lappend _adjacency($vertex1,children) $vertex2
+    lappend _adjacency($vertex2,parents)  $vertex1
 }
 
 ########################################################################
 #### _adjacencydelete
 #
 # Delete an edge from the adjacency matrix. If it doesn't exist, do
-# nothing.
+# nothing, an error will occur -- sub-classes should make sure
+# that this doesn't happen.
 #
 body ::tycho::AbstractGraph::_adjacencydelete {vertex1 vertex2} {
     set pindex [lsearch -exact $_adjacency($vertex1,children) $vertex2]
     set cindex [lsearch -exact $_adjacency($vertex2,parents)  $vertex1]
-    if {$pindex >= 0 && $cindex >= 0} {
-        set _adjacency($vertex1,children) \
-                [lreplace $_adjacency($vertex1,children) $pindex $pindex]
-        set _adjacency($vertex2,parents) \
-                [lreplace $_adjacency($vertex2,parents) $cindex $cindex]
-    }
+    set _adjacency($vertex1,children) \
+            [lreplace $_adjacency($vertex1,children) $pindex $pindex]
+    set _adjacency($vertex2,parents) \
+            [lreplace $_adjacency($vertex2,parents) $cindex $cindex]
 }
 
 ########################################################################
