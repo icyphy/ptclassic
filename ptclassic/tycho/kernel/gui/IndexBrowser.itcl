@@ -78,14 +78,12 @@ class ::tycho::IndexBrowser {
     ##################################################################
     ####                     public methods                       ####
 
-    #### help
     # Open a help window.
     method help {}
 
     ##################################################################
     ####                   protected methods                      ####
 
-    #### processItem
     # Process a file or directory selection.
     protected method processItem {filename}
 

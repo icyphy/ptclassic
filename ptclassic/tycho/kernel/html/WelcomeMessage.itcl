@@ -74,15 +74,12 @@ proc ::ptkStartupMessage {version executable} {
 class ::tycho::WelcomeMessage {
     inherit ::tycho::Message
 
-    #### -version option
     # Indicates the version of the executable that we are running.
     itk_option define -version version Version ""
 
-    #### -executable option
     # Indicates the actual executable file that we are running.
     itk_option define -executable executable Executable ""
 
-    #### -persistent option
     # Indicates whether the window should destroy itself after a timeout.
     itk_option define -persistent persistent Persistent 1
 

@@ -79,47 +79,38 @@ class ::tycho::DialogWindow {
     #####################################################################
     ####                          options                            ####
 
-    #### -bitmap option
     # The bitmap to display to the left of the message.
     # Typical values are "error", "warning", "info", "hourglass", or
     # "questhead".  The default is a null string, which means no bitmap.
     itk_option define -bitmap bitmap Bitmap ""
 
-    #### -height option
     # The height of the embedded HTML in characters.
     itk_option define -height height Height 15
 
-    #### -html option
     # Embedded HTML can be used for the message.
     itk_option define -html html HTML ""
 
-    #### -image option
     # An image to display to the left of the message.
     itk_option define -image image Image ""
 
-    #### -text option
     # The message to display at the top of the widget.
     itk_option define -text text Text ""
 
-    #### -width option
     # The width of the embedded HTML in characters.
     itk_option define -width width Width 50
 
     #####################################################################
     ####                        public methods                       ####
 
-    #### addButton
     # Add a button to the set of buttons at the bottom.
     method addButton {args}
 
-    #### default
     # Specify the default button.
     method default {id}
 
     # Execute a command given by an option and set commandResult.
     method execCommand {option args}
 
-    #### invoke
     # Invoke a button.
     method invoke {args}
 

@@ -112,22 +112,18 @@ class ::tycho::FileBrowser {
     ##################################################################
     ####                     public methods                       ####
 
-    #### help
     # Open a help window.
     method help {}
 
-    #### mkdir
     # Make a new directory and go to it.
     method mkdir {}
 
     ##################################################################
     ####                   protected methods                      ####
 
-    #### processItem
     # Process a file or directory selection.
     protected method processItem {filename}
 
-    #### updateListbox
     # Fill the listbox with file and directory names.
     protected method updateListbox {}
 

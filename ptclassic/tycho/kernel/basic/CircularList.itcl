@@ -39,23 +39,18 @@ class ::tycho::CircularList {
 
     constructor {args} {}
 
-    #### append
     # Append an element, at the end or after the given element.
     method append {element {after {}}}
 
-    #### clear
     # Reinitialize the list.
     method clear {}
 
-    #### elements
     # Return the elements as a list, optionally starting at the given element.
     method elements {{start {}}}
 
-    #### insert
     # Insert an element, at the beginning or before the given element.
     method insert {element {before {}}}
 
-    #### remove
     # Remove an element from the list.
     method remove {element}
 

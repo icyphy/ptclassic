@@ -31,9 +31,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME - to do
-#  - Reload should also be undoable.
-
 #######################################################################
 #### Edit
 # This class defines a window for editing plain text. It supports
@@ -54,54 +51,42 @@ class ::tycho::Edit {
     ###################################################################
     ####                      public methods                       ####
 
-    #### focusin
     # Call this to give the text subwindow the focus.
     method focusin {}
 
-    #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
-    #### isModified
     # Return $modified.
     method isModified {}
 
-    #### insertData
     # Insert data.
     method insertData {data}
 
-    #### insertFile
     # Insert the contents of a file at the insertion cursor.
     method insertFile {}
 
-    #### loadFile
     # Directly load the contents of the file.
     method loadFile {loadfile} 
 
-    #### reload
     # Reload the current file. 
     method reload {}
 
-    #### save
     # Save text to a file (by default, the file given by the -file option).
     method save {{name ""}}
 
-    #### seeName
     # Go to the point in the text given by the specified regular expression.
     method seeName {regexpr}
 
-    #### setFont
     # Query the user for an alternative font.
     method setFont {}
 
-    #### setInsert
     # Set the insertion point to the value of position.
     method setInsert {position}
 
     ###################################################################
     ####                     protected methods                     ####
 
-    #### textWidget
     # Return the name of the type of text widget to use. It must be
     # derived from EditText.
     method textWidget {} {return ::tycho::EditText}

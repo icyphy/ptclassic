@@ -71,15 +71,12 @@ option add *File.autoSaveInterval 5 widgetDefault
 class ::tycho::File {
     inherit ::tycho::Dismiss
 
-    #### -autosaveinterval option
     # Defines the interval (in minutes) between auto-save operations.
     itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
 
-    #### -data option
     # Specifies initial data to display.
     itk_option define -data data Data {}
 
-    #### -file variable
     # Specify the name of the file associated with the data being edited.
     # NOTE: This should really be a public variable, not an Itk option.
     # But the Itk implementation does not recognize public variables as
@@ -87,7 +84,6 @@ class ::tycho::File {
     # and remove the protected variable "file".
     itk_option define -file file File "NoName"
 
-    #### readOnly option
     # If readOnly is 0, then modifications will be permitted on
     # the file.
     # NOTE: This should really be a public variable, not an Itk option.
@@ -101,137 +97,107 @@ class ::tycho::File {
     ##########################################################################
     ####                         public methods                           ####
 
-    #### altFile
     # Query the user for a filename, then load its contents into the current
     # editor.
     method altFile {}
 
-    #### evaluate
     # Query the user for a filename, then evaluate its contents as 
     # Tcl commands. 
     method evaluate {}
 
-    #### filename
     # Return the name of the file associated with the object.
     method filename {} {return $file}
 
-    #### getReadonly
     # Return the value of the readonly option.
     method getReadonly {} 
 
-    #### help
     # Open a help window.  This should be redefined in derived classes.
     method help {}
 
-    #### insertData
     # Insert data.
     method insertData {data}
 
-    #### insertFile
     # Insert the contents of a file.
     method insertFile {}
 
-    #### markModified
     # Mark the window as containing modified data.
     method markModified {}
 
-    #### markUnmodified
     # Mark the window as not containing modified data.
     method markUnmodified {}
 
-    #### revisionControl
     # Check in a file using the selected revision control program command
     # if the file is writable. Otherwise check the file out using the
     # specified revision control program command. 
     method revisionControl {}
 
-    #### print
     # Print the contents of the file. The default behavior is an error.
     method print {}
 
-    #### reload
     # Reload the previously saved file.  The default behavior is an error.
     method reload {}
 
-    #### save
     # Save to a given filename, or if none is given, to the name given by
     # the file variable.
     method save {{name ""}}
 
-    #### saveAs
     # Open the file browser to save to some other file.
     method saveAs {}
 
-    #### saveAsFile
     # Change the associated file to the specified file name and then save.
     method saveAsFile {filename}
 
-    #### crashSave
     # Save data to a crash recovery file.
     method saveCrash {}
 
-    #### seeName
     # Find the point in the file identified by "name". The default
     # implementation is an error.
     method seeName {name}
 
-    #### windowMenuAppend
     # Append a file editor to the window menu.
     method windowMenuAppend {obj label}
 
-    #### windowMenuRemove
     # Remove a filename from the window menu.
     method windowMenuRemove {filename}
 
     ##########################################################################
     ####                         public procedures                        ####
 
-    #### callAutoSave
     # If the argument is a File object, call its autoSave method.
     proc callAutoSave {obj} {}
 
-    #### displayData
     # Display data as if it were stored in the file by the given name.
     proc displayData {data filename} {}
 
-    #### emergencySave
     # Call the saveCrash method for all File objects.
     proc emergencySave {} {}
 
-    #### hyperJump
     # Open a file and go to its internal point identified by name.
     proc hyperJump {filename point} {}
 
-    #### newEditor
     # Open a new editor of the specified class.
     proc newEditor {editor} {}
 
-    #### openWin
     # Open a file browser, and then open an editor for the file.
     proc openWin {} {}
 
-    #### openContext
     # Open an editor to edit the file.
     # Which editor is determined by the file extension.
     proc openContext {file} {}
 
-    #### registerEditor
     # Register file extensions and an associated editor class.
     proc registerEditor {extensions editorClass {description {}} \
 	    {baseFilename {}}} {}
 	
-    #### windowMenuAddAll
     # Add a file editor object to the window menus of all open File objects.
     proc windowMenuAddAll {obj label} {}
 
-    #### windowMenuRemoveAll
     # Remove a filename from the window menus of all open File objects.
     proc windowMenuRemoveAll {filename} {}
 
     ##########################################################################
     ####                         protected variables                      ####
 
-    #### file variable
     # FIXME: This should be removed when Itk is fixed to understand
     # public variables.
     protected variable file "NoName"
@@ -240,7 +206,6 @@ class ::tycho::File {
     # if the same file is opened a second time, we can just raise the window.
     protected common filesOpen
 
-    #### modified variable
     # Indicates whether or not the file has been modified since it was
     # last saved.
     protected variable modified 0    
@@ -252,19 +217,15 @@ class ::tycho::File {
     ##########################################################################
     ####                  protected methods and procedures                ####
 
-    #### addWindowMenuEditor
     # Add an entry to the window menu.
     protected method addWindowMenuEditor {desc command}
 
-    #### autoSave
     # Save a backup file and arrange to be called again later.
     protected method autoSave {}
 
-    #### checkForAutoSaveFiles
     # Check for auto-save or crash-recovery files, and return the file to open.
     protected proc checkForAutoSaveFiles {filename} {}
 
-    #### removeBackupFiles
     # Remove auto-save and crash-recovery files, if they exist.
     protected method removeBackupFiles {}
 
