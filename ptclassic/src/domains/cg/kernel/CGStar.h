@@ -36,6 +36,9 @@ class CGWormhole;
 class CGStar : public SDFStar  {
 
 public:
+	// Constructor
+	CGStar();
+
 	// my domain
 	const char* domain() const;
 
@@ -54,6 +57,9 @@ public:
 
         // max {cost of communication with its anscestros}
         int maxComm();
+
+	Symbol codeblockSymbol;
+	Symbol starSymbol;
 
 protected:
 
@@ -100,15 +106,9 @@ protected:
 	// A zero-length StringList is returned if there is no such State.
 	virtual StringList lookupVal(const char* name);
 
-	// Lookup the unique global label name for the local symbol
-	// The first of these is local to a codeblock, the second
-	// is local to a star.  In both cases, the symbol is guaranteed
-	// to be unique with respect to all other symbols in the target.
-        StringList codeblockSymbol(const char* name);
-        StringList starSymbol(const char* name);
-
 	// Pointer to target
         CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+
 
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.
@@ -116,11 +116,11 @@ protected:
 
 private:
 	// List of all local star labels
-	StringList codeblockSymbols;
-	StringList starSymbols;
+/*	StringList codeblockSymbols;
+	StringList starSymbols;*/
 
 	// Reset local codeblock labels
-	void resetCodeblockSyms(){ codeblockSymbols.initialize(); }
+	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
 };
 
 /*
