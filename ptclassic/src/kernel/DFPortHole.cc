@@ -111,7 +111,7 @@ MultiPortHole& MultiDFPort :: setPort (const char* s,
         return *this;
 }
 
-PortHole& MultiDFPort :: installPort(DFPortHole& p) {
+PortHole& MultiDFPort :: installPort(PortHole& p) {
 	ports.put(p);
 	parent()->addPort(p.setPort(newName(), parent(), type(),numberTokens));
  // for ANYTYPE multiportholes, all ports are resolved to be the same type.
