@@ -185,6 +185,22 @@ octObject *instPtr;
 
 /***** end of Isxxx functions */
 
+/* see if facetPtr has any items of the type designated by the mask argument.
+   (e.g. OCT_TERM_MASK, OCT_INSTANCE_MASK, ...)
+ */
+
+static boolean
+FacetHasItem(facetPtr,mask)
+octObject *facetPtr;
+octObjectMask mask;
+{
+    octObject obj;
+    int status;
+    obj.objectId = 0;
+    status = (octGenFirstContent(facetPtr, mask, &obj) == OCT_OK);
+    if (status) FreeOctMembers(&obj);
+    return status;
+}
 
 /* 1/30/89
 Test to see if facet is a galaxy by looking for a formal term.
@@ -193,20 +209,15 @@ boolean
 IsGalFacet(facetPtr)
 octObject *facetPtr;
 {
-    octObject fterm;
-    int status;
-    fterm.objectId = 0;		/* silence Purify */
-    status = (octGenFirstContent(facetPtr, OCT_TERM_MASK, &fterm) == OCT_OK);
-    if (status) FreeOctMembers(&fterm);
-    return status;
+    return FacetHasItem(facetPtr,OCT_TERM_MASK);
 }
 
-/* 8/8/89
-Test to see if facet is a palette by looking for a cursor.
-*/
-boolean 
-IsPalFacet(facetPtr)
-octObject *facetPtr;
+/*
+ Predicate returns true if there is an instance that is a universe,
+ palette, or cursor instance.  Used in IsPalFacet and IsUnivFacet.
+ */
+static boolean
+HasUPC(facetPtr)
 {
     octObject inst;
     octGenerator gen;
@@ -214,7 +225,7 @@ octObject *facetPtr;
 
     octInitGenContents(facetPtr, OCT_INSTANCE_MASK, &gen);
     while (octGenerate(&gen, &inst) == OCT_OK && !status) {
-	status = IsCursor(&inst);
+	status = IsCursor(&inst) || IsUniv(&inst) || IsPal(&inst);
 	FreeOctMembers(&inst);
     }
     octFreeGenerator(&gen);
@@ -222,13 +233,29 @@ octObject *facetPtr;
 }
 
 /* 8/8/89
+Test to see if facet is a palette by looking for absense of nets, and
+either a cursor or universe instance.
+*/
+boolean 
+IsPalFacet(facetPtr)
+octObject *facetPtr;
+{
+    return (!FacetHasItem(facetPtr,OCT_NET_MASK) &&
+	    HasUPC(facetPtr));
+}
+
+/* 8/8/89
+ A universe may not have terminals, and cannot have universe,
+ cursor, or palette instances in it.
 */
 boolean 
 IsUnivFacet(facetPtr)
 octObject *facetPtr;
 {
-    return (!(IsGalFacet(facetPtr) || IsPalFacet(facetPtr)));
+    return (!FacetHasItem(facetPtr,OCT_TERM_MASK) &&
+	    !HasUPC(facetPtr));
 }
+
 
 /* AkoName 2.0  8/29/88 7/1/88 4/17/88
 Derive name of ako star from name of master facet.
