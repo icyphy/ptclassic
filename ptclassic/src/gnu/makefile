@@ -125,7 +125,7 @@ install_make:
 install_gcc: $(BINDIR) install_make
 	(cd $(GNU_OBJ)/gcc; $(GNU_OBJ)/make/make install CC="stage2/xgcc -Bstage2/" CFLAGS="-g -O")
 
-install_gcc_links:
+install_gcc_links: $(BINDIR)
 	#@echo "Install c++filt, the g++ name demangler"
 	#-(cd $(GNU_OBJ)/gcc; cp c++filt $(BINDIR))
 	@echo "Set up some links so we can move the compiler"
