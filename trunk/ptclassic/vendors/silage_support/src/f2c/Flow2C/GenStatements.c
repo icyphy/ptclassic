@@ -150,8 +150,8 @@ bool pl_flag;
     TopologicalOrder(Graph);
     GenStatements(Graph,pl_flag);
 /*  Generate statements to display requested signals */
-    GenDisplays(Graph->EdgeList);
-    GenDisplays(Graph->ControlList);
+    GenDisplays(Graph,Graph->EdgeList,pl_flag);
+    GenDisplays(Graph,Graph->ControlList,pl_flag);
 /* Update loop delay counter */
     GenIncrementLoopDelays(Graph);
     CloseBraces();
@@ -183,8 +183,8 @@ bool pl_flag;
     TopologicalOrder(LoopGraph);
     GenStatements(LoopGraph,pl_flag);
 /*  Generate statements to display requested signals */
-    GenDisplays(LoopGraph->EdgeList);
-    GenDisplays(LoopGraph->ControlList);
+    GenDisplays(LoopGraph,LoopGraph->EdgeList,pl_flag);
+    GenDisplays(LoopGraph,LoopGraph->ControlList,pl_flag);
 /* Update loop delay counter */
     GenIncrementLoopDelays(LoopGraph);
     CloseBraces();
@@ -212,8 +212,8 @@ bool pl_flag;
     TopologicalOrder(LoopBodyGraph);
     GenStatements(LoopBodyGraph,pl_flag);
 /*  Generate statements to display requested signals */
-    GenDisplays(LoopBodyGraph->EdgeList);
-    GenDisplays(LoopBodyGraph->ControlList);
+    GenDisplays(LoopBodyGraph,LoopBodyGraph->EdgeList,pl_flag);
+    GenDisplays(LoopBodyGraph,LoopBodyGraph->ControlList,pl_flag);
 /* Update loop delay counter */
     GenIncrementLoopDelays(LoopBodyGraph);
     CloseBraces();

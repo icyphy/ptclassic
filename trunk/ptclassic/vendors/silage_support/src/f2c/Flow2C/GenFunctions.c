@@ -25,15 +25,15 @@ bool pl_flag;
     register GraphPointer ReverseGraph,tmp;
     bool IsLoop();
 
-    if(!pl_flag)
+   if(!pl_flag)
     {
     for (Graph = Root; Graph != NULL; Graph = Graph->Next) 
 	{
-        	if (!IsLoop(Graph))
-	    	GenFunc(Graph,pl_flag);
+        	if (!IsLoop(Graph)) GenFunc(Graph,pl_flag);
 	}
     }
 /* Need to generate in the reverse order for declaration purposes */
+
     if(pl_flag)
     {
 	tmp = (GraphPointer) malloc (sizeof(Graph));
@@ -43,9 +43,8 @@ bool pl_flag;
 	{
 		for(Graph = Root; Graph->Next != tmp; Graph = Graph->Next);
 		fprintf(stderr,"Graph->name %s \n",Graph->Name);
-		tmp = Graph;
-        	if (!IsLoop(Graph))
-	    	GenFunc(Graph,pl_flag);
+		tmp = Graph;	
+        	if (!IsLoop(Graph)) GenFunc(Graph,pl_flag);
 	} /* while */
     } /*  pl_flag */
 }
@@ -69,7 +68,7 @@ bool pl_flag;
 
    numIn = 0; numOut = 0;
    topLevel = false;
-
+fprintf(stderr," 1 XXX \n");
 if( pl_flag && (Graph == Root) )
 {
    topLevel = true;
@@ -88,6 +87,7 @@ if( pl_flag && (Graph == Root) )
    { strcpy(outputList[numOut].name,outputName); numOut++; }
    numberOut = numOut;
 }
+fprintf(stderr," 2 XXX \n");
     indexlevel++;
     Edgetable[indexlevel] = st_init_table(strcmp, st_strhash);
 
@@ -134,6 +134,7 @@ if(!pl_flag)
     fprintf(CFD, "{\n");
 }
 
+fprintf(stderr," 3 XXX \n");
 /* now is the special case where we generate the signal type
 along with the signalname in the function declaration,
 also in case of the pl_flag and the top level, we also need
@@ -148,7 +149,7 @@ to pass the data type to the signal */
 		mycomma = true;
 	}
 /* here will be the other formal parameters along with the data types */
-	ClearList(ListOfParams);
+/*	ClearList(ListOfParams); */ /* WHY DOES THIS SEG FAULT? */
     	ListOfParams = (ListPointer) NULL;
    mycomma = GenDeclFormalParams(Graph->InEdges,pl_flag,mycomma);
    mycomma = GenDeclFormalParams(Graph->InControl,pl_flag,mycomma);
@@ -157,6 +158,7 @@ to pass the data type to the signal */
     	ClearList(ListOfParams);
    } /* pl_flag */
 
+fprintf(stderr," 4 XXX \n");
    if(topLevel)
    {
 		if(mycomma == true) fprintf(CFD,",");
@@ -170,23 +172,31 @@ to pass the data type to the signal */
    } /* topLevel */
 if(pl_flag) fprintf(CFD, ")\n{\n");
 
+fprintf(stderr," 5 XXX \n");
 /* Generate declarations for local delay variables used */
     GenDeclDelayVars(Graph);
 
+fprintf(stderr," 6 XXX \n");
 /* Generate declarations for local variables used, fixedtype and int */
     GenDeclLocalVars(Graph);
 
+fprintf(stderr," 7 XXX \n");
 /* Generate initializations for local delay variables */
 /* GenInitDelayVars(Graph);   */
 
+fprintf(stderr," 8 XXX \n");
 /* Remove DelayNodes and TopologicalOrder graph for GenStatements */
     RemoveDelaysInGraph(Graph);
+fprintf(stderr," 9 XXX \n");
     RemoveLpDelaysInGraph(Graph);
+fprintf(stderr," 10 XXX \n");
     TopologicalOrder(Graph);
 
 /* Generate the body of the function */
     fprintf(CFD, "\n/* statements of function body */\n");
+fprintf(stderr,"before entering GenFunc \n");
     GenStatements(Graph,pl_flag);
+fprintf(stderr,"after GenFunc \n");
 
 /* Generate statements to display requested signals */
     GenDisplays(Graph,Graph->EdgeList,pl_flag);
@@ -611,12 +621,18 @@ bool pl_flag;
 	}
 	if(pl_flag)
 	{
-		if (HasAttribute(edge->Attributes, "IsDisplay")) {
-			fprintf(CFD,"*s_%s_",Graph->Name);
-    			GenEdgeName(edge);
-			fprintf(CFD," = ");
-    			GenEdgeName(edge);
-			fprintf(CFD,";\n");
+		if (HasAttribute(edge->Attributes, "IsDisplay")) 
+		{
+			if(IsArray(edge))
+				fprintf(CFD,"/* arrays not handled yet */\n");
+			else 
+			{
+				fprintf(CFD,"*s_%s_",Graph->Name);
+    				GenEdgeName(edge);
+				fprintf(CFD," = ");
+    				GenEdgeName(edge);
+				fprintf(CFD,";\n");
+			}
 		}
 	}
     }

@@ -664,7 +664,7 @@ bool pl_flag;
     }
     else
     {
-    	GenMain();
+    	GenMain(pl_flag);
     	GenWrapUp();
     	if (l_flag) {
         	printmsg(NULL, "REDUCING LOCAL VARIABLES...\n\n");
@@ -1014,18 +1014,30 @@ GenReadInputControl(edge,pl_flag)
 EdgePointer edge;
 bool pl_flag;
 {
+/* this is to generate the read for array inputs */
     int i = 0;
     char label[STRSIZE], value[STRSIZE];
     char *lowstr, *highstr, *strtok();
     int low, high;
 
+    if(pl_flag) fprintf(CFD,"void \t");
     fprintf(CFD, "ReadArray_");
     GenEdgeName(edge);
-    fprintf(CFD, " (pIn)\n");
-    fprintf(CFD, "Sig_Type pIn");
+    if(pl_flag) fprintf(CFD,"(");
+    else fprintf(CFD," (pIn)\n");
+    if(pl_flag) fprintf(CFD, "Sig_Type pIn");
+    else fprintf(CFD, "Sig_Type pIn");
 /* generate dimension of signals */
     GenEdgeMaxDim(edge);
-    fprintf(CFD, ";\n{\n");
+    if(pl_flag)	
+    {
+/* not sure if this is needed at all, the case of constant or array inputs...
+   but doint it all the same for completeness */
+    fprintf(CFD, ",float d");
+    GenEdgeMaxDim(edge);
+    fprintf(CFD,")\n{\n");
+    }
+    if(!pl_flag) fprintf(CFD, ";\n{\n");
 
 /* generate local parameter declarations */
     fprintf(CFD, "    int ");
@@ -1062,6 +1074,8 @@ bool pl_flag;
     }
 
 /* generate function call to read input */
+    if(!pl_flag)
+    {
     fprintf(CFD, "\tif (Read_");
     GenEdgeName(edge);
     fprintf(CFD, " (&pIn");
@@ -1074,6 +1088,28 @@ bool pl_flag;
     fprintf(CFD, ") < 0)\n");
     fprintf(CFD, "\t    WrapUp();\n");
     fprintf(CFD, "    return(0);\n}\n\n");
+    }
+    else if(pl_flag)
+    {
+    fprintf(CFD, "\tRead_");
+    GenEdgeName(edge);
+    fprintf(CFD, " (&pIn");
+    i = 0;
+    sprintf(label, "index%d", i);
+    while(HasAttribute(edge->Arguments, label)) {
+        fprintf(CFD, "[i_%d]", i++);
+        sprintf(label, "index%d", i);
+    }
+    /* actual input value instead of a scanf */
+    fprintf(CFD,",&d");
+    i = 0;
+    sprintf(label, "index%d", i);
+    while(HasAttribute(edge->Arguments, label)) {
+        fprintf(CFD, "[i_%d]", i++);
+        sprintf(label, "index%d", i);
+    }
+    fprintf(CFD, "); \n}\n\n");
+    } /* else */
 
 /* generate the routine called above */
     GenReadInputEdge(edge,pl_flag);
@@ -1131,7 +1167,8 @@ bool pl_flag;
     fprintf(CFD, "}\n\n");
 }
 
-GenMain()
+GenMain(pl_flag)
+bool pl_flag;
 {
     extern int NrOfCycles;
 
@@ -1155,7 +1192,7 @@ GenMain()
     fprintf(CFD, "\n/* Creating Display files */\n");
     GenOpenDisplayFiles(Root);  /*  Process all hierarchy  */
     GenOpenInputFiles();
-    GenMainBody();
+    GenMainBody(pl_flag);
     fprintf(CFD, "\n    WrapUp();\n");
     fprintf(CFD, "}\n\n");
 }
@@ -1164,11 +1201,13 @@ GenPtSetup()
 {
     fprintf(CFD, "\t setup { \n");
     fprintf(CFD, "\t\tInitFixedLeafs ();");
+    fprintf(CFD, "/*  Reading Inputs that are constant */\n");
 	if (GE(Root)->HasDelay == true) 
         {
         fprintf(CFD, "\n\t\t/*  Delay Initialization goes here... */\n");
         fprintf(CFD, "\t\tInit_%s (&SigTab);\n", Root->Name);
         }
+/*  Reading Inputs that are constant  case isnt handled - does it happen so? */
     fprintf(CFD, "\n \t } // setup \n\n");
 }
 
@@ -1248,7 +1287,7 @@ GenWrapUp()
     GenCloseInputFiles();
     fprintf(CFD, "\n/* Closing Display files */\n");
     GenCloseDisplayFiles(Root); /*  Process all hierarchy  */
-    GenPerformPostProcessing(Root);
+    GenPerformPostProcessing(Root); 
     fprintf(CFD, "   exit(0);\n}\n\n");
 }
 
@@ -1463,18 +1502,18 @@ bool pl_flag;
         if ((int)GetAttribute(edge->Attributes, "IsConstant")) {
             if(IsArray(edge))
                 fprintf(CFD,"    ReadArray_");
-	        else
+	    else
                 fprintf(CFD,"    Read_");
             GenEdgeName(edge);
             if(IsArray(edge))
                 fprintf(CFD,"(");
-	        else
+	    else
                 fprintf(CFD,"(&");
             GenEdgeName(edge);
 	    if(pl_flag) 
 	    {
  		fprintf(CFD,", %s_",Root->Name);
-/* NEED & HERE? */
+/* NEED & HERE?  we actually dont get this situation in ptolemy */
                 GenEdgeName(edge);
             } 
             fprintf(CFD, ");\n");
