@@ -1,4 +1,6 @@
 # Template makefile used to compile C files and load them into Tcl.
+# Source for this template is at
+# $PTOLEMY/tycho/edit/textedit/templates/Cmakefile.mk
 #
 # $Id$
 # Makefile Author: Christopher Hylands
@@ -42,7 +44,6 @@ include $(CONFIG)
 
 OTHERCFLAGS =
 
-include $(TYCHO)/obj.$(PTARCH)/java.mk
 include $(TYCHO)/obj.$(PTARCH)/tcl.mk
 
 # Tycho substitutes in our filename in the line below
