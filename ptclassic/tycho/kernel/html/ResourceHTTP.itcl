@@ -71,14 +71,6 @@ class ::tycho::ResourceHTTP {
     # Return the end of file status
     method eof {}
 
-    # Test if a given resource exists.
-    # FIXME: Currently we need to "open" first.
-    # FIXME: This doesn't work yet.
-    # method exists {path}
-
-    # Return the current file type
-    # method filetype {} {return HTTP}
-
     # Read a string from a streamable resource
     method gets {{varName {}}}
 
@@ -395,38 +387,60 @@ body ::tycho::ResourceHTTP::delete {path} {
 #####################################################################
 #### dirlist
 # Get a "listing" of files in a "directory." This parses
-# the received index text to extract names from it. The
+# a received file to extract names from it. The
 # list is sorted, with directory names ending in "/",
 # in a similar fashion to ls -F.
 #
 body ::tycho::ResourceHTTP::dirlist {url} {
+    # ::puts "::tycho::ResourceHTTP::dirlist $url"
     # If a non-existent directory, return nothing
     if { ! [exists $url] } {
 	return {}
     }
     # If for some reason it's not a directory, return it
-    if { ! [isdirectory $url] } {
+    if { ! [query $url isdirectory] } {
 	return [list $url]
     }
     # Get the index data
     set data [::tycho::resource read $url]
+    # Here's the list we generate
+    set list {}
+
+    # Take a wild pot-shot here: if the data does _not_ contain
+    # the string "Index of foo", where "foo" is the path component,
+    # of the URL, then add "index.html" to the list of files.
+    if ![regexp "Index of [lindex [splitURL $url] 2]" $data] {
+        lappend list index.html
+    }
+
     # Scan for anything that looks vaguely like a hyperlink
     # Currently this just looks for: href="foo"
     # This will probably need to be tightened up to deal
-    # with different servers.
-    set list {}
-    while { [regexp -nocase {href="([^\"]+)"} $data dummy href] } {
+    # with different servers. Links will be extracted only up to
+    # first # mark.
+    while { [regexp -nocase {href="([^#\"]+)"} $data dummy href] } {
 	# Got a cross-reference. If it's relative, add 
-	# the files or directory list.
-	if [::tycho::resource isrelative $href] {
-	    lappend dirs $href
-	}
-	# Dump the front of the string
-	regexp -nocase -indices {href="([^\"]+)"} $data dummy hidx
-	set data [string range $data $hidx end]
+        # it to the list of files and directories.
+        if { [::tycho::url pathtype $href] == "relative" } {
+            # Ignore odd things like mailto:
+            if ![regexp {^[a-z]+:} $href] {
+                set splat [split $href /]
+                # Directories have slashes in them, or
+                # don't have an extension
+                if { [llength $splat] > 1 \
+                        || [file extension $href] == ""} {
+                    lappend list [lindex $splat 0]/
+                } else {
+                    lappend list [lindex $splat 0]
+                }
+            }
+        }
+        # Dump the front of the string
+        regexp -nocase -indices {href="([^\"]+)"} $data dummy hidx
+        set data [string range $data [lindex $hidx 1] end]
     }
-    # Sort and return
-    lsort $list
+    # Remove duplicates, sort and return
+    lsort [::tycho::lnub $list]
 }
 
 #####################################################################
@@ -470,7 +484,9 @@ body ::tycho::ResourceHTTP::mkdir {dir} {
 #
 body ::tycho::ResourceHTTP::new {path args} {
     #::puts "::tycho::ResourceHTTP::new $path $args"
-    uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] $args
+    uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] \
+	    -debug 1 \
+	    $args
 }
 
 #####################################################################
@@ -479,6 +495,7 @@ body ::tycho::ResourceHTTP::new {path args} {
 # ::tycho::Resource::query for details.
 #
 body ::tycho::ResourceHTTP::query {url option} {
+    # ::puts "::tycho::ResourceHTTP::query $url $option"
     switch -exact -- $option {
 	"executable" {
 	    # FIXME: Do directories need to be executable to read them?
@@ -494,24 +511,26 @@ body ::tycho::ResourceHTTP::query {url option} {
 	    if [::info exists opt(isdirectory)] {
 		return $opt(isdirectory)
 	    }
-	    # Otherwise we have to work it out. As a first
-	    # guess, a URL represents a directory if it
-	    # exists and ends in "/"
+	    # Otherwise we have to work it out. Currently, we say
+	    # that a URL is a directory if a) it does not have a file
+	    # extension or b) its content type is text/html.
 	    set isdir 0
 	    if [exists $url] {
 		while { [::info exists _forwarding($url)] } {
 		    set url $_forwarding($url)
 		}
-		if [regexp {/$} $url] {
+		if { [::tycho::url extension $url] == "" \
+			|| $opt(type) == "text/html" } {
 		    set isdir 1
 		}
-		# As a second guess, it's a directory if it contains the
-		# string "Index of foo", where "foo" is the path component
-		# of the URL.
-		set path [lindex [splitURL $url] 2]
-		set data [::tycho::resource read $url]
-		set isdir [regexp "Index of $path" $data]
-
+		set oldcode {
+		    # As a second guess, it's a directory if it contains the
+		    # string "Index of foo", where "foo" is the path component
+		    # of the URL.
+		    set path [lindex [splitURL $url] 2]
+		    set data [::tycho::resource read $url]
+		    set isdir [regexp "Index of $path" $data]
+		}
 		# Remember what it is
 		lappend _statinfo($url) isdirectory $isdir
 		return $isdir
@@ -521,14 +540,14 @@ body ::tycho::ResourceHTTP::query {url option} {
 	"isfile" {
 	    # A URL is a file if it exists and is not a directory
 	    if [exists $url] {
-		return [expr { ! [query isdirectory $url] }]
+		return [expr { ! [query $url isdirectory] }]
 	    }
 	    return 0
 	}
 	"readable" {
 	    exists $url
 	}
-	"remote" {
+	"isremote" {
 	    return 1
 	}
 	"writable" {
@@ -650,10 +669,10 @@ body ::tycho::ResourceHTTP::httpdone {} {
 	}
 	# Set status info
 	set _statinfo($currentURL) [list \
-		-mtime $lastmodified \
-		-size $contentlength \
-		-type $contenttype]
-	debugputs "Status = [array get _statinfo]"
+		mtime $lastmodified \
+		size $contentlength \
+		type $contenttype]
+	debugputs "_statinfo($currentURL) = $_statinfo($currentURL)"
     }
     # To be picky, let's check that the content size is the
     # same as what we actually got...
@@ -871,5 +890,7 @@ body ::tycho::ResourceHTTP::httpwait {} {
     }
     return
 }
+
+
 
 
