@@ -79,7 +79,7 @@ class ::tycho::EditPtlang {
 # <tcl><pre>
 #  ::tycho::EditPtlang .e -star {SDF Cos}
 #  .e centerOnScreen
-# </pre><tcl>
+# </pre></tcl>
 configbody ::tycho::EditPtlang::star {
     global PTOLEMY
     set domainStarList $itk_option(-star)
