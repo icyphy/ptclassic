@@ -31,7 +31,7 @@
 # tycho -java
 # tycho -e /tmp/foo.tcl
 
-set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-e tclscript] [-bak] [file...]"
+set usagestring = "Usage: $0 [-debug] [-ptiny|-ptrim|-pigi|-bin tychobin] [-nowelcome] [-noconsole] [-e tclscript] [file...]"
 
 set argError = "Usage: $0 -ptiny, -ptrim, -pigi, -bin xxx and -java are mutually exclusive"
 
@@ -40,23 +40,24 @@ if ( ! $?DISPLAY ) then
 	exit 1
 endif
 
-set tclscript = ""
+# tclscript has a value, it is not a boolean so we can't just use
+# $?tclscript, since if we refer to tclscript anywere, it will be
+# dereferenced, so if it is not set, we get an error.
+set tclscript=""
 
 while ($#argv)
 	switch ("$argv[1]")
 		case -help:
 			echo "$usagestring"
-			echo " -debug         Bring up in debug mode"
+			echo " -debug         Bring up in debug mode w/ gdb"
 			echo " -ptiny         Smaller version, fewer domains"
 			echo " -ptrim         Small version, more domains"
 			echo " -pigi          Big version, many domains"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -java          Run with the Tcl/Java interface"
-  			echo " -bak           Run a .bak binary"
 			echo " -nowelcome     No welcome window"
 			echo " -noconsole     No console window"
 			echo " -e tclfile     Start up and source tclfile"
-			echo " -bak           Run a .bak binary"
 			echo " files...       Files to open"
 			exit 0
 		case -debug:
@@ -103,10 +104,10 @@ while ($#argv)
 			set selectJava
 			set tychojava
 			breaksw
-		case -bak:
-			set tychobak
-			breaksw
 		case -nowelcome:
+			echo "To permanently disable the welcome window,"
+			echo "edit your ~/.Tycho/tychorc.tcl file and add:"
+			echo "set tychoWelcomeWindow 0"
 			set nowelcome
 			breaksw
 		case -noconsole:
@@ -156,6 +157,17 @@ if ( ! -d "$TYCHO") then
 	exit 2
 endif
 
+# If -debug, then set up the arguments we are passing to gdb
+if ( $?tychodebug) then
+	set runargs=""
+	if ( $?nowelcome ) set runargs = (-nowelcome)
+	if ( $?noconsole ) set runargs = ($runargs -noconsole)
+	if ( $tclscript != "" ) set runargs = ($runargs -e $tclscript)
+	if ( $?filename) then
+		set runargs =($runargs $filename)
+	endif
+endif
+
 # We could use an if/else/if/else here, but the indentation makes
 # it hard to read
 
@@ -174,12 +186,7 @@ if (! $?selectPtolemy && ! $?selectJava) then
 		endif
 		set debugcmdfile = /tmp/tychodbg.$$
 		echo "break main" > $debugcmdfile
-		if ( $?filename) then
-			echo run -f \"$TYCHO/kernel/Tycho.tcl\" \"$filename\"  >> $debugcmdfile
-		else
-			echo "run -f $TYCHO/kernel/Tycho.tcl "  >> $debugcmdfile
-		endif
-
+		echo run -f \"$TYCHO/kernel/Tycho.tcl\" $runargs >> $debugcmdfile
 		set prog = ($debugger -x $debugcmdfile itkwish)
 
 		#set prog = (itkwish.purify -f $TYCHO/kernel/Tycho.tcl)
@@ -231,32 +238,6 @@ if ( $?selectPtolemy && ! $?selectJava) then
 				endif
 			endif
 		endif
-		if ( $?tychobak ) then
-			if ( -d ${PTOLEMY}/lib.${PTARCH}.bak ) then
-				if ( $?S_LD_LIB_PATH ) then
-					# S_LD_LIB_PATH is set by ptsetup.csh
-					# if this script was called and
-					# and LD_LIBRARY_PATH was not set.
-					# If this was the case, then we
-					# setup user to use the backup
-					# libraries, if they exist.
-					setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:/usr/lib:${PTX11DIR}/lib
-				else
-					# The user set LD_LIBRARY_PATH, so we
-					# stick lib.$PTARCH.bak in front
-					# anyway, just to be sure that we get
-					# good libraries.
-					# This might be a mistake, since if
-					# LD_LIBRARY_PATH is set, we should
-					# assume the user knows what they
-					# want to do
-					setenv LD_LIBRARY_PATH ${PTOLEMY}/lib.${PTARCH}.bak:${LD_LIBRARY_PATH}
-				endif
-			else
-				echo "Warning: Can't find ${PTOLEMY}/lib.${PTARCH}.bak"
-			endif
-		    set prog = $prog.bak
-		endif
 	else # ! $?prog
 		echo "prog=$prog"
 	endif
@@ -270,11 +251,7 @@ if ( $?selectPtolemy && ! $?selectJava) then
 		echo "break main" > $debugcmdfile
 		# Since we are running tysh, not itkwish, we need
 		# not pass -f .../Tycho.tcl
-		if ( $?filename) then
-			echo run \"$filename\"  >> $debugcmdfile
-		else
-			echo "run "  >> $debugcmdfile
-		endif
+		echo "run $runargs"  >> $debugcmdfile
 
 		if ( ! $?tychodebugnoprog ) then
 			set prog = ($debugger -x $debugcmdfile $prog)
@@ -335,9 +312,18 @@ if ( "$1" =~ "-*" ) then
 endif
 
 # Add in options that are passed directly to Tycho.
-if ( $?nowelcome ) set prog = ($prog -nowelcome)
-if ( $?noconsole ) set prog = ($prog -noconsole)
-if ( $tclscript != "") set prog = ($prog -e $tclscript)
+# If we are running gdb, we pass these in as part of the run script
+if ( ! $?tychodebug) then
+	if ( $?nowelcome ) set prog = ($prog -nowelcome)
+	if ( $?noconsole ) set prog = ($prog -noconsole)
+	if ( $tclscript != "") set prog = ($prog -e $tclscript)
+else 
+	# Have gdb echo the contents of the command file
+	set cmdfile=`cat $debugcmdfile`
+	echo "echo gdb commands:\n" >> $debugcmdfile
+	echo "echo $cmdfile\n" >> $debugcmdfile
+
+endif
 
 # If selectPtolemy is set then we are just running itkwish
 # If the user has used -debug, then don't check, the user must be a god :-) 
