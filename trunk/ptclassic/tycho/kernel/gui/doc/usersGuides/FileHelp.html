@@ -139,13 +139,13 @@ File</CODE> command on a file called <CODE>file.foo</CODE>
 will cause an view of <CODE>::tycho::EditFoo</CODE> to be created.
 The syntax of the command that creates the instance will be:
 <pre>
-::tycho::view EditFoo .some_name -file file.foo
+::tycho::view EditFoo -file file.foo
 </pre>
 The name is generated automatically.  The 
 <a name="-file option"><CODE>-file</CODE> option</a> must (obviously)
 be understood by the editor.  But that is the only constraint on the editor.
 <p>
-If a editor has a ToolBar, then the <CODE>registerExtensions</CODE>
+If an editor has a ToolBar, then the <CODE>registerExtensions</CODE>
 command would look like:
 <PRE>
     ::tycho::File::registerExtensions {.html .htm .htl} \
