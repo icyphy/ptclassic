@@ -49,6 +49,7 @@ PortHole& SDFPortHole :: setPort (
 	// Based on the delay, we allocate a Buffer assuming no
 	// past Particles are allocated
         numberTokens = numTokens;
+	maxBackValue = delay;
 	// The number of Particles the buffer has to hold is:
 	//		numberTokens current and future Particles
 	//		delay past Particles
@@ -61,6 +62,7 @@ PortHole& SDFPortHole :: setPort (
 // We re-do porthole initialization if bufferSize changes
 PortHole& SDFPortHole :: setSDFParams(unsigned numTokens, unsigned delay) {
 	numberTokens = numTokens;
+	maxBackValue = delay;
 	bufferSize = numberTokens + delay;
 	if (myBuffer && myBuffer->size() != bufferSize)
 		initialize();
