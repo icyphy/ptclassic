@@ -5,6 +5,7 @@
 #include "IntState.h"
 #include "FloatState.h"
 #include "Geodesic.h"
+#include "GalIter.h"
 
 /**************************************************************************
 Version identification:
@@ -21,8 +22,6 @@ These are the methods for the dynamic dataflow scheduler.
 
 **************************************************************************/
 
-extern Error errorHandler;
-
 extern const char DDFdomainName[];
 
 void fireSource(Star&, int);
@@ -31,10 +30,11 @@ void fireSource(Star&, int);
 		Main DDF scheduler routines
 *******************************************************************/
 
-int isSource(Star& s) {
-	for (int i = s.numberPorts(); i > 0; i--) {
-		PortHole& p = s.nextPort();
-		if (p.isItInput()) return FALSE;
+int isSource(const Star& s) {
+	BlockPortIter nextp(s);
+	PortHole* p;
+	while ((p = nextp++) != 0) {
+		if (p->isItInput()) return FALSE;
 	}
 	return TRUE;
 }
@@ -44,11 +44,10 @@ int isSource(Star& s) {
 	////////////////////////////
 
 StringList DDFScheduler :: displaySchedule () {
-	return "DE schedule is computed at run-time\n";
+	return "DDF schedule is computed at run-time\n";
 }
 
-
-extern StringList checkConnect (Galaxy&);
+extern int warnIfNotConnected (Galaxy&);
 
 	////////////////////////////
 	// setup
@@ -59,40 +58,35 @@ int DDFScheduler :: setup (Block& b) {
 
 	Galaxy& galaxy = b.asGalaxy();
 
-	// initialize the SpaceWalk member
-	alanShepard.setupSpaceWalk(galaxy);
+	GalStarIter nextStar(galaxy);
 
 	// initialize sourceBlocks list
 	sourceBlocks.initialize();
 	numFiring = 0;
 
 	// check connectivity
-	StringList msg = checkConnect (galaxy);
-	if (msg.size() > 0) {
-		errorHandler.error (msg);
+	if (warnIfNotConnected (galaxy)) {
 		return FALSE;
 	}
 
 	// star initialize.  We allow any domain ending in "DF"
-	// (for example, SDF, DDF)
-	for (int i = alanShepard.totalSize(galaxy); i>0; i--) {
-		Star& s = alanShepard.nextStar();
-		const char* dom = s.domain();
+	// (for example, SDF, DDF).  Also compute the size.
+	Star* s;
+	galSize = 0;
+	while ((s = nextStar++) != 0) {
+		const char* dom = s->domain();
 		int l = strlen(dom) - 2;
 		if (strcmp(dom + l, "DF") != 0) {
-			StringList msg = s.readFullName();
-			msg += " is not a DDF star: domain = ";
-			msg += dom;
-		 	errorHandler.error(msg);
+			Error::abortRun (*s, " is not a DDF or SDF star");
 			return FALSE;
 		}
 		// member initialization.
-		s.prepareForScheduling();
+		s->prepareForScheduling();
 
 		// put the source block into the sourceBlocks list.
-		if (isSource(s))
-			sourceBlocks.put(&s);
-		
+		if (isSource(*s))
+			sourceBlocks.put(s);
+		galSize++;
 	}
 
 	galaxy.initialize();
@@ -125,16 +119,15 @@ int
 DDFScheduler :: run (Block& block) {
 
 	if (haltRequestFlag) {
-		errorHandler.error("Can't continue after run-time error");
+		Error::abortRun(block, ": Can't continue after run-time error");
 		return FALSE;
 	}
 
 	Galaxy& galaxy = block.asGalaxy();
 
 	// initialize the SpaceWalk member
-	alanShepard.setupSpaceWalk(galaxy);
+	GalStarIter nextStar(galaxy);
 
-	int galSize = alanShepard.totalSize(galaxy);
 	int scanSize = galSize;		// how many not-runnable stars scanned
 
 	while (numFiring < stopTime && !haltRequestFlag) {
@@ -149,29 +142,32 @@ DDFScheduler :: run (Block& block) {
 
 	   // fire source blocks...
 	   numFiring += numStop;
-	   sourceBlocks.reset();
+	   ListIter nextb(sourceBlocks);
 	   for (int i = sourceBlocks.size(); i > 0; i--) {
-		Star& s = *(Star*)sourceBlocks.next();
+		Star& s = *(Star*)nextb++;
 		fireSource(s, numStop);
 		if (haltRequestFlag) break;
 	   }
 
 	   scanSize = galSize;
-	   alanShepard.setupSpaceWalk(galaxy);
    
 	   while (scanSize) {
 
 		// look at the next star in the block-list
-		Star& s = alanShepard.nextStar();
+		Star* s = nextStar++;
+		if (!s) {
+			nextStar.reset();
+			s = nextStar++;
+		}
 		
 		// check the star is runnable
 		// run it as many times as we can.
-		if (isRunnable(s)) {
+		if (isRunnable(*s)) {
 			// run the star
 			do {
-				s.fire();
+				s->fire();
 				if (haltRequestFlag) exit(1);
-			} while (isRunnable(s));
+			} while (isRunnable(*s));
 
 			// reset scanSize
 			scanSize = galSize;
@@ -219,13 +215,15 @@ int DDFScheduler :: isRunnable(Star& s) {
 
 	// if all input ports have no data, return FALSE
 	int count = 0;
-	for (int i = s.numberPorts(); i > 0; i--) {
-		PortHole& p = s.nextPort();
-		if (p.isItInput() && p.numTokens() != 
-				     p.myGeodesic->numInitialParticles)
+	BlockPortIter nextp(s);
+	PortHole *p;
+	while ((p = nextp++) != 0) {
+		if (p->isItInput() && p->numTokens() != 
+				     p->myGeodesic->numInitialParticles)
 			count++;
 	}
-	if (count == 0)		return FALSE;
+	if (count == 0)		
+		return FALSE;
 
 	// if SDFStar, or no-specified waitPort for DDFStar,....
 
@@ -265,11 +263,11 @@ int DDFScheduler :: lazyEval(Star* s) {
 }
 	
 int DDFScheduler :: checkLazyEval(Star* s) {
-
+	BlockPortIter nextp(*s);
 	for (int i = s->numberPorts(); i > 0; i--) {
 		
 		// look at the next port
-		PortHole& p = s->nextPort();
+		PortHole& p = *nextp++;
 		if (p.isItInput()) {
 			int req = p.numberTokens - p.numTokens() +
 				  p.myGeodesic->numInitialParticles;
@@ -301,15 +299,15 @@ void fireSource(Star& s, int k) {
 			
 	// check how many unused tokens are on output arcs.
 	int min = 10000;		// large enough number
-
+	BlockPortIter nextp(s);
 	for (int j = s.numberPorts(); j > 0; j--) {
-		PortHole& port = s.nextPort();
+		PortHole& port = *nextp++;
 		Geodesic* g = port.myGeodesic;
 
 	  	if (port.numberTokens == 0) {
-			errorHandler.error (s.readFullName(), 
-			 "output port has undefined number of tokens");
-			exit(1);
+			Error::abortRun(s,
+			      ": output port has undefined number of tokens");
+			return;
 		}
 		int r = (g->size() - g->numInitialParticles)/port.numberTokens;
 		if (r < min) min = r;
