@@ -15,13 +15,24 @@ change to the demo directory by typing:
 .(c
 cd ~ptolemy/demo
 .)c
+or if there is no ~ptolemy,
+.(c
+cd $PTOLEMY/demo
+.)c
 Start Ptolemy via the Ptolemy graphical interface:
 .(c
 pigi &
 .)c
 .IE "starting pigi"
 .pp
-You have started two processes: the graphic editor,
+You should get three windows, a VEM console window at the upper left
+of your screen, a startup palette below that, and a message window
+indentifying the version of \*(PT.
+If you do not get the message window, you probably have gotten
+a ``permission denied'' error message. Your .rhost file
+is not properly configured.
+If you do get all three windows,
+then you have started two processes: the graphical editor,
 .i vem ,
 and a process named
 .i pigiRpc
@@ -38,9 +49,9 @@ The remaining VEM windows can be moved and resized.
 The palette contains icons that themselves represent palettes.
 If you have a color monitor, the outline on the icons is purple,
 the color used for icons representing palettes.
-In the current version of \*(PT, five palettes are included,
+In the current version of \*(PT, nine palettes are included,
 one for each of the domains.
-We will begin with the leftmost palette, which contains applications
+We will begin with the palette at the upper left, which contains applications
 in the synchronous dataflow (SDF) domain.
 .pp
 Place the mouse cursor in
@@ -60,20 +71,21 @@ The VEM menu is used for manipulating the
 graphical description of an application.
 We will explain these manipulations later.
 For now, you want to find and execute a demo.
-Place the mouse cursor on the icon labeled ``SDF'', at the left of the palette.
+Place the mouse cursor on the icon labeled ``SDF'', at the upper
+left of the palette.
 Get the \*(PT command menu by holding the shift key and clicking
 the middle mouse button.
 This menu has the same style as the VEM menu.
 Go to the ``Window'' sub menu, and execute the \fIlook-inside\fP command.
 .IE "look-inside"
-A new palette will open, containing icons representing \*(PT
-universes, which have no inputs or outputs.
-These universes are demos of \*(PT,
-self-contained application systems.
-You may move and resize this palette window in the usual way.
+A new palette will open, containing icons representing further palettes.
+Look inside the first of these, labeled ``Basic''.
+The icons inside contain \*(PT
+universes, or application programs.
 .pp
-Note in the \*(PT menu that the \fIlook-inside\fP directive has an ``i'' next to it.
-This is a single key accelerator.
+Note in the \*(PT menu that the \fIlook-inside\fP
+directive has an ``i'' next to it.
+This is a ``single key accelerator''.
 Without using the walking menu, you can look inside any icon by simply
 placing the mouse cursor and hitting the ``i'' key on the keyboard.
 The single-key accelerators are extremely useful.
@@ -81,30 +93,31 @@ The single-key accelerators are extremely useful.
 In time, you will find that you use the menu only for commands
 that have no accelerator.
 .pp
-To look inside one of the universes, and see how it is put together,
-put the mouse over the desired icon,
-and look inside (using the walking menu, or typing an ``i'').
-Try this with the first universe icon in the second row, which shows the
-use of a
-finite impulse response filter to perform linear interpolation.
-This system consists of a noise source,
-an FIR filter, and two display stars.
-To run this system using the walking menu,
-place the mouse cursor anywhere in the window.
-Again hold the shift key, click the middle
+Look inside the first demo, labeled ``butterfly'', at the upper left.
+You will see a schematic.  Try looking inside any of the icons in
+this schematic.  This time, instead of graphics, you will see text
+that defines the functionality of the block.
+The syntax of this text is explained later in the Almagest.
+To run the butterfly system using the walking menu,
+place the mouse cursor anywhere in the window containing
+the butterfly schematic.
+Again holding the shift key, click the middle
 mouse button.  Go to the ``Exec'' sub-menu, and select ``run'' by clicking
 any button.  Notice that typing an ``R'' would have had the
 same effect.
 .IE "run"
 When asked for the number of iterations,
 click on ``OK'' (or hit ``meta-return'') to accept the default.
-When the run is finished, two graphs appear.
-Try resizing and moving these displays.
-Experiment in these xgraph windows with drawing boxes;
+When the run is finished, a graph appears.
+Try resizing and moving this displays.
+Experiment in this xgraph window with drawing boxes;
 to draw a box, just drag any mouse button.
 This causes a new window to open with a display of only the area
 that your box enclosed.
+Although the new window covers the old, if you move it out of the way,
+you can see both at once.
 Any of the now numerous open windows can be closed with a control-d.
+.IE "closing windows"
 .pp
 A few additional window manipulations will prove useful almost
 immediately.  In any of the VEM windows, you can closely examine
@@ -118,30 +131,163 @@ You can also zoom-in (or magnify) by typing a ``z'',
 and zoom-out by typing a ``Z''.
 These and other VEM commands are referenced again later,
 and documented completely in the VEM section of the Almagest.
+.Ir "zoom"
+.Ir "pan"
+.Ir "fill (a window)"
+.Ir "open (a window)"
 .pp
-You may wish to understand exactly how this FIR filter interpolates between
-samples generated by the
-.c IIDUniform
-star.
-The action is all in the FIR filter.
+You may wish to understand exactly how this butterfly
+example works.
+There are several clues to the functionality of the stars.
+After a while, the icons themselves will be all you will need.
+At this point, you can get several levels of detail about them.
+First, you will want to know the name of each star.
+If you closed the butterfly window, open it again.
+Try making the butterfly window larger (dragging the middle button
+while holding the meta key, if you are using the \*(PT standard window
+manager), and filling the larger window with the fill (``f'') command.
+If you make it large enough, names will appear on each of the icons.
+You could have gotten the names as well by zooming.
+Find the
+.c Ramp
+star;
+it is the left-most star, with an orange triangle in the icon.
 To understand its function, place the mouse cursor on it,
 and execute the Other:profile command.
 Here ``Other'' refers to the command category and ``profile''
 to the command in the submenu (you may also type ``,'').
 .IE "profile"
 This command summarizes the behavior of a star.
-Further information can be obtained with the Other:man command,
+Further information can be obtained with the Other:man (``M'') command,
 however as of this writing this has not been fully implemented.
 To see the parameter values of the star, execute the Edit:edit-params
 command, which has accelerator ``e''.
-Notice that the FIR filter supports decimation and interpolation.
-In this case, we are upsampling by a ratio of 8.
-The tap values describe a triangular impulse response,
-which leads to linear interpolation between samples.
+Notice that the \fIstep\fR parameter is given as an expression, ``PI/100''.
+We will see later that a reasonably flexible expression language
+is supported to specify parameter values.
+The ultimate documentation for any star, of course, is its source code.
+You can look at the source code by looking inside the star.
 .pp
 You can safely explore other demos in the palette by the same mechanism.
 The demos this palette
 are documented in the SDF section of the Almagest, the Ptolemy manual.
+.H2 "A Quick Introduction to Targets and Code Generation"
+.pp
+With your mouse cursor in the ``butterfly'' schematic window,
+execute the Edit:edit-target command (or just type ``T'').
+You will get a list of the available
+.c Target s
+in the SDF domain.  The ``default-SDF'' target is selected.
+Change it to ``compile-SDF''.
+.Ir Target
+.Ir "compile-SDF Target"
+.Ir "C++ code generation"
+A dialog box appears with the parameters of the target.
+Click ``Ok''.
+Now run the system again (``R'').
+This time, instead of just running a simulation,
+\*(PT will generate a standalone C++ program
+that implements the system.
+The program will be put in a directory off your home directory
+called ``PTOLEMY_SYSTEMS''.  You can change the name of that directory
+by setting the appropriate Target parameter.
+\*(PT will compile and execute the program for you.
+It will take a while, but eventually you will get the same plot
+that you got originally by running a simulation, assuming
+that the appropriate compiler (g++) is in your path, and that
+you are using the same version of the compiler that was used to build
+the \*(PT libraries.
+.pp
+In a shell window, go look in the directory ~/PTOLEMY_SYSTEMS.
+You will see the following files:
+.(c
+	butterfly
+	butterfly.cc
+	code.cc
+	make.template
+	makefile
+.)c
+The first of these is executable.
+Try executing it.
+You can modify the number of sample points generated using a command-line
+argument.
+For example, to generate 1,000 points instead of 10,000, type
+.(c
+	butterfly 1000
+.)c
+.pp
+You have just seen an example of an alternative
+.c Target
+within the SDF domain.
+A
+.c Target
+defines the way a system is executed.
+The default target is essentially an interpreter.
+The compile-SDF target synthesizes and standalone program and then executes
+it on the native workstation.  More elaborate targets parallelize the code
+and execute the resulting programs on remote hardware.
+Targets can be defined by users and can make use of existing
+\*(PT schedulers.  Knowledgeable users can also define their own
+schedulers.
+.pp
+The resulting C++ program is fairly large because many \*(PT objects
+get linked in (as of this writing, many \fIunnecessary\fR objects
+get linked in, so the executable is unnecessarily large).
+You can create a much leaner program by switching to the CGC domain.
+.H2 "A Quick Introduction to Domains"
+.pp
+In \*(PT, a
+.c Domain
+has two aspects, a ``model of computation'' and a ``target language''.
+.Id Domain
+The model of computation is the \fIoperational semantics\fR of the
+network of blocks.
+.Ir "operational semantics"
+.Id "model of computation"
+It defines what is meant by an interconnection of blocks,
+and how the interconnection will behave when executed.
+.pp
+In the SDF domain, where you have been working, the model of computation
+is ``synchronous dataflow'' and the target language is C++.
+For an explanation of SDF semantics, see the SDF section of the Almagest.
+Many domains have been made for Ptolemy.
+SDF is used as an example only because is it is the most developed of all.
+The DDF (dynamic dataflow) domain is a superset of the SDF domain.
+It uses a run-time scheduler instead of a compile-time scheduler
+(see the DDF section of the Almagest).
+All SDF stars can be used in the DDF domain, but there is also a library
+of DDF-specific stars that require run-time scheduling.
+Since the butterfly example is built using only SDF stars,
+you can it using the DDF scheduler by just switching domains.
+Execute the Edit:edit-domain command (``d''), and select ``DDF''.
+You must also execute Edit:edit-target (``T'') to avoid trying
+to run the DDF scheduler with an SDF target.
+Then run the system (``R'').
+It will behave very much as it did under SDF, except
+that it might be slightly slower.
+.pp
+Another domain, called CGC or ``C Code Generation'', also uses
+synchronous dataflow semantics, but has C as its target language.
+.Ir "CGC domain"
+.Ir "C code generation"
+Unlike DDF, this domain is not a superset of SDF.  Not all SDF stars
+can be used in the CGC domain because
+it has a separate star library.  However, we have made every
+effort use consistent naming of stars and their parameters so that
+it is easy to move from one domain to another.  The ``butterfly''
+example can be executed under the CGC domain.
+To do this, edit the domain (``d'') and select ``CGC''.
+Edit the target (``T'') and select default-CGC.
+Run the system (``R'').
+A window will open displaying a standalone C program that implements
+the system.  Feel free to examine it.
+The program is put (by default) in ~/PTOLEMY_SYSTEMS, and compiled.
+Assuming the compile and link options (Target parameters) are set
+correctly, and the compiler is in your path, then you will get
+an executable, again named ``butterfly''.  The program is considerable
+smaller and somewhat faster than the standalone C++ program.
+As of this writing, it does not accept command-line options,
+although this is likely to change in the future.
 .H2 "Dialog Boxes"
 .pp
 As you explore the demos, you will frequently encounter VEM dialog boxes.
@@ -149,7 +295,7 @@ As you explore the demos, you will frequently encounter VEM dialog boxes.
 For example, the run command triggers a box asking for
 the number of iterations.
 To use the default number, you simply need to click ``OK'' or type
-the key combination indicated in the ``OK'' button.
+the key combination indicated in the ``OK'' button (meta-return).
 To change the number, you must use
 EMACS-like editing control characters.
 These are summarized below:
@@ -182,7 +328,11 @@ For example, to enter a new number for the number of iterations to run,
 position the cursor in the number box, type control-k followed by the
 new number.
 Do not type return;
-this adds a second line to the dialog entry, which is confusing at best.
+this adds a second line to the dialog entry, which for most
+commands is confusing at best.
+If you accidentally type return, you can backspace sufficiently to get
+back to one line.
+.Ir "return in dialog boxes"
 .pp
 Many dialog boxes have more than one field.
 The current field is highlighted, and anything you type will go
@@ -193,11 +343,11 @@ or use the ``Tab'' key to move to the next one.
 .pp
 Since you started pigi in a directory in which you do not have write
 permission, it is not possible here to create new universes, nor
-to modify the demos.  There is currently no convenient way
-to change to a new directory, so you should exit Ptolemy
+to modify the demos.  The easiest way to proceed (when you are just learning)
+is to exit pigi
 before proceeding to the next section, and return to a directory
 where you have write permission.
-Do this by first closing all xgraph windows that you have open by
+Do this by closing all xgraph windows that you have open by
 typing ``control-d'', and then typing ``control-d'' in the VEM console
 window.
 A dialog box may appear with a menu of facets that VEM thinks have
