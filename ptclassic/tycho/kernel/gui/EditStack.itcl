@@ -173,16 +173,27 @@ body ::tycho::EditStack::parseNow {start stop} {
         # If the message has the format:
         #    (... line <line>)
         #    then open previous file, then go to <line>
+        set fname ""
         $text tag configure link$linkcount -foreground \
                 [preference get linkColor] -underline 1
         if {[regexp {((method)|(class)) "([^"]+)" body line ([0-9]+)} \
-                $line match junk1 junk2 junk3 meth lnum]} {
+                $line match junk1 junk2 junk3 meth lnum]} { ;#"
             # WARNING: This is TclIndex dependent.
-            set fname [lindex [uplevel #0 "set auto_index($meth)"] 1]
+            set classnm [::info namespace qualifiers $meth]
+            if { [uplevel #0 "info exists auto_index($meth)"] } {
+                # Get the file directly from the auto_index array
+                set fname [lindex [uplevel #0 "set auto_index($meth)"] 1]
+            } elseif { [uplevel #0 "info exists auto_index($classnm)"] } {
+                # If it's not there, use the same file as the class
+                set fname [lindex [uplevel #0 "set auto_index($classnm)"] 1]
+            }
+        }
+        if { $fname != "" } {
+            # Found a filename, so create a hyperlink
             $text tag bind link$linkcount <Double-Button-1> \
                     "$this hyperJump $fname $meth $lnum"
         } else {
-            # Unknown error message to us, so no hyperlink.
+            # Unknown error message or no filename known, so no hyperlink.
             $text tag configure link$linkcount -underline 0
         }
         incr linkcount
