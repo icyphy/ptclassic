@@ -139,6 +139,8 @@ void CGMultiTarget::setup() {
 	flattenWorm();
     }
 
+    if (inWormHole()) wormPrepare();
+    
     ParScheduler* sched = (ParScheduler*) scheduler();
     sched->setGalaxy(*galaxy());
     sched->setUpProcs(nChildrenAlloc);
@@ -203,7 +205,7 @@ void CGMultiTarget :: prepareChildren() {
 	if (!t) return;
 	addChild(*t);
 	tname.initialize();
-	tname << filePrefix << i;
+	tname << expandPathName(filePrefix) << i;
 	const char* childFilePrefix = hashstring(tname);
 	t->setParent(this);
 	if (cgChild(i)) {
