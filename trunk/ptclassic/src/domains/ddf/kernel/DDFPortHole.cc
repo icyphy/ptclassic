@@ -77,7 +77,7 @@ void DDFPortHole :: setDDFParams(unsigned numTokens = 1)
 
 void InDDFPort :: moveData() 
 {
-	Pointer* p;
+	Particle** p;
 
 	// Back up in the buffer by numberTokens
 	for (int i = numberTokens; i > 0; i--)
@@ -87,7 +87,7 @@ void InDDFPort :: moveData()
 	for (i = numberTokens; i > 0; i--) {
 		p = myBuffer->next();
 		Particle* pp = myPlasma->get();
-		*pp = *(Particle*) *p;
+		*pp = **p;
 		imageGeo->put(pp);
 	}
 }
@@ -96,8 +96,8 @@ void OutDDFPort :: moveData()
 {
 	// get data from imageGeo
 	for (int i = numberTokens; i > 0; i--) {
-		Pointer* p = myBuffer->next();
-		myPlasma->put((Particle*)*p);
+		Particle** p = myBuffer->next();
+		myPlasma->put(*p);
 		*p = imageGeo->get();
 	}
 }
