@@ -39,6 +39,39 @@
 	necessarily work from the doc/codeDoc directory.
 	<CODE>ListBrowser.itcl</CODE> has such a link.
 
+	
+	<LI> If you run <CODE>tydoc</CODE> on the iwidgets classes, then
+	the output does not look as good as it could.  This is in part
+	because the iwidgets classes don't have tydoc sensitive doctags.
+
+
+	<LI> Iwidgets2.1.0/combobox.itcl has a line like:
+	<PRE>
+    private   variable _currItem {};           ;# current selected item.
+	</PRE>
+	which produces the message: <CODE> Failed to call classClause:
+	list element in braces followed by ";" instead of space </CODE>
+	The problem is the trailing <CODE>;</CODE> in <CODE>{};</CODE>
+
+
+	<LI> Not all of the iwidgets classes are consistent in their
+	use of namespaces.  For instance, <CODE>hyperhelp.itk</CODE>
+	declares a class as:
+	<PRE>
+	class ::iwidgets::Hyperhelp {
+	[...]
+	    itk_option define -topics topics Topics {}
+	[...]
+	}
+	</PRE>
+	but then the configbody of <CODE>topics</CODE> does not
+	have a leading <CODE>::</CODE>:
+	<PRE>
+	configbody iwidgets::Hyperhelp::topics {
+	</PRE>
+	<CODE>menubar.itk</CODE> has a similar problem with
+	 <CODE>_getCallerLevel</CODE>.
+
 </MENU>
 
 <H2>Requests For Enhancements (RFEs)</H2>
