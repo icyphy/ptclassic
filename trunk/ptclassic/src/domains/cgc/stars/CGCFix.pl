@@ -84,7 +84,7 @@ experienced overflow in %d out of %d fixed-point calculations checked (%.1lf%%)\
 	// wrapup method
 	wrapup {
 		if (int(ReportOverflow)) {
-			StringList& s = this->fullName();
+			StringList s = this->fullName();
 			addCode(report_overflow((const char*)s));
 		}
 	}
