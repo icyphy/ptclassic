@@ -33,41 +33,29 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "CGCStar.h"
 #include "CGCTarget.h"
 #include "CGCVISSimTarget.h"
 #include "Error.h"
 #include "KnownTarget.h"
 #include "CGUtilities.h"
 // ----------------------------------------------------------------------------
+
 CGCVISSimTarget::CGCVISSimTarget(const char* name,const char* starclass,const char* desc, const char* assocDomain):CGCTarget(name,starclass,desc,assocDomain) {
+  addState(linkCommand.setState("linkCommand",this,"ld",
+				   "command for linking code."));
+  addState(simulate.setState("simulate",this,"YES",
+			    "switch for simulating."));
+  addStream("remoteObjFiles", &remoteObjFilesStream);
 
   functionCounter = 0;
 
   compileCommand.setState("compileCommand",this,"cc","command for compiling code.");
 
-  compileOptions.setState("compileOptions",this,"-fast -xO4 -xdepend -xchip=ultra -xarch=v8plusa -V ${VSDKHOME}/util/vis.il","options to be specified for compiler.");
-}
+  compileOptions.setState("compileOptions",this,"-c -DINCAS -fast -xO4 -xdepend -xchip=ultra -xarch=v8plusa -V -I${VSDKHOME}/include ${VSDKHOME}/util/vis.il","options to be specified for compiler.");
 
-// ----------------------------------------------------------------------------
+  linkOptions.setState("linkOptions",this,"-dn -M ${INCASHOME}/util/prom.ld ${INCASHOME}/util/traps.o ${INCASHOME}/util/incas_utils.o /usr/lib/libc.a","options to be specified for linker.");
 
-int CGCVISSimTarget::compileCode()
-{
-    // invoke the compiler
-    StringList cmd, error, file, rtlib;
-    if (onHostMachine(targetHost)) {
-        StringList ptolemy = getenv("PTOLEMY");
-	StringList vislib;
-	vislib << "-I" << getenv("VSDKHOME") << "/include " ;
-        rtlib << vislib << "-I" << ptolemy << "/src/domains/cgc/rtlib -L" 
-              << ptolemy << "/lib." << getenv("PTARCH") << " -lCGCrtlib" ;
-    }
-    else {
-        rtlib << "CGCrtlib.c";
-    }
-    file << filePrefix << ".c " << rtlib;
-    cmd << compileLine(file) << " -o " << filePrefix;
-    error << "Could not compile " << file;
-    return (systemCall(cmd, error, targetHost) == 0);
 }
 
 // ----------------------------------------------------------------------------
@@ -78,62 +66,139 @@ Block* CGCVISSimTarget :: makeNew() const {
 
 // ----------------------------------------------------------------------------
 
-void CGCVISSimTarget :: genProfileInit(int funcid){
-        *defaultStream << "begintimer_" << funcid << "();\n";
-}
-
-void CGCVISSimTarget :: genProfileEnd(int funcid){
-        *defaultStream << "endtimer_" << funcid << "();\n";
+void CGCVISSimTarget :: genProfile(int funcid){
+        *defaultStream << "sim_break" << funcid << "();\n";
 }
 
 void CGCVISSimTarget :: writeFiring(Star& s,int) { // depth parameter ignored
-        genProfileInit(functionCounter);
+        genProfile(functionCounter);
 	s.run();
-	genProfileEnd(functionCounter);
 	functionCounter++;
-
 }
 
 // ----------------------------------------------------------------------------
 
-void CGCVISSimTarget::generateTimingProc(){
-    Galaxy& gal = *galaxy();
-    GalStarIter starIter(gal);
-    Star* star;
-    int index=0;
-
-    while ((star = starIter++) != NULL) {
-      procedures << "void begintimer_"<<index<<"()"<<"{}\n";
-      procedures << "void endtimer_"<<index<<"()"<<"{}\n";
-      index++;
-    }
+// compile the file <filePrefix>.c
+int CGCVISSimTarget :: compileCode() {
+    // invoke the compiler
+    StringList compilecmd, compileerror, file;
+    file << filePrefix << ".c ";
+    compilecmd << compileLine(file);
+    compileerror << "Could not compile " << file;
+    return (systemCall(compilecmd, compileerror, targetHost) == 0);
 }
 
-void CGCVISSimTarget::generateCode() {
-	if (haltRequested()) return;
-	if (parent()) setup();
-	if (haltRequested()) return;
-	if(!allocateMemory()) {
-		Error::abortRun(*this,"Memory allocation error");
-		return;
-	}
-	if (haltRequested()) return;
-	generateCodeStreams();
-	generateTimingProc();
-	if (haltRequested()) return;
-	frameCode();
-	if (haltRequested()) return;
-	if (!parent()) writeCode();
+// return compile command
+StringList CGCVISSimTarget :: compileLine(const char* fName) {
+    // Get the compiler arguments with environment
+    // variables expanded
+    StringList compileArgs = getCompileOptions(TRUE);
+    StringList srcFiles = getDependentCFiles(TRUE);
+    StringList compilecmd = (const char*) compileCommand;
+    if (compileArgs.length() > 0) compilecmd << " " << compileArgs;
+    compilecmd << " " << fName;
+    if (srcFiles.length() > 0) compilecmd << " " << srcFiles;
+    compilecmd << " ";
+    return compilecmd;
+}
 
-	// now initialize for the next run
-	procedures.initialize();
+// ----------------------------------------------------------------------------
+
+// write the files
+void CGCVISSimTarget :: writeCode() {
+    writeFile(myCode, ".c", displayFlag);
+    processDependentFiles();
+    writeSimFile();
+}
+
+void CGCVISSimTarget :: writeSimFile() {
+  // Make sure to do the sim file uniquely too!!!
+  StringList simCode;
+  //simCode << "echo on\n";
+  simCode << "focus ieu1\n";
+  simCode << "load 0 ram1"<< " " << filePrefix << "\n";
+  simCode << "# main\n";
+  simCode << "breakpoint add &main\n";
+  simCode << "run\n";
+  simCode << "wait\n";
+  simCode << "time\n";
+
+  Galaxy& g = *galaxy();
+  GalStarIter nextStar(g);
+  CGCStar* s;
+  int funcindex=0;
+  while ((s = (CGCStar*)nextStar++) != 0) {
+    simCode << "#" << " " << s->name() << "\n";
+    simCode << "breakpoint add &sim_break" << funcindex << "\n";
+    simCode << "run\n";
+    simCode << "wait\n";
+    simCode << "time\n";
+    simCode << "echo "<< s->name()<< "\n";
+    funcindex++;
+  }
+  simCode << "# exit\n";
+  simCode << "run\n";
+  simCode << "wait\n";
+  simCode << "time\n";
+  //simCode << "quit\n";
+
+  writeFile(simCode, ".sim", 0);
+}
+// ----------------------------------------------------------------------------
+
+// link the file
+int CGCVISSimTarget :: loadCode(){
+    StringList linkcmd, linkerror, file;
+    file << filePrefix << ".o";
+    linkcmd << loadLine(file);
+    linkerror << "Could not link " << file;
+    return (systemCall(linkcmd, linkerror, targetHost) == 0);
+}
+
+// return the link command
+StringList CGCVISSimTarget :: loadLine(const char* fName){
+    StringList linkArgs = getLinkOptions(TRUE);
+    StringList objFiles = getDependentObjFiles(TRUE);
+    StringList linkcmd = (const char*) linkCommand;
+    if (linkArgs.length() > 0) linkcmd << " " << linkArgs;
+    linkcmd << " " << fName;
+    if (objFiles.length() > 0) linkcmd << " " << objFiles;
+    linkcmd << " ";
+    linkcmd << "-o" << " " << filePrefix;
+    return linkcmd;
+}
+
+StringList CGCVISSimTarget :: getDependentObjFiles(int expandEnvironmentVars){
+    StringList objectFileList = "";
+    objectFileList << remoteObjFilesStream;
+
+    // Conditionally expand environment variables in the compile options
+    if (expandEnvironmentVars && objectFileList.length() > 0) {
+	char* allObjFiles = expandPathName(objectFileList);
+	objectFileList = allObjFiles;
+	delete [] allObjFiles;
+   }
+   return objectFileList;
+}
+
+// ----------------------------------------------------------------------------
+
+int CGCVISSimTarget :: runCode() {
+  if (int(simulate)) {
+    StringList simcmd, simerror;
+    simcmd << "xterm -e";
+    simcmd << " " << "${INCASHOME}/bin/incas_startup\n";
+    simerror << "Could not start simulator";
+    return (systemCall(simcmd, simerror, targetHost) == 0);
+  }
+  return TRUE;
 }
 
 // ----------------------------------------------------------------------------
 
 ISA_FUNC(CGCVISSimTarget,CGCTarget);
 
-static CGCVISSimTarget myTargetPrototype("CGCVISSim","CGCStar","A VIS target for VIS code generation");
+static CGCVISSimTarget myTargetPrototype("CGCVISSim","CGCStar","A VIS Simulator target to profile VIS code");
 
 static KnownTarget entry(myTargetPrototype,"CGCVISSim");
 
