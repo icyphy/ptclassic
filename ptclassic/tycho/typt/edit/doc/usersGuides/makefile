@@ -40,6 +40,9 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
+	EditPaletteHelp.html \
+	EditPtclHelp.html \
+	EditPtlangHelp.html \
 	RetargetHelp.html
 
 MISC_FILES =
