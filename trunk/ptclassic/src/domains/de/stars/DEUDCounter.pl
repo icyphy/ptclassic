@@ -47,6 +47,14 @@ a Null star to the unneeded inputs.
 	private {
 		int content;
 	}
+	constructor {
+		countUp.triggers();
+		countDown.triggers();
+		reset.triggers();
+		countUp.before(demand);
+		countDown.before(demand);
+		reset.before(demand);
+	}
 	start {
 		content = int(resetValue);
 	}
@@ -54,17 +62,20 @@ a Null star to the unneeded inputs.
 		completionTime = arrivalTime;
 
 		// check the countUp/Down input to change the content.
-		if (countUp.dataNew) {
+		while (countUp.dataNew) {
 			countUp.dataNew = FALSE;
 			content++;
+			countUp.getSimulEvent();
 		}
-		if (countDown.dataNew) {
+		while (countDown.dataNew) {
 			countDown.dataNew = FALSE;
 			content--;
+			countDown.getSimulEvent();
 		}
-		if (demand.dataNew) {
+		while (demand.dataNew) {
 			demand.dataNew = FALSE;
 			output.put(completionTime) << content;
+			demand.getSimulEvent();
 		}
 		if (reset.dataNew) {
 			reset.dataNew = FALSE;

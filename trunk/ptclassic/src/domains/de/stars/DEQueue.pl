@@ -9,17 +9,18 @@ defstar {
 	seealso {PrQueue}
 	explanation {
 This star queues inputs in a finite length FIFO queue.
-Note that in the DE domain, ordinary arcs also function as a FIFO queue.
-One difference here is that this star refuses to accept any new inputs
+It refuses to accept any new inputs
 after the queue has grown to a specified capacity.
 (Note that storage is allocated dynamically, so a large capacity
 does not necessarily imply a large storage usage.)
 .pp
-Another difference is that this star de-queues particles on demand.
+This star de-queues particles on demand.
 Data outputs are produced when a demand input arrives, if the queue
 is not empty.  If the queue is empty, no data output is produced
 until the next time a data input arrives.
 That next data input will be directed to the data output immediately.
+Initially, the queue is empty and the first data input is directed
+to the data output immediately as if there were a past demand input.
 Any intervening demand inputs (between the time that the queue
 goes empty and the next arrival of a data input) are ignored.
 .pp
@@ -56,7 +57,10 @@ after processing the input is sent to the ``size'' output.
 		default {"10"}
 		desc { Maximum size of the queue (if -1, infinite). }
 	}
-
+	constructor {
+		inData.triggers(size);
+		demand.triggers(outData);
+	}
 	start {
 		demand.dataNew = TRUE;
 		infinite = (int(capacity) < 0);

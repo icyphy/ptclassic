@@ -41,6 +41,9 @@ will be delayed by more than the nominal service time.
 		SingleLinkList tokensInService;
 		int numberInService;
 	}
+	constructor {
+		delayType = TRUE;
+	}
 	start {
 		numberInService = 0;
 		tokensInService.initialize();

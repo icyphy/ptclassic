@@ -36,6 +36,8 @@ signal arrives and there is no data.
 	}
 	constructor {
 		saveData = 0;
+		data.triggers();
+		data.before(demand);
 	}
 	start {
 		delete saveData;

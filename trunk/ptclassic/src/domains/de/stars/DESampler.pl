@@ -28,6 +28,10 @@ The exact meaning of this depends on the particle type.
 		name {output}
 		type {=input}
 	}
+	constructor {
+		input.triggers();
+		input.before(clock);
+	}
 	go {
 	   // Check to see whether the star was triggered by a clock input
 	   if (clock.dataNew) {

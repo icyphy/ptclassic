@@ -38,6 +38,9 @@ sent to the \fIoutput\fR port upon the second arrival.
 	protected {
 		PriorityQueue firstArrivalQ;
 	}
+	constructor {
+		input.triggers(output);
+	}
 	start {
 		firstArrivalQ.initialize();
 	}

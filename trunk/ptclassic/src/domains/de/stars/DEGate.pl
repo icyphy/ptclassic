@@ -39,6 +39,10 @@ recent one will be passed to "output" when the gate is re-opened.
 	private {
 		int open;
 	}
+	constructor {
+		control.triggers();
+		control.before(input);
+	}
 	start {
 		// set initial position of the gate
 		switch(*initPosition.getInitValue()) {
