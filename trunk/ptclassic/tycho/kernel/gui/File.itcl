@@ -85,9 +85,6 @@ class ::tycho::File {
     # Specify the interval (in minutes) between auto-save operations.
     itk_option define -autosaveinterval autoSaveInterval AutoSaveInterval 5
 
-    # Specify initial data to display (ignored in this base class).
-    itk_option define -data data Data {}
-
     # NOTE: The following should really be a public variable, not an
     # Itk option. But the Itk implementation does not recognize public
     # variables as options. When this is fixed, change this to a public
@@ -319,16 +316,6 @@ class ::tycho::File {
 #########################################################################
 #########################################################################
 ####                          option configure                       ####
-
-#########################################################################
-#### -data configuration
-# Specifies initial data to display.
-#
-configbody ::tycho::File::data {
-    if {$itk_option(-data) != {}} {
-        insertData $itk_option(-data)
-    }
-}
 
 #########################################################################
 #### -file configuration
@@ -771,7 +758,7 @@ body ::tycho::File::reload {} {
             set point [currentPoint]
             clear
             set fd [open $completeFilePath r]
-            configure -data [read $fd]
+            insertData [read $fd]
             close $fd
             seeFragment $point
             if {[file writable $completeFilePath]} {
