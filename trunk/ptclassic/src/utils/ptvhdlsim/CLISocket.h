@@ -14,6 +14,9 @@
 #include <sys/un.h>
 #include <sys/ddi.h>
 
+/* Define SOCK_BASE_NAME */
+#include "CLIConstants.h"
+
 void create_socket();
 int connect_socket();
 void get_data();
@@ -23,12 +26,6 @@ void close_socket();
 #define	CHECK_ERRNO	if(cli_warnings || cli_errno) { (void) printf("file %s, line %d\n",__FILE__,__LINE__); cliPrintError((char *)0); exit(1) ;}
 
 #define	PERRNO	{ (void) printf("file %s, line %d\n",__FILE__,__LINE__); }
-
-/* IMPORTANT:  The following #defines must match
-   the ones in $(ROOT)/src/domains/vhdl/targets/CGCVSynchComm.pl
-   in order for the sockets to communicate with one another
-   */
-#define	SOCK_BASE_NAME "/tmp/PTVHDLSIM"
 
 /***************************
    Data Structure Definition
