@@ -1492,10 +1492,13 @@ int BDFClusterBag::genSched() {
 
 // indent by depth tabs.
 static const char* tab(int depth) {
-	// this fails for depth > 20, so:
-	if (depth > 20) depth = 20;
-	static const char *tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
-	return (tabs + 20 - depth);
+    // this fails for depth > 20, so:
+    if (depth > 20) depth = 20;
+
+    // For more compact schedule displays, we use two spaces
+    // rather than tabs.
+    static const char *tabs = "                                        ";
+    return (tabs + 40 - depth*2);
 }
 
 static const char* do_conds[] = { 0, "if(", "if(!", "until(", "until(!" };
@@ -1509,21 +1512,21 @@ StringList BDFClusterBag::displaySchedule(int depth) {
 	StringList sch;
 	if (pType != DO_ITER) {
 		// add a nesting with the condition
-		sch << tab(depth) << do_conds[pType]
+		sch << tab(depth) << "{ " << do_conds[pType]
 		    << pCond->name() << ") {\n";
 		close++;
 		depth++;
 	}
 	if (loop() > 1) {
 		// add a nesting for the loop
-		sch << tab(depth) << loop() << "*{\n";
+		sch << tab(depth) << "{ repeat " << loop() << " {\n";
 		close++;
 		depth++;
 	}
 	sch << sched->displaySchedule(depth);
 	while (close > 0) {
 		depth--;
-		sch << tab(depth) << "}\n";
+		sch << tab(depth) << "} }\n";
 		close--;
 	}
 	return sch;
@@ -1822,15 +1825,25 @@ ostream& BDFAtomCluster::printOn(ostream& o) {
 }
 
 StringList BDFAtomCluster::displaySchedule(int depth) {
-	StringList sch = tab(depth);
-	if (pType != DO_ITER) {
-		sch << do_conds[pType] << pCond->name() << ") ";
-	}
-	if (loop() > 1) {
-		sch << loop() << "*";
-	}
-	sch << real().fullName() << "\n";
-	return sch;
+    int close = 0;
+    StringList sch = tab(depth);
+    if (pType != DO_ITER) {
+	sch << "{ " << do_conds[pType] << pCond->name() << ") {\n";
+	depth++;
+	close++;
+    }
+    if (loop() > 1) {
+	sch << tab(depth) << "{ repeat " << loop() << " {\n";
+	depth++;
+	close++;
+    }
+    sch << tab(depth) << "{ fire " << real().fullName() << " }\n";
+    while (close > 0) {
+	depth--;
+	sch << tab(depth) << "} }\n";
+	close--;
+    }
+    return sch;
 }
 
 // run inside of the atomCluster loop() times.
@@ -1972,26 +1985,28 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 
 // display the top-level schedule.
 StringList BDFClustSched::displaySchedule() {
-	StringList sch;
-	if (dynSched) {
-		sch << "Dynamic execution of " << cgal->numberClusts()
-		    << " clusters:\n";
-		int i = 1;
-		BDFClusterGalIter next(*cgal);
-		BDFCluster* c;
-		while ((c = next++) != 0) {
-			sch << "Cluster " << i++ << ":\n";
-			sch << c->displaySchedule(1);
-		}
+    StringList sch;
+    if (dynSched) {
+	sch << "{\n  { scheduler \"Dynamic dataflow scheduler on "
+	    << cgal->numberClusts() << " clusters\" }\n";
+	BDFClusterGalIter next(*cgal);
+	BDFCluster* c;
+	while ((c = next++) != 0) {
+	    sch << "  { cluster {\n"
+		<< c->displaySchedule(2)
+		<< "  } }\n";
 	}
-	else {
-		SDFSchedIter next(*this);
-		BDFCluster* c;
-		while ((c = (BDFCluster*)next++) != 0) {
-			sch << c->displaySchedule(0);
-		}
+    }
+    else {
+	sch << "{\n  { scheduler \"Buck's Boolean Dataflow Scheduler\" }\n";
+	SDFSchedIter next(*this);
+	BDFCluster* c;
+	while ((c = (BDFCluster*)next++) != 0) {
+	    sch << c->displaySchedule(1);
 	}
-	return sch;
+    }
+    sch << "}\n";
+    return sch;
 }
 
 int BDFClustSched::handleDynamic(BDFTopGal& gal) {
@@ -2169,24 +2184,24 @@ StringList BDFWhileLoop::displaySchedule(int depth) {
 	int close = 0;
 	StringList sch;
 	if (loop() > 1) {
-		sch << tab(depth) << loop() << "*{\n";
+		sch << tab(depth) << "{ repeat " << loop() << "{\n";
 		close = 1;
 	}
 	depth += close;
-	sch << tab(depth) << "do {\n";
+	sch << tab(depth) << "{ do {\n";
 	depth += 1;
 	sch << a->displaySchedule(depth);
-	sch << tab(depth) << name() << "_token := <value from "
-	    << pCond->name() << ">\n";
+	sch << tab(depth) << "{ assign " << name() << "_token {value from "
+	    << pCond->name() << "} }\n";
 	if (b)
 		sch << b->displaySchedule(depth);
 	depth -= 1;
-	sch << tab(depth) << "} while (";
+	sch << tab(depth) << "} while(";
 	if (pType == DO_UNTILTRUE) sch << "!";
-	sch << name() << "_token)\n";
+	sch << name() << "_token) }\n";
 	if (close) {
 		depth--;
-		sch << tab(depth) << "}\n";
+		sch << tab(depth) << "} }\n";
 	}
 	return sch;
 }
