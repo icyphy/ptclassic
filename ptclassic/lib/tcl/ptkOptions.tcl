@@ -60,6 +60,7 @@ option add CGC.bigfont  *-Helvetica-Bold-R-Normal-*-240-* startupFile
 #Define Special Colors
 option add Pigi.positiveColor [ptkColor blue] startupFile
 option add Pigi.negativeColor [ptkColor red] startupFile
+option add Pigi.highlightColor [ptkColor firebrick] startupFile
 
 #Colors used for plots with multiple traces
 option add *plotColor1 [ptkColor red3] startupFile
