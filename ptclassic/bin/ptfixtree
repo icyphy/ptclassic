@@ -1,3 +1,10 @@
-#!/bin/csh
-if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
-$PTOLEMY/bin.$ARCH/wish -f $PTOLEMY/bin/ptfixtree.tk $*
+#!/bin/sh
+#
+# Two forms, because I cant decide whether to use sh or csh.
+# I cant figure out the equivalent of sh's "$@".  The big gotcha is
+# '~' homedir expansions happening siliently by home
+# If csh, remember to use "-f".
+#
+#if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+PTOLEMY=${PTOLEMY-`csh -fc 'echo ~ptolemy'`}
+$PTOLEMY/bin.$ARCH/wish -f $PTOLEMY/bin/ptfixtree.tk "$@"
