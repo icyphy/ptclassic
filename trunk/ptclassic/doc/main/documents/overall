@@ -15,6 +15,7 @@ Edward A. Lee
 .AE
 .H1 "Introduction
 .pp
+.Id "documentation"
 Since \*(PT is by design an extensible system,
 the documentation must be also be extensible.
 To ensure reasonable portability, only standard tools
@@ -27,9 +28,12 @@ Furthermore, all shell scripts and Makefiles are supplied
 along with the documentation so that they can be modified if
 necessary.
 The formating is with ditroff (device independent troff)
-.IE ditroff
+.Ir "ditroff program"
+.Ir "troff program"
+.Ir "eqn program"
+.Ir "tbl program"
 with the -me macros, eqn, and tbl.  In addition, some custom macros
-.IE "me macros"
+.Ir "me troff macros"
 have been supplied in order to enforce a consistent look
 across all \*(PT documents.
 These macros and their use are explained here.
@@ -37,16 +41,18 @@ The -me macros will not be covered, since they are adequately
 documented elsewhere.
 .H1 "Printing the manual"
 .pp
-.IE "printing"
+.Id "printing the Ptolemy manual"
+.Id "manual, printing"
 First, all scripts for printing the manual use the c shell,
 and require that the printer you wish to use be defined.
 To do this, place the following line in the file .cshrc in
-.IE "cshrc"
+.Ir "cshrc file"
 your home directory:
 .(c
 setenv PRINTER lw
 .)c
-.IE "PRINTER variable"
+.Ir "PRINTER environment variable"
+.Ir "environment variable, PRINTER"
 where
 .c lw
 is replaced with whatever name your printer has.
@@ -67,7 +73,7 @@ in ~ptolemy/src/domains/sdf/doc.
 Each directory with documentation has a Makefile.
 Printing subsections of the manual can be
 accomplished by typing "make print" in the appropriate directory.
-.IE "Makefile"
+.Ir "Makefile"
 For instance, to print the whole manual,
 .(c
 % cd ~ptolemy/doc
@@ -85,7 +91,7 @@ Then use
 make OPTIONS=-o48- print
 .)c
 Any set of ditroff options may be passed this way.
-.IE "ditroff options"
+.Ir "ditroff options"
 To print only the pigi document,
 .(c
 % cd ~ptolemy/doc/main/pigi
@@ -98,7 +104,8 @@ If you are printing the entire manual, an index will be generated
 after the entire manual has been printed.
 If you have printed a new version of a subsection,
 and wish to update the index, then:
-.IE "index, printing"
+.Id "index, printing"
+.Id "printing the Ptolemy manual index"
 .(c
 % cd ~ptolemy/doc
 % make prindex
@@ -111,6 +118,8 @@ manual.  In addition, a title page may appear that does not
 appear when the complete manual is printed.
 .H1 "Writing new sections"
 .pp
+.Id "writing new documentation"
+.Id "documentation, writing new"
 In order to get consistent documentation, a set of troff
 macros is used to control most important formatting options.
 These macros are explained here.
@@ -148,7 +157,7 @@ A typical document has the following syntax:
 .)c
 Text appearing between headers uses standard -me macro formatting.
 The first line is a comment that will be translated by sccs
-.IE sccs
+.Ir "sccs program"
 into a version number for the document, looking something like:
 .(c
 	.\\\\\&" @(#)filename 1.1     10/14/90
@@ -157,7 +166,7 @@ This is interpreted by troff as a comment, and hence has no
 affect on the output.
 The version number that will appear on the output
 is specified by the .VR macro.
-.IE "VR macro"
+.Id "VR troff macro"
 It takes two arguments, a version number and a date.
 These two arguments will be printed in the lower left and right
 corners of each page, respectively.
@@ -172,7 +181,7 @@ by sccs into a date as shown in the lower right hand corner of
 this document.
 .pp
 The ``.TI'' macro gives the section title.
-.IE "TI macro"
+.Id "TI troff macro"
 When the document is printed standalone, this title will be put
 on a separate title page.
 Otherwise, it will be a level-one header.
@@ -190,7 +199,9 @@ and
 using existing entries as a model.
 .pp
 Your new directory should contain a file called ``overall''
-which defines the entire document.  It may contain lines like
+which defines the entire document.
+.Id "overall document file"
+It may contain lines like
 .(c
 	.so filename
 .)c
@@ -205,7 +216,9 @@ in ~ptolemy/doc/main/documents should work fine.
 .pp
 In any documentation directory, when the documentation is printed,
 a file named ``index'' will be created.
-.IE "index, file"
+.Id "files, restricted, in doc/main"
+.Id "doc/main directory restricted files"
+.Id "index, file"
 If there already is such a file, and you have write permission,
 it will be clobbered.
 Hence, you should not store document sections in a file called ``index''.
@@ -213,23 +226,43 @@ Hence, you should not store document sections in a file called ``index''.
 .pp
 The documentation scripts for \*(PT will automatically
 generate an index.
+.Id "index entries"
+The indexing system supports three kinds of index entries:
+``definition'' entries are used when a term is defined in
+some sense;
+``example'' entries are used when a term is used in an example;
+and ``reference'' enteries are used in all other cases \-
+typically when a term is referenced.
+When the index is printed, definition entries have their page
+numbers in boldface, index entries have their page
+numbers in italics, and reference entries have their page number
+in the default font.
+This allows the reader to quickly locate the information for which
+they are searching.
+.pp
 Entries in the index must be defined in the document source
-using the macro:
-.IE "index, entries"
+using one of the the macros:
 .(c
-	.IE "entry"
+	.Id "definition entry"
+	.Ie "example entry"
+	.Ir "reference entry"
 .)c
+for a definition, example, or reference entry, respectively.
+(The .IE macro used in older versions of Ptolemy acts as a
+reference entry).
 The entries will be sorted alphabetically.
-.IE "index entries"
-.IE "IE macro"
+.Id "IE troff macro"
+.Id "Id troff macro"
+.Id "Ir troff macro"
+.Id "Ie troff macro"
 If you look at the index printed with this document,
 you will find an entry ``index'' pointing right here.
 If you wish for a two word entry to appear twice,
 alphabetically by each of the two words, then you must use two index
 entries:
 .(c
-	.IE "two words"
-	.IE "words, two"
+	.Ir "two words"
+	.Ir "words, two"
 .)c
 No additional editing will be done on index entries.
 For this reason, index entries should be carefully chosen.
@@ -248,10 +281,39 @@ or
 .c domain.
 Of course, if you are writing some explanation of these basic terms,
 then an index entry is appropriate.
+Before entering index entries for a star, look in the documentation
+for similar stars to get an idea of the subject terms that have
+already been used and might be related.
+.pp
+One final note: to generate an index entry for a star or galaxy,
+use one of the macros:
+.(c
+	.Sr star domain
+	.Se star domain
+.)c
+These will create reference or example index entry for the named star
+in the given domain
+in the ``C++ class font'' (to set it off from other entries), and will
+parenthetically note that the entry is for a star in the specified domain.
+.Id "Sr troff macro"
+.Id "Se troff macro"
+If the star is in the same domain as the current section of the documentation,
+you can leave off the domain specifier.
+For example,
+the entry:
+.(c
+	.Sr autocor
+.)c
+when in SDF domain documentation will generate an index entry of the form:
+.(c
+	autocor \fR(SDF star)\fP
+.)c
 .H2 "Special fonts and displays"
 .pp
 By convention, \*(PT documentation always refers to \*(PT
 using the troff string invoked by the sequence ``\\*(PT''.
+.Id "PT troff string"
+.Id "fonts, special"
 This gets formatted in a standard way with a standard font.
 The overall \*(PT version number is \*(PV, invoked
 by the sequence ``\\*(PV''.
@@ -263,6 +325,7 @@ by using the ``.c'' macro:
 .)c
 as shown here:
 .c Class.
+.Id "c troff macro"
 For a display entirely set in this font, with no fill,
 use the macro pair ``.(c ... .)c'', as in
 .(c
@@ -292,12 +355,15 @@ stars.  You need not, therefore, be concerned with the
 troff macros used for this.
 All editing of the star documentation should be done in the .pl file,
 not in the troff file.
-.IE "stars, documenting"
+.Id "stars, documenting"
+.Id "documentation, stars"
 .H2 "Documenting new galaxies and demos"
 .pp
-.IE "galaxies, documenting"
-.IE "demos, documenting"
-Galaxies and demos must be documented manually, unlike stars.
+.Id "galaxies, documenting"
+.Id "demos, documenting"
+.Id "documenting galaxies"
+.Id "documenting demos"
+Unlike stars, galaxies and demos must be documented manually.
 The troff source files for galaxies should go in XXX/doc/stars,
 where XXX is the location of the domain source directory.
 Since galaxies can be used exactly as if they were stars,
@@ -340,7 +406,7 @@ Here is an example:
 	.SD
 	A demo of the LMS adaptive filter star
 	.DE
-	.IE LMS
+	.Se LMS
 	.SV %\&I\&% %\&G\&%
 	.AL "Edward A. Lee"
 	.LO "~ptolemy/src/domains/sdf/demo"
@@ -359,10 +425,12 @@ Here is an example:
 	FIR.
 	.ES
 .)c
-Note that a carefully chosen index entry has been inserted here.
+Note that a carefully chosen index entry has been inserted here via
+the ``.Se'' macro.
+.Ie "Se troff macro"
 \fIIt is not necessary to insert an explicit index entry for the
-name of the galaxy or demo\fR.  This will be done automatically.
-It is also not recommended that index entries be inserted
+name of the galaxy or demo\fP.  This will be done automatically.
+It is also recommended that index entries not be inserted
 for all the ``See Also'' entries.
 In this case, however, the main purpose of the demo is to demonstrate
 the
@@ -377,7 +445,8 @@ This command is stored in ~ptolemy/doc/bin, but also has a link
 in ~ptolemy/bin, so it should be in your path.
 .H2 "Documenting new domains"
 .pp
-.IE "domains, documenting"
+.Id "domains, documenting"
+.Id "documenting domains"
 To include a new domain in the manual, you must 
 edit the Makefile in ~ptolemy/doc to add to the
 .c DIRS
@@ -389,6 +458,8 @@ by the documentation scripts.
 .UH "title:"
 The directory XXX/doc should contain a file called ``title''
 which defines the title page for the domain.
+.Id "title page, domain"
+.Id "domain title page"
 A typical title page is:
 .(c
 	.\\\\\&" %\&W\&%	%\&G\&%
@@ -457,6 +528,8 @@ as in the following example:
 .pp
 The following filenames in an XXX/doc directory,
 where XXX is the domain directory, have special functions, as explained above:
+.Id "files, restricted, in domain documentation"
+.Id "domain documentation, restricted files"
 .(c
 index
 title
