@@ -17,6 +17,7 @@ Date of last revision:
 #endif
 
 #include "UniProcessor.h"
+#include "SDFScheduler.h"
 #include "CGWormhole.h"
 
 StringList UniProcessor :: display(int makespan)
@@ -313,6 +314,33 @@ int UniProcessor :: getStartTime() {
 }
 
 		/////////////////////////////////////
+		//    Generate code
+		/////////////////////////////////////
+
+StringList UniProcessor :: generateCode() {
+	// convert a processor schedule to a SDF schedule
+	// for child target.
+	convertSchedule();
+
+	// now, call the child target routines to generate code
+	// as well as memory assignment
+	return targetPtr->generateCode(*subGal);
+}
+	
+void UniProcessor :: convertSchedule() {
+	SDFSchedule sched;
+	ProcessorIter schedIter(*this);
+	ParNode* n;
+	while ((n = schedIter.nextNode()) != 0) {
+		if (n->getType() > 0) continue;
+		SDFStar* s = n->getCopyStar();
+		s->setTarget(targetPtr);
+		sched.append(*s);
+	}
+	targetPtr->copySchedule(sched);
+}
+
+		/////////////////////////////////////
 		//    down-load the code
 		/////////////////////////////////////
 
@@ -423,4 +451,5 @@ NodeSchedule* UniProcessor :: getNodeSchedule(ParNode* n) {
 		if (ns->getNode() == n) return ns;
 	return 0;
 }
+
 

@@ -21,6 +21,7 @@ Date of last revision:
 #include "UserOutput.h"
 #include "DynamicGalaxy.h"
 #include "BaseMultiTarget.h"
+#include "StringList.h"
 
 ////////////////////////
 // class NodeSchedule //
@@ -91,8 +92,8 @@ private:
 	void makeSend(int pindex, PortHole* sP, ParNode*, EGGate*);
 
 	// set the cloned star pointer of the Send/Receive node in OSOP option.
-	void matchReceiveNode(SDFStar*, PortHole*, ParNode*);
-	void matchSendNode(SDFStar*, PortHole*, ParNode*);
+	void matchReceiveNode(SDFStar*, PortHole*, ParNode*, int);
+	void matchSendNode(SDFStar*, PortHole*, ParNode*, int);
 
 	// Depending on OSOPReq(), make connections
 	void makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* far,
@@ -104,6 +105,9 @@ private:
         // into the same processor or not.
         int OSOPreq() { return mtarget->getOSOPreq(); }
 
+	// Convert a processor schedule to an SDF schedule for child target.
+	void convertSchedule();
+
 protected:
 	// The time when the processor available
 	int availTime;
@@ -112,7 +116,8 @@ protected:
 	NodeSchedule* curSchedule;
 
 	// target pointer
-	BaseMultiTarget* mtarget;
+	BaseMultiTarget* mtarget;	// multi-target
+	CGTarget* targetPtr;		// my target processor
 
 	// sum of idle time
 	int sumIdle;
@@ -131,7 +136,7 @@ protected:
 public:
 	// constructor
 	UniProcessor() : availTime(0), curSchedule(0), numFree(0),
-			 freeNodeSched(0), subGal(0) {}
+			 freeNodeSched(0), subGal(0), targetPtr(0) {}
 	~UniProcessor();
 
 	// return the galaxy
@@ -202,6 +207,9 @@ public:
 	// get NodeSchedule
 	NodeSchedule* getNodeSchedule(ParNode* n);
 	NodeSchedule* getCurSchedule() { return curSchedule; }
+
+	// generate code
+	StringList generateCode();
 };
 
 /////////////////////////
