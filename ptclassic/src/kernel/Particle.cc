@@ -262,3 +262,20 @@ Plasma* Plasma :: getPlasma(DataType t)
 	return 0;
 }
 
+// Error catcher for attempts to retrieve a Packet from a different
+// type of particle
+
+class Packet;
+
+void Particle::accessPacket(Packet &) const {
+	Error::abortRun ("Attempt to getPacket from a non-packet Particle");
+}
+
+void Particle::getPacket(Packet & p) {
+	Particle::accessPacket(p);
+}
+
+void Particle::operator<<(const Packet&) {
+	Error::abortRun ("Attempt to load a Packet into non-packet Particle");
+}
+
