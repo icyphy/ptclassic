@@ -25,7 +25,7 @@ $Id$
 
 **************************************************************************/
 
-enum CanDom { UnKnown, Case, For, DoWhile, Recur, DDF};
+enum CanDom { UnKnown, EndCase, Case, For, DoWhile, Recur, DDF};
 
 	////////////////////////////
 	// DDFScheduler
