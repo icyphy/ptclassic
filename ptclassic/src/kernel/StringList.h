@@ -1,7 +1,6 @@
 #ifndef _StringList_h
 #define _StringList_h 1
 #include "miscFuncs.h"
-#include <std.h>
 #include "DataStruct.h"
 
 /****************************************************************
