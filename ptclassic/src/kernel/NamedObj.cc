@@ -3,7 +3,7 @@ static const char file_id[] = "NamedObj.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-%Q% The Regents of the University of California.
+Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -46,6 +46,23 @@ where the parent is a Block (a specific type of NamedObj).
 #include "Block.h"
 #include "SimControl.h"
 
+/***********************************************************************
+
+  Return the full name of the object
+
+  @Description This has no relation to the class name; it specifies
+  the specific instance's place in the universe-galaxy-star
+  hierarchy. The default implementation returns names that might look
+  like
+
+<PRE>
+      universe.galaxy.star.port
+</PRE>
+
+  for a porthole; the output is the fullName of the parent, plus a
+  period, plus the name of the NamedObj it is called on.
+
+***********************************************************************/
 StringList NamedObj :: fullName () const
 {
 	StringList out;
@@ -55,16 +72,51 @@ StringList NamedObj :: fullName () const
 	return out;
 }
 
-int NamedObj :: isA(const char* cname) const
-{
-	return (strcmp(cname,"NamedObj") == 0);
-}
+/***********************************************************************
 
+ Return TRUE if the argument is the name either of the class or of one
+   of the baseclasses.
+
+ @Description The isA method should be redefined for all classed
+ derived from NamedObj. To make this easy to implement, a macro
+ ISA_FUNC is provided; for example, in the file Block.cc we see the
+ line
+
+<PRE>
+      ISA_FUNC(Block,NamedObj);
+</PRE>
+
+  since NamedObj is the base class from which Block is derived. This
+  macro creates the function definition
+
+<PRE>
+      int Block::isA(const char* cname) const {
+              if (strcmp(cname,"Block") == 0) return TRUE;
+              else return NamedObj::isA(cname);
+      }
+</PRE>
+
+  Methods isA and className are overriden in derived classes; the
+  re-definitions will not be described for each individual class.
+
+***********************************************************************/
+int NamedObj :: isA(const char* cname) const { return
+(strcmp(cname,"NamedObj") == 0); }
+
+// Return the class name of this object
 const char* NamedObj :: className() const
 {
 	return "NamedObj";
 }
 
+/***********************************************************************
+
+   Return a verbose description of the object.
+
+   @Description If <B>verbose</B> is 0, a somewhat more compact form
+   is printed than if verbose is 1.
+
+***********************************************************************/
 StringList NamedObj :: print(int) const
 {
 	StringList out;
@@ -72,15 +124,23 @@ StringList NamedObj :: print(int) const
 	return out;
 }
 
-// empty destructor.
+// Do nothing
 NamedObj::~NamedObj() {}
 
 // NamedObjList methods
 
-// Find a NamedObj with the given name and return pointer
-// This is the guts for both forms of objWithName.
-// ListIter is used to bypass the const restrictions we impose.
+/***********************************************************************
 
+  Find a NamedObj with the given name and return pointer
+
+  @Description This is the guts for both forms of objWithName.
+  ListIter is used to bypass the const restrictions we impose. <P>
+
+  Publicly, we enforce the rule that you can only get const pointers
+  from a const list.  However, findObj can get non const pointers from
+  a const list; it implements the guts of both objWithName methods.
+
+***********************************************************************/
 NamedObj* NamedObjList::findObj(const char* name) const {
 	NamedObj *obj;
 	ListIter next(*this);
@@ -91,8 +151,13 @@ NamedObj* NamedObjList::findObj(const char* name) const {
 	return 0;
 }
 
-// Apply initialize() to all elements.  Stop if an error occurs.
+/**********************************************************************
 
+  Apply <CODE>initialize()</CODE> to all object on the list
+
+  @Description Stop if an error occurs.
+
+***********************************************************************/
 void NamedObjList::initElements() {
 	NamedObj *p;
 	NamedObjListIter next(*this);
@@ -101,8 +166,15 @@ void NamedObjList::initElements() {
 	};
 };
 
-// Delete all elements.  WARNING: elements assumed to be on the heap.
+/***********************************************************************
 
+   Delete all elements
+
+   @Description <B>WARNING:</B> elements assumed to be on the heap
+   (i.e., were created with <CODE>new</CODE> and deleted with
+   <CODE>delete</CODE>.
+
+***********************************************************************/
 void NamedObjList::deleteAll() {
 	NamedObj *p;
 	// get and remove list nodes, while any remain.
@@ -112,9 +184,9 @@ void NamedObjList::deleteAll() {
 	}
 }
 
-// constructor out-of-line to save code (esp. with cfront)
 NamedObjList::NamedObjList() {}
-// ditto for these.
-NamedObjListIter :: NamedObjListIter(NamedObjList& sl) : ListIter (sl) {}
+
+NamedObjListIter :: NamedObjListIter(NamedObjList& sl)
+  : ListIter (sl) {}
 CNamedObjListIter :: CNamedObjListIter (const NamedObjList& sl)
-: ListIter (sl) {}
+  : ListIter (sl) {}
