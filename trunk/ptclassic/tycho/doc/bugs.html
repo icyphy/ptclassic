@@ -15,6 +15,11 @@
 <h3><a href="$TYCHO/kernel/Edit.itcl">Edit</a></h3>
 <ul>
 <li>Fill region is much too slow.
+<li>Core dump: Hitting return quickly in a search window can cause two
+    dialogs to appear asking if it's OK to start again at the top.
+    Answering yes to both causes a core dump.
+<li>Need multiple undo.
+<li>Meta-f, Meta-d do not skip over white space.
 </ul>
 
 <h3><a href="$TYCHO/kernel/EditSearch.itcl">EditSearch</a></h3>
@@ -71,6 +76,7 @@
 
 <h3><a href="$TYCHO/editors/textedit/EditProgram.itcl">EditProgram</a></h3>
 <ul>
+<li>Indent region should be undoable.
 <li>Spelling checker should ignore HTML directives in comments.
 </ul>
 
