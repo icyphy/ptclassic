@@ -50,29 +50,43 @@ static void SetVersionInfo (Tcl_Interp *ptkInterp, char *Filename)
 
 TyConsole::TyConsole(int argc, char **argv) {
 
-  // Create the main Tk window
-  char *appName = "tycho";
-  char *appClass = "Tycho";
-
   // Create an interpreter
   tyInterp = Tcl_CreateInterp();
+
   if (!tyInterp) {
     fprintf(stderr,"Failed to create Tcl interpreter!\n");
     exit(1);
   }
   ptcl = new PTcl(tyInterp);
 
+  // our vers of Tk_AppInit
+  if (appInit(tyInterp) != TCL_OK) {
+    fprintf(stderr,
+	"Failed to initialize Tcl, [incr Tcl], and/or Tk: %s\n",
+	tyInterp->result);
+    tyExit(1);
+  }
+
+  // Create the main Tk window
+  char *appName = "tycho";
+  char *appClass = "Tycho";
+
 #if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
   ptkw = Tk_CreateMainWindow(tyInterp, NULL, appName, appClass);
 #else
-  ptkW = Tk_MainWindow(tyInterp);
-  Tk_SetClass(ptkW, appClass);
-  Tk_SetAppName(ptkW, appName);
-#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
+  ptkw = Tk_MainWindow(tyInterp);
+#endif
   if (!ptkw) {
     fprintf(stderr,"Failed to create Tk main window: %s\n", tyInterp->result);
     exit(1);
   }
+
+#if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
+#else
+  Tk_SetClass(ptkw, appClass);
+  Tk_SetAppName(ptkw, appName);
+#endif /* TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1 */
+
   // Define Tcl and Tk extensions
   tytcl = new TyTcl(tyInterp, ptkw);
 
@@ -92,14 +106,6 @@ TyConsole::TyConsole(int argc, char **argv) {
   }
   Tcl_SetVar(tyInterp, "tcl_interactive",
 	     (tty) ? "1" : "0", TCL_GLOBAL_ONLY);
-
-  // our vers of Tk_AppInit
-  if (appInit(tyInterp, ptkw) != TCL_OK) {
-    fprintf(stderr,
-	"Failed to initialize Tcl, [incr Tcl], and/or Tk: %s\n",
-	tyInterp->result);
-    tyExit(1);
-  }
 
   // Set version/binary info variables
   SetVersionInfo(tyInterp, argv[0]);
@@ -154,7 +160,7 @@ void TyConsole::tyExit(int code) {
   exit(1);
 }
 
-int TyConsole::appInit(Tcl_Interp *ip, Tk_Window) {
+int TyConsole::appInit(Tcl_Interp *ip) {
   if (Tcl_Init(ip) == TCL_ERROR)
     return TCL_ERROR;
   if (Tk_Init(ip) == TCL_ERROR)
