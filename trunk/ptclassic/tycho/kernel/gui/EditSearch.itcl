@@ -300,6 +300,7 @@ body ::tycho::EditSearch::changeAndFind {} {
 body ::tycho::EditSearch::clearFindMatch {} {
     set tw $itk_option(-edit)
     [$tw textWinName] tag remove findmatch 1.0 end
+    [$tw textWinName] tag remove currmatch 1.0 end
 }
 
 #####################################################################
@@ -381,9 +382,9 @@ body ::tycho::EditSearch::find {{start {}}} {
         $tw findAll findmatch $casesw $regexpsw $wordsw $pattern 1.0 end {}
 
         # Set up reverse video for the found text. First lower the
-        # priority of the tag so selection is still visible as normal.
+        # priority of the tag so current match is still visible as normal.
 
-        $text tag raise sel findmatch
+        $text tag raise currmatch findmatch
         $text tag configure findmatch \
                 -background [stylesheet get text search.background] \
                 -foreground [stylesheet get text search.foreground]    }
