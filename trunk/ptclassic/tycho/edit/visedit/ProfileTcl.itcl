@@ -97,8 +97,7 @@ option add *ProfileTcl.spacingx 1.0 widgetDefault
 # <p>
 # Here is an example of how to use the ProfileTcl:
 # <tcl><pre>
-#     ::tycho::ProfileTcl .p
-#     .p centerOnScreen   
+#     ::tycho::view ProfileTcl
 # </pre></tcl>
 #
 class ::tycho::ProfileTcl {
