@@ -647,7 +647,8 @@ body ::tycho::EditProgram::gendocFileInternal { file setDocCommand genCommand} {
             [file mtime $filename] > [file mtime $fulldoc] } {
             set savedir [pwd]
             cd $dir
-            eval $genCommand
+            set retval [eval $genCommand]
+	    return $retval
             cd $savedir
     }
     if [file exists $fulldoc] {
@@ -712,8 +713,9 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
             saveQuery
             set savedir [pwd]
             cd $dir
-            eval $genCommand
+            set retval [eval $genCommand]
             cd $savedir
+	    return $retval
         } {
             ::tycho::warn "The documentation file is out of date, \
                     and you do not have permission to update it."
