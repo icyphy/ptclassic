@@ -19,9 +19,9 @@ First note that the
 approximate disk space requirements are (for the Sun-4 distribution;
 other distributions are roughly the same size):
 .(b
-	\*(PT: 60 Mbytes
-	\*(PT (after you optionally remake): 75 Mbytes
-	Gnu subset: ?? Mbytes
+	\*(PT: 49 Mbytes
+	\*(PT (after you optionally remake): 64 Mbytes
+	Gnu subset: 16 Mbytes
 .)b
 Steps to install \*(PT on a Sun-3 or Sun-4:
 .ip 1.
@@ -134,8 +134,17 @@ For convenience, some software from the Free Software Foundation is
 included on the distribution tape.  This includes the compiler
 used to make \*(PT, which is also the compiler you will use to extend
 \*(PT.  Note that this is not a complete set of Gnu software.
+.(f
+It is also possible to build \*(PT with Sun's port of AT&T's
+.i cfront
+compiler, version 2.1.  To do so, you must completely rebuild Ptolemy;
+the libraries on the tape were produced by the Gnu C++ compiler and
+are not interoperable with
+.i cfront
+code.
+.)f
 .ip 1.
-cd /usr
+cd /usr/tools
 .ip 2.
 mkdir gnu (Unless there is such a directory there, in which case, you
 probably don't want to load the version from this tape).
@@ -176,6 +185,19 @@ configured to run ptolemy.  All the .files in the home directory
 are set up according to the tastes of the \*(PT authors,
 and according the standard use of windowing software in the \*(PT
 development group.
+.H2 "Rebuilding Ptolemy From Source"
+.pp
+If you wish to rebuild \*(PT from source (this step is recommended
+if you plan to do major development work, such as adding a
+new domain), it is simply a matter of editing the appropriate
+configuration file and typing ``make''.  We recommend using Gnu
+make; Ultrix make is not powerful enough to work with our makefiles.
+.pp
+Configuration files live in the root directory and have names like
+``config-xxx.mk''.  They are included by other makefiles and define
+symbols specifying compiler flags, the directory where X include
+files are located, etc.  The file that is used is determined by
+replacing ``xxx'' above by the value of the ARCH environment variable.
 .H2 "Troubleshooting"
 .pp
 If when you start pigi you get the message "permission denied"
