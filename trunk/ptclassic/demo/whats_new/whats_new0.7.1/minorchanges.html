@@ -7,6 +7,40 @@
 <body bgcolor=#faf0e6>
 
 <H1>Minor Changes in Ptolemy 0.7.1</H1>
+<menu>
+
+<LI> Vem/pigiRpc interlocks to prevent the dreaded "RPC Protocol Error" -
+     Tom Lane
+
+<LI> Custom display of universe parameters in run control panels.
+     It is now possible to add parameters to the Run Control panel by checking
+     check boxes in the Edit Parameters Window.  - Tom Lane
+
+<LI> Support for using the
+     <A HREF="http://www.cs.tu-bs.de/softech/ddd/">ddd</A>
+     debugger from <CODE>pigi -debug</CODE> - Jens Voigt
+
+<LI> Support for compiling Ptolemy under Solaris 2.5 for the PC using
+     PTARCH=sol2.5pc - Dominique Ragot
+
+
+<li> Support for the Process Network (PN) domain under Linux -
+	Wolfgang Reimer 
+<li> Various bug fixes from Wolfgang Reimer, including:
+	<menu>
+
+	<li> Create 2 new Ptolemy targets for Linux (linux.static, linux.debug)
+	<li> Work around to allow to use Complex class of GNU libg++
+	<li> <CODE>matlab.mk</CODE> and <CODE>mathematica.mk</CODE>
+	now allow predefinition of <CODE>MATLABDIR</CODE>
+	and <CODE>MATHEMATICADIR</CODE>
+	</menu>
+
+For complete details, see
+<a href="http://ptolemy.eecs.berkeley.edu/ptolemy0.7/patches/reimer/index.html"><CODE>http://ptolemy.eecs.berkeley.edu/ptolemy0.7/patches/reimer/index.html</CODE></a>
+</menu>
+
+</dl>
 
 
 <p>
