@@ -76,7 +76,7 @@ Input matrix should have dimension numRowsSubMx*numColsSubMx.
   }
   go {
     Envelope pkt;
-    FloatMatrix& matrix = *(new FloatMatrix);
+    FloatMatrix& matrix = *(new FloatMatrix(int(numRowsSubMx),int(numColsSubMx)));
     FloatMatrix& result = *(new FloatMatrix(int(numRows),int(numCols)));
 
     for (int h=0; h<numHeight; h++)
