@@ -37,6 +37,7 @@ static char SccsId[]="$Id$";
 #include <sys/wait.h>
 #include <signal.h>
 
+#include "vov_lib.h"
 
 #define VOV_CHANNEL "$OCTTOOLS/bin/vov_channel"
 

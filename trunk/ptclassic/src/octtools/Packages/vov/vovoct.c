@@ -31,6 +31,8 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "errtrap.h"
 
+#include "vov_lib.h"
+
 static char* facet_fullname(facet)
     octObject* facet;
 /*
