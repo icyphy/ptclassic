@@ -107,7 +107,7 @@ proc ptkPrintFacet {name} {
     # Tk returns useless numbers when asked about the width of the widget
     set leftEdge [expr {[string length $name] - 41}]
     if {$leftEdge < 0} {set leftEdge 0}
-    .print.file view $leftEdge
+    .print.file xview $leftEdge
     .print.file icursor end
 
     global ptkPrFileName
