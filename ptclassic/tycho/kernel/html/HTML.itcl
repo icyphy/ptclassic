@@ -284,8 +284,10 @@ body ::tycho::HTML::constructor {args} {
         configure -directory [file dirname $file]
     }
 
-    # Mark read-only to prevent modifications
-    configure -readonly 1
+    # Mark read-only to prevent modifications.
+    # This is deferred because "reload" is deferred, and that sets the
+    # readonly status based on whether the file is readable.
+    after idle [code evalIfExists $this configure -readonly 1]
     
     bind $text <space> "$this scroll 1; break"
 
