@@ -10,10 +10,6 @@ Version identification:
 
 *******************************************************************/
 #include "DEWormhole.h"
-#include "StringList.h"
-#include "Output.h"
-
-extern Error errorHandler;
 
 /*******************************************************************
 
@@ -23,11 +19,7 @@ extern Error errorHandler;
 
 void DEWormhole :: go()
 {
-// It notifies the output ports of the wormhole that data arrives and
-// sets the timeStamp for them.
 	run();
-
-	completionTime = arrivalTime + double(messageProcessingTime);
 }
 
 // cloner -- clone the inside and make a new wormhole from that.
