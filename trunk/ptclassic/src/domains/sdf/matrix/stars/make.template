@@ -52,6 +52,7 @@ STARDOCDIR = ../../doc/stars
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+  SDFAbs_M.pl \
   SDFAddCx_M.pl \
   SDFAddFix_M.pl \
   SDFAddInt_M.pl \
