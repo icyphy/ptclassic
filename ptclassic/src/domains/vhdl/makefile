@@ -1,5 +1,5 @@
 # Makefile for VHDL domain support
-# Copyright (c) 1990 The Regents of the University of California.
+# Copyright (c) 1990-%Q% The Regents of the University of California.
 #                       All Rights Reserved.
 #		       
 # Programmer:  Edward A. Lee
