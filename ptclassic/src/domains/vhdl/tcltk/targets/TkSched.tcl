@@ -414,6 +414,11 @@ proc DisplayGraph {} {
     set dot(.view.c,canvasBottom) $canvasBottom
 
     frame .view
+    canvas .view.new -width 300 -height $initHeight -scrollregion \
+	    " $canvasLeft $canvasTop $canvasRight $canvasBottom " \
+	    -background green \
+	    -xscrollcommand [list .view.xscroll set] \
+	    -yscrollcommand [list .view.yscroll set]
     canvas .view.c -width $initWidth -height $initHeight -scrollregion \
 	    " $canvasLeft $canvasTop $canvasRight $canvasBottom " \
 	    -xscrollcommand [list .view.xscroll set] \
@@ -426,10 +431,11 @@ proc DisplayGraph {} {
     set dot(.view.c,nodeName) "No node selected"
     label .view.nodeName -textvariable dot(.view.c,nodeName)
 
+#    pack .view.new -side right -fill both -expand true
     pack .view.nodeName -side bottom -fill x
     pack .view.xscroll -side bottom -fill x
-    pack .view.yscroll -side right  -fill y
     pack .view.c -side left -fill both -expand true
+    pack .view.yscroll -side right  -fill y
     pack .view -side top -fill both -expand true
 
     .view.c bind movable <Button-1> {NodeMark %W %x %y}
