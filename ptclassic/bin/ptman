@@ -2,12 +2,13 @@
 
 # Print a man page for a Ptolemy star.  Star can have its domain prepended to
 # it (e.g., SDFLMS) or not (e.g., LMS).  Looks through all the domains in
-# ~ptolemy/src/domains unless the PTMAN path is set to a subset.  If DISPLAY
+# $PTOLEMY/src/domains unless the PTMAN path is set to a subset.  If DISPLAY
 # is set, invokes xditview, otherwise uses nroff -- unless the -P option is
 # specified, which causes the page to be printed.
 
-set domaindir = ~ptolemy/src/domains
-set headers = "~ptolemy/doc/headers/domain ~ptolemy/doc/headers/shared"
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+set domaindir = $PTOLEMY/src/domains
+set headers = "$PTOLEMY/doc/headers/domain $PTOLEMY/doc/headers/shared"
 set all = 0
 set files = ""
 set exact = 0
