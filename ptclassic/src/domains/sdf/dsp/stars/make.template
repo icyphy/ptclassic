@@ -59,6 +59,7 @@ PL_SRCS= \
  SDFBlockRLattice.pl \
  SDFBurg.pl \
  SDFConvolve.pl \
+ SDFConvolCx.pl \
  SDFDirichlet.pl \
  SDFDTFT.pl \
  SDFFFTCx.pl \
