@@ -65,9 +65,9 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 	addStream("tkSetup", &tkSetup);
 
 	// Add the string state for the Tcl start command
-	addState(startCommand.setState("startCommand",this,"makeRunWindow",
-        "set the Tcl comment to execute to start the interactive interface")
-		 );
+	// addState(startCommand.setState("startCommand",this,"makeRunWindow",
+        // "set the Tcl comment to execute to start the interactive interface")
+	//	 );
 }
 
 void CGCTclTkTarget :: initCodeStrings() {
@@ -91,7 +91,7 @@ int CGCTclTkTarget :: codeGenInit() {
     globalDecls << "char *name = \"" << galaxy()->name() << "\";\n"
 		<< "int numIterations = "
 		<< int(scheduler()->getStopTime()) << ";\n"
-		<< "static char startCmd[] = \"" << startCommand << "\";\n"
+      // << "static char startCmd[] = \"" << startCommand << "\";\n"
 		<< "#include \"tkMain.c\"\n\n";
 
     // If the system is paused, wait until Go is hit again
