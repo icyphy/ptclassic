@@ -4,7 +4,8 @@ $Id$
 This is the README.txt file for the Tycho
 package tycho.edit.pn.
 
-[Insert brief description of tycho.edit.pn here]
+tycho.edit.pn is and editor and run-time window
+for the PN simulation domain for Ptolemy II.
 
 
 This package contains the following directories:
