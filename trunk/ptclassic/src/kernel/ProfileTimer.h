@@ -47,8 +47,8 @@ public:
     void reset();
 
     // Elapsed CPU time in seconds since the last reset.  The time is equal
-    // to the time the Ptolemy process is executing time plus the time and 
-    // when the UNIX system is running on behalf of Ptolemy.
+    // to the time the Ptolemy process is executing plus the time 
+    // of the UNIX system calls run on behalf of Ptolemy.
     TimeVal elapsedCPUTime() const;
 
 private:
