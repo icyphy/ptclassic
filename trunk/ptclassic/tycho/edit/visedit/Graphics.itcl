@@ -69,8 +69,11 @@ class ::tycho::Graphics {
     # Insert the specified data into the canvas.
     method insertData {data}
 
-    # Reload data from the current file.
-    method reload {}
+    # Query the user for the type of scrollbars to use.
+    method scrollQuery {}
+
+    # Set the scrolling style (use with scrollQuery).
+    method scrollSet {dialog}
 
     # Find the item identified by "name".
     # FIXME: Implement this.
@@ -98,8 +101,8 @@ body ::tycho::Graphics::constructor {args} {
        [graphicsWidget] $itk_component(childsite).graphics \
                -top $this
     } {
-        keep -readonly -scrolling -canvascolor -cursor 
-        # NOTE:  Cannot keep -canvasheight -canvaswidth, -title, -subtitle.
+        keep -readonly -canvascolor -cursor 
+        # NOTE:  Cannot keep -canvasheight -canvaswidth, -title, -subtitle, etc.
         # Overrides saved width and height with the defaults.
     }
 
@@ -116,24 +119,26 @@ body ::tycho::Graphics::constructor {args} {
     addMenuSeparator Edit
 
     addMenuItem Cut Edit -underline 0 -accelerator "x" \
-	    -command "$this component graphics cut"
+	    -command "$this component graphics modify cut"
     
     addMenuItem Copy Edit -underline 1 -accelerator "c" \
 	    -command "$this component graphics copy"
     
     addMenuItem Paste Edit -underline 0 -accelerator "v" \
-	    -command "$this component graphics paste"
+	    -command "$this component graphics modify paste"
     
     addMenuSeparator Edit
 
     addMenuItem {Title...} Edit -underline 0 -accelerator "T" \
-            -command "$this component graphics titleEdit 0"
-
-    addMenuItem {Subtitle...} Edit -underline 2 -accelerator "t" \
-            -command "$this component graphics titleEdit 1"
+            -command "$this component graphics titleAdd"
 
     addMenuItem {Edit Item} Edit -underline 0 -accelerator "e" \
 	    -command "$this component graphics edit"
+
+    addMenu Format left {} -underline 1
+
+    addMenuItem {Scrollbars...} Format -underline 0 \
+            -command "$this scrollQuery"
 
     eval itk_initialize $args
 
@@ -192,27 +197,42 @@ body ::tycho::Graphics::insertData {data} {
     }
 }
 
-#######################################################################
-#### reload
-# Reload the current file.  This is redefined in order to first clear
-# the display, then redraw it.
+#####################################################################
+#### scrollQuery
+# Query the user for the type of scrollbars to use.
 #
-body ::tycho::Graphics::reload {} {
-    if {$file == "NoName" || $file == ""} {
-	return 
+body ::tycho::Graphics::scrollQuery {} {
+    set name [::tycho::autoName .query]
+    ::tycho::EntryQuery $name -okcommand "$this scrollSet $name"
+    switch -exact [component graphics cget -scrolling] {
+        bars {set default {Always use scrollbars}}
+        auto {set default {Automatic scrollbars}}
+        default {set default {Never use scrollbars}}
     }
-    if {$modified} {
-	if {![::tycho::askuser \
-		"The data has been modified. Proceed anyway?"]} {
-	    return 
-	}
+    $name addRadioQuery scrolling {} [list \
+            {Always use scrollbars} \
+            {Automatic scrollbars} \
+            {Never use scrollbars}] $default
+    $name centerOnScreen
+}
+
+#####################################################################
+#### scrollSet
+# Set the scrolling style of the child widget depending on the user's
+# response in the specified dialog box.
+#
+body ::tycho::Graphics::scrollSet {dialog} {
+    set prevoption [component graphics cget -scrolling]
+    switch -exact [$dialog get scrolling] {
+        {Always use scrollbars} {set option bars}
+        {Automatic scrollbars} {set option auto}
+        default {set option none}
     }
-    component graphics undoBoundary
-    clear
-    markUnmodified
-    ::tycho::File::reload
-    component graphics updateDisplay
-    markUnmodified
+    if {$option != $prevoption} {
+        component graphics configure -scrolling $option
+        component graphics updateDisplay
+        markModified
+    }
 }
 
 #####################################################################
@@ -246,5 +266,11 @@ body ::tycho::Graphics::setReadOnly {bool} {
 # Return the text to be saved.
 #
 body ::tycho::Graphics::saveText {} {
-    return [component graphics describe]
+    # Insert carriage returns between list elements.
+    set dsc {}
+    foreach cmd [component graphics describe] {
+        append dsc "{$cmd}"
+        append dsc "\n"
+    }
+    return $dsc
 }
