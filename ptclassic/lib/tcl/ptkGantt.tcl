@@ -763,17 +763,8 @@ proc ptkGanttDisplay { universe {inputFile ""} {standalone 0} } {
     global tychoWelcomeWindow tychoConsoleWindow
     global tychoExitWhenNoMoreWindows tychoShouldWeDoRegularExit
 
-    # check to make sure that Tycho.tcl has been sourced
-    if {"" == [info classes ::tycho::File]} {
-	# this sourcing wants to bring up tycho so we supress console and 
-	# welcome windows and ensure that tycho does not exit after browser
-	# exits
-	set tychoWelcomeWindow 0
-	set tychoConsoleWindow 0
-	set tychoExitWhenNoMoreWindows 0
-	set tychoShouldWeDoRegularExit  0
-	uplevel #0 {source $env(PTOLEMY)/tycho/kernel/Tycho.tcl}
-    }
+    # make sure that tycho is running
+    ptkStartTycho
 
     set chart .gantt_${universe}
 
