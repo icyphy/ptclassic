@@ -35,7 +35,8 @@
 
 MAKEVARS = "PTARCH=$(PTARCH)"
 
-makefiles depend all install clean sources realclean checkjunk sccsinfo:
+makefiles depend all install clean sources realclean checkjunk sccsinfo \
+extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
@@ -45,16 +46,3 @@ makefiles depend all install clean sources realclean checkjunk sccsinfo:
 		) \
 	    fi ; \
 	done
-
-.PHONY:	TAGS
-TAGS:
-	@for x in $(DIRS); do \
-	    if [ -w $$x ] ; then \
-		( cd $$x ; \
-		  echo making $@ in domains/$(ME)/$$x ; \
-		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../tycho/domains/$(ME)/$$x $@ ; \
-		) \
-	    fi ; \
-	done
-	-cat -s $(DIRS:%=%/TAGS) > $@
