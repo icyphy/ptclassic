@@ -489,6 +489,7 @@ ifdef SDFFULL
 	SDFDSP = 1
 	ifdef TK
 		SDFTK = 1
+		SDFDMM = 1
 	endif
 endif
 
@@ -501,6 +502,7 @@ ifdef SDF
 	ifdef SDFTK
 		CUSTOM_DIRS += $(SDFDIR)/tcltk/stars
 		SDFDSP=1
+		SDFDMM = 1
 		STARS += $(LIBDIR)/sdftclstars.o
 		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
 		LIBS += -lsdftclstars
@@ -518,6 +520,11 @@ ifdef SDF
 		LIBS += -lsdfdspstars
 		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
 	endif
+	ifdef SDFDMM
+		CUSTOM_DIRS += $(SDFDIR)/dmm/stars
+		STARS += $(LIBDIR)/sdfdmmstars.o
+		LIBS += -lsdfdmmstars
+		LIBFILES += $(LIBDIR)/libsdfdmmstars.$(LIBSUFFIX)
 	ifdef SDFMATRIX 
 		CUSTOM_DIRS += $(SDFDIR)/matrix/stars
 		STARS += $(LIBDIR)/sdfmatrixstars.o
