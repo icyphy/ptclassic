@@ -1,5 +1,5 @@
 defstar {
-  name		{ DisplayImage }
+  name		{ ShowImg }
   domain	{ MDSDF }
   version	{ $Id$ }
   author	{ J. Buck & Paul Haskell, modified for MDSDF by Mike J. Chen }
@@ -27,7 +27,7 @@ The user can set the root filename of the displayed image (which will
 probably be printed in the image display window titlebar) and
 can choose whether or not the image file is saved or deleted.
 
-This star does not support frame numbers.  See DisplayImage2.
+This star does not support frame numbers.  See ShowImg2.
   }
   explanation {
 .Id "image display"
@@ -137,4 +137,4 @@ This star does not support frame numbers.  See DisplayImage2.
     system (cmdbuf);
     delete image;
   } // end go{}
-} // end defstar { DisplayImage }
+} // end defstar { ShowImg }
