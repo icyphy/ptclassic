@@ -70,6 +70,9 @@ public:
     virtual double delay(double);
 
 protected:
+    // Increase buffer capacities.
+    int increaseBuffers();
+
     // Create threads.
     void createThreads();
 
@@ -90,6 +93,7 @@ protected:
 
     // Condition variable for synchronizing the start of an iteration.
     PNCondition* start;
+    int iteration;
 
     // ThreadScheduler for keeping track of Threads.
     PNThreadScheduler* threads;

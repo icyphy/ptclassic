@@ -36,6 +36,7 @@ static const char file_id[] = "$RCSfile$";
 #include "PNScheduler.h"
 #include "DataFlowStar.h"
 #include "GalIter.h"
+#include "PNGeodesic.h"
 
 extern const char PNdomainName[];
 
@@ -49,6 +50,7 @@ PNScheduler::PNScheduler()
     schedulePeriod = 1.0;
     setStopTime(0.0);
     setCurrentTime(0.0);
+    iteration = 0;
 }
 
 
@@ -79,10 +81,12 @@ void PNScheduler::setup()
     deleteThreads();
     galaxy()->initialize();
     disableLocking();
-    enableLocking();
-    createThreads();
 
     setCurrentTime(0.0);
+    iteration = 0;
+
+    enableLocking();
+    createThreads();
 }
 
 
@@ -95,21 +99,58 @@ int PNScheduler::run()
 	return FALSE;
     }
 
-    // Allow threads to start.
-    threads->run();
-
     while((currentTime < stopTime) && !SimControl::haltRequested())
     {
 	// Notify all threads to continue.
 	{
 	    CriticalSection region(start->monitor());
+	    iteration++;
 	    start->notifyAll();
 	}
 	threads->run();
+	while (increaseBuffers() && !SimControl::haltRequested())
+	{
+	    threads->run();
+	}
 	currentTime += schedulePeriod;
     }
 
     return !SimControl::haltRequested();
+}
+
+// Increase buffer capacities.
+// Return number of full buffers encountered.
+int PNScheduler::increaseBuffers()
+{
+    int fullBuffers = 0;
+    PNGeodesic* smallest = NULL;
+    
+    // Increase the capacity of the smallest full geodesic.
+    GalStarIter nextStar(*galaxy());
+    Star* star;
+    while ((star = nextStar++) != NULL)
+    {
+        BlockPortIter nextPort(*star);
+        PortHole* port;
+        while ((port = nextPort++) != NULL)
+        {
+	    PNGeodesic* geo = NULL;
+	    if (port->isItOutput() && (geo = (PNGeodesic*)port->geo()) != NULL)
+	    {
+		if (geo->size() >= geo->capacity())
+		{
+		    fullBuffers++;
+		    if (smallest == NULL
+			|| geo->capacity() < smallest->capacity())
+			smallest = geo;
+		}
+	    }
+        }
+    }
+    if (smallest != NULL)
+	smallest->setCapacity(smallest->capacity() + 1);
+
+    return fullBuffers;
 }
 
 
@@ -124,7 +165,10 @@ void PNScheduler::createThreads()
     // Create Threads for all the Stars.
     while((star = (DataFlowStar*)nextStar++) != NULL)
     {
-	LOG_NEW; new SyncDataFlowProcess(*threads, *star, *start);
+	LOG_NEW; SyncDataFlowProcess* p
+	    = new SyncDataFlowProcess(*star,*start,iteration);
+	threads->add(p);
+	p->initialize();
     }
 }
 
@@ -209,7 +253,7 @@ void PNScheduler::resetStopTime(double limit)
 }
 
 
-double PNScheduler::delay(double when)
+double PNScheduler::delay(double /*when*/)
 {
     return 0.0;
 }
