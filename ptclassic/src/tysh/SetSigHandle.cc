@@ -36,6 +36,7 @@ Sets up the signal handlers for Tycho.
 **************************************************************************/
 
 #include "SetSigHandle.h"
+#include "SigHandle.h"
 
 /****************************************************************************/
 
@@ -52,23 +53,23 @@ setSignalHandlers(void)
     char *isDevelop; 
     int returnValue = 0;
 
-    if (setCoreLimit() != 0) 
-        returnValue = 1; /* Try to go ahead and set the signalhandlers      */
-                         /* despite the initial setback.                    */
-
-    isDevelop = getenv("PT_DEVELOP"); /* getenv(char *) gets the value of an*/
+    isDevelop = getenv("PT_DEVELOP"); /* getenv(char *) returns a pointer to*/
                                       /* environmental variable or returns  */
                                       /* NULL if it does not exist.         */
 
-    if (isDevelop == 0 || isDevelop[0] == 0) 
+    if (isDevelop == 0 || isDevelop[0] == '0') 
     {
+        if (setCoreLimitRelease() != 0) 
+            returnValue = 1; 
         if (setReleaseHandlers() != 0)
 	    returnValue = 2;
     }
     else
     {
+        if (setCoreLimitDebug() != 0) 
+            returnValue = 3; 
         if (setDebugHandlers() != 0)
-	    returnValue = 3;
+	    returnValue = 4;
     }
 
     return returnValue;
@@ -97,6 +98,8 @@ setCoreLimitDebug(void)
                                              /* was set to zero it would    */
                                              /* prevent a core file from    */
                                              /* being made.                 */
+
+    printf("Size: %i", coreLimit.rlim_cur);
  
     if (setrlimit(RLIMIT_CORE, &coreLimit) != 0) 
     {             /* setrlimit sets system values to the information in     */
@@ -138,6 +141,40 @@ setCoreLimitRelease(void)
 
 /****************************************************************************/
 
+void
+setSignalError(void)
+{
 
+    pid_t childPID;
+    int garbage;
+    char *ptolemy, *arch, path[50], file[50];
+
+    ptolemy = getenv("PTOLEMY");
+    arch = getenv("ARCH");
+    path[0] = '\0';
+    file[0] = '\0';
+    strcat(path, ptolemy);
+    strcat(path, "/tcltk/tk.");
+    strcat(path, arch);
+    strcat(path, "/bin/wish");
+    strcat(file, ptolemy);
+    strcat(file, "/tycho/kernel/TyHandleError.tcl");
+
+    switch(childPID = fork()) 
+    {
+        case -1: /* fork() return value for error. */
+                 /* Do nothing if error occurs,    */
+                 /* since we cannot warn user.     */
+      
+	case 0: /* fork() return value for child. */
+	    sleep(2); /* Allow core file to be generated. */    
+	    execle(path, "wish", "-f", file, (char *)0, environ); 
+
+	default:
+	    waitpid(childPID, &garbage, 1);
+
+    }
+
+}
 
 

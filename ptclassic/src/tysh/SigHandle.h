@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+extern "C" {
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
@@ -43,21 +44,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <signal.h>
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
+}
 
 /****************************************************************************/
 
+extern "C" {
 extern char **environ; /* An array of pointers to strings containing the    */
                        /* environmental variables. This is needed by the    */
                        /* execle() function, as an argument to setup the    */
                        /* environment for the process that its launching.   */
+}
 
 /****************************************************************************/
 
+extern "C" {
 int setReleaseHandlers(void);
 int setDebugHandlers(void);
 static void signalHandlerRelease(int);
 static void signalHandlerDebug(int);
-static void abortHandling(void);
+void abortHandling(int at = 0);
+}
 
 /****************************************************************************/
 
