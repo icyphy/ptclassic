@@ -44,9 +44,29 @@ from other cases:
 
 class DFPortHole : public PortHole
 {
+protected:
+	int maxBackValue;	// maximum % argument allowed
 public:
-	virtual PortHole* assocPort() { return 0;}
-	virtual int assocRelation() const { return -1;}
+	DFPortHole();
+
+	// Tell whether port uses old values
+	int usesOldValues() const { return maxBackValue >= numberTokens;}
+
+	// access the maximum delay
+	int maxDelay() const { return maxBackValue;}
+
+	// Modify simulated counts on geodesics, for scheduling
+	void decCount(int n);
+	void incCount(int n);
+
+	// class identification
+	int isA(const char*) const;
+
+	// associated control port (default: none)
+	virtual PortHole* assocPort();
+
+	// relation to associated port (default: none)
+	virtual int assocRelation() const;
 };
 
         //////////////////////////////////////////
@@ -58,10 +78,8 @@ public:
 
 class SDFPortHole : public DFPortHole
 {
-private:
-	int maxBackValue;	// maximum % argument allowed
 public:
-	SDFPortHole() : maxBackValue(0) {}
+
 
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles consumed/generated
@@ -77,15 +95,6 @@ public:
 	// We re-do porthole initialization if bufferSize changes
 	PortHole& setSDFParams(unsigned numTokens = 1, unsigned maxPctValue=0);
 
-	// Tell whether port uses old values
-	int usesOldValues() const { return maxBackValue >= numberTokens;}
-
-	// access the maximum delay
-	int maxDelay() const { return maxBackValue;}
-
-	// Modify simulated counts on geodesics, for scheduling
-	void decCount(int n);
-	void incCount(int n);
 
 	// class identification
 	int isA(const char*) const;
@@ -144,10 +153,13 @@ public:
 // Synchronous dataflow MultiPortHole
  
 class MultiSDFPort : public MultiPortHole {
-public:
+protected:
         // The number of Particles consumed
         unsigned numberTokens;
- 
+public:
+	MultiSDFPort();
+	~MultiSDFPort();
+
         // The setPort function is redefined to take one more optional
         // argument, the number of Particles produced
         MultiPortHole& setPort(const char* portName,
