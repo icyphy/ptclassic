@@ -79,6 +79,8 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAGS)
 #
 # system libraries (libraries from the environment)
 SYSLIBS=-lsocket -lnsl -ldl -lg++ -lm
+# system libraries for linking .o files from C files only
+CSYSLIBS=-lsocket -lnsl -ldl -lm
 
 # Ask ld to strip symbolic information, otherwise, expect a 32Mb pigiRpc
 LINKSTRIPFLAGS=-Wl,-s

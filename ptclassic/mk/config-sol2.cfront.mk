@@ -98,6 +98,8 @@ LINKER =	CC
 CRT0 =
 # system libraries (libraries from the environment)
 SYSLIBS =	-lsocket -lnsl -ldl -lm
+# system libraries for linking .o files from C files only
+CSYSLIBS =	$(SYSLIBS)
 
 # If you don't strip symbols, then pigiRpc will be about 69Mb
 # If you strip pigiRpc, then dynamic linking won't work

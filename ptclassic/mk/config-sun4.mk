@@ -60,8 +60,13 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # Note that cc uses -Bstatic
 CC_STATIC = 	-static
 
+# system libraries for linking .o files from C files only
+CSYSLIBS =	-lm
+
+# system libraries (libraries from the environment) for c++ files
 # gcc-2.7.0/libg++-2.7 seems to require -liostream and -liberty (for memmove)
-SYSLIBS =	-liostream -lg++ -liberty -lm
+SYSLIBS =	-liostream -lg++ -liberty $(CSYSLIBS)
+
 
 #
 # Directories to use

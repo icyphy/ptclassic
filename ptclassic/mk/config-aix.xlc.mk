@@ -56,6 +56,9 @@ CFLAGS =	 -Daix -Daix_xlC $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 
 SYSLIBS= -L/usr/lpp/xlC/lib -lC -lm -lc -lbsd
 
+# system libraries for linking .o files from C files only
+CSYSLIBS = $(SYSLIBS)
+
 #
 # Variables for the linker
 #

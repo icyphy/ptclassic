@@ -137,6 +137,8 @@ LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 #USER_CC_SHAREDFLAGS =		-fPIC
 #USER_C_SHAREDFLAGS =		-fPIC
 #SYSLIBS =			-lg++ -lm -ldld
+## system libraries for linking .o files from C files only
+#CSYSLIBS = -lm -ldld
 
 # Matlab architecture
 MATARCH = hp700

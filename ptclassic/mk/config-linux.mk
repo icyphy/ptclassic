@@ -125,8 +125,12 @@ CFLAGS =	$(LINUXDEF) $(OPTIMIZER) -fwritable-strings
 #
 # Variables for the linker
 #
+# system libraries for linking .o files from C files only
+CSYSLIBS=-lieee -lm $(DLLIB)
+
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lieee -lm $(DLLIB)
+SYSLIBS=-lg++ $(CSYSLIBS)
+
 
 #LINKFLAGS=-L$(LIBDIR) Xlinker -S -Xlinker -x # -static
 #LINKFLAGS_D=-L$(LIBDIR) -g -static

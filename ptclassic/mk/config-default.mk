@@ -174,7 +174,10 @@ LINKER=g++
 # we want to avoid involving libg++.so, so we use gcc to link.
 CLINKER=$(LINKER)
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ -lm
+SYSLIBS=-lm
+# system libraries for linking .o files from C files only
+CSYSLIBS=-lm
+
 # linker options.  Defined by the arch-config mk.
 LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left

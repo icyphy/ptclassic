@@ -104,6 +104,8 @@ RANLIB = 	true
 LINKER=CC
 # system libraries (libraries from the environment)
 SYSLIBS=-lm
+# system libraries for linking .o files from C files only
+CSYSLIBS = $(SYSLIBS)
 
 OPTIMIZER =
 # -g
