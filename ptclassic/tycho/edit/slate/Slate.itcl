@@ -372,7 +372,6 @@ body ::tycho::Slate::constructor {args} {
     eval itk_initialize $args
 }
 
-
 #######################################################################
 #### addtag
 #
@@ -930,7 +929,7 @@ body ::tycho::Slate::focusin {} {
 # <b>Note</b>: Unlike the canvas version, the first argument cannot
 # be an arbitrary tag.
 #
-#body ::tycho::Slate::gettags {id} {
+body ::tycho::Slate::gettags {id} {
     # If a picture, get the primary
     if { [string match {_*} $id] } {
 	set id [@scope ::tycho::Picture [list set primary($id)]]
