@@ -192,6 +192,12 @@ extern int warnIfNotConnected (Galaxy&);
 
 // Here's the main guy.
 int AsmTarget::modifyGalaxy() {
+
+    // First splice in type conversion stars if there are any
+    // We do this before we compute the repetitions for the
+    // CircToLin and LinToCirc stars
+    if (!CGTarget::modifyGalaxy()) return FALSE;
+
     Galaxy& g = *galaxy();
     const char* dom = g.domain();
     // if (!int(loopingLevel)) return TRUE;
@@ -277,7 +283,7 @@ int AsmTarget::modifyGalaxy() {
 	    }
 	}
     }
-    return CGTarget::modifyGalaxy();
+    return TRUE;
 }
 
 void AsmTarget::disableInterrupts() {}
