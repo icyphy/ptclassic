@@ -148,6 +148,12 @@ class ::tycho::FileBrowser {
     method mkdir {}
 
     ##################################################################
+    ####                     public procs                         ####
+
+    # Set the global current working directory.
+    proc setCWD {cwd} {set CWD $cwd}
+
+    ##################################################################
     ####                   protected methods                      ####
 
     # Process a file or directory selection.
@@ -170,6 +176,9 @@ class ::tycho::FileBrowser {
 
     # The directory last visited.
     protected common CWD
+
+    # The last file opened.
+    protected common fileLastOpened {}
 
     # A local version of the CWD is kept in case multiple file browsers
     # are open at once (each has to have its own notion of the current
@@ -260,14 +269,24 @@ body ::tycho::FileBrowser::constructor {args} {
     # option will be set to the path of the file from which the
     # browser was opened -- if the option is not set, then the
     # most recent directory is used anyway.
-    if { ! [::tycho::preference get dialogs fileBrowserUseLastDirectory] } {
+    if { [::tycho::preference get dialogs fileBrowserUseLastDirectory] } {
+	# Load the files into the listbox
+	updateListbox
+
+        # In case updateListbox inserts into the entry; to avoid repetition
+        clear entry
+        insert entry $fileLastOpened
+        select entry range 0 end
+    } else {
 	if {$itk_option(-initial) != {} && \
-		[::tycho::url pathtype $itk_option(-initial)] == "absolute" } {
+		[::tycho::url pathtype $itk_option(-initial)] \
+                == "absolute" } {
             changeDir $itk_option(-initial)
+        } else {
+            # Load the files into the listbox
+            updateListbox
         }
     }
-    # Load the files into the listbox
-    updateListbox
 }
 
 
@@ -456,7 +475,8 @@ body ::tycho::FileBrowser::complete {} {
 body ::tycho::FileBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [::tycho::url join $TYCHO kernel doc usersGuides FileBrowserHelp.html]
+	    [::tycho::url join $TYCHO kernel doc \
+            usersGuides FileBrowserHelp.html]
 }
 
 ######################################################################
@@ -465,7 +485,8 @@ body ::tycho::FileBrowser::help {} {
 # Also, make this new directory the common working directory.
 #
 body ::tycho::FileBrowser::mkdir {} {
-    set dirname [safeEval ::tycho::queryinfo "Directory name" "$localCWD/" 80]
+    set dirname [safeEval ::tycho::queryinfo \
+            "Directory name" "$localCWD/" 80]
     if {$dirname != {}} {
 	file mkdir $dirname
 	processItem $dirname
@@ -514,6 +535,9 @@ body ::tycho::FileBrowser::processItem {filename} {
 	set dir [::tycho::url dirname $file]
 	if {[::tycho::resource exists $dir] \
 		&& [::tycho::resource isdirectory $dir]} {
+            # set CWD [::tycho::url dirname $file]
+	    # set fileLastOpened [::tycho::url tail $file]
+            set fileLastOpened $filename
 	    execCommand -command $file
 	    return 1
 	} {
@@ -525,11 +549,15 @@ body ::tycho::FileBrowser::processItem {filename} {
     # If the file does exist, and is a directory
     if {[::tycho::resource isdirectory $file] \
             && [::tycho::File::registeredCommands $file] == {}} {
+        set fileLastOpened ""
         changeDir $file
         return 0
     } else {
 	# It's a plain file or a directory with a registered editor
 	if {[::tycho::resource readable $file]} {
+            # set CWD [::tycho::url dirname $file]
+	    # set fileLastOpened [::tycho::url tail $file]
+            set fileLastOpened $filename
 	    execCommand -command $file
 	    return 1
 	} {
