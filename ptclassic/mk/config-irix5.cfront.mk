@@ -26,7 +26,8 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #
-#	Programmers: Dan Ellis (MIT Media Lab), Christopher Hylands
+#	Programmer: Dan Ellis (MIT Media Lab)
+#	Contributors:  Christopher Hylands, Uwe Trautwein 
 #
 # NOTES on installing Ptolemy 0.5.2 beta under SGI IRIX 5.3 using the 
 # vendor's compilers ($PTARCH=irix5.cfront)
@@ -87,7 +88,9 @@ CPLUSPLUS = 	CC -I$(ROOT)/src/compat/cfront
 CC = cc
 
 # OCT_CC is used in src/octtools/vem-{lib,bin}.mk
-OCT_CC = cc -D_BSD_SIGNALS
+# -acpp means that we should use the ansi cpp for 
+#	src/octtools/XPackages/rpc/rpcInternal.h
+OCT_CC = cc -D_BSD_SIGNALS -acpp
 # BSD_SIGNALS needed *only* for src/octtools/Xpackages/iv/timer.c, 
 # but put it here for yuks
 
@@ -108,6 +111,8 @@ OCT_CC = cc -D_BSD_SIGNALS
 OPTIMIZER = -O2
 # debug info uses too much disk space
 WARNINGS  =
+
+ARCHFLAGS =	-DIRIX5
 
 # Use -D_BSD_SIGNALS for src/kernel/SimControl.cc
 #  see /usr/include/sys/signals.h for more info.
