@@ -278,10 +278,14 @@ body ::tycho::Edit::altFile {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Alternate file to load:"]
     if {$filename != {}} {
+	$this busy
 	$this reload 0 $filename
 	$itk_component(text) setInsert 1.0
 	windowMenuRemoveAll $prevfile
 	$this configure -file $filename
+	update idletasks
+	$this unBusy
+	update
     } 
 }
 
@@ -339,8 +343,11 @@ body ::tycho::Edit::help {} {
 body ::tycho::Edit::insertFile {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .filebr] \
 	    -text {File to Insert}]
+    $this busy
     $itk_component(text) readFile $filename
     markModified
+    update 
+    $this unBusy
 }
 
 #####################################################################
@@ -418,6 +425,7 @@ body ::tycho::Edit::save {{name ""}} {
 	set filename $name
     }
     if {$filename != "" && $filename != "NoName"} {
+	$this busy
 	set fd [open $filename w+]
 	puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
 	close $fd
@@ -429,6 +437,7 @@ body ::tycho::Edit::save {{name ""}} {
 	removeBackupFiles
     }
     markUnmodified
+    $this unBusy
     return 1
 }
 
@@ -444,3 +453,5 @@ body ::tycho::Edit::save {{name ""}} {
 body ::tycho::Edit::seeName {regexpr} {
     $itk_component(text) seeName $regexpr
 }
+
+
