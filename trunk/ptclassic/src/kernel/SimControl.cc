@@ -203,6 +203,20 @@ void SimControl::declareErrorHalt ()
 	flags |= (error|halt);
 }
 	
+// Abort is for an external user-requested abort, as opposed to an error
+// within the simulation.  We set the error bit as well, though.
+// The abort bit is mainly used to ensure that PTcl reports "abort" rather
+// than some other error message.  Setting the Tcl result would not do the job
+// for various reasons, notably (a) the abort button handler cannot affect
+// the result value seen outside the event handler; (b) we'd like to report
+// "abort" even if the act of aborting induces some other spurious error.
+
+void SimControl::declareAbortHalt () 
+{
+	CriticalSection region(gate);
+	flags |= (error|halt|abort);
+}
+
 void SimControl::clearHalt () {
         // Clears all flags
 	CriticalSection region(gate);
