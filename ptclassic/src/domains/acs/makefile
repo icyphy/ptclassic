@@ -1,5 +1,5 @@
 # Makefile for ACS domain support
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -45,7 +45,7 @@ include $(ROOT)/mk/topdomain.mk
 # Subdirectories with star directories in them
 SUBDOMAINDIRS =
 
-DIRS = kernel stars $(SUBDOMAINDIRS)
+DIRS = kernel stars targets $(SUBDOMAINDIRS)
 
 include $(ROOT)/mk/domain.mk
 
