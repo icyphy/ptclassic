@@ -66,7 +66,6 @@
 
 #ifdef linux
 #define __linux		linux
-#define sun			/* Seems risky */
 #define _POSIX_SOURCE
 #define _GNU_SOURCE
 #define _BSD_SOURCE
