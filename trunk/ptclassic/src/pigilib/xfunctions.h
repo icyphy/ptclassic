@@ -28,4 +28,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
    $Id$
 */
 
+void win_msg(/* char * omsg */);
+
 void PrintVersion ();
