@@ -33,8 +33,6 @@ is used.
 #ifndef _Tokenizer_h
 #define _Tokenizer_h 1
 
-#include <string.h>
-
 const int WORDBUF_SIZE = 256;
 
 const char defWhite[] = " \t\n";

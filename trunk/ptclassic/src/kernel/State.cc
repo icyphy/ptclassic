@@ -19,7 +19,6 @@ $Id$
 
 #include <std.h>
 #include <ctype.h>
-#include <string.h>
 #include "Tokenizer.h"
 #include "State.h"
 #include "Block.h"
