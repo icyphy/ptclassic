@@ -1,0 +1,48 @@
+<!-- $Id$ ->
+<html>
+<head>
+<Title>Using update</Title>
+</head>
+<body>
+<p>
+<h1>Using the Tcl "update" command in Itcl</h1>
+<p>
+Calling <a name=update>"update"</a> or even
+<a name="update idletasks">"update idletasks"</a> within a method of any Itcl
+object is very dangerous.  The Itcl object may be deleted during the
+update, so when the update returns, you will be trying to execute a
+method for an object that no longer exists.
+<em>You must not call update in a method.</em>
+<p>
+<a name="saferUpdate procedure">
+<h3>saferUpdate procedure</h3>
+</a>
+<p>
+At least in version 2.0 of Itcl,
+it seems to be safe to test a return value and exit from
+a method, even if the corresponding 
+object no longer exists.  Thus, for the rare
+situations where you really have to call update
+inside a method, Tycho provides a method called
+::tycho::saferUpdate that can be used.
+It returns 0 if the object is deleted during
+the call to "update."  The single argument to this procedure
+is the name of the object
+whose method is calling saferUpdate, so the typical usage is:
+<pre>
+if {![::tycho::saferUpdate $this]} {return}
+</pre>
+Note that the "return" must not just return to another procedure
+in the object.  It must entirely exit any code associated with the
+object.  Thus, any method that contains a call to "safteUpdate" should
+not be called within any other method, unless the failure condition
+is propagated up the calling chain.
+<p>
+<a href="../index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>eal@eecs.berkeley.edu</author>
