@@ -92,7 +92,7 @@ class ::tycho::Shortcuts {
             Copy2        {{} {}                       <Escape><Key-w> Esc-w                     {} {}} \
             Cut          {<Control-x> Ctrl+X          <Control-w> C-w                           <Control-x> Ctrl+X} \
             DownLine     {{} {}                       <Control-n> {C-n}                         <Control-n> {C-n}} \
-            DownPage     {{} {}                       <Control-v> {C-v}                         {} {}} \
+            DownPage     {<Next> {Page Down}          <Control-v> {C-v}                         <Next> {Page Down}} \
             Evaluate     {{} {}                       <Control-x><Control-r> {C-x C-r}          {} {}} \
             Exit         {<Control-q> Ctrl+Q          <Control-x><Control-c> {C-x C-c}          <Control-q> Ctrl+Q} \
             Fill         {{} {}                       <Meta-q> M-q                              {} {}} \
@@ -134,7 +134,7 @@ class ::tycho::Shortcuts {
             UpperCase    {{} {}                       <Meta-u> M-u                              {} {}} \
             UpperCase2   {{} {}                       <Escape><u> {Esc u}                       {} {}} \
             UpLine       {{} {}                       <Control-p> {C-p}                         {} {}} \
-            UpPage       {{} {}                       <Meta-v> {M-v}                            {} {}} \
+            UpPage       {<Prior> {Page Up}           <Meta-v> {M-v}                            <Prior> {Page Up}} \
             UpPage2      {{} {}                       <Escape><v> {Esc-v}                       {} {}} \
     }
 }
