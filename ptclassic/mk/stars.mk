@@ -935,7 +935,7 @@ endif
 # Program to test the ptolemy libraries, see standalone.mk
 ifdef PIGI
 	ifdef PITCL
-		LIBS += version.o $(OBJDIR)/pitcl/ptclInvokeInterp.o -lpitcl
+		LIBS += version.o $(OBJDIR)/ptcl/ptclInvokeInterp.o -lpitcl
 	else
 		LIBS += version.o $(OBJDIR)/ptcl/ptclInvokeInterp.o -lptcl
 	endif
