@@ -50,7 +50,8 @@ long userOptionWord;
     static dmTextItem items[] = {
 	{"Animation", 1, 10, NULL, NULL},
 	{"Debug msgs", 1, 10, NULL, NULL},
-	{"Error Windows", 1, 10, NULL, NULL}
+	{"Error Windows", 1, 10, NULL, NULL},
+	{"Tk Event Loop", 1, 10, NULL, NULL}
     };
 #define ITEMS_N sizeof(items) / sizeof(dmTextItem)
 
@@ -59,6 +60,7 @@ long userOptionWord;
     items[0].value = BooleanToYesNo(KcGetAnimationState());
     items[1].value = BooleanToYesNo(PrintDebugGet());
     items[2].value = BooleanToYesNo(ViGetErrWindows());
+    items[3].value = BooleanToYesNo(KcEventLoopActive());
     if (dmMultiText("Options", ITEMS_N, items) != VEM_OK) {
 	PrintCon("Aborted entry");
 	ViDone();
@@ -66,6 +68,7 @@ long userOptionWord;
     KcSetAnimationState(YesNoToBoolean(items[0].value));
     PrintDebugSet(YesNoToBoolean(items[1].value));
     ViSetErrWindows(YesNoToBoolean(items[2].value));
+    KcSetEventLoop(YesNoToBoolean(items[3].value));
     ViDone();
 #undef ITEMS_N
 }
