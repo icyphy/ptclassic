@@ -712,7 +712,7 @@ body ::tycho::Slate::move {tag xAmount yAmount} {
 # item is to be moved or reshaped using a "ghost" outline.
 #
 body ::tycho::Slate::moveclick {id x y args} {
-    eval ::tycho::Shape::_moveclick $id $canvas $this $x $y $args
+    eval [list ::tycho::Shape::_moveclick $id $canvas $this $x $y] $args
 }
 
 #######################################################################
@@ -723,7 +723,7 @@ body ::tycho::Slate::moveclick {id x y args} {
 # arguments supplied.
 #
 body ::tycho::Slate::movedrag {id x y} {
-    eval ::tycho::Shape::_movedrag $id $canvas $this $x $y
+    ::tycho::Shape::_movedrag $id $canvas $this $x $y
 }
 
 #######################################################################
@@ -732,7 +732,7 @@ body ::tycho::Slate::movedrag {id x y} {
 # Terminate the interaction sequence.
 #
 body ::tycho::Slate::moverelease {id} {
-    eval ::tycho::Shape::_moverelease $id $canvas $this
+    ::tycho::Shape::_moverelease $id $canvas $this
 }
 
 #######################################################################
