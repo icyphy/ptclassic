@@ -69,6 +69,7 @@ $(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
 $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 
 STAR_LIBFILES=\
+$(ATM_LIBFILES) \
 $(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
 $(LIBDIR)/libcgc.$(LIBSUFFIX) \
 $(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
@@ -114,6 +115,7 @@ $(MATLABLIBDIR) $(MATLABEXT_LIB) \
 
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
+$(ATM_LIBS) \
 -lcgcstars -lcgc -lcgctcltk \
 -lcg96dspstars -lcg96stars -lcg96 \
 -lcg56dspstars -lcg56stars -lcg56 \
