@@ -222,7 +222,6 @@ static void pl_print_private( fp, node )
     /* net_var_t *var, *pvar; */
     
     fprintf( fp, "\n  private {\n" );
-    fprintf( fp, "    int nemitevent;\n" );
     fprintf( fp, "    double min_time;\n" );
     fprintf( fp, "    double end_time;\n" );
     /* fprintf( fp, "    static double _delay;\n" ); move to code */
@@ -416,15 +415,16 @@ static void pl_print_method( fp, node, autotick, unittime )
      * is the dummy event by means of a passed flag. If flag is set (!=0) then
      * it is a dummy event.
      */
+     
+
     fprintf( fp, "  method {\n" );
     fprintf( fp, "    name { emitEventToIntQ }\n" );
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    arglist { \"( int outputPort, double delay, int isDummy )\" }\n" );
     fprintf( fp, "    type { void }\n" );
-    fprintf( fp, "    code {\n" );
-    
-
-    fprintf( fp, "    printf(\"emitting event to interrupt Q\");fflush(0);\n\n");
+    fprintf( fp, "    code {\n" );    
+    fprintf( fp, "\n   /*CLEANUP : code reuse, combine next 2 methods into 1? */\n");
+  /*  fprintf( fp, "    printf(\"emitting event to interrupt Q\");fflush(0);\n\n"); */
 
     output_event_count = 1;
     foreach_net_node_fanout( node, var ) {
@@ -449,8 +449,12 @@ static void pl_print_method( fp, node, autotick, unittime )
         if ( pvar != NULL ) {
             strcpy( pvarst, util_make_valid_name( pvar ));
             fprintf( fp, "            case c%s:\n", pvarst );
-            fprintf( fp, "                newEvent->dest = %s.far(); \n", pvarst); /* changed */
-            fprintf( fp, "                newEvent->data = ");
+            fprintf( fp, "                newEvent->dest = %s.far(); \n", pvarst); 
+            /* changed */
+            fprintf( fp, "                newEvent->outputPort = c%s;\n", pvarst );
+            fprintf( fp, "                if(!needResource) {\n");
+            fprintf( fp, "                     ((OutDEPort*)newEvent->dest->far())");
+            fprintf( fp, "->put(now+1/clkFreq) << ");           
             assoc_var = net_var_assoc_var( var );
             if ( assoc_var == NIL(net_var_t)) {
                 fprintf( fp, "1;\n" );
@@ -462,10 +466,12 @@ static void pl_print_method( fp, node, autotick, unittime )
                     fprintf( fp, "%s;\n", util_make_valid_name( assoc_var ));
                 }
             }
+            fprintf( fp, "                     newEvent->~PolisEvent();\n");
+            fprintf( fp, "                }\n");
             fprintf( fp, "                break;\n" );
         }
     } end_foreach_net_node_fanout;
-    fprintf( fp, "            default:\n             printf(\"shouldn't reach here!!\");\n          break;\n" );
+    fprintf( fp, "            default:\n             /*   printf(\"dummy event being released \");*/\n                break;\n" );
     fprintf( fp, "      }\n" );
     fprintf( fp, "      if (needResource) { \n");   
     fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
@@ -478,23 +484,63 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "        }\n");
     fprintf( fp, "        emittedEvents->prepend(newEvent); \n");
     fprintf( fp, "     }\n");
-    fprintf( fp, "     else {/*Doesnt need Resource */ \n");
-    fprintf( fp, "          ((OutDEPort*)newEvent->dest->far())->put(now+1/clkFreq) << ");
-    fprintf( fp, " newEvent->data; \n");
-    fprintf( fp, "          newEvent->~PolisEvent(); \n");
-    fprintf( fp, "      } \n");
     fprintf( fp, "   }\n  }\n\n");
-    
+ 
+
+   
     fprintf( fp, "  method {\n");
     fprintf( fp, "    name { emitEvent }\n");
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    type { void }\n" );
     fprintf( fp, "    arglist { \"(PolisEvent* event, double emitTime)\" }\n" );
     fprintf( fp, "    code {\n" );
-    fprintf( fp, "      printf(\"emitting event\");fflush(0);\n\n");
-    fprintf( fp, "      ((OutDEPort*)event->dest->far())->put(emitTime) << event->data; \n");
-    fprintf( fp, "      event->~PolisEvent(); \n");
+ /*  fprintf( fp, "      printf(\"emitting event\");fflush(0);\n\n"); */
+
+    output_event_count = 1;
+    foreach_net_node_fanout( node, var ) {
+        pvar = isOutputEvent( var, node );
+        if ( pvar == NULL ) pvar = isIntOutput( var, node );
+        if ( pvar != NULL ) {
+            fprintf( fp, "      static const int c%s = %d;\n",
+                    util_make_valid_name( pvar ), output_event_count++ );
+        }
+    } end_foreach_net_node_fanout;
+    fprintf( fp, "\n" );
+
+    fprintf( fp, "      OutDEPort* tl = ((OutDEPort*)event->dest->far()); \n");
+    fprintf( fp, "      tl->dataNew = FALSE;\n");
+    fprintf( fp, "      switch( event->outputPort ) {\n" );
+
+    foreach_net_node_fanout( node, var ) {
+        pvar = isOutputEvent( var, node );
+        if ( pvar == NULL ) pvar = isIntOutput( var, node );
+        if ( pvar != NULL ) {
+            strcpy( pvarst, util_make_valid_name( pvar ));
+            fprintf( fp, "            case c%s:\n", pvarst );
+            fprintf( fp, "                tl->put(event->realTime) << ");
+            assoc_var = net_var_assoc_var( var );
+            if ( assoc_var == NIL(net_var_t)) {
+                fprintf( fp, "1;\n" );
+            } else {
+                if ( !isIntOutput( var, node )) {
+                    fprintf( fp, "%s;\n", util_make_valid_name(
+                            net_var_parent_var( assoc_var, node )));
+                } else {
+                    fprintf( fp, "%s;\n", util_make_valid_name( assoc_var ));
+                }
+            }
+                   
+            fprintf( fp, "                break;\n" );
+        }
+    } end_foreach_net_node_fanout;
+    fprintf( fp, "            default:\n                printf(\"shouldn't reach here in emitEvent!\");\n                break;\n" );
+    fprintf( fp, "      }\n" );
+    fprintf( fp, "      tl->sendData();\n");    
+    fprintf( fp, "      event->~PolisEvent();\n");
     fprintf( fp, "    }\n  }\n");
+
+
+
     fprintf( fp, "  method {\n" );
     fprintf( fp, "    name { getDelay }\n");
     fprintf( fp, "    access { public }\n" );
@@ -504,14 +550,16 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "      if (needResource) return _delay/clkFreq;\n" );
     fprintf( fp, "      else return 1/clkFreq;\n");
     fprintf( fp, "    }\n}\n\n");
-    
+  
+
+  
     fprintf( fp, "  method {\n" );
     fprintf( fp, "    name { getEvents }\n");
     fprintf( fp, "    access { public }\n" );
     fprintf( fp, "    type { \"SequentialList*\" }\n" );
     fprintf( fp, "    arglist { \"()\" }\n" );
     fprintf( fp, "    code {\n" );
-    fprintf( fp, "      printf(\"returning list of emitted events\");fflush(0);\n\n");
+  /*  fprintf( fp, "      printf(\"returning list of emitted events\");fflush(0);\n\n"); */
     fprintf( fp, "      return emittedEvents;\n" );
     fprintf( fp, "    }\n}\n\n");
 
@@ -1014,7 +1062,6 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     
     /* Fire the Star! */
     fprintf( fp, "    min_time = -1;\n" );
-    fprintf( fp, "    nemitevent = 0;\n" );
     fprintf( fp, "    _delay = 0.0;\n" );
     fprintf( fp, "    _t_%s(0,0); // fire the star\n", util_map_pathname( node_name ));
     fprintf( fp, "    if (needResource) emitEventToIntQ(0, _delay,1);// emit dummy event \n");
