@@ -404,13 +404,15 @@ public:
 	// get arc count .. go outside until one with a geo is found
 	int maxArcCount();
 
+	void loopBy(int fac) { numberTokens *= fac;}
+	void unloopBy(int fac) { numberTokens /= fac;}
+	// don't like this being public, but...
+	void setNumXfer(int v) { numberTokens = v;}
 private:
 	DFPortHole& pPort;
 	SDFClustPort* pOutPtr;
 	unsigned char bagPortFlag;
 	unsigned char feedForwardFlag;
-	void loopBy(int fac) { numberTokens *= fac;}
-	void unloopBy(int fac) { numberTokens /= fac;}
 };
 
 class SDFClustSched : public SDFBagScheduler {
