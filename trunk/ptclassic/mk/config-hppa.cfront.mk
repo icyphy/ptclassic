@@ -26,7 +26,8 @@ OCT_DEBUG_FLAGS =
 # flags for C++ compilation.  -DPOSTFIX_OP= is needed for cfront 2.1; it
 # is not needed for 3.0.
 GPPFLAGS =	-DUSG $(GPPDEBUGFLAGS) $(MEMLOG)
-CFLAGS =	-DUSG $(CDEBUGFLAGS) 
+# -Aa turns on ansi c
+CFLAGS =	-DUSG $(CDEBUGFLAGS) -Aa
 
 # CC on HPs does not know the "-M" option as given in DEPEND.
 # makedepend is part of X11
