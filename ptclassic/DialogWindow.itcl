@@ -192,7 +192,7 @@ configbody ::tycho::DialogWindow::html {
 	    # Create the message window.
 	    itk_component add html {
 		HTMLText $itk_interior.top.html \
-			-simple 1 \
+			-scrollbar 0 \
 			-html $itk_option(-html)
 	    } {
 		keep -background -cursor -foreground \
