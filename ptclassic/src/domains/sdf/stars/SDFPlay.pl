@@ -57,7 +57,7 @@ be a parameter.
 		char* fileName;		// name of file to use (on heap)
 	}
 	hinclude { <stdio.h> }
-	ccinclude { "miscFuncs.h", "paths.h", <std.h> }
+	ccinclude { "miscFuncs.h", "paths.h", "PTDSPMuLaw.h", <std.h> }
 	constructor {
 		strm = NULL;
 		delFile = FALSE;
@@ -85,52 +85,13 @@ be a parameter.
 			Error::abortRun (*this, "Can't open file ", fileName);
 		}
 	}
-// mulaw compression routine
-	code {
-		const int BIAS = 0x84;
-		const int CLIP = 32635;
 
-		static unsigned char ulaw( int sample )
-	{
-		static int exp_lut[256] = {0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
-                               4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-                               5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-                               5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-                               6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-                               6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-                               6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-                               6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-                               7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
-		int sign, exponent, mantissa;
-		unsigned char ulawbyte;
-
-		/* Get the sample into sign-magnitude. */
-		/* this code assumes a twos complement representation */
-		sign = (sample >> 8) & 0x80;
-		if ( sign != 0 ) sample = -sample;
-		if ( sample > CLIP ) sample = CLIP;
-
-		/* Convert from 16 bit linear to ulaw. */
-		sample = sample + BIAS;
-		exponent = exp_lut[( sample >> 7 ) & 0xFF];
-		mantissa = ( sample >> ( exponent + 3 ) ) & 0x0F;
-		ulawbyte = ~ ( sign | ( exponent << 4 ) | mantissa );
-		return ulawbyte;
-	}
-	}
 // go.  Does nothing if open failed.  Does mu-law compression.
 	go {
 		if (!strm) return;
 		// add gain, cvt to integer
 		int data = int(double(input%0) * double(gain));
-		putc (ulaw(data), strm);
+		putc (PTDSPMuLaw(data), strm);
 	}
 // wrapup.  Does nothing if open failed, or 2nd wrapup call.
 // closes file and runs the command.
