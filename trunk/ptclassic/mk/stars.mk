@@ -511,9 +511,17 @@ ifdef SDFFULL
 	endif
 endif
 
-# SDF VIS subdomain will only build under Solaris 2.5 and higher under cfront
+# We only build the VIS subdomain under the cfront compiler on Solaris
+# 2.5 and higher.  We test for sol2 and cfront in the architecture name
+# and the presence of the VSDKHOME environment variable.
 ifdef SDFVIS
-	ifneq ("sol2.5.cfront","$(PTARCH)")
+	ifeq ("$(findstring sol2,$(PTARCH))","")
+		SDFVIS =
+	endif
+	ifeq ("$(findstring cfront,$(PTARCH))","")
+		SDFVIS =
+	endif
+	ifndef VSDKHOME
 		SDFVIS =
 	endif
 endif
