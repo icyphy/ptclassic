@@ -153,6 +153,9 @@ class ::tycho::IDoc {
     # Generate a DAG for the current class and it's parents.
     public method generateDAG {}
 
+    # Generate an HTML representation of the current class.
+    public method generateHTML {}
+
     # Place a ghost handle a certain number of pixels from the actual one.
     public method ghostHandle {horizontal pixels}
 
@@ -166,7 +169,7 @@ class ::tycho::IDoc {
     public method insertData {data}
     
     # Insert HTML into myHtml(Top or Bottom) widget
-    public method putHtml {class data {top 1}}
+    public method putHtml {class data {top 1} {show 1}}
 
     # Return the filename of the relative documentation of the given class.
     public method relFile {classname}
@@ -256,11 +259,14 @@ class ::tycho::IDoc {
     # Format the explanation of the given item in HTML.
     private method formatExpl {class item type}
 
+    # Format the given item as an HTML link
+    private method hyperLink {class item type {text {}} {itemtype {}}}
+
     # Initialize the menu bar.
     private method initializeMenubar {menubar}
     
     # Calculate a new -relwidth parameter (doesn't reset it)
-    private method newRelWidth {pizels}
+    private method newRelWidth {pizxls}
 
     # Calculate a new -relheight parameter (doesn't reset it)
     private method newRelHeight {pixels}
@@ -554,6 +560,8 @@ body ::tycho::IDoc::docFile {classname} {
 
 #####################################################################
 #### downSize
+# Call downSize (decrease the current font size) on the constituent (HTML)
+# widgets.
 # 
 body ::tycho::IDoc::downSize {} {
     $myHtmlTop downSize
@@ -590,7 +598,15 @@ body ::tycho::IDoc::generateDAG {} {
     }
     
 }
+
+#####################################################################
+#### generateHTML
+# Output the class data in HTML form. 
+#
+body ::tycho::IDoc::generateHTML {} {
     
+
+}    
 #####################################################################
 #### ghostHandle
 # Control the ghost handle (for lack of a standard name), which is the
@@ -716,9 +732,11 @@ body ::tycho::IDoc::insertData {data} {
 #########################################################################
 #### putHtml
 # Load a portion of HTML into the proper HTML widget. Add tags to format
-# properly.
+# properly. If top is true, format the data for the upper HTML widget. If 
+# show is true, reload the data in the HTML widget. Show is set to false 
+# when generating HTML for output to a file.
 #
-body ::tycho::IDoc::putHtml {class data {top 1}} {
+body ::tycho::IDoc::putHtml {class data {top 1} {show 1}} {
     switch $top {
         1 {
             set myTopData " 
@@ -787,7 +805,9 @@ body ::tycho::IDoc::resizeFrame {horizontal pixels} {
 
 #####################################################################
 #### upSize
-# 
+# Call upSize (increase the current font size) on the constituent (HTML)
+# widgets.
+#
 body ::tycho::IDoc::upSize {} {
     $myHtmlTop upSize
     $myHtmlBottom upSize
@@ -1698,6 +1718,9 @@ body ::tycho::IDoc::formatExpl {class item type} {
                 }
             }
 
+            # Create hyperLink to source
+            set item [hyperLink $class $item $type]
+            
             # Format HTML
             set html "<b>$item</b> <i>$other</i><p> $expl"
 
@@ -1757,6 +1780,9 @@ body ::tycho::IDoc::formatExpl {class item type} {
                 set itemtype ""
             }
 
+            # Create hyperlink to source
+            set shortname [hyperLink $class $item $type $shortname $itemtype]
+            
             # Format HTML
             if {$modifiers != {} || $itemtype != {}} {
                 set html "$modifiers $itemtype <b>$shortname</b> "
@@ -1773,6 +1799,66 @@ body ::tycho::IDoc::formatExpl {class item type} {
         }
     }
     return $html
+}
+
+#####################################################################
+#### hyperLink
+# Generates a reasonable hyperLink tag to the given item, using the text
+# field as the link text, if it's given (otherwise use item). This will
+# not work if the source is formatted differently.
+#
+body ::tycho::IDoc::hyperLink {class item type {text {}} {itemtype {}}} {
+    set classModel $myClass($class)
+
+    if {$text == {}} {
+        set text $item
+    }
+
+    switch $language {
+        Itcl {
+            if {$type == "method" || $type == "Destructor" \
+                    || $type == "Constructor"} {
+                set text "<a href = \
+                    \"[$classModel modelcget -source]#body [$classModel \
+                    modelcget -name]::$item\">$text</a>"
+            } elseif {$type == "variable" && [$classModel itemcget \
+                    variable $item -modifiers] != "itk_option"} { 
+                set text "<a href = \
+                    \"[$classModel modelcget -source]#variable $item\">\
+                    $text</a>"
+            } else {
+                # It's an itk_option, link to the itk_option define
+                set text "<a href = \
+                    \"[$classModel modelcget -source]#itk_option define $item\">\
+                    $text</a>"
+            }  
+
+        }
+        Java {
+            # Assume text is the fixed name and item is the full name
+            set protection [$classModel itemcget $type $item -protection]
+            if {$protection == "package"} {
+                set protection {}
+            } else {
+                set protection "$protection "
+            }
+            set modifiers [$classModel itemcget $type $item -modifiers]
+            if {$modifiers != {}} {
+                set modifiers "$modifiers "
+            }
+            if {$itemtype != {}} {
+                set itemtype "$itemtype "
+            }
+
+            if {$type != "method"} {
+                set text "<a href = \
+                    \"[$classModel modelcget \
+                    -source]#$protection$modifiers$itemtype$text\"\
+                    >$text</a>"
+            } 
+        }
+    }
+    return $text
 }
 
 #####################################################################
