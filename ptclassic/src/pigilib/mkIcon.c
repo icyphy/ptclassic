@@ -211,7 +211,8 @@ int size;
     corners[1].x = 50;
     corners[1].y = 50-size*25;
 
-    ERR_IF1(!PutShape(layerPtr, &dummy, &box, &noTranslate));
+/* 11/11/93 added FALSE */
+    ERR_IF1(!PutShape(layerPtr, &dummy, &box, &noTranslate, FALSE));
     return TRUE;
 }
 
