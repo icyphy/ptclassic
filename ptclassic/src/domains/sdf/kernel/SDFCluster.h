@@ -311,7 +311,7 @@ public:
 	int internalClustering();
 
 protected:
-	int genSched();
+	virtual int genSched();
 
 	// createInnerGal
 	virtual void createInnerGal();
