@@ -31,8 +31,8 @@ by factoring <i>S</i> into three simpler integer matrices such that
 Here, <i>D</i> is diagonal, and <i>U</i> and <i>V</i> have determinant of <i>+</i>1<i></i> or <i>-</i>1<i></i>
 (and are called <i>regular unimodular</i></b>).
 Therefore, <i>|det   S| </i>=<i> |det   D|</i>.
-Note that <i>S</i> is <i>m</i> x <i>n</i>, so <i>U</i> is <i>m</i> x <i>m</i>, <i>D</i> is <i>m</i> x <i>n</i>, and
-<i>V</i> is <i>n</i> x <i>n</i>.
+Note that <i>S</i> is <i>m</i> &#215; <i>n</i>, so <i>U</i> is <i>m</i> &#215; <i>m</i>, <i>D</i> is <i>m</i> &#215; <i>n</i>, and
+<i>V</i> is <i>n</i> &#215; <i>n</i>.
 Hence, <i>U</i> and <i>V</i> are always square.
 <p>
 Smith form decompositions are not unique [5-6].
@@ -45,9 +45,9 @@ This block will return the canonical form if the state
 <i>SmithCanonicalForm</i></b> is <i>TRUE</i></b>.
 <p>
 The Smith form decomposition algorithm requires on the order of
-<i>[n + m]^</i>4<i></i> operations.
+(<i>n + m</i>)<sup>4</sup> operations.
 Converting the Smith form into canonical form requires on the order of
-<i></i>min<i></i>(<i>m, n</i>)<i>^</i>2<i></i> comparisons and <i></i>min<i></i>(<i>m, n</i>)<i></i> arithmetic operations [6].
+min(<i>m, n</i>)<sup>2</sup> comparisons and min(<i>m, n</i>) arithmetic operations [6].
 Therefore, it takes the same order of operations to compute a Smith
 form or the Smith canonical form.
 <p>
