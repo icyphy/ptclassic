@@ -33,7 +33,16 @@
 
 #
 # Programs to use
-CPLUSPLUS = g++
+CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront  -isystem $(ROOT)/gnu/common/include/g++-3/ 
+
+# We must pass -DPT_EGCS so that make depend works properly.  Otherwise
+# we get messages like:
+# ../../src/compat/cfront/std.h:65: warning: No include path in which
+#	 to find sysent.h 
+# This may appear to be really strange, since this is fsf gcc and not
+# egcs.
+CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
+
 
 # If we have g++, then compile Octtools with gcc.  ARCHs that are cfront
 # based probably don't have gcc.
@@ -89,8 +98,8 @@ CRT0=
 CSYSLIBS=-lm 
 
 # system libraries (libraries from the environment)
-SYSLIBS=-lg++ $(CSYSLIBS)
-
+# No need to include -lg++ under egcs
+SYSLIBS=-lstdc++ $(CSYSLIBS)
 
 # link flags (tell linker to strip out debug symbols)
 # -static prevents use of shared libraries when building ptolemy
