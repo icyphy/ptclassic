@@ -180,7 +180,8 @@ install_tcl: $(TCL_DEST)/lib/libtcl.a $(BINDIR)/tclsh
 $(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DEST)/lib $(TCL_INDEPENDENT_DEST)
 	(cd  $(TCL_OBJ); $(MAKE) install)
 	if [ ! -f $(TCL_DEST)/lib/libtcl.a ]; then \
-		cd $(TCL_DEST)/lib; ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a; \
+		cd $(TCL_DEST)/lib; rm -f libtcl.a; \
+		ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a; \
 	fi
 	# Don't overwrite this each time we install
 	chmod a-w $(TCL_INDEPENDENT_DEST)/include/tcl.h
@@ -232,7 +233,8 @@ $(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/li
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		install)
 	if [ ! -f $(TK_DEST)/lib/libtk.a ]; then \
-		cd $(TK_DEST)/lib; ln -s lib$(TK_MAJOR_VERSION).a libtk.a; \
+		cd $(TK_DEST)/lib; rm -f libtk.a; \
+		ln -s lib$(TK_MAJOR_VERSION).a libtk.a; \
 	fi
 	# Don't overwrite this each time we install
 	chmod a-w $(TK_INDEPENDENT_DEST)/include/tk.h
@@ -288,6 +290,7 @@ $(ITCL_DEST_LIB)/libitcl.a: \
 		INCLUDE_DIR=$(ITCL_INDEPENDENT_DEST)/include \
 		install)
 	-(cd $(ITCL_DEST_LIB); \
+		rm -f libitcl.a; \
 		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).a libitcl.a)
 
 $(ITCL_DEST):
@@ -300,12 +303,15 @@ $(ITCL_INDEPENDENT_DEST):
 # Links so that we don't have to change version numbers in lots of makefiles.
 $(ITCL_DEST_LIB)/libtcl.a:
 	(cd $(ITCL_DEST_LIB); \
+		rm -f libtcl.a; \
 		ln -s libtcl$(ITCL_TCL_MAJOR_VERSION_NUMBER).a libtcl.a)
 $(ITCL_DEST_LIB)/libtk.a:
 	(cd $(ITCL_DEST_LIB); \
+		rm -f libtk.a; \
 		ln -s libtk$(ITCL_TK_MAJOR_VERSION_NUMBER).a libtk.a)
 $(ITCL_DEST_LIB)/libitk.a:
 	(cd $(ITCL_DEST_LIB); \
+		rm -f libitk.a; \
 		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).a libitk.a)
 
 # Links so that older programs can find libs and includes.
