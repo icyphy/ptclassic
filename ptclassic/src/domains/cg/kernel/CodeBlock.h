@@ -15,32 +15,34 @@ $Id$
 #include "type.h"
 
 	////////////////////////////////////
-	// class LineOfCode
+	// class CodeBlock
 	////////////////////////////////////
 
 // This class should be replaced with a derived class for each specific
-// code generator.  The method XXXCGStar::codeLine() should create
-// an instance of this class, and store it in the codeBlock.
+// code generator.  The constructor XXXCodeBlock, where XXX is the domain
+// name, will normally process the input code in some way.
 
-class LineOfCode {
+class CodeBlock {
 public:
-	LineOfCode(char* line) { text = line; }
+	// Constructor for the default case just stores the code
+	CodeBlock(char* b) { text = b; }
 	// Is the following needed also?
 	void setText(char* line) {text = line;}
 	char* getText() {return text;}
+	void printCode ();
 private:
 	char* text;
 };
 
 
 	////////////////////////////////////
-	// class BlockOfCode
+	// class CodeBlockList
 	////////////////////////////////////
 
-class BlockOfCode : public SequentialList {
+class CodeBlockList : public SequentialList {
 public:
 	// For many code generators, this method will parse the code lines
-	void put(LineOfCode* line) {
+	void put(CodeBlock* line) {
 		SequentialList::put(line);
 	}
 
@@ -54,9 +56,9 @@ public:
 // For now, this is identical with ListIter, except for a cast
 class CodeBlockIter : private ListIter {
 public:
-	CodeBlockIter(const BlockOfCode& c) : ListIter (c) {}
-	LineOfCode* next() { return (LineOfCode*)ListIter::next();}
-	LineOfCode* operator++() { return next();}
+	CodeBlockIter(const CodeBlockList& c) : ListIter (c) {}
+	CodeBlock* next() { return (CodeBlock*)ListIter::next();}
+	CodeBlock* operator++() { return next();}
 	ListIter::reset;
 };
 
@@ -64,7 +66,7 @@ public:
 	// class CodeVector
 	////////////////////////////////////
 
-// The following class stores a vector of BlockOfCode*'s.
+// The following class stores a vector of CodeBlockList*'s.
 // It is different from vector primarily in that the "elem" method
 // creates new vector entries if the index is larger than the number
 // of entries already allocated.
@@ -72,9 +74,9 @@ public:
 class CodeVector : public Vector {
 public:
 	// Add an indexed element
-	const BlockOfCode* elem (int index) {
+	const CodeBlockList* elem (int index) {
 		while (dimension() <= index) {
-			put(new BlockOfCode);
+			put(new CodeBlockList);
 		}
 		return(Vector::elem(index));
 	}
