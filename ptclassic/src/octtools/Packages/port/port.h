@@ -268,13 +268,17 @@ extern double trunc();
 #if defined(sequent) || defined(news800)
 #define LACK_SYS5
 #endif
-
-#if defined(PTSUN4) || defined(ultrix4) || defined(PTLINUX) || defined(PTHPPA) || defined(PTNBSD_386) || defined(PTSVR4)
+#ifdef NEVER
+/* Let's just assume void signals */
+#if defined(PTSUN4) || defined(ultrix4) || defined(PTLINUX) || defined(PTHPPA) || defined(PTNBSD_386) || defined(PTSVR4) || defined(PTSOL2)
 #define SIGNAL_FN	void
 #else
 /* sequent, ultrix2, 4.3BSD (vax, hp), sunos3 */
 #define SIGNAL_FN	int
 #endif
+#endif
+
+#define SIGNAL_FN void
 
 #ifdef PTSVR4
 #define stricmp strcasecmp
@@ -531,7 +535,14 @@ extern int gethostname( char * name, int namelen);
 #include <unistd.h>
 /* Don't include memset, it should be /usr/include/memory.h */
 /*extern char * memset ARGS(( char *, char *, int));*/
+#ifndef __cplusplus
+/* If we are compiling with g++-2.7.0 under sun4, then don't
+ * include memory.h or files in pigilib won't compile because of
+ * conflicts between memory.h and g++-include/std/cstring.h
+ * over the declaration of memchr()
+ */
 #include <memory.h>
+#endif
 
 /* Don't include a declaration for qsort, include stdlib.h instead */
 #include <stdlib.h>
