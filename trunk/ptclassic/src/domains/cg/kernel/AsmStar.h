@@ -65,17 +65,17 @@ public:
 	// requirements for the state.
 	void addEntry(const State&,ProcMemory&,unsigned);
 
-protected:
-	// Given a CodeBlock, generate output code and add it to the
-	// code of the star's target.  Macros referencing states and
-	// inputs and outputs are processed here.
-	void gencode(CodeBlock&);
-
 	// Look up an address for a State entry by name.
 	// Return a pointer to the memory in which the state will be stored,
 	// or NULL if no entry is found.  Set the second argument
 	// equal to the address.
 	ProcMemory* lookupEntry(const char*,unsigned&);
+
+protected:
+	// Given a CodeBlock, generate output code and add it to the
+	// code of the star's target.  Macros referencing states and
+	// inputs and outputs are processed here.
+	void gencode(CodeBlock&);
 
 	// Return the special character that introduces a macro
 	// in a code block.  This character is used by gencode() to
@@ -108,6 +108,7 @@ protected:
 
 	// Reset the state entry list.
 	void zapStateEntries();
+
 private:
 	// State entry list.  This stores the addresses allocated to each
 	// State.
