@@ -171,7 +171,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
     }
     if (*bucket) {
 	current = *bucket;
-        if (cq_debug) printf("INSERT1: last time %lf, ev # %ld, time %lf, fine level %lf\n", 
+        if (cq_debug) printf("INSERT1: last time %f, ev # %ld, time %f, fine level %f\n", 
 	cq_lastTime, link->absEventNum, link->level, link->fineLevel);
 	// Now we are going to look for the first element
 	// such that ((current->level > link->level) or
@@ -254,7 +254,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	    *bucket = link;
 	}
     } else { // empty bucket 
-        if (cq_debug) printf("INSERT2: at time %lf, ev # %ld, time %lf, fine level %lf\n", 
+        if (cq_debug) printf("INSERT2: at time %f, ev # %ld, time %f, fine level %f\n", 
 	cq_lastTime, link->absEventNum, link->level, link->fineLevel);
 	link->before = link->next = NULL;
 	*bucket = link;
@@ -295,7 +295,7 @@ CqLevelLink* CalendarQueue :: NextEvent()
 	    cq_eventNum--;
 	    if ((cq_resizeEnabled) && (cq_eventNum < cq_bottomThreshold))
 		Resize(cq_bucketNum/2);
-	    if (cq_debug) printf("REMOVE: ev # %ld, time %lf, fine level %lf\n",
+	    if (cq_debug) printf("REMOVE: ev # %ld, time %f, fine level %f\n",
 	 		result->absEventNum, result->level, result->fineLevel);
 	    return(result);
 	} else {
