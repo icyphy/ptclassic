@@ -63,5 +63,4 @@ test openContext-1.1 {openContext} {
 	    \$PTOLEMY/src/domains/sdf/demo/basic.pal
 } {}
 
-doneTests
 
