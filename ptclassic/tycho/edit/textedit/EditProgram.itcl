@@ -234,7 +234,7 @@ body ::tycho::EditProgram::constructor {args} {
 
     menubar add "Indent Region" Format -underline 1 \
             -accelerator "Esc C-\\" \
-	    -command "$this busy indentSelection"
+	    -command "$this busy $this indentSelection"
     
     menubar add "Tab" Format -underline 0 -accelerator "C-q Tab" \
 	    -command "$this insertString insert {\t}"
@@ -254,7 +254,7 @@ body ::tycho::EditProgram::constructor {args} {
     
     # Indent region binding
     bind $itk_component(text) <Escape><Control-backslash> \
-            "$this busy indentSelection"
+            "$this busy $this indentSelection"
 }
 
 #####################################################################
