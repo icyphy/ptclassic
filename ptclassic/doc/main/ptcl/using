@@ -100,7 +100,7 @@ returns the current domain.  It is possible to create
 \- interfaces between domains \- by including a
 .c domain
 command inside a galaxy definition.
-.H3 "Creating Instances of Stars and Galaxys
+.H3 "Creating Instances of Stars and Galaxies
 .pp
 The first step in any simulation is to define the blocks
 (
@@ -146,7 +146,7 @@ galaxy \fIname\fP \fIclass\fP
 .IE "galaxy command"
 is also provided to create an instance of a
 .c Galaxy .
-.H3 "Connecting Stars and Galaxys
+.H3 "Connecting Stars and Galaxies
 .pp
 The next step is to connect the blocks so that they can
 pass data among themselves using the
@@ -225,7 +225,7 @@ of the bus (how many portholes in the multiportholes);
 and
 .i delay
 is an optional expression giving the delay on each connection.
-.H3 "Connecting Internal Galaxy Stars and Galaxys to the Outside
+.H3 "Connecting Internal Galaxy Stars and Galaxies to the Outside
 .pp
 When you define a new
 .c Galaxy
@@ -472,7 +472,7 @@ numports summer input 2
 input galInput summer "input#1"
 connect foo output summer "input#2"
 .)c
-.H3 "Defining New Galaxys
+.H3 "Defining New Galaxies
 .pp
 The
 .c defgalaxy
@@ -906,6 +906,38 @@ that a star that can be linked into Pigi, the graphic interface, might
 not be linkable into the interpreter in some rare cases.
 .IE "link command"
 .IE "dynamic linking"
+.pp
+It is also possible to link in several object files, pull in functions
+from libraries, etc. by use of the
+.c multilink
+command.  The syntax is
+.(c
+multilink \fIopt1 opt2 opt3 ...\fP
+.)c
+where the options may be the names of object files, linker options
+such as "-L" or "-l" switches, etc.  These arguments are supplied
+to the Unix linker along with whatever options are needed to completely
+specify the incremental link.
+.pp
+When the above linker commands are used, the linked in code has temporary
+status; symbols for it are not entered into the symbol table (meaning
+that the code cannot be linked against by future incremental links),
+and it can be replaced: an error in the loaded modules could be corrected
+and the
+.c link
+or
+.c multilink
+command could be repeated.  There is an alternative linking command that
+specifies that the new code is to be considered ``permanent''; it causes
+a new symbol table to be produced for use in future links.  Such code
+cannot be replaced, but it can be linked against by future incremental
+link commands.  The syntax is
+.(c
+permlink  \fIopt1 opt2 opt3 ...\fP
+.)c
+where the options are the same as for the
+.c multilink
+command. 
 .H3 "Top Blocks"
 .pp
 The
