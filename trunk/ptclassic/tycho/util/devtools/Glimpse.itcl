@@ -89,7 +89,7 @@ class ::tycho::Glimpse {
 #
 body ::tycho::Glimpse::constructor {args} {
     global PTOLEMY TYCHO tcl_library tcl_platform
-    if {$tcl_platform(platform) =!= "macintosh"} {
+    if {$tcl_platform(platform) == "macintosh"} {
 	error "Sorry, Glimpse is not supported on the Mac,\nthere is\
 		no Tcl \"exec\" on the Mac."
     }
@@ -179,9 +179,9 @@ body ::tycho::Glimpse::destructor {} {
 body tycho::Glimpse::glimpseSearch {} {
     global TYCHO
     set pattern [get pattern]
-    set glimpse_index [get glimpse_index]
-    if {! [file exists [eval file join $glimpse_index]]} {
-        error "[eval file join $glimpse_index] does not exist.\n\
+    set glimpse_index [list [get glimpse_index]]
+    if {! [file exists [lindex $glimpse_index 0]]} {
+        error "$glimpse_index does not exist.\n\
                 If this is the Tycho glimpse file, and if you have glimpse\n\
                 installed, then you need to run\
                 (cd $TYCHO; make glimpse).\n\
@@ -196,9 +196,9 @@ body tycho::Glimpse::glimpseSearch {} {
     puts $fd "{Glimpse $pattern}\n{"
 
     # Unix only? exec glimpse and get the output:
-    set glimpseIndexDir [file dirname [eval file join $glimpse_index]]
+    set glimpseIndexDir [file dirname [file join [lindex $glimpse_index 0]]]
     # glimpse options: -y = don't prompt -n = show line numbers
-    set glimpseOut [busy exec glimpse -y -n -H $glimpseIndexDir $pattern]
+    set glimpseOut [busy exec glimpse -y -n -H "$glimpseIndexDir" $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
         regsub {^.*/tycho/(.*)} $glimpseItem {$TYCHO/\1} shortGlimpseItem
