@@ -72,9 +72,9 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 {
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
-	targetNestedSymbol.setCounter(&symbolCounter);
+	targetNestedSymbol.setCounter(symbolCounter());
 	sharedSymbol.setSeparator(separator);
-	sharedSymbol.setCounter(&symbolCounter);
+	sharedSymbol.setCounter(symbolCounter());
 
 	addState(targetHost.setState("host", this, "",
 	    "Host machine to compile or assemble code on."));
@@ -105,7 +105,7 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
-	symbolCounter = 0;
+	counter = 0;
 }
 
 // destructor
@@ -167,7 +167,7 @@ void CGTarget::setup() {
 	writeDirectoryName(destDirectory);
 
 	// Reset the symbol lists.
-	symbolCounter = 0;
+	counter = 0;
 	targetNestedSymbol.initialize();
 	sharedSymbol.initialize();
 
@@ -249,9 +249,16 @@ void CGTarget::generateCode() {
 	if (!parent()) writeCode();
 }
 
+int* CGTarget::symbolCounter() {
+	if (parent()) {
+		if(((CGTarget*)parent())->isA("CGTarget")) {
+			return ((CGTarget*)parent())->symbolCounter();
+		}
+	}
+	return &counter;
+}
+
 void CGTarget::generateCodeStreams() {
-	CGTarget* parT = (CGTarget*) parent();
-	if (parT) symbolCounter = parT->symbolCounter;
 	if (SimControl::haltRequested()) return;
 	headerCode();
 	if (!codeGenInit())
@@ -262,7 +269,6 @@ void CGTarget::generateCodeStreams() {
 	mainLoopCode();
 	Target :: wrapup();
 	trailerCode();
-	if (parT) parT->symbolCounter = symbolCounter;
 }
 
 void CGTarget :: mainLoopCode() {

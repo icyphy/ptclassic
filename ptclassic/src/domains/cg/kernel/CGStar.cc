@@ -129,9 +129,9 @@ void CGStar :: setTarget(Target* t)
 {
 	Star::setTarget(t);
 	codeblockSymbol.setSeparator(myTarget()->separator);
-	codeblockSymbol.setCounter(&(myTarget()->symbolCounter));
+	codeblockSymbol.setCounter(myTarget()->symbolCounter());
 	starSymbol.setSeparator(myTarget()->separator);
-	starSymbol.setCounter(&(myTarget()->symbolCounter));
+	starSymbol.setCounter(myTarget()->symbolCounter());
 	myCode = getStream(CODE);
 	procedures = getStream(PROCEDURE);
 }
