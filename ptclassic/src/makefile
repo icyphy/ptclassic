@@ -14,10 +14,10 @@
 DIRS = kernel preproc domains interp ptcl pigilib libgantt pigiRpc xgraph filters
 
 # directories with a make.template
-MTDIRS = kernel pigilib libgantt xgraph
+MTDIRS = kernel interp pigilib libgantt xgraph ptcl
 
 # "leaf" directories with no make.template
-LDIRS = preproc interp pigiRpc filters
+LDIRS = preproc pigiRpc filters
 
 # directories with subtrees
 SDIRS = domains
