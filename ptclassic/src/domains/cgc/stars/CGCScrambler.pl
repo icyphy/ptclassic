@@ -143,23 +143,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	    Error::abortRun(*this,"Sorry, the polynomial must be a positive integer.");
 	    return;
 	  }
-          addGlobal("int ffs();");
 	}
 	codeblock(scramble) {
-	  int reg, masked, parity, lob;
+	  int reg, masked, parity;
 	  reg = $ref(shiftReg) << 1;
 	  masked = $val(polynomial) & reg;
 	  /* Now we need to find the parity of "masked". */
 	  parity = 0;
-	  /*
-	   * Find the lowest order bit that is set and shift it out
-	   * "ffs" is a c library function does this. It returns zero when
-	   * there are no more bits set.
-	   */
-	  while (lob = ffs(masked)) {
-	    masked = masked >> lob;
-	    /* toggle the parity bit */
-	    parity = parity ^ 1;
+	  /* Calculate the parity of the masked word */
+	  while (masked > 0) {
+	    parity = parity ^ (masked & 1);
+	    masked = masked >> 1;
 	  }
 	  /* Exclusive-or with the input */
 	  parity = parity ^ ($ref(input) != 0);
