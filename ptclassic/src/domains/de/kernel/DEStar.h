@@ -52,6 +52,9 @@ public:
 	// define firing
 	void fire();
 
+	// class identification
+	int isA(const char*) const;
+
 	// my domain
 	const char* domain() const;
 
