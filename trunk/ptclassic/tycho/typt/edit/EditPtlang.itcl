@@ -166,17 +166,17 @@ body ::tycho::EditPtlang::gendoc {filename} {
     set docfile "$root.htm"
     set fulldoc [file join $dir $docfile]
     if {![file exists $fulldoc] || \
-            [file mtime $filename] > [file mtime $fulldoc]} {
+            [file mtime $filename] > [file mtime $fulldoc] } {
         # Need to regenerate the doc.  Check permissions first.
         # It is sufficient for the directory to be writable.
         if {[file writable $dir]} {
 	    # Save the file if it has not been saved
-	    if {[isModified] == 1} {
-		if {[::tycho::askuser \
-			"File $filename has not been saved, Save it now?"]} {
-		    save
-		}
-	    }
+#	    if {[isModified] == 1} {
+#		if {[::tycho::askuser \
+#			"File $filename has not been saved, Save it now?"]} {
+#		    save
+#		}
+#	    }
 
             set savedir [pwd]
             cd $dir
