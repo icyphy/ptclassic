@@ -166,10 +166,10 @@ class ::tycho::FileBrowser {
     ####                   protected variables                    ####
 
     # The parent directory string: platform-dependent
-    protected common directoryParent
+    protected common directoryParent [::tycho::directoryParent]
 
     # The directory separator: platform-dependent
-    protected common directorySeparator
+    protected common directorySeparator [::tycho::directorySeparator]
 
     # The directory separator to use at the end of a directory.
     protected common directorySeparatorTrailer "/"
@@ -189,29 +189,6 @@ class ::tycho::FileBrowser {
     # If tab is hit again with the same entry, the directory will
     # be changed (ala Emacs)
     protected variable lastCompletion
-
-    ##################################################################
-    ####                   initialization code                    ####
-
-    # Set directory separator and parent according to platform
-    switch $tcl_platform(platform) {
-        macintosh {
-            set directoryParent "::"
-            set directorySeparator ":"
-        }
-        unix {
-            set directoryParent "../"
-            set directorySeparator "/"
-        }
-        windows {
-            set directoryParent "../"
-            set directorySeparator "/"
-	    # This is what is used to be -- according to CliffC
-	    # the forward slashes work just as well
-            # set directorySeparator "\\"
-            # set directoryParent "..\\"
-        }
-    }
 }
 
 ######################################################################
