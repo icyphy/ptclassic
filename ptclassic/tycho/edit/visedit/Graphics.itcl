@@ -538,11 +538,11 @@ body ::tycho::Graphics::constructor {args} {
 	}
     }
 
-    # Subscribe to the preferences
-    preference subscribeoptions $this \
-	    -canvasheight canvasHeight \
-	    -canvaswidth  canvasWidth \
-	    -canvascolor  canvasColor
+    # Subscribe to the style parameters
+    stylesheet subscribe \
+	    -canvasheight graphics canvasHeight \
+	    -canvaswidth  graphics canvasWidth \
+	    -canvascolor  graphics canvasColor
 
 }
 
@@ -632,11 +632,11 @@ body ::tycho::Graphics::centeredText \
             set cwidth [expr $cwidth-20]
         }
         if {$font != {}} {
-            set usefont [eval ::tycho::font $font]
+            set usefont $font
         } {
             set usefont [::tycho::font helvetica]
         }
-        set usecolor [::tycho::color $color]
+        set usecolor $color
         set id [$slate create text $xcoord $top \
                 -width $cwidth \
                 -justify center \
@@ -1343,7 +1343,7 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
     set name [::tycho::autoName .query]
     if !$newcategory {
         if $readOnly {bell; return}
-        set titleTypes [preference get titleTypes]
+        set titleTypes [stylesheet get graphics titleTypes]
         set categories {}
         foreach cat $titleTypes {
             if {[$slate find withtag $cat] == {}} {
@@ -1392,15 +1392,15 @@ body ::tycho::Graphics::titleAdd {{newcategory 0}} {
 body ::tycho::Graphics::titleSet {category text} {
     # Define the order in which title categories appear by specifying tags
     # that should come before them.
-    set titleTypes [preference get titleTypes]
+    set titleTypes [stylesheet get graphics titleTypes]
     set idx [lsearch -exact $titleTypes $category]
     if {$idx >= 0} {
         set below [lrange $titleTypes 0 [incr idx -1]]
     } {
         set below $titleTypes
     }
-    set font [preference get ${category}Font]
-    set color [preference get ${category}Color]
+    set font [stylesheet get graphics ${category}Font]
+    set color [stylesheet get graphics ${category}Color]
     centeredText $text $category $below $color $font
 }
 
