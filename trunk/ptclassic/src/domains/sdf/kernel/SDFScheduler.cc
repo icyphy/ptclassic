@@ -634,7 +634,7 @@ SDFScheduler::SDFScheduler () {
 // for now, we assume each schedule interation takes 1.0
 // time units.  (Argh).  Deal with roundoff problems.
 void SDFScheduler::setStopTime (float limit) {
-	numIters = int(limit + 0.001);
+	numIters = int(floor(limit + 0.001));
 }
 
 // timing control for wormholes
