@@ -1,40 +1,42 @@
 <!-- $Id$ -->
 <html>
 <head>
-<Title>User's Guide to the BuildDialog Widget</title>
+<Title>User's Guide to the BuilderDialog Widget</title>
 </head>
 <body bgcolor="#faf0e6">
-<h1><a name="BuildDialog Widget">User's Guide to the BuildDialog Widget</a></h1>
-The BuildDialog widget allows the user to build documentation and indexes
+<h1><a name="BuilderDialog Widget">User's Guide to the BuilderDialog Widget</a></h1>
+The BuilderDialog widget allows the user to build documentation and indexes
 on platforms that do not have a <code>make</code> binary.
 <p>
-The BuildDialog widget consists of a set of radio buttons that allow
+The BuilderDialog widget consists of a set of radio buttons that allow
 the user to choose different operations, and a set of regular buttons that
 invoke different operations.
 
-<h2>BuildDialog Radio Buttons</h2>
-The BuildDialog Radio Buttons allow the user to select an operation to
+<h2>BuilderDialog Radio Buttons</h2>
+The BuilderDialog Radio Buttons allow the user to select an operation to
 be performed when the user hits the <code>OK</code> or <code>Build</code>
 buttons.  Below are the radio buttons
 <dl>
 <dt><code>Full</code>
 <dd>Do a Full build, takes about 10 minutes
+<dt><code>Itcl HTML docs</code>
+<dd>Build the Itcl HTML docs, takes about 9 minutes
 <dt><code>Indices Only</code>
 <dd>Build only the Tycho Concept and Code Indices
 <dt><code>Class Diagram Only</code>
 <dd>Build only the Class Diagram
 </dl>
 
-<h2>BuildDialog Buttons</h2>
+<h2>BuilderDialog Buttons</h2>
 <dl>
 <dt><code>OK</code>
 <dd>Run the operation that is selected in the radio buttons, then
-destroy the BuildDialog window.
+destroy the BuilderDialog window.
 <dt><code>Cancel</code>
-Destroy the BuildDialog window without running any build operations.
+Destroy the BuilderDialog window without running any build operations.
 <dt><code>Build</code>
 <dd>Run the operation that is selected in the radio buttons, but
-do not destroy the BuildDialog window.
+do not destroy the BuilderDialog window.
 </dl>
 
 <p>
