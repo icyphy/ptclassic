@@ -151,7 +151,7 @@ proc ptkPrintXYPlot {w title} {
     # Tk returns useless numbers when asked about the width of the widget
     set leftEdge [expr {[string length [pwd]/[lindex $title 0].ps] - 41}]
     if {$leftEdge < 0} {set leftEdge 0}
-    $wpr.file view $leftEdge
+    $wpr.file xview $leftEdge
     $wpr.file icursor end
     pack [frame $wpr.f] -padx 5 -pady 5 -side bottom -fill x
     pack [checkbutton $wpr.f.on -text "To file only:" \
@@ -211,13 +211,18 @@ proc ptkPrintXYPlotGo w {
 	}
    }
 
-   # FIXME: Does not check if ps file already exists
-   eval "$command"
+   if {![file exists $psfile]} {
+   	eval "$command"
+   } else {
+	exec mv ${psfile} ${psfile}.old
+	eval "$command"
+   }
 
    upvar #0 ${wpr}ToFile toFile
    if {! $toFile} {
 	exec lpr -P$env(PRINTER) ${psfile}
 	exec /bin/rm ${psfile}
+	exec mv ${psfile}.old ${psfile}
    }
 }
 
