@@ -1,0 +1,155 @@
+.H2 "Multiprocessor Target"
+.pp
+Targets representing multiple processors are derived from 
+the CG target class. The base class for all 
+multiple-processor targets is called 
+.c MultiTarget , 
+and resides in
+.Id "multiprocessor target"
+.Id "target, multiprocessor"
+.Id "MultiTarget, class"
+the $(PTOLEMY)/src/domains/cg/kernel directory. 
+Derived classes of MultiTarget class are
+.c CGMultiTarget
+and 
+.c CGDDFTarget 
+in this release. CGMultiTarget class
+.Id "CGMultiTarget, class"
+is the base class for all homogeneous multiple-processor targets while
+CGDDFTarget is the default target of the experimental domain: 
+.c CGDDF .
+.Id "CGDDFTarget, class"
+CGDDF domain is corresponding to the 
+.c DDF 
+domain for simulation, aiming
+to support dynamic constructs for code generation. Currently, we
+have developed a scheduling scheme how to handle dynamic constructs [3],
+.Id "dynamic constructs"
+but haven't not completed code generation part yet.
+Refer to the CGDDF domain documentation for detailed discussion of the
+current status. 
+.pp
+The design of Ptolemy is also intended to support heterogenous 
+multi-processor targets. 
+In the future, the base class of all heterogeous
+multiprocessor targets will be implemented from the MultiTarget class.
+For such targets, certain actors must be assigned to certain 
+targets, and the cost of a given actor is in general a function 
+of which child target it is assigned to. We have developed parallel 
+schedulers that address this problem [1].
+.pp
+We have implemented, or are in the process of implementing, 
+both "abstract" and "concrete" multi-processor targets. 
+For example, we have classes named 
+.c CGMultiTarget 
+.Id "CGMultiTarget, class"
+and 
+.c CGSharedBus 
+.Id "CGSharedBus, class"
+that represent sets of homogenous single-processor 
+targets of arbitrary type, connected in either a fully 
+connected or shared-bus topology, with parametrized communication 
+costs. 	 
+We are also working on models for actual 
+multiple-processor systems such as the CM-5, the AT&T DSP-3, 
+the ordered transaction architecture [3], the Ariel Hydra board, 
+and the Spectrum VASP. Refer to the CG56 domain documentation for
+.c CG56MultiSim 
+target, or the CGC domain documentation for 
+.c CGCMultiTarget
+class as examples of "concrete" multi-processor targets.
+In this section, we concentrated on the "abstract" multiprocessor
+target classes that are in $(PTOLEMY)/src/domains/cg/targets directory.
+.pp
+A CGMultiTarget is the base target class for all homogeneous targets.
+By default, it models a fully-connected multiprocessor architecture;
+when a processor wants to communicate with another processor, it can do
+immediately. The
+.c scheduleComm()
+.Id "scheduleComm, method"
+method returns the time when the required communication is scheduled.
+In the CGMultiTarget class, it returns the same time as the communication
+is required. On the other hand, a CGSharedBus, which is
+derived from the CGMultiTarget class, is the base target class for
+all multiprocesor targets in shared-bus topology. In the CGSharedBus
+class, the
+.c scheduleComm()
+method schedules the required communication on the shared-bus member
+object of that class, and returns the scheduled time.
+The communication cost (in time) is modeled by the
+.c commTime()
+.Id "commTime, method"
+method. Given the information on which processors are involved in this
+communication and how many tokens are transmitted, it returns the
+expected communication time once started. 
+By default (or in fully-connected topology), 
+it only depends on the number of tokens.
+.pp
+A CGMultiTarget has 
+a sequence of child Target objects to represent each of the 
+individual processors. The number of processors are determined by a
+.c IntState
+.c nprocs , 
+and the type of the child target is specified by a 
+.c StringState
+.c childType .
+In the setup stage, the child targets are created and added to the
+child target list as a member of the multiprocessor target.
+The decomposition of function is done 
+in such a way that classes derived from MultiTarget represent the 
+topology of the multi-processor network (communication costs 
+between processors, schedules for use of communication facilities, 
+etc.), and single-processor child targets can represent arbitrary types 
+of processors. The resource allocation problem is divided between 
+the parent target, representing the shared resources, and 
+the child targets, representing the resources that are local to 
+each processor.	
+.pp
+The main role of a multiprocessor target is to coordinate child target.
+The CGMultiTarget class has a set of parameters to select a parallel
+scheduling options. See the 
+.c "Schedulers"
+section for detailed discussion on parallel schedulers.
+The selected parallel scheduler schedules the program graph
+onto the child targets; the scheduling results are displayed in a Gantt
+chart. After each child target finishes generating code after the 
+scheduling result, it passes the code the parent multiprocessor target
+that arrange the code in an appropriate way (in
+.c addProcessorCode()
+.Id "addProcessorCode, method"
+method). By default, it merges all child-processor codes into a single file.
+Since the child targets is named after the
+.c filePrefix
+.Id "filePrefix, state"
+state appended by a unique number starting from 0, one common
+alternative is to write a child-processor code into a separate file
+named after the child target name.
+.pp
+To generate interprocessor communication codes properly, the multiprocessor
+target creates the send/receive stars (
+.c createSend() ,
+.Id "createSend, method"
+and
+.c createReceive() )
+.Id "createReceive, method"
+for the child targets, and
+establishes the connection between each pair of send/receive stars in
+.c pairSendReceive()
+.Id "pairSendReceive, method"
+method.
+.pp
+There is no preprocessor for targets like "ptlang" for stars. 
+Designing a customized multiprocessor target, therefore, is a bit
+complicated compared to designing a customized star. If the interconnection
+topology is neither fully-connected nor shared-bus, in particular,
+the communication scheduling should be designed in the target, which
+makes a target design more complicated. So, the best way to design a
+target is to look at an already-implemented target such as CGCMultiTarget
+class in the CGC domain.
+
+.UH "References"
+.ip [3]
+S. Ha,
+"Compile-Time Scheduling of Dataflow Program Graphs with Dynamic Constructs",
+Ph.D. dissertation, U.C.Berkeley, 1992.
+
