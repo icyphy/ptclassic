@@ -237,7 +237,7 @@ dirs="c50/dsp/stars cg56/dsp/stars \
 	de/atm/stars \
 	de/contrib/stars \
 	de/java/stars \
-	de/sip/kernel de/sip/ptsip \
+	de/sip/kernel de/sip/ptsip de/sip/ppl2pl \
 	de/tcltk/stars \
 	vhdl/tcltk/targets \
 	cgc/contrib/stars \

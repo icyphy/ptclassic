@@ -11,6 +11,6 @@
 
 include ../../../../mk/subdomain.mk
 
-DIRS = kernel ptsip
+DIRS = kernel ptsip ppl2pl
 
 ME = de/sip
