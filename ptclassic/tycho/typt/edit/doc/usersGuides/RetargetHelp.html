@@ -27,6 +27,28 @@ C50 domain.  This editor can be used to retarget a universe that was
 written in the CG56 domain to the C50 domain.  The retargetting editor
 can also be used to compare the stars in two different domains.
 
+<h2><a name="Ptolemy Retargetting editor bugs">Ptolemy Retargetting editor bugs</a></h2>
+<menu>
+
+<li> Currently, while the tool is comparing domains, no status messages
+come up until after the compare is done. Perhaps we need an update or a
+flush here.
+
+<li> If the user opens the retargetting editor from a ptcl editor, we should
+probably change domainA to the domain of the universe in the ptcl editor.
+
+<li> The buttons that change domainA and domainB should be menus with radio
+button choices of all the domains.  Also, the buttons don't get updated
+with the name of the new domain choice.
+
+<li> If the user is attempting to retarget a multi domain universe,
+then things could get a little confusing. Currently, the tool throws
+away the domain information of the stars in the ptcl file and just
+compares star names.
+
+
+<menu>
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
