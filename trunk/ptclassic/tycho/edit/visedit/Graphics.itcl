@@ -1077,6 +1077,13 @@ body ::tycho::Graphics::export {} {
 # xwdtopnm, ppmtogif, and xwd, which must be in your path.
 #
 body ::tycho::Graphics::exportGif {filename} {
+    global tcl_platform
+    if {$tcl_platform(platform) === macintosh} {
+	error "Sorry, the Graphics exportGif method is not supported on\
+		the mac.\n  This method uses the tcl \"exec\" command\
+		which is not available on the mac."
+    }
+
     set fn1 [::tycho::tmpFileName]
     exportXwd $fn1
     # NOTE: -transparent color option should be added for the background.
@@ -1087,7 +1094,8 @@ body ::tycho::Graphics::exportGif {filename} {
     }
     ::tycho::rm $fn1
     # For some reason, the above leaves a non-readable file.    
-    exec chmod +r $filename
+    # chmod might not be present, but if this fails, we should not die
+    catch {exec chmod +r $filename}
     # FIXME: Should display the gif!
 }
 
