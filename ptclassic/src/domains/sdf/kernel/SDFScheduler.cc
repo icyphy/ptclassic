@@ -84,18 +84,22 @@ SDFSchedule :: printVerbose () const {
 
 // runs the number of times indicated by numIters.
 int SDFScheduler :: run () {
+	// Process pending events and check for halt
+	// If the user hit the DISMISS button in the run control panel,
+	// then the universe referenced by galaxy() will return a null pointer
+	int haltFlag = SimControl::haltRequested();
         if (! galaxy()) {
 	    invalid = TRUE;
             Error::abortRun("SDF Scheduler has no galaxy to run");
             return FALSE;
         }
 	if (invalid) {
-	    Error::abortRun("Cannot run because the setup is invalid");
+	    Error::abortRun(*galaxy(),
+		    "SDF Scheduler cannot run because the setup is invalid");
 	    return FALSE;
 	}
-	if (SimControl::haltRequested()) {
-	    invalid = TRUE;
-            Error::abortRun("Cannot continue after run-time error");
+	if (haltFlag) {
+            Error::abortRun(*galaxy(), "Cannot continue after run-time error");
 	    return FALSE;
 	}
 
