@@ -136,7 +136,7 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		doc img test tclIndex
+MISC_FILES =		doc img test styles tclIndex
 
 # Sub directories to run make in.
 DIRS =			doc test styles
