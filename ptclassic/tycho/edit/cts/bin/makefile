@@ -59,7 +59,7 @@ REALCLEAN_STUFF =
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all: sources $(MISC_SRCS) tclIndex
+all: sources $(MISC_SRCS)
 	-chmod a+x cts
 
 install: all tybin_install
