@@ -939,6 +939,7 @@ body ::tycho::File::saveAsFile {filename} {
                 return 1
             }
 	} {
+            focusin
 	    error {Did not save file}
 	}
     } {
@@ -946,9 +947,11 @@ body ::tycho::File::saveAsFile {filename} {
 	set oldname $itk_option(-file)
 	if [save $filename] {
             configure -file $filename
+            focusin
 	    return 1
 	}
     }
+    focusin
     return 0
 }
 
