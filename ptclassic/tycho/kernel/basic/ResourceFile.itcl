@@ -91,7 +91,7 @@ class ::tycho::ResourceFile {
     ####                           public procs                    ####
 
     # Change the permissions of a resource
-    proc chmod {permissions path}
+    proc chmod {path permissions}
 
     # Delete a resource
     proc delete {path}
@@ -202,11 +202,11 @@ body ::tycho::ResourceFile::gets {{varName {}}} {
 	error "File \"$this\" is not open"
     }
     if { $varName == "" } {
-	    ::gets $fileid
-	} else {
-	   upvar $varName v
-	   uplevel ::get $fileid v
-	}
+	::gets $fileid
+    } else {
+	upvar $varName v
+	uplevel ::get $fileid v
+    }
 }
 
 #####################################################################
@@ -258,7 +258,7 @@ body ::tycho::ResourceFile::write {data} {
     if !$fileIsOpen {
 	error "File \"$this\" is not open"
     }
-    ::puts $fileid $data
+    ::puts -nonewline $fileid $data
 }
 
 
@@ -268,7 +268,7 @@ body ::tycho::ResourceFile::write {data} {
 
 #####################################################################
 #### chmod
-body ::tycho::ResourceFile::chmod {permissions path} {
+body ::tycho::ResourceFile::chmod {path permissions} {
     # NOTE: Unix-dependent implementation
     regsub {^file:} $path {} path
     exec chmod $permission $path
