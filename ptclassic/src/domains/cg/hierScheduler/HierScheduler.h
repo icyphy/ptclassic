@@ -37,14 +37,15 @@ Programmer: Jose Luis Pino
 *****************************************************************/
 
 #include "ParScheduler.h"
-#include "CGCluster.h"
+
+class CGCluster;
 
 class MultiScheduler : public ParScheduler {
 public:
     MultiScheduler(MultiTarget* t, const char* log, ParScheduler& top):
-    ParScheduler(t, log), topScheduler(top) {};
+    ParScheduler(t, log), topScheduler(top), topCluster(0){};
 
-    ~MultiScheduler() { LOG_DEL; delete topCluster; }
+    ~MultiScheduler();
 
     /*virtual*/ void setup();
 
@@ -52,22 +53,15 @@ public:
 
     // Pass through functions
     
-    /*virtual*/ int run() { return topCluster->run(); }
+    /*virtual*/ int run();
 
     /*virtual*/ void setUpProcs(int num) { topScheduler.setUpProcs(num); }
-    /*virtual*/ void setStopTime(double limit) {
-	topCluster->setStopTime(limit);
-    }
-    
-    /*virtual*/ double getStopTime() {
-	return topCluster->getStopTime();
-    }
 
-    /*virtual*/ StringList displaySchedule() {
-	StringList schedule;
-	if (topCluster) schedule << topCluster->displaySchedule();
-	return schedule;
-    }
+    /*virtual*/ void setStopTime(double limit);
+    
+    /*virtual*/ double getStopTime();
+
+    /*virtual*/ StringList displaySchedule();
 
     /*virtual*/ void compileRun();
 
@@ -76,8 +70,8 @@ public:
     /*virtual*/ int dagNodes() const;
 
 private:
-    CGCluster* topCluster;
     ParScheduler& topScheduler;
+    CGCluster* topCluster;
 };
 
 #endif
