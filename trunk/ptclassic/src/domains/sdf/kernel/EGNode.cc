@@ -92,7 +92,7 @@ int EGNode::root() {
 	EGGateLinkIter nextAncestor(ancestors);
 	EGGate *p;
 	while((p=nextAncestor++)!=0) {
-		if (p->delay() < p->samples())
+		if ((p->delay() < p->samples()) || (p->samples() == 0))
 			return FALSE;
 	}
 	return TRUE;    
