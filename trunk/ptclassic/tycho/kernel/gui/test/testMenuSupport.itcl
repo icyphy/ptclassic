@@ -461,3 +461,5 @@ test MenuSupport-unpost-2 {Unpost bottom-level menu} {
 
 ########################################################################
 ## CLEAN UP
+after 500
+catch {delete object .m}
