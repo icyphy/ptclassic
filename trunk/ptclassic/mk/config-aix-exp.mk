@@ -31,9 +31,9 @@
 .SUFFIXES:    .o .cc .h .pl .chdl .exp
 
 .a.exp:
-     ${PTOLEMY}/mk/mkexps $< > $*.exp
-     rm -f $(LIBDIR)/$*.exp
-     ln $*.exp $(LIBDIR)
+	${PTOLEMY}/mk/mkexps $< > $*.exp
+	rm -f $(LIBDIR)/$*.exp
+	ln $*.exp $(LIBDIR)
 
 EXP=\
 libDC.exp\
@@ -158,6 +158,6 @@ EXP_OPTS=\
 $(EXP): $(LIB)
 
 $(LIBDIR)/$(LIB): $(LIB) $(EXP)
-     rm -f $(LIBDIR)/$(LIB)
-     ln $(LIB) $(LIBDIR)
-     ln $(EXP) $(LIBDIR)
+	rm -f $(LIBDIR)/$(LIB)
+	ln $(LIB) $(LIBDIR)
+	ln $(EXP) $(LIBDIR)
