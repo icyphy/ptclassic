@@ -131,3 +131,19 @@ ifdef DIRS
 	done
 endif
 
+
+# Remove the sources too, so that we can get them back from sccs
+extraclean:
+	rm -f $(CRUD) $(REALCLEAN_STUFF) $(EXTRA_SRCS)
+ifdef DIRS
+	@for x in $(DIRS); do \
+	    if [ -w $$x ] ; then \
+		( cd $$x ; \
+		echo making $@ in $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		) \
+	    fi ; \
+	done
+endif
+
+
