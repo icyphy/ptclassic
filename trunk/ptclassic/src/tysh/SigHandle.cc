@@ -69,7 +69,7 @@ static void DoTychoSave(void);
 /***** This function sets the signal handler function for each of the   *****/
 /***** signals that we want to intercept.                               *****/
 
-int 
+extern "C" int 
 setHandlers(SIG_PF sigHandler)
 {
     if (ptSignal(SIGBUS, sigHandler) != 0) {
