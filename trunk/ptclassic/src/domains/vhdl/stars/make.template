@@ -53,6 +53,7 @@ PL_SRCS = \
  VHDLMpyInt.pl \
  VHDLRamp.pl \
  VHDLRampInt.pl \
+ VHDLAverage.pl \
  VHDLIntegrator.pl \
  VHDLFIR.pl \
  VHDLFIRInt.pl \
