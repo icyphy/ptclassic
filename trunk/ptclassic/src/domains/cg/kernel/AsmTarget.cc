@@ -60,6 +60,7 @@ void AsmTarget :: initStates() {
 	targetHost.setAttributes(A_SETTABLE);
 	filePrefix.setAttributes(A_SETTABLE);
 	displayFlag.setAttributes(A_SETTABLE);
+	compileFlag.setAttributes(A_SETTABLE);
 	runFlag.setAttributes(A_SETTABLE);
 }
 
