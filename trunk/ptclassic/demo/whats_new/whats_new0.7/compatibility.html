@@ -39,7 +39,7 @@ any user designed stars.
 <DT> Type system changes
 <DD> The type system has been changed.  Some Code Generation universes may
 need explicit conversion stars to properly compile.
-
+<A HREF="typesys.html">Further Documentation</A>
 
 <DT> Certain HOF stars have been removed
 <DD> The type system changes mean that certain Higher Order Function stars have been removed.  The stars that have been removed are:
@@ -51,7 +51,10 @@ If you have universes that were using the old stars, then you can update the uni
 <DT> <CODE>htmldoc</CODE> is a new keyword that has been added to
 <CODE>ptlang</CODE>.
 <DD> <CODE>ptlang</CODE> no longer generates troff output and instead
-	generates html.
+	generates html.  The html output is generated in the
+	<CODE>stars/</CODE> directory.  In releases earlier than
+	Ptolemy0.7, the troff output was generated in
+	 <CODE>stars/../doc/stars</CODE>
 
 <DT> Certain CGC DSP stars have been moved.
 <DD> To support retargeting demonstrations and galaxies from SDF to CGC, 
@@ -64,9 +67,14 @@ If you have universes that were using the old stars, then you can update the uni
 	those stars for backwards compatibility.
 	Users should run masters on their own CGC demos in order
 	for look-inside to work.
-	 <BR>Affected stars: DTMFPostTest, Dirichlet, FFTCx, FIR, FIRFix,
-	GAL, GGAL, Goertzel, GoertzelBase, GoertzelPower, IIR, LMS,
-	LMSOscDet, RaisedCosine, Sinc, Window.
+	 <BR>Affected stars: 
+	<CODE>DTMFPostTest</CODE>,
+	<CODE>Dirichlet</CODE>, <CODE>FFTCx</CODE>, <CODE>FIR</CODE>,
+	<CODE>FIRFix</CODE>, <CODE>GAL</CODE>, <CODE>GGAL</CODE>,
+	<CODE>Goertzel</CODE>, <CODE>GoertzelBase</CODE>,
+	<CODE>GoertzelPower</CODE>, <CODE>IIR</CODE>, <CODE>LMS</CODE>,
+	<CODE>LMSOscDet</CODE>, <CODE>RaisedCosine</CODE>, 
+	<CODE>Sinc</CODE>, <CODE>Window</CODE>.
 
 <DT> The <CODE>cgc/targets/main</CODE> directory has been split.
 <DD> To separate the uniprocessor and multiprocessor CGC targets,
@@ -85,6 +93,12 @@ has been changed.
 	because POSIX-compliant Unix operating systems always define
 	the HOME environment variable but do not always support ~.
 	Also, it is possible to define environment variables on Macs and PCs.
+
+
+<DT> <CODE>BDFTrue</CODE> renamed to <CODE>BDFCondGate</CODE>
+<DD> Brian Evans renamed the <CODE>BDFTrue</CODE> star to
+	<CODE>BDFCondGate</CODE>.
+
 
 <DT> Certain audio stars have been removed.
 <DD> Sunil Bhave removed the old PCMread/write and 
@@ -111,14 +125,13 @@ Tom Lane's diagnosis was that the last few ramp outputs were rounding
 to 2 instead of truncating to 1, so his fix was to change the lower
 Ramp star from 0.1 to 0.5.
 
-<DT> * DERepeatStar has been revised to use a delay marker rather than
+<DT> <CODE>DERepeatStar</CODE>
+ <DD>DERepeatStar has been revised to use a delay marker rather than
 setting nonstandard porthole priorities on its feedback arc.  In most
 cases this will give better behavior.  Derived stars that set
 delayType or contain triggers() directives may need to be revised.
 DERepeatStar can also pass a numeric value in each feedback event.
 See section 11.2.6 of the Programmer's Manual for details.
-
-<DD> 
 
 </DL>
 
