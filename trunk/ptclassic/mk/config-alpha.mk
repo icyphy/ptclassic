@@ -29,7 +29,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Author:  Kevin D. Kissell <kkissell@acri.fr>
+# Author:  Kevin D. Kissell <kkissell@acri.fr>, Christopher Hylands
 #
 
 # --------------------------------------------------------------------
@@ -78,8 +78,13 @@ CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 #
 # The dynamically linked version of pigiRpc has problems that *may*
 # stem from a symbol collision (clog) between libm and libg++.
-LINKFLAGS =	-L$(LIBDIR) -static -Xlinker -x
-LINKFLAGS_D =	-L$(LIBDIR)
+#
+# -depth_ring_search is necessary for incremental linking to work.
+# Without -depth_ring_search, changes in a reloaded star will
+# not be visible.  For more information about -depth_ring_search, see
+# ld(1) and loader(5)
+LINKFLAGS =	-L$(LIBDIR) -static -Xlinker -x -Xlinker -depth_ring_search
+LINKFLAGS_D =	-L$(LIBDIR) -Xlinker -depth_ring_search
 
 #
 # Directories to use
