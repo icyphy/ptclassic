@@ -472,10 +472,12 @@ extern long lrand48();
 #else
 #if !defined(PTALPHA)
 /* Sun CC 2.1 requires the __cplusplus below */
+#if !defined (__GLIBC__) || (__GLIBC__ < 2)
 #if !defined(PTIRIX5) && !defined(__cplusplus)
 extern VOID_HACK srandom();
 #endif
 extern long random();
+#endif /* ! __GLIBC__ */
 #endif /* ! PTALPHA */
 #endif
 #endif /* _std_h */

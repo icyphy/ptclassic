@@ -213,6 +213,11 @@ extern char *sprintf();
 #include <sys/socket.h>
 #endif
 
+#ifdef PTSOL2
+  /* /usr/openwin/include/Xib.h */
+#define FUNCPROTO 1
+#endif
+
 #ifdef PTSUN4
 #include <sys/time.h>			/* For select() */
 /* Place all SunOS4.1.3 specific declarations here. (In alphabetical order). */
@@ -296,7 +301,9 @@ extern int fscanf (FILE *, const char *, ...);
 extern double hypot(double, double); /* kernel/ComplexSubset.h */
 #endif
 
+#if !defined( __GLIBC__) || (__GLIBC__ < 2)
 extern int listen(int, int);
+#endif
 
 #if defined(PTNBSD_386) || defined(PTFREEBSD)
 extern off_t lseek();		/* octtools/vem/serverVem.c uses lseek(). */
@@ -363,8 +370,12 @@ extern int errno;
 #include <stdlib.h>
 #else /* PT_NT4VC */
 extern int sys_nerr;
+#if defined (__GLIBC__) && (__GLIBC__ >= 2)
+#include <errno.h>
+#else
 extern char *sys_errlist[];
 extern int errno;
+#endif /* (__GLIBC__) && (__GLIBC__ >= 2) */
 #endif /* PTNBSD_386 */
 #endif /* PT_NT4VC */
 #endif /* NEED_SYS_ERRLIST */
