@@ -42,6 +42,7 @@ include $(CONFIG)
 
 ITCL_SRCS = \
 	DomainInfo.itcl \
+	Oct.itcl \
 	Profile.itcl \
 	PtWelcomeMessage.itcl
 
