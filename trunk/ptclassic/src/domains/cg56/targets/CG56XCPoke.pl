@@ -29,33 +29,22 @@ codeblock(sendData) {
 	move x0,$ref(buffer)
 }
 
-codeblock(sendBuffer,"") {
-;	btst	#0,$ref(semaphore)
-;	jcs	$label(bufferLocked)
-	move	#0,a
-	move	$ref(semaphore),x0
-	cmp	x0,a
-	jne	$label(bufferLocked)
-	bset	#1,$ref(semaphore)
-	move	#$addr(input),r0	;read starting input geodesic address
-	move	#$addr(buffer),r1	;read starting buffer address
-	do	#@blockSize,$label(XFR)
-	move	$mem(input):(r0)+,x0
-	move	x0,$mem(buffer):(r1)+
-$label(XFR)
-	nop
-	bclr	#1,$ref(semaphore)
-$label(bufferLocked) 
+codeblock(sendBuffer) {
+	movec	#($val(blockSize)-1),m0
+	move	$ref(bufStart),r0
+	move	$ref(input),x0
+	move	x0,$mem(buffer):(r0)+
+	move	r0,$ref(bufStart)
+	movec	m1,m0			;restore m0
 }
 
 setup {
 	CG56XCABase::setup();
-	input.setSDFParams(blockSize,blockSize-1);
 }
 
 go {
 	if (blockSize > 1)
-		addCode(sendBuffer());
+		addCode(sendBuffer);
 	else
 		addCode(sendData);
 }

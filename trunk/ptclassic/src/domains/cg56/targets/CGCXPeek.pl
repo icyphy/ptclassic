@@ -27,28 +27,37 @@ codeblock(receiveData) {
 	if (value & 0x00800000) value |= 0xff000000;
 }
 
-codeblock(receiveBlock) {
-	int value;
-	if ((value = qckGetY(dsp,$starSymbol(bufferAddr)+i)) == -1) { 
-		fprintf(stderr, "$val(VariableName)_buf %d: Receive Data Failed\n",
-			i, qckErrString);
-		exit(1);
+codeblock(receiveBlock,"") {
+	if ( $starSymbol(bufStart) == 0) {
+		int value[$val(blockSize)+1];
+		int i;
+		int j;
+		int offset;
+		if ( qckGetBlkItem(dsp,$starSymbol(s56xBuffer),value,$val(blockSize)+1) == -1) { 
+			fprintf(stderr,"$val(VariableName): Receive Data Failed\n", qckErrString);
+			exit(1);
+		}
+		offset = value[$val(blockSize)] - $starSymbol(bufferAddr);
+		j = 0;
+		for(i=offset;i<$val(blockSize);i++) {
+			if (value[i] & 0x00800000) value[i] |= 0xff000000;
+			$starSymbol(buffer)[j++] = @(strcmp(output.resolvedType(),INT)?"(double)value[i]/(1<<23)":"value[i]");
+		}
+		for(i=0;i<offset;i++) {
+			if (value[i] & 0x00800000) value[i] |= 0xff000000;
+			$starSymbol(buffer)[j++] = @(strcmp(output.resolvedType(),INT)?"(double)value[i]/(1<<23)":"value[i]");
+		}
 	}
-	if (value & 0x00800000) value |= 0xff000000;
 }
 
 	
 codeblock(bufferRead) {
-{
-	int i;
-	for (i = 0; i < $val(blockSize) ; i++) {
-		$ref(output,i) = $starSymbol(buffer)[i];
-	}
-}
+	$ref(output) = $starSymbol(buffer)[$starSymbol(bufStart)++];
+	if ($starSymbol(bufStart) >= $val(blockSize))
+		$starSymbol(bufStart) = 0;
 }
 
 setup {
-	if (blockSize > 1) output.setSDFParams(blockSize,blockSize-1);
 	if (strcmp(output.resolvedType(),INT)==0)
 		txType = "int";
 	else
@@ -58,14 +67,8 @@ setup {
 		
 go {
 	if (blockSize > 1) {
-		StringList txCode = receiveBlock;
-		txCode << "\t$starSymbol(buffer)[i] = ";
-		if (strcmp(output.resolvedType(),INT)==0)
-			txCode << "value;\n";
-		else
-			txCode << "(double)value/(1<<23);\n";
 		StringList code;
-		code << updateLink(txBlock(txCode)) << bufferRead;
+		code << (const char*)receiveBlock() << bufferRead;
 		addCode(code);
 	}
 	else {
