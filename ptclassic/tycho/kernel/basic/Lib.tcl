@@ -79,7 +79,7 @@ namespace ::tycho {
 	::tycho::File::registerEditor {} ::tycho::Mathematica \
 		{Mathematica console}
     }
-    ::tycho::File::registerEditor .html ::tycho::HTML {}
+    ::tycho::File::registerEditor {.html .htm .htl} ::tycho::HTML {}
     # ::tycho::File::registerEditor {.cir .sp} ::tycho::EditSpice {Spice editor}
     ::tycho::File::registerEditor {.mk .template} ::tycho::EditMake \
 	    {Makefile editor} {Makefile makefile GNUmakefile}
