@@ -86,6 +86,57 @@ proc ptkGantt_DualMove { chartName dir args } {
     }
 }
 
+proc ptkGantt_Zoom { universe num_procs period dir } {
+
+    set chartName .gantt_${universe}
+    if {$dir == "in"} {
+	$chartName.mbar.zoomindex configure -text \
+		[expr 2.0*[lindex [$chartName.mbar.zoomindex configure -text] \
+		4]]
+    } else {
+	$chartName.mbar.zoomindex configure -text \
+		[expr 0.5*[lindex [$chartName.mbar.zoomindex configure -text] \
+		4]]
+    }
+
+    set ganttFont -adobe-courier-medium-r-normal--10-100-75-75-m-60-iso8859-1
+    if {$dir == "in"} {
+	set scale 2.0 
+    } else {
+	set scale 0.5
+    }
+
+    # delete labels and bar then scale boxes and ruler
+    $chartName.chart.graph delete slabel bar
+    $chartName.chart.graph scale box 1c 0 $scale 1.0
+    $chartName.chart.ruler scale all 1c 0 $scale 1.0
+
+    # set new scrollregion
+    set new_width [expr [expr [lindex [$chartName.mbar.zoomindex configure \
+	    -text] 4] * $period] + 2]
+    puts $new_width
+    $chartName.chart.graph configure -scrollregion \
+	    "0 0 ${new_width}c ${num_procs}i"
+    $chartName.chart.ruler configure -scrollregion "0 0 ${new_width}c 1.5c"
+
+    foreach box [$chartName.chart.graph find withtag box] {
+	set star_name [string range [lindex [$chartName.chart.graph gettags \
+		$box] [lsearch -glob [$chartName.chart.graph gettags $box] \
+		"star_*"]] 5 end]
+	puts $star_name
+	set coords [$chartName.chart.graph coords $box]
+	puts $coords
+	if {[expr [string length $star_name] * 10] <= [expr [lindex $coords 2]\
+		- [lindex $coords 0]] } {
+	    set proc [string range [lindex [$chartName.chart.graph gettags \
+		    $box] [lsearch -glob [$chartName.chart.graph gettags $box]\
+		    "p*"]] 1 end]		    
+	    ${chartName}.chart.graph create text [lindex $coords 0] \
+		    [expr $proc -1]i -text $star_name -font $ganttFont \
+		    -anchor nw -fill white -tags "slabel"
+	}
+    }
+}
 
 proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 
@@ -98,6 +149,17 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 
 
     if ![winfo exists ${chartName}.chart] {
+
+	# first we add the zoom buttons...not done earlier because we need
+	# to pass tons of variables not yet set earlier
+	button $chartName.mbar.zoomin -text "Zoom In" -command \
+		"ptkGantt_Zoom $universe $num_procs $period in"
+	button $chartName.mbar.zoomout -text "Zoom Out" -command \
+		"ptkGantt_Zoom $universe $num_procs $period out"
+	label $chartName.mbar.zoomlabel -text "   Zoom factor: "
+	label $chartName.mbar.zoomindex -text "1.0" -relief sunken 
+	pack $chartName.mbar.zoomin $chartName.mbar.zoomout \
+		$chartName.mbar.zoomlabel $chartName.mbar.zoomindex -side left
 
 	# Here we create the ruler
 
@@ -154,16 +216,17 @@ proc ptkGantt_DrawProc { universe num_procs period proc star_name start fin } {
 
     }
     if {$start < $fin} {
-	set tags_list [list star_$star_name p$proc]
+	set tags_list [list box star_$star_name p$proc]
 	${chartName}.chart.graph create rectangle [expr $start + 1]c \
 	[expr $proc - 1]i [expr $fin + 1]c \
 		${proc}i -fill [lindex $ptkGantt_Colors \
 		[expr $proc - 1]] -outline black -tags $tags_list
-	if {[expr [string length $star_name] * 10] <= [expr  \
-		($fin - $start)*28.3]} {
+	if {[expr [string length $star_name] * 10] <= [expr \
+		($fin - $start)*28.3] } {
 	    ${chartName}.chart.graph create text [expr $start + 1]c \
 		    [expr $proc -1]i -width [expr $fin - $start]i \
-		    -text $star_name -font $ganttFont -anchor nw -fill white
+		    -text $star_name -font $ganttFont -anchor nw -fill white \
+		    -tags "slabel"
 	}
 	pack ${chartName}.chart.graph
     }
@@ -251,11 +314,13 @@ proc ptkGantt_MoveMarker { chartName num_procs x-coord } {
 	    [lindex $bar_coords 3]]
     foreach box $star_list {
 	if {([lsearch -exact [${chartName}.chart.graph gettags $box] "bar"] \
-		== -1)&&([${chartName}.chart.graph gettags $box] != "") } {
+		== -1)&&([lsearch -exact [${chartName}.chart.graph gettags \
+		$box] "slabel"] == -1) } {
 	    set ptag [string trimleft [lindex [${chartName}.chart.graph \
 		    gettags $box] [lsearch -glob [${chartName}.chart.graph \
 		    gettags $box] "p*"]] p]
-	    set col [lindex $ptkGantt_Colors [expr [string trim $ptag p] - 1]]
+	    set col [lindex $ptkGantt_Colors [expr [string trimleft $ptag p] \
+		    - 1]]
 	    set new_tags [concat [${chartName}.chart.graph gettags $box] \
 		    "highlight"]
 	    ${chartName}.chart.graph itemconfigure $box -width 2 -fill $col \
