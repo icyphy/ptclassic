@@ -207,7 +207,7 @@ body ::tycho::EditItcl::evaluate {} {
     if {[lsearch -exact $itclClasses [$this info class]] != -1} {
 	error {Sorry: I cannot evaluate my own class definition.}
     }
-	
+
     # NOTE: Itcl 2.0 and 2.1 can dump core here if here we delete a class that
     # has objects existing as components of another class.
     if {$itclClasses != {} && \
@@ -262,7 +262,7 @@ body ::tycho::EditItcl::getClassName {} {
     }
     return $className
 }
-    
+
 ###################################################################
 #### gendocBuffer
 # Generate and display a doc file from the current file.
@@ -290,9 +290,10 @@ body ::tycho::EditItcl::gendocBuffer {} {
 # then it is simply displayed, not regenerated.
 #
 body ::tycho::EditItcl::genidocBuffer {} {
+puts !
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
-                [info namespace tail [getClassName]].itclclass]] \
+                [info namespace tail [getClassName]].idoc]] \
     {
         set debug 0
         set generateIndex 0
@@ -442,7 +443,7 @@ body ::tycho::EditItcl::genidoc {filename} {
     return [ ::tycho::EditProgram::gendocFileInternal $filename\
             [list set docfile [file join doc codeDoc \
             [info namespace tail \
-	    [file tail [file rootname $filename].itclclass]]]] \
+	    [file tail [file rootname $filename].idoc]]]] \
             {
         set debug 0
         set generateIndex 0
