@@ -42,7 +42,11 @@ from, for further information. }
         PortHole *Dest;          
     }
     constructor {
-        DEDynBlockBase::DEDynBlockBase();
+	// hppa.cfront fails with:
+	// line 45: error: qualified name
+   	//    DEDynBlockBase::DEDynBlockBase not found in DEDynBlock (1290 )
+	// If the next line is uncommented.
+        // DEDynBlockBase::DEDynBlockBase();
     }
     destructor {
         if (list_h) deleteList();
@@ -256,5 +260,3 @@ from, for further information. }
         clearList();
     }
 }   
-
-
