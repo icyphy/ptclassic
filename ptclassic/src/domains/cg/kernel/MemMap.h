@@ -78,7 +78,7 @@ class MemMapIter {
 	MemAssignment* ptr;
 	MemMap& ref;
 public:
-	MemMapIter(MemMap& l) : ref(l), ptr(l.first) {}
+	MemMapIter(MemMap& l) :  ptr(l.first), ref(l) {}
 	void reset() { ptr = ref.first;}
 	MemAssignment* next() {
 		MemAssignment* res = ptr;
