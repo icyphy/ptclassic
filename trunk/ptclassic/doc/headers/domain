@@ -83,67 +83,74 @@ delim off
 ..
 
 .de SD
-.(b F
+.ne 7
 .S \\n(BX
 .lp
 .hl
-.uh "\\f\\n(SXNAME:\\f(\\*F \\*(NM"
-.br
-.in +0.65i
+\\f\\n(SXNAME: \\f(\\*F\\*(NM\\fR
+.lp
 .tm headerU \\n(AS-\\n% \\*(NM
 .tm index_star_def \\n(AS-\\n% \\*(NM (\\*(DO \\*(TY)
 ..
 
 .de SE
-.in -0.65i
 ..
 
 .de ES
-.)b
 ..
 
 .de SV
 .\" First argument is the version number, then the date.
-.br
-.uh "\\f\\n(SXVERSION:\\fR \\$1 (\\$2)"
+.lp
+\\f\\n(SXVERSION:\\fR \\$1 (\\$2)
 ..
 
 .de DM
 .\" domain information
-.br
-.uh "\\f\\n(SXDOMAIN: \\f(\\*F\\$1  \\f\\n(SX(DERIVED FROM:\\f(\\*F \\$2\\fR)"
+.lp
+\\f\\n(SXDOMAIN: \\f(\\*F\\$1  \\f\\n(SX(DERIVED FROM:\\f(\\*F \\$2\\fR)
 ..
 
 .de IH
 .\" input information
-.br
-.uh "\\f\\n(SXINPUTS:\\fR"
-.in +1.0i
+.nr Fe 0
+.lp
+.ta 1.0i
+.in +1.5i
+.ti -1.5i
+\\f\\n(SXINPUTS:\\fR\t
 ..
 
 .de OH
 .\" output information
-.br
-.uh "\\f\\n(SXOUTPUTS:\\fR"
-.in +1.0i
+.nr Fe 0
+.lp
+.ta 1.0i
+.in +1.5i
+.ti -1.5i
+\\f\\n(SXOUTPUTS:\\fR\t
 ..
 
 .de PE
-.in -0.5i
+.in -1.5i
 .fi
 ..
 
 .de SH
 .\" state information
-.br
-.uh "\\f\\n(SXSTATES:\\fR"
-.in +1.0i
+.nr Fe 0
+.lp
+.ta 1.0i
+.in +1.5i
+.ti -1.5i
+\\f\\n(SXSTATES:\\fR\t
 ..
 
 .de NE
 .\" new entry for states, inputs, or outputs
-.br
-.ti -0.5i
+.if \\n(Fe .br
+.if \\n(Fe .ti -0.5i
+.nr Fe 1
 ..
 
 .de DF
@@ -152,23 +159,25 @@ delim off
 ..
 
 .de ET
-.in -0.5i
+.in -1.5i
 .fi
 ..
 
 .de AL \" Author list
-.uh "\\f\\n(SXAUTHOR(S):\\fI  \\$1"
+.lp
+\\f\\n(SXAUTHOR(S):\\fI  \\$1
 ..
 
 .de AC \" Acknowlegements info
-.uh "\\f\\n(SXACKNOWLEDGEMENTS:\\fI  \\$1"
+.lp
+\\f\\n(SXACKNOWLEDGEMENTS:\\fI  \\$1
 ..
 
 .de UH
 .\" Single argument is the name of the section
-.br
+.lp
 .ne 1.5i
-.uh "\\f\\n(SX\\$1"
+\\f\\n(SX\\$1\\fR
 .tm headerU \\n(AS-\\n% \\$1 \"Output for table of contents
 ..
 
@@ -185,8 +194,9 @@ delim off
 .br
 .na
 .if \\n(Ic .ta 5i
-.if !\\n(Ic .uh "\\f\\n(SXLOCATION:\\fR \\$1"
-.if \\n(Ic .uh "\\f\\n(SXLOCATION:\\fR \\$1	\\f\\n(SXICON:\\fR"
+.lp
+.if !\\n(Ic \\f\\n(SXLOCATION:\\fR \\$1
+.if \\n(Ic \\f\\n(SXLOCATION:\\fR \\$1	\\fR
 .nr Im 0
 .\"
 .if \\n(Ic .if '\\$1'DE main library' \{\
@@ -309,14 +319,14 @@ delim off
 ..
 
 .de LD \"long description
-.br
-.uh "\\f\\n(SXDESCRIPTION: \\$1"
+.lp
+\\f\\n(SXDESCRIPTION: \\fR\\$1
 .br
 ..
 
 .de SA \"See also section
-.br
-.uh "\\f\\n(SXSEE ALSO: \\$1"
+.lp
+\\f\\n(SXSEE ALSO: \\fR\\$1
 ..
 
 .de TI \" Print title
