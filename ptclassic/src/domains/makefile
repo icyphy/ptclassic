@@ -12,12 +12,12 @@
 
 # The EXPDOMAINS environment variable can be used to build experimental domains
 # which are assumed to follow the same directory structure.
-DIRS = sdf de ddf thor cg cg-ddf cgc cg56 cg96 $(EXPDOMAINS)
+DOMAINS = sdf de ddf thor cg cg-ddf cgc cg56 cg96 $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
-	@for x in $(DIRS); do \
+	@for x in $(DOMAINS); do \
 		cd $$x ; \
 		echo making $@ in domains/$$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/domains/$$x $@ ;\
