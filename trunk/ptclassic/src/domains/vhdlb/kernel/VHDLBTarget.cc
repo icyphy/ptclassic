@@ -706,7 +706,7 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
     while ((p = (VHDLBPortHole*)nextPort++) != 0) {
       if ((p->isItInput())) {
 	gn = p;
-	while(gp = gn->aliasFrom()) gn = gp;
+	while( (gp = gn->aliasFrom()) ) gn = gp;
 	StringList s = sanitizedShortName(*gn);
 	p->setGeoName(savestring(s));
       }
@@ -719,7 +719,7 @@ void VHDLBTarget :: setGeoNames(Galaxy& galaxy) {
     while ((p = (VHDLBPortHole*)nextPort++) != 0) {
       if ((p->isItOutput())) {
 	gn = p;
-	while(gp = gn->aliasFrom()) gn = gp;
+	while( (gp = gn->aliasFrom()) ) gn = gp;
 	StringList s = sanitizedShortName(*gn);
 	p->setGeoName(savestring(s));
       }
