@@ -342,17 +342,8 @@ void CGCTarget :: frameCode () {
 void CGCTarget :: writeCode()
 {
     writeFile(myCode, ".c", displayFlag);
-    // FIXME: Read the "RemoteFiles" stream to get list of files to transfer
-    if (!onHostMachine(targetHost)) {
-	const char* header1 = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.h";
-	const char* source1 = "$PTOLEMY/src/domains/cgc/rtlib/CGCrtlib.c";
-	const char* header2 = "$PTOLEMY/src/utils/libptdsp/ptdspMuLaw.h";
-	const char* source2 = "$PTOLEMY/src/utils/libptdsp/ptdspMuLaw.c";
-	rcpCopyFile(targetHost, destDirectory, header1);
-	rcpCopyFile(targetHost, destDirectory, source1);
-	rcpCopyFile(targetHost, destDirectory, header2);
-	rcpCopyFile(targetHost, destDirectory, source2);
-    }
+    if (!onHostMachine(targetHost))
+	rcpCopyFile(targetHost, destDirectory, (const char*) remoteFilesStream);
 }
 
 int CGCTarget::compileCode()
