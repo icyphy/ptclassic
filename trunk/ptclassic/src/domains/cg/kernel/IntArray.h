@@ -79,8 +79,8 @@ protected:
 
 public:
 	// constructors
-	IntArray(): data(0), memSz(0) {}
-	IntArray(int n): data(0), memSz(0) { create(n); }
+	IntArray(): memSz(0), data(0) {} 
+	IntArray(int n): memSz(0), data(0) { create(n); }
 	~IntArray();
 
 	// data access
