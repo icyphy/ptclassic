@@ -122,6 +122,7 @@ void CGCVISSimTarget :: writeSimFile() {
   simCode << "run\n";
   simCode << "wait\n";
   simCode << "time\n";
+  simCode << "echo main\n";
 
   Galaxy& g = *galaxy();
   GalStarIter nextStar(g);
@@ -130,7 +131,10 @@ void CGCVISSimTarget :: writeSimFile() {
   while ((s = (CGCStar*)nextStar++) != 0) {
     simCode << "#" << " " << s->name() << "\n";
     simCode << "breakpoint add &sim_break" << funcindex << "\n";
-    simCode << "run\n";
+    for(int i=0;i < s->repetitions.num();i++){
+      simCode << "run\n";
+      simCode << "wait\n";
+    }
     simCode << "wait\n";
     simCode << "time\n";
     simCode << "echo "<< s->name()<< "\n";
