@@ -51,7 +51,7 @@
 
     
 struct obj_flags {
-    /* unsigned int ref_count : 2; /* not used any more */
+    /* unsigned int ref_count : 2 ;*/ /* not used any more */
     unsigned int is_temporary : 1;
     unsigned int is_record : 1;
     unsigned int is_marked : 1;	/*  generic mark bit */
