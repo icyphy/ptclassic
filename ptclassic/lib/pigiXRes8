@@ -13,7 +13,7 @@ vem*technology:	~ptolemy/lib/technology
 vem*font: 9x15
 vem*wrap: word
 vem*grid*zero*size: 0
-vem.label.boundbox: 10
+vem*label*boundbox: 10
 #ifdef COLOR
 vem*background: white
 vem*background*color: grey
