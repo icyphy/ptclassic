@@ -12,6 +12,7 @@ $Id$
 
 *******************************************************************/
 #include "AsmStar.h"
+#include "AsmTarget.h"
 #include "ProcMemory.h"
 #include "IntState.h"
 #include "FixState.h"

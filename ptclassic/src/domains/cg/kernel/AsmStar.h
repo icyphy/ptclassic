@@ -15,7 +15,6 @@ $Id$
 
 #include "Attribute.h"
 #include "AsmConnect.h"
-#include "AsmTarget.h"
 // FixSample is included so AsmStars can use FIX-type ports
 #include "FixSample.h"
 
