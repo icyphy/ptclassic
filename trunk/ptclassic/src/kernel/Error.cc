@@ -24,7 +24,7 @@ typedef const char cc;
 static void p3(cc* m1, cc* m2, cc* m3) {
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
-	cerr << m1 << m2 << m3 << "\n";
+	cerr << m1 << " " << m2 << " " << m3 << "\n";
 }
 
 void
