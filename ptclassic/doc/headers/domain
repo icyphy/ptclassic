@@ -42,6 +42,9 @@ input descriptions, one per line.
 .OH
 output descriptions, one per line.
 .PE
+.BH
+inout (bidir) descriptions, one per line.
+.PE
 .SH
 state description
 .DF default_value
@@ -134,6 +137,18 @@ delim off
 .ti -1.5i
 .mk
 \\f\\n(SXOUTPUTS:\\fR
+..
+
+
+.de BH
+.\" inout (bidir) information
+.nr Fe 1
+.lp
+.ta 1.0i
+.in +1.5i
+.ti -1.5i
+.mk
+\\f\\n(SXINOUTS:\\fR
 ..
 
 .de PE
