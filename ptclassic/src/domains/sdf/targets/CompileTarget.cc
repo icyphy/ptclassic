@@ -261,18 +261,20 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
 	char* piecep = piece;
         for (int i = 0; i < 100; i++) {
 	    if (*str == NULL) {
-		piecep = NULL;
+		*(piecep++) = NULL;
 		break;
 	    } else if (*str == '\"') {
-	        piecep++ = '\\';
-	        piecep++ = '\"';
+	        *(piecep++) = '\\';
+	        *(piecep++) = '\"';
+		i++;
 	    } else {
-	        piecep++ = *str;
+	        *(piecep++) = *str;
 	    }
 	    str++;
 	}
 	ret += piece;
     }
+    return ret;
 }
 
 // Define a galaxy
@@ -483,12 +485,16 @@ StringList CompileTarget::galDef(Galaxy* galaxy,
 		    while(gp->aliasFrom()) { gp = gp->aliasFrom(); }
 		    myCode += sanitizedName(*(gp->parent()));
 		    myCode += ".";
+		    // FIXME: If the gp port is a multiporthole,
+		    // there is no guarantee here that it will be
+		    // wired up in the same order as in the original graph
+		    // under the SDF-default target.
 		    myCode += expandedName(gp);
 		    myCode += ", ";
-		    myCode += ((PortHole&)p->realPort())->numInitDelays();
-		    myCode += ", ";
-		    myCode += ((PortHole&)p->realPort())->initDelayValues();
-		    myCode += ");\n";
+		    myCode += ((PortHole&)p->realPort()).numInitDelays();
+		    myCode += ", \"";
+		    myCode += ((PortHole&)p->realPort()).initDelayValues();
+		    myCode += "\");\n";
 		}
 	    }
 	}
