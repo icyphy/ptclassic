@@ -30,7 +30,7 @@ mmapath=""
 #
 for i in `echo $PATH | sed -e 's/:/ /g'`
 do
-  if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+  if [ -x "$i/$searchfile" -a ! -d "$i/$searchfile" ]
   then
     mmapath=$i/$searchfile
     break
@@ -46,7 +46,7 @@ then
     altpath=/usr/{bin,*/bin}
     for i in $altpath
     do
-      if [ -x $i/$searchfile -a ! -d $i/$searchfile ]
+      if [ -x "$i/$searchfile" -a ! -d "$i/$searchfile" ]
       then
         mmapath=$i/$searchfile
         break
@@ -68,23 +68,23 @@ else
   # 1. eliminate all comments:           sed -e 's/#\(.*\)//g' 
   # 2. find the expression for mathdir:  grep "mathdir="
   # 3. extract the value of mathdir:     sed -e 's/mathdir=//g'
-  newpath=`sed -e 's/#\(.*\)//g' $mmapath | grep 'mathdir=' | sed -e 's/mathdir=//g'`
+  newpath=`sed -e 's/#\(.*\)//g' "$mmapath" | grep 'mathdir=' | sed -e 's/mathdir=//g'`
   # If the newpath is not an absolute path name, then append
   # newpath to the mmapath (mmapath is always guaranteed to be correct)
-  if [ ! -x $newpath ]
+  if [ ! -x "$newpath" ]
   then
     newdir=`dirname $mmapath`
-    newpath="$newdir/$newpath"
+    newpath=$newdir/$newpath
   fi
-  mathlinksource=$newpath/Source
-  mathlinkincdir=$mathlinksource/Includes
-  if [ -x $mathlinksource -a -r $mathlinksource -a -d $mathlinksource -a \
-       -x $mathlinkincdir -a -r $mathlinkincdir -a -d $mathlinkincdir ]
+  mathlinksrc=$newpath/Source
+  mathlinkincdir=$mathlinksrc/Includes
+  if [ -x "$mathlinksrc" -a -r "$mathlinksrc" -a -d "$mathlinksrc" -a \
+       -x "$mathlinkincdir" -a -r "$mathlinkincdir" -a -d "$mathlinkincdir" ]
   then
     mathlinkbin=$newpath/Bin
     mathlinklib=$mathlinkbin/MathLink
-    if [ -x $mathlinkbin -a -r $mathlinkbin -a -d $mathlinkbin -a \
-         -x $mathlinklib -a -r $mathlinklib -a -d $mathlinklib ]
+    if [ -x "$mathlinkbin" -a -r "$mathlinkbin" -a -d "$mathlinkbin" -a \
+         -x "$mathlinklib" -a -r "$mathlinklib" -a -d "$mathlinklib" ]
     then
         echo $newpath
     else
