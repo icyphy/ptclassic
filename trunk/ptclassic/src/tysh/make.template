@@ -174,9 +174,14 @@ HDRS = \
   TyConsole.h \
   TyTcl.h \
   ptk.h \
+  sol2compat.h \
   TclObj.h \
   TclStarIfc.h \
   XYPlot.h
+
+# Used by make checkjunk
+OTHERSRCS = \
+  README
 
 # Objects
 OBJS =			$(SRCS:.cc=.o)
