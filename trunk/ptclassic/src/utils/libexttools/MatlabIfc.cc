@@ -43,14 +43,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <ctype.h>
+#include <string.h>
 #include "StringList.h"
 #include "InfString.h"
 #include "miscFuncs.h"
 #include "MatlabIfc.h"
+#include "Error.h"
 
 // initialize static members
-MatlabIfc :: matlabStarsCount = 0;
-MatlabIfc :: matlabEnginePtr = 0;
+// MatlabIfc :: matlabStarsCount = 0;
+// MatlabIfc :: matlabEnginePtr = 0;
 
 // constructor
 MatlabIfc :: MatlabIfc() {
@@ -66,7 +68,7 @@ MatlabIfc :: MatlabIfc() {
 // destructor
 MatlabIfc :: ~MatlabIfc() {
     // close any figures associated with this star
-    if ( deleteFigures) ) {
+    if ( deleteFigures ) {
 	CloseMatlabFigures();
     }
 
@@ -75,7 +77,7 @@ MatlabIfc :: ~MatlabIfc() {
 	KillMatlab();
     }
 
-    delete [] scriptDirectory
+    delete [] scriptDirectory;
 }
 
 // set data members
@@ -84,17 +86,18 @@ int MatlabIfc :: SetDeleteFigures(int flag) {
     return deleteFigures;
 }
 
-const char* MatlabIfc :: SetScriptDirectory(const char *dir) {
+const char* MatlabIfc :: SetScriptDirectory(const char* dir) {
     delete [] scriptDirectory;
     scriptDirectory = expandPathName(dir);
     return scriptDirectory;
 }
 
-const char* MatlabIfc :: SetFigureHandle(const char *handle) {
+const char* MatlabIfc :: SetFigureHandle(const char* handle) {
     matlabFigureHandle = handle;
+    return matlabFigureHandle;
 }
 
-const char* MatlabIfc :: SetMatlabCommand(const char *command) {
+const char* MatlabIfc :: SetMatlabCommand(const char* command) {
     commandString = command;
     return (const char*) commandString;
 }
@@ -108,20 +111,20 @@ const char* MatlabIfc :: GetScriptDirectory() {
     return scriptDirectory;
 }
 
-const char* MatlabIfc :: GetFigureHandle(const char *handle) {
-    return (const char *) matlabFigureHandle;
+const char* MatlabIfc :: GetFigureHandle() {
+    return (const char*) matlabFigureHandle;
 }
 
-const char* MatlabIfc :: GetFigureHandle() {
-    return (const char *) commandString;
+const char* MatlabIfc :: GetMatlabCommand() {
+    return (const char*) commandString;
 }
 
 // setup methods
 
 // generate names for Matlab versions of input matrix names
-void MatlabIfc :: NameMatlabMatrices(char *matNames[], int numMatrices,
-				     const char *baseName)
-    for ( int i = 0; i < numMatrices; i++ ) {
+void MatlabIfc :: NameMatlabMatrices(char* matNames[], int numMatrices,
+				     const char* baseName) {
+    for (int i = 0; i < numMatrices; i++ ) {
 	StringList newname = baseName;
 	char numstr[32];
 	sprintf(numstr, "_%d", i+1);
@@ -132,14 +135,14 @@ void MatlabIfc :: NameMatlabMatrices(char *matNames[], int numMatrices,
 
 // build up a Matlab command for a block with inputs and/or outputs
 const char* MatlabIfc :: BuildMatlabCommand(
-		char *matlabInputNames[], int numInputs,
-		const char *matlabFunction,
-		char *matlabOutputNames[], int numOutputs) {
+		char* matlabInputNames[], int numInputs,
+		const char* matlabFunction,
+		char* matlabOutputNames[], int numOutputs) {
 
     int length = strlen(matlabFunction);
 
     // replace pound signs in matlabFunction with underscores
-    char *matlabFragment = new char[length + 1];
+    char* matlabFragment = new char[length + 1];
     strcpy(matlabFragment, matlabFunction);
     for ( int i = 0; i < length; i++ ) {
         if ( matlabFragment[i] == '#' ) {
@@ -186,66 +189,71 @@ const char* MatlabIfc :: BuildMatlabCommand(
     }
 
     delete [] matlabFragment;
+    return (const char*) commandString;
 }
 
 // manage the Matlab process (low-level methods)
 
 // start a Matlab process
-char* MatlabIfc :: MatlabEngineOpen() {
-    // return engOpen(MATLAB_UNIX_COMMAND);
+char* MatlabIfc :: MatlabEngineOpen(char* /*unixCommand*/) {
+    Error::abortRun("The Matlab Engine routines have not been linked in, ",
+		    "so the interface to Matlab cannot be started.");
+    // return engOpen(unixCommand);
     return 0;
 }
 
 // send a command to the Matlab Engine for evaluation
-int MatlabIfc :: MatlabEngineSend(char* command) {
-    // return engEvalString(matlabEnginePtr, command);
+int MatlabIfc :: MatlabEngineSend(char* /*enginePtr*/, char* /*command*/) {
+    // return engEvalString(enginePtr, command);
     return FALSE;
 }
 
 // tell Matlab where to put the output of computations
-int MatlabIfc :: MatlabEngineOutputBuffer() {
-    // return engOutputBuffer(matlabEnginePtr, matlabOutputBuffer,
-    //			      MATLAB_BUFFER_LEN);
+int MatlabIfc :: MatlabEngineOutputBuffer(char* /*enginePtr*/,
+					  char* /*buffer*/,
+					  int /*buferLength*/) {
+    // return engOutputBuffer(enginePtr, buffer, buferLength);
     return FALSE;
 }
 
 // get pointer to a copy of a Matlab matrix
-char* MatlabIfc :: MatlabEngineGetMatrix(char* name) {
-    // return engGetMatrix(matlabEnginePtr, name);
+char* MatlabIfc :: MatlabEngineGetMatrix(char* /*enginePtr*/, char* /*name*/) {
+    // return engGetMatrix(enginePtr, name);
     return 0;
 }
 
 // put a matrix in the Matlab environment (Matlab will copy the matrix)
-char* MatlabIfc :: MatlabEnginePutMatrix(char* matrix) {
-    // return engPutMatrix(matlabEnginePtr, matlabMatrix);
+char* MatlabIfc :: MatlabEnginePutMatrix(char* /*enginePtr*/,
+					 char* /*matrix*/) {
+    // return engPutMatrix(enginePtr, matlabMatrix);
     return 0;
 }
 
 // kill the Matlab connection
-int MatlabIfc :: MatlabEngineClose() {
-    // return engClose(matlabEnginePtr);
+int MatlabIfc :: MatlabEngineClose(char* /*enginePtr*/) {
+    // return engClose(enginePtr);
     return FALSE;
 }
 
 // higher-level interface to the Matlab process
-int MatlabIfc :: EvaluateOneCommand(char *command) {
+int MatlabIfc :: EvaluateOneCommand(char* command) {
     if ( MatlabIsRunning() ) {
 	// assert location of buffer to hold output of Matlab commands
 	AssertOutputBuffer();
 
-	// SendMatlabCommand returns 0 on success and non-zero on failure
+	// MatlabEngineSend returns 0 on success and non-zero on failure
 	matlabOutputBuffer[0] = 0;
-	int merror = SendMatlabCommand(command);
+	int merror = MatlabEngineSend(matlabEnginePtr, command);
 	matlabOutputBuffer[MATLAB_BUFFER_LEN] = 0;
 
-	// kludge: SendMatlabCommand always returns 0 (success) even if
+	// kludge: MatlabEngineSend always returns 0 (success) even if
 	// there is an error.  Therefore, we must determine if there
 	// is an error.  An error occurs if when the output of the
 	// Matlab command contains MATLAB_ERR_STR
 	if ( merror == 0 ) {
 	    merror = ( strstr(matlabOutputBuffer, MATLAB_ERR_STR) != 0 );
 	}
-	return( merror );
+	return merror;
     }
     else {
 	strcpy(matlabOutputBuffer, "Matlab is not running!");
@@ -255,24 +263,25 @@ int MatlabIfc :: EvaluateOneCommand(char *command) {
 
 // highest-level interface to the Matlab process
 
-void MatlabIfc :: StartMatlab() {
+int MatlabIfc :: StartMatlab() {
     KillMatlab();
 
     // start the Matlab engine which starts Matlab
     matlabEnginePtr = MatlabEngineOpen(MATLAB_UNIX_COMMAND);
     if ( ! MatlabIsRunning() ) {
-	Error::abortRun( *this, "Could not start Matlab using ",
+	Error::abortRun( "Could not start Matlab using ",
 			 MATLAB_UNIX_COMMAND );
-        return;
+        return FALSE;
     }
 
     // add the PTOLEMY_MATLAB_DIRECTORY to the Matlab path
-    char *fulldirname = expandPathName(PTOLEMY_MATLAB_DIRECTORY);
-    InfString command = "path(path, '";
-    command << fulldirname;
-    command << "');";
-    EvaluateOneCommand(command);
+    char* fulldirname = expandPathName(PTOLEMY_MATLAB_DIRECTORY);
+    InfString setPathCommand = "path(path, '";
+    setPathCommand << fulldirname;
+    setPathCommand << "');";
+    EvaluateOneCommand(setPathCommand);
     delete [] fulldirname;
+    return TRUE;
 }
 
 // check to see if a Matlab process is running
@@ -281,23 +290,23 @@ int MatlabIfc :: MatlabIsRunning() {
 }
 
 int MatlabIfc :: EvaluateUserCommand() {
-    return EvaluateUserCommand(matlabCommand);
+    return EvaluateUserCommand(commandString);
 }
 
-int MatlabIfc :: EvaluateUserCommand(const char* command) {
+int MatlabIfc :: EvaluateUserCommand(char* command) {
 
      // change directories to one containing the Matlab command
      ChangeMatlabDirectory();
 
      // evaluate the passed command and report error if one occurred
-     int merror = SendMatlabCommand(command);
+     int merror = EvaluateOneCommand(command);
      if ( merror ) {
 	  StringList errstr = "\nThe Matlab command `";
 	  errstr << command << "'\ngave the following error message:\n";
-	  Error::warn(*this, errstr, matlabOutputBuffer);
+	  Error::warn(errstr, matlabOutputBuffer);
      }
 
-     return(merror);
+     return merror;
 }
 
 int MatlabIfc :: ChangeMatlabDirectory() {
@@ -308,9 +317,8 @@ int MatlabIfc :: ChangeMatlabDirectory() {
     if ( scriptDirectory && *scriptDirectory ) {
 	struct stat stbuf;
 	if ( stat(scriptDirectory, &stbuf) == -1 ) {
-	    if ( strcmp((char *) lastdirname, fulldirname) != 0 ) {
-		Error::warn( *this,
-			     "Cannot access the directory ",
+	    if ( strcmp((char*) lastdirname, scriptDirectory) != 0 ) {
+		Error::warn( "Cannot access the directory ",
 			     scriptDirectory );
 		lastdirname = scriptDirectory;
 	    }
@@ -334,23 +342,26 @@ int MatlabIfc :: ChangeMatlabDirectory() {
 int MatlabIfc :: AttachMatlabFigureIds() {
      InfString command = MATLAB_SET_FIGURES;
      command << "('" << matlabFigureHandle << "');";
-     return EvaluateOneMatlabCommand(command);
+     return EvaluateOneCommand(command);
 }
 
 // close all figures associated with arg handle implemented by Matlab
 // script defined by MATLAB_CLOSE_FIGURES in PTOLEMY_MATLAB_DIRECTORY
 int MatlabIfc :: CloseMatlabFigures() {
     InfString command = MATLAB_CLOSE_FIGURES;
-    command << "('" << handle << "');";
-    return( EvaluateOneCommand(command) );
+    command << "('" << matlabFigureHandle << "');";
+    return EvaluateOneCommand(command);
 }
 
 int MatlabIfc :: KillMatlab() {
+     int retval = TRUE;
      if ( MatlabIsRunning() ) {
 	  if ( MatlabEngineClose( matlabEnginePtr ) ) {
-		Error::warn(*this, "Error when terminating connection ",
+		Error::warn("Error when terminating connection ",
 			    "to the Matlab kernel.");
+		retval = FALSE;
 	  }
      }
      matlabEnginePtr = 0;
+     return retval;
 }
