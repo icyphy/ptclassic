@@ -86,7 +86,8 @@ TyConsole::TyConsole(int argc, char **argv) {
   // Set the "tcl_interactive" variable.
   int tty = isatty(0);
   if (tty) {		// set up interrupt handler
-    SimControl::catchInt();
+    // SimControl::catchInt(); 
+    // I removed this to allow for killing of Tycho with ^C. - jking -
   }
   Tcl_SetVar(interp, "tcl_interactive",
 	     ((fileName == NULL) && tty) ? "1" : "0", TCL_GLOBAL_ONLY);
