@@ -62,15 +62,9 @@ processes DCTImages, not GrayImages.
 		code {
 // Initialize.
 			const int bSize = dcImage->retBS();
-			const int width = dcImage->fullWidth();
-			const int height = dcImage->fullHeight();
-			const int size = width * height;
+			const int size = dcImage->fullWidth() *
+					dcImage->fullHeight();
 			const int blocks = size / (bSize*bSize);
-			if (size != dcImage->retSize()) {
-				Error::abortRun(*this,
-						"Can't encode a fragment or precoded image!");
-				return;
-			}
 
 // Temporary storage for one block.
 			float* tmpPtr = dcImage->retData();
@@ -152,6 +146,12 @@ processes DCTImages, not GrayImages.
 
 // Do processing and send out.
 		DCTImage* dcImage = (DCTImage*) inPkt.writableCopy();
+		if (dcImage->fragmented() || dcImage->processed()) {
+			delete dcImage;
+			Error::abortRun(*this,
+					"Can't encode a fragment or precoded image!");
+			return;
+		}
 		DCTImage* acImage = (DCTImage*) dcImage->clone(1);
 		doRunLen(dcImage, acImage);
 

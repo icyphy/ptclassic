@@ -20,7 +20,7 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 	}
 
 // CODE
-	hinclude { <math.h>, "GrayImage.h", "DCTImage.h" }
+	hinclude { <math.h>, "GrayImage.h", "DCTImage.h", "Error.h" }
 
 	protected {
 		int firstTime;
@@ -133,6 +133,12 @@ discrete cosine transform (DCT) coding and outputs a GrayImage.
 // Need to call "writableCopy()" rather than "myData()" because the
 // doInvDCT function modifies "dctimage"!!
 		DCTImage* dctimage = (DCTImage*) inPacket.writableCopy();
+		if (dctimage->fragmented() || dctimage->processed()) {
+			delete dctimage;
+			Error::abortRun(*this,
+					"Can't decode a fragmented or processed image.");
+			return;
+		}
 
 		if (firstTime) { doFirst(dctimage); firstTime = 0; }
 
