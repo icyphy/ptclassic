@@ -43,24 +43,13 @@ EGNode *DCGraph::newNode(SDFStar *s, int i)
 
 int DCGraph::initializeGraph() {
 
+	if (ParGraph::initializeGraph() == 0) return FALSE;
+
 	// initialize members
 	clustNumber = 0;
-	nodeCount = 0;
-	ExecTotal = 0;
 
 	cutArcs.initialize();
 	findRunnableNodes();
-
-	// Remove the arcs with delay from the ancestors and descendants
-	removeArcsWithDelay();
-
-        EGSourceIter nxtSrc(*this);
-        DCNode *src;
-
-        // Set the levels for each node
-        while ((src = (DCNode*)nxtSrc++) != 0) {
-                if(SetNodeSL(src) < 0) return FALSE;
-        }
 
 	if (logstrm)
            *logstrm << "Finished assigning levels, starting sortDCNodes\n";
