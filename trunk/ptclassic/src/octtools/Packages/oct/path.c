@@ -34,11 +34,18 @@ static char SccsId[]="$Id$";
 #include "geo.h"
 #include "io.h"
 
+#include "bb.h"
+#include "io_procs.h"
+#include "oct_utils.h"
+
+#include "path.h"
+
 static octStatus path_read_fields(), path_write_fields(), path_bb();
 
 extern struct object_desc oct_geo_points_desc;
 static struct object_desc *super = &oct_geo_points_desc;
 
+void
 oct_path_desc_set(object_desc)
 struct object_desc *object_desc;
 {
@@ -62,10 +69,11 @@ struct object_desc *object_desc;
  * (pt1, pt2) and width `width`
  */
 
-static
+static void
 add_segment(box, pt1, pt2, width)
 struct octBox *box;
 struct octPoint *pt1, *pt2;
+int width;
 {
     octCoord dir_x, dir_y;
     octCoord low_x, low_y;
