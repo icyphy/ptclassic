@@ -48,16 +48,17 @@ typedef struct RgbValue_s {
     unsigned short blue;
 } RgbValue;
 
-extern char* incr ARGS((char *s));
-extern boolean FrameStarCall ARGS((char *name, RgbValue color, int usePattern));
+extern char* incr ARGS((const char *s));
+extern boolean FrameStarCall ARGS((char* name, RgbValue color, int usePattern));
 extern void FindClear();
-extern boolean FindNameSet ARGS((octObject *facetPtr, char *name));
-extern void FindAndMark ARGS((octObject *facetP, char *name, int pattern));
+extern boolean FindNameSet ARGS((octObject* facetPtr, char *name));
+extern void FindAndMark ARGS((octObject* facetP, const char *name,
+			      int pattern));
 extern int CreateFrames ARGS((RgbValue colors[], int n));
 extern int ClearFrames();
 extern int DestroyFrames();
 extern int Frame ARGS((char *stars[]));
-extern void FindAndMarkColor ARGS((octObject *facetP, char *name,
-				   int pattern, char *Color));
+extern void FindAndMarkColor ARGS((octObject* facetP, const char *name,
+				   int pattern, const char *Color));
 
 #endif /* _GANTTIFC_H */
