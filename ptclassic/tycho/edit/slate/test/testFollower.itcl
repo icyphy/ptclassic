@@ -49,6 +49,18 @@ if { ! [::info exists SHORTTIME] } {
 #
 
 #######################################################################
+#### A proc to create two items and a follower
+#
+proc _followeditems {} {
+    global i
+    _twoitems
+    if { [.s find withtag title] == "" } {
+	.s create text 180 20 -text Follower -tags title
+    }
+    set i [.s interactor Follower]
+}
+
+#######################################################################
 #### constructor
 #
 test Follower-constructor-1 {Create a follower} {
@@ -65,10 +77,9 @@ test Follower-constructor-1 {Create a follower} {
 #
 test Follower-basic-1 {Basic interaction sequence test case} {
     _slate
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind to rectangle
     $i bind $r -button 1
 
     # To simulate click, get bound script and evaluate.
@@ -112,10 +123,9 @@ test Follower-basic-1 {Basic interaction sequence test case} {
 
 # As above but use the _interaction{} proc
 test Follower-basic-2 {Basic interaction sequence, item id, button 1} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     $i bind $r -button 1
 
     # Simulate an interaction
@@ -130,10 +140,9 @@ test Follower-basic-2 {Basic interaction sequence, item id, button 1} {
 } {90.0 90.0 130.0 130.0}
 
 test Follower-basic-3 {Basic interaction sequence, item id, no button} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     $i bind $r
 
     # Simulate an interaction
@@ -148,10 +157,9 @@ test Follower-basic-3 {Basic interaction sequence, item id, no button} {
 } {90.0 90.0 130.0 130.0}
 
 test Follower-basic-4 {Basic interaction sequence, by tag, button 2} {
-    _twoitems
+    _followeditems
 
     # Create follower and bind to tag
-    set i [.s interactor Follower]
     $i bind foo -button 2
 
     # Simulate an interaction
@@ -166,10 +174,9 @@ test Follower-basic-4 {Basic interaction sequence, by tag, button 2} {
 } {90.0 90.0 130.0 130.0}
 
 test Follower-basic-4 {Basic interaction sequence, by tag, button 3, modifiers} {
-    _twoitems
+    _followeditems
 
     # Create follower and bind to tag
-    set i [.s interactor Follower]
     $i bind foo -button 2 -modifiers {shift alt}
 
     # Simulate an interaction
@@ -191,9 +198,9 @@ test Follower-basic-4 {Basic interaction sequence, by tag, button 3, modifiers} 
 # just record the arguments to the prefix to check they're
 # being called correctly.
 # 
-_twoitems
+_followeditems
 test Follower-prefix-1 {Test -click/drag/releaseprefix options} {
-    # Create follower and bind to rectangle
+    # Bind follower to rectangle
     set i [.s interactor Follower \
 	    -clickprefix {::tycho::apply {set a [list %0 %1 %2 %3 %4]}} \
 	    -dragprefix  {::tycho::apply {set b [list %0 %1 %2]}} \
@@ -222,9 +229,9 @@ test Follower-prefix-1 {Test -click/drag/releaseprefix options} {
 # Note that *activatecommand* has the target and coords appended,
 # but not other arguments (as *-clickprefix* does).
 #
-_twoitems
+_followeditems
 test Follower-command-1 {Test -activate/drag/deactivatecommand options} {
-    # Create follower and bind to rectangle
+    # Bind follower to rectangle
     set i [.s interactor Follower \
 	    -activatecommand {::tycho::apply {set a [list %0 %1 %2 %3 %4]}} \
 	    -dragcommand  {::tycho::apply {set b [list %0 %1 %2]}} \
@@ -260,10 +267,9 @@ test Follower-command-1 {Test -activate/drag/deactivatecommand options} {
 # correctly.
 #
 test Follower-cascade-1 {Cascaded interactor} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     set j [.s interactor Bounder -bounds {20 20 100 100}]
     $i bind $r -button 1
     $i cascade $j
@@ -296,10 +302,9 @@ test Follower-cascade-1 {Cascaded interactor} {
 #### disable
 #
 test Follower-disable-1 {Disable an interactor} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     $i bind $r -button 1
 
     # Disable it
@@ -317,10 +322,9 @@ test Follower-disable-1 {Disable an interactor} {
 #### enable
 #
 test Follower-enable-1 {Disable and reenable a binding} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     $i bind $r -button 1
 
     # Disable and reenable it
@@ -353,10 +357,9 @@ test Follower-enable-1 {Disable and reenable a binding} {
 # Test the target method
 #
 test Follower-target-1 {Target is null when not interacting} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     $i bind $r -button 1
 
     # Target starts at null
@@ -374,11 +377,10 @@ test Follower-target-1 {Target is null when not interacting} {
 } {{} {}}
 
 test Follower-target-2 {Change target after activation} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle. Give the interactor
+    # Bind follower to rectangle. Give the interactor
     # a -activatecommand to change the target to the Frame
-    set i [.s interactor Follower]
     $i bind $r -button 1
     $i configure -activatecommand "$i target $f"
 
@@ -401,10 +403,9 @@ test Follower-target-2 {Change target after activation} {
 #### uncascade
 #
 test Follower-uncascade-1 {Un-cascad an interactor} {
-    _twoitems
+    _followeditems
 
-    # Create follower and bind to rectangle
-    set i [.s interactor Follower]
+    # Bind follower to rectangle
     set j [.s interactor Bounder -bounds {20 20 100 100}]
     $i bind $r -button 1
 
