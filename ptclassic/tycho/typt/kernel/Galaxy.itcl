@@ -238,7 +238,9 @@ body ::ptolemy::Galaxy::addParam {statename stateclass statevalue} {
 # Create a galaxy port and connect it to the port of an inside block.
 #
 body ::ptolemy::Galaxy::addPort {galport block blockport} {
-    localEval ::pitcl::alias $galport $block $blockport
+    # FIXME: Is this right??????
+    #localEval ::pitcl::alias $galport $block $blockport
+    localEval ::pitcl::galaxyPort $galport $block.$blockport 
 }
 
 #####################################################################
@@ -322,10 +324,10 @@ body ::ptolemy::Galaxy::createBlock {ptblockname master} {
         # No master is specified.  Create an new empty galaxy, then
         # fill it in if commands to do so have been supplied.
         # Can't use localeval here because the galaxy doesn't exist yet.
-        set savegal [::pitcl::curgalaxy]
+        set savegal [::pitcl::currentGalaxy]
 
-        # Create an empty galaxy
-        ::pitcl::defgalaxy $ptblockname {}
+        # Create an empty galaxy in the current domain
+        ::pitcl::defGalaxy $ptblockname [::pitcl::getDomain]
 
         # Fill it in.
         if {$master != {}} {
@@ -333,7 +335,7 @@ body ::ptolemy::Galaxy::createBlock {ptblockname master} {
         }
 
         # Restore the current galaxy
-        ::pitcl::curgalaxy $savegal
+        ::pitcl::currentGalaxy $savegal
     }
 }
 
@@ -344,16 +346,16 @@ body ::ptolemy::Galaxy::createBlock {ptblockname master} {
 #
 body ::ptolemy::Galaxy::localEval {args} {
     # The current galaxy and current universe may not be the same.
-    set savegal [::pitcl::curgalaxy]
-    ::pitcl::curgalaxy $fullname
-puts "executing $args, with curgalaxy [::pitcl::curgalaxy]"
+    set savegal [::pitcl::currentGalaxy]
+    ::pitcl::currentGalaxy $fullname
+puts "executing $args, with curgalaxy [::pitcl::currentGalaxy]"
     if {[catch {set result [uplevel #0 $args]} msg] != 0} {
         global ::errorInfo
         set saveInfo $errorInfo
-        ::pitcl::curgalaxy $savegal
+        ::pitcl::currentGalaxy $savegal
         error $msg $saveInfo
     }
-    ::pitcl::curgalaxy $savegal
+    ::pitcl::currentGalaxy $savegal
     return $result
 }
 
