@@ -52,7 +52,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif /* SOLARIS */
 
 #include <sys/time.h>
-int gettimeofday(struct timeval *, struct timezone *);
+/* Under Solaris2.5, see /usr/include/sys/time.h for a discussion
+ * of gettimeofday()
+ */
+int gettimeofday(struct timeval *, void *);
 
 extern int  GlobalToIndex(ea_t endpoint, struct sockaddr_in *global);
 extern void BuildToken(Token *token, struct sockaddr_in *sender, int buf_id, 
