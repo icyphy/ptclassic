@@ -1,7 +1,7 @@
 defstar {
 	name { MpyInt }
 	domain { CG56 }
-	desc { Two input integer multiplier }
+	desc { Two input integer multiplier.  The output wraps around on overflow.}
 	version { $Id$ }
 	acknowledge { Gabriel version by Martha Fratt }
 	author { Chih-Tsung Huang, ported from Gabriel }
@@ -20,15 +20,15 @@ Input and output are assumed to be integers (right-justified in word).
 
 	input {
 		name {firstInput}
-		type {FIX}
+		type {int}
 	}
 	input {
 		name {secondInput}
-		type {FIX}
+		type {int}
 	}
 	output {
 		name {output}
-		type {FIX}
+		type {int}
 	}
 	codeblock (multblock) {
 	move	$ref(firstInput),x0		; input #1 -> x0
