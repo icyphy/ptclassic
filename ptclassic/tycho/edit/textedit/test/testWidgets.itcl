@@ -187,6 +187,8 @@ test EditMake-1.1 {Test EditMake} {
 # 
 test EditMake-1.1 {Test generating makefile.vc files} {
     cd [file join $env(TEXTEDIT_LIBRARY) test]
+    file delete -force vctest.mk
+    file copy makefile vctest.mk
     set view [::tycho::openContext vctest.mk]
     set win [$view displayer windowName]
     file delete -force vctest.mk.vc
@@ -194,6 +196,7 @@ test EditMake-1.1 {Test generating makefile.vc files} {
     set vcwin [$vcview displayer windowName]
     after $duration removeobj $win
     after $duration removeobj $vcwin
+    after $duration file delete -force vctest.mk vctest.mk.vc
     update
 } {}
 
