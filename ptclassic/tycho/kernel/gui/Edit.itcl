@@ -537,6 +537,10 @@ body ::tycho::Edit::constructor {args} {
     # here ensures a uniform alternative.
     bind $itk_component(text) <<Tab>> "$this insertString insert {\t}; break"
     
+    # This seems to be necessary for C-xk to work.  Without it, it looks like
+    # the text widget is grabbing the k?
+    bind $text <<Close>> "continue" 
+
     # Cutting and pasting
     bind $text <<Paste>> "$this paste; break"
     bind $text <Key-F18> "$this paste; break"
