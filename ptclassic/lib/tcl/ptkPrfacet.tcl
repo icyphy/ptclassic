@@ -224,7 +224,12 @@ proc ptkPrfacet {name} {
 	}
 	global ptkPrFileName
 	append command $ptkPrFileName
-	append command " -L"
+	# append the -L flag to oct2ps if you are interested in generating
+	# postscript for framemaker.  In house, we should be generating 
+	# epsi.  If you append -L to the command line, then postscript
+	# generated to a file will be different than what is sent to the
+	# printer. [bug oct2ps/287]
+	#append command " -L"
     }
 
     global ptkPortrait
