@@ -36,12 +36,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "PosixCondition.h"
 #include "PosixMonitor.h"
+#include "type.h"
 
 // Constructor.
 PosixCondition::PosixCondition(PosixMonitor& m)
     : PtCondition(m), mutex(m.mutex)
 {
+#ifdef PTHPUX10
+    pthread_cond_init(&condition, pthread_condattr_default);
+#else
     pthread_cond_init(&condition, NULL);
+#endif
 }
 
 // Destructor.
@@ -53,7 +58,13 @@ PosixCondition::PosixCondition(PosixMonitor& m)
 // Wait for notification.
 /*virtual*/ void PosixCondition::wait()
 {
+    // Guarantee that the mutex will not remain locked by a cancelled thread.
+    pthread_cleanup_push((void (*)(void *))pthread_mutex_unlock, &mutex);
+
     pthread_cond_wait(&condition, &mutex);
+
+    // Remove cleanup handler, but do not execute.
+    pthread_cleanup_pop(FALSE);
 }
 
 // Give notification to a single waiting thread.
