@@ -423,11 +423,6 @@ int	permB;
 	PrintErr("Instance is not a star");
 	ViDone();
     } else {
-	char *akoName = AkoName(inst.contents.instance.master);
-	if (KcIsCompiledInStar(akoName)) {
-	    PrintErr("Cannot re-load a compiled-in star class");
-	    ViDone();
-        }
 	if (!LoadTheStar(&inst, permB, linkArgs))
 		PrintErr(ErrGet());
 	ViDone();
