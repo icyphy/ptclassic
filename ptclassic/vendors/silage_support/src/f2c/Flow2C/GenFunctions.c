@@ -18,8 +18,9 @@ extern int indexlevel;
 extern st_table *Edgetable[MAXINDEXLEVEL];
 extern ListPointer ListOfParams;
 
-GenFunctions(pl_flag)
+GenFunctions(pl_flag,bittrue)
 bool pl_flag;
+bool bittrue;
 {
     register GraphPointer Graph;
     register GraphPointer ReverseGraph,tmp;
@@ -29,7 +30,7 @@ bool pl_flag;
     {
     for (Graph = Root; Graph != NULL; Graph = Graph->Next) 
 	{
-        	if (!IsLoop(Graph)) GenFunc(Graph,pl_flag);
+        	if (!IsLoop(Graph)) GenFunc(Graph,pl_flag,bittrue);
 	}
     }
 /* Need to generate in the reverse order for declaration purposes */
@@ -44,14 +45,15 @@ bool pl_flag;
 		for(Graph = Root; Graph->Next != tmp; Graph = Graph->Next);
 		fprintf(stderr,"Graph->name %s \n",Graph->Name);
 		tmp = Graph;	
-        	if (!IsLoop(Graph)) GenFunc(Graph,pl_flag);
+        	if (!IsLoop(Graph)) GenFunc(Graph,pl_flag,bittrue);
 	} /* while */
     } /*  pl_flag */
 }
 
-GenFunc(Graph,pl_flag)
+GenFunc(Graph,pl_flag,bittrue)
 GraphPointer Graph;
 bool pl_flag;
+bool bittrue;
 {
    FILE *fp;
    FILE *fq;
@@ -158,6 +160,8 @@ to pass the data type to the signal */
    if(topLevel)
    {
 		if(mycomma == true) fprintf(CFD,",");
+        if(!bittrue)
+	{
    	for( k=0; k< (numberIn-1) ; k++)
    	{ fprintf(CFD, "float* r_%s_%s, ",Graph->Name,inputList[k].name); }
    	fprintf(CFD, "float* r_%s_%s",Graph->Name,inputList[numberIn-1].name);
@@ -165,6 +169,17 @@ to pass the data type to the signal */
    	for( k=0; k< (numberOut-1) ; k++)
    	{ fprintf(CFD, "float* s_%s_%s,",Graph->Name,outputList[k].name); }
    	fprintf(CFD, "float* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
+	}
+	else if(bittrue)
+	{
+   	for( k=0; k< (numberIn-1) ; k++)
+   	{ fprintf(CFD, "Sig_Type* r_%s_%s, ",Graph->Name,inputList[k].name); }
+   	fprintf(CFD,"Sig_Type* r_%s_%s",Graph->Name,inputList[numberIn-1].name);
+	if(numberOut>0) fprintf(CFD,",");
+   	for( k=0; k< (numberOut-1) ; k++)
+   	{ fprintf(CFD, "Sig_Type* s_%s_%s,",Graph->Name,outputList[k].name); }
+   	fprintf(CFD,"Sig_Type* s_%s_%s",Graph->Name,outputList[numberOut-1].name);
+	}
    } /* topLevel */
 if(pl_flag) fprintf(CFD, ")\n{\n");
 
@@ -184,7 +199,7 @@ if(pl_flag) fprintf(CFD, ")\n{\n");
 
 /* Generate the body of the function */
     fprintf(CFD, "\n/* statements of function body */\n");
-    GenStatements(Graph,pl_flag);
+    GenStatements(Graph,pl_flag,bittrue);
 
 /* Generate statements to display requested signals */
     GenDisplays(Graph,Graph->EdgeList,pl_flag);

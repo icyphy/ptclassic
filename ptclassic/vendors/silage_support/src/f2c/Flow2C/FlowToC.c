@@ -645,7 +645,7 @@ bool bittrue;
     GenDelayStruct(Root,pl_flag);  /*  Process all hierarchy  */
     if(!pl_flag) GenInputFileDecls();
     if(!pl_flag) GenDisplayFileDecls(Root);  /*  Process all hierarchy  */
-    fprintf (CFD, ";\n\n");
+    if(!pl_flag) fprintf (CFD, ";\n\n");
     if (GE(Root)->HasDelay) {
 	GenDelayStructName(Root);
 	fprintf (CFD, " SigTab;\n\n");
@@ -660,10 +660,10 @@ bool bittrue;
 
     if(pl_flag)
     {
-    	GenFunctions(pl_flag);  /*  Process all hierarchy  */
+    	GenFunctions(pl_flag,bittrue);  /*  Process all hierarchy  */
 	fprintf(CFD,"} // end code \n");
-	GenPtSetup();
-	GenPtGo();
+	GenPtSetup(bittrue);
+	GenPtGo(bittrue);
 	fprintf(CFD,"} // end defstar \n");
     }
     else
@@ -675,7 +675,7 @@ bool bittrue;
 		ReduceLocalVars(Root);
     	}
     	printmsg(NULL, "GENERATING FUNCTION DEFINITION CODE...\n\n");
-    	GenFunctions(pl_flag);  /*  Process all hierarchy  */
+    	GenFunctions(pl_flag,bittrue);  /*  Process all hierarchy  */
     }
     st_free_table(Edgetable[indexlevel]);
 }
@@ -731,6 +731,7 @@ bool bittrue;
 	fprintf (CFD, "\t hinclude { \"highlevel.h\", \"FixedPoint.h\" } \n");
    else if(bittrue) 
 	fprintf (CFD, "\t hinclude { \"bittrue.h\", \"FixedPoint.h\" } \n"); 
+   if(bittrue) GenPtProtectedVars();
    fprintf (CFD, "\t code { \n");
    fprintf (CFD, "#define at(d, i, m)  ((i+d)%%m)\n");
    fprintf (CFD, "#define _Min(a,b)  ((a) < (b) ? (a) : (b))\n");
@@ -822,6 +823,58 @@ GenPtOutputHeaders()
 GenPtState(outputName,prec);
    }
    fclose(fq);
+}
+
+GenPtProtectedVars()
+{
+/* to generate the protected variables needed for using Fixed SDF fns */
+   FILE *fq;
+   char fileName[100];
+   char portName[100];
+
+   strcpy(portName,"");
+   strcpy(fileName,Root->Name);
+   strcat(fileName,".outputs");
+   fq = fopen(fileName,"r");
+/* outputs */
+   if(fq == NULL) 
+   {
+   	fprintf(stderr,"output information file not found.\n");
+   	exit(-1);
+   }
+
+   fprintf (CFD, "\tprotected { \n");
+
+   while( (fscanf(fq,"%s",portName) == 1 ) )
+   {
+   fprintf (CFD, "\t\tconst char* %s_P; \n",portName); 	/* precision read in */
+   fprintf (CFD, "\t\tint %s_IntBits; \n",portName); 	/* int part */
+   fprintf (CFD, "\t\tint %s_Len; \n",portName); 	/* word length */
+   fprintf (CFD, "\t\tint %s_FracBits; \n",portName); 	/* fractional length */
+   }
+   fclose(fq);
+/* inputs */
+
+   strcpy(portName,"");
+   strcpy(fileName,Root->Name);
+   strcat(fileName,".inputs");
+   fq = fopen(fileName,"r");
+
+   if(fq == NULL) 
+   {
+   	fprintf(stderr,"input information file not found.\n");
+   	exit(-1);
+   }
+
+   while( (fscanf(fq,"%s",portName) == 1 ) )
+   {
+   fprintf (CFD, "\t\tconst char* %s_P; \n",portName); 	/* precision read in */
+   fprintf (CFD, "\t\tint %s_IntBits; \n",portName); 	/* int part */
+   fprintf (CFD, "\t\tint %s_Len; \n",portName); 	/* word length */
+   fprintf (CFD, "\t\tint %s_FracBits; \n",portName); 	/* fractional length */
+   }
+   fclose(fq);
+   fprintf (CFD, "\t} \n");
 }
 
 GenInputFileDecls()
@@ -1234,8 +1287,21 @@ bool pl_flag;
     fprintf(CFD, "}\n\n");
 }
 
-GenPtSetup()
+GenPtSetup(bittrue)
+bool bittrue;
 {
+   FILE *fq; 	char in_fileName[100]; 		char portName[100];
+   FILE *fp; 	char out_fileName[100]; 
+
+   strcpy(portName,"");
+   strcpy(in_fileName,Root->Name); 	strcpy(out_fileName,Root->Name);
+   strcat(in_fileName,".inputs");	strcat(out_fileName,".outputs");
+   fq = fopen(in_fileName,"r");		 fp = fopen(out_fileName,"r");
+
+   if(fq == NULL) { fprintf(stderr,"input file not found.\n"); exit(-1); }
+   if(fp == NULL) { fprintf(stderr,"output file not found.\n"); exit(-1); }
+
+
     fprintf(CFD, "\t setup { \n");
     fprintf(CFD, "\t\tInitFixedLeafs ();");
     fprintf(CFD, "/*  Reading Inputs that are constant */\n");
@@ -1245,10 +1311,32 @@ GenPtSetup()
         fprintf(CFD, "\t\tInit_%s (&SigTab);\n", Root->Name);
         }
 /*  Reading Inputs that are constant  case isnt handled - does it happen so? */
+/* in case of the bittrue simulation, need to use th SDF Fixed functions */
+   if(bittrue)
+   { 
+	while( (fscanf(fq,"%s",portName) == 1 ) )
+	{
+	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_IntBits = get_intbits (%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_Len = get_len (%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_FracBits = %s_Len - %s_IntBits;\n",portName,portName,portName);
+	}
+	while( (fscanf(fp,"%s",portName) == 1 ) )
+	{
+	fprintf(CFD,"\t\t%s_P = %sPrecision;\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_IntBits = get_intbits (%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_Len = get_len (%s_P);\n",portName,portName);
+    	fprintf(CFD,"\t\t%s_FracBits = %s_Len - %s_IntBits;\n",portName,portName,portName);
+	}
+    }
     fprintf(CFD, "\n \t } // setup \n\n");
+
+   fclose(fq);
+   fclose(fp);
 }
 
-GenPtGo()
+GenPtGo(bittrue)
+bool bittrue;
 {
    bool comma = false;
    FILE *fp;
@@ -1266,18 +1354,26 @@ GenPtGo()
    numIn = 0;
    numOut = 0;
 
-   strcpy(fInName,Root->Name); 
-   strcat(fInName,".inputs");
-   strcpy(fOutName,Root->Name); 
-   strcat(fOutName,".outputs");
-   fp = fopen(fInName,"r");
+   strcpy(fInName,Root->Name); 		strcat(fInName,".inputs");
+   strcpy(fOutName,Root->Name); 	strcat(fOutName,".outputs");
+   fp = fopen(fInName,"r");		fq = fopen(fOutName,"r");
    if (fp == NULL) {fprintf(stderr,"error opening input file\n"); exit(-1); }
-   fq = fopen(fOutName,"r");
    if (fq == NULL) {fprintf(stderr,"error opening output file\n"); exit(-1); }
 
    while( fscanf(fp,"%s",inputName) == 1)
    {
+   if(!bittrue)
    fprintf(CFD, "\t\tfloat %s_%s = %s%%0; \n", Root->Name,inputName,inputName);
+   else if(bittrue)
+   {
+   fprintf(CFD,"\t\tEnvelope env_%s;\n",inputName);
+   fprintf(CFD,"\t\t(%s%%0).getMessage(env_%s);\n",inputName,inputName);
+   fprintf(CFD,"\t\tconst FixedPoint* f_%s = (const FixedPoint*)env_%s.myData();\n",inputName,inputName);
+  /* fprintf(CFD,"//\tFixedPoint* ff_%s = new FixedPoint(%s_Len,%s_IntBits,*f_%s);\n",inputName,inputName,inputName,inputName); */
+   fprintf(CFD,"\t\tdouble %s_%s = FixToDouble(*f_%s);\n",Root->Name,inputName,inputName); /* this is from SDF */
+   fprintf(CFD,"\t\tSig_Type F_%s_%s;\n",Root->Name,inputName);
+   fprintf(CFD,"\t\tFloat2Fix(%s_%s,F_%s_%s,%s_Len,%s_FracBits);\n",Root->Name,inputName,Root->Name,inputName,inputName,inputName); /* from Silage */
+   }
    strcpy(inputList[numIn].name,inputName);
    numIn++;
    }
@@ -1285,7 +1381,12 @@ GenPtGo()
 
    while( fscanf(fq,"%s",outputName) == 1)
    {
-   fprintf(CFD, "\t\tfloat %s_%s; \n", Root->Name,outputName);
+   if(!bittrue)
+   	fprintf(CFD, "\t\tfloat %s_%s; \n", Root->Name,outputName);
+   else if(bittrue)
+   {
+  	fprintf(CFD,"\t\tSig_Type F_%s_%s;\n",Root->Name,outputName);
+   }
    strcpy(outputList[numOut].name,outputName);
    numOut++;
    }
@@ -1297,22 +1398,46 @@ GenPtGo()
 	if(numberIn>0) fprintf(CFD,",");
 	if(numberIn==0 && numberOut>0) fprintf(CFD,",");
         }
-   for( k=0; k< (numberIn-1) ; k++)
-   { fprintf(CFD, "&%s_%s, ",Root->Name,inputList[k].name); }
-   fprintf(CFD, "&%s_%s",Root->Name,inputList[numberIn-1].name); 
+   if(!bittrue)
+   {
+   	for( k=0; k< (numberIn-1) ; k++)
+   	{ fprintf(CFD, "&%s_%s, ",Root->Name,inputList[k].name); }
+   	fprintf(CFD, "&%s_%s",Root->Name,inputList[numberIn-1].name); 
 
-   if(numberOut>0) fprintf(CFD,", ");
+   	if(numberOut>0) fprintf(CFD,", ");
 
-   for( k=0; k< (numberOut-1) ; k++)
-   { fprintf(CFD, "&%s_%s, ",Root->Name,outputList[k].name); }
-   fprintf(CFD, "&%s_%s ",Root->Name,outputList[numberOut-1].name); 
+   	for( k=0; k< (numberOut-1) ; k++)
+   	{ fprintf(CFD, "&%s_%s, ",Root->Name,outputList[k].name); }
+   	fprintf(CFD, "&%s_%s ",Root->Name,outputList[numberOut-1].name); 
+   }
+   else if (bittrue)
+   {
+   	for( k=0; k< (numberIn-1) ; k++)
+   	{ fprintf(CFD, "&F_%s_%s, ",Root->Name,inputList[k].name); }
+   	fprintf(CFD, "&F_%s_%s",Root->Name,inputList[numberIn-1].name); 
+
+   	if(numberOut>0) fprintf(CFD,", ");
+
+   	for( k=0; k< (numberOut-1) ; k++)
+   	{ fprintf(CFD, "&F_%s_%s, ",Root->Name,outputList[k].name); }
+   	fprintf(CFD, "&F_%s_%s ",Root->Name,outputList[numberOut-1].name); 
+   }
 
     fprintf(CFD, ");\n");
 
    for( k=0; k<numberOut; k++)
    {
-   fprintf(CFD,"\t\t%s%%0 << %s_%s; \n",outputList[k].name,Root->Name,outputList[k].name);
-   }
+   	if(!bittrue)
+   		fprintf(CFD,"\t\t%s%%0 << %s_%s; \n",outputList[k].name,Root->Name,outputList[k].name);
+   	else if(bittrue)
+   	{
+   fprintf(CFD,"\t\tdouble %s_%s;\n",Root->Name,outputList[k].name);
+   fprintf(CFD,"\t\tfix_2_float (F_%s_%s,%s_Len,%s_FracBits,&%s_%s);\n",Root->Name,outputList[k].name,outputList[k].name,outputList[k].name,Root->Name,outputList[k].name);
+   fprintf(CFD,"\t\tFixedPoint* t_%s = new FixedPoint(%s_Len,%s_IntBits,%s_%s);\n",outputList[k].name,outputList[k].name,outputList[k].name,Root->Name,outputList[k].name);
+		fprintf(CFD,"\t\tEnvelope env_%s(*t_%s);\n",outputList[k].name,outputList[k].name);
+          	fprintf(CFD,"\t\t%s%%0 << env_%s;\n",outputList[k].name,outputList[k].name);
+   	}
+   } /* for */
 
     fprintf(CFD, "\t } // go \n");
     fclose(fp); fclose(fq);
