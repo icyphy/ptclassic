@@ -37,6 +37,7 @@
 ##########################################################################
 
 
+## butt {word}
 #
 # Join arguments into a string without intervening spaces
 #
@@ -45,18 +46,20 @@ proc butt {args} {
 }
 
 
+## spaces n
 #
 # Generate a string of n spaces
 #
 proc spaces {n} {
-    return [butt [lcopy $n " "]]
+    return [join [lcopy $n " "] ""]
 }
 
 
+## namespaceStrip namespacepath
 #
 # Strip an itcl namespace path of all by the last name
 #
-proc nsLastField {nsp} {
+proc namespaceStrip {nsp} {
    set index [string last "::" $nsp]
    if {$index == -1} { 
        return $nsp
@@ -66,13 +69,24 @@ proc nsLastField {nsp} {
 }
 
 
+## capitalize
+#
+# Capitalize a word -- first letter is uppercase; rest are lowercase.
+#
+proc capitalize {word} {
+    return [string toupper \
+	    [string index $word 0]][string tolower [string range $word 1 end]]
+}
+
+
+## stringSubtract
 #
 # Subtract one string from another. No change if no match.
 # The -all option causes all such strings to be replaced.
 #
 # (Similar to regsub, but for literals.)
 #
-proc ssubtract {args} {
+proc stringSubtract {args} {
     getflag all args
     assign a b $args
 
