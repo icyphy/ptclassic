@@ -272,7 +272,8 @@ body ::tycho::EditForest::expand {node} {
 # Open a help window.
 #
 body ::tycho::EditForest::help {} {
-    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/EditForestHelp.html" {}
+    hyperJump [file join \$TYCHO editors visedit doc \
+	    usersGuides EditForestHelp.html] {}
 }
 
 #######################################################################
@@ -329,10 +330,10 @@ body ::tycho::EditForest::drawSubgraph {root xcoord ycoord {pntloc {}}} {
     if {$children != {}} {
         global ::TYCHO
         if $open {
-            set bm @$TYCHO/kernel/img/arrowopen.xbm
+            set bm [file join @$TYCHO kernel img arrowopen.xbm]
             set cmd [list $this contract $root]
         } {
-            set bm @$TYCHO/kernel/img/arrowclose.xbm
+            set bm [file join @$TYCHO kernel img arrowclose.xbm]
             set cmd [list $this expand $root]
         }
         set arrow [$cvs create bitmap $xcoord $ycoord -bitmap $bm \

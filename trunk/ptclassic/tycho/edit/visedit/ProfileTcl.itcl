@@ -1,6 +1,7 @@
 # A code profiler for Tcl and Itcl code, using the TclX extension.
 #
 # @Author: Edward A. Lee
+# @Contributor: Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -173,7 +174,8 @@ body ::tycho::ProfileTcl::constructor {args} {
 # Open a help window.
 #
 body ::tycho::ProfileTcl::help {} {
-    hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/ProfileTclHelp.html" {}
+    hyperJump [file join \$TYCHO editors visedit doc \
+	    usersGuides ProfileTclHelp.html] {}
 }
 
 #######################################################################
