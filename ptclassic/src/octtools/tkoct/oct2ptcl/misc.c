@@ -112,28 +112,23 @@ otpCvtPropToStr( octObject *pProp) {
 }
 
 
-/* Do some massage for initializable delays */
+/* Return a string equal to the value of the delay  */
 char*
 otpCvtPropToStrDelay( octObject *pProp) {
+    /* Old style delays all get a * appended to the value of the delay.
+     * see $PTOLEMY/src/kernel/compile.c 
+     */
     switch ( pProp->contents.prop.type ) {
     case OCT_INTEGER:
-        /* If it is a integer, add a '*' */
 	return memStrSaveFmt("*%d",pProp->contents.prop.value.integer);
     case OCT_REAL:
-	return memStrSaveFmt("%g",pProp->contents.prop.value.real);
+	return memStrSaveFmt("*%g",pProp->contents.prop.value.real);
     case OCT_STRING:
-	/* FIXME:
-	 * Ok, this is really gross, but if the value is a string
-	 * with a length of one, then we prepend a '*'
-	 * Clearly, this will fail for delays of 10 or greater.
-	 */
-	if (strlen(pProp->contents.prop.value.string) == 1) {
-	  return memStrSaveFmt("*%s",pProp->contents.prop.value.string);
-	} else
-	  return pProp->contents.prop.value.string;
+	return memStrSaveFmt("*%s",pProp->contents.prop.value.string);
     default: ;
     }
     errRaise(SPKG,-1,"Cannot convert prop type %d to string.",
       pProp->contents.prop.type);
     return NULL;
 }
+
