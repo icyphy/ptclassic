@@ -57,6 +57,9 @@ public:
   // Return TRUE if this input is (known as) present
   virtual int present() const;
 
+  // Return the particle being emitted
+  virtual Particle & get() const;
+
 };
 
 	//////////////////////////////
@@ -110,6 +113,9 @@ public:
   /*virtual*/ int known() const;
   /*virtual*/ int absent() const;
   /*virtual*/ int present() const;
+
+  // Return the particle being emitted
+  /*virtual*/ Particle & get() const;
 
   void initialize();
 
