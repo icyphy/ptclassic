@@ -15,6 +15,13 @@ $Id$
 #endif
 
 #include <signal.h>
+
+// the following should really, I suppose, be #ifdef cfront
+#ifndef __GNUG__
+#define SignalHandler SIG_PF
+#define SignalIgnore SIG_IGN
+#endif
+
 #include "Scheduler.h"
 #include "Error.h"
 
