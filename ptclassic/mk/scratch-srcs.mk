@@ -114,7 +114,7 @@ tcltk_configure: $(OBJARCH)/tcltk
 $(OBJARCH)/tcltk: $(OBJARCH) 
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC="$(CC)" \
-		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		configure)
@@ -122,7 +122,7 @@ $(OBJARCH)/tcltk: $(OBJARCH)
 tcltk_bin: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC="$(CC)" \
-		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		bin)
@@ -130,7 +130,7 @@ tcltk_bin: $(OBJARCH)/tcltk
 tcltk_install: $(OBJARCH)/tcltk
 	(cd $(PTOLEMY)/src/tcltk; $(MAKE) $(MFLAGS) \
 		CC="$(CC)" \
-		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		CFLAGS="$(CFLAGS)" \
 		RANLIB=$(RANLIB) \
 		TCLTK_DEST=$(TCLTK_DEST) \
 		install)
