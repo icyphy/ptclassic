@@ -15,11 +15,16 @@
 # for your installation)
 PTOLEMY_FULL_PATH = /usr/users/ptolemy
 
+# To enable memory logging, define the following symbol as -DMEMORYLOG.
+# To disable it, define it as empty.
+MEMLOG = -DMEMORYLOG
+
 # C++ compiler to use.  I suppose calling this symbol GNU instead of
 # CPLUSPLUS shows our bias?
 GNU = /usr/lang/CC -I$(ROOT)/src/compat/cfront
+
 # flags for C++ compilation
-GPPFLAGS = -g -Dvolatile=
+GPPFLAGS = -g -Dvolatile= $(MEMLOG)
 # flags for C compilation
 CFLAGS = -O
 

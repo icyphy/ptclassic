@@ -13,10 +13,14 @@
 # for your installation)
 PTOLEMY_FULL_PATH = /usr/users/ptolemy
 
+# To enable memory logging, define the following symbol as -DMEMORYLOG.
+# To disable it, define it as empty.
+MEMLOG = -DMEMORYLOG
+
 # C++ compiler to use
 GNU = g++
 # flags for C++ compilation
-GPPFLAGS = -g
+GPPFLAGS = -g $(MEMLOG)
 # flags for C compilation
 CFLAGS = -g
 
