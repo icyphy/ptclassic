@@ -64,7 +64,7 @@ void DETarget :: setup()
 	}
 	// setSched deletes the old scheduler.
 	setSched(dSched);
-	dSched->setGalaxy(*galaxy());
+	if (galaxy()) dSched->setGalaxy(*galaxy());
 	dSched->relTimeScale = timeScale;
 	dSched->syncMode = syncMode;
 	Target :: setup();
