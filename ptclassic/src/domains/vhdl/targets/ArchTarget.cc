@@ -76,9 +76,7 @@ static ArchTarget proto("arch-VHDL", "VHDLStar",
 			 "VHDL code generation target with structural style");
 static KnownTarget entry(proto,"arch-VHDL");
 
-void ArchTarget :: begin() {
-  SimVSSTarget::begin();
-}
+void ArchTarget :: begin() { SimVSSTarget::begin(); }
 
 // Setup the target.
 void ArchTarget :: setup() {
@@ -227,8 +225,7 @@ void ArchTarget::generateCode() {
 }
 
 // Initial stage of code generation (done first).
-void ArchTarget :: headerCode() {
-}
+void ArchTarget :: headerCode() {}
 
 // Trailer code (done last).
 void ArchTarget :: trailerCode() {
@@ -420,40 +417,6 @@ void ArchTarget :: trailerCode() {
 
       initSignal->setControlValue(0);
       signalList.put(*initSignal);
-
-      /*
-      StringList initName = state->name;
-      initName << "_INIT";
-      signalList.put(initName, state->type);
-      VHDLSignal* initSignal = signalList.vhdlSignalWithName(initName);
-      if (initSignal) {
-	connectSource(state->initVal, initSignal);
-      }
-      else {
-	Error::abortRun(initName,
-			": no such signal with this name in signalList");
-	return;
-      }
-
-      VHDLReg* firstRefReg =
-	regList.vhdlRegWithName(state->firstRef);
-      if (!firstRefReg) {
-	Error::abortRun(state->firstRef, ": no such reg in regList");
-	return;
-      }
-      else {
-	firstRefReg->setInput(initSignal);
-	VHDLSignal* startClockSignal =
-	  signalList.vhdlSignalWithName("start_clock");
-	if (!startClockSignal) {
-	  startClockSignal = new VHDLSignal;
-	  startClockSignal->setName("start_clock");
-	  startClockSignal->setType("BOOLEAN");
-	  signalList.put(*startClockSignal);
-	}
-	firstRefReg->setClock(startClockSignal);
-      }
-      */
     }
     // If firings change state, need to connect a reg and a mux
     // between the lastRef to the state and the firstRef to the state.
@@ -489,20 +452,6 @@ void ArchTarget :: trailerCode() {
 	firstRefMux->addInput(initSignal);
 	connectSource(state->initVal, initSignal);
       }
-
-      /*
-      // NEW: Add a dependency over iterations between
-      // the last ref signal and the first ref reg.
-      VHDLDependency* dep = new VHDLDependency;
-      dep->source = lastRefSignal;
-      dep->sink = firstRefReg;
-      // Need dep to have unique name before putting into list.
-      StringList depName = "";
-      depName << dep->source->getName() << "," << dep->sink->getName();
-      dep->setName(depName);
-      iterDependencyList.put(*dep);
-      // END NEW
-      */
 
       // NEW: Add a dependency over iterations between
       // the last ref firing and the first ref reg.
@@ -677,12 +626,10 @@ void ArchTarget :: trailerCode() {
       // Add a token to the token list so that it will get processed
       // by the interactive app.
       if (!sourceToken) {
-	sourceToken = new VHDLToken;
-	sourceToken->setName(sourceReg->getName());
+	sourceToken = new VHDLToken(sourceReg->getName(), "");
       }
       if (!destToken) {
-	destToken = new VHDLToken;
-	destToken->setName(destReg->getName());
+	destToken = new VHDLToken(destReg->getName(), "");
       }
 
       tokenList.put(*sourceToken);
@@ -1005,19 +952,11 @@ void ArchTarget :: frameCode() {
 }
 
 // Write the code to a file.
-void ArchTarget :: writeCode() {
-  SimVSSTarget::writeCode();
-}
-
+void ArchTarget :: writeCode() { SimVSSTarget::writeCode(); }
 // Compile the code.
-int ArchTarget :: compileCode() {
-  return SimVSSTarget::compileCode();
-}
-
+int ArchTarget :: compileCode() { return SimVSSTarget::compileCode(); }
 // Run the code.
-int ArchTarget :: runCode() {
-  return SimVSSTarget::runCode();
-}
+int ArchTarget :: runCode() { return SimVSSTarget::runCode(); }
 
 // Merge the Star's signal list with the Target's signal list.
 void ArchTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
@@ -1028,8 +967,7 @@ void ArchTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
     // Search for a match from the existing list.
     if (!(signalList.inList(nStarSignal))) {
       // Allocate memory for a new VHDLSignal and put it in the list.
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal = nStarSignal->newCopy();
+      VHDLSignal* newSignal = nStarSignal->newCopy();
       signalList.put(*newSignal);
     }
   }
@@ -1037,11 +975,8 @@ void ArchTarget :: mergeSignalList(VHDLSignalList* starSignalList) {
 
 // Register temporary variable reference.
 void ArchTarget :: registerTemp(const char* name, const char* type) {
-    VHDLVariable* newVar = new VHDLVariable;
-    newVar->setName(name);
-    newVar->setType(type);
-
-    firingVariableList.put(*newVar);
+  VHDLVariable* newVar = new VHDLVariable(name, type);
+  firingVariableList.put(*newVar);
 }
 
 // Register PortHole reference.
@@ -1108,12 +1043,8 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     newPort->setDirec(port->direction());
     newPort->setFire(currentFiring);
 
-    VHDLVariable* newVar = new VHDLVariable;
-    newVar->setName(varName);
-    newVar->setType(port->dataType());
-
+    VHDLVariable* newVar = new VHDLVariable(varName, port->dataType());
     newPort->setVar(newVar);
-
     firingVariableList.put(*newVar);
 
     // If it's an input port, find the token holding the data.
@@ -1162,13 +1093,9 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 	// tokenNum is negative, therefore it couldn't have been output from
 	// a firing, so create a new token to input from.
 	if (tokenNum < 0) {
-	  VHDLToken* newToken = new VHDLToken;
-	  newToken->setName(tokenName);
-	  newToken->setType(port->dataType());
-
+	  VHDLToken* newToken = new VHDLToken(tokenName, port->dataType());
 	  newToken->addDestFiring(currentFiring);
 	  newPort->setToken(newToken);
-
 	  tokenList.put(*newToken);
 	}
 	else { // tokenNum >= 0
@@ -1182,9 +1109,7 @@ void ArchTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
     }
     // If it's an output port, create a new output token.
     if (newPort->isItOutput()) {
-      VHDLToken* newToken = new VHDLToken;
-      newToken->setName(tokenName);
-      newToken->setType(port->dataType());
+      VHDLToken* newToken = new VHDLToken(tokenName, port->dataType());
       newToken->clockName = clockName;
 
       // Add a new clock signal also.
@@ -1330,9 +1255,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
     // for the first time in this firing, perhaps the first time ever.
 
     // Create a new port and variable mapping.
-    VHDLVariable* inVar = new VHDLVariable;
-    inVar->setName(inVarName);
-    inVar->setType(stType);
+    VHDLVariable* inVar = new VHDLVariable(inVarName, stType);
 
     VHDLPort* inPort = new VHDLPort;
     inPort->setName(inPortName);
@@ -1342,54 +1265,17 @@ void ArchTarget :: registerState(State* state, const char* varName,
     inPort->setFire(currentFiring);
 
     firingPortList.put(*inPort);
-
     firingVariableList.put(*inVar);
 
     if (constState) {
       listState->constRefFiringList << currentFiring->getName();
-
-      // NEW: NO LONGER CREATE A TOKEN FOR CONST STATES
-      /*
-      listState->constant = 1;
-      if (isFirstStateRef) {
-	// This is the first state ref, so create a new token.
-	listState->firstRef = inTokenName;
-	listState->firstFiringName = currentFiring->getName();
-	listState->lastRef = inTokenName;
-
-	VHDLToken* inToken = new VHDLToken;
-	inToken->setName(inTokenName);
-	inToken->setType(stType);
-
-	inToken->addDestFiring(currentFiring);
-	inPort->setToken(inToken);
-
-	tokenList.put(*inToken);
-      }
-      if (!isFirstStateRef) {
-	// Need to find the existing token to associate with.
-	// That token should have been created during the previous firing's
-	// first reference to the constant state.
-	VHDLToken* existToken = tokenList.vhdlTokenWithName(inTokenName);
-	if (!existToken) {
-	  Error::abortRun(inTokenName,
-			  ": Not first const state ref, but can't",
-			  " find any existing source token created for it");
-	  return;
-	}
-	existToken->addDestFiring(currentFiring);
-	inPort->setToken(existToken);
-      }
-      */
     }
 
     if (!constState) {
       listState->constant = 0;
 
       // Create a new port and variable mapping.
-      VHDLVariable* outVar = new VHDLVariable;
-      outVar->setName(outVarName);
-      outVar->setType(stType);
+      VHDLVariable* outVar = new VHDLVariable(outVarName, stType);
 
       VHDLPort* outPort = new VHDLPort;
       outPort->setName(outPortName);
@@ -1399,9 +1285,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
       outPort->setVar(outVar);
 
       // Create a new output token to carry the updated state value.
-      VHDLToken* outToken = new VHDLToken;
-      outToken->setName(outTokenName);
-      outToken->setType(stType);
+      VHDLToken* outToken = new VHDLToken(outTokenName, stType);
       outToken->clockName = clockName;
 
       // Add a new clock signal also.
@@ -1415,9 +1299,7 @@ void ArchTarget :: registerState(State* state, const char* varName,
 
       if (isFirstStateRef) {
 	// This is the first state ref, so create a new token.
-	VHDLToken* inToken = new VHDLToken;
-	inToken->setName(inTokenName);
-	inToken->setType(stType);
+	VHDLToken* inToken = new VHDLToken(inTokenName, stType);
 
 	inToken->addDestFiring(currentFiring);
 	inPort->setToken(inToken);
@@ -1606,14 +1488,6 @@ void ArchTarget :: connectMultiplexor(StringList muxName,
 
   VHDLGenericList* genList = new VHDLGenericList;
   VHDLPortList* portList = new VHDLPortList;
-
-  /*
-  VHDLSignal* controlSignal = ctlerSignalList.vhdlSignalWithName("control");
-  if (!controlSignal) {
-    controlSignal = new VHDLSignal("control", "boolean", NULL);
-    ctlerSignalList.put(*controlSignal);
-  }
-  */
 
   {
     VHDLSignalListIter nextSignal(*inSignals);
@@ -2006,27 +1880,24 @@ void ArchTarget :: registerAndMerge(VHDLFiring* firing) {
   VHDLGenericList* masterGenericList = new VHDLGenericList;
   VHDLSignalList* masterSignalList = new VHDLSignalList;
 
-    VHDLPortListIter nextPort(*(firing->portList));
-    VHDLPort* po;
-    while ((po = nextPort++) != 0) {
-      VHDLPort* newPort = new VHDLPort;
-      newPort = po->newCopy();
-      masterPortList->put(*newPort);
-    }
-    VHDLGenericListIter nextGeneric(*(firing->genericList));
-    VHDLGeneric* ge;
-    while ((ge = nextGeneric++) != 0) {
-      VHDLGeneric* newGeneric = new VHDLGeneric;
-      newGeneric = ge->newCopy();
-      masterGenericList->put(*newGeneric);
-    }
-    VHDLSignalListIter nextSignal(*(firing->signalList));
-    VHDLSignal* si;
-    while ((si = nextSignal++) != 0) {
-      VHDLSignal* newSignal = new VHDLSignal;
-      newSignal = si->newCopy();
-      masterSignalList->put(*newSignal);
-    }
+  VHDLPortListIter nextPort(*(firing->portList));
+  VHDLPort* po;
+  while ((po = nextPort++) != 0) {
+    VHDLPort* newPort = po->newCopy();
+    masterPortList->put(*newPort);
+  }
+  VHDLGenericListIter nextGeneric(*(firing->genericList));
+  VHDLGeneric* ge;
+  while ((ge = nextGeneric++) != 0) {
+    VHDLGeneric* newGeneric = ge->newCopy();
+    masterGenericList->put(*newGeneric);
+  }
+  VHDLSignalListIter nextSignal(*(firing->signalList));
+  VHDLSignal* si;
+  while ((si = nextSignal++) != 0) {
+    VHDLSignal* newSignal = si->newCopy();
+    masterSignalList->put(*newSignal);
+  }
 
   mainCompDeclList.put(firingLabel, masterPortList, masterGenericList,
 		       firingName, masterPortList, masterGenericList);
@@ -2092,22 +1963,19 @@ StringList ArchTarget :: addFiregroupCode(VHDLFiregroupList* fgList, int level) 
 	VHDLGenericListIter nextGeneric(*(firing->genericList));
 	VHDLGeneric* ge;
 	while ((ge = nextGeneric++) != 0) {
-	  VHDLGeneric* newGeneric = new VHDLGeneric;
-	  newGeneric = ge->newCopy();
+	  VHDLGeneric* newGeneric = ge->newCopy();
 	  newGenericList->put(*newGeneric);
 	}
 	VHDLPortListIter nextPort(*(firing->portList));
 	VHDLPort* po;
 	while ((po = nextPort++) != 0) {
-	  VHDLPort* newPort = new VHDLPort;
-	  newPort = po->newCopy();
+	  VHDLPort* newPort = po->newCopy();
 	  newPortList->put(*newPort);
 	}
 	VHDLVariableListIter nextVariable(*(firing->variableList));
 	VHDLVariable* va;
 	while ((va = nextVariable++) != 0) {
-	  VHDLVariable* newVariable = new VHDLVariable;
-	  newVariable = va->newCopy();
+	  VHDLVariable* newVariable = va->newCopy();
 	  newVariableList->put(*newVariable);
 	}
       }
@@ -2371,13 +2239,10 @@ StringList ArchTarget :: comment(const char* text, const char* b,
 }
 
 // Generate code to begin an iterative procedure
-void ArchTarget :: beginIteration(int /*repetitions*/, int /*depth*/) {
-}
+void ArchTarget :: beginIteration(int /*repetitions*/, int /*depth*/) {}
 
 // Generate code to end an iterative procedure
-void ArchTarget :: endIteration(int /*reps*/, int /*depth*/) {
-  //  toggleClock("iter_clock");
-}
+void ArchTarget :: endIteration(int /*reps*/, int /*depth*/) {}
 
 // Pulse the given clock TRUE at the given time.
 void ArchTarget :: pulseClock(const char* clockName, int clockTime) {
