@@ -46,16 +46,27 @@ ENHANCEMENTS, OR MODIFICATIONS.
 CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
                    const char* desc) : CGCTarget(name,starclass,desc) {
 	funcName.setInitValue("go");
-	compileOptions.setInitValue(
+	StringList compOpts =
 		  "-I$PTOLEMY/tcltk/tk/include -I$PTOLEMY/tcltk/tcl/include "
 		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib "
-		  "-I$PTOLEMY/src/ptklib");
-	linkOptions.setInitValue(
+		  "-I$PTOLEMY/src/ptklib";
+	char *x11dirstring = getenv("PTX11DIR");
+	if (x11dirstring) {
+	  compOpts << " -I" << x11dirstring << "/include";
+	}
+	compileOptions.setInitValue(compOpts);
+
+	StringList linkOpts =
 		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
 		  "-L$PTOLEMY/tcltk/tcl.$ARCH/lib "
 		  "-L$PTOLEMY/lib.$ARCH "
-		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
-		  "-L/usr/X11/lib -ltk -ltcl -lptk -lXpm -lX11 -lm");
+		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib ";
+	if (x11dirstring) {
+	  linkOpts << " -L" << x11dirstring << "/lib";
+	}
+	linkOpts << " -L/usr/X11/lib";
+	linkOpts << " -ltk -ltcl -lptk -lXpm -lX11 -lm";
+	linkOptions.setInitValue(linkOpts);
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
