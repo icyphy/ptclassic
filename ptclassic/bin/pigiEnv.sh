@@ -11,7 +11,7 @@
 
 # Call this sh function to print the usage
 usage () {
-    echo "usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
+    echo "${0}: usage: pigi [-bw] [-cp] [-debug] [-console] [-help]"
     echo "  [-ptiny] [-ptrim] [-rpc rpcname] [-xres resname ] [-display display] [cell_name]"
 }
 
@@ -36,7 +36,7 @@ if [ -z "$PTOLEMY" ]; then
     if [ -d /users/ptolemy ]; then
 	PTOLEMY=/users/ptolemy
     else	
-	echo "$0: \$PTOLEMY environment variable not set, exiting script!"
+	echo "${0}: \$PTOLEMY environment variable not set, exiting script!"
     fi	
 fi
 
@@ -63,7 +63,7 @@ esac
 # and it does not exist.
 if [ -n "$PIGIRPC" ]; then
     if [ ! -x "$PIGIRPC" ]; then
-	echo "$0: \$PIGIRPC = '$PIGIRPC', which does not exist, exiting."
+	echo "${0}: \$PIGIRPC = '$PIGIRPC', which does not exist, exiting."
 	exit 3
     fi
 fi
@@ -88,7 +88,7 @@ while [ $# -gt 0 ]; do
 	    DISPLAY=$2
 	    shift;;
 	-console)
-	    echo "-console is obsolete and no longer supported."
+	    echo "${0}: -console is obsolete and no longer supported."
 	    echo " To bring up a Tycho console that has similar"
 	    echo " functionality, start pigi and type a 'y' while"
 	    echo " the mouse is over a facet." 
@@ -102,13 +102,13 @@ while [ $# -gt 0 ]; do
 	-ptrim)
 	    PIGIBASE=pigiRpc.ptrim;;
 	-*)
-	    echo "Bad option: $1"
+	    echo "${0}: Bad option: $1"
 	    usage
 	    exit 1;;
 	*)
 	    cell=$1
 	    if [ `basename $cell` = "" ]; then
-		echo "Warning: pigi can't handle names with trailing slashes"
+		echo "$(0): Warning: pigi can't handle names with trailing slashes"
 		cell=`echo $cell | awk '{print substr($0,1,length($0)-1)}'`
 		echo "Removed the trailing /, so now the pathname is $cell"
     fi;;
@@ -137,12 +137,12 @@ fi
 
 # If the user has set $PIGIRPC and is calling -debug, don't try and be 
 # smart here
-if [ -z "$pigidebug" -a -z "$PIGIRPC" ]; then
+if [ -n "$pigidebug" -a -z "$PIGIRPC" ]; then
     if [ -z "$PIGIRPC" ]; then
 	     PIGIRPC=$PTOLEMY/bin.$PTARCH/$PIGIBASE
 	fi
-	if [ -z "$pigidebug" -a ! -x $PIGIRPC.debug ]; then
-		echo "$PIGIRPC.debug does not exist or is not executable"	
+	if [ -n "$pigidebug" -a ! -x $PIGIRPC.debug ]; then
+		echo "${0}: $PIGIRPC.debug does not exist or is not executable"
 		if [ -x $PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug ]; then
 			PIGIRPC=$PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug
 			echo "Using $PIGIRPC instead"
@@ -164,7 +164,7 @@ if [ -z "$PIGIRPC" ]; then
 fi
 
 if [ ! -x $PIGIRPC ]; then
-    echo "$PIGIRPC does not exist or is not executable."
+    echo "${0}: $PIGIRPC does not exist or is not executable."
 	if [ -n "$pigidebug" -a -x $PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug ]; then
 	    PIGIRPC=$PTOLEMY/obj.$PTARCH/pigiRpc/${PIGIBASE}.debug
 	    echo "Using $PIGIRPC instead"
@@ -173,14 +173,15 @@ if [ ! -x $PIGIRPC ]; then
 		    PIGIRPC=$PTOLEMY/obj.$PTARCH/pigiRpc/$PIGIBASE
 		    echo "Using $PIGIRPC instead"
 		else
-		    echo "${progname}: exiting"
+		    echo "${0}: exiting"
 		    exit 4
 		fi
 	fi
 fi
 
-if [ -z $PIGIRPC ]; then
-    echo "$PIGIRPC binary is zero length. Perhaps make install failed?"
+if [ -f $PIGIRPC -a ! -s $PIGIRPC ]; then
+    echo "${0}: $PIGIRPC binary is zero length."
+    echo "  Perhaps make install failed?"
     ls -l $PIGIRPC
     exit 4
 fi
@@ -215,7 +216,7 @@ if [ $? != 0 ]; then
 fi
 $xrdb -query > $dbfile
 if [ $? != 0 ]; then 
-    echo "${progname}: '$xrdb -query' failed. Exiting"
+    echo "${0}: '$xrdb -query' failed. Exiting"
     exit 1
 fi
 
@@ -228,8 +229,8 @@ fi
 
 if [ -n "$pigiconsole" ]; then
     if [ -n "$pigidebug" ]; then
-	echo "-console and -debug together means that the "
-	echo "   pigi console prompt will come up inside the debugger"
+	echo "${0}: -console and -debug together means that the "
+	echo " pigi console prompt will come up inside the debugger"
     fi
     TAILARGS=-console
 fi
