@@ -58,7 +58,8 @@ HDRS = \
  DDFClustSched.h \
  DDFSimpleSched.h \
  DDFStar.h \
- DDFTarget.h
+ DDFTarget.h \
+ DDFWormhole.h
 
 # Library sources
 SRCS= $(HDRS:.h=.cc) DDFDomain.cc 
