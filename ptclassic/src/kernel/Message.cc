@@ -67,6 +67,10 @@ Complex Message::asComplex() const {
 	return errorConvert("complex");
 }
 
+Fix Message::asFix() const {
+	return errorConvert("Fix");
+}
+
 const char* Message::dataType() const { return "DUMMY";}
 
 int Message::isA(const char*) const {
