@@ -19,8 +19,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This one-pole IIR filter has a transfer function of
 <pre>
-{1} over
-{1 ~-~ {W sub N} sup {-k} z sup -1 } ~.
+    1
+-----------
+1 - W<sub>N</sub><sup>-k</sup>z<sup>-1</sup>.
 </pre>
 <h3>References</h3>
 <p>[1]  
