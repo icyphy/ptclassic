@@ -14,19 +14,19 @@ Note: all print functions append \n to string before printing.
 #include "list.h"
 
 /* Controls whether errors get printed out in windows */
-static boolean gabWind = TRUE;
+static boolean errorWindows = TRUE;
 
 void
 ViSetErrWindows(state)
 boolean state;
 {
-    gabWind = state;
+    errorWindows = state;
 }
 
 boolean
 ViGetErrWindows()
 {
-    return (gabWind);
+    return (errorWindows);
 }
 
 
@@ -68,8 +68,10 @@ char *s;
 
     (void) sprintf(buf, "\0062Error: %s\n\0060", s);
     (void) vemMessage(buf, MSG_DISP);
-    if (gabWind) {
-	/* print error message in a dialog box, not yet implemented */
+    if (errorWindows) {
+	/* print error message in a dialog box */
+	(void) sprintf(buf, "Error: %s", s);
+	win_msg (buf);
     }
 }
 
