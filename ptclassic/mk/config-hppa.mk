@@ -238,7 +238,7 @@ FLUSH_CACHE =	flush_cache.o
 # in pigiRpc/makefile, or the make will fail on other archs.
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
-# -ldce is necessary to get pthread_once in gcc-2.951
+# -ldce is necessary to get pthread_once in gcc-2.95.1
 DCELIB = 	-ldce
 
 # If you are trying out the shl_load feature uncomment the lines below.
