@@ -183,8 +183,9 @@ body ::tycho::Compile::checkSourceFiles {} {
 body ::tycho::Compile::compileFiles {} {
     putStatus "About to make shared object, when complete, be sure to \
 	    close the Exec window to continue."
-    ::tycho::execModal "make -f $makefile" $dirname
+    set results [::tycho::execModal "make -f $makefile" $dirname]
     putStatus ""
+    return $results
 }
 
 #######################################################################
