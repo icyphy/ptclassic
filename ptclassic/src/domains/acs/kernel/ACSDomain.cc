@@ -78,7 +78,10 @@ public:
 // declare a prototype
 static ACSDomain proto;
 
-static ACSTarget defaultACStarget("default-CGC","ACSStar", "Runs ACS systems on the local workstation using the default\n"
-"one-processor SDF scheduler.");
+static ACSTarget defaultACStarget("default-ACS","ACSStar", "Runs ACS systems on the local workstation using the default\n"
+"one-processor SDF scheduler.","FPSim");
 static KnownTarget entry(defaultACStarget, "default-ACS");
+static ACSTarget FixACStarget("ACS-Fix","ACSStar", "Runs ACS systems on the local workstation using the default\n"
+"one-processor SDF scheduler.","FixSim");
+static KnownTarget entry2(FixACStarget, "ACS-Fix");
 

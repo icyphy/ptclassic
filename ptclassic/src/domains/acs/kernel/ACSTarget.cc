@@ -41,11 +41,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 ACSTarget::ACSTarget(const char* name,const char* starclass, const char* desc,
-        const char* assocDomain) :
+        const char* category, const char* assocDomain) :
     HLLTarget(name,starclass,desc,assocDomain) {
 
 	// This determines the core used in simulation.
-	addState(coreCategory.setState("Core Category", this, "FPSim", "Sets the core category."));
+	addState(coreCategory.setState("Core Category", this, category, "Sets the core category."));
+	coreCategory.clearAttributes(A_SETTABLE);
 
 	// These are from the SDF simulation Target.
 	addState(logFile.setState("logFile",this,"",
