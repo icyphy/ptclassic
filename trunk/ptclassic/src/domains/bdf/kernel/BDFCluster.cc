@@ -242,27 +242,25 @@ int BDFClusterGal::mergePass() {
 			nextClust.reset();
 	} while (c2 && !SimControl::haltRequested());
 
-	// if we made any changes, try to turn clusters with self-loops
-	// into while-loops now.
-	if (changes) {
-		// this code is the way it is because iterators are not
-		// safe on modified lists.  So we reset and search again
-		// if we do a makeWhile.
-		int gotThrough;
-		do {
-			BDFClustPort* ctl;
-			BDFRelation rel;
-			gotThrough = 1;
-			nextClust.reset();
-			while ((c1 = nextClust++) != 0) {
-				if ((ctl = c1->canBeWhiled(rel)) != 0) {
-					makeWhile(ctl,rel);
-					gotThrough = 0;
-					break;
-				}
+	// Try to turn clusters with self-loops into while-loops now.
+	// this code is the way it is because iterators are not
+	// safe on modified lists.  So we reset and search again
+	// if we do a makeWhile.
+	int gotThrough;
+	do {
+		BDFClustPort* ctl;
+		BDFRelation rel;
+		gotThrough = 1;
+		nextClust.reset();
+		while ((c1 = nextClust++) != 0) {
+			if ((ctl = c1->canBeWhiled(rel)) != 0) {
+				makeWhile(ctl,rel);
+				gotThrough = 0;
+				changes = TRUE;
+				break;
 			}
-		} while (!gotThrough);
-	}
+		}
+	} while (!gotThrough);
 				
 	if (logstrm) {
 		if (changes)
@@ -299,9 +297,9 @@ BDFCluster* BDFClusterGal::fullSearchMerge() {
 		BDFClustPort *p;
 		while ((p = nextPort++) != 0) {
 			if (p->far() == 0) continue;
+			BDFCluster *peer = p->far()->parentClust();
 			// check requirement 1: same rate and no delay
-			if (!p->fbDelay() && p->sameRate()) {
-				BDFCluster *peer = p->far()->parentClust();
+			if (peer != this && !p->fbDelay() && p->sameRate()) {
 				BDFCluster *src, *dest;
 				// sort them so src is the source.
 				if (p->isItOutput()) {
@@ -481,7 +479,7 @@ int BDFClusterGal::indirectPath(BDFCluster* src, BDFCluster* dst,
 	while ((p = nextP++) != 0) {
 		if (p->far() == 0) continue;
 		BDFCluster* peer = p->far()->parentClust();
-		if (p->isItOutput() && peer != dst &&
+		if (p->isItOutput() && peer != dst && peer != src &&
 		    findPath(peer,dst,ignoreDelayArcs))
 			return TRUE;
 	}
@@ -509,6 +507,7 @@ int BDFClusterGal::findPath(BDFCluster* start, BDFCluster* dst,
 		if (ignoreDelayArcs && p->numTokens() >= p->numIO())
 			continue;
 		BDFCluster* peer = p->far()->parentClust();
+		if (peer == start) continue; // ignore self-loops
 		if (peer == dst) return TRUE;
 		if (stopList.member(peer)) continue;
 		if (findPath(peer,dst,ignoreDelayArcs)) return TRUE;
@@ -579,6 +578,8 @@ int BDFClusterGal::loopPass() {
 			// add Boolean arc if needed.  cond may be remapped
 			// and rel may be reversed.
 			cond = connectBoolean(c,cond,rel);
+		}
+		if (cond) {
 			c->ifIze(cond,rel,logstrm);
 			changes = TRUE;
 		}
@@ -625,6 +626,15 @@ BDFClustPort* BDFCluster::ifFactor(BDFRelation& rel) {
 		else if (TorF(p->relType()) && !TorF(pFar->relType())) {
 			return 0;
 		}
+	}
+	// if the conditional is on a self-loop, we may want to avoid
+	// creating an if construct and create a "while" instead.
+	// we will avoid the if if the if-condition matches the state
+	// of the initial token on the feedback arc.
+	// FIXME: for now we assume initial tokens are always FALSE.
+	if (cond->selfLoop() && rel == BDF_FALSE) {
+		cerr << "Avoiding making 'if' out of " << name() << "\n";
+		return 0;
 	}
 	return cond;
 }
@@ -731,7 +741,7 @@ BDFClustPort* BDFClusterGal::connectBoolean(
 	// condition is not available here -- create a new connection
 	if (logstrm)
 		*logstrm << "Creating a boolean arc to pass "
-			 << cond->name() << " to " << c->name()
+			 << cond->fullName() << " to " << c->name()
 			 << "\n";
 // condition is not present.  We must pass it.  If we can pair it with
 // a parallel arc in the same direction this passing is always safe,
@@ -758,7 +768,12 @@ BDFClustPort* BDFClusterGal::connectBoolean(
 			}
 		}
 		if (!acc) {
-			die (*cond, "impossible? can't pass w/o || arc");
+			if (logstrm)
+				*logstrm << "whoops: " << cond->fullName()
+					 << " cannot be passed to "
+					 << c->name()
+					 << "w/o delay free loop\n";
+			return 0;
 		}
 		if (r2 == BDF_COMPLEMENT) rel = reverse(rel);
 	}
@@ -1396,20 +1411,30 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 {
 	BDFClustPortIter nextp(*src);
 	BDFClustPort *p;
+// find conditional ports that will remain external, and check their
+// control arcs.
 	while ((p = nextp++) != 0) {
 		BDFClustPort *pFar = p->far();
-		BDFClustPort *pRemap;
+		if (pFar == 0) continue;
+		BDFCluster *peer = pFar->parentClust();
+		if (peer == src || peer == dest || !TorF(p->relType()))
+			continue;
+		// OK, p remains an external port and is conditional.
+		// See if its control port gets buried.
+		BDFClustPort *ctl = p->assoc();
+		pFar = ctl->far();
+		if (!pFar || pFar->parentClust() != dest ||
+		    ctl->numTokens() > 0)
+			continue;
+		// OK, control arc connects src and dest w/o delay.
+		// Cannot merge unless we can remap it.
 		BDFClustPort *pFail = 0;
 		BDFRelation r;
-		if (!pFar || pFar->parentClust() != dest || p->numTokens() > 0)
-			continue;
-		if (p->isControl()) {
-			pRemap = remapControl(p,r);
-			if (!pRemap) pFail = p;
-		}
+		BDFClustPort *pRemap = remapControl(ctl,r);
+		if (!pRemap) pFail = ctl;
 		if (pFar->isControl() && !pFail) {
 			pRemap = remapControl(pFar,r);
-			if (!pRemap) pFail = p;
+			if (!pRemap) pFail = ctl;
 		}
 		if (pFail) {
 			if (logstrm) {
@@ -1417,8 +1442,6 @@ int BDFClusterGal::buriedCtlArcs(BDFCluster* src, BDFCluster* dest)
 					<< " and " << dest->name() <<
 					": would bury a control arc:\n"
 					<< *pFail << "\n";
-				if (p->numTokens() > 0)
-					*logstrm << "But there is delay!  Eventually self-loop!\n";
 			}
 			return TRUE;
 		}
@@ -1436,6 +1459,7 @@ BDFCluster* BDFCluster::mergeCandidate() {
 	BDFCluster* srcOK = 0, *dstOK = 0;
 	BDFClustPortIter nextPort(*this);
 	BDFClustPort* p;
+
 	while ((p = nextPort++) != 0) {
 		BDFClustPort* pFar = p->far();
 		if (!pFar) continue;
@@ -1627,6 +1651,19 @@ BDFClustSched::~BDFClustSched() { LOG_DEL; delete cgal;}
 // for now, we assume we are SDF at top level.
 void BDFClustSched::runOnce() { SDFScheduler::runOnce();}
 
+// verify that at top-level we are SDF.
+
+static int SDFcheck(BDFClusterGal& gal) {
+	if (gal.numberBlocks() == 1) return TRUE;
+	BDFClusterGalIter nextClust(gal);
+	BDFCluster* c;
+	while ((c = nextClust++) != 0) {
+		c->initialize();
+		if (!c->isSDFinContext()) return FALSE;
+	}
+	return TRUE;
+}
+
 // compute the schedule!
 int BDFClustSched::computeSchedule (Galaxy& gal) {
 	LOG_DEL; delete cgal;
@@ -1648,6 +1685,13 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 	}
 	cgal->initialize();
 	setGalaxy(*cgal);
+// verify that top level is SDF (have not yet implemented BDF or dynamic
+// cases).
+	if (!SDFcheck(*cgal)) {
+		Error::abortRun(gal, "Top level of clustering is not SDF",
+				"\nThis case is not yet implemented");
+		return FALSE;
+	}
 // recompute top-level repetitions.
 	SDFScheduler::repetitions();
 // generate schedule -- this assumes top level is SDF.  FIXME
