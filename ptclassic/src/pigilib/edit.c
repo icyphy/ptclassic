@@ -31,6 +31,10 @@ $Id$
 
 
 /* Includes */
+#if defined(PTSVR4)
+#include <sys/types.h>
+#endif /* PTSVR4 */
+
 #include <string.h>
 #include <sys/file.h>
 #include "local.h"
