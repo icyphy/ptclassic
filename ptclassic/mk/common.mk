@@ -46,9 +46,30 @@ $(LIBDIR)/$(LIB):	$(LIB)
 		rm -f $(LIBDIR)/$(LIB)
 		ln $(LIB) $(LIBDIR)
 
+# Rule for making a star list for inclusion by make
 $(STAR_MK).mk:	make.template
 		rm -f $(STAR_MK).mk
 		genStarList $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).mk
+
+# Rule for making a star list module for pulling stars out of libraries
+$(STAR_MK).c:	make.template
+		rm -f $(STAR_MK).c
+		genStarTable $(DOMAIN) $(DOMAIN_2) > $(STAR_MK).c
+
+$(STAR_MK).o:	$(STAR_MK).c
+
+# Standard "all" for stars directories
+stars_all:	$(SRCS) $(LIB) $(STAR_MK).o
+
+# Rule for installing both the star library and star list
+stars_install:	all $(LIBDIR)/$(LIB) $(LIBDIR)/$(STAR_MK).o
+		@echo Installation complete.
+
+# Rule for installing the star list
+
+$(LIBDIR)/$(STAR_MK).o:	$(STAR_MK).o
+		rm -f $(LIBDIR)/$(STAR_MK).o
+		ln $(STAR_MK).o $(LIBDIR)
 
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	$(EXTRA_SRCS) $(SRCS) $(HDRS) make.template
@@ -86,7 +107,7 @@ TAGS:		$(SRCS)
 
 checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) $(OBJS) $(LIB) \
-		$(EXTRA_DESTS) makefile make.template SCCS
+		$(STAR_MK).o $(EXTRA_DESTS) makefile make.template SCCS
 
 # "check" does not print anything if nothing is being edited.
 sccsinfo:
