@@ -29,7 +29,7 @@ sequence
 		type { fixarray }
 		desc { list of values. }
 		default { "0.1 0.2 0.3 0.4" }
-                attributes { A_NONCONSTANT|A_YMEM}
+                attributes { A_YMEM }
         }
         state  {
                 name { dataCount }
@@ -47,35 +47,24 @@ sequence
         }
       
         codeblock(std) {
-        section $label(sec)   ; limit scope
-; memory locations
-N       equ     $ref(N)
-out     equ     $ref(output)
-count   equ     $ref(dataCount)
-base    equ     $ref(data)
-      
-; constants
-len     equ     $val(dataLen)
-
-        clr     a       y:count,b
-        move    #len,a1         ; len may be SHORT
+        clr     a       $ref(dataCount),b
+        move    #$val(dataLen),a1         ; len may be SHORT
         cmp     a,b     #<0.0,a ; output = zero
-        jge     <output
-        move    #base,r0        ; base may be SHORT
+        jge     <$label(output)
+        move    #$addr(data),r0        ; base may be SHORT
         move    b,n0
         nop                     ; wait for n0
         move    y:(r0+n0),a1    ; output = next sample
 $label(output)
-        move    a1,x:out
+        move    a1,$ref(output)
         move    #1,a1
-        add     a,b     x:N,a1  ; increment counter
+        add     a,b     $ref(N),a1  ; increment counter
         tst     a
         jeq     <$label(cont)
         cmp     a,b     #<0.0,a
         tge     a,b             ; reset counter
 $label(cont)
-        move    b,y:count
-        endsec
+        move    b,$ref(dataCount)
         }
 
         start {
