@@ -46,6 +46,13 @@
 class ::tycho::EditJava {
     inherit ::tycho::EditCpp
 
+    ##########################################################################
+    ####                            options                               ####
+
+    # Location of the template file
+    itk_option define -filetemplate fileTemplate FileTemplate \
+	    $TYCHO/editors/textedit/templates/JavaTemplate.java {}
+
     constructor {args} {}
     destructor {}
 
@@ -58,6 +65,9 @@ class ::tycho::EditJava {
     # Generate and display a doc file from the current buffer
     method gendoc {}
  
+    # Guess about the class name from the filename
+    public method getClassName {}
+
     # Open a help window.
     method help {}
 
@@ -70,11 +80,15 @@ class ::tycho::EditJava {
     ####################################################################
     ####                    protected methods                       ####
 
+
     # Return the regular expression used to identify line-oriented comments.
     protected method commentRegexp {}
 
     ##########################################################################
     ####                         protected variables                      ####
+
+    # The name of the class in this file
+    protected variable className {}
 
     # Counter for hyperlinks.
     protected variable hypcount 0
@@ -89,6 +103,12 @@ body ::tycho::EditJava::constructor {args} {
     # Set the fill prefix to be the comment character for Java.
     set fillPrefix "//"
     menubar addMenu Special -underline 0
+
+    menubar add "File Template" Special -underline 0 \
+	    -command "$this fileTemplate $itk_option(-filetemplate) \
+	    		\[$this getClassName\]"
+
+    menubar addSeparator Special
 
     menubar add "Appletviewer" Special -underline 0 \
             -command "$this execProcess appletviewer"
@@ -148,6 +168,20 @@ body ::tycho::EditJava::gendoc {} {
     return [::tycho::EditProgram::gendoc {set docfile $root.htm} \
             { exec javadoc $tail}] 
 
+}
+
+#####################################################################
+#### getClassName
+# Guess about the class name from the filename
+# If the file has not been parsed then the className variable might
+# not be set.  If it is not set, guess on the className from
+# the name of the file
+#
+body ::tycho::EditJava::getClassName {} {
+    if {$className == {}} {
+	return [file tail [file rootname [filename]]]
+    }
+    return $className
 }
 
 ###################################################################
