@@ -42,8 +42,9 @@
 # <p>
 # To create a simple slider:
 # <tcl><pre>
+#    catch {delete object .d}
 #    ::tycho::Displayer .d
-#    ::tycho::Slider .d.s -label Fred -resolution 0.5 -to 11 -command puts
+#    ::tycho::Slider .d.s -label Fred -resolution 0.5 -to 11
 #    pack .d.s
 #    .d centerOnScreen
 # </pre></tcl>
