@@ -43,6 +43,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  StringList out;
 	  int tapSize = taps.size();
 
+	  // Update the tap values.
+	  for (int k = 0; k < int(tapSize); k++) {
+	    out << "$ref(taps," << k << ") $assign(taps) $ref(taps," << k
+		<< ") + $val(stepSize) * $ref(error) * $ref(signalIn,"
+		<< k << ");\n";
+	  }
 	  // Perform calculation.
 	  int j = 0;
 	  for (int i = 0; i < int(tapSize); i++) {
@@ -61,12 +67,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	      }
 	  }
 	  out << ";\n";
-	  for (int k = 0; k < int(tapSize); k++) {
-	    // Update the tap values.
-	    out << "$ref(taps," << k << ") $assign(taps) $ref(taps," << k
-		<< ") + $val(stepSize) * $ref(error) * $ref(signalIn,"
-		<< k << ");\n";
-	  }
 	  out << "$ref(signalOut) $assign(signalOut) $temp(signalOut"
 	      << j << ",float);\n";
 
