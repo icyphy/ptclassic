@@ -44,7 +44,7 @@ VPATH         = $(ROOT)/src/vendors/mercury/src/single
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-include $(VPATH)/../mercury.mk
+include $(ROOT)/../mercury.mk
 
 LIBCSDS = \
 acor.csd         acorf.csd        acort.csd        aspec.csd \
@@ -119,7 +119,7 @@ OBJS = $(LIBCSDS:.csd=.o)
 # Library name
 # Build a non-shared libptolemy.a for faster startup time
 # It would be nice if we built both
-LIBNONSHARED=libmercdouble.a
+LIBNONSHARED=libmercsingle.a
 
 all: makefile $(LIBNONSHARED)
 
