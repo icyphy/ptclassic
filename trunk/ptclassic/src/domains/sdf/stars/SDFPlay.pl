@@ -138,6 +138,6 @@ be a parameter.
 	destructor {
 		if (strm) fclose (strm);
 		if (delFile) unlink (fileName);
-		delete fileName;
+		delete (char*)fileName;
 	}
 }
