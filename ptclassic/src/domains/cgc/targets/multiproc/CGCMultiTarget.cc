@@ -276,46 +276,6 @@ int CGCMultiTarget :: identifyMachines() {
 	return TRUE;
 }
 
-void CGCMultiTarget :: addProcessorCode(int i, const char* s) {
-	StringList code = s;
-	StringList fileName;
-	if (nChildrenAlloc > 1) {
-		fileName << child(i)->name() << ".c";
-	} else {
-		fileName << galaxy()->name() << ".c";
-	}
-	rcpWriteFile("",destDirectory,fileName,code,displayFlag);
-}
-
-// -----------------------------------------------------------------------------
-			///////////////////
-			// compile and run
-			///////////////////
-// ship the codes and run them.
-int CGCMultiTarget :: compileCode() {
-	for (int i = 0; i < nChildrenAlloc; i++) {
-		CGCTarget* t = (CGCTarget*) child(i);
-		if (t->compileCode() == FALSE) return FALSE;
-		feedback << "compile " << t->hostName() << ": "
-		         << t->name() << ".c is done!\n";
-		feedback.flush();
-	}
-	return TRUE;
-}
-
-// -----------------------------------------------------------------------------
-int CGCMultiTarget :: runCode() {
-	for (int i = 0; i < nChildrenAlloc; i++) {
-		CGCTarget* t = (CGCTarget*) child(i);
-		if (t->runCode() == FALSE) return FALSE;
-
-		feedback << "run " << t->hostName() << ": "
-		         << t->name() << " is done!\n";
-		feedback.flush();
-	}
-	return TRUE;
-}
-
 // -----------------------------------------------------------------------------
 Block* CGCMultiTarget :: makeNew() const {
 	LOG_NEW; return new CGCMultiTarget(name(),starType(),descriptor());
