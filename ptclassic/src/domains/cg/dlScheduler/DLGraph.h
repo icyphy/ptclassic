@@ -74,7 +74,7 @@ public:
 
 protected:
 	// reset the busy flag of the DLNodes.
-	void resetNodes();
+	virtual void resetNodes();
 
 	// number of unscheduled nodes.
 	int unschedNodes;
