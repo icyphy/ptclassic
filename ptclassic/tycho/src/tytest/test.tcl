@@ -6,6 +6,7 @@
 #
 
 # Load the package
+::tycho::loadIfNotPresent ::tycho::timer tytimer
 ::tycho::loadIfNotPresent ::tycho::testtask tytest
 
 # Initialize a Tk counter
