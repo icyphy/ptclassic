@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "DETarget.h"
 #include "DEScheduler.h"
+#include "CQScheduler.h"
 
 DETarget :: DETarget() : 
 Target("default-DE","DEStar","default DE target") 
@@ -46,14 +47,26 @@ Target("default-DE","DEStar","default DE target")
 	    "Relative time scale for interface with another timed domain"));
 	addState(syncMode.setState("syncMode",this,"YES",
 	"Enforce that the inner timed domain can not be ahead of me in time"));
+	addState(calQ.setState("calendar queue?", this, "NO",
+	    "Use the experimental CalendarQueue scheduler."));
 }
 
 void DETarget :: setup()
 {
-	if (!scheduler()) { LOG_NEW; setSched(new DEScheduler); }
-
-	// scheduler state set-up
-	DEScheduler* dSched = (DEScheduler*) scheduler();
+	if (!scheduler())
+	{
+	    if (calQ)
+	    {
+		LOG_NEW; CQScheduler* sched = new CQScheduler;
+		setSched(sched);
+	    }
+	    else
+	    {
+		LOG_NEW; DEScheduler* sched = new DEScheduler;
+		setSched(sched);
+	    }
+	}
+	DEBaseSched* dSched = (DEBaseSched*) scheduler();
 	dSched->setGalaxy(*galaxy());
 	dSched->relTimeScale = timeScale;
 	dSched->syncMode = syncMode;
