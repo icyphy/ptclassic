@@ -37,7 +37,7 @@ namespace ::tycho {
 
 ## LabelledOval
 #
-# A 3D rectangle class.
+# An oval with a label in it.
 #
 class ::tycho::LabelledOval {
     inherit ::tycho::Picture
@@ -51,11 +51,19 @@ class ::tycho::LabelledOval {
     # The text in the label
     common text
 
+    # The outline color of the oval
+    common outline
+
+    # The fill color of the oval
+    common fill
+
     ###################################################################
     ####                         public procs                      ####
 
-    proc text   {id canvas tx}
-    proc coords {id canvas args}
+    proc text    {id canvas tx}
+    proc outline {id canvas ot}
+    proc fill    {id canvas fi}
+    proc coords  {id canvas args}
 
 
     ###################################################################
@@ -80,6 +88,8 @@ class ::tycho::LabelledOval {
     array set methodtable [array get ::tycho::Picture::methodtable]
 
     set methodtable(text)      ::tycho::LabelledOval::text
+    set methodtable(outline)   ::tycho::LabelledOval::outline
+    set methodtable(fill)      ::tycho::LabelledOval::fill
     set methodtable(construct) ::tycho::LabelledOval::construct
     set methodtable(coords)    ::tycho::LabelledOval::coords
 
@@ -87,6 +97,8 @@ class ::tycho::LabelledOval {
     array set optiondefault [array get ::tycho::Picture::optiondefault]
 
     set optiondefault(-text) ""
+    set optiondefault(-fill) ""
+    set optiondefault(-outline) "black"
 }
 
 
@@ -101,6 +113,27 @@ body ::tycho::LabelledOval::text {id canvas tx} {
 }
 
 ##########################################################################
+## fill
+#
+# Set the fill configuration option.
+#
+body ::tycho::LabelledOval::fill {id canvas fi} {
+    set fill($id) $fi
+    $canvas itemconfigure $primary($id) -fill $fill($id)
+}
+
+##########################################################################
+## outline
+#
+# Set the outline configuration option.
+#
+body ::tycho::LabelledOval::outline {id canvas ot} {
+    set outline($id) $ot
+    $canvas itemconfigure $primary($id) -outline $outline($id)
+    $canvas itemconfigure $textitem($id) -fill $outline($id)
+}
+
+##########################################################################
 #### construct
 #
 body ::tycho::LabelledOval::construct {id tags canvas x0 y0 x1 y1 args} {
@@ -111,6 +144,7 @@ body ::tycho::LabelledOval::construct {id tags canvas x0 y0 x1 y1 args} {
 
     # Create the primary component. This is the displayed oval.
     set primary($id) [$canvas create oval $x0 $y0 $x1 $y1 \
+	    -fill $fill($id) -outline $outline($id) \
 	    -tags $tags]
 
     # Create the text label
@@ -131,8 +165,8 @@ body ::tycho::LabelledOval::coords {id canvas args} {
     }
 
     # Move the oval itself
-    assign x0 x1 y0 y1 $args
-    $canvas coords $primary($id) $x $x1 $y0 $y1
+    assign x0 y0 x1 y1 $args
+    $canvas coords $primary($id) $x0 $y0 $x1 $y1
 
     # Move the text item
     $canvas coords $textitem($id) [expr ($x0+$x1)/2] [expr ($y0+$y1)/2]
