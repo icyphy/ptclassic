@@ -52,7 +52,7 @@ static int pathSize = 0;          /*  Its size.  */
 static octId *visitedIdPath;      /*  Stack with the paths already met */
 static int visitedSize = 0;       /*  Its size.  */
 static octStatus nextNewTermInPath();
-/*static octStatus chooseTermCouple();*/
+/*static octStatus chooseTermCouple(); */
 static octId *scanNetBranches();
 
 static double
