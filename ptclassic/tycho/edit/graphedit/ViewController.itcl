@@ -59,8 +59,8 @@ class ::tycho::ViewController {
     #################################################################
     ####                     public methods                      ####
     
-    # Get or set an interactor by name
-    method interactor {name object}
+    # Initialize the context-sensitive popup menu
+    method contextmenu {item args}
 
     # Get or change the name of an item given its slate id
     method itemname {slateid {newname {}}}
@@ -78,16 +78,15 @@ body ::tycho::ViewController::constructor {args} {
 }
 
 #########################################################################
-#### interactor
+#### contextmenu
 #
-# Get or set an interactor by name.
+# Initialize the context-sensitive pop-up menu. This default
+# method does nothing. Subclasses should override to add
+# additional items to the menu according to the passed
+# item id
 #
-body ::tycho::ViewController::interactor {name {object {}}} {
-    if { $object != "" } {
-        @scope [info class] set _$name $object
-    } else {
-        @scope [info class] set _$name
-    }
+body ::tycho::ViewController::contextmenu {slateid args} {
+    ;
 }
 
 #########################################################################
