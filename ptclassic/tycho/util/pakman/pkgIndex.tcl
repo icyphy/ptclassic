@@ -31,7 +31,7 @@
 ##########################################################################
 
 
-package ifneeded Pakman 1.0 \
+package ifneeded pakman 1.0 \
 	[list source [file join $dir pakman.tcl]]
 
 
