@@ -120,7 +120,7 @@ test Path-3.1 {Test out mkdir and rm} {
     set myTmpDir [::tycho::tmpFileName myTmpDir .dir]
     ::tycho::mkdir  $myTmpDir
     set shouldExist [file isdirectory $myTmpDir]
-    ::tycho::rm -rf $myTmpDir
+    file delete -force $myTmpDir
     set shouldNotExist [file isdirectory $myTmpDir]
     list $shouldExist $shouldNotExist
 } {1 0}
