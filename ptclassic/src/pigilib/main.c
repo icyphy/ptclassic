@@ -21,7 +21,7 @@ Initialization code for pigiRpc.
 /* Global Vars */
 
 char *xDisplay;  /* display name passed by vem */
-char *version = "Pigi Version: 0.1";
+char *version = "Pigi Version: 0.2";
 
 
 static void
@@ -104,6 +104,10 @@ RPCFunction **array;
 {
     char buf[MSG_BUF_MAX], *envVar, *getenv();
 
+/* try to find myself, using getenv as a guru */
+    char* pigiRpcName = getenv("PIGIRPC");
+    if (pigiRpcName == 0) pigiRpcName = "pigiRpc";
+
     __main();  /* for c++ initialization */
 
     xDisplay = display;
@@ -126,6 +130,7 @@ RPCFunction **array;
 	RPCExit(-1);
     }
     CompileInit();
+    KcLoadInit(pigiRpcName);
     *array = CommandArray;
     PrintVersion();
     welcome_window ();
