@@ -64,6 +64,13 @@ public:
 	// Type hierarchy checking
 	int isA(const char*) const;
 
+        // Workaround for SGI Compiler Problem
+        int computeImplementationCost()
+          { return MotorolaSimTarget::computeImplementationCost(); }
+
+        const char* describeImplementationCost()
+          { return MotorolaSimTarget::describeImplementationCost(); }
+
 protected:
         /*virtual*/ void headerCode();
         /*virtual*/ void trailerCode();
