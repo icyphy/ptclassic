@@ -159,7 +159,7 @@ static char *q1 = "Cannot find star definition.  Define a new star?";
 /* 11/17/89 3/6/89 8/29/88
 */
 int 
-RpcMkStar(spot, cmdList, userOptionWord)
+RpcMkStar(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -228,10 +228,9 @@ GetTildePath(facetPtr, tPath)
 octObject *facetPtr;
 char *tPath;
 {
-    char *fullName, expanded_path[MAXPATHLEN], *dir, *edir;
+    char *fullName, expanded_path[MAXPATHLEN];
     int uid, n;
     struct passwd *pwent;
-    char *kludge;
 
     octFullName(facetPtr, &fullName);
 
@@ -339,7 +338,7 @@ AbsPath(path, abs_path)
 }
 
 int 
-RpcMkSchemIcon(spot, cmdList, userOptionWord)
+RpcMkSchemIcon(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -386,7 +385,7 @@ static dmTextItem item = {"Palette", 1, DM_WIDTH, "./user.pal", NULL};
 }
 
 int 
-RpcLookInside(spot, cmdList, userOptionWord)
+RpcLookInside(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -489,14 +488,13 @@ char* iconFile, *sourceFile, *domain;
 }
 
 int 
-RpcEditIcon(spot, cmdList, userOptionWord)
+RpcEditIcon(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
     octObject mFacet, inst;
     vemStatus status;
-    char *fullName;
     Window iconWindow; /* the vem window to edit icon in */
     wnOpts options; /* need this to set snap size of iconWindow */
 

@@ -80,9 +80,7 @@ char* name;
 int iterations;
 {
 	octObject facet;
-	octStatus status;
 	int editStatus;
-	Window newWindow;
 
 	ViInit(name);
 	ErrClear();
@@ -118,12 +116,11 @@ int iterations;
 /* 11/7/89 4/24/88
 */
 int 
-RpcRun(spot, cmdList, userOptionWord)
+RpcRun(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-    int n;
     octObject facet;
 
     ViInit("run");
@@ -163,7 +160,7 @@ ReRun()
 /* 12/29/89
 */
 int 
-RpcReRun(spot, cmdList, userOptionWord)
+RpcReRun(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;

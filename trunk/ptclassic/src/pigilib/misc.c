@@ -18,7 +18,7 @@ $Id$
 #define dmWidth 40
 
 int 
-Man(spot, cmdList, userOptionWord)
+Man(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -40,7 +40,7 @@ long userOptionWord;
 }
 
 int
-PrintFacet(spot, cmdList, userOptionWord)
+PrintFacet(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -74,7 +74,7 @@ long userOptionWord;
 
 
 int
-ERFilterDesign(spot, cmdList, userOptionWord)
+ERFilterDesign(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -93,7 +93,7 @@ long userOptionWord;
 }
 
 int
-WFilterDesign(spot, cmdList, userOptionWord)
+WFilterDesign(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -113,7 +113,7 @@ long userOptionWord;
 
 
 int 
-Profile(spot, cmdList, userOptionWord)
+Profile(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -121,7 +121,6 @@ long userOptionWord;
     static dmTextItem item = {"Star name", 1, 80, NULL, NULL};
     octObject facet, inst;
     vemStatus status;
-    char *info;
 
     ViInit("profile");
     ErrClear();
@@ -166,7 +165,7 @@ long userOptionWord;
 
 /* 6/27/89 = tries to open facet read-only first */
 int 
-RpcOpenFacet(spot, cmdList, userOptionWord)
+RpcOpenFacet(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -267,7 +266,7 @@ octId facetId;
 
 /* Load the star pointed to */
 int 
-RpcLoadStar(spot, cmdList, userOptionWord)
+RpcLoadStar(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;

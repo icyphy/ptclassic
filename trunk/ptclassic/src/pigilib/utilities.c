@@ -10,7 +10,7 @@ $Id$
 
 /* Invoke a standard facet to plot a signal */
 int 
-RpcPlotSignal(spot, cmdList, userOptionWord)
+RpcPlotSignal(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -21,7 +21,7 @@ long userOptionWord;
 
 /* Invoke a standard facet to plot a signal */
 int 
-RpcPlotCxSignal(spot, cmdList, userOptionWord)
+RpcPlotCxSignal(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -33,7 +33,7 @@ long userOptionWord;
 
 /* Invoke a standard facet to plot a DFT */
 int 
-RpcDFT(spot, cmdList, userOptionWord)
+RpcDFT(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -43,7 +43,7 @@ long userOptionWord;
 
 /* Invoke a standard facet to plot a DFT */
 int 
-RpcDFTCx(spot, cmdList, userOptionWord)
+RpcDFTCx(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;

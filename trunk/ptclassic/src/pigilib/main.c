@@ -18,6 +18,7 @@ Initialization code for pigiRpc.
 #include "ganttIfc.h"
 #include "options.h"
 #include "utilities.h"
+#include "err.h"
 
 /* Global Vars */
 
@@ -32,7 +33,7 @@ PrintVersion()
 }
 
 int
-Version(spot, cmdList, userOptionWord)
+Version(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -44,7 +45,7 @@ long userOptionWord;
 }
 
 int 
-ClearMarks(spot, cmdList, userOptionWord)
+ClearMarks(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -59,7 +60,7 @@ long userOptionWord;
 }
 
 int
-ExitApp(spot, cmdList, userOptionWord)
+ExitApp(spot, cmdList, userOptionWord) /* ARGSUSED */
 RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
@@ -114,11 +115,11 @@ char **argv;
 {
     pigiRpcName = argv[0];
     RPCMain (argc, argv);
-    exit (0);
+    return 0;
 }
 
 int
-UserMain(display, spot, cmdList, userOptionWord, array)
+UserMain(display, spot, cmdList, userOptionWord, array) /* ARGSUSED */
 char *display;
 RPCSpot *spot;
 lsList cmdList;
@@ -159,6 +160,8 @@ RPCFunction **array;
     vemPrompt();
     return(sizeof(CommandArray) / sizeof(RPCFunction));
 }
+
+void pr_accum_string();
 
 welcome_window ()
 {
