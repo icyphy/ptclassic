@@ -52,7 +52,8 @@ Some refinement by Brian Evans.
 // Define the name of the [incr tk] program: either itcl_wish or itkwish
 #define SH_ITCLTK_PROG "itkwish"
 
-// Sub-directory of $PTOLEMY that contains itcl files to source plus file names
+// Sub-directory of $PTOLEMY that contains itcl files to source 
+// plus file names
 #define SH_ITCLTK_SCRIPT "/tycho/kernel/CoreError.itcl"
 
 // Used so we can call the Tcl procedure emergencySave
@@ -71,7 +72,7 @@ extern "C" char **environ;
 static char *signalPath = NULL, *signalScript = NULL, *signalMsg = NULL;
 
 // Store size of signalMsg for use by abortHandling. We do this here 
-// since neither sizeof() nor strlen are reentrant.
+// since strlen may not be reentrant depending on vendor implementation.
 int signalMsgSize;
 
 // DoTychoSave
