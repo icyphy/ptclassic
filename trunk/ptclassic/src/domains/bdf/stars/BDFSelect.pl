@@ -11,15 +11,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	author { J. T. Buck }
 	location { BDF main library }
 	desc {
-If the value on the 'control' line is nonzero, N tokens (from the
-parameter N) from trueInput are copied to the output; otherwise, 
-N tokens from falseInput are copied to the output.
+If the value on the "control" line is nonzero, N particles (from the
+parameter N) from "trueInput" are copied to the output; otherwise, 
+N particles from "falseInput" are copied to the output.
 	}
 	defstate {
 		name { N }
 		type { int }
 		default { 1 }
-		desc { Number of data tokens to move per execution }
+		desc { Number of data particles to move per execution }
 	}
 	input {
 		name { trueInput }

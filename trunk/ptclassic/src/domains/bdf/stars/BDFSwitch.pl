@@ -11,17 +11,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	author { J. T. Buck }
 	location { BDF main library }
 	desc {
-Switches input tokens to one of two outputs, depending on
+Switch input particles to one of two outputs, depending on
 the value of the control input.  The parameter N gives the
-number of tokens read.  If the token read from control is true, the
-values are written to trueOutput; otherwise they are written to
-falseOutput.
+number of particles read in one firing.  If the particle read
+from the control input is TRUE, then the values are written
+to "trueOutput"; otherwise they are written to "falseOutput".
 	}
 	defstate {
 		name { N }
 		type { int }
 		default { 1 }
-		desc { Number of data tokens to move per execution }
+		desc { Number of data particles to move per execution }
 	}
 	input {
 		name { input }
