@@ -25,3 +25,14 @@ Universe :: print (int recursive) {
 		out += Galaxy::printVerbose();
 	return out;
 }
+
+// complete the simulation
+void Runnable::wrapupGal (Galaxy& g) {
+	g.wrapup();
+	for (int i=g.numberBlocks(); i>0; i--) {
+		Block& b = g.nextBlock();
+		if (b.isItAtomic()) b.wrapup();
+		else wrapupGal (b.asGalaxy());
+	}
+}
+	
