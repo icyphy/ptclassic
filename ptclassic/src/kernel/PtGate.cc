@@ -73,7 +73,7 @@ GateKeeper::~GateKeeper () {
 		// code here to search for and zap "this" from the list
 		// started by listHead
 		GateKeeper *p = listHead;
-		while (p->next && p->next != this)
+		while (p->next && p->next != p)
 			p = p->next;
 		if (p->next == 0) Error::error("GateKeeper error!");
 		else p->next = p->next->next;
