@@ -328,7 +328,9 @@ body ::tycho::FileBrowser::updateListbox {} {
 # directory, then the listbox is updated with the contents of the
 # directory and a 0 is returned. If the specified filename is an empty
 # string, then nothing is done and a zero is returned. If the specified
-# filename exists but is not readable, an error is triggered.
+# filename exists but is not readable, an error is triggered.  If the
+# filename does not exist as either a file or a directory, then the
+# specified command is invoked on that file.
 #
 body ::tycho::FileBrowser::checkFile {filename} {
 

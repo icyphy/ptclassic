@@ -29,8 +29,8 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-
 #######################################################################
+
 #### Options
 
 #### autoSaveInterval option
@@ -182,8 +182,15 @@ class ::tycho::File {
     # Register a file extension and an associated editor class.
     proc registerEditor {extension editorClass}
 	
+    # Save and close all open windows.
+    proc saveAndCloseAll {}
+	
     ##########################################################################
     ####                         protected variables                      ####
+
+    # This array stores window names indexed by file names so that
+    # if the same file is opened a second time, we can just raise the window.
+    protected common filesOpen
 
     #### modified variable
     # Indicates whether or not the file has been modified since it was
@@ -199,6 +206,10 @@ class ::tycho::File {
     # FIXME: This should be removed when we itk is fixed to understand
     # public variables.
     protected variable file "NoName"
+
+    # This is used to recall the previous filename associated with
+    # the window in case the name is changed.
+    protected variable previousfile
 
     ##########################################################################
     ####                  protected methods and procedures                ####
@@ -218,17 +229,10 @@ class ::tycho::File {
     ##########################################################################
     ####                         private variables                        ####
 
-    # This array stores window names indexed by file names so that
-    # if the same file is opened a second time, we can just raise the window.
-    private common filesOpen
-
     # This array stores the names of all currently active objects
     # of type File.  This is used to create crash recovery files.
     private common fileObjects
 
-    # This is used to recall the previous filename associated with
-    # the window in case the name is changed.
-    private variable previousfile
 }
 
 #########################################################################
@@ -397,7 +401,7 @@ body ::tycho::File::constructor {args} {
 	    -label Quit \
 	    -underline 0 \
 	    -accelerator "C-x C-c" \
-	    -command "$this exitprogram"
+	    -command "::tycho::TopLevel::exitprogram"
     
     # Undo the binding in the base class, where Return dismisses
     # the window.
@@ -516,7 +520,7 @@ body ::tycho::File::save {{name ""}} {
     } {
 	# For this base class, this method cannot actually save anything.
 	# Thus, we issue a warning.
-	warn "Tried to save to file: $filename.\nDon't know how to save."
+	warn "Tried to save to file: $filename.\nSave not implemented yet."
 	return 1
     }
 }
@@ -531,7 +535,10 @@ body ::tycho::File::save {{name ""}} {
 body ::tycho::File::saveAs {} {
     set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
 	    -text "Save As File:"]
-    return [saveAsFile $filename]
+    # Ignore if the user cancels
+    if {$filename != {}} {
+	return [saveAsFile $filename]
+    }
 }
 
 #####################################################################
@@ -545,7 +552,7 @@ body ::tycho::File::saveAsFile {filename} {
 	if [askuser "File \"$filename\" exists.  Overwrite?"] {
 	    removeBackupFiles
 	    configure -file $filename
-	    save
+	    return [save]
 	} {
 	    error {Did not save file}
 	}
@@ -554,7 +561,6 @@ body ::tycho::File::saveAsFile {filename} {
 	configure -file $filename
 	return [save]
     }
-    return 1
 }
 
 #####################################################################
@@ -610,7 +616,7 @@ body ::tycho::File::new {} {
 # insert the contents of that file at the insertion cursor.
 #
 body ::tycho::File::insertFile {} {
-    error "Don't know how to insert"
+    error "Sorry, insert file not implemented yet."
 }
 
 #####################################################################
@@ -618,7 +624,7 @@ body ::tycho::File::insertFile {} {
 # Print the data.  The default behavior is an error.
 #
 body ::tycho::File::print {} {
-    error "Don't know how to print"
+    error "Sorry, print not implemented yet."
 }
 
 #####################################################################
@@ -626,7 +632,7 @@ body ::tycho::File::print {} {
 # Evaluate the data.  The default behavior is an error.
 #
 body ::tycho::File::evaluate {} {
-    error "Don't know how to evaluate"
+    error "Don't know how to evaluate."
 }
 
 #####################################################################
@@ -634,7 +640,7 @@ body ::tycho::File::evaluate {} {
 # Revert to previously saved file.
 #
 body ::tycho::File::revert {} {
-    error "Don't know how to revert"
+    error "Sorry, revert not implemented yet."
 }
 
 #####################################################################
@@ -644,7 +650,7 @@ body ::tycho::File::revert {} {
 # type of data is contained in the file.
 #
 body ::tycho::File::seename {name} {
-    error "Don't know how to find point $name"
+    error "Sorry, seename not implemented. Don't know how to find point $name"
 }
 
 #####################################################################
@@ -761,6 +767,7 @@ body ::tycho::File::opentext {} {
 # extension that is given, use it to open the file.  Otherwise, just
 # open a plain text editor.  Return the name of the editor object.
 # If a window already exists editing this file, simply raise it instead.
+# New windows are always opened at the global scope.
 #
 body ::tycho::File::openContext {filename} {
     if {[info exists filesOpen] && \
@@ -774,12 +781,13 @@ body ::tycho::File::openContext {filename} {
 	set filename [checkForAutoSaveFiles $filename]
 	set ext [file extension $filename]
 	if {[info exists editors] && [info exists editors($ext)]} {
-	    set name [$editors($ext) [autoName .file] -file $filename]
+	    set name [uplevel #0 $editors($ext) [autoName .file] \
+		    -file $filename]
 	} {
-	    set name [Edit [autoName .edit] -file $filename]
+	    set name [uplevel #0 Edit [autoName .edit] -file $filename]
 	}
+	# FIXME: Should call update here, but this causes a segfault.
 	wm deiconify $name
-	update
 	raise $name
 	return $name
     }
@@ -822,12 +830,15 @@ body ::tycho::File::emergencySave {} {
 
 #####################################################################
 #### hyperjump
-# Given a string of the form "filename" or "filename#name", open
-# the corresponding file, and call "seename name".
+# Given a filename and a point within the file, open
+# the corresponding file, and call "seename $point".
 #
 body ::tycho::File::hyperjump {filename point} {
-    set win [File::openContext $filename]
-    $win seename $point
+    set win [uplevel #0 File::openContext $filename]
+    tkwait visibility $win
+    if {$point != {}} {
+	uplevel #0 $win seename $point
+    }
 }
 
 #####################################################################

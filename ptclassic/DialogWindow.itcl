@@ -69,6 +69,10 @@ class ::tycho::DialogWindow {
     # "questhead".  The default is a null string, which means no bitmap.
     itk_option define -bitmap bitmap Bitmap ""
 
+    #### text option
+    # The message to display at the top of the widget.
+    itk_option define -text text Text ""
+
     #### title option
     # The title for the window.
     itk_option define -title title Title "Tycho"
@@ -102,6 +106,60 @@ class ::tycho::DialogWindow {
     protected common commandResult
 }
 
+#########################################################################
+#### -bitmap option configuration
+# If a non-null bitmap option is given, insert the bitmap left of the text.
+# 
+configbody ::tycho::DialogWindow::bitmap {
+    if {$itk_option(-bitmap) != ""} {
+	if [info exists itk_component(bitmap)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(bitmap) configure -bitmap $itk_option(-bitmap)
+	} {
+	    # Component does not exist, so we create it.
+	    itk_component add bitmap {
+		label $itk_component(top).bitmap -bitmap $itk_option(-bitmap)
+	    } {
+		keep -background -cursor -foreground
+	    }
+	    pack $itk_component(bitmap) -side left
+	}
+    }
+}
+
+#########################################################################
+#### -text option configuration
+# If a non-null text option is given, insert the text.
+# 
+configbody ::tycho::DialogWindow::text {
+    if {$itk_option(-text) != ""} {
+	if [info exists itk_component(message)] {
+	    # Component already exists, so we just configure it.
+	    $itk_component(message) configure -text $itk_option(-text)
+	} {
+	    # Create the message window.
+	    itk_component add message {
+		message $itk_interior.top.message \
+			-width 15c \
+			-justify left \
+			-text $itk_option(-text)
+	    } {
+		keep -background -cursor -foreground -font
+	    }
+	    pack $itk_component(message) -side right -fill both
+	}
+    }
+}
+    
+#########################################################################
+#### -title option configuration
+# Set the window manager title and icon name.
+#
+configbody ::tycho::DialogWindow::title {
+    wm title $prefix $itk_option(-title)
+    wm iconname $prefix $itk_option(-title)
+}
+
 #####################################################################
 #
 body ::tycho::DialogWindow::constructor {args} {
@@ -110,11 +168,11 @@ body ::tycho::DialogWindow::constructor {args} {
     # have room for a bitmap, inserted in derived classes.
     #
     itk_component add top {
-	frame $itk_interior.top -bd 10
+	frame $itk_interior.top -border 10
     } {
 	keep -background -cursor
     }
-    pack $itk_component(top) -fill both -expand yes
+    pack $itk_component(top) -expand yes
     
     #
     # Create a frame to serve as a childsite.
@@ -126,18 +184,6 @@ body ::tycho::DialogWindow::constructor {args} {
     }
     pack $itk_component(childsite) -fill both -expand yes
 
-    #
-    # Create the message window.
-    #
-    itk_component add message {
-	message $itk_interior.top.message \
-		-width 15c \
-		-justify left
-    } {
-	keep -background -cursor -foreground -font -text
-    }
-    pack $itk_component(message) -side left -fill both
-    
     #
     # Create a separator
     #
@@ -162,50 +208,13 @@ body ::tycho::DialogWindow::constructor {args} {
     }
     pack $itk_component(bbox) -expand no
     
-    # FIXME:  The following does not work, and the current
-    # itk documentation is far too cryptic to figure out why.
-    # Add certain options to the option list so that setting
-    # them will affect the child widgets.
-    # itk_option add bbox.font bbox.background bbox.foreground
-    
-    # The following silliness appears to be necessary to be sure
-    # that the commandResult array exists.
+    # FIXME: In itcl2.0-beta, the following silliness appears to be
+    # necessary to enable commandResult to be an array.
     set commandResult(junk) ""
 
     # Process any unevaluated arguments.
     eval itk_initialize $args
     eval configure $args
-}
-
-#########################################################################
-#### title configuration
-# Set the window manager title and icon name.
-#
-configbody ::tycho::DialogWindow::title {
-    wm title $prefix $itk_option(-title)
-    wm iconname $prefix $itk_option(-title)
-}
-
-#########################################################################
-#### bitmap configuration
-# If a non-null bitmap option is given, insert the bitmap left of the text.
-# 
-configbody ::tycho::DialogWindow::bitmap {
-    if {$itk_option(-bitmap) != "" && ![info exists itk_component(bitmap)]} {
-	if [info exists itk_component(bitmap)] {
-	    # Component already exists, so we just configure it.
-	    $itk_component(bitmap) configure -bitmap $itk_option(-bitmap)
-	} {
-	    # Component does not exist, so we create it.
-	    itk_component add bitmap {
-		label $itk_component(top).bitmap -bitmap $itk_option(-bitmap)
-	    } {
-		keep -background -cursor -foreground
-	    }
-	    pack $itk_component(bitmap) \
-		    -side left -before $itk_component(message)
-	}
-    }
 }
 
 #########################################################################
@@ -217,9 +226,10 @@ configbody ::tycho::DialogWindow::title {
 
 #########################################################################
 #### addButton
-# Add a button to the button box at the bottom. The options are
-# -command, which specified the command to execute, and -width,
-# which specifies the desired width of the button.
+# Add a button to the button box at the bottom. The most useful options
+# are -command, which specified the command to execute, -text, which
+# specifies the label in the button, and -width, which specifies the
+# desired width of the button.
 #
 body ::tycho::DialogWindow::addButton {args} {
     eval [concat $itk_component(bbox) add $args]
@@ -295,11 +305,13 @@ body ::tycho::DialogWindow::execCommand {option args} {
 # </pre>
 # This will return 0 or 1.  The arguments after the class and instance
 # names are just passed directly to the constructor of the class.
+# The class is assumed to be defined in namespace ::tycho, so the
+# string "::tycho::" is prepended to the class name.
 #
 body ::tycho::DialogWindow::newModal {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
     set commandResult($instance) ""
-    eval $class $instance $args
+    eval ::tycho::$class $instance $args
     $instance centerOnScreen
     $instance freezeWindowSize
     # Do not continue in this thread until the window is dismissed.
@@ -322,10 +334,12 @@ body ::tycho::DialogWindow::newModal {class instance args} {
 # </pre>
 # The arguments after the class and instance names are just passed
 # directly to the constructor of the class.
+# The class is assumed to be defined in namespace ::tycho, so the
+# string "::tycho::" is prepended to the class name.
 #
 body ::tycho::DialogWindow::new {class instance args} {
     # FIXME: Should check to make sure the class is derived from this.
-    eval $class $instance $args
+    eval ::tycho::$class $instance $args
     $instance centerOnScreen
     $instance freezeWindowSize
     if [info exists commandResult($instance)] {
