@@ -320,6 +320,23 @@ proc lnub {list} {
 }
 
 ##########################################################################
+#### lnull list
+#
+# Test for a null list (or element). Written the way it is
+# because a) `==' cannot be used if the list starts with a number and b
+# llength is not so good because it traverses the whole list.
+#
+# The second case checks for the list being null but indicated
+# by empty braces. I'm confused as to why I need this...
+#
+# <i>Do not use this proc: it will be deleted soon.</i>
+#
+proc lnull {list} {
+    return [expr (! [string match "?*" $list]) \
+	         || [string match "{}" $list]]
+}
+
+##########################################################################
 #### lorder list order
 #
 # Order elements of a list in the same way as elements of another.
