@@ -3,6 +3,7 @@ defstar {
 	domain { SDF }
 	version { $Id$ }
 	author { John S. Davis, II }
+	acknowledge { Brian L. Evans }
 	location { SDF user contribution library }
 	copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.
@@ -12,7 +13,34 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	desc {
 Wireless Channel - Equivalent Complex Baseband Channel.
-This model takes multipath proprogation into account.
+This model takes multipath propagation into account.
+	}
+
+        explanation {
+The Wireless Channel Star assumes complex baseband input.
+The two "most" important parameters are \fIRMSDelaySpread\fR and
+the \fISymbolRate\fR (sample rate).
+Symbol \fIPeriods\fR (1/\fISymbolRate\fR) which are not significantly
+less than the \fIRMSDelaySpread\fR will result in an environment
+that is essentially not a multipath channel.
+
+We make the following assumptions.
+First, that the signal velocity is equal to the speed of light.
+Second, the signal propagation distance varies about the
+\fIMeanSeparationDistance\fR random phase variation.
+Note that this Star does not consider shadowing effects.
+
+This star is designed primarily for modeling indoor wireless 
+channels but can be adapted to outdoor mobile communication
+channels by changing the \fIChannelType\fR parameter from the 
+default of "Indoor" to "Outdoor."
+Given this change, the \fIDopplerSpread\fR (which is otherwise unused)
+will be incorporated via the coherence bandwidth to model the degree
+of time variation within the channel.
+One problem with this scheme is that high symbol rates will require
+very long simulations (millions of iterations with each iteration
+representing perhaps millionths of a second) in order to see the
+effects of the time variation.
 	}
 
 	hinclude { <stdlib.h>, "Wireless.h" }
@@ -88,7 +116,7 @@ This model takes multipath proprogation into account.
 	}
 
 	protected {
-		// Channel Paramters (From States Above)
+		// Channel Parameters (From States Above)
 		ChannelParameters params;
 
 		// Channel Filter
