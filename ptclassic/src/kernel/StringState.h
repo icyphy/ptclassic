@@ -28,7 +28,7 @@ class StringState : public State
 {
 public:
         // constructor
-        StringState() { val = "";}
+        StringState() : val(0) {}
 
         // parses initValue to set value
         void initialize();
@@ -36,12 +36,12 @@ public:
 	// don't redefine type(), baseclass version returns "STRING"
 
         // the value as a string
-	StringList currentValue() { return val;}
+	StringList currentValue() const;
 
 	// for use as a string in stars
 	operator const char* () { return val;}
 
-	State* clone () const {return new StringState;}
+	State* clone () const; // {return new StringState;}
 
 private:
 	const char* val;
