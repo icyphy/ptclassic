@@ -31,9 +31,13 @@ $Id$
 	////////////////////////////
 
 class Galaxy;
+class Target;
 
 class Scheduler {
 public:
+	// Constructor
+	Scheduler() : myTarget(0) {}
+
 	// setup sets up the schedule; it returns TRUE for success
 	// and FALSE for failure.
 	virtual int setup(Galaxy&) = 0;
@@ -78,6 +82,16 @@ public:
 	// identify itself
 	virtual const char* domain() const;
 
+	// set the target
+	void setTarget(Target& t);
+
+	// get the target
+	Target& getTarget ();
+
+	// Return a StringList with code that can be executed to
+	// effect a run.  In the base class, this just causes an error.
+	virtual StringList compileRun();
+
 protected:
 	// only schedulers can clear the halt flag.
 	static void clearHalt() {
@@ -96,6 +110,9 @@ private:
 
 	// tell user about interrupts
 	static void reportInterrupt();
+
+	// Target pointer
+	Target* myTarget;
 };
 
 #endif
