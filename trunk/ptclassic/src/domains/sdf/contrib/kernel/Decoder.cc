@@ -119,9 +119,8 @@ int Decoder::TraceBack() {
 				/* normalize, it's the most basic. */
 				/* StateMetricIndex is flipped here also. */
 void Decoder::Normalize() {
-  int state;
   float* NewState;
-  float MinMetric;
+  int state;
 
   if( StateMetricIndex == 0 ) {
     NewState = StateMetric[ 0 ];
@@ -132,13 +131,10 @@ void Decoder::Normalize() {
     StateMetricIndex = 0;
   }
 
-  for( state = 0; state < 64; state++ ) {
-    if( state == 0 )
-      MinMetric = NewState[ state ];
-    else {
-      MinMetric = ( NewState[ state ] < MinMetric ) ? 
-	NewState[ state ] : MinMetric;
-    }
+  float MinMetric = NewState[0];
+  for( state = 1; state < 64; state++ ) {
+    MinMetric = ( NewState[ state ] < MinMetric ) ?
+		NewState[ state ] : MinMetric;
   }
 
   for( state = 0; state < 64; state++ )
