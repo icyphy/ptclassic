@@ -47,6 +47,7 @@ SIMPLE_TESTS = \
 	testForest.itcl \
 	testLoader.itcl \
 	testGraph.itcl \
+	testDigraph.itcl \
 	testPath.itcl \
 	testStack.itcl
 
