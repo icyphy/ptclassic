@@ -61,4 +61,4 @@ include $(ROOT)/mk/no-compile.mk
 
 # This rule must be after include no-compile.mk so that get any sources
 # in the subdirs before generating the index
-sources:: tycho.idx introduction.html
+sources:: tycho.idx
