@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
                                                         COPYRIGHTENDKEY
 
 
- Programmer:  R. S. Stevens
+ The authors gratefully acknowledge the contributions of Richard Stevens.
  Date of creation: 7/20/94
 
  Methods for the DDF Scheduler
