@@ -38,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	ccinclude { <math.h> }
 	go {
-		const double DELTA 1.0e-9;
+		const double DELTA = 1.0e-9;
 		double x = input%0;
 		double sinInDenom = sin(x/2);
 		double length = double(N);
