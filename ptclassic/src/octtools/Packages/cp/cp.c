@@ -41,7 +41,7 @@ tr_stack *cp_stack;
  * in it, which we declare below
  */ 
 extern void cp_call
-	ARGS((int cell_num, double (*array)[2], int 32 x, int32 y, int type));
+	ARGS((int cell_num, double (*array)[2], int32 x, int32 y, int type));
 extern void cp_defdelete
 	ARGS((int cell_num));
 extern void cp_deffinish();
