@@ -102,12 +102,12 @@ public:
 	// Add at tail of list and get pointer.
 	Link * appendGet(Pointer a);    
 
-	// Remove pointer to link directly without searching;
-	// Return TRUE if link is found; return false otherwise
-	void directRemove(Link * a);	
-
 	// Remove a link from the list
         Link* removeLink(Link&);
+
+	// Erase a link from the list. Note: This method returns
+	// the element to which this Link points.
+        Pointer eraseLinkNotElement(Link&);
 
 	// Remove pointer by searching; return TRUE if removed
 	int searchAndRemove(Pointer a);  
