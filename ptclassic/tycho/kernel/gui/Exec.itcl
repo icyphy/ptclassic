@@ -68,6 +68,12 @@ class ::tycho::Exec {
 
     # Read from the file descriptor, and close if we are at eof.
     method readOrClose {fd}
+
+    ###################################################################
+    ####                         private variables                 ####
+
+    # The value of the cursor before we set it to the busy cursor.
+    private variable oldCursor
 }
 
 #######################################################################
@@ -152,7 +158,12 @@ body ::tycho::Exec::execProcess {} {
         set saveDir [pwd]
         cd $dirToExecFrom
     }
-    
+
+    # Set the busy cursor
+    set oldCursor [lindex [config -cursor] end]
+    config -cursor {watch}
+    ::tycho::safeUpdate $prefix
+
     # Open a non-blocking pipe from the command
     set fd [open [concat "|[get commandToExec]"] {RDONLY NONBLOCK}]
 
@@ -177,7 +188,7 @@ body ::tycho::Exec::readOrClose {fd} {
             ![winfo exists $itk_component(history)]} {
         # We have not yet created the history window, so do so now.
         itk_component add history {
-            ::tycho::Edit $itk_component(hull).history -textheight 30
+            ::tycho::Edit $itk_component(hull).history -textheight 15
         } {
             keep -readonly -textwidth -background \
                     -highlightbackground -highlightcolor -selectforeground \
@@ -195,6 +206,7 @@ body ::tycho::Exec::readOrClose {fd} {
     # If we are at the end of the file, close the descriptor.
     # See the man page for the fileevent tcl command.
     if [eof $fd] {
+        config -cursor $oldCursor
         close $fd
     }
 }
