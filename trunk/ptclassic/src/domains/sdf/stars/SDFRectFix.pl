@@ -8,6 +8,12 @@ If "period" is greater than zero, then the pulse is repeated with the
 given period.
 	}
         author { A. Khazeni }
+	copyright {
+Copyright (c) 1993, 1994 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	version { $Id$ }
 	location { SDF main library }
         explanation {

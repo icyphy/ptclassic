@@ -5,6 +5,12 @@ defstar {
 Output as a fixed-point number the "pos" input minus all "neg" inputs.
 	}
         author { A. Khazeni }
+	copyright {
+Copyright (c) 1993, 1994 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	version { $Id$ }
         location { SDF main library }
         input {

@@ -6,6 +6,12 @@ Output the sum of the fixed-point inputs as a fixed-point value.
 	}
 	version { $Id$ }
         author { A. Khazeni }
+	copyright {
+Copyright (c) 1993, 1994 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
         location { SDF main library }
 	inmulti {
 		name { input }
