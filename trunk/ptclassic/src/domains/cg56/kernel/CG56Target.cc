@@ -40,6 +40,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56Star.h"
 #include "FixState.h"
 
+int CG56Target :: compileCode() {
+        StringList assembleCmds = "asm56000 -b -l -A -oso ";
+        assembleCmds += filePrefix;
+        if (systemCall(assembleCmds,"Errors in assembly")!=0)
+                return FALSE;
+        return TRUE;
+}
+
 void CG56Target :: headerCode () {
     MotorolaTarget::headerCode();
     const char* path = expandPathName("$PTOLEMY/lib/cg56");
