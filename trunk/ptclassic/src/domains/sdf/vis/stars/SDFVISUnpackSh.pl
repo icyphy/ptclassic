@@ -25,6 +25,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { float }
        		desc { Output float type }
 	}
+	ccinclude {<vis_proto.h>}
 	defstate {
 	        name { scale }
 		type { float }
@@ -40,6 +41,8 @@ limitation of liability, and disclaimer of warranty provisions.
         }
 	go {
 
+	  int i;
+
 	  union vis_dreg {
 	    double dreg64;
 	    short  sreg16[NumOut];
@@ -51,12 +54,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	  packedin.dreg64 = In%0;
 
 	  /*scale output*/
-	  for (int i=NumOut;i>0;i--){
+	  for (i=NumOut;i>0;i--){
 	  outtmp[i-1] = double(scale)*double(packedin.sreg16[i-1]);
 	  }
 	  
 	  /*output unpacked values*/
-	  for (int i=NumOut;i>0;i--){
+	  for (i=NumOut;i>0;i--){
 	  Out%(i-1) << double(outtmp[i-1]);
 	  }
       	}
