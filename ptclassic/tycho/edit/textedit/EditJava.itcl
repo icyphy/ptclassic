@@ -210,7 +210,6 @@ body ::tycho::EditJava::evaluate {} {
 # $TYCHO/java, otherwise the Java package line is commented out.
 #
 body ::tycho::EditJava::fileTemplate {fileTemplate {newClassName {}}} {
-    puts "$fileTemplate $newClassName $className"
     ::tycho::EditProgram::fileTemplate $fileTemplate $newClassName
     set className $newClassName
 
