@@ -262,7 +262,7 @@ const char* MathematicaIfc::GetOutputBuffer() {
 }
 
 int MathematicaIfc::GetOutputBufferLength() {
-    return strlen(outputBuffer);
+    return outputBuffer.length();
 }
 
 const char* MathematicaIfc::GetErrorString() {
@@ -291,7 +291,7 @@ const char* MathematicaIfc::GetPrivateOutputBuffer() {
 }
 
 int MathematicaIfc::GetPrivateOutputBufferLength() {
-    return strlen(privateOutputBuffer);
+    return privateOutputBuffer.length();
 }
 
 // Methods to interface to the Mathematica process via MathLink
