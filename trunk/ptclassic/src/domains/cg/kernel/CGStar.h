@@ -48,6 +48,9 @@ public:
 	// Generate code.  No data is grabbed or put onto geodesics.
 	int fire();
 
+	 // Pointer to target
+	 CGTarget* myTarget() { return (CGTarget*)targetPtr; }
+
 	// class identification
 	int isA(const char*) const;
 
@@ -105,9 +108,6 @@ protected:
 	// Look up the value of state and return it as a StringList.
 	// A zero-length StringList is returned if there is no such State.
 	virtual StringList lookupVal(const char* name);
-
-	// Pointer to target
-        CGTarget* myTarget() { return (CGTarget*)targetPtr; }
 
 
 	// Update all PortHoles so that the offset is incremented by the
