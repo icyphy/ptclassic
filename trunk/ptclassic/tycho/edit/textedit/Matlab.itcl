@@ -106,6 +106,8 @@ body ::tycho::Matlab::constructor {args} {
     incr consoleCount 
   
     eval itk_initialize $args
+
+    displayer configure -title "Matlab Shell"
 }
 
 ###################################################################
