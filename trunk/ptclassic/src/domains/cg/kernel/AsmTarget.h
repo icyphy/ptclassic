@@ -51,7 +51,6 @@ class AsmTargetPtr;
 
 class AsmTarget : public CGTarget {
 private:
-	SequentialList spliceList;
 	void initStates();
 protected:
 	ProcMemory* mem;
@@ -69,13 +68,6 @@ protected:
 	// and handling of long delays.
 	int modifyGalaxy();
 
-	// splice in a new star, returning a pointer to its input
-	// porthole.  Spliced stars are assumed to have one input
-	// named "input" and one output named "output".
-	// dom is the domain of the new star.
-	PortHole* spliceStar(PortHole*, const char* name, int delayBefore,
-			     const char* dom);
-       
 	virtual void doInitialization(CGStar&);
 
 	// host through which the target should be accessed.

@@ -175,12 +175,10 @@ int AsmTarget::modifyGalaxy() {
 	if (warnIfNotConnected(g)) return FALSE;
 	g.initialize();
 
-/* hack to be removed */
-	SDFScheduler tempSched;
-	tempSched.setGalaxy(g);
-	SDFSchedule tempList;
-	tempSched.copySchedule(tempList);
-/* hack done */
+	// compute repetitions.
+	SDFScheduler* sched = (SDFScheduler*) scheduler();
+	sched->setGalaxy(g);
+	sched->repetitions();
 
 	if (Scheduler::haltRequested()) return FALSE;
 	int status = TRUE;
@@ -220,9 +218,11 @@ int AsmTarget::modifyGalaxy() {
 				// must have P_CIRC but writer does not
 				// need it.
 				if (!hasCirc(p)) {
-					PortHole* newP =
+					Block* newb =
 					   spliceStar(p, "CircToLin",0,dom);
-					if (!newP) return FALSE;
+					if (!newb) return FALSE;
+					PortHole* newP = 
+						newb->portWithName("input");
 					if (boundaryFlag) {
 					    p->aliasFrom()->setAlias(*newP);
 					}
@@ -232,9 +232,11 @@ int AsmTarget::modifyGalaxy() {
 				// My writer runs more often than me.
 				// It needs PB_CIRC, I do not.
 				if (!hasCirc(p->far())) {
-					PortHole* newP = 
+					Block* newb = 
 					   spliceStar(p, "LinToCirc",1,dom);
-					if (!newP) return FALSE;
+					if (!newb) return FALSE;
+					PortHole* newP = 
+						newb->portWithName("output");
 					if (boundaryFlag) {
 					    p->aliasFrom()->setAlias(*newP);
 					}
@@ -243,9 +245,11 @@ int AsmTarget::modifyGalaxy() {
  			else {
 				// nonintegral rate conversion, both need
 				// PB_CIRC
+				Block* newb;
 				PortHole* newP = p;
 				if (!hasCirc(newP)) {
-					newP = spliceStar(newP, "CircToLin", 0,dom);
+					newb = spliceStar(newP, "CircToLin", 0,dom);
+					newP = newb->portWithName("input");
 					if (!newP) return FALSE;
 				}
 				if (!hasCirc(newP->far())) {
@@ -258,61 +262,8 @@ int AsmTarget::modifyGalaxy() {
 	return status;
 }
 
-PortHole* AsmTarget::spliceStar(PortHole* p, const char* name,
-				int delayBefore, const char* dom)
-{
-	PortHole* pfar = p->far();
-	int ndelay = p->numTokens();
-	p->disconnect();
-	if (p->isItOutput()) {
-		PortHole* t = p;
-		p = pfar;
-		pfar = t;
-	}
-	
-	// p is now an input port.
-	Block* newb = KnownBlock::clone(name,dom);
-	if (newb == 0) {
-		Error::abortRun("failed to clone a ", name, "!");
-		return 0;
-	}
-	PortHole* ip = newb->portWithName("input");
-	PortHole* op = newb->portWithName("output");
-	if (ip == 0 || op == 0) {
-		Error::abortRun(name, " has the wrong interface for splicing");
-		LOG_DEL; delete newb;
-		return 0;
-	}
-
-	// connect up the new star
-	pfar->connect(*ip,delayBefore ? ndelay : 0);
-	p->connect(*op,delayBefore ? 0 : ndelay);
-
-	// save in the list of spliced stars
-	spliceList.put(newb);
-
-	// initialize the new star.  Name it and add it to the galaxy.
-	// using size of splice list in name forces unique names.
-	StringList newname("splice-");
-	newname << newb->className() << "-" << spliceList.size();
-	galaxy()->addBlock(*newb,hashstring(newname));
-	newb->initialize();
-
-	// check errors in initialization
-	if (Scheduler::haltRequested()) return 0;
-	if (delayBefore == 0) return ip;
-	else return op;
-}
-
 AsmTarget::~AsmTarget() {
 	LOG_DEL; delete uname; uname = 0;
-	ListIter next(spliceList);
-	Block* b;
-	while ((b = (Block*)next++) != 0) {
-		// prevent some galaxy types from deleting b twice.
-		galaxy()->removeBlock(*b);
-		LOG_DEL; delete b;
-	}
 }
 /*
 void AsmTarget :: outputLineOrientedComment(const char* prefix,
@@ -427,7 +378,7 @@ void AsmTarget :: writeCode(const char* name) {
 }
 
 void AsmTarget :: wrapup() {
-	if (int(runFlag) && !haltRequested()) {
+	if ((!inWormHole()) && int(runFlag) && !haltRequested()) {
 		if (compileCode() && !haltRequested()) {
 			if (loadCode() && !haltRequested()) runCode();
 		}
