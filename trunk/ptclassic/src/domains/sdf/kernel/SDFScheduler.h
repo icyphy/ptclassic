@@ -133,7 +133,7 @@ public:
 	float schedulePeriod;
 
 	// declare "untimed"
-	int amITimed();
+	int amITimed() {return FALSE ;}
 private:
 	// This is a kludge to help integrate SDFScheduler and
 	// DEScheduler together.  numIters says how many times
