@@ -60,17 +60,41 @@ class ::tycho::DataModel {
     #################################################################
     ####                     public methods                      ####
 
+    # Add a new item
+    method add {type name args}
+
+    # Access annotations
+    method annotation {mode name args}
+
+    # Set the value of an item
+    method assign {type name value}
+
     # Define an attribute of the model
     method attribute {args}
 
     # Remove all data
     method clear {}
 
-    # Describe the data in the model in TIM
-    method describe {}
+    # Describe the data as a string in TIM format
+    method describe {{type {}} {name {}} {prefix {}}}
 
-    # Load data from files into the model
-    method load {args}
+    # Check if an item exists
+    method exists {type name}
+
+    # Externalize the data into an image file
+    method externalize {fd}
+
+    # Get the names and data of each item matching a pattern
+    method get {type {pattern {}}}
+
+    # Load data from an image file
+    method internalize {filename}
+
+    # Get an attribute or attributes of an item
+    method itemcget {type name {attribute {}}}
+
+    # Configure attributes of an item
+    method itemconfigure {type name args}
 
     # Get an attribute of the model
     method modelcget {name}
@@ -78,11 +102,29 @@ class ::tycho::DataModel {
     # Configure attributes of the model
     method modelconfigure {args}
 
-    # Parse data into the model from a string
+    # Get the names of each item matching a pattern
+    method names {type {pattern {}}}
+
+    # Add a new type of item
+    method newtype {type args}
+
+    # Load data from a TIM string
     method parse {data}
 
     # Write the model to its files
     method save {args}
+
+    # Sort items in a given context
+    method sort {type context args}
+
+    # Get an attribute of an item type
+    method typecget {type attribute}
+
+    # Add or change default attributes of an item type
+    method typeconfigure {type args}
+
+    # Get the value of an item
+    method value {type name}
 
     #################################################################
     ####                   protected methods                     ####
@@ -102,6 +144,21 @@ class ::tycho::DataModel {
     # Describe an attribute
     private method _describeattribute {type name prefix}
 
+    # Add a new item
+    private method _add {type name arguments}
+
+    # Return a description of a single item
+    private method _describeitem {type name {prefix {}}}
+    
+    # Parse a nested item
+    private method _parsegroup {type name data}
+
+    # Verify that an item exists
+    private method _verify {type name}
+
+    # Verify that an item does not exist
+    private method _verifynot {type name}
+
     #################################################################
     ####                  private variables                    ####
 
@@ -116,6 +173,62 @@ class ::tycho::DataModel {
 
     # The safe interpreter provided for safe parsing
     private variable safeInterp [interp create]
+
+    # Default type attributes
+    private common _typeattributes {
+    	-describe {}
+    	-leafonly 0
+    	-nonroot 0
+    	-ordered 1
+    	-rootonly 0
+    	-strict 1
+    	-valued 0
+    }
+
+    # Annotations. This data is accessed only by the annotation{}
+    # method, and is intended to allow clients to save arbitrary data
+    # in the image file.
+    private variable _annot
+
+    # The data of each item. The index of each entry is a pair of its
+    # full type and full name. For example, the item *bar* of type B
+    # nested in *foo* of type *A* would have the index
+    # <code>{A B},{foo bar}</code>. The value of the entry is the
+    # item's value, if its type has the *-valued* attribute set, or
+    # null if not, followed by a list of attribute-value pairs. For
+    # example, the item just given may have the array entry
+    # <pre>
+    #    _data({A B} {foo bar}) -> {Hello -today yes -volume loud}
+    # </pre>
+    private variable _data
+
+    # The ordered children of a given type of an item. An element is
+    # placed into this array only for those types that have the
+    # *-ordered* attribute set in the call to newtype{}. The array
+    # indices are the pair of the full type and the name of the
+    # enclosing context. For example, *foo* might have the entry
+    # <pre>
+    #    _order({A B},foo) -> {bar baz}
+    # </pre>
+    private variable _order
+
+    #### _typeinfo
+    # This array contains a set of entries for each item type.
+    # It is set up and accessed by the newtype{} and
+    # typeconfigure{} methods.
+    # <pre>
+    #    _typeinfo()                  -> List of types in order defined
+    #    _typeinfo($type)             -> $type
+    #    _typeinfo($type,defaults)    -> Default attribute values
+    #    _typeinfo($type,describe)    -> Script to describe this item
+    #    _typeinfo($type,leafonly)    -> Must be a leaf?
+    #    _typeinfo($type,nonroot)     -> Cannot be a root item?
+    #    _typeinfo($type,ordered)     -> Are instances ordered?
+    #    _typeinfo($type,rootonly)    -> Must be a root?
+    #    _typeinfo($type,strict)      -> Are attributes checked strictly?
+    #    _typeinfo($type,valued)      -> Has a value?
+    # </pre>
+    private variable _typeinfo
 
     # Debugging only
     method debug {args} {
@@ -154,6 +267,69 @@ body ::tycho::DataModel::constructor {args} {
 	attribute $name $value
     }
     modelconfigure -class [info class]   ;# Override default
+}
+
+########################################################################
+#### add
+#
+# Add a new item. _type_ and _name_ are its full type
+# and full name. Following arguments are the item's value if
+# this type has a false value for its *-valued* attribute (as declared
+# in a call to newtype{}), and a list of attribute-value pairs.
+# Raise an error if the item already exists.
+#
+body ::tycho::NewInterchange::add {type name args} {
+    _verifynot $type $name
+    _add $type $name $args
+}
+
+########################################################################
+#### assign
+#
+# Assign a value to the item specified by _type_ and _name_, and
+# return the original value so that it can be used to construct
+# an undo command. Raise an error if the item does not exist or
+# if the type does not have its *-valued* attribute set.
+#
+body ::tycho::NewInterchange::assign {type name value} {
+    _verify $type $name
+    if !$_typeinfo([lindex $type end],valued) {
+        error "Type [lindex $type end] cannot have a value assigned"
+    }
+    set index [list $type $name]
+    set result [lindex $_data($index) 0]
+    set _data($index) [lreplace $_data($index) 0 0 $value]
+    return $result
+}
+
+########################################################################
+#### annotation
+#
+# Read or set an annotation. If two arguments are supplied, then
+# an annotation named _name_ will be written to the image
+# file generated by externalize{}, with the value given by the
+# second argument. If the annotation already exists, its value
+# will be silently over-written. If one argument is supplied, then
+# the current value of the annotation named _name_ will be returned,
+# or an error raised if the annotation does not exist.
+#
+# This method is provided solely as a means for clients to have
+# additional data stored into and loaded from an image of the data.
+# It cannot be used to annotate individual items, nor will annotations
+# be produced in a TIM description produced by the describe{} method.
+#
+body ::tycho::NewInterchange::annotation {name args} {
+    if { [llength $args] > 1 } {
+        error "One or two arguments expected"
+    }
+    if { $args == "" } {
+        if ![::info exists _annot($name)] {
+            error "Annotation does not exist: $name"
+        }
+        return $_annot($name)
+    } else {
+        set _annot($name) [lindex $args 0]
+    }
 }
 
 ########################################################################
@@ -199,15 +375,288 @@ body ::tycho::DataModel::clear {} {
 }
 
 ########################################################################
+#### clear
+#
+# Delete all data. Type information is not cleared -- if you
+# want to do that you should probably just create a new object.
+#
+set junk {
+    body ::tycho::NewInterchange::clear {} {
+	catch {unset _data}
+	catch {unset _order}
+	catch {unset _annot}
+	return
+    }
+}
+
+########################################################################
+#### delete
+#
+# Delete the item specified by _type_ and _name_. Raise an error if
+# the item does not exist.  This method deletes _only_
+# the specified item, and will not delete any child items.
+# This is done for two reasons. Firstly, clients are more likely
+# to know whether there are any children and thus avoid the test
+# for children (which, depending on the settings of the type
+# attributes, can be more or less expensive). Secondly, this method
+# needs to return data that can be used to construct an undo
+# command, and it is simpler to do this is the method does not
+# delete children. Thus, it is the client's responsibility to
+# decide whether and when to test for and delete child items.
+# This method returns the value and attributes of this item (prior
+# to deletion) if its type has *-valued* set, or just the list
+# of attributes if not.
+#
+body ::tycho::NewInterchange::delete {type name} {
+    _verify $type $name
+
+    set itype [lindex $type end]
+    set index [list $type $name]
+
+    # Remove from the ordering list
+    if { $_typeinfo($itype,ordered) } {
+        set context [lreplace $name end end]
+        # The ordered list may not exist
+        if [::info exists _order([list $type $context])] {
+            set _order([list $type $context]) \
+                    [::tycho::ldelete $_order([list $type $context]) \
+                    [lindex $name end]]
+        }
+    } 
+    # Remove the information about this item and return the old data
+    set result $_data($index)
+    unset _data($index)
+    return $result
+}
+
+########################################################################
 #### describe
 #
 # Return a string that describes the model. The description starts
 # with an emacs-style header string that contains the mode, class, and
 # version attributes, and the current date.
 #
-body ::tycho::DataModel::describe {} {
-    set result "# -*- [_header] -*-"
-    append result [$_data describe]
+set junk {
+    body ::tycho::DataModel::describe {} {
+	set result "# -*- [_header] -*-"
+	append result [$_data describe]
+	return $result
+    }
+}
+
+########################################################################
+#### describe
+#
+# Generate a TIM description. If no arguments are supplied, generate a
+# description of all the data. Annotations (see the annotation{} method)
+# are not produced into the output file. If the _type_ and _name_
+# arguments are supplied, generate a description of just the item
+# specified by _type_ and _name_. If the _prefix_ argument is also
+# supplied, prepend the prefix to each line produced. Note that this
+# method can safely be called to produce a description of a single 
+# item from within the *-describe* attribute of a type (see newtype{}).
+#
+body ::tycho::NewInterchange::describe {{type {}} {name {}} {prefix {}}} {
+    if { $type != "" && $name!= "" } {
+	_verify $type $name
+	_describeitem $type $name $prefix
+    } else {
+	set string ""
+	foreach type $_typeinfo() {
+	    # Get the root items of this type
+	    set items [names $type]
+	    
+	    # If the items are not ordered, sort anyway to improve layout
+	    if { ! $_typeinfo($type,ordered) } {
+		set items [lsort $items]
+	    }
+	    # Append a description of each to the result string
+	    if { $_typeinfo($type,describe) != "" } {
+		# Call external script to get description
+		foreach name $items {
+		    append string [uplevel #0 $_typeinfo($type,describe) \
+			    [list $type $name $prefix]
+		}
+	    } else {
+		foreach name $items {
+		    append string [_describeitem $type $name $prefix]
+		}
+	    }
+	}
+    	return $string
+    }
+}
+
+########################################################################
+#### exists
+#
+# Test if the item given by _type_ and _name_ exists, returning 1 if it
+# does and 0 if not.
+#
+body ::tycho::NewInterchange::exists {type name} {
+    ::info exists _data([list $type $name])
+}
+
+########################################################################
+#### externalize
+#
+# Write an image of the data to a file so that it
+# can be reconstructed rapidly at some later date. The string
+# format is "opaque," and should not be parsed or modified in
+# any way. Clients can use the annotation{} method
+# to add their own data to the output file. The argument is a
+# file descriptor so that clients can write comment data to
+# the start of the file if needed.
+#
+body ::tycho::NewInterchange::externalize {df} {
+    # This writes the contents of each internal array out as
+    # a huge list. I did try writing the array one element
+    # at a time: this gave larger files and took a fair
+    # bit longer to write out -- performance speedup
+    # when loading very large datasets was less then 5%.
+
+    puts $fd "# Item data\n"
+    puts $fd "array set _data \{[array get _data]\}\n\n"
+
+    puts $fd "# Item ordering\n"
+    puts $fd "array set _order \{[array get _order]\}\n\n"
+
+    puts $fd "# Annotations\n"
+    puts $fd "array set _annot \{[array get _annot]\}\n\n"
+}
+
+########################################################################
+#### get
+#
+# Return the names and data of item which have type _type_
+# and match the pattern _pattern_. See the names{} method
+# for the format of the _pattern_ arguments. The result is
+# a list of names as returned by names{}, interspersed by the
+# data of that item. Each data list starts with the item's value
+# if the item's type has *-valued* set, or null otherwise. Following
+# elements are an attribute-value list.
+# 
+# FIXME: Better error-checking needed.
+#
+body ::tycho::NewInterchange::get {type {pattern {}}} {
+    set p [llength $pattern]
+    set t [llength $type]
+    if { $p != $t && $p != $t-1 } {
+        error "Pattern \"$p\" cannot match type \"$t\""
+    }
+    if { $p == $t-1 } {
+        # The pattern argument is the context only
+        if $_typeinfo([lindex $type end],ordered) {
+            # Get ordered list (if it exists)
+            if [::info exists _order([list $type $context])] {
+                set result {}
+                foreach name $_order([list $type $context]) {
+                    lappend result \
+                            $name \
+                            $_data([list $type [concat $pattern $name]])
+                }
+                return $result
+            } else {
+                return {}
+            }
+        } else {
+            lappend pattern *
+        }
+    }
+    # Get the children from the _data array
+    set result {}
+    foreach {typename data} [array get _data [list $type $pattern]] {
+        lappend result [lindex [lindex $typename 1] end] $data
+    }
+    return $result
+}
+
+########################################################################
+#### internalize
+#
+# Load data from an image file generated by the externalize{}
+# method. The object must have the correct types defined. Raise an
+# error if the object already contains data. If the client has its
+# own data stored in the image, it can access it with the annotation{}
+# method after this method returns.
+# 
+# In general, there is no guarantee that an image file will produce
+# a correct model object. In particular, changes in internal format
+# or its types or attributes may cause an error. To prevent this from
+# happening, clients should produce and track a version number when
+# creating and storing image files, and check the version number against
+# either an "authoritative" TIM description of the data or an internal
+# version number.
+#
+body ::tycho::NewInterchange::internalize {filename} {
+    if { [array names _data] != "" } {
+        error "$errorname already contains data"
+    }
+    # Source the file
+    source $data
+}
+
+########################################################################
+#### itemcget
+#
+# Get an attribute or attributes of the item specified by _type_ and
+# _name_. If the _attribute_ argument is not supplied, return an
+# attribute-value list of all attributes. Otherwise return the value of
+# the specified attribute. Raise an error if the item does not exist or
+# if the attribute is unknown.
+#
+body ::tycho::NewInterchange::itemcget {type name {attribute {}}} {
+    _verify $type $name
+
+    set itype [lindex $type end]
+    set index [list $type $name]
+
+    array set opts [lreplace $_data($index) 0 0]
+    if { $attribute == "" } {
+	array get opts
+    } else {
+	if { ! [::info exists opts($attribute)] } {
+    	    error "Unknown attribute $attribute in $errorname"
+    	}
+    	return $opts($attribute)
+    }
+}
+
+########################################################################
+#### itemconfigure
+#
+# Configure the item specified by _type_ and _name_. Following arguments
+# are an attribute-value list. If the *-strict* attribute of the item's type
+# is set, than each attribute must have been defined in a call to newtype{}
+# or typeconfigure{} or an error will be raised. Otherwise, any attribute
+# can be given to the item. The returned value is a list of attribute names
+# and their values prior to this call, for use in building an undo command.
+# Raise an error if the item does not exist. 
+#
+body ::tycho::NewInterchange::itemconfigure {type name args} {
+    _verify $type $name
+    
+    set itype [lindex $type end]
+    set index [list $type $name]
+    set result [lreplace $_data($index) 0 0]
+
+    # Get defaults as an array
+    array set opts $_typeinfo($itype,defaults)
+    
+    if { ! $_typeinfo($itype,strict) } {
+        # If checking is turned off, just add the new attributes
+        array set opts $args
+    } else {
+        # Flag an error if a given attribute is not in the defaults
+        foreach {attribute value} $args {
+            if { ! [::info exists opts($attribute)] } {
+                # Error
+                error "Unknown attribute $attribute in $errorname"
+            }
+            set opts($attribute) $value
+        }
+        eval [list lappend _data($index)] [array get opts]
+    }
     return $result
 }
 
@@ -337,12 +786,177 @@ body ::tycho::DataModel::modelconfigure {args} {
 }
 
 ########################################################################
+#### names
+#
+# Return the names and data of items which have type _type_
+# and match the pattern _pattern_. The type is the full type
+# of the items to be found. The _pattern_ is a glob-style pattern
+# used to locate items, and must be supplied if the length of
+# _type_ is greater than one. If the length of _type_ is _n_,
+# then _pattern_ must either be
+# <ul>
+# <li>A context -- that is, a list of length <i>n - 1</i> not
+# containing any pattern characters. All items in this context
+# with the specified type are returned. If the type is ordered,
+# the returned items are in order.
+# <li>A name pattern -- that is, a context with a glob-style
+# pattern appended. All items in the context that match the
+# pattern are returned. The result is _not_ ordered, regardless
+# of whether this type is ordered or not.
+# </ul>
+# In either case, the names within that context are returned
+# (that is, the local names, not the full names).
+# 
+# FIXME: Better error-checking
+#
+body ::tycho::NewInterchange::names {type {pattern {}}} {
+    set p [llength $pattern]
+    set t [llength $type]
+    if { $p != $t && $p != $t-1 } {
+        error "Pattern \"$pattern\" cannot match type \"$type\""
+    }
+    if { $p == $t-1 } {
+        # The pattern argument is the context only
+        if $_typeinfo([lindex $type end],ordered) {
+            # Get ordered list (if it exists)
+            if [::info exists _order([list $type $context])] {
+                return $_order([list $type $context])
+            } else {
+                return {}
+            }
+        } else {
+            lappend pattern *
+        }
+    }
+    # Get the children from the _data array
+    set result {}
+    foreach typename [array names _data [list $type $pattern]] {
+        lappend result [lindex [lindex $typename 1] end]
+    }
+    return $result
+}
+
+########################################################################
+#### newtype
+#
+# Add a new item type. The first argument is the type of the item.
+# Following arguments are attribute names and their default values. The
+# following special attributes are recognised:
+# <ul>
+# <li><b>-describe</b> _script_: If not null, a script that will be 
+# evaluated to describe each item of this type. The item type and name,
+# and a prefix string, will be appended to the script, and the script
+# evaluated in the global scope. (Note that these are the same arguments
+# as required by the describe{} method.) The script must return a
+# valid description of the item or null (in which case no description
+# of that item will be produced by describe{}). The default is null.
+# <li><b>-leafonly</b> _bool_: If true, items of this type most be
+# a leaf item -- that is, they cannot contain nested items.
+# The default is false.
+# <li><b>-nonroot</b> _bool_: If true, items of this type cannot
+# be a root item. The default is false.
+# <li><b>-ordered</b> _bool_: If true, items of this type are ordered
+# within a given context. That is, the names{} and get{} methods
+# return items in the same order in which they were added.
+# The default is true.
+# <li><b>-rootonly</b> _bool_: If true, items of this type must
+# be a root item. The default is false.
+# <li><b>-strict</b> _bool_: If true, the attributes of this type
+# are limited to those that are declared with typeconfigure{}
+# or newtype{}. If not true, any attributes can be given to
+# items of this type. The default is true.
+# <li><b>-valued</b> _bool_: If true, items of this type have
+# a value. If not true, no value will be parsed or printed in the
+# external format. The default is false.
+# </ul>
+# Any other attribute names become an attribute of this type. For
+# example, the call
+# <pre>
+#     $NewInterchange newtype foo -ordered 1 -bar hello
+# </pre>
+# will create the type *foo* and make instances of it ordered.
+# In addition, any item of type *foo* can accept the attribute
+# *-bar*, which will have the default value "Hello." An error
+# will be raised if the type already exists.
+#
+# Some of the type attributes affect efficiency of certain attributes.
+# These following effects should be considered if performance
+# problems arise:
+# <ul>
+# <li> Items that cannot accept nested items should have the
+# *-leafonly* attribute set, as this makes printing large models faster.
+# <li> The *-ordered* attribute makes the names{}, get{}, and
+# describe{} (for nested items) methods faster. However, the
+# delete{} method is slower.
+# <li> The *-strict* attribute slows down parsing a TIM description.
+# It can be turned off if less error-checking is acceptable.
+# </ul>
+#
+body ::tycho::NewInterchange::newtype {type args} {
+    if [::info exists _typeinfo($type)] {
+        error "Item type $type already exists"
+    }
+    lappend _typeinfo() $type
+
+    array set opts $_typeattributes
+    array set opts $args
+
+    # Set special attributes
+    set _typeinfo($type) $type
+    foreach {a _} $_typeattributes {
+        set _typeinfo($type,[string trim $a "-"]) $opts($a)
+        unset opts($a)
+    }
+    
+    # Set defaults
+    set _typeinfo($type,defaults) [array get opts]
+}
+
+########################################################################
 #### parse
 #
-# Load data from a string into the model.
+# Read data from a string containing a TIM representation of a
+# model. Each non-comment line must start with the name of a type
+# defined for this object.The item name follows, then the item value
+# if it is a valued type, and then attributes and nested items. If
+# the *-loadcommand* attribute is set, then the type, name, and arguments
+# are appended to that attribute and the whole lot is evaluated in the global
+# scope: this is typically used so that a client can "intercept" the call
+# to add an item. Otherwise, the item and its data is added. An error is
+# raised if the object already contains data.
 #
-body ::tycho::DataModel::parse {data} {
-    $_data parse $data
+body ::tycho::NewInterchange::parse {data} {
+    if { [array names _data] != "" } {
+        error "$errorname already contains data"
+    }
+    # Scan the string by dropping lines.
+    append $data "\n"
+    while { $data != "" } {
+        # Get the next line
+        regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+        # Process if not a space or comment line
+        if ![regexp "^\[ \t\]*#" $line] {
+            # Get lines until a complete command 
+            set command $line
+            while { ! [::info complete $command] && $data != "" } {
+                regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+                append command "\n" $line
+            }
+            # Check that the command is legal
+            if ![::info exists _typeinfo($type)] {
+                error "Illegal type: $type"
+            }
+            if $_typeinfo($type,nonroot) {
+                error "$type cannot be a root"
+            }
+            # Evaluate the command
+            if { $loadcommand != "" } {
+                uplevel #0 $loadcommand $command
+            } else {
+                _add $type $name $args
+            }
+        }
+    }
 }
 
 ########################################################################
@@ -423,6 +1037,95 @@ body ::tycho::DataModel::save {args} {
     return ""
 }
 
+########################################################################
+#### sort
+#
+# Sort the items in a given context. This method can be called
+# only if the given _type_ has the *-ordered* flag set. If so,
+# the ordering of the items in _context_ is changed to that produced
+# by performing an *lsort* on the item names, with the following
+# arguments passed to the Tcl lsort{} procedure.
+#
+# FIXME: Error-checking
+#
+body ::tycho::NewInterchange::sort {type context args} {
+    set itype [lindex $type end]
+    set index [list $type $context]
+
+    if { ! $_typeinfo($itype,ordered) } {
+        error "Item type \"$itype\" is not ordered"
+    }
+    # Sort the ordering list as long as there are children
+    if [::info exists _order($index)] {
+        set _order($index) [eval lsort $args [list $_order($index)]]
+    }
+}
+
+########################################################################
+#### typecget
+#
+# Get attributes of an item type. Raise an error if the type is
+# invalid or the attribute is unknown. This method accesses attributes
+# defined for the type as well as special attributes such as
+# *-ordered* and *-valued*.
+# 
+body ::tycho::NewInterchange::typecget {type attribute} {
+    if ![::info exists _typeinfo($type)] {
+        error "Unknown type: $type"
+    }
+    array set opts $_typeattributes
+    if [::info exists opts($attribute)] {
+        return $_typeinfo($type,[string trimleft $attribute "-"])
+    }
+    array set opts $_typeinfo($type,defaults)
+    if [::info exists opts($attribute)] {
+        return $opts($attribute)
+    }  
+    error "Unknown attribute: $attribute"
+}
+
+########################################################################
+#### typeconfigure
+#
+# Add attributes to an item type or change default values. Raise an error
+# if the type does not exist or if there is already data of this type.
+# The latter restriction prevents type attributes being changed once data
+# is present in order to a) ensure consistency and b) keep the code
+# manageable. The same special attributes as for newtype{} are recognised.
+#
+body ::tycho::NewInterchange::typeconfigure {type args} {
+    if ![::info exists _typeinfo($type)] {
+        error "Unknown type: $type"
+    }
+    if { [array names _data [list [list * $type] *]] != "" } {
+        error "Cannot change attributes of type $type: data exists"
+    }
+    array set opts $_typeinfo($type,defaults)
+    array set opts $args
+    foreach {a _} $_typeattributes {
+        if [::info exists opts($a)] {
+            set _typeinfo($type,[string trimleft $a "-"]) $opts($a)
+            unset opts($a)
+        }
+    }
+    set _typeinfo($type,defaults) [array get opts]
+}
+
+########################################################################
+#### value
+#
+# Get the value of the item specified by _type_ and _name_. Raise an
+# error if the item does not exist or if this item's type has the
+# *-valued* attribute set false.
+#
+body ::tycho::NewInterchange::value {type name} {
+    _verify $type $name
+    if !$_typeinfo([lindex $type end],valued) {
+        error "Type [lindex $type end] is not valued"
+    } 
+    lindex $_data([list $type $name]) 0
+}
+
 #####################################################################
 #####################################################################
 ####                     protected methods                       ####
@@ -447,7 +1150,57 @@ body ::tycho::DataModel::_header {} {
 
 #####################################################################
 #####################################################################
-####                      private methods                        ####
+####                       private methods                       ####
+
+########################################################################
+#### _add
+#
+# Add a new item. _type_ and _name_ are its full type
+# and full name. The third argument is a list containing the item
+# value if its *-valued* attribute (as declared in a call to newtype{})
+# it set, followed by attribute-value pairs.
+#
+body ::tycho::NewInterchange::_add {type name arguments} {
+    set itype [lindex $type end]
+    set index [list $type $name]
+
+    # Add it to the list of ordered children of its context
+    if $_typeinfo($itype,ordered) {
+        set context [lreplace $name end end]
+        lappend _order([list $type $context]) [lindex $name end]
+    }
+    # Process value
+    if $_typeinfo($itype,valued) {
+        set _data($index) [lindex $arguments 0]
+        set arguments [lreplace $arguments 0 0]
+    } else {
+        set _data($index) {{}}
+    }
+    # Get a nesting group if there is one
+    if { [llength $arguments] & 1 } {
+    	set nesting [lindex $arguments end]
+    	set arguments [lreplace $arguments end end]
+    } else {
+    	set nesting {}
+    }
+    # Process attributes
+    if { $arguments != "" } {
+	array set opts $_typeinfo($itype,defaults)
+	if $_typeinfo($itype,strict) {
+	    foreach {opt val} $arguments {
+		if ![::info exists opts($opt)] {
+		    error "Unknown attribute $opt of $itype \"$name\""
+		}
+	    }
+	}
+	array set opts $arguments
+	eval [list lappend _data($index)] [array get opts]
+    }
+    # Process nesting group
+    if { $nesting != "" } {
+        _parsegroup $type $name $nesting
+    }
+}
 
 ########################################################################
 #### _describeattribute
@@ -464,5 +1217,183 @@ body ::tycho::DataModel::_describeattribute {type name prefix} {
     } else {
 	set result $prefix
 	lappend result $value
+    }
+}
+
+########################################################################
+#### _describeitem
+#
+# Return a string describing the item given by _type_ and _name_
+# in the TIM format. This method performs no error-checking, so
+# the item must exist or an obscure Tcl error will be raised.
+# The _prefix_, if supplied, is prepended to each line. The
+# description will be wrapped at an arbitrary line length of
+# 72 characters where possible.
+#
+# FIXME: Add line wrapping
+#
+body ::tycho::NewInterchange::_describeitem {type name {prefix {}}} {
+    set itype [lindex $type end]
+    set index [list $type $name]
+
+    # Figure out what kind of printout to do, according to whether
+    # I have children or not
+    set nested [expr { !$_typeinfo($itype,leafonly) \
+            && [array names _data [list [concat $type *] [concat $name *]]]\
+            != "" }]
+
+    # Start string with local type followed by local name
+    set string $prefix$itype
+    lappend string [lindex $name end]
+    
+    # If this type has a value, append that
+    if { $_typeinfo($itype,valued) } {
+        lappend string [lindex $_data($index) 0]
+    }
+    set attributes [lreplace $_data($index) 0 0]
+
+    # Get default attributes
+    array set dflt $_typeinfo($itype,defaults)
+
+    # If I have no children, print my attributes only
+    if { ! $nested } {
+        foreach {opt val} $attributes {
+            if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+                lappend string $opt $val
+            }
+        }
+        # FIXME: Add line wrapping here
+    } else {
+        # If I have children, then print enclosing braces, then
+        # attributes, then child items
+        set childprefix $prefix
+        append childprefix "    "
+        append string " \{\n"
+        
+        # Output attributes
+        foreach {opt val} $attributes {
+            if { ! [::info exists dflt($opt)] || $dflt($opt) != $val } {
+                append string $childprefix
+                lappend string $opt $val
+                append string "\n"
+            }
+        }
+        # Output children
+        foreach subtype $_typeinfo() {
+            set children [names [concat $type $subtype] $name]
+            # Sort if not ordered, to improve readability
+            if { ! $_typeinfo($subtype,ordered) } {
+                set children [lsort $children]
+            }
+            foreach child $children {
+                append string [_describeitem \
+                        [concat $type $subtype] \
+                        [concat $name $child] $childprefix]
+            }
+        }
+        append string "$prefix\}"
+    }
+    return $string\n
+}
+
+########################################################################
+#### _parsegroup
+#
+# Parse a string representing the contents of the TIM item given by
+# _type_ and _name_. The _data_ is a string containing, on each line,
+# a list of attribute names and values, or a nested item declaration.
+#
+body ::tycho::NewInterchange::_parsegroup {type name data} {
+    set itype [lindex $type end]
+    set index [list $type $name]
+
+    # Check for null string and trim white space
+    if  { [set data [string trimleft $data " \t\n"]] == "" } {
+        return
+    }
+    # Parsing is easier if there's always an end-of line
+    append data "\n"
+
+    # Scan the string for attributes.
+    while { $data != "" } {
+        # Get the next line
+        regexp "^(\[^\n\]*)\[ \t\n\]*(.*)" $data _ line data
+        if [string match {#*} $line] {
+            continue   ;# space or comment line
+        } elseif [string match {-*} $line] {
+            array set opts $line
+        } else {
+            break
+        }
+    }
+    # Set the collected attributes, checking if strict attributes
+    array set dflt $_typeinfo($type,defaults)
+    if $_typeinfo($itype,strict) {
+        foreach opt [array names opts] {
+            if ![::info exists dflt($opt)] {
+                error "Unknown attribute $attribute of $itype \"$name\""
+            }
+        }
+    }
+    array set dflt [array get opts]
+    eval [list lappend _data($index)] [array get dflt]
+
+    # Process nested items. Note that we already have a line from before.
+    while 1 {
+	if [string match {#*} $line] {
+            # Discard space or comment line
+            continue
+        } else {
+            # Get lines until a complete command 
+            set command $line
+            while { ! [::info complete $command] && $data != "" } {
+                regexp "^(\[^\n\]*)\n(.*)" $data _ line data
+                append command "\n" $line
+            }
+            # Check that the command is legal
+            set t [lindex $command 0]
+            set n [lindex $command 1]
+            set command [lreplace $command 0 1]
+            if ![::info exists _typeinfo($t)] {
+                error "Illegal type: $t"
+            }
+            if $_typeinfo($t,rootonly) {
+                error "Type $t cannot be nested"
+            }
+            # Evaluate the command
+            if { $loadcommand != "" } {
+                uplevel #0 $loadcommand _$command
+            } else {
+		_add [concat $type $t] [concat $name $n] $command
+            }
+        }
+        # Get the next line, breaking out of loop if done
+        if ![regexp "^(\[^\n\]*)\n\[ \t\n\]*(.*)" $data _ line data] {
+            break
+        }
+    }
+}
+
+########################################################################
+#### _verify
+#
+# Verify that the item given by _type_ and _name_ exists, raising an
+# error if it does not.
+#
+body ::tycho::NewInterchange::_verify {type name} {
+    if ![::info exists _data([list $type $name])] {
+    	error "Unknown [lindex $type end] \"$name\" in $errorname"
+    }
+}
+
+########################################################################
+#### _verifynot
+#
+# Verify that no item with the given _type_ and _name_ exists, raising
+# an error if it does.
+#
+body ::tycho::NewInterchange::_verifynot {type name} {
+    if [::info exists _data([list $type $name])] {
+    	error "A [lindex $type end] \"$name\" already exists in $errorname"
     }
 }
