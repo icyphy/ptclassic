@@ -47,8 +47,6 @@ public:
 
     /*virtual*/ void setup();
 
-    /*virtual*/ int computeSchedule(Galaxy&);
-
     // Pass through functions
     
     /*virtual*/ int run();
@@ -62,8 +60,6 @@ public:
     /*virtual*/ StringList displaySchedule();
 
     /*virtual*/ void compileRun();
-
-    /*virtual*/ void prepareCodeGen();
 
     /*virtual*/ int dagNodes() const;
 
