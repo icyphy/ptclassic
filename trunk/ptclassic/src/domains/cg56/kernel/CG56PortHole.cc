@@ -14,5 +14,24 @@ $Id$
 #pragma implementation
 #endif
 
-// nothing here now.
+#include "CG56Connect.h"
 
+int InCG56Port :: isItInput() const { return TRUE; }
+int OutCG56Port :: isItOutput() const { return TRUE; }
+int MultiInCG56Port :: isItInput() const { return TRUE; }
+int MultiOutCG56Port :: isItOutput() const { return TRUE; }
+
+// Dummy
+int MultiCG56Port :: someFunc() { return 1; }
+
+PortHole& MultiInCG56Port :: newPort () {
+        PortHole& p = *new InCG56Port;
+        p.numberTokens = numberTokens;
+        return installPort(p);
+}
+
+PortHole& MultiOutCG56Port :: newPort () {
+        PortHole& p = *new OutCG56Port;
+        p.numberTokens = numberTokens;
+        return installPort(p);
+}

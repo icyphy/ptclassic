@@ -25,3 +25,18 @@ void CG56Star::fire() {
 	// Issue a comment here giving the full name of the star
 	AsmStar::fire();
 }
+
+// const char* CG56Star::format(unsigned addr) {
+	// static char* tmp = "ADDRESS";
+	// return tmp;
+// }
+
+// The following is defined in CG56Domain.cc -- this forces that module
+// to be included if any CG56 stars are linked in.
+extern const char CG56domainName[];
+
+const char* CG56Star :: domain () const { return CG56domainName;}
+
+// isa
+
+ISA_FUNC(CG56Star, CGStar);

@@ -34,8 +34,16 @@ extern const Attribute A_YMEM;
 extern const Attribute A_XMEM_BIT;
 
 class CG56Star : public AsmStar {
+protected:
+	// const char* format(unsigned addr);
 public:
+	// my domain
+	const char* domain() const;
+
 	void fire();
+
+	// class identification
+	int isA(const char*) const;
 };
 
 #endif
