@@ -55,3 +55,8 @@ unsigned AsmPortHole::baseAddr() const {
 	return geo().addr();
 }
 
+int InAsmPort :: isItInput() const {return TRUE; }
+int OutAsmPort :: isItOutput() const {return TRUE; }
+int MultiInAsmPort :: isItInput() const {return TRUE; }
+int MultiOutAsmPort :: isItOutput() const {return TRUE; }
+
