@@ -122,6 +122,7 @@ ITCL_SRCS = \
 	Stack.itcl \
 	StarLibrary.itcl \
 	StatusBar.itcl \
+	StylePreferences.itcl \
 	StyleSheet.itcl \
 	Subpanel.itcl \
 	TclShell.itcl \
