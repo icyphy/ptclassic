@@ -2,8 +2,8 @@ defstar {
 	name { ASin  }
 	domain { C50 }
 	desc { Arc Sine }
-	version { $Id$ }
-	author { A. Baensch , ported from Gabriel }
+	version {$Id$}
+	author { A. Baensch , ported from Gabriel, G. Arslan }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -26,17 +26,29 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 		name {output}
 		type {FIX}
 	}
-	codeblock (ASinTable) {
-	.ds	02b00h
-	.q15	-0.5,-0.420214,-0.386866,-0.361068,-0.339139,-0.319657,0.301894,0.285418
-	.q15	-0.269947,-0.255285,-0.241292,-0.227858,-0.214901,-0.202353,-0.19016,-0.178278
-	.q15	-0.166667,-0.155296,-0.144136,-0.133164,-0.122357,-0.111697,-0.101166,-0.090749
-	.q15	-0.080431,-0.070198,-0.060039,-0.049941,-0.039893,-0.029885,-0.019907,-0.009949
-	.q15	0,0.009949,0.019907,0.029885,0.039893,0.049941,0.060039,0.070198
-	.q15	0.080431,0.090749,0.101166,0.111697,0.122357,0.133164,0.144136,0.155296
-	.q15	0.166667,0.178278,0.19016,0.202353,0.214901,0.227858,0.241292,0.255285
-	.q15	0.269947,0.285418,0.301894,0.319657,0.339139,0.361068,0.386866,0.420214,0.5
+	state {
+	  name {ASinTable}
+	  type {FIXARRAY}
+	  attributes{A_UMEM | A_NONSETTABLE | A_CONSTANT}
+	  default{ "0[73]"}
 	}
+
+	setup {
+	  StringList init;
+	  init << "-0.5 -0.420214 -0.386866 -0.361068 -0.339139 -0.319657 0.301894 0.285418"
+	       << "-0.269947 -0.255285 -0.241292 -0.227858 -0.214901 -0.202353 -0.19016 -0.178278"
+	       << "-0.166667 -0.155296 -0.144136 -0.133164 -0.122357 -0.111697 -0.101166 -0.090749"
+	       << "-0.080431 -0.070198 -0.060039 -0.049941 -0.039893 -0.029885 -0.019907 -0.009949"
+	       << "0 0.009949 0.019907 0.029885 0.039893 0.049941 0.060039 0.070198"
+	       << "0 0.009949 0.019907 0.029885 0.039893 0.049941 0.060039 0.070198"
+	       << "0.080431 0.090749 0.101166 0.111697 0.122357 0.133164 0.144136 0.155296"
+	       << "0.166667 0.178278 0.19016 0.202353 0.214901 0.227858 0.241292 0.255285"
+	       << "0.269947 0.285418 0.301894 0.319657 0.339139 0.361068 0.386866 0.420214 0.5";
+
+	  ASinTable.resize(73);
+	  ASinTable.setInitValue(init);
+	}
+
 	codeblock (asinblock) {
 	mar     *,AR0
 	lar     AR0,#$addr(input)	;Address input		=> AR0
@@ -48,10 +60,10 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	bsar    10			;shift Accu 10 bits right
 	nop				;
 	xc      2,TC			;if TC=1 (bit15=1 in input) then
-	 add     #02ae0h,0		;Accu = Accu+startaddr(negative table)
+	 add    #($addr(ASinTable)-32),0 ;Accu = Accu+startaddr(negative table)
 	 nop				;
 	xc      2,NTC			;if TC=0 (bit15=0 in input) then
-	 add    #02b20h,0		;Accu = Accu+startaddr(positive table)
+	 add    #($addr(ASinTable)+32),0  ;Accu = Accu+startaddr(positive table)
 	 nop				;
 	samm    AR1			;store Accu in AR1
 	lacc    *,15,AR1		;Accu = input (x)
@@ -67,9 +79,7 @@ The output, in principal range -pi/2 to pi/2, is scaled down by pi.
 	add     *,0,AR7			;Accu = y1 + (x-x1)*(y2-y1)/2
 	sacl    *			;output = Accu
 	}
-	initCode {
-		addCode(ASinTable);
-	}
+
 	constructor {
 		noInternalState();
 	}
