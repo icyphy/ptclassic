@@ -20,7 +20,7 @@ other distributions are roughly the same size):
 	\*(PT (after you optionally remake): 57 Mbytes
 	Gnu subset: 14 Mbytes
 .)b
-Steps to install \*(PT:
+Steps to install \*(PT on a Sun-3 or Sun-4:
 .ip 1.
 Create a user ``ptolemy'', together with a home directory for the ``ptolemy''
 user.
@@ -51,6 +51,45 @@ Edit ~ptolemy/.rhosts, adding a line for your system
 command ).
 The added line will be of the form "hostname ptolemy", you can
 find the correct hostname with the command "hostname".
+.H2 "Installation on a VaxStation or a DecStation"
+.pp
+For a VaxStation or DecStation, the procedure is exactly as above,
+except that the device names to use are different.
+.\" ??? we need to find out the device name ???
+.H2 "Special considerations for installation under Open Windows"
+.pp
+\*(PT was developed using the X11R4 distribution from MIT.  It will
+run successfully under Open Windows version 2.  There are problems
+with running the graphic interface with Open Windows version 3,
+unfortunately; we have not yet determined whether the problem is
+a bug in the version 3
+.i olwm
+(Open Look window manager)
+or in the Vem editor.  One workaround is to use the
+.i twm
+window manager from the MIT distribution instead of
+.i olwm ;
+while not as pretty as
+.i olwm ,
+at least it works.
+.pp
+In order for all utilities included with this distribution to work
+under Open Windows (either version), you must install the Athena
+widgets (the freely redistributable widget set from the X11R4 distribution),
+which are provided with this distribution under the
+``~ptolemy/athena.sunX'' directory, where the X may be a 3 or 4 depending
+on your machine type.  To install them, become root
+and copy all files in that directory into ``/usr/openwin/lib'' (or, if
+you have installed Open Windows in a non-standard place, into
+``$OPENWINHOME/lib'').
+.pp
+After installation, the ptolemy account will contain several scripts for
+starting up X11R4 (Xrun), Open Windows with
+.i olwm
+(Xrun.ow),
+or Open Windows with
+.i twm
+(Xrun.ow.twm).
 .H2 "GNU Installation"
 .pp
 For convenience, some software from the Free Software Foundation is
@@ -113,6 +152,10 @@ please ask your system administrator to enable networking.
 .pp
 If you succeed in invoking pigi, but graphs do not appear, but messages
 saying that the xgraph program could not be found appear instead,
-your path is set incorrectly.  Because pigi uses rsh, your path
+your path is set incorrectly.  Because pigi uses
+.i rsh 
+to start up \*(PT, your path
 must be defined in your .cshrc file, not just in your .login file.
-The path must be defined even when ``prompt'' is not set.
+The path must be defined even when ``prompt'' is not set, since
+your .cshrc file will b read in non-interactive mode.
+

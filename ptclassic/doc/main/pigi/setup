@@ -86,8 +86,19 @@ pigiRpc'' you wish to use (advanced users use this feature when
 they want to, say, link in their own domains to Ptolemy).
 .H3 "Running Pigi using Open Windows"
 .pp
-Pigi will run under Sun's Open Windows (which is based on a combination
-of X11R4 and NeWS, another windowing protocol).  This document will
+Sun does not provide the Athena widgets in the Open Windows
+distribution; these are required by the VEM editor (the Athena widgets
+are a freely distributable toolkit for X11 developed at MIT).  For
+this reason, we have provided a copy of the library on the tape, in
+the directory ``~ptolemy/athena.sun4''.  The simplest way to install
+them is to simply copy the files in this directory to the directory
+containing the Open Windows libraries, which is usually
+``/usr/openwin/lib'' or ``$OPENWINHOME/lib''.
+.pp
+Pigi will run under Sun's Open Windows Version 2
+(which is based on a combination
+of X11R4 and NeWS, another windowing protocol), once the Athena widgets
+are installed.  This document will
 not attempt to teach you how to use Open Windows; there are excellent
 tutorial documents available from Sun.  We'll assume as a starting
 point that you are configured to run Open Windows;
@@ -105,8 +116,18 @@ add the option
 to the olwm command.  If, for some reason, you must run olwm in the
 click-to-focus mode, you must click the mouse in each window before
 pigi will accept keyboard commands in that window; it is possible
-but annoying to use pigi this way.
+but annoying to use pigi this way.  An alternative is to add the
+following line to your ``.Xdefaults'' file:
+.(c
+OpenWindows.SetInput:	followmouse
+.)c
 .pp
-Since pigi does not use the NeWS protocol you may get better performance
-on a Sun with 8 Mb or fewer by disabling the NeWS server.  See the
-Open Windows documentation to find out how to do this.
+There is a fatal interaction between VEM and the Open Look Window Manager
+(olwm) in Version 3 of Open Windows.  One workaround is to use the
+.i twm
+window manager from the X11R4 distribution instead; it is included
+on the distribution tape, along with its manual entry, which can be
+found in ``~ptolemy/doc/man/man1/twm.1''.  This problem was discovered
+too late to know whether the problem is in Open Windows or in VEM;
+we apologize for making you use an uglier window manager.
+
