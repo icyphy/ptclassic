@@ -128,17 +128,23 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
     $_schematic setAttribute name $name
     $_schematic setAttribute version "1.0"
 
+    # Top-level
+    set isToplevel [$simulation cget -isToplevel]
+    set p [java::new ptolemy.schematic.SchematicParameter \
+	    isToplevel "CONTROLPARAMETER" $isToplevel]
+    $_schematic addParameter $p
+
     # The domain
     set domain [$simulation getDomain]
     set p [java::new ptolemy.schematic.SchematicParameter \
-	    domain "StringToken" $domain]
+	    domain "CONTROLPARAMETER" $domain]
     $_schematic addParameter $p
 
     # The director name
     set director [$simulation getDirector]
     set directorName [$simulation getDirectorName]
     set p [java::new ptolemy.schematic.SchematicParameter \
-            "director" "StringToken" $directorName]
+            "director" "CONTROLPARAMETER" $directorName]
     $_schematic addParameter $p
 
     # The director parameters are added directly as parameters
@@ -184,6 +190,37 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 	$_schematic addEntity $xmlelt
     }
 
+    # The ports
+    foreach a [$simulation ports] {
+	puts "Port $a"
+	set actor [$simulation getPort $a
+]
+	set xmlelt [java::new ptolemy.schematic.SchematicEntity]
+	$xmlelt setAttribute name $a
+	$xmlelt setAttribute icon [$graph attrget $a -icon]
+	$xmlelt setAttribute coords [$layout attrget $a -coords]
+
+	set etype [java::new ptolemy.schematic.EntityType]
+	$etype setAttribute name [$graph attrget $a -class]
+	$etype setAttribute type "port"
+	$xmlelt addChildElement $etype
+
+	# Parameters
+	set iterator [$actor getAttributes]
+	while { [$iterator hasMoreElements] } {
+	    set attr [$iterator nextElement]
+	    set class [[[$attr getToken] getClass] getName]
+	    set type [lindex [split $class "."] end]
+	    set p [java::new ptolemy.schematic.SchematicParameter \
+		    [join [$attr getName] ""] \
+		    $type \
+		    [[$attr getToken] stringValue]]
+	    $xmlelt addParameter $p
+	}
+	# Add it
+	$_schematic addEntity $xmlelt
+    }
+
     # The relations
     foreach r [$simulation relations] {
 	puts "Relation $r"
@@ -192,10 +229,42 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 	$xmlelt setAttribute name $r
 	
 	# Links
-	set fromlink [join [$graph attrget $r -from] "."]
-	set tolink [join [$graph attrget $r -to] "."]
-	$xmlelt addLink $fromlink
-	$xmlelt addLink $tolink
+        foreach link [$simulation links $r] {
+            $xmlelt addLink [join $link "."]
+        }
+
+	# Layout
+	foreach junction [$simulation junctions $r] {
+	    set xe [java::new ptolemy.schematic.SchematicLayout]
+	    $xe setAttribute name $junction
+	    $xe setAttribute coords [$layout attrget $junction -coords]
+	    $xe setAttribute type "junction"
+	    $xmlelt addChildElement $xe
+	}
+	foreach e [$simulation edges $r] {
+	    set from [$graph attrget $e -from]
+            puts $from
+	    if [string match {junction*} $from] {
+		set from [list $from [$layout attrget $e -fromfeature]]
+                puts !$from
+	    }
+	    set to [$graph attrget $e -to]
+            puts $to
+	    if [string match {junction*} $to] {
+		set to [list $to [$layout attrget $e -tofeature]]
+                puts !$to
+	    }
+	    set xe [java::new ptolemy.schematic.SchematicLayout]
+	    $xe setAttribute name $e
+	    $xe setAttribute from $from
+	    $xe setAttribute to $to
+	    $xe setAttribute type "edge"
+	    $xmlelt addChildElement $xe
+	}
+
+	#set tolink [join [$graph attrget $r -to] "."]
+	#$xmlelt addLink $fromlink
+	#$xmlelt addLink $tolink
 
 	# Parameters
 	set iterator [$relation getAttributes]
@@ -253,6 +322,12 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 	domainPanel vertexcontroller edgecontroller} {
     puts "PtSimulation::construct $simulation $graph $layout $name"
 
+    # Configure for top-level
+    set isToplevel [$_schematic getChildElement parameter isToplevel]
+    puts ####[$isToplevel toString]
+    #puts [$domain toString]
+    $simulation configure -isToplevel [$isToplevel getAttribute value]
+
     # Get the domain
     set domain [$_schematic getChildElement parameter domain]
     #puts [$domain toString]
@@ -262,6 +337,19 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
     set director [$_schematic getChildElement parameter director]
     #puts [$director toString]
     $domainPanel setDirector [$director getAttribute value]
+    set javaDir [$simulation getDirector]
+
+    # Update the director's parameters
+    set iterator [$_schematic parameters]
+    while { [$iterator hasMoreElements] } {
+	set param [$iterator nextElement]
+	if { [$param getAttribute "type"] != "CONTROLPARAMETER" } {
+	    set name [$param getAttribute name]
+	    set value [$param getAttribute value]
+	    [$javaDir getAttribute $name] setExpression $value
+	}
+    }
+    [[winfo parent $domainPanel] component time] loadParameters $javaDir
 
     # Create the entities
     set iterator [$_schematic entityNames]
@@ -292,61 +380,92 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 	$simulation addRelation $name
 
 	# The links
-	set ports {}
+	#set ports {}
 	set links [$xmlelt childElements "link"]
 	while { [$links hasMoreElements] } {
 	    set l [$links nextElement]
 	    set port [$l getAttribute name]
-	    lappend ports $port
-	
+	    #lappend ports $port
+
 	    set a [lindex [split $port "."] 0]
 	    set p [lindex [split $port "."] 1]
 	    $simulation link $name $a $p
 	}
 
-	# What we do depends on how many ports are connected
-	if { [llength $ports] == 2 } {
-	    set t1 [split [lindex $ports 0] "."]
-	    set a1 [lindex $t1 0]
-	    set p1 [lindex $t1 1]
-	    set c1 [$layout forward feature $t1 "terminal"]
-	    set d1 [$layout forward itemcget $t1 -direction]
+	# Process layout
+	set elts [$xmlelt childElements "layout"]
+	while { [$elts hasMoreElements] } {
+	    set l [$elts nextElement]
+            puts [$l toString]
+	    if { [$l getAttribute type] == "junction" } {
+		set coords [$l getAttribute coords]
+		set junctionname [$l getAttribute name]
 
-	    set t2 [split [lindex $ports 1] "."]
-	    set a2 [lindex $t2 0]
-	    set p2 [lindex $t2 1]
-	    set c2 [$layout forward feature $t2 "terminal"]
-	    set d2 [$layout forward itemcget $t2 -direction]
+		# Create the new junction
+		$layout publish add item $junctionname \
+			-slatetype Junction \
+			-coords $coords \
+			-tags "junction"
 
-	    set e1 [$simulation getActor $a1]
-	    set j1 [$e1 getPort $p1]
-
-	    set e2 [$simulation getActor $a2]
-	    set j2 [$e1 getPort $p2]
-
-	    if { [$j1 isOutput] } {
-		# Create the new edge
-		$graph publish add edge $name -from $t1 -to $t2
-
-		# Create the new net
-		$layout publish add item $name \
-			-slatetype Net \
-			-coords [concat $c1 $c2] \
-			-start $d1 \
-			-end [::tycho::Shape::compass $d2 "rev"] \
-			-tags "edge"
-	    } else {
-		# Create the new edge
-		$graph publish add edge $name -to $t1 -from $t2
-
-		# Create the new net
-		$layout publish add item $name \
-			-slatetype Net \
-			-coords [concat $c2 $c1] \
-			-start $d2 \
-			-end [::tycho::Shape::compass $d1 "rev"] \
-			-tags "edge"
+		# Create the junction vertex and add it to the simulation
+		$graph publish add vertex $junctionname \
+			-relation $name
+		$simulation addJunction $name $junctionname
 	    }
 	}
-    }   
+	set elts [$xmlelt childElements "layout"]
+	while { [$elts hasMoreElements] } {
+	    set l [$elts nextElement]
+            puts [$l toString]
+	    if { [$l getAttribute type] == "edge" } {
+		set edgename [$l getAttribute name]
+		set from [$l getAttribute from]
+		set to [$l getAttribute to]
+                puts "from = $from"
+                puts "to = $to"
+                
+		set opts {}
+		if { [string match {junction*} [lindex $from 0]] } {
+		    set dfrom [lindex $from 1]
+		    set from [lindex $from 0]
+		    set cfrom [$layout forward feature $from $dfrom]
+		} else {
+		    set dfrom [$layout forward itemcget $from -direction]
+		    set cfrom [$layout forward feature $from "terminal"]
+		}
+
+		if { [string match {junction*} [lindex $to 0]] } {
+		    set dto [lindex $to 1]
+		    set to [lindex $to 0]
+		    set cto [$layout forward feature $to $dto]
+		} else {
+		    set dto [$layout forward itemcget $to -direction]
+		    set cto [$layout forward feature $to "terminal"]
+		}
+		set dto [::tycho::Shape::compass $dto "rev"]
+
+		# Create the new edge
+		$graph publish add edge $edgename -from $from -to $to \
+			-relation $name
+
+		# Create the new net
+		$layout publish add item $edgename \
+			-slatetype Net \
+			-coords [concat $cfrom $cto] \
+			-start $dfrom \
+			-end $dto \
+			-tags "edge"
+		
+		if { [string match {junction*} $from] } {
+		    $layout attrset $edgename -fromfeature $dfrom
+		}
+		if { [string match {junction*} $to] } {
+		    $layout attrset $edgename -tofeature $dto
+		}
+	
+		# Add to the simulation
+		$simulation addEdge $name $edgename
+	    }
+	}
+    }
 }
