@@ -34,9 +34,12 @@
 # Based on pp 344-346 of Harrison and McClellan's "Effective Tcl/Tk
 # Programming" book
 
+# Only load the graphical classes if running with Tk
 if [info exists tk_version] {
     package require tycho.kernel.gui
     package require tycho.kernel.html
+} else {
+    package require tycho.kernel.basic
 }
 
 package provide tycho.util.tydoc 2.0
