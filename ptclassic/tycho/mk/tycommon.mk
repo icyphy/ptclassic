@@ -165,6 +165,19 @@ itcldocs: $(ITCL_SRCS) $(TCL_SRCS)
 		$(TYDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
 	fi
 
+# Generate idoc files from itcl files, requires itclsh and tycho
+# Note that $(ROOT) here is relative to the tycho directory, not
+# the Ptolemy directory.
+IDOC=$(ROOT)/lib/tydoc/idoc
+idocs: $(ITCL_SRCS) $(TCL_SRCS)
+	@if [ "$(TYDOC_DESC)" = "" ] ; then \
+		echo "$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS)"; \
+	 	$(IDOC) -d $(ITCL_SRCS) $(TCL_SRCS); \
+	else \
+		echo "$(IDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS)"; \
+		$(IDOC) -d -t "$(TYDOC_DESC)" $(ITCL_SRCS) $(TCL_SRCS); \
+	fi
+
 # Create tclIndex from .tcl and .itcl files
 # This rule must be after the TCL_SRC and ITCL_SRC lines in the makefile
 # that includes this makefile.  tclIndex should depend on the makefile
