@@ -365,24 +365,34 @@ foreach _name {
 # Test the join option
 foreach _name {
     foo.bar
+    {ptolemy foo bar}
+    {/ users ptolemy foo.bar}
+    {/users/ptolemy foo.bar}
+    {file: {} users ptolemy foo.bar}
+    {http: ptolemy.eecs}
+    http://ptolemy.eecs
+    {http: ptolemy.eecs ~ptdesign}
+    {http://ptolemy.eecs ~ptdesign}
+    {http: ptolemy.eecs ~ptdesign index.html}
+    {http://ptolemy.eecs ~ptdesign/index.html}
+} _result {
+    foo.bar
+    ptolemy/foo/bar
+    /users/ptolemy/foo.bar
     /users/ptolemy/foo.bar
     file:/users/ptolemy/foo.bar
     http://ptolemy.eecs
+    http://ptolemy.eecs
+    http://ptolemy.eecs/~ptdesign
     http://ptolemy.eecs/~ptdesign
     http://ptolemy.eecs/~ptdesign/index.html
-} _result {
-    foo.bar
-    {/ users ptolemy foo.bar}
-    {file: {} users ptolemy foo.bar}
-    {http: ptolemy.eecs}
-    {http: ptolemy.eecs ~ptdesign}
-    {http: ptolemy.eecs ~ptdesign index.html}
+    http://ptolemy.eecs/~ptdesign/index.html
 } {
-    test Path-::tycho::url-$_count [list ::tycho::url join $_result] {
+    test Path-::tycho::url-$_count [list ::tycho::url join $_name] {
         incr _count
         update ;# so results can be seen while running
-        eval ::tycho::url join $_result
-    } $_name
+        eval ::tycho::url join $_name
+    } $_result
 }
 
 # Test the aslocal option
@@ -401,4 +411,5 @@ foreach _name {
         eval ::tycho::url aslocal $_result
     } $_result
 }
+
 
