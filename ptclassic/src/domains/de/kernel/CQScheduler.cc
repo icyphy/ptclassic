@@ -79,6 +79,11 @@ void CQScheduler :: setup () {
 
 	galaxy()->initialize();
 	if(SimControl::haltRequested()) return;
+
+	// Check connectivity again because the galaxy may have
+	// changed after initialization due to e.g. hof stars
+	// performing block replacement.
+	if (warnIfNotConnected (*galaxy())) return;
 	
 	if (!checkDelayFreeLoop() || !computeDepth()) return;
 
