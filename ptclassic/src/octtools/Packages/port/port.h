@@ -304,7 +304,7 @@ extern double trunc();
 #endif /* PTSVR4 */
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(PTAIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PNBSD_386) || defined(PTSVR4)
+#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(PTAIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PTNBSD_386) || defined(PTSVR4)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
