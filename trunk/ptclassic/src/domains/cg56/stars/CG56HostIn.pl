@@ -28,8 +28,10 @@ $label(l)
 	jclr	#1,x:m_pbddr,$label(l)
 	movep	x:m_hrx,$ref(output)
 	}
-	go {
+        initCode {
 		addRunCmd(command,"\n");
+	}
+	go {
 		gencode(std);
 	}
 }
