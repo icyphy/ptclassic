@@ -70,7 +70,7 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) \
 MISC_FILES =		$(DIRS) tclIndex
 
 # Sub directories to run make in.
-DIRS =			adm bin demos doc test
+DIRS =			adm bin demo doc test
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
