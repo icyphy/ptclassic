@@ -12,15 +12,15 @@ $Id$
  The function returns a StringList containing all the names
  of disconnected stars or stars with no ports.
 
- warnIfNotConnected prints the result of checkConnect out onto
- errorHandler if if contains any messages; it returns 1 if an
+ warnIfNotConnected prints the result of checkConnect out with
+ Error::error if if contains any messages; it returns 1 if an
  error has occurred, otherwise 0.
 
 *************************************************************************/
 #include "Galaxy.h"
 #include "StringList.h"
 #include "Block.h"
-#include "Output.h"
+#include "Error.h"
 #include "GalIter.h"
 
 StringList checkConnect (Galaxy& g) {
@@ -34,6 +34,7 @@ StringList checkConnect (Galaxy& g) {
 		if (s->numberPorts() == 0) {
 			msg += s->readFullName();
 			msg += " has no portholes\n";
+			Error::mark(*s);
 			break;
 		}
 		// error if any porthole is disconnected
@@ -43,6 +44,7 @@ StringList checkConnect (Galaxy& g) {
 			if (!p->far()) {
 				msg += p->readFullName();
 				msg += " is not connected\n";
+				Error::mark(*p->parent());
 			}
 		}
 	}
@@ -54,7 +56,7 @@ int warnIfNotConnected (Galaxy& g) {
 	char* str = msg;	// cast to char*
 	// check for non-zero-length message
 	if (str) {
-		errorHandler.error (str);
+		Error::error (str);
 		return 1;
 	}
 	else return 0;
