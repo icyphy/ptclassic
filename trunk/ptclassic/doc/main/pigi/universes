@@ -385,3 +385,52 @@ Execute \fIexit-pigi\fP from the Pigi menu.
 Execute \fIclose-window\fP with the cursor in the VEM
 console window (or type control-d).
 .in -0.5i
+.H2 "Particle Types"
+.pp
+The packets of data that pass from one star to another
+in \*(PT are called \fIparticles\fR.
+.IE "particle type"
+.IE "types"
+So far, all particles have been simply floating point numbers representing
+samples of signals.  However, several other data types are supported.
+Each star icon has a protrusion for each porthole.
+.IE "porthole type"
+In pigi, if you are using a color monitor, the color of the stem
+indicates the type of data that the porthole consumes or produces.
+A blue stem on an input
+or output of a star icon indicates type "float", a white stem
+indicates type "complex", and a red stem indicates "anytype".
+.pp
+Ptolemy usually make conversions between these types automatically.
+The float to complex conversion does the obvious thing,
+putting the float value into the real part of the complex,
+and setting the imaginary part to zero.  The complex to float
+conversion computes the magnitude of the complex number.
+The XGraph star, and most other stars that generate output,
+accept "anytype" of input.  If the input is complex, the magnitude
+will be plotted, because it will be cast to a float internally.
+If you want to plot both the real and imaginary parts, you
+should use the ComplexReal conversion star first.
+.pp
+For technical reasons too involved to explain here, automatic type conversions
+cannot always be made.  In particular, Ptolemy can only do one
+type conversion for any given output of a star.  So if a single
+output is connected to multiple inputs of different types,
+Ptolemy may complain.  For example, suppose you connect a "float" output
+to both a "complex" input and a "float" input.  Ptolemy will complain.
+A simple solution is to insert a unit gain (use the FloatGain star)
+between the "float" output and the "complex" input.
+Then the type conversion occurs on the output of the FloatGain star,
+which goes only to a "complex" input.
+.pp
+Automatic type conversions have one potentially serious pitfall.
+Suppose you connect a "float" output to a "complex" and "anytype" input.
+This is legal, because Ptolemy can satisfy the constraints with just
+one type conversion, float to complex.  However, suppose the "anytype"
+input belongs to an XGraph star.  As explained above, the XGgraph
+star plots the magnitude of a complex number, unless you have
+an explicit ComplexReal conversion star.  Hence, instead of plotting
+the "float" output, XGraph will plot the magnitude, converting
+all negative numbers to positive.  Inserting a ComplexReal is one
+way to correct the problem.  Another way is to use the FloatGain star
+with unity gain to postpone the conversion to complex on the other fork.
