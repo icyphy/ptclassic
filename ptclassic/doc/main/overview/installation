@@ -20,19 +20,19 @@ approximate disk space requirements are:
 	Gnu subset: 14 Mbytes
 .)b
 Steps to install \*(PT:
-(steps 2-4 may not be necessary in the future)
-Much of this has to be done as root.
+(steps 2-3 are optional; you'll have to edit a couple of makefiles in
+~ptolemy/example and ~ptolemy/pigiExample if you don't do them).
+Steps 1-3 must be done as root.
 .ip 1.
 Create a user "ptolemy".
 .ip 2.
 Create directory /usr/users (if not already there).
 .ip 3.
-cd /usr/users
+ln -s ~ptolemy /usr/users/ptolemy
 .ip 4.
-ln -s ~ptolemy
-(This creates a directory /usr/users/ptolemy).
-.ip 5.
 Load the tape in your drive.
+.ip 5.
+Log in or su to user ptolemy.
 .ip 6.
 mt -f /dev/nrst8 rewind
 (This rewinds the tape.)
@@ -40,9 +40,6 @@ mt -f /dev/nrst8 rewind
 tar xf /dev/nrst8 
 (This reads the tape, and will take a while.)
 .ip 8.
-chown -R ptolemy ptolemy
-(This changes ownership of all files to user ptolemy.)
-.ip 9.
 Edit ~ptolemy/.rhosts, adding a line for your system
 (This gives pigi permission to create a ptolemy process.)
 The added line will be of the form "hostname ptolemy", you can
@@ -68,12 +65,12 @@ To test \*(PT:
 .ip 1.
 login as ptolemy
 .ip 2.
-Wait for the X window system to start up.
-Note that the ptolemy user is configured to start the X window system
-when you log on.
-If your installation uses X some other way, please modify the dot files
-in ~ptolemy
-accordingly.
+If the X server is not already running, the .login script will attempt
+to start it.  If your installation is different from ours, you may
+need to modify .login to work at your site (in particular, you may
+need a different
+.i path
+variable).
 .ip 3.
 cd demo
 .ip 4.
