@@ -1496,19 +1496,19 @@ void genDef ()
 		fprintf (fp, ".AC \"%s\"\n", objAcknowledge);
 
 /* inputs */
-	if (strlen(inputDescriptions) > 0)
+	if ((int)strlen(inputDescriptions) > 0)
 		fprintf (fp, ".IH\n%s.PE\n", inputDescriptions);
 
 /* outputs */
-	if (strlen(outputDescriptions) > 0)
+	if ((int)strlen(outputDescriptions) > 0)
 		fprintf (fp, ".OH\n%s.PE\n", outputDescriptions);
 
 /* inouts */
-	if (strlen(inoutDescriptions) > 0)
+	if ((int)strlen(inoutDescriptions) > 0)
 		fprintf (fp, ".BH\n%s.PE\n", inoutDescriptions);
 
 /* states */
-	if (strlen(stateDescriptions) > 0)
+	if ((int)strlen(stateDescriptions) > 0)
 		fprintf (fp, ".SH\n%s.ET\n", stateDescriptions);
 
 /* explanation */
