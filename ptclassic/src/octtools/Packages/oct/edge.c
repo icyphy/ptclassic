@@ -33,13 +33,16 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "geo.h"
 #include "io.h"
+#include "io_procs.h"
 
+#include "edge.h"
 
 static octStatus edge_read_fields(), edge_write_fields(), edge_bb();
 
 extern struct object_desc oct_geo_desc;
 static struct object_desc *super = &oct_geo_desc;
 
+void
 oct_edge_desc_set(object_desc)
 struct object_desc *object_desc;
 {
