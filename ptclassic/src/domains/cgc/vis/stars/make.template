@@ -54,7 +54,6 @@ LIB=libcgcvisstars.$(LIBSUFFIX)
 # source files for all stars, using preprocessor
 # put base stars first
 PL_SRCS= \
- CGCVISBase.pl \
  CGCVISAddSh.pl \
  CGCVISBiquad.pl \
  CGCVISFFTCx.pl \
@@ -62,6 +61,7 @@ PL_SRCS= \
  CGCVISMpyDblSh.pl \
  CGCVISMpySh.pl \
  CGCVISPackSh.pl \
+ CGCVISParametricEq.pl \
  CGCVISStereoBiquad.pl \
  CGCVISInterleaveIn.pl \
  CGCVISInterleaveOut.pl \
