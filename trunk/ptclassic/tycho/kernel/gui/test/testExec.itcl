@@ -1,4 +1,4 @@
-# Test suite for Exec class
+# Test suite for Exec class, this uses graphics, so it must be run with tycho -e
 #
 # @Authors: Christopher Hylands
 #
@@ -44,10 +44,12 @@ test Exec-1.1 {run make} {
     after $longDuration .exec invoke cancel
     puts "about to do getHistory"
     flush stdout
-    .exec getHistory 1.0
-} {This message is used to test the Exec class
+    set history [.exec getHistory 1.0]
+    regsub -all "make\[^\n\]+\n" $history "" results
+    list $results
+} {{This message is used to test the Exec class
 
 
-}
+}}
 
 doneTests
