@@ -298,6 +298,8 @@ char *propname;
     return(TRUE);
 }
 
+/* This function is called recursively if there's hierarchy */
+/* Upon premature exit, do not free inst */
 static boolean
 ProcessInsts(facetPtr)
 octObject *facetPtr;
@@ -318,26 +320,24 @@ octObject *facetPtr;
 	} else if (IsDelay(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay")) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else if (IsDelay2(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "delay2")) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else if (IsBus(&inst)) {
 	    if (!ProcessMarker(facetPtr, &inst, "buswidth")) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	} else {
 	    /* assume it's a sog */
+	    /* FIXME: Major memory leak here */
+	    /* Do not free inst: it will be read at a later time */
 	    if (!GetOrInitSogParams(&inst, &pList)) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	    akoName = BaseName(inst.contents.instance.master); 
@@ -353,14 +353,12 @@ octObject *facetPtr;
 		inst.contents.instance.name = name;
 		if (octModify(&inst) != OCT_OK) {
 		    octFreeGenerator(&genInst);
-		    FreeOctMembers(&inst);
 		    ErrAdd(octErrorString());
 		    return FALSE;
 		}
 	    }
 	    if (!KcInstance(name, akoName, &pList)) {
 		octFreeGenerator(&genInst);
-		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	    /* Process the pragmas list, if any */
