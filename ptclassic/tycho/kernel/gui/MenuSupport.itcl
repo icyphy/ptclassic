@@ -238,8 +238,6 @@ body ::tycho::MenuSupport::clearMenu {menu} {
     while { $i <= $lastindex } {
 	switch [$menu type $i] {
 	    "cascade" {
-puts $i
-	puts \"[$menu entrycget $i -label]\"
 		$this delete [$menu entrycget $i -label]
 	    }
 	    "separator" {
@@ -247,8 +245,6 @@ puts $i
 	    }
 	    default {
 		set name [$menu entrycget $i -label]
-puts $i
-puts \"$name\"
 		unset itemtype($name)
 		unset entrypath($name)
 	    }
