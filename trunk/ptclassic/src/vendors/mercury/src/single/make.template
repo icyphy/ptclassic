@@ -44,7 +44,7 @@ VPATH         = $(ROOT)/src/vendors/mercury/src/single
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-include $(ROOT)/../mercury.mk
+include $(VPATH)/../mercury.mk
 
 LIBCSDS = \
 acor.csd         acorf.csd        acort.csd        aspec.csd \
