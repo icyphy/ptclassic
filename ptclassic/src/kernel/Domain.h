@@ -58,18 +58,40 @@ const int NUMDOMAINS = 20;		// maximum # of domains
 class Domain {
 public:
 	Domain (const char* domname);
+	// method for creating new wormholes
 	virtual Star& newWorm(Galaxy& innerGal,Target* innerTarget = 0);
+
+	// methods for creating event horizons
 	virtual EventHorizon& newFrom();
 	virtual EventHorizon& newTo();
+
+	// method for creating "nodes" or permanent geodesics
 	virtual Geodesic& newNode() = 0;
+
+	// return true if wormholes should be made for all galaxies
 	virtual int isGalWorm();
+
+	// if non-null, return requirement for targets for use with this
+	// domain
+	virtual const char* requiredTarget() { return 0;}
+
+	// name of this domain
 	const char* name() { return myName;}
+
+	// find Domain with given name
 	static Domain* named(const char* name);
+
+	// find Domain corresponding to argument Block
 	static Domain* of(Block&);
+
+	// return # of domains and nth domain
 	static int number() {return numDomains;}
 	static const char* nthName(int n) {return (allDomains[n])->myName;}
+
+	// subdomains of this domain
 	StringList subDomains;
 private:
+	// lists of domains
 	static int numDomains;
 	static Domain* allDomains[NUMDOMAINS];
 
