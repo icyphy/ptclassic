@@ -40,6 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
+	ColorBrowserHelp.html \
 	EditHelp.html \
 	FileBrowserHelp.html \
 	FileHelp.html \
