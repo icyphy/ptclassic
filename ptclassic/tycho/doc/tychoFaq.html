@@ -10,7 +10,7 @@ The information below is covered in the Tycho documentation, we
 present it here in a slightly different format.
 <H2>Table of Contents</H2>
 <MENU>
-<LI> <A HREF="faq: general questions"><B>1. General</B></A>
+<LI> <A HREF="#faq: general questions"><B>1. General</B></A>
 	<MENU>
 	<LI> <A HREF="#Tycho description (short)"><B>1.1 What Is Tycho?</B></A>
 
@@ -25,7 +25,7 @@ present it here in a slightly different format.
 	<LI> <A HREF="#astronomy"><B>1.5 Who was Tycho Brahe?</B></A>
 	</MENU>
 
-<LI> <A HREF="faq: installation"><B>2. Installation questions</B></A>
+<LI> <A HREF="#faq: installation"><B>2. Installation questions</B></A>
 	<MENU>
 	<LI> <A HREF="#downloading Tycho"><B>2.1 How do I download
 	Tycho?</B></A>
@@ -185,15 +185,15 @@ Your mail should include:
 
 
 
-<H2><A NAME="faq: why didn't you . . . ">2. Why didn't you . . .</A>
+<H2><A NAME="faq: why didn't you . . . ">3. Why didn't you . . .</A>
 </H2>
 
 <DL>
-<DT> <A NAME="emacs"><B>2.1 Why didn't you just use emacs?</B></A>
+<DT> <A NAME="emacs"><B>3.1 Why didn't you just use emacs?</B></A>
 <DD> FSF Emacs is not particularly graphical, though xemacs is better.
 We want to be able to have active graphical widgets intermingled with text.
 
-<DT> <A NAME="iwidgets"><B>2.2 Why didn't you use the Iwidgets widgets
+<DT> <A NAME="iwidgets"><B>3.2 Why didn't you use the Iwidgets widgets
 everywhere?</B></A>
 
 <DD> 
@@ -212,7 +212,7 @@ functionality we needed was missing.  We also wanted the widget we
 wrote to use some of the features of Tycho, such as automatically
 generated documentation and active tcl examples.
 
-<DT> <A NAME="java, instead of Itcl"><B>2.3 Why didn't you use Java?</B></A>
+<DT> <A NAME="java, instead of Itcl"><B>3.3 Why didn't you use Java?</B></A>
 <DD> When we started Tycho, Java was still very new.  Currently, we
 don't know of a good canvas like Java class like the tk canvas.  We'd
 rather not reinvent the wheel here and write our own Java canvas.  We
@@ -222,7 +222,9 @@ are looking into integrating Java and Tycho.
 environment for non-programmers, which makes an interpreted language
 such as Tcl a stronger candidate than a compiled language such as
 Java.
-
+ <P> Tycho does include a version of Sun's Tcljava interface and we are
+looking into using Tcl and Java together.  For more information, see the
+Tycho<A HREF="../java/doc/index.html">Java </A> page.
 </DL>
 
 <p>
