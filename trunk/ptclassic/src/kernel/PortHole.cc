@@ -515,7 +515,7 @@ void PortHole :: initialize()
 	}
 	// If this is an output PortHole (or connected to an
 	// input porthole), initialize myGeodesic
-	if(myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
+	if (far() && myGeodesic && (isItOutput() || (!asEH() && atBoundary())))
 		myGeodesic->initialize();
 }
 
