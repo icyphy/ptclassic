@@ -41,7 +41,8 @@ include $(CONFIG)
 EXTRA_SRCS = \
 	Cmakefile.mk \
 	HTMLTemplate.html \
-	ItclTemplate.itcl
+	ItclTemplate.itcl \
+	JavaTemplate.java
 
 MISC_FILES =
 
