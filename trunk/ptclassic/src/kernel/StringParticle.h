@@ -1,5 +1,5 @@
-#ifndef _FileParticle_h
-#define _FileParticle_h 1
+#ifndef _StringParticle_h
+#define _StringParticle_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -7,9 +7,9 @@
 
 /**************************************************************************
 Version identification:
-@(#)FileParticle.h	1.1 1/27/96
+$Id$
 
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -37,8 +37,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  John Reekie
  Date of creation: 1/27/96
 
-This is a Particle class that contains FileMessages (accessed via
-Envelopes). The class exists in order to make File messages
+This is a Particle class that contains StringMessages (accessed via
+Envelopes). The class exists in order to make String messages
 "first-class" datatypes.
 
 I consider this a temporary measure until we can rationalise the
@@ -50,9 +50,9 @@ have to change MessageParticle (by making member functions virtual).
 **************************************************************************/
 #include "Message.h"
 
-extern const DataType FILEMSG;
+extern const DataType STRING;
 
-class FileParticle : public Particle {
+class StringParticle : public Particle {
 public:
 	DataType type() const;
 
@@ -67,8 +67,8 @@ public:
 	void accessMessage (Envelope& p) const;
 
 	// fill in remaining functions for Particle classes
-	FileParticle(const Envelope& p);
-	FileParticle();
+	StringParticle(const Envelope& p);
+	StringParticle();
 	Particle& initialize();
 
 	// The next two methods return an error.  Should be redefined by
@@ -83,8 +83,7 @@ public:
                                           Plasma* myPlasma, 
 					  const char* delay = 0);
 
-	// load with data -- these cause errors except for a Envelope argument.
-
+	// load with data
 	void operator << (int i);
 	void operator << (double f);
 	void operator << (const Complex& c);
