@@ -118,14 +118,14 @@ class ::tycho::EditProgram {
     # Indent the set of lines identified by the selection.
     method indentSelection {}
 
+    # Specify whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
     # In derived classes, returns a string with keywords separated by "|".
     method keywords {} {return {}}
 
     # Color the code in a region.
     method parseNow {start stop}
-
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
 
     # Returns a list of tags to use when checking the spelling.
     method spellCheckTags {} {return {comment}}
@@ -376,6 +376,32 @@ body ::tycho::EditProgram::indentSelection {} {
 }
 
 #####################################################################
+#### indicateReadOnly
+# Specify whether or not modifications are allowed in the displayed text.
+# Note that this is independent of whether the associated file is readonly.
+# It merely determines whether the buffer can be modified, not whether the
+# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
+#
+body ::tycho::EditProgram::indicateReadOnly {bool} {
+    ::tycho::Edit::indicateReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disableMenuItem {Comment Out Region} Format
+            menubar disableMenuItem {Uncomment Region} Format
+            menubar disableMenuItem {Indent Line} Format
+            menubar disableMenuItem {Indent Region} Format
+            menubar disableMenuItem {Tab} Format
+	} {
+            menubar enableMenuItem {Comment Out Region} Format
+            menubar enableMenuItem {Uncomment Region} Format
+            menubar enableMenuItem {Indent Line} Format
+            menubar enableMenuItem {Indent Region} Format
+            menubar enableMenuItem {Tab} Format
+	}
+    }
+}
+
+#####################################################################
 #### parseNow
 # Tag and color line-oriented comments, strings that are entirely on
 # one line, the strings "NOTE" and "FIXME", and keywords in the
@@ -453,32 +479,6 @@ body ::tycho::EditProgram::parseNow {start stop} {
             [option get $itk_component(hull) fixmeColor EditProgram]
     $text tag configure keyword -foreground \
             [option get $itk_component(hull) keywordColor EditProgram]
-}
-
-#####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether the associated file is readonly.
-# It merely determines whether the buffer can be modified, not whether the
-# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
-#
-body ::tycho::EditProgram::setReadOnly {bool} {
-    ::tycho::Edit::setReadOnly $bool
-    if [winfo exists $prefix] {
-	if {$bool} {
-            menubar disableMenuItem {Comment Out Region} Format
-            menubar disableMenuItem {Uncomment Region} Format
-            menubar disableMenuItem {Indent Line} Format
-            menubar disableMenuItem {Indent Region} Format
-            menubar disableMenuItem {Tab} Format
-	} {
-            menubar enableMenuItem {Comment Out Region} Format
-            menubar enableMenuItem {Uncomment Region} Format
-            menubar enableMenuItem {Indent Line} Format
-            menubar enableMenuItem {Indent Region} Format
-            menubar enableMenuItem {Tab} Format
-	}
-    }
 }
 
 #####################################################################

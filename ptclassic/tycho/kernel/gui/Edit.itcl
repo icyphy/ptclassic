@@ -164,6 +164,9 @@ class ::tycho::Edit {
     # Return the selection if it is mine, otherwise return a null string.
     method getSelection {}
 
+    # Indicate whether or not modifications are allowed in the displayed text.
+    method indicateReadOnly {bool}
+
     # Insert the given data at the insertion cursor.
     method insertData {data}
 
@@ -220,9 +223,6 @@ class ::tycho::Edit {
 
     # Query the user for an alternative font.
     method setFont {}
-
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
 
     # Check the spelling.
     method spellCheck {}
@@ -1299,6 +1299,32 @@ body ::tycho::Edit::help {} {
     ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/EditHelp.html
 }
 
+#####################################################################
+#### indicateReadOnly
+# Indicate in the status bar and in the menus
+# whether modifications are allowed on the buffer.
+#
+body ::tycho::Edit::indicateReadOnly {bool} {
+    ::tycho::File::indicateReadOnly $bool
+    if [winfo exists $prefix] {
+	if {$bool} {
+            menubar disableMenuItem {Undo/Redo} Edit
+            menubar disableMenuItem Cut Edit
+            menubar disableMenuItem Paste Edit
+            menubar disableMenuItem {Fill Region} Format
+            menubar disableMenuItem {Right Fill Column} Format
+            menubar disableMenuItem {Set Fill Prefix} Format
+	} {
+            menubar enableMenuItem {Undo/Redo} Edit
+            menubar enableMenuItem Cut Edit
+            menubar enableMenuItem Paste Edit
+            menubar enableMenuItem {Fill Region} Format
+            menubar enableMenuItem {Right Fill Column} Format
+            menubar enableMenuItem {Set Fill Prefix} Format
+	}
+    }
+}
+
 ###################################################################
 #### insertData
 # Insert the given data at the insertion cursor.
@@ -1625,34 +1651,6 @@ body ::tycho::Edit::setFont {} {
 	    -initialfont $ifont \
 	    -okcommand \
 	    "$this configure -textfont \[$wname getCurrentFont\]"
-}
-
-#####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether the associated file is readonly.
-# It merely determines whether the buffer can be modified, not whether the
-# file can be modified.  To control the file, use <code>toggleReadOnly</code>.
-#
-body ::tycho::Edit::setReadOnly {bool} {
-    ::tycho::File::setReadOnly $bool
-    if [winfo exists $prefix] {
-	if {$bool} {
-            menubar disableMenuItem {Undo/Redo} Edit
-            menubar disableMenuItem Cut Edit
-            menubar disableMenuItem Paste Edit
-            menubar disableMenuItem {Fill Region} Format
-            menubar disableMenuItem {Right Fill Column} Format
-            menubar disableMenuItem {Set Fill Prefix} Format
-	} {
-            menubar enableMenuItem {Undo/Redo} Edit
-            menubar enableMenuItem Cut Edit
-            menubar enableMenuItem Paste Edit
-            menubar enableMenuItem {Fill Region} Format
-            menubar enableMenuItem {Right Fill Column} Format
-            menubar enableMenuItem {Set Fill Prefix} Format
-	}
-    }
 }
 
 #####################################################################

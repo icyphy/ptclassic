@@ -117,9 +117,6 @@ class ::tycho::View {
     # Find and make visible a point in the display.
     method seePoint {point}
 
-    # Specify whether or not modifications are allowed in the displayed text.
-    method setReadOnly {bool}
-
     # Invoke a command on the status bar, if it exists.
     method statusbar {args}
 
@@ -134,6 +131,12 @@ class ::tycho::View {
 
     # Set the current contents of the local and Tk clipboards.
     proc setClipboard {text} {set clipboard $text}
+
+    ###################################################################
+    ####                         protected methods                 ####
+
+    # Indicate whether or not modifications are allowed in the displayed text.
+    protected method indicateReadOnly {bool}
 
     ###################################################################
     ####                         protected variables               ####
@@ -183,9 +186,10 @@ class ::tycho::View {
 # be modified, not whether the file can be modified.
 # 
 configbody ::tycho::View::readonly {
+    set readOnly $itk_option(-readonly)
     # Delay to ensure that all constructors (including derived class
     # constructors) have completed.
-    after idle $this setReadOnly $itk_option(-readonly)
+    after idle [code $this indicateReadOnly $itk_option(-readonly)]
 }
 
 #######################################################################
@@ -438,21 +442,6 @@ body ::tycho::View::setClipboard {text} {
     clipboard append -- $text
 }
 
-#####################################################################
-#### setReadOnly
-# Specify whether or not modifications are allowed in the displayed text.
-# Note that this is independent of whether any associated file is readonly.
-#
-body ::tycho::View::setReadOnly {bool} {
-    if {$bool} {
-        statusbar configure -filestatus "readonly"
-    } {
-        statusbar configure -filestatus "readwrite"
-    }
-
-    set readOnly $bool
-}
-
 #########################################################################
 #### statusbar
 # If there is a status bar associated with this view, use the arguments
@@ -478,5 +467,22 @@ body ::tycho::View::toolbar {args} {
         return [eval $myToolbar $args]
     } {
         return {}
+    }
+}
+
+#####################################################################
+#####################################################################
+####                   protected methods                         ####
+
+#####################################################################
+#### indicateReadOnly
+# Indicate in the status bar (and in derived classes, in the menus)
+# whether modifications are allowed on the buffer.
+#
+body ::tycho::View::indicateReadOnly {bool} {
+    if {$bool} {
+        statusbar configure -filestatus "readonly"
+    } {
+        statusbar configure -filestatus "readwrite"
     }
 }
