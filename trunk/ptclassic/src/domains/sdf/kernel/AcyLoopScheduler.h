@@ -138,7 +138,7 @@ public:
 	int computeBMLB();
 
 	// Set up and execute everything related to RPMC+DPPO
-	int callRPMC(Galaxy& gal);
+	int callRPMC(AcyCluster* clusterGraph);
 
 	// Set up and execute everything related to APGAN+DPPO
 	int callAPGAN(Galaxy& gal);
