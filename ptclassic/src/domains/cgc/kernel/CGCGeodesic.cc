@@ -25,6 +25,6 @@ ISA_FUNC(CGCGeodesic,CGGeodesic);
 // Return the name assigned to the buffer.
 // If I am a fork destination, my buffer name is that of the source.
 char* CGCGeodesic::getBufName() const {
-	const CGCPortHole* p = (CGCPortHole*)src();
+	const CGCPortHole* p = (const CGCPortHole*)src();
 	return p ? p->geo().getBufName() : bufName;
 }
