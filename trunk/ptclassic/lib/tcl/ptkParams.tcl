@@ -622,7 +622,7 @@ proc ptkEditParams {facet number args} {
 		if [ptkIsStar $number] {
 			destroy $top
 			ptkImportantMessage .error \
-				"Error: Star of galaxy has no parameters"
+				"Error: Star has no parameters"
 			return
 		} else { 
 			set paramArray($facet,$number) {}
