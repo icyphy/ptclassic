@@ -59,6 +59,24 @@
 #
 # <p><b>Enhancements</b> (none)
 #
+# <p><b>Example</b>
+# <p>Create some items on the slate:
+# <tcl quiet><pre>
+#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   set frame [$slate create Frame 100 100 200 200 &#92
+#       -color green]
+#   set solid FIXME
+# </pre></tcl>
+#
+# Add grapples to them:
+# <tcl quiet><pre>
+#   $slate grapple $frame
+#   $slate grapple $solid
+# </pre></tcl>
+#
+# (Try clicking and dragging the grapples.) Add quantization to the
+# reshaping by cascading the reshaping interactor with a 
+#
 # <p><b>Links</b>
 # 
 # <ul>
