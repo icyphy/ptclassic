@@ -77,8 +77,10 @@ GNU_BUILD_CC=cc
 
 # Special CC for irix5.  If you are using gcc to recompile, use this:
 #IRIX5_GNU_BUILD_CC=/users/ptolemy/gnu/irix5/bin/gcc
-# If you are using cc to compile gnu under irix5, use this:
-IRIX5_GNU_BUILD_CC=cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1
+# If you are using cc to compile gcc-2.5.8 under irix5, use this:
+#IRIX5_GNU_BUILD_CC=cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1
+# If you are using cc to compile gcc-2.6.2 under irix5, use this:
+IRIX5_GNU_BUILD_CC=cc -Wf,-XNh2000,-XNg1500 -Olimit 3000 -cckr -O1
 
 # irix5 /bin/make seems to need this
 SHELL=/bin/sh
