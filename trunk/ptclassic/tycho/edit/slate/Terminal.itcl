@@ -52,11 +52,10 @@ namespace ::tycho {
 # arrow styles. Default is *{8 10 3}*.
 # 
 # <li><b>-direction</b>. The direction of the terminal away from its 
-# origin (the point at which it "connects" to something), as a unit 
-# vector. The "unit vector" is a Tcl list of two elements (x and y). The 
-# default is <code>{1 0}</code>, meaning that the terminal will be 
-# horizontal and drawn to connect to a node on its left, and to a wire 
-# on its right.
+# origin (the point at which it "connects" to something). This value
+# can be any of the eight compass directions. The default is <b>e</b>,
+# meaning that the terminal will be horizontal and drawn to connect
+# to a node on its left, and to a wire on its right.
 # 
 # <li><b>-fill</b>. The color of the terminal. 
 # 
@@ -70,6 +69,9 @@ namespace ::tycho {
 # 
 # <li><b>-size</b>. The size of the radius of the circle, in the
 # circle or rectangle styles.
+# 
+# <li><b>-slash</b>. If true, a slash is drawn across the terminal.
+# The default is false.
 # 
 # <li><b>-style</b>.  The "style" of terminal: <i>plain</i>,
 # <i>arrowin</i>, <i>arrowout</i>, <i>doublearrowout</i>, 
@@ -99,11 +101,11 @@ namespace ::tycho {
 #    	{}
 #    	{-style plain -fill red}
 #    	{-style arrowin -fill red -arrowshape {10 15 3}}
-#    	{-style arrowout -fill green -length 60 -direction {-1 0}} 
-#    	{-style circle -fill blue -direction {0 -1}}
-#    	{-style rectangle -fill magenta -width 2 -direction {-1 1}}
-#    	{-style doublearrowin -direction {1 1}}
-#    	{-style doublearrowout -direction {-1 0.5}}
+#    	{-style arrowout -fill green -length 60 -direction w} 
+#    	{-style circle -fill blue -direction n}
+#    	{-style rectangle -fill magenta -width 2 -direction sw}
+#    	{-style doublearrowin -direction se}
+#    	{-style doublearrowout -direction ne}
 #   } {
 #       incr x 40
 #       incr y 25
@@ -144,6 +146,9 @@ class ::tycho::Terminal {
     # Update the *-size* option
     proc _size {id canvas slate size}
     
+    # Update the *-slash* option
+    proc _slash {id canvas slate slash}
+    
     # Update the *-style* option
     proc _style {id canvas slate length}
     
@@ -180,6 +185,7 @@ class ::tycho::Terminal {
     set methodtable(_direction)  ::tycho::Terminal::_direction
     set methodtable(_fill)       ::tycho::Terminal::_fill
     set methodtable(_length)     ::tycho::Terminal::_length
+    set methodtable(_slash)      ::tycho::Terminal::_slash
     set methodtable(_style)      ::tycho::Terminal::_style
     set methodtable(_type)       ::tycho::Terminal::_type
     set methodtable(_width)      ::tycho::Terminal::_width
@@ -192,12 +198,13 @@ class ::tycho::Terminal {
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
     set optiondefault(-arrowshape) {8 10 3}
-    set optiondefault(-scaled)    1
-    set optiondefault(-size)      3
-    set optiondefault(-direction) {1 0}
+    set optiondefault(-direction) e
     set optiondefault(-fill)      black
     set optiondefault(-length)    25
+    set optiondefault(-scaled)    1
     set optiondefault(-shape)     point
+    set optiondefault(-size)      3
+    set optiondefault(-slash)     0
     set optiondefault(-style)     arrowin
     set optiondefault(-type)      input
     set optiondefault(-width)     1
@@ -217,12 +224,13 @@ body ::tycho::Terminal::_arrowshape {id canvas slate arrowshape} {
 body ::tycho::Terminal::_direction {id canvas slate direction} {
     set option(direction$id) $direction
     set coords [$canvas coords $primary($id)]
+    set variable(vector$id) [::tycho::Shape::compassToVector $direction]
 
     # Figure the other end.
     set x1 [expr [lindex $coords 0] \
-	    + [lindex $option(direction$id) 0] * $option(length$id)]
+	    + [lindex $variable(vector$id) 0] * $option(length$id)]
     set y1 [expr [lindex $coords 1] \
-	    + [lindex $option(direction$id) 1] * $option(length$id)]
+	    + [lindex $variable(vector$id) 1] * $option(length$id)]
 
     # Change the coordinates
     eval $canvas coords $primary($id) [lrange $coords 0 1] $x1 $y1
@@ -241,6 +249,9 @@ body ::tycho::Terminal::_fill {id canvas slate fill} {
     if { [::info exists component(blob$id)] } {
 	$canvas itemconfigure $component(blob$id) -fill $option(fill$id)
     }
+    if { [::info exists component(slash$id)] } {
+	$canvas itemconfigure $component(slash$id) -fill $option(fill$id)
+    }
 }
 
 ##########################################################################
@@ -252,9 +263,9 @@ body ::tycho::Terminal::_length {id canvas slate length} {
 
     # Figure the other end.
     set x1 [expr $x0 \
-	    + [lindex $option(direction$id) 0] * $option(length$id)]
+	    + [lindex $variable(vector$id) 0] * $option(length$id)]
     set y1 [expr $y0 \
-	    + [lindex $option(direction$id) 1] * $option(length$id)]
+	    + [lindex $variable(vector$id) 1] * $option(length$id)]
 
     # Change the coordinates
     $canvas coords $primary($id) $x0 $y0 $x1 $y1
@@ -285,6 +296,27 @@ body ::tycho::Terminal::_size {id canvas slate size} {
 }
 
 ##########################################################################
+#### -slash option configuration
+#
+body ::tycho::Terminal::_slash {id canvas slate slash} {
+    set option(slash$id) $slash
+
+    if !$slash {
+	if { [::info exists component(slash$id)] } {
+	    $canvas delete $component(slash$id)
+	    unset component(slash$id)
+	}
+    } elseif { ![::info exists component(slash$id)] } {
+	set coords [$canvas coords $primary($id)]
+	set x [expr ([lindex $coords 0] + [lindex $coords 2]) / 2]
+	set y [expr ([lindex $coords 1] + [lindex $coords 3]) / 2]
+	set component(slash$id) [$canvas create line \
+		[expr $x+5] [expr $y-5] [expr $x-5] [expr $y+5] \
+		-fill $option(fill$id) -width $option(width$id)]
+    }
+}
+
+##########################################################################
 #### -style option configuration
 #
 body ::tycho::Terminal::_style {id canvas slate style} {
@@ -307,8 +339,8 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 	}
 	"doublearrowin" {
 	    set coords [$canvas coords $primary($id)]
-	    set xdir [lindex $option(direction$id) 0]
-	    set ydir [lindex $option(direction$id) 1]
+	    set xdir [lindex $variable(vector$id) 0]
+	    set ydir [lindex $variable(vector$id) 1]
 
 	    $canvas itemconfigure $primary($id) -arrow first
 	    set component(blob$id) [$canvas create line \
@@ -322,8 +354,8 @@ body ::tycho::Terminal::_style {id canvas slate style} {
 	}
 	"doublearrowout" {
 	    set coords [$canvas coords $primary($id)]
-	    set xdir [lindex $option(direction$id) 0]
-	    set ydir [lindex $option(direction$id) 1]
+	    set xdir [lindex $variable(vector$id) 0]
+	    set ydir [lindex $variable(vector$id) 1]
 
 	    $canvas itemconfigure $primary($id) -arrow last
 	    set component(blob$id) [$canvas create line \
@@ -375,8 +407,11 @@ body ::tycho::Terminal::_type {id canvas slate type} {
 #### -width option configuration
 #
 body ::tycho::Terminal::_width {id canvas slate width} {
-    set option(width$id) width
-   $canvas itemconfigure $primary($id) -width $width
+    set option(width$id) $width
+    $canvas itemconfigure $primary($id) -width $width
+    if { [::info exists component(slash$id)] } {
+	$canvas itemconfigure $component(slash$id) -width $option(width$id)
+    }
 }
 
 ##########################################################################
@@ -411,8 +446,10 @@ body ::tycho::Terminal::aspect {id canvas slate args} {
 body ::tycho::Terminal::construct {id canvas slate tags x y args} {
     # Initialize the options
     foreach {opt val} [concat [array get optiondefault] $args] {
-	set option([string trimleft $opt -]$id) $val
+        set option([string trimleft $opt -]$id) $val
     }
+    set variable(vector$id) \
+            [::tycho::Shape::compassToVector $option(direction$id)]
 
     # Figure out the origin
     set parent [$slate parent $id]
@@ -433,8 +470,8 @@ body ::tycho::Terminal::construct {id canvas slate tags x y args} {
         set y0 $y
     }
     # Figure the other end.
-    set x1 [expr $x0 + [lindex $option(direction$id) 0] * $option(length$id)]
-    set y1 [expr $y0 + [lindex $option(direction$id) 1] * $option(length$id)]
+    set x1 [expr $x0 + [lindex $variable(vector$id) 0] * $option(length$id)]
+    set y1 [expr $y0 + [lindex $variable(vector$id) 1] * $option(length$id)]
 
     # The primary component is also the line.
     set primary($id) [$canvas create line $x0 $y0 $x1 $y1 \
