@@ -1,5 +1,5 @@
 /* 
-Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+Copyright (c) 1990-1993 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -23,11 +23,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 */
 /* Version $Id$
-   Copyright 1991 The Regents of the University of California.
-   All Rights Reserved.
-
-   Programmer:  T. M. Parks
-   Date of creation:  8 Nov 91
+   Author:	T. M. Parks
+   Created:	8 Nov 91
 */
 
 static const char file_id[] = "$RCSfile$";
@@ -39,12 +36,10 @@ static const char file_id[] = "$RCSfile$";
 #include "TimeVal.h"
 #include "type.h"
 #include <signal.h>
+#include <sys/types.h>
 
-#ifdef __GNUG__
-typedef void (*SIG_PF)(int);
-#else
-#include <std.h>
-#endif
+extern "C" int select(int width, fd_set* read, fd_set* write, fd_set* except,
+			const timeval* timeout);
 
 TimeVal::TimeVal()
 {
@@ -114,33 +109,13 @@ TimeVal& TimeVal::operator-=(const TimeVal& t)
     return *this;
 }
 
-// Signal handler used by sleep().
-static int gotcha = FALSE;
-void alarmHandler(int)
-{
-    gotcha = TRUE;
-}
-
-/* This sleep function makes exclusive use of the real interval timer.
-   No effort is made to save or restore its previous state.
-   Return TRUE if a pause was required (non-negative delay).
-*/
+// Return TRUE if a pause was required (non-negative delay).
 int TimeVal::sleep() const
 {
     // sleep only if the delay is non-negative.
     if (tv_sec >= 0 && tv_usec >= 0)
     {
-	itimerval i;
-	i.it_interval.tv_sec = i.it_interval.tv_usec = 0;
-	i.it_value.tv_sec = tv_sec;
-	i.it_value.tv_usec = tv_usec;
-	SIG_PF act = signal(SIGALRM, (SIG_PF)alarmHandler);
-	setitimer(ITIMER_REAL, &i, 0);
-	while(!gotcha) sigpause(0);
-#	ifndef hpux
-	signal(SIGALRM, act);	// restore previous action
-#	endif
-	gotcha = FALSE;
+	select(0, NULL, NULL, NULL, this);
 	return TRUE;
     }
     else return FALSE;
