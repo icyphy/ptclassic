@@ -440,7 +440,7 @@ so we removed the <CODE>-DPT_NO_TIMER</CODE> from
 is to either edit <CODE>config-nt4.mk</CODE> and add the 
 <CODE>-DPT_NO_TIMER</CODE> flag and recompile, or to do the following:
 <pre>
-cd $PTOLEMY/obj.nt4
+cd $PTOLEMY/obj.nt4/kernel
 rm SimControl.o ProfileTimer.o
 make USERFLAGS=-DPT_NO_TIMER install
 cd ../pigiRpc
