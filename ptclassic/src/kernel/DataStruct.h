@@ -215,12 +215,23 @@ private:
 
 class ListIter {
 public:
+	// constructor: attach to a SequentialList
 	ListIter(const SequentialList& l) : list(&l), ref(l.lastNode) {}
+
+	// reset to the beginning of a list
 	void reset() { ref = list->lastNode;}
-	Pointer next();
+
+	// next and operator++ are synonyms.  Return the next element,
+	// return 0 if there are no more.
+	// The compact form is chosen so that cfront can inline it.
+	Pointer next() {
+		Pointer p = ref ? (ref = ref->next, ref->e) : 0;
+		if (ref == list->lastNode) ref = 0;
+		return p;
+	}
+
 	Pointer operator++ () { return next();}
-// a bug in g++ 1.96 makes things blow up if reconnect is protected. gak!
-// protected:
+
 // attach the ListIter to a different object
 	void reconnect(const SequentialList& l) {
 		list = &l; ref = l.lastNode;
