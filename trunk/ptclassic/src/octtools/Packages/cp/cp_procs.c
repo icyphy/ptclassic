@@ -71,10 +71,10 @@ int
 cp_get_point (point)
 cp_point *point;
 {
+    int temp;
 
     flush(SEP);
 
-    int temp;
     /* point->x and point->y is a int32, which could be a long, and
        cp_get_sinteger takes a *int arg, so we use a temp variable */
     if (!cp_get_sinteger(&temp))
