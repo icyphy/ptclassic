@@ -73,7 +73,8 @@ PL_SRCS= \
  SDFVis64ToFloat.pl \
  SDFQuadFir.pl \
  SDFQuadBiquad.pl \
- SDFQuadRFFT8.pl
+ SDFQuad8FFT.pl \
+ SDFQuadFFTCx.pl
 
 # The .cc files
 SRCS= $(PL_SRCS:.pl=.cc)
