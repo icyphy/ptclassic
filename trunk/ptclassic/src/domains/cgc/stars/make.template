@@ -56,10 +56,10 @@ PL_SRCS= \
  CGCSpread.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
- CGCXgraph \
+ CGCXgraph.pl \
  CGCXMgraph.pl \
- CGCXscope \
- CGCXYgraph
+ CGCXscope.pl \
+ CGCXYgraph.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
