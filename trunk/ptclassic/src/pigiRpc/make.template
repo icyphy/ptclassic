@@ -82,11 +82,11 @@ include $(ROOT)/mk/ptbin.mk
 
 all: $(PIGI) $(PIGI).ptiny $(PIGI).ptrim
 
+# Can't use echo -n on hppa, see the hppa echo man page.
+# First we substitute 'pal:' for 'pal '
+# Then we substitute \$$PTOLEMY for PTOLEMY
 palettes.$(PIGI).c: $(PT_DEPEND)
-	echo -n "char* defaultPalettes(){ return " > palettes.$(PIGI).c
-	echo "\"$(PALETTES):./user.pal:./init.pal\";}" | \
-		sed -e 's/PTOLEMY/$$PTOLEMY/g' -e 's/ /:/g' \
-		>> palettes.$(PIGI).c
+	echo "char* defaultPalettes(){ return \"$(subst PTOLEMY,\$$PTOLEMY,$(subst pal ,pal:,$(PALETTES))):./user.pal:./init.pal\";}" > palettes.$(PIGI).c
 	$(CC) -c palettes.$(PIGI).c	
 
 include $(ROOT)/mk/common.mk
