@@ -127,7 +127,12 @@ OBJS=$(SRCS:.cc=.o)
 all:	makefile $(LIB)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB)
+install:	makefile $(LIBDIR)/$(LIB) $(FLUSH_CACHE)
+ifdef FLUSH_CACHE
+	# FLUSH_CACHE is defined for hppa
+	rm -f $(LIBDIR)/$(FLUSH_CACHE)
+	ln $(FLUSH_CACHE) $(LIBDIR)	
+endif
 
 EXTRA_SRCS=XDomain.ccP ArrayState.ccP ArrayState.hP ScalarState.ccP ScalarState.hP
 
@@ -167,8 +172,11 @@ IntArrayState.h IntArrayState.cc : ArrayState.hP ArrayState.ccP
 	sed 's/"IntARRAY/"INTARRAY/' Int.int.ArrayState.cc > IntArrayState.cc; \
 	rm Int.int.ArrayState.cc
 
+# For dynamic linking on the hppa
+$(FLUSH_CACHE):
+	/bin/as $(VPATH)/`basename $(FLUSH_CACHE) .o`.s
+
 include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.
-
