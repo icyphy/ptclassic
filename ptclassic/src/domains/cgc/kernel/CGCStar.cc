@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGCStar.h"
 #include "CGCGeodesic.h"
+#include "CGUtilities.h"
 #include "Tokenizer.h"
 #include "ComplexState.h"
 #include "FixState.h"
@@ -53,35 +54,8 @@ extern const char CGCdomainName[];
 
 const char* CGCStar :: domain () const { return CGCdomainName;}
 
-// isa
-
+// isA
 ISA_FUNC(CGCStar, CGStar);
-
-// Sanitize a string so that it is usable as a C identifier.
-const char* sanitize(const char* string)
-{
-    const int MAX_LENGTH = 64;
-    static char clean[MAX_LENGTH];
-    char* c = clean;
-    int i = 0;
-
-    // Check for leading digit.
-    if (isdigit(*string))
-    {
-	*c++ = '_';
-	i++;
-    }
-
-    // Replace strange characters.
-    while (++i < MAX_LENGTH && *string)
-    {
-	*c++ = isalnum(*string) ? *string : '_';
-	string++;
-    }
-    *c = 0;
-
-    return clean;
-}
 
 // substitute macros for fixed point variables
 StringList CGCStar::expandMacro(const char* func, const StringList& argList)
@@ -166,7 +140,7 @@ StringList CGCStar::expandRef(const char* name)
 	{
 	    ref << '[';
 	    if (port->staticBuf()) ref << port->bufPos();
-	    else ref << sanitize(starSymbol.lookup(port->name()));
+	    else ref << ptSanitize(starSymbol.lookup(port->name()));
 	    ref << ']';
 	}
     }
@@ -290,7 +264,7 @@ StringList CGCStar::expandRef(const char* name, const char* offset)
 	    {
 		ref << '(';
 		if (port->staticBuf()) ref << port->bufPos();
-		else ref << sanitize(starSymbol.lookup(port->name()));
+		else ref << ptSanitize(starSymbol.lookup(port->name()));
 		ref << "-(" << offset << ')';
 		if (!port->linearBuf())	// use circular addressing
 		{
@@ -532,7 +506,7 @@ int CGCStar::setTarget(Target* t)
 // construct symbolic precision for state or port with given name
 Precision CGCStar :: newSymbolicPrecision(int length,int intBits, const char* name)
 {
-    const char* label = sanitize(starSymbol.lookup(name));
+    const char* label = ptSanitize(starSymbol.lookup(name));
 
     StringList sym_len, sym_intb;
     sym_len  << label << "p.len";
@@ -697,7 +671,7 @@ void CGCStar :: updateOffsets()
 		    int nx = p->numXfer();
 		    if (nx == bs) continue;
 
-		    StringList pname = sanitize(starSymbol.lookup(p->name()));
+		    StringList pname = ptSanitize(starSymbol.lookup(p->name()));
 		    const char* geoname = NULL;
 
 		    // determine label of fix_prec array for ports of type FIX
@@ -1021,7 +995,7 @@ StringList CGCStar::declareOffset(const CGCPortHole* port)
 
     if (!port->staticBuf())
     {
-	dec << "int " << sanitize(starSymbol.lookup(port->name()))
+	dec << "int " << ptSanitize(starSymbol.lookup(port->name()))
 	    << ";\n";
     }
     return dec;
@@ -1034,7 +1008,7 @@ StringList CGCStar::initCodeOffset(const CGCPortHole* port)
 
     if (!port->staticBuf())
     {
-	code << sanitize(starSymbol.lookup(port->name()))
+	code << ptSanitize(starSymbol.lookup(port->name()))
 	    << " = " << port->bufPos() << ";\n";
     }
     return code;
@@ -1057,7 +1031,7 @@ StringList CGCStar::declareState(const State* state)
 	dec << "fix_prec";
     else dec << "double";
 
-    const char* name = sanitize(starSymbol.lookup(state->name()));
+    const char* name = ptSanitize(starSymbol.lookup(state->name()));
     dec << " " << name;
     if (state->isArray()) dec << "[" << state->size() << "]";
 
