@@ -53,6 +53,8 @@ ptplay.irix4: ptplay.irix5
 	ln -s $^ $@ 
 ptplay.hppa.cfront: ptplay.hppa
 	ln -s $^ $@ 
+ptplay.mips:
+	@echo "mips architecture does not have a ptplay (yet)."
 
 $(BINDIR)/ptplay:	ptplay
 	@if [ $(ARCH) = "mips" ]; then \
