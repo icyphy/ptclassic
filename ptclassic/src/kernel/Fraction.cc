@@ -1,11 +1,7 @@
 static const char file_id[] = "Fraction.cc";
-#include "Fraction.h"
-#include <stream.h>
-
-// SCCS version identification
-// $Id$
-
-/*
+/**************************************************************************
+Version identification:
+$Id$
 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -41,7 +37,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  This file contains the member function definitions.
 
-*/
+**************************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "Fraction.h"
+#include <stream.h>
 
 // greatest common divisor function.  If 2nd arg is negative, result is
 // negative.  Magnitude of result equals gcd(abs(a),abs(b)).
