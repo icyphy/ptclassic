@@ -44,7 +44,6 @@ EXTRA_SRCS =	create.html \
 		directories.html \
 		index.html \
 		install.html \
-		old.html \
 		structure.html \
 		use.html
 
