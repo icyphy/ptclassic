@@ -7,15 +7,17 @@ Demonstrate the DTFT star.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
-.IE DTFT
-.IE "discrete-time Fourier transform"
-.IE "Fourier transform"
 .pp
+.Ie "spectral estimation"
+.Ie "discrete time Fourier transform"
+.Ie "DTFT"
+.Ie "Fourier transform, discrete time"
 This demo compares the function of the
 .c DTFT
 star to that of the
 .c ComplexFFT
 star.
+.Ie "ComplexFFT"
 While both stars output samples of the discrete-time Fourier
 transform of a finite-length signal, the
 .c FFT

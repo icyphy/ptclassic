@@ -19,6 +19,10 @@ Note that since the
 star does block processing, this demo should be run for one iteration.
 The number of Gaussian samples processed will be determined
 by the \fInoInputsToAvg\fR parameter of the autocorrelation block.
+.Ie "IIDGaussian"
+.Ie "Autocor"
+.Ie "Gaussian noise"
+.Ie "noise, Gaussian"
 .SA
 Autocor,
 Xhistogram,
