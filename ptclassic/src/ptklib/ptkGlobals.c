@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkGlobals.cc  aok
-    Version: $Id$
+    Version: @(#)ptkGlobals.c	1.1 5/27/93
 */
 
 #include "ptk.h"
@@ -33,3 +33,5 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Tcl_Interp *ptkInterp;
 Tk_Window ptkW;
 
+/* we need this decl to prevent tkMain.o from being faulted in -- kennard */
+char *tcl_RcFileName = NULL;

@@ -103,17 +103,19 @@ all:	makefile $(LIB)
 install: makefile $(LIBDIR)/$(LIB)
 
 # include the X11, oct and tcl headers for C++ as well as C
+# Note that some X11 installs have bogus (old versions) of the tcl/tk
+# headers, thus we must search the tcl/tk includes before the X11 includes
 INCL=	-I$(KERNDIR) -I$(PTCL_INCDIR) -I$(OCTTOOLS)/include \
-	$(X11_INCSPEC) -I$(TCL_INCDIR) -I$(TK_INCDIR)
+	-I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
-C_INCL=-I$(OCTTOOLS)/include $(X11_INCSPEC) -I$(TCL_INCDIR)
+C_INCL=-I$(OCTTOOLS)/include -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
 
 lint:	$(LIBCSRCS)
 	lint -u -I$(OCTTOOLS)/include $(LIBCSRCS) > lint
 
 
 # include common definitions, rules
-include $(ROOT)/common.mk
+include $(ROOT)/mk/common.mk
 
 # Don't add anything after the next line; makedepend will zap it.
 # DO NOT DELETE THIS LINE -- make depend depends on it.

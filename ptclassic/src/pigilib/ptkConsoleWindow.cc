@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkConsoleWindow.cc  aok
-    Version: $Id$
+    Version: @(#)ptkConsoleWindow.cc	1.1 5/27/93
 */
 
 // Sets up the standard input to feed from the xterm that
@@ -34,55 +34,153 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Alan Kamas 
 
 #include <stdio.h>
+#include <stdlib.h>	/* for exit() */
+#include <unistd.h>	/* for read() */
 extern "C" {
 #include "ptk.h"
 }
 
 
-Tcl_CmdBuf ptkConsoleBuffer;
+// The following function is taken directly from tkMain.c
 
-// The following function is taken directly from Wish.c
-void
-StdinProc(ClientData clientData, int mask)
-{
-    char line[200];
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * Prompt --
+ *
+ *	Issue a prompt on standard output, or invoke a script
+ *	to issue the prompt.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	A prompt gets output, and a Tcl script may be evaluated
+ *	in interp.
+ *
+ *----------------------------------------------------------------------
+ */
+
+static void
+_ptkPrompt(Tcl_Interp *interp, int partial) {
+    /* Tcl_Interp *interp; */		/* Interpreter to use for prompting. */
+    /* int partial; */			/* Non-zero means there already
+					 * exists a partial command, so use
+					 * the secondary prompt. */
+    char *promptCmd;
+    int code;
+
+    promptCmd = Tcl_GetVar(interp,
+	partial ? "tcl_prompt2" : "tcl_prompt1", TCL_GLOBAL_ONLY);
+    if (promptCmd == NULL) {
+	defaultPrompt:
+	if (!partial) {
+	    fputs("% ", stdout);
+	}
+    } else {
+	code = Tcl_Eval(interp, promptCmd);
+	if (code != TCL_OK) {
+	    Tcl_AddErrorInfo(interp,
+		    "\n    (script that generates prompt)");
+	    fprintf(stderr, "%s\n", interp->result);
+	    goto defaultPrompt;
+	}
+    }
+    fflush(stdout);
+}
+
+/*
+ *----------------------------------------------------------------------
+ *
+ * StdinProc --
+ *
+ *	This procedure is invoked by the event dispatcher whenever
+ *	standard input becomes readable.  It grabs the next line of
+ *	input characters, adds them to a command being assembled, and
+ *	executes the command if it's complete.
+ *
+ * Results:
+ *	None.
+ *
+ * Side effects:
+ *	Could be almost arbitrary, depending on the command that's
+ *	typed.
+ *
+ *----------------------------------------------------------------------
+ */
+
+static Tcl_DString _ptkStdinCmdStr;
+
+    /* ARGSUSED */
+static void
+_ptkStdinProc(ClientData clientData, int mask) {
+#define BUFFER_SIZE 4000
+    char input[BUFFER_SIZE+1];
     static int gotPartial = 0;
     char *cmd;
-    int result;
+    int code, count;
+    int tty = 1;
 
-    if (mask & TK_READABLE) {
-        if (fgets(line, 200, stdin) == NULL) {
-            if (!gotPartial) {
-                Tcl_Eval(ptkInterp, "destroy .", 0, (char **) NULL);
-                return;
-            } else {
-                line[0] = 0;
-            }
-        }
-        cmd = Tcl_AssembleCmd(ptkConsoleBuffer, line);
-        if (cmd == NULL) {
-            gotPartial = 1;
-            return;
-        }
-        gotPartial = 0;
-        result = Tcl_RecordAndEval(ptkInterp, cmd, 0);
-        if (*ptkInterp->result != 0) {
-            printf("%s\n", ptkInterp->result);
-        }
-        printf("ptk: ");
-        fflush(stdout);
+    count = read(fileno(stdin), input, BUFFER_SIZE);
+    if (count <= 0) {
+	if (!gotPartial) {
+	    if (tty) {
+		Tcl_Eval(ptkInterp, "exit");
+		exit(1);
+	    } else {
+		Tk_DeleteFileHandler(0);
+	    }
+	    return;
+	} else {
+	    count = 0;
+	}
+    }
+    cmd = Tcl_DStringAppend(&_ptkStdinCmdStr, input, count);
+    if (count != 0) {
+	if ((input[count-1] != '\n') && (input[count-1] != ';')) {
+	    gotPartial = 1;
+	    goto prompt;
+	}
+	if (!Tcl_CommandComplete(cmd)) {
+	    gotPartial = 1;
+	    goto prompt;
+	}
+    }
+    gotPartial = 0;
+
+    /*
+     * Disable the stdin file handler while evaluating the command;
+     * otherwise if the command re-enters the event loop we might
+     * process commands from stdin before the current command is
+     * finished.  Among other things, this will trash the text of the
+     * command being evaluated.
+     */
+
+    Tk_CreateFileHandler(0, 0, _ptkStdinProc, (ClientData) 0);
+    code = Tcl_RecordAndEval(ptkInterp, cmd, 0);
+    Tk_CreateFileHandler(0, TK_READABLE, _ptkStdinProc, (ClientData) 0);
+    Tcl_DStringFree(&_ptkStdinCmdStr);
+    if (*ptkInterp->result != 0) {
+	if ((code != TCL_OK) || (tty)) {
+	    printf("%s\n", ptkInterp->result);
+	}
+    }
+
+    /*
+     * Output a prompt.
+     */
+
+    prompt:
+    if (tty) {
+	_ptkPrompt(ptkInterp, gotPartial);
     }
 }
 
 
-void ptkConsoleWindow()
-{
-    Tk_CreateFileHandler(0, TK_READABLE, StdinProc, (ClientData) 0);
-    printf("ptk started\n\nptk: ");
-    fflush (stdout);
-    // fixme: should be some way to deletle this when done.
-    ptkConsoleBuffer = Tcl_CreateCmdBuf();
 
+void ptkConsoleWindow() {
+    Tcl_DStringInit(&_ptkStdinCmdStr);
+    Tk_CreateFileHandler(0, TK_READABLE, _ptkStdinProc, (ClientData) 0);
+    _ptkPrompt(ptkInterp,0);
 }
-
-
