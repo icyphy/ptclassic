@@ -119,8 +119,7 @@ octObject *obj;			/* Object (returned) */
 {
     symIntArea *atg = (symIntArea *) gen;
     symTermGen sgen;
-    octObject aterm, lyr, geo;
-    regStatus stat;
+    octObject lyr, geo;
     int result;
 
     switch (atg->state) {
@@ -164,6 +163,7 @@ octObject *obj;			/* Object (returned) */
 	}
     }
     /*NOTREACHED*/
+    return 0;
 }
 
 
