@@ -645,16 +645,16 @@ body ::tycho::DFGEdgeController::_initdrag:grapple {x y} {
 #
 body ::tycho::DFGEdgeController::_initdrag:junction {x y} {
     set id [$slate find withtag "current"]
-	set name [itemname $id]
+    set name [itemname $id]
 
     # Find the closest free terminal
-    set connectat [junctionnearest $id $x $y]
+    set connectat [junctionnearest $name $id $x $y]
     
-	# Make an output connection always.
-  	set end "from"
+    # Make an output connection always.
+    set end "from"
     set _aspect end
     set _totags input
-    set coords [concat [$slate aspect $source $connectat] $x $y]       
+    set coords [concat [$slate aspect $id $connectat] $x $y]       
 
     # Get a unique name for the edge/net
     while [$graph exists [set _edgename [::tycho::autoName edge]]] {}
