@@ -51,7 +51,6 @@ ITCL_SRCS = \
 	Compile.itcl \
 	CompileCTcl.itcl \
 	CompileJava.itcl \
-	DirSearch.itcl \
 	EditDiff.itcl \
 	Glimpse.itcl \
 	ItclClassList.itcl \

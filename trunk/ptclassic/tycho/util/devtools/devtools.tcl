@@ -57,15 +57,6 @@ if {$tcl_platform(platform) != "macintosh"} {
 	    -underline 0
 }
 
-# Directory Search
-::tycho::register mode "dirsearch" \
-        -command {set w [::tycho::autoName .dirsearch]; \
-        ::tycho::DirSearch $w -geometry +0+0;\
-	    wm deiconify $w} \
-	    -label {Directory Search}  \
-	    -category "tool" \
-	    -underline 1
-
 # Glimpse interface -- will not run on the Macintosh
 if {$tcl_platform(platform) != "macintosh"} {
     ::tycho::register mode "glimpse" \
