@@ -36,10 +36,11 @@ LIB=libddf.a
 # Library sources
 SRCS= \
  DDFConnect.cc DDFScheduler.cc DDFStar.cc DDFWormhole.cc DDFWormConnect.cc \
- DDFDomain.cc DDFAutoWorm.cc
+ DDFDomain.cc DDFAutoWorm.cc DDFTarget.cc
 
 # Header files
-HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFWormhole.h DDFWormConnect.h 
+HDRS= DDFConnect.h DDFScheduler.h DDFStar.h DDFWormhole.h DDFWormConnect.h \
+ DDFTarget.h
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)
