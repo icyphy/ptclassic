@@ -106,7 +106,7 @@ protected:
 private:
 	int indexValue;
 	int inStateFlag; // indicate there are internal states (default)
-	friend setStarIndices(Galaxy&);
+	friend int setStarIndices(Galaxy&);
 };
 
 int setStarIndices(Galaxy&);
