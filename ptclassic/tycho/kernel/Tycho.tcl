@@ -113,17 +113,21 @@ uplevel #0 {
     source $tychokernel/Lib.tcl
 }
 
+# If tychoWelcomeWindow is 0, then no 'Mr. Tycho' window is opened
+set tychoWelcomeWindow 1
+# If tychoWelcomeWindow is 0, then no console window is opened.
+set tychoConsoleWindow 1
+set tychoOpenFiles 0
+
+# Source ~/.tycho if it exists.  ~/.tycho contains user modifications.
 set tychostartfile [glob -nocomplain ~/.tycho]
 if {$tychostartfile != {} && \
 	[file exists $tychostartfile] && \
 	[file readable $tychostartfile]} {
-    source $tychostartfile
+    uplevel #0 {source $tychostartfile}
 }
 unset tychostartfile
 
-set tychoWelcomeWindow 1
-set tychoConsoleWindow 1
-set tychoOpenFiles 0
 foreach file $argv {
     if {$file == {-nowelcome}} {
 	set tychoWelcomeWindow 0
