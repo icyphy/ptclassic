@@ -42,30 +42,35 @@ limitation of liability, and disclaimer of warranty provisions.
 		readyToGo = FALSE;
 	}
 	go {
-	// get control Particles from Geodesic
-		if (!readyToGo)
-			control.receiveData();	
-		
-		InDDFMPHIter nexti(input);
-		InDDFPort* p = 0;
-		for (int i = int(control%0); i >= 0; i--)
-			p = nexti++;
-		if (!p) {
-			Error::abortRun (*this, "control value out of range");
+		// get control Particles from Geodesic
+		if (!readyToGo) control.receiveData();	
+
+		// test value of control string
+		int inputNum = int(control%0);
+		if ( inputNum < 0 ) {
+			Error::abortRun(*this, "control value is negative");
 			return;
 		}
-		if (p->numTokens() >= p->numXfer()) {
-			p->receiveData();
-			output%0 = (*p)%0;
+		else if ( inputNum >= input.numberPorts() ) {
+			Error::abortRun(*this, "control value is too large");
+			return;
+		}
+
+		InDDFMPHIter nexti(input);
+		InDDFPort* iportp = nexti++;
+		for (int i = 0; i < inputNum; i++) {
+			iportp = nexti++;
+		}
+		if (iportp->numTokens() >= iportp->numXfer()) {
+			iportp->receiveData();
+			output%0 = (*iportp)%0;
 			output.sendData();
 			waitFor(control);
 			readyToGo = FALSE;
 		} else {
-			waitFor(*p);
+			waitFor(*iportp);
 			readyToGo = TRUE;
 			return;
 		}
 	}
 }
-
-

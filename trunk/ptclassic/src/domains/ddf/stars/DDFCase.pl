@@ -34,19 +34,25 @@ limitation of liability, and disclaimer of warranty provisions.
 		control.receiveData();
 		input.receiveData();
 
+		// test the current value of the control signal
+		int outputNum = int(control%0);
+		if ( outputNum < 0 ) {
+		    Error::abortRun(*this, "control value is negative");
+		    return;
+		}
+		else if ( outputNum >= output.numberPorts() ) {
+		    Error::abortRun(*this, "control value too large");
+		    return;
+		}
+
 		// read control value, and route input
 		// to output depending on it.
 		MPHIter nexti(output);
-		PortHole* p = 0;
-		for (int i = int(control%0); i >= 0; i--)
-			p = nexti++;
-		if (!p) {
-			Error::abortRun (*this, "control value out of range");
-			return;
+		PortHole* oportp = nexti++;
+		for (int i = 0; i < outputNum; i++) {
+		    oportp = nexti++;
 		}
-		(*p)%0 = input%0;
-		p->sendData();
+		(*oportp)%0 = input%0;
+		oportp->sendData();
 	}
 }
-
-
