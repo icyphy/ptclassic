@@ -202,9 +202,10 @@ class ::tycho::EditProgram {
 body ::tycho::EditProgram::constructor {args} {
     
     eval itk_initialize $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -stringcolor stringColor \
 	    -commentcolor commentColor \
 	    -fixmecolor fixmeColor \
@@ -218,24 +219,24 @@ body ::tycho::EditProgram::constructor {args} {
     # the regions defined by the selection.
     menubar addSeparator Format
     
-    menubar add "Comment Out Region" Format -underline 8 \
+    menubar command "Comment Out Region" Format -underline 8 \
 	    -command "$this commentSelection"
     
-    menubar add "Uncomment Region" Format -underline 1 \
+    menubar command "Uncomment Region" Format -underline 1 \
 	    -command "$this uncommentSelection"
     
     menubar addSeparator Format
     
-    menubar add "Recolorize" Format -underline 0 -accelerator "C-L" \
+    menubar command "Recolorize" Format -underline 0 -accelerator "C-L" \
 	    -command "$this parseRegion 1.0 end"
     
-    menubar add "Indent Line" Format -underline 0 -accelerator "Tab" \
+    menubar command "Indent Line" Format -underline 0 -accelerator "Tab" \
 	    -command "$this indentLine"
 
-    menubar add "Tab" Format -underline 0 -accelerator "C-q Tab" \
+    menubar command "Tab" Format -underline 0 -accelerator "C-q Tab" \
 	    -command "$this insertString insert {\t}"
 
-    menubar add "Indent Region" Format -underline 2 \
+    menubar command "Indent Region" Format -underline 2 \
             -accelerator "M-C-\\" \
 	    -command "$this busy $this indentSelection"
     

@@ -109,9 +109,10 @@ class ::tycho::EditHTML {
 #
 body ::tycho::EditHTML::constructor {args} {
     eval itk_initialize $args
+    eval preference excludeoptions $this $args
 
     # Subscribe to the preference set
-    preference subscribe $this \
+    preference subscribeoptions $this \
 	    -commandcolor commandColor \
 	    -pointercolor pointerColor \
 	    -destcolor destColor
@@ -120,16 +121,16 @@ body ::tycho::EditHTML::constructor {args} {
     # the regions defined by the selection.
     menubar addSeparator Format
         
-    menubar add "Recolorize" Format -underline 0 \
+    menubar command "Recolorize" Format -underline 0 \
 	    -command "$this parseRegion 1.0 end"
 
     menubar addSeparator Edit
         
-    menubar add "Check Links" Edit -underline 6 \
+    menubar command "Check Links" Edit -underline 6 \
 	    -command "$this busy $this checkLinks"
 
     menubar addMenu Special -underline 0
-    menubar add "File Template" Special -underline 0 \
+    menubar command "File Template" Special -underline 0 \
 	    -command "$this fileTemplate"
 
 }
