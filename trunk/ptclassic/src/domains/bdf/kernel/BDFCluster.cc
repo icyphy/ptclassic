@@ -1931,7 +1931,7 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 // if the top level is not SDF -- not yet implemented.
 	int status;
 	if (!SDFcheck(*cgal)) {
-		status = handleDynamic(gal);
+		status = handleDynamic(*cgal);
 	}
 	else {
 		// top level is SDF.
