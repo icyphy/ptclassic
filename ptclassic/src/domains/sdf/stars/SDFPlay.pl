@@ -71,6 +71,7 @@ be a parameter.
 		const char* sf = saveFile;
 		// if name is empty, use a temp file.
 		if (sf == NULL || *sf == 0) {
+			delete [] fileName;
 			fileName = tempFileName();
 			delFile = TRUE;
 		}
@@ -153,7 +154,7 @@ be a parameter.
 	destructor {
 		if (strm) fclose (strm);
 		if (delFile) unlink (fileName);
-		LOG_DEL; delete fileName;
+		LOG_DEL; delete [] fileName;
 		fileName = 0;
 	}
 }
