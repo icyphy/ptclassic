@@ -47,9 +47,7 @@ PortHole& EventHorizon :: setPort (
                              Wormhole* parentWormhole,
                              Star* parentStar,
                              dataType t = FLOAT,
-			     float timeStamp = 0.0,
-			     unsigned numTokens = 1,
-			     unsigned delay = 0)
+			     unsigned numTokens = 1)
 {
 	// Initialize PortHole
         PortHole::setPort(s, parentStar,t);
@@ -57,8 +55,8 @@ PortHole& EventHorizon :: setPort (
 	// Initialize the EventHorizon members
 	timeStamp = 0.0;
 	dataNew = FALSE;
-	numberTokens = 1;
-	bufferSize = numberTokens + delay;
+	numberTokens = numTokens;
+	bufferSize = numberTokens;
 
 	// set which wormhole it is in
 	wormhole = parentWormhole;
@@ -176,10 +174,10 @@ void FromEventHorizon :: initialize()
 	// Initialize members
 	timeStamp = 0.0;
 	dataNew = FALSE;
-	numData = 0;
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItOutput())
 		ghostPort->initialize();
 }
 
+int FromEventHorizon :: ready() { return TRUE ;}
