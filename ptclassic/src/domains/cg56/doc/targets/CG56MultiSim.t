@@ -70,20 +70,18 @@ shared memory configuration.
 Given a CG56 domain description of the algorithm,  the user
 can set the target to CG56MultiSim. A number of parameters
 are available for this target. Many of these are similar to those of
-.c
-CGMultiTarget 
+.c CGMultiTarget 
 (from which this is derived).
 Those of particular interest here include the destination 
 directory to write the code to, the number of processors, the prefix
 for the generated code, and the shared memory map. The shared memory 
 map is the region of memory used for inter-processor communication.
-
+.pp
 On running a CG56 system with this target, the CG56 algorithm 
 is partitioned onto the specified number of processors, and 
 assembly code for the various processors is generated and assembled. 
 This can be followed by running the Thor demo
-.c
-CG56MultiSim_2
+.c CG56MultiSim_2
 which is a Thor domain simulation model for this target architecture.
 It consists of two ThorDSP56000s 
 connected via a dual-ported shared memory. The destination directory
