@@ -15,7 +15,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC tcltk library }
-	input {
+	inmulti {
 		name {input}
 		type {float}
 		desc { Any number of inputs to plot }
@@ -64,56 +64,86 @@ limitation of liability, and disclaimer of warranty provisions.
 		default { "+0+0" }
 		desc { Width of the bar graph in centimeters }
 	}
+	defstate {
+	        name {updateSize}
+	        type {int}
+	        default {1}
+	        desc { To speed up the display, this many bars are updated at once }
+	}
 	setup {
 	    if(double(top) <= double(bottom)) {
 		Error::abortRun(*this, "invalid range for the scale");
 	    }
         }
+	// The single argument to the codeblock is the number of inputs
+	codeblock (globalDecl,"int numIn") {
+	  int $starSymbol(ids)[@numIn][$val(number_of_bars)];
+	  int* $starSymbol(ids_ptr)[@numIn];
+	  double $starSymbol(buffer)[@numIn][$val(number_of_bars)];
+	  double* $starSymbol(buffer_ptr)[@numIn];
+	}
+	codeblock (inits,"int numIn") {
+	  {
+	    int i;
+	    for (i = 0; i < @numIn; i++) {
+	      $starSymbol(buffer_ptr)[i] = $starSymbol(buffer)[i];
+	      $starSymbol(ids_ptr)[i] = $starSymbol(ids)[i];
+	    }
+	    $ref(top) = $val(top);
+	    $ref(bottom) = $val(bottom);
+	  }
+	}
 	initCode {
-	    addGlobal("int $starSymbol(ids)[$val(number_of_bars)];");
-	    addGlobal("double $starSymbol(buffer)[$val(number_of_bars)];");
-	    addGlobal("double* $starSymbol(buffer_ptr);");
+	    addGlobal(globalDecl(input.numberPorts()));
 	    addDeclaration("int $starSymbol(count);");
-	    addGlobal("int* $starSymbol(ids_ptr);");
-	    addCode("$starSymbol(buffer_ptr)=$starSymbol(buffer);","tkSetup");
-	    addCode("$starSymbol(ids_ptr) = $starSymbol(ids);","tkSetup");
-	    addCode("$ref(top) = $val(top);\n","tkSetup");
-	    addCode("$ref(bottom) = $val(bottom);\n","tkSetup");
-	    addCode(makeGraph,"tkSetup");
-	    addCode(procDefs,"procedure");
+	    addDeclaration("int $starSymbol(batchCount);");
+	    addCode(inits(input.numberPorts()), "tkSetup");
+	    addCode(makeGraph(input.numberPorts()),"tkSetup");
+	    addCode(procDefs(input.numberPorts()),"procedure");
 	    addCode("$starSymbol(count) = 0;");
+	    addCode("$starSymbol(batchCount) = 0;");
 	}
 	go {
-	    addCode(updateDisplay);
+	  for (int i = 0; i < input.numberPorts(); i++) {
+	    StringList cmd = "$starSymbol(buffer)[";
+	    cmd << i;
+	    cmd << "][$starSymbol(count)] = $ref(input#";
+	    cmd << i+1;
+	    cmd << ");";
+	    addCode(cmd);
+	  }
+	  addCode(updateDisplay(input.numberPorts()));
 	}
-	codeblock (updateDisplay) {
-	    $starSymbol(buffer)[$starSymbol(count)++] = $ref(input);
-	    if ($starSymbol(count) == $val(number_of_bars)) {
-		    $starSymbol(count) = 0;
-		    if(ptkSetBarGraph(interp, &w,
-			    "$starSymbol(.bar)",
-			    &$starSymbol(buffer_ptr),
-			    1,
-			    $val(number_of_bars),
-			    $ref(top),
-			    $ref(bottom),
-			    &$starSymbol(ids_ptr)) == 0)
-		    errorReport("Cannot update bar graph.");
-	    }
-        }
-	codeblock (makeGraph) {
-	    Tcl_CreateCommand(interp, "$starSymbol(.bar)rescale",
-			$starSymbol(rescale),
-			(ClientData) 0, (void (*)()) NULL);
-	    if(ptkMakeBarGraph(interp, &w,
+	codeblock (updateDisplay,"int numIn") {
+	  if (++$starSymbol(count) == $val(number_of_bars)) {
+	    $starSymbol(count) = 0;
+	  }
+	  if (++$starSymbol(batchCount) == $val(updateSize)) {
+	    $starSymbol(batchCount) = 0;
+	    if(ptkSetBarGraph(interp, &w,
+			      "$starSymbol(.bar)",
+			      $starSymbol(buffer_ptr),
+			      @numIn,
+			      $val(number_of_bars),
+			      $ref(top),
+			      $ref(bottom),
+			      $starSymbol(ids_ptr)) == 0)
+	      errorReport("Cannot update bar graph.");
+	  }
+	}
+	codeblock (makeGraph,"int numIn") {
+	  Tcl_CreateCommand(interp, "$starSymbol(.bar)rescale",
+			    $starSymbol(rescale),
+			    (ClientData) 0, (void (*)()) NULL);
+	  if(ptkMakeBarGraph(interp, &w,
 			 "$starSymbol(.bar)",	/* name of top level window */
 			 "$val(label)",	        /* identifying string */
-			 &$starSymbol(buffer_ptr),/* data to be plotted */
-			 1,			/* one trace only */
+			 $starSymbol(buffer_ptr),   /* data to be plotted */
+			 @numIn,		/* number of traces */
 			 $val(number_of_bars),	/* number of data points */
 			 $ref(top),	        /* top of scale */
 			 $ref(bottom),	        /* bottom of scale */
-			 &$starSymbol(ids_ptr),	/* array to store item ids */
+			 $starSymbol(ids_ptr),	/* array to store item ids */
 			 "$val(position)",	/* position window*/
 			 $val(bar_graph_width),	/* width, in cm */
 			 $val(bar_graph_height)) == 0)
@@ -122,7 +152,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			$starSymbol(redraw),
 			(ClientData) 0, (void (*)()) NULL);
 	}
-	codeblock (procDefs) {
+	codeblock (procDefs,"int numIn") {
 	    static int
 	    $starSymbol(redraw)(dummy, interp, argc, argv)
 		ClientData dummy;		   /* Not used. */
@@ -132,12 +162,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    {
 		if(ptkSetBarGraph(interp, &w,
 			    "$starSymbol(.bar)",
-			    &$starSymbol(buffer_ptr),
-			    1,
+			    $starSymbol(buffer_ptr),
+			    @numIn,
 			    $val(number_of_bars),
 			    $ref(top),
 			    $ref(bottom),
-			    &$starSymbol(ids_ptr)) == 0)
+			    $starSymbol(ids_ptr)) == 0)
 		    errorReport("Cannot redraw bar graph");
 		return TCL_OK;
 	    }
