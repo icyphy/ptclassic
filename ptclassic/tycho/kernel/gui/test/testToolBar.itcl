@@ -68,9 +68,9 @@ test ToolBar-1.1 {Test out buttons} {
    # Try running entry methods on buttons
    set retval4 [list [.t clear foo] [.t get bar]]
 
-   catch {.t insert foo "This is a foo"} retval5
+   set retval5 [catch {.t insert foo "This is a foo"}]
    list $retval1 $retval2 $retval3 $retval4 $retval5
-} {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!}}
+} {{Foo! Bar!} {Foo! Bar!} {Foo! Bar! Bif!} {{} {}} 1}
 
 test ToolBar-2.1 {Test out entries} {
    catch {delete object .t}
