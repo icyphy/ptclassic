@@ -31,8 +31,9 @@ Target("simulate-BDF","DataFlowStar",
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
-	addState(loopScheduler.setState("loopScheduler",this,"YES",
-			"Specify whether to use loop scheduler."));
+	addState(allowDynamic.setState("allowDynamic",this,"YES",
+		"Specify whether to try dynamic execution if the graph\n"
+					"cannot be completely clustered"));
 	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
 		"schedulePeriod for interface with a timed domain."));
 }
@@ -46,21 +47,8 @@ BDFTarget::~BDFTarget() {
 }
 
 void BDFTarget::setup() {
-	SDFScheduler* s;
-	if (int(loopScheduler)) {
-		LOG_NEW; s = new BDFClustSched(logFile);
-	} else {
-		LOG_NEW; s = new BDFScheduler;
-	}
+	LOG_NEW; BDFClustSched* s = new BDFClustSched(logFile,allowDynamic);
 	setSched(s);
 	s->schedulePeriod = schedulePeriod;
 	Target::setup();
-	const char* file = logFile;
-	// just return status, unless we want a log file
-	// with the default scheduler.
-	if (int(loopScheduler) || Scheduler::haltRequested() || *file == 0)
-		return;
-	// create a file with the schedule in it
-	pt_ofstream o(logFile);
-	if (o) o << scheduler()->displaySchedule() << "\n";
 }
