@@ -1598,6 +1598,7 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
             }
 	    $HTMLDocSys readFile $filename
 
+	    # cd to the proper location so that getFileName works properly
 	    cd [file join doc codeDoc]
 	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
                                 if {[info exists ::gStop] && $gStop != 0} {
@@ -1611,12 +1612,12 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
                                 }
 		set retval "$retval\nWarning: $errMsg"
 	    }
-	    cd [file join .. ..]
 	    if {$generateIndex == 1} {
 		if [catch {$HTMLDocSys generateHTMLIndex $indexfd} errMsg] {
 		    set retval "$retval\nTyDoc generateHTMLIndex: Warning: $errMsg"
 		}
 	    }
+	    cd [file join .. ..]
 #	    if [catch {$HTMLDocSys resetOutsideClassComment} errMsg] {
 #                                if {[info exists ::gStop] && $gStop != 0} {
 #                                    error "Stop button hit. $errMsg"
@@ -1957,7 +1958,7 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 	    # The codeDoc.idx file is present, check it to see if it
 	    # has a link to our file
 	    if { $codeDocIdxContents == {} } {
-		# puts "getFileName: reading in $codeDocIdx"
+		 # puts "getFileName: reading in $codeDocIdx"
 		# Read codeDoc.idx into a common variable
 		set fd [open $codeDocIdx r]
 		set tmpContents [read $fd]
@@ -1976,7 +1977,15 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 		}
 		if [regexp "$classname class$" [lindex $item 0]] {
 		    # puts "getFileName: found $item "
-		    return [::tycho::relativePath  [file join [pwd] doc codeDoc] [lindex $item 1]]
+		    set retfile [::tycho::relativePath  [pwd] [lindex $item 1]]
+		    # puts "getFileName: returning1 $retfile"
+		    if ![ file exists $retfile] {
+			puts stderr "tydoc: Warning: while looking for\
+				`$classname',\n\
+				`[lindex $item 1]' was found,\n which resolves\
+				to `$retfile`, which does not exist"
+		    }
+		    return $retfile
 		}
 	    }
 
@@ -1990,20 +1999,24 @@ body ::tycho::HTMLDocSys::getFileName {classname} {
 		if [regexp "$classNameTail class documentation" \
 			[lindex $item 0]] {
 		    # puts "getFileName: found $item "
-		    # puts "getFileName: returning [::tycho::relativePath \
-		    #	    [file join [pwd] doc codeDoc] [lindex $item 1]]"
-		    return [::tycho::relativePath \
-			    [file join [pwd] doc codeDoc] [lindex $item 1]]
+		    set retfile [::tycho::relativePath  [pwd] [lindex $item 1]]
+		    # puts "getFileName: returning2 $retfile"
+		    if ![ file exists $retfile] {
+			puts stderr "tydoc: Warning: while looking for\
+				`$classname',\n\
+				`[lindex $item 1]' was found,\n which resolves\
+				to `$retfile`, which does not exist"
+		    }
+		    return $retfile
 		}
 	    }
-
 	}
     }
 
     # We failed to find a pre-existing html file with the right name,
     # so we just return the calculated name and hope that it gets
     # created later
-    puts "getFileName: returning $docFile"
+    puts "getFileName: returning at bottom: $docFile"
     return $docFile
 }
 
