@@ -107,9 +107,9 @@ ifdef CG96
 	CG = 1
 	PALETTES += PTOLEMY/src/domains/cg96/icons/cg96.pal
 	STARS += $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
-	TARGETS += $(CG96T)/Sim96Target.o
-	LIBS += -lcg96dspstars -lcg96stars -lcg96
-	LIBFILES += $(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
+	LIBS += -lcg96targets -lcg96dspstars -lcg96stars -lcg96
+	LIBFILES += $(LIBDIR)/libcg96targets.$(LIBSUFFIX) \
+		$(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcg96stars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcg96.$(LIBSUFFIX)
 endif
