@@ -465,11 +465,6 @@ body ::tycho::Edit::reload {{askuser 1} {filename ""}} {
     if {$filename == ""} {
 	set filename $file
     }
-    if {[info class] == "::tycho::Console"} {
-	# We are being called by a console.
-	tycho::inform "This action is not defined for consoles."
-	return 
-    }   
     # Save the position of the cursor.
     set ins [$itk_component(text) returnInsert]
     if {$modified && $askuser} {
