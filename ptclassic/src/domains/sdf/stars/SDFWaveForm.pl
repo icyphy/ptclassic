@@ -30,7 +30,7 @@ uses less storage.
 .Ir "halting a simulation"
 .Ir "simulation, halting"
 	}
-	version {$Id$}
+	version { $Id$ }
 	author { J. T. Buck }
 	copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
@@ -39,7 +39,7 @@ See the file ~ptolemy/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
-	ccinclude { "Scheduler.h" }
+	ccinclude { "SimControl.h" }
 	output {
 		name { output }
 		type { float }
@@ -76,7 +76,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	go {
 		if (int(haltAtEnd) && (pos >= value.size()))
-			Scheduler::requestHalt();
+			SimControl::requestHalt();
 		if (pos >= value.size()) {
 			output%0 << 0.0;
 			pos++;
