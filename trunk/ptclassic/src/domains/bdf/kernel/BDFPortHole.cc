@@ -109,15 +109,17 @@ void BDFPortHole::removeRelation() {
 	pAssocPort = 0;
 }
 	
+// return true if I am dynamic
+int BDFPortHole :: isDynamic() const {
+	return TorF((BDFRelation)relation);
+}
 
+// mph functions.
 PortHole& MultiInBDFPort :: newPort () {
 	BDFPortHole& p = *new InBDFPort;
 	p.setBDFParams(numberTokens,assocBoolean,relation,delay);
 	return installPort(p);
 }
-
-
-
 
 PortHole& MultiOutBDFPort :: newPort () {
 	BDFPortHole& p = *new OutBDFPort;

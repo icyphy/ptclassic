@@ -650,9 +650,16 @@ void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 }
 
 // return true if any condition associated with the port is satisfied.
-// This setup is ok for unconditional, DO_IFTRUE and DO_IFFALSE.
-int BDFCluster::condSatisfied() {
-	if (pType != DO_IFTRUE && pType != DO_IFFALSE) return TRUE;
+// if "pre" is true, the call is happening before any execution.  We
+// always return true except for DO_IFTRUE and DO_IFFALSE.
+// if "pre" is false, teh call happens after execution and we are being
+// asked if we should keep going, which can be true only for DO_UNTILTRUE
+// or DO_UNTILFALSE.
+
+int BDFCluster::condSatisfied(int pre) {
+	if (pre && pType != DO_IFTRUE && pType != DO_IFFALSE) return TRUE;
+	if (!pre && pType != DO_UNTILTRUE && pType != DO_UNTILFALSE)
+		return FALSE;
 	// get most recent token from geodesic.
 	Geodesic* g = pCond->innermost()->real().geo();
 	Particle* p = g->get();
@@ -662,7 +669,10 @@ int BDFCluster::condSatisfied() {
 	}
 	int v = int(*p);
 	g->pushBack(p);
-	return (pType == DO_IFTRUE) == (v != 0);
+// if this is DO_IFTRUE, return TRUE (execute) if token is true (nonzero).
+// if this is DO_UNTILFALSE, return TRUE (keep going) " "   "     "
+// the reverse happens for DO_IFFALSE or DO_UNTILTRUE.
+	return (pType == DO_IFTRUE || pType == DO_UNTILFALSE) == (v != 0);
 }
 
 // this creates a duplicate of a port.  For bag ports, we recursively
@@ -1206,13 +1216,14 @@ StringList BDFClusterBag::displaySchedule(int depth) {
 }
 
 // run the cluster, taking into account the loop factor
-int BDFClusterBag::run() {
-	if (!sched) return FALSE;
-	if (!condSatisfied()) return TRUE;
-	sched->setStopTime(loop()+exCount);
-	sched->run();
-	exCount += loop();
-	return !Scheduler::haltRequested();
+void BDFClusterBag::go() {
+	if (!sched || !condSatisfied(TRUE)) return;
+	do {
+		sched->setStopTime(loop()+exCount);
+		sched->run();
+		exCount += loop();
+	} while (!Scheduler::haltRequested() && condSatisfied(FALSE));
+	return;
 }
 
 // destroy the bag.
@@ -1490,12 +1501,14 @@ StringList BDFAtomCluster::displaySchedule(int depth) {
 	return sch;
 }
 
-int BDFAtomCluster::run() {
-	if (!condSatisfied()) return TRUE;
-	for (int i = 0; i < loop(); i++) {
-		if (!pStar.run()) return FALSE;
-	}
-	return TRUE;
+void BDFAtomCluster::go() {
+	if (!condSatisfied(TRUE)) return;
+	do {
+		for (int i = 0; i < loop(); i++) {
+			if (!pStar.run()) return;
+		}
+	} while (condSatisfied(FALSE));
+	return;
 }
 
 int BDFAtomCluster::myExecTime() {

@@ -69,6 +69,9 @@ public:
 
 	int assocRelation() const { return relation;}
 
+	// return true if port is dynamic (transfers variable # of tokens)
+	int isDynamic() const;
+
         // The setPort function is redefined to take one more optional
         // argument, a reference to a BDFSigInfo object giving information
 	// about the signal.
@@ -97,10 +100,6 @@ public:
 			  int delay = 0) {
 		return setBDFParams(numTokens,&assocBool,relation,delay);
 	}
-
-	// Services of PortHole that are often used:
-	// setPort(DataType d);
-	// Particle& operator % (int);
 
 	// table for use of "reversals" function
 	static BDFRelation reversals[4];
