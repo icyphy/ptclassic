@@ -151,33 +151,67 @@ body ::tycho::CompileJava::destructor {} {
 #
 body ::tycho::CompileJava::classpath {} {
     global env tcl_platform
+    set classPathArg ""
+    set classPath ""
     if [::tycho::preference get java useEnvClassPath] {
         if [info exists env(CLASSPATH)] { 
 	    set classPath [::tycho::expandPathSplit $env(CLASSPATH)]
 	    set classPathArg "-classpath $classPath"
-	} else {
-	    set classPathArg ""
 	}
     } else {
 	set classPath [::tycho::expandPath \
                 [::tycho::preference get java classPath]]
-	if {$classPath == {} } { 
-	    # Why??? if [info exists env(CLASSPATH)] { 
-		# unset env(CLASSPATH)
-	    # }
-	    set classPathArg ""
-	} else {
+	if {$classPath != {} } { 
 	    set classPathArg "$classPath"
 	}
     }
     
+    # Check that each element of the class path exists
+    foreach dirorfile $classPath {
+        if [catch {set expandeddirorfile \
+                [uplevel #0 subst $dirorfile]} errMsg ] {
+            # This is an error because if the substitution above failed,
+            # then the substitution at the end of this file will fail too.
+            error "The classPath  preference contains `$dirorfile' \
+		    which failed to expand properly.  The error message \
+		    was: \n$errMsg\n\n\
+                    To change the classPath preference, select Preferences \
+                    menu choice under the Help menu, and then select the \
+		    Java preferences"
+        }
+        if { ![ file isdirectory $expandeddirorfile] && \
+		![file readable $expandeddirorfile] } {
+            ::tycho::warn "The classPath  preference contains `$dirorfile' \
+		    as an element, which expands to `$expandeddirorfile' \
+		    which does not exists  (Either it is not a directory \
+                    or it is not a readablefile).\n\
+		    To change the classPath preference, select Preferences \
+                    menu choice under the Help menu, and then select the \
+		    Java preferences"
+        }
+        if {$tcl_platform(platform) == "windows"} {
+            if [regexp {[^\]\\[^\]} $expandeddirorfile] {
+                ::tycho::warn "The classPath  preference contains \
+			`$dirorfile' as an element, which \
+                        expands to `$expandeddirorfile' which contains a \
+			backslash.  In the Sun JDK1.1.2 \
+                        under Windows, a backslash might prevent javac from \
+			properly finding a class.\n\
+			To change the classPath preference, select \
+			Preferences menu choice under the Help menu, and then \
+			select the Java preferences""
+            }
+        }
+    }
+
+
     switch $tcl_platform(platform) {
         {unix} { set classpath [join $classPathArg ":"]}
         {windows} { set classpath [join $classPathArg "\\\\;"]}
         {macintosh} { error "Internal error: CompileJava::classPath, macintosh \
                 not supported"}
     }
-    return [subst $classpath]
+    return [uplevel #0 subst $classpath]
 }
 
 #######################################################################
