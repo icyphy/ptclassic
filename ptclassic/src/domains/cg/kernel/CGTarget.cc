@@ -195,6 +195,7 @@ void CGTarget::setup() {
 	if (inWormHole() && alone())
 	{
 	    adjustSampleRates();
+	    wormPrepare();
 	    generateCode();
 	    if (haltRequested()) return;
 	    if (compileCode())
@@ -218,6 +219,8 @@ void CGTarget::childInit() {
 		LOG_NEW; setSched(new SDFScheduler);
 	}
 }
+
+void CGTarget::wormPrepare() { }
 
 int CGTarget :: run() {
     // avoid core dumps from incorrect operation
