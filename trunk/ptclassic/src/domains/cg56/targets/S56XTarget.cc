@@ -52,10 +52,9 @@ void S56XTarget :: headerCode () {
 	aioCmds.initialize();
 	shellCmds.initialize();
 	CG56Target :: headerCode();
-	const char *path = expandPathName("~ptolemy/lib/cg56/s56x.asm");
+	const char *path = expandPathName("$PTOLEMY/lib/cg56/s56x.asm");
 	myCode << "\tinclude '" << path << "'\n";
 	interruptFlag = TRUE;
-	shellCmds << headerComment("# ");
 };
 
 Block* S56XTarget::makeNew() const {
@@ -76,7 +75,11 @@ int S56XTarget :: compileCode() {
 	return TRUE;
 }
 
-void S56XTarget :: writeCode() {
+void S56XTarget :: writeCode(const char* name) {
+	if (name==NULL) {
+		LOG_DEL; delete uname;
+		uname = savestring(name);
+	}
 	/*
 	 * generate .aio data file
 	 */
@@ -90,6 +93,7 @@ void S56XTarget :: writeCode() {
 	 */
 	const char *monprog = monitorProg;
 	StringList realcmds = "#!/bin/sh\n";
+	realcmds << headerComment("# ");
 	if ( monprog==NULL || *monprog=='\0' ) {
 	    realcmds << "load_s56x" << " '" << uname << ".lod'\n" << shellCmds;
 	} else {
@@ -113,7 +117,7 @@ void S56XTarget :: writeCode() {
 int S56XTarget :: runCode() {
 	StringList runCmd;
 	runCmd << uname << " &";
-	if (systemCall(runCmd,"Problems running code onto S56X")!=0)
+	if (systemCall(runCmd,"Problems running code onto S56X",targetHost)!=0)
 	    return FALSE;
 	return TRUE;
 }

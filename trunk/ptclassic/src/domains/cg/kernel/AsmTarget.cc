@@ -291,7 +291,7 @@ char* AsmTarget :: fullFileName(const char* base, const char* suffix)
 	return fullName;
 }
 
-int AsmTarget::genDisFile(const char* stuff,char* base,const char* suffix)
+int AsmTarget::genDisFile(const char* stuff,const char* base,const char* suffix)
 {
 	char* name = fullFileName(base,suffix);
 	int status = display(stuff,name);
@@ -299,10 +299,10 @@ int AsmTarget::genDisFile(const char* stuff,char* base,const char* suffix)
 	return status;
 }
 
-int AsmTarget :: genFile(const char* stuff,char* base,const char* suffix)
+int AsmTarget :: genFile(const char* stuff,const char* base,const char* suffix)
 {
 	int status;
-	if (stuff == NULL) return FALSE;
+	if (stuff == NULL) return TRUE;
 	char* fullName = fullFileName(base, suffix);
 	pt_ofstream o(fullName);
 	if (!o) status = FALSE;
@@ -353,11 +353,12 @@ void AsmTarget :: wormOutputCode(PortHole& p) {
     myCode << comment(mem->printMemMap("",""));
 }
 
-void AsmTarget :: writeCode() {
+void AsmTarget :: writeCode(const char* name) {
+	if (name==NULL) name=uname;
         if (int(displayFlag) && !haltRequested())
-                if (!genDisFile(myCode,uname,asmSuffix())) return;
+                if (!genDisFile(myCode,name,asmSuffix())) return;
         else 
-                if (!genFile(myCode,uname,asmSuffix())) return;
+                if (!genFile(myCode,name,asmSuffix())) return;
 }
 
 void AsmTarget :: wrapup() {
