@@ -40,7 +40,7 @@ BINARY = ptlang.exe
 all:	$(BINARY)
 
 $(BINARY): ptlang.c
-	$(cc32) $(CON_CFLAGS) -Dstrncasecmp=strnicmp -Fo$(TMPDIR)\ $?
+	$(cc32) $(CON_CFLAGS) /DPT_NT4VC -Dstrncasecmp=strnicmp -Fo$(TMPDIR)\ $?
 	set LIB=$(TOOLS32)\lib
 	$(link32) $(linkdebug) $(conlflags) -out:$@ $(TMPDIR)\ptlang.obj $(guilibs) libc.lib
 
