@@ -58,6 +58,7 @@ char *s_prompt();
 #include <X11/StringDefs.h>
 #include <X11/Xaw/AsciiText.h>
 #include <X11/Xaw/Text.h>
+#include <X11/Xmu/Atoms.h>	/* Pick up XmuInternStrings() */
 #include "st.h"
 #include "ts.h"
 
@@ -96,6 +97,9 @@ static int ts_char_remove();
 static void ts_del();
 static void tsSelectionReceived();
 static void SelOffSetInsert();
+int ts_merge
+	ARGS((int size_one, Cardinal len_one, ArgList args_one,
+	      Cardinal len_two, ArgList args_two));
 
 
 
@@ -220,7 +224,7 @@ XEvent *evt;			/* Event to examine */
  * Returns the time field of the event.
  */
 {
-    Time ret_time;
+    Time ret_time = 0;
 
     switch (evt->type) {
     case ButtonPress:
@@ -581,12 +585,12 @@ String str;			/* Null terminated array of characters */
 {
     ts_info *info;
     String current;
-    int ret_value;
+    int ret_value = 0;
 
     if (st_lookup(ts_table, (char *) w, (char **) &info)) {
 	current = str;
 	while (str && *str) {
-	    if (str = strchr(str, BS_CHAR)) {
+	    if ( (str = strchr(str, BS_CHAR)) ) {
 		ts_write_buf(w, info, str-current, current);
 		while (*str && (*str == BS_CHAR)) {
 		    ret_value = tsWriteChar(w, *str);
@@ -621,9 +625,7 @@ int size;			/* Additional characters   */
  * infrequent line breaks.
  */
 {
-    Arg arg_list[MAX_ARGS];
     char *str = (char *) 0;
-    Cardinal count = 0;
     XawTextBlock block;
     int i;
 #ifdef DEBUG
