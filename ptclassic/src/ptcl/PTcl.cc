@@ -55,6 +55,21 @@ static const char file_id[] = "PTcl.cc";
 #include "Scheduler.h"
 #include "InfString.h"
 
+// "matlab" ptcl command -BLE
+// we make matlabtcl a static instance of the MatlabTcl class instead of
+// a data member of the PTcl class because other libraries, e.g. pigilib,
+// rely on the PTcl class but do not use the "matlab" ptcl command, so
+// false dependencies would otherwise be automatically created by make depend
+#include "MatlabTcl.h"
+
+static MatlabTcl matlabtcl;
+
+int PTcl::matlab(int argc,char** argv) {
+	matlabtcl.SetTclInterpreter(interp);
+	return matlabtcl.matlab(argc, argv);
+}
+
+
 // we want to be able to map Tcl_interp pointers to PTcl objects.
 // this is done with a table storing all the PTcl objects.
 
@@ -611,12 +626,6 @@ int PTcl::listobjs (int argc,char ** argv) {
 	}
 	else return usage(use);
 	return TCL_OK;
-}
-
-// Interface to Matlab for matrix computations
-int PTcl::matlab(int argc,char** argv) {
-	matlabtcl.SetTclInterpreter(interp);
-	return matlabtcl.matlab(argc, argv);
 }
 
 int PTcl::reset(int argc,char** argv) {
