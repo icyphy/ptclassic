@@ -30,23 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#### options
-# Unfortunately, Itcl appears to require us to repeat the options
-# from the base class with the new class name.
-option add *Mathematica.textWidth 60 widgetDefault
-option add *Mathematica.textHeight 16 widgetDefault
-option add *Mathematica.parenColor [ptkColor white white] widgetDefault
-option add *Mathematica.targetColor [ptkColor white white] widgetDefault
-option add *Mathematica.fillMaxLineLength 50 widgetDefault
-option add *Mathematica.textBackground \
-	[ptkColor lightblue1 white] widgetDefault
-option add *Mathematica.textfont [.tychoFonts defaultFont fixed]
-option add *Mathematica.relief raised widgetDefault
-option add *Mathematica.answerForeground \
-	[ptkColor NavyBlue4 black] widgetDefault
-option add *Mathematica.selectColor \
-	[ptkColor yellow white] widgetDefault
-
 #######################################################################
 #### Mathematica
 # A Mathematica widget is a Console widget that accepts Mathematica 

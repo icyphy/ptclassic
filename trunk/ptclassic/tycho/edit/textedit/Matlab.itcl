@@ -30,23 +30,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-#### options
-# Unfortunately, Itcl appears to require us to repeat the options
-# from the base class with the new class name.
-option add *Matlab.textWidth 60 widgetDefault
-option add *Matlab.textHeight 16 widgetDefault
-option add *Matlab.parenColor [ptkColor white white] widgetDefault
-option add *Matlab.targetColor [ptkColor white white] widgetDefault
-option add *Matlab.fillMaxLineLength 50 widgetDefault
-option add *Matlab.textBackground \
-	[ptkColor lightblue1 white] widgetDefault
-option add *Matlab.textfont [.tychoFonts defaultFont fixed]
-option add *Matlab.relief raised widgetDefault
-option add *Matlab.answerForeground \
-	[ptkColor NavyBlue4 black] widgetDefault
-option add *Matlab.selectColor \
-	[ptkColor yellow white] widgetDefault
-
 #######################################################################
 #### Matlab
 # A Matlab widget is a Console widget that accepts Matlab commands
