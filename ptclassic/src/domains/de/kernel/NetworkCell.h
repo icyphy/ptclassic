@@ -89,7 +89,4 @@ protected:
 };
 
 
-ISA_FUNC(NetworkCell, Message);
-
-
 #endif // #ifndef _NetworkCell_h
