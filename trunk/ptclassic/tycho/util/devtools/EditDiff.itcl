@@ -229,10 +229,37 @@ class ::tycho::EditDiff {
 ###################################################################
 #
 body ::tycho::EditDiff::constructor {args} {
+    global filename1 filename2
+   
+    # FIXME: Currently, we'd like to change the default colors
+    set linecolor1 [list blue {}]
+    set linecolor2 [list red {}]
 
-    puts "menubar $myMenubar"
-    puts "status $myStatusbar"
-    puts "toolbar $myToolbar"
+
+    toolbar button compare {Read in both files, and start parsing} \
+            -text Compare -command "$this insertFile"
+    toolbar button addfile {Read in one more file to compare} \
+            -text "Add File" -command {} -state disabled
+    toolbar button remfile {Remove one more file entry} \
+            -text "Remove File" -command {} -state disabled
+    toolbar button linediff {Line by line diff (1:1 correspondence)} \
+            -text "Line/Line Diff" -command {} -state disabled
+    toolbar button smartdiff {Smart diff, remove extra lines, etc} \
+            -text "Smart Diff" -command {tycho::post "Not implemented yet"}
+            
+            
+    toolbar entry filename1 "File 1 name: " {} "puts " \
+            -foreground [lindex $linecolor1 0] -command \
+            {set filename1 [::tycho::queryfilename {File 1 to compare:}]} \
+            -textvariable filename1
+           
+    toolbar entry filename2 "File 2 name: " {} "puts " \
+            -foreground [lindex $linecolor2 0] -command \
+            {set filename2 [::tycho::queryfilename {File 2 to compare:}]} \
+            -textvariable filename2
+
+    toolbar entry lala "LALALA" {} {} -background yellow
+
 
     eval itk_initialize $args
 
@@ -248,7 +275,7 @@ body ::tycho::EditDiff::constructor {args} {
 	    -proccolor procColor
 
     # Create the Special menu for file templates and so on
-    menubar addMenu Special -underline 0
+    #menubar addMenu Special -underline 0
 
     # Add to the format menu commands to comment and uncomment
     # the regions defined by the selection.
@@ -294,55 +321,9 @@ body ::tycho::EditDiff::constructor {args} {
     bind $itk_component(text) <Escape><Control-backslash> \
             "$this busy $this indentSelection"
 
+
 }
 
-
-configbody ::tycho::EditDiff::diff {
-    # FIXME: Currently, we'd like to change the default colors
-    set linecolor1 [list blue {}]
-    set linecolor2 [list red {}]
-
-    if {$itk_option(-diff) == 0} {
-	# Delete the line1 if it exists
-        foreach i {1 2} {
-            if {[info exists itk_component(line$i)]} {
-                destroy $itk_component(line$i)
-            }
-        }
-    } {
-	# Add a diff line file name if it does not already exist.
-	#
-	# The line1bar is packed "-before" the text widget to prevent the
-	# line1bar from disappearing when the window is made smaller (see
-	# Welch page 126).
-	#
-        foreach i {1 2} {
-            if {![info exists itk_component(line$i)]} {
-                itk_component add line$i {
-                    uplevel #0 [list frame $itk_interior.line$i \
-                            -relief raised] 
-                } {
-                    #keep -activebackground -background -highlightcolor \
-                            #	-troughcolor -cursor
-                }
-                puts "New color [eval set linecolor$i]"
-                #-background [lindex [eval set linecolor$i] 1] 
-                button $itk_interior.line$i.label -text "File $i: " \
-                        -foreground [lindex [eval set linecolor$i] 0] \
-                        -command "set filename$i \
-                    \[::tycho::queryfilename \"File $i to compare:\"\]"
-                entry $itk_interior.line$i.entry -relief sunken -width 60 \
-                        -textvariable filename$i
-                pack $itk_interior.line$i.label $itk_interior.line$i.entry \
-                        -side left -expand y -fill y
-                pack $itk_component(line$i) -side top -fill y -expand y \
-                        -before $itk_component(text)
-            }
-        }
-	# Add line1bar packing to statusbar
-	#statusbar configure -line1barpad 1
-    }
-}
 
 body ::tycho::EditDiff::insertString {index str {status {common}}} {
     set text $itk_component(text)
