@@ -159,7 +159,7 @@ void IntParticle :: operator << (double f) {data=int(f);}
 void IntParticle :: operator << (const Complex& c) {data=int(abs(c));}
 void IntParticle :: operator << (const Fix& x) {data = int(x);}
 void IntParticle :: operator << (const Envelope&) {
-	Error::abortRun ("Attempt to load a Message into Fix Particle");
+	Error::abortRun ("Attempt to load a Message into Int Particle");
 }
 
 
@@ -235,7 +235,7 @@ void FloatParticle :: operator << (double f) {data=f;}
 void FloatParticle :: operator << (const Complex& c) {data=abs(c);}
 void FloatParticle :: operator << (const Fix& x) {data = double(x);}
 void FloatParticle :: operator << (const Envelope&) {
-	Error::abortRun ("Attempt to load a Message into Fix Particle");
+	Error::abortRun ("Attempt to load a Message into Float Particle");
 }
 
 
@@ -320,7 +320,7 @@ void ComplexParticle :: operator << (const Complex& c) {data=c;}
 void ComplexParticle :: operator << (const Fix& x) 
                                               {data = Complex(double(x));}
 void ComplexParticle :: operator << (const Envelope&) {
-	Error::abortRun ("Attempt to load a Message into Fix Particle");
+	Error::abortRun ("Attempt to load a Message into Complex Particle");
 }
 
 
