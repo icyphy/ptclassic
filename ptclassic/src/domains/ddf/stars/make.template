@@ -35,7 +35,7 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 
 SRCS=DDFDownCounter.pl DDFLastOfN.pl DDFRepeater.pl DDFSelect.pl DDFSelf.pl \
- DDFSwitch.pl
+ DDFSwitch.pl DDFCase.pl DDFEndCase.pl
 
 CCS=$(SRCS:.pl=.cc)
 
