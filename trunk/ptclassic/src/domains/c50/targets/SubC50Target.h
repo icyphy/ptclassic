@@ -52,7 +52,8 @@ private:
 protected:
         /*virtual*/ void headerCode();
 public:
-	SubC50Target(const char*,const char*);
+	SubC50Target(const char* name, const char* desc, 
+		    const char* assocDomain = C50domainName);
 	SubC50Target(const SubC50Target&);
 	/*virtual*/ void mainLoopCode();
 	/*virtual*/ Block* makeNew() const;
