@@ -1,7 +1,7 @@
 # Pathname utilities that don't use the window system
 #
 # @Author: Edward A. Lee
-# @Contributors: Joel King, Farhana Sheikh
+# @Contributors: Joel King, Farhana Sheikh, Christopher Hylands
 #
 # @Version: $Id$
 #
@@ -176,7 +176,7 @@ proc ::tycho::rm { args } {
 # Return a filename that is unique
 proc ::tycho::uniqueFileName { {stem {tyuniq}}} {
     while {1} {
-	set tmpname [::tycho::autoName $stem]]
+	set tmpname [::tycho::autoName $stem]
 	if {![file exists $tmpname]} {
 	    break
 	}
