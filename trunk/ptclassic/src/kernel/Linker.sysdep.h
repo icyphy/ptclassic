@@ -39,9 +39,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/types.h>
 #include "compat.h"		/* Pickup PTSOL2 etc. */
 
-#ifdef PTALPHA
-#define LINKING_NOT_SUPPORTED
-#endif
+// #ifdef PTALPHA
+// #define LINKING_NOT_SUPPORTED
+// #endif
 
 // Is linking supported?
 const int linkingNotSupported =
@@ -60,7 +60,7 @@ const int linkingNotSupported =
 // dlopen() style linking works under sun4, but if you try and load a
 // star that has undefined symbols, pigiRpc or ptcl will exit.
 
-#if defined(PTIRIX5) || defined(PTSOL2)
+#if defined(PTIRIX5) || defined(PTSOL2)  || defined(PTALPHA)
 #include <dlfcn.h>
 #include <sys/stat.h>
 #define USE_DLOPEN
@@ -72,9 +72,9 @@ const int linkingNotSupported =
 #define DLOPEN_FLAGS RTLD_NOW
 #endif // PTIRIX5
 
-#if defined(PTSOL2) || defined(PTSUN4)
+#if defined(PTSOL2) || defined(PTSUN4) || defined(PTALPHA)
 #define DLOPEN dlopen
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTALPHA)
 #define DLOPEN_FLAGS RTLD_NOW
 #else
 // defined(sun)
@@ -88,7 +88,13 @@ const int linkingNotSupported =
 #else
 #ifdef PTSUN4
 #define SHARED_OBJECT_COMMAND "ld -z -o"
+#else // PTSUN4
+#ifdef PTALPHA
+#define SHARED_OBJECT_COMMAND "g++ -shared -Wl,-expect_unresolved,'*' -o"
+//#define SHARED_OBJECT_COMMAND "ld -shared -expect_unresolved '*' -soname"
+#endif // PTALPHA
 #endif // PTSUN4
+
 #endif // PTSOL2
 #else // __GNUG__
 #define SHARED_OBJECT_COMMAND "CC -G -o"
@@ -238,8 +244,13 @@ extern "C" size_t getpagesize(void);
 #define CONS_PREFIX "_GLOBAL_.I."
 #define CONS_LENGTH 11
 #else // PTSOL2 || PTAIX
+#if defined(PTALPHA)
+#define CONS_PREFIX "_GLOBAL_$I$"
+#define CONS_LENGTH 11
+#else // PTALPHA
 #define CONS_PREFIX "__GLOBAL_$I$"
 #define CONS_LENGTH 12
+#endif //PTALPHA
 #endif //PTSOL2 || PTAIX
 #endif
 #else /* not __GNUG__ (i.e. cfront) */
@@ -265,7 +276,11 @@ extern "C" size_t getpagesize(void);
 #ifdef PTLINUX
 #define NM_OPTIONS "-g --no-cplus"
 #else
+#ifdef PTALPHA
+#define NM_OPTIONS "-B"
+#else
 #define NM_OPTIONS "-g"
+#endif // PTALPHA
 #endif
 #endif
 
