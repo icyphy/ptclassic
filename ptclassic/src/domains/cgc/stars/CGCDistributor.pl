@@ -37,7 +37,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { index for multiple output trace }
 		attributes { A_NONSETTABLE|A_NONCONSTANT }
 	}
-	start {
+	setup {
 		int n = output.numberPorts();
 		input.setSDFParams(n*int(blockSize),n*int(blockSize)-1);
 		output.setSDFParams(int(blockSize),int(blockSize)-1);
