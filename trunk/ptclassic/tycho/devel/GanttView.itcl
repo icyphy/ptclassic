@@ -37,7 +37,6 @@
 option add *GanttView.height 600 widgetDefault
 option add *GanttView.width 480 widgetDefault
 
-
 ########################################################################
 #### GanttView
 # This class defines a class for displaying a Gantt View.
@@ -76,9 +75,9 @@ class ::tycho::GanttView {
     ###################################################################
     ####                         public methods                    ####
 
-    # Add slate view menus to Displayer
+    # Add Gantt view menus to Displayer
     method addMyMenus {}
- 
+
     # Draw labels
     method drawLabels {}
 
@@ -93,9 +92,6 @@ class ::tycho::GanttView {
 
     # Get help on using the Gantt Chart
     method help {}
-
-    # Insert the gantt chart in its Displayer
-    method insertInDisplay {}
 
     # Open a schedule file for display
     method open {}
@@ -299,62 +295,65 @@ body ::tycho::GanttView::destructor {} {
 #
 body ::tycho::GanttView::addMyMenus {} {
 
+    # Add File menu
+    $myMenubar addMenu File left {} -underline 0
+
     # First add commands to the existing File menu which is standard on
     # the displayer
-    $myDisplayer addMenuItem {Open} File \
+    $myMenubar addMenuItem {Open} File \
 	    -command [code "$this open"] \
 	    -state normal
  
-    $myDisplayer addMenuItem {Save} File \
+    $myMenubar addMenuItem {Save} File \
 	    -command [code "$this save"] \
 	    -state normal 
 
-    $myDisplayer addSeparator File
+    $myMenubar addMenuSeparator File
 
-    $myDisplayer addMenuItem {Print Chart...} File \
+    $myMenubar addMenuItem {Print Chart...} File \
 	    -command [code "$this print"] \
 	    -state normal 
 
-    $myDisplayer addSeparator File
+    $myMenubar addMenuSeparator File
 
-    $myDisplayer addMenuItem {Close} File \
-	    -command "$myDisplayer nextWindow; delete object $myDisplayer" \
+    $myMenubar addMenuItem {Close} File \
+	    -command "$this quit" \
 	    -state normal 
 
     # Add the Edit menu
-    $myDisplayer addMenu {Edit} left -underline 0
+    $myMenubar addMenu {Edit} left {} -underline 0
 
     # Add Edit menu items
     # FIXME: add these later - see Graphics object
     
     # Add the Zoom menu
-    $myDisplayer addMenu {Zoom} left -underline 0
+    $myMenubar addMenu {Zoom} left {} -underline 0
     
     # Add the Zoom menu items
-    $myDisplayer addMenuItem {In} Zoom \
+    $myMenubar addMenuItem {In} Zoom \
 	    -command [code "$this zoom in"] \
 	    -state normal
 
-    $myDisplayer addMenuItem {Out} Zoom \
+    $myMenubar addMenuItem {Out} Zoom \
 	    -command [code "$this zoom out"] \
 	    -state normal
 
-    $myDisplayer addSeparator Zoom
+    $myMenubar addMenuSeparator Zoom
 
-    $myDisplayer addMenuItem {Set Zoom Factor...} Zoom \
+    $myMenubar addMenuItem {Set Zoom Factor...} Zoom \
 	    -command [code "$this setZoomFactor"] \
 	    -state normal
 
     # Add legend menu
-    $myDisplayer addMenu {Legend} left -underline 0
+    $myMenubar addMenu {Legend} left {} -underline 0
 
     # Add legend menu items
     # FIXME: add these items
 
     # Add Help menu
-    $myDisplayer addMenu {Help} right -underline 0
+    $myMenubar addMenu {Help} right {} -underline 0
 
-    $myDisplayer addMenuItem {Gantt Chart Help} Help \
+    $myMenubar addMenuItem {Gantt Chart Help} Help \
 	    -command [code "$this help"] \
 	    -state normal
 }
@@ -520,7 +519,8 @@ body ::tycho::GanttView::drawProcessor {proc} {
 	    } elseif {$name == "receive"} {
 		lappend dlist [list $name $start $end -fill lightblue]
 	    } else {
-		lappend dlist [list $name $start $end -fill [lindex $layout(COLORS) $color]]
+		lappend dlist [list $name $start $end -fill \
+                        [lindex $layout(COLORS) $color]]
 	    }
 	    incr color 
 	    if {$color == [llength $layout(COLORS)]} {
@@ -588,17 +588,6 @@ body ::tycho::GanttView::help {} {
 	  chart.  It will not be closed by the run control panel.
     }
 }
-
-#######################################################################
-#### insertInDisplay
-# Insert view in the display
-#
-body ::tycho::GanttView::insertInDisplay {} {
-
-    # insert the view into the displayer
-    $myDisplayer setView $itk_component(hull)
-}
-
 
 #######################################################################
 #### Open
@@ -839,4 +828,7 @@ body ::tycho::GanttView::moveBox {proc name start end box} {
 body ::tycho::GanttView::moveMarker {xposition} {
 
 }
+
+
+
 
