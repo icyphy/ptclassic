@@ -60,7 +60,7 @@ if { ! [::info exists SHORTTIME] } {
 #######################################################################
 #### constructor
 #
-test Slate-constructor.1 {Simplest construction test} {
+test Slate-constructor-1 {Simplest construction test} {
    catch {delete object .s}
    ::tycho::slate .s
 } {.s}
@@ -88,7 +88,7 @@ delete object .s
 #### ghost{}
 #
 _twoitems
-test Slate-ghost.1 {Pass simple item by ID} {
+test Slate-ghost-1 {Pass simple item by ID} {
     set h [.s ghost $r blah]
     string compare  [list \
 	    [.s.canvas find withtag ghost] \
@@ -97,7 +97,7 @@ test Slate-ghost.1 {Pass simple item by ID} {
 	    [list $h $h $h]
 } {0}
 
-test Slate-ghost.2 {Pass complex item by ID} {
+test Slate-ghost-2 {Pass complex item by ID} {
     set j [.s ghost $f blab]
     string compare  [list \
 	    [lsort [.s.canvas find withtag ghost]] \
@@ -107,7 +107,7 @@ test Slate-ghost.2 {Pass complex item by ID} {
 } {0}
 
 _twoitems
-test Slate-ghost.11 {Pass simple item by tag} {
+test Slate-ghost-11 {Pass simple item by tag} {
     set h [.s ghost foo blah]
     string compare  [list \
 	    [.s.canvas find withtag ghost] \
@@ -117,7 +117,7 @@ test Slate-ghost.11 {Pass simple item by tag} {
 	    [list $h $h $h $h]
 } {0}
 
-test Slate-ghost.12 {Pass complex item by tag} {
+test Slate-ghost-12 {Pass complex item by tag} {
     set j [.s ghost bar blab]
     string compare  [list \
 	    [lsort [.s.canvas find withtag ghost]] \
@@ -128,7 +128,7 @@ test Slate-ghost.12 {Pass complex item by tag} {
 } {0}
 
 _twoitems
-test Slate-ghost.21 {Multiple items by tag} {
+test Slate-ghost-21 {Multiple items by tag} {
     .s addtag foo all
     set hs [.s ghost foo]
     string compare [lsort $hs] \
@@ -139,7 +139,7 @@ test Slate-ghost.21 {Multiple items by tag} {
 #### highlight{}
 #
 _twoitems
-test Slate-highlight.1 {Pass simple item by ID} {
+test Slate-highlight-1 {Pass simple item by ID} {
     set h [.s highlight $r -tags blah]
     string compare  [list \
 	    [.s.canvas find withtag highlight] \
@@ -148,7 +148,7 @@ test Slate-highlight.1 {Pass simple item by ID} {
 	    [list $h $h $h]
 } {0}
 
-test Slate-highlight.2 {Pass complex item by ID} {
+test Slate-highlight-2 {Pass complex item by ID} {
     set j [.s highlight $f -tags blab]
     string compare  [list \
 	    [lsort [.s.canvas find withtag highlight]] \
@@ -158,7 +158,7 @@ test Slate-highlight.2 {Pass complex item by ID} {
 } {0}
 
 _twoitems
-test Slate-highlight.11 {Pass simple item by tag} {
+test Slate-highlight-11 {Pass simple item by tag} {
     set h [.s highlight foo -tags blah]
     string compare  [list \
 	    [.s.canvas find withtag highlight] \
@@ -168,7 +168,7 @@ test Slate-highlight.11 {Pass simple item by tag} {
 	    [list $h $h $h $h]
 } {0}
 
-test Slate-highlight.12 {Pass complex item by tag} {
+test Slate-highlight-12 {Pass complex item by tag} {
     set j [.s highlight bar -tags blab]
     string compare  [list \
 	    [lsort [.s.canvas find withtag highlight]] \
@@ -179,7 +179,7 @@ test Slate-highlight.12 {Pass complex item by tag} {
 } {0}
 
 _twoitems
-test Slate-highlight.21 {Multiple items by tag} {
+test Slate-highlight-21 {Multiple items by tag} {
     .s addtag foo all
     set hs [.s highlight foo]
     string compare [lsort $hs] \
@@ -204,7 +204,7 @@ test Slate-highlight.21 {Multiple items by tag} {
 # see testShape.itcl for that class for more complex tests.
 #
 _twoitems
-test Slate-moveclick.1 {Move the simple item, no ghosting} {
+test Slate-moveclick-1 {Move the simple item, no ghosting} {
     .s moveclick $r 100 100; _update
     .s movedrag $r 110 110; _update
     .s movedrag $r 120 120; _update
@@ -212,7 +212,7 @@ test Slate-moveclick.1 {Move the simple item, no ghosting} {
     .s coords $r
 } {60.0 60.0 100.0 100.0}
 
-test Slate-moveclick.2 {Move the simple item, with ghosting} {
+test Slate-moveclick-2 {Move the simple item, with ghosting} {
     .s moveclick $r 100 100 -ghost; _update
     .s movedrag $r 90 90; _update
     .s movedrag $r 80 80; _update
@@ -231,7 +231,141 @@ test Slate-moveclick.2 {Move the simple item, with ghosting} {
 
 #######################################################################
 #### region
-# FIXME
+#
+_twoitems
+
+test Slate-region-1.1 {Get region, simple rectangle by ID} {
+    .s region $r
+} {40.0 40.0 80.0 80.0}
+
+test Slate-region-1.2 {Get region, simple rectangle by tag} {
+    .s region foo
+} {40.0 40.0 80.0 80.0}
+
+test Slate-region-1.3 {Get region, complex rectangle by ID} {
+    .s region $f
+} {140.0 140.0 180.0 180.0}
+
+test Slate-region-1.4 {Get region, complex rectangle by tag} {
+    .s region bar
+} {140.0 140.0 180.0 180.0}
+
+# Create non-rectangles
+proc _moreitems {} {
+    global l m
+    _clean
+    set l [.s create line 40 40 80 80 -fill blue -tags foo]
+    set m [.s create SmartLine 140 140 180 180 -fill red -tags bar]
+}
+
+_moreitems
+test Slate-region-1.5 {Get region, simple non-rectangle by ID} {
+    .s region $l
+} {40 40 80 80}
+
+test Slate-region-1.6 {Get region, simple non-rectangle by tag} {
+    .s region foo
+} {40 40 80 80}
+
+test Slate-region-1.7 {Get region, complex non-rectangle by ID} {
+    .s region $m
+} {140 140 180 180}
+
+test Slate-region-1.8 {Get region, complex non-rectangle by tag} {
+    .s region bar
+} {140 140 180 180}
+
+_twoitems
+.s addtag all all
+test Slate-region-1.9 {Get region, multiple items by tag} {
+    # For some reason, the bbox doesn't quite give us the right answer...
+    .s region all
+} {41 41 181 181}
+
+test Slate-region-1.10 {Get region, no items metched} {
+    # For some reason, the bbox doesn't quite give us the right answer...
+    .s region nothing
+} {}
+
+_twoitems
+_update
+test Slate-region-2.1 {Change region, simple rectangle by ID} {
+    .s region $r 70 70 90 90
+    .s coords $r
+} {70.0 70.0 90.0 90.0}
+_update
+
+_twoitems
+_update
+test Slate-region-2.2 {Change region, simple rectangle by tag} {
+    .s region foo 70 70 90 90
+    .s coords $r
+} {70.0 70.0 90.0 90.0}
+_update
+
+_twoitems
+_update
+test Slate-region-2.3 {Change region, complex rectangle by ID} {
+    .s region $f 70 70 90 90
+    .s coords $f
+} {70.0 70.0 90.0 90.0}
+_update
+
+_twoitems
+_update
+test Slate-region-2.4 {Change region, complex rectangle by tag} {
+    .s region bar 70 70 90 90
+    .s coords $f
+} {70.0 70.0 90.0 90.0}
+_update
+
+# Test non-rectangles
+_moreitems
+_update
+test Slate-region-2.5 {Change region, simple non-rectangle by ID} {
+    .s region $l 70 70 90 90
+    .s coords $l
+} {70.0 70.0 90.0 90.0}
+_update
+
+_moreitems
+_update
+test Slate-region-2.6 {Change region, simple non-rectangle by tag} {
+    .s region foo 70 70 90 90
+    .s coords $l
+} {70.0 70.0 90.0 90.0}
+_update
+
+_moreitems
+_update
+test Slate-region-2.7 {Change region, complex non-rectangle by ID} {
+    .s region $m 70 70 90 90
+    .s coords $m
+} {70.0 70.0 90.0 90.0}
+_update
+
+_moreitems
+_update
+test Slate-region-2.8 {Change region, complex non-rectangle by tag} {
+    .s region bar 70 70 90 90
+    .s coords $m
+} {70.0 70.0 90.0 90.0}
+_update
+
+_twoitems
+_update
+.s addtag all all
+test Slate-region-2.9 {Change region, multiple items by tag} {
+    # For some reason, the bbox doesn't quite give us the right answer...
+    .s region all 70 70 150 150
+    .s bbox all
+} {68 68 152 152}
+_update
+
+test Slate-region-2.10 {Change region, no items metched} {
+    # For some reason, the bbox doesn't quite give us the right answer...
+    .s region nothing 70 70 90 90
+} {}
 
 #######################################################################
 #### reshape
