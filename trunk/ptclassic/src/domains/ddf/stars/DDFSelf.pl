@@ -44,11 +44,13 @@ necessary.
 	inmulti {
 		name { input }
 		type { ANYTYPE }
+		descriptor { Inputs to match with galaxy ports named input#? }
 	}
 	outmulti {
 		name { output }
 		type { ANYTYPE }
 		num { 0 }
+		descriptor { Outputs to match with galaxy ports named input#? }
 	}
 // made one change: the value "", not NULL, is given to indicate recurGal
 // not set.
@@ -86,6 +88,10 @@ necessary.
 		LOG_DEL; delete myGal;
 	}
 	setup {
+	    // If a galaxy already exists, just initialize it
+	    if (myGal) {
+		myGal->initialize();
+	    } else {
 		// The following should not be required because of the
 		// num { 0 } above.  At one time, this did not work.
 		// output.setDDFParams(0);
@@ -134,6 +140,7 @@ necessary.
 			flag++;
 		}
 		if (flag) Error::abortRun(msg);
+	    }
 	}
 	go {
 	    if (myGal == 0) {
