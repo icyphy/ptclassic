@@ -1,0 +1,49 @@
+<!--  $Id$ -->
+<html>
+<head>
+<title>Ptolemy Type System Changes</title>
+</head>
+<body bgcolor=#faf0e6>
+<H1>Ptolemy Type System Changes</H1>
+
+Tom Lane (Structured Software Systems) has redesigned the type
+resolution system in Ptolemy, fixing a number of anomalies. The key
+changes are that types propagate forwards through arcs rather than
+backwards, that groups of multiple portholes are no longer constrained
+to have the same data type, and that higher-order functions in the HOF
+domain are evaluated in a new pre-initialization phase of execution.
+This solves a number of problems:
+
+
+<MENU>
+<LI> When a fork delivers particles to inputs of different types, the type
+  conversion will occur at the receiving end not the sending end, because
+  the plasma or buffer will be of the sender's type.  This prevents doing
+  coercion that may be appropriate for only some of the recipients.
+
+
+<LI> Input ANYTYPE multiportholes can accept particles of different types
+  from different sources.  This is an essential capability for polymorphic
+  stars like Printer.
+
+
+<LI> In a star like Merge, the constraint that output type = input type
+  will still constrain the input multiporthole members individually.
+  Thus, the DE Merge will still require that all input types be the same,
+  as it should.
+
+
+<LI> Rewiring the schematic before porthole type assignment fixes all the
+  type-assignment problems with HOF stars.  In particular, HOFNop will
+  not improperly constrain types, and we can get rid of the type-specific
+  variants of HOFSrc.
+
+</MENU>
+<hr>
+<p>
+Last updated: $Date$,
+<ADDRESS><a
+href="mailto:cxh@eecs.berkeley.edu">cxh@eecs.berkeley.edu</a><br>
+</ADDRESS>
+</body>
+</html>
