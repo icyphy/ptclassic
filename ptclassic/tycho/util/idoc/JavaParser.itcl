@@ -663,16 +663,11 @@ body ::tycho::JavaDocSys::parseVarMeth {class protection modifiers\
     
     # Check for multiple declarations (int x=2,y,z=3;)
     set c_others {}
-    set initIndex end
     foreach token $others {
-        if {$token == "="} {
-            # In multiple declarations, remove everything but the type
-            set initIndex [expr [llength $c_others] -1]
-        }
         if {$token == "," || $token == ";"} {
             addVariable $class $protection $modifiers $c_others $comment
-            set c_others [lreplace $c_others $initIndex end]
-            set initIndex end
+            # FIXME: won't work with: int[] x, y; will work with int x[],y[];
+            set c_others [lindex $c_others 0]
         } else {
             lappend c_others $token
         }
@@ -1002,10 +997,10 @@ body ::tycho::JavaDocSys::tokenize {list} {
     set retval ""
 
     # Remove extra braces so regexp works
-    foreach item $list {
-        append tlist " " $item
-    }
-    set list $tlist
+#     foreach item $list {
+#         append tlist " " $item
+#     }
+#     set list $tlist
 
     while {$list != {}} {
         # Pull off a token that's white space delimited
