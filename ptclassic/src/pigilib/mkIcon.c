@@ -71,8 +71,8 @@ MkGetTerms(const char* name, TermList* terms) {
 	const char *newTypes[MAX_NUM_TERMS];
 	int newIsOut[MAX_NUM_TERMS];
 
-	if ( !KcCheckTerms(name, newNames, newTypes, newIsOut,
-			   &numOrdPorts, &newNameCount) ) {
+	if ( !KcCheckTerms(name, (const char **)newNames, newTypes,
+			   newIsOut, &numOrdPorts, &newNameCount) ) {
 	    return FALSE;
 	}
 
@@ -311,7 +311,7 @@ char *name;
 
 /* MkTerms  8/6/88
 Make terminals of icon according to a TermList.  This function determines
-the position (ie. location) of each Term in the TermList.
+the position (i.e. location) of each Term in the TermList.
 */
 static boolean
 MkTerms(facetPtr, termsPtr)
@@ -323,11 +323,13 @@ TermList *termsPtr;
 
     /* init the mkTerm.c package */
     ERR_IF1(!MkTermInit(facetPtr));
+
     /* make input terminals */
     p = termsPtr->in;
     numIns = termsPtr->in_n;
     numOuts = termsPtr->out_n;
     numTerms = numIns + numOuts;
+
     /* Deal with special cases first */
     if (numTerms > MAX_NUM_TERMS) {
 	ErrAdd("Too many terminals");
@@ -341,12 +343,16 @@ TermList *termsPtr;
 	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 1, numIns)); p++;
 	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 2, numIns)); p++;
 	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, 3, numIns));
-    } else for (i = 0; i < termsPtr->in_n; i++) {
-	ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, i, numIns));
-	p++;
+    } else {
+	for (i = 0; i < termsPtr->in_n; i++) {
+	    ERR_IF1(!MkTerm(p->name, TRUE, p->type, p->multiple, i, numIns));
+	    p++;
+	}
     }
+
     /* make output terminals */
     p = termsPtr->out;
+
     /* Deal with special cases first */
     if (numTerms > MAX_NUM_TERMS) {
 	ErrAdd("Too many output terminals");
@@ -360,9 +366,11 @@ TermList *termsPtr;
 	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 1,numOuts)); p++;
 	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 2,numOuts)); p++;
 	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, 3,numOuts));
-    } else for (i = 0; i < termsPtr->out_n; i++) {
-	ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, i,numOuts));
-	p++;
+    } else {
+	for (i = 0; i < termsPtr->out_n; i++) {
+	    ERR_IF1(!MkTerm(p->name, FALSE, p->type, p->multiple, i, numOuts));
+	    p++;
+	}
     }
     return(TRUE);
 }
