@@ -35,7 +35,7 @@
 include ../../../mk/topdomain.mk
 
 DIRS = kernel stars loopScheduler dfm dsp image targets tcltk \
-	matrix matlab atm contrib
+	matrix matlab atm contrib vis
 
 ME = sdf
 
