@@ -40,7 +40,7 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 EXTRA_SRCS =	\
-	FontManager.html \
+	fontmanager.html \
 	base.html \
 	console.html \
 	dialogclasses.html \
