@@ -44,7 +44,12 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+TCL_SRCS = \
+	DataModel.itcl \
+	Model.itcl \
+	ModelRegistry.itcl \
+	ModelViewer.itcl \
+	TextModel.itcl
 
 ITCL_SRCS = 
 
