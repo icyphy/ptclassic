@@ -44,6 +44,8 @@ public:
 	// if bar is char*, int, or double
 	StringList() : totalSize(0) {}
 
+	StringList(char c);
+
 	StringList(const char* s);
 
 	StringList(int i);
@@ -56,6 +58,9 @@ public:
 	// Assignment operator
 	StringList& operator = (const StringList& sl);
 	StringList& operator = (const char* s);
+	StringList& operator = (char c);
+	StringList& operator = (int i) { initialize(); return *this += i;}
+	StringList& operator = (double d) { initialize(); return *this += d;}
 
 	// Destructor
 	~StringList() { deleteAllStrings();}
@@ -63,15 +68,9 @@ public:
 	// initialize
 	void initialize() { deleteAllStrings();}
 
-	// Put number on list: same as +=
-	// Use of this operator to add something to a nonempty
-	// StringList is deprecated
-
-	StringList& operator = (int i) { return *this += i;}
-	StringList& operator = (double d) { return *this += d;}
-
-        // Add string to list
+        // Add a thing to list
         StringList& operator += (const char*);
+	StringList& operator += (char);
 	StringList& operator += (int);
 	StringList& operator += (double);
 	StringList& operator += (const StringList&);
@@ -117,5 +116,27 @@ UserOutput& operator << (UserOutput& o, const StringList& sl);
 
 class ostream;
 ostream& operator << (ostream& o,const StringList& sl);
+
+// add objects to a StringList, streamlike syntax
+
+inline StringList& operator << (StringList& list, const char* arg) {
+	return list += arg;
+}
+
+inline StringList& operator << (StringList& list, char arg) {
+	return list += arg;
+}
+
+inline StringList& operator << (StringList& list, double arg) {
+	return list += arg;
+}
+
+inline StringList& operator << (StringList& list, int arg) {
+	return list += arg;
+}
+
+inline StringList& operator << (StringList& list, StringList& arg) {
+	return list += arg;
+}
 
 #endif
