@@ -124,11 +124,23 @@ SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
-LIB=libpigi.$(LIBSUFFIX)
+# HPUX has a hard time handling symbols that are defined both in a static
+# library and in a shared library, so, since we have different Error::
+# functions for pigiRpc, ptcl and tycho, we need to be sure that
+# libpigi, libptcl and libtycho are all static on the hppa.
+ifdef USE_CORE_STATIC_LIBS
+LIBNONSHARED =	libpigi.a
+
+all:	$(LIBNONSHARED) $(OTHER_OBJS)
+
+install: all $(LIBDIR)/$(LIBNONSHARED)
+else
+LIB =	libpigi.$(LIBSUFFIX)
 
 all:	$(LIB) $(OTHER_OBJS)
 
 install: all $(LIBDIR)/$(LIB)
+endif
 
 # Directory containing utilities for BarGraph
 PTKDIR = $(ROOT)/src/ptklib
