@@ -55,6 +55,6 @@ install_octtools: obj.$(ARCH)
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
 # then everything else.  gcc and tcl/tk source are usually distributed as a
 # separate tar file. 
-bootstrap:
+bootstrap: obj.$(ARCH)
 	$(MAKE) -f mk/scratch-srcs.mk
 	$(MAKE) $(MFLAGS) install_octtools install
