@@ -42,10 +42,9 @@ CFLAGS =	-G 0 $(MEMLOG) $(WARNINGS) $(MISC_DEFINES) $(OPTIMIZER)
 #
 SYSLIBS =	-lg++ -lm -lmld
 
-# -N flags causes 'syntax errors' at runtime under irix4
-#	./ptcl: syntax error at line 2: `(' unexpected
-# Without the -N flag, it is doubtful if dynamic linking will work
-LINKFLAGS =	-L$(LIBDIR) -G 0 -Xlinker -x
+# -s strips out debugging information, otherwise we get a 30Mb pigiRpc
+# -x is also useful, it removed local symbols, see the ld man page
+LINKFLAGS =	-L$(LIBDIR) -G 0 -Xlinker -s
 LINKFLAGS_D =	-L$(LIBDIR) -G 0
 
 #
