@@ -73,7 +73,7 @@ MATLABLIBDIR =
 # Used by xv
 #XV_RAND= RAND="-DNO_RANDOM -Drandom=rand"
 XV_INSTALL =	/usr/bin/X11/bsdinst
-XV_CC =		"cc -cckr -DSVR4 -DXLIB_ILLEGAL_ACCESS"
+XV_CC =		cc -cckr -DSVR4 -DXLIB_ILLEGAL_ACCESS
 
 # Used by tcltk to build the X pixmap extension
 XPM_DEFINES =	-DZPIPE
