@@ -35,28 +35,29 @@ LIB=libvhdlstars.$(LIBSUFFIX)
 
 # source files for all stars, using preprocessor
 PL_SRCS = \
- VHDLAdd.pl \
  VHDLBlackHole.pl \
- VHDLCos.pl \
- VHDLExp.pl \
- VHDLFIR.pl \
- VHDLFIRInt.pl \
  VHDLFork.pl \
  VHDLGain.pl \
+ VHDLAdd.pl \
+ VHDLAddInt.pl \
+ VHDLSub.pl \
+ VHDLSubInt.pl \
+ VHDLRamp.pl \
+ VHDLRampInt.pl \
+ VHDLFIR.pl \
+ VHDLFIRInt.pl \
  VHDLInhomogeneous.pl \
  VHDLLMS.pl \
  VHDLMpy.pl \
+ VHDLCos.pl \
+ VHDLSin.pl \
+ VHDLExp.pl \
  VHDLPolarToRect.pl \
  VHDLQuant.pl \
- VHDLRamp.pl \
- VHDLRampInt.pl \
- VHDLSin.pl \
- VHDLSub.pl \
- VHDLSubInt.pl \
- VHDLXgraph.pl \
- VHDLXYgraph.pl \
  VHDLCReceive.pl \
  VHDLCSend.pl \
+ VHDLXgraph.pl \
+ VHDLXYgraph.pl \
 
 # The .cc files
 SRCS =	$(PL_SRCS:.pl=.cc)
