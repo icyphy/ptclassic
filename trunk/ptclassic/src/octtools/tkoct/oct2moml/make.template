@@ -57,7 +57,7 @@ all:		makefile $(BINARY)
 # references to it. 
 # Include -lvov because under sol2.cfront, -loh has undefined references
 # to funcs in -lvov.
-OCT2MOML_LIBS =        -L../top -ltop $(TK_LIBSPEC) $(TCL_LIBSPEC) \
+OCT2MOML_LIBS =        -L../top -ltop $(TCL_LIBSPEC) \
                -L$(OCTLIBDIR) \
                -loptions -lregion -lkd -lgu -loh -lvov -loct -ltr -lst \
                -lutility -lerrtrap -luprintf -lport
@@ -65,19 +65,19 @@ OCT2MOML_LIBS =        -L../top -ltop $(TK_LIBSPEC) $(TCL_LIBSPEC) \
 # top is a package used by OCT2MOML and oct2moml
 TOPDIR = 	$(VPATH)/../top
 
-C_INCL = 	-I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC)
+C_INCL = 	-I$(OCTTOOLS)/include -I$(TOPDIR) -I$(TCL_INCDIR) $(PTCOMPAT_INCSPEC)
 
 $(BINARY):	$(OBJS)
 	rm -f $@
-	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(OCT2MOML_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+	$(CLINKER) $(LINKFLAGS) -o $@ $(OBJS) $(OCT2MOML_LIBS) $(CSYSLIBS)
 
 oct2moml.debug$(BINARY_EXT):	$(OBJS)
 	rm -f $@
-	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2MOML_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+	$(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2MOML_LIBS) $(CSYSLIBS)
 
 oct2moml.debug.purify: $(OBJS)
 	rm -f $@
-	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2MOML_LIBS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
+	$(PURIFY) $(CLINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(OCT2MOML_LIBS) $(CSYSLIBS)
 
 
 DEST = $(OCTTOOLS)/bin.$(PTARCH)/$(BINARY)
