@@ -1,0 +1,243 @@
+##########################################################################
+# A widget containing a Slate and scroll-bars. Modified from
+# the [incr Widgets] scrolledcanvas, by Mark L. Ulferts.
+# Note that the slate methods are not wrapped -- use component
+# slate to get access to the actual slate.
+#
+# @Version: $Id$
+# @Author: H. John Reekie, Mark L. Ulferts
+#
+# @Copyright (c) 1996-1998 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the
+# above copyright notice and the following two paragraphs appear in all
+# copies of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+# 
+# 						PT_COPYRIGHT_VERSION_2
+# 						COPYRIGHTENDKEY
+##########################################################################
+
+# ----------------------------------------------------------------------
+#  AUTHOR: Mark Ulferts                        mulferts@austin.dsccc.com 
+#
+#  @(#) $Id$
+# ----------------------------------------------------------------------
+#            Copyright (c) 1995 DSC Technologies Corporation
+# ======================================================================
+# Permission to use, copy, modify, distribute and license this software 
+# and its documentation for any purpose, and without fee or written 
+# agreement with DSC, is hereby granted, provided that the above copyright 
+# notice appears in all copies and that both the copyright notice and 
+# warranty disclaimer below appear in supporting documentation, and that 
+# the names of DSC Technologies Corporation or DSC Communications 
+# Corporation not be used in advertising or publicity pertaining to the 
+# software without specific, written prior permission.
+# 
+# DSC DISCLAIMS ALL WARRANTIES WITH REGARD TO THIS SOFTWARE, INCLUDING 
+# ALL IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS, AND NON-
+# INFRINGEMENT. THIS SOFTWARE IS PROVIDED ON AN "AS IS" BASIS, AND THE
+# AUTHORS AND DISTRIBUTORS HAVE NO OBLIGATION TO PROVIDE MAINTENANCE, 
+# SUPPORT, UPDATES, ENHANCEMENTS, OR MODIFICATIONS. IN NO EVENT SHALL 
+# DSC BE LIABLE FOR ANY SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR 
+# ANY DAMAGES WHATSOEVER RESULTING FROM LOSS OF USE, DATA OR PROFITS, 
+# WHETHER IN AN ACTION OF CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION,
+# ARISING OUT OF OR IN CONNECTION WITH THE USE OR PERFORMANCE OF THIS 
+# SOFTWARE.
+# ======================================================================
+
+#
+# Usual options.
+#
+itk::usual ScrolledSlate {
+    keep -background -borderwidth -cursor \
+	 -foreground -highlightcolor -highlightthickness \
+	 -selectbackground -selectborderwidth \
+	 -selectforeground -textbackground -troughcolor
+}
+
+# ------------------------------------------------------------------
+#                            SCROLLEDSLATE
+# ------------------------------------------------------------------
+class tycho::ScrolledSlate {
+    inherit iwidgets::Scrolledwidget
+
+    constructor {args} {}
+    destructor {}
+
+    itk_option define -autoresize autoResize AutoResize 1 
+    itk_option define -automargin autoMargin AutoMargin 0
+
+    public method childsite {} 
+    public method justify {direction} 
+}
+
+#
+# Provide a lowercased access method for the ScrolledSlate class.
+# 
+proc ::tycho::scrolledslate {pathName args} {
+    uplevel ::tycho::ScrolledSlate $pathName $args
+}
+
+#
+# Use option database to override default resources of base classes.
+#
+option add *ScrolledSlate.width 200 widgetDefault
+option add *ScrolledSlate.height 230 widgetDefault
+option add *ScrolledSlate.labelPos n widgetDefault
+
+# ------------------------------------------------------------------
+#                        CONSTRUCTOR
+# ------------------------------------------------------------------
+body iwidgets::ScrolledSlate::constructor {args} {
+    #
+    # Create a clipping frame which will provide the border for
+    # relief display.
+    #
+    public itk_component add clipper {
+	frame $itk_interior.clipper
+    } {
+	usual
+
+	keep -borderwidth -relief -highlightthickness -highlightcolor
+	rename -highlightbackground -background background Background
+    }	
+    grid $itk_component(clipper) -row 0 -column 0 -sticky nsew
+    grid rowconfigure $_interior 0 -weight 1
+    grid columnconfigure $_interior 0 -weight 1
+
+    # 
+    # Create a slate to scroll
+    #
+    public itk_component add slate {
+	slate $itk_component(clipper).slate \
+		-height 1.0 -width 1.0 \
+                -scrollregion "0 0 1 1" \
+                -xscrollcommand \
+		[code $this _scrollWidget $itk_interior.horizsb] \
+		-yscrollcommand \
+		[code $this _scrollWidget $itk_interior.vertsb]
+    } {
+	usual
+
+	ignore -highlightthickness -highlightcolor
+
+	keep -closeenough -confine -scrollregion 
+	keep -xscrollincrement -yscrollincrement
+
+	rename -background -textbackground textBackground Background
+    }
+    grid $itk_component(slate) -row 0 -column 0 -sticky nsew
+    grid rowconfigure $itk_component(clipper) 0 -weight 1
+    grid columnconfigure $itk_component(clipper) 0 -weight 1
+    
+    # 
+    # Configure the command on the vertical scroll bar in the base class.
+    #
+    $itk_component(vertsb) configure \
+	-command [code $itk_component(slate) yview]
+
+    #
+    # Configure the command on the horizontal scroll bar in the base class.
+    #
+    $itk_component(horizsb) configure \
+		-command [code $itk_component(slate) xview]
+    
+    #
+    # Initialize the widget based on the command line options.
+    #
+    eval itk_initialize $args
+}
+
+# ------------------------------------------------------------------
+#                           DESTURCTOR
+# ------------------------------------------------------------------
+body iwidgets::ScrolledSlate::destructor {} {
+}
+
+# ------------------------------------------------------------------
+#                             OPTIONS
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+# OPTION: -autoresize
+#
+# Automatically adjusts the scrolled region to be the bounding 
+# box covering all the items in the slate following the execution 
+# of any method which creates or destroys items.  Thus, as new 
+# items are added, the scrollbars adjust accordingly.
+# ------------------------------------------------------------------
+configbody iwidgets::ScrolledSlate::autoresize {
+    if {$itk_option(-autoresize)} {
+	set bbox [$itk_component(slate) bbox all]
+
+	if {$bbox != {}} {
+	    set marg $itk_option(-automargin)
+	    set bbox [lreplace $bbox 0 0 [expr [lindex $bbox 0] - $marg]]
+	    set bbox [lreplace $bbox 1 1 [expr [lindex $bbox 1] - $marg]]
+	    set bbox [lreplace $bbox 2 2 [expr [lindex $bbox 2] + $marg]]
+	    set bbox [lreplace $bbox 3 3 [expr [lindex $bbox 3] + $marg]]
+	}
+
+	$itk_component(slate) configure -scrollregion $bbox
+    }
+}
+
+# ------------------------------------------------------------------
+#                            METHODS
+# ------------------------------------------------------------------
+
+# ------------------------------------------------------------------
+# METHOD: childsite
+#
+# Returns the path name of the child site widget.
+# ------------------------------------------------------------------
+body iwidgets::ScrolledSlate::childsite {} {
+    return $itk_component(slate)
+}
+
+# ------------------------------------------------------------------
+# METHOD: justify
+#
+# Justifies the slate scrolled region in one of four directions: top,
+# bottom, left, or right.
+# ------------------------------------------------------------------
+body iwidgets::ScrolledSlate::justify {direction} {
+    if {[winfo ismapped $itk_component(slate)]} {
+	update idletasks
+	
+	switch $direction {
+	    left { 
+		$itk_component(slate) xview moveto 0
+	    }
+	    right {
+		$itk_component(slate) xview moveto 1
+	    }
+	    top {
+		$itk_component(slate) yview moveto 0
+	    }
+	    bottom {
+		$itk_component(slate) yview moveto 1
+	    }
+	    default {
+		error "bad justify argument \"$direction\": should be\
+			left, right, top, or bottom"
+	    }
+	}
+    }
+}
