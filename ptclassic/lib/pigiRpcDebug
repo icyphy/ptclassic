@@ -11,6 +11,9 @@ break main
 run $*
 EOF
 
-DEBUG='xterm -title pigiRpc_debug_window -bg black -fg green -e gdb'
+DEBUG='xterm -sl 1000 -title pigiRpc_debug_window -bg black -fg green -e gdb'
 
-${PT_DEBUG-$DEBUG} -command=$dbgcmdfile $PIGIRPC &
+${PT_DEBUG-$DEBUG} -command=$dbgcmdfile $PIGIRPC
+
+/bin/rm $dbgcmdfile
+
