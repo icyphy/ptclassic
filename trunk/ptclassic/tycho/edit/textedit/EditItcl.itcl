@@ -270,6 +270,8 @@ body ::tycho::EditItcl::getClassName {} {
 # then it is simply displayed, not regenerated.
 #
 body ::tycho::EditItcl::gendocBuffer {} {
+    package require tycho.util.tydoc
+
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
                 [info namespace tail [getClassName]].html]] \
@@ -290,6 +292,8 @@ body ::tycho::EditItcl::gendocBuffer {} {
 # then it is simply displayed, not regenerated.
 #
 body ::tycho::EditItcl::genidocBuffer {} {
+    package require tycho.util.tydoc
+
     return [ ::tycho::EditProgram::gendocBufferInternal \
         [list set docfile [file join doc codeDoc \
                 [info namespace tail [getClassName]].idoc]] \
