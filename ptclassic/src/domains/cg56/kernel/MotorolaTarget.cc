@@ -171,10 +171,9 @@ int staticCode(CGStar& star)
     // Test the parameters of all ports.
     while ( (port = (CGPortHole*)nextPort++) != NULL)
     {
-	/* If the buffer size is not the same as the number of
-	   particles transferred in one firing, then each firing must
-	   read from a different location.
-	*/
+	// If the buffer size is not the same as the number of
+	// particles transferred in one firing, then each firing must
+	// read from a different location.
 	if (port->numXfer() != port->bufSize())
 	{
 	    if ((port->attributes() & PB_CIRC) == 0) return FALSE;
@@ -205,7 +204,7 @@ void MotorolaTarget::writeFiring(Star& s, int level)
 	    AsmTarget::writeFiring(star, level);
 	    defaultStream = previous;
 
-	    // Some instructions are not allowed to preceed rts
+	    // Some instructions are not allowed to precede rts
 	    // so insert a nop to be safe.
 	    procedures << "	nop\n";
 	    procedures << "	rts\n";
