@@ -796,8 +796,11 @@ body ::tycho::Class::_describeentity {type context name prefix} {
 # parameter. Flag an error if the parameter already exists. 
 #
 body ::tycho::Class::_parameter {context name args} {
-    _verifynot parameter $context $name $context$separator$name
-    _addentity parameter $context $name $context$separator$name {} $args
+    set fullname [fullName parameter $name]
+
+    _verifynot parameter $context $fullname $context$separator$fullname
+    _addentity parameter $context $fullname \
+            $context$separator$fullname {} $args
 }
 
 ########################################################################
@@ -827,6 +830,7 @@ body ::tycho::Class::fullName {type shortname} {
         "Constructor" {return con_$shortname}
         "Destructor" {return des_$shortname}
         "method" {return met_$shortname}
+        "parameter" {return pra_$shortname}
         "parent" {return pnt_$shortname}
         "variable" {return var_$shortname}
         default {return $shortname}
@@ -862,6 +866,7 @@ body ::tycho::Class::shortName {type fullname} {
         "Destructor" {return $shortname}
         "method" {return $shortname}
         "parent" {return $shortname}
+        "parameter" {return $shortname}
         "variable" {return $shortname}
         default {return $fullname}
     }
