@@ -146,7 +146,7 @@ HP_GNU_SRC=$(PTOLEMY)/src/gnu/src.hp
 #HP_MACH=`$(HP_GNU_SRC)/gcc/config.guess`
 HP_MACH=hppa1.1-hp-hpux
 
-hp_all: hp_configure hp_pregcc_install hp_bin install hp_all_gdb
+hp_all: hp_configure hp_pregcc_install hp_bin install
 
 # Binaries to be renamed after installation
 HP_BINARIES= ar nm ranlib size strings strip
@@ -198,9 +198,6 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.h .)
 	-(cd $(GNU_OBJ)/gcc/objc; ln -s $(HP_GNU_SRC)/gcc/objc/*.m .)
 	-(cd $(GNU_OBJ)/gcc/cp; ln -s $(HP_GNU_SRC)/gcc/cp/*.c .)
-	# We build gdb as a separate step, after we have GNU make
-	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.c .)
-	#-(cd $(GNU_OBJ)/gcc/gdb; ln -s $(HP_GNU_SRC)/gcc/gdb/*.h .)
 	# Building libg++ requires as to bin in gcc so -B arg will work
 	-(cd $(GNU_OBJ)/gcc; ln -s ../gas/as.new as)
 	-(cd $(GNU_OBJ)/librx; ln -s $(HP_GNU_SRC)/librx/*.c .)
@@ -223,30 +220,6 @@ $(GNU_DEST)/$(PTARCH):
 hp_bin:
 	#(cd $(GNU_OBJ); $(MAKE) -f $(PTOLEMY)/src/gnu/makefile bin)
 	(PATH=$(GNU_OBJ)/gas:$(PATH) ;echo $$PATH; cd $(GNU_OBJ); $(MAKE) $(MFLAGS) CC="$(CC)" )
-
-# Install HP GDB
-# We have a separate directory in part because the bfd directories 
-# from gdb and binutils are not easily shareable.
-hp_all_gdb: hp_configure_gdb hp_bin_gdb hp_install_gdb
-
-HP_GDB_SRC=$(HP_GNU_SRC)/gdb-4.13.u4
-
-hp_configure_gdb: $(GNU_OBJ)/gdb
-	(cd $(GNU_OBJ)/gdb; \
-	$(HP_GDB_SRC)/configure $(HP_MACH) --srcdir=$(HP_GDB_SRC) \
-		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) \
-		--with-gnu-as)
-$(GNU_OBJ)/gdb:
-	if [ ! -d $@ ]; then \
-		mkdir $@; \
-	fi
-
-# We assume you have GNU make installed here, otherwise you won't find alloca.c
-hp_bin_gdb:
-	cd $(GNU_OBJ)/gdb; $(GMAKE) $(MFLAGS) CC="$(CC)"
-
-hp_install_gdb:
-	cd $(GNU_OBJ)/gdb; $(GMAKE) $(MFLAGS) CC="$(CC)" install
 
 # In gcc-2.5.8, collect2 is not automagically installed.  The symptom
 # of this is that ptcl says that there is no SDF domain, and that perhaps
