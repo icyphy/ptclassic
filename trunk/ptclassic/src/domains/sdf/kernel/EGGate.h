@@ -227,8 +227,8 @@ public:
 	// "p" will be deallocated -- since this arc ("p") is redundant.
 	// (If update is 1, we will still try to update the other
 	// end of "p" later, so don't deallocate now.)
-	//
-	void insertGate(EGGate* p, int update);
+	// return FALSE if the list was not updated
+	int insertGate(EGGate* p, int update);
 
 	// destructor: makes sure that "arc"'s get deallocated too
 	~EGGateList();
