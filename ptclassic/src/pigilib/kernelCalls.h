@@ -10,7 +10,7 @@ $Id$
 typedef int boolean;
 
 /* error handling function for pigi */
-extern "C" void ErrAdd(char*);
+extern "C" void ErrAdd(const char*);
 
 #include "mkIcon.h"
 #include "paramStructs.h"
