@@ -52,7 +52,6 @@ PL_SRCS= \
  SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCosine.pl \
- SDFRaisedCosCx.pl \
  SDFUnwrap.pl \
  SDFWindow.pl
 
