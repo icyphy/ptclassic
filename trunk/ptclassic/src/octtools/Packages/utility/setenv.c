@@ -72,7 +72,7 @@ static int setenv_envlen( environ )
 
 static void setenv_init() 
 {
-    static copiedP = 0;
+    static int copiedP = 0;
     if ( ! copiedP ) {
 	int envlen = setenv_envlen( environ );
 	char** newenviron = ALLOC( char*, envlen + 1 );
