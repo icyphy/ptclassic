@@ -165,7 +165,7 @@ gthreads_sol2.5: $(GT_OBJ)
 		all install;
 
 # Build library for sol2 using Sun's compiler.
-gthreads_sol2.cfront: $(GT_OBJ)
+gthreads_sol2.cfront gthreads_sol2.5.cfront: $(GT_OBJ)
 	$(MAKE) -C $(GT_OBJ)/src $(MFLAGS) $(MAKEVARS) \
 		INSTALL_INCLUDE='../../$(THREAD_INCLUDE)' \
 		INSTALL_LIBS='../../$(THREAD_LIB)' \
