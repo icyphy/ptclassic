@@ -506,8 +506,8 @@ body ::tycho::HTML::help {} {
 #
 body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
     if {$filename != {}} {
-        set char [string index $filename 0]
-        if {$char != "/" && $char != "~" && $char != "\$"} {
+
+	if {[file pathtype $filename] != "absolute"} {
             set filename [format "%s/%s" [file dirname $file] $filename]
         }
         set filename [::tycho::expandPath $filename]
