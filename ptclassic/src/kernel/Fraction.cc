@@ -44,8 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stream.h>             // gcc-3.0: This include should be first
 #include "Fraction.h"
-#include <stream.h>
 
 // greatest common divisor function.  If 2nd arg is negative, result is
 // negative.  Magnitude of result equals gcd(abs(a),abs(b)).
