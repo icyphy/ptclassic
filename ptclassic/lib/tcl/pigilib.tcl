@@ -35,7 +35,9 @@
 # If gSlowX11Link is set, do not show the mr ptolemy bitmap
 # ptkVerboseErrors controls whether we get a stack trace
 #
-if {[file exists [glob -nocomplain ~/.ptkrc ]]} {
+# sun4 says that 'file exists ""' returns 1, rather than 0
+if {[glob -nocomplain ~/.ptkrc ] != "" && \
+	[file exists [glob -nocomplain ~/.ptkrc ]]} {
     source ~/.ptkrc
 }
 
