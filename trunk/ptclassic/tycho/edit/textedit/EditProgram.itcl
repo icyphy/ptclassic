@@ -763,7 +763,6 @@ body ::tycho::EditProgram::gendocBufferInternal {setDocCommand genCommand} {
     }
     if [file exists $fulldoc] {
         set window [::tycho::File::openContext $fulldoc]
-	$window reload
 	# Return the window that we opened so the test suite can close it
 	return $window
     }
