@@ -40,8 +40,7 @@ VPATH =		$(ROOT)/doc/coding
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-EXTRA_SRCS =	copyrights.html \
-		directories.html \
+EXTRA_SRCS =	directories.html \
 		fileheader.html \
 		index.html \
 		performance.html \
