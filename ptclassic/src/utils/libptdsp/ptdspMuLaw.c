@@ -37,22 +37,26 @@ and 4 bits for the mantissa.
 const int BIAS16 = 0x84;
 const int CLIP16 = 32635;		/* 2^15 - BIAS16 - 1 */
 
-static int exp_lut[256] = {0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
-			   4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
-			   5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-			   5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
-			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			   6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
-			   7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
+static int sample_to_exponent_table[256] =
+	{0,0,1,1,2,2,2,2,3,3,3,3,3,3,3,3,
+	 4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,4,
+	 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+	 5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,5,
+	 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+	 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+	 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+	 6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,6,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,
+	 7,7,7,7,7,7,7,7,7,7,7,7,7,7,7,7};
+
+static int exponent_to_sample_table[8] =
+	{ 0, 132, 396, 924, 1980, 4092, 8316, 16764 };
 
 /* Compress 16-bit linear data to 8-bit mu-law data */
 unsigned char Ptdsp_Linear16ToMuLaw8(int sample) {
@@ -66,32 +70,48 @@ unsigned char Ptdsp_Linear16ToMuLaw8(int sample) {
   if ( sample > CLIP16 ) sample = CLIP16;
 
   /* Convert from 16-bit linear to mu-law. */
-  /* The exponent is four bits; the mantissa is four bits */
+  /* The exponent is three bits; the mantissa is four bits */
   sample += BIAS16;
-  exponent = exp_lut[( sample >> 7 ) & 0xFF];
+  exponent = sample_to_exponent_table[( sample >> 7 ) & 0xFF];
   mantissa = ( sample >> ( exponent + 3 ) ) & 0x0F;
   ulawbyte = ~ ( sign | ( exponent << 4 ) | mantissa );
 
   return ulawbyte;
 }
 
-/* Compress 8-bit linear data to 8-bit mu-law data */
-/* Convert the data to 16 bits and call the 16-bit converter */
+/*
+Compress 8-bit linear data to 8-bit mu-law data
+Convert the data to 16 bits and call the 16-bit converter
+*/
 unsigned char Ptdsp_Linear8ToMuLaw8(int sample) {
   return Ptdsp_Linear8ToMuLaw8((sample & 0xFF) << 8);
 }
 
-/* Uncompress 8-bit mu-law data to 16-bit linear data */
+/*
+Uncompress 8-bit mu-law data to 16-bit linear data
+
+Author:  Craig Reese: IDA/Supercomputing Research Center
+Created: 29 September 1989
+
+References:
+1) CCITT Recommendation G.711  (very difficult to follow)
+2) MIL-STD-188-113,"Interoperability and Performance
+   Standards for Analog-to_Digital Conversion Techniques,"
+   17 February 1987
+
+Input: 8 bit ulaw sample
+Output: signed 16 bit linear sample
+*/
 int Ptdsp_MuLaw8ToLinear16(unsigned char ulawbyte) {
-  int exponent, mantissa, sample, sign;
+  int sign, exponent, mantissa, sample;
 
-  ulawbyte = ~ulawbyte;
-  sign = ulawbyte & 0x80;
-  exponent = (ulawbyte & 0x70) >> 4;
-  mantissa = (ulawbyte & 0x0F);
-  sample = mantissa << exponent;
-  if (sign) sample = -sample;
-
+  ulawbyte = ~ ulawbyte;
+  sign = ( ulawbyte & 0x80 );
+  exponent = ( ulawbyte >> 4 ) & 0x07;
+  mantissa = ulawbyte & 0x0F;
+  sample = exponent_to_sample_table[exponent] +
+		( mantissa << ( exponent + 3 ) );
+  if ( sign != 0 ) sample = -sample;
   return sample;
 }
 
