@@ -61,7 +61,9 @@ public:
 	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// constructor
-	DEDomain() : Domain("DE") {}
+	DEDomain() : Domain("DE") {
+	  subDomains += "HOF";
+	}
 };
 
 // declare a prototype
