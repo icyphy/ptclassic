@@ -154,11 +154,14 @@ class ::tycho::Slate {
     # Convert a screen y coordinate into a canvas y coordinate
     method canvasy {screeny {gridspacing {}}}
 
-    # Set or get the coordinates of an item
-    method coords {id args}
-
     # Access a component of an item
     method component {id args}
+
+    # Access constraints of an item
+    method constraint {id {pattern {}} args}
+
+    # Set or get the coordinates of an item
+    method coords {id args}
 
     # Create a new item
     method create {type args}
@@ -167,6 +170,9 @@ class ::tycho::Slate {
     method dchars {id first {last {}}} {
 	eval $canvas dchars $id $first $last
     }
+
+    # Deform one or more aspects of an item
+    method deform {id x y args}
 
     # Delete items
     method delete {args}
@@ -230,6 +236,9 @@ class ::tycho::Slate {
     # Generate postscript
     method postscript {args}
 
+    # Propagate the constraints attached to an item
+    method propagate {id event args}
+
     # Raise an item
     method raise {id {aboveThis {}}}
 
@@ -252,8 +261,11 @@ class ::tycho::Slate {
 	eval $canvas select $option $id $index
     }
 
+    # Return the item shape
+    method shape {id}
+
     # Return the item type
-    method type {id args}
+    method type {id}
 
     # Set the horizontal view for scrolling
     method xview {args}
@@ -261,13 +273,11 @@ class ::tycho::Slate {
     # Set the vertical view for scrolling
     method yview {args}
 
-
     ###################################################################
     ####                   protected variables                     ####
 
     # The canvas on which I draw
     protected variable canvas
-
 
     ###################################################################
     ####                     private methods                       ####
@@ -278,11 +288,11 @@ class ::tycho::Slate {
     # Test id an item is an ancestor of another
     private method ancestor {ancestor descendent}
 
-    # Return the children of an item or complex item
-    private method children {id}
-
     # Return the ancestors of an item or complex item
     private method ancestors {id}
+
+    # Return the children of an item or complex item
+    private method children {id}
 
     # Return the items only under this item or complex item
     private method items {id}
@@ -307,22 +317,28 @@ class ::tycho::Slate {
     ###################################################################
     ####                    private variables                      ####
 
+    # Items can have constraints attached to them
+    private variable constraints
+
+    # Each item has a "type"
+    private variable itemtype
+
+    # Every complex item remembers its parent
+    private variable parent
+
+    # Storage for temporary variables
+    private variable scratch
+
     # Unique IDs and tags are created using this counter.
     # Note: this must be common so item ids are unique across 
     # all slates!
     private common secretcounter 0
 
-    # Every complex item remembers its parent
-    private variable parent
-
-    # Each item has a "type"
-    private variable itemtype
-
     # Each tag belongs to one or more items
     private variable tagged
 
-    # Storage for temporary variables
-    private variable scratch
+    # Constraints "visit" item
+    private variable visited
 }
 
 
@@ -413,8 +429,7 @@ body ::tycho::Slate::addtag {add mode args} {
 # The returned value is a list of coordinates, two (x and y) for each
 # given aspect.
 #
-# The aspects supported depends on the type (or more specifically,
-# the shape type -- see the type{} method) of the complex item. Some
+# The aspects supported depends on the shape of the item. Some
 # item types will support a more complex set of aspects. If the
 # complex item is rectangular, is supports at least the aspects _c_ or
 # _center_, and the eight compass
@@ -429,18 +444,15 @@ body ::tycho::Slate::addtag {add mode args} {
 body ::tycho::Slate::aspect {id args} {
     getflag region args
 
-    # If the -region flag is given, treat the complex item as a rectangle
+    # Get the shape of the item
+    set shape [shape $id]
+    
+    # If the -region flag is given, treat the item as a rectangle
     if { $region } {
-	if { $args == "" } {
-	    return {c n s e w ne nw se sw}
-	} else {
-	    return [eval rectAspect [list [$this region $id]] $args]
-	}
-    }
-
-    # If this is a complex item, and there's a method defined for it,
-    # call the method
-    if { [string match {_*} $id] } {
+	set shape rectangle
+    } elseif { [string match {_*} $id] } {
+	# If this is a complex item, and there's a method defined for it,
+	# call the method
 	if { [@scope ::tycho::$itemtype($id) [list \
 		::info exists methodtable(aspect)]] } {
 	    return [@scope ::tycho::$itemtype($id) [list \
@@ -448,13 +460,15 @@ body ::tycho::Slate::aspect {id args} {
 	}
     }
 
-    # There's no method defined or this is a canvas item,
-    # so process according to the shape type of the item
-    if { [string match {[0-9]*} $id] } {
-	set shape [$canvas type $id]
-    } else {
-	set shape [@scope ::tycho::$itemtype($id) [list set shape]]
+    # Text, image, and bitmap items are treated as a "point"
+    if { [lmember {text bitmap image} $shape] } {
+	set shape point
     }
+
+    # To process the request, call the method on the right shape class
+    return [eval ::tycho::As[capitalize $shape]::aspect \
+	    $id $canvas $this $args]
+
     switch -exact $shape {
 	"oval" -
 	"rectangle" {
@@ -632,6 +646,72 @@ body ::tycho::Slate::component {id {component {}} {method {}} args} {
 }
 
 #######################################################################
+#### constraint
+#
+# Attach, detach, or query constraints. A "constraint" is simply a
+# function-script that is executed when certain things are done to
+# an item (such as moving it). (The mechanism is very simple, and
+# probably is misnamed -- since it is, however, used to implement
+# constraints, I think it's OK.)
+#
+# A constraint is associated with an item _and_ a glob-style pattern
+# that matches certain events generated by the Slate. Each event causes
+# all matching function-scripts to be applied to a number of arguments.
+# The events and arguments are:
+# <ul>
+# <li><b>move</b> _id_ _x_ _y_: An item has been moved (_x_, _y_) pixels.
+# <li><b>deform-</b><i>aspect</i> _id_ _x_ _y_ { _aspect_ ... }:
+#     An item has had one or more aspects deformed by (_x_, _y_) pixels.
+#     The aspect within the event name is the aspect that was matched
+#     to trigger this event; the list of aspects passed to the
+#     function-script is the list of aspects which were deformed.
+# </ul>
+#
+# The argument list to this method takes the following forms:
+# <ul>
+# <li>_id_: Return the constraint patterns attached to _id_.
+# <li>_id_ _pattern_: Return the script attached to the given
+#     item and event pattern. Note that the match with the pattern
+#     is a _literal_ match. Returns null if there is no script.
+# <li>_id_ _pattern_ _script_: Attach _script_ to the given item
+#     at the given pattern. If there is already a script attached,
+#     it is overwritten; if the script is the empty list, the
+#     constraint is removed.
+# </ul>
+#
+# <b>Note</b>: This mechanism should be used sparingly. It is intended
+# for use to implement constraints between items for user-interaction,
+# and should not be used as a "I want to know whenever something
+# happens" mechanism.
+#
+body ::tycho::Slate::constraint {id {pattern {}} args} {
+    if { $pattern == "" } {
+	# Return constraint patterns for this item
+	set result {}
+	foreach name [array names constraints $id,*] {
+	    lappend result [lindex [split $name ","] 1]
+	}
+	return $result
+    } elseif { $args == {} } {
+	# Return the script bound to the item and pattern
+	if { ! [::info exists constraints($id,$pattern)] } {
+	    return ""
+	} else {
+	    return $constraints($id,$pattern)
+	}
+    } else {
+	set script [lindex $args 0]
+	if { $script == "" } {
+	    # Detach the constraint
+	    unset constraints($id,$pattern)
+	} else {
+	    # Attach a constraint
+	    set constraints($id,$pattern) $script
+	}
+    }
+}
+
+#######################################################################
 #### coords
 #
 # Get or set the coordinates of an item. If the argument
@@ -727,6 +807,49 @@ body ::tycho::Slate::create {type args} {
 	# Make sure the name is returned
 	return $id
     }
+}
+
+
+#######################################################################
+#### deform
+#
+# Deform an item by moving one or more of its aspects the specified
+# distance. If the *-region flag is specified, treat the picture as
+# a rectangular region.
+#
+body ::tycho::Slate::deform {id x y args} {
+    getflag region args
+
+    # First, propagate constraints and return if already visited
+    if { ! [eval propagate $id deform $x $y $args] } {
+	return
+    }
+
+    # Get the shape of the item
+    set shape [shape $id]
+    
+    # If the -region flag is given, treat the item as a rectangle
+    if { $region } {
+	set shape rectangle
+    } elseif { [string match {_*} $id] } {
+	# If this is a complex item, and there's a method defined for it,
+	# call the method
+	if { [@scope ::tycho::$itemtype($id) [list \
+		::info exists methodtable(deform)]] } {
+	    return [@scope ::tycho::$itemtype($id) [list \
+		    eval \[set methodtable(deform)\] $id \
+		    $canvas $this $x $y $args]]
+	}
+    }
+    
+    # Text, image, and bitmap items are treated as a "point"
+    if { [lmember {text bitmap image} $shape] } {
+	set shape point
+    }
+    
+    # To process the request, call the method on the right shape class
+    return [eval ::tycho::As[capitalize $shape]::deform \
+	    $id $canvas $this $x $y $args]
 }
 
 
@@ -1143,8 +1266,8 @@ body ::tycho::Slate::interact {command id args} {
 	    set scratch($id.prevY) $y
 	}
 	"release" {
-	    # If there's a ghost, move the complex item to its position and then
-	    # delete it
+	    # If there's a ghost, move the complex item to its
+	    # position and then delete it
 	    if { [::info exists scratch($id.ghost)] } {
 		assign x y $scratch($id.start)
 		assign a b [$this coords $scratch($id.ghost)]
@@ -1355,7 +1478,15 @@ body ::tycho::Slate::lower {id {belowThis {}}} {
 # can either be a tag or an id.
 #
 body ::tycho::Slate::move {tag xAmount yAmount} {
-    $canvas move $tag $xAmount $yAmount
+    # Move the items
+    # $canvas move $tag $xAmount $yAmount
+
+    # Propagate constraints and move items
+    foreach item [find withtag $tag] {
+	if { [propagate $item "move" $xAmount $yAmount] } {
+	    $canvas move $item $xAmount $yAmount
+	}
+    }
 }
 
 #######################################################################
@@ -1439,6 +1570,53 @@ body ::tycho::Slate::picture {command args} {
 #
 body ::tycho::Slate::postscript {args} {
     eval $canvas postscript $args
+}
+
+#######################################################################
+#### propagate
+#
+# Propagate the constraints attached to an item and event. The first
+# argument is the item, the second the interaction event name.
+# Following arguments depends on the event, and must be as documented
+# in the comment to the *constraint* method.
+#
+# This methods check for circular constraints. It
+# returns 1 if the item was visited for the first
+# time and zero otherwise. Methods that call it should test the
+# return value, and if it is zero, should _not_ perform their
+# action.
+#
+# <b>Note</b>: If an error occurs, some items will have been
+# moved (deformed etc.) and some won't. At the moment, we ignore
+# this problem, but later on there should probably be some way
+# of "rewinding" constraint propagation.
+#
+body ::tycho::Slate::propagate {id event args} {
+    # If the item has already been visited, return 0
+    if { [::info exists visited($id)] } {
+	return 0
+    }
+
+    # Mark as visited and propagate constraints
+    set visited($id) 1
+    foreach name [array names constraints $id,*] {
+	set pattern [lindex [split $name ","] 1]
+	if { [string match $pattern $event] } {
+	    # Apply the constraint script if a match
+	    if { [catch { \
+		    uplevel #0 apply \
+		    [list $constraints($id,$pattern)] $id $args} msg]} {
+		# If there's an error, reset the visited items
+		# and reinvoke the error
+		catch {unset visited}
+		error $msg
+	    }
+	}
+    }
+
+    # Unmark the item
+    unset visited($id)
+    return 1
 }
 
 #######################################################################
@@ -1601,23 +1779,29 @@ body ::tycho::Slate::scale {id xOrigin yOrigin xScale yScale} {
 }
 
 #######################################################################
+#### shape
+#
+# Return the "shape" of an item. The shape of an item
+# value returned is a subset of the types.
+#
+body ::tycho::Slate::shape {id} {
+    if { [string match {[0-9]*} $id] } {
+	$canvas type $id
+    } else {
+	@scope ::tycho::$itemtype($id) [list set shape]
+    }
+}
+
+#######################################################################
 #### type
 #
 # Return the type of an item. Note that types are case-sensitive.
 #
-# With the *-shape* option, return the "shape" of the complex item. The
-# value returned is a subset of the types.
-#
-body ::tycho::Slate::type {id args} {
+body ::tycho::Slate::type {id} {
     if { [string match {[0-9]*} $id] } {
 	$canvas type $id
     } else {
-	getflag shape args
-	if { $shape } {
-	    return [@scope ::tycho::$itemtype($id) [list set shape]]
-	} else {
-	    return $itemtype($id)
-	}
+	return $itemtype($id)
     }
 }
 
