@@ -117,6 +117,9 @@ LINKFLAGS=-L$(LIBDIR)
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR)
 
+# Libraries are of the form libfoo.$(LIBSUFFIX) 
+LIBSUFFIX = 	a
+
 # Flag for cc to statically link binaries (hppa and sun4 currently use this)
 CC_STATIC=
 
