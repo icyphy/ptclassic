@@ -18,8 +18,11 @@ limitation of liability, an ddisclaimer of warranty provisions.
 This star computes the sinc of the input, which must be in the range
 [-1.0, 1.0).  The output equals
 <pre>
-sin(pi cdot input) over {pi cdot input}
+sin(pi&#183input)
+-------------
+ pi&#183input
 </pre>
+<p>
 so the input range is effectively <i></i>(<i>-pi, pi</i>)<i></i>.  The output is in
 the range <i></i>(<i>-</i>0<i>.</i>22<i>, </i>1<i>.</i>0<i></i>)<i></i>.
 	}

@@ -41,8 +41,9 @@ For this complex LMS filter star,
 the number of initial coefficients specify the order.
 <pre>
 y = c' * x
-c[n+1] = c[n] + (step_size)(x)(e')
+c[n+1] = c[n] + step_size * x * e'
 </pre>
+<p>
 where <i>x</i> = input, <i>c</i> = coefficients, <i>y</i> = output, <i>e</i> = error
 (desired output - actual output), and ' represents the complex conjugate.
 Default <i>step_size</i></b> is 0.01
