@@ -239,7 +239,8 @@ void CGCTarget::beginIteration(int repetitions, int depth) {
 		      << "int " << targetNestedSymbol.push("i") << ";\n";
 	    myCode << "for (" << targetNestedSymbol.get() << "=0; "
 		   << targetNestedSymbol.get() << " < " << repetitions << "; "
-	    	   << targetNestedSymbol.pop() << "++) {\n";
+	    	   << targetNestedSymbol.get() << "++) {\n";
+ 	    targetNestedSymbol.pop();
         }
 	myCode += wormIn;
         return;
