@@ -45,6 +45,7 @@ public:
 	virtual EventHorizon& newFrom() = 0;
 	virtual EventHorizon& newTo() = 0;
 	virtual Geodesic& newNode() = 0;
+	virtual int isGalWorm() {return FALSE;}
 	const char* domainName() { return name;}
 	static Domain* named(const char* name);
 	static Domain* domainOf(Block&);
