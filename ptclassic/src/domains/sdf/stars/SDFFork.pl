@@ -37,7 +37,7 @@ intends.  Hence, the Fork star should be inserted explicitly.
 	go {
 		MPHIter nextp(output);
 		PortHole* p;
-		while ((p = nextp++) != 0)
+		while ((p = nextp.next()) != 0)
 			(*p)%0 = input%0;
 	}
 }

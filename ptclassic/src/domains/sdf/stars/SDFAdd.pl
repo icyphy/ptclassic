@@ -23,7 +23,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		MPHIter nexti(input);
 		PortHole *p;
 		double sum = 0.0;
-		while ((p = nexti++) != 0)
+		while ((p = nexti.next()) != 0)
 			sum += double((*p)%0);
 		output%0 << sum;
 	}
