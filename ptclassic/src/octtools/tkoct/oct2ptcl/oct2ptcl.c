@@ -952,12 +952,14 @@ otpGetFacetInfo( OTPDesignInfo *pDInfo, octObject *pFacet) {
     pFInfo = _otpAddFacet( pDInfo, pFacet->contents.facet.cell, &newB);
     if ( newB ) {
 	if ( ohOpenInterface( &xface, pFacet, "r") <= OCT_NEW_FACET ) {
-	    errRaise(SPKG,-1,"Failed to read %s",ohFormatName(&xface));
+	    errRaise(SPKG,-1,"Failed to open interface %s",
+		     ohFormatName(&xface));
 	}
 	pFInfo->interfaceId = xface.objectId;
 
 	if ( ohOpenContents( &conts, pFacet, "r") <= OCT_NEW_FACET ) {
-	    errRaise(SPKG,-1,"Failed to read %s",ohFormatName(&conts));
+	    errRaise(SPKG,-1,"Failed to open Contents %s",
+		     ohFormatName(&conts));
 	}
 	pFInfo->contentsId = conts.objectId;
 
