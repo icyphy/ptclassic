@@ -63,7 +63,9 @@ public:
   ~SRGeodesic();
 
   PortHole * setSourcePort( GenericPort &, int, const char * = 0 );
+  PortHole * setOldSourcePort( GenericPort &, int, const char * = 0 );
   PortHole * setDestPort( GenericPort & );
+  PortHole * setOldDestPort( GenericPort & );
   
 };
 
