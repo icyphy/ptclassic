@@ -73,8 +73,6 @@ For instance, to print the whole manual,
 % cd ~ptolemy/doc
 % make print
 .)c
-As of this writing, you must have write permission in
-the doc subdirectories for this to work.
 To print only section 1 of the manual, which contains this section,
 .(c
 % cd ~ptolemy/doc/main
