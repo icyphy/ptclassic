@@ -51,8 +51,16 @@ SDFVariance.pl \
 SDFWirelessChannel.pl \
 SDFWriteVar.pl
 
+# supporting C++ code
+LIB_SRCS= \
+Decoder.cc \
+Encoder.cc \
+Interp.cc \
+Wireless.cc \
+fft.cc
+
 # The .cc files
-SRCS =		$(PL_SRCS:.pl=.cc)
+SRCS =		$(PL_SRCS:.pl=.cc) $(LIB_SRCS)
 
 # object files for all stars
 OBJS =		$(SRCS:.cc=.o)
@@ -67,17 +75,9 @@ MISC_FILES =	README README.notes
 EXTRA_SRCS = \
 $(STAR_MK).c \
 $(PL_SRCS) \
-Constants.h \
-Decoder.cc \
-Decoder.h \
-Encoder.cc \
-Encoder.h \
-Interp.cc \
-Interp.h \
-Wireless.cc \
-Wireless.h \
-fft.cc \
-fft.h
+$(LIB_SRCS) \
+$(LIB_SRCS:.cc=.h) \
+Constants.h
 
 all:		$(SRCS) stars_all
 
