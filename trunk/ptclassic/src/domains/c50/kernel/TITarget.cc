@@ -26,7 +26,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: A. Baensch 
+ Programmer: A. Baensch, Luis Gutierrez 
  Date of creation: 6 May 1995
 
  Base target for TI  DSP assembly code generation.
@@ -58,8 +58,8 @@ TITarget :: TITarget (const char* nam, const char* desc,
 void TITarget :: initStates() {
 	inProgSection = 0;
  	mem = 0;
-	addState(bMemMap.setState("bMemMap",this,"768-1279","B1 memory map"));
-	addState(uMemMap.setState("uMemMap",this,"2432-9999","UD memory map"));
+	addState(bMemMap.setState("bMemMap",this,"768-1279","B memory map"));
+	addState(uMemMap.setState("uMemMap",this,"2432-6848","UD memory map"));
 	addState(subFire.setState("subroutines?",this,"-1",
 	    "Write star firings as subroutine calls."));
 	destDirectory.setInitValue("$HOME/PTOLEMY_SYSTEMS/C50");
@@ -120,7 +120,7 @@ void TITarget::beginIteration(int repetitions, int) {
       // there are more than 8 levels of nested loops.  Also
       // using the stack within a codeblock will most likely
       // break the program.
-	*defaultStream << "\tlacl\t#" << repetitions << "\n"
+	*defaultStream << "\tlacc\t#" << repetitions << "\n"
 	       << targetNestedSymbol.push("LOOP") << "\tpush\n";
     }
 }
