@@ -47,8 +47,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern int setPortIndices(Galaxy&);
 
-Cluster::Cluster(Star& self) : selfStar(self), master(NULL),
-sched(0) {};
+Cluster::Cluster(Star&self, const char* domain):
+selfStar(self),master(NULL),myDomain(domain),sched(0) {};
 
 /*virtual*/ Cluster::~Cluster() {
     LOG_DEL; delete sched;

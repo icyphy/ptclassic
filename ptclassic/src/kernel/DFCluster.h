@@ -59,17 +59,20 @@ public:
     /*virtual*/ int run();
 
     // Constructors
-    DFCluster();
+    DFCluster(const char* domain);
 
     /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
     
-    /*virtual*/ Cluster* newCluster(Block* master) const;
+    /*virtual*/ Cluster* newCluster(Block* master,const char* domain) const;
 
     /*virtual*/ Cluster* asCluster() { return this; }
     
     /*virtual*/ int isSDFinContext() const;
 
-    /* virtual*/ int generateSchedule();
+    /*virtual*/ int generateSchedule();
+
+    // return my domain.  all clusters should redefine this method of block.
+    /*virtual*/ const char* domain () const { return myDomain; }
 };
 #endif
 

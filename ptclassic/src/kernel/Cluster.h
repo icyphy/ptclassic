@@ -48,7 +48,7 @@ class Cluster {
 friend class ClusterIter;
 public:
 
-    Cluster(Star& self);
+    Cluster(Star& self,const char* domain);
 
     virtual ~Cluster();
     // set the master and build cluster
@@ -71,7 +71,8 @@ public:
     virtual int generateSchedule();
 
     int isClusterAtomic() const;
-    
+
+    // Add a cluster into the internal galaxy of this cluster.
     void addCluster(Cluster*);
 
     void addGalaxy(Galaxy*,PortHole**);
@@ -91,7 +92,9 @@ public:
 
     virtual PortHole* clonePort(const PortHole*,Star*) = 0;
 
-    virtual Cluster* newCluster(Block* s = NULL) const = 0;
+    // By default the domain is set to the same as this cluster.
+    virtual Cluster* newCluster(Block* s = NULL,const char* domain = NULL)
+	 const = 0;
 
     virtual int flattenGalaxy(Galaxy*) {return FALSE;}
     
@@ -107,6 +110,7 @@ protected:
     DynamicGalaxy gal;
     Scheduler* sched;
 
+    const char* myDomain;
 private:
     // Connect two Cluster PortHoles together
     void connect(PortHole* source, PortHole* destination);
