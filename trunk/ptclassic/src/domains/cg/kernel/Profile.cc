@@ -37,6 +37,7 @@ Date of last revision:
 #endif
 
 #include "Profile.h"
+#include "Error.h"
 
 // constructor
 
@@ -45,10 +46,14 @@ Profile :: Profile(int n) {
 	effP = 0;
 	makespan = 0;
 	maxPeriod = 0;
-	syncPoint = 0;
+	assignedId = 0;
 	
 	// array creation
 	create(n);
+}
+
+Profile :: ~Profile() {
+	LOG_DEL; delete [] assignedId;
 }
 
 void Profile :: create(int n) {
@@ -58,6 +63,17 @@ void Profile :: create(int n) {
 	startTime.create(n);
 	finishTime.create(n);
 	procId.create(n);
+	for (int i = 0; i < effP; i++)	procId[i] = i;
+}
+
+void Profile :: createAssignArray(int n) {
+	LOG_DEL; delete [] assignedId;
+	LOG_NEW; assignedId = new IntArray[n];
+	numAssignArray = n;
+	for (int i = 0; i < n; i++) {
+		assignedId[i].create(effP);
+		assignedId[i].initialize();
+	}
 }
 
 void Profile :: initialize() {
@@ -65,7 +81,16 @@ void Profile :: initialize() {
 	finishTime.initialize();
 	maxPeriod = 0;
 	makespan = 0;
-	syncPoint = 0;
+}
+
+int Profile :: profileIx(int i, int t) {
+	int j = i - 1;
+	int limit = assignedId[j].size();
+	for (int k = 0; k < limit; k++) {
+		if (assignedId[j][k] == t) return k;
+	}
+	Error::abortRun("no profile index with a given processor id");
+	return -1;
 }
 
 void Profile :: summary() {
@@ -101,49 +126,47 @@ void Profile :: copyIt(Profile* dest, int offsetIndex,
 	
 // currently insertion sort...
 
-void Profile :: sortWithFinishTime() {
+void Profile :: sortWithFinishTime(int start) {
 
-	LOG_NEW; int *order = new int[effP];
-	for (int i = 0; i < effP; i++)	order[i] = i;
+	for (int i = 0; i < effP; i++)	procId[i] = i;
 
 	// insertion sort
-	for (i = 1; i < effP; i++) {
+	for (i = 1 + start; i < effP; i++) {
 		int j = i - 1;
-		int x = finishTime[order[i]];
-		int temp = order[i];
-		while (j >= 0) {
-			if (x < finishTime[order[j]]) break;
-			order[j+1] = order[j];
+		int x = finishTime[procId[i]];
+		int temp = procId[i];
+		while (j >= start) {
+			if (x <= finishTime[procId[j]]) break;
+			procId[j+1] = procId[j];
 			j--;
 		}
 		j++;
-		order[j] = temp;
+		procId[j] = temp;
 	}
 
 	// copy values.
 	LOG_NEW; int *value = new int[effP];
-	for (i = 0; i < effP; i++) value[i] = finishTime[order[i]];
+	for (i = 0; i < effP; i++) value[i] = finishTime[procId[i]];
 	for (i = 0; i < effP; i++) finishTime[i] = value[i];
-	for (i = 0; i < effP; i++) value[i] = startTime[order[i]];
+	for (i = 0; i < effP; i++) value[i] = startTime[procId[i]];
 	for (i = 0; i < effP; i++) startTime[i] = value[i];
 	LOG_DEL; delete value;
-	LOG_DEL; delete order;
 }
 
 // currently insertion sort.
 // It also updates procId[] arrays...
 
-void Profile :: sortWithStartTime() {
+void Profile :: sortWithStartTime(int start) {
 
 	for (int i = 0; i < effP; i++)	procId[i] = i;
 
 	// insertion sort
-	for (i = 1; i < effP; i++) {
+	for (i = 1 + start; i < effP; i++) {
 		int j = i - 1;
 		int x = startTime[procId[i]];
 		int temp = procId[i];
-		while (j >= 0) {
-			if (x > startTime[procId[j]]) break;
+		while (j >= start) {
+			if (x >= startTime[procId[j]]) break;
 			procId[j+1] = procId[j];
 			j--;
 		}

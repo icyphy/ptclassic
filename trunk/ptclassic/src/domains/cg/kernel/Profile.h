@@ -46,44 +46,11 @@ Date of last revision:
 
 class Profile {
 
-private:
-	int effP;		// number of actually-used processors.
-
-	// Start and finish time on each processor
-	IntArray	startTime;
-	IntArray	finishTime;
-
-	// processor id.
-	// Mapping between virtual processors represented by Profile and
-	// actual processors.
-	// procId[i] = j means that the (i+1)th virtual processor is
-	// assigned to the (j+1)th actual processor.
-	IntArray	procId;
-
-	// makespan: schedule length assuming the blocked scheduling.
-	//         = latest finishTime.
-	int makespan;
-
-	// minimum displacement of parallel schedules.
-	// If we want to overlap many instances of this profile,
-	// this value gives the minimum displacement.
-	int minDisplacement;
-
-	// maxPeriod: maximum schedule length on a processor.
-	//	    = max over i (finishTime[i] - startTime[i])
-	int maxPeriod;
-	
-	// Total cost of the profile
-	double totalCost;
-
-	// processor id of syncronization point.
-	int syncPoint;
-
 public:
 	// Constructor
-	Profile() : makespan(0), maxPeriod(0), syncPoint(0) {}
+	Profile() : makespan(0), maxPeriod(0), assignedId(0) {}
 	Profile(int n);
-	~Profile() {}
+	~Profile();
 
 	// Dynamic creation
 	void create(int n);
@@ -91,11 +58,14 @@ public:
 	// initialize
 	void initialize();
 
-	// sort with finish time.
-	void sortWithFinishTime();
+	// sort with finish time, and change the procId accordingly.
+	// The argument indicates the starting index of sorting.
+	// For example, if 1 is given, the first index is excluded in the
+	// sorting.
+	void sortWithFinishTime(int start = 0);
 
 	// sort with start time, and update the procId accordingly.
-	void sortWithStartTime();
+	void sortWithStartTime(int start = 0);
 
 	// Set start and finish time on processor k.
 	void setStartTime(int k, int t) { startTime[k] = t; }
@@ -105,13 +75,17 @@ public:
 	int getStartTime(int k) { return startTime[k]; }
 	int getFinishTime(int k) { return finishTime[k]; }
 
-	// procId
+	// procId for the inner schedule
 	void setProcId(int k, int t) { procId[k] = t; }
 	int getProcId(int k) { return procId[k]; }
 
-	// syncId
-	void setSyncPoint(int k) { syncPoint = k; }
-	int syncProc()		 { return syncPoint; }
+	// create "assignedId" array
+	void createAssignArray(int);
+	IntArray* assignArray(int i) { return &assignedId[i-1]; }
+	void assign(int i, int k, int t) { assignedId[i-1][k] = t; }
+	int assignedTo(int i, int k) { return assignedId[i-1][k]; }
+	int profileIx(int i, int t);
+	int numInstance() { return numAssignArray; }
 
 	// The number of effectively-used processors.
 	void setEffP(int i) { effP = i; }
@@ -150,6 +124,48 @@ public:
 	// and at the end.
 	// Return the sum of those idle times.
 	int totalIdleTime(IntArray& avail, int numProcs);
+
+private:
+	int effP;		// number of actually-used processors.
+
+	// Start and finish time on each processor
+	IntArray	startTime;
+	IntArray	finishTime;
+
+	// processor id of the local schedule.
+	// Mapping between virtual processors represented by Profile and
+	// actual processors inside.
+	// procId[i] = j means that the (i+1)th virtual processor is
+	// assigned to the (j+1)th actual processor.
+	IntArray	procId;
+
+	// processor id for outer processors.
+	// assignedId[k][i] = j means that (i+1)th profile  of the (k+1)th
+	// invocation is assigned to the (j+1)th outer processor.
+	// The number of arrays is "numInstance" of the star containing this
+	// profile.
+	IntArray* 	assignedId;
+	int		numAssignArray;
+
+	// makespan: schedule length assuming the blocked scheduling.
+	//         = latest finishTime.
+	int makespan;
+
+	// minimum displacement of parallel schedules.
+	// If we want to overlap many instances of this profile,
+	// this value gives the minimum displacement.
+	int minDisplacement;
+
+	// maxPeriod: maximum schedule length on a processor.
+	//	    = max over i (finishTime[i] - startTime[i])
+	int maxPeriod;
+	
+	// Total cost of the profile
+	double totalCost;
+
+	// processor id of synchronization point.
+	// Synchronization point is hardwired to 0 for program simplicity.
+	// no more need of "int syncPoint;"
 }; 
 	
 #endif
