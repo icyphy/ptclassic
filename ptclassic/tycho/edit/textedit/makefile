@@ -53,8 +53,6 @@ ITCL_SRCS = \
 	EditMake.itcl \
 	EditMail.itcl \
 	EditProgram.itcl \
-	EditPtcl.itcl \
-	EditPtlang.itcl \
 	EditSDL.itcl \
 	EditTcl.itcl \
 	HTMLOutline.itcl \
