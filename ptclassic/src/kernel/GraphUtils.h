@@ -47,6 +47,12 @@ Programmer: Jose Luis Pino
 // the user
 int totalNumberOfStars(Galaxy& g);
 
+int isAcyclic(Galaxy* g, int ignoreDelayArcs);
+
+void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode=0);
+
+void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode=0);
+
 class BlockParentIter {
 public:
     BlockParentIter(Block& b):first(b) { reset(); }

@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
-Programmer: Jose Luis Pino
+Programmer: Jose Luis Pino, Praveen K. Murthy
 
 *****************************************************************/
 
@@ -42,12 +42,188 @@ Programmer: Jose Luis Pino
 #include "GalIter.h"
 #include <string.h>
 
+int findBackEdge(Block* node, int flagLoc, int igonreDelayArcs);
+
 // function to count stars in a galaxy
 int totalNumberOfStars(Galaxy& g) {
     GalStarIter nextStar(g);
     int n = 0;
     while (nextStar++ != NULL) n++;
     return n;
+}
+
+/****
+
+Returns TRUE if Galaxy is acyclic; FALSE else.
+
+@Description
+Done by computing depth first search (dfs) on g.
+<p>
+If <code>ignoreDelayArcs</code> is 0, then every arc is taken into account.
+if <code>ignoreDelayArcs</code> is n>0, then arcs that have been tagged (at
+location <code>flags[ignoreDelayArcs])</code> non-zero are ignored as 
+precedence arcs.
+
+@SideEffects
+It uses <code>flags[0]</code> for all Blocks in the Galaxy for keeping
+track of nodes that have been visited and haven't been visited; any previous
+value in <code>flags[0]</code> will be lost.
+
+@Returns TRUE or FALSE
+
+****/
+int isAcyclic(Galaxy* g, int ignoreDelayArcs)
+{
+    // This is done by DFS.
+    // flagLoc is hard-wired to be 0 here; perhaps it can become
+    // an argument to the function.
+    int flagLoc = 0;
+    resetFlags(*g,flagLoc,0);
+    Block *node;
+    GalTopBlockIter nextBlock(*g);
+    while ((node = nextBlock++) != NULL) {
+	if (node->flags[flagLoc]) continue;
+	if (findBackEdge(node,flagLoc,ignoreDelayArcs)) return FALSE;
+    }
+    return TRUE;
+}
+
+int findBackEdge(Block* node, int flagLoc, int ignoreDelayArcs)
+{
+    Block *succ;
+    int fl, result;
+    PortHole *p;
+    node->flags[flagLoc] = 1;
+    SuccessorIter nextSucc(*node);
+    BlockOutputIter nextO(*node);
+    if (ignoreDelayArcs) {
+
+   	// now we only want to explore those edges
+	// that are not tagged non-zero
+	// at flags[ignoreDelayArcs] if ignoreDelayArcs > 0
+
+	while ( (p = nextO.next(ignoreDelayArcs,0)) != NULL) {
+	    if (!p->far() || !p->far()->parent()) continue;
+	    succ = p->far()->parent();
+	    fl = succ->flags[flagLoc];
+	    if (fl == 2) continue;
+	    if (fl == 1) {
+	    	result = TRUE;
+	    } else {
+	    	result = findBackEdge(succ,flagLoc,ignoreDelayArcs);
+	    }
+	    if (result) return TRUE;
+	}
+    } else {
+	while ((succ = nextSucc++) != NULL) {
+	    fl = succ->flags[flagLoc];
+	    if (fl == 2) continue;
+	    if (fl == 1) {
+		result = TRUE;
+	    } else {
+		result = findBackEdge(succ,flagLoc,ignoreDelayArcs);
+	    }
+	    if (result) return TRUE;
+	}
+    }
+    node->flags[flagLoc] = 2;
+    return FALSE;
+}
+
+/****
+
+Find the source nodes in the Galaxy
+
+@Description
+A source node here is any node that has all of its input
+nodes marked.  This method is used in order to simulate
+the removal of nodes from the graph; a node is "removed"
+by marking it at <code>flags[flagLoc]</code> (by the function that calls
+this function).  If no node is marked, then this function will
+return the sources in the graph.  If nodes are marked, then
+the list returned by the function represents the sources
+in the graph that would result from removing the marked nodes
+and all their edges from the graph.
+<p>
+If <code>deletedNode</code> is specified, then the algorithm will assume that
+the only node deleted from the graph (from the last time this function
+was called ) was <code>deletedNode</code> and explore
+only the edges going out of <code>deletedNode</code>.  This will make
+this computation much more efficient when it is used in
+conjunction with functions like <code>isWellOrdered</code>
+because <code>isWellOrdered</code> deletes one node at a time
+and calls <code>findSources</code>
+after each deletion.  IN THIS CASE NOTE THAT THE FUNCTION WILL ONLY
+RETURN THOSE SOURCES FORMED BY THE DELETION OF 
+<code>deletedNode</code> AND NOT ALL SOURCES IN THE GRAPH.
+<p>
+To generalize this function, we could give a
+list of deleted nodes (instead of just one) and only explore the edges
+out of those from the list. 
+<p>
+Worst case running time: O(E) (when <code>deletedNode</code> is specified)
+
+@SideEffects
+The input list sources is filled with the source nodes
+
+****/
+void findSources(Galaxy* g, int flagLoc, SequentialList& sources, Block* deletedNode)
+{
+    Block *pred, *node;
+    int notSource;
+    if (deletedNode) {
+	SuccessorIter nextNeigh(*deletedNode);
+	while ((node = nextNeigh++) != NULL) {
+	    notSource = 0;
+	    PredecessorIter nextPred(*node);
+	    while ((pred=nextPred++) != NULL) {
+		if (!pred->flags[flagLoc]) {notSource = 1; break;}
+	    }
+	    if (!notSource) sources.append(node);
+	}
+    } else {
+	GalTopBlockIter nextBlock(*g);
+	while ((node = nextBlock++) != NULL) {
+	    if (node->flags[flagLoc]) continue;
+	    notSource = 0;
+	    PredecessorIter nextPred(*node);
+	    while ((pred=nextPred++) != NULL) {
+		if (!pred->flags[flagLoc]) {notSource = 1; break; }
+	    }
+	    if (!notSource) sources.append(node);
+	}
+    }
+}
+
+// Find the sink nodes in the Galaxy; symmetric to <code>findSources</code>
+void findSinks(Galaxy* g, int flagLoc, SequentialList& sinks, Block* deletedNode)
+{
+    // symmetric to findSources; see comments therein
+    // FIXME: Make this like findSources above after everything's been debugged
+    Block *succ, *node;
+    int notSink;
+    if (deletedNode) {
+	PredecessorIter nextNeigh(*deletedNode);
+	while ((node = nextNeigh++) != NULL) {
+	    notSink = 0;
+	    SuccessorIter nextSucc(*node);
+	    while ((succ=nextSucc++) != NULL) {
+		if (!succ->flags[flagLoc]) {notSink = 1; break;}
+	    }
+	    if (!notSink) sinks.append(node);
+	}
+    } else {
+	GalTopBlockIter nextBlock(*g);
+	while ((node=nextBlock++) != NULL) {
+	    if(node->flags[flagLoc]) continue;
+	    notSink = 0;
+	    SuccessorIter nextSucc(*node);
+	    while ((succ=nextSucc++) != NULL) {
+		if (!succ->flags[flagLoc]) {notSink = 1; break;}
+	    }
+	    if (!notSink) sinks.append(node);
+	}
+    }
 }
 
 Block* BlockParentIter::next() {
