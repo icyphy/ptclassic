@@ -55,7 +55,7 @@ class BDFPortHole : public DFPortHole
 private:
 	// if given, points to an associated boolean signal;
 	// tokens are only produced/consumed when that signal is true
-	PortHole* pAssocPort;
+	BDFPortHole* pAssocPort;
 
 	// "relation" specifies the relation of this porthole with the
 	// assocPort porthole (if it is non-null).  There are five
@@ -69,8 +69,23 @@ private:
 	// for the latter two cases data are always moved.
 
 	BDFRelation relation;
+
+	void removeRelation();
+
 public:
+	BDFPortHole() 
+	: pAssocPort(0), relation(BDF_NONE) {}
+
+	~BDFPortHole();
+
 	PortHole* assocPort() { return pAssocPort;}
+
+	// cast is safe because of restrictions on setting of assocPort
+	BDFPortHole* assoc() { return (BDFPortHole*)pAssocPort;}
+
+	BDFRelation relType() const {
+		return (BDFRelation) assocRelation();
+	}
 
 	int assocRelation() const { return relation;}
 
@@ -81,19 +96,23 @@ public:
                           Block* parent,
                           DataType type = FLOAT,
 			  unsigned numTokens = 1,
-			  PortHole* assocBool = 0,
+			  BDFPortHole* assocBool = 0,
 			  BDFRelation relation = BDF_NONE,
 			  int delay = 0);
 
+	// Function to set associations.  BDF_SAME and BDF_COMPLEMENT
+	// relations always form a loop.
+	void setRelation(BDFRelation rel, BDFPortHole* assocBool = 0);
+
 	// Function to alter BDF values.
 	PortHole& setBDFParams(unsigned numTokens = 1,
-			  PortHole* assocBool = 0,
+			  BDFPortHole* assocBool = 0,
 			  BDFRelation relation = BDF_NONE,
 			  int delay = 0);
 
 	// Function to alter BDF values (alternate form)
 	PortHole& setBDFParams(unsigned numTokens,
-			  PortHole& assocBool,
+			  BDFPortHole& assocBool,
 			  BDFRelation relation = BDF_NONE,
 			  int delay = 0) {
 		return setBDFParams(numTokens,&assocBool,relation,delay);
@@ -102,6 +121,9 @@ public:
 	// Services of PortHole that are often used:
 	// setPort(DataType d);
 	// Particle& operator % (int);
+
+	// table for use of "reversals" function
+	static BDFRelation reversals[4];
 };
 
 	///////////////////////////////////////////
@@ -160,7 +182,7 @@ public:
                           Block* parent,
 			       DataType type = FLOAT,
 			  unsigned numTokens = 1,
-			  PortHole* assocBool = 0,
+			  BDFPortHole* assocBool = 0,
 			  BDFRelation rel = BDF_NONE,
 			  int del = 0) {
 		MultiPortHole::setPort(portName,parent,type);
@@ -170,7 +192,7 @@ public:
 		delay = del;
 		return *this;
 	}
-	void setBDFParams(unsigned n = 1, PortHole* assoc = 0,
+	void setBDFParams(unsigned n = 1, BDFPortHole* assoc = 0,
 			  BDFRelation rel = BDF_NONE, int del = 0) {
 		numberTokens = n;
 		assocBoolean = assoc;
@@ -178,7 +200,7 @@ public:
 		del = 0;
 	}
 	// alternate version with reference arg.
-	void setBDFParams(unsigned n, PortHole& assoc,
+	void setBDFParams(unsigned n, BDFPortHole& assoc,
 			  BDFRelation rel = BDF_NONE, int del = 0) {
 		numberTokens = n;
 		assocBoolean = &assoc;
@@ -192,7 +214,7 @@ protected:
 
 	// if given, points to an associated boolean signal;
 	// tokens are only produced/consumed when that signal is true
-	PortHole* assocBoolean;
+	BDFPortHole* assocBoolean;
 
 	// specifies relation to the assocBoolean signal (see BDFPortHole)
 	BDFRelation relation;
@@ -238,5 +260,13 @@ public:
         // Add a new physical port to the MultiPortHole list
         PortHole& newPort();
 };
+
+// common tests on BDFRelations
+inline int TorF(BDFRelation r) { return r == BDF_TRUE || r == BDF_FALSE;}
+inline int SorC(BDFRelation r) { return r == BDF_SAME || r == BDF_COMPLEMENT;}
+
+inline int reverse(BDFRelation r) {
+	return (r == BDF_NONE) ? r : BDFPortHole::reversals[r];
+}
 
 #endif
