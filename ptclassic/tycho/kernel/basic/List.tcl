@@ -37,6 +37,10 @@
 ##########################################################################
 
 
+## lhead, ltail list
+#
+# Take the head and tail of a list.
+#
 proc lhead {list} {
     return [lindex $list 0]
 }
@@ -45,6 +49,11 @@ proc ltail {list} {
     return [lreplace $list 0 0]
 }
 
+## linit, llast list
+#
+# Take the last element of a list, end everything by the last
+# element.
+#
 proc linit {list} {
     return [ltake $list [expr [llength $list] - 1]]
 }
@@ -53,6 +62,7 @@ proc llast {list} {
     return [lindex $list [expr [llength $list] - 1]]
 }
 
+## lnull list
 #
 # Test for a null list (or element). Written the way it is
 # because a) `==' cannot be used if the list starts with a number and b
@@ -67,8 +77,9 @@ proc lnull {list} {
 }
 
 
+## ltake, ldrop list n
 #
-# Take or drop list elements
+# Take or drop list elements.
 #
 proc ltake {list n} {
     return [lrange $list 0 [expr $n - 1]]
@@ -82,6 +93,12 @@ proc ldrop {list n} {
     }
 }
 
+
+## ldropUntil list item
+#
+# Drop list elements until the given value, _item_ is found. The
+# returned list starts with _item_.
+#
 proc ldropUntil {list item} {
     set index [lsearch -exact $list $item]
     if { $index == -1 } {
@@ -91,6 +108,7 @@ proc ldropUntil {list item} {
     }
 }
 
+## lcopy n item
 #
 # Make a list containing n copies of the specified item
 #
@@ -103,8 +121,13 @@ proc lcopy {n item} {
 }
 
 
+## interval x y
 #
-# Return list of n integers in the range x to y
+# Return list of integers in the range _x_ to _y_. For example,
+#
+#    interval 2 5
+#
+# returns {2 3 4 5}.
 #
 proc interval {x y} {
     set result {}
@@ -118,8 +141,14 @@ proc interval {x y} {
 }
 
 
+## ldistl item list
 #
-# List distributions: like in Backus' FP
+# A left list distribution, as in Backus' FP. Note carefully
+# the order of arguments. Example:
+#
+#     ldistl 1 {2 3 4}
+#
+# returns {{1 2} {1 3} {1 4}}.
 #
 proc ldistl {item list} {
     set result {}
@@ -131,6 +160,15 @@ proc ldistl {item list} {
     return $result
 }
 
+## ldistr list item
+#
+# A right list distribution, as in Backus' FP. Note carefully
+# the order of arguments. Example:
+#
+#     ldistr {1 2 3} 4
+#
+# returns {{1 4} {2 4} {3 4}}.
+#
 proc ldistr {list item} {
     set result {}
 
@@ -141,6 +179,7 @@ proc ldistr {list item} {
     return $result
 }
 
+## lmember list item
 #
 # Test whether an element is in a list
 #
@@ -149,10 +188,16 @@ proc lmember {list item} {
 }
 
 
+## lorder list order
 #
-# Order elements of a list in the same way as elements of another
+# Order elements of a list in the same way as elements of another.
+# For example:
 #
-proc cp {a b} {
+#     lorder {5 2 8 6} {1 2 3 4 5 6 7 8 9}
+#
+# returns {2 5 6 8}.
+#
+proc lorder_cp {a b} {
     return [expr [lindex $a 0] - [lindex $b 0]]
 }
 
@@ -168,7 +213,7 @@ proc lorder {list order} {
     }
 
     set list {}
-    set nlist [lsort -command cp $nlist]
+    set nlist [lsort -command lorder_cp $nlist]
     foreach item $nlist {
 	lappend list [lindex $item 1]
     }
@@ -177,6 +222,7 @@ proc lorder {list order} {
 }
 
 
+## lnub list
 #
 # Remove duplicates from a list
 #
@@ -191,8 +237,14 @@ proc lnub {list} {
     return $result
 }
 
+## subsets list
 #
-# Generate all non-empty subsets of a list
+# Generate all non-empty subsets of a list. Subsets are not in
+# any kind of order. For example,
+#
+#     subsets {1 2 3}
+#
+# generate {{1 2 3} {1 2} {1 3} 1 {2 3} 2 3}.
 #
 proc subsets {list} {
     set result {}
@@ -214,19 +266,6 @@ proc subsets {list} {
 
 
 #
-# Apply a function to every element of a list
-#
-proc lmap {list cmd} {
-    set result {}
-
-    foreach x $list {
-	lappend result [$cmd $x]
-    }
-    return $result
-}
-
-
-#
 # Remove an item from a list
 #
 proc ldelete {list item} {
@@ -240,8 +279,11 @@ proc ldelete {list item} {
 }
 
 
+## lsubst list item value
 #
-# Replace an element of a list with another
+# Replace an element of a list with another. If _list_ contains
+# _item_, then the returned list has _value_ substituted for
+# _value_. If not, then _list_ is returned unchanged.
 #
 proc lsubst {list item value} {
     set i [lsearch -exact $list $item]
@@ -254,8 +296,9 @@ proc lsubst {list item value} {
 }
 
 
+## ldifference l1 l2
 #
-# Difference of two lists: l1 - l2
+# Return the difference of two lists: l1 - l2
 #
 proc lsubtract {l1 l2} {
     set result {}
@@ -273,8 +316,9 @@ proc lsubtract {l1 l2} {
     return $result
 }
 
+## lsubset l1 l2
 #
-# Is l1 a subset of l2?
+# Return true if l1 is a subset of l2.
 #
 proc lsubset {l1 l2} {
     set result {}
@@ -289,8 +333,10 @@ proc lsubset {l1 l2} {
 }
 
 
+## ldisjoint l1 l2
 #
-# Are l1 and l2 disjoint?
+# Return true if l1 and l2 are disjoint -- that is, their
+# intersection is null.
 #
 proc ldisjoint {l1 l2} {
     set result {}
@@ -303,3 +349,75 @@ proc ldisjoint {l1 l2} {
 
     return 1
 }
+
+
+
+
+##########################################################################
+#
+# ``Higher-order'' functions on lists.
+#
+# A miscelleous set of functions that sort-of mimics some of the common
+# higher-order functions found in functional languages.
+#
+# The ``function'' arguments to these functions can either be an
+# itcl command name, or a string of the command name and an initial
+# set of arguments.
+#
+# In all of these, the list argument comes _list_, rather than first
+# as is common in itcl procs. This is because it's less confusing
+# when writing command prefixes: because the list element comes at the
+# end of the string, it's better that the list in the call to the
+# higher-order function come at the end of the argument list.
+#
+#
+
+
+## lmap
+#
+# Apply a function to every element of a list
+#
+proc lmap {cmd list} {
+    set result {}
+
+    foreach x $list {
+	lappend result [eval $cmd [list $x]]
+    }
+    return $result
+}
+
+
+## lselect
+#
+# Filter a list based on a predicate. The output list contains
+# elements of the input list for which the predicate is satisfied.
+#
+proc lselect {cmd list} {
+    set result {}
+    
+    foreach x $list {
+	if { [eval $cmd [list $x]] } {
+	    lappend result $x
+	}
+    }
+    return $result
+}
+
+
+## lreject
+#
+# Filter a list based on a predicate. The output list contains
+# elements of the input list for which the predicate fails.
+#
+proc lreject {cmd list} {
+    set result {}
+
+    foreach x $list {
+	if { ! [eval $cmd [list $x]] } {
+	    lappend result $x
+	}
+    }
+    return $result
+}
+
+
