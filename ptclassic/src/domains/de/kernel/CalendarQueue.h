@@ -57,6 +57,7 @@ extern const double __infinity;
 
 class Star;
 class DEStar;
+class CQScheduler;
 
 #define MAX_BUCKET     1024*4
 #define QUEUE_SIZE     (MAX_BUCKET*3)/2
@@ -108,6 +109,8 @@ public:
 
 class CalendarQueue : public BasePrioQueue
 {
+	friend CQScheduler;
+
 public:
 	// Add element to the tail of the queue and sort it by its level (v)
 	// first and its fineLevel (fv) second.
@@ -145,6 +148,7 @@ public:
 
 	void EnableResize() { cq_resizeEnabled = 1; }
 	void DisableResize() { cq_resizeEnabled = 0; }
+	int isResizeEnabled() { return cq_resizeEnabled; }
 
 	// Constructor
 	CalendarQueue() : cq_debug(0), cq_eventNum(0),
@@ -178,6 +182,7 @@ protected:
 	virtual void 	   clearFreeList();
 
 	void LocalInit(int qbase, int nbuck, double startInterval, double lastTime);
+	void InsertCqLevelLink( CqLevelLink * );
 	void InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *event);
 	CqLevelLink* NextEvent();
 	void Resize(int newSize);
