@@ -60,10 +60,10 @@ class ::tycho::ResourceMail {
     method gets {{varName {}}}
 
     # Test if the file is currently open
-    method isopen {}
+    method isopen {} {return 0}
 
-    # Open the resource
-    method open {{mode "r"}}
+    # Open the resource.
+    method open {{path {}}}
 
     # Write a string to a streamable resource.
     # Can't write into HTTP file! Read permission of off
@@ -74,9 +74,6 @@ class ::tycho::ResourceMail {
 
     # Return 1 if this resource is streamable
     method streamable {}
-
-    # Return the progess indicator, as a decimal number. 1.0 is full.
-    method progress {}
 
     # Write to the file
     method write {data}
@@ -93,8 +90,14 @@ class ::tycho::ResourceMail {
     # Return the content type of the current file
     proc contenttype {path}
 
+    # See if the server or hostname exists
+    proc exists {path}
+
     # Create a new resource object
     proc new {path args}
+
+    # Split up URL
+    proc splitURL {path}
 
     # Return the type of a given file
     proc type {path}
@@ -105,6 +108,13 @@ class ::tycho::ResourceMail {
     # Puts a string to console of the debug option is set
     protected method debugputs {string}
 
+    # Initiate a connection on the mail server
+    method mailinitiate {url}
+
+    # File event handler for mail server.
+    method mailhandler {}
+
+
     ###################################################################
     ####                        protected commons                  ####
 
@@ -113,6 +123,17 @@ class ::tycho::ResourceMail {
 
     # The url this object is accessing
     protected variable currentURL {}
+
+    # The socket id used to open the mail port
+    protected variable socketid {}
+
+    # The state of transfer during the upload connection on port 25.
+    # The variable could be any of the following:
+    # <tt>DISCONNECTED, HELO, MAILFROM, RCPTTO, DATA1, DATA2 and QUIT.</tt>
+    #
+    # The names are derived from mail daemon (ESMTP Sendmail 8.8.5)
+    protected variable state {DISCONNECTED}
+
 
     ###################################################################
     ####                         private variables               ####
@@ -157,34 +178,18 @@ body ::tycho::ResourceMail::close {} {
 
 #####################################################################
 #### open
-# Open an HTTP file. If it's already been downloaded into
-# a local temporary file, just use that file; otherwise
-# download it into a temporary file and then download it.
+# Open a connection for mail on port 25.
 #
-body ::tycho::ResourceMail::open {{mode "r"}} {
+body ::tycho::ResourceMail::open {{path {}}} {
     set url [path]
 
-    if { $mode != "r" } {
-	error "File $url is not writable"
-    }
+    ::puts "URL: $url"
+
     if { ! [exists $url] } {
 	error "File $url does not exist"
     }
-    if { ! [httpcached $url] } {
-	# Get it if not already
-	httpget $url file
-	httpwait
-    }
-    # Check again in case something went wrong
-    if { ! [httpcached $url] } {
-	error "File $url is not accessible"
-    }
-    # Go through forwarding locations
-    while { [::info exists _forwarding($url)] } {
-	set url $_forwarding($url)
-    }
+
     # Open the cache file
-    set fileid [::open $_cachefile($url) "r"]
     set fileIsOpen 1
 }
 
@@ -248,36 +253,90 @@ body ::tycho::ResourceMail::debugputs {string} {
 }
 
 #########################################################################
+#### mailinitiate
+# Opening a mail connection, and set the fileevent.
+#
+body ::tycho::ResourceMail::mailinitiate {url} {
+    # Parse URL into hostname, port, and path
+    set currentURL $url
+    ::tycho::assign username hostname port [splitURL $url]
+
+    if {[catch {socket -async $hostname $port} socketid]} {
+	catch {unset $socketid}
+	error "Can't open $hostname, $port"
+    }
+
+    # <tt>DISCONNECTED, HELO, MAILFROM, RCPTTO, DATA1, DATA2 and QUIT.</tt>
+    set state HELO
+
+    # Set up the file events for incoming data
+    ::fileevent $socketid w {}
+    ::fileevent $socketid readable \
+	    "@scope ::tycho::ResourceMail [list $this mailhandler]"
+
+    # Request the URL
+    # FIXME: Need to figure out how to set the Accept-Encoding field
+    ::fconfigure $socketid -blocking no    ;#-translation crlf
+    ::fconfigure $socketid -translation auto
+}
+
+
+
+#########################################################################
+#### mailhandler
+# The following is the handshake protocol between the client and
+# the server. When the mailhandler gets the expected state from
+# the server, it'll send out the right data.
+#
+# <pre>
+# State          Expect from Server             Send/"Action"
+# -----          ------------------             -----------
+#
+# 220-hofmann.CS.Berkeley.EDU Sendmail 8.6.11/8.6.6.Beta11 \
+#        ready at Mon, 2 Jun 1997 18:15:06 -0700
+# 220 ESMTP spoken here
+# DISCONNECTED                                  "THIS IS AN ERROR HERE!"
+# HELO           220 <hostname> ESMTP ...       HELO <hostname>
+# MAILFROM       250 <host> Hello <host>        MAIL FROM: <username@hostname>
+# RCPTTO         250 <username> Recipient ok    DATA
+# DATA1          354 Enter mail...              <subject, body, .>
+# DATA2          250 ...Message accepted        QUIT
+# QUIT           221 Accepted for delivery      "Close status is okay"
+# </pre>
+body ::tycho::ResourceMail::mailhandler {} {
+    if {[::eof $socketid] && $state!="DISCONNECTED"} {
+        error "Handshaking failed"
+	return
+    }
+    # Line will contain the status
+    ::gets $socketid line
+    ::puts "LINE: $line"
+
+
+}
+
+
+
+#########################################################################
 #### splitURL
 # Parse a url into the hostname, port, and return them
 # as a three-element list.
 #
 body ::tycho::ResourceMail::splitURL {url} {
-    set _port 25
-    set _hostname {}
     set _username {}
+    set _hostname {}
+    set _port 25
 
     # The following parses the url into hostname, port, and username
     # The following is verbatim from Surfit: vvvvvvvvvvvvvvvvvvvvvvvvvvvv
-    if {[regexp -nocase {^http://([^/:]*)(:([^/]+))?(.*)} $url match \
-	    hosttmp optport porttmp usertmp]} {
-	if {$hosttmp!={}} {set _hostname $hosttmp} ;# Supply reasonable default
-	if {$porttmp!={}} {set _path $porttmp}
-	if {$usertmp!={}} {set _port $usertmp}
-    } else {
-	# Recover from malformed URL
-	if {![string match */* $url]} {
-	    # Assume only the hostname:port has been given
-	    regexp {([^:]*)(:(.*))?} $url match \
-		    hosttmp optport porttmp
-	    if {$hosttmp != {}} {set _hostname $hosttmp}
-	    if {$porttmp != {}} {set _port $porttmp}
-	    set _path /
-	} else {
-	    error "no hostname given in URL \"$url\""
-	}
+    if {[regexp -nocase {^mailto:(/+)?([a-z]+)@([a-z0-9\.]+)(:([0-9]+))?} \
+            $url _ _ \
+	    usertmp hosttmp _ porttmp]} {
+	if {$hosttmp!={}} {set _hostname $hosttmp}
+	if {$porttmp!={}} {set _port $porttmp}
+	if {$usertmp!={}} {set _username $usertmp}
     }
-    return [list $_hostname $_port $_username]
+    return [list $_username $_hostname $_port]
 }
 
 
