@@ -34,8 +34,9 @@ DIRS = textedit visedit
 # Root of Tycho directory
 ROOT =		..
 
+ME = 		editors
 # True source directory
-VPATH =		$(ROOT)/lib
+VPATH =		$(ROOT)/$(ME)
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
