@@ -23,7 +23,7 @@ $Id$
 #include "Domain.h"
 #include "miscFuncs.h"
 #include "StringList.h"
-#include "Output.h"
+#include "Interpreter.h"
 #include <ctype.h>
 #ifndef O_RDONLY
 #define O_RDONLY 0
@@ -178,9 +178,11 @@ linkObject (const char* ofile) {
 }
 
 // tables for suffixes and preprocessors
-const int N_PREPROCS = 2;
-static char *preprocSuffix[] = { "", "pl", "chdl" };
-static char *preprocProg[] = { "", "ptlang", "pepp" };
+const int N_PREPROCS = 3;
+const int INTERP_FILE = 3;
+
+static char *preprocSuffix[] = { "", "pl", "chdl", "pt" };
+static char *preprocProg[] = { "", "ptlang", "pepp", 0 };
 
 // Here is the function that loads in a star!
 // name = username of the star
@@ -203,6 +205,14 @@ compileAndLink (const char* name, const char* idomain, const char* srcDir,
 	if (fd < 0) return noPermission ("Loader: can't open ", plName);
 	close (fd);
 	sprintf (oName, "%s/%s%s.o", objDir, idomain, name);
+// Special case hack: Interpreter file.  We simply load the file into
+// an Interpreter object and run the command router.  We always return
+// success.
+	if (preproc == INTERP_FILE) {
+		Interpreter intObj(sourceFile);
+		intObj.commandRouter();
+		return TRUE;
+	}
 // if there is a makefile, use make.
 	char makeFile[512];
 	sprintf (makeFile, "%s/%s", objDir, "Makefile");
