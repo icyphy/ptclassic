@@ -44,7 +44,7 @@
 
 # Set the TYCHO variable
 if ![info exists env(TYCHO)] {
-	set env(TYCHO) "c:/tycho0.2.1devel"
+	set env(TYCHO) "c:/tycho0.3devel"
 }
 
 # If you are having problems, uncomment the next line
