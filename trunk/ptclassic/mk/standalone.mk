@@ -27,20 +27,30 @@
 #		       
 # Programmer:  Jose Luis Pino
 #
-# This makefile is to be used to create small, stand-alone testing programs
-# for the Ptolemy kernel.
+# This makefile is to be used to create small, stand-alone programs
+# that use parts of Ptolemy kernel.
 #
-# To use this, you need to construct a <filename>.cc file that has a main 
-# function and accomplishes the test.  This file should be located in the 
-# src directory of the library to test.  Then, just cd into the obj directory 
-# and execute the make command:
+# To use this, you need to construct a single <filename>.cc file 
+# that defines a main function. The usage of this mk file is:
+#
 # make -f $(ROOT)/mk/standalone.mk <stars.mk variable defs> <filename>.<suffix>
 #
 # where the suffix is one of: .bin, .debug, .purify, .quantify, .purecov
 #
-include makefile
 
+ROOT=$(PTOLEMY)
 include $(ROOT)/mk/stars.mk
+
+INCL= $(foreach dir,$(CUSTOM_DIRS),-I$(ROOT)$(dir))
+
+VPATH=.
+
+include $(ROOT)/mk/config-$(PTARCH).mk
+
+#This definition is needed so that make won't complain w/ common.mk
+LIB=dummy
+
+include $(ROOT)/mk/common.mk
 
 %.bin: %.o $(PT_DEPEND)
 	$(PURELINK) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
@@ -56,3 +66,9 @@ include $(ROOT)/mk/stars.mk
 
 $.purecov: %.o
 	$(PURECOV) $(LINKER) $(LINKFLAGS) $< $(LIBS) -o $(@F)
+
+
+
+
+
+
