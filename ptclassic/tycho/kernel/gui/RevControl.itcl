@@ -223,7 +223,7 @@ body ::tycho::RevControl::constructor {args} {
     }
     
     itk_component add history {
-        ::tycho::Edit $itk_component(historyframe).history -textheight 20
+        ::tycho::Edit $itk_component(historyframe).history -textheight 28
     } {
         keep -readonly -textwidth -background \
                 -highlightbackground -highlightcolor -selectforeground \
@@ -332,11 +332,6 @@ body ::tycho::RevControl::compareVersion {} {
     set olddir [eval pwd]
     cdDir $dir
 
-    # Generate a temporary file name that has the same extension as the file
-    # we are working on.
-    set tmpFile [::tycho::tmpFileName \
-            [file rootname $basefile] \
-            [file extension $basefile]]
     # We originally have the formal UNIQUEID+12345_678
     set version1 [returnVersion [lindex $difflist 0]]
     set version2 [returnVersion [lindex $difflist 1]]
@@ -348,6 +343,11 @@ body ::tycho::RevControl::compareVersion {} {
     set versions [lsort -real -decreasing [list $version1 $version2]]
     set version1 [lindex $versions 0]
     set version2 [lindex $versions 1]
+
+    # Generate a temporary file name that has the same extension as the file
+    # we are working on.
+    set tmpFile [::tycho::tmpFileName \
+            [file rootname $basefile] [file extension $basefile]]
 
     # Now make sure that version $INFINITY.$INFINITY is the original file
     if {$version1=="$INFINITY.$INFINITY"} {
@@ -683,7 +683,7 @@ body ::tycho::RevControl::getComments {} {
 # Info contains the status of the current file (empty means not checked out).
 body ::tycho::RevControl::parseHistory {history text} {
     # FIXME: oldCursor is empty from [$itk_component(history) config -cursor]
-    set oldCursor xterm
+    set oldCursor top_left_arrow
     set newCursor dot
     
     set file [$object filename]
