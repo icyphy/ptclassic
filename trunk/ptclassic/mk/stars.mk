@@ -495,18 +495,6 @@ ifdef DE
 			LIBFILES += $(LIBDIR)/libdecontribstars.$(LIBSUFFIX)
 		endif
 	endif
-	# SiP (SPIN in Ptolemy) SPIN is a protocol simulator
-	ifdef DESIP
-		CUSTOM_DIRS += $(DEDIR)/sip/kernel $(DEDIR)/sip/ptsip
-		LIBS += -lsip -lptsip
-		LIBFILES + =$(LIBDIR)/libsip.$(LIBSUFFIX) \
-			$(LIBDIR)/libptsip.$(LIBSUFFIX)
-	else 
-		# CQScheduler includes a call to wraupUpPML() which
-		# is part of SiP.  If SiP is not present, then link
-		# with sipdummy.o. 
-		LIBS += $(OBJDIR)/domains/de/kernel/sipdummy.o
-	endif
 	# Tcl/Tk stars
 	ifdef TK
 		# Java stars
@@ -531,6 +519,19 @@ ifdef DE
 	LIBS += -ldestars -lde
 	LIBFILES += $(LIBDIR)/libdestars.$(LIBSUFFIX) \
 		$(LIBDIR)/libde.$(LIBSUFFIX)
+
+        # SiP (SPIN in Ptolemy) SPIN is a protocol simulator
+	ifdef DESIP
+		CUSTOM_DIRS += $(DEDIR)/sip/kernel $(DEDIR)/sip/ptsip
+		LIBS += -lsip -lptsip -lsip
+		LIBFILES + =$(LIBDIR)/libsip.$(LIBSUFFIX) \
+			$(LIBDIR)/libptsip.$(LIBSUFFIX)
+	else 
+		# CQScheduler includes a call to wraupUpPML() which
+		# is part of SiP.  If SiP is not present, then link
+		# with sipdummy.o. 
+		LIBS += $(OBJDIR)/domains/de/kernel/sipdummy.o
+	endif	
 	# dependencies
 	SDFLIB = 1
 endif
