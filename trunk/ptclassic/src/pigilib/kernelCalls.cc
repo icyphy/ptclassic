@@ -260,6 +260,7 @@ static void logDomain() {
 	const char* dom = KnownBlock::domain();
 	if (strcmp(dom, oldDom) == 0) return;
 	LOG << "domain " << dom << "\n";
+	oldDom = dom;
 }
 
 // Return the domain of an object: note, it may not be the current
