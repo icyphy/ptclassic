@@ -2,7 +2,7 @@ defstar {
 	name { AddInt }
 	domain { C50 }
 	desc { Add any number of integer inputs, producing an integer output. }
-	version { @(#)C50AddInt.pl	1.3	2/10/96 }
+	version { $Id$ }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -39,7 +39,6 @@ two's complement addition.
 	}
 
 	codeblock(copyInput) {
-	ldp	#00h
 	lmmr	ar0,#$addr(input)
 	smmr	ar0,#$addr(output)
 	}
@@ -64,7 +63,7 @@ two's complement addition.
 
 	go {
 
-		if (int(saturation)) addCodeblock(saturate);
+		if (int(saturation)) addCode(saturate);
 
 		if (input.numberPorts() == 1) {
 			addCode(copyInput);
@@ -80,7 +79,7 @@ two's complement addition.
 
 	exectime {
 		int time = 0;
-		if ( input.numberPorts() == 1 ) retrun 3;
+		if ( input.numberPorts() == 1 ) return 2;
 		if (int(saturation)){
 			time ++;
 		}

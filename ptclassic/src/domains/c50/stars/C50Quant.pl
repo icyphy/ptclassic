@@ -5,7 +5,7 @@ defstar {
 The star quantizes the input to one of N+1 possible output levels
 using N thresholds.
 	}
-	version { @(#)C50Quant.pl	1.22	2/15/96 }
+	version { $Id$ }
 	author { Luis Gutierrez, based on CG56 version }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -87,7 +87,7 @@ $starSymbol(lp):
 	lacc	*,16,ar2		; acc = input
 	sub	*,16,ar0		; acc = input - threshold
 	lar	ar0,#$addr(levels)	; ar0 -> levels
-	xc	2,GT			; if input - threshold > 0 do next inst.
+	xc	2,GT			; if input - threshold > 0 do next inst
 	mar	*+,ar1			; ar0 -> levels + 1
 	mar	*+,ar0
 	lacc	ar3,#$addr(output)	; ar3 -> output
@@ -112,7 +112,7 @@ $starSymbol(lp):
                 }
         }
 	go {
-		if (threshold.size() == 1) addCode(one);
+		if (thresholds.size() == 1) addCode(one);
 		else {
 			addCode(main);
 		}

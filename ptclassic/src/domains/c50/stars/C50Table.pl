@@ -31,7 +31,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fixarray }
 		default { "-1 1" }
 		desc { table of values to output }
-		attributes { A_UMEM|A_CONSEC }
+		attributes { A_UMEM|A_NONCONSTANT }
 	}
 	defstate {
 		name { runTimeCheck }
@@ -64,6 +64,7 @@ This is currently not supported in the C50 domain.
 		return 6;
 	}
 }
+
 
 
 
