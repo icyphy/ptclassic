@@ -87,8 +87,10 @@ proc ed_MkEntryButton {frame label} {
 	global ptolemy ed_MaxEntryLength
 	pack append [frame $frame -bd 2] \
 	   [label $frame.label -text "$label:  " -anchor w] left \
-[button $frame.right -bitmap @$ptolemy/tcl/lib/right.xbm -relief flat] right \
-[button $frame.left -bitmap @$ptolemy/tcl/lib/left.xbm -relief flat] right
+		[button $frame.right -bitmap @$ptolemy/tcl/lib/right.xbm \
+			-command ed_Dummy -relief flat] right \
+		[button $frame.left -bitmap @$ptolemy/tcl/lib/left.xbm \
+			-command ed_Dummy -relief flat] right
     bind $frame.left <Button-1> "tk_butDown %W
       $frame.entry view \[expr \[$frame.entry index @0\]-1\]
       after 200 ed_ShiftButtonViewLeft %W $frame.entry"
@@ -482,7 +484,6 @@ proc ptkEditParams {facet number} {
 #    wm title $top "Edit Params: $number"
     wm title $top "Edit Params"
     wm iconname $top "Edit Params"
-    wm minsize $top 0 0
 
     bind $top <Destroy> "catch \"unset ed_ToplevelNumbers($facet,$number\"
 							 destroy %W"
@@ -499,34 +500,35 @@ proc ptkEditParams {facet number} {
 
     set u $top.b
     frame $u -bd 5
-    pack append $top.f $u {bottom expand fill} \
+    pack append $top.f $u {bottom fillx} \
 		$c {bottom expand fill}
 
     pack append $u \
 	   [frame $u.okfr -relief sunken -bd 2] \
-		{left expand fill} \
+		{left expand fillx} \
 	   [button $u.apply -text "     Apply     " -command \
 		"ed_Apply $facet $number"] \
-		{left expand fill} \
+		{left expand fillx} \
 	   [button $u.close -text "     Close      " \
 		-command "catch \"unset paramArray($facet,$number) \
 			      paramArrayBAK($facet,$number\"; destroy $top"] \
-		{left expand fill} \
+		{left expand fillx} \
 	   [button $u.q -text "     Cancel      " -command \
 	        "ed_RestoreParam $facet $number; $u.close invoke"] \
-		{left expand fill}
+		{left expand fillx}
 
     pack append $u.okfr \
 	[button $u.okfr.ok -text "       OK       " -relief raised \
 		-command "ed_Apply $facet $number
 				$u.close invoke"] {expand fill}
 
-# Joe Buck's fix
+# Joe Buck's fix <jbuck@Synopsys.com> 11/93
+
     if {$number == "NIL"} {
 	pack append $u \
 	   [button $u.add -text " Add parameter " -command \
 		"ed_AddParamDialog $facet $number"] \
-		{left expand fill} \
+		{left expand fillx} \
 	   [button $u.remove -text "Remove parameter" -command \
 		"$u.remove config -relief sunken
 		ed_RemoveParam $facet $number $top $u
@@ -804,14 +806,14 @@ proc ed_ConfigCanvas {top facet number} {
     set existv [winfo exist $top.f.vscroll]
 
     if {$scrollWidth > $maxWidth} {
-	if {! $existh} {
-		scrollbar $top.f.hscroll -orient horiz -relief sunken \
-			-command "$c xview"
-		$c config -xscroll "$top.f.hscroll set"
-		pack before $c $top.f.hscroll {bottom fillx}
-	}
-	set canvWidth $maxWidth
-    } else {
+#	if {! $existh} {
+#		scrollbar $top.f.hscroll -orient horiz -relief sunken \
+#			-command "$c xview"
+#		$c config -xscroll "$top.f.hscroll set"
+#		pack before $c $top.f.hscroll {bottom fillx}
+#	}
+#	set canvWidth $maxWidth
+#    } else {
 		set scrollWidth 0
     }
     if {$scrollHeight > $maxHeight} {
@@ -827,6 +829,10 @@ proc ed_ConfigCanvas {top facet number} {
 
     $c configure -scrollregion "0 0 $scrollWidth $scrollHeight"
     $c configure -width $canvWidth -height $canvHeight
-
+    if {[string first . $canvWidth] != -1} {
+	    scan $canvWidth "%d." intWidth
+    } else { set intWidth $canvWidth }
+    wm minsize $top $intWidth 0
+    wm maxsize $top $intWidth [winfo screenheight .]
 }
 
