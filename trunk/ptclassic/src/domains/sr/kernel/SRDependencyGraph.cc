@@ -55,7 +55,7 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
   mygalaxy = &g;
 
-  GalTopBlockIter nextStar(g);
+  GalStarIter nextStar(g);
 
   // Count the number of vertices by summing the number of outputs on each
   // star
@@ -80,7 +80,6 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
-      op = (OutSRPort *) op->doAliases();
       stars[vs] = s;
       ports[vs] = op;
       vs++;
@@ -102,7 +101,6 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
-      op = (OutSRPort *) op->doAliases();
       vd = vertexOfStarPort( s, op );
 
       // We should be able to find this (destination) vertex
@@ -110,10 +108,8 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
-
-	ip = (InSRPort *) ip->doAliases();
 	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
-	  fs = (SRStar *) fop->undoAliases()->parent();
+	  fs = (SRStar *) fop->parent();
 	  vs = vertexOfStarPort( fs, fop );
 
 	  // cout << "Found something connected to vertex " << vs << "\n";
@@ -158,7 +154,6 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
   while ( (s = (SRStar *)(nextStar++)) != NULL ) {
     BlockOutputIter nextOutput(*s);
     while ( (op = (OutSRPort *)(nextOutput++)) != NULL ) {
-      op = (OutSRPort *) op->doAliases();
       vd = vertexOfStarPort(s, op );
 
       // We should have been able to find the output vertex
@@ -166,9 +161,8 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
       BlockInputIter nextInput(*s);
       while ( (ip = (InSRPort *)(nextInput++)) != NULL ) {
-	ip = (InSRPort *) ip->doAliases();
 	if ( (fop = (OutSRPort *) (ip->far())) != NULL ) {
-	  fs = (SRStar *) fop->undoAliases()->parent();
+	  fs = (SRStar * ) fop->parent();
 	  vs = vertexOfStarPort( fs, fop );
 
 	  // We should have been able to find the vertex driving this input
@@ -238,7 +232,7 @@ StringList SRDependencyGraph::displayGraph() const
 
   for ( int v = 0 ; v < numvertices ; v++ ) {
     out << v << ": " << stars[v]->name()
-	<< " " << ports[v]->undoAliases()->name() << "\n  -> ";
+	<< " " << ports[v]->name() << "\n  -> ";
     for ( int e = 0 ; e < fEdgeCount[v] ; e++ ) {
       out << fEdge[v][e] << " ";
     }
