@@ -54,6 +54,15 @@
 #
 
 
+if [info exist env(PTOLEMY)] {
+    set TYCHO $env(PTOLEMY)/tycho
+}
+
+if [info exist env(TYCHO)] {
+    set TYCHO $env(TYCHO)
+}
+
+
 if ![info exists FAILED] {
     set FAILED 0
 }
@@ -189,8 +198,7 @@ proc doneTests {args} {
 	    "Total: [expr $PASSED + $FAILED] (Passed: $PASSED Failed: $FAILED)"
     flush stderr
     update
-    ::preference assign misc confirmOnExit 0
-    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram
+    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
     #after [expr {2 * $duration}] ::tclexit
 }
 
