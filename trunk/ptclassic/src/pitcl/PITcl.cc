@@ -2877,7 +2877,7 @@ int PTcl::animation (int argc,char** argv) {
     return usage ("animation ?on|off?");
     if (argc != 2) {
         Tcl_SetResult(interp,
-        textAnimationState() ? "on" : "off",
+        (char *) (textAnimationState() ? "on" : "off"),
         TCL_STATIC);
     }
     else if (c == 0) textAnimationOn();
