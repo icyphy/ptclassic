@@ -1,5 +1,5 @@
-#ifndef _AutoForkNode_h
-#define _AutoForkNode_h 1
+#ifndef _AsmForkNode_h
+#define _AsmForkNode_h 1
 
 #ifdef __GNUG__
 #pragma interface
