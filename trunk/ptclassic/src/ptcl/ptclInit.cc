@@ -44,6 +44,7 @@ to a Tcl interpreter by invoking the Ptcl_Init() function on it.
 
 #ifdef PTLINUX
 #include <fpu_control.h>
+#include <unistd.h>	// pick up isatty()
 #endif
 
 #ifndef PTLINUX
