@@ -100,8 +100,8 @@ void DEScheduler :: setup () {
 	clearHalt();
 	currentTime = 0;
 
-	if (!galaxy()) {
-		Error::abortRun("DEScheduler: no galaxy!");
+	if (! galaxy()) {
+		Error::abortRun("Discrete Event scheduler has no galaxy defined");
 		return;
 	}
 
@@ -109,7 +109,7 @@ void DEScheduler :: setup () {
 	eventQ.initialize();
 
 	// check connectivity
-	if (warnIfNotConnected (*galaxy())) return;
+	if (warnIfNotConnected(*galaxy())) return;
 
 	galaxy()->initialize();
 	if (SimControl::haltRequested()) return;
@@ -129,6 +129,8 @@ void DEScheduler :: setup () {
 
 // detect the delay free loop.
 int DEScheduler :: checkDelayFreeLoop() {
+	if (! galaxy()) return FALSE;
+
 	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
@@ -142,6 +144,11 @@ int DEScheduler :: checkDelayFreeLoop() {
 
 // set the depth of the stars...
 int DEScheduler :: computeDepth() {
+	if (! galaxy()) {
+		Error::abortRun("Discrete Event scheduler has no galaxy defined.");
+		return FALSE;
+	}
+
 	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
@@ -169,13 +176,13 @@ int
 DEScheduler :: run () {
 
         if (!galaxy()) {
-            Error::abortRun("No galaxy to run");
+            Error::abortRun("Discrete Event scheduler has no galaxy to run");
             return FALSE;
         }
 
 	if (haltRequested()) {
 		Error::abortRun(*galaxy(),
-				"Can't continue after run-time error");
+				"Cannot continue after run-time error");
 		return FALSE;
 	}
 
