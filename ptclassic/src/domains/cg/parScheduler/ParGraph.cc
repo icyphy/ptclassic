@@ -103,6 +103,23 @@ int ParGraph :: initializeGraph() {
 	while ((src = (ParNode*)nxtSrc++) != 0) {
 		if (SetNodeSL(src) < 0) return FALSE;
 	}
+
+	// Set the level of the nodes on the wormhole boundary large.
+	nxtSrc.reset();
+	while ((src = (ParNode*) nxtSrc++) != 0) {
+		DataFlowStar* s = src->myMaster();
+		if (!s->isSource()) {
+			BlockPortIter nextp(*s);
+			PortHole* p;
+			while ((p = nextp++) != 0) {
+				if (p->atBoundary()) {
+					src->assignSL(ExecTotal);
+					break;
+				}
+			}
+		}
+	}
+			
 	return TRUE;
 }
 
@@ -260,15 +277,22 @@ void ParGraph::replenish(int flag) {
 
 // compute the maximum schedule distance between node pairs.
 int ParGraph :: pairDistance() {
+	if (parallelizable == FALSE) return -1;
 
 	ListIter nextPair(nodePairs);
 	NodePair* p;
 	int distance = 0;
 
 	while((p = (NodePair*) nextPair++) != 0) {
+		return -1;
+/*
+  At current stage, we do not parallelize the graph if there is a delay
+  in the graph. It is tricky how to implement IPC across the delay
+
 		int temp = p->getStart()->getScheduledTime() +
                p->getStart()->myExecTime() - p->getDest()->getScheduledTime();
 		if (temp > distance) distance = temp;
+*/
 	}
 	return distance;
 }
