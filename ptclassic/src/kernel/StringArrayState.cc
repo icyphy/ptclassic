@@ -99,10 +99,12 @@ const char* StringArrayState :: type() const { return "STRINGARRAY";}
 
 StringList StringArrayState :: currentValue() const { 
 	StringList s; 
-	if (size() != 0) s << val[0];
-	for(int i = 1; i<size(); i++) {
-		s << '\n' << val[i];
-	} 
+	if (val) {
+		if (size() != 0) s << val[0];
+		for (int i = 1; i < size(); i++) {
+			s << '\n' << val[i];
+		} 
+	}
 	return s;
 }
 
@@ -151,7 +153,7 @@ void StringArrayState  :: initialize() {
                 	if (!lexer.fromFile(filename)) {
                         	StringList msg;
                         	msg << filename << ": " << why();
-                        	parseError ("can't open file ", msg);
+                        	parseError ("cannot open the file ", msg);
 				err = TRUE;
                 	}
 		      }
@@ -161,7 +163,7 @@ void StringArrayState  :: initialize() {
 		      {
 			char* saveValue = 0;
 			if ( i > 0 ) {
-			  saveValue = buf[i-1];
+				saveValue = buf[i-1];
 			}
 			if ( saveValue == 0 ) {
 				parseError ("no string to repeat ",
