@@ -49,6 +49,9 @@ public:
 	// disconnect from porthole
 	virtual int disconnect (PortHole &);
 
+	// change the number of delays
+	virtual void setDelay (int);
+
 	// return true if the Geodesic is persistent
 	// (may exist in a disconnected state)
 	virtual int isItPersistent() const;

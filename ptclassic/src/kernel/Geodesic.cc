@@ -75,6 +75,11 @@ PortHole* Geodesic :: setSourcePort (GenericPort& sp, int delay) {
 	return originatingPort;
 }
 
+// this function adjusts the delay.
+void Geodesic :: setDelay (int delay) {
+	numInitialParticles = delay;
+}
+
 PortHole* Geodesic :: setDestPort (GenericPort& dp) {
 	destinationPort = &dp.newConnection();
 	portHoleConnect();
