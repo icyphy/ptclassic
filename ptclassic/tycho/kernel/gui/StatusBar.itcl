@@ -52,6 +52,9 @@ class ::tycho::StatusBar {
     # The current file status: none, readonly, readwrite, modified
     itk_option define -filestatus fileStatus FileStatus "none"
 
+    # Flag to indicate whether to leave space for a scroll bar
+    itk_option define -scrollbarpad scrollbarPad ScrollbarPad 0
+
 
     ###################################################################
     ####                         public methods                    ####
@@ -105,21 +108,72 @@ configbody ::tycho::StatusBar::closetext {
 # with some meaningful icons.
 #
 configbody ::tycho::StatusBar::filestatus {
-    switch -exact $itk_option(-filestatus) {
-	"none" {
-	    $itk_component(fileStatus) configure -text ""
+    if { $itk_option(-filestatus) == "none" } {
+	# Delete the file status if there is one
+	if { [::info exists itk_component(fileStatus)] } {
+	    destroy $itk_component(fileStatus)
+	    unset itk_component(fileStatus
 	}
-	"readonly" {
-	    $itk_component(fileStatus) configure -text "R"
+    } else {
+	# Create the file status if there isn't one
+	if { ! [::info exists itk_component(fileStatus)] } {
+	    itk_component add fileStatus {
+		label $itk_interior.fileStatus -width 3 \
+			-borderwidth 1 \
+			-relief raised
+	    } {
+		keep -background -cursor
+	    }
+	    pack $itk_component(fileStatus) \
+		    -side left -fill y \
+		    -padx 0 -pady 2 \
+		    -side left \
+		    -before $itk_component(mainStatus)
 	}
-	"readwrite" {
-	    $itk_component(fileStatus) configure -text ""
+	
+	# Bind help to the file status display
+	bind $itk_component(fileStatus) <Enter> [code "%Q helpFileStatus"]
+	bind $itk_component(fileStatus) <Leave> [code "%Q puts {}"]
+
+	# Set the status display
+	switch -exact $itk_option(-filestatus) {
+	    "readonly" {
+		$itk_component(fileStatus) configure -text "R"
+	    }
+	    "readwrite" {
+		$itk_component(fileStatus) configure -text ""
+	    }
+	    "modified" {
+		$itk_component(fileStatus) configure -text "M"
+	    }
+	    default {
+		error "StatusBar::filestatus: Invalid option $status"
+	    }
 	}
-	"modified" {
-	    $itk_component(fileStatus) configure -text "M"
+    }
+}
+
+
+#######################################################################
+#### -scrollbarpad configuration
+#
+configbody ::tycho::StatusBar::scrollbarpad {
+    if { $itk_option(-scrollbarpad) } {
+	if { ! [::info exists itk_component(packing)] } {
+	    # Create the empty space under the scroll bar
+	    # FIXME: Need a better way of getting the scroll bar width
+	    itk_component add packing {
+		frame $itk_interior.packing -width 23
+	    } {
+		keep -background -cursor
+	    }
+	    pack $itk_component(packing) -fill y -side right \
+		    -before $itk_component(closeButton)
 	}
-	default {
-	    error "StatusBar::fileStatus: Invalid option $status"
+    } else {
+	if { [::info exists itk_component(packing)] } {
+	    destroy $itk_component(packing)
+	    unset itk_component(packing)
 	}
     }
 }
@@ -138,32 +192,22 @@ body ::tycho::StatusBar::constructor {args} {
     }
     pack $itk_component(leftpacking) -side left
 
-    # Create the file status display
-    itk_component add fileStatus {
-	label $itk_interior.fileStatus -width 3 \
-		-borderwidth 1 \
-		-relief raised
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(fileStatus) \
-	    -side left -fill y \
-	    -padx 0 -pady 2 \
-	    -side left
-
-    # Bind help to the file status display
-    bind $itk_component(fileStatus) <Enter> [code "%Q helpFileStatus"]
-    bind $itk_component(fileStatus) <Leave> [code "%Q puts {}"]
-
-
-    # Create the empty space under the scroll bar
-    # FIXME: Need a better way of getting the scroll bar width
-    itk_component add packing {
-	frame $itk_interior.packing -width 23
-    } {
-	keep -background -cursor
-    }
-    pack $itk_component(packing) -fill y -side right
+#     # Create the file status display
+#     itk_component add fileStatus {
+# 	label $itk_interior.fileStatus -width 3 \
+# 		-borderwidth 1 \
+# 		-relief raised
+#     } {
+# 	keep -background -cursor
+#     }
+#     pack $itk_component(fileStatus) \
+# 	    -side left -fill y \
+# 	    -padx 0 -pady 2 \
+# 	    -side left
+#
+#    # Bind help to the file status display
+#    bind $itk_component(fileStatus) <Enter> [code "%Q helpFileStatus"]
+#    bind $itk_component(fileStatus) <Leave> [code "%Q puts {}"]
 
     # Create the close button
     itk_component add closeButton {
@@ -174,20 +218,6 @@ body ::tycho::StatusBar::constructor {args} {
 		-foreground -highlightcolor -highlightbackground
     }
     pack $itk_component(closeButton) -side right
-
-#     # Create the class display
-#     itk_component add class {
-# 	label $itk_interior.class -anchor w \
-# 		-font [.tychoFonts getFont Helvetica 10] \
-# 		-borderwidth 1 \
-# 		-relief raised
-#     } {
-# 	keep -background -cursor
-#     }
-#     pack $itk_component(class) \
-# 	    -fill y \
-# 	    -padx 0 -pady 2 \
-# 	    -side left
 
     # Create the status output display
     itk_component add mainStatus {
@@ -207,9 +237,6 @@ body ::tycho::StatusBar::constructor {args} {
     # Initialise options
     eval itk_initialize $args
     eval preference exclude $this $args
-
-    # EXPERIMENTAL
-    bind $itk_component(packing) <B1-Motion> {puts "%X %Y"}
 }
 
 
@@ -228,13 +255,13 @@ body ::tycho::StatusBar::constructor {args} {
 body ::tycho::StatusBar::helpFileStatus {} {
     switch -exact $itk_option(-filestatus) {
 	"readonly" {
-	    puts "Read-only"
+	    puts "File is read-only"
 	}
 	"readwrite" {
-	    puts "Read-write"
+	    puts "File is writable"
 	}
 	"modified" {
-	    puts "Modified"
+	    puts "File has been modified"
 	}
     }
 }
