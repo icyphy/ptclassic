@@ -478,9 +478,9 @@ body ::tycho::Slate::highlight {tag args} {
 #######################################################################
 #### interactor
 #
-# Create an interactor on the slate and return it. This is just
+# Create an interactor on the slate and return it. This is just a
 # convenient interface to the interactor constructors. The first
-# argument is the name of the interactor class, followinf arguments
+# argument is the name of the interactor class, following arguments
 # are options to the interactor.
 #
 body ::tycho::Slate::interactor {class args} {
@@ -496,7 +496,7 @@ body ::tycho::Slate::interactor {class args} {
 #
 body ::tycho::Slate::move {tag xAmount yAmount} {
     # Move the items
-    $canvas move $tag $xAmount $yAmount
+    chain $tag $xAmount $yAmount
 
     # Move the highlights
     $canvas move highlight.$tag $xAmount $yAmount
@@ -656,11 +656,34 @@ body ::tycho::Slate::recreate {description args} {
 # additional arguments are given, scale the item or items so that
 # its region become the given arguments.
 #
+# FIXME: Figure out how to allow complex items to sensibly
+# override.
+#
 body ::tycho::Slate::region {tag args} {
     set rectangular 1
-    # For an item, use the coords if it's a 4-list, else
-    # use the bounding box shrunk by 2 in each direction
-    if { [string match {_[0-9]*} $tag] } {
+
+    # If it's a complex item and it has a region{} method,
+    # call that. FIXME: Need to rethink overriding mechanism.
+    if { [string match {_*} $tag] } {
+        if { [@scope ::tycho::$itemClass($tag) \
+                [list ::info exists methodtable(region)]] } {
+            set region [@scope ::tycho::$itemClass($tag) \
+                    [list eval \[set methodtable(region)\] \
+                    $tag $canvas $this $args]]
+            if { [llength $region] != 4 } {
+                set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
+                set rectangular 0
+            }
+        } else {
+            set region [coords $tag]
+            if { [llength $region] != 4 } {
+                set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
+                set rectangular 0
+            }
+        }
+    } elseif { [string match {_[0-9]*} $tag] } {
+        # For an item, use the coords if it's a 4-list, else
+        # use the bounding box shrunk by 2 in each direction
 	set region [coords $tag]
 	if { [llength $region] != 4 } {
 	    set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
@@ -802,7 +825,7 @@ body ::tycho::Slate::reshapeto {tag x y aspect} {
 # Manipulate the selection. This methods extends the canvas mechanism
 # to allow multiple items to be selected. In particular, the "item"
 # mode returns a list of selected items. Selected items are tagged with
-# the tag "sel." Three new modes are added:
+# the tag "sel." Several new modes are added:
 # <ul>
 # <li><b>add</b> _tagorid_: Add the items specified by _tagorid_
 # to the selection. If the selection is currently inside an item, that
