@@ -83,7 +83,7 @@ class ::tycho::StatusBar {
     ####                       private methods                     ####
 
     # Draw the progress bar
-    private method drawProgress {progress}
+    private method drawProgress {progress {color blue}}
 
     # Set the current display mode
     private method setMode {mode}
@@ -307,9 +307,9 @@ body ::tycho::StatusBar::progress {{label {}} {command {}}} {
 		    after $updateInterval "$this progress"
 		}
 	    } else {
-		# FIXME: For now, keep goign even if failed,
-		# because of a bug in RresourceHTTP::progress{}
-		after $updateInterval "$this progress"
+                # There's a terrible error! Display the bar fully
+                # filled in red!
+                drawProgress 1 red
 	    }
 	}
     } else {
@@ -338,7 +338,7 @@ body ::tycho::StatusBar::puts {string} {
 #
 # Draw or update the progress bar.
 #
-body ::tycho::StatusBar::drawProgress {progress} {
+body ::tycho::StatusBar::drawProgress {progress {color blue}} {
     if { $progress < 0 } {
 	set progress 0
     } elseif { $progress > 1.0 } {
@@ -349,13 +349,15 @@ body ::tycho::StatusBar::drawProgress {progress} {
 	$itk_component(progressDisplay) create rectangle \
 		0 0 0 0 \
 		-outline "" \
-		-fill blue \
+		-fill $color \
 		-tags foo
     }
     set width  [winfo width $itk_component(progressDisplay)]
     set height [winfo height $itk_component(progressDisplay)]
     set width  [expr $width * $progress]
     $itk_component(progressDisplay) coords foo 0 0 $width $height
+    # Update the color too in case it changed
+    $itk_component(progressDisplay) itemconfigure foo -fill $color
 }
 
 #######################################################################
@@ -384,9 +386,15 @@ body ::tycho::StatusBar::setMode {mode} {
 		    rename -font -messagefont messageFont MessageFont
 		}
 		pack $itk_component(progressLabel) -side left
+                
+                # Create the progress display bar. We just set it
+                # to a fixed height because if you try and make
+                # it a fraction of the status bar height it gets
+                # zero if invoked before the window is mapped. Same
+                # old samo Tk nonsense... -- hjr
 		itk_component add progressDisplay {
 		    canvas $itk_interior.progress.display \
-			    -height [expr [winfo height [component hull]]/3] \
+			    -height 12 \
 			    -borderwidth 2 \
 			    -relief sunken
 		} {
