@@ -48,11 +48,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "PTcl.h"
 #include "ptk.h"
 
-// Even though pigiLoader.cc is a C++ file, pigiLoader.h is a C include file.
-extern "C" {
-#include "pigiLoader.h"
-}
-
 extern PTcl *ptcl;
 
 ISA_FUNC(FSMStateStar,FSMStar);
@@ -264,17 +259,21 @@ const char* FSMStateStar::ptkCompile(const char *galname,
       ptcl->curDomain = currentDomain;
 
       return galname;
+
     } else {
-      // Specified file name is a file, use TychoLoadFSM to compile it.
-
-      // Get the rootname of galname as the classname.
-      command = "file rootname ";
-      command << galname;
-      Tcl_GlobalEval(ptkInterp, command);
+      // Specified file name is a file, then consider it as a "std" file
+      // and use ptkTychoLoadFSM to compile it.
+      command = "ptkTychoLoadFSM ";
+      command += fullName;
+      if (Tcl_GlobalEval(ptkInterp, command) != TCL_OK) {
+	InfString buf  = "Unable to compile the file: ";
+	buf << where_defined;
+	buf << "/";
+	buf << galname;
+	Error::abortRun(*this,(const char*)buf);
+	return NULL;
+      }
       const char* classname = hashstring(ptkInterp->result);
-
-      if (!TychoLoadFSM(classname, expandPathName(where_defined)))
-	return 0;
 
       // Restore the original domain name.
       ptcl->curDomain = currentDomain;
