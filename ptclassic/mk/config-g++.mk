@@ -43,3 +43,7 @@ SYSLIBS=-lg++ -lm
 LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
 # link flags if debugging symbols are to be left
 LINKFLAGS_D=-L$(LIBDIR) -static
+
+# Since we are compiling octtools with gcc, we don't want the 
+# -lmm library linked in
+OCTTOOLS_MM_LIB=
