@@ -239,7 +239,7 @@ TNSE = Total Number of Samples Exchanged in a complete period of an SDF schedule
 ****/
 int SynDFCluster::computeTNSE(SynDFCluster* c1, SynDFCluster* c2, SynDFClusterPort* a)
 {
-    // Compute the TNSE+numInitDelays for the arc between c1 and c2
+    // Compute the TNSE for the arc between c1 and c2
 
     int numP, numC, reps;
     numP = a->numXfer();
@@ -249,7 +249,7 @@ int SynDFCluster::computeTNSE(SynDFCluster* c1, SynDFCluster* c2, SynDFClusterPo
 	Error::abortRun("Balance equations seem to be violated in SynDFCluster");
 	return -1;
     }
-    return reps*numP + a->numInitDelays();
+    return reps*numP;
 }
 
 
