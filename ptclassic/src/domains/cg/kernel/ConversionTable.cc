@@ -53,8 +53,8 @@ ConversionTable::ConversionTable() {
 ConversionTable::~ConversionTable() {
   // hppa.cfront: HP CC 10.24 requires the casts to (void *)
   for (int i = 0; i < rows ; i++)
-    delete [] (void *)table[i].star;
-  delete [] (void *)table;
+    delete [] (char *)table[i].star;
+  delete [] table;
 }
     
 // Add a table row.
