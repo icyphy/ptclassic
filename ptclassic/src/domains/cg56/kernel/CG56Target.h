@@ -57,6 +57,7 @@ public:
 	void headerCode();
 	const char* className() const;
 	void setup();
+	int compileCode();
 };
 
 #endif
