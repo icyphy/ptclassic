@@ -1,5 +1,6 @@
 .VR 0.$Revision$ "$Date$"
 .TI "SDF Domain"
+.ds DO "SDF
 .AU
 J. T. Buck
 E. A. Lee
@@ -19,7 +20,8 @@ It is a direct implementation of the techniques given in [1] and [2].
 at the inputs of a star enables it.
 Stars with no input ports are always enabled.
 "Statically scheduled" means that the firing order of the stars
-.Id "statically scheduled"
+.Id "static scheduling"
+.Id "scheduling, static"
 is determined once, during the startup phase.
 The firing order will be periodic.
 .H2 "Delays"
@@ -37,7 +39,7 @@ For most particle types, the initial value will be zero.
 .H2 "Number of iterations"
 .pp
 When running an SDF universe or wormhole, the number of iterations
-.Id "iterations (SDF)"
+.Id "iterations, SDF"
 .Id "SDF iterations"
 may not be the same as the number of times a star in the system is fired.
 The number of invocations of each star depends
@@ -55,7 +57,7 @@ Consider for example a universe A-->FFT-->B,
 where FFT is the
 .c ComplexFFT
 star.
-.Ie "FFT"
+.Sr ComplexFFT
 This star consumes some number of particles (given by its \fIsize\fR parameter)
 and produces some number of tokens ($2 sup n$, where
 $n$ is its \fIorder\fR parameter).
@@ -69,8 +71,8 @@ then this system should be run through just one iteration.
 It is not always possible to find a consistent number of firings
 for all stars in the system that returns the geodesics to their
 original state.
-.Id "inconsistences, SDF"
-.Id "SDF inconsistences"
+.Id "inconsistent SDF system"
+.Id "SDF system, inconsistent"
 For instance, suppose that the input and output of the ComplexFFT
 are added together using a ComplexAdd star.
 Also suppose that $2 sup n ~!=$ \fIsize\fR.
@@ -105,14 +107,15 @@ The value of that state specifies the number of samples
 required at the input in order for the star to be enabled.
 The following line in the start() function of the star
 is used to make this information available to the scheduler:
-.(b
+.(c
 	input.setSDFParams (int(size), int(size)-1);
-.)b
+.)c
 .Id "SDF parameters"
 .Id "setSDFParams"
-.IE "past particles"
-.IE "consumed particles"
-.IE "produced particles"
+.IE "past particles, SDF"
+.IE "consumed particles, SDF"
+.IE "produced particle, SDF"
+.IE "particles, SDF"
 The name of the input porthole is "input".
 The first argument to \fIsetSDFParams\fP specifies how many samples
 are consumed by the star when it fires, which is the same
@@ -133,10 +136,12 @@ input {
 }
 .)c
 declares an input that consumes two particles.
-.H1 "Accessing inputs and Outputs"
+.Ie "numtokens"
+.H1 "Accessing Inputs and Outputs"
 .pp
 The mechanism for accessing inputs and outputs is explained in the
 section of the Almagest on the \*(PT preprocessor language.
+.IE "inputs and outputs, accessing, SDF"
 .H1 "The Scheduler"
 .pp
 The SDF scheduler determines the order of execution of stars
