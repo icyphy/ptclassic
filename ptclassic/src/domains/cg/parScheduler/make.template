@@ -1,7 +1,7 @@
-# @(#)make.template	1.6	6/16/92
+# $Id$
 # Copyright (c) 1991 The Regents of the University of California.
 #				All Rights Reserved.
-# Gil Sih's parallel scheduler.
+# base parallel schedulers
 
 
 # Root of Ptolemy directory
