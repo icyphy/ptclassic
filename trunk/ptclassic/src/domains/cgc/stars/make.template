@@ -70,7 +70,6 @@ PL_SRCS= \
  CGCConst.pl \
  CGCConstCx.pl \
  CGCConstInt.pl \
- CGCCopy.pl \
  CGCCos.pl \
  CGCCxToFix.pl \
  CGCCxToFloat.pl \
@@ -117,7 +116,6 @@ PL_SRCS= \
  CGCMpyInt.pl \
  CGCMux.pl \
  CGCOrderTwoInt.pl \
- CGCPad.pl \
  CGCPCM.pl \
  CGCPCMread.pl \
  CGCPCMwrite.pl \
