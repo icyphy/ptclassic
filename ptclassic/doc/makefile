@@ -3,7 +3,7 @@
 # Makefile for the Almagest
 #
 
-PTOLEMY       = /usr/users/ptolemy
+PTOLEMY       = ..
 
 DIRS =	\
 	$(PTOLEMY)/src/domains/cg/doc \
