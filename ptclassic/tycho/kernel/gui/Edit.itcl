@@ -505,9 +505,9 @@ body ::tycho::Edit::constructor {args} {
         "%Q seeFragment {range end-1c end-1c}; break"
 
     # The fillSelection commands
-    bind $itk_component(text) <Meta-q> "%Q busy fillSelection; break"
+    bind $itk_component(text) <Meta-q> "%Q busy %Q fillSelection; break"
     bind $itk_component(text) <Escape><q> \
-	    "%Q busy fillSelection; break"
+	    "%Q busy %Q fillSelection; break"
     bind $itk_component(text) <Control-x><period> \
 	    "%Q queryFillPrefix; break"
     bind $itk_component(text) <Control-x><f> \
@@ -585,7 +585,7 @@ body ::tycho::Edit::constructor {args} {
     # NOTE: For efficiency, avoid "menubar" method.
     if {$myMenubar != {}} {
          $myMenubar insert "Compile" "Evaluate" -underline 2 \
-                 -command "$this execProcess make 0"
+                 -command "$this execProcess make"
           
 	# Add an Edit menu
         $myMenubar addMenu Edit -before Window -underline 0
@@ -630,7 +630,7 @@ body ::tycho::Edit::constructor {args} {
         $myMenubar addSeparator Format
         
         $myMenubar add "Fill Region" Format -underline 2 \
-                -accelerator "M-q" -command "$this busy fillSelection"
+                -accelerator "M-q" -command "$this busy $this fillSelection"
         
         $myMenubar add "Right Fill Column" Format -underline 2 \
                 -accelerator "C-x f" -command "$this queryFillColumn"
