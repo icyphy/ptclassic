@@ -1,0 +1,151 @@
+# -*- mode: tcl -*-
+# -*- class: ::tycho::IconLibrary -*-
+#
+# $Id$
+# Test icon library for CT domain
+
+termstyle 2-1-north-east {
+    terminal in-0 -coords {0 50} -direction w -style circle
+    terminal in-1 -coords {50 0} -direction n -style circle
+    terminal out -coords {100 50} -direction e \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 2-1-north-west {
+    terminal in-0 -coords {100 50} -direction e -style circle
+    terminal in-1 -coords {50 0} -direction n -style circle
+    terminal out -coords {0 50} -direction w \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 2-1-east {
+    terminal in-0 -coords {0 25} -direction w -style circle
+    terminal in-1 -coords {0 75} -direction w -style circle
+    terminal out -coords {100 50} -direction e \
+            -style arrowout -fill green2 -tags output
+}
+
+termstyle 1-0-east {
+    terminal in -coords {0 50} -direction w -style circle
+}
+
+termstyle 0-1-east {
+    terminal out -coords {100 50} \
+            -direction e \
+            -style arrowout \
+            -tags output
+}
+
+termstyle multi_1-0-east {
+    terminal in -coords {0 50} -direction w -style circle -slash 1
+}
+
+termstyle 0-multi_1-east {
+    terminal out -coords {100 50} \
+            -direction e \
+            -style arrowout \
+            -tags output \
+            -slash 1
+}
+
+termstyle 1-0-west {
+    terminal in -coords {100 50} -direction e -style circle
+}
+
+termstyle 0-1-west {
+    terminal out -coords {0 50} \
+            -direction w \
+            -style arrowout \
+            -tags output
+}
+
+termstyle multi_1-0-west {
+    terminal in -coords {100 50} -direction e -style circle -slash 1
+}
+
+termstyle 0-multi_1-west {
+    terminal out -coords {0 50} \
+            -direction w \
+            -style arrowout \
+            -tags output \
+            -slash 1
+}
+
+termstyle 1-1-east {
+    terminal in -coords {0 50} -direction w -style circle
+    terminal out -coords {100 50} -direction e \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 1-1-west {
+    terminal in -coords {100 50} -direction e -style circle
+    terminal out -coords {0 50} -direction w \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 1_multi-1-east {
+    terminal in -coords {0 50} -direction w -style circle -slash 1
+    terminal out -coords {100 50} -direction e \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 1_multi-1-west {
+    terminal in -coords {100 50} -direction e -style circle -slash 1
+    terminal out -coords {0 50} -direction w \
+            -style arrowout \
+            -tags output
+}
+
+termstyle 2-2-east {
+    terminal in-0 -coords {0 25} -direction w -style circle
+    terminal in-1 -coords {0 75} -direction w -style circle
+    terminal out-0 -coords {100 25} -direction e \
+            -style arrowout -fill green2 -tags output
+    terminal out-1 -coords {100 75} -direction e \
+            -style arrowout -fill green2 -tags output
+}
+
+group source -label {Source Icons} {
+    icon ramp \
+            -slatetype IconFrame \
+            -label {Ramp} \
+            -text Ramp \
+            -color lightgreen \
+            -termstyles {
+            	0-1-east
+            	0-1-west
+            } \
+            -graphics {
+        polygon 20 80 80 80 80 20 -fill orange -outline ""
+    }
+}
+
+group sink -label {Sink Icons} {
+    icon plotter \
+            -slatetype IconFrame \
+            -label {Plotter} \
+            -text Plotter \
+            -color lightblue \
+            -graphics {
+        polygon 20 50 20 90 80 90 80 50 50 50 45 45 30 45 25 50 \
+                -fill red -outline red
+        line 50 10 50 45 -width 10 -arrow last
+    } {
+        terminal input -coords {0 50} -direction w \
+                -style circle -fill red
+    }
+}
+
+group filter -label {Filter Icons} {
+    icon integral \
+            -slatetype IconFrame \
+            -label {Integral} \
+            -text Integral \
+            -color lightsteelblue \
+            -termstyles {1-1-east}
+}
