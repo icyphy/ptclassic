@@ -37,8 +37,8 @@ all phase transitions.  It also assumes that the input is in the
 		double newPhase = float(input%0);
 		// compute the phase change and check for wraparound
 		double phaseChange = newPhase - double(prevPhase);
-		if (phaseChange < -PI) phaseChange += 2*PI;
-		if (phaseChange > PI) phaseChange -= 2*PI;
+		if (phaseChange < -M_PI) phaseChange += 2*M_PI;
+		if (phaseChange > M_PI) phaseChange -= 2*M_PI;
 		outPhase = double(outPhase) + phaseChange;
 		output%0 << float(double(outPhase));
 		prevPhase = newPhase;
