@@ -7,7 +7,7 @@
 
 /*******************************************************************
  SCCS Version identification :
- $Id$
+$Id$
 
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -185,6 +185,7 @@ class ClusterIter: private GalTopBlockIter {
 public:
     inline ClusterIter(Galaxy& g):GalTopBlockIter(g),prnt(g) {};
     Cluster* next();
+    Cluster* next(int flagValue, int index);
     inline Cluster* operator++(POSTFIX_OP) { return next();}
     GalTopBlockIter::reset;
     GalTopBlockIter::remove;
@@ -197,6 +198,7 @@ public:
     inline SuccessorClusterIter(Block&b):SuccessorIter(b),prnt(b.parent()) {};
     inline virtual ~SuccessorClusterIter() {};
     Cluster* next();
+    Cluster* next(int flag_loc, int flag_val);
     inline Cluster* operator++(POSTFIX_OP) { return next();}
     SuccessorIter::reset;
 private:
@@ -210,6 +212,7 @@ public:
     
     inline virtual ~PredecessorClusterIter() {};
     Cluster* next();
+    Cluster* next(int flag_loc, int flag_val);
     inline Cluster* operator++(POSTFIX_OP) { return next();}
     PredecessorIter::reset;
 private:
@@ -238,6 +241,9 @@ public:
     inline ClusterPort* next() {
 	return (ClusterPort*)BlockOutputIter::next();
     }
+    inline ClusterPort* next(int flag_loc, int flag_val) {
+	return (ClusterPort*)BlockOutputIter::next(flag_loc,flag_val);
+    }
     inline ClusterPort* operator++(POSTFIX_OP) {
 	return ClusterOutputIter::next();
     }
@@ -250,6 +256,9 @@ public:
     inline ClusterInputIter(Block& b):BlockInputIter(b) {};
     inline ClusterPort* next() {
 	return (ClusterPort*)BlockInputIter::next();
+    }
+    inline ClusterPort* next(int flag_loc, int flag_val) {
+	return (ClusterPort*)BlockInputIter::next(flag_loc,flag_val);
     }
     inline ClusterPort* operator++(POSTFIX_OP) {
 	return ClusterInputIter::next();
@@ -277,9 +286,3 @@ void cleanupAfterCluster(Galaxy&,int /*recursive*/ = FALSE);
 // http://www.research.att.com/orgs/ssr/book/reuse.
 StringList printClusterDot(Galaxy&);
 #endif
-
-
-
-
-
-
