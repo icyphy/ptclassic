@@ -86,6 +86,7 @@ MISC_FILES = 		chktycho testBuilderDialog.itcl
 # make realclean removes OPTIONAL_FILES
 OPTIONAL_FILES = \
 	IndexBrowser.idx \
+	doc \
 	rcstst \
 	sccstst \
 	Path-5.1a \
