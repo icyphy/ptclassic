@@ -172,6 +172,8 @@ proc starindex_FindOctFacetDirs { pathname } {
     foreach sfile $schematicFiles {
       lappend facetdirlist [starindex_StripSubDir $sfile]
     }
+  } else {
+      puts "find returned $retval: $schematicFiles"
   }
   #puts "dbg: starindex_FindOctFacetDirs $pathname $facetdirlist"
   puts "[llength $facetdirlist] directories found."
@@ -379,10 +381,11 @@ proc starindex_WriteDemoIndex { domainname } {
     if { ! [info exists env(PTOLEMY)] } return
    
     set lcdomainname [string tolower $domainname]
+    set ucdomainname [string toupper $domainname]
     # If we add 'demo' to this pathname, then we don't get the palettes
     set pathname "$env(PTOLEMY)/src/domains/$lcdomainname"
 
-    set header "$lcdomainname stars/demo cross reference"
+    set header "$lcdomainname stars/demo-palette cross reference"
     set starlist [starindex_MakeStarDemoIndex $pathname]
 
     #puts "dbg: starlist: $starlist"
@@ -397,7 +400,7 @@ proc starindex_WriteDemoIndex { domainname } {
 	if { [llength $treelist ] > 2} {
 	    # We have a recursive index, that is an index that has
 	    # one key, and multiple entries.
-	    puts $fd "\{\{$starname\} \{"
+	    puts $fd "\{\{$starname, $ucdomainname users\} \{"
 	    puts $fd " \{Users of $starname\} \{"
 	    foreach demo [lrange $treelist 1 end]  {
 		# Keep track of each demo we see for the demo.idx
@@ -407,7 +410,7 @@ proc starindex_WriteDemoIndex { domainname } {
 	    puts $fd "  \}\n \}\n\}"
 	} else {
 	    # We have a simple index entry, a key and a value
-	    puts $fd "\{$starname [lindex $treelist 1] \{\}\}"
+	    puts $fd "\{\{$starname, $ucdomainname user\} [lindex $treelist 1] \{\}\}"
    	    set demoArray([lindex $treelist 1]) 1
 	}
     }
@@ -419,7 +422,7 @@ proc starindex_WriteDemoIndex { domainname } {
     set outfile demo.idx
     puts -nonewline " About to generate $outfile. . ."
     set fd [open $outfile w]
-    set header "$lcdomainname demos"
+    set header "$lcdomainname demos and palettes"
     puts $fd "\{$header\}\n \{"
     foreach el [lsort [array names demoArray]] {
 	puts $fd "{[file tail $el] $el {}}"
