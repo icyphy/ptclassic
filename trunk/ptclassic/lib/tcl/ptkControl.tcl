@@ -31,6 +31,7 @@
 #	2			active run
 #	3			paused run
 #	4			finished run
+#	5			pending stop requested
 
 set ptkRunFlag(main) 0
 
@@ -53,6 +54,7 @@ proc ptkClearRunFlag { name } {
     set  cntrWindow .run_$name
     catch {$cntrWindow.panel.go configure -relief raised}
     set ptkRunFlag($name) 4
+    return ""
 }
 
 #######################################################################
@@ -147,8 +149,11 @@ proc ptkRunControl { name octHandle } {
 #
 proc ptkRunControlDel { name window octHandle defNumIter} {
     global ptkRunFlag
-    if {$ptkRunFlag($name) == 2} "ptkStop $name"
-	 set ptkRunFlag($name) 0
+    if {$ptkRunFlag($name) == 2 || $ptkRunFlag($name) == 5 } {
+	ptkImportantMessage .message {System is still running.  Please stop it.}
+	return
+    }
+    set ptkRunFlag($name) 0
     # update the oct facet only if the number of iterations has changed.
     if {$defNumIter != [$window.iter.entry get]} {
          ptkSetRunLength $octHandle [$window.iter.entry get]
@@ -163,6 +168,7 @@ proc ptkStop { name } {
     global ptkRunFlag
     # Ignore if the named system is not running
     if {$ptkRunFlag($name) != 2} return
+    set ptkRunFlag($name) 5
     halt
     # Finish processing the run command
     update
@@ -200,7 +206,7 @@ proc ptkGo {name octHandle} {
     set numIter [$w.iter.entry get]
     global ptkRunFlag
     # For now, we allow only one run at a time.
-    if {$ptkRunFlag([curuniverse]) == 2} {
+    if {$ptkRunFlag([curuniverse]) == 2 || $ptkRunFlag([curuniverse]) == 5} {
         ptkImportantMessage .error \
 		"Sorry.  Only one run at time. "
 	return
