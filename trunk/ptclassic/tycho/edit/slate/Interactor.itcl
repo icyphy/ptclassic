@@ -71,6 +71,10 @@ class ::tycho::Interactor {
     # be changed once the interactor has been bound.</i>
     public variable modifiers {}
 
+    # A list of options passed along to the interactor chain on the
+    # click event.
+    public variable options {}
+
     # A script executed at the beginning of the interaction sequence. It
     # is typically used to set target parameters or to chain interactors.
     # As with all interactor scripts, this script takes four arguments:
@@ -123,13 +127,15 @@ class ::tycho::Interactor {
     protected method activate {args} {}
 
     # Start the interaction sequence on the target.
-    protected method click {x y} {}
+    protected method click {x y args} {}
 
     # Continue the interaction sequence: start a new phase.
     protected method continue {} {}
 
     # Get the current picture on the slate.
-    protected method current {} {}
+    protected method current {} {
+	error "Not implemented!"
+    }
 
     # Remove my bindings
     protected method deactivate {args} {}
@@ -137,14 +143,14 @@ class ::tycho::Interactor {
     # Continue the interaction sequence: move the mouse.
     protected method drag {x y} {}
 
-    # Terminate the interaction sequence.
-    protected method release {} {}
-
     # Execute a script.
     protected method execute {script x y} {}
 
     # Set or get the proxy object.
     protected method proxy {args} {}
+
+    # Terminate the interaction sequence.
+    protected method release {} {}
 
 
     ###################################################################
@@ -221,11 +227,11 @@ body ::tycho::Interactor::cascade {that} {
 # is one. Sub-classes that over-ride this method should always call
 # this implementation to forward the click action.
 #
-body ::tycho::Interactor::click {x y} {
+body ::tycho::Interactor::click {x y args} {
     if { $proxy != "" } {
-	@scope [$proxy info class] "$proxy click $x $y"
+	@scope [$proxy info class] "eval $proxy click $x $y $args"
     } else {
-	$target click $x $y
+	eval $slate interact click $target $x $y $args
     }
 }
 
@@ -241,7 +247,7 @@ body ::tycho::Interactor::continue {} {
     if { $proxy != "" } {
 	@scope [$proxy info class] "$proxy continue"
     } else {
-	$target continue
+	$slate continue $target
     }
 }
 
@@ -271,7 +277,7 @@ body ::tycho::Interactor::drag {x y} {
     if { $proxy != "" } {
 	@scope [$proxy info class] "$proxy drag $x $y"
     } else {
-	$target drag $x $y
+	$slate interact drag $target $x $y
     }
     execute $dragcommand $x $y
 }
@@ -317,7 +323,7 @@ body ::tycho::Interactor::release {} {
     if { $proxy != "" } {
 	@scope [$proxy info class] "$proxy release"
     } else {
-	$target release
+	$slate interact release $target
     }
 }
 
