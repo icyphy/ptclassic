@@ -658,65 +658,61 @@ void StructTarget :: registerState(State* state, const char* varName,
     }
     
     // Contstruct the name of the last ref to the state.
-    StringList stateSignal = root;
-    stateSignal << "_F" << listState->lastFiring << "_Out";
-    StringList temp_state = stateSignal;
+    StringList temp_state = root;
+    temp_state << "_F" << listState->lastFiring << "_Out";
     temp_state << "_sink";
-    StringList temp_in = refIn;
-    temp_in << "_sink";
     StringList temp_out = refOut;
     temp_out << "_source";
-    StringList temp_out_reg = refOut;
-    temp_out_reg << "_sink";
 
-    /*
     VHDLPort* inPort = new VHDLPort;
     inPort->setName(refIn);
     inPort->setType(stType);
     inPort->setDirec("IN");
-    */
 
-    firingPortList.put(refIn, "IN", stType);
+    //    firingPortList.put(refIn, "IN", stType);
+    firingPortList.put(*inPort);
 
     firingVariableList.put(ref, stType, "");
     firingPortVarList.put(refIn, ref);
 
     if (constState) {
       if (isFirstStateRef) {
-	/*
 	// Create a new signal.
 	VHDLSignal* inSignal = new VHDLSignal;
 	inSignal->setName(root);
 	inSignal->setType(stType);
 
 	inPort->connect(inSignal);
-	*/
 
-	firingSignalList.put(root, stType);
+	//	firingSignalList.put(root, stType);
+	topSignalList.put(*inSignal);
+	firingSignalList.put(*inSignal);
+
 	firingPortMapList.put(refIn, "", "", root);
       }
       if (!isFirstStateRef) {
-	/*
 	// Need to find the previous signal to connect to
 	// That signal should have been created during the previous firing's
 	// first reference to the state.
-	VHDLSignal* inSignal =  mainSignalList.vhdlSignalWithName(root);
+	// HEY! won't find it in mainSignalList, that doesn't go until trailerCode()!
+	VHDLSignal* inSignal =  topSignalList.vhdlSignalWithName(root);
 	if (!inSignal) {
 	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
 	  return;
 	}
 
 	inPort->connect(inSignal);
-	*/
 
-	firingSignalList.put(root, stType);
+	//	firingSignalList.put(root, stType);
+        topSignalList.put(*inSignal);
+        firingSignalList.put(*inSignal);
+
 	firingPortMapList.put(refIn, "", "", root);
       }
 
     }
 
     if (!(constState)) {
-      /*
       // Create an output signal to propagate the updated state value.
       VHDLPort* outPort = new VHDLPort;
       outPort->setName(refOut);
@@ -725,44 +721,47 @@ void StructTarget :: registerState(State* state, const char* varName,
 
       VHDLSignal* outSignal = new VHDLSignal;
       outSignal->setName(temp_out);
-      outSignal->stType(stType);
+      outSignal->setType(stType);
 
       outPort->connect(outSignal);
-      */
 
       if (isFirstStateRef) {
-	/*
-	  // Create a new signal.
-	  VHDLSignal* inSignal = new VHDLSignal;
-	  inSignal->setName(refIn);
-	  inSignal->stType(stType);
+	// Create a new signal.
+	VHDLSignal* inSignal = new VHDLSignal;
+	inSignal->setName(refIn);
+	inSignal->setType(stType);
 
-	  inPort->connect(inSignal);
-	 */
+	inPort->connect(inSignal);
 
-	firingSignalList.put(refIn, stType);
+	//	firingSignalList.put(refIn, stType);
+	topSignalList.put(*inSignal);
+	firingSignalList.put(*inSignal);
+
 	firingPortMapList.put(refIn, "", "", refIn);
 	firingPortMapList.put(refOut, "", "", temp_out);
       }
       if (!isFirstStateRef) {
-	/*
-	  // Need to find the previous signal to connect to
-	  // FIXME: Still don't like this, depends on knowing the name already!!
-	  VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(temp_state);
-	  if (!inSignal) {
-	    Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
-	    return;
-	  }
+	// Need to find the previous signal to connect to
+	// FIXME: Still don't like this, depends on knowing the name already!!
+	VHDLSignal* inSignal = mainSignalList.vhdlSignalWithName(temp_state);
+	if (!inSignal) {
+	  Error::abortRun(*this, "Not first state ref, but can't find any signal created for it");
+	  return;
+	}
 
-	  inPort->connect(inSignal);
-	 */
+	inPort->connect(inSignal);
 
-	firingSignalList.put(temp_state, stType);
+	//	firingSignalList.put(temp_state, stType);
+
 	firingPortMapList.put(refIn, "", "", temp_state);
 	firingPortMapList.put(refOut, "", "", temp_out);
       }
-      firingSignalList.put(temp_out, stType);
-      firingPortList.put(refOut, "OUT", stType);
+      //      firingSignalList.put(temp_out, stType);
+      topSignalList.put(*outSignal);
+      firingSignalList.put(*outSignal);
+
+      //      firingPortList.put(refOut, "OUT", stType);
+      firingPortList.put(*outPort);
 
       firingVarPortList.put(refOut, ref);
 
@@ -1810,6 +1809,8 @@ void StructTarget :: initVHDLObjLists() {
   mainCompMapList.initialize();
   stateList.initialize();
   clusterList.initialize();
+
+  topSignalList.initialize();
 
   ctlerGenericList.initialize();
   ctlerPortList.initialize();
