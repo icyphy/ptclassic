@@ -7,6 +7,7 @@ static const char file_id[] = "FixArrayState.cc";
 #include "FixArrayState.h"
 #include "Tokenizer.h"
 #include "KnownState.h"
+#include "PrecisionState.h"
 
 const int MAXLEN = 20000;
 
@@ -50,9 +51,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+// constructor
+FixArrayState :: FixArrayState ()
+{
+	nElements = 0; val = 0;
+
+	overrideablePrecision = TRUE;
+	symbolic_length = symbolic_intBits = NULL;
+}
+
 // alternate constructor: size
 FixArrayState :: FixArrayState (int size) {
 	LOG_NEW; val = new Fix [nElements = size];
+
+	overrideablePrecision = TRUE;
+	symbolic_length = symbolic_intBits = NULL;
 }
 
 // alternate constructor: size and fill value.
@@ -61,6 +74,9 @@ FixArrayState :: FixArrayState (int size, const Fix& fill_value) {
 	Fix * top = &(val[nElements]);
 	Fix * t = val;
 	while (t < top) *t++ = fill_value;
+
+	overrideablePrecision = TRUE;
+	symbolic_length = symbolic_intBits = NULL;
 }
 
 const char* FixArrayState :: type() const { return "FIXARRAY";}
@@ -85,15 +101,51 @@ void FixArrayState  :: initialize() {
         val = 0;
         nElements = 0;
 
-	Fix buf[MAXLEN];
-        const char* specialChars = "*+-/()<[]";
+	double buf[MAXLEN];
+        const char* specialChars = "*+-/()<[],";
         Tokenizer lexer(initValue(),specialChars);
 
         int i = 0, err = 0;
         int numRepeats;
         int sSiz;
-        Fix saveValue = 0.0;
-        while(!lexer.eof() && i < MAXLEN && err == 0) {
+        double saveValue = 0.0;
+
+	Precision prec;
+	int need_precision = 0;
+
+	// check whether value matches "(<fix-values>,<precision>)"
+     {  char token[1024];
+	lexer >> token;
+
+	if (!strcmp(token, "(")) {
+		SequentialList token_list = savestring(token);
+
+		while (lexer >> token, *token) {
+			token_list.prepend(savestring(token));
+
+			if (!strcmp(token, ","))  need_precision = 1;
+		}	
+		// need matching parenth at end of expression
+		if (!!strcmp((char*)token_list.head(), ")"))
+			need_precision = 0;
+
+		ListIter titer(token_list);
+		char* tp;
+		int cnt = 0, size = token_list.size();
+
+		while (cnt++, tp = (char*)titer++) {
+			// skip first parenth before the value string
+			if (!need_precision || (cnt != size))
+				lexer.pushBack(tp);
+
+			LOG_DEL; delete [] tp;
+		}
+	} else
+		lexer.pushBack(token);
+     }
+
+	// scan field expressions
+        while (i < MAXLEN && err == 0) {
                 ParseToken t = evalExpression(lexer);
                 if (t.tok == T_EOF) break;
                 switch (t.tok) {
@@ -127,7 +179,7 @@ void FixArrayState  :: initialize() {
                         // allow general expression inside parenths
                         t = evalFloatExpression(lexer);
                         if (t.tok == T_Float) {
-                                buf[i++] = Fix(t.doubleval);
+                                buf[i++] = t.doubleval;
                                 t = getParseToken(lexer);
                                 if (t.tok != ')') {
                                         parseError ("expected ')'");
@@ -140,7 +192,7 @@ void FixArrayState  :: initialize() {
                         }
                         break;
                 case T_Float:
-                        buf[i++] = Fix(t.doubleval);
+                        buf[i++] = t.doubleval;
                         break;
                 case T_ID:
                         // got a state value.  Must have same type as me.
@@ -158,9 +210,25 @@ void FixArrayState  :: initialize() {
                                 const Fix *sPtr =
                                         ((const FixArrayState *)(t.s))->val;
                                 for (int j = 0; j < sSiz; j++)
-                                        buf[i++] = *sPtr++;
+                                        buf[i++] = double(*sPtr++);
                         }
                         break;
+		case ',':
+			// scan precision string in "(<values...>,<precision>)"
+			if (need_precision) {
+				prec = PrecisionState::parsePrecisionString(
+					      lexer, name(), parent());
+
+				if (!prec.isValid()) {
+					// parser error; is already reported in
+					// PrecisionState::parsePrecisionString
+					err = 1;
+				      break;
+				}
+			   else if ((getParseToken(lexer).tok == ')') &&
+				    (getParseToken(lexer).tok == T_EOF))
+					break;
+			}
                 default:
                         parseError ("syntax error in FixArray state");
                         err = 1;
@@ -171,7 +239,7 @@ void FixArrayState  :: initialize() {
                 nElements  = i;
                 LOG_NEW; val  = new Fix [nElements];
                 for(i = 0; i < nElements; i++)
-                        val[i] = buf[i];
+			val[i] = prec.isValid() ? Fix(prec,buf[i]) : Fix(buf[i]);
         }
         return;
 }
@@ -212,6 +280,42 @@ void FixArrayState :: resize (int newSize) {
 	for (int i = 0; i < nCopy; i++)
 		val[i] = oldVal[i];
 	LOG_DEL; delete [] oldVal;
+}
+
+// Explicitly set the precision;
+// if overrideable is FALSE the symbolic expressions may not be redefined
+// in the future.
+void FixArrayState::setPrecision(const Precision& p, int overrideable)
+{
+	// change the precision of all fix values
+	Fix f(p.len(),p.intb());
+
+	for (int i=size(); i--; ) {
+	    f = val[i];
+	    val[i].initialize();
+	    val[i] = f;
+	}
+
+	// set the symbolic expressions for the precision
+	if (overrideablePrecision) {
+#if 0
+	    if (symbolic_length) {
+		LOG_DEL; delete [] symbolic_length;
+	    }
+	    if (symbolic_intBits) {
+		LOG_DEL; delete [] symbolic_intBits;
+	    }
+#endif
+	    symbolic_length  = p.symbolic_len()  ? savestring(p.symbolic_len())  : NULL;
+	    symbolic_intBits = p.symbolic_intb() ? savestring(p.symbolic_intb()) : NULL;
+
+	    overrideablePrecision = overrideable;
+	}
+}
+
+Precision FixArrayState::precision() const
+{
+	return Precision(val[0].len(),val[0].intb(), symbolic_length,symbolic_intBits);
 }
 
 // make knownstate entry
