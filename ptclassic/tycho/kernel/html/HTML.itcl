@@ -1772,7 +1772,30 @@ proc HMlink_callback {win href} {
     # Got a reference to a file (or if file == {}, a local point).
     uplevel #0 [list $HTML hyperJump $file $fragment]
 }
+###########################################
+#### HMparse_html
+# Turn HTML into TCL commands
+#   html    A string containing an html document
+#   cmd		A command to run for each html tag found
+#   start	The name of the dummy html start/stop tags
+#
+# The only difference from the original HMparse_html is that we
+# substitute backslashes
+#
+proc HMparse_html {html {cmd HMtest_parse} {start hmstart}} {
+	regsub -all \{ $html {\&ob;} html
+	regsub -all \} $html {\&cb;} html
+        # substitute backslashes 
+	regsub -all {\\} $html {\&#92} html
 
+	set w " \t\r\n"	;# white space
+	proc HMcl x {return "\[$x\]"}
+	set exp <(/?)([HMcl ^$w>]+)[HMcl $w]*([HMcl ^>]*)>
+	set sub "\}\n$cmd {\\2} {\\1} {\\3} \{"
+	regsub -all $exp $html $sub html
+	eval "$cmd {$start} {} {} \{ $html \}"
+	eval "$cmd {$start} / {} {}"
+}
 #######################################################################
 #### HMrender
 # HMrender gets called for every html tag
