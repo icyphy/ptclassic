@@ -297,6 +297,10 @@ void ParScheduler :: compileRun() {
 		return;
 	}
 
+	// prepare code generation for each processing element:
+	// galaxy initialize, copy schedule, and simulate the schedule.
+	parProcs->prepareCodeGen();
+
 	// make parallel target intervene here to do something necessary
 	// by default, do nothing
 	mtarget->prepareCodeGen();
