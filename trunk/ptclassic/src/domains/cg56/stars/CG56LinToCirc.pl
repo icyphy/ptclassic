@@ -7,7 +7,12 @@ the number transferred per execution equals the number written per execution
 by the star that feeds the input. }
 	version { $Id$ }
 	author { J. Buck }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG56 demo library }
 	explanation {
 .Id "linear to circular buffer copy"

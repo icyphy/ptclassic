@@ -4,7 +4,12 @@ defstar {
 	desc { A variable delay with linear interpolation. }
 	version { $Id$ }
 	author { Chih-Tsung Huang, ported from Gabriel }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG56 demo library }
         explanation {
 Delay will vary between 0 and maxDelay as the control varies between -1.0 and 1.0.

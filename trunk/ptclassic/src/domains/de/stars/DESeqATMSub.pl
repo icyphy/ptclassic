@@ -4,8 +4,12 @@ defstar {
 	author { GSWalter }
 	derivedFrom { SeqATMZero }
 	version { $Id$ }
-WARNING: CHECK COPYRIGHT - not UC
-	copyright { 1992 (c) U. C. Regents }
+        copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+        }
 	location { DE main palette }
 	desc {
 This star reads in a sequence of SeqATMCells. It will

@@ -10,7 +10,12 @@ and hence "offset" must be negative.
 	}
 	version {$Id$ }
 	author { Chih-Tsung Huang }
-	copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
 	location { CG56 main library }
 	explanation {
 This star reads a block of particles of any type, and writes a block

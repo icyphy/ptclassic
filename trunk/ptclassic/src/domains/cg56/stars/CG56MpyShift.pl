@@ -4,7 +4,12 @@ defstar {
     desc { Multiply and shift }
     version { $Id$ }
     author { Kennard White (ported from Gabriel) }
-    copyright { 1992 The Regents of the University of California }
+	copyright {
+Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
+All rights reserved.
+See the file ~ptolemy/copyright for copyright notice,
+limitation of liability, and disclaimer of warranty provisions.
+	}
     location { CG56 library }
     explanation {
 .Id "multiplication with shifting"
