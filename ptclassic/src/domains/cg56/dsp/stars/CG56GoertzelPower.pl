@@ -73,6 +73,10 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	}
 
 	exectime {
+                // FIXME. Estimates of execution time are given in pairs of
+		// oscillator cycles because that's the way it was done in
+		// Gabriel: they simply counted the number of instructions.
+
 		return 5 + CG56GoertzelBase::myExecTime();
 	}
 }
