@@ -1,15 +1,15 @@
 {configure -canvasheight 358}
 {configure -canvaswidth 480}
 {configure -scrolling auto}
-{centeredText Title title {} black {{helvetica 24 bold i} {times 24 bold i}}}
-{centeredText subtitle subtitle title blue {{times 16 bold r} {helvetica 16 bold r}}}
-{centeredText Author author {subtitle title} red {{times 16 bold r} {helvetica 16 bold r}}}
-{centeredText {version: $Id$} version {author subtitle title} black {{times 16 bold r} {helvetica 16 bold r}}}
-{centeredText {Copyright (c) %Q%} copyright {version author subtitle title} black {{times 16 bold r} {helvetica 16 bold r}}}
+{centeredText Title title {} black {helvetica 24 bolditalic}}
+{centeredText subtitle subtitle title blue {times 16 bold}}
+{centeredText Author author {subtitle title} red {times 16 bold}}
+{centeredText {version: $Id$} version {author subtitle title} black {times 16 bold}}
+{centeredText {Copyright (c) %Q%} copyright {version author subtitle title} black {times 16 bold}}
 {add {Simple node} {} {}}
 {add Color {color red} {{Simple node}}}
 {add Font {font {Times 24 bold i}} {{Simple node}}}
-{add {Color and Font} {color forestgreen font {Times 18 bold i}} Font}
+{add {Color and Font} {color forestgreen font {Times 18 bolditalic}} Font}
 {add {HTML formatted message} {html {<h3>HTML Field</h3><p>
      This message is contained in the "html"
      field of the contents of the tree node.
