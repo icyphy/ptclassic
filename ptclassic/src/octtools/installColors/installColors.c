@@ -124,6 +124,10 @@ int directive;
 
 
 
+#if defined(ultrix)
+#define NEED_STRICMP
+#endif
+
 #ifdef NEED_STRICMP
 int stricmp(a, b)
 register char *a, *b;
