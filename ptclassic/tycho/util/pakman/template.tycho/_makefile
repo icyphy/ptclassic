@@ -16,6 +16,15 @@ VPATH =		$(ROOT)/%metapkg%/%pkg%
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
+# The variables below are used to create distributions
+TYPACKAGE = 	%Package%
+TYPACKAGE_DIR = %metapkg%/%pkg%
+# If you change JVERSION, modify the version numbers in %pkg%.tcl
+TYVERSION =	%version%
+TYDIST =	$(TYPACKAGE)$(TYVERSION)
+TYZIP =		$(TYPACKAGE_DIR)/$(TYPACKAGE).zip
+TYJARFILE =
+
 # Sub directories to run make in.
 DIRS =	bin demo doc test
 
