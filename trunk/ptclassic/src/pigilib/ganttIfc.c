@@ -217,43 +217,6 @@ char *name;
     return 1;
 }
 
-
-/* 3/28/90
-Find a name starting at facet under cursor.  Name can have '.' between
-components and all components in heirarchy will be marked.
-*/
-/* Rewritten for Tcl/Tk by Alan Kamas, 1/94 */
-int 
-RpcFindName(spot, cmdList, userOptionWord) /* ARGSUSED */
-RPCSpot *spot;
-lsList cmdList;
-long userOptionWord;
-{
-    octObject facet;
-    char facetHandle[16]; 
-
-    ViInit("find-name");
-    ErrClear();
-
-    /* get current facet */
-    facet.objectId = spot->facet;
-    if (octGetById(&facet) != OCT_OK) {
-	PrintErr(octErrorString());
-    	ViDone();
-    }
-
-    ptkOctObj2Handle(&facet,facetHandle);
-
-    TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,"ptkEditStrings ",
-                   " \"Find Name\" ",
-                   " \"ptkSetFindName ", facetHandle, " %s \" ",
-                   " \"{{Name} {}}\" ",
-                   (char *)NULL) )
-
-    ViDone();
-
-}
-
 void
 FindAndMark(facetP, name, pattern)
 octObject *facetP;
