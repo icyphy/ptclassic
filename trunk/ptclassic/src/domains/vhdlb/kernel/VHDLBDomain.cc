@@ -78,8 +78,11 @@ public:
 		return *new VHDLBToUniversal;
 	}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new VHDLBForkNode;}
+	// new geodesic
+	Geodesic& newGeo(int multi) {
+		if (multi) { LOG_NEW; return *new VHDLBForkNode;}
+		else { LOG_NEW; return *new VHDLBGeodesic;}
+	}
 
 	// constructor
 	VHDLBDomain() : Domain("VHDLB") {}
