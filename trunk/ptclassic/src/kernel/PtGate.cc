@@ -35,7 +35,12 @@ This file defines classes that support multi-threading in the kernel.
 
 #ifdef __GNUG__
 #pragma implementation
+#pragma implementation "PtThread.h"
+#pragma implementation "PtCondition.h"
 #endif
+
+#include "PtThread.h"
+#include "PtCondition.h"
 
 #include "PtGate.h"
 #include "logNew.h"
