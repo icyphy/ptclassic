@@ -23,11 +23,11 @@ $Id$
 
 class Sub56Target : public CG56Target {
 private:
-	int genFile(StringList&,const char*);
 	char* uname;
 	void initStates();
 protected:
 	StringState dirName;
+	StringState disCode;
 public:
 	Sub56Target(const char*,const char*,
 		    unsigned,unsigned,unsigned,unsigned);

@@ -5,7 +5,7 @@ $Id$
  Copyright (c) 1992 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck, J. Pino
 
  Target for Motorola 56000 assembly code generation that runs its
  output on the simulator.
@@ -23,7 +23,6 @@ $Id$
 
 class Sim56Target : public CG56Target {
 private:
-	int genFile(StringList&,const char*);
 	void initStates();
 	StringList cmds;
 	char* uname;
@@ -32,6 +31,8 @@ protected:
 	StringState plotFile;
 	StringState plotTitle;
 	StringState plotOptions;
+	StringState disCode;
+	StringState simCode;
 public:
 	Sim56Target(const char*,const char*,
 		    unsigned,unsigned,unsigned,unsigned);
