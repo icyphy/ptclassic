@@ -161,7 +161,7 @@ void PacketSample::operator << (const Packet& p) { data = p;}
 // particle copy
 Particle& PacketSample::operator = (const Particle& p) {
 	if (compareType(p))
-		data = ((PacketSample*)&p)->data;
+		data = ((const PacketSample*)&p)->data;
 	return *this;
 }
 

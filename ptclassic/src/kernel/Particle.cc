@@ -69,7 +69,7 @@ Particle& IntSample :: operator = (const Particle& p)
 {
 	if(compareType(p)) {
 		// Types are compatible, so we can copy
-		data = ((IntSample*)&p)->data;
+		data = ((const IntSample*)&p)->data;
 	}
 	return *this;
 }
@@ -117,7 +117,7 @@ Particle& FloatSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-		data = ((FloatSample*)&p)->data;
+		data = ((const FloatSample*)&p)->data;
 	}
 	return *this;
 }
@@ -168,7 +168,7 @@ Particle& ComplexSample :: operator = (const Particle& p)
 {
         if(compareType(p)) {
                 // Types are compatible, so we can copy
-		data = ((ComplexSample*)&p)->data;
+		data = ((const ComplexSample*)&p)->data;
 	}
         return *this;
 }
