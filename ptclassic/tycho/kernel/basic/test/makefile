@@ -53,7 +53,8 @@ GRAPHICAL_TESTS = \
 	testLoader.itcl
 
 ITCL_SRCS = \
-	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS)
+	$(SIMPLE_TESTS) $(GRAPHICAL_TESTS) \
+	alltests.itcl all.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
