@@ -68,8 +68,7 @@ CGCostTarget::CGCostTarget(const char* nam, const char* startype,
 CGTarget(nam, startype, desc, assocDomain) {
     // Override the default value of the destination directory
     // to be $HOME/PTOLEMY_SYSTEMS/CG/CostTarget
-    destDirName = (const char*) destDirectory;
-    destDirName << "/" << "CostTarget";
+    destDirName = destDirectoryName("CostTarget");
     destDirectory.setInitValue(destDirName);
 
     // Add a state for the user to list the targets to use to generate
