@@ -89,7 +89,7 @@ void MultiTarget :: setTargets(int n) {
 	char temp[6];
 	sprintf(temp, "%d", n);
 	const char* t = hashstring(temp);
-	nprocs.setValue(t); }
+	nprocs.setInitValue(t); }
 
 int MultiTarget :: inheritChildTargets(Target* father) {
 
