@@ -47,19 +47,19 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	protected {
 	  int taplength,tappadlength,maxpast;
-	  short *shift_taparray;
-	  float *result;
 	  double *accumpair;
+	  float *result;
+	  short *shift_taparray;
 	}
 	constructor {
-	  shift_taparray = 0;
-	  result = 0;
 	  accumpair = 0;
+	  result = 0;
+	  shift_taparray = 0;
 	}
 	destructor {
-	  free(shift_taparray);
-	  free(result);
 	  free(accumpair);
+	  free(result);
+	  free(shift_taparray);
 	}
         setup {
 
@@ -77,16 +77,14 @@ limitation of liability, and disclaimer of warranty provisions.
 	  signalIn.setSDFParams(NumIn,maxpast-1);
 	}
 	begin {
-
+	  double intmp;
 	  int taprowindex, tapcolindex;
 	  short *indexcount;
-	  double intmp;
 
   	  // allocate shifted tap and tmp arrays
-	       free(shift_taparray);
+	       free(accumpair);
 	  free(result);
-	  free(accumpair);
-
+	  free(shift_taparray);
 	  accumpair = (double *)
 	    memalign(sizeof(double),sizeof(double)*NumPack);
 	  result = (float *)
@@ -121,20 +119,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	       }
 	}
 	go {	
-
-	  int outerloop, innerloop, numloop;
-	  int genindex;
-	  float datahi, datalo;
-          float tappairhi, tappairlo;
-          float splithi, splitlo;
-          float packedhi, packedlo;
-          double tapvalue;
-	  double *tapptr[NumPack];
-	  double pairlohi, pairlolo;
-	  double pairhilo, pairhihi;
-	  double pairlo, pairhi, pair;
-	  double packedOut;
-	  double *packedaccum;
+	  double *tapptr[NumPack],tapvalue;
+	  double pairlohi,pairlolo,pairhilo,pairhihi;
+	  double pairlo,pairhi,pair,packedOut,*packedaccum;
+          float packedhi,packedlo,datahi,datalo;
+          float tappairhi,tappairlo,splithi,splitlo;
+	  int outerloop,innerloop,numloop,genindex;
 
 	  vis_write_gsr(8);	  
 	  
@@ -161,26 +151,23 @@ limitation of liability, and disclaimer of warranty provisions.
 		 // set up data
 		      datahi = vis_read_hi(double(signalIn%(outerloop)));
 		 datalo = vis_read_lo(double(signalIn%(outerloop)));
-
 		 // calculate four outputs
 		      for(innerloop=0;innerloop<NumPack;innerloop++){
 			// set up tap pairs for each shifted taparray
 			     tapvalue = *tapptr[innerloop]++;
 			tappairhi = vis_read_hi(tapvalue);
 			tappairlo = vis_read_lo(tapvalue);
-
 			// take inner products
 			     pairlolo = vis_fmuld8sux16(datalo,tappairlo);
 			pairlohi = vis_fmuld8ulx16(datalo,tappairlo);	    
-
 			pairhilo = vis_fmuld8sux16(datahi,tappairhi);
 			pairhihi = vis_fmuld8ulx16(datahi,tappairhi);
-
 			// accumulate results
 			     pairlo = vis_fpadd32(pairlolo,pairlohi);
 			pairhi = vis_fpadd32(pairhilo,pairhihi);
 			pair = vis_fpadd32(pairhi,pairlo);
-			accumpair[innerloop] = vis_fpadd32(accumpair[innerloop],pair);
+			accumpair[innerloop] =
+			  vis_fpadd32(accumpair[innerloop],pair);
 		      }  
 	       }
 
