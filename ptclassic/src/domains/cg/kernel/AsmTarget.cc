@@ -1,4 +1,3 @@
-static const char file_id[] = "AsmTarget.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -21,15 +20,17 @@ $Id$
 
 int
 AsmTarget::setup(Galaxy& g) {
+// clear the memory
+	mem.reset();
 // initialize proc ptrs and create schedule
 	if (!Target::setup(g)) return FALSE;
 	GalStarIter nextStar(g);
-// allocate memory, using the Target, for all stars in the galaxy.
-// note that allocMem just posts requests; performAllocation processes
+// request memory, using the Target, for all stars in the galaxy.
+// note that allocReq just posts requests; performAllocation processes
 // all the requests.  Note we've already checked that all stars are AsmStar.
 	AsmStar* s;
 	while ((s = (AsmStar*)nextStar++) != 0) {
-		allocMem(*s);
+		allocReq(*s);
 	}
 	if (!mem.performAllocation()) return FALSE;
 // do all initCode methods.
@@ -39,18 +40,30 @@ AsmTarget::setup(Galaxy& g) {
 	return TRUE;
 }
 
-// allocate memory for all structures in a star
+// request memory for all structures in a star
 int
-AsmTarget::allocMem(AsmStar& star) {
+AsmTarget::allocReq(AsmStar& star) {
+	int sflag = TRUE;
+	int pflag = TRUE;
 // first, allocate for portholes.
 	AsmStarPortIter nextPort(star);
 	AsmPortHole* p;
 	while ((p = nextPort++) != 0)
-		mem.allocReq(*p);
+		pflag = pflag && mem.allocReq(*p);
 	BlockStateIter nextState(star);
 	State* s;
 	while ((s = nextState++) != 0)
-		mem.allocReq(*s);
-	return mem.performAllocation();
+		sflag = sflag && mem.allocReq(*s);
+	if(!sflag) {
+		Error::abortRun(
+	   	    "Cannot find memory for States in ", star.readName());
+		return FALSE;
+	} else if(!pflag) {
+		Error::abortRun(
+	   	    "Cannot find memory for PortHoles in ", star.readName());
+		return FALSE;
+	} else {
+		return TRUE;
+	}
 }
 
