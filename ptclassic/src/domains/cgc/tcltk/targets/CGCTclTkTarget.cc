@@ -48,7 +48,8 @@ CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
 	funcName.setInitValue("go");
 	compileOptions.setInitValue(
 		  "-I$PTOLEMY/tcltk/tk/include -I$PTOLEMY/tcltk/tcl/include "
-		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib");
+		  "-I$PTOLEMY/src/domains/cgc/tcltk/lib "
+		  "-I$PTOLEMY/src/ptklib");
 	linkOptions.setInitValue(
 		  "-L$PTOLEMY/tcltk/tk.$ARCH/lib "
 		  "-L$PTOLEMY/tcltk/tcl.$ARCH/lib "
