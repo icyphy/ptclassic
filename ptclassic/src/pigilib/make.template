@@ -13,25 +13,24 @@
 #	make depend
 # This will add the dependencies to the makefile.
 #
-# Change PTOLEMY to point to the correct directory
-# in your system (no tilde-user allowed!).
-PTOLEMY	      = ../..
+# root of source tree
+ROOT	      = ../..
 # VPATH points to the "real" source directory
-VPATH         = $(PTOLEMY)/src/pigiRpc
+VPATH         = $(ROOT)/src/pigiRpc
 # Octtools root directory
-OCTTOOLS      = /usr/tools/octtools
+OCTTOOLS      = $(ROOT)/octtools
 
 # C compiler variables
 CFLAGS        = -g -I$(OCTTOOLS)/include
 
 # C++ compiler variables
 GXX	      = g++
-GPPFLAGS      = -g -fminimal-debug -I$(PTOLEMY)/src/kernel
+GPPFLAGS      = -g -fminimal-debug -I$(ROOT)/src/kernel
 GNUINCLUDE    = /usr/gnu/lib/g++-include
 
 # Linker variables
 LINKER        = g++
-LDFLAGS	      = -L$(OCTTOOLS)/lib -L$(PTOLEMY)/lib.$(ARCH)
+LDFLAGS	      = -L$(OCTTOOLS)/lib.$(ARCH) -L$(ROOT)/lib.$(ARCH)
 LIBS	      = -lsdf -lddf -lde \
 		-lptolemy -lg++ -loh -lrpc -llist -ltr -lutility -lst \
 		-lerrtrap -luprintf -lport -lX11 -lm
@@ -96,18 +95,18 @@ TARGET	      = pigiRpc
 
 all:	$(TARGET)
 
-$(TARGET): makefile $(OBJS) $(PTOLEMY)/lib.$(ARCH)/libptolemy.a 
+$(TARGET): makefile $(OBJS) $(ROOT)/lib.$(ARCH)/libptolemy.a 
 	$(LINKER) $(LDFLAGS) $(OBJS) \
 	    ../domains/ddf/stars/*.o \
 	    ../domains/de/stars/*.o \
 	    ../domains/sdf/stars/*.o \
 	    $(LIBS) -o $(TARGET)
 
-INSTALLED     = $(PTOLEMY)/bin.$(ARCH)/$(TARGET)
+INSTALLED     = $(ROOT)/bin.$(ARCH)/$(TARGET)
 install: $(INSTALLED)
 
 $(INSTALLED):	$(TARGET)
-	@echo Installing $(TARGET) in $(PTOLEMY)/bin
+	@echo Installing $(TARGET) in $(ROOT)/bin
 	rm -f $(INSTALLED)
 	cp $(TARGET) $(INSTALLED)
 	strip $(INSTALLED)
@@ -120,7 +119,7 @@ clean:
 sources:	$(SRCS) $(HDRS) make.template
 
 depend:	
-		makedepend -I$(GNUINCLUDE) -I$(PTOLEMY)/src/kernel \
+		makedepend -I$(GNUINCLUDE) -I$(ROOT)/src/kernel \
 			   -I$(OCTTOOLS)/include $(SRCS)
 
 makefile:	make.template
