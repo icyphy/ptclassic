@@ -41,6 +41,7 @@ PL_SRCS= \
  SDFFIR.pl \
  SDFFIRCx.pl \
  SDFFIRFix.pl \
+ SDFGAL.pl SDFGGAL.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
  SDFIIRFix.pl \
