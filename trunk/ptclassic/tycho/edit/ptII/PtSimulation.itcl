@@ -298,7 +298,7 @@ class ::tycho::PtSimulation {
 configbody ::tycho::PtSimulation::isToplevel {
     if { $_toplevelActor != "" } {
 	if $isToplevel {
-	    #if { $_manager == "" } {
+	#    if { $_manager == "" } {
 	#	set _manager [java::new ptolemy.actor.Manager]
 	#	$_toplevelActor setManager $_manager
 	#	puts "Manager: $_manager (isToplevel)"
