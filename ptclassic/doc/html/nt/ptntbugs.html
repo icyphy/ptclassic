@@ -27,9 +27,15 @@ with the vanilla bash emulator.
 	and then selecting <CODE>Telnetd</CODE> and then <CODE>Enable</CODE>
 
 	
-	<li> To bring up an xterm,
-	start up <CODE>bash</CODE>, and then start up an xterm with 
+	<li> From the remote machine, telnet in to the NT machine. You
+	will be running a DOS shell.
+	<li> To bring up <CODE>bash</CODE> with the proper environment,
+	run <CODE>C:\Cygnus\b19\cygnus</CODE>
+	
+	<li> To bring up an <CODE>xterm</CODE> from within bash:
 	<pre>
+	DISPLAY=<I>yourremotemachine</I>:0
+	export DISPLAY
 	xterm -sb -e bash &amp;
 	</pre>
 	</ol>
@@ -175,6 +181,13 @@ RPC Error: cannot connect to the server
 
 <h2>Problems Running Ptolemy</h2>
 <MENU>
+
+
+<li> If you have problems with <CODE>pxgraph</CODE>, see
+the <a href="ptntinstall.html#pxgraph">Ptolemy NT Installation page</a>,
+and <a href="../../../src/pxgraph/README.txt"><CODE>$PTOLEMY/src/pxgraph/README.txt</CODE></a>
+
+<li> The SDF Butterfly demo gives a bogus graph
 <LI> The Matlab and Mathematica stars do not work.
 
 <li> The SDF Gaussian demo fails with:
