@@ -39,6 +39,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 #include <stdio.h>
 
+static void SetVersionInfo (Tcl_Interp *ptkInterp, char *Filename)
+{
+    InfString pid = (int)getpid();
+    Tcl_VarEval(ptkInterp, "set TychoVersionInfo {", gVersion, \
+	    " (proc. id. ", (char*)pid, ")}", (char *) NULL);
+    Tcl_VarEval(ptkInterp, "set TychoBinaryInfo {", Filename, "}", \
+	    (char *) NULL);
+}
+
 TyConsole::TyConsole(int argc, char **argv) {
 
   // Create an interpreter
@@ -86,6 +95,9 @@ TyConsole::TyConsole(int argc, char **argv) {
 	interp->result);
     tyExit(1);
   }
+
+  // Set version/binary info variables
+  SetVersionInfo(interp, argv[0]);
 
   // Load the startup file Tycho.tcl
   char *ty = getenv("TYCHO");

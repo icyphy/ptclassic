@@ -47,6 +47,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "expect_tcl.h"
 #endif
 
+// This is used by SetVersionInfo
+extern char *gVersion;
+
 class TyConsole {
 
  public:
