@@ -105,13 +105,13 @@ public:
 // add a connection (point-to-point)
 	int
 	connect(const char* srcstar, const char* srcport, const char* dststar,
-		const char* dstport, const char* delay = 0);
+		const char* dstport, const char* initDelayValues = 0);
 
 // add a bus connection
 	int
 	busConnect(const char* srcstar, const char* srcport,
 		   const char* dststar, const char* dstport,
-		   const char* width, const char* delay = 0);
+		   const char* width, const char* initDelayValues = 0);
 
 // disconnect a porthole (works for point-to-point or netlist connections)
 	int
@@ -132,7 +132,7 @@ public:
 // connnect a porthole to a node
 	int
 	nodeConnect(const char* star, const char* port, const char* node,
-		    const char* delay = 0);
+		    const char* initDelayValues = 0);
 
 // add a state
 	int
