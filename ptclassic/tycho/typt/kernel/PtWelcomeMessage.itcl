@@ -112,7 +112,7 @@ body ::tycho::PtWelcomeMessage::constructor {args} {
 		$itk_option(-executable)
     }
     append html "<p>" \
-	    "Copyright \251 -1996, " \
+	    "Copyright \251 1990-%Q%, " \
 	    {Regents of the University of California<br>} \
 	    {- All rights reserved -<br>} \
 	    "<a href=$TYCHO/copyright>See the copyright notice, " \
