@@ -231,6 +231,16 @@ body ::tycho::DFGEditor::constructor {args} {
     $selector bind edge -button 1 \
             -modifiers {shift control} -toggle 1
 
+    # Enable junction selection with button 1; shift-click toggles
+    $selector bind junction -button 1
+    $selector bind junction -button 1 \
+            -modifiers shift -toggle 1
+
+    # Enable junction selection with control-button 1; shift-click toggles
+    $selector bind junction -button 1 -modifiers control
+    $selector bind junction -button 1 \
+            -modifiers {shift control} -toggle 1
+
     # Enable grapple selection with button 2; shift-click toggles
     $selector bind grapple -button 2
     $selector bind grapple -button 2 \
@@ -239,6 +249,11 @@ body ::tycho::DFGEditor::constructor {args} {
     # Delegate vertex movement for selected vertexes
     $selector delegate $follower vertex -button 1
     $selector delegate $follower vertex -button 1 \
+            -modifiers shift
+
+    # Delegate junction movement for selected vertexes
+    $selector delegate $follower junction -button 1
+    $selector delegate $follower junction -button 1 \
             -modifiers shift
 
     # The selector sends selection events here

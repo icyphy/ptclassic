@@ -116,6 +116,7 @@ body ::tycho::DFGMover::click {tag x y args} {
     # Get the vertices, and start a move sequence on them
     set vertices [$slateview find withtag $tag]
 
+puts "vertexes = $vertices ($graph)"
     # Get the item name or the same tag
     set name [itemname $tag]
     set _movetag $name
@@ -127,6 +128,7 @@ body ::tycho::DFGMover::click {tag x y args} {
     set _moveedges [eval $graph subgraphEdges $vertices]
     set _inputedges [eval $graph subgraphInputs $vertices]
     set _outputedges [eval $graph subgraphOutputs $vertices]
+puts [list $_moveedges $_inputedges $_outputedges]
 
     # Start a move or reshape sequence on found edges
     if { $_moveedges != "" } {
