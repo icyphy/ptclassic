@@ -149,7 +149,7 @@ proc ::tycho::readFileHeader {filename var} {
 # *aslocal* option.) If a network name and no path is given,
 # return <code>/</code>.
 # <li><code>::tycho::url pathtype</code> _name_: Return the
-# "type" of a path -- aboslute, relative, or volumerelative.
+# "type" of a path -- absolute, relative, or volumerelative.
 # If _name_ is a network name, always return
 # <code>absolute</code>. If it is a local name, return whatever
 # Tcl file{} returns. (To tell if a name is a network-style
@@ -414,11 +414,23 @@ ensemble ::tycho::url {
 # directories, it is expected to be a Unix-style name
 # containing slashes -- this is because this function is
 # typically used to look for files obtained from portable
-# files.
+# files. If <i>basepath</i> is supplied, then any entries in
+# the search path that are relative will be made relative to
+# this directory; otherwise they will be ignored.
 #
-proc ::tycho::urlPathSearch {name searchpath} {
+proc ::tycho::urlPathSearch {name searchpath {basepath {}}} {
     set f [split $name /]
+    if { $basepath != "" } {
+        set b [::tycho::url split $basepath]
+    }
     foreach p $searchpath {
+        if { [::tycho::url pathtype $p] == "relative" } {
+            if { $b != "" } {
+                set p [eval ::tycho::url join [concat $b [file split $p]]]
+            } else {
+                continue
+            }
+        }
 	set file [eval ::tycho::url join [concat [::tycho::url split $p] $f]]
 	if [::tycho::resource exists $file] {
 	    return $file
