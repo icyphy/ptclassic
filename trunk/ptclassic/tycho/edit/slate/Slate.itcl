@@ -1,4 +1,6 @@
 ##########################################################################
+# A canvas mega-widget for manipulating hierarchical picture objects.
+#
 # @Version: $Id$
 # @Author: H. John Reekie
 #
@@ -80,7 +82,8 @@ proc ::tycho::slate {pathName args} {
 #######################################################################
 #### Slate
 #
-# A canvas mega-widget. The Slate is the primary interface to the
+# A canvas mega-widget for manipulating hierarchical picture objects.
+# The Slate is the primary interface to the
 # Visual Language Toolkit, which supports hierarchical canvas items,
 # moving and dragging, reusable interactions mechansism, constraints,
 # and things generally useful for building visual language editors.
