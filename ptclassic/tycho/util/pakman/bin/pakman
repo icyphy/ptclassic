@@ -21,7 +21,7 @@ if [info exists env(TYCHO)] {
 
 # Require the Pakman package. If this fails, require the Tycho
 # package first, since that may make the Pakman package visible
-if [catch {package require Pakman}] {
+if [catch {package require pakman}] {
     if [catch {package require Tycho}] {
 	puts "Cannot find Pakman or Tycho. You can\n\
 		1. Set the TYCHO variable to point to your \
@@ -31,7 +31,7 @@ if [catch {package require Pakman}] {
 		3. Install Pakman in a subdirectory of your Tcl library"
 	exit
     } else {
-	package require Pakman
+	package require pakman
     }
 }
 
