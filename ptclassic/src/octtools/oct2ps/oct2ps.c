@@ -624,7 +624,7 @@ char* lbl_str;			/* Label string */
 }
 
 
-char *
+static char *
 parens(string)
 char *string;
 {
@@ -753,7 +753,8 @@ struct octLabel *oneLabel;
 	}
 
 	printf("x y moveto\n");
-	printf("(%s) show\n", parens(daData(char, daGet(lblDesc, lblInfo, idx)->line)));
+	/* removed call to "parens" for daData below - EAL */
+	printf("(%s) show\n", daData(char, daGet(lblDesc, lblInfo, idx)->line));
 	printf("/y y %d sub def\n", oneLabel->textHeight);
     }
     if (!alwaysDisplayLabel) {
