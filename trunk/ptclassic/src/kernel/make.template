@@ -42,7 +42,10 @@ CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Library name
-LIB=libptolemy.$(LIBSUFFIX)
+# Build a non-shared libptolemy.a for faster startup time
+# It would be nice if we built both
+#LIB=libptolemy.$(LIBSUFFIX)
+LIBNONSHARED=	libptolemy.a
 
 # No extra directories to include
 INCL = $(PTCOMPAT_INCSPEC)
@@ -157,10 +160,11 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
 # Library objects
 OBJS=$(SRCS:.cc=.o)
 
-all:	makefile $(LIB)
+
+all:	makefile $(LIBNONSHARED)
 
 # "make install" puts things in the official place
-install:	makefile $(LIBDIR)/$(LIB) $(FLUSH_CACHE)
+install:	makefile $(LIBDIR)/$(LIBNONSHARED) $(FLUSH_CACHE)
 ifdef FLUSH_CACHE
 	# FLUSH_CACHE is defined for hppa
 	rm -f $(LIBDIR)/$(FLUSH_CACHE)
