@@ -121,7 +121,7 @@ tclexts: config_tclexts all_tclexts install_tclexts
 
 # Run configure
 # You can pass arguments to configure like so:
-# make tclexts CONFIGURE_ARGS=--with-tclsrc=/users/cxh/pt/src/tcltk/itcl2.2/tcl7.6
+# make tclexts CONFIGURE_ARGS=--with-tclsrc=/users/cxh/pt/src/tcltk/tcl8.0.5
 # If you don't have Java, then do 
 # make tclexts CONFIGURE_ARGS=--without-java
 #
