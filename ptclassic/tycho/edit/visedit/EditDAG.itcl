@@ -217,7 +217,7 @@ class ::tycho::EditDAG {
     protected method drawParentLines {node {parent {}}}
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Access the "diagram" preferences
     protected method preference {mode args}
@@ -256,7 +256,7 @@ class ::tycho::EditDAG {
     ####                   private methods                         ####
 
     # Initialize the menu bar.
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 
     # Set the "widthpos" attribute of nodes in the subgraph.
     private method widthPos {roots ymin {parent {}}}
@@ -1046,22 +1046,19 @@ body ::tycho::EditDAG::drawParentLines {node {parent {}}} {
 }
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::EditDAG::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::EditDAG::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::EditDAG::initializeMenubar $menubar
+        ::tycho::EditDAG::_initializeMenubar $menubar
     }
 }
 
@@ -1122,10 +1119,10 @@ body ::tycho::EditDAG::verifycontents {contents} {
     ####                      private methods                      ####
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::EditDAG::initializeMenubar {menubar} {
+body ::tycho::EditDAG::_initializeMenubar {menubar} {
     $menubar separator editsep19 edit
 
     $menubar command newroot edit \

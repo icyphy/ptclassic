@@ -309,7 +309,7 @@ class ::tycho::File {
     ####                  protected methods                               ####
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Write the data to the given file
     protected method saveFile {filename}
@@ -336,7 +336,7 @@ class ::tycho::File {
     ####                  private methods                                 ####
 
     # Initialize the menubar.
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 
     # Remove the backup file that gets automatically created periodically.
     private method removeBackupFiles {}
@@ -1342,16 +1342,13 @@ body ::tycho::File::winGetByRootName {rootname} {
 ####                          protected methods                      ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in its initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by its displayer when attachView is called
-# (usually in <code>::tycho::view</code>).
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::File::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
     
     # Insert items in the menu bar. This is faster in a seperate
@@ -1359,7 +1356,7 @@ body ::tycho::File::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     if {$menubar != {}} {
         # We have to qualify the call to this supposed-ly private
         # method because Itcl (2.2) has virtual private methods!
-        ::tycho::File::initializeMenubar $menubar
+        ::tycho::File::_initializeMenubar $menubar
     }
     displayer configure -title $itk_option(-file)
 
@@ -1406,10 +1403,10 @@ body ::tycho::File::saveText {} {
 ####                          private methods                        ####
 
 #####################################################################
-#### initializeMenubar
+#### _initializeMenubar
 # Initialize the menu bar.  Adds entries specific to this class.
 #
-body ::tycho::File::initializeMenubar {menubar} {
+body ::tycho::File::_initializeMenubar {menubar} {
     global tcl_platform
 
     # Construct the menus

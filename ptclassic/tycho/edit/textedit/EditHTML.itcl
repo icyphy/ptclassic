@@ -102,7 +102,7 @@ class ::tycho::EditHTML {
     protected method fixLink {link start end err}
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
 
     # Given an HTML anchor, return the filename and point within the file.
     protected method parseLink {dest}
@@ -416,16 +416,13 @@ body ::tycho::EditHTML::fixLink {link start end err} {
 }
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
-# The root (view) class sets up the menubar methods in it's initialize
-# via the chain command, which should always be the first command in
-# this method.
-# 
-# This method is called by it's displayer when attachView is called (usually
-# in ::tycho::view
+# If any of these arguments is null, the associated bar does not
+# exist and must be ignored. This method is called from within
+# the attachDisplayer{} method.
 #
-body ::tycho::EditHTML::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
+body ::tycho::EditHTML::_initializeBars {menubar statusbar toolbar} {
     chain $menubar $statusbar $toolbar
 
     if {$menubar != {}} {
