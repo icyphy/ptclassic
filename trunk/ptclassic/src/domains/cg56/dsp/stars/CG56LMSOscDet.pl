@@ -95,10 +95,7 @@ The initial guess at the angle being estimated in radians.
 
 		// decimation is not supported
 		decimation.clearAttributes(A_SETTABLE);
-
-		// FIXME: Add the following lines back in when CG56FIR
-		// is updated to match SDFFIR
-		// decimationPhase.clearAttributes(A_SETTABLE);
+		decimationPhase.clearAttributes(A_SETTABLE);
 	}
 	setup {
 		if ( double(stepSize) < 0.0 ) {
@@ -146,8 +143,8 @@ The initial guess at the angle being estimated in radians.
 	go {
 		// 1. Since we don't support decimation,
 		//    index = int(errorDelay) + 1, a constant
-		int index = int(errorDelay)*int(decimation) + 1;
-		// + int(decimationPhase);
+		int index = int(errorDelay)*int(decimation) + 
+			    int(decimationPhase) + 1;
 
 		// 2. Update the middle tap and compute the estimate
 		//    of cos(w) = -tap/2
