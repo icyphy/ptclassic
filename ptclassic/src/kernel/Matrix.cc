@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Matrix.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <math.h>
 
 // Must be greater than the maximum number of characters in the %22.15g format
 #define SMALL_STRING_SIZE 32
@@ -632,7 +633,7 @@ ComplexMatrix::operator FloatMatrix () const {
 ComplexMatrix::operator IntMatrix () const {
   IntMatrix result(nRows,nCols);
   for(int i = 0; i < totalDataSize; i++)
-    result.entry(i) = (int)abs(entry(i));
+    result.entry(i) = int(floor(abs(entry(i)) + 0.5));
   return result;
 }
 
@@ -1456,7 +1457,7 @@ FloatMatrix::operator FixMatrix () const {
 FloatMatrix::operator IntMatrix () const {
   IntMatrix result(nRows,nCols);
   for(int i = 0; i < totalDataSize; i++)
-    result.entry(i) = int(entry(i));
+    result.entry(i) = int(floor(entry(i) + 0.5));
   return result;
 }
 

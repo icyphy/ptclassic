@@ -47,6 +47,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "FixArrayState.h"       // 3/2/94 added for initParticleStack
 #include "FloatArrayState.h"     // 3/2/94 added for initParticleStack
 #include "IntArrayState.h"       // 3/2/94 added for initParticleStack
+#include <math.h>
 
 // Here are the plasmas!
 // Create instances of each particle and plasma
@@ -155,8 +156,8 @@ int IntParticle::initParticleStack(Block* parent, ParticleStack& pstack,
 
 	// Load up with data
 void IntParticle :: operator << (int i) {data=i;}
-void IntParticle :: operator << (double f) {data=int(f);}
-void IntParticle :: operator << (const Complex& c) {data=int(abs(c));}
+void IntParticle :: operator << (double f) {data=int(floor(f + 0.5));}
+void IntParticle :: operator << (const Complex& c) {data=int(floor(abs(c) + 0.5));}
 void IntParticle :: operator << (const Fix& x) {data = int(x);}
 void IntParticle :: operator << (const Envelope&) {
 	Error::abortRun ("Attempt to load a Message into Int Particle");
@@ -196,7 +197,7 @@ int FloatParticle :: operator == (const Particle& p) {
 DataType FloatParticle :: type() const {return FLOAT;}
 
         // Cast to an int, double, and Complex
-FloatParticle :: operator int () const {return int(data);}
+FloatParticle :: operator int () const {return int(floor(data + 0.5));}
 FloatParticle :: operator double () const {return data;}
 FloatParticle :: operator float () const {return float(data);}
 FloatParticle :: operator Complex () const {return Complex(data);}
@@ -275,7 +276,7 @@ DataType ComplexParticle :: type() const {return COMPLEX;}
         // Cast to an int, double, Complex
 	// when casting to a real, we use the magnitude
 
-ComplexParticle :: operator int () const {return int(abs(data));}
+ComplexParticle :: operator int () const {return int(floor(abs(data) + 0.5));}
 ComplexParticle :: operator double () const {return abs(data);}
 ComplexParticle :: operator float () const {return float(abs(data));}
 ComplexParticle :: operator Complex () const {return data;}

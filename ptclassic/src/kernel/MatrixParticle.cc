@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MatrixParticle.h"
 #include "Plasma.h"
 #include "Error.h"
+#include <math.h>
 
 /***********************************************************************
  MatrixParticles, used to hold the actual matrices.
@@ -545,9 +546,9 @@ void IntMatrixParticle::operator << (const Envelope&) {
 void IntMatrixParticle::operator << (int i) { 
   *data = i; }
 void IntMatrixParticle::operator << (double f) { 
-  *data = int(f); }
+  *data = int(floor(f + 0.5)); }
 void IntMatrixParticle::operator << (const Complex& c) { 
-  *data = int(abs(c));}
+  *data = int(floor(abs(c) + 0.5));}
 void IntMatrixParticle::operator << (const Fix& x) { 
   *data = int(x); }
 void IntMatrixParticle::operator << (const IntMatrix& m) { 
