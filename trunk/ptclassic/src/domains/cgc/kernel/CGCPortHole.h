@@ -27,7 +27,7 @@ CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
- Programmer: E. A. Lee, S. Ha
+ Programmer: S. Ha and E. A. Lee
 
  These classes are portholes for stars that generate C code.  
 
@@ -50,7 +50,7 @@ class CGCGeodesic;
 class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
-	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), 
+	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), bufName(0),
 			hasStaticBuf(1), myType(NA), converted(-1) {}
 
 	void initialize();
@@ -73,7 +73,7 @@ public:
 
 	// return the buffer requirements. Indicates whether static buffering
 	// is achieved or not.
-	// return 1 if on the wormhole boundary
+	// return numTokens if on the wormhole boundary
 	int maxBufReq() const;
 
 	// return TRUE if a star can see this port as a linear buffer.
@@ -89,8 +89,10 @@ public:
 
 	BufType  bufType() const;
 
+	// name the porthole in the data structure.
 	void setGeoName(char* n);
 	const char* getGeoName() const;
+	// in case explicit type conversion is required.
 	const char* getLocalGeoName();
 
 	// Return the geodesic connected to this PortHole.
@@ -111,7 +113,8 @@ public:
 	// initialize offset
 	int initOffset();
 
-	// determine the buffer size finally
+	// determine the buffer size for this porthole finally
+	// Consider delay and need of past particles.
 	void finalBufSize(int statBuf);
 
 	// Set the maxBuf manually. In finalBufSize() method, we will
@@ -124,6 +127,7 @@ public:
 	int isConverted();
 	
 protected:
+	// determine the property of the buffer associated with this port.
 	void setFlags();
 
 private:
@@ -135,6 +139,8 @@ private:
 	
 	int converted;		// set TRUE if the explicit type conversion 
 				// is required.
+
+	char* bufName;		// set if no geodesic is assigned.
 
 	SequentialList& myDest() { return forkDests; }
 };
