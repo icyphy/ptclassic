@@ -79,6 +79,8 @@ class ::tycho::TyDoc {
 class ::tycho::DocClass {
     inherit ::tycho::TyDoc
 
+    destructor {}
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -133,6 +135,24 @@ class ::tycho::DocClass {
     # Merge one type of construct with another construct
     private method mergeConstructs {src dst} {}
 
+    ###################################################################
+    ####                   private variables                        ####
+
+    # List of DocComments that we have appended (used only for destruction)
+    private variable docCommentList {}
+}
+
+#######################################################################
+#### destructor
+#
+body ::tycho::DocClass::destructor {} {
+    # puts "dbg: ::tycho::DocClass::destructor $this [configure]"
+    if [info exist docCommentList] {
+        foreach docComment $docCommentList {
+            catch {delete object $docComment}
+        }
+        set docCommentList {}
+    }
 }
 
     ###################################################################
@@ -145,12 +165,15 @@ class ::tycho::DocClass {
 #
 body ::tycho::DocClass::appendConstruct { construct comment access argList } {
     set myDocComment [DocComment .docClass#auto $comment]
+    # Save the name of the docComment so we can delete it later
+    lappend docCommentList $myDocComment
     lappend $construct \
 	    [list  $myDocComment \
 	    $access [lindex $argList 0] $argList]
     #puts "DC:AppCnstct: $construct [set $construct] [$myDocComment configure]"
 }
     
+
 #######################################################################
 #### mergeAllConstructs
 # Merge all the constructs
@@ -681,6 +704,11 @@ body ::tycho::DocSys::parseFileAsList {fileAsList} {
 #
 body ::tycho::DocSys::tydocUpdate {obj} {
     update
+    global gStop
+    if {[info exists gStop] && $gStop > 0} {
+                set gStop -1
+	error "Hit Stop"
+    }
     if {$obj == {}} {return}
     # NOTE: Formerly used
     #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
@@ -694,6 +722,8 @@ body ::tycho::DocSys::tydocUpdate {obj} {
 	error silent
 
     }
+    # ::tycho::BuilderDialog sets gStop
+   
     return 0
 
 }
@@ -721,6 +751,8 @@ body ::tycho::DocSys::tydocUpdate {obj} {
 class ::tycho::ListDocSys {
     inherit ::tycho::DocSys
 
+    destructor {}
+
     ###################################################################
     ####                         public methods                    ####
 
@@ -747,8 +779,11 @@ class ::tycho::ListDocSys {
     }
 
     public method resetOutsideClassComment {} {
+                catch {delete object $outsideClassComment}
 	set outsideClassComment {}
+                catch {delete object $currentClass}
 	set currentClass {}
+                catch {delete object $topClass}
 	set topClass {}
     }
     
@@ -845,14 +880,34 @@ class ::tycho::ListDocSys {
 
     # All constructs outside a class are associated with topClass
     private variable topClass {}
+
+    ###################################################################
+    ####                   private variables                        ####
+
+    # List of DocComments that we have appended (used only for destruction)
+    private variable ldsDocCommentList {}
 }
 
-
+#######################################################################
+#### destructor
+body ::tycho::ListDocSys::destructor {} {
+    foreach classItem $classList {
+        catch {delete object $classItem}
+    }
+    set classList {}
+    foreach docComment $ldsDocCommentList {
+        catch {delete object $docComment}
+    }
+    set ldsDocCommentList {}
+    catch { delete object $outsideClassComment}
+    set outsideClassComment {}
+    catch { delete object $currentClass}
+    set currentClass {}
+}
 
     ###################################################################
     ###################################################################
     ####                      public methods                       ####
-
 #######################################################################
 #### appendConstruct
 # Append a construct data to the appropriate construct variable
@@ -936,6 +991,7 @@ body ::tycho::ListDocSys::appendConstruct {construct comment access argList } {
     $myClass appendConstruct $construct $comment $access $argList
 }
 
+
     ###################################################################
     ###################################################################
     ####                      public procedures                    ####
@@ -1016,8 +1072,10 @@ body ::tycho::ListDocSys::commentClause { comment access argList } {
 		}
 	    }
 	} else {
-	    appendConstruct comment [::tycho::DocComment .docComment#auto $comment] \
-		    {} {}
+                    set myComment [::tycho::DocComment .docComment#auto $comment]
+                    # Save myComment  in the list of comments to be destructed
+                    lappend ldsDocCommentList $myComment
+	    appendConstruct comment $myComment  {} {}
 	}
     }
 }
@@ -1511,14 +1569,16 @@ body ::tycho::HTMLDocSys::modCheck {filename} {
 #
 body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
         title filelist} {
-    set HTMLDocSys [::tycho::HTMLDocSys [::tycho::autoName .HTMLDocSys]]
-    $HTMLDocSys configure -verbose $verbose
-	
+    global gStop
     if ![file isdirectory [file join doc codeDoc]] {
 	file mkdir [file join doc codeDoc]
     }
     set retval ""
     foreach filename $filelist {
+        set HTMLDocSys [::tycho::HTMLDocSys [::tycho::autoName .HTMLDocSys]]
+        $HTMLDocSys configure -verbose $verbose
+	
+
 	if ![file readable $filename] {
 	    set retval "$retval\nWarning: generateHTML: $filename is not readable"
 	} else {
@@ -1538,16 +1598,26 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 	    $HTMLDocSys readFile $filename
 	    cd [file join doc codeDoc]
 	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
+                                if {[info exists ::gStop] && $gStop != 0} {
+                                    error "Stop button hit. $errMsg"
+                                }
 		set retval "$retval\nWarning: $errMsg"
 	    }
 	    if [catch {$HTMLDocSys generateOutsideClassHTML} errMsg] {
+                                if {[info exists ::gStop] && $gStop != 0} {
+                                    error "Stop button hit. $errMsg"
+                                }
 		set retval "$retval\nWarning: $errMsg"
 	    }
 	    cd [file join .. ..]
 	    if [catch {$HTMLDocSys resetOutsideClassComment} errMsg] {
+                                if {[info exists ::gStop] && $gStop != 0} {
+                                    error "Stop button hit. $errMsg"
+                                }
 		set retval "$retval\nWarning: $errMsg"
 	    }
 	}
+        delete object $HTMLDocSys
     }
     if {$generateIndex == 1} {
 	cd [file join doc codeDoc]
@@ -1555,7 +1625,6 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
 	    set retval "$retval\nWarning: $errMsg"
 	}
     }
-    delete object $HTMLDocSys
     return $retval
 }
 
