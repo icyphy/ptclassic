@@ -1002,6 +1002,7 @@ body ::tycho::File::toggleReadOnly {} {
             configure -readonly 1
         }
     }
+    focusin
 }
 
 #####################################################################
