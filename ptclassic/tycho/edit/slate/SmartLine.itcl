@@ -122,14 +122,24 @@ namespace ::tycho {
 #
 #  <P><b>Example</b>
 #
-#  <P>Create a smart line and an object for moving it around:
+#  <P>Create a smart line and an object for moving it around
+# (this is an example of how to implement a simple kind of
+# constraint using interactors and the slate -- some support
+# for this will be built into the interactors in the near future):
 # <tcl quiet><pre>
 #   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   proc mv {mode id x y args} {
+#       global d l slate
+#       $slate move$mode $d $x $y
+#       $slate reshape$mode $l $x $y end
+#   }
+#   $follower configure &#92
+#           -clickprefix "mv click" &#92
+#           -dragprefix "mv drag" &#92
+#           -releaseprefix "mv release"
 #   set l [$slate create SmartLine 150 120 200 200 -arrow last]
 #   set d [$slate create Solid 200 200 210 190 220 200 210 210 &#92
 #   		-color green -tags moveable]
-#   $slate constraint $d "move" {lambda id x y -> &#92
-# 		$slate reshape $l $x $y "end"}
 # </pre></tcl>
 #
 # Move the diamond around to see the different line shapes.
