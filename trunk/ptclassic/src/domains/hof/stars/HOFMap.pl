@@ -72,6 +72,11 @@ This creates a problem when there are no inputs.  Thus, the zero-input
 version of this star is implemented as a family of derived stars called
 .c ParSources,
 each with a particular type of output.
+There are other problems as well with this mechanism, in that
+when type resolution is done, before the block substitution occurs,
+there is no information about the substitution block.
+It is best, therefore, when using the Map star, to make all type
+conversions explicit.
 .UH "Bugs"
 .pp
 Repeated names in the \fIinput_map\fR or \fIoutput_map\fR
