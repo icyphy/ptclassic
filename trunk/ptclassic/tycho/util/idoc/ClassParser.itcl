@@ -418,6 +418,12 @@ body ::tycho::IDocSys::formatDesc {comment} {
     # suitable mark)
     regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
 
+    # Remove HTML tags. 
+    while "\[regexp \{^(.*)\[ 	\]*<\[^>\]*>\[ 	\]*(.*)\$\} \
+            \$comment dmy first last\]" {
+        set comment "$first $last"
+    }
+
     return $comment
 }
 
@@ -472,7 +478,7 @@ body ::tycho::IDocSys::shortDesc {comment} {
     set comment [formatDesc $comment]
 
     # Return the first sentence.
-    regexp {^(.*[.!?])[ 	]+} $comment dmy comment
+    regexp {^([^.!?]*[.!?]+)[ 	]+} $comment dmy comment
     regexp {^(.*)@} $comment dmy comment
 
     return $comment
