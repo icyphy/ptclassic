@@ -176,6 +176,7 @@ void FromEventHorizon :: initialize()
 	// Initialize members
 	timeStamp = 0.0;
 	dataNew = FALSE;
+	numData = 0;
 
 	// if on the boundary, call ghostPort :: initialize()
 	if (isItOutput())
