@@ -293,8 +293,9 @@ body ::tycho::ItclDocSys::generateSingleFileIDoc {filename} {
 # procs) in the file.
 #
 # This is approximate, they must be declared before the first class 
-# in a file or after a body within a file. Which is only decent coding
-# style.
+# in a file or after a body within a file, which is only decent coding
+# style. It can be fooled by declaring a proc within a body, which is
+# done in IDocSys.itcl and TyDoc.itcl
 #
 body ::tycho::ItclDocSys::getClassesInSource {filename} {
     set inClass 0
@@ -335,8 +336,9 @@ body ::tycho::ItclDocSys::getClassesInSource {filename} {
 
 #####################################################################
 #### modCheck
-# Checks if the current file is newer than it's associated documentation.
-# And returns 1 if so.
+# Checks if the current file is newer than its associated documentation.
+# And returns 1 if so. Also returns one if the generator is newer than the
+# documentation.
 #
 # This requires searching for all classes defined within the file and
 # checking if those class's documents are older. This takes about 5 percent
@@ -351,6 +353,17 @@ body ::tycho::ItclDocSys::getClassesInSource {filename} {
 # appropriate sibling for the file extension.
 #
 body ::tycho::ItclDocSys::modCheck {filename} {
+    global TYCHO
+
+    # Check to see if the generator itself has been changed.
+    set itclGenTime [file mtime [file join $TYCHO lib tydoc ItclDocSys.itcl]]
+    set idocGenTime [file mtime [file join $TYCHO lib tydoc IDocSys.itcl]]
+    if {$itclGenTime > $idocGenTime} {
+        set genTime $itclGenTime
+    } {
+        set genTime $idocGenTime
+    }
+
     set sourceTime [file mtime $filename]
     set extension [file extension $filename]
 
@@ -360,8 +373,13 @@ body ::tycho::ItclDocSys::modCheck {filename} {
             # No tcl-only documentation
             return 1
         }
-        if {$sourceTime > [file mtime $docFile]} {
+        set docTime [file mtime $docFile]
+        if {$sourceTime > $docTime} {
             # The source is newer than the tcl-only docs
+            return 1
+        }
+        if {$genTime > $docTime} {
+            # The generator is newer than the tcl-only docs
             return 1
         }
         # It's okay
@@ -381,8 +399,13 @@ body ::tycho::ItclDocSys::modCheck {filename} {
                 # No class-related documentation
                 return 1
             }
-            if {$sourceTime > [file mtime $relFile]} {
+            set relTime [file mtime $relFile]
+            if {$sourceTime > $relTime} {
                 # The source is newer than the related docs
+                return 1
+            }
+            if {$genTime > $relTime} {
+                # The generator is newer than the related docs.
                 return 1
             }
             continue
@@ -392,8 +415,13 @@ body ::tycho::ItclDocSys::modCheck {filename} {
             # There is no documentation.
             return 1
         }
-        if {$sourceTime > [file mtime $docFile]} {
+        set docTime [file mtime $docFile]
+        if {$sourceTime > $docTime} {
             # The source is newer.
+            return 1
+        }
+        if {$genTime > $docTime} {
+            # The generator is newer.
             return 1
         }
     }
