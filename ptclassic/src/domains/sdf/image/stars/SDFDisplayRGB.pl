@@ -99,7 +99,7 @@ can choose whether or not the image file is saved or deleted.
 
 // Write the PGM header and then the data.
         fprintf (fp, "P6\n %d %d 255\n", Width, Height);
-        fwrite(rgbfp, sizeof(unsigned char), unsigned(3*Width*Height),
+        fwrite((char*)rgbfp, sizeof(unsigned char), unsigned(3*Width*Height),
                 fp);
         fclose(fp);
 

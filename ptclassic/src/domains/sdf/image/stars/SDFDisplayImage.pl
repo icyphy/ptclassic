@@ -67,7 +67,7 @@ can choose whether or not the image file is saved or deleted.
 // Write the PGM header and then the data.
         fprintf (fd, "P5\n %d %d 255\n", imD->retWidth(),
              imD->retHeight());
-        fwrite(imD->retData(), sizeof(unsigned char), (unsigned)
+        fwrite((char*)imD->retData(), sizeof(unsigned char), (unsigned)
                         imD->retWidth() * imD->retHeight(), fd);
         fclose(fd);
 
