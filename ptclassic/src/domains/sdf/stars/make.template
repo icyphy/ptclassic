@@ -18,76 +18,83 @@ GPPFLAGS = -g
 GNU = g++
 GNUINCLUDE = /usr/gnu/lib/g++-include
 
-.SUFFIXES: .cc
+.SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(SDFDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
 
-# .cc filenames for all stars
+# Make sure we always run the preprocessor in the source directory
+.pl.cc:
+	cd $(VPATH); ptlang $<
+
+.pl.h:
+	cd $(VPATH); ptlang $<
+
+# source files for all stars, using preprocessor
 SRCS= \
- BiQuad.cc \
- BlackHole.cc \
- Commutator.cc \
- ComplexDC.cc \
- ComplexFFT.cc \
- ComplexFIR.cc \
- ComplexPower.cc \
- ComplexProduct.cc \
- ComplexReal.cc \
- ComplexSum.cc \
- Cos.cc \
- Cut.cc \
- DB.cc \
- Distributor.cc \
- DownSample.cc \
- FIR.cc \
- FloatDC.cc \
- FloatDiff.cc \
- FloatGain.cc \
- FloatImpulse.cc \
- FloatProduct.cc \
- FloatRamp.cc \
- FloatRect.cc \
- FloatSum.cc \
- FloatThresh.cc \
- Fork.cc \
- IIDGaussian.cc \
- IIDUniform.cc \
- IntRamp.cc \
- Integrator.cc \
- LMS.cc \
- PolarRect.cc \
- Printer.cc \
- RealComplex.cc \
- RectPolar.cc \
- Sin.cc \
- Sqrt.cc \
- UpSample.cc \
- WaveForm.cc \
- XMgraph.cc \
- XYgraph.cc \
- Xgraph.cc
+ SDFBiQuad.pl \
+ SDFBlackHole.pl \
+ SDFCommutator.pl \
+ SDFComplexDC.pl \
+ SDFComplexFFT.pl \
+ SDFComplexFIR.pl \
+ SDFComplexPower.pl \
+ SDFComplexProduct.pl \
+ SDFComplexReal.pl \
+ SDFComplexSum.pl \
+ SDFCos.pl \
+ SDFCut.pl \
+ SDFDB.pl \
+ SDFDistributor.pl \
+ SDFDownSample.pl \
+ SDFFIR.pl \
+ SDFFloatDC.pl \
+ SDFFloatDiff.pl \
+ SDFFloatGain.pl \
+ SDFFloatImpulse.pl \
+ SDFFloatProduct.pl \
+ SDFFloatRamp.pl \
+ SDFFloatRect.pl \
+ SDFFloatSum.pl \
+ SDFFloatThresh.pl \
+ SDFFork.pl \
+ SDFIIDGaussian.pl \
+ SDFIIDUniform.pl \
+ SDFIntRamp.pl \
+ SDFIntegrator.pl \
+ SDFLMS.pl \
+ SDFPolarRect.pl \
+ SDFPrinter.pl \
+ SDFRealComplex.pl \
+ SDFRectPolar.pl \
+ SDFSin.pl \
+ SDFSqrt.pl \
+ SDFUpSample.pl \
+ SDFWaveForm.pl \
+ SDFXMgraph.pl \
+ SDFXYgraph.pl \
+ SDFXgraph.pl
+
+# The .cc files
+CCSRCS=$(SRCS:.pl=.cc)
 
 # object files for all stars
-OBJS= $(SRCS:.cc=.o)
+OBJS= $(SRCS:.pl=.o)
 
 # header files for all stars
-HDRS= $(SRCS:.cc=.h)
+HDRS= $(SRCS:.pl=.h)
 
-printhdrs:
-	@echo $(HDRS)
-
-all:		makefile $(OBJS)
+all:		$(CCSRCS) makefile $(OBJS)
 
 # nothing to install -- use it where it lies
 install:	all
 		@echo Installation complete.
 
-sources:	$(SRCS) $(HDRS) make.template
+sources:	$(SRCS) $(CCSRCS) $(HDRS) make.template
 
 clean:
 		rm -f *.o core *~ *#
 depend:
-		makedepend -I$(SDFDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(SRCS)
+		makedepend -I$(SDFDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(CCSRCS)
 
 makefile:	make.template
 		rm -f makefile
