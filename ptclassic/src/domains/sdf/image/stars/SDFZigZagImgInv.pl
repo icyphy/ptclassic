@@ -41,13 +41,16 @@ This star inverse zig-zag scans a Float Matrix.
       double* outFloatArr = new double[width*height];
       double* outArr = outFloatArr;
 
-      // set tmpFloatPtr to the array representing inImg
-      // inImg[0] returns address of 1st row, which is also address of the array
-      // since array is contiguously stored in memory
+      // FIXME
+      // Sets tmpFloatPtr to the vector representing the FloatMatrix, inImg.
+      // This only works because in the underlying implementation of FloatMatrix,
+      // inImage[0], which returns the 1st row, also returns the entire vector
+      // representing the matrix. 
+      // A method should be added to the FloatMatrix class to do this instead
+      // of relying on this current operation
       const double* tmpFloatPtr = inImg[0];
 
-      Ptdsp_ZigZagInverse ( tmpFloatPtr, outArr, width,
-			    height, int(BlockSize));
+      Ptdsp_ZigZagInverse ( tmpFloatPtr, outArr, width, height, int(BlockSize));
 
       // Copy the data to the outImg.
       for(int i = 0; i < width * height; i++) {
