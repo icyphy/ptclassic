@@ -704,3 +704,26 @@ char *s;
     errorReport(s);
 }
 */
+
+
+/*
+Connect to a control by name.
+*/
+void connectControl (starname, ctrlname, callback)
+    char *starname, *ctrlname;
+    Tcl_CmdProc *callback;
+{
+    /* Register the callback function with Tcl */
+    sprintf(command, "%s.%s.Callback", starname, ctrlname);
+    Tcl_CreateCommand (interp, command, callback,
+	    (ClientData) 0, (void (*)()) NULL);
+
+    /* Call Tcl to make the connection */
+    sprintf(command,
+	"connectControl %s %s %s.%s.Callback",
+	starname, ctrlname, starname, ctrlname);
+    if(Tcl_Eval(interp, command) != TCL_OK) {
+	printf("Cannot connect control %s.%s\n", starname, ctrlname);
+    }
+}
+
