@@ -2,8 +2,8 @@ defstar {
 	name {DB}
 	domain {SDF}
 	desc {
-Converts input to dB.  Zero and negative values are
-converted to "min" (default -100).
+Converts input to decibels (dB).  Zero and negative values are
+converted to "min" dB (default -100 dB).
 	}
 	version {$Id$}
 	author { J. T. Buck }
@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { SDF main library }
 	explanation {
-For inputs that are greater than zero, the output either
+For inputs that are greater than zero, the output is either
 $N log sub 10 (input)$ or \fImin\fR, whichever is larger, where
 $N ~=~ 10$ if \fIinputIsPower\fR is TRUE, and $N ~=~ 20$ otherwise.
 .Id "decibel"
