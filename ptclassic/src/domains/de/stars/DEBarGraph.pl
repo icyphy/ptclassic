@@ -23,7 +23,7 @@ It is assumed that "xgraph" is on your path, or this will not work!!!
 	defstate {
 		name {title}
 		type {string}
-		default {"X graph"}
+		default {"X Graph Bar Chart"}
 		desc { Graph title.}
 	}
 	defstate {
@@ -33,16 +33,16 @@ It is assumed that "xgraph" is on your path, or this will not work!!!
 		desc { File to save xgraph input.}
 	}
 	defstate {
-		name {options}
-		type {string}
-		default {"-bar -nl -brb {base}"}
-		desc { Command line options for a bar graph in xgraph.}
-	}
-	defstate {
 		name {base}
 		type {float}
 		default {0.0}
 		desc { Base of the bar graph. }
+	}
+	defstate {
+		name {options}
+		type {string}
+		default {"-bb -lw 3 -zg black -x time -0 input"}
+		desc { Command line options for a bar graph in xgraph.}
 	}
 	hinclude { "Display.h" }
 	public {
