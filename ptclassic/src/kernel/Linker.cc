@@ -1,4 +1,3 @@
-#define DEBUG
 static const char file_id[] = "Linker.cc";
 /**************************************************************************
 Version identification:
