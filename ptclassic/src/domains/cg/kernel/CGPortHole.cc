@@ -47,20 +47,19 @@ static const char file_id[] = "CGPortHole.cc";
 
 // constructor
 CGPortHole :: CGPortHole() : offset(0), forkSrc(0), embeddedPort(0),
-	embeddedLoc(-1), embeddingFlag(0), switchFlag(0) {}
+	embeddedLoc(DF_NONE), embeddingFlag(0), switchFlag(0) {}
 
 // destructor: remove fork from chain of blocks
 CGPortHole :: ~CGPortHole() {
 	// Destroy fork destination list
-	// Set the source of the destination ports to zero to prevent
-	// access to this porthole since it is being destroyed
+	// Set the source of the CGPortHole destination ports to zero to
+	// prevent access to this porthole since it is being destroyed
 	OutCGPort* p;
-	while ((p = (OutCGPort*)forkDests.getAndRemove()) != 0)
-		p->zeroForkSource();
+	while ((p = (OutCGPort*)portHoleForkDests.getAndRemove()) != 0)
+		p->setForkSource(0);
 
 	// Remove this porthole from the source's destination porthole list
 	if (forkSrc) forkSrc->removeForkDest(this);
-	forkSrc = 0;
 
 	// If myGeodesic is switched, the pointer is set to zero to prevent
 	// deleting the same geodesic multiple times.  Make sure that
@@ -78,17 +77,17 @@ void CGPortHole::advance() {
 }
 
 // make me a fork destination; set my source.
-void CGPortHole::setForkSource(CGPortHole* p) {
+void CGPortHole::setForkSource(CGPortHole* p, int cgPortHoleFlag) {
 	// set new forkSrc
 	forkSrc = p;
 	// add me as one of forkSrc's destinations
-	if (forkSrc) forkSrc->putForkDest(this);
+	if (forkSrc) forkSrc->putForkDest(this, cgPortHoleFlag);
 }
 
 // processing for each port added to a fork buffer
 // call this from OutXXX
 void MultiCGPort :: forkProcessing (CGPortHole& p) {
-	if (forkSrc) p.setForkSource(forkSrc);
+	if (forkSrc) p.setForkSource(forkSrc, FALSE);
 }
 
 // this avoids having cfront generate many copies of the destructor
