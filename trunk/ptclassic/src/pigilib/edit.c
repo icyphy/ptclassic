@@ -514,6 +514,40 @@ long userOptionWord;
     ViDone();
 }
 
+/* kernel Call */
+void KcEditSeed();
+
+int
+RpcEditSeed(spot, cmdList, userOptionWord)
+RPCSpot *spot;
+lsList cmdList;
+long userOptionWord;
+{
+    int n;
+    char buf[64];
+    static oldN = 1;
+    static dmTextItem item = {"Seed for Random number", 1, 20,
+				NULL, NULL};
+
+    ViInit("edit-seed");
+    ErrClear();
+    FindClear();
+
+    /* default seed is 1 */
+    item.value = sprintf(buf, "%d", oldN);
+    if (dmMultiText("Edit-Seed", 1, &item) != VEM_OK) {
+            PrintCon("Aborted entry");
+            PrintErr(ErrGet());
+	    ViDone();
+    }
+    ERR_IF2((n = atoi(item.value)) <= 0,
+        "Invalid entry, number must be > 0");
+
+    oldN = n;
+    KcEditSeed(n);
+    ViDone();
+}
+
 /* Maximum number of architectures that can be supported by one domain */
 #define MAX_NUM_ARCHS 50
 
