@@ -44,7 +44,7 @@
 #   <li><b>-duration</b>: The duration of the schedule. Default is zero.
 # </ul>
 #
-# The model has the following entities and associations:
+# The model has the following entities and links:
 # <ul>
 # <li><b>task</b> _name_: A task to be performed. The _name_ must be
 # unique at this level of the schedule. Tasks have the following attributes:
@@ -90,7 +90,7 @@
 #    Default is a null string.
 #   </ul>
 #
-# <li><b>dependency</b> _type_ _a_ _b_: This is an association
+# <li><b>dependency</b> _type_ _a_ _b_: This is a link
 # between tasks, and is a more complex version of the _dependson_
 # attribute of tasks. The _type_ value can have the value:
 #   <ul>
@@ -101,13 +101,48 @@
 #   <li><b>completebefore</b>: _b_ completes before after _a_ completes.
 #   </ul>
 #
-# The association can have the following attributes:
+# The link can have the following attributes:
 #   <ul>
 #   <li><b>-strict</b>: The dependency is mandatory. Otherwise it
 #   it is just preferable. (OK, OK, this is probably bogus -- would
 #   someone like to do this properly?)
 #   </ul>
 # </ul>
+#
+# Here is an example of creating a schedule:
+# For more general information on models, see <a href="Model.html">Model</a>.
+# <pre><tcl quiet>
+#     catch {delete object $sched}
+#     set sched [::tycho::Schedule [::tycho::autoName sched]]
+# </tcl></pre>
+#
+# Now load the schedule with some data. In this example, give it a string
+# in TIM format -- usually, you would set the *-datafile* option and
+# call load{} (see <a href="Model.html">Model</a>):
+# <pre><tcl quiet>
+#     $sched read string {
+#         configure -author Ptolemy
+#        configure -duration 30
+#        annotation scheduler {T.C. Hu's Parallel Scheduler}
+#        resource processor-1 {
+#            -utilization 90
+#            annotation target NOW
+#            task starA-1 -duration 10 -whattodo starA -repeatcount 2
+#            task starB-1 -duration 5  -whattodo starB -dependson starA-1
+#            task starA-2 -duration 5  -whattodo starA -dependson starB-1
+#        }
+#        resource processor-2 {
+#            -utilization 65
+#            task starC-1 -duration 25 -whattodo starC
+#            task starD-1 -duration 5  -whattodo starD -dependson starC-1
+#        }
+#     }
+# </tcl></pre>
+#
+# Display a TIM representation of the schedule:
+# <pre><tcl>
+#     $sched describe
+# </tcl></pre>
 #
 class ::tycho::Schedule {
     inherit ::tycho::Model
@@ -118,56 +153,116 @@ class ::tycho::Schedule {
     #################################################################
     ####                        options                          ####
 
-    ### Attributes of the model
+    # Author of the schedule 
     public variable author ""
+    
+    # The time this schedule starts
     public variable starttime 0
+
+    # The time at which this schedule was written
     public variable writetime 0
+    
+    # The time this schedule ends
     public variable endtime 0
+    
+    # The time this schedule occupies
     public variable duration 0
+    
+    # A string describing  the schedule
     public variable description ""
 
     #################################################################
     ####                     public methods                      ####
 
-    #### Access methods for annotations
+    # Add a top-level annotation with attributes to the schedule
     method annotation {name string args}
+
+    # Return all attributes of an annotation
     method annotationattrs {name}
+
+    # Get an attribute or attributes of an annotation
     method annotationcget {name option}
+
+    # Configure the annotation with one or more attributes
     method annotationconfigure {name args}
+
+    # Remove an annotation to the schedule
     method annotationdelete {name}
+
+	# Get the value of an annotation
     method annotationget {name}
+    
+    # Add a nested annotation with attributes to the schedule
     method annotationin {context name string args}
 
-    #### Access methods for dependencies
+    # Get the children of a given type
+    method children {context type}
+
+    # Add a top-level dependency with attributes to the schedule
     method dependency {name string args}
+
+    # Return all attributes of an dependency
     method dependencyattrs {name}
+
+    # Get an attribute or attributes of an dependency
     method dependencycget {name option}
+
+    # Configure the dependency with one or more attributes
     method dependencyconfigure {name args}
+
+    # Remove an dependency to the schedule
     method dependencydelete {name}
+
+	# Get the value of an dependency
     method dependencyget {name}
+    
+    # Add a nested dependency with attributes to the schedule
     method dependencyin {context name string args}
-
-    #### Access methods for resources
-    method resource {name args}
-    method resourceattrs {name}
-    method resourcecget {name option}
-    method resourceconfigure {name args}
-    method resourcedelete {name}
-    method resourcein {context name args}
-
-    #### Access methods for tasks
-    method task {name args}
-    method taskattrs {name}
-    method taskcget {name option}
-    method taskconfigure {name args}
-    method taskdelete {name}
-    method taskin {name args}
 
     # Test if an item exists in the schedule
     method exists {name}
 
     # Return the items within an item
     method get {{name{}}}
+
+    # Add a top-level resource with attributes to the schedule
+    method resource {name args}
+
+    # Return all attributes of a resource
+    method resourceattrs {name}
+
+    # Get an attribute or attributes of a resource
+    method resourcecget {name option}
+
+    # Configure the resource with one or more attributes
+    method resourceconfigure {name args}
+
+    # Remove a resource to the schedule
+    method resourcedelete {name}
+     
+    # Add a nested resource with attributes to the schedule
+	method resourcein {context name args}
+
+    # Get the roots items of a given type
+    method roots {type}
+
+    # Add a top-level task with attributes to the schedule
+    method task {name args}
+
+    # Return all attributes of a task
+    method taskattrs {name}
+
+    # Get an attribute or attributes of a task
+    method taskcget {name option}
+
+    # Configure the task with one or more attributes
+    method taskconfigure {name args}
+
+    # Remove a task to the schedule
+    method taskdelete {name}
+     
+    # Add a nested task with attributes to the schedule
+    method taskin {name args}
 
     # Return the type of an item
     method type {name}
@@ -186,8 +281,8 @@ body ::tycho::Schedule::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # Declare the "task" entity
-    entity task 0 \
+    # Define the "task" entity
+    defineEntity task \
 	    -starttime 0 \
 	    -endtime 0 \
 	    -duration 0 \
@@ -196,157 +291,180 @@ body ::tycho::Schedule::constructor {args} {
 	    -repeatcount 1 \
 	    -description ""
 
-    # Declare the "resource" entity
-    entity resource 0 \
+    # Define the "resource" entity
+    defineEntity resource \
 	    -utilization 100 \
 	    -description ""
 
-    # Declare the "annotation" entity
-    entity annotation 1  \
+    # Define the "annotation" entity
+    defineEntity annotation \
+    	-valued 1  \
 	    -writtenby "" \
 	    -writetime ""
 
-    # Declare the "dependency" association
-    association dependency 1 2 \
+    # Define the "dependency" link
+    defineLink dependency \
+    	-named 1 \
+    	-lcount 2 \
 	    -strict yes
 }
 
 ########################################################################
-#### Access methods for annotations
+#### annotation
+#
+# Add a new annotation and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# annotation. Flag an error if the annotation already exists. 
 #
 body ::tycho::Schedule::annotation {name value args} {
     _verifynot annotation name
     _entity annotation {} $name [concat [list $value] $args]
 }
 
+########################################################################
+#### annotationattrs
+#
+# Return a list containing the attributes of the annotation as a flat
+# attribute-value list. Flag an error if the annotation does not exist.
+#
 body ::tycho::Schedule::annotationattrs {name} {
     _attributes annotation $name
 }
 
+########################################################################
+#### annotationcget
+#
+# Get an attribute of an annotation. Flag an error if the annotation does
+# not exist.
+#
 body ::tycho::Schedule::annotationcget {name option} {
     _verify annotation $name
     _cget annotation $name $option
 }
 
+########################################################################
+#### annotationconfigure
+#
+# Configure the annotation and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# annotation does not exist.
+#
 body ::tycho::Schedule::annotationconfigure {name args} {
     _verify annotation $name
     _configure annotation $name $args
 }
 
+########################################################################
+#### annotationdelete
+#
+# Delete a annotation and return the inverse command. Flag an error if
+# the annotation does not exist.
+#
 body ::tycho::Schedule::annotationdelete {name} {
     _verify annotation $name
     _delete annotation $name
 }
 
+########################################################################
+#### annotationget
+#
+# Return the value of a annotation. Flag an error if
+# the annotation does not exist.
+#
 body ::tycho::Schedule::annotationget {name} {
     _verify annotation $name
     _get annotation $name
 }
 
+########################################################################
+#### annotationin
+#
+# Add a nested annotation and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# annotation. Flag an error if the annotation already exists. 
+#
 body ::tycho::Schedule::annotationin {context name value args} {
     _verifynotin annotation $context name
     _entity annotation $context $name [concat [list $value] $args]
 }
 
 ########################################################################
-#### Access methods for dependencies
+#### dependency
+#
+# Add a new dependency and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# dependency. Flag an error if the dependency already exists. 
 #
 body ::tycho::Schedule::dependency {name value args} {
     _verifynot dependency $name
-    _association dependency $name [concat [list $value] $args]
+    _link dependency $name [concat [list $value] $args]
 }
 
+########################################################################
+#### dependencyattrs
+#
+# Return a list containing the attributes of the dependency as a flat
+# attribute-value list. Flag an error if the dependency does not exist.
+#
 body ::tycho::Schedule::dependencyattrs {name} {
     _attributes dependency $name
 }
 
+########################################################################
+#### dependencycget
+#
+# Get an attribute of an dependency. Flag an error if the dependency does
+# not exist.
+#
 body ::tycho::Schedule::dependencycget {name option} {
     _verify dependency $name
     _cget dependency $name $option
 }
 
+########################################################################
+#### dependencyconfigure
+#
+# Configure the dependency and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# dependency does not exist.
+#
 body ::tycho::Schedule::dependencyconfigure {name args} {
     _verify dependency $name
     _configure dependency $name $args
 }
 
+########################################################################
+#### dependencydelete
+#
+# Delete a dependency and return the inverse command. Flag an error if
+# the dependency does not exist.
+#
 body ::tycho::Schedule::dependencydelete {name} {
     _verify dependency $name
     _delete dependency $name
 }
 
+########################################################################
+#### dependencyget
+#
+# Return the value of a dependency. Flag an error if
+# the dependency does not exist.
+#
 body ::tycho::Schedule::dependencyget {name} {
     _verify dependency $name
     _get dependency $name
 }
 
+########################################################################
+#### dependencyin
+#
+# Add a nested dependency and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# dependency. Flag an error if the dependency already exists. 
+#
 body ::tycho::Schedule::dependencyin {context name value args} {
     _verifynotin dependency $context $name
-    _association dependency $context $name [concat [list $value] $args]
-}
-
-########################################################################
-#### Access methods for resources
-#
-body ::tycho::Schedule::resource {name args} {
-    _verifynot resource $name
-    _entity resource {} $name $args
-}
-
-body ::tycho::Schedule::resourceattrs {name} {
-    _attributes resource $name
-}
-
-body ::tycho::Schedule::resourcecget {name option} {
-    _verify resource $name
-    _cget resource $name $option
-}
-
-body ::tycho::Schedule::resourceconfigure {name args} {
-    _verify resource $name
-    _configure resource $name $args
-}
-
-body ::tycho::Schedule::resourcedelete {name} {
-    _verify resource $name
-    _delete resource $name
-}
-
-body ::tycho::Schedule::resourcein {context name args} {
-    _verifynotin resource $context $name
-    _entity resource $context $name $args
-}
-
-########################################################################
-#### Access methods for tasks
-#
-body ::tycho::Schedule::task {name args} {
-    _verifynot task $name
-    _entity task {} $name $args
-}
-
-body ::tycho::Schedule::taskattrs {name} {
-    _attributes task $name
-}
-
-body ::tycho::Schedule::taskcget {name option} {
-    _verify task $name
-    _cget task $name $option
-}
-
-body ::tycho::Schedule::taskconfigure {name args} {
-    _verify task $name
-    _configure task $name $args
-}
-
-body ::tycho::Schedule::taskdelete {name} {
-    _verify task $name
-    _delete task $name
-}
-
-body ::tycho::Schedule::taskin {context name args} {
-    _verifynotin task $context $name
-    _entity task $context $name $args
+    _link dependency $context $name [concat [list $value] $args]
 }
 
 ########################################################################
@@ -360,22 +478,157 @@ body ::tycho::Schedule::exists {name} {
 }
 
 ########################################################################
-#### get
+#### children
 #
-# Get the names of the tasks and resources within an item.
-# The result is a list of type followed by name.
+# Get the names of the items of the specified type within a given context.
 #
-body ::tycho::Schedule::get {{name {}}} {
-    set result {}
-    foreach i  [_children $name] {
-	if { $name == "" } {
-	    set child $i
-	} else {
-	    set child $name$_separator$i
-	}
-	lappend result [_type $child] $child
-    }
-    return $result
+body ::tycho::Schedule::children {context type} {
+    _children $context $type
+}
+
+########################################################################
+#### resource
+#
+# Add a new resource and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# resource. Flag an error if the resource already exists. 
+#
+body ::tycho::Schedule::resource {name args} {
+    _verifynot resource $name
+    _entity resource {} $name $args
+}
+
+########################################################################
+#### resourceattrs
+#
+# Return a list containing the attributes of the resource as a flat
+# attribute-value list. Flag an error if the resource does not exist.
+#
+body ::tycho::Schedule::resourceattrs {name} {
+    _attributes resource $name
+}
+
+########################################################################
+#### resourcecget
+#
+# Get an attribute of an resource. Flag an error if the resource does
+# not exist.
+#
+body ::tycho::Schedule::resourcecget {name option} {
+    _verify resource $name
+    _cget resource $name $option
+}
+
+########################################################################
+#### resourceconfigure
+#
+# Configure the resource and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# resource does not exist.
+#
+body ::tycho::Schedule::resourceconfigure {name args} {
+    _verify resource $name
+    _configure resource $name $args
+}
+
+########################################################################
+#### resourcedelete
+#
+# Delete a resource and return the inverse command. Flag an error if
+# the resource does not exist.
+#
+body ::tycho::Schedule::resourcedelete {name} {
+    _verify resource $name
+    _delete resource $name
+}
+
+########################################################################
+#### resourcein
+#
+# Add a nested resource and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# resource. Flag an error if the resource already exists. 
+#
+body ::tycho::Schedule::resourcein {context name args} {
+    _verifynotin resource $context $name
+    _entity resource $context $name $args
+}
+
+########################################################################
+#### roots
+#
+# Return the root entries of the given type.
+#
+body ::tycho::Schedule::roots {type} {
+    _roots $type
+}
+
+########################################################################
+#### task
+#
+# Add a new task and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# task. Flag an error if the task already exists. 
+#
+body ::tycho::Schedule::task {name args} {
+    _verifynot task $name
+    _entity task {} $name $args
+}
+
+########################################################################
+#### taskattrs
+#
+# Return a list containing the attributes of the task as a flat
+# attribute-value list. Flag an error if the task does not exist.
+#
+body ::tycho::Schedule::taskattrs {name} {
+    _attributes task $name
+}
+
+########################################################################
+#### taskcget
+#
+# Get an attribute of an task. Flag an error if the task does
+# not exist.
+#
+body ::tycho::Schedule::taskcget {name option} {
+    _verify task $name
+    _cget task $name $option
+}
+
+########################################################################
+#### taskconfigure
+#
+# Configure the task and return the inverse command. The argument list
+# is a flat list of attribute-value pairs. Flag an error if the
+# task does not exist.
+#
+body ::tycho::Schedule::taskconfigure {name args} {
+    _verify task $name
+    _configure task $name $args
+}
+
+########################################################################
+#### taskdelete
+#
+# Delete a task and return the inverse command. Flag an error if
+# the task does not exist.
+#
+body ::tycho::Schedule::taskdelete {name} {
+    _verify task $name
+    _delete task $name
+}
+
+########################################################################
+#### taskin
+#
+# Add a nested task and return the inverse command.
+# Additional arguments are a flat attribute-value list for the
+# task. Flag an error if the task already exists. 
+#
+body ::tycho::Schedule::taskin {context name args} {
+    _verifynotin task $context $name
+    _entity task $context $name $args
 }
 
 #########################################################################
