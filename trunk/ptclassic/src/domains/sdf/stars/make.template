@@ -45,6 +45,7 @@ SRCS= \
  SDFBlockAllPole.pl \
  SDFBlockFIR.pl \
  SDFBlockLattice.pl \
+ SDFBlockRLattice.pl \
  SDFBurg.pl \
  SDFBusToNum.pl \
  SDFCommutator.pl \
