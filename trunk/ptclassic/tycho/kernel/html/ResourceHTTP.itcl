@@ -43,10 +43,9 @@ set _httpstatus(http://127.0.0.1) done
 ######################################################################
 #### ResourceHTTP
 #
-# This provides an abstraction of remote files for anything that
-# uses Resource. Using this class, attributes are abstracted away
-# from functionalities which include: cache, updating cache, HTTP
-# protocol, socket error, etc.
+# This class provides an abstraction of remote files through HTTP. 
+# Using this class, remote attributes are abstracted away
+# from functionalities that Resource has.
 #
 # Here is a quick mini-tutorial to get familiar with this class. These
 # should be executed sequentially. Please look at the global procedure 
@@ -218,12 +217,13 @@ class ::tycho::ResourceHTTP {
     # Puts a string to console of the debug option is set
     protected method debugputs {string}
 
-    # FIXME: This is a hack to get the internal variables.
     # Used by proc contenttype, and mostly exists
     protected method getcontenttype {} {return $contenttype}
-    # FIXME: This is a hack to get the internal variables.
+
+    # Used by exists
     protected method getsize {} {return $contentlength}
-    # FIXME: This is a hack to get the internal variables.
+
+    # Used by exists
     protected method getdate {} {return $lastmodified}
 
     # Abort an HTTP GET
@@ -937,7 +937,8 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 # just the header info or the whole file and save it to a temporary
 # cache file, depending on the *requestMode* variable.
 #
-# Parse the possible header information:
+# This method parses the possible header information (200-299 is okay,
+# 300-399 is special, 400+ is error):
 # <pre>
 # HTTP/1.0 200 Document follows
 # Date: Wed, 21 May 1997 00:54:29 GMT
@@ -958,7 +959,7 @@ body ::tycho::ResourceHTTP::httpget {url type} {
 # Content-type: text/html
 # Last-modified: Mon, 12 May 1997 18:46:57 GMT
 # Content-length: 683
-# </pre>
+# </h5></pre>
 #
 body ::tycho::ResourceHTTP::httpread {} {
     # Disconnect the file handler. It gets reconnected again
