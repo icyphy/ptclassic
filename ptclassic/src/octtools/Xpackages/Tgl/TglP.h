@@ -95,6 +95,6 @@ typedef struct _TglRec {
     TglPart	     tgl;
 } TglRec;
 
-#endif _XtCommandP_h
+#endif /* _XtCommandP_h */
 
 
