@@ -50,7 +50,8 @@ SIMPLE_TESTS = \
 	testGraph.itcl \
 	testDigraph.itcl \
 	testPath.itcl \
-	testStack.itcl
+	testStack.itcl \
+	testURLPath.itcl
 
 GRAPHICAL_TESTS = \
 	testExec.itcl \
