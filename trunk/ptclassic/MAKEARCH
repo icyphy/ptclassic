@@ -307,7 +307,8 @@ if [ -d $PTOLEMY/src/octtools/tkoct  ]; then
 	optmkdir tkoct
 	cd tkoct
 	optlink ../../../src/octtools/tkoct makefile
-	dirs="oct2ptcl tkgraph tkoct top"
+	#Don't create links for tkoct and tkgraph, we do not ship those
+	dirs="oct2ptcl top"
 	for x in $dirs
 	do
 		optmkdir $x
