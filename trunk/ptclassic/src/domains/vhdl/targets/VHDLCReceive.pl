@@ -34,6 +34,12 @@ setup {
 //  VHDLCSynchComm::setup();      
 }
 
+// Called only once, after the scheduler is done
+begin {
+  // Call method to wire up a C2V VHDL entity
+  targ()->registerC2V(int(pairNumber),numXfer);
+}
+
 go {
   // Add code to synch at beginning of main.
   StringList preSynch;
@@ -41,9 +47,8 @@ go {
   preSynch << "wait on " << "C2V" << int(pairNumber) << "_done" << "'transaction;\n";
   preSynch << "$ref(output)" << " := " << "C2V" << int(pairNumber) << "_data;\n";
   
-  addCode(preSynch, "preSynch");
-  // Call method to wire up a C2V VHDL entity
-  targ()->registerC2V(int(pairNumber),numXfer);
+//  addCode(preSynch, "preSynch");
+  addCode(preSynch);
 }
 
 }
