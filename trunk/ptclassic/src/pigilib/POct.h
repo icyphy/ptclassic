@@ -107,7 +107,6 @@ public:
         int ptkSetDomain (int argc,char** argv);
         int ptkGetTargetNames (int argc,char** argv);
         int ptkGetTargetParams (int argc,char** argv);
-        int ptkSetDMMChangedFlag(int argc,char** argv);
         int ptkSetTargetParams (int argc,char** argv);
         int ptkFacetContents (int argc,char** argv);
         int ptkOpenMaster (int argc,char** argv);

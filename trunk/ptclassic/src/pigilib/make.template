@@ -47,8 +47,6 @@ include $(CONFIG)
 PTCLHDRS = $(ROOT)/src/ptcl
 
 CHDRS	      = compile.h \
-                dmmSupport.h \
-                dmmSupportFunc.h \
 		edit.h \
 		err.h \
 		exec.h \
@@ -66,7 +64,6 @@ CHDRS	      = compile.h \
 		options.h \
 		palette.h \
 		paramStructs.h \
-		pdmm.h \
 		pigiLoader.h \
 		poct.h \
 		ptcl.h \
@@ -109,8 +106,6 @@ LIBCSRCS      = main.c \
 		ptkTemplate.c \
 		ptkTclIfc.c \
 		ptkTkSetup.c \
-		dmmSupport.c \
-                dmmSupportFunc.c
 
 LIBCPPSRCS    = kernelCalls.cc \
 		XError.cc \
@@ -120,17 +115,14 @@ LIBCPPSRCS    = kernelCalls.cc \
 		POct.cc \
 		PVem.cc \
 		ganttChart.cc \
-		pigiInvokeInterp.cc
+		pigiInvokeInterp.cc \
+		ptkRegisterCmds.cc 
 
 HDRS = $(CHDRS) $(CCHDRS) 
 
 SRCS = $(LIBCSRCS) $(LIBCPPSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
-
-EXTRA_SRCS = PDMM.h ptkRegisterCmds.cc ptkDMMRegisterCmds.cc
-
-OTHER_OBJS = ptkRegisterCmds.o ptkDMMRegisterCmds.o
 
 LIB=libpigi.$(LIBSUFFIX)
 
