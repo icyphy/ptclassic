@@ -378,6 +378,7 @@ int POct::ptkCompile (int aC, char** aV) {
     if (ptkHandle2OctObj(aV[1], &facet) == 0) {
 	Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0], 
                          (char *) NULL);
+	FreeOctMembers(&facet);
         return TCL_ERROR;
     }
 
