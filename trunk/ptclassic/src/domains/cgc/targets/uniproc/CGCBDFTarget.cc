@@ -58,9 +58,9 @@ void CGCBDFTarget::setup() {
 	if (!scheduler()) {
 		StringList fname;
 		fname << galaxy()->name() << ".bdf-sched";
-		writeDirectoryName(destDirectory);
+		StringList logPath = logFilePathName(destDirectory, fname);
 		delete [] schedFileName;
-		schedFileName = writeFileName(fname);
+		schedFileName = logPath.newCopy();
 		LOG_NEW; setSched(new BDFClustSched(schedFileName));
 	}
 	CGCTarget::setup();
