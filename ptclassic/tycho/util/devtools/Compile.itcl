@@ -185,6 +185,26 @@ body ::tycho::Compile::compileFiles {} {
 	    close the Exec window to continue."
     set results [::tycho::execModal "make -f $makefile" $dirname]
     putStatus ""
+
+    # Simple parse the results here.
+    # FIXME This should be relocated to CompileC class:
+    set text [lindex $results 1].history.text
+    set output [[lindex $results 1].history get 0.0 end]
+    set output [split $output "\n"]
+    set editorName [$this cget -view]
+    for {set i 0} {$i < [llength $output]} {incr i} {
+        # The text index starts off on 1, the lindex starts off on 0
+        set line [lindex $output [expr $i-1]]
+        # Does it match the format: "test.cc:15: Error message here"
+        if {[regexp {([^:]+):([0-9]+):(.+)} $line temp fileName lineNum msg]} {
+            $text tag add error$i $i.0 $i.end
+            $text tag configure error$i -foreground red -underline 0
+            $text tag bind error$i <Double-Button-1> \
+                    "$editorName seeFragment \"line $lineNum\""
+        }
+    }
+    #puts "This: $this, parent [$this cget -view], Monitor:$results"
+
     return $results
 }
 
