@@ -49,7 +49,7 @@ static const char file_id[] = "MathematicaTcl.cc";
 #define MATHEMATICATCL_CHECK_MATHEMATICA() \
         if (! init()) return error(MATHEMATICATCL_NOT_START)
 
-// Consturctor
+// Constructor
 MathematicaTcl::MathematicaTcl() {
     tclinterp = 0;
     mathematicaInterface = 0;
