@@ -33,7 +33,9 @@ PL_SRCS= \
 	SRConst.pl \
 	SRItcl.pl \
 	SRItclCounter.pl \
+	SRItclDisplay.pl \
 	SRItclDatabase.pl \
+	SRItclEditor.pl \
 	SRItclIn.pl \
 	SRItclInOut.pl \
 	SRItclModeSelect.pl \
