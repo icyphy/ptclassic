@@ -1,98 +1,87 @@
+# -*- mode: tcl -*-
+# -*- class: ::tycho::StarLibrary -*-
+#
 # $Id$ G%
-# Test star index for graph editor
+# Test star library
 
-group sdf {
-    -label {SDF Stars}
-    item Ramp {
-        -label {Ramp}
-	-numinputs 0
-	-numoutputs 1
-        parameter step 1.0 -type number -label step
-        parameter value 0.0 -type number -label value
+group sdf -label {SDF Stars} {
+    star Ramp \
+        -label {Ramp} \
+		-icon {icons.tim#sdf.Ramp} {
+	        attribute step -default 1.0 -type number -label step
+	        attribute value -default 0.0 -type number -label value
+	        port out -composite 0 -datatype float
+	}
+    star Printer \
+    	-label {Printer} \
+		-icon {icons.tim#sdf.Printer} {
+			attribute fileName -default "<stdout>" -label fileName
+			port in -composite 0 -datatype float
     }
-    item Printer {
-        -label {Printer}
-	-numinputs 1
-	-numoutputs 0
-	parameter fileName "<stdout>" -label fileName
-    }
-    item Xgraph {
-        -label {Xgraph}
-	-numinputs 1
-	-numoutputs 0
+    star Xgraph \
+        -label {Xgraph} {
+			port in -composite 0 -datatype float
     }
 }
 
-group arithmetic {
-    -label {Basic Arithmetic}
-    item Add {
-        -label Add
-	-numinputs 2
-	-numoutputs 1
+group arithmetic -label {Basic Arithmetic} {
+    star Add -label Add {
+       	port in -composite 1
+       	port out -composite 0
     }
-    item Multiply {
-	-numinputs 2
-	-numoutputs 1
+    star Multiply {
+       	port in -composite 1
+       	port out -composite 0
     }
-    item Subtract {
-	-numinputs 2
-	-numoutputs 1
+    star Subtract  {
+       	port in -composite 1
+       	port out -composite 0
     }
 }
  
-group uncommitted {
-    -label {Uncommitted Icons}
-    item one-zero {
-        -label {One in}
-	-numinputs 1
-	-numoutputs 0
+group uncommitted -label {Uncommitted Icons} {
+    star one-zero -label {One in} {
+        port in
     }
-    item zero-one {
-        -label {One out}
-	-numinputs 0
-	-numoutputs 1
+    star zero-one -label {One out} {
+    	port out
     }
-    item one-one {
-        -label {One in, one out}
-	-numinputs 1
-	-numoutputs 1
+    star one-one -label {One in, one out} {
+    	port in
+    	port out
     }
-    item two-one {
-        -label {Two in, one out}
-	-numinputs 2
-	-numoutputs 1
+    star two-one -label {Two in, one out} {
+    	port in-0
+    	port in-1
+    	port out
     }
-    item two-two {
-        -label {Two in, two out}
-	-numinputs 2
-	-numoutputs 2
+    star two-two -label {Two in, two out} {
+    	port in-0
+    	port in-1
+    	port out-0
+    	port out-1
     }
 }
  
-group miscellaneous {
-    -label {Miscellaneous Icons}
-    item Foo {
-        -label {The Foo Icon}
-	-numinputs 2
-	-numoutputs 2
+group miscellaneous -label {Miscellaneous Icons} {
+    star Foo -label {The Foo Icon} {
+    	port in-0
+    	port in-1
+    	port out-0
+    	port out-1
     }
-    item Bar {
-        -label {The Bar Icon}
-	-numinputs 1
-	-numoutputs 1
+    star Bar -label {The Bar Icon} {
+    	port in
+    	port out
     }
-   item Baz {
-        -label {The Baz Icon}
-	-numinputs 1
-	-numoutputs 1
+    star Baz -label {The Baz Icon} {
+        port in
+        port out
     }
 }
 
-group test {
-    -label {Test Icons}
-    item simple {
-        -label {A Simple Icon}
-	-numinputs 0
-	-numoutputs 1
+group test -label {Test Icons} {
+    star simple -label {A Simple Icon} {
+        port out
     }
 }

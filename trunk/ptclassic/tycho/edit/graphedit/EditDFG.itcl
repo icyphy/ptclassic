@@ -39,9 +39,11 @@ proc ::tycho::editdfg {file} {
 
     # FIXME FIXME
     # Load stars and icons
-    $nm loadStars [::tycho::expandPath {$TYCHO/editors/visedit/stars.tim}]
-    $nm loadIcons [::tycho::expandPath {$TYCHO/editors/visedit/icons.tim}]
+    # $nm loadStars [::tycho::expandPath {$TYCHO/editors/graphedit/stars.tim}]
+    # $nm loadIcons [::tycho::expandPath {$TYCHO/editors/graphedit/icons.tim}]
 
+    $nm library load editors/graphedit/stars.tim
+    $nm library addtomenu stars stars -command puts
     return $nm
 }
 
@@ -52,7 +54,7 @@ proc ::tycho::editdfg {file} {
 # directed graphs.
 #
 class ::tycho::EditDFG {
-    inherit ::tycho::TCanvas
+    inherit ::tycho::SlateView
 
     constructor {args} {}
     destructor {}
@@ -60,19 +62,13 @@ class ::tycho::EditDFG {
     #################################################################
     ####                        options                          ####
 
-    # The layout model
-    itk_option define -layout layout Layout {}
-    
-    # The graph model
-    itk_option define -graph graph Graph {}
-    
     #################################################################
     ####                     public methods                      ####
 
-    # Create another editor.
-    method clone {}
+    # Clear all data
+    method clear {}
 
-	# Edit parameters of the given vertices
+    # Edit parameters of the given vertices
     method editparameters {args}
 
     # Select an icon -- for menubar use only
@@ -120,25 +116,17 @@ class ::tycho::EditDFG {
     # Stop moving a vertex
     method vertexrelease {tag}
 
-    ##### Pitcl stuff
-    ###
-    # Create a Ptolemy script
-    method createPitcl {{iterations {}}}
-
-    # Run as a Ptolemy Universe
-    method runPtolemy {}
-
-    # Run as a Ptolemy Universe o a remote server
-    method runRemotePtolemy {}
-
-    # Generate Pitcl to a file
-    method writePitcl {}
-
-   #################################################################
+    #################################################################
     ####                  protected methods                      ####
 
     # Initialize the menu/status/tool bars
-    protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
+    protected method _initializeBars {menubar statusbar toolbar}
+
+    # Insert the specified data
+    protected method insertData {data}
+
+    # Return the data to be saved
+    protected method saveText {}
 
     #################################################################
     ####                 protected variables                     ####
@@ -149,8 +137,8 @@ class ::tycho::EditDFG {
     # The interactor to connect edges
     protected variable dropper
 
-    # The view on the slate
-    protected variable slateView
+    # The semantic model
+    protected variable _graph ""
 
     # Storage for temporary variables
     protected variable _scratch
@@ -159,21 +147,12 @@ class ::tycho::EditDFG {
     ####                   private methods                       ####
 
     # Initialize the menubar
-    private method initializeMenubar {menubar}
+    private method _initializeMenubar {menubar}
 
     #################################################################
     ####                  FIXME FIXME FIXME                      ####
 
     # FIXME: temporary
-
-    # Clear all data
-    method clear {}
-
-    # Insert the specified data
-    method insertData {data}
-
-    # Return the data to be saved
-    protected method saveText {}
 
     # Load a star library
     method loadStars {file}
@@ -187,18 +166,6 @@ class ::tycho::EditDFG {
     # The star library
     private variable starLibrary
 
-    # The current number of iterations
-    private variable iterationCount 100
-
-    # The current remote Tycho server
-    private variable remoteServer "yoyodyne.eecs.berkeley.edu"
-
-    # The current port of the remote server
-    private variable remotePort 7010
-
-    # The java object used to talk to the server
-    private variable javaClient ""
-
     #################################################################
     ####                  FIXME FIXME FIXME                      ####
     
@@ -207,66 +174,30 @@ class ::tycho::EditDFG {
     private variable icony 10
  }
 
-#####################################################################
-#### -layout configuration
-# Subscribe to the layout model. Note: there will be a problem here
-# if the model is changed, since the old one is not unsubscribed...
-#
-configbody ::tycho::EditDFG::layout {
-    if { $itk_option(-layout) != "" } {
-        $itk_option(-layout) subscribe $slateView all
-	    # If the graph model already exists, load the layout
-    	if { $itk_option(-graph) != "" } {
-        	$slateView clear
- 	        $slateView load $itk_option(-layout)
-    	}
-    }
-}
-
 ########################################################################
 #### constructor
 #
 body ::tycho::EditDFG::constructor {args} {
-    # Create the "view" object for this slate
-    set slateView [uplevel #0 ::tycho::SlateView \
-                [::tycho::autoName slateview] \
-                -slate $slate]
 
     # Evaluate options
     eval itk_initialize $args
 
-    # If there is not already a graph model, create one
-    if { $itk_option(-graph) == "" } {
-	configure -graph \
-                [uplevel #0 ::tycho::KeyedDigraph \
-                [::tycho::autoName graph] \
-                -strictoptions 0]
-    }
-
-    # If there is not already a layout model, create one
-    if { $itk_option(-layout) == "" } {
-	configure -layout \
-                [uplevel #0 ::tycho::Layout \
-                [::tycho::autoName layout] \
-                -primaryview $slateView]
-    }
-
     # Key bindings
-    bind $slate <Meta-Key-z> "$this undo"
-    bind $slate <Meta-Key-r> "$this redo"
+    bind $_slate <Meta-Key-z> "$this undo"
+    bind $_slate <Meta-Key-r> "$this redo"
 
     # Make a more pronounced highlight
-    $slate configure -highlightcolor azure2 -highlightwidth 4
+    $_slate configure -highlightcolor azure2 -highlightwidth 4
 
     # Enable selection with button 1; shift-click toggles
-    $slate selector bind vertex -button 1
-    $slate selector bind vertex -button 1 \
+    $_slate selector bind vertex -button 1
+    $_slate selector bind vertex -button 1 \
             -modifiers shift -toggle 1
 
     # Create the interactor to move selected items
-    set follower [$slate interactor Follower]
-    $slate selector delegate $follower vertex -button 1
-    $slate selector delegate $follower vertex -button 1 \
+    set follower [$_slate interactor Follower]
+    $_slate selector delegate $follower vertex -button 1
+    $_slate selector delegate $follower vertex -button 1 \
             -modifiers shift
 
     # Now for some tricky stuff: we want the follower to send
@@ -279,13 +210,13 @@ body ::tycho::EditDFG::constructor {args} {
 
     # More tricky stuff: the selector sends selection events
     # to the model:
-    $slate selector configure \
+    $_slate selector configure \
 	    -clearprefix "$this selection clear" \
 	    -deselectprefix "$this selection remove" \
 	    -selectprefix "$this selection add"
 
     # Create a DragDropper to join terminals
-    set dropper [$slate interactor DragDropper]
+    set dropper [$_slate interactor DragDropper]
     $dropper bind output
     $dropper configure \
 	    -halo 6 \
@@ -295,18 +226,7 @@ body ::tycho::EditDFG::constructor {args} {
 	    -deactivatecommand "$this newrelease"
 
     # Is this needed?
-    $slate configure -exportselection 0
-}
-
-########################################################################
-#### clone
-#
-# Create another editor -- for demos only.
-#
-body ::tycho::EditDFG::clone {} {
-    set clone [::tycho::view EditDFG \
-            -layout $itk_option(-layout) \
-            -graph $itk_option(-graph)]
+    $_slate configure -exportselection 0
 }
 
 ########################################################################
@@ -316,7 +236,7 @@ body ::tycho::EditDFG::editparameters {args} {
     # FIXME: The parameter editing window must include the whole
     # path name of the model
     foreach v $args {
-        set item [$itk_option(-graph) vertexcget $v -type]
+        set item [$_graph vertexcget $v -type]
         regsub -all {\.} $v "_" nm
         set nm .$nm
         if { [::info which -command $nm] != "" } {
@@ -326,7 +246,7 @@ body ::tycho::EditDFG::editparameters {args} {
         } else {
             uplevel #0 [list ::tycho::ParameterEdit $nm \
                     -command "::tycho::post \[$nm get\]"]
-            $nm edit $starLibrary $item $itk_option(-graph) $v vertex
+            $nm edit $starLibrary $item $_graph $v vertex
             wm deiconify $nm
         }
     }
@@ -339,16 +259,16 @@ body ::tycho::EditDFG::editparameters {args} {
 #
 body ::tycho::EditDFG::iconselect {name} {
     # Figure out where to put the icon. First check if topleft is free
-    if { [$slate find overlapping 10 10 10 10] == "" } {
+    if { [$_slate find overlapping 10 10 10 10] == "" } {
         set iconx 10
         set icony 10
     }
     # Create the icon
     set v [vertex $name 0 0]
-    set id [$slateView id $v]
+    set id [id $v]
 
     # Move its nw corner to the right position
-    $slate moveto $id $iconx $icony "nw" -shape rectangle
+    $_slate moveto $id $iconx $icony "nw" -shape rectangle
 
     # Advance place position
     incr iconx 10
@@ -367,13 +287,13 @@ body ::tycho::EditDFG::newclick {item x y} {
     selection clear
 
     # Create the connection line
-    set coords [$slate aspect $item terminal]
-    set _scratch(line) [eval $slate create SmartLine $coords $x $y]
+    set coords [$_slate aspect $item terminal]
+    set _scratch(line) [eval $_slate create SmartLine $coords $x $y]
 
     # Set the directions of the line
     set dir [eval ::tycho::Shape::compassFromVector \
-	    [$slate itemcget $item -direction]]
-    $slate itemconfigure $_scratch(line) -start $dir -end $dir
+	    [$_slate itemcget $item -direction]]
+    $_slate itemconfigure $_scratch(line) -start $dir -end $dir
     set _scratch(dir) $dir
 
     # Remember the source item
@@ -392,20 +312,20 @@ body ::tycho::EditDFG::newclick {item x y} {
 body ::tycho::EditDFG::newdrag {item x y} {
     if { $item == "" } {
 	# Just move end point
-	$slate reshapeto $_scratch(line) $x $y end
+	$_slate reshapeto $_scratch(line) $x $y end
     } else {
 	# Move end point to terminal connection point
-	set coords [$slate aspect $item terminal]
-	eval $slate reshapeto $_scratch(line) $coords end
+	set coords [$_slate aspect $item terminal]
+	eval $_slate reshapeto $_scratch(line) $coords end
 
 	# If the line direction does not match the terminal
 	# direction, change the line
 	set dir [eval ::tycho::Shape::compassFromVector \
-	    [$slate itemcget $item -direction]]
+	    [$_slate itemcget $item -direction]]
 	set dir [::tycho::Shape::compass $dir rev]
 
 	if { $dir != $_scratch(dir) } {
-	    $slate itemconfigure $_scratch(line) -end $dir
+	    $_slate itemconfigure $_scratch(line) -end $dir
 	    set _scratch(dir) $dir
 	}
     }
@@ -423,31 +343,32 @@ body ::tycho::EditDFG::newdrag {item x y} {
 body ::tycho::EditDFG::newrelease {ignore} {
     set line $_scratch(line)
     if { $_scratch(dest) == "" } {
-	$slate delete $line
+	$_slate delete $line
     } else {
 	# Get the vertices and ports being connected
-	set srcpar [$slateView name [$slate parent $_scratch(source)]]
-	set source [$slateView name $_scratch(source)]
-	set dstpar [$slateView name [$slate parent $_scratch(dest)]]
-	set dest [$slateView name $_scratch(dest)]
+	set srcpar [name [$_slate parent $_scratch(source)]]
+	set source [name $_scratch(source)]
+	set dstpar [name [$_slate parent $_scratch(dest)]]
+	set dest [name $_scratch(dest)]
 
 	# Add an edge to the graph
-	$itk_option(-graph) publish edge $srcpar $source $dstpar $dest
+	$_graph publish edge $srcpar $source $dstpar $dest
 
 	# Give the edge a name
 	set name [list $srcpar $source $dstpar $dest]
-	$slateView name $line $name
+        # FIXME!!!
+	name $line $name
 
 	# Add an edge to the layout model, 
 	# and inform all views _except_ the slate-view
-	$itk_option(-layout) update $slateView item \
+	$_layout update item \
 		[list $srcpar $source $dstpar $dest] \
-		[concat [$slate type $line] [$slate coords $line]] \
-		-start [$slate itemcget $line -start] \
-		-end [$slate itemcget $line -end]
+		[concat [$_slate type $line] [$_slate coords $line]] \
+		-start [$_slate itemcget $line -start] \
+		-end [$_slate itemcget $line -end]
 	
 	# Update the layout model's coordinates
-	eval $itk_option(-layout) coords $name [$slate coords $line]
+	eval $_layout coords $name [$_slate coords $line]
     }
 }
 
@@ -468,8 +389,8 @@ body ::tycho::EditDFG::notify {method args} {
 # Redo the most recent command
 #
 body ::tycho::EditDFG::redo {} {
-    eval $itk_option(-layout) redo
-    eval $itk_option(-graph) redo
+    eval $_layout redo
+    eval $_graph redo
 }
 
 ########################################################################
@@ -478,12 +399,12 @@ body ::tycho::EditDFG::redo {} {
 # Manipulate the selection
 #
 body ::tycho::EditDFG::selection {mode {id {}}} {
-	if { $id != {} } {
-		set name [$slateView name $id]
-	} else {
-		set name {}
-	}
-	eval $itk_option(-layout) publish selection $mode $name
+    if { $id != {} } {
+        set name [name $id]
+    } else {
+        set name {}
+    }
+    eval $_layout publish selection $mode $name
 }
 
 ########################################################################
@@ -492,8 +413,8 @@ body ::tycho::EditDFG::selection {mode {id {}}} {
 # Undo the most recent command
 #
 body ::tycho::EditDFG::undo {} {
-    set foo [eval $itk_option(-layout) undo]
-    set bar [eval $itk_option(-graph) undo]
+    set foo [eval $_layout undo]
+    set bar [eval $_graph undo]
 }
 
 ########################################################################
@@ -504,38 +425,36 @@ body ::tycho::EditDFG::undo {} {
 #
 body ::tycho::EditDFG::vertex {star x y} {
     set name [::tycho::autoName vertex]
-    set graph $itk_option(-graph)
-    set layout $itk_option(-layout)
     set stars $starLibrary
     set icons $iconLibrary
 
     # Mark the graph and the layout
-    $graph mark vertex
-    $layout mark vertex
+    $_graph mark vertex
+    $_layout mark vertex
 
     # Add a vertex to the graph
-    $graph publish vertex $name -type $star
+    $_graph publish vertex $name -type $star
 
     # Get its parameters and add them as attributes
     foreach parm [$stars names parameter $star] \
 	    parm2 [$stars names* parameter $star] {
-        $graph vertexconfigure $name -$parm [$stars get parameter $parm2]
+        $_graph vertexconfigure $name -$parm [$stars get parameter $parm2]
     }
 
     # Add a vertex to the layout model
     set type  [$icons type $star]
     set attrs [$icons attributes icon $star]
-    set undo [eval [list $layout publish item \
+    set undo [eval [list $_layout publish item \
 	    $name [list $type $x $y]] $attrs \
 	    -tags vertex]
 
     # Remember the undo commands. FIXME!!!
-    set undograph [$graph getUndo current]
-    set undolayout [$layout getUndo current]
+    set undograph [$_graph getUndo current]
+    set undolayout [$_layout getUndo current]
 
     # Add ports to the graph.
     foreach port [$icons names port $star] {
-        $graph publish key $name $port
+        $_graph publish key $name $port
     }
 
     # Add the ports to the layout model
@@ -549,21 +468,21 @@ body ::tycho::EditDFG::vertex {star x y} {
         #set cmd [concat [list subitem $name $port [list $type 0 0]] $attrs \
         #        -tags [$icons portcget $icon.$port -type] \
         #        -name $port]
-        #eval $layout $cmd
-        #eval $layout notify $cmd
-	eval [list $layout publish subitem $name $port $type] \
+        #eval $_layout $cmd
+        #eval $_layout notify $cmd
+	eval [list $_layout publish subitem $name $port $type] \
 		$attrs \
                 -tags [list [$icons itemcget port $star.$port -type]] \
 		-name $port
     }
 
     # Compact the commands into a single one
-    $graph compactHistory vertex current 1
-    $layout compactHistory vertex current 1
+    $_graph compactHistory vertex current 1
+    $_layout compactHistory vertex current 1
 
     # Do this kludge to overwrite the undo command
-    $graph setUndo current $undograph
-    $layout setUndo current $undolayout
+    $_graph setUndo current $undograph
+    $_layout setUndo current $undolayout
 
     # Return its name
     return $name
@@ -581,34 +500,31 @@ body ::tycho::EditDFG::vertex {star x y} {
 # remember who they are.
 #
 body ::tycho::EditDFG::vertexclick {tag x y args} {
-    set layout $itk_option(-layout)
-    set graph  $itk_option(-graph)
-
     # Get the vertices, and start a move sequence on them
-    set vertices [$slateView withtag $tag]
+    set vertices [withtag $tag]
 
     # Get the item name or the same tag
-    set name [$slateView name $tag]
+    set name [name $tag]
     set _scratch(movetag) $name
 
     # Notify views that these items are about to move
-    $layout publish moveclick $name $x $y
+    $_layout publish moveclick $name $x $y
 
     # Get completely-connected and partially-connected edges
-    set _scratch(moveedges) [eval $graph subgraphEdges $vertices]
-    set _scratch(inputedges) [eval $graph subgraphInputs $vertices]
-    set _scratch(outputedges) [eval $graph subgraphOutputs $vertices]
+    set _scratch(moveedges) [eval $_graph subgraphEdges $vertices]
+    set _scratch(inputedges) [eval $_graph subgraphInputs $vertices]
+    set _scratch(outputedges) [eval $_graph subgraphOutputs $vertices]
     
     # Start a move or reshape sequence on found edges
     if { $_scratch(moveedges) != "" } {
-	eval $layout publish addtag $this.edge $_scratch(moveedges)
-	$layout publish moveclick $this.edge $x $y
+	eval $_layout publish addtag $this.edge $_scratch(moveedges)
+	$_layout publish moveclick $this.edge $x $y
     }
     foreach edge $_scratch(inputedges) {
-        $layout publish reshapeclick $edge $x $y -aspects end
+        $_layout publish reshapeclick $edge $x $y -aspects end
     }
     foreach edge $_scratch(outputedges) {
-        $layout publish reshapeclick $edge $x $y -aspects start
+        $_layout publish reshapeclick $edge $x $y -aspects start
     }
 }
 
@@ -618,31 +534,28 @@ body ::tycho::EditDFG::vertexclick {tag x y args} {
 # Delete a vertex and all connected edges.
 #
 body ::tycho::EditDFG::vertexdelete {vertex} {
-    set layout $itk_option(-layout)
-    set graph  $itk_option(-graph)
-
     # Get connected edges
     set edges [concat \
-	    [$graph subgraphEdges $vertex] \
-	    [$graph subgraphInputs $vertex]]
+	    [$_graph subgraphEdges $vertex] \
+	    [$_graph subgraphInputs $vertex]]
     
     # Mark the layout history
-    $layout mark vertex
+    $_layout mark vertex
     
     # Delete the vertex and connected edges
-    $layout publish delete $vertex
+    $_layout publish delete $vertex
     foreach edge $edges {
-    	$layout publish delete $edge
+    	$_layout publish delete $edge
     }
     
     # Merge the deletion commands into one
     if { $edges != "" } {
-    	$layout compactHistory vertex current 1
+    	$_layout compactHistory vertex current 1
     }
     
     # Delete the vertex form the graph model. This automatically
     # deletes connected edges
-    $graph publish vertexdelete $vertex
+    $_graph publish vertexdelete $vertex
 }
 
 ########################################################################
@@ -652,19 +565,17 @@ body ::tycho::EditDFG::vertexdelete {vertex} {
 # vertices and edges are moved and reshaped as appropriate.
 #
 body ::tycho::EditDFG::vertexdrag {tag x y} {
-    set layout $itk_option(-layout)
-
     # Move the vertices and fully-connected edges
-    $layout publish movedrag $_scratch(movetag) $x $y
+    $_layout publish movedrag $_scratch(movetag) $x $y
     if { $_scratch(moveedges) != "" } {
-	$layout publish movedrag $this.edge $x $y
+	$_layout publish movedrag $this.edge $x $y
     }
     # Reshape the partially-connected edges.
     foreach edge $_scratch(inputedges) {
-	$layout publish reshapedrag $edge $x $y
+	$_layout publish reshapedrag $edge $x $y
     }
     foreach edge $_scratch(outputedges) {
-	$layout publish reshapedrag $edge $x $y
+	$_layou publish reshapedrag $edge $x $y
     }
 }
 
@@ -675,35 +586,33 @@ body ::tycho::EditDFG::vertexdrag {tag x y} {
 # redo command to the history of the layout model.
 #
 body ::tycho::EditDFG::vertexrelease {tag} {
-    set layout $itk_option(-layout)
-    
     # Because the following will record a bunch of commands that we
     # want merged into a single undo/redo command, set a mark
-    $layout mark vertex
+    $_layout mark vertex
 
     # Terminate move of vertices
-    $layout publish moverelease $_scratch(movetag)
+    $_layout publish moverelease $_scratch(movetag)
 
     # Terminate move of fully-connected edges
     if { $_scratch(moveedges) != "" } {
-        $layout publish moverelease $this.edge
-        $layout publish dtag $this.edge
+        $_layout publish moverelease $this.edge
+        $_layout publish dtag $this.edge
     }
 
     # Terminate the reshape of partially-connected edges
     foreach edge $_scratch(inputedges) {
-	$layout publish reshaperelease $edge
+	$_layout publish reshaperelease $edge
     }
     foreach edge $_scratch(outputedges) {
-	$layout publish reshaperelease $edge
+	$_layout publish reshaperelease $edge
     }
 
     # Now merge all those commands into a single one
-    $layout compactHistory vertex current 1
+    $_layout compactHistory vertex current 1
 
     # Finally (and importantly!), add a null command to the graph
     # model to match this command
-    $itk_option(-graph) appendHistory {} {} 0
+    $_graph appendHistory {} {} 0
 }
 
 ###################################################################
@@ -711,7 +620,7 @@ body ::tycho::EditDFG::vertexrelease {tag} {
 ####                      protected methods                    ####
 
 #####################################################################
-#### initialize
+#### _initializeBars
 # Initialize the menu, status, and toolbars associated with this widget.
 # The root (view) class sets up the menubar methods in it's initialize
 # via the chain command, which should always be the first command in
@@ -728,6 +637,59 @@ body ::tycho::EditDFG::_initializeBars {menubar statusbar toolbar} {
         # method because Itcl (2.2) has virtual private methods!
         ::tycho::EditDFG::_initializeMenubar $menubar
     }
+}
+
+#####################################################################
+#### clear
+# Clear the data.
+#
+body ::tycho::EditDFG::clear {} {
+    if { $_graph != "" } {
+        $_graph clear
+    }
+    if { $_layout != "" } {
+        $_layout clear
+    }
+    $_slate delete all
+}
+
+#####################################################################
+#### insertData
+# Insert the specified data. For now, this is a two-list containing
+# a description of the graph and the layout respectively.
+# Note that data cannot be just inserted: it will always
+# be cleared too.
+#
+body ::tycho::EditDFG::insertData {data} {
+    # Delete all data
+    clear
+    # Create the models if they don't exist
+    if { $_graph == "" } {
+        set _graph [::tycho::KeyedDigraph [::tycho::autoName graph]]
+    }
+    if { $_layout == "" } {
+        set _layout [::tycho::Layout [::tycho::autoName layout]]
+    }
+    # Load the data into the models
+    $_graph parse [lindex $data 0]
+    $_layout parse [lindex $data 1]
+
+    # Load the new data into this view
+    loadLayout
+}
+
+#####################################################################
+#### saveText
+# Return the text to save. For now, this is a two-list containing
+# a description of the graph and the layout respectively.
+#
+body ::tycho::EditDFG::saveText {} {
+    set result "\{\n"
+    append result [$_graph describe]
+    append result "\}\n\{\n"
+    append result [$_layout describe]
+    append result "\}\n"
+    return $result
 }
 
     #####################################################################
@@ -781,15 +743,12 @@ body ::tycho::EditDFG::_initializeMenubar {menubar} {
     $menubar command editparameters stars \
             -label "Edit Parameters..." \
             -underline 5 \
-            -command "eval $this editparameters \[$slateView withtag sel\]"
+            -command "eval $this editparameters \[$this withtag sel\]"
 
     $menubar separator starsep1 stars
 
     # Add a Devel menu for development use
     $menubar addMenu devel -label Devel -underline 0
-    $menubar command clone devel \
-	    -label "Clone" \
-            -command "$this clone"
 
     $menubar add separator develsep1 devel
 
@@ -827,63 +786,6 @@ body ::tycho::EditDFG::_initializeMenubar {menubar} {
 
 
 #####################################################################
-#### clear
-# Clear the data.
-#
-body ::tycho::EditDFG::clear {} {
-    # OK, the easiest way to do this is to just delete the
-    # two models. Obviously this won't work with multiple
-    # subscribers so models should really have a clear method!
-    # $itk_option(-graph) clear
-    # $itk_option(-layout) clear
-    delete object $itk_option(-graph)
-    configure -graph \
-            [uplevel #0 ::tycho::KeyedDigraph \
-            [::tycho::autoName graph] \
-            -strictoptions 0]
-
-    delete object $itk_option(-layout)
-    configure -layout \
-            [uplevel #0 ::tycho::Layout \
-            [::tycho::autoName layout] \
-            -primaryview $this]
-    
-    # Clean the slate
-    $slate delete all
-}
-
-#####################################################################
-#### insertData
-# Insert the specified data. For now, this is a two-list containing
-# a description of the graph and the layout respectively.
-# Note that data cannot be just inserted: it will always
-# be cleared too.
-#
-body ::tycho::EditDFG::insertData {data} {
-    # Delete all data
-    clear
-    # Load the new data into the models
-    $itk_option(-graph) read string [lindex $data 0]
-    $itk_option(-layout) read string [lindex $data 1]
-    # Load the new data into this view
-    loadLayout
-}
-
-#####################################################################
-#### saveText
-# Return the text to save. For now, this is a two-list containing
-# a description of the graph and the layout respectively.
-#
-body ::tycho::EditDFG::saveText {} {
-    set result "\{\n"
-    append result [$itk_option(-graph) describe]
-    append result "\}\n\{\n"
-    append result [$itk_option(-layout) describe]
-    append result "\}\n"
-    return $result
-}
-
-#####################################################################
 #### loadIcons
 # Load an icon library.
 #
@@ -900,7 +802,7 @@ body ::tycho::EditDFG::loadIcons {file} {
 # Load a star library.
 #
 body ::tycho::EditDFG::loadStars {file} {
-    set stars [uplevel #0 ::tycho::Library \
+    set stars [uplevel #0 ::tycho::StarLibrary \
 	    [::tycho::autoName stars] \
 	    -datafile $file]
     $stars load
