@@ -222,6 +222,7 @@ net_node_t *node;
   net_var_t *var, *pvar;
 
   fprintf( fp, "  private {\n" );
+  fprintf( fp, "    static SequentialList *emittedEvents;\n" );
   fprintf( fp, "    int nemitevent;\n" );
   fprintf( fp, "    double min_time;\n" );
   fprintf( fp, "    double end_time;\n" );
@@ -394,7 +395,8 @@ FILE *fp;
 net_node_t *node;
 {
   fprintf( fp, "  constructor {\n    delayType = TRUE;\n" );
-  fprintf( fp, "    SequentialList emittedEvents = new SequentialList(); \n" );
+  fprintf( fp, "    clkFreq = Clock_freq;\n" );
+  fprintf( fp, "    emittedEvents = new SequentialList(); \n" );
   fprintf( fp, " }\n" );
 }
 
@@ -447,18 +449,18 @@ int autotick, unittime;
     fprintf( fp, "          default:\n          break;\n" );
     fprintf( fp, "      }\n" );
     fprintf( fp, "      if (!needResource) { \n");   
-    fprintf( fp, "        emitTime = now + (1/Clock_freq); \n");   
-    fprintf( fp, "        eventQ->levelput(&newEvent, emitTime, (DEPortHole*)newEvent.dest->depth, &(newEvent.dest->parent()->asStar())); \n");
+    fprintf( fp, "        emitTime = now + (1/clkFreq); \n");   
+    fprintf( fp, "        ((CQEventQueue*)eventQ)->levelput(&newEvent, emitTime, ((DEPortHole*)(newEvent.dest))->depth, &(newEvent.dest->parent()->asStar())); \n");
     fprintf( fp, "      } else { \n");  
-    fprintf( fp, "        emitTime = now + (delay/Clock_freq); \n");
+    fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
     fprintf( fp, "        newEvent.realTime = emitTime; \n");
     fprintf( fp, "        if (isDummy) { \n");
     fprintf( fp, "           // set fine level to -0.5 for scheduling in Q \n"); 
     fprintf( fp, "         interruptQ->levelput(&newEvent, emitTime, -0.5, (DEPolis*)this); \n");
     fprintf( fp, "      } else { \n");
-    fprintf( fp, "         interruptQ->levelput(&newEvent, emitTime, newEvent.dest->depth, ((DEPolis*)&newEvent.dest->parent()->asStar())); \n");
-    fprintf( fp, "      }");
-    fprintf( fp, "      emittedEvents->prepend(newEvent); \n");
+    fprintf( fp, "         interruptQ->levelput(&newEvent, emitTime, ((DEPortHole*)newEvent.dest)->depth, ((DEPolis*)&newEvent.dest->parent()->asStar())); \n");
+    fprintf( fp, "      }\n");
+    fprintf( fp, "      emittedEvents->prepend(&newEvent); \n");
     fprintf( fp, "   }\n}\n}");
 
 
@@ -533,12 +535,12 @@ int autotick, unittime;
   foreach_net_node_fanout( node, var ) {
     if ( pvar = isOutputEvent( var, node )) {
       fprintf( fp, "#define emit_%s() ", util_make_valid_name( pvar ));
-      fprintf( fp, "%s%s_Star->emitEvent( %s, _delay, isDummy )\n", model_name, 
+      fprintf( fp, "%s%s_Star->emitEvent( %s, _delay, 0 )\n", model_name, 
                option, util_make_valid_name( pvar ));
     } else if ( pvar = isIntOutput( var, node )) {
       fprintf( fp, "#define emit_%s() ", 
                util_make_valid_name( net_var_parent_var( pvar, node )));
-      fprintf( fp, "%s%s_Star->emitEvent( %s, _delay, isDummy )\n", model_name, 
+      fprintf( fp, "%s%s_Star->emitEvent( %s, _delay, 0 )\n", model_name, 
                option, util_make_valid_name( pvar ));
    }
   } end_foreach_net_node_fanout; 
@@ -724,8 +726,6 @@ net_node_t *node;
 int compat;
 {
   fprintf( fp, "  setup {\n" );
-/*  fprintf( fp, "    char stemp[ 1024 ];\n\n" ); */
-  fprintf( fp, "    int temp;\n\n" );
 /*  if ( !compat ) {
     fprintf( fp, "    strcpy( stemp, implem );\n" );
     fprintf( fp, "    needResource = getImplem( stemp );\n" );
@@ -1010,6 +1010,7 @@ int autotick, unittime;
   fprintf( fp, "            nemitevent = 0;\n" );
   fprintf( fp, "            _delay = 1.0;\n" );
   fprintf( fp, "            _t_%s(0,0);\n", util_map_pathname( node_name ));
+  fprintf( fp, "            emitEvent(0, _delay, 1); \n");
   if ( trace ) {
     fprintf( fp, "            if ( debug ) {\n" );
    fprintf( fp, "              tcl.go();\n" );
