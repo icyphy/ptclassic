@@ -147,7 +147,8 @@ proc test {test_name test_description contents_of_test passing_results} {
     }
 
     # Now we're done, reset the variable
-    unset TY_TESTING
+    # We place a catch around this in case we have recursive tests
+    catch {unset TY_TESTING}
 }
 
 proc dotests {file args} {
