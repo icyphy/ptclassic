@@ -4,7 +4,7 @@
 # Author: Edward Lee
 # Version: $Id$
 #
-# Copyright (c) %Q% The Regents of the University of California.
+# Copyright (c) 1994-%Q% The Regents of the University of California.
 # All rights reserved.
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
@@ -31,8 +31,13 @@ setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
 # Not all shells and platforms set $PWD, so we use our own
 setenv PTPWD `pwd`
 
-# To get tcl/tk man pages before corresponding unix man pages
-setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$MANPATH
+# To get tcl/tk man pages before corresponding unix man pages,
+# and to guess about a reasonable manpath if none is set.
+if (! $?MANPATH ) then
+    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:/usr/local/man:/usr/man
+else
+    setenv MANPATH $PTOLEMY/tcltk/tk/man:$PTOLEMY/tcltk/tcl/man:$PTOLEMY/doc/man:$MANPATH
+endif
 
 while ($#argv)
 	switch ($argv[1])
