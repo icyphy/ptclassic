@@ -51,7 +51,7 @@ complete filename of the displayed image.
 		Packet pkt;
 		(inData%0).getPacket(pkt);
 		TYPE_CHECK(pkt,"GrayImage");
-		GrayImage* imD = (GrayImage*) pkt.myData();
+		const GrayImage* imD = (const GrayImage*) pkt.myData();
 
 // Set filename and save values.
 		const char* saveMe = saveImage;
@@ -75,8 +75,8 @@ complete filename of the displayed image.
 // Write the PGM header and the data, and then run.
 		fprintf (fd, "P5\n %d %d 255\n", imD->retWidth(),
 				imD->retHeight());
-		fwrite((char*)imD->retData(), sizeof(unsigned char), (unsigned)
-				imD->retWidth() * imD->retHeight(), fd);
+		fwrite((const char*)imD->constData(), sizeof(unsigned char),
+			(unsigned) imD->retWidth() * imD->retHeight(), fd);
 		fclose(fd);
 
 		char cmdbuf[256];

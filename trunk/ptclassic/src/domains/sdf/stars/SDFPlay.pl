@@ -45,7 +45,7 @@ be a parameter.
 	protected {
 		FILE *strm;
 		int delFile;
-		const char* fileName;
+		char* fileName;
 	}
 	hinclude { <stdio.h> }
 	ccinclude { "miscFuncs.h" , "UserOutput.h", <std.h> }
@@ -138,6 +138,6 @@ be a parameter.
 	destructor {
 		if (strm) fclose (strm);
 		if (delFile) unlink (fileName);
-		delete (char*)fileName;
+		delete fileName;
 	}
 }

@@ -64,8 +64,8 @@ cosine transform (DCT) and outputs a DCTImage.
 	method {
 		name { doDCT }
 		type { void }
-		arglist { "(float* out, unsigned char* in, int outw, int outh,
-				int inw, int inh)"
+		arglist { "(float* out, unsigned const char* in, int outw,
+			    int outh, int inw, int inh)"
 		}
 		code {
 	register int ndx, ndx2, cntr;
@@ -135,11 +135,11 @@ cosine transform (DCT) and outputs a DCTImage.
 		Packet inPacket;
 		(input%0).getPacket(inPacket);
 		TYPE_CHECK(inPacket,"GrayImage");
-		GrayImage* image = (GrayImage*) inPacket.myData();
+		const GrayImage* image = (const GrayImage*) inPacket.myData();
 
 // Do transform.
 		DCTImage* DCT = new DCTImage(*image, blocksize);
-		doDCT(DCT->retData(), image->retData(), DCT->fullWidth(),
+		doDCT(DCT->retData(), image->constData(), DCT->fullWidth(),
 				DCT->fullHeight(), image->retWidth(),
 				image->retHeight());
 

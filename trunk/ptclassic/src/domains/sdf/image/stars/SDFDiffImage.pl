@@ -45,7 +45,7 @@ and pass the result to the output.
 	TYPE_CHECK(inPkt1,"GrayImage");
 	TYPE_CHECK(inPkt2,"GrayImage");
         GrayImage* inImage1 = (GrayImage*) inPkt1.writableCopy();
-        GrayImage* inImage2 = (GrayImage*) inPkt2.myData();
+        const GrayImage* inImage2 = (const GrayImage*) inPkt2.myData();
 
 // Calc the difference.
         int width, height;
@@ -58,7 +58,7 @@ and pass the result to the output.
             return;
         }
         unsigned char* ptr1 = inImage1->retData();
-        unsigned char* ptr2 = inImage2->retData();
+        unsigned const char* ptr2 = inImage2->constData();
         float  diff;
         double scale = Scale;
         for(int travel = 0; travel < width*height; travel++) {

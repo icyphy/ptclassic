@@ -44,8 +44,8 @@ when displaying single frames from a moving sequence.
 	// ridiculously strict rules.
 	extern "C" {
 	static int sortUC(const void* aV,const void* bV) {
-		unsigned char* a = (unsigned char*)aV;
-		unsigned char* b = (unsigned char*)bV;
+		unsigned const char* a = aV;
+		unsigned const char* b = bV;
 		if (*a < *b) return -1;
 		else if (*a == *b) return 0;
 		else return 1;
@@ -71,7 +71,7 @@ when displaying single frames from a moving sequence.
 		name	{ retMedian }
 		access	{ protected }
 		type	{ "unsigned char" }
-		arglist { "(unsigned char* p, int pi, int pj)" }
+		arglist { "(unsigned const char* p, int pi, int pj)" }
 
 		code
 		{
@@ -93,7 +93,7 @@ when displaying single frames from a moving sequence.
 		Packet inPkt;
 		(inData%0).getPacket(inPkt);
 		TYPE_CHECK(inPkt,"GrayImage");
-		GrayImage* inImage = (GrayImage*) inPkt.myData();
+		const GrayImage* inImage = (const GrayImage*) inPkt.myData();
 		width = inImage->retWidth();
 		height = inImage->retHeight();
 
@@ -103,7 +103,7 @@ when displaying single frames from a moving sequence.
 // Do the median filtering--don't do boundary pixels for now.
 		int i, j;
 		unsigned char* outP = outImage->retData();
-		unsigned char* inP = inImage->retData();
+		unsigned const char* inP = inImage->constData();
 		for(i = size/2; i < height-size/2; i++) {
 			for(j = size/2; j < width-size/2; j++) {
 				outP[j + i*width] = retMedian(inP, i, j);

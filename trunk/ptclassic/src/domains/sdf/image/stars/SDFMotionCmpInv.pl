@@ -48,7 +48,7 @@ code {
 	method {
 		name { getInputs }
 		type { "void" }
-		arglist { "(GrayImage** gi, MVImage** mi, Packet& inPkt,
+		arglist { "(const GrayImage** gi, const MVImage** mi, Packet& inPkt,
 				Packet& mvPkt)" }
 		access { protected }
 		code {
@@ -56,8 +56,8 @@ code {
 			(mvIn%0).getPacket(mvPkt);
 			TYPE_CHECK(inPkt,"GrayImage");
 			TYPE_CHECK(mvPkt,"MVImage");
-			*gi = (GrayImage*)	inPkt.myData();
-			*mi = (MVImage*)	mvPkt.myData();
+			*gi = (const GrayImage*) inPkt.myData();
+			*mi = (const MVImage*) mvPkt.myData();
 		}
 	} // end getInputs()
 
@@ -65,7 +65,7 @@ code {
 		name	{ doIntraImage }
 		type	{ "void" }
 		access	{ protected }
-		arglist { "(GrayImage* gi)" }
+		arglist { "(const GrayImage* gi)" }
 		code {
 			width  = gi->retWidth();
 			height = gi->retHeight();
@@ -78,9 +78,9 @@ code {
 		name { doInvMC }
 		type { "void" }
 		access { protected }
-		arglist { "(unsigned char* out, unsigned char* prev,
-				unsigned char* diff, char* horz, char* vert,
-				int width, int height, int blocksize)" }
+		arglist { "(unsigned char* out, unsigned const char* prev,
+		    unsigned const char* diff, const char* horz,
+		    const char* vert, int width, int height, int blocksize)" }
 		code {
 		int i, j, ii, jj, index, mcindex;
 		for(ii = 0; ii < height; ii += blocksize) {
@@ -102,8 +102,8 @@ code {
 // Read data from inputs.
 		Packet pastPkt = storPkt; // Holds result of previous run.
 		Packet mvPkt; // goes out of scope at end of go{}
-		GrayImage* diffImage;
-		MVImage*   mvImage;
+		const GrayImage* diffImage;
+		const MVImage*   mvImage;
 		getInputs(&diffImage, &mvImage, storPkt, mvPkt);
 
 // Initialize if this is the a resynchronization.
@@ -119,10 +119,11 @@ code {
 		GrayImage* outImage = (GrayImage*) diffImage->clone(1);
 
 ////// Do the inverse motion compensation.
-		GrayImage* prevImage = (GrayImage*) pastPkt.myData();
-		doInvMC(outImage->retData(), prevImage->retData(),
-				diffImage->retData(), mvImage->retHorz(),
-				mvImage->retVert(), width, height,
+		const GrayImage* prevImage =
+			(const GrayImage*) pastPkt.myData();
+		doInvMC(outImage->retData(), prevImage->constData(),
+				diffImage->constData(), mvImage->constHorz(),
+				mvImage->constVert(), width, height,
 				mvImage->retBlockSize());
 
 // Save the state and send the outputs on their way.
