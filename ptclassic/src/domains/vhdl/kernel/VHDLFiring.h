@@ -79,6 +79,8 @@ class VHDLFiring : public VHDLObj
   VHDLSignalList* signalList;
   // Extra variable declarations.
   StringList decls;
+  // Suppress sensitivity lists.
+  int noSensitivities;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
