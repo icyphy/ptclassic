@@ -43,9 +43,7 @@
 # <p>
 # Here is an example of how to use the ItclClassList:
 # <tcl quiet><pre>
-# ::tycho::view ItclClassList &#92
-#      {-file classList.icl} &#92
-#      Displayer {-toolbar 1}
+# ::tycho::view ItclClassList -file classList.icl -toolbar 1
 # </pre></tcl>
 #
 class ::tycho::ItclClassList {
