@@ -177,7 +177,8 @@ void CGCDDFCode :: startCode_Recur(Geodesic* arg, PortHole* p,
 void CGCDDFCode :: middleCode_Recur(Geodesic* selfGeo, Geodesic* gd, 
 					const char* fName, CGTarget* ct) {
 	CGCTarget* t = (CGCTarget*) ct;
-
+	t->switchDefaultStream(*(t->getStream("mainLoop")));
+	
 	StringList out = "\t";
 	if (selfGeo) {
 		out << ((CGCGeodesic*) selfGeo)->getBufName() << " = ";
