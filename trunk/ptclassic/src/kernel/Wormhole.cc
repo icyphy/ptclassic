@@ -197,6 +197,9 @@ void Wormhole :: setStopTime(double) {
 	target->resetStopTime(getStopTime());
 }
 
+// return the scheduler of the outer domain.
+Scheduler* Wormhole :: outerSched() { return selfStar.parent()->scheduler(); }
+
 void Wormhole :: setup() {
 	initTarget();
 }
