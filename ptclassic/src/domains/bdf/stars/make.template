@@ -1,0 +1,67 @@
+# Makefile for Ptolemy DDF stars
+# $Id$
+# Copyright (c) 1991 The Regents of the University of California.
+#				All Rights Reserved.
+#
+# If this file's name is "make.template" and there is no makefile in
+# this directory, do
+#	make -f make.template makefile
+#
+# This will add the dependencies to the makefile.
+
+ROOT = ../../../..
+VPATH = $(ROOT)/src/domains/bdf/stars
+# KERNDIR is the directory containing the Ptolemy kernel source.
+KERNDIR = $(ROOT)/src/kernel
+# BDFDIR is the directory containing BDF domain support
+BDFDIR = $(ROOT)/src/domains/bdf/kernel
+
+GPPFLAGS = -g
+GNU = g++
+INCL = -I$(BDFDIR) -I$(KERNDIR)
+GNUINCLUDE = /usr/gnu/lib/g++-include
+
+.SUFFIXES: .o .cc .h .pl
+.cc.o:
+	$(GNU) $(GPPFLAGS) $(INCL) -I$(VPATH) -c  $<
+
+.pl.cc:
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+
+.pl.h:
+	cd $(VPATH); ptlang $< ; mv *.t ../doc/stars
+
+
+SRCS=BDFFork.pl BDFNot.pl BDFSelect.pl BDFSwitch.pl
+
+CCS=$(SRCS:.pl=.cc)
+
+OBJS=$(SRCS:.pl=.o)
+
+HDRS=$(SRCS:.pl=.h)
+
+all:		makefile $(OBJS)
+
+# nothing to install -- use it where it lies
+install:	all
+		@echo Installation complete.
+
+sources:	$(CCS) $(HDRS) make.template bdfstars.mk
+
+clean:
+		rm -f *.o core *~ *#
+depend:		$(CCS)
+		makedepend $(INCL) -I$(GNUINCLUDE) $(CCS)
+
+makefile:	make.template
+		cd $(VPATH); rm -f makefile; cp make.template makefile; \
+		make -f make.template sources depend
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
+		@echo makefile remade -- you must rerun make.
+		exit 1
+
+# Don't add anything after the next line; makedepend will zap it.
+# DO NOT DELETE THIS LINE -- make depend depends on it.
+
+
+
