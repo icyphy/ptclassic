@@ -57,6 +57,13 @@ first-order feedback coefficient which is a function of k and N }
 		desc { internal state. does not persist across invocations. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
+	defstate {
+		name { halfd1 }
+		type { fix }
+		default { "0.0" }
+		desc { internal state. does not persist across invocations. }
+		attributes { A_NONCONSTANT|A_NONSETTABLE }
+	}
 	protected {
 		double theta;
 	}
@@ -96,28 +103,33 @@ first-order feedback coefficient which is a function of k and N }
 		double kd = int(k);
 		double Nd = int(N);
 		theta = -2.0 * M_PI * kd / Nd;
-		d1 = 2.0 * cos(theta);
+		halfd1 = cos(theta);
+		d1 = 2.0 * halfd1;
 		input.setSDFParams(int(size), int(size)-1);
 	}
 
 	codeblock(init) {
-; move constant d1 into y0 where d1 = 2 cos(theta) such that
-; theta = 2 Pi k / N for the kth coefficient of an N-point DFT
+; Goertzel algorithm relies on one feedback coefficient d1 = 2 cos(theta)
+; such that theta = 2 Pi k / N for the kth coefficient of an N-point DFT.
+; Register usage:
 ; r0: base address for the block of input samples
 ; x0: value of one-sample delay (state1)
 ; x1: value of two-sample delay (state2)
-		clr	a	#<$addr(input),r0	#$val(d1),y0
-		clr	b	a,x1
+; y0: feedback coefficient d1 divided by 2
+; y1: ith input value
+	clr	a	#<$addr(input),r0		; a = 0
+	clr	b	a,x1	#$val(halfd1),y0		; x1 = 0 and y0 = d1/2
 	}
 
 	codeblock(loop,"int len") {
-; Run all-pole section of Goertzel's algorithm N iterations.
-		do	#@len,$label(_GoertzelBase)	; begin loop
-		move	x:(r0)+,a	a,x0		; save previous a
-		mac	x0,y0,a
+; Begin loop for Goertzel algorithm: run all-pole section for @len iterations
+	do	#@len,$label(_GoertzelBase)
+	addl	a,b		x:(r0)+,a	; b = a + 2*b and a = x[n]
+	sub	x1,a		b,x0		; a = x[n] - state2
 $label(_GoertzelBase)
-		sub	x1,a		x0,x1		; end loop
-		mac	y0,x1,b		a,x0		; b = d1*state2
+	macr	x0,y0,b		x0,x1		; b = (d1/2)*state1 and x1 = x0
+; End loop to compute Goertzel algorithm
+	asl	b		a,x0		; b = d1*state2
 	}
 
 	go {
@@ -140,6 +152,6 @@ $label(_GoertzelBase)
 		// Gabriel: they simply counted the number of instructions.
 
 		// However, the do command takes 3 pairs of oscillator cycles
-		return (4 + 3*int(N));
+		return (3 + 3 + 3*int(N));
 	}
 }
