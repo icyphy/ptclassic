@@ -186,7 +186,7 @@ int Tcl_AppInit(Tcl_Interp *interp)
      * then no user-specific startup file will be run under any conditions.
      */
 
-#if TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION >= 5
+#if (TCL_MAJOR_VERSION >= 7 && TCL_MINOR_VERSION >= 5) || (TCL_MAJOR_VERSION >=8)
     Tcl_SetVar(interp, "tcl_rcFileName", "~/.ptclrc", TCL_GLOBAL_ONLY);
 #else
     tcl_RcFileName = "~/.ptclrc";
