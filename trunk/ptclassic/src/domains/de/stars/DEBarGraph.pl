@@ -7,6 +7,8 @@ a zero-order hold to interpolate between event values.
 Two points are plotted for each event, one when the event
 first occurs, and the second when the event is supplanted
 by a new event.  A horizontal line then connects the two points.
+If "draw_line_to_base" is YES then a vertical line to the base
+of the bar graph is also drawn for each event occurrence.
 	}
 	version { $Id$ }
 	author { Brian Evans and Edward Lee }
@@ -33,6 +35,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		type {string}
 		default {""}
 		desc { File to save xgraph input.}
+	}
+	defstate {
+		name { draw_line_to_base }
+		type { int }
+		default { "NO" }
+		desc { Specifies vertical line to base. }
 	}
 	defstate {
 		name {base}
@@ -77,7 +85,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		      firstPointFlags[port] = FALSE;
 		    else
 		      graph.addPoint(port, arrivalTime, lastDataValues[port]);
-		    graph.addPoint(port, arrivalTime, base);
+		    if (int(draw_line_to_base))
+		      graph.addPoint(port, arrivalTime, base);
 		    graph.addPoint(port, arrivalTime, data);
 		    lastDataValues[port] = data;
 		  }
