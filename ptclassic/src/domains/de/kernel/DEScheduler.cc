@@ -294,10 +294,13 @@ int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
 	}
 }
 
-// detect any delay-free loop which will potentially generate an
+// detect any delay-free loop which may potentially generate an
 // infinite loop at runtime.  If there is no delay-free loop, this
 // routine automatically initialize the "depth" member of the portholes
 // for later use from "setDepth()" method.
+// By putting a initial delay on a feedback arc, we can intentionally
+// create a delay-free loop: the programmer is in charge of the
+// possibilities of an infinite loop.
 
 int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 
@@ -325,7 +328,8 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 
 		if (!fromP->depth) 	return TRUE;
 		else if (fromP->depth < 0) {
-			if (fromP->far()->isItInput()) {
+			if (fromP->numTokens()) fromP->depth = 0;
+			else if (fromP->far()->isItInput()) {
 			   	fromP->depth = 1;
 				if (!checkLoop(fromP->far(), s)) return FALSE;
 			   	fromP->depth = 0;
@@ -384,7 +388,8 @@ int DEScheduler :: checkLoop(PortHole* p, DEStar* s) {
 		}
 	   // 2. If it is an output, look at the connected input.
 	   } else if (!s->delayType) {
-		if (dp->far()->isItInput()) {
+		if (dp->numTokens()) dp->depth = 0;
+		else if (dp->far()->isItInput()) {
 			dp->depth = 1;
 			if(!checkLoop(dp->far(),(DEStar*) dp->far()->parent()))
 				return FALSE;
