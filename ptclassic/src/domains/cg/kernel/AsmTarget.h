@@ -101,6 +101,9 @@ public:
 	ProcMemory* lookupSharedEntry(State&,unsigned&);
 
 protected:
+	/*virtual*/ void setup();
+	/*virtual*/ void mailLoopCode();
+
 	ProcMemory* mem;
 
 	// what it says
@@ -128,6 +131,10 @@ protected:
 	const char* auxStarClass() const;
 
 	/*virtual*/ void frameCode();
+	/*virtual*/ void mainLoopCode();
+
+	CodeStream mainLoop;
+	CodeStream trailer;
 
 private:
 	void initStates();
