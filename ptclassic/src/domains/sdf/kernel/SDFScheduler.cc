@@ -64,11 +64,11 @@ SDFSchedule :: printVerbose () {
 int SDFScheduler :: run (Block& galaxy) {
 	if (invalid) {
 		errorHandler.error ("SDF schedule is invalid -- can't run");
-		return;
+		return FALSE;
 	}
 	if (haltRequestFlag) {
 		errorHandler.error ("Can't continue after run-time error");
-		return;
+		return FALSE;
 	}
 	galaxy;			// dummy statement
 	while (numItersSoFar < numIters && !haltRequestFlag) {
@@ -77,6 +77,7 @@ int SDFScheduler :: run (Block& galaxy) {
 		numItersSoFar++;
 	}
 	numIters++;
+	return TRUE;
 }
 
 	////////////////////////////
@@ -286,7 +287,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 			// all blocks connected to the current block.
 			star.repetitions = 1;
 			reptConnectedSubgraph(star);
-			if (invalid) return;
+			if (invalid) return FALSE;
 		}
 	}
 
@@ -301,6 +302,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 		star.repetitions *= Fraction(lcm);
 		star.repetitions.simplify();
 	}
+	return TRUE;
 }
 
 
@@ -322,7 +324,7 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 			msg += " is not connected!";
 			errorHandler.error (msg);
 			invalid = TRUE;
-			return;
+			return FALSE;
 		} else if (nearPort.isItInput() == nearPort.far()->isItInput())
 			// if the port is at the boundary of the wormhole.
 			continue;
@@ -334,6 +336,7 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 		if(reptArc(nearPort,farPort))
 			reptConnectedSubgraph (*(farPort.parent()));
 	}
+	return TRUE;
 }
 
 
@@ -548,7 +551,6 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 int SDFScheduler :: notRunnable (SDFStar& atom) {
 
 	int i, v = 0;
-	SDFPortHole* port;
 
 	// Check to see whether the requisite repetitions have been met.
 	if (atom.repetitions.numerator <= atom.noTimes)
