@@ -77,8 +77,9 @@ delayfreeloops again and update the porthole priorities.
 Using <i>scanEventList()</i> and <i>scanGalaxyForContents()</i> I go down the 
 block's hierarchy until I only deal with atomic elements (<tt>stars</tt>). 
 For each star I check the current eventQueue for any pending pointer to it 
-(CQScheduler) or for any pending pointer to any of its input-portholes 
-(DEScheduler) using <i>deletePendingEventsOfStar</i> or <i>deletePendingEventsOfPortHole</i>, which should be self-exploratory both.
+(CQScheduler and MutableCQSCheduler) or for any pending pointer to any of its 
+input-portholes (DEScheduler) using <i>deletePendingEventsOfStar</i> or 
+<i>deletePendingEventsOfPortHole</i>, which should be self-exploratory both.
 <p>
 <h3>Setting parameter values:</h3>
 <p>
@@ -110,9 +111,9 @@ FIXME: The eventlist is to re-sort after the configuration changed. Thanks to To
 <tt>HOFBase</tt>. Former versions of <tt>DEDynMapBase</tt> called that code 
 directly. But, Tom Lane changed the HOF-stars. So, I copied the older code 
 directly into this file, having the advantage of being independent of further 
-changes in HOF now. }
+changes in HOF now. MutableCQScheduler incorporated by John S. Davis II}
     location { $PTOLEMY/src/domains/de/contrib/stars }
-    hinclude { "checkConnect.h", "CQScheduler.h", "DEScheduler.h", "DERepeatStar.h", "DEDynMerge.h", "KnownBlock.h", "InfString.h", <list.h>, <stack.h> }
+    hinclude { "checkConnect.h", "MutableCQScheduler.h", "CQScheduler.h", "DEScheduler.h", "DERepeatStar.h", "DEDynMerge.h", "DETarget.h", "KnownBlock.h", "InfString.h", <list.h>, <stack.h> }
     ccinclude { "ptk.h" }
     defstate {
         name { blockname }
@@ -161,6 +162,7 @@ changes in HOF now. }
         Block *delBlock_p;
         DEScheduler *myDEScheduler_p;
         CQScheduler *myCQScheduler_p;
+        MutableCQScheduler *myMutCQScheduler_p;
     }
     header {
         struct blockCounter {
@@ -408,6 +410,8 @@ changes in HOF now. }
                 // to set the depth of the PortHoles
                 if (((myDEScheduler_p != NULL) && 
                 (!myDEScheduler_p->checkDelayFreeLoop())) || 
+                ((myMutCQScheduler_p != NULL) && 
+                (!myMutCQScheduler_p->checkDelayFreeLoop())) || 
                 ((myCQScheduler_p != NULL) && 
                 (!myCQScheduler_p->checkDelayFreeLoop()))) {
                     Error::abortRun(*this,
@@ -418,6 +422,8 @@ changes in HOF now. }
                 // the porthole priorities (depth) have to be updated
                 if (((myDEScheduler_p != NULL) && 
                 (!myDEScheduler_p->computeDepth())) || 
+                ((myMutCQScheduler_p != NULL) && 
+                (!myMutCQScheduler_p->computeDepth())) || 
                 ((myCQScheduler_p != NULL) && 
                 (!myCQScheduler_p->computeDepth()))) {
                     Error::abortRun(*this,
@@ -439,6 +445,31 @@ changes in HOF now. }
                 const char *value = parameter_map[i];
                 block_p->setState(name, value);
             }
+            return;
+        }
+    }
+    method {
+        name { makeStarsMutable }
+        type { void }
+        access { private }
+        arglist { "(Block *block_p)" }
+        code {
+	    // Block is a star
+	    if( block_p->isItAtomic() ) {
+		if( block_p->isA("DEStar") ) {
+		    DEStar *deStar = (DEStar *)block_p;
+		    deStar->makeMutable();
+		    return;
+		}
+	    }
+	    // Block is a galaxy
+	    else {
+		GalTopBlockIter next( (block_p->asGalaxy()) );
+		Block *nextBlock;
+		while( (nextBlock = next++) != NULL ) {
+		    makeStarsMutable( nextBlock );
+		}
+	    }
             return;
         }
     }
@@ -538,6 +569,16 @@ changes in HOF now. }
             // then their default values are set during initialization
             setParameter(block_p);
 
+	    // If the Mutable target is being used, make the DE 
+	    // Stars mutable. Note here that we assume that if
+	    // one wants to use the MutableCalendarQueue, then
+	    // they will take advantage of it w.r.t. all stars
+	    // involved.
+	    DETarget *tar = (DETarget *)target();
+	    if( tar->isMutable() ) {
+	        makeStarsMutable(block_p);
+	    }
+
             // the block is fully connected now, initialize it
             if (!Scheduler::haltRequested()) block_p->initialize();
             if (Scheduler::haltRequested()) return;
@@ -552,6 +593,8 @@ changes in HOF now. }
             // to set the PortHole depths
             if (((myDEScheduler_p != NULL) && 
             !(myDEScheduler_p->checkDelayFreeLoop())) || 
+            ((myMutCQScheduler_p != NULL) && 
+            !(myMutCQScheduler_p->checkDelayFreeLoop())) || 
             ((myCQScheduler_p != NULL) && 
             !(myCQScheduler_p->checkDelayFreeLoop()))) {
                 Error::abortRun(*this,
@@ -562,6 +605,8 @@ changes in HOF now. }
             // the porthole priorities (depth) have to be updated
             if (((myDEScheduler_p != NULL) && 
             (!myDEScheduler_p->computeDepth())) || 
+            ((myMutCQScheduler_p != NULL) && 
+            (!myMutCQScheduler_p->computeDepth())) || 
             ((myCQScheduler_p != NULL) && 
             (!myCQScheduler_p->computeDepth()))) {
                 Error::abortRun(*this,
@@ -583,7 +628,8 @@ changes in HOF now. }
                 if (block_p->isItAtomic()) {
                     // our block is just a star, that's easy to deal with
                     if (block_p->isA("DERepeatStar")) {
-                        DERepeatStar& mySource = (DERepeatStar&) block_p->asStar();
+                        DERepeatStar& mySource = 
+		                (DERepeatStar&) block_p->asStar();
                         DERepeatStar *mySource_p = &mySource;
                         mySource_p->arrivalTime = myScheduler_p->now();
                         mySource_p->completionTime = myScheduler_p->now();
@@ -613,7 +659,8 @@ changes in HOF now. }
                     // is it a RepeatStar?
                     if (myBlock_p->isA("DERepeatStar")) {
                         // it is
-                        DERepeatStar& mySource = (DERepeatStar&) myBlock_p->asStar();
+                        DERepeatStar& mySource = 
+		                (DERepeatStar&) myBlock_p->asStar();
                         DERepeatStar *mySource_p = &mySource;
                         mySource_p->arrivalTime = myScheduler_p->now();
                         mySource_p->completionTime = myScheduler_p->now();
@@ -665,7 +712,70 @@ changes in HOF now. }
         access { private }
         arglist { "(Star *myStar_p)" }
         code {
-            // we have "read" access to the block's private PortHoleList 
+	    // In the case of the mutable calendar queue, things are
+	    // relatively simple.
+            if (myMutCQScheduler_p) {
+		// DE Stars are easiest
+		if( myStar_p->isA("DEStar") ){
+		    DEStar * deStar = (DEStar *)myStar_p;
+		    deStar->clearAllPendingEvents(); 
+		    return;
+		}
+
+		// Check to see if non-DE stars are on a wormhole boundary.
+		// If not, then there should be no pending events. If so,
+		// we'll have to remove pending events using a brute force
+		// approach.
+		else { 
+		    BlockPortIter next(*myStar_p); 
+		    PortHole *myPortHole_p; 
+		    while ((myPortHole_p = next++) != NULL) {
+
+                        if( myPortHole_p->atBoundary() ){
+			    int numberOfEvents = 
+				    myMutCQScheduler_p->eventQ.length();
+                            CqLevelLink *store = NULL;
+                            while ( numberOfEvents ) {
+                                numberOfEvents--; 
+				// get the first entry from the list 
+				CqLevelLink *cqll_p = 
+					myMutCQScheduler_p->eventQ.get(); 
+				// for which star is that entry ?
+                                Star *thatStar_p = cqll_p->dest; 
+				// if this is the star under consideration ...
+				if ( myStar_p == thatStar_p ) { 
+				    // ... put it to the free links 
+				    myMutCQScheduler_p->
+					    eventQ.putFreeLink(cqll_p);
+                                }  
+                                else {
+                                     // check the next entry 
+				     cqll_p->next = store; 
+				     store = cqll_p;
+                                }
+                            }
+                            // put all still needed entries back into the queue 
+			    while (store != NULL) { 
+				CqLevelLink *temp = store; 
+				store = (CqLevelLink *)store->next; 
+				myMutCQScheduler_p->eventQ.pushBack(temp); 
+			    } 
+
+			    // No need to check other portholes as we
+			    // have removed all pending events from the Queue.
+			    return;
+                        }     
+
+		    } 
+
+	        } 
+		// We have exhausted all possibilities given that
+		// the MutableCQScheduler is being used. 
+		return;
+	    } 
+
+
+            // We have "read" access to the block's private PortHoleList 
             // using the Iterator
             BlockPortIter next(*myStar_p);
             PortHole *myPortHole_p;
@@ -741,8 +851,19 @@ changes in HOF now. }
         name { deletePendingEventsOfPortHole }
         type { void }
         access { protected }
-        arglist { "(PortHole *myPortHole_p)" }
+        arglist { "(DEPortHole *myPortHole_p)" }
         code {
+	    // In the case of the mutable calendar queue, things are
+	    // relatively simple.
+            if (myMutCQScheduler_p) {
+                // we need the star our porthole belongs to
+		// FIXME: Are we sure that the parent of this PortHole
+		// will be a DEStar??
+                DEStar* myStar_p = (DEStar *)myPortHole_p->parent();
+		myStar_p->clearPendingEventsOfPortHole(myPortHole_p);
+		return;
+	    }
+
             // again, we have to deal with two different schedulers in DE
             if (myDEScheduler_p) {
                 // we use the simple DEscheduler
@@ -922,28 +1043,26 @@ changes in HOF now. }
         // need a pointer to this star's parent
         mom = myParent();
                 
-        // we need a pointer to the current scheduler
-        // scheduler() is recursively called untill a block with a scheduler
-        // is reached
-        // At this time (0.7) we have two different types of DE-scheduler.
+        // We need a pointer to the current scheduler.
+        // scheduler() is recursively called until a block with a scheduler
+        // is reached. At this time we have three different DE schedulers.
         // We have to check which one is currently used and have to use a 
-        // correct pointer. The other pointer is set to NULL for safety 
+        // correct pointer. The other pointers are set to NULL for safety 
         // reasons.
         myDEScheduler_p = NULL;
         myCQScheduler_p = NULL;
+        myMutCQScheduler_p = NULL;
         myScheduler_p = (DEBaseSched *)scheduler();
         if ( myScheduler_p->isA("DEScheduler") ) {
             myDEScheduler_p = (DEScheduler *)scheduler();
-        }
-        else {
-            if  ( myScheduler_p->isA("CQScheduler") ) {
-                myCQScheduler_p = (CQScheduler *)scheduler();
-            }
-            else {
-                Error::abortRun(*this,
-                "Mr. Ptolemy doesn't know this type of DEScheduler");
-                return;
-            }
+        } else if ( myScheduler_p->isA("CQScheduler") ) {
+            myCQScheduler_p = (CQScheduler *)scheduler();
+	} else if ( myScheduler_p->isA("MutableCQScheduler") ) {
+            myMutCQScheduler_p = (MutableCQScheduler *)scheduler();
+        } else {
+            Error::abortRun(*this,
+            "Mr. Ptolemy doesn't know this type of DEScheduler");
+            return;
         }
     }	
 }   
