@@ -80,6 +80,7 @@ proc ::tkMbLeave {arg} {
 proc ::tycho::safeUpdate {obj} {
     update
     if {[uplevel #0 info objects $obj] == {}} {
+        puts "command aborted: $obj does not exist"
         ::tycho::silentError
     }
     return 0
