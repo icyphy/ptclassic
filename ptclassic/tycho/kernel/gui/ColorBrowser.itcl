@@ -55,7 +55,7 @@
 #
 proc ::tycho::querycolor {string {default {}}} {
     set name [autoName .color]
-    uplevel #0 ::tycho::ColorBrowser $name -text $string
+    uplevel #0 [list ::tycho::ColorBrowser $name -text $string]
     if {$default != {}} {
         $name configure -default $default
     }
