@@ -47,6 +47,8 @@ install:	$(BINDIR)/ptplay
 
 ptplay.cfront ptplay.sol2: ptplay.sun4
 	ln -s $^ $@ 
+ptplay.irix4: ptplay.irix5
+	ln -s $^ $@ 
 ptplay.hppa.cfront: ptplay.hppa
 	ln -s $^ $@ 
 
