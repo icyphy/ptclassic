@@ -38,7 +38,8 @@
 # dismissed).
 #
 proc ::tycho::askuser {question} {
-    return [DialogWindow::newModal YesNoQuery [autoName .yesno] \
+    return [::tycho::DialogWindow::newModal YesNoQuery \
+	    [::tycho::autoName .yesno] \
 	    -text $question]
 }
 
@@ -56,10 +57,12 @@ class ::tycho::YesNoQuery {
     inherit ::tycho::DialogWindow
 
     # The command to execute on a yes response.
-    itk_option define -yescommand yescommand YesCommand "DialogWindow::answer 1"
+    itk_option define -yescommand yescommand YesCommand \
+	    "::tycho::DialogWindow::answer 1"
 
     # The command to execute on a no response
-    itk_option define -nocommand nocommand NoCommand "DialogWindow::answer 0"
+    itk_option define -nocommand nocommand NoCommand \
+	    "::tycho::DialogWindow::answer 0"
 
     constructor {args} {}
 }
@@ -75,17 +78,17 @@ body ::tycho::YesNoQuery::constructor {args} {
     # Pack the yes and no buttons.
     #
     addButton yes -text "Yes <Ret>" -command \
-	    "$this execCommand -yescommand; \
+	    [code "$this execCommand -yescommand; \
 	    $this nextWindow; \
-	    delete object $this"
+	    delete object $this"]
     addButton no -text "No <Esc>" -command \
-	    "$this execCommand -nocommand; \
+	    [code "$this execCommand -nocommand; \
 	    $this nextWindow; \
-	    delete object $this"
+	    delete object $this"]
     default yes
 
-    bind $prefix <Return> "$this invoke yes"
-    bind $prefix <Escape> "$this invoke no"
+    bind $prefix <Return> [code "$this invoke yes"]
+    bind $prefix <Escape> [code "$this invoke no"]
 
     #
     # Explicitly handle configs that may have been ignored earlier.

@@ -35,7 +35,7 @@
 # Warn the user, and return only after the user has acknowledged.
 #
 proc ::tycho::warn {msg} {
-    DialogWindow::newModal Message [autoName .message] \
+    ::tycho::DialogWindow::newModal Message [::tycho::autoName .message] \
 	    -text $msg -bitmap warning
 }
 
@@ -45,7 +45,7 @@ proc ::tycho::warn {msg} {
 # the user has acknowledged.
 #
 proc ::tycho::inform {msg} {
-    DialogWindow::newModal Message [autoName .message] \
+    ::tycho::DialogWindow::newModal Message [::tycho::autoName .message] \
 	    -text $msg -bitmap info
 }
 
@@ -55,8 +55,8 @@ proc ::tycho::inform {msg} {
 # The name of the window is returned.
 #
 proc ::tycho::post {msg {title ""}} {
-    return [DialogWindow::new Message [autoName .message] -text $msg \
-	    -title $title]
+    return [::tycho::DialogWindow::new Message \
+	    [::tycho::autoName .message] -text $msg -title $title]
 }
 
 ##########################################################################
@@ -65,8 +65,8 @@ proc ::tycho::post {msg {title ""}} {
 # The name of the window is returned.
 #
 proc ::tycho::postLong {msg {title ""}} {
-    return [DialogWindow::new Message [autoName .message] -scrolltext $msg \
-	    -title $title]
+    return [::tycho::DialogWindow::new Message \
+	    [::tycho::autoName .message] -scrolltext $msg -title $title]
 }
 
 # COMPATIBILITY procedures.  The following procedures emulate the behavior
@@ -74,8 +74,8 @@ proc ::tycho::postLong {msg {title ""}} {
 # The window names in these arguments are ignored (since they bring
 # up modal dialogs, the window names are not important anyway).
 #
-proc ptkMessage {text} {::tycho::inform $text}
-proc ptkInform {win text} {::tycho::inform $text}
+proc ::ptkMessage {text} {::tycho::inform $text}
+proc ::ptkInform {win text} {::tycho::inform $text}
 
 ##########################################################################
 #### Message

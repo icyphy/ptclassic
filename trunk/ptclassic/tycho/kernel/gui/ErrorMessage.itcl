@@ -41,8 +41,8 @@
 proc ::tkerror {msg} {
     # Handle the blank message case
     if {$msg == ""} {set msg "Tcl reports an error"}
-
-    ::tycho::DialogWindow::newModal ErrorMessage [::tycho::autoName .error] \
+    ::tycho::DialogWindow::newModal ErrorMessage \
+	    [::tycho::autoName .error] \
 	    -text $msg -bitmap error
 }
 
@@ -61,7 +61,7 @@ proc ::tycho::showStack {args} {
 	append trace "\n"
         append trace "$level $i: [info level $i]"
     }
-    post $trace
+    ::tycho::post $trace
 }
 
 # COMPATIBILITY procedures.  The following procedures emulate the behavior
@@ -69,10 +69,10 @@ proc ::tycho::showStack {args} {
 # The window names in these arguments are ignored (since they bring
 # up modal dialogs, the window names are not important anyway).
 #
-proc ptkImportantMessage {win msg} {::tkerror $msg}
-proc ptkDisplayErrorInfo {} {
-    global errorInfo
-    # We have to return immediately, or the pigiRpc gets into
+proc ::ptkImportantMessage {win msg} {::tkerror $msg}
+proc ::ptkDisplayErrorInfo {} {
+    global ::errorInfo
+    # We have to return immediately, or the pigiRpc process gets into
     # very bad state where it hangs on an Rpc call.
     after 1 [list ::tycho::post $errorInfo]
 }
@@ -97,6 +97,9 @@ class ::tycho::ErrorMessage {
 
     # Show the stack trace in a window, if there is one.
     method stackTrace {} {}
+
+    # Store the error information locally.
+    private variable localErrorInfo {}
 }
 
 ##########################################################################
@@ -104,9 +107,10 @@ class ::tycho::ErrorMessage {
 #
 body ::tycho::ErrorMessage::constructor {args} {
     # Pack the stack trace button, if there is error info.
-    global errorInfo
+    global ::errorInfo
     if {$errorInfo != ""} {
-	addButton trace -text "Stack Trace" -command "$this stackTrace"
+	addButton trace -text "Stack Trace" -command [code "$this stackTrace"]
+	set localErrorInfo $errorInfo
     }
 
     # In case there is a Ptolemy system running, halt it.
@@ -114,8 +118,7 @@ body ::tycho::ErrorMessage::constructor {args} {
     # To avoid losing information in the stack trace, we have to save it.
     set savestack $errorInfo
     catch {::tycho::halt}
-    set errorInfo $savestack
-
+    uplevel #0 [list set errorInfo $savestack]
     # Process any unevaluated arguments.
     eval itk_initialize $args
 }
@@ -125,15 +128,14 @@ body ::tycho::ErrorMessage::constructor {args} {
 # Show the stack trace in a window, if there is one.
 #
 body ::tycho::ErrorMessage::stackTrace {} {
-    global errorInfo
-    if {$errorInfo != ""} {
-	set nm [autoName .stack]
-	EditStack $nm \
-		-text "The most recent stack trace found is:\n$errorInfo"
+    if {$localErrorInfo != ""} {
+	set nm [::tycho::autoName .stack]
+	::tycho::EditStack $nm \
+		-text "The most recent stack trace found is:\n$localErrorInfo"
 	$nm configure -readonly 1
 	$nm centerOnScreen
     } {
-	warn "No stack trace found"
+	::tycho::warn "No stack trace found"
     }
     nextWindow
     delete object $this
