@@ -59,7 +59,7 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
 	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxCOMPLEX);
 	realp = mxGetPr(matlabMatrix);
 	imagp = mxGetPi(matlabMatrix);
-	Complex temp = particle;
+	Complex temp = (const Complex &)particle; // Cast needed for nt4.vc
 	*realp = real(temp);
 	*imagp = imag(temp);
     }
