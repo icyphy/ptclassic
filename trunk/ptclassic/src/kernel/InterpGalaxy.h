@@ -146,28 +146,31 @@ public:
 			    const char* outerDomain,
 			    Target* innerTarget = 0);
 
-// return a contained star/galaxy (this is protected in Galaxy)
-	Block* blockWithName(const char* s) {return Galaxy::blockWithName(s);}
-
-// This method lets us get at lower-level galaxies
+// Return a contained star/galaxy; this is like Galaxy::blockWithName
+// but it lets us get at lower-level galaxies
 	Block* blockWithDottedName(const char* s);
+
+// Given a porthole, determine the block name and porthole name that name it
+// in this galaxy.  This is nontrivial since the desired name may be for an
+// alias leading to the given porthole.  Returns TRUE if successful.
+	int getPortHoleName (GenericPort& port,
+			     const char* & blockName, const char* & portName);
 
 // Register a connection that needs to be reinitialized each time
 // preinitialize() is called.  Note that this is needed only if the
 // connection is created in some way that bypasses the connect
 // method here. The tag indicates what type of connection it is.
 // Use "B" for bus, "C" for ordinary, and "c" for node.
-// For "c", only the first four arguments and the 7th are needed
-// (set the 5th and 6th to zero).
-// For "C", the first 6 are needed.  For "B", all are needed.
-        void registerInit(const char* tag,
-			  const char* srcStar,
-			  const char* srcPort,
-			  const char* initDelayValues,
-			  const char* dstStar = 0,
-			  const char* dstPort = 0,
-			  const char* node = 0,
-			  const char* busWidth = 0);
+// For "c", only the first three arguments and the 5th are needed
+// (set dstPort to 0).
+// For "C", the first 4 are needed.
+// For "B", the first 4 and the last are needed (set node to 0).
+        void registerInit(const char*  tag,
+			  GenericPort* srcPort,
+			  const char*  initDelayValues,
+			  GenericPort* dstPort = 0,
+			  const char*  node = 0,
+			  const char*  busWidth = 0);
 
 // class identification
 	int isA(const char*) const;
