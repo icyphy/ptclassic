@@ -51,6 +51,9 @@ public:
 	// return zero if not associated with a fork buffer.
 	int forkDelay() const;
 
+	// return the maxNumParticles
+	int getMaxNum() { return maxNumParticles; }
+
 protected:
 	CGPortHole* src() {
 		return ((CGPortHole*)originatingPort)->forkSrc;
