@@ -127,9 +127,6 @@ class ::tycho::View {
     # Indicate whether modifying the text is allowed.
     protected variable readOnly 0
 
-    # "Type" of this view, used for placing windows in the Window menu
-    protected variable viewType {}
-
     ###################################################################
     ####                          private variables                ####
 
