@@ -1,0 +1,63 @@
+.\" $Id$
+.H1 "Creating Custom Versions of pigiRpc"
+.pp
+.Ir "pigiRpc, custom version"
+\*(PT is an extensible system.  Extensions can take the form
+of Universes and Galaxies, which are viewed by \*(PT as applications,
+but they can also take the form of additional code linked to the \*(PT
+kernel.  New stars can be dynamically linked (see the section on writing
+stars in the Almagest).  Other additional code has to be linked in
+statically.  If you add many of your own stars to the system,
+you will want these stars to be statically linked as well,
+so that you don't have to wait for the dynamic linking to complete
+every time you execute your applications.
+.pp
+The \*(PT kernel and VEM are separate Unix\** processes.
+.(f
+Unix is a trademark of AT&T.
+.)f
+The \*(PT kernel process is called ``pigiRpc'', while the VEM process
+is called ``vem''.
+.Ir pigiRpc
+You can create your own version of pigiRpc that contains your stars
+and other extensions permanently linked in.
+.pp
+The instructions for creating your own version of pigiRpc are contained
+in the file
+.(c
+~ptolemy/src/pigiRpc/MakeYourOwn
+.)c
+These instructions basically consist of copying a small set of files
+into a directory where you want your private version of pigiRpc to
+reside, say ~/PTOLEMY/MYPIGI, and editing these files.
+By editing the makefile, you can customize the configuration,
+specifying your own code that you want linked in, and removing
+domains that you do not want linked in.  To remove a domain, simply
+avoid linking any stars from that domain.
+You can easily create, for example, a version of pigiRpc that contains
+only the SDF domain.
+After editing these files according to the instructions, you must
+make pigiRpc:
+.(c
+cd ~/PTOLEMY/MYPIGI
+make pigiRpc
+.)c
+Alternatively, you can make a version of pigiRpc with debug
+symbols:
+.(c
+make pigiRpc.debug
+.)c
+Then you should set the environment variable PIGIRPC to point
+to your private version of pigiRpc. If you use csh:
+.(c
+setenv PIGIRPC ~/PTOLEMY/MYPIGI/pigiRpc
+.)c
+or
+.(c
+setenv PIGIRPC ~/PTOLEMY/MYPIGI/pigiRpc.debug
+.)c
+The next time you run pigi, it will use your private version of pigiRpc.
+To revert to using the installed pigiRpc, just type
+.(c
+unsetenv PIGIRPC
+.)c
