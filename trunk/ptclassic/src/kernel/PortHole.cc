@@ -236,11 +236,11 @@ void PortHole :: allocateBuffer()
 PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
                               DataType t) {
+// zero my plasma if my type is being changed.
+	if (t != myType()) myPlasma = 0;
 	GenericPort::setPort (s, parent, t);
 	numberTokens = 1;
 	bufferSize = numberTokens;
-	if (t != ANYTYPE)
-		myPlasma = Plasma::getPlasma(t);
         return *this;
 }
 
@@ -363,9 +363,13 @@ Plasma* const Mark = (Plasma*)1;
 
 Plasma*
 PortHole :: setPlasma (Plasma* useType) {
+
 // check for infinite recursion
-	
 	if (myPlasma == Mark) return 0;
+
+// Set initial value if not set and not ANYTYPE.
+	if (myPlasma == 0 && myType() != ANYTYPE)
+		myPlasma = Plasma::getPlasma(myType());
 
 // I am allowed to change my type only if I am an output porthole.
 // This happens if, say, an output of type FLOAT feeds an input of
@@ -411,8 +415,9 @@ PortHole :: setPlasma (Plasma* useType) {
 // If it is an output PortHole.
 	else {	
 		// first, if far() has known type, use it
-		if (far() && far()->myPlasma && far()->myPlasma != Mark) {
-			myPlasma = far()->myPlasma;
+		if (far() && far()->myPlasma != Mark &&
+		    (far()->myPlasma || far()->myType() != ANYTYPE)) {
+			myPlasma = far()->setPlasma();
 		}
 		// or, far() has typePort: set far() and use it
 		else if (far() && far()->typePort()) {
@@ -442,7 +447,6 @@ MultiPortHole :: setPlasma (Plasma* useType) {
 
 void PortHole :: initialize()
 {
-	// set plasma if not set
 	if (!setPlasma ()) {
 		Error::abortRun (*this, "can't determine DataType");
 		return;
@@ -639,6 +643,11 @@ void PortHole :: putParticle()
 		// Put it my buffer, replacing the used-up particle.
 		*p = myPlasma->get();
 	}
+}
+
+// PortList function
+void PortList::put(PortHole& p) {
+	SequentialList::put(&p);
 }
 
 // isa functions
