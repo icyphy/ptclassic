@@ -10,6 +10,9 @@ an out of bounds value is received.
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "table lookup"
+	}
 	input {
 		name { input }
 		type { int }

@@ -17,6 +17,11 @@ It also smooths out textures, so it is a useful pre-processing step
 before edge detection. It removes inter-field flicker quite well
 when displaying single frames from a moving sequence.
 	}
+	explanation {
+.Id "filter, median"
+.Id "image, median filter"
+.Id "median filtering"
+	}
 
 	ccinclude { "GrayImage.h", <std.h> }
 

@@ -15,7 +15,12 @@ plotted as it adapts.
 	location { SDF dsp library }
 	explanation {
 This star is exactly like the LMS star, except that, in addition,
-it makes a plot of the tap coefficients.  It can produce two types
+it makes a plot of the tap coefficients.
+.Id "adaptive filter with coefficient plotting"
+.Id "filter, adaptive, with coefficient plotting"
+.Id "filter, LMS, with coefficient plotting"
+.Id "LMS adaptive filter with coefficient plotting"
+It can produce two types
 of plots: a plot of the final tap values or a plot that traces the
 time evolution of each tap value: the time evolution is obtained
 if \fItrace\fP is YES.

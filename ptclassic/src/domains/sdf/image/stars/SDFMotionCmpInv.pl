@@ -13,6 +13,10 @@ unchanged to the output and discard the 'pastIn' input.
 For non-NULL 'mvIn' inputs, perform inverse motion compensation and
 write the result to 'output'.
 }
+	explanation {
+.Id "motion compensation, inverse"
+.Id "inverse motion compensation"
+	}
 
 
 //////// I/O AND STATES.

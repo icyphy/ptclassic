@@ -12,6 +12,8 @@ and "upper" (default 1).
 	location { SDF main library }
 	explanation {
 This Star uses the GNU library <Uniform.h>.
+.Id "uniform noise"
+.Id "noise, uniform"
 	}
 	output {
 		name { output }

@@ -25,6 +25,10 @@ When invoked as "play filename", where filename is a sequence of
 bytes representing mu-law PCM samples, the program should play
 the file at 8000 samples per second.  Perhaps later this rate can
 be a parameter.
+.Ir "mu-law"
+.Ir "play program"
+.Ir "audio, Sparcstation"
+.Ir "Sparcstation audio"
 	}
 	input {
 		name { input }

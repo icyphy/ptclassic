@@ -9,6 +9,7 @@ defstar {
 	explanation {
 Outputs natural log of input.
 If the input is zero or negative, the run is aborted.
+.Id "logarithm"
 	}
 	input {
 		name { input }

@@ -14,6 +14,9 @@ this range, an error is signaled.
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
 	location { SDF main library }
+	explanation {
+.Id "multiplexing"
+	}
 	inmulti {
 		name {input}
 		type {ANYTYPE}

@@ -15,6 +15,8 @@ coefficients with "<fileName".
 	explanation {
 .pp
 This star implements a finite-impulse response filter with multirate capability.
+.Id "filter, FIR"
+.Id "FIR filter"
 The default coefficients correspond to an eighth order, equiripple,
 linear-phase, lowpass filter.  The 3dB cutoff frequency at about 1/3
 of the Nyquist frequency.  To load filter coefficients from a file,
@@ -42,6 +44,9 @@ To design a filter for a multirate system, simply assume the
 sample rate is the product of the interpolation parameter and
 the input sample rate, or equivalently, the product of the decimation
 parameter and the output sample rate.
+.Ir "multirate filter design"
+.Ir "filter design, multirate"
+.Ir "filter, multirate"
 In particular, considerable care must be taken to avoid aliasing.
 Specifically, if the input sample rate is f,
 then the filter stopband should begin before f/2.

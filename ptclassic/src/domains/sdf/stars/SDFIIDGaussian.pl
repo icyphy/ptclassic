@@ -11,6 +11,8 @@ Generates a white Gaussian pseudo-random process with mean
 	location { SDF main library }
 	explanation {
 This Star uses the GNU library <Normal.h>
+.Id "Gaussian noise"
+.Id "noise, Gaussian"
 	}
 	output {
 		name { output }

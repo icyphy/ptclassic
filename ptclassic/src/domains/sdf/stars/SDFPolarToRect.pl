@@ -5,6 +5,13 @@ defstar {
 	version {$Id$}
 	author { E. A. Lee }
 	copyright { 1991 The Regents of the University of California }
+	explanation {
+.Id "polar to rectangular conversion"
+.Id "format conversion, polar to recangular"
+.Ir "magnitude"
+.Ir "phase"
+.Ir "Cartesian coordinates"
+	}
 	location { SDF main library }
 	input {
 		name { magnitude }

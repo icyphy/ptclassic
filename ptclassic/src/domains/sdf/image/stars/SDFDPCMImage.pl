@@ -10,6 +10,12 @@ If the 'past' input is not a GrayImage or has size 0, pass the 'input'
 directly to the 'output'. Otherwise, subtract the 'past' from the
 'input' (with leak factor 'alpha') and send the result to 'output'.
 	}
+	explanation {
+.Id "image DPCM"
+.Id "image compression"
+.Id "DPCM, image"
+.Id "compression, image"
+}
 
 	hinclude { "GrayImage.h", "Error.h" }
 

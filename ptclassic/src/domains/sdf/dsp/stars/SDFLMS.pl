@@ -17,6 +17,10 @@ Supports decimation, but not interpolation.
 	explanation {
 When correctly used, this filter will adapt to try to minimize
 the mean-squared error of the signal at its \fIerror\fR input.
+.Id "adaptive filter"
+.Id "filter, adaptive"
+.Id "filter, LMS"
+.Id "LMS adaptive filter"
 In order for this to be possible, the output of the filter should
 be compared (subtracted from) some reference signal to produce
 an error signal.
@@ -28,7 +32,7 @@ The number of delays must be greater than zero or the dataflow
 graph will deadlock.
 The adaptation algorithm used is the well-known LMS, or stochastic-gradient
 algorithm.
-.IE "stochastic gradient algorithm"
+.Ir "stochastic gradient algorithm"
 .lp
 If the \fIsaveTapsFile\fR string is non-null, a file will
 be created by the name given by that string, and the final tap values

@@ -18,6 +18,10 @@ This star can be derived from, to implement slightly different motion
 compensation algorithms. For example, synchronization techniques
 can be added or reduced-search motion compensation can be performed.
 }
+	explanation {
+.Id "motion compensation"
+.Id "image, motion compensation"
+}
 
 	hinclude { "GrayImage.h", "MVImage.h", "Error.h" }
 
