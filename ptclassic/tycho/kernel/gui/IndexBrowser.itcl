@@ -276,6 +276,7 @@ body ::tycho::IndexBrowser::updateListbox {} {
 		Should contain the form: name { items }"
     }
     configure -text [lindex $contents 0]
+    configure -title [lindex $contents 0]
     catch {unset entries}
     set items {}
     set count 1
