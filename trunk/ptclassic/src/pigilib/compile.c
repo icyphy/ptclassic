@@ -33,6 +33,9 @@ the xfered list or if it has been changed since the last transfer.
 #include "octIfc.h"
 #include "octMacros.h"
 
+void KcClearUniverse();
+void KcSetDesc();
+
 #define TERMS_MAX 50  /* maximum number of actual terms allowed on a net */
 
 DupSheet traverse;  /* used to traverse design heriarchy which is a DAG */
@@ -564,7 +567,10 @@ octObject *galInstPtr, *parentFacetPtr;
     }
     /* set outer domain */
     if (IsPalFacet(parentFacetPtr)) KcSetKBDomain(galDomain);
-    else setCurDomainF(parentFacetPtr);
+    else if (!setCurDomainF(parentFacetPtr)) {
+	PrintErr("Invalid domain found");
+	return FALSE;
+    }
 
     /* now do the compile */
     ERR_IF1(!UniqNameInit());
