@@ -9,6 +9,9 @@ ROOT=../../../..
 # True source directory
 VPATH = $(ROOT)/src/domains/X/targets
 
+# do this for Synopsys
+ARCH = $(PTARCH)
+
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
