@@ -7,14 +7,10 @@ PTOLEMY       = /usr/users/ptolemy
 PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
 HEADER        = $(PTOLEMY)/doc/headers/together
 MAINSEC	      = overall
-TMPFILE	      = tmp_print
+TMPFILE	      = $$HOME/Almagest.main
 OPTIONS       =
 
 DIRS = overview pigi interpreter ptlang domains documents xgraph filters vem
-SECTIONS = overview/$(TMPFILE) pigi/$(TMPFILE) \
-	interpreter/$(TMPFILE) ptlang/$(TMPFILE) \
-	domains/$(TMPFILE) documents/$(TMPFILE) \
-	xgraph/$(TMPFILE) filters/$(TMPFILE) vem/$(TMPFILE)
 
 MAKEVARS =	\
 		"PTOLEMY=$(PTOLEMY)" \
@@ -26,11 +22,12 @@ $(DIRS):
 	cd $@; $(MAKE) $(MFLAGS) $(MAKEVARS) print
 
 print:
+	rm -f $(TMPFILE)
 	for x in $(DIRS); do \
 		cd $$x ; \
-		soelim $(MAINSEC) > $(TMPFILE) ; \
+		soelim $(MAINSEC) >> $(TMPFILE) ; \
 		cd .. ; \
-	done ; \
-	$(PRINTSEC) $(OPTIONS) $(HEADER) init $(SECTIONS); \
-	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title; \
-	/bin/rm $(SECTIONS)
+	done
+	$(PRINTSEC) $(OPTIONS) $(HEADER) init $(TMPFILE)
+	ditroff -me -eqn -P$(PRINTER) $(PTOLEMY)/doc/headers/shared title
+#	/bin/rm $(TMPFILE)
