@@ -61,11 +61,15 @@ class</A> is used.
 <H2>Bugs</H2>
 <MENU>
 
-<LI> Since Itcl is dynamically scoped, it can be difficult to determine
-inheritance from just reading a file.  In particular, subtle
+<LI> Since Itcl is dynamically scoped, it can be difficult to
+determine inheritance from just reading a file.  In particular, subtle
 differences in namespaces can confuse this tool.  For example, the <A
-HREF="../../../../kernel/TWidget.itcl"><CODE>TWidget</CODE></A> class
-inherits from <CODE>::itk::Widget</CODE> with the following:
+HREF="../../../../kernel/gui/TWidget.itcl"><CODE>TWidget</CODE></A>
+class used to inherit from <CODE>::itk::Widget</CODE> with the
+following (this example is no longer accurate because
+<CODE>::tycho::TWidget</CODE> now inherits from
+<CODE>::tycho::TArchetype</CODE>, but the bug is still there :-):
+
 <PRE>
 class ::tycho::TWidget {
     inherit ::itk::Widget
