@@ -263,7 +263,7 @@ int Resource :: newEventFromEventQ(DERCEvent* e, double now) {
                     else {
                         //success is True only for the first event at the given
                         //time for this port
-                        int success = ((InDEPort*) port)->getFromQueue(sortArray[i]->p);
+                        ((InDEPort*) port)->getFromQueue(sortArray[i]->p);
 			// Remove this Event from the Array
 			//if (success) sortArray[i] = 0; 
                         // This implies that the simultaneous events to the 
@@ -478,9 +478,8 @@ void Resource :: intQupdate(DERCEvent* eventPointer, double newTime, double oldT
 // used to get the destination of the event as a DERC Star
 /////////////////////////////////////////////////////////////
 DERCStar* Resource :: getDERCStar(Event* e) {
-    Star* temp = &(e->dest->parent()->asStar());
-    DERCStar* tmp = (DERCStar*)temp;
-    return tmp;
+    DERCStar* temp = ((DERCStar*)&(e->dest->parent()->asStar()));
+    return temp;
 }
 
 // For some reason, under Cygwin32, we need to the body in the .cc file
