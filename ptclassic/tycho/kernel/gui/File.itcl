@@ -1557,6 +1557,12 @@ body ::tycho::File::initializeMenubar {menubar} {
 	    -label "Insert..." -underline 0 \
 	    -accelerator "C-x i" -command "$this insertFile"
     
+    $menubar command reload file \
+	    -label "Reload" -underline 0 \
+	    -command "$this reload"
+    
+    $menubar separator filesep1 file
+    
     $menubar command save file \
 	    -label "Save" -underline 0 \
 	    -accelerator "C-x C-s" -command "$this save"
@@ -1569,6 +1575,8 @@ body ::tycho::File::initializeMenubar {menubar} {
 	    -label "Print..." -underline 0 \
 	    -accelerator "C-x p" -command "$this print"
     
+    $menubar separator filesep2 file
+    
     $menubar command evaluate file \
 	    -label "Evaluate" -underline 0 \
 	    -accelerator "C-x C-r" -command "$this evaluate"
@@ -1577,17 +1585,13 @@ body ::tycho::File::initializeMenubar {menubar} {
 	    -label "Compare To..." -underline 2 \
             -command "$this compareTo "
 
-    $menubar command reload file \
-	    -label "Reload" -underline 0 \
-	    -command "$this reload"
-    
-    $menubar command togglereadonly file \
-	    -label "Toggle Read-Only" -underline 0 \
-	    -accelerator "C-x C-q" -command "$this toggleReadOnly"
-
     $menubar command revisioncontrol file \
 	    -label "Revision Control..." -underline 2 \
 	    -accelerator "C-x v" -command "$this revisionControl"
+
+    $menubar command togglereadonly file \
+	    -label "Toggle Read-Only" -underline 0 \
+	    -accelerator "C-x C-q" -command "$this toggleReadOnly"
 
     # Windows might have a chmod and RCS.
     if {$tcl_platform(platform) == "macintosh"} {
@@ -1595,7 +1599,7 @@ body ::tycho::File::initializeMenubar {menubar} {
 	$menubar disable revisioncontrol
     }
 
-    $menubar separator filesep1 file
+    $menubar separator filesepbot file
     
     $menubar command close file \
 	    -label "Close" -underline 0 -accelerator "C-x k" \
