@@ -23,6 +23,7 @@ $Id$
 // class  <T>State
 ///////////////////////////////////////////
 
+
 class <T>State : public State
 {
 public:
@@ -46,6 +47,8 @@ public:
 
 	// Evaluate expression  in string
 	ParseToken evalExpression(Tokenizer& lexer, Block* blockIAmIn);	
+	ParseToken evalTerm(Tokenizer& lexer, Block* blockIAmIn);	
+	ParseToken evalFactor(Tokenizer& lexer, Block* blockIAmIn);	
 
 	virtual State* clone ()  {return new <T>State;}
 
