@@ -22,6 +22,7 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 INCL = -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 
 LIB = libcgstars.$(LIBSUFFIX)
+DOMAIN_3 = AnyCG
 DOMAIN_2 = AnyAsm
 DOMAIN=CG
 STAR_MK=cgstars
@@ -32,6 +33,7 @@ PL_SRCS= \
  AnyAsmBlackHole.pl \
  AnyAsmFork.pl \
  AnyAsmGround.pl \
+ AnyCGPeekPoke.pl \
  CGRateChange.pl \
  CGMultiIn.pl \
  CGMultiInOut.pl \
