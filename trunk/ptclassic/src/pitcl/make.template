@@ -47,7 +47,7 @@ include $(CONFIG)
 
 # if you want to create a custom pigiRpc, define a override.mk
 # file that defines the necessary variables to pull in the domains
-# you want.  See $(ROOT)/mk/stars.mk.  This files must at least 
+# you want.  See $(ROOT)/mk/ptbin.mk.  This files must at least 
 # define the variable PTCL which defines the name of the ptcl executable.
 
 -include override.mk
