@@ -33,7 +33,7 @@ static char SccsId[]="$Id$";
  * Rick L Spickelmier, 3/20/86, last modified 4/3/87
  */
 
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "xvals.h"
 #include "list.h"
 #include "message.h"

@@ -71,7 +71,7 @@
 #include "oct.h"
 
 #ifndef XId
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #endif /* XId */
 
 #include "rpcInternal.h"

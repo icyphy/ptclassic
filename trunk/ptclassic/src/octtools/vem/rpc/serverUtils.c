@@ -31,7 +31,7 @@ static char SccsId[]="$Id$";
  * routines for translating to and from VEM and RPC arglists
  */
 
-#include "X11/Xlib.h"
+#include <X11/Xlib.h>
 #include "list.h"
 #include "message.h"
 #include "buffer.h"
