@@ -18,7 +18,7 @@ The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
 	}
-	version {$Id$ }
+	version { $Id$ }
 	author { E. A. Lee  }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
@@ -387,6 +387,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	    // Get the top-level port that we are connected to
 	    while (gpt = gp->aliasFrom()) {
 	      gp = gpt;
+	    }
+	    // If the multiporthole did not have an aliasFrom
+	    // porthole, it could still be that the original
+	    // porthole did.
+	    if (gp == mph) {
+	      gp = ph;
+	      while (gpt = gp->aliasFrom()) {
+		gp = gpt;
+	      }
+	      // If the original porthole also did not have an aliasFrom,
+	      // then make sure to return a pointer to its mph.
+	      if (gp == ph) gp = mph;
 	    }
 	    return gp;
 	  }
