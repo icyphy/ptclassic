@@ -67,9 +67,9 @@ ENABLE_GCC =		--enable-gcc
 ENABLE_SHARED =		`$(PTOLEMY)/src/tcltk/tcl_shared`
 
 ITCL_MAJOR_VERSION_NUMBER =	3.0
-ITCL_VERSION =		itcl$(ITCL_MAJOR_VERSION_NUMBER)
+ITCL_VERSION =		itcl$(ITCL_MAJOR_VERSION_NUMBER).1
 IWIDGETS_MAJOR_VERSION_NUMBER =	3.0.0
-TCLTK8_VERSION = 		8.0.3
+TCLTK8_VERSION = 		8.0.4
 TCLTK_MAJOR_VERSION_NUMBER = 	8.0 
 WINDOWSTCLTK_MAJOR_VERSION_NUMBER = 80
 
@@ -118,7 +118,7 @@ realclean:	clean_itcl
 
 all_tcltk8: 	configure_tcltk8 tcltk8 install_tcltk8
 configure_tcltk8: configure_tcl8 configure_tk8
-configure_tcl8: $(TCL8_OBJ)
+configure_tcl8: $(TCL8_OBJ) $(TCL8_SRC)/configure
 	@echo "Configuring tcl8"
 	(cd $(TCL8_OBJ); PWD=$(TCL8_OBJ); export PWD; \
 	$(TCL8_SRC)/configure \
@@ -127,7 +127,11 @@ configure_tcl8: $(TCL8_OBJ)
 		--exec-prefix=$(TCL8_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
-configure_tk8: $(TK8_OBJ)
+# We may need to run configure, esp. if we checked out from cvs
+$(TCL8_SRC)/configure: $(TCL8_SRC)/configure.in
+	(cd $(TCL8_SRC); autoconf)
+
+configure_tk8: $(TK8_SRC)/configure $(TK8_OBJ)
 	@echo "Configuring tk8"
 	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; \
 	$(TK8_SRC)/configure \
@@ -137,11 +141,17 @@ configure_tk8: $(TK8_OBJ)
 		--exec-prefix=$(TCL8_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
+# We may need to run configure, esp. if we checked out from cvs
+$(TK8_SRC)/configure: $(TK8_SRC)/configure.in
+	(cd $(TK8_SRC); autoconf)
+
 tcltk8:
 	(cd $(TCL8_OBJ); PWD=$(TCL8_OBJ); export PWD; $(MAKE))
 	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; $(MAKE))
 
 install_tcltk8: $(TCL8_DEST) $(TCL8_INDEPENDENT_DEST)
+	-chmod a+x $(TCL8_SRC)/install-sh $(TK8_SRC)/install-sh
+	-chmod a+x $(TCL8_SRC)/mkLinks $(TK8_SRC)/mkLinks
 	(cd $(TCL8_OBJ); PWD=$(TCL8_OBJ); export PWD; $(MAKE) install)
 	(cd $(TK8_OBJ); PWD=$(TK8_OBJ); export PWD; $(MAKE) install)
 
@@ -168,7 +178,14 @@ $(PTOLEMY)/src/tcltk/tcl_shared: FORCE
 
 $(ITCL_OBJ)/config.status: configure_itcl
 
-configure_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWIDGETS_OBJ)
+configure_itcl: $(ITCL_SRC)/configure \
+		$(ITCL_SRC)/itcl/unix/configure \
+		$(ITCL_SRC)/itk/unix/configure \
+		$(ITCL_SRC)/iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER)/unix/configure \
+		$(ITCL_SRC)/iwidgets2.2.0/unix/configure \
+		$(TCLTK_OBJ) $(ITCL_OBJ) \
+		$(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWIDGETS_OBJ) \
+		$(ITCL_OBJ)/iwidgets2.2.0
 	@echo "Configuring itcl"
 	(cd $(ITCL_OBJ); PWD=$(ITCL_OBJ); export PWD; \
 	$(ITCL_SRC)/configure \
@@ -176,6 +193,22 @@ configure_itcl: $(TCLTK_OBJ) $(ITCL_OBJ)  $(ITCL_OBJ)/itcl $(ITCL_OBJ)/itk $(IWI
 		--prefix=$(TCL8_INDEPENDENT_DEST) \
 		--exec-prefix=$(TCL8_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+# We may need to run configure, esp. if we checked out from cvs
+$(ITCL_SRC)/configure: $(ITCL_SRC)/configure.in
+	(cd $(ITCL_SRC); autoconf)
+$(ITCL_SRC)/itcl/unix/configure: $(ITCL_SRC)/itcl/unix/configure.in
+	(cd $(ITCL_SRC)/itcl/unix; autoconf)
+$(ITCL_SRC)/itk/unix/configure: $(ITCL_SRC)/itk/unix/configure.in
+	(cd $(ITCL_SRC)/itk/unix; autoconf)
+$(ITCL_SRC)/iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER)/unix/configure: \
+	$(ITCL_SRC)/iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER)/unix/configure.in
+	(cd $(ITCL_SRC)/iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER)/unix; \
+		autoconf);
+$(ITCL_SRC)/iwidgets2.2.0/unix/configure: \
+	$(ITCL_SRC)/iwidgets2.2.0/unix/configure.in
+	(cd $(ITCL_SRC)/iwidgets2.2.0/unix; \
+		autoconf);
 
 $(TCLTK_OBJ): 
 	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
@@ -186,6 +219,8 @@ $(ITCL_OBJ)/itcl: $(ITCL_OBJ)
 $(ITCL_OBJ)/itk: $(ITCL_OBJ)
 	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 $(IWIDGETS_OBJ): $(ITCL_OBJ)
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
+$(ITCL_OBJ)/iwidgets2.2.0:  $(ITCL_OBJ)
 	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 $(TCLTK_OBJ)/makefile:
@@ -232,6 +267,8 @@ $(ITCL_DEST_LIB): $(TCL8_DEST)
 
 $(ITCL_DEST_LIB)/libitcl.a: $(ITCL_DEST_LIB)
 	@echo "Making install in itcl"
+	-chmod a+x $(ITCL_SRC)/config/install-sh \
+		$(ITCL_SRC)/config/mkinstalldirs
 	(cd  $(ITCL_OBJ); $(MAKE) \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
@@ -286,7 +323,7 @@ fixlinks:
 # TclBlend
 
 TCLBLEND_MAJOR_VERSION = 1.1
-TCLBLEND_MINOR_VERSION = a1
+TCLBLEND_MINOR_VERSION = b1
 TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
 TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
@@ -331,6 +368,9 @@ test_tclblend:
 
 bean_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) bean)
+tcljavaSrcDist_tclblend:
+	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; \
+		$(MAKE) tcljavaSrcDist DISTDIR=$(TCLBLEND_OBJ)/dist)
 # Run JavaScope, the Java Code Coverage tool.
 # See http://www.suntest.com/JavaScope
 jsall_tclblend:
@@ -356,8 +396,8 @@ $(TCLBLEND_OBJ): $(TCLTK_OBJ)
 ######################################################
 # Jacl
 
-JACL_MAJOR_VERSION = 1.0
-JACL_MINOR_VERSION =
+JACL_MAJOR_VERSION = 1.1
+JACL_MINOR_VERSION = b1
 JACL_VERSION = $(JACL_MAJOR_VERSION)$(JACL_MINOR_VERSION)
 
 JACL_SRC =	$(TCLTK_SRC)/jacl$(JACL_VERSION)/unix
@@ -395,6 +435,54 @@ $(JACL_OBJ): $(TCLTK_OBJ)
 	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 
+
+######################################################
+# Tcljava
+# Tcljava is the combined Tcl Blend and Jacl source tree which is used
+# to create the individual Tcl Blend and Jacl tar files.
+# You will only need to run these rules if you are building 
+# Tcl Blend and Jacl releases.
+
+TCLJAVA_SRC =	$(TCLTK_SRC)/tcljava$(TCLBLEND_VERSION)/unix
+TCLJAVA_OBJ =	$(TCLTK_OBJ)/tcljava$(TCLBLEND_VERSION)
+
+# Script that checks for Java Studio
+JAVA_STUDIO_CONFIG=`$(PTOLEMY)/src/tcltk/java_studio`
+
+all_tcljava: configure_tcljava tcljava \
+		install_tcljava fixlinks_tcljava
+configure_tcljava: $(TCLJAVA_OBJ)
+	@echo "Configuring tcljava"
+	(cd $(TCLJAVA_OBJ); PWD=$(TCLJAVA_OBJ); export PWD; \
+		$(TCLJAVA_SRC)/configure \
+		--srcdir=$(TCLJAVA_SRC) \
+		--with-tcl=$(TCL8_OBJ) \
+		--prefix=$(TCLBLEND_INDEPENDENT_DEST) \
+		--exec-prefix=$(TCLBLEND_DEST) \
+		$(JAVA_STUDIO_CONFIG) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+tcljava:
+	(cd $(TCLJAVA_OBJ); PWD=$(TCLJAVA_OBJ); export PWD; $(MAKE) all)
+
+install_tcljava:
+	(cd $(TCLJAVA_OBJ); PWD=$(TCLJAVA_OBJ); export PWD; $(MAKE) install)
+
+fixlinks_tcljava:
+	-(cd $(BINDIR); ln -s $(REL_ITCL_BINDIR)/* .)
+
+clean_tcljava:
+	(cd $(TCLJAVA_OBJ); PWD=$(TCLJAVA_OBJ); export PWD; $(MAKE) clean)
+
+test_tcljava:
+	(cd $(TCLJAVA_OBJ); PWD=$(TCLJAVA_OBJ); export PWD; $(MAKE) test)
+
+dist_tcljava:
+	(cd $(TCLJAVA_OBJ); PWD=$(TCLJAVA_OBJ); export PWD; $(MAKE) dist)
+
+
+$(TCLJAVA_OBJ): $(TCLTK_OBJ)
+	@if [ ! -d $@ ]; then echo "Making directory $@"; mkdir $@; fi
 
 #######################
 clean_itcl:
