@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGTarget.h"
 #include "CGStar.h"
+#include "CGPortHole.h"
 #include "GalIter.h"
 #include "Error.h"
 #include "SDFScheduler.h"
@@ -68,7 +69,8 @@ StringList CGTarget::indent(int depth) {
 // constructor
 CGTarget::CGTarget(const char* name,const char* starclass,
 		   const char* desc, char sep)
-: Target(name,starclass,desc), schedFileName(0), noSchedule(0), inheritFlag(0)
+: Target(name,starclass,desc), schedFileName(0), noSchedule(0), inheritFlag(0),
+  defaultStream(&myCode)
 {
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
@@ -327,9 +329,20 @@ void CGTarget :: addStream(const char* name, CodeStream* code)
 	}
 }
 
+// Lookup a CodeStream by name.
 CodeStream* CGTarget :: getStream(const char* name)
 {
-	return codeStringLists.get(name);
+    CodeStream* stream;
+
+    if (name == NULL) stream = defaultStream;
+    else stream  = codeStringLists.get(name);
+
+    if (stream == NULL)
+    {
+	Error::abortRun(*this, "getStream: could not find ", name);
+    }
+
+    return stream;
 }
 
 
@@ -554,19 +567,6 @@ int CGTarget::systemCall(const char*command,const char*error,const char*host){
 const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
 {
     return sharedSymbol.lookup(scope, name);
-}
-
-void CGTarget :: switchCodeStream(Block* b, CodeStream* cs) {
-	CGStar* s;
-	if (b->isItAtomic()) {
-		s = (CGStar*) b;
-		s->myCode = cs;
-	} else {
-		Galaxy *g = (Galaxy*) b;
-		GalStarIter nextS(*g);
-		while ((s = (CGStar*) nextS++) != 0)
-			s->myCode = cs;
-	}
 }
 
 // do I support a given star

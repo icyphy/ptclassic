@@ -1,3 +1,6 @@
+#ifndef _CGTarget_h
+#define  _CGTarget_h 1
+
 /******************************************************************
 Version identification:
 $Id$
@@ -31,9 +34,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
-#ifndef _CGTarget_h
-#define  _CGTarget_h 1
-
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -45,8 +45,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SimControl.h"
 #include "CodeStreamList.h"
 #include "StringList.h"
-#include "CGStar.h"
+#include "DataFlowStar.h"
 
+class CGStar;
 class SDFSchedule;
 class SDFScheduler;
 
@@ -170,10 +171,10 @@ public:
     // of performing an SDF scheduler for a uni-processor target
     void copySchedule(SDFSchedule&);
     
-    // return the pointer of a code StringList given its name.  If it is 
-    // not found, This method allows stars to access a code StringList by 
-    // name.  If stream is not found, return NULL.
-    CodeStream* getStream(const char* name);
+    // Return a pointer to the named CodeStream.
+    // If name=NULL, return a pointer to defaultStream.
+    // Call Error::abortRun and return NULL on error.
+    CodeStream* getStream(const char* name=NULL);
 
     // Add a CodeStream to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
@@ -239,13 +240,12 @@ protected:
     // Symbols which are shared Target-wide.
     ScopedSymbolList sharedSymbol;
 
+    // The default stream.  Used by the getStream method.
+    CodeStream* defaultStream;
+
     // myCode contains the code generated for the target
     CodeStream myCode;
     CodeStream procedures;
-
-    // change the myCode pointer of the CGStars in the argument galaxy
-    // to the appropriate code stream.
-    void switchCodeStream(Block* b, CodeStream* s);
 
     // Host machine on which to compile or assemble code.
     StringState targetHost;
