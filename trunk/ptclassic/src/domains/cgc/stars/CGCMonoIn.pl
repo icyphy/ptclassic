@@ -94,6 +94,7 @@ provisions.
 	addCode("$sharedSymbol(CGCAudioBase,audio_setup)($starSymbol(file), $ref(encodingType), $ref(sampleRate), $ref(channels));");
 	/* audio_control : to set portType, volume and balance */
 	addCode("$sharedSymbol(CGCAudioBase,audio_control)($starSymbol(file), $ref(portType), $ref(volume), $ref(balance), 1);");
+	addCode("$sharedSymbol(CGCAudioBase,audio_balance)($starSymbol(file), $ref(balance));");
       }
   }
 
