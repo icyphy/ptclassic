@@ -107,14 +107,14 @@ method {
 
 	    farPort = temp;
 	}
-	if (!farPort)
+	if (!farPort) {
 	    Error::abortRun(*this,startPort.name()," not connected");
-
-	// Remove all galaxy references to the startPort
-	removeGalaxyPort(startPort.aliasFrom());
-	// Remove the all galaxy references to the farPort
-	removeGalaxyPort(farPort->aliasFrom());
-
+	} else {
+	  // Remove all galaxy references to the startPort
+	  removeGalaxyPort(startPort.aliasFrom());
+	  // Remove the all galaxy references to the farPort
+	  removeGalaxyPort(farPort->aliasFrom());
+	}
 	return farPort;
     }
 }
