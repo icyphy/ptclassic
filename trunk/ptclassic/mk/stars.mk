@@ -362,7 +362,7 @@ ifdef DE
 endif
 
 ifdef CM5
-	CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/cm5
+	CUSTOM_DIRS += $(CGCDIR)/targets/cm5
 	CGC = 1
 	TARGETS += $(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
@@ -373,8 +373,8 @@ ifdef NOWAM
 	# NOWam only supported under the Solaris operating system,
 	# matched by pattern sol%
 	ifneq ("$(filter sol%,$(PTARCH))","")
-		CUSTOM_DIRS += $(ROOT)/src/domains/cgc/targets/NOWam/NOWam \
-			$(ROOT)/src/domains/cgc/targets/NOWam/libudpam
+		CUSTOM_DIRS += $(CGCDIR)/targets/NOWam/NOWam \
+			$(CGCDIR)/targets/NOWam/libudpam
 		CGC = 1
 		ifeq ($(USE_SHARED_LIBS),yes) 
 			LIBS += -lNOWam
