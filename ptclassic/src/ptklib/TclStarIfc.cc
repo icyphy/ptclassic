@@ -178,12 +178,6 @@ int TclStarIfc::setup (Block* star,
 
 	myStar = star;
 
-	if(Tcl_SetVar(ptkInterp, "starID", (char*)starID, TCL_GLOBAL_ONLY)
-			== NULL) {
-		Error::abortRun(*star, "Failed to set starID");
-		return FALSE;
-	}
-
 	if (numInputs > 0) {
 		buf = "grabInputs_";
 		buf += starID;
@@ -255,24 +249,29 @@ int TclStarIfc::setup (Block* star,
 	}
 	outputArraySize = numOutputs;
 
+
+	// Before sourcing the Tcl script, we set the global variable
+	// starID, which will be used by the Tcl script.
+	if(Tcl_SetVar(ptkInterp, "starID", (char*)starID, TCL_GLOBAL_ONLY)
+			== NULL) {
+		Error::abortRun(*star, "Failed to set starID");
+		return FALSE;
+	}
+
+	// Source the Tcl script.
 	if(tcl_file[0] == '$') {
 	        buf = "source [ptkExpandEnvVar \\";
 		buf += tcl_file;
 		buf += "]";
-	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		    Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
-		    Error::abortRun(*star, "Cannot source tcl script");
-		    return FALSE;
-		}
 	} else {
 	        buf = "source ";
 		buf += tcl_file;
-	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		    Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
-		    Error::abortRun(*star, "Cannot source tcl script");
-		    return FALSE;
-	        }
 	}
+	if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
+		Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
+		Error::abortRun(*star, "Cannot source tcl script");
+		return FALSE;
+        }
 
 	// Determine whether the star is synchronous by checking to
 	// see whether the goTcl procedure has been defined by the
@@ -280,9 +279,10 @@ int TclStarIfc::setup (Block* star,
 	buf = "info procs goTcl_";
 	buf += starID;
 	if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK ||
-	strlen(ptkInterp->result) == 0)
-			synchronous = 0;
-	else synchronous = 1;
+	  strlen(ptkInterp->result) == 0)
+		synchronous = 0;
+	else 
+		synchronous = 1;
 
 	// Determine whether Tk has been loaded into the system
 	// (if so, then its event loop will need to be updated).
@@ -292,31 +292,20 @@ int TclStarIfc::setup (Block* star,
 	return TRUE;
 }
 
+// Invoke the Tcl procedure name_starID, which is assumed to be
+// defined, with one argument (starID).
 int TclStarIfc::callTclProc(const char* name) {
 	InfString buf;
-	buf = "info procs ";
-	buf += name;
+	buf = name;
 	buf += "_";
 	buf += starID;
-	if(Tcl_GlobalEval(ptkInterp, (char*)buf) == TCL_OK &&
-	    strlen(ptkInterp->result) != 0) {
-		// A name_starID procedure is defined.  Invoke it.
-	        if(Tcl_SetVar(ptkInterp, "starID", (char*)starID,
-			TCL_GLOBAL_ONLY) == NULL) {
-		    Error::abortRun(*myStar, "Failed to set starID");
-		    return FALSE;
-	        }
-		buf = name;
-		buf += "_";
-		buf += starID;
-		buf += " ";
-		buf += starID;
-	        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		    Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
-		    Error::abortRun(*myStar, "Failed to run Tcl procedure");
-		    return FALSE;
-		}
-	    }
+	buf += " ";
+	buf += starID;
+        if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
+		Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
+		Error::abortRun(*myStar, "Failed to run Tcl procedure");
+		return FALSE;
+	}
 	return TRUE;
 }
 
@@ -358,7 +347,8 @@ InfString TclStarIfc::getInputs () {
 	return result;
 }
 
-// Convert values on input to strings; works for all Ptolemy domains
+// Convert input states (1 for new input, 0 otherwise) to strings;
+// works for all Ptolemy domains.
 InfString TclStarIfc::getInputsState () {
     	InfString result;
 	for (int i = 0; i<inputArraySize; i++)
