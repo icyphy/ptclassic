@@ -12,13 +12,13 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 signal sources library }
         explanation {
-The star produces at its output an impulse with height given by the parameter
-\fIimpulseSize\fR.
+The star produces at its output an impulse train with height given by the 
+parameter \fIimpulseSize\fR and period given by \fIperiod\fR which is 0 for
+a single impulse.
 .PP
 A state variable is maintained to keep around the next output value.
 At initialization, the state is set to \fIimpulseSize\fR.
-During each subsequent invocation, the output value is taken from the state,
-which is then set to zero.
+
         }
         seealso { Quasar, DC }
         output {
@@ -31,7 +31,21 @@ which is then set to zero.
 		desc { impulse size }
 		default { ONE }
 	}
- 	state {
+	state {
+		name { period }
+		type { int }
+		desc { period of the impulse train( 0 for one impulse) }
+		default { 0 }
+		attributes { A_CONSTANT|A_YMEM }
+	} 
+	state {
+		name { counter }
+		type { int }
+		desc { internal counter }
+		default { 0 }
+		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM}
+	}
+	state {
 		name { pulse }
 		type { FIX }
 		desc { internal }
@@ -40,16 +54,42 @@ which is then set to zero.
 	}
  	setup {
 	           pulse=impulseSize;
+		   counter = 0;
+		   if ( int(period) < 0 ){
+			Error::abortRun( *this, 
+				"Period must be non-negative.");
+		   };
+			
 	      }
 
-	codeblock(std) {
-	clr	b	$ref(pulse),a
-	move	a,$ref(output)
-	move	b,$ref(pulse)
+	codeblock(multiple) {
+	move 	$ref(counter),a
+	move	#1,r0
+	clr	b	$ref(period),x0
+	cmp 	x0,a	r0,x0
+	tge	b,a
+	tst	a	$ref(pulse),y0
+	teq	y0,b	
+	add	x0,a	b,$ref(output)
+	move	a,$ref(counter)
 	} 
+	
+	codeblock(single){
+	clr	a	$ref(pulse),b
+	move 	b,$ref(output)
+	move	a,$ref(pulse)
+	}
 
-        go { addCode(std); }
+        go { 
+		if (int(period) > 0) {
+			addCode(multiple); 
+		} else {
+			addCode(single);
+		}
+	}
+
 	execTime { 
-		return 3;
+		return 9;
 	}
  }
+
