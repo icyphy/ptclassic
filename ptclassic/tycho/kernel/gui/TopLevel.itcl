@@ -31,8 +31,13 @@
 ##########################################################################
 
 
-# FIXME: this is for debugging on the mac
-if { "$tcl_platform(platform)" != "mac"} {
+# FIXME: this is for debugging on the mac and windows
+if { [info exists tyDebug] && "$tyDebug" == 1} {
+    proc ::tclexit {} {
+	puts "You called tclexit.  $tyDebug was set to 1,\
+		so we are not exiting"
+    }
+} else {
     ##########################################################################
     #### exit
     # Redefine the Tcl exit procedure to cleanly exit, querying the user
