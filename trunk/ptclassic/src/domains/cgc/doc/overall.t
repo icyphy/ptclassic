@@ -455,6 +455,25 @@ generation domain by just changing the domain in the user interface.
 As shown with some examples, a CGC star is easy to write if there
 is a corresponding SDF star. The best way to learn writing a new
 star is to refer to the library stars.
+.pp
+One difficulty of writing a CGC star is to determine the execution time
+of that star. 
+The more accurate is the estimate of the (relative) execution times of stars, 
+the more effective become the parallel scheduling algorithms. 
+Since the efficiency of assembled code depends on the
+compiler and block boundaries may be dispersed after compilation, it
+is almost impossible to estimate the exact execution time of the star.
+Thus, we have to
+minimize the efficiency loss by giving rough but good estimates of
+excution times.  To make matters worse, the relative execution times of
+stars heavily depend on which compiler we use and which architecture
+we target. In this release, we do not include any scheme to decide the
+relative execution times of stars in a target-specific way. Currently,
+we do not specify the execution time of each CGC star, which will have
+the execution time 5 by default. We suggest, therefore, that the user
+use the manual scheduling option to make a serious test from this release.
+Or, the user may want to edit all CGC stars to specify the execution time
+for the target of interest.
 
 .H1 "Multi-Processor Targets"
 .pp
