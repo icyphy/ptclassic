@@ -69,9 +69,15 @@ namespace ::tycho {
 #
 # </dl></dl>
 #
-# <p><b>Bugs</b>: (none)
+# <p><b>Bugs</b>
 #
-# <p><b>Enhancements</b>: (none)
+# If there are graphics and the anchor is "e" or "w," the label
+# is displayed inside the icon not outside.
+#
+# <p><b>Enhancements</b>
+#
+# There are four possible positions for the label (on the left and right
+# sides, near the top and bottom of that edge) that cannot be specified.
 #
 # <p><b>Links</b>
 # 
@@ -143,17 +149,19 @@ class ::tycho::LabelledItem {
 #
 body ::tycho::LabelledItem::_anchor {id canvas slate anchor} {
     set _anchor($id) $anchor
-    
+
     # If there are no graphics, place inside the item, else place
     # outside the item
     if { $_text($id) != "" } {
-        eval $canvas coords $textitem($id) [$slate aspect $id $anchor]
+        eval $canvas coords $textitem($id) \
+		[$slate aspect $id $anchor -region]
         if { $_graphics($id) == "" } {
             $canvas itemconfigure $textitem($id) -anchor $anchor
         } else {
             if { $anchor == "center" || $anchor == "c" } {
                 set anchor "s"
-                eval $canvas coords $textitem($id) [$slate aspect $id s]
+                eval $canvas coords $textitem($id) \
+			[$slate aspect $id s -region]
             }
             $canvas itemconfigure $textitem($id) \
                     -anchor [::tycho::Shape::compass $anchor "ud"]
@@ -169,6 +177,8 @@ body ::tycho::LabelledItem::_anchor {id canvas slate anchor} {
 #
 body ::tycho::LabelledItem::_graphics {id canvas slate graphics} {
     set _graphics($id) $graphics
+
+    # Delete existing graphics
     $slate delete graphics.$id
 
     # If graphics are empty, do nothing
@@ -176,10 +186,13 @@ body ::tycho::LabelledItem::_graphics {id canvas slate graphics} {
         return
     }
 
+    # Get my hierarchy tags
+    set htags [$canvas gettags $primary($id)]
+
     # Draw each item at full scale
     set tags [concat graphics.$id [$canvas gettags $primary($id)]]
-    foreach item [split $graphics ";\n"] {    	
-    	eval $slate create $item [list -tags $tags]
+    foreach spec [split $graphics ";\n"] {
+	eval [list $slate createchild* $id $htags graphics.$id] $spec
     }
 
     # Move and scale them to fit into this item
@@ -199,21 +212,20 @@ body ::tycho::LabelledItem::_graphics {id canvas slate graphics} {
 ## -text option configuration
 #
 body ::tycho::LabelledItem::_text {id canvas slate text} {
-    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
-    set tags [$canvas gettags $primary($id)]
-
     if { $text != "" } {
-        if { $_text($id) == "" || ! [::info exists textitem($id)] } {
-            set textitem($id) [$canvas create text \
-                    [expr ($x0+$x1)/2] [expr ($y0+$y1)/2] \
-                    -text $_text($id) -tags $tags]
+        if { ! [::info exists textitem($id)] } {
+	    assign x0 y0 x1 y1 [$canvas coords $primary($id)]
+	    set textitem($id) [$canvas create text \
+                    [expr ($x0+$x1)/2] \
+		    [expr ($y0+$y1)/2] \
+                    -text $text \
+		    -tags  [$canvas gettags $primary($id)]]
             _anchor $id $canvas $slate $_anchor($id)
-        }
-        $canvas itemconfigure $textitem($id) -text $text
+        } else {
+	    $canvas itemconfigure $textitem($id) -text $text
+	}
     } else {
         catch {$canvas delete $textitem($id)}
     }
     set _text($id) $text
 }
-
-

@@ -75,8 +75,8 @@ namespace ::tycho {
 # <tcl quiet><pre>
 #  source $tycho/editors/slate/doc/internals/newslate.itcl
 #  $slate create LabelledFrame 40 40 100 80 -color green &#92
-#		-text Foo -tags moveable &#92
-#		-graphics "Frame 25 25 75 75 -color green -relief sunken"
+#          -text Foo -tags moveable &#92
+#          -graphics "Frame 25 25 75 75 -color green -relief sunken"
 # </pre></tcl>
 #
 # <p><b>Enhancements</b>: (none)
@@ -144,7 +144,7 @@ body ::tycho::LabelledFrame::construct {id canvas slate tags x0 y0 x1 y1 args} {
     eval ::tycho::Frame::construct \
     	$id $canvas $slate [list $tags] $x0 $y0 $x1 $y1 $args
 
-    # Create the text label and graphics
+    # Create the graphics and text label -- do not change the order!
     _text     $id $canvas $slate $_text($id)
     _graphics $id $canvas $slate $_graphics($id)
 }
@@ -164,6 +164,6 @@ body ::tycho::LabelledFrame::coords {id canvas slate args} {
     eval ::tycho::Frame::coords $id $canvas $slate $args
 
     # Move and scale the text and graphics FIXME: Inefficient
-    _anchor   $id $canvas $slate $_anchor($id)
     _graphics $id $canvas $slate $_graphics($id)
+    _anchor   $id $canvas $slate $_anchor($id)
 }
