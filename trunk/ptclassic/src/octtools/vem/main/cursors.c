@@ -97,7 +97,7 @@ XColor *fg, *bg;		/* Cursor color    */
 }
 
 
-static int vemInitCursors()
+static void vemInitCursors()
 /*
  * This routine defines all VEM cursors for retrieval using
  * vemCursor.
