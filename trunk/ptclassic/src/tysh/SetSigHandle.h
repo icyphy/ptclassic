@@ -42,6 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <sys/resource.h>
 #include <signal.h>
 #include <stdlib.h>
+#include <string.h>
 #include <stdio.h>
 #include "SetSigHandle.h"
 
