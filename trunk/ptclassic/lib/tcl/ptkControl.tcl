@@ -50,7 +50,7 @@ set ptkRunFlag(main) IDLE
 proc ptkClearRunFlag { name octHandle } {
     global ptkRunFlag
     set  cntrWindow .run_$octHandle
-    catch {$cntrWindow.panel.go configure -relief raised}
+    catch {$cntrWindow.panel.gofr.go configure -relief raised}
     catch {$cntrWindow.panel.pause configure -relief raised}
     if {[info exists ptkStepAction($name)]} {
 	cancelAction $ptkStepAction($name)
@@ -120,21 +120,24 @@ proc ptkRunControl { name octHandle } {
     # for buttons, and "low" for sliders.  The full name for the
     # frame is .run_${octHandle}.$position, where $name is the name of the
     # universe, and $position is "high", "middle", or "low".
-    frame $ptkControlPanel.high -bd 10
-    frame $ptkControlPanel.middle -bd 10
-    frame $ptkControlPanel.low -bd 10
+    frame $ptkControlPanel.high
+    frame $ptkControlPanel.middle
+    frame $ptkControlPanel.low
 
     # Define the panel of control buttons
     frame $ptkControlPanel.panel -bd 10
-	button $ptkControlPanel.panel.go -text " GO <Return> " \
+	frame $ptkControlPanel.panel.gofr  -relief sunken -bd 2
+	button $ptkControlPanel.panel.gofr.go -text " GO <Return> " \
 	    -command "ptkGo $name $octHandle" -width 14
+	pack append $ptkControlPanel.panel.gofr \
+	    $ptkControlPanel.panel.gofr.go {expand fill}
 		
 	button $ptkControlPanel.panel.pause -text "PAUSE <Space>" \
 		-command "ptkPause $name $octHandle" -width 14
 	button $ptkControlPanel.panel.stop -text "STOP <Escape>" \
 		-command "ptkStop $name" -width 14
 	pack append $ptkControlPanel.panel \
-	    $ptkControlPanel.panel.go {left expand fill expand} \
+	    $ptkControlPanel.panel.gofr {left expand fill expand} \
 	    $ptkControlPanel.panel.pause {left expand fill expand} \
 	    $ptkControlPanel.panel.stop {right expand fill expand}
 
@@ -155,14 +158,14 @@ proc ptkRunControl { name octHandle } {
     pack append $ptkControlPanel.disfr \
 	$ptkControlPanel.disfr.dismiss {top fill expand}
 
-    pack append $ptkControlPanel \
-	$ptkControlPanel.msg {top fill expand} \
-	$ptkControlPanel.iter top \
-	$ptkControlPanel.panel top \
-	$ptkControlPanel.high top \
-	$ptkControlPanel.middle top \
-	$ptkControlPanel.low top \
-	$ptkControlPanel.disfr {top fill expand}
+    # Newer syntax for pack command used below
+    pack $ptkControlPanel.msg -fill both -expand yes
+    pack $ptkControlPanel.iter
+    pack $ptkControlPanel.panel
+    pack $ptkControlPanel.high -fill x -padx 10 -expand yes
+    pack $ptkControlPanel.middle -fill x -padx 10 -expand yes
+    pack $ptkControlPanel.low -fill x -padx 10 -expand yes
+    pack $ptkControlPanel.disfr -fill both -expand yes
 
     wm geometry $ptkControlPanel +400+400
     focus $ptkControlPanel
@@ -350,8 +353,12 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	# Assume the window has been deleted already and ignore command
 	return
     }
-    if [regexp {^ACTIVE$|^PAUSED$|^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
-	ptkImportantMessage .message {System is still running.  Please stop it.}
+    if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
+	ptkStop $name
+	update
+    }
+    if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
+	ptkImportantMessage .message {Stopping the run.}
 	return
     }
     unset ptkRunFlag($name)
@@ -374,9 +381,9 @@ proc ptkStop { name } {
     # Ignore if the named system is not running or paused
     if {$ptkRunFlag($name) != {ACTIVE} && \
 	$ptkRunFlag($name) != {PAUSED}} return
-    halt
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) STOP_PENDING
+    halt
 }
 
 #######################################################################
@@ -390,9 +397,9 @@ proc ptkAbort { name } {
     # Ignore if the named system is not running or paused
     if {$ptkRunFlag($name) != {ACTIVE} && \
 	$ptkRunFlag($name) != {PAUSED}} return
-    halt
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) ABORT
+    halt
 }
 
 #######################################################################
@@ -403,7 +410,7 @@ proc ptkPause { name octHandle } {
     if {![info exists ptkRunFlag($name)] || \
     	$ptkRunFlag($name) != {ACTIVE}} return
     set cntrWindow .run_$octHandle
-    catch {$cntrWindow.panel.go configure -relief raised}
+    catch {$cntrWindow.panel.gofr.go configure -relief raised}
     catch {$cntrWindow.panel.pause configure -relief sunken}
     set ptkRunFlag($name) PAUSED
     tkwait variable ptkRunFlag($name)
@@ -455,7 +462,7 @@ proc ptkGo {name octHandle} {
     global ptkControlPanel
     set ptkControlPanel .run_$octHandle
     after 200 ptkUpdateCount $name $octHandle
-    catch {$ptkControlPanel.panel.go configure -relief sunken}
+    catch {$ptkControlPanel.panel.gofr.go configure -relief sunken}
     catch {$ptkControlPanel.panel.pause configure -relief raised}
     # So that error highlighting, etc. works
     if {$univ != $name} {ptkSetHighlightFacet $octHandle}
