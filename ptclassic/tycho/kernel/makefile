@@ -58,7 +58,9 @@ REALCLEAN_STUFF =	tclIndex
 TYDOC_DESC =	Index of classes in tycho/kernel
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS) tclIndex
+all: sources $(MISC_SRCS) tclIndex
+
+install:
 
 # Include rules for directories that contain only subdirectories.
 include $(ROOT)/mk/tydir.mk
