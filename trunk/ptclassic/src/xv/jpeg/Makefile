@@ -1,5 +1,10 @@
 # Makefile for Independent JPEG Group's software
 
+ROOT = ../../..
+# get configuration info
+CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+include $(CONFIG)
+
 # This makefile is suitable for Unix-like systems with non-ANSI compilers.
 # If you have an ANSI compiler, makefile.ansi is a better starting point.
 
