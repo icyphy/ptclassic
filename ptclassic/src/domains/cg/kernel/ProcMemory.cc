@@ -1,4 +1,3 @@
-static const char file_id[] = "ProcMemory.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -6,7 +5,7 @@ $Id$
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer: J. Buck
+ Programmer: J. Buck and E. A. Lee
 
 // a ProcMemory object represents a processor's memory.  In the base
 // class, no assumption about the organization of the memory is made.
@@ -38,7 +37,7 @@ int MemoryList::firstFitAlloc(unsigned reqSize, unsigned &reqAddr) {
 		// delete this chunk
 		MemInterval* q = p->link;
 		*p = *q;
-		LOG_DEL; delete q;
+		delete q;
 	}
 	else p->len = 0;
 	return TRUE;
@@ -68,8 +67,8 @@ int MemoryList::circBufAlloc(unsigned reqSize, unsigned& reqAddr) {
 	// OK, block has split.  Make new piece for 2nd half
 		int loSize = reqAddr - p->addr;
 		int hiSize = p->len - reqSize - loSize;
-		LOG_NEW; MemInterval* newInt =
-			new MemInterval(reqAddr + reqSize, hiSize, p->link);
+		MemInterval* newInt = new MemInterval(reqAddr + reqSize,
+						      hiSize, p->link);
 		p->len = loSize;
 		p->link = newInt;
 	}
@@ -81,11 +80,11 @@ void MemoryList::copy(const MemoryList& src) {
 	min = src.min;
 	max = src.max;
 	MemInterval* q = src.l;
-	LOG_NEW; l = new MemInterval(q->addr,q->len);
+	l = new MemInterval(q->addr,q->len);
 	MemInterval* p = l;
 	while (q->link) {
 		q = q->link;
-		LOG_NEW; p->link = new MemInterval(q->addr,q->len);
+		p->link = new MemInterval(q->addr,q->len);
 		p = p->link;
 	}
 	p->link = 0;
@@ -94,7 +93,7 @@ void MemoryList::copy(const MemoryList& src) {
 void MemoryList::zero() {
 	MemInterval* p;
 	while (l->link) {
-		LOG_DEL; p = l; l = l->link; delete p;
+		p = l; l = l->link; delete p;
 	}
 }
 
@@ -102,16 +101,22 @@ int MemoryList::addChunk(unsigned addr,unsigned len) {
 	if (len == 0) return TRUE;
 	if (addr + len <= min) {
 		min = addr;
-		LOG_NEW; l = new MemInterval(addr, len, l);
+		l = new MemInterval(addr, len, l);
 	}
 	else if (addr > max) {
 		max = addr + len - 1;
 		MemInterval* p = l;
 		while (p->link) p = p->link;
-		LOG_NEW; p->link = new MemInterval(addr, len);
+		p->link = new MemInterval(addr, len);
 	}
 	else return FALSE;
 	return TRUE;
+}
+
+void MemoryList::reset() {
+	zero();
+	if(l) delete l;
+	l = new MemInterval(min, max-min+1);
 }
 
 
@@ -119,33 +124,36 @@ int MemoryList::addChunk(unsigned addr,unsigned len) {
 void LinProcMemory::reset() {
 	lin.zero();
 	circ.zero();
-	LOG_DEL; delete consec;
+	mem.reset();
+	delete consec;
 }
 
-void LinProcMemory::allocReq(AsmPortHole& p) {
-	if (!match(p)) return;
-	LOG_NEW; MPortReq* r = new MPortReq(p);
+int LinProcMemory::allocReq(AsmPortHole& p) {
+	if (!match(p)) return FALSE;
+	MPortReq* r = new MPortReq(p);
 	if (p.circAccess())
 		circ.appendSorted(*r);
 	else lin.appendSorted(*r);
+	return TRUE;
 }
 
-void LinProcMemory::allocReq(const State& s) {
-	if (!match(s)) return;
+int LinProcMemory::allocReq(const State& s) {
+	if (!match(s)) return FALSE;
 
-	if (s.attributes() | AB_CONSEC) {
-		LOG_NEW; if (!consec) consec = new MConsecStateReq;
+	if (s.attributes() & AB_CONSEC) {
+		if (!consec) consec = new MConsecStateReq;
 		consec->append(s);
-		return;
+		return TRUE;
 	}
-	if (consec->size() > 0) {
+	if (consec && consec->size() > 0) {
 		lin.appendSorted(*consec);
 		consec = 0;
 	}
-	LOG_NEW; MStateReq* r = new MStateReq(s);
+	MStateReq* r = new MStateReq(s);
 	if (s.attributes() | AB_CIRC)
 		circ.appendSorted(*r);
 	else lin.appendSorted(*r);
+	return TRUE;
 };
 
 int LinProcMemory::performAllocation() {
@@ -179,40 +187,38 @@ static unsigned share_len(unsigned xa,unsigned ya,unsigned xl,unsigned yl) {
 }
 
 DualMemory:: DualMemory(const char* n_x,     // name of the first memory space
-			const char* n_y,     // name of the second memory space
-			const Attribute& st, // attribute for states
-			const Attribute& p,  // attribute for portholes
-			const Attribute& a_x,// attribute for X, as opposed to
-					     // Y memory.
+			const Attribute& st_x, // attribute for states
+			const Attribute& p_x,  // attribute for portholes
 			unsigned x_addr,     // start of x memory
 			unsigned x_len,	     // length of x memory
+			const char* n_y,     // name of the second memory space
+			const Attribute& st_y, // attribute for states
+			const Attribute& p_y,  // attribute for portholes
 			unsigned y_addr,     // start of y memory
 			unsigned y_len	     // length of y memory
-			) : 
-			sAddr(max(x_addr,y_addr)),
-			sLen(share_len(x_addr,y_addr,x_len,y_len)),
-	LinProcMemory(n_x,st,p,sAddr,sLen), name_y(n_y),
-	x(n_x,st,p,0,0), y(n_y,st,p,0,0), 
-	xAddr(x_addr),xLen(x_len), yAddr(y_addr),yLen(y_len), xmemAttr(a_x)
+	) : 
+	sAddr(max(x_addr,y_addr)),
+	sLen(share_len(x_addr,y_addr,x_len,y_len)),
+	// The shared portion of the memory is arbitrarily given name n_x.
+	LinProcMemory(n_x,(st_x&st_y)|A_SHARED,(p_x&p_y)|A_SHARED,sAddr,sLen),
+	x(n_x,st_x,p_x,0,0),
+	y(n_y,st_y,p_y,0,0), 
+	xAddr(x_addr),xLen(x_len),
+	yAddr(y_addr),yLen(y_len)
 {}
 
-void DualMemory::allocReq(AsmPortHole& p) {
-	if (!match(p)) return;
-	if (p.attributes() | AB_SHARED)
-		LinProcMemory::allocReq(p);
-	else if (consistent(p.attributes(), xmemAttr))
-		x.allocReq(p);
-	else
-		y.allocReq(p);
+int DualMemory::allocReq(AsmPortHole& p) {
+	if (!LinProcMemory::allocReq(p))
+	    if (!x.allocReq(p))
+		return y.allocReq(p);
+	return TRUE;
 }
 
-void DualMemory::allocReq(const State& s) {
-	if (s.attributes() | AB_SHARED)
-		LinProcMemory::allocReq(s);
-	else if (consistent(s.attributes(), xmemAttr))
-		x.allocReq(s);
-	else
-		y.allocReq(s);
+int DualMemory::allocReq(const State& s) {
+	if (!LinProcMemory::allocReq(s))
+	    if (!x.allocReq(s))
+		return y.allocReq(s);
+	return TRUE;
 }
 
 int DualMemory::performAllocation() {
