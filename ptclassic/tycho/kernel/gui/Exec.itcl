@@ -131,23 +131,23 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 # Here is a quick mini-tutorial to get familiar with this 
 # non-graphical Exec:<br>
 # <ol>
-# <li><b>Create a name, then create object</b><tcl><pre>
+# <li>Create a name, then create object<tcl><pre>
 #   set execName [::tycho::autoName execObject]
 #   ::tycho::Exec $execName
 # </tcl></pre>
 #
-# <li><b>Execute process, and check for return type. Return
-# could be either "abnormal" or "normal".</b><tcl><pre>
+# <li>Execute process, and check for return type. Return
+# could be either "abnormal" or "normal".<tcl><pre>
 #   $execName execProcess {ls -al} {~}
 #   set status [$execName getStatusWait]
 #   tycho::inform "The return status is \"$status\""
 #   tycho::inform "The output is [$execName getHistory]"
 # </tcl></pre>
 #
-# <li><b>Alternatively, there are asynchronous calls to use
+# <li>Alternatively, there are asynchronous calls to use
 # (ie. getStatusNow can immediately return the status of the 
 # process, whether it is "running", "normal", or "abnormal").
-# </b><tcl><pre>
+# <tcl><pre>
 #   $execName execProcess
 #   # The return status is most likely still \"running\"
 #   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
@@ -155,14 +155,14 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
 # </tcl></pre>
 #
-# <li><b>A process is killed with <i>killProcess</i>.
+# <li>A process is killed with <i>killProcess</i>.
 # <tcl><pre>
 #   $execName execProcess
 #   $execName killProcess
 #   tycho::inform "The return status is \"[$execName getStatusWait]\""
 # </pre></tcl>
 #
-# <li><b>Maximum number of lines can be set by the user. This is useful
+# <li>Maximum number of lines can be set by the user. This is useful
 # especially if a process could potentially output a large file.
 # <tcl><pre>
 #   $execName execProcess {} {} {8}
@@ -170,8 +170,8 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #   tycho::inform "History:\n [$execName getHistory]"
 # </pre></tcl>
 #
-# <li><b>The following commands are used frequently, especially
-# by the Monitor class. Feel free to experiment:</b>
+# <li>The following commands are used frequently, especially
+# by the Monitor class. Feel free to experiment:
 # <tcl><pre>$execName execProcess</tcl></pre>
 # <tcl><pre>$execName clearHistory</tcl></pre>
 # <tcl><pre>$execName getHistory</tcl></pre>
