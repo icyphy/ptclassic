@@ -40,6 +40,8 @@ a list containing the current value of each of the inputs, and
 ${uniqueSymbol}setOutputs, which sets the value of the outputs.
 The argument list for ${uniqueSymbol}setOutputs should contain a
 floating point value for each output of the star.
+The inputs can be of any type.  The print() method of the particle
+is used to construct a string passed to tcl.
 This mechanism is entirely asychronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 .pp
@@ -75,8 +77,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	inmulti {
 		name {input}
-		type {float}
-		desc { Any number of intputs to feed to tcl }
+		type {anytype}
+		desc { Any number of inputs to feed to tcl }
 	}
 	defstate {
 		name {tcl_file}
@@ -199,8 +201,10 @@ limitation of liability, and disclaimer of warranty provisions.
 		PortHole *p;
 		StringList result;
 		while ((p = nexti++) != 0) {
-		    result += double((*p)%0);
-		    result += " ";
+		    // return a quoted string for tcl consumption
+		    result += "{";
+		    result += ((*p)%0).print();
+		    result += "} ";
 		}
 		return result;
 	    }
