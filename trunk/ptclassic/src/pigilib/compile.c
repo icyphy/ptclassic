@@ -352,14 +352,20 @@ octObject *facetPtr;
 	    oldInstName = inst.contents.instance.name;
 	    if (!oldInstName || strcmp(name, oldInstName) != 0) {
 		inst.contents.instance.name = name;
+		if (oldInstName) {
+		    free(oldInstName);
+		}
 		if (octModify(&inst) != OCT_OK) {
 		    octFreeGenerator(&genInst);
 		    ErrAdd(octErrorString());
+		    FreeOctMembers(&inst);
 		    return FALSE;
 		}
 	    }
 	    if (!KcInstance(name, akoName, &pList)) {
 		octFreeGenerator(&genInst);
+		free(name);
+		FreeOctMembers(&inst);
 		return FALSE;
 	    }
 	    /* Process the pragmas list, if any */
@@ -437,9 +443,10 @@ int *inN, *outN;
     octObject term = {OCT_UNDEFINED_OBJECT};
     octGenerator termGen;
     int i;
+    int retval = TRUE;
     boolean result;
 
-    *inN = 0;
+    *inN = 0;				/* Set length of arrays to zero */
     *outN = 0;
     (void) octInitGenContentsSpecial(netPtr, OCT_TERM_MASK, &termGen);
     for (i = 0; i < TERMS_MAX; ) {
@@ -450,7 +457,8 @@ int *inN, *outN;
 	    /* actual term */
 	    if (!IsInputTerm(&term, &result)) {
 		octFreeGenerator(&termGen);
-		return FALSE;
+		retval = FALSE;
+		break;
 	    }
 	    if (result) {
 		in[(*inN)++] = term;
@@ -460,14 +468,28 @@ int *inN, *outN;
 	    i++;
 	}
     }
-    octFreeGenerator(&termGen);
+
     if (i >= TERMS_MAX) {
 	ErrAdd("CollectTerms: Too many actual terminals on net");
 	EssAddObj(netPtr);
-	return (FALSE);
+	retval = FALSE;
     }
-    return (TRUE);
-}    
+
+    /* Clean up memory */
+    octFreeGenerator(&termGen);
+    if ( ! retval ) {
+	for (i = 0; i < *inN; i++) {
+	    FreeOctMembers( in[i] );
+	}
+	*inN = 0;
+	for (i = 0; i < *outN; i++) {
+	    FreeOctMembers( out[i] );
+	}
+	*outN = 0;
+    }
+
+    return (retval);
+}
 
 /* 6/14/89
 */
