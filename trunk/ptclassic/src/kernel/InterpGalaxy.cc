@@ -153,11 +153,11 @@ InterpGalaxy::alias(const char* galportname,const char* starname,
 // create new galaxy port, add to galaxy, do the alias
 	if (ph->isItMulti()) {
 		GalMultiPort *p = new GalMultiPort(*ph);
-		addPort(p->setPort(galportname,this));
+		addPort(p->setPort(galportname,this,ph->myType()));
 	}
 	else {
 		GalPort *p = new GalPort(*ph);
-		addPort(p->setPort(galportname,this));
+		addPort(p->setPort(galportname,this,ph->myType()));
 	}
 // add action to list
 	actionList += "A";
