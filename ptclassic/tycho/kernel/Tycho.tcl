@@ -252,7 +252,8 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
 }
 uplevel #0 {
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors textedit ] ]
-    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors graphedit ] ]    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors graphedit ] ]
+    set ::auto_path [linsert $auto_path 0 [file join $tychoeditors visedit ] ]
     set ::auto_path [linsert $auto_path 0 [file join $tychoeditors slate ] ]
 
     set ::auto_path [linsert $auto_path 0 [file join $tycholib tydoc ] ]
