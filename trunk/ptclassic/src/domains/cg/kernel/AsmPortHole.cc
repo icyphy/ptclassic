@@ -27,7 +27,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
  Programmer: J. Buck
- Modified by: E. A. Lee
+ Modified by: E. A. Lee & Jose L. Pino
 
  These classes are portholes for stars that generate assembly language code.  
 
@@ -43,6 +43,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // attributes
 extern const Attribute P_CIRC = {PB_CIRC,0};
 extern const Attribute P_SYMMETRIC = {PB_SYMMETRIC,0};
+extern const Attribute P_NONCIRC = {0,PB_CIRC};
+extern const Attribute P_NOINIT = {PB_NOINIT,0};
 
 // we require circular access either if the PB_CIRC attribute is set
 // (indicating a user request for it), or if the number of tokens

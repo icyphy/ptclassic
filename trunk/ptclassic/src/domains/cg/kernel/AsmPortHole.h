@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 							COPYRIGHTENDKEY
 
  Programmer: J. Buck
- Modified by: E. A. Lee
+ Modified by: E. A. Lee & Jose L. Pino
 
  These classes are portholes for stars that generate assembly language code.  
 
@@ -41,9 +41,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // portholes for AsmCodeStars and derived stars
 const bitWord PB_CIRC = 0x40;
 const bitWord PB_SYMMETRIC = 0x200;
+const bitWord PB_NOINIT	= 0x400;
 
 extern const Attribute P_CIRC;
 extern const Attribute P_SYMMETRIC;
+extern const Attribute P_NONCIRC;
+extern const Attribute P_NOINIT;
 
 // attributes for code generation portholes
 
