@@ -54,6 +54,9 @@ public:
 
 	// current time of the schedule
 	float currentTime;
+
+	// "timed" or "untimed" scheduler?
+	virtual int amITimed() = 0;
 protected:
 	// The following member is used to visit all atomic blocks
 	// (stars and wormholes) in the galaxy exacly once each
