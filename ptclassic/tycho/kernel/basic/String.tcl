@@ -86,6 +86,12 @@ proc ::tycho::breakLines {string args} {
     set donereturn 0
 
     while { $stringlength > $opts(-length) } {
+        # Strip leading whitespace (not newlines)
+        if [regexp "(^\[ \t\]+)" $string init] {
+            set t [string length $init]
+            set string [string range $string $t end]
+            incr stringlength -$t
+        }
         set temp [string range $string 0 [expr $opts(-length) - $indentlength]]
         set index [string first "\n" $temp]
         if { $index != -1 } {
@@ -110,8 +116,12 @@ proc ::tycho::breakLines {string args} {
            continue
        }
        set index [string last $opts(-substring) $temp]
+       if { $index == -1 } {
+	   # Didn't find a break-point: try searching forwards
+	   set index [string first $opts(-substring) $string]
+       }
        if { $index != -1 } {
-           # Found a break-point
+          # Found a break-point
            if !$doneone {
                append result \
                        $prefix \
