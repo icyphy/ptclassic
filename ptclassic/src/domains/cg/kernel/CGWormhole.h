@@ -5,9 +5,7 @@
 #endif
 
 #include "CGStar.h"
-#include "Wormhole.h"
-#include "Profile.h"
-#include "MultiTarget.h"
+#include "CGWormBase.h"
 #include "EventHorizon.h"
 #include "CGPortHole.h"
 
@@ -50,35 +48,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	// CGWormhole
 	//////////////////////////////
 
-class CGWormhole : public Wormhole, public CGStar {
-
-private:
-        // The total number of processors  in the system.
-        int numProcs;
-	int prevNum;
-
-	// The final optimal number of assigned processors to inside
-	// CG domain.
-	int optNum;
-
-        // execution profile of the wormhole, presumably a dynamic construct.
-        // profiles for varying number of assigned processors.
-        Profile* profile;
-
-	// multi target indicator
-	MultiTarget* mtarget;
-
-	// Domains to be supported
-	StringList supportedDomains;
-
-	// execution time
-	int execTime;
+class CGWormhole : public CGWormBase, public CGStar {
 
 public:
 	void setup();
-		       
 	void go();
-	void wrapup() { target->wrapup(); }
+	void wrapup() { /* target->wrapup();  */ }
 
 	// Constructor
 	CGWormhole(Galaxy& g, Target* t = 0);
@@ -90,9 +65,6 @@ public:
 	// execution time which is the average of the workload inside 
 	// the wormhole with 1 processor.
 	int myExecTime() { return execTime; }
-
-	// display the schedules of the CGDDFWormholes.
-	StringList displaySchedule();
 
 	// print methods
 	StringList print(int verbose = 0) const {
@@ -114,28 +86,15 @@ public:
 	void initState() { gal.initState() ;}
 
 	// return myself
-	CGWormhole* myWormhole();
+	CGWormBase* myWormhole();
 
 	// FIXME: what should this do?
 	double getStopTime() { return 0.0;}
 
 /*******  methods for parallel scheduler. ********/
 
-        // return the profile when "pNum" processors are assigned.
-        Profile& getProfile(int pNum) { pNum--; return profile[pNum]; }
-
-        // set the "numProcs" member and initialize Profiles.
-        void assignProcs(int num);
-
-        // compute the optimal profile with the given number of processors.
-        void computeProfile(int num, int resWork, IntArray* avail);
-
-	// main schedule
-	void insideSchedule();
-
-	// down-load the code
-	void downLoadCode(int);
-
+        // Redefine: return the profile when "pNum" processors are assigned.
+        Profile* getProfile(int pNum); 
 };
 
 
