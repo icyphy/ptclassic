@@ -41,17 +41,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTypedObj.h"
 #include "VHDLSignal.h"
 #include "VHDLVariable.h"
+#include "VHDLFiring.h"
 
 class VHDLSignal;
+class VHDLFiring;
 
 class VHDLPort : public VHDLTypedObj
 {
  public:
   // Constructors.
   VHDLPort();
-  VHDLPort(const char* n, const char* t, const char* d,
-	   const char* m, VHDLSignal* s, VHDLVariable* v = NULL)
-    : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s), variable(v) {}
+  VHDLPort(const char* n, const char* t, const char* d, const char* m, VHDLSignal* s, VHDLVariable* v = NULL,
+	   VHDLFiring* f = NULL) : VHDLTypedObj(n,t), direction(d), mapping(m), signal(s), variable(v), firing(f) {}
 
   // Destructor.
   ~VHDLPort();
@@ -64,6 +65,8 @@ class VHDLPort : public VHDLTypedObj
   VHDLSignal* signal;
   // Internal variable.
   VHDLVariable* variable;
+  // Parent firing.
+  VHDLFiring* firing;
 
   // Class Idenitification.
   /* virtual */ int isA(const char*) const;
@@ -76,6 +79,8 @@ class VHDLPort : public VHDLTypedObj
   StringList getDirec() { return direction; }
   void setVar(VHDLVariable* newVar) { variable = newVar; }
   VHDLVariable* getVar() { return variable; }
+  void setFire(VHDLFiring* newFire) { firing = newFire; }
+  VHDLFiring* getFire() { return firing; }
 
   void connect(VHDLSignal*);
 
@@ -115,7 +120,7 @@ class VHDLPortList : public VHDLTypedObjList
 
   // Allocate memory for a new VHDLPort and put it in the list.
   void put(StringList, StringList, StringList, StringList="",
-	   VHDLSignal* =NULL, VHDLVariable* =NULL);
+	   VHDLSignal* =NULL, VHDLVariable* =NULL, VHDLFiring* =NULL);
 };
 
 class VHDLPortListIter : public VHDLTypedObjListIter {
