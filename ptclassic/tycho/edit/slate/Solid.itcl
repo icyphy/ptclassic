@@ -82,9 +82,6 @@ class ::tycho::Solid {
     # Set or get the item's coordinates
     proc coords {id canvas slate args}
 
-    # Create a ghost of the polygon
-    proc ghost {id canvas slate}
-
     ###################################################################
     ####                         picture components                ####
 
@@ -136,7 +133,6 @@ class ::tycho::Solid {
 
     set methodtable(construct)   ::tycho::Solid::construct
     set methodtable(coords)      ::tycho::Solid::coords
-    set methodtable(ghost)       ::tycho::Solid::ghost
 
     #### Set option defaults
     array set optiondefault [array get ::tycho::Picture::optiondefault]
@@ -166,7 +162,7 @@ body ::tycho::Solid::_borderwidth {id canvas slate borderwidth} {
 #
 body ::tycho::Solid::_color {id canvas slate color} {
     set _color($id) $color
-    set colorShadesObject($id) [::tycho::Shades::new $_color($id)]
+    set colorShadesObject($id) [::tycho::Shades::new $color]
 
     # FIXME: quick and dirty
     _relief $id $canvas $_relief($id)
@@ -178,12 +174,12 @@ body ::tycho::Solid::_color {id canvas slate color} {
 #
 body ::tycho::Solid::_relief {id canvas slate relief} {
     set _relief($id) $relief
-    if { $_relief($id) == "ridge" || $_relief($id) == "groove" } {
+    if { $relief == "ridge" || $relief == "groove" } {
 
 	set light [$colorShadesObject($id) light]
 	set dark  [$colorShadesObject($id) dark]
 
-	if { $_relief($id) == "groove" } {
+	if { $relief == "groove" } {
 	    set light $dark
 	    set dark [$colorShadesObject($id) light]
 	}
@@ -229,10 +225,10 @@ body ::tycho::Solid::_relief {id canvas slate relief} {
 	set light [$colorShadesObject($id) light]
 	set dark  [$colorShadesObject($id) dark]
 
-	if { $_relief($id) == "sunken" } {
+	if { $relief == "sunken" } {
 	    set light $dark
 	    set dark [$colorShadesObject($id) light]
-	} elseif { $_relief($id) == "flat" } {
+	} elseif { $relief == "flat" } {
 	    set light [$colorShadesObject($id) matt]
 	    set dark $light
 	}
@@ -385,19 +381,6 @@ body ::tycho::Solid::coords {id canvas slate args} {
     if { [::info exists surface($id)] } {
 	eval $canvas coords $surface($id) $inside
     }
-}
-
-##########################################################################
-## ghost
-#
-# Create and return a "ghost" of the item.
-#
-# FIXME: Why do we need to provide this -- the Slate should do the
-# right thing from the shape variable?
-#
-body ::tycho::Solid::ghost {id canvas slate} {
-    eval $canvas create polygon [$canvas coords $primary($id)] \
-	    -outline grey {-fill {}}
 }
 
 ##########################################################################
