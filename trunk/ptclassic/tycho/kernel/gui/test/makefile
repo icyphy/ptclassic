@@ -90,7 +90,7 @@ all.itcl: FORCE
 	echo "set reallyExit 0" > $@
 	echo "foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}" >> $@
 	for x in $(GRAPHICAL_TESTS); do \
-		echo "puts $$x" >> $@; \
+		echo "puts stderr $$x" >> $@; \
 		echo "source $$x" >> $@; \
 	done
 	echo "set reallyExit 1" >> $@
