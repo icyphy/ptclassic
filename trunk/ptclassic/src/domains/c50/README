@@ -2,8 +2,19 @@ Version: $Id$
 
 README file for ptolemy/src/domains/c50
 
-The Ptolemy c50 domain generated code for the Texas Instruments C50 chip.
-To make much use of this domain, you will need a PC with a C50.
+
+The Ptolemy c50 domain generates code for the Texas Instruments
+TMS320C50 fixed-point DSP processor.  To make much use of this domain,
+you will need a PC with a C50.
+
+The c50 domain is based on an initial implementation by Andreas
+Baensch and Prof. Fritz Heinrichmeyer at FernUniverstitat in Hagen,
+Germany.
+
+Luis Gutierrez and Brian Evans have fleshed out the c50 domain star
+library.
+
+
 
 Installation
 ------------
@@ -37,3 +48,9 @@ makes the above changes.  To patch the vanilla Ptolemy 0.6 sources, do:
 
 cd $PTOLEMY; patch < $PTOLEMY/src/domains/c50/pt-0.6.c50.patch
  
+Using the c50 domain
+--------------------
+
+The C50 domain is meant to run on a Linux machine with the DSK starter
+board and kit.  The C50 files are downloaded to the chip via a dos shell.
+
