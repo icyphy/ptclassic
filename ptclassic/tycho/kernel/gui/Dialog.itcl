@@ -335,7 +335,7 @@ body ::tycho::Dialog::execCommand {option args} {
 		[uplevel #0 $itk_option($option) $args]} errcode] != 0} {
             # Schedule deletion of the object, since its state may be
             # corrupted.
-            after idle "delete object $this"
+            after idle "catch \{delete object $this\}"
             global ::errorInfo
             set saveInfo $errorInfo
 	    error "Failed to execute command:\n$errcode" \
