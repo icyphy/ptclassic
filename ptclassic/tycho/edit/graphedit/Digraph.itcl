@@ -167,8 +167,8 @@ body ::tycho::Digraph::constructor {args} {
 
     # Define the "edge" type
     type define edge \
-            -override 1 \
-            -leafonly 1
+            :override 1 \
+            :leafonly 1
 }
 
 ########################################################################
@@ -398,9 +398,16 @@ body ::tycho::Digraph::_describeitem {name {prefix {}}} {
         set string $prefix
         append string "edge"
 
-        # Append the two vertices and the data
-        eval lappend string [split $tail ^] [itemcget edge:$tail]
+        # Append the two vertices
+        eval lappend string [split $tail ^]
 
+	# Append data that differs from the default
+	array set dflt [type defaults edge]
+	foreach {attr val} [itemcget edge:$tail] {
+	    if { ! [::info exists dflt($attr)] || $dflt($attr) != $val } {
+		lappend string $attr $val
+	    }
+	}
         append string \n
     } else {
         chain $name $prefix
