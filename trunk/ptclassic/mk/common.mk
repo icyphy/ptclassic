@@ -35,11 +35,15 @@ whatToBuild:	all
 
 # Rules for running the ptlang processor
 # Make sure we always run the preprocessor in the source directory
+# the "mv" part moves the documentation to the doc dir.
+# note if there is no doc dir, the command continues despite the error.
 .pl.cc:
-	cd $(VPATH); ptlang $< ; mv $*.t $(STARDOCDIR)
+	cd $(VPATH); ptlang $< 
+	-cd $(VPATH); mv $*.t $(STARDOCDIR)/$*.t
 
 .pl.h:
-	cd $(VPATH); ptlang $< ; mv $*.t $(STARDOCDIR)
+	cd $(VPATH); ptlang $< 
+	-cd $(VPATH); mv $*.t $(STARDOCDIR)/$*.t
 
 # Rule for the thor preprocessor
 # Make sure we always run the preprocessor in the source directory
