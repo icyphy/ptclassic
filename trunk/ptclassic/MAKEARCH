@@ -41,6 +41,7 @@ optdifflink ../octtools/bin.$PTARCH/attache attache
 optdifflink ../octtools/bin.$PTARCH/installColors installColors
 optdifflink ../octtools/bin.$PTARCH/masters masters
 optdifflink ../octtools/bin.$PTARCH/oct2ps oct2ps
+optdifflink ../octtools/bin.$PTARCH/oct2tim oct2tim
 optdifflink ../octtools/bin.$PTARCH/octfix octfix
 optdifflink ../octtools/bin.$PTARCH/octls octls
 optdifflink ../octtools/bin.$PTARCH/octredomain octredomain
