@@ -45,8 +45,8 @@ DataFlowStar is the baseclass for stars in the various dataflow domains.
 // stars should override these methods or avoid calling them; if not,
 // errors will be reported.
 
-DataFlowStar::DataFlowStar() : repetitions(0,1), noTimes(0), nInP(0),
-master(0) {}
+DataFlowStar::DataFlowStar() : repetitions(0,1), iter(0), firings(0),
+noTimes(0), nInP(0), master(0) {}
 
 // default runCost is 0
 unsigned DataFlowStar::runCost() { return 0;}
@@ -71,6 +71,8 @@ void DataFlowStar :: initialize() {
 	repetitions = 0;
 	noTimes = 0;
 	initPortCounts();
+	iter = 0;
+	firings = 0;
 }
 
 // count # of ports.
@@ -92,6 +94,7 @@ int DataFlowStar :: run() {
 	for(int i = numberPorts(); i > 0; i--)
 		(next++)->receiveData();
 	int status = Star::run();
+	incrFirings();	// count firings
 	// we send the data even on error
 	next.reset();
 	for(i = numberPorts(); i > 0; i--)
@@ -111,7 +114,10 @@ ISA_FUNC(DataFlowStar,Star);
 // repetitions.
 /* virtual */ Block* DataFlowStar::clone () const {
 	DataFlowStar* star = (DataFlowStar*)Star::clone();
-	if (star) star->repetitions = repetitions;
+	if (star) {
+	  star->repetitions = repetitions;
+	  star->iter = iter;
+	}
 	return star;
 }
 

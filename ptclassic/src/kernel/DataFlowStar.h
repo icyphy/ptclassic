@@ -141,7 +141,20 @@ public:
 	// repetitions.
 	/* virtual */ Block* clone () const;
 
+	// Methods to count firings in dynamic dataflow invocation.
+	void setIter(int i) {iter = i;}
+	int getIter() {return iter;}
+	void resetFirings() {firings = 0;}
+	int enoughFirings() { return firings >= iter; }
+	int getFirings() {return firings;}
 protected:
+	void incrFirings() {firings++;}
+
+	// The number of iterations requested by the user.
+	int iter;
+	// The number of firings so far in one iteration.
+	int firings;
+
 	// initialize the port counts used by isSource, isSink, etc.
 	void initPortCounts();
 
