@@ -53,7 +53,10 @@ public:
 	StringList& operator = (const char* s);
 
 	// Destructor
-	~StringList();
+	~StringList() { deleteAllStrings();}
+
+	// initialize
+	void initialize() { deleteAllStrings();}
 
 	// Put number on list: same as +=
 	// Use of this operator to add something to a nonempty
