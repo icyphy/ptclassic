@@ -46,8 +46,9 @@ Decimation parameters > 1 reduces sample rate.
 		type {fixarray}
 		default {0}
 		desc {internal}
+		// removed A_CONSEQ flag -- kennard
                 attributes {
-               A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_XMEM|A_CONSEC|A_NOINIT
+               A_CIRC|A_NONCONSTANT|A_NONSETTABLE|A_XMEM|A_NOINIT
 	        }
 	}
         state {
