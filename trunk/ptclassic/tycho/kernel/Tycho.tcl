@@ -3,10 +3,11 @@
 # on the command-line arguments.  If no command-line arguments are given,
 # then a console window is opened.
 #
-# Author: Edward A. Lee
-# Version: $Id$
+# @Author: Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without

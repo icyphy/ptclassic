@@ -1,11 +1,11 @@
 # Definition of a window that displays HTML.
-# This uses the HTML library by Stephen Uhler.
+# 
+# @Author: Edward A. Lee
+# @Contributor: This uses the HTML library by Stephen Uhler.
 #
-# Author: Edward A. Lee
+# @Version: $Id$
 #
-# Version: $Id$
-#
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -60,16 +60,16 @@ class ::tycho::HTML {
     # Open a help window.
     method help {}
 
-    # Open the HTML source
+    # Open the source file using an HTML editor.
     method openSource {}
 
-    # raise the HTML broswer window and the source window (if any).
+    # Raise the HTML broswer window and the source window (if any).
     method raiseWindow {}
 
     # Clear the current text and reload from the source file.
     method reload {}
 
-    # Goto a named point within the file.
+    # Go to a named point within the file.
     method seeName {name}
 
     # Switch to a different HTML file.
@@ -301,7 +301,7 @@ body ::tycho::HTML::seeName {name} {
 
 #####################################################################
 #### switchFile
-# Switch to displaying another HTML file.  Special care is required
+# Switch to a different HTML file. Special care is required
 # here because there might be a source file open for either the old
 # or the new file. If there is a source file for the old HTML file,
 # it should now appear in the Window menu.  If there is one for the

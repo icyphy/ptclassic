@@ -2,10 +2,11 @@
 # This depends on a variable TYCHO having been set pointing to the
 # Tycho installation directory.
 #
-# Author: Edward A. Lee
-# Version: $Id$
+# @Author: Edward A. Lee
 #
-# Copyright (c) 1990-%Q% The Regents of the University of California.
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 #
 # Permission is hereby granted, without written agreement and without

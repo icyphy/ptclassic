@@ -1,9 +1,10 @@
 # Makefile for Ptolemy Tycho system, kernel directory.
 #
-# $Id$
-# Author: Christopher Hylands
+# @Author: Christopher Hylands
 #
-# Copyright (c) 1991-%Q% The Regents of the University of California.
+# @Version: $Id$
+#
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -28,12 +29,6 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 ##########################################################################
-
-# If this file's name is "make.template" and there is no makefile in
-# this directory, do
-#	cp make.template makefile
-#	make depend
-# This will add the dependencies to the makefile.
 
 # Root of Ptolemy directory
 ROOT =		../..

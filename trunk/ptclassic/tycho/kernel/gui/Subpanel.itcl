@@ -1,9 +1,10 @@
 # Subpanel widget which mimics opening and closing of a drawer. 
 # 
-# Author: Farhana Sheikh
-# Version: $Id$
+# @Author: Farhana Sheikh
+#
+# @Version: $Id$
 # 
-# Copyright (c) %Q% The Regents of the University of California.
+# @Copyright (c) %Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -121,10 +122,10 @@ class ::tycho::Subpanel {
     ###################################################################
     ####                        public methods                     ####
 
-    # Close a subpanel
+    # Close a subpanel.
     method close {}
 
-    # Open a subpanel
+    # Open a subpanel.
     method open {}
 
     ###################################################################
