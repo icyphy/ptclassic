@@ -58,6 +58,7 @@ parameter.  The keywords for overflow handling methods are :
                 int in_len;
                 int out_IntBits;
                 int out_len;
+		Fix sum;
         }
         setup {
                 IP = InputPrecision;
@@ -67,23 +68,23 @@ parameter.  The keywords for overflow handling methods are :
                 in_len = Fix::get_length (IP);
                 out_IntBits = Fix::get_intBits (OP);
                 out_len = Fix::get_length (OP);
+                sum = Fix(out_len, out_IntBits);
+                sum.set_ovflow(OV);  // Set the overflow characteristic of sum
         }
         go {
                 MPHIter nexti(input);
                 PortHole *p;
-                Fix sum(out_len, out_IntBits);
-                sum.set_ovflow(OV);  //Set the overflow characteristic of sum
                 Fix fixIn;
 
+		sum = 0.0;
                 while ((p = nexti++) != 0) {
+                  if ( int(ArrivingPrecision) )
+                    fixIn = Fix((*p)%0);
+                  else
+                    fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
 
-                   if(int(ArrivingPrecision))
-                      fixIn = Fix((*p)%0);
-                   else
-                      fixIn = Fix(in_len, in_IntBits, Fix((*p)%0));
-
-                   sum += fixIn; }
+                  sum += fixIn;
+		}
                 output%0 << sum;
         }
-
 }
