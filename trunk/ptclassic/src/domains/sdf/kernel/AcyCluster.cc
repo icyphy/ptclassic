@@ -100,6 +100,7 @@ void AcyCluster::weightArcs()
 	    // hence, skip this arc.
 	    if (!outArc->far()) continue;
 	    cost = computeTNSE(c,(SynDFCluster*)outArc->far()->parent(),outArc);
+	    if (loopFactor()) cost /= loopFactor();
 	    WEIGHT(outArc) = cost;
 	    WEIGHT(outArc->far()) = cost;
 	}
@@ -129,8 +130,9 @@ void AcyCluster::tagDelayArcs()
 	while ((outArc=nextO++) != NULL) {
 	    if (!outArc->far()) continue;
 	    // determine if the arc has enough delays.
-	    // 2* because WEIGHT has delays as cost already.
-	    if (2*outArc->numInitDelays() >= WEIGHT(outArc)) {
+	    // Recall: WEIGHT(a) = TNSE(a)/loopFac
+	    // Thus want to check if numInitDelays() > TNSE(a)=loopFac*WEIGHT
+	    if (outArc->numInitDelays() >= loopFactor()* WEIGHT(outArc)) {
 		DELAY_TAG(outArc) = 1;
 		DELAY_TAG(outArc->far()) = 1;
 	    }
@@ -251,7 +253,7 @@ int AcyCluster::computeCutCost(int flag_loc, int leftFlagValue)
 		// arc->far() == 0 ==> arc going across parent cluster boundary
 		if (!arc->far()) continue;
 		if (arc->far()->parent()->flags[flag_loc] != leftFlagValue) {
-		    cutVal += WEIGHT(arc);
+		    cutVal += WEIGHT(arc) + arc->numInitDelays();
 		}
 	    }
 	    // Also check if there are reverse arcs, and add the delay
@@ -585,7 +587,7 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
     while ((arc=nextO++) != NULL) {
 	if (!arc->far()) continue;
 	if (TMP_PARTITION(arc->far()->parent())) {
-	    Atmp += WEIGHT(arc);
+	    Atmp += WEIGHT(arc) + arc->numInitDelays();
 	} else {
 	    // It is a predecessor meaning that the reverse
 	    // arc has enough delays on it (since only arcs with
@@ -605,7 +607,7 @@ int AcyCluster::costOfMovingAcross(Cluster* bndryNode, int direction)
 	    Atmp += arc->numInitDelays();
 	} else {
 	    // It is a predecessor meaning that the arc is external
-	    Btmp += WEIGHT(arc);
+	    Btmp += WEIGHT(arc) + arc->numInitDelays();
 	}
     }
     if (direction == 1) {
