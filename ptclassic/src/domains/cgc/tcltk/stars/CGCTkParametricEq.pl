@@ -69,40 +69,40 @@ limitation of liability, and disclaimer of warranty provisions.
 	displaySliderValue(".middle", "$starSymbol(scale2)",
 			   "$val(centerFreq)");
       }
-
-      if (strcasecmp("$val(filtertype)", "BAND") == 0) {
-	/* "tkband" is  a local variable which scales the    */
-	/* bandwidth from (0.1 to 4) to (0 to 100) for makeScale */ 
-	{
-	  int tkband;
-	  tkband = (int) ($val(bandwidth)-0.01)*100/3.99;
-	  makeScale(".high",
-		    "$starSymbol(scale3)",
-		    "Bandwidth control:$val(nameofStar)",
-		    tkband,
-		    $starSymbol(setBandwidth));
-	  displaySliderValue(".high", "$starSymbol(scale3)",
+    }
+    codeblock(tkSetupband) {
+      /* "tkband" is  a local variable which scales the    */
+      /* bandwidth from (0.1 to 4) to (0 to 100) for makeScale */ 
+      {
+	int tkband;
+	tkband = (int) ($val(bandwidth)-0.01)*100/3.99;
+	makeScale(".high",
+		  "$starSymbol(scale3)",
+		  "Bandwidth control:$val(nameofStar)",
+		  tkband,
+		  $starSymbol(setBandwidth));
+	displaySliderValue(".high", "$starSymbol(scale3)",
 			     "$val(bandwidth)");
-	}      
+      }      
+    }
+    codeblock(tkSetuppass) {
+      /* "tkpass" is a local variable which scale the pass  */
+      /* freq from (lowFreq to highFreq) to 0-100 */
+      {	
+	int tkpass;
+	tkpass = (int)
+	  100*($val(passFreq)-$val(lowFreq))/
+	  ($val(highFreq) - $val(lowFreq));
+	makeScale(".middle",
+		  "$starSymbol(scale4)",
+		  "Pass Frequency control:$val(nameofStar)",
+		  tkpass,
+		  $starSymbol(setpassFreq));
+	displaySliderValue(".middle", "$starSymbol(scale4)",
+			   "$val(passFreq)");
       }
-      else {
-	/* "tkpass" is a local variable which scale the pass  */
-	/* freq from (lowFreq to highFreq) to 0-100 */
-	{	
-	  int tkpass;
-	  tkpass = (int)
-	    100*($val(passFreq)-$val(lowFreq))/
-	    ($val(highFreq) - $val(lowFreq));
-	  makeScale(".middle",
-		    "$starSymbol(scale4)",
-		    "Pass Frequency control:$val(nameofStar)",
-		    tkpass,
-		    $starSymbol(setpassFreq));
-	  displaySliderValue(".middle", "$starSymbol(scale4)",
-			     "$val(passFreq)");
-	}
-      }
-    }   
+    }
+
 
     codeblock (setGainDef) {
         static int $starSymbol(setGain)(dummy, interp, argc, argv)
@@ -221,9 +221,16 @@ limitation of liability, and disclaimer of warranty provisions.
     initCode {
 	CGCParamBiquad :: initCode();
 	addCode(tkSetup, "tkSetup");
+	if (strcasecmp(filtertype, "BAND") == 0) {
+	  addCode(tkSetupband, "tkSetup");
+	  addCode(setBandwidthDef, "procedure");
+	}
+	else { 
+	  addCode(tkSetuppass, "tkSetup");
+	  addCode(setpassFreqDef, "procedure");
+	}
         addCode(setGainDef, "procedure");
 	addCode(setcenterFreqDef, "procedure");
-	addCode(setBandwidthDef, "procedure");
-	addCode(setpassFreqDef, "procedure");
+
     }
 }
