@@ -3,9 +3,6 @@ ident {
 Version identification:
 $Id$
 
-MISSING:  THIS SHOULD BE DERIVED FROM DERepeatStar, not DEStar.
-I DON'T KNOW HOW TO DO THIS IN THE INTERPRETER
-
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
@@ -18,6 +15,7 @@ I DON'T KNOW HOW TO DO THIS IN THE INTERPRETER
 }
 defstar {
 	name {Clock}
+	derivedFrom { RepeatStar }
 	domain {DE}
 	desc {
 	   "Generates events at regular intervals, starting at time zero."
