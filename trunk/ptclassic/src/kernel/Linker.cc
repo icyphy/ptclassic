@@ -180,8 +180,8 @@ Linker::genHeader (const char* objName) {
 	FILE* fd = fopen (aname, "w");
 // output some assembler stuff
 	fprintf (fd, "\t%s\n", TEXT_DIR);
-	fprintf (fd, "\t%s __GLOBAL_$I$__%d%s\n", ADDR_WORD, strlen(name), name);
-	fprintf (fd, "\t%s __GLOBAL_$D$__%d%s\n", ADDR_WORD, strlen(name), name);
+	fprintf (fd, "\t%s %s_$I$__%d%s\n", ADDR_WORD, CONS_PREFIX, strlen(name), name);
+	fprintf (fd, "\t%s %s_$D$__%d%s\n", ADDR_WORD, CONS_PREFIX, strlen(name), name);
 	fclose (fd);
 // assemble the file
 	char command[256];
