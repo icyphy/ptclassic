@@ -76,11 +76,11 @@ proc ptkHasRun { name } {
 # Procedure to run a universe.
 #
 proc ptkRunControl { name octHandle } {
-    global ptkRunFlag
-    global ptkDebug
-    global ptkControlPanel
+    global ptkRunFlag ptkDebug ptkControlPanel ptkOctHandles
     set ptkDebug($name) 0
+    set ptkOctHandles($name) $octHandle
     set ptkControlPanel .run_$octHandle
+    
     if {[info exists ptkRunFlag($name)] && [winfo exists $ptkControlPanel]} {
             ptkImportantMessage .error \
 		"Sorry.  Only one run window for $name at time. "
@@ -135,7 +135,7 @@ proc ptkRunControl { name octHandle } {
 	button $ptkControlPanel.panel.pause -text "PAUSE <Space>" \
 		-command "ptkPause $name $octHandle" -width 14
 	button $ptkControlPanel.panel.stop -text "STOP <Escape>" \
-		-command "ptkStop $name $octHandle" -width 14
+		-command "ptkStop $name" -width 14
 	pack append $ptkControlPanel.panel \
 	    $ptkControlPanel.panel.gofr {left expand fill expand} \
 	    $ptkControlPanel.panel.pause {left expand fill expand} \
@@ -175,11 +175,11 @@ proc ptkRunControl { name octHandle } {
 
     bind $ptkControlPanel.iter.entry <Return> \
 		"ptkGo $name $octHandle"
-    bind $ptkControlPanel.iter.entry <Escape> "ptkStop $name $octHandle"
+    bind $ptkControlPanel.iter.entry <Escape> "ptkStop $name"
     bind $ptkControlPanel.iter.entry <space> "ptkPause $name $octHandle"
     bind $ptkControlPanel <Return> "ptkGo $name $octHandle"
     bind $ptkControlPanel <space> "ptkPause $name $octHandle"
-    bind $ptkControlPanel <Escape> "ptkStop $name $octHandle"
+    bind $ptkControlPanel <Escape> "ptkStop $name"
     bind $ptkControlPanel <Control-d> \
 	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
 }
@@ -202,7 +202,7 @@ proc ptkSetOrClearDebug { name octHandle } {
 	    button $w.debug.left.buttons.step -text "STEP" \
 		-command "ptkStep $name $octHandle" -width 9
 	    button $w.debug.left.buttons.abort -text "ABORT" \
-		-command "ptkAbort $name $octHandle" -width 9
+		-command "ptkAbort $name" -width 9
 	    pack append $w.debug.left.buttons \
 	        $w.debug.left.buttons.step {left fill expand} \
 	        $w.debug.left.buttons.abort {left fill expand}
@@ -347,15 +347,17 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
     global ptkRunFlag ptkDebug
 
     # Turn debug off
-    set ptkDebug($name) 0
-    ptkSetOrClearDebug $name $octHandle
+    if {$ptkDebug($name)} {
+	set ptkDebug($name) 0
+	ptkSetOrClearDebug $name $octHandle
+    }
 
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
 	return
     }
     if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
-	ptkStop $name $octHandle
+	ptkStop $name 
 	update
     }
     if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
@@ -364,6 +366,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 	return
     }
     catch {unset ptkRunFlag($name)}
+    catch {unset ptkOctHandles($name)}
     # update the oct facet only if the number of iterations has changed.
     if {$defNumIter != [$window.iter.entry get]} {
          ptkSetRunLength $octHandle [$window.iter.entry get]
@@ -374,7 +377,7 @@ proc ptkRunControlDel { name window octHandle defNumIter} {
 
 #######################################################################
 # basic procedure to stop a run
-proc ptkStop { name octHandle } {
+proc ptkStop { name } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
@@ -386,12 +389,15 @@ proc ptkStop { name octHandle } {
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) STOP_PENDING
     halt
-    after 10000 "ptkForceReset STOP_PENDING $name $octHandle"
+    global ptkOctHandles
+    if {[info exists ptkOctHandles($name)]} {
+	after 10000 "ptkForceReset STOP_PENDING $name $ptkOctHandles($name)"
+    }
 }
 
 #######################################################################
 # procedure to stop a run without running wrapup
-proc ptkAbort { name octHandle } {
+proc ptkAbort { name } {
     global ptkRunFlag
     if {![info exists ptkRunFlag($name)]} {
 	# Assume the window has been deleted already and ignore command
@@ -403,7 +409,10 @@ proc ptkAbort { name octHandle } {
     # Note that the following set will release the ptkPause proc
     set ptkRunFlag($name) ABORT
     halt
-    after 10000 "ptkForceReset ABORT $name $octHandle"
+    global ptkOctHandles
+    if {[info exists ptkOctHandles($name)]} {
+	after 10000 "ptkForceReset ABORT $name $ptkOctHandles($name)"
+    }
 }
 
 #######################################################################
@@ -411,7 +420,7 @@ proc ptkAbort { name octHandle } {
 # then reset it.
 proc ptkForceReset { trigger name octHandle } {
     global ptkRunFlag
-    if {$ptkRunFlag($name) == $trigger} {
+    if {[info exists ptkRunFlag($name)] && $ptkRunFlag($name) == $trigger} {
 	ptkClearRunFlag $name $octHandle
     }
 }
