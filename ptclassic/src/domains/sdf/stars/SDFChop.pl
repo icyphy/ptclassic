@@ -145,14 +145,14 @@ used for zeros.
 		// This method is called in the setup() method for the Chop
 		// star, and in the go method for ChopVarOffset because
 		// it resets the offset parameter
-		int hiLim = int(nwrite) - int(offset) - 1;
+		hiLim = int(nwrite) - int(offset) - 1;
 		if (hiLim >= int(nwrite)) hiLim = int(nwrite) - 1;
 		else if (int(use_past_inputs)) hiLim = int(nwrite) - 1;
 
-		int loLim = int(nwrite) - int(nread) - int(offset);
+		loLim = int(nwrite) - int(nread) - int(offset);
 		if (loLim < 0) loLim = 0;
 
-		int inidx = int(nread) - int(nwrite) + int(offset);
+		inidx = int(nread) - int(nwrite) + int(offset);
 		if (inidx < 0) inidx = 0;
 	    }
 	}
