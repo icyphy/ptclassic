@@ -1,4 +1,4 @@
-static const char file_id[] = "BaseMultiTarget.cc";
+static const char file_id[] = "MultiTarget.cc";
 
 /******************************************************************
 Version identification:
@@ -18,14 +18,14 @@ $Id$
 #pragma implementation
 #endif
 
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 #include "SDFScheduler.h"
 #include "Error.h"
 #include "Profile.h"
 #include <std.h>
 
 // constructor
-BaseMultiTarget::BaseMultiTarget(const char* name,const char* starclass,
+MultiTarget::MultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGTarget(name,starclass,desc),
 	nChildrenAlloc(0), curChild(0), iters(0)
 {
@@ -46,52 +46,52 @@ BaseMultiTarget::BaseMultiTarget(const char* name,const char* starclass,
 
 // Based on priorities of the parameters, we may need to adjust the
 // value of the parameters of low priority.
-void BaseMultiTarget :: initState() {
+void MultiTarget :: initState() {
 	Block :: initState();
 	if (int(adjustSchedule)) manualAssignment = TRUE;
 	if (int(manualAssignment)) oneStarOneProc = TRUE;
 }
 	
 // associate send and receive stars.  Do nothing by default.
-void BaseMultiTarget :: pairSendReceive(DataFlowStar*, DataFlowStar*) {}
+void MultiTarget :: pairSendReceive(DataFlowStar*, DataFlowStar*) {}
 
-void BaseMultiTarget :: setProfile(Profile*) {}
-void BaseMultiTarget :: prepareCodeGen() {}
+void MultiTarget :: setProfile(Profile*) {}
+void MultiTarget :: prepareCodeGen() {}
 
-int BaseMultiTarget :: totalWorkLoad() { return -1; }		// undefined...
+int MultiTarget :: totalWorkLoad() { return -1; }		// undefined...
 
-int BaseMultiTarget :: computeProfile(int pNum, int, IntArray*) {
+int MultiTarget :: computeProfile(int pNum, int, IntArray*) {
 	// do nothing in this base class.
 	return pNum;
 }
 
-void BaseMultiTarget :: insideSchedule() {}
+void MultiTarget :: insideSchedule() {}
 
-void BaseMultiTarget :: downLoadCode(int, Profile*) {}
+void MultiTarget :: downLoadCode(int, Profile*) {}
 
-void BaseMultiTarget :: addProcessorCode(int, const char* s) { myCode += s; }
+void MultiTarget :: addProcessorCode(int, const char* s) { myCode += s; }
 
-void BaseMultiTarget :: saveCommPattern() {}
-void BaseMultiTarget :: restoreCommPattern() {}
-void BaseMultiTarget :: clearCommPattern() {}
+void MultiTarget :: saveCommPattern() {}
+void MultiTarget :: restoreCommPattern() {}
+void MultiTarget :: clearCommPattern() {}
 
 // By default, assume zero communication time.
-int BaseMultiTarget :: scheduleComm(ParNode*,int when, int) 
+int MultiTarget :: scheduleComm(ParNode*,int when, int) 
 	{ return when; }
 
-ParNode* BaseMultiTarget :: backComm(ParNode*) { return 0; }
+ParNode* MultiTarget :: backComm(ParNode*) { return 0; }
 
-IntArray* BaseMultiTarget :: candidateProcs(ParProcessors*) 
+IntArray* MultiTarget :: candidateProcs(ParProcessors*) 
 	{ return NULL; }
 
-void BaseMultiTarget :: setTargets(int n) { 
+void MultiTarget :: setTargets(int n) { 
 	nprocs = n; 
 	char temp[6];
 	sprintf(temp, "%d", n);
 	const char* t = hashstring(temp);
 	nprocs.setValue(t); }
 
-int BaseMultiTarget :: inheritChildTargets(Target* father) {
+int MultiTarget :: inheritChildTargets(Target* father) {
 
         if (int(nprocs) > father->nProcs()) {
                 Error::abortRun(name(), " target has more children than \
@@ -104,13 +104,3 @@ its parent target: ", father->name());
 	return TRUE;
 }
 
-// FIXME: the following two functions will go away (become pure virtual)
-
-DataFlowStar* BaseMultiTarget::createReceive(int from, int to, int num) {
-	Error::abortRun(*this, "createReceive not implemented");
-	return 0;
-}
-DataFlowStar* BaseMultiTarget::createSend(int from, int to, int num) {
-	Error::abortRun(*this, "createSend not implemented");
-	return 0;
-}

@@ -7,7 +7,7 @@
 #include "CGStar.h"
 #include "Wormhole.h"
 #include "Profile.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 #include "EventHorizon.h"
 #include "CGPortHole.h"
 
@@ -46,7 +46,7 @@ private:
         Profile* profile;
 
 	// multi target indicator
-	BaseMultiTarget* mtarget;
+	MultiTarget* mtarget;
 
 	// Domains to be supported
 	StringList supportedDomains;

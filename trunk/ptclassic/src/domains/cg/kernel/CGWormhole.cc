@@ -130,7 +130,7 @@ void CGWormhole :: insideSchedule() {
 void CGWormhole :: downLoadCode(int index) {
 	if (!mtarget) return;
 	if (mtarget->inherited())
-	   mtarget->setCurChild(((BaseMultiTarget*)targetPtr)->getCurChild());
+	   mtarget->setCurChild(((MultiTarget*)targetPtr)->getCurChild());
 	mtarget->downLoadCode(index, profile + numProcs - 1);
 }
 	
@@ -164,7 +164,7 @@ void CGWormhole :: assignProcs(int num) {
 
 	// When the system is under MultiProcessor target, define "mtarget".
 	// A kind of heckery.
-	if (targetPtr->child(0)) mtarget = (BaseMultiTarget*) target;
+	if (targetPtr->child(0)) mtarget = (MultiTarget*) target;
 }
 
 // calculate the optimal number of assigned processors.

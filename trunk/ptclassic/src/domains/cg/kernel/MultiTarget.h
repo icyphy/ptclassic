@@ -16,8 +16,8 @@ $Id$
 
 *******************************************************************/
 
-#ifndef _BaseMultiTarget_h
-#define  _BaseMultiTarget_h 1
+#ifndef _MultiTarget_h
+#define  _MultiTarget_h 1
 
 #ifdef __GNUG__
 #pragma interface
@@ -32,10 +32,10 @@ class ParNode;
 class ParProcessors;
 class DataFlowStar;
 
-class BaseMultiTarget : public CGTarget {
+class MultiTarget : public CGTarget {
 
 public:
-        BaseMultiTarget(const char* name, const char* starclass, const char* desc);
+        MultiTarget(const char* name, const char* starclass, const char* desc);
 
 	// Resolve the parameter conflicts based on priorities
 	void initState();
@@ -44,9 +44,12 @@ public:
 
 	// create Send and Receive Star.  "from" and "to" are the processor
 	// ID numbers.  "num" is the number of tokens moved.
-	// FIXME: want the following functions to be pure virtual
-	virtual DataFlowStar* createReceive(int from, int to, int num);
-	virtual DataFlowStar* createSend(int from, int to, int num);
+	virtual DataFlowStar* createReceive(int from, int to, int num) = 0;
+	virtual DataFlowStar* createSend(int from, int to, int num) = 0;
+
+	// create Spread/Collect star
+	virtual DataFlowStar* createSpread() = 0;
+	virtual DataFlowStar* createCollect() = 0;
 
 	// pairSendReceive causes the send and receive stars to be associated
 	// with each other, and should be called after they are created
@@ -68,6 +71,7 @@ public:
 	// get the OSOP requirement flag : all invocations of a star
 	// should be assigned to the same processor
 	int getOSOPreq() { return int(oneStarOneProc); }
+	void setOSOPreq(int i) { oneStarOneProc = i; }
 
 	// get the manualAssignment parameter
 	int assignManually() { return int(manualAssignment); }
@@ -75,7 +79,7 @@ public:
 	// get the adjustSchedule parameter
 	int overrideSchedule() { return int(adjustSchedule); }
 
-        // Inherit the child targets from a given BaseMultiTarget.
+        // Inherit the child targets from a given MultiTarget.
         // If the number of child targets is greater than that of a given
         // target, return FALSE. Otherwise, return TRUE.
         int inheritChildTargets(Target*);
