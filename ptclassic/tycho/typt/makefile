@@ -30,7 +30,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = kernel editors
+DIRS = kernel lib editors
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo \
 itcldocs extraclean:
