@@ -88,15 +88,25 @@ test_graphics: $(EXTRA_SRCS)
 	tycho -ptiny -noconsole -nowelcome -e alltests.itcl
 
 
-# Purecov binary to use
+# Pure Inc tools to use for testing
 PURECOV_BINARY = $(PTOLEMY)/obj.$(PTARCH)/pitcl/pitcl.ptiny.debug.purecov
+PURIFY_BINARY = $(PTOLEMY)/obj.$(PTARCH)/pitcl/pitcl.ptiny.debug.purify
 
-# Run the tests under purecov
-test_purecov: $(PURECOV_BINARY)
-	echo "set TYCHO $$TYCHO; source alltests.itcl; exit" | $^
 
 $(PURECOV_BINARY):
 	(cd $(PTOLEMY)/obj.$(PTARCH)/pitcl; make pitcl.ptiny.debug.purecov)
+$(PURIFY_BINARY):
+	(cd $(PTOLEMY)/obj.$(PTARCH)/pitcl; make pitcl.ptiny.debug.purify)
+
+# Run the tests under purecov
+test_purecov: $(PURECOV_BINARY)
+	@echo "It could take a few minutes to save the coverage data"
+	echo "set TYCHO $$TYCHO; source alltests.itcl; exit" | $^
+
+# Run the tests under purify
+test_purify: $(PURIFY_BINARY)
+	echo "set TYCHO $$TYCHO; source alltests.itcl; exit" | $^
+
 
 FORCE:
 
