@@ -15,6 +15,8 @@
 #include <winsock2.h>
 #undef FLOAT
 #undef INT
+#undef far /* Redefine far to fix problems compiling DERealTimeStar */
+#define far ptfar
 #ifdef PT_NT4VC
 /* FIXME!! NT does not have SIGALRM! */
 #define SIGALRM 4
