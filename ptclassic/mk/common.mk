@@ -147,6 +147,13 @@ else
 	$(RANLIB) $(LIB)
 endif
 
+# Used to explicitly build non-shared libraries. For an example, see 
+# $PTOLEMY/src/domains/cgc/rtlib/make.template
+$(LIBNONSHARED): $(OBJS)
+	rm -f $@
+	$(AR) cq $@ $^
+	$(RANLIB) $@
+
 # AIX used EXP for export lists
 $(EXP): $(LIB)
 
