@@ -195,10 +195,12 @@ fixlinks:
 		ln -s libitcl$(ITCL_MAJOR_VERSION_NUMBER).so libitcl.so; \
 		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).so libitk.so)
 	@echo "Create a links for itclsh to ish"
-	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish)
+	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish itclsh)
 	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
 	-(cd $(ITCL_DEST)/bin; \
 		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish)
+	-(cd $(ITCL_DEST)/bin; \
+		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh)
 	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
 	-(cd $(TCLTK_DEST); mkdir tcl tk; \
 		cd tcl; ln -s ../itcl/include/itcl include; \
