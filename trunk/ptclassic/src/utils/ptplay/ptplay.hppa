@@ -1,0 +1,13 @@
+#!/bin/csh -f
+# ptplay for hppa 
+# $Id$
+# Original source by Stefan Detroch of Imec
+# Requires the player program found in /usr/audio to be compiled
+# and installed in your path.
+# The publically avaible program 'sox' is used to normalize the volume.
+# sox is available via anonymous ftp
+
+set SCALE = `sox -t ul $1 -e stat |& grep Volume | awk '{print $3;}'`
+sox -v ${SCALE} -t ul $1 -t ul /tmp/mysound$$
+player /tmp/mysound$$ -u -pri urgent
+rm -f /tmp/mysound$$
