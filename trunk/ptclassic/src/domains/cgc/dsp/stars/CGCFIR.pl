@@ -6,7 +6,7 @@ A Finite Impulse Response (FIR) filter.
 Coefficients are in the "taps" state variable.
 Default coefficients give an 8th order, linear phase lowpass
 filter. To read coefficients from a file, replace the default
-coefficients with "<fileName".
+coefficients with "fileName".
 	}
 	version {$Id$}
 	author { Soonhoi Ha }
