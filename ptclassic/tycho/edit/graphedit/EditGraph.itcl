@@ -199,12 +199,13 @@ class ::tycho::EditGraph {
     # The java object used to talk to the server
     private variable javaClient ""
 
-
-    # FIXME: How can the layout find items with a given tag???
-    method withtag {tag} {
-        $slateView withtag $tag
-    }
-}
+    #################################################################
+    ####                  FIXME FIXME FIXME                      ####
+    
+    # Position used to place new icons
+    private variable iconx 10
+    private variable icony 10
+ }
 
 #####################################################################
 #### -layout configuration
@@ -247,7 +248,7 @@ body ::tycho::EditGraph::constructor {args} {
 	configure -layout \
                 [uplevel #0 ::tycho::Layout \
                 [::tycho::autoName layout] \
-                -primaryview $this]
+                -primaryview $slateView]
     }
 
     # Key bindings
@@ -339,7 +340,21 @@ body ::tycho::EditGraph::editparameters {args} {
 # Process an icon selection.
 #
 body ::tycho::EditGraph::iconselect {name} {
-    vertex $name 100 100
+    # Figure out where to put the icon. First check if topleft is free
+    if { [$slate find overlapping 10 10 10 10] == "" } {
+        set iconx 10
+        set icony 10
+    }
+    # Create the icon
+    set v [vertex $name 0 0]
+    set id [$slateView id $v]
+
+    # Move its nw corner to the right position
+    $slate moveto $id $iconx $icony "nw"
+
+    # Advance place position
+    incr iconx 10
+    incr icony 10
 }
 
 ########################################################################
@@ -486,6 +501,9 @@ body ::tycho::EditGraph::undo {} {
 ########################################################################
 #### vertex
 #
+# Create a new vertex using the given name to find
+# its icon and parameters. Return the name of the new vertex.
+#
 body ::tycho::EditGraph::vertex {star x y} {
     set name [::tycho::autoName vertex]
     set graph $itk_option(-graph)
@@ -503,8 +521,7 @@ body ::tycho::EditGraph::vertex {star x y} {
     # Get its parameters and add them as attributes
     foreach parm [$stars names parameter $star] \
 	    parm2 [$stars names* parameter $star] {
-	puts "$parm $parm2"
-	$graph vertexconfigure $name -$parm [$stars get parameter $parm2]
+        $graph vertexconfigure $name -$parm [$stars get parameter $parm2]
     }
 
     # Add a vertex to the layout model
@@ -549,6 +566,9 @@ body ::tycho::EditGraph::vertex {star x y} {
     # Do this kludge to overwrite the undo command
     $graph setUndo current $undograph
     $layout setUndo current $undolayout
+
+    # Return its name
+    return $name
 }
 
 
@@ -894,6 +914,7 @@ body ::tycho::EditGraph::initializeMenubar {menubar} {
 
     # Build a menu for stars
     $menubar addMenu stars -label Stars -underline 0
+    $menubar menuconfigure stars -tearoff 1
 
     $menubar command editparameters stars \
             -label "Edit Parameters..." \
