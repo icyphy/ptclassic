@@ -151,12 +151,6 @@ class ::tycho::IDocSys {
     # Format an explanation properly (in HTML)
     private method formatExpl {comment}
 
-    # FIXME: not implemented. May move to viewer.
-    private method getSourceFile {classname}
-
-    # FIXME: not implemented. May move to viewer.
-    private method getDocFile {classname}
-
     ###################################################################
     ####                   private variables                       ####
 
@@ -311,7 +305,7 @@ body ::tycho::IDocSys::generateIDoc {debug generateIndex title filelist} {
     foreach filename $filelist {
 
         if ![$IDocSys modCheck $filename] {
-            # file does not need to be redocumented
+            # file does not need to be redocumented if batch and not modified
             if $debug {
               #  puts "$filename <not modified>"
             }
@@ -475,7 +469,7 @@ body ::tycho::IDocSys::readFile {filename} {
                 # -----------------------------------
                 continue
             }
-            if {[regexp {^[	 ]*##+.*$} $lineIn]} {
+            if {[regexp {^[	 ]*#[	 ]*#+.*$} $lineIn]} {
                 # Filter out comment lines with multiple #'s
                 continue
             }
@@ -851,9 +845,7 @@ body ::tycho::IDocSys::parseClass {class body} {
         }
         if {$inInherit} {
             if {[string range $construct 0 1] == "::"} {
-                $myClass($class) parent $construct \
-                        -sourcefile [getSourceFile $construct] \
-                        -docfile [getDocFile $construct]
+                $myClass($class) parent $construct
                 continue
             }
             # No more parents, parse this.
@@ -1245,15 +1237,3 @@ body ::tycho::IDocSys::formatExpl {comment} {
 
     return "$comment"
 }
-
-# Get the source file for a given class
-body ::tycho::IDocSys::getSourceFile {classname} {
-return "genericsource.itcl"
-}
-
-# Get the documentation file for a given class
-body ::tycho::IDocSys::getDocFile {classname} {
-return "genericidoc.idoc"
-}
-
-
