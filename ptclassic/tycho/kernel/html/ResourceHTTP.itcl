@@ -213,8 +213,9 @@ body ::tycho::ResourceHTTP::close {} {
 
 #####################################################################
 #### exists
-body ::tycho::ResourceHTTP::exists {[ath} {
-    return ($status>=200 && $status<300)
+body ::tycho::ResourceHTTP::exists {path} {
+    return 1
+    #expr ($status>=200 && $status<300)
 }
 
 #####################################################################
@@ -509,3 +510,4 @@ proc httpSetStatus {name value} {
     global $name
     set $name $value
 }
+
