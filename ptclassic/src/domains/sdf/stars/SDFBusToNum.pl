@@ -32,7 +32,7 @@ binary number.
 	
 	go {
 		int b;
-		int binary[bits+1];
+		LOG_NEW; int* binary = new int[bits+1];
 		MPHIter nexti(input);
 		int number 	= 0;
 
@@ -46,7 +46,8 @@ binary number.
 		for(i=0; i< bits; i++)
 		{
 			if(binary[i] ==3){
-				output%0 << previous; 
+				output%0 << int(previous); 
+				LOG_DEL; delete [] binary;
 				return; 
 			}
 		}
@@ -73,7 +74,7 @@ binary number.
                                 number +=1;
                                 break;
                         }
-                 }
+		}
                 number +=1;
                 number = number * (-1);
 	}
@@ -96,6 +97,6 @@ binary number.
 
 		previous= number;
 		output%0 << number;	
-
+		LOG_DEL; delete [] binary;
 	} // go
 }
