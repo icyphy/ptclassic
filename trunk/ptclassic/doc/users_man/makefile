@@ -46,11 +46,11 @@ DOCS=bdf.doc cg.doc cg56.doc cg96.doc ddf.doc de.doc documents.doc domains.doc f
 
 # Update all the cross references and then Create postscript files
 # Script to fix up cg56.ps and cg96.ps postscript
-FIXPS=/users/ptdesign/bin/fixPS
+FIXFRAMEPS=/users/ptdesign/bin/fixframeps
 fm2ps: update_book
 	fmprint2ps $(DOCS)
-	$(FIXPS) cg56.ps
-	$(FIXPS) cg96.ps
+	$(FIXFRAMEPS) cg56.ps
+	$(FIXFRAMEPS) cg96.ps
 
 # Produce the obtainPtolemy docs in ascii format
 /tmp/obtainPtolemy.txt: obtainPtolemy.doc /tmp/fmobtainPtolemy.fmb
