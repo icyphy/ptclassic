@@ -197,7 +197,10 @@ DDFClustSched::~DDFClustSched() {
 int DDFClustSched :: pragmaRegistered(SDFAtomCluster* as) {
   // For efficiency, check to see whether the iter flag is
   // non-zero.  This means we have already parsed a pragma.
-  if (as->flags[iter] > 0) return 1;
+  if (as->flags[iter] > 0) {
+    pragmaStars.append(as);
+    return 1;
+  }
 
   // The following conditional is a hopefully unnecessary precaution,
   // since the star should certainly have a target.

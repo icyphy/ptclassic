@@ -67,7 +67,10 @@ DDFSimpleSched::DDFSimpleSched() : runUntilDeadlock(0) {}
 int DDFSimpleSched :: pragmaRegistered(DataFlowStar* st) {
   // For efficiency, check to see whether the iter flag is
   // non-zero.  This means we have already parsed a pragma.
-  if (st->flags[iter] > 0) return 1;
+  if (st->flags[iter] > 0) {
+    pragmaStars.append(st);
+    return 1;
+  }
 
   // The following conditional is a hopefully unnecessary precaution,
   // since the star should certainly have a target.
