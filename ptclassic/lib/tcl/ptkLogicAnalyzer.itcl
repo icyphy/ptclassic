@@ -1,0 +1,480 @@
+# Author: Matthew T. Tavis
+# Version: $Id$
+
+
+itcl_class ptkLogicAnalyzer {
+
+    constructor { config } {
+	$this setup
+    }
+
+    destructor { destroy $chartName }
+
+    public starID "standalone" {}
+    public bordX 10 {}
+    public bordY 20 {}
+    public numInputs 2 {}
+    public yValues {} {}
+    public xValues {} {}
+    public prevYVal {} {}
+    public prevXVal {} {}
+    public PLabels {} {}
+    public signalLabels "" {}
+    public count 0
+    public stopTime 0
+    public univ ""
+    public chartName ".logicAnalyzer"
+    public scrollCount 1
+    public title ""
+    public position "+0-0"
+    public height_cm 10.0
+    public width_cm 20.0
+    public TimeWindow 20
+    public unitDistance 38.0
+    public unitHeight 38.0
+    public chartScale 1.0
+    
+    method setup {} {
+
+	# call init proc
+	LAInit
+
+	# create the canvas
+	$this MkWindow
+
+	# Command to execute when resizing
+	bind $chartName <Configure> [$this LARefresh]
+	bind $chartName.chart.c <Button-1> "$this LADrawBar %x"
+
+	# setup focus
+	focus ${chartName}
+    }
+
+    # config method allows on-the-fly reconfiguration
+    # method config {config} {}
+
+
+    # LAInit: initialization routine for starID array
+
+    method LAInit {} {
+	
+	# Break out the signal labels individually for easier access.
+	regsub -all \n $signalLabels \40 PP
+
+	# set up stopTime var
+	set stopTime [stoptime]
+
+	# set up univ var
+	set univ [curuniverse]
+	
+	for { set i 0} {$i < $numInputs} {incr i} {
+	    set PLabels [lappend PLabels [lindex $PP $i]]
+	    set yValues [lappend yValues {}]
+	    set prevYVal [lappend prevYVal 0]
+	    set xValues [lappend xValues {}]
+	    set prevXVal [lappend prevXVal 0]
+	}
+    }
+
+    # temporary show method to see variables
+    # method show { var } {
+    #	set $var
+    # }
+
+
+    method MkWindow { } { 
+	
+	catch {destroy $chartName}
+	toplevel $chartName
+	
+	wm title $chartName "$title           Star ID= $starID"
+	wm iconname $chartName "$title"
+	# request window positioning
+	wm geometry $chartName $position
+	
+	# The following allows the window to resize
+	wm minsize $chartName 200 200
+	wm maxsize $chartName 1000 1000
+	
+	# menu bar frame
+	frame $chartName.mBar -relief raised -bd 2
+	menubutton $chartName.mBar.com -text Commands -underline 0 -menu \
+		$chartName.mBar.com.m 
+	menubutton $chartName.mBar.zoom -text Zoom -underline 0 -menu \
+		$chartName.mBar.zoom.m 
+	
+	pack $chartName.mBar -side top -fill x
+	pack $chartName.mBar.com $chartName.mBar.zoom -side left -padx 2m
+	
+	button $chartName.ok -text DISMISS -command "destroy $chartName"
+	pack $chartName.ok -side bottom -fill x
+	
+	menu $chartName.mBar.com.m -tearoff 0
+	$chartName.mBar.com.m add command -label "Refresh" \
+		-command "$this LARefresh"
+	$chartName.mBar.com.m add command -label "Help" \
+		-command "$this LAHelp"
+	$chartName.mBar.com.m add command -label "Print" \
+		-command "$this LAPrint"
+	
+	# zoom buttons
+	menu $chartName.mBar.zoom.m -tearoff 0
+	$chartName.mBar.zoom.m add command -label "Zoom In" \
+		-command "$this LAZoom in"
+	$chartName.mBar.zoom.m add command -label "Zoom Out" \
+		-command "$this LAZoom out"
+
+	label $chartName.mBar.zoomlabel -text "Zoom:"
+	label $chartName.mBar.zoomindex -relief sunken -text "1.0"
+	pack $chartName.mBar.zoomlabel $chartName.mBar.zoomindex \
+		-side left -padx 2m
+
+	canvas $chartName.chart
+	pack $chartName.chart
+
+	# Create the canvas for labeling the vertical axis
+	canvas $chartName.chart.yBar  -bg tomato \
+		-height [expr $height_cm*$numInputs + 1.5]c \
+		-width 14m \
+		-yscrollcommand "$chartName.yscroll set" \
+		-scrollregion "0 0 14m [expr $height_cm*$numInputs + 1.5]c" 
+	pack $chartName.chart.yBar -side left -in $chartName.chart -fill y
+
+	# create canvas for upper ruler
+	canvas $chartName.chart.ruler -bg SeaGreen3 \
+		-height 1.5c -width ${width_cm}c \
+		-xscrollcommand "$chartName.xscroll set" \
+		-scrollregion "0 0 ${width_cm}c 1.5c" 
+	pack $chartName.chart.ruler -side top -after $chartName.chart.yBar \
+		-in $chartName.chart -fill x
+
+	# Create the canvas for plotting the points.
+	canvas $chartName.chart.c -bg SkyBlue3 \
+		-height [expr $height_cm*$numInputs]c \
+		-width ${width_cm}c \
+		-xscrollcommand "$chartName.xscroll set" \
+		-yscrollcommand "$chartName.yscroll set" \
+		-scrollregion "0 0 ${width_cm}c [expr $height_cm*$numInputs]c"
+	pack $chartName.chart.c -side top -in $chartName.chart -fill both
+
+	# set up the scroll region based on the window width
+	# How many time windows do we expect for the given stop time?
+	set numWindows [expr ($stopTime+2.0)*1.0/$TimeWindow]
+	set curWidth [lindex [$chartName.chart.c configure -width] 4]
+	set scrollWidth [expr $numWindows*$curWidth]
+
+	# Control all the plots with one scrollbar
+	scrollbar $chartName.xscroll -orient horizontal \
+		-command "$this LAScroll x"
+	pack $chartName.xscroll -before $chartName.chart -side bottom -fill x
+
+	# vertically scroll both chart and label bar
+	scrollbar $chartName.yscroll -orient vertical \
+		-command "$this LAScroll y"
+	pack $chartName.yscroll -before $chartName.chart -side right -fill y
+ 
+	# tkwait visibility $chartName.chart.yBar
+	LAMkYScale $chartName.chart.yBar
+	# tkwait visibility $chartName.chart.ruler
+	LAMkXScale $chartName.chart.ruler
+	
+	LAPaginate
+	
+    }
+
+    # draws vertical bar for reference
+    method LADrawBar { x } {
+
+	# convert x coord given to canvas x coord
+	set x [$chartName.chart.c canvasx $x]
+
+	# delete old bar
+	$chartName.chart.c delete bar
+
+	# draw new bar at new position
+	$chartName.chart.c create line $x 0 $x \
+		[winfo height $chartName.chart.c] -fill white -tags bar
+    }
+
+    method LAHelp {} {
+	ptkMessage {
+Logic Analyzer chart:
+  - use scroll bars to view different plots.
+  - print function only prints visible area.
+  	- to print whole area try shrinking,
+	  refreshing and then resizing window.
+  - use refresh when in doubt.
+  - zoom menu zooms the chart only on the x-axis.
+  	}
+  }
+
+    # LAScroll: this version is Tk4.0 compatible
+
+    method LAScroll { dir option position {units ""} } {
+	if { $units == "" } {
+	    if { $dir == "x" } {
+		$chartName.chart.c xview moveto $position
+		$chartName.chart.ruler xview moveto $position
+	    } else {
+		$chartName.chart.c yview moveto $position
+		$chartName.chart.yBar yview moveto $position
+	    }
+	} else {
+	    if { $dir == "x" } {
+		$chartName.chart.c xview scroll $position units
+		$chartName.chart.ruler xview scroll $position units
+	    } else {
+		$chartName.chart.c yview scroll $position units
+		$chartName.chart.yBar yview scroll $position units
+	    }
+	}
+    }
+
+
+    # LAPaginate
+    method LAPaginate { } {
+
+	set endPoint [expr ($stopTime*$unitDistance)+$bordX]
+	set timeWindow $TimeWindow
+	
+	for {set m 1} {$m <= $numInputs} {incr m} {
+	    
+	    # Position in the vertical direction for text, in pixels
+	    set textYposition [expr [expr $bordY*$m]+[expr $unitHeight*$m]]
+	    
+	    if {$stopTime < $timeWindow} {
+		$chartName.chart.c create text $bordX $textYposition \
+			-text "0" -fill yellow
+		$chartName.chart.c create text $endPoint $textYposition \
+			-text "$stopTime" -fill black -anchor n
+		$chartName.chart.c create text [expr 2*$bordX]  \
+			[expr $textYposition - $unitHeight] \
+			-text [lindex $PLabels [expr $m-1]] -anchor sw
+	    } else {  
+		for {set t 0} {$t <= $stopTime} {set t [expr $t+$timeWindow]} {
+		    $chartName.chart.c create text \
+			    [expr ($t*$unitDistance)+$bordX] $textYposition \
+			    -text "$t" -fill black -anchor n
+		    $chartName.chart.c create text \
+			    [expr ($t*$unitDistance)+ (2*$bordX)] \
+			    [expr $textYposition - $unitHeight] \
+			    -text [lindex $PLabels [expr $m-1]] -anchor sw
+		}
+	    }
+	} 
+    }
+
+    # Print method
+    method LAPrint {} {
+	global env
+	if {[info exists env(PRINTER)]} {
+	    set OUTPUT [open "|lpr -P$env(PRINTER)" w]
+	    puts $OUTPUT [$chartName.chart.c postscript -colormode gray \
+		    -pageheight 10i -pagewidth 8i -height \
+		    [expr $height_cm*$numInputs]c \
+		    -width ${width_cm}c -rotate 1]
+	    close $OUTPUT
+	} else {
+	    ptkMessage {
+ The PRINTER enviroment variable
+ is not set.  Please set this 
+ the printer enviroment variable.
+ 	    }
+	}
+    }
+
+    # LAChartMkYScale
+    # Procedure to label the vertical scale
+    method LAMkYScale { canv } {
+
+	$canv delete all
+	
+	# Set window height for each plot
+	set winHeight [expr ([winfo height $canv]-55.5)*1.0/$numInputs]
+	
+	# For lack of a better method to specifiy unitHeight
+	set unitHeight $winHeight
+
+	# For very small windows, we do not divide the vertical axis.
+	# For small windows, we divide the vertical axis in two.
+	if {$unitHeight < 60.0} {set div 1.0} \
+		elseif {$unitHeight >= 60.0} {set div 2.0} 
+
+	set tickIncrement [expr 1/$div]
+	set tickYposition [expr $bordY + 55.5]
+	set tickYincrement [expr $tickIncrement*$unitHeight]
+	for { set i 1 } { $i <= $numInputs } { incr i } {
+	    for {set tick 1} \
+		    {$tick >= 0} \
+		    {set tick [expr $tick-$tickIncrement] } {
+		$canv create line 14m ${tickYposition} \
+			12m ${tickYposition} -fill black
+		$canv create text 7m ${tickYposition} -text "$tick" -fill blue
+		set tickYposition [expr $tickYposition+$tickYincrement]
+	    }
+	    set tickYposition [expr 55.5 + [expr ($bordY*($i+1)) + \
+		    [expr $i*$unitHeight]]]
+	}
+	$canv configure -scrollregion "0 0 14m [expr $tickYposition + 20]"
+	# the following is removed to help fix refresh problems
+	# $canv configure -height [expr $tickYposition + 20]
+	$chartName.chart.c configure -scrollregion \
+		"0 0 [winfo width $chartName.chart.c] \
+		[expr $tickYposition - 35.5]"
+	# the following is removed to help fix refresh problems
+	# $chartName.chart.c configure -height [expr $tickYposition - 35.5]
+    }
+
+    # LAMkXScale
+    # creates an overhead ruler to count the values
+    method LAMkXScale { canv } {
+	$canv delete all
+
+	# create ruler
+	$canv create line $bordX 0.5c $bordX 1c  \
+		[expr $bordX+($count*$unitDistance*$chartScale)] 1c \
+		[expr $bordX+($count*$unitDistance*$chartScale)] 0.5c
+	for { set i 0 } { $i < $count } { incr i } {
+	    set x [expr $bordX + ($i*$unitDistance*$chartScale)]
+	    $canv create line $x 0.5c $x 1c
+	    $canv create text [expr $x + 4] .75c -text $i -anchor sw
+	}
+	$canv create text [expr $bordX + 4 + \
+		($count*$unitDistance*$chartScale)] \
+		.75c -text $count -anchor sw
+    }
+
+   
+ 
+    # LAPlotPoint
+    # Plot a point.
+    
+    method LAPlotPoint { x y plotNum } { 
+
+	# scaledTime is the x position of the new point, in pixels.
+	set scaledTime [expr [expr $x*$unitDistance*$chartScale] + $bordX]
+	# scaledValue is the y position of the new point, in pixels.
+	set scaledValue [expr [expr $unitHeight*$plotNum] + \
+		[expr $bordY*($plotNum+1)] + [expr (1-$y)*$unitHeight]]
+
+	if {$count==0} {
+	    set prevYVal [lreplace $prevYVal $plotNum $plotNum $y]
+	    set prevXVal [lreplace $prevXVal $plotNum $plotNum $x]
+	    set prevYValues [lindex $yValues $plotNum]
+	    set prevXValues [lindex $xValues $plotNum]
+	    set yValues [lreplace $yValues $plotNum $plotNum  \
+		    [lappend prevYValues $y]]
+	    set xValues [lreplace $xValues $plotNum $plotNum  \
+		    [lappend prevXValues $x]]
+	} else {
+	    set py [expr [expr $plotNum * $unitHeight] + \
+		    [expr $bordY*($plotNum+1)]+ [expr (1 - \
+		    [lindex $prevYVal $plotNum])*$unitHeight]]
+	    set px [expr [expr [lindex $prevXVal $plotNum]*$unitDistance* \
+		    $chartScale] + $bordX]
+	    $chartName.chart.c create line ${px} ${py} \
+		    ${scaledTime} ${py} ${scaledTime} ${scaledValue} \
+		    -fill black
+	    set prevYVal [lreplace $prevYVal $plotNum $plotNum $y]
+	    set prevXVal [lreplace $prevXVal $plotNum $plotNum $x]
+	    set prevYValues [lindex $yValues $plotNum]
+	    set prevXValues [lindex $xValues $plotNum]
+	    set yValues [lreplace $yValues $plotNum $plotNum  \
+		    [lappend prevYValues $y]]
+	    set xValues [lreplace $xValues $plotNum $plotNum  \
+		    [lappend prevXValues $x]]
+	} 
+	set scrollheight [lindex [lindex \
+		[$chartName.chart.c configure -scrollregion] 4] 3]
+	$chartName.chart.c configure -scrollregion \
+		"0 0 $scaledTime $scrollheight"
+	$chartName.chart.ruler configure -scrollregion "0 0 $scaledTime 1.5c"
+
+	# scroll each canvas based when time has advanced by timeWindow or more
+	if {[expr $count*1.0/$TimeWindow] >= $scrollCount} {
+	    LAScroll x moveto [expr round([expr $scaledTime*1.0/40])]
+	    set scrollCount [expr $scrollCount + 1]
+	}
+    }
+
+    # LARefresh
+    # Redraw all objects.
+    method LARefresh { } {
+	
+	# To ensure that the window resizing has been completed,
+	update
+	
+	# draw y label
+	LAMkYScale $chartName.chart.yBar
+	# clean chart
+	$chartName.chart.c delete all
+	for {set plotNum 0} {$plotNum < $numInputs} {incr plotNum} {
+	    set yvalsList [lindex $yValues $plotNum]
+	    set xvalsList [lindex $xValues $plotNum]
+	    set yValues [lreplace $yValues $plotNum $plotNum {}]
+	    set xValues [lreplace $xValues $plotNum $plotNum {}]
+	    set count 0
+	    for {set i 0} {[lindex $yvalsList $i] != ""} {incr i} {
+		LAPlotPoint [lindex $xvalsList $i] [lindex $yvalsList $i] \
+			$plotNum
+		incr count
+	    }
+	}
+	# redraw ruler
+	LAMkXScale $chartName.chart.ruler
+	# paginate chart
+	LAPaginate
+    }
+
+    # zoom in or out along horizontal axis.  Taken from gantt chart.
+    method LAZoom { dir } {
+	
+	if {$dir == "in"} {
+	    $chartName.mBar.zoomindex configure -text \
+		    [expr 2.0*$chartScale]
+	} else {
+	    $chartName.mBar.zoomindex configure -text \
+		    [expr 0.5*$chartScale]
+	}
+	
+	if {$dir == "in"} {
+	    set scale 2.0 
+	} else {
+	    set scale 0.5
+	}
+	set chartScale [expr $chartScale*$scale]
+
+	# zoom in on the horizontal scale
+	$chartName.chart.c scale all $bordX $bordY $scale 1.0
+	# here we zoom the ruler to be used later
+	$chartName.chart.ruler scale all $bordX $bordY $scale 1.0
+	
+	set scrollheight [lindex [lindex \
+		[$chartName.chart.c configure -scrollregion] 4] 3]
+        $chartName.chart.c configure -scrollregion \
+		"0 0 [expr $bordX + ($unitDistance*$count*$chartScale)] \
+		$scrollheight"
+	$chartName.chart.ruler configure -scrollregion \
+		"0 0 [expr $bordX + ($unitDistance*$count*$chartScale)] 1.5c"
+    }
+   
+    # this method is no longer used except when working by hand
+    # since the change to plotpoint this method no longer works
+    method addData { inputList } {
+	set canv $chartName.chart.c
+	while { $inputList != "" } {
+	    for {set i 0} {$i < $numInputs} {incr i} {
+		switch [lindex $inputList $i] {
+		    1.0 -
+		    1 {LAPlotPoint 1 $i}
+		    0.0 -
+		    0 {LAPlotPoint 0 $i}
+		    "" {LAPlotPoint -1 $i}
+		    \-1 {LAPlotPoint -1 $i}
+		}
+	    }
+	    set count [expr $count + 1]
+	    set inputList [lrange $inputList $numInputs end]
+	}
+    }
+}
