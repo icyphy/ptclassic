@@ -381,7 +381,6 @@ int PTcl::computeSchedule() {
 		return FALSE;
 	}
 	if (SimControl::flagValues() & SimControl::halt) {
-		Tcl_AppendResult(interp, "Halt was requested when setting up the schedule", (char*) NULL);
 		return FALSE;
 	}
 	return TRUE;
@@ -830,31 +829,59 @@ int PTcl::targetparam(int argc,char ** argv) {
 	return TCL_OK;
 }
 
-// If no arguments are given, return the names, types, and default values
-// of the hints supported by the current target. If one argument is
-// given, assume it is a block name, and return the names and values
-// of all hints that have been set for that block.  If two arguments
-// are given, then assume they are blockname and hintname, and return
-// the value of the particular hint.  If three arguments are given,
-// use the third argument to set the value of the hint.
+// Set or examine pragmas registered with the current target.
+// This procedure can take between 1 and 4 arguments, all optional.
+// They must be given in the order:
+//	parentname
+//	blockname
+//	pragmaname
+//	pragmavalue
+// If two arguments are given, assume the second is a block name,
+// and the first is the name of the galaxy or universe within which the block
+// sits, and return the names and values of all pragmas that have been set for
+// that block for the current target.  If three arguments
+// are given (blockname, parentname, pragmaname), return
+// the value of the particular pragma.  If four arguments are given,
+// use the fourth argument to set the value of the pragma.
 //
-int PTcl::targetHint(int argc,char ** argv) {
+int PTcl::pragma(int argc,char ** argv) {
     if (!currentTarget) {
+	Tcl_AppendResult(interp,"No current target!",(char*) NULL);
+	return TCL_ERROR;
+    }
+    if (argc == 3) {
+	return staticResult(currentTarget->pragma(argv[1],argv[2]));
+    } else if (argc == 4) {
+	return staticResult(currentTarget->pragma(argv[1],argv[2],argv[3]));
+    } else if (argc == 5) {
+	return staticResult(currentTarget->pragma(argv[1],argv[2],argv[3],argv[4]));
+    } else {
+	return usage("pragma ?<parentname>? ?<blockname>? ?<pragmaname>? ?<pragmavalue>?");
+    }
+}
+
+// Return the names, types, and default values of the pragmas supported
+// by targets with the given name.
+// If the target name is "<parent>", issue an error message.
+//
+int PTcl::pragmaDefaults(int argc,char ** argv) {
+    if (argc < 2 || strcmp(argv[1],"<parent>") == 0) {
 	Tcl_AppendResult(interp,
-			 "targetHint: Target has not been created yet.",
+			 "You must specify a Target to access pragmas.\n",
+			 "It cannot be <parent>.",
 			 (char*) NULL);
 	return TCL_ERROR;
     }
-    if (argc == 1) {
-	return staticResult(currentTarget->hint());
-    } else if (argc == 2) {
-	return staticResult(currentTarget->hint(argv[1]));
-    } else if (argc == 3) {
-	return staticResult(currentTarget->hint(argv[1],argv[2]));
-    } else if (argc == 4) {
-	return staticResult(currentTarget->hint(argv[1],argv[2],argv[3]));
+    const Target* t = KnownTarget::find(argv[1]);
+    if (!t) {
+      Tcl_AppendResult(interp,"Unrecognized target: ", argv[1], (char*) NULL);
+      return TCL_ERROR;
+    }
+    if (argc == 2) {
+	addResult(t->pragma());
+	return TCL_OK;
     } else {
-	return usage("targetHint ?<blockname ?<hintname ?<value>?>?>?");
+	return usage("pragmaDefaults <targetname>");
     }
 }
 
@@ -1081,6 +1108,8 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(nodeconnect),
 	ENTRY(numports),
 	ENTRY2(permlink,multilink),
+	ENTRY(pragma),
+	ENTRY(pragmaDefaults),
 	ENTRY(print),
 	ENTRY(renameuniv),
 	ENTRY(registerAction),
@@ -1094,7 +1123,6 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(star),
 	ENTRY(statevalue),
 	ENTRY(target),
-	ENTRY(targetHint),
 	ENTRY(targetparam),
 	ENTRY(targets),
 	ENTRY(topblocks),
