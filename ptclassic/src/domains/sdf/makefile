@@ -37,8 +37,15 @@ include ../../../mk/topdomain.mk
 DIRS = kernel stars loopScheduler dfm dsp image targets tcltk \
 	matrix matlab atm contrib
 
-ifeq ("$(PTARCH)","sol2.5.front")
+# We only build the VIS subdomain under the cfront compiler on Solaris
+# 2.5 and higher.  We test for sol2 and cfront in the architecture name
+# and the presence of the VSDKHOME environment variable
+ifneq ("$(findstring sol2,$(PTARCH))","")
+ifneq ("$(findstring cfront,$(PTARCH))","")
+ifdef VSDKHOME
 DIRS += vis
+endif
+endif
 endif
 
 ME = sdf
