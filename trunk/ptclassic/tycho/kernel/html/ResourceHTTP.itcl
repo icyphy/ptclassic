@@ -369,6 +369,9 @@ body ::tycho::ResourceHTTP::open {{mode "r"}} {
 # if not called during a non-blocking read.
 #
 body ::tycho::ResourceHTTP::progress {} {
+    if {$contentlength==0} {
+        return 0
+    }
     expr $contentloaded / $contentlength.0
 }
 
@@ -535,7 +538,6 @@ body ::tycho::ResourceHTTP::mkdir {dir} {
 body ::tycho::ResourceHTTP::new {path args} {
     #::puts "::tycho::ResourceHTTP::new $path $args"
     uplevel #0 ::tycho::ResourceHTTP [::tycho::autoName resourcehttp] \
-	    -debug 1 \
 	    $args
 }
 
