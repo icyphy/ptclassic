@@ -11,8 +11,9 @@
 # not function correctly under cfront at present, due either to non-portable
 # constructs or cfront compiler bugs.
 
-# C++ compiler to use
-GNU = /usr/lang/CC -I$(ROOT)/src/cfront
+# C++ compiler to use.  I suppose calling this symbol GNU instead of
+# CPLUSPLUS shows our bias?
+GNU = /usr/lang/CC -I$(ROOT)/src/compat/cfront
 # flags for C++ compilation
 GPPFLAGS = -g -Dvolatile=
 # flags for C compilation
@@ -55,3 +56,12 @@ OCTTOOLS = $(ROOT)/octtools
 # Oct libraries
 OCTLIBDIR = $(OCTTOOLS)/lib.sun4
 
+# If the X11 include directories are in /usr/include/X11, leave
+# the following symbol blank.  Otherwise define it as "-Idir" where
+# dir is the PARENT of the include directory, which must end in X11.
+X11INCL=
+
+# If the X11 libraries are not on the standard library search path,
+# define the following symbol as "-Ldir" where dir is the directory
+# containing them.  Otherwise leave it blank.
+X11LIBDIR=
