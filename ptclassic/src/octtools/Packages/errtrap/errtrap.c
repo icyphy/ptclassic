@@ -205,7 +205,7 @@ va_dcl
 jmp_buf errJmpBuf;
 
 static jmp_buf jmpBufList[STACK_SIZE];
-static numJmpBufs = 0;
+static int numJmpBufs = 0;
 
 /*ARGSUSED*/
 static void ignoreHandler(pkgName, code, message)
