@@ -43,6 +43,7 @@ EXTRA_SRCS =	abbreviations.html \
 		authors.html \
 		bindings.html \
 		brahe.html \
+		bugs0.1.html \
 		bugs.html \
 		documentation.html \
 		help.html \
