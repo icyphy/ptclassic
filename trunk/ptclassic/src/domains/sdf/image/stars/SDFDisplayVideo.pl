@@ -29,6 +29,13 @@ The 'Save' state can be set to "YES" or "NO" to choose whether
 the created image files should be saved or deleted.
 Each image's frame number is appended to the root filename
 to form the image's complete filename.
+
+The 'ByFields' state can be set to either "YES" or "NO" to choose
+whether the input images should be treated as interlaced fields
+that make up a frame or as entire frames.
+If the inputs are fields, then the first field should contain
+frame lines 1, 3, 5, etc. and the second field should contain
+lines 0, 2, 4, 6, etc.
 	}
 	explanation {
 .pp
@@ -82,7 +89,8 @@ These instructions are appropriate as of December 1992 but may change
 in the future.
 	}
 
-	ccinclude { "GrayImage.h" , <std.h> , <stdio.h> }
+	hinclude { "GrayImage.h" }
+	ccinclude { <std.h> , <stdio.h> }
 
 // INPUT AND STATES.
 
@@ -98,53 +106,133 @@ in the future.
 		name { Save }
 		type { int }
 		default { "NO" }
-		desc { If true (YES), then save the file }
+		desc { If true (YES), then save the file. }
+	}
+	defstate {
+		name { ByFields }
+		type { int }
+		default { "NO" }
+		desc { If true (YES), then inputs are interlaced fields. }
 	}
 
-	header {
-		const int LINELEN = 100;
-	}
+////// Code
+	header { const int LINELEN = 100; }
+
 	protected {
-		char allFileNames[40*LINELEN], rootName[LINELEN],
-				temp1[LINELEN];
+		unsigned char* tmpFrm;
+		int width, height, fieldNum, firstTime;
+		char allFileNames[100*LINELEN], rootName[LINELEN],
+				tmpFile[LINELEN];
 	}
 
 	setup {
+		fieldNum = 0;
+		firstTime = 1;
 		allFileNames[0] = '\000';
+		tmpFrm = NULL;
 
 		const char* t = ImageName;
 		if (t && t[0]) { strcpy(rootName, ImageName); }
 		else { strcpy(rootName, tempFileName()); }
-		strcpy(temp1, tempFileName());
+		strcpy(tmpFile, tempFileName());
 	}
 
+
 	method { // Remove all appropriate files.
-		name { cleanUp }
+		name { CleanUp }
 		type { "void" }
 		access { private }
 		arglist { "()" }
 		code {
 			LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
-			sprintf(cmd, "rm -f %s", temp1); system(cmd);
+			sprintf(cmd, "rm -f %s", tmpFile); system(cmd);
 			if ((allFileNames[0]) && !int(Save)) {
 				sprintf(cmd, "rm -f %s", allFileNames);
 				system(cmd);
 			}
+
+			allFileNames[0] = '\000'; // Clear the file list.
 			LOG_DEL; delete [] cmd;
+			LOG_DEL; delete [] tmpFrm; tmpFrm = NULL;
 	}	}
 
-	wrapup { // Display the video here.
-		LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
 
+	wrapup { // Display the video here.
 		if (!(allFileNames[0])) { // No files to show.
-			LOG_DEL; delete [] cmd; cleanUp(); return;
+			CleanUp(); return;
 		}
+
+		LOG_NEW; char* cmd = new char[20 + strlen(allFileNames)];
 		sprintf(cmd, "getx11 -m %s", allFileNames);
 		system (cmd);
 
 		LOG_DEL; delete [] cmd;
-		cleanUp();
+		CleanUp();
 	}
+
+
+	method {
+		name { DoFirstTime }
+		type { "void" }
+		access { protected }
+		arglist { "(const GrayImage& img)" }
+		code {
+			width = img.retWidth();
+			height = img.retHeight();
+			if (ByFields) {
+				height *= 2;
+				LOG_NEW; tmpFrm = new unsigned char[width*height];
+			}
+			firstTime = 0;
+	}	}
+
+
+	method {
+		name { SizeCheck }
+		type { "int" }
+		arglist { "(const GrayImage& img)" }
+		access { protected }
+		code {
+			int err = (img.retWidth() != width);
+			if (ByFields) { err |= (img.retHeight() != height/2); }
+			else { err |= (img.retHeight() != height); }
+			return err;
+	}	}
+
+
+	method {
+		name { DataToFile }
+		type { "void" }
+		access { protected }
+		arglist { "(const unsigned char* data, const int id)" }
+		code {
+// Open file, write data, close file.
+			FILE* fptr = fopen(tmpFile, "w");
+			if (fptr == (FILE*) NULL) {
+				Error::abortRun(*this, "can not create: ", tmpFile);
+				return;
+			}
+
+			fwrite((const char*) data, sizeof(unsigned char),
+				(unsigned) (width*height), fptr);
+			fclose(fptr);
+
+// Translate data.
+			char name[LINELEN];
+			sprintf(name, "%s%d", rootName, id);
+
+			char cmd[LINELEN];
+			sprintf(cmd,
+					"rawtorle -n 1 -w %d -h %d < %s | rleflip -v -o %s",
+					width, height, tmpFile, name);
+			system(cmd);
+
+// Add file to list.
+			strcat(allFileNames, " ");
+			strcat(allFileNames, name);
+		}
+	} // end { DataToFile }
+
 
 	go {
 // Read data from input.
@@ -158,29 +246,38 @@ in the future.
 			return;
 		}
 
-// Open file, write data, close file.
-		char name[LINELEN];
-		sprintf(name, "%s%d", rootName, imD->retId());
+// Do size check.
+		if (firstTime) {
+			DoFirstTime(*imD);
+		} else {
+			if (SizeCheck(*imD)) {
+				Error::abortRun(*this, "Different input image sizes.");
+				return;
+		}	}
 
-		FILE* fptr = fopen(temp1, "w");
-		if (fptr == (FILE*) NULL) {
-			Error::abortRun(*this, "can not create: ", temp1);
-			return;
+// Process the input data.
+		if (ByFields) {
+			if (!fieldNum) {
+				for(int i = 0; i < height/2; i++) {
+					const int t2 = i*width;
+					const int t1 = 2*t2 + width;
+					for(int j = 0; j < width; j++) {
+						tmpFrm[t1 + j] = (imD->constData())[t2 + j];
+				}	}
+				fieldNum = 1;
+			} else {
+				for(int i = 0; i < height/2; i++) {
+					const int t2 = i*width;
+					const int t1 = 2*t2;
+					for(int j = 0; j < width; j++) {
+						tmpFrm[t1 + j] = (imD->constData())[t2 + j];
+				}	}
+				fieldNum = 0;
+				DataToFile(tmpFrm, imD->retId());
+			}
+
+		} else { // Data is NOT by fields.
+			DataToFile(imD->constData(), imD->retId());
 		}
-
-		fwrite((const char*)imD->constData(), sizeof(unsigned char),
-			(unsigned) imD->retWidth() * imD->retHeight(), fptr);
-		fclose(fptr);
-
-// Translate data.
-		char cmd[LINELEN];
-		sprintf(cmd,
-				"rawtorle -n 1 -w %d -h %d < %s | rleflip -v -o %s",
-				imD->retWidth(), imD->retHeight(), temp1, name);
-		system(cmd);
-
-// Add file to list.
-		strcat(allFileNames, " ");
-		strcat(allFileNames, name);
 	} // end go{}
-} // end defstar { DisplaySeq }
+} // end defstar { DisplayVideo }
