@@ -1,4 +1,4 @@
-#!/usr/tools/bin/wish -f
+#! /usr/tools/bin/wish -f
 #
 # ptfixtree (pft)
 # 
@@ -400,4 +400,4 @@ proc pftMain { } {
 }
 
 pftMain
-destroy .
+#destroy .
