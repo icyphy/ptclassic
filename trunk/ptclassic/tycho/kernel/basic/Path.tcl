@@ -328,7 +328,7 @@ proc ::tycho::rm { args } {
 #
 proc ::tycho::rmIfNotWritable { file } {
     if {[file exists $file] && ![file writable $file]} {
-	catch {::tycho::rm -f $file}
+	file delete -force $file
     }
 
 }
