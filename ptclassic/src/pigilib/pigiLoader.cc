@@ -64,6 +64,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Architecture-specific stuff.  The PTFOO defs come from compat.h
 
+#ifdef PTAIX
+#define ARCH "aix"
+#endif
+
 #ifdef PTALPHA
 #define ARCH "alpha"
 #endif
