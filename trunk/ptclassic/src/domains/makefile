@@ -16,7 +16,7 @@ DIRS = sdf de ddf thor $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
-makefiles all install clean sources:
+makefiles all install clean sources depend:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in domains/$$x ; \

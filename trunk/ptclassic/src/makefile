@@ -41,7 +41,7 @@ makefiles:
 		cd .. ; \
 	done
 
-all install clean sources:
+all install clean sources depend:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in $$x ; \
