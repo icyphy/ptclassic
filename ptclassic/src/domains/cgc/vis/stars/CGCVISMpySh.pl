@@ -1,5 +1,5 @@
 defstar {
-	name { VISMpyDblSh }
+	name { VISMpySh }
 	domain { CGC }
 	version { $Id$ }
 	author { William Chen }
@@ -39,38 +39,17 @@ limitation of liability, and disclaimer of warranty provisions.
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	}
-	codeblock(localDecl){
-	  vis_d64  resulthihi,resulthilo,resulthi;
-	  vis_d64  resultlohi,resultlolo,resultlo,result;
-	  vis_f32  dataAlo,dataAhi,dataBlo,dataBhi,resultu,resultl;
-	}
 	codeblock(multfour){
-	  vis_write_gsr(8);
-	  
 	  /* setup the data */
-	  dataAhi=vis_read_hi((double) $ref(inA));
-	  dataAlo=vis_read_lo((double) $ref(inA));
-	  dataBhi=vis_read_hi((double) $ref(inB));
-	  dataBlo=vis_read_lo((double) $ref(inB));
+	  vis_d64 dataA = (double) $ref(inA);
+	  vis_d64 dataB = (double) $ref(inB);
 	  
 	  /* calculate the partial products */
-	  resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
-	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
-	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
-	  
-	  resultlohi = vis_fmuld8sux16(dataAlo,dataBlo);
-	  resultlolo = vis_fmuld8ulx16(dataAlo,dataBlo);
-	  resultlo   = vis_fpadd32(resultlohi,resultlolo);
-	  
-	  /*pack and concat the final product*/
-	  resultu = vis_fpackfix(resulthi);
-	  resultl = vis_fpackfix(resultlo);
-	  result = vis_freg_pair(resultu,resultl);
-	  
-          $ref(out) = result;
+	  vis_d64 resulthi = vis_fmul8sux16(dataA,dataB);
+	  vis_d64 resultlo = vis_fmul8ulx16(dataA,dataB);
+	  $ref(out) = vis_fpadd16(resulthi,resultlo);
 	}
 	go {	  
-	  addCode(localDecl);
 	  addCode(multfour);
       	}
 }
