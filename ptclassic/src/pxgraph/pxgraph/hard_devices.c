@@ -1,3 +1,6 @@
+/* Version info
+ * $Id$
+ */
 /*
  * Hardcopy Devices
  *
@@ -14,6 +17,18 @@ extern int hpglInit();
 extern int psInit();
 extern int idrawInit();
 
+#if defined(hppa) || defined(__hppa)
+struct hard_dev hard_devices[] = {
+    { "HPGL", hpglInit, "lp -d%s", "xgraph.hpgl", "paper",
+	27.5, "1", 14.0, "1", 12.0, NONE },
+    { "Postscript", psInit, "lp -d%s", "xgraph.ps", "lps40",
+	19.0, "Times-Bold", 18.0, "Times-Roman", 12.0, NO },
+    { "Idraw", idrawInit,
+	"cat > /usr/tmp/idraw.tmp.ps; %s /usr/tmp/idraw.tmp.ps&",
+	"~/.clipboard", "/usr/local/idraw", 19.0, "Times-Bold", 18.0,
+	"Times-Roman", 12.0, NONE }
+};
+#else
 struct hard_dev hard_devices[] = {
     { "HPGL", hpglInit, "lpr -P%s", "xgraph.hpgl", "paper",
 	27.5, "1", 14.0, "1", 12.0, NONE },
@@ -24,6 +39,7 @@ struct hard_dev hard_devices[] = {
 	"~/.clipboard", "/usr/local/idraw", 19.0, "Times-Bold", 18.0,
 	"Times-Roman", 12.0, NONE }
 };
+#endif
 
 int hard_count = sizeof(hard_devices)/sizeof(struct hard_dev);
 
