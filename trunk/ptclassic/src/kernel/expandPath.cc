@@ -36,11 +36,17 @@ to the expanded path name.  The savestring routine allocates a new dynamic
 string via the new operator.
 
 The prototype declaration of the expandPathName function is defined in
-miscFuncs.h.  The expandPathName function should return the same data
-type as savestring does, char*, but it does not.
+miscFuncs.h.
 
-The pathname may begin with ~, ~user, or $var where var is an environment
-variable.  Variables are expanded only at the beginning of the string.
+The POSIX standard requires that every login shell defines the HOME and
+LOGNAME environment variables [1, p. 39].  The POSIX standard also
+defines two routines for searching the password database: getpwid
+and getpwnam [1, p. 147].
+
+Reference:
+
+1. W. Richard Stevens, {Advanced Programming in the Unix Environment},
+   Addison-Wesley, Reading, MA, ISBN 0-201-56317-7, 1992.
 
 **************************************************************************/
 
@@ -51,6 +57,12 @@ variable.  Variables are expanded only at the beginning of the string.
 #include "miscFuncs.h"
 #define MAXSTRINGLEN 4096
 
+// Expand a pathname. The pathname may begin with ~, ~user, or $var where
+// var is an environment variable.  The expansion of ~ and ~user is
+// POSIX compliant.  The expansion of environment variables is ANSI C
+// compliant.  This function returns the result of savestring applied
+// to the expanded path name, which allocates a new dynamic string via
+// the new operator.
 char* expandPathName(const char* name) {
     // Allow file name to expand to an arbitrary length
     StringList expandedPath;
