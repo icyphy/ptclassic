@@ -1,0 +1,53 @@
+<!-- $Id$ -->
+
+Welcome to the prototype audio control panel! Sorry about the
+formatting, but this will be fixed sooner or later ...
+
+ <P>
+<b>General information</b>
+
+ <P> This application controls the Sun Audio device. By default, the
+Ptolemy universe that created it configures the device to run stereo
+at 44.1 kHz with 16-bit linear encoding. This is the simplest (and
+most useless!) real-time audio demonstration we have -- it just
+demonstrates that the audio works.
+
+ <P>
+<b>Controls</b>
+
+<dl>
+
+<dt>Input and output selectors
+
+<dd>The input and output selectors do the obvious thing. Or, at least,
+they would if they worked. We haven't gotten around to this
+yet. Really, buttons would be nicer than check-boxes --  what do you
+think?
+
+<dt>Rec
+
+<dd>Controls the gain on the input. For CD source, this should really
+be down quite low to avoid clipping.
+
+<dt>Bal
+
+<dd>Controls the balance of the output signal. Negative numbers are
+left, positive are right (we think...)
+
+<dt>Gain
+
+<dd>Controls the output gain. Again, if it's too high or there's too
+much gain in a filter (in other applications), you'll get nasty
+noises.  We really need an amplitude-limiting star to prevent this...
+
+</dl>
+
+ <P>
+<b>Shortcuts</b>
+
+<ul>
+<li>Go -- Control-g
+<li>Pause -- Control-p
+<li>Stop -- Control-s
+<li>Quit -- Control-q
+
