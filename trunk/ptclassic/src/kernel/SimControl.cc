@@ -77,8 +77,6 @@ typedef void (*SIG_PF)(int);
 #include <sys/time.h>
 #include <signal.h>
 
-extern "C" int setitimer( int, struct itimerval *, struct itimerval *);
-
 // declare action list stuff.
 SimActionList* SimControl::preList = 0;
 SimActionList* SimControl::postList = 0;
@@ -276,7 +274,7 @@ void SimControl::setPollTimer( int seconds, int micro_seconds ) {
         i.it_value.tv_sec = seconds;
         i.it_value.tv_usec = micro_seconds;
 	// Turn on the poll flag when the timer expires
-	signal(SIGALRM, (void (*)(int))setPollFlag);
+	signal(SIGALRM, (SIG_PF)SimControl::setPollFlag);
 	// Turn off the poll flag until the timer fires
 	flags &= ~poll;
 	// Start the timer
