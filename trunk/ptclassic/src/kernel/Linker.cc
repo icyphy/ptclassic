@@ -89,7 +89,7 @@ void Linker::adjustMemory() {
 		size_t t = (size_t) availMem;
 		size_t ps = getpagesize();
 		size_t t2 = (t / ps) * ps;
-		if (t2 < t) availMem = t2 + ps;
+		if (t2 < t) availMem = (char *) (t2 + ps);
 	}
 }
 
