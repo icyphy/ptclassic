@@ -49,7 +49,9 @@ include $(CONFIG)
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 EXTTOOLSLIB = $(ROOT)/src/utils/libexttools
-INCL = -I$(SDFDIR) -I$(KERNDIR) $(MATLAB_INCSPEC) -I$(EXTTOOLSLIB)
+PTMATLABLIB = $(ROOT)/src/utils/libptmatlab
+INCL = -I$(SDFDIR) -I$(KERNDIR) $(MATLAB_INCSPEC) \
+       -I$(EXTTOOLSLIB) -I$(PTMATLABLIB)
 
 # Library name
 LIB=libsdfmatlabstars.$(LIBSUFFIX)
