@@ -30,33 +30,16 @@
 
 
 ##########################################################################
-#### IconIndex
+#### IconLibrary
 #
-# The _IconIndex_ model is a hierarchical model for a library
-# of "icons" for dataflow graphs and such. The attribute-checking
-# of this model is non-strict, so that icons can have arbitrary
-# attributes representing graphical display options.
+# <b>This class is under development.</b>
 #
-# In addition to those in the <a href="Model.html">Model</a> superclass,
-# this model has the following attributes:
+# The _IconLibrary_ model is a hierarchical model for a library
+# of "icons" for dataflow graphs and such.
+#
+# In addition to those in the <a href="Library.html">Library</a>
+# superclass, this model has the following types:
 # <ul>
-#   <li><b>(none)</b>:
-# </ul>
-#
-# The model has the following entities and links:
-# <ul>
-# <li><b>group</b> _name_: A group of icons. This is simply a
-# structuring mechanism. The name cannot contain spaces. Tools that
-# read this model will usually
-# treat each group as a new hierarchical menu or palette. Groups
-# have the following attributes:
-#   <ul>
-#   <li><b>-label</b>: The label used to display the group in
-#    menu bars and the like. This is used because the group name
-#    cannot contain spaces. By default, this attribute will be
-#    set to the group name.
-#   </ul>
-#
 # <li><b>icon</b> _name_ _type_: An icon. The _type_ is the
 # actual type of Slate item that will be used to draw the icon.
 # The name cannot contain spaces.
@@ -77,16 +60,11 @@
 #
 # </ul>
 #
-# Here is an example of an icon model. This creates
-# a model and loads it with a string in TIM format -- usually,
-# though, you would set the *-datafile* option and
-# call load{} (see <a href="Model.html">Model</a>). After
-# creating it, call the describe{} method to confirm its
-# contents:
+# Here is an example of an icon model:
 # <pre><tcl>
 #     catch {delete object $icons}
-#     set icons [::tycho::IconIndex [::tycho::autoName iconIndex]]
-#     $icons read string {
+#     set icons [::tycho::IconLibrary [::tycho::autoName icons]]
+#     $icons parse {
 #         group sample {
 #             -label {Some sample icons}
 #             icon Add IconOval {
@@ -139,8 +117,8 @@
 #     $icons draw sample.Ramp $slate 200 100 -tags moveable
 # </pre></tcl>
 # 
-class ::tycho::IconIndex {
-    inherit ::tycho::HierModel
+class ::tycho::IconLibrary {
+    inherit ::tycho::Library
 
     constructor {args} {}
     destructor {}
@@ -153,59 +131,30 @@ class ::tycho::IconIndex {
     ####                     public methods                      ####
 
     # Draw an icon on a given slate
-    method draw {name slate x y args}
-    
-    # Add a group
-    method group {name args}
-    
+    method draw {icon slate x y args}
+
     # Add an icon
     method icon {name value args}
-
-    # Create a menu with icons in this index
-    method menu {menubar menuname prefix {context {}}}
 
     # Add a port to an icon
     method port {icon name value args}
     
     # Get the Slate type of an icon
     method type {name}
-
-    #################################################################
-    ####                  protected methods                      ####
-    
-    # Add a nested group to the array -- parser call
-    protected method _group {context name args}
-
-    # Add an icon into a group
-    protected method _icon {group name args}
-
-    # Add a port to an icon -- parser call
-    protected method _port {icon name data args}
-    
-    # Evaluate code in this object's context
-    protected method evalInSpecificContext {args} {
-	eval $args
-    }
 }
 
 ########################################################################
 #### constructor
 #
-body ::tycho::IconIndex::constructor {args} {
-    # Attribute-checking is non-strict
-    configure -strictoptions 0
-
+body ::tycho::IconLibrary::constructor {args} {
     # Evaluate options
     eval configure $args
 
-    # The group entity type. Label is for menu display.
-    defineEntityType group -valued 0 -ordered 1 -label ""
-
-    # The icon entity type. Label is for menu display.
-    defineEntityType icon -valued 1 -ordered 1 -label ""
+    # The icon entity type
+    definetype icon -label ""
 
     # The port entity type
-    defineEntityType port -valued 1 -ordered 1 -leaf 1 -type input
+    definetype port -leafonly 1 -type input
 }
 
 ########################################################################
@@ -214,7 +163,7 @@ body ::tycho::IconIndex::constructor {args} {
 # Draw an icon on a slate at the given coordinates. Additional
 # argument are given to the icon item when created
 #
-body ::tycho::IconIndex::draw {icon slate x y args} {
+body ::tycho::IconLibrary::draw {icon slate x y args} {
     set type  [type $icon]
     set attrs [attributes icon $icon]
     set iconid [eval $slate create $type $x $y \
@@ -234,27 +183,6 @@ body ::tycho::IconIndex::draw {icon slate x y args} {
 }
 
 ########################################################################
-#### group
-#
-# Add a new group. Flag an error if the group
-# already exists. Additional arguments are the initial values
-# of group attributes. Return the inverse command. If the
-# *-label* attribute is null, set it to the group name.
-#
-body ::tycho::IconIndex::group {name args} {
-    set splut [split $name $separator]
-    set cntxt [join [lreplace $splut end end] "."]
-    set local [lindex $splut end]
-
-    _verifynot group $cntxt $local $name
-    _addentity group $cntxt $local $name {} $args
-    if { [_itemcget group $cntxt $local -label] == "" } {
-	_itemconfigure group $cntxt $local [list -label $local]
-    }
-    list delete group $name
-}
-
-########################################################################
 #### icon
 #
 # Add a new icon. Flag an error if the icon
@@ -264,7 +192,7 @@ body ::tycho::IconIndex::group {name args} {
 # Note that is the icon is in a group, it's name is
 # in the form "group.iconname".
 #
-body ::tycho::IconIndex::icon {name value args} {
+body ::tycho::IconLibrary::icon {name value args} {
     set splut [split $name $separator]
     set cntxt [join [lreplace $splut end end] "."]
     set local [lindex $splut end]
@@ -278,52 +206,13 @@ body ::tycho::IconIndex::icon {name value args} {
 }
 
 ########################################################################
-#### menu
-#
-# Add a menu to a menubar containing icons in this index.
-# The first argument is the menubar. The second is the name
-# of the menu to place these icons into. The third
-# is the command prefix for each menu entry, to which will be
-# appended the icon name. The fourth,
-# if supplied and not null, is the group to add icons from.
-#
-body ::tycho::IconIndex::menu {menubar menuname prefix {context {}}} {
-    if { $context == "" } {
-	foreach g [names group] {
-            $menubar add [_itemcget group $context $g -label] $menuname \
-                    -type cascade
-	    menu $menubar [_itemcget group $context $g -label] $prefix $g
-	}
-        foreach i [names icon] {
-            $menubar command \
-                    [_itemcget icon {} $i -label] \
-                    $menuname \
-                    -command [concat $prefix $i]
-	}
-    } else {
-	foreach g [names group $context] {
-            $menubar add [_itemcget group $context $g -label] $menuname \
-                    -type cascade
-	    menu $menubar [_itemcget group $context $g -label] \
-                    $prefix $context.$g
-	}
-	foreach i [names icon $context] {
-            $menubar command \
-		    [_itemcget icon $context $i -label] \
-		    $menuname \
-		    -command [concat $prefix $context.$i]
-        }
-    }
-}
-
-########################################################################
 #### port
 #
 # Add a new port to an icon. Flag an error if the port
 # already exists. Additional arguments are the initial values
 # of port attributes. Return the inverse command.
 #
-body ::tycho::IconIndex::port {icon port value args} {
+body ::tycho::IconLibrary::port {icon port value args} {
     _verifynot port $icon $port $icon$separator$port
     _addentity port $icon $port $icon$separator$port $value $args
     list delete port $icon$separator$name
@@ -335,7 +224,7 @@ body ::tycho::IconIndex::port {icon port value args} {
 # Get the slate type of an icon. Flag an error if the icon does
 # not exist.
 #
-body ::tycho::IconIndex::type {name} {
+body ::tycho::IconLibrary::type {name} {
     set splut [split $name $separator]
     set cntxt [join [lreplace $splut end end] "."]
     set local [lindex $splut end]
@@ -344,52 +233,3 @@ body ::tycho::IconIndex::type {name} {
     _verify $t $cntxt $local
     _get $t $cntxt $local
 }
-
-########################################################################
-########################################################################
-####                       protected methods                        ####
-
-########################################################################
-#### _group
-#
-# Add a new nested group to the array. Flag an error if the group
-# already exists. Additional arguments are the initial values
-# of group attributes. If the
-# *-label* attribute is null, set it to the group name.
-#
-body ::tycho::IconIndex::_group {context name args} {
-    _verifynot group $context $name $context$separator$name
-    _addentity group $context $name $context$separator$name {} $args
-    if { [_itemcget group $context $name -label] == "" } {
-	_itemconfigure group $context $name [list -label $name]
-    }
-}
-
-########################################################################
-#### _icon
-#
-# Add a new nested icon to the array. Flag an error if the icon
-# already exists. Additional arguments are the initial values
-# of icon attributes. If the
-# *-label* attribute is null, set it to the icon name.
-#
-body ::tycho::IconIndex::_icon {group name value args} {
-    _verifynot icon $group $name $group$separator$name
-    _addentity icon $group $name $group$separator$name $value $args
-    if { [_itemcget icon $group $name -label] == "" } {
-	_itemconfigure icon $group $name [list -label $name]
-    }
-}
-
-########################################################################
-#### _port
-#
-# Add a new port to an icon. Flag an error if the port
-# already exists. Additional arguments are the initial values
-# of port attributes.
-#
-body ::tycho::IconIndex::_port {icon port value args} {
-    _verifynot port $icon $port $icon$separator$port
-    _addentity port $icon $port $icon$separator$port $value $args
-}
-
