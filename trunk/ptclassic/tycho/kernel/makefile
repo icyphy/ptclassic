@@ -49,6 +49,7 @@ ITCL_SRCS = \
 	CircularList.itcl \
 	ConsoleText.itcl \
 	DialogWindow.itcl \
+	Displayer.itcl \
 	DirectedAcyclicGraph.itcl \
 	Dismiss.itcl \
 	Edit.itcl \
@@ -82,6 +83,7 @@ ITCL_SRCS = \
 	TopLevel.itcl \
 	Tycho.tcl \
 	TychoWidget.itcl \
+	View.itcl \
 	WelcomeMessage.itcl \
 	YesNoCancel.itcl \
 	YesNoQuery.itcl
