@@ -90,7 +90,6 @@ configbody ::tycho::EditPtlang::star {
         set star [lindex $domainStarList 1]
         set file [file join $PTOLEMY src domains [string tolower $domain] \
                 stars $domain$star.pl]
-        puts $file
         if [file exists $file] {
             configure -file $file
         } else {
@@ -98,7 +97,6 @@ configbody ::tycho::EditPtlang::star {
             set file [ glob -nocomplain \
                     [file join $PTOLEMY src domains [string tolower $domain] \
                     * stars $domain$star.pl ]]
-            puts $file
             switch [llength $file] {
                 0 {error "Could not find a source file for $star in $domain"}
                 1 {configure -file $file} 
