@@ -58,7 +58,7 @@ void Sim56Target::initializeCmds() {
 	downloadCmds += fileName(uname,".cmd\n");
 	const char* file = plotFile;
 	if (*file != 0) {
-		miscCmds += "awk '{print ++n, $1}' ";
+		downloadCmds += "awk '{print ++n, $1}' ";
 		downloadCmds += file;
 		downloadCmds += " | xgraph -t '";
 		downloadCmds += (const char*)plotTitle;
