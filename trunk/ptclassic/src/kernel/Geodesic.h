@@ -114,7 +114,7 @@ public:
 	}
 
 	//  Push a Particle back into the Geodesic
-	void pushBack(Particle* p);
+	virtual void pushBack(Particle* p);
 
 	// Return the number of Particles on the Geodesic
 	int size() const {return sz;}
@@ -150,10 +150,10 @@ public:
 
 	// create a lock for the Geodesic, because it crosses
 	// thead boundaries.
-	void makeLock(const PtGate& master);
+	virtual void makeLock(const PtGate& master);
 
 	// delete lock for the Geodesic.
-	void delLock();
+	virtual void delLock();
 
 	int isLockEnabled() const { return gate != 0;}
 protected:
@@ -173,6 +173,8 @@ protected:
 	// setMaxArcCount.
 	int maxBufLength;
 
+	// lock for the Geodesic
+	PtGate* gate;
 private:
         // A connection may require some initial particles.
 	// This specifies the number.
@@ -182,7 +184,5 @@ private:
 	ParticleStack pstack;
 	// number of particles
 	int sz;
-	// lock for the Geodesic
-	PtGate* gate;
 };
 #endif
