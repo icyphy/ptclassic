@@ -12,8 +12,78 @@ group sdf {
     }
     item Printer {
         -label {Printer}
+	-numinputs 1
+	-numoutputs 0
+	parameter fileName "<stdout>" -label fileName
+    }
+    item Xgraph {
+        -label {Xgraph}
+	-numinputs 1
+	-numoutputs 0
+    }
+}
+
+group arithmetic {
+    -label {Basic Arithmetic}
+    item Add {
+        -label Add
+	-numinputs 2
+	-numoutputs 1
+    }
+    item Multiply {
+	-numinputs 2
+	-numoutputs 1
+    }
+    item Subtract {
+	-numinputs 2
+	-numoutputs 1
+    }
+}
+ 
+group uncommitted {
+    -label {Uncommitted Icons}
+    item one-zero {
+        -label {One in}
+	-numinputs 1
+	-numoutputs 0
+    }
+    item zero-one {
+        -label {One out}
 	-numinputs 0
 	-numoutputs 1
-	parameter fileName "<stdout>" -label fileName
+    }
+    item one-one {
+        -label {One in, one out}
+	-numinputs 1
+	-numoutputs 1
+    }
+    item two-one {
+        -label {Two in, one out}
+	-numinputs 2
+	-numoutputs 1
+    }
+    item two-two {
+        -label {Two in, two out}
+	-numinputs 2
+	-numoutputs 2
+    }
+}
+ 
+group miscellaneous {
+    -label {Miscellaneous Icons}
+    item Foo {
+        -label {The Foo Icon}
+	-numinputs 2
+	-numoutputs 2
+    }
+    item Bar {
+        -label {The Bar Icon}
+	-numinputs 1
+	-numoutputs 1
+    }
+   item Baz {
+        -label {The Baz Icon}
+	-numinputs 1
+	-numoutputs 1
     }
 }
