@@ -432,8 +432,7 @@ proc html2psProcessArgs {} {
 	set indexfile [lindex $argv 0]
 	set outputfile [lindex $argv 1]
     }
-    if {! ([file readable $indexfile] && \
-	    ("file" == "[file type $indexfile]" )) } {
+    if {![file readable $indexfile]} {
 	puts "html2ps: $indexfile is not readable"
 	set error 1
     }    
