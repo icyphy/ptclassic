@@ -43,7 +43,7 @@ interpreter.
 #pragma interface
 #endif
 
-#include "tcl.h"
+#include <tcl.h>
 #include "NamedObj.h"
 #include "SimControl.h"
 

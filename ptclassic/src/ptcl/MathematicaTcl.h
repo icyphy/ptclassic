@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include "tcl.h"
+#include <tcl.h>
 #include "StringList.h"
 #include "MathematicaIfc.h"
 #include "InstanceManager.h"
