@@ -86,6 +86,9 @@ public:
 	// destructor zaps all the member clusters (inherited)
 	~SDFClusterGal() {}
 
+	// partial destructor: use with caution. See notes in SDFCluster.cc.
+	void PartialDestructor();
+
 	// how many?
 	int numberClusts() const { return numberBlocks();}
 
