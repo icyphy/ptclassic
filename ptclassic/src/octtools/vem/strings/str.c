@@ -80,7 +80,7 @@ register char *a, *b;
  * This routine compares two strings disregarding case.
  */
 {
-    register int value;
+    register int value = 0;
 
     if ((a == (char *) 0) || (b == (char *) 0)) {
 	return a - b;
