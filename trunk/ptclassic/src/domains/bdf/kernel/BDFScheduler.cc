@@ -164,6 +164,8 @@ void BDFScheduler :: runOnce () {
 }
 
 int BDFScheduler::prepareGalaxy() {
+	if (! galaxy()) return FALSE;
+
 	// initialize galaxy and all contents.
 	galaxy()->initialize();
 	galSize = setStarIndices(*galaxy());
