@@ -39,13 +39,21 @@ PL_SRCS= \
  SDFCos.pl \
  SDFCutAndPaste.pl \
  SDFCutVarOffset.pl \
+ SDFCxToFix.pl \
+ SDFCxToFloat.pl \
+ SDFCxToInt.pl \
  SDFCxToRect.pl \
  SDFDB.pl \
  SDFDeMux.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
+ SDFFixToCx.pl \
+ SDFFixToFloat.pl \
+ SDFFixToInt.pl \
+ SDFFloatToCx.pl \
  SDFFloatToFix.pl \
+ SDFFloatToInt.pl \
  SDFFloor.pl \
  SDFFork.pl \
  SDFGain.pl \
@@ -56,6 +64,9 @@ PL_SRCS= \
  SDFIIDUniform.pl \
  SDFImpulse.pl \
  SDFIntToBits.pl \
+ SDFIntToCx.pl \
+ SDFIntToFix.pl \
+ SDFIntToFloat.pl \
  SDFIntegrator.pl \
  SDFLimit.pl \
  SDFLinQuantIdx.pl \
