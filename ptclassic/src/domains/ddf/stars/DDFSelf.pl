@@ -60,8 +60,6 @@ At compile time, this star appears to just be an atomic star.
 		gal = 0;
 	}	
 	setup {
-		if (gal) return;
-
 		StringList msg = "DDFSelf Star \"";
 		msg += name();
 		msg += "\" :\n";
