@@ -93,6 +93,20 @@ as the user if we want to create it.
 
 <h3><a href="$TYCHO/kernel/HTML.itcl">HTML</a></h3>
 <ul>
+<li>If I create a new Java template and generate the
+doc the indenting is all wrong, because the file contains
+HTML like:
+<pre>
+  <dl>
+    <dt> <b>Parameters:</b>
+    <dd> parameter-name - description
+    <dd> parameter-name - description
+    <dt> <b>Returns:</b>
+    <dd> description
+  </dl>
+</pre>
+Tycho's HTML viewer doesn't deal with the double <dd>
+(Netscape does, BTW).
 <li>The HTML parser is quite slow.
 <li>In "img" directives, align="right" causes an error.
 <li>In "img" directives dollar signs are not properly handled.
