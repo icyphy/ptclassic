@@ -35,6 +35,8 @@ CGStar :: CGStar() {
 int CGStar :: fire() {
 	// No need to grab data, so just use Star::fire, not SDFStar::fire.
 	int status = Star::fire();
+	// Advance the offset in the PortHoles
+	advance();
 	return status;
 }
 
