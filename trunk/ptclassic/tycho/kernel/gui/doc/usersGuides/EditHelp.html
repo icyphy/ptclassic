@@ -7,7 +7,7 @@
 <h1><a name="text editors">User's Guide to the Text Edit Windows</a></h1>
 <p>
 The Edit class in Tycho provides an Emacs-like text editor window.
-It is derived from the <a href=FileHelp.html>File class</a>, and
+It is derived from the <a href="FileHelp.html">File class</a>, and
 therefore inherits all of its features.
 Several classes derived from Edit provide specialized editors for a variety
 of uses.  All of these share the same Emacs-like
@@ -18,34 +18,40 @@ at the top.
 <p>
 The Edit class provides the following special features:
 <ul>
-<li><em><a name="Find/Change">Find/Change</a>
-<a name="search">search</a></em>.  This is a fairly sophisticated search
+<li><code><a name="Find/Change">Find/Change</a>
+<a name="search">search</a></code>.  This is a fairly sophisticated search
 mechanism that includes facilities for identifying only whole words,
 considering case, using regular expressions, and changing all instances
 at once.  When a search is launched, all matches are highlighted in the
 text.  You can then step through the matches one by one by repeating the
 search.
-<li><em><a name="spelling checker">Spelling checker</a></em>.
-The spelling checker current uses the Unix "spell" command and highlights
-all whole words that the spell command identified as being misspelled.
-In specialized editors derived from this one, a subset of the text
-may be checked for spelling errors.  For example, in a language-specific
-programming editor, only comments will be checked.  In the HTML editor,
-HTML directives are ignored.
-<li><em><a name="filling text">Fill</a></em>.  In the "Format" menu, three
-commands support filling text. 
-The <em><a name="Fill Region">Fill Region</a></em>
-command restructures the selected text to make all lines approximately
-the same length.  The <em><a name="Right Fill Column">Right Fill Column</a></em>
-command queries the user for the maximum line length to use in filling.
-The <em><a name="Set Fill Prefix">Set Fill Prefix</a></em> command queries
-the user for a prefix (such as a comment character) to use when filling
-text.  In language-specific derived classes, this prefix is set by
-default to the comment character(s) for the language.
-<li><em><a name="printing text">Printing</a></em>.  In the "File" menu,
-the Print command can be used to print the entire contents of the text
-widget or, if there is a selection, the selected area.
-The user is prompted for the command to use for printing.
+
+<li><code><a name="spelling checker">Spelling checker</a></code>.  The
+spelling checker current uses the Unix <CODE>spell</CODE> command and
+highlights all whole words that the spell command identified as being
+misspelled.  In specialized editors derived from this one, a subset of
+the text may be checked for spelling errors.  For example, in a
+language-specific programming editor, only comments will be checked.
+In the HTML editor, HTML directives are ignored.
+
+<li><code><a name="filling text">Fill</a></code>.  In the
+<CODE>Format</CODE> menu, three commands support filling text.  The
+<code><a name="Fill Region">Fill Region</a></code> command
+restructures the selected text to make all lines approximately the
+same length.  The <code><a name="Right Fill Column">Right Fill
+Column</a></code> command queries the user for the maximum line length
+to use in filling.  The <code><a name="Set Fill Prefix">Set Fill
+Prefix</a></code> command queries the user for a prefix (such as a
+comment character) to use when filling text.  In language-specific
+derived classes, this prefix is set by default to the comment
+character(s) for the language.
+
+<li><code><a name="printing text">Print</a></code>.  In the
+<CODE>File</CODE> menu, the <CODE>Print</CODE> command can be used to
+print the entire contents of the text widget or, if there is a
+selection, the selected area.  The user is prompted for the command to
+use for printing.
+
 </ul>
 <p>
 <a href="../../../doc/index.html">Tycho Home Page</a><br>
