@@ -2,8 +2,9 @@ defstar {
 	name { Variance }
 	domain { SDF } 
 	desc { Compute Mean and Variance }
-	location { SDF user contribution library }
 	author { N. Becker }
+	version { $Id$ }
+	location { SDF user contribution library }
         copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -45,8 +46,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	  SumXsqr = 0;
 	  SumX = 0;
 	  count = 0;
-	  skipcount = (int)skip;
-	  in.setSDFParams( (int)block, (int)block - 1);
+	  skipcount = int(skip);
+	  in.setSDFParams( int(block), int(block) - 1);
 	}
 	code {
 	  inline double sqr( double x ) {
@@ -54,7 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  }
 	}
 	go {
-	  for( int i = (int)block - 1; i >= 0; i-- ) {
+	  for( int i = int(block) - 1; i >= 0; i-- ) {
 	    if( skipcount )
 	      skipcount--;
 	    else {
