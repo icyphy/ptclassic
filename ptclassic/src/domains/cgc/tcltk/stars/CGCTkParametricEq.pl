@@ -130,10 +130,12 @@ limitation of liability, and disclaimer of warranty provisions.
 	    /* set the new gain  */
 	    $ref(gain) = tkgain/5.0 - 10.0;
 	    /* procedure calls to update; defined in base class */
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
-	       $starSymbol(filtertaps), "$val(filtertype)");
+	       $starSymbol(filtertaps), $ref(filtertype));
 
 	    sprintf(buf, "%.2f", $ref(gain));
 	    displaySliderValue(".low", "$starSymbol(scale1)", buf);
@@ -159,7 +161,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	      tkcenter*($val(highFreq) - $val(lowFreq))/100 
 	      + $val(lowFreq);
 	    /* procedure calls to update; defined in base class */	    
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
@@ -183,7 +187,9 @@ limitation of liability, and disclaimer of warranty provisions.
                 return TCL_ERROR;
             }
 	    /* procedure calls to update; defined in base class */	    
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq),
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
@@ -211,7 +217,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    /* only for bandpass filters, else inactive          */
 	    $ref(bandwidth) = tkband*0.0399 + 0.01;
 	    /* procedure calls to update; defined in base class */
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq), 
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
@@ -241,7 +249,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	      tkpass*($val(highFreq) - $val(lowFreq))/100 
 	      + $val(lowFreq);
 	    /* procedure calls to update; defined in base class */	    
-	    $starSymbol(setparams)(&$starSymbol(parametric));
+	    $sharedSymbol(CGCParametricEq,setparams)
+	      (&$starSymbol(parametric),$ref(sampleFreq), 
+	       $ref(passFreq), $ref(centerFreq), $ref(bandwidth), $ref(gain));
 	    $sharedSymbol(CGCParametricEq,selectFilter)
 	      (&$starSymbol(parametric), $starSymbol(filtercoeff),
 	       $starSymbol(filtertaps), "$val(filtertype)");
