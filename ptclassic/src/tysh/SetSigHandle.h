@@ -50,6 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 int setSignalHandlers(void);
 int setCoreLimitDebug(void);
 int setCoreLimitRelease(void);
+void setSignalError(void);
 
 /****************************************************************************/
 
