@@ -325,13 +325,13 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
 // a shell process so that we can redirect standard error as
 // a temporary workaround to the following bug in Matlab 4.
 //
-// FIXME: The Matlab 4 engine interface has an undesirable side effects
+// FIXME: The Matlab 4 engine interface has an undesirable side effect
 // on System V operating systems like Solaris and HP.  The problem is
 // that engClose routine issues ioctl(2, TIOCGWINSZ, 0xEFFFC028) which
 // attempts to get the window size of terminal that does not exist.
 // This showed up when running tycho and opening a Matlab console.
 // If one runs tycho as "tycho -ptiny >/dev/null" then the problem does
-// not exist.  See about for a temporary fix-- ble, cxh
+// not exist.  See above for a temporary fix-- ble, cxh
 int MatlabIfc :: StartMatlab(char* userCommand) {
     InfString command;
     const char* matlabServer = 0;
@@ -385,7 +385,7 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
 			<< " to the remote machine.";
 	}
 	else {
-	    errorString = "Could not start Matlab using '";
+	    errorString = "Could not start Matlab using the command '";
 	    errorString << command << "'.";
 	}
 	return FALSE;
