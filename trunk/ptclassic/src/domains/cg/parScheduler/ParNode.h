@@ -37,40 +37,6 @@ class ParNode : public EGNode {
 
 friend class ParAncestorIter;
 friend class ParDescendantIter;
-
-private:
-	// necessary information for sub universe generation
-	DataFlowStar* clonedStar;
-	ParNode* nextNode;	// next invoc. assigned to the same processor
-	ParNode* firstNode;	// the earliest invoc. assigned.
-	int numCopied;		// number of invoc. assigned
-	EGGate* origin;		// Send and Receive star only.
-	ParNode* partner;	// comm. node partner
-
-protected:
-	// Length of the longest execution time path to an endnode 
-	int StaticLevel;
-
-	// The type of this node.
-	int type;
-
-	// processor ID which it is scheduled on.
-	int procId;
-
-	// The scheduled time on the processor.
-	int scheduledTime;
-	int finishTime;
-
-	// execution time
-	int exTime;
-
-	// # ancestors to be assigned before assign this node.
-	int waitNum;
-
-	// temporary copy of the list of ancestors and descendants
-	EGNodeList tempAncs;
-	EGNodeList tempDescs;
-
 public: 
 	// Constructor declaration
 	ParNode(DataFlowStar* Mas, int invoc_no);
@@ -131,8 +97,16 @@ public:
 	int fireable() { waitNum--;
 			 return (waitNum > 0)? FALSE : TRUE ; }
 
-	// set informations for sub-universe generation
-	// should be called in the increasing order of the invocation number.
+	// print outs.
+	StringList print();	// Prints star name and invocation
+
+// indicate whether all invocations are assigned to the same processor
+// or not.
+	void setOSOPflag(int i) { myOSOPflag = i; }
+	int isOSOP() { return myOSOPflag; }
+
+// set informations for sub-universe generation
+// should be called in the increasing order of the invocation number.
 	void setCopyStar(DataFlowStar* s, ParNode* prevN);
 
 	DataFlowStar* getCopyStar() { return clonedStar; }
@@ -140,14 +114,46 @@ public:
 	ParNode* getFirstNode() { return firstNode; }
 	int numAssigned() { return numCopied; }
 
-	// Send or Receive star only
+// Send or Receive star only
 	void setOrigin(EGGate* g) { origin = g; }
 	EGGate* getOrigin() { return origin; }
 	void setPartner(ParNode* n) { partner = n; n->partner = this; }
 	ParNode* getPartner() { return partner; }
 
-	// print outs.
-	StringList print();	// Prints star name and invocation
+protected:
+	// Length of the longest execution time path to an endnode 
+	int StaticLevel;
+
+	// The type of this node.
+	int type;
+
+	// processor ID which it is scheduled on.
+	int procId;
+
+	// The scheduled time on the processor.
+	int scheduledTime;
+	int finishTime;
+
+	// execution time
+	int exTime;
+
+	// # ancestors to be assigned before assign this node.
+	int waitNum;
+
+	// temporary copy of the list of ancestors and descendants
+	EGNodeList tempAncs;
+	EGNodeList tempDescs;
+
+private:
+	// necessary information for sub universe generation
+	DataFlowStar* clonedStar;
+	ParNode* nextNode;	// next invoc. assigned to the same processor
+	ParNode* firstNode;	// the earliest invoc. assigned.
+	int numCopied;		// number of invoc. assigned
+	EGGate* origin;		// Send and Receive star only.
+	ParNode* partner;	// comm. node partner
+	int myOSOPflag;		// to be set when all invocations are assigned
+				// to the same processor.
 };
 
 class ParAncestorIter : public EGNodeListIter
