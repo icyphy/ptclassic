@@ -95,6 +95,7 @@ public:
 
 	// identify myself as a wormhole
 	int isItWormhole() const { return TRUE; }
+	Wormhole* asWormhole() { return this; }
 
 	// use statelist for inner galaxy for stateWithName
 	State* stateWithName (const char* name) {
