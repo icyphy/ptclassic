@@ -79,7 +79,6 @@ if {[info commands HMinit_win] == {}} {
 
 #######################################################################
 #### HTML
-# FIXME: Update docs.
 # This widget parses HTML using the library by Stephen Uhler and
 # displays it in a Tk text widget. Only local file accesses are
 # currently supported (no HTTP, FTP, etc). The HTML source can be
@@ -493,6 +492,7 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
 
             configure -directory [file dirname $filename]
             configure -file $filename
+            reload
             if {$point != {}} {
                 after 200 [list $this seeFragment $point]
             }
