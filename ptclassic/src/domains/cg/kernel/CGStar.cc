@@ -28,15 +28,22 @@ $Id$
 
 
 
-// firing CG star
+// firing CG star : generate code.
 void CGStar :: fire() {
-	BlockPortIter next(*this);
-	for(int i = numberPorts(); i > 0; i--)
-		(next++)->grabData();
+	// No need to grab data, so just go.
 	go();
-	next.reset();
-	for(i = numberPorts(); i > 0; i--)
-		(next++)->sendData();
+
+	// Advance the offset in the PortHoles
+	advance();
+}
+
+// Update all PortHoles so that the offset is incremented by the
+// number of samples consumed or produced.
+void CGStar::advance() {
+        BlockPortIter nextPort(*this);
+        CGPortHole* p;
+        while ((p = (CGPortHole*) nextPort++) != 0)
+                p->advance();
 }
 
 const int MAXLINELEN = 256;

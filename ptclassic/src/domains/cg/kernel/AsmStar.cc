@@ -29,15 +29,6 @@ extern const Attribute A_REVERSE(AB_REVERSE,0);
 extern const Attribute A_CONSEC(AB_CONSEC,0);
 extern const Attribute A_SYMMETRIC(AB_SYMMETRIC,0);
 
-// Generate code
-void AsmStar::fire() {
-	// No need to grab data, so just go.
-	go();
-
-	// Advance the offset in the PortHoles
-	advance();
-}
-
 // lookup location for a symbol (a porthole or state) in a
 // codeblock.
 StringList
@@ -195,15 +186,6 @@ AsmStar::processMacro(const char* func, const char* id, const char* arg2) {
 		s += ")";
 	}
 	return s;
-}
-
-// Update all PortHoles so that the offset is incremented by the
-// number of samples consumed or produced.
-void AsmStar::advance() {
-	AsmStarPortIter nextPort(*this);
-	AsmPortHole* p;
-	while ((p = nextPort++) != 0)
-		p->advance();
 }
 
 // data structure used to keep track of memory allocation for states.
