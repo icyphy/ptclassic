@@ -89,7 +89,7 @@ ifeq ($(USE_SHARED_LIBS),yes)
 	$(SHARED_LIBRARY_COMMAND) $(LIB) $(OBJS) 
 else
 	rm -f $(LIB)
-	ar cq $(LIB) $(OBJS)
+	$(AR) cq $(LIB) $(OBJS)
 	$(RANLIB) $(LIB)
 endif
 # Rule for installing a library
