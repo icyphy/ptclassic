@@ -39,7 +39,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* Standard includes */
 #include <stdio.h>
 
+#ifndef PT_NO_ITCL
 #include "itcl.h"
+#endif /* PT_NO_ITCL */
+
 #ifdef ITCL_VERSION
 /* ITCL2.0 or better */
 #include "itk.h"
@@ -101,9 +104,11 @@ _ptkAppInit( ip, win)
     if (Tk_Init(ip) == TCL_ERROR)
 	return TCL_ERROR;
     /* Add [incr Tcl] (itcl) facilities */
+#ifndef PT_NO_ITCL
     if (Itcl_Init(ip) == TCL_ERROR) {
       return TCL_ERROR;
     }
+#endif
 #ifdef ITCL_VERSION
     /* ITCL2.0 or better */
     if (Itk_Init(ip) == TCL_ERROR) {
