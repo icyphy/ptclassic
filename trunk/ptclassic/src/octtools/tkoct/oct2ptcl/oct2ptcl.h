@@ -81,6 +81,7 @@ enum _OTPFacetType {
     OTP_FtTarget,	/* not really a facet type, but useful... */
     OTP_FtMarker,	/* special star (bus & delay) */
     OTP_FtContact,	/* net connector (contact) */
+    OTP_FtPragma,	/* pragma (used by ddf to dictate firings/iteration)*/
 };
 typedef enum _OTPFacetType OTPFacetType;
 
