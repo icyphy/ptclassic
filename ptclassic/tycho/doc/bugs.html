@@ -17,6 +17,7 @@ Contents:
 <li><a href="#bugs in the kernel">Kernel bugs</a>
 <li><a href="#bugs in text editors">Bugs in text editors</a>
 <li><a href="#bugs in visual editors">Bugs in visual editors</a>
+<li><a href="#bugs in gendoc">Bugs in the documentation generator</a>
 </ul>
 <h1><a name="bugs in the kernel">Bugs in the kernel</a></h1>
 
@@ -239,6 +240,16 @@ won't help much.
 
 <li> Sometimes 4 colons instead of 2 colons are printed.
 </ul>
+
+<h1><a name="bugs in gendoc">Bugs in the documentation generator</a></h1>
+
+<ul>
+<li>The gendoc command leaves a huge number of ::tycho::DocClass objects
+    around after completing.  Do "info objects" after running gendoc
+    to see them.
+
+</ul>
+
 
 <p>
 <a href="index.html">Tycho Home Page</a><br>
