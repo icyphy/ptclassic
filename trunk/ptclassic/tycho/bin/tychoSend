@@ -10,6 +10,4 @@
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?PTARCH ) setenv PTARCH `$PTOLEMY/bin/ptarch`
 
-#$PTOLEMY/tycho/lib/
-
-$PTOLEMY/bin.$PTARCH/itkwish -f /users/pino/tychoSend.tcl $argv
+$PTOLEMY/bin.$PTARCH/itkwish -f $PTOLEMY/tycho/lib/tychoSend.tcl $argv
