@@ -1,3 +1,5 @@
+#ifndef OCTIFC_H
+#define OCTIFC_H 1
 /* 
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
@@ -44,12 +46,21 @@ extern boolean IsGal();
 extern boolean IsStar();
 extern boolean IsUniv();
 extern boolean IsGalFacet();
-extern boolean GetGalTerms();
-extern boolean GetHardwareProp();
-extern boolean SetHardwareProp();
 extern boolean GetCommentProp();
 extern boolean SetCommentProp();
 extern boolean GOCDomainProp();
-extern boolean GOCArchProp();
 extern int GetIterateProp();
 extern void SetIterateProp();
+
+/* Added for POct.cc */
+extern boolean IsUnivFacet();
+extern boolean IsBus();
+
+
+/* FIXME: These Functions are NOT defined in octIfc.c */
+extern boolean GetGalTerms();
+extern boolean GetHardwareProp();
+extern boolean SetHardwareProp();
+extern boolean GOCArchProp();
+
+#endif /* OCTIFC_H */
