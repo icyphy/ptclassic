@@ -10,7 +10,7 @@ vem*snap:	25
 vem*technology:	$PTOLEMY/lib/colors
 
 ! The following are optional.  They can be overriden by the user.
-vem*font: 9x15
+Vem*Font: *-times-medium-r-normal--*-180-*
 vem*wrap: word
 vem*grid*zero*size: 0
 vem*label*boundbox: 10
@@ -18,10 +18,11 @@ vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
 #ifdef COLOR
 vem*cursor*color: red
-vem*background: white
+Vem*Background: bisque
 vem*foreground: black
 vem.background.color: #cdcdc1
 vem.grid.zero.color: #cdcdc1
+vem*menu*background: white
 vem*menu*item*background: #eeeee0
 vem*button*foreground: IndianRed
 vem*title*foreground: black
