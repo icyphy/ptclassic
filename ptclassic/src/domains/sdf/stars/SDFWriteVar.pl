@@ -1,7 +1,7 @@
 defstar {
   name { WriteVar }
   domain { SDF }
-  derivedfrom {SDFSharedMem}
+  derivedfrom { SDFSharedMem }
   version { $Id$ }
   author { Stefan De Troch (IMEC) }
   copyright{ 
@@ -10,7 +10,10 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-  desc {}
+  location { SDF main library }
+  desc {
+Write the value of the input to a floating-point variable in shared memory.
+  }
   input
   {
     name { in }
@@ -23,11 +26,32 @@ limitation of liability, and disclaimer of warranty provisions.
     default { "0" }
     desc { Name of the register }
   }
+  protected
+  {
+    const char* lastname;
+  }
+  constructor {
+    lastname = 0;
+  }
+  destructor
+  {
+    if (lastname) {
+      SDFSharedMem::RemoveVar(lastname);
+    }
+    delete [] lastname;
+  }
+  setup {
+    const char* namestring = name;
+    if (lastname) {
+      SDFSharedMem::RemoveVar(lastname);
+      delete [] lastname;
+    }
+    lastname = savestring(namestring);
+  }
   go
   {
-    float val;
-
-    val = float(in%0);
-    SDFSharedMem::WriteVar(name,val);
+    float val = float(in%0);
+    // Write val to register 'name' and create 'name' if it doesn't exist
+    SDFSharedMem::WriteVar(name, val);
   }
 }
