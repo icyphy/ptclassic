@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Grapple {} {}
 
 ##########################################################################
 ## Grapple
@@ -65,12 +63,9 @@ proc ::tycho::Grapple {} {}
 #
 # <p><b>Bugs</b>: (none)
 #
-# <p><b>Example</b>: Create a grapple:
-# <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   $slate create Grapple 40 40 100 80 -fill white -outline blue &#92
-# 		-width 4 -text Foo -tags moveable
-# </pre></tcl>
+# <p><b>Example</b>:
+#
+# See the demo directory.
 #
 # <p><b>Enhancements</b>: (none)
 #

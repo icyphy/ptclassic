@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Solid {} {}
 
 ##########################################################################
 ## Solid
@@ -105,7 +103,8 @@ proc ::tycho::Solid {} {}
 # Create some Solids with various options. These can be moved around
 # with the mouse:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "Some \"Solids\""]
 #   $slate create Solid 100 20 120 20 120 10 140 30 120 50 120 40 100 40 &#92
 # 		  -color green -tags moveable
 #   $slate create Solid 60 20 60 40 40 40 &#92

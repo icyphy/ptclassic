@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Point {} {}
 
 #######################################################################
 #### Point
@@ -56,7 +54,7 @@ proc ::tycho::Point {} {}
 # 
 # <ul>
 # <li><a href="../internals/shapes.html">An overview of Shape classes</a>
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="../codeDoc/index.html">Class documentation index</a>
 # </ul>
 #
@@ -91,7 +89,7 @@ class ::tycho::Point {
 #######################################################################
 #### _feature
 #
-# Return the value of an feature. The only valid feature is "origin."
+# Return the value of a feature. The only valid feature is "origin."
 #
 body ::tycho::Point::_feature {id canvas slate args} {
     array set opts {-features {}}

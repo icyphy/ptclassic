@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::LabeledRect {} {}
 
 ##########################################################################
 ## LabeledRect
@@ -67,8 +65,9 @@ proc ::tycho::LabeledRect {} {}
 #
 # <p><b>Example</b>: Create a labeled rectangle:
 # <tcl quiet><pre>
-#  source $tycho/editors/slate/doc/internals/newslate.itcl
-#  $slate create LabeledRect 40 40 100 80 -fill blue -outline red &#92
+#   package require slate.demo
+#   set slate [::demo::newslate "A LabeledRect demo"]
+#   $slate create LabeledRect 40 40 100 80 -fill blue -outline red &#92
 #               -anchor nw -text Foo -tags moveable &#92
 #               -graphics "line 0 0 100 100; line 0 100 100 0"
 # </pre></tcl>

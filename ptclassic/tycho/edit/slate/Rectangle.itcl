@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Rectangle {} {}
 
 #######################################################################
 #### Rectangle
@@ -71,7 +69,7 @@ proc ::tycho::Rectangle {} {}
 # 
 # <ul>
 # <li><a href="../internals/shapes.html">An overview of Shape classes</a>
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="../codeDoc/index.html">Class documentation index</a>
 # </ul>
 #
@@ -99,7 +97,7 @@ class ::tycho::Rectangle {
     # Terminate a reshape interaction sequence
     proc _reshaperelease {id canvas slate}
 
-    # Get an feature of a rectangle
+    # Get a feature of a rectangle
     proc feature {x0 y0 x1 y1 feature}
 
     # Test if the first rectangle is inside the second.
@@ -418,7 +416,7 @@ body ::tycho::Rectangle::_reshaperelease {id canvas slate} {
 ##########################################################################
 #### feature
 #
-# Return an feature of a rectangle. Valid features are any
+# Return a feature of a rectangle. Valid features are any
 # of the eight compass points and "c" or "center."
 #
 body ::tycho::Rectangle::feature {x0 y0 x1 y1 feature} {

@@ -121,7 +121,8 @@
 # either text item will make it editable. Escape makes either
 # item uneditable:
 # <tcl quiet><pre>
-#   set slate [::tycho::Slate::sample]
+#   package require slate.demo
+#   set slate [::demo::newslate "A TextItemEdit example"]
 #   $slate create text 50 50 -text Foo -tags foo
 #   $slate create text 100 100 -text Bar -tags foo
 #   set edit [$slate interactor TextItemEdit]
@@ -131,9 +132,8 @@
 # <p><b>Links</b>
 # 
 # <ul>
-# <li><a href="../internals/interacting.html">How interactors work</a>.
-# <li><a href="../internals/interactors.html">Interactor classes</a>.
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/interactors.html">How interactors work</a>.
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="index.html">Class documentation index</a>
 # </ul>
 #
@@ -220,11 +220,11 @@ class ::tycho::TextItemEdit {
 body ::tycho::TextItemEdit::activate {t x y args} {
     # If already editing another item, deactivate from it first
     if { $target != "" } {
-	deactivate
+	$this deactivate
     }
 
     # Set the target
-    target $t
+    $this target $t
 
     # Set the focus to the slate
     $slate focusin
@@ -233,7 +233,7 @@ body ::tycho::TextItemEdit::activate {t x y args} {
     $slate focus $target
 
     # Make the background highlight
-    highlight
+    $this highlight
 
     # Create the binding to insert keys
     # FIXME: Can this be bound to the individual item?
@@ -258,7 +258,7 @@ body ::tycho::TextItemEdit::activate {t x y args} {
 	    "$this dbclick"
 
     # Start the interaction sequence
-    eval click $x $y -button $button
+    eval $this click $x $y -button $button
 }
 
 #######################################################################
@@ -270,7 +270,7 @@ body ::tycho::TextItemEdit::activate {t x y args} {
 #
 body ::tycho::TextItemEdit::click {x y args} {
     # Clear the selection
-    select clear
+    $this select clear
 
     # Move the insertion cursor
     $slate icursor $target @$x,$y
@@ -303,8 +303,8 @@ body ::tycho::TextItemEdit::dbclick {} {
     set _wordmode 1
 
     # Select the word underneath the  cursor
-    icursor -word
-    select adjust +char
+    $this icursor -word
+    $this select adjust +char
 
     # Make the motion event bindings
     $slate bind $target \
@@ -327,7 +327,7 @@ body ::tycho::TextItemEdit::deactivate {args} {
     ::bind $slate <Key> {}
 
     # Clear the selection
-    select clear
+    $this select clear
 
     # If there is no target, return here
     if { $target == "" } {
@@ -349,7 +349,7 @@ body ::tycho::TextItemEdit::deactivate {args} {
     }
 
     # Clear the target
-    target ""
+    $this target ""
 }
 
 #######################################################################
@@ -358,7 +358,7 @@ body ::tycho::TextItemEdit::deactivate {args} {
 # Drag-select a text region.
 #
 body ::tycho::TextItemEdit::drag {x y} {
-    select adjust @$x,$y
+    $this select adjust @$x,$y
 
     # Forward to a cascaded interactor if there is one
     if { $cascaded != "" } {
@@ -388,33 +388,33 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
     if { $control } {
 	switch -exact $keysym {
 	    "a" {
-		select clear
-		icursor 0
+		$this select clear
+		$this icursor 0
 	    }
 	    "e" {
-		select clear
-		icursor end
+		$this select clear
+		$this icursor end
 	    }
 	    "d" {
-		select delete
+		$this select delete
 		$slate dchars $target insert
 	    }
 	    "Left" {
 		# Move the cursor. Adjust the selection if shift.
 		if { $shift } {
-		    select adjust -word
+		    $this select adjust -word
 		} else {
-		    select clear
-		    icursor -word
+		    $this select clear
+		    $this icursor -word
 		}
 	    }
 	    "Right" {
 		# Move the cursor. Adjust the selection if shift.
 		if { $shift } {
-		    select adjust +word
+		    $this select adjust +word
 		} else {
-		    select clear
-		    icursor +word
+		    $this select clear
+		    $this icursor +word
 		}
 	    }
 	}
@@ -468,69 +468,69 @@ body ::tycho::TextItemEdit::key {key keysym state args} {
 	    }
 	    "Return" {
 		# If there's a selection, then delete it
-		select delete
+		$this select delete
 
 		# Insert the character
 		$slate insert $target insert "\n"
 	    }
 	    "BackSpace" {
 		# If there's a selection then delete it
-		if { [select exists] } {
-		    select delete
+		if { [$this select exists] } {
+		    $this select delete
 		} else {
 		    # If not, then delete the previous character
-		    icursor -char
+		    $this icursor -char
 		    $slate dchars $target insert
 		}
                 # Adjust the highlight
-		highlight
+		$this highlight
 	    }
 	    "Delete" {
 		# If there's a selection then delete it
-		if { [select exists] } {
-		    select delete
+		if { [$this select exists] } {
+		    $this select delete
 		} else {
 		    # If not, then delete the next character
 		    $slate dchars $target insert
 		}
                 # Adjust the highlight
-                highlight
+                $this highlight
             }
 	    "Left" {
 		# Move the cursor. Adjust the selection if shift.
 		if { $shift } {
-		    select adjust -char
+		    $this select adjust -char
 		} else {
-		    select clear
-		    icursor -char
+		    $this select clear
+		    $this icursor -char
 		}
 	    }
 	    "Right" {
 		# Move the cursor. Adjust the selection if shift.
 		if { $shift } {
-		    select adjust +char
+		    $this select adjust +char
 		} else {
-		    select clear
-		    icursor +char
+		    $this select clear
+		    $this icursor +char
 		}
 	    }
 	    "End" {
-		select clear
-		icursor 0
+		$this select clear
+		$this icursor 0
 	    }
 	    "Home" {
-		select clear
-		icursor end
+		$this select clear
+		$this icursor end
 	    }
 	    default {
 		# If there's a selection, then delete it
-		select delete
+		$this select delete
 
 		# Insert the character
 		$slate insert $target [$slate index $target insert] $key
 
                 # Adjust the highlight
-                highlight
+                $this highlight
 	    }
 	}
     }
@@ -653,7 +653,7 @@ body ::tycho::TextItemEdit::select {mode args} {
 	    }
 
 	    # Move the cursor
-	    icursor $index
+	    $this icursor $index
 
 	    # Adjust the selection
  	    if { [$slate index $target insert] == $_anchor } {
@@ -662,9 +662,9 @@ body ::tycho::TextItemEdit::select {mode args} {
 		if { ! $_wordmode } {
 		    # Adjust in character mode
 		    if { [$slate index $target insert] > $_anchor } {
-			icursor -char
+			$this icursor -char
 			$slate select to $target insert
-			icursor +char
+			$this icursor +char
 		    } else {
 			$slate select to $target insert
 		    }
@@ -672,12 +672,12 @@ body ::tycho::TextItemEdit::select {mode args} {
 		    # Adjust in word mode
 		    # FIXME: this is not quite right...
 		    if { [$slate index $target insert] > $_anchor } {
-			icursor +word
-			icursor -char
+			$this icursor +word
+			$this icursor -char
 			$slate select to $target insert
-			icursor +char
+			$this icursor +char
 		    } else {
-			icursor -word
+			$this icursor -word
 			$slate select to $target insert
 		    }
 		}
@@ -694,7 +694,7 @@ body ::tycho::TextItemEdit::select {mode args} {
 		$slate dchars $target sel.first sel.last
 		$slate select clear
                 # Adjust the highlight
-		highlight
+		$this highlight
 	    }
 	}
 	"exists" {

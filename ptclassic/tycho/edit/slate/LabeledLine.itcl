@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::LabeledLine {} {}
 
 ##########################################################################
 ## LabeledLine
@@ -92,43 +90,9 @@ proc ::tycho::LabeledLine {} {}
 #
 #  <P><b>Example</b>
 #
-#  <P>Create a couple of labeled lines and some objects that can be
-# dragged around to change their shapes:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   proc mv {mode id x y args} {
-#       global d l slate
-#       $slate move$mode $d $x $y
-#       $slate reshape$mode $l $x $y end
-#   }
-#   $follower configure &#92
-#           -clickprefix "mv click" &#92
-#           -dragprefix "mv drag" &#92
-#           -releaseprefix "mv release"
-#   set l [$slate create LabeledLine 50 50 110 100 110 200 &#92
-#               -arrow last -text Foo]
-#   set d [$slate create Solid 100 210 110 200 120 210 110 220 100 210 &#92
-#   		-color green -tags moveable]
-# </pre></tcl>
-#
-# Move the diamond around to see the effect.
-#
-# Here's one with an odd number of segments:
-# <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   proc mv {mode id x y args} {
-#       global d l slate
-#       $slate move$mode $d $x $y
-#       $slate reshape$mode $l $x $y end
-#   }
-#   $follower configure &#92
-#           -clickprefix "mv click" &#92
-#           -dragprefix "mv drag" &#92
-#           -releaseprefix "mv release"
-#   set l [$slate create LabeledLine 210 50 260 150 &#92
-#               -arrow last -text Bar]
-#   set d [$slate create Solid 250 160 260 150 270 160 260 170 250 160 &#92
-#               -color green -tags moveable]
+#   package require slate.demo
+#   ::demo::demoLabeledLine
 # </pre></tcl>
 #
 class ::tycho::LabeledLine {

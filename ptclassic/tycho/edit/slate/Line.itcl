@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Line {} {}
 
 #######################################################################
 #### Line
@@ -53,7 +51,7 @@ proc ::tycho::Line {} {}
 # 
 # <ul>
 # <li><a href="../internals/shapes.html">An overview of Shape classes</a>
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="../codeDoc/index.html">Class documentation index</a>
 # </ul>
 #

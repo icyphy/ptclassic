@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::IconRect {} {}
 
 ########################################################################
 ## IconRect
@@ -58,7 +56,8 @@ proc ::tycho::IconRect {} {}
 # 
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "An IconRect example"]
 #   set icon [$slate create IconRect 100 100 &#92
 #       -fill green &#92
 #       -graphics {rectangle 20 20 80 80; &#92
@@ -73,10 +72,10 @@ proc ::tycho::IconRect {} {}
 # To create, call the terminal{} method:
 # <tcl quiet><pre>
 #   $slate call $icon terminal input Terminal 50 0 &#92
-#       -direction {0 -1} &#92
+#       -direction n &#92
 #       -style doublearrowin
 #   $slate call $icon terminal output Terminal 50 100 &#92
-#       -direction {0 1} &#92
+#       -direction e &#92
 #       -style arrowout -fill red
 # </pre></tcl>
 # 
