@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {The output is the square of the input.}
 	input {
 		name {input}
@@ -27,7 +27,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	zap					;clear P-Reg and Accu
 	sqra	*,AR7				;P-Reg = input*input
 	pac					;Accu = input*input
-   	sach	*,1				;ouput = input*input
+   	sach	*,1				;output = input*input
+	}
+	constructor {
+		noInternalState();
 	}
  	go {
 	 	 addCode(std);

@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 signal sources library }
+	location { C50 main library }
 	explanation {
 There are no runtime instructions associated with this star.  The
 output buffer is initialized with the specified DC value.
@@ -34,6 +34,9 @@ output buffer is initialized with the specified DC value.
 	}
 	codeblock (orgp) {
 	.text
+	}
+	constructor {
+		noInternalState();
 	}
 	initCode {
 		addCode(org);

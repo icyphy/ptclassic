@@ -1,7 +1,7 @@
 defstar {
 	name { LookupTbl }
 	domain { C50 }
-	desc { Table Lookup }
+	desc { Table lookup }
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .PP
 The input accesses a lookup table.  More generally, this star defines
@@ -104,6 +104,9 @@ one more memory location if \fIinterpolation\fR is "linear".
 		coefNum = coef.size();
 	}
 	ccinclude { <string.h> }
+	constructor {
+		noInternalState();
+	}
 	initCode {
 		const char* tabletype = tableType;
 		const char* interptype = interpolation;
@@ -111,9 +114,10 @@ one more memory location if \fIinterpolation\fR is "linear".
 		    if (strcasecmp(tabletype, "periodic") == 0)
 			addedVal = coef[0];
 		    else if (strcasecmp(tabletype, "limited") == 0)
-			addedVal=coef[coefNum-1];
+			addedVal=coef[int(coefNum)-1];
 		    else if (strcasecmp(tabletype, "linear") == 0)
-			addedVal = 2*coef[coefNum-1] - coef[coefNum-2];
+			addedVal = 2*coef[int(coefNum) - 1] -
+				   coef[int(coefNum) - 2];
 		    addCode(addblockinit);
 		}
 		else if ( strcasecmp(interptype, "none") != 0 ) {
@@ -153,7 +157,7 @@ one more memory location if \fIinterpolation\fR is "linear".
 	sfr			     		;1 shift right
 	add   	#$addr(coef),0			;Accu = Accu + Address coef
 	samm	BMAR				;store Accu in BMAR
-	bldd	BMAR,*				;ouput = value at address BMAR
+	bldd	BMAR,*				;output = value at address BMAR
   	}
 
 	codeblock(other) {

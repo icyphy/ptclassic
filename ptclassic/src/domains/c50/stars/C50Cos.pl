@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .Id "cosine"
 This star computes the cosine of the input, which must be in the range
@@ -71,7 +71,10 @@ The output is in the range (-1.0, 1.0).
 	pac				;Accu = P-Reg
 	bsar    11			;shift Accu 11 bits right (division 2)
 	add     *,0,AR7			;Accu = y1 + (x - x1)*(y2 - y1)/2
-	sacl    *			;ouput = Accu
+	sacl    *			;output = Accu
+	}
+	constructor {
+		noInternalState();
 	}
 	initCode {
 		addCode(CosTable);

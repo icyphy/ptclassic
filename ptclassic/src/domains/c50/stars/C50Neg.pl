@@ -10,10 +10,11 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 .Id "negation"
-The input is moved into accumlator "a", where the "neg" instruction is applied.
+The input is moved into accumulator "a", where the "neg" instruction
+is applied.
 	}
 	input {
 		name {input}
@@ -31,6 +32,10 @@ The input is moved into accumlator "a", where the "neg" instruction is applied.
 	neg					;Accu = -input
 	sach	*,1				;output = -input
 	}
+	constructor {
+		noInternalState();
+	}
+
 	go {
 		addCode(negblock);
 	}

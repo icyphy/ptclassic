@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 nonlinear functions library }
+	location { C50 main library }
 	explanation {
 .PP
 .Id "arccosine"
@@ -21,9 +21,6 @@ The input is in the range -1.0 to 1.0.  The output is in the principle range of
 
 	}
         seealso { ASin, Cos, Sin }
-	execTime {
-		return 50;
-	}
 	input {
 		name {input}
 		type {FIX}
@@ -47,7 +44,7 @@ The input is in the range -1.0 to 1.0.  The output is in the principle range of
 	mar     *,AR0
 	lar     AR0,#$addr(input)	;Address input		=> AR0
 	lar     AR7,#$addr(output)	;Address output		=> AR7
-	bit     *                    	;Bit 15 = 1 in input (negativ value) ?
+	bit     *                    	;Bit 15 = 1 in input (negative value) ?
 	lacc    *                       ;Accu = input
 	and     #0fb00h			;normalize input value for table
 	samm    INDX    		;store Accu in INDX
@@ -76,6 +73,9 @@ The input is in the range -1.0 to 1.0.  The output is in the principle range of
 	initCode {
 		addCode(ACosTable);
 	}
+	constructor {
+		noInternalState();
+	}
 	go {
 		addCode(acosblock);
 	}
@@ -83,17 +83,3 @@ The input is in the range -1.0 to 1.0.  The output is in the principle range of
 		return 27;
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-

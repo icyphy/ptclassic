@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 control library }
+	location { C50 main library }
 	explanation {
 .Ir "interleaving data streams"
 .Ir "combining data streams"
@@ -36,6 +36,9 @@ the next B particles from the next input, etc.
                 type {int}
                 default {1}
                 desc {Number of particles in a block.}
+	}
+	constructor {
+		noInternalState();
 	}
         setup {
                 int n = input.numberPorts();

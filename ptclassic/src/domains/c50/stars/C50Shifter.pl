@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 .Id "bit shifter"
 Scale by shifting left \fIleftShifts\fP bits.
@@ -65,6 +65,9 @@ Arithmetic shifts are used.
 	sach	*,1				;output = Accu
 	}
 
+	constructor {
+		noInternalState();
+	}
 	go {
 		addCode(cbLoad);
 		if ( int(absShifts) != 0 ) addCode(cbShifts);

@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 .Id "multiplication, integer"
 .Id "integer multiplication"
@@ -40,6 +40,10 @@ Input and output are assumed to be integers (right-justified in word).
 	mpy 	*,AR7				;P-Reg. = input#1*input#2
 	spl 	*				;output = P-Reg.
 	}
+	constructor {
+		noInternalState();
+	}
+
  	go {
 		addCode(multblock);
   	}

@@ -1,7 +1,7 @@
 defstar {
 	name { Sub }
 	domain { C50 }
-	desc { Input subtractor }
+	desc { Subtract the neg inputs from the pos input. }
 	version { $Id$ }
 	author { A. Baensch }
 	copyright {
@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { C50 arithmetic library }
+	location { C50 main library }
 	explanation {
 .PP
 Output the \fIpos\fR minus all \fIneg\fR inputs.
@@ -42,6 +42,9 @@ Output the \fIpos\fR minus all \fIneg\fR inputs.
         sach    *,1				;output = Accu
         }
 
+	constructor {
+		noInternalState();
+	}
 	go {
 		addCode(main);
 		for (int i = 1; i <= neg.numberPorts(); i++) {

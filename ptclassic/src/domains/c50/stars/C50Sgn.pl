@@ -14,7 +14,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-       	location { C50 nonlinear functions library }
+       	location { C50 main library }
 	explanation { 
 .Id "signum"
 	}
@@ -38,8 +38,11 @@ limitation of liability, and disclaimer of warranty provisions.
 	xc	2,GT				;if Accu > 0 then
 	 lar	AR0,#07fffh			; 0.9999395 (in Q15) to AR0
 	 nop					;
-        sar    	AR0,*				;ouput = AR0
+        sar    	AR0,*				;output = AR0
 	}	
+	constructor {
+		noInternalState();
+	}
 	go {
 		addCode(sgnblock);
  
