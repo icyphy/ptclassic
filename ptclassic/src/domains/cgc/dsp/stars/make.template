@@ -68,6 +68,7 @@ PL_SRCS= \
  CGCGoertzelPower.pl \
  CGCIIR.pl \
  CGCLMSOscDet.pl \
+ CGCParamBiquad.pl \
  CGCRaisedCosine.pl \
  CGCSinc.pl \
  CGCWindow.pl
