@@ -61,8 +61,6 @@ CompileTarget::CompileTarget(const char* nam,
 			     const char* desc)
 : HLLTarget(nam,stype,desc)
 {
-	addState(includeTclTkFlag.setState("Include Tcl/Tk", this, "NO",
-		 "Specify whether to generate Tcl/Tk initialization code"));
 }
 
 Block* CompileTarget::makeNew() const {
@@ -163,12 +161,8 @@ int CompileTarget::run() {
     myCode += "// INCLUDE FILES\n";
     myCode += "#include \"CompiledUniverse.h\"\n";
     myCode += "#include \"GalIter.h\"\n";
+    myCode += tcltkSetup();
     myCode += galDef(galaxy(), universeClassName, 0);
-
-    if ( int(includeTclTkFlag) ) {
-      myCode += tcltkSetup();
-    }
-
     myCode += "\n// MAIN FUNCTION\n";
     myCode += "main(int argc, char** argv) {\n";
     myCode += "int iterations;\n";
@@ -189,9 +183,7 @@ int CompileTarget::run() {
     myCode += universeName;
     myCode += ".parseCommandLine(argc, argv, &iterations);\n";
 
-    if ( int(includeTclTkFlag) ) {
-      myCode += tcltkInitialize(universeName);
-    }
+    myCode += tcltkInitialize(universeName);
 
     myCode += "\n// INITIALIZE CODE\n";
     myCode += universeName;
@@ -373,12 +365,16 @@ StringList CompileTarget::quoteQuotationMarks(const char* str) {
 
 // Define the routines necessary for Tcl/Tk (Wan-Teh Chang and Brian Evans)
 StringList CompileTarget::tcltkSetup() {
-    StringList myCode = "// Include files needed by Tcl/Tk commands\n";
+    StringList myCode = "\n// Include files needed by Tcl/Tk commands\n";
     myCode += "#include <iostream.h>\n";
     myCode += "#include \"SimControl.h\"\n";
     myCode += "extern \"C\" {\n";
     myCode += "#include \"ptk.h\"\n";
     myCode += "}\n";
+    myCode += "\n// ptk.h includes tk.h which defines Complex to be 0\n";
+    myCode += "#ifdef Complex\n";
+    myCode += "#undef Complex\n";
+    myCode += "#endif\n";
     myCode += "\n";
     myCode += "// Tcl/Tk commands\n";
     myCode += "// halt command -- ptkStop defined as synonym\n";
