@@ -158,13 +158,23 @@ body ::tycho::Glimpse::constructor {args} {
             updateTychoDatabase
         }
     }
+
+    # Register this window so it appears on the menus
+    # FIXME: This should check that the "glimpse" mode actually exists
+    ::tycho::register window Glimpse $this \
+            -label [tycho::autoName "Glimpse "] \
+            -mode glimpse
 }
 
 #######################################################################
 #### destructor
 #
 body ::tycho::Glimpse::destructor {} {
+    # Delete the temporary output file
     file delete -force $glimpseOutputFile
+
+    # Deregister this window
+    ::tycho::deregister window Glimpse $this
 }
 
 
