@@ -227,23 +227,23 @@ body ::tycho::FileBrowser::processItem {filename} {
 
     if {$filename == ""} {return 0}
    
-    # Expand environment variables and user home directory references.
-    set file [::tycho::expandPath $filename]
+    set char [string index $filename 0]
+
+    # If the name is relative, prepend with current path.
+    if {$char != "/" && $char != "~" && $char != "\$"} {
+	set file $localCWD/$filename
+    } {
+        set file $filename
+    }
+
+    # Expand to absolute path.
+    set file [::tycho::expandPath $file]
 
     # If expansion failed, trigger an error
-    set char [string index $file 0]
-    if {$char == "~" || $char == "\$"} {
+    if {[string index $file 0] != "/"} {
         error "Cannot expand $filename"
     }
     
-    # Name of the file before calculating the absolute path.
-    set relPath $file
-    
-    # If the name is relative, calculate the absolute path.
-    if {$char != "/"} {
-	set file $localCWD/$file
-    }
-
     # If the file does not exist, check to see whether the
     # directory exists.  If it does, execute the command given by -command
     # (which will probably create the file).  Otherwise, trigger an error.
@@ -251,7 +251,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	set dir [file dirname $file]
 	if {[file exist $dir] && [file isdir $dir]} {
 	    execCommand -command $file
-	    set fileLastOpened $relPath
+	    set fileLastOpened $filename
 	    return 1
 	} {
 	    ::tycho::warn "Directory does not exist: $dir"
@@ -263,57 +263,12 @@ body ::tycho::FileBrowser::processItem {filename} {
     if {[file isdir $file]} {
 	if {[file readable $file] && [file executable $file]} {
 	    
-	    # Non-relative path
-	    if {$char == "/"} {
-		set CWD $relPath
-		$itk_component(dir) config -text $CWD
-		set localCWD $CWD
-		set fileLastOpened ""
-		updateListbox
-		return 0
-	    }
-	    # Else relative path
-	    set newPath $localCWD
-	    while {[regsub {^([^/]+)(/.*$|$)} $relPath {\1 \2} temp]} {
-		set partOfPath [lindex $temp 0]
-		set relPath [string trimleft [lindex $temp 1] "/"]
-		if {$partOfPath == "."} {
-		    continue
-		} elseif {$partOfPath == ".."} {
-		    if [regsub {(.*)/[^/]+$} $newPath {\1} temp] {
-			set newPath $temp
-		    } else {
-			::tycho::warn "Invalid component: \"$partOfPath\""
-			return 0
-		    }
-		} else {
-		    if {$newPath == "/"} {
-			if [file exists /$partOfPath] {
-			    set newPath /$partOfPath
-			} else {
-			    ::tycho::warn "Invalid component: \"$partOfPath\""
-			    return 0
-			}
-		    } else {
-			if [file exists $newPath/$partOfPath] {
-			    set newPath $newPath/$partOfPath
-			} else {
-			    ::tycho::warn "Invalid component: \"$partOfPath\""
-			    return 0
-			}
-		    }
-		}
-	    }
-	    if {$newPath == ""} {
-		set CWD "/"
-	    } else {
-		set CWD $newPath
-	    }
-	    set localCWD $CWD
-	    $itk_component(dir) config -text $localCWD
-	    set fileLastOpened ""
-	    updateListbox
-	    return 0
+            set CWD $file
+            $itk_component(dir) config -text $CWD
+            set localCWD $CWD
+            set fileLastOpened ""
+            updateListbox
+            return 0
 	} else {
 	    ::tycho::warn \
 		    "Directory \"[string trimright $file /]\" is unreadable"
@@ -324,7 +279,7 @@ body ::tycho::FileBrowser::processItem {filename} {
 	if {[file readable $file]} {
 	    execCommand -command $file
 	    # Store last file opened
-	    set fileLastOpened $relPath
+	    set fileLastOpened $filename
 	    return 1
 	} {
 	    ::tycho::warn "\"$file\" is unreadable"
