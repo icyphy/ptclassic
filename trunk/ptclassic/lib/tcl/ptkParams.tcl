@@ -1,22 +1,49 @@
-# Ptolemy edit-parameters dialog box--tcl routines
-# Author: Wei-Jen Huang
-# $Id$
+# VERSION: $Id$	%H%
 #
-# Copyright (c) 1990-1993 The Regents of the University of California.
+#---------------------------------------------------------------------------
+# Copyright (c) 1993 The Regents of the University of California.
 # All rights reserved.
 #
-# With numerous contributions from Prof. Edward Lee and Alan Kamas
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+#
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+#
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#---------------------------------------------------------------------------
+#
+#  Programmer: Wei-Jen Huang
+#
+#  Contributors: Prof. Edward Lee and Alan Kamas
+#
+# This file currently contains routines for edit-params, target-params
+#  and possibly, edit-domain dialog boxes.
+#
+#---------------------------------------------------------------------------
 #
 # For storage, there exist two global array--one which stores lists of
 # current parameter-type-value triplets and the other which (upon
 # invocation of an edit-parameters command) stores the original triplet
 # values as back-ups.
-
+#
 # Entry bindings specific to the edit-parameters box include:
 # 		Focus on next entry
 # 		Focus on previous entry
 # Tab		Focus on next entry
 # Return	Focus on next entry
+#---------------------------------------------------------------------------
 
 # Width of entry in average-sized chars of font
 set ed_MaxEntryLength 60
