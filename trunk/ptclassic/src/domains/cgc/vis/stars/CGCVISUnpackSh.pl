@@ -52,14 +52,18 @@ FALSE unpacks with most current sample at trailing position}
 	setup {
 	  out.setSDFParams(PACKOUT,PACKOUT-1);
 	}
-	codeblock(mainDecl){
-	  union $starSymbol(inoverlay) {
+	codeblock(globalDecl){
+	  union $sharedSymbol(CGCVISUnpackSh,inoverlay){
 	    vis_d64 invaluedbl;
 	    vis_s16 invaluesh[4];
-	  } $starSymbol(packedin);
-	}	  
+	  };
+	}
+	codeblock(mainDecl){
+	  union $sharedSymbol(CGCVISUnpackSh,inoverlay) $starSymbol(packedin);
+	}
 	initCode{
 	  CGCVISBase::initCode();
+	  addGlobal(globalDecl);
 	  addDeclaration(mainDecl);
           addInclude("<vis_types.h>");
 	}
