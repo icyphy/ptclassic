@@ -329,8 +329,8 @@ Inputs:
     name = name of block to get params of
     pListPtr = the address of a ParamList node
 Outputs:
-    return = TRUE if ok, else FALSE and pListPtr->length == 0
-        returns FALSE if star does not exist (or invalid param string).
+    return = TRUE if ok (no error), else FALSE.
+        returns FALSE if star does not exist or new fails to allocate memory.
     pListPtr = returns a filled ParamList node that contains params
         if the star has any.  Callers can free() memory in ParamList
         array when no longer needed.
@@ -344,17 +344,43 @@ realGetParams(const char* name, ParamListType* pListPtr)
 	if (block == 0) {
 		return FALSE;
 	}
+	pListPtr->array = NULL; // initialization
 	int n = block->numberStates();
-	pListPtr->array = new ParamStruct[n];
-	BlockStateIter nexts(*block);
-	int j = 0;
-	for (int i = 0; i < n; i++) {
-		State& s = *nexts++;
-		// Only return settable states
-		if (s.attributes() & A_SETTABLE) {
-		    pListPtr->array[j].name = s.readName();
-		    pListPtr->array[j++].value = s.getInitValue();
+	int j = 0; // # of settable states, initialized to 0
+	if (n) { 
+	    /* Since we don't know beforehand how many of the n states
+	       are nonsettable, we temperarily requests n ParamStructs
+	       at tempArray. 
+	    */
+	    ParamType* tempArray = new ParamStruct[n];
+	    if (!tempArray) {  // Out of memory error
+		return FALSE;
+	    }
+	    BlockStateIter nexts(*block);
+	    for (int i = 0; i < n; i++) {
+		    State& s = *nexts++;
+		    // Only return settable states
+		    if (s.attributes() & A_SETTABLE) {
+		        tempArray[j].name = s.readName();
+		        tempArray[j++].value = s.getInitValue();
+		    }
+	    }
+	    /* Now we know there are exactly j settable states.
+	       If there are any settable states (j > 0), we requests
+	       j ParamStructs at pListPtr->array and copy tempArray
+	       to pListPtr->array.
+	    */
+	    if (j) {
+		pListPtr->array = new ParamStruct[j];
+		if (!pListPtr->array) { // out of memory error
+		    return FALSE;
 		}
+		for (i = 0; i < j; i++) {
+		    pListPtr->array[i].name = tempArray[i].name;
+		    pListPtr->array[i].value = tempArray[i].value;
+		}
+	    }
+	    delete tempArray;
 	}
 	pListPtr->length = j;
 	return TRUE;
