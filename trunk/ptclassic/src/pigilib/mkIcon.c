@@ -21,29 +21,9 @@ Copyright (c) 1989 The Regents of the University of California.
 #include "oh.h"
 #include "vemInterface.h"
 #include "list.h"
+#include "mkIcon.h"
 
 #define ERRBUF_MAX 1000
-
-/***** types TermList and Term are exported */
-
-#define TERM_ARR_MAX 14  /* max # I/O terms = max # positions */
-
-struct Term_s {
-    char *name;
-    boolean multiple;
-};
-typedef struct Term_s Term;
-
-struct TermList_s {
-    Term in[TERM_ARR_MAX];
-    int in_n;
-    Term out[TERM_ARR_MAX];
-    int out_n;
-};
-typedef struct TermList_s TermList;
-
-/***** end */
-
 
 /* 8/24/89
 Check to see if icon already exists.
