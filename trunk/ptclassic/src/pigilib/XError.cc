@@ -46,10 +46,17 @@ extern "C" {
 #include "Scheduler.h"
 #include "miscFuncs.h"
 #include "NamedObj.h"
+#include "PtGate.h"
+
+// the gate object ensures that messages come out in one piece even
+// with multi-threading.
+
+KeptGate gate;
 
 typedef const char cc;
 
 static void outMsg(cc* obj, int warn, cc* m1, cc* m2, cc* m3) {
+	CriticalSection region(gate);
 	const char* status = warn ? "warning: " : "";
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
@@ -109,6 +116,7 @@ extern "C" {
 };
 
 static void info(cc* obj, cc* m1, cc* m2, cc* m3) {
+	CriticalSection region(gate);
 	if (!m2) m2 = "";
 	if (!m3) m3 = "";
 	int l = strlen(m1)+strlen(m2)+strlen(m3)+1;
