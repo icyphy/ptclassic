@@ -249,7 +249,7 @@ protected:
 	int size() {return dimen;}
 
 	// Return next element on the list
-	Pointer next() {SingleLinkList::next();}
+	Pointer next() {return SingleLinkList::next();}
 
 	// Reset, so that the next access will be the
 	// first element that was added to the list
