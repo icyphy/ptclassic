@@ -105,6 +105,13 @@ class ::tycho::EditItcl {
     ####                   protected variables                     ####
 
     protected variable className {}
+
+    ##########################################################################
+    ####                         protected commons                        ####
+
+    # Regular expression to select a construct
+    protected common selectConstructRegexp {^(proc|body|configbody)}
+
 }
 
 ###################################################################
