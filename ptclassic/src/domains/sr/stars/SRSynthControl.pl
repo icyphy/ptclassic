@@ -217,6 +217,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	  if ( voicePitch[i] == 0 ) {
 	    voicePitch[i] = int(onPitch.get());
 	    voiceVelocity[i] = int(onVelocity.get());
+	    cout << "Note on: pitch " << voicePitch[i] << " velocity "
+		<< voiceVelocity[i] << " voice " << i << '\n';		
 	    break;
 	  }
 	}
@@ -233,6 +235,8 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	  if ( voicePitch[i] == p ) {
 	    voiceVelocity[i] = 0;
+	    cout << "Note off: pitch " << voicePitch[i] << " voice "
+		<< i << '\n';
 	  }
 	}
       }
@@ -255,15 +259,20 @@ limitation of liability, and disclaimer of warranty provisions.
     // any that are non-zero
 
     for ( int i = numVoices ; --i >= 0 ; ) {
-      if ( donePort[i]->present() && int(donePort[i]->get()) != 0 ) {
+      if ( donePort[i]->present() && int(donePort[i]->get()) != 0 &&
+	  voicePitch[i] != 0 ) {
 	voicePitch[i] = voiceVelocity[i] = 0;
+	cout << "Done: voice " << i << '\n';
       }
     }
 
+    /* 
     for ( i = 0 ; i < numVoices ; i++ ) {
       cout << voicePitch[i] << ' ' << voiceVelocity[i] << ' ';
     }
     cout << '\n';
+    */
+
   }
 
 }
