@@ -84,7 +84,7 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 all: configure bin install
 .PHONY:	configure bin install
 
-MACH=`$(GNU_SRC)/gcc/config.guess`
+MACH=`$(GNU_SRC)/egcs/gcc/config.guess`
 
 SHAREDLIB_CONFIGURE_FLAGS = --enable-shared
 # gnu make and egcs
