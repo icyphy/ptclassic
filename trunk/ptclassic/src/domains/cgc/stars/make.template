@@ -64,6 +64,7 @@ PL_SRCS= \
  CGCReverse.pl \
  CGCTrainer.pl \
  CGCSin.pl \
+ CGCSleep.pl \
  CGCSqrt.pl \
  CGCSub.pl \
  CGCSpread.pl \
