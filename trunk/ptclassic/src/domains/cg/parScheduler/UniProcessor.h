@@ -83,6 +83,9 @@ private:
 	// galaxy of blocks assigned to this processor
 	DynamicGalaxy* subGal;
 
+	// Multiprocessor object of which I am a part of
+	ParProcessors* parent;
+
 	// my id
 	int index;
 
@@ -91,10 +94,6 @@ private:
 	SDFStar* makeCollect(PortHole* destP, ParNode* dN);
 	void makeReceive(int pindex, PortHole* rP,int delay,ParNode*,EGGate*);
 	void makeSend(int pindex, PortHole* sP, ParNode*, EGGate*);
-
-	// set the cloned star pointer of the Send/Receive node in OSOP option.
-	void matchReceiveNode(SDFStar*, PortHole*, ParNode*, int);
-	void matchSendNode(SDFStar*, PortHole*, ParNode*, int);
 
 	// Depending on OSOPReq(), make connections
 	void makeOSOPConnect(PortHole* p, SDFStar* org, SDFStar* far,
@@ -136,7 +135,7 @@ protected:
 
 public:
 	// constructor
-	UniProcessor() : availTime(0), curSchedule(0), numFree(0),
+	UniProcessor() : availTime(0), curSchedule(0), numFree(0), parent(0),
 			 freeNodeSched(0), subGal(0), targetPtr(0) {}
 	~UniProcessor();
 
@@ -144,7 +143,8 @@ public:
 	Galaxy* myGalaxy() { return subGal; }
 
 	// set the target pointer
-	void setTarget(BaseMultiTarget* t) { mtarget = t; }
+	void setTarget(BaseMultiTarget* t, ParProcessors* p) 
+		{ mtarget = t; parent = p; }
 
 	// create the galaxy
 	void createSubGal();
