@@ -22,7 +22,7 @@ The <A HREF="fileheader.html">file header</A> is discussed elsewhere.
 In general, comments should follow the <A HREF="style.html#comment conventions"> conventions</A> described in the Tycho style guide.
 
  <P>The <A HREF="../../lib/tydoc/doc/index.html"><CODE>tydoc</CODE></A>
-system automatically generates html documentation from the source
+system automatically generates HTML documentation from the source
 code file, so the comments should follow the <CODE>tydoc</CODE>
 <A HREF="../../lib/tydoc/doc/overview.html#comment format conventions">comment format conventions</A>.
 
@@ -44,7 +44,7 @@ creating definition bodies.
 <H3><A NAME="the order of elements">The order of elements</A></H3>
 	
 The Itcl file body  consists of the following elements.
-Note that the order of tags should bestrictly followed for
+Note that the order of tags should be strictly followed for
 consistency among files.
 	
 <H2><A NAME="itcl class comments">Itcl class comments</A></H2>
@@ -71,7 +71,9 @@ Class comments have the following elements:
 
 	<LI> Four comment characters, followed by the class name.  This
 	tells the reader what class is being defined, which is useful
-	if the actual comment is long.
+	if the actual comment is long.  The <CODE>tydoc</CODE> facility
+	uses the four comment characters to indicate the start of a 
+	doc comment.
 	<PRE>
 	#### MyClass
 	</PRE>
@@ -84,7 +86,7 @@ Class comments have the following elements:
 	</PRE>
 
 	<LI> An
-<A HREF="../documentation.html#HTML extensions">embedded tcl code example</A>.
+<A HREF="../documentation.html#HTML extensions">embedded Tcl code example</A>.
 	<PRE>
 	# &lt;tcl&gt;&lt;pre&gt;
 	# ::tycho::MyClass
@@ -114,7 +116,7 @@ In itcl, the class declaration body defines the interface to the
 class.  The actual definition can be either be included in the class
 declaration body, or put after the class declaration body in a series of
 <CODE>body</CODE> statements.  However, the Tycho convention
-<B>requires/B> that methods and procedures that are longer than one
+<B>requires</B> that methods and procedures that are longer than one
 line be in separate <CODE>body</CODE> statements after the class body
 itself.  This makes the file more readable.
 

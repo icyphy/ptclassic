@@ -11,7 +11,7 @@ if you are planning on extending tycho.
 <p>
 <MENU>
 	<LI> <A HREF="../../README.files"><CODE>$TYCHO/README.files</CODE></A>
-	contains a description of the tycho directory structure.
+	contains a description of the Tycho directory structure.
 	<LI> <A HREF="#tylndir and private trees"><CODE>tylndir</CODE>
 	and private trees</A>
 	<LI> <A HREF="#makefile structure">makefile structure</A>
@@ -25,10 +25,10 @@ The script
 <A HREF="../../bin/tylndir"><CODE>$TYCHO/bin/tylndir</CODE></A>
  will create a private directory tree with links to a common Tycho
 tree.  This allows Tycho developers to maintain their own tree and
-edit it as they see fit.
+edit it as they see fit and to get changes that other developers make.
 
  <P>For example, to create your own private tree in <CODE>~/ty</CODE> from
-the sources in <CODE>~ptdesign/tycho</CODE>, do the following:
+the master sources in <CODE>~ptdesign/tycho</CODE>, do the following:
 <OL>
 <LI> <CODE>mkdir ~/ty</CODE>
 
@@ -58,13 +58,13 @@ files such as <CODE>,*</CODE> and <CODE>*~</CODE> in your private tree.
 
  <P>The tree that <CODE>tylndir</CODE> builds has links for the
 <CODE>SCCS</CODE> directories, so that everyone is sharing the
-ptdesign <CODE>SCCS</CODE> directories via links.
+the master <CODE>~ptdesign</CODE> <CODE>SCCS</CODE> directories via links.
 
  <P>When you start using your tree, most of the files are also links.
 If you check out a file, then the link is removed, and checked out
-version of the file is put in its place.  The shared <CODE>SCCS</CODE>
-directory is modified so that noone can check out that file while you
-have it checked out.
+version of the file is put in its place.  The SCCS version control system
+creates a lock file in the shared <CODE>SCCS</CODE> directory.
+so that noone can check out that file while you have it checked out.
 
  <P>To update your tree, you do <CODE>cd $TYCHO; make sources</CODE>.
 This will update any files that have been changed by others.
@@ -75,8 +75,11 @@ parallel trees, but the amount of training is fairly substantial.
 <HR>
 <H3><A NAME="makefile structure">makefile structure</A></H3>
 
- <P>It is best if the makefiles do not contain any <A NAME="gnu make">GNU make</A>
- extensions so that the makefiles can be used with non-GNU make.
+ <P>It is best if the makefiles do not contain any
+<A NAME="gnu make">GNU <CODE>make</CODE></A>
+ extensions so that the makefiles can be used with non-GNU
+<CODE>make</CODE>.  Over time we are migrating away from makefiles and
+using scripts instead.
 
  <P>The general structure of a Tycho makefile is
 <OL>
