@@ -483,7 +483,7 @@ body ::tycho::Model::mark {mode args} {
 #
 body ::tycho::Model::notify {mode args} {
     # Extract the -except option
-    if ![regexp "^-exclude (\[^ \t\n\]+) (.*)$" $args _ except args] {
+    if ![regexp "^-except (\[^ \t\n\]+) (.*)$" $args _ except args] {
         set except {}
     }
     # Switch on the mode to perform error-checking
@@ -573,16 +573,16 @@ body ::tycho::Model::publish {command index args} {
 ########################################################################
 #### record
 #
-# Execute a method on this data object. The _command_ argument
+# Execute a method on this data object. The _method_ argument
 # is the name of the method to call, and remaining arguments are
 # passed directly to the method. The method is called in the scope
-# of the most specific class. The command must return a non-null value
+# of the most specific class. The method must return a non-null value
 # or an error is raised. This value is recorded in the command
-# history as the command history, along with the method and its
+# history, along with the method and its
 # arguments, which are recorded as the redo command. Any commands
 # in the "future" are cleared from the history.
 #
-body ::tycho::Model::record {command args} {
+body ::tycho::Model::record {method args} {
     # Clear the redo future if needed
     if { $_mark(current) < $_mark(last) } {
 	_clearhistory current last
@@ -591,12 +591,11 @@ body ::tycho::Model::record {command args} {
     # Execute the command and remember its result (the undo command).
     # If the command causes an error, this method will abort,
     # and neither the command nor its undo command will be recorded.
-    set undo [eval @scope [info class] $command $args]
+    set undo [@scope [info class] eval $this $method $args]
 
-    # If the command returned null, raise an error.
+    # If the method returned null, raise an error.
     if { $undo == "" } {
-    	error "The recorded command \"$method $args\" returned no\
-                    undo command"
+    	error "The recorded command \"$method $args\" returned no undo command"
     }
     # Record the command and the undo command
     _appendhistory [concat $method $args] $undo
@@ -641,11 +640,11 @@ body ::tycho::Model::redo {{distance 1}} {
         # Note that here we reset the "recording" flag, so that
         # any methods that usually write to the history know not to.
         set recording 0
-        eval @scope [info class] $_redo($_mark(current))
+        @scope [info class] eval $this $_redo($_mark(current))
         set recording 1
 
 	# Publish
-	eval _notifydata noone $_redo($_mark(current))
+	eval notify data $_redo($_mark(current))
     }
     # Return the number of commands redone
     return $distance
@@ -744,11 +743,11 @@ body ::tycho::Model::undo {{distance 1}} {
         # Note that here we reset the "recording" flag, so that
         # any methods that usually write to the history know not to.
         set recording 0
-        eval @scope [info class] $_undo($_mark(current))
+        @scope [info class] eval $this $_undo($_mark(current))
         set recording 1
 
         # Publish
-	eval _notifydata noone $_undo($_mark(current))
+	eval notify data $_undo($_mark(current))
 
         # Adjust indexes
         incr _mark(current) -1
