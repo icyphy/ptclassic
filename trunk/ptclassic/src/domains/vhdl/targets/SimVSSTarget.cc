@@ -59,12 +59,12 @@ VHDLTarget(name,starclass,desc) {
 
 //  addStream("preSynch", &preSynch);
 //  addStream("postSynch", &postSynch);
-/*
+
   needC2Vinteger = 0;
   needV2Cinteger = 0;
   needC2Vreal = 0;
   needV2Creal = 0;
-  */
+
   // See if this takes hold, or init in setup
   pairNumber = 2000;
 }
