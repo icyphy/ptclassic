@@ -90,13 +90,13 @@ MISC_FILES =		doc img test tclIndex
 DIRS =			doc
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =			tclIndex
+REALCLEAN_STUFF =	tclIndex
 
 # Include information on all stars and targets.
 include $(ROOT)/mk/stars.mk
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: tclIndex $(MISC_SRCS) sources
+all install: sources $(MISC_SRCS) tclIndex
 
 tclIndex: $(TCL_SRCS) $(ITCL_SRCS)
 	@echo "Updating tclIndex"
