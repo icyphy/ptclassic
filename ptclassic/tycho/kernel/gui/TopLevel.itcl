@@ -534,12 +534,20 @@ body ::tycho::TopLevel::exitProgram { {exitWithNoConfirmation 0}} {
 	    foreach obj [::info objects] {
 		# A second check for object instance is necessary, because the
 		# object may have been deleted earlier in the loop.
+                # Also, defer destruction of mainConsole.
 		if {[::info objects $obj] != {} && \
-			[$obj isa ::tycho::TopLevel]} {
+			[$obj isa ::tycho::File] && \
+                        ![string match *.mainConsole* $obj]} {
+                    # In theory, the delete below will fail with a silent
+                    # error if the user cancels, and the destruction will get
+                    # cancelled.  For some reason, this doesn't work.  So we
+                    # explicitly ask about saving first.  If the user says no,
+                    # they will be asked a second time during the delete.
+                    $obj saveQuery
 		    delete object $obj
 		}
 	    }
-	}] == 0} {
+        }] == 0} {
 	    ::tclexit
 	} {
 	    set exitconfirmed 0
