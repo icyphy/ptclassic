@@ -1,6 +1,6 @@
-# Makefile for de/contrib, which contains user contributed stars
+# Makefile for de/java, which contains DE/Java stars
 # Top-level Ptolemy makefile.
-# Copyright (c) 1994- The Regents of the University of California.
+# Copyright (c) 1994- %Q%The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,16 +25,16 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# @(#)make.template	1.2 06/24/97
+# $Id$
 #
 # Important!  Do not run this makefile while in 
-# ~ptolemy/src/domains/de/contrib.  Instead run in from
-# ~ptolemy/obj.$PTARCH/domains/de/contrib (through the symbolic
+# ~ptolemy/src/domains/de/java.  Instead run in from
+# ~ptolemy/obj.$PTARCH/domains/de/java (through the symbolic
 # link) -- that way a separate directory containing, say, sol2 and hppa
 # objects can be maintained.
 
 include ../../../../mk/subdomain.mk
 
-DIRS = stars
+DIRS = stars java
 
 ME = de/contrib
