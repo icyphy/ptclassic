@@ -38,7 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Is linking supported?  Currently not complete for HP/UX.
 const int linkingNotSupported =
-#ifdef hpux
+#if defined(hpux) || defined(__alpha)
  1;
 #else
  0;
@@ -186,4 +186,18 @@ read (fd, (char*) &h2, sizeof h2) <= 0)
 #define READHEAD_FAIL (read (fd, (char*) &header, sizeof(header)) <= 0)
 #define READOBJ_FAIL (read (fd, availMem, size) < size)
 #define OBJ_SIZE (size_t)(header.a_text + header.a_data + header.a_bss)
+#endif
+
+// alpha stuff
+#ifdef __alpha
+#define STRUCT_DEFS
+#define READHEAD_FAIL 1
+#define READOBJ_FAIL 1
+#define OBJ_SIZE 0
+#define READOBJ_FAIL 1
+inline int getpagesize() { return 4096;}
+// ugly hack to get around a bug in the popen prototype for Alpha/OSF
+#define ALPHAFIX (char*)(const char*)
+#else
+#define ALPHAFIX
 #endif

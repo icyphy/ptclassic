@@ -267,7 +267,8 @@ Linker::invokeConstructors (const char* objName) {
 // Open a pipe to "nm" to get symbol information
 	StringList command = NM_PROGRAM;
 	command << " " << NM_OPTIONS << " " << objName;
-	FILE* fd = popen (command, "r");
+// ALPHAFIX is needed because ALPHA/OSF provides a bogus prototype for popen.
+	FILE* fd = popen (ALPHAFIX command, "r");
 	if (fd == 0) {
 		Error::abortRun("Linker: can't exec ", NM_PROGRAM);
 		return -1;
