@@ -229,7 +229,6 @@ else
   Try --with-java=DIR, or set the JAVA_HOME environment variable.
   If you don't have java, try --without-java. If you are building within Tycho,
   try 'make tclexts CONFIGURE_ARGS=--without-java'.] )
-		AC_MSG_ERROR(
 	fi
 
 	if test ! -f $JAVAHOME/include/StubPreamble.h; then
@@ -238,7 +237,6 @@ else
   Try --with-java=DIR, or set the JAVA_HOME environment variable.
   If you don't have java, try --without-java. If you are building within Tycho,
   try 'make tclexts CONFIGURE_ARGS=--without-java'.] )
-
 	fi
 
 
@@ -260,7 +258,6 @@ else
 	if test -f $JAVA_ARCH_INCLUDE/oobj_md.h; then
 		AC_MSG_RESULT($JAVA_ARCH_INCLUDE/oobj_md.h)
 	else
-
 	    AC_MSG_ERROR([There's no oobj_md.h in $JAVA_ARCH_INCLUDE/include;
 use the --with-javaarchinclude= configure flag to specify the location
 of the architecture dependent include files in the JDK.])
