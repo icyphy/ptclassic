@@ -1,7 +1,12 @@
 #! /bin/sh
 # $Id$
-# This script generates a file that references every star mentioned in
-# the PL_SRCS variable in the makefile.
+# This script generates a file that references every star referenced
+# in a makefile (normally by the PL_SRCS makefile variable).
+#
+# usage: genStarTable [-vars makefilevars] domain1 domain2
+# If not specified, makefilevars defaults to "PL_SRCS".  It may specify
+# more than one makefile variable.
+#
 
 cat > /tmp/$$.hdr << EOF
 /* This file contains a table of the official $1 stars.  Its purpose is
@@ -16,27 +21,37 @@ cat > /tmp/$$.hdr << EOF
 
 EOF
 
-pp=ZZZ
-if [ $# = 2 ]
-then pp=$2
+makevarlist="PL_SRCS"
+if [ "$1" = "-vars" ] ; then
+    shift; makevarlist=$1; shift
 fi
 
-sed -n	-e "s/$1/STR star_nm_${1}/g" \
-	-e "s/$pp/STR star_nm_${pp}/g" \
-	-e 's?PL_SRCS.*?/\* declare symbols \*/?' \
-	-e "s/\.pl/;/g" \
-	-e "s/[\\]//" \
-	-e "/^.. declare/,/^\$/p" make.template > /tmp/$$.p1
+pp=ZZZ
+if [ $# = 2 ] ; then
+    pp=$2
+fi
 
-sed -n	-e "s/$1/\&star_nm_${1}/g" \
-	-e "s/$pp/\&star_nm_${pp}/g" \
-	-e 's?PL_SRCS.*=?static char\*\* nm_table[] = {?' \
-	-e "s/\.pl/,/g" \
-	-e "s/[\\]//" \
-	-e "/^static char/,/^\$/p" make.template > /tmp/$$.p2
+cp /dev/null /tmp/$$.p1
+echo 'static char** nm_table[] = {' > /tmp/$$.p2
+
+for makevar in $makevarlist ; do
+	sed -n	-e "s/$1/STR star_nm_${1}/g" \
+		-e "s/$pp/STR star_nm_${pp}/g" \
+		-e "s?${makevar}.*?/\* declare ${makevar} symbols \*/?" \
+		-e "s/\.[a-z]*/;/g" \
+		-e "s/[\\]//" \
+		-e "/^.. declare/,/^\$/p" make.template >> /tmp/$$.p1
+
+	sed -n	-e "s/$1/\&star_nm_${1}/g" \
+		-e "s/$pp/\&star_nm_${pp}/g" \
+		-e "s?^${makevar}.*=?/\* reference ${makevar} symbols \*/?" \
+		-e "s/\.[a-z]*/,/g" \
+		-e "s/[\\]//" \
+		-e "/^.. reference/,/^\$/p" make.template >> /tmp/$$.p2
+done
 
 cat /tmp/$$.hdr /tmp/$$.p1 /tmp/$$.p2
 echo '};'
 
-rm  /tmp/$$.hdr /tmp/$$.p1 /tmp/$$.p2
-
+rm /tmp/$$.hdr /tmp/$$.p1 /tmp/$$.p2
+exit
