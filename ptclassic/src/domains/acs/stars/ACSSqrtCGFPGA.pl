@@ -6,10 +6,10 @@ defcore {
 	desc {
 Produces the square root of the input.
 	}
-	version {$Id$}
+	version {@(#)ACSSqrtCGFPGA.pl	1.4 09/10/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -57,12 +57,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -101,26 +95,16 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
 	    }
 	}
 	method {
@@ -158,7 +142,7 @@ It outputs lines of comments, instead of code.
 		    << "orr=sqrt(inputrange);" << endl;
 
                 natcon_file << "%Assuming fractional input" << endl
-		            << "yesno=(insizes>=4 & insizes<=60 & outsizes>=4 & outsizes<=60);" << endl;
+		            << "yesno=(insizes>=4 & insizes<=64 & outsizes>=4 & outsizes<=64);" << endl;
 
 		schedule_file << "outdel= 1+outsizes; " << endl;
                 schedule_file << "vl1=veclengs(1); " << endl;
@@ -180,22 +164,40 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
+		// Output precisions are variable, user must prescribe these
 		    
-		// Calculate CLB sizes
-		    
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		int out_bitlen=pins->query_bitlen(1);
 		acs_delay=out_bitlen+1;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -219,14 +221,14 @@ It outputs lines of comments, instead of code.
 
 		// Output port definitions
 		pins->add_pin("dout","output",OUTPUT_PIN);
-		pins->set_min_vlength(1,8);
-		pins->set_max_vlength(1,16);
+		pins->set_min_vlength(1,4);
+		pins->set_max_vlength(1,64);
 
 		// Bidir port definitions
 		
 		// Control port definitions
 		pins->add_pin("c",INPUT_PIN_CLK);
-		pins->add_pin("ce",INPUT_PIN_AH);
+		pins->add_pin("ce",INPUT_PIN_CE,AH);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");

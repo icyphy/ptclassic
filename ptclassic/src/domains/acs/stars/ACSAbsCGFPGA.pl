@@ -6,10 +6,10 @@ defcore {
 	desc {
 Produces the cosine of the input, that is assumed to be in radians
 	}
-	version {$Id$}
+	version {@(#)ACSAbsCGFPGA.pl	1.5 09/10/99}
 	author { P. Fiore }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -57,12 +57,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -101,26 +95,16 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
 	    }
 	}
 	method {
@@ -177,21 +161,56 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
 		// Calculate BW
+	        // NOTE:Ignoring changes in majorbits
+		int in_bits=pins->query_bitlen(0);
+		int in_mb=pins->query_majorbit(0);
+		int out_bits=pins->query_bitlen(1);
+		int out_mb=pins->query_majorbit(1);
 
-		// Calculate CLB sizes
+		if (in_bits != out_bits)
+		{
+		    int new_bits=0;
+		    if (in_bits > out_bits)
+			new_bits=in_bits;
+		    else
+			new_bits=out_bits;
+
+		    pins->set_precision(0,in_mb,new_bits,lock_mode);
+		    pins->set_precision(1,out_mb,new_bits,lock_mode);
+		}
 		    
+
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=1;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -222,7 +241,7 @@ It outputs lines of comments, instead of code.
 		
 		// Control port definitions
 		pins->add_pin("c",INPUT_PIN_CLK);
-		pins->add_pin("ce",INPUT_PIN_AH);
+		pins->add_pin("ce",INPUT_PIN_CE,AH);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");
@@ -271,9 +290,6 @@ It outputs lines of comments, instead of code.
 		if (sg_language==VHDL_BEHAVIORAL)
 		// BEGIN-USER CODE
 		{
-
-       constant_signals->add_pin("GND",0,1,STD_LOGIC);
-
                     Pin* new_pins=NULL;
                     ostrstream core_entity;
 

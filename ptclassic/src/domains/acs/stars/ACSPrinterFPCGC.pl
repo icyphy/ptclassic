@@ -6,7 +6,7 @@ defcore {
     desc { Prints out one sample from each input port per line.
 If "fileName" is not equal to "cout" (the default) or "stdout", it
 specifies the filename to write to. }
-    version { $Id$}
+    version { @(#)ACSPrinterFPCGC.pl	1.4 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

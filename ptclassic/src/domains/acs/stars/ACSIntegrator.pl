@@ -17,7 +17,7 @@ Leakage is controlled by the "feedbackGain" state (default 1.0).
 The output is the data input plus feedbackGain*state, where state
 is the previous output.
 	}
-	version { $Id$ }
+	version { @(#)ACSIntegrator.pl	1.2 09/08/99 }
 	author { James Lundblad }
 	copyright {
 Copyright (c) 1998 The Regents of the University of California.

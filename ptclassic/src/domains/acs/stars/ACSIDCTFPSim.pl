@@ -4,7 +4,7 @@ defcore {
     	coreCategory { FPSim }
     	corona { IDCT } 
 	desc { computes the inverse discrete cosine transform of a block of 8 samples }
-	version { $Id$ }
+	version { @(#)ACSIDCTFPSim.pl	1.2 09/08/99 }
 	copyright {
 Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

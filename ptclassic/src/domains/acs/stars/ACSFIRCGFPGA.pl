@@ -4,10 +4,10 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { FIR }
 	desc {FIR Filter}
-	version {$Id$}
+	version {@(#)ACSFIRCGFPGA.pl	1.5 09/10/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -60,12 +60,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -108,35 +102,16 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 		    
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
 	    }
 	}
 	method {
@@ -152,11 +127,16 @@ It outputs lines of comments, instead of code.
 			  << corona.taps.size() << "/4)*(" 
 			  << coef_prec << "+2)"
 			  << ";" << endl;
-		int sum=0;
+		double sum=0;
 		for (int loop=corona.taps.size()-1;loop >= 0;loop--)
-		    sum+=(int) abs(corona.taps[loop]);
-
-		numsim_file << "y=x*" << sum << ";" << endl << "%Note: for range and variance calc only!" << endl;
+		{
+		    if (corona.taps[loop] < 0)
+			sum-=corona.taps[loop];
+		    else
+			sum+=corona.taps[loop];
+		}
+		
+//		numsim_file << "y=x*" << sum << ";" << endl << "%Note: for range and variance calc only!" << endl;
 
                 numsim_file <<  " y=cell(1,size(x,2));" << endl;
                 numsim_file <<  " for k=1:size(x,2) " << endl;
@@ -168,7 +148,7 @@ It outputs lines of comments, instead of code.
 		rangecalc_file << "orr=inputrange*" << sum << ";" << endl;
 		natcon_file << "yesno=(insizes>=4 & insizes<=16);" << endl;
 
-                schedule_file << "outdel= << corona.taps.size() <<  ; " << endl;
+                schedule_file << "outdel= " << corona.taps.size() << ";" << endl;
                 schedule_file << "vl1=veclengs(1); " << endl;
                 schedule_file << "racts=cell(1,size(insizes,2));" << endl;
                 schedule_file << "for k=1:size(insizes,2)" << endl;
@@ -188,7 +168,7 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
@@ -212,20 +192,31 @@ It outputs lines of comments, instead of code.
 		    pins->set_precision(1,out_majorbit,out_bitlen,lock_mode);
 		}
 
-		//
-		// Calculate CLB sizes
-		//
-		taps=corona.taps.size();
-		
-		// FIX:
-		resources->set_occupancy(out_bitlen/2,1);
-
-		// Calculate pipe delay
-		acs_delay=taps;
-			    
 		// Return happy condition
 		return(1);
 		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
+		// Calculate pipe delay
+		acs_delay=corona.taps.size();
+			    
+		// Return happy condition
+		return(1);
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -381,7 +372,7 @@ It outputs lines of comments, instead of code.
 		    delete []new_coefficients;
 
 		    out_core << "GSET Signed_Input_Data = true" << endl;
-		    out_core << "GSET Number_Of_Taps = " << taps << endl;
+		    out_core << "GSET Number_Of_Taps = " << corona.taps.size() << endl;
 
 		    // FIX:Fixed for now:
 		    out_core << "GSET Antisymmetry = false" << endl;

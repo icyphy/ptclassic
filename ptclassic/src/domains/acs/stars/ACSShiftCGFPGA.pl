@@ -4,10 +4,10 @@ defcore {
 	coreCategory { CGFPGA }
 	corona { Shift }
 	desc {Scale by a power of 2}
-	version {$Id$}
+	version {@(#)ACSShiftCGFPGA.pl	1.6 09/13/99}
 	author { P. Fiore }
 	copyright { 
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -50,12 +50,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -92,39 +86,21 @@ It outputs lines of comments, instead of code.
 	    
 	    int shift_amt;
 
+	    static const int DEBUG_SHIFT=0;
 	}
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input_Major_Bit");
-		input_list->append((Pointer) "Input_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input_Major_Bit");
+		input_list->add("Input_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
 	    }
 	}
 	method {
@@ -136,12 +112,15 @@ It outputs lines of comments, instead of code.
 		// BEGIN-USER CODE
 		shift_amt=(int) (corona.shift);                // the amount to shift
 
-		cost_file << "cost=0;" << endl;
+		cost_file << "cost=zeros(1,size(insizes,2));" << endl;
+                cost_file << " if sum(numforms)>0 " << endl;
+                cost_file << "  disp('ERROR - use parallel numeric form only' )  " << endl;
+                cost_file << " end " << endl;
 
 		// numsim_file << "y=x*2^(" << shift_amt << ");" << endl;
                 numsim_file <<  " y=cell(1,size(x,2));" << endl;
                 numsim_file <<  " for k=1:size(x,2) " << endl;
-                numsim_file <<  "   y{k}=x{k}*2^(; "<< shift_amt << ");"  << endl;
+                numsim_file <<  "   y{k}=x{k}*2^( "<< shift_amt << ");"  << endl;
                 numsim_file <<  " end " << endl;
                 numsim_file <<  " " << endl;
 
@@ -168,38 +147,50 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		//
-		// Calculate output bitwidth/format
-		//
+		shift_amt=(int) (corona.shift);                // the amount to shift
 
 		// Check if locked by user from PTOLEMY graph
 		if (pins->query_preclock(1)==UNLOCKED )
                 {
-  	        // get input size/msb
-		int inmsb=pins->query_majorbit(0);
-		int inlen=pins->query_bitlen(0);
-
-		int outlen = inlen;
-		int outmsb = inmsb+shift_amt;
-		pins->set_precision(1,outmsb,outlen,lock_mode);
+		    // get input size/msb
+		    int inmsb=pins->query_majorbit(0);
+		    int inlen=pins->query_bitlen(0);
+		    
+		    int outlen = inlen;
+		    int outmsb = inmsb+shift_amt;
+		    pins->set_precision(1,outmsb,outlen,lock_mode);
 		}	    
 
-		//
-		// Calculate CLB sizes
-		//
-		resources->set_occupancy(0,0);
-		
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
 		acs_delay=0;
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -273,9 +264,6 @@ It outputs lines of comments, instead of code.
 		    VHDL_LANG* lang=new VHDL_LANG;
 		    ofstream out_fstr(output_filename.str());
 
-		    constant_signals->add_pin("GND",1.0,STD_LOGIC,OUTPUT_PIN_GND);
-
-
 		    out_fstr << lang->gen_libraries(libs,incs);
 		    out_fstr << lang->gen_entity(name(),pins);
 		    out_fstr << lang->gen_architecture(name(),
@@ -296,10 +284,11 @@ It outputs lines of comments, instead of code.
 
 		    //  Calc number of extra sign bits 
 		    int numextrasignbits = outmsb - inmsb - shift_amt;
-		    printf("outmsb=%d, inmsb=%d, shift_amt=%d\n",
-			   outmsb,
-			   inmsb,
-			   shift_amt);
+		    if (DEBUG_SHIFT)
+			printf("outmsb=%d, inmsb=%d, shift_amt=%d\n",
+			       outmsb,
+			       inmsb,
+			       shift_amt);
 
 
 		    // Trap for error
@@ -334,9 +323,10 @@ It outputs lines of comments, instead of code.
 		    // END-USER CODE
 		    out_fstr << lang->end_scope << lang->end_statement << endl;
 		    out_fstr.close();
+		    printf("Core %s has been built\n",name());
 		    
 		    // Return happy condition
-			return(1);
+		    return(1);
 		}
 
 		else

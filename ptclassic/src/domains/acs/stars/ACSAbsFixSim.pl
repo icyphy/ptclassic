@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FixSim }
 	corona { Abs }
 	desc { Takes the absolute value of the input. }
-	version { $Id$ }
+	version { @(#)ACSAbsFixSim.pl	1.3 09/08/99 }
 	author { James Lundblad }
     	copyright {
 Copyright (c) 1998 The Regents of the University of California.

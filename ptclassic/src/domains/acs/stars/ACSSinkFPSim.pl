@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Discards input samples.
 	}
-	version {$Id$}
+	version {@(#)ACSSinkFPSim.pl	1.2 09/08/99}
 	author { Eric Pauer }
 	copyright {
 Copyright (c) 1999 Sanders, a Lockheed Martin Company

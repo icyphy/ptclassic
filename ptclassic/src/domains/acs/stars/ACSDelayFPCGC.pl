@@ -3,8 +3,8 @@ defcore {
     domain { ACS }
     coreCategory { FPCGC }
     corona { Delay } 
-    desc { Provides explicit pipeline delay of one. }
-    version { $Id$}
+    desc { Provides explicit pipeline delay (default 1). }
+    version { @(#)ACSDelayFPCGC.pl	1.3 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 The Regents of the University of California
@@ -15,9 +15,9 @@ limitation of liability, and disclaimer of warranty provisions.
     }
     location { ACS main library }
 
-    codeblock (declarations) {
+    codeblock(decl) {
 	/* static so that buffer will be initialized to zero */
-	double $starSymbol(buffer)[1];
+	double $starSymbol(buffer)[$val(delays)];
 	int $starSymbol(index);
     }
 
@@ -25,26 +25,30 @@ limitation of liability, and disclaimer of warranty provisions.
 	$starSymbol(index) = 0;
     {
 	int i;
-	$starSymbol(buffer)[0] = 0;
+	for (i = 0 ; i < $val(delays) ; i++)
+	    $starSymbol(buffer)[i] = 0;
     }
     }
 
     codeblock (main) {
 	$ref(output) = $starSymbol(buffer)[$starSymbol(index)];
 	$starSymbol(buffer)[$starSymbol(index)] = $ref(input);
-	if ( ++$starSymbol(index) >= 1 )
-	    $starSymbol(index) -= 1;
+	if ( ++$starSymbol(index) >= $val(delays) )
+	    $starSymbol(index) -= $val(delays);
     }
 
     setup {
+	if (!(int) corona.delays) forkInit(corona.input, corona.output);
     }
 
     initCode {
-	addDeclaration(declarations);
+	if (!(int) corona.delays) return;
+	addDeclaration(decl);
 	addCode(init);
     }
 
     go {
+	if (!(int) corona.delays) return;
 	addCode(main);
     }
 }

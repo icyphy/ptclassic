@@ -7,10 +7,10 @@ defcore {
 	    Converts a bidirectional memory interface into individual
 	    source/sink memory lines
 	}
-	version {$Id$}
+	version {@(#)ACSNonBiMemCGFPGA.pl	1.3 09/08/99}
 	author { K. Smith}
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -24,34 +24,12 @@ This star exists only for demoing the generic CG domain.
 	    // Stitcher assignments
 	    ostrstream output_filename;
 	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
-	    }
-	}
-	method {
-	    name {macro_build}
-	    access {public}
-	    arglist { "(int inodes,int* acs_ids)" }
-	    type {SequentialList}
-	    code {
-		return(NULL);
-	    }
-	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		// Calculate CLB sizes
-		resources->set_occupancy(0,0);
-
 		// Calculate BW
 		if ((pins->query_preclock(0)==UNLOCKED) && 
 		    (pins->query_preclock(1)==UNLOCKED))
@@ -90,6 +68,28 @@ This star exists only for demoing the generic CG domain.
 		// Return happy condition
 		return(1);
 		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
+		// Calculate pipe delay
+		acs_delay=0;
+
+		// Return happy condition
+		return(1);
+	    }
 	}
         method {
 	    name {sg_setup}

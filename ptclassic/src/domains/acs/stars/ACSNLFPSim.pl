@@ -4,7 +4,7 @@ defcore {
 	coreCategory { FPSim }
 	corona { NL }
 	desc { nonlinear function providing lower threshold, variable gain linear region, and upper threshold. }
-	version { $Id$ }
+	version { @(#)ACSNLFPSim.pl	1.2 09/08/99 }
 	author { James Lundblad }
 	copyright {
 Copyright (c) 1998 The Regents of the University of California.

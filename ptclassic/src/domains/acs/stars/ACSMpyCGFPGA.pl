@@ -7,10 +7,10 @@ defcore {
 Product of two inputs
 Only the first two connections are used for hardware
 	}
-	version {$Id$}
+	version {@(#)ACSMpyCGFPGA.pl	1.4 09/10/99}
 	author { K. Smith }
 	copyright {
-Copyright (c) 1998-%Q% Sanders, a Lockheed Martin Company
+Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
@@ -71,12 +71,6 @@ It outputs lines of comments, instead of code.
 	    default {"Signed"}
 	}
 	defstate {
-	    name {Delay_Impact}
-	    type {string}
-	    desc {How does this delay affect scheduling? (Algorithmic or None)}
-	    default {"None"}
-	}
-	defstate {
 	    name {Domain}
 	    type {string}
 	    desc {Where does this function reside (HW/SW)}
@@ -115,28 +109,18 @@ It outputs lines of comments, instead of code.
 	method {
 	    name {sg_param_query}
 	    access {public}
-	    arglist { "(SequentialList* input_list,SequentialList* output_list)" }
+	    arglist { "(StringArray* input_list, StringArray* output_list)" }
 	    type {int}
 	    code {
-		input_list->append((Pointer) "Input1_Major_Bit");
-		input_list->append((Pointer) "Input1_Bit_Length");
-		input_list->append((Pointer) "Input2_Major_Bit");
-		input_list->append((Pointer) "Input2_Bit_Length");
-		output_list->append((Pointer) "Output_Major_Bit");
-		output_list->append((Pointer) "Output_Bit_Length");
+		input_list->add("Input1_Major_Bit");
+		input_list->add("Input1_Bit_Length");
+		input_list->add("Input2_Major_Bit");
+		input_list->add("Input2_Bit_Length");
+		output_list->add("Output_Major_Bit");
+		output_list->add("Output_Bit_Length");
 
 		// Return happy condition
 		return(1);
-	    }
-	}
-	method {
-	    name {macro_query}
-	    access {public}
-	    type {int}
-	    code {
-		// BEGIN-USER CODE
-		return(NORMAL_STAR);
-		// END-USER CODE
 	    }
 	}
 	method {
@@ -163,12 +147,13 @@ It outputs lines of comments, instead of code.
 		    << "irr=[ir(1)*ir(2) ir(1)*ir(4) ir(3)*ir(2) ir(3)*ir(4)];"
 			<< endl;
                 rangecalc_file << "orr=[min(irr) max(irr)];" << endl;
-                natcon_file << 
-		    "wi=sum(msbranges(1:2)'*ones(1,size(insizes,2))-insizes+1);"
-			<< endl;
+
+                natcon_file << "wi=sum(msbranges(1:2)'*ones(1,size(insizes,2))-insizes+1);" << endl;
                 natcon_file << "wo=msbranges(3)-outsizes+1;" << endl;
-                natcon_file << "yesno=(wo>=wi) & (min(insizes) >=6 & max(insizes) <=32 & outsizes >= 6 & outsizes <=32);" << endl;
-				
+//                natcon_file << "yesno=(wo>=wi) & (min(insizes) >=6 & max(insizes) <=32 & outsizes >= 6 & outsizes <=32);" << endl;
+ //               natcon_file << "yesno=(wo==wi) & (min(insizes) >=6 & max(insizes) <=32 & outsizes >= 6 & outsizes <=32);" << endl;
+               natcon_file << "yesno=(wo>=wi) & (min(insizes) >=6 & max(insizes) <=32 );" << endl;
+			
 		schedule_file << "outdel= 4*ones(1,size(insizes,2)); " << endl;
 		schedule_file << "t=find(insizes(2,:)>8); " << endl;
 		schedule_file << "outdel(t)=outdel(t)+1; " << endl;
@@ -192,14 +177,11 @@ It outputs lines of comments, instead of code.
 	    }
 	}
         method {
-	    name {sg_resources}
+	    name {sg_bitwidths}
 	    access {public}
 	    arglist { "(int lock_mode)" }
 	    type {int}
 	    code {
-		printf("sg_resources invoked for sg %s\n",comment_name());
-
-
 		// Calculate BW
 		int A_majorbit=pins->query_majorbit(0);
 		int A_bitlen=pins->query_bitlen(0);
@@ -208,18 +190,34 @@ It outputs lines of comments, instead of code.
 		    
 		if (pins->query_preclock(2)==UNLOCKED)
 		{
-		    int S_majorbit=A_majorbit+B_majorbit;
-		    int S_bitlen=S_majorbit + 
-			(int) max((A_majorbit-A_bitlen),(B_majorbit-B_bitlen));
+		    int S_majorbit=A_majorbit+B_majorbit+1;
+		    int S_bitlen=A_bitlen+B_bitlen;
 		    
 		    // Set
 		    pins->set_precision(2,S_majorbit,S_bitlen,lock_mode);
 		}
 
-		// Calculate CLB sizes
-		resources->set_occupancy(A_bitlen*B_bitlen,1);
-
+		// Return happy condition
+		return(1);
+		}
+	}
+	method {
+	    name {sg_designs}
+	    access {public}
+	    arglist { "(int lock_mode)" }
+	    type {int}
+	    code {
+		// Return happy condition
+		return(1);
+	    }
+	}
+	method {
+	    name {sg_delays}
+	    access {public}
+	    type {int}
+	    code {
 		// Calculate pipe delay
+		int B_bitlen=pins->query_bitlen(1);
 		if ((B_bitlen >=6) && (B_bitlen <= 8))
 		    acs_delay=4;
 		else if ((B_bitlen >=9) && (B_bitlen <= 16))
@@ -231,7 +229,7 @@ It outputs lines of comments, instead of code.
 
 		// Return happy condition
 		return(1);
-		}
+	    }
 	}
         method {
 	    name {sg_setup}
@@ -263,7 +261,7 @@ It outputs lines of comments, instead of code.
 		
 		// Control port definitions
 		pins->add_pin("c",INPUT_PIN_CLK);
-		pins->add_pin("ce",INPUT_PIN_AH);
+		pins->add_pin("ce",INPUT_PIN_CE,AH);
 
 		// Capability assignments
 		sg_capability->add_domain("HW");
@@ -313,14 +311,125 @@ It outputs lines of comments, instead of code.
 		if (sg_language==VHDL_BEHAVIORAL)
 		// BEGIN-USER CODE
 		{
+		    // Calculate Core-specified BW
+		    int A_bitlen=pins->query_bitlen(0);
+		    int A_mbit=pins->query_majorbit(0);
+		    int B_bitlen=pins->query_bitlen(1);
+		    int B_mbit=pins->query_majorbit(1);
+		    int S_bitlen=A_bitlen+B_bitlen;
+		    int requested_s_bitlen=pins->query_bitlen(2);
+
+		    // Build preamble
 		    output_filename << ends;
 
 		    ostrstream poutput_filename;
-		    poutput_filename << dest_dir << tolowercase(output_filename.str()) << ends;
+		    ostrstream core_filename;
+		    
+		    if (S_bitlen!=requested_s_bitlen)
+		    {
+			Pin* new_pins=NULL;
+			ostrstream core_entity, patch_filename;
+			new_pins=dup_pins();
+
+			// Establish the correct output size of the coregen
+			int S_mbit=pins->query_majorbit(2);
+			new_pins->set_precision(2,S_mbit,S_bitlen,LOCKED);
+
+			VHDL_LANG* lang=new VHDL_LANG;
+
+			// Parent build instructions
+			core_entity << output_filename.str() << ends;
+			patch_filename << dest_dir << core_entity.str() << ".vhd" << ends;
+			ofstream patch_fstr(patch_filename.str());
+			
+			// Child build instructions
+			ostrstream child_entity;
+			ostrstream child_filename;
+			child_entity << "acspatch" << tolowercase(core_entity.str()) << ends;
+			child_filename << tolowercase(child_entity.str()) << ".vhd" << ends;
+			child_filenames->add(tolowercase(child_filename.str()));
+
+			// Build instructions
+			patch_fstr << "library IEEE;" << endl;
+			patch_fstr << "use IEEE.std_logic_1164.all;" << endl << endl;
+			patch_fstr << lang->gen_entity(output_filename.str(),pins) << endl;
+			patch_fstr << lang->gen_architecture(name(),
+							     NULL,
+							     STRUCTURAL,
+							     pins,
+							     data_signals,
+							     ctrl_signals,
+							     constant_signals);
+			patch_fstr << lang->start_component(child_entity.str());
+			patch_fstr << lang->start_port() << endl;
+			patch_fstr << lang->set_port(new_pins) << endl;
+			patch_fstr << lang->end_port() << endl;
+			patch_fstr << lang->end_component() << endl;
+
+			patch_fstr << lang->signal("out_prod",STD_LOGIC,S_bitlen);
+
+			patch_fstr << lang->begin_scope << endl;
+
+			if (requested_s_bitlen > S_bitlen)
+			    printf("ERROR::ACSMpyCGFPGA:Unexpected wordgui expectations on this core;)\n");
+			else
+			{
+			    // NOTE: Core multiplier has an implicit fractional shift, adjusting at the output
+			    //       If either majorbit is negative then a shift of 2 is needed otherwise 1
+			    int bit_mod1=2;
+			    int bit_mod2=1;
+			    if ((A_mbit<0) || (B_mbit<0))
+			    {
+				bit_mod1=3;
+				bit_mod2=2;
+			    }
+
+			    if (bitslice_strategy==PRESERVE_MSB)
+			    {
+				patch_fstr << "prod" << lang->equals();
+				patch_fstr << lang->slice("out_prod",S_bitlen-bit_mod1+1,
+							  S_bitlen-requested_s_bitlen-bit_mod2+1);
+				patch_fstr << lang->end_statement << endl;
+			    }
+			    else
+			    {
+				patch_fstr << lang->slice("prod",S_bitlen-bit_mod2,
+							  S_bitlen-requested_s_bitlen-bit_mod1) << lang->equals();
+				patch_fstr << lang->slice("out_prod",requested_s_bitlen-bit_mod2,0);
+				patch_fstr << lang->end_statement << endl;
+				patch_fstr << lang->slice("prod",0,0) << lang->equals() << "GND";
+				patch_fstr << lang->end_statement << endl;
+			    }
+			}
+
+			patch_fstr << "U_" << child_entity.str() << ":" 
+			           << child_entity.str() << " port map(" << endl;
+			patch_fstr << "a=>a," << endl;
+			patch_fstr << "b=>b," << endl;
+			
+			patch_fstr << "prod=>out_prod," << endl;
+			patch_fstr << "c=>c," << endl
+			           << "ce=>ce);" << endl;
+			patch_fstr << lang->end_architecture(STRUCTURAL) << endl;
+			patch_fstr.close();
+
+			poutput_filename << dest_dir << tolowercase(child_filename.str()) << ends;
+			core_filename << child_entity.str() << ends;
+
+			// Cleanup
+			delete lang;
+		    }
+		    else
+		    {
+			// Synthesis should ignore this
+			black_box=1;
+
+			poutput_filename << dest_dir << output_filename.str() << ends;
+			core_filename << tolowercase(output_filename.str()) << ends;
+		    }
+			
 		    ofstream out_fstr(poutput_filename.str());
 
-		    // Build instructions
-		    black_box=1;
 
 		    out_fstr << "SET SelectedProducts = ImpNetlist VHDLSym VHDLSim" 
 			     << endl;
@@ -338,7 +447,7 @@ It outputs lines of comments, instead of code.
 		    out_fstr << "GSET B_Width = " 
 			     << pins->query_bitlen(1) << endl;
 		    out_fstr << "GSET Component_Name = " 
-			     << tolowercase(output_filename.str()) 
+			     << tolowercase(core_filename.str()) 
 			     << endl;
 		    out_fstr << "GENERATE" << endl;
 		    out_fstr.close();

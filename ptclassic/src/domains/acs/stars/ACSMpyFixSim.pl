@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Mpy } 
     desc { Output the product of the inputs, as a floating-point value. }
-    version { $Id$}
+    version { @(#)ACSMpyFixSim.pl	1.5 09/08/99}
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.
@@ -111,5 +111,5 @@ rather than modified by wordlength analysis in the FPGA domain }
 		  checkOverflow(product);  // representation has 0 integer bits
 		}
 	        corona.output%0 << product;
-	}
+	    }
 }

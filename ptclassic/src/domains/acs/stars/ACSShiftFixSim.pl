@@ -4,7 +4,7 @@ defcore {
     coreCategory { FixSim }
     corona { Shift } 
     desc { This is a shifter; the output is shifted down or up by dividing (negative shift) or multiplying (positive shift) (default 0). }
-    version { $Id$}
+    version { @(#)ACSShiftFixSim.pl	1.3 09/08/99}
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company
