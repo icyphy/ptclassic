@@ -307,27 +307,35 @@ body ::tycho::ClassModel::constructor {args} {
             -source "" \
             -protection "public" \
             -modifiers "" \
-            -exceptions ""
+            -exceptions "" \
+	    -inherits {} \
+	    -implements {} \
+	    -description "" \
+	    -explanation ""
 
-    # Define the "annotation" entity
-    type define annotation \
-            :leafonly 1
-
-    # Define the "parent" entity
-    type define parent \
-            -inheritance "implementation"
+    # Define the "argument" entity
+    type define argument \
+	    -type "" \
+	    -optional 0 \
+	    -default "" \
+	    -description "" \
+	    -explanation ""
 
     # Define the "constructor" entity
     type define constructor \
 	    -protection public \
 	    -modifiers "" \
-            -exceptions ""
+            -exceptions "" \
+	    -description "" \
+	    -explanation ""
 
     # Define the "destructor" entity
     type define destructor \
 	    -protection public \
 	    -modifiers "" \
-            -exceptions ""
+            -exceptions "" \
+	    -description "" \
+	    -explanation ""
 
     # Define the "method" entity
     type define method \
@@ -335,7 +343,9 @@ body ::tycho::ClassModel::constructor {args} {
 	    -modifiers "" \
 	    -type "" \
 	    -scope instance \
-            -exceptions ""
+            -exceptions "" \
+	    -description "" \
+	    -explanation ""
 
     # Define the "variable" entity
     type define variable \
@@ -343,13 +353,9 @@ body ::tycho::ClassModel::constructor {args} {
 	    -modifiers "" \
 	    -type "" \
 	    -scope instance \
-            -default "" \
-
-    # Define the "argument" entity
-    type define argument \
-	    -type "" \
-	    -optional 0 \
-	    -default ""
+            -default "" \ \
+	    -description "" \
+	    -explanation ""
 }
 
 
