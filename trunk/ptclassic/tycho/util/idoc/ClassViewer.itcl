@@ -129,10 +129,10 @@ class ::tycho::ClassViewer {
     itk_option define -bodyfont bodyFont Font [::tycho::font Hevetica 12 Bold]
     
     # The height of the entire compound widget.
-    itk_option define -height height Height "20 c"
+    itk_option define -height height Height "15 c"
     
     # The width of the entire compound widget.
-    itk_option define -width width Width "30 c"
+    itk_option define -width width Width "20 c"
 
     # The relative width of the contents widget compared to the entire window.
     itk_option define -relwidth relWidth RelWidth 0.22
@@ -636,7 +636,6 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
     _deleteClasses 0
 
     set parents [$classModel parents -inheritance implementation]
-    puts "parents = $parents"
 
     while {[llength $parents] != 0} {
         set parent [lindex $parents 0]
@@ -649,8 +648,6 @@ body ::tycho::ClassViewer::inheritAll {{redisplay 1}} {
         
         # Create a new class model if the parent can be found.
         set parentFile [docFile $parent]
-        puts "parentFile = "$parentFile"
-
         if {$parentFile != {}} {
             # NOTE: parents which aren't loaded aren't part of _heritage
             lappend _heritage $parent
@@ -1229,7 +1226,7 @@ body ::tycho::ClassViewer::_newRelHeight {pixels} {
 # -data option.
 #
 body ::tycho::ClassViewer::_resetHtml {{top 1}} {
-    puts "::tycho::ClassViewer::_resetHtml $top"
+    # puts "::tycho::ClassViewer::_resetHtml $top"
     switch $top {
         "0" {$itk_component(html2) insertData $myBottomData}
         "1" {$itk_component(html1) insertData $myTopData}
