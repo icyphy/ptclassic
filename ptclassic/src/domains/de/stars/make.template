@@ -76,6 +76,7 @@ DEUDCounter.pl \
 DEUnPacketize.pl \
 DEVarDelay.pl \
 DEVarServer.pl \
+DEVirtClock.pl \
 DEXMgraph.pl \
 DEXgraph.pl \
 DEXhistogram.pl
