@@ -4,7 +4,7 @@ static const char file_id[] = "CGWormhole.cc";
 Version identification:
  $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -39,6 +39,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGWormhole.h"
 #include "CGPortHole.h"
+#include "GalIter.h"
+#include "Error.h"
+#include "Scheduler.h"
+
+/*******************************************************************
+
+	class CGWormhole methods
+
+********************************************************************/
+// Constructor
+CGWormhole :: CGWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
+	{ buildEventHorizons(); }
+
+CGWormhole :: ~CGWormhole() { freeContents(); }
+
+// cloner -- clone the inside and make a new wormhole from that.
+Block* CGWormhole :: clone() const {
+	LOG_NEW; return new CGWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
+}
 
 /**************************************************************************
 
