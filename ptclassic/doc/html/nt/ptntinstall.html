@@ -19,7 +19,10 @@ and
 <A HREF="ftp://ftp.cygnus.com/pub/gnu-win32/latest/cdk.exe/"><CODE>cdk.exe</CODE></A>(13.7Mb)
 
 <LI> Install Cygnus GNU-win32 by mousing on the <CODE>cdk.exe</CODE>
-icon.  Be sure to update your path and the other variables mentioned
+icon.  It is best if you install Cygnus GNU-win32 in a directory that
+does not have spaces in the pathname.  Usually GNU-win32 is installed
+in the top level, so it ends up in <CODE>c:/Cygnus</CODE>.
+Be sure to update your path and the other variables mentioned
 in the Cygnus <CODE>README.txt</CODE>.
 
 
@@ -37,6 +40,9 @@ you should also do:
 cp /Cygnus/B19/H-i386-cygwin32/bin/rm.exe /bin
 </pre>
 
+<li> Copy the file gcc.exe from <CODE>Cygnus/B19/H-i386-cygwin-32/bin</CODE>
+to <CODE>/bin</CODE> and rename it to <CODE>cc.exe</CODE>. Otherwise
+you will get problems while trying to compile xv.
 
 <li> Create <CODE>/etc/passwd</CODE> and <CODE>/etc/group</CODE>
 by running 
@@ -134,6 +140,15 @@ rm -rf $PTOLEMY/obj.nt4/tcltk $PTOLEMY/obj.nt4/octtools
 <CODE>Control Panels</CODE>, then <CODE>System</CODE>, then select the
 <CODE>Environment</CODE> tab
 
+ <br> The values of <CODE>PTOLEMY</CODE> and <CODE>PTARCH</CODE> should
+follow these conventions:
+	<menu>
+	<li> The value should not contain a colon '<CODE>:</CODE>'.
+	 <brp>For example, <CODE>D:/users/ptolemy</CODE> is incorrect.
+	<li> Do not use multiple slashes.  
+	 <br>For example, <CODE>//D/users/ptolemy</CODE> is incorrect.
+	</menu>
+The values to set are:
 <pre>
 PTARCH nt4
 PTOLEMY /users/ptolemy
@@ -141,7 +156,7 @@ CC gcc
 </pre>
 Set your <CODE>PATH</CODE> to include
 <pre>
-$PTOLEMY/bin:$PTOLEMY/bin.nt4
+%PTOLEMY%/bin:%PTOLEMY%/bin.nt4
 </pre>
 
 
@@ -184,6 +199,35 @@ unset LIB
 environment variable to <CODE>gcc</CODE>.  If you don't then
 you will get errors while configuring Itcl.
 
+
+<li> Edit the file <CODE>$PTOLEMY/tycho/util/tydoc/tydoc.tcl</CODE>,
+inserting in line 92 the following:
+<pre>
+ set retval ""
+</pre>
+so that it will look like this:
+<pre>
+    set generateIndex 1
+    set errorInfo ""
+    set retval ""
+    if [catch {set retval [::tycho::HTMLDocSys::generateHTML $verbose $debug \
+</pre>
+
+
+<li>  Download and ungzip
+<a href="http://ptolemy.eecs.berkeley.edu/pt0.7.1/ptolemy0.7.1/html/reimer0898/pt0.7.1p1.ptclInvokeInterp.patch.gz"><CODE>pt0.7.1p1.ptclInvokeInterp.patch.gz</CODE></a>
+      Type:
+<pre>
+ cd $PTOLEMY
+ patch -p1 &lt; pt0.7.1p1.ptclInvokeInterp.patch
+
+</pre>
+       If the message occurs that hunk#4 failed, then do:
+<pre>
+cd $PTOLEMY/src/ptcl
+make depend
+</pre>
+
 <li> To do the actual build, do
 <pre>
 cd $PTOLEMY
@@ -220,6 +264,9 @@ Also, my
 <a href="http://ptolemy.eecs.berkeley.edu/~cxh/nt-ptolemy.html">NT and Ptolemy</a> page might be of use.
 </ol>
 
+<HR>
+Some of the notes above are from Saschas Schwarz, 
+&lt;saschas@natasha.auslabs.lucent.com&gt;.
 <HR>
 <A HREF="index.html">Up to the Ptolemy under NT page</A> -
 <A HREF="ptntbugs.html">Back to Ptolemy NT Bugs</A>
