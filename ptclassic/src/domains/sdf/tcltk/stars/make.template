@@ -30,7 +30,8 @@ STARDOCDIR = ../../doc/stars
 # source files for all stars, using preprocessor
 PL_SRCS= \
  SDFTclScript.pl \
- SDFTkMeter.pl
+ SDFTkMeter.pl \
+ SDFTkShowValues.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
