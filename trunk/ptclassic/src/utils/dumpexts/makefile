@@ -62,7 +62,7 @@ OBJS =		$(LIB_CSRCS:.c=.o)
 $(DUMPEXTSBIN): $(SRCS)
 	$(cc32) $(CON_CFLAGS) -Fo$(TMPDIR)\ $?
 	set LIB=$(TOOLS32)\lib
-	$(link32) $(linkdebug) $(conlflags) -out:$@ $(TMPDIR)\winDumpExts.o $(guilibs)
+	$(link32) $(linkdebug) $(conlflags) -out:$@ $(TMPDIR)\winDumpExts.o $(guilibs) libc.lib
 
 install: $(BINDIR)/$(DUMPEXTSBIN)
 $(BINDIR)/$(DUMPEXTSBIN): $(DUMPEXTSBIN)
