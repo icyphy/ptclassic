@@ -262,7 +262,7 @@ body ::tycho::FileBrowser::constructor {args} {
     # most recent directory is used anyway.
     if { ! [::tycho::preference get dialogs fileBrowserUseLastDirectory] } {
 	if {$itk_option(-initial) != {} && \
-		[file pathtype $itk_option(-initial)] == "absolute" } {
+		[::tycho::url pathtype $itk_option(-initial)] == "absolute" } {
             changeDir $itk_option(-initial)
         }
     }
@@ -283,19 +283,20 @@ body ::tycho::FileBrowser::constructor {args} {
 # successful, or 0 if failure.
 #
 body ::tycho::FileBrowser::changeDir {directory} {
-    if { ! [file isdirectory $directory] } {
-        set directory [file dirname $directory]
+    if { ! [::tycho::resource isdirectory $directory] } {
+        set directory [::tycho::url dirname $directory]
     }
-    set directory [::tycho::expandPath $directory]
+    set directory [::tycho::url expand $directory]
 
-    if { ! [file exists $directory] } {
+    if { ! [::tycho::resource exists $directory] } {
         safeEval ::tycho::warn \
                 "\"[string trimright $directory /]\" does not exist"
         return 0
     }
-    if { ! [file readable $directory] || ! [file executable $directory]} {
+    if { ! [::tycho::resource readable $directory] \
+	    || ! [::tycho::resource executable $directory]} {
         safeEval ::tycho::warn \
-                "Directory \"[string trimright $file /]\" is unreadable"
+                "Directory \"[string trimright $directory /]\" is unreadable"
         return 0
     }
     set CWD $directory
@@ -344,7 +345,7 @@ body ::tycho::FileBrowser::complete {} {
     set pattern "[get entry]"
 
     # check if the file/directory is in the current ListBrowser
-    if {[file dirname "$pattern"] == "."} {
+    if {[::tycho::url dirname "$pattern"] == "."} {
         set listReturn [::tycho::ListBrowser::complete]
         # check if completion had already been done and only 1 found
         if {$pattern == $lastCompletion && $listReturn == 1} {
@@ -365,19 +366,20 @@ body ::tycho::FileBrowser::complete {} {
         if {[string index $pattern \
                 [expr [string length $pattern] - 1]] == $directorySeparator} {
             # it's a complete directory
-            processItem [file join $localCWD $pattern]
+            processItem [::tycho::url join $localCWD $pattern]
             setEntry {}
             return 1
         } else {
             # it's a directory/something
-            processItem [file join $localCWD [file dirname $pattern]]
-            setEntry [file tail $pattern]
+            processItem [::tycho::url join $localCWD \
+		    [::tycho::url dirname $pattern]]
+            setEntry [::tycho::url tail $pattern]
             return [complete]
         }
     }
 
-    set dir [file dirname $pattern]
-    set pattern [file tail $pattern]*
+    set dir [::tycho::url dirname $pattern]
+    set pattern [::tycho::url tail $pattern]*
     
     # NOTE: don't tolower dirname, assume it's in proper case
     # otherwise, can't complete beyond upper case directories
@@ -386,20 +388,16 @@ body ::tycho::FileBrowser::complete {} {
         set pattern [string tolower "$pattern"]
     }
 
-    # get the length of the directory _name_ (i.e. /export/rice/rice1/...)
-    set dirlen [string length [glob -nocomplain [file join $localCWD $dir]]]
-    set dirlen [expr $dirlen + 1]
-    
     set matches {}
-    
-    set files [glob -nocomplain [file join $localCWD $dir *]]
+    set files [::tycho::resource dirlist [::tycho::url join $localCWD $dir]]
+
     # add parent directory if it exists
-    if {[::tycho::expandPath [file join $localCWD $dir]] != \
-            [::tycho::rootDir $localCWD]} {
-        lappend files "[file join $localCWD $dir $directoryParent]"
+    # FIXME: probably won't work with URL's on Mac
+    if {[::tycho::url expand $dir] != [::tycho::rootDir $localCWD]} {
+        lappend files $directoryParent
     }
+    # Build list of matching files
     foreach name "$files" {
-        set name [string range $name $dirlen end]
         if $case {
             set nm $name
         } else {
@@ -418,13 +416,15 @@ body ::tycho::FileBrowser::complete {} {
         1 {
             # found exactly one match, replace entry contents
             set temp [lindex $matches 0]
-            if [file isdir [file join $localCWD $dir $temp]] {
+            if [::tycho::resource isdirectory \
+		    [::tycho::url join $localCWD $dir $temp]] {
                 # it's a directory
-                set lastCompletion [file join $dir $temp]$directorySeparator
+                set lastCompletion \
+			[::tycho::url join $dir $temp]$directorySeparator
                 setEntry $lastCompletion
             } else {
                 # just a file
-                set lastCompletion [file join $dir $temp]
+                set lastCompletion [::tycho::url join $dir $temp]
                 setEntry $lastCompletion
             }
             return 1
@@ -438,9 +438,10 @@ body ::tycho::FileBrowser::complete {} {
 
             set compMatch [lsubstring $matches]
             if {$compMatch != {}} {
-                set lastCompletion [file join $dir $compMatch]
+                set lastCompletion [::tycho::url join $dir $compMatch]
             } else {
-                set lastCompletion [file join $dir [string trimright $pattern *]]
+                set lastCompletion [::tycho::url join $dir \
+			[string trimright $pattern *]]
             }
             setEntry $lastCompletion
             return 2
@@ -455,7 +456,7 @@ body ::tycho::FileBrowser::complete {} {
 body ::tycho::FileBrowser::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO kernel doc usersGuides FileBrowserHelp.html]
+	    [::tycho::url join $TYCHO kernel doc usersGuides FileBrowserHelp.html]
 }
 
 ######################################################################
@@ -492,26 +493,27 @@ body ::tycho::FileBrowser::mkdir {} {
 body ::tycho::FileBrowser::processItem {filename} {
     global tcl_platform
     if {$filename == ""} {return 0}
-   
+
     # If the name is relative, prepend with current path.
-    if [::tycho::isRelative $filename] {
-	set file [file join $localCWD $filename]
+    if { [::tycho::url pathtype $filename] == "relative"} {
+	set file [::tycho::url join $localCWD $filename]
     } {
 	set file $filename
     }
     # Expand to absolute path.
-    set file [::tycho::expandPath $file]
+    set file [::tycho::url expand $file]
 
     # If expansion failed, trigger an error
-    if [::tycho::isRelative $file] {
+    if { [::tycho::url pathtype $file] == "relative" } {
 	error "Cannot expand $filename"
     }
     # If the file does not exist, check to see whether the
     # directory exists.  If it does, execute the command given by -command
     # (which will probably create the file).  Otherwise, trigger an error.
-    if {! [file exist $file]} {
-	set dir [file dirname $file]
-	if {[file exist $dir] && [file isdir $dir]} {
+    if {! [::tycho::resource exists $file]} {
+	set dir [::tycho::url dirname $file]
+	if {[::tycho::resource exists $dir] \
+		&& [::tycho::resource isdirectory $dir]} {
 	    execCommand -command $file
 	    return 1
 	} {
@@ -521,13 +523,13 @@ body ::tycho::FileBrowser::processItem {filename} {
     } 
 
     # If the file does exist, and is a directory
-    if {[file isdir $file] \
+    if {[::tycho::resource isdirectory $file] \
             && [::tycho::File::registeredCommands $file] == {}} {
         changeDir $file
         return 0
     } else {
 	# It's a plain file or a directory with a registered editor
-	if {[file readable $file]} {
+	if {[::tycho::resource readable $file]} {
 	    execCommand -command $file
 	    return 1
 	} {
@@ -549,17 +551,24 @@ body ::tycho::FileBrowser::updateListbox {} {
     clearListbox
     
     # Get a list of filenames in the current working directory
-    set files [glob -nocomplain [file join $localCWD *]]
+    set files [::tycho::resource dirlist $localCWD]
     
     # Split the filename list into directories and plain files
     set dirList ""
     set fileList ""
     foreach file $files {
-	set tail [file tail $file]
-	if [file isdirectory $file] {
-	    lappend dirList $tail
-	} {
-	    lappend fileList $tail
+	set oldcode {
+	    set tail [::tycho::url tail $file]
+	    if [::tycho::resource isdirectory $file] {
+		lappend dirList $tail
+	    } {
+		lappend fileList $tail
+	    }
+	}
+	if [regexp {/$} $file] {
+	    lappend dirList $file
+	} else {
+	    lappend fileList $file
 	}
     }
     set dirList [lsort $dirList]
@@ -568,7 +577,7 @@ body ::tycho::FileBrowser::updateListbox {} {
     # Insert directories into the listbox
     # Note that Tcl seems to understand trailing / reasonably well.
     # See the Tcl filename man page for details
-    appendItems $dirList $directorySeparatorTrailer
+    appendItems $dirList ;# $directorySeparatorTrailer
 
     # Insert the files into the listbox
     appendItems $fileList
@@ -594,3 +603,10 @@ body ::tycho::FileBrowser::updateListbox {} {
 	}
     }
 }
+
+
+
+
+
+
+
