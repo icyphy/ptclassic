@@ -51,7 +51,7 @@ EXTRA_SRCS = \
 	layout.style \
 	stacktrace.style \
 	system.style \
-	textcolors.style
+	text.style
 
 # Files or directories that are present, but that 'make checkjunk' 
 # should not complain about
