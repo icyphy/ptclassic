@@ -13,6 +13,10 @@ This file contains definitions of DDF-specific PortHole classes.
 ******************************************************************/
 #ifndef _DDFConnect_h
 #define _DDFConnect_h 1
+#ifdef __GNUG__
+#pragma once
+#pragma interface
+#endif
 #include "Connect.h"
 
         //////////////////////////////////////////

@@ -1,3 +1,7 @@
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Block.h"
 #include "DDFConnect.h"
 #include "Particle.h"

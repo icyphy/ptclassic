@@ -10,6 +10,10 @@ $Id$
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "DDFStar.h"
 #include "Scheduler.h"
 
