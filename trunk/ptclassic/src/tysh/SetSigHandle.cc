@@ -72,6 +72,7 @@ setSignalHandlers(void)
 	    returnValue = 4;
     }
 
+    printf("returnValue = %i", returnValue);
     return returnValue;
 
 }
@@ -140,41 +141,4 @@ setCoreLimitRelease(void)
 }
 
 /****************************************************************************/
-
-void
-setSignalError(void)
-{
-
-    pid_t childPID;
-    int garbage;
-    char *ptolemy, *arch, path[50], file[50];
-
-    ptolemy = getenv("PTOLEMY");
-    arch = getenv("ARCH");
-    path[0] = '\0';
-    file[0] = '\0';
-    strcat(path, ptolemy);
-    strcat(path, "/tcltk/tk.");
-    strcat(path, arch);
-    strcat(path, "/bin/wish");
-    strcat(file, ptolemy);
-    strcat(file, "/tycho/kernel/TyHandleError.tcl");
-
-    switch(childPID = fork()) 
-    {
-        case -1: /* fork() return value for error. */
-                 /* Do nothing if error occurs,    */
-                 /* since we cannot warn user.     */
-      
-	case 0: /* fork() return value for child. */
-	    sleep(2); /* Allow core file to be generated. */    
-	    execle(path, "wish", "-f", file, (char *)0, environ); 
-
-	default:
-	    waitpid(childPID, &garbage, 1);
-
-    }
-
-}
-
 
