@@ -56,6 +56,9 @@ public:
     // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
     /*virtual*/ CommPair fromCGC(PortHole&);
     /*virtual*/ CommPair toCGC(PortHole&);
+
+    /*virtual*/ AsynchCommPair createPeekPoke(CGTarget& peekTarget,
+					      CGTarget& pokeTarget);
     
 protected:
     /*virtual*/ void headerCode();
