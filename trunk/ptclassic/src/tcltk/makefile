@@ -214,12 +214,9 @@ fixlinks:
 		ln -s itcl$(ITCL_MAJOR_VERSION_NUMBER) itcl; \
 		ln -s itk$(ITCL_MAJOR_VERSION_NUMBER) itk; \
 		ln -s iwidgets$(IWIDGETS_MAJOR_VERSION_NUMBER) iwidgets )
-	#@echo "Create links for the itcl2.1 lib files in the directory"
-	#@echo " where itcl2.0 lib files were"
-	#-(cd $(ITCL_DEST)/lib; ln -s itcl/* .)
 	@echo "Create links for systems that require shared lib versioning"
 	@echo " such as sun4 and freebsd"
-	-(cd $(ITCL_DEST)/lib/itcl; \
+	-(cd $(ITCL_DEST)/lib; \
 		if [ -f $(ITCL_DEST)/lib/itcl/libtcl$(TCL_VERSION_NUM).so.1.0 ]; then \
 			echo "Hack for sun4 versioned shared libs"; \
 			LIBVERSION=.1.0; \
