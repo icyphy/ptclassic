@@ -19,4 +19,7 @@ extern char *sprintf();
 
 /* buffer length constants */
 #define MSG_BUF_MAX 512 /* for messages */
+
+#ifndef FILENAME_MAX
 #define FILENAME_MAX 512 /* for filename paths */
+#endif
