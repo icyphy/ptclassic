@@ -34,21 +34,22 @@ BINDIR = $(ROOT)/bin.$(PTARCH)
 CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-all:	ptlang
+BINARY = ptlang$(BINARY_EXT)
+all:	$(BINARY)
 
 ifneq (,$(filter hppa%,$(PTARCH)))
 # We ship a ptlang.c that was created under Solaris2.4
 # Unfortunately, the solaris2.4 ptlang.c will not compile
 # under hppa or hppa.cfront (alloca problems), so we
 # recreate ptlang.c by hand here.
-ptlang:	ptlang.y
-	cd $(VPATH); $(YACC) ptlang.y; mv y.tab.c ptlang.c
-	rm -f ptlang
-	$(CC) $(VPATH)/ptlang.c -o ptlang $(PTLANGLIB)
+$(BINARY):	ptlang.y
+	cd $(VPATH); $(YACC) $^; mv y.tab.c ptlang.c
+	rm -f $@
+	$(CC) $(VPATH)/ptlang.c -o $@ $(PTLANGLIB)
 else
-ptlang:	ptlang.o
-	rm -f ptlang
-	$(CC) ptlang.o -o ptlang $(PTLANGLIB)
+$(BINARY):	ptlang.o
+	rm -f $@
+	$(CC) $^ -o $(BINARY) $(PTLANGLIB)
 endif
 
 ptlang.o:	ptlang.c
@@ -66,10 +67,10 @@ $(VPATH)/ptlang.debug.c:	ptlang.y
 		cd $(VPATH); bison -y -t ptlang.y; mv y.tab.c ptlang.debug.c
 
 
-install:	$(BINDIR)/ptlang
+install:	$(BINDIR)/ptlang$(BINARY_EXT)
 
-$(BINDIR)/ptlang:	ptlang
-		rm -f $(BINDIR)/ptlang; ln ptlang $(BINDIR)
+$(BINDIR)/ptlang$(BINARY_EXT):	$(BINARY)
+		rm -f $@; ln $^ $@
 
 sources:	ptlang.y
 
