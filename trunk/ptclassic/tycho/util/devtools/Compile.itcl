@@ -265,7 +265,7 @@ body ::tycho::Compile::compileFiles {{args {}}} {
         }
 
         set monitorWidget \
-                [::tycho::Monitor [::tycho::autoName .monitor] \
+                [::tycho::view Monitor -toolbar 1 \
                 -autostart $option(-autostart) \
                 -autodestroy $option(-autodestroy) \
                 -command $compileString -dir $dirname]
@@ -292,7 +292,7 @@ body ::tycho::Compile::compileFiles {{args {}}} {
    } else {
         #set retList [::tycho::execModal {} {} $monitorWidget]
         $monitorWidget raiseWindow
-        $monitorWidget execProcessInMonitor
+        $monitorWidget execProcess
         $monitorWidget getStatusWait
     }
 
