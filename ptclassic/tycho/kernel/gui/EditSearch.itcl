@@ -355,6 +355,7 @@ body ::tycho::EditSearch::find {{start {}}} {
 	}
     } {
         # Found a match.  Select it.
+        set text [$tw textWinName]
 
         # The behaviour of the selection tag changed in Tk 8.
         # The changes file says:
@@ -372,8 +373,9 @@ body ::tycho::EditSearch::find {{start {}}} {
             $text see $firstind
             $text tag add currmatch $firstind "$firstind + $numchars chars"
             $text mark set insert $firstind
-	    $text tag configure currmatch -background systemHighlight
-	    $text tag configure currmatch -foreground systemHighlightText
+	    $text tag configure currmatch \
+                    -background [stylesheet get text selectBackground] \
+                    -foreground [stylesheet get text selectForeground]
         }
         # Mark the rest of the matches.
         $tw findAll findmatch $casesw $regexpsw $wordsw $pattern 1.0 end {}
@@ -383,7 +385,6 @@ body ::tycho::EditSearch::find {{start {}}} {
 
         $text tag raise sel findmatch
         $text tag configure findmatch \
-                -background [stylesheet get text search.background]
-        $text tag configure findmatch \
+                -background [stylesheet get text search.background] \
                 -foreground [stylesheet get text search.foreground]    }
     }
