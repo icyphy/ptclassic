@@ -10,6 +10,13 @@ If the 'past' input is not a GrayImage or has size 0, pass the 'diff'
 directly to the 'output'. Otherwise, add the 'past' to the
 'diff' (with leak factor 'alpha') and send the result to 'output'.
 	}
+	explanation {
+.Id "image decompression"
+.Id "image DPCM, inverse"
+.Id "DPCM, inverse"
+.Id "inverse DPCM"
+.Id "decompression, image"
+	}
 	seealso { Dpcm }
 
 	hinclude { "GrayImage.h", "Error.h" }
