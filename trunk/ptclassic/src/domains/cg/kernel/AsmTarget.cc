@@ -117,6 +117,11 @@ AsmTarget::allocReq(AsmStar& star) {
 	AsmPortHole* p;
 	while ((p = nextPort++) != 0) {
 		if (p->isItOutput() && p->far()->isItInput()) continue;
+		if ((p->bufSize() > star.reps()*p->numXfer()) && 
+		    !(p->attributes() & PB_CIRC)) {
+			Error::abortRun(*p, "Dynamic addressing required for the buffer size returned by scheduler.  This is not supported yet."); 
+			return FALSE;
+		}
 		if (!mem->allocReq(*p)) {
 			Error::abortRun(*p,
 			  "memory allocation failed for porthole buffer:",
