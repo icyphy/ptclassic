@@ -79,9 +79,8 @@ char* expandPathName(const char* name) {
 
 	    // next token might be user name or /.
 	    lexer >> tokbuf;
-	    passwd* pwd;
 	    if (tokbuf[0] == '/') {
-		pwd = getpwuid(getuid());
+		passwd* pwd = getpwuid(getuid());
 		if (pwd == 0) {
 		    Error::abortRun ("getpwuid doesn't know you!");
 		    exit (1);
@@ -89,7 +88,7 @@ char* expandPathName(const char* name) {
 		expandedPath << pwd->pw_dir << '/';
 	    }
 	    else {
-		pwd = getpwnam(tokbuf);
+		passwd* pwd = getpwnam(tokbuf);
 		if (pwd == 0)
 		    expandedPath << tokbuf;
 		else
@@ -104,7 +103,7 @@ char* expandPathName(const char* name) {
 	  case '$' : {
 	    // next token might be an environment variable
 	    lexer >> tokbuf;
-	    const char* value = getenv (tokbuf);
+	    const char* value = getenv(tokbuf);
 	    if (!value)
 		expandedPath << '$' << tokbuf;
 	    else
