@@ -141,19 +141,32 @@ const GenericPort& GenericPort :: realPort() const {
 // inheritTypeFrom maintains a circular list of typePortPtr pointers.
 // only this function and the destructor alters typePortPtr.
 void GenericPort :: inheritTypeFrom(GenericPort& p) {
-	typePortPtr = &p;
-// case 1: no pre-existing circle.  Make one and return.
-	if (!p.typePortPtr) {
-		p.typePortPtr = this;
-		return;
-	}
-// case 2: a pre-existing circle.  Search for the link back to p
-// and make it point to me instead.
-	GenericPort* q = p.typePortPtr;
-	while (q->typePortPtr != &p)
-		q = q->typePortPtr;
-	q->typePortPtr = this;
-	return;
+
+  // If a typePortPtr already exists, we need to first remove
+  // this porthole from the circle containing it.
+  GenericPort *q;
+  if (q = typePortPtr) {
+    while (q->typePortPtr != this)
+      q = q->typePortPtr;
+    q->typePortPtr = typePortPtr;
+  }
+
+  // Set my pointer
+  typePortPtr = &p;
+
+  // Now check for a circle already containing the destination port p.
+  // Case 1: no pre-existing circle.  Make one and return.
+  if (!p.typePortPtr) {
+    p.typePortPtr = this;
+    return;
+  }
+  // case 2: a pre-existing circle.  Search for the link back to p
+  // and make it point to me instead.
+  q = p.typePortPtr;
+  while (q->typePortPtr != &p)
+    q = q->typePortPtr;
+  q->typePortPtr = this;
+  return;
 }
 
 // destructor: remove myself from the circle but preserve a smaller circle
