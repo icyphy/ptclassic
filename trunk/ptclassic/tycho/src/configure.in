@@ -38,7 +38,7 @@ AC_PROG_MAKE_SET
 #
 # User specified location of the Ptolemy Tree
 #
-AC_ARG_WITH(ptolemy, [  --with-ptolemy=DIR          use Tcl/Tk from DIR],
+AC_ARG_WITH(ptolemy, [  --with-ptolemy=DIR        use Tcl/Tk from DIR],
         _PTOLEMY=$withval, _PTOLEMY=$PTOLEMY)
 if test ! -d $_PTOLEMY; then
     AC_MSG_ERROR(Tcl directory $_PTOLEMY doesn't exist)
@@ -47,7 +47,7 @@ fi
 #
 # User specified location of the tcl include
 #
-AC_ARG_WITH(tclinclude, [  --with-tclinclude=DIR          use Tcl 7.6 includes from DIR],
+AC_ARG_WITH(tclinclude, [  --with-tclinclude=DIR     use Tcl 7.6 includes from DIR],
         TCL_INCLUDE_DIR=$withval, TCL_INCLUDE_DIR=$_PTOLEMY/tcltk/itcl/include/itcl)
 if test ! -d $TCL_INCLUDE_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_INCLUDE_DIR doesn't exist)
@@ -63,7 +63,7 @@ fi
 #
 # User specified location of the tcl lib
 #
-AC_ARG_WITH(tcllib, [  --with-tcllib=DIR          use Tcl 7.6 lib from DIR],
+AC_ARG_WITH(tcllib, [  --with-tcllib=DIR         use Tcl 7.6 lib from DIR],
         TCL_LIB_DIR=$withval, TCL_LIB_DIR=$_PTOLEMY/tcltk/itcl.$PTARCH/lib/itcl)
 if test ! -d $TCL_LIB_DIR; then
     AC_MSG_ERROR(Tcl directory $TCL_LIB_DIR doesn't exist)
@@ -101,7 +101,7 @@ TCL_LD_SEARCH_FLAGS=$TCL_LD_SEARCH_FLAGS
 # We must set this arg after sourcing tclConfig.sh, as Tcl7.6 tclConfig.sh
 # sets TCL_SRC_DIR.  However, if you are using the automounter, then 
 # tclConfig.sh will probably have the wrong value.
-AC_ARG_WITH(tclsrc, [  --with-tclsrc=DIR          use Tcl srcs lib from DIR],
+AC_ARG_WITH(tclsrc, [  --with-tclsrc=DIR         use Tcl srcs lib from DIR],
         TCL_SRC_DIR=$withval, TCL_SRC_DIR=$_PTOLEMY/src/tcltk/itcl2.2/tcl7.6)
 #if test ! -d $TCL_SRC_DIR; then
 #    AC_MSG_ERROR(Tcl directory $TCL_SRC_DIR doesn't exist)
@@ -116,7 +116,7 @@ fi
 #
 # User specified location of the tk include
 #
-AC_ARG_WITH(tkinclude, [  --with-tkinclude=DIR          use Tk 4.2 include from DIR],
+AC_ARG_WITH(tkinclude, [  --with-tkinclude=DIR      use Tk 4.2 include from DIR],
         TK_INCLUDE_DIR=$withval, TK_INCLUDE_DIR=$TCL_INCLUDE_DIR)
 if test ! -d $TK_INCLUDE_DIR; then
     AC_MSG_ERROR(Tk directory $TK_INCLUDE_DIR doesn't exist)
@@ -175,8 +175,10 @@ fi
 #
 # User specified location of the Java Development Kit (JDK)
 #
-AC_ARG_WITH(java, [  --with-java=DIR          use Java binaries from DIR],
-        JAVAHOME=$withval, JAVAHOME=`cd /opt/jdk1.1; pwd`)
+# If JAVA_HOME is set then we set JAVAHOME for our use in configuring
+#
+AC_ARG_WITH(java, [  --with-java=DIR           use Java binaries from DIR, defaults to the value of the JAVA_HOME environment variable],
+        JAVAHOME=$withval, JAVAHOME=$JAVA_HOME)
 
 #
 # If the user called configure with -without-java, then we don't
@@ -187,20 +189,39 @@ if test "$with_java" = "no"; then
 	TYJAVA=""
 else
 	TYJAVA=tyjava
-	if test ! -d $JAVAHOME; then
-	    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
+	if test ! -d "$JAVAHOME"; then
+           AC_MSG_WARN(["$JAVAHOME" is not a directory, so we search for the java compiler.])
+	    AC_PATH_PROG(JAVAC, javac)
+	    if test -x "$JAVAC"; then	
+		   JAVABIN=`dirname $JAVAC`
+		   JAVAHOME=`dirname $JAVABIN`
+	    else
+	           AC_MSG_WARN([Failed to find javac, perhaps Java is not installed?])
+	    fi
+	    if test ! -d "$JAVAHOME"; then
+		    AC_MSG_ERROR(Java directory $JAVAHOME doesn't exist)
+	    fi	
+	fi
+
+	AC_MSG_CHECKING([for the java compiler in $JAVAHOME/bin])
+	if test -f $JAVAHOME/bin/javac; then
+		AC_MSG_RESULT($JAVAHOME/bin/javac)
+		AC_MSG_CHECKING([that you have the right javac in your path.])
+	        AC_PATH_PROG(JAVAC, javac)
+		if test "$JAVAHOME/bin/javac" = "$JAVAC"; then
+			AC_MSG_RESULT(Everything is fine, $JAVAHOME/bin/javac == $JAVAC)
+		else
+			AC_MSG_WARN($JAVAHOME/bin/java is not the same as $JAVAC. Be sure that you don't have a mismatch in JDK versions. )
+			
+		fi
+	else
+		AC_MSG_ERROR(Cannot find $JAVAHOME/bin/javac, try --with-java=DIR, or set the JAVA_HOME environment variable.)
 	fi
 
 	if test ! -f $JAVAHOME/include/StubPreamble.h; then
-	    AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK), or use --without-java if you don't have Java. )
+	    AC_MSG_ERROR(There's no StubPreamble.h in $JAVAHOME/include;  use the --with-java= configure flag to specify the location of the Java Development Kit (JDK), or set the JAVA_HOME environment variable, or use --without-java if you don't have Java. )
 	fi
 
-	AC_MSG_CHECKING([for the java compiler])
-	if test -f $JAVAHOME/bin/javac; then
-		AC_MSG_RESULT($JAVAHOME/bin/javac)
-	else
-		AC_MSG_ERROR([Cannot find $JAVAHOME/bin/javac, try --with-java=DIR])
-	fi
 
 	case "`uname -s" in
 		HP-UX) TMP_JAVA_ARCH_INCLUDE=$JAVAHOME/include/osfport
@@ -213,7 +234,7 @@ else
 	#
 	# User specified Java architecture, used to find the jdk include files
 	#
-	AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR          use Java arch dependent includes from DIR],
+	AC_ARG_WITH(javaarchinclude, [  --with-javaarchinclude=DIR        use Java arch dependent includes from DIR],
 	        JAVA_ARCH_INCLUDE=$withval, JAVA_ARCH_INCLUDE="$TMP_JAVA_ARCH_INCLUDE")
 	if test ! -d $JAVA_ARCH_INCLUDE; then
 	    AC_MSG_ERROR(Java directory $JAVA_ARCH_INCLUDE doesn't exist)
@@ -277,4 +298,4 @@ AC_SUBST(TYJAVA)
 AC_OUTPUT(makefile tcl.mk:../mk/tcl.mk.in java.mk:../mk/java.mk.in \
 	profile/makefile \
 	tyjava/makefile tyjava/tcljava/makefile tyjava/eprintf/makefile \
-	tytimer/makefile tytest/makefile tycgc/makefile)
+	tytimer/makefile tytest/makefile tycgc/makefile tyjni/makefile)
