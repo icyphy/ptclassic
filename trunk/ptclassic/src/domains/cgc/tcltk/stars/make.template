@@ -26,12 +26,13 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR) -I$(CGCSTARDIR)
 # source files for all stars, using preprocessor
 PL_SRCS= \
  CGCLMSTkPlot.pl \
- CGCTkBarGraph.pl \
  CGCTclScript.pl \
+ CGCTkBarGraph.pl \
  CGCTkEntry.pl \
  CGCTkImpulse.pl \
  CGCTkSlider.pl \
- CGCTkSunSound.pl
+ CGCTkSunSound.pl \
+ CGCTkXYPlot.pl
 
 TCL_SRCS= \
  tkBall.tcl \
@@ -39,7 +40,8 @@ TCL_SRCS= \
  tkScript.tcl \
  tkBallAsync.tcl \
  tkKeypad.tcl \
- tkUniverse.tcl
+ tkUniverse.tcl \
+ tkXYPlot.tcl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
