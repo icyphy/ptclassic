@@ -75,6 +75,9 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 : Target(name,starclass,desc), defaultStream(&myCode), schedFileName(0), noSchedule(0),typeConversionTable(0),typeConversionTableRows(0)
   
 {
+	counter = 0;
+	spliceList.initialize();
+
 	separator = sep;
 	targetNestedSymbol.setSeparator(separator);
 	targetNestedSymbol.setCounter(symbolCounter());
@@ -122,8 +125,6 @@ CGTarget::CGTarget(const char* name,const char* starclass,
 
 	addStream(CODE, &myCode);
 	addStream(PROCEDURE, &procedures);
-	counter = 0;
-	spliceList.initialize();
 }
 
 // destructor
