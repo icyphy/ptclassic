@@ -40,6 +40,7 @@ static const char file_id[] = "miscImpl.cc";
 #endif
 
 #include <stdio.h>		// Pick up sprintf under sol2 Sun CC
+#include <unistd.h>		// getpid()
 #include "miscFuncs.h"
 #ifdef PT_NT4VC
 #include <process.h>		// Need getpid()
