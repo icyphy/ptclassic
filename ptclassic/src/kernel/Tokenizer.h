@@ -32,6 +32,9 @@ is used.
 
 #ifndef _Tokenizer_h
 #define _Tokenizer_h 1
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 const int WORDBUF_SIZE = 256;
 

@@ -15,6 +15,9 @@ $Id$
  XHistogram uses Histogram and the XGraph class to display histograms.
 
 **************************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "logNew.h"
 

@@ -22,6 +22,9 @@ of the class must use the empty() method to check this.
 ParticleStack is used as the baseclass in implementing Plasma
 and Geodesic.
 ***************************************************************/
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 #include "Particle.h"
 

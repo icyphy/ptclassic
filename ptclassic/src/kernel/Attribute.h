@@ -15,6 +15,10 @@ $Id$
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma interface
+#endif
+
 typedef unsigned long bitWord;
 
 // Class Attribute is used to specify a set of bits that must be on

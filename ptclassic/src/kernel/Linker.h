@@ -10,6 +10,11 @@ $Id$
 
  This class implements support for incremental linking.
 **************************************************************************/
+#ifndef _Linker_h
+#define _Linker_h 1
+#ifdef __GNUG__
+#pragma interface
+#endif
 
 class Linker {
 public:
@@ -35,3 +40,4 @@ private:
 	static int pid;
 	static int activeFlag;
 };
+#endif

@@ -1,9 +1,3 @@
-#ifndef _DynamicGalaxy_h
-#define _DynamicGalaxy_h 1
-
-#include "Galaxy.h"
-
-
 /*******************************************************************
 SCCS version identification
 $Id$
@@ -14,6 +8,13 @@ $Id$
  Date : Jan. 14, 1992
 
 ********************************************************************/
+#ifndef _DynamicGalaxy_h
+#define _DynamicGalaxy_h 1
+#ifdef __GNUG__
+#pragma interface
+#endif
+
+#include "Galaxy.h"
 
 // This galaxy is the baseclass for a family of dynamically created
 // galaxies.  Blocks, portholes, and other objects in the galaxy are
