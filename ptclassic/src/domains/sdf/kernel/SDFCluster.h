@@ -74,9 +74,6 @@ public:
 	// return TRUE if all member clusters have the same rate
 	int uniformRate();
 
-	// generate schedules for clusters
-	int genSubScheds();
-
 	// I would prefer for these to be protected rather than
 	// public.
 
@@ -127,11 +124,25 @@ private:
 	SequentialList stopList;// this list is used by fullSearchMerge.
 };
 
+// This is an "even baser" baseclass for all kinds of SDF clusters.
+class SDFBaseCluster : public SDFStar {
+public:
+	// return the schedule
+	virtual StringList displaySchedule(int depth) = 0;
+
+	// generate code using target methods
+	virtual void genCode(Target&, int depth) = 0;
+
+	// fire/go
+	int fire() = 0;
+	void go() { fire();}
+};
+
 // This is the baseclass for SDF cluster objects.  A cluster may have
 // an internal galaxy (if it is an SDFClusterBag); it always has a loop
 // count, indicating how many times it is to be looped.
 
-class SDFCluster : public SDFStar {
+class SDFCluster : public SDFBaseCluster {
 protected:
 	int pLoop;		// loop count
 	int visitFlag;		// visit flag
@@ -179,9 +190,6 @@ public:
 	// print ports
 	ostream& printPorts(ostream&);
 
-	// generate the schedule (does nothing except for bags)
-	virtual int genSched() { return TRUE;}
-
 	// return the schedule
 	virtual StringList displaySchedule(int depth) = 0;
 
@@ -212,6 +220,11 @@ public:
 	int fire();
 	void go() { fire();}
 	int myExecTime();
+
+	// simulate execution for schedule generation.  We also
+	// call simRunStar on the "real" star, so info like the
+	// maximum # of tokens on each arc will get set right.
+	int simRunStar(int deferFiring);
 
 	// print me
 	ostream& printOn(ostream&);
@@ -257,8 +270,12 @@ public:
 	// how many clusters
 	int size() const { return gal ? gal->numberBlocks() : 0;}
 
-	// createScheduler
-	virtual void createScheduler();
+	// simulate execution for schedule generation.  When executed
+	// for the first time, my internal schedule is generated.
+	// The effect is to call simRunStar on the "real" stars,
+	// so info like the maximum # of tokens on each arc will
+	// get set right.
+	int simRunStar(int deferFiring);
 
 	// absorb adds the SDFCluster argument to the bag
 	void absorb(SDFCluster*,SDFClusterGal*);
@@ -275,9 +292,6 @@ public:
 
 	// print me
 	ostream& printOn(ostream&);
-
-	// generate my schedule
-	int genSched();
 
 	// print my schedule
 	StringList displaySchedule(int depth);
@@ -297,6 +311,8 @@ public:
 	int internalClustering();
 
 protected:
+	int genSched();
+
 	// createInnerGal
 	virtual void createInnerGal();
 
