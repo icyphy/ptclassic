@@ -65,7 +65,7 @@ class ::tycho::Interactor {
     # The button number used for mouse events. If a list, then bindings
     # are created for all buttons in the list. <i>This option cannot
     # be changed once the interactor has been bound.</i>
-    public variable button 1
+    public variable button {1 2 3}
 
     # A list of modifiers for mouse events. <i>This option cannot
     # be changed once the interactor has been bound.</i>
