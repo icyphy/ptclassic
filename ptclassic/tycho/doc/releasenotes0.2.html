@@ -10,6 +10,8 @@ Contents:
 <LI> <A HREF="#tycho 0.2 overview">Tycho 0.2 Overview </A> 
 
 <LI> <A HREF="#tycho 0.2 changes">Changes between Tycho 0.1.1 and Tycho 0.2</A>
+
+<LI> <A HREF="#tycho 0.2 backward compatibility ">Backward compatibility issues between 0.1.1 and 0.2</A>
 </MENU>
 
  <hr>
@@ -103,9 +105,6 @@ the future inclusion of graphical elements.
 The editors and shells included in release 0.2 are:
 <p>
 <ul>
-	<li> C and C++ editors.  These color and fill comments and
-	handle indentation.
-
 	<li> HTML editor.  This editor parses HTML commands, supports
 	hyperlinks, and provides a command to check the validity of
 	hyperlinks.
@@ -121,8 +120,11 @@ The editors and shells included in release 0.2 are:
 	They also support "evaluate" commands, where a selected region,
 	a method or procedure body, or the entire file can be evaluated.
 
-	<li> Java editor.  It includes a menu choice that will run
-	<CODE>appletviewer</CODE>.
+	<li> Java editor.  It includes menu choices to run
+	<CODE>appletviewer</CODE>, and to compile Java files
+
+	<li> C and C++ editors.  These color and fill comments and
+	handle indentation, and include a menu choices to compile files.
 
 	<li> Makefile editor.  This editor colors comments, variable
 	definitions, variable references, rules, and various
@@ -159,7 +161,7 @@ The editors and shells included in release 0.2 are:
 Tycho 0.2 also includes <code>tydoc</code>, a script that converts
 itcl to html.
 
-<H2><A HREF="tycho 0.2 changes">Changes between Tycho 0.1.1 and Tycho 0.2</A></H2>
+<H2><A NAME="tycho 0.2 changes">Changes between Tycho 0.1.1 and Tycho 0.2</A></H2>
 
 There were many changes between Tycho 0.1.1 and Tycho 0.2, we only
 discuss some of the important changes.
@@ -195,7 +197,8 @@ within Java.
 about the test system.
 </UL>
 
-<H2>Backward compatibility issues between 0.1.1 and 0.2</H2>
+<H2><A NAME="tycho 0.2 backward compatibility">Backward compatibility issues between 0.1.1 and 0.2</A>
+</H2>
 
 <UL>
 
@@ -208,7 +211,7 @@ Ptolemy kernel called <CODE>pitcl</CODE>.  This interface is not backward
 compatible with ptcl, the previous Tcl-based non-graphical interface
 to the Ptolemy kernel.
 See the
-<A HREF="../typt/kernel/internals/pitcl.html">pitcl</A> page for details.
+<A HREF="../typt/doc/internals/pitcl.html">pitcl</A> page for details.
 
 
 <LI> The <CODE>Exec</CODE> class is now non-graphical, see the
