@@ -214,6 +214,9 @@ body ::tycho::TopLevel::constructor {args} {
 
     # Grab the focus when the window gets mapped.
     bind $itk_component(hull) <Map> "$this focusin; break"
+
+    # Bind the file-open command.
+    bind $prefix <Control-x><Control-f> "File::openWin; break"
 }
 
 #####################################################################
@@ -226,7 +229,7 @@ body ::tycho::TopLevel::constructor {args} {
 # logical window in the window sequence. Note that if the mouse is not
 # over a window belonging to this application after a window is
 # deleted, the focus will be given up entirely by the application.
-#
+# <p>
 # NOTE: It would be better if the user were queried for confirmation
 # about exiting the program, but this appears to be impossible with the
 # current Itcl version.  A call to askuser in this destructor leads to
@@ -268,7 +271,7 @@ body ::tycho::TopLevel::destructor {} {
 # the window.  To properly accomplish such centering, this
 # should be called after all the widgets have been packed into the
 # window, but before any tkwait visibility.
-#
+# <p>
 # FIXME: This procedure doesn't work with widgets that defer mapping
 # (like the iwidget buttonbox). The width of the button box is not
 # taken into account depite the fact that everything has been packed

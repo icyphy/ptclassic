@@ -33,6 +33,8 @@
 
 # FIXME:  Known bugs
 #  - Many of the File menu commands do not do anything reasonable.
+#  - Dismissing the window before rendering is finished causes an
+#    infinite recursion that results in an error message.
 
 #######################################################################
 #### HTML
@@ -44,6 +46,9 @@ class ::tycho::HTML {
 
     constructor {args} {}
     destructor {}
+
+    ###################################################################
+    ####                       public methods                      ####
 
     #### openSource
     # Open the HTML source
@@ -65,19 +70,19 @@ class ::tycho::HTML {
     # Follow a hypertext link within the file.
     method seeName {name}
 
-    #### switchfile
+    #### switchFile
     # Switch to a different HTML file.
-    method switchfile {filename}
+    method switchFile {filename}
 
     #########################################################################
-    #### protected methods and variables
+    ####                   protected methods                             ####
 
     #### textWidget
     # Return the name of the type of text widget to use.
-    method textWidget {} {return ::tycho::HTMLText}
+    protected method textWidget {} {return ::tycho::HTMLText}
 
     #########################################################################
-    #### private methods and variables
+    ####              private methods and variables                      ####
 
     # Keep track of the current source window for the current file.
     private variable sourcewin
@@ -103,8 +108,10 @@ body ::tycho::HTML::constructor {args} {
     itk_component add text {
 	[textWidget] $itk_component(childsite).text
     } {
-	# FIXME: add all pertinent options from EditText
-	keep -text -readonly -font
+	keep -text -readonly -textfont -width -height -background \
+		-highlightbackground -highlightcolor -selectforeground \
+		-cursor -insertbackground -foreground -textfont \
+		-textbackground
     }
     pack $itk_component(text) -expand yes -fill both
 
@@ -170,6 +177,10 @@ body ::tycho::HTML::destructor {} {
 	set filesOpen($file) $sourcewin
     }
 }
+
+    ###################################################################
+    ###################################################################
+    ####                       public methods                      ####
 
 #####################################################################
 #### openSource
@@ -266,14 +277,14 @@ body ::tycho::HTML::seeName {name} {
     # Otherwise, we open a new window.
     if {[file extension $fileref] == {.html}} {
 	configure -file $fileref
-	switchfile $fileref
+	switchFile $fileref
     } {
 	::tycho::File::openContext $fileref
     }
 }
 
 #####################################################################
-#### switchfile
+#### switchFile
 # Switch to displaying another HTML file.  Special care is required
 # here because there might be a source file open for either the old
 # or the new file. If there is a source file for the old HTML file,
@@ -283,7 +294,7 @@ body ::tycho::HTML::seeName {name} {
 # accomplishes the same functions as configuring the -file option,
 # but specialized to this circustance.
 #
-body ::tycho::HTML::switchfile {filename} {
+body ::tycho::HTML::switchFile {filename} {
 
     # If the destination file is already open, raise it.
     if {[info exists filesOpen($filename)] && \
@@ -324,6 +335,10 @@ body ::tycho::HTML::switchfile {filename} {
     $itk_component(text) readFile $file
 }
 
+#########################################################################
+#########################################################################
+####                     private methods                             ####
+
 #####################################################################
 #### sourcewinIsMine
 # Return 1 if the sourcewin window is the source window for the
@@ -339,4 +354,3 @@ body ::tycho::HTML::sourcewinIsMine {} {
 	return 0
     }
 }
-

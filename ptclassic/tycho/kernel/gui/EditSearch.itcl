@@ -149,7 +149,7 @@ body ::tycho::EditSearch::constructor {args} {
 
     itk_component add case {
 	checkbutton $itk_component(switches).case -text "Consider Case" \
-		-variable casesw \
+		-variable [scope casesw] \
 		-relief flat
     } {
 	keep -cursor -font -background -foreground
@@ -158,7 +158,7 @@ body ::tycho::EditSearch::constructor {args} {
 
     itk_component add backwards {
 	checkbutton $itk_component(switches).backwards -text "Find Backwards" \
-		-variable backwardssw \
+		-variable [scope backwardssw] \
 		-relief flat
     } {
 	keep -cursor -font -background -foreground
@@ -167,7 +167,7 @@ body ::tycho::EditSearch::constructor {args} {
     
     itk_component add regexp {
 	checkbutton $itk_component(switches).regexp -text "Regular Expression" \
-		-variable regexpsw \
+		-variable [scope regexpsw] \
 		-relief flat
     } {
 	keep -cursor -font -background -foreground
@@ -216,7 +216,7 @@ body ::tycho::EditSearch::constructor {args} {
 	# Add an option to change all matches
 	itk_component add changeall {
 	    checkbutton $itk_component(switches).changeall -text "Change All" \
-		    -variable changeallsw \
+		    -variable [scope changeallsw] \
 		    -relief flat
 	} {
 	    keep -cursor -font -background -foreground
