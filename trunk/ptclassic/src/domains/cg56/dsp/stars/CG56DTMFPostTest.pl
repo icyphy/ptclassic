@@ -67,21 +67,22 @@ the previous two valid inputs.  For the purposes of DTMF detection, it
 is set to an integer that does not represent a DTMF digit.
         	}
 	}
-
 	codeblock(postTest){
-; Register usage:
-; a = input (from x memory)     x1 = last input value (from y memory)
-; b = valid (from x memory)	y1 = second-to-last input value (from y memory)
-; y0 = FALSE
-	clr	a	$ref(valid),b		; b = valid
-	move	$ref(input),a	a,y0		; a = input, y0 = FALSE
-	move	$ref(last),x1		; x1 = last input value
-	cmp	x1,a	$ref(secondToLast),y1		; y1 = 2nd-to-last input 
-	tne	y0,b		; if last != input, then b = y0 = FALSE
-	cmp	y1,a	x1,$ref(secondToLast)		; update second-to-last value
-	teq	y0,b		; if secondTolast = input, then b = y0 = FALSE
-	move	a,$ref(last)		; update last value
-	move	b,$ref(output)		; write output
+
+	clr	a	$ref(valid),b		; b = valid	
+	move	b,x0	$ref(secondToLast),y0	; x0 = valid, y0=secondToLast	
+	move	$ref(input),a	a,y1		; y1 = 0, a = input
+	cmp	y0,a	$ref(last),x1		; x1 = last
+	teq	y1,b				; input must != secondToLast
+	cmp	x1,a	#$val(initialLastInput),y0	; y0=initialLastInput
+	tne	y1,b				; input must = last
+	mpy	x0,x0,b		b,$ref(output)	
+; output result and check if valid = TRUE
+	move	x1,b				; b = last
+	teq	y0,a				; if valid == FALSE set last=
+	teq	y0,b				; secondToLast=initialLastValue
+	move	a,$ref(last)			; store last and 
+	move	b,$ref(secondToLast)		; secondToLast
 	}
 	setup {
 		secondToLast = int(initialLastInput);
@@ -93,5 +94,7 @@ is set to an integer that does not represent a DTMF digit.
 	}
 
 	// Return an execution estimate in pairs of cycles
-	exectime{ return 9; }
+	exectime{ return 13; }
 }
+
+
