@@ -466,11 +466,15 @@ KcRun(int n) {
 	LOG.flush();
 	SimControl::clearHalt();
 	ptcl->universe->initTarget();
-	if (SimControl::haltRequested())
+	if (SimControl::flagValues() & SimControl::error)
 		return FALSE;
 	ptcl->universe->setStopTime(n);
 	ptcl->universe->run();
+	if (SimControl::flagValues() & SimControl::error)
+		return FALSE;
 	ptcl->universe->wrapup();
+	if (SimControl::flagValues() & SimControl::error)
+		return FALSE;
 	return TRUE;
 }
 
