@@ -36,21 +36,26 @@ ENHANCEMENTS, OR MODIFICATIONS.
   creates the RPC connection from Tcl to RPC
 */
    
+/* Standard includes */
 #include <stdio.h>
 #include <itcl.h>
 #ifdef ITCL_VERSION
 /* ITCL2.0 or better */
 #include <itk.h>
 #endif
-#include "compat.h"
-#include "ptk.h"
-#include "ptkRegisterCmds.h"
-#include "ptkNet.h"
+
+#include "local.h"			/* include "ansi.h" and "compat.h" */
+
+/* Octtools includes */
 #include "rpc.h"
 #include "rpcApp.h"
-#include "err.h"
 
-static void ptkRPCFileProc ();
+/* Pigilib includes */
+#include "ptk.h"
+#include "ptkRegisterCmds.h"		/* define ptkRegisterCmds */
+#include "ptkNet.h"			/* define ptkRPCFileHandler */
+#include "err.h"			/* define ErrAdd */
+
 
 /* Used to pass the funcArray through Tk */
 typedef struct {
@@ -66,6 +71,24 @@ long size;                      /* number of items in the array */
 #include "xfunctions.h"         /* define prototype for PrintVersion */
 #include "vemInterface.h"       /* define prototype for PrintErr */
 #include "kernelCalls.h"	/* define prototype for KcSetEventLoop */
+
+
+static void
+ptkRPCFileProc ( clientdata, mask )
+ClientData clientdata;
+int mask;
+{
+    RPCClientData *RPCData = (RPCClientData *) clientdata;
+    RPCFunction *funcArray = RPCData->funcArray; 
+    long size = RPCData->size;
+
+    if (ptkRPCFileHandler( funcArray, size ) != RPC_OK ) {
+	fprintf(stderr, "RPC connection to VEM closed.\n");
+	exit(1);
+    }
+
+}
+
 
 static int
 _ptkAppInit( ip, win)
@@ -125,7 +148,7 @@ ptkTkSetup(funcArray, size)
     }
 
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
-       ptkRPCFileProc, (ClientData) &RPCdata);
+    			 ptkRPCFileProc, (ClientData) &RPCdata);
 
     pt = getenv("PTOLEMY");
     sprintf(buf, "%s/lib/tcl/pigilib.tcl", pt ? pt : "~ptolemy");
@@ -149,22 +172,6 @@ void
 ptkMainLoop ()
 {
     Tk_MainLoop ();
-}
-
-static void
-ptkRPCFileProc ( clientdata, mask )
-    ClientData clientdata;
-    int mask;
-{
-    RPCClientData *RPCData = (RPCClientData *) clientdata;
-    RPCFunction *funcArray = RPCData->funcArray; 
-    long size = RPCData->size;
-
-    if (ptkRPCFileHandler( funcArray, size ) != RPC_OK ) {
-	fprintf(stderr, "RPC connection to VEM closed.\n");
-	exit(1);
-    }
-
 }
 
 
