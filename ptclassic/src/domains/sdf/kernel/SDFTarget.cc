@@ -54,8 +54,12 @@ Target(nam,"SDFStar",desc,assocDomain)
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
-	addState(loopScheduler.setState("loopScheduler",this,"1",
-			"Specify whether to use loop scheduler."));
+	addState(loopScheduler.setState
+		("loopScheduler(DEF,CLUST,ACYLOOP)",this,"ACYLOOP",
+		"SDF Schedulers:\n"
+		"\tDEF - The default SDF scheduler\n"
+		"\tCLUST - J. Buck's loop scheduler\n"
+		"\tACYLOOP - P. Murthy/S. Bhattacharyya's loop scheduler\n"));
 	addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
 			"schedulePeriod for interface with a timed domain."));
 }
@@ -72,7 +76,10 @@ SDFTarget::~SDFTarget() {
 void SDFTarget::setup() {
 	delSched();
 	SDFScheduler *s;
-	if (int(loopScheduler) == 3) {
+
+	const char* sname = loopScheduler;
+
+	if (strcasecmp(sname,"ACYLOOP") == 0) {
 	    // Determine if the graph is acyclic.  It not, use
 	    // another loop scheduler.
 	    // FIXME:
@@ -83,33 +90,29 @@ void SDFTarget::setup() {
 	    if (galaxy()) {
 	    	if (!isAcyclic(galaxy(), 0)) {
 		    StringList message;
-		    message << "The scheduler option that you selected, 3, "
+		    message << "The scheduler option that you selected, "
+			    << "ACYLOOP, "
 		    	    << "in the SDFTarget parameters represents a "
 		    	    << "loop scheduler that only works on acyclic "
 		    	    << "graphs.  Since this graph is not acyclic "
-		    	    << "another scheduler will be used (corresponding"
-		    	    << " to option 1.\n";
+		    	    << "the scheduler CLUST will be used "
+			    << "(corresponding to old option 1).\n";
 		    Error::message(message);
-		    loopScheduler.setCurrentValue("1");
+		    loopScheduler.setCurrentValue("CLUST");
 		}
 	    }
 	}
-	switch(int(loopScheduler)) {
-	    case 0:
-		LOG_NEW; s = new SDFScheduler;
-		break;
-	    case 1:
-		LOG_NEW; s = new SDFClustSched(logFile);
-		break;
-	    case 2:
-		LOG_NEW; s = new SDFClustSched(logFile);
-		break;
-	    case 3:
-		LOG_NEW; s = new AcyLoopScheduler(logFile);
-		break;
-	    default:
-		Error::abortRun(*this, "Unknown scheduler");
-		return;
+	if (strcasecmp(sname,"DEF")==0 || strcmp(sname,"0")==0 || 
+		strcasecmp(sname,"NO") == 0) {
+	    s = new SDFScheduler;
+	} else if (strcasecmp(sname,"CLUST")==0 || strcmp(sname,"1")==0 || 
+		strcasecmp(sname,"YES")==0 ) {
+	    s = new SDFClustSched(logFile);
+	} else if (strcasecmp(sname,"ACYLOOP") == 0) {
+	    s = new AcyLoopScheduler(logFile);
+	} else {
+	    Error::abortRun(*this, "Unknown scheduler.");
+	    return;
 	}
 	s->schedulePeriod = schedulePeriod;
 	if (galaxy()) s->setGalaxy(*galaxy());
