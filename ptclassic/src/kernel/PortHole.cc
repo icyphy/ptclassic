@@ -515,10 +515,14 @@ MultiPortHole :: newName () {
 
 // Add a new PortHole to the MultiPortHole.  install is provided so
 // we can do multiports for specific domains.
+// This function is a friend of class PortHole.
+
 PortHole& MultiPortHole :: installPort(PortHole& p) {
 	ports.put(p);
 	parent()->addPort(p.setPort(newName(), parent(), type));
-	p.inheritTypeFrom(*this);
+// for ANYTYPE multiportholes, all ports are resolved to be the same type.
+	if (myType() == ANYTYPE)
+		p.inheritTypeFrom(*this);
 	// we can do the following as a friend function
 	p.myMultiPortHole = this;
 	return p;
