@@ -468,7 +468,7 @@ long userOptionWord;
 
     TCL_CATCH_ERR( Tcl_VarEval(ptkInterp,
 	"set tychoconsole [::tycho::autoName .console]\n",
-	"::tycho::Console $tychoconsole -text {Welcome to Tycho in Pigi\n} -geometry -10+0\n",
+	"::tycho::TclConsole $tychoconsole -text {Welcome to Tycho in Pigi\n} -geometry -10+0\n",
 	"wm deiconify $tychoconsole",
 	(char *)NULL) );
 
