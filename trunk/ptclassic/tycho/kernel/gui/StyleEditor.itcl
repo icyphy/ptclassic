@@ -438,9 +438,9 @@ body ::tycho::StyleEditor::constructor {args} {
 # focus moves out of the entry.
 #
 body ::tycho::StyleEditor::_entrybind {param} {
-    bind [$itk_component(items) component $item] <FocusOut> \
+    bind [$itk_component(items) component $param] <FocusOut> \
             "$this _update $param"
-    bind [$itk_component(items) component $item] <Return> \
+    bind [$itk_component(items) component $param] <Return> \
             "$this _update $param"
 }
 
