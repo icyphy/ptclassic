@@ -89,6 +89,15 @@ class ::tycho::Shape {
     # Attach a set of grapples to an item
     proc _grapple {id canvas slate interactor args}
 
+    # Start a move interaction sequence
+    proc _moveclick {id canvas slate x y args}
+
+    # Continue a move interaction sequence
+    proc _movedrag {id canvas slate x y}
+
+    # Terminate a move interaction sequence
+    proc _moverelease {id canvas slate x y}
+
     # Reshape one or more aspects of an item
     proc _reshape {id canvas slate x y args}
 
@@ -100,15 +109,6 @@ class ::tycho::Shape {
 
     # Terminate a reshape interaction sequence
     proc _reshaperelease {id canvas slate x y}
-
-    # Start a move interaction sequence
-    proc _moveclick {id canvas slate x y args}
-
-    # Continue a move interaction sequence
-    proc _movedrag {id canvas slate x y}
-
-    # Terminate a move interaction sequence
-    proc _moverelease {id canvas slate x y}
 
     # Get a compass point transformed in some way
     proc compass {compass transformation}
@@ -122,7 +122,10 @@ class ::tycho::Shape {
     ###################################################################
     ####                  protected variables                      ####
 
-    # Storage for temporary variables
+    # Storage for temporary variables. Note: all methods must be careful
+    # to make array indexes unique, since this array stores data for
+    # multiple slates. The best way to do this is to make the slate
+    # name oart of the index.
     protected common scratch
 
     ## pi and friends
@@ -183,15 +186,15 @@ body ::tycho::Shape::_grapple {id canvas slate interactor args} {
 #
 body ::tycho::Shape::_moveclick {id canvas slate x y args} {
     ::tycho::getflag ghost args
-	
+
     # Remember where we started
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch($slate.$id.prevX) $x
+    set scratch($slate.$id.prevY) $y
 
     # If the -ghost option is specified, create the ghost
     if { [lsearch -exact $args -ghost] != -1 } {
-		set scratch($id.ghost) [$slate call $id ghost]
-		set scratch($id.start) [$slate coords $scratch($id.ghost)]
+		set scratch($slate.$id.ghost) [$slate call $id ghost]
+		set scratch($slate.$id.start) [$slate coords $scratch($slate.$id.ghost)]
     }
 }
 
@@ -199,21 +202,21 @@ body ::tycho::Shape::_moveclick {id canvas slate x y args} {
 #### _movedrag
 #
 body ::tycho::Shape::_movedrag {id canvas slate x y} {
-    # If there's a ghost, move it. else move the complex item.
-    if { [::info exists scratch($id.ghost)] } {
-		set movethis $scratch($id.ghost)
+    # If there's a ghost, move it, else move the item.
+    if { [::info exists scratch($slate.$id.ghost)] } {
+	set movethis $scratch($slate.$id.ghost)
     } else {
-		set movethis $id
+	set movethis $id
     }
 
     # Move is a delta operation.
     $slate move $movethis \
-	    [expr $x - $scratch($id.prevX)] \
-	    [expr $y - $scratch($id.prevY)]
+	    [expr $x - $scratch($slate.$id.prevX)] \
+	    [expr $y - $scratch($slate.$id.prevY)]
 
     # Remember the new position
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set scratch($slate.$id.prevX) $x
+    set scratch($slate.$id.prevY) $y
 }
 	
 #######################################################################
@@ -222,20 +225,20 @@ body ::tycho::Shape::_movedrag {id canvas slate x y} {
 body ::tycho::Shape::_moverelease {id canvas slate x y} {
     # If there's a ghost, move the complex item to its
     # position and then delete it
-    if { [::info exists scratch($id.ghost)] } {
-		::tycho::assign x y $scratch($id.start)
-		::tycho::assign a b [$this coords $scratch($id.ghost)]
+    if { [::info exists scratch($slate.$id.ghost)] } {
+	::tycho::assign x y $scratch($slate.$id.start)
+	::tycho::assign a b [$this coords $scratch($slate.$id.ghost)]
 
-		$slate move $id [expr $a - $x] [expr $b - $y]
-		$slate delete $scratch($id.ghost)
+	$slate move $id [expr $a - $x] [expr $b - $y]
+	$slate delete $scratch($slate.$id.ghost)
 
-		unset scratch($id.ghost)
-		unset scratch($id.start)
-	}
+	unset scratch($slate.$id.ghost)
+	unset scratch($slate.$id.start)
+    }
 
     # Clean up
-    unset scratch($id.prevX)
-    unset scratch($id.prevY)
+    unset scratch($slate.$id.prevX)
+    unset scratch($slate.$id.prevY)
 }
 
 #######################################################################
