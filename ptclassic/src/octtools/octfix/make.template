@@ -60,15 +60,18 @@ octfix:	$(OBJS)
   		-o octfix \
 		$(LIBS) -lm 
 
-DEST = $(BINDIR)/octfix
+DEST = $(OCTTOOLS)/bin.$(ARCH)/octfix
 
 $(DEST):	octfix
 		@echo Installing octfix
 		rm -f $(DEST)
 		ln octfix $(DEST)
 
-install: makefile $(DEST)
+install: makefile $(DEST) $(BINDIR)/octfix
 	
+$(BINDIR)/octfix:
+	(cd $(BINDIR); ln -s ../octtools/bin.$(ARCH)/octfix .)
+
 # "make sources" will do SCCS get on anything where SCCS file is newer.
 sources:	
 
