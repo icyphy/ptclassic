@@ -158,13 +158,13 @@ else
 
 	if ( ! $?prog ) then
 		if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-		    set prog = $PTOLEMY/bin.$PTARCH/tycho/tysh/tysh.ptiny
+		    set prog = $bindir/tysh.ptiny
 		else
 			if ( "$progname" == "tysh.ptrim" || $?tychoptrim ) then
-			    set prog = $PTOLEMY/bin.$PTARCH/tycho/tysh/tysh.ptrim
+			    set prog = $bindir/tysh.ptrim
 			else 
 				if ( "$progname" == "tysh.pigi" || $?tychopigi ) then
-				    set prog = $PTOLEMY/bin.$PTARCH/tycho/tysh/tysh
+				    set prog = $bindir/tysh
 				else
 				    set tychoedit
 				    set prog = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $TYCHO/kernel/Tycho.tcl)
