@@ -272,7 +272,7 @@ htest-netscape: $(JTESTHTML) $(JCLASS)
 # We cd up one level so that the zip file has the proper package name
 jzip: $(JZIP)
 $(JZIP): $(JSRCS) $(JCLASS)
-	(cd $(CLASSPATH); zip -n .class $@ $(JPACKAGE)/*.class)
+	(cd $(CLASSPATH); zip -qn .class $@ $(JPACKAGE)/*.class)
 
 
 # Rules to build Java package distributions
