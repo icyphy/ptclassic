@@ -10,7 +10,7 @@ all phase transitions.  It also assumes that the input is in the
 	version {$Id$}
 	author { J. T. Buck }
 	copyright { 1991 The Regents of the University of California }
-	location { SDF main library }
+	location { SDF DSP library }
 	input {
 		name {input}
 		type {float}
