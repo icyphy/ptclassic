@@ -58,11 +58,12 @@ C_INCL =	$(PTCOMPAT_INCSPEC) \
 # include common definitions, rules
 include $(ROOT)/mk/common.mk
 
-all:	makefile rman
+BINARY = rman$(BINARY_EXT)
+all:	makefile $(BINARY)
 
-install:	rman $(BINDIR)/rman $(ROOT)/man/man1/rman.1
+install:	$(BINARY) $(BINDIR)/$(BINARY) $(ROOT)/man/man1/rman.1
 
-$(BINDIR)/rman:	rman
+$(BINDIR)/$(BINARY):	$(BINARY)
 	@echo Installing $<
 	rm -f $@
 	ln $< $@
