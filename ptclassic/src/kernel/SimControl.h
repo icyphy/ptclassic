@@ -58,16 +58,26 @@ for example.
 class Star;
 class SimAction;
 class SimActionList;
+class PtGate;
+
 typedef void (*SimActionFunction)(Star*,const char*);
 typedef int (*SimHandlerFunction)();
 
 class SimControl {
 	friend class SimControlOwner;
+public:
+	// function to read the flag values.  If threading is on,
+	// we need a function call, otherwise it is inline.
+	static unsigned int flagValues() {
+		return gate ? readFlags() : flags;
+	}
+	// function to read flags with a mutual exclusion region.
+	static unsigned int readFlags();
 private:
 	// must appear before functions that use it for g++ 2.2's
 	// inlining to work correctly.
 	static int haltStatus () {
-		return (flags & halt) != 0;
+		return (flagValues() & halt) != 0;
 	}
 public:
 	enum flag_bit {
@@ -77,7 +87,7 @@ public:
 		poll = 8 };
 
 	static int haltRequested () {
-		if (flags != 0) processFlags();
+		if (flagValues() != 0) processFlags();
 		return haltStatus();
 	}
 
@@ -102,35 +112,18 @@ public:
 
 	// register a function to be called if interrupt flag is set.
 	// Returns old handler if any.
-	static SimHandlerFunction setInterrupt(SimHandlerFunction f) {
-		SimHandlerFunction ret = onInt;
-		onInt = f;
-		return ret;
-	}
+	static SimHandlerFunction setInterrupt(SimHandlerFunction f);
 
 	// register a function to be called if the poll flag is set.
 	// Returns old handler if any.
-	static SimHandlerFunction setPoll(SimHandlerFunction f) {
-		SimHandlerFunction ret = onPoll;
-		onPoll = f;
-		flags |= poll;
-		return ret;
-	}
+	static SimHandlerFunction setPoll(SimHandlerFunction f);
 
 	// cancel an action.  Warning: argument is deleted.
 	static int cancel(SimAction*);
 
-	static void requestHalt () {
-		flags |= halt;
-	}
-	static void declareErrorHalt () {
-		flags |= (error|halt);
-	}
-	static void clearHalt () {
-		flags = 0;
-	}
-
-	static unsigned int flagValues() { return flags;}
+	static void requestHalt ();
+	static void declareErrorHalt ();
+	static void clearHalt ();
 
 	static void catchInt(int signo = -1, int always = 0);
 
@@ -139,11 +132,18 @@ private:
 
 	static void processFlags();
 	static int internalDoActions(SimActionList*,Star*);
-
+	// lists of pre- and post-actions
 	static SimActionList * preList;
 	static SimActionList * postList;
-	static unsigned int flags;
+	// # of pre- and post-actions
 	static int nPre, nPost;
+
+	// system status flags
+	static unsigned int flags;
+	// PtGate for controlling threaded access to flags
+	static PtGate* gate;
+
 	static SimHandlerFunction onInt, onPoll;
+
 };
 #endif
