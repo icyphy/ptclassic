@@ -44,26 +44,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <string.h>
 #include "tk.h"
 
+#define PTK_CONTROL_PANEL_INIT "global ptkControlPanel;set ptkControlPanel"
+
 #define PLOT_PREFIX "plot_"
 #define DATASET_PREFIX "dataset_"
 #define STD_FONT "-Adobe-Helvetica-Bold-R-Normal--*-140-*"
 #define TITLE_FONT "-Adobe-Helvetica-Bold-R-Normal--*-180-*"
 
-#define MAX(xx,yy)			((xx) > (yy) ? (xx) : (yy))
-#define MIN(xx,yy)			((xx) < (yy) ? (xx) : (yy))
-#define LOG10(xx)               (xx == 0.0 ? 0.0 : log10(xx) + 1e-15)
 #define INCR_ALLOC_PTS 128
 #define LARGE_ENOUGH 10000000
 
-#define MAPX(xx)		(plotPtr->llx+ \
-				 ((xx)-plotPtr->xMin)*plotPtr->scalex)
-#define MAPY(xx)		(plotPtr->lly- \
-				 ((xx)-plotPtr->yMin)*plotPtr->scaley)
+#define MAX(xx,yy)	((xx) > (yy) ? (xx) : (yy))
+#define MIN(xx,yy)	((xx) < (yy) ? (xx) : (yy))
+#define LOG10(xx)	((xx) == 0.0 ? 0.0 : log10(xx) + 1e-15)
 
-#define INVMAPX(xx)             (plotPtr->xMin+ \
-				 ((xx)-plotPtr->llx)/plotPtr->scalex)
-#define INVMAPY(xx)             (plotPtr->yMin+ \
-				 (plotPtr->lly-(xx))/plotPtr->scaley)
+#define MAPX(xx)	(plotPtr->llx + ((xx)-plotPtr->xMin)*plotPtr->scalex)
+#define MAPY(xx)	(plotPtr->lly - ((xx)-plotPtr->yMin)*plotPtr->scaley)
+
+#define INVMAPX(xx)	(plotPtr->xMin + ((xx)-plotPtr->llx)/plotPtr->scalex)
+#define INVMAPY(xx)	(plotPtr->yMin + (plotPtr->lly-(xx))/plotPtr->scaley)
 
 struct pktPlotWin;
 
@@ -98,5 +97,6 @@ typedef struct ptkPlotWin {
   ptkPlotDataset *sets;       	/* array of datasets, which are dynamically allocated */
   int numsets;                  /* the number of datasets allocated */
 } ptkPlotWin;
+
 
 #endif
