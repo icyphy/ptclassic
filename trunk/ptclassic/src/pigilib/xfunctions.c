@@ -156,10 +156,9 @@ void PrintVersion ()
      */
     if (Tcl_VarEval(ptkInterp, "ptkStartupMessage {", gVersion, "} {",
 		    pigiFilename, "}", NULL) != TCL_OK) {
-        ErrAdd("Unable to bring up ptkStartupMessage: ");
+        ErrAdd("Unable to bring up ptkStartupMessage.\n");
 	ErrAdd("If you are running a debugger, make sure that $PTOLEMY is");
-	ErrAdd("properly set in your .cshrc");
-        ErrAdd(ptkInterp->result);
+	ErrAdd("properly set in your .cshrc\n");
 	ErrAdd(Tcl_GetVar(ptkInterp,"errorInfo",TCL_GLOBAL_ONLY));
 	PrintErr(ErrGet());
 	exit(1);
