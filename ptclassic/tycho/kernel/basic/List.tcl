@@ -1,9 +1,5 @@
+# list.itcl - Utility functions on lists. See also syntax.tcl.
 #
-# list.itcl
-#
-# Utility functions on lists. See also syntax.tcl.
-#
-
 ##########################################################################
 #
 # Author:  H. John Reekie
@@ -37,19 +33,31 @@
 ##########################################################################
 
 
-## lhead, ltail list
+##########################################################################
+##### lhead
+# Return the first item in the list, or the item itself if it is not a 
+# list.
+# 
+# Return: Return the first item in the list, or the item itself if it is not a 
+# list.
 #
-# Take the head and tail of a list.
+proc lhead {list} {
+    return [lindex $list 0]
+}
+
+##########################################################################
+##### ltail
+# Return a list composed of all elements in the supplied list, except the 
+# first item. 
+# 
+# Return: Return a list composed of all elements in the supplied list, 
+# except the first item.       
 #
 # Note: ltail{} requires that the list contain at least one
 # element. Use lnull{} to check this before calling if you're
 # not sure that this is the case. _This is a deliberate choice,
 # not a bug_.
 #
-proc lhead {list} {
-    return [lindex $list 0]
-}
-
 proc ltail {list} {
     return [lreplace $list 0 0]
 }
