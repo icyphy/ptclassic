@@ -28,8 +28,8 @@
 #define NEWLINE '\n'
 
 /* buffer sizes */
-#define BIGBUFSIZE 32768
-#define MEDBUFSIZE 4096
+#define BIGBUFSIZE 200000
+#define MEDBUFSIZE 50000
 #define SMALLBUFSIZE 512
 
 /* number of code blocks allowed */
@@ -292,6 +292,8 @@ sgitem:
 |	method '{' methlist '}'		{ genMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
+|	CCINCLUDE '{' error '}'		{ yyerror("Error in ccinclude list");}
+|	HINCLUDE '{' error '}'		{ yyerror("Error in hinclude list");}
 |	conscalls BODY			{ if(consCalls[0]) {
 					     strcat(consCalls,", ");
 					     strcat(consCalls,$2);
@@ -1467,7 +1469,7 @@ yylex () {
 				return '/';
 			}
 			/* comment -- eat rest of line */
-			while (input() != NEWLINE);
+			while (input() != NEWLINE && c != EOF);
 		}
 		while (isspace(c)) { input(); }
 	}
@@ -1475,6 +1477,7 @@ yylex () {
 	 * STRING token includes surrounding quotes
 	 * If the STRING includes a NEWLINE, a warning is issued.
 	 */
+	if (c == EOF) return 0;		
 	if (c == QUOTE) {
 		p = yytext;
 		*p++ = c;
