@@ -353,16 +353,17 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 		// note: we can get a minus if 2nd time in loop and value of
 		// substituted state was negative.
 		if (isdigit(*token) || *token == '.' || *token == '-' )  {
-			// possible scientific notation if ending in e or E.
-			// Eliminate + and - as special if so, and append
-			// to token.  Ugly hack.
-			int l = strlen(token);
-			if (token[l-1] == 'e' || token[l-1] == 'E') {
-				const char* tc = lexer.setSpecial("*()/[],^");
-				lexer >> token + l;
-				lexer.setSpecial(tc);
-			}
-			if (stateType == T_Float) {
+		        if (stateType == T_Float) {
+		                // possible scientific notation if ending in e or E.
+			        // Eliminate + and - as special if so, and append
+			        // to token.  Ugly hack.
+			        int l = strlen(token);
+			        if (token[l-1] == 'e' || token[l-1] == 'E') {
+				    const char* tc = lexer.setSpecial("*()/[],^");
+				    lexer >> token + l;
+				    lexer.setSpecial(tc);
+				}
+
 				t.tok = T_Float;
 				t.doubleval = atof(token);
 				return t;
