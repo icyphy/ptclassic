@@ -121,11 +121,12 @@ If you are using SCCS for version control
 .IE SCCS
 then the following syntax will work well:
 .(c
-version { %\&I\&% %\&G\&% }
+version { %\&W\&% %\&G\&% }
 .)c
-When the file is checked in by SCCS, the string "%\&I\&%"
-will be replaced with a version number, and "%\&G\&%" with
-a properly formatted date.
+When the file is checked in by SCCS, the string "%\&W\&%"
+will be replaced with a string of the form:
+"@(#)filename num", where num is the version number, and "%\&G\&%" will
+be replaced with a properly formatted date.
 .UH author
 .pp
 .IE "author { }"
