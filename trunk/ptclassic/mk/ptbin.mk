@@ -362,7 +362,7 @@ endif #ALLBINARIES
 install: $(INSTALL)
 
 # Build four binaries
-all: makefile $(LIB) $(PIGI) $(PIGI).acs $(PIGI).ptiny $(PIGI).ptrim
+all: makefile $(PTLIB) $(PIGI) $(PIGI).acs $(PIGI).ptiny $(PIGI).ptrim
 
 # Print the names of all the binaries that can be produced
 echo_every_binary:

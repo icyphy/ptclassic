@@ -110,10 +110,10 @@ $(VPATH)\$(STAR_MK).c:	make.template
 $(STAR_MK).obj:	$(VPATH)\$(STAR_MK).c
 
 # Standard "all" for stars directories
-stars_all:	$(SRCS) $(LIB) $(STAR_MK).obj
+stars_all:	$(SRCS) $(PTLIB) $(STAR_MK).obj
 
 # Rule for installing both the star library and star list
-stars_install:	all $(LIBDIR)\$(LIB) $(LIBDIR)\$(STAR_MK).obj
+stars_install:	all $(LIBDIR)\$(PTLIB) $(LIBDIR)\$(STAR_MK).obj
 		@echo Installation complete.
 
 # Rule for installing the star list
