@@ -314,7 +314,7 @@ body ::tycho::EditProgram::help {} {
     global ::TYCHO
 
     ::tycho::File::openContext \
-        [file join $TYCHO editors textedit doc usersGuides \
+        [file join $TYCHO edit textedit doc usersGuides \
 	    EditProgramHelp.html]
 }
 

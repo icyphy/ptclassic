@@ -302,7 +302,7 @@ body ::tycho::EditJava::genidocBuffer {} {
 body ::tycho::EditJava::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO editors textedit doc usersGuides \
+        [file join $TYCHO edit textedit doc usersGuides \
 	    EditJavaHelp.html]
 }
 
