@@ -27,6 +27,9 @@
 #
 # $Id$
 
+# Root of Ptolemy directory
+ROOT=../../../../..
+
 EXTRA_SRCS = tkMain.c
 
 MISC_FILES = \
@@ -36,5 +39,4 @@ MISC_FILES = \
 	ptolemy-cgc.tcl \
 	init.tcl
 
-include ../../../../../mk/no-compile.mk
-
+include $(ROOT)/mk/no-compile.mk
