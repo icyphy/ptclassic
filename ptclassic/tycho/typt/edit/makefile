@@ -1,4 +1,4 @@
-# Makefile for Tycho/Ptolemy Editors directory
+# Makefile for tycho/typt/edit directory
 #
 # @Author: Christopher Hylands
 #
@@ -47,7 +47,7 @@ ITCL_SRCS = \
 	EditPtlang.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS) \
-	editors.tcl \
+	edit.tcl \
 	pkgIndex.tcl
 
 MISC_FILES =	tclIndex doc test
@@ -56,7 +56,7 @@ MISC_FILES =	tclIndex doc test
 REALCLEAN_STUFF =	tclIndex *.html
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/editors
+TYDOC_DESC =	Index of classes in tycho/typt/edit
 
 DIRS =		test doc
 

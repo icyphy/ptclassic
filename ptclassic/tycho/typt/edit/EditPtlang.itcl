@@ -153,11 +153,8 @@ body ::tycho::EditPtlang::gendocBuffer {} {
 body ::tycho::EditPtlang::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-        [file join $TYCHO editors ptlangedit doc usersGuides \
-	    EditPtlangHelp.html]
-
+        [file join $TYCHO typt edit doc usersGuides EditPtlangHelp.html]
 }
-
 
 #####################################################################
 #### parseNow
