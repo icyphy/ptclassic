@@ -334,6 +334,9 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
 // if the environment variable MATLAB_SERVER_HOSTNAME is set, or
 // (3) "matlab".
 int MatlabIfc :: StartMatlab(char* userCommand) {
+    int remoteFlag = FALSE;
+    const char* matlabServer = 0;
+
     KillMatlab();
 
     // Build the command to start Matlab
@@ -342,23 +345,27 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
 	command = userCommand;
     }
     else {
-	const char* matlabServer = getenv("MATLAB_SERVER_HOSTNAME");
+	matlabServer = getenv("MATLAB_SERVER_HOSTNAME");
 	// FIXME: This assumes that we are using Unix and X windows
 	if (matlabServer) {
 	    const char* display = getenv("DISPLAY");
 	    const char* username = getenv("USER");
 
+	    remoteFlag = TRUE;
+
 	    // See the {Matlab External Interface Guide For Unix Workstations},
-	    // 1993, page 2-14, under the explanation of the engOpen command
+	    // 1993, page 2-14, under the explanation of the engOpen command.
+	    // We modified the example to use sh instead of csh to improve
+	    // portability. - ble, xw
 	    command = "rsh";
 	    if (username) {
 		command << " -l " << username;
 	    }
-	    command <<  " " << matlabServer << " \"/bin/csh -c \'";
+	    command <<  " " << matlabServer << " \"/bin/sh -c \'";
 	    if (display) {
-		command <<  "setenv DISPLAY " << display << "; ";
+		command <<  "DISPLAY=" << display << "; export DISPLAY; ";
 	    }
-	    command << "matlab'\"";
+	    command << MATLAB_START_COMMAND << "'\"";
 	}
 	else {
 	    command = MATLAB_START_COMMAND;
@@ -368,8 +375,17 @@ int MatlabIfc :: StartMatlab(char* userCommand) {
     // start the Matlab engine which starts Matlab
     matlabEnginePtr = MatlabEngineOpen(command);
     if ( ! MatlabIsRunning() ) {
-	errorString = "Could not start Matlab using ";
-	errorString << command;
+	if ( remoteFlag ) {
+	    errorString = "Could not start Matlab remotely on ";
+	    errorString << matlabServer << " using '";
+	    errorString << command << "'.";
+	    errorString << " Please check rsh/rlogin permission"
+			<< " to the remote machine.";
+	}
+	else {
+	    errorString = "Could not start Matlab using '";
+	    errorString << command << "'.";
+	}
 	return FALSE;
     }
 
