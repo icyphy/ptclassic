@@ -200,6 +200,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addGlobal("double $starSymbol(RecvData);\n");
 		addInclude("<stdio.h>");
 		addInclude("<stdlib.h>");
+		addInclude("<thread.h>");
 		addInclude("<udpam.h>");
 		addInclude("<am.h>");
 		addCompileOption(
@@ -231,7 +232,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 
 	for (i = 0; i < $val(numData); i++) {
 		while ($starSymbol(RecvData) == -0.001) {
-			AM_Poll();
+			AM_Poll(bundle);
 		}
 		pos = $val(numData) - 1 + i;
 		$ref(output,pos) = $starSymbol(RecvData);
