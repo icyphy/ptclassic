@@ -42,6 +42,11 @@
 # cd $PTOLEMY/src/domains; rm */stars/*.c */*/stars/*.c
 # cd $PTOLEMY; make install
 
+# We need to pass the name of the make program to run to this script
+# in case the user is using 'gmake' instead of 'make'
+MAKE=$1
+shift
+
 # Temporary File to hold the header and parts 1 and 2
 hdr=/tmp/genStarTable$$.hdr
 out1=/tmp/genStarTable.$$p1
@@ -97,7 +102,7 @@ echo $makevarlist |
 
 # Run make, convert the output into C code
 # --no-print-directory is a gnu make specific argument
-make -f $mymkfile --no-print-directory echo_pl_srcs | 
+$MAKE -f $mymkfile --no-print-directory echo_pl_srcs | 
 awk ' { nfiles=split($0,files," ")
 		for(i=1;i<=nfiles;i++) {
 
