@@ -51,12 +51,12 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
     double* imagp = 0;
     mxArray* matlabMatrix = 0;
     if ( portType == INT || portType == FLOAT || portType == FIX ) {
-	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxREAL);
+	matlabMatrix = mxCreateDoubleMatrix(1, 1, MXREAL);
 	realp = mxGetPr(matlabMatrix);
 	*realp = double(particle);
     }
     else if ( portType == COMPLEX ) {
-	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxCOMPLEX);
+	matlabMatrix = mxCreateDoubleMatrix(1, 1, MXCOMPLEX);
 	realp = mxGetPr(matlabMatrix);
 	imagp = mxGetPi(matlabMatrix);
 	Complex temp = particle;
@@ -71,7 +71,7 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxCOMPLEX);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, MXCOMPLEX);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
@@ -93,7 +93,7 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxREAL);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, MXREAL);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
@@ -112,7 +112,7 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxREAL);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, MXREAL);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
@@ -131,7 +131,7 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
 	// allocate a Matlab matrix and name it
 	int rows = Amatrix.numRows();
 	int cols = Amatrix.numCols();
-	matlabMatrix = mxCreateDoubleMatrix(rows, cols, mxREAL);
+	matlabMatrix = mxCreateDoubleMatrix(rows, cols, MXREAL);
 
 	// copy values in the Ptolemy matrix to the Matlab matrix
 	// Matlab stores values in column-major order like Fortran
@@ -144,7 +144,7 @@ mxArray* MatlabPtIfc :: PtolemyToMatlab(
     }
     else {
 	*errflag = TRUE;
-	matlabMatrix = mxCreateDoubleMatrix(1, 1, mxREAL);
+	matlabMatrix = mxCreateDoubleMatrix(1, 1, MXREAL);
 	double* realp = mxGetPr(matlabMatrix);
 	*realp = 0.0;
     }
