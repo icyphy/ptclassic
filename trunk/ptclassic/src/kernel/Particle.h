@@ -58,6 +58,9 @@ public:
 	// the compiler can't handle this
 	virtual Particle& operator = (const Particle&) = 0;
 
+	// clone the Particle, and remove clone
+	Particle* clone() ;
+	void die();
 protected:
 	// Before copying Particles, always compare their types
 	// Otherwise the user could always copy Particles of

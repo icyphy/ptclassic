@@ -18,6 +18,21 @@ $Id$
 #include "Output.h"
 
 extern Error errorHandler;
+extern PlasmaList plasmaList;
+
+	///////////////////////////////////////
+	// class Particle
+	///////////////////////////////////////
+
+Particle* Particle :: clone() 
+{
+	return (plasmaList.getPlasma(readType()))->get() ;
+}
+
+void Particle :: die()
+{
+	plasmaList.getPlasma(readType())->put(this) ;
+}
 
 	///////////////////////////////////////
 	// class IntSample
