@@ -67,9 +67,13 @@ OPTIMIZER =
 #-Wsynth is new in g++-2.6.x
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 MULTITHREAD =	-D_REENTRANT
-GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
+# Define PTSOL2_4 if you are on Solaris2_4
+LOCALFLAGS =    -DPTSOL2_4
+GPPFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAG
+S)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
-CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD)
+CFLAGS =	-g $(MEMLOG) $(WARNINGS) $(OPTIMIZER) $(MULTITHREAD) $(LOCALFLAG
+S)
 
 #
 # Variables for the linker
