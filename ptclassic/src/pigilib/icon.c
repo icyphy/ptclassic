@@ -7,6 +7,7 @@ $Id$
 /* Includes */
 #include <stdio.h>
 #include <sys/file.h>
+#include <sys/param.h>
 #include <pwd.h>
 #include "local.h"
 #include "rpc.h"
@@ -80,7 +81,7 @@ static boolean
 MkStar(name, dir)
 char *name, *dir;
 {
-static dmTextItem item = {"Palette", 1, 80, "./user", NULL};
+static dmTextItem item = {"Palette", 1, 80, "./user.pal", NULL};
 static dmTextItem itTemplate = {"Template", 1, 80, NULL, NULL};
 static char *q1 = "Cannot find star definition.  Define a new star?";
     char *iconDir;
@@ -186,37 +187,92 @@ static dmTextItem items[] = {
 #undef ITEMS_N
 }
 
+/*
+Given a directory pathname, expand all the symlinks if any in the path
+and return it.
+This is a hack.  There should be a better way of doing this.
+Inputs: dirPath = directory pathname string
+Outputs: expanded = pointer to new string containing result, can UFree()
+    the string after use.
+*/
+boolean
+SymlinkExpand(dirPath, expanded)
+char *dirPath, **expanded;
+{
+    char *getwd(), *oldCwd, buf[MAXPATHLEN];
+
+    /* get cwd and save it */
+    ERR_IF2(getwd(buf) == 0, buf);
+    ERR_IF1(!StrDup(&oldCwd, buf));
+
+    /* do the expansion */
+    ERR_IF2(chdir(dirPath) != 0, "SymlinkExpand: cannot chdir()");
+    ERR_IF2(getwd(buf) == 0, buf);
+    ERR_IF1(!StrDup(expanded, buf));
+
+    /* change back to old cwd */
+    ERR_IF2(chdir(oldCwd) != 0, "SymlinkExpand: cannot chdir()");
+    UFree(oldCwd);
+    return (TRUE);
+}
+    
+
 /* 11/18/89
 Tries to convert the cell name of the facet into ~user format.
 Inputs: tPath = buffer for output.
+Outputs: tPath = filled with cell name in ~user/... format.
+Caveats: There is a hack in the code to handle a special case that
+    should be handled more generally but, I can't think of any good
+    ways of handling it right now.  (edg 5/27/90)
 */
 static boolean
 GetTildePath(facetPtr, tPath)
 octObject *facetPtr;
 char *tPath;
 {
-    char *fullName, *dir;
+    char *fullName, *dir, *edir;
     int uid, n;
     struct passwd *pwent;
+    char *kludge;
 
     octFullName(facetPtr, &fullName);
+
+    /* check if in current user's directory tree */
     uid = getuid();
     ERR_IF2((pwent = getpwuid(uid)) == NULL,
 	"GetTildePath: Cannot get password entry");
     dir = pwent->pw_dir;
-    n = strlen(dir);
-    if (strncmp(fullName, dir, n) == 0) {
+    ERR_IF1(!SymlinkExpand(dir, &edir));
+    n = strlen(edir);
+    if (strncmp(fullName, edir, n) == 0) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
 	return (TRUE);
     }
+    UFree(edir);
+
+    /* check if in the tool's directory tree */
     ERR_IF2((pwent = getpwnam(UToolName)) == NULL,
 	"GetTildePath: Cannot get password entry");
     dir = pwent->pw_dir;
-    n = strlen(dir);
-    if (strncmp(fullName, dir, n) == 0) {
+    ERR_IF1(!SymlinkExpand(dir, &edir));
+    n = strlen(edir);
+    if (strncmp(fullName, edir, n) == 0) {
 	sprintf(tPath, "~%s%s", pwent->pw_name, fullName + n);
 	return (TRUE);
     }
+    UFree(edir);
+
+    /***** Hack Alert  Hack Alert  Hack Alert  Hack Alert *****
+    Handles the special case of ptolemy directory structure on ohm.
+    Sorry, I don't know any other ways of fixing this problem right now.
+    */
+    kludge = "/home/ohm0/tools/share/ptolemy";
+    n = strlen(kludge);
+    if (strncmp(fullName, kludge, n) == 0) {
+	sprintf(tPath, "~ptolemy%s", fullName + n);
+	return (TRUE);
+    }
+
     ErrAdd("GetTildePath: cannot convert absolute path to ~user");
     return (FALSE);
 }
@@ -227,7 +283,7 @@ RPCSpot *spot;
 lsList cmdList;
 long userOptionWord;
 {
-static dmTextItem item = {"Palette", 1, dmWidth, "./user", NULL};
+static dmTextItem item = {"Palette", 1, dmWidth, "./user.pal", NULL};
     octObject facet;
     char buf[512];
 
