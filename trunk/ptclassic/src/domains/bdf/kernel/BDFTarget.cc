@@ -52,10 +52,10 @@ Target("simulate-BDF","DataFlowStar",
 "one-processor BDF scheduler or Joe's clustering loop scheduler.")
 {
 	addState(logFile.setState("logFile",this,"",
-			"Log file to write to (none if empty)"));
+		"Log file to write to (none if empty)"));
 	addState(allowDynamic.setState("allowDynamic",this,"NO",
 		"Specify whether to try dynamic execution if the graph\n"
-					"cannot be completely clustered"));
+		"cannot be completely clustered"));
 	addState(requireStronglyConsistent.setState(
 		"requireStronglyConsistent",this,"NO",
 		"Enable 'strongly consistent' check: will reject some valid systems"));
@@ -72,9 +72,12 @@ BDFTarget::~BDFTarget() {
 }
 
 void BDFTarget::setup() {
-	LOG_NEW; BDFClustSched* s = new BDFClustSched(logFile,allowDynamic,
-					      requireStronglyConsistent);
+	delSched();
+	LOG_NEW; BDFClustSched* s = new BDFClustSched((const char*) logFile,
+					  int(allowDynamic),
+					  int(requireStronglyConsistent));
+	s->schedulePeriod = schedulePeriod;
+	if (galaxy()) s->setGalaxy(*galaxy());
 	setSched(s);
-	s->schedulePeriod = double(schedulePeriod);
 	Target::setup();
 }
