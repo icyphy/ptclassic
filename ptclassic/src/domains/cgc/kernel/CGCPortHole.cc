@@ -181,6 +181,29 @@ const char* CGCPortHole :: getGeoName() const {
 	return geo().getBufName();
 }
 
+// If type conversion between complex to float/int is required when
+// it is an output.
+int CGCPortHole :: isConverted(){
+	if ((converted >= 0) || isItInput()) return converted;
+	else if (strcmp(type(),resolvedType()) == 0) converted = FALSE;
+	else if (strcmp(type(), ANYTYPE) == 0) converted = FALSE;
+	else if ((strcmp(type(),COMPLEX) == 0) || 
+	    (strcmp(type(),"COMPLEXARRAY") == 0)) converted = TRUE;
+	else if ((strcmp(resolvedType(),COMPLEX) == 0) || 
+	    (strcmp(resolvedType(),"COMPLEXARRAY") == 0)) converted = TRUE;
+	else converted = FALSE;
+
+	return converted;
+}
+
+const char* CGCPortHole :: getLocalGeoName() {
+	if (isItInput() || (isConverted() == FALSE))
+		 return geo().getBufName();
+	StringList temp = geo().getBufName();
+	temp << "_local";
+	return (const char*) temp;
+}
+	
 // Dummy
 int MultiCGCPort :: someFunc() { return 1; }
 

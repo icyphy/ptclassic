@@ -31,7 +31,7 @@ class CGCPortHole : public CGPortHole {
 friend class ForkDestIter;
 public:
 	CGCPortHole() : maxBuf(1), manualFlag(0), asLinearBuf(1), 
-			hasStaticBuf(1), myType(NA) {}
+			hasStaticBuf(1), myType(NA), converted(-1) {}
 
 	void initialize();
 
@@ -71,6 +71,7 @@ public:
 
 	void setGeoName(char* n);
 	const char* getGeoName() const;
+	const char* getLocalGeoName();
 
 	// Return the geodesic connected to this PortHole.
 	// This is typesafe because allocateGeodesic
@@ -98,6 +99,10 @@ public:
 	// calculates. If this manual value is smaller, signal an error.
 	void requestBufSize(int i) { maxBuf = i; manualFlag = TRUE; }
 
+	// check whether automatic type conversion should be performed.
+	// Currently, Complex and float/int type data are converted.
+	int isConverted();
+	
 protected:
 	void setFlags();
 
@@ -107,6 +112,9 @@ private:
 	short hasStaticBuf;	// set if static buffer is achieved.
 	short asLinearBuf;	// set if acts as a linear buf inside a star
 	BufType myType;		// buffer Type.
+	
+	int converted;		// set TRUE if the explicit type conversion 
+				// is required.
 
 	SequentialList& myDest() { return forkDests; }
 };
