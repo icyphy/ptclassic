@@ -119,7 +119,7 @@ X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 COLLECTOR =
 
 PURELINK =	#purelink $(COLLECTOR) -hardlink=yes
-PURIFY =	purify
+PURIFY =	purify -automount-prefix=/tmp_mnt:/vol
 
 # Use beta version under gcc-2.7.2
 #QUANTIFY =	quantify
