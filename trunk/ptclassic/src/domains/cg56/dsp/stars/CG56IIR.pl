@@ -12,6 +12,10 @@ Both arrays start with the constant terms of the polynomial
 and decrease in powers of z (increase in powers of 1/z).
 Note that the constant term of D is not omitted, as is common in
 other programs that assume that it has been normalized to unity.
+The denominator coefficients will be scaled by 1/leading denominator
+coefficient; the numerator coefficients will be scaled by
+gain/leading denominator coefficient.  An error will result if,
+after scaling, any of the coefficients is greater than 1.
     }
     version { $Id$ }
     author { Kennard White and Luis Gutierrez}
@@ -89,7 +93,10 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	name {coeffs}
 	type {fixarray}
 	default { "0" }
-	desc {internal state: contains coeffs}
+	desc {internal state: contains coeffs; even addresses
+		  correspond to denominator coeffs., odd addresses
+		  correspond to numerator coeffs.
+	}
 	attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM }
     }
     defstate{
@@ -104,6 +111,7 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     }
     // for max()
     ccinclude { <minmax.h> }
+
     setup {
 	int numNumer = numerator.size();
 	int numDenom = denominator.size();
@@ -127,34 +135,35 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	delays.resize(numState+1);
 	for (int i = 0; i < numState; i++) {
 	    double temp;
-	    delays[i] = 0;
-        if (i < numNumer) {
-			temp = scaleNumer*double(numerator[i]);
-			if (temp > 1 ) {
-				Error::abortRun(*this,"Scaled numerator coefficient > 1");
-			} else {
-				coeffs[i*2+1] = temp;
-			}
-	    } else {
-			coeffs[i*2 + 1] = 0;
-	    }
+            delays[i] = 0;
+            if (i < numNumer) {
+                temp = scaleNumer*double(numerator[i]);
+                if (temp > 1 ) {
+                    Error::abortRun(*this,"Scaled numerator ", 
+                                          "coefficient > 1");
+                } else {
+                    coeffs[i*2+1] = temp;
+                }
+            } else {
+                coeffs[i*2 + 1] = 0;
+            }
 
-		if ( i < numDenom ) {
-			temp = scaleDenom * -(double(denominator[i]));
-			if (temp > 1 ) {
-				Error::abortRun(*this,"Scaled denominator coefficient > 1");
-			} else {
-				coeffs[i*2] = temp;
-			}
-		} else {
-			coeffs[i*2] = 0;
-		}  
+            if ( i < numDenom ) {
+                temp = scaleDenom * -(double(denominator[i]));
+                if (temp > 1 ) {
+                    Error::abortRun(*this,"Scaled denominator ", 
+                                          "coefficient > 1");
+                } else {
+                    coeffs[i*2] = temp;
+                }
+            } else {
+                coeffs[i*2] = 0;
+            }  
 				
-//	    coeffs[i*2+1] = i < numNumer ? scaleNumer * double(numerator[i]) : 0;
-//	    coeffs[i*2] = i < numDenom ? scaleDenom * -(double(denominator[i])) : 0;
-	}
+        }
 
     }
+
     go{
 	if (numState == 1) {
 		addCode(one);
@@ -177,15 +186,15 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
     codeblock(init){
 ;        b[0] + b[1]z^-1 + ... + b[n]z^-n
 ; H(z) = ----------------------------------
-;		   1  + a[1]z^-1 + ... + a[n]z^-n
+;        1  + a[1]z^-1 + ... + a[n]z^-n
 ; register after executing this block:
 ; r0 -> w[1]
 ; r4 -> a[2]
-; x0 = w[1]
-; y0 = a[1]
+; x0 == w[1]
+; y0 == a[1]
 ; (a[0] is never referenced since it is normalized in setup)
-; a  = sample 
-; b  = 0
+; a  == sample 
+; b  == 0
 	move	#($addr(delays)+1),r0
 	move	#($addr(coeffs)+2),r4
 	move	$ref(signalIn),a
@@ -194,24 +203,24 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
     codeblock(doFilter, "int numLoops"){
 	do #@numLoops,$label(end_loops)
-; x0 = w[p]			y0 = a[p]   x1 = w[p-1]
+; x0 == w[p]	y0 == a[p]	x1 == w[p-1]
 	mac	y0,x0,a		x1,x:(r0)+	y:(r4)+,y1
-; a += w[p]*a[p]  	w[p]=w[p-1]	y1 = b[p]
+; a += w[p]*a[p]	w[p]=w[p-1]	y1 = b[p]
 	move	x0,x1						
-; 	x1 = w[p]
+; x1 = w[p]
 	mac	y1,x1,b		x:(r0),x0	y:(r4)+,y0
-; b += w[p]*b[p]    x0 = w[p+1] y0 = a[p+1]
+; b += w[p]*b[p]	x0 = w[p+1] 	y0 = a[p+1]
 $label(end_loops)
     }
 
     codeblock(end){
 	move $ref(coeffs,1),y1
-; 	y1 = b[0]
+; y1 = b[0]
 	move a,x0
-;   x0 = sample + a[1]w[1] + ... + a[n]w[n]
+; x0 = sample + a[1]w[1] + ... + a[n]w[n]
 	macr x0,y1,b    a,$ref(delays,1)
-;   b  = b[0]*{ sample + a[1]w[1] + ... + a[n]w[n]} = output
-;   w[1] = sample + a[1]w[1] + ... + a[n]w[n]
+; b  = b[0]*{ sample + a[1]w[1] + ... + a[n]w[n]} = output
+; w[1] = sample + a[1]w[1] + ... + a[n]w[n]
 	move b,$ref(signalOut)
     }
 
