@@ -80,6 +80,17 @@ extern const Attribute A_DYNAMIC = {AB_DYNAMIC,0};
 
 ParseToken State :: pushback;
 
+// Stuff to access Unix system error info.
+
+extern int sys_nerr;
+extern char *sys_errlist[];
+extern int errno;
+
+inline const char* why() {
+	return (errno >= 0 && errno < sys_nerr) ? sys_errlist[errno] :
+	"Unknown error";
+}
+
 // The state tokenizer: return next token when parsing a state
 // initializer string.  Handles references to files and other states.
 ParseToken
@@ -104,7 +115,9 @@ State :: getParseToken(Tokenizer& lexer, int stateType) {
 // put special characters back.
 		lexer.setSpecial (tc);
                 if (!lexer.fromFile(filename)) {
-			parseError ("can't open file ", filename);
+			StringList msg;
+			msg << filename << ": " << why();
+			parseError ("can't open file ", msg);
 			t.tok = T_ERROR;
 			return t;
 		}
