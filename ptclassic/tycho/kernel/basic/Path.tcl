@@ -348,29 +348,29 @@ proc ::tycho::pathSeparator {} {
 # </pre>
 #
 proc ::tycho::parseHeaderString {string var} {
-	upvar $var v
+    upvar $var v
 	
-	# Remove delimiters and space
-	regsub -all {-\*-} $string string
-	set string [string trim $string " \t;"]
-	
-	# Try for just the mode
-	if [regexp {^[^:;]+$} $string mode] {
-		set v(mode) $mode
-		return $mode
-	}
+    # Remove delimiters and space
+    regsub -all -- {-\*-} $string {} string
+    set string [string trim $string " \t;"]
 
-	# Parse name-value
-	while [regexp {^([^:;]+) *: *([^:;]+)(.*)$} \
-			$string _ name value string] {
-		set v($name) $value
-		set string [string trimleft $string " \t;"]
-	}
-	if [::info exists v(mode)] {
-		return v(mode)
-	} else {
-		return {}
-	}
+    # Try for just the mode
+    if [regexp {^[^:;]+$} $string mode] {
+        set v(mode) $mode
+        return $mode
+    }
+
+    # Parse name-value
+    while { [regexp {^([^:;]+) *: *([^:;]+)(.*)$} \
+            $string _ name value string] } {
+        set v($name) $value
+        set string [string trimleft $string " \t;"]
+    }
+    if [::info exists v(mode)] {
+        return $v(mode)
+    } else {
+        return {}
+    }
 }
 
 ##############################################################################
