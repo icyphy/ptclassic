@@ -383,6 +383,7 @@ configbody ::tycho::Edit::text {
 ###################################################################
 #
 body ::tycho::Edit::constructor {args} {
+    global tcl_platform
 
     # Set the view "type" for the Window menu
     set viewType "text"
@@ -501,10 +502,12 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Control-r> "%Q searchQuery 1 0; break"
     bind $itk_component(text) <Find> "%Q searchQuery 1 0; break"
 
-    # Spelling command
-    bind $itk_component(text) <Meta-dollar> "%Q spellCheck; break"
-    bind $itk_component(text) <Escape><dollar> "%Q spellCheck; break"
-    
+    if {$tcl_platform(platform) != unix} {
+	# Spelling command
+	bind $itk_component(text) <Meta-dollar> "%Q spellCheck; break"
+	bind $itk_component(text) <Escape><dollar> "%Q spellCheck; break"
+    }
+
     # Scrolling commands
     bind $itk_component(text) <Control-v> "%Q scroll 1; break"
     bind $itk_component(text) <Meta-v> "%Q scroll -1; break"
@@ -648,7 +651,10 @@ body ::tycho::Edit::constructor {args} {
         
         $myMenubar add "Spelling..." Edit -underline 2 \
                 -accelerator "M-$" -command "$this spellCheck"
-        
+	if {$tcl_platform(platform) != unix} {
+	    $myMenubar disable "Spelling..."
+	}
+
         $myMenubar add {Goto Line...} Edit -underline 0 \
                 -accelerator "C-c C-g" -command "$this gotoLine"
         
