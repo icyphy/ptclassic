@@ -39,10 +39,14 @@ screen fonts -- the font manager provides these as a pseudo font
 <P> The arguments passed to this procedure represent the initial font
 to be displayed, as its family, size, and style. Any number may be
 supplied (provided they remain in the right order). If none are
-supplied, the font default to "Helvetica 12 Roman."
+supplied, the font default to "Helvetica 12 Roman." The style can be
+one of "Roman," "Italic," "Bold," or "Bold Italic" -- if omitted, it
+defaults to "Roman". Font family names and styles are all
+case-insensitive.
 
-<p>
-<h2><a name="fonts, setting">Setting Fonts Interactively</a></h2>
+
+<p> <h2><a name="fonts, setting">Setting Fonts
+Interactively</a></h2>
 
 The FontDialog just given returns the selected font when the user
 presses OK, or the name of the initial font if the used presses
