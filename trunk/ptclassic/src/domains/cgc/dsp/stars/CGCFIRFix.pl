@@ -225,7 +225,6 @@ The input particles are only cast to this precision if the parameter
 	int phase, tapsIndex, inC, i;
 	int outCount = $val(interpolation) - 1;
 	int inPos;
-	double out, tap;
    }
 
    codeblock(body) {
