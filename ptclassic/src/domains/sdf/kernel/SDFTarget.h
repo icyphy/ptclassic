@@ -37,9 +37,8 @@ protected:
 
 public:
 	SDFTarget();
-	void start();
-	int setup(Galaxy&);
-	Block* clone() const;
+	void setup();
+	Block* makeNew() const;
 	~SDFTarget();
 };
 #endif

@@ -1,10 +1,10 @@
-static const char file_id[] = "SDFConnect.cc";
+static const char file_id[] = "SDFPortHole.cc";
 #ifdef __GNUG__
 #pragma implementation
 #endif
 
 #include "Block.h"
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 #include "CircularBuffer.h"
 #include "Geodesic.h"
 
@@ -32,11 +32,11 @@ int DFPortHole :: assocRelation() const { return -1;}
 
 int InSDFPort :: isItInput () const { return TRUE;}
 
-void InSDFPort :: grabData () { getParticle();}
+void InSDFPort :: receiveData () { getParticle();}
 
 int OutSDFPort :: isItOutput () const { return TRUE;}
 
-void OutSDFPort :: grabData () { clearParticle();}
+void OutSDFPort :: receiveData () { clearParticle();}
 
 void OutSDFPort :: sendData () { putParticle();}
 

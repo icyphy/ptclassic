@@ -38,36 +38,31 @@ Target("simulate-SDF","SDFStar",
 		"schedulePeriod for interface with a timed domain."));
 }
 
-Block* SDFTarget::clone() const {
-	LOG_NEW;
-	return &(new SDFTarget)->copyStates(*this);
+Block* SDFTarget::makeNew() const {
+	LOG_NEW; return new SDFTarget;
 }
 
 SDFTarget::~SDFTarget() {
 	delSched();
 }
 
-void SDFTarget::start() {
+void SDFTarget::setup() {
+	delSched();
+	SDFScheduler *s;
 	if (int(loopScheduler)) {
-		LOG_NEW; setSched(new SDFClustSched(logFile));
+		LOG_NEW; s = new SDFClustSched(logFile);
 	} else {
-		LOG_NEW; setSched (new SDFScheduler);
+		LOG_NEW; s = new SDFScheduler;
 	}
-	SDFScheduler* s = (SDFScheduler*) mySched();
-	s->schedulePeriod = float(double(schedulePeriod));
-}
+	s->schedulePeriod = schedulePeriod;
+	s->setGalaxy(*galaxy());
+	setSched(s);
+	Target::setup();
+	if (Scheduler::haltRequested() || logFile.null()) return;
 
-int SDFTarget::setup(Galaxy& g) {
-	int status = Target::setup(g);
-	const char* file = logFile;
-	// just return status, unless we want a log file
-	// with the default scheduler.
-	if (int(loopScheduler) || !status || *file == 0)
-		return status;
 	// create a file with the schedule in it
 	pt_ofstream o(logFile);
-	if (!o) return FALSE;
-	o << mySched()->displaySchedule();
-	o << "\n";
-	return TRUE;
+	if (o) {
+		o << scheduler()->displaySchedule() << "\n";
+	}
 }

@@ -28,6 +28,7 @@ $Id$
 
 extern const char SDFdomainName[];
 
+
 /************************************************************************
 
 	Synchronous dataflow (SDF) Scheduler
@@ -46,7 +47,7 @@ SDFSchedule :: printVerbose () const {
 	out = "SDF SCHEDULE:\n";
 	SDFSchedIter next(*this);
 	for (int i = size(); i>0; i--) {
-		out += (next++)->readFullName();
+		out += (next++)->fullName();
 		out += "\n";
 	}
 	return out;
@@ -62,13 +63,15 @@ SDFSchedule :: printVerbose () const {
 	////////////////////////////
 
 // runs the number of times indicated by numIters.
-int SDFScheduler :: run (Galaxy& g) {
+int SDFScheduler :: run () {
 	if (invalid) {
-		Error::abortRun(g, "SDF schedule is invalid; can't run");
+		Error::abortRun(*galaxy(),
+				"SDF schedule is invalid; can't run");
 		return FALSE;
 	}
 	if (haltRequested()) {
-		Error::abortRun(g, "Can't continue after run-time error");
+		Error::abortRun(*galaxy(),
+				"Can't continue after run-time error");
 		return FALSE;
 	}
 	while (numItersSoFar < numIters && !haltRequested()) {
@@ -90,10 +93,10 @@ void SDFScheduler :: runOnce () {
    // assume the schedule has been set by the setup member
    // Adjust the schedule pointer to point to the beginning of the schedule.
 	SDFSchedIter nextStar(mySchedule);
-	SDFStar* star;
+	DataFlowStar* star;
 	while ((star = nextStar++) != 0 && !invalid) {
 		// Fire the next star in the list
-		invalid = !star->fire();
+		invalid = !star->run();
 	}
 }
 
@@ -103,85 +106,79 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-int SDFScheduler :: setup (Galaxy& galaxy) {
-
+void SDFScheduler :: setup () {
+	if (!galaxy()) {
+		Error::abortRun("SDFScheduler: no galaxy!");
+		return;
+	}
 	numItersSoFar = 0;
 	numIters = 1;			// reset the member "numIters"
 	clearHalt();
 	invalid = FALSE;
 
-        checkConnectivity(galaxy);
-        if (invalid) return FALSE;
+        checkConnectivity();
+        if (invalid) return;
 
-        prepareGalaxy(galaxy);
+        prepareGalaxy();
 
 	currentTime = 0;
 
 	if (haltRequested()) {
 		invalid = TRUE;
-		return FALSE;
+		return;
 	}
-
 
 	// force recomputation of repetitions and noTimes.  Also make
 	// sure all stars are SDF.
 
-        checkStars(galaxy);
-	if (invalid) return FALSE;
+        checkStars();
+	if (invalid) return;
 
-        prepareStars(galaxy);
-	if (invalid) return FALSE;
-
-	repetitions(galaxy);
-	if (invalid) return FALSE;
+	repetitions();
+	if (invalid) return;
 
         // Schedule the graph.
 
-        computeSchedule(galaxy);
-	return !invalid;
+        computeSchedule(*galaxy());
+	return;
 }
 
 
-int SDFScheduler::prepareGalaxy(Galaxy& galaxy)
+int SDFScheduler::prepareGalaxy()
 {
-	galaxy.initialize();
+	galaxy()->initialize();
 	return TRUE;
 }
 
-
-
-int SDFScheduler::checkConnectivity(Galaxy& galaxy)
+int SDFScheduler::checkConnectivity()
 {
-	if (warnIfNotConnected (galaxy)) {
+	if (warnIfNotConnected (*galaxy())) {
                 invalid = TRUE;
                 return FALSE;
 	}
 	return TRUE;
 }
 
-// Check that all stars in "galaxy" are SDF stars or are derived from SDF.
-int SDFScheduler::checkStars(Galaxy& galaxy)
+// Check that all stars in "galaxy" have the SDF property.
+// We assume they have already been checked (by the target, say)
+// and are at least DataFlowStar.
+
+// Note that "isSDFinContext" is used.  If actors are inserted
+// after the schedule is computed, the SDF property may be lost,
+// so in that case checkStars should be overriden and isSDF used
+// instead.
+
+int SDFScheduler::checkStars()
 {
-	GalStarIter nextStar(galaxy);
-	Star* s;
+	DFGalStarIter nextStar(*galaxy());
+	DataFlowStar* s;
 	while ((s = nextStar++) != 0) {
-		if (!s->isA("SDFStar")) {
-			Error::abortRun(*s, " is not an SDF star");
+		if (!s->isSDFinContext()) {
+			Error::abortRun(*s, " is not SDF");
 			invalid = TRUE;
 			return FALSE;
 		}
 	}
-	return TRUE;
-}
-
-
-
-int SDFScheduler::prepareStars(Galaxy& galaxy)
-{
-	GalStarIter nextStar(galaxy);
-	Star* s;
-	while ((s = nextStar++) != 0)
-		s->prepareForScheduling();
 	return TRUE;
 }
 
@@ -191,10 +188,10 @@ inline int wormEdge(PortHole& p) {
 	else return p.atBoundary();
 }
 
-int SDFScheduler::computeSchedule(Galaxy& galaxy)
+int SDFScheduler::computeSchedule(Galaxy& g)
 {
-	GalStarIter nextStar(galaxy);
-	Star* s;
+	DFGalStarIter nextStar(g);
+	DataFlowStar* s;
 
 	mySchedule.initialize();
 
@@ -206,7 +203,6 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
         //      1 - scheduler is deadlocked
         //      0 - more passes are required
 
-
 	do {
                 passValue = 2;
 		deferredStar = 0;
@@ -215,11 +211,10 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 		numAddedThisPass = 0;
                 nextStar.reset();
                 while ((s = nextStar++) != 0) {
-                        SDFStar& atom = *(SDFStar*)s;
                         int runResult;
 
                         do {
-                                runResult = addIfWeCan(atom,deferredFiring);
+                                runResult = addIfWeCan(*s,deferredFiring);
 				if (runResult == 0) numAddedThisPass++;
                         } while (runResult == 0);
                 }
@@ -247,17 +242,17 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 }
 
 // function to report deadlock.
-void SDFScheduler::reportDeadlock (GalStarIter& next) {
+void SDFScheduler::reportDeadlock (DFGalStarIter& next) {
 	next.reset();
-	SDFStar *s;
+	DataFlowStar *s;
         if (Error::canMark()) {
-                while ((s = (SDFStar*)next++) != 0)
+                while ((s = next++) != 0)
                         if (s->notRunnable() == 1) Error::mark(*s);
                 Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
         }
         else {
 		Error::abortRun ("DEADLOCK: the following stars cannot be run");
-		while ((s = (SDFStar*)next++) != 0)
+		while ((s = next++) != 0)
 			if (s->notRunnable() == 1)
 				Error::message(*s, "is deadlocked");
 	}
@@ -267,7 +262,7 @@ void SDFScheduler::reportDeadlock (GalStarIter& next) {
 // This routine simulates running the star, adding it to the
 // schedule where it can be run
 
-int SDFScheduler::addIfWeCan (SDFStar& star, int defer) {
+int SDFScheduler::addIfWeCan (DataFlowStar& star, int defer) {
 	int runRes = simRunStar(star,defer);
 	if (runRes == 0) {
 		mySchedule.append(star);
@@ -293,35 +288,33 @@ int SDFScheduler::addIfWeCan (SDFStar& star, int defer) {
 	// repetitions
 	////////////////////////////
 
-int SDFScheduler :: repetitions (Galaxy& galaxy) {
+int SDFScheduler :: repetitions () {
 
 	// Initialize the least common multiple, which after all the
 	// repetitions properties have been set, will equal the lcm
 	// of the all the denominators.
-	lcm = 1;
+	lcmOfDenoms = 1;
 
 	// The following iteration occurs exactly as many times as
 	// there are blocks in the universe.
 	// Note that for a connected universe, this iteration would
 	// entirely unnecessary.  Is there some way to get rid of it?
 	// Should we allow disconnected universes?
-	GalStarIter next(galaxy);
-	Star* s;
+	DFGalStarIter next(*galaxy());
+	DataFlowStar* s;
 	while ((s = next++) != 0) {
 		// Get the next atomic block:
-		SDFStar& star = *(SDFStar*) s;
 
 		// First check to see whether a repetitions property has
 		// been set.  If so, do nothing.  Otherwise, compute the
 		// repetitions property.
-		// The block must be an SDFStar for this to work.
-		// Should there be some error checking here?
-		if(star.repetitions.numerator == 0) {
+
+		if(s->repetitions.num() == 0) {
 
 			// Set repetitions to 1 and set repetitions for
 			// all blocks connected to the current block.
-			star.repetitions = 1;
-			reptConnectedSubgraph(star);
+			s->repetitions = 1;
+			reptConnectedSubgraph(*s);
 			if (invalid) return FALSE;
 		}
 	}
@@ -334,9 +327,8 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	next.reset();
 	while ((s = next++) != 0) {
 		// Get the next atomic block:
-		SDFStar& star = *(SDFStar*) s;
-		star.repetitions *= Fraction(lcm);
-		star.repetitions.simplify();
+		s->repetitions *= Fraction(lcmOfDenoms);
+		s->repetitions.simplify();
 	}
 	return TRUE;
 }
@@ -382,40 +374,31 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 // TRUE is returned.
 
 int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
-	SDFStar& nearStar = (SDFStar&) nearPort.parent()->asStar();
-	SDFStar& farStar =  (SDFStar&) farPort.parent()->asStar();
+	DataFlowStar& nearStar = (DataFlowStar&) nearPort.parent()->asStar();
+	DataFlowStar& farStar =  (DataFlowStar&) farPort.parent()->asStar();
 	Fraction& nearStarRepetitions = nearStar.repetitions;
 	Fraction& farStarRepetitions = farStar.repetitions;
 	Fraction farStarShouldBe;
-	Fraction temp;
 
 	// compute what the far star repetitions property should be.
 
-	farStarShouldBe = nearStarRepetitions *
-		Fraction(nearPort.numberTokens,farPort.numberTokens);
+	Fraction factor(nearPort.numberTokens,farPort.numberTokens);
+	farStarShouldBe = nearStarRepetitions * factor;
 
 	// Simplify the fraction
 	farStarShouldBe.simplify();
 
-	if (farStarRepetitions == Fraction(0)) {
+	if (farStarRepetitions.num() == 0) {
 		// farStarRepetitions has not been set, so set it
 		farStarRepetitions = farStarShouldBe;
-
 		// update the least common multiple of the denominators
-		temp = Fraction(lcm,farStarShouldBe.denominator);
-		lcm = temp.computeGcdLcm().lcm;
+		lcmOfDenoms = lcm(lcmOfDenoms,farStarShouldBe.den());
 		return TRUE;
 	}
 	else {
 		// farStarRepetitions has been set, so test for equality
 		if (!(farStarRepetitions == farStarShouldBe)) {
-			StringList msg = "Sample rate problem between ";
-			msg += nearStar.readFullName();
-			msg += " and ";
-			msg += farStar.readFullName();
-                        Error::mark(nearStar);
-                        Error::mark(farStar);
-                        Error::abortRun(msg);
+			Error::abortRun(farStar,"sample rate inconsistency detected");
 			invalid = TRUE;
 		}
 		return FALSE;
@@ -432,7 +415,7 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 	// simRunStar
 	////////////////////////////
 
-int SDFScheduler :: simRunStar (SDFStar& atom, int deferFiring) {
+int SDFScheduler :: simRunStar (DataFlowStar& atom, int deferFiring) {
 	int status = atom.simRunStar(deferFiring);
 	if (status == 3 && !deferredStar) {
 		// if no star has been deferred yet, defer this one.
@@ -471,22 +454,22 @@ SDFScheduler::~SDFScheduler () {
 // setStopTime, for compatibility with DE scheduler.
 // for now, we assume each schedule interation takes 1.0
 // time units.  (Argh).  Deal with roundoff problems.
-void SDFScheduler::setStopTime (float limit) {
+void SDFScheduler::setStopTime (double limit) {
 	numIters = int(floor(limit + 0.001));
 }
 
 // timing control for wormholes
 
-void SDFScheduler::resetStopTime (float) {
+void SDFScheduler::resetStopTime (double) {
 	numIters = 1; numItersSoFar = 0;
 }
 
 void SDFScheduler::compileRun () {
     // assume the schedule has been set by the setup member
-    Target& tar = getTarget();
+    Target& tar = target();
 
     SDFSchedIter nextStar(mySchedule);
-    SDFStar* star;
+    DataFlowStar* star;
     while ((star = nextStar++) != 0 && !haltRequested()) {
 	// Fire the next star in the list
 	tar.writeFiring(*star, 1);
@@ -497,7 +480,7 @@ void SDFScheduler :: copySchedule(SDFSchedule& s) {
 	mySchedule.initialize();
 
 	SDFSchedIter nextStar(s);
-	SDFStar* star;
+	DataFlowStar* star;
 	while ((star = nextStar++) != 0) {
 		mySchedule.append(*star);
 	}

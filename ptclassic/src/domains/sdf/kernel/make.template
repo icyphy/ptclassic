@@ -24,14 +24,12 @@ INCL = -I$(KERNDIR)
 # Library name
 LIB=libsdf.a
 
-# Library sources
-SRCS= \
- SDFConnect.cc SDFScheduler.cc SDFStar.cc SDFWormhole.cc SDFWormConnect.cc \
- SDFDomain.cc SDFCluster.cc SDFTarget.cc
-
 # Header files
-HDRS= SDFConnect.h SDFGeodesic.h SDFScheduler.h SDFStar.h SDFUniverse.h \
- SDFWormhole.h SDFWormConnect.h SDFCluster.h SDFTarget.h
+HDRS= SDFPortHole.h SDFScheduler.h SDFStar.h SDFWormhole.h \
+ SDFCluster.h SDFTarget.h
+
+# Library sources
+SRCS= $(HDRS:.h=.cc) SDFDomain.cc
 
 # Library objects
 OBJS= $(SRCS:.cc=.o)

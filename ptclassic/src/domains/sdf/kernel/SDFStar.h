@@ -21,7 +21,7 @@ $Id$
 
 #include "Star.h"
 #include "Fraction.h"
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 #include "Particle.h"
 
 class EGNode;
@@ -34,11 +34,6 @@ class EGNode;
 // will be here.
 
 class DataFlowStar : public Star {
-protected:
-	// During scheduling, the scheduler must keep track of how
-	// many times it has scheduled a star.  This is a convenient
-	// place to do that.
-	unsigned noTimes;
 public:
 	// The number of repetitions of the star in a periodic
 	// schedule.  Initialized to 0 by constructor.  Set to correct
@@ -62,34 +57,30 @@ public:
 	// which eligible star to run.
 	virtual unsigned runCost();
 
-	// simulate star execution, see below
-	virtual int simRunStar(int deferFiring);
-
 	// Execution time, for schedulers that use it
 	virtual int myExecTime();
 
+	// initialize -- prepare for scheduling
+	/* virtual */ void initialize();
+
 	// Number of times this star is executed in the schedule
-	int reps() const { return int(double(repetitions));}
+	int reps() const { return repetitions.num()/repetitions.den();}
 
 	int isA(const char*) const;
-	int isSDF() const;
-};
 
-	////////////////////////////////////
-	// class SDFStar
-	////////////////////////////////////
+	// tell if star is SDF in all contexts.  FALSE by default.
+	virtual int isSDF() const;
 
-class SDFStar : public DataFlowStar  {
-private:
-        // pointer to master of instances for an expanded graph
-	// TEMPORARY: these kinds of things don't belong here.
-        EGNode *master;
+	// tell if star is SDF in the current context
+	// (e.g. it is BDF but conditions on all intra-cluster arcs match)
+	// FALSE by default.
+	virtual int isSDFinContext() const;
 
-protected:
-
-public:
-	// constructor
-	SDFStar() : master(0) {}
+	// find source or sink stars quickly
+	int isSource() const { return nInP == numberPorts();}
+	int isSink() const { return nInP == 0;}
+	int numInputs() const { return nInP;}
+	int numOutputs() const { return numberPorts()-nInP;}
 
 	// my expanded graph master (temporary)
 	EGNode *myMaster() { return master;}
@@ -97,25 +88,9 @@ public:
         // set the expanded graph master
         void setMaster(EGNode *m) {master = m;}
 
-	// identify self as SDF
-	int isSDF() const;
-
-	// my domain
-	const char* domain() const;
-
-	// domain specific initialization
-	void prepareForScheduling();
-
-	// functions for use by scheduler
-
-	// notRunnable: returns 0 if the star can be run now,
-	// 1 if it can't be run now but should be runnable later,
-	// and 2 if it has been run as often as it needs to be.
-	int notRunnable();
-
-	// deferrable: returns TRUE if we can defer the star,
-	// FALSE if we cannot.
-	int deferrable();
+	// functions for use by scheduler.  These are for use in
+	// SDF scheduling, e.g. when the stars are SDF or can be
+	// treated as SDF for scheduling purposes.
 
 	// simulate execution of the star, as part of schedule computation.
 	// returns 0 if the star was run successfully;
@@ -125,7 +100,35 @@ public:
 	virtual int simRunStar(int deferFiring);
 
 	// move data and execute the go function
-	int fire();
+	int run();
+
+protected:
+	// During scheduling, the scheduler must keep track of how
+	// many times it has scheduled a star.  This is a convenient
+	// place to do that.
+	unsigned noTimes;
+private:
+	// number of ports that are inputs
+	int nInP;
+        // pointer to master of instances for an expanded graph
+	// TEMPORARY: these kinds of things don't belong here.
+        EGNode *master;
+};
+
+	////////////////////////////////////
+	// class SDFStar
+	////////////////////////////////////
+
+class SDFStar : public DataFlowStar  {
+public:
+	SDFStar() {}
+
+	// identify self as SDF
+	int isSDF() const;
+	int isSDFinContext() const;
+
+	// my domain
+	const char* domain() const;
 
 	// class identification
 	int isA(const char*) const;
@@ -137,6 +140,13 @@ public:
 	SDFStarPortIter(SDFStar& s) : BlockPortIter(s) {}
 	SDFPortHole* next() { return (SDFPortHole*)BlockPortIter::next();}
 	SDFPortHole* operator++() { return next();}
+};
+
+class DFStarPortIter : public BlockPortIter {
+public:
+	DFStarPortIter(DataFlowStar& s) : BlockPortIter(s) {}
+	DFPortHole* next() { return (DFPortHole*)BlockPortIter::next();}
+	DFPortHole* operator++() { return next();}
 };
 
 #endif

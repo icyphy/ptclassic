@@ -133,9 +133,9 @@ public:
 	// generate code using target methods
 	virtual void genCode(Target&, int depth) = 0;
 
-	// fire/go
-	int fire() = 0;
-	void go() { fire();}
+	// run/go
+	int run() = 0;
+	void go() { run();}
 };
 
 // This is the baseclass for SDF cluster objects.  A cluster may have
@@ -157,7 +157,7 @@ public:
 	int  visited() { return visitFlag; }
 
 	// repetitions value
-	int reps() const { return repetitions.numerator;}
+	int reps() const { return repetitions.num();}
 
 	// return loop count
 	int loop() const { return pLoop;}
@@ -205,20 +205,18 @@ inline ostream& operator<<(ostream& o, SDFCluster& cl) {
 // An atomic cluster surrounds an SDFStar, allowing a parallel hierarchy
 // to be built up.
 class SDFAtomCluster : public SDFCluster {
-private:
-	SDFStar& pStar;
 public:
 	// The constructor turns the SDFStar into an atomic cluster.
-	SDFAtomCluster(SDFStar& s,Galaxy* parent = 0);
+	SDFAtomCluster(DataFlowStar& s,Galaxy* parent = 0);
 	// destructor
 	~SDFAtomCluster();
 
 	// return my insides
-	SDFStar& real() { return pStar;}
+	DataFlowStar& real() { return pStar;}
 
 	// "pass-along" functions
-	int fire();
-	void go() { fire();}
+	int run();
+	void go() { run();}
 	int myExecTime();
 
 	// simulate execution for schedule generation.  We also
@@ -234,6 +232,8 @@ public:
 
 	// code generation
 	void genCode(Target&, int depth);
+private:
+	DataFlowStar& pStar;
 };
 
 // An SDFBagScheduler is a modified SDFScheduler that lives in
@@ -242,9 +242,7 @@ public:
 class SDFBagScheduler : public SDFScheduler {
 protected:
 	// we permit disconnected galaxies.
-	int checkConnectivity(Galaxy&) { return TRUE;}
-	// galaxy is already "prepared".
-	int prepareGalaxy(Galaxy&) { return TRUE;}
+	int checkConnectivity() { return TRUE;}
 public:
 	// return the schedule
 	virtual StringList displaySchedule(int depth);
@@ -301,10 +299,10 @@ public:
 
 	// run the cluster, the number of times indicated by the loop
 	// factor.
-	int fire();
+	int run();
 
 	// a synonym
-	void go() { fire();}
+	void go() { run();}
 
 	// do additional clustering on internal cluster (merge parallel
 	// loops, for example)
@@ -325,17 +323,10 @@ private:
 
 class SDFClustPort : public SDFPortHole {
 	friend class SDFCluster;
-private:
-	SDFPortHole& pPort;
-	SDFClustPort* pOutPtr;
-	unsigned char bagPortFlag;
-	unsigned char feedForwardFlag;
-	void loopBy(int fac) { numberTokens *= fac;}
-	void unloopBy(int fac) { numberTokens /= fac;}
 public:
-	SDFClustPort(SDFPortHole& p,SDFCluster* parent = 0,int bagp = 0);
+	SDFClustPort(DFPortHole& p,SDFCluster* parent = 0,int bagp = 0);
 	~SDFClustPort() {}
-	SDFPortHole& real() { return pPort;}
+	DFPortHole& real() { return pPort;}
 	int isItInput() const { return pPort.isItInput();}
 	int isItOutput() const { return pPort.isItOutput();}
 	void initGeo();
@@ -361,14 +352,16 @@ public:
 	SDFClustPort* inPtr() {
 		return bagPortFlag ? (SDFClustPort*)&pPort : 0;
 	}
+private:
+	DFPortHole& pPort;
+	SDFClustPort* pOutPtr;
+	unsigned char bagPortFlag;
+	unsigned char feedForwardFlag;
+	void loopBy(int fac) { numberTokens *= fac;}
+	void unloopBy(int fac) { numberTokens /= fac;}
 };
 
 class SDFClustSched : public SDFScheduler {
-protected:
-	SDFClusterGal* cgal;
-	const char* logFile;
-	// this one does the main work.
-	int computeSchedule (Galaxy&);
 public:
 	// constructor and destructor
 	SDFClustSched(const char* log = 0) : cgal(0),logFile(log) {}
@@ -379,6 +372,11 @@ public:
 
 	// Generate code using the Target to produce the right language.
 	void compileRun();
+protected:
+	SDFClusterGal* cgal;
+	const char* logFile;
+	// this one does the main work.
+	int computeSchedule (Galaxy& g);
 };
 
 class SDFClustPortIter : public BlockPortIter {

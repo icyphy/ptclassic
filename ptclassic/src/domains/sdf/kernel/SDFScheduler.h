@@ -6,8 +6,9 @@
 
 #include "Scheduler.h"
 #include "Galaxy.h"
+#include "GalIter.h"
 #include "SDFStar.h"
-#include "SDFConnect.h"
+#include "SDFPortHole.h"
 #include "DataStruct.h"
 
 /**************************************************************************
@@ -31,14 +32,15 @@ $Id$
 	////////////////////////////
 
 // This class stores the constructed schedule for access at runtime.
-// For now it is simply a list of pointers to SDFStars.
+// For now it is simply a list of pointers to DataFlowStars.
 // Later, we will want it to be a list of lists, where each list
 // has an entry specifying the number of repetitions of its components.
 
-class SDFSchedule : public SequentialList {
+class SDFSchedule : private SequentialList {
+    friend class SDFSchedIter;
 public:
 	// Add an element to the end of the list
-	void append(SDFStar& s) { SequentialList::put(&s);}
+	void append(DataFlowStar& s) { SequentialList::put(&s);}
 
 	// Return the number of elements on the list
 	int size() const {return SequentialList::size();}
@@ -50,7 +52,23 @@ public:
 	void initialize() {SequentialList::initialize();}
 };
 
-class GalStarIter;
+	////////////////////////////
+	// DFGalStarIter
+	////////////////////////////
+
+// DFGalStarIter -- legal to use after galaxy has been checked
+// and known to have only DataFlowStars and derived classes.
+
+class DFGalStarIter : private GalStarIter {
+public:
+	DFGalStarIter(Galaxy& g) 
+	: GalStarIter(g) {}
+	DataFlowStar* next() { return (DataFlowStar*)GalStarIter::next();}
+	DataFlowStar* operator++() { return next();}
+	GalStarIter::reset;
+	// need a public destructor because of private derivation
+	~DFGalStarIter() {}
+};
 
 	////////////////////////////
 	// SDFScheduler
@@ -63,10 +81,10 @@ protected:
 public:
 	// The setup function computes an SDF schedule
 	// and initializes all the blocks.
-	int setup(Galaxy&);
+	void setup();
 
 	// The run function resumes the run where it was left off.
-	int run(Galaxy&);
+	int run();
 
 	// The scheduler makes repeated
 	// passes through the list of atomic blocks in the Universe or
@@ -97,15 +115,15 @@ public:
 	~SDFScheduler ();
 
 	// timing/interation control
-	void setStopTime (float limit);
-	void resetStopTime (float v);
+	void setStopTime (double limit);
+	void resetStopTime (double v);
 
 	// stopping time is floating, in general, though it is always
 	// integral for SDF
-	float getStopTime () {return float(numIters);}
+	double getStopTime () {return double(numIters);}
 
 	// scheduler Period : used when interfaced with timed domain.
-	float schedulePeriod;
+	double schedulePeriod;
 
         // my domain
         const char* domain() const;
@@ -125,24 +143,21 @@ protected:
         // flag if it encounters a problem.
 
         // Verify connectivity for the galaxy.
-        virtual int checkConnectivity(Galaxy& galaxy);
+        virtual int checkConnectivity();
       
         // Initialize the galaxy for scheduling.
-        virtual int prepareGalaxy(Galaxy&galaxy);
+        virtual int prepareGalaxy();
 
         // Check that all stars belong to the right domain.
-        virtual int checkStars(Galaxy &galaxy);
-
-        // Initialize the stars for scheduling.
-        virtual int prepareStars(Galaxy &galaxy);
+        virtual int checkStars();
 
         // set the repetitions property of each atomic block
         // in the galaxy, and recursively call the repetitions
         // function for each non-atomic block in the galaxy.
-        virtual int repetitions (Galaxy& galaxy);
+        virtual int repetitions ();
 
         // Schedule the synchronous data flow graph.
-        virtual int computeSchedule(Galaxy & galaxy);
+        virtual int computeSchedule(Galaxy& g);
 
 	// run one iteration of the SDF schedule
 	virtual void runOnce();
@@ -165,7 +180,7 @@ private:
 
 	// least common multiple of the denominators of the repetitions
 	// member of a connected subgraph
-	int lcm;
+	int lcmOfDenoms;
 
 
 	/******************************************************
@@ -179,35 +194,35 @@ private:
 	// been run the number of times given by repetitions, and 2 if
 	// it has been run the number of times given by repetitions.
 
-	int simRunStar(SDFStar& atom,
+	int simRunStar(DataFlowStar& atom,
 		       int deferFiring = FALSE);
 
 	// The next function runs simRunStar and adds the star to
 	// the schedule if appropriate
-	int addIfWeCan(SDFStar& atom, int deferFiring = FALSE);
+	int addIfWeCan(DataFlowStar& atom, int deferFiring = FALSE);
 
 	// If deferredFiring is TRUE, then we will need a list to store
 	// pointers to blocks whose firing is deferred until the end of
 	// a pass.  A fixed length vector is used because the only effect
 	// the length of the vector has is a mild effect on the speed
 	// of the scheduler.
-	SDFStar* deferredStar;
+	DataFlowStar* deferredStar;
 
 	// State of progress in computing the schedule
 	int passValue;
 
         // Function to report on deadlock
-        void reportDeadlock(GalStarIter&);
+        void reportDeadlock(DFGalStarIter&);
 };
 
 // Iterator for SDFSchedule
 // also works with SDFScheduler
 class SDFSchedIter : private ListIter {
 public:
-	SDFSchedIter(SDFSchedule& s) : ListIter(s) {}
+	SDFSchedIter(const SDFSchedule& s) : ListIter(s) {}
 	SDFSchedIter(SDFScheduler& sch) : ListIter(sch.mySchedule) {}
-	SDFStar* next() { return (SDFStar*)ListIter::next();}
-	SDFStar* operator++() { return next();}
+	DataFlowStar* next() { return (DataFlowStar*)ListIter::next();}
+	DataFlowStar* operator++() { return next();}
 	ListIter::reset;
 };
 
