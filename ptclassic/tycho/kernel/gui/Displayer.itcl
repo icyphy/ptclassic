@@ -75,10 +75,10 @@ class ::tycho::Displayer {
     method deregisterView {viewLabel}
 
     # Get the displayer menubar
-    method menubar {viewLabel} {return $menubar}
+    method menubar {viewLabel}
 
     # Register the given view with the displayer
-    method registerView {viewName viewLabel} {return $menubar}
+    method registerView {viewName viewLabel}
 
     # Remove the given view from the displayer
     method removeView {viewLabel}
