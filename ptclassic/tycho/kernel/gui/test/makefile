@@ -81,7 +81,7 @@ test_simple: $(TCL_SRCS) $(ITCL_SRCS)
 		$(ITCLSH)
 
 # These tests require a graphics terminal
-test_graphics: alltests.itcl all.itcl
+test_graphics: alltests.itcl all.itcl $(TCL_SRCS) $(ITCL_SRCS)
 	tycho -noconsole -e alltests.itcl
 
 FORCE:
