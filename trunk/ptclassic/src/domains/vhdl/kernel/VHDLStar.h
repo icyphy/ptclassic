@@ -61,6 +61,9 @@ public:
 	// class identification
 	int isA(const char*) const;
 
+	// Return the number of the current firing
+	int firingNum() { return firing; }
+
 protected:
 	// access to target (cast is safe: always a VHDLTarget)
 	VHDLTarget* targ() {
@@ -98,6 +101,7 @@ protected:
 
 private:
 	// Maintain counter of firing number.
+	// The first firing is numbered 1.
 	int firing;
 };
 

@@ -214,7 +214,7 @@ StringList VHDLStar :: expandRef(const char* name, const char* offset,
       ref << "_N" << (-tokenNum);
     }
 
-    targ()->registerPortHole(port, ref, tokenNum, part);
+    targ()->registerPortHole(port, ref, firing, tokenNum, part);
   }
 
   // Error:  Couldn't find a State or a PortHole with given name.
