@@ -14,10 +14,14 @@ Some code borrowed from Interpreter.cc, see this file for more info.
 #include "StringList.h"
 #include "miscFuncs.h"
 
-
 static InterpUniverse *universe = NULL;  // Universe to execute
 static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
+
+// Define a stream for logging -- log output to pigiLog.pt
+#include <ostream.h>
+
+ostream LOG("pigiLog.pt", "w");
 
 // Parse a classname
 // We allow classnames to be specified as, say
@@ -82,6 +86,7 @@ KcClearUniverse() {
 	delete universe;
 	universe = new InterpUniverse;
 	currentGalaxy = universe;
+	LOG << "(reset)\n";
 }
 
 // Create a new instance of star or galaxy and set params for it
@@ -92,32 +97,47 @@ KcInstance(char *name, char *ako, ParamListType* pListPtr) {
 	const char* cname = parseClass (ako, &mph, nP);
 	if (!currentGalaxy->addStar(name, cname))
 		return FALSE;
+ 	LOG << "\t(star " << name << " " << cname << ")\n";
 	if (nP && !currentGalaxy->numPorts (name, mph, nP))
 		return FALSE;
+	if (nP)
+		LOG << "\t(numports " << name << " " << mph << " "
+			<< nP << ")\n";
 	if (!pListPtr || pListPtr->length == 0) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
+		LOG << "\t(setstate " << name << " " <<
+			pListPtr->array[i].name << " \"" <<
+			pListPtr->array[i].value << "\")\n";
 		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
 					    pListPtr->array[i].value)) return FALSE;
-    }
-    return TRUE;
+	}
+	return TRUE;
 }
 
 // 7/25/90
 // create a new state for the galaxy
 extern "C" boolean
 KcMakeState(char *name, char *type, char *initVal) {
+	LOG << "\t(state " << name << " " << type << " \"" <<
+		initVal << "\")\n";
 	return currentGalaxy->addState(name, type, initVal);
 }
 
 // connect
 extern "C" boolean
 KcConnect(char *inst1, char *t1, char *inst2, char *t2, int delay) {
+ 	LOG << "\t(connect (" << inst1 << " \"" << t1 << "\") (" <<
+ 		inst2 << " \"" << t2 << "\")";
+ 	if (delay)
+ 		LOG << " " << delay;
+ 	LOG << ")\n";
 	return currentGalaxy->connect(inst1, t1, inst2, t2, delay);
 }
 
 // create a galaxy formal terminal
 extern "C" boolean
 KcAlias(char *fterm, char *inst, char *aterm) {
+	LOG << "\t(alias " << fterm << " " << inst << " " << aterm << ")\n";
 	return currentGalaxy->alias(fterm, inst, aterm);
 }
 
@@ -128,9 +148,8 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 */
 extern "C" boolean
 KcSetKBDomain(char* domain) {
-    if (!KnownBlock::setDomain(domain))
-        return FALSE;
-    return TRUE;
+	LOG << "\t(domain " << domain << ")\n";
+	return KnownBlock::setDomain(domain) ? TRUE : FALSE;
 }
 
 /* 9/22/90, by eal
@@ -144,6 +163,7 @@ curDomainName() {
 // start a galaxy definition
 extern "C" boolean
 KcDefgalaxy(char *galname, char *domain) {
+	LOG << "(defgalaxy " << galname << "\n\t(domain " << domain << ")\n";
 	saveGalaxy = currentGalaxy;
 	currentGalaxy = new InterpGalaxy;
 	currentGalaxy->setBlock(galname, saveGalaxy);
@@ -158,6 +178,7 @@ KcEndDefgalaxy(const char* outerDomain) {
 	// wormhole if that is different from current domain.
 	// note that this call also restores the KnownBlock::currentDomain
 	// to equal the outerDomain.
+	LOG << ")\n";
 	currentGalaxy->addToKnownList(outerDomain);
 
 	currentGalaxy = saveGalaxy;
@@ -167,6 +188,7 @@ KcEndDefgalaxy(const char* outerDomain) {
 // Run the universe
 extern "C" boolean
 KcRun(int n) {
+ 	LOG << "(run " << n << ")\n(wrapup)\n";
 	if (!universe->initSched())
 		return FALSE;
 	universe->setStopTime(n);
@@ -303,7 +325,8 @@ KcInfo(char* name, char** info)
 		ErrAdd("Unknown block");
 		return FALSE;
 	}
-	*info = savestring((char *)b->printVerbose());
+	StringList msg = b->printVerbose();
+	*info = savestring((const char *)msg);
 	return TRUE;
 }
 	
@@ -312,6 +335,8 @@ KcInfo(char* name, char** info)
  */
 extern "C" boolean
 KcNumPorts (char* starname, char* portname, int numP) {
+	LOG << "\t(numports " << starname << " " << portname << " "
+		<< numP << ")\n";
 	return currentGalaxy->numPorts(starname, portname, numP);
 }
 
