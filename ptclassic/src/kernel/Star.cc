@@ -13,6 +13,10 @@ $Id$
 *******************************************************************/
 #include "Star.h"
 #include "StringList.h"
+#include <ACG.h>
+
+// common random number generator for all Star classes.
+ACG gen(10,20);
 
 /*******************************************************************
 
