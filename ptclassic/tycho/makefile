@@ -45,7 +45,7 @@ extraclean:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
+		echo making $@ in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
 		) \
 	    fi ; \
@@ -56,8 +56,8 @@ subinstall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
-		echo making $@ in tycho/lib/$$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+		echo making installin $$x ; \
+		$(MAKE) $(MFLAGS) $(MAKEVARS) install ;\
 		) \
 	    fi ; \
 	done
