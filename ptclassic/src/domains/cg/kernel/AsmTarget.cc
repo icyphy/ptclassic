@@ -40,8 +40,9 @@ AsmTarget::setup(Galaxy& g) {
 	while ((s = (AsmStar*)nextStar++) != 0) {
 		AsmStarPortIter next(*s);
 		AsmPortHole* p;
-		while ((p = next++) != 0)
-			p->initOffset();
+		while ((p = next++) != 0) {
+			if (!p->initOffset()) return FALSE;
+		}
 		doInitialization(*s);
 	}
 	return TRUE;
