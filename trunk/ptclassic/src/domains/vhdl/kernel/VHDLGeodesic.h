@@ -45,13 +45,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class VHDLGeodesic : public CGGeodesic {
 public:
 	VHDLGeodesic() : bufName(0) {}
-	~VHDLGeodesic() {LOG_DEL; delete bufName; }
+	~VHDLGeodesic() {LOG_DEL; delete [] bufName; }
 
 	// class identification
 	int isA(const char*) const;
 
 	void setBufName(const char* n) {
-	    delete [] bufName; bufName = savestring(n);
+	    LOG_DEL; delete [] bufName; bufName = savestring(n);
 	}
     
 	char* getBufName() const;
