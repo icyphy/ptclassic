@@ -46,6 +46,9 @@ class DDFScheduler : public Scheduler {
 
 	// number of overlapped execution allowed.
 	int numOverlapped;
+
+	// number of stars in the galaxy
+	int galSize;
 public:
 	// my domain
 	const char* domain() const ;
