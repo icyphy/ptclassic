@@ -7,8 +7,8 @@ defstar
 Just like ParamBiquad, except that a Tk slider is put in the master
 control panel to control the gain.
     }
-    version { @(#)CGCTkStereoIn.pl	1.4 07/14/96 }
-    author { Sunil Bhave }
+    version { $Id$ }
+    author { William Chen }
     location { CGC Tcl/Tk library }
     copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -57,7 +57,7 @@ limitation of liability, and disclaimer of warranty provisions.
     }
 
     initCode {
-	CGCStereoOut :: initCode();
+	CGCParamBiquad :: initCode();
 	addCode(tkSetup, "tkSetup");
         addCode(setGainDef, "procedure");
     }
