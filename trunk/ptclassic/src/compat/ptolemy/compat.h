@@ -152,6 +152,9 @@ extern "C" {
 #endif /* PTSUN4_CFRONT or PTHPPA_CFRONT or non-ansi cc*/
 #endif /* ! VOLATILE */
 
+/* This is really lame, so lets just not use it.
+ */
+#ifdef NEVER
 #if !defined(PTLINUX) && !defined(PTNBSD_386) && !defined(PTFREEBSD)
 #if defined(USG) && ! defined(PTHPPA) && ! defined(PTAIX) && !defined(PTSVR4) && !defined(PTSOL2)
 extern int sprintf();
@@ -179,6 +182,7 @@ extern char *sprintf();
 #endif /* PTIRIX5 */
 #endif
 #endif /* PTLINUX */
+#endif /* NEVER */
 
 #if defined(__GNUC__) && !defined(PTNBSD_386) && !defined(PTFREEBSD)
 
