@@ -34,6 +34,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
+#include "BasePrioQueue.h"
 #include "DataStruct.h"
 #include "DEStar.h"
 
@@ -53,22 +54,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	// class CqLevelLink
 	//////////////////////////////////////
 
-class CqLevelLink 
+class CqLevelLink : public LevelLink
 {
 	friend class CalendarQueue;
+	friend class CQScheduler;
 public:
-	Pointer e;
-	double	level;		// currently, level is "double" type.
-	double fineLevel;	// If levels are equal, we may need
-				// finerLevel which is optional.
 	Star* dest;             // All the destinations are also stored
 				// contiguously to allow sequential
 				// popping off of same Star event;
 				// of an event.
-	CqLevelLink() {}
-
-	CqLevelLink* next;
-	CqLevelLink* before;
 
 	// v sets the level, and fv sets the fineLevel of the entry.
 	// Numerically smaller number represents  the higher priority.
@@ -80,7 +74,7 @@ public:
 	// class CalendarQueue
 	//////////////////////////////////////
 
-class CalendarQueue
+class CalendarQueue : public BasePrioQueue
 {
 public:
 	// Add element to the tail of the queue and sort it by its level (v)

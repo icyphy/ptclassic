@@ -57,7 +57,7 @@ CqLevelLink* CalendarQueue :: getFreeLink()
 	CqLevelLink* temp;
 	if (freeLinkHead) {
 		temp = freeLinkHead;
-		freeLinkHead = temp->next;
+		freeLinkHead = (CqLevelLink*)temp->next;
 		numFreeLinks--;
 	} else {
 		LOG_NEW; temp = new CqLevelLink;
@@ -83,7 +83,7 @@ void CalendarQueue :: clearFreeList()
 	CqLevelLink* temp;
 	while (freeLinkHead->next) {
 		temp = freeLinkHead;
-		freeLinkHead = freeLinkHead->next;
+		freeLinkHead = (CqLevelLink*)freeLinkHead->next;
 		LOG_DEL; delete temp;
 	}
 	LOG_DEL; delete freeLinkHead;
@@ -184,7 +184,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	//            (l == l) and (fl == fl) and (dest >= dest))
 	while (current->level < link->level) 
 	    if (current->next)
-		current = current->next;
+		current = (CqLevelLink*)current->next;
 	    else {
 		current->next = link;
 		link->before = current;
@@ -197,7 +197,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	while ((current->level == link->level) && 
 	        (current->fineLevel < link->fineLevel))
 	    if (current->next)
-		current = current->next;
+		current = (CqLevelLink*)current->next;
 	    else {
 		current->next = link;
 		link->before = current;
@@ -211,7 +211,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 		(current->fineLevel == link->fineLevel) &&
 		(current->dest < link->dest))
 	    if (current->next)
-		current = current->next;
+		current = (CqLevelLink*)current->next;
 	    else {
 		current->next = link;
 		link->before = current;
@@ -224,7 +224,7 @@ void CalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLink *lin
 	if (current->before) {
 	    link->before = current->before;
 	    link->next = current;
-	    current->before->next = link;
+	    ((CqLevelLink*)current->before)->next = link;
 	    current->before = link;
 	}  else {
 	    link->before = NULL;
@@ -265,7 +265,7 @@ CqLevelLink* CalendarQueue :: NextEvent()
 	    // might cause a event to look bad if it was just on the border.
 	    assert(result->level >= ( cq_bucketTop- 1.6*cq_interval ));
 	    cq_lastTime = result->level;	
-	    if (reg_cq_bucket[i] = reg_cq_bucket[i]->next) 
+	    if (reg_cq_bucket[i] = (CqLevelLink*)reg_cq_bucket[i]->next) 
 		reg_cq_bucket[i]->before = NULL;
 	    cq_lastBucket = i;
 	    cq_eventNum--;
@@ -343,7 +343,7 @@ void CalendarQueue :: Resize(int newSize)
     for (i = oldBucketNum - 1; i>=0; i--) {
 	currentEvent = oldBucket[i];
 	while (currentEvent) {
-	    CqLevelLink *nextEvent = currentEvent->next;
+	    CqLevelLink *nextEvent = (CqLevelLink*)currentEvent->next;
 	    int virtualBucket;
 	    virtualBucket = (int)(currentEvent->level/cq_interval);
 	    virtualBucket = virtualBucket% cq_bucketNum; 
@@ -460,7 +460,7 @@ void CalendarQueue :: initialize()
 		// Put all Links into the free List.
 		for (CqLevelLink *l = cq_bucket[i]; l != NULL;) {
 			CqLevelLink *ll = l;
-			l = l->next;
+			l = (CqLevelLink*)l->next;
 			putFreeLink(ll);
 		}
 
