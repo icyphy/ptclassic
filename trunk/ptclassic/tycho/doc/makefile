@@ -52,7 +52,8 @@ EXTRA_SRCS =	abbreviations.html \
 		releasenotes.html \
 		releasenotes0.1.html \
 		running.html \
-		sponsors.html
+		sponsors.html \
+		troubleshooting.html
 
 MISC_FILES =		coding img
 
