@@ -53,6 +53,8 @@ PL_SRCS= \
  SDFFix.pl \
  SDFSharedMem.pl \
  SDFXgraph.pl \
+ SDFAbs.pl \
+ SDFAdaptLinQuant.pl \
  SDFAdd.pl \
  SDFAddCx.pl \
  SDFAddFix.pl \
