@@ -44,38 +44,57 @@ set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl-2.0b2/lib/tcl7.4
 set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl-2.0b2/lib/tk4.0
 set tk_library $env(TK_LIBRARY)
 
-# FIXME: Are the following needed?
-uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/tcl7.4/init.tcl
-uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/tk4.0/tk.tcl
-uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/itcl2.0/init.itcl
-uplevel #0 source $PTOLEMY/tcltk/itcl-2.0b2/lib/itk2.0/init.itk
+uplevel #0 {
+    source $PTOLEMY/tcltk/itcl-2.0b2/lib/tcl7.4/init.tcl
+    source $PTOLEMY/tcltk/itcl-2.0b2/lib/tk4.0/tk.tcl
+    source $PTOLEMY/tcltk/itcl-2.0b2/lib/itcl2.0/init.itcl
+    source $PTOLEMY/tcltk/itcl-2.0b2/lib/itk2.0/init.itk
+}
 
 ########################################################################
 # auto-loading
 # Set up the directories to be searched in order of priority.
 #
-global auto_path
-set auto_path [linsert $auto_path 0 \
-	$ptolemy/tycho/kernel_itk \
-	$ptolemy/tcltk/itcl-2.0b2/lib \
-	$ptolemy/tcltk/itcl-2.0b2/lib/iwidgets2.0
-]
+set ::auto_path [linsert $auto_path 0 $ptolemy/tycho/kernel_itk ]
 
+# Create the tycho namespace
 namespace ::tycho
+
+# Make the tycho namespace visible at the current scope
+import add ::tycho
 
 # Files that we are going to need right away, so there is no
 # point in deferring them to auto-loading.
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/Color.tcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/Font.itcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/Options.tcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/TopLevel.itcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/Dismiss.itcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/Font.itcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/Message.itcl
-uplevel #0 source $PTOLEMY/tycho/kernel_itk/ErrorMessage.itcl
+uplevel #0 {
+    source $PTOLEMY/tycho/kernel_itk/Color.tcl
+    source $PTOLEMY/tycho/kernel_itk/TopLevel.itcl
+    source $PTOLEMY/tycho/kernel_itk/Dismiss.itcl
+    source $PTOLEMY/tycho/kernel_itk/Font.itcl
+    source $PTOLEMY/tycho/kernel_itk/Options.tcl
+    source $PTOLEMY/tycho/kernel_itk/DialogWindow.itcl
+    source $PTOLEMY/tycho/kernel_itk/Message.itcl
+    source $PTOLEMY/tycho/kernel_itk/ErrorMessage.itcl
+
+    # FIXME: In case auto-loading fails, uncomment these:
+    #     source $PTOLEMY/tycho/kernel_itk/YesNoQuery.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/YesNoCancel.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/EntryQuery.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/FileBrowser.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/File.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/EditText.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/Edit.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/HTMLTclText.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/HTMLTcl.itcl    
+    #     source $PTOLEMY/tycho/kernel_itk/EditTclText.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/EditTcl.itcl    
+    #     source $PTOLEMY/tycho/kernel_itk/EditItclText.itcl
+    #     source $PTOLEMY/tycho/kernel_itk/EditItcl.itcl    
+}
 
 # Register the standard context-sensitive editors
-File::registerEditor .tcl EditTcl
-File::registerEditor .itcl EditItcl
-File::registerEditor .itk EditItcl
-File::registerEditor .tyc HTMLTcl
+namespace ::tycho {
+    File::registerEditor .tcl EditTcl
+    File::registerEditor .itcl EditItcl
+    File::registerEditor .itk EditItcl
+    File::registerEditor .tyc HTMLTcl
+}
