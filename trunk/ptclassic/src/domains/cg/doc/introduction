@@ -10,11 +10,12 @@ and a collection of base classes for derivative domains. This section,
 documents the common features and general structure of all code 
 generation domains. 
 .pp
-The design goal of the class hierachy is to save work and to make the 
-system more maintainable. The vast majority of the problem of allocating 
-memory for buffers, constants, tables, etc that are required in code are 
-completely processor-independent; thus these facilities are provided the 
-generic classes found in the $PTOLEMY/src/domains/cg/kernel directory.
+The design goal of the code generation class hierachy is to save work
+and to make the system more maintainable. The vast majority of the
+problem of allocating memory for buffers, constants, tables, and
+generating symbols that are required in code are completely
+processor-independent; thus these facilities are provided in the generic
+classes found in the $PTOLEMY/src/domains/cg/kernel directory.
 .pp
 .Ir "CG-DDF (Dynamic Dataflow Code Generation)"
 .Ir "BDF (Boolean Dataflow, token-flow)"
@@ -38,10 +39,14 @@ assembling, and downloading code. Since it controls scheduling,
 multiprocessor architectures can be supported with automated task 
 partitioning and synchronization. 
 .pp
-.Ir "CGStar, class"
-.Ir "codeblock"
-\fBCGStars\fR, define \fBcodeblocks\fR which are used to specify blocks of 
-code in the target language. The codeblocks are pieced together 
-\fBCGStar\fR methods thus allowing for conditional code generation. The 
-codeblocks are processed and written to \fBtarget code streams\fR, which 
-can then be compiled or assembled. 
+In the following sections, we will introduce the methods and data
+structures needed to write new code generation targets.  However,
+we will not document what is needed to write a new code generation
+domain.  We will first introduce what is needed to write a new
+code generation star, introducing the concepts of \fIcode blocks\R,
+\fIcode streams\fR and \fIcode block macros\fR.  Next we will 
+describe the various methods which will generally use the \fIaddCode\fR
+method to piece together the code blocks into the code streams.
+We will then go into what is required to write single-processor
+and multiple-processor targets.  Finally we will document the various
+schedulers available in the code generation domains.
