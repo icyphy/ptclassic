@@ -150,10 +150,7 @@ public:
 	// set up alias pointers in pairs.  Public so that InterpGalaxy
 	// can set aliases.  Use with care, since derived types may
 	// want to restrict who can alias
-	void setAlias (GenericPort& gp) {
-		aliasedTo = &gp;
-		gp.aliasedFrom = this;
-	}
+	void setAlias (GenericPort& gp);
 
 protected:
 
