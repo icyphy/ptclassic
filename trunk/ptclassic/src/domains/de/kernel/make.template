@@ -57,7 +57,7 @@ SRCS = $(HDRS:.h=.cc) DEDomain.cc
 LIB=libde.$(LIBSUFFIX)
 
 # Used to create .dlls under nt4.vc
-DLLDEPS = 	$(KERNEL_DLLDEP)
+DLLDEPS =	..\..\..\kernel\libptolemy.lib
 
 # Objects:
 OBJS = $(SRCS:.cc=.o)
