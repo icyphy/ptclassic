@@ -81,7 +81,9 @@ WARNINGS =	-Wall -Wsynth -Wno-non-virtual-dtor #-Wcast-qual
 # USE_SIGACTION: Used by src/octtools/Xpackages/iv/timer.c
 # HAS_TERMIOS: Used by src/octtools/Packages/iv/ivGetLine.c
 
-LOCALCCFLAGS =	-g -DPTNT -DPT_NO_TIMER -DUSE_DIRENT_H \
+# If we compile with -g, then the link can take a long time
+#DEBUGCFLAG = -g 
+LOCALCCFLAGS =	$(DEBUGCFLAGS) -DPTNT -DPT_NO_TIMER -DUSE_DIRENT_H \
 		-DNO_SYS_SIGLIST -DPT_ERRNO_IS_A_FUNCTION $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
