@@ -401,7 +401,7 @@ body ::tycho::Displayer::destructor {} {
 	set alreadyexiting 0
     }
     # Destroy all the registered views.
-    foreach view [array names viewCommand] {
+    foreach view [array names _viewtag] {
         destroyView $view
     }
     # NOTE: The following appears to not be necessary anymore.
@@ -698,8 +698,9 @@ body ::tycho::Displayer::setCurrentView {view} {
 # Show the default status bar, and nothing else.
 # 
 body ::tycho::Displayer::setEmptyView {} {
-    # Unpack existing components
-    if { $currentView == "" } {
+    # Unpack existing components. Be sure to catch the case in which
+    # the current view has already been deleted.
+    if { $currentView == "" || [info which -command $currentView] == "" } {
 	set tag ""
     } else {
 	set tag $_viewtag($currentView)
