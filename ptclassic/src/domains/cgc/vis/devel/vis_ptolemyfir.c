@@ -9,11 +9,11 @@ void vdk_vis_ptolemyfir(double* src, double* dst1, int dlen, double*
   double	*tapptr0,*tapptr1,*tapptr2,*tapptr3, tapvalue;
   double	pairlohi, pairlolo, pairhilo,pairhihi;
   double 	pairlo, pairhi, pair, packedOut,*packedaccum;
-  double 	result[2];
+  double 	dhi,dlo;
   double	accumpair0, accumpair1, accumpair2, accumpair3;
   float  	packedhi, packedlo, datahi,datalo;
   float 	tappairhi, tappairlo, splithi,splitlo;
-  float		*r;
+  float		r0,r1,r2,r3;
   int  		outerloop, nminusk;
   int	     	n,i,j,k;
   short 	*t0,*t1,*t2;
@@ -116,26 +116,27 @@ void vdk_vis_ptolemyfir(double* src, double* dst1, int dlen, double*
      * sum accumulators and pack outputs into a
      * double
      */
-    r=(float *) result;
-
     splithi = vis_read_hi(accumpair0);
     splitlo = vis_read_lo(accumpair0);
-    r[3] = vis_fpadd32s(splithi, splitlo);
+    r3 = vis_fpadd32s(splithi, splitlo);
     
     splithi = vis_read_hi(accumpair1);
     splitlo = vis_read_lo(accumpair1);
-    r[2] = vis_fpadd32s(splithi, splitlo);
+    r2 = vis_fpadd32s(splithi, splitlo);
     
     splithi = vis_read_hi(accumpair2);
     splitlo = vis_read_lo(accumpair2);
-    r[1] = vis_fpadd32s(splithi, splitlo);
+    r1 = vis_fpadd32s(splithi, splitlo);
     
     splithi = vis_read_hi(accumpair3);
     splitlo = vis_read_lo(accumpair3);
-    r[0] = vis_fpadd32s(splithi, splitlo);
+    r0 = vis_fpadd32s(splithi, splitlo);
 
-    packedhi = vis_fpackfix(result[0]);
-    packedlo = vis_fpackfix(result[1]);
+    dlo = vis_freg_pair(r2,r3);
+    dhi = vis_freg_pair(r0,r1);
+
+    packedlo = vis_fpackfix(dlo);
+    packedhi = vis_fpackfix(dhi);
     dst1[i] = vis_freg_pair(packedhi, packedlo);
   }
 }
