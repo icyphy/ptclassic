@@ -56,13 +56,14 @@ if {${itcl::version} < 2.1} {
 
 # Currently Tycho.tcl checks this variable to workaround a bug
 if {$tcl_platform(platform) == "macintosh"} {
+    set tyDebug 1
     set tyMacBug 1
 }
 
 # FIXME: this is for debugging only, and should go away
 proc ::tycho::_announce { msg } {
-    global tyMacBug
-    if [info exists tyMacBug] {
+    global tyDebug
+    if [info exists tyDebug] {
 	puts $msg
 	flush stdout
 	update
