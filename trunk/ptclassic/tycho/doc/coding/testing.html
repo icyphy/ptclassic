@@ -33,15 +33,16 @@ by directory.
 
 <LI> Open a test file such as <A
 HREF="../../kernel/test/testStack.itcl"><CODE>$TYCHO/kernel/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
-the <CODE>Evaluate</CODE> choice from the <CODE>File</CODE> menu (<CODE>C-x C-r</CODE>.
+the <CODE>Evaluate</CODE> choice from the <CODE>File</CODE> menu 
+(<CODE>C-x C-r</CODE>).
 
 
 <LI> The <A HREF="../../mk/tycommon.mk"><CODE>$TYCHO/mk/tycommon.mk</CODE></A>
 file automagically generates two itcl files:
 <DL>
 <DT> <CODE>all.itcl</CODE>
-<DD> This file merely sources all of the *.itcl files in the current
-directory.
+<DD> This file merely sources all of the <CODE>*.itcl</CODE> files in the
+current directory.
 <DT> <CODE>alltests.itcl</CODE>
 <DD> This file sources all of the files that are listed as test files
 in the <CODE>makefile</CODE>.
@@ -73,8 +74,8 @@ click on the tcl code below:
 ::tycho::execModal {make} "[file join $TYCHO kernel test]"
 </pre></tcl>
 
-<LI> The tycho test suite can be run from the Tycho Toplevel directory
-with the command: <CODE>make tests</CODE>
+<LI> The Tycho test suite can be run from the Tycho top-level
+(<CODE>$TYCHO</CODE>) directory with the command: <CODE>make tests</CODE>
 
 </OL>
 
@@ -88,13 +89,13 @@ menu.  This menu choice loads the file
 <A HREF="../../editors/textedit/templates/testTemplate.itcl"><CODE>$TYCHO/editors/textedit/templates/testTemplate</CODE></A> into the Itcl editor.
 
 
- <P>The file <A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A> defines the tcl proc <CODE>test</CODE>.
+ <P>The file <A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A> defines the Tcl proc <CODE>test</CODE>.
 
  <P><CODE>test</CODE> takes four arguments:
 <OL>
-<LI> The name of the test: <CODE>foo-1.0</CODE>
+<LI> The name of the test, for example: <CODE>foo-1.0</CODE>
   <br> The name of the test should strictly follow the format below.
-	The Tcl tests that come with the tcl distribution follow a similar
+	The Tcl tests that come with the Tcl distribution follow a similar
 	format, so unless there is a strong need to not follow the format,
 	please stick with what works.
 	<MENU>
@@ -121,7 +122,7 @@ menu.  This menu choice loads the file
 
 <LI> The test description, usually a single sentence.
 
-<LI> The contents of the test, usually tcl code that does the action to
+<LI> The contents of the test, usually Tcl code that does the action to
 be tested.  The last line of the contents should return a value.
 
 <LI> The results to be compared against.
@@ -145,6 +146,10 @@ test testExample-1.1 {This is the first test example, it does very little} {
 
 <H3>Parts of a test file</H3>
 Test files should be located in the <CODE>test</CODE> directory.
+ <P>The EditItcl class has a test file template menu choice under
+the <CODE>Special</CODE> emy.  The template is located at
+
+<A HREF="../../editors/textedit/templates/testTemplate.itcl"><CODE>$TYCHO/editors/textedit/templates/testTemplate.itcl</CODE></A>
 
  <P>It is better to have many small test files as opposed to a few
 large test files so that other developers can quickly find the tests
@@ -156,8 +161,8 @@ for the class they are working with.  Usually tests for the class
  <P>Each test file should have the following parts:
 <OL>
 
-<LI> The name of the test file should being with the word <CODE>test</CODE>.
-For example, if we were testing the tcl <CODE>foo</CODE> command, then
+<LI> The name of the test file should begin with the word <CODE>test</CODE>.
+For example, if we were testing the Tcl <CODE>foo</CODE> command, then
 the file would be named <CODE>testFoo.itcl</CODE>.  The extension of the file
 is either <CODE>.tcl</CODE> or <CODE>.itcl</CODE>:
 <MENU>
@@ -168,7 +173,7 @@ is either <CODE>.tcl</CODE> or <CODE>.itcl</CODE>:
 <LI> <CODE>.itcl</CODE> if the file contains Itcl constructs or tests
 	Itcl classes. 
 </MENU>
-Most of the tests are <CODE>.itcl</CODE> files
+Most of the tests are <CODE>.itcl</CODE> files.
 
 <LI> The Copyright
 
@@ -227,11 +232,11 @@ halts, so during testing the user would need to know what button to
 hit.  
  <P>As a workaround, we have designed a system that can
 automatically invoke a button during testing.  If we are testing, then
-<CODE>Dialog::wait</CODE> checks to see if <CODE>TY_TEST_SCRIPT</CODE>
-exists.  If <CODE>TY_TEST_SCRIPT</CODE> exists, then
+<CODE>Dialog::wait</CODE> checks to see if the <CODE>TY_TEST_SCRIPT</CODE>
+variable exists.  If <CODE>TY_TEST_SCRIPT</CODE> exists, then
 <CODE>Dialog::wait</CODE> assumes that it is a script, substitutes in the
-dialog name for <CODE>%O</CODE> and then evals the script at level
-<CODE>#0</CODE>
+dialog name for <CODE>%0</CODE> (percent zero) 
+and then evals the script at level <CODE>#0</CODE>
 The script can do anything, usually it just invokes a button and then
 unsets <CODE>TY_TEST_SCRIPT</CODE>.  For example, the
 <A HREF="../../kernel/test/testWidgets.itcl"><CODE>$TYCHO/kernel/test/testWidgets.itcl</CODE></A> script includes a test for <A HREF="../../kernel/YesNoQuery.itcl"><CODE>YesNoQuery</CODE></A>:
@@ -313,7 +318,8 @@ use <CODE>weblint</CODE> for checking individual files.
 <A HREF="ftp://ftp.cs.buffalo.edu/pub/htmlchek/"><CODE>ftp://ftp.cs.buffalo.edu/pub/htmlchek/</CODE></A>
 
 <P> The best way to run <CODE>htmlchek</CODE> is to create a sample
-distribution, create the codeDoc files and then run <CODE>htmlchek</CODE>
+distribution, create the files in the <CODE>codeDoc</CODE> directory
+and then run <CODE>htmlchek</CODE>
 
 <OL>
 <LI> Create the test distribution:
@@ -329,7 +335,7 @@ cd $TYCHO
 
 <LI> Run <CODE>make install</CODE>.  This will make the itcldocs twice, which
 will populate the <CODE>doc/codeDoc</CODE> directories.  You need to make
-the itcldocs twice so that the cross references are correct
+the itcldocs twice so that the cross references are correct.
 
 <LI> Run <CODE>make htmlchek</CODE>
 
@@ -348,10 +354,10 @@ file to look at.
 <LI> <CODE>htmlchekout.SRC</CODE> - References to online images.
 <LI> <CODE>htmlchekout.MAP</CODE> - Cross dependency information.
 </MENU>
-sh	
+
 <P> All of the references in <CODE>htmlchekout.HREF</CODE> that point
-to <CODE>.html</CODE> files should be checked.  References to non-html
-files appear in <CODE>htmlchekout.HREF</CODE> because the non-html
+to <CODE>.html</CODE> files should be checked.  References to non-HTML
+files appear in <CODE>htmlchekout.HREF</CODE> because the non-HTML
 files were not included in the list of files that
 <CODE>htmlchek</CODE> ran on.  One quick way to search all the the <CODE>*.html</CODE> files is
 <PRE>
@@ -360,25 +366,25 @@ grep mystring `find . -name "*.html" -print`
 </PRE>
 
 <H3>Spellchecking</H3>
-Checking the spelling in the html files can be done with:
+Checking the spelling in the HMLT files can be done with:
 <PRE>
 cd $TYCHO
 spell `find . -name "*.html" -print`
 </PRE>
 
-<H3>Checking embedded tcl</H3>
+<H3>Checking Embedded Tcl</H3>
 
 Tycho extends html with <CODE>&lt;TCL&gt; . . . &lt;TCL&gt;</CODE>
 tags.  In the Tycho HTML viewer, when the contents of these tags are
-moused on, the embedded tcl code is executed.
+moused on, the embedded Tcl code is executed.
 
- <P>To test all of the embedded tcl, the script
+ <P>To test all of the embedded Tcl, the script
 <CODE>$TYCHO/adm/bin/chktclpre</CODE> will generated a
-<CODE>tclpre.html</CODE> file that contains all of the embedded tcl.
+<CODE>tclpre.html</CODE> file that contains all of the embedded Tcl.
 This script is not shipped with Tycho.
 
  <P>After running <CODE>chktclpre</CODE>, start up tycho, view
-<CODE>tclpre.html</CODE> and mouse on each block of embedded tcl code.
+<CODE>tclpre.html</CODE> and mouse on each block of embedded Tcl code.
 Note that some blocks depend on the widgets created in earlier blocks.
 If you run into problems, you can follow the hyperlink in
 <CODE>tclpre.html</CODE> to the source HTML file.
@@ -390,7 +396,7 @@ Run <CODE>~ptdesign/adm/copyright/chkq $TYCHO</CODE> to print out
 the names of files that might have bogus percentQpercent values.
  <P>
 Then run <CODE>~ptdesign/adm/bin/sccsadmin</CODE> on each file that
-has no value for percentQpercent substituted in.
+has no value for &#37;Q&#37; substituted in.
 
 <H3>Check the distribution for bogus files</H3>
 Run the following makefile rules and commands
@@ -429,7 +435,7 @@ HREF="~/.Tycho/tychorc.tcl"><CODE>~/.Tycho/tychorc.tcl</CODE></A> so
 that <CODE>tycho</CODE> is exited after a few seconds.  This allows
 the script to test many invocations of <CODE>tycho</CODE> without user
 intervention.  However to test the <CODE>-debug</CODE> option, the
-user must type <CODE>cont</CODE> in the gdb window.
+user must type <CODE>cont</CODE> in the <CODE>gdb</CODE>window.
 
 <p>
 <a href="../../doc/index.html">Tycho Home Page</a><br>
