@@ -218,7 +218,7 @@ else if (ioctl(fd, PIOCUSAGE, &beginRun) == -1)
 		addLinkOption("-L$(PTOLEMY)/lib.$(PTARCH) -ludpam");
 
                 addCode(timeincludes, "include", "timeIncludes");
-                addCode(amdecls, "mainInit", "amDecls");
+                addCode(amdecls, "mainDecls", "amDecls");
                 addCode(timedecls, "mainDecls", "timeDecls");
                 addCode(stardecls, "mainDecls");
                 addCode(timeinit, "mainInit", "timeInit");
