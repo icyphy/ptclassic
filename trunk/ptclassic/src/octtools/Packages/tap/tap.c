@@ -168,10 +168,10 @@ struct tapTech *tapInternTech(objPtr)
 octObject *objPtr;
 {
     octObject facet;
-    struct tapTech *techPtr;
+    struct tapTech *techPtr = (struct tapTech *)NULL;
     char *dummyPtr;
-    char *techName;
-    char *viewName;
+    char *techName = (char *)NULL;
+    char *viewName = (char *)NULL;
     octObject prop;
     int propsMissing = 0;
     char *pkgName, *message;
