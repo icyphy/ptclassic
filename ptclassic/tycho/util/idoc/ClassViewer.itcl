@@ -49,10 +49,10 @@
 # The bottom HTML widget holds specific information relating to
 # constructs the user selects in the Panel on the left. 
 #
-# Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.idoc">
+# Data is stored in a <a href="../../../../kernel/doc/codeDoc/Class.itclclass">
 # ::tycho::Class</a> model. The model is in turn generated from the code.
-# (See <a href="ClassViewerSys.idoc">::tycho::IdocSys</a> for information about 
-# generation.)
+# (See <a href="ClassViewerSys.itclclass">::tycho::IdocSys</a> for
+# information about generation.)
 # 
 # ClassViewer supports any language that can be encoded into a ::tycho::Class
 # representation. Currently, keywords are correct for Itcl as well as Java.
@@ -572,7 +572,7 @@ body ::tycho::ClassViewer::generateHtml {} {
       append html [_generateHtmlBody]
       append html "</body>\n</html>\n"
       
-      # Save it as blah_i.html where the current file is blah.idoc
+      # Save it as blah_i.html where the current file is blah.itclclass
       set htmlFile [file root [docFile $_currentclass]]_i.html
       set fp [open $htmlFile w]
       puts $fp $html
@@ -750,7 +750,7 @@ body ::tycho::ClassViewer::putHtml {class data {top 1}} {
 # to get the _rel.idoc name.
 # 
 body ::tycho::ClassViewer::relFile {classname} {
-    set relname "[info namespace tail $classname]_rel.idoc"
+    set relname "[info namespace tail $classname]_rel.itclclass"
 
     lappend dirs {$TYCHO/kernel}
     lappend dirs {$TYCHO/editors/textedit}
