@@ -59,6 +59,10 @@ style default \
             -values {automatic windows unix compromise} \
             -value automatic \
             -label "Keyboard shortcuts"
+
+    parameter viseditViewOnly 1 \
+	    -type boolean \
+	    -label "visedit classes are view-only"
 }
 
 style quiet \
