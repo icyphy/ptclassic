@@ -64,72 +64,74 @@ Also, the index of the output is provided (count starts at 0).
 	}		
 
 
-	codeblock(compare,"int numSamplesMinus1, int max" ){
-	ldp	#00h		; data page pointer == 0
-	splk	#@numSamplesMinus1,brcr
+	codeblock(compare,"" ){
 	lar	ar0,#$addr(input)
-	lar	ar1,#$addr(input)
 	mar	*,ar0
+	ldp	#00h
+	splk	#@(int(N)-1),brcr
+	lacc	*+,16
+	sacb	
 	rptb	$starSymbol(lp)
-	lacc	*,0,ar1		; acc = current sample
-	sub	*,0,ar0		; compare with max/min sample
-	lph	ar0
-	.if	@max		;if max = 1 seach for max
-	xc	1,GT
+	lacc	*+,16
+	.if	@(int(MAX))
+	crgt
 	.else
-	xc	1,LT		;else search for min
+	crlt
 	.endif
-	sph	ar1		; if necessary
-$starSymbol(lp):
-	mar	*+		; point to next sample
+	nop
+	xc	1,TC
+$starSymbol(lp)
+	lph	ar0
 	}
 
 	codeblock(outIndex){
-	lamm	ar1		; ar1 = address of max/min input
-	sub	#$addr(input),0 ; acc = index
-	samm	ar2		; ar2 = index
-	bldd	ar2,#$addr(index)	; output index
+	pac
+	sub	#0001,0
+	sub	#$addr(input),16
+	lar	ar0,#$addr(output)
+	sach	*,0
 	}
 	
 	codeblock(out){
-	bldd	ar1,#$addr(output)	; output value
+	lar	ar0,#$addr(output)
+	exar	
+	sach	*,0
 	}
 
-	codeblock(compareMag,"int numSamplesMinus1,int max"){
-	ldp	#0000h
-	splk	#@numSamplesMinus1,brcr
+	codeblock(compareMag,""){
 	lar	ar0,#$addr(input)
-	lar	ar1,#$addr(input)
 	mar	*,ar0
+	ldp	#00h
+	splk	#@(int(N)-1),brcr
+	lacc	*+,16
+	abs
+	sacb	
 	rptb	$starSymbol(lp)
-	lacc	*,0,ar1		; load acc with sample
-	abs			; take abs of sample
-	samm	ar2		; store abs(sample) in ar2
-	lacc	*,0		; load acc with max/min sampl
-	abs			; take abs of max/min smpl
-	sub	ar2		; compare the magnitudes
-	lph	ar0
-	.if	@max
-	xc	1,LT
+	lacc	*+,16
+	abs
+	.if	@(int(MAX))
+	crgt
 	.else
-	xc	1,GT
+	crlt
 	.endif
-	sph	ar1
-$starSymbol(lp):
-	mar	*+		; point to next sample
+	nop
+	xc	1,TC
+$starSymbol(lp)
+	lph	ar0
 	}
 
-	codeblock(calcMag){
-	lamm	ar1
+	codeblock(outMag){
+	exar
 	abs
-	samm	ar1
+	lar	ar0,#$addr(output0
+	sach	*,0
 	}
 
 	codeblock(one){
 	lmmr	ar0,#$addr(input)
 	smmr	ar0,#$addr(output)
 	lar	ar0,#0000h
-	smmr	ar0,#$addr(output)
+	smmr	ar0,#$addr(index)
 	}
 
 	codeblock(oneMag){
@@ -139,7 +141,7 @@ $starSymbol(lp):
 	lar	ar2,#$addr(index)
 	mar	*,ar2
 	sach	*,0,ar0
-	lacc	*,0,ar1
+	lacc	*,16,ar1
 	abs
 	sach	*
 	}
@@ -147,13 +149,13 @@ $starSymbol(lp):
  	go {
 		if (int(N) > 1) {
 			if (int(compareMagnitude)){
-				addCode(compareMag((int(N) - 1), int(MAX)));
+				addCode(compareMag());
 			} else {
-				addCode(compare((int(N) - 1), int(MAX)));
+				addCode(compare());
 			}
 			addCode(outIndex);
 			if (int(outputMagnitude))
-				addCode(calcMag);
+				addCode(outMag);
 			addCode(out);				
 		}
 		else{
@@ -167,11 +169,15 @@ $starSymbol(lp):
 
 	exectime {
 		int time=0;
-		if ((int(N) == 1) & int(outputMagnitude)) return 9;
-		else return 4;
-		if (int(compareMagnitude)) time += 6 + 10*int(N);
-		else time += 6 + 6*int(N);
-		if (int(outputMagnitude)) time += 3;
+		if (int(N) == 1) {
+			time += 4;
+			if (int(outputMagnitude)) time += 5;
+			return time;
+		}
+		if (int(compareMagnitude)) time += 8 + 6*int(N);
+		else time += 7 + 5*int(N);
+		if (int(outputMagnitude)) time += 4;
+		else  time += 3;
 		time += 5;
 		return time;
  	}

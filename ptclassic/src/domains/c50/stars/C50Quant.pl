@@ -62,7 +62,7 @@ of \fIthresholds\fR.
 	codeblock(main) {
 	setc	ovm			; addition/subs. saturates
 	lar	ar0,#$addr(augThresholds)	; ar0 -> threshold
-	lar	ar1,#ffffh		; initialize ar1
+	lar	ar1,#65535		; initialize ar1
 	lar	ar3,#$addr(input)	; ar3 -> input
 	lar	ar4,#$addr(output)	; ar4 -> output value
 	mar	*,ar3
@@ -90,7 +90,7 @@ $starSymbol(lp):
 	xc	2,GT			; if input - threshold > 0 do next inst
 	mar	*+,ar1			; ar0 -> levels + 1
 	mar	*+,ar0
-	lacc	ar3,#$addr(output)	; ar3 -> output
+	lar	ar3,#$addr(output)	; ar3 -> output
 	lacc	*,16,ar3		; acc = corresponding level
 	sach	*			; output high acc.
 	}

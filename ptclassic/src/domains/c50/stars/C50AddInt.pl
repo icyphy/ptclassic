@@ -44,16 +44,18 @@ two's complement addition.
 	}
 
 	codeblock(addStart) {
-	lar	ar0,#$addr(input#1)
-	lar	ar1,#$addr(output)
-	mar	*,ar0
-	lacc	*,16
-	lar	ar0,#$addr(input#2)
+	lar	ar0,#$addr(input#1)	;ar0->first input
+	lar	ar1,#$addr(output)	;ar1->output
+	mar	*,ar0			;arp = 0
+	lacc	*,16			;accH = first input
+	lar	ar0,#$addr(input#2)	;ar0 -> second input
 	}
 
+
+
 	codeblock(add,"int i") {
-	add	*,16
-	lar	ar0,#$addr(input#@i)
+	add	*,16			; add last input pointed to
+	lar	ar0,#$addr(input#@i)	; point to next input
 	}
 
 	codeblock(addEnd) {

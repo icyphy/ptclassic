@@ -39,10 +39,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 
 	codeblock(subStart) {
-	lar	ar0,#$addr(pos)
-	lar	ar1,#$addr(output)
-	mar	*,ar0
-	lacc	*,16			; acc = positive
+	lar	ar0,#$addr(pos)		; ar0-> pos. input
+	lar	ar1,#$addr(output)	; ar1-> output
+	mar	*,ar0			; arp = 0
+	lacc	*,16			; acc = pos. input
 	lar	ar0,#$addr(neg#1)	; ar0 -> first negative
 	}
 
