@@ -1,7 +1,7 @@
 defstar {
 	name { QuadMult16x16 }
-	domain { SDF }
-	version { @(#)SDFQuadMult16x16.pl	1.2 3/14/96 }
+	domain { CGC }
+	version { $Date$ $Id$ }
 	author { William Chen }
 	copyright {
 Copyright (c) 1990-1996 The Regents of the University of California.
@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { SDF vis library }
+	location { CGC vis library }
 	desc { 
 	  Multiplies the shorts in a 16bit partitioned float to the
 	  corresponding shorts in a 16bit partitioned float.
@@ -32,24 +32,29 @@ limitation of liability, and disclaimer of warranty provisions.
 	  type { float }
 	  desc { Output float type }
 	}
-        ccinclude {<vis_proto.h>}
-	go {
-	  
+	constructor {
+	  noInternalState();
+	}
+	initCode{
+	  addInclude("<vis_proto.h>");
+	}
+	codeblock(localDecl){
 	  double resulthihi, resulthilo, resulthi;
 	  double resultlohi, resultlolo, resultlo;
 	  double result;
 	  float  dataAlo, dataAhi, dataBlo, dataBhi;
 	  float  resultu, resultl;
-	  
+	}
+	codeblock(multfour){
 	  vis_write_gsr(8);
 	  
-	  // setup the data
-	       dataAhi=vis_read_hi(double(inA%0));
-	  dataAlo=vis_read_lo(double(inA%0));
-	  dataBhi=vis_read_hi(double(inB%0));
-	  dataBlo=vis_read_lo(double(inB%0));
+	  /* setup the data */
+	       dataAhi=vis_read_hi((double) $ref(inA));
+	  dataAlo=vis_read_lo((double) $ref(inA));
+	  dataBhi=vis_read_hi((double) $ref(inB));
+	  dataBlo=vis_read_lo((double) $ref(inB));
 	  
-	  //calculate the partial products
+	  /* calculate the partial products */
 	      resulthihi = vis_fmuld8sux16(dataAhi,dataBhi);
 	  resulthilo = vis_fmuld8ulx16(dataAhi,dataBhi);
 	  resulthi   = vis_fpadd32(resulthihi,resulthilo);
@@ -58,11 +63,15 @@ limitation of liability, and disclaimer of warranty provisions.
 	  resultlolo = vis_fmuld8ulx16(dataAlo,dataBlo);
 	  resultlo   = vis_fpadd32(resultlohi,resultlolo);
 	  
-	  //pack and concat the final product*/
+	  /*pack and concat the final product*/
 	      resultu = vis_fpackfix(resulthi);
 	  resultl = vis_fpackfix(resultlo);
 	  result = vis_freg_pair(resultu,resultl);
 	  
-          out%0 << result;
+          $ref(out) = result;
+	}
+	go {	  
+	  addCode(localDecl);
+	  addCode(multfour);
       	}
 }
