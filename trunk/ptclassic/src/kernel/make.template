@@ -96,7 +96,6 @@ SRCS=$(CCS_WITH_H_FILES) \
 
 # Header files.  When adding a new header, add it here only if there is
 # no corresponding .cc file; otherwise add the .cc file to CCS_WITH_H_FILES.
-# Packet.h is here for backward compatibility only!
 
 HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  Attribute.h \
@@ -104,7 +103,6 @@ HDRS= $(CCS_WITH_H_FILES:.cc=.h) \
  CompiledUniverse.h \
  ConstIters.h \
  Linker.sysdep.h \
- Packet.h \
  ParticleStack.h \
  Plasma.h \
  SimAction.h \
