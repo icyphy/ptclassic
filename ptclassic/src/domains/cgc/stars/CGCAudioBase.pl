@@ -129,8 +129,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  /* check whether file is in Sun audio format */
 	  if($starSymbol(header).magic != 0x2e736e64)
 	    {
-	      perror("$val(fileName): File not in Sun audio
-                   format. Please refer to the star Profile.");
+	      perror("$val(fileName): File not in Sun audio format. Please refer to the star Profile.");
 	      exit(1);
 	    }
 	  /* set the corresponding defstates using info in the header */
