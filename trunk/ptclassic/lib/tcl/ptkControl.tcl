@@ -268,7 +268,7 @@ proc ptkRunControl { name octHandle } {
     set targetToBe [lindex [ptkGetTargetNames $octHandle] 0]
     set targetcust ${targetToBe}-ControlPanel
     if {[info proc $targetcust] == $targetcust} {
-      $targetcust $name $octHandle $ptkControlPanel
+      $targetcust $name $octHandle $ctrlPanel
     }
 
     if {[catch {ptkCompile $octHandle} msg] == 1} {
@@ -415,6 +415,8 @@ proc ptkGrAnimation { on } {
 #
 proc ptkHighlightStar { star args } {
     global ptkColorList
+
+    puts stderr "dbg: ptkHighlightStar $star $args"
 
     ptkClearHighlights
     if {([llength $args] == 1)} {
@@ -701,28 +703,37 @@ proc ptkGo {name octHandle} {
 	    return
     }
 
-    # we were not PAUSED, so we have extra stuff to do
-    # besides setting the flag to ACTIVE, but get that
-    # out of the way first, and make sure the change in 
-    # button relief gets displayed
-    set ptkRunFlag($name) ACTIVE
+    # we were not PAUSED, so we have lots of stuff to do.
+    # Make sure the change in button relief is displayed
+    # before we start cranking
     update idletasks
 
     # catch errors and reset the run flag.
     if {[catch {
+# this is wrong:
+#        curuniverse $name
+
+        # Allow a target-specific procedure to execute.
+	# Again, the correct target may not be set yet.
+	set targetToBe [lindex [ptkGetTargetNames $octHandle] 0]
+	set targetcust ${targetToBe}-CustomGo
+        if {[info proc $targetcust] == $targetcust} {
+            $targetcust $name $octHandle $ctrlPanel
+        }
+
         ptkCompile $octHandle
 
-  	# OK to set the flag to ACTIVE.  Must not do this before
- 	# ptkCompile, because ptkCompile looks at the flag to see
-  	# whether the prior run terminated successfully.
-  	set ptkRunFlag($name) ACTIVE
+	# OK to set the flag to ACTIVE.  Must not do this before
+	# ptkCompile, because ptkCompile looks at the flag to see
+	# whether the prior run terminated successfully.
+	set ptkRunFlag($name) ACTIVE
 
- 	# Set the global indicator of the active control panel
- 	# (which is used by tcltk stars, for example).  Must not
- 	# do this before ptkCompile, either, because ptkCompile
- 	# may cause destruction of an older universe and some
- 	# tcltk star destructors look at ptkControlPanel.
- 	set ptkControlPanel $ctrlPanel
+	# Set the global indicator of the active control panel
+	# (which is used by tcltk stars, for example).  Must not
+	# do this before ptkCompile, either, because ptkCompile
+	# may cause destruction of an older universe and some
+	# tcltk star destructors look at ptkControlPanel.
+	set ptkControlPanel $ctrlPanel
 
 	global ptkScriptOn 
 
