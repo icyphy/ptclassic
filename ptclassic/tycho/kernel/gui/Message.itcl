@@ -33,7 +33,7 @@
 
 ##########################################################################
 #### warn
-# Warn the user, and return only after the user has acknowledged.
+# Post a warning message, and return only after the user has acknowledged.
 #
 proc ::tycho::warn {msg} {
     ::tycho::DialogWindow::newModal Message [::tycho::autoName .message] \
@@ -52,8 +52,8 @@ proc ::tycho::inform {msg} {
 
 ##########################################################################
 #### post
-# Post an informational message to the user in a window and return.
-# The name of the window is returned.
+# Post an informational message to the user in a window and return
+# immediately.  The name of the window is returned.
 #
 proc ::tycho::post {msg {title ""}} {
     return [::tycho::DialogWindow::new Message \
@@ -77,20 +77,22 @@ proc ::tycho::post {msg {title ""}} {
 # of similarly named procedures in pigi, the predecessor to Tycho.
 # The window names in these arguments are ignored (since they bring
 # up modal dialogs, the window names are not important anyway).
-#
+
+# COMPATIBILITY procedure.  Post a message.
 proc ::ptkMessage {text} {::tycho::inform $text}
+# COMPATIBILITY procedure.  Post a message.
 proc ::ptkInform {win text} {::tycho::inform $text}
 
 ##########################################################################
 #### Message
-# Issue a message to the user. To warn the user about something in a
-# modal way, use the procedure "::tycho::warn". "Modal" means that
-# nothing further will happen until the window is destroyed. To inform
-# the user of the something in a modal way, use "::tycho::inform".
-# Otherwise, for non-modal uses, create an instance of this class
-# directly.  If you create an instance of the class directly,
-# you must map it explicitly by either calling "wm deiconify $name" or
-# "$name centerOnScreen", where "$name" is the name of the object.
+# A message window with space for text, a bitmap, an image, and HTML.
+# An OK button causes the object (and its window) to be destroyed.
+# <p>
+# For convenience, the procedures
+# <code>::tycho::post</code>,
+# <code>::tycho::inform</code>, and
+# <code>::tycho::warn</code>
+# offer a slightly simpler interface to this class.
 #
 class ::tycho::Message {
     inherit ::tycho::DialogWindow
