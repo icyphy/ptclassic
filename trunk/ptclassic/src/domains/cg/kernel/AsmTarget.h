@@ -94,6 +94,9 @@ protected:
 	void wormInputCode(PortHole&);
 	void wormOutputCode(PortHole&);
 
+	// AsmTargets always support "AnyAsmStar" stars.
+	const char* auxStarClass() const;
+
 public:
 	AsmTarget(const char* nam, const char* desc,
 		  const char* stype, ProcMemory* m = 0);
