@@ -29,37 +29,63 @@ the window length (i.e., \fIperiod\fR = 0).
     }
     version { $Id$ }
     author { Kennard White }
-	copyright {
+    copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
-	}
+    }
     location { SDF dsp library }
+
+    // Include function prototypes from Cephes Math Library
+    // Necessary for Kaiser window for i0 (0th-order modified Bessel function)
+    ccinclude { "cephes.h" }
+
     output {
         name {output}
         type {float}
     }
+
     defstate {
 	name {name}
 	type {string}
 	default {"Hanning"}
-	desc {Name of the window function to generate.}
+	desc {
+Name of the window function to generate:
+Rectangle, Bartlett, Hanning, Hamming, Blackman, SteepBlackman, or Kaiser.
+	}
     }
+
     defstate {
 	name {length}
 	type {int}
 	default {256}
 	desc {Length of the window function to produce.} 
     }
+
     defstate {
 	name {period}
 	type {int}
 	default {0}
-	desc {Period of the output. Period 0 implies "length" period, and
-	  negative period is non-periodic (single cycle).}
+	desc {
+Period of the output. Period 0 implies "length" period, and
+a negative period is non-periodic (single cycle).
+	}
 	attributes { A_NONCONSTANT|A_SETTABLE }
     }
+
+    defstate {
+        name {WindowParameters}
+	type {floatarray}
+	default {0}
+	desc {
+An array of numeric parameters for the window.
+For the Kaiser window, the first entry in this state is taken as the
+beta parameter which is proportional to the stopband attenuation of
+the window.
+	}
+    }
+
 //  defstate {
 //	name {iter}
 //	type {int}
@@ -67,6 +93,7 @@ limitation of liability, and disclaimer of warranty provisions.
 //	desc {Which period we are in.}
 //	attributes { A_NONCONSTANT|A_NONSETTABLE }
 //  }
+
     protected {
 	int winType;
 	int realLen;
@@ -88,11 +115,13 @@ limitation of liability, and disclaimer of warranty provisions.
 #define SDFWinType_Hamming	(4)
 #define SDFWinType_Blackman	(5)
 #define SDFWinType_SteepBlackman	(6)
+#define SDFWinType_Kaiser	(7)
     }
     setup {
+	// Extract the string data from the string state data structure name
 	const char *wn = name;
 
-	/*IF*/ if ( strcasecmp( wn, "Rectangle")==0 ) {
+	if ( strcasecmp( wn, "Rectangle")==0 ) {
 	    winType = SDFWinType_Rectangle;
 	} else if ( strcasecmp( wn, "Bartlett")==0 ) {
 	    winType = SDFWinType_Bartlett;
@@ -104,14 +133,18 @@ limitation of liability, and disclaimer of warranty provisions.
 	    winType = SDFWinType_Blackman;
 	} else if ( strcasecmp( wn, "SteepBlackman")==0 ) {
 	    winType = SDFWinType_SteepBlackman;
+	} else if ( strcasecmp( wn, "Kaiser")==0 ) {
+	    winType = SDFWinType_Kaiser;
 	} else {
-	    Error::abortRun(*this, ": Unknown window name");
+	    Error::abortRun(*this, ": Unknown window name", wn);
 	    return;
 	}
+
+	// Don't want to risk divide by zero
 	realLen = int(length);
 	if ( realLen < 4 ) {
-	    /* Don't want to risk divide by zero */
-	    Error::abortRun(*this, ": Window length too small");
+	    Error::abortRun(*this, ": Window length too small",
+			    " (should be greater than 3)" );
 	    return;
 	}
 	realPeriod = int(period);
@@ -123,47 +156,57 @@ limitation of liability, and disclaimer of warranty provisions.
 	double sin_base_w = sin(base_w);
 	double sin_2base_w = sin(2*base_w);
 	double d = - (sin_base_w/sin_2base_w) * (sin_base_w/sin_2base_w);
-	scale0 = 0; scale1 = 0; freq1 = 0; scale2 = 0; freq2 = 0;
-	/* 
-	 *  Window defs taken from Jackson, Digital Filters and Signal
-	 *  Processing, Second Ed, chap 7.
-	 */
+	scale0 = scale1 = scale2 = freq1 = freq2 = 0.0;
+	// 
+	//  Window defs taken from Jackson, Digital Filters and Signal
+	//  Processing, Second Ed, chap 7.
+	//
 	switch ( winType ) {
-	case SDFWinType_Rectangle:
+	  case SDFWinType_Rectangle:
 	    scale0 = 1;
 	    break;
-	case SDFWinType_Bartlett:
-	    scale0 = 0;		scale1 = 2.0/realLen;
+	  case SDFWinType_Bartlett:
+	    scale1 = 2.0/(realLen - 1);
 	    break;
-	case SDFWinType_Hanning:
-	    scale0 = .5;	scale1 = -.5;	freq1 = 2*base_w;
+	  case SDFWinType_Hanning:
+	    scale0 = .5;
+	    scale1 = -.5;
+	    freq1 = 2*base_w;
 	    break;
-	case SDFWinType_Hamming:
-	    scale0 = .54;	scale1 = -.46;	freq1 = 2*base_w;
+	  case SDFWinType_Hamming:
+	    scale0 = .54;
+	    scale1 = -.46;
+	    freq1 = 2*base_w;
 	    break;
-	case SDFWinType_Blackman:
-	    /* This is a special case of SteepBlackman */
-	    d = -.16;		/* scale0 = .42, scale1 = -.5, scale2=.08 */
-	    /*FALLTHROUGH*/
-	case SDFWinType_SteepBlackman:
-	    /* See Jackson 2ed, eqns 7.3.6 through 7.3.10 */
-	    scale0 = (d+1)/2;	scale1 = -.5;	freq1 = 2*base_w;
-	    			scale2 = -d/2;	freq2 = 4*base_w;
+	  case SDFWinType_Blackman:
+	    // This is a special case of SteepBlackman
+	    d = -.16;		// scale0 = .42, scale1 = -.5, scale2=.08
+	    // FALLTHROUGH (omit break statement)
+	  case SDFWinType_SteepBlackman:
+	    // See Jackson 2ed, eqns 7.3.6 through 7.3.10
+	    scale0 = (d+1)/2;
+	    scale1 = -.5;
+	    freq1 = 2*base_w;
+	    scale2 = -d/2;
+	    freq2 = 4*base_w;
 	    break;
-	default:
-	    Error::abortRun(*this, ": Invalid window type");
+	  case SDFWinType_Kaiser:
+	    Error::abortRun(*this, ": Kaiser not implemented yet");
+            return; 
+          default:
+	    Error::abortRun(*this, ": Invalid window type", wn);
 	    return;
 	}
-	    
     }
+
     go {
 	int i;
 	double val;
 
 	switch ( winType ) {
-	case SDFWinType_Bartlett:
-	    for ( i=0; i < realLen/2; i++) {
-		val = scale1 * (i+1);
+	  case SDFWinType_Bartlett:
+	    for ( i=0; i <= (realLen - 1)/2; i++) {
+		val = scale1 * i;
 		output%(realPeriod-(i+1)) << val;
 	    }
 	    for ( ; i < realLen; i++) {
@@ -171,7 +214,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		output%(realPeriod-(i+1)) << val;
 	    }
 	    break;
-	default:
+	  default:
 	    for ( i=0; i < realLen; i++) {
 		val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
 		output%(realPeriod-(i+1)) << val;
@@ -184,3 +227,6 @@ limitation of liability, and disclaimer of warranty provisions.
 	    realLen = 0;
     }
 }
+
+
+
