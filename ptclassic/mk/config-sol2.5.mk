@@ -40,11 +40,23 @@ include $(ROOT)/mk/config-sol2.mk
 
 CPLUSPLUS_COMPAT =  -I$(ROOT)/src/compat/cfront
 
-# We must pase -DPT_EGCS so that make depend works properly.  Otherwise
+
+# Wildforce Directory
+WILDFORCE_DIR 	= $(PTOLEMY)/vendors/annapolis/wf4
+
+WILDFORCE_INCL	= $(WILDFORCE_DIR)/include
+WILDFORCE_LIBSPEC = -L$(WILDFORCE_DIR)/lib -lWF4
+
+# Uncomment the two lines below if you have the Annapolis Wildforce board
+# and software (http://www.annapmicro.com)
+#WILDFORCECFLAGS = -DPT_WILDFORCE -I$(WILDFORCE_INCL)
+#SDFWILDFORCE =	1
+
+# We must pass -DPT_EGCS so that make depend works properly.  Otherwise
 # we get messages like:
 # ../../src/compat/cfront/std.h:65: warning: No include path in which
 #	 to find sysent.h 
-CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS
+CPLUSPLUS = g++ $(CPLUSPLUS_COMPAT) -DPT_EGCS $(WILDFORCECFLAGS)
 
 # system libraries (libraries from the environment)
 # No need to include -lg++ under egcs
