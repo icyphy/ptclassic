@@ -78,7 +78,6 @@ proc print_verbose {test_name test_description contents_of_test code answer} {
 	incr FAILED
         if {$code == 1} {
             puts stdout "==== Test generated error:"
-            puts stdout $answer
 	    puts stdout "$errorInfo"
         } elseif {$code == 2} {
             puts stdout "==== Test generated return exception;  result was:"
