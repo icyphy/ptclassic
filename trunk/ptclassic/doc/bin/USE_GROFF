@@ -1,0 +1,22 @@
+#! /bin/csh -f
+# $Id$
+# This script configures your system to use groff, the Free Software
+# Foundation replacement for ditroff, to print and preview the Ptolemy
+# documentation.
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+cd $PTOLEMY/doc/bin
+
+set nonomatch
+set files = ( *.groff )
+if ("$files" == "*.groff" ) then
+	echo Already configured to use groff.
+	exit 0
+endif
+
+foreach x ( $files )
+	set r = $x:r
+	mv $r $r.ditroff
+	mv $x $r
+end

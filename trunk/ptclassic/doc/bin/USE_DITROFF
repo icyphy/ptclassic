@@ -1,0 +1,21 @@
+#! /bin/csh -f
+# $Id$
+# This script configures your system to use ditroff to print the
+# Ptolemy documentation.
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+cd $PTOLEMY/doc/bin
+
+set nonomatch
+set files = ( *.ditroff )
+if ("$files" == "*.ditroff" ) then
+	echo Already configured to use ditroff.
+	exit 0
+endif
+
+foreach x ( $files )
+	set r = $x:r
+	mv $r $r.groff
+	mv $x $r
+end

@@ -1,0 +1,71 @@
+#!/bin/csh -f
+
+# $Id$
+# Print index for Ptolemy Almagest.
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+set preview = 0
+set printoptions = "-me"
+set printcommand = "groff"
+set dircmds = $PTOLEMY/doc/bin/
+set dirheader = $PTOLEMY/doc/headers/
+
+while ($#argv)
+	switch ($argv[1])
+	case -preview:
+		set preview = 1
+		shift
+		breaksw
+	case -*:
+		set printoptions = ($printoptions $argv[1])
+		shift
+		breaksw
+	default:
+		break
+	endsw
+end
+if ($#argv < 1) then
+	echo "usage: $0 [-preview] [troff options] index_file [...]"
+	exit 1
+endif
+
+# On interrupt, remove temporary files
+onintr catch
+
+# Cull out the interesting entries from the input file, sort them,
+# and then change spaces into |'s so subsequent awk script can
+# do the right thing with them.
+egrep index $* | \
+	sort -fd +2 +1.2 -2n | \
+	sed -e 's/ /\|/' -e 's/ /\|/' \
+	> /tmp/ptc$$
+
+# Put macro stuff at beginning
+cat ${dirheader}groff-fix ${dirheader}index > /tmp/ptinf$$
+# Format the index.
+awk -f ${dircmds}awk.index /tmp/ptc$$ >> /tmp/ptinf$$
+
+# Print it.
+if ($preview) then
+	# if previewing, use either X windows or nroff
+	if ($?DISPLAY) then
+		$printcommand $printoptions -TX75 /tmp/ptinf$$
+	else
+		($printcommand $printoptions -Tascii /tmp/ptinf$$ > \
+			/tmp/ptnr$$) >& /dev/null
+		more /tmp/ptnr$$
+	endif
+else
+	$printcommand $printoptions /tmp/ptinf$$ | lpr
+endif
+
+/bin/rm /tmp/ptc$$ /tmp/ptinf$$
+exit 0
+
+catch:
+	# prevent the "no match" error message if there are no temporary files
+	set nonomatch
+	/bin/rm -f /tmp/pt*$$
+	exit 1
+

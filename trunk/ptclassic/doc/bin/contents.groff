@@ -1,0 +1,29 @@
+#! /bin/csh
+# $Id$
+
+# On interrupt, remove temporary files
+onintr catch
+
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+set dircmds = $PTOLEMY/doc/bin/
+set dirheader = $PTOLEMY/doc/headers/
+
+# Cull out the interesting entries from the input file
+fgrep -f ${dircmds}fgrep.contents $* > /tmp/ptc$$
+
+# Format the table of contents with page numbers.
+awk -f ${dircmds}awk.contents /tmp/ptc$$ > /tmp/ptcf$$
+
+# Print it.
+groff -me ${dirheader}groff-fix ${dirheader}contents /tmp/ptcf$$ | lpr
+
+/bin/rm /tmp/ptc$$ /tmp/ptcf$$
+exit 0
+
+catch:
+	# prevent the "no match" error message if there are no temporary files
+	set nonomatch
+	/bin/rm -f /tmp/ptc$$ /tmp/ptcf$$
+	exit 1
+
