@@ -2,7 +2,7 @@ static const char file_id[] = "BaseMultiTarget.cc";
 
 /******************************************************************
 Version identification:
-$Id$
+@(#)BaseMultiTarget.cc	1.1	2/5/92
 
  Copyright (c) 1991 The Regents of the University of California.
                        All Rights Reserved.
@@ -50,12 +50,12 @@ void BaseMultiTarget :: downLoadCode(int, Profile*) {}
 void BaseMultiTarget :: saveCommPattern() {}
 void BaseMultiTarget :: restoreCommPattern() {}
 void BaseMultiTarget :: clearCommPattern() {}
+ParNode* BaseMultiTarget :: backComm(ParNode*) { return 0;}
 
 // By default, assume zero communication time.
-int BaseMultiTarget :: reserveComm(int,int,int when,int) { return when; }
-int BaseMultiTarget :: scheduleComm(DLNode*,int when,int) { return when; }
+int BaseMultiTarget :: scheduleComm(ParNode*,int when) { return when; }
 
-IntArray* BaseMultiTarget :: candidateProcs(DLNode*, ParProcessors*) 
+IntArray* BaseMultiTarget :: candidateProcs(ParProcessors*) 
 	{ return NULL; }
 
 void BaseMultiTarget :: setTargets(int n) { 
