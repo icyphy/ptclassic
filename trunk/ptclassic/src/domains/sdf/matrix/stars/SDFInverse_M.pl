@@ -1,0 +1,46 @@
+defstar {
+	name { Inverse_M }
+	domain { SDF }
+	desc {
+Invert a square matrix using the Matrix class function.
+The input matrix has dimensions (rowsCols,rowsCols).
+The output matrix has dimensions (rowsCols,rowsCols).
+	}
+	version { $Id$ }
+	author { Mike J. Chen }
+	copyright { 1993 The Regents of the University of California }
+        location  { SDF matrix library }
+	input {
+		name { input }
+		type { FLOAT_MATRIX_ENV }
+	}
+	output {
+		name { output }
+		type { FLOAT_MATRIX_ENV }
+	}
+	defstate {
+		name { rowsCols }
+		type { int }
+		default { 8 }
+		desc { The number of rows/columns of the input square matrix. }
+	}
+        ccinclude { "Matrix.h" }
+	go {
+          Envelope pkt;
+          (input%0).getMessage(pkt);
+          const FloatMatrix *matrix = (const FloatMatrix *)pkt.myData();
+
+          if((matrix->numRows() != int(rowsCols)) ||
+             (matrix->numCols() != int(rowsCols))) {
+            Error::abortRun(*this,"Dimension size of FloatMatrix input does ",
+                                  "not match the given state parameters.");
+            return;
+          }
+          FloatMatrix *result = new FloatMatrix(int(rowsCols),int(rowsCols));
+          *result = !(*matrix);        // invert the matrix
+
+          output%0 << *result;
+        }
+}
+
+
