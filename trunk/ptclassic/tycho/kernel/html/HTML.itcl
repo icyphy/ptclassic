@@ -2063,6 +2063,37 @@ proc HMstack {win push list} {
 }
 
 #######################################################################
+#### HMtag_applet
+# If we are running tycho -java, then start up an AppletFrame with the 
+# applet
+# 
+# This code is modified from the body code for"surfit".
+#
+proc HMtag_applet {win param text} {
+    upvar #0 HM$win var
+    global tyjavapresent
+    set name ""
+    HMextract_param $param name
+    HMextract_param $param code
+    HMextract_param $param codebase
+    HMextract_param $param width
+    HMextract_param $param height
+
+    puts "HMtag_applet: name = $name"
+    if { "$name" != "" && [info exists tyjavapresent] } {
+        puts "HMtag_applet: name = $name, tyjavapresent = $tyjavapresent"
+
+	if [catch {set appletFrame [::java::new TclAppletFrame \
+		[::tycho::autoName .appletFrame]] } errMsg] {
+	    error "::java::new failed to create a TclAppletFrame:\n$errMsg"
+	}
+	if [catch {$appletFrame run $name} errMsg] {
+	    error "Failed to run applet $name\n$errMsg"
+	}
+    }
+}
+
+#######################################################################
 #### HMtag_body
 # This code is modified from "surfit".
 # HTML 3.2 introduces various attributes for the BODY tag.
