@@ -36,6 +36,8 @@ option add *EditSearch.entryWidth 30 widgetDefault
 option add *EditSearch.entryBackground \
 	[ptkColor antiqueWhite white] widgetDefault
 
+option add *EditSearch.entryfont [.tychoFonts defaultFont fixed]
+
 ##########################################################################
 #### EditSearch class.
 # Create a dialog box for searching for text in a Edit object.
@@ -145,7 +147,7 @@ body ::tycho::EditSearch::constructor {args} {
     } {
 	keep -cursor -background
     }
-    pack $itk_component(switches)
+    pack $itk_component(switches) -side bottom
 
     itk_component add case {
 	checkbutton $itk_component(switches).case -text "Consider Case" \
