@@ -1,10 +1,10 @@
 ! $Id$
 ! VEM options for Pigi:
 vem.bindings:	$PTOLEMY/lib/vem.bindings.8-1
-vem*deftechname:	ptolemy
-vem*grid*major*units:	100
-vem*grid*minor*units:	10
-vem*lambda:	1
+vem.deftechname:	ptolemy
+vem.grid.major.units:	100
+vem.grid.minor.units:	10
+vem.lambda:	1
 vem*logfile:	/dev/null
 vem*snap:	25
 vem*technology:	$PTOLEMY/lib/colors
@@ -14,16 +14,16 @@ vem*font: 9x15
 vem*wrap: word
 vem*grid*zero*size: 0
 vem*label*boundbox: 10
-#ifdef COLOR
-vem*background: white
-vem*background*color: grey
-vem*grid*zero*color: grey
-vem*menu*item*background: LightGray
 vem*button*highlightThickness: 5
 vem*edit*borderWidth: 3
+#ifdef COLOR
+vem*cursor*color: red
+vem*background: white
+vem.background.color: #cdcdc1
+vem.grid.zero.color: #cdcdc1
+vem*menu*item*background: #eeeee0
 vem*button*foreground: IndianRed
 vem*title*foreground: black
-vem*cursor*color: red
 #else
 *Background:    white
 *Foreground:    black
