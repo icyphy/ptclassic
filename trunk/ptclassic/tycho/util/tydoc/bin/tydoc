@@ -30,9 +30,18 @@ if [catch {package require tycho.util.tydoc}] {
 
 # If that didn't work, try the TYCHO environment variable.
 if !$ok {
+    if ![info exists env(TYCHO)] {
+	if [info exists env(PTOLEMY)] {
+	    # TYCHO is not set, but PTOLEMY is.
+	    if [file exists [file join $env(PTOLEMY) tycho]] {
+		set env(TYCHO) [file join $env(PTOLEMY) tycho]
+	    }
+	} 
+    }
     if [info exists env(TYCHO)] {
 	if { [lsearch -exact $auto_path $env(TYCHO)] == -1 }  {
-	    lappend auto_path $env(TYCHO)
+	    lappend auto_path [file join $env(TYCHO) util tydoc]
+	    puts "TYCHO = $env(TYCHO) $auto_path"
 	    if ![catch {package require tycho.util.tydoc}] {
 		set ok 1
 	    }
