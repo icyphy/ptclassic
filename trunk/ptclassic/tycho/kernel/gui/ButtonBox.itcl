@@ -128,9 +128,6 @@ class ::tycho::ButtonBox {
     # Execute the command of a specified button
     method invoke {tag}
 
-    # Return the location of the given button as row.column
-    method location {tag}
-
     # Reset the location of the next button
     method reset {{row 0} {column 0}}
 
@@ -529,19 +526,6 @@ body ::tycho::ButtonBox::invoke {tag} {
 	error "Button $tag does not exist"
     }
     uplevel #0 [$itk_component(button$tag) cget -command]
-}
-
-####################################################################
-#### location
-# Get the location of the specified button.
-#
-body ::tycho::ButtonBox::location {tag} {
-    if { ! [::info exists _row($tag)] } {
-	error "Button $tag does not exist"
-    }
-
-    set opts [array set [grid info $itk_component(inside)]]
-    return [join $opts(-row) $opts(-column) "."]
 }
 
 ####################################################################
