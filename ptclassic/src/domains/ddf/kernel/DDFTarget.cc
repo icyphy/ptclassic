@@ -55,6 +55,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "DDFSimpleSched.h"
 #include "InfString.h"
 
+// Defined in DDFDomain.cc
+extern const char DDFdomainName[];
+
 DDFTarget::DDFTarget() :
 Target("default-DDF","DataFlowStar","default DDF target")
 {
@@ -163,7 +166,7 @@ StringList DDFTarget::pragma (const char* parentname,
 }
 
 const char* DDFTarget::domain() {
-  return galaxy() ? galaxy()->domain() : "DDF";
+  return galaxy() ? galaxy()->domain() : DDFdomainName;
 }
 
 const char* DDFTarget::className() const { return "DDFTarget";}
