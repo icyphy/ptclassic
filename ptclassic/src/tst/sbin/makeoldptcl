@@ -28,6 +28,7 @@
 
 # This script sets things up to use a ptcl from a possibly older Ptolemy
 # Usage: makeoldptcl oldptolemypath makeargs 
+# For example: $PTOLEMY/src/tst/sbin/makeoldptcl /usr/eesww/share/ptolemy test
 
 set OLDPTOLEMY=$1
 shift
@@ -35,5 +36,8 @@ shift
 # Setup to use the OLDPTOLEMY g++ so that we properly compile the stars
 source $OLDPTOLEMY/bin/g++-setup
 
-set path = ($OLDPTOLEMY/bin.$PTARCH)
-make PTOLEMY=$OLDPTOLEMY PTCL=$PTOLEMY/src/tst/sbin/ptcltst OCT2PTCL=$PTOLEMY/bin.$PTARCH/oct2ptcl TST_SBINDIR=$PTOLEMY/src/tst/sbin $@
+# Be sure to place $PTOLEMY/src/tst/sbin in the path first so we get
+# the testbed pxgraph
+set path = ($PTOLEMY/src/tst/sbin $OLDPTOLEMY/bin.$PTARCH $path)
+
+make PTOLEMY=$OLDPTOLEMY PTCL=$PTOLEMY/src/tst/sbin/ptcltst OCT2PTCL=$PTOLEMY/bin.$PTARCH/oct2ptcl TST_SBINDIR=$PTOLEMY/src/tst/sbin $*
