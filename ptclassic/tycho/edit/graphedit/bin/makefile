@@ -48,7 +48,7 @@ TCL_SRCS =
 
 ITCL_SRCS = 
 
-EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) graphedit
+EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) graphedit README.txt
 
 MISC_FILES = 
 
