@@ -145,6 +145,55 @@ public:
 	// Register a read or write to an arc and the offset.
 	void registerArcRef(VHDLPortHole*, int);
 
+	// Add in generic refs here from genericList.
+	void addGenericRefs(VHDLCluster*, int);
+
+	// Add in port refs here from portList.
+	void addPortRefs(VHDLCluster*, int);
+
+	// Add in sensitivity list of input ports.
+	// Do this explicitly for sake of synthesis.
+	void addSensitivities(VHDLCluster*, int);
+
+	// Add in variable refs here from variableList.
+	void addVariableRefs(VHDLCluster*, int);
+
+	// Add in port to variable transfers here from portVarList.
+	void addPortVarTransfers(VHDLCluster*, int);
+
+	// Add in variable to port transfers here from varPortList.
+	void addVarPortTransfers(VHDLCluster*, int);
+
+	// Generate the entity_declaration.
+	void buildEntityDeclaration(int);
+
+	// Generate the architecture_body_opener.
+	void buildArchitectureBodyOpener(int);
+
+	// Add in component declarations here from compDeclList.
+	void buildComponentDeclarations(int);
+
+	// Add in signal declarations here from signalList.
+	void buildSignalDeclarations(int);
+
+	// Add in component mappings here from compMapList.
+	void buildComponentMappings(int);
+
+	// Generate the architecture_body_closer.
+	void buildArchitectureBodyCloser(int);
+
+	// Add in configuration declaration here from compDeclList.
+	void buildConfigurationDeclaration(int);
+
+	// Generate the register entity and architecture.
+	StringList regCode();
+
+	// Generate the selector entity and architecture.
+	StringList selCode();
+
+	// Generate the source entity and architecture.
+	StringList sourceCode();
+
 protected:
 	CodeStream component_declarations;
 	CodeStream signal_declarations;
