@@ -27,7 +27,7 @@ static char SccsId[]="$Id$";
 #include "copyright.h"
 #include "port.h"
 #include "utility.h"
-#include "mm.h"
+/* #include "mm.h" */
 #include "errtrap.h"
 #include "ansi.h"
 #include "options.h"
