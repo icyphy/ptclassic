@@ -48,8 +48,17 @@ void CGSharedBus::restoreCommPattern() {
 // cNode is the communication node to be scheduled
 // when is the time its ancestors have finished execution 
 
-int CGSharedBus::scheduleComm(ParNode *cNode, int when) {
-	bus.addNode(cNode, when);
+int CGSharedBus::scheduleComm(ParNode *cNode, int when, int limit) {
+	if ((limit > 0) && (when < bus.getAvailTime())) {
+		int t = bus.filledInIdleSlot(cNode, when, limit);
+		if (t < 0) return -1;
+		else if (t >= bus.getAvailTime())
+			bus.schedAtEnd(cNode, t, cNode->getExTime());
+		else
+			bus.schedInMiddle(cNode, t, cNode->getExTime());
+	} else {
+		bus.addNode(cNode, when);
+	}
 	return cNode->getScheduledTime();
 }
 
@@ -66,6 +75,27 @@ Block* CGSharedBus::clone() const {
 	LOG_NEW; CGSharedBus *t = 
 		new CGSharedBus(readName(),starType(),readDescriptor());
 	return &t->copyStates(*this);
+}
+
+			//////////////////
+			///  backComm  ///
+			//////////////////
+// For a given communication node, find a comm. node scheduled
+// just before the argument node on the same communication resource.
+
+ParNode* CGSharedBus :: backComm(ParNode* n) {
+	ProcessorIter iter(bestBus);
+	ParNode* pn;
+	ParNode* prev = 0;
+	while ((pn = iter.nextNode()) != 0) {
+		if (pn == n) break;
+		else prev = pn;
+	}
+	if (prev) {
+		if (prev->getType() >= 0) return 0;
+		else return prev;
+	}
+	return 0;
 }
 
 static CGSharedBus targ("SharedBus","CGStar",

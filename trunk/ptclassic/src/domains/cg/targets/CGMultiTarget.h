@@ -58,7 +58,16 @@ public:
 	IntArray* candidateProcs(ParProcessors*);
 
 	// resource management
-	int scheduleComm(ParNode* comm, int when) { return when; }
+	int scheduleComm(ParNode* comm, int when, int limit = 0) 
+		{ return when; }
+
+	// For a given communication node, find a comm. node scheduled
+	// just before the argument node on the same communication resource.
+	ParNode* backComm (ParNode* n);
+
+	// redefine 
+	SDFStar* createSend(int from, int to, int num);
+	SDFStar* createReceive(int from, int to, int num);
 
 protected:
 	StringState childType;

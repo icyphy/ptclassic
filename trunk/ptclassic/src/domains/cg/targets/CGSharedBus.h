@@ -29,7 +29,11 @@ public:
 	void restoreCommPattern();
 
 	// resource management
-	int scheduleComm(ParNode*,int);
+	int scheduleComm(ParNode*,int, int limit = 0);
+
+	// For a given communication node, find a comm. node scheduled
+	// just before the argument node on the same communication resource.
+	ParNode* backComm(ParNode* n);
 
 	Block* clone() const;
 
