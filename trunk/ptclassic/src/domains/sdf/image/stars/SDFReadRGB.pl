@@ -58,26 +58,30 @@ are read are 'dir.2/pic2', 'dir.3/pic3', etc.
 		code {
 			char* p = outstr;
 			const char* q = expandPathName(str);
+			const char* qorig = q;
 			char num[16];
 
 			sprintf(num, "%d", d);
 			int len = strlen(num);
-			while (*q != '\000') { // Replace '#' with 'num's value.
+			// Replace '#' with 'num's value.
+			while ( *q ) {
 				if (*q == '#') {
 					strcpy(p, num);
 					p += len;
 					q++;
-				} else {
-					*p = *q; p++; q++;
+				}
+				else {
+					*p++ = *q++;
 				}
 			}
 			*p = '\000';
+			delete [] qorig;
 		} // end genFileName()
 	}
 
 	go {
 // Open file containing the image.
-		char fullName[256];
+		char fullName[512];
 		genFileName(fullName, fileName, int(frameId));
 		FILE* fp = fopen(fullName, "r");
 		if (fp == (FILE*) NULL) {
