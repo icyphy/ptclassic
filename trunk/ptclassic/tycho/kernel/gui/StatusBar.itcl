@@ -199,7 +199,7 @@ configbody ::tycho::StatusBar::filestatus {
 	# Delete the file status if there is one
 	if [::info exists itk_component(filestatus)] {
 	    destroy $itk_component(filestatus)
-	    unset itk_component(filestatus)
+	    catch {unset itk_component(filestatus)}
 	}
         grid columnconfigure $itk_interior 0 -minsize 0
    } else {
@@ -220,8 +220,10 @@ configbody ::tycho::StatusBar::filestatus {
         }
 	
 	# Bind help to the file status display
-	bind $itk_component(filestatus) <Enter> [code "%Q _filestatushelp"]
-	bind $itk_component(filestatus) <Leave> [code "%Q putMessage {}"]
+	bind $itk_component(filestatus) <Enter> \
+		[@scope [info class] "$this _filestatushelp"]
+	bind $itk_component(filestatus) <Leave> \
+		[@scope [info class] "$this putMessage {}"]
 
 	# Set the status display
 	switch -exact $itk_option(-filestatus) {
@@ -920,7 +922,7 @@ body ::tycho::StatusBar::_setmode {mode} {
     if [::info exists itk_component(feedback)] {
         grid forget $itk_component(feedback)
         destroy $itk_component(feedback)
-        unset itk_component(feedback)
+        catch {unset itk_component(feedback)}
     }
 
     # Create a new feedback widget if needed
