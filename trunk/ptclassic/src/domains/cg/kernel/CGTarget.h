@@ -50,6 +50,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 class CGStar;
 class SDFSchedule;
 class SDFScheduler;
+class CGCStar;
+
+class CommPair {
+public:
+    CommPair(CGCStar* c, CGStar* o):cgcStar(c),cgStar(o) {};
+    CommPair():cgcStar(0),cgStar(0) {};
+    CGCStar* cgcStar;
+    CGStar* cgStar;
+};
+ 
 
 extern const char *CODE, *PROCEDURE;
 
@@ -252,6 +262,11 @@ public:
     // If set to 2, Shuvra and Ha's extensive looping.
     IntState loopingLevel;
 
+    // Routines to construct CG wormholes, using the
+    // $PTOLEMY/src/domains/cgc/targets/main/CGWormTarget
+    virtual CommPair fromCGC(PortHole&);
+    virtual CommPair toCGC(PortHole&);
+    
 protected:
 
     // Initialization for code generation.

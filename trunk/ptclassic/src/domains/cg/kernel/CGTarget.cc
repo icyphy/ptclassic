@@ -139,6 +139,18 @@ int CGTarget :: runCode() { return TRUE; }
 
 // the main guy.
 
+CommPair CGTarget::fromCGC(PortHole&) {
+    CommPair empty;
+    Error::abortRun(*this,"This target does not support the CGWormTarget.");
+    return empty;
+}
+
+CommPair CGTarget::toCGC(PortHole&) {
+    CommPair empty;
+    Error::abortRun(*this,"This target does not support the CGWormTarget.");
+    return empty;
+}
+
 void CGTarget::setup() {
 	myCode.initialize();
 	makefile.initialize();
