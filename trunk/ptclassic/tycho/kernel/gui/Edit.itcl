@@ -279,6 +279,9 @@ class ::tycho::Edit {
     ##########################################################################
     ####                  protected methods and procedures                ####
 
+    # Configure the popup menu depending on the current context
+    protected method configurePopup {}
+
     # Return the region of text tagged with the given tag within which
     # the "current" mark sits.
     protected method getTaggedText {tag}
@@ -656,13 +659,19 @@ body ::tycho::Edit::constructor {args} {
     set maxLineLength \
             [option get $itk_component(hull) fillMaxLineLength Edit]
 
-    # FIXME: This is totally bogus!!!
+    # Create and configure the context-sensitive popup menu
+    # FIXME: Is this the right place for this code?
+    set myContextmenu [::tycho::PopupMenu .#auto \
+	    -command "@scope ::tycho::Edit [list $this configurePopup]"]
 
-    # Create my context-sensitive popup menu
-    set myContextmenu [::tycho::PopupMenu .#auto]
-    # FIXME: Add better description.
-    $myContextmenu add {Describe this widget...} -command \
+    # Entries for cross-linking
+    contextmenu add {Open source} -type cascade -state disabled
+    contextmenu add {Open documentation} -type cascade -state disabled
+
+    # Entries for developer information FIXME
+    contextmenu add {Describe this widget...} -command \
 	    "::tycho::post $itk_component(text)"
+
     bind $itk_component(text) <Button-3> {%Q contextmenu post %X %Y}
 }
 
@@ -1866,6 +1875,67 @@ body ::tycho::Edit::writeSpellText {filename} {
 #####################################################################
 ####                     protected methods                       ####
 
+
+#####################################################################
+#### configurePopup
+# Configure the popup menu according to context. For the Edit widget,
+# this method enables the hyperlink entries and the evaluate
+# entry if there is a selection, and disables them otherwise.
+#
+body ::tycho::Edit::configurePopup {} {
+    if { [$itk_component(text) tag ranges sel] == "" } {
+	# No selection, so disable entries
+	contextmenu disable {Open source}
+	contextmenu disable {Open documentation}
+    } else {
+	# There is a selection, so see if the index files contain
+	# something, and if they do, enable the entries.
+	# FIXME
+	set f [open [::tycho::expandPath \
+		[file join \$TYCHO lib idx codeDoc.idx]]]
+	set index [read $f]
+	close $f
+	# Remove comments.
+	regsub -all "(^|\n)\[ \t\]*#\[^\n\]*(\n|$)" $index {} index
+	set index [lindex $index 1]
+
+	set selection [$itk_component(text) get sel.first sel.last]
+
+	# Clear the submenu
+	contextmenu clear {Open documentation}
+
+	# Find links and add to submenu
+	set linksfound 0
+	foreach entry $index {
+	    set desc [lindex $entry 0]
+	    set link [lindex $entry 1]
+	    if { [string match [lindex $desc 0] $selection] } {
+		# Add the doc link
+		contextmenu add "HTML: [lrange $desc 1 end]" \
+			{Open documentation} \
+			-command "::tycho::File::openContext $link"
+
+		# Add a source link
+		set link [file split $link]
+		set path [lrange $link 0 [expr [llength $link] - 4]]
+		set file [join [concat \
+			[linit [split [lindex $link end] .]] "itcl"] .]
+		set link [eval file join $path $file]
+		contextmenu add "Source: [lrange $desc 1 end]" \
+			{Open source} \
+			-command "::tycho::File::openContext $link"
+
+		set linksfound 1
+	    }
+	}
+
+	# Enable submenus
+	if { $linksfound } {
+	    contextmenu enable {Open documentation}
+	    contextmenu enable {Open source}
+	}
+    }
+}
 
 #####################################################################
 #### getTaggedText
