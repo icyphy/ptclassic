@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include <stdio.h>
 #include "SimC50Target.h"
 #include "KnownTarget.h"
 #include "TITarget.h"
