@@ -25,11 +25,25 @@ $Id$
 #include "Star.h"
 #include "IntState.h"
 
+enum FiringMode {SIMPLE, PHASE};
+
 	////////////////////////////////////
 	// class DEStar
 	////////////////////////////////////
 
 class DEStar : public Star {
+protected:
+	FiringMode mode;
+
+	// set mode. If mode = PHASE, create inQue for its input portholes.
+	// PHASE mode:
+	// Get all simultaneous events in its input portholes at one time.
+	// Then, the number of firing will be reduced as many as the number of
+	// simultaneous input events on a porthole.
+	// SIMPLE mode:
+	// A special case of PHASE mode where the size of InQue of input
+	// portholes is one, so unneccesary.
+	void setMode(FiringMode m);
 
 public:
 	// initialize domain-specific members
@@ -41,10 +55,13 @@ public:
 	// my domain
 	const char* domain() const;
 
-	// constructor
-	DEStar() : delayType(FALSE) { arrivalTime = 0.0;
-				      completionTime = 0.0; }
+	// prepare a new phase of firing.
+	virtual void startNewPhase();
 
+	// constructor
+	DEStar() : delayType(FALSE), mode(SIMPLE) { arrivalTime = 0.0;
+				      completionTime = 0.0; }
+	
 	// Store the completion time of the current execution, which in turn
 	// the next free time. But, it may not be the start time of the next
 	// execution since some users may allow several executions 
