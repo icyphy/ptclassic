@@ -24,7 +24,6 @@ static char SccsId[]="$Id$";
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
-static char rcs_id[] = "$Id$";
 /*
  * Implementations of the the oct functions for layers.
  */
