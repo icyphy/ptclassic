@@ -42,7 +42,7 @@
 # <p>
 # Here is an example of how to use the Exec:
 # <tcl><pre>
-#     ::tycho::Exec .x -command make all
+#     ::tycho::Exec .x -command {make all}
 #     .x centerOnScreen
 # </pre></tcl>
 #
