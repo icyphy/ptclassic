@@ -24,7 +24,8 @@
 # 						COPYRIGHTENDKEY
 #
 #
-# mkPtolemyTree: A shell script to build custom Ptolemy trees
+# mkPtolemyTree: A shell script to build custom Ptolemy trees that
+# use parts of a shared master tree.
 #
 # Version: $Id$
 #
@@ -33,17 +34,14 @@
 #
 # Port to Tcl by Matt Tavis and Brian L. Evans.
 #
-# We rely on 'mkdir -p' to create all the parent directories for
-# a given path name.  The '-p' option is supported on the platforms
-# we build for Ptolemy 0.6, and we use it in $PTOLEMY/src/kernel/Target.cc 
-# and $PTOLEMY/src/domains/cg/kernel/CGUtilities.cc.  However, the
-# '-p' option is not support on, for example, Ultrix 4.1.  See
-# $PTOLEMY/src/gnu/src/make/make-stds.texi.  -cxh
-
+# Execessive hacking under duress :-) : Christopher Hylands
+#
 proc replaceLinkWithDir {pathname linkspec} {
     if { [file type $pathname] == "link" } {
 	puts "Creating $pathname"
-	exec sh -c "rm $pathname ; mkdir -p $pathname ; ln -s $linkspec $pathname"
+	file delete $pathname
+	file mkdir $pathname
+	exec ln -s $linkspec $pathname
     } elseif { [file isdirectory $pathname] } {
 	puts "The directory $pathname already exists"
     } else {
@@ -149,16 +147,16 @@ TREE:
 
     puts "Creating obj directories"
     foreach mdir $objdirs {
-	if [catch {exec mkdir -p "$mdir"} errMsg] {
-	    puts "mkPtolemyTree Error: mkdir -p $mdir failed: $errMsg"
+	if [catch {file mkdir "$mdir"} errMsg] {
+	    puts "mkPtolemyTree Error: file mkdir $mdir failed: $errMsg"
 	    puts $objdirs
 	    exit
 	}
     }
     puts "Creating src directories"
     foreach mdir $srcdirs {
-	if [catch {exec mkdir -p "$mdir"} errMsg] {
-	    puts "mkPtolemyTree Error: mkdir -p $mdir failed: $errMsg"
+	if [catch {file mkdir "$mdir"} errMsg] {
+	    puts "mkPtolemyTree Error: file mkdir $mdir failed: $errMsg"
 	    puts $objdirs
 	    exit
 	}
@@ -182,15 +180,26 @@ TREE:
 	processDirectory $dir $croot $root
     }
 
-    exec rm -f $croot/obj.$ptarch/makefile
+    file delete -force $croot/obj.$ptarch/makefile
     exec ln -s $root/src/makefile $croot/obj.$ptarch/makefile
 
-    exec rm -f $croot/MAKEARCH
-    exec cp $root/MAKEARCH $croot/MAKEARCH
+    file delete -force $croot/MAKEARCH
+    file copy $root/MAKEARCH $croot/MAKEARCH
+
+    # If the .glimpse files exist, then create links for them
+    if [file exists $root/src/.glimpse_exclude] {
+	file delete -force $croot/src/.glimpse_exclude
+	file copy $root/src/.glimpse_exclude $croot/src/.glimpse_exclude
+    }
+    if [file exists $root/src/.glimpse_index] {
+	file delete -force $croot/src/.glimpse_index
+	file copy $root/src/.glimpse_index $croot/src/.glimpse_index
+    }
 
     puts "Copying $override to $croot/mk/override.mk"
-    exec cp $override $croot/mk/override.mk
+    file copy $override $croot/mk/override.mk
     
+    # Copy override.mk to the directories that create binaries 
     set over [open "$croot/obj.$ptarch/pigiRpc/override.mk" w]
     puts $over \
 	    "include \$(ROOT)/mk/override.mk\nPTOLEMY=$croot\nPIGI=pigiRpc\n"
@@ -231,7 +240,15 @@ TREE:
 
 # Process the args we were called with and then call mkPtolemyTree
 proc processArgs {} {
-    global argc argv env
+    global argc argv env tcl_version tcl_platform
+    if {$tcl_version < 7.6} {
+	error "mkPtolemyTree must be run with a version of tcl\ngreater \
+		than or equal to 7.6, as we use 'file mkdir' etc."
+    }
+    if {$tcl_platform(platform) != "unix"} {
+	error "mkPtolemyTree probably won't work under non-unix platforms"
+    }
+
     set error 0
     if {$argc != 2} {
 	puts "mkPtolemyTree: wrong number of arguments"
@@ -265,6 +282,7 @@ proc processArgs {} {
 	puts " full documentation for mkPtolemyTree"
 	exit
     }
+    
     mkPtolemyTree [lindex $argv 0] [lindex $argv 1] $env(PTOLEMY) $env(PTARCH) 
 }
 
