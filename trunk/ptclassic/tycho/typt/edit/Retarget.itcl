@@ -96,5 +96,6 @@ body ::tycho::EditRetarg::compareDomains {} {
 
     component graphics redrawGraph
 }
-::tycho::EditRetarg .t
-.t centerOnScreen
+
+#::tycho::EditRetarg .t
+#.t centerOnScreen
