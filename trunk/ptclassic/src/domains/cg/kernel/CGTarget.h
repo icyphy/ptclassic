@@ -20,6 +20,7 @@ $Id$
 
 #include "Target.h"
 #include "StringState.h"
+#include "StringStack.h"
 
 class CGStar;
 
@@ -71,15 +72,29 @@ public:
 // Class for unique symbol generation.  The symbol is guaranteed
 // to be unique with respect to all other symbols in the target.
 class Symbol {
-	private:
-		// List of all symbols
-		StringList symbols;
-		CGTarget* myTarget;
-	public:
-		Symbol(CGTarget* t = 0);
-		void initialize() { symbols.initialize(); };
-		StringList lookup(const char* name);
-		void setTarget(CGTarget* t) {myTarget = t;}
+private:
+	// List of all symbols
+	StringList symbols;
+	CGTarget* myTarget;
+public:
+	Symbol(CGTarget* t=0);
+	void initialize() { symbols.initialize(); };
+	StringList lookup(const char*);
+	void setTarget(CGTarget* t) {myTarget = t;}
 };
 
+// Class for unique nested symbol generation.
+class NestedSymbol {
+private:
+	// List of all symbols
+	StringStack symbols;
+	CGTarget* myTarget;
+public:
+	NestedSymbol(CGTarget* t=0);
+	void initialize() { symbols.initialize(); };
+	const char* push(const char* tag="L");
+	const char* pop();
+	int depth() { return symbols.depth();};
+	void setTarget(CGTarget* t) {myTarget = t;};
+};
 #endif

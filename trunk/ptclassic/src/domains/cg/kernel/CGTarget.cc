@@ -23,6 +23,7 @@ $Id$
 #include "UserOutput.h"
 #include "SDFScheduler.h"
 #include "CGDisplay.h"
+#include "miscFuncs.h"
 
 // Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
@@ -144,6 +145,28 @@ StringList Symbol::lookup(const char* name) {
     	// add the new symbol as well
    	symbols += s;
     	return s;
+}
+	
+
+NestedSymbol::NestedSymbol (CGTarget* target=0) {
+	initialize();
+	myTarget = target;
+}
+	
+const char* NestedSymbol::push(const char* name="L") {
+	StringList s;
+   	s = name;
+	s += myTarget->separator;
+    	s += myTarget->numLabels++;
+	const char* temp = s;
+   	symbols.push(temp);
+    	return savestring(temp);
+}
+
+const char* NestedSymbol::pop() {
+	if(depth()==0) return 0;
+	return symbols.pop();
+
 }
 	
 
