@@ -60,6 +60,7 @@ USER_C_SHAREDFLAGS =	$(C_SHAREDFLAGS)
 USER_CC_SHAREDFLAGS =	$(CC_SHAREDFLAGS)
 LIBSUFFIX =		so
 SHARED_LIBRARY_COMMAND =	CC -G -o
+CSHARED_LIBRARY_COMMAND =	cc -G -o
 #endif
 
 # If you turn on debugging (-g) with cfront, ptcl and pigiRpc could be
