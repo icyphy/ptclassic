@@ -55,7 +55,7 @@ static  octStatus fix_actuals();
 	ptr->contents = ptr->containers = NIL(struct chain);\
 	CLEAR_FLAGS(ptr);\
 	if (id != oct_new_id(ptr)) {\
-	    oct_error("Panic: Corrupted facet: id's out of sequence");\
+	    oct_error("Panic: Corrupted facet: Id's out of sequence");\
 	    return 0;\
 	}\
     }\
