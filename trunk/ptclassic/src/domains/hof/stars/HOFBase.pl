@@ -18,7 +18,7 @@ The basic mechanism is that a star or galaxy is statically
 specified, and the higher-order star replaces itself with
 one or more instances of the specified replacement block.
 	}
-	version { $Id$ }
+	version { $Id$    %Q% }
 	author { E. A. Lee  }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
@@ -128,6 +128,8 @@ limitation of liability, and disclaimer of warranty provisions.
 			blockname);
 		    return NULL;
 		}
+		// Set the target
+		if (target()) block->setTarget(target());
 
 		// Choose a name for the block
 	        StringList instancename = "HOF_";
