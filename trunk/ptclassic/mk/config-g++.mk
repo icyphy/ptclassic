@@ -61,8 +61,9 @@ USE_GPLUSPLUS = yes
 # -Wsynth is new in g++-2.6.x
 # Under gcc-2.7.0, you will need to add -fno-for-scope to LOCALCCFLAGS
 # Under gxx-2.7.0 -Wcast-qual will drown you with warnings from libg++ includes
+GCC_270_OPTIONS = -fno-for-scope
 WARNINGS =	-Wall -Wsynth #-Wcast-qual 
-LOCALCCFLAGS =	-g -fno-for-scope
+LOCALCCFLAGS =	-g $(GCC_270_OPTIONS)
 LOCALCFLAGS = 	$(LOCALCCFLAGS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)

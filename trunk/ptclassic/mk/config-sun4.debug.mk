@@ -59,7 +59,7 @@ OPTIMIZER =
 # -Wsynth is new in g++-2.6.x
 WARNINGS =	-Wall -Wcast-qual -Wsynth
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-g -fno-for-scope
+LOCALCCFLAGS =	-g $(GCC_270_OPTIONS)
 LOCALCFLAGS = 	$(LOCALCCFLAGS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)

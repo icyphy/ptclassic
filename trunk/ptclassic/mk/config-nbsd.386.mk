@@ -74,7 +74,7 @@ ARCHFLAGS=	-Dnetbsd_i386
 
 WARNINGS =	-Wall -Wcast-qual -Wcast-align
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-fno-for-scope
+LOCALCCFLAGS =	$(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 LOCALCFLAGS =	-fwritable-strings

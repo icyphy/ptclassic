@@ -141,7 +141,7 @@ WARNINGS =	-Wall -Wcast-align -Wsynth
 ARCHFLAGS =	-DPTSVR4
 
 # Under gcc-2.7.0, you will need -fno-for-scope for LOCALCCFLAGS
-LOCALCCFLAGS =	-g -fno-for-scope 
+LOCALCCFLAGS =	-g $(GCC_270_OPTIONS)
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
 # If you are not using gcc, then you might have problems with the WARNINGS flag
