@@ -15,9 +15,8 @@ $Id$
 #ifndef _type_h
 #define _type_h 1
 
-// The most general type of pointer, for use in generic types.  You can't
-// use a Pointer to change the memory
-typedef const void* Pointer;
+// The most general type of pointer, for use in generic types.
+typedef void* Pointer;
 
 // The following is also defined in gnu stdio.h, which is included
 // by stream.h
