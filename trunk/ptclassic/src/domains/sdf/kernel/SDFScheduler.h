@@ -41,7 +41,7 @@ public:
 	int size() {return SequentialList::size();}
 
 	// Return the next block on the list
-	SDFStar& operator ++ () {return nextStar(); }
+	SDFStar& operator ++ () {return *(SDFStar*) next(); }
 
 	// Same as operator ++, but alternative format
 	SDFStar& nextStar () {return *(SDFStar*) next(); }
