@@ -44,6 +44,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdlib.h>
 #include <string.h>
 #include <stdio.h>
+#include "compat.h"
+#include "ptsignals.h"
 #include "SigHandle.h"
 
 /****************************************************************************/

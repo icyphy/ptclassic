@@ -35,8 +35,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
-extern "C" int setHandlers(SIG_PF sigHandler);
-void signalHandlerRelease(int signo);
+#ifdef PTHPPA
+typedef void (*SIG_PF)(int);
+#endif
+
+/****************************************************************************/
+
+int setHandlers(SIG_PF sigHandler);
+void signalHandlerRelease(void);
 void signalHandlerDebug(int signo);
 
 /****************************************************************************/
