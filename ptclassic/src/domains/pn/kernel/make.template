@@ -30,9 +30,8 @@ INCL=-I$(KERNDIR) -I$(THREADDIR) -I$(SDFDIR)
 # Library sources
 CC_WITH_H=\
 	MTDFTarget.cc MTDFScheduler.cc MTDFStar.cc\
-	MTDFConnect.cc MTDFGeodesic.cc\
-	MTDFThread.cc\
-	MTDFWormhole.cc MTDFWormConnect.cc\
+	MTDFPortHole.cc MTDFGeodesic.cc MTDFForkNode.cc\
+	MTDFThread.cc
 
 SRCS=	$(CC_WITH_H)\
 	MTDFDomain.cc
