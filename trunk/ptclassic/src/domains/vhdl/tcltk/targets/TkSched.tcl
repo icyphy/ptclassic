@@ -554,7 +554,10 @@ proc Level { node } {
     foreach conn $dot($node,inConns) {
 	# Find the nodes which are predecessors
 	set predNode [lindex $conn 0]
-	if { $dot($predNode,level) == -1 } {
+	# If it's a topToken, use predLevel = 0
+	if { [lsearch $dot(topTokenList) $predNode] >= 0 } {
+	    set predLevel 0
+	} elseif { $dot($predNode,level) == -1 } {
 	    set predLevel [Level $predNode]
 	} else {
 	    set predLevel $dot($predNode,level)
