@@ -51,7 +51,8 @@ and a quote character for strings.
 #include <std.h>
 #include <stdio.h>
 #include "miscFuncs.h"
-#include "streamCompat.h"
+#include <fstream.h>
+#include <strstream.h>
 
 // older versions of the GNU libg++ library have a bug; this
 // turns on the bug fix code

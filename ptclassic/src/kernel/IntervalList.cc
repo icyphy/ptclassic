@@ -46,8 +46,9 @@ and they always have gaps between them.
 
 #include "IntervalList.h"
 #include <minmax.h>
-#include "streamCompat.h"
 #include "miscFuncs.h"
+#include <fstream.h>
+#include <strstream.h>
 
 int Interval::isAfter(const Interval &i1) const { 
 	return (pOrigin >= i1.end()); 
