@@ -446,8 +446,7 @@ body ::tycho::Monitor::insertLine {line} {
         # 2) update internal count, so Next button will know where to jump
         $text tag bind error$errorCount <Double-Button-1> \
                 "$this setErrorCount $errorCount;\
-                $this jumpToLine $monitorLine $editorLine $fname"
-
+                $this jumpToLine $monitorLine $editorLine \"$fname\""
     }
 }
 
