@@ -32,7 +32,8 @@ INCL=-I$(KERNDIR) -I$(CGDIR) -I$(SDFDIR)
 LIB=libcgc.a
 
 # Header files
-HDRS= CGCPortHole.h CGCStar.h CGCTarget.h CGCGeodesic.h CGCForkNode.h
+HDRS= CGCPortHole.h CGCStar.h CGCTarget.h CGCGeodesic.h CGCForkNode.h \
+	CGCWormhole.h
 
 # Library objects
 OBJS= $(HDRS:.h=.o) CGCDomain.o
