@@ -87,14 +87,12 @@ ITCL_SRCS = \
 	Graph.itcl \
 	HTML.itcl \
 	HTMLMessage.itcl \
-	IconLibrary.itcl \
 	IndexBrowser.itcl \
 	Library.itcl \
 	ListBrowser.itcl \
 	MenuBar.itcl \
 	MenuSupport.itcl \
 	Message.itcl \
-	MetaData.itcl \
 	Model.itcl \
 	ModelViewer.itcl \
 	Monitor.itcl \
@@ -121,7 +119,6 @@ ITCL_SRCS = \
 	SimpleModel.itcl \
 	SimpleView.itcl \
 	Stack.itcl \
-	StarLibrary.itcl \
 	StatusBar.itcl \
 	StyleSheet.itcl \
 	Subpanel.itcl \
