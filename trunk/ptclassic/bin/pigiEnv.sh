@@ -15,11 +15,17 @@ usage () {
     echo "  [-ptiny] [-ptrim] [-rpc rpcname] [-xres resname ] [-display display] [cell_name]"
 }
 
+xrdb=xrdb
+if [ $PTARCH = "nt4" ]; then
+    # If we are running under nt4, then add the proper cpp
+    xrdb="xrdb -cpp `gcc --print-prog-name cpp| sed 's@\\\@/@g`" 
+fi
+
 # Call this sh function to cleanup
 cleanup () {
     if [ -n "$dbfile" -a -r "$dbfile" ]; then
-	xrdb $dbfile
-	/bin/rm -f $dbfile
+	$xrdb $dbfile
+	rm -f $dbfile
     fi
 }
 
@@ -35,7 +41,7 @@ if [ -z "$PTOLEMY" ]; then
 fi
 
 # Set the commonly used environment variables
-#source $PTOLEMY/bin/ptsetup.csh
+. $PTOLEMY/bin/ptsetup.sh
 OCTTOOLS=${OCTTOOLS:=$PTOLEMY}
 
 if [ -z "$DISPLAY" ]; then
@@ -101,11 +107,11 @@ while [ $# -gt 0 ]; do
 	    exit 1;;
 	*)
 	    cell=$1
-	    if [ `basename $cell` == "" ]; then
+	    if [ `basename $cell` = "" ]; then
 		echo "Warning: pigi can't handle names with trailing slashes"
 		cell=`echo $cell | awk '{print substr($0,1,length($0)-1)}'`
 		echo "Removed the trailing /, so now the pathname is $cell"
-	    fi;;
+    fi;;
 	esac    
 	shift
 done
@@ -118,7 +124,7 @@ done
 # pigi -ptrim try looking for ptinyRpc or ptrimRpc.
 # If we are running with -debug, try looking for .debug images
 
-if [ -n "$PIGIBASE" ]; then
+if [ -z "$PIGIBASE" ]; then
      case $progname in
 	ptiny)  
 	    PIGIBASE=pigiRpc.ptiny;;
@@ -201,22 +207,23 @@ fi
 
 dbfile=/tmp/pigiXR$$
 
+
 # Check to see whether xrdb is in the path
-(xrdb -help) >/dev/null 2>&1
+($xrdb -help) >/dev/null 2>&1
 if [ $? != 0 ]; then
     PATH=$PATH:/usr/X11/bin:/usr/bin/X11
 fi
-xrdb -query > $dbfile
+$xrdb -query > $dbfile
 if [ $? != 0 ]; then 
-    echo "${progname}: 'xrdb -query' failed. Exiting"
+    echo "${progname}: '$xrdb -query' failed. Exiting"
     exit 1
 fi
 
-xrdb -merge $PTOLEMY/lib/$resfile
+$xrdb -merge $PTOLEMY/lib/$resfile
 
 # Allow user-specified X resources
 if [ -n "$PIGIXRES" ]; then
-    xrdb -merge $PIGIXRES
+    $xrdb -merge $PIGIXRES
 fi
 
 if [ -n "$pigiconsole" ]; then
@@ -242,7 +249,7 @@ else
     fi
 fi
 
-export PTOLEMY PTARCH OCTTOOLS COMMAND
+export PTOLEMY HOME PTARCH PIGIRPC DISPLAY PATH TCL_LIBRARY TK_LIBRARY PTPWD LD_LIBRARY_PATH TYCHO OCTTOOLS COMMAND
 
 VEMBINARY=${VEMBINARY:=$PTOLEMY/bin.$PTARCH/vem} 
 
