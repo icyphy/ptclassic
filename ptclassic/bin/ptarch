@@ -93,6 +93,10 @@ case "${UNAME_MACHINE}:${UNAME_SYSTEM}:${UNAME_RELEASE}:${UNAME_VERSION}" in
 	echo irix5
 	exit 0 ;;
 
+     *:IRIX:6.*:*)
+    	echo irix6.cfront
+    	exit 0 ;;
+
     9000/???:HP-UX:A.09.*:*)
 	echo hppa9
 	exit 0 ;;
