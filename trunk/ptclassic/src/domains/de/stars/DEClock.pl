@@ -28,8 +28,7 @@ Generates events at regular intervals, starting at time zero.
 	go {
 	   // Generate the output event
 	   // (Recall that the first event comes out at time 0).
-	   // (The double cast is because of a gnu compiler bug)
-	   output.put(completionTime) << float(double(magnitude));
+	   output.put(completionTime) << double(magnitude);
 
 	   // and schedule the next firing
 	   refireAtTime(completionTime);

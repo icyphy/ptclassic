@@ -22,7 +22,7 @@ signal arrives and there is no data.
 	}
 	output {
 		name { output }
-		type { packet }
+		type { message }
 	}
 	defstate {
 		name { maxLength }
@@ -49,11 +49,11 @@ signal arrives and there is no data.
 			saveData[idx++] = data.get();
 		if (demand.dataNew || idx == int(maxLength)) {
 			demand.dataNew = FALSE;
-			// create a IntVecData and imbed it in a Packet
+			// create a IntVecData and imbed it in an Envelope.
 			LOG_NEW; IntVecData *p = new IntVecData(idx,saveData);
-			Packet pkt(*p);
-			// copy the Packet to the output
-			output.put(arrivalTime) << pkt;
+			Envelope env(*p);
+			// copy the Envelope to the output
+			output.put(arrivalTime) << env;
 			idx = 0;
 		}
 	}

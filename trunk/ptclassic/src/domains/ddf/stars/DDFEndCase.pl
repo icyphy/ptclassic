@@ -43,7 +43,7 @@ the "output".
 	go {
 	// get control Particles from Geodesic
 		if (!readyToGo)
-			control.grabData();	
+			control.receiveData();	
 		
 		MPHIter nexti(input);
 		PortHole* p = 0;
@@ -54,7 +54,7 @@ the "output".
 			return;
 		}
 		if (p->numTokens() >= p->numberTokens) {
-			p->grabData();
+			p->receiveData();
 			output%0 = (*p)%0;
 			output.sendData();
 			waitFor(control);

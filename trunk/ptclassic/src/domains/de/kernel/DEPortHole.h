@@ -17,8 +17,8 @@ Two DE-specific struct/classes are defined.
 
 ******************************************************************/
 
-#ifndef _DEconnect_h
-#define _DEconnect_h 1
+#ifndef _DEPortHole_h
+#define _DEPortHole_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -27,7 +27,7 @@ Two DE-specific struct/classes are defined.
 #include "DataStruct.h"
 #include "dataType.h"
 #include "type.h"
-#include "Connect.h"
+#include "PortHole.h"
 
 class Particle;
 
@@ -52,7 +52,7 @@ public:
 			  DataType type = FLOAT);
 
 	// DEPortHole has a "timeStamp" attribute.
-	float timeStamp;
+	double timeStamp;
 
 	// Is there a new data?
 	int dataNew;
@@ -156,7 +156,7 @@ public:
 	// operator to return a zero delayed Particle,
 	// which is same as operator % (0).
 	// set the timestamp.
-	Particle& put(float stamp);
+	Particle& put(double stamp);
 };
 
         //////////////////////////////////////////

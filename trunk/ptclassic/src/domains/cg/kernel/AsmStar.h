@@ -18,7 +18,7 @@ $Id$
 #endif
 
 #include "Attribute.h"
-#include "AsmConnect.h"
+#include "AsmPortHole.h"
 // FixSample is included so AsmStars can use FIX-type ports
 #include "FixSample.h"
 
@@ -57,7 +57,7 @@ public:
 
 	// Clear list of state memory allocations and requests,
 	// and prepare SDF properties of the star for scheduling.
-	void prepareForScheduling();
+	void initialize();
 
 	// If postprocessing for a line of code after symbol substitution
 	// is needed, the function addCode(char*) should be redefined.
@@ -72,7 +72,8 @@ public:
 	// equal to the address.
 	ProcMemory* lookupEntry(const char*,unsigned&);
 
-	int fire();
+	// generate one execution of the star
+	int run();
 
 protected:
 	// Get one of my ports, which is always an AsmPortHole

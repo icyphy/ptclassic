@@ -32,15 +32,15 @@ will be delayed by more than the nominal service time.
 	code {
 		struct token {
 		   Particle* pp;
-		   float serviceNeeded;
-		   float lastUpdate;
+		   double serviceNeeded;
+		   double lastUpdate;
 		    token() : pp(0) {}
 		   ~token() { if (pp) pp->die();}
 		};
 	}
 	protected {
 		// structure to store tokens in service
-		SingleLinkList tokensInService;
+		SequentialList tokensInService;
 		int numberInService;
 	}
 	constructor {
@@ -72,7 +72,7 @@ will be delayed by more than the nominal service time.
 	   // to be output.
 	   int outputP = FALSE;
 	   while(numberInService > 0) {
-	      t = (token*)(tokensInService.getNotRemove());
+	      t = (token*)(tokensInService.head());
 	      if (t->serviceNeeded
 	              <= (arrivalTime - t->lastUpdate)/numberInService) {
 		// This token is ready to be output
@@ -90,8 +90,7 @@ will be delayed by more than the nominal service time.
 	   if((!input.dataNew) & (!outputP)) return;
 
 	   // Modify the serviceNeeded for all tokensInService.
-	   // I sincerely apologize for this cast!
-	   ListIter nextTok(*(SequentialList*)&tokensInService);
+	   ListIter nextTok(tokensInService);
 	   for(int i = numberInService; i > 0; i--) {
 		t = (token*) nextTok++;
 		t->serviceNeeded = t->serviceNeeded -

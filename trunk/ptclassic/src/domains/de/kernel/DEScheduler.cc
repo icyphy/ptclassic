@@ -25,7 +25,6 @@ These are the methods for the discrete event scheduler.
 #include "StringList.h"
 #include "FloatState.h"
 #include "GalIter.h"
-#include "DEWormConnect.h"
 #include "IntState.h"
 
 extern const char DEdomainName[];
@@ -50,63 +49,60 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-int DEScheduler :: setup (Galaxy& galaxy) {
+void DEScheduler :: setup () {
 	clearHalt();
 	currentTime = 0;
 
-	GalStarIter next(galaxy);
+	if (!galaxy()) {
+		Error::abortRun("DEScheduler: no galaxy!");
+		return;
+	}
+	GalStarIter next(*galaxy());
 
 	// initialize the global event queue and process queue.
 	eventQ.initialize();
 
 	// check connectivity
-	if (warnIfNotConnected (galaxy)) return FALSE;
+	if (warnIfNotConnected (*galaxy())) return;
 
 	// Notify each star of the global event queue, 
 	Star* s;
 	while ((s = next++) != 0) {
 		if (strcmp (s->domain(), DEdomainName) != 0) {
 			Error::abortRun (*s, " is not a DE star");
-			return FALSE;
+			return;
 		}
 		// set up the block event queue.
 		DEStar* p = (DEStar*) s;
 		p->eventQ = &eventQ;
 
-		// reset data members
-		p->prepareForScheduling();
 	}
 
-	galaxy.initialize();
+	galaxy()->initialize();
 	
 	// Fire source stars to initialize the global event queue.
-	initialFire(galaxy);
+	initialFire();
 
-	if (!checkDelayFreeLoop(galaxy)) return FALSE;
-
-	if (!computeDepth(galaxy)) return FALSE;
+	if (!checkDelayFreeLoop() || !computeDepth()) return;
 
 	if (!relTimeScale) {
-		Error::abortRun(galaxy,
+		Error::abortRun(*galaxy(),
 				": zero timeScale is not allowed in DE.");
-		return FALSE;
 	}
-
-	return !haltRequested();
 }
 
 //  If output events are generated during the "start" phase, send them
 //  to the global event queue.
-void DEScheduler :: initialFire(Galaxy& g) {
-	GalStarIter nextStar(g);
+void DEScheduler :: initialFire() {
+	GalStarIter nextStar(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) nextStar++) != 0 )
 		s->sendOutput();
 }
 
 // detect the delay free loop.
-int DEScheduler :: checkDelayFreeLoop(Galaxy& g) {
-	GalStarIter next(g);
+int DEScheduler :: checkDelayFreeLoop() {
+	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
 		BlockPortIter nextp(*s);
@@ -118,8 +114,8 @@ int DEScheduler :: checkDelayFreeLoop(Galaxy& g) {
 }
 
 // set the depth of the stars...
-int DEScheduler :: computeDepth(Galaxy& g) {
-	GalStarIter next(g);
+int DEScheduler :: computeDepth() {
+	GalStarIter next(*galaxy());
 	DEStar* s;
 	while ((s = (DEStar*) next++) != 0) {
 		BlockPortIter nextp(*s);
@@ -143,11 +139,12 @@ int DEScheduler :: computeDepth(Galaxy& g) {
 // and fire the destination star. Check all simultaneous events to the star.
 // Run until StopTime.
 int
-DEScheduler :: run (Galaxy& g) {
+DEScheduler :: run () {
 
 
 	if (haltRequested()) {
-		Error::abortRun(g, "Can't continue after run-time error");
+		Error::abortRun(*galaxy(),
+				"Can't continue after run-time error");
 		return FALSE;
 	}
 
@@ -158,7 +155,7 @@ DEScheduler :: run (Galaxy& g) {
 
 		// fetch the earliest event.
 		LevelLink* f   = eventQ.get();
-		float level    = f->level;
+		double level    = f->level;
 
 		// if level > stopTime, RETURN...
 		if (level > stopTime)	{
@@ -257,7 +254,7 @@ DEScheduler :: run (Galaxy& g) {
 
  		// fire the star.
  L1 :		if (!bFlag) {
-	 		if (!s->fire()) return FALSE;
+	 		if (!s->run()) return FALSE;
 		}
 
 	} // end of while
@@ -274,7 +271,7 @@ DEScheduler :: run (Galaxy& g) {
 	////////////////////////////
 
 // fetch an event on request.
-int DEScheduler :: fetchEvent(InDEPort* p, float timeVal) {
+int DEScheduler :: fetchEvent(InDEPort* p, double timeVal) {
 
 	eventQ.reset();
 	int l = eventQ.length();
@@ -460,7 +457,7 @@ int DEScheduler :: setDepth(PortHole* p, DEStar* s) {
 
 int DEScheduler :: errorDelayFree(PortHole* p) {
 	StringList msg;
-	msg += p->readFullName();
+	msg += p->fullName();
 	msg += " lies on a delay-free loop";
 	Error::mark(*p);
 	Error::abortRun(msg);
@@ -469,7 +466,7 @@ int DEScheduler :: errorDelayFree(PortHole* p) {
 
 void DEScheduler :: errorUndefined(PortHole* p) {
 	StringList msg;
-	msg += p->readFullName();
+	msg += p->fullName();
 	msg += " lies on a non-deterministic loop\n";
 	msg += "(execution order of simultaneous events is \
  non-deterministic)\n";

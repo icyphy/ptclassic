@@ -36,9 +36,9 @@ CGStar :: CGStar() : forkId(0) {
 }
 
 // firing CG star : generate code.
-int CGStar :: fire() {
-	// No need to grab data, so just use Star::fire, not SDFStar::fire.
-	int status = Star::fire();
+int CGStar :: run() {
+	// No need to grab data, so just use Star::run, not SDFStar::run.
+	int status = Star::run();
 	// Advance the offset in the PortHoles
 	advance();
 	return status;
@@ -444,6 +444,7 @@ void CGStar :: forkInit(CGPortHole& input,CGPortHole& output) {
 	int srcDelay = input.numTokens();
 	if (srcDelay > 0) {
 		// move delays from input to outputs
+		int n = output.numTokens();
 		PortHole* f = input.far();
 		input.disconnect();
 		input.connect(*f,0);

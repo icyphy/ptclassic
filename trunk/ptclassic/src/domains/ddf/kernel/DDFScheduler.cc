@@ -6,9 +6,7 @@ static const char file_id[] = "DDFScheduler.cc";
 #include "type.h"
 #include "SDFStar.h"
 #include "DDFScheduler.h"
-#include "Geodesic.h"
 #include "GalIter.h"
-#include "ConstIters.h"
 #include "defConstructs.h"
 #include <std.h>
 
@@ -66,13 +64,13 @@ static StringList msg;
 		Main DDF scheduler routines
 *******************************************************************/
 
-int isSource(const Star& s) {
-	CBlockPortIter nextp(s);
-	const PortHole* p;
+int isSource(Star& s) {
+	BlockPortIter nextp(s);
+	PortHole* p;
 
 	while ((p = nextp++) != 0) {
 		if (p->isItInput()) {
-			int numP = p->myGeodesic->numInit();
+			int numP = p->numInitDelays();
 			if (!numP || p->numTokens() > numP)
 				return FALSE;
 		}
@@ -94,22 +92,28 @@ extern int warnIfNotConnected (Galaxy&);
 	// setup
 	////////////////////////////
 
-int DDFScheduler :: setup (Galaxy& galaxy) {
+void DDFScheduler :: setup () {
+	if (!galaxy()) {
+		Error::abortRun("DDFScheduler: no galaxy!");
+		return;
+	}
 	clearHalt();
 
 	// if canDom is already set SDF, do SDFScheduling
-	if (canDom == SDF) 
-		return (realSched->setup(galaxy));
+	if (canDom == SDF) {
+		realSched->setup();
+		return;
+	}
 		
-	GalStarIter nextStar(galaxy);
+	GalStarIter nextStar(*galaxy());
 
 	// initialize sourceBlocks list
 	sourceBlocks.initialize();
 	numFiring = 0;
 
 	// check connectivity
-	if (warnIfNotConnected (galaxy)) {
-		return FALSE;
+	if (warnIfNotConnected (*galaxy())) {
+		return;
 	}
 
 	// star initialize.  Stars must be derived from DataFlowStar.
@@ -118,13 +122,17 @@ int DDFScheduler :: setup (Galaxy& galaxy) {
 	while ((s = nextStar++) != 0) {
 		if (!s->isA("DataFlowStar")) {
 			Error::abortRun (*s, " is not a dataflow star");
-			return FALSE;
+			return;
 		}
-		// member initialization.
-		s->prepareForScheduling();
+		// we do not handle other DataFlowStars (eg BDF) yet.
+		DataFlowStar* ds = (DataFlowStar*)s;
+		if (!ds->isSDF() && !ds->isA("DDFStar")) {
+			Error::abortRun (*s, " is neither SDF nor DDF");
+			return;
+		}
 	}
 
-	galaxy.initialize();
+	galaxy()->initialize();
 
 	currentTime = schedulePeriod;
 	overFlow = FALSE;
@@ -133,13 +141,13 @@ int DDFScheduler :: setup (Galaxy& galaxy) {
 		// fancy stuff...
 		// auto-creation of SDF wormholes, decide the most efficient
 		// scheduler (Case, For, DoWhile, Recur)
-		makeSDFWormholes(galaxy);
-		selectScheduler(galaxy);
+		makeSDFWormholes(*galaxy());
+		selectScheduler(*galaxy());
 		restructured = TRUE;
 	}
 
 	if (canDom == DDF) {
-		GalStarIter nextS(galaxy);
+		GalStarIter nextS(*galaxy());
 		Star* sW;
 
 		galSize = 0;
@@ -150,12 +158,13 @@ int DDFScheduler :: setup (Galaxy& galaxy) {
 			galSize++;
 		}
 
-		if (galaxy.parent() && galaxy.parent()->isItWormhole()) 
-			renewNumTokens(galaxy.parent(), FALSE);
+		Block* gpar = galaxy()->parent();
+		if (gpar && gpar->isItWormhole()) 
+			renewNumTokens(gpar, FALSE);
 	}
 			
 		
-	return !haltRequested();
+	return;
 }
 
 	////////////////////////////
@@ -170,12 +179,12 @@ int DDFScheduler :: setup (Galaxy& galaxy) {
 // EXPLICIT STOPPING CONDITION : # of firing of all sources - 
 // default stopTime = 0
 int
-DDFScheduler :: run (Galaxy& galaxy) {
+DDFScheduler :: run () {
 
 	msg.initialize();
 
 	if (haltRequested()) {
-		Error::abortRun(galaxy, ": Can't continue after run-time error");
+		Error::abortRun(*galaxy(), ": Can't continue after run-time error");
 		return FALSE;
 	}
 
@@ -184,12 +193,11 @@ DDFScheduler :: run (Galaxy& galaxy) {
 		case DDF : break;
 		case SDF : 
 			realSched->setStopTime((float) stopTime);
-		default : return realSched->run(galaxy); 
+		default : return realSched->run(); 
 
 	}
 		
-	// initialize the SpaceWalk member
-	GalStarIter nextStar(galaxy);
+	GalStarIter nextStar(*galaxy());
 
 	int scanSize = galSize;		// how many not-runnable stars scanned
 	int deadlock = TRUE;		// deadlock detection.
@@ -229,7 +237,7 @@ DDFScheduler :: run (Galaxy& galaxy) {
 		if (isRunnable(*s)) {
 			// run the star
 			do {
-				if (!s->fire()) return FALSE;
+				if (!s->run()) return FALSE;
 				deadlock = FALSE;
 			} while (isRunnable(*s));
 
@@ -238,7 +246,7 @@ DDFScheduler :: run (Galaxy& galaxy) {
 		} else {
 			scanSize--;
 		}
-		// some geodesic is full 
+		// some arc is full 
 		if (overFlow)  { 
 			msg += err0;
 			msg += err2_1;
@@ -294,18 +302,18 @@ int DDFScheduler :: isRunnable(Star& s) {
 		DDFStar* p = (DDFStar*) &s;
 		if (p->hasWaitPort()) {
 		
-			// check Geodesic overflow
+			// check arc overflow
 
 			BlockPortIter nextp(s);
 			for (int i = s.numberPorts(); i > 0; i--) {
 				// look at the next port
 				PortHole& tp = *nextp++;
 				if (tp.isItInput()) {
-					// check Geodesic size 
-					int geoSize = tp.numTokens();
-					if (geoSize > maxToken) {
+					// check arc size 
+					int numOnArc = tp.numTokens();
+					if (numOnArc > maxToken) {
 						overFlow = TRUE;
-						msg += tp.readFullName();
+						msg += tp.fullName();
 						return FALSE;
 					}
 				}
@@ -338,7 +346,7 @@ int DDFScheduler :: isRunnable(Star& s) {
 	PortHole *p;
 	while ((p = nextp++) != 0) {
 		if (p->isItInput() && 
-			p->numTokens() > p->myGeodesic->numInitialParticles)
+			p->numTokens() > p->numInitDelays())
 			count++;
 	}
 	if (count == 0)		
@@ -375,7 +383,7 @@ int DDFScheduler :: lazyEval(Star* s) {
 			   }
 			   req = p->reqTokens();
 			}
-			s->fire();
+			s->run();
 			return TRUE;
 		}
 	}
@@ -383,7 +391,7 @@ int DDFScheduler :: lazyEval(Star* s) {
 	int result = checkLazyEval(s);
 	if (result) {
 		// fire the star
-		s->fire();
+		s->run();
 		return TRUE;
 	} else
 		return FALSE;
@@ -398,9 +406,9 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 		PortHole& p = *nextp++;
 		if (p.isItInput()) {
 
-			int geoSize = p.numTokens();
+			int numOnArc = p.numTokens();
 
-			int req = p.numberTokens - geoSize;
+			int req = p.numXfer() - numOnArc;
 			if ((req > 0) && 
 				// check wormhole, recursive star
 				(p.far()->isItInput())) {
@@ -410,7 +418,7 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 			Star* str = (Star*) p.far()->parent();
 			if (strcmp (str->domain(), DDFdomainName) == 0) {
 			   // check if wormhole...
-			   if (str->mySched() == (Scheduler*) this) {
+			   if (str->scheduler() == (Scheduler*) this) {
 				// check dynamic port for ddf star.
 			   	DDFPortHole* po = (DDFPortHole*) p.far();
 			   	if (req > 0 && po->isDynamic()) {
@@ -428,8 +436,8 @@ int DDFScheduler :: checkLazyEval(Star* s) {
 			}
 
 			// check Geodesic size if it exceeds the limit
-			if (geoSize > maxToken) {
-				msg += p.readFullName();
+			if (numOnArc > maxToken) {
+				msg += p.fullName();
 				overFlow = TRUE;
 				return FALSE;
 			}
@@ -447,7 +455,6 @@ int fireSource(Star& s, int k) {
 	BlockPortIter nextp(s);
 	for (int j = s.numberPorts(); j > 0; j--) {
 		PortHole& port = *nextp++;
-		Geodesic* g = port.myGeodesic;
 
 	  	if (port.numberTokens == 0) {
 			Error::abortRun(s,
@@ -455,7 +462,7 @@ int fireSource(Star& s, int k) {
 			return FALSE;
 		}
 		if (port.isItOutput()) {
-			int r = (g->size())/port.numberTokens;
+			int r = port.numTokens()/port.numXfer();
 			if (r < min) min = r;
 		} else {
 			int k = port.numTokens() / port.numberTokens;
@@ -469,7 +476,7 @@ int fireSource(Star& s, int k) {
 	// fire sources "k-min" times.
 	if (minIn > k - min) minIn = k - min;
 	for (int i = 0; i < minIn; i++) {
-		if (!s.fire()) return FALSE;
+		if (!s.run()) return FALSE;
 	}
 	return TRUE;
 }
@@ -489,21 +496,25 @@ void DDFScheduler :: selectScheduler(Galaxy& galaxy) {
 	// set up the right scheduler
 	switch(canDom) {
 		// special care for SDF domain.
-		case SDF : LOG_NEW; realSched = new SDFScheduler;
-			realSched->setup(galaxy);
-		        if (galaxy.parent()) 
-				renewNumTokens(galaxy.parent(), TRUE);
-			break;
-		case Unknown :
-		case DDF : break;
-		default : realSched = getScheduler(canDom);
-			  if (!realSched) {
-				Error::abortRun("Undefined Scheduler for ",
-				nameType(canDom), " construct.");
-				return;
-			  }
-			  realSched->setup(galaxy);
-			  break;
+	case SDF :
+		LOG_NEW; realSched = new SDFScheduler;
+		realSched->setGalaxy(galaxy);
+		realSched->setup();
+		if (galaxy.parent()) 
+			renewNumTokens(galaxy.parent(), TRUE);
+		break;
+	case Unknown :
+	case DDF : break;
+	default :
+		realSched = getScheduler(canDom);
+		if (!realSched) {
+			Error::abortRun("Undefined Scheduler for ",
+					nameType(canDom), " construct.");
+			return;
+		}
+		realSched->setGalaxy(galaxy);
+		realSched->setup();
+		break;
 	}
 }
 
@@ -520,7 +531,7 @@ void DDFScheduler :: detectConstruct(Galaxy& gal) {
 
 	while ((s = nextStar++) != 0) {
 		if (s->isItWormhole()) {
-			const char* dom = s->mySched()->domain();
+			const char* dom = s->scheduler()->domain();
 			if (strcmp(dom + 1, "DF"))
 				canDom = DDF;
 		} else if (strcmp(s->domain(), DDFdomainName)) {
@@ -548,11 +559,11 @@ DDFScheduler::~DDFScheduler() { LOG_DEL; delete realSched; }
 // setStopTime, for compatibility with DE scheduler.
 // for now, we assume each schedule interation takes 1.0
 // time units.  (Argh).  Deal with roundoff problems.
-void DDFScheduler::setStopTime (float limit) {
+void DDFScheduler::setStopTime (double limit) {
 	stopTime = int(limit + 0.001) ;
 }
 
-void DDFScheduler::resetStopTime (float) {
+void DDFScheduler::resetStopTime (double) {
 	stopTime = 1; numFiring = 0;
 }
 

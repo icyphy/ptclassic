@@ -17,7 +17,7 @@ $Id$
 
 #include "DoubleLink.h"
 #include "StringList.h"
-#include "Connect.h"
+#include "PortHole.h"
 
 class EGGateLink;
 class EGNode;
@@ -107,7 +107,7 @@ public:
 	int isItInput() { return pPort->isItInput(); }
 
 	// readName
-	const char* readName() const { return pPort->readName(); }
+	const char* name() const { return pPort->name(); }
 
 	// hide me from the node
 	void hideMe(int flag = 0);

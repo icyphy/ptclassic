@@ -44,7 +44,7 @@ protected:
 
 public:
 	DDFTarget();
-	Block* clone() const;
+	Block* makeNew() const;
 	void start();
 	~DDFTarget();
 };

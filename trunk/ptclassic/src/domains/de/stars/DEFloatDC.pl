@@ -28,6 +28,6 @@ that of the input. The value of the input is ignored.
 	go {
 	   // if the star is triggered, generate DC output (ignore input).
 	   completionTime = arrivalTime;
-	   output.put(completionTime) << float(double(value));
+	   output.put(completionTime) << double(value);
 	}
 }

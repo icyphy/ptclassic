@@ -119,7 +119,7 @@ int LSGraph::makeRM() {
 	while ((p = nextNode++) != 0) {
 		if (RM->pathExists(*p,*p)) {
 			StringList msg = "Deadlocked graph -- insufficient delay in loop containing ";
-			msg +=  p->myMaster()->readFullName();
+			msg +=  p->myMaster()->fullName();
 			Error::abortRun(msg);
 			return FALSE;
 		}

@@ -21,7 +21,7 @@ $Id$
 #pragma interface
 #endif
 
-#include "CGConnect.h"
+#include "CGPortHole.h"
 #include "Geodesic.h"
 #include <minmax.h>
 

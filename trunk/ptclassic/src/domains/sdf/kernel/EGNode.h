@@ -136,7 +136,7 @@ public:
         EGNode* takeFromFront()
                 { return (EGNode*) DoubleLinkList :: takeFromFront(); }
 	
-	EGNode* headNode() { return ((EGNodeLink*) head)->myNode(); }
+	EGNode* headNode() { return ((EGNodeLink*) head())->myNode(); }
 
 	StringList print();
 };

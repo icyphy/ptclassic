@@ -19,7 +19,7 @@ $Id$
 #endif
 
 #include "AsmStar.h"
-#include "AsmConnect.h"
+#include "AsmPortHole.h"
 
 class ProcMemory;
 

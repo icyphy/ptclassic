@@ -41,13 +41,13 @@ where N is the control input.
 	go {
 		// get control Particles from "control" porthole
 		if (!readyToGo) {
-			control.grabData();	
+			control.receiveData();	
 		}
 		int num = int (control%0);
 		if (input.numTokens() >= num) {
 			// skip the num-1 inputs
 			for (int i = num; i > 0; i--)
-				input.grabData();
+				input.receiveData();
 
 			// prepare for the next round.
 			waitFor(control);

@@ -11,12 +11,12 @@ $Id$
 This file contains definitions of DDF-specific PortHole classes.
 
 ******************************************************************/
-#ifndef _DDFConnect_h
-#define _DDFConnect_h 1
+#ifndef _DDFPortHole_h
+#define _DDFPortHole_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
-#include "Connect.h"
+#include "PortHole.h"
 
         //////////////////////////////////////////
         // class DDFPortHole
@@ -68,7 +68,7 @@ public:
 	int isItInput () const; // {return TRUE; }
 
 	// Get Particles from input Geodesic
-	void grabData();
+	void receiveData();
 
 	// for special case
 	void moveData();
@@ -86,8 +86,8 @@ public:
 	void increment();
 
 	// Move the current Particle in the input buffer -- this
-	// method is invoked by the DDFScheduler grabData()
-	void grabData();
+	// method is invoked by the DDFScheduler receiveData()
+	void receiveData();
 
 	// Put the Particles that were generated into the
 	// output Geodesic -- this method is invoked by the

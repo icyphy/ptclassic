@@ -99,13 +99,13 @@ void LSCluster :: addFiring(SDFStar* s, int cnt) {
 	}
 }
 
-// fire the cluster
-int LSCluster :: fire() {
+// run the cluster
+int LSCluster :: run() {
 
 	SDFFiring* f = firing;
 	while (f) {
 		for (int i = f->count; i > 0; i--) {
-			if (!f->s->fire()) return FALSE;
+			if (!f->s->run()) return FALSE;
 		}
 		f = f->next;
 	}

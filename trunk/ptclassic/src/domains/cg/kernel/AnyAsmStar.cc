@@ -20,7 +20,7 @@ static const char file_id[] = "AnyAsmStar.cc";
 
 #include "AnyAsmStar.h"
 #include "Domain.h"
-#include "SDFWormConnect.h"
+#include "SDFWormhole.h"
 #include "AutoForkNode.h"
 
 const char* AnyAsmStar::domain() const { return "AnyAsm";}
@@ -29,20 +29,20 @@ ISA_FUNC(AnyAsmStar,AsmStar);
 
 class AnyAsmDomain : public Domain {
 private:
-	void bitch() {
+	void complain() {
 		Error::abortRun("AnyAsm is a pseudo-domain -- do not attempt",
 			"\nto build galaxies using this domain");
 	}
 public:
 	// new wormhole
-        Star& newWorm(Galaxy& innerGal, Target* tg)  {
-		bitch();
+        Star& newWorm(Galaxy&, Target*)  {
+		complain();
                 LOG_NEW; return *new AnyAsmStar;
         }
 
 	// new input porthole
 	PortHole& newInPort() {
-		bitch();
+		complain();
 		LOG_NEW; return *new InCGPort;
 	}
 
@@ -51,18 +51,18 @@ public:
 
 	// new fromUniversal EventHorizon
         EventHorizon& newFrom() {
-		bitch();
+		complain();
                 LOG_NEW; return *new SDFfromUniversal;
         }
 
 	// new toUniversal EventHorizon
         EventHorizon& newTo() {
-		bitch();
+		complain();
                 LOG_NEW; return *new SDFtoUniversal;
         }
 
 	// new node (geodesic)
-	Geodesic& newNode() { bitch(); LOG_NEW; return *new AutoForkNode;}
+	Geodesic& newNode() { complain(); LOG_NEW; return *new AutoForkNode;}
 
 	// constructor
 	AnyAsmDomain() : Domain("AnyAsm") {}

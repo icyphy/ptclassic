@@ -70,7 +70,7 @@ public:
 	void setRMIndex(int x) {rm_index=x;}
 
 	// return FALSE if it is an isolated (unconnected) node.
-	int connected() { return ancestors.mySize() + descendants.mySize(); }
+	int connected() { return ancestors.size() + descendants.size(); }
 
 	// get this node's connection-matrix index
 	int myRMIndex() {return rm_index;}

@@ -36,7 +36,7 @@ The value of the input is ignored.
 	   // if the star is triggered, generate ramp output (ignore input).
 	   completionTime = arrivalTime;
 	   double t = value;
-           output.put(completionTime) << float(t);
+           output.put(completionTime) << t;
            t += double(step);
            value = t;
 	}

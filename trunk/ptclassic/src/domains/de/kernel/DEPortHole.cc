@@ -1,4 +1,4 @@
-static const char file_id[] = "DEConnect.cc";
+static const char file_id[] = "DEPortHole.cc";
 /**************************************************************************
 Version identification:
 $Id$
@@ -11,7 +11,7 @@ $Id$
  Revisions: If the galaxy inside a Wormhole has a output data, stop the
 	DE scheduler if "stopAfterOutput" flag is set(10/24/90).
 
-Code for functions declared in DEConnect.h
+Code for functions declared in DEPortHole.h
 
 **************************************************************************/
 
@@ -19,16 +19,16 @@ Code for functions declared in DEConnect.h
 #pragma implementation
 #endif
 
-#include "DEConnect.h"
+#include "DEPortHole.h"
+#include "EventHorizon.h"
 #include "DEScheduler.h"
 #include "Block.h"
 #include "Plasma.h"
 #include "StringList.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
-#include "DEWormConnect.h"
 #include "CircularBuffer.h"
- 
+
 /**********************************************************
 
  Member functions for DEPortHoles..
@@ -78,11 +78,11 @@ Particle& InDEPort :: get()
 void InDEPort :: getSimulEvent()
 {
         if (moreData > 1) {
-                DEScheduler* sched = (DEScheduler*) parent()->mySched();
+                DEScheduler* sched = (DEScheduler*) parent()->scheduler();
 		int store = moreData;
 		moreData = 0;
                 if (sched->fetchEvent(this, timeStamp)) {
-			// offset the increase from "grabData()" method.
+			// offset the increase from "receiveData()" method.
 			moreData = store - 1;
 		} else {
 			moreData = 0;
@@ -146,7 +146,7 @@ InDEPort :: ~InDEPort () {
 	}
 }
 
-Particle& OutDEPort :: put(float stamp)
+Particle& OutDEPort :: put(double stamp)
 {
 // if there is a new Particle, send it
 	if (dataNew) sendData();
@@ -176,7 +176,7 @@ void OutDEPort :: sendData ()
 	// If the port lies on the Wormhole boundary, inform timeStamp.
 	if (farSidePort->isItOutput()) {
 		EventHorizon* q = farSidePort->asEH();
-		DEScheduler* sr = (DEScheduler*) parent()->mySched();
+		DEScheduler* sr = (DEScheduler*) parent()->scheduler();
 		q->setTimeMark(timeStamp / sr->relTimeScale);
 		level = -1;
 	} else {

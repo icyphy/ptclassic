@@ -57,47 +57,63 @@ CGTarget::~CGTarget() {
 }
 
 // dummy functions that perform parts of setup.
-int CGTarget :: modifyGalaxy(Galaxy&) { return TRUE; }
-int CGTarget :: allocateMemory(Galaxy&) { return TRUE; }
-int CGTarget :: codeGenInit(Galaxy&) { return TRUE; }
+int CGTarget :: modifyGalaxy() { return TRUE; }
+int CGTarget :: allocateMemory() { return TRUE; }
+int CGTarget :: codeGenInit() { return TRUE; }
 
 // the main guy.
-int CGTarget::setup(Galaxy& g) {
+// If there is no galaxy yet, we just create a scheduler and return.
+// This is not to my liking; the whole way we do this needs to be
+// rethought.  It also means that any derived classes of CGTarget that
+// are intended to be used as child targets of CGMultiTarget must
+// behave the same way.
+
+void CGTarget::setup() {
+	noSchedule = 0;
+	myCode.initialize();
+	writeDirectoryName(destDirectory);
+	if (!scheduler()) {
+		if(int(loopScheduler)) {
+			schedFileName = writeFileName("schedule.log");
+			LOG_NEW; setSched(new SDFClustSched(schedFileName));
+		} else {
+			LOG_NEW; setSched(new SDFScheduler);
+		}
+	}
+	if (!galaxy()) return;
+// We have a galaxy; continue the setup.
+	headerCode();
 	// reset the label counter
 	BaseSymbolList::reset() ;
-
-	gal = &g;
 
 	targetNestedSymbol.initialize();
 
 	if (!noSchedule) {
-		if (!modifyGalaxy(g)) return FALSE;
-		if (!Target::setup(g)) return FALSE;
+		if (!modifyGalaxy()) return;
+		Target::setup();
+		if (Scheduler::haltRequested()) return;
 	}
 
 	// choose sizes for buffers and allocate memory, if needed
-	if(!allocateMemory(g)) return FALSE;
-
-	if(!codeGenInit(g)) return FALSE;
+	if(!allocateMemory() || !codeGenInit()) return;
 
 	// if inside a wormhole, proceed to generate and download
 	// code now.
-	if(g.parent()) return wormCodeGenerate(g);
-	else return TRUE;
+	if(galaxy()->parent()) wormCodeGenerate();
 }
 
 // default code generation for a wormhole.  This produces an infinite
 // loop that reads from the inputs, processes the schedule, and generates
 // the outputs.
-int CGTarget :: wormCodeGenerate(Galaxy&g) {
-	BlockPortIter nextPort(g);
+int CGTarget :: wormCodeGenerate() {
+	BlockPortIter nextPort(*galaxy());
 	PortHole* p;
 	beginIteration(-1,0);
 	// generate wormhole inputs
 	while ((p = nextPort++) != 0) {
 		if (p->isItInput()) wormInputCode(p->newConnection());
 	}
-	mySched()->compileRun();
+	scheduler()->compileRun();
 	nextPort.reset();
 	// generate wormhole outputs
 	while ((p = nextPort++) != 0) {
@@ -106,22 +122,6 @@ int CGTarget :: wormCodeGenerate(Galaxy&g) {
 	endIteration(-1,0);
 	frameCode();
 	return wormLoadCode();
-}
-
-void CGTarget :: start() {
-	noSchedule = 0;
-	myCode.initialize();
-	LOG_DEL; delete dirFullName;
-	dirFullName = writeDirectoryName(destDirectory);
-	if (!mySched()) {
-		if(int(loopScheduler)) {
-			schedFileName = writeFileName("schedule.log");
-			LOG_NEW; setSched(new SDFClustSched(schedFileName));
-		} else {
-			LOG_NEW; setSched(new SDFScheduler);
-		}
-	}
-	headerCode();
 }
 
 void CGTarget :: addStream(const char* name, StringList* slist)
@@ -143,8 +143,8 @@ StringList* CGTarget :: getStream(const char* name)
 int CGTarget :: run() {
 	// if a wormhole, setup already generated code.
 	// We must do the transfer of data to and from the target.
-	if(gal->parent()) {
-		BlockPortIter nextPort(*gal);
+	if(galaxy()->parent()) {
+		BlockPortIter nextPort(*galaxy());
 		PortHole* p;
 		while ((p = nextPort++) != 0) {
 			if (p->isItInput() &&
@@ -158,9 +158,9 @@ int CGTarget :: run() {
 	}
 	else {
 		// Note that stopTime in an SDF scheduler is always integral
-		int iters = (int)mySched()->getStopTime();
+		int iters = (int)scheduler()->getStopTime();
 		beginIteration(iters,0);
-		mySched()->compileRun();
+		scheduler()->compileRun();
 		endIteration(iters,0);
 		frameCode();
 	}
@@ -170,23 +170,21 @@ int CGTarget :: run() {
 void CGTarget :: frameCode() {}
 
 void CGTarget :: copySchedule(SDFSchedule& s) {
-	SDFScheduler* sched = (SDFScheduler*) mySched();
+	SDFScheduler* sched = (SDFScheduler*) scheduler();
 	sched->copySchedule(s);
 	// indicate multiprocessor scheduler already generated schedule
 	noSchedule = TRUE;
 }
 
-StringList CGTarget :: generateCode(Galaxy& g) {
-	setup(g);
+StringList CGTarget :: generateCode() {
+	setup();
 	run();
 	Target::wrapup();
 	return myCode;
 }
 
-Block* CGTarget :: clone() const {
-	LOG_NEW; CGTarget*t= new CGTarget(readName(),starType(),readDescriptor());
-	t->copyStates(*this);
-	return t;
+Block* CGTarget :: makeNew() const {
+	LOG_NEW; return new CGTarget(name(),starType(),descriptor());
 }
 
 void CGTarget :: addCode(const char* code) {
@@ -195,7 +193,7 @@ void CGTarget :: addCode(const char* code) {
 
 void CGTarget :: headerCode () {
 	StringList code = "generated code for target ";
-	code += readFullName();
+	code += fullName();
 	outputComment(code);
 }
 
@@ -203,7 +201,7 @@ void CGTarget :: beginIteration(int reps, int depth) {
 	myCode << "REPEAT " << reps << " TIMES { /* depth " << depth << "*/\n";
 }
 
-void CGTarget :: endIteration(int reps, int depth) {
+void CGTarget :: endIteration(int /*reps*/, int depth) {
 	myCode << "} /* end repeat, depth " << depth << "*/\n";
 }
 
@@ -223,16 +221,16 @@ int CGTarget :: runCode() {
 }
 
 void CGTarget :: wormInputCode(PortHole& p) {
-	myCode << "/* READ from wormhole port " << p.readFullName() << " */\n";
+	myCode << "/* READ from wormhole port " << p.fullName() << " */\n";
 }
 
 void CGTarget :: wormOutputCode(PortHole& p) {
-	myCode << "/* WRITE to wormhole port " << p.readFullName() << " */\n";
+	myCode << "/* WRITE to wormhole port " << p.fullName() << " */\n";
 }
 
 int CGTarget :: sendWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
-	cout << "sending " << cp.bufSize() << " values to worm port " << cp.readFullName() << "\n";
+	cout << "sending " << cp.bufSize() << " values to worm port " << cp.fullName() << "\n";
 	cout.flush();
 	// data are discarded
 	cp.forceGrabData();
@@ -243,7 +241,7 @@ int CGTarget :: receiveWormData(PortHole& p) {
 	CGPortHole& cp = *(CGPortHole*)&p;
 	int size = cp.bufSize();
 	cout << "receiving " << size <<
-		" values from worm port " << p.readFullName() << "\n";
+		" values from worm port " << p.fullName() << "\n";
 	cout.flush();
 	// insert zero-valued particles onto cp's geodesic
 	for (int i = 0; i < size; i++)
@@ -258,7 +256,7 @@ int CGTarget :: wormLoadCode() {
 }
 
 void CGTarget :: writeFiring(Star& s,int) { // depth parameter ignored
-	s.fire();
+	s.run();
 }
 
 void CGTarget :: wrapup() {
@@ -282,7 +280,7 @@ void CGTarget :: outputComment (const char* msg) {
 
 int CGTarget :: systemCall(const char* command, const char* error) {
 	StringList cmd = "cd ";
-	cmd += dirFullName;
+	cmd += workingDirectory();
 	cmd += ";";
 	cmd += command;
 	int i = system(cmd);

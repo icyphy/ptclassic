@@ -25,8 +25,8 @@ protected:
 	FloatState schedulePeriod;
 public:
 	LoopTarget();
-	void start();
-	Block* clone() const { LOG_NEW; return &(new LoopTarget)->copyStates(*this);}
+	void setup();
+	Block* makeNew() const { LOG_NEW; return new LoopTarget;}
 	~LoopTarget();
 };
 
@@ -45,10 +45,14 @@ LoopTarget::~LoopTarget() {
 	delSched();
 }
 
-void LoopTarget::start() {
-	LOG_NEW; setSched(new LoopScheduler(logFile));
-	SDFScheduler* s = (SDFScheduler*) mySched();
+void LoopTarget::setup() {
+	if (!scheduler()) {
+		LOG_NEW; setSched(new LoopScheduler(logFile));
+	}
+	SDFScheduler* s = (SDFScheduler*) scheduler();
 	s->schedulePeriod = float(double(schedulePeriod));
+	s->setGalaxy(*galaxy());
+	Target::setup();
 }
 
 static LoopTarget loopTargetProto;

@@ -89,7 +89,7 @@ StringList AsmStar::lookupAddress(const char* name, const char* offset)
 
     if ((state = stateWithName(name)) != NULL)
     {
-	int a;
+	unsigned a;
 	if (lookupEntry(name, a) != NULL)
 	{
 	    a += off;
@@ -129,11 +129,11 @@ StringList AsmStar::lookupMem(const char* name)
 
     if (stateWithName(name) != NULL)
     {
-	int a = 0;
+	unsigned a = 0;
 	ProcMemory* m;
 	if ((m = lookupEntry(name, a)) != NULL)
 	{
-	    mem = m->readName();
+	    mem = m->name();
 	}
 	else
 	{
@@ -144,7 +144,7 @@ StringList AsmStar::lookupMem(const char* name)
     else if ((port = (AsmPortHole*)genPortWithName(portName)) != NULL)
     {
 	if (port->memory() != NULL)
-	    mem = port->memory()->readName();
+	    mem = port->memory()->name();
 	else
 	{
 	    codeblockError(name, " is not assigned to memory");
@@ -169,8 +169,8 @@ StringList AsmStar::expandMacro(const char* func, const StringList& argList)
 	else if (matchMacro(func, argList, "addr", 2)) s = lookupAddress(arg++, arg++);
 	else if (matchMacro(func, argList, "addr", 1)) s = lookupAddress(arg++);
 	else if (matchMacro(func, argList, "mem", 1)) s = lookupMem(arg++);
-	else if (matchMacro(func, argList, "fullname", 0)) s = readFullName();
-	else if (matchMacro(func, argList, "starname", 0)) s = readName();
+	else if (matchMacro(func, argList, "fullname", 0)) s = fullName();
+	else if (matchMacro(func, argList, "starname", 0)) s = name();
 	else s = CGStar::expandMacro(func, argList);
 
 	return s;
@@ -190,7 +190,7 @@ class StateAddrEntry {
 
 // add a new state to the table.
 void AsmStar::addEntry(const State& s,ProcMemory& m, unsigned a) {
-	LOG_NEW; addrList = new StateAddrEntry(s.readName(),m,a,addrList);
+	LOG_NEW; addrList = new StateAddrEntry(s.name(),m,a,addrList);
 }
 
 // look up a state in the table.
@@ -220,9 +220,9 @@ AsmStar::~AsmStar() {
 }
 
 // redo the list whenever remaking the scheduler.
-void AsmStar::prepareForScheduling() {
+void AsmStar::initialize() {
 	zapStateEntries();
-	CGStar::prepareForScheduling();
+	CGStar::initialize();
 }
 
 void AsmStar::addRunCmd(const char* cmd,const char* cmd2) {
@@ -254,15 +254,15 @@ void AsmStar::genProcCode(CodeBlock& cb) {
 	addProcCode((const char*)t);
 }
 
-// fire: prefix the code with a comment
+// run: prefix the code with a comment
 
-int AsmStar::fire() {
+int AsmStar::run() {
 	StringList code = "code from star ";
-	code += readFullName();
+	code += fullName();
 	code += " (class ";
-	code += readClassName();
+	code += className();
 	code += ")\n";
 	((AsmTarget*)targetPtr)->outputComment(code);
-	return CGStar::fire();
+	return CGStar::run();
 }
 

@@ -82,7 +82,7 @@ and $i( tau )$ is the data input.
 	   }
 	   // Produce an output only if the clock input is new.
 	   if (clock.dataNew) {
-		float t = double(state) *
+		double t = double(state) *
 			pow(double(decay),(arrivalTime-double(tau)));
 		completionTime = arrivalTime;
 		output.put(completionTime) << t;

@@ -37,17 +37,17 @@ protected:
 	ProcMemory* mem;
 
 	// what it says
-	int allocateMemory(Galaxy&);
+	int allocateMemory();
 
 	// redefine init routine for code generation
-	int codeGenInit(Galaxy&);
+	int codeGenInit();
 
 	// Request memory for all structures in a Star
 	int allocReq(AsmStar&);
 
 	// make modifications to interface circular to linear buffers
 	// and handling of long delays.
-	int modifyGalaxy(Galaxy&);
+	int modifyGalaxy();
 
 	// splice in a new star, returning a pointer to its input
 	// porthole.  Spliced stars are assumed to have one input
@@ -108,9 +108,9 @@ public:
 	// err is displayed if system call is unsuccessful.
 	virtual int hostSystemCall(const char*,const char* err = NULL);
 
-	Block* clone() const = 0;
+	Block* makeNew() const = 0;
 
-	int setup(Galaxy &g);
+	void setup();
 
 	// output a directive that switches to the code section
 	virtual void codeSection() = 0;
@@ -132,7 +132,7 @@ public:
 
 	// output an "org" directive that switches to the specified
 	// memory and address
-	virtual void orgDirective(const char* mem, unsigned addr) {};
+	virtual void orgDirective(const char*, unsigned) {}
 
 	// output an integer
 	virtual void writeInt (int) {};

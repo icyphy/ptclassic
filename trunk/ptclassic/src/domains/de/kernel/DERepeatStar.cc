@@ -39,8 +39,8 @@ DERepeatStar :: DERepeatStar() {
 	feedbackIn.setAttributes(P_HIDDEN);
 }
 
-void DERepeatStar :: refireAtTime(float when) {
-	feedbackOut.put(when) << float(0.0) ;
+void DERepeatStar :: refireAtTime(double when) {
+	feedbackOut.put(when) << 0.0;
 }
 
 int DERepeatStar :: canGetFired() {
@@ -52,7 +52,8 @@ int DERepeatStar :: canGetFired() {
 
 // start method for DERepeatStar
 
-void DERepeatStar :: start() {
-	feedbackOut.put(completionTime) << float(0.0);
+void DERepeatStar :: initialize() {
+	DEStar :: initialize();
+	feedbackOut.put(completionTime) << 0.0;
 }
 

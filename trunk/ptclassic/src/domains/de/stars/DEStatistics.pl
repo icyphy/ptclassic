@@ -46,10 +46,10 @@ the next input arrives.
 		type { float }
 	}
 	private {
-		float sum;
-		float squareSum;
-		float previous;
-		float startTime;
+		double sum;
+		double squareSum;
+		double previous;
+		double startTime;
 	}
 	constructor {
 		input.triggers();
@@ -67,13 +67,13 @@ the next input arrives.
 		if (demand.dataNew) {
 			demand.dataNew = FALSE;
 			if (startTime < 0 ) return;
-			float leng = arrivalTime - startTime;
-			float span = arrivalTime - completionTime;
+			double leng = arrivalTime - startTime;
+			double span = arrivalTime - completionTime;
 			sum += previous * span;
 			squareSum += previous*previous*span;
 			// output
 			if (leng) {
-			   float t1 = sum/leng;
+			   double t1 = sum/leng;
 			   average.put(arrivalTime) << t1;
 			   variance.put(arrivalTime) << squareSum/leng - t1*t1;
 			}
@@ -89,11 +89,11 @@ the next input arrives.
 			if (startTime < 0) {
 			      startTime = arrivalTime;
 			} else {
-			   	float span = arrivalTime - completionTime;
+			   	double span = arrivalTime - completionTime;
 			 	sum += previous * span;
 			     	squareSum += previous * previous * span;
 			}
-			previous = float(input.get());
+			previous = input.get();
 			// renew the completionTime
 			completionTime = arrivalTime;
 		}

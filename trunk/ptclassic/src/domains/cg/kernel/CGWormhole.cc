@@ -18,8 +18,8 @@ Version identification:
 #endif
 
 #include "CGWormhole.h"
+#include "CGPortHole.h"
 #include "GalIter.h"
-#include "StringList.h"
 #include "Error.h"
 #include "Scheduler.h"
 
@@ -74,10 +74,10 @@ void CGWormhole :: start() {
 
 void CGWormhole :: go() {
 	// set the currentTime of the inner domain.
-	target->setCurrentTime(targetPtr->mySched()->currentTime);
+	target->setCurrentTime(targetPtr->scheduler()->currentTime);
 
 	// run
-	run();
+	Wormhole::run();
 }
 
 CGWormhole* CGWormhole :: myWormhole() {
@@ -174,4 +174,42 @@ void CGWormhole :: computeProfile(int num, int resWork, IntArray* avail)
 	numProcs = num;
 	optNum = mtarget->computeProfile(num, resWork, avail);
 }
+
+
+ 
+/**************************************************************************
+
+	methods for CGtoUniversal
+
+**************************************************************************/
+
+void CGtoUniversal :: initialize() {
+	InCGPort :: initialize();
+	ToEventHorizon :: initialize();
+}
+
+int CGtoUniversal :: isItInput() const 
+	{ return EventHorizon :: isItInput(); }
+int CGtoUniversal :: isItOutput() const 
+	{ return EventHorizon :: isItOutput(); }
+	
+EventHorizon* CGtoUniversal :: asEH() { return this; }
+
+/**************************************************************************
+
+	methods for CGfromUniversal
+
+**************************************************************************/
+
+void CGfromUniversal :: initialize() {
+	OutCGPort :: initialize();
+	FromEventHorizon :: initialize();
+}
+
+int CGfromUniversal :: isItInput() const 
+	{ return EventHorizon :: isItInput(); }
+int CGfromUniversal :: isItOutput() const 
+	{ return EventHorizon :: isItOutput(); }
+	
+EventHorizon* CGfromUniversal :: asEH() { return this; }
 

@@ -18,7 +18,7 @@ $Id$
 #pragma interface
 #endif
 
-#include "AsmConnect.h"
+#include "AsmPortHole.h"
 #include "CGGeodesic.h"
 
 class ProcMemory;

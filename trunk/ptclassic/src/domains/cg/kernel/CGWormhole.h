@@ -8,6 +8,8 @@
 #include "Wormhole.h"
 #include "Profile.h"
 #include "BaseMultiTarget.h"
+#include "EventHorizon.h"
+#include "CGPortHole.h"
 
 /*******************************************************************
  SCCS Version identification :
@@ -56,14 +58,14 @@ public:
 	void start();
 		       
 	void go();
-	void wrapup() { endSimulation(); }
+	void wrapup() { target->wrapup(); }
 
 	// Constructor
 	CGWormhole(Galaxy& g, Target* t = 0);
 	~CGWormhole();
 
 	// return my scheduler
-	Scheduler* mySched() const { return target->mySched() ;}
+	Scheduler* scheduler() const { return target->scheduler() ;}
 
 	// execution time which is the average of the workload inside 
 	// the wormhole with 1 processor.
@@ -111,5 +113,46 @@ public:
 	void downLoadCode(int);
 
 };
-	
+
+
+        //////////////////////////////////////////
+        // class CGtoUniversal
+        //////////////////////////////////////////
+
+class CGtoUniversal : public ToEventHorizon, public InCGPort
+{
+public:
+	// constructor
+	CGtoUniversal(): ToEventHorizon(this) {}
+
+	// redefine
+	void initialize();
+
+	int isItInput() const;
+	int isItOutput() const;
+
+	// as Eventhorizon
+	EventHorizon* asEH();
+};
+
+        //////////////////////////////////////////
+        // class CGfromUniversal
+        //////////////////////////////////////////
+
+class CGfromUniversal : public FromEventHorizon, public OutCGPort
+{
+public:
+	// constructor
+	CGfromUniversal(): FromEventHorizon(this) {}
+
+	// redefine
+	void initialize();
+
+	int isItInput() const;
+	int isItOutput() const;
+
+	// as Eventhorizon
+	EventHorizon* asEH();
+};
+
 #endif

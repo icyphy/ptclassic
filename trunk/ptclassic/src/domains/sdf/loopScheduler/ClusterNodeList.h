@@ -48,7 +48,7 @@ public:
 	ClusterNodeList* nextList() { return next; }
 
 	// insert a node into the cluster
-	void insert(LSNode *n) { tup(n);
+	void insert(LSNode *n) { prepend(n);
 				 setComponents(n); }
 
 	// append a node into the cluster

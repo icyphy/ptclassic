@@ -1,6 +1,6 @@
-static const char file_id[] = "CGConnect.cc";
+static const char file_id[] = "CGPortHole.cc";
 #include "Block.h"
-#include "CGConnect.h"
+#include "CGPortHole.h"
 #include "CircularBuffer.h"
 #include "CGGeodesic.h"
 #include "SDFStar.h"
@@ -12,7 +12,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee
+ Programmer:  J. Buck, E. A. Lee
 
 Code for CG-type portholes and multiportholes.
 
@@ -43,7 +43,7 @@ void CGPortHole::advance() {
 Geodesic* CGPortHole::allocateGeodesic() {
         char nm[80];
         strcpy (nm, "Node_");
-        strcat (nm, readName());
+        strcat (nm, name());
         LOG_NEW; Geodesic *g = new CGGeodesic;
         g->setNameParent(hashstring(nm), parent());
         return g;

@@ -8,6 +8,8 @@
 #include "Wormhole.h"
 #include "DEStar.h"
 #include "PriorityQueue.h"
+#include "EventHorizon.h"
+#include "DEPortHole.h"
 
 /*******************************************************************
  SCCS Version identification :
@@ -31,7 +33,7 @@ public:
 
 	void start();
 	void go();
-	void wrapup() { endSimulation(); }
+	void wrapup();
 
 	// prepare for a new phase of firing
 	void startNewPhase();
@@ -45,7 +47,7 @@ public:
 	~DEWormhole() { freeContents();}
 
 	// return my scheduler
-	Scheduler* mySched() const { return target->mySched();}
+	Scheduler* scheduler() const { return target->scheduler();}
 
 	// print methods
 	StringList printVerbose() const { return Wormhole :: print(0);}
@@ -69,10 +71,60 @@ protected:
 	// redefine getStopTime() : 
 	// return the currentTime if syncMode of the scheduler is set (default)
 	// otherwise     the stopTime.
-	float getStopTime();
+	double getStopTime();
 
 	// redefine sumUp()
 	void sumUp();
 };
+
+        //////////////////////////////////////////
+        // class DEtoUniversal
+        //////////////////////////////////////////
+
+
+// Input Boundary of ??inDE_Wormholes.
+class DEtoUniversal : public ToEventHorizon, public InDEPort
+{
+public:
+	// constructor
+	DEtoUniversal(): ToEventHorizon(this) {}
+
+	// redefine
+	void receiveData(); 
+	void cleanIt();
+
+	// fetch the event from the qlobal queue
+	int getFromQueue(Particle* p);
+
+	void initialize();
+
+	int isItInput() const;
+	int isItOutput() const;
 	
+	// as eventhorizon
+	EventHorizon* asEH();
+};
+
+        //////////////////////////////////////////
+        // class DEfromUniversal
+        //////////////////////////////////////////
+
+// Output Boundary of ??inDE_Wormholes.
+class DEfromUniversal : public FromEventHorizon, public OutDEPort
+{
+public:
+	// constructor
+	DEfromUniversal(): FromEventHorizon(this) {}
+
+	void sendData();
+
+	void initialize();
+
+	int isItInput() const;
+	int isItOutput() const;
+	
+	// as eventhorizon
+	EventHorizon* asEH();
+};
+
 #endif

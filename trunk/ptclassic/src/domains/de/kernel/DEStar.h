@@ -18,7 +18,7 @@ $Id$
 #endif
 
 #include "type.h"
-#include "DEConnect.h"
+#include "DEPortHole.h"
 #include "Particle.h"
 #include "Star.h"
 
@@ -30,34 +30,21 @@ class EventQueue;
 	////////////////////////////////////
 
 class DEStar : public Star {
-protected:
-	FiringMode mode;
-
-	// set mode. If mode = PHASE, create inQue for its input portholes.
-	// PHASE mode:
-	// Get all simultaneous events in its input portholes at one time.
-	// Then, the number of firing will be reduced as many as the number of
-	// simultaneous input events on a porthole.
-	// SIMPLE mode:
-	// A special case of PHASE mode where the size of InQue of input
-	// portholes is one, so unneccesary.
-	void setMode(FiringMode m) { mode = m; }
-
 public:
-	// initialize domain-specific members
-	void prepareForScheduling();
+	// initialize domain-specific members (+ std initialize)
+	/* virtual */ void initialize();
 
 	// define firing
-	int fire();
+	/* virtual */ int run();
 
 	// send output events to the global event queue.
 	void sendOutput();
 
 	// class identification
-	int isA(const char*) const;
+	/* virtual */ int isA(const char*) const;
 
 	// my domain
-	const char* domain() const;
+	/* virtual */ const char* domain() const;
 
 	// prepare a new phase of firing.
 	virtual void startNewPhase();
@@ -72,8 +59,8 @@ public:
 	// either event-arriveTime or MAX { availTime, event-arriveTime },
 	// which is user's choice
 	// It will be set by go() method in each  star definition.
-	float completionTime;
-	float arrivalTime;
+	double completionTime;
+	double arrivalTime;
 
 	// Pointer to the event queue of the universe or warmhole
 	// in which the DEstar is. It is set by the Scheduler :
@@ -87,6 +74,19 @@ public:
         // For wormhole case, it is set in the start() method depending on
         // whether the inside domain is timed or untimed.
         int delayType;
+protected:
+	FiringMode mode;
+
+	// set mode. If mode = PHASE, create inQue for its input portholes.
+	// PHASE mode:
+	// Get all simultaneous events in its input portholes at one time.
+	// Then, the number of firing will be reduced as many as the number of
+	// simultaneous input events on a porthole.
+	// SIMPLE mode:
+	// A special case of PHASE mode where the size of InQue of input
+	// portholes is one, so unneccesary.
+	void setMode(FiringMode m) { mode = m; }
+
 };
 
 #endif

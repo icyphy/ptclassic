@@ -185,7 +185,7 @@ StringList DualMemory::printMemMap(const char* startString, const char* endStrin
 
 	l += startString;
 	l += " --------------------- ";
-	l += x.readName();
+	l += x.name();
 	l += " memory map: ";
 	l += endString;
 	l += "\n";
@@ -193,7 +193,7 @@ StringList DualMemory::printMemMap(const char* startString, const char* endStrin
 
 	l += startString;
 	l += " --------------------- ";
-	l += y.readName();
+	l += y.name();
 	l += " memory map: ";
 	l += endString;
 	l += "\n";

@@ -32,9 +32,9 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 	BlockStateIter nextState(star);
 	State* s;
         StringList comment = "initialization code from star ";
-        comment += star.readFullName();
+        comment += star.fullName();
         comment += " (class ";
-        comment += star.readClassName();
+        comment += star.className();
         comment += ")\n";
         outputComment(comment);
 	while ((s = nextState++) != 0) {
@@ -42,11 +42,11 @@ void AsmTarget::doInitialization(CGStar& cgStar) {
 		    (s->attributes() & AB_NOINIT) != 0) continue;
 		// too bad -- switching on state types
 		StringList smsg = "initialization for state ";
-		smsg += s->readFullName();
+		smsg += s->fullName();
 		outputComment (smsg);
 		unsigned addr;
-		ProcMemory *mem = star.lookupEntry(s->readName(),addr);
-		orgDirective(mem->readName(), addr);
+		ProcMemory *mem = star.lookupEntry(s->name(),addr);
+		orgDirective(mem->name(), addr);
 
 		// handle A_REVERSE attribute, which makes arrays
 		// write out backwards.

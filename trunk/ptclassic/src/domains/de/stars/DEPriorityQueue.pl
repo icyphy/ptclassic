@@ -173,7 +173,7 @@ Maximum total number of particles. If <0, capacity is infinite.
 	    for(int i=0;i<inData.numberPorts(); i++) {
 		InDEPort* p = nextp++;
 		while (p->dataNew) {
-		    queue.levelput(p->get().clone(),float(i));
+		    queue.levelput(p->get().clone(),i);
 		    p->getSimulEvent();
 		}
 	    }

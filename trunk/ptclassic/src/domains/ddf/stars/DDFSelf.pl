@@ -58,19 +58,19 @@ At compile time, this star appears to just be an atomic star.
 		if (gal) return;
 
 		StringList msg = "DDFSelf Star \"";
-		msg += readName();
+		msg += name();
 		msg += "\" :\n";
 		int flag = 0;
 
 		// find out which galaxy is recursive.
-		if (*(recurGal.getInitValue()) == 0) {
+		if (recurGal.null()) {
 			msg += "undefined name for recursion construct\n";
 			Error :: abortRun(msg);
 			return;
 		}
 
 		Block* b = parent();
-		while (b && strcmp(b->readName(), recurGal.getInitValue()))
+		while (b && strcmp(b->name(), recurGal) != 0)
 			b = b->parent();
 		if (!b) {
 			msg += "unmatched name for recursion construct\n";
@@ -86,10 +86,10 @@ At compile time, this star appears to just be an atomic star.
 			PortHole& p = *next++;
 			if (p.isItInput()) inNum++;
 			else outNum++;
-			DDFPortHole* dp = (DDFPortHole*) portWithName(p.readName());
+			DDFPortHole* dp = (DDFPortHole*) portWithName(p.name());
 			if (!dp) {
 				msg += "wrong galaxy portname for recursion \"";
-				msg += p.readName();
+				msg += p.name();
 				msg += "\" (should be input#? or output#?)\n";
 				flag++;
 			} else {
@@ -105,14 +105,14 @@ At compile time, this star appears to just be an atomic star.
 	go {
 		// clone the recursion galaxy
 		InterpGalaxy* myGal = (InterpGalaxy*) gal->clone();
-		myGal->setNameParent(gal->readName(), this);
+		myGal->setNameParent(gal->name(), this);
 		sched.resetFlag();
 
 		// make a image connection between DDFSelf and galaxy.
 		BlockPortIter next(*myGal);
 		for (int i = myGal->numberPorts(); i > 0; i--) {
 			PortHole& p = *next++;
-			DDFPortHole* dp = (DDFPortHole*) portWithName(p.readName());
+			DDFPortHole* dp = (DDFPortHole*) portWithName(p.name());
 			dp->imagePort = &p;
 
 			// make connection
@@ -120,7 +120,9 @@ At compile time, this star appears to just be an atomic star.
 		}
 
 		// scheduler setup and run
-		if (!sched.setup(*myGal)) {
+		sched.setGalaxy(*myGal);
+		sched.setup();
+		if (Scheduler::haltRequested()) {
 			Error :: abortRun("error in setup the scheduler in DDFSelf\n");
 			return;
 		}
@@ -129,12 +131,12 @@ At compile time, this star appears to just be an atomic star.
 		MPHIter nexti(input);
 		for (i = input.numberPorts(); i > 0; i--) {
 			InDDFPort& p = *(InDDFPort*) nexti++;
-			p.grabData();
+			p.receiveData();
 			p.moveData();
 		}
 
 		// scheduler run
-		sched.run(*myGal);	// default stop condition = 1
+		sched.run();	// default stop condition = 1
 
 		// move data out of galaxy
 		MPHIter nexto(output);

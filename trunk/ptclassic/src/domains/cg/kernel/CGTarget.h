@@ -40,14 +40,10 @@ public:
 
     static int haltRequested() {return SimControl::haltRequested();}
 
-    // function that initializes the Target itself, before a Galaxy
-    // is attached to it.  This is called first (before setup).
-    void start();
-
     // function that computes the schedule, allocates memory (if needed),
     // and prepares for code generation (generating header and initial
     // code)
-    int setup(Galaxy&);
+    void setup();
 
     // function that executes the schedule to generate the main code.
     int run();
@@ -58,7 +54,7 @@ public:
     void wrapup();
 
     // generate a new, identical CGTarget.
-    Block* clone() const;
+    Block* makeNew() const;
 
     // fn for adding code to the target
     void addCode(const char*);
@@ -73,7 +69,7 @@ public:
     virtual void writeCode(ostream&);
 
     // generate code for a processor in a multiprocessor system
-    virtual StringList generateCode(Galaxy&);
+    virtual StringList generateCode();
 
     // type identification
     int isA(const char*) const;
@@ -101,13 +97,14 @@ public:
     // not found, This method allows stars to access a code StringList by 
     // name.  If stream is not found, return NULL.
     StringList* getStream(const char* name);
-	
+
     // methods for generating code for reading and writing
     // wormhole ports.  Argument is the "real port" of the interior
     // star that is attached to an event horizon.
     virtual void wormInputCode(PortHole&);
     virtual void wormOutputCode(PortHole&);
 
+	
 protected:
     // Add a code StringList to the target.  This allows stars to access this
     // stream by name.  This method should be called in the the target's
@@ -142,17 +139,17 @@ protected:
     // returns FALSE on error.  This class has a do-nothing version.
     // if defined, it is responsible for calling galaxy.initialize()
     // if needed to do the start functions.
-    virtual int modifyGalaxy(Galaxy&);
+    virtual int modifyGalaxy();
 
     // compute buffer sizes, allocate memory, etc.  return TRUE for
     // success, false for failure.  Called after schedule generation
     // and modifyGalaxy.
-    virtual int allocateMemory(Galaxy&);
+    virtual int allocateMemory();
 
     // do initialization for code generation: for example, compute
     // offsets of portholes and generate initCode. But in this base
     // class, do nothing
-    virtual int codeGenInit(Galaxy&);
+    virtual int codeGenInit();
 
     // writes initial code
     virtual void headerCode();
@@ -161,7 +158,7 @@ protected:
     // a wormhole.  The default implementation generates an infinite
     // loop that reads input wormholes, runs the schedule, and writes
     // output wormholes, forever.
-    virtual int wormCodeGenerate(Galaxy&);
+    virtual int wormCodeGenerate();
 
     // The following method downloads code for the inside of a wormhole
     // and starts it executing.

@@ -64,9 +64,9 @@ public:
 	// display schedule
 	StringList displaySchedule(int depth);
 
-	// fire the cluster
-	int fire();
-	void go() { fire();}
+	// run the cluster
+	int run();
+	void go() { run();}
 
 	// generate code
 	void genCode(Target&, int);

@@ -150,8 +150,8 @@ after processing all inputs is sent to the "size" output.
 			queue.initialize();
 		}
 	}
-	start {
-		DEQueueBase::start();
+	setup {
+		DEQueueBase::setup();
 		zapQueue();
 	}
 	destructor {

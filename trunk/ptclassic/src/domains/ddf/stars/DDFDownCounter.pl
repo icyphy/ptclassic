@@ -26,7 +26,7 @@ This star generates (int-1), (int-2), ... 1,0 samples for (int) input.
 	}
 	go {
 		// get input token from Geodesic
-		input.grabData();
+		input.receiveData();
 
 		// generates output
 		int in = int (input%0);

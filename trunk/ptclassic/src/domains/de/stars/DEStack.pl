@@ -154,8 +154,8 @@ after processing all inputs is sent to the "size" output.
 			stack.initialize();
 		}
 	}
-	start {
-		DEQueueBase::start();
+	setup {
+		DEQueueBase::setup();
 		zapStack();
 	}
 	destructor {

@@ -22,16 +22,22 @@ a universe.
 
 class CompileTarget : public BaseCTarget {
 public:
-	int setup(Galaxy& g);
+	void setup();
 	int run();
 	void wrapup ();
 	CompileTarget(const char* nam,const char* stype,const char* desc) :
 		BaseCTarget(nam,stype,desc) {}
-	Block* clone() const
-		{ LOG_NEW; CompileTarget* t = new CompileTarget(readName(),
-						starType(), readDescriptor());
-		  return &t->copyStates(*this); }
-
+	Block* makeNew() const {
+		LOG_NEW; return new CompileTarget(name(),
+						  starType(), descriptor());
+	}
+	// FIXME: eliminate after BaseCTarget is fixed.
+	Block* clone() const {
+		LOG_NEW; CompileTarget* t = new CompileTarget(name(),
+						  starType(), descriptor());
+		t->copyStates(*this);
+		return t;
+	}
 	// Routines for writing code: schedulers may call these
 	void writeFiring(Star& s, int depth);
 
@@ -39,7 +45,7 @@ private:
 	// Method to return a pointer to the MultiPortHole that spawned a
 	// given PortHole, if there is such a thing.  If not, the pointer
 	// to the PortHole is returned as pointer to a GenericPort.
-	GenericPort* findMasterPort(const PortHole* p) const;
+	const GenericPort* findMasterPort(const PortHole* p) const;
 
 	// Returns the name of an ordinary porthole, or
 	// "name.newPort()" for a MultiPortHole.

@@ -19,9 +19,8 @@ $Id$
 #include "KnownTarget.h"
 #include "DEScheduler.h"
 #include "DEWormhole.h"
-#include "DEConnect.h"
-#include "DEWormConnect.h"
-#include "DEGeodesic.h"
+#include "DEPortHole.h"
+#include "AutoForkNode.h"
 
 extern const char DEdomainName[] = "DE";
 
@@ -32,12 +31,6 @@ public:
 		LOG_NEW; return *new DEWormhole(innerGal,innerTarget);
 	}
 
-	// new input porthole
-	PortHole& newInPort() { LOG_NEW; return *new InDEPort;}
-
-	// new output porthole
-	PortHole& newOutPort() { LOG_NEW; return *new OutDEPort;}
-
 	// new fromUniversal EventHorizon
 	EventHorizon& newFrom() { LOG_NEW; return *new DEfromUniversal;}
 
@@ -45,7 +38,7 @@ public:
 	EventHorizon& newTo() { LOG_NEW; return *new DEtoUniversal;}
 
 	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new DEGeodesic;}
+	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
 
 	// constructor
 	DEDomain() : Domain("DE") {}

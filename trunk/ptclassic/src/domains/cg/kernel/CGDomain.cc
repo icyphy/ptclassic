@@ -18,10 +18,9 @@ $Id$
 #include "CGTarget.h"
 #include "KnownTarget.h"
 #include "SDFScheduler.h"
-#include "CGConnect.h"
+#include "CGPortHole.h"
 #include "AutoForkNode.h"
 #include "CGWormhole.h"
-#include "CGWormConnect.h"
 
 // For the hacks below to avoid doing wormholes:
 

@@ -25,7 +25,7 @@ of the simulation.
 	}
 	ccinclude { "DEScheduler.h" }
 	go {
-		DEScheduler* sched = (DEScheduler*) mySched();
+		DEScheduler* sched = (DEScheduler*) scheduler();
 		completionTime = sched->whenStop();
 		output.put(completionTime) << 0;
 	}

@@ -31,8 +31,8 @@ This star routes an "input" token to one "output" depending on the
 	}
 	go {
 		// get Particles from Geodesic
-		control.grabData();
-		input.grabData();
+		control.receiveData();
+		input.receiveData();
 
 		// read control value, and route input
 		// to output depending on it.

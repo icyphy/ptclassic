@@ -71,7 +71,7 @@ int NamedList::append(Pointer object, const char* name)
 void NamedList::prepend(Pointer object, const char* name)
 {
     LOG_NEW; NamedNode* node = new NamedNode(object, name);
-    SequentialList::tup(node);
+    SequentialList::prepend(node);
 }
 
 // Get a named object from the list.
