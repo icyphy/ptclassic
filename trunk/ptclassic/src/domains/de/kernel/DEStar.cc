@@ -10,8 +10,11 @@ $Id$
 
 *******************************************************************/
 #include "DEStar.h"
+#include "DERepeatStar.h"
+#include "DEPriorityStar.h"
 #include "StringList.h"
 #include "Output.h"
+#include "PriorityQueue.h"
 
 extern  Error errorHandler;
 
