@@ -138,7 +138,7 @@ Scope::Scope(Galaxy& galaxyToScope):prntScope(0){
 	if (!block->isItAtomic())
 	    child = createScope(block->asGalaxy());
 	if (block->isItWormhole()) {
-	    Galaxy& wormGalaxy = ((Wormhole*)block)->insideGalaxy();
+	    Galaxy& wormGalaxy = ((Star*)block)->asWormhole()->insideGalaxy();
 	    wormGalaxy.setScope(this);
 	    child = createScope(wormGalaxy);
 	}
