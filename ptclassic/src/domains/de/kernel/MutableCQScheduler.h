@@ -94,6 +94,9 @@ public:
 	double whenStop() { return stopTime ;}
 
 	// fetch an event on request.
+	// FIXME: This method is dangerous. It is public but can
+	// lead to an aborted run if it is called with timeVal
+	// set to a time in the past. - John Davis, 1/21/98
 	/*virtual*/ int fetchEvent(InDEPort* p, double timeVal);
 
 	/*virtual*/ BasePrioQueue* queue() { return &eventQ; }
