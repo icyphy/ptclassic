@@ -34,10 +34,37 @@
 
 #######################################################################
 #### JavaDocSys
-# Parses Java code, creates ::tycho::Class models for each class found, 
-# and outputs those to the proper files. The most convenient interface
-# is from ::tycho::IDocSys::generateIDoc which will also generate Itcl
+# Parses Java code, creates <a href = 
+#"../../../../kernel/doc/codeDoc/Class.idoc">::tycho::Class</a>
+# models for each class found, and outputs those to the proper
+# files. The most convenient interface
+# is from ::tycho::IDocSys::generateIDoc which will also generate Java
 # documentation if necessary.
+#
+# The parsing is done in three main procedures. <code>readFile</code>
+# reads in a file line by line, deletes irrelevant comments, and formats the
+# doc comments in such a way
+# as to allow easier parsing later. That is, by turning a comment like this:
+# 
+# <pre>
+# // Blah blah
+# /** blah */
+# </pre>
+# 
+# Into:
+#
+# # {blah}
+#
+# This is also where other pre-formatting is done which allows the following
+# Tcl list-based step to complete successfully. (Such as separating brackets
+# and semicolons, which breaks lists.)
+#
+# The next method used is parseData, which sees the output of readFile as a Tcl 
+# list. It goes through item by item, looking for keywords, and then calls 
+# the appropriate method to add those into the Class model (or models, if 
+# more than one Class is being defined).
+#
+# Finally, the classes are output as files by calling their write methods.
 #
 class ::tycho::JavaDocSys {
     inherit ::tycho::IDocSys
