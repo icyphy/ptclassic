@@ -56,6 +56,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "stdlib.h"
 #include "BooleanMatrix.h"
 #include "MultiScheduler.h"
+#include <sys/time.h>
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
@@ -83,6 +84,8 @@ CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 	addState(useMultipleSchedulers.setState("Use multiple schedulers?",
 						this,"NO",
 				   "Use hierarchical schedulers?"));
+	addState(displaySchedulerStats.setState("Display scheduler stats?",
+		 this,"NO","Print DAG nodes and scheduling time to stdout?"));
 	addedStates.initialize();
 }
 
@@ -448,6 +451,47 @@ int CGMultiTarget :: allReceiveWormData() {
 	return !Scheduler::haltRequested();
 }
 
+/*virtual*/ int CGMultiTarget::schedulerSetup() {
+    itimerval year,elapsed;
+    year.it_interval.tv_sec = year.it_interval.tv_usec = 0;
+    year.it_value.tv_sec = 3600 * 24 * 355;
+    year.it_value.tv_usec = 0;
+
+    setitimer(ITIMER_PROF,&year,NULL);
+
+    int status = MultiTarget::schedulerSetup();
+
+    if (int(displaySchedulerStats)) {
+	// turn off timer and get elapsed time
+	getitimer(ITIMER_PROF,&elapsed);
+	setitimer(ITIMER_PROF,&year,NULL);
+	double schedulingTime =  3600 * 24 * 355 - elapsed.it_value.tv_sec 
+	    - 1.0e-6*elapsed.it_value.tv_usec;
+
+	StringList message;
+
+	// Compute total stars
+	GalStarIter nextStar(*galaxy());
+	DataFlowStar* star;
+	int totalStars = 0;
+	while ((star = (DataFlowStar*) nextStar++) != NULL)
+	    totalStars++;
+	    
+	int dagNodes = ((ParScheduler*)scheduler())->dagNodes();
+
+	message << "The time to compute the schedule was "
+		<< schedulingTime 
+		<< " seconds.  There were a total of "
+		<< dagNodes << " precedence DAG nodes "
+		<< "constructed from a multirate dataflow graph of " 
+		<< totalStars << " nodes.";
+	Error::message(message);
+	cout << message << "\n";
+	cout.flush();
+    }
+    return status;
+}    
+
 // default code generation for a wormhole.  This produces an infinite
 // loop that reads from the inputs, processes the schedule, and generates
 // the outputs.
@@ -455,16 +499,11 @@ int CGMultiTarget :: allReceiveWormData() {
 // all child targets will finish generating code.
 
 void CGMultiTarget :: generateCode() {
-	if (parent()) setup();		// check later whether this is right.
-
-	int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
-        beginIteration(iterations,0);
-// THIS IS NOT CORRECT FIXME!!!  compileRun needs to be called before wormInputCode
-	if (inWormHole()) {
-		allWormInputCode();
-		allWormOutputCode();	// note the change of calling order.
-	}
-	scheduler()->compileRun();
+    if (parent()) setup();		// check later whether this is right.
+    int iterations = inWormHole()? -1 : (int)scheduler()->getStopTime();
+    beginIteration(iterations,0);
+    scheduler()->compileRun();
+	if (SimControl::haltRequested()) return;
 	for (int i = 0 ; i < nChildrenAlloc ; i++) {
 		if (child(i)->isA("CGTarget")) {
 			((CGTarget*)child(i))->generateCode();
