@@ -1,15 +1,7 @@
 defstar {
     name { Mux }
     domain { CG56 }
-    desc {
-Multiplexes any number of inputs onto one output stream.
-B particles are consumed on each input, where B is the blockSize.
-But only one of these blocks of particles is copied to the output.
-The one copied is determined by the "control" input.
-Integers from 0 through N-1 are accepted at the "control" input,
-where N is the number of inputs.  If the control input is outside
-this range, an error is signaled.
-    }
+    desc { Multiplexes any number of inputs onto one output stream. }
     version { $Id$ }
     author { Kennard White }
     acknowledge { SDF version by E. A. Lee }
@@ -22,6 +14,12 @@ limitation of liability, and disclaimer of warranty provisions.
     location { CG56 control library }
     explanation {
 .Id "multiplex"
+\fIblockSize\fP particles are consumed on each input.
+But only one of these blocks of particles is copied to the output.
+The one copied is determined by the \fIcontrol\fP input.
+Integers from 0 through N-1 are accepted at the \fIcontrol\fP input,
+where N is the number of inputs.  If the control input is outside
+this range, random data (possibly memory mapped devices) will be copied.
 .UH IMPLEMENTATION:
 .pp
 There are potentially very many special cases that could be handled
@@ -36,8 +34,11 @@ input blocks.  The \fIcontrol\fP input is used to index this table,
 yielding a pointer to the appropriate input block for the firing.  This
 implementation assumes that all of its input ports reside in X memory.
 .LP
-Also, in a non-looped schedule, the location of the inputs will change
-on each schedule firing.  This requires a different table for each firing.
+Currently we advance each of the pointers in the table on every firing.
+With some schedule the advancement is a nop; this case is handled.
+In other schedules the adancement is periodic over all inputs; in this
+case, we could pre-calculate a set of tables at compile time instead
+of performing run-time advancement.  This is not currently handled.
     }
     inmulti {
         name {input}
@@ -125,14 +126,17 @@ on each schedule firing.  This requires a different table for each firing.
 	.ENDL
 	nop
     }
+    // the cbAdvancePtr is only code-gen'd when bufsize > 1.
+    // note that ports are 1-based array, while states are 0-based
     codeblock(cbAdvancePtr) {
+	; advance ptr for input#$val(curinput)
 	IF	$val(notAllScalorB)
 	  move	#$size(input#curinput)-1,m2
 	ENDIF
-	move	$ref(ptrvec,$val(curinput)),r2
+	move	x:$addr(ptrvec,curinput)-1,r2
 	rep	#$val(blockSize)
-	  move	x:(r2)+
-	move	r2,$ref(ptrvec,$val(curinput))
+	  move	(r2)+
+	move	r2,x:$addr(ptrvec,curinput)-1
     }
     go {
 	addCode(cbCopy);
