@@ -69,12 +69,6 @@ protected:
 	StringArrayState intlEventNames;
 	StringArrayState intlEventTypes;
 
-	// Evaluation type: Strict or NonStrict.
-	StringState evaluationType;
-
-	// One-writer rule checking type: Compile Run None.
-	StringState oneWriterType;
-
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
