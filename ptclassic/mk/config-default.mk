@@ -114,6 +114,12 @@ TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl$(TCL_VERSION_NUM)
 # addtional -L and/or -l options to support tk extensions.
 TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION_NUM) #-lXpm
 
+# Directory containing Tcl include files
+TCL_INCDIR=$(TCL_ROOT)/itcl/include $(ITCL_SRC_INCDIR)
+
+# Directory containing Tk include files
+TK_INCDIR=$(TCL_ROOT)/itk/include
+
 # Directory containing itcl include files
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
