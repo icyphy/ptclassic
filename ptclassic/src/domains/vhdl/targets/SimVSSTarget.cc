@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SimVSSTarget.h"
 #include "KnownTarget.h"
-//#include <ostream.h>
+#include "paths.h"
 
 // Constructor.
 SimVSSTarget :: SimVSSTarget(const char* name,const char* starclass,
@@ -322,10 +322,11 @@ int SimVSSTarget :: compileCode() {
   if (int(analyze)) {
     // Generate the command to analyze the VHDL code here.
     StringList command = "";
+    if (progNotFound("gvan")) return FALSE;
     command << "gvan -nc " << filePrefix << ".vhdl";
     StringList error = "";
     error << "Could not compile " << filePrefix << ".vhdl";
-    return (systemCall(command, error, targetHost) == 0);
+    if (systemCall(command, error, targetHost)) return FALSE;
   }
   // Return TRUE indicating success.
   return TRUE;
@@ -338,33 +339,23 @@ int SimVSSTarget :: runCode() {
     StringList command = "";
     StringList sysCommand = "";
     if (int(interactive)) {
+      if (progNotFound("vhdldbx")) return FALSE;
       command << "vhdldbx -nc " << filePrefix;
       StringList error = "";
       error << "Could not compile " << filePrefix << ".vhdl";
-      (void) systemCall(command, error, targetHost);
+      if (systemCall(command, error, targetHost)) return FALSE;
     }
     else {
-/*
-      StringList comCode = "";
-      comCode << "run\n";
-      comCode << "quit\n";
-      writeFile(comCode, ".com", 0);
-      */
+      if (progNotFound("ptvhdlsim")) return FALSE;
       command << "ptvhdlsim -nc -i " << filePrefix << ".com " << filePrefix;
       StringList error = "";
       error << "Could not simulate " << filePrefix << ".vhdl";
-      (void) systemCall(command, error, targetHost);
+      if (systemCall(command, error, targetHost)) return FALSE;
     }
     sysCommand << "cd " << (const char*) destDirectory;
     sysCommand << " ; ";
     sysCommand << sysWrapup;
     (void) system(sysCommand);
-    
-//    sysCommand << sysWrapup;
-//    StringList sysError = "";
-//    sysError << "Error performing sysWrapup, " << filePrefix << ".vhdl";
-// systemCall puts too much noise on the std output, esp. for xgraphs
-//    (void) systemCall(sysCommand, sysError, targetHost);
   }  
   // Return TRUE indicating success.
   return TRUE;
@@ -402,7 +393,7 @@ StringList SimVSSTarget :: addGenericRefs(VHDLGenericList* genList) {
   if (genCount) {
     all << opener << body << closer;
   }
-  return(all);
+  return all;
 }
 
 // Add in port refs here from portList.
@@ -432,7 +423,7 @@ StringList SimVSSTarget :: addPortRefs(VHDLPortList* portList) {
   if (portCount) {
     all << opener << body << closer;
   }
-  return(all);
+  return all;
 }
 
 // Add in signal declarations here from signalList.
@@ -445,7 +436,7 @@ StringList SimVSSTarget :: addSignalDeclarations(VHDLSignalList* signalList) {
     all << indent(level) << "signal " << signal->name << ": "
 	<< signal->type << ";\n";
   }
-  return(all);
+  return all;
 }
 
 // Add in component mappings here from compMapList.
@@ -506,7 +497,7 @@ StringList SimVSSTarget :: addComponentMaps(VHDLCompMapList* compMapList) {
     all << indent(level) << ";\n";
     level--;
   }
-  return(all);
+  return all;
 }
 
 // Register component mapping.

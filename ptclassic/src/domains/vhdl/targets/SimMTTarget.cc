@@ -40,7 +40,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "SimMTTarget.h"
 #include "KnownTarget.h"
-//#include <ostream.h>
+#include "paths.h"
 
 // Constructor.
 SimMTTarget :: SimMTTarget(const char* name,const char* starclass,
@@ -81,11 +81,14 @@ int SimMTTarget :: compileCode() {
   if (int(analyze)) {
     // Generate command for MTI simulator.
     StringList command = "";
-    command << "cd " << (const char*) destDirectory;
+    if (progNotFound("vlib")) return FALSE;
+    if (progNotFound("vcom")) return FALSE;
+    command << "vlib work";
     command << " ; ";
-    command << "vlib work; ";
     command << "vcom " << filePrefix << ".vhdl";
-    system(command);
+    StringList error = "";
+    error << "Could not compile " << filePrefix << ".vhdl";
+    if (systemCall(command, error, targetHost)) return FALSE;
   }
   // Return TRUE indicating success.
   return TRUE;
@@ -109,25 +112,27 @@ int SimMTTarget :: runCode() {
     StringList command = "";
     StringList sysCommand = "";   
     if (int(interactive)) {
-      command << "cd " << (const char*) destDirectory;
-      command << " ; ";
+      if (progNotFound("vsim")) return FALSE;
       command << "vsim -i " << name << " ; ";
-      system(command);
+      StringList error = "";
+      error << "Could not simulate " << filePrefix << ".vhdl";
+      if (systemCall(command, error, targetHost)) return FALSE;
     }
     else {
       StringList comCode = "";
       comCode << "run -all\n";
       comCode << "quit -f\n";
       writeFile(comCode, ".do", 0);
-      command << "cd " << (const char*) destDirectory;
-      command << " ; ";
+      if (progNotFound("vsim")) return FALSE;
       command << "vsim " << name << " < " << filePrefix << ".do; ";
-      system(command);
+      StringList error = "";
+      error << "Could not simulate " << filePrefix << ".vhdl";
+      if (systemCall(command, error, targetHost)) return FALSE;
     }
     sysCommand << "cd " << (const char*) destDirectory;
     sysCommand << " ; ";
     sysCommand << sysWrapup;
-    system(sysCommand);
+    (void) system(sysCommand);
   }
   return TRUE;
 }

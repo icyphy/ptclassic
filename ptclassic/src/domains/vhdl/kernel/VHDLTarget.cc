@@ -364,6 +364,7 @@ void VHDLTarget :: writeCode() {
   singleUnderscore();
 }
 
+// FIXME: Need to do this inside before code is generated instead.
 // Change all double underscores to single ones to ensure proper identifiers.
 void VHDLTarget :: singleUnderscore() {
   StringList command = "";
