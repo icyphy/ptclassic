@@ -64,7 +64,7 @@ set EXPDOMAINS=(cg-ddf cg56 cgc cg96)
 set EXPEXTRAS=(cg56/targets cg96/targets)
 
 cd domains
-foreach x (sdf ddf de thor cg $EXPDOMAINS)
+foreach x (sdf ddf de thor bdf cg $EXPDOMAINS)
 	optmkdir $x
 	cd $x
 	optlink ../../../src/domains/$x makefile
@@ -85,7 +85,7 @@ end
 
 foreach x (thor/pepp cg/targets sdf/image sdf/targets \
 	sdf/loopScheduler cg/parScheduler thor/analyzerX11 \
-	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets \
+	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets cgc/tcltk \
 	cg56/dsp cg96/dsp sdf/dsp sdf/image $EXPEXTRAS )
 	optmkdir $x
 	cd $x
