@@ -22,6 +22,9 @@ LDIRS = ptlang pigiRpc filters utils
 # directories with subtrees
 SDIRS = thread domains
 
+# directories to build TAGS tables in
+TDIRS = kernel domains
+
 MAKEVARS = "ARCH=$(ARCH)"
 
 # This target makes sure all the makefiles are current
@@ -55,8 +58,9 @@ all install clean realclean sources depend checkjunk sccsinfo:
 	    fi ; \
 	done
 
+.PHONY:	TAGS
 TAGS:
-	@for x in $(DIRS); do \
+	@for x in $(TDIRS); do \
 	    if [ -w $$x ] ; then \
 		( cd $$x ; \
 		echo making $@ in $$x ; \
@@ -64,5 +68,4 @@ TAGS:
 		) \
 	    fi ; \
 	done
-	-cat -s $(DIRS:%=%/TAGS) > $@
-
+	-cat -s $(TDIRS:%=%/TAGS) > $@
