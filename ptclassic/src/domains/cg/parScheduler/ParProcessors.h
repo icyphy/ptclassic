@@ -20,7 +20,7 @@ Date of last revision:
 #include "NamedObj.h"
 #include "UniProcessor.h"
 #include "IntArray.h"
-#include "BaseMultiTarget.h"
+#include "MultiTarget.h"
 
 class ParGraph;
 
@@ -34,7 +34,7 @@ class ParProcessors {
 
 public:
 	// constructor
-	ParProcessors(int, BaseMultiTarget*);
+	ParProcessors(int, MultiTarget*);
 
 	virtual ~ParProcessors();
 
@@ -80,7 +80,7 @@ protected:
 	int numProcs;
 
 	// target pointer
-	BaseMultiTarget* mtarget;
+	MultiTarget* mtarget;
 
   	// pattern of processor availability (PPA) is stored in indices.
   	IntArray pIndex;

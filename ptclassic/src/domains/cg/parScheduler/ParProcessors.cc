@@ -20,7 +20,7 @@ Date of last revision:
 #include "ParGraph.h"
 #include "StringList.h"
 
-ParProcessors :: ParProcessors(int pNum, BaseMultiTarget* t) : mtarget(t) {
+ParProcessors :: ParProcessors(int pNum, MultiTarget* t) : mtarget(t) {
 	numProcs = pNum;
 	pIndex.create(pNum);
 	pId.create(pNum); 
