@@ -60,8 +60,8 @@ endif
 # we really need it.
 ifdef NEED_MATHEMATICADIR
 	ifeq ("$(INCLUDE_MATHEMATICA)","no")
-		MATHEMATICADIR = 	$(ROOT)\src\compat\mathematica
-		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)\Source\Includes
+		MATHEMATICADIR = 	$(ROOT)/src/compat/mathematica
+		MATHEMATICA_INCSPEC =	-I$(MATHEMATICADIR)/Source/Includes
 		MATHEMATICAEXT_LIB = 	-lptmathematica
 	else
 		MATHEMATICADIR := $(shell $(ROOT)/bin/mathRootDir)
