@@ -17,13 +17,14 @@ SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 CGSTARS = $(ROOT)/src/domains/cg/stars
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
+LSKERNEL = $(ROOT)/src/domains/sdf/loopScheduler
 DCDIR = $(ROOT)/src/domains/cg/dcScheduler
 DLDIR = $(ROOT)/src/domains/cg/dlScheduler
 HuDIR = $(ROOT)/src/domains/cg/HuScheduler
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 
 INCL=-I$(CGSTARS) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
-	-I$(DCDIR)  -I$(DLDIR) -I$(HuDIR) -I$(PARDIR)
+	-I$(LSKERNEL) -I$(DCDIR)  -I$(DLDIR) -I$(HuDIR) -I$(PARDIR)
 
 SRCS=CGMultiTarget.cc CGSharedBus.cc 
 HDRS=CGMultiTarget.h CGSharedBus.h 
