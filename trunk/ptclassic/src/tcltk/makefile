@@ -77,6 +77,7 @@ ITCL_VERSION =		itcl3.0a1
 ITCL_TCL_MAJOR_VERSION_NUMBER =	8.0
 ITCL_WINDOWS_TCL_MAJOR_VERSION_NUMBER =	80
 ITCL_TK_MAJOR_VERSION_NUMBER =	8.0
+ITCL_WINDOWS_TK_MAJOR_VERSION_NUMBER =	80
 ITCL_MAJOR_VERSION_NUMBER =	3.0
 IWIDGETS_MAJOR_VERSION_NUMBER =	3.0.0
 
@@ -242,17 +243,22 @@ fixlinks:
 		ln -s libitcl$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitcl.$$LIBSUFFIX; \
 		ln -s libitk$(ITCL_VERSION_NUM).$$LIBSUFFIX$$LIBVERSION libitk.$$LIBSUFFIX; \
 	)
-	@echo "Create a links for itclsh to ish"
-	-(cd $(ITCL_DEST)/bin; rm -f ish tclsh itkwish itclsh)
-	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) ish)
-	-(cd $(ITCL_DEST)/bin; ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) tclsh)
-	-(cd $(ITCL_DEST)/bin; \
-		ln -s ish$(ITCL_TCL_MAJOR_VERSION_NUMBER) \
-			tclsh$(ITCL_WINDOWS_TCL_MAJOR_VERSION_NUMBER))
+	@echo "Create a links for itclsh"
+	-(cd $(ITCL_DEST)/bin; rm -f tclsh itkwish itclsh wish \
+		tclsh$(ITCL_WINDOWS_TCL_MAJOR_VERSION_NUMBER) \
+		wish$(ITCL_WINDOWS_TK_MAJOR_VERSION_NUMBER))
 	-(cd $(ITCL_DEST)/bin; \
 		ln -s itkwish$(ITCL_MAJOR_VERSION_NUMBER) itkwish)
 	-(cd $(ITCL_DEST)/bin; \
 		ln -s itclsh$(ITCL_MAJOR_VERSION_NUMBER) itclsh)
+	-(cd $(ITCL_DEST)/bin; \
+		ln -s tclsh$(ITCL_TCL_MAJOR_VERSION_NUMBER) \
+			tclsh$(ITCL_WINDOWS_TCL_MAJOR_VERSION_NUMBER))
+	-(cd $(ITCL_DEST)/bin; \
+		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) wish)
+	-(cd $(ITCL_DEST)/bin; \
+		ln -s wish$(ITCL_TK_MAJOR_VERSION_NUMBER) \
+			wish$(ITCL_WINDOWS_TK_MAJOR_VERSION_NUMBER))
 	@echo "Create links so Ptolemy can find tcl.h and tk.h easily"
 	-(cd $(TCLTK_DEST); rm -rf tcl tk; mkdir tcl tk; \
 		cd tcl; ln -s ../itcl/include/itcl include; \
