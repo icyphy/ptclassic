@@ -21,7 +21,7 @@ static InterpGalaxy *currentGalaxy = NULL;  // current galaxy to make things in
 static InterpGalaxy *saveGalaxy = NULL;  // used to build galaxies
 
 // Define a stream for logging -- log output to pigiLog.pt
-#include <ostream.h>
+#include <stream.h>
 
 ostream LOG("pigiLog.pt", "w");
 
