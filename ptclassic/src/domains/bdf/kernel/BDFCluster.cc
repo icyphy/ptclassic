@@ -45,7 +45,7 @@ Cluster boundaries are represented by disconnected portholes;
 BDFScheduler treats such portholes exactly as if they were wormhole
 boundaries.
 
-The virtual baseclass BDFCluster refers to either type of cluster.
+The virtual base class BDFCluster refers to either type of cluster.
 
 Two specialized types of scheduler, both derived from BDFScheduler,
 are used; BDFBagScheduler is used for schedules inside BDFClusterBags,
@@ -61,6 +61,8 @@ static const char file_id[] = "BDFCluster.cc";
 #pragma implementation
 #endif
 
+#define BDF_PROCESS_RELATIONS_IN_LOOPS 0
+
 #include "BDFCluster.h"
 #include "BDFClustPort.h"
 #include "BDFRelIter.h"
@@ -70,6 +72,7 @@ static const char file_id[] = "BDFCluster.cc";
 #include "pt_fstream.h"
 #include "DynDFScheduler.h"
 #include "Error.h"
+#include "miscFuncs.h"
 #include <assert.h>
 
 // A BDFClusterGal is a Galaxy, built from another galaxy.
@@ -94,14 +97,14 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 : logstrm(log), bagNumber(1), urateFlag(FALSE)
 {
 	int nports = setPortIndices(gal);
-	LOG_NEW; BDFClustPort** ptable = new BDFClustPort*[nports];
+	BDFClustPort** ptable = new BDFClustPort*[nports];
 	for (int i = 0; i < nports; i++)
 		ptable[i] = 0;
 	GalStarIter nextStar(gal);
 	DataFlowStar* s;
-	BDFCluster* c;
 	while ((s = (DataFlowStar*)nextStar++) != 0) {
-		LOG_NEW; c = new BDFAtomCluster(*s,this);
+		// FIXME: Memory leak
+		BDFCluster* c = new BDFAtomCluster(*s,this);
 		addBlock(*c);
 		BDFClustPortIter nextPort(*c);
 		BDFClustPort *p;
@@ -146,7 +149,7 @@ BDFClusterGal::BDFClusterGal(Galaxy& gal, ostream* log)
 			curCP->initGeo();
 		}
 	}
-	LOG_DEL; delete [] ptable;
+	delete [] ptable;
 }
 
 // remove blocks from this galaxy without deallocating the blocks.
@@ -272,6 +275,7 @@ int BDFClusterGal::mergePass() {
 			if (c2) break;
 		}
 		if (c2) {
+			// FIXME: Memory leak
 			c1 = merge(c1, c2);
 			// keep expanding the result as much as possible.
 			BDFCluster* c3;
@@ -284,7 +288,6 @@ int BDFClusterGal::mergePass() {
 		// note we must always reset the iterator after a
 		// merge since it might be invalid (point to a deleted
 		// cluster).
-		// FIXME: Memory leak: is c2 is added to any lists? -BLE
 		else if ((c2 = fullSearchMerge()) != 0) {
 			nextClust.reset();
 			changes = TRUE;
@@ -322,9 +325,8 @@ int BDFClusterGal::mergePass() {
 }
 
 void BDFClusterGal::makeWhile(BDFClustPort* ctl, BDFRelation rel) {
-	BDFCluster *c_in, *c_new;
-	c_in = ctl->parentClust();
-	LOG_NEW; c_new = new BDFWhileLoop(rel,ctl,c_in);
+	BDFCluster* c_in = ctl->parentClust();
+	BDFCluster* c_new = new BDFWhileLoop(rel,ctl,c_in);
 	addBlock(c_new->setBlock(genBagName(),this));
 	if (logstrm)
 		*logstrm << "Created while loop around " << c_in->name()
@@ -525,16 +527,13 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 		if (logstrm)
 			*logstrm << a->name() << " and " << b->name()
 				 << ": doing loop merge, result:\n";
-		// FIXME: Memory leak
-		LOG_NEW; BDFCluster *c = new BDFWhileLoop(desrel,condSrc,a,b);
+		BDFCluster* c = new BDFWhileLoop(desrel,condSrc,a,b);
 		addBlock(c->setBlock(genBagName(),this));
 		if (logstrm) *logstrm << *c << "\n";
 		return c;
 	}
 	return 0;
 }
-
-BDFTopGal::~BDFTopGal() {}
 
 // return TRUE if this and b have the same loop condition.
 // FIXME: only return true for DO_ITER type loops -- needs
@@ -543,7 +542,8 @@ int BDFCluster::sameLoopCondition(const BDFCluster& b) const
 {
 	if (pType == DO_ITER)
 		return b.pType == DO_ITER && pLoop == b.pLoop;
-#if 0
+
+#if BDF_PROCESS_RELATIONS_IN_LOOPS
 	BDFRelation desrel;
 	// array of "reversals" for the loop types.
 	static BDFLoopType revType[] = {
@@ -846,7 +846,6 @@ void BDFCluster::ifIze(BDFClustPort* cond, BDFRelation rel,ostream* logstrm) {
 		if (p == cond) continue;
 
 		// FIXME: should deal correctly with already-conditional ports.
-
 		p->setRelation(rel,cond);
 	}
 	cond->setControl(TRUE);
@@ -862,15 +861,13 @@ static BDFClustPort* createDupPort(BDFClustPort* cond,const char* name) {
 	BDFCluster* cpar = cond->parentClust();
 	cond->markDuped();
 	if (!in) {
-		// FIXME: Memory leak
-		LOG_NEW; a = new BDFClustPort(cond->real(),cpar,BCP_DUP);
+		a = new BDFClustPort(cond->real(),cpar,BCP_DUP);
 		a->setPort(name,cpar,INT);
 	}
 	else {
-		// FIXME: Memory leak
-		BDFClustPort* d = createDupPort(in,name);
-		LOG_NEW; a = new BDFClustPort(*d,cpar,BCP_BAG);
 		// a is the external link for d.
+		BDFClustPort* d = createDupPort(in,name);
+		a = new BDFClustPort(*d,cpar,BCP_BAG);
 		d->makeExternLink(a);
 	}
 	a->setRelation(BDF_SAME,cond);
@@ -914,9 +911,9 @@ BDFClustPort* BDFClusterGal::connectBoolean(
 		*logstrm << "Creating a boolean arc to pass "
 			 << cond->fullName() << " to " << c->name()
 			 << "\n";
-// condition is not present.  We must pass it.  If we can pair it with
-// a parallel arc in the same direction this passing is always safe,
-// otherwise we must make sure a delay-free-loop is not introduced.
+	// condition is not present.  We must pass it.  If we can pair it with
+	// a parallel arc in the same direction this passing is always safe,
+	// otherwise we must make sure a delay-free-loop is not introduced.
 	BDFClustPort * acc = hasParallel(cond,c) ? cond : 0;
 	if (!acc) {
 		BDFClustPortRelIter iter(*cond);
@@ -950,14 +947,15 @@ BDFClustPort* BDFClusterGal::connectBoolean(
 	}
 	cond = acc;
 	// create a new port in the far cluster
-	BDFClustPort *a = createDupPort(cond,pseudoName());
+	// FIXME: Memory leak
+	BDFClustPort* a = createDupPort(cond,pseudoName());
 	// mark it as a control port
 	a->setControl(TRUE);
 	// create it in the near cluster -- name matches original
 	// condition and the inner port is cond->innermost(), so
 	// we will not be effected when outer bag ports are zapped.
 	// FIXME: Memory leak
-	BDFClustPort *b =
+	BDFClustPort* b =
 		new BDFClustPort(cond->innermost()->real(),c,BCP_DUP_IN);
 	b->setPort(cond->name(),c,INT);
 	c->addPort(*b);
@@ -1140,6 +1138,7 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 	BDFClusterBag* c2Bag = c2->looped() ? 0 : c2->asBag();
 
 	if (c1Bag) {
+		// FIXME: Memory leak
 		if (c2Bag) c1Bag->merge(c2Bag,this); // merge two bags
 		else c1Bag->absorb(c2,this);   // put c2 into the c1 bag
 	}
@@ -1149,9 +1148,12 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 	}
 	else {
 		// make a new bag and put both atoms into it.
-		LOG_NEW; BDFClusterBag* bag = new BDFClusterBag;
+		// FIXME: Memory leak
+		BDFClusterBag* bag = new BDFClusterBag;
 		addBlock(bag->setBlock(genBagName(),this));
+		// FIXME: Memory leak
 		bag->absorb(c1,this);
+		// FIXME: Memory leak
 		bag->absorb(c2,this);
 		c1Bag = bag;
 	}
@@ -1166,15 +1168,14 @@ BDFCluster* BDFClusterGal::merge(BDFCluster* c1, BDFCluster* c2) {
 // constructor: make empty bag.
 BDFClusterBag :: BDFClusterBag() : sched(0), gal(0), exCount(0) {}
 
-
 void BDFClusterBag :: createScheduler() {
-	LOG_DEL; delete sched;
-	LOG_NEW; sched = new BDFBagScheduler;
+	delete sched;
+	sched = new BDFBagScheduler;
 }
 
 void BDFClusterBag :: createInnerGal() {
-	LOG_DEL; delete gal;
-	LOG_NEW; gal = new BDFClusterGal;
+	delete gal;
+	gal = new BDFClusterGal;
 	if (parent()) {
 		BDFClusterGal* pgal = (BDFClusterGal*)parent();
 		gal->dupStream(pgal);
@@ -1202,13 +1203,15 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 		createInnerGal();
 		repetitions = c->repetitions;
 	}
-// move c from its current galaxy to my galaxy.
+
+	// move c from its current galaxy to my galaxy.
 	par->removeBlock(*c);
 	gal->addBlock(*c,c->name());
-// adjust the bag porthole list.  Some of c's ports will now become
-// external ports of the cluster, while some external ports of the
-// cluster that connnect to c will disappear.  We will leave connecting
-// arcs as self-loops under some conditions (see above).
+
+	// adjust the bag porthole list.  Some of c's ports will now become
+	// external ports of the cluster, while some external ports of the
+	// cluster that connnect to c will disappear.  We will leave connecting
+	// arcs as self-loops under some conditions (see above).
 	BDFClustPortIter next(*c);
 	BDFClustPort* cp;
 	while ((cp = next++) != 0) {
@@ -1218,14 +1221,14 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 			// zap it and connect directly.
 			BDFClustPort* p = pFar->inPtr();
 			int numDelays = cp->numInitDelays();
-			LOG_DEL; delete pFar;
+			delete pFar;
 			cp->connect(*p, numDelays);
 			cp->initGeo();
 		}
 		else {
 			// add a new connection to the outside for this guy
-			LOG_NEW; BDFClustPort *np =
-				new BDFClustPort(*cp,this,BCP_BAG);
+			// FIXME: Memory leak
+			BDFClustPort* np = new BDFClustPort(*cp,this,BCP_BAG);
 			cp->makeExternLink(np);
 			addPort(*np);
 		}
@@ -1234,8 +1237,7 @@ void BDFClusterBag::absorb(BDFCluster* c,BDFClusterGal* par) {
 }
 
 // this function merges two bags.
-void
-BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
+void BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 	if (b->size() == 0) return;
 	if (!gal) createInnerGal();
 	// get a list of all "bagports" that connect the two clusters.
@@ -1262,8 +1264,9 @@ BDFClusterBag::merge(BDFClusterBag* b,BDFClusterGal* par) {
 		BDFClustPort* near = p->inPtr();
 		BDFClustPort* far = pFar->inPtr();
 		int numDelays = p->numInitDelays();
-		LOG_DEL; delete pFar;
-		LOG_DEL; delete p;
+		delete pFar;
+		delete p;
+		// FIXME: Memory leak
 		near->connect(*far, numDelays);
 		near->initGeo();
 	}
@@ -1472,7 +1475,8 @@ void BDFClusterBag::fixBufferSizes(int nReps) {
 // generate internal schedules
 int BDFClusterBag::genSched() {
 	if (sched) return TRUE;
-	LOG_NEW; sched = new BDFBagScheduler;
+	// FIXME: Memory leak
+	sched = new BDFBagScheduler;
 	sched->setGalaxy(*gal);
 	sched->setup();
 	if (Scheduler::haltRequested()) return FALSE;
@@ -1762,8 +1766,7 @@ const char* BDFCluster::mungeName(NamedObj& o) {
 	if (cname == 0) return "top";
 	// Change dots . to underscores _, but leave the first dot alone
 	cname++;
-	char* buf = new char[ strlen(cname) + 1 ];
-	strcpy(buf, cname);
+	char* buf = savestring(cname);
 	char* p = buf;
 	while (*p) {
 		if (*p == '.') *p = '_';
@@ -1783,7 +1786,7 @@ BDFAtomCluster::BDFAtomCluster(DataFlowStar& star,Galaxy* parent) : pStar(star)
 	while ((p = nextPort++) != 0) {
 		// do not make a port in the cluster if it is a "loopback" port
 		if (p->far()->parent() == &star) continue;
-		LOG_NEW; BDFClustPort *cp = new BDFClustPort(*p,this);
+		BDFClustPort* cp = new BDFClustPort(*p,this);
 		addPort(*cp);
 		cp->numIO();	// test
 	}
@@ -1798,7 +1801,7 @@ BDFAtomCluster::~BDFAtomCluster() {
 	while ((p = nextPort++) != 0) {
 		// avoid removal from parent list.
 		p->setNameParent("",0);
-		LOG_DEL; delete p;
+		delete p;
 	}
 }
 
@@ -1889,8 +1892,8 @@ BDFClustSched::BDFClustSched(const char* log , int canDoDyn, int scc)
   strongConstCheck(scc) {}
 
 BDFClustSched::~BDFClustSched() {
-	LOG_DEL; delete cgal;
-	LOG_DEL; delete dynSched;
+	delete cgal;
+	delete dynSched;
 }
 
 // timing control
@@ -1924,7 +1927,6 @@ static int SDFcheck(BDFClusterGal& gal) {
 
 // compute the schedule!
 int BDFClustSched::computeSchedule (Galaxy& gal) {
-	LOG_DEL; delete cgal;
 
 	// log file stuff.
 	const char* file = logFile;
@@ -1933,19 +1935,21 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 		logstrm = new pt_ofstream(file);
 
 	// do the clustering.
+	delete cgal;
 	cgal = new BDFTopGal(gal,logstrm);
 	cgal->cluster();
 	if (logstrm) {
 		*logstrm << "Clustering complete.  ";
 		if (cgal->numberClusts() > 1)
 			*logstrm << "Final clustering:\n" << *cgal;
-		else *logstrm << "\n";
+		else
+			*logstrm << "\n";
 	}
 	cgal->initialize();
 	setGalaxy(*cgal);
-// verify that top level is SDF.  If not, handle as dynamic case.
-// NOTE: it is possible to schedule some BDF universes statically even
-// if the top level is not SDF -- not yet implemented.
+	// verify that top level is SDF.  If not, handle as dynamic case.
+	// NOTE: it is possible to schedule some BDF universes statically even
+	// if the top level is not SDF -- not yet implemented.
 	int status;
 	if (!SDFcheck(*cgal)) {
 		status = handleDynamic(*cgal);
@@ -1962,19 +1966,19 @@ int BDFClustSched::computeSchedule (Galaxy& gal) {
 				*logstrm << "Schedule:\n" << displaySchedule();
 		}
 	}
-	if (logstrm) { LOG_DEL; delete logstrm; }
+	delete logstrm;
 	return status;
 }
 
 // display the top-level schedule.
 StringList BDFClustSched::displaySchedule() {
 	StringList sch;
-	BDFCluster* c;
 	if (dynSched) {
 		sch << "Dynamic execution of " << cgal->numberClusts()
 		    << " clusters:\n";
 		int i = 1;
 		BDFClusterGalIter next(*cgal);
+		BDFCluster* c;
 		while ((c = next++) != 0) {
 			sch << "Cluster " << i++ << ":\n";
 			sch << c->displaySchedule(1);
@@ -1982,6 +1986,7 @@ StringList BDFClustSched::displaySchedule() {
 	}
 	else {
 		SDFSchedIter next(*this);
+		BDFCluster* c;
 		while ((c = (BDFCluster*)next++) != 0) {
 			sch << c->displaySchedule(0);
 		}
@@ -1996,8 +2001,8 @@ int BDFClustSched::handleDynamic(BDFTopGal& gal) {
 		return FALSE;
 	}
 	// create dynamic scheduler
-	LOG_DEL; delete dynSched;
-	LOG_NEW; dynSched = new DynDFScheduler;
+	delete dynSched;
+	dynSched = new DynDFScheduler;
 	dynSched->setGalaxy(*cgal);
 	gal.setSched(dynSched);
 
@@ -2218,10 +2223,6 @@ BDFWhileLoop::BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
 	else fixArcs(a,0);
 }
 
-BDFWhileLoop::~BDFWhileLoop() {
-	deleteAllGenPorts();
-}
-
 // setup: initialize sub-clusters.
 void BDFWhileLoop::setup() {
 	a->initialize();
@@ -2237,13 +2238,15 @@ void BDFWhileLoop::fixArcs(BDFCluster* x,BDFCluster* y) {
 		BDFCluster* peer = pFar->parentClust();
 		if (peer != x && peer != y) {
 			// create an external port
-			// FIXME: Memory leak
-			LOG_NEW; BDFClustPort *np =
-				new BDFClustPort(*cp,this,BCP_BAG);
+			BDFClustPort* np = new BDFClustPort(*cp,this,BCP_BAG);
 			cp->makeExternLink(np);
 			addPort(*np);
 			// make the external port unconditional
 			np->setRelation(BDF_NONE);
 		}
 	}
+}
+
+BDFWhileLoop::~BDFWhileLoop() {
+	deleteAllGenPorts();
 }
