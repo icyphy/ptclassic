@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::IconOval {} {}
 
 ########################################################################
 ## IconOval
@@ -58,14 +56,15 @@ proc ::tycho::IconOval {} {}
 # 
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "An IconOval example"]
 #   set icon [$slate create IconOval 80 80 &#92
 #       -fill green &#92
 #       -graphics {line 20 50 80 50 -width 4
 #                  line 50 20 50 80 -width 4} &#92
 #       -tags moveable]
 #   $slate call $icon terminal input Terminal 0 50 &#92
-#       -direction {-1 0} &#92
+#       -direction w &#92
 #       -style circle &#92
 #       -fill red
 #   $slate call $icon terminal output Terminal 100 50 &#92

@@ -30,8 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::IncrCanvas {} {}
 
 #######################################################################
 ## icanvas pathName args
@@ -50,9 +48,8 @@ proc ::tycho::icanvas {pathName args} {
 	bindtags [$pathName component canvas] \
 		[lreplace $canvastags 1 1 [lindex $icanvastags 1]]
 	bindtags $pathName [lreplace $icanvastags 1 1]
-
-	return $pathName
     }
+    return $pathName
 }
 
 #######################################################################
@@ -800,8 +797,8 @@ body ::tycho::IncrCanvas::createrootchild* {parent ptags tags type args} {
 	set parentChild($parent,$id) [list $parent $id]
 	eval lappend tags $ptags !$id $id
 	eval ::tycho::${type}::construct $id $canvas $this [list $tags] $args
-	return $id
     }
+    return $id
 }
 
 #######################################################################
@@ -1356,7 +1353,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 		if { ! [::info exists covered($root)] } {
 		    set covered($root) $tags
 		    # Add the tag to the complex item
-		    addtag $tag withtag $root
+		    $this addtag $tag withtag $root
                     # $canvas addtag $tag withtag $root
 		    # set taggedItems($tag,$root) $root
 		}
@@ -1400,7 +1397,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 		    if { [eval eval ::tycho::Rectangle::inside \
 			    [$canvas bbox !$root] $x0 $y0 $x1 $y1] } {
 			set covered($root) $tags
-			addtag $tag withtag $root
+			$this addtag $tag withtag $root
                         # $canvas addtag $tag withtag $root
 			# set taggedItems($tag,$root) $root
 		    }

@@ -29,9 +29,6 @@
 ##########################################################################
 
 
-# auto_mkindex \
-proc ::tycho::Slider {} {}
-
 #
 # Usual options for Slider
 #

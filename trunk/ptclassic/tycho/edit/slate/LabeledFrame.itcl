@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::LabeledFrame {} {}
 
 ##########################################################################
 ## LabeledFrame
@@ -48,7 +46,8 @@ proc ::tycho::LabeledFrame {} {}
 #
 # <p><b>Example</b>: Create a labeled rectangle:
 # <tcl quiet><pre>
-#  source $tycho/editors/slate/doc/internals/newslate.itcl
+#  package require slate.demo
+#  set slate [::demo::newslate "A LabeledFrame"]
 #  $slate create LabeledFrame 40 40 100 80 -color green &#92
 #          -text Foo -tags moveable &#92
 #          -graphics "Frame 25 25 75 75 -color green -relief sunken"

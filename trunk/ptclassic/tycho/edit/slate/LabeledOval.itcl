@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::LabeledOval {} {}
 
 ##########################################################################
 ## LabeledOval
@@ -58,7 +56,8 @@ proc ::tycho::LabeledOval {} {}
 #
 # <p><b>Example</b>: Create a labeled oval:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "A LabeledOval demo"]
 #   $slate create LabeledOval 40 40 100 80 -fill white -outline blue &#92
 # 		-width 4 -text Foo -tags moveable
 # </pre></tcl>

@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Reshaper {} {}
 
 #######################################################################
 #### Reshaper
@@ -82,10 +80,10 @@ proc ::tycho::Reshaper {} {}
 # <p><b>Links</b>
 # 
 # <ul>
-# <li><a href="../internals/interacting.html">How interactors work</a>
+# <li><a href="../internals/interactors.html">How interactors work</a>
 # <li><a href="../internals/interactors.html">An overview of
 #                    interactor classes</a>
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="index.html">Class documentation index</a>
 # </ul>
 #

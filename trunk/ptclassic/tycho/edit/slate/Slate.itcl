@@ -30,8 +30,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Slate {} {}
 
 #######################################################################
 ## slate pathName args
@@ -171,14 +169,14 @@ class ::tycho::Slate {
     # Animate movement of an item
     method animate {mode {tagOrID {}} {x {}} {y {}} args}
 
-    # Get features of an item
-    method feature {id args}
-
     # Delete items
     method delete {args}
 
     # Return a representation of items
     method describe {args}
+
+    # Get features of an item
+    method feature {id args}
 
     # Create a "ghost" of one or more items
     method ghost {tag args}
@@ -225,7 +223,7 @@ class ::tycho::Slate {
     # Terminate a reshape interaction sequence
     method reshaperelease {tag}
 
-    # Reshape by moving an feature to an absolute location
+    # Reshape by moving a feature to an absolute location
     method reshapeto {tag x y feature args}
 
     # Manipulate the selection
@@ -335,31 +333,6 @@ body ::tycho::Slate::destructor {} {
 #  $slate animate wait
 # </pre>
 # to wait for all executing animations to complete.
-# Here is a more complex example:
-#
-# <pre><tcl quiet>
-# set s [[::tycho::view Graphics] component slate]
-# set f [$s create Frame 50 50 100 100 -color green]
-# set a [$s create Solid 150.0 60.0 182.0 60.0 &#92
-#         182.0 44.0 214.0 76.0 182.0 108.0 182.0 &#92
-#         92.0 150.0 92.0 150.0 60.0 &#92
-#         -color red]
-# update
-# after 1000
-# $s animate move $f 100 100
-# $s animate move $a 50 50 -duration 500
-# $s animate wait
-# $s animate reshape $f 100 100 -features se -interval 200 
-# $s animate wait
-# $s animate reshape $f 100 100 -features nw -duration 2000
-# $s animate reshape $a 100 0 &#92
-#         -features {vertex-1 vertex-2 vertex-3 vertex-4 vertex-5} &#92
-#         -duration 2000
-# $s animate wait
-# $s animate move $f -200 -200 -ghost 1
-# $s animate reshape $a 100 0 &#92
-#         -features {vertex-0 vertex-6}
-# </tcl></pre>
 #
 body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
     switch -exact $mode {
@@ -368,9 +341,11 @@ body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
             # Mess around with arguments
             set cargs {}
             array set opts $args
-            foreach o {prefix clickprefix dragprefix releaseprefix
-            activatecommand deactivatecommand dragcommand
-            distance duration interval} {
+            foreach o {
+		prefix clickprefix dragprefix releaseprefix
+		activatecommand deactivatecommand dragcommand
+		distance duration interval
+	    } {
                 if [::info exists opts(-$o)] {
                     lappend cargs -$o $opts(-$o)
                 }
@@ -378,7 +353,7 @@ body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
             set args [array get opts]
             
             # Create the Animator
-            set animator [eval [list interactor Animator \
+            set animator [eval [list $this interactor Animator \
                     -distance [list $x $y] \
                     -prefix [list $this $mode]] \
                     $cargs]
@@ -407,34 +382,6 @@ body ::tycho::Slate::animate {mode {tagOrID {}} {x {}} {y {}} args} {
         default {
             error "Invalid option \"$mode\""
         }
-    }
-}
-
-#######################################################################
-#### feature
-#
-# Return the value of one or more "features" of an item. An feature
-# is a point on the item, such as its center or north-east corner.
-# The returned value is a list of coordinates, two (_x_ and _y_) for each
-# given feature.  The features of an item depend on its shape. If the
-# arguments contain the *-shape* option, the following argument
-# is the shape to use instead of the item's actual shape. All
-# items will respond correctly to the *rectangle* shape; only
-# some will respond correctly to other shapes. If no other arguments
-# are supplied, return a list of legal features. (Note that the 
-# legal features are not necessarily constant over the lifetime of an item 
-# -- for example, adding a vertex to a polygon will also add an feature.)
-# Complex items can choose to override the default behaviour of this
-# method by providing an feature{} procedure in their method table.
-#
-body ::tycho::Slate::feature {id args} {
-    set t [lsearch -exact $args -shape]
-    if { $t != -1 } {
-        $this shapecall $id feature \
-                -features [lreplace $args $t [expr $t+1]] \
-                -shape [lindex $args [expr $t+1]]
-    } else {
-        $this shapecall $id feature -features $args
     }
 }
 
@@ -497,6 +444,34 @@ body ::tycho::Slate::describe {args} {
         append description "\n"
     }
     return $description
+}
+
+#######################################################################
+#### feature
+#
+# Return the value of one or more "features" of an item. a feature
+# is a point on the item, such as its center or north-east corner.
+# The returned value is a list of coordinates, two (_x_ and _y_) for each
+# given feature.  The features of an item depend on its shape. If the
+# arguments contain the *-shape* option, the following argument
+# is the shape to use instead of the item's actual shape. All
+# items will respond correctly to the *rectangle* shape; only
+# some will respond correctly to other shapes. If no other arguments
+# are supplied, return a list of legal features. (Note that the 
+# legal features are not necessarily constant over the lifetime of an item 
+# -- for example, adding a vertex to a polygon will also add a feature.)
+# Complex items can choose to override the default behaviour of this
+# method by providing a feature{} procedure in their method table.
+#
+body ::tycho::Slate::feature {id args} {
+    set t [lsearch -exact $args -shape]
+    if { $t != -1 } {
+        $this shapecall $id feature \
+                -features [lreplace $args $t [expr $t+1]] \
+                -shape [lindex $args [expr $t+1]]
+    } else {
+        $this shapecall $id feature -features $args
+    }
 }
 
 #######################################################################
@@ -751,7 +726,7 @@ body ::tycho::Slate::highlight {tag args} {
 	}
 	"default" {
 	    set highlight [eval $canvas create rectangle \
-		    [eval ::tycho::Rectangle::stretch [region $tag] 2] \
+		    [eval ::tycho::Rectangle::stretch [$this region $tag] 2] \
                     [list \
                     -width $opts(-highlightwidth) \
                     -outline $opts(-highlightcolor) \
@@ -1074,7 +1049,7 @@ body ::tycho::Slate::reshaperelease {tag} {
 #######################################################################
 #### reshapeto
 #
-# Move an feature of an item or items to a specified location.
+# Move a feature of an item or items to a specified location.
 # If the arguments contain the *-shape* option, its value
 # is used instead of the item's actual shape.
 #
@@ -1337,6 +1312,7 @@ body ::tycho::Slate::shapecall {tag method args} {
     # Get the Shape class
     set class ::tycho::[::tycho::capitalize \
 	    [eval [list $this shape* $tag] $args]]
+
     # Call the procedure
     eval ${class}::_$method $tag $canvas $this $args
 }

@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::SmartLine {} {}
 
 ##########################################################################
 ## SmartLine
@@ -126,48 +124,9 @@ proc ::tycho::SmartLine {} {}
 #
 #  <P><b>Example</b>
 #
-#  <P>Create a smart line and an object for moving it around
-# (this is an example of how to implement "constraints" using
-# interactors.):
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
-#   proc mv {mode id x y args} {
-#       global d l slate
-#       $slate move$mode $d $x $y
-#       $slate reshape$mode $l $x $y end
-#   }
-#   $follower configure &#92
-#           -clickprefix "mv click" &#92
-#           -dragprefix "mv drag" &#92
-#           -releaseprefix "mv release"
-#   set l [$slate create SmartLine 150 120 200 200 -arrow last]
-#   set d [$slate create Solid 200 200 210 190 220 200 210 210 &#92
-#   		-color green -tags moveable]
-# </pre></tcl>
-#
-# Move the diamond around to see the different line shapes.
-# Change the direction of the end of the line: "w":
-# <tcl quiet><pre>
-#   eval $slate reshapeto $l [$slate feature $d vertex-2] end
-#   $slate itemconfigure $l -end w
-# </pre></tcl>
-#
-# Change the direction of the end of the line: "s":
-# <tcl quiet><pre>
-#   eval $slate reshapeto $l [$slate feature $d vertex-1] end
-#   $slate itemconfigure $l -end s
-# </pre></tcl>
-#
-# Change the direction of the end of the line: "n":
-# <tcl quiet><pre>
-#   eval $slate reshapeto $l [$slate feature $d vertex-3] end
-#   $slate itemconfigure $l -end n
-# </pre></tcl>
-#
-# Change the direction of the end of the line: "e":
-# <tcl quiet><pre>
-#   eval $slate reshapeto $l [$slate feature $d vertex-0] end
-#   $slate itemconfigure $l -end e
+#   package require slate.demo
+#   ::demo::demoSmartLine
 # </pre></tcl>
 #
 class ::tycho::SmartLine {

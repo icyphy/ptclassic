@@ -31,9 +31,6 @@
 ##########################################################################
 
 
-# auto_mkindex \
-proc ::tycho::Shades {} {}
-
 ## Shades
 #
 # A color class. Any object that needs a color can ask

@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Frame {} {}
 
 ##########################################################################
 ## Frame
@@ -103,7 +101,8 @@ proc ::tycho::Frame {} {}
 # Create some Frames with various options. These can be moved around
 # with the mouse:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "Some Frame items"]
 #   $slate create Frame 30 30 70 50 -color green -tags moveable
 #   $slate create Frame 100 20 120 40 -color lightblue &#92
 # 	-relief ridge -tags moveable

@@ -64,3 +64,11 @@ if ![info exists ::TYCHO] {
     source [file join $env(SLATE_LIBRARY) compat/classes.tcl]
 }
 
+# Create a global "slate" procedure if not running in Tycho
+if ![info exists ::TYCHO] {
+    uplevel #0 {
+	proc slate {name args} {
+	    eval ::tycho::slate $name $args
+	}
+    }
+}

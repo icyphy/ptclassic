@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::IconFrame {} {}
 
 ########################################################################
 ## IconFrame
@@ -56,7 +54,8 @@ proc ::tycho::IconFrame {} {}
 # 
 # <p><b>Example</b>: Create an icon:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "An IconFrame example"]
 #   set icon [$slate create IconFrame 100 100 &#92
 #       -color green &#92
 #       -graphics {line 20 20 80 80} &#92
@@ -68,10 +67,10 @@ proc ::tycho::IconFrame {} {}
 # To create, call the terminal{} method:
 # <tcl quiet><pre>
 #   $slate call $icon terminal input-1 Terminal 50 0 &#92
-#       -direction {0 -1} &#92
+#       -direction n &#92
 #       -style doublearrowin
 #   $slate call $icon terminal input-2 Terminal 0 50 &#92
-#       -direction {-1 0} &#92
+#       -direction w &#92
 #       -style circle -fill blue
 # </pre></tcl>
 # 

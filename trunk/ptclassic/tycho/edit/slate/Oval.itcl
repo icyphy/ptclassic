@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Oval {} {}
 
 #######################################################################
 #### Oval
@@ -83,7 +81,7 @@ proc ::tycho::Oval {} {}
 # 
 # <ul>
 # <li><a href="../internals/shapes.html">An overview of Shape classes</a>
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="../codeDoc/index.html">Class documentation index</a>
 # </ul>
 #
@@ -128,7 +126,7 @@ class ::tycho::Oval {
 #######################################################################
 #### _feature
 #
-# Return the value of an feature. Valid features are "hradius,"
+# Return the value of a feature. Valid features are "hradius,"
 # "vradius," "center," or <code>circumference-</code><i>x-y</i>, where
 # (_x_, _y_) is a vector from the center.
 #

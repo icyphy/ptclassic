@@ -28,9 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Terminal {} {}
-
 ########################################################################
 ## Terminal
 #
@@ -86,7 +83,8 @@ proc ::tycho::Terminal {} {}
 # 
 # <p><b>Example</b>: Create some terminals:
 # <tcl quiet><pre>
-#   source $tycho/editors/slate/doc/internals/newslate.itcl
+#   package require slate.demo
+#   set slate [::demo::newslate "A collection of terminals"]
 #   set x 0
 #   set y 0
 #   $slate create line 0 0 320 200 -fill grey
@@ -151,7 +149,7 @@ class ::tycho::Terminal {
     # Update the *-width* option
     proc _width {id canvas slate width}
 
-    # Get an feature
+    # Get a feature
     proc feature {id canvas slate args}
 
     # Set or get the Terminal's coordinates

@@ -28,8 +28,6 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-# auto_mkindex \
-proc ::tycho::Animator {} {}
 
 #######################################################################
 ## Animator
@@ -64,7 +62,11 @@ proc ::tycho::Animator {} {}
 #
 # <p><b>Bugs</b>
 #
-# (None.)
+# <ol>
+# <li> The <b>-prefix</b> option should be removed, and <b>-action</b>
+# used (which is inherited from Interactor).
+#
+# </ol>
 #
 # <p><b>Enhancements</b>
 #
@@ -75,9 +77,8 @@ proc ::tycho::Animator {} {}
 # <p><b>Links</b>
 # 
 # <ul>
-# <li><a href="../internals/interacting.html">How interactors work</a>.
-# <li><a href="../internals/interactors.html">Interactor classes</a>.
-# <li><a href="../internals/index.html">Infrastructure contents</a>
+# <li><a href="../internals/interactors.html">How interactors work</a>.
+# <li><a href="../internals/index.html">Programmer's guide</a>
 # <li><a href="index.html">Class documentation index</a>
 # </ul>
 #
@@ -153,16 +154,16 @@ class ::tycho::Animator {
 #
 body ::tycho::Animator::activate {t x y args} {
     # Set the target.
-    target $t
+    $this target $t
     
     # Adjust the prefixes
     if { $prefix != "" } {
-    	configure \
+    	$this configure \
     		-clickprefix ${prefix}click \
     		-dragprefix ${prefix}drag \
     		-releaseprefix ${prefix}release
     } else {
-    	configure  \
+    	$this configure  \
     		-clickprefix {} \
     		-dragprefix {} \
     		-releaseprefix {}
@@ -185,10 +186,10 @@ body ::tycho::Animator::activate {t x y args} {
     set deltaY [expr double([lindex $distance 1]) / $repetitions]
 
     # Start the interaction sequence
-    eval click $x $y $args
+    eval $this click $x $y $args
     
     # Call reactivate to do the first event
-    reactivate $x $y
+    $this reactivate $x $y
 }
 
 #######################################################################
@@ -203,7 +204,7 @@ body ::tycho::Animator::deactivate {args} {
         set afterid ""
     }
     # Terminate interaction sequence
-    release
+    $this release
     if { $deactivatecommand != "" } {
         uplevel #0 $deactivatecommand $target
     }
@@ -223,7 +224,7 @@ body ::tycho::Animator::reactivate {x y} {
     set currentY [expr $currentY + $deltaY]
 
     # The interaction event
-    drag $currentX $currentY
+    $this drag $currentX $currentY
 
     # Delayed call for next event
     incr repetitions -1
@@ -234,6 +235,6 @@ body ::tycho::Animator::reactivate {x y} {
                 [list $this reactivate $currentX $currentY]]]
     } else {
         # Deactivate myself
-        deactivate
+        $this deactivate
     }
 }
