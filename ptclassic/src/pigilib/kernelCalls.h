@@ -58,7 +58,8 @@ extern boolean KcSetKBDomain ARGS((const char* domain));
 extern const char* curDomainName();
 extern boolean KcDefgalaxy ARGS((const char* galname, const char* domain,
 			   const char* innerTarget));
-extern boolean KcEndDefgalaxy ARGS((const char* outerDomain));
+extern boolean KcEndDefgalaxy ARGS((const char* definitionSource,
+				    const char* outerDomain));
 extern void KcSetDesc ARGS((const char* desc));
 extern boolean KcDisplaySchedule();
 extern void KcEditSeed ARGS((int n));

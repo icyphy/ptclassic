@@ -1017,7 +1017,7 @@ octObject *galFacetPtr;
     ERR_IF1(!UniqNameInit());
     ERR_IF2(!ProcessInsts(galFacetPtr), "Failed to process instances");
     ERR_IF2(!ConnectPass(galFacetPtr), "Connect pass failure");
-    ERR_IF1(!KcEndDefgalaxy(oldDomain));
+    ERR_IF1(!KcEndDefgalaxy(galFacetPtr->contents.facet.cell, oldDomain));
     ERR_IF2(!ClearDirty(galFacetPtr), "Failed to mark clean!");
     if (!xferedBool) {
 	ERR_IF2(!DupSheetAdd2(&xfered, name, oldDomain),

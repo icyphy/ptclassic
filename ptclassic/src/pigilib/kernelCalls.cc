@@ -453,14 +453,15 @@ KcDefgalaxy(const char *galname, const char *domain, const char* innerTarget) {
 }
 
 extern "C" boolean
-KcEndDefgalaxy(const char* outerDomain) {
+KcEndDefgalaxy(const char* definitionSource, const char* outerDomain) {
 	//
 	// add to the knownlist for the outer domain, and create a
 	// wormhole if that is different from current domain.
 	// note that this call also restores the current domain
 	// to equal the outerDomain.
 	LOG << "}\n";
-	ptcl->currentGalaxy->addToKnownList(outerDomain,ptcl->currentTarget);
+	ptcl->currentGalaxy->addToKnownList(hashstring(definitionSource),
+					    outerDomain,ptcl->currentTarget);
 	ptcl->currentGalaxy = ptcl->universe;
 	return KcSetKBDomain(outerDomain);
 }
