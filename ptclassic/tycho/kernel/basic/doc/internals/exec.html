@@ -1,0 +1,104 @@
+<!-- $Id$ -->
+<html>
+<head>
+<Title>Execing Proceses</Title>
+</head>
+<body bgcolor="#faf0e6">
+<h1><a name="Execing Processes">Execing Processes</a></h1>
+<p>
+Tycho includes a few different ways of
+<A NAME="running a subprocess">running</A> <A NAME="subprocesses, running">subprocesses</A>.  
+<DL>
+<DT> <CODE>::tycho::invoke</CODE> <I>args</I>
+<DD> The <A HREF="../codeDoc/Path.html">invoke procedure</A>
+ will pass <I>args</I> to the Tcl <CODE>exec</CODE> command.
+
+<DT> <CODE>::tycho::Exec</CODE>
+<DD> The <A HREF="../usersGuides/ExecHelp.html">Exec Class</A>
+ brings up a dialog widget that allows the user to type
+in a command and view the output.
+
+</DL>
+<H2>Platform Exec Policies</H2>
+
+ <P>Consult the tcl man pages for <CODE>open</CODE> and <CODE>exec</CODE>
+for descriptions of platform dependencies.
+
+<H3>Code that calls <CODE>exec</CODE> on the Macintosh</H3>
+
+ <P>Neither <CODE>::tycho::invoke</CODE> or the <CODE>Exec</CODE> class
+will work on the Macintosh, so all methods that call these two methods
+should check the <CODE>$tcl_platform</CODE> variable at the top of the
+method and call <CODE>error</CODE> with an informative error message.
+<PRE>
+body ::tycho::MyClass::myMethod {} {
+	global tcl_platform
+	if {$tcl_platform(platform) == macintosh} {
+		error "Sorry, the myMethod method in MyClass is not\
+			supported on the Macintosh as it\ncalls the\
+			tcl \"exec\" command which is not available." 
+	}
+
+	# The rest of the method . . .
+}
+</PRE>
+
+ <P>In addition, any menu choice that calls a method that inturn eventually
+calls <CODE>exec</CODE> should be disabled on the Macintosh.  In the example
+below, from <A HREF="../../Edit.html"><CODE>$TYCHO/kernel/Edit.html</CODE></A>,
+we check the <CODE>tcl_platform</CODE> variable and disable the menu item
+if we are on the mac
+<PRE>
+body ::tycho::Edit::constructor {args} {
+    global tcl_platform
+    # . . .
+
+        $myMenubar add "Spelling..." Edit -underline 2 \
+                -accelerator "M-$" -command "$this spellCheck"
+	if {$tcl_platform(platform) != unix} {
+	    $myMenubar disable "Spelling..."
+	}
+
+</PRE>
+
+<H3>Code that calls <CODE>exec</CODE> under Windows</H3>
+
+The Tcl <CODE>exec</CODE> commmand works under Windows, but there are
+various limitations, see the Tcl <CODE>exec</CODE> man page.
+
+ <P>Some of the classes in Tycho include execs of external commands
+that are not shipped with Tycho.  The Tycho policy is to allow these
+commands to be <CODE>exec</CODE>'d under Windows, as the user may have
+installed third-party commands.
+
+<H3>Common exec mistakes</H3>
+<OL>
+<LI> In Itcl2.1 and later, there is no need to do <CODE>exec date</CODE>.
+Instead, call <CODE>clock format [clock seconds]</CODE>.
+
+<LI> Itcl2.2 is based on Tcl7.6, in which the Tcl <CODE>file</CODE>
+command has been extended with subcommands that <CODE>copy</CODE>,
+<CODE>delete</CODE>, and <CODE>rename</CODE> files.  In addition,
+there is a <CODE>file</CODE> subcommand that will make a directory.
+ <P> The tycho procs <CODE>::tycho::rm</CODE> and ::tycho::mkdir
+can be uses with Itcl2.1 and Itcl2.2.  These commands are wrapper.
+
+<LI> Be sure to wrap <CODE>exec chmod</CODE> <I>...</I> calls with
+<CODE>catch</CODE> so that the command does not fail on non-unix
+platforms.  The details of file permissions on non-Unix are a little
+murky, but wrapping <CODE>catch</CODE> around the <CODE>chmod</CODE>
+call will probably make your code more robust.
+
+</OL>
+
+<p>
+<a href="../../../doc/index.html">Tycho Home Page</a><br>
+<p>
+<HR>
+Copyright &#169 1996, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 96/11/30,
+comments to: <author>eal@eecs.berkeley.edu</author>
+</body>
+</html>
