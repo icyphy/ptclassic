@@ -23,6 +23,7 @@ INCL = -I$(DEDIR) -I$(KERNDIR)
 PL_SRCS= \
 DEAnd.pl \
 DEArbitrate.pl \
+DEBeep.pl \
 DEBlackHole.pl \
 DEClock.pl \
 DEDelay.pl \
