@@ -871,7 +871,7 @@ KcProfile (const char* name) {
 		accum_string ("\n");
 // get termlist
 	if (!tFlag) {
-		MkPrintTerms(name);
+		KcPrintTerms(name);
 	}
 
 // now do states
