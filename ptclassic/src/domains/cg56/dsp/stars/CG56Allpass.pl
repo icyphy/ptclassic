@@ -71,7 +71,7 @@ reverberation business', Computer Music. Journal, Vol 3, No.2
         move    a,$ref(output)
         move    r0,$ref(delayBufStart)
         }
-        start {
+        setup {
                 delayBuf.resize(delay);
         }
         initCode {

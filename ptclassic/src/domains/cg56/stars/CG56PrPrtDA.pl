@@ -224,7 +224,7 @@ $label(empty)
         move    x:$starSymbol(proportda)_savereg+2,m0
         rti
         }        
-	start {
+	setup {
 		bufLen = interruptBufferSize;
 		saveReg.resize(3);
 		outIntBuffer.resize(bufLen);

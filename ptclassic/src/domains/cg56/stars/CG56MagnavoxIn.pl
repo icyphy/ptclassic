@@ -232,7 +232,7 @@ $label(used)
         move    x:$starSymbol(mag)_savereg+2,m0
         rti
         }        
-        start {
+        setup {
         bufLen=interruptBufferSize;
         saveReg.resize(3);
 	inIntBuffer.resize(bufLen);

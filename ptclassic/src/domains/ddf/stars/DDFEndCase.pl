@@ -41,7 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	constructor {
 		input.inheritTypeFrom(output);
 	}
-	start {
+	setup {
 		waitFor(control);
 		readyToGo = FALSE;
 	}

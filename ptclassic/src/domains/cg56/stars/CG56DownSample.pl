@@ -38,7 +38,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Downsample phase. }
 		attributes { A_SETTABLE }
 	}
- start {
+ setup {
 		input.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");

@@ -175,7 +175,7 @@ $label(l28)
         org     p:
         }
 
-	start {
+	setup {
 		firstVal = value[0];
 		valueLen = value.size();
 		if (!(int (haltAtEnd)) &&int (periodic) && period == 0)

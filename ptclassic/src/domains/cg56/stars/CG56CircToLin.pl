@@ -42,7 +42,7 @@ is repeated inline so may not be efficient for large N.
 		desc { number to transfer per execution }
 		default { 0 }
 	}
-	start {
+	setup {
 		n = int(N);
 		if (n == 0)
 			n = output.far()->numberTokens;

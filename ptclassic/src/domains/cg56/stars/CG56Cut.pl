@@ -55,7 +55,7 @@ and the output consists of overlapping blocks input particles.
 		default {0}
 		desc { Position of output block relative to input block.}
 	}
-	start {
+	setup {
 		if (int(nwrite) + int(offset) > int(nread)) {
 			Error::abortRun(*this,
 			   ": nwrite + offset cannot be greater than nread");

@@ -77,7 +77,7 @@ $label(lab4)
         move    a,$ref(output)
         } 
 
-        start {
+        setup {
                 input.setSDFParams(int(length),int(length)-1);
                 output.setSDFParams(int(length),int(length)-1);
         }

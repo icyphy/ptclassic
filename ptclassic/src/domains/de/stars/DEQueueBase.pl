@@ -78,7 +78,7 @@ Arrival data that can not be queued due to capacity limit.
 		// a trigger relationship:
 		demand.triggers(outData);
 	}
-	start {
+	setup {
 		infinite = (int(capacity) < 0);
 	}
 

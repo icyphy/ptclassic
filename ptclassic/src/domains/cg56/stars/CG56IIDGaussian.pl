@@ -73,7 +73,7 @@ variables used is less than 2 or 3.
 	        attributes { A_XMEM|A_NONCONSTANT|A_NONSETTABLE|A_NOINIT }
         }
 
-        start {
+        setup {
                 ravs.resize(noUniforms);
         }		
         initCode {

@@ -116,7 +116,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
                 attributes {A_NONCONSTANT|A_NONSETTABLE}
         }	    
 
-	start {
+	setup {
               tapsNum=taps.size();
               if (int(-(int(decimation)-int(tapsNum))/int(interpolation))>0)
                    oldsample.resize(int(-(int(decimation)-int(tapsNum))/int(interpolation)));

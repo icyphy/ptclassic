@@ -160,7 +160,7 @@ after processing all inputs is sent to the "size" output.
 		// but an infinitessimal delay should be put in the feedback
 		// path.
 	}
-	start {
+	setup {
 		infinite = (int(capacity) < 0);
 		queue.initialize();
 	}

@@ -72,7 +72,7 @@ $label(cont)
         move    b,$ref(dataCount)
         }
 
-        start {
+        setup {
                 dataLen=data.size();
         }		
 

@@ -51,7 +51,7 @@ given as parameters.
 	destructor {
 		if(random) { LOG_DEL; delete random;}
 	}
-	start {
+	setup {
 		if(random) { LOG_DEL; delete random;}
 		LOG_NEW; random = new NegativeExpntl(double(meanTime),gen);
 	}

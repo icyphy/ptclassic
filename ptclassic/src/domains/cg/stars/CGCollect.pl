@@ -27,7 +27,7 @@ is more than one. Its role is just opposite to that of Scatter star.
 		name {output}
 		type {=input}
 	}
-	start {
+	setup {
 		MPHIter iter(input);
 		CGPortHole* p;
 		int loc = 0;

@@ -100,7 +100,7 @@ one more memory location if \fIinterpolation\fR is "linear".
 		default { 2 }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
-        start {
+        setup {
                 coefNum=coef.size();
         }		
         initCode {

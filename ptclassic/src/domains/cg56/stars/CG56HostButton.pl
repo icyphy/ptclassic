@@ -78,7 +78,7 @@ $val(canonicalWidget) $ref(value) $fullname() {$val(label)} $val(offVal) $val(on
 	dc	$val(initValStr)
 	org	p:
     }
-    start {
+    setup {
 	const char *wn = buttonType;
 	/*IF*/ if ( strcmp(wn,"pushbutton")==0 
 		 || strcmp(wn,"commandbutton")==0 ) {

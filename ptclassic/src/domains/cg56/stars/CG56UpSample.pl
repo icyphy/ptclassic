@@ -44,7 +44,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Value to fill the output block. }
 		attributes { A_SETTABLE }
 	}
-	start {
+	setup {
 		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");

@@ -77,7 +77,7 @@ on either input.
 		double right;
 		int test;
 	}
-	start {
+	setup {
 		// Initial value indicates that flag has not yet gotten the result of a test.
 		// This ensures that the first test result will always be output.
 		flag = -1;

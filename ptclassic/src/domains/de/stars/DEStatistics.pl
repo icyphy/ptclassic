@@ -61,7 +61,7 @@ the next input arrives.
 		reset.triggers();
 		setMode(PHASE);
 	}
-	start {
+	setup {
 		previous = 0;
 		sum = 0;
 		squareSum = 0;

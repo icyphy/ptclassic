@@ -84,7 +84,7 @@ $label(rloop)
         move    a,x:(r1)+
         }
 
-	start {
+	setup {
 		input.setSDFParams(int (nread), int (nread) - 1);
 		output.setSDFParams(int (nwrite), int (nwrite) - 1);
 

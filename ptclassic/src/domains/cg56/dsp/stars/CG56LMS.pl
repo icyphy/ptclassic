@@ -213,7 +213,7 @@ $label(loop1)
         dc      $addr(delayLine)
         org     p:
         }
-        start {
+        setup {
                 coefLen=coef.size();
                 delayLineSize=errorDelay-1;
 		delayLineSize=coefLen+decimation*delayLineSize;

@@ -55,7 +55,7 @@ is repeated inline so may not be efficient for large N.
 	protected {
 		int n;
 	}
-	start {
+	setup {
 		n = int(N);
 		if (n == 0)
 			n = input.far()->numberTokens;

@@ -92,7 +92,7 @@ $label(zero)
 $label(end)
         }
 
-        start {
+        setup {
 		 int w=width;
 		 int p=period;
 		 amp=height;

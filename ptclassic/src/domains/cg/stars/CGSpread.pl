@@ -28,7 +28,7 @@ one Send star, more than one Send stars, and so on.)
 		name {output}
 		type {=input}
 	}
-	start {
+	setup {
 		MPHIter iter(output);
 		CGPortHole* p;
 		int loc = 0;

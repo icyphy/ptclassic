@@ -71,7 +71,7 @@ A delay star of parameter totalDelay unit delays.
 	move	$ref(input),a
 	move	a,$ref(output)
 	}
-        start {
+        setup {
                 delayBuf.resize(totalDelay);
         }		
         initCode {

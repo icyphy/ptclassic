@@ -58,7 +58,7 @@ the input exceeds the threshold.
 	private {
 		int flag;
 	}
-	start {
+	setup {
 		flag = FALSE;
 	}
 

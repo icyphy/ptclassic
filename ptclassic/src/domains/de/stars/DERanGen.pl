@@ -55,7 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	destructor {
 		if(random) { LOG_DEL; delete random;}
 	}
-	start {
+	setup {
 		if(random) { LOG_DEL; delete random;}
 
 		// decide which distribution.

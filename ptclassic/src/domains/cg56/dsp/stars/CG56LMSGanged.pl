@@ -215,7 +215,7 @@ $label(loop3)
         move    m7,m5
         }
 
-        start {
+        setup {
                 coefLen=coef.size();
                 delayLineAdpSize=errorDelay-1+coefLen;
 		delayLineAdp.resize(delayLineAdpSize);

@@ -106,7 +106,7 @@ Journal, Vol.  3, No. 2.
         move    m1,m0
 
         }
-        start {
+        setup {
                 delayBuf.resize(delay);
         }		
         initCode {

@@ -107,7 +107,7 @@ reset.
 	move	a1,$ref(sum)
     }
 
-    start {
+    setup {
 	sum = initialValue;
 	unityGainB = double(feedbackGain) >= CG56_ONE;
     }

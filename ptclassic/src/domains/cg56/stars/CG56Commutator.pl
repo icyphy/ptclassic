@@ -44,7 +44,7 @@ the next B particles from the next input, etc.
                 desc { input#() }
                 attributes { A_NONCONSTANT|A_NONSETTABLE }
         }
-        start {
+        setup {
                 int n = input.numberPorts();
                 MPHIter nexti(input);
                 PortHole* p;

@@ -74,7 +74,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	grantIn.triggers(grantB);
 	grantIn.before(requestA);
     }
-    start
+	setup
     {
 	idle = TRUE;
 	req = rel = FALSE;

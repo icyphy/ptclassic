@@ -59,7 +59,7 @@ Also, the index of the output is provided (count starts at 0).
 		desc {default is not to output magnitude}
 	}    
 
-	start {
+	setup {
 		input.setSDFParams(int(N),int(N)-1);
 	}		
 	
