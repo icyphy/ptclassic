@@ -16,8 +16,12 @@ awk ' {filelist=$0}
 		for(i=1;i<=nf;i++) {
 			if (sccsfiles[f[i]] != f[i]) {
 			    if (f[i] != "tclIndex" && f[i] !~ /.class$/) {
-				    print f[i]
-				}	
+				    basen=split(f[i],base,".")
+				    plfile=base[1]".pl"
+				    if (sccsfiles[plfile] != plfile) {
+					print f[i]
+				    }
+			    }	
 			}
 		}
 	}' sccsfiles="`echo SCCS/s.* | sed 's=SCCS/s.==g'`" - > $tmpfile
