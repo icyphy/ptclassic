@@ -46,7 +46,7 @@ int MotorolaSimTarget::compileCode() {
 
 int MotorolaSimTarget::loadCode() {
 	const char* file = plotFile;
-	if (*file != 0) unlink(fullFileName((char *)file));
+	if (*file != 0) unlink(fullFileName(file));
 	StringList cmdFile = "load ";
 	cmdFile += fileName(uname,".lod\n");
 	cmdFile += miscCmds;
@@ -73,7 +73,7 @@ int MotorolaSimTarget::runCode() {
 	downloadCmds += " > /dev/null)";
 	if (systemCall(downloadCmds,"Errors in starting up the simulator")) 
 		return FALSE;
-	if (*file != 0 && access(fullFileName((char*)file),F_OK)==0) {
+	if (*file != 0 && access(fullFileName(file),0)==0) {
 		StringList plotCmds;
  		plotCmds = "awk '{print ++n, $1}' ";
 		plotCmds += file;

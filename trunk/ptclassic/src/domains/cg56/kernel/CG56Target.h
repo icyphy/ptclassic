@@ -31,10 +31,10 @@ protected:
 	FixState ONE;
 public:
 	CG56Target (const char* nam, const char* desc) :
-		MotorolaTarget(nam,desc,"CG56Star") {};
+		MotorolaTarget(nam,desc,"CG56Star") {}
 	// copy constructor
 	CG56Target(const CG56Target& src) : 
-	  MotorolaTarget(src.readName(),src.readDescriptor(),"CG56Star") {};
+	  MotorolaTarget(src.readName(),src.readDescriptor(),"CG56Star") {}
 	int setup(Galaxy &g);
 	Block* clone() const;
 	void headerCode();

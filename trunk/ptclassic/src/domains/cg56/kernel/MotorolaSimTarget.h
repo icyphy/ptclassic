@@ -32,6 +32,10 @@ protected:
 	StringList startAddress;
 	StringList endAddress;
 public:
+	MotorolaSimTarget(const char* nam,const char* desc,
+		  const char* sclass) : MotorolaTarget(nam,desc,sclass) {}
+	MotorolaSimTarget(const MotorolaSimTarget& arg) 
+	: MotorolaTarget(arg) {}
 	void initStates(const char* dsp,const char* start, const char* end);
 	void headerCode();
 	void wrapup();
