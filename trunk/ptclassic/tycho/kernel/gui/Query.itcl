@@ -778,6 +778,9 @@ body ::tycho::Query::radio {tag label bttnNames default args} {
 # 
 body ::tycho::Query::remove {tag} {
     if [info exists itk_component(tag_$tag)] {
+        if {$focuswindow == $itk_component(tag_$tag)} {
+            set focuswindow {}
+        }
 	destroy $itk_component(tag_$tag)
 	unset itk_component(tag_$tag)
         destroy $itk_component(label_$tag)
