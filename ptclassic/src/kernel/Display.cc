@@ -34,10 +34,13 @@ XGraph :: XGraph () {
 	}
 }
 
-// destructor removes any files that might be open
-XGraph :: ~XGraph () {
+// close all files, and remove any files that might be open
+void XGraph :: zapFiles () {
 	for (int i = 0; i<ng; i++) {
-		if (strm[i]) fclose (strm[i]);
+		if (strm[i]) {
+			fclose (strm[i]);
+			strm[i] = 0;
+		}
 		const char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
@@ -50,13 +53,15 @@ void XGraph :: initialize(Block* parent,
 			  int noGraphs,
 			  const char* options,
 			  const char* title,
-			  const char* saveFile)
+			  const char* saveFile,
+			  int ignore)
 {
 	StringList msg;
 
 	blockIamIn = parent;
 	opt = options;
 	ttl = title;
+	nIgnore = ignore;
 	sf = saveFile;
 	ng = noGraphs;
 
@@ -69,6 +74,7 @@ void XGraph :: initialize(Block* parent,
 
 	for (int i = 0; i<ng; i++) {
 	    tmpFileNames[i] = tempFileName();
+	    count[i] = 0;
 	    // open and make sure the file is writable
 	    if ((strm[i] = fopen (tmpFileNames[i], "w")) == NULL) {
 		msg += "Can't open temporary file for writing:";
@@ -91,33 +97,39 @@ void XGraph :: initialize(Block* parent,
 #define IsNANorINF(X) 0
 #endif
 
-void XGraph :: fcheck(double y) {
-	if (IsNANorINF(y))
-		Error::abortRun(*blockIamIn,
-				"Numeric overflow or divide by 0 detected");
-};
+static char* ordinal(int n) {
+	int ldig = n%10;
+	char* format = ldig == 1 ? "%dst" : (ldig == 2 ? "%dnd" : "%dth");
+	static char buf[10];
+	sprintf (buf, format, n);
+	return buf;
+}
+
+void XGraph :: fcheck(double y, int set) {
+	if (IsNANorINF(y)) {
+		char buf[128];
+		sprintf (buf, "in the %s value on input stream %d",
+			 ordinal(count[set-1]), set);
+		Error::abortRun(*blockIamIn, "Overflow or divide by zero\n",
+				buf);
+		zapFiles();
+	}
+}
 
 void XGraph :: addPoint(float y) {
+	count[0]++;
 	fcheck (y);
-	if ( strm[0] )
-	    fprintf(strm[0], "%d %g\n", index, y);
+	if (count[0] >= nIgnore && strm[0])
+		fprintf(strm[0], "%d %g\n", index, y);
 	index++;
 }
 
-void XGraph :: addPoint(float x, float y) {
-	fcheck(x);
-	fcheck(y);
-	if ( strm[0] )
-	    fprintf(strm[0], "%g %g\n", x, y);
-}
-
-
 void XGraph :: addPoint (int dataSet, float x, float y) {
-	fcheck(x);
-	fcheck(y);
-	// Do nothing if the file is not open
-	if ( strm[dataSet-1] )
-	    fprintf(strm[dataSet-1], "%g %g\n", x, y);
+	count[dataSet-1]++;
+	fcheck(x,dataSet);
+	fcheck(y,dataSet);
+	if (count[dataSet-1] >= nIgnore	&& strm[dataSet-1])
+		fprintf(strm[dataSet-1], "%g %g\n", x, y);
 }
 
 // start a new trace on the graph.
@@ -139,9 +151,12 @@ void XGraph :: terminate () {
 
 	// put title on command line
         if (ttl && *ttl) {
-            cmd += "-t '";
-            cmd += ttl;
-            cmd += "' ";
+		if (strchr(ttl,'\'')) {
+			cmd += "-t \""; cmd += ttl; cmd += "\" ";
+		}
+		else {
+			cmd += "-t '"; cmd += ttl; cmd += "' ";
+		}
         }
 
 	// put options on the command line
