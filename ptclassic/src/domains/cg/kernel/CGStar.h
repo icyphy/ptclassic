@@ -70,9 +70,6 @@ public:
         // max {cost of communication with its ancestors}
         int maxComm();
 
-	Symbol codeblockSymbol;
-	Symbol starSymbol;
-
 	// get and set the procId
 	int getProcId() { return int(procId); }
 	void setProcId(int i) { procId = i; }
@@ -80,17 +77,23 @@ public:
 	// am I a Fork star?
 	int isItFork() { return forkId; }
 
+	// set the target pointer, initialize the various target pointers
+	// such as codeStreams & symbols if needed.
+	void setTarget(Target* t);
+	
 protected:
 	// Process code, expanding macros.
 	StringList processCode(CGCodeBlock&);
 	StringList processCode(const char*);
 
-	// Add processed code to the Target.
-	void gencode(CGCodeBlock&);
-	void gencode(const char*);
+	SymbolList codeblockSymbol;
+	SymbolList starSymbol;
 
-	// Add a string to the Target code.  (should be private?)
+	// Process the string and add it to the Target code.
 	void addCode(const char*);
+
+	// Call addCode - temporarily here for backgroud compatibility.
+	void gencode(const char* code) { addCode(code); };
 
 	// Return the special character that introduces a macro
 	// in a code block.  This character is used by gencode() to
@@ -109,8 +112,9 @@ protected:
 		$ref(name)		Reference to a state or port.
 		$ref(name,offset)	Reference with offset.
 		$label(name)		Unique label for codeblock.
-		$codeblockSymbol(name)	Another name for label.
+		$codeblockSymbol(name)	Another name for $label.
 		$starSymbol(name)	Unique label for star.
+		$sharedSymbol(list,name)Unique label for set list,name pair
 
 	   The number, names, and meaning of
 	   these functions can be easily redefined in derived classes.
@@ -138,6 +142,14 @@ protected:
 	// Size of State or PortHole.
 	StringList expandSize(const char*);
 
+	// lookup a code StringList that is supported by the target.  If
+	// the stream does not exist, Error::abortRun is called.  The
+	// target should set up pointers that are set to the StringLists they
+	// need rather that allowing functions to call this routine directly.
+	// Initialize the pointers by overloading the star public member
+	// function void setTarget(Target* ).
+	StringList* getStream(const char* name);
+	
 	// Update all PortHoles so that the offset is incremented by the
 	// number of samples consumed or produced.
 	void advance();
@@ -148,12 +160,33 @@ protected:
 	// declare that I am a Fork star
 	void isaFork() { forkId = TRUE; }
 
+	// lookup a shared symbol by list name & symbol name, if it is 
+	// not found Error::abortRun is called.
+	const char* lookupSharedSymbol(const char* list,const char* name);	
+
+	// add a SymbolList to the list of symbol lists.  For a SymbolList
+	// to be shared it should be declared static.  If a SymbolList
+	// is found with the same name but different pointer Error::abortRun
+	// is called.  If a SymbolList is found with the same name and
+	// same pointer, it is ignored.  This command should be called in 
+	// the defining star's constructor.
+	void addSharedSymbolList(SymbolList* list, const char* name);
 private:
+
+	// List of all shared symbol lists.  To add a shared symbol list
+	// use the addSharedSymbolList(name) method.  To lookup a shared
+	// symbol use the lookupSharedSymbol(list_name,symbol_name) method.
+	SymbolListList sharedSymbolLists;
+
 	// Reset local codeblock labels
 	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
 
 	// indicate if a fork star
 	int forkId;
+	
+	// Main code stream, the reference is set in the setTarget method.
+	StringList* code;
+	
 };
 
 /*
