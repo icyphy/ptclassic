@@ -256,7 +256,7 @@ extern double trunc();
 #define LACK_SYS5
 #endif
 
-#if defined(ultrix3) || defined(sunos4) || defined(_IBMR2) || defined(ultrix4) || defined(linux)
+#if defined(PTSUN4) || defined(ultrix4) || defined(PTLINUX)  || defined(PTHPPA) || defined(PTNBSD_386)
 #define SIGNAL_FN	void
 #else
 /* sequent, ultrix2, 4.3BSD (vax, hp), sunos3 */
@@ -265,7 +265,7 @@ extern double trunc();
 
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(aiws) || defined(apollo) || defined(AIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2)
+#if defined(PTULTRIX) || defined(SABER) || defined(PTHPPA) || defined(AIX) || defined(PTLINUX) || defined(__STDC__) || defined(PTSOL2) || defined(PNBSD_386)
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -373,7 +373,7 @@ extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
 
-#if defined(PTHPPA) || defined(aiws) || defined(PTLINUX) ||(defined(PTSOL2) && ! defined(BSD))
+#if defined(PTHPPA) || defined(aiws) || defined(PTLINUX) ||(defined(PTSOL2) || defined(PTNBSD_386) && ! defined(BSD)) 
 extern int sprintf();
 #else
 #ifndef _IBMR2
@@ -392,7 +392,7 @@ extern int sscanf();
 
 
 /* some call it strings.h, some call it string.h; others, also have memory.h */
-#if defined(__STDC__) || defined(sprite) || defined(PTHPPA) || defined(__cplusplus) || defined(PTLINUX)
+#if defined(__STDC__) || defined(sprite) || defined(PTHPPA) || defined(__cplusplus) || defined(PTLINUX) || defined(PTNBSD_386)
 #include <string.h>
 #else
 /* ANSI C string.h -- 1/11/88 Draft Standard */
@@ -418,7 +418,7 @@ extern int memcmp(), strcmp();
 #undef putc			/* correct lint '_flsbuf' bug */
 #endif /* lint */
 
-#ifdef PTLINUX
+#if defined(PTLINUX) || defined(PTNBSD_386)
 #undef srandom
 #undef random
 #undef bzero
@@ -449,7 +449,7 @@ extern long random();
 
 /* This causes errors on a Sun.
 #if ! defined(_std_h)
-#if defined(ultrix3) || defined(ultrix4) ||  defined(hpux) || defined(linux)
+#if defined(ultrix4) || defined(PTHPPA) || defined(PTLINUX) || defined(PTNBSD_36)
 extern unsigned sleep();
 #else
 extern VOID_HACK sleep();
@@ -458,7 +458,7 @@ extern VOID_HACK sleep();
 
 /* assertion macro */
 #ifndef assert
-#if defined(__STDC__) || defined(sprite)
+#if defined(__STDC__) || defined(sprite) || defined(PTNBSD_386)
 #include <assert.h>
 #else
 #ifndef NDEBUG
@@ -477,7 +477,7 @@ extern VOID_HACK sleep();
 #endif
 
 /* handle various limits */
-#if defined(__STDC__) || defined(POSIX) || defined(PTLINUX)
+#if defined(__STDC__) || defined(POSIX) || defined(PTLINUX) || defined(PTNBSD_386)
 #include <limits.h>
 #else
 #ifndef _IBMR2
@@ -496,13 +496,16 @@ extern VOID_HACK sleep();
 #define SIG_FLAGS(s)    (s).sv_flags
 #endif
 
-#ifdef PTSOL2
+#if defined(PTSOL2) || defined(PTHPPA) || defined(SUN4)
 /* gcc-2.5.8 under Solaris2.3 with Openwindows3.3 prints warning
-   messages while compiling Maxport.c. 
+   messages while compiling octtools/Maxport/Maxport.c. 
    message was: warning: cast discards `const' from pointer target type
  */
 #define XTSTRINGDEFINES
+#endif
 
+
+#ifdef PTSOL2
 extern void qsort
 	ARGS((void *, size_t, size_t, int (*)(CONST void *, CONST void *)));
 extern int system(CONST char *);
@@ -512,12 +515,6 @@ extern int gethostname( char * name, int namelen);
 
 #if defined(sun) && !defined(SOL2)
 #include <unistd.h>
-/* gcc-2.5.8 under SunOS4.1.3 with X11R5 prints messages while
- * compiling Maxport.c. 
- * message was: warning: cast discards `const' from pointer target type
- */
-#define XTSTRINGDEFINES
-
 /* Don't include memset, it should be /usr/include/memory.h */
 /*extern char * memset ARGS(( char *, char *, int));*/
 #include <memory.h>
