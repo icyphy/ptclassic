@@ -128,6 +128,7 @@
 #   <li><b>-default</b>: The initial/default value of the variable. The defualt 
 #        is null. This attribute does not apply to certain languages and
 #        should then be ignored.
+# </ul>
 # A variable often contains nested _annotation_ entities
 # which document its purpose.
 #
