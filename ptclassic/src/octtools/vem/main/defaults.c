@@ -356,19 +356,19 @@ def_value *val;		/* Returned value                        */
 
     /* Begin translation by looking up the defaults */
     theColor.pixel = theColor.red = theColor.blue = theColor.green = 0;
-    if (strlen(colstr) > 0) {
+    if ((int)strlen(colstr) > 0) {
 	XColor *lookUpColor;
 
 	dfGetCol(colstr, &lookUpColor);
 	theColor = *lookUpColor;
     }
-    if (strlen(fillstr) > 0) {
+    if ((int)strlen(fillstr) > 0) {
 	dfGetFill(fillstr, &theFill); 
     }
-    if (strlen(patstr) > 0) {
+    if ((int)strlen(patstr) > 0) {
 	dfGetFill(patstr, &theStyle);
     }
-    if (strlen(wstr) > 0) {
+    if ((int)strlen(wstr) > 0) {
 	dfGetInt(wstr, &theWidth);
     }
 

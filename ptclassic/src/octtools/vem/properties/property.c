@@ -252,7 +252,7 @@ octObject *theProp;		/* The property */
 	(void) sprintf(valueArea, "%g", theProp->contents.prop.value.real);
 	break;
     case OCT_STRING:
-	if (strlen(theProp->contents.prop.value.string) > 20) {
+	if ((int)strlen(theProp->contents.prop.value.string) > 20) {
 	    STRMOVE(valueArea, "`");
 	    STRNCONCAT(valueArea, theProp->contents.prop.value.string, 20);
 	    STRCONCAT(valueArea, "...'");

@@ -547,7 +547,7 @@ struct enumTemplate *tmpPtr;
     stop = getString(tCurString, tCurString + strlen(tCurString), TEMP_STOPS);
     strUpcase(tCurString);
     if (strncmp(oldString, tCurString, strlen(oldString)) == 0 &&
-			    strlen(tCurString) > strlen(oldString)) {
+			    (int)strlen(tCurString) > strlen(oldString)) {
 	newString = tCurString + strlen(oldString);
     } else {
 	newString = tCurString;

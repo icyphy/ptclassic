@@ -1855,12 +1855,12 @@ STR old_name;			/* Old object name           */
     copy = *obj;
     if (octGetByName(container, &copy) == OCT_OK) {
 	/* Post dialog */
-	if (STRLEN(new_name) > 0) {
+	if ((int)STRLEN(new_name) > 0) {
 	    sprintf(n1, "object named `%s'", new_name);
 	} else {
 	    sprintf(n1, "unnamed object");
 	}
-	if (STRLEN(old_name) > 0) {
+	if ((int)STRLEN(old_name) > 0) {
 	    sprintf(n2, "object named `%s'", old_name);
 	} else {
 	    sprintf(n2, "unnamed object");
