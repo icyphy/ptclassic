@@ -152,7 +152,9 @@ void DCGraph :: mergeClosure(DCNodeList& first, DCNodeList& second) {
 	DCNode* pnode;
 
 	while ((pnode = niter++) != 0) {
-		if (isMember(first, pnode) == FALSE) sortedInsert(first, pnode, 1);
+		if (isMember(first, pnode) == FALSE) 
+			sortedInsert(first, pnode, 1);
+	}
 }
 
 			//////////////////
