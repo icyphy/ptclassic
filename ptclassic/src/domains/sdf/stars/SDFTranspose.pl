@@ -9,7 +9,7 @@ of "samplesInaRow" and "numberOfRows".
 	}
 	version {$Id$}
 	author { E. A. Lee }
-	copyright { 1991 The Regents of the University of California }
+	copyright { 1991-%Q% The Regents of the University of California }
 	location { SDF main library }
 	input {
 		name { input }
