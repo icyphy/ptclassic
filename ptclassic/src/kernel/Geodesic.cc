@@ -189,7 +189,7 @@ Particle* Geodesic :: tail() const {
 // locking functions
 void Geodesic :: makeLock(const PtGate& master) {
 	LOG_DEL; delete gate;
-	gate = master.clone();
+	gate = master.makeNew();
 }
 
 void Geodesic :: delLock() {

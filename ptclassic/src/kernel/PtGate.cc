@@ -74,7 +74,7 @@ GateKeeper::~GateKeeper () {
 void GateKeeper::enableAll(const PtGate& master) {
 	for (GateKeeper *gkp = listHead; gkp; gkp = gkp->next) {
 		LOG_DEL; delete gkp->gate;
-		gkp->gate = master.clone();
+		gkp->gate = master.makeNew();
 	}
 }
 
