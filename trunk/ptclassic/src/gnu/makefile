@@ -186,8 +186,9 @@ hp_configure: $(GNU_OBJ)
 	-(cd $(GNU_OBJ)/libiberty; ln -s $(HP_GNU_SRC)/libiberty/*.c* .)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.c* .)
 	-(cd $(GNU_OBJ)/libg++/src; ln -s $(HP_GNU_SRC)/libg++/src/*.h .)
-	-(cd $(GNU_OBJ)/libg++/gprof/src; \
-		ln -s $(HP_GNU_SRC)/libg++/gprof/src/*.c* .)
+	# Don't need gprof for Ptolemy.  BTW - gprof on hppa needs -lm
+	#-(cd $(GNU_OBJ)/libg++/gprof/src; \
+	#	ln -s $(HP_GNU_SRC)/libg++/gprof/src/*.c* .)
 	-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.c .)
 	# Don't link the .h files, or cp/call.c won't compile
 	#-(cd $(GNU_OBJ)/gcc; ln -s $(HP_GNU_SRC)/gcc/*.h .)
