@@ -618,17 +618,18 @@ int BDFScheduler :: simRunStar (Star& atom, int deferFiring) {
 
 StringList BDFScheduler :: displaySchedule() {
 	StringList out;
+	out << "{\n  { scheduler \"Buck's BDF scheduler\" }\n";
 	if (preamble.size()) {
-		out += "--- preamble ---\n";
+		out << "  { preamble {\n";
 		BlockListIter next(preamble);
 		Block* b;
 		while ((b = next++) != 0) {
-			out += b->fullName();
-			out += "\n";
+			out << "    { fire " << b->fullName() << " }\n";
 		}
-		out += "--- main schedule ---\n";
+		out << "  } }\n";
 	}
-	out += mySchedule->print();
+	out << mySchedule->print();
+	out << "}\n";
 	return out;
 }
 
