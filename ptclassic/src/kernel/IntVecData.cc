@@ -49,7 +49,7 @@ ISA_FUNC(IntVecData,Message);
 
 Message* IntVecData::clone() const { LOG_NEW; return new IntVecData(*this);}
 
-IntVecData::~IntVecData() { LOG_DEL; delete data;}
+IntVecData::~IntVecData() { LOG_DEL; delete [] data;}
 
 StringList IntVecData::print() const {
 	StringList out = "{";
