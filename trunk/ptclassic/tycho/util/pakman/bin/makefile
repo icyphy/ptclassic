@@ -2,9 +2,9 @@
 #
 # @Author: Christopher Hylands
 #
-# @Version: @(#)_makefile	1.1 02/23/98
+# @Version: $Id$
 #
-# @Copyright (c)  The Regents of the University of California.
+# @Copyright (c) 1998 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -35,7 +35,7 @@
 ROOT =		../../..
 
 # True source directory
-VPATH =		$(ROOT)/%metapkg%/pakman/bin
+VPATH =		$(ROOT)/util/pakman/bin
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
@@ -50,7 +50,7 @@ ITCL_SRCS =
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) pakman
 
-MISC_FILES = 
+MISC_FILES = 	README.txt
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
