@@ -174,6 +174,15 @@ void HierScheduler :: setup () {
     temp.initializeForClustering(*galaxy());
 
     // clusterChains(*galaxy());
+
+    // Now we output the clustered graph (with and w/o hierarchy
+    // exposed).  We need to do this before we do the cluster->worm
+    // conversion
+    StringList dot;
+    dot = printClusterDot(*galaxy());
+    mtarget->writeFile(dot,".cdot");
+    dot = printDot(*galaxy());
+    mtarget->writeFile(dot,".dot");
     
     // We may want to promote this code into a Cluster method if
     // others going to need to convert their clusters into wormholes.
@@ -226,8 +235,6 @@ void HierScheduler :: setup () {
 	    shadow->setScheduler(cluster->scheduler());
 	    shadow->initialize();
 	}
-
-	
     }
 
     // Compute top-level schedule
