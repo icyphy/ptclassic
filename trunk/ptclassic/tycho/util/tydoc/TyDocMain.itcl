@@ -1025,6 +1025,9 @@ class ::tycho::HTMLDocSys {
     ###################################################################
     ####                         private methods                   ####
 
+    # Generate HTML files for constructs that are not associated w/ a class
+    private method generateNonClassHTML {class}
+
     # Generate a table of contents for this class
     private method putsClassContents {fd class} {}
 
@@ -1075,6 +1078,11 @@ class ::tycho::HTMLDocSys {
     }
 
     ###################################################################
+    ####                         private variable                  ####
+
+    # List of files that don't have classes
+    private variable nonClassFileList {}
+    ###################################################################
     ####                         private common                    ####
 
     # Holds the contents of $TYCHO/lib/idx/codeDoc.idx
@@ -1105,6 +1113,7 @@ body ::tycho::HTMLDocSys::generateClassHTML {} {
 
         # Don't call getFilename here, or we might end up putting the
         # output file in a location that we get from the codeDoc.idx file.
+	::tycho::rmIfNotWritable [info namespace tail $className].html
 	set fd [open [info namespace tail $className].html "w"]
 
 	# Print the header
@@ -1146,6 +1155,7 @@ body ::tycho::HTMLDocSys::generateClassHTML {} {
 	    }
 	}
     }
+    return ""
 }
 
 #######################################################################
@@ -1161,11 +1171,14 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 	
 	if {[needToOutputOutsideConstructs $class]} {
 	    set className [$class getClassName]
-
 	    if {$className == {}} {
-		continue
+		# If there is no classname, then this file does not
+		# define a class, so it consists only of procs.
+		generateNonClassHTML $class
+		return
 	    }
 
+	    ::tycho::rmIfNotWritable [getOutsideFileName $className]
 	    set fd [open [getOutsideFileName $className] "w"]
 
 	    # Print the header
@@ -1176,7 +1189,7 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 		    Constructs related to\n\
 		    <A NAME=\"[info namespace tail $className] class\
 		    related documentation\
-		    ([info namespace qualifiers $className]\
+ 		    ([info namespace qualifiers $className]\
 		    namespace)\">$className</A></H1>"
 	    puts $fd "[$class cget -comment]\n<HR>\nRelated class:\
 		    <A HREF=\"[getFileName \
@@ -1270,6 +1283,7 @@ body ::tycho::HTMLDocSys::generateOutsideClassHTML {} {
 # links to each class in the classList
 #
 body ::tycho::HTMLDocSys::generateHTMLIndex { {title {"Index of classes"}}} {
+    ::tycho::rmIfNotWritable index.html
     set fd [open index.html "w"]
     
     # Print the header
@@ -1325,6 +1339,10 @@ body ::tycho::HTMLDocSys::generateHTMLIndex { {title {"Index of classes"}}} {
  	    }
  	}
     }
+    foreach nonClassFile $nonClassFileList {
+	puts $fd " <DT> Procs defined in\
+		<A HREF=\"[file rootname $nonClassFile].html\"><CODE>$nonClassFile</CODE></A>"
+    }
     puts $fd "</DL>\n<HR>"
     if {[info tclversion] >=7.5} { 
 	# In tcl7.5, use clock for speed and portablity
@@ -1353,27 +1371,120 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
     if ![file isdirectory doc/codeDoc] {
 	exec mkdir -p doc/codeDoc
     }
+    set retval ""
     foreach filename $filelist {
         if $debug {
             puts "$filename"
         }
-	$HTMLDocSys readFile $filename
-	cd doc/codeDoc
-	$HTMLDocSys generateClassHTML
-	$HTMLDocSys generateOutsideClassHTML
-	cd ../..
-	$HTMLDocSys resetOutsideClassComment
+	if ![file readable $filename] {
+	    set retval "$retval\ngenerateHTML: $filename is not readable"
+	} else {
+	    $HTMLDocSys readFile $filename
+	    cd doc/codeDoc
+	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
+		set retval "$retval\n$errMsg"
+	    }
+	    if [catch {$HTMLDocSys generateOutsideClassHTML} errMsg] {
+		set retval "$retval\n$errMsg"
+	    }
+	    cd ../..
+	    if [catch {$HTMLDocSys resetOutsideClassComment} errMsg] {
+		set retval "$retval\n$errMsg"
+	    }
+	}
     }
     if {$generateIndex == 1} {
 	cd doc/codeDoc
-	$HTMLDocSys generateHTMLIndex $title
+	if [catch {$HTMLDocSys generateHTMLIndex $title} errMsg] {
+	    set retval "$retval\n$errMsg"
+	}
     }
     delete object $HTMLDocSys
+    return $retval
 }
 
     ###################################################################
     ###################################################################
     ####                      private methods                      ####
+
+#######################################################################
+#### generateNonClassHTML
+# Generate HTML files for constructs that are not associated w/ a class.
+# A file that does not define a class, but only defines a collection
+# of procs would be an example of a non-class file
+#
+body ::tycho::HTMLDocSys::generateNonClassHTML {class} {
+
+    if {[needToOutputOutsideConstructs $class]} {
+	set className [$class getClassName]
+	if {$className != {}} {
+	    return
+	}
+
+	lappend nonClassFileList $currentFile
+	set baseName [file rootname [file tail $currentFile]]
+
+	::tycho::rmIfNotWritable $baseName.html
+	set fd [open $baseName.html "w"]
+
+	# Print the header
+	puts $fd "<!-- Automatically generated by the Tycho\
+		tydoc program -->\n<html>\n<head>\n<title>Procedures\
+		from [file tail $currentFile]</title>"
+	puts $fd "</head>\n<body bgcolor=\"#faf0e6\">\n<H1>\
+		Procedures associated with\n\
+		<A NAME=\"$baseName procedures\">$baseName\(s\)</A></H1>"
+	# Create a link to the source file
+	# Here we assume that the source is ../.. from the docs
+
+
+	# Here, we assume that the source file is two levels up.
+	set srcFile [file join .. .. $currentFile]
+	puts $fd "<br> The procs below are not associated with\
+		a particular class.  These procs were defined in\
+		<A HREF=\"$srcFile\"><CODE>[file tail \
+		$currentFile]</CODE></A>, but no class\
+		was defined.\n<HR>"
+
+	# We don't print out a table of contents, since we only have procs
+	# Print out the outside constructs
+	# puts $fd "<HR>"
+	foreach construct {outsideProc} {
+	    set printedConstructHeader 0
+	    set constructListList [$class cget -$construct]
+	    foreach constructList $constructListList {
+		set shortConstruct \
+			[capitalize [string range $construct 7 end]]
+		if !$printedConstructHeader {
+			puts $fd "<DL>"
+			set printedConstructHeader 1
+		}
+		putsDefinition $fd \
+			" <A NAME=\"[info namespace tail\
+			[getName $constructList]] $shortConstruct\
+			associated with $baseName\(s\)\">" \
+			[getName $constructList] \
+			"\{[getArgs $constructList]\}"
+		putsClassComment $fd $constructList
+	    }
+	    if $printedConstructHeader {
+		puts $fd "</DL>"
+	    }
+	}
+
+	# Print the footer
+	puts $fd "<p><p><A HREF=\"index.html\"> Index of classes</A>\n<HR>"
+
+	#puts "outsideClassComment: [$outsideClassComment configure]"
+	putsConstructIfNotEmpty $fd $outsideClassComment author
+	putsConstructIfNotEmpty $fd $outsideClassComment contributor
+	putsConstructIfNotEmpty $fd $outsideClassComment version
+	putsConstructIfNotEmpty $fd $outsideClassComment copyright
+	puts $fd "</body>\n</html>"
+	close $fd
+    }
+}
+
 
 #######################################################################
 #### putsClassComment
