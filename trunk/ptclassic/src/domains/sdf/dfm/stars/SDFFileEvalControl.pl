@@ -10,7 +10,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
     }
-    location { SDF dmm library }
+    location { SDF dfm library }
     desc {
 This is just like FileEval, except that it supports any number of
 integer-valued inputs and outputs in addition to the anytype
@@ -32,7 +32,7 @@ the value of the outputs will be 0.
     }
     begin {
 	if (sourceIfNeeded("fileevalcontrol_editcommand",
-	    "$PTOLEMY/src/domains/sdf/dmm/stars/fileevalcontrolsupport.tcl")
+	    "$PTOLEMY/src/domains/sdf/dfm/stars/fileevalcontrolsupport.tcl")
 	    == 0) {
 	        return;
 	}
