@@ -2,9 +2,9 @@
 #
 # $Id$
 
-preference assign edittext textBackground grey93
-preference assign edittext selectColor    lightyellow
-preference assign dialogs entryBackground grey90
+::tycho::preference assign edittext textBackground grey93
+::tycho::preference assign edittext selectColor    lightyellow
+::tycho::preference assign dialogs entryBackground grey90
 
-preference configure tkpalette -inherits tkdefaultpalettePreferences
+::tycho::preference configure tkpalette -inherits tkdefaultpalettePreferences
 updateTkPalette
