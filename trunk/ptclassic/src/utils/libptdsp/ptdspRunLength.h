@@ -37,9 +37,9 @@ Version: $Id$
 extern "C" {
 #endif
 
-void Ptdsp_RunLengthEncode ( const Ptdsp_FloatMatrix_t inImage, int BlockSize,
-			    int HiPri, float thresh, float **outDc,
-			    float **outAc, int *indxDc, int *indxAc);
+extern void Ptdsp_RunLengthEncode ( const double * inImagePtr, int arraySize, int bSize,
+				    int HiPri, double thresh, double **outDc,
+				    double **outAc, int *indxDc, int *indxAc); 
 
 #ifdef __cplusplus
 }
