@@ -1232,7 +1232,15 @@ body ::tycho::Slate::itemconfigure {id args} {
 			[@scope ::tycho::$picttype($id) \
 			[list set primary($id)]]]
 
-		
+		# Filter out hierarchy tags. Boy, this is kludgy...
+		set temp $tags
+		set tags {}
+		foreach t $temp {
+		    if { ! [string match {[!_]*} $t] } {
+			lappend tags $t
+		    }
+		}
+
 		set new [lsubtract $value $tags]
 		set old [lsubtract $tags $value]
 
