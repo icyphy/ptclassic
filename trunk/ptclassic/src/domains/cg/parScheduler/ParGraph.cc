@@ -17,7 +17,7 @@ Date of last revision:
 #endif
 
 #include "ParGraph.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 #include "streamCompat.h"
 #include "Error.h"
 
@@ -165,7 +165,7 @@ void ParGraph::sortedInsert(EGNodeList& nlist, ParNode *node, int flag) {
 
 	// Find the correct location for node in the list
 	while ((nl = NodeIter.nextLink()) != 0) {
-		ParNode* pd = (ParNode*) nl->myNode();
+		ParNode* pd = (ParNode*) nl->node();
 		if (flag == 1) {
 			// Sort highest SL first
 			if (pd->getLevel() <= nodeSL) break;
