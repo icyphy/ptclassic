@@ -35,40 +35,523 @@ if {[string compare test [info procs test]] == 1} then {
 } {}
 # See tycho/editors/slate/doc/internals/tute-drawing.html
 
-## These tests test out only the methods in ICanvas. For tests
+############################################################################
+#### Comments on these tests
+#
+# These tests test out only the methods in ICanvas. For tests
 # that apply to individual item types, shapes, or interactors,
 # see the individual test files. For test of the methods
 # in Slate.itcl, see testSlate.itcl.
+#
+# The test are in two groups: the first test basic operations
+# like construction, item creation, and tagging, which need to
+# be functioning for the remaining tests. Following tests are
+# on a per-method basis. Most methods have (at least) four cases:
+# pass a simple item by ID, pass a tag that will match a simple
+# item, pass a complex item by ID, and pass a tag that will match
+# a complex item.
+#
+# 
+
+if { ! [::info exists SHORTTIME] } {
+    set SHORTTIME 50
+}
+#set VERBOSE 1
+
+############################################################################
+#### Define a proc that can be used to create a new canvas
+#
+proc _icanvas {} {
+    catch {delete object .c}
+    ::tycho::icanvas .c
+    pack .c
+    wm deiconify .
+    raise .
+}
+
+############################################################################
+#### Define a proc that does an update and then waits
+#
+proc _update {} {
+    global SHORTTIME
+    update idletasks
+    if { [::info exists SHORTTIME] } {
+        after $SHORTTIME
+    }
+}
+
+############################################################################
+#### Define a proc that creates a clean canvas
+#
+proc _clean {} {
+    if { [::info which -command .c] == "" } {
+	_icanvas
+    }
+    .c delete all
+    raise .
+}
+
+############################################################################
+#### Define a proc that creates two items on the canvas
+#
+proc _twoitems {} {
+    global r f
+    _clean
+    set r [.c create rectangle 40 40 80 80 -fill blue -tags foo]
+    set f [.c create Frame 140 140 180 180 -color green -tags bar]
+}
+
+############################################################################
+#### Define a proc that creates a complex item with two
+#### child items -- one a root and one not
+#
+proc _hieritem {} {
+    global h i j
+    _clean
+    set h [.c create Frame 40 40 200 160 -color green]
+    set i [.c createchild $h Frame 60 60 120 100 -color red -relief sunken]
+    set j [.c createrootchild $h Frame 120 100 180 140 -color blue]
+}
 
 ############################################################################
 #### Construction tests
 #
-test IncrCanvas-1.1 {Simplest construction test} {
+test IncrCanvas-constructor.1 {Simplest construction test} {
    catch {delete object .c}
    ::tycho::icanvas .c
 } {.c}
+delete object .c
 
 # FIXME: add more tests with different options
 
 ############################################################################
-#### Simple item creation
+#### Basic tests, needed for following tests to work
 #
-catch {delete object .c}
-::tycho::icanvas .c
+_clean
+test IncrCanvas-basic.1 {Create a simple item} {
+    set r [.c create rectangle 40 40 80 80 -fill blue -tags foo]
+    list \
+	    [regexp {[0-9]+} $r] \
+	    [string compare [.c find all] $r] \
+	    [string compare [.c.canvas find all] $r]
+} {1 0 0}
+_update
 
-update
-test IncrCanvas-2.1 {Create simple canvas items} {
-    set result {}
+test IncrCanvas-basic.2 {Find simple item by tag} {
+    string compare [.c find withtag foo] $r
+} {0}
+_update
+
+test IncrCanvas-basic.3 {Delete simple item} {
+    .c delete $r
+    list \
+	    [.c find all] \
+	    [.c.canvas find all]
+} {{} {}}
+_update
+
+test IncrCanvas-basic.11 {Create a complex item} {
+    set f [.c create Frame 140 140 180 180 -color green -tags bar]
+    list \
+	    [regexp {_[0-9]+} $f] \
+	    [string compare [.c find all] $f]
+} {1 0}
+_update
+
+test IncrCanvas-basic.12 {Find complex item by tag} {
+    string compare [.c find withtag bar] $f
+} {0}
+_update
+
+test IncrCanvas-basic.13 {Delete complex item} {
+    .c delete $f
+    list \
+	    [.c find all] \
+	    [.c.canvas find all]
+} {{} {}}
+_update
+
+test IncrCanvas-basic.21 {Delete all items} {
+    .c create rectangle 40 40 80 80 -fill blue -tags foo
+    .c create Frame 140 140 180 180 -color green -tags bar
+    .c delete all
+    list \
+	    [.c find all] \
+	    [.c.canvas find all]
+} {{} {}}
+
+############################################################################
+#### addtag{}
+#
+_twoitems
+test IncrCanvas-addtag.1 {Pass simple item by ID} {
+    .c addtag new withtag $r
+    list \
+	    [lsort [.c itemcget $r -tags]] \
+	    [string compare [.c find withtag new] $r]
+} {{foo new} 0}
+
+test IncrCanvas-addtag.2 {Pass simple item by tag} {
+    .c addtag zoo withtag foo
+    list \
+	    [lsort [.c itemcget $r -tags]] \
+	    [string compare [.c find withtag zoo] $r]
+} {{foo new zoo} 0}
+
+test IncrCanvas-addtag.11 {Pass complex item by ID} {
+    .c addtag moo withtag $f
+    list \
+	    [lsort [.c itemcget $f -tags]] \
+	    [string compare [.c find withtag moo] $f]
+} {{bar moo} 0}
+
+test IncrCanvas-addtag.12 {Pass complex item by tag} {
+    .c addtag roo withtag bar
+    list \
+	    [lsort [.c itemcget $f -tags]] \
+	    [string compare [.c find withtag roo] $f]
+} {{bar moo roo} 0}
+
+# Tests on hierarchical items
+test IncrCanvas-addtag.21 {Add to the actual root} {
+    _hieritem
+    .c addtag foo withtag $h
+    # The items tagged with foo are the items in h minus the items in j
+    string compare \
+	    [lsort [.c.canvas find withtag foo]] \
+	    [lsort [::tycho::lsubtract [.c.canvas find all] \
+	       [.c.canvas find withtag $j]]]
+} {0}
+
+############################################################################
+#### bbox{}
+#
+_twoitems
+
+test IncrCanvas-bbox.1 {Pass simple item by ID} {
+    .c bbox $r
+} {39 39 81 81}
+
+test IncrCanvas-bbox.2 {Pass simple item by tag} {
+    .c bbox foo
+} {39 39 81 81}
+
+test IncrCanvas-bbox.11 {Pass complex item by ID} {
+    .c bbox $f
+} {138 138 183 183}
+
+test IncrCanvas-bbox.12 {Pass complex item by tag} {
+    .c bbox bar
+} {138 138 183 183}
+
+############################################################################
+#### bind{}
+#
+_twoitems
+test IncrCanvas-bind.1 {Pass simple item by ID} {
+    .c bind $r <Button-1> {puts !}
+    .c.canvas bind $r <Button-1>
+} {puts !}
+
+test IncrCanvas-bind.1a {Read bindings of simple item} {
+    list \
+	    [.c bind $r] \
+	    [.c bind $r <Button-1>]
+} {<Button-1> {puts !}}
+
+test IncrCanvas-bind.2 {Pass complex item by ID} {
+    .c bind $f <Button-1> {puts !}
+    list \
+	    [.c.canvas bind !$f <Button-1>] \
+	    [.c.canvas bind $f]
+} {{puts !} {}}
+
+test IncrCanvas-bind.2a {Read bindings of complex item} {
+    list \
+	    [.c bind $f] \
+	    [.c bind $f <Button-1>]
+} {<Button-1> {puts !}}
+
+test IncrCanvas-bind.3 {Pass a tag} {
+    .c bind foo <Button-2> {puts !}
+    .c.canvas bind foo <Button-2>
+} {puts !}
+
+test IncrCanvas-bind.3a {Read bindings of tag} {
+    list \
+	    [.c bind foo] \
+	    [.c bind foo <Button-2>]
+} {<Button-2> {puts !}}
+
+############################################################################
+#### children{}
+#
+_hieritem
+test IncrCanvas-children.1 {Get children by ID} {
+    string compare [lsort [.c children $h]] [lsort [list $i $j]]
+} {0}
+
+test IncrCanvas-children.2 {Get children by tag} {
+    .c addtag foo withtag $h
+    string compare [lsort [.c children foo]] [lsort [list $i $j]]
+} {0}
+
+test IncrCanvas-children.3 {Get children -- none} {
+    list [.c children $i] [.c children $j]
+} {{} {}}
+
+_twoitems
+test IncrCanvas-children.4 {Get children -- none} {
+    .c children $r
+} {}
+
+############################################################################
+#### coords{}
+#
+_twoitems
+
+test IncrCanvas-coords.1 {Pass simple item by ID} {
+    .c coords $r
+} {40.0 40.0 80.0 80.0}
+_update
+
+test IncrCanvas-coords.2 {Pass simple item by tag} {
+    .c coords foo
+} {40.0 40.0 80.0 80.0}
+_update
+
+test IncrCanvas-coords.3 {Pass simple item by ID to change coords} {
+    .c coords $r 30 30 90 90
+    .c coords $r
+} {30.0 30.0 90.0 90.0}
+_update
+
+test IncrCanvas-coords.4 {Pass simple item by tag to change coords} {
+    .c coords foo 40 40 80 80
+    .c coords foo
+} {40.0 40.0 80.0 80.0}
+_update
+
+test IncrCanvas-coords.11 {Pass complex item by ID} {
+    .c coords $f
+} {140.0 140.0 180.0 180.0}
+_update
+
+test IncrCanvas-coords.12 {Pass complex item by tag} {
+    .c coords bar
+} {140.0 140.0 180.0 180.0}
+_update
+
+test IncrCanvas-coords.13 {Pass complex item by ID to change coords} {
+    .c coords $f 130 130 190 190
+    .c coords $f
+} {130.0 130.0 190.0 190.0}
+_update
+
+test IncrCanvas-coords.14 {Pass complex item by tag to change coords} {
+    .c coords bar 140 140 180 180
+    .c coords bar
+} {140.0 140.0 180.0 180.0}
+_update
+
+############################################################################
+#### create {}
+#
+_clean
+
+test IncrCanvas-create.1 {Test create and delete of simple items} {
+    image create photo .img \
+	    -file [::tycho::expandPath $TYCHO/editors/slate/img/mantra.gif]
+    set result 1
     # FIXME: Add other item types
     foreach item {
 	{rectangle 100 100 200 200 -fill blue}
 	{oval 100 100 200 200 -outline green}
 	{line 100 100 200 200 -arrow last}
+	{polygon 100 100 200 200 100 200 -fill red}
+	{arc 100 100 200 200 -width 6}
+	{text 150 150 -text Foo}
+	{image 150 150 -image .img}
+	{bitmap 150 150 -bitmap \
+		@[::tycho::expandPath $TYCHO/kernel/img/arrowclose.xbm]}
     } {
 	set i [eval .c create $item]
-	lappend result [expr $i-$i]
-	.c delete $i
+	_update
+	# This makes sure that an integer was returned
+	set result [expr $result && [regexp {[0-9]+} $i]]
     }
-} {0 0 0}
+    .c delete all
+    set result
+} {1}
+_update
 
-	
+############################################################################
+#### delete{}
+#
+_twoitems
+test IncrCanvas-delete.1 {Delete simple item by ID} {
+    .c delete $r
+    .c.canvas find withtag $r
+} {}
+_update
+
+test IncrCanvas-delete.2 {Delete complex item by ID} {
+    .c delete $f
+    .c.canvas find withtag $f
+} {}
+_update
+
+_twoitems
+test IncrCanvas-delete.11 {Delete simple item by tag} {
+    .c delete foo
+    .c.canvas find withtag $r
+} {}
+_update
+
+test IncrCanvas-delete.12 {Delete complex item by tag} {
+    .c delete bar
+    .c.canvas find withtag $f
+} {}
+_update
+
+############################################################################
+#### move{}
+#
+_twoitems
+
+test IncrCanvas-move.1 {Pass simple item by ID} {
+    .c move $r 10 10
+    .c coords $r
+} {50.0 50.0 90.0 90.0}
+_update
+
+test IncrCanvas-move.2 {Pass simple item by tag} {
+    .c move foo 10 10
+    .c coords foo
+} {60.0 60.0 100.0 100.0}
+_update
+
+test IncrCanvas-move.11 {Pass complex item by ID} {
+    .c move $f 10 10
+    .c coords $f
+} {150.0 150.0 190.0 190.0}
+_update
+
+test IncrCanvas-move.12 {Pass complex item by tag} {
+    .c move bar 10 10
+    .c coords bar
+} {160.0 160.0 200.0 200.0}
+_update
+
+############################################################################
+#### parent{}
+#
+_hieritem
+test IncrCanvas-parent.1 {Get parent by ID} {
+    .c parent $h
+} {}
+
+test IncrCanvas-parent.2 {Get parent by tag} {
+    .c addtag foo withtag $h
+    .c parent foo
+} {}
+
+test IncrCanvas-parent.3 {Get parent by ID} {
+    string compare [.c parent $i] $h
+} {0}
+
+test IncrCanvas-parent.4 {Get parent by tag} {
+    .c addtag bar withtag $i
+    string compare [.c parent bar] $h
+} {0}
+
+test IncrCanvas-parent.5 {Get parent by ID} {
+    string compare [.c parent $j] $h
+} {0}
+
+test IncrCanvas-parent.6 {Get parent by tag} {
+    .c addtag baz withtag $j
+    string compare [.c parent baz] $h
+} {0}
+
+_twoitems
+test IncrCanvas-parent.7 {Get parent by ID} {
+    .c parent $r
+} {}
+
+test IncrCanvas-parent.8 {Get parent by tag} {
+    .c parent foo
+} {}
+
+############################################################################
+#### root{}
+#
+_hieritem
+test IncrCanvas-root.1 {Get root by ID} {
+    string compare [.c root $h] $h
+} {0}
+
+test IncrCanvas-root.2 {Get root by tag -- error} {
+    .c addtag foo withtag $h
+    catch {.c root foo} result
+    set result
+} {Argument (foo) is not an item ID}
+
+test IncrCanvas-root.3 {Get root of non-root} {
+    string compare [.c root $i] $h
+} {0}
+
+test IncrCanvas-root.4 {Get root of child-root} {
+    string compare [.c root $j] $j
+} {0}
+
+_twoitems
+test IncrCanvas-root.5 {Get root of simple item} {
+    string compare [.c root $r] $r
+} {0}
+
+############################################################################
+#### type{}
+#
+_twoitems
+test IncrCanvas-type.1 {Simple item by ID} {
+    .c type $r
+} {rectangle}
+
+test IncrCanvas-type.2 {Complex item by ID} {
+    .c type $f
+} {Frame}
+
+test IncrCanvas-type.2 {Any tag} {
+    catch {.c type foo} result
+    set result
+} {foo is not a valid item ID}
+
+############################################################################
+#### scale{}
+#
+_twoitems
+
+test IncrCanvas-scale.1 {Pass simple item by ID} {
+    .c scale $r 20 20 0.5 2.0
+    .c coords $r
+} {30.0 60.0 50.0 140.0}
+_update
+
+test IncrCanvas-scale.2 {Pass simple item by tag} {
+    .c scale foo 20 20 2.0 0.5
+    .c coords foo
+} {40.0 40.0 80.0 80.0}
+_update
+
+test IncrCanvas-scale.11 {Pass complex item by ID} {
+    .c scale $f 120 120 0.5 2.0
+    .c coords $f
+} {130.0 160.0 150.0 240.0}
+_update
+
+test IncrCanvas-scale.12 {Pass complex item by tag} {
+    .c scale bar 120 120 2.0 0.5
+    .c coords bar
+} {140.0 140.0 180.0 180.0}
+_update
