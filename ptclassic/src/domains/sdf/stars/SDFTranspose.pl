@@ -33,7 +33,7 @@ of "samplesInaRow" and "numberOfRows".
 	protected {
 		int size;
 	}
-	start {
+	setup {
 		size = int(samplesInaRow)*int(numberOfRows);
 		input.setSDFParams(size, size-1);
 		output.setSDFParams(size, size-1);
