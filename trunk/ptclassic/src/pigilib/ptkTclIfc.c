@@ -118,7 +118,6 @@ ptkSetHighlightFacet(dummy, interp, argc, argv)
             "incorrect usage: should be \"ptkSetHighlightFacet <octHandle>\"");
         return TCL_ERROR;
     }
-    FreeOctMembers(&lastFacet);
     if (ptkHandle2OctObj(argv[1], &lastFacet)) return TCL_OK;
     else {
 	strcpy(interp->result,
