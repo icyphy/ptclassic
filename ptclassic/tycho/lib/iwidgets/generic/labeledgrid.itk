@@ -200,8 +200,12 @@ body iwidgets::Labeledgrid::constructor {args} {
     set _type() "group"
     set _children() {}
 
+    # Unique counter to distinguish widget instances
     set unique [incr widgetCounter]
     
+    # It's nice to have relief and borderwidth options
+    itk_option add hull.borderwidth hull.relief
+
     # Evaluate options
     eval itk_initialize $args
 }
