@@ -424,7 +424,7 @@ checkjunk:
 
 CRUD=*.o *.so core *~ *.bak ,* LOG* *.class \
 	config.cache config.log config.status \
-	$(JCLASS) $(JZIP) $(JDISTS) $(KRUFT)  
+	$(JCLASS) $(JPACKAGE).zip $(JDISTS) $(KRUFT)  
 
 clean:
 	rm -f $(CRUD)
