@@ -117,6 +117,23 @@ itcldocs: $(ITCL_SRCS)
 		$(ROOT)/lib/tydoc/tydoc -d -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
 
+# weblint finds problems with html pages
+# ftp://ftp.cre.canon.co.uk/pub/weblint/weblint.tar.gz
+weblint:
+	-weblint -x netscape -d heading-order *.html
+	@if [ "x$(DIRS)" != "x" ]; then \
+		set $(DIRS); \
+		for x do \
+		    if [ -w $$x ] ; then \
+			( cd $$x ; \
+			echo making $@ in $$x ; \
+			$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
+			) \
+		    fi ; \
+		done ; \
+	fi
+
+
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
 # that includes this one and have it set $(EXTRA_SRCS)
