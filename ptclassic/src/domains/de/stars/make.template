@@ -18,8 +18,6 @@ DEDIR = $(ROOT)/src/domains/de/kernel
 
 GPPFLAGS = -g
 GNU = g++
-GNULIB = /usr/gnu/lib
-GNUINCLUDE = $(GNULIB)/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:

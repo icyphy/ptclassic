@@ -22,8 +22,6 @@ SDFDIR = $(ROOT)/src/domains/sdf/kernel
 GPPFLAGS = -g
 GNU = g++
 INCL = -I$(DDFDIR) -I$(DYCONDIR) -I$(SDFDIR) -I$(KERNDIR)
-GNULIB = /usr/gnu/lib
-GNUINCLUDE = $(GNULIB)/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
