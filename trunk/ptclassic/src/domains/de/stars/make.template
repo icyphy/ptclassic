@@ -76,10 +76,9 @@ depend:		$(CCS)
 		makedepend -I$(DEDIR) -I$(KERNDIR) -I$(GNUINCLUDE) $(CCS)
 
 makefile:	make.template
-		rm -f makefile
 		cd $(VPATH); rm -f makefile; cp make.template makefile; \
 		make -f make.template sources depend
-		ln -s $(VPATH)/makefile makefile
+		if [ ! -f makefile ]; then ln -s $(VPATH)/makefile makefile; fi
 		@echo makefile remade -- you must rerun make.
 		exit 1
 
