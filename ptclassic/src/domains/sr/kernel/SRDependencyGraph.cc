@@ -119,8 +119,11 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 
 	  // Record this edge
 
-	  fEdgeCount[vs]++;
-	  bEdgeCount[vd]++;
+	  if ( vs != vd ) {
+	    fEdgeCount[vs]++;
+	    bEdgeCount[vd]++;
+          }
+
 	} else {
 	  //	  cout << "input " << ip->name() << " on " << s->name()
 	  //	       << " has no far port\n";
@@ -169,8 +172,12 @@ SRDependencyGraph::SRDependencyGraph( Galaxy & g )
 	  assert( vs >= 0 );
 	
 	  // Add the forward and backward edge to the lists
-	  fEdge[vs][ fedgenumber[vs]++ ] = vd;
-	  bEdge[vd][ bedgenumber[vd]++ ] = vs;
+
+	  if ( vs != vd ) {
+	    fEdge[vs][ fedgenumber[vs]++ ] = vd;
+	    bEdge[vd][ bedgenumber[vd]++ ] = vs;
+   	  }
+
 	}
       }
     }
