@@ -200,8 +200,8 @@ long userOptionWord;
         /* modeled after RpcRun in exec.c */
         octObject facet;
         char* name;
+	char* domainName;
         char octHandle[16];
-        char command[100];
         ViInit("run-DesignMaker");
         ErrClear();
         facet.objectId = spot->facet;
@@ -219,7 +219,7 @@ long userOptionWord;
 	/* check if DMM domain, else prompt user to use R */
 	if(!GOCDomainProp(&facet,&domainName,DEFAULT_DOMAIN))
         {
-                PrintErr("Domain error in facet %s",domainName);
+                PrintErr("Domain error in facet");
                 ViDone();
         }
         if(strcmp(domainName,"DMM")!= 0)
