@@ -18,6 +18,7 @@ description.
 #include <std.h>
 #include "Scheduler.h"
 #include "Domain.h"
+#include "Linker.h"
 
 extern Error errorHandler;
 
@@ -27,11 +28,19 @@ class KnownListEntry {
 	friend class KnownBlock;
 	Block* b;
 	int onHeap;
+	int dynLinked;
 	KnownListEntry *next;
 };
 
+// declarations for static variables.  I would rather use class
+// static than file static for the arrays, but g++ has bugs.
+
+static KnownListEntry* allBlocks[NUMDOMAINS];
+static const char* domainNames[NUMDOMAINS];
 int KnownBlock :: currentDomain = 0;
 int KnownBlock :: numDomains = 0;
+
+const char* KnownBlock::domain()  { return domainNames[currentDomain];}
 
 // This function looks up a domain.  It returns -1 if not found and
 // we specified no adding.
@@ -49,7 +58,7 @@ int KnownBlock::domainIndex (const char* myDomain, int addIfNotFound) {
 		else if (strcmp (domainNames[i], myDomain) == 0)
 			return i;
 	}
-	errorHandler.error("Too many distinct domains");
+	Error::abortRun("Too many distinct domains");
 	exit (1);
 }
 
@@ -75,6 +84,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 		if (kb->onHeap) delete kb->b;
 		kb->b = &block;
 		kb->onHeap = isOnHeap;
+		kb->dynLinked = Linker::isActive();
 	}
 
 	// otherwise create a new entry
@@ -83,6 +93,7 @@ void KnownBlock::addEntry (Block& block, const char* name, int isOnHeap) {
 		nkb->b = &block;
 		nkb->next = allBlocks[idx];
 		nkb->onHeap = isOnHeap;
+		nkb->dynLinked = Linker::isActive();
 		allBlocks[idx] = nkb;
 	}
 }
@@ -116,6 +127,14 @@ KnownBlock::find(const char* type) {
 	return e ? e->b : NULL;
 }
 
+// return TRUE if indicated name refers to a dynamically linked block.
+int
+KnownBlock::isDynamic(const char* type) {
+	KnownListEntry* e = findEntry (type, allBlocks[currentDomain]);
+	if (!e) return FALSE;
+	return e->dynLinked;
+}
+
 // The main cloner.  This method gives us a new block of the named
 // type, by asking the matching block on the list to clone itself.
 
@@ -128,7 +147,7 @@ KnownBlock::clone(const char* type) {
 	msg += "' in domain '";
 	msg += domainNames[currentDomain];
 	msg += "'";
-	errorHandler.error (msg);
+	Error::abortRun (msg);
 	return 0;
 }
 
