@@ -35,4 +35,4 @@
 PTOLEMY=${PTOLEMY-`csh -fc 'echo ~ptolemy'`}
 ARCH=${ARCH-`csh -fc '$PTOLEMY/bin/ptarch'`}
 TCL_LIBRARY=$PTOLEMY/tcltk/tcl/lib/tcl
-$PTOLEMY/tcltk/tcl.$ARCH/bin/tclsh $PTOLEMY/lib/tcl/esterel2pl.tcl "$@"
+$PTOLEMY/tcltk/tcl.$PTARCH/bin/tclsh $PTOLEMY/lib/tcl/esterel2pl.tcl "$@"
