@@ -49,18 +49,23 @@
 # $Id$
 
 # If add_to_help has not been defined as a procedure, then define a dummy one
+#
+# FIXME: Need to consolidate ptcl help functionality and Tycho
+# automatic documentation generation.
+#
 if { [info commands add_to_help] == "" } {
   proc add_to_help {cmd argl desc} {}
 }
 
-# Function: listApplyExpression
-
+#######################################################################
+#### listApplyExpression
+#
 add_to_help listApplyExpression {<tclexpr> <list>} {
 Produces a new list by applying each item in list to the tclexpr
 by substituting for the variable i in tclexpr.  The tclexpr should
 be in an unevaluated form, e.g. { cos($i) }.
 }
-
+#
 proc listApplyExpression {tclexpr thelist} {
   foreach i $thelist {
     lappend newlist [expr $tclexpr]
@@ -68,15 +73,16 @@ proc listApplyExpression {tclexpr thelist} {
   return $newlist
 }
 
-# Function: makeOrderedPairs
-
+#######################################################################
+#### makeOrderedPairs
+#
 add_to_help makeOrderedPairs {<x-values> ?<y-values>?} {
 Converts two lists, <x-values> and <y-values>, into ordered pairs; e.g.,
 makeOrderedPairs "1 2 3" "3 2 1" returns "(1,3) (2,2) (3,1)".
 If <y-values> is omitted, then <x-values> is returned.  This procedure
 returns a string.
 }
-
+#
 proc makeOrderedPairs {args} {
   set numargs [llength $args]
   if { $numargs == 2 } {
@@ -109,13 +115,14 @@ proc makeOrderedPairs {args} {
   }
 }
 
-# Function: max
-
+#######################################################################
+#### max
+#
 add_to_help max {<x1> <x2> ...} {
 Computes the maximum of the arguments according to the > operator,
 which also compares strings.
 }
-
+#
 proc max {a args} {
   set maxvalue $a
   foreach i $args {
@@ -126,13 +133,15 @@ proc max {a args} {
   return $maxvalue
 }
 
-# Function: min
 
+#######################################################################
+#### min
+#
 add_to_help min {<x1> <x2> ...} {
 Computes the minimum of the arguments according to the < operator,
 which also compares strings.
 }
-
+#
 proc min {a args} {
   set minvalue $a
   foreach i $args {
@@ -143,14 +152,16 @@ proc min {a args} {
   return $minvalue
 }
 
-# Function: range
 
+#######################################################################
+#### range
+#
 add_to_help range {<min> <max> ?<increment>?} {
 Produces an ordered list of numbers running from min to max at increments
 of increment.  If the sequence of numbers will never reach max, then
 the routine will return an empty list.
 }
-
+#
 proc range {minindex maxindex {inc 1}} {
   if { [sign [expr "$maxindex - $minindex"]] == [sign $inc] } {
     for {set i $minindex} {$i <= $maxindex} {incr i $inc} {
@@ -162,15 +173,17 @@ proc range {minindex maxindex {inc 1}} {
   return $rangelist
 }
 
-# Function: rangeApplyExpression
 
+#######################################################################
+#### rangeApplyExpression
+#
 add_to_help rangeApplyExpression {<tclexpr> <min> <max> ?<increment>?} {
 Evaluate tclexpr at values of i running from min to max at increments
 of increment to produce a list.  If the sequence of numbers will never
 reach max, then the routine will return an empty list.  The tclexpr should
 be in an unevaluated form, e.g. { cos($i) }. 
 }
-
+#
 proc rangeApplyExpression {tclexpr minindex maxindex {inc 1}} {
   if { [sign [expr "$maxindex - $minindex"]] == [sign $inc] } {
     for {set i $minindex} {$i <= $maxindex} {incr i $inc} {
@@ -182,14 +195,16 @@ proc rangeApplyExpression {tclexpr minindex maxindex {inc 1}} {
   return $rangelist
 }
 
-# Function: sign
 
+#######################################################################
+#### sign
+#
 add_to_help sign {<x>} {
 Returns 1 if x > 0, -1 if x < 0, and 0 otherwise.
 The comparison is based on the Tcl operators < and >, which also
 compare strings.
 }
-
+#
 proc sign {x} {
   if { $x < 0 } {
     set signum -1
