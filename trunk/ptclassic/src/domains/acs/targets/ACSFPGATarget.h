@@ -37,6 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class ACSFPGATarget : public ACSCGTarget {
 public:
-}
+};
 
 #endif //_ACSFPGATarget_h

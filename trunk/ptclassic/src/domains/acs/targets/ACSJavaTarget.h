@@ -37,6 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class ACSJavaTarget : public ACSCGTarget {
 public:
-}
+};
 
 #endif //_ACSJavaTarget_h

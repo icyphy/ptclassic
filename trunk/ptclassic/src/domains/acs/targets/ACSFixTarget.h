@@ -37,6 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class ACSFixTarget : public ACSSimTarget {
 public:
-}
+};
 
 #endif //_ACSFixTarget_h

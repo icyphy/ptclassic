@@ -1,6 +1,6 @@
 // This may look like C code, but it is really -*- C++ -*-
-#ifndef _ACSCGTarget_h
-#define _ACSCGTarget_h
+#ifndef _ACSSimTarget_h
+#define _ACSSimTarget_h
 
 /**********************************************************************
 Copyright (c) 1998 The Regents of the University of California.
@@ -35,8 +35,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "ACSTarget.h"
 
-class ACSCGTarget : public ACSTarget {
+class ACSSimTarget : public ACSTarget {
 public:
-}
+};
 
-#endif //_ACSCGTarget_h
+#endif //_ACSSimTarget_h

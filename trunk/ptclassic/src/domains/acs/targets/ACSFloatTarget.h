@@ -37,6 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class ACSFloatTarget : public ACSSimTarget {
 public:
-}
+};
 
 #endif //_ACSFloatTarget_h
