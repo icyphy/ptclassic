@@ -495,8 +495,10 @@ body ::tycho::DataModel::configure {{option {}} args} {
     # Call superclass
     set result [eval chain $option $args]
 
-    # Record (note: called after chain configure, since error may occur)
-    history append "configure $option $args" $undo
+    # Record (note: called after chain to superclass, since error may occur)
+    if $recording {
+	history append "configure $option $args" $undo
+    }
 
     # Done
     return $result
