@@ -7,7 +7,7 @@ A finite impulse response (FIR) filter with fixed-point capabilities.
 The fixed-point coefficients are specified by the "taps" parameter.
 The default coefficients give an 8th-order, linear phase lowpass filter.
 To read coefficients from a file, replace the default coefficients
-with "<fileName", preferably specifying a complete path.
+with "fileName", preferably specifying a complete path.
 Polyphase multirate filtering is also supported.
         }
         version { $Id$ }
@@ -35,7 +35,7 @@ During computation of filter outputs, the precision of the filter taps
 is converted to the precision contained in the "TapsPrecision" parameter.
 <p>
 To load the filter coefficients from a file, simply replace the default
-coefficients with the string "&lt;filename".
+coefficients with the string "<i>filename</i>".
 It is advisable to use an absolute path name as part of the file name,
 especially if you are using the graphical interface.
 This will allow the FIR filter to work as expected regardless of
@@ -62,7 +62,7 @@ parameter and the output sample rate.
 <a name="filter design, multirate"></a>
 <a name="filter, multirate"></a>
 In particular, considerable care must be taken to avoid aliasing.
-Specifically, if the input sample rate is f,
+Specifically, if the input sample rate is <i>f</i>,
 then the filter stopband should begin before <i>f/</i>2.
 If the interpolation ratio is <i>i</i>, then <i>f/</i>2 is a fraction 1<i>/</i>(2<i> i</i>)
 of the sample rate at which you must design your filter.
