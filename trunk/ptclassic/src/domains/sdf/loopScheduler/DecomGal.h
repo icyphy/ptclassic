@@ -29,6 +29,21 @@ class ostream;
 
 class DecomGal : public SDFClusterGal
 {
+public:
+	DecomGal(Galaxy& g, ostream* l) : SDFClusterGal(g,l) {}
+	DecomGal(ostream* l) : SDFClusterGal(l) {}
+
+	// remove Arcs with delays if these delays are enough to
+	// fire the destination nodes as many as repetitions numbers.
+	int simplify();
+
+	// Detect all strongly connected components and cluster them
+	// to decompose the galaxy.
+	void decompose();
+
+	// loop all clusters for the final clustering phase.
+	void loopAll();
+
 private:
 	// Make clusters of strongly connected graph
 	void makeCluster(SequentialList*);
@@ -44,35 +59,9 @@ private:
 
 	// setup the decomposed clusters.
 	void setUpClusters();
-
-public:
-	// constructor.
-	DecomGal(Galaxy& g, ostream* l) : SDFClusterGal(g,l) {}
-	DecomGal(ostream* l) : SDFClusterGal(l) {}
-
-	// remove Arcs with delays if these delays are enough to
-	// fire the destination nodes as many as repetitions numbers.
-	int simplify();
-
-	// Detect all strongly connected components and cluster them
-	// to decompose the galaxy.
-	void decompose();
-
-	// loop all clusters for the final clustering phase.
-	void loopAll();
 };
 
 class DecomClusterBag : public SDFClusterBag {
-
-private:
-	// private scheduler
-	DecomScheduler* loopSched;
-
-	// The outermost bag will create an SDFClusterGal member.
-	DecomGal* cgal;
-
-	// id: Bag in the decomposition, Atomic in the Joe's clustering.
-	int idFlag;
 
 public:
 	// create the SDFClusterGal
@@ -84,7 +73,6 @@ public:
 	// setup Galaxy
 	void setUpGalaxy();
 
-	// constructor
 	DecomClusterBag() : cgal(0), loopSched(0), idFlag(1) {}
 	~DecomClusterBag();
 
@@ -103,6 +91,16 @@ protected:
 		sched = loopSched;
 		return loopSched->genSched(cgal); 
 	} 
+
+private:
+	// private scheduler
+	DecomScheduler* loopSched;
+
+	// The outermost bag will create an SDFClusterGal member.
+	DecomGal* cgal;
+
+	// id: Bag in the decomposition, Atomic in the Joe's clustering.
+	int idFlag;
 };
 
 #endif

@@ -30,6 +30,21 @@ class ostream;
 /////////////////////////
 
 class DecomScheduler : public SDFBagScheduler {
+public:
+	DecomScheduler(ostream* log = 0): logstrm(log) {}
+
+	// generate schedule
+	int genSched(DecomGal*);
+
+	// Display the schedule
+	StringList displaySchedule(int depth);
+
+	// default (for SDFScheduler::displaySchedule override)
+	StringList displaySchedule() { return displaySchedule(0);}
+
+	// Generate code using the Target to produce the right language.
+	void genCode(Target&, int depth);
+
 private:
 	// Attempt to form a cluster with base node "p" in graph "g".
 	// This involves examining each node adjacent to "p" and
@@ -56,22 +71,6 @@ private:
 
 	// do nothing in the following method
 	int computeSchedule(Galaxy&) { return TRUE; }
-
-public:
-	// constructor
-	DecomScheduler(ostream* log = 0): logstrm(log) {}
-
-	// generate schedule
-	int genSched(DecomGal*);
-
-	// Display the schedule
-	StringList displaySchedule(int depth);
-
-	// default (for SDFScheduler::displaySchedule override)
-	StringList displaySchedule() { return displaySchedule(0);}
-
-	// Generate code using the Target to produce the right language.
-	void genCode(Target&, int depth);
 };
 
 #endif

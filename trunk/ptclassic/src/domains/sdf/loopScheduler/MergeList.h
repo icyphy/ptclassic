@@ -45,6 +45,13 @@ class LSGraph;
 class MergeLink : public DoubleLink {
 friend class MergeList;
 
+public:
+	// Constructor with base node and adjacent node arguments.
+	MergeLink(LSNode*, LSNode*, int);
+
+	// Try to form an iterated cluster based on this merge link.
+	int formRepeatedCluster(LSGraph &g);
+
 private:
 	// The base  and adjacent node 
 	LSNode *base_node;
@@ -101,13 +108,6 @@ private:
 	void appendIsolatedPar(ClusterNodeList*);
 	void insertIsolatedPar(ClusterNodeList*);
 	void insertIsolatedSon(ClusterNodeList*);
-
-public:
-	// Constructor with base node and adjacent node arguments.
-	MergeLink(LSNode*, LSNode*, int);
-
-	// Try to form an iterated cluster based on this merge link.
-	int formRepeatedCluster(LSGraph &g);
 };
 
 /////////////////////////

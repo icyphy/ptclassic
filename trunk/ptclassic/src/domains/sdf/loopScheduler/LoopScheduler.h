@@ -27,6 +27,16 @@ Loop scheduler
 /////////////////////////
 
 class LoopScheduler : public SDFClustSched {
+
+public:
+	LoopScheduler(const char* log) : SDFClustSched(log) {}
+
+	// Display the schedule
+	StringList displaySchedule();
+
+	// Generate code using the Target to produce the right language.
+	void compileRun();
+
 protected:
 	//
 	// First step: decomposition
@@ -35,16 +45,6 @@ protected:
 	// only if everything went OK.
 	//
 	int computeSchedule(Galaxy& g);
-
-public:
-	// constructor
-	LoopScheduler(const char* log) : SDFClustSched(log) {}
-
-	// Display the schedule
-	StringList displaySchedule();
-
-	// Generate code using the Target to produce the right language.
-	void compileRun();
 };
 
 #endif
