@@ -74,8 +74,7 @@ extern const char* PROCEDURE = "procedure";
 CGTarget::CGTarget(const char* name, const char* starclass,
 		   const char* desc, const char* assocDomain, char sep) :
 Target(name, starclass, desc, assocDomain), defaultStream(&myCode),
-schedFileName(0), noSchedule(0), typeConversionTable(0),
-typeConversionTableRows(0)
+schedFileName(0), noSchedule(0), typeConversionTable(0)
 {
 	counter = 0;
 	spliceList.initialize();
@@ -246,45 +245,6 @@ void CGTarget::setup() {
 
 	// reset for next setup
 	noSchedule = 0;
-
-	// Type resolution double-checking:
-	// PortHole types should be resolved by the time of
-	// the finish of the call to galaxy->initialize().
-
-	// Iterate over the galaxy, checking all port types.
-	// If a port's type doesn't match its resolvedType, we generate
-	// an error, because implicit type conversion is not supported,
-	// in general, in CG domains, unlike in simulation domains.
-	// Failing to perform explicit type conversion can lead to
-	// run-time and compile-time bugs.
-	GalAllBlockIter nextBlock(*galaxy());
-	Block* b;
-	while ((b = nextBlock++) != 0) {
-	  BlockPortIter phIter(*b);
-	  PortHole* ph;
-	  while ((ph = phIter++) != 0) {
-	    // If ph is an alias, get the true port.
-	    while (ph->alias()) {
-	      ph = (PortHole*) ph->alias();
-	    }
-	    // Issue an error if the resolved type doesn't match the type,
-	    // and it wasn't an ANYTYPE to begin with.
-	    // Domains that automatically splice in conversion stars
-	    // prior to this point will not generate errors.
-	    if (strcmp(ph->type(),"ANYTYPE") &&
-		strcmp(ph->resolvedType(),ph->type())) {
-	      StringList phInfo = "";
-	      phInfo << "type: " << ph->type()
-		<< "; resolvedType: " << ph->resolvedType();
-	      Error::warn(*ph, "\nConflict between PortHole type() and resolvedType():\n",
-			  (const char*) phInfo);
-	      Error::abortRun("Implicit type conversion not allowed in code generation domains.\n",
-			      "Please use an explicit type-conversion star, or redesign the graph\n",
-			      "so as to eliminate the conflict.");
-	      return;
-	    }
-	  }
-	}
 
 	// If in a WormHole, generate, compile, load, and run code.
 	// Ignore flags which may otherwise disable these functions.
@@ -762,44 +722,52 @@ const char* CGTarget::lookupSharedSymbol(const char* scope, const char* name)
 int CGTarget :: modifyGalaxy() {
     if(! galaxy()) return FALSE;
     if(haltRequested()) return FALSE;
-    if(!typeConversionTable) return TRUE;
 
+    // If the domain has no type conversion table,
+    // assume it doesn't care about type mismatches
+    // between source and destination ports.
+    if (!typeConversionTable) return TRUE;
 
+    // Splice type conversion stars as necessary.
     Galaxy& gal = *galaxy();
-    GalStarIter starIter(gal);
-    Star* star;
-    const char* domain = gal.domain();
-
-    // type conversion table;
-    // procession takes place in chronological order
 
     if (warnIfNotConnected(gal)) return FALSE;
+
+    const char* domain = gal.domain();
+    GalStarIter starIter(gal);
+    Star* star;
 
     while ((star = starIter++) != NULL) {
 	BlockPortIter portIter(*star);
 	PortHole* port;
 	while ((port = portIter++) != NULL) {
-	    // Splice in type conversion stars.
 	    if (needsTypeConversionStar(*port)) {
-		PortHole* input = port->far();	// destination input PortHole
-
-		int i;
-		for (i=0; i < typeConversionTableRows; i++) {
-		    if (((port->type() == typeConversionTable->table[i].src) ||
-			 (typeConversionTable->table[i].src == ANYTYPE)) &&
-			((port->resolvedType() ==
-			  typeConversionTable->table[i].dst) ||
-			 (typeConversionTable->table[i].dst == ANYTYPE)))
+		// Need a type conversion star here.
+		Block* s = 0;
+		for (int i=0; i < typeConversionTable->numEntries(); i++) {
+		    const ConversionTableRow& row =
+		      * typeConversionTable->entry(i);
+		    if (((port->preferredType() == row.src) ||
+			 (row.src == ANYTYPE)) &&
+			((port->resolvedType() == row.dst) ||
+			 (row.dst == ANYTYPE)))
 		    {
-			Block* s = 0;
-			if (!(s = spliceStar(input,
-				            typeConversionTable->table[i].star,
-					     TRUE, domain)))
+			PortHole* input = port->far(); // destination PortHole
+			if (!(s = spliceStar(input, row.star, TRUE, domain)))
 			    return FALSE;
-			else {
-			    s->setTarget(this);
-			}
+			s->setTarget(this);
+			break;	// out of table-searching loop
 		    }
+		}
+		if (s == 0) {
+		    // Failed to find a suitable conversion star.
+		    StringList phInfo = "source type: ";
+		    phInfo << port->preferredType() << ", destination type: "
+			   << port->resolvedType();
+		    Error::abortRun(*port,
+			"No type conversion star available to convert:\n",
+			(const char*) phInfo);
+		    return FALSE;
 		}
 	    }
 	}
@@ -893,8 +861,7 @@ int CGTarget::needsTypeConversionStar(PortHole& port) {
 	if (port.isItOutput()) {
 	    // splice conversion star if type of output port does not
 	    // match the type of the data connection
-	    if ((port.type() != port.resolvedType()) &&
-	        (port.type() != ANYTYPE))
+	    if (port.preferredType() != port.resolvedType())
 		return TRUE;
 	}
 	return FALSE;

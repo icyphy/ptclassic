@@ -402,7 +402,6 @@ protected:
                              const char* domainName);
 
     ConversionTable* typeConversionTable;
-    int typeConversionTableRows;
     virtual int needsTypeConversionStar(PortHole& port);
  
     // Copy of default value of the destination directory

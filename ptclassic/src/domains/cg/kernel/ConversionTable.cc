@@ -38,35 +38,38 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include <iostream.h>
+
 #include <string.h>
-#include "dataType.h"
 #include "ConversionTable.h"
 
 // Constructor
-ConversionTable::ConversionTable(int r):rows(r),rowToInitialize(0) {
-  table = new ConversionTableRow[rows];
+ConversionTable::ConversionTable() {
+  rows = 0;
+  tablesize = 16;		// Arbitrary initial estimate of table size
+  table = new ConversionTableRow[tablesize];
 }
     
 // Destructor
 ConversionTable::~ConversionTable() {
-  int i;
-  for (i = 0; i < rows ; i++)
+  for (int i = 0; i < rows ; i++)
     delete [] table[i].star;
   delete [] table;
 }
     
 // Add a table row.
-int ConversionTable::tblRow(DataType src, DataType dst, const char* star) {
-  int status;
-  if (rowToInitialize >= rows) {
-    cout << "Attempting to add too many rows to table\n";
-    status = 0;
-  } else {
-    table[rowToInitialize].src = src;
-    table[rowToInitialize].dst = dst;
-    table[rowToInitialize++].star = strcpy (new char[strlen(star)+1], star);
-    status =1;
+void ConversionTable::tblRow(DataType src, DataType dst, const char* star) {
+  if (rows >= tablesize) {
+    // need to enlarge table
+    tablesize *= 2;
+    ConversionTableRow* newtable = new ConversionTableRow[tablesize];
+    for (int i = 0; i < rows; i++)
+      newtable[i] = table[i];
+    delete [] table;
+    table = newtable;
   }
-  return status;
+  table[rows].src = src;
+  table[rows].dst = dst;
+  table[rows].star = strcpy (new char[strlen(star)+1], star);
+  rows++;
+
 }

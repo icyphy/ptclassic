@@ -44,21 +44,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 struct ConversionTableRow {
     DataType src, dst;
-    char *star;
+    const char *star;		// name of star class to do this conversion
 };
 
 class ConversionTable {
 public:
-    ConversionTable(int r);
+    ConversionTable();
     ~ConversionTable();
 
-				// Add a row to the table
-    int tblRow(DataType src, DataType dst, const char* star);
+    // Add a row to the table
+    void tblRow(DataType src, DataType dst, const char* star);
 
-    ConversionTableRow* table;
+    // Accessors
+    int numEntries() const { return rows; }
+    const ConversionTableRow* entry (int i) const { return table + i; }
     
 private:
-    int rows;
-    int rowToInitialize;
+    ConversionTableRow* table;
+    int rows;			// number of slots in use
+    int tablesize;		// allocated size of table
 };
 #endif
