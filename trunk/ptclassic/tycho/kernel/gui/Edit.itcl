@@ -5,7 +5,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-1997 The Regents of the University of California.
+# @Copyright (c) 1995-%Q% The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -461,16 +461,22 @@ body ::tycho::Edit::constructor {args} {
     set text $itk_component(text)
     pack $text -side left -expand yes -fill both
 
-    # Modify the Tk binding tags.
+    # Modify the Tk binding tags to add the hull, which is File object.
+    # This ensures that the file bindings work.
     # NOTE: This used to reverse the order of the text widget and
-    # the top level.  This appears to be no longer necessary.
+    # the top level.  This was in part to ensure that the top-level
+    # bindings kick in before some inappropriate built-in Tk binding
+    # (like C-o) override them.  However, it meant that if you put
+    # a text widget into a query box, then you couldn't type any
+    # character bound to a button without invoking that button.
+    # So instead, we disable Tk's bogus bindings below.
     set tl [winfo toplevel $itk_component(hull)]
     bindtags $text \
-	    "$tl $itk_component(hull) $text Text all"
+            "$itk_component(hull) $text Text $tl all"
 
     # NOTE: This used to be bound to the hull of TopLevel, which caused
     # focusin to be called a very large number of times.
-    bind $text <Map> "$this focusin; break"
+    whenMapped text "$this focusin"
 
     # Put the insertion cursor at the top
     $text mark set insert @0,0
