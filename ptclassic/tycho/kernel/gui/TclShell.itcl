@@ -671,15 +671,11 @@ body ::tycho::TclShell::recordCommand {cmd} {
 # including return values and prompts, to the specified file. 
 #
 body ::tycho::TclShell::saveAsFile {filename} {
-    if {[file exists $filename]} {
-	if {![safeEval ::tycho::askuser \
-                "File \"$filename\" exists.  Overwrite?"]} {
-	    error {Did not save file}
-	}
-    }
+puts "::tycho::TclShell::saveAsFile $filename"
     set fd [open $filename w+]
     puts -nonewline $fd [$itk_component(text) get 1.0 {end -1 char}]
     close $fd
+    return 1
 }
 
 #########################################################################
