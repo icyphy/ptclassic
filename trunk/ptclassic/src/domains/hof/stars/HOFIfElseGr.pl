@@ -4,11 +4,11 @@ defstar {
 	derivedFrom { IfElse }
 	desc {
 A variant of the IfElse star where the two possible replacement
-blocks are specified by graphically rather than textually.
-There must be exactly two blocks connected in the positions of the
+blocks are specified graphically rather than textually.
+There must be exactly one block connected in the positions of the
 replacement blocks.
 The HOFNop stars are the only exception: they may be used in addition to the
-two replacement blocks in order to control the order of connection.
+replacement block in order to control the order of connection.
 	}
 	htmldoc {
 See the documentation for the
@@ -26,34 +26,28 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { HOF main library }
-	ccinclude { "ptk.h" }
-	ccinclude { "SimControl.h" }
 	ccinclude { "InfString.h" }
-	ccinclude { "HOFDelayedMap.h" }
 	outmulti {
 	  name {trueout}
-	  type {=input}
+	  type {anytype}
 	  desc {output to the true block}
 	}
 	inmulti {
 	  name {truein}
-	  type {ANYTYPE}
+	  type {anytype}
 	  desc {input from the true block}
 	}
 	outmulti {
 	  name {falseout}
-	  type {=input}
+	  type {anytype}
 	  desc {output to the false block}
 	}
 	inmulti {
 	  name {falsein}
-	  type {ANYTYPE}
+	  type {anytype}
 	  desc {input from the false block}
 	}
 	constructor {
-	  // Note that both branches must have the same output type.
-	  output.inheritTypeFrom(truein);
-
 	  // The constructor for IfElse hides blockname, where_defined,
 	  // input_map, output_map, and parameter_map.  Here, we need to hide
 	  // the rest.
@@ -71,118 +65,111 @@ limitation of liability, and disclaimer of warranty provisions.
 	protected {
 	  Block *trueblock, *falseblock;
 	}
-	setup {
-	  HOFBaseHiOrdFn::setup();
+	method {
+	  name { preinitialize }
+	  access { public }
+	  code {
+	    HOFBaseHiOrdFn::preinitialize();
 
-	  Galaxy* mom = idParent();
-	  if(!mom) return;
+	    Galaxy* mom = idParent();
+	    if(!mom) return;
 
-	  // Any HOF star has to call this method for all multiPortHoles
-	  // to be sure that HOFNop stars are dealt with properly.
-	  initConnections(trueout);
-	  initConnections(truein);
-	  initConnections(falseout);
-	  initConnections(falsein);
-	  initConnections(input);
-	  initConnections(output);
+	    // Make sure we know the number of connections on the
+	    // input and output multiPortHoles.
+	    initConnections(input);
+	    initConnections(output);
+	    initConnections(trueout);
+	    initConnections(truein);
+	    initConnections(falseout);
+	    initConnections(falsein);
 
-	  // At this point, any HOFNop stars will have been disconnected,
-	  // so there should be only one block connected to each of the
-	  // true and false connections.
+	    // At this point, any HOFNop stars will have been disconnected,
+	    // so there should be only one block connected to each of the
+	    // true and false connections.
 
-	  MPHIter nexti(input);
-	  MPHIter nexto(output);
-	  MPHIter *nextexo;
-	  MPHIter *nextexi;
-	  MPHIter *nextnuo;
-	  MPHIter *nextnui;
-	  // Choose the porthole over which to iterate
-	  if (int(condition)) {
-	    // Iterators for ports connected to the block we will use
-	    LOG_NEW; nextexo = new MPHIter(trueout);
-	    LOG_NEW; nextexi = new MPHIter(truein);
-	    // Iterators for ports connected to the block we won't use
-	    LOG_NEW; nextnuo = new MPHIter(falseout);
-	    LOG_NEW; nextnui = new MPHIter(falsein);
-	  } else {
-	    LOG_NEW; nextexo = new MPHIter(falseout);
-	    LOG_NEW; nextexi = new MPHIter(falsein);
-	    LOG_NEW; nextnuo = new MPHIter(trueout);
-	    LOG_NEW; nextnui = new MPHIter(truein);
-	  }
+	    MPHIter nexti(input);
+	    MPHIter nexto(output);
+	    MPHIter *nextexo;
+	    MPHIter *nextexi;
+	    MPHIter *nextnuo;
+	    MPHIter *nextnui;
+	    // Choose the porthole over which to iterate
+	    if (int(condition)) {
+	      // Iterators for ports connected to the block we will use
+	      LOG_NEW; nextexo = new MPHIter(trueout);
+	      LOG_NEW; nextexi = new MPHIter(truein);
+	      // Iterators for ports connected to the block we won't use
+	      LOG_NEW; nextnuo = new MPHIter(falseout);
+	      LOG_NEW; nextnui = new MPHIter(falsein);
+	    } else {
+	      LOG_NEW; nextexo = new MPHIter(falseout);
+	      LOG_NEW; nextexi = new MPHIter(falsein);
+	      LOG_NEW; nextnuo = new MPHIter(trueout);
+	      LOG_NEW; nextnui = new MPHIter(truein);
+	    }
 
-	  PortHole *pi, *po, *pei, *peo, *dest;
-	  GenericPort *sourcegp, *destgp;
+	    PortHole *pi, *po, *pei, *peo;
+	    GenericPort *sourcegp, *destgp;
 
-	  // Now that we know which substitution block will be used, it
-	  // is safe to initialize that substitution block even if it is
-	  // a recursive reference to a galaxy above us.
-	  // This is a violation of information hiding, but I can't figure
-	  // out a cleaner way to support graphical recursion.
-	  if ((peo = (*nextexo)++) &&
-	      (dest = peo->far()) &&
-	      (myblock = dest->parent()) &&
-	      (myblock->isA("HOFDelayedMap"))) {
-	    destgp = findTopGenericPort(dest);
-	    destgp->parent()->setTarget(target());
-	    destgp->parent()->initialize();
-	    ((HOFDelayedMap*)myblock)->substitute();
-	  }
-	  myblock = 0;
-	  nextexo->reset();
+	    myblock = 0;	// this will get a ref to the replacement block
 
-	  // Make the block connection
-	  // Iterate over the inputs first
-	  while ((peo = (*nextexo)++) != 0) {
-	    if ((pi = nexti++) == 0) {
-	      Error::abortRun(*this,
-			      "Not enough inputs for the specified replacement block");
+	    // Make the block connection
+	    // Iterate over the inputs first
+	    while ((peo = (*nextexo)++) != 0) {
+	      if ((pi = nexti++) == 0) {
+		Error::abortRun(*this,
+				"Not enough inputs for the specified replacement block");
+		return;
+	      }
+	      if (!(destgp = breakConnection(peo))) return;
+	      if (!connectInput(pi,destgp)) return;
+	    }
+	    // Better be out of outputs at this point
+	    if ((pi = nexti++) != 0) {
+	      Error::abortRun(*this, "Leftover inputs after connecting the replacement block");
 	      return;
 	    }
-	    if (!(destgp = breakConnection(peo))) return;
-	    if (!connectInput(pi,destgp)) return;
-	  }
-	  // Better be out of outputs at this point
-	  if ((pi = nexti++) != 0) {
-	    Error::abortRun(*this, "Leftover inputs after connecting the replacement block");
-	    return;
-	  }
-	  // Iterate over the outputs next
-	  while ((pei = (*nextexi)++) != 0) {
-	    if ((po = nexto++) == 0) {
+	    // Iterate over the outputs next
+	    while ((pei = (*nextexi)++) != 0) {
+	      if ((po = nexto++) == 0) {
+		Error::abortRun(*this,
+				"Not enough outputs for the specified replacement block");
+		return;
+	      }
+	      if (!(sourcegp = breakConnection(pei))) return;
+	      if (!connectOutput(po, sourcegp)) return;
+	    }
+	    if (!myblock) {
 	      Error::abortRun(*this,
-			      "Not enough outputs for the specified replacement block");
+			      "No connections to replacement block!");
 	      return;
 	    }
-	    if (!(sourcegp = breakConnection(pei))) return;
-	    if (!connectOutput(po, sourcegp)) return;
+
+	    myblock = 0;	// now get a reference to the unused block
+
+	    // Disconnect the block that we will not use
+	    while ((peo = (*nextnuo)++) != 0) {
+	      breakConnection(peo);
+	    }
+	    while ((pei = (*nextnui)++) != 0) {
+	      breakConnection(pei);
+	    }
+	    if (!myblock) {
+	      Error::abortRun(*this,
+			      "No connections to unused replacement block!");
+	      return;
+	    }
+
+	    LOG_DEL; delete nextexo;
+	    LOG_DEL; delete nextexi;
+	    LOG_DEL; delete nextnuo;
+	    LOG_DEL; delete nextnui;
+
+	    // Delete the unused block from the parent galaxy.
+	    // This is *critical* to stop a graphical recursion.
+	    mom->deleteBlockAfterInit(*myblock);
+
+	    mom->deleteBlockAfterInit(*this);
 	  }
-	  if (!myblock) {
-	    Error::abortRun(*this,
-			    "No connections to a replacement block!");
-	    return;
-	  }
-
-	  myblock->setTarget(target());
-	  myblock->initialize();
-	  myblock = 0;
-
-	  // Disconnect the block that we will not use
-	  while ((peo = (*nextnuo)++) != 0) {
-	    breakConnection(peo);
-          }
-	  while ((pei = (*nextnui)++) != 0) {
-	    breakConnection(pei);
-          }
-
-	  LOG_DEL; delete nextexo;
-	  LOG_DEL; delete nextexi;
-	  LOG_DEL; delete nextnuo;
-	  LOG_DEL; delete nextnui;
-
-	  // delete the unused block.
-	  mom->deleteBlockAfterInit(*myblock);
-
-	  mom->deleteBlockAfterInit(*this);
 	}
 }
