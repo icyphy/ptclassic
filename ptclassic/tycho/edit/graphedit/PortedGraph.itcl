@@ -234,7 +234,7 @@ body ::tycho::PortedGraph::constructor {args} {
 #    $graph edges {vertex1 output}
 #
 body ::tycho::PortedGraph::edges {{v1 *} {v2 *}} {
-	_update
+    _update
     set result {}
     foreach {_ edge} [array get _edges [list $v1 $v2]] {
         lappend result $edge
@@ -259,9 +259,9 @@ body ::tycho::PortedGraph::remove {vertex} {
     foreach edge [edges $vertex] {
         delete $edge
     }
- 	foreach edge [edges * * $vertex *] {
-		delete $edge
-	} 	
+    foreach edge [edges * * $vertex *] {
+        delete $edge
+    } 	
     # Delete the vertex
     delete $vertex
 
@@ -294,16 +294,21 @@ body ::tycho::PortedGraph::repair {} {
 #### subgraphEdges
 #
 # Return the edges within the sub-graph given by the arguments. Each
-# argument is the name of a vertex.
+# argument is the name of a vertex. The edges can either be connected
+# directly to a vertex or to a port within a vertex.
 #
 body ::tycho::PortedGraph::subgraphEdges {args} {
     _update
     set result {}
     foreach v $args {
-        array set out [array get _edges [list "$v *" *]]
+        array set out [concat \
+                [array get _edges [list "$v *" *]] \
+                [array get _edges [list $v *]]]
     }
     foreach v $args {
-        foreach {edge name} [array get _edges [list * "$v *"]] {
+        foreach {edge name} [concat \
+                [array get _edges [list * "$v *"]] \
+                [array get _edges [list * $v]]] {
             if [::info exists out($edge)] {
                 lappend result $name
             }
@@ -322,10 +327,14 @@ body ::tycho::PortedGraph::subgraphInputs {args} {
     _update
     set result {}
     foreach v $args {
-        array set in [array get _edges [list * "$v *"]]
+        array set in [concat \
+                [array get _edges [list * "$v *"]] \
+                [array get _edges [list * $v]]]
     }
     foreach v $args {
-        foreach {edge name} [array get _edges [list "$v *" *]] {
+        foreach {edge name} [concat \
+                [array get _edges [list "$v *" *]] \
+                [array get _edges [list $v *]]] {
             if [::info exists in($edge)] {
                 unset in($edge)
             }
@@ -347,10 +356,14 @@ body ::tycho::PortedGraph::subgraphOutputs {args} {
     _update
     set result {}
     foreach v $args {
-        array set out [array get _edges [list "$v *" *]]
+        array set out [concat \
+                [array get _edges [list "$v *" *]] \
+                [array get _edges [list $v *]]]
     }
     foreach v $args {
-        foreach {edge name} [array get _edges [list * "$v *"]] {
+        foreach {edge name} [concat \
+                [array get _edges [list * "$v *"]] \
+                [array get _edges [list * $v]]] {
             if [::info exists out($edge)] {
                 unset out($edge)
             }
