@@ -125,6 +125,7 @@ StringList QuasiScheduler :: displaySchedule() {
 	return out;
 }
 
-void QuasiScheduler :: createSubGals() {
-	if (!wormFlag) ParScheduler :: createSubGals();
+int QuasiScheduler :: createSubGals() {
+	if (!wormFlag) return ParScheduler :: createSubGals();
+	else return FALSE;
 }
