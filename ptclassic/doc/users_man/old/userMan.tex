@@ -1,0 +1,44 @@
+% Version $Id$
+% Author:	T. M. Parks
+% Created:	17 January 1993
+
+\documentstyle[12pt,elisp,ptinfo,Almagest]{book}
+\newindex{cp}
+\newindex{pg}
+\newindex{fn}
+\newindex{vr}
+\newindex{tp}
+\newindex{ky}
+
+% The \syncodeindex command does not work, so use \synindex instead.
+\synindex{pg}{cp}
+\synindex{fn}{cp}
+\synindex{vr}{cp}
+\synindex{tp}{cp}
+\synindex{ky}{cp}
+
+\begin{document}
+
+\alwaysrefill
+\setfilename{userMan.info}
+
+\node Top
+
+\begin{ifinfo}
+\title{The Almagest\\
+A User's Guide to \Ptolemy}
+\author{}
+\maketitle
+\end{ifinfo}
+
+\begin{iftex}
+\setcounter{chapter}{0}
+\setcounter{page}{1}
+\end{iftex}
+\include{../../src/domains/cgc/doc/CGCUser}
+
+\include{other}
+
+\include{index}
+
+\end{document}
