@@ -48,7 +48,8 @@ class MathematicaIfc {
 
 public:
     // Constructor
-    MathematicaIfc(const char* name = 0,
+    MathematicaIfc(const char* initstring = 0,
+		   const char* name = 0,
 		   int privateContextFlag = 0,
 		   int echoInputFlag = 0,
 		   int echoOutputNumFlag = 0);
@@ -110,16 +111,16 @@ protected:
     // Mathematica error string
     InfString errorString;
 
-    // Add an error message
+    // add an error message
     void AddErrorMessage(const char *msg);
 
-    // Initialize error messages
+    // initialize error messages
     void InitErrorMessages();
 
     // Mathematica warning string
     InfString warningString;
 
-    // Instance number
+    // instance number
     int instanceNumber;
 
     // package name attached to Mathematica interface instance
@@ -127,6 +128,7 @@ protected:
     InfString prolog;
     InfString epilog;
     InfString initCode;
+    InfString customInitCommand;
 
     // method to set the string states context, prolog, epilog, and initCode
     void setContext(const char* name, int flag);

@@ -196,10 +196,11 @@ static void printPacketType(int packetType, int currentFlag) {
 
 // Constructor
 MathematicaIfc::MathematicaIfc(
-	const char* name, int privateContextFlag,
+	const char* initstring, const char* name, int privateContextFlag,
 	int echoInputFlag, int echoOutputNumFlag) :
 			mathlink(0), environment(0) {
     instanceNumber = mathematicaStarsCount++;
+    customInitCommand = initstring ? initstring : "";
     setContext(name, privateContextFlag);
     displayInputFlag = echoInputFlag;
     displayOutputNumFlag = echoOutputNumFlag;
@@ -492,6 +493,7 @@ int MathematicaIfc::StartMathematica(int oargc, char** oargv) {
 	return FALSE;
     }
 
+    EvaluateUnrecordedCommand(customInitCommand);
     EvaluateUnrecordedCommand(initCode);
 
     return TRUE;
