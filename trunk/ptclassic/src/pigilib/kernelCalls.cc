@@ -402,7 +402,7 @@ KcAlias(char *fterm, char *inst, char *aterm) {
 
 extern "C" boolean
 KcSetKBDomain(const char* domain) {
-	domain = domain ? hashstring(domain) : DEFAULT_DOMAIN;
+	domain = domain ? hashstring(domain) : hashstring(DEFAULT_DOMAIN);
 	if (!KnownBlock::validDomain(domain)) {
 		Error::abortRun("Invalid domain: ", domain);
 		return FALSE;
