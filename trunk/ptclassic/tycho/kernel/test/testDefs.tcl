@@ -217,11 +217,11 @@ proc doneTests {args} {
     flush stderr
     update
     if ![info exists reallyExit] {
-	after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
+	after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram
 	#after [expr {2 * $duration}] ::tclexit
     } else {
 	if {$reallyExit == 1} {
-	    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram 1
+	    after [expr {2 * $duration}] ::tycho::TopLevel::exitProgram
 	}
     }
 }
