@@ -15,13 +15,14 @@ include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
+CGSTARS = $(ROOT)/src/domains/cg/stars
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
 DCDIR = $(ROOT)/src/domains/cg/dcScheduler
 DLDIR = $(ROOT)/src/domains/cg/dlScheduler
 QSDIR = $(ROOT)/src/domains/cg/quasiScheduler
 PARDIR = $(ROOT)/src/domains/cg/parScheduler
 
-INCL=-I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
+INCL=-I$(CGSTARS) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
 	-I$(DCDIR)  -I$(DLDIR) -I$(QSDIR) -I$(PARDIR)
 
 SRCS=CGFullConnect.cc CGSharedBus.cc 
