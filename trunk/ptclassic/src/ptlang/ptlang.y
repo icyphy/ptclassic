@@ -30,6 +30,9 @@
 #define MEDBUFSIZE 4096
 #define SMALLBUFSIZE 512
 
+/* number of code blocks allowed */
+#define NUMCODEBLOCKS 100
+
 #define FLEN 256
 #define NINC 10
 #define NSEE 30
@@ -40,10 +43,16 @@ int yyline = 1;			/* current input line */
 int bodyMode = 0;		/* special lexan mode flag to read bodies  */
 int docMode = 0;		/* flag document bodies  */
 int descMode = 0;		/* flag descriptor bodies  */
+int codeMode = 0;		/* flag code block bodies  */
 FILE* yyin;			/* stream to read from */
 
 char* progName = "ptlang";	/* program name */
 int nerrs = 0;			/* # syntax errors detected */
+
+char* blockID;			/* identifier for code blocks */
+char* blockNames[NUMCODEBLOCKS];
+char* codeBlocks[NUMCODEBLOCKS];
+int numBlocks = 0;
 
 /* scratch buffers */
 char str1[SMALLBUFSIZE];
@@ -57,6 +66,8 @@ char outputDescriptions[MEDBUFSIZE];
 char stateDescriptions[MEDBUFSIZE];
 char ccCode[BIGBUFSIZE];
 char miscCode[BIGBUFSIZE];
+char codeBlock[MEDBUFSIZE];
+char consCalls[BIGBUFSIZE];
 
 /* state classes */
 #define T_INT 0
@@ -121,7 +132,6 @@ char* methodArgs;		/* arglist of user method */
 char* methodAccess;		/* protection of user method */
 char* methodType;		/* return type of user method */
 char* methodCode;		/* body of user method */
-char* consCalls;		/* constructor calls for members */
 char* galPortName;		/* name of galaxy port */
 char* consCode;			/* extra constructor code */
 char* destCode;			/* destructor */
@@ -149,8 +159,8 @@ typedef char * STRINGVAL;
 %token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS OUTPUT INPUT ACCESS
 %token OUTMULTI INMULTI TYPE DEFAULT CLASS START GO WRAPUP CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
-%token BODY IDENTIFIER STRING CONSCALLS ATTRIB
-%token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION
+%token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE
+%token VERSION AUTHOR COPYRIGHT EXPLANATION SEEALSO LOCATION CODEBLOCK
 %%
 /* a file consists of a series of definitions. */
 file:
@@ -220,7 +230,14 @@ sgitem:
 		'{' methlist '}'	{ genMethod();}
 |	CCINCLUDE '{' cclist '}'	{ }
 |	HINCLUDE '{' hlist '}'
-|	conscalls BODY			{ consCalls = $2; bodyMode = 0;}
+|	conscalls BODY			{ if(consCalls[0]) {
+					     strcat(consCalls,", ");
+					     strcat(consCalls,$2);
+					  } else {
+					     strcpy(consCalls,$2);
+					  }
+					  bodyMode = 0; 
+					}
 |	error '}'			{ yyerror ("bad sgitem");}
 ;
 
@@ -263,6 +280,26 @@ staritem:
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
 |	go BODY				{ goCode = $2; bodyMode = 0;}
+|	CODEBLOCK '(' IDENTIFIER ')' '{'
+					{ char* b = malloc(SMALLBUFSIZE);
+					  blockID = $3;
+					  strcpy(b,blockID);
+					  blockNames[numBlocks]=b;
+					  codeMode = 1;
+					}
+		lines '}'		{ char* b = malloc(strlen(codeBlock));
+					  strcpy(b,codeBlock);
+					  codeBlocks[numBlocks++]=b;
+					  codeMode = 0; 
+					  codeBlock[0] = 0;
+					}
+;
+
+lines:	/* nothing */
+|	lines LINE		{ char b[SMALLBUFSIZE];
+		sprintf(b,"\"%s\\n\"\n",$2);
+		strcat(codeBlock,b);
+				}
 ;
 
 constructor:
@@ -450,7 +487,7 @@ ident:	IDENTIFIER|DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
 |CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS|OUTPUT|INPUT|OUTMULTI|INMULTI|TYPE
 |DEFAULT|START|GO|WRAPUP|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
 |PRIVATE|METHOD|ARGLIST|CODE|ACCESS|AUTHOR|VERSION|COPYRIGHT|EXPLANATION
-|SEEALSO|LOCATION
+|SEEALSO|LOCATION|CODEBLOCK
 /* also allow strings; strip quotation marks */
 |STRING					{ $$ = stripQuotes ($1);}
 ;
@@ -466,9 +503,9 @@ int g;
 	int i;
 	for (i = 0; i < NSTATECLASSES; i++) stateMarks[i] = 0;
 	galDef = g;
-	objName = objVer = objDesc = domain = derivedFrom = consCalls =
+	objName = objVer = objDesc = domain = derivedFrom =
 		objAuthor = objCopyright = objExpl = objLocation = NULL;
-	consStuff[0] = ccCode[0] = 0;
+	consStuff[0] = ccCode[0] = codeBlock[0] = consCalls[0] = 0;
 	publicMembers[0] = privateMembers[0] = protectedMembers[0] = 0;
 	inputDescriptions[0] = outputDescriptions[0] = stateDescriptions[0] = 0;
 	nCcInclude = nHInclude = nSeeAlso = 0;
@@ -816,8 +853,10 @@ genDef ()
 		fprintf (fp, "\tvoid wrapup();\n");
 	if (destCode)
 		fprintf (fp, "\t~%s();\n", fullClass);
-	if (publicMembers)
+	if (publicMembers[0])
 		fprintf (fp, "%s\n", publicMembers);
+	for (i=0; i<numBlocks; i++)
+		fprintf (fp, "\tstatic %sCodeBlock %s;\n",domain,blockNames[i]);
 /* The clone function; end of file */
 	fprintf (fp, "\tBlock* clone() const { return new %s;}\n};\n", fullClass);
 	fprintf (fp, "#endif\n");
@@ -847,13 +886,14 @@ genDef ()
 		fprintf (fp, "#include %s\n", ccInclude[i]);
 /* prefix code and constructor */
 	fprintf (fp, "\n%s%s::%s ()", ccCode, fullClass, fullClass);
-	if (consCalls)
+	if (consCalls[0])
 		fprintf (fp, " :\n\t%s", consCalls);
 	fprintf (fp, "\n{\n");
 	if (objDesc)
 		fprintf (fp, "\tdescriptor = \"%s\";\n", objDesc);
 	if (!consCode) consCode = "";
-	fprintf (fp, "%s\n%s\n}\n", consStuff, consCode);
+	fprintf (fp, "%s\n%s\n", consStuff, consCode);
+	fprintf (fp, "}\n");
 	if (startCode)
 		fprintf (fp, "\nvoid %s::start() {\n%s\n}\n", fullClass, startCode);
 	if (goCode)
@@ -864,6 +904,10 @@ genDef ()
 		fprintf (fp, "\n%s::~%s() {\n%s\n}\n", fullClass, fullClass, destCode);
 	if (miscCode[0])
 		fprintf (fp, "%s\n", miscCode);
+	/* generate the CodeBlock constructor calls */
+	for (i=0; i<numBlocks; i++)
+		fprintf (fp, "%sCodeBlock %s :: %s (\n%s);\n",
+			domain,fullClass,blockNames[i],codeBlocks[i]);
 	fprintf (fp, "\n// prototype instance for known block list\n");
 	fprintf (fp, "static %s proto;\n", fullClass);
 	fprintf (fp, "static KnownBlock entry(proto,\"%s\");\n", objName);
@@ -985,6 +1029,7 @@ struct tentry keyTable[] = {
 	"ccinclude", CCINCLUDE,
 	"class", CLASS,
 	"code", CODE,
+	"codeblock", CODEBLOCK,
 	"conscalls", CONSCALLS,
 	"consCalls", CONSCALLS,
 	"constructor", CONSTRUCTOR,
@@ -1037,6 +1082,59 @@ yylex () {
 	int key;
 	char* p = yytext;
 	if (c == EOF) return 0;
+/*
+ * In codeMode, we look for LINEs and return them.
+ * A LINE is an exact copy of of line of input that
+ * does not contain the closing '}'.
+ * When a line is encountered that contains the closing '}'
+ * that closing '}' is returned.  Anything else on the line is lost.
+ */
+	if (codeMode) {
+	    int brace = 1;
+	    int inQuote = 0;
+	    /* eat spaces until a newline */
+	    while (!c || (isspace(c) && c != NEWLINE))
+		input();
+	    /* now eat the newline */
+	    if (c == NEWLINE) input();
+	    /* now transfer characters to yytext until the next newline,
+	       or the closing brace. */
+	    while (c != NEWLINE) {
+		*p++ = c;
+		switch (c) {
+		  case ESC:
+		    c = getc(yyin);
+		    *p++ = c;
+		    break;
+		  case QUOTE:
+		    inQuote = !inQuote;
+		    break;
+		  case EOF:
+		    yyerror ("Unexpected EOF in body!");
+		    exit (1);
+		  default:
+		    if (!inQuote) {
+			if (c == '{') brace++;
+			else if (c == '}') {
+			    brace--;
+			    if (brace == 0) {
+				/* output doesn't include the '}' */
+				p[0] = 0;
+				c = 0;
+				yylval = save(yytext);
+				return '}';
+			    }
+			}
+		    }
+		}
+		input();
+	    }
+	    /* output doesn't include the NEWLINE */
+	    p[0] = 0;
+	    yylval = save(yytext);
+	    return LINE;
+	}
+
 /* bodyMode causes a whole function or document
  * body to be returned as a single token.
  * Leading and trailing spaces are removed
