@@ -275,7 +275,7 @@ body ::tycho::TCanvas::constructor {args} {
     bind $slate <Control-x><Control-q> "$this toggleReadOnly; break"
     bind $slate <Control-x><v> "$this revisionControl; break"
 
-    # Allow cursor control of slate
+    # Allow cursor/keyboard control of slate
     bind $slate <Up> "$slate yview scroll -1 unit"
     bind $slate <Down> "$slate yview scroll 1 unit"
     bind $slate <Left> "$slate xview scroll -1 unit"
@@ -283,7 +283,9 @@ body ::tycho::TCanvas::constructor {args} {
     bind $slate <Prior> "$slate yview scroll -1 page"
     bind $slate <Next> "$slate yview scroll 1 page"
     bind $slate <Home> "$slate xview scroll -1 page"
-    bind $slate <End> "$slate xview scroll 1 page" 
+    bind $slate <End> "$slate xview scroll 1 page"
+    bind $slate <Control-v> "$slate yview scroll 1 page"
+    bind $slate <Meta-v> "$slate yview scroll -1 page"
    
     # Bind configure events to update the display.
     # Interactivity is enabled only after the first configure event.
