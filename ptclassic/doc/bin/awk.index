@@ -23,7 +23,7 @@ BEGIN {
 		upconv[uc] = uc;
 	}
 	# Formatting commands are inserted in the header file
-	# ~ptolemy/doc/headers/index.
+	# $PTOLEMY/doc/headers/index.
 }
 
 # index|page-number|term with spaces in it

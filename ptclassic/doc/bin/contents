@@ -4,8 +4,10 @@
 # On interrupt, remove temporary files
 onintr catch
 
-set dircmds = ~ptolemy/doc/bin/
-set dirheader = ~ptolemy/doc/headers/
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
+set dircmds = $PTOLEMY/doc/bin/
+set dirheader = $PTOLEMY/doc/headers/
 
 # Cull out the interesting entries from the input file
 fgrep -f ${dircmds}fgrep.contents $* > /tmp/ptc$$

@@ -3,11 +3,13 @@
 # $Id$
 # Print index for Ptolemy Almagest.
 
+if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
+
 set preview = 0
 set printoptions = "-me -P$PRINTER"
 set printcommand = "ditroff"
-set dircmds = ~ptolemy/doc/bin/
-set dirheader = ~ptolemy/doc/headers/
+set dircmds = $PRINTER/doc/bin/
+set dirheader = $PRINTER/doc/headers/
 
 while ($#argv)
 	switch ($argv[1])
