@@ -203,7 +203,7 @@ class ::tycho::File {
     proc emergencySave {} {}
 
     # Open a file browser, and then open an editor for the file.
-    proc openWin {} {}
+    proc openWin {{megawidget {}}} {}
 
     # Edit a file using the file extension to select an editor.
     proc openContext {filename} {}
@@ -694,6 +694,10 @@ body ::tycho::File::openItclHTMLPage {} {
 # is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
 #
+# The optional argument is the name of the megawidget that this proc
+# is being invoked from.  Usually, openWin is called from a keystroke binding,
+# and the megaWidget argument is %Q.  See TopLevel for an example
+#
 body ::tycho::File::openWinMethod {} {
     ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
 	    -command "::tycho::File::openContext " \
@@ -1120,10 +1124,17 @@ body ::tycho::File::indicateReadOnly {bool} {
 # is recognized.  Otherwise, the <code>Edit</code> class is used to open an
 # ordinary text editor.
 #
-body ::tycho::File::openWin {} {
-    ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
-	    -command "::tycho::File::openContext " \
-	    -text "Open File:"
+body ::tycho::File::openWin {{megawidget {}}} {
+    if { $megawidget == {} || [$megawidget isa ::tycho::File] != 1} {
+        ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
+                -command "::tycho::File::openContext " \
+                -text "Open File:"
+    } else {
+        ::tycho::Dialog::new FileBrowser [::tycho::autoName .fileBrowser] \
+                -command "::tycho::File::openContext " \
+                -text "Open File:" \
+                -default [$megawidget filename]
+    }
 }
 
 #####################################################################
