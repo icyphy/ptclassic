@@ -425,6 +425,6 @@ IntervalList::IntervalList(const char* argString) : head(0) {
 	istrstream strm(p, l);
 	strm >> *this;
 	if (l >= BUFLEN) {
-		LOG_DEL; delete p;
+		LOG_DEL; delete [] p;
 	}
 }
