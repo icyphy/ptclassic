@@ -5,9 +5,15 @@ A sinusoidal test signal is sent over a telephone channel simulation.
 .DE
 .SV $Revision$	$Date$
 .AL "Edward A. Lee"
+.EQ
+delim off
+.EN
 .LO "$PTOLEMY/src/domains/sdf/demo"
+.EQ
+delim $$
+.EN
 .LD
-Assuming a sampling rate of 8kHz, a sinusoid at 500 Hz
+Assuming a sampling rate of 8 kHz, a sinusoid at 500 Hz
 is transmitted through a simulation of a telephone channel with
 additive Gaussian noise, nonlinear distortion, and phase jitter.
 The time domain plot of the output clearly shows the phase jitter
