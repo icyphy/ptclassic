@@ -51,8 +51,8 @@ proc pigilib_init_env {} {
     set ptolemy $env(PTOLEMY)
     set PTOLEMY $env(PTOLEMY)
     if {$tk_version >= 8.0 } {
-	set env(TCL_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tcl
-	set env(TK_LIBRARY) $PTOLEMY/tcltk/itcl/lib/tk
+	set env(TCL_LIBRARY) $PTOLEMY/tcltk/tcl/lib/tcl
+	set env(TK_LIBRARY) $PTOLEMY/tcltk/tcl/lib/tk
 	set tk_library $env(TK_LIBRARY)
 	#uplevel #0 {
 	#    source $PTOLEMY/tcltk/itcl/lib/tcl/init.tcl
