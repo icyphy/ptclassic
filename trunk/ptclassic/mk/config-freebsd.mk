@@ -114,8 +114,8 @@ OCT_CC =	gcc $(OCTTOOLS_MM_LIB)
 # USERFLAGS - Ptolemy makefiles should never set this, but the user can set it.
 
 
-OPTIMIZER =	-O2 -mpentium -pip3
-#OPTIMIZER =	-O2 -m486 -pipe
+OPTIMIZER =	-O2 -m486 -pipe
+#OPTIMIZER =	-O2 -mpentium -pipe
 #OPTIMIZER =	-O2 -m486 -fomit-frame-pointer -pipe
 
 # Under gcc-2.7.0, you will need to add -fno-for-scope to $WARNINGS
