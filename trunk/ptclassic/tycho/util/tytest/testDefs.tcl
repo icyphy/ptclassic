@@ -56,7 +56,7 @@
 
 # Define testsuite in the global context so that we can check to
 # see if it is set inside functions that use dialog boxes.
-set testsuite 1
+# set testsuite 1
 
 if [info exist env(PTOLEMY)] {
     set TYCHO $env(PTOLEMY)/tycho
@@ -111,7 +111,12 @@ proc print_verbose {test_name test_description contents_of_test code answer} {
 
 proc test {test_name test_description contents_of_test passing_results} {
     global VERBOSE
+    global TY_TESTING
     global TESTS PASSED FAILED
+
+    # Set this so modal dialogs become -- ta-dah! -- non-modal
+    set TY_TESTING 1
+
     if {[string compare $TESTS ""] != 0} then {
         set ok 0
         foreach test $TESTS {
@@ -142,6 +147,9 @@ proc test {test_name test_description contents_of_test passing_results} {
         puts "---- $test_name FAILED" 
 	incr FAILED
     }
+
+    # Now we're done, reset the variable
+    unset TY_TESTING
 }
 
 proc dotests {file args} {
