@@ -234,9 +234,10 @@ int AsmTarget::modifyGalaxy() {
 				// must have P_CIRC but writer does not
 				// need it.
 				if (!hasCirc(p)) {
-					Block* newb =
+					Star* newb = (Star*)
 					   spliceStar(p, "CircToLin",0,dom);
 					if (!newb) return FALSE;
+					newb->setTarget(this);
 					PortHole* newP = 
 						newb->portWithName("input");
 					if (boundaryFlag) {
@@ -248,9 +249,10 @@ int AsmTarget::modifyGalaxy() {
 				// My writer runs more often than me.
 				// It needs PB_CIRC, I do not.
 				if (!hasCirc(p->far())) {
-					Block* newb = 
+					Star* newb =  (Star*)
 					   spliceStar(p, "LinToCirc",1,dom);
 					if (!newb) return FALSE;
+					newb->setTarget(this);
 					PortHole* newP = 
 						newb->portWithName("output");
 					if (boundaryFlag) {
@@ -261,16 +263,19 @@ int AsmTarget::modifyGalaxy() {
  			else {
 				// nonintegral rate conversion, both need
 				// PB_CIRC
-				Block* newb;
+				Star* newb;
 				PortHole* newP = p;
 				if (!hasCirc(newP)) {
-					newb = spliceStar(newP, "CircToLin", 0,dom);
+					newb = (Star*) spliceStar(newP, "CircToLin", 0,dom);
+					if (!newb) return FALSE;
+					newb->setTarget(this);
 					newP = newb->portWithName("input");
 					if (!newP) return FALSE;
 				}
 				if (!hasCirc(newP->far())) {
-					if (!spliceStar(newP, "LinToCirc", 1,dom))
-						return FALSE;
+					newb = (Star*) spliceStar(newP, "LinToCirc", 1,dom);
+					if (!newb) return FALSE;
+					newb->setTarget(this);
 				}
 			}
 		}
