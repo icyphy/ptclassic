@@ -19,8 +19,11 @@ deallocating memory for the objects, etc.
 #ifndef _DataStruct_h
 #define _DataStruct_h 1
 
-#include "type.h"
+#ifdef __GNUG__
+#pragma interface
+#endif
 
+#include "type.h"
 
 	//////////////////////////////////////
 	// class SingleLink
@@ -201,7 +204,8 @@ public:
 	void reset() { ref = list->lastNode;}
 	Pointer next();
 	Pointer operator++ () { return next();}
-protected:
+// a bug in g++ 1.96 makes things blow up if reconnect is protected. gak!
+// protected:
 // attach the ListIter to a different object
 	void reconnect(const SequentialList& l) {
 		list = &l; ref = l.lastNode;
