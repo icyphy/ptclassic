@@ -387,8 +387,7 @@ body ::tycho::Interactor::release {} {
 # you can use this method to have the picture being operated on
 # set to a different picture to the one being moused on, which is
 # very useful in some situations -- see
-# <a href="../../../../lib/widgets/doc/codeDoc/Slider.html">
-# <i>Slider</i></a> for an example.
+# <a href="Slider.html"><i>Slider</i></a> for an example.
 #
 body ::tycho::Interactor::target {args} {
     if { $args == "" } {
