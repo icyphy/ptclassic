@@ -139,7 +139,7 @@ void CGMultiTarget::setup() {
 	rm = new BooleanMatrix(nChildrenAlloc, nChildrenAlloc); 
     }
 
-    //choose the right scheduler
+    // choose the right scheduler
     chooseScheduler();
     
     // in case of heterogeneous targets, flatten the wormholes.
