@@ -221,10 +221,20 @@ proc ptkGo {name octHandle} {
     catch {$cntrWindow.panel.go configure -relief sunken}
     catch {$cntrWindow.panel.pause configure -relief raised}
     if {$prevRunFlag != {PAUSED}} {
-        curuniverse $name
-        ptkCompile $octHandle
-        run $numIter
-    } { cont }
+	# catch errors and reset the run flag.
+	if {[catch {
+        	curuniverse $name
+        	ptkCompile $octHandle
+        	run $numIter
+	   } msg] == 1} {
+		ptkClearRunFlag $name
+		error $msg
+	   }
+    } { if {[catch { cont } msg] == 1} {
+		ptkClearRunFlag $name
+		error $msg
+	   }
+    }
     if {$ptkRunFlag($name) != {PAUSED}} {
 	wrapup
 	ptkClearRunFlag $name
