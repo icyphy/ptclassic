@@ -17,6 +17,7 @@ $Id$
 #endif
 
 #include "CGCTarget.h"
+#include "CGDisplay.h"
 #include "FloatArrayState.h"
 #include "CGCStar.h"
 #include "GalIter.h"
@@ -203,16 +204,9 @@ void CGCTarget :: wrapup () {
 	myCode += "exit(0);\n";
 	myCode += "}\n";
 
+	// display code
 	char* codeFileName = writeFileName("code.c");
-	UserOutput codeFile;
-	if(!codeFile.fileName(codeFileName)) {
-	    Error::abortRun("Can't open code file for writing: ",codeFileName);
-	    return;
-	}
-	writeCode(codeFile);
-
-	// Display the code
-	Error::message(myCode);
+	if(!display(myCode, codeFileName)) return;
 
 	// Compile and run the code
 	StringList cmd = "cd ";
@@ -395,7 +389,7 @@ int CGCTarget :: codeGenInit(Galaxy& g) {
 	nextStar.reset();
 	while ((s = (CGCStar*) nextStar++) != 0) {
 		if (s->amIFork()) continue;
-		s->offsetInit();
+		s->initBufPointer();
 		s->initCode();
 	}
 
