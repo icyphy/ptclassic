@@ -22,6 +22,24 @@ $Id$
 #include "CG56Star.h"
 #include "KnownTarget.h"
 
+Sub56Target :: Sub56Target(const char* nam, const char* desc) :
+	CG56Target(nam,desc)
+{
+	initStates();
+}
+
+Sub56Target::Sub56Target(const Sub56Target& arg) :
+	CG56Target(arg)
+{
+	initStates();
+	copyStates(arg);
+}
+
+void Sub56Target :: initStates() {
+	xMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+	yMemMap.setAttributes(A_SETTABLE|A_NONCONSTANT);
+}
+
 int Sub56Target :: run() {
 	addCode("	rts\n");
 	addCode("ptolemyMain\n");
@@ -32,10 +50,9 @@ int Sub56Target :: run() {
 }
 
 void Sub56Target :: headerCode () {
-	CG56Target :: headerCode();
-	addCode(
-		"	org	p:\n"
+	addCode("	org p:\n"
 		"ptolemyInit\n");
+	CG56Target :: headerCode();
 };
 
 Block* Sub56Target::clone() const {
