@@ -65,7 +65,7 @@ class NodeListIter : private NamedObjListIter {
 public:
 	NodeListIter(NodeList& n) : NamedObjListIter(n) {}
 	Geodesic* next() { return (Geodesic*) NamedObjListIter::next();}
-	Geodesic* operator++() { return next();}
+	Geodesic* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 

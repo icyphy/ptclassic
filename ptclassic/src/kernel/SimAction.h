@@ -73,7 +73,7 @@ class SimActionListIter : private ListIter {
 public:
 	SimActionListIter(SimActionList& alist) : ListIter(alist) {}
 	SimAction* next() { return (SimAction*)ListIter::next();}
-	SimAction* operator++() { return next();}
+	SimAction* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 

@@ -87,7 +87,7 @@ class BlockListIter : private NamedObjListIter {
 public:
 	BlockListIter(BlockList& sl) : NamedObjListIter (sl) {}
 	Block* next() { return (Block*)NamedObjListIter::next();}
-	Block* operator++() { return next();}
+	Block* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 

@@ -99,7 +99,7 @@ public:
 	KnownTargetIter() { reset();}
 	void reset();
 	const Target* next();
-	const Target* operator++() { return next();}
+	const Target* operator++(POSTFIX_OP) { return next();}
 };
 
 #endif
