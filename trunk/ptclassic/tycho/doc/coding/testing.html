@@ -29,12 +29,12 @@ There are several ways to run the tests:
 <OL>
 
 <LI> The <A
-HREF="../../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
+HREF="../../kernel/gui/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</A>
 has a <CODE>Test</CODE> menu which has choices for the tests arranged
 by directory.
 
 <LI> Open a test file such as <A
-HREF="../../kernel/test/testStack.itcl"><CODE>$TYCHO/kernel/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
+HREF="../../kernel/gui/test/testStack.itcl"><CODE>$TYCHO/kernel/gui/test/testStack.itcl</CODE></A>  with Tycho and then evaluate the contents of the file with
 the <CODE>Evaluate</CODE> choice from the <CODE>File</CODE> menu 
 (<CODE>C-x C-r</CODE>).
 
@@ -53,7 +53,7 @@ in the <CODE>makefile</CODE>.
 After running <CODE>make sources</CODE>, you can open up either of these files
 and then evaluate it, which will run all the tests in that directory.
 
-<LI> <A HREF="../../kernel/test/alltychotests.tcl"><CODE>$TYCHO/kernel/test/alltychotests.tcl</CODE></A>
+<LI> <A HREF="../../kernel/gui/test/alltychotests.tcl"><CODE>$TYCHO/kernel/gui/test/alltychotests.tcl</CODE></A>
 
 <br>  <CODE>alltychotests.tcl</CODE> will run all the <CODE>alltests.itcl</CODE>
 files.  <CODE>$TYCHO/makefile</CODE> has two rules:
@@ -67,13 +67,13 @@ files.  <CODE>$TYCHO/makefile</CODE> has two rules:
 	</DL>
 If you are on a machine that does not have <CODE>make</CODE>, you can try
 <tcl><pre>
-source [file join $TYCHO kernel test alltychotests.tcl]
+source [file join $TYCHO kernel gui test alltychotests.tcl]
 </pre></tcl>
 <LI> The tests can also be run by changing to a <CODE>test</CODE>
 directory and typing <CODE>make</CODE> from a shell.  To try this out,
 click on the Tcl code below:
 <tcl><pre>
-::tycho::execModal {make} "[file join $TYCHO kernel test]"
+::tycho::execModal {make} "[file join $TYCHO kernel gui test]"
 </pre></tcl>
 
 <LI> The Tycho test suite can be run from the Tycho top-level
@@ -91,7 +91,7 @@ menu.  This menu choice loads the file
 <A HREF="../../editors/textedit/templates/testTemplate.itcl"><CODE>$TYCHO/editors/textedit/templates/testTemplate</CODE></A> into the Itcl editor.
 
 
- <P>The file <A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A> defines the Tcl proc <CODE>test</CODE>.
+ <P>The file <A HREF="../../kernel/gui/test/testDefs.tcl"><CODE>$TYCHO/kernel/gui/test/testDefs.tcl</CODE></A> defines the Tcl proc <CODE>test</CODE>.
 
  <P><CODE>test</CODE> takes four arguments:
 <OL>
@@ -137,7 +137,7 @@ test suite properly indicates that the test failed.
 
 <tcl><pre>
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
+    source [file join $TYCHO kernel gui test testDefs.tcl]
 } {}
 test testExample-1.1 {This is the first test example, it does very little} {
 	catch {this is an error} errMsg1
@@ -158,7 +158,7 @@ large test files so that other developers can quickly find the tests
 for the class they are working with.  Usually tests for the class
 <CODE>Foo</CODE> are found in the file <CODE>test/testFoo.itcl</CODE>
 
- <P>See <A HREF="../../kernel/test/testGraph.itcl"><CODE>$TYCHO/kernel/test/testGraph.itcl</CODE></A> for an example test file.
+ <P>See <A HREF="../../kernel/gui/test/testGraph.itcl"><CODE>$TYCHO/kernel/gui/test/testGraph.itcl</CODE></A> for an example test file.
 
  <P>Each test file should have the following parts:
 <OL>
@@ -170,7 +170,7 @@ is either <CODE>.tcl</CODE> or <CODE>.itcl</CODE>:
 <MENU>
 <LI> <CODE>.tcl</CODE> if the file can be sourced in a <CODE>tclsh</CODE>
 	that does not contain Itcl.
-	<CODE>$TYCHO/kernel/test/testPath.tcl</CODE> is an example.
+	<CODE>$TYCHO/kernel/gui/test/testPath.tcl</CODE> is an example.
 
 <LI> <CODE>.itcl</CODE> if the file contains Itcl constructs or tests
 	Itcl classes. 
@@ -182,7 +182,7 @@ Most of the tests are <CODE>.itcl</CODE> files.
 <LI> The code that sources testDefs.tcl:
 <PRE>
 if {[string compare test [info procs test]] == 1} then { 
-    source [file join $TYCHO kernel test testDefs.tcl]
+    source [file join $TYCHO kernel gui test testDefs.tcl]
 } {}
 </PRE>
 
@@ -265,10 +265,10 @@ the name of the dialog box.
 
 <p>
 For example, the
-<A HREF="../../kernel/test/testWidgets.itcl"><CODE>$TYCHO/kernel/test/testWidgets.itcl</CODE></A> script includes a test for <A HREF="../../kernel/YesNoQuery.itcl"><CODE>YesNoQuery</CODE></A>:
+<A HREF="../../kernel/gui/test/testWidgets.itcl"><CODE>$TYCHO/kernel/gui/test/testWidgets.itcl</CODE></A> script includes a test for <A HREF="../../kernel/gui/YesNoQuery.itcl"><CODE>YesNoQuery</CODE></A>:
 <tcl><pre>
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source $TYCHO/kernel/gui/test/testDefs.tcl
 } {}
 
 test YesNoQuery-2.1 {Test the modal ::tycho::askuser proc} {
@@ -286,12 +286,12 @@ scripts, even if the list contains only one script. Here is
 another sample test that simulates the user interaction to
 a series of two dialog boxes.
 The code being test is an example from
-the <a href="../../kernel/doc/internals/dialogclasses.html">
+the <a href="../../kernel/gui/doc/internals/dialogclasses.html">
 Dialog Classes</a> tutorial:
 
 <tcl><pre>
 if {[string compare test [info procs test]] == 1} then { 
-    source $TYCHO/kernel/test/testDefs.tcl
+    source $TYCHO/kernel/gui/test/testDefs.tcl
 } {}
 
 test sampleTest-1 {Test a series of modal dialogs} {
@@ -418,7 +418,7 @@ the Tcl test file should be at <CODE>test/NamedObj.tcl</CODE>.
 <H4><A NAME="getJavaInfo testing proc">getJavaInfo Testing Proc</A></H4>
  <P>TclBlend provides a Tcl procedure called <CODE>java::info</CODE>
 which returns information about an instance of a Java class.  
-<A HREF="../../kernel/test/testDefs.tcl"><CODE>$TYCHO/kernel/test/testDefs.tcl</CODE></A>
+<A HREF="../../kernel/gui/test/testDefs.tcl"><CODE>$TYCHO/kernel/gui/test/testDefs.tcl</CODE></A>
 defines the <CODE>getJavaInfo</CODE> Tcl proc, which takes a Java object
 handle and returns a string that describes the object's fields, methods
 constructors, and superclass.
@@ -697,7 +697,7 @@ in the distribution.
 
 The <A HREF="../../bin/tycho"><CODE>$TYCHO/bin/tycho</CODE></A> script
 can be tested with the <A
-HREF="../../kernel/test/chktycho"><CODE>$TYCHO/kernel/test/chktycho</CODE></A>
+HREF="../../kernel/gui/test/chktycho"><CODE>$TYCHO/kernel/gui/test/chktycho</CODE></A>
 script.
 
  <P>This script calls <CODE>tycho</CODE> with all the various
