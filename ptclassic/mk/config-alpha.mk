@@ -28,7 +28,9 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Author:  Kevin D. Kissell <kkissell@acri.fr>, Christopher Hylands
+# Authors:  Kevin D. Kissell <kkissell@acri.fr>,
+#	Frederic Boulanger <Frederic.Boulanger@supelec.fr>,
+#	Christopher Hylands
 #
 
 # --------------------------------------------------------------------
