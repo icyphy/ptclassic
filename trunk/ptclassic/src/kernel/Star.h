@@ -33,6 +33,12 @@ public:
 	// input PortHoles, generating Particles on the output PortHoles
         virtual void go();
 
+	// initialize domain-specific members.
+	virtual void prepareForScheduling() = 0;
+
+	// define firing 
+	virtual void fire();
+
 	// Method to print out description
 	StringList printVerbose ();
 

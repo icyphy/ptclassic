@@ -39,6 +39,9 @@ Star :: printVerbose () {
 // default go does nothing
 void Star :: go () {}
 
+// default fire() function
+void Star :: fire() { go() ;}
+
 // return myself as a Star.
 Star& Star :: asStar () const { return *this;}
 
