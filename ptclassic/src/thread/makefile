@@ -53,10 +53,11 @@ endif
 ############################################################
 # Directories for installing include files and libraries
 # for thread packages.
-THREAD_INCLUDE = $(ROOT)/thread/include.$(PTARCH)
-THREAD_LIB = $(ROOT)/thread/lib.$(PTARCH)
+THREAD_ROOT =		$(ROOT)/thread
+THREAD_INCLUDE = 	$(THREAD_ROOT)/include.$(PTARCH)
+THREAD_LIB = 		$(THREAD_ROOT)/lib.$(PTARCH)
 
-$(THREAD_INCLUDE) $(THREAD_LIB):
+$(THREAD_ROOT) $(THREAD_INCLUDE) $(THREAD_LIB):
 	mkdir $@
 
 #
@@ -73,7 +74,8 @@ GT_CFLAGS =	-DASM_SETJMP -DNOERR_CHECK -DSTACK_CHECK -DSIGNAL_STACK \
 GT_COMP_ASM =	$$(CC) $$(INC1) $$(INC2) $$(CFLAGS) -c $$*.S
 
 # Install gthreads library and include files.
-gthreads_install: $(THREAD_LIB) $(THREAD_INCLUDE) gthreads_$(PTARCH)
+gthreads_install: $(THREAD_ROOT) $(THREAD_LIB) $(THREAD_INCLUDE) \
+			gthreads_$(PTARCH)
 
 # Clean up.
 gthreads_clean: $(GT_OBJ)
