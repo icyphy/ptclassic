@@ -796,20 +796,11 @@ KcProfile (char* name) {
 		accum_string (name);
 		accum_string ("\n");
 	}
-	else if (b->isItAtomic ()) {
-		accum_string ("Star: ");
-		accum_string (name);
-		accum_string (" (");
-		accum_string (b->asStar().domain());
-		accum_string (")\n");
-	}
-	else {
-		accum_string ("Galaxy: ");
-		accum_string (name);
-		accum_string (" (");
-		accum_string (b->asGalaxy().myDomain);
-		accum_string (")\n");
-	}
+	accum_string(b->isItAtomic() ? "Star: " : "Galaxy: ");
+	accum_string (name);
+	accum_string (" (");
+	accum_string (b->domain());
+	accum_string (")\n");
 	const char* desc = b->descriptor();
 	accum_string (desc);
 // some descriptors don't end in '\n'
