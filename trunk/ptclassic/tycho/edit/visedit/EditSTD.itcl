@@ -134,8 +134,8 @@ body ::tycho::EditSTD::constructor {args} {
     # Enable items in Edit menu
     menubar enable "Edit Item"
 
-    # Renew items in Edit menu
-    menubar add {Edit Item} Edit -underline 0 \
+    # Change command of items in Edit menu
+    menubar entryconfigure {Edit Item} \
 	    -command "$this editItem selected"
 
     # Add items into Special menu
