@@ -209,14 +209,13 @@ body tycho::Glimpse::glimpseSearch {} {
     set glimpseOut [busy exec glimpse -y -n -H "$glimpseIndexDir" $pattern]
     set listGlimpseOut [split $glimpseOut '\\\n']
     foreach glimpseItem $listGlimpseOut {
-        regsub {^.*/tycho/(.*)} $glimpseItem {$TYCHO/\1} shortGlimpseItem
-        regexp {(^[^ :]*): ([0-9]*):(.*)} $shortGlimpseItem dummy \
+        regexp {(^[^ :]*): ([0-9]*):(.*)} $glimpseItem dummy \
                 filename linenum patternline
         if ![info exists filename] {
-            error "Internal Glimpse error: regexp `$shortGlimpseItem' failed!\n\
-                    line was: `$glimpseItem'\n\
+            error "Internal Glimpse error: regexp `$glimpseItem' failed!\n\
                     glimpse command returned: $glimpseOut" 
         }
+        set filename [::tycho::simplifyPath $filename]
         puts $fd "{[list "$filename $patternline"] $filename {line $linenum}}"
     }
     puts $fd "}\n# >"
