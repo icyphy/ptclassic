@@ -40,8 +40,7 @@ inline anyway).
         general. In particular, an arbitrary member can be
         removed (regardless of the position in the list) and
         the Links can be directly accessed in an efficient
-        manner. The LinkedList class does not have an
-        associated iterator.
+        manner. 
 
 **************************************************************************/
 #ifdef __GNUG__
@@ -81,7 +80,7 @@ void LinkedList::directRemove( Link * a ) {
 	 lastNode = 0;
 	 previous = 0;
     }
-    return 1;
+    return;
 }
 
 Link* LinkedList::removeLink(Link& a) {
@@ -233,5 +232,24 @@ int LinkedList::member (Pointer x) const {
 		f = f->next;
 	} while (f != lastNode);
 	return FALSE;
+}
+
+void LinkedListIter::reset() {
+    startAtHead = TRUE;
+    ref = 0;
+}
+
+void LinkedListIter::reconnect(const LinkedList& l) {
+    list = &l;
+    reset();
+}
+
+void LinkedListIter::remove() {
+    if (ref) {
+        ref = ((LinkedList*)list)->removeLink(*ref);
+        if (ref == list->lastNode) startAtHead = TRUE;
+    }
+    else if (list->lastNode)
+        ((LinkedList*)list)->removeLink(*list->lastNode);
 }
 
