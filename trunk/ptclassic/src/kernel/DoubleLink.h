@@ -160,7 +160,7 @@ public:
         void reset(DoubleLink *start) {ref=start;}
 	DoubleLink* nextLink();
 	Pointer	next(); 
-	Pointer operator++ () { return next();}
+	Pointer operator++ (POSTFIX_OP) { return next();}
 
 	// attach the DoubleLinkIter to a different object
 	void reconnect(const DoubleLinkList& l) {

@@ -234,7 +234,7 @@ class StateListIter : private NamedObjListIter {
 public:
 	StateListIter(StateList& sl) : NamedObjListIter (sl) {}
 	State* next() { return (State*)NamedObjListIter::next();}
-	State* operator++() { return next();}
+	State* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 

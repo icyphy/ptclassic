@@ -133,7 +133,7 @@ public:
 	// is default domain.
 	KnownBlockIter(const char* dom = 0);
 	const Block* next();
-	const Block* operator++() { return next();}
+	const Block* operator++(POSTFIX_OP) { return next();}
 	void reset();
 };
 

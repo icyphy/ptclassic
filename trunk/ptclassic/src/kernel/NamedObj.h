@@ -151,7 +151,7 @@ class NamedObjListIter : private ListIter {
 public:
 	NamedObjListIter(NamedObjList& sl) : ListIter (sl) {}
 	NamedObj* next() { return (NamedObj*)ListIter::next();}
-	NamedObj* operator++() { return next();}
+	NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 
@@ -160,7 +160,7 @@ class CNamedObjListIter : private ListIter {
 public:
 	CNamedObjListIter(const NamedObjList& sl) : ListIter (sl) {}
 	const NamedObj* next() { return (const NamedObj*)ListIter::next();}
-	const NamedObj* operator++() { return next();}
+	const NamedObj* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 

@@ -509,7 +509,7 @@ class PortListIter : private NamedObjListIter {
 public:
 	PortListIter(PortList& plist) : NamedObjListIter (plist) {}
 	PortHole* next() { return (PortHole*)NamedObjListIter::next();}
-	PortHole* operator++() { return next();}
+	PortHole* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 
@@ -582,7 +582,7 @@ class MPHListIter : private NamedObjListIter {
 public:
 	MPHListIter(MPHList& plist) : NamedObjListIter (plist) {}
 	MultiPortHole* next() { return (MultiPortHole*)NamedObjListIter::next();}
-	MultiPortHole* operator++() { return next();}
+	MultiPortHole* operator++(POSTFIX_OP) { return next();}
 	NamedObjListIter::reset;
 };
 

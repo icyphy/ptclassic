@@ -210,7 +210,7 @@ public:
 		if (p) p = p->next;
 		return tmp;
 	}
-	Interval* operator++() { return next();}
+	Interval* operator++(POSTFIX_OP) { return next();}
 };
 
 class CIntervalListIter {
@@ -226,7 +226,7 @@ public:
 		if (p) p = p->next;
 		return tmp;
 	}
-	const Interval* operator++() { return next();}
+	const Interval* operator++(POSTFIX_OP) { return next();}
 };
 
 

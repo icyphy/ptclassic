@@ -177,7 +177,7 @@ public:
 		return p;
 	}
 
-	Pointer operator++ () { return next();}
+	Pointer operator++ (POSTFIX_OP) { return next();}
 
 // attach the ListIter to a different object
 	void reconnect(const SequentialList& l) {

@@ -137,7 +137,7 @@ class StringListIter : private ListIter {
 public:
 	StringListIter(const StringList& s) : ListIter(s) {}
 	const char* next() { return (const char*)ListIter::next();}
-	const char* operator++() { return next();}
+	const char* operator++(POSTFIX_OP) { return next();}
 	ListIter::reset;
 };
 
