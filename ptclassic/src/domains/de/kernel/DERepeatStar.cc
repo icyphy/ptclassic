@@ -84,8 +84,8 @@ DERepeatStar::~DERepeatStar() {
 	LOG_DEL; delete feedbackOut;
 }
 
-void DERepeatStar :: refireAtTime(double when) {
-	feedbackOut->put(when) << 0.0;
+void DERepeatStar :: refireAtTime(double when, double value = 0.0) {
+	feedbackOut->put(when) << value;
 }
 
 int DERepeatStar :: canGetFired() {
