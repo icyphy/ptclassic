@@ -24,8 +24,8 @@ public:
 
   Complex* Compute( Complex* z1, Complex* z2 );
 
-  Complex getW( int m, int N ) {
-    double angle = ( Pi2 * m ) / N;
+  Complex getW( int m, int n ) {
+    double angle = ( Pi2 * m ) / n;
     return Complex( cos( angle ), sin( angle ) );
   }
 
