@@ -128,7 +128,8 @@ void GenericPort :: inheritTypeFrom(GenericPort& p) {
 // Basic idea: remove all pointers to me before deletion.
 
 GenericPort :: ~GenericPort () {
-	if (aliasedFrom) aliasedFrom->aliasedTo = 0;
+	if (aliasedFrom) aliasedFrom->aliasedTo = aliasedTo;
+	if (aliasedTo) aliasedTo->aliasedFrom = aliasedFrom;
 	if (!typePortPtr) return;
 	GenericPort* q = typePortPtr;
 	while (q->typePortPtr != this) q = q->typePortPtr;
@@ -172,7 +173,7 @@ void PortHole :: disconnect(int delGeo) {
 
 // Porthole constructor.
 PortHole :: PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
-		      myBuffer(0) {}
+		      myBuffer(0), myMultiPortHole(0) {}
 	
 
 // Porthole destructor.
@@ -486,6 +487,7 @@ PortHole& MultiPortHole :: installPort(PortHole& p) {
 	ports.put(p);
 	parent()->addPort(p.setPort(newName(), parent(), type));
 	p.inheritTypeFrom(*this);
+	p.setMyMultiPortHole(this);
 	return p;
 }
 
