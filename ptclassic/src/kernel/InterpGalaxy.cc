@@ -491,8 +491,11 @@ InterpGalaxy::addToKnownList(const char* outerDomain) {
 
 // If there was a domain change, this is a Wormhole.  Make the appropriate
 // type of wormhole, add it to the list, and change back to outerDomain
-	if ((Domain::named(outerDomain)->isGalWorm() == TRUE) ||
-	   (strcmp (outerDomain, KnownBlock::domain()) != 0)) {
+// We always create a wormhole for certain domains (those for which
+// isGalWorm is true)
+
+	if (Domain::named(outerDomain)->isGalWorm() ||
+	    strcmp (outerDomain, KnownBlock::domain()) != 0) {
 		Star& s = Domain::named(outerDomain)->newWorm(*this);
 		setBlock (myName, &s);
 		KnownBlock::addEntry (s, myName, 1);
@@ -525,18 +528,25 @@ Block* InterpGalaxy::blockWithDottedName (const char* dotname) {
 // ports, and states are members.
 
 InterpGalaxy :: ~InterpGalaxy () {
+	// delete permanent nodes
+	NodeListIter nextn(nodes);
+	for (int i = nodes.size(); i > 0; i--)
+		delete nextn++;
+
+	// delete component blocks
 	GalTopBlockIter nextb(*this);
-	for (int i = numberBlocks(); i > 0; i--)
+	for (i = numberBlocks(); i > 0; i--)
 		delete nextb++;
+
+	// delete ports
 	BlockPortIter nextp(*this);
 	for (i = numberPorts(); i > 0; i--)
 		delete nextp++;
+
+	// delete states
 	BlockStateIter nexts(*this);
 	for (i = numberStates(); i > 0; i--)
 		delete nexts++;
-	NodeListIter nextn(nodes);
-	for (i = nodes.size(); i > 0; i--)
-		delete nextn++;
 }
 
 // function to find Node with given name, or NULL if no match
