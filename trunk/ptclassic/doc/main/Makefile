@@ -26,7 +26,6 @@ $(DIRS):
 	cd $@; $(MAKE) $(MFLAGS) $(MAKEVARS) print
 
 print:
-	$(DOCBIN)/$(PRINTTITLE) $(OPTIONS) title
 	rm -f $(TMPFILE)
 	for x in $(DIRS); do \
 		cd $$x ; \
@@ -35,7 +34,7 @@ print:
 	done
 	$(DOCBIN)/$(PRINTSEC) $(OPTIONS) -H together init $(TMPFILE)
 	
-	$(PRINTTITLE) $(OPTIONS) title
+	$(DOCBIN)/$(PRINTTITLE) $(OPTIONS) title
 #	/bin/rm $(TMPFILE)
 
 preview:
