@@ -35,7 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDF Target, the default target to be used in the DDF
  domain. 
 
- If useOldScheduler is non-zero, we use the DDF scheduler distributed
+ If useFastScheduler is non-zero, we use the DDF scheduler distributed
  with Ptolemy 0.5.2.
 
  If restructure is 1, SDF stars are collected into clusters and scheduled
@@ -69,7 +69,7 @@ protected:
 	FloatState schedulePeriod;
 
 	// If this is nonzero, either of the new schedulers
-	// (but not the old scheduler) will run until deadlock
+	// (but not the fast scheduler) will run until deadlock
 	// in a single iteration.  This is sometimes useful for
 	// wormholes that are DDF on the inside.
 	IntState runUntilDeadlock;
@@ -81,7 +81,7 @@ protected:
 	IntState restructure;
 
 	// Use the original (0.5.2 version) DDF scheduler.
-	IntState useOldScheduler;
+	IntState useFastScheduler;
 
 	// For the original DDF scheduler, it defines the number of
 	// execution cycles to be overlapped in execution.
