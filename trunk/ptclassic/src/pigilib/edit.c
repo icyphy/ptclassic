@@ -35,9 +35,9 @@ $Id$
 #include <sys/types.h>
 #endif /* PTSVR4 */
 
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <string.h>
 #include <sys/file.h>
-#include "local.h"
 
 /* Include sol2compat.h, oct.h, list.h, and rpc.h */
 /* Defines boolean, octObject, lsList, and RPC data structures, respectively */

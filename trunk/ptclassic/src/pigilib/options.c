@@ -30,7 +30,9 @@ $Id$
 */
 
 /* Includes */
-#include "local.h"
+
+/* Standard includes */
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
 
 /* Include sol2compat.h, oct.h, list.h, and rpc.h */

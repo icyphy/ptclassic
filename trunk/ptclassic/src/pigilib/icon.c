@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 
 /* Includes */
-#include "local.h"
+#include "local.h"			/* include "ansi.h" and "compat.h" */
 #include <stdio.h>
 #include <sys/file.h>
 #include <sys/param.h>
