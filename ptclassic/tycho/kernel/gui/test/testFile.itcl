@@ -46,7 +46,6 @@ test File-constructor-1 {Create FileTester widget} {
 } {.f}
 
 test File-constructor-2 {Create File with -file option} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Yes, Stanley, a fine specimen indeed.}
     _file -file $foo
     # Have to put in this call to after{} because of
@@ -57,7 +56,6 @@ test File-constructor-2 {Create File with -file option} {
 } {Yes, Stanley, a fine specimen indeed.}
 
 test File-constructor-3 {Create File with non-existent -file option} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _rmfile $foo
     _file -file $foo
     # Have to put in this call to after{} because of
@@ -71,7 +69,6 @@ test File-constructor-3 {Create File with non-existent -file option} {
 # reload{}
 #
 test File-reload-1 {Reload while blank} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {That hat. Yes, the yellow one.}
     _file
     # Configure -file and then call reload
@@ -82,7 +79,6 @@ update
 after 500
 
 test File-reload-2 {Reload new file starting with blank} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {That hat. Yes, the yellow one.}
     _file
     # Configure -file and then call reload
@@ -94,8 +90,6 @@ update
 after 500
 
 test File-reload-3 {Reload after -file already set} {
-    set foo [file join $TYCHO kernel test testFile.junk]
-    set bar [file join $TYCHO kernel test testFile.knuj]
     _mkfile $foo {The rain in Spain}
     _mkfile $bar {falls mainly on the plain.}
     _file -file $foo
@@ -112,7 +106,6 @@ update
 after 500
 
 test File-reload-4 {Reload with non-existent file} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _rmfile $foo
     _file
     # Have to put in this call to after{} because of
@@ -131,7 +124,6 @@ test File-reload-4 {Reload with non-existent file} {
 # saveAsFile{} performs no checking or user-level dialog.
 #
 test File-saveAsFile-1 {Save with the same file name} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Fresh outta mud, dang it}
     _file -file $foo
     # Have to put in this call to after{} because of
@@ -145,8 +137,6 @@ test File-saveAsFile-1 {Save with the same file name} {
 } {Fresh outta mud, dang it}
 
 test File-saveAsFile-2 {Save with a different file name} {
-    set foo [file join $TYCHO kernel test testFile.junk]
-    set bar [file join $TYCHO kernel test testFile.knuj]
     _mkfile $foo {Earl Grey, hot}
     _rmfile $bar
      _file -file $foo
@@ -157,7 +147,7 @@ test File-saveAsFile-2 {Save with a different file name} {
     # To test that the save is happening, delete the file first
     .f saveAsFile $bar
     list [.f cget -file] [_rdfile $bar]
-} [list [file join $TYCHO kernel test testFile.knuj] {Earl Grey, hot}]
+} [list $bar {Earl Grey, hot}]
 
 #####################################################################
 # saveAs{}
@@ -165,8 +155,6 @@ test File-saveAsFile-2 {Save with a different file name} {
 # saveAs{} performs a number of checks on the file name and
 # initiates user-level dialogs.
 #
-set foo [file join $TYCHO kernel test testFile.junk]
-set bar [file join $TYCHO kernel test testFile.knuj]
 test File-saveAs-1 {Query and save with a new file} {
     _mkfile $foo {A highly developed capacity for reason}
     _rmfile $bar
@@ -180,7 +168,7 @@ test File-saveAs-1 {Query and save with a new file} {
     set TY_TEST_MODAL {
 	{
 	    %0 clear
-	    %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+	    %0 insert entry $bar
 	    update
 	    after 1000
 	    %0 ok
@@ -203,7 +191,7 @@ test File-saveAs-2 {Query and save with a new file in given directory} {
     set TY_TEST_MODAL {
         {
             %0 clear
-            %0 insert entry testFile.knuj
+            %0 insert entry [file tail $bar]
             update
             after 1000
             %0 ok
@@ -273,7 +261,7 @@ test File-saveAs-5 {Query and overwrite an existing file} {
     set TY_TEST_MODAL {
         {
             %0 clear
-            %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+            %0 insert entry $bar
             update
             after 1000
             %0 ok
@@ -299,7 +287,7 @@ test File-saveAs-6 {Query and cancel overwrite of an existing file} {
     set TY_TEST_MODAL {
         {
             %0 clear
-            %0 insert entry [file join $TYCHO kernel test testFile.knuj]
+            %0 insert entry $bar
             update
             after 1000
             %0 ok
@@ -319,7 +307,6 @@ after 500
 # save{}
 #
 test File-save-1 {Insert data and save} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _file -file $foo
     # Insert data and call save
     .f insertData {Oh, for goodness' sake, not the elephant again!}
@@ -328,7 +315,6 @@ test File-save-1 {Insert data and save} {
 } {Oh, for goodness' sake, not the elephant again!}
 
 test File-save-2 {Insert data and save new file} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _rmfile $foo
     _file
     .f insertData {Realistically? Not a chance.}
@@ -338,7 +324,7 @@ test File-save-2 {Insert data and save new file} {
     set TY_TEST_MODAL {
         {
             %0 clear
-            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            %0 insert entry $foo
             update
             after 1000
             %0 ok
@@ -350,7 +336,6 @@ test File-save-2 {Insert data and save new file} {
 } {1 {Realistically? Not a chance.}}
 
 test File-save-3 {Insert data and overwrite existing file} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Hardly worth deleting...}
     _file
     .f insertData {Magic! she thought.}
@@ -358,7 +343,7 @@ test File-save-3 {Insert data and overwrite existing file} {
     set TY_TEST_MODAL {
         {
             %0 clear
-            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            %0 insert entry $foo
             update
             after 1000
             %0 ok
@@ -373,7 +358,6 @@ test File-save-3 {Insert data and overwrite existing file} {
 } {1 {Magic! she thought.}}
 
 test File-save-4 {Don't overwrite existing file} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Hardly worth deleting...}
     _file
     .f insertData {Sinister thoughts crept unsummoned...}
@@ -383,7 +367,7 @@ test File-save-4 {Don't overwrite existing file} {
     set TY_TEST_MODAL {
         {
             %0 clear
-            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            %0 insert entry $foo
             update
             after 1000
             %0 ok
@@ -401,11 +385,9 @@ test File-save-4 {Don't overwrite existing file} {
 .f save
 
 test File-save-5 {Save an auto-save file} {
-    set foo [file join $TYCHO kernel test #auto#testFile.junk]
-    set bar [file join $TYCHO kernel test testFile.junk]
-    _mkfile $foo {Marvin's bullet-proof quilt}
-    _rmfile $bar
-    _file -file $foo
+    _mkfile $autofoo {Marvin's bullet-proof quilt}
+    _rmfile $foo
+    _file -file $autofoo
     update
     after 500
      # Script to select a filename
@@ -418,15 +400,13 @@ test File-save-5 {Save an auto-save file} {
     }
     # Save it
     set result [.f save]
-    list $result [_rdfile $bar]
+    list $result [_rdfile $foo]
 } {1 {Marvin's bullet-proof quilt}}
 
 test File-save-6 {Cancel saving an auto-save file} {
-    set foo [file join $TYCHO kernel test #auto#testFile.junk]
-    set bar [file join $TYCHO kernel test testFile.junk]
-    _mkfile $foo {The first warning sign of hypothermia}
-    _rmfile $bar
-    _file -file $foo
+    _mkfile $autofoo {The first warning sign of hypothermia}
+    _rmfile $foo
+    _file -file $autofoo
     update
     after 500
      # Script to select a filename
@@ -439,22 +419,21 @@ test File-save-6 {Cancel saving an auto-save file} {
     }
     # Save it
     set result [.f save]
-    list $result [file exists $bar]
+    list $result [file exists $foo]
 } {0 0}
 
 test File-save-7 {Save a NoName auto-save file} {
-    set foo [file join $TYCHO kernel test #auto#NoName]
-    set bar [file join $TYCHO kernel test testFile.junk]
-    _mkfile $foo {Mmmm... donuts}
-    _rmfile $bar
-    _file -file $foo
+    set autononame [file join $TYCHO kernel test #auto#NoName]
+    _mkfile $autononame {Mmmm... donuts}
+    _rmfile $foo
+    _file -file $autononame
     update
     after 500
     # Script to select a filename
     set TY_TEST_MODAL {
         {
             set result1 [%0 get entry]
-            %0 insert entry [file join $TYCHO kernel test testFile.junk]
+            %0 insert entry $foo
             update
             after 1000
             %0 ok
@@ -462,7 +441,7 @@ test File-save-7 {Save a NoName auto-save file} {
     }
     # Save it
     set result2 [.f save]
-    list $result1 $result2 [_rdfile $bar]
+    list $result1 $result2 [_rdfile $foo]
 } {{} 1 {Mmmm... donuts}}
 
 
@@ -470,7 +449,6 @@ test File-save-7 {Save a NoName auto-save file} {
 # saveQuery{}
 #
 test File-saveQuery-1 {If not modified, do nothing} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Verbal veracity}
     _file -file $foo
     # Wait around for a while...
@@ -484,7 +462,6 @@ test File-saveQuery-1 {If not modified, do nothing} {
 } {2 {}}
 
 test File-saveQuery-2 {If modified, answer yes} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Voluminous verbiage}
     _file -file $foo
     # Wait around for a while...
@@ -508,7 +485,6 @@ test File-saveQuery-2 {If modified, answer yes} {
 } {1 {Voluble vilification}}
 
 test File-saveQuery-3 {If modified, answer no} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Vellacious vivre}
     _file -file $foo
     # Wait around for a while...
@@ -534,7 +510,6 @@ test File-saveQuery-3 {If modified, answer no} {
 .f save
 
 test File-saveQuery-4 {If modified, cancel} {
-    set foo [file join $TYCHO kernel test testFile.junk]
     _mkfile $foo {Vital vivisection}
     _file -file $foo
     # Wait around for a while...
@@ -559,8 +534,26 @@ test File-saveQuery-4 {If modified, cancel} {
 # So we can delete it...
 .f save
 
+############################################################################
+# altFile{}
+#
+test File-altFile-1 {Switch to another file} {
+    _mkfile $foo {Verbal veracity}
+    _file -file $foo
+    # Wait around for a while...
+    update
+    after 1000
+    # Save it, checking that the file is not touched
+    set fd [open $foo "w+"]
+    close $fd
+    set result [.f saveQuery]
+    list $result [_rdfile $foo]
+} {2 {}}
+
 ########################################################################
 ## CLEAN UP
-catch {file delete [file join $TYCHO kernel test testFile.junk]}
-catch {file delete [file join $TYCHO kernel test testFile.knuj]}
+catch {file delete $foo}
+catch {file delete $bar}
+catch {file delete $autofoo}
+catch {file delete $autononame}
 
