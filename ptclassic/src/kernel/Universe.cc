@@ -50,7 +50,7 @@ type(dom), galP(g) {
 }
 
 Runnable :: Runnable (Target* tar, const char* dom, Galaxy* g) :
-pTarget(tar), type(dom), galP(g) {
+type(dom), galP(g), pTarget(tar) {
 	if (!myTarget())
 		pTarget = KnownTarget::clone(KnownTarget::defaultName(type));
 }
