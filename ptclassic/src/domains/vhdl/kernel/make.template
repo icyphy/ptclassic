@@ -14,7 +14,10 @@
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/X/kernel
+VPATH = $(ROOT)/src/domains/vhdl/kernel
+
+# do this for Synopsys
+ARCH = $(PTARCH)
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
@@ -35,7 +38,8 @@ LIB=libvhdl.$(LIBSUFFIX)
 HDRS= VHDLPortHole.h VHDLStar.h VHDLTarget.h VHDLGeodesic.h VHDLForkNode.h \
 	VHDLWormhole.h VHDLObj.h VHDLObjList.h VHDLPort.h  VHDLState.h \
 	VHDLGeneric.h VHDLVariable.h VHDLSignal.h VHDLArc.h VHDLPortVar.h \
-	VHDLPortMap.h VHDLGenericMap.h VHDLCompDecl.h VHDLCompMap.h
+	VHDLPortMap.h VHDLGenericMap.h VHDLCompDecl.h VHDLCompMap.h \
+	VHDLCluster.h VHDLFiring.h
 
 # Library objects
 OBJS= $(HDRS:.h=.o) VHDLDomain.o
