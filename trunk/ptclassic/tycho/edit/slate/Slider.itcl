@@ -40,9 +40,9 @@
 # <p>
 # To create a simple slider:
 # <tcl><pre>
-#     ::tycho::Slider .s -text Fred -resolution 0.5 -command puts
+#     ::tycho::Slider .s -label Fred -resolution 0.5 -command puts
 #     pack .s
-#     .s centerOnScreen
+#     wm deiconify .
 # </pre></tcl>
 # <p>
 # To move the slider, use the left button on the horizontal ``bar''
