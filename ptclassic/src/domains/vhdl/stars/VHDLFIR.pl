@@ -85,36 +85,20 @@ For more information about polyphase filters, see F. J. Harris,
 		}
 		desc { Filter tap values. }
 	}
-	defstate {
-		name {delays}
-		type {floatarray}
-		default {0}
-		attributes { A_NONCONSTANT|A_NONSETTABLE }
-	}
 	go {
 	  StringList out;
 	  int tapSize = taps.size();
 	  // Perform calculation.
 	  out << "$ref(signalOut) $assign(signalOut) ";
-	  out << "$ref(signalIn)*$ref(taps,0)";
+	  out << "$ref(signalIn,0)*$ref(taps,0)";
 	  for (int i=1; i<int(tapSize); i++) {
-	    out << " + $ref(delays,";
+	    out << " + $ref(signalIn,";
 	    out << i;
 	    out << ")*$ref(taps,";
 	    out << i;
 	    out << ")";
 	  }
 	  out << ";\n";
-	  // State update.
-	  out << "$ref(delays,1) $assign(delays) ";
-	  out << "$ref(signalIn);\n";
-	  for (int j=2; j<int(tapSize); j++) {
-	    out << "$ref(delays,";
-	    out << j;
-	    out << ") $assign(delays) $ref(delays,";
-            out << j-1;
-            out << ");\n";
-	  }
 	  addCode(out);
 	  out.initialize();
 	}
