@@ -304,6 +304,7 @@ int POct::MakePList(char* parameterList, ParamListType* pListp) {
     // By default, return an empty parameter list (0 elements)
     pListp->length = 0;
     pListp->array = 0;
+    pListp->dynamic_memory = 0;
 
     if (strcmp(parameterList, "NIL") == 0) {
         return TRUE;
