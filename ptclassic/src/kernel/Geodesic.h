@@ -74,7 +74,7 @@ public:
 	// also calls initialize() for each of those Particles
 	// TO BE DONE:  There should be a way to specify the value
 	// of these initial particles.
-	void initialize();
+	virtual void initialize();
 
 	// Put a Particle into the Geodesic
 	void put(Particle* p) {putTail(p); sz++;}
