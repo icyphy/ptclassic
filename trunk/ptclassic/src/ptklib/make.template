@@ -54,16 +54,25 @@ SRCS = 		$(LIBCSRCS) $(LIBCPPSRCS)
 
 OBJS = 		$(LIBCSRCS:.c=.o) $(LIBCPPSRCS:.cc=.o)
 
-LIB =		libptk.$(LIBSUFFIX)
+# Library name
+# Hack to be sure we don't build a shared version of libptk.a
+# If we do have a shared libptk.so, then we need to be sure to include
+# -lg++ -lcurses when building cgctcltk binaries.
+# This is because libptk.so will have an RPATH that includes the libg++.so
+# that in turn has undeclared curses symbols.
+#LIB =		libptk.$(LIBSUFFIX)
+LIBNONSHARED=	libptk.a
+
+
 
 # extra source files: tcl/tk script files
 SCRIPTS = ptkPlot.tcl
 
 EXTRA_SRCS = 	$(SCRIPTS) README
 
-all:	makefile $(LIB)
+all:	makefile $(LIBNONSHARED)
 
-install: makefile $(LIBDIR)/$(LIB)
+install: makefile $(LIBNONSHARED) $(LIBDIR)/$(LIBNONSHARED)
 
 # include the X11, oct and tcl headers for C++ as well as C
 INCL =		-I$(KERNDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) $(X11_INCSPEC)
