@@ -37,7 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
  * for porting to other window systems.
  */
 
-#include "copyright.h"
 #include "xgout.h"
 #include "params.h"
 
