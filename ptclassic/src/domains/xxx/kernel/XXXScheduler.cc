@@ -70,13 +70,8 @@ void XXXScheduler::setup()
 // Run (or continue) the simulation.
 int XXXScheduler::run()
 {
-    if (!galaxy()) {
-	Error::abortRun(domain(), " domain has no galaxy to run");
-	return FALSE;
-    }
-
-    if (SimControl::haltRequested()) {
-	Error::abortRun(*galaxy(), "Cannot continue.");
+    if (SimControl::haltRequested() || !galaxy()) {
+	Error::abortRun(domain(), " Scheduler has no galaxy to run");
 	return FALSE;
     }
 
