@@ -274,7 +274,7 @@ void CGCTarget :: setGeoNames(Galaxy& galaxy) {
 // this routine just determines the buffer sizes, and buffer properties.
 
 int CGCTarget :: allocateMemory() {
-	int loop = int(loopScheduler);
+	int loop = int(loopingLevel);
 	Galaxy& g = *galaxy();
 	// set up the forkDests members of each Fork inputs.
 	setupForkDests(g);
