@@ -230,7 +230,13 @@ body ::tycho::PtIconLibrary::instantiate {icon uniqueName layout args} {
 		    lappend options -color [$elt getAttribute "color"]
 		}
 		if { [$elt hasAttribute "fill"] } {
-		    lappend options -color [$elt getAttribute "fill"]
+		    lappend options -fill [$elt getAttribute "fill"]
+		}
+		if { [$elt hasAttribute "hsize"] } {
+		    lappend options -hsize [$elt getAttribute "hsize"]
+		}
+		if { [$elt hasAttribute "vsize"] } {
+		    lappend options -vsize [$elt getAttribute "vsize"]
 		}
 		# puts "Got graphics \"$graphics\""
 		break

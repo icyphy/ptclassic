@@ -157,12 +157,24 @@ body ::tycho::PtVertexController::add {libname iconname {uniqueName {}} {coords 
     # puts [$icon toString]
 
     set type [$icon getChildElement entitytype]
+    puts [$type toString]
     set realname [$type getAttribute "name"]
+    set etype [$type getAttribute "type"]
 
     if { $uniqueName == "" } {
 	set uniqueName [::tycho::autoName $realname]
     }
-    $simulation addActor $realname $uniqueName
+    switch -exact $etype {
+	"actor" {
+	    $simulation addActor $realname $uniqueName
+	}
+	"port" {
+	    $simulation addPort $realname $uniqueName
+	}
+	"composite" {
+	    puts "FIXME FIXME Can't do composite actors yet"
+	}
+    }
 
     # Mess with the history
     $graph mark set temp
@@ -174,36 +186,15 @@ body ::tycho::PtVertexController::add {libname iconname {uniqueName {}} {coords 
     # Place the icon
     if { $coords == "" } {
 	set coords [$slateview place]
-    }
+	set coords [list \
+		[expr [lindex $coords 0] + 50] \
+		[expr [lindex $coords 1] + 40]]
+    }    
     eval place [list $iconlib $iconname $uniqueName] $coords
 
     # Notify views that the data has been modified
     $layout notify event "modified"
     $graph notify event "modified"
-
-    set OLDSTUFF {
-	# puts "PtVertexController::add $libname $starname"
-	set lib [$slateview library access $libname]
-
-	# Instantiate the star as a vertex of the graph
-	set v [$lib instantiate $starname $graph -itemtype vertex]
-
-	# Remember the library it came from and its name
-	$graph attrset $v \
-		-master [$lib cget -modelname]#[join $starname "."]
-	
-	# Find the icon of the star
-	set iconmodel [iconlib $v]
-	set iconname [iconname $v]
-	
-	# Place the icon
-	set coords [$slateview place]
-	eval place [list $iconmodel $iconname $v] $coords
-	
-	# Notify views that the data has been modified
-	$layout notify event "modified"
-	$graph notify event "modified"
-    }
 }
 
 ########################################################################
@@ -469,10 +460,10 @@ body ::tycho::PtVertexController::place {iconlib iconname starname x y} {
     # Move its nw corner to the right position. Find the position
     # from my slate, and then move by publishing to the model
     # $_slate moveto $id $iconx $icony "nw" -shape rectangle
-    set current [$layout forward feature $starname "nw" -shape "rectangle"]
-    set dx [expr $x - [lindex $current 0]]
-    set dy [expr $y - [lindex $current 1]]
-    $layout publish move $starname $dx $dy
+    #set current [$layout forward feature $starname "nw" -shape "rectangle"]
+    #set dx [expr $x - [lindex $current 0]]
+    #set dy [expr $y - [lindex $current 1]]
+    #$layout publish move $starname $dx $dy
 
     # Compact the history and replace the undo command
     $layout history compact vertex current
