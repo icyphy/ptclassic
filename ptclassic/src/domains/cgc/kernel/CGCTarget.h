@@ -50,6 +50,9 @@ class SDFScheduler;
 class CGCTarget : public HLLTarget {
 public:
 	CGCTarget(const char* name, const char* starclass, const char* desc);
+
+        ~CGCTarget();
+
 	/*virtual*/ Block* makeNew() const;
 
 	// Class identification.

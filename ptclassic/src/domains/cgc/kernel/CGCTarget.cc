@@ -95,8 +95,12 @@ CGCTarget::CGCTarget(const char* name,const char* starclass,
 	addStream("mainInit", &mainInit);
 	addStream("commInit", &commInit);
 	addStream("mainClose", &mainClose);
-	LOG_NEW; mappings = new TextTable;
-      }
+	mappings = new TextTable;
+}
+
+CGCTarget::~CGCTarget() {
+    delete mappings;
+}
 
 StringList CGCTarget::comment(const char* text, const char* b,
     const char* e, const char* c)
