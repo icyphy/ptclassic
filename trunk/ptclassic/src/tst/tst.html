@@ -205,12 +205,35 @@ all the demos from the graphical interface</H2>
 	cd $PTOLEMY/obj.$PTARCH/tst; make test; make diff
 	</LISTING>
 
+	 <P>To update the 'known good' results, do:
+	<LISTING>
+	cd $PTOLEMY/src/tst
+	make test
+	make updateresults
+	</LISTING>
+
+	<CODE>cd $PTOLEMY/src/tst</CODE>
 <H3>Running with an old ptcl</H3>
 
 	It is possible to run the test with an old ptcl by running
 	<CODE>$PTOLEMY/src/tst/sbin/makeoldptcl</CODE> <I>/Your/Old/Ptolemy</I>
 	<CODE>test</CODE>
 
+	<H4>Causes of differences in results between old and new
+	<CODE>ptcl</CODE>s</H4>
+
+	<MENU>
+	<LI> You will probably want to build the ptcl test code with
+	the same <CODE>$PTOLEMY</CODE> that you used to build the
+	master results file.  The demos are likely to have changed
+	between versions of Ptolemy, so your results will be different.
+
+	<LI> Some stars may be present in a newer <CODE>ptcl</CODE>, but 
+	not in the older <CODE>ptcl</CODE>
+
+	<LI> Bugs in the old <CODE>ptcl</CODE> may be fixed in the new
+	version.
+	</MENU>
 
 
 <H3>Test Suite Bugs</H3>
