@@ -105,7 +105,8 @@ class ::tycho::File {
     method altFile {}
 
     #### evaluate
-    # Query the user for a filename, then evaluate its contents as Tcl commands.
+    # Query the user for a filename, then evaluate its contents as 
+    # Tcl commands. 
     method evaluate {}
 
     #### filename
@@ -131,6 +132,12 @@ class ::tycho::File {
     #### markUnmodified
     # Mark the window as not containing modified data.
     method markUnmodified {}
+
+    #### nextRevAction
+    # Check in a file using the selected revision control program command
+    # if the file is writeable. Otherwise check the file out using the
+    # specified revision control program command. 
+    method nextRevAction {}
 
     #### print
     # Print the contents of the file. The default behavior is an error.
@@ -428,6 +435,12 @@ body ::tycho::File::constructor {args} {
 	    -command "$this insertFile"
     
     $itk_component(fileMenu) add command \
+	    -label "Revision Control " \
+	    -underline 0 \
+	    -accelerator "C-x v" \
+	    -command "$this nextRevAction"
+
+    $itk_component(fileMenu) add command \
 	    -label Save \
 	    -underline 0 \
 	    -accelerator "C-x C-s" \
@@ -533,6 +546,7 @@ body ::tycho::File::constructor {args} {
     bind $prefix <Control-x><Key-i> "$this insertFile; break"
     bind $prefix <Control-x><Key-p> "$this print; break"
     bind $prefix <Control-x><Control-r> "$this evaluate; break"
+    bind $itk_component(hull) <Control-x><v> "$this nextRevAction; break"
 
     # The following initialize options and then invoke any
     # configuration options, assuming there are options specified.
@@ -600,7 +614,7 @@ body ::tycho::File::destructor {} {
 # Query the user for a filename, insert it into the current editor.
 #
 body ::tycho::File::altFile {} {
-    error "Sorry, insert file not implemented yet."
+    error "Sorry, alternate file not implemented yet."
 }
 
 #####################################################################
@@ -665,6 +679,50 @@ body ::tycho::File::markUnmodified {} {
 	    $itk_component(dismiss) configure -text "DISMISS"
 	}
 	set modified 0
+    }
+}
+
+###################################################################
+#### nextRevAction
+# Check to see if a filename is associated with the editor, if not 
+# fail and inform the user. If the file has not been saved we will 
+# do so at this point. Then check in the file if it is writeable, 
+# prompting for a message, and reload the new file with the insert
+# cursor at the same location. If the file is not writeable then 
+# check the file out and reload the new file with the insert cursor 
+# at the same location. If the file is not under revision control, 
+# then we place it under control after asking the user if this is 
+# what he wants. If the necessary revision control directory does 
+# not exist then create it if we can.
+#
+body ::tycho::File::nextRevAction {} {
+    set revclass [::tycho::File::getOption revclass]
+    set currentfile [$this filename]
+    set topwin [winfo toplevel $itk_component(hull)]
+    if [winfo exists $topwin.revcontrol] {
+	wm deiconify $topwin.revcontrol
+	raise $topwin.revcontrol
+	$topwin.revcontrol configure -file $currentfile
+	$topwin.revcontrol focusin
+    } {
+	if {$topwin != "" &&  \
+		[uplevel #0 info objects $topwin] != "" && \
+		[$topwin isa ::tycho::Edit]} {
+	    set currentTitle $currentfile
+	} {
+	    set currentTitle "Revision Control Window"
+	}
+
+	uplevel #0 "
+	    $revclass $topwin.revcontrol \
+		    -text {Select desired revision control command} \
+		    -object $this \
+		    -textobject $itk_component(text) \
+		    -file $currentfile \
+		    -geometry +0+0 \
+		    -before $itk_component(hull) \
+		    -title $currentTitle "
+	    wm deiconify $topwin.revcontrol
     }
 }
 
