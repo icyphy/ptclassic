@@ -54,13 +54,34 @@ void CGFullConnect::start() {
 		nChildrenAlloc = nprocs;
 		strcpy (oldChildType, childType);
 		for (int i = 0; i < nChildrenAlloc; i++) {
-			Target* t = KnownTarget::clone(childType);
+			Target* t = createChild();
 			if (!t) return;
 			addChild(*t);
-			t->start();
+			t->initialize();
 		}
 	   }
 	}
+	//choose the right scheduler
+	chooseScheduler();
+
+	ParScheduler* tempSched = (ParScheduler*) mySched();
+	tempSched->setUpProcs(nChildrenAlloc);
+	parProcs = tempSched->myProcs();
+
+	canProcs.create(nChildrenAlloc);
+
+	// CG stuff
+	LOG_DEL; delete dirFullName;
+	dirFullName = writeDirectoryName(destDirectory);
+	myCode.initialize();
+}
+
+Target* CGFullConnect :: createChild() {
+	return KnownTarget::clone(childType);
+}
+	
+void CGFullConnect :: chooseScheduler() {
+
 	delSched();
 	if (int(ignoreIPC)) {
 		LOG_NEW; setSched(new QuasiScheduler(this, logFile));
@@ -71,12 +92,6 @@ void CGFullConnect::start() {
 	} else {
 		LOG_NEW; setSched(new DLScheduler(this, logFile, 1));
 	}
-
-	ParScheduler* tempSched = (ParScheduler*) mySched();
-	tempSched->setUpProcs(nChildrenAlloc);
-	parProcs = tempSched->myProcs();
-
-	canProcs.create(nChildrenAlloc);
 }
 
 int CGFullConnect::setup(Galaxy& gal) {
@@ -108,7 +123,7 @@ CGFullConnect::~CGFullConnect() {
 	delSched();
 }
 
-void CGFullConnect::addCode(const char* code) {
+void CGFullConnect :: addCode(const char* code) {
 	child(curChild)->addCode(code);
 }
 
@@ -122,26 +137,23 @@ int CGFullConnect :: totalWorkLoad() {
 
 extern "C" int displayGanttChart(const char*);
 
-void CGFullConnect::wrapup() {
-	StringList logMsg;
-
-//
 // Display Gantt chart if requested.
+void CGFullConnect::displaySchedule(ParScheduler* s) {
         if (int(ganttChart)) {
             UserOutput o;
             const char* gname = tempFileName();
             o.fileName(gname);
-            ((ParScheduler*)mySched())->writeGantt(o);
+            s->writeGantt(o);
             displayGanttChart(gname);
             unlink(gname);
         }
+}
 
+void CGFullConnect::wrapup() {
+
+	displaySchedule((ParScheduler*) mySched());
+	StringList logMsg;
 	for (int i = 0; i < nProcs(); i++) {
-
-		// call wrapup function once for each processor.
-//		setCurChild(i);
-//		Target::wrapup();
-
 		// write out generated code.
 		UserOutput out;
 		StringList name = (const char*)filePrefix;
