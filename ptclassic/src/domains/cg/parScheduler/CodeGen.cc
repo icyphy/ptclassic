@@ -147,8 +147,7 @@ void UniProcessor :: createSubGal() {
 // -DCGDDF_CODEGEN_CC_WORKAROUND
 //  cd $PTOLEMY/obj.$PTARCH/domains/cg/parScheduler; rm -f CodeGen.o
 //  make USERFLAGS=-DCGDDF_CODEGEN_CC_WORKAROUND install
-
-// 
+//
 #ifdef CGDDF_CODEGEN_CC_WORKAROUND
                 Block* black = 0;
                 Block* cst = 0;
