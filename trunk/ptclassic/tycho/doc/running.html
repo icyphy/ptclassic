@@ -10,6 +10,7 @@
 <LI><a href="#standalone execution">Stand-alone Execution</a>
 <LI><a href="#Ptolemy with Tycho">Executing Tycho with Ptolemy</a>
 <LI><a href="#debugging Tycho with Ptolemy">Debugging Tycho with Ptolemy</a>
+<LI><a href="#customizing Tycho on startup">Customizing Tycho on Startup</a>
 </OL>
 <p>
 Tycho is designed to be used as a stand-alone program or on conjunction
@@ -19,25 +20,31 @@ design environment developed at U.C. Berkeley.
 <h2>Setup</h2>
 </a>
 <p>
-If you are set up to run Ptolemy version 0.6 or higher, then
+If you are set up to run Ptolemy version 0.6 or higher, and
+Tycho is installed in the Ptolemy tree, then
 you are already set up to run Tycho.
 If you do not have Ptolemy installed
 on your system, or are not set up to run Ptolemy,
-then you must have the program <a name=itkwish>"itkwish"</a> in your path.
+then you must have the program <a name=itkwish>"itkwish"</a> in your
+<a name="path envvironment variable">path</a>.
 This program is a generic Itcl shell.
 You must be running Itcl version 2.0 or higher.
 <!-- FIXME: Need pointers here to how to get it, and instructions -->
 <!-- on how to check the version. -->
+You will also need to have the tycho/bin directory in your path.
 In addition, you will need to set an
 <a name="environment variables">environment variable</a>
 <a name="TYCHO environment variable">TYCHO</a>
 to point to the installation directory for Tycho.
-For example, if Tycho is installed in /usr/tools/tycho,
-then you could put the following line in your .cshrc file:
+For example, if Tycho is installed in /usr/tools/tycho and
+Itcl is installed in /usr/tools/itcl/bin,
+then you could put the following lines in your .cshrc file (assuming you
+use csh):
 <pre>
+    set path = (/usr/tools/tycho/bin /usr/tools/itcl/bin $path)
     setenv TYCHO /usr/tools/tycho
 </pre>
-This environment variable can also be used to control which of
+The TYCHO environment variable can also be used to control which of
 several versions of Tycho you run, if you have more than one
 version installed on your system.
 <p>
@@ -124,6 +131,19 @@ Of course, there is no guarantee that this will work, so
 files are saved with the prefix "#crash#". When the file is 
 reopened Tycho will check to see if a #crash# file exists, and if 
 it does, give the user the option of opening it.
+<p>
+<a name="customizing Tycho on startup">
+<h2>Customizing Tycho on Startup</h2>
+</a>
+<p>
+You can configure Tycho to execute some Tcl code on startup.
+Simply create a <a name=".tycho directory">directory called ".tycho"</a>
+in your home directory and a file called
+<a name="tychorc.tcl file">"tychorc.tcl"</a> in that directory.
+That file will automatically be sourced on startup.
+Note that the .tycho directory is used to store other state
+information for Tycho, such as your personal dictionary for spelling
+checks.
 <p>
 <a href="index.html">Tycho Home Page</a><br>
 <p>
