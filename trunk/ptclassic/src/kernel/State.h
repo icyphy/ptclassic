@@ -185,9 +185,6 @@ public:
 	// class identification
 	int isA(const char*) const;
 
-	// an external interpreter for evaluating commands
-	InvokeInterp interp;
-
 	// lookup state from name
 	const State* lookup(const char*, Block*);
 
@@ -215,6 +212,12 @@ protected:
 	ParseToken evalFloatTerm(Tokenizer& lexer);
 	ParseToken evalFloatFactor(Tokenizer& lexer);
 	ParseToken evalFloatAtom(Tokenizer& lexer);
+
+	StringList parseFileName(const char* fileName);
+	StringList parseNestedExpression(const char* expression);
+
+	// an external interpreter for evaluating commands
+	InvokeInterp interp;
 
 private:
 	// pushback token, for use in parsing
