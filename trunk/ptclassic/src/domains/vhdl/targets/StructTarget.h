@@ -156,6 +156,9 @@ private:
 	VHDLStateList stateList;
 	VHDLClusterList clusterList;
 
+	// This is where to store and look for persistent signals.
+        VHDLSignalList topSignalList;
+
 	// The following are for keeping track of components and
 	// signals within one firing.
 	VHDLPortList firingPortList;
