@@ -40,6 +40,12 @@ limitation of liability, and disclaimer of warranty provisions.
 		desc { Width of bins for histogram.}
 	}
 	defstate {
+		name {showPercent}
+		type {int}
+		default {FALSE}
+		desc {Show Y-axis as percentages rather than counts.}
+	}
+	defstate {
 		name {options}
 		type {string}
 		default {"-bb =800x400"}
@@ -52,10 +58,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	hinclude { "Histogram.h" }
 	setup {
 		his.initialize(this,binWidth,options,title,saveFile);
+		his.setPercentageDisplay(int(showPercent));
 	}
 	go {
-		float data = float(input%0);
-		his.addPoint(data);
+		his.addPoint(double(input.get()));
 	}
 	wrapup {
 		his.terminate();

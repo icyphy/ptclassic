@@ -116,6 +116,7 @@ XHistogram :: XHistogram () {
 	LOG_NEW; display = new XGraph;
 	hist = 0;
 	optstring = 0;
+	showPercentages = 0;
 }
 
 void XHistogram :: initialize(Block* parent, double binW, const char* options,
@@ -125,23 +126,26 @@ void XHistogram :: initialize(Block* parent, double binW, const char* options,
 	sprintf(numstr, "%g", binW/2);
 	StringList buf = "-bar -nl";
 	buf << " -brw " << numstr << " " << options;
+	LOG_DEL; delete [] optstring;
 	optstring = savestring(buf);
 	display->initialize(parent, 1, optstring, title, saveFile);
 	LOG_DEL; delete hist;
 	LOG_NEW; hist = new Histogram(binW,maxBins);
-}
-
-void XHistogram :: addPoint(float y) {
-	hist->add(y);
+	showPercentages = 0;
 }
 
 void XHistogram :: terminate() {
 	if (numCounts() > 0) {
+		double scaleFactor;
+		if (showPercentages)
+			scaleFactor = 100.0 / numCounts();
+		else
+			scaleFactor = 1.0;
 		int count;
 		double binCtr;
 		int binno = 0;
 		while (hist->getData (binno, count, binCtr)) {
-			display->addPoint (binCtr, float(count));
+			display->addPoint (binCtr, count * scaleFactor);
 			binno++;
 		}
 		display->terminate();
