@@ -166,7 +166,7 @@ class ::tycho::GraphEditor {
 	$clone model add "graph" $_graph
 
 	# Make it draw the data
-	$clone layout load
+	# $clone layout load
     }
 }
 
