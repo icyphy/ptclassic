@@ -133,10 +133,11 @@ int StructTarget :: runIt(VHDLStar* s) {
   // We're trying to find repeated firings of the same send/receive stars
   // so that they can be handled specially.
   int foundFiring = 0;
-  VHDLClusterListIter nextCl(clusterList);
+  //  VHDLClusterListIter nextCl(clusterList);
   VHDLCluster* ncl;
-  while ((ncl = nextCl++) != 0) {
-    if (!strcmp(ncl->name,fiName)) {
+  //  while ((ncl = nextCl++) != 0) {
+  //    if (!strcmp(ncl->name,fiName)) {
+    if ((ncl = clusterList.vhdlClusterWithName(fiName)) != 0) {
       foundFiring = 1;
       VHDLFiring* nfi = ncl->firingList->head();
       // We found a cluster (firing) with the same name.
@@ -172,7 +173,7 @@ int StructTarget :: runIt(VHDLStar* s) {
       // Add to the VarPort list.
       nfi->varPortList->addList(firingVarPortList);
     }
-  }
+    //  }
 
   if (!foundFiring) {
     fi->setName(fiName);
@@ -653,13 +654,10 @@ void StructTarget :: registerState(State* state, const char* varName,
     // a bit differently: have all references refer only to the single
     // constant source, rather than passing through values from one firing
     // to the next, which is useless and restrictive.
+    // Also, there should be no output on which to pass on the value,
+    // since it isn't changed by this exu.
 
     if (state->attributes() & AB_CONST) {
-      // if constant, the ref should be to the main constant value,
-      // not to the last exu which reffed the value, but can't have
-      // changed it.
-      // Also, there should be no output on which to pass on the value,
-      // since it isn't changed by this exu.
       constState = 1;
       listState->constant = 1;
     }
@@ -722,16 +720,12 @@ void StructTarget :: registerState(State* state, const char* varName,
       StringList clockName = sanitize(state->parent()->fullName());
       clockName << "_F" << thisFiring;
       clockName << "_clk";
+
       // NEW: Stil need to get that clock timing right.
       toggleClock(clockName);
-
-      //      // Create a register for data value.
-      //      connectRegister(temp_out, temp_out_reg, clockName, stType);
-      //      firingSignalList.put(temp_out_reg, stType, temp_out_reg, "");
     }
 
     // Reset state's lastRef name.
-    //    listState->lastRef = temp_out_reg;
     listState->lastRef = temp_out;
   }
 
@@ -786,27 +780,6 @@ void StructTarget :: registerSource(StringList type/*="INTEGER"*/) {
 void StructTarget :: connectMultiplexor(StringList inName, StringList outName,
 					StringList initVal, StringList type) {
   assertClock("control");
-  /*
-  // Add the clock to the list of clocks to be triggered.
-  const char* clock = "control";
-  // First check to see if it isn't already listed at the end.
-  if (clockList.tail()) {
-    if (strcmp(clockList.tail(),clock)) {
-      clockList << clock;
-      ctlerAction << "     -- Assert " << clock << "\n";
-      ctlerAction << "wait until "
-		  << "system_clock'event and system_clock = TRUE;\n";
-      ctlerAction << clock << " <= TRUE;\n";
-    }
-  }
-  else {
-    clockList << clock;
-    ctlerAction << "     -- Assert " << clock << "\n";
-    ctlerAction << "wait until "
-		<< "system_clock'event and system_clock = TRUE;\n";
-    ctlerAction << clock << " <= TRUE;\n";
-  }
-  */
 
   registerMultiplexor(type);
   StringList label = outName;
@@ -869,11 +842,6 @@ void StructTarget :: registerMultiplexor(StringList type/*="INTEGER"*/) {
 // Connect a register between the given input and output signals.
 void StructTarget :: connectRegister(StringList inName, StringList outName,
 				     StringList clkName, StringList type) {
-  // NEW: We add registers after all firings run now, so we add clock
-  // at the time of firing to preserve order, no need to add clock now.
-  //  // Add the clock to the list of clocks to be triggered.
-  //  toggleClock(clkName);
-
   registerRegister(type);
   StringList label = outName;
   label << "_REG";
@@ -975,13 +943,6 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
   // Continue to do normal signal naming and portmapping.
 
-  // NEW:  If the port reference is to be latched, then outputs will
-  // refer to signals that are inputs to registers, and inputs will
-  // refer to signals that are outputs of registers.  Additional names
-  // are required for this.  An additional register is needed.  The
-  // register needs its own clock signal also, keyed off of when the
-  // exu that feeds it completes its execution (outputs are stable).
-
   // The registry keeps track of all refed arcs, and their min/max R/W offsets.
   registerArcRef(port, tokenNum);
 
@@ -1001,16 +962,10 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 
   // Create a port and a port mapping for this firing entity.
   firingPortList.put(ref, port->direction(), port->dataType());
-  if (port->isItInput()) {
-    firingPortMapList.put(ref, sinkName);
-  }
-  else {
-    // Create a register for data value.
-    //    connectRegister(sourceName, sinkName, clockName, port->dataType());
-    //    firingPortMapList.put(ref, sourceName);
-    // NEW: Since eliminating reg here, output from port directly onto sinkName.
-    firingPortMapList.put(ref, sinkName);
-    // NEW: But still need right clock timing, so add a clock here.
+  firingPortMapList.put(ref, sinkName);
+
+  // Only provide a toggled clock for firing if data is output.
+  if (port->isItOutput()) {
     toggleClock(clockName);
   }
 
@@ -1018,13 +973,12 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   // But for delayed values of wormhole inputs, do not create another port.
   // For local inputs, create a signal.
   if ((port->atBoundary()) && (tokenNum >= 0)) {
-    // NEW: Signal an error: we won't support wormholes for now:
+    // Signal an error: we won't support wormholes for now:
     Error::error(*port, "is at a wormhole boundary: Not currently supported");
     // Port at wormhole boundary, so create a system port instead of a signal.
     //    systemPortList.put(ref, port->direction(), port->dataType());
   }
   else {
-    //    firingSignalList.put(sourceName, port->dataType(), ref, ref);
     firingSignalList.put(sinkName, port->dataType(), ref, ref);
   }
 }
@@ -1680,9 +1634,6 @@ void StructTarget :: beginIteration(int /*repetitions*/, int /*depth*/) {
 // Generate code to end an iterative procedure
 void StructTarget :: endIteration(int /*reps*/, int /*depth*/) {
   toggleClock("iter_clock");
-  //  ctlerPortList.put("iter_clock", "OUT", "boolean");
-  //  ctlerPortMapList.put("iter_clock", "iter_clock");
-  //  ctlerSignalList.put("iter_clock", "boolean", "", "");
 }
 
 // Add the clock to the clock list and generate code to toggle it.
