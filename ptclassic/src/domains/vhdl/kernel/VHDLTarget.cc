@@ -41,6 +41,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLTarget.h"
 #include "CGUtilities.h"
 #include "ConversionTable.h"
+#include <fstream.h>
 
 
 // HPPA CC under HPUX10.01 cannot deal with arrays, the message is:
@@ -488,6 +489,12 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
     while ((p = (VHDLPortHole*) nextPort++) != NULL) {
       if (p->isItOutput()) {
 	p->setGeoName(symbol(ptSanitize(p->name())));
+	if (p->embedded()) {
+	  VHDLPortHole* ep = (VHDLPortHole*)p->embedded();
+	  p->setGeoName(symbol(ptSanitize(ep->name())));
+	  cout << "Setting geo name for port " << p->name() <<
+	    " to " << p->getGeoName() << "\n";
+	}
       }
     }
   }
@@ -498,6 +505,12 @@ void VHDLTarget :: setGeoNames(Galaxy& galaxy) {
     while ((p = (VHDLPortHole*) nextPort++) != NULL) {
       if (p->getGeoName() == NULL) {
 	p->setGeoName(symbol(ptSanitize(p->name())));
+	if (p->embedded()) {
+	  VHDLPortHole* ep = (VHDLPortHole*)p->embedded();
+	  p->setGeoName(symbol(ptSanitize(ep->name())));
+	  cout << "Setting geo name for port " << p->name() <<
+	    " to " << p->getGeoName() << "\n";
+	}
       }
     }
   }
@@ -642,7 +655,9 @@ void VHDLTarget :: registerTemp(const char* temp, const char* type) {
   VHDLVariable* newvar = new VHDLVariable;
   newvar->setName(temp);
   newvar->type = sanitizeType(type);
-  if (hashstring(newvar->type) == hashINTEGER) {
+  if ((hashstring(newvar->type) == hashINTEGER) ||
+      (hashstring(newvar->type) == hashINT) ||
+      (hashstring(newvar->type) == hashint)) {
     newvar->initVal = "0";
   }
   else {
