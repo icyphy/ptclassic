@@ -134,31 +134,31 @@ long userOptionWord;
     status = vuFindSpot(spot, &inst, OCT_INSTANCE_MASK);
     if (status == VEM_NOSELECT) {
 	PrintCon("Aborted");
-        ViDone();
     } else if (status != VEM_OK) {
 	/* No inst under cursor */
 	if (dmMultiText("Profile", 1, &item) != VEM_OK) {
 	    PrintCon("Aborted entry");
-	    ViDone();
 	}
-	if (!KcProfile(item.value)) {
+	else if (!KcProfile(item.value)) {
 	    PrintErr(ErrGet());
 	}
-    } else if (IsDelay(&inst) || IsPal(&inst)) {
-	/* delay or palette inst is under cursor */
-	PrintErr("Cursor must be over a star");
     } else if (IsStar(&inst)) {
 	if(setCurDomainInst(&inst) == NULL) {
 	    PrintErr("Domain error in instance.");
-	    ViDone();
 	}
 	    /* autoload the star if necessary */
-	if (!AutoLoadCk(&inst) ||
+	else if (!AutoLoadCk(&inst) ||
+	    !KcProfile(AkoName(inst.contents.instance.master))) {
+	    PrintErr(ErrGet());
+	}
+    } else if (IsGal(&inst)) {
+	if (!CompileGalInst(&inst,&facet) ||
 	    !KcProfile(AkoName(inst.contents.instance.master))) {
 	    PrintErr(ErrGet());
 	}
     } else {
-	PrintErr("Profile not yet implemented for galaxies/universes");
+	/* delay or palette inst, or universe is under cursor */
+	PrintErr("Cursor must be over a star or galaxy instance");
     }
     ViDone();
 }
