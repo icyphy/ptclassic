@@ -178,10 +178,10 @@ if [file isdirectory [file join $PTOLEMY tcltk itcl lib]] {
 			    tcltk itcl lib itcl iwidgets iwidgets.tcl]
 		} errMsg ] {
 		    puts "Error sourcing Ptolemy tcltk files:\n\
-			    $errMsg\nThis sort of thing could happen if\
+			    $errMsg\n\n This sort of thing could happen if\
 			    you are using a itkwish that is a later\n\
 			    release than the itkwish in your\
-			    Ptolemy installation.\nOr it could mean trouble\
+			    Ptolemy installation.\n Or it could mean trouble\
 			    with your Ptolemy tcltk installation.\n\
 			    Continuing. . ."
 		}
