@@ -48,6 +48,7 @@ LIBCSRCS	= iv.c \
 		ivBuf.c \
 		ivGetLine.c \
 		test.c \
+		timer.c \
 		xformatevent.c
 
 OTHERSRCS	= test.c
@@ -66,7 +67,7 @@ KRUFT =		$(DRIVER)
 
 DRVROBJ = 	test.o
 
-DRVRLIBS =	-lkd -lport -lerrtrap -luprintf
+DRVRLIBS =	-lkd -lport -lerrtrap -luprintf -lX11
 
 # common makefile file for vem libraries
 VEMLIBCONFIG=../../vem-lib.mk
