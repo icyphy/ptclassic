@@ -101,14 +101,20 @@ int rshSystem(const char* hname, const char* cmd, const char* dir) {
     
 	StringList preCmd, postCmd;
 	const char* cmdtext = rshCommand;
-	if ( strchr(cmdtext,'\'')!=NULL ) {
+	if ( strchr(cmdtext,'\'') ) {
 	    // cmd has quotes.  put it in file and send through pipe.
 	    char *cmdfilename = tempnam( NULL, "pt");
+	    if ( cmdfilename == 0 ) {
+	      Error::abortRun("rshSystem: the tempnam function",
+			      "cannot allocate memory");
+	      return FALSE;
+	    }
 	    pt_ofstream cmdfile(cmdfilename);
 	    cmdfile << rshCommand;
 	    cmdfile.close();
 	    preCmd << "/bin/cat " << cmdfilename << " | ";
 	    postCmd << " ; /bin/rm -f " << cmdfilename;
+	    free(cmdfilename);
 	} else {
 	    // cmd is quoteless.  Just echo it directly into the pipe.
 	    preCmd << "echo '" << rshCommand << "' | ";
