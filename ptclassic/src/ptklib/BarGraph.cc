@@ -64,9 +64,9 @@ ENHANCEMENTS, OR MODIFICATIONS.
 // Define the callback procedure used by Tcl to redraw the bar graph
 static int redraw(
     ClientData bargraph,	// Pointer to the BarGraph object
-    Tcl_Interp *interp, 	// Current interpreter
-    int argc,           	// Number of arguments
-    char **argv         	// Argument strings
+    Tcl_Interp*, 		// Current interpreter
+    int,           		// Number of arguments
+    char *[]         		// Argument strings
 ) {
     ((BarGraph*)bargraph)->redrawBars();
     return TCL_OK;
@@ -77,8 +77,8 @@ static int redraw(
 static int rescale(
     ClientData bargraph,	// Pointer to the BarGraph object
     Tcl_Interp *interp, 	// Current interpreter
-    int argc,           	// Number of arguments
-    char **argv         	// Argument strings
+    int,           		// Number of arguments
+    char *argv[]         	// Argument strings
 ) {
     float scaleFactor;
     if(sscanf(argv[1], "%4f", &scaleFactor) != 1) {
@@ -90,7 +90,7 @@ static int rescale(
     InfString buf = ((BarGraph*)bargraph)->top;
     buf += " ";
     buf += ((BarGraph*)bargraph)->bottom;
-    Tcl_SetResult(ptkInterp,(char*)buf, TCL_VOLATILE);
+    Tcl_SetResult(interp,(char*)buf, TCL_VOLATILE);
     return TCL_OK;
 }
 
@@ -201,7 +201,7 @@ int BarGraph::setup (Block* star,       // The star I am in
 
 	// Create the window
 	if(ptkMakeBarGraph(ptkInterp,
-		ptkW,
+		&ptkW,
 		(char*)winName,
 		desc,
 		data,
@@ -260,7 +260,7 @@ int BarGraph::update (int input,          // Identifies the data set
 
 void BarGraph::redrawBars () {
 	ptkSetBarGraph (ptkInterp,
-		ptkW,
+		&ptkW,
 		(char*)winName,
 		data,
 		noInputs,
