@@ -584,7 +584,9 @@ body ::tycho::Model::compareMarks {mark1 operator mark2} {
 # special attribute <b>-valued</b> sets the flag
 # that states whether an entity has a value; the special attribute
 # <b>-ordered</b> sets the flag that states whether instances of
-# this type of entity are ordered. This method is not
+# this type of entity are ordered; the special attribute
+# <b>-leaf</b> sets the flag that states whether instances of
+# this type of entity are leaf entities. This method is not
 # undoable or publishable.
 # 
 body ::tycho::Model::configureEntityType {type args} {
@@ -594,11 +596,15 @@ body ::tycho::Model::configureEntityType {type args} {
     array set temp $_typeinfo($type,defaults)
     array set temp $args
     if { [::info exists temp(-valued)] } {
-	set _typeinfo($type,valued) temp(-valued)
+	set _typeinfo($type,valued) $temp(-valued)
 	unset temp(-valued)
     }
+    if { [::info exists temp(-leaf)] } {
+	set _typeinfo($type,leaf) $temp(-leaf)
+	unset temp(-leaf)
+    }
     if { [::info exists temp(-ordered)] } {
-	set _typeinfo($type,ordered) temp(-ordered)
+	set _typeinfo($type,ordered) $temp(-ordered)
 	unset temp(-ordered)
     }
     set _typeinfo($type,defaults) [array get temp]
@@ -614,10 +620,9 @@ body ::tycho::Model::configureEntityType {type args} {
 # default value to the given one. Default attributes cannot be
 # changed once the model contains links of that type, so the
 # method flags an error if that is the case.  The
-# special attribute <b>-named</b> sets the flag
-# that states whether an entity has a name; the special attribute
-# <b>-order</b> sets the number of entities linked
-# by this link type. This method is not undoable or publishable.
+# special attribute <b>-ordered</b> sets the flag
+# that states whether links are ordered.
+# This method is not undoable or publishable.
 #
 body ::tycho::Model::configureLinkType {type args} {
     if { [array names _info([list $type * * *])] != "" } {
@@ -625,13 +630,9 @@ body ::tycho::Model::configureLinkType {type args} {
     }
     array set temp $_typeinfo($type,defaults)
     array set temp $args
-    if { [::info exists temp(-named)] } {
-	set _typeinfo($type,named) temp(-named)
-	unset temp(-named)
-    }
-    if { [::info exists temp(-order)] } {
-	set _typeinfo($type,order) temp(-order)
-	unset temp(-order)
+    if { [::info exists temp(-ordered)] } {
+	set _typeinfo($type,ordered) $temp(-ordered)
+	unset temp(-ordered)
     }
     set _typeinfo($type,defaults) [array get temp]
     return ""
