@@ -102,6 +102,11 @@ if {![winfo exists $s]} {
     # (Tk bug)
     update
 
+    # Zero out the linecount array (Fix from Tom Lane 1/9)
+    if {[info exists ${starID}_lineCount]} {
+	unset ${starID}_lineCount
+    }
+
     set ${starID}(lineCount) 0
 
     # Store the window name in the star data structure
@@ -114,24 +119,29 @@ if {![winfo exists $s]} {
 	upvar #0 $starID param
 	global $starID
 
+ 	# Shorthand for referring to ${starID}_lineCount array (Tom Lane 1/96)
+ 	upvar #0 ${starID}_lineCount lineCount
+
 	set c $param(win).f
 	set inputVals [grabInputs_$starID]
+ 	set inputStates [grabInputsState_$starID]
 	for {set i 0} {$i < $param(numInputs)} {incr i} {
-	    set in [lindex $inputVals $i]
-	    $param(win).f.m$i.t yview -pickplace end
-	    $param(win).f.m$i.t insert end [schedtime]
-	    $param(win).f.m$i.t insert end ": "
-	    $param(win).f.m$i.t insert end $in
-	    $param(win).f.m$i.t insert end "\n"
-	}
-	incr ${starID}(lineCount)
-	if {$param(lineCount) >= $param(number_of_past_values)} {
-	    incr ${starID}(lineCount) -1
-	    for {set i 0} {$i < $param(numInputs)} {incr i} {
-		$param(win).f.m$i.t delete 1.0 2.0
+ 	    if {[lindex $inputStates $i]} {
+ 		set in [lindex $inputVals $i]
+ 		$param(win).f.m$i.t yview -pickplace end
+ 		$param(win).f.m$i.t insert end [schedtime]
+ 		$param(win).f.m$i.t insert end ": "
+ 		$param(win).f.m$i.t insert end $in
+ 		$param(win).f.m$i.t insert end "\n"
+ 		if {! [info exists lineCount($i)]} {
+ 		    set lineCount($i) 1
+ 		} elseif {$lineCount($i) < $param(number_of_past_values)} {
+ 		    incr lineCount($i)
+ 		} else {
+ 		    $param(win).f.m$i.t delete 1.0 2.0
+ 		}
 	    }
 	}
-
 	if {$param(wait_between_outputs)} {
 	    set ${starID}(tkTextWaitTrig) 0
 	    $param(win).att.cont configure -state normal
