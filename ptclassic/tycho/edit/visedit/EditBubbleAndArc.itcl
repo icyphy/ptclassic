@@ -420,7 +420,9 @@ body ::tycho::EditBubbleAndArc::bind_B1_Motion {x y} {
     set x [$slate canvasx $x]
     set y [$slate canvasy $y]
     if {$create_item == "node"} {
-	$slate coords $node_id $oldx $oldy $x $y
+        if {$oldx!=$X && $oldy!=$y} { 
+            $slate coords $node_id $oldx $oldy $x $y
+        }
     }
 }
 
