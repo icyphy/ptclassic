@@ -1470,7 +1470,8 @@ void genDef ()
 	fprintf (fp, ".DM %s %s\n", domain, baseClass);
 
 /* version */
-	fprintf (fp, ".SV %s %s\n", objVer, objDate);
+	if (objVer && objDate)
+		fprintf (fp, ".SV %s %s\n", objVer, objDate);
 
 /* author */
 	if (objAuthor)
