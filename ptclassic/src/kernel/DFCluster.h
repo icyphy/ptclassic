@@ -42,7 +42,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DFNebulaPort : public DFPortHole, public NebulaPort{
 public:
-    DFNebulaPort(const PortHole* master,Nebula* parent);
+    DFNebulaPort(const PortHole* master, Star* parent);
     /*virtual*/ int isItInput() const {
 	return NebulaPort::isItInput();
     }
@@ -61,7 +61,7 @@ public:
     // Constructors
     DFNebula();
 
-    /*virtual*/ PortHole* clonePort(const PortHole* master);
+    /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
     
     /*virtual*/ Nebula* newNebula(Block* master) const;
 

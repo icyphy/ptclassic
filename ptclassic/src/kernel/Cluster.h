@@ -70,10 +70,8 @@ public:
     // Generate the schedules of the nested Nebulas recursively.
     int generateSchedule();
 
-    int isNebulaAtomic() {
-	return master? master->isItAtomic() : NULL;
-    }
-
+    int isNebulaAtomic() const;
+    
     void addNebula(Nebula*);
 
     void addGalaxy(Galaxy*,PortHole**);
@@ -91,7 +89,7 @@ public:
 
     int run();
 
-    virtual PortHole* clonePort(const PortHole*) = 0;
+    virtual PortHole* clonePort(const PortHole*,Star*) = 0;
 
     virtual Nebula* newNebula(Block* s = NULL) const = 0;
 
@@ -109,6 +107,12 @@ protected:
     DynamicGalaxy gal;
     Scheduler* sched;
 
+private:
+    Star* sourceNebula;
+    Star* sinkNebula;
+
+    // Connect two Nebula PortHoles together
+    void connect(PortHole* source, PortHole* destination);
 };
 
 // An iterator for NebulaList.
@@ -127,7 +131,7 @@ public:
 
 class NebulaPort {
 public:
-    NebulaPort(PortHole& self, const PortHole& p, Nebula* parnetN);
+    NebulaPort(PortHole& self, const PortHole& p, Star* parent);
     const PortHole& real() const { return master; }
     PortHole& asPort() const { return selfPort;}
     int isItInput() const {
@@ -137,11 +141,11 @@ public:
 	return real().isItOutput();
     }
 
-    void setNebAlias(PortHole* np) {
-	nebAliasedTo = np;
-    }
+    void setNebAlias(PortHole* np) { nebAliasedTo = np;} 
 
     PortHole* nebAlias() const { return nebAliasedTo; }
+
+    PortHole* realNebulaPort();
 private:
     
     // selfPort is a reference to the PortHole side of a NebulaPort
