@@ -52,7 +52,7 @@ OCT_CC=cc
 octtools: obj.$(ARCH)
 	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) all
 install_octtools: obj.$(ARCH)
-	cd obj.$(ARCH)/octtools; $(MAKE) CC=$((OCT_CC) $(MFLAGS) install
+	cd obj.$(ARCH)/octtools; $(MAKE) CC=$(OCT_CC) $(MFLAGS) install
 
 # This rule builds and installs gcc and tcl/tk from scratch, then octtools,
 # then everything else.  gcc and tcl/tk source are usually distributed as a
