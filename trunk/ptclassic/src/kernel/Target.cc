@@ -26,6 +26,15 @@ $Id$
 #include "ConstIters.h"
 #include "miscFuncs.h"
 #include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include "miscFuncs.h"
+
+void Target::setSched(Scheduler* sch) {
+	delete sched;
+	sched = sch;
+	sch->setTarget(*this);
+}
 
 // default commTime method: only one processor, no time
 
@@ -71,7 +80,7 @@ int Target::run() {
 // default wrapup: call wrapup on all stars and galaxies
 void Target::wrapup () {
 	if (!gal) return;
-	GalAllBlockIter next(*gal);
+	GalTopBlockIter next(*gal);
 	Block* b;
 	while ((b = next++) != 0) b->wrapup();
 	return;
@@ -196,3 +205,72 @@ void Target::deleteChildren() {
 	}
 	nChildren = 0;
 }
+
+char* Target::writeDirectoryName(char* dirName) {
+
+   if(dirName && *dirName) {
+	const char* dir;
+
+	// expand the path name
+	dir = expandPathName(dirName);
+
+	// check to see whether the directory exists, create it if not
+	struct stat stbuf;
+	if(stat(dir, &stbuf) == -1) {
+	    // Directory does not exist.  Attempt to create it.
+	    if (mkdir(dir, 0777)) {
+		Error::warn("Cannot create Target directory : ", dir);
+		return 0;
+	    }
+	} else {
+	    // Something by that name exists, see whether it's a directory
+	    if((stbuf.st_mode & S_IFMT) != S_IFDIR) {
+		Error::warn("Target directory is not a directory: ",
+					dirFullName);
+		return 0;
+	    }
+	}
+	// Directory is there
+	return savestring(dir);
+   } else return 0;
+}
+
+// Method to set a file name for writing.
+// Prepends dirFullName to fileName with "/" between.
+// Always returns a pointer to a string in new memory.
+// It is up to the user to delete the memory when no longer needed.
+// If dirFullName or fileName is NULL then it returns a
+// pointer to a new copy of the string "/dev/null".
+char* Target::writeFileName(char* fileName) {
+	if(dirFullName && *dirFullName && fileName && *fileName) {
+		StringList fullName = dirFullName;
+		fullName += "/";
+		fullName += fileName;
+		return savestring((char*)fullName);
+	}
+	return savestring("/dev/null");
+}
+
+// Routines for writing code: schedulers may call these
+StringList Target::beginIteration(int repetitions, int depth) {
+	StringList out;
+	out = "REPEAT ";
+	out += repetitions;
+	out += " TIMES {\n";
+	return out;
+}
+
+StringList Target::endIteration(int repetitions, int depth) {
+	StringList out;
+	out = "}\n";
+	return out;
+}
+
+StringList Target::writeFiring(Star& s, int depth) {
+	StringList out;
+	out = s.readFullName();
+	out += "\n";
+	return out;
+}
+
+ISA_FUNC(Target,Block);
