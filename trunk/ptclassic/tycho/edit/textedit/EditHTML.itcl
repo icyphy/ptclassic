@@ -254,7 +254,7 @@ body ::tycho::EditHTML::fileTemplate {} {
 body ::tycho::EditHTML::help {} {
     global ::TYCHO
     ::tycho::File::openContext \
-	    [file join $TYCHO editors htmledit doc usersGuides \
+	    [file join $TYCHO editors textedit doc usersGuides \
 	    EditHTMLHelp.html]
 }
 
