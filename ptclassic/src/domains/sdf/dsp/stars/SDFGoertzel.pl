@@ -19,9 +19,9 @@ limitation of liability, and disclaimer of warranty provisions.
 <p>
 This two-pole, one-zero IIR filter has a transfer function of
 <pre>
-           1 - (W<sub>N</sub>)<sup>k</sup> z<sup>-1</sup>
-    ---------------------------
-    1 - 2cos(2pik/N)z<sup>-1</sup> + z<sup>-2</sup>
+               1 + W<sub>N</sub><sup>k</sup>z<sup>-1</sup>
+          ------------------------
+          1 - 2cos(2 pi/Nk)z<sup>-1</sup> +z<sup>-2</sup>
 </pre>
 <p>
 This filter is a biquad filter with
