@@ -94,12 +94,13 @@ public:
 
         // return the current value as a string.  Here we just give
         // back initValue
-         const char* print() { return initValue;}
+	virtual StringList currentValue() { return initValue;}
 
-	virtual State* clone();
+	// force all state classes to redefine this
+	virtual State* clone() = 0;
 
-	// put info.
-	virtual operator StringList();
+	// output all info.  This is NOT redefined for each type of state
+	StringList printVerbose();
 
 protected:
 	// string used to set initial value by initialize()
