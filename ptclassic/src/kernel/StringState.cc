@@ -94,7 +94,7 @@ void StringState  :: initialize() {
 			}
 		}
 		else if (*p == '\\') {
-			*q++ = *p++;
+			p++;	// skip the backslash
 			if (*p) *q++ = *p++;
 		}
 		else *q++ = *p++;
