@@ -41,6 +41,13 @@ defstar{
         name{strength_bs}
         type {int }
     }
+    defstate {
+	name { fileName }
+	type { string }
+	default { "$PTOLEMY/src/domains/de/contrib/stars/topo.dxf" }
+	descriptor { File describing topology }
+    }
+
     header { 
         //declare list_h for that file
         extern Handy *list_h;
