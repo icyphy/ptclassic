@@ -65,8 +65,8 @@ void CGCBDFTarget::setup() {
 	CGCTarget::setup();
 }
 
-void CGCBDFTarget :: beginIf(PortHole& cond,int truthdir,
-			    int depth,int haveElsePart) {
+void CGCBDFTarget :: beginIf(PortHole& cond, int truthdir,
+			    int depth, int /*haveElsePart*/) {
 	CGCPortHole* realCond = (CGCPortHole*)&cond;
 	myCode << indent(depth);
 	const char* tflag = truthdir ? "" : "!";

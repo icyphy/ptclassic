@@ -89,7 +89,7 @@ void commStarInit(CGCSDFBase* s,PortHole& p,int numXfer) {
 }
 
 // Create the CGC star that receives data from simulation
-CommPair cgcIncoming(PortHole& p,int numXfer, CGTarget& target) {
+CommPair cgcIncoming(PortHole& p,int numXfer, CGTarget& /*target*/) {
     CommPair pair;
     pair.outer = NULL;
     LOG_NEW; CGCSDFBase *newStar = new CGCSDFReceive;
@@ -99,7 +99,7 @@ CommPair cgcIncoming(PortHole& p,int numXfer, CGTarget& target) {
 }
 
 // Create the CGC star that sends data to simulation
-CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& target) {
+CommPair cgcOutgoing(PortHole& p,int numXfer, CGTarget& /*target*/) {
     CommPair pair;
     pair.outer = NULL;
     LOG_NEW; CGCSDFBase *newStar = new CGCSDFSend;
