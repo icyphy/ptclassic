@@ -121,8 +121,7 @@ defstar {
             code {
                 StringList cmd;
     
-                if (delFile) cmd += "( ";
-                cmd += "xgraph ";
+                cmd += "( xgraph ";
     
                 const char* t = title;
                 if (t && *t) {
