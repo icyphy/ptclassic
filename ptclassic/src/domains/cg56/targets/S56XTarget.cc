@@ -26,7 +26,7 @@ $Id$
 #include <ctype.h>
 
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
-	CG56Target(nam,desc)
+	Sim56Target(nam,desc)
 {
 	initStates();
 }
@@ -43,12 +43,6 @@ void S56XTarget :: initStates() {
 	yMemMap.setValue("0-16383");
 	xMemMap.setAttributes(A_NONCONSTANT|A_NONSETTABLE);
 	yMemMap.setAttributes(A_NONCONSTANT|A_NONSETTABLE); 
-	addState(dirName.setState("dirName",this,"~/DSPcode",
-				  "directory for all output files"));
-	addState(disCode.setState("Display code?",this,"YES",
-	                          "display code if YES."));
-	addState(simCode.setState("Simulate code?",this,"YES",
-	                          "display code if YES."));
 }
 
 int S56XTarget :: setup (Galaxy& g) {
