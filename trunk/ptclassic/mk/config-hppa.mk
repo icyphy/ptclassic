@@ -1,6 +1,7 @@
-# Configuration makefile to make on an HP-PA machine (7xx or 8xx) and HPUX10.x
-# using GNU gcc and g++
-#
+# Configuration makefile to make on an HPUX9 and HPUX10 machine
+# using GNU gcc and g++.  This file is setup for HPUX10, and would
+# require some editing for HPUX9
+
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -27,7 +28,7 @@
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
 #		       
-# Programmer:  J. T. Buck, Neal Becker, Christopher Hylands
+# Programmers:  J. T. Buck, Neal Becker, Christopher Hylands
 
 # --------------------------------------------------------------------
 # |  Please see the file ``config-default.mk'' in this directory!    |
@@ -37,11 +38,12 @@ include $(ROOT)/mk/config-default.mk
 # Get the g++ definitions; we override some below.
 include $(ROOT)/mk/config-g++.mk
 
+# The HPUX9/HPUX10 dependencies are below here
+
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
+# Under HPUX9 you will probably want to comment this out.
 include $(ROOT)/mk/config-g++.shared.mk
-
-# The HPUX9/HPUX10 dependencies are below here
 
 # ptbin.mk uses this to decide whether to include the PN stars
 # If you are under HPUX10, then the PN domain requires DCE threads.
@@ -49,8 +51,8 @@ include $(ROOT)/mk/config-g++.shared.mk
 #  If you don't have a /usr/include/pthread.h, then you probably
 #  don't have the DCE developement set installed.  If you don't have
 #  this installed, set INCLUDE_PN_DOMAIN to no
-#INCLUDE_PN_DOMAIN = no
 INCLUDE_PN_DOMAIN = yes
+#INCLUDE_PN_DOMAIN = 
 
 # Misc. flags for OS version, if you are under HPUX9.x:
 #ARCHFLAGS =	
@@ -158,9 +160,15 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 # to remove the -static below
 # If you are trying out the shl_load feature, then remove -static
 # and add -Wl,-E
+# Under HPUX10.01, ld takes the following arguments
+#   -x partially strip the output file, leaving out local symbols
+#   -E export all syms
+#   -G Strip all unloadable data from the output file
+#   +s use SHLIB_PATH
+#   +b list of directories to be searched
 #LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
 #LINKFLAGS_D = 	-L$(LIBDIR) -g -static
-LINKFLAGS = 	-L$(LIBDIR) -Wl,-x,-E $(SHARED_LIBRARY_R_LIST)
+LINKFLAGS = 	-L$(LIBDIR) -Wl,-x,-E,-G $(SHARED_LIBRARY_R_LIST)
 LINKFLAGS_D = 	-L$(LIBDIR) -g -Wl,-E $(SHARED_LIBRARY_R_LIST)
 
 LIBSUFFIX =		sl
