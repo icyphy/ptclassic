@@ -258,7 +258,7 @@ body ::tycho::EditForest::redrawGraph {} {
     }
     interactiveEnable $saveinteractiveEnabled
     # The bounding box may have changed, so...
-    ::tycho::Graphics::updateScrollbars
+    updateScrollbars
 }
 
     ###################################################################

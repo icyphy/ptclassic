@@ -776,7 +776,7 @@ body ::tycho::EditDAG::redrawGraph {} {
 
     interactiveEnable $saveinteractiveEnabled
     # The bounding box may have changed, so...
-    ::tycho::TCanvas::updateScrollbars
+    updateScrollbars
 }
 
 #######################################################################
