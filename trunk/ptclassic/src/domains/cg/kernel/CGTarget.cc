@@ -49,14 +49,14 @@ void CGTarget :: initialize() {
 }
 
 int CGTarget::setup(Galaxy& g) {
-	// reset the label counter
-	numLabels = 0 ;
-
 	if (!Target::setup(g)) return FALSE;
 
+	// BUG ALERT?
 	// It is not clear whether the following is correct.
-	// AsmTarget has to bypass it, needing to do something with
-	// memory allocation first.
+	// AsmTarget and CompileTarget have to bypass it.
+	// The cast to CGPortHole clearly creates the problem for
+	// CompileTarget.  It's not clear what the problem is for
+	// AsmTarget.
 
 	// initialize the porthole offsets, and do all initCode methods.
 	GalStarIter nextStar(g);
