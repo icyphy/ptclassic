@@ -112,7 +112,7 @@ alltests.itcl: FORCEIT
 	echo "#Do an update so that we are sure tycho is done displaying" >> $@
 	echo "update" >> $@
 	echo "set savedir \"[pwd]\"" >> $@
-	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; source \$$i}}" >> $@
+	echo "if {\"$(SIMPLE_TESTS)\" != \"\"} {foreach i [list $(SIMPLE_TESTS)] {puts \$$i; cd \"\$$savedir\"; source \$$i}}" >> $@
 	for x in $(GRAPHICAL_TESTS); do \
 		echo "puts stderr $$x" >> $@; \
 		echo "cd \"\$$savedir\"" >> $@; \
