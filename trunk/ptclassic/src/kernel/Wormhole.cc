@@ -290,7 +290,7 @@ Galaxy* Wormhole :: explode() {
 		PortHole* inP = eveP->ghostAsPort()->far();
 		if (tempP) tempP->disconnect(1);
 		if (inP) inP->disconnect(1);
-x
+
 		// relink any aliases pointing at me to point to inner galaxy.
 		if (inP) p->moveMyAliasesTo(*inP);
 
