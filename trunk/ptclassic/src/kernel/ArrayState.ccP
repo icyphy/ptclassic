@@ -54,7 +54,7 @@ $Id$
 int <T>ArrayState :: size() const { return nElements;}
 
 // type (not inline because it's virtual)
-const char* <T>ArrayState :: type() const { return "<T>Array";}
+const char* <T>ArrayState :: type() const { return "<T>ARRAY";}
 
 // the value as a string
 
@@ -182,4 +182,4 @@ ParseToken <T>ArrayState :: evalExpression(Tokenizer& lexer)
 
 // make knownstate entry
 static <T>ArrayState proto;
-static KnownState entry(proto,"<T>Array");
+static KnownState entry(proto,"<T>ARRAY");

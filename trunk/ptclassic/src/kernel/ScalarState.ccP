@@ -143,4 +143,4 @@ ParseToken State :: eval<T>Factor(Tokenizer& lexer) {
 
 // make knownstate entry
 static <T>State proto;
-static KnownState entry(proto,"<C>");
+static KnownState entry(proto,"<T>");
