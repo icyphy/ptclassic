@@ -504,9 +504,17 @@ ifdef SDFFULL
 	SDFMATLAB = 1
 	SDFCONTRIB = 1
 	SDFDSP = 1
+	SDFVIS = 1
 	ifdef TK
 		SDFTK = 1
 		SDFDFM = 1
+	endif
+endif
+
+# SDF VIS subdomain will only build under Solaris 2.5 and higher under cfront
+ifdef SDFVIS
+	ifneq ("sol2.5.cfront","$(PTARCH)")
+		SDFVIS =
 	endif
 endif
 
@@ -574,6 +582,7 @@ ifdef SDF
 		# Ultrasparc Visual Instruction Set (VIS) stars
 		CUSTOM_DIRS += $(SDFDIR)/vis/stars
 		STARS += $(LIBDIR)/sdfvisstars.o
+		LIBS += -lsdfvisstars
 		LIBS += $(VSDKHOME)/util/vis.il
 	endif
 	CUSTOM_DIRS += $(SDFDIR)/stars
