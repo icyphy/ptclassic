@@ -32,33 +32,28 @@ $Id$
 // Later, we will want it to be a list of lists, where each list
 // has an entry specifying the number of repetitions of its components.
 
-class SDFSchedule : SequentialList {
+class SDFSchedule : public SequentialList {
 public:
 	// Add an element to the end of the list
 	void append(SDFStar& s) { SequentialList::put(&s);}
 
 	// Return the number of elements on the list
-	int size() {return SequentialList::size();}
-
-	// Return the next block on the list
-	SDFStar& operator ++ () {return *(SDFStar*) next(); }
-
-	// Same as operator ++, but alternative format
-	SDFStar& nextStar () {return *(SDFStar*) next(); }
-
-	// Reset the last reference pointer so that accesses start
-	// at the head of the list
-	void reset() {SequentialList::reset();}
+	int size() const {return SequentialList::size();}
 
 	// Display the schedule
-	StringList printVerbose ();
+	StringList printVerbose () const;
 
 	// Clear the data structure
 	void initialize() {SequentialList::initialize();}
+};
 
-	// Must define destructor since baseclass is private
-	~SDFSchedule() {}
-
+// Iterator for SDFSchedule
+class SDFSchedIter : private ListIter {
+public:
+	SDFSchedIter(const SDFSchedule& s) : ListIter(s) {}
+	SDFStar* next() { return (SDFStar*)ListIter::next();}
+	SDFStar* operator++() { return next();}
+	ListIter::reset();
 };
 
 
