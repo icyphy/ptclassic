@@ -35,6 +35,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 /* Includes */
 #include "local.h"
 #include <stdio.h>
+#include <string.h>
 #include "rpc.h"
 #include "err.h"
 #include "octMacros.h"
@@ -254,10 +255,10 @@ boolean thick;
     objPtr->type = shapePtr->type;
 
     switch (shapePtr->type) {
-    case OCT_PATH:
+      case OCT_PATH:
         if(thick) objPtr->contents.path.width = (octCoord) 5;
         else objPtr->contents.path.width = (octCoord) 0;
-    case OCT_POLYGON:
+      case OCT_POLYGON:
         CK_OCT(octCreate(containPtr, objPtr));
         src = shapePtr->points;
         dest = buf;
@@ -269,14 +270,14 @@ boolean thick;
         }
         (void) octPutPoints(objPtr, shapePtr->points_n, buf);
         break;
-    case OCT_BOX:
+      case OCT_BOX:
         objPtr->contents.box.lowerLeft.x = shapePtr->points[0].x + tx;
         objPtr->contents.box.lowerLeft.y = shapePtr->points[0].y + ty; 
         objPtr->contents.box.upperRight.x = shapePtr->points[1].x + tx;
         objPtr->contents.box.upperRight.y = shapePtr->points[1].y + ty;
         (void) octCreate(containPtr, objPtr);
         break;
-    default:
+      default:
         return(FALSE);
     }
     return(TRUE);
@@ -284,14 +285,14 @@ boolean thick;
 
 /*
  * MkTerm 8/24/89 8/6/88
- * Create a terminal, arrow, and stem  for a porthole.
+ * Create a terminal, arrow, and stem for a porthole.
  * Always puts inputs on the left and outputs on the right.
  */
 boolean
 MkTerm(name, input, type, multiple, position, totalNumber)
 	char	*name;
 	boolean	input;
-	char 	*type;
+	const char *type;
 	boolean	multiple;
 	int	position;
 	int	totalNumber;
@@ -302,44 +303,61 @@ MkTerm(name, input, type, multiple, position, totalNumber)
 	      box = {OCT_UNDEFINED_OBJECT, 0},
 	      term = {OCT_UNDEFINED_OBJECT, 0};
     struct octPoint arrowTranslate;
-    octObject *layerPtr;
+    octObject* layerPtr = 0;
     boolean thick = FALSE;
 
-    if (strcmp(type, "float") == 0 || strcmp(type, "FLOAT") == 0) {
-	layerPtr = &floatColorLayer;
-    } else if (strcmp(type, "int") == 0 || strcmp(type, "INT") == 0 ) {
-	layerPtr = &intColorLayer;
-    } else if (strcmp(type, "complex") == 0 || strcmp(type, "COMPLEX") == 0) {
-	layerPtr = &complexColorLayer;
-    } else if (strcmp(type, "anytype") == 0 || strcmp(type, "ANYTYPE") == 0) {
-	layerPtr = &anytypeColorLayer;
-    } else if (strcmp(type, "packet") == 0 || strcmp(type, "PACKET") == 0) {
-	layerPtr = &packetColorLayer;
-    } else if (strcmp(type, "message") == 0 || strcmp(type, "MESSAGE") == 0) {
-	layerPtr = &packetColorLayer;
-    } else if (strcmp(type, "fix") == 0 || strcmp(type, "FIX") == 0) {
-	layerPtr = &fixColorLayer;
-    } else if (strcmp(type, "filemsg") == 0 || strcmp(type, "FILEMSG") == 0) {
-	layerPtr = &fileColorLayer;
-    } else if (strcmp(type, "string") == 0 || strcmp(type, "STRING") == 0) {
-	layerPtr = &stringColorLayer;
-    } else if (strcmp(type, "COMPLEX_MATRIX_ENV") == 0 || strcmp(type, "COMPLEX_MATRIX") == 0) {
-	layerPtr = &complexColorLayer;
-        thick = TRUE;
-    } else if (strcmp(type, "FIX_MATRIX_ENV") == 0 || strcmp(type, "FIX_MATRIX") == 0) {
-	layerPtr = &fixColorLayer;
-        thick = TRUE;
-    } else if (strcmp(type, "FLOAT_MATRIX_ENV") == 0 || strcmp(type, "FLOAT_MATRIX") == 0) {
-	layerPtr = &floatColorLayer;
-        thick = TRUE;
-    } else if (strcmp(type, "INT_MATRIX_ENV") == 0 || strcmp(type, "INT_MATRIX") == 0) {
-	layerPtr = &intColorLayer;
-        thick = TRUE;
-    } else {
-	/* print error message, unknown datatype */
+    switch( tolower(*type) ) {
+      case 'a':
+	if (strcasecmp(type, "anytype") == 0) layerPtr = &anytypeColorLayer;
+	break;
+      case 'c':
+	if (strcasecmp(type, "complex") == 0) layerPtr = &complexColorLayer;
+	else if (strcmp(type, "COMPLEX_MATRIX_ENV") == 0 ||
+		 strcmp(type, "COMPLEX_MATRIX") == 0) {
+	  layerPtr = &complexColorLayer;
+	  thick = TRUE;
+	}
+	break;
+      case 'f':
+	if (strcasecmp(type, "float") == 0 ) layerPtr = &floatColorLayer;
+	else if (strcasecmp(type, "fix") == 0) layerPtr = &fixColorLayer;
+	else if (strcasecmp(type, "filemsg") == 0 ) layerPtr = &fileColorLayer;
+	else if (strcmp(type, "FLOAT_MATRIX_ENV") == 0 ||
+		 strcmp(type, "FLOAT_MATRIX") == 0) {
+	  layerPtr = &floatColorLayer;
+	  thick = TRUE;
+	}
+	else if (strcmp(type, "FIX_MATRIX_ENV") == 0 ||
+		 strcmp(type, "FIX_MATRIX") == 0) {
+	  layerPtr = &fixColorLayer;
+          thick = TRUE;
+	}
+	break;
+      case 'i':
+	if (strcasecmp(type, "int") == 0) layerPtr = &intColorLayer;
+	else if (strcmp(type, "INT_MATRIX_ENV") == 0 ||
+		 strcmp(type, "INT_MATRIX") == 0) {
+	  layerPtr = &intColorLayer;
+          thick = TRUE;
+	}
+	break;
+      case 'm':
+	if (strcasecmp(type, "message") == 0) layerPtr = &packetColorLayer;
+	break;
+      case 'p':
+	if (strcasecmp(type, "packet") == 0) layerPtr = &packetColorLayer;
+	break;
+      case 's':
+	if (strcasecmp(type, "string") == 0) layerPtr = &stringColorLayer;
+	break;
+    }
+
+    /* print error message, unknown datatype */
+    if (layerPtr == 0) {
 	ErrAdd("Unknown datatype for terminal");
 	return FALSE;
     }
+
     path = terminalPath(input,position,&translation,totalNumber);
     ERR_IF1(!PutShape(layerPtr, &dummy, path, &translation, thick));
     ERR_IF1(!MkTermLabel(name, input, position, totalNumber));
