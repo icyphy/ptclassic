@@ -316,7 +316,7 @@ void SimC50Target::writeFloat(double val) {
 
 }
 
-void TITarget::writeFix(double val) {
+void SimC50Target::writeFix(double val) {
 	*defaultStream << "\t.word\t" << int(limitFix(val)*(pow(2,15)-1)) << "\n";
 }
 
