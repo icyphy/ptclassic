@@ -2,7 +2,6 @@
 #define _Galaxy_h 1
 
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 

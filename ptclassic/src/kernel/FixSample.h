@@ -16,7 +16,6 @@ $Id$
 #ifndef _FixSample_h
 #define _FixSample_h 1
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 #include "Particle.h"

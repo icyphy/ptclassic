@@ -14,7 +14,6 @@ This is a simple vector packet body.  It stores an array of integer values
 of arbitrary length.  The length is specified by the constructor.
 **************************************************************************/
 #ifdef __GNUG__
-#pragma once
 #pragma interface
 #endif
 
