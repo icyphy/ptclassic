@@ -187,8 +187,10 @@ Creates <code>reachMatrix</code> a class data member.
 Also, uses <code>flags[TMP_PARTITION_FLAG_LOC]</code> for marking nodes.
 <code>TMP_PARTITION_FLAG_LOC</code> = 1 in this file.
 
+@Returns Int: TRUE or FALSE depending on success.
+
 ****/
-void AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
+int AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
 {
     Block *s;
     // reset flags[1] to 0 for all blocks in gal
@@ -198,8 +200,9 @@ void AcyLoopScheduler::createReachabilityMatrix(Galaxy& gal)
     GalTopBlockIter nextBlock(gal);
     while ((s=nextBlock++) != NULL) {
 	if (s->flags[TMP_PARTITION_FLAG_LOC]) continue;
-	if (!visitSuccessors(s,1)) return;
+	if (!visitSuccessors(s,1)) return FALSE;
     }
+    return TRUE;
 }
 
 // Called by <code>createReachabilityMatrix</code>; this does the actual DFS.
@@ -212,7 +215,9 @@ int AcyLoopScheduler::visitSuccessors(Block* s, int flagLoc)
     while ((succ=nextSucc++) != NULL) {
 	fl = succ->flags[flagLoc];
 	if (fl == 1) {
-	    Error::abortRun("Graph is cyclic.  Aborting...");
+	    StringList message = "AcyLoopScheduler::visitSuccessors:\n";
+	    message << "Graph is cyclic.  Aborting...";
+	    Error::warn(message);
 	    return FALSE;
 	}
 	if (fl == 0) {
@@ -362,7 +367,7 @@ void AcyLoopScheduler :: copyFlagsToClusters(Galaxy* gr, int flagLocation)
 // Create the array of all the DataFlowStars in the galaxy.
 // It is assumed here that gal consists of atomic clusters; the star
 // is just the head() of each such cluster.
-void AcyLoopScheduler :: createNodelist(Galaxy& gal)
+int AcyLoopScheduler :: createNodelist(Galaxy& gal)
 {
     // Holds the nodes in galaxy as an array
     delete [] nodelist;
@@ -372,13 +377,16 @@ void AcyLoopScheduler :: createNodelist(Galaxy& gal)
     DataFlowStar* s;
     while ((c=nextClust++) != NULL) {
 	if (c->numberBlocks() > 1 || !c->head()->isItAtomic()) {
-	    Error::abortRun("createNodelist got galaxy with non-atomic clusters.\n");
-	    return;
+	    StringList message = "AcyLoopScheduler::createNodelist:\n";
+	    message << "Got galaxy with non-atomic clusters.\n";
+	    Error::warn(message);
+	    return FALSE;
 	}
 	s = (DataFlowStar*)(c->head());
 	nodelist[NODE_NUM(c)] = s;
 	NODE_NUM(s) = NODE_NUM(c);
     }
+    return TRUE;
 }
 
 int AcyLoopScheduler :: computeBMLB()
@@ -420,9 +428,9 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     Block *d;
     int i = 0, rpmc, apgan, rpmcDppo, apganDppo;
     SequentialList wellOrderedList;
+    StringList message = "AcyLoopScheduler::computeSchedule:\n";
 
     if (!isAcyclic(&gal,0)) {
-	StringList message;
 	message << "Graph is not acyclic; this loop scheduler cannot be used. "
 		<< "Set the looping level parameter in the target to 0, 1, or "
 		<< "2 and rerun the universe.\n";
@@ -467,7 +475,7 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 
     // this function will also propgate the cluster numbering to the
     // star inside.
-    createNodelist(gal);
+    if (!createNodelist(gal)) return FALSE;
 
     // createIncidenceMatrix requires the above node numbering
     createIncidenceMatrix(gal);
@@ -487,35 +495,72 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
 	    *logstrm << "\nGraph is well-ordered; only DPPO used.\n"
 		 << "DPPO cost is: " << rpmcDppo << ".\n";
 	}
+	if (rpmcDppo < 0) {
+	    message << "AcyLoopScheduler::DPPO failed on well-ordered graph.\n";
+	    Error::abortRun(message);
+	    return FALSE;
+	}
     } else {
+
+	SimpleIntMatrix RPMCGcdMatrix;
+	SimpleIntMatrix RPMCSplitMatrix;
 
 	// First of the two heuristics
 	rpmc = callRPMC(gal);
-	if (rpmc < 0) return FALSE;
-        if (logstrm) *logstrm << "RPMC cost (w/out DPPO) is " << rpmc << ".\n";
+	if (rpmc >= 0) {
+            if (logstrm)
+	    	*logstrm << "RPMC cost (w/out DPPO) is " << rpmc << ".\n";
 
-	// Call DPPO
-	rpmcDppo = DPPO();
-	if (rpmcDppo < 0) return FALSE;
+	    // Call DPPO
+	    rpmcDppo = DPPO();
+	    if (rpmcDppo >= 0) {
 
-	if (logstrm) *logstrm << "RPMC+DPPO schedule:\n" << displaySchedule();
+	    	if (logstrm)
+		    *logstrm << "RPMC+DPPO schedule:\n" << displaySchedule();
 
-	// save results for rpmc
-	SimpleIntMatrix RPMCGcdMatrix = gcdMatrix;
-	SimpleIntMatrix RPMCSplitMatrix = splitMatrix;
+	    	// save results for rpmc
+	    	RPMCGcdMatrix = gcdMatrix;
+	    	RPMCSplitMatrix = splitMatrix;
+	    } else {
+		if (logstrm) *logstrm << "DPPO failed on RPMC schedule.\n";
+	    }
+	} else {
+	    if (logstrm) *logstrm << "RPMC failed to produce schedule.\n";
+	}
 
 	// Second of the two heuristics
 	apgan = callAPGAN(gal); 
-	if (apgan < 0) return FALSE;
-        if (logstrm) *logstrm << "APGAN cost (w/out DPPO) is " << apgan << ".\n";
+	if (apgan >= 0) {
+            if (logstrm)
+		*logstrm << "APGAN cost (w/out DPPO) is " << apgan << ".\n";
 
-	apganDppo = DPPO();
-	if (apganDppo < 0) return FALSE;
+	    apganDppo = DPPO();
+	    if (apganDppo >= 0) {
 
-	if (logstrm) *logstrm << "APGAN+DPPO schedule:\n" << displaySchedule();
+		if (logstrm)
+		    *logstrm << "APGAN+DPPO schedule:\n" << displaySchedule();
 
-	// Compare the two and use the better one.
-	if (rpmcDppo < apganDppo) {
+	    } else {
+		if (logstrm) *logstrm << "DPPO failed on APGAN schedule.\n";
+	    }
+	} else {
+	    if (logstrm) *logstrm << "APGAN failed to produce schedule.\n";
+	}
+
+	// check if either heuristic ran to completion.
+	if (apganDppo < 0 && rpmcDppo < 0) {
+	    message << "Both APGAN and RPMC failed to produce valid "
+		    << "schedules due to previous errors.  Aborting...\n";
+	    Error::abortRun(message);
+	    return FALSE;
+	}
+	// 3 cases left now:
+	// Only RPMC failed ==> do nothing; all data-structures have 
+	// 			APGAN results already.
+	// Only APGAN failed ==> All data structures should hold previously
+	//			 computed RPMC results
+	// neither failed ==> if rpmcDppo is lower, then above, else nothing.
+	if ( (apganDppo < 0) || ((rpmcDppo >= 0) && (rpmcDppo < apganDppo))) {
 	    // use RPMC results
 	    gcdMatrix = RPMCGcdMatrix;
 	    splitMatrix = RPMCSplitMatrix;
@@ -536,7 +581,12 @@ int AcyLoopScheduler :: computeSchedule(Galaxy& gal)
     for (i=0; i<graphSize; i++) topInvSort[topSort[i]] = i;
 
     // finally, set all the buffer sizes in accordance with the schedule.
-    fixBufferSizes(0,graphSize-1);
+    if (!fixBufferSizes(0,graphSize-1)) {
+	message << "Failed to set buffer sizes after "
+		<< "schedule computation.  Aborting...\n";
+	Error::abortRun(message);
+	return FALSE;
+    }
 
     if (logstrm) logstrm->flush();
 
@@ -602,7 +652,7 @@ int AcyLoopScheduler :: callAPGAN(Galaxy& gal)
     // Reachability matrix is needed by APGAN.  Note that copyFlagsToClusters
     // should be invoked before this since the following function depends
     // on the clusters having the node numbers.
-    createReachabilityMatrix(gal);
+    if (!createReachabilityMatrix(gal)) return -1;
 
     topSort = APGANTopSort;
     apgan = APGAN(&gal);
@@ -636,19 +686,19 @@ int AcyLoopScheduler :: checkTopsort()
     DataFlowStar *nodei, *pn;
     DFPortHole *p, *q;
     int flag=0;
+    StringList message = "AcyLoopScheduler::checkTopsort:\n";
     for (int i=0; i<graphSize; i++) topInvSort[i] = -1;
     for (i = 0; i < graphSize; i++) {
 	if ( (topSort[i] >= 0) && (topSort[i] < graphSize) &&
 	    (topInvSort[topSort[i]] == -1) ) {
 	    topInvSort[topSort[i]] = i;
 	} else {
-	    StringList message;
 	    message << "AcyLoopScheduler::topSort is not valid.\n"
 		    << "There could be several reasons for this: "
 		    << "the node numbering might be wrong, RPMC or "
 		    << "APGAN constructed an invalid topSort, or other "
-		    << "reasons.  Aborting...\n";
-	    Error :: abortRun(message);
+		    << "reasons.\n";
+	    Error :: warn(message);
 	    return FALSE;
 	}
     }
@@ -677,10 +727,9 @@ int AcyLoopScheduler :: checkTopsort()
         if (flag) break;
     }
     if (flag) {
-	StringList message;
-	message << "topSort array is invalid; precedence constraints"
-		<< " violated.\n";
-	Error::abortRun(message);
+	message << "AcyLoopScheduler::topSort array is invalid; precedence "
+		<< "constraints violated.\n";
+	Error::warn(message);
 	return FALSE;
     }
     return TRUE;
@@ -705,6 +754,7 @@ else inside it.
 int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 {
     AcyCluster* c, *b;
+    StringList message = "AcyLoopScheduler::addTopLevelCluster:\n";
     if ((gal->head())->isItCluster()) {
 	AcyClusterIter nextClust(*gal);
 	c = nextClust++;
@@ -714,26 +764,21 @@ int AcyLoopScheduler::addTopLevelCluster(Galaxy* gal)
 	}
 	cleanupAfterCluster(*gal);
 	if (gal->numberBlocks() != 1) {
-	    StringList message;
-	    message << "Bug in AcyLoopScheduler::addTopLevelCluster: "
-		    << "galaxy has"
-		    << " more than one block after clustering process.\n";
-	    Error::abortRun(message);
+	    message << "Galaxy has more than one block after "
+		    << "clustering process.\n";
+	    Error::warn(message);
 	    return FALSE;
 	}
 	// Change c's name to gal's name.
 	c->setName(gal->name());
 	return TRUE;
     } else {
-	StringList message;
-	message << "Function AcyLoopScheduler::addTopLevelCluster "
-		<< "called on galaxy that has "
-		<< "not been converted to cluster hierarchy by calling "
-		<< "Cluster::initializeForClustering first.\n"
+	message << "Galaxy has not been converted to cluster hierarchy "
+		<< "by calling Cluster::initializeForClustering first.\n"
 		<< "OR There's a bug in addTopLevelCluster since it thinks "
 		<< "that the members of the argument "
 		<< "galaxy are not Clusters.\n";
-	Error::abortRun(message);
+	Error::warn(message);
 	return FALSE;
    }
 }
@@ -774,7 +819,7 @@ if the node under examination is either A or B, and B is a spliced-in star,
 then condition a) is satisfied.  If A is the spliced-in star, then b) is
 satisfied.
 
-@Returns Int: TRUE or FALSE depending on whether the clustering was successfull.
+@Returns Int: TRUE or FALSE depending on whether the clustering was successful
 
 @SideEffects gr gets modified because that is the point of the clustering.
 
@@ -816,7 +861,13 @@ int AcyLoopScheduler::clusterSplicedStars(AcyCluster* gr)
 		    // c gets absorbed into something else only when
 		    // it is the node being examined.  So the main while
 		    // loop can never visit c again after it has been absorbed.
-		    if (!b->absorb(*c,0)) return FALSE;
+		    if (!b->absorb(*c,0)) {
+			StringList message = 
+				"AcyLoopScheduler::clusterSplicedStars:\n";
+			message << "Failed to complete absorb operation.\n";
+			Error::warn(message);
+			return FALSE;
+		    }
 		    break;
 		}
 	    }
@@ -854,6 +905,7 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
     int N, lflag = 0, rflag = 0;
     AcyCluster *c, *leftSubGraph = 0, *rightSubGraph = 0, *newL = 0, *newR = 0;
     SequentialList leftGroup, rightGroup;
+    StringList message = "AcyLoopScheduler::RPMC:\n";
 
     // Call graph splitter if total number of nodes in cluster hierarchy 
     // is more than 1.
@@ -866,10 +918,10 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 		// Since totalNumberOfBlocks() returned more than 1,
 		// we cannot ever end up with an atomic block in this
 		// loop; hence, abort.
-		StringList message;
 		message << "There appears to be an error in the  "
-			<< "number returned by totalNumberOfBlocks.\n";
-		Error::abortRun(message);
+			<< "number returned by "
+			<< "SynDFCluster::totalNumberOfBlocks.\n";
+		Error::warn(message);
 		return -1;
 	    }
 	    gr = (AcyCluster*)gr->head();
@@ -887,12 +939,11 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    // since normally the graph splitter should never return -1
 	    // if it can find a bounded cut, and the code above takes
 	    // care of that.
-	    StringList message;
 	    message << "AcyCluster::legalCutIntoBddSets failed to "
 		    << "produce a cut. Either there is a bug there "
 		    << "or earlier clustering steps have introduced "
 		    << "cycles into the graph.\n";
-	    Error::abortRun(message);
+	    Error::warn(message);
 	    return -1;
 	}
 
@@ -916,11 +967,9 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	// on the same side of the cut.  Both these conditions are
 	// errors and mean that there is a bug somewhere.
 	if (!leftSubGraph || !rightSubGraph) {
-	    StringList message;
-	    message << "Cut produced in AcyLoopScheduler::RPMC has "
-		    << "an error: Every node "
+	    message << "Cut produced in RPMC has an error: Every node "
 		    << "appears to be on the same side of the cut.\n";
-	    Error::abortRun(message);
+	    Error::warn(message);
 	    return -1;
 	}
 	// Now we start clustering using leftSubGraph and rightSubGraph
@@ -939,10 +988,18 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    ListIter nextLeft(leftGroup);
 	    c = (AcyCluster*)nextLeft++;
 	    newL = (AcyCluster*)(leftSubGraph->group(*c));
-	    if (!newL) return -1;
+	    if (!newL) {
+		message << "Failed to complete group operation.\n";
+		Error::warn(message);
+		return -1;
+	    }
 	    PARTITION(newL) = 0;
 	    while ((c = (AcyCluster*)nextLeft++) != NULL) {
-		if (!newL->absorb(*c)) return -1;
+		if (!newL->absorb(*c)) {
+		    message << "Failed to complete absorb operation.\n";
+		    Error::warn(message);
+		    return -1;
+		}
 	    }
 	} else newL = leftSubGraph;
 
@@ -950,19 +1007,28 @@ int AcyLoopScheduler::RPMC(AcyCluster* gr)
 	    ListIter nextRight(rightGroup);
 	    c = (AcyCluster*)nextRight++;
 	    newR = (AcyCluster*)(rightSubGraph->group(*c));
-	    if (!newR) return -1;
+	    if (!newR) {
+		message << "Failed to complete group operation.\n";
+		Error::warn(message);
+		return -1;
+	    }
 	    PARTITION(newR) = 1;
 	    while ((c = (AcyCluster*)nextRight++) != NULL) {
-		if (!newR->absorb(*c)) return -1;
+		if (!newR->absorb(*c)) {
+		    message << "Failed to complete absorb operation.\n";
+		    Error::warn(message);
+		    return -1;
+		}
 	    }
 	} else newR = rightSubGraph;
 
 	// Now call RPMC again on the left and right subgraphs.
 
 	leftCost = RPMC(newL);
-	rightCost = RPMC(newR);
+	if (leftCost < 0) return -1;
 
-	if (leftCost < 0 || rightCost < 0) return -1;
+	rightCost = RPMC(newR);
+	if (rightCost < 0) return -1;
 
 	totalCost = leftCost + cost + rightCost;
     }
@@ -1006,6 +1072,7 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
     int N, rho, flag, tmp, i, cost = 0;
     SynDFClusterPort *p, *clusterEdge = 0;
     AcyCluster *src, *snk, *clusterSrc = 0, *clusterSnk = 0, *omega;
+    StringList message = "AcyLoopScheduler::APGAN:\n";
     // create the edge list; this list will contain all the output ports
     // in gal.
     createEdgelist(gal);
@@ -1048,24 +1115,26 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 		}
 	    }
 	}
+	// Now check whether the edgelist is empty.  If it is empty,
+	// then there are no new candidates to be clustered since
+	// the part that removes edges above also continues the loop.
+	// Also, only edges marked for deletion from previous pass are
+	// deleted. Hence, this means that the graph has several connected
+	// components.
+	if (edgelist.size() == 0) break;
+
 	// cluster clusterSrc and clusterSnk.  Also update the reachability
 	// matrix and the edge list.  The edgelist is updated next time around;
 	// now it is simply marked to be deleted.
 	omega = (AcyCluster*)(clusterSrc->group(*clusterSnk));
 	NODE_NUM(omega) = NODE_NUM(clusterSrc);
-	// the following two statements are to make it easy to determine
-	// which way the arc is going between clusterSrc and clusterSnk.
-	// Even though it is obvious here, it won't be obvious when we
-	// retrieve the clusters from omega using ClusterIter.  Then, rather
-	// than physically checking which direction the arcs are going, we
-	// can just look at PARTITION()
+
 	PARTITION(clusterSrc) = 0;
 	PARTITION(clusterSnk) = 1;
-	// mark this edge (that we just clustered) for deletion
-	clusterEdge->DELETE = 1;
+
 	// mark all the output ports from clusterSrc and clusterSnk
-	// for deletion as well.  Finally, add all of the output ports
-	// of omega to the list.
+	// for deletion as well (this will include clusterEdge).
+	// Finally, add all of the output ports of omega to the list.
 	SynDFClusterOutputIter nextO1(*clusterSrc);
 	while ((p=nextO1++) != NULL) {
 	    p->DELETE = 1;
@@ -1082,6 +1151,7 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	while ((p=nextO2++) != NULL) p->DELETE = 1;
 	SynDFClusterOutputIter nextO3(*omega);
 	while ((p=nextO3++) != NULL) edgelist.append(p);
+
 	// Update the reachability matrix.  The rows and columns corresponding
 	// to clusterSnk are all marked -1 so that we can detect that
 	// clusterSnk is not in the clustered graph anymore.  clusterSrc
@@ -1106,14 +1176,51 @@ int AcyLoopScheduler::APGAN(Galaxy* gal)
 	    reachMatrix.m[i][NODE_NUM(clusterSnk)] = -1;
 	}
     }
+
     // graph has been completely clustered now.  Build up the schedule
     // tree by traversing the clustering hierarchy backwards.
     // First check that there is only one node in gal.
     if (gal->numberBlocks() != 1) {
-	// This means there is a bug either in the implementation above,
-	// or in the clustering routines that it calls.
-	Error::abortRun("Bug in APGAN implementation; didn't cluster properly.");
-	return -1;
+	// this means that the graph has several connected components
+	// So we just create a linear tree-shaped cluster hierarchy
+	// out of these in order to maintain a binary-tree hierarchy
+	// in the cluster nesting.
+	AcyClusterIter nextClust(*gal);
+	AcyCluster* c1, *c2;
+	// Since we use group operations, and these add clusters to
+	// the parent galaxy, we do not iterate over members of the parent.
+	// instead, we copy the clusters to this list and iterate over
+	// this list.
+	SequentialList connComps;
+
+	// first check that all clusters are maximal connected components
+	while ((c1=nextClust++) != NULL) {
+	    // Note: it might be more robust to allow numberPorts() to be
+	    // non-zero but check that each port is unconnected.  However,
+	    // that situation is a bug anyway which might indicate other
+	    // problems.
+	    if (c1->numberPorts() != 0) {
+		message << "Did not cluster properly; "
+			<< "there is a bug in the routine.\n";
+		Error::warn(message);
+		return -1;
+	    }
+	    connComps.append(c1);
+	}
+	// Now build up the linear binary-tree.
+	ListIter nextComp(connComps);
+	c1 = (AcyCluster*)nextComp++;
+	while ((c2=(AcyCluster*)nextComp++) != NULL) {
+	    c1 = (AcyCluster*)(c1->group(*c2));
+	    if (!c1) break;
+	}
+	// Below should hopefully never occur.
+        if (gal->numberBlocks() != 1) {
+	    message << "Failed to build tree-hierarchy out of "
+		    << "connected components after main clustering.\n";
+	    Error::warn(message);
+	    return -1;
+    	}
     }
     return cost;
 }
@@ -1135,12 +1242,11 @@ int AcyLoopScheduler::buildTopsort(AcyCluster* gr, int ti)
     AcyCluster *tmp,*leftOmega, *rightOmega;
     int lt, rt;
     if (gr->numberBlocks() > 2) {
-	StringList message;
-	message << "Error in RPMC or APGAN in AcyLoopScheduler. "
-		<< "Clustering process did not cluster properly.\n"
-		<< "Message generated in AcyLoopScheduler::buildTopsort.\n";
-	Error::abortRun(message);
-	return -1;
+	StringList message = "AcyLoopScheduler::buildTopsort:\n";
+	message << "Error detected in RPMC or APGAN in AcyLoopScheduler. "
+		<< "Clustering process did not cluster properly.\n";
+	Error::warn(message);
+	return 0;
     }
     else if (gr->numberBlocks() == 1) {
 	if (!gr->head()->isItAtomic()) {
@@ -1164,7 +1270,9 @@ int AcyLoopScheduler::buildTopsort(AcyCluster* gr, int ti)
 	    rightOmega = nextClust++;
 	}
 	lt = buildTopsort(leftOmega, ti);
+	if (!lt) return 0;
 	rt = buildTopsort(rightOmega, lt);
+	if (!rt) return 0;
 	return rt;
     }
 }
@@ -1245,15 +1353,14 @@ int AcyLoopScheduler::DPPO()
 		// First check if the number of delays are sufficiently high
 		// since this is a feedback arc
 		if (tmpDel2 < tmpInc2*reps[ke]) {
-		    StringList message;
+		    StringList message = "AcyLoopScheduler::DPPO:\n";
 		    message << "DPPO thinks that the topological sort "
 			    << "constructed by RPMC or APGAN "
 		            << "has reverse arcs with insufficient delay.\n"
 			    << "This could happen if the topSort array "
 			    << "is filled incorrectly.  Either that or "
-			    << "there is a bug in the DPPO function where "
-			    << "this message is being generated.\n";
-		    Error::abortRun(message);
+			    << "there is a bug in the DPPO function.\n";
+		    Error::warn(message);
 		    return -1;
 		} else {
 		    costij = tmpDel2;
@@ -1287,8 +1394,10 @@ schedule computed by <code>computeSchedule</code>.
 
 @SideEffects Geodesics bufferSize is changed.
 
+@Returns Int: TRUE or FALSE
+
 ****/
-void AcyLoopScheduler::fixBufferSizes(int i, int j) {
+int AcyLoopScheduler::fixBufferSizes(int i, int j) {
  
     // function that establishes the maximum buffer size for
     // each arc based on the schedule computed by RPMC+DPPO
@@ -1314,8 +1423,8 @@ void AcyLoopScheduler::fixBufferSizes(int i, int j) {
 		    // t is on the other side of the split.
 		    geod = p->geo();
 		    if (!geod) {
-			Error::abortRun(*p, "has no geodesic.\n");
-			return;
+			Error::warn(*p, "has no geodesic.\n");
+			return FALSE;
 		    }
 		    delays = p->numInitDelays();
 		    if (p->isItInput()) {
@@ -1327,15 +1436,66 @@ void AcyLoopScheduler::fixBufferSizes(int i, int j) {
 		}
 	    }
 	}
-	fixBufferSizes(i,split);
-	fixBufferSizes(split+1,j);
+	if (!fixBufferSizes(i,split)) return FALSE;
+	if (!fixBufferSizes(split+1,j)) return FALSE;
     }
+    return TRUE;
 }
 
-///// Run methods ////
-///// runOnce is called from SDFScheduler::run ////
-///// AcyLoopScheduler does not need to redefine run(); SDFScheduler::run
-///// is used.
+/****
+
+Determine whether the graph is well-ordered or not.
+
+@Description
+Returns a list containing ALL the nodes in the graph in topological
+ordering if the graph is well ordered.  This means that the
+following are equivalent for this graph
+<p>
+<li>a) there is only 1 topological sort
+<li>b) there is a hamiltonian path
+<li>c) there is a total precedence ordering rather than a partial one,
+<li>d) For any two nodes u,v, it is either the case that u->v is a path
+	or v->u is a path
+<p>
+The algorithm is to repeatedly find sources, and return the incomplete
+list if there is more than 1 source node at any stage.  If there is
+only one source at any stage, we mark that node (meaning it is
+"removed" from the graph) and find sources on the resulting
+graph.  Worst case running time: O(N+E) where N=graphSize,
+E is the number of edges.
+
+@SideEffects
+Fills the <code>topsort</code> list with the topological ordering of the nodes
+
+@Returns Int TRUE or FALSE.
+
+****/
+int AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
+{
+    int flagLoc = TMP_PARTITION_FLAG_LOC, numPasses=0;
+    resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
+    SequentialList sources;
+    findSources(g,flagLoc, sources, 0);
+    while (numPasses < graphSize) {
+	if (sources.size() == 1) {
+	    Block* src = (Block*)sources.getAndRemove();
+	    topsort.append(src);
+	    src->flags[flagLoc] = 1;
+	    numPasses++;
+	    findSources(g, flagLoc, sources, src);
+	} else {
+	    return FALSE;
+	}
+    }
+    return TRUE;
+}
+/************* End of methods called from computeSchedule() *************/
+
+/************************** Run methods *********************************/
+
+
+// AcyLoopScheduler does not need to redefine run(); SDFScheduler::run
+// is used.
 
 // this is called from SDFScheduler::run
 void AcyLoopScheduler::runOnce()
@@ -1404,8 +1564,10 @@ void AcyLoopScheduler::genCode(Target& t, int depth, int i, int j, int g)
     }
 }
 
+/************************* End of methods called from run() **********/
 
-///////  Display Schedule routines.                      ///////
+/************************* Display Schedule routines. ****************/
+//
 ///////  These methods are called when display-schedule  ///////
 ///////  is called in pigi or the "schedule" command is  ///////
 ///////  used in ptcl.
@@ -1454,53 +1616,7 @@ StringList AcyLoopScheduler::dispNestedSchedules(int depth,int i,int j,int g)
     return sch;
 }
 
-/****
-
-Determine whether the graph is well-ordered or not.
-
-@Description
-Returns a list containing ALL the nodes in the graph in topological
-ordering if the graph is well ordered.  This means that the
-following are equivalent for this graph
-<p>
-<li>a) there is only 1 topological sort
-<li>b) there is a hamiltonian path
-<li>c) there is a total precedence ordering rather than a partial one,
-<li>d) For any two nodes u,v, it is either the case that u->v is a path
-	or v->u is a path
-<p>
-The algorithm is to repeatedly find sources, and return the incomplete
-list if there is more than 1 source node at any stage.  If there is
-only one source at any stage, we mark that node (meaning it is
-"removed" from the graph) and find sources on the resulting
-graph.  Worst case running time: O(N+E) where N=graphSize,
-E is the number of edges.
-
-@SideEffects
-Fills the <code>topsort</code> list with the topological ordering of the nodes
-
-@Returns Int TRUE or FALSE.
-
-****/
-int AcyLoopScheduler::isWellOrdered(Galaxy* g, SequentialList& topsort)
-{
-    int flagLoc = TMP_PARTITION_FLAG_LOC, numPasses=0;
-    resetFlags(*g,flagLoc); // reset flags[flagLoc] for all blocks
-    SequentialList sources;
-    findSources(g,flagLoc, sources, 0);
-    while (numPasses < graphSize) {
-	if (sources.size() == 1) {
-	    Block* src = (Block*)sources.getAndRemove();
-	    topsort.append(src);
-	    src->flags[flagLoc] = 1;
-	    numPasses++;
-	    findSources(g, flagLoc, sources, src);
-	} else {
-	    return FALSE;
-	}
-    }
-    return TRUE;
-}
+/************************ Methods used for debugging only *******************/
 
 // These methods are for debugging; they print out the various matrices
 // used by this scheduler.
@@ -1595,8 +1711,8 @@ void AcyLoopScheduler :: createReachabilityMatrix(Galaxy& gal)
 		    StringList message;
 		    message << "Failed to create reachability matrix. ";
 			    << "Graph appears to be non-acyclic.\n";
-		    Error::abortRun(message);
-		    return;
+		    Error::warn(message);
+		    return FALSE;
 		}
 		reachMatrix.m[NODE_NUM(s)][NODE_NUM(u)] = 1;
 		if (nodeColors.m[0][NODE_NUM(u)] == 0) {
