@@ -49,6 +49,7 @@ EXTRA_SRCS =	abbreviations.html \
 		documentation.html \
 		help.html \
 		index.html \
+		install.html \
 		introduction.html \
 		overview.html \
 		policies.html \
