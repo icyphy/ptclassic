@@ -47,20 +47,19 @@ label in the window header.
 to modify its data.  In the base class, the only action is to handle
 the annotation at the bottom of the window that indicates whether the
 file has been modified.
-The <I>bool</I> value can be
+The <CODE><I>bool</I></CODE> value can be
 <CODE>yes</CODE>, <CODE>no</CODE>, <CODE>true</CODE>,<CODE>false</CODE>,
 <CODE>1</CODE>, or <CODE>0</CODE> (it is not case sensitive).
 
-<dt><a name="autosaveinterval option"><CODE>-autosaveinterval</CODE>
-<i>value</i></a>
+<dt><a name="autosaveinterval option"><CODE>-autosaveinterval <i>value</i></CODE></a>
 <dd>The value
 is the time (in minutes) between saves.  In this base class,
 there is no meaningful save operation, so the
 <a name="autosave">autosave</a> operation
 does not do anything.  In derived classes, if the data has been
 modified, then the auto-save operation will create a file called
-<CODE>#auto#</CODE><I>name</I>, where <I>name</I> is
-the associated file name.  This file
+<CODE>#auto#<I>name</I></CODE>, where <CODE><I>name</I></CODE>
+is the associated file name.  This file
 is automatically deleted when a successful save occurs.
 (see <a href="../../../../doc/running.html">Running Tycho</a>).
 </dl>
