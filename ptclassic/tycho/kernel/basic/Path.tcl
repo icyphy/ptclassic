@@ -323,7 +323,7 @@ proc ::tycho::rootDir {pathname} {
 proc ::tycho::rm { args } {
     global itcl::version tcl_platform
     if {[namespace ::itcl {set ::itcl::version} ] >= 2.2} {
-	if {[lindex $args 0] == "-f"} {
+	if {[lindex $args 0] == "-f" || [lindex $args 0] == "-rf"} {
 	    eval file delete -force -- $args
 	} else {
 	    eval file delete -- $args
