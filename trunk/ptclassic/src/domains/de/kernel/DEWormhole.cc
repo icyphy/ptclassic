@@ -15,6 +15,7 @@ Version identification:
 #endif
 
 #include "DEWormhole.h"
+#include "DEWormConnect.h"
 #include "DEScheduler.h"
 
 /*******************************************************************
@@ -36,6 +37,19 @@ void DEWormhole :: go()
 
 	// run the inner scheduler.
 	run();
+}
+
+// new phase
+void DEWormhole :: startNewPhase() 
+{
+        BlockPortIter next(*this);
+        PortHole* p;
+        while ((p = next++) != 0) {
+                if (p->isItInput()) {
+                        DEtoUniversal* inp = (DEtoUniversal*) p;
+                        inp->cleanIt();
+                }
+        }
 }
 
 // cloner -- clone the inside and make a new wormhole from that.
