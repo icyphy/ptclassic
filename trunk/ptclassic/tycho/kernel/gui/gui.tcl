@@ -95,9 +95,15 @@ if {![info exists tychoShouldWeDoRegularExit]} {
 ########### Miscellaneous and conditional modes
 
 # If we open a shared object, try to load it as a Tycho task
-::tycho::register mode "sharedlibrary" \
-	-command {::tycho::controlpanel {%s}}
-::tycho::register extensions "sharedlibrary" [info sharedlibext]
+if { "[info sharedlibext]" != "" } {
+    # Ptolemy Classic compiled under NT does not support shared libs
+    # so [info sharedlibext] will return the empty string, so
+    # trying to view the Ptolemy copyright will try to load it as
+    # a shared library. 
+    ::tycho::register mode "sharedlibrary" \
+	    -command {::tycho::controlpanel {%s}}
+    ::tycho::register extensions "sharedlibrary" [info sharedlibext]
+}
 
 ##### End
 
