@@ -83,7 +83,7 @@ int CGGeodesic :: forkDelay() const {
 
 	const CGPortHole* p;
 	while ((p = s->src()) != 0) {
-		n += s->numInitialParticles;
+		n += s->numInit();
 		s = &p->cgGeo();
 		if (s->sourcePort()->isItInput()) return n;
 	}
