@@ -187,9 +187,16 @@ makefile:	make.template $(MDEPS)
 
 makefiles:	makefile
 
+# Command used in "make TAGS"
+#
+# Override with something like
+#  gmake TAGS ETAGS="echo >>/tmp/allfiles"
+# to generate a line of all source and header files
+ETAGS =		etags++ -b
+
 # Convert relative VPATH to an absolute path.
 TAGS:		$(HDRS) $(SRCS)
-		etags++ -b $(HDRS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%) \
+		$(ETAGS) $(HDRS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%) \
 			$(SRCS:%=$(VPATH:$(ROOT)%=$(PTOLEMY)%)/%)
 
 # Rule for detecting junk files
