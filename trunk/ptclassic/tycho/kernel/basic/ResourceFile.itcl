@@ -60,6 +60,9 @@ class ::tycho::ResourceFile {
     # Return the content type of the resource
     method contenttype {}
 
+    # Return the end of file status
+    method eof {}
+
     # Flush buffered output to a streamable resource 
     method flush {}
 
@@ -178,6 +181,15 @@ body ::tycho::ResourceFile::flush {} {
 	error "File \"$this\" is not open"
     }
     ::flush $fileid
+}
+
+#####################################################################
+#### eof
+body ::tycho::ResourceFile::eof {} {
+    if !$fileIsOpen {
+	error "File \"$this\" is not open"
+    }
+    ::eof $fileid
 }
 
 #####################################################################
