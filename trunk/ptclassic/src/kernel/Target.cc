@@ -98,13 +98,11 @@ void Target::setup() {
 				" no galaxy attached to the target");
 		return;
 	}
-	Target* t = child(0);
-	if (!t) t = this;
 	GalStarIter next(*gal);
 	Star* s;
 	while ((s = next++) != 0) {
-		if (!s->isA(t->supportedStarClass) && 
-		    !s->isA(t->auxStarClass())) {
+		if (!s->isA(supportedStarClass) && 
+		    !s->isA(auxStarClass())) {
 			Error::abortRun (*s,
 					 "wrong star type for target ",
 					 name());
