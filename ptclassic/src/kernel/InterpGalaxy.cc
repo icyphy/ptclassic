@@ -456,6 +456,10 @@ InterpGalaxy::setDomain (const char* name) {
 			Error::error ("Can't change domain, non-empty galaxy");
 			return FALSE;
 		}
+		else if (!KnownBlock::validDomain(name)) {
+			Error::error ("No such domain: ", name);
+			return FALSE;
+		}
 		// OK, do it.
 		name = hashstring(name);
 		Galaxy::setDomain(name);
@@ -626,7 +630,10 @@ InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
 // We also make a wormhole whenever an innerTarget is specified.
 
 	Domain* od = Domain::named(outerDomain);
-
+	if (!od) {
+		Error::error("No such domain: ", outerDomain);
+		return;
+	}
 	if (innerTarget || od->isGalWorm() ||
 	    strcmp (outerDomain, domain()) != 0) {
 		Star& s = od->newWorm(*this,innerTarget);
