@@ -71,7 +71,7 @@ test connect-1 {connection of galaxy port to multiport, relative naming} {
 } {.x.a.out .x.c.input#1 .x.a.z.output}
 
 test connect-2 {connection of star port to multiport, absolute naming} {
-    ::pitcl::currentGalaxy .main
+    ::pitcl::addUniverse .confuse SDF
     ::pitcl::connect .x.b.output .x.c.input
     list \
             [::pitcl::connected .x.c.input#2] \

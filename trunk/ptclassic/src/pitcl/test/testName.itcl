@@ -64,20 +64,20 @@ test name-0 {create a test universe} {
 ######################################################################
 #### getClassName
 
-test getClassName-1 {get the class name of a library block} {
+test name-1 {get the class name of a library block} {
     ::pitcl::getClassName BlackHole
 } {SDFBlackHole}
 
-test getClassName-2 {get the class name of a master galaxy} {
+test name-2 {get the class name of a master galaxy} {
     ::pitcl::getClassName y
 } {y}
 
-test getClassName-3 {get the class name of an instance galaxy} {
-    ::pitcl::currentGalaxy .main
+test name-3 {get the class name of an instance galaxy} {
+    ::pitcl::addUniverse .confusion SDF
     ::pitcl::getClassName .x.a
 } {y}
 
-test getClassName-4 {get the class name of an instance star} {
+test name-4 {get the class name of an instance star} {
     ::pitcl::currentGalaxy .x
     ::pitcl::getClassName a.z
 } {SDFRamp}
@@ -85,25 +85,25 @@ test getClassName-4 {get the class name of an instance star} {
 ######################################################################
 #### getFullName
 
-test getFullName-1 {get the full name of a library block} {
+test name-5 {get the full name of a library block} {
     ::pitcl::getFullName BlackHole
 } {BlackHole}
 
-test getFullName-2 {get the full name of a master galaxy} {
+test name-6 {get the full name of a master galaxy} {
     ::pitcl::getFullName y
 } {y}
 
-test getFullName-3 {get the full name of an instance galaxy} {
+test name-7 {get the full name of an instance galaxy} {
     ::pitcl::currentGalaxy .x
     ::pitcl::getFullName a
 } {.x.a}
 
-test getFullName-4 {get the full name of an instance star} {
+test name-8 {get the full name of an instance star} {
     ::pitcl::currentGalaxy .x
     ::pitcl::getFullName a.z
 } {.x.a.z}
 
-test getFullName-5 {get the full name of a star within a master galaxy} {
+test name-9 {get the full name of a star within a master galaxy} {
     ::pitcl::currentGalaxy y
     ::pitcl::getFullName z
 } {y.z}
@@ -111,25 +111,25 @@ test getFullName-5 {get the full name of a star within a master galaxy} {
 ######################################################################
 #### getParent
 
-test getParent-1 {get the parent of a library block} {
+test name-10 {get the parent of a library block} {
     ::pitcl::getParent BlackHole
 } {}
 
-test getParent-2 {get the parent of a master galaxy} {
+test name-11 {get the parent of a master galaxy} {
     ::pitcl::getParent y
 } {}
 
-test getParent-3 {get the parent of an instance galaxy} {
+test name-12 {get the parent of an instance galaxy} {
     ::pitcl::currentGalaxy .x
     ::pitcl::getParent a
 } {.x}
 
-test getParent-4 {get the parent of an instance galaxy} {
-    ::pitcl::currentGalaxy .main
+test name-13 {get the parent of an instance galaxy} {
+    ::pitcl::currentGalaxy .confusion
     ::pitcl::getParent .x.a
 } {.x}
 
-test getParent-5 {get the parent of an instance star} {
+test name-14 {get the parent of an instance star} {
     ::pitcl::currentGalaxy .x
     ::pitcl::getParent a.z
 } {.x.a}

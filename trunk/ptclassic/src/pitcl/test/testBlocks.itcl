@@ -95,7 +95,7 @@ test blocks-6 {get the full name of all stars of a universe} {
 } {.x.a.z .x.b .x.c .x.d}
 
 test blocks-7 {get the names from another universe} {
-    ::pitcl::currentGalaxy .main
+    ::pitcl::addUniverse .confusion DE
     ::pitcl::blocks -deep -fullname .x
 } {.x.a.z .x.b .x.c .x.d}
 

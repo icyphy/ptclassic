@@ -50,6 +50,7 @@ SIMPLE_TESTS = \
 	testGalaxyPort.itcl \
 	testKnown.itcl \
 	testName.itcl \
+	testOnFiring.itcl \
 	testPorts.itcl \
 	testPredicates.itcl \
 	testRemove.itcl \

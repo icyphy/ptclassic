@@ -46,7 +46,7 @@ set reallyExit 0
 
 test predicates-0 {create a test universe} {
     namespace ::pitcl {
-        defWormhole ym SDF DE {
+        defWormhole ymw SDF DE {} {
             addBlock z PulseGen
             galaxyPort out z.output
         }
@@ -55,7 +55,7 @@ test predicates-0 {create a test universe} {
             galaxyPort in e.input
         }
         addUniverse x SDF
-        addBlock y ym
+        addBlock y ymw
         addBlock b Const
         addBlock c Add
         addBlock z zm
