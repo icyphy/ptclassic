@@ -192,6 +192,6 @@ void State::parseError (const char* text, const char* text2) {
 	msg += text;
 	msg += " ";
 	msg += text2;
-	errorHandler.error (msg);
+	Error::abortRun (msg);
 }
 

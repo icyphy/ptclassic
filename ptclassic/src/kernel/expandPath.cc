@@ -12,7 +12,7 @@ Routine to expand a pathname
 warning: may return a pointer to a static buffer; a second
 call may over-write this buffer.
 
-This is almost plain C except for calling errorHandler.error
+This is almost plain C except for calling Error::abortRun
 
 **************************************************************************/
 
@@ -34,7 +34,7 @@ expandPathName(const char* name) {
 	if (pslash == name + 1) {
 		pwd = getpwuid(getuid());
 		if (pwd == 0) {
-			errorHandler.error ("getpwuid doesn't know you!");
+			Error::abortRun ("getpwuid doesn't know you!");
 			exit (1);
 		}
 	}
