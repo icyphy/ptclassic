@@ -72,7 +72,15 @@ public:
 	/* virtual */ int run();
 
 	// send output events to the global event queue.
-	inline void sendOutput();
+        // declare inline so that it can be inlined into DEStar::run,
+        // the primary call point
+        inline void sendOutput() {
+            BlockPortIter next(*this);
+            PortHole* p;
+            while ((p = next++) != 0) {
+		p->sendData();
+            }
+        }
 
 	// class identification
 	/* virtual */ int isA(const char*) const;

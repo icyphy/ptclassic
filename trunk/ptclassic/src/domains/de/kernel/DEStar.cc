@@ -140,16 +140,6 @@ int DEStar::isMutable() {
 	return _mutabilitySet;
 }
 
-// declare inline so that it can be inlined into DEStar::run,
-// the primary call point
-inline void DEStar :: sendOutput() {
-	BlockPortIter next(*this);
-	PortHole* p;
-	while ((p = next++) != 0) {
-		p->sendData();
-	}
-}
-
 int DEStar :: run() {
 	int status = Star::run();
 	sendOutput();
