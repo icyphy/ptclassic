@@ -50,6 +50,8 @@ OBJS = 	$(SRCS:.c=.o)
 
 LIB =	libudpam.$(LIBSUFFIX)
 
+MISC_FILES = Makefile.dist
+
 # This probably only works under Solaris
 #OS =	AIX
 OS =	SOLARIS
