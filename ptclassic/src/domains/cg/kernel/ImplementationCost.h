@@ -47,10 +47,15 @@ class ImplementationCost {
 	// destructor
 	~ImplementationCost();
 
+	// initialize data members
+	void initialize();
+
+	// return values of data members
 	inline int executionTime() { return exectime; }
 	inline const int* programMemory() { return progMemoryVector; }
 	inline const int* dataMemory() { return dataMemoryVector; }
 
+	// set values of data members
 	inline void setExecutionTime(int etime) {
 		exectime = etime;
 	}
