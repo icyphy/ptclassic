@@ -102,7 +102,7 @@ proc ptkRunControl { name octHandle } {
 
     # Define the entry that controls the number of iterations
     frame $ptkControlPanel.iter -bd 10
-	label $ptkControlPanel.iter.label -text "Number of iterations:"
+	label $ptkControlPanel.iter.label -text "When to stop:"
         entry $ptkControlPanel.iter.entry -relief sunken -width 10 -bg wheat3
 	$ptkControlPanel.iter.entry insert @0 $defNumIter
 	checkbutton $ptkControlPanel.iter.debug -text "Debug" \
@@ -139,7 +139,7 @@ proc ptkRunControl { name octHandle } {
 
     # The debug panel will be filled with buttons when debugging is
     # turned on.  It starts out off always.
-    frame $ptkControlPanel.debug -bd 10 
+    frame $ptkControlPanel.debug -bd 10
 
     # Animation is off by default
     # Note that since pre and post actions are global, there is no point
@@ -148,18 +148,21 @@ proc ptkRunControl { name octHandle } {
     set ptkGrAnimationFlag 0
     ptkGrAnimation 0
 
-    button $ptkControlPanel.dismiss -text "DISMISS" -command \
+    frame $ptkControlPanel.disfr
+    button $ptkControlPanel.disfr.dismiss -text "DISMISS" -command \
 	"ptkRunControlDel $name $ptkControlPanel $octHandle $defNumIter"
+    pack append $ptkControlPanel.disfr \
+	$ptkControlPanel.disfr.dismiss {top fill expand}
 
     pack append $ptkControlPanel \
 	$ptkControlPanel.msg {top fill expand} \
 	$ptkControlPanel.iter top \
 	$ptkControlPanel.panel top \
-	$ptkControlPanel.debug top \
+	$ptkControlPanel.debug {top frame w} \
 	$ptkControlPanel.high top \
 	$ptkControlPanel.middle top \
 	$ptkControlPanel.low top \
-	$ptkControlPanel.dismiss {top fill expand}
+	$ptkControlPanel.disfr {top fill expand}
 
     wm geometry $ptkControlPanel +400+400
     focus $ptkControlPanel
@@ -186,17 +189,34 @@ proc ptkRunControl { name octHandle } {
 # Procedure to open or close the debug section of the control panel
 #
 proc ptkSetOrClearDebug { name octHandle } {
-    global ptkDebug
+    global ptkDebug ptkVerboseErrors
     set w .run_$octHandle
     if {$ptkDebug($name)} {
 	# Turning debug on.  Enable verbose Tcl messages.
 	set ptkVerboseErrors 1
 	# Create control panel
 	frame $w.debug.eph
-	button $w.debug.eph.step -text "STEP" \
-		-command "ptkStep $name $octHandle" -width 10
-	button $w.debug.eph.abort -text "ABORT" -command "ptkAbort $name" \
-		-width 10
+	# Left half of control panel
+	frame $w.debug.eph.left
+	frame $w.debug.eph.left.buttons
+	button $w.debug.eph.left.buttons.step -text "STEP" \
+		-command "ptkStep $name $octHandle" -width 9
+	button $w.debug.eph.left.buttons.abort -text "ABORT" \
+		-command "ptkAbort $name" -width 9
+	pack append $w.debug.eph.left.buttons \
+	    $w.debug.eph.left.buttons.step {left fill expand} \
+	    $w.debug.eph.left.buttons.abort {left fill expand}
+	frame $w.debug.eph.left.runcount -bd 10
+	label $w.debug.eph.left.runcount.lbl -text "Count:"
+	label $w.debug.eph.left.runcount.cnt -width 10
+	$w.debug.eph.left.runcount.cnt configure -text "0"
+	pack append $w.debug.eph.left.runcount \
+	    $w.debug.eph.left.runcount.lbl {left fill expand} \
+	    $w.debug.eph.left.runcount.cnt {left fill expand}
+	pack append $w.debug.eph.left \
+	    $w.debug.eph.left.buttons {top fill expand} \
+	    $w.debug.eph.left.runcount {top fill expand}
+
 	# Animation is off by default
 	# Note that since pre and post actions are global, there is no point
 	# in associating the universe name with the Animation flags.
@@ -205,20 +225,20 @@ proc ptkSetOrClearDebug { name octHandle } {
 	ptkGrAnimation 0
 	set ptkTxAnimationFlag 0
 	ptkTxAnimation 0
-	frame $w.debug.eph.anim
+	frame $w.debug.eph.anim -bd 10
 	checkbutton $w.debug.eph.anim.gr -text "Graphical Animation" \
 	    -variable ptkGrAnimationFlag -relief flat \
 	    -command {ptkGrAnimation $ptkGrAnimationFlag}
 	checkbutton $w.debug.eph.anim.tx -text "Textual Animation" \
 	    -variable ptkTxAnimationFlag -relief flat \
 	    -command {ptkTxAnimation $ptkTxAnimationFlag}
-	pack append $w.debug.eph.anim $w.debug.eph.anim.tx {top frame w} \
+	pack append $w.debug.eph.anim \
+	    $w.debug.eph.anim.tx {top frame w} \
 	    $w.debug.eph.anim.gr {top frame w}
 	pack append $w.debug.eph \
-	    $w.debug.eph.step {left fill expand} \
-	    $w.debug.eph.abort {left fill expand} \
+	    $w.debug.eph.left {left frame w} \
 	    $w.debug.eph.anim {left fill expand}
-	pack append $w.debug $w.debug.eph left
+	pack append $w.debug $w.debug.eph {left frame w}
     } {
 	# Turning debug off.  Destroy control panel.
 	catch {destroy $w.debug.eph}
@@ -227,6 +247,17 @@ proc ptkSetOrClearDebug { name octHandle } {
     }
 }
 
+#######################################################################
+# Procedure to open or close the debug section of the control panel
+#
+proc ptkUpdateCount { name octHandle } {
+    global ptkDebug
+    set win .run_$octHandle.debug.eph.left.runcount.cnt
+    if {[info exists ptkDebug($name)] && $ptkDebug($name) } {
+	$win configure -text [schedtime]
+	after 200 ptkUpdateCount $name $octHandle
+    }
+}
 
 #######################################################################
 # Procedure to turn on or off graphical animation
@@ -417,6 +448,7 @@ proc ptkGo {name octHandle} {
     }
     global ptkControlPanel
     set ptkControlPanel .run_$octHandle
+    after 200 ptkUpdateCount $name $octHandle
     catch {$ptkControlPanel.panel.go configure -relief sunken}
     catch {$ptkControlPanel.panel.pause configure -relief raised}
     # So that error highlighting, etc. works
