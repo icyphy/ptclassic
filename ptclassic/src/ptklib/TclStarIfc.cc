@@ -312,7 +312,8 @@ int TclStarIfc::callTclProc(const char* name) {
 int TclStarIfc::go () {
 
     // If the tk library is part of the interp, update the graphics
-    if (tkExists) Tcl_Eval( ptkInterp, "update");
+    // No longer needed with new event loop
+    // if (tkExists) Tcl_Eval( ptkInterp, "update");
 
     // If the there exists a "goTcl" procedure, call it
     int result = TRUE;
