@@ -94,21 +94,21 @@ tychoClasses.dag: FORCE
 	@if [ "$(TYCHO)" = "" ]; then \
 		echo "TYCHO is not set so we assume we are part of PTOLEMY"; \
 		echo "Running $(ITCLSH), \$$PTOLEMY=$(PTOLEMY)"; \
-		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
+		echo "set TYCHO \"$(PTOLEMY)/tycho\"; source ../kernel/basic/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
 	else \
 		echo "Running $(ITCLSH)"; \
-		echo "set TYCHO \"$(TYCHO)\"; source ../kernel/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
+		echo "set TYCHO \"$(TYCHO)\"; source ../kernel/basic/tychoMakeClassDAG.tcl; tychoStandardDAG" | $(ITCLSH); \
 	fi
 
 HTMLDIRS= $(TYCHO)/doc \
 	$(TYCHO)/doc/coding \
-	$(TYCHO)/lib/tydoc/doc \
-	$(TYCHO)/kernel/doc/usersGuides \
-	$(TYCHO)/editors/textedit/doc/usersGuides \
-	$(TYCHO)/editors/visedit/doc/usersGuides \
-	$(TYCHO)/editors/slate/doc/usersGuides \
-	$(TYCHO)/kernel/doc/internals \
-	$(TYCHO)/editors/slate/doc/internals \
+	$(TYCHO)/util/tydoc/doc \
+	$(TYCHO)/kernel/gui/doc/usersGuides \
+	$(TYCHO)/edit/textedit/doc/usersGuides \
+	$(TYCHO)/edit/visedit/doc/usersGuides \
+	$(TYCHO)/edit/slate/doc/usersGuides \
+	$(TYCHO)/kernel/gui/doc/internals \
+	$(TYCHO)/edit/slate/doc/internals \
 	$(TYCHO)/src/tytest \
 	$(TYCHO)/src/tytimer \
 	$(TYCHO)/java/doc \
