@@ -103,7 +103,7 @@ endif
 
 TK = 1
 
-ADD_SRCS=version.$(PIGI).c
+ADD_OBJS=version.$(PIGI).o
 
 PIGI_OBJS = -L./ -ltycho -lptcl version.$(PIGI).o
 
