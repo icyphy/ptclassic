@@ -35,7 +35,7 @@ ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/de/stars
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # DEDIR is the directory containing DE domain support

@@ -28,7 +28,7 @@
 # Written by: J. L. Pino
 
 VPATH = .
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 CGCDIR = $(ROOT)/src/domains/cgc/rtlib

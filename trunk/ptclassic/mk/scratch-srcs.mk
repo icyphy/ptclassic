@@ -35,11 +35,11 @@
 # from the binary only distribution
 #
 # If you are going to build from scratch, you should have the PTOLEMY and
-# ARCH variables set, and you should have $PTOLEMY/bin.$ARCH
+# PTARCH variables set, and you should have $PTOLEMY/bin.$PTARCH
 # in your path. For example:
 #	setenv PTOLEMY /users/ptolemy
-#	setenv ARCH sun4
-#	set path = ( $PTOLEMY/bin.$ARCH $PTOLEMY/bin $path)
+#	setenv PTARCH sun4
+#	set path = ( $PTOLEMY/bin.$PTARCH $PTOLEMY/bin $path)
 #
 # Then type:
 #	make -f $PTOLEMY/mk/scratch-srcs.mk
@@ -58,12 +58,12 @@ SHELL=		/bin/sh
 GNU_DEST=	$(PTOLEMY)/gnu
 TCLTK_DEST=	$(PTOLEMY)/tcltk
 XV_DEST= 	$(PTOLEMY)
-OBJARCH=	$(PTOLEMY)/obj.$(ARCH)
+OBJARCH=	$(PTOLEMY)/obj.$(PTARCH)
 ROOT=		.
 XV_CC=		cc
 XMKMF=		/usr/bin/X11/xmkmf
 MKDIRHIER=	/usr/bin/X11/mkdirhier
-include $(ROOT)/mk/config-$(ARCH).mk
+include $(ROOT)/mk/config-$(PTARCH).mk
 
 all: gnu_all tcltk_all xv_all
 install: gnu_all tcltk_all xv_all
@@ -85,10 +85,10 @@ $(OBJARCH)/gnu: $(OBJARCH)
 gnu_bin: $(OBJARCH)/gnu
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bin)
 	@echo "Now we rebuild gcc, bootstrapping gcc with itself"
-	(cd $(PTOLEMY)/obj.$(ARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
+	(cd $(PTOLEMY)/obj.$(PTARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
 
 gnu_install: $(OBJARCH)/gnu
-	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) install)
+	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) install)
 
 gnu_clean:
 	(cd $(PTOLEMY)/src/gnu; $(MAKE) clean)
@@ -97,17 +97,17 @@ gnu_clean:
 # No need to depend on  $(OBJARCH)/gnu, as hp_all will run configure
 # for us
 hpgnu_all: 
-	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
+	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) hp_all)
 	@echo "Now we rebuild gcc, bootstrapping gcc with itself"
-	(cd $(PTOLEMY)/obj.$(ARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
+	(cd $(PTOLEMY)/obj.$(PTARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
 
 # For irix5
 # No need to depend on  $(OBJARCH)/gnu, as irix5_all will run configure
 # for us
 irix5gnu_all:
-	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) ARCH=$(ARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
+	(cd $(PTOLEMY)/src/gnu; $(MAKE) $(MFLAGS) PTARCH=$(PTARCH) PTOLEMY=$(PTOLEMY) GNU_DEST=$(GNU_DEST) irix5_all)
 	@echo "Now we rebuild gcc, bootstrapping gcc with itself"
-	(cd $(PTOLEMY)/obj.$(ARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
+	(cd $(PTOLEMY)/obj.$(PTARCH)/gnu/gcc; $(MAKE) $(MFLAGS) GNU_DEST=$(GNU_DEST) bootstrap)
 
 
 #
@@ -183,16 +183,16 @@ xv_bin: $(OBJARCH)/xv
 		RANLIB=$(RANLIB) \
 		RAND=$(XV_RAND) \
 		MKDIRHIER=$(MKDIRHIER) \
-		BINDIR=$(XV_DEST)/bin.$(ARCH) all)
+		BINDIR=$(XV_DEST)/bin.$(PTARCH) all)
 
-xv_install: $(OBJARCH)/xv $(XV_DEST)/bin.$(ARCH)
-	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(ARCH))
-	chmod a+rx $(PTOLEMY)/bin.$(ARCH)/xv
-	strip $(PTOLEMY)/bin.$(ARCH)/xv
+xv_install: $(OBJARCH)/xv $(XV_DEST)/bin.$(PTARCH)
+	(cd $(OBJARCH)/xv; cp xv $(XV_DEST)/bin.$(PTARCH))
+	chmod a+rx $(PTOLEMY)/bin.$(PTARCH)/xv
+	strip $(PTOLEMY)/bin.$(PTARCH)/xv
 
-$(XV_DEST)/bin.$(ARCH):
-	if [ ! -d $(XV_DEST)/bin.$(ARCH) ]; then \
-		mkdir $(XV_DEST)/bin.$(ARCH); \
+$(XV_DEST)/bin.$(PTARCH):
+	if [ ! -d $(XV_DEST)/bin.$(PTARCH) ]; then \
+		mkdir $(XV_DEST)/bin.$(PTARCH); \
 	fi
 
 xv_install.man: $(XV_DEST)/man/man1

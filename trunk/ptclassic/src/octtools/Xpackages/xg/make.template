@@ -40,7 +40,7 @@ ROOT	      = ../../../..
 VPATH         = $(ROOT)/src/octtools/Xpackages/xg
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 HDRS		= x10-x11.h \

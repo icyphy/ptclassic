@@ -57,13 +57,13 @@ whatToBuild:	all
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
-# bin.$(ARCH) directory, so we check to see if there is a ptlang in the
-# obj.$(ARCH)/ptlang directory and use it.  This is awkward, but the
+# bin.$(PTARCH) directory, so we check to see if there is a ptlang in the
+# obj.$(PTARCH)/ptlang directory and use it.  This is awkward, but the
 # GNU tools do something similar
 
 # ptlang binary in the obj directory
-PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/ptlang/ptlang
-ISLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/islang/islang
+PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/ptlang/ptlang
+ISLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/islang/islang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
 PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \
@@ -77,16 +77,16 @@ ISLANG= `if [ -f $(ISLANG_IN_OBJ) ]; \
 
 # Build the ptlang binary if necessary
 $(PTLANG_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(ARCH)/ptlang; $(MAKE) VPATH=../../src/ptlang)
+	(cd $(PTOLEMY)/obj.$(PTARCH)/ptlang; $(MAKE) VPATH=../../src/ptlang)
 
 # Build the islang binary if necessary
 $(ISLANG_IN_OBJ):
-	(cd $(PTOLEMY)/obj.$(ARCH)/islang; $(MAKE) VPATH=../../src/islang)
+	(cd $(PTOLEMY)/obj.$(PTARCH)/islang; $(MAKE) VPATH=../../src/islang)
 
 # Rule to build the ../doc/star directory
 # Can't use mkdir -p here, it might not exist everywhere
 # Run 'exit 0' as the last command if the directories already exist.
-#  (Otherwise the mips ARCH will produce make error message like:
+#  (Otherwise the mips PTARCH will produce make error message like:
 #  'make: *** [DETest.cc] Error 2' because the if [] statement is returning
 #  non-zero if the directory exists.  sigh.)
 

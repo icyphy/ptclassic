@@ -44,16 +44,16 @@
 
 # Each makefile must define ROOT, the relative position of the root
 # of the directory tree, and include one of the makefiles file.
-# ARCH is assumed set to, say, "sun4", "sun3", or "vax".
+# PTARCH is assumed set to, say, "sun4", "sun3", or "vax".
 
 #-----------------------------------------------------------------------
 # 		Directories to use
 #-----------------------------------------------------------------------
 
 # where libraries are (and where to install them)
-LIBDIR=$(ROOT)/lib.$(ARCH)
+LIBDIR=$(ROOT)/lib.$(PTARCH)
 # where to install binaries
-BINDIR=$(ROOT)/bin.$(ARCH)
+BINDIR=$(ROOT)/bin.$(PTARCH)
 # Ptolemy kernel directory
 KERNDIR=$(ROOT)/src/kernel
 # where help files go
@@ -67,7 +67,7 @@ PTCL_INCDIR = $(ROOT)/src/ptcl
 # root of Octtools
 OCTTOOLS = $(ROOT)/octtools
 # Oct libraries
-OCTLIBDIR = $(OCTTOOLS)/lib.$(ARCH)
+OCTLIBDIR = $(OCTTOOLS)/lib.$(PTARCH)
 # cc to compile octtools with.
 OCT_CC =	cc
 # octtools/attache uses this
@@ -100,17 +100,17 @@ TCL_ROOT=$(ROOT)/tcltk
 TCL_INCDIR=$(TCL_ROOT)/tcl/include
 
 # Combined -L and -l options to link with tcl library.
-TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(ARCH)/lib -ltcl
+TCL_LIBSPEC=-L$(TCL_ROOT)/tcl.$(PTARCH)/lib -ltcl
 
 # Directory containing Tk include files
 TK_INCDIR=$(TCL_ROOT)/tk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(ARCH)/lib -ltk #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/tk.$(PTARCH)/lib -ltk #-lXpm
 
 # Location of the itcl_sh binary
-ITCL_SH=$(ROOT)/tcltk/itcl.$(ARCH)/bin/itcl_sh
+ITCL_SH=$(ROOT)/tcltk/itcl.$(PTARCH)/bin/itcl_sh
 
 # Location of the itcl library, needed for itcl_mkindex
 ITCL_LIBDIR=$(ROOT)/tcltk/itcl/library

@@ -39,7 +39,7 @@ ROOT=../../../..
 VPATH = $(ROOT)/src/domains/bdf/kernel
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # SDF domain
@@ -78,7 +78,7 @@ install:	makefile $(LIBDIR)/$(LIB)
 include $(ROOT)/mk/common.mk
 
 # This is a GNU make conditional
-ifeq ($(ARCH),hppa)
+ifeq ($(PTARCH),hppa)
 BDFSchList.o: BDFSchList.cc
 	@echo "DANGER: serious hppa specific bug here."
 	@echo "If, under gcc-2.5.8, BDFSchList is compiled with optimization"
@@ -93,7 +93,7 @@ endif
 
 # Alpha version seems to have the same problem
 
-ifeq ($(ARCH),alpha)
+ifeq ($(PTARCH),alpha)
 BDFSchList.o: BDFSchList.cc
 	@echo "DANGER: serious GNU compiler bug suspected here."
 	@echo "If, under gcc-2.6.0, BDFSchList is compiled with optimization"

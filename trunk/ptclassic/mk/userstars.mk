@@ -41,7 +41,7 @@
 #	---------------------------------------------------------
 #	| ROOT = $(PTOLEMY)					|
 #	| VPATH = .						|
-#	| include $(ROOT)/mk/config-$(ARCH).mk			|
+#	| include $(ROOT)/mk/config-$(PTARCH).mk			|
 #	| INCL = -I$(ROOT)/src/domains/de/kernel -I$(KERNDIR)	|
 #	| PL_SRCS = DEMyFirstStar.pl DEMySecondStar.pl		|
 #	| DOMAIN = DE						|
@@ -51,13 +51,13 @@
 # The above file assumes the PTOLEMY environment variable is set to point
 # to the home directory of the Ptolemy installation (e.g. /users/ptolemy).
 #
-# It also assumes the ARCH environment variable is set to specify the target
+# It also assumes the PTARCH environment variable is set to specify the target
 # architecture (such as "sun4").
 #
 # The VPATH variable specifies where the sources are.  If the directory name
 # in which your stars are stored includes the string "/src/", then the
 # object files will be put in a corresponding directory with "src" replaced
-# by $(ARCH).  This allows your stars to have several object files for
+# by $(PTARCH).  This allows your stars to have several object files for
 # different architectures simultaneously.
 #
 # The include statement includes a standard Ptolemy makefile for the
@@ -110,12 +110,12 @@ all:	makefile $(OBJS)
 
 # Note that forcing the installation of ptlang might not be the best
 # thing to do, it would be best if 'make sources' did not touch the
-# bin.$(ARCH) directory, so we check to see if there is a ptlang in the
-# obj.$(ARCH)/ptlang directory and use it.  This is awkward, but the
+# bin.$(PTARCH) directory, so we check to see if there is a ptlang in the
+# obj.$(PTARCH)/ptlang directory and use it.  This is awkward, but the
 # GNU tools do something similar
 
 # ptlang binary in the obj directory
-PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(ARCH)/ptlang/ptlang
+PTLANG_IN_OBJ=$(PTOLEMY)/obj.$(PTARCH)/ptlang/ptlang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
 PTLANG= `if [ -f $(PTLANG_IN_OBJ) ]; \

@@ -36,7 +36,7 @@ ROOT = ../../../..
 VPATH = $(ROOT)/src/domains/hof/stars
 
 # get configuration info
-CONFIG=$(ROOT)/mk/config-$(ARCH).mk
+CONFIG=$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
 # Turn off optimization for debugging

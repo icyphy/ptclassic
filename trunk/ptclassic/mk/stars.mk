@@ -264,7 +264,7 @@ LWP_LIBS =		-llwpthread -llwp
 LWP_LIBFILES =		$(LIBDIR)/liblwpthread.$(LIBSUFFIX)
 
 # POSIX thread library from Florida State University.
-PTHREAD_LIBS =		-lposixthread -L$(ROOT)/thread/lib.$(ARCH) -lgthreads
+PTHREAD_LIBS =		-lposixthread -L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
 PTHREAD_LIBFILES =	$(LIBDIR)/libposixthread.$(LIBSUFFIX)
 
 #
@@ -272,7 +272,7 @@ PTHREAD_LIBFILES =	$(LIBDIR)/libposixthread.$(LIBSUFFIX)
 #
 
 # Use POSIX threads for SunOS and Solaris.
-ifneq (,$(filter sun% sol%,$(ARCH)))
+ifneq (,$(filter sun% sol%,$(PTARCH)))
 THREAD_STARS =		$(PNSTARS)
 THREAD_STAR_LIBS =	$(PN_LIBS)
 THREAD_STAR_LIBFILES =	$(PN_LIBFILES)
