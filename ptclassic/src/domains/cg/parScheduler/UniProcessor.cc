@@ -158,7 +158,11 @@ int UniProcessor :: schedAtEnd(ParNode* pd, int when, int leng) {
 // Check whether we can schedule a node in an idle slot if any.
 int UniProcessor :: filledInIdleSlot(ParNode* node, int start, int limit) {
 
-	int load = node->getExTime();
+	int load;
+	if (!node->myMaster()) load = node->getExTime();
+	else load = mtarget->execTime(node->myMaster(), targetPtr);
+	if (load < 0) return -1;
+
 	int curTime = getAvailTime();
 	NodeSchedule* obj = (NodeSchedule*) tail();
 	ParNode* temp;
@@ -311,7 +315,10 @@ void UniProcessor :: scheduleCommNode(ParNode* n, int start) {
 void UniProcessor::addNode(ParNode *node, int start) {
 
 	// If earliestStart is >= availTime, then we append the node
-	int d = node->getExTime();
+	int d;
+	if (!node->myMaster()) d = node->getExTime();
+	else d = mtarget->execTime(node->myMaster(), targetPtr);
+
 	if (start < availTime) {
 		// start < availTime so check gaps
 		int newStart = filledInIdleSlot(node,start);
