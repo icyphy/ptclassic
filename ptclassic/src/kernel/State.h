@@ -52,7 +52,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 **************************************************************************/
 
 extern int sys_nerr;
+
+#ifdef netbsd_i386
+extern const char *const sys_errlist[];
+#else
 extern char *sys_errlist[];
+#endif
+
 extern int errno;
 
 
