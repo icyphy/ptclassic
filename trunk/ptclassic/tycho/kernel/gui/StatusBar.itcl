@@ -123,6 +123,9 @@ class ::tycho::StatusBar {
     # Start or update progress display
     method progress {{label {}} {command {}}}
     
+    # Register a command to execute when the status bar is mapped
+    method whenmapped {command}
+
     ###################################################################
     ####                       private methods                     ####
 
@@ -138,6 +141,9 @@ class ::tycho::StatusBar {
     
     # Lock the current display mode
     private method _lock {}
+
+    # Execute code waiting for the status bar to be mapped
+    private method _notifymapped {}
 
     # Set the current display mode
     private method _setmode {mode}
@@ -162,6 +168,9 @@ class ::tycho::StatusBar {
 
     # The command to get the current progress
     private variable _progressCommand ""
+
+    # A list of commands to execute when the status bar is mapped
+    private variable _whenmapped {}
 }
 
 
@@ -799,6 +808,35 @@ body ::tycho::StatusBar::puts {string} {
 }
 
 #######################################################################
+#### whenmapped
+#
+# Register a command to be executed when the status bar is
+# mapped. Any number of commands can be registered. If the
+# statusbar is already mapped, the command will be executed
+# immediately in the scope of this status bar; if not, a binding
+# will be made to the status bar for the &lt;Map&gt; event,
+# and the pending commands executed within the scope of this status
+# bar if the status bar is mapped when the binding is triggered.
+#
+# This method should be called whenever the call may be executed
+# the constructor of a view widget.
+#
+body ::tycho::StatusBar::whenmapped {command} {
+    set w [component status]
+    if [winfo ismapped $w] {
+        eval $command
+    } else {
+        lappend _whenmapped $command
+
+        # Make the binding: Note that we bind to the actual message
+        # pane, not to the status bar megawidget, as it appears
+        # that the megawidget gets mapped before the message pane
+        # does.
+        bind $w <Map> "@scope [info context] $this _notifymapped"
+    }
+}
+
+#######################################################################
 #### _drawprogress
 #
 # Draw or update the progress bar.
@@ -867,6 +905,31 @@ body ::tycho::StatusBar::_label {label} {
 #
 body ::tycho::StatusBar::_lock {} {
     set _lock 1
+}
+
+#######################################################################
+#### _notifymapped
+#
+# This method is a callback to be executed when the <Map>
+# event is triggered on the message widget. If the statusbar is not
+# already mapped, return without doing anything. Otherwise,
+# evaluate the commands registered with the *whenmapped* method
+# and remove the binding that triggered this callback.
+#
+body ::tycho::StatusBar::_notifymapped {} {
+    set w [string trimleft $this :]
+    # Just check this to make sure...
+    if ![winfo ismapped $w] {
+        # Not mapped: return
+        return
+    } else {
+        # Mapped: evaluate commands and then remove the binding
+        foreach cmd $_whenmapped {
+            eval $cmd
+        }
+        set _whenmapped {}
+        bind $w <Map> {}
+    }
 }
 
 #######################################################################
