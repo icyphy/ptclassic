@@ -99,6 +99,23 @@ This star exists only for demoing the generic CG domain.
 		return(NULL);
 	    }
 	}
+	method {
+	    name {sg_cost}
+	    access {public}
+	    arglist { "(ofstream& cost_file, ofstream& numsim_file, ofstream& 
+rangecalc_file, ofstream& natcon_file)" }
+	    type {int}
+	    code {
+		// BEGIN-USER CODE
+		cost_file << "cost=0" << endl;
+		numsim_file << "y=x;" << endl;
+		rangecalc_file << "orr=inputrange;" << endl;
+		// END-USER CODE
+
+		// Return happy condition
+		return(1);
+	    }
+	}
         method {
 	    name {sg_resources}
 	    access {public}
