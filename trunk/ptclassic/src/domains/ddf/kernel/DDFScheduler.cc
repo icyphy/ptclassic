@@ -37,12 +37,10 @@ int isSource(const Star& s) {
 
 	while ((p = nextp++) != 0) {
 		if (p->isItInput()) {
-			if ((p->myGeodesic->numInitialParticles))
-				return TRUE;
-			else flag = 1;
+			if (!(p->myGeodesic->numInitialParticles))
+				return FALSE;
 		}
 	}
-	if (flag) return FALSE;
 	return TRUE;
 }
 
@@ -225,7 +223,8 @@ int DDFScheduler :: isRunnable(Star& s) {
 	BlockPortIter nextp(s);
 	PortHole *p;
 	while ((p = nextp++) != 0) {
-		if (p->isItInput() && p->numTokens() > 0)
+		if (p->isItInput() && 
+			p->numTokens() > p->myGeodesic->numInitialParticles)
 			count++;
 	}
 	if (count == 0)		
@@ -326,8 +325,8 @@ void fireSource(Star& s, int k) {
 	}
 
 	// fire sources "k-min" times.
-	if (minIn < min) min = minIn;
-	for (int i = min; i < k; i++) 
+	if (minIn > k - min) minIn = k - min;
+	for (int i = 0; i < minIn; i++) 
 		s.fire();
 }
 
