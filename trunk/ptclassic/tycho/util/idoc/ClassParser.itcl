@@ -352,6 +352,7 @@ body ::tycho::IDocSys::formatClassComment {expl} {
     set contributor {}
     set version {}
     set copyright {}
+    set desc {}
 
     # Parse line by line
     set explList [split $expl "\n"]
