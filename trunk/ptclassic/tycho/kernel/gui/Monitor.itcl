@@ -331,7 +331,7 @@ body ::tycho::Monitor::autoDestroy { {time 0} } {
 #######################################################################
 #### execProcess
 # This simply calls the non-graphical Exec's execProcess. Also, it
-# reads the autoDestroy flag and determins whether this widget should
+# reads the autoDestroy flag and determines whether this widget should
 # automatically exit upon successful execution.
 #
 body ::tycho::Monitor::execProcess { {type {}} {line {}} } {

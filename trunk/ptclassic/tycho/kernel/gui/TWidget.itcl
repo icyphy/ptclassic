@@ -38,7 +38,7 @@
 #######################################################################
 #### TWidget
 # This class is the base class for non-top-level widgets in Tycho.
-# It extands the <code>::tycho::Archetype</code> widget with
+# It extends the <code>::tycho::Archetype</code> widget with
 # several useful methods that only apply to non-top-level widgets.
 # All Tycho widgets should inherit from this class rather than
 # from the <code>itk::Widget</code> class. 

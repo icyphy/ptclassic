@@ -338,7 +338,7 @@ ensemble ::tycho::resource {
 # <br>
 # Create a new mail object, send 0-9, close.
 # <tcl><pre>
-# if {$destimation != {}} {
+# if {$destination != {}} {
 #     set obj [::tycho::resource new mailto:$destination]
 #     $obj open
 #     for {set i 0} {$i < 10} {incr i} {$obj puts "LINE $i"}
