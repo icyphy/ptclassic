@@ -9,19 +9,25 @@
 # See the file $PTOLEMY/copyright for copyright notice,
 # limitation of liability, and disclaimer of warranty provisions.
 
-set usagestring = "usage: tycho [-debug] [-ptiny] [-bin tychobin] [-bak] [scriptfile]"
-
-# If 'tycho.ptiny' is a link to this script, then we just use tysh.ptiny
-set base = `basename $0`
-set progname = tysh
-if ( $base == "tycho.ptiny") then
-	set progname = tysh.ptiny
-endif
+set usagestring = "usage: tycho [-debug] [-ptiny] [-tyed] [-bin tychobin] [-bak] [scriptfile]"
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 
 # Set the commonly used environment variables
 source $PTOLEMY/bin/ptsetup.csh
+
+set tyed = ($PTOLEMY/tcltk/itcl.$PTARCH/bin/itkwish -f $PTOLEMY/tycho/kernel/Tycho.tcl)
+
+switch ($progname) 
+	case tycho.ptiny:
+		# If 'tycho.ptiny' is a link to this script,
+		# then we just use tysh.ptiny
+		set progname = tysh.ptiny
+		breaksw
+	case tyed:
+		set prog = ($tyed)
+		breaksw
+endsw	
 
 if ( ! $?DISPLAY ) then
     echo "${0}: Your DISPLAY environment variable must be set"
@@ -32,10 +38,9 @@ endif
 # FIXME: Hardwired in tk4.0
 # See also $PTOLEMY/src/tycho/kernel/make.template
 #	   $PTOLEMY/tycho/kernel/Lib.tcl
-if ($base != "tycho2.0" ) then
-	setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl7.4p1/lib/tcl7.4
-	setenv TK_LIBRARY $PTOLEMY/tcltk/tk4.0p1/lib/tk4.0
-endif
+setenv TCL_LIBRARY $PTOLEMY/tcltk/tcl/lib/tcl
+setenv TK_LIBRARY $PTOLEMY/tcltk/tk/lib/tk
+
 
 # To get tcl/tk man pages before corresponding unix man pages,
 # and to guess about a reasonable manpath if none is set.
@@ -51,6 +56,7 @@ while ($#argv)
 			echo "$usagestring"
 			echo " -debug         Bring up in debug mode"
 			echo " -ptiny         Smaller version, fewer domains"
+			echo " -tyed	      Run w/o ptolemy, as an editor"
 			echo " -bin tychobin  Run the binary 'tychobin'"
 			echo " -bak           Run a .bak binary"
 			echo " scriptfile     Exec itcl(?) script"
@@ -60,6 +66,9 @@ while ($#argv)
 			breaksw
 		case -ptiny:
 			set tychoptiny
+			breaksw
+		case -tyed:
+			set prog = ($tyed)
 			breaksw
 		case -bin:
 			set prog = $argv[2]
@@ -85,17 +94,9 @@ set bindir = $PTOLEMY/obj.$PTARCH
 
 if ( ! $?prog ) then
 	if ( "$progname" == "tysh.ptiny" || $?tychoptiny ) then
-		if ($base == "tycho2.0" ) then
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel-2.0b2/tysh-itcl2.0b2.ptiny
-		else
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
-		endif
+	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh.ptiny
 	else
-		if ($base == "tycho2.0" ) then
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel-2.0b2/tysh-itcl2.0b2
-		else
-		    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
-		endif
+	    set prog = $PTOLEMY/obj.$PTARCH/tycho/kernel/tysh
 	endif
 	if ( $?tychodebug ) then
 	    set prog = $prog.debug
@@ -133,7 +134,7 @@ endif
 # FIXME: Should check starting palette/facet for validity.
 # FIXME: Should make the starting facet if needed.
 
-if (! -x $prog) then
+if (! -x $prog[1] ) then
     echo "Program does not exist: $prog"
 else
     $prog
