@@ -118,6 +118,7 @@ void error_handler(int status, op_t opcode, void *argblock)
         }
         codeblock (amdecls) {
 en_t global;
+eb_t bundle;
         }
 	codeblock (timedecls) {
 #ifdef TIME_INFO
@@ -140,6 +141,14 @@ ea_t $starSymbol(endpoint);
 	}
         codeblock (aminit) {
 AM_Init();
+if (AM_AllocateBundle(AM_PAR, &bundle) != AM_OK) {
+        fprintf(stderr, "error: AM_AllocateBundle failed\n");
+        exit(1);
+}
+if (AM_SetEventMask(bundle, AM_EMPTYTONOT ) != AM_OK) {
+        fprintf(stderr, "error: AM_SetEventMask error\n");
+        exit(1);
+}
         }
 	codeblock (timeinit) {
 #ifdef TIME_INFO
@@ -149,8 +158,9 @@ timeRun = 0.0;
 	codeblock (starinit) {
 #ifdef TIME_INFO
 $starSymbol(timeRecv) = 0.0;
-$starSymbol(RecvData) = -0.001;
 #endif
+$starSymbol(RecvData) = -0.001;
+
 if (AM_AllocateBundle(AM_PAR, &$starSymbol(bundle)) != AM_OK) {
         fprintf(stderr, "error: AM_AllocateBundle failed\n");
         exit(1);
