@@ -151,7 +151,7 @@ octObject *galFacetPtr;
 }
 
 /* This function will be called recursively if there's hierarchy */
-/* Do not free local octObject variable inst */
+/* Only free local octObject variable inst in the while loop */
 static boolean
 ProcessSubGals(facetPtr)
 octObject *facetPtr;
@@ -179,6 +179,7 @@ octObject *facetPtr;
 		return (FALSE);
 	    }
 	}
+	FreeOctMembers(&inst);
     }
     octFreeGenerator(&genInst);
     return(TRUE);
