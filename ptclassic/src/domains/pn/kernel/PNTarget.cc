@@ -69,3 +69,7 @@ void PNTarget::wrapup()
     Target::wrapup();
     delSched();
 }
+
+const char* PNTarget::domain() {
+    return galaxy() ? galaxy()->domain() : "PN";
+}
