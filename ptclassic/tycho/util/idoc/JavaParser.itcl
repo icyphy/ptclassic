@@ -221,7 +221,7 @@ body ::tycho::JavaParser::readFile {filename} {
     set fd [open $filename]
     while {![eof $fd]} {
         # Keep the interface live.
-        tydocUpdate $this
+        idocUpdate $this
 
         gets $fd lineIn
 
@@ -337,11 +337,11 @@ body ::tycho::JavaParser::getClassesInSource {filename} {
 # appropriate sibling for the file extension.
 #
 body ::tycho::JavaParser::modCheck {filename} {
-    global TYCHO
+    global env
 
     # Check to see if the generator itself has been changed.
-    set javaGenTime [file mtime [file join $TYCHO lib tydoc JavaParser.itcl]]
-    set idocGenTime [file mtime [file join $TYCHO lib tydoc ClassParser.itcl]]
+    set javaGenTime [file mtime [file join $env(IDOC_LIBRARY) JavaParser.itcl]]
+    set idocGenTime [file mtime [file join $env(IDOC_LIBRARY) ClassParser.itcl]]
     if {$javaGenTime > $idocGenTime} {
         set genTime $javaGenTime
     } {
@@ -652,7 +652,7 @@ body ::tycho::JavaParser::parseClass {class body} {
     # Parse each item
     foreach construct $body {
         # Keep the interface live.
-        tydocUpdate $this
+        idocUpdate $this
 
         # Ignore empty lines (is necessary?)
         if {$construct == "\n"} {
@@ -784,7 +784,7 @@ body ::tycho::JavaParser::parseData {data} {
     set firstComment {}
     foreach construct $data {
         # Keep the interface live.
-        tydocUpdate $this
+        idocUpdate $this
 
         if {$inComment} {
             # This is the class comment. Save it.

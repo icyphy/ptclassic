@@ -107,7 +107,7 @@ class ::tycho::ClassParser {
     ####                   protected procs                         ####
 
     # ::tycho::safeUpdate copied here
-    protected proc tydocUpdate {obj}
+    protected proc idocUpdate {obj}
 
     ###################################################################
     ####                   protected variables                     ####
@@ -326,11 +326,11 @@ body ::tycho::ClassParser::modCheck {filename} {
     ####                      protected procs                      ####
 
 #######################################################################
-#### tydocUpdate
+#### idocUpdate
 # Safe update, local copy so we can run this in a script w/o Tycho.
 # This is a copy of ::tycho::safeUpdate, see kernel/TopLevel.itcl.
 #
-body ::tycho::ClassParser::tydocUpdate {obj} {
+body ::tycho::ClassParser::idocUpdate {obj} {
     update
     if {$obj == {}} {return}
     # NOTE: Formerly used

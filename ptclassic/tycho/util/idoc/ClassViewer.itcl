@@ -615,9 +615,9 @@ body ::tycho::ClassViewer::ghostHandle {horizontal pixels} {
 # Open a window with help on the ClassViewer widget.
 #
 body ::tycho::ClassViewer::help {} {
-    global ::TYCHO
+    global env
     ::tycho::File::openContext \
-	    [file join $TYCHO lib tydoc doc usersGuides ClassViewerHelp.html]
+	    [file join $env(IDOC_LIBRARY) doc usersGuides ClassViewerHelp.html]
 }
 
 #######################################################################
@@ -749,11 +749,15 @@ body ::tycho::ClassViewer::putHtml {class data {top 1}} {
 body ::tycho::ClassViewer::relFile {classname} {
     set relname "[info namespace tail $classname]_rel.idoc"
 
-    lappend dirs {$TYCHO/kernel}
+    lappend dirs {$TYCHO/kernel/basic}
+    lappend dirs {$TYCHO/kernel/model}
+    lappend dirs {$TYCHO/kernel/gui}
+    lappend dirs {$TYCHO/kernel/html}
     lappend dirs {$TYCHO/edit/textedit}
     lappend dirs {$TYCHO/edit/slate}
     lappend dirs {$TYCHO/edit/visedit}
     lappend dirs {$TYCHO/util/tydoc}
+    lappend dirs {$TYCHO/util/idoc}
     
     foreach dir $dirs {
         set findfile [file join $dir doc codeDoc $relname]
@@ -1089,16 +1093,16 @@ body ::tycho::ClassViewer::_initializeBars {menubar statusbar toolbar} {
     stylesheet subscribe \
             -headfont fonts displayFont \
             -bodyfont fonts entryFont \
-            -background tydoc bgColor \
-            -height     tydoc height \
-            -width      tydoc width \
-            -publiccolor tydoc publicColor \
-            -protectedcolor tydoc protectedColor \
-            -packagecolor tydoc packageColor \
-            -privatecolor tydoc privateColor \
-            -optioncolor tydoc optionColor  \
-            -inheritcolor tydoc inheritColor \
-            -verbose tydoc verboseHtml
+            -background idoc bgColor \
+            -height     idoc height \
+            -width      idoc width \
+            -publiccolor idoc publicColor \
+            -protectedcolor idoc protectedColor \
+            -packagecolor idoc packageColor \
+            -privatecolor idoc privateColor \
+            -optioncolor idoc optionColor  \
+            -inheritcolor idoc inheritColor \
+            -verbose idoc verboseHtml
 }
 
     ###################################################################
