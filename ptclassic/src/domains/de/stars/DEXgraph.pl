@@ -24,7 +24,7 @@ defstar {
 	desc { "Generate a plot with the xgraph program." }
 	input {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
@@ -55,7 +55,7 @@ defstar {
 	}
 
 	go {
-		float data = input.get();
+		float data = float(input.get());
 		graph.addPoint(arrivalTime, data);
 	}
 

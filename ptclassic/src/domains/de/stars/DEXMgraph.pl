@@ -23,7 +23,7 @@ defstar {
 	desc { "Generate a plot with the xgraph program." }
 	inmulti {
 		name { input }
-		type { float }
+		type { anytype }
 	}
 	defstate {
 		name {title}
@@ -59,7 +59,7 @@ defstar {
 	    for (int i = 1; i <= input.numberPorts(); i++) {
 		InDEPort& p = (InDEPort&) input();
 	    	if(p.dataNew) {
-		    graph.addPoint(i, arrivalTime, double(p.get()));
+		    graph.addPoint(i, arrivalTime, float(p.get()));
 		}
 		p.dataNew = FALSE;
 	    }
