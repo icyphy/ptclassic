@@ -1,11 +1,11 @@
 static const char file_id[] = "DERCScheduler.cc";
 /******************************************************************** 
-Version identification:  $Id$
+Version identification:  @(#)DERCScheduler.cc	1.13  04/28/98
  
 Author: Mudit Goel
         Neil Smyth
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -116,8 +116,7 @@ SequentialList* DERCScheduler :: getResources() {
 	if (star->isRCStar) {
 	    rcStar = (DERCStar*)star;
 	    newResourceName = rcStar->resource;; 	
-	    rcStar->interruptQ = (DERCEventQ*)interruptQueue();
-	    if (strcmp(newResourceName, "HW")) {	 //Not a HW star
+            if (strcmp(newResourceName, "HW")) {	 //Not a HW star
 		found = 0;
 		ListIter nextResource(*resList);
 		while ((found == 0) && ((reslink = (Resource*)nextResource++) != NULL)) {
@@ -137,14 +136,14 @@ policies executing on same resource");
 		if (found == 0) {
                     int schedPolicy = (rcStar->schedPolicy);
                     Resource* newResource = new Resource(newResourceName, schedPolicy, this); 
-		    resList->append(newResource);
+                    resList->append(newResource);
 		    rcStar->resourcePointer = newResource;
                 }
 	    }
 	    else { // This is a HW star
 		// 1 indicates that the resource doesn't allow preemption
 		Resource* newResource = new Resource("HW", NonPreemptive, this);
-		rcStar->resourcePointer = newResource;	
+                rcStar->resourcePointer = newResource;	
 	    }
 	}
     }
@@ -162,57 +161,29 @@ policies executing on same resource");
 
 int DERCScheduler :: run () {
     resourceList = getResources();
-
+    
     if (SimControl::haltRequested() || !galaxy()) {
         Error::abortRun("Calendar Queue scheduler has no galaxy to run");
         return FALSE;
     }
-
+    
     double level = 0;
-       
+    
     while (TRUE) {      
-        int qFlag = -1;
 	int bFlag = FALSE;  // flag = TRUE when the terminal is on the
         // boundary of a wormhole of DE domain.
-
+        
 	// fetch the earliest event.
-	CqLevelLink* f  = NULL;
-	CqLevelLink* ev  = eventQ.get();
-	CqLevelLink* interr  = interruptQ.get();
+	CqLevelLink* f  = eventQ.get();
         
 	// Choosing the one with the lowest level
-	if ((ev == NULL) && (interr == NULL)) break;
-	else if ((ev != NULL) && (interr != NULL)) {
- 	    if (( ev->level) < (interr->level)) {
-                f = ev;
-		ev = NULL;
-                interruptQ.pushBack(interr);
-                qFlag = 0;
-            }
-            else {
-                f = interr;
-		interr = NULL;
-                eventQ.pushBack(ev);
-                qFlag = 1;
-            }
-	}
-	else if (ev != NULL) { 
-	    f = ev; 
-	    ev = NULL;
-	    qFlag = 0; 
-	}
-	else { 
-	    f = interr; 
-	    interr = NULL;
- 	    qFlag = 1; 
-	}
-        
-	level    = f->level;
+	if (f == NULL) break;
+        level    = f->level;
+        //printf("\thave event in scheduler for star %s at time %f\n\n", ((Event*)f->e)->dest->parent()->asStar().name(), f->level);fflush(0);
      
 	// if level > stopTime, RETURN...
 	if (level > stopTime)	{
-            if (qFlag == 0) eventQ.pushBack(f);		// push back
-            else interruptQ.pushBack(f);
+            eventQ.pushBack(f);		// push back
             // set currentTime = next event time.
             // FIXME : need to resolve time issue (real time vs instants)
             currentTime = stopTime/relTimeScale;
@@ -226,30 +197,22 @@ int DERCScheduler :: run () {
 	    // Try to give a good error message.
             Event* ent = (Event*) f->e;
             PortHole* src = ent->dest->far();
+            //printf("now is %f, event at time %f\n", currentTime, level);fflush(0);
             Error::abortRun(*src, ": event from this porthole is in the past!");
             return FALSE;  
 	}        
 	// set currentTime
 	currentTime = level;
        
-        // event from the interruptQ
-	if (qFlag == 1) {
-	    DERCEvent* pEvent = (DERCEvent*)(f->e);
-	    DERCStar* pStar = (DERCStar*)(pEvent->src);
-            pStar->arrivalTime = level;
-            // interruptQ.putFreeLink(f);
-            // this method will only return false if an error occurs
-            if (!(pStar->resourcePointer->newEventFromInterruptQ(pEvent, currentTime))) return FALSE;
-        }
         //A new event, never seen before
-	else if (((DEStar*)f->dest)->isRCStar) {
-	    DERCEvent* pEvent = (DERCEvent*)(f->e);
-	    DERCStar* pStar = (DERCStar*)(f->dest);
-            pStar->arrivalTime = level;
+	if (((DEStar*)f->dest)->isRCStar) {
+            DERCStar* pStar = (DERCStar*)(f->dest);
+            //pStar->arrivalTime = level;
+            //printf("updating arrivalTime of Star  %s, to time %f\n", ((Event*)f->e)->dest->parent()->asStar().name(), level);fflush(0);
  	    // eventQ.putFreeLink(f);
-             // this method will only return false if star fails to run(error)
-             if (!(pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime))) return FALSE;
-         }
+            // this method will only return false if star fails to run(error)
+            if (!(pStar->resourcePointer->newEventFromEventQ(f, currentTime))) return FALSE;
+        }
         else {
             // check if the normal event is fetched
 	    //
@@ -374,7 +337,6 @@ int DERCScheduler :: fetchEvent(InDEPort* p, double timeVal)
     while (1) {
         CqLevelLink *h = eventQ.get();
         if ((h == NULL) || (h->level > timeVal)) {
-            printf("in DERCSchedulker %f %f\n", h->level, timeVal);fflush(0);
             Error :: abortRun (*p, " has no more data.");
             return FALSE;
         }

@@ -5,7 +5,7 @@ Version identification: @(#)DERCStar.cc	1.4 03/02/98
 Author: Mudit Goel
         Neil Smyth
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -48,79 +48,104 @@ FILE * DERCStar::fpfiring;
 
 DERCStar::DERCStar ()
 {
-	setDescriptor("Common Polis(resource contention) Software Scheduler");
-        isRCStar = 1;  // override to true (false in DEStar)
+    setDescriptor("Common Polis(resource contention) Software Scheduler");
+    isRCStar = 1;  // override to true (false in DEStar)
 }
 
 
 double DERCStar::getDelay ()
 {
-	return 0;
+    return 0;
 }
 
 
 SequentialList* DERCStar::getEvents ()
 {
-	return emittedEvents;
+    return emittedEvents;
 }
 
 
 FILE* DERCStar::Openoverflow ( char *name )
 {
-	if ( DERCStar::fpoverflow == NULL ) {
-        	DERCStar::fpoverflow = fopen( name, "w" );
-        	if ( DERCStar::fpoverflow ) {
-          		fprintf( DERCStar::fpoverflow, "Overflow report\n\n" );
-          	fflush( DERCStar::fpoverflow );
-        	}
-	}
-	return( fpoverflow );
+    if ( DERCStar::fpoverflow == NULL ) {
+        DERCStar::fpoverflow = fopen( name, "w" );
+        if ( DERCStar::fpoverflow ) {
+            fprintf( DERCStar::fpoverflow, "Overflow report\n\n" );
+            fflush( DERCStar::fpoverflow );
+        }
+    }
+    return( fpoverflow );
 }
 
 
 void DERCStar::Printoverflow ( char *st )
 {
-	if ( DERCStar::fpoverflow ) {
-        	fprintf( DERCStar::fpoverflow, st );
-        	fflush( DERCStar::fpoverflow );
-	}
+    if ( DERCStar::fpoverflow ) {
+        fprintf( DERCStar::fpoverflow, st );
+        fflush( DERCStar::fpoverflow );
+    }
 }
 
 
 FILE * DERCStar::Openfiring ( char *name )
 {
-	if ( DERCStar::fpfiring == NULL ) {
-        	DERCStar::fpfiring = fopen( name, "w" );
-        	if ( DERCStar::fpfiring ) {
-          		fprintf( DERCStar::fpfiring, "Firing report\n\n" );
-          		fflush( DERCStar::fpfiring );
-        	}
-	}
-	return( fpfiring );
+    if ( DERCStar::fpfiring == NULL ) {
+        DERCStar::fpfiring = fopen( name, "w" );
+        if ( DERCStar::fpfiring ) {
+            fprintf( DERCStar::fpfiring, "Firing report\n\n" );
+            fflush( DERCStar::fpfiring );
+        }
+    }
+    return( fpfiring );
 }
 
 
 void DERCStar::Printfiring ( char *st )
 {
-	if ( DERCStar::fpfiring ) {
-        	fprintf( DERCStar::fpfiring, st );
-        	fflush( DERCStar::fpfiring );
-	}
+    if ( DERCStar::fpfiring ) {
+        fprintf( DERCStar::fpfiring, st );
+        fflush( DERCStar::fpfiring );
+    }
 }
 
 
 void DERCStar::Closeflow ()
 {
-	if ( DERCStar::fpoverflow ) {
-        	fclose( DERCStar::fpoverflow );
-        	DERCStar::fpoverflow = NULL;
-	}
-	if ( DERCStar::fpfiring ) {
-        	fclose( DERCStar::fpfiring );
-        	DERCStar::fpfiring = NULL;
-	}
+    if ( DERCStar::fpoverflow ) {
+        fclose( DERCStar::fpoverflow );
+        DERCStar::fpoverflow = NULL;
+    }
+    if ( DERCStar::fpfiring ) {
+        fclose( DERCStar::fpfiring );
+        DERCStar::fpfiring = NULL;
+    }
 }
+
+/*void DERCStar::emitEventToIntQ( int outputPort, double delay ) {
+    double emitTime; 
+    StarLLCell* temp = (StarLLCell*)storeList->getAndRemove();
+    if (temp == 0) temp = new StarLLCell(-1, -1);
+    if (needsSharedResource) { 
+        emitTime = now + (delay/clkFreq);
+    } else { 
+        emitTime = now + (1/clkFreq); }
+    temp->time = emitTime;
+    temp->outputPort = outputPort;
+    emittedEvents->append(temp);
+}*/
+
 
 
 static DERCStar proto;
 static RegisterBlock registerBlock(proto,"RCStar");
+
+
+
+StarLLCell::StarLLCell(double tim, int number) {
+    time = tim;
+    outputPort= number;
+}
+
+
+
+

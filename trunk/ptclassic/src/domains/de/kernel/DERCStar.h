@@ -5,7 +5,7 @@ Version identification:	$Id$
 
 Author: Mudit Goel, Neil Smyth
 
-Copyright (c) 1997-%Q% The Regents of the University of California.
+Copyright (c) 1997- The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -35,40 +35,53 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma interface
 #endif
 
-#include <stdio.h>              // Needed for FILE
+#include <assert.h>
 #include "Particle.h"
 #include "DERepeatStar.h"
 #include "Resource.h"
 #include "DERCScheduler.h"
-#include "DERCEventQ.h"
 class Resource;
 
-class DERCStar : public DERepeatStar
-{
-public:
-	DERCStar();
-	/* virtual */ virtual Block* makeNew() const;
-	/* virtual */ virtual const char* className() const;
-	/* virtual */ virtual int isA(const char*) const;
-	/* virtual */ virtual double getDelay();
-	/* virtual */ virtual SequentialList* getEvents ();
-        /* virtual */ virtual void emitEvent(DERCEvent*, double ) {};
-	Resource* resourcePointer;
-	char resource[1024];
-	double timeOfArrival;
-	int priority;
-	SequentialList* emittedEvents;
-	FILE * Openoverflow ( char *name );
-	void Printoverflow ( char *st );
-	FILE * Openfiring ( char *name );
-	void Printfiring ( char *st );
-	void Closeflow ();
-        int needsSharedResource;
-        int schedPolicy;
-	DERCEventQ* interruptQ;
-
-protected:
-	static FILE *fpoverflow;
-	static FILE *fpfiring;
+class DERCStar : public DERepeatStar {
+ public:
+    DERCStar();
+    /* virtual */ virtual Block* makeNew() const;
+    /* virtual */ virtual const char* className() const;
+    /* virtual */ virtual int isA(const char*) const;
+    /* virtual */ virtual double getDelay();
+    /* virtual */ virtual SequentialList* getEvents ();
+    /* virtual */ virtual void emitEvent(Event*, double ) {};
+    /* virtual */ virtual int emitEventToIntQ(int, double ) {return 0;};
+    Resource* resourcePointer;
+    char resource[1024];
+    double timeOfArrival;
+    int priority;
+    SequentialList* emittedEvents;
+    SequentialList* storeList;
+    FILE * Openoverflow ( char *name );
+    void Printoverflow ( char *st );
+    FILE * Openfiring ( char *name );
+    void Printfiring ( char *st );
+    void Closeflow ();
+    int needsSharedResource;
+    int schedPolicy;
+        
+ protected:
+    static FILE *fpoverflow;
+    static FILE *fpfiring;
 };
+
+class StarLLCell {
+ public: 
+    Event* event;
+    double time;     /* Expected Completion Time */
+    int outputPort;
+    
+    StarLLCell(double, int);
+};
+
 #endif
+
+
+
+
