@@ -44,17 +44,22 @@ static const char file_id[] = "SDFCluster.cc";
 #include "GalIter.h"
 #include "Geodesic.h"
 #include "Plasma.h"
+#include "Target.h"
 #include "streamCompat.h"
 
 // A SDFClusterGal is a Galaxy, built from another galaxy.
 
+// function to print an SDFClusterGal on an ostream.
 ostream& operator<< (ostream& o, SDFClusterGal& g) {
 	SDFClusterGalIter next(g);
 	SDFCluster* c;
 	while ((c = next++) != 0) {
 		o << *c << "\n";
 	}
+	return o;
 }
+
+// constructor: builds a flat galaxy of SDFAtomCluster objects.
 
 SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 : bagNumber(1), logstrm(log)
@@ -84,19 +89,27 @@ SDFClusterGal::SDFClusterGal(Galaxy& gal, ostream* log)
 	LOG_DEL; delete ptable;
 }
 
+// Main clustering routine.  Alternate merge passes and loop passes
+// until no more can be done.
 int SDFClusterGal::cluster() {
+	if (numberClusts() <= 1) return FALSE;
+
 	int urate, changes = FALSE;
 	while ((urate = uniformRate()) == FALSE) {
 		if (!mergePass()) break;
 		changes = TRUE;
 		if (!loopPass()) break;
 	}
+	if (numberClusts() == 1) {
+		if (logstrm)
+			*logstrm << "Reduced to one cluster\n";
+		return TRUE;
+	}
 	if (urate) {
 		if (logstrm)
 			*logstrm << "Uniform rate achieved: one extra merge pass now\n";
 		mergePass();
 	}
-
 	return changes;
 }
 
@@ -122,7 +135,7 @@ int SDFClusterGal::mergePass() {
 	if (numberClusts() <= 1) return FALSE;
 	int changes = 0;
 	SDFClusterGalIter nextClust(*this);
-	SDFCluster *c1, *c2;
+	SDFCluster *c1, *c2 = 0;
 	do {
 		while ((c1 = nextClust++) != 0) {
 			c2 = c1->mergeCandidate();
@@ -253,14 +266,45 @@ int SDFClusterGal::findPath(SDFCluster* start, SDFCluster* dst) {
 
 // This is the loop pass.  It loops any cluster for which loopFactor
 // returns a value greater than 1.
-// This version does not loop non-integral rate conversions (e.g. 2->3
-// or 3->2).
+
+// This version only does non-integral rate conversions (e.g. 2->3 or
+// 3->2) when there are only two clusters.
+
 int SDFClusterGal::loopPass() {
 	if (logstrm)
 		*logstrm << "Starting loop pass\n";
 	if (numberClusts() <= 1) return FALSE;
 	int changes = 0;
 	SDFClusterGalIter nextClust(*this);
+
+	// special handling for two clusters: do arbitrary rate
+	// changes if no delays between the clusters and rate
+	// mismatch exists.
+	if (numberClusts() == 2) {
+		SDFCluster* c1 = nextClust++;
+		SDFCluster* c2 = nextClust++;
+		// check to see that there are no delays on arcs,
+		// and that a sample rate change is needed.
+		SDFClustPortIter nextPort(*c1);
+		SDFClustPort* p;
+		while ((p = nextPort++) != 0) {
+			if (p->numTokens() > 0 ||
+			    p->numIO() == p->far()->numIO()) return FALSE;
+		}
+		// ok, loop both clusters so that their
+		// repetitions values become 1.
+		int r1 = c1->reps();
+		int r2 = c2->reps();
+		c1->loopBy(r1);
+		c2->loopBy(r2);
+		if (logstrm)
+			*logstrm << "looping " << c1->readName() << " by "
+				<< r1 << " and " << c2->readName() << " by "
+					<< r2 << "\n";
+		return TRUE;
+	}
+
+	// "normal" case: only loop to do integral rate conversions.
 	SDFCluster *c;
 	while ((c = nextClust++) != 0) {
 		int fac = c->loopFactor();
@@ -329,6 +373,10 @@ ostream& SDFCluster::printPorts(ostream& o) {
 void SDFCluster::loopBy(int fac) {
 	pLoop *= fac;
 	repetitions.numerator /= fac;
+	SDFClustPortIter nextPort(*this);
+	SDFClustPort* p;
+	while ((p = nextPort++) != 0)
+		p->numberTokens *= fac;
 }
 
 // generate a name for a new bag
@@ -387,15 +435,7 @@ void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
 	SDFClustPort* cp;
 	while ((cp = next++) != 0) {
 		SDFClustPort* pFar = cp->far();
-		if (pFar == 0) {
-			// external port: this is now a "grandparent pointer".
-			LOG_NEW; SDFClustPort *gp = new SDFClustPort(*cp,this,1);
-			SDFClustPort* alias = cp->outPtr();
-			gp->makeExternLink(alias);
-			cp->makeExternLink(gp);
-			addPort(*gp);
-		}
-		else if (pFar->parent() == this) {
+		if (pFar->parent() == this) {
 			// the far side of this guy is one of my bag pointers.
 			// zap it and connect directly.
 			SDFClustPort* p = pFar->inPtr();
@@ -405,7 +445,9 @@ void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
 			cp->initGeo();
 		}
 		else {
-			LOG_NEW; SDFClustPort *np = new SDFClustPort(*cp,this,1);
+			// add a new connection to the outside for this guy
+			LOG_NEW; SDFClustPort *np =
+				new SDFClustPort(*cp,this,1);
 			cp->makeExternLink(np);
 			addPort(*np);
 		}
@@ -416,11 +458,16 @@ void SDFClusterBag::absorb(SDFCluster* c,Galaxy* par) {
 void
 SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 	// get a list of all "bagports" that connect the two clusters.
+	// we accumulate them on one pass and delete on the next to avoid
+	// problems with iterators.
 	SDFClustPortIter nextbp(*this);
 	SDFClustPort* p;
 	SequentialList zap;
 	while ((p = nextbp++) != 0)
 		if (p->far()->parent() == b) zap.put(p);
+	// zap is the list of connections between the two clusters.  These
+	// become internal connections so we zap them from both bags' lists
+	// of external pointers.
 	ListIter nextZap(zap);
 	while ((p = (SDFClustPort*)nextZap++) != 0) {
 		SDFClustPort* near = p->inPtr();
@@ -431,7 +478,7 @@ SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 		near->connect(*far, del);
 		near->initGeo();
 	}
-	// now we simply combine the bagports and clusters into this.
+	// now we simply combine the remaining bagports and clusters into this.
 	SDFClusterBagIter nextC(*b);
 	SDFCluster* c;
 	while ((c = (SDFCluster*)nextC++) != 0) {
@@ -439,7 +486,8 @@ SDFClusterBag::merge(SDFClusterBag* b,Galaxy* par) {
 	}
 	SDFClustPortIter nextP(*b);
 	while ((p = nextP++) != 0) {
-		addPort(p->setPort(p->readName(),this));
+		p->setNameParent(p->readName(),this);
+		addPort(*p);
 	}
 // get rid of b.
 	par->removeBlock(*b); // remove from parent galaxy
@@ -471,15 +519,29 @@ int SDFClusterBag::genSched() {
 	return sched.setup(gal);
 }
 
+// indent by depth tabs.
+static const char* tab(int depth) {
+	// this fails for depth > 20, so:
+	if (depth > 20) depth = 20;
+	static const char *tabs = "\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t";
+	return (tabs + 20 - depth);
+}
+
 // return the bag's schedule.
-StringList SDFClusterBag::displaySchedule() {
+StringList SDFClusterBag::displaySchedule(int depth) {
 	StringList sch;
 	if (loop() > 1) {
+		sch += tab(depth);
 		sch += loop();
-		sch += "*{ ";
+		sch += "*{\n";
+		depth++;
 	}
-	sch += sched.displaySchedule();
-	if (loop() > 1) sch += " }";
+	sch += sched.displaySchedule(depth);
+	if (loop() > 1) {
+		depth--;
+		sch += tab(depth);
+		sch += "}\n";
+	}
 	return sch;
 }
 
@@ -573,6 +635,7 @@ SDFAtomCluster::SDFAtomCluster(SDFStar& star,Galaxy* parent) : pStar(star)
 		if (p->far()->parent() == &star) continue;
 		LOG_NEW; SDFClustPort *cp = new SDFClustPort(*p,this);
 		addPort(*cp);
+		cp->numIO();	// test
 	}
 	setNameParent(mungeName(star),parent);
 	repetitions = pStar.repetitions;
@@ -603,13 +666,14 @@ ostream& SDFAtomCluster::printOn(ostream& o) {
 	return printPorts(o);
 }
 
-StringList SDFAtomCluster::displaySchedule() {
-	StringList sch;
+StringList SDFAtomCluster::displaySchedule(int depth) {
+	StringList sch = tab(depth);
 	if (loop() > 1) {
 		sch += loop();
 		sch += "*";
 	}
 	sch += real().readFullName();
+	sch += "\n";
 	return sch;
 }
 
@@ -630,6 +694,7 @@ SDFClustPort::SDFClustPort(SDFPortHole& port,SDFCluster* parent, int bp)
 	const char* name = bp ? port.readName() : mungeName(port);
 	setPort(name,parent,INT);
 	myPlasma = Plasma::getPlasma(INT);
+	numberTokens = port.numberTokens;
 }
 
 void SDFClustPort::initGeo() { myGeodesic->initialize();}
@@ -639,6 +704,7 @@ void SDFClustPort::initGeo() { myGeodesic->initialize();}
 
 void SDFClustPort::makeExternLink(SDFClustPort* bagPort) {
 	pOutPtr = bagPort;
+	bagPort->numberTokens = numberTokens;
 	// if I am connected, disconnect me and connect my peer
 	// to my external link (the bagPort)
 	SDFClustPort* pFar = far();
@@ -650,14 +716,6 @@ void SDFClustPort::makeExternLink(SDFClustPort* bagPort) {
 	}
 }
 
-
-// return the number of tokens read or written by the port, taking into
-// account any looping.
-int SDFClustPort::numIO() {
-	SDFClustPort* in = inPtr();
-	int n = in ? in->numIO() : pPort.numberTokens;
-	return n * parentClust()->loop();
-}
 
 // methods for SDFClustSched, the clustering scheduler.
 
@@ -702,27 +760,72 @@ int SDFClustSched::computeSchedule (Galaxy& gal) {
 	else return FALSE;
 }
 
+// display the top-level schedule.
 StringList SDFClustSched::displaySchedule() {
 	StringList sch;
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*)next++) != 0) {
-		sch += c->displaySchedule();
-		sch += "\n";
+		sch += c->displaySchedule(0);
 	}
 	return sch;
 }
 
-StringList SDFBagScheduler::displaySchedule() {
+StringList SDFBagScheduler::displaySchedule(int depth) {
 	StringList sch;
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
-	const char* sep = "";
 	while ((c = (SDFCluster*)next++) != 0) {
-		sch += sep;
-		sch += c->displaySchedule();
-		sep = " ";
+		sch += c->displaySchedule(depth);
 	}
 	return sch;
 }
+
+// The following functions are used in code generation.  Work is
+// distributed among the two scheduler and two cluster classes.
+StringList SDFClustSched::compileRun() {
+	StringList code;
+	Target& target = getTarget();
+	SDFSchedIter next(mySchedule);
+	SDFCluster* c;
+	while ((c = (SDFCluster*)next++) != 0) {
+		code += c->genCode(target,1);
+	}
+	return code;
+}
+
+StringList SDFAtomCluster::genCode(Target& t, int depth) {
+	if (loop() > 1) {
+		StringList out = t.beginIteration(loop(), depth);
+		out += t.writeFiring(real(), depth+1);
+		out += t.endIteration(loop(), depth);
+		return out;
+	}
+	else return t.writeFiring(real(), depth);
+}
+
+StringList SDFClusterBag::genCode(Target& t, int depth) {
+	StringList out;
+	if (loop() > 1) {
+		out += t.beginIteration(loop(), depth);
+		depth++;
+	}
+	out += sched.genCode(t, depth);
+	if (loop() > 1) {
+		depth--;
+		out += t.endIteration(loop(), depth);
+	}
+	return out;
+}
+
+StringList SDFBagScheduler::genCode(Target& t, int depth) {
+	StringList out;
+	SDFSchedIter next(mySchedule);
+	SDFCluster* c;
+	while ((c = (SDFCluster*)next++) != 0) {
+		out += c->genCode(t, depth);
+	}
+	return out;
+}
+
 
