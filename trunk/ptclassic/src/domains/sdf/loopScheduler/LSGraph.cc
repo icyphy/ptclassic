@@ -44,7 +44,6 @@ int LSGraph::createMe(Galaxy& galaxy, int) {
 // insert a node into "candidates" list sorted by repetition counter.
 void LSGraph::sortedInsert(LSNode *p) {
 	LSNodeListIter nextNode(candidates);
-	LSNode *n;
 	LSNodeLink* nl;
 	LSNodeLink* tmp = candidates.createLink(p);
 

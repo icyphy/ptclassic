@@ -36,7 +36,7 @@ friend class LSCluster;
 
 public:
 	SDFFiring(SDFStar* p, int i) : s(p), count(i), next(0) {}
-	~SDFFiring() { INC_LOG_DEL; delete next; }
+	~SDFFiring();
 
 	int getExecTime() { return s->myExecTime() * count; }
 };

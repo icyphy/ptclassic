@@ -44,7 +44,7 @@ public:
 	// constructor
 	ClusterNodeList(ClusterNodeList* n = NULL) : 
 		next(0),first(0),second(0) { if (n) n->next = this; }	
-	~ClusterNodeList() { INC_LOG_DEL; delete next; }
+	~ClusterNodeList();
 	ClusterNodeList* nextList() { return next; }
 
 	// insert a node into the cluster
