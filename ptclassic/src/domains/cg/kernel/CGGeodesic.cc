@@ -63,6 +63,7 @@ F_SRC|F_DEST:
 #include "Error.h"
 #include "Fraction.h"
 #include "SimControl.h"
+#include "IntState.h"
 
 ISA_FUNC(CGGeodesic,Geodesic);
 
@@ -199,3 +200,48 @@ int CGGeodesic :: internalBufSize() const {
 // default waste factor.
 double CGGeodesic::wasteFactor() const { return 2.0;}
 
+
+// Prevent delay warning messages from being repeated.
+static int alreadyWarned = FALSE;
+
+// Reset the alreadyWarned flag.
+void CGGeodesic::initialize()
+{
+    Geodesic::initialize();
+    alreadyWarned = FALSE;
+}
+
+// Helper function for setDelay() and setSourcePort().
+void checkNumDelays(const char* values)
+{
+    if (values && *values)
+    {
+	StringList msg;
+
+	if (*values == '*')
+	{
+	    msg << "Use of variable delays may result in incorrect code.\n"
+	        << "Please use a constant expression for the number of delays.";
+	}
+	else
+	{
+	    msg << "Use of initializable delays may result in incorrect code.\n"
+		<< "Please use non-initializable delays.";
+	}
+
+	if (!alreadyWarned) Error::warn(msg);
+	alreadyWarned = TRUE;
+    }
+}
+
+void CGGeodesic::setDelay(int num, const char* values)
+{
+    checkNumDelays(values);
+    Geodesic::setDelay(num, values);
+}
+
+PortHole* CGGeodesic::setSourcePort(GenericPort& port, int num, const char* values)
+{
+    checkNumDelays(values);
+    return Geodesic::setSourcePort(port, num, values);
+}

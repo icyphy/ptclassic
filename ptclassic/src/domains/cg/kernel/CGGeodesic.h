@@ -68,6 +68,10 @@ public:
 	// return zero if not associated with a fork buffer.
 	int forkDelay() const;
 
+	/*virtual*/ void initialize();
+	/*virtual*/ void setDelay(int, const char* = 0);
+	/*virtual*/ PortHole* setSourcePort(GenericPort&, int = 0, const char* = 0);
+
 protected:
 	CGPortHole* src() {
 		return ((CGPortHole*)originatingPort)->forkSrc;
