@@ -227,12 +227,6 @@ class ::tycho::Exec {
     method help {}
 
     ###################################################################
-    ####                         public procs                       ####
-
-    # Return 1 if the Exec widget will work on the current platform
-    proc execWidgetIsSupported {} 
-
-    ###################################################################
     ####                         private variables                 ####
 
     # File descriptor of the process. Process id is simply pid = [pid $fd]
@@ -516,29 +510,4 @@ body ::tycho::Exec::getStatusWait {{timeToWait {}} } {
     return [getStatusNow]
 }
 
-
-    ###################################################################
-    ###################################################################
-    ####                      public procs                          ####
-
-#####################################################################
-#### execWidgetIsSupported
-# Return 1 if the Exec widget will work on the current platform, otherwise
-# return 0.
-#
-body ::tycho::Exec::execWidgetIsSupported {} {
-    global tcl_platform
-    global tcl_platform
-    switch $tcl_platform(platform) {
-	macintosh {
-	    return 0
-	}
-	unix {
-	    return 1
-	}
-	windows {
-	    return 0
-	}
-    }
-}
 
