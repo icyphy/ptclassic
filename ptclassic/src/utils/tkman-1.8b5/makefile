@@ -25,7 +25,7 @@
 # 
 # 						PT_COPYRIGHT_VERSION_2
 # 						COPYRIGHTENDKEY
-TKMAN_VERSION = 1.7.3
+TKMAN_VERSION = 1.8b5
 ROOT = ../../..
 VPATH = $(ROOT)/src/utils/tkman-$(TKMAN_VERSION)
 BINDIR = $(ROOT)/bin.$(PTARCH)
