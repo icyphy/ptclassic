@@ -49,6 +49,7 @@ static const char file_id[] = "TyMain.cc";
 #include <tcl.h>
 #include <errno.h>
 #include "ptk.h"
+#include "SetSigHandle.h"
 
 /*
  * Global variables
@@ -96,6 +97,9 @@ int
 main(int argc, char **argv) {
 
     tyFilename = argv[0];
+
+    if (setSignalHandlers() != 0) 
+        setSignalError();
 
     // The following creates a Tcl interpreter, adds the ptcl and itcl 
     // extensions, and creates a top-level Tk window.
