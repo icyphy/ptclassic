@@ -35,7 +35,7 @@
 
 # Register the standard context-sensitive editors
 namespace ::tycho {
-    global ptolemypresent tcl_platform
+    global ptolemyfeature tcl_platform
     ############# text editors (alphabetical except the first one)
 
     ::tycho::File::registerExtensions {} \
@@ -102,7 +102,7 @@ namespace ::tycho {
     ::tycho::File::registerExtensions {.graph} \
             {::tycho::view EditGraph -file {%s}} \
             {Graph editor} "graphics"
-    if !$ptolemypresent {
+    if !$ptolemyfeature(octtools) {
         # Vem is not present.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::tycho::view EditPalette -facet {%s}} \
@@ -118,7 +118,7 @@ namespace ::tycho {
             {::tycho::Dialog::new IndexBrowser [::tycho::autoName .idx] \
             -file {%s}} \
             {}
-    if $ptolemypresent {
+    if $ptolemyfeature(octtools) {
         # Ptolemy and vem are present.  Use them.
         ::tycho::File::registerContents [file join schematic {contents;}] \
                 {::pvOpenWindow [::ptkOpenFacet {%s} schematic contents]} \
@@ -165,7 +165,7 @@ namespace ::tycho {
             {::tycho::view ProfileTcl -file {%s} -toolbar 1} \
             {Tcl profiler} "tools"
 
-    if {[info namespace all pitcl] != "pitcl" || $ptolemypresent} {
+    if {[info namespace all pitcl] != "pitcl" || $ptolemyfeature(octtools)} {
 	::tycho::File::registerExtensions {} \
                 {::tycho::view Retarget -file {%s} -toolbar 1} \
                 {Ptolemy Retargeter} "tools"
