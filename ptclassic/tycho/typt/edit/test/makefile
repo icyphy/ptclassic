@@ -48,8 +48,8 @@ MISC_FILES =
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
-test:: $(ITCL_SRCS)
-	tycho -pigi RetargetTest.itcl
+tests:: $(ITCL_SRCS)
+	tycho -pigi -e RetargetTest.itcl
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
