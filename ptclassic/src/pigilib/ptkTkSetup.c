@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkTkSetup.c  aok
-    Version: @(#)ptkTkSetup.c	1.3 6/30/93
+    Version: $Id$
 */
 
 
