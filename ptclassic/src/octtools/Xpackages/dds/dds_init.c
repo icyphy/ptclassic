@@ -41,9 +41,9 @@ static ddsHandle no_new();
 static void no_get_set();
 static void no_del();
 
-static ddsHandle do_full_init();
-static ddsHandle do_partial_init();
-
+/*static ddsHandle do_full_init();
+ static ddsHandle do_partial_init();
+*/
 static Widget init_parent();
 static void init_placement();
 
@@ -67,8 +67,6 @@ char *argv[];			/* Argument list itself           */
  */
 {
     ddsFullInitialize *item;
-    Arg arg_list[MAX_ARGS];
-    int arg_len;
     Display *disp;
 
     item = ALLOC(ddsFullInitialize, 1);
@@ -134,6 +132,7 @@ ddsData data;			/* Not used */
     errRaise(ddsPackageName, DDS_NOT_SUPPORTED,
 	     "Items of type DDS_INITIALIZE are created using dm_initialize()");
     /*NOTREACHED*/
+    return (ddsHandle)NULL;
 }
 
 
