@@ -11,7 +11,7 @@ $Id$
 *******************************************************************/
 #include "ReachabilityMatrix.h"
 #include "BooleanMatrix.h"
-#include "EGConnect.h"
+#include "EGGate.h"
 #include "Error.h"
 #include "LSNode.h"
 #include "LSGraph.h"
@@ -42,7 +42,7 @@ ReachabilityMatrix::~ReachabilityMatrix() {
 
 inline void ReachabilityMatrix::connect(LSNode *parent, LSNode *child)
 {
-	matrix->setElem(parent->myRMIndex(), child->myRMIndex(), 1);
+	matrix->setElem(parent->RMIndex(), child->RMIndex(), 1);
 }
 
 
@@ -68,7 +68,7 @@ void ReachabilityMatrix::initialize(LSNode *p) {
 	while ((q = nextKid++)!=0) {
 		n = (LSNode*) q->farEndNode();
 		connect(p,n);
-		addPaths(p->myRMIndex(),n->myRMIndex());
+		addPaths(p->RMIndex(),n->RMIndex());
 	} 
 }
 
@@ -93,9 +93,9 @@ int ReachabilityMatrix::formCluster(ClusterNodeList &nl, EGGateList &gl)
 	LSNode *p;
 
 	if ((firstnode = nextNode++) == 0) return 0;
-	int clusterindex = firstnode->myRMIndex();
+	int clusterindex = firstnode->RMIndex();
 	while ((p = nextNode++) != 0) {
-		int j = p->myRMIndex();
+		int j = p->RMIndex();
 		addPaths(clusterindex, j); 
 	}
 
@@ -105,7 +105,7 @@ int ReachabilityMatrix::formCluster(ClusterNodeList &nl, EGGateList &gl)
 	EGGate* d;
 	while ((d = nextAncestor++) != 0 ) {
 		LSNode* temp = (LSNode*) d->farEndNode();
-    		addPaths(temp->myRMIndex(), clusterindex); 
+    		addPaths(temp->RMIndex(), clusterindex); 
 		connect(temp, firstnode);
 	}
 
@@ -114,7 +114,7 @@ int ReachabilityMatrix::formCluster(ClusterNodeList &nl, EGGateList &gl)
 
 int ReachabilityMatrix::pathExists(LSNode &src, LSNode &dest)
 { 
-	return matrix->getElem(src.myRMIndex(), dest.myRMIndex());
+	return matrix->getElem(src.RMIndex(), dest.RMIndex());
 }
 
 // Check whether any descendant of the cluster, which is outside the 
