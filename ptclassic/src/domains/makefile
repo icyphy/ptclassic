@@ -16,7 +16,7 @@ DIRS = sdf de ddf thor cg cg-ddf cgc cg56 cg96 $(EXPDOMAINS)
 
 MAKEVARS = "ARCH=$(ARCH)"
 
-makefiles all install clean sources depend realclean checkjunk:
+makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
 		cd $$x ; \
 		echo making $@ in domains/$$x ; \
