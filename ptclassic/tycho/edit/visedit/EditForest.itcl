@@ -128,7 +128,7 @@
 #    ff roots
 #    ff add e {e e} b
 #    set descr [ff describe]
-#    set view [::tycho::view EditForest [list -graph ff]]
+#    set view [::tycho::view EditForest -graph ff]
 #    set win [$view displayer windowName]
 #    wm deiconify $win
 # </pre></tcl>
