@@ -41,7 +41,9 @@ EXTRA_DESTS =	ptplay.sun4 ptplay.irix5 ptplay.irix5.cfront \
 	ptplay.hppa ptplay.linux ptplay.linux.debug ptplay.linux.static \
 	ptplay.cfront ptplay.sol2 ptplay.sol2.cfront ptplay.irix4 \
 	ptplay.hppa.cfront ptplay.hppa9 ptplay.freebsd \
-	ptplay.sol2.5 ptplay.sol2.5.cfront
+	ptplay.sol2.5 ptplay.sol2.5.cfront \
+	ptplay.sol2.6 ptplay.sol2.6.cfront \
+	ptplay.sol7 ptplay.sol7.cfront \
 
 KRUFT = ptplay.sol2 ptplay	
 
@@ -101,9 +103,9 @@ ptplay.linux.static: ptplay.linux
 	ln -s $^ $@ 
 
 C_INCL =	$(PTCOMPAT_INCSPEC)
-ptplay.sol2 ptplay.sol2.5: ptplay.sol2.o
+ptplay.sol2 ptplay.sol2.5 ptplay.sol2.6 ptplay.sol7: ptplay.sol2.o
 
-ptplay.sol2.cfront ptplay.sol2.5.cfront: ptplay.sol2.o 
+ptplay.sol2.cfront ptplay.sol2.5.cfront ptplay.sol2.6.cfront ptplay.sol7.cfront: ptplay.sol2.o 
 	$(CC) $^ -o $@
 
 #clean:
