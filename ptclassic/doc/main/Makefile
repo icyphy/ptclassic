@@ -4,7 +4,6 @@
 #
 
 PTOLEMY       = /usr/users/ptolemy
-PRINTER       = lw
 PRINTSEC      = $(PTOLEMY)/doc/bin/printsec
 HEADER        = $(PTOLEMY)/doc/headers/together
 MAINSEC	      = overall
