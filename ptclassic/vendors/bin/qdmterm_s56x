@@ -1,5 +1,6 @@
 #!/bin/sh
 # $Id$
 TCL_LIBRARY=~ptdesign/vendors/qdm/lib/tcl
-export TCL_LIBRARY
+TK_LIBRARY=~ptdesign/vendors/qdm/lib/tk
+export TCL_LIBRARY TK_LIBRARY
 exec `dirname $0`/vendorexec.s56dsp qdm/bin/qdmterm $*
