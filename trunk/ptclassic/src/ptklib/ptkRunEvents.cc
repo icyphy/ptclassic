@@ -34,6 +34,14 @@ SimControl object.
 
 */
    
+#ifdef PTSVR4
+/* ptk.h eventually includes X11/Xlib.h which gets the C++ string.h,
+ * and the extern C kills it, so include it first and it protects
+ * itself.
+ */
+#include <X11/Xlib.h>
+#endif /* PTSVR4 */
+
 extern "C" {
 #include "ptk.h"
 }
