@@ -170,6 +170,34 @@ proc ::tycho::mkdir { args } {
 }
 
 ##############################################################################
+#### pathEnvSearch
+# Search the user's PATH environment variable for filename
+# 
+proc ::tycho::pathEnvSearch {filename} {
+    global env 
+    if ![info exists env(PATH)] {
+	error "pathEnvSearch: \$PATH is not set!"
+    }
+    # FIXME: Unixism? Do all PATHs have colons?
+    return [::tycho::pathSearch $filename [split $env(PATH) :]]
+}
+
+##############################################################################
+#### pathSearch
+# Search the path list for filename, if it is found then return the
+# directory where it was found.  If it is not found, return the empty 
+# string
+#
+proc ::tycho::pathSearch {filename path} {
+    foreach dir $path {
+	if [file executable [file join $dir $filename]] {
+	    return $dir
+	}
+    }
+    return {}
+}
+
+##############################################################################
 #### relativePath 
 # Given two pathnames srcFile and dstFile, return a relative pathname
 # that goes from the srcFile to the dstFile.  This is useful for
