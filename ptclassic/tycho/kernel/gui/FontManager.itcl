@@ -549,9 +549,13 @@ namespace ::tycho {
     # Create an instance of the class
     FontManager .tychoFonts
 
+    # The following code has been disabled because it breaks the
+    # layout of existing Ptolemy windows by changing the default
+    # widget fonts. (hjr 2/29/96)
+
     # The overall default font is fixed
-    set defaultFont [.tychoFonts defaultFont fixed]
-    option add *Font $defaultFont widgetDefault
-    option add *TextFont $defaultFont widgetDefault
-    option add *font $defaultFont widgetDefault
+    #    set defaultFont [.tychoFonts defaultFont fixed]
+    #    option add *Font $defaultFont widgetDefault
+    #    option add *TextFont $defaultFont widgetDefault
+    #    option add *font $defaultFont widgetDefault
 }
