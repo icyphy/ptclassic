@@ -34,6 +34,10 @@ BDF_SAME and BDF_COMPLEMENT relations.
 **************************************************************************/
 static const char file_id[] = "BDFRelIter.cc";
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "BDFClustPort.h"
 #include "BDFCluster.h"
 #include "BDFRelIter.h"

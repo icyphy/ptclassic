@@ -33,6 +33,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 *******************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "BDFSchList.h"
 #include "Geodesic.h"
 #include "Scheduler.h"

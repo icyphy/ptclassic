@@ -1,8 +1,3 @@
-static const char file_id[] = "BDFPortHole.cc";
-#include "Block.h"
-#include "BDFPortHole.h"
-#include "CircularBuffer.h"
-
 /**************************************************************************
 Version identification:
 $Id$
@@ -35,6 +30,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Code for BDF-type portholes and multiportholes.
 
 **************************************************************************/
+
+static const char file_id[] = "BDFPortHole.cc";
+
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
+#include "Block.h"
+#include "BDFPortHole.h"
+#include "CircularBuffer.h"
+
 
 // table used by reverse(BDFRelation) function.
 BDFRelation

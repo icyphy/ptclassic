@@ -31,6 +31,10 @@ BDFCluster class.
 **************************************************************************/
 static const char file_id[] = "BDFClustPort.cc";
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "BDFClustPort.h"
 #include "BDFCluster.h"
 #include "BDFRelIter.h"
