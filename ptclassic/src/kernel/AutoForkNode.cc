@@ -28,7 +28,7 @@ const char* AutoForkNode::autoForkName() {
 }
 	
 // this type is persistent
-int AutoForkNode::isItPersistent () {
+int AutoForkNode::isItPersistent () const {
 	return TRUE;
 }
 
