@@ -29,7 +29,7 @@
 # 						COPYRIGHTENDKEY
 ##########################################################################
 
-DIRS = textedit visedit vltoolkit
+DIRS = textedit slate visedit 
 
 makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	@for x in $(DIRS); do \
