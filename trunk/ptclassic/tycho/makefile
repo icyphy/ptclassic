@@ -70,18 +70,10 @@ subsources:	$(EXTRA_SRCS) $(HDRS) $(MISC_FILES) makefile
 indices:
 	(cd lib/idx; $(MAKE))
 
-# If JAVAHOME is not set, then don't go down into the java directory
 makefiles all clean depend realclean checkjunk sccsinfo sccsclean itcldocs \
 	tests idocs extraclean weblint dists:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
-		if [ $$x = "java" ]; then \
-			if [ ! -d "$(JAVAHOME)" ]; then \
-				echo "JAVAHOME = $(JAVAHOME), which does not exist, so no need to run in the java directory"; \
-				echo "mk/tycommon.mk contains the line that sets JAVAHOME"; \
-				continue; \
-			fi ; \
-		fi; \
 		( cd $$x ; \
 		echo making $@ in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) $@ ;\
@@ -96,13 +88,6 @@ install: subinstall itcldocs indices itcldocs_again
 subinstall:
 	@for x in $(DIRS); do \
 	    if [ -w $$x ] ; then \
-		if [ $$x = "java" ]; then \
-			if [ ! -d "$(JAVAHOME)" ]; then \
-				echo "JAVAHOME = $(JAVAHOME), which does not exist, so no need to run in the java directory"; \
-				echo "mk/tycommon.mk contains the line that sets JAVAHOME"; \
-				continue; \
-			fi ; \
-		fi; \
 		( cd $$x ; \
 		echo making install in $$x ; \
 		$(MAKE) $(MFLAGS) $(MAKEVARS) install ;\
