@@ -119,7 +119,7 @@ class ::tycho::IconItem {
     # Change coordinates
     proc coords {id canvas slate {x {}} {y {}}}
     
-    # Get the region of the icon
+    # Get or set the region of the icon
     proc region {id canvas slate args}
 
     # Add a terminal to the icon
@@ -148,9 +148,6 @@ class ::tycho::IconItem {
 
     ###################################################################
     ####                           private procs                   ####
-
-    proc redrawinputs  {id canvas slate positions}
-    proc redrawoutputs {id canvas slate positions}
 
     ###################################################################
     ####                       class initialization                ####
@@ -276,10 +273,17 @@ body ::tycho::IconItem::coords {id canvas slate {x {}} {y {}}} {
 ##########################################################################
 #### region
 #
-# Get the region of the primary.
+# Get or set the region of the item. This is needed because the
+# coordinates do not match the type of the primary component.
 #
 body ::tycho::IconItem::region {id canvas slate args} {
-    eval $slate region $primary($id) $args
+    if { $args == "" } {
+        $canvas coords $primary($id)
+    } else {
+        set option(hsize$id) [expr [lindex $args 2] - [lindex $args 0]]
+        set option(vsize$id) [expr [lindex $args 3] - [lindex $args 1]]
+        adjust $id $canvas $slate
+    }
 }
 
 ##########################################################################
