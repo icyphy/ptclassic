@@ -138,8 +138,11 @@ bin:
 	(cd $(GNU_OBJ)/gcc; $(MAKE) $(MFLAGS) CC="$(CC)" MAKE=$(GMAKE) \
 		LANGUAGES=c )
 	@echo "Building libiberty and g++"
+	# LDFLAGS is needed to build gmake
 	(cd $(GNU_OBJ); $(MAKE) $(MFLAGS) \
-		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ MAKE=$(GMAKE))
+		CC=$(GNU_OBJ)/gcc/xgcc CFLAGS=-B$(GNU_OBJ)/gcc/ \
+		LDFLAGS=-B$(GNU_OBJ)/gcc/ \
+		MAKE=$(GMAKE))
 
 $(BINDIR):
 	mkdir $(BINDIR)
