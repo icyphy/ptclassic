@@ -1,7 +1,8 @@
 static const char file_id[] = "kernelCalls.cc";
 /* 
 Version identification:
-$Id$
+$Date$ $Id$
+
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 
@@ -288,11 +289,11 @@ KcDomainOf(char* name) {
 
 // Delete the universe and make another
 extern "C" void
-KcNewUniverse(const char* name, const char* domain) {
+KcClearUniverse(const char* name) {
 	// ptcl function replaces old Kernel Calls code:
-	ptcl -> newUniv( name, domain );
+	ptcl -> resetUniverse();
 	LOG << "reset\n";
-	LOG << "# Creating new universe '" << name << "'\n";
+	LOG << "# Creating universe '" << name << "'\n";
 	logDomain();
 }
 
