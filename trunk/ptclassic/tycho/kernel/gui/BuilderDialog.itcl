@@ -59,7 +59,7 @@ class ::tycho::BuilderDialog {
     ####                         public procs                      ####
 
     # Check to see what files need to be built and bring up a dialog
-    proc checkFiles {}
+    proc checkFiles { {displayOKMessage 0}}
 
     ####################################################################
     ####                  protected methods                         ####
@@ -91,8 +91,10 @@ body ::tycho::BuilderDialog::constructor {args} {
 #### checkFiles
 # Check to see what files need to be built and bring up a dialog asking
 # the user if they want to build.
-# 
-body ::tycho::BuilderDialog::checkFiles {} {
+# If the optional displayOKMessage argument is 1, then if all the files
+# are OK, a message is displayed that says everything is OK. 
+#
+body ::tycho::BuilderDialog::checkFiles { {displayOKMessage 0}} {
     global TYCHO
     set origmsg "The following Tycho files do not exist:" 
     set msg $origmsg
@@ -123,6 +125,11 @@ body ::tycho::BuilderDialog::checkFiles {} {
 	    set bd [::tycho::view BuilderDialog]
 	    # Return the name of the window so the test suite can get at it.
 	    return $bd
+	}
+    } else {
+	if $displayOKMessage { 
+	    ::tycho::inform "The Tycho installation is OK, there is no\
+		    need to regenerate any files."
 	}
     }
 }
@@ -182,6 +189,9 @@ body ::tycho::BuilderDialog::initializeMenubar {menubar} {
 	    -menupadx 10
 
     $menubar addMenu Build -underline 0
+
+    $menubar add {Check} Build -underline 0 \
+	    -command "$this busy ::tycho::BuilderDialog::checkFiles 1"
 
     $menubar add {Full (10 Minutes)} Build -underline 0 \
 	    -command "$this busy ::tycho::Builder::build"
