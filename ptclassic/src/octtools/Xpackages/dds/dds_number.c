@@ -315,7 +315,7 @@ int vspan;
 
 #define CK_VAL(val) \
 (void) sprintf(num_buf, item->user_spec.format, val);\
-if (strlen(num_buf) > strlen(max_buf)) strcpy(max_buf, num_buf);
+if ((int)strlen(num_buf) > (int)strlen(max_buf)) strcpy(max_buf, num_buf);
 
 static Widget new_value_label(pw, item)
 Widget pw;
