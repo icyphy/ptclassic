@@ -57,9 +57,6 @@ public:
 	// new toUniversal EventHorizon
 	EventHorizon& newTo() { LOG_NEW; return *new DEtoUniversal;}
 
-	// new node (geodesic)
-	Geodesic& newNode() { LOG_NEW; return *new AutoForkNode;}
-
 	// constructor
 	DEDomain() : Domain("DE") {
 	  subDomains += "HOF";
