@@ -173,15 +173,34 @@ static void printPacketType(int packetType, int currentFlag) {
 #endif
 
 // Constructor
-MathematicaIfc::MathematicaIfc(const char* name, int restrictContextFlag) :
+MathematicaIfc::MathematicaIfc(const char* name, int privateContextFlag) :
 	mathlink(0), environment(0) {
     instanceNumber = mathematicaStarsCount++;
-    contextFlag = restrictContextFlag;
+    setContext(name, privateContextFlag);
+}
+
+void MathematicaIfc::setContext(const char* name, int flag) {
     context = name;
     context << instanceNumber << "`";
-    prolog = "Begin[\"";
-    prolog << context << "\"]";
-    epilog = "End[]";
+
+    // Define Mathematica variables to keep track of state:
+    // context`Private`context`lastContext
+    // context`Private`context`currContext
+    StringList lastContextVariable = context;
+    lastContextVariable << "Private`" << context << "lastContext";
+    StringList currContextVariable = context;
+    currContextVariable << "Private`" << context << "currContext";
+
+    prolog = currContextVariable;
+    prolog << " = $Context; $Context = " << lastContextVariable;
+
+    epilog = lastContextVariable;
+    epilog << " = $Context; $Context = " << currContextVariable;
+
+    if (flag) {
+	initCode = lastContextVariable;
+	initCode << " = \"" << context << "\"";
+    }
 }
 
 // Destructor
@@ -459,6 +478,8 @@ int MathematicaIfc::StartMathematica(int oargc, char** oargv) {
 	return FALSE;
     }
 
+    EvaluateUnrecordedCommand(initCode);
+
     return TRUE;
 }
 
@@ -469,9 +490,9 @@ int MathematicaIfc::MathematicaIsRunning() {
 
 // EvaluateUserCommand
 int MathematicaIfc::EvaluateUserCommand(char* command) {
-    if ( contextFlag ) EvaluateUnrecordedCommand(prolog);
+    EvaluateUnrecordedCommand(prolog);
     int retval = EvaluateOneCommand(command);
-    if ( contextFlag ) EvaluateUnrecordedCommand(epilog);
+    EvaluateUnrecordedCommand(epilog);
     return retval;
 }
 
