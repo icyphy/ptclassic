@@ -59,9 +59,7 @@ SRCS = $(LIBCSRCS)
 
 OBJS = $(LIBCSRCS:.c=.o)
 
-LIB =		librpc.a
-
-LIB=librpcserver.a
+LIB =		librpcserver.a
 
 # This is a GNU make hack that appends more text to CFLAGS
 CFLAGS += -DSERVER
