@@ -104,6 +104,7 @@ delim off
 .\" "Reference" index entry (current same as all others for now)
 .de Ir
 .tm index \\n(AS-\\n% \\$1
+..
 
 .\" The following are included for partial compatibility
 .\" with some standard Unix manual pages
