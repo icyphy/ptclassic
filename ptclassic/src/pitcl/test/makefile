@@ -42,21 +42,21 @@ include $(CONFIG)
 TCL_SRCS =
 
 SIMPLE_TESTS = \
-	addBlock.itcl \
-	blocks.itcl \
-	connect.itcl \
-	connected.itcl \
-	descriptor.itcl \
-	galaxyPort.itcl \
-	known.itcl \
-	name.itcl \
-	ports.itcl \
-	predicates.itcl \
-	remove.itcl
+	testAddBlock.itcl \
+	testBlocks.itcl \
+	testConnect.itcl \
+	testConnected.itcl \
+	testDescriptor.itcl \
+	testGalaxyPort.itcl \
+	testKnown.itcl \
+	testName.itcl \
+	testPorts.itcl \
+	testPredicates.itcl \
+	testRemove.itcl
 
 # We need at least one GRAPHICAL_TEST so that we can generate alltests.itcl
 GRAPHICAL_TESTS = \
-	dummy.itcl
+	testDummy.itcl
 
 ITCL_SRCS =	$(SIMPLE_TESTS) alltests.itcl all.itcl
 
