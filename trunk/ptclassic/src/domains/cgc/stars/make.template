@@ -26,7 +26,8 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
 PL_SRCS= \
  CGCFloatRamp.pl \
  CGCFork.pl \
- CGCPrinter.pl
+ CGCPrinter.pl \
+ CGCUpSample.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
