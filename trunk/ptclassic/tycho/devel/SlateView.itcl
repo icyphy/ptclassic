@@ -598,7 +598,7 @@ body ::tycho::SlateView::configureFiller {} {
 body ::tycho::SlateView::configureFiller {} {
     
     $itk_component(filler) config -width [fillerWidth] -height 1
-
+    $this configure -autoresize 1
     set reconfigPlanned ""
 }
 	
