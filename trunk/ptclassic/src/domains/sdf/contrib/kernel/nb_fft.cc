@@ -29,7 +29,7 @@ static const char file_id[] = "nb_fft.cc";
 #include <ComplexSubset.h>
 #include "nb_fft.h"
 
-const NEXTMX = 12;
+const int NEXTMX = 12;
 
 const int prime[ NEXTMX ] = { 2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37 };
 
