@@ -76,7 +76,8 @@ int port2interp(PortHole* port,Tcl_Interp* myInterp,const char* ghostDomain) {
     buf << " != 0]";
     Tcl_Eval(myInterp,buf);
 
-  } else if (!strcmp(ghostDomain,"DE") || !strcmp(ghostDomain,"FSM")) {
+  } else if (!strcmp(ghostDomain,"DE") || !strcmp(ghostDomain,"FSM") ||
+	     !strcmp(ghostDomain,"DDF")) {
     InfString statusStr;
     InfString valueStr;
     InfString buf;
