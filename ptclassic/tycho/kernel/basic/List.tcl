@@ -338,7 +338,7 @@ proc llast {list} {
 # script is evaluated in the caller's context, so "free" variables
 # are evaluated correctly.
 #
-# This code is a nigh-mare, and there _must_ be a simpler way
+# This code is a night-mare, and there _must_ be a simpler way
 # of doing it. Tcl's schizophrenic treatment of lists, strings,
 # and commands has almost made ME schizoid, so let's just be
 # glad the damn thing works! (If you know a better way, please
@@ -569,6 +569,20 @@ proc lselect {list script} {
 }
 
 
+## lsetadd
+#
+# Add an element to a set (represented as a Tcl list).
+#
+proc lsetadd {list item} {
+    if { [lsearch -exact $list $item] != -1 } {
+	return $list
+    } else {
+	lappend list $item
+	return $list
+    }
+}
+
+
 ## lsplit list n
 #
 # Split a list at the specified index. This is equivalent to
@@ -753,5 +767,3 @@ proc ltranspose {listlist} {
 proc lunion {l1 l2} {
     return [lnub [concat $l1 $l2]]
 }
-
-
