@@ -71,7 +71,6 @@ PL_SRCS= \
  CG56ConstCx.pl \
  CG56ConstInt.pl \
  CG56Cos.pl \
- CG56Cut.pl \
  CG56CxToRect.pl \
  CG56CxToFix.pl \
  CG56CxToInt.pl \
@@ -116,7 +115,6 @@ PL_SRCS= \
  CG56MpyShift.pl \
  CG56Neg.pl \
  CG56OrderTwoInt.pl \
- CG56Pad.pl \
  CG56PrPrtAD.pl \
  CG56PrPrtADDA.pl \
  CG56PrPrtDA.pl \
