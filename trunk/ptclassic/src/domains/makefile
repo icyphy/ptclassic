@@ -70,3 +70,9 @@ TAGS:
 	    fi ; \
 	done
 	-cat -s $(DOMAINS:%=%/TAGS) > $@
+
+starindex:
+	-mkdir $(ROOT)/doc
+	-mkdir $(ROOT)/doc/star-demo-index
+	mkStarIndex "$(DOMAINS)" $(ROOT)/doc/star-demo-index
+
