@@ -171,7 +171,7 @@ proc starindex_FindOctFacetDirs { pathname } {
       lappend facetdirlist [starindex_StripSubDir $sfile]
     }
   }
-  puts "dbg: starindex_FindOctFacetDirs $pathname [llength $schematicFiles]"
+  #puts "dbg: starindex_FindOctFacetDirs $pathname [llength $schematicFiles]"
   return $facetdirlist
 }
 
@@ -270,7 +270,7 @@ proc starindex_MakeStarDemoIndex { pathname } {
 # convert a starlist returned by starindex_MakeStarDemoIndex
 # into World Wide Web format
 proc starindex_StarDemoIndexToWWW { fd starlist header } {
-  puts "dbg: starindex_StarDemoIndexToWWW \{ starlist $header\}"
+  #puts "dbg: starindex_StarDemoIndexToWWW \{ starlist $header\}"
   puts $fd "$header\n<ul>\n"
   set numelements [llength $starlist]
   for { set i 0 } { $i < $numelements } { incr i } {
@@ -291,7 +291,7 @@ proc starindex_StarDemoIndexToWWW { fd starlist header } {
 proc starindex_MakeWWWOctFacetIndex { fd pathname locationdesc } {
   set header "Stars, galaxies, and universes $locationdesc"
   set starlist [starindex_MakeStarDemoIndex $pathname]
-  puts "dbg: starindex_MakeWWWOctFacetIndex $pathname $locationdesc"
+  #puts "dbg: starindex_MakeWWWOctFacetIndex $pathname $locationdesc"
   #starindex_NormalizePathNames [starindex_StarDemoIndexToWWW $starlist $header]
   starindex_StarDemoIndexToWWW $fd $starlist $header
 }
