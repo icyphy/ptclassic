@@ -163,10 +163,6 @@ body ::tycho::EditTcl::parseNow {start stop} {
 	# The following appears to be needed to prevent infinite loops.
 	if [$text compare $ind >= end] {break}
     }
-    
-    # Set the visual characteristics of the tagged text
-    $text tag configure procname -foreground \
-	    [preference get textedit procColor]
 }
 
 #### tagLinks
