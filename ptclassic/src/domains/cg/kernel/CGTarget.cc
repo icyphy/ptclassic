@@ -124,6 +124,8 @@ CGTarget::~CGTarget() {
 	while ((b = (Block*)next++) != 0) {
 		// prevent some galaxy types from deleting b twice.
 		galaxy()->removeBlock(*b);
+		if (b->isItAtomic() && ((Star*)b)->parentCluster())
+		    ((Star*)b)->parentCluster()->clearMaster();
 		LOG_DEL; delete b;
 	}
 }
@@ -600,6 +602,7 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 		Error::abortRun("failed to clone a ", name, "!");
 		return 0;
 	}
+
 	PortHole* ip = newb->portWithName("input");
 	PortHole* op = newb->portWithName("output");
 	if (ip == 0 || op == 0) {
@@ -625,6 +628,7 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 	    addTo = (Galaxy*) p->parent()->parent();
 	
 	addTo->addBlock(*newb,hashstring(newname));
+	newb->setParent(addTo);
 
  	// connect up the new star.  This must be done after adding the
 	// block to the galaxy so that the geodesics are allocated
@@ -634,6 +638,21 @@ Block* CGTarget::spliceStar(PortHole* p, const char* name,
 	op->connect(*p,delayBefore ? 0 : ndelay);
 
 	newb->initialize();
+
+	// If stars have cluster parents, must add to a cluster
+	DataFlowStar* dfnewb = (DataFlowStar*)newb;
+	DataFlowStar* pfarStar = (DataFlowStar*)pfar->parent();
+	DataFlowStar* pStar = (DataFlowStar*)p->parent();
+	if (pfarStar->parentCluster() && pfar->numXfer() == ip->numXfer()) {
+	    pfarStar->parentCluster()->addSplicedStar(*dfnewb);
+	}
+	else if (pStar->parentCluster() && p->numXfer() == op->numXfer()) {
+	    pStar->parentCluster()->addSplicedStar(*dfnewb);
+	}
+	else if (pStar->parentCluster() || pfarStar->parentCluster()) {
+	    Error::abortRun(*this,"Could not place into a cluster:",
+			    newb->name());
+	}
 	
 	// save in the list of spliced stars
 	spliceList.put(newb);
