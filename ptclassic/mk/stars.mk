@@ -162,7 +162,7 @@ CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
 #
 
 # PN domain and Awesime supported on sun4 and mips architectures.
-ifneq (,$(filter sun% cfront mips,$(ARCH)))
+ifneq (,$(filter sun% mips,$(ARCH)))
 PNSTARS = $(LIBDIR)/pnstars.o
 PN_LIBS= -lpnstars -lpn
 PN_LIBFILES= $(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
