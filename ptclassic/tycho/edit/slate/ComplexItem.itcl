@@ -36,6 +36,8 @@ uplevel #0 {
     set Picture(destruct)  ::tycho::Picture::destruct
     set Picture(coords)    ::tycho::Picture::coords
     set Picture(draw)      ::tycho::Picture::draw
+    set Picture(ghost)     ::tycho::Picture::ghost
+    set Picture(update)    ::tycho::Picture::update
 }
 
 ## Picture
@@ -53,6 +55,8 @@ class ::tycho::Picture {
 
     proc coords {id canvas args}
     proc draw   {id canvas args}
+    proc ghost  {id canvas}
+    proc update {id canvas}
 
     ###################################################################
     ####                         protected variables               ####
@@ -136,3 +140,21 @@ body ::tycho::Picture::coords {id canvas args} {
 	eval $canvas coords $primary($id) $args
     }
 }
+
+##########################################################################
+## ghost
+#
+# Create and return a "ghost" of the picture.
+#
+body ::tycho::Picture::ghost {id canvas} {
+    eval $canvas create rectangle [$canvas coords $primary($id)] \
+	    -outline grey
+}
+
+##########################################################################
+## update
+#
+# The proc that gets called after changing a configuration option.
+# By default, does nothing.
+#
+body ::tycho::Picture::update {id canvas} {}
