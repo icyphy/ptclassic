@@ -180,6 +180,9 @@ protected:
 	// Matlab command to execute to tag Matlab figures
 	InfString figureHandleCommand;
 
+	// set figureHandleCommand to Matlab command to attach tags to figures
+	const char* MakeFigureHandleCommand();
+
 	// Matlab command to execute
 	InfString commandString;
 
