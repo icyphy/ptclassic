@@ -31,9 +31,6 @@
 # 						COPYRIGHTENDKEY
 #######################################################################
 
-# FIXME:  Known bugs
-#  - Many of the File menu commands do not do anything reasonable.
-
 #######################################################################
 #### HTML
 # This window contains a text widget that displays HTML using the
@@ -55,6 +52,14 @@ class ::tycho::HTML {
     ###################################################################
     ####                       public methods                      ####
 
+    #### altFile
+    # Prompt the user for a file name and load in place of the current file.
+    method altFile {}
+
+    #### focusin
+    # Call this to give the text subwindow the focus.
+    method focusin {}
+
     #### openSource
     # Open the HTML source
     method openSource {}
@@ -67,10 +72,6 @@ class ::tycho::HTML {
     # Clear the current text and reload from the source file.
     method reload {}
 
-    #### save
-    # Save HTML source to a file.
-    method save {{name ""}}
-
     #### seeName
     # Follow a hypertext link within the file.
     method seeName {name}
@@ -81,6 +82,10 @@ class ::tycho::HTML {
 
     #########################################################################
     ####                   protected methods                             ####
+
+    #### addTool
+    # Add a button to the toolbar.
+    method addTool {name label command}
 
     #### textWidget
     # Return the name of the type of text widget to use.
@@ -134,19 +139,18 @@ body ::tycho::HTML::constructor {args} {
     }
     pack $itk_component(text) -expand yes -fill both
 
-    # A button to move back in the stack
-    itk_component add back {
-	global TYCHO
-	button $itk_component(acc).back \
-		-text Back \
-		-bitmap @$TYCHO/kernel/img/back.xbm \
-		-command "$itk_component(text) back"
-    } {
-	keep -background -font -activebackground -cursor \
-		-highlightthickness -activeforeground \
-		-foreground -highlightcolor -highlightbackground
-    }
-    pack $itk_component(back) -side left
+    # A toolbar for frequently used functions.
+    addTool back Back [code $itk_component(text) back]
+    # FIXME: need a forward command.
+    # FIXME: should the user be allowed to change the home window?
+    global TYCHO
+    addTool home Home \
+	    [code $itk_component(text) switchFile \
+	    $TYCHO/kernel/doc/introduction.html]
+    addTool reload Reload [code $this reload]
+    addTool open Open [code $this altFile]
+    addTool find Find [code $itk_component(text) search]
+    addTool stop Stop [code $itk_component(text) stopRendering]
 
     itk_component add formatMenuButton {
 	menubutton $itk_component(menuFrame).format \
@@ -174,8 +178,11 @@ body ::tycho::HTML::constructor {args} {
 	$itk_component(formatMenu) add radio \
 		-label [lindex $size 0] \
 		-variable [scope sizeName($this)] \
-		-command "$this configure -sizeadjustment [lindex $size 1]; \
-		::HTMLText::render $itk_component(text)"
+		-command [code \
+		"$this configure -sizeadjustment [lindex $size 1]; \
+		HTMLText::render ::tycho::HTML::$itk_component(text)"]
+	# FIXME: Is the scoping on the previous line correct?
+	# I couldn't find anything else that would work (EAL).
     }
     set sizeName($this) medium
 
@@ -183,14 +190,24 @@ body ::tycho::HTML::constructor {args} {
     $itk_component(fileMenu) entryconfigure 2 \
 	    -label "Open Source" \
 	    -underline 1 \
-	    -accelerator {} \
+	    -accelerator {C-x s} \
 	    -command "$this openSource"
+
+    $itk_component(fileMenu) delete "Save"
+    $itk_component(fileMenu) delete "SaveAs..."
+    $itk_component(fileMenu) delete "Evaluate"
+    $itk_component(fileMenu) delete "Revision Control..."
 
     if {$itk_option(-file) != "NoName"} {
 	# In order to get reasonably interactive response, this is delayed.
 	# Not doing this seems to send the program into an infinite wait.
 	after 1 $itk_component(text) readFile $itk_option(-file)
     }
+
+    bind $prefix <Control-x><Key-s> [code "$this openSource; break"]
+    # disable save bindings
+    bind $prefix <Control-x><Control-s> { }
+    bind $prefix <Control-x><Control-w> { }
 
     $itk_component(text) configure -readonly 1
 }
@@ -212,6 +229,26 @@ body ::tycho::HTML::destructor {} {
     ###################################################################
     ###################################################################
     ####                       public methods                      ####
+
+###################################################################
+#### altFile
+# Query the user for a filename, insert it in place of the current file.
+#
+body ::tycho::HTML::altFile {} {
+    set filename [DialogWindow::newModal FileBrowser [autoName .fileBrowser] \
+	    -text "Alternate file to load:"]
+    if {$filename != {}} {
+	switchFile $filename
+    }
+}
+
+###################################################################
+#### focusin
+# Hand the focus to the text window.
+#
+body ::tycho::HTML::focusin {} {
+    focus [$itk_component(text) textWinName]
+}
 
 #####################################################################
 #### openSource
@@ -249,34 +286,6 @@ body ::tycho::HTML::reload {} {
     HMreset_win [$itk_component(text) textWinName]
     $itk_component(text) deleteRange 1.0 end
     $itk_component(text) readFile $file
-}
-
-#####################################################################
-#### save
-# Save HTML source to a file. If no argument is given, the filename is
-# taken from the -file option for the class. If the value of the
-# -file option is "NoName" (the default), then saveAs is invoked.
-# Remove backup files (auto-save or crash-recovery). If an argument
-# is supplied, save the current data to a file with the given name
-# and do not remove the backup files. In either case, if the
-# specified file is not writable, trigger an error. Return 1 if the
-# write succeeds, 0 otherwise.
-#
-body ::tycho::HTML::save {{name ""}} {
-    if {$name == ""} {
-	set filename $file
-    } {
-	set filename $name
-    }
-    if {$filename != "" && $filename != "NoName"} {
-	set fd [open $filename w+]
-	puts -nonewline $fd [$itk_component(text) source]
-	close $fd
-    } {	
-	# The file has not been specified.  Invoke saveAs
-	if {[saveAs] == 0} {return 0}
-    }
-    return 1
 }
 
 #####################################################################
@@ -364,6 +373,35 @@ body ::tycho::HTML::switchFile {filename} {
 
     # Render the HTML file.
     $itk_component(text) readFile $file
+}
+
+#########################################################################
+#########################################################################
+####                     protected methods                           ####
+
+#####################################################################
+#### addTool
+# Add a button to the toolbar at the top.
+# The arguments are: a name for the button and itk_component,
+# the text label to use for the button, and the command associated with
+# the button.
+#
+body ::tycho::HTML::addTool {name label command} {
+    itk_component add $name {
+	button $itk_component(acc).$name \
+		-text $label \
+		-command $command
+    } {
+	keep -background -font -activebackground -cursor \
+		-highlightthickness -activeforeground \
+		-foreground -highlightcolor -highlightbackground
+    }
+    # To use a bitmap instead, we need before the button command:
+    #       global TYCHO
+    # and as one of the button options:
+    #		-bitmap @$TYCHO/kernel/img/back.xbm
+
+    pack $itk_component($name) -side left
 }
 
 #########################################################################
