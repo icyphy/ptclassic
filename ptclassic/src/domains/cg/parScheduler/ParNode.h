@@ -82,6 +82,9 @@ public:
 	//      permanent ancestors and descendants lists
 	void copyAncDesc(ParGraph*, int flag);
 
+	// increase waitNum by 1
+	void incWaitNum() { waitNum++; }
+
         // make connection.
 	void connectedTo(ParNode* to) {
 		tempDescs.insert(to);
@@ -123,9 +126,6 @@ public:
 	// indicate how many tokens it is waiting.
 	// note that it works for homogeneous graph.
 	void resetWaitNum() { waitNum = ancestors.mySize(); }
-
-	// increase waitNum by 1
-	void incWaitNum() { waitNum++; }
 
 	// Return whether or not this node is presently fireable.
 	int fireable() { waitNum--;
