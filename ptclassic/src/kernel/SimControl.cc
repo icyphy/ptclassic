@@ -198,6 +198,13 @@ void SimControl::intCatcher(int) {
 	return;
 }
 
+/* In gcc2.5.6, signal.h defines SIG_IGN incorrectly. */
+#if defined(ultrix) 
+#ifdef __GNUG__
+#define	SIG_IGN		(void (*)(int))1
+#endif
+#endif
+
 void SimControl::catchInt(int signo, int always) {
 	// unspecified interrupt means SIGINT.
 	if (signo == -1) signo = SIGINT;
