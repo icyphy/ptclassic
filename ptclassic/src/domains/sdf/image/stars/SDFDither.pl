@@ -52,12 +52,7 @@ limitation of liability, and disclaimer of warranty provisions.
         double *mask;
         int rowsMask, colsMask;
     }
-    code {
-	extern "C" {
-	    extern int strcasecmp(const char*,const char*);
-	}
-    }
-    ccinclude {"Matrix.h"}
+    ccinclude { <string.h>, "Matrix.h" }
     constructor {
 	mask = 0;
     }
@@ -90,7 +85,7 @@ limitation of liability, and disclaimer of warranty provisions.
             mask[8] = 60; mask[9] =180; mask[10]= 30; mask[11]=150;
             mask[12]=240; mask[13]=120; mask[14]=210; mask[15]= 90;
 	}
-	else if ( strcasecmp( dt, "Own")==0 ) {
+	else if ( strcasecmp(dt, "Own") == 0 ) {
             // Use dither mask specified by user
             int size = ownMask.size();
             rowsMask = int(rowsOwnMask); colsMask = int(colsOwnMask);
