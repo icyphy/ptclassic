@@ -61,6 +61,7 @@ extern "C" {
 	void ErrAdd(const char*);
 	void KcLog();
 	int KcIsCompiledInStar(const char*);
+	int KcIsKnown(const char*);
 	const char* curDomainName();
 	int KcSetKBDomain(const char*);
 };
@@ -354,7 +355,12 @@ KcLoad (const char* iconName) {
 			ErrAdd (msg);
 			return FALSE;
 		}
-		KcSetKBDomain(curdom);
 	}
-	return compileAndLink (base, domain, dir, preproc);
+	if (!compileAndLink (base, domain, dir, preproc))
+		return FALSE;
+	int status = KcIsKnown(base);
+	if (!status)
+		ErrAdd("loader ran successfully, but star is not defined!");
+	KcSetKBDomain(curdom);
+	return status;
 }

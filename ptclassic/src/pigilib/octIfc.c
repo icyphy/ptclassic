@@ -292,12 +292,8 @@ octObject *instPtr;
     ERR_IF1(!MyOpenMaster(&mFacet, instPtr, "interface", "r"));
     octFullName(&mFacet, &fullName);
     ERR_IF1(!KcLoad(fullName));
-    if (KcIsKnown(akoName)) {
-	PrintCon("Load completed");
-	return (TRUE);
-    }
-    ErrAdd("Load failed.");
-    return (FALSE);
+    PrintCon("Load completed");
+    return (TRUE);
 }
 
 /* GetOrInitSogParams
