@@ -319,6 +319,7 @@ long userOptionWord;
 	/* set default values */
 	facet.contents.facet.view = "schematic";
 	facet.contents.facet.facet = "contents";
+	facet.objectId = 0;	/* silence Purify */
 	if (ohUnpackFacetName(&facet, theArg->argData.string) != OCT_OK) {
 	    PrintErr("Cannot parse window specification");
 	    ViDone();
