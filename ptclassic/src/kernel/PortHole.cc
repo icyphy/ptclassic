@@ -237,6 +237,10 @@ PortHole :: setPlasma () {
 			myPlasma = far()->myPlasma;
 			return myPlasma;
 		}
+		// or, far() has typePort and not on wormhole boundary
+		if (far()->typePort && far()->isItInput()) {
+			myPlasma = far()->typePort->setPlasma();
+		}
 		// second, look for typePort (ANYTYPE or on wormhole boundary)
 		if (typePort)
 			myPlasma = typePort->setPlasma();
