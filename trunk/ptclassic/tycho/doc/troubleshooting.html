@@ -44,8 +44,8 @@ highlightBackground ..."
 </PRE>
 
 then you are probably running Itcl2.0, but the <CODE>tclIndex</CODE>
-files were prepared with Itcl2.1 or later.  Tycho0.1.1 will not work
-with Itcl2.0, you must upgrade to Itcl2.1 or later.  See the <A
+files were prepared with Itcl2.1 or later.  Tycho0.2 will not work
+with Itcl2.0, you must upgrade to Itcl2.2 or later.  See the <A
 HREF="install.html">Installation guide</A> for more information.
 
 
@@ -55,7 +55,7 @@ Unable to load Tycho.tcl startup file: invalid command name "CircularList"
 </PRE>
 Probably the <CODE>$TYCHO/kernel/tclIndex</CODE>
 file is corrupt, try
-recreating it by cding to that directory and doing <CODE>make</CODE>.
+recreating it by <CODE>cd</CODE>ing to that directory and doing <CODE>make</CODE>.
 
 <H3><A NAME="file join error message">file join error message</A></H3>
 If you are starting up Tycho0.1.1 or later and you see a message about
@@ -70,7 +70,7 @@ If you are starting up Tycho0.1.1 or later and you see a message about
 
 then the problem is that you are running an
 Itcl2.0 <CODE>itkwish</CODE>, and Tycho0.2 requires Itcl2.2, which
-includes the tcl7.7 <CODE>file join</CODE> command.  The way to tell
+includes the Tcl7.6 <CODE>file join</CODE> command.  The way to tell
 is to start <CODE>itkwish</CODE> by hand and type
 
 <PRE>
@@ -80,9 +80,7 @@ you should get back <CODE>2.2</CODE> if you are running Itcl2.2.
 
 <H3><A NAME="Problems creating indices">Problems creating indices</A></H3>
 The <A HREF="../kernel/doc/usersGuides/BuilderDialogHelp.html">BuilderDialog</a>
-can be used to create Tycho indices.
-
-<p>Below are the steps to follow if the indices start failing on you:
+can be used to create Tycho indices, to create the indices by hand, follow the steps below.
 
 <OL>
 
@@ -101,7 +99,7 @@ make install
 and recreates the <CODE>doc/codeDoc/*</CODE>.  The
 <CODE>doc/codeDoc/*</CODE> files get created once by
 <CODE>tydoc</CODE>, then <CODE>$TYCHO/lib/idx/codeDoc.idx</CODE> gets
-created, then the tydoc files get recreated so that they can use
+created, then the <CODE>tydoc</CODE> files get recreated so that they can use
 <CODE>$TYCHO/lib/idx/codeDoc.idx</CODE>.
 
 <LI> If that does not work, and you are using a private tree that has
