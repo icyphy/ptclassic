@@ -627,11 +627,11 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
 	// Port is IN, so source is mySignal's port's firing.
 	VHDLPort* sourcePort = mySignal->getSource();
 	if(!sourcePort) {
-	  Error::abortRun(mySignal->name, "has NULL sourcePort");
+	  Error::abortRun(mySignal->name, ": has NULL sourcePort");
 	}
 	VHDLFiring* sourceFiring = sourcePort->getFire();
 	if(!sourceFiring) {
-	  Error::abortRun(sourcePort->name, "has NULL sourceFiring");
+	  Error::abortRun(sourcePort->name, ": has NULL sourceFiring");
 	}
 	dep->source = sourceFiring;
 
@@ -690,7 +690,7 @@ void StructTarget :: registerPortHole(VHDLPortHole* port, const char* dataName,
   // But for delayed values of wormhole inputs, do not create another port.
   if ((port->atBoundary()) && (tokenNum >= 0)) {
     // Signal an error: we won't support wormholes for now:
-    Error::error(*port, "is at a wormhole boundary: Not currently supported");
+    Error::error(*port, " is at a wormhole boundary: Not currently supported");
     // Port at wormhole boundary, so create a system port instead of a signal.
     //    systemPortList.put(ref, port->direction(), port->dataType());
   }
@@ -713,11 +713,11 @@ void StructTarget :: registerState(State* state, const char* varName,
   // Initialize the state and check for inconsistencies.
   if (pos >= 0) {
     if (!(state->isArray())) {
-      Error::error(*state, " reference of non-arrayState as an arrayState");
+      Error::error(*state, ": reference of non-arrayState as an arrayState");
     }
     else {
       if (pos >= state->size()) {
-	Error::error(*state, " attempt to reference arrayState past its size");
+	Error::error(*state, ": attempt to reference arrayState past its size");
       }
       else {
 	state->initialize();
@@ -729,7 +729,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 	  initVal << (*((IntArrayState *) state))[pos];
 	}
 	else {
-	  Error::error(*state, "is not a Float or Int ArrayState");
+	  Error::error(*state, " is not a Float or Int ArrayState");
 	}
       }
     }
@@ -911,7 +911,7 @@ void StructTarget :: registerState(State* state, const char* varName,
 void StructTarget :: connectSource(StringList initVal, VHDLSignal* initSignal)
 {
   if (!initSignal) {
-    Error::abortRun(*this, "connectSource passed a null initSignal");
+    Error::abortRun(*this, ": connectSource passed a null initSignal");
     return;
   }
 
@@ -949,15 +949,15 @@ void StructTarget :: connectMultiplexor(VHDLSignal* inSignal,
 					VHDLSignal* outSignal,
 					VHDLSignal* initSignal) {
   if (!inSignal) {
-    Error::abortRun(*this, "connectMultiplexor passed a null inSignal");
+    Error::abortRun(*this, ": connectMultiplexor passed a null inSignal");
     return;
   }
   if (!outSignal) {
-    Error::abortRun(*this, "connectMultiplexor passed a null outSignal");
+    Error::abortRun(*this, ": connectMultiplexor passed a null outSignal");
     return;
   }
   if (!initSignal) {
-    Error::abortRun(*this, "connectMultiplexor passed a null initSignal");
+    Error::abortRun(*this, ": connectMultiplexor passed a null initSignal");
     return;
   }
 
@@ -1028,15 +1028,15 @@ void StructTarget :: connectRegister(VHDLSignal* inSignal,
 				     VHDLSignal* outSignal,
 				     VHDLSignal* clkSignal) {
   if (!inSignal) {
-    Error::abortRun(*this, "connectRegister passed a null inSignal");
+    Error::abortRun(*this, ": connectRegister passed a null inSignal");
     return;
   }
   if (!outSignal) {
-    Error::abortRun(*this, "connectRegister passed a null outSignal");
+    Error::abortRun(*this, ": connectRegister passed a null outSignal");
     return;
   }
   if (!clkSignal) {
-    Error::abortRun(*this, "connectRegister passed a null clkSignal");
+    Error::abortRun(*this, ": connectRegister passed a null clkSignal");
     return;
   }
 
