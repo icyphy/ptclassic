@@ -91,10 +91,12 @@ libsproc.exp\
 libsprocstars.exp\
 libthor.exp\
 libthorstars.exp\
-libvhdlb.exp\
-libvhdlbstars.exp\
 libvhdlf.exp\
 libvhdlfstars.exp\
+libvhdlb.exp\
+libvhdlbstars.exp\
+libvhdl.exp\
+libvhdlstars.exp\
 libpigi.exp\
 libX11.exp
 
