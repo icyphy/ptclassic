@@ -4,7 +4,7 @@ defstar {
   version { $Id$ }
   author { Paul Haskell }
   copyright {
-Copyright (c) 1990-1995 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
@@ -73,7 +73,7 @@ input data is affected by loss.
       // Do DC image first.
       int i, j, k, blk;
 
-      LOG_NEW; float* outPtr = new float[fullFrame];
+      float* outPtr = new float[fullFrame];
       for(k = 0; k < fullFrame; k++) { outPtr[k] = 0.0; }
       
       i = 0;
@@ -121,11 +121,11 @@ input data is affected by loss.
       } // end while (indx < size)
       
       // Copy the data to return.
-      LOG_NEW; FloatMatrix& outImage = *(new FloatMatrix(height,width));
+      FloatMatrix& outImage = *(new FloatMatrix(height,width));
       for(i = 0; i < fullFrame; i++) {
 	outImage.entry(i) = outPtr[i];
       }
-      LOG_DEL; delete [] outPtr;
+      delete [] outPtr;
 
       return outImage;
     }
