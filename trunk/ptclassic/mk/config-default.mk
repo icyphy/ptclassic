@@ -104,6 +104,8 @@ ITCL_VERSION=itcl
 TCL_INCDIR=$(TCL_ROOT)/itcl/include
 
 TCL_VERSION=7.6i
+TK_VERSION=4.2i
+ITCL_VERSION=2.2
 
 # Combined -L and -l options to link with tcl library.
 TCL_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltcl$(TCL_VERSION)
@@ -113,11 +115,12 @@ TK_INCDIR=$(TCL_ROOT)/itk/include
 
 # Combined -L and -l options to link with tk library.  Can add
 # addtional -L and/or -l options to support tk extensions.
-TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk #-lXpm
+TK_LIBSPEC=-L$(TCL_ROOT)/itcl.$(PTARCH)/lib/itcl -ltk$(TK_VERSION) #-lXpm
 
 # Directory containing itcl include files
 ITCL_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
-ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litcl
+ITCL_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-litcl$(ITCL_VERSION)
 
 ITK_INCDIR=$(TCL_ROOT)/$(ITCL_VERSION)/include
 # Uncomment the next line for itcl-2.0b2
@@ -132,7 +135,8 @@ ITCL_LIBDIR=$(ROOT)/tcltk/$(ITCL_VERSION)/library
 # For shared libraries, if we use them
 TCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
 	-ltcl$(TCL_VERSION)
-TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -ltk
+TK_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl \
+	-ltk$(TK_VERSION)
 ITCL_SHARED_LIBSPEC=-L$(TCL_ROOT)/$(ITCL_VERSION).$(PTARCH)/lib/itcl -litcl
 
 #-----------------------------------------------------------------------
