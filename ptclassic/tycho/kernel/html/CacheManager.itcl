@@ -1,5 +1,3 @@
-# The cache management system to keep local/remote files synchronized.
-# 
 # @Author: Kevin Chang
 #
 # @Version: $Id$
@@ -59,13 +57,18 @@ ensemble ::tycho::cache {
 
 #######################################################################
 #### CacheManager
-# This class will keep an association between an URL and the
-# cache file name. It keeps the following information in the
-# index file: URL name, content type, size, and date.
-# This class is smart enough to keep concurrency between the
-# index file and the actual cache directory (ie. if a file exists
-# in the cache directory but not in index file, or if a file exists
-# in the index file but not in the cache directory).
+# CacheManager remembers the date, size, and content of the remote 
+# file, and synchronizes the remote/local file association even in
+# different sessions of running Tycho. The following information is 
+# kept in the index file (~/.Tycho/index.db): URL name, content type, 
+# size, and date.
+#
+# This class will continually append information to the index file in order
+# to keep concurrency between the index file and the actual cache 
+# directory. During start up, the index file and the cache directory
+# is cleaned up in either one of the cases:
+# 1) a file exists in the cache directory but not in index file, or 
+# 2) a file exists in the index file but not in the cache directory).
 # <br>
 # <br><b>Here is a mini-tutorial on using this class. Note that
 # <tt>ensemble ::tycho::cache (method_name)</tt> is used as a 
@@ -124,12 +127,12 @@ ensemble ::tycho::cache {
 # will always keep the last update). The following is a chart of
 # the types of operations that the methods deal with:<br><br>
 # <pre>
-# method name  compact index.db  sync memory  sync cache dir  time
-# -----------  ----------------  -----------  --------------  ----
+# method name  compact index.db  sync memory  sync cache dir  file access
+# -----------  ----------------  -----------  --------------  -----------
 # initialize   yes               yes          yes             O(2n)
-# exists       no                yes          yes             O(1)
+# exists       no                yes          yes             n/a
 # update       no (appends)      yes          yes             O(1)
-# others...    no                no           no              O(1)
+# others...    no                no           no              O(1)?
 #
 class ::tycho::CacheManager {
     inherit ::tycho::Uninstantiable
