@@ -10,7 +10,7 @@ Some code borrowed from Interpreter.cc, see this file for more info.
 */
 
 
-#include "Universe.h"
+#include "SDFUniverse.h"
 #include "InterpGalaxy.h"
 #include "KnownBlock.h"
 #include "Block.h"
@@ -200,7 +200,7 @@ KcInfo(char* name, char** info)
 	return (FALSE);
     }
     b->setBlock(name, NULL);
-    StringList sl = *b;  // sl holds string until it can be copied
+    StringList sl = b->printVerbose;  // sl holds string until it can be copied
     char* s = sl;
     *info = new char[strlen(s) + 1];
     strcpy(*info, s);
