@@ -64,9 +64,24 @@ public:
 
 static KnownListOwner knownListOwner;
 
+static const char msg[] =
+"No domains can be located by Ptolemy; something is wrong with your\n\
+installation of either Ptolemy (no domains were included, perhaps?) or\n\
+of your C++ compiler and linker (if global constructors aren't being called\n\
+properly, we also get this symptom).  Exiting...\n";
+
+// Function to abort program if there are no known domains.
+static void bombNoDomains() {
+	Error::error(msg);
+	exit(1);
+}
+		
 // KnownBlock methods
 
-const char* KnownBlock::domain()  { return domainNames[currentDomain];}
+const char* KnownBlock::domain()  {
+	if (numDomains == 0) bombNoDomains();
+	return domainNames[currentDomain];
+}
 
 // This function looks up a domain.  It returns -1 if not found and
 // we specified no adding.
@@ -163,6 +178,7 @@ KnownBlock::isDynamic(const char* type) {
 
 Block*
 KnownBlock::clone(const char* type) {
+	if (numDomains == 0) bombNoDomains();
 	const Block* p = find(type);
 	if (p) return p->clone();
 	StringList msg = "No star/galaxy named '";
