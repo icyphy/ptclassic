@@ -1,5 +1,5 @@
 defstar {
-	name {Cut}
+	name {Chop}
 	domain {C50}
 	desc {
 On each execution, this star reads a block of "nread" samples (default 128)
@@ -55,33 +55,45 @@ and the output consists of overlapping blocks input particles.
 		default {0}
 		desc { Position of output block relative to input block.}
 	}
+	// FIXME: use_past_inputs is not supported
 	setup {
+		if (int(nread) <= 0){
+			Error::abortRun(*this,
+					"The number of samples to read ",
+					"must be positive");
+			return;
+		}
+		if (int(nwrite) <= 0){
+			Error::abortRun(*this,
+					"The number of samples to write ",
+					"must be positive");
+			return;
+		}
 		if (int(nwrite) + int(offset) > int(nread)) {
 			Error::abortRun(*this,
 			   ": nwrite + offset cannot be greater than nread");
 			return;
 		}
-		input.setSDFParams(int(nread),int(nread)-int(offset)-1);
-		output.setSDFParams(int(nwrite),int(nwrite)-1);
+		input.setSDFParams(int(nread), int(nread)-int(offset)-1);
+		output.setSDFParams(int(nwrite), int(nwrite)-1);
 	}
-        codeblock(main) {
-        lar    	AR0,#$addr(input,offset)	;Startaddress input	=> AR0
+	codeblock(main) {
+	lar	AR0,#$addr(input,offset)	;Startaddress input	=> AR0
     	lar	AR7,#$addr(output)		;Address output		=> AR7
-	mar 	*,AR0				;
-	 }
-        codeblock(write) {
-        splk     #$val(nwrite)-1,BRCR		;number of loops into BRCR
-        rptb	label(loop)			;loop to label(write)
-	 lacc	*,15,AR7			;Accu = input(i)
-	 sach   *,1,AR0				;output(n) = input(i)
-label(loop)
-        }    
-	go {
-                addCode(main);
-		if(nwrite>0) addCode(write);
+	mar	*,AR0
 	}
-        execTime {
-                return 3+ 2*int(nwrite);
-        }
-
+	codeblock(write) {
+	splk	#$val(nwrite)-1,BRCR		;number of loops into BRCR
+	rptb	label(loop)			;loop to label(write)
+	lacc	*,15,AR7			;Accu = input(i)
+	sach	*,1,AR0				;output(n) = input(i)
+label(loop)
+	}    
+	go {
+		addCode(main);
+		if (int(nwrite) > 0) addCode(write);
+	}
+	execTime {
+		return 3 + 2*int(nwrite);
+	}
 }
