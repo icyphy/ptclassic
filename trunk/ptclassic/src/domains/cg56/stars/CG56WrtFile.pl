@@ -19,9 +19,6 @@ limitation of liability, and disclaimer of warranty provisions.
 <a name="file output"></a>
 Writes data to a file, for use with the Motorola DSP56000 simulator.
 	}
-	execTime {
-		return 2;
-	}
 	input {
 		name {input}
 		type {ANYTYPE}
@@ -30,7 +27,7 @@ Writes data to a file, for use with the Motorola DSP56000 simulator.
 		name { fileName }
 		type { STRING }
 		default { "" }
-		desc { 'Root' of filename that gets the data.}
+		desc { 'Root' of the filename that gets the data.}
 	}
 	state {
 		name { outVal}
@@ -38,21 +35,39 @@ Writes data to a file, for use with the Motorola DSP56000 simulator.
 		attributes { A_NONCONSTANT|A_NONSETTABLE|A_YMEM|A_NOINIT }
 		default { "0"}
 	}
-	// this codeblock produces code
 	codeblock (copy) {
 	move	$ref(input),a
 	move	a,$ref(outVal)
 	}
+	ccinclude { <Uniform.h>, <ACG.h> }
+	protected {
+		StringList logFileNameString;
+	}
+	// declare the static random-number generator in the .cc file
+	code {
+		extern ACG* gen;
+	}
+        setup {
+		if (fileName.null()) {
+                	Uniform random(0.0, 1.0, gen);
+			int uniqueId = int(32000.0 * (random)());
+			logFileNameString = "$starSymbol(";
+			logFileNameString << "cgwritefile)_" << uniqueId;
+		}
+		else {
+			logFileNameString = "$val(fileName)";
+		}
+        }
         initCode {
 		StringList logOut = "output $ref(outVal) ";
-		if (fileName.null()) 
-			logOut << "$starSymbol(cgwritefile) ";
-		else
-			logOut << "$val(fileName) ";
-		logOut << (strcmp(input.resolvedType(),INT)?"-RF":"-RD");
-		addCode(logOut,"simulatorCmds");
+		logOut << logFileNameString << " "
+		       << (strcmp(input.resolvedType(),INT) ? "-RF" : "-RD");
+		addCode(logOut, "simulatorCmds");
 	}
 	go {
 		addCode(copy);
+	}
+	execTime {
+		return 2;
 	}
 }
