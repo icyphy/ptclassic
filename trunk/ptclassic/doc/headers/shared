@@ -86,10 +86,24 @@ delim off
 .ip \ \ \ \ \ \ \ \ \ \- 0.75i
 ..
 
-.\" Macro for index entries
+.\" (Old) Macro for index entries.
 .de IE
 .tm index \\n(AS-\\n% \\$1
 ..
+
+.\" "Example" index entry (current same as all others for now)
+.de Ie
+.tm index \\n(AS-\\n% \\$1
+..
+
+.\" "Definition" index entry (current same as all others for now)
+.de Id
+.tm index \\n(AS-\\n% \\$1
+..
+
+.\" "Reference" index entry (current same as all others for now)
+.de Ir
+.tm index \\n(AS-\\n% \\$1
 
 .\" The following are included for partial compatibility
 .\" with some standard Unix manual pages
