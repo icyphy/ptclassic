@@ -281,7 +281,9 @@ if {[file exists [file join $TYCHO edit ptII]] \
     # from within pigi.  As of 12/98, 'package require java' would
     # crash pigi upon startup with a message like:
     #    Vem RPCfread(): read 0 bytes, connection has been broken.
-    package require tycho.edit.ptII
+    if [ catch {package require tycho.edit.ptII} errmsg] {
+	puts "Warning 'package require tycho.edit.ptII failed':\n$errmsg"
+    }
 }
 
 # These are obsolete and will be removed soon [johnr 10/13/98]
