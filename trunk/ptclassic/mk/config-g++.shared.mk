@@ -59,8 +59,7 @@ INC_LINK_FLAGS =	-shared $(SHARED_COMPILERDIR_FLAG)
 
 TCL_LIBSPEC =	$(TCL_SHARED_LIBSPEC)
 TK_LIBSPEC =	$(TK_SHARED_LIBSPEC)
-ITCL_LIBSPEC =	$(ITCL_SHARED_LIBSPEC)
-
+#ITCL_LIBSPEC =	$(ITCL_SHARED_LIBSPEC)
 # List of libraries to search, obviating the need to set LD_LIBRARY_PATH
 # See the ld man page for more information.  These path names must
 # be absolute pathnames, not relative pathnames.
