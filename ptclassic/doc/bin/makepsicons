@@ -15,7 +15,7 @@ foreach domain ($argv)
 	foreach star ( icons/* */icons/* )
 		if (-d $star) then 
 			echo "makepsicons: generate icon for $star"
-			#$PTOLEMY/doc/bin/psicon $star > $star.ps
+			$PTOLEMY/doc/bin/psicon $star > $star.ps
 		endif
 	end
 	echo "makepsicons: done with domain $domain"
