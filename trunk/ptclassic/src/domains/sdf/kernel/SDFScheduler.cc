@@ -492,3 +492,13 @@ void SDFScheduler::compileRun () {
 	tar.writeFiring(*star, 1);
     }
 }
+
+void SDFScheduler :: copySchedule(SDFSchedule& s) {
+	mySchedule.initialize();
+
+	SDFSchedIter nextStar(s);
+	SDFStar* star;
+	while ((star = nextStar++) != 0) {
+		mySchedule.append(*star);
+	}
+}
