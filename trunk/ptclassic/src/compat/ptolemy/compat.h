@@ -147,7 +147,7 @@ extern int sprintf();
 #ifndef PTAIX
 #ifndef PTALPHA
 #if !(defined(sun) && defined (__GNUC__)) && !defined(hppa) && !defined(__hppa__)
-#if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2) && 
+#if defined(sun) && !defined(__GNUC__) && defined(__cplusplus) && !defined(SOL2)
 /* SunOS4.1.3 Sun Cfront */	
 #else
 extern char *sprintf();
