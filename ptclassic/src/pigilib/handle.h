@@ -32,9 +32,11 @@ Version identification:
 $Id$
 */
 
+/* Define octObject data structure */
+#include "oct.h"
+
 /* functions to convert from octObjects to string "handles" */
 /* defined in "POct.cc" */
-
 extern int ptkHandle2OctObj ARGS((char *stringValue, octObject *objPtr));
 extern void ptkOctObj2Handle ARGS((octObject *objPtr, char *stringValue));
 
