@@ -46,19 +46,19 @@ ENHANCEMENTS, OR MODIFICATIONS.
 CGCTclTkTarget::CGCTclTkTarget(const char* name,const char* starclass,
                    const char* desc) : CGCMakefileTarget(name,starclass,desc) {
 	funcName.setInitValue("go");
-	StringList compOpts =
-	          "$(X11_INCSPEC) -I$(TK_INCDIR) -I$(TCL_INCDIR) "
-		  "-I$(TK_INCDIR) -I$(PTOLEMY)/src/domains/cgc/tcltk/lib "
-		  "-I$(PTOLEMY)/src/ptklib -I$(ROOT)/src/domains/cgc/rtlib";
+	//StringList compOpts = "$(TCLTK_CFLAGS)";
+
 	// There is no point in including X11 directories here,
 	// since they will be different for each platform.
-	compileOptions.setInitValue(hashstring(compOpts));
+	//compileOptions.setInitValue(hashstring(compOpts));
 
-	StringList linkOpts =
-		  "-L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib"
-		  "$(TK_LIBSPEC) $(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)";
+	//StringList linkOpts = "$(TCLTK_LOADLIBES)";
+	//linkOptions.setInitValue(hashstring(linkOpts));
 
-	linkOptions.setInitValue(hashstring(linkOpts));
+	// Set the default skeleton makefile
+	StringList skelMakefile = "$PTOLEMY/lib/cgc/TclTk_Target.mk";
+	skeletonMakefile.setInitValue(hashstring(skelMakefile));
+
 	loopingLevel.setInitValue("1");
 	addStream("mainLoopInit", &mainLoopInit);
 	addStream("mainLoopTerm", &mainLoopTerm);
