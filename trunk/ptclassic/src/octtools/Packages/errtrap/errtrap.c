@@ -222,8 +222,6 @@ char *message;
 
 void errIgnPush()
 {
-    void ignoreHandler();
-
     /* don't need to check for overflow, since errPushHandler will */
     errPushHandler(ignoreHandler);
     (void) memcpy((char *) jmpBufList[numJmpBufs++], (char *) errJmpBuf,
