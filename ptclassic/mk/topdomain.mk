@@ -97,25 +97,36 @@ doc/stars/starHTML.idx: $(wildcard doc/stars/*.htm)
 		\"\{General Ptolemy $(notdir $(ME)) stars\}\"" | itclsh)
 
 
-STARIDXFILES := $(foreach file,$(SUBDOMAINDIRS),$(file)/doc/stars/starHTML.idx)
+starHTML.idx: subdomainstarHTML doc/stars/starHTML.idx
+	@echo "Updating $@:"
+	rm -f $@
+	@if [ "$(SUBDOMAINDIRS)" != "" ]; then \
+		subdirs="$(addsuffix /doc/stars/starHTML.idx, $(SUBDOMAINDIRS))"; \
+		echo "We have subdomain directories, doing the merge.";\
+		echo "set TYCHO $(PTOLEMY)/tycho; \
+			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+			tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
+				$$subdirs \
+				doc/stars/starHTML.idx" | itclsh; \
+	else \
+		echo "No subdomain directories, doing the merge."; \
+		echo "set TYCHO $(PTOLEMY)/tycho; \
+			source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
+			tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
+				doc/stars/starHTML.idx" | itclsh; \
+	fi
 
-starHTML.idx: doc/stars/starHTML.idx
+SUBDOMAINDIRS = . 
+subdomainstarHTML:
 	@for x in $(SUBDOMAINDIRS); do \
 	    if [ -w $$x/ ] ; then \
 		( cd $$x ; \
-		  echo making $@ in domains/$$x ; \
-		  $(MAKE) -f make.template $(MFLAGS) $(MAKEVARS) \
-			VPATH=../../../src/domains/$$x \
+		  echo making doc/stars/starHTML.idx in domains/$$x ; \
+		  $(MAKE) $(MFLAGS) $(MAKEVARS) \
+			VPATH=../../../src/domains/$$x 	\
 			doc/stars/starHTML.idx ; \
 		) \
 	    fi ; \
 	done
-	@echo "Updating $@:"
-	rm -f $@
-	echo "set TYCHO $(PTOLEMY)/tycho; \
-		source $(PTOLEMY)/tycho/lib/idx/tychoMakeIndex.tcl; \
-		tychoMergeIndices \"All Ptolemy $(ME) stars\" $@ \
-			$(addsuffix /doc/stars/starHTML.idx, \
-					$(SUBDOMAINDIRS)) \
-			doc/stars/starHTML.idx" | itclsh
+
 
