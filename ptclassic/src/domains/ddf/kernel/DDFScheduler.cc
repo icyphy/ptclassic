@@ -31,8 +31,6 @@ void fireSource(Star&, int);
 		Main DDF scheduler routines
 *******************************************************************/
 
-int DDFScheduler :: amITimed() {return FALSE ;}
-
 int isSource(Star& s) {
 	for (int i = s.numberPorts(); i > 0; i--) {
 		PortHole& p = s.nextPort();
