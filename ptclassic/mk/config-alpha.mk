@@ -1,5 +1,4 @@
-#
-# Config file to build on an Alpha AXP running DEC OSF/1, V3.2
+# Config file to build on an Alpha AXP running DEC OSF/1, V3.2 with egcs
 # 
 # Derived from config file for mips processor (DECstation) running Ultrix 4.x
 #
@@ -37,8 +36,8 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-# Get the g++ definitions; we override some below.
-include $(ROOT)/mk/config-g++.mk
+# Get the egcs definitions; we override some below.
+include $(ROOT)/mk/config-egcs.mk
 
 # Get the g++ definitions for shared libraries; we override some below.
 # Comment the next line out if you don't want shared libraries.
@@ -86,7 +85,7 @@ OCT_CC =	gcc -fwritable-strings
 
 OPTIMIZER =	-O2
 # -pipe might not work under DEC Alpha 'as'
-LOCALCCFLAGS =	-g
+LOCALCCFLAGS =	-g -DPT_USE_RAND
 WARNINGS =	-Wall -Wcast-qual
 GPPFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 			$(ARCHFLAGS) $(LOCALCCFLAGS) $(USERFLAGS)
@@ -101,7 +100,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 CSYSLIBS = 	-lots -lm
 
 # system libraries (libraries from the environment)
-SYSLIBS =	-lg++ $(CSYSLIBS)
+#SYSLIBS =	-lg++ $(CSYSLIBS)
 
 #
 # Variables for the linker
