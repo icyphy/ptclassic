@@ -13,13 +13,6 @@ and send the difference to the output.
 
 	hinclude { "GrayImage.h", "Error.h" }
 
-code {
-// This star code uses "wraparound" to represent negative values
-// using unsigned char's.  Suppose unsigned char a = 3 and unsigned
-// char b = 4.  Then unsigned char (a-b) == 255.  BUT, (a-b) + b == 3,
-// which is what we need.  Note that the quant() function does not
-// do thresholding for negative floating-point values.
-}
 
 //////// I/O AND STATES.
 	input {
@@ -61,13 +54,23 @@ code {
 		}
 	} // end getInput()
 
-	method { // Don't get rid of negative values--use "wraparound".
+	method {
+
+// This star code uses "wraparound" to represent negative values
+// using unsigned char's.  Suppose unsigned char a = 3 and unsigned
+// char b = 4.  Then unsigned char (a-b) == 255.  BUT, (a-b) + b == 3,
+// which is what we need.  Note that the quant() function does not
+// do thresholding for negative floating-point values.
+// The '128' is so this star's output can be compressed with the DCT.
+// Without the '128', the values +1 and -1 are represented as 1 and 255.
+// The DCT can't compress very well then.
+
 		name { quant }
 		access { protected }
 		type { "unsigned char" }
 		arglist { "(float val)" }
 		code {
-			return((unsigned char) (val + 0.5));
+			return((unsigned char) (val + 128.5));
 		}
 	}
 

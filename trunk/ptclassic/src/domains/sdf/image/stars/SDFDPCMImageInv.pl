@@ -51,7 +51,7 @@ for errors in the transmission of the difference frames.
 		access { protected }
 		arglist { "(float val)" }
 		code {
-			return ((unsigned char) (val + 0.5));
+			return ((unsigned char) (val - 127.5));
 		}
 	}
 

@@ -64,7 +64,7 @@ result to the output.
 		type { "unsigned char" }
 		access { protected }
 		arglist { "(const float in)" }
-		code { return((unsigned char) (in + 0.5)); }
+		code { return((unsigned char) (in - 127.5)); }
 	}
 
 
