@@ -133,10 +133,10 @@ global ::ptolemyfeature
 # ptolemyfeature(ptolemy) is set to 1 if ptolemy is present
 set ptolemyfeature(ptolemy) 0
 
-# ptolemyfeature(ptolemyinsalled) is set if the file
-# $ptolemy/copyright exists.  This is not the same as having
-# ptolemy present, which means the executing binary can execute
-# ptolemy commands.
+# ptolemyfeature(ptolemyinstalled) is set if the file
+# $ptolemy/copyright exists.
+# This is not the same as having ptolemy present,
+# which means the executing binary can execute ptolemy commands.
 set ptolemyfeature(ptolemyinstalled) \
         [file exists [file join $ptolemy copyright]]
 
@@ -169,6 +169,15 @@ if {[uplevel #0 info commands ptkOpenFacet] != {} && \
 } {
     set ptolemyfeature(octtools) 0
 }
+
+# Check to see if there is a configuration problem
+if {$ptolemyfeature(ptolemy) == 1 && $ptolemyfeature(ptolemyinstalled) == 0} {
+    puts stderr "Warning: This binary is ptolemy enabled, but we failed\nto\
+	    detect a complete ptolemy installation because\n\
+	    `[file join $ptolemy copyright]' is missing."
+    set ptolemyfeature(ptolemyinstalled) 1
+}
+
 
 global ::tychokernel
 set tychokernel [file join $tycho kernel]
