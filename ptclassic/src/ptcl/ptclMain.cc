@@ -79,17 +79,20 @@ extern char *		strcpy _ANSI_ARGS_((char *dst, CONST char *src));
 };
 #endif
 
-static Tcl_Interp *interp;	/* Interpreter for application. */
-static Tcl_DString command;	/* Used to buffer incomplete commands being
-				 * read from stdin. */
-char *tcl_RcFileName = NULL;	/* Name of a user-specific startup script
-				 * to source if the application is being run
-				 * interactively (e.g. "~/.tclshrc").  Set
-				 * by Tcl_AppInit.  NULL means don't source
-				 * anything ever. */
+/* Interpreter for application. */
+static Tcl_Interp *interp;
+
+/* Used to buffer incomplete commands being read from stdin. */
+static Tcl_DString command;
+
+/*
+ * Name of a user-specific startup script to source if the application
+ * is being run interactively (e.g. "~/.tclshrc").  Set by Tcl_AppInit.
+ * NULL means don't source anything ever.
+ */
+char *tcl_RcFileName = "~/.ptclrc";
 
 /* This defines the default domain for ptcl. */
-
 char DEFAULT_DOMAIN[] = "SDF";
 
 /*
@@ -185,29 +188,6 @@ main(int argc, char **argv) {
 	sprintf(buffer, "exit %d", exitCode);
 	Tcl_Eval(interp, buffer);
 	return 1;
-    }
-
-    /*
-     * We're running interactively.  Source a user-specific startup
-     * file if Tcl_AppInit specified one and if the file exists.
-     */
-
-    if (tcl_RcFileName != NULL) {
-	Tcl_DString buffer;
-	char *fullName;
-
-	fullName = Tcl_TildeSubst(interp, tcl_RcFileName, &buffer);
-	if (fullName == NULL) {
-	    fprintf(stderr, "%s\n", interp->result);
-	} else {
-	    if (access(fullName, R_OK) == 0) {
-		code = Tcl_EvalFile(interp, fullName);
-		if (code != TCL_OK) {
-		    fprintf(stderr, "%s\n", interp->result);
-		}
-	    }
-	}
-	Tcl_DStringFree(&buffer);
     }
 
     /*
