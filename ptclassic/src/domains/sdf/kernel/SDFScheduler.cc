@@ -6,15 +6,7 @@ $Id$
  Copyright (c) 1990 The Regents of the University of California.
                        All Rights Reserved.
 
- Programmer:  E. A. Lee and D. G. Messerschmitt
- Revision by Shuvra.
- Date of creation: 1/17/90
- Date of revision: 5/7/91
- Revisions: 5/29/90 -- renamed to SDFScheduler.cc from Scheduler.cc
-		Other schedulers will go in separate files.
-
-	    6/20/90 -- setup() now calls Galaxy::initialize rather
-	    than calling initialize() and start() for all stars.
+ Programmer:  E. A. Lee, D. G. Messerschmitt, J. Buck, S. Bhattacharyya
 
  SDF Scheduler methods
 
@@ -217,7 +209,7 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 
 	do {
                 passValue = 2;
-                numDeferredBlocks = 0;
+		deferredStar = 0;
 		int numAddedThisPass;
 
 		numAddedThisPass = 0;
@@ -229,25 +221,23 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
                         do {
                                 runResult = addIfWeCan(atom,deferredFiring);
 				if (runResult == 0) numAddedThisPass++;
-                        } while (repeatedFiring && (runResult == 0));
+                        } while (runResult == 0);
                 }
 
                 // If the deferred firing option is set, we must now schedule
-                // the deferred blocks.  We permit them to be "re-deferred",
-		// unless no stars at all were added in the most recent pass.
+                // the deferred star (if any).  We permit it to be
+		// "re-deferred", unless no stars at all were added in the
+		// most recent pass.
 
 		// use of "deferAgain" is intended to produce the minimum
 		// buffer sizes between stars.
 
-		int deferAgain = deferredFiring;
-		if (numAddedThisPass == 0) deferAgain = 0;
+		if (deferredStar) {
+			int deferAgain = deferredFiring;
+			if (numAddedThisPass == 0) deferAgain = 0;
 
-                for (int i=0; i<numDeferredBlocks; i++) {
-                        SDFStar& atom = (SDFStar&)deferredBlocks[i]->asStar();
-                        if (addIfWeCan (atom,deferAgain) == 0)
-				deferAgain = deferredFiring;
-                }
-
+			addIfWeCan(*deferredStar,deferAgain);
+		}
 	} while (passValue == 0);
 	// END OF MAIN LOOP
 
@@ -257,16 +247,19 @@ int SDFScheduler::computeSchedule(Galaxy& galaxy)
 
 // function to report deadlock.
 void SDFScheduler::reportDeadlock (GalStarIter& next) {
+	next.reset();
+	SDFStar *s;
         if (Error::canMark()) {
-                next.reset();
-                SDFStar *s;
                 while ((s = (SDFStar*)next++) != 0)
                         if (notRunnable(*s) == 1) Error::mark(*s);
                 Error::abortRun ("DEADLOCK: the indicated stars cannot be run");
         }
-        else
-                Error::abortRun (*dead,
-                                 ": DEADLOCK in a loop containing this block");
+        else {
+		Error::abortRun ("DEADLOCK: the following stars cannot be run");
+		while ((s = (SDFStar*)next++) != 0)
+			if (notRunnable(*s) == 1)
+				Error::message(*s, "is deadlocked");
+	}
         invalid = TRUE;
 }
 
@@ -279,9 +272,8 @@ int SDFScheduler::addIfWeCan (SDFStar& star, int defer) {
 		mySchedule.append(star);
 		passValue = 0;
 	}
-	else if (runRes == 1 && passValue != 0 && numDeferredBlocks == 0) {
+	else if (runRes == 1 && passValue != 0 && deferredStar == 0) {
 		passValue = 1;
-		dead = &star;
 	}
 	return runRes;
 }
@@ -348,6 +340,11 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	return TRUE;
 }
 
+int wormEdge(PortHole& p) {
+	PortHole* f = p.far();
+	if (!f) return TRUE;
+	else return (p.isItInput() == f->isItInput());
+}
 
 	////////////////////////////
 	// reptConnectedSubgraph
@@ -363,14 +360,9 @@ int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 	BlockPortIter nextp(block);
 	for(int i = block.numberPorts(); i>0; i--) {
 		PortHole& nearPort = *nextp++;
-		if (nearPort.far() == NULL) {
-			Error::abortRun(nearPort, " is not connected!");
-			invalid = TRUE;
-			return FALSE;
-		} else if (nearPort.isItInput() == nearPort.far()->isItInput())
+		if (wormEdge(nearPort))
 			// if the port is at the boundary of the wormhole.
 			continue;
-
 		PortHole& farPort = *(nearPort.far());
 		// recursively call this function on the farSideBlock,
 		// having determined that it has not previously been done.
@@ -476,8 +468,7 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 		port = nextp++;
 
 		// On the wormhole boundary, skip.
-		if (port->isItInput() == port->far()->isItInput())
-			continue;
+		if (wormEdge(*port)) continue;
 
 		if( port->isItInput() )
 			// OK to update size for input PortHole
@@ -495,18 +486,13 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 	return 0;
 }
 
-void SDFScheduler :: defer (Block* b) {
-	// If possible, store a pointer to the block
-	// (If the list of deferredBlocks is full, then
-	// the block effectively gets deferred until a
-	// future pass.  This is harmless).  But at least
-	// one deferred block must go on the list, or the
-	// scheduler can deadlock.
+void SDFScheduler :: defer (SDFStar* b) {
+	// if no star has been deferred yet, defer this one.
+	// if there already is a deferred star, this star effectively
+	// is deferred until a future pass.  This is harmless.
 
-	if(numDeferredBlocks < MAX_NUM_DEFERRED_BLOCKS) {
-		deferredBlocks[numDeferredBlocks] = b;
-		numDeferredBlocks += 1;
-	}
+	if(!deferredStar)
+		deferredStar = b;
 }
 
 	///////////////////////////
@@ -527,14 +513,8 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 	for(i = atom.numberPorts(); i>0; i--) {
 		// Look at the next port in the list
 		port = nextp++;
-		if (port->far() == NULL) {
-			invalid = TRUE;
-			return 0;
-		}
-
 		// cannot be deferred if on the boundary of wormhole.
-		if ((port->isItOutput()) && (port->isItOutput() == port->far()->isItOutput()))
-			return FALSE;
+		if (wormEdge(*port)) return FALSE;
 
 		SDFStar& dest = (SDFStar&) port->far()->parent()->asStar();
 
@@ -545,7 +525,7 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 			continue;
 		
 		// It is runnable, but can be postponed.
-		defer(port->parent());
+		defer((SDFStar*)port->parent());
 
 		// Give up on this star -- it has been deferred
 		return TRUE;
@@ -598,29 +578,22 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 
 int SDFScheduler :: notRunnable (SDFStar& atom) {
 
-	int i, v = 0;
 	SDFStarPortIter nextp(atom);
+	SDFPortHole *p;
 	// Check to see whether the requisite repetitions have been met.
 	if (atom.repetitions.numerator <= atom.noTimes)
-		v = 2;
+		return 2;
 
 	// Step through all the input ports, checking to see whether
 	// there is enough data on the inputs
-	else for(i = atom.numberPorts(); i>0; i--) {
-
-		// Look at the next port in the list
-		SDFPortHole& port = *nextp++;
-
-		if(port.isItInput() && port.far()->isItOutput()) {
-		   // If not in the interface of Wormhole
-		   if(port.numTokens() < port.numberTokens){ 
+	while ((p = nextp++) != 0) {
+		// worm edges always have enough data
+		if (wormEdge(*p)) continue;
+		if (p->isItInput() && p->numTokens() < p->numberTokens)
 			// not enough data
-			v = 1;
-			break;
-		   }
-		}
+			return 1;
 	}
-	return v;
+	return 0;
 }
 
 const char* SDFScheduler::domain() const { return SDFdomainName;}
@@ -634,7 +607,6 @@ StringList SDFScheduler::displaySchedule() {
 // constructor -- initialize members
 
 SDFScheduler::SDFScheduler () {
-	repeatedFiring = TRUE;
 	deferredFiring = TRUE;
 	numItersSoFar = 0;
 	numIters = 1;
