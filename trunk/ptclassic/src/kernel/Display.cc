@@ -83,17 +83,21 @@ dataToPlot(0)
 // close all files, and remove any files that might be open
 void XGraph :: zapFiles () {
 	for (int i = 0; i<ng; i++) {
+	    if (strm) {
 		if (strm[i]) {
 			fclose (strm[i]);
 		}
+		LOG_DEL; delete [] strm;
+	    }
+	    if (tmpFileNames) {
 		char *name = tmpFileNames[i];
 		if (name) {
 			unlink(name);
 			LOG_DEL; delete [] name;
 		}
+		LOG_DEL; delete [] tmpFileNames;
+	    }
 	}
-	LOG_DEL; delete [] strm;
-	LOG_DEL; delete [] tmpFileNames;
 	LOG_DEL; delete [] count;
 	ng = 0;
 	dataToPlot = FALSE;
