@@ -124,10 +124,9 @@ body ::tycho::EditItcl::constructor {args} {
     menubar add "Generate doc" Special -underline 0 \
 	    -command "$this gendocBuffer"
 
-    menubar add "Generate class diagram" Special -underline 0 \
-	    -command {
-	::tycho::view ItclClassDiagram [list -file classList.icl]
-    }
+    menubar add "Generate class diagram" Special -underline 9  \
+	    -command "::tycho::view ItclClassList \
+	    {-file classList.icl} Displayer {-toolbar 1}"
 }
 
 ###################################################################
