@@ -60,6 +60,15 @@ class ::tycho::EditPtcl {
     # Return a list of domains that have stars in this universe 
     method domains {}
 
+    # Generate a universe from the current universe
+    method generateUniverse {}
+
+    # Return the default implementation.
+    method getPLFileName {}
+
+    # Return a list of stars, organized as {{instance {domain star}} ...}
+    method getStarInfoList {}
+
     # Open a help window.
     method help {}
 
@@ -69,11 +78,26 @@ class ::tycho::EditPtcl {
     # Color the Tcl code in a region.
     method parseNow {start stop} {}
 
+    # Register the star-implementation pair.
+    method registerImplementation {starinfo impl}
+
     # Open a retargetting window.
     method retarget {}
 
     # Evaluate the file and then run it for 'iterations', and call wrapup
     method run {iterations}
+
+    # Save the list of implementations
+    method saveImplementation {}
+
+    # Select an implementation for the star.
+    method selectImplementation {{default {}}}
+
+    # Select a star to specify the implementation.
+    method selectStar {stars {default {}}}
+
+    # Specify implementations for stars.
+    method setImplementation {}
 
     # Color the Tcl code in a region.
     # Return a list of the stars in the file, organized as { {DOMAIN star} ...}
@@ -84,6 +108,9 @@ class ::tycho::EditPtcl {
 
     # Return the universe name
     method universeName {}
+
+    # Update the list of star-implementation pairs
+    method updateImplementationList {}
 
     ####################################################################
     ####                    protected methods                       ####
@@ -103,14 +130,32 @@ class ::tycho::EditPtcl {
     ####################################################################
     ####                     private methods                        ####
 
+    # Return the list of candidate implementations.
+    private method getCandidates {starinfo}
+
+    # Return the implementation.
+    private method getImplementation {starinfo}
+
     # Initialize the menu bar.
     private method initializeMenubar {menubar}
 
     ####################################################################
     ####                     private variables                      ####
 
+    # List of the star-implementation pairs.
+    private variable implementationList {}
+
+    # New list of the star-implementation pairs.
+    private variable implementationListNew {}
+
+    # Name of query to set implementations.
+    private variable queryName {}
+
     # Name of the universe defined in this file
     private variable univName {}
+
+    # Constant string for the unspecified implementation.
+    private common notSpecified "Not Specified"
 }
 
 ###################################################################
@@ -164,6 +209,120 @@ body ::tycho::EditPtcl::domains {} {
         }
     }
     return $domainList
+}
+
+#####################################################################
+#### generateUniverse
+# Generate a universe from the current universe by replacing stars with
+# specified implementation.
+# 
+body ::tycho::EditPtcl::generateUniverse {} {
+    set generatedFile "/tmp/generateduniverse.pt"
+    set fid [open $generatedFile w]
+    array set implementation $implementationList
+
+    set text $itk_component(text)
+
+    set start 0.0
+    set stop end
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set id "\[^ \t\]*"
+    set starregexp "^$spaces*(star)$spaces+($id)$spaces+($id)"
+
+    while {[set newind [$text search -count len -regexp $starregexp \
+	    $ind $stop]] != {}} {
+
+	set prevlines [$text get $ind $newind]
+	puts -nonewline $fid $prevlines
+
+	set endc [$text index "$newind + $len chars"]
+	set line [$text get $newind $endc]
+	
+	regexp $starregexp $line match star starInstance starType
+	if [info exists implementation($starInstance)] {
+	    set starname [lindex $implementation($starInstance) 1]
+	    regsub "(\[ \t\])$starType*\$" $line \
+		    "\\1$starname" line
+	}
+	puts -nonewline $fid $line
+
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    set restlines [$text get $ind end]
+    puts -nonewline $fid $restlines
+    close $fid
+
+    ::tycho::view EditPtcl -file $generatedFile
+}
+
+#####################################################################
+#### getPLFileName
+# Return the implementation of the star which is on the "sel_impl" query.
+# In case that the implementation has not been specified yet, return
+# the default instead.
+# The argument <code>starinfo</code> has the form of
+# {instance_name {domain_name star_name}}.
+#
+body ::tycho::EditPtcl::getPLFileName {} {
+    set def_impl [$queryName get sel_impl]
+    if {$def_impl == $notSpecified} {
+	set starinfo [$queryName get sel_star]
+	set candidateList [getCandidates $starinfo]
+	set def_impl [lindex $candidateList 0]
+    }
+    return [eval ::tycho::EditPtlang::getPtlangFile $def_impl]
+}
+
+#####################################################################
+#### getStarInfoList
+# Return a list of the stars in the file, organized as 
+# { {instance_name {domain star}} ...}
+body ::tycho::EditPtcl::getStarInfoList {} {
+    set text $itk_component(text)
+
+    if [catch {domain} currentDomain] {
+        # We don't have ptcl commands, so we punt
+        set currentDomain SDF
+    }
+
+    set start 0.0
+    set stop end
+    set results {}
+    set ind $start
+    set endc $stop
+    set spaces "\[ \t\]"
+    set lineregexp "^$spaces*(domain|star|newuniverse).*"
+    set procregexp "^$spaces*(domain|star)$spaces+(\[^ \t\]*)"
+    set starregexp "^$spaces*(star)$spaces+(\[^ \t\]*)$spaces+(\[^ \t\]*)"
+    while {[set ind [$text search -count len -regexp $lineregexp \
+	    $ind $stop]] != {}} {
+
+	set endc [$text index "$ind + $len chars"]
+	set line [$text get $ind $endc]
+	
+	# Procedures
+	if [regexp $procregexp $line match domainOrStar domain] {
+            if { $domainOrStar == "domain" } {
+                set currentDomain $domain
+            } else {
+                if [regexp $starregexp $line \
+                        match star starInstance starType] {
+                    set domainStarList [list $currentDomain $starType]
+		    lappend results [list $starInstance $domainStarList]
+                }
+            }
+
+	}
+
+        set ind $endc
+	# The following appears to be needed to prevent infinite loops.
+	if [$text compare $ind >= end] {break}
+    }
+    return $results
 }
 
 ###################################################################
@@ -264,6 +423,130 @@ body ::tycho::EditPtcl::parseNow {start stop} {
     # Set the visual characteristics of the tagged text
     $text tag configure procname -foreground \
 	    [option get $itk_component(hull) procColor EditPtcl]
+}
+
+#####################################################################
+#### registerImplementation
+# Register the star-implementation pair. The list is organized as
+# {instance1 implementation1 instance2 ...} so that it could be
+# processed further easily with the array command.
+#
+body ::tycho::EditPtcl::registerImplementation {starinfo impl} {
+    array set implementation $implementationListNew
+    set instance [lindex $starinfo 0]
+    set implementation($instance) $impl
+    set implementationListNew {}
+    foreach instance [array names implementation] {
+	lappend implementationListNew $instance
+	lappend implementationListNew $implementation($instance)
+    }
+}
+
+#####################################################################
+#### saveImplementation
+# Save the list of implementations, which are specified for each star,
+# under the name of .impl.
+#
+body ::tycho::EditPtcl::saveImplementation {} {
+    set implfile [::tycho::expandPath [string range $itk_option(-file) 0 \
+	    [expr [string last .pt $itk_option(-file)] - 1]].impl]
+    set fid [open $implfile w]
+    puts $fid $implementationList
+    close $fid
+}
+
+#####################################################################
+#### selectImplementation
+# Make a list broswer which lists up implementations. When the OK button
+# is hit, record the star-implementation pair.
+#
+body ::tycho::EditPtcl::selectImplementation {{default {}}} {
+    set nm [::tycho::autoName .lb]
+    ::tycho::ListBrowser $nm -default $default -entrywidth 0 -width 0
+    $nm appendItems [getCandidates [$queryName get sel_star]]
+    $nm centerOnScreen
+
+    set impl [::tycho::Dialog::wait $nm]
+    
+    if { $impl == $notSpecified } { 
+	set impl $default 
+    } else {
+	registerImplementation [$queryName get sel_star] $impl
+    }
+
+    return $impl
+}
+
+#####################################################################
+#### selectStar
+# Make a list broswer which lists up stars.
+#
+body ::tycho::EditPtcl::selectStar {stars {default {}}} {
+    set nm [::tycho::autoName .lb]
+    ::tycho::ListBrowser $nm -default $default
+    $nm appendItems $stars
+    $nm centerOnScreen
+
+    set starinfo [::tycho::Dialog::wait $nm]
+
+    if { $starinfo == "" } { 
+	set starinfo $default 
+    } else {
+	# Update the default implementation.
+	set def_impl [getImplementation $starinfo]
+	$queryName insert sel_impl $def_impl
+    }
+    
+    return $starinfo
+}
+
+#####################################################################
+#### setImplementation
+# Specify implementations for stars, which will substitute when a
+# fixed-point universe is generated.
+body ::tycho::EditPtcl::setImplementation {} {
+    # Initialize the implementation list from the init file, if exists
+    set implfile [::tycho::expandPath [string range $itk_option(-file) 0 \
+	    [expr [string last .pl $itk_option(-file)] - 1]].impl]
+    if [file exists $implfile] {
+	set fid [open $implfile r]
+	set implementationList [read -nonewline $fid]
+	close $fid
+    }
+
+    # Prepare a working list of star-implementation pairs.
+    set implementationListNew $implementationList
+
+    # "starinfo" has the form of "instance {domain star}".
+    set starinfolist [getStarInfoList]
+    set def_starinfo [lindex $starinfolist 0]
+    set def_impl [getImplementation $def_starinfo]
+
+    set queryName [::tycho::autoName .query]
+    set query {}
+    lappend query [list \
+	    mediated sel_star {Star Name:} $def_starinfo \
+	    [list $this selectStar $starinfolist]]
+    lappend query [list \
+	    mediated sel_impl {Implementation:} $def_impl \
+	    "$this selectImplementation"]    
+    lappend query [list \
+	    addButton open -text "Open Ptlang File" \
+	    -command "::tycho::view EditPtlang -file \
+	                  \[$this getPLFileName\]"]
+    lappend query [list \
+	    addButton apply -text "Apply" \
+	    -command "$this updateImplementationList"]
+
+    ::tycho::MatrixQuery $queryName \
+	    -matrixqueries "$query" \
+	    -text "Select Implementation" \
+	    -okcommand "$this updateImplementationList; \
+	                $this saveImplementation" \
+	    -geometry +0+0 \
+	    -entrywidth 60
+
+    wm deiconify $queryName
 }
 
 #####################################################################
@@ -399,6 +682,7 @@ body ::tycho::EditPtcl::tagLinks {} {
 	}
     }
 }
+
 #####################################################################
 #### universeName
 # Return the name of the universe
@@ -406,6 +690,13 @@ body ::tycho::EditPtcl::universeName {} {
     # The stars method will also find the universe name for us.
     stars
     return $univName
+}
+
+#####################################################################
+#### updateImplementationList
+# Update the list of star-implementation pairs.
+body ::tycho::EditPtcl::updateImplementationList {} {
+    set implementationList $implementationListNew
 }
 
 ####################################################################
@@ -443,6 +734,46 @@ body ::tycho::EditPtcl::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 #########################################################################
 #########################################################################
 ####                     private methods                             ####
+
+#####################################################################
+#### getCandidates
+# Return the list of candidate implementations of the star.
+# The argument <code>starinfo</code> has the form of
+# {instance_name {domain_name star_name}}.
+#
+body ::tycho::EditPtcl::getCandidates {starinfo} {
+    set domainstarpair [lindex $starinfo 1]
+    set domain [lindex $domainstarpair 0]
+    set starname [lindex $domainstarpair 1]*
+    set newdomainstarpair [lreplace $domainstarpair 1 1 $starname]
+    set implist [eval ::tycho::EditPtlang::getPtlangFile $newdomainstarpair]
+    set candidates {}
+    foreach impl $implist {
+	set begin [expr [string last $domain $impl] + [string length $domain]]
+	set end [expr [string last .pl $impl] - 1]
+	set starname [string range $impl $begin $end]
+	lappend candidates [list $domain $starname]
+    }
+    return $candidates
+}
+
+#####################################################################
+#### getImplementation
+# Return the implementation of the star. If the implementation has not
+# been specified, return "Not Specified".
+# The argument <code>starinfo</code> has the form of
+# {instance_name {domain_name star_name}}.
+#
+body ::tycho::EditPtcl::getImplementation {starinfo} {
+    array set implementation $implementationListNew
+    set instance [lindex $starinfo 0]
+    if [info exists implementation($instance)] {
+	set impl $implementation($instance)
+    } else {
+	set impl $notSpecified
+    }
+    return $impl
+}
 
 #####################################################################
 #### initializeMenubar
@@ -503,4 +834,16 @@ body ::tycho::EditPtcl::initializeMenubar {menubar} {
 	    -label "Ptolemy stars" -underline 0 \
             -command "::tycho::File::openContext \
             [file join $PTOLEMY src domains starHTML.idx.fst]"
+
+    # Menu for fixed-point simulation
+    $menubar separator specialsep4 special
+    $menubar command setimplementation special \
+            -label "Set Implementation" -underline 4 \
+            -command "$this setImplementation"
+
+    $menubar command generateuniverse special \
+            -label "Generate Universe" -underline 9 \
+            -command "$this generateUniverse"
 }
+
+
