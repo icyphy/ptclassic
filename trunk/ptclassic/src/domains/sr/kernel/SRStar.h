@@ -68,7 +68,7 @@ public:
 
   // Inter-instant time advancement
   // Default is to do nothing; derived non-strict stars should override this
-  virtual int tick();
+  virtual void tick();
 
   // Beginning-of-instant initialization
   virtual void initializeInstant();
