@@ -47,6 +47,9 @@ public:
 	// pair them
 	virtual void pairSendReceive(SDFStar* s, SDFStar* r);
 
+	virtual SDFStar* createSpread();
+	virtual SDFStar* createCollect();
+
 	// set current child.
 	void setCurChild(int i) { curChild = i; }
 
