@@ -140,11 +140,11 @@ SYSLIBS =	-lg++ -lstdc++ $(CSYSLIBS)
 # We could use X11_DIR here, but the rules to make tcltk do not pass it down.
 X11_INCSPEC =	-I/usr/openwin/include
 # Statically link X11 so we can ship something that works
-X11_LIBSPEC =	-Wl,-Bstatic -L/usr/openwin/lib -lX11 $(LD_DYNAMIC)
+X11_LIBSPEC =	-Wl,-Bstatic -L/usr/openwin/lib -lX11 #$(LD_DYNAMIC)
 
 # Use -lSM -lICE for X11R6, don't use then for X11R5
-X11EXT_LIBSPEC=-lXext -lSM -lICE
-#X11EXT_LIBSPEC=-lXext
+#X11EXT_LIBSPEC=-lXext -lSM -lICE
+X11EXT_LIBSPEC=-lXext
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR = 	-collector=$(ROOT)/gnu/$(PTARCH)/lib/gcc-lib/$(PTARCH)/2.7.2.2/ld
