@@ -86,4 +86,4 @@ checkjunk:
 	@checkextra -v $(SRCS) $(HDRS) $(EXTRA_SRCS) makefile make.template SCCS
 
 sccsinfo:
-	sccs info
+	@if sccs check; then true; else sccs info; fi
