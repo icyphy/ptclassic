@@ -36,7 +36,7 @@ SDFLOOP=$(ROOT)/src/domains/sdf/loopScheduler
 
 # libraries
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
-ifeq ($MATLABDIR,)
+ifeq ("$MATLABDIR","")
 MATLABDIR= $(ROOT)/src/compat/matlab
 else
 MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
