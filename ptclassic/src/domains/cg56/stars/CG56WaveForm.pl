@@ -27,18 +27,13 @@ _
 NO	YES	0	Period is the length of the waveform.
 NO	YES	N > 0	Period is N.
 NO	NO	anything	Output the waveform once, then zeros.
-YES	anything	anything	Stop after outputing the waveform once.
 .TE
 The first line of the table gives the default settings.
 .PP
 This star may be used to read a file by simply setting "value" to
 something of the form "< filename".  The file will be read completely
 and its contents stored in an array.  The size of the array is currently
-limited to 20,000 samples.  To read longer files, use the
-.c ReadFile
-star.  This latter star reads one sample at a time, and hence also
-uses less storage.
-.IE "file read"
+limited to 20,000 samples.
 .IE "waveform from file"
 .IE "reading from a file"
 .IE "halting a simulation"
