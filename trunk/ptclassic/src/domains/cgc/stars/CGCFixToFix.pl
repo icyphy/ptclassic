@@ -11,7 +11,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CGC main library }
-	desc { Convert a fixed-point value into one with a different precision. }
+	desc {
+Convert a fixed-point value into one with a different precision.
+	}
 	input {
 		name { input }
 		type { fix }
@@ -33,10 +35,15 @@ the precision parameter, then the output is set to its maximum value (or
 minimum for negative magnitudes).
 		}
         }
+
         setup {
 		CGCFix::setup();
 		output.setPrecision(OutputPrecision);
         }
+
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	go {
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
@@ -49,5 +56,5 @@ minimum for negative magnitudes).
 	}
 
 	// a wrap-up method is inherited from CGCFix
-	// if you defined your own, you should call CGCFix::wrapup()
+	// if you define your own, you should call CGCFix::wrapup()
 }

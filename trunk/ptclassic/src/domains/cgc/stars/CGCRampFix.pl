@@ -89,6 +89,9 @@ The precision of this state is the precision of the accumulation.
 		step.setPrecision(StepPrecision);
         }
 
+        // an initCode method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::initCode()
+
 	go {
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();
@@ -100,6 +103,6 @@ The precision of this state is the precision of the accumulation.
 		CGCFix::checkOverflow();
 	}
 
-        // a wrap-up method is inherited from CGCFix
-        // if you defined your own, you should call CGCFix::wrapup()
+        // a wrapup method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::wrapup()
 }

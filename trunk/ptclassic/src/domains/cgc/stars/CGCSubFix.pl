@@ -74,12 +74,16 @@ magnitudes).
 	}
 
         setup {
+		CGCFix::setup();
                 if (!int(ArrivingPrecision)) {
 		    pos.setPrecision(InputPrecision);
 		    neg.setPrecision(InputPrecision);
 		}
 		output.setPrecision(OutputPrecision);
         }
+
+        // an initCode method is inherited from CGCFix
+        // if you define your own, you should call CGCFix::initCode()
 
 	go {
 		// insert code to clear overflow flag

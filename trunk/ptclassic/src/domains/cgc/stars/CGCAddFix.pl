@@ -73,6 +73,9 @@ magnitudes).
 		output.setPrecision(OutputPrecision);
         }
 
+	// an initCode method is inherited from CGCFix
+	// if you define your own, you should call CGCFix::initCode()
+
 	go {
 		// insert code to clear overflow flag
 		CGCFix::clearOverflow();

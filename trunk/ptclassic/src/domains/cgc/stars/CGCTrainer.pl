@@ -1,6 +1,7 @@
 defstar {
 	name { Trainer }
 	domain { CGC }
+	derivedFrom { Fix }
 	desc {
 Passes the "train" input to the output for the first "trainLength"
 samples, then passes the "decision" input to the output.  Designed
@@ -52,6 +53,12 @@ limitation of liability, and disclaimer of warranty provisions.
 
 	setup {
 		count = 0;
+	}
+
+	initCode {
+		if (train.resolvedType() == FIX) {
+			CGCFix::initCode();
+		}
 	}
 
 	begin {
