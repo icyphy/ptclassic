@@ -240,4 +240,3 @@ test Path-7.1 {Test out isRelative} {
 	    [::tycho::isRelative [file join .. a b]] \
 	    [::tycho::isRelative [file join / a b .. ..]]
 } {1 1 0 0 0 0 1 0}
-doneTests

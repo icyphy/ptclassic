@@ -93,5 +93,3 @@ test CircularList-1.4 {Check out append} {
     foo append c b
     foo elements c
 } {c a b}
-
-doneTests

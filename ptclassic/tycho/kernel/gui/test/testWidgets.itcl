@@ -239,4 +239,3 @@ test YesNoQuery-1.1 {Test YesNoQuery} {
     list {Done}
 } {Done}
 
-doneTests
