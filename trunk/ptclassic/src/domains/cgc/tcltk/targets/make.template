@@ -49,8 +49,13 @@ INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS=CGCTclTkTarget.cc $(PLSRC) 
-HDRS=CGCTclTkTarget.h $(PLSRC:.cc=.h)
+SRCS=	CGCTclTkTarget.cc \
+	CGCTychoTarget.cc \
+	$(PLSRC) 
+
+HDRS=	CGCTclTkTarget.h \
+	CGCTychoTarget.h \
+	$(PLSRC:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
