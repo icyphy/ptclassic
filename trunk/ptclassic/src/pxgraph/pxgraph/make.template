@@ -18,8 +18,7 @@ OBJS = xgraph.o xgX.o hard_devices.o dialog.o hpgl.o mif.o ps.o idraw.o xtb.o \
  st.o params.o
 
 SRCS = $(OBJS:.o=.c)
-HDRS = copyright.h hard_devices.h params.h plotter.h st.h \
- xgout.h xgraph.h xtb.h
+HDRS = dialog.h hard_devices.h params.h plotter.h st.h xgout.h xgraph.h xtb.h
 
 all:	makefile pxgraph
 
@@ -28,7 +27,12 @@ all:	makefile pxgraph
 # here.
 pxgraph:	$(OBJS)
 	rm -f pxgraph
-	$(LINKER) $(LINKFLAGS) -o pxgraph $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+	$(LINKER) $(LINKFLAGS) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
+pxgraph.debug:	$(OBJS)
+	rm -f pxgraph
+	$(LINKER) $(LINKFLAGS_D) -o $@ $(OBJS) $(X11EXT_LIBSPEC) $(X11_LIBSPEC) $(SYSLIBS)
+
 
 OUT = $(BINDIR)/pxgraph
 
@@ -39,7 +43,7 @@ $(OUT):	pxgraph
 install:	makefile $(OUT)
 
 .c.o:
-	$(CC) $(CFLAGS) $(X11_INCSPEC) -c $<
+	$(CC) $(CFLAGS) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC) -c $<
 
 # "make clean" removes .o files and other cruft
 clean:
@@ -50,7 +54,7 @@ sources:	$(SRCS) $(HDRS) make.template
 
 depend:
 		cd $(VPATH); \
-		$(DEPEND) $(X11_INCSPEC) $(SRCS)|cat make.template - > makefile.n;\
+		$(DEPEND) $(PTCOMPAT_INCSPEC) $(X11_INCSPEC) $(SRCS)|cat make.template - > makefile.n;\
 		mv -f makefile.n makefile
 
 makefile:	make.template
