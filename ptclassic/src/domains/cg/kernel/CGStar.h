@@ -143,7 +143,7 @@ protected:
 	// null, output the comment to myCode stream.  Note: this will
 	// only use the default comment separators specified by comment
 	// in Target class.
-	virtual void outputComment(const char* msg,const char* stream=NULL);
+	virtual void outputComment(const char* msg, const char* stream=NULL);
 
 	// Return the special character that introduces a macro
 	// in a code block.  This character is used by gencode() to
@@ -169,12 +169,15 @@ protected:
 	   The number, names, and meaning of
 	   these functions can be easily redefined in derived classes.
 	*/
-	virtual StringList expandMacro(const char* func, const StringList& argList);
+	virtual StringList expandMacro(const char* func,
+				       const StringList& argList);
 
 	// Match macro name and argument count.
-	int matchMacro(const char* func, const StringList& argList, const char* name, int argc)
+	int matchMacro(const char* func, const StringList& argList,
+		       const char* name, int argc)
 	{
-	    return (strcasecmp(func, name) == 0) && (argList.numPieces() == argc);
+	    return ((strcasecmp(func, name) == 0) &&
+		    (argList.numPieces() == argc));
 	}
 
 	// Evaluate State used as MultiPortHole index.
@@ -226,7 +229,7 @@ protected:
 
 	// Lookup a shared symbol by scope name & symbol name.
 	// Return NULL on error.
-	const char* lookupSharedSymbol(const char* scope, const char* name);	
+	const char* lookupSharedSymbol(const char* scope, const char* name);
 
 	// modify "deferrable": always defer stars that feed into forks,
 	// to keep minimum possible size for fork buffers.

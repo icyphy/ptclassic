@@ -465,13 +465,12 @@ void CGTarget :: compileRun(SDFScheduler* s) {
 	s->compileRun();
 }
 
-void CGTarget :: addStream(const char* name, CodeStream* code)
-{
-	if (! codeStringLists.append(code, name) ) {
-		StringList message = "addStream: ";
-		message << name << " already exists";
-		Error::abortRun(*this, message);
-	}
+void CGTarget :: addStream(const char* name, CodeStream* code) {
+    if (!(codeStringLists.append(code, name))) {
+	StringList message = "addStream: ";
+	message << name << " already exists";
+	Error::abortRun(*this, message);
+    }
 }
 
 // Lookup a CodeStream by name.
