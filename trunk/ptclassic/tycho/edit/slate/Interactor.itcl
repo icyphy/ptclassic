@@ -107,6 +107,9 @@ class ::tycho::Interactor {
     # <i>apply</i></a> procedure for the format of the script.
     public variable activatecommand {}
 
+    # The prefix used to forward click events
+    public variable clickprefix {}
+
     # A script executed at the end of the interaction sequence. It is
     # useful for assigning objects created during an interaction to
     # variables, and other clean-up stuff.
@@ -117,6 +120,11 @@ class ::tycho::Interactor {
     # an object when it is moved, etc.
     public variable dragcommand {}
 
+    # The prefix used to forward drag events
+    public variable dragprefix {}
+
+    # The prefix used to forward release events
+    public variable releaseprefix {}
 
     ###################################################################
     ####                         public methods                    ####
@@ -276,8 +284,10 @@ body ::tycho::Interactor::cascade {args} {
 body ::tycho::Interactor::click {x y args} {
     if { $proxy != "" } {
 	eval $proxy click $x $y $args
+    } elseif { $clickprefix != "" } {
+        eval $clickprefix $x $y $args
     } else {
-	eval $slate manipulate $target click $x $y $args
+	eval $slate moveclick $target $x $y $args
     }
 }
 
@@ -321,8 +331,10 @@ body ::tycho::Interactor::disable {} {
 body ::tycho::Interactor::drag {x y} {
     if { $proxy != "" } {
 	$proxy drag $x $y
+    } elseif { $dragprefix != "" } {
+        eval $dragprefix $x $y
     } else {
-	$slate manipulate $target drag $x $y
+	$slate movedrag $target $x $y
     }
     execute $dragcommand $x $y
 }
@@ -385,8 +397,10 @@ body ::tycho::Interactor::proxy {args} {
 body ::tycho::Interactor::release {x y} {
     if { $proxy != "" } {
 	$proxy release $x $y
+    } elseif { $releaseprefix != "" } {
+        eval $releaseprefix $x $y
     } else {
-	$slate manipulate $target release $x $y
+	$slate moverelease $target $x $y
     }
 }
 
