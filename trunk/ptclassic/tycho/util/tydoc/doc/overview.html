@@ -192,6 +192,25 @@ have comments.
 </MENU>
 Another optimization that always happens is that only the first line of the <CODE>@copyright</CODE> doc comment is present in the html.
 
+<H2><A NAME="tydoc and codeDoc.idx">tydoc and codeDoc.idx</A></H2>
+
+Classes can inherit from parent classes that are not necessarily in
+the current directory.  To use create the proper links,
+<CODE>tydoc</CODE> uses the <A
+HREF="../idx/codeDoc.idx"><CODE>codeDoc.idx</CODE></A> file.  
+
+ <P>However, this represents a bit of a chicken and egg problem, as
+<CODE>codeDoc.idx</CODE> is based upon the <CODE>tydoc</CODE> output.
+The best solution is to create the <CODE>tydoc</CODE> output, then
+create <CODE>codeDoc.idx</CODE> and then recreate the
+<CODE>tydoc</CODE> output, which will use the <CODE>codeDoc.idx</CODE>
+to fix cross references.  The following commands will do this for you:
+<PRE>
+cd $TYCHO
+make itcldocs indices itcldocs
+</PRE>
+
+
 <HR>
 Copyright &#169 %Q%, The Regents of the University of California.
 All rights reserved.
