@@ -115,9 +115,11 @@ body ::tycho::JRPC::constructor {args} {
     # FIXME: this will probably only work under Unix right now.
     # FIXME: we need to save the output
     set _logFile [::tycho::tmpFileName JRPClog .txt]
-    #if [catch {set _subprocpid [exec tyjtclsh \
-    #        [file join $tycho util ptsim JRPCServer.tcl] \
-    #        $portnum $debug >& $_logFile &]} err]
+    set FIXME___this_disables_debug_output {
+        if [catch {set _subprocpid [exec tyjtclsh \
+                [file join $tycho util ptsim JRPCServer.tcl] \
+                $portnum $debug >& $_logFile &]} err]
+    }
 
     if [catch {set _subprocpid [exec tyjtclsh \
             [file join $tycho util ptsim JRPCServer.tcl] \
