@@ -117,7 +117,6 @@ HTMLDIRS= $(TYCHO)/doc \
 	$(TYCHO)/java/pn \
 	$(TYCHO)/java/pt/kernel \
 	$(TYCHO)/java/tycho/doc/internals \
-	$(TYCHO)/src/tksteal \
 	$(TYCHO)/typt/doc \
 	$(TYCHO)/typt/doc/internals \
 	$(TYCHO)/typt/doc/usersGuides \
