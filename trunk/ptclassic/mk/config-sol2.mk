@@ -128,7 +128,3 @@ XPM_DEFINES =	-DZPIPE $(X11_INCSPEC)
 
 # Matlab architecture
 MATARCH = sol2
-
-# Don't include the PN domain for the time being, there is a bug with
-# interrupted system calls
-INCLUDE_PN_DOMAIN = no
