@@ -1,0 +1,64 @@
+<!$Id$>
+<html>
+<head>
+<title>Tycho under Windows NT</title>
+</head>
+<body bgcolor="#faf0e6">
+<HR>
+<h1>Tycho under Windows NT</h1>
+<H2>Places to go</H2>
+<MENU>
+
+<LI> <A HREF="http://ourworld.compuserve.com:80/homepages/efjohnson/tclwin.htm">Tcl/Tk on Windows FAQ</A>
+
+</MENU>
+
+Itcl2.2 should be out shortly, and have binaries for NT.  As of 12/1/96, we
+are still using Itcl2.1.
+
+<H2>Compiling itcl2.1</H2>
+You can pick up prebuilt Itcl2.1 NT binaries at <A HREF="ftp://mirror.neosoft.com/pub/tcl/NEW/itcl2.1p.NT.tar.Z"><CODE>ftp://mirror.neosoft.com/pub/tcl/NEW/itcl2.1p.NT.tar.Z</CODE></A>
+
+<MENU>
+
+<LI> I had to set the INCLUDE and LIB environment variables by using
+the system control panel.
+
+<LI> Before running <CODE>nmake -f makefile.vc install</CODE>, be sure
+that <CODE>c:\bin</CODE> is in your path, or the iwidgets installation
+will fail.
+
+<LI> In <CODE>iwidgets2.1.0</CODE>, I substituted <CODE>itclsh21</CODE>
+for <CODE>tclsh75</CODE>
+
+</MENU>
+
+<H3>Changes to Tycho</H3>
+<OL>
+
+<LI> In the default NT setup, <CODE>exec rm</CODE> does not work,
+there is no <CODE>rm</CODE> binary.  Ditto with <CODE>exec
+mkdir</CODE>.  If you download the Cygnus <A
+HREF="http://www.cygnus.com/misc/gnu-win32/">GNU-win32</A> tools, then
+you will have mkdir and rm.
+
+<LI> To create a tycho script, I created a script called ty.itcl, with
+the contents:
+<LISTING>
+set env(TYCHO) c:/users/cxh/tycho0.1.1
+source $env(TYCHO)/kernel
+</LISTING>
+then I clicked on the <CODE>ty.itcl</CODE> icon, and when I was prompted
+to select an application, I chose <CODE>c:/bin/itkwish2.1</CODE>
+
+</OL>
+<p>
+<HR>
+Copyright &#169 %Q%, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: %D%,
+comments to: <author>tycho@eecs.berkeley.edu</author>
+</body>
+</html>
+
