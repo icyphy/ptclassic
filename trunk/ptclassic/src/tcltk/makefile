@@ -101,7 +101,7 @@ ITCL_DEST_LIB = $(TCL8_DEST)/lib
 # Itcl contains its own custom tcltk
 all: 		configure itcl
 configure:	configure_tcltk8 tcltk8 install_tcltk8 \
-			(PTOLEMY)/src/tcltk/tcl_shared \
+			$(PTOLEMY)/src/tcltk/tcl_shared \
 			$(ITCL_OBJ)/config.status $(TCLTK_OBJ)/makefile
 bin:		itcl
 install:	install_itcl
@@ -282,7 +282,7 @@ fixlinks:
 # TclBlend
 
 TCLBLEND_MAJOR_VERSION = 1.1
-TCLBLEND_MINOR_VERSION = .1
+TCLBLEND_MINOR_VERSION = a1
 TCLBLEND_VERSION = $(TCLBLEND_MAJOR_VERSION)$(TCLBLEND_MINOR_VERSION)
 
 TCLBLEND_SRC =	$(TCLTK_SRC)/tclBlend$(TCLBLEND_VERSION)/unix
@@ -306,12 +306,12 @@ configure_tclblend: $(TCLBLEND_OBJ)
 		$(JAVA_STUDIO_CONFIG) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
-tclblend: $(TCLBLEND_OBJ)/pkgIndex.tcl
+tclblend: #$(TCLBLEND_OBJ)/pkgIndex.tcl
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) tclblend.jar)
 
-$(TCLBLEND_OBJ)/pkgIndex.tcl: $(TCLBLEND_SRC)/pkgIndex.tcl
-	rm -f $@
-	cp $^ $@
+#$(TCLBLEND_OBJ)/pkgIndex.tcl: $(TCLBLEND_SRC)/pkgIndex.tcl
+#	rm -f $@
+#	cp $^ $@
 
 install_tclblend:
 	(cd $(TCLBLEND_OBJ); PWD=$(TCLBLEND_OBJ); export PWD; $(MAKE) install)
