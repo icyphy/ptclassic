@@ -63,6 +63,9 @@ class ::tycho::Picture {
 
     # All pictures must have a "primary" item to define their coordinates
     common primary
+
+    # All options have a default value
+    common optiondefault
 }
 
 ##########################################################################
