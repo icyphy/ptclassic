@@ -37,9 +37,7 @@ This item allows the user to specify extra C++ code to be executed in
 the constructor for the class.  This code appears
 .i after
 any automatically generated code to initialize portholes, states, etc.
-The most common use is to insert a call to
-.c inheritTypeFrom
-when ANYTYPE portholes are used.  Syntax:
+Syntax:
 .sp
 .c constructor
 .i body
@@ -49,6 +47,25 @@ where
 is a piece of C++ code surrounded by curly braces.  Note that actions
 that must be performed before every simulation run should appear in the
 start method, not the constructor.
+.UH conscalls
+.pp
+You may want to have members in your star or galaxy that have constructors
+that require arguments (these members would be added with the
+.c public ,
+.c private ,
+or
+.c protected
+keyword).  If you have such members, the
+.c conscalls
+keyword provides a mechanism for passing arguments to the constructors.
+Simply list the names of the members followed by the list of constructor
+arguments for each, separated by commas if there is more than one.
+Syntax:
+.sp
+.c conscalls
+{
+.i member1(arglist) ,
+.i member2(arglist) " }"
 .UH destructor
 .pp
 This item defines a destructor.  Syntax:
@@ -99,6 +116,10 @@ protected {
         const char* fileName;
 }
 .)c
+If any of the added members require arguments for their constructors,
+use the
+.c conscalls
+item to specify them.
 .UH "ccinclude, hinclude"
 .pp
 These directives cause the
@@ -166,7 +187,7 @@ defstate {
         desc { "output gain" }
 }
 .)c
-There are four types of sub-items that may appear in a defstate
+There are five types of sub-items that may appear in a defstate
 statement, in any order.  The
 .c name
 field is the name of the state; the
@@ -189,6 +210,27 @@ a string or a numeric value.
 (or
 .c descriptor ),
 which is optional, gives a descriptor to the state.
+.pp
+Finally, the
+.c attributes
+keyword specifies state attributes.  At present, two attributes
+are defined: A_CONSTANT and A_SETTABLE (along with their complements
+A_NONCONSTANT and A_NONSETTABLE).  If a state has the A_CONSTANT attribute,
+then its value is not modified by the run-time code in the star (it is
+up to you as the star writer to ensure that this condition is satisfied).
+States with the A_NONCONSTANT attribute may change when the star is run.
+If a state has the A_SETTABLE attribute, then user interfaces (such as
+.i pigi )
+will prompt the user for values when directives such as
+.i edit-parameters
+are given.  States without this attribute are not presented to the user;
+such states always start with their default values as the initial value.
+If no attributes are specified, the default is A_CONSTANT|A_SETTABLE.
+If you specify attributes, you
+.i must
+specify the state of both bits: for example, A_NONCONSTANT|A_SETTABLE.
+.pp
+Attributes are ignored for galaxy states.
 .UH method
 .pp
 The
