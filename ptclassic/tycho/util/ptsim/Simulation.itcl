@@ -177,8 +177,6 @@ body ::tycho::Simulation::constructor {args} {
     #if !$disconnect {
 #	set _socketTalker [::tycho::JRPC #auto -debug 1 -portnum $portnum]
 #    }
-
-    puts "Simulation ready"
 }
 
 
@@ -193,7 +191,7 @@ body ::tycho::Simulation::constructor {args} {
 #
 body ::tycho::Simulation::notify {method args} {
     # FIXME
-    puts "$this notify $method"
+    # puts "$this notify $method"
 }
 
 ########################################################################
