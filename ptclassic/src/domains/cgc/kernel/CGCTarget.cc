@@ -393,8 +393,13 @@ int CGCTarget :: allocateMemory() {
 			if (loop) {
 				if (p->far() && (!p->atBoundary())) {
 					int nMe = p->numXfer();
-					int nFar = p->far()->numXfer();
-					if ((nMe < nFar) || (nMe%nFar != 0))
+					CGCPortHole* farP = 
+						(CGCPortHole*) p->far();
+					int nFar = farP->numXfer();
+					if ((nMe < nFar) || (nMe%nFar != 0) ||
+					    (p->numInitDelays() > 0) || 
+					    p->usesOldValues() ||
+					    farP->usesOldValues() )
 						p->giveUpStatic();
 				}
 			}
