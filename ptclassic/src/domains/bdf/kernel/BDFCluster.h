@@ -62,7 +62,8 @@ class BDFClusterGal : public DynamicGalaxy {
 public:
 	// constructor creates flat galaxy of atomic clusters
 	BDFClusterGal(Galaxy&,ostream* log = 0);
-	BDFClusterGal(ostream* log = 0) : logstrm(log), bagNumber(-1) {}
+	BDFClusterGal(ostream* log = 0)
+	: logstrm(log), bagNumber(-1), urateFlag(FALSE) {}
 
 	// destructor zaps all the member clusters (inherited)
 	~BDFClusterGal() {}
@@ -123,16 +124,19 @@ protected:
 
 	// return true if there is an indirect path between two
 	// member clusters
-	int indirectPath(BDFCluster* src,BDFCluster* dst);
+	int indirectPath(BDFCluster* src,BDFCluster* dst,
+			 int ignoreDelayArcs = FALSE);
 
 	// function used in finding paths by indirectPath.
-	int findPath(BDFCluster* src,BDFCluster* dst);
+	int findPath(BDFCluster* src,BDFCluster* dst,
+		     int ignoreDelayArcs = FALSE);
 
 	// mark feed-forward delays
 	int markFeedForwardDelayArcs();
 
 private:
 	int bagNumber;		// number for generating bag names
+	int urateFlag;
 	SequentialList stopList;// this list is used by fullSearchMerge.
 };
 
@@ -167,6 +171,10 @@ public:
 	// return loop count
 	int loop() const { return pLoop;}
 
+	// return true if two clusters have the same looping
+	// condition
+	int sameLoopCondition(const BDFCluster& arg) const;
+
 	// return true if I am looped (by iteration or if-ing)
 	int looped() const { return pLoop > 1 || pType != DO_ITER;}
 
@@ -195,7 +203,10 @@ public:
 	BDFClustPort* connectBoolean(BDFClustPort* cond,BDFRelation& rel);
 
 	// undo looping of a cluster, changing repetitions, token numbers
-	int unloop();
+	BDFClustPort* unloop(int& reps,BDFLoopType& lcond);
+
+	// redo looping of a cluster -- reverse unloop.
+	void reloop(int reps,BDFLoopType lcond,BDFClustPort* pcond);
 
 	// optionally do additional clustering on internal cluster
 	virtual int internalClustering() { return FALSE;}
