@@ -75,6 +75,7 @@ const int MAX_NO_GRAPHS = 64;
 #include "SimControl.h"
 #include "ieee.h"
 #include <fcntl.h>
+#include <unistd.h>	 // unlink()
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () : blockIamIn(0), ng(0), strm(0), tmpFileNames(0), count(0),
