@@ -86,7 +86,9 @@ parameter values, hierarchy, and file structure.
 VEM provides one of many ways to examine and edit designs
 stored by Oct.
 This section gives enough information about VEM to use it with \*(PT
-in simple ways.  More complete documentation is contained in the VEM
+in simple ways.  It is assumed that VEM 8.1, which is
+part of the octtools distribution version 5, is being used.
+More complete documentation is contained in the VEM
 section of the Almagest.
 A third component of this system, called \fBRPC\fR, is
 .IE RPC
