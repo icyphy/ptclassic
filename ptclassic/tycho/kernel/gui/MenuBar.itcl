@@ -40,9 +40,9 @@
 # <p>
 # Here is an example (FIXME: This is out of date):
 # <tcl><pre>
-# ::tycho::Displayer .f
+# ::tycho::TopLevel .f
 # ::tycho::MenuBar .f.mb
-# .f configure -menubar .f.mb
+# pack .f.mb
 # .f.mb addMenu File
 # .f.mb add Close File -command {delete object .f}
 # .f centerOnScreen
