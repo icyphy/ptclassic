@@ -121,7 +121,12 @@ int KnownTarget::getList (const Block& b, const char** names, int nMax) {
 
 int KnownTarget::getList (const char* dom, const char** names, int nMax) {
 	KnownBlockIter iter(dom);
-	const Block* b = iter++;
+	const Block* b;
+	// skip any galaxies at head of list, need a star.
+	do {
+		b = iter++;
+	} while (b && !b->isItAtomic());
+
 	if (b == 0) return 0;
 	return getList(*b, names, nMax);
 }
