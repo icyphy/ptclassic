@@ -120,6 +120,16 @@ InterpGalaxy::findPortHole (const char* star,const char* port) {
 	return ph;
 }
 
+// Find a port without reporting errors.
+// Return zero if the port does not exist.
+PortHole *
+InterpGalaxy::findPortHoleNE (const char* star,const char* port) {
+	Block *st = blockWithName(star);
+	if (st == NULL) return 0;
+	PortHole *ph = st->portWithName(port);
+	return ph;
+}
+
 // Find a MPH.
 MultiPortHole *
 InterpGalaxy::findMPH(const char* star, const char* port) {
@@ -130,6 +140,17 @@ InterpGalaxy::findMPH(const char* star, const char* port) {
 	}
 	MultiPortHole *ph = st->multiPortWithName(port);
 	if (ph == NULL) noInstance (port, star);
+	return ph;
+}
+
+// Find a MPH without reporting errors.
+// Returns zero if it does not exist.
+
+MultiPortHole *
+InterpGalaxy::findMPHNE(const char* star, const char* port) {
+	Block *st = blockWithName(star);
+	if (st == NULL) return 0;
+	MultiPortHole *ph = st->multiPortWithName(port);
 	return ph;
 }
 
@@ -165,6 +186,25 @@ logConnect(StringList& list,const char* srcStar,const char* srcPipe,
 	list += dstPipe;
 	list += initDelayValues;
 }
+
+void InterpGalaxy::registerInit(const char* tag,
+				const char* srcStar,
+				const char* srcPort,
+				const char* initDelayValues,
+				const char* dstStar = 0,
+				const char* dstPort = 0,
+				const char* node = 0,
+				const char* busWidth = 0) {
+  initList += tag;
+  initList += srcStar;
+  initList += srcPort;
+  if(dstStar)  initList += dstStar;
+  if(dstPort)  initList += dstStar;
+  if(busWidth) initList += busWidth;
+  if(node)     initList += node;
+  initList += initDelayValues;
+}
+
 
 // Form a point-to-point connection.
 int
@@ -204,7 +244,7 @@ int
 InterpGalaxy::busConnect(const char* srcStar,const char* srcPipe,
 			 const char* dstStar,const char* dstPipe,
 			 const char* width, const char* initDelayValues) {
-  if (initDelayValues == 0)
+  if ((initDelayValues == 0) || (*initDelayValues == 0))
     initDelayValues = &emptyDelay;
   MultiPortHole* s = findMPH (srcStar, srcPipe);
   MultiPortHole* d = findMPH (dstStar, dstPipe);
@@ -326,7 +366,7 @@ InterpGalaxy::delNode (const char* nodename) {
 int
 InterpGalaxy::nodeConnect (const char* star, const char* port,
 			   const char* node, const char* initDelayValues) {
-	if (initDelayValues == 0)
+	if ((initDelayValues == 0) || (*initDelayValues == 0))
 	  initDelayValues = &emptyDelay;
 	GenericPort *ph = findGenericPort (star, port);
 	if (ph == NULL) return FALSE;
@@ -336,13 +376,11 @@ InterpGalaxy::nodeConnect (const char* star, const char* port,
 		return FALSE;
 	}
 	if (ph->isItOutput()) {
-		if (!g->setSourcePort (*ph, 0)) return FALSE;
-	}
-	else if (*initDelayValues) {
+		if (!g->setSourcePort (*ph, 0, initDelayValues)) return FALSE;
+	} else if (*initDelayValues) {
 	  Error::abortRun ("delay not allowed when nodeConnecting an input");
 	  return FALSE;
-	}
-	else if (!g->setDestPort (*ph)) return FALSE;
+	} else if (!g->setDestPort (*ph)) return FALSE;
 
 	// add to action list
 	actionList += "c";
@@ -525,7 +563,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 			nacts -= 6;
 			break;
 
-		case 'B':	// add a bus connection
+		case 'B':	// add a bu connection
 			a = next++;
 			b = next++;
 			c = next++;
@@ -605,12 +643,15 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 		}
 	}
 
-// copy the initialization list.
-	StringListIter nextI(g.initList);
-	initList.initialize();
-	const char* s;
-	while ((s = nextI++) != 0)
-		initList += s;
+// Here we used to copy the initialization list.
+// This is not necessary, however, because the initialization list
+// should be correct based on the above connections created
+// from processing the action list.
+//	StringListIter nextI(g.initList);
+//	initList.initialize();
+//	const char* s;
+//	while ((s = nextI++) != 0)
+//		initList += s;
 }
 
 // add the galaxy to the known list (completing the definition of a galaxy
@@ -690,6 +731,10 @@ InterpGalaxy::initialize () {
 	StringListIter next(initList);
 	int nacts = initList.numPieces();
 	int err = 0;
+	// Note that while processing the initList, we ignore errors due to
+	// missing stars or portholes.  Such errors are caused by HOF stars
+	// that have been removed in the setup phase of a previous run.
+	// The err counter is kept in case it is needed for debugging.
 	while (nacts > 0) {
 		const char *a, *b, *c, *d, *initDelayValues, *action;
 		int width;
@@ -703,8 +748,8 @@ InterpGalaxy::initialize () {
 			width = evalExp(this,next++,"busWidth");
 			initDelayValues = next++;
 			{
-			  MultiPortHole* s = findMPH (a, b);
-			  MultiPortHole* dp = findMPH (c, d);
+			  MultiPortHole* s = findMPHNE (a, b);
+			  MultiPortHole* dp = findMPHNE (c, d);
 			  if (s == 0 || dp == 0) err++;
 			  else s->busConnect(*dp, width, 0, initDelayValues);
 			}
@@ -717,7 +762,7 @@ InterpGalaxy::initialize () {
 			d = next++;
 			initDelayValues = next++;
 			{
-				PortHole* s = findPortHole(a, b);
+				PortHole* s = findPortHoleNE(a, b);
 				if (s == 0) err++;
 				else {
 					s->setDelay(0, initDelayValues);
@@ -739,11 +784,6 @@ InterpGalaxy::initialize () {
 			break;
 		default:
 			err++;
-		}
-		if (err) {
-			Error::abortRun (*this,
-					 "Internal error in initialize()");
-			return;
 		}
 	}
 	initSubblocks();
