@@ -64,8 +64,11 @@ char *iconCellName;
     iconFacet.contents.facet.mode = "r";
     if (octOpenFacet(&iconFacet) >= OCT_OK) {
 	CK_OCT(octCloseFacet(&iconFacet));
-	ERR_IF2(dmConfirm("Icon already exists, overwrite?", "", "OK", "Abort")
-	    == VEM_FALSE, "AskAboutIcon: aborted");
+	if (dmConfirm("Icon already exists, overwrite?", "", "OK", "Abort")
+	    == VEM_FALSE) {
+	    PrintCon("AskAboutIcon: aborted");
+	    return FALSE;
+	}
     }
     return (TRUE);
 }
