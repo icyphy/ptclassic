@@ -207,7 +207,7 @@ protected:
 	int dataIndependent();
 public:
 	// constructor: looping is 1 by default
-	BDFCluster() : pLoop(1), pType(DO_ITER), pCond(0), visitFlag(0) {}
+	BDFCluster() : pLoop(1), pCond(0), pType(DO_ITER), visitFlag(0) {}
 
 	// make destructor virtual
 	virtual ~BDFCluster() {}
