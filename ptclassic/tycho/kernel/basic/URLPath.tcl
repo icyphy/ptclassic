@@ -391,6 +391,8 @@ ensemble ::tycho::url {
     set nn [string trimright $name /]
 	if { [regexp {^([a-z]+):(//[^/]*)?(.*)$} $name _ protocol server path] \
 		&& [::tycho::registered protocol $protocol] } {
+            # Need the following to parse correctly: ftp://ptolemy/pub/dir/
+            set path [string trimright $path /]
 	    # Network name
 	    lindex [split $path /] end
 	} else {
