@@ -3,6 +3,7 @@
 % Created:	17 January 1993
 
 \documentstyle[12pt,psfig,elisp,ptinfo,Almagest]{book}
+\batchmode	% Suppress all messages from now on.
 \pssilent	% Suppress messages from psfig.
 
 \newindex{cp}
@@ -31,7 +32,7 @@
 \begin{iftex}
 \begin{titlepage}
 \centering
-\Huge\sf
+\Huge\bsf
 The Almagest \\
 \psfig{figure=../figures/Ptolemy.ps,width=\textwidth}
 Volume \thevolume :  A User's Guide to Ptolemy 0.5
@@ -67,7 +68,6 @@ A User's Guide to Ptolemy 0.5}
 \end{iftex}
 
 \include{cp}
-\include{cg}
 \include{cgc}
 \include{other}
 \include{index}
