@@ -113,9 +113,6 @@ void InDEPort :: getSimulEvent()
         }
 }
 
-int InDEPort :: getcomplete() { return complete; }
-SequentialList * InDEPort :: gettriggerList() { return triggerList; }
-
 int InDEPort :: getFromQueue (Particle* p)
 {
 	// get an event from the global queue into either porthole or
