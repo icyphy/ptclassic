@@ -475,7 +475,7 @@ ifdef CG
 			$(LIBDIR)/libPar.$(LIBSUFFIX)
 	endif
 	SDFLIB = 1
-	STARS = $(LIBDIR)/cgstars.o
+	STARS += $(LIBDIR)/cgstars.o
 	LIBS += -lcgstars -lcg
 	LIBFILES += $(LIBDIR)/libcgstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libcg.$(LIBSUFFIX)
