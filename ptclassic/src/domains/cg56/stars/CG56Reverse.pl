@@ -36,8 +36,8 @@ limitation of liability, and disclaimer of warranty provisions.
         move    #<$addr(in)+$val(N),r0
         move    #<$addr(out),r1
         do      #$val(N),$label(loop)
-        move    x:-(r0),a
-        move    a,x:(r1)+
+        move    $mem(in):-(r0),a
+        move    $mem(out),x:(r1)+
 $label(loop)
         }
         codeblock(one) {

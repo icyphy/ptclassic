@@ -7,7 +7,7 @@ Upsample by a factor (default 2), filling with fill (default 0.0).  The
 is to output it first (phase = 0). The maximum phase is "factor" - 1.
 	}
 	version { $Id$ }
-	author { J. Pino, ported from Gabriel }
+	author { Jose Luis Pino Pino, ported from Gabriel }
 	copyright {
 Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
@@ -57,7 +57,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	rep	#$size(output)
 	}
 	codeblock (fillcode) {
-	move	a,x:(r1)+
+	move	a,$mem(output):(r1)+
 	}
 	initCode {
 		addCode (initfill);
@@ -65,8 +65,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		addCode(fillcode);
 	}
 	codeblock (sendsample) {
-	move	$ref(input),x0
-	move	x0,$ref2(output,phase)
+	move	$ref(input),a
+	move	a,$ref2(output,phase)
 	}
 	go {
 		addCode(sendsample);

@@ -70,8 +70,8 @@ and the output consists of overlapping blocks input particles.
         }
         codeblock(write) {
         do      #$val(nwrite),$label(loop)
-        move    x:(r0)+,a
-        move    a,x:(r1)+
+        move    $mem(input):(r0)+,a
+        move    $mem(output),x:(r1)+
 $label(loop)
         }    
 	go {

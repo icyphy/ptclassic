@@ -40,20 +40,20 @@ For now, we just assume the worst case.
     
     }
     codeblock(cbOnce) {
-    	move	$ref(input),x0
-    	move	x0,$ref(output)
+    	move	$ref(input),a
+    	move	a,$ref(output)
     }
     codeblock(cbRepLoop) {
     	move	#$addr(output),r1
-    	move	$ref(input),x0
+    	move	$ref(input),a
     	rep	#$val(numTimes)
-    	  move	x0,x:(r1)+
+    	  move	a,$mem(output):(r1)+
     }
     codeblock(cbDoLoop) {
     	move	#$addr(output),r1
-    	move	$ref(input),x0
+    	move	$ref(input),a
     	.LOOP	#$val(numTimes)
-    	  move	x0,x:(r1)+
+    	  move	a,$mem(output):(r1)+
 	.ENDL
 	nop
     }
