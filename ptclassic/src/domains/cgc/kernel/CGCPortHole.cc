@@ -61,7 +61,6 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 
 	int reqSize = cgGeo().getMaxNum();
 	int staticSize = localBufSize();
-	int tryFlag = TRUE;	// try to achieve static buffering
 
 	if (far()->isItOutput()) {
 		maxBuf = staticSize;
@@ -70,7 +69,6 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 
 	if (bufferSize > numXfer()) {
 		asLinearBuf = FALSE;
-		tryFlag = FALSE;
 		if (reqSize < bufferSize) reqSize = bufferSize;
 	}
 
@@ -94,14 +92,12 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 
 			// determine whether p can be of static buffering
 			if (!myTry) {
-				tryFlag = FALSE;
 				inp->asLinearBuf = FALSE;
 			}
 		}
 	} else {
 		int temp = p->inBufSize() - p->numXfer();
 		if (temp || (p->numTokens() % p->numXfer() != 0)) { 
-			tryFlag = FALSE;
 			p->asLinearBuf = FALSE;
 		}
 		reqSize += temp;
@@ -117,10 +113,8 @@ void CGCPortHole :: finalBufSize(int statBuf) {
 	} else if (statBuf == 0) {
 		maxBuf = reqSize;
 	} else { // static buffering option.
-		if (tryFlag && (reqSize % staticSize != 0)) {
+		if (asLinearBuf && (reqSize % staticSize != 0)) {
 			maxBuf = ((reqSize/staticSize)+1) * staticSize;
-		} else if ((asLinearBuf != 0) && (reqSize % numXfer() != 0)) {
-			maxBuf = ((reqSize / numXfer()) + 1) * numXfer();
 		} else {
 			maxBuf = reqSize;
 		}
