@@ -119,7 +119,7 @@ body ::tycho::MenuBar::destructor {} {
 body ::tycho::MenuBar::addMenu {name args} {
 
     # Do nothing at all if the menu already exists
-    if { [::info exists itemtype($name)] } {
+    if { [::info exists entrypath($name)] } {
 	return
 	# error "menu $name already exists"
     }
@@ -167,8 +167,7 @@ body ::tycho::MenuBar::addMenu {name args} {
 	pack $itk_component(menuButton$name) -side $side
     }
 
-    # Record its "path" and type
-    set itemtype($name) "menu"
+    # Record its "path"
     set menupath($name) $itk_component(menuButton$name).menu
 }
 
@@ -187,9 +186,7 @@ body ::tycho::MenuBar::delete {name} {
 	destroy $itk_component(menuButton$name)
 	unset itk_component(menu$name)
 	unset itk_component(menuButton$name)
-
 	unset menupath($name)
-	unset itemtype($name)
     } else {
 	# If not, perform default removal
 	::tycho::MenuSupport::delete $name
