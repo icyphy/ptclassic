@@ -15,8 +15,11 @@ makefiles:		obj.$(ARCH)
 	@echo the top-level makefile will make sure it is done right.
 	cd obj.$(ARCH); $(MAKE) $(MFLAGS) makefiles
 
-all install clean sources:	obj.$(ARCH)
+all install clean:	obj.$(ARCH)
 	cd obj.$(ARCH); umask 2; $(MAKE) $(MFLAGS) makefiles $@
+
+sources depend:
+	cd src; umask 2; $(MAKE) $(MFLAGS) makefiles $@
 
 obj.$(ARCH):		MAKEARCH
 	csh -f MAKEARCH
