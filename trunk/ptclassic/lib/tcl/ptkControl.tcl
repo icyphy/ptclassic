@@ -90,7 +90,9 @@ proc ptkRunControl { name octHandle } {
     set ptkRunFlag($name) IDLE
 
     catch {destroy $ptkControlPanel}
-    toplevel $ptkControlPanel
+    # Sets the Class of the Window.  This is used to set all options
+    #   for widgets used in the Contol window
+    toplevel $ptkControlPanel -class PigiControl
     wm title $ptkControlPanel "Run $name"
     wm iconname $ptkControlPanel "Run $name"
 
@@ -102,8 +104,7 @@ proc ptkRunControl { name octHandle } {
     # Define the entry that controls the number of iterations
     frame $ptkControlPanel.iter -bd 10
 	label $ptkControlPanel.iter.label -text "When to stop:"
-        entry $ptkControlPanel.iter.entry -relief sunken -width 10 \
-		-bg [ptkColor wheat3]
+        entry $ptkControlPanel.iter.entry -relief sunken -width 10
 	$ptkControlPanel.iter.entry insert @0 $defNumIter
 	checkbutton $ptkControlPanel.iter.debug -text "Debug" \
 	    -variable ptkDebug($name) -relief flat \

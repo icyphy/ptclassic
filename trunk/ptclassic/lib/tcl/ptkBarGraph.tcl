@@ -55,7 +55,7 @@ proc ptkMakeBarGraph {w desc geo numBars barGraphWidth barGraphHeight} {
 	$w.cntr.dbl left
 
     frame $w.pf -bd 10
-    canvas $w.pf.plot -relief sunken -bd 3 -bg [ptkColor AntiqueWhite3] \
+    canvas $w.pf.plot -relief sunken -bd 3 \
 	    -height ${barGraphHeight}c -width ${barGraphWidth}c
     pack append $w.pf $w.pf.plot {top fill expand}
 
