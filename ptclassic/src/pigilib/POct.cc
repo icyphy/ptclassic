@@ -78,6 +78,7 @@ extern boolean KcSetKBDomain(const char* domain);
 extern void KcSetEventLoop(int on);
 #undef Pointer
 }
+
 #include "miscFuncs.h"
 #include "StringList.h"
 
@@ -99,9 +100,10 @@ extern void KcSetEventLoop(int on);
 #define POCT_TCL_FALSE result("0")
 #define POCT_TCL_TRUE result("1")
 
-// Free temporary oct object f used in ptk commands and return value r
+// Free temporary oct object f used in ptk commands
 // octFreeFacet is in $PTOLEMY/src/octtools/Xpackages/rpc/appOct.c
-#define POCT_FREE_FACET(f)	octFreeFacet(f)
+// we use FreeOctMembers provided by pigilib (why?)
+#define POCT_FREE_FACET(f)	FreeOctMembers(&(f))
 
 /////////////////////////////////////////////////////////////////
 // "C" callable functions.  These functions are used to convert
@@ -209,8 +211,8 @@ POct::~POct() {
 // it and finally sending it back.
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
-int POct::SetBusParams(octObject *instPtr, ParamListType *pList) {
-    octObject prop;
+int POct::SetBusParams(octObject *instPtr, ParamListType *pListp) {
+    octObject prop;			// has some non-dynamic members
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -220,14 +222,13 @@ int POct::SetBusParams(octObject *instPtr, ParamListType *pList) {
     prop.contents.prop.type = OCT_STRING;
 
     // The line below will not compile under cfront 1.0
-    //((const char*)(prop.contents.prop.value.string)) = pList->array->value;
-    prop.contents.prop.value.string = (char *)pList->array->value;
+    //((const char*)(prop.contents.prop.value.string)) = pListp->array->value;
+    prop.contents.prop.value.string = (char *)pListp->array->value;
 
     // Save this new bus value;
     IntizeProp(&prop);
     (void) octModify(&prop);
 
-    POCT_FREE_FACET(&prop);
     return(TRUE);
 }
 
@@ -236,8 +237,8 @@ int POct::SetBusParams(octObject *instPtr, ParamListType *pList) {
 // it and finally sending it back.
 // FIXME: Is there a way to modify and send it to the base without doing
 //        the get first?
-int POct::SetDelayParams(octObject *instPtr, ParamListType *pList) {
-    octObject prop;
+int POct::SetDelayParams(octObject *instPtr, ParamListType *pListp) {
+    octObject prop;			// has some non-dynamic members
 
     // Set up the Prop
     // This step may not be necessary (see above).
@@ -246,22 +247,21 @@ int POct::SetDelayParams(octObject *instPtr, ParamListType *pList) {
     // Fill in the props new value
     prop.contents.prop.type = OCT_STRING;
     // The line below will not compile under cfront1.0
-    //((const char*)(prop.contents.prop.value.string)) = pList->array->value;
-    prop.contents.prop.value.string = (char *)pList->array->value;
+    //((const char*)(prop.contents.prop.value.string)) = pListp->array->value;
+    prop.contents.prop.value.string = (char *)pListp->array->value;
 
     // Save this new delay value;
     (void) octModify(&prop);
 
-    POCT_FREE_FACET(&prop);
     return(TRUE);
 }
 
 // Deletes all of the elements of the passed parameter list pList
 // The memory was allocated in POct::MakePList below 
-void POct::DeletePList(ParamListType* pList) {
-    if ( pList ) {
-	if ( pList->array ) {
-	    for (int i=0; i < pList->length; i++) {
+void POct::DeletePList(ParamListType* pListp) {
+    if ( pListp ) {
+	if ( pListp->array ) {
+	    for (int i=0; i < pListp->length; i++) {
 
 		// FIXME: a consistent decision should be made about
 		// whether a ParamListType owns its strings or not,
@@ -270,17 +270,17 @@ void POct::DeletePList(ParamListType* pList) {
 		// pointer, hence the casts.
 
 		// strings created by savestring, which uses the new operator
-		delete [] (char*)(pList->array[i].name);
-		pList->array[i].name = 0;
-		delete [] (char*)(pList->array[i].type);
-		pList->array[i].type = 0;
-		delete [] (char*)(pList->array[i].value);
-		pList->array[i].value = 0;
+		delete [] (char*)(pListp->array[i].name);
+		pListp->array[i].name = 0;
+		delete [] (char*)(pListp->array[i].type);
+		pListp->array[i].type = 0;
+		delete [] (char*)(pListp->array[i].value);
+		pListp->array[i].value = 0;
     	    }
-    	    delete [] pList->array;
-	    pList->array = 0;
+    	    delete [] pListp->array;
+	    pListp->array = 0;
 	}
-	pList->length = 0;
+	pListp->length = 0;
     }
 }
 
@@ -291,13 +291,13 @@ void POct::DeletePList(ParamListType* pList) {
 // elements as well.  Note that all of the elements must
 // be freed once the pList is no longer needed.  DeletePList
 // does this.
-int POct::MakePList(char* parameterList, ParamListType* pList) {
+int POct::MakePList(char* parameterList, ParamListType* pListp) {
 
     // Error checking
     if (strcmp(parameterList, "NIL") == 0) {
         // Create a "NIL" pList with 0 elements
-        pList->length = 0;
-        pList->array = 0;
+        pListp->length = 0;
+        pListp->array = 0;
         return TRUE;
     }
 
@@ -308,12 +308,12 @@ int POct::MakePList(char* parameterList, ParamListType* pList) {
 	return FALSE;
     }
 
-    pList->length = aC;
-    pList->array = new ParamType[aC];
+    pListp->length = aC;
+    pListp->array = new ParamType[aC];
 
     int ErrorFound = FALSE;
     ParamType *pElement;
-    for (int i=0; i< pList->length; i++) {
+    for (int i=0; i< pListp->length; i++) {
 
         int Element_aC;
         char **Element_aV;
@@ -323,7 +323,7 @@ int POct::MakePList(char* parameterList, ParamListType* pList) {
             ErrorFound = TRUE;
         }
 
-        pElement = &pList->array[i];
+        pElement = &pListp->array[i];
         if (Element_aC != 3 ){
             Error::error("Parameter list element ", aV[i], 
                          " does not have 3 elements.");
@@ -349,7 +349,7 @@ int POct::MakePList(char* parameterList, ParamListType* pList) {
     // If an error was encountered while parsing the list, free pList
     // and return FALSE
     if (ErrorFound) {
-        DeletePList(pList);
+        DeletePList(pListp);
         return FALSE;
     } else {
         return TRUE;
@@ -382,7 +382,7 @@ int POct::ptkCompile (int aC, char** aV) {
 	retval = TCL_ERROR;
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval;
 }
 
@@ -425,14 +425,14 @@ int POct::ptkGetParams (int aC, char** aV) {
             if (!GetFormalParams(&facet, &pList)) {
 		Tcl_AppendResult( interp, "Error getting Formal parameters. ",
 		                  ErrGet(), (char *)NULL );
-		POCT_FREE_FACET(&facet);
+		POCT_FREE_FACET(facet);
 		return TCL_ERROR;
             }
             strcpy(title, "Edit Formal Parameters");
             // Result string will be built below
         } else {
 	    win_msg ("Not a Star, Galaxy, or Universe");
-	    POCT_FREE_FACET(&facet);
+	    POCT_FREE_FACET(facet);
 	    return TCL_OK;
         }
     } else {
@@ -441,7 +441,7 @@ int POct::ptkGetParams (int aC, char** aV) {
         if (ptkHandle2OctObj(aV[2], &instance) == 0) {
             Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
 		aV[0], (char *) NULL);
-	    POCT_FREE_FACET(&facet);
+	    POCT_FREE_FACET(facet);
 	    return TCL_ERROR;
 	}
     
@@ -478,15 +478,15 @@ int POct::ptkGetParams (int aC, char** aV) {
                 break;
               default:
                 Error::error("type unknown in editing delay/bus width");
-	        POCT_FREE_FACET(&property);
-		POCT_FREE_FACET(&instance);
-		POCT_FREE_FACET(&facet);
+	        POCT_FREE_FACET(property);
+		POCT_FREE_FACET(instance);
+		POCT_FREE_FACET(facet);
 		return TCL_ERROR;
             }
             Tcl_AppendResult(interp, "} }", NULL);
-	    POCT_FREE_FACET(&property);
-	    POCT_FREE_FACET(&instance);
-	    POCT_FREE_FACET(&facet);
+	    POCT_FREE_FACET(property);
+	    POCT_FREE_FACET(instance);
+	    POCT_FREE_FACET(facet);
             return TCL_OK;
   	}
 	else if (IsGal(&instance) || IsStar(&instance)) {
@@ -494,27 +494,27 @@ int POct::ptkGetParams (int aC, char** aV) {
 	    // Set the domain to be that of the instance
 	    if (!setCurDomainInst(&instance)) {
                 Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
-		POCT_FREE_FACET(&instance);
-		POCT_FREE_FACET(&facet);
+		POCT_FREE_FACET(instance);
+		POCT_FREE_FACET(facet);
                 return TCL_ERROR;
             }
 	    if (!GetOrInitSogParams(&instance, &pList)) {
 		Tcl_AppendResult(interp, 
                                  "Error Getting Star or Galaxy parameters.  ", 
                                   ErrGet(), (char *) NULL);
-		POCT_FREE_FACET(&instance);
-		POCT_FREE_FACET(&facet);
+		POCT_FREE_FACET(instance);
+		POCT_FREE_FACET(facet);
                 return TCL_ERROR;
             }
             strcpy(title, "Edit Actual Parameters");
             // Build results string below.
         } else {
 	    win_msg("Not a star, galaxy, bus, or delay instance");
-	    POCT_FREE_FACET(&instance);
-	    POCT_FREE_FACET(&facet);
+	    POCT_FREE_FACET(instance);
+	    POCT_FREE_FACET(facet);
             return TCL_OK;
         }
-	POCT_FREE_FACET(&instance);
+	POCT_FREE_FACET(instance);
     }
 
     // Convert pList into a TCL list of Strings to return as result
@@ -536,7 +536,7 @@ int POct::ptkGetParams (int aC, char** aV) {
 	Tcl_AppendResult(interp, " NIL", NULL);
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 }
 
@@ -568,7 +568,7 @@ int POct::ptkSetParams (int aC, char** aV) {
     if (MakePList(aV[3], &pList) == 0) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
-        POCT_FREE_FACET(&facet);
+        POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -598,13 +598,13 @@ int POct::ptkSetParams (int aC, char** aV) {
             DeletePList(&pList);
             Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", 
 		aV[0], (char *) NULL);
-	    POCT_FREE_FACET(&facet);
+	    POCT_FREE_FACET(facet);
             return TCL_ERROR;
         }
 
         if ( IsDelay(&instance) || IsDelay2(&instance)) {
             // Set Delay Parameters from the pList
-            if (SetDelayParams(&instance,&pList) == 0) {
+            if (SetDelayParams(&instance, &pList) == 0) {
                 ErrorFound = TRUE;
 		Tcl_AppendResult(interp, aV[0], 
 				 " Could not save parameters to Oct. ",
@@ -624,8 +624,8 @@ int POct::ptkSetParams (int aC, char** aV) {
 	    // Set the domain to be that of the instance
 	    if (!setCurDomainInst(&instance)) {
                 Tcl_AppendResult(interp,"Invalid Domain Found.",(char *) NULL);
-		POCT_FREE_FACET(&facet);
-		POCT_FREE_FACET(&instance);
+		POCT_FREE_FACET(facet);
+		POCT_FREE_FACET(instance);
                 return TCL_ERROR;
             }
             // Set Star or Galaxy params from the pList
@@ -642,11 +642,11 @@ int POct::ptkSetParams (int aC, char** aV) {
                              "Not a star, galaxy, bus, or delay instance.",
                              (char *) NULL);
         }
-	POCT_FREE_FACET(&instance);
+	POCT_FREE_FACET(instance);
     }
 
-    DeletePList (&pList);
-    POCT_FREE_FACET(&facet);
+    DeletePList(&pList);
+    POCT_FREE_FACET(facet);
 
     if (ErrorFound) return TCL_ERROR;
     else return TCL_OK;
@@ -680,7 +680,7 @@ int POct::ptkSetFindName (int aC, char** aV) {
         retval = TCL_ERROR;
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval;
 }
 
@@ -706,13 +706,13 @@ int POct::ptkSetRunUniverse (int aC, char** aV) {
     if (!IsUnivFacet(&facet)){
         Tcl_AppendResult(interp, "Schematic is not a universe.",
                          (char *) NULL);
-        POCT_FREE_FACET(&facet);
+        POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
     if (! KcSetKBDomain((const char *)DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, "Failed to set default domain.",
                          (char *) NULL);
-        POCT_FREE_FACET(&facet);
+        POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -727,7 +727,7 @@ int POct::ptkSetRunUniverse (int aC, char** aV) {
         retval = TCL_ERROR; 
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval; 
 }
 
@@ -766,7 +766,7 @@ int POct::ptkGetStringProp (int aC, char** aV) {
         Tcl_AppendResult(interp, value, (char *) NULL);
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval;
 }
 
@@ -801,7 +801,7 @@ int POct::ptkSetStringProp (int aC, char** aV) {
         retval = TCL_ERROR;
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval;
 }
 
@@ -874,7 +874,7 @@ int POct::ptkSetMkSchemIcon (int aC, char** aV) {
 	}
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval;
 }
 
@@ -1035,7 +1035,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
     char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-        POCT_FREE_FACET(&facet);
+        POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1045,7 +1045,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
         Tcl_AppendResult(interp, 
 			 "No domains supported by for this facet.",
                          (char *) NULL);
-        POCT_FREE_FACET(&facet);
+        POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1054,7 +1054,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
     if (nDomains == 1) {
 	// Only one element means that no ordering need be done.
 	Tcl_AppendElement ( interp, (char *)nthDomainName(0) );
-        POCT_FREE_FACET(&facet);
+        POCT_FREE_FACET(facet);
 	return TCL_OK;
     }
 
@@ -1074,7 +1074,7 @@ int POct::ptkGetDomainNames (int aC, char** aV) {
         }
     }   
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 }
 
@@ -1105,7 +1105,7 @@ int POct::ptkSetDomain (int aC, char** aV) {
         retval = TCL_ERROR;
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return retval;
 }
 
@@ -1131,7 +1131,7 @@ int POct::ptkGetTargetNames (int aC, char** aV) {
     char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return TCL_ERROR;
     }
 
@@ -1142,7 +1142,7 @@ int POct::ptkGetTargetNames (int aC, char** aV) {
         Tcl_AppendResult(interp, 
 			 "No targets supported by current domain.",
                          (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1161,7 +1161,7 @@ int POct::ptkGetTargetNames (int aC, char** aV) {
     if (nChoices == 1) {
 	// Only one element means that no ordering need be done.
 	Tcl_AppendElement ( interp, (char *)targetNames[0] );
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return TCL_OK;
     }
 
@@ -1169,7 +1169,7 @@ int POct::ptkGetTargetNames (int aC, char** aV) {
     char *target ;
     if (!GOCTargetProp(&facet, &target, defaultTarget)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1192,7 +1192,7 @@ int POct::ptkGetTargetNames (int aC, char** aV) {
         }
     }   
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 }
 
@@ -1227,14 +1227,14 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
     // Set the target to the passed target name
     if (!SetTargetProp(&facet, target)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1242,7 +1242,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
 
     // No target parameters to get if the target is "<parent>"
     if (strcmp(target, "<parent>") == 0) {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_NIL;
     }
 
@@ -1250,7 +1250,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
     ParamListType pList;
     if (!GetTargetParams(target, &facet, &pList)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1264,7 +1264,7 @@ int POct::ptkGetTargetParams (int aC, char** aV) {
 	Tcl_AppendResult(interp, " } ", (char *) NULL);
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 }
 
@@ -1298,14 +1298,14 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
     char *domain;
     if (!GOCDomainProp(&facet, &domain, DEFAULT_DOMAIN)) {
         Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
     // Set the target to the passed target name
     if (!SetTargetProp(&facet, target)) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1315,7 +1315,7 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
     if (MakePList(aV[3], &pList) == 0) {
         Tcl_AppendResult(interp, "Unable to parse parameter list: ",
                          aV[3], (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
@@ -1323,15 +1323,15 @@ int POct::ptkSetTargetParams (int aC, char** aV) {
     if (pList.length > 0 ) {
         if (!SetTargetParams(&facet, &pList)) {
 	    Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	    POCT_FREE_FACET(&facet);
+	    POCT_FREE_FACET(facet);
             return TCL_ERROR;
         }
     }
     
     // Free up the pList as it is no longer needed
-    DeletePList (&pList);
+    DeletePList(&pList);
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
 
     return TCL_OK;
 }
@@ -1375,7 +1375,7 @@ int POct::ptkFacetContents (int aC, char** aV) {
     if (Tcl_SplitList( interp, aV[2], &typeC, &typeV ) != TCL_OK){
 	Tcl_AppendResult(interp, "Cannot parse list of types: ", aV[2],
                          (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
     octObjectMask mask = 0; 
@@ -1416,7 +1416,7 @@ int POct::ptkFacetContents (int aC, char** aV) {
     Tcl_AppendResult(interp, " } ", NULL );
     octFreeGenerator(&gen);
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 }
 
@@ -1447,7 +1447,7 @@ int POct::ptkOpenMaster (int aC, char** aV) {
 
     if ( ! MyOpenMaster(&facet, &instance, facetType, "r") ) {
 	Tcl_AppendResult(interp, ErrGet(), (char *) NULL);
-	POCT_FREE_FACET(&instance);
+	POCT_FREE_FACET(instance);
         return TCL_ERROR;
     }
 
@@ -1455,8 +1455,8 @@ int POct::ptkOpenMaster (int aC, char** aV) {
     ptkOctObj2Handle(&facet, facetStr);
     Tcl_AppendResult(interp, facetStr, NULL);
 
-    POCT_FREE_FACET(&facet);
-    POCT_FREE_FACET(&instance);
+    POCT_FREE_FACET(facet);
+    POCT_FREE_FACET(instance);
 
     return TCL_OK;
 }
@@ -1511,16 +1511,16 @@ int POct::ptkOpenFacet (int aC, char** aV) {
     } else if (status <= 0) {
 	// Unexpected Oct error when trying to open the facet
         Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return TCL_ERROR;
     }
 
     // Convert the new Facet into a string Oct ID Handle
     char facetHandle[16];
-    ptkOctObj2Handle ( &facet, facetHandle );
+    ptkOctObj2Handle(&facet, facetHandle);
     Tcl_AppendResult(interp, facetHandle, " ", NULL );
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 
 }
@@ -1541,7 +1541,7 @@ int POct::ptkCloseFacet(int argc, char **argv) {
     if (octCloseFacet(&facet) != OCT_OK) {
 	Tcl_AppendResult(interp, octErrorString(), (char *) NULL);
 	// Should we free the facet after we close it?
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	retval = TCL_ERROR;
     }
 
@@ -1562,10 +1562,10 @@ int POct::ptkIsStar (int aC, char** aV) {
     }
 
     if (IsStar(&facet)) {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_TRUE;
     } else {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_FALSE;
     }
 }
@@ -1586,10 +1586,10 @@ int POct::ptkIsGalaxy (int aC, char** aV) {
     // We cannot use a temporary variable retval because
     // POCT_TCL_TRUE and POCT_TCL_FALSE have side effects
     if (IsGal(&facet)) {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_TRUE;
     } else {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_FALSE;
     }
 }
@@ -1608,10 +1608,10 @@ int POct::ptkIsBus (int aC, char** aV) {
     }
 
     if (IsBus(&facet)) {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_TRUE;
     } else {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_FALSE;
     }
 }
@@ -1630,10 +1630,10 @@ int POct::ptkIsDelay (int aC, char** aV) {
     }
 
     if (IsDelay(&facet) || IsDelay2(&facet)) {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_TRUE;
     } else {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return POCT_TCL_FALSE;
     }
 }
@@ -1657,7 +1657,7 @@ int POct::ptkGetRunLength (int aC, char** aV) {
       IterationNumber = PIGI_DEFAULT_ITERATIONS;
     }
 
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return result(IterationNumber);
 }
 
@@ -1678,7 +1678,7 @@ int POct::ptkSetRunLength (int aC, char** aV) {
     int IterationNumber;
     Tcl_GetInt(interp, aV[2], &IterationNumber);
     SetIterateProp(&facet, IterationNumber);
-    POCT_FREE_FACET(&facet);
+    POCT_FREE_FACET(facet);
     return TCL_OK;
 }
 
@@ -1719,12 +1719,12 @@ int POct::ptkGetStarName(int aC, char** aV) {
     char *starName;
     GetStarName(&facet, &starName);
     if (starName == NULL) {
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
         return POCT_TCL_NIL;
     }
     else {
         Tcl_AppendResult(interp, starName, (char *) NULL);
-	POCT_FREE_FACET(&facet);
+	POCT_FREE_FACET(facet);
 	return TCL_OK;
     }
 }
