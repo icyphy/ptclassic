@@ -131,6 +131,12 @@ hp_gas_configure: $(GNU_OBJ) $(GNU_OBJ)/hp
 	(cd $(GNU_OBJ)/hp; \
 	$(HP_GAS_SRC)/configure $(MACH) -v --srcdir=$(HP_GAS_SRC) \
 		--prefix=$(GNU_PREFIX) --exec-prefix=$(GNU_EXEC_PREFIX) )
+	-(cd $(GNU_OBJ)/hp/gas; ln -s $(HP_GAS_SRC)/gas/*.c .)
+	-(cd $(GNU_OBJ)/hp/gas; ln -s $(HP_GAS_SRC)/gas/*.h .)
+	-(cd $(GNU_OBJ)/hp/libiberty; ln -s $(HP_GAS_SRC)/libiberty/*.c* .)
+	-(cd $(GNU_OBJ)/hp/bfd; ln -s $(HP_GAS_SRC)/bfd/*.c .)
+	-(cd $(GNU_OBJ)/hp/bfd; ln -s $(HP_GAS_SRC)/bfd/*.h .)
+
 $(GNU_OBJ)/hp:
 	mkdir $(GNU_OBJ)/hp
 
