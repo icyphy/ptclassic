@@ -90,7 +90,11 @@ extern char *sys_errlist[];
 #endif
 
 #ifdef mips
+#if defined(__sgi__) || defined(sgi)
+#define ARCH "irix5"
+#else
 #define ARCH "mips"
+#endif // __sgi__ sgi
 #define EXTRAOPTS "-G 0"
 #else
 #ifndef __GNUG__
