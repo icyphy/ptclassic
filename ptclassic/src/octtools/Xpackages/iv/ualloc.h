@@ -1,7 +1,7 @@
 /* Version Identification:
  * $Id$
  */
-/* Copyright (c) 1990-1993 The Regents of the University of California.
+/* Copyright (c) 1990-1994 The Regents of the University of California.
  * All rights reserved.
  * 
  * Permission is hereby granted, without written agreement and without
@@ -24,6 +24,8 @@
  * ENHANCEMENTS, OR MODIFICATIONS.
  * 
  */
+
+#include "utility.h"
       /* Boolean type */
 
 typedef char bool;
@@ -48,15 +50,6 @@ typedef char bool;
  */
 
 #define NEWVEC(type,n) ((type *) calloc((unsigned) (n), sizeof(type)))
-
-#define REALLOC(type, ptr, newcount) \
-	(type *) realloc((char *) ptr, (unsigned) (sizeof(type) * (newcount)))
-
-/* FREE(p) 
- *      Free any heap-allocated object, p
- */
-
-#define FREE(p) ((void) free((char *) (p)))
 
     /* Infinite loop macro */
 
