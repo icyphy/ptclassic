@@ -120,7 +120,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	initCode {
-	    addCode(setup1,"tkSetup");
+	    addCode(setUniqueSymbol,"tkSetup");
 
             // Export the environment variables
             BlockStateIter nextState(*this);
@@ -136,7 +136,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		// " is escaped so that we can embed the entire string
 	        // in "" in CGCTclScript::exportState
 
-                StringList currentValue = state->currentValue();
+                StringList currentValue;
+		currentValue = state->currentValue();
 		const char* p = currentValue;
 		StringList escapedCurrentValue;
 		while (*p) {
@@ -153,14 +154,14 @@ limitation of liability, and disclaimer of warranty provisions.
             // Create setOutputs tcl command
 	    numOutputs = output.numberPorts();
 	    if (numOutputs > 0) {
-		addCode(setup2,"tkSetup");
+		addCode(declareSetOutputs,"tkSetup");
 		addCode(setOutputsDef, "procedure");
 	    }
 
             // Create setInputs tcl command
 	    numInputs = input.numberPorts();
 	    if (numInputs > 0) {
-		addCode(setup3,"tkSetup");
+		addCode(declareGrabInputs,"tkSetup");
 		addCode(grabInputsDef, "procedure");
 	    }
 
@@ -179,6 +180,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	        out << "\tfloat $starSymbol(ins)[" << int(numInputs) << "];\n";
 	    addGlobal((const char*) out);
 	    if(!int(synchronous)) {
+		addCode(setUniqueSymbol);
 		addCode(callTcl);
 	    }
 	}
@@ -191,6 +193,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		out.initialize();
 	    }
 	    if(int(synchronous)) {
+		addCode(setUniqueSymbol);
 		addCode(callTcl);
 	    }
 	    for (i = 1; i <= output.numberPorts(); i++) {
@@ -200,16 +203,16 @@ limitation of liability, and disclaimer of warranty provisions.
 		out.initialize();
 	    }
 	}
-	codeblock (setup1) {
-	    if(Tcl_Eval(interp, "set uniqueSymbol $starSymbol(tkScript)")
+	codeblock (setUniqueSymbol) {
+	    if(Tcl_Eval(interp, "global uniqueSymbol; set uniqueSymbol $starSymbol(tkScript)")
 		!= TCL_OK)
 		errorReport("Error accessing tcl");
 	}
-	codeblock (setup2) {
+	codeblock (declareSetOutputs) {
 	    Tcl_CreateCommand(interp, "$starSymbol(tkScript)setOutputs",
 		$starSymbol(setOutputs), (ClientData) 0, NULL);
 	}
-	codeblock (setup3) {
+	codeblock (declareGrabInputs) {
 	    Tcl_CreateCommand(interp, "$starSymbol(tkScript)grabInputs",
 		$starSymbol(grabInputs), (ClientData) 0, NULL);
 	}

@@ -47,9 +47,10 @@ proc ${uniqueSymbol}setupTcl {identifier initialChoice pairs} {
 
     foreach pair $pairs {
 	set pairlbl [lindex $pair 0]
+	set pairValue [lindex $pair 1]
 	radiobutton $s.buttons."p_$pairlbl" -text $pairlbl -val \
-		[lindex $pair 1] -var $s \
-		-com "${uniqueSymbol}setOutputs [lindex $pair 1]"
+		$pairValue -var $s \
+		-com "${uniqueSymbol}setOutputs $pairValue"
 	pack $s.buttons $s.buttons."p_$pairlbl" -side left
     }
     pack append $s $s.buttons {top fill}
