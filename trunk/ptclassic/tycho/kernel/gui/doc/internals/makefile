@@ -55,6 +55,7 @@ EXTRA_SRCS =	\
 	index.html \
 	introduction.html \
 	messageclasses.html \
+	path.html \
 	toplevel.html \
 	view.html
 
