@@ -8,6 +8,8 @@ A simple demonstration of chaos.
 .AL "E. A. Lee"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
+.Ir "Henon map"
+.Ir "chaos"
 This universe generates the so called Henon map, using
 the following nonlinear recurrence:
 .EQ

@@ -10,8 +10,14 @@ A universe that median filters an image.
 .LD
 This universe reads an image from a file and median filters the
 image.
+.Ie "filter, median"
+.Ie "image, median filter"
+.Ie "median filtering"
 The original image, median filtered image, and difference
 between the two are all displayed.
+.Ie "DisplayImage"
+.Ie "ReadImage"
+.Ie "MedianImage"
 .SA
 DisplayImage
 ReadImage

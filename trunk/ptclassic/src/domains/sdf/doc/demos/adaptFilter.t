@@ -16,6 +16,10 @@ By examining the parameters of the two filters, you can find
 the filenames for the FIR filter coefficients and the initial tap values.
 The final tap values can be saved by specifying a saveTapsFile
 in the adaptive filter star.
+.Ie "adaptive filter"
+.Ie "filter, adaptive"
+.Ie "LMS"
+.Ie "LMS adaptive filter"
 .SA
 IIDGaussian,
 LMS,

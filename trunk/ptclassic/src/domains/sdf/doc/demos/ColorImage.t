@@ -8,6 +8,12 @@ A universe that displays a color image.
 .AL "P. E. Haskell"
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
+.Ir "image, color"
+.Ie "image format, RGB"
+.Ie "image format, YUV"
+.Ie "ReadRgb"
+.Ie "Rgb2Yuv"
+.Ie "Yuv2Rgb"
 This universe reads a color image in RGB format from a file.
 The image is transformed into YUV color format, and then back
 to RGB format.

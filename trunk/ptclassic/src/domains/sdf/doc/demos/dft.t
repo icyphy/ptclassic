@@ -8,6 +8,9 @@ Compute a discrete Fourier transform of a finite signal
 .LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This demo computes a DFT (using the FFT star) of a finite signal.
+.Ie "discrete Fourier transform"
+.Ie "Fourier transform, discrete"
+.Ie "DFT"
 It can be used, for example, to plot the frequency response of an FIR filter
 given its impulse response.  This system is so useful that it is
 included in the Utilities menu of pigi.
@@ -35,6 +38,9 @@ to the COMPLEX input of the ComplexFFT is implicit.
 The default time-domain signal is an impulse response of an
 equirriple lowpass filter designed using the optfir
 command.
+.Ir "optfir program"
+.Ie "FFT"
+.Ie "Unwrap"
 .SA
 FFT,
 ComplexFFT,
