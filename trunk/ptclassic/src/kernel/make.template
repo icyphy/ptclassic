@@ -4,7 +4,6 @@
 # If this file's name is "make.template" and there is no makefile in
 # this directory, do
 #	cp make.template makefile
-#	chmod +w makefile
 #	make depend
 # This will add the dependencies to the makefile.
 
@@ -43,14 +42,16 @@ demos:		BlockDemo DataStructDemo FractionDemo MultiPortDemo \
 		SchedulerDemo SpaceWalkDemo StarDemo StringListDemo \
 		TokenDemo UniverseDemo
 
-BlockDemo:	BlockDemo.o ptolemy.a
-		$(GNU) $(GFLAGS) BlockDemo.o ptolemy.a -oBlockDemo
+BD=BlockDemo.o Block.o Connect.o Particle.o StringList.o Output.o NamedObj.o
+BlockDemo:	$(BD)
+		$(GNU) $(GFLAGS) $(BD) -oBlockDemo
 
-DataStructDemo:	DataStructDemo.o ptolemy.a
-		$(GNU) $(GFLAGS) DataStructDemo.o ptolemy.a -oDataStructDemo
+DataStructDemo:	DataStructDemo.o StringList.o
+		$(GNU) $(GFLAGS) DataStructDemo.o StringList.o -oDataStructDemo
 
-FractionDemo:	FractionDemo.o ptolemy.a
-		$(GNU) $(GFLAGS) FractionDemo.o ptolemy.a -oFractionDemo
+FractionDemo:	FractionDemo.o Fraction.o StringList.o
+		$(GNU) $(GFLAGS) FractionDemo.o Fraction.o StringList.o \
+			-oFractionDemo
 
 MultiPortDemo:	MultiPortDemo.o ptolemy.a
 		$(GNU) $(GFLAGS) MultiPortDemo.o ptolemy.a -oMultiPortDemo
@@ -61,14 +62,15 @@ SchedulerDemo:	SchedulerDemo.o ptolemy.a
 SpaceWalkDemo:	SpaceWalkDemo.o ptolemy.a
 		$(GNU) $(GFLAGS) SpaceWalkDemo.o ptolemy.a -oSpaceWalkDemo
 
-StarDemo:	StarDemo.o ptolemy.a
-		$(GNU) $(GFLAGS) StarDemo.o ptolemy.a -oStarDemo
+SD=StarDemo.o Star.o Block.o Connect.o Particle.o StringList.o Output.o NamedObj.o
+StarDemo:	$(SD)
+		$(GNU) $(GFLAGS) $(SD) -oStarDemo
 
-StringListDemo:	StringListDemo.o ptolemy.a
-		$(GNU) $(GFLAGS) StringListDemo.o ptolemy.a -oStringListDemo
+StringListDemo:	StringListDemo.o StringList.o
+		$(GNU) $(GFLAGS) StringListDemo.o StringList.o -oStringListDemo
 
-TokenDemo:	TokenDemo.o ptolemy.a
-		$(GNU) $(GFLAGS) TokenDemo.o ptolemy.a -oTokenDemo
+TokenDemo:	TokenDemo.o Tokenizer.o
+		$(GNU) $(GFLAGS) TokenDemo.o Tokenizer.o -oTokenDemo
 
 UniverseDemo:	UniverseDemo.o ptolemy.a
 		$(GNU) $(GFLAGS) UniverseDemo.o ptolemy.a -oUniverseDemo
