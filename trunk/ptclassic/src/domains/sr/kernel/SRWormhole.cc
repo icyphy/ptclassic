@@ -36,9 +36,12 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SRScheduler.h"
 #include "CircularBuffer.h"
 
-// #include <stream.h>
-// #include "Geodesic.h"
+// #define DEBUG_SRWORMHOLE
 
+#ifdef DEBUG_SRWORMHOLE
+#  include <stream.h>
+#  include "Geodesic.h"
+#endif
 
 
 /*******************************************************************
@@ -84,7 +87,19 @@ void SRWormhole::go()
   
   // Run the inner (foreign) galaxy
 
-  Wormhole::run();
+#ifdef DEBUG_SRWORMHOLE
+  cout << "Trying to call Wormhole::run()\n";
+#endif
+
+  int result;
+  result = Wormhole::run();
+
+#ifdef DEBUG_SRWORMHOLE
+  cout << "Wormhole::run() returned " << result << "\n";
+#endif
+
+
+  // Runnable::run();
 
   // Move the contents of the output ports back across the Event Horizon
   // into our domain
@@ -133,7 +148,10 @@ Block * SRWormhole::makeNew() const
 				 myTarget()->cloneTarget());
 }
 
-// return stop time
+// Return the stop time
+//
+// @Description Return the value of now() from the outer scheduler.
+
 double SRWormhole :: getStopTime()
 {
   SRScheduler * sched = (SRScheduler *) outerSched();
@@ -170,8 +188,10 @@ void SRtoUniversal::receiveData()
     Particle ** newLocation = myBuffer->next();
     *newLocation = get().clone();
 
-    // cout << "Just transfered " << (*newLocation)->print() << "\n";
-    
+#ifdef DEBUG_SRWORMHOLE
+    cout << "Just transfered `" << (*newLocation)->print() << "' to universal\n";
+#endif
+
     // Indicate that there is a new particle in myBuffer
 
     tokenNew = TRUE;
@@ -181,13 +201,14 @@ void SRtoUniversal::receiveData()
 
     transferData();
 
-    // cout << "The particle is now " << (*newLocation)->print() << "\n";
+#ifdef DEBUG_SRWORMHOLE
+    cout << "The particle is now " << (*newLocation)->print() << "\n";
+    cout << "There are " << ghostAsPort()->numTokens() << " tokens on the far Geodesic\n";
 
-    // cout << "There are " << ghostAsPort()->numTokens() << " tokens on the far Geodesic\n";
-
-    // Particle * p = ghostAsPort()->geo()->get();
-    // ghostAsPort()->geo()->pushBack(p);    
-    // cout << "The first particle is " << p->print() << " " << p << "\n";
+    Particle * p = ghostAsPort()->geo()->get();
+    ghostAsPort()->geo()->pushBack(p);    
+    cout << "The first particle is " << p->print() << " " << p << "\n";
+#endif
   }
 
 }
@@ -265,6 +286,10 @@ void SRfromUniversal::sendData()
 
     emit() = **p;
 
+#ifdef DEBUG_SRWORMHOLE
+    cout << "Just transfered `" << (*p)->print() << "' from universal\n";
+#endif
+
     tokenNew = FALSE;
 
   } else {
@@ -272,6 +297,10 @@ void SRfromUniversal::sendData()
     // No particle -- make it absent.
 
     makeAbsent();
+
+#ifdef DEBUG_SRWORMHOLE
+    cout << "Just made particle absent from universal\n";
+#endif
 
   }
 
