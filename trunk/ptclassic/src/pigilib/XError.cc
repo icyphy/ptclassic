@@ -100,14 +100,12 @@ Error :: warn (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 void
 Error :: abortRun (cc *m1, cc* m2, cc* m3) {
 	outMsg (0, 0, m1, m2, m3);
-	Tcl_Eval(ptkInterp, "ptkClearRunFlag [curuniverse]", 0, (char **) NULL);
 	Scheduler::requestHalt();
 }
 
 void
 Error :: abortRun (const NamedObj& o, cc* m1, cc* m2, cc* m3) {
 	error (o, m1, m2, m3);
-	Tcl_Eval(ptkInterp, "ptkClearRunFlag [curuniverse]", 0, (char **) NULL);
 	Scheduler::requestHalt();
 }
 
