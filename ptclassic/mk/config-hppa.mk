@@ -64,7 +64,7 @@ CFLAGS =	-g -DUSG $(MEMLOG) $(WARNINGS) $(OPTIMIZER)
 # Binaries that are shipped should be statically linked.
 # Note that currently vem is built with cc, not gcc, so vem uses
 # this flag. See also config-g++.mk
-CC_STATIC = 	-Wl,-a,archive
+#CC_STATIC = 	-Wl,-a,archive
 # If you are trying out the shl_load feature then you want
 # CC_STATIC =	
 
@@ -77,16 +77,18 @@ CC_STATIC = 	-Wl,-a,archive
 # binaries.  Note that linking pigiRpc on a 32Mb hp735 can take upwards
 # of 30 minutes.  GNU strip (cygnus-2.3.1 version) was reported to have 
 # troubles here, so use HP strip.
-STRIP_DEBUG =	/bin/strip -x
+#STRIP_DEBUG =	/bin/strip -x
 # If you are trying out the shl_load feature then you want
-# STRIP_DEBUG = true
+ STRIP_DEBUG = true
 
 # We ship statically linked binaries, but other sites might want
 # to remove the -static below
 # If you are trying out the shl_load feature, then remove -static
 # and add -Xlinker -E
-LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
-LINKFLAGS_D = 	-L$(LIBDIR) -g -static
+#LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -static 
+#LINKFLAGS_D = 	-L$(LIBDIR) -g -static
+LINKFLAGS = 	-L$(LIBDIR) -Xlinker -x -Xlinker -E
+LINKFLAGS_D = 	-L$(LIBDIR) -g -Xlinker -E
 
 
 #
@@ -134,11 +136,11 @@ FLUSH_CACHE =	flush_cache.o
 LIB_FLUSH_CACHE = $(LIBDIR)/flush_cache.o
 
 # If you are trying out the shl_load feature uncomment the lines below.
-#USER_CC_SHAREDFLAGS =		-fPIC
-#USER_C_SHAREDFLAGS =		-fPIC
-#SYSLIBS =			-lg++ -lm -ldld
+USER_CC_SHAREDFLAGS =		-fPIC
+USER_C_SHAREDFLAGS =		-fPIC
+SYSLIBS =			-lg++ -lm -ldld
 ## system libraries for linking .o files from C files only
-#CSYSLIBS = -lm -ldld
+CSYSLIBS = -lm -ldld
 
 # Matlab architecture
 MATARCH = hp700
