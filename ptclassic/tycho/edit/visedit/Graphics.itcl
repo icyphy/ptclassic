@@ -437,29 +437,29 @@ body ::tycho::Graphics::constructor {args} {
     # Create and configure the widget's menu bar
     menubar addMenu Edit left Window -underline 0
 
-    menubar addMenuItem {Undo} Edit -underline 0 -accelerator "z" \
+    menubar addMenuItem {Undo} Edit -underline 0 -accelerator "M-z" \
 	    -command "$this undo"
 
-    menubar addMenuItem {Redo} Edit -underline 0 -accelerator "d" \
+    menubar addMenuItem {Redo} Edit -underline 0 -accelerator "M-d" \
 	    -command "$this redo"
 
     menubar addMenuSeparator Edit
 
-    menubar addMenuItem Cut Edit -underline 0 -accelerator "x" \
+    menubar addMenuItem Cut Edit -underline 0 -accelerator "M-x" \
 	    -command "$this modify cut"
     
-    menubar addMenuItem Copy Edit -underline 1 -accelerator "c" \
+    menubar addMenuItem Copy Edit -underline 1 -accelerator "M-c" \
 	    -command "$this copy"
     
-    menubar addMenuItem Paste Edit -underline 0 -accelerator "v" \
+    menubar addMenuItem Paste Edit -underline 0 -accelerator "M-v" \
 	    -command "$this modify paste"
     
     menubar addMenuSeparator Edit
 
-    menubar addMenuItem {Title...} Edit -underline 0 -accelerator "T" \
+    menubar addMenuItem {Title...} Edit -underline 0 -accelerator "M-T" \
             -command "$this titleAdd"
 
-    menubar addMenuItem {Edit Item} Edit -underline 0 -accelerator "e" \
+    menubar addMenuItem {Edit Item} Edit -underline 0 -accelerator "M-e" \
 	    -command "$this edit"
 
     menubar addMenu Format left {} -underline 1
@@ -472,9 +472,6 @@ body ::tycho::Graphics::constructor {args} {
     menubar disableMenuItem Redo Edit
 
     eval itk_initialize $args
-
-    # bind $canvas <Button-1> "$this select"
-    # bind $canvas <Shift-Button-1> "$this select 1"
 
     # Prevent shadowing of bindings in the File class.
     bind $canvas <Control-x> { }
@@ -498,11 +495,12 @@ body ::tycho::Graphics::constructor {args} {
 
     # Bindings provided for compatibility with emacs conventions.
     # These must be specified after the simpler bindings above.
-#    bind $canvas <Meta-x> { }
-    bind $canvas <Control-x><u> "$this undo; break"
-    bind $canvas <Control-w> "$this modify cut; break"
-#    bind $canvas <Meta-w> "$this copy; break"
-    bind $canvas <Control-y> "$this modify paste; break"
+    # FIXME: How can we recover these?
+    # bind $canvas <Meta-x> { }
+    # bind $canvas <Control-x><u> "$this undo; break"
+    # bind $canvas <Control-w> "$this modify cut; break"
+    # bind $canvas <Meta-w> "$this copy; break"
+    # bind $canvas <Control-y> "$this modify paste; break"
 
     # Bind configure events to update the display.
     # Interactivity is enabled only after the first configure event.
