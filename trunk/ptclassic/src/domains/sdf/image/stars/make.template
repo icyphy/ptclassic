@@ -50,8 +50,9 @@ LIB=libsdfimagestars.$(LIBSUFFIX)
 # Where star doc files go
 STARDOCDIR = ../../doc/stars
 
-# source files for all stars, using preprocessor
+# source files for all stars, using preprocessor, put derived stars first
 PL_SRCS= \
+ SDFRankImage.pl \
  SDFAddMotionVecs.pl \
  SDFContrast.pl \
  SDFDCTImage.pl \
