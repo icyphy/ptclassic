@@ -34,12 +34,17 @@ where these names depend on who you are and what your machine is
 called.  If rsh is not granted permission, you will receive an
 uninformative message saying ``Permission denied.''  If you see this,
 it means you must fix your .rhosts file.
+.pp
+As an alternative, the system manager may have set up the file
+``/etc/hosts.equiv'' to make all the workstations on your cluster
+``equivalent''.  If so, you need not bother with .rhosts.
 .H2 "Environment Variables"
 .pp
 The most basic requirement
 is that \*(PT executables be in your path.
 .IE path
-This should be done in your .cshrc file, rather than your .login file,
+.b Important:
+this should be done in your .cshrc file, rather than your .login file,
 because RPC applications are started as separate processes,
 and new processes do not examine the .login file.
 .pp
@@ -78,12 +83,7 @@ If, for some reason, you wish to use an alternate version of the
 process, you will need to set your PIGIRPC environment variable
 to the complete pathname of the executable file for the ``alternate
 pigiRpc'' you wish to use (advanced users use this feature when
-they want to, say, link in their own domains to Ptolemy).  This
-variable must be set in your ``.cshrc'' or ``.profile'' to be
-effective because of the way
-.i vem
-invokes
-.i pigiRpc .
+they want to, say, link in their own domains to Ptolemy).
 .H2 "The X Window System"
 .pp
 Pigi uses the X window system, version 11 release 4 (X11R4).
@@ -105,40 +105,42 @@ to scan this section.
 Resources are explained below.
 .H3 "Starting X"
 .pp
-At some installations, the X window server runs continually.
-In our default installation, the server is
-started explicitly by each workstation
-user.  This permits a user to select a preferred window system.
-The ``ptolemy'' user in the standard distribution
-is configured under this latter model.
-Unless the installer has modified it to conform with your installation,
-then at the end of the file ~ptolemy/.login you will find the lines:
-.IE "login file"
-.(c
-echo "To prevent X windows from coming up, type ^c now"
-sleep 5
-xinit -g +100+100 -iconic -fg white -bg black \\\\
-        -title login -sb -sl 256 -C -e ~/.xinit
-.)c
-These lines start the X window system when you log in, unless you
-type control-c before the sleep command finishes.
-Some windows will open, together with an icon manager at the right
-of the screen.
-The number, size and location of the windows that are opened
-are specified in the ~ptolemy/.xinit file, which reads:
-.IE "xinit file"
+There are two principal ways that X may be configured:
+.bu
+The X server may be running all the time.  In this configuration,
+when no one is logged in a single window together with a background
+appears.  You don't have to worry about starting X.  A daemon
+program called
+.i xdm
+is responsible for logging you in.
+.bu
+The user may be responsible for starting X \- in this case, when
+you log in you get a bare Sun (or VaxStation or DecStation) tube.
+.pp
+Our sample configuration attempts to support both to some degree.
+If
+.i xdm
+is running, it will use the supplied .xsession file to set up
+windows.  If xdm is not running, and the user is on a bare Sun
+tube, the
+.i xinit
+program will fire up, starting the X server; the .xinitrc file
+is used in this case to configure windows.
+The supplied .xinitrc file reads:
+.IE ".xinitrc file"
+.IE ".xsession file"
 .(c
 #! /bin/csh -f
 xrdb ~/.Xresources
-xterm -geometry +0+0 -fn 9x15 -name "top left" &
-xterm -geometry 80x40+0-0 -fn 9x15 -name "bottom left" &
-xclock -geometry 120x120-0+0 &
 twm &
-/bin/csh
+xclock -geometry 120x120-0+0 &
+xterm -geometry 80x30+0-0 -fn 9x15 -name "bottom left" &
+exec xterm -geometry +0+0 -fn 9x15 -name "login" -ls
 .)c
 The second line reads X resources from the file ~/.Xresources.
-The next three lines open windows using the xterm and xclock commands.
 Then the window manager called ``twm'' is started.
+The next three lines open windows using the xterm and xclock commands.
+The .xsession file works pretty much the same way for xdm installations.
 The function of the mouse buttons is determined by
 the ~ptolemy/.twmrc file.
 This file is reasonably easy to interpret, even without any X experience,
@@ -262,6 +264,13 @@ to the olwm command.  If, for some reason, you must run olwm in the
 click-to-focus mode, you must click the mouse in each window before
 Pigi will accept keyboard commands in that window; it is possible
 but annoying to use Pigi this way.
+.pp
+Since Pigi does not use the NeWS protocol you may get better performance
+on a Sun with 8 Mb or fewer by disabling the NeWS server.  See the
+Open Windows documentation to find out how to do this.
 .EQ
 delim $$
 .EN
+.\" Local variables:
+.\" mode: nroff
+.\" End:
