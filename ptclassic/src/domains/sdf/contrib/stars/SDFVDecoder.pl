@@ -33,10 +33,10 @@ limitation of liability, and disclaimer of warranty provisions.
 	private {
 	    Decoder decoder;
 	}
-	conscalls{ decoder(int(Gain)) }
+	conscalls{ decoder(double(Gain)) }
 	setup {
 	    decoder.Reset();
-	    decoder.SetGain( int(Gain) );
+	    decoder.SetGain( double(Gain) );
 	}
 	go {
 	    out%0 << decoder(int(I%0), int(Q%0));
