@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Const } 
     desc { Output the constant level as a floating-point value. }
-    version { @(#)ACSConstFPCGC.pl	1.1	05/07/98 }
+    version { $Id$
     author { Eric Pauer }
     copyright {
 Copyright (c) 1998-1999 The Regents of the University of California

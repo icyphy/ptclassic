@@ -6,7 +6,7 @@ defcore {
 	desc {
 	    Generates a single delay for multiple lines
 	}
-	version {@(#)ACSDelayCGFPGA.pl	1.0	06 Jun 1999}
+	version {$Id$
 	author { K. Smith }
 	copyright {
 Copyright (c) 1998-1999 Sanders, a Lockheed Martin Company

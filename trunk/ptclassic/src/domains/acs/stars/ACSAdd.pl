@@ -2,7 +2,7 @@ defcorona {
     name { Add }
     domain { ACS }
     desc { Output the sum of the inputs. }
-    version { @(#)ACSAdd.pl	1.1 03/09/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

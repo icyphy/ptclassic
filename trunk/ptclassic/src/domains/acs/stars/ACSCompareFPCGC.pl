@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPCGC }
     corona { Compare } 
     desc { Output 1 (True) if left input is less than right input }
-    version { @(#)ACSCompareFPCGC.pl        1.1 8/5/99 }
+    version { $Id$
     author { Eric Pauer }
     copyright {
 Copyright (c) 1999 The Regents of the University of California

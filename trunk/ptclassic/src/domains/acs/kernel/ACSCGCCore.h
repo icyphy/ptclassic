@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 2/29/98
- Version: @(#)ACSCGCCore.h	1.4	04/28/98
+ Version: $Id$
 
 ***********************************************************************/
 #ifdef __GNUG__

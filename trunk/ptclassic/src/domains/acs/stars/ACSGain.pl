@@ -2,7 +2,7 @@ defcorona {
     name { Gain }
     domain { ACS }
     desc { This is an amplifier; the output is the input multiplied by the "gain" (default 1.0). }
-    version { @(#)ACSGain.pl	1.1 03/16/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

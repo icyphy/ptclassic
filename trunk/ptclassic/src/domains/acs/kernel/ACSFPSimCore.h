@@ -28,7 +28,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 2/25/98
- Version: @(#)ACSFPSimCore.h	1.5	03/18/98
+ Version: $Id$
 
 ***********************************************************************/
 #ifdef __GNUG__

@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSWormhole.cc";
 
-/*  Version @(#)ACSWormhole.cc	1.4 04/28/98
+/*  Version $Id$
 
 @Copyright (c) 1998 The Regents of the University of California.
 All rights reserved.

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { Sub } 
     desc { Output the difference of the inputs, as a floating-point value. }
-    version { @(#)ACSSubFPSim.pl	1.1 03/09/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

@@ -4,7 +4,7 @@ defcore {
     coreCategory { FPSim }
     corona { Exp } 
     desc { Compute the exponential function of the input. }
-    version { @(#)ACSExpFPSim.pl	1.1 03/16/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

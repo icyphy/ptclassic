@@ -31,7 +31,7 @@ ENHANCEMENTS, OR MODIFICATIONS.  COPYRIGHTENDKEY
 
  Programmers:  Eric Pauer (Sanders), Christopher Hylands
  Date of creation: 1/15/98
- Version: @(#)ACSCorona.h	1.16	06/18/99
+ Version: $Id$
 
 ***********************************************************************/
 #ifdef __GNUG__

@@ -26,7 +26,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Programmers:  J. A. Lundblad
  Date of creation: 3/11/98
- Version: @(#)ACSFixSimCore.cc	1.4 03/18/98
+ Version: $Id$
 
 ***********************************************************************/
 

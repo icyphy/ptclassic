@@ -8,7 +8,7 @@ state specifies the file to be written; the special names
 stream, and &lt;stderr&gt; and &lt;cerr&gt;, which specify the
 standard error stream, are also supported.
     }
-    version { @(#)ACSPrinter.pl	1.1 03/09/98 }
+    version { $Id$
     author { James Lundblad }
     copyright {
 Copyright (c) 1998 The Regents of the University of California.

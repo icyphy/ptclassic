@@ -1,7 +1,7 @@
 static const char file_id[] = "ACSKnownCategory.cc";
 /******************************************************************
 Version identification:
-@(#)ACSKnownCategory.cc	1.6	04/20/98
+$Id$
 
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.

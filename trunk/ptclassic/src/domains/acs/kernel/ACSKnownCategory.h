@@ -2,7 +2,7 @@
 #define _ACSKnownCategory_h 1
 /******************************************************************
 Version identification:
-@(#)ACSKnownCategory.h	1.6	04/20/98
+$Id$
 
 Copyright (c) 1997-1998 The Regents of the University of California.
 All rights reserved.

@@ -2,7 +2,7 @@ defcorona {
 	name {Nop}
 	domain {ACS}
 	desc { Does nothing }
-	version {@(#)ACSNop.pl	1.1 01/14/98}
+	version {$Id$
 	author { E. A. Lee and D. Niehaus }
 	copyright {
 Copyright (c) 1990-1994 The Regents of the University of California.
