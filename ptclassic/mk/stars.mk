@@ -76,7 +76,9 @@ ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
 CONTRIBSTARS = $(LIBDIR)/sdfcontribstars.o
 CONTRIB_LIBFILES = $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
 CONTRIB_LIBS = -lsdfcontribstars
-
+IPUS_STAR_LIBFILES = $(LIBDIR)/libipusstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libipus.$(LIBSUFFIX) \
+			$(LIBDIR)/libicp.$(LIBSUFFIX)
 OPTIONAL_STARS = $(ATMSTARS) $(CONTRIBSTARS)
 OPTIONAL_LIBFILES = $(ATM_LIBFILES) $(CONTRIB_LIBFILES)
 OPTIONAL_LIBS = $(ATM_LIBS) $(CONTRIB_LIBS)
@@ -134,8 +136,7 @@ $(LIBDIR)/libsdf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
 $(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
 $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
-$(LIBDIR)/libipusstars.$(LIBSUFFIX) $(LIBDIR)/libipus.$(LIBSUFFIX) \
-$(LIBDIR)/libicp.$(LIBSUFFIX) \
+$(IPUS_STAR_LIBFILES) \
 $(THREAD_STAR_LIBFILES) \
 $(MATLABSTARS_LIBFILE)
 
@@ -152,21 +153,23 @@ HOF_LIBFILES =	$(LIBDIR)/libhofstars.$(LIBSUFFIX) \
 # Tcl/Tk stars can be used in pigiRpc but not ptcl.
 PTINY_TCLSTARS = $(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o
 PTRIM_TCLSTARS = $(PTINY_TCLSTARS)
+IPUS_TCLSTARS =	$(LIBDIR)/ipustclstars.o
 TCLSTARS =	$(PTINY_TCLSTARS) $(LIBDIR)/mdsdftclstars.o \
-		$(LIBDIR)/ipustclstars.o
+		$(IPUS_TCLSTARS)
 
 PTINY_TCL_STAR_LIBS = -lsdftclstars -ldetclstars
 PTRIM_TCL_STAR_LIBS = $(PTINY_TCL_STAR_LIBS)
-TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars \
-		-lipustclstars -lipustcltk
+IPUS_TCL_STAR_LIBS = -lipustclstars -lipustcltk
+TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars $(IPUS_TCL_STAR_LIBS)
 
 PTINY_TCL_STAR_LIBFILES =	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
 				$(LIBDIR)/libdetclstars.$(LIBSUFFIX)
 PTRIM_TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES)
+IPUS_TCL_STAR_LIBFILES =	$(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
+				$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
 TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES) \
 			$(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
-			$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
+			$(IPUS_TCL_STAR_LIBFILES)
 
 # Matlab settings
 include $(ROOT)/mk/matlab.mk
@@ -190,6 +193,7 @@ PTRIM_STAR_LIBS=\
 -lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
 $(MATLABSTAR_LIB) $(MATLABEXT_LIB)
 
+IPUS_STAR_LIBS = -lipusstars -lipus -licp
 # Library switches reqd by stars.  Note that -lptolemy is not included.
 STAR_LIBS=\
 $(OPTIONAL_LIBS) \
@@ -207,7 +211,7 @@ $(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
 -lvhdlfstars -lvhdlf \
 -lvhdlbstars -lvhdlb \
 -lmdsdfstars -lmdsdf \
--lipusstars -lipus -licp \
+$(IPUS_STAR_LIBS) \
 $(THREAD_STAR_LIBS)
 
 # Extra targets
