@@ -70,14 +70,16 @@ namespace ::tycho {
 # then this option sets the horizontal size of the item; otherwise
 # it will read zero and will cause an error if set. (This option
 # should have been called "width," but that is already used for
-# the width of the outline in Tk.)
+# the width of the outline in Tk.) The minimum size of this
+# option is 2.
 #
 # <li><b>-vsize</b>:
 # The vertical size of the item. If the *-shape* option is "point,"
 # then this option sets the vertical size of the item; otherwise
 # it will read zero and will cause an error if set. (This option
 # should have been called "height," but since "width" cannot be used
-# then neither can "height.")
+# then neither can "height.") The minimum size of this
+# option is 2.
 #
 # </ul>
 # 
@@ -195,6 +197,9 @@ body ::tycho::IconItem::_anchor {id canvas slate anchor {x {}} {y {}}} {
 ## -hsize option configuration
 #
 body ::tycho::IconItem::_hsize {id canvas slate hsize} {
+    if { $hsize < 2} {
+        error "Invalid -hsize: $hsize"
+    }
     set option(hsize$id) $hsize
     adjust $id $canvas $slate
 }
@@ -203,6 +208,9 @@ body ::tycho::IconItem::_hsize {id canvas slate hsize} {
 ## -vsize option configuration
 #
 body ::tycho::IconItem::_vsize {id canvas slate vsize} {
+     if { $vsize < 2} {
+        error "Invalid -vsize: $vsize"
+    }
     set option(vsize$id) $vsize
     adjust $id $canvas $slate
 }
