@@ -17,7 +17,7 @@ $Id$
 
 #include "CGStar.h"
 #include "CGWormhole.h"
-#include "Target.h"
+#include "CGTarget.h"
 #include <ctype.h>
 
 /*******************************************************************
