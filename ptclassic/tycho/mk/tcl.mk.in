@@ -34,8 +34,10 @@
 
 SHELL = 	/bin/sh
 
-srcdir =	@srcdir@
-VPATH =		@srcdir@
+# Don't set srcdir or VPATH in this file or you will override the values
+# in the makefile that includes this file.
+#srcdir =	@srcdir@
+#VPATH =		@srcdir@
 
 # Location of Tcl and Tk files
 TCL_SRC_DIR =		@TCL_SRC_DIR@
