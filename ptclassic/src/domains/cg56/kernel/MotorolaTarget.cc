@@ -80,6 +80,7 @@ void MotorolaTarget :: initStates() {
  	mem = 0;
 	assemblerOptions = "-A -B -L";
 	softwareCost = 0;
+	costString.initialize();
 }
 
 void MotorolaTarget :: setup() {
