@@ -101,10 +101,10 @@ class ::tycho::Simulation {
 
     # Print a debug message
     protected method debug {msg} {
-	if $debug {
+	#if $debug {
 	    puts "DEBUG: $simulationName: $msg"
             update
-	}
+	#}
     }
 
     # Generate simulation from the current graph
