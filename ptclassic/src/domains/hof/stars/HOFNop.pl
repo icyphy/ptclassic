@@ -88,6 +88,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	      PortHole *prevpifar = 0;
 	      PortHole *pi = nexti++;
 	      PortHole *po = nexto++;
+	      GenericPort *gpo, *gpi;
 	      while ((pi != 0) ||
 		     (po != 0)) {
 		if (pi == 0) {
@@ -113,6 +114,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		  numOutDelays = po->numInitDelays();
 		  sinkDelayVals = po->initDelayValues();
 		  sourceDelayVals = prevpifar->initDelayValues();
+		  gpo = aliasPointingAt(po);
+		  gpi = 0;
 		  sink->disconnect();
 		} else if (po == 0) {
 		  // Out of outputs.
@@ -137,6 +140,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		  numOutDelays = prevpofar->numInitDelays();
 		  sourceDelayVals = pi->initDelayValues();
 		  sinkDelayVals = prevpofar->initDelayValues();
+		  gpi = aliasPointingAt(pi);
+		  gpo = 0;
 		  source->disconnect();
 		} else {
 		  if((source = pi->far()) == 0 ||
@@ -150,6 +155,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		  prevpifar = pi->far();
 		  numInDelays = pi->numInitDelays();
 		  numOutDelays = po->numInitDelays();
+		  gpo = aliasPointingAt(po);
+		  gpi = aliasPointingAt(pi);
 		  source->disconnect();
 		  sink->disconnect();
 		}
@@ -180,17 +187,9 @@ limitation of liability, and disclaimer of warranty provisions.
 							  sink->parent()->name(),
 							  sink->name());
 		}
-		
-		// Fix aliases
-		GenericPort *gp;
-		if (pi) {
-		  gp = pi->aliasFrom();
-		  if(gp) gp->setAlias(*sink);
-		}
-		if (po) {
-		  gp = po->aliasFrom();
-		  if(gp) gp->setAlias(*source);
-		}
+
+		fixAliases(gpi,pi,sink);
+		fixAliases(gpo,po,source);
 
 		// If the farside porthole belongs to a HOFStar, we can assume it
 		// has not been initialized (since it would have self-destructed).
