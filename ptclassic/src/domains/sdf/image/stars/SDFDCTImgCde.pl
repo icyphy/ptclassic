@@ -91,11 +91,17 @@ the high-priority output. The remainder of the coefficients are sent to
       // Initialize.
       int size = inImage.numCols() * inImage.numRows();
 
-      // set inImagePtr pointing to array representing the FloatMatrix itself
+      // FIXME
+      // Sets inImagePtr pointing to array representing the FloatMatrix itself.
+      // This only works because in the underlying implementation of FloatMatrix,
+      // inImage[0], which returns the 1st row, also returns the entire vector
+      // representing the matrix. 
+      // A method should be added to the FloatMatrix class to does this instead
+      // of relying on this current operation
       const double* inImagePtr = inImage[0];
 
       Ptdsp_RunLengthEncode(inImagePtr, size, int(BlockSize), HiPri,
-			   (double)Thresh, &outDc, &outAc, &indxDc, &indxAc); 
+			   double(Thresh), &outDc, &outAc, &indxDc, &indxAc); 
     }
   }
 
