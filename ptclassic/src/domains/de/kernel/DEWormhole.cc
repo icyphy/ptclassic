@@ -206,9 +206,10 @@ void DEfromUniversal :: sendData ()
         	}
 
 		// send the event
+		myBuffer->backup(numberTokens);
 		for (int k = numberTokens; k > 0; k--) {
 			// 3. get the particle
-			Particle** p = myBuffer->here();
+			Particle** p = myBuffer->next();
 			Particle* pp = myPlasma->get();
 			*pp = **p;
 
