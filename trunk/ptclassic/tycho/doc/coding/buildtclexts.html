@@ -19,6 +19,15 @@ This page discusses the mechanism behind building and installing Tcl
 extensions.  This information is primarily useful for adding your own
 Tcl package.
 
+<MENU>
+<LI> <A HREF="#autoconf software package">Autoconf</A>
+<LI> <A HREF="#tcl extensions, building">Overall Tcl Extension Build
+	Procedure</A>
+<LI> <A HREF="#tcl extensions, overview">Tcl Extensions Overview</A>
+<LI> <A HREF="#tcl extensions, files">Files used to build Tcl extensions</A>
+<LI> <A HREF="#tcl extensions, adding">Adding a Tcl extension</A>
+</MENU>
+
 <H2><A NAME="autoconf software package">Autoconf</A></H2>
 
 Autoconf is a package from the Free Software Foundation that is used
@@ -40,7 +49,8 @@ produce a new <CODE>configure</CODE> file.  If <CODE>autoconf</CODE>
 is not available, then it is possible to edit the <CODE>configure</CODE>
 file directly, it is merely a <CODE>/bin/sh</CODE> script.
 
-<H2>Overall Tcl Extension Build Procedure</H2>
+<H2><A NAME="tcl extensions, building">Overall Tcl Extension Build Procedure</A>
+</H2>
 
 To build and install all the Tcl Extensions, the user sets the <A
 NAME="PTARCH environment variable"> <CODE>PTARCH</CODE> environment
@@ -73,7 +83,7 @@ the shared libraries into <CODE>$TYCHO/lib.$PTARCH</CODE>
 
 </DL>
 
-<H2>Tcl Extensions in general</H2>
+<H2><A NAME="tcl extensions, overview">Tcl Extensions Overview</A></H2>
 
 In Tcl7.5 and later it is fairly easy to load in shared objects that
 add new Tcl commands.  The Tcl <CODE>load</CODE> and
@@ -87,8 +97,9 @@ architecture dependent Tcl library directory.
 
  <P>The shared object has a architecture dependent file extension,
 such as <CODE>.so</CODE> under Solaris2, and <CODE>.sl</CODE> under
-HPUX.  To see what the extension is on your system, start up <CODE>tclsh</CODE>
-or <CODE>itkwish</CODE> and run <CODE>info sharedlibextension</CODE>.
+HPUX.  To see what the extension is on your system, start up
+<CODE>tclsh</CODE> or <CODE>itkwish</CODE> and run <A
+NAME="sharedlibextension"><CODE>info sharedlibextension</CODE></A>.
 
  <P>When the file is loaded by Tcl, a C initialization procedure is
 called by Tcl.  The name of the procedure depends on the name of the
@@ -96,9 +107,14 @@ package or file that is being loaded, see the Tcl <CODE>load</CODE>
 command documentation.  Usually, this procedure is used to create new
 Tcl commands that call user supplied C procedures.
 
+ <P>If you use Tycho to open a file with the <CODE>sharedlibextension</CODE>
+then Tycho passes that file to the Tcl <CODE>load</CODE> command.
+
 </OL>
 
-<H2>Files in Tycho that are used to create Tcl Extensions</H2>
+<H2><A NAME="tcl extensions, files">Files used to build Tcl extensions</A>
+</H2>
+
 Below we describe individual files that are used to create Tcl extensions.
 <DL>
 
@@ -144,7 +160,7 @@ is generated.
 
 </DL>
 
-<H2>Adding a tcl extension</H2>
+<H2><A NAME="tcl extensions, adding">Adding a Tcl extension</A></H2>
 <OL>
 <LI> Create a directory in <CODE>$TYCHO/src</CODE> for your extension.
 
