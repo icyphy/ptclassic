@@ -1,4 +1,4 @@
-static const char file_id[] = "CGSymbol.cc";
+static const char file_id[] = "$RCSfile$";
 /******************************************************************
 Version identification:
 $Id$
@@ -14,91 +14,72 @@ $Id$
 #pragma implementation
 #endif
 
-#include "CGSymbol.h"
-#include "miscFuncs.h"
+#include "SymbolList.h"
 #include "StringList.h"
-#include "type.h"
-#include <string.h>
-
-Symbol::Symbol(const char* k,const char* s) {
-	key = savestring(k);
-	symbol = savestring(s);
-}
-
-Symbol::~Symbol() {
-	LOG_DEL; delete(key);
-	LOG_DEL; delete(symbol);
-}
+#include "miscFuncs.h"
 
 int BaseSymbolList::numSymbols = 0;
 
-void BaseSymbolList::reset() { 
-	numSymbols = 0;
+StringList BaseSymbolList::symbol(const char* string)
+{
+    StringList sym;
+    sym << string << separator << numSymbols++;
+    return sym;
 }
 
-// Lookup unique symbol, if one doesn't exist, create new symbol.
-// SymbolLists are stored in pairs: key, symbol.
-const char* BaseSymbolList::lookup(const char* name) {
-	if (name==NULL) return NULL;
-	ListIter next(*this);
-	Symbol* p;
-	while ((p = (Symbol*)next++) != 0)
-		if(!strcmp(name,p->key)) return p->symbol;
-	return NULL;
+// Put a named symbol in the list.
+// Return NULL on error.
+const char* BaseSymbolList::append(const char* name)
+{
+    char* sym = savestring(symbol(name));
+    if (NamedList::append(sym, name)) return sym;
+    else return NULL;
 }
 
-const char* BaseSymbolList::add(const char* name) {
-	if (name==NULL) return NULL;
-	StringList symbol;
-	symbol << name << separator << numSymbols++;
-	LOG_NEW; Symbol* newSymbol = new Symbol(name,symbol);
-	tup(newSymbol);
-	return newSymbol->symbol;
+// Put a named symbol at the head of the list.
+// Return NULL on error.
+const char* BaseSymbolList::prepend(const char* name)
+{
+    char* sym = savestring(symbol(name));
+    if (NamedList::prepend(sym, name)) return sym;
+    else return NULL;
 }
 
-int BaseSymbolList::remove(Symbol* s) { 
-	LOG_DEL; delete(s);
-	return SequentialList::remove(s);
+// Remove a named symbol from the list.
+// Return FALSE on error.
+int BaseSymbolList::remove(const char* name)
+{ 
+    char* symbol = (char*)NamedList::get(name);
+    if (symbol != NULL)
+    {
+	LOG_DEL; delete symbol;
+	return NamedList::remove(name);
+    }
+    else return FALSE;
 }
 
-void BaseSymbolList::initialize() {
-	ListIter next(*this);
-	for (int i=size(); i > 0; i--) {
-		Symbol* p = (Symbol*)next++;
-		LOG_DEL; delete p;
-	}           
-	SequentialList::initialize();
-}               
+// Delete all the symbols in the list.
+void BaseSymbolList::deleteSymbols()
+{
+    NamedListIter symbol(*this);
+    char* s;
 
-BaseSymbolList::~BaseSymbolList() {               
-    ListIter next(*this);
-    for (int i=size(); i > 0; i--) {           
-                Symbol* p = (Symbol*)next++;
-                LOG_DEL; delete p;
-    }           
-}               
+    while((s = (char*)symbol++) != NULL)
+    {
+	LOG_DEL; delete s;
+    }
+}
 
-const char* SymbolList::lookup(const char* name) {
-	if (name==NULL) return NULL;
-	const char* pSymbol = BaseSymbolList::lookup(name);
-	if (pSymbol==NULL) pSymbol = add(name);
-	return pSymbol;
+const char* SymbolList::lookup(const char* name)
+{
+    const char* symbol = get(name);
+    if (symbol == NULL) symbol = append(name);
+    return symbol;
 }
 	
-const char* NestedSymbolList::push(const char* name) {
-    	return add(name);
-}
-
-const char* NestedSymbolList::pop() {
-	if (top() == NULL) return NULL;
-	Symbol* pSymbol = top();
-	StringList symbol = pSymbol->symbol;
-	remove(pSymbol);	
-	return symbol;
-}
-
-const char* NestedSymbolList::lookup(const char* name) {
-	if (top() == NULL) return NULL;
-	if (name == NULL) return top()->symbol;
-	return BaseSymbolList::lookup(name);
+StringList SymbolStack::pop()
+{
+    StringList symbol = get();
+    remove();
+    return symbol;
 }
