@@ -33,7 +33,13 @@ setup {
   numXfer = input.numXfer();
 //  VHDLCSynchComm::setup();
 }
-	
+
+// Called only once, after the scheduler is done
+begin {
+  // Call method to wire up a V2C VHDL entity
+  targ()->registerV2C(int(pairNumber),numXfer);
+}
+
 go {
   // Add code to synch at end of main.
   StringList postSynch;
@@ -41,9 +47,8 @@ go {
   postSynch << "V2C" << int(pairNumber) << "_go" << " <= " << "'0';\n";
   postSynch << "wait on " << "V2C" << int(pairNumber) << "_done" << "'transaction;\n";
 
-  addCode(postSynch, "postSynch");
-  // Call method to wire up a V2C VHDL entity
-  targ()->registerV2C(int(pairNumber),numXfer);
+//  addCode(postSynch, "postSynch");
+  addCode(postSynch);
 }
 
 }
