@@ -21,28 +21,50 @@ set ed_ToplevelNumbers(ed_Num) 0
 #  in tk.tcl: , , , ,  + various mouse-related bindings
 # Old bindings if any are overwritten
 
+# Emacs/shell type bindings include:
+#   Kill line
+#   Kill word
+#   Forward one character
+#   Backward one character
+#   Goto beginning of line
+#   Goto EOL
+#   Kill to EOL
+#   Delete insertion point character
+
 # Useless bindings:
 #    bind Entry <Control-Key> "+ [bind Entry <Any-Key>]"
 #    bind Entry <Control-t> {ed_AddScroll %W}
 
-    bind Entry <Control-f> {+
+    bind Entry <Control-f> {
 	%W icursor [expr [%W index insert]+1]; tk_entrySeeCaret %W
     }
-    bind Entry <Control-b> {+
+    bind Entry <Control-b> {
 	%W icursor [expr [%W index insert]-1]; tk_entrySeeCaret %W
     }
-    bind Entry <Control-a> {+
+    bind Entry <Control-a> {
 	%W icursor 0; tk_entrySeeCaret %W
     }
-    bind Entry <Control-e> {+
+    bind Entry <Control-e> {
 	%W icursor end; tk_entrySeeCaret %W
     }
-    bind Entry <Control-k> {+
+    bind Entry <Control-k> {
 	%W delete insert end; tk_entrySeeCaret %W
     }
-    bind Entry <Control-d> {+
+    bind Entry <Control-d> {
 	%W delete insert; tk_entrySeeCaret %W
     }
+    bind Entry <Any-Enter> {
+	focus %W
+    }
+# Appropriate?  Might need some refinement
+
+    bind Entry <3> "[bind Entry <2>]"
+    bind Entry <B3-Motion> "[bind Entry <B2-Motion>]"
+    #binds third mouse button to scanning
+
+    bind Entry <2> {%W insert insert [selection get]; tk_entrySeeCaret %W}
+    bind Entry <B2-Motion> ""
+    #binds second mouse button to selection insertion
 
 # An attempt at binding <space> to deleting the current selection
 #    bind Entry <space> {
