@@ -34,6 +34,9 @@ public:
 	void go();
 	void wrapup() { endSimulation(); }
 
+	// prepare for a new phase of firing
+	void startNewPhase();
+
 	// constructor
 	DEWormhole(Galaxy &g) : Wormhole(*this,g) {
 		buildEventHorizons ();
