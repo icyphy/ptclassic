@@ -21,24 +21,24 @@ class Error {
 public:
 // this pair tells the schedulers to halt, adds a prefix "ERROR: ".
 	static void abortRun (const char*, const char* = 0, const char* = 0);
-	static void abortRun (NamedObj&, const char*, const char* = 0,
+	static void abortRun (const NamedObj&, const char*, const char* = 0,
 			      const char* = 0);
 // this pair does not tell the schedulers to halt, prefix "ERROR: ".
 	static void error (const char*, const char* = 0, const char* = 0);
-	static void error (NamedObj&, const char*, const char* = 0,
+	static void error (const NamedObj&, const char*, const char* = 0,
 			   const char* = 0);
 // this pair does not tell the schedulers to halt, prefix "WARNING: ".
 // there may be other differences as well.
 	static void warn (const char*, const char* = 0, const char* = 0);
-	static void warn (NamedObj&, const char*, const char* = 0,
+	static void warn (const NamedObj&, const char*, const char* = 0,
 			  const char* = 0);
 // this pair has no prefix at all.
 	static void message (const char*, const char* = 0, const char* = 0);
 
-	static void message (NamedObj&, const char*, const char* = 0,
+	static void message (const NamedObj&, const char*, const char* = 0,
 			     const char* = 0);
 
 	static int canMark();
-	static void mark (NamedObj&);
+	static void mark (const NamedObj&);
 };
 #endif
