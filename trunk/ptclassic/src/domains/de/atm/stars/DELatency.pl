@@ -7,7 +7,7 @@ defstar{
        name {Latency}
        domain {DE}
        version {$Id$}
-       location {ATM demo library}
+       location { DE ATM library }
        author { Allen Lao }
        copyright { 
 Copyright (c) 1990-%Q% The Regents of the University of California.

@@ -14,7 +14,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
-	location { ATM demo library }
+	location { DE ATM library }
 
         explanation {
 Star is to be placed at switch output and feeds into "graphing" star,

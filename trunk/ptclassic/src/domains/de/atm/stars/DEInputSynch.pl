@@ -20,7 +20,7 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
 
-       location {ATM demo library}
+       location { DE ATM library }
 
        explanation {
 An SDF-in-DE wormhole, in order to fire, requires at least one message

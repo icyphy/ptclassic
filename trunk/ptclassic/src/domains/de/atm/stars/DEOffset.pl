@@ -12,7 +12,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 }
-	location { ATM demo library }
+	location { DE ATM library }
 	explanation {
 Merely produces a DC output (default zero offset) when stimulated
 by an input.  The time stamp of the output is the same as
