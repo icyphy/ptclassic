@@ -47,16 +47,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Date of creation: 5/26/90
  Revisions:
 
- State is a data member of a Block, it is where paremeters and
+ State is a data member of a Block, it is where parameters and
  state information is stored for that Block.
 
 **************************************************************************/
 
-extern int sys_nerr;
 
 #if defined(netbsd_i386) || defined(freebsd)
+extern const int sys_nerr;
 extern const char *const sys_errlist[];
 #else
+extern int sys_nerr;
 extern char *sys_errlist[];
 #endif
 
