@@ -26,11 +26,11 @@ defstar {
 	}
 	input {
 		name{input}
-		type{ANYTYPE}
+		type{float}
 	}
 	output {
 		name{output}
-		type{ANYTYPE}
+		type{float}
 	}
 	defstate {
 		name {factor}
@@ -50,11 +50,8 @@ defstar {
 		default {0.0}
 		desc { "fill value" }
 	}
-	constructor {
-		input.inheritTypeFrom(output);
-	}
 	start {
-		input.setSDFParams(int(factor),int(factor)-1);
+		output.setSDFParams(int(factor),int(factor)-1);
 		if (int(phase) >= int(factor))
 			Error::abortRun(*this, ": phase must be < factor");
 	}
