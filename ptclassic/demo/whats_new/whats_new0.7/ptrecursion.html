@@ -1,0 +1,69 @@
+<!--  $Id$ -->
+<html>
+<head>
+<title>Recursive Galaxy Tests</title>
+</head>
+<body bgcolor=#faf0e6>
+<H1>Recursive Galaxy Tests</H1>
+
+<PRE>
+To: Christopher Hylands <cxh@eecs.berkeley.edu>
+cc: eal@eecs.berkeley.edu (Edward A. Lee), jbuck@watson.eecs.berkeley.edu,
+        ptdesign@watson.eecs.berkeley.edu
+Subject: Re: Avoiding coredumps with recursive galaxy definitions 
+Date: Wed, 21 Aug 1996 18:17:09 -0400
+From: Tom Lane <tgl@sss.pgh.pa.us>
+
+Attached is a patch that implements the KnownBlock changes I proposed
+a few days ago.  To summarize:
+
+1. KnownBlock::clone and KnownBlock::makeNew detect recursion loops
+(defined as an attempt to clone a KnownBlock while a prior clone of
+the same KnownBlock is still executing).  An error report is produced
+with Error::abortRun, and NULL is returned as though the block didn't
+exist.  The NULL return tends to lead to additional, extraneous error
+messages afterwards, but it beats the heck out of stack overflow and
+coredump when you've accidentally created a self-referential galaxy.
+This defense does *not* prevent the DDF eratosthenes demo from working.
+
+2. KnownBlock keeps track of the definition source of each known block,
+and issues warning messages (*not* fatal errors) if it changes.  The
+definition source can be "built-in star" (represented by a NULL pointer),
+"dynamically loaded star", "ptcl defgalaxy command", or the pathname
+of a Vem facet.  The possible warning messages are:
+  * Multiple built-in definitions of the same block name/domain
+    (certainly a programmer error);
+  * Star definition overridden by galaxy definition or vice versa;
+  * Vem-facet galaxy replaced by one originating from a different Vem
+    facet (ie, duplicate facet names);
+  * Vem-facet galaxy replaced by a ptcl defgalaxy or vice versa.
+Although all but the first *could* be valid, they are all more likely
+to be user mistakes, and the results could be quite mystifying if the
+user doesn't know what has happened.  So I think a nonfatal warning
+message is appropriate system behavior.
+
+Note that recompiling a Vem facet, reloading a dynamically linked star,
+or re-executing a defgalaxy do *not* count as definition source changes
+and do not trigger a warning.  So the messages are not likely to be
+triggered by ordinary use of the system.
+
+I had originally planned to keep track of the exact filename source of
+dynamically loaded stars as well, but this seems rather difficult given
+the way that Linker.cc behaves --- in particular, during a multilink
+there's no easy way to tell which input file contains which constructors,
+and getting it wrong would lead to bogus warnings.  So I punted on that;
+all dynamically loaded block definitions are treated as coming from the
+same source.  I doubt this'll hurt the usefulness of the warnings much.
+Erroneously loading two distinct-but-identically-named dynamic stars
+during the same session seems much less probable than loading two
+different Vem facets with the same name.
+
+</PRE>
+<hr>
+<p>
+Last updated: $Date$,
+<ADDRESS><a
+href="mailto:cxh@eecs.berkeley.edu">cxh@eecs.berkeley.edu</a><br>
+</ADDRESS>
+</body>
+</html>
