@@ -4,7 +4,7 @@ static const char file_id[] = "CGCMacroStar.cc";
 Version identification:
 $Id$
 
-Copyright (c) 1990-1994 The Regents of the University of California.
+Copyright (c) 1990-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
@@ -62,10 +62,10 @@ void CGCMacroStar :: setProp(CGStar* s, int pix, int invoc, int flag) {
 	myCluster = (CGMacroClusterBag*) s;
 
 	if (flag) {
-		input.setPort("input", this, ANYTYPE);
-		output.setPort("output", this, ANYTYPE);
-		CGClustPortIter nextp(*myCluster);
-		CGClustPort* p;
+		input.setPort("input", this, FLOAT);
+		output.setPort("output", this, FLOAT);
+		CGMacroClustPortIter nextp(*myCluster);
+		CGMacroClustPort* p;
 		PortHole * newP;
 		while ((p = nextp++) != 0) {
 			if (p->isItInput()) {
@@ -74,13 +74,14 @@ void CGCMacroStar :: setProp(CGStar* s, int pix, int invoc, int flag) {
 				newP = &output.newPort();
 			}
 			DFPortHole& ref = p->inPtr()->real();
-			newP->setPort(p->name(), this, ref.resolvedType(),
-				      ref.numXfer());
+			DataType dt = ref.resolvedType();
+			if (!dt) dt = ANYTYPE;
+			newP->setPort(p->name(), this, dt, ref.numXfer());
 	   	}
 	}
 }
 
-void CGCMacroStar :: initialize() {}
+// void CGCMacroStar :: initialize() {}
 
 // redefine go() method to generate code for the inside wormhole.
 void CGCMacroStar :: go() {
