@@ -220,7 +220,7 @@ extern int pclose(FILE *);
 extern void perror (const char *);
 extern int printf (const char *, ...);
 
-#if !defined(PTHPPA) && !defined(PTLINUX) && !defined(PTALPHA)
+#if !defined(PTHPPA) && !defined(PTLINUX) && !defined(PTALPHA) && !defined(PTSOL2_4)
 extern int putenv (char *);
 #endif /* ! PTHPPA && ! PTLINUX && ! PTALPHA */
 
@@ -303,6 +303,12 @@ extern int unlink(const char *);
 #if defined(PT_ULTRIX) || defined(PTHPPA) || defined(PTIRIX5) || defined(PTSOL2) || defined(PTLINUX) || defined(PTALPHA)
 #define NEED_STRICMP
 #endif
+
+/* Do we have termios.h?  See octtools/Xpackages/iv/ivGetLine.c */
+#if defined(PTHPPA) || defined(SYSV) || defined(PTIRIX5) || defined(PTLINUX)
+#define HAS_TERMIOS
+#endif
+
 
 /* End of octtools specific defines */
 
