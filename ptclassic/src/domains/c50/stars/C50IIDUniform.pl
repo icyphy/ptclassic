@@ -30,7 +30,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		type { fix }
 		default { ONE }
 		desc { range of random number generator is [-range,+range] }
-		attributes { A_UMEM|A_NOINIT|A_NONSETTABLE}	
+		attributes { A_UMEM|A_NOINIT}	
 	}
 	defstate {
 		name { seed }
