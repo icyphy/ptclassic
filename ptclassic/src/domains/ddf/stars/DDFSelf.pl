@@ -9,6 +9,7 @@ defstar {
 	explanation {
 This is a star for recursion.  At runtime, it appears to contain
 a clone of the galaxy whose name is given by "recurGal".
+.Ir "recursion"
 That galaxy is supplied with the input particles and executed.
 That galaxy may be one within which this instance of Self resides,
 hence realizing recursion.
