@@ -73,5 +73,9 @@ static CGCDomain proto;
 
 // declare the default Target object
 
-static CGCTarget defaultCGCtarget;
+static CGCTarget defaultCGCtarget("default-CGC","CGCStar",
+"Generate stand-alone C programs and compile them.  The program\n"
+"and associated makefile is written to a directory given as a Target param.\n"
+"Can use either the default SDF scheduler or Joe's loop scheduler.");
+
 static KnownTarget entry(defaultCGCtarget,"default-CGC");
