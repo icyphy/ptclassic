@@ -87,7 +87,7 @@ the OverflowHandler will be called.
                 if ( int(ArrivingPrecision) ) {
 		  diff = Fix(pos%0);
                   while ((p = nexti++) != 0) {
-                    diff -= Fix((*p)%0);
+                    diff -= (Fix)((*p)%0);
 		    checkOverflow(diff);
 		  }
 		}
@@ -95,7 +95,7 @@ the OverflowHandler will be called.
 		  fixIn = Fix(pos%0);
 		  diff = fixIn;
                   while ((p = nexti++) != 0) {
-		    fixIn = Fix((*p)%0);
+		    fixIn = (Fix)((*p)%0);
                     diff -= fixIn;
 		    checkOverflow(diff);
 		  }
