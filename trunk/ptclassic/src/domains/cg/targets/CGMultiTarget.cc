@@ -50,21 +50,26 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "Geodesic.h"
 #include "pt_fstream.h"
 #include "stdlib.h"
+#include "BooleanMatrix.h"
 
 CGMultiTarget::CGMultiTarget(const char* name,const char* sClass,
 			     const char* desc) :
-	MultiTarget(name,sClass,desc), parProcs(0)
+	MultiTarget(name,sClass,desc), parProcs(0), rm(0)
 {
 	addState(childType.setState("childType",this,"default-CG",
 				    "child proc types"));
 	addState(resources.setState("resources",this,"",
 	"define the specific resources of child targets (separated by ;)"));
+	addState(relTimeScales.setState("relTimeScales",this,"1",
+		"define the relative time scales of child targets"));
 	addState(filePrefix.setState("filePrefix",this,"code_proc",
 				    "prefix for output code files"));
         addState(ganttChart.setState("ganttChart",this,"YES",
                                      "if true, display Gantt chart"));
         addState(logFile.setState("logFile",this,"",
                                      "log file to write to (none if empty)"));
+        addState(ammortizedComm.setState("ammortizedComm",this,"NO",
+                                     "try to ammortize communication?"));
 	addState(ignoreIPC.setState("ignoreIPC",this,"NO",
 				   "ignore communication cost?"));
 	addState(overlapComm.setState("overlapComm",this,"NO",
@@ -78,6 +83,7 @@ CGMultiTarget::~CGMultiTarget() {
 	if (!inherited()) deleteChildren();
 	delSched();
 	addedStates.deleteAll();
+	LOG_DEL; delete rm;
 }
 
 Block* CGMultiTarget::makeNew() const {
@@ -92,6 +98,13 @@ void CGMultiTarget::setup() {
 	// prepare child targets
 	prepareChildren();
 	if (SimControl :: haltRequested()) return;
+
+	// check whether communication can be amortized or not.
+	// If YES, setup the  Reachability matrix.
+	if ((nChildrenAlloc > 1) && int(ammortizedComm)) {
+		LOG_NEW; 
+		rm = new BooleanMatrix(nChildrenAlloc, nChildrenAlloc); 
+	}
 
 	//choose the right scheduler
 	chooseScheduler();
@@ -131,6 +144,15 @@ void CGMultiTarget :: prepareChildren() {
 	if (!inherited()) {
 		deleteChildren();
 		nChildrenAlloc = nprocs;
+		if (childType.size() > nChildrenAlloc) {
+			Error :: warn("too many child types are",
+			  " sepcified: look at [nprocs] parameter");
+		}
+		if (childType.size() != relTimeScales.size()) {
+			Error :: warn("unmatched number of parameters: ",
+			"[childType] and [relTimeScales].\n",
+			"By default, we assume the same time scale, 1");
+		}
 		StringList tname;
 		for (int i = 0; i < nChildrenAlloc; i++) {
 			Target* t = createChild(i);
@@ -549,6 +571,40 @@ DataFlowStar* CGMultiTarget :: createCollect() {
 	LOG_NEW; return (new CGCollect);
 }
 	
+// return the execution of a star if scheduled on the given target.
+// If the target does not support the star, return -1.
+int CGMultiTarget :: execTime(DataFlowStar* s, CGTarget* t) {
+	if ((!t) || (childType.size() <= 1)) return s->myExecTime();
+	else if (!t->support(s)) return -1;
+
+	// for heterogeneous case, we need to consider relative time
+	// scale
+	for (int i = 0; i < nChildrenAlloc; i++) 
+		if (child(i) == t) break;
+	int mx = childType.size() - 1;
+	if (i > mx) i = mx;
+	return relTimeScales[i] * t->execTime(s);
+}
+		
+	///////////////////////////////
+	// Communication Amortization
+	///////////////////////////////
+
+// update the matrix from createSend() method.
+void CGMultiTarget :: updateRM(int from, int to) {
+	if (!rm) return;
+	rm->setElem(from, to, 1);
+	rm->orRows(from, to);
+}
+
+// return TRUE if ammortization is possible, FALSE otherwise.
+int CGMultiTarget :: ammortize(int from, int to) {
+	if (!rm) return FALSE;
+	int x = rm->getElem(from, to) + rm->getElem(to, from);
+	if (x < 2) return TRUE;
+	else return FALSE;
+}
+
 	/////////////////////////
 	// CGDDF support
 	/////////////////////////
