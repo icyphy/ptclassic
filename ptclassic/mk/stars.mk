@@ -47,276 +47,390 @@
 # SDF tcl stars are omitted because they do.
 
 # Stub files that pull in the stars.
-PTINY_SDFSTARS = $(LIBDIR)/sdfstars.o $(LIBDIR)/sdfdspstars.o \
-	$(LIBDIR)/sdfmatrixstars.o $(MATLABSTARS_DOT_O)
-SDFSTARS = $(PTINY_SDFSTARS) $(LIBDIR)/sdfimagestars.o
-CGCSTARS = $(LIBDIR)/cgcstars.o $(LIBDIR)/cgctcltkstars.o
-CG96STARS = $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
-CG56STARS = $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
-SilageSTARS = $(LIBDIR)/silagestars.o
-CGSTARS = $(LIBDIR)/cgstars.o
-DDFSTARS = $(LIBDIR)/ddfstars.o
-THORSTARS = $(LIBDIR)/thorstars.o
-DESTARS = $(LIBDIR)/destars.o
-CGDDFSTARS = $(LIBDIR)/cgddfstars.o 
-BDFSTARS = $(LIBDIR)/bdfstars.o
-VHDLFSTARS = $(LIBDIR)/vhdlfstars.o
-VHDLBSTARS = $(LIBDIR)/vhdlbstars.o
-MDSDFSTARS = $(LIBDIR)/mdsdfstars.o
-CPSTARS = $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
-PNSTARS = $(LIBDIR)/pnstars.o
-IPUSSTARS = $(LIBDIR)/ipusstars.o
 
-# Optional star libraries
-ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o $(LIBDIR)/sdfatmstars.o
-ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
-	$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) $(LIBDIR)/libatm.$(LIBSUFFIX)
-ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
-CONTRIBSTARS = $(LIBDIR)/sdfcontribstars.o
-CONTRIB_LIBFILES = $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
-CONTRIB_LIBS = -lsdfcontribstars
-IPUS_STAR_LIBFILES = $(LIBDIR)/libipusstars.$(LIBSUFFIX) \
+#STARS =
+#TARGETS =
+#LIBS =
+#LIBFILES =
+#PALETTES =
+#PT_DEPEND = 
+
+ifndef DEFAULT_DOMAIN
+	DEFAULT_DOMAIN = SDF
+endif 
+
+# Matlab settings
+include $(ROOT)/mk/matlab.mk
+
+CG56T = $(OBJDIR)/domains/cg56/targets
+CG96T = $(OBJDIR)/domains/cg96/targets
+CGCT = $(OBJDIR)/domains/cgc/targets
+CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
+CGT = $(OBJDIR)/domains/cg/targets
+SDFT = $(OBJDIR)/domains/sdf/targets
+
+# Tcl/Tk stars can be used in pigiRpc but not ptcl, for this we define TK
+
+ifdef CG96
+	CG = 1
+	PALETTES += PTOLEMY/src/domains/cg96/icons/cg96.pal
+	STARS += $(LIBDIR)/cg96dspstars.o $(LIBDIR)/cg96stars.o
+	TARGETS += $(CG96T)/Sim96Target.o
+	LIBS += -lcg96dspstars -lcg96stars -lcg96
+	LIBFILES += $(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcg96stars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcg96.$(LIBSUFFIX)
+endif
+
+ifdef CG56
+	CG = 1
+	PALETTES += PTOLEMY/src/domains/cg56/icons/main.pal
+	STARS += $(LIBDIR)/cg56dspstars.o $(LIBDIR)/cg56stars.o
+	LIBS += -lcg56dspstars -lcg56stars -lcg56
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		LIBS += -lcg56targets
+		LIBFILES += $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
+	else
+		TARGETS += $(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
+			$(CG56T)/S56XTargetWH.o \
+			$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
+			$(CG56T)/CG56MultiSimSend.o \
+			$(CG56T)/CG56MultiSimReceive.o \
+			$(CG56T)/CG56XCReceive.o $(CG56T)/CG56XCSend.o \
+			$(CG56T)/CG56XCPeek.o $(CG56T)/CG56XCPoke.o \
+			$(CG56T)/CGCXReceive.o $(CG56T)/CGCXSend.o \
+			$(CG56T)/CGCXPeek.o $(CG56T)/CGCXPoke.o \
+	 		$(CG56T)/CGCXSynchComm.o $(CG56T)/CG56XCSynchComm.o \
+			$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
+			$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
+	endif
+endif
+
+ifdef SILAGE
+	PALETTES += PTOLEMY/src/domains/silage/icons/silage.pal
+	STARS += $(LIBDIR)/silagestars.o
+	LIBS += -lsilagestars -lsilage
+	LIBFILES += $(LIBDIR)/libsilagestars.$(LIBSUFFIX) \
+		$(LIBDIR)/libsilage.$(LIBSUFFIX)
+endif
+
+ifdef DDF
+	PALETTES += PTOLEMY/src/domains/ddf/icons/ddf.pal
+	STARS += $(LIBDIR)/ddfstars.o
+	LIBS += -lddfstars -lddf
+	LIBFILES += $(LIBDIR)/libddfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libddf.$(LIBSUFFIX)
+endif
+
+ifdef THOR
+	PALETTES += PTOLEMY/src/domains/thor/icons/thor.pal
+	STARS += $(LIBDIR)/thorstars.o
+	LIBS += -lthorstars -lthor
+	LIBFILES += $(LIBDIR)/libthorstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libthor.$(LIBSUFFIX)
+endif
+
+ifdef CGCFULL
+	CGC = 1
+	CGCTK = 1
+endif
+
+ifdef CGFULL
+	CG = 1
+	CGPAR = 1
+endif
+
+ifdef CGDDF
+	CGC = 1
+	STARS += $(LIBDIR)/cgddfstars.o
+	TARGETS += $(CGCT)/main/CGCDDFTarget.o
+	LIBS += -lcgddf
+	LIBFILES += $(LIBDIR)/libddfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libddf.$(LIBSUFFIX)
+else
+	#FIXME!!  We shouldn't have to include CGDDF if we want CGPAR!
+	#This is for a CGMultiTarget dependency
+	ifdef CGPAR
+		LIBS += -lcgddf
+	endif
+endif
+
+ifdef VHDL
+	PALETTES += PTOLEMY/src/domains/vhdlf/icons/vhdlf.pal
+	PALETTES += PTOLEMY/src/domains/vhdlb/icons/vhdlb.pal
+	CG = 1
+	STARS += $(LIBDIR)/vhdlfstars.o $(LIBDIR)/vhdlbstars.o
+	LIBS += -lvhdlfstars -lvhdlf -lvhdlbstars -lvhdlb
+	LIBFILES += $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libvhdlb.$(LIBSUFFIX)
+endif
+
+ifdef MDSDF
+	PALETTES += PTOLEMY/src/domains/mdsdf/icons/mdsdf.pal
+	SDF = 1
+	STARS +=  $(LIBDIR)/mdsdfstars.o
+	LIBS += -lmdsdfstars -lmdsdf
+	LIBFILES += $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libmdsdf.$(LIBSUFFIX)
+	ifdef TK 
+		STARS += $(LIBDIR)/mdsdftclstars.o
+		LIBFILES += $(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX)
+		LIBS += -lmdsdftclstars
+	endif
+endif
+
+ifdef CP
+	PALETTES += PTOLEMY/src/domains/cp/icons/cp.pal
+	LPW = 1
+	STARS += $(LIBDIR)/cpstars.o $(LIBDIR)/cpipstars.o
+	LIBS += -lcpstars -lcpipstars -lcp -laudio
+	LIBFILES += $(LIBDIR)/libcpstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcp.$(LIBSUFFI
+endif
+
+ifdef LPW
+	LIBS += -llwpthread -llwp
+	LIBFILES += $(LIBDIR)/liblwpthread.$(LIBSUFFIX)
+endif
+
+ifdef PN
+	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
+	ifneq (,$(filter sun% sol%,$(PTARCH)))
+		STARS += $(LIBDIR)/pnstars.o
+		LIBS += -lpnstars -lpn
+		LIBFILES += $(LIBDIR)/libpnstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libpn.$(LIBSUFFIX)
+		# POSIX thread library from Florida State University.
+		LIBS += -lposixthread -L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
+		LIBFILES += $(LIBDIR)/libposixthread.$(LIBSUFFIX)
+	endif
+endif
+
+ifdef IPUS
+	PALETTES += PTOLEMY/src/domains/ipus/icons/ipus.pal
+	ifdef TK
+		STARS += $(LIBDIR)/ipustclstars.o
+		LIBFILES += $(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
+		LIBS += -lipustclstars -lipustcltk
+	endif
+	STARS += $(LIBDIR)/ipusstars.o
+	LIBS += -lipusstars -lipus -licp
+	LIBFILES += $(LIBDIR)/libipusstars.$(LIBSUFFIX) \
 			$(LIBDIR)/libipus.$(LIBSUFFIX) \
 			$(LIBDIR)/libicp.$(LIBSUFFIX)
-OPTIONAL_STARS = $(ATMSTARS) $(CONTRIBSTARS)
-OPTIONAL_LIBFILES = $(ATM_LIBFILES) $(CONTRIB_LIBFILES)
-OPTIONAL_LIBS = $(ATM_LIBS) $(CONTRIB_LIBS)
+endif
 
-# parallel scheduler libraries.
-PARLIBFILES = $(LIBDIR)/libDC.$(LIBSUFFIX) $(LIBDIR)/libHu.$(LIBSUFFIX) \
-	$(LIBDIR)/libMacro.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX) \
-	$(LIBDIR)/libDL.$(LIBSUFFIX) $(LIBDIR)/libMSH.$(LIBSUFFIX) \
-	$(LIBDIR)/libPar.$(LIBSUFFIX) \
-	$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX)
+ifdef MQ
+	SDF = 1
+	DE = 1
+	ATMSTARS = $(LIBDIR)/mqstars.o $(LIBDIR)/deatmstars.o \
+		$(LIBDIR)/sdfatmstars.o
+	ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) \
+		$(LIBDIR)/libmqstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libdeatmstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libsdfatmstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libatm.$(LIBSUFFIX)
+	ATM_LIBS= -lmqstars -lmq -ldeatmstars -lsdfatmstars -latm
+endif
 
-# Library files reqd by stars.
-# Note that libptolemy.$(LIBSUFFIX) is not included.
-PTINY_STAR_LIBFILES=\
-$(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
-$(MATLABSTAR_LIBFILE) \
-$(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
-$(LIBDIR)/libsdf.$(LIBSUFFIX) \
+ifdef DE
+	PALETTES += PTOLEMY/src/domains/de/icons/de.pal
+	STARS += $(LIBDIR)/destars.o
+	LIBS += -ldestars -lde
+	LIBFILES += $(LIBDIR)/libdestars.$(LIBSUFFIX) \
+		$(LIBDIR)/libde.$(LIBSUFFIX)
+	ifdef TK
+		STARS += $(LIBDIR)/detclstars.o
+		LIBS += -ldetclstars
+		LIBFILES += $(LIBDIR)/libdetclstars.$(LIBSUFFIX)
+	endif
+	#FIXME - This is ugly, there are DE stars that depend on the image lib
+	ifndef SDFIMAGE
+		LIBS += -lImage
+		LIBFILES += $(LIBDIR)/libImage.$(LIBSUFFIX)
+	endif
+endif
 
-PTRIM_STAR_LIBFILES=\
-$(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
-$(LIBDIR)/libcgc.$(LIBSUFFIX) \
-$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(LIBDIR)/libcg.$(LIBSUFFIX) \
-$(LIBDIR)/libddfstars.$(LIBSUFFIX) $(LIBDIR)/libddf.$(LIBSUFFIX) \
-$(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) $(LIBDIR)/libImage.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
-$(MATLABSTAR_LIBFILE) \
-$(LIBDIR)/libbdfstars.$(LIBSUFFIX) $(LIBDIR)/libbdf.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
-$(LIBDIR)/libsdf.$(LIBSUFFIX) \
+ifdef CM5
+	CGC = 1
+	TARGETS += $(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
+		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
+endif
 
-STAR_LIBFILES=\
-$(OPTIONAL_LIBFILES) \
-$(LIBDIR)/libcgcstars.$(LIBSUFFIX) $(LIBDIR)/libcgctcltk.$(LIBSUFFIX) \
-$(LIBDIR)/libcgc.$(LIBSUFFIX) \
-$(LIBDIR)/libcg96dspstars.$(LIBSUFFIX) \
-$(LIBDIR)/libcg96stars.$(LIBSUFFIX) $(LIBDIR)/libcg96.$(LIBSUFFIX) \
-$(LIBDIR)/libcg56dspstars.$(LIBSUFFIX) \
-$(LIBDIR)/libcg56stars.$(LIBSUFFIX) $(LIBDIR)/libcg56.$(LIBSUFFIX) \
-$(LIBDIR)/libsilagestars.$(LIBSUFFIX) $(LIBDIR)/libsilage.$(LIBSUFFIX) \
-$(LIBDIR)/libcgstars.$(LIBSUFFIX) $(PARLIBFILES) $(LIBDIR)/libcg.$(LIBSUFFIX) \
-$(LIBDIR)/libddfstars.$(LIBSUFFIX) $(LIBDIR)/libddf.$(LIBSUFFIX) \
-$(LIBDIR)/libthorstars.$(LIBSUFFIX) $(LIBDIR)/libthor.$(LIBSUFFIX) \
-$(LIBDIR)/libdestars.$(LIBSUFFIX) $(LIBDIR)/libde.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) $(LIBDIR)/libImage.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfdspstars.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX) \
-$(LIBDIR)/libbdfstars.$(LIBSUFFIX) $(LIBDIR)/libbdf.$(LIBSUFFIX) \
-$(LIBDIR)/libsdfstars.$(LIBSUFFIX) $(LIBDIR)/libLS.$(LIBSUFFIX) \
-$(LIBDIR)/libsdf.$(LIBSUFFIX) \
-$(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlf.$(LIBSUFFIX) \
-$(LIBDIR)/libvhdlbstars.$(LIBSUFFIX) $(LIBDIR)/libvhdlb.$(LIBSUFFIX) \
-$(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) $(LIBDIR)/libmdsdf.$(LIBSUFFIX) \
-$(IPUS_STAR_LIBFILES) \
-$(THREAD_STAR_LIBFILES) \
-$(MATLABSTARS_LIBFILE)
+ifdef CGC
+	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
+	ifdef CGCTK
+		STARS += $(LIBDIR)/cgctcltkstars.o
+		LIBS += -lcgctcltk
+		LIBFILES += $(LIBDIR)/libcgctcltk.$(LIBSUFFIX)
+	endif
+	CG = 1
+	STARS += $(LIBDIR)/cgcstars.o
+	ifeq ($(USE_SHARED_LIBS),yes) 
+		TARGETS += $(CGCTCL)/CGCTclTkTarget.o
+		LIBS += -lcgctargets
+		LIBFILES += $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
+	else
+		TARGETS += $(CGCT)/main/CGCUnixSend.o \
+			$(CGCT)/main/CGCUnixReceive.o \
+			$(CGCT)/main/CGCMultiTarget.o \
+			$(CGCTCL)/CGCTclTkTarget.o \
+			$(CGCT)/main/CGCMacroStar.o $(CGCT)/main/CGCDDFCode.o \
+			$(CGCT)/main/CGCSDFSend.o \
+			$(CGCT)/main/CGCSDFReceive.o \
+			$(CGCT)/main/CGCSDFBase.o \
+			$(CGCT)/main/CGCTargetWH.o
+	endif
+	LIBS += -lcgcstars -lcgc
+	LIBFILES += $(LIBDIR)/libcgcstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcgc.$(LIBSUFFIX)
+endif
+
+ifdef BDF
+	PALETTES += PTOLEMY/src/domains/bdf/icons/bdf.pal
+	SDF = 1
+	STARS += $(LIBDIR)/bdfstars.o
+	ifdef CG
+		TARGETS += $(CGT)/CGBDFTarget.o 
+	endif
+	ifdef CGC
+		TARGETS += $(CGCT)/main/CGCBDFTarget.o
+	endif
+	LIBS += -lbdfstars -lbdf
+	LIBFILES += $(LIBDIR)/libbdfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libbdf.$(LIBSUFFIX)
+else
+	#FIXME - you need bdf in CGCBDFTarget.... maybe it shouldn't be
+	#part of the cgc target shared library?
+	ifdef CGC
+		LIBS += -lbdf
+	endif
+endif
+
+ifdef CG
+	PALETTES += PTOLEMY/src/domains/cg/icons/cg.pal
+	ifdef CGPAR
+		LIBS += -lMacro -lDC -lHu -lDL -lMSH -lPar -lcg
+		TARGETS += $(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o 
+		LIBFILES += $(LIBDIR)/libDC.$(LIBSUFFIX) \
+			$(LIBDIR)/libHu.$(LIBSUFFIX) \
+			$(LIBDIR)/libMacro.$(LIBSUFFIX) \
+			$(LIBDIR)/libcgddf.$(LIBSUFFIX) \
+			$(LIBDIR)/libDL.$(LIBSUFFIX) \
+			$(LIBDIR)/libMSH.$(LIBSUFFIX) \
+			$(LIBDIR)/libPar.$(LIBSUFFIX) \
+			$(LIBDIR)/libcgstars.$(LIBSUFFIX) \
+			$(LIBDIR)/libcg.$(LIBSUFFIX)
+	endif
+	SDF = 1
+	CGSTARS = $(LIBDIR)/cgstars.o
+	TARGETS += $(SDFT)/CompileTarget.o
+	LIBS += -lcgstars -lcg
+	LIBFILES += $(LIBDIR)/libcgstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libcg.$(LIBSUFFIX)
+endif
+
+ifdef SDFFULL
+	SDF = 1
+	SDFIMAGE = 1
+	SDFMATRIX = 1
+	SDFMATLAB = 1
+	SDFCONTRIB = 1
+	SDFDSP = 1
+	ifdef TK
+		SDFTK = 1
+	endif
+endif
+
+ifdef SDF 
+	PALETTES += PTOLEMY/src/domains/sdf/icons/sdf.pal
+	ifdef SDFTK
+		SDFDSP=1
+		STARS += $(LIBDIR)/sdftclstars.o
+		LIBFILES += $(LIBDIR)/libsdftclstars.$(LIBSUFFIX)
+		LIBS += -lsdftclstars
+	endif
+	ifdef SDFDSP 
+		STARS += $(LIBDIR)/sdfdspstars.o
+		LIBS += -lsdfdspstars
+		LIBFILES += $(LIBDIR)/libsdfdspstars.$(LIBSUFFIX)
+	endif
+	ifdef SDFMATRIX 
+		STARS += $(LIBDIR)/sdfmatrixstars.o
+		LIBS += -lsdfmatrixstars
+		LIBFILES += $(LIBDIR)/libsdfmatrixstars.$(LIBSUFFIX)
+	endif
+	ifdef SDFIMAGE
+		STARS += $(LIBDIR)/sdfimagestars.o
+		LIBS += -lsdfimagestars -lImage
+		LIBFILES += $(LIBDIR)/libsdfimagestars.$(LIBSUFFIX) \
+			 $(LIBDIR)/libImage.$(LIBSUFFIX)
+	endif
+	ifdef SDFMATLAB
+		STARS += $(MATLABSTARS_DOT_O)
+		LIBS += $(MATLABSTAR_LIB) $(MATLABEXT_LIB)
+		LIBFILES += $(MATLABSTAR_LIBFILE)
+	endif
+	ifdef SDFCONTRIB
+		STARS += $(LIBDIR)/sdfcontribstars.o
+		LIBFILES += $(LIBDIR)/libsdfcontribstars.$(LIBSUFFIX)
+		LIBS += -lsdfcontribstars
+	endif
+	STARS += $(LIBDIR)/sdfstars.o 
+	TARGETS += $(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o \
+		
+	LIBS += -lLS -lsdfstars -lsdf
+	LIBFILES += $(LIBDIR)/libsdfstars.$(LIBSUFFIX) \
+		$(LIBDIR)/libLS.$(LIBSUFFIX) \
+		$(LIBDIR)/libsdf.$(LIBSUFFIX)
+endif
 
 # HOF stars can be used in pigiRpc but not ptcl.
 # The HOF base classes call Tk_DoOneEvent so that if you accidentally
 # specify an infinite recursion (easy to do with HOF), you can hit the
 # STOP button and abort the run.  But Tk is not linked into ptcl, so
 # this call cannot be done.
-HOFSTARS =	$(LIBDIR)/hofstars.o
-HOF_LIBS =	-lhofstars -lhof
-HOF_LIBFILES =	$(LIBDIR)/libhofstars.$(LIBSUFFIX) \
+ifdef HOF
+	STARS += $(LIBDIR)/hofstars.o
+	LIBS +=	-lhofstars -lhof
+	LIBFILES += $(LIBDIR)/libhofstars.$(LIBSUFFIX) \
 		$(LIBDIR)/libhof.$(LIBSUFFIX)
-
-# Tcl/Tk stars can be used in pigiRpc but not ptcl.
-PTINY_TCLSTARS = $(LIBDIR)/sdftclstars.o $(LIBDIR)/detclstars.o
-PTRIM_TCLSTARS = $(PTINY_TCLSTARS)
-IPUS_TCLSTARS =	$(LIBDIR)/ipustclstars.o
-TCLSTARS =	$(PTINY_TCLSTARS) $(LIBDIR)/mdsdftclstars.o \
-		$(IPUS_TCLSTARS)
-
-PTINY_TCL_STAR_LIBS = -lsdftclstars -ldetclstars
-PTRIM_TCL_STAR_LIBS = $(PTINY_TCL_STAR_LIBS)
-IPUS_TCL_STAR_LIBS = -lipustclstars -lipustcltk
-TCL_STAR_LIBS =	$(PTINY_TCL_STAR_LIBS) -lmdsdftclstars $(IPUS_TCL_STAR_LIBS)
-
-PTINY_TCL_STAR_LIBFILES =	$(LIBDIR)/libsdftclstars.$(LIBSUFFIX) \
-				$(LIBDIR)/libdetclstars.$(LIBSUFFIX)
-PTRIM_TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES)
-IPUS_TCL_STAR_LIBFILES =	$(LIBDIR)/libipustclstars.$(LIBSUFFIX) \
-				$(LIBDIR)/libipustcltk.$(LIBSUFFIX)
-TCL_STAR_LIBFILES =	$(PTINY_TCL_STAR_LIBFILES) \
-			$(LIBDIR)/libmdsdftclstars.$(LIBSUFFIX) \
-			$(IPUS_TCL_STAR_LIBFILES)
-
-# Matlab settings
-include $(ROOT)/mk/matlab.mk
-
-# CG-DDF no longer supported
-#$(LIBDIR)/libcgddfstars.$(LIBSUFFIX) $(LIBDIR)/libcgddf.$(LIBSUFFIX)  \
-
-# Library switches reqd by stars for a ptiny ptolemy. Note that we don't
-# include the sdf image stars.  Need -lImage for the de ATM stars
-PTINY_STAR_LIBS=\
--ldestars -lde \
--lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABSTAR_LIB) $(MATLABEXT_LIB)
-
-PTRIM_STAR_LIBS=\
--lcgcstars -lcgc -lcgctcltk \
--lcgstars -lcg \
--lddfstars -lddf \
--ldestars -lde \
--lbdfstars -lbdf \
--lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABSTAR_LIB) $(MATLABEXT_LIB)
-
-IPUS_STAR_LIBS = -lipusstars -lipus -licp
-# Library switches reqd by stars.  Note that -lptolemy is not included.
-STAR_LIBS=\
-$(OPTIONAL_LIBS) \
--lcgcstars -lcgc -lcgctcltk \
--lcg96dspstars -lcg96stars -lcg96 \
--lcg56dspstars -lcg56stars -lcg56 \
--lsilagestars -lsilage \
--lcgstars -lcgddf -lMacro -lDC -lHu -lDL -lMSH -lPar -lcg \
--lddfstars -lddf \
--lthorstars -lthor \
--ldestars -lde \
--lbdfstars -lbdf \
--lsdfimagestars -lImage -lsdfdspstars -lsdfstars -lLS -lsdf -lsdfmatrixstars \
-$(MATLABSTAR_LIB) $(MATLABEXT_LIB) \
--lvhdlfstars -lvhdlf \
--lvhdlbstars -lvhdlb \
--lmdsdfstars -lmdsdf \
-$(IPUS_STAR_LIBS) \
-$(THREAD_STAR_LIBS)
-
-# Extra targets
-SDFT = $(OBJDIR)/domains/sdf/targets
-CGT = $(OBJDIR)/domains/cg/targets
-CGCT = $(OBJDIR)/domains/cgc/targets
-CGCTCL = $(OBJDIR)/domains/cgc/tcltk/targets
-CG56T = $(OBJDIR)/domains/cg56/targets
-CG96T = $(OBJDIR)/domains/cg96/targets
-
-SDFTARGETS =	$(OBJDIR)/domains/sdf/loopScheduler/LoopTarget.o 
-CGTARGETS =	$(CGT)/CGMultiTarget.o $(CGT)/CGSharedBus.o \
-		$(SDFT)/CompileTarget.o 
-ifeq ($(USE_SHARED_LIBS),yes) 
-CGCTARGETS =	$(CGCTCL)/CGCTclTkTarget.o
-CGCTARGETS_LIBS = 	-lcgctargets
-CGCTARGETS_LIBFILES = $(LIBDIR)/libcgctargets.$(LIBSUFFIX)
-else
-CGCTARGETS =	$(CGCT)/main/CGCUnixSend.o $(CGCT)/main/CGCUnixReceive.o \
-		$(CGCT)/main/CGCMultiTarget.o $(CGCTCL)/CGCTclTkTarget.o \
-		$(CGCT)/main/CGCMacroStar.o $(CGCT)/main/CGCDDFCode.o \
-		$(CGCT)/main/CGCSDFSend.o $(CGCT)/main/CGCSDFReceive.o \
-		$(CGCT)/main/CGCSDFBase.o $(CGCT)/main/CGCTargetWH.o
-CGCTARGETS_LIBS =
-CGCTARGETS_LIBFILES =
 endif
-
-CGCDDFTARGETS =	$(CGCT)/main/CGCDDFTarget.o
-BDFTARGETS =	$(CGT)/CGBDFTarget.o $(CGCT)/main/CGCBDFTarget.o
 
 ifeq ($(USE_SHARED_LIBS),yes) 
-CG56TARGETS =
-CG56TARGETS_LIBS = 	-lcg56targets
-CG56TARGETS_LIBFILES = $(LIBDIR)/libcg56targets.$(LIBSUFFIX)
-else
-CG56TARGETS =	$(CG56T)/Sim56Target.o $(CG56T)/S56XTarget.o \
-		$(CG56T)/S56XTargetWH.o \
-		$(CG56T)/Sub56Target.o $(CG56T)/CG56MultiSimTarget.o \
-		$(CG56T)/CG56MultiSimSend.o $(CG56T)/CG56MultiSimReceive.o \
-		$(CG56T)/CG56XCReceive.o $(CG56T)/CG56XCSend.o \
-		$(CG56T)/CG56XCPeek.o $(CG56T)/CG56XCPoke.o \
-		$(CG56T)/CGCXReceive.o $(CG56T)/CGCXSend.o \
-		$(CG56T)/CGCXPeek.o $(CG56T)/CGCXPoke.o \
-	 	$(CG56T)/CGCXSynchComm.o $(CG56T)/CG56XCSynchComm.o \
-		$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
-		$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
-CG56TARGETS_LIBS =
-CG56TARGETS_LIBFILES =
+	STARS =
 endif
 
-CG96TARGETS =	$(CG96T)/Sim96Target.o
-CGCcm5TARGETS =	$(CGCT)/cm5/CGCcm5Send.o $(CGCT)/cm5/CGCcm5Recv.o \
-		$(CGCT)/cm5/CGCcm5Target.o $(CGCT)/cm5/CGCcm5peTarget.o
-
-# If we are not using shared libraries, then this will be empty
-TARGETS_LIBS = $(CG56TARGETS_LIBS) $(CGCTARGETS_LIBS)
-
-#
-# Thread related definitions.
-#
-
-# PN domain.
-ifeq ($(INCLUDE_PN_DOMAIN),yes) 
-PN_LIBS =	-lpnstars -lpn
-PN_LIBFILES =	$(LIBDIR)/libpnstars.$(LIBSUFFIX) $(LIBDIR)/libpn.$(LIBSUFFIX)
-else
-PN_LIBS =
-PN_LIBFILES =
+ifeq ($(NEED_PALETTES),yes)
+	PALETTES =		defpalettes-pigi.o
 endif
 
-# CP domain.
-# -laudio is for the Infopad stars in the CP domain
-CP_LIBS =	-lcpstars -lcpipstars -lcp -laudio
-CP_LIBFILES =	$(LIBDIR)/libcpstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcpipstars.$(LIBSUFFIX) \
-		$(LIBDIR)/libcp.$(LIBSUFFIX)
+ifdef TK
+	LIBS += -L$(OCTLIBDIR) -lrpc -lpigi -lptk -lgantt \
+		-loh -lvov -lrpc -llist -ltr -lutility -lst \
+		-lerrtrap -luprintf -lport \
+		 $(ITK_LIBSPEC) $(TK_LIBSPEC) $(X11_LIBSPEC) 
+	PT_DEPEND += pigiMain.o $(OCTLIBDIR)/librpc.$(LIBSUFFIX) \
+		$(LIBDIR)/libpigi.$(LIBSUFFIX) \
+		$(LIBDIR)/libptk.a \
+		$(LIBDIR)/libgantt.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/liboh.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/liblist.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/libtr.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/libutility.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/libst.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/liberrtrap.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/libuprintf.$(LIBSUFFIX) \
+		$(OCTLIBDIR)/libport.$(LIBSUFFIX)
 
-# Sun's Lightweight Process library.
-LWP_LIBS =		-llwpthread -llwp
-LWP_LIBFILES =		$(LIBDIR)/liblwpthread.$(LIBSUFFIX)
-
-# POSIX thread library from Florida State University.
-PTHREAD_LIBS =		-lposixthread -L$(ROOT)/thread/lib.$(PTARCH) -lgthreads
-PTHREAD_LIBFILES =	$(LIBDIR)/libposixthread.$(LIBSUFFIX)
-
-#
-# Architecture dependent definitions.
-#
-
-# Use POSIX threads for SunOS and Solaris.
-ifneq (,$(filter sun% sol%,$(PTARCH)))
-THREAD_STARS =		$(PNSTARS)
-THREAD_STAR_LIBS =	$(PN_LIBS)
-THREAD_STAR_LIBFILES =	$(PN_LIBFILES)
-THREAD_LIBS =		$(PTHREAD_LIBS)
-THREAD_LIBFILES =	$(PTHREAD_LIBFILES)
 endif
 
-# sol2.cfront can't build ipus because of template problems
-ifeq ($(INCLUDE_IPUS_DOMAIN),no) 
-IPUSSTARS =
-IPUS_STAR_LIBFILES =
-IPUS_TCLSTARS =
-IPUS_TCL_STAR_LIBS =
-IPUS_TCL_STAR_LIBFILES =
-IPUS_STAR_LIBS =
-endif
+PT_DEPEND += $(LIBDIR)/libptcl.$(LIBSUFFIX) $(LIBDIR)/libptolemy.a \
+	$(LIBFILES) $(STARS)
 
+LIBS += -lptolemy $(ITCL_LIBSPEC) $(TCL_LIBSPEC) $(SYSLIBS) $(LIB_FLUSH_CACHE)
