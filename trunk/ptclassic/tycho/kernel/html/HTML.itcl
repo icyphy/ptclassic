@@ -786,6 +786,14 @@ body ::tycho::HTML::hyperJump {filename {point {}} {push 1}} {
                 pushNextHTMLFile
             }
 
+	    # If the file does not have <body bgcolor="xxx">, then reset
+	    # to the default colors
+	    upvar #0 $stateArrayName var
+	    $itk_component(text) configure \
+                    -insertbackground $var(S_bgcolor) \
+		    -background $var(S_bgcolor) \
+		    -foreground $var(S_fgcolor)
+
             configure -directory [file dirname $filename]
             configure -file $filename
             toolbar clear location
