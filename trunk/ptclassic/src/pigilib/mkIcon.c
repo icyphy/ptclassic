@@ -354,8 +354,9 @@ octObject *iconFacetPtr;
     octObject iconConFacet, prop;
     int maxNumTerms, size;
 
-    sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)");
-    ERR_IF2(!KcIsKnown(name), buf, name);
+    sprintf(buf, "MkStarIcon: unknown star '%s' (it needs to be loaded?)",
+	    name);
+    ERR_IF2(!KcIsKnown(name), buf);
     sprintf(buf, "Making star icon for '%s'", name);
     PrintDebug(buf);
     ERR_IF1(!ConcatDirName(dir, name, &fileName));
