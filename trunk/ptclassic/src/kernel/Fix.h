@@ -207,7 +207,7 @@ public:
 
     // assignment operator.  If *this does not have precision set, it is
     // copied, otherwise value is converted from existing precision.
-    Fix&          operator =  (const Fix&);
+    Fix&          operator =  (const Fix& x);
 
     // assignment from double 
     Fix&          operator =  (double arg) {
