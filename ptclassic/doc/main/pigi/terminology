@@ -25,7 +25,8 @@ to see how it is constructed.
 Elementary blocks are called
 .c Star s.
 .IE Star
-Looking inside a star reveals the C++ code that defines it.
+Looking inside a star reveals the C++ code that defines it
+(actually, most stars are written in a special preprocessor language).
 A
 .c Galaxy
 is a block that contains stars and other galaxies.
