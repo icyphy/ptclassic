@@ -161,6 +161,7 @@ CFLAGS =	$(OPTIMIZER) $(MEMLOG) $(WARNINGS) \
 CSYSLIBS=$(SHARED_COMPILERDIR_FLAG) -lm $(DLLIB) #-lieee
 
 # system libraries (libraries from the environment)
+# This line may need to be commented out for egcs
 SYSLIBS=$(CSYSLIBS) -lg++
 
 
@@ -175,6 +176,8 @@ LINKFLAGS_D=-L$(LIBDIR) $(SHARED_LIBRARY_R_LIST) -g -rdynamic #-static
 # octtools/attache uses this
 TERMLIB_LIBSPEC = -ltermcap
 CURSES_LIBSPEC = -lncurses
+# You may need to do something like:
+#CURSES_LIBSPEC = -lcurses
 
 #
 # Variables for miscellaneous programs
@@ -182,7 +185,9 @@ CURSES_LIBSPEC = -lncurses
 # Used by xv
 # -DXLIB_ILLEGAL_ACCESS is need for X11R6 to compile xv.c:rd_str_cl()
 XV_CC =		$(CC) -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC)
-
+# You may need to do something like:
+# XV_CC =	$(CC) -DXLIB_ILLEGAL_ACCESS $(X11_INCSPEC) $(X11_LIBSPEC) \
+#               -traditional -DDIRENT
 #
 # Directories to use
 #
