@@ -33,10 +33,12 @@ CCS_WITH_H_FILES=\
  AutoForkNode.cc \
  Block.cc \
  Clock.cc \
+ Cluster.cc \
  ComplexArrayState.cc \
  ComplexState.cc \
  ComplexSubset.cc \
  PortHole.cc \
+ DFCluster.cc \
  DFPortHole.cc \
  DataFlowStar.cc \
  DataStruct.cc \

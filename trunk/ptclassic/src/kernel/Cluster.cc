@@ -1,4 +1,4 @@
-static const char file_id[] = "Nebula.cc";
+static const char file_id[] = "Cluster.cc";
 /******************************************************************
 Version identification:
  $Id$
@@ -29,7 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmers: J. L. Pino & T. M. Parks
  Date of creation: 6/10/94
 
- A Nebula is an executable Star, a sort of light-weight Wormhole.
+ A Cluster is an executable Star, a sort of light-weight Wormhole.
 
 *******************************************************************/
 
@@ -37,7 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include "Nebula.h"
+#include "Cluster.h"
 #include "Star.h"
 #include "Galaxy.h"
 #include "SimControl.h"
@@ -47,37 +47,37 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern int setPortIndices(Galaxy&);
 
-Nebula::Nebula(Star& self) : selfStar(self), master(NULL),
+Cluster::Cluster(Star& self) : selfStar(self), master(NULL),
 sched(0) {};
 
-/*virtual*/ Nebula::~Nebula() {
+/*virtual*/ Cluster::~Cluster() {
     LOG_DEL; delete sched;
 }
 
-StringList Nebula::displaySchedule() {
+StringList Cluster::displaySchedule() {
     StringList schedule;
-    if (isNebulaAtomic()) {
+    if (isClusterAtomic()) {
 	schedule = star().fullName();
 	return schedule;
     }
     else if (!innerSched())
-	schedule << "ERROR NO SCHEDULE MEMBER IN NEBULA:"
+	schedule << "ERROR NO SCHEDULE MEMBER IN CLUSTER:"
 		 << star().fullName() << "\n";
     else
 	schedule << "/* Schedule for " << star().fullName() << " */\n"
 		 << innerSched()->displaySchedule() << "\n";
-    // If we get here nebula is Non-atomic
-    FatNebulaIter next(*this);
-    Nebula* fatNebula;
-    while ((fatNebula = next++) != 0)
-	schedule << fatNebula->displaySchedule();
+    // If we get here cluster is Non-atomic
+    FatClusterIter next(*this);
+    Cluster* fatCluster;
+    while ((fatCluster = next++) != 0)
+	schedule << fatCluster->displaySchedule();
     return schedule;
 }
 
-void Nebula::setInnerSched(Scheduler* s) {
+void Cluster::setInnerSched(Scheduler* s) {
     if (s == NULL) {
 	Error::abortRun(star(),
-			"Nebula::setInnerSched sent a NULL scheduler pointer");
+			"Cluster::setInnerSched sent a NULL scheduler pointer");
 	return;
     }
     LOG_DEL; delete sched;
@@ -85,9 +85,9 @@ void Nebula::setInnerSched(Scheduler* s) {
     sched.setGalaxy(gal);
 }
 
-void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
+void Cluster::setMasterBlock(Block* m,PortHole** newPorts) {
     if (master) {
-	Error::abortRun("Can not run setMaster twice on same Nebula");
+	Error::abortRun("Can not run setMaster twice on same Cluster");
 	return;
     }
     master = m;
@@ -109,7 +109,7 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	    else {
 		PortHole* clonedPort = clonePort(port,&star());
 		if(newPorts)
-		    newPorts[clonedPort.asNebulaPort()->
+		    newPorts[clonedPort.asClusterPort()->
 			     real().index()] = clonedPort;
 	    }
 	}
@@ -117,14 +117,14 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
     else {
 	// Set the name, leave parent unchanged
 	StringList name;
-	name << master->name() << "_Nebula";
+	name << master->name() << "_Cluster";
 	const char* pname = hashstring(name);
 	star().setName(pname);
 	
 	Galaxy* g = (Galaxy*) m;
-	int isTopNebula = ! (int) newPorts;
+	int isTopCluster = ! (int) newPorts;
 	int nports = 0;
-	if (isTopNebula) {
+	if (isTopCluster) {
 	    nports = setPortIndices(*g);
 	    LOG_NEW; newPorts = new PortHole*[nports];
 	    for (int i = 0; i < nports; i++) newPorts[i] = 0;
@@ -133,47 +133,47 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	addGalaxy(g,newPorts);
 
 	// Connect the interal ports to dummy sink and source
-	// nodes.  Add the Nebula ports corresponding to the galaxy ports
+	// nodes.  Add the Cluster ports corresponding to the galaxy ports
 	int sources = 0, sinks = 0;
 	BlockPortIter galaxyPorts(*g);
 	PortHole* port;
 	while((port = galaxyPorts++) != NULL) {
 	    int index = ((PortHole&)port->realPort()).index();
-	    PortHole* nebulaPort = newPorts[index];
-	    if (nebulaPort) {
-		PortHole* realFar = (PortHole*) &nebulaPort->
-		    asNebulaPort()->real().far()->realPort();
-		Nebula* dummyNebula = newNebula();
-		Star* dummyStar = &dummyNebula->star();
+	    PortHole* clusterPort = newPorts[index];
+	    if (clusterPort) {
+		PortHole* realFar = (PortHole*) &clusterPort->
+		    asClusterPort()->real().far()->realPort();
+		Cluster* dummyCluster = newCluster();
+		Star* dummyStar = &dummyCluster->star();
 		PortHole* dummyPort = clonePort(realFar,dummyStar);
-		dummyPort->asNebulaPort().setNebAlias(nebulaPort);
+		dummyPort->asClusterPort().setClusterAlias(clusterPort);
 		StringList name;
-		if (nebulaPort->isItInput()) {
-		    name << "sourceNebula" << sources++;	
-		    connect(dummyPort,nebulaPort);
+		if (clusterPort->isItInput()) {
+		    name << "sourceCluster" << sources++;	
+		    connect(dummyPort,clusterPort);
 		}
 		else {
-		    name << "sinkNebula" << sinks++;
-		    connect(nebulaPort,dummyPort);
+		    name << "sinkCluster" << sinks++;
+		    connect(clusterPort,dummyPort);
 		}
 		dummyStar->setName(hashstring(name));       
-		addNebula(dummyNebula);
-		PortHole* fatNebulaPort =
-		    clonePort(&nebulaPort->asNebulaPort().real(),&star());
-		fatNebulaPort->asNebulaPort().setNebAlias(nebulaPort);
-		newPorts[index] = fatNebulaPort;
+		addCluster(dummyCluster);
+		PortHole* fatClusterPort =
+		    clonePort(&clusterPort->asClusterPort().real(),&star());
+		fatClusterPort->asClusterPort().setClusterAlias(clusterPort);
+		newPorts[index] = fatClusterPort;
 	    }
 	}
 
-	// now connect up the Nebula ports to match the real ports.
-	// There may be fewer Nebula  ports than real ports if there
+	// now connect up the Cluster ports to match the real ports.
+	// There may be fewer Cluster  ports than real ports if there
 	// are self-loops, for such cases, ptable[i] will be null.
-	if (isTopNebula) {
+	if (isTopCluster) {
 	    for (int i = 0; i < nports; i++) {
 		PortHole* source = newPorts[i];
 		if (!source || source->isItInput()) continue;
 		PortHole* destination =
-		    newPorts[source->asNebulaPort()->real().far()->index()];
+		    newPorts[source->asClusterPort()->real().far()->index()];
 		connect(source,destination);
 	    }
 	    LOG_DEL; delete newPorts;
@@ -181,26 +181,26 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
     }
 }
 
-void Nebula::connect(PortHole* source, PortHole* destination) {
-    const PortHole& realDestination = destination->asNebulaPort()->real();
+void Cluster::connect(PortHole* source, PortHole* destination) {
+    const PortHole& realDestination = destination->asClusterPort()->real();
     int numDelays = realDestination.numInitDelays();
     const char* initDelays = realDestination.initDelayValues();
     source->connect(*destination,numDelays,initDelays);
     source->geo()->initialize();
 }
 
-void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
+void Cluster::addGalaxy(Galaxy* g,PortHole** newPorts) {
     GalTopBlockIter nextBlock(*g);
     Block* b; 
     while ((b = nextBlock++) != 0) {
 	if (b->isItAtomic()) {
-	    Nebula* c = newNebula();
+	    Cluster* c = newCluster();
 	    c->setMasterBlock(b,newPorts);
-	    addNebula(c);
+	    addCluster(c);
 	} else if (!flattenGalaxy((Galaxy*)b)) {
-	    Nebula* c = newNebula();
+	    Cluster* c = newCluster();
 	    c->setMasterBlock(b,newPorts);
-	    addNebula(c);
+	    addCluster(c);
 	}
 	else {
 	    addGalaxy((Galaxy*)b,newPorts);
@@ -208,49 +208,49 @@ void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
     }
 }
 
-void Nebula::addNebula(Nebula* c) {
+void Cluster::addCluster(Cluster* c) {
     gal.addBlock(c->star(),c->star().name());
     c->star().setParent(&star());
 }
 
-inline void Nebula::initMaster() {
+inline void Cluster::initMaster() {
     if (master) master->initialize();
     return;
 }
 
-inline int Nebula::isNebulaAtomic() const {
+inline int Cluster::isClusterAtomic() const {
     return master? master->isItAtomic() : TRUE;
 }
 
-int Nebula::run() {
-    if (isNebulaAtomic())
-	// Atomic Nebula - if there is no master, then it is a
+int Cluster::run() {
+    if (isClusterAtomic())
+	// Atomic Cluster - if there is no master, then it is a
 	// virtual sink or source node
 	return master? master->run() : TRUE;
     else if (sched)
-	// Nebula contains a scheduled galaxy
+	// Cluster contains a scheduled galaxy
 	return sched->run();
     else
-	// Nebula contains a un-scheduled galaxy
+	// Cluster contains a un-scheduled galaxy
 	return FALSE;
 }
 
-int Nebula::generateSchedule() {
-    if (isNebulaAtomic()) {
+int Cluster::generateSchedule() {
+    if (isClusterAtomic()) {
 	return TRUE;
     }
     else {
-	NebulaIter nebula(*this);
-	Nebula* n;
-	while ((n = nebula++) !=0)
+	ClusterIter cluster(*this);
+	Cluster* n;
+	while ((n = cluster++) !=0)
 	    n->generateSchedule();
 	sched->setup();
 	return ! SimControl::haltRequested();
     }
 }
 
-NebulaPort::NebulaPort(PortHole& self, const PortHole& myMaster, Star* parent)
-:selfPort(self),master(myMaster),nebAliasedTo(0) {
+ClusterPort::ClusterPort(PortHole& self, const PortHole& myMaster, Star* parent)
+:selfPort(self),master(myMaster),clusterAliasedTo(0) {
     selfPort.setPort(real().name(),parent,INT);
     selfPort.myPlasma = Plasma::getPlasma(INT);
     selfPort.numberTokens = real().numXfer();
@@ -258,52 +258,52 @@ NebulaPort::NebulaPort(PortHole& self, const PortHole& myMaster, Star* parent)
     parent->addPort(selfPort);
 }
 
-PortHole* NebulaPort::realNebulaPort() {
-    if (nebAlias())
-     	return nebAlias()->asNebulaPort()->realNebulaPort();
+PortHole* ClusterPort::realClusterPort() {
+    if (clusterAlias())
+     	return clusterAlias()->asClusterPort()->realClusterPort();
     else
 	return &this->asPort();
 }
 ////////////////// ITERATORS ////////////////////////
 
-// This private class is a stack of AllNebulaIter iterators.
+// This private class is a stack of AllClusterIter iterators.
 
-class NebulaIterContext {
-friend AllNebulaIter;
-    NebulaIter* iter;
-    NebulaIterContext* link;
-    NebulaIterContext(NebulaIter* ii,NebulaIterContext* l)
+class ClusterIterContext {
+friend AllClusterIter;
+    ClusterIter* iter;
+    ClusterIterContext* link;
+    ClusterIterContext(ClusterIter* ii,ClusterIterContext* l)
     : iter(ii), link(l) {}
 };
 
 // Constructor.  Clear stack, create an iterator for this level.
-AllNebulaIter::AllNebulaIter(Nebula& n) {
+AllClusterIter::AllClusterIter(Cluster& n) {
     stack = 0;
-    LOG_NEW; thisLevelIter = new NebulaIter(n);
+    LOG_NEW; thisLevelIter = new ClusterIter(n);
 }
 
 // The reset method pops up to the top level, then resets the top iterator
-void AllNebulaIter::reset() {
+void AllClusterIter::reset() {
     while (stack) pop();
     thisLevelIter->reset();
 }
 
 // Destructor.
-AllNebulaIter::~AllNebulaIter() {
+AllClusterIter::~AllClusterIter() {
     reset();
     LOG_DEL; delete thisLevelIter;
 }
 
 // push current iterator onto stack, enter a new galaxy g.
-inline void AllNebulaIter::push(Nebula& n) {
-    LOG_NEW; stack = new NebulaIterContext(thisLevelIter, stack);
-    LOG_NEW; thisLevelIter = new NebulaIter(n);
+inline void AllClusterIter::push(Cluster& n) {
+    LOG_NEW; stack = new ClusterIterContext(thisLevelIter, stack);
+    LOG_NEW; thisLevelIter = new ClusterIter(n);
 }
 
 // pop an iterator off of the stack.
-void AllNebulaIter::pop() {
+void AllClusterIter::pop() {
     if (stack == 0) return;
-    NebulaIterContext* t = stack;
+    ClusterIterContext* t = stack;
     LOG_DEL; delete thisLevelIter;
     thisLevelIter = t->iter;
     stack = t->link;
@@ -311,8 +311,8 @@ void AllNebulaIter::pop() {
 }
 
 // This method returns the next block.
-Nebula* AllNebulaIter::next() {
-    Nebula* n = thisLevelIter->next();
+Cluster* AllClusterIter::next() {
+    Cluster* n = thisLevelIter->next();
     while (!n) {
 	// current level exhausted.  Try popping to proceed.
 	// if stack is empty we are done.
@@ -322,16 +322,16 @@ Nebula* AllNebulaIter::next() {
     }
     // have a block.  If it's a galaxy, we will need to process
     // it; this is pushed so we'll do it next time.
-    if (!n->isNebulaAtomic()) push (*n);
+    if (!n->isClusterAtomic()) push (*n);
     return n;
 }		
 
-FatNebulaIter::FatNebulaIter(Nebula& n) : AllNebulaIter(n) {}	
+FatClusterIter::FatClusterIter(Cluster& n) : AllClusterIter(n) {}	
 
-Nebula* FatNebulaIter::next() {	
+Cluster* FatClusterIter::next() {	
     while (1) {			
-	Nebula* n = AllNebulaIter::next();	
+	Cluster* n = AllClusterIter::next();	
 	if (!n) return 0;
-	if (!n->isNebulaAtomic()) return n;
+	if (!n->isClusterAtomic()) return n;
     }			
 }			

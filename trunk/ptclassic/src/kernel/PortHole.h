@@ -323,6 +323,7 @@ private:
         // class PortHole
         //////////////////////////////////////////
 
+class ClusterPort;
 // Contains all the facilities of all PortHoles; base class
 //  for all PortHoles
 class PortHole : public GenericPort
@@ -331,6 +332,7 @@ class PortHole : public GenericPort
 	friend class EventHorizon;	// access myBuffer
 	friend class ToEventHorizon;	// access getParticle()
 	friend class FromEventHorizon;	// access putParticle()
+	friend class ClusterPort;
 
 	// the following function may set indices
 	friend setPortIndices(Galaxy&);
@@ -388,6 +390,9 @@ public:
 
 	// Return me as an eventHorizon
 	virtual EventHorizon* asEH();
+
+	// Return me as a ClusterPort
+	virtual ClusterPort* asClusterPort();
 
 	// Can be used for things like inputing and output
 	//  Particles.  These are currently do-nothing functions

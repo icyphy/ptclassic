@@ -1,5 +1,5 @@
-#ifndef _DFNebula_h
-#define _DFNebula_h 1
+#ifndef _DFCluster_h
+#define _DFCluster_h 1
 #ifdef __GNUG__
 #pragma interface
 #endif
@@ -36,36 +36,36 @@ ENHANCEMENTS, OR MODIFICATIONS.
 	
 ********************************************************************/
 
-#include "Nebula.h"
+#include "Cluster.h"
 #include "DataFlowStar.h"
 #include "DFPortHole.h"
 
-class DFNebulaPort : public DFPortHole, public NebulaPort{
+class DFClusterPort : public DFPortHole, public ClusterPort{
 public:
-    DFNebulaPort(const PortHole* master, Star* parent);
+    DFClusterPort(const PortHole* master, Star* parent);
     /*virtual*/ int isItInput() const {
-	return NebulaPort::isItInput();
+	return ClusterPort::isItInput();
     }
     /*virtual*/ int isItOutput() const {
-	return NebulaPort::isItOutput();
+	return ClusterPort::isItOutput();
     }
-    /*virtual*/ NebulaPort* asNebulaPort() { return this; }
+    /*virtual*/ ClusterPort* asClusterPort() { return this; }
 };
 
-class DFNebula : public DataFlowStar, public Nebula{
+class DFCluster : public DataFlowStar, public Cluster{
 public:
 
     /*virtual*/ void setMasterBlock(Block*,PortHole**);
     /*virtual*/ int run();
 
     // Constructors
-    DFNebula();
+    DFCluster();
 
     /*virtual*/ PortHole* clonePort(const PortHole* master, Star* parent);
     
-    /*virtual*/ Nebula* newNebula(Block* master) const;
+    /*virtual*/ Cluster* newCluster(Block* master) const;
 
-    /*virtual*/ Nebula* asNebula() { return this; }
+    /*virtual*/ Cluster* asCluster() { return this; }
     
     /*virtual*/ int isSDFinContext() const;
 

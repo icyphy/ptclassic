@@ -66,10 +66,20 @@ public:
 	// return the full name
 	virtual StringList fullName() const;
 
+	// set the name
+	void setName (const char* my_name) {
+		nm = my_name;
+	}
+
+	// set the parent
+	void setParent (Block* my_parent) {
+		prnt = my_parent;
+	}
+
 	// set the name and parent
 	void setNameParent (const char* my_name,Block* my_parent) {
-		nm = my_name;
-		prnt = my_parent;
+		setName(my_name);
+	        setParent(my_parent);
 	}
 
 	// initialize the object
