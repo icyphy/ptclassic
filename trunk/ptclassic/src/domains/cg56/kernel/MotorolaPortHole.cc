@@ -1,4 +1,4 @@
-static const char file_id[] = "MotorolaConnect.cc";
+static const char file_id[] = "MotorolaPortHole.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -15,7 +15,7 @@ $Id$
 #pragma implementation
 #endif
 
-#include "MotorolaConnect.h"
+#include "MotorolaPortHole.h"
 
 // allocate portholes in X memory by default
 // this can be changed by specifying, say, P_YMEM
