@@ -88,7 +88,7 @@ DLLIB = -ldl
 
 # where the Gnu library is
 # GNULIB = $(PTOLEMY)/gnu/$(PTARCH)/lib
-GNULIB = /usr/lib
+# don't set GNULIB=/usr/lib or else the wrong tcltk libraries may be used
 
 # linker to use for pigi and interpreter.
 LINKER = $(CPLUSPLUS)
@@ -102,7 +102,7 @@ else
     SHARED_COMPILERDIR = $(GNULIB)
     SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
     INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
-    SHARED_LIBRARY_PATH = $(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
+    SHARED_LIBRARY_PATH = $(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib
     SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
 endif
 
