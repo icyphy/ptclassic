@@ -1,5 +1,5 @@
 defstar {
-	name {Compress}
+	name {MuLaw}
 	domain {SDF}
 	desc { This star compresses its input as per the Mu law. 
 		using the conversion formula

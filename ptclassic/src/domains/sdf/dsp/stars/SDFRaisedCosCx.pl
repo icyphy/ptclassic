@@ -1,7 +1,7 @@
 defstar {
-	name { CxRaisedCos }
+	name { RaisedCosCx }
 	domain { SDF }
-	derivedFrom { ComplexFIR }
+	derivedFrom { FIRCx }
 	desc {
 Output a complex raised-cosine Nyquist pulse.
 	}
@@ -22,7 +22,7 @@ star.
 See "Digital Communication" by Lee and Messerschmitt for a discussion
 of raised cosine pulses in communications systems.
 	}
-	seealso {ComplexFIR, RaisedCos}
+	seealso {FIRCx, RaisedCos}
 	code {
 		static double rcos (int t, int T, double excess) {
 			const double DELTA = 1.0e-7;
@@ -70,7 +70,7 @@ of raised cosine pulses in communications systems.
 		int center = int(N)/2;
 		for (int i = 0; i < int(N); i++)
 			taps[i] = rcos (i - center, P, excessBW);
-		SDFComplexFIR :: setup();
+		SDFFIRCx :: setup();
 	}
 }
 

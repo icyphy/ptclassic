@@ -1,5 +1,5 @@
 defstar {
-	name {BiQuad}
+	name {Biquad}
 	domain {SDF}
 	version {$Id$}
 	desc {

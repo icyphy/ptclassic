@@ -30,7 +30,7 @@ powers of 1/z).  Note that the leading term of D is *not* ommitted.
 Note that the numerical finite precision noise increases with the filter order.
 It is often desirable to expand the filter into a parallel or cascade form.
     }
-    seealso { FIR, BiQuad }
+    seealso { FIR, Biquad }
     input {
 	name {signalIn}
 	type {float}

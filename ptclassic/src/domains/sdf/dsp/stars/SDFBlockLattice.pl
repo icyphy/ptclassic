@@ -14,7 +14,7 @@ signalIn samples should be processed for each set of coefficients.
 	author { Alan Kamas and Edward Lee }
 	copyright { 1992 The Regents of the University of California }
 	location { SDF dsp library }
-	seealso { Lattice, RLattice, BlockRLattice, FIR, ComplexFIR, BiQuad}
+	seealso { Lattice, RLattice, BlockRLattice, FIR, FIRCx, Biquad}
 	input {
 		name {signalIn}
 		type {float}

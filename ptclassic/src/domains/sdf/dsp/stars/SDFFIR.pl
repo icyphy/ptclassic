@@ -69,7 +69,7 @@ For more information about polyphase filters, see F. J. Harris,
 "Multirate FIR Filters for Interpolating and Desampling", in
 \fIHandbook of Digital Signal Processing\fR, Academic Press, 1987.
 	}
-	seealso { ComplexFIR, BiQuad, UpSample, DownSample,
+	seealso { FIRCx, Biquad, UpSample, DownSample,
 		  firDemo, interp, multirate }
 	input {
 		name {signalIn}

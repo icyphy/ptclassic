@@ -53,7 +53,7 @@ Prentice-Hall, Englewood Cliffs, NJ, 1988.
 S. Haykin, \fIModern Filters\fR, MacMillan Publishing Company,
 New York, 1989.
 	}
-	seealso { RLattice, BlockLattice, BlockRLattice, FIR, ComplexFIR, BiQuad}
+	seealso { RLattice, BlockLattice, BlockRLattice, FIR, FIRCx, Biquad}
 	input {
 		name {signalIn}
 		type {float}

@@ -16,7 +16,7 @@ depth larger than the number of output samples of interest.
 If it is smaller, you will get unexpected results after truncationDepth
 samples.
 	}
-	seealso { FIR, ComplexFIR, blockFIR, firDemo }
+	seealso { FIR, FIRCx, blockFIR, firDemo }
 	input {
 		name {inA}
 		type {float}

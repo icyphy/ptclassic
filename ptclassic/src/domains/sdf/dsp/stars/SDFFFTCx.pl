@@ -1,5 +1,5 @@
 defstar {
-	name {ComplexFFT}
+	name {FFTCx}
 	domain {SDF}
 	desc {
 Complex Fast Fourier transform.
