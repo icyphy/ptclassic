@@ -55,6 +55,7 @@ ITCL_SRCS =  \
 	Net.itcl \
 	ParameterDialog.itcl \
 	PortedGraph.itcl \
+	ScrolledSlate.itcl \
 	SlateView.itcl \
 	StarLibrary.itcl \
 	VertexController.itcl \
