@@ -30,15 +30,20 @@ $Id$
 Utility functions.
 */
 
-/* Includes */
+/* Standard includes */
 #include "local.h"
 #include <stdio.h>
 #include <string.h>
 #include <pwd.h>
 #include "tcl.h"
+
+/* Octtools includes */
+#include "oct.h"
+#include "rpc.h"
+
+/* Pigilib includes */
 #include "err.h"
 #include "util.h"
-#include "rpc.h"
 #include "octIfc.h"
 #include "vemInterface.h"
 #include "kernelCalls.h"
@@ -280,7 +285,7 @@ DupSheet *ds;
 boolean
 DupSheetAdd(ds, item)
 DupSheet *ds;
-char *item;
+const char *item;
 {
     DupSheetNode *new;
     
@@ -299,8 +304,8 @@ char *item;
 boolean
 DupSheetAdd2(ds, item, item2)
 DupSheet *ds;
-char *item;
-char *item2;
+const char *item;
+const char *item2;
 {
     DupSheetNode *new;
     
@@ -319,7 +324,7 @@ char *item2;
 boolean
 DupSheetIsDup(ds, item)
 DupSheet *ds;
-char *item;
+const char *item;
 {
     DupSheetNode *p;
 
@@ -333,8 +338,8 @@ char *item;
 boolean
 DupSheetIsDup2(ds, item, item2)
 DupSheet *ds;
-char *item;
-char *item2;
+const char *item;
+const char *item2;
 {
     DupSheetNode *p;
 
@@ -358,12 +363,13 @@ char *item2;
    or NULL if it fails.
         EAL, 9/23/90
 */
-char *
+const char *
 getDomainS(spot)
 RPCSpot *spot;
 {
     octObject facet = {OCT_UNDEFINED_OBJECT};
-    char *domain, *oldDomain;
+    const char *domain;
+    const char *oldDomain;
 
     oldDomain = curDomainName();
 
@@ -381,11 +387,12 @@ RPCSpot *spot;
     return domain;
 }
 
-char *
+const char *
 setCurDomainS(spot)
 RPCSpot *spot;
 {
-    char *domain, *oldDomain;
+    const char *domain;
+    const char *oldDomain;
     domain = getDomainS(spot);
     if (!domain) return NULL;
     oldDomain = curDomainName();
@@ -398,11 +405,12 @@ RPCSpot *spot;
 }
 
 /* Get domain corresponding to the facet */
-char *
+const char *
 getDomainF(facetPtr)
 octObject *facetPtr;
 {
-    char *domain,*oldDomain;
+    const char *domain;
+    const char *oldDomain;
     oldDomain = curDomainName();
     if (!GOCDomainProp(facetPtr, &domain, oldDomain)) {
         PrintErr(ErrGet());
@@ -419,11 +427,12 @@ octObject *facetPtr;
    NULL if this fails.
         EAL, 9/23/90
 */
-char *
+const char *
 setCurDomainF(facetPtr)
 octObject *facetPtr;
 {
-    char *domain, *oldDomain;
+    const char *domain;
+    const char *oldDomain;
     domain = getDomainF(facetPtr);
     if (!domain) return NULL;
     oldDomain = curDomainName();
@@ -436,15 +445,16 @@ octObject *facetPtr;
 }
 
 /* Get the domain corresponding to an instance. */
-char *
+const char *
 getDomainInst(instPtr)
 octObject *instPtr;
 {
     octObject mFacet = {OCT_UNDEFINED_OBJECT};
     static char domain[32];
     char srcName[512], *fullName;
-    if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr))
+    if (IsGal(instPtr) || IsUniv(instPtr) || IsPal(instPtr)) {
 	    return setCurDomainF(instPtr);
+    }
     if (!MyOpenMaster(&mFacet, instPtr, "interface", "r")) {
 	    PrintErr(ErrGet());
 	    return NULL;
@@ -459,12 +469,14 @@ octObject *instPtr;
 
 /* Set the domain to correspond to an instance. */
 
-char *
+const char *
 setCurDomainInst(instPtr)
 octObject *instPtr;
 {
-    char *oldDomain = curDomainName();
-    char* domain = getDomainInst(instPtr);
+    const char* oldDomain;
+    const char* domain;
+    oldDomain = curDomainName();
+    domain = getDomainInst(instPtr);
     if (!domain) return NULL;
     if (!KcSetKBDomain(domain)) {
 	PrintErr("Domain error in instance.");
