@@ -44,6 +44,9 @@ SYSLIBS=-lg++ -lbsd -lm
 LINKFLAGS=-L$(LIBDIR) -Xlinker -S -Xlinker -x -static
 LINKFLAGS_D=-L$(LIBDIR) -g -static
 
+# octtools/attache uses this
+TERMLIB_LIBSPEC = -ltermcap
+
 #
 # Directories to use
 #
