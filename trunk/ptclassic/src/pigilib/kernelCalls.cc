@@ -57,42 +57,57 @@ extern "C" void KcLog(const char* str) { LOG << str; }
 // The returned name and mphname are in static buffers and will be
 // overwritten by the next call.
 // First argument: pointer to the name to be parsed
-// Second argument: pointer to a char* that on return, will point
+// Second argument: pointer to a char* array that on return, will point
 //	to the name of the multiPortHole (mph).
 // Third argument: reference to an integer that on return will contain
-//	the number of multiPortHoles referenced.
+//	the number of portHoles to instantiate.
 // Return value: pointer to the stem, or class name.
 
-static const char* parseClass (const char* name, const char** mph, int& nP) {
-	static char buf[128], buf2[128];
+#define MAX_NUM_MULTS 4
+
+static const char* parseClass (const char* name, const char* mph[], int nP[]) {
+	static char buf[128], buf2[MAX_NUM_MULTS][128], buf3[32];
 	char *p;
 	p = buf;
-	*mph = buf2;
-	nP = 0;
 
-	buf2[0] = 0;
+	for( int i = 0; i < MAX_NUM_MULTS; i++) {
+	    mph[i] = buf2[i];
+	    buf2[i][0] = 0;
+	    nP[i] = 0;
+	}
 	while (*name && *name != '.') *p++ = *name++;
 	*p = 0;
 	if (*name == 0) return buf;
-// we have a . field.
-	name++;
-	p = buf2;
-	while (*name && *name != '=')
+
+	// we have a . field.
+	for(int mphCounter = 0; mphCounter < MAX_NUM_MULTS; mphCounter++) {
+	    name++;
+	    p = buf2[mphCounter];
+	    while (*name && *name != '=')
 		*p++ = *name++;
-	*p = 0;
-// do we have a = field?
-	if (*name == '=') {
+	    *p = 0;
+
+	    // do we have a = field?
+	    if (*name == '=') {
 		name++;
-		nP = atoi (name);
+		nP[mphCounter] = atoi (name);
+	    }
+	    // skip to the next '.' or end of string
+	    while (*name && *name != '.') name++;
+	    if(*name == 0) return buf;
+	}
+	if(*name == '.') {
+            ErrAdd ("Too many multiPortHoles specified");
+	    return 0;
 	}
 	return buf;
 }
 
 // Call parseClass from C, returning only the pointer to the class name.
 extern "C" const char* callParseClass (char* name) {
-	const char* junkChar;
-	int junkInt;
-	return parseClass (name, &junkChar, junkInt);
+	const char* junkChar[MAX_NUM_MULTS];
+	int junkInt[MAX_NUM_MULTS];
+	return parseClass (name, junkChar, junkInt);
 }
 
 // const version of Block::multiPortWithName
@@ -106,13 +121,23 @@ static const MultiPortHole* findMPH(const Block* b,const char* name) {
 	return NULL;
 };
 
-// Find a class.  Handle Printer.input=2.  Fail if the mphname is bogus.
+// Find a class.  Handle Printer.input=2.  Fail if any mphname is bogus.
 static const Block* findClass (const char* name) {
-	const char* mph;
-	int nP;
-	const Block* b = KnownBlock::find (parseClass (name, &mph, nP));
-	if (!b || nP == 0) return b;
-	return findMPH(b,mph) ? b : 0;
+	const char* mph[MAX_NUM_MULTS];
+	int nP[MAX_NUM_MULTS];
+	const char* c = parseClass (name, mph, nP);
+	if (!c) return 0;
+	const Block* b = KnownBlock::find (c);
+	if (!b) return b;
+	for(int i=0; i < MAX_NUM_MULTS; i++)
+	    if(nP[i] && !findMPH(b,mph[i])) {
+	        char buf[80];
+	        sprintf (buf, "No multiport named '%s' in class '%s'",
+				mph[i], c);
+	        ErrAdd (buf);
+	        return 0;
+	    }
+	return b;
 }
 
 // This function writes the domain to the log file, if and only if
@@ -151,24 +176,26 @@ KcClearUniverse(const char* name) {
 // Create a new instance of star or galaxy and set params for it
 extern "C" boolean
 KcInstance(char *name, char *ako, ParamListType* pListPtr) {
-	int nP;
-	const char* mph;
-	const char* cname = parseClass (ako, &mph, nP);
-	if (!currentGalaxy->addStar(name, cname))
+	int nP[MAX_NUM_MULTS];
+	const char* mph[MAX_NUM_MULTS];
+	const char* cname = parseClass (ako, mph, nP);
+	if (!cname || !currentGalaxy->addStar(name, cname))
 		return FALSE;
  	LOG << "\t(star " << name << " " << cname << ")\n";
-	if (nP && !currentGalaxy->numPorts (name, mph, nP))
+	for(int j = 0; j < MAX_NUM_MULTS; j++ ) {
+	    if (nP[j] && !currentGalaxy->numPorts (name, mph[j], nP[j]))
 		return FALSE;
-	if (nP)
-		LOG << "\t(numports " << name << " " << mph << " "
-			<< nP << ")\n";
+	    if (nP[j])
+		LOG << "\t(numports " << name << " " << mph[j] << " "
+			<< nP[j] << ")\n";
+	}
 	if (!pListPtr || pListPtr->length == 0) return TRUE;
 	for (int i = 0; i < pListPtr->length; i++) {
 		LOG << "\t(setstate " << name << " " <<
 			pListPtr->array[i].name << " \"" <<
 			pListPtr->array[i].value << "\")\n";
 		if(!currentGalaxy->setState(name, pListPtr->array[i].name,
-					    pListPtr->array[i].value)) return FALSE;
+			pListPtr->array[i].value)) return FALSE;
 	}
 	return TRUE;
 }
@@ -315,6 +342,21 @@ KcIsCompiledInStar(char *className) {
 	return !KnownBlock::isDynamic(b->readName());
 }
 
+/* 12/22/91 - by Edward A. Lee
+   Return TRUE if the string is in the list of strings.
+*/
+static boolean
+isStringInList(const char* string, const char* list[],
+		int listLen, int &position) {
+	for(int i=0; i < listLen; i++) {
+		if(strcmp(string, list[i]) == 0) {
+			position = i;
+		 	return TRUE;
+		}
+	}
+	return FALSE;
+}
+
 /* 5/17/90
 Get information about the portholes of a sog.
 Inputs: name = name of sog
@@ -322,66 +364,96 @@ Outputs: terms = list of info about each porthole
 
 Changed to support multiPortHoles, 7/24/90
 Changed to add info on data types, 10/5/90
+Changed to support several multiPortHole clusters, 12/22/91
 */
 extern "C" boolean
 KcGetTerms(char* name, TermList* terms)
 {
 	const Block *block;
-	const char* mphname;
+	const char* mphname[MAX_NUM_MULTS];
+	int npspec[MAX_NUM_MULTS];
 	const char* cname;
-	int npspec;
 
-	cname = parseClass (name, &mphname, npspec);
+	cname = parseClass (name, mphname, npspec);
 
-	if ((block = findClass(name)) == 0) {
+	if (!cname || (block = findClass(name)) == 0) {
 		return FALSE;
 	}
 	const char *names[MAX_NUM_TERMS];
+	const char *newNames[MAX_NUM_TERMS];
 	const char *types[MAX_NUM_TERMS];
+	const char *newTypes[MAX_NUM_TERMS];
 	int isOut[MAX_NUM_TERMS];
+	int newIsOut[MAX_NUM_TERMS];
 
 	int n = block->portNames(names, types, isOut, MAX_NUM_TERMS);
 	int nm = block->multiPortNames(names+n, types+n,
 				       isOut+n, MAX_NUM_TERMS-n);
-	if (npspec) {
-		if (nm == 0 || nm == 1 && strcmp (names[n], mphname) != 0) {
+	int numOrdPorts = n;
+	// Copy all the names of the ordinary portHoles
+	int newNameCount = 0;
+	for(int j=0; j<numOrdPorts; j++) {
+		newNames[newNameCount] = names[j];
+		newTypes[newNameCount] = types[j];
+		newIsOut[newNameCount++] = isOut[j];
+	}
+	// For each multiPortHole, create newNames
+	for(j=0; j < MAX_NUM_MULTS; j++) {
+	    const char *mphName, *mphType;
+	    int dir;
+	    if (npspec[j]) {
+		// Check that the block has a mph with name mphname[j]
+		int position;
+		if(isStringInList(mphname[j], &(names[n]), nm, position)) {
+			mphName = names[n+position];
+			mphType = types[n+position];
+			dir = isOut[n+position];
+		} else {
 			char buf[80];
 			sprintf (buf, "No multiport named '%s' in class '%s'",
-				 mphname, cname);
+				mphname[j], cname);
 			ErrAdd (buf);
 			return FALSE;
 		}
-		else if (nm > 1) {
-			ErrAdd ("Case not yet implemented: more than one MPH");
-			return FALSE;
+		// Create the new names
+		for (int i = 1; i <= npspec[j]; i++) {
+			char buf[128];
+			sprintf (buf, "%s#%d", mphName, i);
+			newNames[newNameCount] = savestring (buf);
+			newIsOut[newNameCount] = dir;
+			newTypes[newNameCount++] = mphType;
 		}
-		else {
-			const char* mphname = names[n];
-			int dir = isOut[n];
-			const char* mphtype = types[n];
-			for (int i = 1; i <= npspec; i++) {
-				char buf[128];
-				sprintf (buf, "%s#%d", mphname, i);
-				names[n+i-1] = savestring (buf);
-				isOut[n+i-1] = dir;
-				types[n+i-1] = mphtype;
-			}
-			n += npspec;
-			nm = 0;
-		}
+	    }
 	}
+	// Since all the multiPortHoles treated above have been converted
+	// to ordinary PortHoles,
+	numOrdPorts = newNameCount;
+
+	// Now look for any multiPortHoles that were not converted
+	for(int mphNum = 0; mphNum < nm; mphNum++) {
+	    int mpos;
+	    if(isStringInList(names[n+mphNum], mphname, MAX_NUM_MULTS, mpos) &&
+			npspec[mpos])
+		continue;
+	    newNames[newNameCount] = names[n+mphNum];
+	    newTypes[newNameCount] = types[n+mphNum];
+	    newIsOut[newNameCount++] = isOut[n+mphNum];
+	}
+
 	terms->in_n = 0;
 	terms->out_n = 0;
-	for (int i=0; i < n + nm; i++) {
-		if (isOut[i]) {
-			terms->out[terms->out_n].name = names[i];
-			terms->out[terms->out_n].type = types[i];
-			terms->out[terms->out_n++].multiple = (i >= n);
+	for (int i=0; i < newNameCount; i++) {
+		if (newIsOut[i]) {
+			terms->out[terms->out_n].name = newNames[i];
+			terms->out[terms->out_n].type = newTypes[i];
+			terms->out[terms->out_n++].multiple =
+				(i >= numOrdPorts);
 		}
 		else {
-			terms->in[terms->in_n].name = names[i];
-			terms->in[terms->in_n].type = types[i];
-			terms->in[terms->in_n++].multiple = (i >= n);
+			terms->in[terms->in_n].name = newNames[i];
+			terms->in[terms->in_n].type = newTypes[i];
+			terms->in[terms->in_n++].multiple =
+				(i >= numOrdPorts);
 		}
 	}
 	return TRUE;
