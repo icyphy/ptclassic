@@ -24,27 +24,34 @@ radians (so that there is one fewer cycle for every four
 cycles of the original sinusoid).
 The remaining samples are not shifted at all.
 .pp
-The Doppler shift is accomplished by the phaseShift galaxy,
-which forms an analytic signal (using a Hilbert transform)
+The Doppler shift is accomplished by the
+.c phaseShift
+galaxy, which forms an analytic signal (using a Hilbert transform)
 that modulates a complex exponential.
 .Ie "phase shift"
 .Ie "analytic signal"
 .Ie "Hilbert transform"
 .Se phaseShift
-The input is assumed to be real, and the output
-produced is real.  The frequency shift produced by the phaseShift
-galaxy is the slope of the phase control input.  This input is
-designed to be flat for the first 100 samples, rising for the next 160
-samples, falling for the next 160 samples, and flat thereafter.
-To get this waveform, the WaveForm star is combined with an Integrator.
-The outputs of the WaveForm star, therefore, give the frequency offset
-in radians.
+The input is assumed to be real, and the output produced is real.
+The frequency shift produced by the
+.c phaseShift
+galaxy is the slope of the phase control input.
+This input is designed to be flat for the first 100 samples, rising for
+the next 160 samples, falling for the next 160 samples, and flat thereafter.
+To get this waveform, the
+.c WaveForm
+star is combined with an
+.c Integrator.
+The outputs of the
+.c WaveForm
+star, therefore, give the frequency offset in radians.
 .pp
-Note that because the Hilbert filter in the phaseShift galaxy
-is a 64-tap, linear-phase FIR filter,
-there is a transient of 64 samples while the delay line of the filter
-fills.  Since the group-delay of this filter is 32 samples, the
-original sinusoid is delayed by 32 samples before being displayed.
+Note that because the Hilbert filter in the
+.c phaseShift
+galaxy is a 64-tap, linear-phase FIR filter, there is a transient of 64
+samples while the delay line of the filter fills.
+Since the group-delay of this filter is 32 samples, the original sinusoid
+is delayed by 32 samples before being displayed.
 .SA
 phaseShift.
 .ES

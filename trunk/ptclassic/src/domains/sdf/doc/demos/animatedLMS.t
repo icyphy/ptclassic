@@ -11,7 +11,7 @@ but this time the filter taps are displayed as they adapt.
 .LD
 A Gaussian white noise signal serves as input to an FIR filter and
 an adaptive filter using the LMS algorithm.
-The output of the two filters are subtracted, and the power of the
+The outputs of the two filters are subtracted, and the power of the
 resulting error signal is measured and displayed.
 .Ie "adaptive filter"
 .Ie "filter, adaptive"

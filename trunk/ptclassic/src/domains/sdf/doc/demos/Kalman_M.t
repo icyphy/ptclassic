@@ -19,15 +19,18 @@ of a process in noise.
 .LD
 The Kalman filter has faster convergence properties than an LMS filter.
 The plot that is generated compares the power of the error process for
-the two filters.  The Kalman_M star is used to generate the taps of
-a block FIR filter.
+the two filters.
+The
+.c Kalman_M
+star is used to generate the taps of a block FIR filter.
 .pp
-The Kalman filter is a state-space method.  The
+The Kalman filter is a state-space method.
+The
 .c Kalman_M
 star takes on data input value, along with a state transition matrix,
 a measurement matrix, a process noise correlation matrix, and a measurement
-noise correlation matrix.  Initially, the data input values are delayed
-using the 
+noise correlation matrix.
+Initially, the data input values are delayed using the 
 .c Trainer
 star to allow the 
 .c powerEst
@@ -47,13 +50,13 @@ show the LMS filter converging to the same minimum mean square error as
 the Kalman filter.
 .Ir "Kalman, R.E."
 .Ir "Haykin, S."
-.UH "References"
+.UH REFERENCES
 .ip [1]
 R.E. Kalman, "A new approach to linear filtering and prediction problems",
 \fITrans. ASME, J. Basic Eng.\fR, Ser 82D, pp. 35-45, March 1960.
 .ip [2]
 S. Haykin, \fIAdaptive Filter Theory\fR, Prentice-Hall, Inc., Englewood Cliffs,
-N.J., 1986.
+N.J., ISBN 0130040525, 1986.
 .SA
 Kalman_M,
 LMS.

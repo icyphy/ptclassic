@@ -25,6 +25,6 @@ by the \fInoInputsToAvg\fR parameter of the autocorrelation block.
 .Ie "noise, Gaussian"
 .SA
 Autocor,
-Xhistogram,
-IIDGaussian.
+IIDGaussian,
+Xhistogram.
 .ES

@@ -20,8 +20,8 @@ The image is transformed into YUV color format, and then back
 to RGB format.
 Finally, the RGB image is displayed.
 .SA
-DisplayRgb
-ReadRgb
-Rgb2Yuv
-Yuv2Rgb
+DisplayRgb,
+ReadRgb,
+Rgb2Yuv,
+Yuv2Rgb.
 .ES

@@ -21,22 +21,25 @@ coefficients, and run-length coding of the DCT coefficients.
 .Se DCTImageCode
 The final video sequence is displayed.
 .pp
-The DisplayVideo star needs programs from the Utah Raster Toolkit
+The
+.c DisplayVideo
+star needs programs from the Utah Raster Toolkit
 .EQ
 delim off
 .EN
-to be in your $path variable to work.
+to be in your Unix $path variable to work.
 .EQ
 delim $$
 .EN
 These programs are not included with Ptolemy.
-The manual page for the SDF \fIDisplayVideo\fR star tells how to
-get the Utah Raster Toolkit for free.
+The manual page for the SDF
+.c DisplayVideo
+star tells how to obtain the Utah Raster Toolkit for free.
 .Ir "Utah Raster Toolkit"
 .SA
-DisplayVideo
-ReadImage
-MotionCmp
-DCTImage
-DCTImageCode
+DisplayVideo,
+ReadImage,
+MotionCmp,
+DCTImage,
+DCTImageCode.
 .ES

@@ -2,8 +2,9 @@
 .NA scramble
 .SD
 This system rearranges the order of samples of signal using
-the Commutator and Distributor stars. Note that because these
-are multirate stars, one iteration involves more than one sample.
+the Commutator and Distributor stars.
+Note that because these are multirate stars, one iteration involves
+more than one sample.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
@@ -18,5 +19,6 @@ and
 .c Distributor
 stars.
 .SA
-Commutator, Distributor
+Commutator,
+Distributor.
 .ES

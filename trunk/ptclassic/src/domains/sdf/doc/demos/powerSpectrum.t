@@ -2,8 +2,8 @@
 .NA powerSpectrum
 .SD
 Compare three methods for estimating a power spectrum of
-a signal with three sinusoids plus colored noise.  The three
-methods are the periodogram method, the autocorrelation
+a signal with three sinusoids plus colored noise.
+The three methods are the periodogram method, the autocorrelation
 method, and Burg's method. 
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
@@ -11,26 +11,26 @@ method, and Burg's method.
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD
-.Ir "Levinson-Durbin algorithm"
-.Ir "Burg's algorithm"
-.Ir "system identification"
-.Ir "power spectrum"
- This demo generates a random process that is a real-valued version
+.IR "Levinson-Durbin algorithm"
+.IR "Burg's algorithm"
+.IR "system identification"
+.IR "power spectrum"
+This demo generates a random process that is a real-valued version
 of the test process described in [2] (page 11).
- It consists of three sinusoids, two of which are closely spaced,
+It consists of three sinusoids, two of which are closely spaced,
 and colored Gaussian noise.
- The power spectrum of this process is estimated using three
+The power spectrum of this process is estimated using three
 methods, the periodogram,
-.Ir periodogram
+.IR periodogram
 the autocorrelation method
-.Ir "autocorrelation method"
+.IR "autocorrelation method"
 (which uses the Levinson Durbin algorithm), and the Burg method.
- Since the input process is Gaussian, the latter two methods
+Since the input process is Gaussian, the latter two methods
 produce approximate \fImaximum entropy\fR spectral estimates.
-.Ir "maximum entropy spectral estimation"
- If the autocorrelation of the input process were known
+.IR "maximum entropy spectral estimation"
+If the autocorrelation of the input process were known
 exactly, then these methods would produce exact maximum entropy spectra.
- However, the autocorrelation is estimated from observations
+However, the autocorrelation is estimated from observations
 of the input, so the two methods yield slightly different results.
 .pp
 The universe parameters are \fIlog2NumInputs\fR, the log base 2 of the
@@ -92,7 +92,7 @@ a spectral estimate.
 .Ir "Makhoul, J."
 .Ir "Kay, S. M."
 .Ir "Haykin, S."
-.UH "References"
+.UH REFERENCES
 .ip [1]
 J. Makhoul, "Linear Prediction: A Tutorial Review",
 \fIProc. IEEE\fR, vol. 63, pp. 561-580, Apr. 1975.

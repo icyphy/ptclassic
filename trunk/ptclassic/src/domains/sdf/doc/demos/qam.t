@@ -21,12 +21,13 @@ twice the symbol rate.
 Run it for about 100 iterations.
 .pp
 This is a port of the ``transmitter'' demo from Gabriel version 0.7.
-.Ir "Gabriel"
-.UH "References"
+.IR "Gabriel"
+.UH REFERENCES
 .ip [1]
 E. A. Lee and D. G. Messerschmitt,
 .i "Digital Communication" ,
 Kluwer Academic Publishers, Boston, MA, 1988, pp. 154-172
 .SA
-RaisedCos, Xscope
+RaisedCos,
+Xscope.
 .ES

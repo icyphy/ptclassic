@@ -8,7 +8,9 @@ to finite precision effects.
 .SV $Revision$ $Date$
 .AL "A. Khazeni, Asawaree Kalavade"
 .LD
-The precision of the Add star can be varied to study
-the effect on the result.
+The precision of the
+.c AddFix
+star can be varied to study the effect on the result.
 .SA
-fixAdd
+AddFix
+.ES

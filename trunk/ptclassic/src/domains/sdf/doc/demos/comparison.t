@@ -1,7 +1,7 @@
 .\" $Id$
 .NA comparison
 .SD
-Compare two sinusoidal signals using the Test star.
+Compare two sinusoidal signals using the Test star.
 .DE
 .LO "$PTOLEMY/src/domains/sdf/demo"
 .DM SDF Universe
@@ -13,11 +13,9 @@ Compare two sinusoidal signals using the Test star.
 .Ir "Signal crossing"
 .Ir "Comparing signals"
 This universe generates two sinusoids, 90 degrees out of phase
-with one another, and compares them using the
+with each other, and compares them using the
 .c Test
-star with the
-.c condition
-parameter set to "GT".
+star with the \fIcondition\fR parameter set to "GT" for greater than.
 The first comparison simply identifies when signal A is greater
 than signal B.
 The second comparison identifies when the signals cross.

@@ -11,4 +11,5 @@ filter response.
 The tap values for the three FIR filters have different precisions.
 The effect of this on the filter responses can be observed.
 .SA
-fixAdd
+AddFix.
+.ES

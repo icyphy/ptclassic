@@ -72,12 +72,9 @@ By typing 'e' in the image window, the color map can be edited to enhance
 details.
 The galaxy prescaler has gain and offset parameters which can be
 adjusted to optimize the dynamic range of the image.
-.pp
-The \fIsfb\fR universe is a four-level decomposition using the same filters.
-It runs much more quickly.
 .SA
-sfb
-.UH References
+filterBankNonUniform
+.UH REFERENCES
 .ip [1]
 M. Vetterli and C. Herley,
 ``Wavelets and Filter Banks: Theory and Design,''

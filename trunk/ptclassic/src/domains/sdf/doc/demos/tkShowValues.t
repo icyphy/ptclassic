@@ -9,8 +9,7 @@ form of two ramp sequences.
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
 .LD
-This system uses the Tk X window toolkit to generated
-an animated display.
+This system uses the Tk X window toolkit to generate an animated display.
 .Se "TkShowValues"
 .Se "TkText"
 .SA

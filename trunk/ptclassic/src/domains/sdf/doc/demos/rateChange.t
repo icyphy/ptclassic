@@ -43,11 +43,14 @@ delim $$
 .ET
 .LD
 Change the sampling rate of \fIinput\fR by a rational factor,
-\fIinterpolation\fR:\fIdecimation\fR.  The coefficients of the anti-aliasing
-filter are given by \fIcoef\fR.  The spectra of \fIinput\fR, \fIcoef\fR, and
-\fIoutput\fR are plotted on a common frequency scale.  A block of input
-samples of size \fIblockSize\fR will be consumed to produce a single plot.
+\fIinterpolation\fR:\fIdecimation\fR.
+The coefficients of the anti-aliasing filter are given by \fIcoef\fR.
+The spectra of \fIinput\fR, \fIcoef\fR, and \fIoutput\fR are plotted
+on a common frequency scale.
+A block of input samples of size \fIblockSize\fR will be consumed to
+produce a single plot.
 .SA
-upSample,
+blockFFT,
 downSample,
-blockFFT
+upSample.
+.ES

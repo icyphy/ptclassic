@@ -8,8 +8,8 @@ structures to finite precision.
 .SV $Revision$ $Date$
 .AL "A. Khazeni, Asawaree Kalavade"
 .LD
-Two functionally equivalent IIR filter structures are
-shown. The direct-form is more sensitive to finite precision
-effects.
+Two functionally equivalent IIR filter structures are shown.
+The direct-form is more sensitive to finite precision effects.
 .SA
-fixAdd
+AddFix
+.ES

@@ -13,10 +13,10 @@ Generate and plot a complex exponential.
 .AL "Edward A. Lee"
 .LD
 A complex exponential with frequency $pi$/50 (radians per second)
-is generated and plotted.  The sampling frequency is normalized
-to $2 pi$ radians per second.
+is generated and plotted.
+The sampling frequency is normalized to $2 pi$ radians per second.
 .SA
-expgen
-CxToFloat
-XMgraph
+expgen,
+CxToFloat,
+XMgraph.
 .ES

@@ -21,21 +21,24 @@ The difference-coded image sequence is run-length encoded.
 The coded image, final image, and difference between the original and
 final images are all displayed.
 .pp
-The DisplayVideo star needs programs from the Utah Raster Toolkit
+The
+.c DisplayVideo
+star needs programs from the Utah Raster Toolkit
 .Ir "Utah Raster Toolkit"
 .EQ
 delim off
 .EN
-to be in your $path variable to work.
+to be in your Unix $PATH variable to work.
 .EQ
 delim $$
 .EN
 These programs are not included with Ptolemy.
-The manual page for the SDF DisplayVideo star tells how to get the
-Utah Raster Toolkit for free.
+The manual page for the SDF
+.c DisplayVideo
+star tells how to get the Utah Raster Toolkit for free.
 .SA
-DisplayVideo
-ReadImage
-Dpcm
-RunLen
+DisplayVideo,
+ReadImage,
+Dpcm,
+RunLen.
 .ES
