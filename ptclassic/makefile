@@ -81,7 +81,7 @@ GNU_BUILD_CC=cc
 IRIX5_GNU_BUILD_CC=cc -Wf,-XNh1500,-XNg1500 -Olimit 3000 -cckr -O1
 
 # irix5 /bin/make seems to need this
-SHELL=sh
+SHELL=/bin/sh
 
 install_gnu:
 	@echo "Building gnu for $(ARCH)";
