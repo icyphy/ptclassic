@@ -1,3 +1,4 @@
+static const char file_id[] = "BDFConnect.cc";
 #include "Block.h"
 #include "BDFConnect.h"
 #include "CircularBuffer.h"

@@ -1,3 +1,4 @@
+static const char file_id[] = "BDFScheduler.cc";
 #include "type.h"
 #include "BDFScheduler.h"
 #include "BDFStar.h"
@@ -11,6 +12,7 @@
 #include "Geodesic.h"
 #include "GalIter.h"
 #include "ParticleStack.h"
+#include "ConstIters.h"
 
 /**************************************************************************
 Version identification:
@@ -122,30 +124,6 @@ int SimGeo::nget(int nPart) {
 
 
 	////////////////////////////
-	// run
-	////////////////////////////
-
-// runs the number of times indicated by numIters.
-int BDFScheduler :: run (Block& galaxy) {
-	if (invalid) {
-		Error::abortRun(galaxy, ": BDF schedule is invalid; can't run");
-		return FALSE;
-	}
-	if (haltRequestFlag) {
-		Error::abortRun(galaxy,
-				": Can't continue after run-time error");
-		return FALSE;
-	}
-	while (numItersSoFar < numIters && !haltRequestFlag) {
-		runOnce();
-		currentTime += schedulePeriod;
-		numItersSoFar++;
-	}
-	numIters++;
-	return TRUE;
-}
-
-	////////////////////////////
 	// runOnce
 	////////////////////////////
 
@@ -157,7 +135,7 @@ void BDFScheduler :: runOnce () {
 		Star* s;
 		while ((s = (Star*)next++) != 0) {
 			s->fire();
-			if (haltRequestFlag) return;
+			if (haltRequested()) return;
 		}
 		inPreamble = FALSE;
 	}
@@ -165,48 +143,22 @@ void BDFScheduler :: runOnce () {
 	mySchedule->run(*this);
 }
 
-extern int warnIfNotConnected (Galaxy&);
-
-	////////////////////////////
-	// setup
-	////////////////////////////
-
-int BDFScheduler :: setup (Block& block) {
-
-	Galaxy& galaxy = block.asGalaxy();
-	numItersSoFar = 0;
-	numIters = 1;			// reset the member "numIters"
-	invalid = FALSE;
-	haltRequestFlag = FALSE;
-
-// check connectivity
-	if (warnIfNotConnected (galaxy)) {
-		invalid = TRUE;
-		return FALSE;
-	}
-
+int BDFScheduler::prepareGalaxy(Galaxy& galaxy) {
 	// initialize galaxy and all contents.
 	galaxy.initialize();
 	galSize = setStarIndices(galaxy);
 	nPorts = setPortIndices(galaxy);
-
-	// set schedulePeriod if user gives it.
-	FloatState* st = (FloatState*) galaxy.stateWithName("schedulePeriod");
-	if (st) schedulePeriod = float ((double) (*st));
-	currentTime = 0;
-
 	// turn on debugging if there is a state named debug
 	if (galaxy.stateWithName("debug")) debug = TRUE;
-	if (haltRequestFlag) {
-		invalid = TRUE;
-		return FALSE;
-	}
+}
 
-// Allocate space for the SchedInfo structures.
-	delete starInfo;
-	delete portInfo;
-	starInfo = new BDFStarSchedInfo[galSize];
-	portInfo = new BDFPortSchedInfo[nPorts];
+int BDFScheduler::checkStars(Galaxy& galaxy) {
+// Allocate space for the SchedInfo structures.  Check the stars
+// for BDF-ness or SDF-ness, and set up the structures.
+	LOG_DEL; delete starInfo;
+	LOG_DEL; delete portInfo;
+	LOG_NEW; starInfo = new BDFStarSchedInfo[galSize];
+	LOG_NEW; portInfo = new BDFPortSchedInfo[nPorts];
 
 	GalStarIter nextStar(galaxy);
 	Star* s;
@@ -214,25 +166,21 @@ int BDFScheduler :: setup (Block& block) {
 	// make sure they are of the right domain.
 
 	while ((s = nextStar++) != 0) {
-		if (strcmp (s->domain(), BDFdomainName) == 0) {
+		if (s->isA("BDFStar")) 
 			initInfoBDF (*s);
-		}
-		else if (strcmp (s->domain(), SDFdomainName) == 0) {
+		else if (s->isA("SDFStar"))
 			initInfoSDF (*s);
-		}
 		else {
 			Error::abortRun(*s, " is not an SDF or BDF star");
 			invalid = TRUE;
 			return FALSE;
 		}
-		s->prepareForScheduling();
 	}
+}
 
-	// This computes the number of times each component star must be
-	// run in one cycle of a periodic schedule.
-
-
-	if (!repetitions(galaxy)) return FALSE;
+int BDFScheduler::computeSchedule(Galaxy& galaxy) {
+	GalStarIter nextStar(galaxy);
+	Star* s;
 
 	// debug -- print repetition counts
 	if (debug) {
@@ -264,8 +212,8 @@ int BDFScheduler :: setup (Block& block) {
 	}
 
 	preamble.initialize();
-	delete mySchedule;
-	mySchedule = new BDFSchedule;
+	LOG_DEL; delete mySchedule;
+	LOG_NEW; mySchedule = new BDFSchedule;
 	if (preambleNeeded) {
 		if (debug) cout << "Generating preamble\n";
 		inPreamble = TRUE;
@@ -541,7 +489,7 @@ int BDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 // act as if the values are unknown.
 
 void BDFScheduler :: computeTokens(const Star& star, int useKnownBools) {
-	BlockPortIter nextp(star);
+	CBlockPortIter nextp(star);
 	const PortHole* port;
 	while ((port = nextp++) != 0) {
 		BDFPortSchedInfo& pinfo = info(*port);
@@ -562,14 +510,13 @@ void BDFScheduler :: computeTokens(const Star& star, int useKnownBools) {
 
 static char chtok[] = "FTU";	// debug
 
-int BDFScheduler :: simRunStar (Star& atom, int deferFiring = FALSE) {
+int BDFScheduler :: simRunStar (Star& atom, int deferFiring) {
 
 	int test = notRunnable(atom);
 	if(test) return test;	// return if the star cannot be run
 
 	// If we get to this point without returning, then the star can be run.
 
-	int i;
 	PortHole* port;
 
 	// An important optimization for code generation:
@@ -821,7 +768,7 @@ BDFPortSchedInfo::BDFPortSchedInfo() : num(0), assoc(0), relDelay(0), geo(0),
 
 void BDFScheduler::initInfoBDF(const Star& star) {
 	BDFStarSchedInfo& sinfo = info(star);
-	BlockPortIter nextPort(star);
+	CBlockPortIter nextPort(star);
 	BDFPortHole* p;
 	while ((p = (BDFPortHole*)nextPort++) != 0) {
 		BDFPortSchedInfo& pinfo = info(*p);
@@ -844,7 +791,7 @@ void BDFScheduler::initInfoBDF(const Star& star) {
 
 void BDFScheduler::initInfoSDF(const Star& star) {
 	BDFStarSchedInfo& sinfo = info(star);
-	BlockPortIter nextPort(star);
+	CBlockPortIter nextPort(star);
 	SDFPortHole* p;
 	while ((p = (SDFPortHole*)nextPort++) != 0) {
 		BDFPortSchedInfo& pinfo = info(*p);
@@ -907,7 +854,7 @@ int BDFScheduler::debug = FALSE;
 
 // Functions used in executing the schedule
 
-BDFScheduler::saveBooleans(Star& s) {
+void BDFScheduler::saveBooleans(Star& s) {
 	BlockPortIter next(s);
 	PortHole *p;
 	while ((p = next++) != 0) {

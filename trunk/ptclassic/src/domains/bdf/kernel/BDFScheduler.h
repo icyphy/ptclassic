@@ -15,10 +15,8 @@ $Id$
 *******************************************************************/
 
 #include "BDFStar.h"
-#include "SDFStar.h"
 #include "BDFBool.h"
-#include "Scheduler.h"
-#include "Galaxy.h"
+#include "SDFScheduler.h"
 
 class BDFSchedule;
 class BDFScheduler;
@@ -59,16 +57,10 @@ class BDFPortSchedInfo {
         void traceBack (const BDFPortHole&);
 };
 
-class BDFScheduler : public Scheduler {
+class BDFScheduler : public SDFScheduler {
 public:
 	// Constructor
 	BDFScheduler() {
-		repeatedFiring = TRUE;
-		deferredFiring = TRUE;
-		numItersSoFar = 0;
-		numIters = 1;
-		invalid = 1;
-		schedulePeriod = 10000.0;
 		starInfo = 0;
 		portInfo = 0;
 		dead = 0;
@@ -81,35 +73,33 @@ public:
 	// Destructor
 	~BDFScheduler();
 
-	// The setup function computes an SDF schedule
-	// and initializes all the blocks.
-	int setup(Block& galaxy);
+	// setup and run are inherited from SDF.
 
-	// The run function resumes the run where it was left off.
-	int run(Block& galaxy);
+	// runOnce does one iteration of the schedule.
 	void runOnce();
 	
 	StringList displaySchedule();
 
-	// setStopTime, for compatibility with DE scheduler.
-	// for now, we assume each schedule interation takes 1.0
-	// time units.  (Argh).  Deal with roundoff problems.
-	void setStopTime (float limit) { numIters = int(limit + 0.001);}
-	void resetStopTime (float v) { numIters = 1; numItersSoFar = 0;}
-
-	// scheduler Period : used when interfaced with timed domain.
-	float schedulePeriod;
-
 	// return the number of repetitions for the indicated star.
 	int repetitions(Star&);
 
-	// save boolean values for a star (access should be more restricted)
-	BDFScheduler::saveBooleans(Star& s);
+	// save boolean values for a star
+	void saveBooleans(Star& s);
 
 	// retrieve boolean value for a star
 	getBoolValue(const PortHole& p) const {
 		return info(p).lastRead;
 	}
+
+protected:
+	// prepare galaxy for scheduling
+	int prepareGalaxy(Galaxy&);
+
+	// check stars for compatible domains
+	int checkStars(Galaxy&);
+
+	// compute the BDF schedule (the biggie)
+	int computeSchedule(Galaxy&);
 
 private:
 	// return info structure for a star
@@ -171,16 +161,7 @@ private:
 	// least common multiple for denominators of BoolFraction expressions
 	BoolTerm lcm;
 
-	// option: if true, allow deferred firing
-	int deferredFiring;
-
-	// option: if true, allow repeated firing
-	int repeatedFiring;
-	int numItersSoFar;
-	int numIters;
-
 	// error flag
-	int invalid;
 	int galSize;		// number of stars
 	int nPorts;		// number of star portholes
 

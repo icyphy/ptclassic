@@ -1,3 +1,4 @@
+static const char file_id[] = "BDFBool.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -39,7 +40,7 @@ int BoolTerm::elim (const BoolSignal& term) {
 	if (*bList == term) {
 		BoolSignal* t = bList;
 		bList = t->link;
-		delete t;
+		LOG_DEL; delete t;
 		return 1;
 	}
 	BoolSignal* p = bList;
@@ -47,7 +48,7 @@ int BoolTerm::elim (const BoolSignal& term) {
 	while (q) {
 		if (*q == term) {
 			p->link = q->link;
-			delete q;
+			LOG_DEL; delete q;
 			return 1;
 		}
 		p = q;
@@ -56,15 +57,15 @@ int BoolTerm::elim (const BoolSignal& term) {
 	return 0;
 }
 
-// find the gcd of two unsigned integers.
-static unsigned gcd(unsigned a, unsigned b) {
+// find the gcd of two integers.
+static int gcd(int a, int b) {
 	if (a < b) {
 		int t = a; a = b; b = t;
 	}
 	// now b is less.  Check for zero
-	if (b == 0) return 0;
+	if (b <= 0) return 0;
 	while (1) {
-		unsigned rem = a % b;
+		int rem = a % b;
 		if (rem == 0) return b;
 		a = b;
 		b = rem;
@@ -90,7 +91,7 @@ void BoolTerm::zerofy() {
 	while (bList) {
 		t = bList;
 		bList = t->link;
-		delete t;
+		LOG_DEL; delete t;
 	}
 	constTerm = 0;
 }
@@ -196,7 +197,7 @@ StringList& operator+=(StringList& msg, const BoolTerm& t) {
 // print a BoolFraction
 StringList& operator+=(StringList& msg, const BoolFraction& f) {
 	msg += f.num();
-	if (f.den().constTerm == 1 && f.den().pureNumber()) return;
+	if (f.den().constTerm == 1 && f.den().pureNumber()) return msg;
 	msg += "/";
 	msg += f.den();
 	return msg;
