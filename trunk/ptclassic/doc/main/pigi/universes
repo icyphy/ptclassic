@@ -13,11 +13,14 @@ cd example
 .BU
 Start pigi:
 .(c
-pigi &
+pigi
 .)c
-A dialog box titled ``Missing properties for init.pal:schematic'' will appear.
-Just click the mouse on ``OK'' and continue.
-Wait until the ``Pigi is running'' message appears in the VEM console.
+.lp
+You will see the message:
+.(c
+creating initial facet ``init.pal''
+.)c
+Wait until the startup window with the version number appears.
 We are now ready to learn about the basics of using VEM.
 More complete VEM documentation can be found in the VEM section
 of the Almagest.
@@ -89,30 +92,36 @@ pigi menu (shift-middle-button).
 Alternatively, type an ``F''.
 .IE open-facet
 .LE
-Replace the cell ``name'' in the dialog with ``wave'' and click
-the ``OK'' button.  Leave the view and facet entries
-unmodified.  A new window will appear.
+Replace the cell Name ``untitled'' in the dialog with ``wave'' and click
+the ``OK'' button.  A quick way to delete the ``untitled'' is
+using control-k.  Leave the View and Facet fields
+unmodified.  A new blank window will appear.
 .in -0.5i
 .BU
 Open a palette:
 .in +0.5i
 .LE
-Place cursor in the new window labeled ``wave:schematic''.
+Place cursor in either blank window.
 .LE
 Select the \fIopen-palette\fP command from the ``Window''
-pigi menu (shift-middle-button).
+pigi menu.
 .IE open-palette
 Alternatively, type an ``O''.
 .LE
 Pigi will present a palette menu.
-Select the main ``sdf'' palette by clicking
-the left button in the box next to the
-``~ptolemy/src/domains/sdf/icons/main.pal'' entry
+Select the ``sdf'' palette by clicking
+the left button in the box next to
+``$PTOLEMY/src/domains/sdf/icons/main.pal'' (the first entry),
 and then click on ``OK''.
-This palette shows the basic synchronous dataflow stars that are available.
-(You may have to wait a while before the palette appears.)
-The companion palette, ``~ptolemy/src/domains/sdf/icons/dsp.pal'',
-has more advanced signal processing stars in it.
+This palette shows the basic categories of
+synchronous dataflow stars that are availabel.
+There are too many stars to put in just one palette.
+You can use the Window:look-inside (``i'') command to
+open any of the palettes.
+At this point you should look inside
+the ``Signal Sources'', ``Nonlinear Functions'',
+and ``Signal Sinks''.  Arrange these palettes on the screen so that you
+can see the blank window labeled ``wave:schematic''.
 .in -0.5i
 .H2 "Some Basic VEM Commands"
 .pp
@@ -127,9 +136,10 @@ entered in a different way.  All graphics arguments are created
 with the left mouse button.  The five types of arguments are listed
 below:
 .BU
-Point: position cursor, click left mouse button
+Point: position the cursor, click the left mouse button
+.Ir "point in VEM"
 .BU
-Box: position cursor, drag\**
+Box: position the cursor, drag\**
 .IE drag
 .IE "drawing a box"
 .IE "box"
@@ -138,9 +148,9 @@ Box: position cursor, drag\**
 down on a mouse button, move the mouse while holding it down, and then
 release the button.
 .)f
-left mouse button
+the left mouse button
 .BU
-Line: make a point, position cursor above point, drag left
+Line: make a point, position the cursor above point, drag the left
 mouse button
 .IE "drawing a line"
 .IE "line"
@@ -160,16 +170,17 @@ for pigi commands.  Menus are of the ``walking'' variety, as explained before.
 Key bindings: commands can be bound to single keys
 and activated by just pressing the key.
 .IE "key bindings"
+.IE "single key accelerator"
 .IE "bindings"
 Key bindings are case sensitive.
-We'll give key bindings for the pigi commands that have them
+We have been giving key bindings for the pigi commands that have them
 as we go along.
 There are also tables at the end of this document summarizing
 VEM and pigi commands and their key bindings.
 .BU
 Type-in: type a colon followed by the command name
 .lp
-Let's try a few examples.
+Let's try a few examples, some of which should be familiar by now.
 Place the cursor in the palette window (the one with the library
 stars) and:
 .BU
@@ -185,7 +196,7 @@ giving the name of the star.  VEM does not display these labels
 if they will be too small.
 .BU
 The VEM \fIshow-property\fR command (``control-p'') is useful
-for finding out the name of a star when the lable is not visible.
+for finding out the name of a star when the label is not visible.
 Just place the mouse cursor on the icon of interest and type
 ``control-p''.
 .IE "show-property"
@@ -235,9 +246,9 @@ You can also resize a window, using whatever X Window
 bindings you have installed, and then type ``f'' to show all.
 .H2 "Back to the example"
 .BU
-Create an instance of the star called ``FloatRamp''.  This star is the sixth star of the first row.  Its icon
-is an orange triangle.
-(blue = float).
+Create an instance of the star called ``Ramp''.
+This star is the first star of the second row of the sources palette.
+Its icon has an orange triangle.
 To do this:
 .in +0.5i
 .LE
@@ -246,86 +257,89 @@ With your mouse cursor in the window ``wave:schematic'':
 Create a point anywhere in the
 window by clicking the left button.
 .LE
-Move the cursor over the ``FloatRamp'' icon in the palette and
+Move the cursor over the ``Ramp'' icon in the palette and
 press the ``c'' key.
 This is a key binding that executes the VEM ``create'' command.
 .IE create
 .LE
-You have just created an \fBinstance\fP of the ``FloatRamp''
-icon.  The actual data which describes how the ``FloatRamp'' icon should
+You have just created an \fBinstance\fP of the ``Ramp''
+icon.  The actual data which describes how the ``Ramp'' icon should
 be drawn is stored in another facet (an interface facet).  An
-\fBinstance\fP\ of the `FloatRamp'' icon points to this facet.
+\fBinstance\fP\ of the ``Ramp'' icon points to this facet.
 .IE instance
 .in -0.5i
 .BU
 Delete and select instances:
 Sometimes in the process of editing your schematic, you may
-need to delete objects.  As an example, let's create another ramp
+need to delete objects.  As an example, let's create another Ramp
 instance and then delete it.
 .in +0.5i
 .LE
-Create another ramp instance next to the first one:
-place a point near the original ramp, place the cursor over the
-ramp icon in the palette and press ``c''.
+Create another Ramp instance next to the first one:
+place a point near the original Ramp, place the cursor over the
+Ramp icon in the palette and press ``c''.
 Actually, you don't have to use the icon in the palette \- you
-could also put the cursor over the already existing ramp icon
-and achieve the same effect.
+could also put the cursor over the already existing Ramp icon
+to achieve the same effect.
 .LE
-Place the cursor over the new ramp icon and execute \fIselect-objects\fP
+Place the cursor over the new Ramp icon and execute \fIselect-objects\fP
 by typing ``s''.
 .IE select-objects
 This creates an object argument on the VEM command line.
 This is necessary because the VEM \fIdelete-objects\fP command
 takes arguments of type ``object''.
 .IE delete-objects
-\fIselect-objects\fP takes point, box, and line arguments and turns the
-items underneath them into object arguments.  \fIunselect-objects\fP
-does the reverse of \fIselect-objects\fP.
+The \fIselect-objects\fP command
+takes point, box, and/or line arguments and turns the
+items underneath them into object arguments.  The \fIunselect-objects\fP
+command (``u'') does the reverse of \fIselect-objects\fP.
 .IE unselect-objects
 .LE
 Execute \fIdelete-objects\fP by typing ``D'' (upper-case!).
 This deletes the objects we selected previously.
 .LE
-You could also have deleted the newly created ramp with the \fIundo\fR
+You could also have deleted the newly created Ramp with the \fIundo\fR
 command (``U'').
 .IE undo
 This is an infinite undo, so you can backtrack through all changes
 you have made since starting the VEM session by repeatedly executing
 the undo command.
 .LE
-Sometimes when you use the select and unselect commands, the
+Occasionally when you use the select and unselect commands, the
 objects are not redrawn correctly.  When this happens, use the
 VEM \fIredraw-window\fP command, ``control-l'' (lower case L), to redraw.
 .IE redraw
 .in -0.5i
 .BU
-Create the remaining instances:
+Create the remaining instances in our example:
 .in +0.5i
 .LE
 Create an instance of the ``Sin'' icon to the right of
-the ramp.
-``Sin'' is the first icon in the fifth row of the ``sdf'' palette.
+the Ramp.
+``Sin'' is the first icon in the second row of the ``nonlinear'' palette.
 Make sure it does not overlap with the
-ramp icon.
+Ramp icon.
 If it overlaps, you can delete it and create a new one.
 .LE
 Create an ``Xgraph'' instance to the right of the
 Sin icon.
-``Xgraph'' is the first icon in the second row.
-We now have three icons: a FloatRamp, a Sin, and an Xgraph.  Next,
+``Xgraph'' is the first icon in the first row of the ``sinks'' palette.
+.lp
+We now have three icons: a Ramp, a Sin, and an Xgraph.  Next,
 we will connect them together.
 .in -0.5i
 .BU
-Connect the ramp output to the sin input:
+Connect the Ramp output to the sin input using the following steps:
 .in +0.5i
 .LE
-Type ``f'' to show all.
+With the mouse cursor in the ``wave:schematic'' window,
+type ``f'' to show all.
 This will rescale your system, and make it easier
 to make connections.
 .LE
-Draw a line between the output of the ramp and the input of the
+Draw a line between the output of the Ramp and the input of the
 Sin:
-put the cursor over the ramp output, double-click on the left mouse button,
+put the cursor over the Ramp output, double-click on the left mouse button,
 and drag the cursor to the Sin input, and then let up on the mouse
 button.
 If the two terminals are not on a horizontal line, you can bend the line
@@ -372,14 +386,14 @@ or computer system fails unexpectedly.
 .BU
 Change parameters:
 If we look at the output, the sine wave appears jagged.  This is because
-the ramp star has a set of default parameters which cause the ramp
+the Ramp star has a set of default parameters which cause the Ramp
 to generate output values with an increment that is too large.  We
-can change the parameters of the ramp star as follows:
+can change the parameters of the Ramp star as follows:
 .in +0.5i
 .LE
-Place the cursor over the ramp icon and execute
+Place the cursor over the Ramp icon and execute
 \fIedit-params\fP in the pigi menu (or type ``e'').  A dialog box will appear
-that shows the current parameters of the ramp.
+that shows the current parameters of the Ramp.
 .IE edit-params
 .LE
 Replace the value of ``step'' with ``PI/50''.
@@ -437,7 +451,6 @@ do not need to be saved.
 To indicate which of the listed buffers you wish
 to save, click on the box to the left of each name.  Then click on the
 ``OK'' button.
-Do not attempt to save any facets belonging to the user ``ptolemy''.
 .LE
 A final warning appears telling you that closing the console window
 will terminate the program.  Click on ``Yes''.
