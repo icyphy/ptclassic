@@ -187,8 +187,10 @@ int SDFScheduler :: setup (Block& block) {
 	// END OF MAIN LOOP
 	
 	if (passValue == 1) {
-		errorHandler.error("DEADLOCK! Not enough delay in a loop containing:",
-                                   dead->readFullName());
+		StringList msg;
+		msg = "DEADLOCK! Not enough delay in a loop containing: ";
+		msg += dead->readFullName();
+		errorHandler.error (msg);
 		invalid = TRUE;
 	}
 	return !invalid;
@@ -249,11 +251,8 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 		if(star.repetitions == 0) {
 
 			// Set repetitions to 1 and set repetitions for
-			// all connected block.
+			// all blocks connected to the current block.
 			star.repetitions = 1;
-
-			// set the repetitions property of all atomic blocks
-			// connected to the currentBlock
 			reptConnectedSubgraph(star);
 			if (invalid) return;
 		}
@@ -263,6 +262,7 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	// contains the least common multiple of all the denominators
 	// of all the fractional repetitions.  To convert them to
 	// integers, we multiply through by lcm.
+
 	for(i = alanShepard.totalSize(galaxy); i>0; i--) {
 		// Get the next atomic block:
 		SDFStar& star = (SDFStar&) alanShepard.nextStar();
@@ -337,7 +337,7 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 		farStarRepetitions = farStarShouldBe;
 
 		// update the least common multiple of the denominators
-		temp = (Fraction)(lcm,farStarShouldBe.denominator);
+		temp = Fraction(lcm,farStarShouldBe.denominator);
 		lcm = temp.computeGcdLcm().lcm;
 		return TRUE;
 	}
