@@ -17,6 +17,6 @@ Xvax
 Xmips
 #endif
 #ifdef hppa
-Xsnake
+Xhppa
 #endif
 EOF
