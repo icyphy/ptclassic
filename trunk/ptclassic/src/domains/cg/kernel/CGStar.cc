@@ -27,7 +27,7 @@ $Id$
 ********************************************************************/
 
 //Constructor
-CGStar :: CGStar() {
+CGStar :: CGStar() : forkId(0) {
 	starSymbol.initialize();
         addState(procId.setState("procId", this, "-1",
                 "assigned processor id. If -1, not assigned manually."));

@@ -77,8 +77,10 @@ public:
 	int getProcId() { return int(procId); }
 	void setProcId(int i) { procId = i; }
 
-protected:
+	// am I a Fork star?
+	int isItFork() { return forkId; }
 
+protected:
 	// Process code, expanding macros.
 	StringList processCode(CGCodeBlock&);
 	StringList processCode(const char*);
@@ -143,9 +145,15 @@ protected:
 	// processor id 
 	IntState procId;
 
+	// declare that I am a Fork star
+	void isaFork() { forkId = TRUE; }
+
 private:
 	// Reset local codeblock labels
 	void resetCodeblockSyms(){ codeblockSymbol.initialize(); }
+
+	// indicate if a fork star
+	int forkId;
 };
 
 /*
