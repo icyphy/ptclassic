@@ -12,6 +12,6 @@ MAKEVARS =	\
 all install clean check:
 	 for x in $(DIRS); do \
 	 	cd $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../src/filters/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) VPATH=../../../src/filters/$$x $@ ;\
 	  	cd .. ; \
 	 done
