@@ -97,7 +97,7 @@ source traffic blocks.
 
                    phoneIn.get().getMessage(inEnv);
                    if (!voiceCheck (inEnv, *this)) return;
-                   VoiceData*  v = (VoiceData*) inEnv.myData();
+                   const VoiceData*  v = (const VoiceData*) inEnv.myData();
                 
                    if (!v->isitSDMessage())  {
                        Error :: abortRun (*this,
@@ -139,7 +139,7 @@ source traffic blocks.
                        //  the caller interrupted by MQ telephone
                        phoneIn.get().getMessage(inEnv);
                        if (!voiceCheck (inEnv, *this)) return;
-                       VoiceData*  v1 = (VoiceData*) inEnv.myData();
+                       const VoiceData*  v1 = (const VoiceData*) inEnv.myData();
                     
                        if (!v1->isitSSDMessage()) {
                            Error :: abortRun (*this,
@@ -173,7 +173,7 @@ source traffic blocks.
                            return;
                        }
 
-                       Particle& p = feedbackIn.get();
+                       feedbackIn.get();
 
                        if (feedbacksLeft != 0)  {
                            // this situation indicates that there are leftover events
