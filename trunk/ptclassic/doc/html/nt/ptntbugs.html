@@ -6,6 +6,35 @@
 <body bgcolor=#faf0e6>
 <H1>Ptolemy NT Bugs</H1>
 
+<h2>Tar bugs</h2>
+<menu>
+<li> Cygwin32 tar has problems creating <CODE>$PTOLEMY/colors/ptolemy/con</CODE>.  The problem is that <CODE>con</CODE> is a reserved name.
+ <br>The Cygwin32 FAQ says
+<BLOCKQUOTE>
+DOS special filenames
+
+Files cannot be named com1, lpt1, or aux (to name a few); either as
+the root filename or as the extension part. If you do, you'll have
+trouble. Unix programs don't avoid these names which can make things
+interesting. Eg, the perl distribution has a file called aux.sh. The
+perl configuration tries to make sure that aux.sh is there, but an
+operation on a file with the magic letters 'aux' in it will hang.
+
+</BLOCKQUOTE>
+You can replicate this with:
+<pre>
+bash-2.01$ cd /tmp
+bash-2.01$ mkdir con
+mkdir: cannot make directory `con': Permission denied
+bash-2.01$ mkdir foo
+bash-2.01$
+</pre>
+The workaround is to use a non GNU tar tool such as Winzip. 
+ <br>(Reported by
+Sascha Schwarz <CODE>&lt;saschas@natasha.auslabs.lucent.com&gt;</CODE>).
+
+</menu>
+
 <h2>Compilation bugs</h2>
 <MENU>
 
