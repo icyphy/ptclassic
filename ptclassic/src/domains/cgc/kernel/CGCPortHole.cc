@@ -39,6 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGCGeodesic.h"
 #include "SDFStar.h"
 #include "Error.h"
+#include "SimControl.h"
 
 extern const Attribute P_GLOBAL = {PB_GLOBAL,0};
 extern const Attribute P_LOCAL = {0,PB_GLOBAL};
@@ -67,6 +68,10 @@ void CGCPortHole::setFlags() {
 	}
 	if (bufSize() % numXfer() != 0)
 		asLinearBuf = FALSE;
+	
+	// BufferSize might not be set - bufSize class error abort run
+	if (SimControl::haltRequested()) return;
+       
 	if ((numXfer() * parentReps()) % bufSize() != 0)
 		hasStaticBuf = FALSE; 
 }
