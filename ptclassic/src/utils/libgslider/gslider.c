@@ -31,7 +31,6 @@ static	char	SccsId[] = "$Id$";
 #include "compat.h"
 #include "gslider.h"
 
-extern	char	*malloc();
 extern	char	*index();
 extern	double	atof();
 
