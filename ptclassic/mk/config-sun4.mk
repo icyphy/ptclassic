@@ -40,7 +40,7 @@ X11_INCSPEC =	-I/usr/X11/include
 X11_LIBSPEC =	-L/usr/X11/lib -lX11
 
 # Variables for Pure Inc tools (purify, purelink, quantify)
-COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sun4/2.5.8/ld
+COLLECTOR = 	-collector=$(ROOT)/gnu/sun4/lib/gcc-lib/sparc-sun-sunos4.1.3/2.6.2/ld
 
 PURELINK =	purelink $(COLLECTOR)
 PURIFY =	purelink $(COLLECTOR) purify
