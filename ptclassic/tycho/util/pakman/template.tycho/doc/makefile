@@ -52,6 +52,10 @@ EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS) _makefile _index.html
 
 MISC_FILES =	$(DIRS) img
 
+# make checkjunk will not report OPTIONAL_FILES as trash
+OPTIONAL_FILES =	
+
+# 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =
 
 # Do make sources so that we ensure that the subdirectories are checked out
