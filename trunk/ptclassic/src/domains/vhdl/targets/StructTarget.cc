@@ -971,21 +971,33 @@ const char* StructTarget :: portAssign() {
 
 ISA_FUNC(StructTarget,SimVSSTarget);
 
-// Method called by C2V star to place important code into structure.
-void StructTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
+// Method called by comm stars to place important code into structure.
+void StructTarget :: registerComm(int direction, int pairid, int numxfer, const char* dtype) {
+  // direction == 0 --> C2V ; direction == 1 --> V2C.
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
   if (strcmp(dtype, "INT") == 0) {
     vtype = "INTEGER";
-    name = "C2Vinteger";
+    if (direction) {
+      name = "V2Cinteger";
+    }
+    else {
+      name = "C2Vinteger";
+    }
   }
   else if (strcmp(dtype, "FLOAT") == 0) {
     vtype = "REAL";
-    name = "C2Vreal";
+    if (direction) {
+      name = "V2Creal";
+    }
+    else {
+      name = "C2Vreal";
+    }
   }
-  else
+  else {
     Error::abortRun(*this, dtype, ": type not supported");
+  }
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
@@ -1015,78 +1027,12 @@ void StructTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
   ctlerPortList.put(startName, "OUT", "STD_LOGIC");
   firingPortList.put(startName, "IN", "STD_LOGIC");
   firingPortList.put(goName, "OUT", "STD_LOGIC");
-  firingPortList.put(dataName, "IN", vtype);
-  firingPortList.put(doneName, "IN", "STD_LOGIC");
-  firingPortList.put(endName, "OUT", "STD_LOGIC");
-  ctlerPortList.put(endName, "IN", "STD_LOGIC");
-
-  ctlerPortMapList.put(startName, startName);
-  firingPortMapList.put(startName, startName);
-  firingPortMapList.put(goName, goName);
-  firingPortMapList.put(dataName, dataName);
-  firingPortMapList.put(doneName, doneName);
-  firingPortMapList.put(endName, endName);
-  ctlerPortMapList.put(endName, endName);
-
-  ctlerSignalList.put(startName, "STD_LOGIC", startName, startName);
-  firingSignalList.put(startName, "STD_LOGIC", startName, startName);
-  firingSignalList.put(goName, "STD_LOGIC", goName, goName);
-  firingSignalList.put(dataName, vtype, dataName, dataName);
-  firingSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
-  firingSignalList.put(endName, "STD_LOGIC", endName, endName);
-  ctlerSignalList.put(endName, "STD_LOGIC", endName, endName);
-
-  ctlerAction << startName << " <= '0';\n";
-  preSynch << "wait on " << startName << "'transaction;\n";
-  postSynch << endName << " <= '0';\n";
-  ctlerAction << "wait on " << endName << "'transaction;\n";
-}
-
-// Method called by V2C star to place important code into structure.
-void StructTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
-  // Create a string with the right VHDL data type
-  StringList vtype = "";
-  StringList name = "";
-  if (strcmp(dtype, "INT") == 0) {
-    vtype = "INTEGER";
-    name = "V2Cinteger";
+  if (direction) {
+    firingPortList.put(dataName, "OUT", vtype);
   }
-  else if (strcmp(dtype, "FLOAT") == 0) {
-    vtype = "REAL";
-    name = "V2Creal";
+  else {
+    firingPortList.put(dataName, "IN", vtype);
   }
-  else
-    Error::abortRun(*this, dtype, ": type not supported");
-  
-  // Construct unique label and signal names and put comp map in main list
-  StringList label;
-  StringList startName, goName, dataName, doneName, endName;
-  StringList rootName = name;
-  rootName << pairid;
-
-  label << rootName;
-  startName << rootName << "_start";
-  goName << rootName << "_go";
-  dataName << rootName << "_data";
-  doneName << rootName << "_done";
-  endName << rootName << "_end";
-  
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
-  genMapList->initialize();
-  portMapList->initialize();
-  
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
-  mainCompMapList.put(label, name, portMapList, genMapList);
-
-  ctlerPortList.put(startName, "OUT", "STD_LOGIC");
-  firingPortList.put(startName, "IN", "STD_LOGIC");
-  firingPortList.put(goName, "OUT", "STD_LOGIC");
-  firingPortList.put(dataName, "OUT", vtype);
   firingPortList.put(doneName, "IN", "STD_LOGIC");
   firingPortList.put(endName, "OUT", "STD_LOGIC");
   ctlerPortList.put(endName, "IN", "STD_LOGIC");

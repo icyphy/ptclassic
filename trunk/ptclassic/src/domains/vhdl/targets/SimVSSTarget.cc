@@ -368,23 +368,33 @@ int SimVSSTarget :: runCode() {
 
 ISA_FUNC(SimVSSTarget,VHDLTarget);
 
-// Method called by C2V star to place important code into structure.
-void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
-//  printf("RegisterC2V Method of SimVSSTarget called\n");
-
+// Method called by comm stars to place important code into structure.
+void SimVSSTarget :: registerComm(int direction, int pairid, int numxfer, const char* dtype) {
+  // direction == 0 --> C2V ; direction == 1 --> V2C.
   // Create a string with the right VHDL data type
   StringList vtype = "";
   StringList name = "";
   if (strcmp(dtype, "INT") == 0) {
     vtype = "INTEGER";
-    name = "C2Vinteger";
+    if (direction) {
+      name = "V2Cinteger";
+    }
+    else {
+      name = "C2Vinteger";
+    }
   }
   else if (strcmp(dtype, "FLOAT") == 0) {
     vtype = "REAL";
-    name = "C2Vreal";
+    if (direction) {
+      name = "V2Creal";
+    }
+    else {
+      name = "C2Vreal";
+    }
   }
-  else
+  else {
     Error::abortRun(*this, dtype, ": type not supported");
+  }
   
   // Construct unique label and signal names and put comp map in main list
   StringList label;
@@ -411,62 +421,12 @@ void SimVSSTarget :: registerC2V(int pairid, int numxfer, const char* dtype) {
 
   // Also add to port list of main.
   mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "IN", vtype);
-  mainPortList.put(doneName, "IN", "STD_LOGIC");
-  // Also add to port map list of main.
-  mainPortMapList.put(goName, goName);
-  mainPortMapList.put(dataName, dataName);
-  mainPortMapList.put(doneName, doneName);
-  // Also add to signal list of top.
-  topSignalList.put(goName, "STD_LOGIC", goName, goName);
-  topSignalList.put(dataName, vtype, dataName, dataName);
-  topSignalList.put(doneName, "STD_LOGIC", doneName, doneName);
-}
-
-// Method called by V2C star to place important code into structure.
-void SimVSSTarget :: registerV2C(int pairid, int numxfer, const char* dtype) {
-//  printf("RegisterV2C Method of SimVSSTarget called\n");
-
-  // Create a string with the right VHDL data type
-  StringList vtype = "";
-  StringList name = "";
-  if (strcmp(dtype, "INT") == 0) {
-    vtype = "INTEGER";
-    name = "V2Cinteger";
+  if (direction) {
+    mainPortList.put(dataName, "OUT", vtype);
   }
-  else if (strcmp(dtype, "FLOAT") == 0) {
-    vtype = "REAL";
-    name = "V2Creal";
+  else {
+    mainPortList.put(dataName, "IN", vtype);
   }
-  else
-    Error::abortRun(*this, dtype, ": type not supported");
-  
-  // Construct unique label and signal names and put comp map in main list
-  StringList label;
-  StringList goName, dataName, doneName;
-  StringList rootName = name;
-  rootName << pairid;
-
-  label << rootName;
-  goName << rootName << "_go";
-  dataName << rootName << "_data";
-  doneName << rootName << "_done";
-  
-  VHDLGenericMapList* genMapList = new VHDLGenericMapList;
-  VHDLPortMapList* portMapList = new VHDLPortMapList;
-  genMapList->initialize();
-  portMapList->initialize();
-  
-  genMapList->put("pairid", pairid);
-  genMapList->put("numxfer", numxfer);
-  portMapList->put("go", goName);
-  portMapList->put("data", dataName);
-  portMapList->put("done", doneName);
-  topCompMapList.put(label, name, portMapList, genMapList);
-
-  // Also add to port list of main.
-  mainPortList.put(goName, "OUT", "STD_LOGIC");
-  mainPortList.put(dataName, "OUT", vtype);
   mainPortList.put(doneName, "IN", "STD_LOGIC");
   // Also add to port map list of main.
   mainPortMapList.put(goName, goName);

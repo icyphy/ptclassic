@@ -122,11 +122,8 @@ private:
 	VHDLSignalList topSignalList;
 	VHDLCompMapList topCompMapList;
 
-	// Method called by C2V star to place important code into structure.
-	virtual void registerC2V(int pairid, int numxfer, const char* dtype);
-
-	// Method called by V2C star to place important code into structure.
-	virtual void registerV2C(int pairid, int numxfer, const char* dtype);
+	// Method called by comm stars to place important code into structure.
+	virtual void registerComm(int, int, int, const char*);
 
 	int pairNumber;
 	int writeCom;
