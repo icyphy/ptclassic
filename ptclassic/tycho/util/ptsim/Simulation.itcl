@@ -39,6 +39,12 @@
 # Model class, in order that multiple views can monitor the
 # simulation.
 #
+# The simulation object
+# represents a "live" simulation, and is distinct from the
+# graph object that represents the static structure of the
+# simulation. We say that the simulation object "performs"
+# the graph.
+#
 # Most of the implementations of the methods in here are garbage,
 # and will be fixed when we get a proper interface to Ptolemy II.
 #
@@ -66,16 +72,22 @@ class ::tycho::Simulation {
     ###################################################################
     ####                         public methods                    ####
 
-    # Pause the task
+    # Respond to changes in the graph
+    method notify {method args}
+
+    # Pause the simulation
     method pause {}
 
-    # Resume the task
+    # Accept and remember the graph describing the simulation
+    method perform {graph}
+
+    # Resume the simulation
     method resume {}
 
-    # Start the task
+    # Start the simulation
     method start {}
 
-    # Stop the task
+    # Stop the simulation
     method stop {}
 
     ###################################################################
@@ -88,8 +100,12 @@ class ::tycho::Simulation {
     protected method debug {msg} {
 	if $debug {
 	    puts "DEBUG: $simulationName: $msg"
+            update
 	}
     }
+
+    # Generate simulation from the current graph
+    protected method _construct {}
 
     # Send a script to the simulation
     protected method _send {script}
@@ -97,11 +113,23 @@ class ::tycho::Simulation {
     ###################################################################
     ####                   protected variables                     ####
 
+    # The graph we are performing
+    protected variable _graph
+
     ###################################################################
     ####                     private variables                     ####
 
     # The object that talks to the simulation. This is temporary
     private variable _socketTalker
+
+    # TEMPORARY
+    method send {script} {
+        _send $script
+    }
+
+    method talker {} {
+        return $_socketTalker
+    }
 }
 
 
@@ -153,6 +181,40 @@ body ::tycho::Simulation::constructor {args} {
     ###################################################################
     ####                      public methods                       ####
 
+########################################################################
+#### notify
+#
+# Handle data change notification from the graph.
+#
+body ::tycho::Simulation::notify {method args} {
+    # FIXME
+    puts "$this notify $method"
+}
+
+########################################################################
+#### perform
+#
+# Accept a graph describing the simulation and construct the
+# run-time simulation. Subscribe to the graph, so that any changes
+# to it (from, for example, the user interface) update the
+# simulation.
+#
+body ::tycho::Simulation::perform {graph} {
+    if [info exists _graph] {
+        # Unsubscribe from the graph
+        $_graph subscribe data $this
+
+        # FIXME: unlink from it as well?
+    }
+    set _graph $graph
+
+    # Subscribe to the graph
+    $graph subscribe data $this
+
+    # Generate the initial simulation run-time
+    _construct
+}
+
 #######################################################################
 #### pause
 #
@@ -197,6 +259,19 @@ body ::tycho::Simulation::stop {} {
     ###################################################################
     ###################################################################
     ####                    protected methods                      ####
+
+########################################################################
+#### _construct
+#
+# Construct a simulation from the current graph. Subclasses must
+# override (for now, at least).
+#
+body ::tycho::Simulation::_construct {} {
+    
+    _send {
+
+    }
+}
 
 #######################################################################
 #### _send
