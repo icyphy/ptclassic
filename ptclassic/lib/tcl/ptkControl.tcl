@@ -110,9 +110,6 @@ proc ptkRunControlInit { name ctrlPanel title msgtext } {
     frame $ctrlPanel.high
     frame $ctrlPanel.middle
     frame $ctrlPanel.low
-
-    # Animation is off by default
-    ptkGrAnimation 0
 }
 
 #######################################################################
@@ -151,6 +148,9 @@ proc ptkRunControl { name octHandle } {
 
     ptkRunControlInit $name $ctrlPanel "Run $name" "Control panel for $name"
     set ptkOctHandles($name) $octHandle
+
+    # Animation is off by default
+    ptkGrAnimation 0
 
     frame $ctrlPanel.options
 	checkbutton $ctrlPanel.options.debug -text "Debug" \
@@ -411,7 +411,7 @@ proc ptkUpdateCount { name octHandle } {
 #######################################################################
 # Procedure to turn on or off graphical animation
 #
-proc ptkGrAnimation { on} {
+proc ptkGrAnimation { on } {
 
     global ptkGrAnimationAction ptkGrAnimationFlag
 
