@@ -71,7 +71,7 @@ class ::tycho::Layout {
     # Get the coordinates of an item
     method getcoords {item}
 
-    # Add an item to the picture
+    # Add a top-level item to the layout
     method item {item spec args}
 
     # Return all attributes of an item
@@ -128,26 +128,23 @@ class ::tycho::Layout {
     #################################################################
     ####                  protected methods                      ####
    
+    # Add a nested item -- parser call
+    protected method _item {context item spec args}
+
+    # Evaluate code in this object's context
+    protected method evalInSpecificContext {args} {eval $args}
+
     #################################################################
     ####                 protected variables                     ####
     
     # Storage used during interaction sequences
     protected variable _scratch
-
-    #################################################################
-    ####                   private methods                       ####
-    
-    # Evaluate code in this object's context
-    private method evalInSpecificContext {args} {eval $args}
 }
 
 ########################################################################
 #### constructor
 #
 body ::tycho::Layout::constructor {args} {	
-    # Hierarchical items separated by period
-    configure -separator "."
-
     # Evaluate options
     eval configure $args
 
@@ -171,8 +168,12 @@ body ::tycho::Layout::addtag {tag args} {
 # Get the children of an item.
 #
 body ::tycho::Layout::children {item} {
-    _verifynot item $item
-    _children item $item
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verifynot item $cntxt $local $item
+    _children item $cntxt $local
 }
 
 ########################################################################
@@ -181,8 +182,12 @@ body ::tycho::Layout::children {item} {
 # Set the coordinates of an item.
 #
 body ::tycho::Layout::coords {item args} {
-    _verify item $item
-    _assign item $item [concat [list [lindex [_get item $item] 0]] $args]
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    _assign item $cntxt $local [concat [list [lindex $_value($item) 0]] $args]
 }
 
 ########################################################################
@@ -225,8 +230,12 @@ body ::tycho::Layout::deselect {name} {
 # Get the coordinates of an item.
 #
 body ::tycho::Layout::getcoords {item} {
-    _verify item $item
-    lindex [_get item $item] 0
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    lreplace $_value($item) 0 0
 }
 
 ########################################################################
@@ -236,8 +245,12 @@ body ::tycho::Layout::getcoords {item} {
 # value is the type and the _initial_ coordinates only.
 #
 body ::tycho::Layout::item {item spec args} {
-    _verifynot item $item
-    _entity item {} $item $spec $args
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verifynot item $cntxt $local $item
+    _addentity item $cntxt $local $item $spec $args
 }
 
 ########################################################################
@@ -247,8 +260,12 @@ body ::tycho::Layout::item {item spec args} {
 # attribute-value list. Flag an error if the item does not exist.
 #
 body ::tycho::Layout::itemattrs {item} {
-    _verify item $item
-    _attributes item $item
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    _attributes item $cntxt $local
 }
 
 ########################################################################
@@ -257,8 +274,12 @@ body ::tycho::Layout::itemattrs {item} {
 # Get an attribute of an item.
 #
 body ::tycho::Layout::itemcget {item attribute} {
-    _verify item $item
-    _cget item $item $attribute
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    _cget item $cntxt $local $attribute
 }
 
 ########################################################################
@@ -267,8 +288,12 @@ body ::tycho::Layout::itemcget {item attribute} {
 # Configure an item and return the inverse command.
 #
 body ::tycho::Layout::itemconfigure {item args} {
-    _verify item $item
-    _configure item $item $args
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    concat [list itemconfigure $name] [_configure $type $cntxt $local $args]
 }
 
 ########################################################################
@@ -277,8 +302,16 @@ body ::tycho::Layout::itemconfigure {item args} {
 # Delete an item from the model.
 #
 body ::tycho::Layout::itemdelete {item} {
-    _verify item $item
-    _delete item $item
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify $type $cntxt $local
+    set info [_delete $type $cntxt $local]
+    
+    # Return inverse command.
+    # FIXME: does not work with nested entities yet!
+    concat item $item $info
 }
 
 ########################################################################
@@ -287,8 +320,12 @@ body ::tycho::Layout::itemdelete {item} {
 # Get the type and coordinates of an item
 #
 body ::tycho::Layout::itemget {item} {
-    _verify item $item
-    _get item $item
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    _cget item $cntxt $local $option
 }
 
 ########################################################################
@@ -297,8 +334,8 @@ body ::tycho::Layout::itemget {item} {
 # Add a nested item.
 #
 body ::tycho::Layout::itemin {context item value args} {
-    _verifynotin item $context $item
-    _entity item $context $item [concat [list $value] $args]
+    _verifynot item $context $item $context.$item
+    _addentity item $context $item $context.$item $value $args]
 }
 
 ########################################################################
@@ -311,24 +348,24 @@ body ::tycho::Layout::move {tag x y} {
     # This is not for efficiency, but because the command may
     # need to generate its own redo command.
     if { $recording } {
-	    if { [_exists item $tag] } {
-	    	# This is an item, so return simple inverse command
-	    	return [list move $tag [expr -$x] [expr -$y]]
-	    } else {
-	    	# It's a tag, so explicitly construct commands to move all
-	    	# tagged items. Note that we don't use the tag since the
-	    	# tags may change by the time the command is undone.
-	    	set undo [list sequence]
-	    	set redo [list sequence]
-	    	foreach item [$primaryview withtag $tag] {
-	    		lappend undo [list move $item [expr -$x] [expr -$y]]
-	    		lappend redo [list move $item $x $y]
-	    	}
-	    	# Add to history, and return null so nothing else is recorded.
-	    	appendHistory $redo $undo 1
-	    	return ""
+	if { [::info exists _value($tag)] } {
+	    # This is an item, so return simple inverse command
+	    return [list move $tag [expr -$x] [expr -$y]]
+	} else {
+	    # It's a tag, so explicitly construct commands to move all
+	    # tagged items. Note that we don't use the tag since the
+	    # tags may change by the time the command is undone.
+	    set undo [list sequence]
+	    set redo [list sequence]
+	    foreach item [$primaryview withtag $tag] {
+		lappend undo [list move $item [expr -$x] [expr -$y]]
+		lappend redo [list move $item $x $y]
 	    }
+	    # Add to history, and return null so nothing else is recorded.
+	    appendHistory $redo $undo 1
+	    return ""
 	}
+    }
 }
 
 ########################################################################
@@ -370,7 +407,7 @@ body ::tycho::Layout::moverelease {tag x y} {
     # Only construct the inverse if the "recording" flag is set.
     # This should never happen, but we check just to make sure.
     if { $recording } {
-	if { [_exists item $tag] } {
+	if { [::info exists _value($tag)] } {
 	    # This is an item, so use simple commands
 	    set undo [list move $tag [expr -$deltax] [expr -$deltay]]
 	    set redo [list move $tag $deltax $deltay]
@@ -408,7 +445,7 @@ body ::tycho::Layout::moverelease {tag x y} {
 # Reshape an item by name.
 #
 body ::tycho::Layout::reshape {name x y args} {
-    if { ! [_exists item $name] } {
+    if { ! [::info exists _value($tag)] } {
     	error "Item \"$name\" does not exists in [_dataname]"
     }
     concat reshape [list $name] [expr -$x] [expr -$y] $args
@@ -420,10 +457,10 @@ body ::tycho::Layout::reshape {name x y args} {
 # Start moving an item specified by name.
 #
 body ::tycho::Layout::reshapeclick {name x y args} {
-    if { ! [_exists item $name] } {
+    if { ! [::info exists _value($tag)] } {
     	error "Item \"$name\" does not exist in [_dataname]"
     }
-	# Just remember where we are, and don't record in the history
+    # Just remember where we are, and don't record in the history
     set _scratch($name.startx) $x
     set _scratch($name.starty) $y
     set _scratch($name.aspects) $args
@@ -494,7 +531,20 @@ body ::tycho::Layout::selectionclear {foo} {
 # Get the type of an item
 #
 body ::tycho::Layout::type {item} {
-    _verify item $item
-    lindex [_get item $item] 0
+    set splut [split $item "."]
+    set cntxt [lreplace $splut end end]
+    set local [lindex $splut end]
+
+    _verify item $cntxt $local
+    lindex $_value($item) 0
 }
 
+########################################################################
+#### _item
+#
+# Add a nested item -- parser call
+#
+body ::tycho::Layout::_item {context item value args} {
+    _verifynot item $context $item $context.$item
+    _addentity item $context $item $context.$item $value $args]
+}
