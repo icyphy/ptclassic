@@ -31,6 +31,12 @@ public:
 	// my domain
 	const char* domain() const;
 
+	// domain specific initialization
+	void prepareForScheduling();
+
+	// define the firing 
+	void fire();
+
 	// The number of repetitions of the star in a periodic
 	// schedule.  Initialized to 1 by setBlock.  Set to correct
 	// value by an SDF scheduler.  It is represented as a fraction
