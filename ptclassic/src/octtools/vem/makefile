@@ -212,13 +212,13 @@ $(OCTBINDIR):
 $(DESTBIN):	vem $(OCTBINDIR)
 		@echo Installing vem
 		rm -f $(DESTBIN)
-		cp vem $(DESTBIN)
+		ln vem $(DESTBIN)
 		-strip $(DESTBIN)
 
 $(DESTBIN_D):	vem.debug $(OCTBINDIR)
 		@echo Installing vem
 		rm -f $(DESTBIN_D)
-		cp vem $(DESTBIN_D)
+		ln vem $(DESTBIN_D)
 
 install: $(DESTBIN) $(DESTBIN_D)  $(BINDIR)/vem $(BINDIR)/vem.debug
 	@for x in $(DIRS); do \
