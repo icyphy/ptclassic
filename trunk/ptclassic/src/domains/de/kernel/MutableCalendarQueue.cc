@@ -1,7 +1,7 @@
 static const char file_id[] = "MutableCalendarQueue.cc";
 /**************************************************************************
 Version identification:
- @(#)MutableCalendarQueue.cc	1.22 05/21/97
+ @(#)MutableCalendarQueue.cc	1.23 12/12/97
 
 WARNING experimental version
 Copyright (c) 1990-1997 The Regents of the University of California.
@@ -30,20 +30,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
  Modified: John Davis
- Date: 5/19/97
-        This class is extended from CalendarQueue and includes
-        extensions that allow for mutability. We make this
-        extension rather than adding the functionality directly
-        to the CalendarQueue class so that the user can easily
-        switch between the "regular" CalendarQueue and the
-        MutableCalendarQueue. The primary modifications include:
-
-           CqLevelLink Class Extensions
-              Link * starPendingEventRef
-
-	   CalendarQueue Class Extensions
-	      CqLevelLink * NextEvent() has been overridden
-	      int removeEvent( CqLevelLink * ) has been added
+ Date: 12/12/97
+        Modifications were made to allow for mutability within
+        the DE domain. The primary modifications is the addition
+        of the member  
+           Link * starPendingEventRef
+        to the class CqLevelLink. This allows CqLevelLink to be
+        directly accessed by the DestinedEventList.
 
 **************************************************************************/
 
@@ -55,23 +48,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MutableCalendarQueue.h"
 #include <assert.h>
 #include <limits.h>		// We use INT_MAX below
-
-/**********************************
-// Set the properties of the CqLevelLink class.
-CqLevelLink* CqLevelLink :: setLink(Pointer a, double v, double fv,
-			  Star* d, unsigned long abs,
-			  CqLevelLink* n, CqLevelLink* b) 
-{
-	e = a;
-	level = v;
-	fineLevel = fv;
-	dest = d;
-	absEventNum = abs;
-	next = n;
-	before = b;
-	return this;
-}
-***********************************/
 
 // get a free CqLevelLink if any. If none, create a new CqLevelLink.
 // Once created, it's never destroyed.
@@ -175,10 +151,10 @@ void MutableCalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLi
     register CqLevelLink *current = NULL;
     int virtualBucket;
 
-    // This is not in the paper, but you have to check if the new event 
-    // actually has the smallest timestamp, if so, "cq_lastTime" should 
-    // be reset. I am overriding Hui's patch with mine which checks for 
-    // the condition on which the bucket needs to be set based on the
+    // This is not in the paper, but you have to check if the new event actually 
+    // has the smallest timestamp, if so, "cq_lastTime" should be reset.
+    // I am overriding Hui's patch with mine which checks for the
+    // condition on which the bucket needs to be set based on the
     // present bucket position and the new event, rather than the
     // youngest event previously in the queue. This is faster because
     // we do not need to fetch the event. I am inserting an assert
@@ -194,16 +170,14 @@ void MutableCalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLi
     }
     if (*bucket) {
 	current = *bucket;
-        if (cq_debug) {
-	   printf("INSERT1: last time %f, ev # %ld, time %f, fine level %f\n", 
-	   cq_lastTime, link->absEventNum, link->level, link->fineLevel);
-	}
-        // Now we are going to look for the first element
-        // such that ((current->level > link->level) or
-        //            (level == level) and (finer_level > link->finer_level) or
-        //            (l==l) and (fl==fl) and (current->dest > link->dest))
-        //            (l==l) and (fl==fl) and (dest == dest)
-        //                   and (current->absEventNum > link->absEventNum)
+        if (cq_debug) printf("INSERT1: last time %f, ev # %ld, time %f, fine level %f\n", 
+	cq_lastTime, link->absEventNum, link->level, link->fineLevel);
+	// Now we are going to look for the first element
+	// such that ((current->level > link->level) or
+	//            (level == level) and (finer_level > link->finer_level) or
+	//            (l==l) and (fl==fl) and (current->dest > link->dest))
+	// 	      (l==l) and (fl==fl) and (dest == dest) 
+	// 	             and (current->absEventNum > link->absEventNum)
 
 
 	// Sort on time stamp
@@ -290,219 +264,75 @@ void MutableCalendarQueue :: InsertEventInBucket(CqLevelLink **bucket, CqLevelLi
     
 }
     
-/****************************************************/
-// 		    BEGIN HERE
-/****************************************************/
 	
-
-// Remove a CqLevelLink from the Calendar Queue in response to a dying star. 
-int MutableCalendarQueue::removeEvent( CqLevelLink * cqLevelLink )
-{
-	double level, fineLevel;
-	unsigned long absEventNum;
-	Star * dest;
-	int virtualBucket, actualBucket;
-	CqLevelLink * current;
-
-	level = cqLevelLink->level;
-	fineLevel = cqLevelLink->fineLevel;
-	absEventNum = cqLevelLink->absEventNum;
-	dest = cqLevelLink->dest;
-
-	virtualBucket = (int) (level/cq_interval);
-	actualBucket = virtualBucket%cq_bucketNum;
-
-	if( cq_bucket[actualBucket] )
-	{
-	     current = cq_bucket[actualBucket];
-
-
-	     // Sort on time stamp (level)
-	     while( current->level < level )
-	     {
-		  if( current->next )
-		  {
-		       current = current->next;
-		  }
-	     }
-	     if( !current->next && current->level != level )
-	     {
-		  // Reached end of the road without finding event
-		  Error::abortRun( "Can't Find Event Within Calendar Queue!" );
-		  return 0;
-	     }
-
-
-	     // Sort on fineLevel
-	     while( current->fineLevel < fineLevel )
-	     {
-		  if( current->next )
-		  {
-		       current = current->next;
-		  }
-	     }
-	     if( !current->next && current->fineLevel != fineLevel )
-	     {
-		  // Reached end of the road without finding event
-		  Error::abortRun( "Can't Find Event Within Calendar Queue!" );
-		  return 0;
-	     }
-
-
-	     // Sort on destination
-	     while( current->dest < dest )
-	     {
-		  if( current->next )
-		  {
-		       current = current->next;
-		  }
-	     }
-	     if( !current->next && current->dest != dest )
-	     {
-		  // Reached end of the road without finding event
-		  Error::abortRun( "Can't Find Event Within Calendar Queue!" );
-		  return 0;
-	     }
-
-
-	     // Sort on event number
-	     while( current->absEventNum < absEventNum )
-	     {
-		  if( current->next )
-		  {
-		       current = current->next;
-		  }
-	     }
-	     if( !current->next && current->dest != dest )
-	     {
-		  // Reached end of the road without finding event
-		  Error::abortRun( "Can't Find Event Within Calendar Queue!" );
-		  return 0;
-	     }
-
-
-	     // We've successfully made it!!
-	     cq_eventNum--;
-	     cq_absEventCounter--;
-
-	     // Take CqLevelLink out of calendar queue
-	     current->before->next = current->next;
-	     current->before = 0;
-	     current->next = 0;
-
-	     // Put CqLevelLink in the free list
-	     putFreeLink( current );
-
-	}
-
-	if(  ( resizeEnabled() ) && 
-	     (cq_eventNum > cq_topThreshold && cq_bucketNum < HALF_MAX_DAYS)  )
-	{
-	     Resize( cq_bucketNum/2 );
-	}
-
-
-	return 1;
-
-}	// End of removeEvent()
-
-
 CqLevelLink* MutableCalendarQueue :: NextEvent()
 {
     register CqLevelLink **reg_cq_bucket = cq_bucket;
     register int i;
     int year;
     CqLevelLink *result;
-    Link * starPendingEventRef;
-    DEStar * starPtr = 0;
 
-   
+    
     if (cq_eventNum == 0) return(NULL);
   again:
     for (i = cq_lastBucket;;) {       /* search buckets */
-        if (reg_cq_bucket[i] && reg_cq_bucket[i]->level < cq_bucketTop) {
-            result = reg_cq_bucket[i];
-            // This checks for my tweak which sets the lastBucket stuff
-            // in InsertEventInBucket. If this fails this means that the
-            // lastBucket stuff was not correctly set because we have
-            // found an event from the past still lying around.
-            // (cq_bucketTop - 1.5*cq_interval )
+	if (reg_cq_bucket[i] && reg_cq_bucket[i]->level < cq_bucketTop) {
+	    result = reg_cq_bucket[i];
+	    // This checks for my tweak which sets the lastBucket stuff
+	    // in InsertEventInBucket. If this fails this means that the
+	    // lastBucket stuff was not correctly set because we have
+	    // found an event from the past still lying around.
+            // (cq_bucketTop - 1.5*cq_interval ) 
             // is the bottom of the lastBucket in time units.
-            // We use 1.6 here to account for rounding off errors which
-            // might cause a event to look bad if it was just on the border.
-            assert(result->level >= ( cq_bucketTop- 1.6*cq_interval ));
-            cq_lastTime = result->level;
-            if ( (reg_cq_bucket[i] = reg_cq_bucket[i]->next) )
-                reg_cq_bucket[i]->before = NULL;
-            cq_lastBucket = i;
-            cq_eventNum--;
-            if (( resizeEnabled() ) && (cq_eventNum < cq_bottomThreshold))
-                Resize(cq_bucketNum/2);
-            if (cq_debug) printf("REMOVE: ev # %ld, time %f, fine level %f\n",
-                        result->absEventNum, result->level, result->fineLevel);
-
-
-
-	    // ************************************************ //
-	    // An event is expiring. Remove the corresponding 
-	    // element within the DestinedEventList.
-	    // ************************************************ //
-/* FIXME
-	    starPendingEventRef = result->starPendingEventRef;
-	    result->starPendingEventRef = 0;
-	    starPtr = (DEStar *)result->dest;
-	    starPtr->removeDestinedEvent( starPendingEventRef ); 
-	    delete starPtr;	// FIXME:Is This Necessary??
-            return(result);
-
-	    // blockPtr = (Block *)result->e->dest;
-	    // starPtr->destinedEventList->directRemove( starPendingEventRef ); 
-*/
-
-	    // ************************************************ //
-
-        } else {
-            if ( ++i == cq_bucketNum)
-                i = 0;
-            cq_bucketTop += cq_interval;
-            if (i == cq_lastBucket)
-                break; /* go to direct search */
-        }
+	    // We use 1.6 here to account for rounding off errors which
+	    // might cause a event to look bad if it was just on the border.
+	    assert(result->level >= ( cq_bucketTop- 1.6*cq_interval ));
+	    cq_lastTime = result->level;	
+	    if ( (reg_cq_bucket[i] = reg_cq_bucket[i]->next) ) 
+		reg_cq_bucket[i]->before = NULL;
+	    cq_lastBucket = i;
+	    cq_eventNum--;
+	    if ((cq_resizeEnabled) && (cq_eventNum < cq_bottomThreshold))
+		Resize(cq_bucketNum/2);
+	    if (cq_debug) printf("REMOVE: ev # %ld, time %f, fine level %f\n",
+	 		result->absEventNum, result->level, result->fineLevel);
+	    return(result);
+	} else {
+	    if ( ++i == cq_bucketNum) 
+		i = 0;
+	    cq_bucketTop += cq_interval;
+	    if (i == cq_lastBucket)
+		break; /* go to direct search */
+	}
     }
-   
-// find lowest priority by examining first event of each bucket
-// set cq_lastBucket, cq_lastTime, cq_bucketTop
+    
+// find lowest priority by examining first event of each bucket 
+// set cq_lastBucket, cq_lastTime, cq_bucketTop                 
     result = NULL;
-    for (i=0; i<cq_bucketNum; i++)
-        if (reg_cq_bucket[i]) {
-            result = reg_cq_bucket[i];
-            cq_lastBucket = i;
-            break;
-        }
+    for (i=0; i<cq_bucketNum; i++) 
+	if (reg_cq_bucket[i]) {
+	    result = reg_cq_bucket[i];
+	    cq_lastBucket = i;
+	    break;
+	}
     if (result == NULL) {
-        fprintf(stderr,"NextEvent\n");
-        exit(1);
+	fprintf(stderr,"NextEvent\n");
+	exit(1);
     }
     for (i=cq_lastBucket+1; i<cq_bucketNum; i++) {
-        if (reg_cq_bucket[i] && reg_cq_bucket[i]->level < result->level)  {
-            result = reg_cq_bucket[i];
-            cq_lastBucket = i;
-        }
+	if (reg_cq_bucket[i] && reg_cq_bucket[i]->level < result->level)  {
+	    result = reg_cq_bucket[i];
+	    cq_lastBucket = i;
+	}
     }
-
+	    
     cq_lastTime = result->level;
     year = (int)(cq_lastTime/(cq_interval*cq_bucketNum));
-    cq_bucketTop = year*cq_interval*cq_bucketNum +
-        (cq_lastBucket+1.5)*cq_interval;
+    cq_bucketTop = year*cq_interval*cq_bucketNum + 
+	(cq_lastBucket+1.5)*cq_interval;
     goto again;
+}
 
-}	// End of NextEvent()
-
-
-/****************************************************/
-// 		    END HERE
-/****************************************************/
-	
 
 
 //  This copies the queue onto a calendar with newsize buckets. The
@@ -547,7 +377,7 @@ void MutableCalendarQueue :: Resize(int newSize)
 	}
     }
 	    
-}   // End of Resize()
+}
 
 
 double MutableCalendarQueue :: NewInterval()
