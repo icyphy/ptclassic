@@ -34,7 +34,7 @@
 
 
 DIRS = libexttools libgslider libptdsp libptmatlab libptmathematica \
-       ptplay ptvhdlsim rman tkman
+       ptplay ptvhdlsim rman-2.5a6 tkman-1.8b5
 
 # Need to have $PTOLEMY as an absolute pathname for wish
 #PTOLEMY = ../..
