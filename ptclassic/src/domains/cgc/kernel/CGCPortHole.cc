@@ -271,7 +271,7 @@ const char* CGCPortHole :: getGeoName() const {
 // If type conversion between complex to float/int is required when
 // it is an output.
 int CGCPortHole :: isConverted(){
-	if ((converted >= 0) || isItInput()) return converted;
+	if (isItInput()) return converted;
 	else if (strcmp(type(),resolvedType()) == 0) converted = FALSE;
 	else if (strcmp(type(), ANYTYPE) == 0) converted = FALSE;
 	else if ((strcmp(type(),COMPLEX) == 0) || 
