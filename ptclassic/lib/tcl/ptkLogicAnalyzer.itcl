@@ -2,13 +2,14 @@
 # Version: $Id$
 
 
+if {[itcl_info class ptkLogicAnalyzer] == ""} {
 itcl_class ptkLogicAnalyzer {
 
     constructor { config } {
 	$this setup
     }
 
-    destructor { destroy $chartName }
+    destructor { }
 
     public starID "standalone" {}
     public bordX 10 {}
@@ -26,8 +27,8 @@ itcl_class ptkLogicAnalyzer {
     public chartName ".logicAnalyzer"
     public scrollCount 1
     public title ""
-    public position "+0-0"
-    public height_cm 10.0
+    public position "+0+0"
+    public height_cm 1.0
     public width_cm 20.0
     public TimeWindow 20
     public unitDistance 38.0
@@ -106,7 +107,8 @@ itcl_class ptkLogicAnalyzer {
 	pack $chartName.mBar -side top -fill x
 	pack $chartName.mBar.com $chartName.mBar.zoom -side left -padx 2m
 	
-	button $chartName.ok -text DISMISS -command "destroy $chartName"
+	button $chartName.ok -text DISMISS -command "destroy $chartName; \
+		$this delete"
 	pack $chartName.ok -side bottom -fill x
 	
 	menu $chartName.mBar.com.m -tearoff 0
@@ -203,6 +205,8 @@ Logic Analyzer chart:
   - print function only prints visible area.
   	- to print whole area try shrinking,
 	  refreshing and then resizing window.
+  - use left mouse button to mark a time across
+        the entire chart.
   - use refresh when in doubt.
   - zoom menu zooms the chart only on the x-axis.
   	}
@@ -235,7 +239,9 @@ Logic Analyzer chart:
     method LAPaginate { } {
 
 	set endPoint [expr ($stopTime*$unitDistance)+$bordX]
-	set timeWindow $TimeWindow
+	set timeWindow [expr $TimeWindow*1.0/$chartScale]
+	# clear old paginations
+	$chartName.chart.c delete paginate
 	
 	for {set m 1} {$m <= $numInputs} {incr m} {
 	    
@@ -244,21 +250,23 @@ Logic Analyzer chart:
 	    
 	    if {$stopTime < $timeWindow} {
 		$chartName.chart.c create text $bordX $textYposition \
-			-text "0" -fill yellow
+			-text "0" -fill yellow -tags paginate
 		$chartName.chart.c create text $endPoint $textYposition \
-			-text "$stopTime" -fill black -anchor n
-		$chartName.chart.c create text [expr 2*$bordX]  \
+			-text "$stopTime" -fill black -anchor n -tags paginate
+		$chartName.chart.c create text [expr 3*$bordX]  \
 			[expr $textYposition - $unitHeight] \
-			-text [lindex $PLabels [expr $m-1]] -anchor sw
+			-text [lindex $PLabels [expr $m-1]] -anchor sw \
+			-tags paginate
 	    } else {  
 		for {set t 0} {$t <= $stopTime} {set t [expr $t+$timeWindow]} {
 		    $chartName.chart.c create text \
 			    [expr ($t*$unitDistance)+$bordX] $textYposition \
-			    -text "$t" -fill black -anchor n
+			    -text "$t" -fill black -anchor n -tags paginate
 		    $chartName.chart.c create text \
-			    [expr ($t*$unitDistance)+ (2*$bordX)] \
+			    [expr ($t*$unitDistance)+ (3*$bordX)] \
 			    [expr $textYposition - $unitHeight] \
-			    -text [lindex $PLabels [expr $m-1]] -anchor sw
+			    -text [lindex $PLabels [expr $m-1]] -anchor sw \
+			    -tags paginate
 		}
 	    }
 	} 
@@ -270,9 +278,7 @@ Logic Analyzer chart:
 	if {[info exists env(PRINTER)]} {
 	    set OUTPUT [open "|lpr -P$env(PRINTER)" w]
 	    puts $OUTPUT [$chartName.chart.c postscript -colormode gray \
-		    -pageheight 10i -pagewidth 8i -height \
-		    [expr $height_cm*$numInputs]c \
-		    -width ${width_cm}c -rotate 1]
+		    -pageheight 10i -pagewidth 8i -rotate 1]
 	    close $OUTPUT
 	} else {
 	    ptkMessage {
@@ -293,7 +299,7 @@ Logic Analyzer chart:
 	set winHeight [expr ([winfo height $canv]-55.5)*1.0/$numInputs]
 	
 	# For lack of a better method to specifiy unitHeight
-	set unitHeight $winHeight
+	set unitHeight [expr $height_cm*37 - $bordY]
 
 	# For very small windows, we do not divide the vertical axis.
 	# For small windows, we divide the vertical axis in two.
@@ -317,12 +323,12 @@ Logic Analyzer chart:
 	}
 	$canv configure -scrollregion "0 0 14m [expr $tickYposition + 20]"
 	# the following is removed to help fix refresh problems
-	# $canv configure -height [expr $tickYposition + 20]
+	$canv configure -height [expr $tickYposition + 20]
 	$chartName.chart.c configure -scrollregion \
 		"0 0 [winfo width $chartName.chart.c] \
 		[expr $tickYposition - 35.5]"
 	# the following is removed to help fix refresh problems
-	# $chartName.chart.c configure -height [expr $tickYposition - 35.5]
+	$chartName.chart.c configure -height [expr $tickYposition - 35.5]
     }
 
     # LAMkXScale
@@ -387,8 +393,11 @@ Logic Analyzer chart:
 	set scrollheight [lindex [lindex \
 		[$chartName.chart.c configure -scrollregion] 4] 3]
 	$chartName.chart.c configure -scrollregion \
-		"0 0 $scaledTime $scrollheight"
-	$chartName.chart.ruler configure -scrollregion "0 0 $scaledTime 1.5c"
+		"0 0 [expr $scaledTime + $bordX] $scrollheight"
+	$chartName.chart.ruler configure -scrollregion "0 0 \
+		[expr $scaledTime + $bordX] 1.5c"
+	$chartName.chart.c configure -width [expr $scaledTime + $bordX]
+	$chartName.chart.ruler configure -width [expr $scaledTime + $bordX]
 
 	# scroll each canvas based when time has advanced by timeWindow or more
 	if {[expr $count*1.0/$TimeWindow] >= $scrollCount} {
@@ -456,6 +465,11 @@ Logic Analyzer chart:
 		$scrollheight"
 	$chartName.chart.ruler configure -scrollregion \
 		"0 0 [expr $bordX + ($unitDistance*$count*$chartScale)] 1.5c"
+        $chartName.chart.c configure -width \
+		[expr $bordX + ($unitDistance*$count*$chartScale)]
+	$chartName.chart.ruler configure -width \
+		[expr $bordX + ($unitDistance*$count*$chartScale)]
+	LAPaginate
     }
    
     # this method is no longer used except when working by hand
@@ -477,4 +491,5 @@ Logic Analyzer chart:
 	    set inputList [lrange $inputList $numInputs end]
 	}
     }
+}
 }
