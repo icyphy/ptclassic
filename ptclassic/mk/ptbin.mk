@@ -216,53 +216,63 @@ else
 
 INSTALL += $(BINDIR)/$(BASENAME) $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAME).ptiny
 
+
+.PHONY: $(BASENAME).ptrim $(BASENAME).ptiny \
+	$(BASENAME).ptrim.debug $(BASENAME).ptiny.debug \
+	$(BASENAME).ptrim.purify $(BASENAME).ptiny.purify \
+	$(BASENAME).ptrim.quantify $(BASENAME).ptiny.quantify \
+	$(BASENAME).ptrim.purecov $(BASENAME).ptiny.purecov
+
+# The .ptrim and .ptiny files below should not depend on $(PT_DEPEND), or
+# else we must have all the libs installed to build ptrim and ptiny, even
+# though ptrim and ptiny do not use all the libs.
+
 $(BASENAME): $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME)
 
-$(BASENAME).ptrim: $(PT_DEPEND)
+$(BASENAME).ptrim: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim
 
-$(BASENAME).ptiny: $(PT_DEPEND)
+$(BASENAME).ptiny:
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
-
 
 $(BASENAME).debug: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
 
-$(BASENAME).ptrim.debug: $(PT_DEPEND)
+$(BASENAME).ptrim.debug: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
 
-$(BASENAME).ptiny.debug: $(PT_DEPEND)
+$(BASENAME).ptiny.debug: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
 
 
 $(BASENAME).debug.purify: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
 
-$(BASENAME).ptrim.debug.purify: $(PT_DEPEND)
+$(BASENAME).ptrim.debug.purify: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
 
-$(BASENAME).ptiny.debug.purify: $(PT_DEPEND)
+$(BASENAME).ptiny.debug.purify: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
 
 
 $(BASENAME).debug.quantify: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
 
-$(BASENAME).ptrim.debug.quantify: $(PT_DEPEND)
+$(BASENAME).ptrim.debug.quantify: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
 
-$(BASENAME).ptiny.debug.quantify: $(PT_DEPEND)
+$(BASENAME).ptiny.debug.quantify: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
 
 $(BASENAME).debug.purecov: $(PT_DEPEND)
 	$(MAKE) FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
 
-$(BASENAME).ptrim.debug.purecov: $(PT_DEPEND)
+$(BASENAME).ptrim.debug.purecov: 
 	$(MAKE) PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
 
-$(BASENAME).ptiny.debug.purecov: $(PT_DEPEND)
+$(BASENAME).ptiny.debug.purecov: 
 	$(MAKE) PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
 
 
