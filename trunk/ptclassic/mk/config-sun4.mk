@@ -22,4 +22,9 @@ X11_LIBSPEC = -L/usr/X11/lib -lX11
 # this flag. See also config-g++.mk
 CC_STATIC = -Bstatic
 
+# Variables for Pure Inc tools (purify, purelink, quantify)
+COLLECTOR = -collector=/users/ptdesign/vendors/bin/ld-collect-2.4.3 g++
+# cfront users will need a different value here
+#COLLECTOR =
+
 S56DIR= $(ROOT)/vendors/s56dsp
