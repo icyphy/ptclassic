@@ -29,7 +29,7 @@ static char SccsId[]="$Id$";
 #include "vov.h"
 #include "utility.h"
 #include "sys/types.h"
-#include "sys/stat.h"
+#include <sys/stat.h>
 #include "errtrap.h"
 #include "st.h"
 
