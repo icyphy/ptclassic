@@ -1,6 +1,6 @@
 .VR $Revision$	$Date$
 .TI "CG56 Domain"
-.ds DO "CG
+.ds DO "CG56
 .EQ
 delim off
 .EN
