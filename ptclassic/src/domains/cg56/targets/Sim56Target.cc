@@ -42,18 +42,32 @@ void Sim56Target :: initStates() {
 				    "graph title (if any)"));
 	addState(plotOptions.setState("plotOptions",this,"",
 				      "xgraph options"));
-	addState(simCode.setState("Simulate code?",this,"YES",
-	                          "display code if YES."));
+	runCode.setValue("YES");
+	runCode.setAttributes(A_SETTABLE|A_NONCONSTANT);
 }
 
-int Sim56Target :: setup (Galaxy& g) {
-	if (!CG56Target::setup(g)) return FALSE;
-	StringList lod = "!load ";
-	lod += uname;
-	lod += "\n";
-	addCode(lod);
-	return TRUE;
+void Sim56Target::initializeCmds() {
+	CG56Target::initializeCmds();
+	assembleCmds += "asm56000 -A -B -L ";
+	assembleCmds += uname;
+	assembleCmds += "\n";
+	miscCmds += "load ";
+	miscCmds += uname;
+	miscCmds += "\n";
+	downloadCmds += "xterm -e sim56000 ";
+	downloadCmds += fileName(uname,".cmd\n");
+	const char* file = plotFile;
+	if (*file != 0) {
+		miscCmds += "awk '{print ++n, $1}' ";
+		downloadCmds += file;
+		downloadCmds += " | xgraph -t '";
+		downloadCmds += (const char*)plotTitle;
+		downloadCmds += "' ";
+		downloadCmds += (const char*)plotOptions;
+		downloadCmds += "&\n";
+	}
 }
+
 
 void Sim56Target :: headerCode () {
 	CG56Target :: headerCode();
@@ -74,48 +88,11 @@ void Sim56Target :: wrapup () {
 		 "	org	p:$ff0\n"
 		 "	nop\n"
 		 "	stop\n");
-	addCode ("!break pc>=$ff0\n"
-		 "go $48\n");
+	miscCmds += "break pc>=$ff0\n";
+	miscCmds += "go $48\n";
 	inProgSection = TRUE;
+	if (!genFile(miscCmds, uname,".cmd")) return;
 	CG56Target::wrapup();
-// put the stuff into the files.
-	if (!genFile(cmds, uname,".cmd")) return;
-// directive to change to the working directory
-	StringList cd = "cd "; cd += dirFullName; cd += ";";
-// execute the assembler
-	if (int(simCode)) {
-		StringList assem = cd;
-		assem += "asm56000 -A -B -L ";
-		assem += uname;
-		if (system(assem) != 0) {
-			StringList listing = (const char*)dirName;
-			listing += "/";
-			listing += uname;
-			listing += ".list";
-			Error::abortRun(
-			"Errors in assembly: see assembler listing in file ",
-					listing, " for errors");
-			return;
-		}
-// execute the simulator
-		StringList ex = cd;
-		ex += "xterm -e sim56000 ";
-		ex += uname;
-		ex += ".cmd";
-		system (ex);
-// now plot the result if requested
-		const char* file = plotFile;
-		if (*file == 0) return;
-		StringList plot = cd;
-		plot += "awk '{print ++n, $1}' ";
-		plot += file;
-		plot += " | xgraph -t '";
-		plot += (const char*)plotTitle;
-		plot += "' ";
-		plot += (const char*)plotOptions;
-		plot += "&";
-		system (plot);
-	}
 }
 
 ISA_FUNC(Sim56Target,CG56Target);

@@ -25,16 +25,15 @@ class S56XTarget : public CG56Target {
 private:
 	void initStates();
 protected:
-	StringList aio;
-	IntState runCode;
+	void initializeCmds();
 public:
 	S56XTarget(const char*,const char*);
 	S56XTarget(const S56XTarget&);
 	void headerCode();
  	void wrapup();
 	Block* clone() const;
-	void addCode(const char*);
 	int isA(const char*) const;
+	const char* readClassName() const{return "S56XTarget";}
 };
 
 #endif

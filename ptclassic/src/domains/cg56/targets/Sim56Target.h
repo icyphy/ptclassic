@@ -29,15 +29,15 @@ protected:
 	StringState plotFile;
 	StringState plotTitle;
 	StringState plotOptions;
-	IntState simCode;
+	void initializeCmds();
 public:
 	Sim56Target(const char*,const char*);
 	Sim56Target(const Sim56Target&);
 	void headerCode();
-	int setup(Galaxy&);
 	void wrapup();
 	Block* clone() const;
 	int isA(const char*) const;
+	const char* readClassName() const {return "Sim56Target";}
 };
 
 #endif
