@@ -118,15 +118,19 @@ static struct octPoint defaultCursorPt = {500, -500};
     octBox bb;
     char *techDir, buf[MAXPATHLEN], *cell;
 
-    octInitGenContents(palFacetPtr, OCT_INSTANCE_MASK, &genInst);
+    octInitGenContentsSpecial(palFacetPtr, OCT_INSTANCE_MASK, &genInst);
     while (octGenerate(&genInst, cursorPtr) == OCT_OK) {
 	if (IsCursor(cursorPtr)) {
-	    ERR_IF1(!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width,
-		dx, dy));
+	    if (!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width,
+	      dx, dy)) {
+		octFreeGenerator(&genInst);
+		return FALSE;
+	    }
 	    octFreeGenerator(&genInst);
 	    return (TRUE);
 	}
     }
+    octFreeGenerator(&genInst);
     /* No cursor found, create one... */
     if (octBB(palFacetPtr, &bb) == OCT_OK) {
 	/* It looks like RPC octBB() doesn't give the right BB for some reason,
@@ -146,7 +150,6 @@ static struct octPoint defaultCursorPt = {500, -500};
     CK_OCT(CreateInstance2(palFacetPtr, cursorPtr, "", cell, "schematic",
 	"interface", cursorPt.x, cursorPt.y, OCT_NO_TRANSFORM));
     ERR_IF1(!GOCCursorParams(palFacetPtr, cursorPtr, leftMar, width, dx, dy));
-    octFreeGenerator(&genInst);
     return (TRUE);
 }
 
