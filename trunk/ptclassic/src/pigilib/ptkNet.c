@@ -74,6 +74,13 @@ extern int errno;
 #include "rpcApp.h"
 #include "oh.h"
 
+#ifdef PTKCODE
+/* This is defined in octtools/Xpackages/rpc/rpc.c */
+int RPCReceiveFunctionToken(/* long *value, FILE *stream */);
+/* This is defined in octtools/Xpackages/rpc/appNet.c */
+int RPCApplicationFunctionComplete();
+#endif
+
 /* ptk code change
    huge block of functions removed 
 */
