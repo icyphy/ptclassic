@@ -92,14 +92,14 @@ private:
 	int emptyFlag;
 
 	// declare PortHoles and States
+	virtual void decideBufferType(CGCPortHole* p);
 	virtual StringList declarePortHole(CGCPortHole* p);
 	virtual StringList declareOffset(const CGCPortHole* p);
 	virtual StringList declareState(const State* p);
 
-	// initialize PortHoles and States
+	// initialize PortHoles
 	virtual StringList initializeBuffer(CGCPortHole* p);
 	virtual StringList initializeOffset(const CGCPortHole* p);
-	virtual StringList initializeState(const State* p);
 
 	// offset initialize
 	void initBufPointer();
