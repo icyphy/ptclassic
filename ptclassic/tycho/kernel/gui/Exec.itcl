@@ -129,12 +129,13 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #
 # Here is a quick mini-tutorial to get familiar with this 
 # non-graphical Exec:<br>
-# <b>1: Create a name, then create object</b><tcl><pre>
+# <ol>
+# <li><b>Create a name, then create object</b><tcl><pre>
 #   set execName [::tycho::autoName execObject]
 #   ::tycho::Exec $execName
 # </tcl></pre>
 #
-# <b>2: Execute process, and check for return type. Return
+# <li><b>Execute process, and check for return type. Return
 # could be either "abnormal" or "normal".</b><tcl><pre>
 #   $execName execProcess {ls -al} {~}
 #   set status [$execName getStatusWait]
@@ -142,7 +143,7 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #   tycho::inform "The output is [$execName getHistory]"
 # </tcl></pre>
 #
-# <b>3: Alternatively, there are asynchronous calls to use
+# <li><b>Alternatively, there are asynchronous calls to use
 # (ie. getStatusNow can immediately return the status of the 
 # process, whether it is "running", "normal", or "abnormal").
 # </b><tcl><pre>
@@ -153,14 +154,14 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #   tycho::inform "The immediate status is \"[$execName getStatusNow]\""
 # </tcl></pre>
 #
-# <b>4: A process is killed with <i>killProcess</i>.
+# <li><b>A process is killed with <i>killProcess</i>.
 # <tcl><pre>
 #   $execName execProcess
 #   $execName killProcess
 #   tycho::inform "The return status is \"[$execName getStatusWait]\""
 # </pre></tcl>
 #
-# <b>5: Maximum number of lines can be set by the user. This is useful
+# <li><b>Maximum number of lines can be set by the user. This is useful
 # especially if a process could potentially output a large file.
 # <tcl><pre>
 #   $execName execProcess {} {} {8}
@@ -168,14 +169,14 @@ proc ::tycho::execModal {{command {}} {dir {}} {execWidget {}}} {
 #   tycho::inform "History:\n [$execName getHistory]"
 # </pre></tcl>
 #
-# <b>6: The following commands are used frequently, especially
+# <li><b>The following commands are used frequently, especially
 # by the Monitor class. Feel free to experiment:</b>
 # <tcl><pre>$execName execProcess</tcl></pre>
 # <tcl><pre>$execName clearHistory</tcl></pre>
 # <tcl><pre>$execName getHistory</tcl></pre>
 # <tcl><pre>$execName getStatusWait</tcl></pre>
 # <tcl><pre>$execName getStatusNow</tcl></pre>
-#
+# </ol>
 class ::tycho::Exec {
     inherit ::tycho::Object
     constructor {command dir maxline} {}
