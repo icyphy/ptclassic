@@ -1,0 +1,219 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Tycho Directory Layout</title>
+</head>
+<body bgcolor=#ffffff>
+<h1><a name="tycho directory layout">Tycho directory layout</a></h1>
+<p>
+Tycho has a certain directory structure that you need to know about
+if you are planning on extending tycho.
+<p>
+<OL>
+	<LI> <A HREF="../../README.files">README.files</A>
+	<LI> <A HREF="#tylndir and private trees"><CODE>tylndir</CODE> and private trees</A>
+	<LI> <A HREF="#makefile rules"makefile rules</A>
+</OL>
+	
+<H3><A NAME="tylndir and private trees"></A><CODE>tylndir</CODE></H3>
+
+The script <CODE>$TYCHO/bin/tylndir</CODE> will create a private
+directory tree with links to a common Tycho tree.  This allows tycho
+developers to maintain their own tree and edit it as they see fit.
+
+ <P>For example, to create your own private tree in <CODE>~/ty</CODE> from
+the sources in <CODE>~ptdesign/tycho</CODE>, do the following:
+<OL>
+<LI> <CODE>mkdir ~/ty</CODE>
+
+<LI> <CODE>cd ~/ty</CODE>
+
+<LI> <CODE>~ptdesign/tycho/bin/tylndir ~ptdesign/tycho</CODE>
+
+
+<LI> Then set your <CODE>TYCHO</CODE> environment to <CODE>~/ty</CODE>.
+If you are running the C shell, you would type:
+<LISTING>
+setenv TYCHO ~/ty
+</LISTING>
+You could place the above line in your <CODE>.cshrc</CODE> file so that
+it is set each time you log in.
+</OL>
+
+
+<H3><A NAME="makefile rules">makefile rules</A></H3>
+
+The general structure of a tycho makefile is
+<OL>
+
+<LI> A header that includes a one line summary, author, version and
+copyright information.
+
+<LI> A section that sets the makefile variables <CODE>ROOT</CODE> and
+<CODE>VPATH</CODE>.  <CODE>ROOT</CODE> is a relative path to the top
+of the tycho distribution, and <CODE>VPATH</CODE> is a pathname to the
+current directory that uses <CODE>$(ROOT)</CODE>.  For example,
+<CODE>$TYCHO/kernel/makefile</CODE> contains:
+
+<LISTING>
+# Root of Tycho directory
+ROOT =		..
+
+# True source directory
+VPATH =		$(ROOT)/kernel
+</LISTING>
+
+<LI> A section that includes <CODE>$TYCHO/mk/tycho.mk</CODE>, which is
+a makefile that sets common makefile variables.  For example:
+
+<LISTING>
+# Get configuration info
+CONFIG =	$(ROOT)/mk/tycho.mk
+include $(CONFIG)
+</LISTING>
+
+
+<LI> A section that sets makefile variables to files in the current
+directory.
+<DL>
+
+<DT> <CODE>TCL_SRCS</CODE>
+<DD> Tcl source files that usually have a <CODE>.tcl</CODE> suffix
+
+<DT> <CODE>ITCL_SRCS</CODE>
+<DD> Itcl source files that usually have a <CODE>.itcl</CODE> suffix
+
+
+<DT> <CODE>EXTRA_SRCS</CODE>
+
+<DD> Usually set to <CODE>$(TCL_SRCS) $(ITCL_SRCS)</CODE>.  The name
+<CODE>EXTRA_SRCS</CODE> is from Ptolemy, it denotes that these files
+are not compiled or otherwise processed.
+
+<DT> <CODE>MISC_FILES</CODE>
+<DD> This variable lists files that are part of the distribution but are
+not source files per se.  <CODE>MISC_FILES</CODE> usually includes
+the names of any subdirectories, along with <CODE>tclIndex</CODE> and
+any <CODE>README</CODE> files that might be present.
+<CODE>make checkjunk</CODE> uses this variable.
+
+
+<DT> <CODE>DIRS</CODE>
+<DD> This variable lists any subdirectories that we should run make in.
+
+<DT> <CODE>REALCLEAN_STUFF</CODE>
+<DD> Files to be removed by <CODE>make realclean</CODE>
+
+<DT> <CODE>TYDOC_DESC</CODE>
+<DD> Title for the tydoc documentation system index page.
+
+</DL>
+
+
+<LI> The next section consists of any rules.  Usually there is only
+a <CODE>all</CODE> and <CODE>install</CODE> rule:
+<LISTING>
+all install: sources $(MISC_SRCS) tclIndex
+</LISTING>
+
+
+<LI> The final section includes the makefile that has rules that are
+common to all tycho makefiles.  This file is usually
+<CODE>$TYCHO/mk/no-compile.mk</CODE>
+
+</OL>
+
+
+The following makefile rules are defined in
+<CODE>$TYCHO/mk/no-compile.mk</CODE> These rules are useful when
+extending Tycho
+
+
+<DL>
+
+<DT> <CODE>make sources</CODE>
+
+<DD> This rule will update any source files that are out of date.  The
+publicly available distribution of tycho does not include version
+control files, but the development distribution at UC Berkeley does
+have version control files.  If a directory has version control files,
+then <CODE>make sources</CODE> will update any files that have changed
+in the master tree, but not in the local tree.
+
+<DT> <CODE>make all</CODE>
+
+<DD> For the most part, tycho uses interpreted files that do not
+require compilation, so <CODE>make all</CODE> does things like create
+<CODE>tclIndex</CODE> files, and fix the permissions on scripts.  
+<CODE>make all</CODE> also runs the <CODE>make sources</CODE> rules.
+
+
+<DT> <CODE>make install</CODE>
+
+<DD> In tycho, <CODE>make install</CODE> usually just does whatever
+<CODE>make all</CODE> does.  In tycho, there is no need to run
+<CODE>make install</CODE> after running <CODE>make all</CODE>.
+<CODE>make install</CODE> is present only for compatibility with other
+packages, such as Ptolemy.
+
+
+</DL>
+
+<H4><A NAME="file manipulation makefile rules">File Manipulation
+makefile rules</A></H4>
+
+The following makefile rules are used to manipulate files in the distribution
+<DL>
+
+<DT> <CODE>make clean</CODE>
+<DD> This rule removes files that are generated by installation or 
+editing files.   The files removed include: <CODE>*.o core *~ *.bak ,*</CODE>
+
+<DT> <CODE>make realclean</CODE>
+
+<DD> This rule does everything <CODE>make clean</CODE> does, and it
+removed any files named in the <CODE>REALCLEAN_STUFF</CODE> makefile
+variable.  For example, in <CODE>$TYCHO/kernel/makefile</CODE>
+<CODE>REALCLEAN_STUFF</CODE> is set so that <CODE>tclIndex</CODE> is
+removed when <CODE>make realclean</CODE> is run
+
+
+<DT> <CODE>make extraclean</CODE>
+
+<DD> This rule removes the sources, along with everthing that
+<CODE>make realclean</CODE> does.  Note that to retrieve the sources
+automatically after running <CODE>make extraclean</CODE>you need to
+have the sources checked into RCS or SCCS.  The publically available
+distribution of tycho does not include SCCS files, so running this
+command is not recommended <CODE>make extraclean sources</CODE> is a
+good way to change all the links created by <CODE>tylndir</CODE> into
+actual files.
+
+<DT> <CODE>make sccsinfo</CODE>
+
+<DD> This rule is only useful if the tycho distribution has SCCS
+version control information.  The publicly available distribution does
+not have SCCS version control information, so this rule is only useful
+in the tycho development tree.  <CODE>make sccsinfo</CODE> traverses
+the distribution and runs <CODE>sccs info</CODE> in each directory.
+<CODE>sccs info</CODE> prints out the names of any files that are checked out.
+
+
+<DT> <CODE>make checkjunk</CODE>
+
+<DD> The <CODE>make checkjunk</CODE> rule traverses the distribution
+and prints the names of any files that are not mentioned in the
+makefile.  This rule is useful for cleaning up the distribution
+before release.
+
+</DL>
+
+<P>
+<P>
+<a href="../index.html">Tycho Home Page</a><br>
+<HR>
+Copyright &#169 1996, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: 96/08/31,
+comments to: <author>tycho@eecs.berkeley.edu</author>
