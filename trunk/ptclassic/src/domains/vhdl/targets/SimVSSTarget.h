@@ -110,6 +110,9 @@ protected:
 	// Initialize VHDLObjLists.
 	/*virtual*/ void initVHDLObjLists();
 
+	// Method called by comm stars to place important code into structure.
+	virtual void registerComm(int, int, int, const char*);
+
 private:
 	CodeStream top_uses;
 	CodeStream top_entity;
@@ -122,9 +125,6 @@ private:
 	VHDLPortMapList mainPortMapList;
 	VHDLSignalList topSignalList;
 	VHDLCompMapList topCompMapList;
-
-	// Method called by comm stars to place important code into structure.
-	virtual void registerComm(int, int, int, const char*);
 
 	int pairNumber;
 	int writeCom;
