@@ -614,7 +614,13 @@ ifdef OCT
 		-lrpc -loh -lvov -lrpc -llist \
 		-ltr -lutility -lst -lerrtrap -luprintf -lport
 
-    LIBFILES += $(LIBDIR)/libpigi.$(LIBSUFFIX) \
+    ifdef USE_CORE_STATIC_LIBS
+	LIBPIGI = $(LIBDIR)/libpigi.a
+    else
+	LIBPIGI = $(LIBDIR)/libpigi.$(LIBSUFFIX)
+    endif
+
+    LIBFILES += $(LIBPIGI) \
 	$(OCTLIBDIR)/librpc.$(LIBSUFFIX)  \
 	$(OCTLIBDIR)/liboh.$(LIBSUFFIX) $(OCTLIBDIR)/libvov.$(LIBSUFFIX) \
 	$(OCTLIBDIR)/liblist.$(LIBSUFFIX) \
@@ -632,6 +638,8 @@ endif
 CUSTOM_DIRS += $(CROOT)/src/kernel $(CROOT)/src/pigiRpc $(CROOT)/src/ptcl \
 	$(CROOT)/mk $(CROOT)/src/tycho/tysh
 
+# Under some architectures, we need to use static libraries or we get
+# GateKeeper errors.
 ifdef USE_CORE_STATIC_LIBS
 	LIBPTCL = $(LIBDIR)/libptcl.a
 else
