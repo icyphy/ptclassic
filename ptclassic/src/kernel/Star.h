@@ -50,7 +50,8 @@ public:
 	StringList printVerbose () const;
 
 	// Return myself as a Star.  Overrides Block::asStar.
-	Star& asStar() const;
+	Star& asStar();
+	const Star& asStar() const;
 
 	// Return my indexValue.
 	int index() const { return indexValue;}

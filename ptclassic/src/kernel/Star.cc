@@ -61,7 +61,8 @@ void Star :: fire() {
 }
 
 // return myself as a Star.
-Star& Star :: asStar () const { return *this;}
+Star& Star :: asStar () { return *this;}
+const Star& Star :: asStar () const { return *this;}
 
 // sets the index values of each star in the galaxy.  Returns the
 // total number of stars.
