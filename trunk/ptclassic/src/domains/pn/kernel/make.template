@@ -24,9 +24,10 @@ LIB=libmtdf.a
 # Library sources
 CC_WITH_H=\
 	MTDFTarget.cc MTDFScheduler.cc MTDFStar.cc\
-	RTDFScheduler.cc\
+	MTDFWormhole.cc MTDFEventHorizon.cc\
 	MTDFPortHole.cc MTDFGeodesic.cc MTDFForkNode.cc\
-	MTDFThread.cc
+	MTDFThread.cc\
+	RTScheduler.cc
 
 SRCS=	$(CC_WITH_H)\
 	MTDFDomain.cc
