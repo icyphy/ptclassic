@@ -66,6 +66,10 @@ class ::tycho::Graphics {
     # Open a help window.
     method help {}
 
+    # Print out the graph in the canvas.
+    method print {}
+    method printOut {win}
+
     # Insert the specified data into the canvas.
     method insertData {data}
 
@@ -202,6 +206,145 @@ body ::tycho::Graphics::focusin {} {
 #
 body ::tycho::Graphics::help {} {
     hyperJump "\$TYCHO/editors/visedit/doc/usersGuides/GraphicsHelp.html" {}
+}
+
+#######################################################################
+#### print
+# Print out the graph in the canvas.
+body ::tycho::Graphics::print {} {
+    set w [$this windowName].print
+
+    if [winfo exists $w] {
+	wm deiconify $w
+	raise $w
+
+    } else {
+	toplevel $w
+        wm title $w "Print Graphics"
+        wm iconname $w "Print Graphics"
+
+	label $w.title -text "Print Graphics"
+	frame $w.rotate -relief groove -bd 3
+	frame $w.page
+	frame $w.color -relief groove -bd 3
+	frame $w.command
+	frame $w.tofile
+	frame $w.buttons
+	pack $w.title $w.rotate $w.page $w.color $w.command $w.tofile\
+		$w.buttons -side top -padx 1 -pady 3 -expand 1 -fill both
+
+	radiobutton $w.rotate.portrait -text Portrait -value Portrait\
+		-variable [scope $itk_component(hull)_rotate]
+	radiobutton $w.rotate.landscape -text Landscape -value Landscape\
+		-variable [scope $itk_component(hull)_rotate]
+	set [scope $itk_component(hull)_rotate] Portrait
+	pack $w.rotate.portrait $w.rotate.landscape -side left
+
+	frame $w.page.pageheight
+	frame $w.page.pagewidth
+	frame $w.page.pagey
+	frame $w.page.pagex
+	pack $w.page.pageheight $w.page.pagewidth $w.page.pagey $w.page.pagex
+
+	label $w.page.pageheight.label -text {Max. height (inches):}
+	label $w.page.pagewidth.label -text {Max. width (inches) :}
+	label $w.page.pagey.label -text {Verticle offset     :}
+	label $w.page.pagex.label -text {Horizontal offset   :}
+
+	foreach name {pageheight pagewidth pagey pagex} {
+	    entry $w.page.${name}.entry -relief sunken -bd 2 -width 6 
+	    pack $w.page.${name}.label $w.page.${name}.entry -side left
+	}
+
+	$w.page.pageheight.entry insert 0 "14.0"
+	$w.page.pagewidth.entry insert 0 "8.0"
+	$w.page.pagey.entry insert 0 "0.0"
+	$w.page.pagex.entry insert 0 "0.0"
+
+	label $w.command.label -text "Print Command:"
+	entry $w.command.entry -relief sunken -bd 2 -width 15
+	pack $w.command.label $w.command.entry -side left
+	$w.command.entry insert 0 "lpr "
+
+	radiobutton $w.color.mono -text "Black & White" -value mono\
+		-variable [scope $itk_component(hull)_color]
+	radiobutton $w.color.gray -text Gray -value gray\
+		-variable [scope $itk_component(hull)_color]
+	radiobutton $w.color.color -text Color -value color\
+		-variable [scope $itk_component(hull)_color]
+	set [scope $itk_component(hull)_color] mono
+	pack $w.color.mono $w.color.gray $w.color.color -side left
+
+	checkbutton $w.tofile.button -text "To file only:"\
+		-variable [scope $itk_component(hull)_tofile]
+	entry $w.tofile.entry -relief sunken -bd 2 -width 35
+	pack $w.tofile.button $w.tofile.entry -side top -anchor w
+	$w.tofile.entry insert 0 "[file rootname $file].ps"
+
+	button $w.buttons.print -text "Print"\
+		-command "$this printOut $w" -relief groove -bd 8
+	button $w.buttons.cancel -text "Cancel" -command "destroy $w" -bd 5
+	pack $w.buttons.print $w.buttons.cancel -fill both -expand 1\
+		-side left -padx 2 -pady 2
+    }
+}
+
+body ::tycho::Graphics::printOut {win} {
+    set height [winfo height [component graphics canvasName]]
+    if {$height == 1} {
+        # Canvas has not been mapped yet
+        set height [cget -canvasheight]
+    }
+    set width [winfo width [component graphics canvasName]]
+    if {$width == 1} {
+        # Canvas has not been mapped yet
+        set width [cget -canvaswidth]
+    }
+
+    set pageheight [$win.page.pageheight.entry get]
+    set pagewidth [$win.page.pagewidth.entry get]
+    set pagey [$win.page.pagey.entry get]
+    set pagex [$win.page.pagex.entry get]
+
+    set printCmd [$win.command.entry get]
+
+    set rotate [set [scope $itk_component(hull)_rotate]]
+    if {$rotate == "Landscape"} {
+	set rotate 1
+    } else {
+	set rotate 0
+    }
+
+    # Adjust the offset.
+    set pagey [expr $pageheight/2+$pagey]
+    set pagex [expr $pagewidth/2+$pagex]
+
+    set color [set [scope $itk_component(hull)_color]]
+
+    set ps [ [component graphics canvasName] postscript\
+	     -height $height -width $width\
+	     -pageheight ${pageheight}i -pagewidth ${pagewidth}i\
+	     -rotate $rotate -colormode $color]
+
+    if [set [scope $itk_component(hull)_tofile]] {
+	set fileID [open [$win.tofile.entry get] w]
+	puts $fileID $ps
+	close $fileID
+
+    } else {
+	set tmpFile [file join /tmp [$this windowName]]
+	catch {exec "rm -f $tmpFile"}
+
+	set fileID [open $tmpFile w]
+	puts $fileID $ps
+	close $fileID
+
+	eval exec "$printCmd $tmpFile"
+
+	catch {exec "rm -f $tmpFile"}
+    }
+
+    destroy $win
 }
 
 #######################################################################
