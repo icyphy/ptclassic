@@ -49,9 +49,9 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR) $(PTCOMPAT_INCSPEC) \
 # source files for all stars, using preprocessor
 # put base stars first, i.e., those that other stars are derived from
 PL_SRCS= \
+ CGCAudioBase.pl \
  CGCChop.pl \
  CGCFix.pl \
- CGCPCM.pl \
  CGCPCMwrite.pl \
  CGCQuant.pl \
  CGCSGIAudio.pl \
