@@ -152,11 +152,13 @@ void <T>ArrayState  :: initialize() {
 			sSiz = t.s->size();
 			if (i + sSiz > MAXLEN) {
 				parseError ("too many elements!");
-				break;
 			}
-			const <C> *sPtr = ((const <T>ArrayState *)(t.s))->val;
-			for (int j = 0; j < sSiz; j++)
-				buf[i++] = *sPtr++;
+			else {	
+				const <C> *sPtr =
+					((const <T>ArrayState *)(t.s))->val;
+				for (int j = 0; j < sSiz; j++)
+					buf[i++] = *sPtr++;
+			}
 			break;
 		default:
 			parseError ("syntax error");
