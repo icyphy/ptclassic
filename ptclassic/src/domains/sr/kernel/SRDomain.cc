@@ -43,6 +43,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 extern const char SRdomainName[] = "SR";
 
+
+/**********************************************************************
+
+ The Synchronous/Reactive Domain
+
+ @Description This domain implements a synchronous model of time
+ similar to that used in the Esterel, Argos, and Lustre languages.
+ Everything computes instantly, and communication takes place through
+ unbuffered "wires" that take on exactly one value in an instant.  The
+ value on each wire may be unknown, absent, or present with some
+ value.  The semantics of the domain are the least fixed point of the
+ system, and schedulers use an iterative relaxation scheme to approach
+ this least fixed point.
+
+**********************************************************************/
 class SRDomain : public Domain {
 public:
 	// constructor
@@ -63,8 +78,15 @@ public:
 // declare a prototype
 static SRDomain proto;
 
-// declare the default Target object
+/**********************************************************************
 
+  The default target for the SR domain
+
+  @Description This uses the brute-force scheduler
+
+  @SeeAlso SRScheduler
+
+ **********************************************************************/
 class SRTarget : public Target {
 public:
 	// Constructor
@@ -87,8 +109,14 @@ protected:
 static SRTarget defaultSRtarget;
 static KnownTarget entry(defaultSRtarget,"default-SR");
 
-// declare the static Target object
 
+/**********************************************************************
+
+  The static scheduler target for the SR domain
+
+  @Description This uses the static scheduler
+
+ **********************************************************************/
 class SRStaticTarget : public Target {
 public:
 	// Constructor
