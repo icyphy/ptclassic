@@ -42,9 +42,11 @@ EXTRA_SRCS = CompileMake.template README gantt.me \
 	pigiXRes9 pigiXRes9.bw pigiXRes9.cp startPigiRpc \
 	vem.bindings.7-3 vem.bindings.8-0 vem.bindings.8-1
 
+# Don't include xpole-1.4.6 here, as we don't ship it.
+
 MISC_FILES = 	Vem Vem-8.1 Vem-8.2 app-defaults bw_patterns bw_postscript \
 		cg56 cg96 cgc cm5 colors defaultContent \
-		gantt.help matlab rename tcl tech technology vem xpole-1.4.6
+		gantt.help matlab rename tcl tech technology vem
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
