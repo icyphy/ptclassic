@@ -31,10 +31,11 @@ are integer values in the range from 0 to 255 (inclusive).
 .pp
 This star supports two YUV formats--- the usual one [1] and
 the CCIR 601 standard.
-The usual YUV definition shifts the YUV values so that they fall in
+The usual YUV definition shifts the U and V values so that they fall in
 the range from 0 to 255 (inclusive).
-The CCIR 601 standard scales and then shifts the YUV values so that fall in
-the range from 0 to 255 (inclusive).
+The CCIR 601 standard scales and then shifts the Y, U, and V values so that
+Y falls in the range from 16 to 235 (inclusive) and U and V falls
+in the range from 16 to 240 (inclusive).
 The CCIR 601 standard was developed so that more of the YUV space maps into
 the RGB space.
 All RGB values, however, map into both YUV standards, so RGB to YUV conversion
@@ -72,13 +73,14 @@ Wiley & Sons: New York.  1991.  2nd ed.
 TRUE means that the RGB space will be converted to shifted-and-scaled YUV
 color space defined by the CCIR 601 standard, which is used in the MPEG
 and H.261 standards; otherwise, the RGB space will be converted according
-to the usual YUV definition. }
+to the usual YUV definition.
+		}
 	}
 
 	inline method {		// perform rounding in range [0, 255]
 		name { quant }
 		type { "unsigned char" }
-		arglist { "(const float inval)" }
+		arglist { "(double inval)" }
 		access { protected }
 		code {
 			if (inval < 0.5) return ((unsigned char) 0);
@@ -148,9 +150,9 @@ to the usual YUV definition. }
 					 -0.4187 * gvalue +
 					 -0.0813 * bvalue;
 				if ( int(CCIR_601) ) {
-				  yvalue = (219*yvalue)/255 +  16;
-				  uvalue = (224*yvalue)/255 + 128;
-				  vvalue = (224*yvalue)/255 + 128;
+				  yvalue = (219.0*yvalue)/255.0 +  16;
+				  uvalue = (224.0*uvalue)/255.0 + 128;
+				  vvalue = (224.0*vvalue)/255.0 + 128;
 				}
 				else {
 				  uvalue += 128;
