@@ -5,7 +5,7 @@ defcore {
 	corona { XMGraph }
         version {$Id$
     copyright {
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
