@@ -61,8 +61,8 @@ Programmer: J. T. Buck and E. A. Lee
 #define FLEN 256
 /* number of include files */
 #define NINC 30
-/* Number of classes we can derive from */
-#define NDERIVED 10
+/* Number of non-star classes we can derive from */
+#define NALSODERIVED 10
 /* number of see alsos */
 #define NSEE 30
 #define NSTR 20
@@ -271,8 +271,9 @@ char* hInclude[NINC];		/* include files in .h file */
 int   nHInclude;		/* number of such files */
 char* ccInclude[NINC];		/* include files in .cc file */
 int   nCcInclude;		/* number of such files */
-char* derivedFrom[NDERIVED];	/* classes obj is derived from */
-int   nDerivedFrom;		/* number of such files */
+char* derivedFrom;		/* stars obj is derived from */
+char* alsoDerivedFrom[NALSODERIVED]; /* Other non star classes derived from */
+int   nAlsoDerivedFrom;		/* number of such files */
 char* seeAlsoList[NSEE];	/* list of pointers to other manual sections */
 int   nSeeAlso;			/* number of such pointers */
 
@@ -285,8 +286,8 @@ typedef char * STRINGVAL;
 %}
 
 %token DEFSTAR GALAXY NAME DESC DEFSTATE DOMAIN NUMPORTS NUM VIRTUAL
-%token DERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT INOUT ACCESS
-%token INMULTI OUTMULTI INOUTMULTI
+%token DERIVED ALSODERIVED CONSTRUCTOR DESTRUCTOR STAR ALIAS INPUT OUTPUT
+%token INOUT ACCESS INMULTI OUTMULTI INOUTMULTI
 %token TYPE DEFAULT CLASS BEGIN SETUP GO WRAPUP TICK CONNECT ID
 %token CCINCLUDE HINCLUDE PROTECTED PUBLIC PRIVATE METHOD ARGLIST CODE
 %token BODY IDENTIFIER STRING CONSCALLS ATTRIB LINE HTMLDOC
@@ -544,7 +545,8 @@ version:
 staritem:
 	sgitem
 |	DOMAIN '{' ident '}'		{ domain = $3;}
-|	DERIVED '{' derivedlist '}'	{ }
+|	DERIVED '{' ident '}'		{ derivedFrom = $3;}
+|	ALSODERIVED '{' alsoderivedlist '}'		{}
 |	portkey '{' portlist '}'	{ genPort();
 					  describePort(); }
 |	CODEBLOCK '(' ident cbargs ')' '{'
@@ -563,8 +565,8 @@ staritem:
 ;
 
 /* include files */
-derivedlist:	IDENTIFIER		{ derivedFrom[nDerivedFrom++] = $1; }
-|	derivedlist ',' IDENTIFIER	{ derivedFrom[nDerivedFrom++] = $3; }
+alsoderivedlist:	IDENTIFIER	{ alsoDerivedFrom[nAlsoDerivedFrom++] = $1; }
+|	alsoderivedlist ',' IDENTIFIER	{ alsoDerivedFrom[nAlsoDerivedFrom++] = $3; }
 ;
 
 cbargs: /*nothing*/		{ $$ = (char*)0; }
@@ -754,7 +756,7 @@ ident:	keyword
 
 /* keyword in identifier position */
 keyword:	DEFSTAR|GALAXY|NAME|DESC|DEFSTATE|DOMAIN|NUMPORTS|DERIVED
-|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
+|ALSODERIVED|CONSTRUCTOR|DESTRUCTOR|STAR|ALIAS
 |INPUT|OUTPUT|INOUT|INMULTI|OUTMULTI|INOUTMULTI
 |TYPE
 |DEFAULT|BEGIN|SETUP|GO|WRAPUP|TICK|CONNECT|CCINCLUDE|HINCLUDE|PROTECTED|PUBLIC
@@ -797,7 +799,7 @@ int g;
 	stateDescriptions[0] = 0;
 	inputDescHTML[0] = outputDescHTML[0] = inoutDescHTML[0] = 0;
 	stateDescHTML[0] = 0;
-	nCcInclude = nDerivedFrom = nHInclude = nSeeAlso = 0;
+	nCcInclude = nAlsoDerivedFrom = nHInclude = nSeeAlso = 0;
 	pureFlag = 0;
 	for (i = 0; i < N_FORMS; i++) {
 		codeBody[i] = 0;
@@ -1417,14 +1419,14 @@ void genDef ()
 /* The base class */
 /* For stars, we append the domain name to the beginning of the name,
    unless it is already there */
-	if (derivedFrom[0]) {
+	if (derivedFrom) {
 		if (domain &&
-		    strncmp (domain, derivedFrom[0], strlen (domain)) != 0) {
+		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
 			sprintf (baseClass, "%s%s", galDef ? "" : domain,
-				 derivedFrom[0]);
+				 derivedFrom);
 		}
 		else
-			(void) strcpy (baseClass, derivedFrom[0]);
+			(void) strcpy (baseClass, derivedFrom);
 	}
 /* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef)
@@ -1434,6 +1436,9 @@ void genDef ()
 
 /* Include files */
 	fprintf (fp, "#include \"%s.h\"\n", baseClass);
+	for( i = 0; i < nAlsoDerivedFrom; i++ ) {
+		fprintf (fp, "#include \"%s.h\"\n", alsoDerivedFrom[i] );
+        }
 	
 	checkIncludes(nHInclude);
 	for (i = 0; i < nHInclude; i++) {
@@ -1447,13 +1452,9 @@ void genDef ()
 /* extra header code */
 	fprintf (fp, "%s\n", hCode);
 /* The class template */
-	fprintf (fp, "class %s : public %s ", fullClass, baseClass);
-	for( i = 1; i < nDerivedFrom; i++ ) {
-	    if (domain &&
-		strncmp (domain, derivedFrom[i], strlen (domain)) != 0) {
-		fprintf( fp, ", %s%s", galDef ? "" : domain, derivedFrom[i]);
-	    } else 
-		fprintf( fp, ", %s", derivedFrom[i] );
+	fprintf (fp, "class %s : public %s", fullClass, baseClass);
+	for( i = 0; i < nAlsoDerivedFrom; i++ ) {
+		fprintf( fp, ", %s", alsoDerivedFrom[i] );
         }
 	fprintf( fp, "\n{\n" );
 
@@ -1620,23 +1621,18 @@ void genDef ()
 /* base class and domain */
 	/* For stars, we append the domain name to the beginning of the name,
 	   unless it is already there */
-	if (nDerivedFrom > 0) {
+	if (derivedFrom) {
+		if (domain &&
+		    strncmp (domain, derivedFrom, strlen (domain)) != 0) {
+			sprintf (baseClass, "%s%s", galDef ? "" : domain,
+				 derivedFrom);
+                        derivedSimple = derivedFrom;
+		} else {
+			(void) strcpy (baseClass, derivedFrom);
+                        derivedSimple = derivedFrom + strlen(domain);
+                }
                 /* Put in a hyperlink to the domain index */
-                fprintf (fp, "<b>Derived from:</b>");
-		for( i = 0; i < nDerivedFrom; i++ ) {
-		    if (domain &&
-			strncmp (domain, derivedFrom[i],
-			    strlen (domain)) != 0) {
-			    sprintf (baseClass, "%s%s", galDef ? "" : domain,
-				 derivedFrom[i]);
-                            derivedSimple = derivedFrom[i];
-		    } else {
-			(void) strcpy (baseClass, derivedFrom[i]);
-                        derivedSimple = derivedFrom[i] + strlen(domain);
-	            }
-		    if (i>0) fprintf(fp,", ");
-	            fprintf (fp, "<a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a><br>\n", cvtToLower(domain), derivedSimple, baseClass);
-		}
+                fprintf (fp, "<b>Derived from:</b> <a href=\"$PTOLEMY/src/domains/%s/domain.idx#%s \">%s</a><br>\n", cvtToLower(domain), derivedSimple, baseClass);
 	}
 	/* Not explicitly specified: baseclass is Galaxy or XXXStar */
 	else if (galDef) {
@@ -1647,6 +1643,17 @@ void genDef ()
                 fprintf (fp, "<b>Derived from:</b> <a href=\"$PTOLEMY/src/domains/%s/kernel/%sStar.cc\">%sStar</a><br>\n",
 			cvtToLower(domain), domain, domain);
         }
+	/* Since we don't know if the values in alsoDerivedFrom
+	 * are stars, we cannot easily include hyperlinks
+	 */
+	if (nAlsoDerivedFrom > 0) {
+                /* Put in a hyperlink to the domain index */
+                fprintf (fp, "<b>Also Derived from:</b>");
+		for( i = 0; i < nAlsoDerivedFrom; i++ ) {
+		    if (i>0) fprintf(fp,", ");
+	            fprintf (fp, "<code>%s</code>", alsoDerivedFrom[i]);
+		}
+	}
 
 /* location */
 	if (objLocation)
@@ -1758,6 +1765,9 @@ struct tentry keyTable[] = {
 	{"access", ACCESS},
 	{"acknowledge", ACKNOWLEDGE},
 	{"alias", ALIAS},
+	{"alsoderived", ALSODERIVED},
+	{"alsoDerivedFrom", ALSODERIVED},
+	{"alsoderivedfrom", ALSODERIVED},
 	{"arglist", ARGLIST},
 	{"attrib", ATTRIB},
 	{"attributes", ATTRIB},
