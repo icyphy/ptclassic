@@ -104,7 +104,7 @@
 #     ::tycho::view EditForest
 # </pre></tcl>
 # <p>
-# The widget has a number of options. The <b>-forest</b> option gives
+# The widget has a number of options. The <b>-graph</b> option gives
 # the name of an object of type <code>Forest</code> to display and
 # edit. If it is not given, the widget creates its own object of type
 # <code>Forest</code>, and destroys that object on exiting. The
@@ -116,6 +116,22 @@
 # options gives the position of the upper left corner of the first node
 # (in pixels, default 10 and 5).  This upper left corner will be placed
 # below the title information, if there is any.
+#
+# Below is an example:
+# <tcl><pre>
+#    catch {delete object ff}
+#    ::tycho::Forest ff
+#    ff add a {label {A Node} color red font {times 16 bold r}}
+#    ff add b {label {B Node} color green}
+#    ff add c {label {C Node} font {times 40 bold r}}
+#    ff add d {label {D Node}}
+#    ff roots
+#    ff add e {e e} b
+#    set descr [ff describe]
+#    set view [::tycho::view EditForest [list -graph ff]]
+#    set win [$view displayer windowName]
+#    wm deiconify $win
+# </pre></tcl>
 #
 class ::tycho::EditForest {
     inherit ::tycho::EditDAG
