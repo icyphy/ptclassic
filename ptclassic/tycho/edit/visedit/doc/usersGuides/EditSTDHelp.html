@@ -14,63 +14,63 @@ diagram (STD), can be used to describe an FSM. It represents a system
 in the form of states (nodes) and transitions (arcs) between states.
 
  <P>The State Transition Diagram editor is automatically invoked
-whenever you open any file with a <a name=".std">".std" extension</a>.
+whenever you open any file with a 
+<a name=".std"><CODE>.std</CODE> extension</a>.
 
 The <a name="EditSTD class">EditSTD class</a> is derived from the
 <a href="EditBubbleAndArcHelp.html">EditBubbleAndArc class</a>, and
 therefore inherits all of its features.
-
-Note that STDs are not part of Ptolemy0.6, but should be available in
-the next Ptolemy release.
 
 <H2>How to use the STD Editor</H2>
 
 <H3>Edit a new STD file</H3>
 
 To edit a new STD for an FSM either open a file with the file
-extension <CODE>.std</CODE> , or drag down the <I>Window</I> menu and
-under <I>Graphical Editors</I>choose <I>State transition diagram
-editor</I>.  A message window will pop up to ask for machine type. So
+extension <CODE>.std</CODE> , or drag down the <CODE>Window</CODE> menu and
+under <CODE>Graphical Editors</CODE>choose <CODE>State transition diagram
+editor</CODE>.  A message window will pop up to ask for machine type. So
 far there is only one type of FSM supported, called mixed Mealy/Moore
 machine.
 
 <H3>Edit the Input/Output and Internal Events Names</H3>
 
 If there are any input/output and internal events for the FSM, their
-names must be specified: Drag down the <I>Special</I> menu and choose
-<I>I/O Port Names...</I>, then enter the names for the
+names must be specified: Drag down the <CODE>Special</CODE> menu and choose
+<CODE>I/O Port Names...</CODE>, then enter the names for the
 input/output. Each name should be separated by at least one space.
 
 <H3>Draw/Edit a State</H3>
 
-To draw a state, either drag down the <I>Edit</I> menu and choose
-<I>New Node</I>, or press the hot key <CODE>Shift-N</CODE>.  . Then a
-crossbar cursor will appear in the window. Press and hold (don't
-release) the left mouse button, and move the mouse to get a different
-shape of node. Release the button to finish the drawing.
+To draw a state, either drag down the <CODE>Edit</CODE> menu and
+choose <CODE>New Node</CODE>, or use the keyboard accelerator
+<CODE>N</CODE>.  . Then a crossbar cursor will appear in the
+window. Press and hold (don't release) the left mouse button, and move
+the mouse to get a different shape of node. Release the button to
+finish the drawing.
 
  <P> To edit a state, first select the state by pressing the left
-mouse button on it. Then either drag down the <I>Edit</I> menu and
-choose <I>Edit Item</I>, or press the hot key <CODE>e</CODE>.
+mouse button on it. Then either drag down the <CODE>Edit</CODE> menu
+and choose <CODE>Edit Item</CODE>, or use the <CODE>e</CODE> keyboard accelerator key.
 
 <H3> Draw/Edit a Transition</H3>
 
-To draw a transition, either drag down the <I>Edit</I> menu and choose
-<I>New Arc</I>, or press the hot key <CODE>Shift-A</CODE>. Then a
-crossbar cursor will appear in the window. Press the left mouse button
-on the periphery of the starting state.  Move the mouse and press the
-left mouse button to get more delicate arc.  To finish the drawing,
-move the mouse on the periphery of the ending state and press the left
-mouse button.
+To draw a transition, either drag down the <CODE>Edit</CODE> menu and
+choose <CODE>New Arc</CODE>, or use the <CODE>A</CODE> keyboard
+accelerator key. Then a crossbar cursor will appear in the
+window. Press the left mouse button on the periphery of the starting
+state.  Move the mouse and press the left mouse button to get more
+delicate arc.  To finish the drawing, move the mouse on the periphery
+of the ending state and press the left mouse button.
 
  <P>To edit a transition, first select the transition by pressing the
-left mouse button on it. Then either drag down the <I>Edit</I> menu
-and choose <I>Edit Item</I>, or press the hot key <CODE>e</CODE>.
+left mouse button on it. Then either drag down the <CODE>Edit</CODE> menu
+and choose <CODE>Edit Item</CODE>, or use the <CODE>e</CODE> keyboard
+accelerator key.
 
 <H3>Delete a State/Transition</H3>
 
 First select the state/transition by pressing the left mouse button on
-it, then drag down the <I>Edit</I> menu and choose <I>Delete</I>.
+it, then drag down the <CODE>Edit</CODE> menu and choose <CODE>Delete</CODE>.
 
 <H3>Move/Reshape a State/Transition</H3>
 
@@ -86,7 +86,6 @@ rectangles to move/reshape the arc.
 
 <HR>
 <H2>Working in Ptolemy</H2>
-<B>Note that Ptolemy0.6 does not support STDs</B>
 
  <P>From the point of view of implementation, a stand-alone FSM domain in
 Ptolemy is not very interesting, because in most of applications, in
@@ -95,30 +94,34 @@ signal processing. Moreover, there are various Ptolemy domains. With
 the FSM domain mixed with them, we can get a much more powerful FSM
 model.
 
-<H3>Make an Icon in VEM</H3>
+<H3>Make an Icon in <CODE>vem</CODE></H3>
 
 Unlike other domains, an FSM galaxy is edited in a previous mentioned
-STD file using Tycho instead of VEM. However, to work with other
-domains, an icon in VEM is required to represent the corresponding FSM
+STD file using Tycho instead of <CODE>vem</CODE>. However, to work with other
+domains, an icon in <CODE>vem</CODE> is required to represent the corresponding FSM
 galaxy described in an STD file. In Ptolemy, the Tycho can be started
-by pressing key <CODE>Y</CODE>. To make an icon in VEM for the STD
+by typing a <CODE>y</CODE> while the mouse is over a  facet.
+To make an icon in <CODE>vem</CODE> for the STD
 file, first open the file in term of Tycho started in Ptolemy. Then
-drag down the <I>Special</I> menu and choose <I>Make Icon...</I>. This
-will load the FSM galaxy into the Ptolemy kernel, and make an icon
-with appropriate input/output ports in the specified palette in VEM.
+drag down the <CODE>Special</CODE> menu and choose <CODE>Make
+Icon...</CODE>. This will load the FSM galaxy into the Ptolemy kernel,
+and make an icon with appropriate input/output ports in the specified
+palette in <CODE>vem</CODE>.
 
 The icon looks like a star (blue outline), but it is actually an
 galaxy. It may cause confusion, but the reason is to avoid using
-octool handle. There are two different ways to make an icon in VEM:
-ptkSetMkSchemIcon and ptkSetMkStar. The former one needs an
-OctFactHandle as one argument and is used for other VEM galaxy. The
-FSM galaxy uses Tycho as the editor instead of VEM, so there is no
-OctFactHandle for an FSM galaxy. Therefore the latter one, which uses
-the star (or galaxy) name instead, is more appropriate for this case.
+octool handle. There are two different ways to make an icon in
+<CODE>vem</CODE>: <CODE>ptkSetMkSchemIcon</CODE> and
+<CODE>ptkSetMkStar</CODE>. The former one needs an OctFactHandle as
+one argument and is used for other <CODE>vem</CODE> galaxy. The FSM
+galaxy uses Tycho as the editor instead of <CODE>vem</CODE>, so there
+is no OctFactHandle for an FSM galaxy. Therefore the latter one, which
+uses the star (or galaxy) name instead, is more appropriate for this
+case.
 
-Similar to the galaxy icon in other domain, when the key
-<CODE>I</CODE> is pressed on the icon to look inside the galaxy, the
-corresponding STD file which describes the FSM galaxy will be
+ <P>Similar to the galaxy icon in other domains, when the
+<CODE>i</CODE> key is pressed on the icon to look inside the galaxy,
+the corresponding STD file which describes the FSM galaxy will be
 automatically invoked in Tycho. (Note: if the environment variable
 <CODE>PT_DISPLAY</CODE>
  is set to other editor instead of Tycho, it must be unset for the
