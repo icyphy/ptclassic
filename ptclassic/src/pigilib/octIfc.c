@@ -87,8 +87,7 @@ char *f, *m;
 
     octGetFacet(i, &rfacet);
     t->type = OCT_FACET;
-    t->objectId = 0;		/* though not used, it is sent, so
-				   this is needed to shut up Purify */
+    t->objectId = 0;		    /* set only to silence Purify warnings */
     t->contents.facet.cell = i->contents.instance.master;
     t->contents.facet.view = i->contents.instance.view;
     t->contents.facet.facet = f;
@@ -96,7 +95,7 @@ char *f, *m;
     t->contents.facet.mode = m;
     CK_OCT(octOpenRelative(&rfacet, t, OCT_SIBLING));
 
-    /* Do not free rfacet */
+    FreeOctMembers(&rfacet);
 
     return (TRUE);
 }
@@ -492,8 +491,6 @@ ParamListType *pListPtr;
     ParamListType tempList = {0, 0};
 
     ERR_IF1(!GetDefaultParams(instPtr, pListPtr));
-
-    /* Don't free prop with FreeOctMembers: it contains static strings */
     prop.contents.prop.name = "params";
 
     /* If no parameters: use default list */
@@ -501,10 +498,12 @@ ParamListType *pListPtr;
 	ERR_IF1(!SetSogParams(instPtr, pListPtr));
 	return(TRUE);
     }
-
     if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
 	return(FALSE);
     }
+
+    /* Don't free prop with FreeOctMembers: prop.contents.prop.name is static */
+    free(prop.contents.prop.value.string);
 
     /* Do not free tempList: its pointers will be copied to pListPtr */
     MergeParams(pListPtr, &tempList);
@@ -531,18 +530,18 @@ ParamListType *pListPtr;
     ParamListType tempList = {0, 0};
 
     ERR_IF1(!KcGetTargetParams(targName, pListPtr));
-
-    /* Don't free prop with FreeOctMembers: it contains static strings */
     prop.contents.prop.name = "targetparams";
 
     /* If no parameters, return default list */
     if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
 	return(TRUE);
     }
-
     if (!PStrToPList(prop.contents.prop.value.string, &tempList)) {
 	return(FALSE);
     }
+
+    /* Don't free prop with FreeOctMembers: prop.contents.prop.name is static */
+    free(prop.contents.prop.value.string);
 
     /* Do not free tempList: its pointers will be copied to pListPtr */
     MergeParams(pListPtr, &tempList);
