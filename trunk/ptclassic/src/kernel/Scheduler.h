@@ -63,6 +63,9 @@ public:
 
 	// Display the schedule
 	operator char* ();
+
+	// Clear the data structure
+	void clear() {SequentialList::clear();}
 };
 
 
