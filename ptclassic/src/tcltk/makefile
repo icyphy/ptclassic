@@ -1,4 +1,4 @@
-# Version Identification:
+# Version Idenitfication:
 # $Id$
 # Copyright (c) 1990-%Q% The Regents of the University of California.
 # All rights reserved.
@@ -70,10 +70,15 @@ ITCL_TK_MAJOR_VERSION_NUMBER =	4.1
 ITCL_MAJOR_VERSION_NUMBER =	2.1
 IWIDGETS_MAJOR_VERSION_NUMBER =	2.1.0
 
-
-TCLX_VERSION =		tclX7.5.2
+# TclX
+TCLX_VERSION =		tclX7.5.3-a1
 TCLX_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(TCLX_VERSION)
 TCLX_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(TCLX_VERSION)/unix
+
+# BLT
+BLT_VERSION =		blt2.0
+BLT_SRC =		$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)/$(BLT_VERSION)
+BLT_OBJ =		$(TCLTK_OBJ)/$(ITCL_VERSION)/$(BLT_VERSION)/unix
 
 # Location of the itcl source
 ITCL_SRC =	$(TCLTK_SRC)/$(ITCL_VERSION).$(TCLX_VERSION)
@@ -170,10 +175,10 @@ fixlinks:
 		cd ../tk; ln -s ../itcl/include/itcl include; \
 		cd ../itcl/include; ln -s itcl/*.h .)
 
-###
+######################################################
 # TclX rules
 # we use TclX for the profile command
-all_tclx: all config_tclx tclx install_tclx
+all_tclx: all config_tclx tclx
 
 # FIXME: configure fails with GNU make!  try set path=(`pwd` $path)
 config_tclx: $(TCLX_OBJ)	
@@ -184,17 +189,24 @@ config_tclx: $(TCLX_OBJ)
 		--exec-prefix=$(ITCL_DEST) \
 		$(ENABLE_SHARED) $(ENABLE_GCC))
 
-#FIXME: LD_LIBRARY_PATH will not work on hppa
-tclx: 
+# TclX demands that we run the dynamic loading tests in the tcl directory
+# so we do that before actually building
+# The tcl dl test:
+DLTEST=$(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/unix/dltest/pkgIndex.tcl
+$(DLTEST):
+	(cd $(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/unix; \
+		$(MAKE) dltest/pkgIndex.tcl)
+
+tclx: $(DLTEST)
 	@echo "Making all in tclx"
+	rm -f $(TCLX_OBJ)/tcl/unix/dltest
 	(cd  $(TCLX_OBJ); \
 		$(MAKE) \
-		LD_LIBRARY_PATH=$(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/unix \
-		SHLIB_PATH=$(ITCL_OBJ)/tcl$(ITCL_TCL_MAJOR_VERSION_NUMBER)/unix \
 		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
 		X11_INCLUDES="$(X11_INCSPEC)" \
 		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
 		all)
+
 install_tclx:
 	@echo "Making install in itcl"
 	(cd  $(TCLX_OBJ); $(MAKE) \
@@ -204,6 +216,40 @@ install_tclx:
 		install)
 
 $(TCLX_OBJ):
+	mkdir -p $@
+
+######################################################
+# Blt rules
+# we use Blt for the profile command
+all_blt: all config_blt blt
+
+# FIXME: configure fails with GNU make!  try set path=(`pwd` $path)
+config_blt: $(BLT_OBJ)	
+	( cd $(BLT_OBJ); \
+		$(BLT_SRC)/configure \
+		--srcdir=$(BLT_SRC) \
+		--prefix=$(ITCL_INDEPENDENT_DEST) \
+		--exec-prefix=$(ITCL_DEST) \
+		$(ENABLE_SHARED) $(ENABLE_GCC))
+
+blt: 
+	@echo "Making all in blt"
+	(cd  $(BLT_OBJ); \
+		$(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		all)
+
+install_blt:
+	@echo "Making install in itcl"
+	(cd  $(BLT_OBJ); $(MAKE) \
+		CFLAGS="$(CFLAGS) $(WRITABLE_STRINGS_CFLAGS)" \
+		X11_INCLUDES="$(X11_INCSPEC)" \
+		X11_LIB_SWITCHES="$(X11_LIBSPEC)" \
+		install)
+
+$(BLT_OBJ):
 	mkdir -p $@
 
 # Links so that older programs can find libs and includes.
