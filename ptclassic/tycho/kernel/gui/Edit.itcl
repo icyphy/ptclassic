@@ -45,18 +45,6 @@ catch {delete class ::tycho::Edit}
 #     findParagraph, that finds the boundaries of a paragraph.
 #     This should then be redefined in derived classes.
 
-#######################################################################
-# options
-#
-preference add textedit textWidth  80
-preference add textedit textHeight 40
-preference add textedit textrelief "raised"
-preference add textedit parenColor  [ptkColor lightskyblue white]
-preference add textedit targetColor [ptkColor lightskyblue white] 
-preference add textedit selectColor [ptkColor yellow white]
-
-# The maximum length of the lines for the purposes of filling text.
-preference add textedit fillMaxLineLength 70
 
 #######################################################################
 #### Edit
@@ -662,7 +650,7 @@ body ::tycho::Edit::constructor {args} {
 	    -background [preference get textedit selectColor]
 
     set maxLineLength \
-            [preference get textedit fillMaxLineLength]
+            [preference get textedit fillColumn]
 
     # Create and configure the context-sensitive popup menu
     # FIXME: Is this the right place for this code?
@@ -1498,7 +1486,7 @@ body ::tycho::Edit::paste {} {
 body ::tycho::Edit::queryFillColumn {} {
     set maxLineLength \
             [::tycho::queryinfo "Right column for text fill:" \
-            [preference get textedit fillMaxLineLength] \
+            [preference get textedit fillColumn] \
             15]
 }
 

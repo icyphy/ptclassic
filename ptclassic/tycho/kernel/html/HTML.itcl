@@ -78,36 +78,6 @@ if {[info commands HMinit_win] == {}} {
 }
 
 #######################################################################
-#### options
-#
-# option add *HTML.fontSize medium widgetDefault
-# option add *HTML.textWidth 100 widgetDefault
-# option add *HTML.textHeight 40 widgetDefault
-
-# option add *HTML.textBackground \
-# 	[ptkColor linen white] widgetDefault
-# option add *HTML.textForeground \
-# 	[ptkColor black black] widgetDefault
-
-# option add *HTML.relief raised widgetDefault
-# option add *HTML.targetColor [ptkColor lightskyblue white] widgetDefault
-# option add *HTML.findMatchColor [ptkColor forestGreen black] widgetDefault
-# option add *HTML.selectColor [ptkColor yellow white] widgetDefault
-
-# # Define the color for embedded Tcl code in the HTML document.
-# option add *HTML.tclColor [ptkColor purple black] widgetDefault
-
-preference add htmlview fontSize medium
-preference add htmlview textWidth 100
-preference add htmlview textBackground [ptkColor linen white]
-preference add htmlview targetColor [ptkColor lightskyblue white]
-preference add htmlview findMatchColor [ptkColor forestGreen white]
-preference add htmlview selectColor [ptkColor yellow white]
-
-# Define the color for embedded Tcl code in the HTML document.
-preference add htmlview tclColor [ptkColor purple black]
-
-#######################################################################
 #### HTML
 # FIXME: Update docs.
 # This widget parses HTML using the library by Stephen Uhler and
