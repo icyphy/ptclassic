@@ -39,7 +39,7 @@
 # blocks of comments.
 #
 class ::tycho::EditTcl {
-    inherit ::tycho::Edit
+    inherit ::tycho::EditProgram
 
     ###################################################################
     ####                     public methods                        ####
@@ -48,10 +48,6 @@ class ::tycho::EditTcl {
     # Evaluate the contents of the text window as Tcl commands
     # in the global context.
     method evaluate {}
-
-    #### revert
-    # Revert to previously saved version and recolorize.
-    method revert {}
 
     constructor {args} {}
     destructor {}
@@ -69,52 +65,15 @@ class ::tycho::EditTcl {
 body ::tycho::EditTcl::constructor {args} {
     
     eval itk_initialize $args
-
-    # Add to the format menu commands to comment and uncomment
-    # the regions defined by the selection.
-    $itk_component(formatMenu) add separator
-    
-    $itk_component(formatMenu) add command \
-	    -label "Comment Out Region" \
-	    -underline 0 \
-	    -command "$itk_component(text) commentSelection"
-    
-    $itk_component(formatMenu) add command \
-	    -label "Uncomment Region" \
-	    -underline 0 \
-	    -command "$itk_component(text) uncommentSelection"
     
     # Add to the format menu a command to recolorize.
     $itk_component(formatMenu) add separator
-    
-    $itk_component(formatMenu) add command \
-	    -label "Recolorize" \
-	    -underline 0 \
-	    -command "$itk_component(text) parse"
-    
+        
     $itk_component(formatMenu) add command \
 	    -label "Show Links" \
 	    -underline 1 \
 	    -command "$itk_component(text) tagLinks"
     
-    $itk_component(formatMenu) add command \
-	    -label "Indent Line" \
-	    -accelerator "Tab" \
-	    -underline 0 \
-	    -command "$itk_component(text) indentLine"
-    
-    $itk_component(formatMenu) add command \
-	    -label "Indent Region" \
-	    -accelerator "Esc C-\\" \
-	    -underline 1 \
-	    -command "$itk_component(text) indentSelection"
-    
-    $itk_component(formatMenu) add command \
-	    -label "Tab" \
-	    -accelerator "C-q Tab" \
-	    -underline 0 \
-	    -command "$itk_component(text) insertString insert {\t}"
-
     # Read contents from the specified file, unless the name is "NoName".
     # This needs to be repeated from the baseclass because the -file
     # option will not have been processed by the time the base class
@@ -135,13 +94,4 @@ body ::tycho::EditTcl::constructor {args} {
 #
 body ::tycho::EditTcl::evaluate {} {
     return [$itk_component(text) evaluate]
-}
-
-#####################################################################
-#### revert
-# Override the base-class revert to recolorize.
-#
-body ::tycho::EditTcl::revert {} {
-    Edit::revert
-    $itk_component(text) parse
 }
