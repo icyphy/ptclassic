@@ -24,6 +24,8 @@
 # 						COPYRIGHTENDKEY
 #
 #
+# Programmer:  Brian L. Evans
+#
 # matlab.mk :: Common definitions for the Ptolemy interface to Matlab
 # Version: $Id$
 #
@@ -46,6 +48,10 @@
 # (a) libsdfnomatlabstars.a is linked if Matlab is not installed, or
 # (b) libmat.a is linked if Matlab is installed.
 #
+# If Matlab is installed, the old way to determine the Matlab architecture is
+# MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
+# Now, MATARCH is set by the config makefiles.
+#
 MATLABDIR := $(shell $(ROOT)/bin/matlabRootDir)
 ifeq ("$(MATLABDIR)","")
 MATLABDIR= 		$(ROOT)/src/compat/matlab
@@ -53,7 +59,6 @@ MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlabstars.$(LIBSUFFIX)
 MATLABSTAR_LIB=		-lsdfnomatlabstars
 MATLABSTARS_DOT_O=	$(LIBDIR)/sdfnomatlabstars.o
 else
-MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
 MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
 MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
 MATLABSTAR_LIB=		-lsdfmatlabstars
