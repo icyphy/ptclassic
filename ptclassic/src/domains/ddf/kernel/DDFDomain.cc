@@ -62,7 +62,7 @@ class DDFTarget : public Target {
 public:
 	DDFTarget() : Target("default-DDF", "DataFlowStar",
 			     "default DDF target") {
-		sched = new DDFScheduler;
+		setSched(new DDFScheduler);
 	}
 	Block* clone() const;
 };
