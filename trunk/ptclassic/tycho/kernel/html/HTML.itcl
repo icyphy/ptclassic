@@ -719,7 +719,7 @@ body ::tycho::HTML::render {obj {html {}}} {
     $tktext delete 1.0 end
     
     # Put the insertion cursor at the top
-    $tktext mark set insert @0,0
+    $tktext mark set insert 1.0
     $tktext mark gravity insert left
     HMreset_win $tktext
 
