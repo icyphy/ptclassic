@@ -42,7 +42,7 @@ public:
 	// initialize and/or generate schedule
 	int initSched() {
 		target->initialize();
-		return target->setup(gal);
+		return target->setup(*galP);
 	}
 
 	// run, until stopping condition
@@ -58,12 +58,21 @@ public:
 	StringList displaySchedule() {return target->displaySchedule();}
 
 	// destructor: deletes scheduler
-	virtual ~Runnable() { INC_LOG_DEL; delete target;}
+	// for some reason, g++ 1.xx goes nuts if this destructor
+	// is virtual: destructors for wormholes, which are multiply
+	// inherited, crash.
+
+#if !defined(__GNUG__) || __GNUG__ == 2
+	virtual
+#else
+	/* virtual */
+#endif
+		~Runnable() { INC_LOG_DEL; delete target;}
 
 protected:
 	const char* type;
 	Target* target;
-	Galaxy& gal;
+	Galaxy* galP;
 private:
 	void wrapupGal (Galaxy& g);
 };
