@@ -1478,8 +1478,8 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
     set HTMLDocSys [::tycho::HTMLDocSys [::tycho::autoName .HTMLDocSys]]
     $HTMLDocSys configure -verbose $verbose
 	
-    if ![file isdirectory doc/codeDoc] {
-	exec mkdir -p doc/codeDoc
+    if ![file isdirectory [file join doc codeDoc]] {
+	file mkdir [file join doc codeDoc]
     }
     set retval ""
     foreach filename $filelist {
@@ -1498,21 +1498,21 @@ body ::tycho::HTMLDocSys::generateHTML {verbose debug generateIndex \
                 puts "$filename"
             }
 	    $HTMLDocSys readFile $filename
-	    cd doc/codeDoc
+	    cd [file join doc codeDoc]
 	    if [catch {$HTMLDocSys generateClassHTML} errMsg] {
 		set retval "$retval\nWarning: $errMsg"
 	    }
 	    if [catch {$HTMLDocSys generateOutsideClassHTML} errMsg] {
 		set retval "$retval\nWarning: $errMsg"
 	    }
-	    cd ../..
+	    cd [file join .. ..]
 	    if [catch {$HTMLDocSys resetOutsideClassComment} errMsg] {
 		set retval "$retval\nWarning: $errMsg"
 	    }
 	}
     }
     if {$generateIndex == 1} {
-	cd doc/codeDoc
+	cd [file join doc codeDoc]
 	if [catch {$HTMLDocSys generateHTMLIndex $title} errMsg] {
 	    set retval "$retval\nWarning: $errMsg"
 	}
