@@ -86,6 +86,11 @@ HDRS =		displayFile.h \
 # Objects that make up the library
 OBJS =		$(LIB_SRCS:.cc=.o) $(LIB_CSRCS:.c=.o)
 
+# Used to create .dlls under nt4.vc
+DLLDEPS = ..\utils\libexttools\libexttools.lib \
+	..\kernel\libptolemy.lib \
+	$(TCL_LIBDEP)
+
 # HPUX has a hard time handling symbols that are defined both in a static
 # library and in a shared library, so, since we have different Error::
 # functions for pigiRpc, ptcl and tycho, we need to be sure that
