@@ -63,4 +63,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include <math.h>
 
-double chbevl( double x, double array[], int n );
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+extern double i0( double x );
+extern double chbevl( double x, double array[], int n );
+
+#ifdef __cplusplus
+}
+#endif
