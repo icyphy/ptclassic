@@ -86,9 +86,10 @@ int MultiTarget :: computeProfile(int pNum, int, IntArray*) {
 	return pNum;
 }
 
-void MultiTarget :: insideSchedule() {}
+int MultiTarget :: insideSchedule(Profile*) { return TRUE; }
+Profile* MultiTarget :: manualSchedule(int) { return 0; }
 
-void MultiTarget :: downLoadCode(int, Profile*) {}
+int MultiTarget :: downLoadCode(int, int, Profile*) { return TRUE; }
 
 void MultiTarget :: addProcessorCode(int, const char* s) { myCode += s; }
 
@@ -110,7 +111,8 @@ void MultiTarget :: setTargets(int n) {
 	char temp[6];
 	sprintf(temp, "%d", n);
 	const char* t = hashstring(temp);
-	nprocs.setInitValue(t); }
+	nprocs.setInitValue(t); 
+	nprocs.initialize(); }
 
 int MultiTarget :: inheritChildTargets(Target* father) {
 
@@ -121,7 +123,14 @@ its parent target: ", father->name());
         }
 
         nChildrenAlloc = int(nprocs);
-	inheritChildren(father,0,nChildrenAlloc-1);
+	if (father->child(0)) {
+		inheritChildren(father,0,nChildrenAlloc-1);
+	} else {
+		const char* saveNm = father->name();
+		addChild(*father);
+		father->setNameParent(saveNm, 0);
+	}
 	return TRUE;
 }
 
+ISA_FUNC(MultiTarget, CGTarget);
