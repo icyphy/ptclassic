@@ -10,7 +10,7 @@ of this star does nothing.  The go method flags an error, it is
 normally required that the substitution have occured prior to that
 point. To accomplish the substitution, the public method "substitute()"
 must be explicitly called.  This method is called, for one, by
-the IfThenElseGr star.
+the IfElseGr star.
 	}
 	version { $Id$ }
 	author { Edward A. Lee }
