@@ -42,8 +42,10 @@ include $(CONFIG)
 
 TCL_SRCS = \
 	Color.tcl \
-	Lib.tcl
-  
+	Lib.tcl \
+	Path.tcl \
+	tychoMakeClassDAG.tcl
+
 ITCL_SRCS = \
 	CircularList.itcl \
 	ConsoleText.itcl \
