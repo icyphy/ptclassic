@@ -33,6 +33,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 */
 #include "tytimer.h"
 
+/* FIXME: architecture dependencies are not being defined */
+#define PTSOL2
 
 /***************************************************************
  * This section of code is taken from the original code used for
@@ -76,8 +78,8 @@ static void ptSafeSig( int SigNum ) {
   pt_alarm_action.sa_flags |= SA_RESTART;
   sigaction( SigNum, &pt_alarm_action, NULL);
 }
-static void ptBlockSig ARGS((int SigNum)) {}
-static void ptReleaseSig ARGS((int SigNum)) {}
+static void ptBlockSig (int SigNum) {}
+static void ptReleaseSig (int SigNum) {}
 
 #else 
 #if defined(PTHPPA)
