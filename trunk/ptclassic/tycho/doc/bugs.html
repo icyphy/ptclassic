@@ -82,6 +82,16 @@ clipboard.
 <li>Crash recovery code only works with Ptolemy binaries.
 </ul>
 
+<h3><a href="$TYCHO/kernel/FileBrowser.itcl">FileBrowser</a></h3>
+<ul>
+
+<li>Name completion does not work through directories, you can only
+complete names of files in the current directory, not names in the sub
+directories.
+
+
+</ul>
+
 <h3><a href="$TYCHO/kernel/Glimpse.itcl">Glimpse</a></h3>
 <ul>
 <li>Glimpse should not freeze Tycho while running. Searching
@@ -97,15 +107,15 @@ as the user if we want to create it.
 doc the indenting is all wrong, because the file contains
 HTML like:
 <pre>
-  <dl>
-    <dt> <b>Parameters:</b>
-    <dd> parameter-name - description
-    <dd> parameter-name - description
-    <dt> <b>Returns:</b>
-    <dd> description
-  </dl>
+  &lt;dl&gt;
+    &lt;dt&gt; &lt;b&gt;Parameters:&lt;/b&gt;
+    &lt;dd&gt; parameter-name - description
+    &lt;dd&gt; parameter-name - description
+    &lt;dt&gt; &lt;b&gt;Returns:&lt;/b&gt;
+    &lt;dd&gt; description
+  &lt;/dl&gt;
 </pre>
-Tycho's HTML viewer doesn't deal with the double <dd>
+Tycho's HTML viewer doesn't deal with the double &lt;dd&gt;
 (Netscape does, BTW).
 <li>The HTML parser is quite slow.
 <li>In "img" directives, align="right" causes an error.
@@ -179,13 +189,11 @@ do this, as the Alt key might be used in some window managers
 <li> The up arrow and down arrow keys should work.
 </ul>
 
-<h3><a href="$TYCHO/kernel/FileBrowser.itcl">FileBrowser</a></h3>
+<h3><a href="$TYCHO/kernel/Query.itcl">Query</a></h3>
 <ul>
 
-<li>Name completion does not work through directories, you can only
-complete names of files in the current directory, not names in the sub
-directories.
-
+<li> Control-v in the search window inserts garbage into the search
+field.
 
 </ul>
 
