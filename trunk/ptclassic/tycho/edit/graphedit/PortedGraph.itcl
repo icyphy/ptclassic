@@ -216,7 +216,7 @@ body ::tycho::PortedGraph::constructor {args} {
 
     # Turn off the :leafonly option of vertices, so that
     # they can contain ports
-    configure vertex :leafonly 0
+    define vertex :leafonly 0
 
     # Evaluate options
     eval configure $args
@@ -249,7 +249,7 @@ body ::tycho::PortedGraph::edges {{v1 *} {v2 *}} {
 # commands if the recording flag is set.
 #
 body ::tycho::PortedGraph::remove {vertex} {
-    if { ![exists $vertex] || [type get $vertex] != "vertex" } {
+    if { ![exists $vertex] || [type $vertex] != "vertex" } {
         error "Unknown vertex: \"$vertex\""
     }
     # Mark the history

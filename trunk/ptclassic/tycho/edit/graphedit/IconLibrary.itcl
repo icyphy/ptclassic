@@ -256,7 +256,7 @@ body ::tycho::IconLibrary::draw {icon slate x y args} {
     if ![exists $icon] {
         error "Unknown icon \"$icon\""
     }
-    if { [type get $icon] != "icon" } {
+    if { [type $icon] != "icon" } {
         error "\"$icon\" is not an icon"
     }
     array set opts {-termstyle {}}
