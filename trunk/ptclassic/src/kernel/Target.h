@@ -59,8 +59,7 @@ protected:
 // MyTarget::clone() const { return (new MyTarget)->copyStates(*this);}
 	Target& copyStates(const Target&);
 public:
-	Target(const char* nam, const char* starClass, Scheduler* s = 0,
-	       const char* desc = "") :
+	Target(const char* nam, const char* starClass,const char* desc = "") :
 		Block(nam,0,desc),
 		supportedStarClass(starClass), sched(0), gal(0),
 		children(0), link(0), nChildren(0) {}
