@@ -148,6 +148,9 @@ class ::tycho::TclShell {
     # Insert text from the selection and possibly execute a command.
     method stuff {}
 
+    # Add me to the window menus of all menu bars
+    method windowMenuAddAll {label}
+
     ##########################################################################
     ####                         protected methods                        ####
 
@@ -218,9 +221,6 @@ configbody ::tycho::TclShell::stdout {
 ###################################################################
 #
 body ::tycho::TclShell::constructor {args} {
-
-    # Set the view "type" for the Window menu
-    set viewType "tools"
 
     # Initialize the "promptEnd" mark
     $itk_component(text) mark set promptEnd end
@@ -336,8 +336,6 @@ body ::tycho::TclShell::destructor {} {
                 rename monitorPtcl {}; \
                 catch {rename ptclMonitorPtcl monitorPtcl}}"
     }
-    set menulabel "[info class] $this"
-    windowMenuRemoveAll $menulabel
 }
 
 #########################################################################
@@ -737,6 +735,31 @@ body ::tycho::TclShell::stuff {} {
     }
 }
 
+#####################################################################
+#### windowMenuAddAll
+# Add me to all "Window" menus of all current file objects.
+# The argument is just the tag used to reference this
+# window, and is basically ignored. The label used in the Window
+# menu will be "Tcl Shell #n" where #n is a unique integer,
+# unless the displayer's *-master* option is set, in which case the
+# label will be "Tycho Console." (This is rather ad-hoc,
+# but works OK in the most common situation...)
+# Do nothing if this View is not inside a Displayer.
+#
+body ::tycho::TclShell::windowMenuAddAll {label} {
+    if { [displayer] == {} } {
+	return
+    }
+    if [displayer cget -master] {
+        set label "Tycho Console"
+    } else {
+        set label [::tycho::autoName "Tcl Shell "]
+    }
+    ::tycho::register window $label $this \
+	    -label $label \
+	    -mode "tclshell"
+}
+
 #########################################################################
 #########################################################################
 ####                       protected methods                         ####
@@ -801,9 +824,14 @@ body ::tycho::TclShell::evalTextEntry {} {
 body ::tycho::TclShell::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
     chain $menubar $statusbar $toolbar
 
-    # Change some of the configuration made by default.
-    displayer configure -title "Tcl Shell"
-    
+    # Change the default title. If this is a master window, display
+    # the title "Tycho Console", otherwise use "Tcl Shell."
+    if [displayer cget -master] {
+        displayer configure -title "Tycho Console"
+    } else {
+        displayer configure -title "Tcl Shell"
+    }
+
     if {$menubar != {}} {
         # Remove the unneeded menu items.
         $menubar delete insert
@@ -840,10 +868,6 @@ body ::tycho::TclShell::initialize {{menubar {}} {statusbar {}} {toolbar {}}} {
 		-label "Set Namespace..." -underline 0 \
                 -command "$this queryNamespace"    
     }
-
-    # Add myself to the list of open files. 
-    set menulabel "[info class] $this"
-    windowMenuAddAll $menulabel
 }
 
 #####################################################################
