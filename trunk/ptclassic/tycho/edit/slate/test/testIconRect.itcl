@@ -78,7 +78,7 @@ set i 0
 set f [.s create IconRect 100 100]
 update
 foreach {opt val} {\
-        -fill "" \
+        -fill white \
         -outline black \
         -shape point \
         -width 1 \
@@ -230,7 +230,7 @@ _update
 _rect
 test IconRect-terminal-1 "Create a terminal and access as component" {
     .s call $f terminal input-1 Terminal 50 0 \
-            -direction {0 -1} \
+            -direction n \
             -length 20 \
             -style arrowout
     # Test: just make sure we get something
@@ -240,7 +240,7 @@ _update
 
 test IconRect-terminal-2 "Create a terminal and get coordinates" {
     .s call $f terminal input-2 Terminal 0 50 \
-            -direction {-1 0} \
+            -direction w \
             -length 30 \
             -style rectangle
     # Test: get the two ends of both terminals
