@@ -223,6 +223,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 		EGGateLinkIter ancs(n->ancestors);
 		EGGate* g;
 		while ((g = ancs++) != 0) {
+			if (g->samples() == 0) continue;
 			if (strcmp(g->readName(), ref->readName())) continue;
 			
 			// get the partner node.
@@ -256,6 +257,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGateLinkIter descs(n->descendants);
 			EGGate* g;
 			while ((g = descs++) != 0) {
+				if (g->samples() == 0) continue;
 				if (strcmp(g->readName(),farP->readName()))
 					continue;
 				partner = (ParNode*) g->farEndNode();
@@ -322,6 +324,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGateLinkIter descs(n->descendants);
 			EGGate* g;
 			while ((g = descs++) != 0) {
+				if (g->samples() == 0) continue;
 				if (strcmp(g->readName(),farP->readName()))
 					continue;
 				partner = (ParNode*) g->farEndNode();
@@ -359,6 +362,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGateLinkIter ancs(n->ancestors);
 			EGGate* g;
 			while ((g = ancs++) != 0) {
+				if (g->samples() == 0) continue;
 				if (strcmp(g->readName(),ref->readName()))
 					continue;
 				numDel += g->delay();
@@ -404,6 +408,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 			EGGateLinkIter descs(n->descendants);
 			EGGate* g;
 			while ((g = descs++) != 0) {
+				if (g->samples() == 0) continue;
 				if (strcmp(g->readName(),farP->readName()))
 					continue;
 				partner = (ParNode*) g->farEndNode();
@@ -455,6 +460,7 @@ void UniProcessor :: makeConnection(ParNode* dN, ParNode* sN, PortHole* ref) {
 					if (g != firstGate) continue;
 					else startFlag = FALSE;
 				}
+				if (g->samples() == 0) continue;
 				if (strcmp(g->readName(),ref->readName()))
 					continue;
 				if ((count == 0) && (g == firstGate)) {
@@ -646,6 +652,7 @@ void UniProcessor :: makeBoundary(ParNode* sN, PortHole* ref) {
 		EGGateLinkIter descs(n->descendants);
 		EGGate* g;
 		while ((g = descs++) != 0) {
+			if (g->samples() == 0) continue;
 			if (strcmp(g->readName(), ref->readName())) continue;
 			partner = (ParNode*) g->farEndNode();
 			sG = g;
@@ -678,6 +685,7 @@ M:
 		EGGateLinkIter descs(n->descendants);
 		EGGate* g;
 		while ((g = descs++) != 0) {
+			if (g->samples() == 0) continue;
 			if (strcmp(g->readName(), ref->readName())) continue;
 			partner = (ParNode*) g->farEndNode();
 
