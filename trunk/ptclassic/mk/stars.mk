@@ -104,9 +104,13 @@ ifdef CG56
 			$(CG56T)/CGCXAsynchComm.o $(CG56T)/CG56XCAsynchComm.o \
 			$(CG56T)/CGCXBase.o  $(CG56T)/CGCS56XTarget.o
 	endif
+	# Window star in cg56/dsp/stars needs the Cephes Library
+	CEPHESLIB = 1
 endif
 
 ifdef SILAGE
+	CG = 1
+	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/silage/icons/silage.pal
 	STARS += $(LIBDIR)/silagestars.o
 	LIBS += -lsilagestars -lsilage
@@ -115,6 +119,14 @@ ifdef SILAGE
 endif
 
 ifdef DDF
+	SDFLIB = 1
+	# There are many DDF code generators and schedulers
+	# (HuScheduler, dcScheduler, ddfScheduler, dlScheduler, etc.)
+	# but none are currently being built.  When they are, add
+	# ifdef CG
+	#	LIBS +=
+	#	LIBFILES +=
+	# endif
 	PALETTES += PTOLEMY/src/domains/ddf/icons/ddf.pal
 	STARS += $(LIBDIR)/ddfstars.o
 	LIBS += -lddfstars -lddf
@@ -157,9 +169,10 @@ else
 endif
 
 ifdef VHDL
+	CG = 1
+	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/vhdlf/icons/vhdlf.pal
 	PALETTES += PTOLEMY/src/domains/vhdlb/icons/vhdlb.pal
-	CG = 1
 	STARS += $(LIBDIR)/vhdlfstars.o $(LIBDIR)/vhdlbstars.o
 	LIBS += -lvhdlfstars -lvhdlf -lvhdlbstars -lvhdlb
 	LIBFILES += $(LIBDIR)/libvhdlfstars.$(LIBSUFFIX) \
@@ -170,7 +183,7 @@ endif
 
 ifdef MDSDF
 	PALETTES += PTOLEMY/src/domains/mdsdf/icons/mdsdf.pal
-	SDF = 1
+	SDFLIB = 1
 	STARS +=  $(LIBDIR)/mdsdfstars.o
 	LIBS += -lmdsdfstars -lmdsdf
 	LIBFILES += $(LIBDIR)/libmdsdfstars.$(LIBSUFFIX) \
@@ -198,6 +211,7 @@ ifdef LPW
 endif
 
 ifdef PN
+	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/pn/icons/pn.pal
 	ifneq (,$(filter sun% sol%,$(PTARCH)))
 		STARS += $(LIBDIR)/pnstars.o
@@ -271,6 +285,7 @@ ifdef CM5
 endif
 
 ifdef CGC
+	SDFLIB = 1
 	PALETTES += PTOLEMY/src/domains/cgc/icons/cgc.pal
 	ifdef CGCTK
 		STARS += $(LIBDIR)/cgctcltkstars.o
@@ -352,6 +367,16 @@ ifdef SDFFULL
 	ifdef TK
 		SDFTK = 1
 	endif
+endif
+
+# Cephes library is used by the Window star
+ifdef SDFDSP
+	CEPHESLIB = 1
+endif
+
+ifdef CEPHESLIB
+	LIBS += -lcephes
+	LIBFILES += $(LIBDIR)/libcephes.$(LIBSUFFIX)
 endif
 
 ifndef TK
