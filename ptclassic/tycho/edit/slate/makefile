@@ -66,10 +66,10 @@ ITCL_SRCS = \
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES =		tclIndex doc
+MISC_FILES =		tclIndex doc img test
 
 # Sub directories to run make in.
-DIRS =			# doc
+DIRS =			test # doc
 
 # 'make realclean' should remove tclIndex
 REALCLEAN_STUFF =	tclIndex
