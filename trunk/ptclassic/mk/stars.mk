@@ -131,13 +131,13 @@ ATM_LIBFILES = $(LIBDIR)/libmq.$(LIBSUFFIX) $(LIBDIR)/libmqstars.$(LIBSUFFIX) \
 MATLABDIR := 	$(shell $(ROOT)/bin/matlabRootDir)
 ifeq ("$(MATLABDIR)","")
 MATLABDIR= 		$(ROOT)/src/compat/matlab
-MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlab.$(LIBSUFFIX) 
+MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfnomatlabstars.$(LIBSUFFIX) 
 MATLABSTAR_LIB=		-lsdfnomatlabstars
 MATLABSTARS_DOT_O=	$(LIBDIR)/sdfnomatlabstars.o
 else
 MATARCH := $(shell $(ROOT)/bin/matlabArch $(ARCH))
 MATLABEXT_LIB = 	-L$(MATLABDIR)/extern/lib/$(MATARCH) -lmat
-MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlab.$(LIBSUFFIX) 
+MATLABSTAR_LIBFILE=	$(LIBDIR)/libsdfmatlabstars.$(LIBSUFFIX) 
 MATLABSTAR_LIB=		-lsdfmatlabstars
 MATLABSTARS_DOT_O=	$(LIBDIR)/sdfmatlabstars.o
 endif
