@@ -71,7 +71,7 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
 		default { "" }
 		desc { File to save the final codebook. }
 	}
-	ccinclude { "Matrix.h", "PTDSPNearestNeighbor.h" }
+	ccinclude { "Matrix.h", "PTDSPNearestNeighbor.h", "WriteASCIIFiles.h" }
 
 	protected {
 		double* codebook;
@@ -297,26 +297,13 @@ A number between 0 to 1. When equal to 0, the resulting codebook will satisfy th
 	}
 
 	wrapup {
+		int totalSize = int(sizeCodebook) * int(dimension);
 		const char* sf = saveFile;
-		if (sf != 0 && *sf != 0) {
-		    char* saveFileName = expandPathName(sf);
-		    // open the file for writing
-		    FILE* fp = fopen(saveFileName, "w");
-		    if ( fp ) {
-			for (int i = 0; i < int(sizeCodebook); i++) {
-			    for (int j = 0; j < int(dimension); j++) {
-				fprintf(fp, "%e ",
-					codebook[i*int(dimension)+j]);
-			    }
-			    fprintf(fp,"\n");
-			}
-			fclose(fp);
-		    }
-		    else {
-			Error::warn(*this, "Cannot open '", saveFile,
-				    "' for writing: codebook not saved.");
-		    }
-		    delete [] saveFileName;
+                if ( ! doubleArrayAsASCFile(sf, "%e ", FALSE, codebook,
+					    totalSize, int(dimension)) ) {
+		    Error::warn(*this,
+				"Error writing the codebook to the file ",
+				sf); 
 		}
 	}
 }

@@ -72,7 +72,7 @@ Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 		default { "" }
 		desc { File to save final tap values. }
 	}
-	ccinclude { "miscFuncs.h" , <stdio.h> }
+	ccinclude { "miscFuncs.h", <stdio.h>, "WriteASCIIFiles.h" }
 	constructor {
 		// remove interpolation as a settable parameter
 		interpolation.clearAttributes(A_SETTABLE);
@@ -89,40 +89,26 @@ Prentice Hall: Englewood Cliffs, NJ.  1991.  2nd ed.
 		// Then reset the signalIn number of samples in the past
 		// to account for the error delay.
 		signalIn.setSDFParams(int(decimation),
-				      int(decimation) + 1 + int(errorDelay)
-				      + taps.size());
+			int(decimation) + 1 + int(errorDelay) + taps.size());
 	}
 	go {
 		// First update the taps
-		double e = double(error%0);
-		int index = int(errorDelay)*int(decimation) + int(decimationPhase);
-
+		int index = int(errorDelay) * int(decimation) +
+			    int(decimationPhase);
+		double factor = double(error%0) * double(stepSize);
 		for (int i = 0; i < taps.size(); i++) {
-			taps[i] = taps[i] +
-				e * double(signalIn%(index)) * double(stepSize);
-			index++;
+		    taps[i] += factor * double(signalIn%(index));
+		    index++;
 		}
-		
+
 		// Then run FIR filter
 		SDFFIR :: go();
 	}
 	wrapup {
 		const char* sf = saveTapsFile;
-		if (sf != NULL && *sf != 0) {
-			char* saveFileName = expandPathName(sf);
-			// open the file for writing
-			FILE* fp;
-			if (!(fp = fopen(saveFileName,"w"))) {
-				// File cannot be opened
-				Error::warn(*this,
-				 "Cannot open saveTapsFile for writing: ",
-				 saveFileName, ". Taps not saved.");
-			} else {
-				for (int i = 0; i < taps.size(); i++)
-					fprintf(fp, "%d %g\n", i, taps[i]);
-			}
-			fclose(fp);
-			LOG_DEL; delete [] saveFileName;
+		if ( ! doubleArrayAsASCFile(sf, "%d %g\n", TRUE,
+					    (double*) taps, taps.size(), 0) ) {
+		    Error::warn(*this, "Error saving taps to the file ", sf);
 		}
 	}
 }

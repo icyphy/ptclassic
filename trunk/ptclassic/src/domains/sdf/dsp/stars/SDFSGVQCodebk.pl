@@ -83,7 +83,7 @@ represent a training vector.
     default { "" }
     desc { File to save final gain codebook values. }
   }
-  ccinclude { "Matrix.h", "PTDSPPartitionCodebook.h" }
+  ccinclude { "Matrix.h", "PTDSPPartitionCodebook.h", "WriteASCIIFiles.h" }
   protected {
     double* shapeCodebook;
     double* gainCodebook;
@@ -328,44 +328,20 @@ represent a training vector.
   }
 
   wrapup {
+    int shapeTotalSize = int(sizeShapeCodebook) * int(dimension);
     const char* sf1 = saveShapeCodebook;
-    if (sf1 != NULL && *sf1 != 0) {
-      char* saveFileName = expandPathName(sf1);
-      // open the file for writing
-      FILE* fp = fopen(saveFileName, "w");
-      if ( fp == 0 ) {
-         Error::warn(*this, "Cannot open '", sf1,
-		     "' for writing: shape codebook not saved.");
-      }
-      else {
-         for (int i = 0; i < int(sizeShapeCodebook); i++) {
-	   int rowloc = i * int(dimension);
-           for (int j = 0; j < int(dimension); j++) {
-             fprintf(fp, "%e ", shapeCodebook[rowloc +j]);
-	   }
-           fprintf(fp,"\n");
-         }
-      }
-      fclose(fp);
-      delete [] saveFileName;
+    if ( ! doubleArrayAsASCFile(sf1, "%e ", FALSE, shapeCodebook,
+			        shapeTotalSize, int(dimension)) ) {
+         Error::warn(*this, "Error writing the shape codebook to the file ",
+		     sf1);
     }
 
+    int gainTotalSize = int(sizeGainCodebook) * int(dimension);
     const char* sf2 = saveGainCodebook;
-    if (sf2 != NULL && *sf2 != 0) {
-      char* saveFileName = expandPathName(sf2);
-      // open the file for writing
-      FILE* fp = fopen(saveFileName, "w");
-      if ( fp == 0 ) {
-         Error::warn(*this, "Cannot open '", sf2,
-		     "' for writing: gain codebook not saved.");
-      } else {
-         for (int i = 0; i < int(sizeGainCodebook); i++) {
-           fprintf(fp, "%e ",gainCodebook[i]);
-           fprintf(fp,"\n");
-         }
-      }
-      fclose(fp);
-      delete [] saveFileName;
+    if ( ! doubleArrayAsASCFile(sf2, "%e ", FALSE, gainCodebook, gainTotalSize,
+			        int(dimension)) ) {
+         Error::warn(*this, "Error writing the shape codebook to the file ",
+		     sf1);
     }
   }
 }
