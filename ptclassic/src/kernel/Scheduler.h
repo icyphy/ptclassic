@@ -119,6 +119,8 @@ public:
 	// haltRequested, for backward compatibilty
 	static int haltRequested() { return SimControl::haltRequested();}
 
+        // class identification
+        virtual int isA(const char*) const;
 protected:
 	// the current time
 	double currentTime;
