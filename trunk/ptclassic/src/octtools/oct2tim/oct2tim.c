@@ -84,6 +84,8 @@ static void drawPath();
 static char *tail();
 static int layerGenCompare();
 
+static char lastColor[16];	/* Last Color in a layer */
+
 /* transform stack */
 tr_stack *stack;
 
@@ -173,7 +175,6 @@ struct dLayer {
 #define ACTUAL 1
 
 char facetType[32];
-char prologueFile[1024];
 char *techDirRoot;
 char fontName[32];
 int plotFormals = 0;
@@ -182,7 +183,7 @@ int plotConnectors = 0;
 int plotCellLabel = 0;
 int plotLabels = 0;
 int plotOutlines = 0;
-int plotColor = 0;
+int plotColor = 1;
 int alwaysDisplayLabel = 1;
 int Abstraction = 0;
 double xoffset = 0.0;
@@ -215,7 +216,6 @@ optionStruct optionList[] = {
     { "f",	"facet",	"type of facet to use for instances " },
     { OPT_CONT,	0,		"(contents, interface, or bb; defaults to contents)" },
     { "o",      "outfile",      "output file name (default to stdout)" },
-    { "P",	"prologue",	"replace the standard PostScript prologue file with `prologue'" },
     { "T",	"techdir",	"replace the standard technology directory root with `techdir'" },
     { "F",	"font/size",	"change the font and size (defaults to Times-Bold/7)" },
     { "S",	"layers",	"suppress the comma separated list of layers" },
@@ -240,10 +240,10 @@ char **argv;
     int option;
     extern int octoptind;
     extern char *optarg;
-    int i, c;
-    char *temp, *ptr;
+    int i;
+    char /* *temp, */ *ptr;
     int fontSize;
-    FILE *fp;
+    /* FILE *fp;*/
     double width, height;
     int boxscale = 0;
     double dim1 = DIM1;
@@ -253,12 +253,25 @@ char **argv;
     double nonprint = NONPRINT;
     int bbdx, bbdy;
     char *outFileName = 0;
-
+    char *groupname = 0;
+    char octenv[BUFSIZ];
     extern char *version;
     
+    if (getenv("PTOLEMY") == (char *)NULL) {
+	fprintf(stderr, "$PTOLEMY is not set, exiting.");
+	exit(6);
+    }
+    sprintf(octenv,"OCTTOOLS=%s",getenv("PTOLEMY")); 
+
+    putenv(octenv);
+
     (void) strcpy(facetType, "contents");
-    /* (void) sprintf(prologueFile, "%s/lib/oct2ps.pro", "$OCTTOOLS");*/
-    techDirRoot = NIL(char);
+
+    techDirRoot = (char *) malloc((unsigned) strlen(getenv("PTOLEMY")) +
+				  strlen("/lib/colors/" + 1));
+    sprintf(techDirRoot, "%s/lib/colors",getenv("PTOLEMY"));
+
+    sprintf(lastColor,"#ffffff"); 	/* Initialize to black */
 
     (void) strcpy(fontName, FONT);
     fontSize = FONTSIZE;
@@ -298,7 +311,6 @@ char **argv;
 
 	    case 'O': (void) sscanf(optarg, "%lfx%lf", &xoffset, &yoffset); break; 
 	    case 'o': outFileName = util_strsav( optarg ); break;
-    	    case 'P': (void) strcpy(prologueFile, optarg); break; 
     	    case 'S':
 		ptr = optarg;
 		while ((ptr = strtok(ptr, ",")) != NIL(char)) {
@@ -375,20 +387,11 @@ char **argv;
         (void) tapSetDisplayType("PostScript-BW", TAP_BW);
     }
 
-    /* copy the prologue file to standard output */
-
-    temp = util_file_expand(prologueFile);
-    if ((fp = VOVfopen(temp, "r")) == NULL) {
-	(void) fprintf(stderr, "can not open the prologue file, %s (%s)\n",
-			       prologueFile, temp);
-	VOVend(-1);
-    }
-
     if (latex == 0) {
 	/* meant to go directly to the printer */
-	(void) printf("%%!\n");
+	(void) printf("#\n");
 	(void) time(&clock);
-	(void) printf("%% %s:%s:%s - output from oct2tim on %s",
+	(void) printf("# %s:%s:%s - output from oct2tim on %s",
 		      facet.contents.facet.cell,
 		      facet.contents.facet.view,
 		      facet.contents.facet.facet,
@@ -398,32 +401,36 @@ char **argv;
 	mode = PORTRAIT;
 	userscale = 1.0;
 	(void) time(&clock);
-	(void) printf("%% %s:%s:%s - output for a latex/dvi2ps special - from oct2ps on %s",
+	(void) printf("# %s:%s:%s - output for a latex/dvi2ps special - from oct2ps on %s",
 		      facet.contents.facet.cell,
 		      facet.contents.facet.view,
 		      facet.contents.facet.facet,
 		      ctime(&clock));
     }
 
-    (void) printf("%% OCT2PS (compiled %s)\n", version);
+    (void) printf("# oct2tim (compiled %s)\n", version);
 
     /* output the command line */
-    (void) printf("%%\n%%");
+    (void) printf("#\n#");
     for (i = 0; i < --argc; i++) {
 	(void) printf(" %s", argv[i]);
     }
     (void) printf(" %s:%s:%s", facet.contents.facet.cell,
 		  facet.contents.facet.view,
 		  facet.contents.facet.facet);
-    (void) printf("\n%%\n");
+    (void) printf("\n#\n");
 
-    /* copy the prologue to standard output */
-    while ((c = fgetc(fp)) != EOF) {
-	putc(c, stdout);
-    }
 
-    (void) fclose(fp);
-
+    groupname = strdup(strrchr(facet.contents.facet.cell, '/') +1);
+    /* Get the groupname by getting the name of the palette and removing
+     * and dots.  /users/ptolemy/src/domains/sdf/icons/sources.pal
+     * is in group 'sources'
+     */
+    *strchr(groupname,'.') = '\0';
+    	
+    (void) printf("group %s {\n", groupname);
+    (void) printf("    -label {%s}\n", groupname);
+    free(groupname);
 
     /* determine the scaling and translation */
     
@@ -433,7 +440,7 @@ char **argv;
     bbdy = bb.upperRight.y - bb.lowerLeft.y;
 
     if ((bbdx == 0) || (bbdy == 0)) {
-	(void) fprintf(stderr, "OCT2PS: Fatal Error: the width or height of the facet bounding box is zero\n");
+	(void) fprintf(stderr, "oct2ps: Fatal Error: the width or height of the facet bounding box is zero\n");
 	VOVend(-1);
     }
 
@@ -468,11 +475,11 @@ char **argv;
 	}
     }
     
-    (void) printf("/fctm matrix currentmatrix def\n");
+/*     (void) fprintf(stderr, "# /fctm matrix currentmatrix def\n"); */
 
-    (void) printf("%d %d translate\n",
-		  (int) (POINTSPERINCH * xoffset),
-		  (int) (POINTSPERINCH * yoffset));
+/*     (void) fprintf(stderr, "# %d %d translate\n", */
+/* 		  (int) (POINTSPERINCH * xoffset), */
+/* 		  (int) (POINTSPERINCH * yoffset)); */
 
     box.lowerLeft.x += (int) (xoffset * POINTSPERINCH);
     box.lowerLeft.y += (int) (yoffset * POINTSPERINCH);
@@ -481,9 +488,9 @@ char **argv;
 	scale = scalep * userscale;
 	/* center in X and Y */
 	if (latex == 0) {
-	    (void) printf("%d %d translate\n",
-		   (int) (((POINTSPERINCH * DIM1) - scale * bbdx) / 2.0),
-		   (int) (((POINTSPERINCH * DIM2) - scale * bbdy) / 2.0));
+/* 	    (void) fprintf(stderr, "# %d %d translate\n", */
+/* 		   (int) (((POINTSPERINCH * DIM1) - scale * bbdx) / 2.0), */
+/* 		   (int) (((POINTSPERINCH * DIM2) - scale * bbdy) / 2.0)); */
 
 	    box.lowerLeft.x += 
 		   (int) (((POINTSPERINCH * DIM1) - scale * bbdx) / 2.0);
@@ -493,7 +500,7 @@ char **argv;
 	} else {
 	    /* used to be center of page for x and box for y */
 	    /* changed to lower left for both -- EAL 1/5/94  */
-	    (void) printf("0 0 translate\n");
+/* 	    (void) fprintf(stderr, "# 0 0 translate\n"); */
 	}
 	
     } else {
@@ -518,48 +525,49 @@ char **argv;
     box.upperRight.x = (int) (bbdx * scale) + box.lowerLeft.x;
     box.upperRight.y = (int) (bbdy * scale) + box.lowerLeft.y;
 
-    (void) printf("%%%%BoundingBox: %d %d %d %d\n",
-		   (int)box.lowerLeft.x,
-		   (int)box.lowerLeft.y,
-		   (int)box.upperRight.x,
-		   (int)box.upperRight.y);
+/*     (void) fprintf(stderr, "##BoundingBox: %d %d %d %d\n", */
+/* 		   (int)box.lowerLeft.x, */
+/* 		   (int)box.lowerLeft.y, */
+/* 		   (int)box.upperRight.x, */
+/* 		   (int)box.upperRight.y); */
     
-    (void) printf("/sc %f def\n", scale);
-    (void) printf("/fsize %f def\n", (double) fontSize);
-    (void) printf("/fscale fsize sc div def\n");
+/*     (void) fprintf(stderr, "# /sc %f def\n", scale); */
+/*     (void) fprintf(stderr, "# /fsize %f def\n", (double) fontSize); */
+/*     (void) fprintf(stderr, "# /fscale fsize sc div def\n"); */
     /*
      * psize is the size of a bitmap in PostScript units, independent of scaling
      *
      * this particular number seems to work fine
      */
-    (void) printf("/psize %d def\n", LAYERFONTWIDTH / 4);
-    (void) printf("/scsize psize sc div def\n");
-    (void) printf("/lfont { /%s findfont fscale scalefont setfont } def\n",
-		       fontName);
-    (void) printf("/bmw scsize def\n");
-    (void) printf("/bmh scsize def\n");
-    (void) printf("sc sc scale\n");
-    (void) printf("%d %d translate\n", (int)(-bb.lowerLeft.x),
-		  (int)(-bb.lowerLeft.y));
+/*     (void) fprintf(stderr, "# /psize %d def\n", LAYERFONTWIDTH / 4); */
+/*     (void) fprintf(stderr, "# /scsize psize sc div def\n"); */
+/*     (void) fprintf(stderr, "# /lfont { /%s findfont fscale scalefont setfont } def\n", */
+/* 		       fontName); */
+/*     (void) fprintf(stderr, "# /bmw scsize def\n"); */
+/*     (void) fprintf(stderr, "# /bmh scsize def\n"); */
+/*     (void) fprintf(stderr, "# sc sc scale\n"); */
+/*     (void) fprintf(stderr, "#  %d %d translate\n", (int)(-bb.lowerLeft.x), */
+/* 		  (int)(-bb.lowerLeft.y)); */
 
     TechnologyTable = st_init_table(octIdCmp, octIdHash);
 
     /* generate the PostScript for the facet */
     processCell((octObject *) 0, &facet, 0);
 
-    if (plotCellLabel == 1) {
-	(void) printf("lfont\n");
-	(void) printf("%d %d moveto (%s) show\n",
-	       (int)bb.lowerLeft.x,
-	       (int)bb.lowerLeft.y,
-	       facet.contents.facet.cell);
-    }
+/*     if (plotCellLabel == 1) { */
+/* 	(void) fprintf(stderr, "#  lfont\n"); */
+/* 	(void) fprintf(stderr, "#  %d %d moveto (%s) show\n", */
+/* 	       (int)bb.lowerLeft.x, */
+/* 	       (int)bb.lowerLeft.y, */
+/* 	       facet.contents.facet.cell); */
+/*     } */
 
     if (latex == 0) {
 	/* don't output the page for an included PostScript image */
-	(void) printf("showpage\n");
+/* 	(void) fprintf(stderr, "#  showpage\n"); */
     }
 
+    printf("}\n");
     if ( outFileName ) {
 	fflush( stdout );
 	fclose( stdout );
@@ -699,8 +707,8 @@ struct octLabel *oneLabel;
 	return;
     }
 
-    printf("%%\n");
-    printf("gsave\n");
+/*     fprintf(stderr, "# \n"); */
+    /*    printf("gsave\n"); */
     /* the font is scaled down slightly here */
     printf("/Helvetica findfont %d scalefont setfont\n", 
 	ptirint(0.8*oneLabel->textHeight));
@@ -787,10 +795,12 @@ struct octLabel *oneLabel;
 	printf("} if\n");
     }
     printf("grestore\n");
-    printf("%%\n");
+    fprintf(stderr, "# \n");
 
     return;
 }
+
+static  int printClosers = 0;	/* Set to 1 if we print closing braces. */
 
 
 static void
@@ -811,12 +821,15 @@ int level;
     st_table *layerTable;
     char *bbname;
     int numLayers;
-    
 
+#ifdef NEVER
+    fprintf(stderr, "#  dbg: processCell: inst.contents.facet.cell = %s\n",
+		       inst.contents.facet.cell ? inst.contents.facet.cell: "''");
+#endif
     level++;
 
     /* gsave for possible font change */
-    (void) printf("gsave\n");
+/*     (void) fprintf(stderr, "#  gsave\n"); */
     (void) setTechnology(facet, &layerTable);
 
     /* get the oct transform to give to the octTransform functions */
@@ -856,7 +869,7 @@ int level;
 	    connectors.type = OCT_BAG;
 	    connectors.contents.bag.name = "CONNECTORS";
 	    if (octGetByName(facet, &connectors) < OCT_OK) {
-		(void) fprintf(stderr, "%% can not get the CONNECTORS bag; plotting connector names\n");
+		(void) fprintf(stderr, "# can not get the CONNECTORS bag; plotting connector names\n");
 		plotConnectors = 1;
 	    }
 	}
@@ -896,15 +909,44 @@ int level;
 		}		
 	    } else {
 	    
+
+
+
+
+
 		master.type = OCT_FACET;
 		master.contents.facet.facet = facetType;
 		master.contents.facet.mode = "r";
 		OH_ASSERT_DESCR(octOpenMaster(&inst, &master), "can not open the master");
 
 		tr_push(stack);
+
+
+		/* FIXME: this is a big evil hack to get the icons so
+		 * that they are centered.
+                 */  
+		inst.contents.instance.transform.translation.x = 50;
+		inst.contents.instance.transform.translation.y = 50;
 		tr_add_transform(stack, &inst.contents.instance.transform, 0);
+
+
+
+/* 		fprintf(stderr, "#  dbg: processCell: master.contents.facet.cell = %s\n", */
+/* 		       master.contents.facet.cell ? master.contents.facet.cell: "''"); */
+
+		printf("    icon %s IconFrame {\n",
+		       strrchr(master.contents.facet.cell, '/')+1);
+		printf("        -label {The %s Icon}\n",
+		       strrchr(master.contents.facet.cell, '/')+1);
+		printf("        -text %s \n",
+		       strrchr(master.contents.facet.cell, '/')+1);
+		printf("        -anchor nw\n");
+		printf("        -graphics {\n");
+
+		printClosers=1;
 		processCell(&inst, &master, level);
 		tr_pop(stack);
+
 	    }
 	}
 
@@ -949,7 +991,7 @@ int level;
 
 	if (st_lookup(layerTable, layers[numLayers].layer.contents.layer.name,
 		      (char **) &layers[numLayers].description) == 0) {
-	    (void) fprintf(stderr, "%% unknown layer, %s, skipping\n", 
+	    (void) fprintf(stderr, "# unknown layer, %s, skipping\n", 
 			   layers[numLayers].layer.contents.layer.name);
 	    continue;
 	}
@@ -974,12 +1016,17 @@ int level;
 	 *
 	 * all geometries will be draw in this layer
 	 */
-	(void) printf("/bm %d def\n", layerDescription->name);
+/* 	(void) fprintf(stderr, "#  /bm %d def\n", layerDescription->name); */
         if (plotColor && layerDescription->colorp) {
-            (void) printf("%f %f %f setrgbcolor\n", 
-				layerDescription->red,
-				layerDescription->green,
-				layerDescription->blue);
+	    sprintf(lastColor,"#%02x%02x%02x",
+				(int) ((layerDescription->red) * 255),
+				(int) ((layerDescription->green) * 255),
+				(int) ((layerDescription->blue) * 255));
+
+/*             (void) printf("%f %f %f setrgbcolor\n",  */
+/* 				layerDescription->red, */
+/* 				layerDescription->green, */
+/* 				layerDescription->blue); */
         }
 
 	/*
@@ -1009,38 +1056,42 @@ int level;
 	    if (MAX((bb.upperRight.x - bb.lowerLeft.x),
 		    (bb.upperRight.y - bb.lowerLeft.y)) * scale > Abstraction) {
 		
-		(void) printf("gsave\n");
+/* 		(void) fprintf(stderr, "#  gsave\n"); */
     
 		numpoints = sizeof(points)/sizeof(struct octPoint);
 		OH_ASSERT_DESCR(octGetPoints(&poly, &numpoints, points),
 			  "can not get the polygon points");
 		octTransformPoints(numpoints, points, &transform);
 	    
-		(void) printf("newpath\n");
-		(void) printf("%d %d moveto\n",
+/* 		(void) fprintf(stderr, "#  newpath\n"); */
+/* 		(void) fprintf(stderr, "#  %d %d moveto\n", */
+/* 			      (int)points[0].x, (int)points[0].y); */
+
+		(void) printf("\t    polygon %d %d ",
 			      (int)points[0].x, (int)points[0].y);
+
 		for (i = 1; i < numpoints; i++) {
-		    (void) printf("%d %d lineto\n",
+		    (void) printf("%d %d ",
 				  (int)points[i].x, (int)points[i].y);
 		}
-		(void) printf("closepath clip\n");
+		(void) printf("-outline %s\n",lastColor);
 		
-		(void) printf("%d %d %d %d tp\n",
-			      (int)bb.lowerLeft.x, (int)bb.lowerLeft.y,
-			      (int)bb.upperRight.x, (int)bb.upperRight.y);
+/* 		(void) fprintf(stderr, "#  %d %d %d %d tp\n", */
+/* 			      (int)bb.lowerLeft.x, (int)bb.lowerLeft.y, */
+/* 			      (int)bb.upperRight.x, (int)bb.upperRight.y); */
 	    
-		(void) printf("grestore\n");
+/* 		(void) fprintf(stderr, "#  grestore\n"); */
 
 		/* see if the outline should be generated */
 		if ((layerDescription->outlinep == 1) || (plotOutlines == 1)) {
-		    (void) printf("newpath\n");
-		    (void) printf("%d %d moveto\n", 
+/* 		    (void) fprintf(stderr, "#  newpath (outline) \n"); */
+		    (void) printf("\t    polygon %d %d ", 
 				  (int)points[0].x, (int)points[0].y);
 		    for (i = 1; i < numpoints; i++) {
-			(void) printf("%d %d lineto\n", 
+			(void) printf("%d %d ", 
 				      (int)points[i].x, (int)points[i].y);
 		    }
-		    (void) printf("closepath stroke\n");
+		    (void) printf("-fill %s\n",lastColor);
 		}
 	    }
 	}
@@ -1076,44 +1127,60 @@ int level;
 		
 		octTransformGeo(&circle, &transform);
 	    
-		(void) printf("gsave\n");
-		(void) printf("newpath\n");
+/* 		(void) fprintf(stderr, "#  gsave\n"); */
+/* 		(void) fprintf(stderr, "#  newpath\n"); */
 	    
 		if (circle.contents.circle.outerRadius == circle.contents.circle.innerRadius) {
-		    (void) printf("%d %d %d %f %f arc\n",
-				  (int)circle.contents.circle.center.x,
-				  (int)circle.contents.circle.center.y,
-				  (int)circle.contents.circle.outerRadius,
-				  (double) circle.contents.circle.startingAngle / 10.0,
-				  (double) circle.contents.circle.endingAngle / 10.0);
+/*  		    (void) fprintf(stderr, "#  %d %d %d %f %f arc\n", */
+/*  				  (int)circle.contents.circle.center.x, */
+/*  				  (int)circle.contents.circle.center.y, */
+/*  				  (int)circle.contents.circle.outerRadius, */
+/*  				  (double) circle.contents.circle.startingAngle / 10.0, */
+/*  				  (double) circle.contents.circle.endingAngle / 10.0); */
+ 		    (void) printf("\t    oval  %d %d %d %d -outline %s\n",
+ 				  (int)circle.contents.circle.center.x,
+ 				  (int)circle.contents.circle.center.y,
+  				  (int)circle.contents.circle.outerRadius,
+  				  (int)circle.contents.circle.outerRadius,
+				  lastColor);
 
-		    (void) printf("stroke\n");
+
+/* 		    (void) fprintf(stderr, "#  stroke\n"); */
+
 		} else if (circle.contents.circle.innerRadius == 0) {
-		    (void) printf("%d %d %d %f %f arc\n",
-				  (int)circle.contents.circle.center.x,
-				  (int)circle.contents.circle.center.y,
-				  (int)circle.contents.circle.outerRadius,
-				  (double) circle.contents.circle.startingAngle / 10.0,
-				  (double) circle.contents.circle.endingAngle / 10.0);
+/* 		    (void) fprintf(stderr, "#  %d %d %d %f %f arc\n", */
+/* 				  (int)circle.contents.circle.center.x, */
+/* 				  (int)circle.contents.circle.center.y, */
+/* 				  (int)circle.contents.circle.outerRadius, */
+/* 				  (double) circle.contents.circle.startingAngle / 10.0, */
+/* 				  (double) circle.contents.circle.endingAngle / 10.0); */
 
-		    (void) printf("clip\n");
+ 		    (void) printf("\t    oval  %d %d %d %d -fill %s\n",
+ 				  (int)circle.contents.circle.center.x,
+ 				  (int)circle.contents.circle.center.y,
+  				  (int)circle.contents.circle.outerRadius,
+  				  (int)circle.contents.circle.outerRadius,
+				  lastColor);
+
+/* 		    (void) fprintf(stderr, "#  clip\n"); */
+
 		    OH_ASSERT_DESCR(octBB(&circle, &bb), "can not get the circle bb");
 		    tr_transform(stack, &bb.lowerLeft.x, &bb.lowerLeft.y);
 		    tr_transform(stack, &bb.upperRight.x, &bb.upperRight.y);
 		    BOXNORM(bb);
-		    (void) printf("%d %d %d %d tp\n",
-				  (int)bb.lowerLeft.x, (int)bb.lowerLeft.y,
-				  (int)bb.upperRight.x, (int)bb.upperRight.y);
+/* 		    (void) fprintf(stderr, "#  %d %d %d %d tp\n", */
+/* 				  (int)bb.lowerLeft.x, (int)bb.lowerLeft.y, */
+/* 				  (int)bb.upperRight.x, (int)bb.upperRight.y); */
 		} else {
-		    (void) printf("%d %d %d %f %f arc\n",
-				  (int)circle.contents.circle.center.x,
-				  (int)circle.contents.circle.center.y,
-				  (int)circle.contents.circle.outerRadius,
-				  (double) circle.contents.circle.startingAngle / 10.0,
-				  (double) circle.contents.circle.endingAngle / 10.0);
-		    (void) printf("stroke\n");
+/* 		    (void) fprintf(stderr, "#  %d %d %d %f %f arc\n", */
+/* 				  (int)circle.contents.circle.center.x, */
+/* 				  (int)circle.contents.circle.center.y, */
+/* 				  (int)circle.contents.circle.outerRadius, */
+/* 				  (double) circle.contents.circle.startingAngle / 10.0, */
+/* 				  (double) circle.contents.circle.endingAngle / 10.0); */
+/* 		    (void) fprintf(stderr, "#  stroke\n"); */
 		}
-		(void) printf("grestore\n");
+/* 		(void) fprintf(stderr, "#  grestore\n"); */
 	    }
 	}
 
@@ -1144,18 +1211,22 @@ int level;
 		
 		BOXNORM(box.contents.box);
 	    
-		(void) printf("%d %d %d %d tb\n",
+/* 		fprintf(stderr, "#  dbg: box\n"); */
+		(void) printf("\t    rectangle %d %d %d %d -outline %s\n",
 			      (int)box.contents.box.lowerLeft.x,
 			      (int)box.contents.box.lowerLeft.y,
 			      (int)box.contents.box.upperRight.x,
-			      (int)box.contents.box.upperRight.y);
+			      (int)box.contents.box.upperRight.y,
+			      lastColor);
 		
 		if ((layerDescription->outlinep == 1) || (plotOutlines == 1)) {
-		    (void) printf("%d %d %d %d bx\n",
+		    (void) printf("\t    rectangle %d %d %d %d -outline %s\n",
 				  (int)box.contents.box.lowerLeft.x,
 				  (int)box.contents.box.lowerLeft.y,
 				  (int)box.contents.box.upperRight.x,
-				  (int)box.contents.box.upperRight.y);
+				  (int)box.contents.box.upperRight.y,
+				  lastColor);
+
 		}
 	    }
 	}
@@ -1195,6 +1266,7 @@ int level;
 
 	while (octGenerate(&pathgen, &path) == OCT_OK) {
 
+
 	    OH_ASSERT_DESCR(octBB(&path, &bb), "can not get the path bb");
 	    tr_transform(stack, &bb.lowerLeft.x, &bb.lowerLeft.y);
 	    tr_transform(stack, &bb.upperRight.x, &bb.upperRight.y);
@@ -1226,7 +1298,11 @@ int level;
     }
 
     /* grestore to old font */
-    (void) printf("grestore\n");
+    if (printClosers==1) {
+	printf("\t}\n    }\n");    
+	printClosers=0;
+    }
+/*     (void) fprintf(stderr, "#  processCell: dbg: grestore\n"); */
 
     return;
 }
@@ -1364,11 +1440,12 @@ char *key;
 char *value;
 char *arg;
 {
-    (void) fprintf(stderr, "%%    key is %s\n", key);
+    (void) fprintf(stderr, "#    key is %s\n", key);
     return ST_CONTINUE;
 }
 #endif
 
+#ifdef NEVER
 /*
  * convert a string of '0' and '1' to a number
  */
@@ -1386,6 +1463,7 @@ char *str;
     }
     return value;
 }
+#endif
 
 static void
 setTechnology(facet, layerTable)
@@ -1408,11 +1486,11 @@ st_table **layerTable;
     techfacet.type = OCT_FACET;
     techfacet.objectId = tapGetFacetIdFromObj(facet);
     if (octIdIsNull(techfacet.objectId)) {
-	(void) fprintf(stderr, "%% no technology facet for %s:%s:%s\n",
+	(void) fprintf(stderr, "# no technology facet for %s:%s:%s\n",
 		       facet->contents.facet.cell,
 		       facet->contents.facet.view,
 		       facet->contents.facet.facet);
-	(void) fprintf(stderr, "%% probably missing the TECHNOLOGY or VIEWTYPE property\n");
+	(void) fprintf(stderr, "# probably missing the TECHNOLOGY or VIEWTYPE property\n");
 	VOVend(-1);
     }
     OH_ASSERT_DESCR(octGetById(&techfacet), "can not get the tech facet\n");
@@ -1421,10 +1499,12 @@ st_table **layerTable;
     (void) strcpy(technology, tail(tapGetDirectory(facet)));
 
     if (st_is_member(TechnologyTable, (char *) &techfacet.objectId) == 1) {
+#ifdef NEVER
 	(void) printf("/sctm matrix currentmatrix def\n");
 	(void) printf("fctm setmatrix\n");
 	(void) printf("sf-%s\n", buffer);
 	(void) printf("sctm setmatrix\n");
+#endif
 	(void) st_lookup(TechnologyTable, (char *) &techfacet.objectId, (char **) layerTable);
 	
 	return;
@@ -1435,9 +1515,10 @@ st_table **layerTable;
     layers = 0;
     *layerTable = st_init_table(strcmp, st_strhash);
 
+#ifdef NEVER
     (void) printf("/sctm matrix currentmatrix def\n");
     (void) printf("fctm setmatrix\n");
-    
+#endif    
     /*
      * process each layer description
      */
@@ -1456,7 +1537,7 @@ st_table **layerTable;
 	    tapGetDisplayPattern(&layer, TAP_FILL_PATTERN, &width, &height, &bitPtr);
 
 	    if ((width != 8) && (height != 8)) {
-		(void) fprintf(stderr,"%% Width and Height of a Fill Pattern must be 8\n");
+		(void) fprintf(stderr,"# Width and Height of a Fill Pattern must be 8\n");
 		VOVend(-1);
 	    }
 	    for (i = 0; i < 8; i++) {
@@ -1466,20 +1547,20 @@ st_table **layerTable;
 	    }
 	}
 #ifdef HUH
-	(void) printf("%%\n");
-	(void) printf("%% layer name %s\n", layerName[layers]);
+	(void) fprintf(stderr, "# \n");
+	(void) fprintf(stderr, "#  layer name %s\n", layerName[layers]);
 	layerDescription->fillp = 1;
 	if (fill == TAP_EMPTY) {
 	    layerDescription->fillp = 0;
-	    (void) printf("%% empty layer\n");
+	    (void) fprintf(stderr, "#  empty layer\n");
 	} else if (fill == TAP_SOLID) {
-	    (void) printf("%% solid layer\n");
+	    (void) fprintf(stderr, "#  solid layer\n");
 	} else {
 	    for (i = 0; i < 8; i++) {
-		(void) printf("%% %s\n", row[i]);
+		(void) fprintf(stderr, "#  %s\n", row[i]);
 	    }
 	}
-/*	(void) printf("%% %s\n", outline);*/
+/*	(void) fprintf(stderr, "#  %s\n", outline);*/
 #endif
 	
 	layerDescription = (struct layerdescription *) malloc((unsigned) sizeof(struct layerdescription));
@@ -1541,6 +1622,7 @@ st_table **layerTable;
 	layerDescription->name = EMPTY_LAYER + 1;
 	(void) st_insert(*layerTable, util_strsav(layerName[layers]), (char *) layerDescription);
 	
+#ifdef NEVER
 	(void) printf("/%s-%s [ ", layerName[layers], buffer);
 	for (i = 0; i < 8; i++) {
 	    for (j = 0; j < LAYERFONTWIDTH / 8; j++) {
@@ -1551,11 +1633,12 @@ st_table **layerTable;
 
 	(void) printf("/%s-%s-BM { %s-%s } def\n",
 		      layerName[layers], buffer, layerName[layers], buffer);
+#endif
 	layers++;
     }
 
     if (layers > 256) {
-	(void) fprintf(stderr, "%% tried to define more than 256 layers\n");
+	(void) fprintf(stderr, "# tried to define more than 256 layers\n");
 	VOVend(-1);
     }
 
@@ -1566,6 +1649,7 @@ st_table **layerTable;
     /*
      * not sure how to properly size dictionaries....
      */
+#ifdef NEVER
     (void) printf("/Dict-%s %d dict def\n", buffer,
 		  MAX(2 * layers, 16));
     (void) printf("/$workingdict %d dict def\n", MAX(2 * (layers + 2), 18));
@@ -1576,7 +1660,7 @@ st_table **layerTable;
     (void) printf("/FontBBox [0 0 %d %d] def\n", LAYERFONTWIDTH, LAYERFONTWIDTH);
 
     (void) printf("/Encoding %d array def\n", layers+1);
-
+#endif
     /* start at 1, 0 is the code for an EMPTY layer */
     bitmapName = 1;
 
@@ -1584,24 +1668,31 @@ st_table **layerTable;
 	(void) st_lookup(*layerTable, layerName[i], (char **) &layerDescription);
 	if ((layerDescription->name != EMPTY_LAYER)
 	    && (layerDescription->name != FILLED_LAYER)) {
+#ifdef NEVER
 	    (void) printf("Encoding %d /%s put\n",
 			  bitmapName, layerName[i]);
+#endif
 	    layerDescription->name = bitmapName;
 	    (void) st_insert(*layerTable, util_strsav(layerName[i]), (char *) layerDescription);
 	}	    
 	bitmapName++;
     }
 
+#ifdef NEVER
     (void) printf("/CharProcs %d dict dup begin\n", MAX(2 * layers, 16));
+#endif
     for (i = 0; i < layers; i++) {
 	(void) st_lookup(*layerTable, layerName[i], (char **) &layerDescription);
 	if ((layerDescription->name != EMPTY_LAYER)
 	    && (layerDescription->name != FILLED_LAYER)) {
+#ifdef NEVER
 	    (void) printf("/%s { %d %d true [1 0 0 1 0 0] { %s-%s-BM } imagemask } def\n",
 		   layerName[i], LAYERFONTWIDTH, LAYERFONTWIDTH, layerName[i], buffer);
+#endif
 	}
     }
 
+#ifdef NEVER
     (void) printf("end def\n");
     (void) printf("/BuildChar\n");
     (void) printf("{$workingdict begin\n");
@@ -1621,17 +1712,19 @@ st_table **layerTable;
     (void) printf("end\n");
     (void) printf("} def\n");
     (void) printf("end\n");
-    
+#endif    
+
     /* set the font table and the font */
     id = ALLOC(octId, 1);
     *id = techfacet.objectId;
     (void) st_insert(TechnologyTable, (char *) id, (char *) *layerTable);
+#ifdef NEVER
     (void) printf("/font-%s Dict-%s definefont pop\n", buffer, buffer);
     (void) printf("/sf-%s { /font-%s findfont scsize scalefont setfont } def\n",
 		  buffer, buffer);
     (void) printf("sf-%s\n", buffer);
     (void) printf("sctm setmatrix\n");
-    
+#endif    
     return;
 }
 
@@ -1670,6 +1763,8 @@ int outlinep;
     int i;
     int llx, lly, urx, ury;
 
+/*     fprintf(stderr, "#  drawNonManhattanBox(x1=%d, y1=%d, x2=%d, y2=%d, size=%d, outlinep=%d)\n", */
+/* 	   (int) x1, (int)y1, (int)x2, (int)y2, size, outlinep);  */
     /* Compute point 'size' units along line between (x1,y1) and (x2,y2) */
     distRatio = ((double) size) / hypot((double) (x2-x1), (double) (y2-y1));
     temporary.x = (int) (distRatio * ((double) (x2-x1)));
@@ -1702,15 +1797,17 @@ int outlinep;
     /* Draw the box */
 
     if (size > 0) {
-	(void) printf("gsave\n");
-	(void) printf("newpath\n");
+/* 	(void) fprintf(stderr, "#  gsave\n"); */
+/* 	(void) fprintf(stderr, "#  newpath\n"); */
     
-	(void) printf("%d %d moveto\n", (int)points[0].x, (int)points[0].y);
+/* 	(void) fprintf(stderr, "#  %d %d moveto\n", (int)points[0].x, (int)points[0].y); */
+	(void) printf("polygon %d %d ", (int)points[0].x, (int)points[0].y);
+	
 	for (i = 1; i < 4; i++) {
-	    (void) printf("%d %d lineto\n", (int)points[i].x, (int)points[i].y);
+	    (void) printf("%d %d", (int)points[i].x, (int)points[i].y);
 	}
-
-	(void) printf("closepath clip\n");
+	(void) printf("-fill %s\n",lastColor);
+/* 	(void) fprintf(stderr, "#  closepath clip\n"); */
 
 	if (outlinep == 1) {
 	    (void) printf("newpath\n");
@@ -1767,6 +1864,9 @@ int outlinep, fillp;
     short prevManFlag = 1, nowManFlag = 1;
     struct octBox box;
 
+/*     fprintf(stderr, "# dbg: drawPath(width = %d, numpoints = %d, points = ..., outlinep = %d, fillp = %d)\n", */
+/* 	   width, numpoints, outlinep, fillp); */
+
     if (numpoints < 2) {
 	return;
     }
@@ -1797,14 +1897,14 @@ int outlinep, fillp;
 		    box.lowerLeft.y = points[index+1].y;
 		}
 
-		(void) printf("%d %d %d %d tb\n",
+		(void) printf("\t    line %d %d %d %d\n",
 			      (int)box.lowerLeft.x,
 			      (int)box.lowerLeft.y,
 			      (int)box.upperRight.x,
 			      (int)box.upperRight.y);
 		
 		if (outlinep == 1) {
-		    (void) printf("%d %d %d %d bx\n",
+		    (void) printf("\t    line %d %d %d %d\n",
 				  (int)box.lowerLeft.x,
 				  (int)box.lowerLeft.y,
 				  (int)box.upperRight.x,
@@ -1815,7 +1915,7 @@ int outlinep, fillp;
 #ifdef notdef		
 		if (fillp) {
 #endif
-		    (void) printf("%d %d %d %d ln\n",
+		    (void) printf("\t    line %d %d %d %d\n",
 				  (int)points[index].x, (int)points[index].y,
 				  (int)points[index+1].x,
 				  (int)points[index+1].y);
@@ -1848,14 +1948,14 @@ int outlinep, fillp;
 		    box.lowerLeft.x = points[index+1].x;
 		}
 
-		(void) printf("%d %d %d %d tb\n",
+		(void) printf("\t    line %d %d %d %d\n",
 			      (int)box.lowerLeft.x,
 			      (int)box.lowerLeft.y,
 			      (int)box.upperRight.x,
 			      (int)box.upperRight.y);
 
 		if (outlinep == 1) {
-		    (void) printf("%d %d %d %d bx\n",
+		    (void) printf("\t    line %d %d %d %d\n",
 				  (int)box.lowerLeft.x,
 				  (int)box.lowerLeft.y,
 				  (int)box.upperRight.x,
@@ -1866,7 +1966,7 @@ int outlinep, fillp;
 #ifdef notdef		
 		if (fillp) {
 #endif
-		    (void) printf("%d %d %d %d ln\n",
+		    (void) printf("\t    line %d %d %d %d\n",
 				  (int)points[index].x, (int)points[index].y,
 				  (int)points[index+1].x, (int)points[index+1].y);
 #ifdef notdef		    
@@ -1884,7 +1984,7 @@ int outlinep, fillp;
 #ifdef notdef		
 		if (fillp) {
 #endif
-		    (void) printf("%d %d %d %d ln\n",
+		    (void) printf("\t    line %d %d %d %d\n",
 				  (int)points[index].x, (int)points[index].y,
 				  (int)points[index+1].x, (int)points[index+1].y);
 #ifdef notdef		    
