@@ -38,13 +38,30 @@ set ptkProfileString ""
 # increment on each use to get unique window names
 set unique 0
 
+# flag whether or not to report tcl error messages.
+# This should be made a settable option.
+set ptkVerboseErrors 0
+
 
 ###################################################################
 # procedure to issue an error message from any internal tk error
 #
 proc tkerror message {
-    ptkImportantMessage .error "Tcl reports an error"
-    if {$message != ""} {ptkImportantMessage .error $message}
+    set flag 1
+    if {$message != ""} {
+	ptkImportantMessage .error $message
+	set flag 0
+    }
+    global ptkVerboseErrors
+    if {$ptkVerboseErrors} {
+        global errorInfo
+        if {$errorInfo != ""} {
+	    ptkImportantMessage .error $errorInfo
+	    set flag 0
+        }
+    }
+    # If no other messages are available, issue a generic one
+    if {$flag} {ptkImportantMessage .error "Tcl reports an error"}
 }
 
 
@@ -60,7 +77,7 @@ proc ptkImportantMessage {w text} {
 
     button $w.ok -text "OK <Return>" -command "destroy $w"
     message $w.msg -font -Adobe-times-medium-r-normal--*-180* -width 25c \
-            -text $text -justify center
+            -text $text -justify left
     pack append $w $w.msg {top fill expand} $w.ok {top fill expand}
 
     wm geometry $w +200+200
