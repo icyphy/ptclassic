@@ -58,13 +58,13 @@ GNU_PREFIX=$(GNU_DEST)/common
 # $PTOLEMY/.cshrc and $PTOLEMY/bin/g++-setup make sure that they
 # refer to the right version.  Also, $PTOLEMY/src/gnu/makefile contains
 # references to the current version, along with
-# $PTOLEMY/src/gnu/README and $PTOLEMY/src/gnu/INSTALL.
+# $PTOLEMY/src/gnu/README.
 # Also, check out the COLLECTOR variables in $PTOLEMY/mk/config-*.mk
-GCC_VERSION=2.7.2
+GCC_VERSION=2.7.2.1
 # If you are trying to build GNU for Linux, you may want to uncomment
 # the next line and comment out the following line
 #LIBGPLUSPLUS_VERSION=27.1.0
-LIBGPLUSPLUS_VERSION=2.7.1
+LIBGPLUSPLUS_VERSION=2.7.2
 
 # Machine dependent files
 GNU_EXEC_PREFIX=$(GNU_DEST)/$(PTARCH)
