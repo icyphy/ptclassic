@@ -1420,33 +1420,63 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 #######################################################################
 #### select
 #
-# Manipulate the selection. The _mode_ and following arguments can
-# be any of the following values. If _mode_ is <b>adjust</b>,
-# <b>from</b>, or <b>to</b>, then complex items can override
-# the default behaviour (which is to forward the call directly
-# to the canvas) by providing a select{} procedure in their
-# method tables:
-# <ul>
-# <li><b>adjust</b> _tagOrId_ _index_: Adjust the end
-# of the selection to be at the specified _index_.
-# <li><b>clear</b>: Clear the selection if it is in this canvas.
-# <li><b>from</b> _tagOrId_ _index_: Set the selection
-# anchor point to just before _index_.
-# <li><b>item</b>: Return the ID of the selected item.
-# <li><b>to</b> _tagOrId_ _index_: Set the end of the
-# selection to _index_.
-# </ul>
+# Manipulate the selection. This method has several forms, depending
+# on the value of the _mode_ argument. If _mode_ is <b>adjust</b>,
+# <b>from</b>, or <b>to</b>, then complex items will respond
+# to this method only of they have provided a <b>select</b> procedure
+# in their method tables. Valid modes are:
+# <dl>
+# <dt><b>adjust</b> _tagOrId_ _index_
+# <dd>
+# Adjust the end of the selection to be at the specified _index_.
+#
+# <dt><b>clear</b>
+# <dd>
+# Clear the selection if it is in this canvas.
+#
+# <dt><b>from</b> _tagOrId_ _index_
+# <dd>
+# Set the selection anchor point to just before _index_.
+#
+# <dt><b>get</b> _tagOrId_
+# <dd>
+# Get the current seleciton if there is one, or a null string
+# if not.
+#
+# <dt><b>item</b>
+# <dd> Return the id of the item with the selection, or null
+# if no item has the selection.
+# 
+# <dt><b>to</b> _tagOrId_ _index_
+# <dd>
+# Set the end of the selection to _index_.
+#
+# </dl>
 #
 body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
     switch -exact $mode {
-	"clear" -
-	"item" {
-	    eval $canvas select $mode
+	"clear" {
+	    $canvas select clear
 	}
-	default {
+        "get" {
+            set id [$canvas select item]
+            if { $id == "" } {
+                return ""
+            } else {
+                set a [$canvas index $id sel.first]
+                set b [$canvas index $id sel.last]
+                return [string range [$canvas itemcget $id -text] $a $b]
+            }
+        }
+	"item" {
+	    find withtag [$canvas select item]
+	}
+	"adjust" -
+        "from" -
+        "to" {
 	    # If it's a tag, get the first item
 	    if { ! [string match {[_0-9]*} $id] } {
-		set items [find withtag $tag]
+		set items [find withtag $id]
 		if { $items == "" } {
 		    return ""
 		}
@@ -1455,8 +1485,8 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 	    # If it's a complex item and has a select{} method, call that
 	    if { [string match {_*} $id] } {
                 set class ::tycho::$itemClass($id)
-		if { [@scope $class ::info exists methodtable(highlight)] } {
-		    [@scope $class set methodtable(highlight)] \
+		if { [@scope $class ::info exists methodtable(select)] } {
+		    [@scope $class set methodtable(select)] \
                             $id $canvas $this
 		} else {
 		    error "Item $id does not support select"
@@ -1466,6 +1496,10 @@ body ::tycho::IncrCanvas::select {mode {id {}} {index {}}} {
 		eval $canvas select $mode $id $index
 	    }
 	}
+        default {
+            error "Invalid option \"$mode\": must be one of\
+                    adjust, clear, from, get, item, or to"
+        }
     }
 }
 
