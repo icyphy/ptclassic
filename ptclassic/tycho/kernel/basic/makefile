@@ -66,8 +66,8 @@ TCL_SRCS = \
 	String.tcl \
 	Tyexec.tcl \
 	URLPath.tcl\
-
 	tychoMakeClassDAG.tcl
+
 
 ITCL_SRCS = \
 	Builder.itcl \
