@@ -32,6 +32,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
  Declaration for the default DE target. It used to be in DEDomain.cc file.
 
+ Modified: John Davis
+ Date: 12/16/97
+        Facilities have been added to DETarget to allow for
+        mutability. In particular, a parameter is set which
+        allows the MutableCQScheduler to be used instead
+        of the DEScheduler or CQScheduler. Key methods and
+        members are:
+
+                IntState mutableQ;
+
 ***********************************************************************/
 #ifndef _DETarget_h
 #define _DETarget_h 1
@@ -58,6 +68,9 @@ public:
 	// call the begin method on the galaxy
 	/* virtual */ void begin();
 
+	// Return TRUE if the MutableCalendarQueue is being used
+	int isMutable();
+
 protected:
 	void setup();
 
@@ -69,6 +82,10 @@ protected:
 
 	// Use CalendarQueue scheduler if TRUE;
 	IntState calQ;
+
+        // Use MutableCalendarQueue scheduler if TRUE;
+        IntState mutableQ;
+
 };
 
 #endif
