@@ -208,6 +208,8 @@ int SDFScheduler::checkStars()
 // if the schedule is for a wormhole, we need to set the number
 // of tokens transferred by the attached event horizons.
 // This function does the job.
+// Note that eh->setParams has no effect if either end of the
+// wormhole boundary is restrained to transfer only one sample at a time.
 
 void SDFScheduler::adjustSampleRates() {
 	BlockPortIter nextPort(*galaxy());
