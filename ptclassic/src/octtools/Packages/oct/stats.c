@@ -29,6 +29,9 @@ static char SccsId[]="$Id$";
 #include "internal.h"
 #include "geo.h"
 
+#include "oct_utils.h"
+#include "oct_id.h"
+
 extern char *oct_type_names[];
 
 void oct_dump_stats(), print_cpu_stats();
@@ -132,6 +135,7 @@ int size;
     return size;
 }
 
+void
 do_stats(obj, stats)
 generic *obj;
 struct stats *stats;
