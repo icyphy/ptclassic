@@ -108,9 +108,11 @@
 # reasonably complex and likely to be using complex items anyway...
 # </ul>
 #
-# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
-# <br>
-# <a href="../internals/items.html">Complex item classes</a>.
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
 #
 class ::tycho::ComplexItem {
     inherit ::tycho::Uninstantiable

@@ -67,7 +67,7 @@ namespace ::tycho {
 # The width of the outline of the rectangle, in pixels. By 
 # default, it is one.
 #
-# </dl></dl>
+# </ul>
 #
 # <p><b>Components</b>
 #

@@ -87,7 +87,6 @@ namespace ::tycho {
 # <li><b>blob</b>: A component item used for terminal ends.
 # </ul>
 #
-# </dl></dl>
 # <p><b>Enhancements</b>: The "arrow" style should perhaps put a
 # "tail" on the wiring end of an input terminal (as in VEM).
 # 
@@ -104,9 +103,11 @@ namespace ::tycho {
 #   }
 # </pre></tcl>
 #
-# <a href="../internals/howtoread.html">Reading <i>ComplexItem</i> documentation</a>.
-#
-# <b>Note</b>: This is an experimental class.
+# <ul>
+# <li><a href="../internals/howtoread.html">Reading <i>ComplexItem</i>
+# documentation</a>.
+# <li><a href="../internals/items.html">Complex item classes</a>.
+# </ul>
 #
 class ::tycho::Terminal {
     inherit ::tycho::ComplexItem
@@ -188,7 +189,7 @@ class ::tycho::Terminal {
     #### Set option defaults
     array set optiondefault [array get ::tycho::ComplexItem::optiondefault]
 
-    set optiondefault(-anchor)    {50 50}
+    set optiondefault(-anchor)    {}
     set optiondefault(-arrowshape) {}
     set optiondefault(-blobsize)  3
     set optiondefault(-direction) {1 0}
