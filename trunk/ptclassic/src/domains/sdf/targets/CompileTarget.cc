@@ -379,7 +379,7 @@ StringList CompileTarget::tcltkInitialize(StringList& universeName) {
     myCode +=
 "\n"
 "// Read pigi tcl initialization files to set key bindings, colors, etc.\n"
-"char *fulldirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
+"const char *fulldirname = expandPathName(\"$PTOLEMY/lib/tcl/pigilib.tcl\");\n"
 "if (Tcl_EvalFile(ptkInterp, fulldirname) != TCL_OK) {\n"
 "    cerr << \"Tcl_EvalFile: Error in evaluating $PTOLEMY/lib/tcl/pigilib.tcl\";\n"
 "    exit(1);\n"
