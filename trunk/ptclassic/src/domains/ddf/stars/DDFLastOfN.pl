@@ -2,8 +2,9 @@ defstar {
 	name { LastOfN }
 	domain { DDF }
 	desc {
-Outputs the last token of N input tokens,
-where N is the control input.
+Given a control input with integer value N,
+consume N particles from the data input and
+produce only the last of these at the output.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }

@@ -2,8 +2,9 @@ defstar {
 	name { Repeater }
 	domain { DDF }
 	desc {
-This star uses the "control" input value to specify how many
-times to repeat the "input" value on "output".
+Given a control input with integer value N,
+and a single input data particle, produce N
+copies of the data particle on the output.
 	}
 	version { $Id$ }
 	author { Soonhoi Ha }
