@@ -32,7 +32,8 @@ PortHole& MultiInCG56Port :: newPort () {
 }
 
 PortHole& MultiOutCG56Port :: newPort () {
-        LOG_NEW; PortHole& p = *new OutCG56Port;
-        p.numberTokens = numberTokens;
-        return installPort(p);
+	LOG_NEW; OutCG56Port* p = new OutCG56Port;
+        p->numberTokens = numberTokens;
+	forkProcessing(*p);
+        return installPort(*p);
 }
