@@ -102,8 +102,9 @@ void PTcl::resetUniverse () {
 
 // Return a "usage" error
 int PTcl::usage(const char* msg) {
-	strcpy(interp->result,"Usage: ");
+	strcpy(interp->result,"wrong # args: should be \"");
 	strcat(interp->result,msg);
+	strcat(interp->result,"\"");
 	return TCL_ERROR;
 }
 
@@ -276,8 +277,8 @@ int PTcl::statevalue(int argc,char ** argv) {
 	if (!b) return TCL_ERROR;
 	const State* s = b->stateWithName(argv[2]);
 	if (!s) {
-		Tcl_AppendResult(interp, "No state named '", argv[2],
-				 "' in block '", argv[1], "'");
+		sprintf (interp->result, "No state named '%s' in block '%s'",
+			 argv[2], argv[1]);
 		return TCL_ERROR;
 	}
 	// return initial value if asked.
@@ -463,7 +464,8 @@ int PTcl::targetparam(int argc,char ** argv) {
 	if (definingGal && currentTarget) t = currentTarget;
 	State* s = t->stateWithName(argv[1]);
 	if (!s) {
-		Tcl_AppendResult(interp,"No such target parameter: ", argv[1]);
+		sprintf (interp->result, "No such target parameter: %s",
+			 argv[1]);
 		return TCL_ERROR;
 	}
 	if (argc == 1) {
@@ -541,6 +543,9 @@ void PTcl::registerFuncs() {
 	}
 }
 
+// static member: tells which Tcl interpreter is "innermost"
+Tcl_Interp* PTcl::activeInterp = 0;
+
 // dispatch the functions.
 int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char** argv)
 			   {
@@ -551,5 +556,10 @@ int PTcl::dispatcher(ClientData which,Tcl_Interp* interp,int argc,char** argv)
 		return TCL_ERROR;
 	}
 	int i = int(which);
-	return (obj->*(funcTable[i].func))(argc,argv);
+	// this code makes an effective stack of active Tcl interpreters.
+	Tcl_Interp* save = activeInterp;
+	activeInterp = interp;
+	int status = (obj->*(funcTable[i].func))(argc,argv);
+	activeInterp = save;
+	return status;
 }
