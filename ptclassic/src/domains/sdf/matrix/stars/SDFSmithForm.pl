@@ -302,9 +302,9 @@ void intSwapCols( IntMatrix *mat, int col1, int col2 )
 	    return;
 	  }
 
-	  // free memory 
-	  free( mVector );
-	  free( nVector );
+	  // free memory --  must put the (char *) cast for cfront
+	  free( (char *) mVector );
+	  free( (char *) nVector );
 
 	  // output the Smith form matrices
           U%0 << u;
