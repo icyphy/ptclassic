@@ -42,11 +42,13 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "IntState.h"
 #include "StringState.h"
 #include "StringArrayState.h"
+#include "IntArrayState.h"
 #include "Profile.h"
 #include "ParProcessors.h"
 #include "ParNode.h"
 
 class ParScheduler;
+class BooleanMatrix;
 
 class CGMultiTarget : public MultiTarget {
 public:
@@ -110,12 +112,20 @@ public:
 	void wormOutputCode();
 	void wormOutputCode(PortHole&);
 
+	// redefine the execution time of a star
+	/* virtual */ int execTime(DataFlowStar*, CGTarget*);
+
+	// check whether communication ammortization is possible.
+	// If yes, return TRUE, else return FALSE.
+	int ammortize(int from, int to);
+
 protected:
 	void setup();
 
 	// parameters to set the child targets
 	StringArrayState childType;
 	StringArrayState resources;
+	IntArrayState relTimeScales;
 
 	// parameters to set the scheduling option
 	IntState useCluster;
@@ -126,6 +136,7 @@ protected:
 	StringState filePrefix;
 	IntState ganttChart;
 	StringState logFile;
+	IntState ammortizedComm;
 
 	// prepare child targets: create and initialize.
 	virtual void prepareChildren();
@@ -166,6 +177,10 @@ protected:
 		return MultiTarget::receiveWormData(p);
 	}
 
+	// update the reachability matrix for communication amortization.
+	// This method is supposed to be called in createSend() method.
+	void updateRM(int from, int to);
+
 	// parallel processors
 	ParProcessors* parProcs;
 	IntArray canProcs;
@@ -173,6 +188,9 @@ protected:
 private:
 	// state list added dynamically
 	StateList addedStates;
+
+	// reachability matrix
+	BooleanMatrix* rm;
 };
 
 #endif
