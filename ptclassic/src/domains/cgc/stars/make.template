@@ -24,6 +24,7 @@ INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR)
 # source files for all stars, using preprocessor
 PL_SRCS= \
  CGCAdd.pl \
+ CGCAddFix.pl \
  CGCBitsToInt.pl \
  CGCBlackHole.pl \
  CGCBusFork.pl \
@@ -34,6 +35,7 @@ PL_SRCS= \
  CGCCos.pl \
  CGCCut.pl \
  CGCCutVarOffset.pl \
+ CGCCxToFix.pl \
  CGCCxToFloat.pl \
  CGCCxToRect.pl \
  CGCDB.pl \
@@ -45,10 +47,18 @@ PL_SRCS= \
  CGCExpr.pl \
  CGCFFTCx.pl \
  CGCFIR.pl \
+ CGCFIRFix.pl \
+ CGCFix.pl \
+ CGCFixToCx.pl \
+ CGCFixToFix.pl \
+ CGCFixToFloat.pl \
  CGCFloatToCx.pl \
+ CGCFloatToFix.pl \
  CGCFork.pl \
  CGCGAL.pl CGCGGAL.pl \
  CGCGain.pl \
+ CGCGainFix.pl \
+ CGCImpulse.pl \
  CGCIntegrator.pl \
  CGCIIDGaussian.pl \
  CGCIIDUniform.pl \
@@ -57,6 +67,7 @@ PL_SRCS= \
  CGCLMS.pl \
  CGCLog.pl \
  CGCMpy.pl \
+ CGCMpyFix.pl \
  CGCMux.pl \
  CGCPad.pl \
  CGCPCM.pl \
@@ -66,8 +77,10 @@ PL_SRCS= \
  CGCPrinter.pl \
  CGCQuant.pl \
  CGCRamp.pl \
+ CGCRampFix.pl \
  CGCReciprocal.pl \
  CGCRect.pl \
+ CGCRectFix.pl \
  CGCRectToCx.pl \
  CGCRectToPolar.pl \
  CGCRepeat.pl \
@@ -78,6 +91,7 @@ PL_SRCS= \
  CGCSleep.pl \
  CGCSqrt.pl \
  CGCSub.pl \
+ CGCSubFix.pl \
  CGCSpread.pl \
  CGCSunSound.pl \
  CGCTable.pl \
