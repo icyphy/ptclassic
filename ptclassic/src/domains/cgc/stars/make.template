@@ -18,9 +18,8 @@ include $(CONFIG)
 CGCDIR = $(ROOT)/src/domains/cgc/kernel
 # CGDIR is the directory containing CG domain support
 CGDIR = $(ROOT)/src/domains/cg/kernel
-SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
-INCL = -I$(CGCDIR) -I$(CGDIR) -I$(SDFDIR) -I$(KERNDIR)
+INCL = -I$(CGCDIR) -I$(CGDIR) -I$(KERNDIR)
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
@@ -69,6 +68,8 @@ PL_SRCS= \
  CGCSub.pl \
  CGCSpread.pl \
  CGCSunSound.pl \
+ CGCTable.pl \
+ CGCThresh.pl \
  CGCUpSample.pl \
  CGCWaveForm.pl \
  CGCXgraph.pl \
@@ -81,7 +82,9 @@ PL_SRCS= \
  CGCRepeater.pl \
  CGCLastOfN.pl \
  CGCSumOfN.pl \
- CGCSelf.pl 
+ CGCSelf.pl \
+ CGCSwitch.pl \
+ CGCSelect.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
