@@ -7,6 +7,7 @@
 #include "Geodesic.h"
 #include "Plasma.h"
 #include "miscFuncs.h"
+#include "GalIter.h"
  
 /**************************************************************************
 Version identification:
@@ -222,6 +223,21 @@ PortHole :: printVerbose () const {
               out += "    Not connected.\n";
         }
         return out;
+}
+
+// sets the index values of each porthole of each star in the galaxy.
+// Returns the total number of portholes.
+int setPortIndices(Galaxy& g) {
+	GalStarIter nextStar(g);
+	Star* s;
+	int cnt = 0;
+	while ((s = nextStar++) != 0) {
+		BlockPortIter nextPort(*s);
+		PortHole* p;
+		while ((p = nextPort++) != 0)
+			p->indexValue = cnt++;
+	}
+	return cnt;
 }
 
 int MultiPortHole :: isItMulti() const { return TRUE;}
