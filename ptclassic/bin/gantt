@@ -14,5 +14,5 @@
 PTOLEMY=${PTOLEMY:-~/ptolemy}
 PTARCH=`$PTOLEMY/bin/ptarch`
 ganttscript=$PTOLEMY/lib/tcl/gantt.tcl
-ptolemywish=$PTOLEMY/bin.$PTARCH/itkwish2.0
+ptolemywish=$PTOLEMY/bin.$PTARCH/itkwish
 exec $ptolemywish $ganttscript "$@"
