@@ -11,6 +11,7 @@
 #include <X11/cursorfont.h>
 #include <X11/Xresource.h>	/* Pick up XrmUniqueQuark() for sol2 */
 
+#include <malloc.h>
 #include "compat.h"		/* Pick up common decls (sprintf() etc) */
 
 #define VERSION_STRING	"11.3.3 November 1994"
@@ -47,9 +48,7 @@ extern void set_X();		/* Initializes X device    */
 #define SOL2
 #endif
 
-/* To make lint happy */
-extern char *malloc();
-extern char *realloc();
+
 #ifdef USG
 extern int sprintf();
 #else
@@ -61,9 +60,14 @@ extern char *strcpy();
 extern char *strcat();
 extern char *strrchr();
 extern char *strchr();
-extern void exit();
-extern void free();
+/* 
+ * extern char *malloc();
+ * extern char *realloc();
+ * extern void exit();
+ * extern void free();
+ * extern void abort();
+ */
 extern double atof();
-extern void abort();
+
 
 #endif /* _XGRAPH_H_ */
