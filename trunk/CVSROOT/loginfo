@@ -24,3 +24,8 @@
 #DEFAULT (echo ""; id; echo %s; date; cat) >> $CVSROOT/CVSROOT/commitlog
 # or
 #DEFAULT (echo ""; id; echo %{sVv}; date; cat) >> $CVSROOT/CVSROOT/commitlog
+
+CVSROOT/.* mail -s "%s" johnr@eecs.berkeley.edu
+
+diva/.* mail -s "%s" diva-cvs@gigascale.eecs.berkeley.edu
+diva-binaries/.* mail -s "%s" diva-cvs@gigascale.eecs.berkeley.edu
