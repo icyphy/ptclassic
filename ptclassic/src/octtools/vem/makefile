@@ -35,11 +35,6 @@ ROOT	      = ../../..
 # VPATH points to the "real" source directory
 VPATH         = $(ROOT)/src/octtools/vem
 
-# If, under gcc, you link with -lmm, then you will probably get bus errors
-# If you are compiling with gcc, don't include -lmm
-# try 'make CC="gcc -traditional" OCTTOOLS_MM_LIB= '
-OCTTOOLS_MM_LIB = -lmm
-
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
@@ -114,7 +109,7 @@ VEMLIBS = -Lrpc -lrpcserver -Ldialogs -ldialogs \
 	-L$(OCTLIBDIR) -lts -llel -lfc -lsymbolic -lvulcan \
 	-lharpoon -lfang -lregion -lkd -lgu -lda -llist -loh -lvov -ltap \
 	-loptions -loct -ltr -lst -lxpa -lfb -ldds -lMaxport -lTable \
-	-lTgl -lutility -lport -lerrtrap -luprintf -lst $(OCTTOOLS_MM_LIB)  \
+	-lTgl -lutility -lport -lerrtrap -luprintf -lst \
 	$(X11_LIBSPEC) -lXaw -lXt -lXmu $(X11EXT_LIBSPEC) -lX11 $(SYSLIBS)
 
 all: vem vem.debug
