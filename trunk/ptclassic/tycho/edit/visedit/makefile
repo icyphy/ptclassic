@@ -49,6 +49,7 @@ include $(CONFIG)
 TCL_SRCS = 
   
 ITCL_SRCS = \
+	EditBubbleAndArc.itcl \
 	EditFSM.itcl
 
 EXTRA_SRCS =		$(TCL_SRCS) $(ITCL_SRCS)
