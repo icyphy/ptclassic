@@ -299,7 +299,7 @@ body ::tycho::EditSTD::saveText {} {
 	if {$machineType == "Moore"} {
 	    # Output choice
 	    if "[info exists nodeInfo($node,output)]" {
-		append text "# Output choice: None, Action or Value.\n"
+		append text "# Output choice: Value, Action or None.\n"
 		append text "set nodeInfo(\$node$node,output)\
 			[list $nodeInfo($node,output)]\n"
 
@@ -393,7 +393,7 @@ body ::tycho::EditSTD::saveText {} {
 	if {$machineType == "Mealy"} {
 	    # Output choice
 	    if "[info exists edgeInfo($arc,output)]" {
-		append text "# Output choice: None, Action or Value.\n"
+		append text "# Output choice: Value, Action or None.\n"
 		append text "set edgeInfo(\$arc,output)\
 			[list $edgeInfo($arc,output)]\n"
 
@@ -485,9 +485,9 @@ body ::tycho::EditSTD::editState {node} {
 
 	if {$machineType == "Moore"} {
 	    if "![info exists nodeInfo($node,output)]" {
-		set nodeInfo($node,output) "None"
+		set nodeInfo($node,output) "Value"
 	    }
-	    $w addRadioQuery output {Output} {None Action Value} \
+	    $w addRadioQuery output {Output} {Value Action None} \
 		    $nodeInfo($node,output) 
 	    
 	    $w addButton lookInside -text {Look Inside}\
@@ -548,9 +548,9 @@ body ::tycho::EditSTD::editArc {arc} {
 
 	if {$machineType == "Mealy"} {
 	    if "![info exists edgeInfo($arc,output)]" {
-		set edgeInfo($arc,output) "None"
+		set edgeInfo($arc,output) "Value"
 	    }
-	    $w addRadioQuery output {Output} {None Action Value} \
+	    $w addRadioQuery output {Output} {Value Action None} \
 		    $edgeInfo($arc,output) 
 
 	    $w addButton lookInside -text {Look Inside}\
@@ -914,7 +914,7 @@ body ::tycho::EditSTD::ptkCompile {} {
 		set where_is_defined ""
 		foreach arc $nodeInfo($node,outEdges) {
 		    if "![info exists edgeInfo($arc,output)]" {
-			set edgeInfo($arc,output) "None"
+			set edgeInfo($arc,output) "Value"
 		    }
 		    append outputBy "$edgeInfo($arc,output)\ "
 
@@ -935,13 +935,20 @@ body ::tycho::EditSTD::ptkCompile {} {
 			# Output by an action
 			if { ![info exists edgeInfo($arc,action)] ||\
 			    $edgeInfo($arc,action) == "" } {
-			    error "Output is by Action. An action is required. "
+			    error "Output is by Action.\
+				    An action is required. "
 		        } else {
 			    set action [file tail $edgeInfo($arc,action)]
 			    append actionOrValue \"$action\"
 			    set dirname [file dirname $edgeInfo($arc,action)]
 			    append where_is_defined \"$dirname\"
 			}
+		    }  elseif {$edgeInfo($arc,output) == "None"} {
+			append actionOrValue \"\"
+			append where_is_defined \"\"
+		    }  else {
+			error "Unrecognized output type:\
+				$edgeInfo($arc,output). "
 		    }
 		}
 		setstate [set star$node] outputBy $outputBy
