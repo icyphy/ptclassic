@@ -31,12 +31,16 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer:  J. T. Buck, Jose Luis Pino
  Date of creation: 6/10/90
 
-Routine to expand a pathname
-warning: may return a pointer to a static buffer; a second
-call may over-write this buffer.
+Routine to expand a pathname.  It returns the result of savestring applied
+to the expanded path name.  The savestring routine allocates a new dynamic
+string via the new operator.
 
-The pathname may begin with ~, ~user, or $var where var is an
-environment variable.  Variables are expanded only at the beginning.
+The prototype declaration of the expandPathName function is defined in
+miscFuncs.h.  The expandPathName function should return the same data
+type as savestring does, char*, but it does not.
+
+The pathname may begin with ~, ~user, or $var where var is an environment
+variable.  Variables are expanded only at the beginning of the string.
 
 **************************************************************************/
 
