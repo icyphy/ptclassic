@@ -69,9 +69,9 @@ BINDIR=$(PTOLEMY)/bin.$(PTARCH)
 #TK_VERSION =		tk4.0p1
 
 TCL_MAJOR_VERSION = 	tcl7.5
-TCL_VERSION =		tcl7.5a1
+TCL_VERSION =		tcl7.5a2
 TK_MAJOR_VERSION = 	tk4.1
-TK_VERSION =		tk4.1a1
+TK_VERSION =		tk4.1a2
 # Between tcl7.4 and tcl7.5, the location of the unix sources moved.
 TCL_7_5_HACK=		/unix
 ENABLE_GCC =		--enable-gcc --disable-load
@@ -161,6 +161,7 @@ $(TCL_OBJ):
 	mkdir -p $@
 
 $(BINDIR)/tclsh:
+	rm -f $@
 	ln -s $(TCL_DEST)/bin/tclsh $@ 
 
 # Build tcl
@@ -176,6 +177,8 @@ $(TCL_DEST)/lib/libtcl.a: $(TCL_OBJ)/libtcl.a $(TCLTK_DEST) $(TCL_DEST) $(TCL_DE
 	if [ ! -f $(TCL_DEST)/lib/libtcl.a ]; then \
 		cd $(TCL_DEST)/lib; ln -s lib$(TCL_MAJOR_VERSION).a libtcl.a; \
 	fi
+	# Don't overwrite this each time we install
+	chmod a-w $(TCL_INDEPENDENT_DEST)/include/tcl.h
 
 $(TCLTK_DEST):
 	mkdir $(TCLTK_DEST)
@@ -232,9 +235,8 @@ $(TK_DEST)/lib/libtk.a: $(TK_OBJ)/libtk.a $(TCLTK_DEST) $(TK_DEST) $(TK_DEST)/li
 	if [ ! -f $(TK_DEST)/lib/libtk.a ]; then \
 		cd $(TK_DEST)/lib; ln -s lib$(TK_MAJOR_VERSION).a libtk.a; \
 	fi
-
-$(TK_DEST)/lib:
-	mkdir $(TK_DEST)/lib
+	# Don't overwrite this each time we install
+	chmod a-w $(TK_INDEPENDENT_DEST)/include/tk.h
 
 clean_tk:
 	(cd $(TK_OBJ); $(MAKE) clean)
@@ -304,14 +306,23 @@ $(ITCL_DEST_LIB)/libitk.a:
 		ln -s libitk$(ITCL_MAJOR_VERSION_NUMBER).a libitk.a)
 
 # Links so that older programs can find libs and includes.
+# Note that itcl contains its own tcl/tk so we have to make links
 $(TCL_DEST):
-	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tcl.$(PTARCH))
+	#(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tcl.$(PTARCH))
+	mkdir $@
 $(TCL_INDEPENDENT_DEST):
-	(cd $(TCLTK_DEST); ln -s itcl tcl)
+	#(cd $(TCLTK_DEST); ln -s itcl tcl)
+	mkdir $@
+$(TCL_DEST)/lib:
+	mkdir $@
 $(TK_DEST):
-	(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tk.$(PTARCH))
+	#(cd $(TCLTK_DEST); ln -s itcl.$(PTARCH) tk.$(PTARCH))
+	mkdir $@
+$(TK_DEST)/lib:
+	mkdir $@
 $(TK_INDEPENDENT_DEST):
-	(cd $(TCLTK_DEST); ln -s itcl kt)
+	#(cd $(TCLTK_DEST); ln -s itcl tk)
+	mkdir $@
 
 clean_itcl:
 	(cd $(ITCL_OBJ); $(MAKE) clean)
