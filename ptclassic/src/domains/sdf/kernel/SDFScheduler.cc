@@ -6,6 +6,7 @@
 #include "StringList.h"
 #include "FloatState.h"
 #include "Geodesic.h"
+#include "GalIter.h"
 
 /**************************************************************************
 Version identification:
@@ -41,12 +42,12 @@ extern const char SDFdomainName[];
 // Display a schedule
 
 StringList
-SDFSchedule :: printVerbose () {
+SDFSchedule :: printVerbose () const {
 	StringList out;
 	out = "SDF SCHEDULE:\n";
-	reset();
+	SDFSchedIter next(*this);
 	for (int i = size(); i>0; i--) {
-		out += nextStar().readFullName();
+		out += (next++)->readFullName();
 		out += "\n";
 	}
 	return out;
@@ -64,14 +65,14 @@ SDFSchedule :: printVerbose () {
 // runs the number of times indicated by numIters.
 int SDFScheduler :: run (Block& galaxy) {
 	if (invalid) {
-		errorHandler.error ("SDF schedule is invalid -- can't run");
+		Error::abortRun(galaxy, ": SDF schedule is invalid; can't run");
 		return FALSE;
 	}
 	if (haltRequestFlag) {
-		errorHandler.error ("Can't continue after run-time error");
+		Error::abortRun(galaxy,
+				": Can't continue after run-time error");
 		return FALSE;
 	}
-	galaxy;			// dummy statement
 	while (numItersSoFar < numIters && !haltRequestFlag) {
 		runOnce();
 		currentTime += schedulePeriod;
@@ -90,15 +91,11 @@ void SDFScheduler :: runOnce () {
 
    // assume the schedule has been set by the setup member
    // Adjust the schedule pointer to point to the beginning of the schedule.
-	mySchedule.reset();
-
-	for (int i = mySchedule.size(); i>0; i--) {
-
-		// Next star in the list
-		SDFStar& currentStar = mySchedule.nextStar();
-
-		currentStar.fire();
-
+	SDFSchedIter nextStar(mySchedule);
+	SDFStar* star;
+	while ((star = nextStar++) != 0) {
+		// Fire the next star in the list
+		star->fire();
 		if (haltRequestFlag) { invalid = TRUE; return;}
 	}
 }
@@ -136,27 +133,21 @@ int SDFScheduler :: setup (Block& block) {
 		return FALSE;
 	}
 
-	// initialize the SpaceWalk member
-	alanShepard.setupSpaceWalk(galaxy);
-
-	int i;
+	GalStarIter nextStar(galaxy);
+	Star* s;
 
 	// force recomputation of repetitions and noTimes.  Also make
 	// sure all stars are SDF.
 
-	for (i = alanShepard.totalSize(galaxy); i>0; i--)
-	{
-		Star& s = alanShepard.nextStar();
-		if (strcmp (s.domain(), SDFdomainName) != 0) {
-			Error::abortRun(s, " is not an SDF star");
+	while ((s = nextStar++) != 0) {
+		if (strcmp (s->domain(), SDFdomainName) != 0) {
+			Error::abortRun(*s, " is not an SDF star");
 			invalid = TRUE;
 			return FALSE;
 		}
-		s.prepareForScheduling();
+		s->prepareForScheduling();
 	}
-	
-	alanShepard.setupSpaceWalk(galaxy);
-	
+
 	// This computes the number of times each component star must be
 	// run in one cycle of a periodic schedule.
 
@@ -177,9 +168,10 @@ int SDFScheduler :: setup (Block& block) {
 	do {
 		passValue = 2;
 		numDeferredBlocks = 0;
-		
-		for (i = alanShepard.totalSize(galaxy); i>0; i--) {
-			SDFStar& atom = (SDFStar&)alanShepard.nextStar();
+
+		nextStar.reset();
+		while ((s = nextStar++) != 0) {
+			SDFStar& atom = *(SDFStar*)s;
 			int runResult;
 
 			do {
@@ -190,7 +182,7 @@ int SDFScheduler :: setup (Block& block) {
 		// If the deferred firing option is set, we must now schedule
 		// the deferred blocks
 
-		for (i=0; i<numDeferredBlocks; i++) {
+		for (int i=0; i<numDeferredBlocks; i++) {
 			SDFStar& atom = (SDFStar&)deferredBlocks[i]->asStar();
 			addIfWeCan (atom);
 		}
@@ -248,10 +240,11 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	// Note that for a connected universe, this iteration would
 	// entirely unnecessary.  Is there some way to get rid of it?
 	// Should we allow disconnected universes?
-	for(int i = alanShepard.totalSize(galaxy); i>0; i--) {
-
+	GalStarIter next(galaxy);
+	Star* s;
+	while ((s = next++) != 0) {
 		// Get the next atomic block:
-		SDFStar& star = (SDFStar&) alanShepard.nextStar();
+		SDFStar& star = *(SDFStar*) s;
 
 		// First check to see whether a repetitions property has
 		// been set.  If so, do nothing.  Otherwise, compute the
@@ -273,9 +266,10 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 	// of all the fractional repetitions.  To convert them to
 	// integers, we multiply through by lcm.
 
-	for(i = alanShepard.totalSize(galaxy); i>0; i--) {
+	next.reset();
+	while ((s = next++) != 0) {
 		// Get the next atomic block:
-		SDFStar& star = (SDFStar&) alanShepard.nextStar();
+		SDFStar& star = *(SDFStar*) s;
 		star.repetitions *= Fraction(lcm);
 		star.repetitions.simplify();
 	}
@@ -294,12 +288,11 @@ int SDFScheduler :: repetitions (Galaxy& galaxy) {
 int SDFScheduler :: reptConnectedSubgraph (Block& block) {
 
 	// Step through each portHole
+	BlockPortIter nextp(block);
 	for(int i = block.numberPorts(); i>0; i--) {
-		PortHole& nearPort = block.nextPort();
+		PortHole& nearPort = *nextp++;
 		if (nearPort.far() == NULL) {
-			StringList msg = nearPort.readFullName();
-			msg += " is not connected!";
-			errorHandler.error (msg);
+			Error::abortRun(nearPort, " is not connected!");
 			invalid = TRUE;
 			return FALSE;
 		} else if (nearPort.isItInput() == nearPort.far()->isItInput())
@@ -360,7 +353,7 @@ int SDFScheduler :: reptArc (PortHole& nearPort, PortHole& farPort){
 			msg += nearStar.readFullName();
 			msg += " and ";
 			msg += farStar.readFullName();
-			errorHandler.error(msg);
+			Error::abortRun(msg);
 			invalid = TRUE;
 		}
 		return FALSE;
@@ -402,10 +395,11 @@ int SDFScheduler :: simRunStar (SDFStar& atom,
 	// the numInitialParticles member of the geodesic.
 	// Note that this should work equally well if there are no inputs.
 
+	SDFStarPortIter nextp(atom);
 	for(i = atom.numberPorts(); i>0; i--) {
 
 		// Look at the next port in the list
-		port = (SDFPortHole*)&atom.nextPort();
+		port = nextp++;
 
 		// On the wormhole boundary, skip.
 		if (port->isItInput() == port->far()->isItInput())
@@ -442,17 +436,17 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 
 	int i;
 	SDFPortHole* port;
-
+	SDFStarPortIter nextp(atom);
 	// Check to see whether any destination blocks are runnable
 	for(i = atom.numberPorts(); i>0; i--) {
 		// Look at the next port in the list
-		port = (SDFPortHole*)&atom.nextPort();
+		port = nextp++;
 		if (port->far() == NULL) {
 			invalid = TRUE;
 			return 0;
 		}
 
-		// can't be deferred if on the boundary of wormhole.
+		// cannot be deferred if on the boundary of wormhole.
 		if ((port->isItOutput()) && (port->isItOutput() == port->far()->isItOutput()))
 			return FALSE;
 
@@ -488,10 +482,11 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 
 	// We must detect the case that there are no output ports
 	int outputPorts = FALSE;
+	nextp.reset();	// restart iterator
 	for(i = atom.numberPorts(); i>0; i--) {
 
 		// Look at the farSidePort of the next port in the list
-		port = (SDFPortHole*)&atom.nextPort();
+		port = nextp++;
 		// Skip if it is not output or not connected
 		if (!port->isItOutput() || port->far() == NULL)
 			continue;
@@ -528,7 +523,7 @@ int SDFScheduler :: deferIfWeCan (SDFStar& atom) {
 int SDFScheduler :: notRunnable (SDFStar& atom) {
 
 	int i, v = 0;
-
+	SDFStarPortIter nextp(atom);
 	// Check to see whether the requisite repetitions have been met.
 	if (atom.repetitions.numerator <= atom.noTimes)
 		v = 2;
@@ -538,7 +533,7 @@ int SDFScheduler :: notRunnable (SDFStar& atom) {
 	else for(i = atom.numberPorts(); i>0; i--) {
 
 		// Look at the next port in the list
-		SDFPortHole& port = (SDFPortHole&)atom.nextPort();
+		SDFPortHole& port = *nextp++;
 
 		if(port.isItInput() && port.far()->isItOutput()) {
 		   // If not in the interface of Wormhole
