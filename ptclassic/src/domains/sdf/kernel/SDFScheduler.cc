@@ -4,6 +4,7 @@
 #include "Fraction.h"
 #include "Output.h"
 #include "StringList.h"
+#include "FloatState.h"
 
 /**************************************************************************
 Version identification:
@@ -72,6 +73,7 @@ int SDFScheduler :: run (Block& galaxy) {
 	galaxy;			// dummy statement
 	while (numItersSoFar < numIters && !haltRequestFlag) {
 		runOnce();
+		currentTime += schedulePeriod;
 		numItersSoFar++;
 	}
 	numIters++;
@@ -138,6 +140,12 @@ int SDFScheduler :: setup (Block& block) {
 
 	// initialize galaxy and all contents.
 	galaxy.initialize();
+
+	// set schedulePeriod if user gives it.
+	FloatState* st = (FloatState*) galaxy.stateWithName("schedulePeriod");
+	if (st) schedulePeriod = float ((double) (*st));
+	currentTime = schedulePeriod;
+
 	if (haltRequestFlag) {
 		invalid = TRUE;
 		return FALSE;
