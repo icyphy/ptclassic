@@ -580,7 +580,7 @@ body ::tycho::HTML::seePoint {point} {
         return
     } {
         # Third form: a named anchor.
-        ::tycho::safeUpdate $this
+        ::tycho::safeUpdate $prefix
         HMgoto $text $point
         return
     }
