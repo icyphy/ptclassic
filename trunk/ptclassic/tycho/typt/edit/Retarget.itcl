@@ -114,13 +114,13 @@ configbody ::tycho::Retarget::edit {
 #### constructor
 #
 body ::tycho::Retarget::constructor {args} {
-    addTool newDomains -text {Compare Domains} -command "$this compareDomains"
-    addTool domainAButton -text "Change Domain A: $domainA" \
+    toolbar addButton newDomains -text {Compare Domains} -command "$this compareDomains"
+    toolbar addButton domainAButton -text "Change Domain A: $domainA" \
             -command "$this changeDomainA"
-    addTool domainBButton -text "Change Domain B: $domainB" \
+    toolbar addButton domainBButton -text "Change Domain B: $domainB" \
             -command "$this changeDomainB"
 
-    addTool checkUniverse -text {Check Universe} \
+    toolbar addButton checkUniverse -text {Check Universe} \
 	    -command "$this checkUniverse"
 
     eval itk_initialize $args
@@ -145,7 +145,7 @@ body ::tycho::Retarget::changeDomainA {} {
     clear
     set dirtyCompareDomains 1
     catch {delete object component graphics}
-    #addTool domainAButton -text "Change Domain A: $domainA" 
+    #toolbar addButton domainAButton -text "Change Domain A: $domainA" 
     #        -command "$this changeDomainA"
     modifyAfterDomainChange
 }
@@ -164,7 +164,7 @@ body ::tycho::Retarget::changeDomainB {} {
     clear
     set dirtyCompareDomains 1
     catch {delete object component graphics}
-    #addTool domainBButton -text "Change Domain B: $domainB" \
+    #toolbar addButton domainBButton -text "Change Domain B: $domainB" \
     #        -command "$this changeDomainB"
     modifyAfterDomainChange
 }
