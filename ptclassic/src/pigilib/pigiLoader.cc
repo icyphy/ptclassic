@@ -91,7 +91,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #else
 #ifndef __GNUG__
 // Then we are using cfront
-#define EXTRAOPTS " -DPOSTFIX_OP="
+#define EXTRAOPTS " -PIC -DPOSTFIX_OP="
 #else
 #if __GNUC_MINOR__ >= 7
 
