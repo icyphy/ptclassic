@@ -1,7 +1,7 @@
 defstar {
 name { PeekPoke }
 domain { AnyCG }
-desc { Asynchronous communication star, splices in a peek/poke pair }
+desc { Nondeterminate communication link, splices in a peek/poke pair }
 version { $Id$ }
 author { Jose Luis Pino }
 copyright {
@@ -15,11 +15,29 @@ ccinclude { "Galaxy.h","EventHorizon.h","MultiTarget.h"  }
 explanation {
 This star allows for peek/poke communications as was described in, currently
 this is only supported in multitargets.
-
+.pp
 J.L. Pino, T.M. Parks and E.A. Lee, "Mapping Multiple Independent Synchronous
-Dataflow Graphs onto Heterogeneous Multiprocessors," Proc. of IEEE Asilomar
-Conf. on Signals, Systems, and Computers, Pacific Grove, CA, Oct. 31 - Nov. 2,
-1994.
+Dataflow Graphs onto Heterogeneous Multiprocessors," \fIProc. of IEEE Asilomar
+Conf. on Signals, Systems, and Computers\fR, Pacific Grove, CA,
+Oct. 31 - Nov. 2, 1994.
+<http://ptolemy.eecs.berkeley.edu/papers/hierStaticSched-asilomar-95>
+.pp
+The peek/poke facilities implement only a limited part of the
+functionality described in the Asilomar paper.
+.pp
+The first two user settable states are the \fIPoke_procId\fR and
+\fIPeek_procId\fR.  These must be set to the processor id where the poke
+actor and peek actor are to be mapped to.
+.pp
+The next user settable state is \fIblockSize\fR.  With this state a
+peek/poke link can transfer \fIblockSize\fR number of consequtive
+samples.
+.pp
+The final user settable state is \fIupdateRate\fR.  This state can be
+considered as a nondeterminate downsample factor for the link.
+The link will be updated at most once every \fIupdateRate\fR number of
+iterations of one of the two disconnected SDF graphs.  The side which
+this effects is determined by the specific peek/poke implementation.
 }
 
 ccinclude { "miscFuncs.h" }
@@ -107,29 +125,55 @@ constructor {
 		    "assigned.");
 }
 
+method {
+    name { findMultiTarget }
+    arglist { "(Target* multitarget)" }
+    type { "inline Target*" }
+    code
+    {
+	while (multitarget && !multitarget->isA("MultiTarget"))
+	    multitarget = (Target*) multitarget->parent();
+	if (multitarget) return multitarget;
+	return (Target*)NULL;
+    }
+}
+
 setup {
-    Target* target = cgTarget();
-    while (target && ! target->isA("MultiTarget"))
-	target = (Target*) target->parent();
-    if (!target) {
+    // Try to find the multitarget by going up the target parent
+    Target* multitarget = findMultiTarget(target());
+
+    // Now if we haven't found the multitarget yet - we iterate over
+    // the parent wormholes
+    Block* prnt = this;
+    while ((prnt = prnt->parent()) != NULL) {
+	// If my parent is not atomic, it is not a wormhole
+	if (!prnt->isItAtomic()) continue;
+
+	// My parent is atomic, it is a wormhole - check its
+	// target to see if it is a multitarget
+	multitarget = findMultiTarget(prnt->target());
+	if (multitarget) break;
+    }
+    
+    if (!multitarget) {
 	Error::abortRun(*this,"is not inside of a multitarget");
 	return;
     }
 
-    if (target->nProcs() <= (int)procId || procId < 0 ) {
+    if (multitarget->nProcs() <= (int)procId || procId < 0 ) {
 	StringList message;
 	message << "The Peek_ProcId is invalid, it is set to "
 		<< procId << " but the number of child targets is "
-		<< target->nProcs();
+		<< multitarget->nProcs();
 	Error::abortRun(*this,message);
 	return;
     }
 
-    if (target->nProcs() <= Poke_procId || Poke_procId < 0) {
+    if (multitarget->nProcs() <= Poke_procId || Poke_procId < 0) {
 	StringList message;
 	message << "The Poke_ProcId is invalid, it is set to "
 		<< Poke_procId << " but the number of child targets is "
-		<< target->nProcs();
+		<< multitarget->nProcs();
 	Error::abortRun(*this,message);
 	return;
     }
@@ -139,7 +183,7 @@ setup {
     if (!(peekPort && pokePort)) return;
 
     AsynchCommPair 
-	pair = ((MultiTarget*)target)
+	pair = ((MultiTarget*)multitarget)
 	    ->createPeekPokeProcId(procId,Poke_procId);
 
     CGStar *peek = pair.peek, *poke = pair.poke;
@@ -176,7 +220,7 @@ setup {
     starName.initialize();
     starName << "Peek_" << linkName ;
     parentGal->addBlock(*peek,hashstring(starName));
-    peek->setTarget(target->child(procId));
+    peek->setTarget(multitarget->child(procId));
 
     // FIXME - we do not support initial delays on peek/poke arcs
     // The peekPort and pokePort are in a disconnected state here.
@@ -188,7 +232,7 @@ setup {
     starName.initialize();
     starName << "Poke_" << linkName;
     parentGal->addBlock(*poke,hashstring(starName));
-    poke->setTarget(target->child(Poke_procId));
+    poke->setTarget(multitarget->child(Poke_procId));
 
     if ((int) blockSize > 1) 
 	setAsynchCommState(pair,"blockSize",blockSize.currentValue());
