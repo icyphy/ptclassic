@@ -125,6 +125,9 @@ protected:
 	// do non-integral rate changes, if any
 	int nonIntegralRateChange();
 
+	// create a while loop
+	void makeWhile(BDFClustPort*, BDFRelation);
+
 	// generate a name for a new member ClusterBag
 	const char* genBagName();
 
@@ -193,6 +196,11 @@ public:
 
 	// return some other cluster that can merge with me
 	BDFCluster* mergeCandidate();
+
+	// if this cluster can be turned into a while loop, return the
+	// port that produces the control signal for the loop.  The
+	// reference argument returns the termination condition.
+	BDFClustPort* canBeWhiled(BDFRelation& rel);
 
 	// return an appropriate loop factor: 0 if none.
 	int loopFactor();
@@ -388,6 +396,8 @@ public:
 	void runInner();
 	StringList displaySchedule(int depth);
 	void genCode(Target&, int depth);
+protected:
+	void setup();
 private:
 	// fix arcs of member clusters.
 	void fixArcs(BDFCluster*,BDFCluster*);

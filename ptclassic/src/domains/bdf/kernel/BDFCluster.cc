@@ -242,12 +242,44 @@ int BDFClusterGal::mergePass() {
 			nextClust.reset();
 	} while (c2 && !SimControl::haltRequested());
 
+	// if we made any changes, try to turn clusters with self-loops
+	// into while-loops now.
+	if (changes) {
+		// this code is the way it is because iterators are not
+		// safe on modified lists.  So we reset and search again
+		// if we do a makeWhile.
+		int gotThrough;
+		do {
+			BDFClustPort* ctl;
+			BDFRelation rel;
+			gotThrough = 1;
+			nextClust.reset();
+			while ((c1 = nextClust++) != 0) {
+				if ((ctl = c1->canBeWhiled(rel)) != 0) {
+					makeWhile(ctl,rel);
+					gotThrough = 0;
+					break;
+				}
+			}
+		} while (!gotThrough);
+	}
+				
 	if (logstrm) {
 		if (changes)
 			*logstrm << "After merge pass:\n" << *this;
 		else *logstrm << "Merge pass made no changes\n";
 	}
 	return changes;
+}
+
+void BDFClusterGal::makeWhile(BDFClustPort* ctl, BDFRelation rel) {
+	BDFCluster *c_in, *c_new;
+	c_in = ctl->parentClust();
+	LOG_NEW; c_new = new BDFWhileLoop(rel,ctl,c_in);
+	addBlock(c_new->setBlock(genBagName(),this));
+	if (logstrm)
+		*logstrm << "Created while loop around " << c_in->name()
+			 << ": " << *c_new << "\n";
 }
 
 void showBDFg(BDFClusterGal* g) {
@@ -332,14 +364,15 @@ BDFCluster* BDFClusterGal::tryLoopMerge(BDFCluster* a,BDFCluster* b) {
 		if (p->numIO() != pFar->numIO()) rateChange = TRUE;
 	}
 	if (cond && rateChange) {
-		// arrange so a is the source of cond.
+		// arrange so a is the source of the cond signal.
+		// Be conditional on the source (the output)
+		if (cond->isItInput()) cond = cond->far();
 		if (cond->parentClust() == b) {
 			BDFCluster* t = a; a = b; b = t;
 		}
 		if (logstrm)
 			*logstrm << a->name() << " and " << b->name()
 				 << ": doing loop merge, result:\n";
-		cond = cond->inPtr();
 		LOG_NEW; BDFCluster *c = new BDFWhileLoop(desrel,cond,a,b);
 		addBlock(c->setBlock(genBagName(),this));
 		if (logstrm) *logstrm << *c << "\n";
@@ -1185,6 +1218,7 @@ int BDFClusterBag::simRunStar(int deferFiring) {
 	return status;
 }
 
+// create internal schedule in the bag.
 int BDFClusterBag::genSched() {
 	if (sched) return TRUE;
 	LOG_NEW; sched = new BDFBagScheduler;
@@ -1452,6 +1486,50 @@ BDFCluster* BDFCluster::mergeCandidate() {
 	else return 0;
 }
 
+// See if cluster can be converted into a while loop.  It MUST have a
+// control port that is on a self-loop.  Furthermore, all non-self-loop
+// ports must be conditional with the same sign on one or the other end
+// of the self-loop.
+// We could do more checking to make sure the loop is really valid and
+// deadlock or unbounded behavior does not happen.
+// Return value is either 0 or the source port for the control signal.
+
+BDFClustPort* BDFCluster::canBeWhiled(BDFRelation& rel) {
+	// if <= 2 ports, forget it.
+	rel = BDF_NONE;
+	if (numberPorts() <= 2) return 0;
+	BDFClustPortIter nextPort(*this);
+	BDFClustPort* p;
+	BDFClustPort* csrc = 0;
+	// pass 1: find a control loop.
+	while ((p = nextPort++) != 0) {
+		if (p->isControl() && p->selfLoop()) {
+			// must have 1 token.
+			if (p->numTokens() != 1) return 0;
+			csrc = p->isItOutput() ? p : p->far();
+		}
+	}
+	if (csrc == 0) return 0;
+
+	// for now, all initial tokens are FALSE so we must have
+	// this.  Eventually this is determined by the value of the
+	// token on the control arc.
+	rel = BDF_FALSE;
+
+	// pass 2: check conditions on ports.  All external ports must
+	// be conditional in the same way.
+	nextPort.reset();
+	while ((p = nextPort++) != 0) {
+		if (p->selfLoop()) continue;
+		BDFRelation r = p->relType();
+		if (!TorF(r) ||
+		    (p->assoc() != csrc && p->assoc() != csrc->far()))
+			return 0;
+		if (rel == BDF_NONE) rel = r;
+		else if (rel != r) return 0;
+	}
+	return csrc;
+}
 
 // function to create names for atomic clusters and portholes.
 // This is a static class function.
@@ -1692,6 +1770,8 @@ void BDFWhileLoop::runInner() {
 	}
 }
 
+// Output schedule as a do-while.
+
 StringList BDFWhileLoop::displaySchedule(int depth) {
 	int close = 0;
 	StringList sch;
@@ -1700,15 +1780,17 @@ StringList BDFWhileLoop::displaySchedule(int depth) {
 		close = 1;
 	}
 	depth += close;
-	sch << tab(depth) << do_conds[pType] << pCond->name() << ") {\n";
+	sch << tab(depth) << "do {\n";
 	depth += 1;
 	sch << a->displaySchedule(depth);
-	if (b) {
-		sch << tab(depth) << "<save token>\n";
+	sch << tab(depth) << name() << "_token := <value from "
+	    << pCond->name() << ">\n";
+	if (b)
 		sch << b->displaySchedule(depth);
-	}
 	depth -= 1;
-	sch << tab(depth) << "}\n";
+	sch << tab(depth) << "} while (";
+	if (pType == DO_UNTILTRUE) sch << "!";
+	sch << name() << "_token)\n";
 	if (close) {
 		depth--;
 		sch << tab(depth) << "}\n";
@@ -1735,6 +1817,12 @@ BDFWhileLoop::BDFWhileLoop(BDFRelation t, BDFClustPort* cond,
 		fixArcs(b,a);
 	}
 	else fixArcs(a,0);
+}
+
+// setup: initialize sub-clusters.
+void BDFWhileLoop::setup() {
+	a->initialize();
+	if (b) b->initialize();
 }
 
 void BDFWhileLoop::fixArcs(BDFCluster* x,BDFCluster* y) {
