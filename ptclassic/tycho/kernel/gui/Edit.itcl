@@ -426,9 +426,6 @@ configbody ::tycho::Edit::text {
 body ::tycho::Edit::constructor {args} {
     global tcl_platform
 
-    # Set the view "type" for the Window menu
-    set viewType "text"
-
     # The text window.
     itk_component add text {
         # Put at the global scope to avoid invoking "unknown".
