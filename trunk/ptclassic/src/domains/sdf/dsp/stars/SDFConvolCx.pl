@@ -53,12 +53,16 @@ samples.
 	}
 	go {
 	    Complex sum =  Complex(0.0);
+	    // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+	    Complex tmpA;
+	    Complex tmpB;
 	    int c = int(iterationCount);
 	    for (int k = 0; k < int(truncationDepth); k++) {
 		int index = c-k;
 		if (index < 0) index += int(truncationDepth);
-		sum += (const Complex&)(inA%(index)) *
-			 (const Complex&)(conj(inB%(k)));
+		tmpA = (inA%(index));
+		tmpB = (conj(inB%(k)));
+		sum += tmpA * tmpB;
 	    }
 	    out%(0) << sum;
 	    if (c >= int(truncationDepth) - 1) iterationCount = 0;

@@ -146,12 +146,14 @@ For more information about polyphase filters, see F. J. Harris,
 		   out = 0.0;
 		   // Compute the inner product.
 		   for (int i = 0; i < phaseLength; i++) {
+			// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+			Complex tmpA = (signalIn%(int(decimation) - inC + i));
 			tapsIndex = i * int(interpolation) + phase;
 			if (tapsIndex >= taps.size())
 			    tap = 0.0;
 			else
 			    tap = taps[tapsIndex];
-			out += tap * (const Complex&)(signalIn%(int(decimation) - inC + i));
+		  	    out += tap * tmpA;
 		   }
 		   // note: output%0 is the last output chronologically
 		   signalOut%(outCount--) << out;

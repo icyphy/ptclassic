@@ -91,7 +91,9 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	    for (int n = int(numberOfSamples)-1; n>=0; n--) {
 		Complex sum = Complex(0.0, 0.0);
 		for (int i = 0;i < int(length); i++) {
-		    sum += (const Complex&)(signal%(int(length)-i-1))
+		    // We use a temporary variable to avoid gcc2.7.2/2.8 problems
+		    Complex tmpA = (signal%(int(length)-i-1));
+		    sum += tmpA
 			* Complex(
 			    cos(double(omega%n)*i*double(timeBetweenSamples)),
 			    -sin(double(omega%n)*i*double(timeBetweenSamples)));

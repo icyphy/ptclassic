@@ -236,6 +236,8 @@ The input particles are only cast to this precision if the parameter
                    Accum = 0.0;
                    // Compute the inner product.
                    for ( int i = 0; i < phaseLength; i++ ) {
+			// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+			Fix tmpA = (signalIn%(Decim - inC + i)); 
                         tapsIndex = i * Interp + phase;
                         if (tapsIndex >= taps.size())
                             tap = 0.0;
@@ -243,9 +245,9 @@ The input particles are only cast to this precision if the parameter
                             tap = taps[tapsIndex];
         
                         if ( int(ArrivingPrecision) )
-                            Accum += tap * (const Fix&)(signalIn%(Decim - inC + i));
+                            Accum += tap * tmpA;
                         else {
-                            fixIn = (const Fix&)(signalIn%(Decim - inC + i));
+                            fixIn = tmpA;
                             Accum += tap * fixIn;
 			}
                    }

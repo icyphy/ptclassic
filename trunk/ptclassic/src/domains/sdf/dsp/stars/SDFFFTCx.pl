@@ -100,7 +100,8 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 
 		// note: particle at maximum delay is the first one
 		for (int i = int(size)-1; i >= 0; i--) {
-			Complex t = (const Complex &)(input%i);
+			// We use a temporary variable to avoid gcc2.7.2/2.8 problems
+			Complex t = input%i;
 			*p++ = t.real();
 			*p++ = t.imag();
 		}
