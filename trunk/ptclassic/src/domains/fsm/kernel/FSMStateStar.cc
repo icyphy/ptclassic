@@ -419,19 +419,22 @@ Geodesic** FSMStateStar::setupGeodesic (PortList& pList, MultiPortHole* mph, Sta
 	  return NULL;
 	}
 
-	// Dummy output port used to fool the geodesic into thinking it
-	// is fully connected.
-	PortHole* dummyPort = new PortHole;
-
-	// Set the desination port for the geodesic.
-	// We also have to set a source port, although we don't use it.
-	dummyPort->setPort("dummyPort",(Block*)0,FLOAT);
 	if (mph->isItInput()) {
+	  // Dummy output port used to fool the geodesic into thinking it
+	  // is fully connected, i.e. dummyPort -- Geodesic --> wp.
+	  OutFSMPort* dummyPort = new OutFSMPort;
+	  dummyPort->setPort("dummyOutPort",(Block*)0,FLOAT);
+
 	  geo->setSourcePort(*dummyPort, 0, "");
 	  geo->setDestPort(*wp);
 	  geo->initialize();
 	}
 	else {
+	  // Dummy input port used to fool the geodesic into thinking it
+	  // is fully connected, i.e. wp -- Geodesic --> dummyPort.
+	  InFSMPort* dummyPort = new InFSMPort;
+	  dummyPort->setPort("dummyInPort",(Block*)0,FLOAT);
+
 	  geo->setSourcePort(*wp,0,"");
 	  geo->setDestPort(*dummyPort);
 	  geo->initialize();
