@@ -74,16 +74,14 @@ public:
 	return master? master->isItAtomic() : NULL;
     }
 
-    void addNebula(Nebula* c) {
-	gal.addBlock(c->star(),c->star().name());
-    }
+    void addNebula(Nebula*);
 
     void addGalaxy(Galaxy*,PortHole**);
 
     void initMaster();
 
     Scheduler* outerSched() {
-	return selfStar.scheduler()?selfStar.scheduler():master->scheduler();
+	return star().scheduler()?star().scheduler():master->scheduler();
     }
     
     Scheduler* innerSched() { return sched;} 
@@ -108,11 +106,12 @@ public:
     virtual int flattenGalaxy(Galaxy*) {return FALSE;}
     
     Star& star() const { return selfStar; }
+    StringList displaySchedule();
+    
 protected:
     // The Star part of the Nebula.
     Star& selfStar;
 
-    // The star master if the Nebula is atomic.
     Block* master;
 
     DynamicGalaxy gal;

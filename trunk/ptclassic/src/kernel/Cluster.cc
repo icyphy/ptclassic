@@ -54,9 +54,29 @@ sched(0) {};
     LOG_DEL; delete sched;
 }
 
+StringList Nebula::displaySchedule() {
+    StringList schedule;
+    if (isNebulaAtomic()) {
+	schedule = star().fullName();
+	return schedule;
+    }
+    else if (!innerSched())
+	schedule << "ERROR NO SCHEDULE MEMBER IN NEBULA:"
+		 << star().fullName() << "\n";
+    else
+	schedule << "/* Schedule for " << star().fullName() << " */\n"
+		 << innerSched()->displaySchedule() << "\n";
+    // If we get here nebula is Non-atomic
+    FatNebulaIter next(*this);
+    Nebula* fatNebula;
+    while ((fatNebula = next++) != 0)
+	schedule << fatNebula->displaySchedule();
+    return schedule;
+}
+
 void Nebula::setInnerSched(Scheduler* s) {
     if (s == NULL) {
-	Error::abortRun(selfStar,
+	Error::abortRun(star(),
 			"Nebula::setInnerSched sent a NULL scheduler pointer");
 	return;
     }
@@ -71,8 +91,8 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	return;
     }
     master = m;
-    selfStar.setNameParent(master->name(),selfStar.parent());
     if (master->isItAtomic()) {
+	star().setNameParent(master->name(),star().parent());
 	// Add the star's ports to the internal galaxy,
 	// but do not change their parents.
 	BlockPortIter starPorts(*master);
@@ -88,9 +108,9 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	    
 	    else {
 		PortHole* clonedPort = clonePort(port);
-		selfStar.addPort(*clonedPort);
+		star().addPort(*clonedPort);
 		clonedPort->setNameParent(port->name(),
-					  &selfStar);
+					  &star());
 		if(newPorts)
 		    newPorts[nebulaPort(clonedPort)->
 			     real().index()] = clonedPort;
@@ -98,6 +118,12 @@ void Nebula::setMasterBlock(Block* m,PortHole** newPorts) {
 	}
     }
     else {
+	// Set the name, leave parent unchanged
+	StringList name;
+	name << master->name() << "_Nebula";
+	const char* pname = hashstring(name);
+	star().setNameParent(pname,star().parent());
+	
 	Galaxy* g = (Galaxy*) m;
 	int isTopNebula = ! (int) newPorts;
 	int nports = 0;
@@ -156,6 +182,12 @@ void Nebula::addGalaxy(Galaxy* g,PortHole** newPorts) {
 	}
     }
 }
+
+void Nebula::addNebula(Nebula* c) {
+    gal.addBlock(c->star(),c->star().name());
+    c->star().setNameParent(c->star().name(),&star());
+}
+
 
 inline void Nebula::initMaster() {
     if (master) master->initialize();
