@@ -50,7 +50,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // constructor: set name and domain
 InterpUniverse::InterpUniverse (const char* name, const char* dom) :
-Runnable((Target*)0, dom, this), InterpGalaxy(name,dom), targName(0)
+InterpGalaxy(name,dom), Runnable((Target*)0, dom, this), targName(0)
 { setBlock(name,NULL);}
 
 const char* InterpUniverse :: targetName() const {
