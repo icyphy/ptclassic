@@ -67,7 +67,7 @@ main(argc, argv)
 int argc;
 char *argv[];
 {
-    extern int optind;		/* index of current argument */
+    extern int octoptind;		/* index of current argument */
     octObject inputFacet;	/* facet to be framed */
     octObject outputFacet;	/* framed facet */
     octStatus status;
@@ -75,7 +75,7 @@ char *argv[];
     void messageHandler();
 
     handleOptions(argc, argv);
-    if (optind >= argc) optUsage();
+    if (octoptind >= argc) optUsage();
 
     VOVbegin( argc, argv );
 
@@ -84,8 +84,8 @@ char *argv[];
 
     ohUnpackDefaults(&inputFacet, "r", "::contents");
 
-    while (optind < argc) {
-	if (ohUnpackFacetName(&inputFacet, argv[optind++]) != OCT_OK) {
+    while (octoptind < argc) {
+	if (ohUnpackFacetName(&inputFacet, argv[octoptind++]) != OCT_OK) {
 	    optUsage();
 	}
 
