@@ -185,13 +185,14 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
         
     // Move these links to an array for more efficent processing    
     const int dimen = sortList->size();
-    CqLevelLink** sortArray = new CqLevelLink*[dimen];
+    LOG_NEW; CqLevelLink** sortArray = new CqLevelLink*[dimen];
     int i;
     for (i=0 ; i<dimen ; i++) {
         sortArray[i] = (CqLevelLink*)sortList->getAndRemove();
     }
 
     sortList->~SequentialList();
+	LOG_DEL; delete sortList;
 
     // Check to see if getOtherEvents only returned an event on a
     // feedbackIn port. If so, then the event is signaling that one
@@ -207,8 +208,10 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             // need to place the particle in the dest port
             InDEPort* dest = (InDEPort*)((Event*)sortArray[0]->e)->dest;
             dest->getFromQueue(((Event*)sortArray[0]->e)->p);
+            CqLevelLink *l = sortArray[0];
+	      LOG_DEL; delete [] sortArray;
             if (!starUsingResource->run()) return FALSE;
-            eventQ->putFreeLink(sortArray[0]);
+            eventQ->putFreeLink(l);
             return TRUE;
         }
     }
@@ -349,7 +352,10 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             }
          
             // Fire the star. The Star will store its output events 
-            if (!starUsingResource->run()) return FALSE;
+            if (!starUsingResource->run()) {
+		LOG_DEL; delete [] sortArray;
+		return FALSE;
+	      }
             // Now update the Resources SequentialList of executing stars
             updateDelay = starUsingResource->getDelay();
         
@@ -372,7 +378,7 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
                 this->timeWhenFree = now + updateDelay;
 
                 // now add the firing star to the resources list of executing stars
-                p = new ResLLCell(starUsingResource, (now+updateDelay), starUsingResource->priority);
+                LOG_NEW; p = new ResLLCell(starUsingResource, (now+updateDelay), starUsingResource->priority);
                 intStarList->prepend(p);
             }
         }
@@ -460,7 +466,10 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
             }
             
             // fire the star. A HW Star writes its Events directly to the eventQ
-            if (!starUsingResource->run()) return FALSE;
+            if (!starUsingResource->run()) {
+		LOG_DEL; delete [] sortArray;
+		return FALSE;
+	      }
 
             nextTry = now + starUsingResource->getDelay();
             this->timeWhenFree = nextTry;
@@ -481,7 +490,7 @@ int Resource :: newEventFromEventQ(CqLevelLink* link, double now) {
 
 SequentialList* Resource :: getOtherLinks(CqLevelLink* f, double now) {
   
-    SequentialList* sortList = new SequentialList();
+    LOG_NEW; SequentialList* sortList = new SequentialList();
     sortList->prepend(f);
 
     // First get all current events from the eventQ
@@ -591,6 +600,7 @@ void Resource :: removeFinishedStar(DERCStar* star) {
         timeWhenFree = p->ECT;
     }
     p->~ResLLCell();
+	LOG_DEL; delete p;
 }
 
 ResLLCell* Resource :: getTopCell() {
