@@ -89,7 +89,9 @@ static StringList ptclGalaxyCode(Galaxy* localGalaxy) {
 	while ((port = nextPort++) != NULL) {
 	    if (port->isItOutput()) {
 	        if (port->far() == NULL) {
-	           ptclCode << "\n # Warning port->far() == NULL!\n";
+	           ptclCode << "\t# Warning " << starName
+		            << " \"output#" << portNumber[port->index()]
+		            << "\" is disconnected\n";
                 } else {
 		   ptclCode << "\tconnect" << starName
 			    << " \"output#" << portNumber[port->index()]
