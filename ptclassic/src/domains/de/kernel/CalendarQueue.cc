@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "EventQueue.h"
 #include "CalendarQueue.h"
 #include <assert.h>
+#include <limits.h>		// We use INT_MAX below
 
 // Set the properties of the CqLevelLink class.
 CqLevelLink* CqLevelLink :: setLink(Pointer a, double v, double fv,
@@ -99,7 +100,7 @@ void CalendarQueue :: clearFreeList()
 // width is set equal to "startInterval". cq_bucket[0] is made equal to
 // CalendarQ[qbase]; and the number of buckets is "nbuck". StartTime is the
 // time at which dequeueing begins. All external variables except 
-// "resizeEnabled are initialized.
+// resizeEnabled are initialized.
 
 void CalendarQueue :: LocalInit(int qbase, int nbuck, double startInterval, 
 double lastTime)
@@ -122,7 +123,9 @@ double lastTime)
 // set up initial position in queue 
 
     cq_lastTime = lastTime;
-    n = (int) (lastTime/cq_interval);
+    // Under FreeBSD, 'int i = (int) __infinity' gives a FPE, so we check
+    n = (int) ((lastTime/cq_interval) > (double)INT_MAX ? INT_MAX : 
+ 	lastTime/cq_interval);
     cq_lastBucket = (int) (n % cq_bucketNum);
     cq_bucketTop = (n+1.5)*cq_interval;
 
