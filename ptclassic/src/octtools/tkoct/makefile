@@ -1,4 +1,4 @@
-# Makefile for Ptolemy tkvem
+# Makefile for Ptolemy tkoct
 
 # Version Identification:
 # $Id$
@@ -24,16 +24,17 @@
 # CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
 # ENHANCEMENTS, OR MODIFICATIONS.
 
-# Important!  Do not run this makefile while in ~ptolemy/src/tkvem.  Instead
-# run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
+# Important!  Do not run this makefile while in ~ptolemy/src/octtools/tkoct.
+# Instead run in from ~ptolemy/obj.$ARCH (through the symbolic link) -- that
 # way a separate directory containing, say, Sun-3 and Sun-4 objects can be
 # maintained.
 
+# Ptolemy style makefile by Christopher Hylands (11/94)
 
-# Note that tkvem and oct2ptcl use libraries from top.  tkvem uses libraries
+# Note that tkoct and oct2ptcl use libraries from top.  tkoct uses libraries
 # from tkgraph.
-DIRS = tkgraph top tkvem oct2ptcl
-PTOLEMY = ../..
+DIRS = 		tkgraph top tkoct oct2ptcl
+PTOLEMY = 	../../..
 
 MAKEVARS =	\
 		"ARCH=$(ARCH)" 
@@ -42,7 +43,7 @@ makefiles all install clean sources depend realclean checkjunk sccsinfo:
 	 @for x in $(DIRS); do \
 	 	cd $$x ; \
 		echo making $@ in $$x ; \
-		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../.. VPATH=../../../src/tkvem/$$x $@ ;\
+		$(MAKE) $(MFLAGS) $(MAKEVARS) PTOLEMY=../../../.. VPATH=../../../../src/octtools/tkoct/$$x $@ ;\
 	  	cd .. ; \
 	 done
 

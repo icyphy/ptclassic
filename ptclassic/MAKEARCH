@@ -116,21 +116,6 @@ cd pxgraph
 optlink ../../src/pxgraph bitmaps
 cd ..
 
-# If tkvem directory exists, then make dirs and do links
-if ( -d $PTOLEMY/src/tkvem ) then
-	optmkdir tkvem
-	cd tkvem
-	optlink ../../src/tkvem makefile
-	foreach x (oct2ptcl tkgraph tkvem top)
-		optmkdir $x
-		cd $x
-		optlink ../../../src/tkvem/$x make.template
-		optlink ../../../src/tkvem/$x makefile
-		cd ..
-	end
-	cd ..
-endif
-
 # EXPDOMAINS = experimental domains
 # EXPDOMAINS = capsim bdf
 
@@ -216,6 +201,20 @@ foreach x ( installColors masters octfix octls oct2ps)
 	cd ..
 end
 
+# If tkoct directory exists, then make dirs and do links
+if ( -d $PTOLEMY/src/octtools/tkoct ) then
+	optmkdir tkoct
+	cd tkoct
+	optlink ../../../src/octtools/tkoct makefile
+	foreach x (oct2ptcl tkgraph tkoct top)
+		optmkdir $x
+		cd $x
+		optlink ../../../../src/octtools/tkoct/$x make.template
+		optlink ../../../../src/octtools/tkoct/$x makefile
+		cd ..
+	end
+	cd ..
+endif
 
 cd Packages
 
