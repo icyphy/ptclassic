@@ -36,30 +36,30 @@ To implement the tests "<" or "<=", simply reverse the inputs.
 	input {
 		name { upper }
 		type { float }
-		desc { Left-hand side of the test. }
+		desc { Left-hand side of the test }
 	}
 	input {
 		name { lower }
 		type { float }
-		desc { Right-hand side of the test. }
+		desc { Right-hand side of the test }
 	}
 	output {
 		name { output }
 		type { int }
-		desc { Result of the test. }
+		desc { Result of the test }
 	}
 	defstate {
 		name { condition }
 		type { string }
 		default { "EQ" }
-		desc { The test condition, i.e, one of EQ, NE, LT, or LE. }
+		desc { The test condition, i.e, one of EQ, NE, LT, or LE }
 	}
 	defstate {
 		name { crossingsOnly }
 		type { int }
 		default { "FALSE" }
 		desc {
-If TRUE, outputs are TRUE only when the sense of the test changes.
+If TRUE, outputs are TRUE only when the sense of the test changes
 		}
 	}
 	defstate {
@@ -94,7 +94,7 @@ test.  This ensures that the first test result will always be TRUE.
 		else if ( strcasecmp(cn, "!=") == 0 ) test = NEID;
 		else if ( strcasecmp(cn, ">") == 0 ) test = GTID;
 		else if ( strcasecmp(cn, ">=") == 0 ) test = GEID;
-		else Error::abortRun(*this, "Unrecognized test.");
+		else Error::abortRun(*this, "Unrecognized test.", cn);
 	}
 	codeblock(decl) {
 		int result;
@@ -104,8 +104,8 @@ test.  This ensures that the first test result will always be TRUE.
 		$ref(prevResult) = result;
 	}
 	go {
-		StringList compare = "$ref(upper) ";
-		compare << test << " $ref(lower);\n";
+		StringList compare = "($ref(upper) ";
+		compare << test << " $ref(lower)) ? 1 : 0;\n";
 
 		if ( int(crossingsOnly) ) {
 			addCode(decl);
