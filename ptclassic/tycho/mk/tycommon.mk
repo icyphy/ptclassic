@@ -279,10 +279,6 @@ alltests.itcl: makefile
 			echo "source $$x" >> $@; \
 		done; \
 	fi
-	echo "# automatically exit" >> $@ 
-	echo "::tycho::preference assign misc confirmOnExit 0" >> $@
-	echo "set reallyExit 1" >> $@
-	echo "doneTests" >> $@
 
 # all.itcl is used to source all the *.itcl files
 all.itcl: makefile
