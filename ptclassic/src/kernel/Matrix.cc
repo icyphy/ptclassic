@@ -39,7 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
-#include <strstream.h>
 #include "Matrix.h"
 #include "Plasma.h"
 #include "Error.h"
@@ -582,8 +581,8 @@ ComplexMatrix::ComplexMatrix(const ComplexMatrix& src, int startRow, int startCo
 
 // Prints matricies in standard row column form.
 StringList ComplexMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "ComplexMatrix: (";
   strm << nRows;
   strm << ",";
@@ -600,8 +599,7 @@ StringList ComplexMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 int ComplexMatrix::operator == (const PtMatrix& src) const {
@@ -1037,8 +1035,8 @@ FixMatrix::FixMatrix(const FixMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matricies in standard row column form.
 StringList FixMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "FixMatrix: (";
   strm << nRows;
   strm << ",";
@@ -1052,8 +1050,7 @@ StringList FixMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 int FixMatrix::operator == (const PtMatrix& src) const {
@@ -1377,8 +1374,8 @@ FloatMatrix::FloatMatrix(const FloatMatrix& src, int startRow, int startCol, int
 
 // Prints matricies in standard row column form.
 StringList FloatMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "FloatMatrix: (";
   strm << nRows;
   strm << ",";
@@ -1392,8 +1389,7 @@ StringList FloatMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 int FloatMatrix::operator == (const PtMatrix& src) const {
@@ -1718,8 +1714,8 @@ IntMatrix::IntMatrix(const IntMatrix& src, int startRow, int startCol, int numRo
 
 // Prints matricies in standard row column form.
 StringList IntMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "IntMatrix: (";
   strm << nRows;
   strm << ",";
@@ -1733,8 +1729,7 @@ StringList IntMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 int IntMatrix::operator == (const PtMatrix& src) const {

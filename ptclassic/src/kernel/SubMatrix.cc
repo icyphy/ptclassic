@@ -39,7 +39,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #ifdef __GNUG__
 #pragma implementation
 #endif
-#include <strstream.h>
+
 #include "SubMatrix.h"
 #include "Plasma.h"
 #include "Error.h"
@@ -55,8 +55,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 ///////////////////////////////////////////////////////
 // Prints matrices in standard row column form.
 StringList ComplexSubMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "ComplexSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -73,8 +73,7 @@ StringList ComplexSubMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -174,8 +173,8 @@ void ComplexSubMatrix::operator << (ComplexArrayState& src) {
 ////////////////////////////////////////////////
 // Prints matrices in standard row column form.
 StringList FixSubMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "FixSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -189,8 +188,7 @@ StringList FixSubMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -290,8 +288,8 @@ void FixSubMatrix::operator << (FixArrayState& src) {
 ///////////////////////////////////////////////////////
 // Prints matrices in standard row- column form.
 StringList FloatSubMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "FloatSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -305,8 +303,7 @@ StringList FloatSubMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
@@ -406,8 +403,8 @@ void FloatSubMatrix::operator << (FloatArrayState& src) {
 /////////////////////////////////////////////////
 // Prints matrices in standard row-column form.
 StringList IntSubMatrix::print() const {
-  ostrstream strm;
   char buf[SMALL_STRING];
+  StringList strm;
   strm << "IntSubMatrix: (";
   strm << nRows;
   strm << ",";
@@ -421,8 +418,7 @@ StringList IntSubMatrix::print() const {
     }
     strm << "\n";
   }
-  strm << ends;
-  return StringList(strm.str());
+  return strm;
 }
 
 // constructor, given just the number of rows and columns.
