@@ -41,20 +41,21 @@ void MVImage::init()
 } // end MVImage::init()
 
 
-MVImage::MVImage(): blocksize(0), BaseImage(0, 0, 0)
+MVImage::MVImage(): BaseImage(0, 0, 0), blocksize(0)
 { horzData = vertData = (char*) NULL; }
 
 
 MVImage::MVImage(int a, int b, int c, int d, int e):
-		blocksize(e), BaseImage(a, b, c, d) { init(); }
+                BaseImage(a, b, c, d), blocksize(e)
+{ init(); }
 
 
 MVImage::MVImage(int a, int b, int c, int d):
-		blocksize(d), BaseImage(a, b, c) { init(); }
+		BaseImage(a, b, c), blocksize(d) { init(); }
 
 
 MVImage::MVImage(const BaseImage& gi, int bs):
-		blocksize(bs), BaseImage(gi)
+		 BaseImage(gi), blocksize(bs)
 {
 	width /= blocksize; height /= blocksize;
 	fullSize /= (blocksize*blocksize);
@@ -64,7 +65,7 @@ MVImage::MVImage(const BaseImage& gi, int bs):
 
 
 MVImage::MVImage(const MVImage& mi, int a):
-		blocksize(mi.blocksize), BaseImage(mi)
+		BaseImage(mi), blocksize(mi.blocksize)
 {
 	init();
 	if (!a) {
