@@ -20,6 +20,7 @@ $Id$
 #include "Error.h"
 #include "UserOutput.h"
 #include "SDFScheduler.h"
+#include "CGDisplay.h"
 
 // Return a string for indenting to the given depth
 StringList CGTarget::indent(int depth) {
@@ -78,7 +79,7 @@ void CGTarget :: headerCode () {
 
 void CGTarget :: wrapup() {
 	Target :: wrapup();
-	Error::message((const char*)myCode);
+	display(myCode);
 }
 
 void CGTarget :: writeCode(UserOutput& o) {
