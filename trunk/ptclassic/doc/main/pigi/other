@@ -1,5 +1,5 @@
 .\" $Id$
-.H1 "Other Basic Information"
+.H1 "Other Useful Information"
 .pp
 In this section we cover additional information which may be useful.
 More advanced topics will be covered in following sections.
@@ -8,7 +8,8 @@ More advanced topics will be covered in following sections.
 .IE "moving objects"
 Sometimes you may want to move objects around within your schematic.
 Use the VEM command \fIdrag-instance\fP to do this.
-Avoid the \fImove-instance\fP command because it can cause
+In versions of VEM before 8.0, you must avoid the
+\fImove-instance\fP command because it can cause
 problems with instances that have actual parameters.  You can
 move objects as follows:
 .BU
@@ -19,6 +20,28 @@ location.
 .BU
 Execute \fIdrag-instance\fP, capital ``M''.
 .IE drag-instance
+In versions of VEM after 8.0, the \fImove-instance\fR command ``m'' is safe.
+.H2 "Icon Orientation"
+.pp
+.IE "transform, VEM command"
+.IE "icons, rotating"
+.IE "icons, reflecting"
+Most \*(PT icons have inputs coming in from the left and outputs going
+out to the right.  To get better looking diagrams, you may sometimes
+wish to reorient the icons.  This can be done with the VEM
+command ``transform'' (``t'').
+Select the icon you wish to transform and type ``t'' as many times
+as necessary to get the desired orientation.
+Each time, you get a 90 degree rotation.
+Then execute the move-object ``m'' or drag-instance ``M'' command
+(depending on your version of VEM).
+Notice that a 180 degree rotation results in an
+upside down icon.  To avoid this, reflect the icon rather than rotating
+it.  To reflect it in the vertical direction (exchanging what's on top
+for what's on the bottom), select the object, type
+"my" (include the quotation marks), type ``t'' to transform,
+and ``M'' or ``m'' to move.
+To reflect along the horizontal direction, use "mx" instead of "my".
 .H2 "Auto-forking"
 .pp
 .IE auto-forks
