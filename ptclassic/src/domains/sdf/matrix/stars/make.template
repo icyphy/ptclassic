@@ -32,13 +32,19 @@ PL_SRCS= \
   SDFAddInt_M.pl \
   SDFAdd_M.pl \
   SDFConjugate_M.pl \
-  SDFCxMatrix.pl \
+  SDFCxToFix_M.pl \
+  SDFCxToFloat_M.pl \
+  SDFCxToInt_M.pl \
   SDFDataCx_M.pl \
   SDFDataFix_M.pl \
   SDFDataInt_M.pl \
   SDFData_M.pl \
-  SDFFixMatrix.pl \
-  SDFFloatMatrix.pl \
+  SDFFixToCx_M.pl \
+  SDFFixToFloat_M.pl \
+  SDFFixToInt_M.pl \
+  SDFFloatToCx_M.pl \
+  SDFFloatToFix_M.pl \
+  SDFFloatToInt_M.pl \
   SDFGainCx_M.pl \
   SDFGainFix_M.pl \
   SDFGainInt_M.pl \
@@ -48,19 +54,25 @@ PL_SRCS= \
   SDFIdentityFix_M.pl \
   SDFIdentityInt_M.pl \
   SDFIdentity_M.pl \
-  SDFIntMatrix.pl \
+  SDFIntToCx_M.pl \
+  SDFIntToFix_M.pl \
+  SDFIntToFloat_M.pl \
   SDFInverseCx_M.pl \
   SDFInverseFix_M.pl \
   SDFInverseInt_M.pl \
   SDFInverse_M.pl \
+  SDFMatrix.pl \
+  SDFMatrixCx.pl \
+  SDFMatrixFix.pl \
+  SDFMatrixInt.pl \
   SDFMpyCx_M.pl \
   SDFMpyFix_M.pl \
   SDFMpyInt_M.pl \
   SDFMpy_M.pl \
   SDFPackCx_M.pl \
   SDFPackFix_M.pl \
-  SDFPackFloat_M.pl \
   SDFPackInt_M.pl \
+  SDFPack_M.pl \
   SDFSmithForm.pl \
   SDFSubCx_M.pl \
   SDFSubFix_M.pl \
@@ -72,8 +84,8 @@ PL_SRCS= \
   SDFTranspose_M.pl \
   SDFUnPkCx_M.pl \
   SDFUnPkFix_M.pl \
-  SDFUnPkFloat_M.pl \
-  SDFUnPkInt_M.pl
+  SDFUnPkInt_M.pl \
+  SDFUnPk_M.pl
 
 # The .cc files
 SRCS=$(PL_SRCS:.pl=.cc)
