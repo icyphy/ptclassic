@@ -1562,7 +1562,7 @@ body ::tycho::HTMLDocSys::putsClassComment {fd construct} {
 
     # Catch comments that don't have a terminating period (or other
     # suitable mark)
-    regsub "\(\[^\.?!\]\)\[ \t\]*\$" $comment {\1.} comment
+    regsub "\(\[^\.?!>\]\)\[ \t\]*\$" $comment {\1.} comment
 
     puts $fd $comment
 }
