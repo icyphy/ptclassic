@@ -117,7 +117,6 @@ proc ::tycho::query {text queries {entrywidth 40} } {
 	    -text $text \
 	    -queries $queries \
 	    -entrywidth $entrywidth]
-puts [list set queries $queries]
     if {[lsearch -glob $queries choice*] >= 0} {
         set autoraise 0
     } {
@@ -220,7 +219,7 @@ class ::tycho::Query {
     # Add an option menu query
     method choice {tag label entries default {command {}}}
 
-    # Clear all or one entry.
+    # Clear all queries or one query.
     method clear {{tag {}}}
 
     # Disable user interaction with a query
@@ -235,7 +234,7 @@ class ::tycho::Query {
     # Get the current value of the queries (or one query).
     method get {{tag {}}}
 
-    # Insert the specified string into the specified entry box.
+    # Insert the specified string into the specified query.
     method insert {tag str}
 
     # Add an entry box query (a single-line text entry).
@@ -501,9 +500,11 @@ body ::tycho::Query::choice {tag label entries default {command {}}} {
 
 #####################################################################
 #### clear
-# If no argument is given, clear the text in all entry boxes. If a tag
-# is given as an argument, clear the corresponding entry. If the tag is
-# not recognized, do nothing.
+# If no argument is given, clear the all widgets. If a tag
+# is given as an argument, clear the corresponding widget. If the tag is
+# not recognized, do nothing.  What it means to clear a widget depends
+# on the widget.  In some cases, it resets the initial default value.
+# In the case of entry widgets, it deletes the current entry.
 # 
 body ::tycho::Query::clear {{tag {}}} {
     if {$tag == {}} {
@@ -551,11 +552,11 @@ body ::tycho::Query::focusin {} {
 
 #####################################################################
 #### get
-# If no argument is given, get the current value of the entry boxes,
+# If no argument is given, get the current value of the queries,
 # and return as a list in the form {tag value tag value ...}.  This list
 # can be directly assigned to an array using <code>array set</code>,
 # making it easy to use the results of the query. If a tag is given as an
-# argument, return the value of the corresponding entry only. If the tag
+# argument, return the value of the corresponding query only. If the tag
 # is not recognized, return an empty string.
 # 
 body ::tycho::Query::get {{tag {}}} {
@@ -573,7 +574,8 @@ body ::tycho::Query::get {{tag {}}} {
 
 #####################################################################
 #### insert
-# Insert the specified string into the specified entry box.
+# Insert the specified string into the specified query.
+# What this means depends on the type of query.
 # If the tag is not recognized, flag an error.
 # 
 body ::tycho::Query::insert {tag str} {
