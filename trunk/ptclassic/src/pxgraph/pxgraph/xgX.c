@@ -21,7 +21,7 @@
 
 typedef struct x_state {
     Window win;			/* Primary window           */
-};
+} x_state;
 
 void text_X();
 void seg_X();
