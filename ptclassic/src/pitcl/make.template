@@ -43,7 +43,7 @@ LIBFILES=\
 
 include $(ROOT)/stars.mk
 
-ALLTARGETS = $(CGTARGETS)
+ALLTARGETS = $(SDFTARGETS) $(CGTARGETS)
 
 # the LAST star linked in determines the default domain
 ALLSTARS =	$(CGSTARS) $(CGDDFSTARS) \
