@@ -104,7 +104,7 @@ X11_LIBSPEC =	-L$(X11_LIBDIR)  -lX11
 # Variables for Pure Inc tools (purify, purelink, quantify)
 COLLECTOR =
 
-PURELINK =	purelink $(COLLECTOR)
+PURELINK =	purelink $(COLLECTOR) -hardlink=yes
 PURIFY =	purelink $(COLLECTOR) purify
 QUANTIFY =	purelink $(COLLECTOR) quantify
 PURECOV = 	purecov $(COLLECTOR)
