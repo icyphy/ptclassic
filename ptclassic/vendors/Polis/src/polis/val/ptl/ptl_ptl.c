@@ -1,4 +1,4 @@
- /*************************************************************************
+/*************************************************************************
 
   Copyright   [Copyright (c) 1994-1998 The Regents of the Univ. of California.
   All rights reserved.
@@ -417,7 +417,7 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "    arglist { \"( int outputPort, double delay )\" }\n" );
     fprintf( fp, "    code {\n" );  
     fprintf( fp, "      double emitTime;\n" ); 
-    fprintf( fp, "      StarLLCell *temp = (StarLLCell)storeList->getAndRemove(); \n" ); 
+    fprintf( fp, "      StarLLCell *temp = (StarLLCell*)storeList->getAndRemove(); \n" ); 
     fprintf( fp, "      if (temp == 0) temp = new StarLLCell(-1, -1); \n" ); 
     fprintf( fp, "      if (needsSharedResource) { \n" );
     fprintf( fp, "                emitTime = now + (delay/clkFreq);\n" ); 
@@ -445,7 +445,7 @@ static void pl_print_method( fp, node, autotick, unittime )
                     util_make_valid_name( pvar ), output_event_count++ );
         }
     } end_foreach_net_node_fanout;
-    fprintf( fp, "\n" );
+    fprintf( fp, "OutDEPort * tl;\n" );
 
     fprintf( fp, "      switch( cell->outputPort ) {\n" );
 
@@ -455,8 +455,8 @@ static void pl_print_method( fp, node, autotick, unittime )
         if ( pvar != NULL ) {
             strcpy( pvarst, util_make_valid_name( pvar ));
             fprintf( fp, "            case c%s:\n", pvarst );
-            fprintf( fp, "                OutDEPort tl = & %s;\n",pvarst ); 
-            fprintf( fp, "                tl->put(event->realTime) << ");
+            fprintf( fp, "                tl = & %s;\n",pvarst ); 
+            fprintf( fp, "                tl->put(emitTime) << ");
             assoc_var = net_var_assoc_var( var );
             if ( assoc_var == NIL(net_var_t)) {
                 fprintf( fp, "1;\n" );
@@ -489,16 +489,6 @@ static void pl_print_method( fp, node, autotick, unittime )
     fprintf( fp, "      else return 1/clkFreq;\n");
     fprintf( fp, "    }\n}\n\n");
   
-
-  
-    fprintf( fp, "  method {\n" );
-    fprintf( fp, "    name { getEvents }\n");
-    fprintf( fp, "    access { public }\n" );
-    fprintf( fp, "    type { \"SequentialList*\" }\n" );
-    fprintf( fp, "    arglist { \"()\" }\n" );
-    fprintf( fp, "    code {\n" );
-    fprintf( fp, "      return emittedEvents;\n" );
-    fprintf( fp, "    }\n}\n\n");
 
     /*
      * Clean up input events
@@ -952,29 +942,32 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
     fprintf( fp, "    name = Block::fullName();\n" );
 
 
-    fprintf( fp, "    if (feedbackIn.dataNew) {\n" );
-    fprintf( fp, "        if (resourcePointer->topStar() == this) {\n" );
+    fprintf( fp, "    if (feedbackIn->dataNew) {\n" );
+    fprintf( fp, "        if (resourcePointer->getTopCell()->star == this) {\n" );
     fprintf( fp, "            // This is the dummy event indicating end of resource usage \n" );
     fprintf( fp, "            if(emittedEvents->head() == emittedEvents->tail() ) {\n" );
     fprintf( fp, "                resourcePointer->removeTopStar(this); \n");
     fprintf( fp, "                emittedEvents->getAndRemove(); \n");
     fprintf( fp, "                assert(emittedEvents->getAndRemove() == 0); \n");
     fprintf( fp, "            } else { \n");
-    fprintf( fp, "                StarLLCell *temp = (StarLLCell)emittedEvents->getAndRemove(); \n");
-    fprintf( fp, "                assert(now == temp->time()); \n");
-    fprintf( fp, "                emitEvent(temp, now); \n");
-    fprintf( fp, "                refireAtTime(((StarLLCell)emittedEvents->head())->time, 0.0); \n");
+    fprintf( fp, "                StarLLCell *temp; \n");
+    fprintf( fp, "                while((temp = (StarLLCell*)emittedEvents->head())->time == now && (emittedEvents->head() != emittedEvents->tail()) ) { \n");
+    fprintf( fp, "                    StarLLCell *temp = (StarLLCell*)emittedEvents->getAndRemove(); \n");
+    fprintf( fp, "                    assert(now == temp->time); \n");
+    fprintf( fp, "                    emitEvent(temp, now); \n");
+    fprintf( fp, "            } \n");
+    fprintf( fp, "                refireAtTime(((StarLLCell*)emittedEvents->head())->time, 0.0); \n");
     fprintf( fp, "            }\n");
     fprintf( fp, "        } else { \n");
     fprintf( fp, "            //The star has been preempted at the resource  \n");
-    fprintf( fp, "            double delay = resourcePointer->getECT(this)->timeWhenFree - ((StarLLCell)emittedEvents->head())->time; \n");
+    fprintf( fp, "            double delay = resourcePointer->getECT(this) - ((StarLLCell*)emittedEvents->head())->time; \n");
     fprintf( fp, "            //The events being delayed in the queue \n");
     fprintf( fp, "            ListIter listEvents(*emittedEvents); \n");
     fprintf( fp, "            StarLLCell *q;  \n");
     fprintf( fp, "            while((q = (StarLLCell*)listEvents++)!=0) {  \n");
     fprintf( fp, "                q->time = q->time + delay; \n");
     fprintf( fp, "            } \n");
-    fprintf( fp, "            refireAtTime(((StarLLCell)emittedEvents->head())->time, 0.0); \n");
+    fprintf( fp, "            refireAtTime(((StarLLCell*)emittedEvents->head())->time, 0.0); \n");
     fprintf( fp, "        } \n");
     fprintf( fp, "     } else { // This star is firing for the first time, and has resource if req \n");
     
@@ -1033,8 +1026,8 @@ static void pl_print_go( fp, node, option, trace, autotick, unittime )
         fprintf( fp, "    if ( debug ) {\n" );
         fprintf( fp, "        tcl.go();\n" );
         fprintf( fp, "    }\n" );
-        fprintf( fp, "    refireAtTime(((StarLLCell)emittedEvents->head())->time, 0.0); \n" ); 
-        fprintf( fp, "  }\n" );
+        fprintf( fp, "    refireAtTime(((StarLLCell*)emittedEvents->head())->time, 0.0); \n" ); 
+        fprintf( fp, "  }\n }\n" );
     }
 } 
 
