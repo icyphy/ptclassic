@@ -24,6 +24,7 @@ David G. Messerschmitt
 .so universes
 .so galaxies
 .so other
+.so codegen
 .so newstars
 .so icons
 .so moreinfo
