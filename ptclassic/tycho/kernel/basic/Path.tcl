@@ -102,7 +102,7 @@ proc ::tycho::expandPath { path } {
     set path [string trim $path]
     
     switch $tcl_platform(platform) {
-	macinitosh {
+	macintosh {
 	    # On the mac, 'file join {$tycho:foo}' results in :$tycho:foo
 	    # So we may need to pull the leading : off.
 	    if [string match {:$*} $path] {
