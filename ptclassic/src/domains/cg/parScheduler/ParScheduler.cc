@@ -160,6 +160,7 @@ int ParScheduler :: scheduleManually(Galaxy& g) {
 		} else if (s->getProcId() > numProcs) {
 			Error :: abortRun(*s, " procId is out of range",
 				"Manual assignment is failed");
+			return FALSE;
 		} else {
 			// set procId of all invocations of the star
 			ParNode* n = (ParNode*) s->myMaster();
