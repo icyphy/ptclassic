@@ -39,17 +39,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "VHDLBGeodesic.h"
 #include "Error.h"
 
-// allocate a VHDLBGeodesic.  Use hashstring for the name since we expect
-// repeated names to occur (lots of Node_input and Node_output, for example)
-Geodesic* VHDLBPortHole::allocateGeodesic() {
-        char nm[80];
-        strcpy (nm, "Node_");
-        strcat (nm, name());
-        LOG_NEW; Geodesic *g = new VHDLBGeodesic;
-        g->setNameParent(hashstring(nm), parent());
-        return g;
-}
-
 // setup ForkDests
 void VHDLBPortHole :: setupForkDests() {
 	SequentialList temp;
