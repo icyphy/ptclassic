@@ -124,6 +124,7 @@ PL_SRCS= \
  SDFReadVar.pl \
  SDFReciprocal.pl \
  SDFRect.pl \
+ SDFRectCx.pl \
  SDFRectFix.pl \
  SDFRectToCx.pl \
  SDFRectToPolar.pl \
@@ -134,6 +135,7 @@ PL_SRCS= \
  SDFSin.pl \
  SDFSharedMem.pl \
  SDFSqrt.pl \
+ SDFSpheToCart.pl \
  SDFSub.pl \
  SDFSubCx.pl \
  SDFSubFix.pl \
