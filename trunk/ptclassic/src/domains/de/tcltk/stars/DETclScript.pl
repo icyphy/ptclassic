@@ -60,7 +60,7 @@ The argument list for setOutputs_$starID should contain a floating-point
 value for each output of the star.
 The inputs can be of any type.
 The print() method of the particle is used to construct a string passed to Tcl.
-This mechanism is entirely asychronous, in that the Tcl/Tk script
+This mechanism is entirely asynchronous, in that the Tcl/Tk script
 decides when these actions should be performed on the basis of X events.
 .pp
 In synchronous operation, the Tcl procedure goTcl_$starID will be called
@@ -70,9 +70,11 @@ although it can do anything the designer wishes, even ignoring the input
 and output values.
 .pp
 For the DE domain, this star checks to see which inputs are new and
-determines which outputs will be affected by the Tcl/Tk script.
-It then calls the Tcl/Tk script, and writes out the output values
-on the appropriate output ports.
+sets flags accordingly.
+Then, the star calls the Tcl/Tk script which writes new output values to
+a buffer in this star.
+Finally, after the Tcl/Tk script is finished, the star writes out the
+new output values (identified by Tcl) onto the appropriate output ports.
 The time stamp on the affected output ports will be the same
 as the time stamp on the input port(s) that caused this star to fire.
 .EQ
@@ -111,7 +113,7 @@ delim $$
 		type{ void }
 		access{ public }
 		arglist{ "()" }
-		code{
+		code {
 		  // Reset newInputFlags and newOutputFlags in the Tcl object
 		  tcl.setAllNewInputFlags(FALSE);
 		  tcl.setAllNewOutputFlags(FALSE);
@@ -120,30 +122,11 @@ delim $$
 		  // and set the flags for the affected output ports
 		  InDEMPHIter nextp(input);
 		  InDEPort* iportp;
-		  int alloutflag = FALSE;
 		  int portnum = 0;
 		  while ((iportp = nextp++) != 0) {
 		    if ( iportp->dataNew ) {
 		      // set proper entry of newInputFlags of the Tcl object
 		      tcl.setOneNewInputFlag(portnum, TRUE);
-
-		      // see which outputs are affected by the new input
-		      if ( ! alloutflag ) {
-		        if ( iportp->getcomplete() ) {
-			  tcl.setAllNewOutputFlags(TRUE);
-			  alloutflag = TRUE;
-			}
-			else {
-			  // walk down triggerList to find affected outputs
-			  SequentialList *outListp = iportp->gettriggerList();
-			  int numTriggers = outListp->size();
-			  int *datap;
-			  for (int trig = 0; trig < numTriggers; trig++ ) {
-			    datap = (int *) outListp->elem(trig);
-			    tcl.setOneNewOutputFlag(*datap, TRUE);
-			  }
-			}
-		      }
 		    }
 		    portnum++;
 		  }
