@@ -15,7 +15,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	location { CG56 dsp library }
 	input {
 		name{input}
-		type{float}
+		type{fix}
 	}
 	defstate {
 		name { k }
@@ -37,7 +37,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	}
 	defstate {
 		name { d1 }
-		type { float }
+		type { fix }
 		default { "0.0" }
 		desc {
 first-order feedback coefficient which is a function of k and N }
@@ -45,14 +45,14 @@ first-order feedback coefficient which is a function of k and N }
 	}
 	defstate {
 		name { state1 }
-		type { float }
+		type { fix }
 		default { "0.0" }
 		desc { internal state. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
 	}
 	defstate {
 		name { state2 }
-		type { float }
+		type { fix }
 		default { "0.0" }
 		desc { internal state. }
 		attributes { A_NONCONSTANT|A_NONSETTABLE }
@@ -107,13 +107,13 @@ first-order feedback coefficient which is a function of k and N }
 		// ONLY to pass their values to derived stars
 		state1 = 0.0;
 		state2 = 0.0;
-		double acc = 0.0;
-		double d1val = d1;
+		Fix acc(0.0);
+		Fix d1val(d1);
 		for (int i = int(N)-1; i >= 0; i--) {
-		  acc = double(input%i);
-		  acc += d1val * double(state1);
-		  acc -= double(state2);
-		  state2 = double(state1);
+		  acc = Fix(input%i);
+		  acc += d1val * Fix(state1);
+		  acc -= Fix(state2);
+		  state2 = Fix(state1);
 		  state1 = acc;
 		}
 	}
