@@ -44,23 +44,30 @@ include $(CONFIG)
 # Sub directories to run make in.
 DIRS =	
 
-TCL_SRCS = 
+TCL_SRCS = \
+	init.tcl \
+	samples \
+	complexitem
 
 ITCL_SRCS = \
 	newslate.itcl
 
 EXTRA_SRCS = $(TCL_SRCS) $(ITCL_SRCS)
 
-MISC_FILES = 
+MISC_FILES = tclIndex
 
 # 'make realclean' should remove tclIndex
-REALCLEAN_STUFF =
+REALCLEAN_STUFF = tclIndex
 
 # Title for the tydoc index page
 TYDOC_DESC =
 
 # Do make sources so that we ensure that the subdirectories are checked out
-all install: sources $(MISC_SRCS)
+all: sources $(MISC_SRCS)
+	chmod a+x samples
+	chmod a+x complexitem
+
+install: all
 
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
