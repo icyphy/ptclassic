@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "ADPCMMissTrack"
+.NA ADPCMMissTrack
 .SD
 This system demonstrates the pitfalls of using a simple voice-recovery
 technique such as zero-sample substitution in an adaptive differential

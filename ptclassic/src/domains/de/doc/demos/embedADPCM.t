@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "EmbedADPCM"
+.NA EmbedADPCM
 .SD
 This demonstration shows how embedded-ADPCM with
 LSB dropping may be used in an ATM network to

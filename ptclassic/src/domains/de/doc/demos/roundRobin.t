@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "roundRobin"
+.NA roundRobin
 .SD
 This is a high-level simulation of a shared memory with
 round-robin arbitration.

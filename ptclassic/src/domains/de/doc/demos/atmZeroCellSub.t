@@ -1,5 +1,5 @@
 .\" $Id$
-.NA "ATMZeroCellSub"
+.NA ATMZeroCellSub
 .SD
 This demonstration implements a simple voice-cell recovery technique.
 Cells which have been dropped during transmission are replaced with all 0 bits.
