@@ -1006,10 +1006,16 @@ octObject *facetPtr;
 	    /* nothing */;
 	}
 	else if (IsUnivFacet(&univFacet)) {
+	    /* lastFacet is a global variable defined in exec.c,
+	     * storing the facet currently being run.  It is used
+	     * by the highlighting/marking routines. 
+	     */
+	    extern octObject lastFacet;
 	    char * name = BaseName(univFacet.contents.facet.cell);
 	    char msg[128];
 	    int n;
 
+	    lastFacet = univFacet;
 	    sprintf(msg, "RunAllDemos: executing universe '%s'", name);
 	    PrintDebug(msg);
 	    if (GetIterateProp(&univFacet,&n) < 0) {
