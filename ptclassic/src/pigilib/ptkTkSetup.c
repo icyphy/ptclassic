@@ -25,7 +25,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 /*
     ptkTkSetup.c  aok
-    Version: @(#)ptkTkSetup.c	1.5	7/16/93
+    Version: $Id$
 */
 
 
@@ -98,7 +98,11 @@ ptkTkSetup(funcArray, size)
 
     Tcl_SetVar(ptkInterp, "tcl_interactive", "1", TCL_GLOBAL_ONLY);
 
-    _ptkAppInit( ptkInterp, ptkW);	/* our vers of Tk_AppInit */
+    /* our vers of Tk_AppInit */
+    if (_ptkAppInit( ptkInterp, ptkW) != TCL_OK) {
+	PrintErr(ptkInterp->result);
+	exit(1);
+    }
 
     Tk_CreateFileHandler(fileno(RPCReceiveStream), TK_READABLE,
        ptkRPCFileProc, (ClientData) &RPCdata);
