@@ -106,6 +106,8 @@ if ( ! $?TYCHO ) then
 		setenv TYCHO $PTOLEMY/tycho
 	else
 		setenv TYCHO ~ptolemy/tycho
+		echo 'Neither $TYCHO or $PTOLEMY set, so we are setting TYCHO to ~ptolemy/tycho'
+
 	endif
 endif
 
