@@ -41,10 +41,13 @@ CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 ITCL_SRCS = \
+	Block.itcl \
 	DomainInfo.itcl \
+	Galaxy.itcl \
 	Oct.itcl \
 	Profile.itcl \
-	PtWelcomeMessage.itcl
+	PtWelcomeMessage.itcl \
+	Universe.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
