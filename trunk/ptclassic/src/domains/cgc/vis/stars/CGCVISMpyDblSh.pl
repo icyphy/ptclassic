@@ -1,6 +1,7 @@
 defstar {
 	name { VISMpyDblSh }
 	domain { CGC }
+	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen }
 	copyright {
@@ -9,14 +10,14 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  Multiplies the shorts in a 16bit partitioned float to the
-	  corresponding shorts in a 16bit partitioned float.
-	  The result is four signed shorts that is returned as
-	  a single floating point number.  Each multiplication
-	  results in a 32 bit result, which is then rounded to 16bits.
-	    }
+Multiplies the 16-bit short integers concatenated in a 64-bit float particle
+to the corresponding 16-bit short integers in another 64-bit float particles.
+The result is four 16-bit signed shorts that are returned as a single
+floating point number.  Each multiplication results in a 32-bit result,
+which is then rounded to 16 bits.
+	}
 	input {
 	  name { inA }
 	  type { float }
@@ -36,6 +37,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  noInternalState();
 	}
 	initCode{
+	  CGCVISBase::initCode();
 	  addInclude("<vis_proto.h>");
 	  addInclude("<vis_types.h>");
 	}

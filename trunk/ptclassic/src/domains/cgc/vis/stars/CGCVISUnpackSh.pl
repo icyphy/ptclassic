@@ -1,6 +1,7 @@
 defstar {
 	name { VISUnpackSh }
 	domain { CGC }
+	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen }
 	copyright {
@@ -9,12 +10,12 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC vis library }
+	location { CGC Visual Instruction Set library }
 	desc { 
-	  UnPack a single floating point number into four floating 
-	  point numbers.  The input floating point number is first
-	  separated into four shorts and then each short is up cast 
-	  to a floating point number.}
+Unpack a single 64-bit floating point number into four floating point numbers.
+The input floating point number is first separated into four 16-bit short
+integers and then each short is up cast to a floating point number.
+	}
 	input {
 		name { in }
 		type { float }
@@ -54,6 +55,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	  } $starSymbol(packedin);
 	}	  
 	initCode{
+	  CGCVISBase::initCode();
 	  addDeclaration(mainDecl);
           addInclude("<vis_types.h>");
 	}

@@ -1,6 +1,7 @@
 defstar {
 	name { VISFIR }
 	domain { CGC }
+	derivedFrom { VISBase }
 	version { $Id$ }
 	author { William Chen, John Reekie, and Edward Lee}
 	copyright {
@@ -9,10 +10,8 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location { CGC vis library }
-	desc { 
-	  A finite impulse response (FIR) filter.
-	}
+	location { CGC Visual Instruction Set library }
+	desc { A finite impulse response (FIR) filter. }
 	input {
 	  name { signalIn }
 	  type { float }
@@ -119,6 +118,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	    $starSymbol(numloop) = $val(maxpast);	
 	}
 	initCode {
+	  CGCVISBase::initCode();
           addInclude("<vis_proto.h>");
           addInclude("<vis_types.h>");
 	  addDeclaration(mainDecl);
