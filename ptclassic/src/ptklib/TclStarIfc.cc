@@ -32,6 +32,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 **************************************************************************/
 
+#ifdef __GNUG__
+#pragma implementation
+#endif
+
 #include "Block.h"
 #include "TclStarIfc.h"
 extern "C" {
