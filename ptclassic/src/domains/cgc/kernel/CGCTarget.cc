@@ -45,7 +45,7 @@ void CGCTarget :: headerCode () {
 }
 
 
-int CGCTarget :: galDataStruct(Galaxy& galaxy, int level=0) {
+int CGCTarget :: galDataStruct(Galaxy& galaxy, int level) {
     GalTopBlockIter next(galaxy);
     Block* b;
     while ((b = next++) != 0) {
@@ -61,9 +61,10 @@ int CGCTarget :: galDataStruct(Galaxy& galaxy, int level=0) {
 	    starDataStruct(*b, level);
 	}
     }
+    return TRUE;
 }
 
-int CGCTarget :: starDataStruct(Block& block, int level=0) {
+int CGCTarget :: starDataStruct(Block& block, int level) {
     int emptyFlag = TRUE;
     StringList out = indent(level);
     out += "struct {\n";
@@ -124,7 +125,7 @@ int CGCTarget :: setup (Galaxy& g) {
     mainInitialization = "";
     unique = 0;
 
-    CGTarget::setup(g);
+    return CGTarget::setup(g);
 }
 
 int CGCTarget :: run () {
