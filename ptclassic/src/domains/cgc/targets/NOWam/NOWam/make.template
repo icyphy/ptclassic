@@ -55,7 +55,7 @@ INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(BDFKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 
 PL_SRCS = \
 	CGCNOWamSend.pl \
-	CGCNOWamReceive.pl
+	CGCNOWamRecv.pl
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
