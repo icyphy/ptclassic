@@ -65,6 +65,12 @@ class ::tycho::IDocSys {
     public proc getClassesInSource {filename}
 
     ###################################################################
+    ####                   protected procs                         ####
+
+    # ::tycho::safeUpdate copied here
+    protected proc tydocUpdate {obj}
+
+    ###################################################################
     ####                   protected variables                     ####
 
     # The author of the current source file
@@ -403,6 +409,33 @@ body ::tycho::IDocSys::getClassesInSource {filename} {
 
     ###################################################################
     ###################################################################
+    ####                      protected procs                      ####
+
+#######################################################################
+#### tydocUpdate
+# Safe update, local copy so we can run this in a script w/o Tycho.
+# This is a copy of ::tycho::safeUpdate, see kernel/TopLevel.itcl.
+#
+body ::tycho::IDocSys::tydocUpdate {obj} {
+    update
+    if {$obj == {}} {return}
+    # NOTE: Formerly used
+    #   if {[uplevel #0 info objects $obj] == {} && ![winfo exists $obj]}
+    if {[info which -command $obj] == {}} {
+	# If you are having trouble with safeUpdate, uncomment the line below
+        # error "::tycho::safeUpdate: command aborted: $obj does not exist"
+
+        #::tycho::silentError
+	set savetkerror [info body ::tkerror]
+	proc ::tkerror {msg} "proc ::tkerror {msg} [list $savetkerror]"
+	error silent
+
+    }
+    return 0
+}
+
+    ###################################################################
+    ###################################################################
     ####                      private methods                      ####
 
 #####################################################################
@@ -454,6 +487,9 @@ body ::tycho::IDocSys::readFile {filename} {
     set currentLongLine {}
     set fd [open $filename]
     while {![eof $fd]} {
+        # Keep interface live
+        tydocUpdate $this
+
         gets $fd lineIn
      
         if {[regexp {\\$} $lineIn]} {
@@ -536,6 +572,9 @@ body ::tycho::IDocSys::parseData {data} {
     set firstComment {}
     set lastComment {}
     foreach construct $data {
+        # Keep interface live.
+        tydocUpdate $this
+
         if {$inComment} {
             # This is a comment. Save it.
             # The first comment in a file contains tags that need to be saved.
@@ -702,6 +741,9 @@ body ::tycho::IDocSys::parseClass {class body} {
 
     # Parse each item
     foreach construct $body {
+        # Keep interface live
+        tydocUpdate $this
+
         # Ignore empty lines (is necessary?)
         if {$construct == "\n"} {
             continue
