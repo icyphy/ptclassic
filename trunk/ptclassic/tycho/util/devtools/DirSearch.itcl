@@ -59,6 +59,9 @@ class ::tycho::DirSearch {
     ##################################################################
     ####                   protected methods                      ####
 
+    # Set the contents of the entry box.
+    protected method setEntry {string}
+
     # Process a file or directory selection.
     protected method processItem {filename}
 
@@ -132,11 +135,10 @@ body ::tycho::DirSearch::ok {} {
         return
     }
 
-
     if [get ignorecase] {
-        set egrepList [eval ::tycho::egrep -i $regexp $entry]
+        set egrepList [eval ::tycho::egrep -i [list $regexp] $entry]
     } {
-        set egrepList [eval ::tycho::egrep $regexp $entry]
+        set egrepList [eval ::tycho::egrep [list $regexp] $entry]
     }
 
     #puts " $regexp [get entry] $egrepList"
@@ -149,11 +151,22 @@ body ::tycho::DirSearch::ok {} {
         regexp {(^[^ :]*): *([0-9]*):(.*)} $egrepItem dummy \
                 filename linenum patternline
         if ![info exists filename] {
-            puts "Internal DirSearch error: regexp `$egrepItem' failed!\n\
-                    line was: `$egrepItem'\n\
-                    ::tycho::egrep $regexp $entry \n\
-                    returned: $egrepList"
-            continue
+            set printerrmsg 1
+            # Deal with egreps on only one file, where the filename
+            # is not in the output
+            if {[llength $entry] == 1 && \
+                    [regexp {([0-9]*):(.*)} $egrepItem dummy \
+                    linenum patternline]} {
+                set filename $entry
+                set printerrmsg 0
+            }
+            if $printerrmsg {
+                puts "Internal DirSearch error: regexp `$egrepItem' failed!\n\
+                        line was: `$egrepItem'\n\
+                        ::tycho::egrep $regexp $entry \n\
+                        returned: $egrepList"
+      h          continue
+            }
         }
         if {[file pathtype $filename] != "absolute"} {
             #set filename [::tycho::simplifyPath [file join [pwd] $filename]]
@@ -206,4 +219,15 @@ body ::tycho::DirSearch::help {} {
 body ::tycho::DirSearch::processItem {filename} {
     ::tycho::FileBrowser::processItem $filename
     return 0
+}
+
+######################################################################
+#### setEntry
+# This method clears the current contents of the entry box and replaces
+# them with the string passed as an argument.  Derived classes may redefine
+# this to take further action as well.
+#
+body ::tycho::DirSearch::setEntry {string} {
+    clear entry
+    insert entry $string
 }
