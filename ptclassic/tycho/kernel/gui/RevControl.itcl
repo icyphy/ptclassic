@@ -148,7 +148,7 @@ body ::tycho::RevControl::constructor {args} {
     $this addButton cancel -text "Close <ESC>" -command \
 	    "$this unMapWindow"
     $this default nextaction
-    bind $itk_component(hull) <Escape> "$this unMapWindow"
+    bind $itk_component(hull) <Escape> "code $this unMapWindow"
     $this configure -bitmap info
 }
 
