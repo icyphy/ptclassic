@@ -42,8 +42,9 @@ include $(CONFIG)
 TCL_SRCS = testSDFDefs.tcl
 
 # Demos that use stars that are not present in pitcl
+# We don't include testSDFArrayRLS.tcl because the output
+# varies by OS and compiler
 SIMPLE_PTCL_TESTS = \
-	testSDFArrayRLS.tcl \
 	testSDFContrib.tcl \
 	testSDFTargets.tcl
 
