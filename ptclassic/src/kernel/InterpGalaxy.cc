@@ -489,7 +489,7 @@ InterpGalaxy::copy(const InterpGalaxy& g) {
 // add the galaxy to the known list (completing the definition of a galaxy
 // class)
 void
-InterpGalaxy::addToKnownList(const char* outerDomain) {
+InterpGalaxy::addToKnownList(const char* outerDomain, Target* innerTarget) {
 	const char* myName = savestring(readName());
 	setNameParent(myName, parent());
 
@@ -498,9 +498,13 @@ InterpGalaxy::addToKnownList(const char* outerDomain) {
 // We always create a wormhole for certain domains (those for which
 // isGalWorm is true)
 
-	if (Domain::named(outerDomain)->isGalWorm() ||
+// We also make a wormhole whenever an innerTarget is specified.
+
+	Domain* od = Domain::named(outerDomain);
+
+	if (innerTarget || od->isGalWorm() ||
 	    strcmp (outerDomain, KnownBlock::domain()) != 0) {
-		Star& s = Domain::named(outerDomain)->newWorm(*this);
+		Star& s = od->newWorm(*this,innerTarget);
 		setBlock (myName, &s);
 		KnownBlock::addEntry (s, myName, 1);
 		KnownBlock::setDomain (outerDomain);
