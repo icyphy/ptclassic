@@ -48,7 +48,7 @@ if {[string compare test [info procs test]] == 1} then {
     source $TYCHO/kernel/test/testDefs.tcl
 } {}
 
-set tychoExitWhenNoMoreWindows 0
+#set tychoExitWhenNoMoreWindows 0
 
 #set VERBOSE 1
 
@@ -59,6 +59,7 @@ test openContext-1.1 {openContext} {
     set testfiles [list \
 	    sample.fst \
 	    sample.gst \
+	    \$TYCHO/doc/tychoClasses.dag \
 	    ]
     foreach testfile $testfiles {
 	if {$VERBOSE == 1} {
@@ -67,10 +68,10 @@ test openContext-1.1 {openContext} {
 	set win [::tycho::File::openContext $testfile]
 #	wm deiconify $win
 	puts $win
-	after $duration removeobj $win 
+	after [expr {2 * $duration}] removeobj $win 
 	update
     }
 } {}
 
 doneTests
-
+exit
