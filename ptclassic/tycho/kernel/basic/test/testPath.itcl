@@ -113,4 +113,21 @@ test Path-3.1 {Test out mkdir and rm} {
     set shouldNotExist [file isdirectory $myTmpDir]
     list $shouldExist $shouldNotExist
 } {1 0}
+
+test Path-4.1 {Test out relativePath} {
+    set r1 [::tycho::relativePath [file join / a b c d e] \
+	    [file join / a b c h i]]
+    set r2 [::tycho::relativePath [file join / a b c d e] \
+	    [file join .. .. h i]]
+
+    set r3 [::tycho::relativePath . .]
+    set r4 [::tycho::relativePath .. ..]
+    set r5 [::tycho::relativePath . [file join .. a]]
+    set r6 [::tycho::relativePath [file join / a b c d e] [file join / a b c d e]]
+    set r7 [::tycho::relativePath [file join / a b ] [file join / a b c d e]]
+    set r8 [::tycho::relativePath  [file join / a b c d e] [file join / a b ]]
+    set r9 [::tycho::relativePath  [file join a b c d e] [file join / a b ]]
+    set r10 [::tycho::relativePath  [file join a b ] [file join a b .. c]]
+    list $r1 $r1 $r3 $r4 $r5 $r6 $r7 $r8 $r9 $r10
+} {../../h/i ../../h/i . .. ../a e c/d/e ../../.. /a/b a/b/../c}
 doneTests
