@@ -64,6 +64,15 @@
 #define	__host_mips   host_mips
 #endif
 
+#ifdef linux
+#define __linux		linux
+#define sun			/* Seems risky */
+#define _POSIX_SOURCE
+#define _GNU_SOURCE
+#define _BSD_SOURCE
+#endif
+
+
 #ifdef MIPSEL
 #define	__MIPSEL      MIPSEL
 #endif
@@ -176,6 +185,10 @@ typedef int int16;
 #define PORTAR
 #endif
 
+#ifdef linux
+#include <ansidecl.h>
+#endif
+
 #include <stdio.h>
 #include <ctype.h>
 
@@ -234,7 +247,7 @@ extern double trunc();
 #define LACK_SYS5
 #endif
 
-#if defined(ultrix3) || defined(sunos4) || defined(_IBMR2) || defined(ultrix4)
+#if defined(ultrix3) || defined(sunos4) || defined(_IBMR2) || defined(ultrix4) || define(linux)
 #define SIGNAL_FN	void
 #else
 /* sequent, ultrix2, 4.3BSD (vax, hp), sunos3 */
@@ -243,7 +256,7 @@ extern double trunc();
 
 
 /* Some systems have 'fixed' certain functions which used to be int */
-#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(__hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(__STDC__)
+#if defined(ultrix) || defined(SABER) || defined(hpux) || defined(__hpux) || defined(aiws) || defined(apollo) || defined(AIX) || defined(linux) ||     defined(__STDC__) 
 #define VOID_HACK void
 #else
 #define VOID_HACK int
@@ -351,7 +364,7 @@ extern char *malloc(), *realloc(), *calloc();
 #endif
 #endif
 
-#if defined(hpux) || defined (__hpux) || defined(aiws) || (defined(SOL2) && ! defined(BSD))
+#if defined(hpux) || defined (__hpux) || defined(aiws) || defined(linux) ||(defined(SOL2) && ! defined(BSD))
 extern int sprintf();
 #else
 #ifndef _IBMR2
@@ -370,7 +383,7 @@ extern int sscanf();
 
 
 /* some call it strings.h, some call it string.h; others, also have memory.h */
-#if defined(__STDC__) || defined(sprite) || defined(hpux) || defined(__cplusplus)
+#if defined(__STDC__) || defined(sprite) || defined(hpux) || defined(__cplusplus) || defined(linux)
 #include <string.h>
 #else
 /* ANSI C string.h -- 1/11/88 Draft Standard */
@@ -396,6 +409,12 @@ extern int memcmp(), strcmp();
 #undef putc			/* correct lint '_flsbuf' bug */
 #endif /* lint */
 
+#ifdef linux
+#undef srandom
+#undef random
+#undef bzero
+#endif
+
 /* a few extras */
 #if ! defined(_std_h)
 #ifdef hpux
@@ -419,7 +438,7 @@ extern long random();
 
 /* This causes errors on a Sun.
 #if ! defined(_std_h)
-#if defined(ultrix3) || defined(ultrix4) ||  defined(hpux)
+#if defined(ultrix3) || defined(ultrix4) ||  defined(hpux) || defined(linux)
 extern unsigned sleep();
 #else
 extern VOID_HACK sleep();
@@ -447,7 +466,7 @@ extern VOID_HACK sleep();
 #endif
 
 /* handle various limits */
-#if defined(__STDC__) || defined(POSIX)
+#if defined(__STDC__) || defined(POSIX) || defined(linux)
 #include <limits.h>
 #else
 #ifndef _IBMR2
