@@ -44,7 +44,7 @@ LDIRS =
 # directories with subtrees
 SDIRS = 
 
-MAKEVARS = "ARCH=$(PTARCH)"
+MAKEVARS = "PTARCH=$(PTARCH)"
 
 # This target makes sure all the makefiles are current
 makefiles:
