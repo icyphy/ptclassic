@@ -42,7 +42,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	default {"0"}
 	desc {Minimum value in input matrix.}
     }
-    ccinclude {"Matrix.h"}
+    ccinclude { <string.h>, "Matrix.h" }
     protected {
         int max, min;
         int *histBuf, *cumulativeHistBuf;
@@ -51,26 +51,20 @@ limitation of liability, and disclaimer of warranty provisions.
 	histBuf = 0;
 	cumulativeHistBuf= 0;
     }
-    code {
-	extern "C" {
-	    extern int strcasecmp(const char*,const char*);
-	}
-    }
-    ccinclude {"Matrix.h"}
     setup {
         max = int(maxInMatrix);
         min = int(minInMatrix);
 	if ( min > max ) {
 	   Error::abortRun(*this,
-			   "the minInMatrix parameter must be less than"
+			   "the minInMatrix parameter must be less than "
 			   "the maxInMatrix parameter");
 	   return;
 	}
         const char *ct = contrastType;
-        if ( (strcasecmp(ct, "Uniform") != 0) ||
+        if ( (strcasecmp(ct, "Uniform") != 0) &&
 	     (strcasecmp(ct, "Hyperbolic") != 0) ) {
 	   Error::abortRun(*this,
-			   "Invalid contrastType: must be either Uniform"
+			   "Invalid contrastType: must be either Uniform "
 			   "or Hyperbolic.");
 	   return;
 	}
