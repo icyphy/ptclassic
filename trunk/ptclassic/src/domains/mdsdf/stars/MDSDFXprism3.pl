@@ -63,7 +63,7 @@ for a complete explanation of the options.
 	go {
           // read data from input
 	  FloatSubMatrix* inputMatrix = (FloatSubMatrix*)(input.getInput());
-	  int del;
+	  int del = 0;
 
 	  char fileName[256]; fileName[0] = '\000';
 	  if((const char*)saveFile) {
