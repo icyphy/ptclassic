@@ -98,7 +98,7 @@ int CGDDFClusterBag :: prepareBag(MultiTarget* t, ostream* l) {
 			Error::abortRun(*this, "unknown construct type");
 			return FALSE;
 	}
-	LOG_DEL; delete cType;
+	LOG_DEL; delete [] cType;
 	conSched->setGalaxy(*gal);
 	conSched->setOwner(this);
 	conSched->setRefGal(pGal);
