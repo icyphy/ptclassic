@@ -191,10 +191,10 @@ void InterpGalaxy::registerInit(const char* tag,
 				const char* srcStar,
 				const char* srcPort,
 				const char* initDelayValues,
-				const char* dstStar = 0,
-				const char* dstPort = 0,
-				const char* node = 0,
-				const char* busWidth = 0) {
+				const char* dstStar,
+				const char* dstPort,
+				const char* node,
+				const char* busWidth) {
   initList += tag;
   initList += srcStar;
   initList += srcPort;
