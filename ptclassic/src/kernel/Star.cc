@@ -38,6 +38,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #pragma implementation
 #endif
 
+#include "Cluster.h"
 #include "Target.h"
 #include "Star.h"
 #include "StringList.h"
@@ -78,6 +79,13 @@ const Star& Star :: asStar () const { return *this;}
 
 Cluster* Star::asCluster() { return NULL; }
 const Cluster* Star::asCluster() const { return NULL; }
+
+// Destructor
+Star::~Star() {
+  if (parentCluster()) {
+    parentCluster()->clearMaster();
+  }
+}
 
 // make a duplicate Star.  This will call Block::clone 
 // and then set Star specific data members
