@@ -223,9 +223,13 @@ body ::tycho::IconIndex::draw {icon slate x y args} {
     foreach port [names port $icon] {
         set type  [type $icon.$port]
         set attrs [attributes port $icon.$port]
-        eval $slate createrootchild $iconid $type 0 0 $attrs \
-                -tags [list [_cget port $icon $port -type]] \
-		-name $icon.$port
+        eval $slate call $iconid terminal \
+                $icon $type 0 0 $attrs \
+                -tags [list [_itemcget port $icon $port -type]]
+
+ #       eval $slate createrootchild $iconid $type 0 0 $attrs \
+#                -tags [list [_itemcget port $icon $port -type]] \
+#		-name $icon.$port
     }
 }
 
@@ -244,8 +248,8 @@ body ::tycho::IconIndex::group {name args} {
 
     _verifynot group $cntxt $local $name
     _addentity group $cntxt $local $name {} $args
-    if { [_cget group $cntxt $local -label] == "" } {
-	_configure group $cntxt $local [list -label $local]
+    if { [_itemcget group $cntxt $local -label] == "" } {
+	_itemconfigure group $cntxt $local [list -label $local]
     }
     list delete group $name
 }
@@ -267,8 +271,8 @@ body ::tycho::IconIndex::icon {name value args} {
 
     _verifynot icon $cntxt $local $name
     _addentity icon $cntxt $local $name $value $args
-    if { [_cget icon $cntxt $local -label] == "" } {
-	_configure icon $cntxt $local [list -label $local]
+    if { [_itemcget icon $cntxt $local -label] == "" } {
+	_itemconfigure icon $cntxt $local [list -label $local]
     }
     list delete icon $name
 }
@@ -286,26 +290,26 @@ body ::tycho::IconIndex::icon {name value args} {
 body ::tycho::IconIndex::menu {menubar menuname prefix {context {}}} {
     if { $context == "" } {
 	foreach g [names group] {
-            $menubar add [_cget group $context $g -label] $menuname \
+            $menubar add [_itemcget group $context $g -label] $menuname \
                     -type cascade
-	    menu $menubar [_cget group $context $g -label] $prefix $g
+	    menu $menubar [_itemcget group $context $g -label] $prefix $g
 	}
         foreach i [names icon] {
             $menubar command \
-                    [_cget icon {} $i -label] \
+                    [_itemcget icon {} $i -label] \
                     $menuname \
                     -command [concat $prefix $i]
 	}
     } else {
 	foreach g [names group $context] {
-            $menubar add [_cget group $context $g -label] $menuname \
+            $menubar add [_itemcget group $context $g -label] $menuname \
                     -type cascade
-	    menu $menubar [_cget group $context $g -label] \
+	    menu $menubar [_itemcget group $context $g -label] \
                     $prefix $context.$g
 	}
 	foreach i [names icon $context] {
             $menubar command \
-		    [_cget icon $context $i -label] \
+		    [_itemcget icon $context $i -label] \
 		    $menuname \
 		    -command [concat $prefix $context.$i]
         }
@@ -356,8 +360,8 @@ body ::tycho::IconIndex::type {name} {
 body ::tycho::IconIndex::_group {context name args} {
     _verifynot group $context $name $context$separator$name
     _addentity group $context $name $context$separator$name {} $args
-    if { [_cget group $context $name -label] == "" } {
-	_configure group $context $name [list -label $name]
+    if { [_itemcget group $context $name -label] == "" } {
+	_itemconfigure group $context $name [list -label $name]
     }
 }
 
@@ -372,8 +376,8 @@ body ::tycho::IconIndex::_group {context name args} {
 body ::tycho::IconIndex::_icon {group name value args} {
     _verifynot icon $group $name $group$separator$name
     _addentity icon $group $name $group$separator$name $value $args
-    if { [_cget icon $group $name -label] == "" } {
-	_configure icon $group $name [list -label $name]
+    if { [_itemcget icon $group $name -label] == "" } {
+	_itemconfigure icon $group $name [list -label $name]
     }
 }
 

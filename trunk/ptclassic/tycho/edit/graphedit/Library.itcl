@@ -276,8 +276,8 @@ body ::tycho::Library::group {name args} {
 
     _verifynot group $cntxt $local $name
     _addentity group $cntxt $local $name {} $args
-    if { [_cget group $cntxt $local -label] == "" } {
-	_configure group $cntxt $local [list -label $local]
+    if { [_itemcget group $cntxt $local -label] == "" } {
+	_itemconfigure group $cntxt $local [list -label $local]
     }
     list delete group $name
 }
@@ -299,8 +299,8 @@ body ::tycho::Library::item {name args} {
 
     _verifynot item $cntxt $local $name
     _addentity item $cntxt $local $name {} $args
-    if { [_cget item $cntxt $local -label] == "" } {
-	_configure item $cntxt $local [list -label $local]
+    if { [_itemcget item $cntxt $local -label] == "" } {
+	_itemconfigure item $cntxt $local [list -label $local]
     }
     list delete item $name
 }
@@ -319,25 +319,26 @@ body ::tycho::Library::menu {menubar menuname prefix {context {}}} {
     if { $context == "" } {
 	foreach g [names group] {
             $menubar add cascade $g $menuname \
-                    -label [_cget group $context $g -label]
+                    -label [_itemcget group $context $g -label] \
+                    -tearoff 1
 	    menu $menubar $g $prefix $g
 	}
         foreach i [names item] {
             $menubar command $i $menuname \
-                    -label [_cget item {} $i -label] \
+                    -label [_itemcget item {} $i -label] \
                     -command [concat $prefix $i]
 	}
     } else {
 	foreach g [names group $context] {
             $menubar add cascade $g $menuname \
-                    -label [_cget group $context $g -label]
+                    -label [_itemcget group $context $g -label] \
+                    -tearoff 1
 	    menu $menubar $g $prefix $context.$g
 	}
 	foreach i [names item $context] {
             $menubar command $i $menuname \
-		    -label [_cget item $context $i -label] \
+		    -label [_itemcget item $context $i -label] \
 		    -command [concat $prefix $context.$i]
-            puts [concat $prefix $context.$i]
         }
     }
 }
@@ -370,8 +371,8 @@ body ::tycho::Library::parameter {item parameter value args} {
 body ::tycho::Library::_group {context name args} {
     _verifynot group $context $name $context$separator$name
     _addentity group $context $name $context$separator$name {} $args
-    if { [_cget group $context $name -label] == "" } {
-	_configure group $context $name [list -label $name]
+    if { [_itemcget group $context $name -label] == "" } {
+	_itemconfigure group $context $name [list -label $name]
     }
 }
 
@@ -386,8 +387,8 @@ body ::tycho::Library::_group {context name args} {
 body ::tycho::Library::_item {group name args} {
     _verifynot item $group $name $group$separator$name
     _addentity item $group $name $group$separator$name {} $args
-    if { [_cget item $group $name -label] == "" } {
-	_configure item $group $name [list -label $name]
+    if { [_itemcget item $group $name -label] == "" } {
+	_itemconfigure item $group $name [list -label $name]
     }
 }
 

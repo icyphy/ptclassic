@@ -429,7 +429,7 @@ body ::tycho::Class::Constructor {name args} {
     set fullname [fullName Constructor $name]
 
     _verifynot Constructor {} $fullname $fullname
-    _addentity Constructor {} $fullname {} {} $args
+    _addentity Constructor {} $fullname $fullname {} $args
     list delete Constructor $name
 }
 
@@ -475,7 +475,7 @@ body ::tycho::Class::Destructor {name args} {
     set fullname [fullName Destructor $name]
 
     _verifynot Destructor {} $fullname $fullname
-    _addentity Destructor {} $fullname {} {} $args
+    _addentity Destructor {} $fullname $fullname {} $args
     list delete Destructor $name
 }
 
@@ -578,7 +578,7 @@ body ::tycho::Class::method {name args} {
     set fullname [fullName method $name]
 
     _verifynot method {} $fullname $fullname
-    _addentity method {} $fullname {} {} $args
+    _addentity method {} $fullname $fullname {} $args
     list delete method $name
 }
 
@@ -673,7 +673,7 @@ body ::tycho::Class::parent {name args} {
     set fullname [fullName parent $name]
 
     _verifynot parent {} $fullname $fullname
-    _addentity parent {} $fullname {} {} $args
+    _addentity parent {} $fullname $fullname {} $args
     list delete parent $name
 }
 
@@ -719,7 +719,7 @@ body ::tycho::Class::variable {name args} {
     set fullname [fullName variable $name]
 
     _verifynot variable {} $fullname $fullname
-    _addentity variable {} $fullname {} {} $args
+    _addentity variable {} $fullname $fullname {} $args
     list delete variable $name
 }
 
