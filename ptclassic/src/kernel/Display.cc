@@ -38,7 +38,11 @@ XGraph :: XGraph () {
 XGraph :: ~XGraph () {
 	for (int i = 0; i<ng; i++) {
 		if (strm[i]) fclose (strm[i]);
-		delete tmpFileNames[i];
+		const char *name = tmpFileNames[i];
+		if (name) {
+			unlink(name);
+			delete name;
+		}
 	}
 }
 
