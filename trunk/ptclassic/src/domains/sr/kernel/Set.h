@@ -44,10 +44,10 @@ public:
   ~Set();
 
   // Return one more than the largest allowed index
-  int size() { return mysize; }
+  int size() const { return mysize; }
 
   // Return non-zero if the item is present, zero otherwise
-  int operator [] (int index) {
+  int operator [] (int index) const {
     return words[word(index)] & (1 << bit(index));
   }
 
@@ -67,15 +67,20 @@ public:
 
   Set & operator -= (Set &);
 
+  Set & operator = (const Set &);
+
   int cardinality();
 
 protected:
 
+  // Return the total number of words in the set
+  int numwords() const { return (mysize-1)/sizeof(int)+1; }
+
   // Return the array for the index
-  int word( int index ) { return index / sizeof(int); }
+  int word( int index ) const { return index / sizeof(int); }
 
   // Return the bit for the index
-  int bit( int index ) { return index % sizeof(int); }
+  int bit( int index ) const { return index % sizeof(int); }
     
   // Number of bits in the set
   int mysize;

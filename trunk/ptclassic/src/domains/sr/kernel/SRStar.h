@@ -3,7 +3,7 @@
 #ifndef _SRStar_h
 #define _SRStar_h
 
-/*  Version @(#)SRStar.h	1.4 4/19/96
+/*  Version $Id$
 
 Copyright (c) 1990- The Regents of the University of California.
 All rights reserved.

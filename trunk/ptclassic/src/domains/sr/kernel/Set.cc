@@ -40,9 +40,19 @@ Set::Set(int s)
 {
   mysize = s;
   words = new int[word(s-1)];
-  for ( int i = word(s) ; --i >= 0 ; ) {
+  for ( int i = numwords() ; --i >= 0 ; ) {
     words[i] = 0;
   }
+}
+
+// Make a copy of the set
+
+Set & Set::operator = (const Set & s) {
+  Set * newset = new Set( s.size() );
+  for ( int i = newset->numwords() ; --i >= 0 ; ) {
+    newset->words[i] = s.words[i];
+  }
+  return *newset;
 }
 
 // Destroy the set
@@ -71,7 +81,7 @@ int Set::cardinality()
 
 Set & Set::operator |= (Set & s)
 {
-  for ( int i = word(mysize-1)+1 ; --i >= 0 ; ) {
+  for ( int i = numwords() ; --i >= 0 ; ) {
     words[i] |= s.words[i];
   }
   return *this;
@@ -79,7 +89,7 @@ Set & Set::operator |= (Set & s)
 
 // Remove a set from a set
 Set & Set::operator -= (Set & s) {
-  for ( int i = word(mysize-1)+1 ; --i >= 0 ; ) {
+  for ( int i = numwords() ; --i >= 0 ; ) {
     words[i] &= ~(s.words[i]);
   }
   return *this;
