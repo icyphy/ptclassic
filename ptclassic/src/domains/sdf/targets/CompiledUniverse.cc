@@ -61,7 +61,7 @@ int CompiledUniverse::parseCommandLine(int argc, char** argv, int* numIters) {
 				State* s;
 				StringList st;
 				st << "Usage: " << name();
-				while(s = nextState++) {
+				while( (s = nextState++) ) {
 					st << " [" << s->name() << " <value>]";
 				}
 				st << " [iterations]";

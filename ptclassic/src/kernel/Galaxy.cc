@@ -125,7 +125,7 @@ void Galaxy :: initSubblocks() {
 	if (Scheduler::haltRequested()) return;
 	BlockListIter bdel(blocksToDelete);
 	Block *bd;
-	while (bd = bdel++) {
+	while ( (bd = bdel++) ) {
 	  removeBlock(*bd);
 	  LOG_DEL; delete bd;
 	}
