@@ -103,7 +103,7 @@ class ::tycho::Monitor {
     itk_option define -modal modal Modal 0
 
     # Command to be executed.
-    itk_option define -command command Command "make"
+    itk_option define -command command Command ""
 
     # Directory to execute the command in.
     itk_option define -dir dir Dir {}
@@ -151,6 +151,12 @@ class ::tycho::Monitor {
 
     # Keep track of the line number in monitor
     private variable monitorLine 0
+
+    # Remember the command to execute.
+    private common commandtoexecute ""
+
+    # The flag to determine whether we should execute the prev cmd or not.
+    private common remembercommand "0"
 }
 
 
@@ -191,7 +197,15 @@ configbody ::tycho::Monitor::modal {
 #
 configbody ::tycho::Monitor::command {
     clear commandToExec
-    insert commandToExec $itk_option(-command)
+    # Insert only when user has not specified a previous command.
+    if {[info exists remembercommand]} {
+        if {$remembercommand=="1"} {
+            insert commandToExec $commandtoexecute
+        }
+    }
+    if {[get commandToExec]=={}} {
+        insert commandToExec $itk_option(-command)
+    }
 }
 
 #######################################################################
@@ -213,19 +227,15 @@ body ::tycho::Monitor::constructor {args} {
 
     # Original Tk stuff here
     configure -queries [list \
-            {line commandToExec {Command to Exec:} make } \
+            {line commandToExec {Command to Exec:} {}} \
             {line dirToExecFrom {Directory to Exec from:} {}} \
+            {check rememberCommand {Remember previous command:} 1} \
             {check autoDestroy {Close window automatically:} 0} \
             {check autoStart {Start execution automatically:} 0}]
 
-    eval itk_initialize $args
+    insert rememberCommand $remembercommand
 
-    # If the command option has not been set, set the default now.
-    # This has to be done in the constructor rather than in the class
-    # definition (as a default) because "$this" is known here.
-    if {$itk_option(-command) == {}} {
-	configure -command {make}
-    }
+    eval itk_initialize $args
 
     $itk_component(bbox) buttonconfigure ok \
 	    -text {Exec <Ret>} \
@@ -456,6 +466,8 @@ body ::tycho::Monitor::execProcessInMonitor {} {
     $itk_component(history) configure -readonly 1
     $this clearHistory
     
+    set commandtoexecute [get commandToExec]
+    set remembercommand [get rememberCommand]
     $this execProcess [get commandToExec] [get dirToExecFrom]
 
     if {[get autoDestroy]==1} {
