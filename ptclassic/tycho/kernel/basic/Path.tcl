@@ -277,6 +277,40 @@ proc ::tycho::relativePath {srcFile dstFile} {
 }
 
 ##############################################################################
+#### rootDir
+# Return the name of the root directory.  Under Unix this is "/".
+# Under Mac the volume name is returned.  Under Windows 
+#
+proc ::tycho::rootDir {pathname} {
+    global tcl_platform
+    switch $tcl_platform(platform) {
+	macintosh {
+	    if { [file pathtype $pathname] == "absolute"} {
+		return [lindex [file split $pathname] 0]
+	    }
+	    return [lindex [file split [pwd]] 0]
+	}
+	unix {
+	    return "/"
+	}
+	windows {
+	    switch [file pathtype $pathname] {
+		absolute {
+		    return [lindex [file split $pathname] 0]
+		}
+		volumerelative {
+		    return [lindex [file split $pathname] 0]
+		}
+		relative {
+		    return [lindex [file split [pwd]] 0]
+		}
+	    }
+	}
+    }
+
+}
+
+##############################################################################
 #### rm
 # Remove a file
 # FIXME: In tcl7.6, this should go away
