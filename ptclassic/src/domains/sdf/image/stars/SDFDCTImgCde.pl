@@ -9,7 +9,7 @@ All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
-	location	{ SDF image palette }
+	location	{ SDF image library }
 	desc {
 This star takes a DCTImage input particle, inserts "start of block" markers,
 run-length encodes it, and outputs the modified DCTImage particle. 
