@@ -169,9 +169,12 @@ body ::tycho::ColorBrowser::updateListbox {} {
 #### setEntry
 # This method clears the current contents of the entry box and replaces
 # them with the string passed as an argument.  In addition, it displays
-# the color named in the entry box.
+# the color named in the entry box. If an empty string is passed, the
+# displayed color is unchanged.
 #
 body ::tycho::ColorBrowser::setEntry {string} {
     chain $string
-    $itk_component(color) configure -background [::tycho::color $string]
+    if {$string != {}} {
+        $itk_component(color) configure -background [::tycho::color $string]
+    }
 }
