@@ -16,6 +16,6 @@ defstar {
 	}
 	ccinclude { <math.h> }
 	go {
-		output%0 << sqrt (input%0);
+		output%0 << sqrt (double(input%0));
 	}
 }
