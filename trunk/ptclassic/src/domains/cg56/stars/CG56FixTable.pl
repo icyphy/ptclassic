@@ -7,11 +7,54 @@ defstar {
 	copyright { 1992 The Regents of the University of California }
 	location { CG56 demo library }
         explanation {
-The input accesses a lookup table.  
-}                  
+.PP
+The input accesses a lookup table.  More generally, 56lookup defines
+a function which maps input values between -1 and +1-2^-23 into
+user-specified output values.
+.PP
+The basic function is given by a table of constants which specify
+values of the function at certain fixed points; the constants are
+taken from a file or given by the list \fIcoef\fR.
+For a table with n constants, the
+first constant specifies the output for an input of -1.  The second
+constant specifies the output for an input of -1 + 2/n, and so on,
+the last constant handling an input of 1 - 2/n.  In essence, the
+table is scaled to fit in the interval from -1 to 1, and the input
+acts as an index into the table.
+.PP
+The \fIinterpolation\fR parameter determines the output for input
+values between table-entry points.  If \fIinterpolation\fR is
+"linear", the star will interpolate between table entries; if
+\fIinterpolation\fR is "none", it will use the next lowest entry.
+With a two-element table, for instance, the first constant
+specifies the output for an input of -1, while the second handles
+an input of 0.  With no interpolation, all inputs less than 0 will
+result in an output of the first constant.
+.PP
+Since the table specifies outputs only for inputs up to +1 - 2/n,
+special provisions must be made for inputs between that point and +1.
+With \fIinterpolation\fR set to "none", inputs in that range result
+in an output of the last table constant.  If  \fIinterpolation\fR
+is "linear", the behavior of the function is specified by
+\fItableType\fR, which determines the effective table entry for an
+input of 1.0.  "periodic" sets the entry equal to the entry for -1,
+allowing smoothly wrapping periodic functions.  For "limited", it
+is equal to the last constant.  "linear" sets it to twice
+the last constant minus the previous one, linearly extending the
+table.  Any other value results in a value of 0 for an input of 1.
+.PP
+As an example, the table [1 2 3 5] with linear interpolation returns
+the following input-output pairs: -1=>1; -.75=>1.5; -.5=> 2; -.25=>2.5;
+0=>3; .25=>4; .5=>5.  An input of .75 gives an output of 3 for periodic
+table type, 5 for limited, 6 for linear, and 2.5 for any other type.
+.PP
+The \fItableType\fR feature is in fact implemented by tacking an extra
+value onto the end of the table.  Thus, the coefficient table will require
+one more memory location if \fIinterpolation\fR is "linear".
+	}                  
        	input {
 		name { input }
-		type { fix }
+		type { int }
 	}
 	output {
 		name { output }
