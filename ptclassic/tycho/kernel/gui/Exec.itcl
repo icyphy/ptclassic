@@ -54,28 +54,13 @@ class ::tycho::Exec {
     ####                            options                        ####
 
     # One line description of command option; listed in alphabetical order
-    itk_option define -command command command "make"
+    itk_option define -command command Command "make"
 
     ###################################################################
     ####                         public methods                    ####
 
-    # exec command, if there is any output, bring up a window and display it
-    method execCommand {command}
-
-    ###################################################################
-    ####                   protected variables                     ####
-
-    # Comments come before the variable declaration; variables listed
-    # in alphabetical order
-    protected variable variableName
-
-    protected common variableName
-
-    ###################################################################
-    ####                   private methods                         ####
-
-    # One line description; listed in alphabetical order
-    private method NameA {}
+    # exec a process, if there is any output, bring up a window and display it
+    method execProcess {command}
 
     ###################################################################
     ####                   private variables                       ####
@@ -110,9 +95,9 @@ body ::tycho::Exec::constructor {args} {
 	configure -command "$this exec"
     }
 
-    itk_component(bbox) buttonconfigure ok \
+    $itk_component(bbox) buttonconfigure ok \
 	    -text {Exec <Ret>} \
-	    -command "$this execCommand $commandToExec"
+	    -command "$this execProcess $commandToExec"
 }
 
 
@@ -128,17 +113,28 @@ body ::tycho::Exec::destructor {} {
     ####                      public methods                       ####
 
 #######################################################################
-#### NameA
-# Description.
+#### execProcess
+# Execute a process.  If there is any output, display it.
 #
-body ::tycho::Exec::execCommand {command} {
+body ::tycho::Exec::execProcess {command} {
+    # Clear the history if it is present
+    if {[info exists itk_component(history)] && \
+        [winfo exists $itk_component(history)]} {
+        $itk_component(history) configure -readonly 0
+        $itk_component(history) clear
+        $itk_component(history) configure -readonly 1
+        # FIXME! Calling update idletasks is entirely unsafe!!!
+        update idletasks
+        #::tycho::safeUpdate $this
+    }
     set fd [open |$command r+]
  
     while ![eof $fd] {
         set line [gets $fd]
         if ![string length $line] { break}
         
-        if ![info exists $itk_component(hull).history] {
+        if {![info exists itk_component(history)] || \
+                ![winfo exists $itk_component(history)]} {
             # Ok, we have some output, so bring up a window
             itk_component add history {
                 ::tycho::Edit $itk_component(hull).history -textheight 30
@@ -151,6 +147,12 @@ body ::tycho::Exec::execCommand {command} {
             pack $itk_component(history) -expand yes -fill both
             $itk_component(history) configure -readonly 1
         }
-        [$itk_component(history) textWinName] insert $line
+        $itk_component(history) configure -readonly 0
+        $itk_component(history) insertData "$line\n"
+        $itk_component(history) configure -readonly 1
+        # FIXME! Calling update idletasks is entirely unsafe!!!
+        update idletasks
+        #::tycho::safeUpdate $this
     }
+    close $fd
 }
