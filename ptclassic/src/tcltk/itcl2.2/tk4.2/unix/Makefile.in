@@ -95,7 +95,9 @@ X11_LIB_SWITCHES =	@XLIBSW@
 # Libraries to use when linking:  must include at least Xlib, the
 # dynamic loading library, and the math library (in that order).  This
 # definition is determined by the configure script.
-LIBS = @TCL_BUILD_LIB_SPEC@ @LIBS@ $(X11_LIB_SWITCHES) @DL_LIBS@ @MATH_LIBS@ -lc
+# -lc makes ld fail on the alpha. I don't see why it is needed.
+# Frederic Boulanger <Frederic.Boulanger@supelec.fr>
+LIBS = @TCL_BUILD_LIB_SPEC@ @LIBS@ $(X11_LIB_SWITCHES) @DL_LIBS@ @MATH_LIBS@ #-lc
 
 # To change the compiler switches, for example to change from -O
 # to -g, change the following line:

@@ -186,7 +186,9 @@ CC_SWITCHES =	${CFLAGS} ${TCL_SHLIB_CFLAGS} -I${GENERIC_DIR} -I${UNIX_DIR} \
 ${AC_FLAGS} ${MATH_FLAGS} ${GENERIC_FLAGS} ${PROTO_FLAGS} ${MEM_DEBUG_FLAGS} \
 ${ENV_FLAGS} -DTCL_SHLIB_EXT=\"${SHLIB_SUFFIX}\"
 
-LIBS =		@DL_LIBS@ @LIBS@ $(MATH_LIBS) -lc
+# -lc makes ld fail on the alpha. I don't see why it is needed.
+# Frederic Boulanger <Frederic.Boulanger@supelec.fr>
+LIBS =		@DL_LIBS@ @LIBS@ $(MATH_LIBS) #-lc
 
 DEPEND_SWITCHES = ${CFLAGS} -I${GENERIC_DIR} -I${UNIX_DIR} \
 ${AC_FLAGS} ${MATH_FLAGS} \
