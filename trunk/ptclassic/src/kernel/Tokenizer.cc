@@ -356,7 +356,7 @@ Tokenizer::pushBack(const char* s)
 		*pb_ptr++ = ungot,  ungot = 0;
 		pb_buffer.index++, toklen--;
 	}
-	*pb_ptr++ = *whitespace;
+	if (*whitespace) *pb_ptr++ = *whitespace;
 
 	// push characters in reversed order
 	s += strlen(s);
@@ -375,4 +375,11 @@ void
 Tokenizer::flush() {
 	while (depth) pop ();
 	while (c != '\n') get();
+}
+
+char
+Tokenizer::peekAtNextChar() {
+	char next = 0;
+	if (get()) ungot = next = c;
+	return next;
 }

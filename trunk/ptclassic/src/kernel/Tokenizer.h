@@ -170,7 +170,8 @@ public:
 		quote_char = n;
 		return o;
 	}
+
+	char peekAtNextChar();
 };
 
 #endif
-
