@@ -48,7 +48,7 @@ MISC_FILES = codeDoc internals usersGuides
 REALCLEAN_STUFF =
 
 # Sub directories to run make in.
-DIRS =          internals usersGuides
+DIRS =          internals tutorial usersGuides
  
 # We don't include common.mk since we don't use the compiler here
 include $(ROOT)/mk/no-compile.mk
