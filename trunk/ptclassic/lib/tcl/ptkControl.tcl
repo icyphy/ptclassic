@@ -715,7 +715,6 @@ proc ptkGo {name octHandle} {
 
     # catch errors and reset the run flag.
     if {[catch {
-        curuniverse $name
         ptkCompile $octHandle
         set w .run_$octHandle
 
