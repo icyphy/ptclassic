@@ -56,16 +56,14 @@ INCLUDE_IPUS_DOMAIN  = no
 include $(ROOT)/mk/stars.mk
 
 # libraries
-PTINY_LIBS =		$(PTINY_STAR_LIBS) -lgantt -lptolemy $(TCL_LIBSPEC) \
+PTINY_LIBS =		$(PTINY_STAR_LIBS) -lptolemy $(TCL_LIBSPEC) \
 			$(SYSLIBS) $(LIB_FLUSH_CACHE)
-LIBS = $(STAR_LIBS) -lgantt -lptolemy $(TCL_LIBSPEC) $(SYSLIBS)\
+LIBS = $(STAR_LIBS) -lptolemy $(TCL_LIBSPEC) $(SYSLIBS)\
 			$(LIB_FLUSH_CACHE)
 
 PTINY_LIBFILES =	$(PTINY_STAR_LIBFILES) \
-				$(LIBDIR)/libptolemy.$(LIBSUFFIX) \
-				$(LIBDIR)/libgantt.$(LIBSUFFIX)
-LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.$(LIBSUFFIX) \
-				$(LIBDIR)/libgantt.$(LIBSUFFIX)
+				$(LIBDIR)/libptolemy.$(LIBSUFFIX)
+LIBFILES = 		$(STAR_LIBFILES) $(LIBDIR)/libptolemy.$(LIBSUFFIX)
 
 # first star determines default domain as a rule
 PTINY_STARS =		$(PTINY_SDFSTARS) $(DESTARS)
@@ -84,10 +82,10 @@ PTINY_PTCL_MODS = 	$(OBJS) $(PTINY_STARS) $(PTINY_TARGETS) $(PTINY_LIBS)
 PTCL_MODS = 		$(OBJS) $(ALLSTARS) $(ALLTARGETS) $(LIBS)
 
 # Sources
-SRCS =			PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc
+SRCS =			PTcl.cc ptclMain.cc ptclError.cc ptclAppInit.cc ptclGantt.cc
 
 # Header files
-HDRS =			PTcl.h
+HDRS =			PTcl.h ganttChart.h
 
 # Objects
 OBJS =			$(SRCS:.cc=.o)
