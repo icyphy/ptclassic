@@ -1,4 +1,4 @@
-static const char file_id[] = "CGCTargetWH.cc";
+static const char file_id[] = "CreateSDFStar.cc";
 /******************************************************************
 Version identification:
 $Id$
@@ -37,7 +37,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGUtilities.h"
 #include "Domain.h"
 #include "CGCPortHole.h"
-#include "CGCTargetWH.h"
+#include "CreateSDFStar.h"
 #include "KnownTarget.h"
 #include "KnownBlock.h"
 #include "Linker.h"
@@ -69,13 +69,13 @@ public:
     }
 };
 	
-CGCTargetWH::CGCTargetWH(const char* name,const char* starclass, const
+CreateSDFStar::CreateSDFStar(const char* name,const char* starclass, const
 			 char* desc) : CGCTarget(name,starclass,desc) {
 			     addStream("starPorts",&starPorts);
 			     addStream("starSetup",&starSetup);
 }
 
-void CGCTargetWH::setup () {
+void CreateSDFStar::setup () {
     // Create the base name for the SDF star to be generated
     StringList plPrefix;
     plPrefix << "SDF" << filePrefix; 
@@ -94,13 +94,13 @@ inline void commStarInit(CGCSDFBase& s,PortHole& p,int numXfer) {
     s.sdfPortType = type;
 }
 
-void CGCTargetWH::wormPrepare() {
+void CreateSDFStar::wormPrepare() {
     StringList plPrefix;
     plPrefix << "SDF" << galaxy()->name(); 
     filePrefix = savestring(plPrefix);    
     convertWormholePorts(*galaxy());
 }
-int CGCTargetWH::convertWormholePorts(Galaxy& gal) {
+int CreateSDFStar::convertWormholePorts(Galaxy& gal) {
     // FIXME - Won't work unless CGC is at top level
     if(!gal.parent()->isItWormhole()) return FALSE;
     
@@ -147,7 +147,7 @@ int CGCTargetWH::convertWormholePorts(Galaxy& gal) {
     return !SimControl::haltRequested();
 }
 		
-int CGCTargetWH::compileCode() {
+int CreateSDFStar::compileCode() {
     StringList command;
     command << "cd " << (const char*)destDirectory << "; "
 	    << "make -f " << (const char*) filePrefix << ".mk all";
@@ -158,7 +158,7 @@ int CGCTargetWH::compileCode() {
     return TRUE;
 }
 
-int CGCTargetWH::loadCode() {
+int CreateSDFStar::loadCode() {
     if(!linkFiles()) {
 	Error::abortRun("Failed to link in new star, aborting");
 	return FALSE;
@@ -171,7 +171,7 @@ int CGCTargetWH::loadCode() {
     return TRUE;
 }
 
-void CGCTargetWH::frameCode() {
+void CreateSDFStar::frameCode() {
     StringList code;
     const char* wormStarName = filePrefix;
     wormStarName += 3;
@@ -190,7 +190,7 @@ void CGCTargetWH::frameCode() {
     initCodeStrings();
 }
 
-void CGCTargetWH::writeCode() {
+void CreateSDFStar::writeCode() {
     writeFile(myCode,".pl",displayFlag);
     // Construct makefile
     StringList makefile;
@@ -206,18 +206,18 @@ void CGCTargetWH::writeCode() {
     writeFile(makefile,".mk");
 }
 
-void CGCTargetWH::initCodeStrings() {
+void CreateSDFStar::initCodeStrings() {
     CGCTarget::initCodeStrings();
     starPorts.initialize();
 }
 
-int CGCTargetWH::run () {
+int CreateSDFStar::run () {
     return TRUE;
 }
 
 // Redefine main loop so that we do not iterate.  The iteration will be
 // controlled by calling the go method of the new SDF star
-void CGCTargetWH::mainLoopCode() {
+void CreateSDFStar::mainLoopCode() {
     defaultStream = &myCode;
     allWormInputCode();
     compileRun((SDFScheduler*) scheduler());
@@ -227,15 +227,15 @@ void CGCTargetWH::mainLoopCode() {
     defaultStream = crStream;
 }
 
-Block* CGCTargetWH::makeNew () const {
-    LOG_NEW; return new CGCTargetWH(name(),starType(),descriptor());
+Block* CreateSDFStar::makeNew () const {
+    LOG_NEW; return new CreateSDFStar(name(),starType(),descriptor());
 }
 
-ISA_FUNC(CGCTargetWH,CGCTarget);
-static CGCTargetWH targ("CGCTargetWH","CGCStar","Wormhole target for CGC.");
-static KnownTarget entry(targ,"CGCTargetWH");
+ISA_FUNC(CreateSDFStar,CGCTarget);
+static CreateSDFStar targ("CreateSDFStar","CGCStar","Wormhole target for CGC.");
+static KnownTarget entry(targ,"CreateSDFStar");
 
-int CGCTargetWH::linkFiles () {
+int CreateSDFStar::linkFiles () {
     StringList dir, linkCmd;
 
     char* expandedDirName = expandPathName((const char*) destDirectory); 
@@ -259,7 +259,7 @@ int CGCTargetWH::linkFiles () {
     return status;
 }
 
-int CGCTargetWH::connectStar() {
+int CreateSDFStar::connectStar() {
     Galaxy* parentGal = (Galaxy*)topLevelGalaxy->parent()->parent();
     StringList	starname;
     starname << topLevelGalaxy->name() << "Worm";
