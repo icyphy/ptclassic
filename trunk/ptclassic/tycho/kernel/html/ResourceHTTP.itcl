@@ -196,7 +196,7 @@ class ::tycho::ResourceHTTP {
     # FIXME
     method info {} {
         error "This shouldn't be called!"
-	concat [array get _forwarding] [array get _statinfo]
+	concat [array get _forward] [array get _statinfo]
     }
 
     # FIXME
@@ -782,14 +782,14 @@ body ::tycho::ResourceHTTP::httpread {} {
                     # may return the forward: http:///<etc><etc>, omitting the
                     # site name completely to save transfer time.
                     set site [lindex [::tycho::url split $currentURL] 1]
-                    set _forwarding($currentURL) "http://$site/$rest"
+                    set _forward($currentURL) "http://$site/$rest"
                 } else {
                     # NCSA and Netscape Enterprise server don't do anything
                     # fancy like Apache.
-                    set _forwarding($currentURL) $forwardlocation
+                    set _forward($currentURL) $forwardlocation
                 }
                 set _exists($currentURL) 1
-		httpget $_forwarding($currentURL) $requestMode
+		httpget $_forward($currentURL) $requestMode
 
 	    } elseif { $requestMode == "header" } {
 		# If in header-only mode, we're done!
