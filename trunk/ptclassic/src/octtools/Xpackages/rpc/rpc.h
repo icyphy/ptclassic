@@ -58,6 +58,21 @@ ENHANCEMENTS, OR MODIFICATIONS.
  *
  */
 
+#if defined(PTHPUX10) && !defined(PTNO_THREADS)
+/* Under HPUX10 with DCE,
+ * /opt/dce/newconfig/RelNotes/HPDCE1.3.1RelNotes.txt says:
+ *
+ *         Source code that is built into applications that use the CDS,
+ *	   RPC, or security APIs must include <pthread.h> .  This is
+ *	   necessary because the DCE RPC runtime library creates a small
+ *	   number of private threads, on both the client and server
+ *	   sides of an application.
+ *  
+ * If you don't have DCE, add -DPTNO_THREADS to ARCHFLAGS in config-hppa.mk
+ */
+#include <pthread.h>
+#endif
+
 #ifndef PORT_H
 #include "port.h"
 #endif
