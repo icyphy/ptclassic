@@ -40,3 +40,5 @@ StringList NetworkCell::print() const
 			dataType(), priority, destAddr, mySize);
 	return (StringList(printBuf));
 }
+
+ISA_FUNC(NetworkCell, Message);
