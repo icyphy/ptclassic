@@ -35,18 +35,23 @@ This is useful before quantizing a DCT transformed image.
     arglist { "(const FloatMatrix& inImg, FloatMatrix& outImg)" }
     code {
       // initialize
+      int width = inImg.numCols();
+      int height = inImg.numRows();
       double * outArr = new double[inImg.numCols() * inImg.numRows()];
 
-      // set outArr to the array representing inImage
-      // inImage[0] returns address of 1st row, which is also address of the array
-      // since array is contiguously stored in memory
+      // FIXME
+      // Sets inImagePtr to the vector representing the FloatMatrix.
+      // This only works because in the underlying implementation of FloatMatrix,
+      // inImage[0], which returns the 1st row, also returns the entire vector
+      // representing the matrix. 
+      // A method should be added to the FloatMatrix class to do this instead
+      // of relying on this current operation
       const double* inImagePtr = inImg[0];
 
-      Ptdsp_ZigZagScan ( inImagePtr, outArr, inImg.numCols(), inImg.numRows(), 
-			 int(BlockSize));
+      Ptdsp_ZigZagScan ( inImagePtr, outArr, width, height, int(BlockSize));
 
       // Copy the data to the outImg.
-      for(int i = 0; i < inImg.numCols() * inImg.numRows(); i++) {
+      for(int i = 0; i < width * height; i++) {
 	outImg.entry(i) = outArr[i];
       }
       LOG_DEL; delete [] outArr;
