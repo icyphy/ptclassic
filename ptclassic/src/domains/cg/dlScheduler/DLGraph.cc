@@ -136,7 +136,7 @@ int workAfter(ParNode* pd) {
 		if (node->alreadyVisited()) continue;
 	        total += workAfter(node);
 	}
-	total += pd->myExecTime();
+	total += pd->getExTime();
 	return total;
 }
 
