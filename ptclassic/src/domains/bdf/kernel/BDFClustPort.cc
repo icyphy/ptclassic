@@ -177,7 +177,7 @@ BDFClustPort* controlPort(BDFClustPort* p,BDFRelation& relation) {
 
 BDFRelation sameSignal(BDFClustPort* a1, BDFClustPort* a2)
 {
-	if (a1 == a2) return BDF_SAME;
+	if (a1 == a2 || &a1->real() == &a2->real()) return BDF_SAME;
 	BDFRelation rel;
 	BDFClustPortRelIter iter(*a1);
 	BDFClustPort* p;
