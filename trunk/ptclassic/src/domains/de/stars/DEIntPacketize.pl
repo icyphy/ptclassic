@@ -45,7 +45,7 @@ if it receives a demand signal and there is no data.
 		data.before(demand);
 	}
 	setup {
-		LOG_DEL; delete saveData;
+		LOG_DEL; delete [] saveData;
 		LOG_NEW; saveData = new int[int(maxLength)];
 		idx = 0;
 	}
@@ -63,6 +63,6 @@ if it receives a demand signal and there is no data.
 		}
 	}
 	destructor {
-		LOG_DEL; delete saveData;
+		LOG_DEL; delete [] saveData;
 	}
 }
