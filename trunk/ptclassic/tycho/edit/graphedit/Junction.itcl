@@ -58,7 +58,7 @@ namespace ::tycho {
 #
 # <li><b>-size</b>:
 # The size of the junction, in pixels from the origin to each corner.
-# The default is 10.
+# The default is 5.
 #
 # <li><b>-width</b>:
 # The width of the outline of the junction, in pixels. By 
@@ -144,7 +144,7 @@ class ::tycho::Junction {
     set optiondefault(-fill)    black
     set optiondefault(-outline) black
     set optiondefault(-shape)   point
-    set optiondefault(-size)    6
+    set optiondefault(-size)    5
     set optiondefault(-width)   1
 }
 
