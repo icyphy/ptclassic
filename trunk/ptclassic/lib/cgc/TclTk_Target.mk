@@ -28,7 +28,7 @@
 
 ROOT =	$(PTOLEMY)
 include $(ROOT)/mk/config-$(PTARCH).mk
-C_INCL =	-I$(ROOT)/src/domains/cgc/rtlib
+C_INCL =
 
 # We turn the optimizer off here, because -O2 can result in
 # long (30+ minutes) compiles.  To turn the optimizer on,
@@ -38,10 +38,9 @@ OPTIMIZER =
 # These two variables are shorthand for what is necessary to
 # compile and link a tk application.
 TKCFLAGS = $(X11_INCSPEC) -I$(TK_INCDIR) -I$(TCL_INCDIR) -I$(TK_INCDIR) \
-	-I$(PTOLEMY)/src/domains/cgc/tcltk/lib -I$(PTOLEMY)/src/ptklib \
-	-I$(ROOT)/src/domains/cgc/rtlib
+	-I$(PTOLEMY)/src/domains/cgc/tcltk/lib
 TKLOADLIBES = $(SHARED_LIBRARY_R_LIST) \
-	-L$(PTOLEMY)/lib.$(PTARCH) -lptk -lCGCrtlib $(TK_LIBSPEC) \
+	-L$(PTOLEMY)/lib.$(PTARCH) $(TK_LIBSPEC) \
 	$(TCL_LIBSPEC) $(X11_LIBSPEC) $(CSYSLIBS)
 
 # We are not assuming GNU make, so we can't include common.mk,
