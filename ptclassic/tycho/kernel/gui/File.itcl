@@ -89,7 +89,15 @@ proc ::tycho::expandPath { path } {
             set path $envval
         }
     } elseif {[string first ~ $path] == 0} {
-        set path [glob $path]
+        if [catch {set path [glob $path]}] {
+            # glob failed. Possibly the file does not exist.
+            set dir [file dirname $path]
+            if [catch {set dir [glob $dir]}] {
+                error "Directory does not exist: $dir"
+            }
+            set tail [file tail $path]
+            set path "$dir/$tail"
+        }
     }
     # Get a consistent filename using "cd".  Note that this may not work
     # on non-Unix machines.  The catch is in case the directory does not
