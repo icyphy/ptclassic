@@ -345,7 +345,7 @@ body ::tycho::RevControlSCCS::isCheckedOutBy {} {
     foreach i [split $infolist \n] {
         # Need to match the format:
         #    ToolBar.itcl: being edited: 1.19 1.20 kchang 97/04/15 14:12:17
-        if [regexp " *$basefile: .*" $i] {
+        if [regexp "^ *$basefile: .*" $i] {
             # Format is:
             set info $i
         }
