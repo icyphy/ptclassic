@@ -144,6 +144,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 
     # Get the coordinates of the line into an efficient-to-process form
     set i 0
+    set scratch($id.indexes) {}
     foreach {a b} [$slate coords $id] {
 	set scratch($id.$i.x) $a
 	set scratch($id.$i.y) $b
@@ -152,6 +153,7 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
     }
 
     # Figure out the vertices that will be changed
+    set scratch($id.vertices) {}
     foreach aspect $args {
 	::tycho::assign a n [split $aspect "-"]
 	switch -exact $a {
@@ -173,9 +175,8 @@ body ::tycho::Line::_reshapeclick {id canvas slate x y args} {
 	    }
 	}
     }
-    
     # Make sure there are no duplicates
-    set scratch($id.vertices) [::tycho::lnub scratch($id.vertices)]
+    set scratch($id.vertices) [::tycho::lnub $scratch($id.vertices)]
 
     # If the -ghost flag is set, draw the ghost line.
     if { $ghost } {
@@ -206,7 +207,7 @@ body ::tycho::Line::_reshapedrag {id canvas slate x y} {
     # Rebuild the coordinates list and change coordinates
     set coords {}
     foreach i $scratch($id.indexes) {
-	lappend coords $scratch($id.$v.x) $scratch($id.$v.y)
+	lappend coords $scratch($id.$i.x) $scratch($id.$i.y)
     }
 
     # If there's a ghost, reshape it. Otherwise reshape the item.
