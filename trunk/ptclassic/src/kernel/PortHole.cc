@@ -118,13 +118,6 @@ void GenericPort :: connect(GenericPort& destination,int numberDelays)
 	geo->setSourcePort(*realSource);
 	PortHole* realDest = geo->setDestPort(destination);
 
-	// Set the farSidePort pointers in both blocks
-	// This information is redundant, since it also appears in the
-	// Geodesic, but to get it from the Geodesic, you have to know
-	// which PortHole is an input, and which is an output.
-	realSource->farSidePort = realDest;
-	realDest->farSidePort = realSource;
-
 	// Set the number of delays
 	geo->numInitialParticles = numberDelays;
 
