@@ -88,6 +88,11 @@ void CompileTarget::setup() {
 	LOG_DEL; delete [] schedFileName;
 }
 
+// do not call the begin methods
+// this prevents Tcl/Tk windows from popping up twice
+void CompileTarget::begin() {
+}
+
 int CompileTarget::writeGalDef(Galaxy& galaxy, StringList className) {
     // First generate the files that define the galaxies
     GalTopBlockIter next(galaxy);
