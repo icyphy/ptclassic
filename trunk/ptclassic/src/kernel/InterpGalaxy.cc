@@ -562,3 +562,6 @@ NodeList::nodeWithName (const char* ident) {
 	}
 	return NULL;
 }
+
+// isa
+ISA_FUNC(InterpGalaxy,Galaxy);

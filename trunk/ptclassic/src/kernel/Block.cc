@@ -172,6 +172,8 @@ Block::stateWithName(const char* name) const {
 	return NULL;
 }
 
+ISA_FUNC(Block,NamedObj);
+
 class Star;
 class Galaxy;
 

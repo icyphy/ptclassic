@@ -144,6 +144,7 @@ ParseToken State :: eval<T>Factor(Tokenizer& lexer) {
 	return t;
 }
 
+ISA_FUNC(<T>State,State);
 
 // make knownstate entry
 static <T>State proto;

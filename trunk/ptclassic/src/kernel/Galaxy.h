@@ -86,6 +86,8 @@ protected:
 	// support blockWithName message to access internal block list
 	Block* blockWithName (const char* name) const;
 
+	// class identification
+	int isA(const char*) const;
 public:
 
 	// Constructor

@@ -76,6 +76,9 @@ public:
 	// The type
 	const char* type() const; // { return "ComplexArray";}
 
+	// class identification
+	int isA(const char*) const;
+
         // the value as a string
         StringList currentValue();
 

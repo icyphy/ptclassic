@@ -30,3 +30,6 @@ void InterpUniverse :: newSched() {
 Scheduler* InterpUniverse :: mySched() const {
 	return scheduler;
 }
+
+// isa
+ISA_FUNC(InterpUniverse,Galaxy);

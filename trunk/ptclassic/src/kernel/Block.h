@@ -140,6 +140,10 @@ public:
 
 	// Return my domain (e.g. SDF, DE, etc.)
 	virtual const char* domain() const;
+
+	// class identification
+	int isA(const char*) const;
+
 protected:
 	// Database for this block
 

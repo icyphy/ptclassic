@@ -123,6 +123,9 @@ public:
 // This method lets us get at lower-level galaxies
 	Block* blockWithDottedName(const char* s);
 
+// class identification
+	int isA(const char*) const;
+
 // Destructor
 	~InterpGalaxy();
 };

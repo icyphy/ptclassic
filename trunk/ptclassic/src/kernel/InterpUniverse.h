@@ -37,6 +37,11 @@ public:
         { setBlock(name,NULL);}
         void newSched();
 	Scheduler* mySched() const;
+
+	// class identification
+	int isA(const char*) const;
 };
 
 #endif
+
+

@@ -64,8 +64,20 @@ public:
 	// unless redefined
 	virtual StringList printRecursive () const;
 
+	// answer queries about my class
+	virtual int isA(const char* cname) const;
+
 	// make destructors for all NamedObjs virtual
 	virtual ~NamedObj();
 };
+
+// A macro for generating isA functions in derived classes
+// requires ANSI C preprocessor
+
+#define ISA_FUNC(me,parent)\
+int me :: isA (const char* cname) const {\
+	if (strcmp(cname,#me) == 0) return 1;\
+	else return parent::isA(cname);\
+}
 
 #endif

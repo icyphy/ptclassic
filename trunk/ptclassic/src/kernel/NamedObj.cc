@@ -35,6 +35,10 @@ StringList NamedObj :: readFullName () const
 	return out;
 }
 
+int NamedObj::isA(const char* cname) const {
+	return (strcmp(cname,"NamedObj") == 0);
+}
+
 // These virtual functions do nothing in the baseclass; still it
 // is more efficient spacewise (and no time penalty) to put them here.
 void NamedObj::initialize() {}

@@ -199,6 +199,9 @@ void <T>ArrayState :: resize (int newSize) {
 	delete oldVal;
 }
 
+// isA
+ISA_FUNC(<T>ArrayState,State);
+
 // make knownstate entry
 static <T>ArrayState proto;
 static KnownState entry(proto,"<T>ARRAY");
