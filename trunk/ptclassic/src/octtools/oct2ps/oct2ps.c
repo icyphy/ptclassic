@@ -475,13 +475,9 @@ char **argv;
 		   (int) (((POINTSPERINCH * DIM2) - scale * bbdy) / 2.0);
 
 	} else {
-	    /* center of page for x and box for y */
-	    (void) printf("%d %d translate\n",
-		   (int) (((POINTSPERINCH * DIM1) - scale * bbdx) / 2.0), 0);
-
-	    box.lowerLeft.x += 
-		   (int) (((POINTSPERINCH * DIM1) - scale * bbdx) / 2.0);
-
+	    /* used to be center of page for x and box for y */
+	    /* changed to lower left for both -- EAL 1/5/94  */
+	    (void) printf("0 0 translate\n");
 	}
 	
     } else {
