@@ -62,6 +62,13 @@ sed -e '
  s/^[    ]*else/!else/
  s/^[    ]*endif/!endif/
 
+ # Deal with $(strip).  Change
+ #  !if "$(strip $(MATLABEXT_LIB))" != "" #ifneq
+ # to
+ #  !if "$(MATLABEXT_LIB)" != "" #ifneq
+ # This is not perfect, since we can't count closing parens
+ s/\$(strip \([^)]*\))/\1/
+
  # Rather than setting a variable to nothing, undefine it
  s/^[    ]*\([A-Za-z0-9_]*\)[]*=[   ]*$/!undef \1/
 
