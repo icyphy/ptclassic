@@ -504,6 +504,16 @@ proc ptkRunControlDel { name octHandle defNumIter } {
 	return
     }
 
+    # Stop the universe if it's running
+    if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
+	ptkAbort $name 
+    }
+    if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
+	# If the universe hasn't stopped already, try again later
+	after 200 ptkRunControlDel $name $octHandle $defNumIter
+	return
+    }
+
     # Remember for next time whether the control panel is set
     # for scripted runs or simple runs.
     ptkSetStringProp $octHandle usescript $ptkScriptOn($name)
@@ -514,19 +524,6 @@ proc ptkRunControlDel { name octHandle defNumIter } {
 	ptkSetOrClearDebug $name $octHandle
     }
 
-    if [regexp {^ACTIVE$|^PAUSED$} $ptkRunFlag($name)] {
-	ptkAbort $name 
-    }
-    if [regexp {^STOP_PENDING$|^ABORT$} $ptkRunFlag($name)] {
-	# If the universe hasn't stopped already, try again later
-	after 200 ptkRunControlDel $name $octHandle $defNumIter
-	return
-    }
-    catch {unset ptkDebug($name)}
-    catch {unset ptkOctHandles($name)}
-    catch {unset ptkRunEventLoop($name)}
-    catch {unset ptkRunFlag($name)}
-    catch {unset ptkScriptOn($name)}
     # update the oct facet only if the number of iterations has changed.
     if {$defNumIter != [$ctrlPanel.iter.entry get]} {
          ptkSetRunLength $octHandle [$ctrlPanel.iter.entry get]
@@ -545,6 +542,12 @@ proc ptkRunControlDel { name octHandle defNumIter } {
     set ptkControlPanel $ctrlPanel
     deluniverse $name
     set ptkControlPanel $oldCtrlPanel
+
+    catch {unset ptkDebug($name)}
+    catch {unset ptkOctHandles($name)}
+    catch {unset ptkRunEventLoop($name)}
+    catch {unset ptkRunFlag($name)}
+    catch {unset ptkScriptOn($name)}
 
     catch {destroy $ctrlPanel}
 }
