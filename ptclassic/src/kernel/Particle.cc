@@ -84,6 +84,13 @@ int Particle :: compareType (const Particle& src) const {
 
 extern const DataType ANYTYPE = "ANYTYPE";
 
+#include "SubMatrix.h"
+
+Particle::operator ComplexSubMatrix* () const { return NULL; }  //added
+Particle::operator FixSubMatrix* () const { return NULL; }      //added
+Particle::operator FloatSubMatrix* () const { return NULL; }    //added
+Particle::operator IntSubMatrix* () const { return NULL; }      //added
+
 	///////////////////////////////////////
 	// class IntParticle
 	///////////////////////////////////////
