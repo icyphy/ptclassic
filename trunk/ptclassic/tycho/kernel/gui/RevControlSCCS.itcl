@@ -127,7 +127,7 @@ body ::tycho::RevControlSCCS::checkIn {object} {
     set comment [getComments]
     if {$comment == ""} {
 	# cancelled
-	::tycho::inform "Checkin cancelled"
+        # ::tycho::inform "Checkin cancelled"
 	return
     }
     catch {exec echo $comment | sccs delget $basefile} output
