@@ -36,6 +36,9 @@ class DEScheduler : public Scheduler {
 	int setDepth(DEStar*);
 
 public:
+	// my domain
+	const char* domain() const;
+
 	// The global event queue is implemented as a priority queue
 	// in DE scheduler.
 	PriorityQueue eventQ;

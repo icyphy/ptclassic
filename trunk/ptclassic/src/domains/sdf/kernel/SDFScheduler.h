@@ -127,6 +127,9 @@ public:
 	// scheduler Period : used when interfaced with timed domain.
 	float schedulePeriod;
 
+	// my domain
+	const char* domain() const;
+
 protected:
 	// This method checks to see whether a domain name is supported
 	// by the scheduler.  When a new domain is created that uses
