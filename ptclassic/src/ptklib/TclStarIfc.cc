@@ -43,6 +43,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 extern "C" {
 #include "ptk.h"
 }
+#include "ptkTclCommands.h"
 
 /////////////////////////////////////////////////////////////////////////
 //			Tcl Callable Procedures
@@ -270,8 +271,10 @@ int TclStarIfc::setup (Block* star,
 		buf += tcl_file;
 	}
 	if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
-		Error::abortRun(*star, "Cannot source tcl script");
+		char tkErrorCmd[ sizeof(PTK_DISPLAY_ERROR_INFO) ];
+		strcpy(tkErrorCmd, PTK_DISPLAY_ERROR_INFO);
+		Tcl_GlobalEval(ptkInterp, tkErrorCmd);
+		Error::abortRun(*star, "Cannot source tcl script ", tcl_file);
 		return FALSE;
         }
 
@@ -281,15 +284,18 @@ int TclStarIfc::setup (Block* star,
 	buf = "info procs goTcl_";
 	buf += starID;
 	if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK ||
-	  strlen(ptkInterp->result) == 0)
+	   strlen(ptkInterp->result) == 0)
 		synchronous = 0;
 	else 
 		synchronous = 1;
 
 	// Determine whether Tk has been loaded into the system
 	// (if so, then its event loop will need to be updated).
-	Tcl_GlobalEval( ptkInterp, "info exists tk_library" );
-	if (*(ptkInterp->result)=='1') tkExists = 1 ; else tkExists = 0;
+	char tkExistsCmd[ sizeof(PTK_TK_EXISTS) ];
+	strcpy(tkExistsCmd, PTK_TK_EXISTS);
+	Tcl_GlobalEval(ptkInterp, tkExistsCmd);
+	if (*(ptkInterp->result)=='1') tkExists = 1;
+	else tkExists = 0;
 
 	return TRUE;
 }
@@ -304,7 +310,9 @@ int TclStarIfc::callTclProc(const char* name) {
 	buf += " ";
 	buf += starID;
         if(Tcl_GlobalEval(ptkInterp, (char*)buf) != TCL_OK) {
-		Tcl_GlobalEval(ptkInterp, "ptkDisplayErrorInfo");
+		char tkErrorCmd[ sizeof("ptkDisplayErrorInfo") ];
+		strcpy(tkErrorCmd, "ptkDisplayErrorInfo");
+		Tcl_GlobalEval(ptkInterp, tkErrorCmd);
 		Error::abortRun(*myStar, "Failed to run Tcl procedure");
 		return FALSE;
 	}
