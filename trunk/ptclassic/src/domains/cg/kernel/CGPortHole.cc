@@ -84,21 +84,21 @@ void CGPortHole::setForkSource(CGPortHole* p, int cgPortHoleFlag) {
 	if (forkSrc) forkSrc->putForkDest(this, cgPortHoleFlag);
 }
 
-// processing for each port added to a fork buffer
-// call this from OutXXX
-void MultiCGPort :: forkProcessing (CGPortHole& p) {
-	if (forkSrc) p.setForkSource(forkSrc, FALSE);
-}
-
-// this avoids having cfront generate many copies of the destructor
-MultiCGPort :: ~MultiCGPort() {}
-
 int CGPortHole :: bufSize() const {
 	return atBoundary() ? (parentReps()*numberTokens) : cgGeo().bufSize();
 }
 
 int CGPortHole :: localBufSize() const {
 	return atBoundary() ? (parentReps()*numberTokens) : cgGeo().localBufSize();
+}
+
+// this avoids having cfront generate many copies of the destructor
+MultiCGPort :: ~MultiCGPort() {}
+
+// processing for each port added to a fork buffer
+// call this from OutXXX
+void MultiCGPort :: forkProcessing (CGPortHole& p) {
+	if (forkSrc) p.setForkSource(forkSrc, FALSE);
 }
 
 int InCGPort :: isItInput () const { return TRUE; }
