@@ -53,14 +53,8 @@ class logstrm;
 class ParGraph : public ExpandedGraph {
 
 protected:
-	// The number of Nodes in the graph
-	int nodeCount;
-
 	// The sum of node execution times in the graph
 	int ExecTotal;
-
-	// my galaxy.
-	Galaxy* myGal;
 
 	// SequentialList of Node-Pairs.
 	SequentialList nodePairs;
@@ -79,7 +73,7 @@ protected:
 
 public:
 	// Null constructor : See comment for ExpandedGraph constructor
-	ParGraph(): logstrm(0), myGal(0) {}
+	ParGraph(): logstrm(0) { myGal = 0; }
 	~ParGraph();
 
 	// A list of initially runnable Nodes
