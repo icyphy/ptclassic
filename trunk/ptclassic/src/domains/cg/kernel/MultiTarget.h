@@ -88,6 +88,9 @@ public:
         // Inform how many processors are available.
         void setTargets(int);
 
+	// Enforce inheritance of targets inside wormholes (e.g. CGDDFWormhole)
+	void enforceInheritance() { inheritProcessors.setInitValue(1); }
+
 	// Return true, if it inherits the child targets from the parent.
 	int inherited() { return int(inheritProcessors); }
 
