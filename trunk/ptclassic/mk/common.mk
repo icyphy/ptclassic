@@ -65,7 +65,8 @@ include $(ROOT)/mk/compile.mk
 
 # ptlang binary in the obj directory
 PTLANG_OBJ_DIR=$(PTOLEMY)/obj.$(PTARCH)/ptlang
-PTLANG_IN_OBJ=$(PTLANG_OBJ_DIR)/ptlang
+# BINARY_EXT is set to .exe for nt4
+PTLANG_IN_OBJ=$(PTLANG_OBJ_DIR)/ptlang$(BINARY_EXT)
 PTLANG_VPATH=../../src/ptlang
 
 # Use either the ptlang binary in the obj directory or just use ptlang
