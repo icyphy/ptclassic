@@ -100,13 +100,20 @@ public:
 	virtual PortHole& newConnection();
 
 	// Translate aliases, if any.
-	GenericPort& realPort() const {
+	GenericPort& realPort() {
+		GenericPort* p = this;
+		while (p->aliasedTo) p = p->aliasedTo;
+		return *p;
+	}
+
+	// this one permits use in const expressions
+	const GenericPort& realPort() const {
 		const GenericPort* p = this;
 		while (p->aliasedTo) p = p->aliasedTo;
 		return *p;
 	}
 
-	GenericPort& setPort(const char* portName, Block* blk, dataType typ=FLOAT) {
+	GenericPort& setPort(const char* portName, Block* blk, DataType typ=FLOAT) {
 		setNameParent (portName, blk);
 		type = typ;
 		return *this;
@@ -124,7 +131,7 @@ public:
 	virtual void connect(GenericPort& destination,int numberDelays);
 
 	// return my type
-	dataType myType () const { return type;}
+	DataType myType () const { return type;}
 
 	// class identification
 	int isA(const char*) const;
@@ -154,7 +161,7 @@ protected:
 	}
 
 	// datatype of particles in this porthole
-	dataType type;
+	DataType type;
 
 	// return typePortPtr
 	GenericPort* typePort() const { return typePortPtr;}
@@ -196,7 +203,7 @@ public:
         // Arguments are the name and type (see type.h for supported types).
         PortHole& setPort(const char* portName,
                           Block* parent,                // parent block pointer
-                          dataType type = FLOAT);       // defaults to FLOAT
+                          DataType type = FLOAT);       // defaults to FLOAT
 
 	// Initialize when starting a simulation
 	void initialize();
@@ -368,7 +375,7 @@ public:
         // Arguments are the name and type (see type.h for supported types).
         MultiPortHole& setPort(const char* portName,
                           Block* parent,                // parent block pointer
-                          dataType type = FLOAT);       // defaults to FLOAT
+                          DataType type = FLOAT);       // defaults to FLOAT
  
         // Return the number of physical port currently allocated
         int numberPorts() const {return ports.size();}
