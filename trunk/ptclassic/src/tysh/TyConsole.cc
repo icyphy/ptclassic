@@ -50,6 +50,10 @@ static void SetVersionInfo (Tcl_Interp *ptkInterp, char *Filename)
 
 TyConsole::TyConsole(int argc, char **argv) {
 
+  // Create the main Tk window
+  char *appName = "tycho";
+  char *appClass = "Tycho";
+
   // Create an interpreter
   tyInterp = Tcl_CreateInterp();
   if (!tyInterp) {
@@ -57,10 +61,6 @@ TyConsole::TyConsole(int argc, char **argv) {
     exit(1);
   }
   ptcl = new PTcl(tyInterp);
-
-  // Create the main Tk window
-  char *appName = "tycho";
-  char *appClass = "Tycho";
 
 #if TK_MAJOR_VERSION <= 4 && TK_MINOR_VERSION < 1
   ptkw = Tk_CreateMainWindow(tyInterp, NULL, appName, appClass);
