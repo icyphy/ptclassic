@@ -43,7 +43,8 @@ State :: getParseToken(const char* string, Block* blockIAmIn) {
 	c  = *tokstart;
 	switch (c) {
 	case 0:			// End of string
-		t.tok = 0;
+		t.tok = "NULL";
+		t.cval = 0;
 		return t;
 
 	case ' ':		// White-space, skip it
@@ -59,7 +60,8 @@ State :: getParseToken(const char* string, Block* blockIAmIn) {
 	case '(':
 	case ')':
 		lexptr++;
-		t.tok = (char*)c;
+		t.tok = "OP";
+		t.cval = c;
 		return t;
 
 	}
@@ -100,6 +102,13 @@ State :: getParseToken(const char* string, Block* blockIAmIn) {
 	};
 
 	State* s = lookup(yytext, blockIAmIn);
+	if(s == 0) 
+	{
+	t.tok = "NULL";
+	t.s = 0;	
+	return t;
+	};
+
 	t.tok  = "ID";
 	t.s  = s;
 
