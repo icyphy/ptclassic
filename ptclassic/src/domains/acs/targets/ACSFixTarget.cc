@@ -1,6 +1,6 @@
 static const char file_id[] = "ACSFixTarget.cc";
 /**********************************************************************
-Copyright (c) 1998 The Regents of the University of California.
+Copyright (c) 1998-%Q% The Regents of the University of California.
 All rights reserved.
 
 Permission is hereby granted, without written agreement and without
