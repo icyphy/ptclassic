@@ -308,7 +308,7 @@ body ::tycho::TopLevel::constructor {args} {
     bind $prefix <Control-x><k> \
             "$this nextWindow; delete object $this; break"
     bind $prefix <Control-x><Control-f> \
-            {::tycho::File::openWin; break}
+            {::tycho::File::openWin %Q; break}
     bind $prefix <Control-x><o> \
             "$this nextWindow 1; break"
     
@@ -325,9 +325,6 @@ body ::tycho::TopLevel::constructor {args} {
     # Grab the focus when the window gets mapped.
     # NOTE: This causes focusin to be called a very large number of times!
     #    bind $itk_component(hull) <Map> "$this focusin; break"
-
-    # Bind the file-open command.
-    bind $prefix <Control-x><Control-f> "::tycho::File::openWin; break"
 
     # Prevent the window manager delete function from exiting.
     wm protocol $prefix WM_DELETE_WINDOW \
