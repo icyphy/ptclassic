@@ -3,10 +3,17 @@ Version identification:
 $Id$
 */
 
+#ifndef __cplusplus
+#ifndef const
+#define const /* nothing */
+#endif
+#endif
+
 /* Data Structures */
 struct ParamStruct {
-    char *name;
-    char *value;
+    const char *name;
+    const char *type;
+    const char *value;
 };
 typedef struct ParamStruct ParamType;
 
