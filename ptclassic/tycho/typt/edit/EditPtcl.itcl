@@ -109,7 +109,7 @@ body ::tycho::EditPtcl::constructor {args} {
     
     addMenu Special left Window -underline 0
     addMenuItem "Retarget" Special -underline 0 \
-	    -command "$this retarget"
+	    -command "::tycho::inform \[$this component text\]"
 
     addMenuItem "Open Facet" File -underline 0 \
 	    -command "$this openFacet"
