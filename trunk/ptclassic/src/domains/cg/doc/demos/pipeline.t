@@ -30,11 +30,11 @@ for a three-processor system with no communication costs.
 .pp
 If this were a real-life example, the programmer would next attempt to
 reduce the "100" values to the minimum values that enable the retimed
-schedule to run.  If the system will function correctly with zero values
+schedule to run; there are other constraints that apply as well when there
+are parallel paths, so that corresponding tokens arrive at the same star.
+If the system will function correctly with zero values
 for initial values at points where the retiming delays are added, the
 generated schedule can be used directly.  Otherwise, a
 .i preamble ,
 or partial schedule, can be prepended to provide initial values.
-
-
-
+.ES
