@@ -6,8 +6,8 @@
 <body bgcolor="#faf0e6">
 <H1><A NAME="tcl extensions, building">Building Tcl Extensions</A></H1>
 
-Tycho includes several Tcl extensions that consist of C code that is
-compiled and loaded into a vanilla <CODE>itkwish</CODE>:
+Tycho optionally includes several Tcl extensions that consist of C
+code that is compiled and loaded into a vanilla <CODE>itkwish</CODE>:
 
 <OL>
 <LI> <A HREF="../../java/tycho/doc/internals/index.html">TclJava</A> requires
@@ -138,7 +138,7 @@ compile and install the package.
 be present if the user wishes to modify <CODE>configure.in</CODE> and
 produce a new <CODE>configure</CODE> file.  If <CODE>autoconf</CODE>
 is not available, then it is possible to edit the <CODE>configure</CODE>
-file directly, it is merely a <CODE>/bin/sh</CODE> script.
+file directly; it is merely a <CODE>/bin/sh</CODE> script.
 
 
 <H2><A NAME="tcl extensions, overview">Tcl Extensions Overview</A></H2>
@@ -146,7 +146,7 @@ file directly, it is merely a <CODE>/bin/sh</CODE> script.
 (The information below is primarily useful for adding your own
 Tcl package).
 
- <P>In Tcl7.5 and later it is fairly easy to load in shared objects that
+ <P>In Tcl7.5 and later it is fairly easy to load shared objects that
 add new Tcl commands.  The Tcl <CODE>load</CODE> and
 <CODE>package</CODE> command man pages cover the details.
 
