@@ -141,7 +141,7 @@ proc ::tycho::slate {pathName args} {
 # </pre></tcl>
 #
 class ::tycho::Slate {
-    inherit itk::Widget
+    inherit ::tycho::Object
 
     constructor {args} {}
     destructor {}
