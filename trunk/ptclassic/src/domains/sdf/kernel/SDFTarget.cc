@@ -53,7 +53,7 @@ Target(nam,"SDFStar",desc)
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
-	addState(loopScheduler.setState("loopScheduler",this,"YES",
+	addState(loopScheduler.setState("loopScheduler",this,"1",
 			"Specify whether to use loop scheduler."));
 	addState(schedulePeriod.setState("schedulePeriod",this,"0.0",
 		"schedulePeriod for interface with a timed domain."));
@@ -70,6 +70,28 @@ SDFTarget::~SDFTarget() {
 void SDFTarget::setup() {
 	delSched();
 	SDFScheduler *s;
+	if (int(loopScheduler) == 3) {
+	    // Determine if the graph is acyclic.  It not, use
+	    // another loop scheduler.
+	    // FIXME:
+	    // NOTE: Error::message will halt the simulation
+	    // till the message is dismissed.  This will be fixed
+	    // later on when we use something to post messages that
+	    // does not require dismissal.
+	    if (galaxy()) {
+	    	if (!isAcyclic(galaxy(), 0)) {
+		    StringList message;
+		    message << "The scheduler option that you selected, 3, "
+		    	    << "in the SDFTarget parameters represents a "
+		    	    << "loop scheduler that only works on acyclic "
+		    	    << "graphs.  Since this graph is not acyclic "
+		    	    << "another scheduler will be used (corresponding"
+		    	    << " to option 1.\n";
+		    Error::message(message);
+		    loopScheduler.setCurrentValue("1");
+		}
+	    }
+	}
 	switch(int(loopScheduler)) {
 	case 0:
 		LOG_NEW; s = new SDFScheduler;
@@ -77,7 +99,11 @@ void SDFTarget::setup() {
 	case 1:
 		LOG_NEW; s = new SDFClustSched(logFile);
 		break;
-	case 2: LOG_NEW; s = new AcyLoopScheduler;
+	case 2:
+		LOG_NEW; s = new SDFClustSched(logFile);
+		break;
+	case 3:
+		LOG_NEW; s = new AcyLoopScheduler(logFile);
 		break;
 	default:
 		Error::abortRun(*this,"Unknown scheduler");
