@@ -50,7 +50,14 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "MatlabIfc.h"
 #include "MatlabIfcFuns.h"
 
-#define MATLAB_BUFFER_LEN        8192
+#define MATLAB_BUFFER_LEN 8192
+
+// Default command to start the Matlab engine.  See the {Matlab External
+// Interface Guide For Unix Workstations}, 1993, page 2-14, under the
+// description for the engOpen command.  We use 'matlab' so as to allow
+// the user to define the matlab script to do special functions, such
+// as control Matlab running on another workstation
+#define MATLAB_START_COMMAND      "matlab"
 
 // counts how many instances of this class have been created
 static int matlabStarsCount = 0;
@@ -321,16 +328,48 @@ int MatlabIfc :: EvaluateOneCommand(char* command) {
     return merror;
 }
 
-// highest-level interface to the Matlab process
-
-int MatlabIfc :: StartMatlab() {
+// Highest-level interface to the Matlab process.  We will start
+// Matlab by using (1) userCommand if it is non-null, or (2) a
+// remote shell to the machine given by MATLAB_SERVER_HOSTNAME
+// if the environment variable MATLAB_SERVER_HOSTNAME is set, or
+// (3) "matlab".
+int MatlabIfc :: StartMatlab(char* userCommand) {
     KillMatlab();
 
+    // Build the command to start Matlab
+    InfString command;
+    if (userCommand) {
+	command = userCommand;
+    }
+    else {
+	const char* matlabServer = getenv("MATLAB_SERVER_HOSTNAME");
+	// FIXME: This assumes that we are using Unix and X windows
+	if (matlabServer) {
+	    const char* display = getenv("DISPLAY");
+	    const char* username = getenv("USER");
+
+	    // See the {Matlab External Interface Guide For Unix Workstations},
+	    // 1993, page 2-14, under the explanation of the engOpen command
+	    command = "rsh";
+	    if (username) {
+		command << " -l " << username;
+	    }
+	    command <<  " " << matlabServer << " \"/bin/csh -c \'";
+	    if (display) {
+		command <<  "setenv DISPLAY " << display << "; ";
+	    }
+	    command << "matlab'\"";
+	}
+	else {
+	    command = MATLAB_START_COMMAND;
+	}
+    }
+
     // start the Matlab engine which starts Matlab
-    matlabEnginePtr = MatlabEngineOpen(MATLAB_UNIX_COMMAND);
+    matlabEnginePtr = MatlabEngineOpen(command);
     if ( ! MatlabIsRunning() ) {
 	errorString = "Could not start Matlab using ";
-	errorString << MATLAB_UNIX_COMMAND;
+	errorString << command;
 	return FALSE;
     }
 
