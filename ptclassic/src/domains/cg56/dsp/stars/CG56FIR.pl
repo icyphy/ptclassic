@@ -191,6 +191,7 @@ cutoff frequency at about 1/3 of the Nyquist frequency.
         }
         
 	go {
+		CheckParameterValues();
                 tp = int(tapsNum/interpolation);
                 dec = tp;
                 if (tp > decimation) dec=decimation;
