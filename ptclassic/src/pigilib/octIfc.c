@@ -238,13 +238,29 @@ SetSogParams(instPtr, pListPtr)
 octObject *instPtr;
 ParamListType *pListPtr;
 {
+	return SetParamProp(instPtr,pListPtr,"params");
+}
+
+SetTargetParams(instPtr, pListPtr)
+octObject *instPtr;
+ParamListType *pListPtr;
+{
+	return SetParamProp(instPtr,pListPtr,"targetparams");
+}
+
+static boolean
+SetParamProp(instPtr, pListPtr, propname)
+octObject *instPtr;
+ParamListType *pListPtr;
+char* propname;
+{
     char *pStr;
     octObject prop;
     octStatus status;
 
     pStr = PListToPStr(pListPtr);
     prop.type = OCT_PROP;
-    prop.contents.prop.name = "params";
+    prop.contents.prop.name = propname;
     prop.contents.prop.type = OCT_STRING;
     prop.contents.prop.value.string = pStr;
     status = octCreateOrModify(instPtr, &prop);
@@ -285,7 +301,6 @@ boolean
 LoadTheStar(instPtr)
 octObject *instPtr;
 {
-    char *akoName = AkoName(instPtr->contents.instance.master);
     octObject mFacet;
     char *fullName;
 
@@ -318,6 +333,38 @@ ParamListType *pListPtr;
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
 	/* no parameters: use default list */
 	ERR_IF1(!SetSogParams(instPtr, pListPtr));
+	return(TRUE);
+    }
+    if (!PStrToPList(prop.contents.prop.value.string, &tempList))
+	return(FALSE);
+    MergeParams(pListPtr,&tempList);
+    return(TRUE);
+}
+
+/* GetOrInitTargetParams
+Get targetparams property if it exists or else init them first
+then return targetparams.
+Inputs:
+    targName = name of target
+    facetPtr = adr of facet to define targetparams for
+    pListPtr = adr of an empty ParamList 
+Outputs: return = TRUE if successful, else FALSE.
+*/
+boolean
+GetTargetParams(targName, facetPtr, pListPtr)
+char* targName;
+octObject *facetPtr;
+ParamListType *pListPtr;
+{
+    octObject prop;
+    ParamListType tempList;
+    void MergeParams();
+
+    ERR_IF1(!KcGetTargetParams(targName, pListPtr));
+    prop.type = OCT_PROP;
+    prop.contents.prop.name = "targetparams";
+    if (octGetByName(facetPtr, &prop) == OCT_NOT_FOUND) {
+	/* no parameters: return default list */
 	return(TRUE);
     }
     if (!PStrToPList(prop.contents.prop.value.string, &tempList))
@@ -585,8 +632,6 @@ char *domain;
     return (TRUE);
 }
 
-/* 1/28/91, EAL
-*/
 boolean
 GOCTargetProp(facetPtr, targetPtr, defaultTarget)
 octObject *facetPtr;
@@ -595,8 +640,13 @@ char *defaultTarget;
 {
     octObject prop;
 
-    CK_OCT(ohGetOrCreatePropStr(facetPtr, &prop, "target", defaultTarget));
-    *targetPtr = prop.contents.prop.value.string;
+/* don't use ohGetOrCreatePropStr, so we avoid problems with the user
+   changing the domain and needing to do edit-target as well.
+ */
+    if (GetByPropName(facetPtr, &prop, "target") == OCT_NOT_FOUND)
+	*targetPtr = defaultTarget;
+    else
+	*targetPtr = prop.contents.prop.value.string;
     return (TRUE);
 }
 
