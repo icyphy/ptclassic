@@ -70,8 +70,9 @@ body ::tycho::MenuSupportTester::constructor {args} {
 	keep -font -activebackground -cursor -activeforeground \
 		-background -foreground
     }
-    set menupath(top) $itk_component(top)
-    set menuentries($itk_component(top)) {}
+    set _menupath(top) $itk_component(top)
+    set _menuentries($itk_component(top)) {}
+    set _tag($_menupath(top)) top
     eval itk_initialize $args
 }
 
