@@ -29,7 +29,7 @@ $Id$
 class BDFTarget : public Target {
 protected:
 	StringState logFile;
-	IntState loopScheduler;
+	IntState allowDynamic;
 
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
