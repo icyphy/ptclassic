@@ -30,7 +30,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Programmer: Soonhoi Ha
 
  Scheduler-independent Baseclass for all multi-processor code generation 
- targets. Virtual methods are provided for uniform wormhole interface.
+ targets. 
 
 *******************************************************************/
 
@@ -43,18 +43,17 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "SDFScheduler.h"
 #include "Error.h"
 #include "Profile.h"
+#include "CGDDFCode.h"
 #include <std.h>
 
 // constructor
 MultiTarget::MultiTarget(const char* name,const char* starclass,
 		   const char* desc) : CGTarget(name,starclass,desc),
-	nChildrenAlloc(0)
+	nChildrenAlloc(0), reorder(0)
 {
 	// loop scheduler makes no sense for a multitarget
 	loopingLevel.setAttributes(A_NONSETTABLE);
         addState(nprocs.setState("nprocs",this,"2","number of processors"));
-        addState(inheritProcessors.setState(
-	     "inheritProcessors",this,"NO","If yes, inherit child targets"));
         addState(sendTime.setState("sendTime",this,"1",
                                    "time to send one datum"));
         addState(oneStarOneProc.setState("oneStarOneProc",this,"NO",
@@ -66,14 +65,32 @@ MultiTarget::MultiTarget(const char* name,const char* starclass,
 	displayFlag.setAttributes(A_SETTABLE);
 	compileFlag.setAttributes(A_SETTABLE);
 	runFlag.setAttributes(A_SETTABLE);
+	installDDF();
+}
+
+MultiTarget::~MultiTarget() {
+	LOG_DEL; delete ddfcode;
+}
+ 
+void MultiTarget :: installDDF() {
+	LOG_NEW; ddfcode = new CGDDFCode(this);
+}
+ 
+// am I a heterogeneous target?
+int MultiTarget :: isHetero() { return FALSE; }
+ 
+// virtual methods
+void MultiTarget :: resetResources() {}
+State* MultiTarget :: galParam(Galaxy* g, const char* name) {
+	return g->stateWithName(name);
 }
 
 // Based on priorities of the parameters, we may need to adjust the
 // value of the parameters of low priority.
 void MultiTarget :: initState() {
 	Block :: initState();
-	if (int(adjustSchedule)) manualAssignment = TRUE;
-	if (int(manualAssignment)) oneStarOneProc = TRUE;
+	if (int(adjustSchedule)) manualAssignment.setInitValue("YES");
+	if (int(manualAssignment)) oneStarOneProc.setInitValue("YES");
 }
 	
 // associate send and receive stars.  If output of receive star
@@ -147,21 +164,8 @@ int MultiTarget :: createPeekPoke(PortHole& peekPort, PortHole& pokePort,
     return TRUE;
 }
 
-void MultiTarget :: setProfile(Profile*) {}
 void MultiTarget :: prepareCodeGen() {}
 int MultiTarget :: prepareSchedule() { return TRUE; }
-
-int MultiTarget :: totalWorkLoad() { return -1; }		// undefined...
-
-int MultiTarget :: computeProfile(int pNum, int, IntArray*) {
-	// do nothing in this base class.
-	return pNum;
-}
-
-int MultiTarget :: insideSchedule(Profile*) { return TRUE; }
-Profile* MultiTarget :: manualSchedule(int) { return 0; }
-
-int MultiTarget :: downLoadCode(int, int, Profile*) { return TRUE; }
 
 void MultiTarget :: addProcessorCode(int, const char* s) { myCode += s; }
 
@@ -178,38 +182,68 @@ ParNode* MultiTarget :: backComm(ParNode*) { return 0; }
 IntArray* MultiTarget :: candidateProcs(ParProcessors*, DataFlowStar*) 
 	{ return NULL; }
 
-void MultiTarget :: setTargets(int n) { 
-	nprocs = n; 
-	char temp[6];
-	sprintf(temp, "%d", n);
-	const char* t = hashstring(temp);
-	nprocs.setInitValue(t); 
-	nprocs.initialize(); }
-
-int MultiTarget :: inheritChildTargets(Target* father) {
-
-        if (int(nprocs) > father->nProcs()) {
-                Error::abortRun(name(), " target has more children than \
-its parent target: ", father->name());
-                return FALSE;
-        }
-
-        nChildrenAlloc = int(nprocs);
-	if (father->child(0)) {
-		inheritChildren(father,0,nChildrenAlloc-1);
-	} else {
-		const char* saveNm = father->name();
-		addChild(*father);
-		father->setNameParent(saveNm, 0);
-	}
-	return TRUE;
-}
-
 CGTarget* MultiTarget :: cgChild(int n) {
 	Target* childTarget;
 	if (!(childTarget = child(n))) return NULL;
 	if (childTarget->isA("CGTarget")) return (CGTarget*) childTarget;
 	else return NULL;
+}
+
+int MultiTarget :: reorderChildren(IntArray* a) {
+	int x = reorder.size();
+	if (!x) {
+		reorder.create(nChildrenAlloc);
+		restore.create(nChildrenAlloc);
+		for (int i = 0; i < nChildrenAlloc; i++) {
+			reorder[i] = i;
+			restore[i] = i;
+		}
+	}
+ 
+	// save old information
+	for (int i = 0; i < x; i++) {
+		restore[i] = reorder[i];
+	}
+	restore.truncate(x);
+ 
+	// update information
+	if (!a) {
+		for (i = 0; i < nChildrenAlloc; i++) {
+			reorder[i] = i;
+		}
+	} else {
+		int effSz = a->size();
+		if (effSz > x) {
+			Error::abortRun("Index too larget to reorder ",
+			"child targets: reorderChildren error");
+			return FALSE;
+		}
+		IntArray temp;
+		temp.create(effSz);
+		for (i = 0; i < effSz; i++) {
+			temp[i] = reorder[a->elem(i)];
+		}
+		for (i = 0; i < effSz; i++) {
+			reorder[i] = temp[i];
+		}
+		reorder.truncate(effSz);
+	}
+	return TRUE;
+}
+ 
+// restore the old ordering information
+void MultiTarget :: restoreChildOrder() {
+	int x = restore.size();
+	for (int i = 0; i < x; i++) {
+		reorder[i] = restore[i];
+	}
+	reorder.truncate(x);
+}
+ 
+// virtual function
+Target* MultiTarget :: child(int n) {
+	int ix = reorder[n];
+	return Target::child(ix);
 }
 
 ISA_FUNC(MultiTarget, CGTarget);

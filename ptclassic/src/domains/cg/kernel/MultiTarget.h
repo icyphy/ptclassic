@@ -42,19 +42,28 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CGTarget.h"
 #include "IntState.h"
 #include "IntArray.h"
+#include "CGDDFCode.h"
 
 class Profile;
 class ParNode;
 class ParProcessors;
 class DataFlowStar;
+class CGStar;
 
 class MultiTarget : public CGTarget {
 
 public:
         MultiTarget(const char* name, const char* starclass, const char* desc);
+	~MultiTarget();
 
 	// type identification
 	/*virtual*/ int isA(const char*) const;
+
+        // return TRUE if it is a heterogeneous target
+        virtual int isHetero();
+
+	// reset resources
+	virtual void resetResources();
 
 	// Resolve the parameter conflicts based on priorities
 	void initState();
@@ -67,6 +76,10 @@ public:
 	// create Spread/Collect star
 	virtual DataFlowStar* createSpread() = 0;
 	virtual DataFlowStar* createCollect() = 0;
+
+	// create Macro actor which models a parallel task in the
+	// hierarchical code generation
+	virtual CGStar* createMacro(CGStar*, int, int, int) = 0;
 
 	// pairSendReceive causes the send and receive stars to be associated
 	// with each other, and should be called after they are created
@@ -83,9 +96,6 @@ public:
 	    PortHole& peekPort, PortHole& pokePort,
 	    CGStar*& peek, CGStar*& poke);
 
-        // Inform how many processors are available.
-        void setTargets(int);
-
 	// get the OSOP requirement flag : all invocations of a star
 	// should be assigned to the same processor
 	int getOSOPreq() { return int(oneStarOneProc); }
@@ -100,56 +110,17 @@ public:
         // return the nth child Target, null if no children or if child is
 	// not a CGTarget.
         CGTarget* cgChild(int n);
+	/* virtual */ Target* child(int);
 
-// to support CGDDF domains
-	// Enforce inheritance of targets inside wormholes (e.g. CGDDFWormhole)
-	void enforceInheritance() { inheritProcessors.setInitValue(1); }
-
-	// Return true, if it inherits the child targets from the parent.
-	int inherited() { return int(inheritProcessors); }
-
-        // Inherit the child targets from a given MultiTarget.
-        // If the number of child targets is greater than that of a given
-        // target, return FALSE. Otherwise, return TRUE.
-        int inheritChildTargets(Target*);
-
-        // For CGWormhole, Profile class provides a common structure
-        // for domain (or target) interface of scheduling results.
-        // This method indicates where to put the scheduling result
-        // of current Target in.
-        virtual void setProfile(Profile*);
-
-        // For wormhole interface, this method calculates the total Workload
-        // under current Target.
-        virtual int totalWorkLoad();
-
-        // Compute the profile of the system under the current Target.
-        // It returns how many processors are actually used.
-        // pNum - the number of available processors.
-        // resWork - work to be done under the outside Target. (for wormhole).
-        // avail - pattern of processor availability.
-        virtual int computeProfile(int, int, IntArray*);
-
-        // Do scheduling job for inside galaxy -- to be called by Wormhole
-	// class.
-        virtual int insideSchedule(Profile*);
-
-        // Download the code for the specified processor.
-        // Argument specifies the profile index, the invocation number,
-	// and profile.
-        virtual int downLoadCode(int, int, Profile*);
-
-// End of CGDDF support
+	// return the galaxy parameter of the given name
+	// Idea: use of parameter file
+	virtual State* galParam(Galaxy* g, const char* name);
 
 	// Add processor code to the multiprocessor target
 	virtual void addProcessorCode(int pid, const char*);
 
 	// return the array of candidate processors.
 	virtual IntArray* candidateProcs(ParProcessors*, DataFlowStar*);
-
-	// determine the processor assignment of the profile manually
-	// and return the profile.
-	virtual Profile* manualSchedule(int);
 
 	// resource management
 	virtual void saveCommPattern();
@@ -172,10 +143,16 @@ public:
 	// scheduling starts.
 	virtual int prepareSchedule();
 
+	// reorder the child targets - and restore the old information
+	virtual int reorderChildren(IntArray* a);
+	virtual void restoreChildOrder();
+ 
+	// to generate code for dynamic constructs
+	virtual void installDDF();
+	CGDDFCode* ddf() { return ddfcode; }
+
 protected:
 	IntState nprocs;		// number of processors
-	IntState inheritProcessors;	// Inside the wormhole, use the
-					// same processors as the outside.
 	IntState sendTime;		// Communication to send a unit data.
 					// To be more elaborated.
 
@@ -188,5 +165,9 @@ protected:
 					// be assigned to a single PE.
 
 	int nChildrenAlloc;
+        IntArray reorder;
+        IntArray restore;
+ 
+        CGDDFCode* ddfcode;
 };
 #endif
