@@ -53,14 +53,6 @@
 
 VERSION =	0.6devel.$(BASENAME)
 
-ifdef ALLBINARIES
-ifndef PTRIM
-ifndef PTINY
-	FULL =	1
-endif
-endif
-endif
-
 ifdef FULL
 	PIGI = 		$(BASENAME)
 	VERSION_DESC =	'With All Common Domains'
@@ -197,11 +189,17 @@ INSTALL += makefile $(BINDIR)/$(PIGI)
 ifdef ALLBINARIES
 INSTALL += $(BINDIR)/$(BASENAME).ptrim $(BINDIR)/$(BASENAME).ptiny
 
+$(BASENAME): $(PT_DEPEND)
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME)
+
 $(BASENAME).ptrim: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim
 
 $(BASENAME).ptiny: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny
+
+$(BASENAME).debug: $(PT_DEPEND)
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug
 
 $(BASENAME).ptrim.debug: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug
@@ -209,11 +207,17 @@ $(BASENAME).ptrim.debug: $(PT_DEPEND)
 $(BASENAME).ptiny.debug: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug
 
+$(BASENAME).debug.purify: $(PT_DEPEND)
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purify
+
 $(BASENAME).ptrim.debug.purify: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purify
 
 $(BASENAME).ptiny.debug.purify: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purify
+
+$(BASENAME).debug.quantify: $(PT_DEPEND)
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.quantify
 
 $(BASENAME).ptrim.debug.quantify: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.quantify
@@ -221,11 +225,17 @@ $(BASENAME).ptrim.debug.quantify: $(PT_DEPEND)
 $(BASENAME).ptiny.debug.quantify: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.quantify
 
+$(BASENAME).debug.purecov: $(PT_DEPEND)
+	make FULL=1 BASENAME=$(BASENAME) $(BASENAME).debug.purecov
+
 $(BASENAME).ptrim.debug.purecov: $(PT_DEPEND)
 	make PTRIM=1 BASENAME=$(BASENAME) $(BASENAME).ptrim.debug.purecov
 
 $(BASENAME).ptiny.debug.purecov: $(PT_DEPEND)
 	make PTINY=1 BASENAME=$(BASENAME) $(BASENAME).ptiny.debug.purecov
+
+$(BINDIR)/$(BASENAME): $(BASENAME) 
+	make FULL=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME)
 
 $(BINDIR)/$(BASENAME).ptrim: $(BASENAME).ptrim 
 	make PTRIM=1 BASENAME=$(BASENAME) $(BINDIR)/$(BASENAME).ptrim
