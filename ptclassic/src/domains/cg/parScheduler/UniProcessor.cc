@@ -41,8 +41,9 @@ Date of last revision:
 #include "UniProcessor.h"
 #include "SDFScheduler.h"
 #include <iostream.h>
-#include "../../../pigilib/ptk.h"
-#include <tcl.h>
+#include "ganttChart.h"
+#include "StringList.h"
+#include "InfString.h"
 
 StringList UniProcessor :: display(int makespan)
 {
@@ -86,7 +87,7 @@ StringList UniProcessor :: display(int makespan)
 }
 
 // write Gantt chart.
-int UniProcessor :: writeGantt(const char* universe, int numProcs, int span) {
+int UniProcessor :: writeGantt(ostream& out, const char* universe, int numProcs, int span) {
 
 	int total = 0;
 	int start = 0;
@@ -105,7 +106,7 @@ int UniProcessor :: writeGantt(const char* universe, int numProcs, int span) {
 			total += obj->getDuration();
 			fin = start + obj->getDuration();
 
-			char tmpbuf[160] = "";
+			InfString tmpbuf;
 			const char* starName;
 			if (!nType) {
 				starName = node->myStar()->name();
@@ -114,10 +115,11 @@ int UniProcessor :: writeGantt(const char* universe, int numProcs, int span) {
 			} else {
 				starName = "rcv";
 			}
-			sprintf(tmpbuf,"ptkGantt_DrawProc %s %d %d %d %s %d %d",
-				universe, numProcs, span,
-				proc_num, starName, start, fin);
-			Tcl_Eval(ptkInterp, tmpbuf);
+			tmpbuf = "ptkGantt_DrawProc ";
+			tmpbuf << universe << " " << numProcs << " ";
+			tmpbuf << span << " " << proc_num << " " << starName;
+			tmpbuf << " " << start << " " << fin;
+			writeGanttProc(out, (char *)tmpbuf);
 			start = fin;
 		} else { // Idle node
 			start += obj->getDuration();
