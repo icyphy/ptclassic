@@ -73,6 +73,7 @@ const int MAX_NO_GRAPHS = 64;
 #include "streamCompat.h"
 #include "paths.h"
 #include "SimControl.h"
+#include "ieee.h"
 
 // constructor initializes streams and filenames
 XGraph :: XGraph () : strm(0), tmpFileNames(0), count(0), blockIamIn(0), ng(0)
@@ -141,19 +142,6 @@ void XGraph :: initialize(Block* parent,
 	    }
 	}
 }
-
-// this check traps IEEE infinities and NaN values
-// the ifdef condition should really be: implement this function if the
-// processor uses IEEE arithmetic.
-#ifdef mips
-#include <nan.h>
-#endif
-#ifdef sun
-#define IsNANorINF(X) (isnan(X) || isinf(X))
-#endif
-#ifndef IsNANorINF
-#define IsNANorINF(X) 0
-#endif
 
 // function to print "1st, 2nd, 23rd", etc.  Return value is in a static
 // buffer and is wiped out by subsequent calls.
