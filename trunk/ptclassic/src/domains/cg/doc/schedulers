@@ -391,18 +391,3 @@ displayed in black and white.
 .pp
 On monochrome displays, highlighting of stars does not work.
 
-
-.UH "References"
-.ip [1]
-G. C. Sih and
-E. A. Lee,
-"A Compile-Time Scheduling Heuristic for Interconnection-Constrained
-Heterogeneous Processor Architecture", 
-to appear \fIIEEE Trans. on
-Parallel and Distributed Systems\fR, 1992.
-.ip [2]
-G. C. Sih and
-E. A. Lee,
-"Declustering: A New Multiprocessor Scheduling Technique",
-to appear \fIIEEE Trans. on
-Parallel and Distributed Systems\fR, 1992.

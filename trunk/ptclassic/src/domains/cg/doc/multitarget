@@ -148,9 +148,3 @@ makes a target design more complicated. So, the best way to design a
 target is to look at an already-implemented target such as CGCMultiTarget
 class in the CGC domain.
 
-.UH "References"
-.ip [3]
-S. Ha,
-"Compile-Time Scheduling of Dataflow Program Graphs with Dynamic Constructs",
-Ph.D. dissertation, U.C.Berkeley, 1992.
-
