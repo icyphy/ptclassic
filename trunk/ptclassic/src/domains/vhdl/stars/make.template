@@ -13,14 +13,17 @@
 # This will add the dependencies to the makefile.
 
 ROOT = ../../../..
-VPATH = $(ROOT)/src/domains/X/stars
+VPATH = $(ROOT)/src/domains/vhdl/stars
+
+# do this for Synopsys
+ARCH = $(PTARCH)
 
 # get configuration info
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 # VHDLDIR is the directory containing VHDL domain support
-VHDLDIR = $(ROOT)/src/domains/X/kernel
+VHDLDIR = $(ROOT)/src/domains/vhdl/kernel
 CGDIR = $(ROOT)/src/domains/cg/kernel
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
 
@@ -34,9 +37,11 @@ PL_SRCS=\
  VHDLAdd.pl \
  VHDLBlackHole.pl \
  VHDLRamp.pl \
+ VHDLRampInt.pl \
  VHDLInhomogeneous.pl \
- VHDLFIR4.pl \
  VHDLFIR.pl \
+ VHDLFIRInt.pl \
+ VHDLFIR4.pl \
  VHDLLMS.pl \
  VHDLQuant.pl \
  VHDLSub.pl \

@@ -7,7 +7,7 @@
 # Root of Ptolemy directory
 ROOT=../../../..
 # True source directory
-VPATH = $(ROOT)/src/domains/X/targets
+VPATH = $(ROOT)/src/domains/vhdl/targets
 
 # do this for Synopsys
 ARCH = $(PTARCH)
@@ -16,16 +16,16 @@ ARCH = $(PTARCH)
 CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
-VHDLKERNEL = $(ROOT)/src/domains/X/kernel
+VHDLKERNEL = $(ROOT)/src/domains/vhdl/kernel
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
 
 INCL = -I$(VHDLKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) \
 		-I$(CGKERNEL)
 
-SRCS = StructTarget.cc
+SRCS = StructTarget.cc SynopsysTarget.cc
 HDRS = $(SRCS:.cc=.h)
-OBJS = StructTarget.o $(LIBSRCS:.cc=.o)
+OBJS = StructTarget.o SynopsysTarget.o $(LIBSRCS:.cc=.o)
 LIB = libvhdlstruct.a
 
 all:	makefile $(LIB)
