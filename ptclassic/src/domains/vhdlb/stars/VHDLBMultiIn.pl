@@ -27,12 +27,12 @@ limitation of liability, and disclaimer of warranty provisions.
                 arglist { "(const MultiVHDLBPort* pp)" }
                 access { protected }
                 code {
-                        if(!strcmp(pp.name(),"input")) {
+                        if(!strcmp(pp->name(),"input")) {
 			  return((const char*) "N");
 			}
                         else {
 			  Error::abortRun(*this, "No MultiVHDLBPort named",
-					  pp.name(), "in star");
+					  pp->name(), "in star");
 			  return((const char*) "ERROR");
 			}
                 }
