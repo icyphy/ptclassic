@@ -1,0 +1,44 @@
+#
+# $Id$
+#
+# The "fonts" default style-sheet
+#
+modelconfigure -label "Fonts"
+modelconfigure -description "This style contains global font settings"
+
+style default {
+    -label "Defaults" {
+
+	parameter textFont {Screen 14} \
+		-type font \
+		-label "Text editor font"
+
+	parameter labelFont {Helvetica 14} \
+		-type font \
+		-label "Label font"
+
+	parameter displayFont {Times 16} \
+		-type font \
+		-label "Proportional display font"
+
+	parameter cwFont {Courier 16} \
+		-type font \
+		-label "Constant-width display font"
+
+	parameter entryFont {Helvetica 14} \
+		-type font \
+		-label "Entry and listbox font"
+
+	parameter messageFont {Helvetica 12} \
+		-type font \
+		-label "Status message font"
+
+	parameter menuFont {Helvetica 12 bold} \
+		-type font \
+		-label "Menu and button font"
+
+	parameter graphicsFont {Helvetica 14 roman} \
+		-type font \
+		-label "Default graphics font"
+    }
+}
