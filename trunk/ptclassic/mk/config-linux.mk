@@ -1,4 +1,4 @@
-# Copyright (c) 1994-%Q% The Regents of the University of California.
+# Copyright (c) 1994-$Date$ The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -25,7 +25,7 @@
 #
 # Config file to build on Linux
 #
-# $Id$
+# @(#)config-linux.mk	1.39 06/08/98
 
 # Author:  Alberto Vignani, FIAT Research Center, TORINO
 # Modified by: 	Neal Becker (neal@ctd.comsat.com)
@@ -38,18 +38,23 @@
 # --------------------------------------------------------------------
 include $(ROOT)/mk/config-default.mk
 
-PT_GPP_V := $(shell g++ --version)
-ifeq ("$(findstring egcs,$(PT_GPP_V))","")
+PT_GPP_V := $(filter egcs-%,$(shell g++ --version))
+ifeq ("$(PT_GPP_V)","")
     # This is GNU g++.
     include $(ROOT)/mk/config-g++.mk
 else
     # This is egcs.
     include $(ROOT)/mk/config-egcs.mk
     PT_EGCS = yes
-    # The current versions (1.0.2 and 1.0.3a) of egcs cannot compile
-    # the file DEWiNeS_Tcl_Animation.cc with -O2 or higher. So we can 
-    # check for this error in a makefile.
-    PT_EGCS_OPT_ERROR = yes
+    ifeq ("$(firstword $(sort egcs-2.91.57 $(PT_GPP_V)))","egcs-2.91.57")
+	# egcs 1.1 does not have optimizer bugs any longer
+	USE_GPLUSPLUS =
+    else
+	# The versions 1.0.2 and 1.0.3a of egcs cannot compile
+	# the file DEWiNeS_Tcl_Animation.cc with -O2 or higher. So we can
+	# check for this error in the makefile.
+	PT_EGCS_OPT_ERROR = yes
+    endif
 endif
 
 # Get the g++ definitions for shared libraries; we override some below.
@@ -67,14 +72,14 @@ RANLIB = ranlib
 CC = gcc
 
 ifeq ($(PT_EGCS),yes)
-    PT_GCC_V := $(shell gcc --version)
+    PT_GCC_V := $(filter egcs-%,$(shell gcc --version))
     ifneq ("$(PT_GPP_V)","$(PT_GCC_V)")
-        # We want to use the same compiler version (egcs) for c and c++
+	# We want to use the same compiler version (egcs) for c and c++
 	# files. RH5.1 comes with egcs-1.0.2 (named g++) as c++ compiler
 	# and two c compilers: the old gcc-2.7.2.3 (named gcc) end
 	# egcs-1.0.2 (named egcs). 
 	CC = egcs
-        OCT_CC = egcs -fwritable-strings
+	OCT_CC = egcs -fwritable-strings
     endif
 endif
 
@@ -97,7 +102,7 @@ else
     SHARED_COMPILERDIR = $(GNULIB)
     SHARED_COMPILERDIR_FLAG = -L$(SHARED_COMPILERDIR)
     INC_LINK_FLAGS = -shared $(SHARED_COMPILERDIR_FLAG)
-    SHARED_LIBRARY_PATH = $(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/tcl.$(PTARCH)/lib
+    SHARED_LIBRARY_PATH = $(X11_LIBDIR):$(SHARED_COMPILERDIR):$(PTOLEMY)/tcltk/itcl.$(PTARCH)/lib/itcl
     SHARED_LIBRARY_R_LIST = -Wl,-R,$(SHARED_LIBRARY_PATH)
 endif
 
@@ -133,7 +138,7 @@ BISONFLEXLIB =	-fl
 #	Pentium optimized compiler; for them -m486 makes things worse.
 #OPTIMIZER =	-m486 -pipe
 ifeq ($(PT_EGCS),yes)
-    OPTIMIZER =	-O3 -march=pentiumpro -fomit-frame-pointer# -pipe
+    OPTIMIZER =	-O3 -march=i486 -mcpu=pentiumpro -fomit-frame-pointer# -pipe
 else
     OPTIMIZER =	-O3 -fomit-frame-pointer# -pipe
 endif
@@ -249,3 +254,4 @@ else
     INCLUDE_MATHEMATICA = no
 endif
 INCLUDE_PN_DOMAIN = no
+
