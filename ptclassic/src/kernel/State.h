@@ -219,6 +219,11 @@ protected:
 	// an external interpreter for evaluating commands
 	InvokeInterp interp;
 
+	// support one character directives
+	mergeFileContents(Tokenizer& lexer, ParseToken& t, char* token);
+	sendToInterpreter(Tokenizer& lexer, ParseToken& t, char* token);
+	getParameterName(Tokenizer& lexer, char* token);
+
 private:
 	// pushback token, for use in parsing
 	static ParseToken pushbackToken;
