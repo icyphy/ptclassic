@@ -26,7 +26,7 @@ limitation of liability, and disclaimer of warranty provisions.
     defstate {
       name { blockSize }
       type { int }
-      default { 8180 }
+      default { 16 }
       desc { Number of samples to read or write. }
     }
 
