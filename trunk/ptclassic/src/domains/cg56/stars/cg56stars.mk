@@ -31,6 +31,7 @@ CG56STARS = \
  $(CG56)/CG56Interpolator.o \
  $(CG56)/CG56IntMult.o \
  $(CG56)/CG56Limit.o \
+ $(CG56)/CG56LMS.o \
  $(CG56)/CG56LocateMax.o \
  $(CG56)/CG56Log.o \
  $(CG56)/CG56Magnavox.o \
@@ -56,6 +57,7 @@ CG56STARS = \
  $(CG56)/CG56UpSample.o \
  $(CG56)/CG56VarDelay.o \
  $(CG56)/CG56VarQuasar.o \
+ $(CG56)/CG56WasteCycles.o \
  $(CG56)/CG56WriteFile.o \
  $(CG56)/CG56WriteFileInt.o \
  $(CG56)/CG56ZeroHld.o
