@@ -66,17 +66,6 @@ public:
 	// return true if port is dynamic (transfers variable # of tokens)
 	int isDynamic() const;
 
-        // The setPort function is redefined to take one more optional
-        // argument, a reference to a BDFSigInfo object giving information
-	// about the signal.
-        PortHole& setPort(const char* portName,
-                          Block* parent,
-                          DataType type = FLOAT,
-			  unsigned numTokens = 1,
-			  BDFPortHole* assocBool = 0,
-			  BDFRelation relation = BDF_NONE,
-			  int delay = 0);
-
 	// Function to set associations.  BDF_SAME and BDF_COMPLEMENT
 	// relations always form a loop.
 	void setRelation(BDFRelation rel, BDFPortHole* assocBool = 0) {

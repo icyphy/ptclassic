@@ -42,14 +42,6 @@ void OutBDFPort :: sendData () {
 int MultiInBDFPort :: isItInput () const { return TRUE;}
 int MultiOutBDFPort :: isItOutput () const { return TRUE;}
 
-PortHole& BDFPortHole :: setPort(const char* portName, Block* parent,
-				 DataType type, unsigned numTokens,
-				 BDFPortHole* assocBool, BDFRelation relation,
-				 int delay) {
-	PortHole::setPort(portName,parent,type);
-	return setBDFParams(numTokens,assocBool,relation,delay);
-}
-
 // Function to alter only BDF parameters
 // We re-do porthole initialization if bufferSize changes
 PortHole& BDFPortHole :: setBDFParams(unsigned num,BDFPortHole* assoc,
