@@ -135,19 +135,21 @@ if ( ! $?PIGIRPC ) then
      setenv PIGIRPC $PTOLEMY/bin.$ARCH/$PIGIBASE
 endif
 
-if ($?pigidebug && ! -x $PIGIRPC.debug ) then
-	echo "$PIGIRPC.debug does not exist or is not executable"	
-	if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
-		setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
-		echo "Using $PIGIRPC instead"
-	else
-		if ( -x $PIGIRPC ) then
-			echo "Using $PIGIRPC instead."
+if ($?pigidebug && ! -x $PIGIRPC ) then
+	if ($?pigidebug && ! -x $PIGIRPC.debug ) then
+		echo "$PIGIRPC.debug does not exist or is not executable"	
+		if ( -x $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug ) then
+			setenv PIGIRPC $PTOLEMY/obj.$ARCH/pigiRpc/${PIGIBASE}.debug
+			echo "Using $PIGIRPC instead"
+		else
+			if ( -x $PIGIRPC ) then
+				echo "Using $PIGIRPC instead."
+			endif
 		endif
-	endif
-else
-	if ($?pigidebug ) then
-		setenv PIGIRPC $PIGIRPC.debug
+	else
+		if ($?pigidebug ) then
+			setenv PIGIRPC $PIGIRPC.debug
+		endif
 	endif
 endif
 
