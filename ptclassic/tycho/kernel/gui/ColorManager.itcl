@@ -679,8 +679,14 @@ set ptkColorList(grey100) #ffffff
 
 set tyMonochrome 0
 
+# COMPATIBILITY procedure
+
+proc ptkColor {name {alternate {}}} {
+    ::tycho::color $name $alternate
+}
+
 ###########################################################################
-#### ptkColor
+#### color
 # Look up a color name in the ptkColorList.  If it exists, return
 # the rgb value of the color.  If it does not exist, look up the value
 # of the second argument, which should normally be "black" or "white".
@@ -688,7 +694,7 @@ set tyMonochrome 0
 # If the global variable tyMonochrome is set, then use the second
 # argument (if it is present).
 #
-proc ptkColor {name {alternate {}}} {
+proc ::tycho::color {name {alternate {}}} {
     if {[regexp {^#.*} $name]} {return $name}
     set usename $name
     global tyMonochrome
@@ -709,3 +715,4 @@ proc ptkColor {name {alternate {}}} {
         return $ptkColorList(black)
     }
 }
+
