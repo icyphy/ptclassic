@@ -42,10 +42,13 @@ CONFIG=$(ROOT)/mk/config-$(ARCH).mk
 include $(CONFIG)
 
 HDRS		= attache.h \
+		command.h \
 		edit.h \
 		internal.h \
 		io.h \
-		obj.h
+		obj.h \
+		template.h \
+		update.h
 
 LIBCSRCS	= attache.c \
 		command.c \
