@@ -388,7 +388,7 @@ int CGForScheduler :: downLoadCode(CGStar* macroS,
 			cs = (CGStar*) s->clone();
 			d1 = (CGStar*)KnownBlock :: clone("BlackHole",inDom);
 			if ((!cs) || (!d1)) return FALSE;
-			cs->setNameParent(s->name(), s->parent());
+			cs->setNameParent(s->name(), 0);
 			DFPortHole* srcP = (DFPortHole*) 
 						cs->portWithName("output");
 			srcP->setSDFParams(1, 0);
@@ -408,7 +408,7 @@ int CGForScheduler :: downLoadCode(CGStar* macroS,
 			ds = (CGStar*) s->clone();
 			d2 = (CGStar*) KnownBlock :: clone("Const",inDom);
 			if ((!cs) || (!d2)) return FALSE;
-			ds->setNameParent(s->name(), s->parent());
+			ds->setNameParent(s->name(), 0);
 			StringList temp = "Const";
 			temp << "_auto" << localId++;
 			d2->setNameParent(hashstring((const char*) temp), 0);
