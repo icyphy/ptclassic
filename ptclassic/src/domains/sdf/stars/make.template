@@ -95,6 +95,7 @@ SRCS= \
  SDFHilbert.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
+ SDFIIR.pl \
  SDFIntRamp.pl \
  SDFIntTable.pl \
  SDFIntToBits.pl \
