@@ -132,11 +132,8 @@ PortHole& PortHole :: setPort(const char* s,
                               Block* parent,
                               dataType t = FLOAT) {
 	GenericPort::setPort (s, parent, t);
-        myGeodesic = NULL;
-	myBuffer = NULL;
 	numberTokens = 1;
 	bufferSize = numberTokens;
-        farSidePort = NULL;
 	if (t != ANYTYPE)
 		myPlasma = plasmaList.getPlasma(t);
         return *this;
@@ -262,43 +259,6 @@ Particle& PortHole ::  operator % (int delay)
 			);
         return *(Particle*)*p;
 }
-
-Particle& InOtherPort :: operator ++ ()
-{
-        Pointer* p = myBuffer->next();
-
-	if(*p != NULL)
-		// Put current Particle back into Plasma
-		myPlasma->put((Particle*)*p);
-
-	// Get a new input from the Geodesic
-	*p = myGeodesic->get();
-	return *(Particle*)*p;
-}
- 
-Particle& InOtherPort ::  operator -- ()
-{
-	Pointer* p = myBuffer->here();
-
-	if(*p == NULL) errorHandler.error(
-		"Attempt to push back nonexistent Particle"
-		);
-	else 	{
-		myGeodesic->pushBack((Particle*)*p);
-		myBuffer->last();
-		}
-}
-
-
-Particle& OutOtherPort :: operator ++ ()
-{
-	Pointer* p = myBuffer->next();
-
-	*p = myPlasma->get();
-	myGeodesic->put((Particle*)*p);
-	return *(Particle*)*p;
-}
-
 MultiPortHole& MultiPortHole :: setPort(const char* s,
                               Block* parent,
                               dataType t = FLOAT) {

@@ -140,7 +140,6 @@ public:
 	GenericPort& setPort(const char* portName, Block* blk, dataType typ=FLOAT) {
 		setNameParent (portName, blk);
 		type = typ;
-		alias = NULL;
 		return *this;
 	}
 
@@ -153,6 +152,9 @@ public:
 
 	// function to connect two portholes
 	virtual void connect(GenericPort& destination,int numberDelays);
+
+	// Constructor
+	GenericPort () : type(ANYTYPE), alias(0), typePort(0) {}
 
 protected:
 	// datatype of particles in this porthole
@@ -229,6 +231,10 @@ public:
 	// initialize the Plasma
 	Plasma* setPlasma();
 
+	// Constructor: just worry about pointers here
+	PortHole () : myGeodesic(0), farSidePort(0), myPlasma(0),
+		      myBuffer(0) {}
+	
 protected:
         // Indicate the real port (aliases resolved) at the far end
         // of a connection.  Initialized to NULL.
@@ -369,52 +375,6 @@ public:
         // Add MultiPortHole to list
         void put(MultiPortHole& p) {SequentialList::put(&p);}
 };
-
-/**************************************************************
-Non-SDF PortHoles
-
-In this case, the Star controls the consuming and generation
-of Particles internally.
-
-In addition, for convenience we allow the Star to consume a
-Particle on an input PortHole, and then put it back into the
-Geodesic if it doesnt like what it sees!
-**************************************************************/
-
-	//////////////////////////////////////////////
-	// class InOtherPort
-	//////////////////////////////////////////////
-
-class InOtherPort : public PortHole
-{
-public:
-	// Increment time by inputing Particles from Geodesic
-	Particle& operator ++ ();
-
-	// Operator to push the last Particle back on the Geodesic
-	Particle& operator -- ();
-
-        // Services of PortHole that are often used: 
-        // setPort(dataType d); 
-        // Particle& operator % (int);
-};
-
-	///////////////////////////////////////
-	// class OutOtherPort
-	///////////////////////////////////////
-
-class OutOtherPort : public PortHole
-{
-public:
-	// Operator to find a new Particle, and output it
-	// from the Star
-	Particle& operator ++ ();
-
-        // Services of PortHole that are often used: 
-        // setPort(dataType d); 
-        // Particle& operator % (int);
-};
-
 /****************************************************************
 Geodesic
 
