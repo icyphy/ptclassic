@@ -100,7 +100,8 @@ cd filters
 foreach x (optfir wfir)
 	optmkdir $x
 	cd $x
-	optlink ../../../src/filters/$x Makefile
+	optlink ../../../src/filters/$x make.template
+	optlink ../../../src/filters/$x makefile
 	cd ..
 end
 cd ..
