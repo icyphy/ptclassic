@@ -103,7 +103,7 @@ extern const Attribute P_HIDDEN = {PB_HIDDEN,0};
 extern const Attribute P_VISIBLE = {0,PB_HIDDEN};
 
 // constructor
-GenericPort :: GenericPort () : myResolvedType(0), myType(ANYTYPE),
+GenericPort :: GenericPort () : myType(ANYTYPE),
               aliasedTo(0), aliasedFrom(0), typePortPtr(0), attributeBits(0) {}
 
 // Small virtual methods
@@ -272,7 +272,6 @@ void PortHole :: setDelay (int numberDelays, const char* initDelayValues) {
 // a multiporthole is ambiguous.  Since fancier geodesics work differently,
 // this is virtual -- redefined for some domains.
 void PortHole :: disconnect(int delGeo) {
-	if (!farSidePort) return;
 	if (myGeodesic && delGeo) {
 
 		// remove the connection on the geodesic end too
@@ -283,20 +282,29 @@ void PortHole :: disconnect(int delGeo) {
 			LOG_DEL; delete myGeodesic;
 		}
 	}
-	// if my peer points to me, (this happens only for persistent geos)
-	// disconnect the peer.
+	myGeodesic = 0;
+	// if my peer still points to me, disconnect the peer.
+	// (this happens only for persistent geos.)
 	if (farSidePort) {
-		if (farSidePort->farSidePort == this)
+		if (farSidePort->farSidePort == this) {
+			// NOTE: order is critical here so as not to crash
+			// if farSidePort points to myself ... see DDFSelf.
+			farSidePort->myResolvedType = 0;
+			farSidePort->myPreferredType = 0;
 			farSidePort->farSidePort = 0;
+		}
 		farSidePort = 0;
 	}
-	myGeodesic = 0;
-	return;
+	// reset any resolved type determined from the old peer,
+	// so that we can redo type resolution with the new one.
+	myResolvedType = 0;
+	myPreferredType = 0;
 }
 
 // Porthole constructor.
 PortHole :: PortHole () : myGeodesic(0), farSidePort(0), 
-myPlasma(0), myBuffer(0), myMultiPortHole(0) {}
+myPlasma(0), myBuffer(0), myResolvedType(0), myPreferredType(0),
+myMultiPortHole(0) {}
 	
 EventHorizon* PortHole :: asEH() { return NULL; }
 	
@@ -390,7 +398,12 @@ PortHole& PortHole :: setPort(const char* s,
                               DataType t,
 			      int nmv) {
 	// zero my plasma if my type is being changed.
-	if (t != type()) deletePlasma();
+	// also reset type resolution
+	if (t != type()) {
+		deletePlasma();
+		myResolvedType = 0;
+		myPreferredType = 0;
+	}
 	GenericPort::setPort (s, parent, t);
 	numberTokens = nmv;
 	// make sure that the buffer size is at least 1
@@ -511,7 +524,7 @@ StringList MultiPortHole :: print (int verbose) const {
 // These routines are concerned with propagating type information around
 // the porthole connection structure.  There are several considerations:
 // 1) We allow ports with different types to be connected together; the
-//    output porthole determines what particle type to use.
+//    input porthole determines what particle type to use.
 // 2) ANYTYPE must be allowed and correctly resolved in three different cases:
 //    * Printer and similar polymorphic stars, which accept any input type.
 //    * Fork and similar stars, which want to bind multiple outputs to
@@ -531,10 +544,9 @@ StringList MultiPortHole :: print (int verbose) const {
 // In Ptolemy 0.6 and earlier, the members of a multiporthole were always
 // constrained to have the same type.  This is no longer true, since it gets
 // in the way for polymorphic stars.  But if a multiporthole is tied to
-// another porthole via inheritTypeFrom, then each member porthole is
-// supposed to match the type of that other porthole.  (Even then,
-// inheritTypeFrom is not a guarantee of type equality; we do not complain
-// if the resolution algorithm ends up assigning different types.)
+// another porthole via inheritTypeFrom, then each member porthole will
+// match the type of that other porthole.  (Even then, inheritTypeFrom
+// is not an absolute guarantee of type equality; see below.)
 //
 // Most stars that have ANYTYPE outputs should tie the port type to an input
 // porthole to avoid its being undefined.  An exception is HOF-type stars,
@@ -549,43 +561,290 @@ StringList MultiPortHole :: print (int verbose) const {
 // There are no types anywhere in the system.  We have little choice
 // but to declare an error.
 //
-// To give convenient results for both Fork-like and Merge-like stars,
-// we resolve types in two passes.
+// Resolution of ANYTYPE portholes is a fairly tricky process; "correct"
+// behavior is not easy to define.  To give convenient behavior in as many
+// situations as possible, we adopt the following algorithm.
 //
-// 1. The first pass is "feed forward" from outputs to inputs: any output
-// port of defined type is resolved to that type, as is its connected input.
-// Then, within any type equivalence loop in which all the input ports are
-// resolved to the same type, we resolve unresolved outputs to that type
-// (and resolve their connected inputs, leading to recursive propagation).
+// We operate in two stages: the first selects a "preferred" type for each
+// porthole, the second the actual "resolved" type.  The resolved type is
+// the actual particle type that will propagate across the geodesic connecting
+// two portholes, so it must always agree at both ends of a connection.
+// (We retain the preferred type for the use of certain domain-specific
+// transformations, as will be explained below.)
+//
+// Preferred type selection is concerned only with assigning real datatypes
+// to ANYTYPE portholes.  The preferred type of a non-ANYTYPE porthole is the
+// same as its declared type.  ANYTYPE portholes are handled in two recursive
+// passes over the connection graph:
+//
+// 1. The first pass is "feed forward" from outputs to inputs.  If an ANYTYPE
+// porthole is not a member of an inheritance group, but is an input porthole
+// and is connected to a porthole of pass-1-assignable type, that porthole's
+// type becomes its preferred type.  If it is a member of an inheritance
+// group, and all the assignable input portholes of the group receive the
+// same type from their connected outputs, then that common type becomes the
+// preferred type of all the members of the group.
 // This pass handles Fork-like stars as well as Merge stars whose inputs
 // all have the same type.
 //
-// 2. The second pass is "feed back" from inputs to outputs: any unresolved
-// input port with a defined type is resolved to that type, as is its
-// connected output.  Then, within any type equivalence loop in which all the
-// outputs are resolved to the same type, we resolve unresolved inputs to
-// that type (and recursively resolve their connected outputs).
+// 2. The second pass is "feed back" from inputs to outputs; it is the dual
+// of the above.  If an unassigned ANYTYPE porthole is not a member of an
+// inheritance group, but is an output porthole and is connected to a porthole
+// of pass-2-assignable type, that porthole's type becomes its preferred type.
+// If it is a member of an inheritance group, and all the assignable output
+// portholes of the group receive the same type from their connected inputs,
+// then that common type becomes the preferred type of all the members of the
+// group.
 // This pass allows us to do something reasonable with Merge stars that have
 // inputs of different types: if the merge output is going to a port of
 // knowable type, we may as well just output particles of that type.
 //
-// 3. Finally, we declare error if any porthole types remain unresolved.
+// Finally, we declare error if any porthole types remain unassigned.
 // This occurs if a Merge-like star has inputs of nonidentical types and
-// an output connected to an ANYTYPE input.  The user must insert type
-// conversion stars to coerce the Merge inputs to a common type, so that
-// the system can figure out what type to use for the Merge output.
+// an output connected to an (unresolvable) ANYTYPE input.  The user must
+// insert type conversion stars to coerce the Merge inputs to a common type,
+// so that the system can figure out what type to use for the Merge output.
+//
+// Resolved type selection is performed after preferred types have been
+// determined.  It is fairly simple: an input porthole's resolved type
+// is the same as its preferred type, while an output porthole's resolved
+// type is that of its connected input.
+//
+// This rather baroque algorithm does have some simple properties:
+// * An input port of a specific declared type will always have that type
+//   as its preferred and resolved types.  A star writer can thus assume
+//   that the received particles are of the type specified; only stars
+//   that declare inputs as ANYTYPE need cope with multiple input types.
+//   (However, output portholes may be assigned a type different from what
+//   is specified, leading to run-time type conversions.)
+// * All members of an inheritance loop are guaranteed to be assigned the
+//   same preferred type; an error will be reported if this is not possible.
+//
+// In some domains it is important that members of an inheritance loop
+// have the same resolved type, not just the same preferred type.  (For
+// example, the CGC Fork star fails if this is not so, because its various
+// portholes are all just aliases for a single variable.)  The domain can
+// check this by seeing whether preferred type = resolved type for all
+// portholes.  If the types are not the same, it can either report an error
+// or splice in a type-conversion star to make them the same.
+//
+// FIXME: would it be better for strict inheritance type equality to be
+// enforced on a per-star basis, rather than a per-domain basis??
 
-// define a marker value to prevent infinite recursion
+
+// Define a marker value to prevent infinite recursion.
+// myPreferredType is temporarily set to Mark to indicate that
+// some outer level of recursion is already working on the porthole.
 const DataType Mark = "MARK";
 
-DataType PortHole :: setResolvedType () {
-  if (myResolvedType && myResolvedType != Mark)
-    return myResolvedType;	// already determined, just return it
 
-  // The resolver subroutines get confused if started from the inside
-  // boundary ghost port of a wormhole, since it has a "backwards"
-  // setting of isItInput/isItOutput.  The simplest answer seems to be
-  // to make sure we start the recursion from the attached ordinary port.
+DataType PortHole :: setPreferredType () {
+  // Fast path if type is already determined
+  if (myPreferredType) {
+    // if we are revisiting a node that an outer level of recursion is
+    // already busy with, return 0 to indicate "not yet resolvable".
+    if (myPreferredType == Mark)
+      return 0;
+    return myPreferredType;
+  }
+
+  // We will get confused if started at the inside boundary ghost port of a
+  // wormhole, since it has a "backwards" setting of isItInput/isItOutput.
+  // setResolvedType() is supposed to take care of this and not call
+  // setPreferredType() at an event horizon.  But we'll just double-check.
+  if (asEH()) {
+    Error::abortRun(*this,
+		    "PortHole::setPreferredType invoked at event horizon");
+    return 0;
+  }
+
+  // Do the main recursive algorithm.
+  // Pass 2 is only invoked if we can't determine the type in pass 1.
+  if (! assignPass1())
+    assignPass2();
+
+  if (myPreferredType == Mark)
+    return 0;			// shouldn't happen, but...
+
+  return myPreferredType;
+}
+
+// First pass of preferred type assignment.
+DataType PortHole :: assignPass1 () {
+  // Fast path if type is already determined
+  if (myPreferredType) {
+    // if we are revisiting a node that an outer level of recursion is
+    // already busy with, return 0 to indicate "not yet resolvable".
+    if (myPreferredType == Mark)
+      return 0;
+    return myPreferredType;
+  }
+
+  if (typePort() == 0) {
+    // Not a member of an inheritance group.
+    // If I have a declared type, that is my preferred type.
+    if (type() != ANYTYPE) {
+      myPreferredType = type();
+    } else {
+      // Only input portholes are assignable in pass 1.
+      if (! isItOutput()) {
+	// I am an input porthole: get preferred type from connected output.
+	PortHole* farend = findFarEnd();
+	if (farend) {
+	  myPreferredType = Mark;
+	  myPreferredType = farend->assignPass1();
+	}
+      }
+    }
+  } else {
+    // I am a member of an inheritance group.
+    // Walk the loop and see whether any members have defined types.
+    // If so, we trivially inherit from them (they'd better all match, too).
+    // A side effect of this first loop is to set all the group members to
+    // Mark as a recursion stop.
+    DataType assignedType = 0;
+    GenericPort *p = this;
+    do {
+      if (p->type() != ANYTYPE) {
+	if (assignedType == 0)
+	  assignedType = p->type();
+	else if (p->type() != assignedType) {
+	  Error::abortRun(*this,
+		"conflicting porthole types declared in inheritance group");
+	}
+      }
+      if (!p->isItMulti()) {
+	PortHole& ph = *(PortHole*) p;
+	ph.myPreferredType = Mark;
+      }
+      p = p->typePort();
+    } while (p && p != this);
+
+    if (assignedType == 0) {
+      // Normal case: all members of inheritance loop are declared ANYTYPE.
+      // Check the connected output of each input port in the loop.
+      DataType connectedType = 0;
+      int uniqueType = TRUE;
+      p = this;
+      do {
+	if (!p->isItMulti() && !p->isItOutput()) {
+	  PortHole& ph = *(PortHole*) p;
+	  PortHole* farend = ph.findFarEnd();
+	  if (farend) {
+	    DataType thisType = farend->assignPass1();
+	    if (thisType) {
+	      if (connectedType == 0)
+		connectedType = thisType;
+	      else if (connectedType != thisType)
+		uniqueType = FALSE;
+	    }
+	  }
+	}
+	p = p->typePort();
+      } while (p && p != this);
+      // If all the resolvable connections report the same type, assign it.
+      if (connectedType && uniqueType)
+	assignedType = connectedType;
+    }
+
+    // Clean up by setting all members of group to assignedType
+    // (which will be 0 if we've failed to select a type).
+    p = this;
+    do {
+      if (!p->isItMulti()) {
+	PortHole& ph = *(PortHole*) p;
+	ph.myPreferredType = assignedType;
+      }
+      p = p->typePort();
+    } while (p && p != this);
+  }
+
+  return myPreferredType;
+}
+
+// Second pass of preferred type assignment.
+DataType PortHole :: assignPass2 () {
+  // We should not get here if the type is already resolved or resolvable.
+  if (myPreferredType || type() != ANYTYPE) {
+    Error::abortRun(*this, "internal error in PortHole::assignPass2");
+    return 0;
+  }
+
+  if (typePort() == 0) {
+    // Not a member of an inheritance group.
+    // Get preferred type from connected porthole.
+    PortHole* farend = findFarEnd();
+    if (farend) {
+      myPreferredType = Mark;
+      myPreferredType = farend->setPreferredType();
+    }
+  } else {
+    // I am a member of an inheritance group.
+    // Walk the loop and set types to Mark as a recursion stop.
+    // We need not check for non-ANYTYPE portholes since assignPass1 did that.
+    GenericPort *p = this;
+    do {
+      if (!p->isItMulti()) {
+	PortHole& ph = *(PortHole*) p;
+	ph.myPreferredType = Mark;
+      }
+      p = p->typePort();
+    } while (p && p != this);
+
+    // Check the connected input of each output port in the loop.
+    DataType connectedType = 0;
+    int uniqueType = TRUE;
+    p = this;
+    do {
+      if (!p->isItMulti() && p->isItOutput()) {
+	PortHole& ph = *(PortHole*) p;
+	PortHole* farend = ph.findFarEnd();
+	if (farend) {
+	  DataType thisType = farend->setPreferredType();
+	  if (thisType) {
+	    if (connectedType == 0)
+	      connectedType = thisType;
+	    else if (connectedType != thisType)
+	      uniqueType = FALSE;
+	  }
+	}
+      }
+      p = p->typePort();
+    } while (p && p != this);
+    // If all the resolvable connections report the same type, assign it.
+    DataType assignedType = 0;
+    if (connectedType && uniqueType)
+      assignedType = connectedType;
+
+    // Clean up by setting all members of group to assignedType
+    // (which will be 0 if we've failed to select a type).
+    p = this;
+    do {
+      if (!p->isItMulti()) {
+	PortHole& ph = *(PortHole*) p;
+	ph.myPreferredType = assignedType;
+      }
+      p = p->typePort();
+    } while (p && p != this);
+  }
+
+  return myPreferredType;
+}
+
+// Final phase of type resolution: assign resolved type given preferred types.
+// Note: this is virtual, so it could be overridden in a specific domain.
+DataType PortHole :: setResolvedType () {
+  // Fast path if type is already determined
+  if (myResolvedType) {
+    if (myResolvedType == Mark)
+      return 0;			// shouldn't happen, but...
+    return myResolvedType;
+  }
+
+  // We will get confused if started at the inside boundary ghost port of a
+  // wormhole, since it has a "backwards" setting of isItInput/isItOutput.
+  // The simplest answer seems to be to make sure we start the recursion
+  // from the attached ordinary port.
   if (asEH()) {
     // Even this is a tad tricky, because we have to look far enough to
     // find a non-EH port; there could be an adjacent wormhole boundary.
@@ -602,9 +861,61 @@ DataType PortHole :: setResolvedType () {
       }
     }
   } else {
-    // normal case at non-EH port
-    if (! resolvePass1())
-      resolvePass2();
+    // normal case at non-EH port: first do preferred-type assignment
+    if (setPreferredType()) {
+      // find the far end and let it do preferred-type assignment too
+      PortHole* farend = findFarEnd();
+      if (farend)
+	farend->setPreferredType();
+      if (isItInput()) {
+	// I am an input porthole: select my preferred type as resolved type.
+	myResolvedType = myPreferredType;
+	// If the other end is also an input, OK only if same type.
+	// Otherwise we have a conflict with neither side taking precedence.
+	if (farend && farend->isItInput()) {
+	  if (myResolvedType != farend->myPreferredType)
+	    myResolvedType = 0;
+	}
+      } else {
+	// I am an output porthole: get resolved type from connected input.
+	if (farend) {
+	  myResolvedType = farend->myPreferredType;
+	  // If the other end is also an output, OK only if same type.
+	  // Otherwise we have a conflict with neither side taking precedence.
+	  if (! farend->isItInput()) {
+	    if (myResolvedType != myPreferredType)
+	      myResolvedType = 0;
+	  }
+	} else {
+	  // A disconnected output resolves to its own preferred type.
+	  // (Lack of connection may be an error,
+	  // but it's not my place to decide that.)
+	  myResolvedType = myPreferredType;
+	}
+      }
+      // Now propagate the resolved type to the partner port and to
+      // any intervening event horizons.
+      // This propagation is not absolutely necessary, but it can save a few
+      // cycles by eliminating future calls from those portholes back to me.
+      // Note: depending on call order, we may end up doing this propagation
+      // from both ends.  This is OK because the logic above is certain to
+      // choose the same resolved type at either end.
+      if (farend)
+	farend->myResolvedType = myResolvedType;
+      farend = far();
+      while (farend && farend->asEH()) {
+	// We set preferred type = resolved type in the intervening EHs
+	// (we assume they are declared ANYTYPE so this is OK).
+	farend->myPreferredType = myResolvedType;	// near EH
+	farend->myResolvedType = myResolvedType;
+	farend = farend->asEH()->ghostAsPort();
+	if (farend) {
+	  farend->myPreferredType = myResolvedType;	// far EH
+	  farend->myResolvedType = myResolvedType;
+	  farend = farend->far();
+	}
+      }
+    }
   }
 
   if (myResolvedType == Mark)
@@ -613,210 +924,20 @@ DataType PortHole :: setResolvedType () {
   return myResolvedType;
 }
 
-DataType GenericPort :: resolvePass1 (DataType useType) {
-  // If being told what to do, do it.
-  if (useType) {
-    // In pass 1, only input ports should be told what to do ---
-    // this represents propagation of resolved type from connected output.
-    // Also, I should never be told to change my type once resolved.
-    if (!isItInput() ||
-	(myResolvedType && myResolvedType != Mark && myResolvedType != useType))
-      Error::abortRun(*this, "internal error in GenericPort::resolvePass1");
-    myResolvedType = useType;
-  }
-  // Resolve output portholes of known types and input portholes that are
-  // connected to output portholes of pass1-resolvable types.
-  // If I am a member of a type equivalence chain, scan all the chain members.
-  GenericPort *p = this;
-  do {
-    // ignore chain members already resolved or marked, as well as MPH members
-    if (p->myResolvedType == 0 && !p->isItMulti()) {
-      PortHole& ph = *(PortHole*) p;
-      if (ph.isItOutput()) {
-	if (ph.type() != ANYTYPE) {
-	  // Pass 1 rule 1: resolve defined-type output ports to their type.
-	  ph.myResolvedType = ph.type();
-	  // Pass 1 rule 2: propagate that type to connected input.
-	  PortHole* farend = ph.far();
-	  while (farend && farend->asEH()) {
-	    // cross through wormhole boundary, fixing EH types as we go.
-	    farend->myResolvedType = ph.myResolvedType; // near EH
-	    farend = farend->asEH()->ghostAsPort();
-	    farend->myResolvedType = ph.myResolvedType; // far EH
-	    farend = farend->far(); // now far = true far end port
-	  }
-	  if (farend)
-	    farend->resolvePass1(ph.myResolvedType);
+
+// Handy subroutine for type assignment:
+// Find the "true" far end, ignoring any intervening event horizons.
+PortHole* PortHole :: findFarEnd() const {
+	PortHole* farend = far();
+	while (farend && farend->asEH()) {
+		farend = farend->asEH()->ghostAsPort();
+		if (farend)
+			farend = farend->far();
 	}
-      } else { // input port
-	// see if far end has pass1-resolvable type
-	PortHole* farend = ph.far();
-	while (farend && farend->asEH())
-	  farend = farend->asEH()->ghostAsPort()->far();
-	if (farend) {
-	  ph.myResolvedType = Mark; // set recursion stop
-	  ph.myResolvedType = farend->resolvePass1();
-	  // note: on successful resolution, the far end will have called me
-	  // back and so myResolvedType will be set already.  Assigning the
-	  // return value is just to clear the Mark if not successful.
-	}
-      }
-    }
-    p = p->typePort();
-  } while (p && p != this);
-  // Now see if we are ready to apply rule 3: are all the resolvable
-  // input members of the equivalence chain resolved to the same type?
-  if (typePort()) {
-    DataType inputType = 0;
-    int haveUnknown = FALSE;
-    p = this;
-    do {
-      if (!p->isItMulti()) {
-	PortHole& ph = *(PortHole*) p;
-	if (ph.isItOutput()) {
-	  if (ph.myResolvedType == 0)
-	    haveUnknown = TRUE;	// worth doing the third scan
-	} else { // input port
-	  if (ph.myResolvedType) { // ignore unresolvable inputs
-	    if (ph.myResolvedType == Mark ||
-		(inputType && inputType != ph.myResolvedType)) {
-	      inputType = 0;	// pass 1 still busy, or not all same type
-	      break;
-	    }
-	    inputType = ph.myResolvedType;
-	  }
-	}
-      }
-      p = p->typePort();
-    } while (p && p != this);
-    if (inputType && haveUnknown) {
-      // Yes, resolve the unknown outputs to this type
-      p = this;
-      do {
-	if (!p->isItMulti()) {
-	  PortHole& ph = *(PortHole*) p;
-	  if (ph.isItOutput() && ph.myResolvedType == 0) {
-	    ph.myResolvedType = inputType;
-	    // Pass 1 rule 2: propagate that type to connected input.
-	    PortHole* farend = ph.far();
-	    while (farend && farend->asEH()) {
-	      // cross through wormhole boundary, fixing EH types as we go.
-	      farend->myResolvedType = ph.myResolvedType; // near EH
-	      farend = farend->asEH()->ghostAsPort();
-	      farend->myResolvedType = ph.myResolvedType; // far EH
-	      farend = farend->far(); // now far = true far end port
-	    }
-	    if (farend)
-	      farend->resolvePass1(ph.myResolvedType);
-	  }
-	}
-	p = p->typePort();
-      } while (p && p != this);
-    }
-  }
-  return myResolvedType;
+	return farend;
 }
 
-DataType GenericPort :: resolvePass2 (DataType useType) {
-  // If being told what to do, do it.
-  if (useType) {
-    // In pass 2, only output ports should be told what to do ---
-    // this represents propagation of resolved type from connected input.
-    // Also, I should never be told to change my type once resolved.
-    if (!isItOutput() ||
-	(myResolvedType && myResolvedType != Mark && myResolvedType != useType))
-      Error::abortRun(*this, "internal error in GenericPort::resolvePass2");
-    myResolvedType = useType;
-  }
-  // Resolve input portholes of defined types and output portholes that are
-  // connected to input portholes of pass2-resolvable types.
-  // If I am a member of a type equivalence chain, scan all the chain members.
-  GenericPort *p = this;
-  do {
-    // ignore chain members already resolved or marked, as well as MPH members
-    if (p->myResolvedType == 0 && !p->isItMulti()) {
-      PortHole& ph = *(PortHole*) p;
-      if (ph.isItInput()) {
-	if (ph.type() != ANYTYPE) {
-	  // Pass 2 rule 1: resolve defined-type input ports to their type.
-	  ph.myResolvedType = ph.type();
-	  // Pass 2 rule 2: propagate that type to connected output.
-	  PortHole* farend = ph.far();
-	  while (farend && farend->asEH()) {
-	    // cross through wormhole boundary, fixing EH types as we go.
-	    farend->myResolvedType = ph.myResolvedType; // near EH
-	    farend = farend->asEH()->ghostAsPort();
-	    farend->myResolvedType = ph.myResolvedType; // far EH
-	    farend = farend->far(); // now far = true far end port
-	  }
-	  if (farend)
-	    farend->resolvePass2(ph.myResolvedType);
-	}
-      } else { // output port
-	// see if far end has pass2-resolvable type
-	PortHole* farend = ph.far();
-	while (farend && farend->asEH())
-	  farend = farend->asEH()->ghostAsPort()->far();
-	if (farend) {
-	  ph.myResolvedType = Mark; // set recursion stop
-	  ph.myResolvedType = farend->resolvePass2();
-	}
-      }
-    }
-    p = p->typePort();
-  } while (p && p != this);
-  // Now see if we are ready to apply rule 3: are all the resolvable
-  // output members of the equivalence chain resolved to the same type?
-  if (typePort()) {
-    DataType outputType = 0;
-    int haveUnknown = FALSE;
-    p = this;
-    do {
-      if (!p->isItMulti()) {
-	PortHole& ph = *(PortHole*) p;
-	if (ph.isItInput()) {
-	  if (ph.myResolvedType == 0)
-	    haveUnknown = TRUE;	// worth doing the third scan
-	} else { // output port
-	  if (ph.myResolvedType) { // ignore unresolvable outputs
-	    if (ph.myResolvedType == Mark ||
-		(outputType && outputType != ph.myResolvedType)) {
-	      outputType = 0;	// pass 2 still busy, or not all same type
-	      break;
-	    }
-	    outputType = ph.myResolvedType;
-	  }
-	}
-      }
-      p = p->typePort();
-    } while (p && p != this);
-    if (outputType && haveUnknown) {
-      // Yes, resolve the unknown inputs to this type
-      p = this;
-      do {
-	if (!p->isItMulti()) {
-	  PortHole& ph = *(PortHole*) p;
-	  if (ph.isItInput() && ph.myResolvedType == 0) {
-	    ph.myResolvedType = outputType;
-	    // Pass 2 rule 2: propagate that type to connected output.
-	    PortHole* farend = ph.far();
-	    while (farend && farend->asEH()) {
-	      // cross through wormhole boundary, fixing EH types as we go.
-	      farend->myResolvedType = ph.myResolvedType; // near EH
-	      farend = farend->asEH()->ghostAsPort();
-	      farend->myResolvedType = ph.myResolvedType; // far EH
-	      farend = farend->far(); // now far = true far end port
-	    }
-	    if (farend)
-	      farend->resolvePass2(ph.myResolvedType);
-	  }
-	}
-	p = p->typePort();
-      } while (p && p != this);
-    }
-  }
-  return myResolvedType;
-}
+
 
 // by default, use the global Plasma appropriate to my resolved type.
 int PortHole :: allocatePlasma() {
@@ -871,9 +992,6 @@ int PortHole :: allocateLocalPlasma() {
 void PortHole :: initialize()
 {
 	if (!setResolvedType ()) {
-		// set error mark on parent star
-		if (parent())
-			Error::mark(*parent());
 		Error::abortRun (*this, "can't determine DataType");
 		return;
 	}
