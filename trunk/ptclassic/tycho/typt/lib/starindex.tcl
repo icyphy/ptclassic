@@ -171,7 +171,7 @@ proc starindex_FindOctFacetDirs { pathname } {
       lappend facetdirlist [starindex_StripSubDir $sfile]
     }
   }
-  #puts "starindex_FindOctFacetDirs $pathname: $facetdirlist $schematicFiles"
+  puts "dbg: starindex_FindOctFacetDirs $pathname [llength $schematicFiles]"
   return $facetdirlist
 }
 
@@ -183,7 +183,7 @@ proc starindex_ReadOctFacetDirs { facetdirlist } {
   foreach facetdir $facetdirlist {
     set retval [catch "exec octls $facetdir" otherfacets]
     if { $retval != 0 } continue
-    set facetpair [split $otherfacets "\n"]
+    set facetpair [split [starindex_NormalizePathNames $otherfacets] "\n"]
     eval lappend facetpairlist $facetpair
   }
   return $facetpairlist
@@ -207,13 +207,11 @@ proc starindex_ReadAllFacetPairs { pathname } {
 proc starindex_FacetPairsToTriplets { facetpairs } {
   set swapped ""
   set numelements [llength $facetpairs]
+  # get the triplets: star name, star path, demo path 
   for { set i 0 } { $i < $numelements } { incr i } {
     set pairlist [lindex $facetpairs $i]
-    # first element: star name
     set triplet [starindex_GetStarBaseName [starindex_StripPath [lindex $pairlist 1]]]
-    # second element: star path
     lappend triplet [lindex $pairlist 1]
-    # third element: demo path
     lappend triplet [lindex $pairlist 0]
     lappend swapped $triplet
   }
@@ -271,40 +269,43 @@ proc starindex_MakeStarDemoIndex { pathname } {
 # starindex_StarDemoIndexToWWW
 # convert a starlist returned by starindex_MakeStarDemoIndex
 # into World Wide Web format
-proc starindex_StarDemoIndexToWWW { starlist header } {
-  set wwwcode "$header\n<ul>\n"
+proc starindex_StarDemoIndexToWWW { fd starlist header } {
+  puts "dbg: starindex_StarDemoIndexToWWW \{ starlist $header\}"
+  puts $fd "$header\n<ul>\n"
   set numelements [llength $starlist]
   for { set i 0 } { $i < $numelements } { incr i } {
     set treelist [lindex $starlist $i]
     set starname [lindex $treelist 0]
-    foreach demo [lrange $treelist 1 end]  {
-	lappend demolist "<a href=\"$demo\">$demo</a>"
+    puts -nonewline $fd "\n<li>$starname: \
+            <a href=\"[lindex $treelist 1]\">[lindex $treelist 1]</a>"
+    foreach demo [lrange $treelist 2 end]  {
+	puts -nonewline $fd ", <a href=\"$demo\">$demo</a>"
     }
-    set wwwcode "$wwwcode<li>$starname: [join $demolist ", "]\n"
   }
-  set wwwcode "$wwwcode</ul>\n<hr>Updated: [clock format [clock seconds]]\n"
-  return $wwwcode
+  puts $fd "</ul>\n<hr>Updated: [clock format [clock seconds]]\n"
 }
 
 # starindex_MakeWWWOctFacetIndex
 # create a list in World Wide Web format of all stars
 # used in Oct facets in a given directory tree
-proc starindex_MakeWWWOctFacetIndex { pathname locationdesc } {
+proc starindex_MakeWWWOctFacetIndex { fd pathname locationdesc } {
   set header "Stars, galaxies, and universes $locationdesc"
   set starlist [starindex_MakeStarDemoIndex $pathname]
-  starindex_NormalizePathNames [starindex_StarDemoIndexToWWW $starlist $header]
+  puts "dbg: starindex_MakeWWWOctFacetIndex $pathname $locationdesc"
+  #starindex_NormalizePathNames [starindex_StarDemoIndexToWWW $starlist $header]
+  starindex_StarDemoIndexToWWW $fd $starlist $header
 }
 
 # starindex_MakeWWWStarDemoIndex
 # generate a World Wide Web (WWW) index for a particular PTOLEMY domain
-proc starindex_MakeWWWStarDemoIndex { domainname } {
+proc starindex_MakeWWWStarDemoIndex { fd domainname } {
   global env
   if { ! [info exists env(PTOLEMY)] } return
 
   set lcdomainname [string tolower $domainname]
   set ucdomainname [string toupper $domainname]
   set pathname "$env(PTOLEMY)/src/domains/$lcdomainname"
-  starindex_MakeWWWOctFacetIndex $pathname "in the $ucdomainname domain"
+  starindex_MakeWWWOctFacetIndex $fd $pathname "in the $ucdomainname domain"
 }
 
 # starindex_WriteWWWStarDemoDir
@@ -338,7 +339,7 @@ proc starindex_WriteWWWStarDemoDir { domainlist wwwdirectory } {
     puts -nonewline "$domain "
     flush stdout  
     set f [open "$wwwdirectory/$domain.html" w]
-    puts $f [starindex_MakeWWWStarDemoIndex $domain]
+    starindex_MakeWWWStarDemoIndex $f $domain
     close $f
     puts $indexfile "<li><a href=\"$domain.html\">$domain</a>"
   }
