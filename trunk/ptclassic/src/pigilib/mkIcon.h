@@ -1,3 +1,5 @@
+#ifndef MKICON_H
+#define MKICON_H 1
 /* mkIcon.h  edg
 Version identification:
 $Id$
@@ -51,7 +53,18 @@ struct TermList_s {
 };
 typedef struct TermList_s TermList;
 
+#ifdef __cplusplus
+#include "oct.h"
+extern boolean MkPalIcon(octObject *facetPtr, octObject *iconFacetPtr);
+extern boolean MkUnivIcon(octObject *facetPtr, octObject *iconFacetPtr);
+extern boolean MkGalIcon(octObject *galFacetPtr, octObject *iconFacetPtr);
+extern boolean MkStarIcon(char *name, char *dir, octObject *iconFacetPtr);
+
+extern boolean PutShape( /* octObject *containPtr, octObject *objPtr, Shape *shapePtr, struct octPoint *translatePtr */);
+#else
 extern boolean MkPalIcon();
 extern boolean MkUnivIcon();
 extern boolean MkGalIcon();
 extern boolean MkStarIcon();
+#endif /* cplusplus */
+#endif /* MKICON_H */

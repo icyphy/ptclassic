@@ -28,12 +28,24 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Version identification:
 $Id$
 */
+#ifdef __cplusplus
 
+#include "rpc.h"     /* needed to define "RPCSpot" */
+
+extern boolean CompileFacet(octObject *facetPtr);
 extern boolean EssClear();
+extern int RpcCompileFacet(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern void CompileInit();
+extern void CompileEnd();
+extern boolean CompileGal(octObject *galFacetPtr);
+extern boolean CompileGalStandalone(octObject *galFacetPtr);
+extern boolean CompileGalInst(octObject *galInstPtr, octObject *parentFacetPtr);
+#else
 extern boolean CompileFacet();
+extern boolean EssClear();
 extern int RpcCompileFacet();
 extern void CompileInit();
 extern void CompileEnd();
 extern int RpcRunAllDemos();
-
+#endif /* __cplusplus */
 #endif /* COMPILE_H */

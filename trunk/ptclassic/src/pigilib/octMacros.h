@@ -142,7 +142,11 @@ boolean CreateOrModifyPropReal();
 boolean CreateOrModifyPropStr();
 boolean GetOrCreatePropInt();
 boolean GetOrCreatePropReal();
+#ifndef __cplusplus
+/* These are defined in OctIfc.c */
 boolean GetOrCreatePropStr();
+boolean OpenFacet();
+#endif
 
 
 /*
@@ -150,8 +154,6 @@ boolean GetOrCreatePropStr();
  */
 #define GetById(obj, id)				\
     ((obj)->objectId = id, octGetById(obj))
-
-boolean OpenFacet();
 
 #define CreateInstance2(c, t, xname, xmaster, xview, xfacet, tx, ty, ttype)\
     ((t)->type=OCT_INSTANCE, 				\

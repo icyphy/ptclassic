@@ -1,3 +1,5 @@
+#ifndef EXEC_H
+#define EXEC_H 1
 /* 
 Copyright (c) 1990-1994 The Regents of the University of California.
 All rights reserved.
@@ -26,10 +28,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Version identification:
 $Id$
 */
+#ifdef __cplusplus
+#include "rpc.h"     /* needed to define "RPCSpot" */
 
+extern int RunUniverse(char* name, int iterations);
+extern int ptkRun(octObject *facetPtr, boolean now);
+
+extern int RpcRun(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcReRun(RPCSpot *spot, lsList cmdList, long userOptionWord);
+extern int RpcDisplaySchedule(RPCSpot *spot, lsList cmdList, long userOptionWord);
+
+/* FIXME:  The following function is not in exec.c */
+extern int ParallelSched();
+#else
 extern int RunUniverse();
 extern int ptkRun();
 extern int RpcRun();
 extern int RpcReRun();
 extern int RpcDisplaySchedule();
 extern int ParallelSched();
+#endif /* __cplusplus */
+
+#endif /* EXEC_H */

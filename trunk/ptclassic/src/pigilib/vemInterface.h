@@ -26,7 +26,25 @@ ENHANCEMENTS, OR MODIFICATIONS.
 Version identification:
 $Id$
 */
+#ifdef __cplusplus
+#ifndef OCT_H
+#include "oct.h"
+#endif
 
+extern void PrintCon();
+extern void PrintConLog();
+extern void PrintErr();
+extern void PrintDebug();
+extern void PrintDebugSet();
+extern boolean PrintDebugGet();
+extern void ViInit();
+extern void ViTerm();
+extern char *ViGetName();
+extern boolean MyCopyFacet();
+extern boolean ViKillBuf(octObject *facetPtr);
+extern boolean ViGetErrWindows();
+extern void ViSetErrWindows(boolean state);
+#else
 extern void PrintCon();
 extern void PrintConLog();
 extern void PrintErr();
@@ -42,3 +60,4 @@ extern boolean MyCopyFacet();
     ViTerm(); \
     vemPrompt(); \
     return (RPC_OK);
+#endif /* __cplusplus */

@@ -31,13 +31,71 @@ $Id$
 
 extern char *AkoName();
 
+#ifdef __cplusplus
+extern char *AkoName();
+
+extern boolean SetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
+extern boolean GetFormalParams(octObject *galFacetPtr, ParamListType *pListPtr);
+extern boolean SetSogParams(octObject *sog,ParamListType *plist);
+extern boolean GetOrInitSogParams(octObject *instPtr, ParamListType *pListPtr);
+extern void GetOrInitDelayProp(octObject *instPtr, octObject *propPtr);
+extern void GetOrInitBusProp(octObject *instPtr, octObject *propPtr);
+extern void IntizeProp(octObject *propPtr);
+extern boolean IsVemConnector(octObject *instPtr);
+extern boolean IsIoPort(octObject *instPtr);
+extern boolean IsInputPort(octObject *instPtr);
+extern boolean IsDelay(octObject *instPtr);
+extern boolean IsGal(octObject *instPtr);
+extern boolean IsStar(octObject *instPtr);
+extern boolean IsUniv(octObject *instPtr);
+extern boolean IsGalFacet(octObject *facetPtr);
+extern boolean IsMarker(octObject *instPtr);
+extern boolean IsCursor(octObject *instPtr);
+
+extern int GetIterateProp(octObject *facetPtr, int *pIterate);
+extern void SetIterateProp(octObject *facetPtr, int iterate);
+extern boolean GetCommentProp(octObject *objPtr, char **commentPtr);
+extern boolean SetCommentProp(octObject *objPtr, char *comment);
+extern boolean GOCDomainProp(octObject *facetPtr, char **domainPtr, char *defaultDomain);
+extern boolean MyOpenMaster( octObject *t, octObject *i, char *f, char *m);
+extern boolean IsPal(octObject *instPtr);
+extern boolean SetTargetParams(octObject *instPtr, ParamListType *pListPtr);
+extern boolean SetTargetProp( octObject *facetPtr, char *target);
+extern boolean GetTargetParams(char* targName, octObject *facetPtr, ParamListType *pListPtr);
+extern boolean GOCTargetProp(octObject *facetPtr, char **targetPtr, char *defaultTarget);
+extern boolean SetDomainProp(octObject *facetPtr, char *domain);
+extern boolean StringizeProp(octObject *propPtr, char* buf, int len);
+extern boolean AutoLoadCk(octObject *instPtr);
+extern boolean GetStringizedProp(octObject *objPtr, char *name, char*dest, int dlen);
+extern boolean IsPalFacet(octObject *facetPtr);
+extern boolean LoadTheStar(octObject* instPtr, int permB, char* linkArgs);
+extern boolean GetDefaultParams(octObject *instPtr, ParamListType *pListPtr);
+
+
+/* Added for ptkCommands.cc */
+extern boolean IsUnivFacet(octObject *facetPtr);
+extern boolean IsBus(octObject *instPtr);
+
+
+/* FIXME: These Functions are NOT defined in octIfc.c */
+extern boolean GetGalTerms();
+extern boolean GetHardwareProp();
+extern boolean SetHardwareProp();
+extern boolean GOCArchProp();
+
+extern boolean GetOrCreatePropStr(octObject *c, octObject *t,char *s,
+				  char *s1);
+
+extern boolean OpenFacet(octObject *t, char *c, char *v, char *f, char *m);
+
+#else
+extern void GetOrInitDelayProp();
+extern void GetOrInitBusProp();
+extern void IntizeProp();
 extern boolean SetFormalParams();
 extern boolean GetFormalParams();
 extern boolean SetSogParams();
 extern boolean GetOrInitSogParams();
-extern void GetOrInitDelayProp();
-extern void GetOrInitBusProp();
-extern void IntizeProp();
 extern boolean IsVemConnector();
 extern boolean IsIoPort();
 extern boolean IsInputPort();
@@ -69,5 +127,5 @@ extern boolean GetGalTerms();
 extern boolean GetHardwareProp();
 extern boolean SetHardwareProp();
 extern boolean GOCArchProp();
-
+#endif /* __cplusplus*/
 #endif /* OCTIFC_H */
