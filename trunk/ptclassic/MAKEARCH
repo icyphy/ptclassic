@@ -80,7 +80,7 @@ end
 
 foreach x (thor/pepp cg/targets sdf/expgraph sdf/image sdf/targets \
 	ddf/constructs sdf/loopScheduler cg/parScheduler thor/analyzerX11 \
-	cg/dlScheduler cg/HuScheduler cg/dcScheduler \
+	cg/dlScheduler cg/HuScheduler cg/dcScheduler cgc/targets \
 	cg56/dsp sdf/dsp sdf/image $EXPEXTRAS )
 	optmkdir $x
 	cd $x
