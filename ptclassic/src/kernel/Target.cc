@@ -1,3 +1,4 @@
+static const char file_id[] = "Target.cc";
 /*******************************************************************
 SCCS version identification
 $Id$
@@ -31,9 +32,14 @@ $Id$
 #include "miscFuncs.h"
 
 void Target::setSched(Scheduler* sch) {
-	delete sched;
+	LOG_DEL; delete sched;
 	sched = sch;
 	sch->setTarget(*this);
+}
+
+void Target::delSched() {
+	LOG_DEL; delete sched;
+	sched = 0;
 }
 
 // default commTime method: only one processor, no time
@@ -200,7 +206,7 @@ void Target::deleteChildren() {
 	Target* p = children;
 	while (p) {
 		children = p->link;
-		delete p;
+		LOG_DEL; delete p;
 		p = children;
 	}
 	nChildren = 0;
