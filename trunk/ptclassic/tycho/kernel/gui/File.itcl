@@ -214,10 +214,10 @@ class ::tycho::File {
     method clear {} {}
 
     # Disable the item in the specified menu.
-    protected method disableMenuItem {itemName inMenu}
+    method disableMenuItem {itemName inMenu}
 
     # Enable the item in the specified menu.
-    protected method enableMenuItem {itemName inMenu}
+    method enableMenuItem {itemName inMenu}
 
     # Query the user for a filename, then evaluate its contents as Tcl commands.
     method evaluate {}
