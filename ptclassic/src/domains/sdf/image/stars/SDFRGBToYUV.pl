@@ -114,10 +114,10 @@ to the usual YUV definition.
 		}
 
 		// FIXME
-		// Sets redimg to the vector representing the FloatMatrix, redI, 
+		// Sets redImg to the vector representing the FloatMatrix redI, 
 		// greenImg to greenI, and blueImg to blueI.
 		// This only works because in the underlying implementation of 
-		// FloatMatrix, redImg[0] for example, which returns the 1st row of the 
+		// FloatMatrix, redI[0] for example, which returns the 1st row of the 
 		// matrix, also returns the entire vector representing the matrix. 
 		// A method should be added to the FloatMatrix class to do this instead
 		// of relying on this current operation
