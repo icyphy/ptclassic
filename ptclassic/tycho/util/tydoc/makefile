@@ -35,14 +35,14 @@
 ROOT =		../..
 
 # True source directory
-VPATH =		$(ROOT)/edit/tydoc
+VPATH =		$(ROOT)/util/tydoc
 
 # Get configuration info
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
 # Sub directories to run make in.
-DIRS =	
+DIRS =	adm bin demos doc test
 
 TCL_SRCS = 
 
