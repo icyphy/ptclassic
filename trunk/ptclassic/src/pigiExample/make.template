@@ -65,14 +65,14 @@ DHDR = $(ROOT)/src/domains
 # START YOUR EDITING HERE!!!!
 
 # Star objects in this directory.  Add your own here.
-# You probably don't want the toy SDFSayDigit star.
-OBJS=SDFSayDigit.o
+# You probably don't want the toy SDFMyStar star.
+OBJS=SDFMyStar.o
 
 # Names of star sources that are written in Ptolemy preprocessor language.
 # (If you also have stars or other object files written the old-fashioned
 # way, no problem -- any .o file in OBJS with no matching .pl file below
 # will be built from a .cc file).
-PLSRCS=SDFSayDigit.pl
+PLSRCS=SDFMyStar.pl
 
 # The following specifies your version string.  It appears in the
 # startup window.
