@@ -662,6 +662,55 @@ int POct::ptkSetFindName (int aC,char** aV) {
     return TCL_OK;
 }
 
+// ptkSetRunUniverse <facet-id> <ParameterList> 
+//
+// Saves the passed Parameter List and then runs the facet
+//
+// This procedure was written to work with ptkEditStrings
+//
+// Written by Alan Kamas  1/94
+//
+int POct::ptkSetRunUniverse (int aC,char** aV) {
+
+    octObject facet;
+
+    if (aC != 3) return 
+        usage ("ptkSetRunUniverse <OctObjectHandle> <ParameterList>");
+
+    if (ptkHandle2OctObj(aV[1], &facet) == 0) {
+        Tcl_AppendResult(interp, "Bad or Stale Facet Handle passed to ", aV[0],
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Redo facet checks to make sure this facet is still okay
+    // before proceeding
+    if (!IsUnivFacet(&facet)){
+        Tcl_AppendResult(interp, "Schematic is not a universe.",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+    if (! KcSetKBDomain(DEFAULT_DOMAIN)) {
+        Tcl_AppendResult(interp, "Failed to set default domain.",
+                         (char *) NULL);
+        return TCL_ERROR;
+    }
+
+    // Save the new parameters into the facet
+    if ( Tcl_VarEval(interp,"ptkSetParams ",
+                   aV[1],
+                   " NIL ",
+                   " \"[list ", aV[2], " ]\" ",
+                   (char *)NULL) != TCL_OK ) {
+        return TCL_ERROR; 
+    }
+     
+    // Run the Facet
+    if (!ptkRun( &facet, TRUE )) return TCL_ERROR; 
+       
+    return TCL_OK; 
+}
+
 // ptkGetComment <facet-id>
 // returns the Comment for the passed facet or instance.
 //
@@ -1559,6 +1608,7 @@ static InterpTableEntry funcTable[] = {
 	ENTRY(ptkSetFindName),
 	ENTRY(ptkGetMkStar),
 	ENTRY(ptkSetMkStar),
+	ENTRY(ptkSetRunUniverse),
 	ENTRY(ptkGetComment),
 	ENTRY(ptkSetComment),
 	ENTRY(ptkGetMkSchemIcon),
