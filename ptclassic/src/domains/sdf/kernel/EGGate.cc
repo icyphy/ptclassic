@@ -59,17 +59,19 @@ void EGGate::allocateArc(EGGate *dest, int no_samples, int no_delays)
 	dest->arc = arc; 
 }
 
-// disconnect this node & it's far end node, and deallocate
-// them.
+// disconnect this node & it's far end node, fix the gate pointers and
+// deallocate this gate.  The far gate will be deallocated by the far EGNode
 EGGate::~EGGate() 
 {
-	myLink->removeMeFromList();
-	if (far) { 
-		far->far = 0;
-		LOG_DEL; delete arc; 
-		LOG_DEL; delete far;
-		far = 0;
-	}
+  myLink->removeMeFromList();
+  if (far) { 
+    far->far = 0;
+    far->arc = 0;
+    far = 0;
+  }
+  if (arc) {
+    LOG_DEL; delete arc; 
+  }
 }
 
 void EGGate::hideMe(int flag) {
