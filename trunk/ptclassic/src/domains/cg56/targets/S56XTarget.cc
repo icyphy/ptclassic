@@ -48,6 +48,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include "CG56XCSend.h"
 #include "CGCXSend.h"
 #include "CGCXReceive.h"
+#include "CGCXPeek.h"
+#include "CGCXPoke.h"
+#include "CG56XCPeek.h"
+#include "CG56XCPoke.h"
 
 S56XTarget :: S56XTarget(const char* nam, const char* desc) :
 CG56Target(nam,desc),MotorolaTarget(nam,desc,"CG56Star"),pairNumber(0) {
@@ -167,6 +171,41 @@ CommPair S56XTarget::fromCGC(PortHole&) {
 CommPair S56XTarget::toCGC(PortHole&) {
     CommPair pair(new CGCXReceive,new CG56XCSend);
     configureCommPair(pair);
+    return pair;
+}
+
+AsynchCommPair S56XTarget::createPeekPoke(CGTarget& peekTarget,
+					  CGTarget& pokeTarget) {
+    
+    AsynchCommPair pair;
+    CGCXBase* cgcSide;
+    if (peekTarget.isA("CGCTarget")) {
+	cgcSide = new CGCXPeek;
+	pair.set(cgcSide, new CG56XCPoke);
+    }
+    else if (pokeTarget.isA("CGCTarget")) {
+	cgcSide = new CGCXPoke;
+	pair.set(new CG56XCPeek, cgcSide);
+    }
+    else {
+	StringList message;
+	message << "Unable to make a peek/poke pair for " << peekTarget.name()
+		<< " to " << pokeTarget.name();
+	Error::abortRun(*this,message);
+	return pair;
+    }
+
+    // FIXME - code duplication
+    char *expandedDirName = expandPathName(destDirectory.currentValue());
+    cgcSide->S56XFilePrefix.initialize();
+    cgcSide->S56XFilePrefix << expandedDirName << "/"
+	       << filePrefix.currentValue();
+
+    delete [] expandedDirName;
+    
+    StringList aioVariable;
+    aioVariable << symbol("peekPoke");
+    setAsynchCommState(pair,"VariableName",aioVariable);
     return pair;
 }
 
