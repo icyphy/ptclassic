@@ -169,7 +169,6 @@ body ::tycho::JavaDocSys::readFile {filename} {
             if [ regexp {^(.*)\/\/(.*)$} $lineIn dmy code comment] {
                 set lineIn $code
             }
-    
 
             # Remove line ending and single line /* */ comments
             if [ regexp {^(.*)\/\*[^*](.*)\*\/(.*)$} \
@@ -198,7 +197,7 @@ body ::tycho::JavaDocSys::readFile {filename} {
                 set lineIn $comment
             }
         }
-        
+    
         if {$inDocComment} {
             if [ regexp {^(.*)(\*\/)(.*)$} $lineIn dmy comment dmy2 code] {
                 # End of doc comment
@@ -225,17 +224,14 @@ body ::tycho::JavaDocSys::readFile {filename} {
                 }
             }
         }
-        
-        if [ regexp {^(.*)[ ]*class[ ]+([A-Za-z_]+[A-Za-z0-9_]*)[ ]+(.*)\{$} \
-                $lineIn dmy mod name code] {
-            # Reformat class definitions:
-            # before: modifier ?modifier? class name extends impl... {code}
-            # after:  class name {modifier ?modifier} {extends impl...} {code}
-            set lineIn "class $name \{$mod\} \{$code\} \{"
-        }
 
+        # Remove brace/quote followed by semi-colon errors (only one pass)
+        if [ regexp {^(.*[\"\}]);(.*)$} $lineIn dmy first last] {
+            set lineIn "$first ;$last"
+        }
         append inEscapedComments "$lineIn \n"
-    }    
+    }
+
     close $fd
 
     parseData $inEscapedComments
@@ -437,6 +433,8 @@ body ::tycho::JavaDocSys::parseData {data} {
     set inPackage 0
     set inImport 0
     set import ""
+    set extends ""
+    set modifiers ""
     set firstComment {}
     foreach construct $data {
         # Keep the interface live.
@@ -469,28 +467,34 @@ body ::tycho::JavaDocSys::parseData {data} {
         }
         if {$inClass} {
             # This is part of a class statement. 
-            # class name {modifiers} {extends,implements} {definition}
+            # modifier+ class name extends?, implements* {definition}
             if {$inClass == 1} {
                 set className $construct
                 set inClass 2
             } elseif {$inClass == 2} {
-                set modifiers $construct
-                set inClass 3
-            } elseif {$inClass == 3} {
-                set extends $construct
-                set inClass 4
-            } else {
-                parseClass $className $construct
-                parseModifiers $className $modifiers
-                parseExtends $className $extends
-                addClassComment $className $firstComment
-                # FIXME: what to do with import?
-                set inClass 0
+                # Check if it is an end of command (;) or block {}
+                # then it's the definition
+                set construct [string trimright $construct " \t\n"]
+                set lastchar [string range $construct end end]
+
+                if {$lastchar == ";" || $lastchar == "\}" || $construct == {}} {
+                    parseClass $className $construct
+                    parseModifiers $className $modifiers
+                    parseExtends $className $extends
+                    addClassComment $className $firstComment
+                    # FIXME: what to do with import?
+                    set extends ""
+                    set modifiers ""
+                    set inClass 0
+                } else {
+                    # Or it's more parents
+                    lappend extends $construct
+                }
+                continue
             }
-            continue
         }
         if {[string index $construct 0] == "#"} {
-            # A comment follows.
+            # A comment follows. NOTE: Is the index necessary?
             set inComment 1
             continue
         }
@@ -508,7 +512,11 @@ body ::tycho::JavaDocSys::parseData {data} {
             # A class follows.
             set inClass 1
             continue
-        } 
+        }
+        if {[lsearch -exact $keywords $construct] != -1} {
+            lappend modifiers $construct
+            continue
+        }
         # puts "UNCLASSIFIED: $construct"
     }
 }
@@ -655,7 +663,11 @@ body ::tycho::JavaDocSys::parseClass {class body} {
                 set construct [string trimright $construct " \t\n"]
                 set lastchar [string range $construct end end]
 
-                if {$lastchar == ";" || $lastchar == "\}" || $construct == {}} {
+                if {$lastchar == "\}" || $construct == {}} {
+                    # It's a method body for sure, ignore it.
+                    set inMethod 1
+                } elseif {$lastchar == ";"} {
+                    # Could be either a method or variable, use heuristic
                     if {[lsearch $modifiers "native"] != -1 \
                             || [lsearch $modifiers "abstract"] != -1} {
                         # It's a method with no body.
@@ -669,7 +681,7 @@ body ::tycho::JavaDocSys::parseClass {class body} {
                         # Heuristic says: it's a method body, ignore it
                         set inMethod 1
                     }
-                } {
+                } else {
                     # Just a word, figure out what it is at the end.
                     lappend others $construct
                 }
