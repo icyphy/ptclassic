@@ -200,21 +200,6 @@ class ::tycho::Model {
     
     # Compare two marks
     method compareMarks {mark1 operator mark2}
-
-    # Add or change default attributes of an entity type
-    method configureEntityType {type args}
-    
-    # Add or change default attributes of a link type
-    method configureLinkType {type args}
-    
-    # Define the attributes of the model
-    method defineModelAttributes {args}
-    
-    # Add a new type of entity to the model
-    method defineEntityType {type args}
-    
-    # Add a new type of link to the model
-    method defineLinkType {type args}
     
     # Describe the data in the model in TIM
     method describe {{prefix {}}}
@@ -233,12 +218,6 @@ class ::tycho::Model {
 
     # Get or set a mark in the undo history
     method mark {{markname {}} {position current}}
-
-    # Configure attributes of this model
-    method modelconfigure {args}
-
-    # Get an attribute of this model
-    method modelcget {name}
 
     # Notify all subscribers of a change in data
     method notify {command pattern args}
@@ -602,127 +581,6 @@ body ::tycho::Model::compareMarks {mark1 operator mark2} {
 }
 
 ########################################################################
-#### configureEntityType
-#
-# Add or change default attributes of an entity type. The argument list
-# consists of attribute-value pairs. For each, if a default
-# attribute does not exist, add it; if it does exist, change the
-# default value to the given one. Default attributes cannot be
-# changed once the model contains entities of that type, so the
-# method flags an error if that is the case. The
-# special attribute <b>-valued</b> sets the flag
-# that states whether an entity has a value; the special attribute
-# <b>-ordered</b> sets the flag that states whether instances of
-# this type of entity are ordered; the special attribute
-# <b>-leaf</b> sets the flag that states whether instances of
-# this type of entity are leaf entities. This method is not
-# undoable or publishable.
-# 
-body ::tycho::Model::configureEntityType {type args} {
-    if { [array names _info [list $type * * *]] != "" } {
-	error "Cannot change default attributes of $type: data exists"
-    }
-    array set temp $_typeinfo($type,defaults)
-    array set temp $args
-    if { [::info exists temp(-valued)] } {
-	set _typeinfo($type,valued) $temp(-valued)
-	unset temp(-valued)
-    }
-    if { [::info exists temp(-leaf)] } {
-	set _typeinfo($type,leaf) $temp(-leaf)
-	unset temp(-leaf)
-    }
-    if { [::info exists temp(-ordered)] } {
-	set _typeinfo($type,ordered) $temp(-ordered)
-	unset temp(-ordered)
-    }
-    set _typeinfo($type,defaults) [array get temp]
-    return ""
-}
-
-########################################################################
-#### configureLinkType
-#
-# Add or change default attributes of a link type. The argument list
-# consists of attribute-value pairs. For each, if a default
-# attribute does not exist, add it; if it does exist, change the
-# default value to the given one. Default attributes cannot be
-# changed once the model contains links of that type, so the
-# method flags an error if that is the case.  The
-# special attribute <b>-ordered</b> sets the flag
-# that states whether links are ordered.
-# This method is not undoable or publishable.
-#
-body ::tycho::Model::configureLinkType {type args} {
-    if { [array names _info([list $type * * *])] != "" } {
-	error "Cannot change default attributes of $type: data exists"
-    }
-    array set temp $_typeinfo($type,defaults)
-    array set temp $args
-    if { [::info exists temp(-ordered)] } {
-	set _typeinfo($type,ordered) $temp(-ordered)
-	unset temp(-ordered)
-    }
-    set _typeinfo($type,defaults) [array get temp]
-    return ""
-}
-
-########################################################################
-#### defineModelAttributes
-#
-# Add new attributes to the model. See the comment for
-# _defineattribute{} in the Interchange class.
-#
-body ::tycho::Model::defineModelAttributes {args} {
-    eval _defineattributes $args
-}
-
-########################################################################
-#### defineEntityType
-#
-# Add a new type of entity to the model. The first argument
-# is the type name of the entity.
-# Following arguments are attribute names and their default values.
-# The special attributes <b>-valued</b> is a flag that states
-# whether an entity has a value (default is zero); the special attribute
-# <b>-ordered</b> sets the flag that states whether instances of
-# this type of entity are ordered; <b>-leaf</b> sets the flag that
-# states that instances of this type of entity are always
-# leaves. This method is not undoable or publishable. 
-# Flag an error if the given type already exists (either as an
-# entity or a link). This method is not undoable or pubishable.
-#
-body ::tycho::Model::defineEntityType {type args} {
-    array set temp {-valued 0 -ordered 0 -leaf 0}
-    array set temp $args
-    set valued $temp(-valued)
-    set ordered $temp(-ordered)
-    set leaf $temp(-leaf)
-    unset temp(-valued)
-    unset temp(-ordered)
-    unset temp(-leaf)
-    _defineentity $type $valued $ordered $leaf [array get temp]
-    return ""
-}
-
-########################################################################
-#### defineLinkType
-#
-# Add a new type of link to the model. The first argument
-# is the type name of the link.
-# Following arguments are option names and their default values.
-# Flag an error if the given type already exists (either as an
-# entity or a link). This method is not undoable or pubishable.
-# 
-body ::tycho::Model::defineLinkType {type args} {
-    array set temp {-ordered 0}
-    array set temp $args
-    set ordered $temp(-ordered)
-    unset temp(-ordered)
-    _definelink $type $ordered $args
-}
-
-########################################################################
 #### describe
 #
 # Return a string that describes the model. Note that the string
@@ -958,24 +816,6 @@ body ::tycho::Model::mark {{markname {}} {position current}} {
 	# Set a mark
 	set historyMark($markname) $historyMark($position)
     }
-}
-
-########################################################################
-#### modelconfigure
-#
-# Configure attributes of the model and return the inverse command.
-#
-body ::tycho::Model::modelconfigure {args} {
-    eval _modelconfigure $args
-}
-
-########################################################################
-#### modelcget
-#
-# Get an attributes of the model.
-#
-body ::tycho::Model::modelcget {name} {
-    _modelcget $name
 }
 
 ########################################################################
@@ -1229,17 +1069,38 @@ body ::tycho::Model::subscribeEvent {subscriber event {whattodo {}}} {
 #
 # Return the Tycho header string for this model. Note that the
 # string does not contain any comment characters. The format is
+# the same as the emacs mode string, being a mode followed
+# by variable-value pairs, all delimited by <code>-*-</code>.
+# For models, the string produced will look like this:
 # <pre>
-#    ## @Tycho  TIM  <classname>  <version>  <date>  <time>
+#   -*- mode: TIM; class: _class_; version: _version_; mtime _mtime_ -*-
 # </pre>
-# where the class name is the name of the Tycho class that created
-# the file, the version is the version of that class, and the
-# date and time are when the header was created.
+# where:
+# <ul>
+# <li>_class_ is the name of the Tycho class that created
+# the file.
+# <li>_version_ is the version number of that class (note: not the SCCS
+# version.
+# <li>_mtime_ is the date and time that the header was created.
+# </ul>
+# Some notes:
+# <ul>
+# <li>_class_ should probably not be the actual name of the
+# class but a symbolic name that is mapped to a real class name.
+# This will be more robust.
+# <li>_version_ should probably be mirrored in the model options.
+# <li>_class_, if symbolic, should be too.
+# <li>There may need to be two version numbers: the version number
+# of the model itself, and the version number of the class that
+# implements it.
+# </ul>
 #
 body ::tycho::Model::tychoHeader {} {
-    set str ""
-    append str "@Tycho  TIM  [info class]  "
-    append str [clock format [clock seconds] -format "%x  %X"]
+    set str "-*- "
+    append str "mode: TIM; class: [info class];  "
+ 	append str "version: [modelcget -version]; "
+    append str "mtime: [clock format [clock seconds] -format "%x  %X"]; "
+    
     return $str
 }
 
