@@ -121,6 +121,9 @@ public:
         virtual int isItInput () {return FALSE; }
         virtual int isItOutput () {return FALSE; }
 
+	// Determine whether the port is a multiporthole.
+	virtual int isItMulti () { return FALSE;}
+
 	// print info on the PortHole
 	StringList printVerbose ();
 
@@ -186,12 +189,8 @@ public:
 	// Initialize when starting a simulation
 	void initialize();
 
-        // Indicate the real port (aliases resolved) at the far end
-        // of a connection.  Initialized to NULL.
-        // This information is redundant with what's in the geodesic,
-        // but to access it through the geodesic, it is necessary
-        // to know whether the PortHole is an input or an output.
-        PortHole* farSidePort;
+	// Return the porthole we are connected to (see below)
+	PortHole* far() { return farSidePort;}
 
         // Print a description of the PortHole
 	StringList printVerbose ();
@@ -231,6 +230,13 @@ public:
 	Plasma* setPlasma();
 
 protected:
+        // Indicate the real port (aliases resolved) at the far end
+        // of a connection.  Initialized to NULL.
+        // This information is redundant with what's in the geodesic,
+        // but to access it through the geodesic, it is necessary
+        // to know whether the PortHole is an input or an output.
+        PortHole* farSidePort;
+
 	// Maintain pointer to the Plasma where we get
 	//  our Particles or replace unused Particles
 	Plasma* myPlasma;
@@ -245,6 +251,26 @@ private:
 	// Allocate new buffer
 	void allocateBuffer();
 
+};
+
+// The following generic types are good enough to use in galaxies.
+// They are just like PortHole except that they indicate whether
+// they are input or output.
+
+        //////////////////////////////////////////
+        // class InPortHole
+        //////////////////////////////////////////
+
+class InPortHole : public PortHole {
+	int isItInput() {return TRUE;}
+};
+
+        //////////////////////////////////////////
+        // class OutPortHole
+        //////////////////////////////////////////
+
+class OutPortHole : public PortHole {
+	int isItOutput() {return TRUE;}
 };
 
         //////////////////////////////////////////
@@ -278,7 +304,10 @@ class MultiPortHole: public GenericPort
 {
 public:
 	void initialize() {ports.initialize();}
- 
+
+	// virtual function to identify multi-ness
+	int isItMulti() {return TRUE;}
+
         // Every MultiPortHole must be initialized with the setPort function
         // Arguments are the name and type (see type.h for supported types).
         MultiPortHole& setPort(const char* portName,
