@@ -59,8 +59,8 @@ Y,U and V components.
 	    default { 2 }
 	    desc { downsample image by this factor in x and y directions. }
 	}
-	hinclude { "/users/luisgm/video/myvideo/rtvc.h"}
-	ccinclude { "/users/luisgm/video/myvideo/rtvc.cc" }
+	hinclude { "/users/ptdesign/src/domains/sdf/image/stars/rtvc.h"}
+	ccinclude { "/users/ptdesign/src/domains/sdf/image/stars/rtvc.cc" }
 	protected{
 	    u_int width, height, bufsize;
 	    u_char* buffer;
