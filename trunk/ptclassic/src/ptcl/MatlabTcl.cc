@@ -89,46 +89,8 @@ int MatlabTcl::error(const char* msg) {
 // convert the Tcl interpreter pointer to a unique string identifier
 void MatlabTcl::sethandle() {
     char handle[32];
-    sprintf(handle, "MatlabTcl%-.8lx", (long)tclinterp);
+    sprintf(handle, "MatlabTcl%-.8lx", long(tclinterp));
     matlabInterface->SetFigureHandle(handle);
-}
-
-const char* MatlabTcl::makeInstanceName(char* name) {
-    StringList uniqueName;
-    if (name) uniqueName = name;
-    char handle[32];
-    sprintf(handle, "%-.8lx", (long)tclinterp);
-    uniqueName << handle;
-    return hashstring(uniqueName);
-}
-
-// add a record of the Matlab instance
-int MatlabTcl::addInstance(char *name) {
-    // key must be a char* because the SequentialList functions
-    // like prepend require void *, so const char* generates warnings
-    char* key = (char *) makeInstanceName(name);
-    int exists = instanceList.member(key);
-    if (! exists) instanceList.prepend(key);
-    return exists;
-}
-
-// delete a record of the Matlab instance
-int MatlabTcl::deleteInstance(char *name) {
-    // the argument to remove must be a char* because it requires a void*;
-    // const char* (value of makeInstanceName) generates warnings
-    return instanceList.remove((char*) makeInstanceName(name));
-}
-
-// add a record of the Matlab instance
-int MatlabTcl::instanceExists(char *name) {
-    // the argument to member must be a char* because it requires a void*;
-    // const char* (value of makeInstanceName) generates warnings
-    return instanceList.member((char*) makeInstanceName(name));
-}
-
-// add a record of the Matlab instance
-int MatlabTcl::noMoreInstances() {
-    return instanceList.empty();
 }
 
 // start a Matlab process if one is not running already
@@ -169,19 +131,8 @@ int MatlabTcl::matlab(int argc, char** argv) {
         return error("wrong # args in \"matlab\" command");
     }
 
-    ListIter nexti(instanceList);
-    char* p;
-
     // switch on the first letter of the command (second argument)
     switch (*argv[1]) {
-      case 'd':
-	fprintf(stderr, "instance list:\n");
-	while ( (p = (char *)nexti++) != 0 ) {
-	    fprintf(stderr, "%s\n", p);
-	}
-	return TCL_OK;
-	break;
-
       case 'e':
 	if ( strcmp(argv[1], "end") == 0 ) {
 	    return MatlabTcl::end(argc, argv);
@@ -237,13 +188,14 @@ int MatlabTcl::end(int argc, char** argv) {
 	return error("the Tcl/Matlab interface has not been initialized");
     }
     char* id = (argc == 3) ? argv[2] : 0;
-    if (! instanceExists(id) ) {
+    Pointer key = manager.makeInstanceName(tclinterp, id);
+    if (! manager.exists(key) ) {
 	StringList msg = "the Tcl/Matlab interface has not been initialized";
 	if (id) msg << " for " << id;
 	return error(msg);
     }
-    deleteInstance(id);
-    if ( noMoreInstances() ) {
+    manager.remove(key);
+    if ( manager.noMoreInstances() ) {
 	matlabInterface->CloseMatlabFigures();
 	delete matlabInterface;
 	matlabInterface = 0;
@@ -380,7 +332,7 @@ int MatlabTcl::start(int argc, char** argv) {
     if (argc < 2 || argc > 3) return usage("matlab start ?<identifier>?");
     if (! init()) return error("Could not start matlab");
     char* id = (argc == 3) ? argv[2] : 0;
-    addInstance(id);
+    manager.add(tclinterp, id);
     return TCL_OK;
 }
 
