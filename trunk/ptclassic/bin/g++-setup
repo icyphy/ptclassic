@@ -27,7 +27,7 @@ if ( ! $?ARCH ) then
     setenv ARCH `$PTOLEMY/bin/ptarch`
 endif
 
-setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$ARCH/lib/gcc-lib/$ARCH/2.5.8/
+setenv GCC_EXEC_PREFIX $PTOLEMY/gnu/$ARCH/lib/gcc-lib/$ARCH/2.6.3/
 setenv C_INCLUDE_PATH $PTOLEMY/gnu/$ARCH/lib/gcc-lib/$ARCH
 setenv CPLUS_INCLUDE_PATH $PTOLEMY/gnu/$ARCH/lib/g++-include:$PTOLEMY/gnu/$ARCH/$ARCH/include
 setenv LIBRARY_PATH $PTOLEMY/gnu/$ARCH/lib
