@@ -16,6 +16,7 @@ integer and then output serially to the Thor domain stars.
 	}
 	author { Asawaree }
 	copyright { 1991 The Regents of the University of California }
+	version { $Id$G}
 	input {
 		name {input}
 		type {float}

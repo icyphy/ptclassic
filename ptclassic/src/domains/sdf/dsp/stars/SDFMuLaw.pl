@@ -6,6 +6,7 @@ defstar {
 	|v2| = log (1+ mu*|v1|) / log( 1+mu)  }
 	author { Asawaree}
 	copyright { 1991 The Regents of the University of California }
+	version {%W %G}
 	input {
 		name{input}
 		type{float}
