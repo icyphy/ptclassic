@@ -257,12 +257,9 @@ char* option;
 
   fprintf( fp, "  public {\n" );
   fprintf( fp, "    double now;\n" );
-  fprintf( fp, "    int needResource;\n" );
-  fprintf( fp, "    int resourceId;\n" );
-/* FIXME
+/* Removed comments from the next 2 lines. */
   fprintf( fp, "\n    DE%s%s* ", model_name, option );
   fprintf( fp, "%s%s_Star;\n", model_name, option );
-*/
 
 
   /* Input event flags */
@@ -435,7 +432,7 @@ int autotick, unittime;
         pvar = isOutputEvent( var, node );
         if ( pvar == NULL ) pvar = isIntOutput( var, node );
         if ( pvar != NULL ) {
-            fprintf( fp, "      const int c%s = %d;\n",
+            fprintf( fp, "      static const int c%s = %d;\n",
             util_make_valid_name( pvar ), output_event_count++ );
         }
     } end_foreach_net_node_fanout;
@@ -443,9 +440,9 @@ int autotick, unittime;
 
     /* added stuff */
     fprintf( fp, "      double emitTime; \n\n");
-    fprintf( fp, "      PolisEvent newEvent; \n");
-    fprintf( fp, "      newEvent.src = (DEPolis*)this; \n");
-    fprintf( fp, "      newEvent.isDummy = isDummy; \n");
+    fprintf( fp, "      PolisEvent *newEvent = new PolisEvent(); \n");
+    fprintf( fp, "      newEvent->src = (DEPolis*)this; \n");
+    fprintf( fp, "      newEvent->isDummy = isDummy; \n");
     fprintf( fp, "      switch( outputPort ) {\n" );
     foreach_net_node_fanout( node, var ) {
         pvar = isOutputEvent( var, node );
@@ -453,7 +450,7 @@ int autotick, unittime;
         if ( pvar != NULL ) {
             strcpy( pvarst, util_make_valid_name( pvar ));
             fprintf( fp, "          case c%s:\n", pvarst );
-            fprintf( fp, "            newEvent.dest = %s.far(); \n", pvarst); /* changed */
+            fprintf( fp, "            newEvent->dest = %s.far(); \n", pvarst); /* changed */
             fprintf( fp, "            break;\n" );
         }
     } end_foreach_net_node_fanout;
@@ -461,17 +458,17 @@ int autotick, unittime;
     fprintf( fp, "      }\n" );
     fprintf( fp, "      if (!needResource) { \n");   
     fprintf( fp, "        emitTime = now + (1/clkFreq); \n");   
-    fprintf( fp, "        ((CQEventQueue*)eventQ)->levelput(&newEvent, emitTime, ((DEPortHole*)(newEvent.dest))->depth, &(newEvent.dest->parent()->asStar())); \n");
+    fprintf( fp, "        ((CQEventQueue*)eventQ)->levelput(newEvent, emitTime, ((DEPortHole*)(newEvent->dest))->depth, &(newEvent->dest->parent()->asStar())); \n");
     fprintf( fp, "      } else { \n");  
     fprintf( fp, "        emitTime = now + (delay/clkFreq); \n");
-    fprintf( fp, "        newEvent.realTime = emitTime; \n");
+    fprintf( fp, "        newEvent->realTime = emitTime; \n");
     fprintf( fp, "        if (isDummy) { \n");
     fprintf( fp, "           // set fine level to -0.5 for scheduling in Q \n"); 
-    fprintf( fp, "         interruptQ->levelput(&newEvent, emitTime, -0.5, (DEPolis*)this); \n");
+    fprintf( fp, "         interruptQ->levelput(newEvent, emitTime, -0.5, (DEStar*)this); \n");
     fprintf( fp, "      } else { \n");
-    fprintf( fp, "         interruptQ->levelput(&newEvent, emitTime, ((DEPortHole*)newEvent.dest)->depth, ((DEPolis*)&newEvent.dest->parent()->asStar())); \n");
+    fprintf( fp, "         interruptQ->levelput(newEvent, emitTime, ((DEPortHole*)newEvent->dest)->depth, ((DEStar*)&newEvent->dest->parent()->asStar())); \n");
     fprintf( fp, "      }\n");
-    fprintf( fp, "      emittedEvents->prepend(&newEvent); \n");
+    fprintf( fp, "      emittedEvents->prepend(newEvent); \n");
     fprintf( fp, "   }\n}\n}\n\n");
 
 
@@ -620,7 +617,7 @@ int autotick, unittime;
       pvar = net_var_parent_var( assoc_var, node );
       strcpy( typest, os_io_var_type( pvar ));
       typecheck( typest );
-      fprintf( fp, "    static %s ", typest );
+      fprintf( fp, "    %s ", typest );
       fprintf( fp, "%s;\n", util_make_valid_name( pvar ));
     }
   } end_foreach_net_node_fanin;
@@ -628,7 +625,7 @@ int autotick, unittime;
     if ( pvar = isSensor( var, node )) {
       strcpy( typest, os_io_var_type( pvar ));
       typecheck( typest );
-      fprintf( fp, "    static %s ", typest );
+      fprintf( fp, "    %s ", typest );
       fprintf( fp, "%s;\n", util_make_valid_name( pvar ));
     }
   } end_foreach_net_node_fanin;
@@ -641,7 +638,7 @@ int autotick, unittime;
       if ( assoc_var != NIL(net_var_t) && net_var_type( assoc_var, EVENT )) {
         strcpy( typest, os_io_var_type( net_var_parent_var( var, node )));
         typecheck( typest );
-        fprintf( fp, "    static %s ", typest );
+        fprintf( fp, "    %s ", typest );
         fprintf( fp, "%s;\n",
                  util_make_valid_name( net_var_parent_var( var, node )));
       }
@@ -652,7 +649,7 @@ int autotick, unittime;
   /* agghhhhh.....*/
   fprintf( fp, "\n    DE%s%s* ", model_name, option );
   fprintf( fp, "%s%s_Star;\n", model_name, option );
-  fprintf( fp, "\n    static int _delay = 0.0;\n");
+  fprintf( fp, "\n    double _delay = 0.0;\n");
 
   /* Define debugging procedure, if -g was selected */
   if ( trace ) {
@@ -765,7 +762,7 @@ char *option;
   fprintf( fp, "    /* set variables which reflect Star parameters*/ \n");
   fprintf( fp, "    priority = Priority;\n");
   fprintf( fp, "    clkFreq = Clock_freq;\n\n"); 
-  fprintf( fp, "\n    emittedEvents = new SequentialList();");
+  fprintf( fp, "\n    emittedEvents = new SequentialList();\n");
   fprintf( fp, "    _delay = 0.0;\n");
 
   fprintf( fp, "    if ( needResource < 2 ) {\n" );
