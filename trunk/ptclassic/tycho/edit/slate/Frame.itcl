@@ -283,7 +283,7 @@ body ::tycho::Frame::_relief {id canvas slate relief} {
 	if { ! [info exists notlit($id)] } {
 
 	    set coords [$canvas coords $primary($id)]
-	    set tags [$slate gethtags $id]
+	    set tags [$canvas gettags $primary($id)]
 
 	    set x0 [expr [lindex $coords 0] + $_borderwidth($id)]
 	    set y0 [expr [lindex $coords 1] + $_borderwidth($id)]

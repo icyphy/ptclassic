@@ -200,10 +200,10 @@ body ::tycho::ComplexItem::coords {id canvas slate args} {
     # If the primary is rectangular, use those coords. If not,
     # base it on the bounding box.
     if { [llength $coords] != 4 } {
-	set oldbox [rectShrink \
+	set oldbox [eval ::tycho::Rectangle::shrink \
 		[$canvas bbox $primary($id)] 2]
 	eval $canvas coords $primary($id)($id) $args
-	set newbox [rectShrink \
+	set newbox [eval ::tycho::Rectangle::shrink \
 		[$canvas bbox $primary($id)] 2]
     } else {
 	set oldbox $coords

@@ -660,7 +660,7 @@ body ::tycho::Slate::manipulate {id mode x y args} {
 	    }
 	    switch -exact $behavior($id) {
 		"move" {
-		    eval ::tycho::Shape::moveclick $id $canvas $this $x $y $args
+		    eval ::tycho::Shape::_moveclick $id $canvas $this $x $y $args
 		}
 		default {
 		    eval [shape $id [lindex $behavior($id) 0]click] \
@@ -672,7 +672,7 @@ body ::tycho::Slate::manipulate {id mode x y args} {
 	"drag" {
 	    switch -exact $behavior($id) {
 		"move" {
-		    eval ::tycho::Shape::movedrag $id $canvas $this $x $y
+		    eval ::tycho::Shape::_movedrag $id $canvas $this $x $y
 		}
 		default {
 		    eval [shape $id [lindex $behavior($id) 0]drag] \
@@ -683,7 +683,7 @@ body ::tycho::Slate::manipulate {id mode x y args} {
 	"release" {
 	    switch -exact $behavior($id) {
 		"move" {
-		    eval ::tycho::Shape::moverelease \
+		    eval ::tycho::Shape::_moverelease \
 			    $id $canvas $this $x $y
 		}
 		default {
@@ -745,7 +745,8 @@ body ::tycho::Slate::moveto {tag x y {aspect center}} {
 	    set current [aspect [lindex $items 0] $aspect]
 	} else {
 	    # Multiple items, so use the region
-	    set current [rectAspect [$this bbox $tag] $aspect]
+	    set current [eval ::tycho::Rectangle::aspect \
+		    [$this bbox $tag] $aspect]
 	}
     } else {
 	# Just get the aspect of the item
@@ -893,7 +894,7 @@ body ::tycho::Slate::region {tag args} {
     if { [string match {_[0-9]*} $tag] } {
 	set region [coords $tag]
 	if { [llength $region] != 4 } {
-	    set region [rectShrink [bbox $tag] 2]
+	    set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
 	    set rectangular 0
     	}
     } else {
@@ -907,13 +908,13 @@ body ::tycho::Slate::region {tag args} {
 	    # If there's one item, process that
 	    set region [coords $tag]
 	    if { [llength $region] != 4 } {
-		set region [rectShrink [bbox $tag] 2]
+		set region [eval ::tycho::Rectangle::shrink [bbox $tag] 2]
 		set rectangular 0
 	    }
 	    set tag [lindex $match 0]
 	} else {
 	    # There are many items, so get the bounding box less 2
-	    set region [rectShrink [$canvas bbox $tag] 2]
+	    set region [eval ::tycho::Rectangle::shrink [$canvas bbox $tag] 2]
 	    set rectangular 0
 	}
     }
@@ -1091,7 +1092,7 @@ body ::tycho::Slate::shape {id {method {}} {region 0}} {
 	} else {
 	    # If we can't get it from the item class, then get it
 	    # from the shape class
-	    return ::tycho::[capitalize $shape]::$method
+	    return ::tycho::[capitalize $shape]::_$method
 	}
     }
 }

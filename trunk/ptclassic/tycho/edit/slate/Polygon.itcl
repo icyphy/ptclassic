@@ -46,7 +46,7 @@
 # <li><B>edges</B>: The number of edges in the polygon.
 # </ul>
 #
-# <p><b>Bugs</b>: Does not work at all.
+# <p><b>Bugs</b>: Untested.
 #
 # <p><b>Enhancements</b>: (none)
 #
@@ -57,78 +57,181 @@
 # </ul>
 #
 class ::tycho::Polygon {
-    inherit ::tycho::Shape
+    inherit ::tycho::Line
 
     ###################################################################
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc aspect {id canvas slate args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
-    proc grapple {id canvas slate interactor args}
+    proc _grapple {id canvas slate interactor args}
 
     # Reshape one or more aspects of an item
-    proc reshape {id canvas slate x y args}
+    proc _reshape {id canvas slate x y args}
 
     # Start a reshape interaction sequence
-    proc reshapeclick {id canvas slate x y args}
+    proc _reshapeclick {id canvas slate x y args}
 
     # Continue a reshape interaction sequence
-    proc reshapedrag {id canvas slate x y}
+    proc _reshapedrag {id canvas slate x y}
 
     # Terminate a reshape interaction sequence
-    proc reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate x y}
+
+    # Get one or more aspects of a polygon
+    proc aspect {coords args}
+
+    # Calculate coordinates needed to make polygon borders
+    proc borders {minAngle maxAngle coords borderWidth}
+
+    # Reshape one or more aspects of a polygon
+    proc reshape {coords x y args}
+
+    # Stretch a polygon
+    proc stretch {coords distance {angles {}}}
 }
 
-
 #######################################################################
-#### aspect
+#### _aspect
 #
-# Return the value of an aspect. Valid aspects are "length"
-# and <code>vertex-</code><i>n</i>, where _n_ is
-# between 0 and _length_ - 1.
-#
-body ::tycho::Polygon::aspect {id canvas slate args} {
+body ::tycho::Polygon::_aspect {id canvas slate args} {
     set coords [$slate coords $id]
-    set result {}
 
     if { $args == "" } {
-	lappend result length start end
+	set result {length start end}
 	foreach n [interval 0 \
 		[expr [llength $coords] / 2 - 2]] {
 	    lappend result "vertex-$n"
 	}
+	return $result
     } else {
-	foreach aspect $args {
-	    set a [lindex [split $aspect "-"] 0]
-	    switch -exact $a {
-		"edges" {
-			set len [llength $coords]
-			if { [lindex $coords 0] == [lindex $coords [expr $len-2]] \
-				 && [lindex $coords 0] == [lindex $coords end] } {
-				# The start vertex is repeated
-				lappend result [expr [llength $coords] / 2 - 2]
-			} else {
-				lappend result [expr [llength $coords] / 2 - 1]
-			}
-		}
-		"length" {
+	return [eval aspect [list $coords] $args]
+    }
+}
+
+#######################################################################
+#### _reshape
+#
+body ::tycho::Polygon::_reshape {id canvas slate x y args} {
+    eval $slate coords $id \
+	    [eval reshape [list [$slate coords $id]] $x $y $args]
+}
+
+#######################################################################
+#### _reshapeclick
+#
+body ::tycho::Polygon::_reshapeclick {id canvas slate x y args} {
+    getflag ghost args
+
+    # Remember how I am now.
+    set scratch($id.prevX) $x
+    set scratch($id.prevY) $y
+
+    # Get the coordinates of the line into an efficient-to-process form
+    set i 0
+    foreach {a b} [$slate coords $id] {
+	set scratch($id.$i.x) $a
+	set scratch($id.$i.y) $b
+	lappend scratch($id.indexes) $i
+	incr i
+    }
+
+    # If the start vertex is repeated, delete it
+    set last [expr $i/2-1]
+    if { $scratch($id.0.x) == $scratch($id.$last.x) \
+	    && $scratch($id.0.y) == $scratch($id.$last.y) } {
+	unset scratch($id.$last.x)
+	unset scratch($id.$last.y)
+    }
+    set scratch($id.indexes) [lreplace $scratch($id.indexes) end end]
+
+    # Figure out the vertices that will be changed
+    foreach aspect $args {
+	assign a n [split $aspect "-"]
+	switch -exact $a {
+	    "vertex" {
+		lappend scratch($id.vertices) $n
+	    }
+	    "length" {
+		error "Cannot set the \"length\" aspect of a line"
+	    }
+	    default {
+		error "Invalid aspect \"$aspect\" of line shape"
+	    }
+	}
+    }
+    
+    # Make sure there are no duplicates
+    set scratch($id.vertices) [lnub scratch($id.vertices)]
+
+    # If the -ghost flag is set, draw the ghost line.
+    if { $ghost } {
+	set scratch($id.ghost) [eval $canvas create line \
+		$scratch($id.coords) \
+		-fill grey]
+    }
+}
+
+#######################################################################
+#### _reshapedrag
+#
+# This just calls the "parent" class -- we should probably
+# implement "inheritance."
+#
+body ::tycho::Polygon::_reshapedrag {id canvas slate x y} {
+    ::tycho::AsPolygon::reshapedrag $id $canvas $slate $x $y
+}
+
+#######################################################################
+#### _reshaperelease
+#
+# This just calls the "parent" class -- we should probably
+# implement "inheritance."
+#
+body ::tycho::Polygon::_reshaperelease {id canvas slate x y} {
+    ::tycho::AsPolygon::reshaperelease $id $canvas $slate $x $y
+}
+
+#######################################################################
+#### aspect
+#
+# Return one or more aspects of a polygon. Valid aspects are "length"
+# and <code>vertex-</code><i>n</i>, where _n_ is
+# between 0 and _length_ - 1.
+#
+body ::tycho::Polygon::aspect {coords args} {
+    set result {}
+
+    foreach aspect $args {
+	set a [lindex [split $aspect "-"] 0]
+	switch -exact $a {
+	    "edges" {
+		set len [llength $coords]
+		if { [lindex $coords 0] == [lindex $coords [expr $len-2]] \
+			&& [lindex $coords 0] == [lindex $coords end] } {
+		    # The start vertex is repeated
+		    lappend result [expr [llength $coords] / 2 - 2]
+		} else {
 		    lappend result [expr [llength $coords] / 2 - 1]
 		}
-		"center" {
-			assign x0 y0 x1 y1 $coords
-		    lappend result [expr ($x0+$x1)/ 2] [expr $y0+$y1)/2]
-		}
-		"vertex" {
-		    set n [lindex [split $aspect "-"] 1]
-		    lappend result \
-			    [lindex $coords [expr 2*$n]] \
-			    [lindex $coords [expr 2*$n + 1]]
-		}
-		default {
-		    error "Invalid aspect \"$aspect\" of polygon shape"
-		}
+	    }
+	    "length" {
+		lappend result [expr [llength $coords] / 2 - 1]
+	    }
+	    "center" {
+		assign x0 y0 x1 y1 $coords
+		lappend result [expr ($x0+$x1)/ 2] [expr $y0+$y1)/2]
+	    }
+	    "vertex" {
+		set n [lindex [split $aspect "-"] 1]
+		lappend result \
+			[lindex $coords [expr 2*$n]] \
+			[lindex $coords [expr 2*$n + 1]]
+	    }
+	    default {
+		error "Invalid aspect \"$aspect\" of polygon shape"
 	    }
 	}
     }
@@ -138,30 +241,27 @@ body ::tycho::Polygon::aspect {id canvas slate args} {
 #######################################################################
 #### reshape
 #
-# Reshape one or more aspects of the item by the specified amount.
-# Reshape each aspect by the specified _x_ and _y_ relative
-# values. Aspects are only affected by the appropriate _x_ or _y_
-# value -- for example, if the "e" (east) aspect is specified, it
-# is moved only by the _x_ amount.
+# Reshape one or more aspects of a polygon by the specified _x_
+# and _y_ relative values.
 #
-body ::tycho::Polygon::reshape {id canvas slate x y args} {
+body ::tycho::Polygon::reshape {coords x y args} {
     # Get the coordinates of the line into an efficient-to-process form
     set i 0
     set indexes {}
-    foreach {a b} [$slate coords $id] {
-		set _x($i) $a
-		set _y($i) $b
-		lappend indexes $i
-		incr i
+    foreach {a b} $coords {
+	set _x($i) $a
+	set _y($i) $b
+	lappend indexes $i
+	incr i
     }
     
     # If the start vertex is repeated, delete it
     set last [expr $i/2-1]
-	if { $_x(0) == $_x($last) && $_y(0) == $_y($last) } {
-		unset _x($last)
-		unset _y($last)
-	}
-	set indexes [lreplace $indexes end end]
+    if { $_x(0) == $_x($last) && $_y(0) == $_y($last) } {
+	unset _x($last)
+	unset _y($last)
+    }
+    set indexes [lreplace $indexes end end]
 
     # Process all aspects to change coordinates
     foreach aspect $args {
@@ -180,124 +280,170 @@ body ::tycho::Polygon::reshape {id canvas slate x y args} {
 	}
     }
 
-    # Rebuild the coordinates list and change coordinates
+    # Rebuild the coordinates list and return
     set coords {}
     foreach i $indexes {
 	lappend coords $_x($i) $_y($i)
     }
-    eval $slate coords $id $coords
+    return $coords
 }
 
-#######################################################################
-#### reshapeclick
+##########################################################################
+#### stretch
 #
-body ::tycho::Polygon::reshapeclick {id canvas slate x y args} {
-    getflag ghost args
+# Stretch a polygon. Requires that first and last coords be the same.
+# The coordinates must proceed around the polygon in a clockwise
+# direction to get the right sense of direction.
+#
+# The -angles options introduces a variable which is set to a list
+# of the angles of each segment. The angles are calculated here
+# anyway so this seemed like a good way to get them without having
+# to calculate them again.
+#
+# NOTE: Because of Tk's upside-down co-ordinates, the angles will come
+# out upside-down as well. Sorry 'bout that.
+#
+body ::tycho::Polygon::stretch {coords distance {angles {}}} {
+    if { $angles != "" } {
+	upvar $angles result2
+    }
+    set result {}
+    set result2 {}
+    set distance [expr double($distance)]
 
-    # Remember how I am now.
-    set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
+    set x0 [lindex $coords [expr [llength $coords] - 4]]
+    set y0 [lindex $coords [expr [llength $coords] - 3]]
 
-    # Get the coordinates of the line into an efficient-to-process form
-    set i 0
-    foreach {a b} [$slate coords $id] {
-		set scratch($id.$i.x) $a
-		set scratch($id.$i.y) $b
-		lappend scratch($id.indexes) $i
-		incr i
+    behead x1 coords
+    behead y1 coords
+
+    set beta [expr atan2($y0-$y1, $x0-$x1)]
+
+    while { [llength $coords] >= 2 } {
+	set x2 [lindex $coords 0]
+	set y2 [lindex $coords 1]
+	set coords [lrange $coords 2 end]
+
+	set alpha [expr atan2($y2-$y1, $x2-$x1)]
+	set gamma [expr ($alpha - $beta) / 2.0]
+	set theta [expr $alpha - $gamma]
+
+	set delta [expr $distance / sin($gamma)]
+
+	set xt [expr $x1 + $delta * cos($theta)]
+	set yt [expr $y1 + $delta * sin($theta)]
+
+	lappend result $xt $yt
+	lappend result2 $alpha
+
+	set x0 $x1
+	set y0 $y1
+	set x1 $x2
+	set y1 $y2
+
+	set beta [expr $alpha + $pi]
     }
 
-    # If the start vertex is repeated, delete it
-    set last [expr $i/2-1]
-	if { $scratch($id.0.x) == $scratch($id.$last.x) \
-			&& $scratch($id.0.y) == $scratch($id.$last.y) } {
-		unset scratch($id.$last.x)
-		unset scratch($id.$last.y)
+    lappend result [lindex $result 0] [lindex $result 1]
+    return $result
+}
+
+##########################################################################
+#### borders
+#
+# Calculate coordinates needed to make polygon borders. It
+# returns a list of three elements:
+# <ul>
+# <li> the coordinates of the inside of the polygon.
+# <li> a list of lists of coordinates of polygons representing lit edges.
+# <li> a list of lists of coordinates of polygons representing shaded edges.
+# </ul>
+#
+# The minAngle and maxAngle arguments are the angles between which an
+# edge is considered to be lit.
+#    
+body ::tycho::Polygon::borders {minAngle maxAngle coords borderWidth} {
+    set minRadians [radians $minAngle]
+    set maxRadians [radians $maxAngle]
+
+    set lit {}
+    set shaded {}
+
+    # Get the coordinates of the two parallel polygons
+    set outer $coords
+    set inner [stretch $outer -$borderWidth angles]
+
+    # Rename to save for later
+    set inside $inner
+
+    # Calculate the lists of coordinates.
+    set a [lindex $angles 0]
+    if { $a <= $minRadians && $a > $maxRadians } {
+	set length 2
+	set angles [lrange $angles 1 end]
+
+	set a [lindex $angles 0]
+	while { ($a <= $minRadians && $a > $maxRadians) \
+		&& [llength $angles] > 0 } {
+	    incr length 2
+	    set angles [lrange $angles 1 end]
+	    set a [lindex $angles 0]
 	}
-	set scratch($id.indexes) [lreplace $scratch($id.indexes) end end]
 
-    # Figure out the vertices that will be changed
-    foreach aspect $args {
-		assign a n [split $aspect "-"]
-		switch -exact $a {
-	    	"vertex" {
-	    		lappend scratch($id.vertices) $n
-	    	}
-		    "length" {
-				error "Cannot set the \"length\" aspect of a line"
-	    	}
-		    default {
-				error "Invalid aspect \"$aspect\" of line shape"
-			}
-		}
-    }
-    
-    # Make sure there are no duplicates
-    set scratch($id.vertices) [lnub scratch($id.vertices)]
+	lappend lit [concat \
+		[ltake $outer [expr $length + 2]] \
+		[reverse [ltake $inner [expr $length + 2]]] \
+		[lindex $outer 0] \
+		[lindex $outer 1]]
 
-    # If the -ghost flag is set, draw the ghost line.
-    if { $ghost } {
-		set scratch($id.ghost) [eval $canvas create line \
-			$scratch($id.coords) \
-			-fill grey]
-    }
-}
-
-#######################################################################
-#### reshapedrag
-#
-body ::tycho::Polygon::reshapedrag {id canvas slate x y} {
-    # Get delta coordinates
-    set deltaX [expr $x - $scratch($id.prevX)]
-    set deltaY [expr $y - $scratch($id.prevY)]
-
-	# Remember the current coordinates
-	set scratch($id.prevX) $x
-    set scratch($id.prevY) $y
-
-    # Add the delta coordinates to the vertices
-    foreach v $scratch($id.vertices) {
-    	set scratch($id.$v.x) [expr $scratch($id.$v.x) + $deltaX]
-    	set scratch($id.$v.y) [expr $scratch($id.$v.y) + $deltaY]
+	set outer [ldrop $outer $length]
+	set inner [ldrop $inner $length]
     }
 
-    # Rebuild the coordinates list and change coordinates
-    set coords {}
-    foreach i $scratch($id.indexes) {
-		lappend coords $scratch($id.$v.x) $scratch($id.$v.y)
+    while { [llength $angles] > 0 } {
+ 	set length 2
+	set angles [lrange $angles 1 end]
+	set a [lindex $angles 0]
+ 	while { ($a > $minRadians || $a <= $maxRadians) \
+		&& [llength $angles] > 0 } {
+	    incr length 2
+ 	    set angles [lrange $angles 1 end]
+	    set a [lindex $angles 0]
+ 	}
+
+	lappend shaded [concat \
+		[ltake $outer [expr $length + 2]] \
+		[reverse [ltake $inner [expr $length + 2]]] \
+		[lindex $outer 0] \
+		[lindex $outer 1]]
+
+ 	if { [llength $angles] == 0 } {
+ 	    break
+ 	}
+
+ 	set outer [ldrop $outer $length]
+ 	set inner [ldrop $inner $length]
+
+ 	set length 2
+	set angles [lrange $angles 1 end]
+ 	set a [lindex $angles 0]
+ 	while { ($a <= $minRadians && $a > $maxRadians) \
+		&& [llength $angles] > 0 } {
+ 	    incr length 2
+ 	    set angles [lrange $angles 1 end]
+ 	    set a [lindex $angles 0]
+ 	}
+
+	lappend lit [concat \
+		[ltake $outer [expr $length + 2]] \
+		[reverse [ltake $inner [expr $length + 2]]] \
+		[lindex $outer 0] \
+		[lindex $outer 1]]
+
+ 	set outer [ldrop $outer $length]
+ 	set inner [ldrop $inner $length]
     }
 
-    # If there's a ghost, reshape it. Otherwise reshape the item.
-    if { [::info exists scratch($id.ghost)] } {
-		eval $canvas coords $scratch($id.ghost) $coords
-    } else {
-		eval $slate coords $id $coords
-    }
-}
-
-#######################################################################
-#### reshaperelease
-#
-body ::tycho::Polygon::reshaperelease {id canvas slate x y} {
-    # If there's a ghost, reshape the item to its shape
-    # and then delete the ghost.
-    if { [::info exists scratch($id.ghost)] } {
-		# Reshape the item
-		eval $slate coords $id [$slate coords $scratch($id.ghost)]
-		$canvas delete $scratch($id.ghost)
-
-		# Clean up
-		unset scratch($id.ghost)
-    }
-
-    # General cleaning up
-    unset scratch($id.prevX)
-    unset scratch($id.prevY)
-
-    foreach v $scratch($id.indexes) {
-    	unset scratch($id.$v.x)
-    	unset scratch($id.$v.y)
-    }
-    unset scratch($id.vertices)
-    unset scratch($id.indexes)
+    # Return the three-list of results
+    return [list $inside $lit $shaded]
 }

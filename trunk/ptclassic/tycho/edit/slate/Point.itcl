@@ -63,31 +63,31 @@ class ::tycho::Point {
     ####                         public procs                      ####
 
     # Get one or more aspects of an item
-    proc aspect {id canvas slate args}
+    proc _aspect {id canvas slate args}
 
     # Attach a set of grapples to an item
-    proc grapple {id canvas slate interactor args}
+    proc _grapple {id canvas slate interactor args}
 
     # Generate an error, since point objects cannot be reshaped
-    proc reshape {id canvas slate x y args}
+    proc _reshape {id canvas slate x y args}
 
     # Generate an error, since point objects cannot be reshaped
-    proc reshapeclick {id canvas slate x y args}
+    proc _reshapeclick {id canvas slate x y args}
 
     # Generate an error, since point objects cannot be reshaped
-    proc reshapedrag {id canvas slate x y}
+    proc _reshapedrag {id canvas slate x y}
 
     # Generate an error, since point objects cannot be reshaped
-    proc reshaperelease {id canvas slate x y}
+    proc _reshaperelease {id canvas slate x y}
 }
 
 
 #######################################################################
-#### aspect
+#### _aspect
 #
 # Return the value of an aspect. The only valid aspect is "origin."
 #
-body ::tycho::Point::aspect {id canvas slate args} {
+body ::tycho::Point::_aspect {id canvas slate args} {
     set coords [$slate coords $id]
     set result {}
 
@@ -109,29 +109,29 @@ body ::tycho::Point::aspect {id canvas slate args} {
 }
 
 #######################################################################
-#### reshape
+#### _reshape
 #
-body ::tycho::Point::reshape {id canvas slate x y args} {
+body ::tycho::Point::_reshape {id canvas slate x y args} {
     error "Point objects cannot be reshaped"
 }
 
 #######################################################################
-#### reshapeclick
+#### _reshapeclick
 #
-body ::tycho::Point::reshapeclick {id canvas slate x y args} {
+body ::tycho::Point::_reshapeclick {id canvas slate x y args} {
     error "Point objects cannot be reshaped"
 }
 
 #######################################################################
-#### reshapedrag
+#### _reshapedrag
 #
-body ::tycho::Point::reshapedrag {id canvas slate x y} {
+body ::tycho::Point::_reshapedrag {id canvas slate x y} {
     error "Point objects cannot be reshaped"
 }
 
 #######################################################################
-#### reshaperelease
+#### _reshaperelease
 #
-body ::tycho::Point::reshaperelease {id canvas slate x y} {
+body ::tycho::Point::_reshaperelease {id canvas slate x y} {
     error "Point objects cannot be reshaped"
 }

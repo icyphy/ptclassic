@@ -1223,7 +1223,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 		    # Only add the item to the result if _all_ simple items
 		    # in the complex item are outside the region. Test for
 		    # this using the bounding box.
-		    if { ! [eval rectOverlap \
+		    if { ! [eval ::tycho::Rectangle::overlap \
 			    $x0 $y0 $x1 $y1 [$canvas bbox $root]] } {
 			set uncovered($root) $tags
 			$canvas dtag $root $tag
@@ -1243,7 +1243,7 @@ body ::tycho::IncrCanvas::search {mode tag x0 y0 x1 y1} {
 	    } else {
 		set root [string range [lindex $tags $t] 1 end]
 		if { ! [::info exists covered($root)] } {
-		    if { [eval rectInside \
+		    if { [eval eval ::tycho::Rectangle::inside \
 			    [$canvas bbox $root] $x0 $y0 $x1 $y1] } {
 			set covered($root) $tags
 			$canvas addtag $tag withtag $root
@@ -1396,7 +1396,8 @@ body ::tycho::IncrCanvas::findenclosed {x0 y0 x1 y1} {
 	    # region. To avoid calculating this twice, keep a
 	    # cache of already-added items.
 	    if { ! [::info exists temp.find($root)] } {
-		if { [eval rectInside [bbox $root] $x0 $y0 $x1 $y1] } {
+		if { [eval ::tycho::Rectangle::inside \
+			[bbox $root] $x0 $y0 $x1 $y1] } {
 		    lappend found $root
 		    set temp.find($root) 1
 		}
