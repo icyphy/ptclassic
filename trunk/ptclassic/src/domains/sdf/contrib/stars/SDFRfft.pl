@@ -118,7 +118,7 @@ limitation of liability, and disclaimer of warranty provisions.
     Complex* Result = F.Compute( Temp1, Temp2 );
 
     double Norm = int(Inverse) ? WinNorm : WinNorm / (double(fftlength));
-    for( i = 0; i < fftlength; i++ )
+    for( i = 0; i < fftlength/2; i++ )
       Result[ i ] *= Norm;
 
     for( i = 0; i < fftlength/2; i++ ) {
