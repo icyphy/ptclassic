@@ -44,29 +44,23 @@ environment variable.  Variables are expanded only at the beginning.
 #include "Error.h"
 #include "Tokenizer.h"
 #include "StringList.h"
-#define MAXLEN 2000
 #define MAXSTRINGLEN 4096
 
-const char*
-expandPathName(const char* name) {
-    const char* buf[MAXLEN];
-    char tokbuf[MAXSTRINGLEN];
+const char* expandPathName(const char* name) {
     const char* specialChars = "~/$";
     Tokenizer lexer(name,specialChars);
-    int i = 0;
-    int err=0;
-    const char* tilda = "~";
-    const char* dollar = "$";
-    const char* slash = "/";
-    while(!lexer.eof() && i < MAXLEN && err == 0) {
+    StringList expandedPath;
+    expandedPath.initialize();
+    while(!lexer.eof()) {
+	char tokbuf[MAXSTRINGLEN];
 	lexer >> tokbuf;
 	char c = tokbuf[0];
 	if (c != 0 && tokbuf[1]) c = 0;
 	switch (c) {
 	case '~' : {
 	    // we only expand the first tilda
-	    if (i != 0) {
-		buf[i++] = tilda;
+	    if (expandedPath.numPieces() != 0) {
+		expandedPath << '~';
 		break;
 	    }
 
@@ -79,41 +73,35 @@ expandPathName(const char* name) {
 		    Error::abortRun ("getpwuid doesn't know you!");
 		    exit (1);
 		}
-		buf[i++] = savestring(pwd->pw_dir);
-		buf[i++] = slash;
+		expandedPath << pwd->pw_dir << '/';
 	    }
 	    else {
 		pwd = getpwnam(tokbuf);
 		if (pwd == 0)
-		    buf[i++] = savestring(tokbuf);
+		    expandedPath << tokbuf;
 		else
-		    buf[i++] = savestring(pwd->pw_dir);
+		    expandedPath << pwd->pw_dir;
 	    }
 	    break;
 	}    
 	case '/' : {
-	    buf[i++] = slash;
+	    expandedPath << '/';
 	    break;
 	}
 	case '$' : {
 	    // next token might be an environment variable
 	    lexer >> tokbuf;
 	    const char* value = getenv (tokbuf);
-	    if (!value) {
-		buf[i++] = dollar;
-		buf[i++] = savestring(tokbuf);
-	    }
-	    else {
-		buf[i++] = savestring(value);
-	    }
+	    if (!value)
+		expandedPath << '$' << tokbuf;
+	    else
+		expandedPath << value;
 	    break;
 	}
 	default: {
-	    buf[i++] = savestring(tokbuf);
+	    expandedPath << tokbuf;
 	}
 	}
     }
-    StringList expandedPath;
-    for (int j = 0 ; j < i ; j++) expandedPath << buf[j];
     return savestring(expandedPath);
 }
