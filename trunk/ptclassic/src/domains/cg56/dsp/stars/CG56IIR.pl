@@ -156,7 +156,7 @@ coeffs., odd addresses correspond to numerator coeffs.
                 double temp = scaleDenom * -(double(denominator[i]));
                 if ((temp > 1) || (temp < -1)) {
 		    StringList msg = "After scaling, denominator coefficient #";
-		    msg << i << " has a value of " << temp
+		    msg << i  << " has a value of " << temp
 			<< " which is not is the range of (-1, 1).";
                     Error::abortRun(*this, msg);
 		    return;
