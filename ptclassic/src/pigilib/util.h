@@ -61,8 +61,8 @@ extern char DEFAULT_DOMAIN[];
 #include "rpc.h"
 
 typedef struct DupSheetNode_s {
-    char *info;
-    char *moreinfo;
+    const char *info;
+    const char *moreinfo;
     struct DupSheetNode_s *next;
 } DupSheetNode;
 typedef DupSheetNode *DupSheet;
@@ -82,15 +82,17 @@ extern char *UniqNameGet ARGS((char *s));
 
 extern void DupSheetInit ARGS((DupSheet *ds));
 extern void DupSheetClear ARGS((DupSheet *ds));
-extern boolean DupSheetAdd ARGS((DupSheet *ds, char *item));
-extern boolean DupSheetAdd2 ARGS((DupSheet *ds, char *item, char *item2));
-extern boolean DupSheetIsDup ARGS((DupSheet *ds, char *item));
-extern boolean DupSheetIsDup2 ARGS((DupSheet *ds, char *item, char* item2));
-extern char* getDomainS ARGS((RPCSpot *spot));
-extern char* setCurDomainS ARGS((RPCSpot *spot));
-extern char* getDomainF ARGS((octObject *facetPtr));
-extern char* setCurDomainF ARGS((octObject *facetPtr));
-extern char* getDomainInst ARGS((octObject *instPtr));
-extern char* setCurDomainInst ARGS((octObject *instPtr));
+extern boolean DupSheetAdd ARGS((DupSheet *ds, const char *item));
+extern boolean DupSheetAdd2 ARGS((DupSheet *ds, const char *item,
+				  const char *item2));
+extern boolean DupSheetIsDup ARGS((DupSheet *ds, const char *item));
+extern boolean DupSheetIsDup2 ARGS((DupSheet *ds, const char *item,
+				    const char* item2));
+extern const char* getDomainS ARGS((RPCSpot *spot));
+extern const char* setCurDomainS ARGS((RPCSpot *spot));
+extern const char* getDomainF ARGS((octObject *facetPtr));
+extern const char* setCurDomainF ARGS((octObject *facetPtr));
+extern const char* getDomainInst ARGS((octObject *instPtr));
+extern const char* setCurDomainInst ARGS((octObject *instPtr));
 
 #endif  /* _UTIL_H */
