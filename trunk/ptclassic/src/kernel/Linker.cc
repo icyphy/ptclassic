@@ -25,6 +25,10 @@ $Id$
 #include "StringList.h"
 #include <sys/stat.h>
 
+// static data objects
+int Linker::activeFlag = 0;
+const char* ptolemyName = 0;
+
 const char*
 pathSearch (const char* name, const char* path) {
 // if name has slashes it must be exact
@@ -147,7 +151,9 @@ int Linker::linkObj (const char* objName) {
 	}
 // get the first word, use it as a function pointer and call it.
 	PointerToVoidFunction fn = *(PointerToVoidFunction*)init_fn;
+	activeFlag = TRUE;	// indicate dynamically linked objects
 	(*fn) ();
+	activeFlag = FALSE;	// turn off the indication.
 	return TRUE;
 }
 
