@@ -26,6 +26,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		name {output}
 		type {float}
 	}
+	ccinclude { <math.h> }
 	defstate {
 		name { thresholds }
 		type { floatarray }
@@ -88,5 +89,9 @@ limitation of liability, and disclaimer of warranty provisions.
 	    st << ";\n";
 	    addCode((const char*)st);
 	    addCode (main);
+	}
+	exectime {
+		double x = log(thresholds.size()) / log(2.0);
+		return 8 + 5 * int(x-0.01);
 	}
 }

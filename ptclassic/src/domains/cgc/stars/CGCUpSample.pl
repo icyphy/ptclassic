@@ -72,4 +72,7 @@ limitation of liability, and disclaimer of warranty provisions.
 		else
 			addCode(sendAll);
 	}
+	exectime {
+		return 1 + int(factor);
+	}
 }

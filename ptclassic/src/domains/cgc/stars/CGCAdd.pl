@@ -41,4 +41,7 @@ limitation of liability, and disclaimer of warranty provisions.
 			out.initialize();
 		}
 	}
+	exectime {
+		return input.numberPorts();
+	}
 }

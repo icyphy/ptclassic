@@ -31,5 +31,8 @@ limitation of liability, and disclaimer of warranty provisions.
 	go {
 		addCode("$ref(output) = $val(gain) * $ref(input);\n");
 	}
+	exectime {
+		return 1;
+	}
 }
 

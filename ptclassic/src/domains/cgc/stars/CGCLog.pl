@@ -37,4 +37,7 @@ If the input is zero or negative, the constant -100.0 is produced.
 	if($ref(input) <= 0) $ref(output) = -100.0;
 	else $ref(output) = log($ref(input));
    }
+	exectime {
+		return 33;  /* based on CG96Log */
+	}
 }

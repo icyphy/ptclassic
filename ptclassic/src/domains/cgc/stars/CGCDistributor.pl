@@ -63,5 +63,8 @@ limitation of liability, and disclaimer of warranty provisions.
 		   out.initialize();
 		}
 	}
+	exectime {
+		return int(blockSize)*2*output.numberPorts();
+	}
 }
 

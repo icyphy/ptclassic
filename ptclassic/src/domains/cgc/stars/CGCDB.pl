@@ -69,4 +69,7 @@ TRUE if input is a power measurement, FALSE if it's an amplitude measurement.
 	go {
 		addCode(body);
 	}
+	exectime {
+		return 37;   /* approximate value from LOG */
+	}
 }

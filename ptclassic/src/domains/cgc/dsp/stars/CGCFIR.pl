@@ -173,4 +173,15 @@ For more information about polyphase filters, see F. J. Harris,
 		addCode(bodyDecl);
 		addCode(body);
 	}
+	exectime {
+		int x = taps.size();
+		int i = interpolation;
+		int d = decimation;
+		if (x % i != 0) x = x/i + 1;
+		else x = x/i;
+		int y = i/d;
+		if (i % d != 0) y++;
+		/* count of elementary operations */
+		return 1 + y * (6 + x * 6);	
+	}
 }

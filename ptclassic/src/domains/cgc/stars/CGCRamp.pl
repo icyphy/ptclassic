@@ -36,4 +36,7 @@ limitation of liability, and disclaimer of warranty provisions.
 	$ref(output) = $ref(value);
 	$ref(value) += $val(step);
 	}
+	exectime {
+		return 2;
+	}
 }

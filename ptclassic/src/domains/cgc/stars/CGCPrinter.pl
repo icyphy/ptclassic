@@ -80,4 +80,7 @@ codeblock (openfile) {
 	    if(fileOutput)
 		addCode("\tfclose($starSymbol(fp));\n");
 	}
+	exectime {
+		return 6;	/* unreliable data */
+	}
 }

@@ -57,4 +57,7 @@ part. The code should be modified for portability.
 		float center = ($val(upper) + ($val(lower)))/2.0;
 		$ref(output) = scale * (drand48() - 0.5) + center;
 	}
+	exectime {
+		return 10 + 5;	/* based on CG96IIDUniform */
+	}
 }

@@ -37,4 +37,7 @@ input interpreted as the x-axis data, and the other input as y-axis data.
                 addCode(
 "\tfprintf($starSymbol(fp),\"%g %g\\n\",$ref(xInput),$ref(input));\n");
 	}
+	exectime {
+		return 6;
+	}
 }

@@ -159,4 +159,7 @@ codeblock(closeFile) {
 		out << cmd << "\");\n";
 		addCode(out);
 	}
+	exectime {
+		return 7;
+	}
 }

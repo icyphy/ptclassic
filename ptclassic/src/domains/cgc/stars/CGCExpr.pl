@@ -35,6 +35,14 @@ defstar
 	desc { List of necessary include files. }
     }
 
+    state
+    {
+	name { runTime }
+	type { int }
+	default { "2" }
+	desc { execution time }
+    }
+
     setup
     {
 	for(int i = 0; i < include.size(); i++)
@@ -46,5 +54,9 @@ defstar
 	StringList code;
 	code << "$ref(out) = " << expr << ";\n";
 	addCode(code);
+    }
+
+    exectime {
+	return int(runTime);
     }
 }

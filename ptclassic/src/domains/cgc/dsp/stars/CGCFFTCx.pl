@@ -206,4 +206,7 @@ int nn, isign;
 
 		addCode(outData);
 	}
+	exectime {
+		return  1000; 	/* just say large number for now */
+	}
 }	

@@ -31,6 +31,9 @@ limitation of liability, and disclaimer of warranty provisions.
    codeblock(singen) {
 	$ref(output) = sin($ref(input));
    }
+	exectime {
+		return 23;	/* value taken from CG96Sin */
+	}
 }
 
 		
