@@ -32,6 +32,9 @@ public:
     // Returns TRUE if code was added to the stream, FALSE otherwise.
     int put(const char* code, const char* name = NULL);
 
+    // initialize myself and sharedNameds if exists.
+    void initialize();
+
 protected:
     UniqueStringList* sharedNames;
     unsigned int share:1;

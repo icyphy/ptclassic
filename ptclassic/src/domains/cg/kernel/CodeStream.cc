@@ -47,3 +47,8 @@ int CodeStream::put(const char* string, const char* name)
     }
     return FALSE;
 }
+
+void CodeStream::initialize() {
+    if (share) sharedNames->initialize();
+    StringList :: initialize();
+}
