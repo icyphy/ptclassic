@@ -68,7 +68,7 @@ void Wormhole :: buildEventHorizons () {
 	for (int n = gal.numberPorts(); n>0; n--) {
 		PortHole& galp = *next++;
 		PortHole& realGalp = (PortHole&) galp.realPort();
-		dataType type = realGalp.myType();
+		DataType type = realGalp.myType();
 		int numToken = realGalp.numberTokens;
 // separate rules for connecting inputs and outputs.
 		if (galp.isItInput()) {

@@ -38,7 +38,7 @@ class Particle
 {
 public:
 	// Identify what type of Particle this is
-	virtual dataType readType() const = 0;
+	virtual DataType readType() const = 0;
 
 	// Cast this Particle to an int, float, Complex
 	virtual operator int () const = 0;
@@ -111,7 +111,7 @@ class IntSample : public Particle
 {
 public:
 	// Tell this world this Particle contains an int
-	dataType readType() const;
+	DataType readType() const;
 
 	// Cast to an int, float, and Complex
 	operator int () const;
@@ -152,7 +152,7 @@ class FloatSample : public Particle
 {
 public:
         // Tell this world this Particle contains an float
-        dataType readType() const;
+        DataType readType() const;
  
         // Cast to an int, float, and Complex
         operator int () const;
@@ -193,7 +193,7 @@ class ComplexSample : public Particle
 {
 public:
         // Tell this world this Particle contains a Complex
-        dataType readType() const;
+        DataType readType() const;
  
         // Cast to an int, float, Complex
         operator int () const;
@@ -204,8 +204,8 @@ public:
  
         // Initialize
         ComplexSample(const Complex& c) {data=c;}
-	ComplexSample(float f) {data=f;}
-	ComplexSample(int i) {data = (float)i;}
+	ComplexSample(float f) {data=double(f);}
+	ComplexSample(int i) {data = double(i);}
         ComplexSample() {data=0.0;}
 
         // Initialize the Particle
