@@ -19,9 +19,56 @@ The <a name="EditJava class">EditJava class</a> is derived from the
 therefore inherits all of its features, such as invoking <CODE>make</CODE>.
 The EditJava class colors certain Java constructs, such as comments.
  <P>
+The <A NAME="Java Editor Body Template"><CODE>Body Template</CODE>
+command</A> in the <CODE>Special</CODE>
+menu places a body template at the current point in the buffer.
+ <P>
+The <A NAME="Java Editor File Template"><CODE>File Template</CODE>
+command</A> in the <CODE>Special</CODE> menu copies the file <A
+HREF="../../templates/JavaTemplate.java"><CODE>$TYCHO/editors/textedit/templates/JavaTemplate.java</CODE></A>
+into the editor and substitutes in a class name based on the file
+name.  For example, if the file is named <CODE>Elvis.java</CODE>, then
+the class name <CODE>Elvis</CODE> will be substituted in.
+ <P>
+The <A NAME="Java Editor Generate doc"><CODE>Generate doc</CODE> command</A>
+in the "Special" menu asks the user if they would like to save the buffer
+and then runs the <CODE>javadoc</CODE> program to produce HTML documentation
+for the current file.
+ <P>
 The <CODE>appletview</CODE> choice in the <CODE>Special</CODE> menu
 brings up the <CODE>appletviewer</CODE> program and loads the file being
 edited into <CODE>appletviewer</CODE>
+
+<H2><A NAME="javadoc tags">Javadoc tags</A></H2>
+
+For reference, we list the <CODE>javadoc</CODE> tags below:
+<DL>
+<DT> <CODE>@see <I>classname</I></CODE>
+<DD> 
+
+<DT> <CODE>@see <I>full-classname</I></CODE>
+<DD> 
+
+<DT> <CODE>@see <I>full-classname</I>#<I>method-name</I> </CODE><DT> 
+<DD> 
+
+<DT> <CODE>@version <I>text</I></CODE>
+<DD> 
+
+<DT> <CODE>@author <I>text</I></CODE>
+<DD> 
+
+<DT> <CODE>@param <I>parameter-name description</I></CODE>
+<DD> 
+
+<DT> <CODE>@return <I>description</I></CODE>
+<DD> 
+
+<DT> <CODE>@exception <I>full-classname description</I></CODE>
+<DD> 
+
+</DL>
+
 <p>
 <a href="../../../../doc/index.html">Tycho Home Page</a><br>
 <p>
