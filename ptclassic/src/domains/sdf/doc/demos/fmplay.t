@@ -3,9 +3,10 @@
 .SD
 Sound generator using FM modulation that plays on the workstation speaker.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV 1.2 "February 8, 1991"
 .AL "E. A. Lee and Tom Parks"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
 .Ir "Chowning, H. M."

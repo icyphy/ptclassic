@@ -3,6 +3,8 @@
 .SD
 An example of an inconsistent SDF system
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "J. Buck"
 .LD

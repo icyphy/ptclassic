@@ -3,9 +3,10 @@
 .SD
 Demonstrate the use of lattice filters.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$	$Date$
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ie "whitening filter"
 .Ie "filter, whitening"

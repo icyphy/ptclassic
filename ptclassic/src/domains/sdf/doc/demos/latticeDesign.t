@@ -4,9 +4,10 @@
 Use of Levinson-Durbin algorithm to design a lattice filter with a known
 transfer function.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV 1.1	4/18/92
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Ie "filter design, lattice"
 .Ie "lattice filter design"

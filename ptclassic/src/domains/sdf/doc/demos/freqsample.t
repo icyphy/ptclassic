@@ -3,9 +3,10 @@
 .SD
 Filter design via frequency sampling.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 20, 1990"
 .AL "J. Buck and E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This system designs filters using the frequency sampling method.
 The frequency domain specification is given using the

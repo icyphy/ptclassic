@@ -3,9 +3,10 @@
 .SD
 A demo that produces a QAM signal
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
 This universe produces a 16-point quadrature amplitude modulated signal

@@ -3,9 +3,10 @@
 .SD
 A demo of the LMS adaptive filter star
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 A Gaussian white noise signal serves as input to an FIR filter and
 an adaptive filter using the LMS algorithm.

@@ -3,9 +3,10 @@
 .SD
 Demonstrate the DTFT star.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 28, 1990"
 .AL "E. A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
 .Ie "spectral estimation"

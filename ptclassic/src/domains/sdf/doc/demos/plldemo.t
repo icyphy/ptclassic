@@ -3,9 +3,10 @@
 .SD
 Simulation of an optical phase-locked loop.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$	$Date$
 .AL "John R. Barry"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .IE "analog systems"
 .IE "continuous-time systems"

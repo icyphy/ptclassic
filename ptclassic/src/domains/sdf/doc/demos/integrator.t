@@ -3,9 +3,10 @@
 .SD
 Demonstrate the features of the integrator star.
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This system shows the various features of the
 .c Integrator

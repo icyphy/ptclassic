@@ -3,9 +3,10 @@
 .SD
 Linear interpolation
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ "October 15, 1990"
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This system uses an FIR filter to upsample by a factor of 8
 and linearly interpolate between samples.

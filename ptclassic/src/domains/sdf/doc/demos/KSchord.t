@@ -3,9 +3,10 @@
 .SD
 Simulation of plucked strings using the Karplus-Strong algorithm
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Joseph T. Buck"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .pp
 This demo models the plucking of three strings; each string is modeled

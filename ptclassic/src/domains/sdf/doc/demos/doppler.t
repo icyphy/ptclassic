@@ -3,9 +3,10 @@
 .SD
 Doppler shift
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 .Id "doppler shift"
 A sine wave of frequency 2*PI/40 radians

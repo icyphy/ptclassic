@@ -3,9 +3,10 @@
 .SD
 Demonstrate the Mux and DeMux stars
 .DE
+.LO "~ptolemy/src/domains/sdf/demo"
+.DM SDF Universe
 .SV $Revision$ $Date$
 .AL "Edward A. Lee"
-.LO "~ptolemy/src/domains/sdf/demo"
 .LD
 This system shows how to use the
 .c Mux
