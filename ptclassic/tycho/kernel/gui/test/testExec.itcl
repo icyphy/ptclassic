@@ -31,26 +31,51 @@
 #######################################################################
 
 if {[string compare test [info procs test]] == 1} then { 
-    source testDefs.tcl
+    source [file join $TYCHO kernel test testDefs.tcl]
 } {}
 
 
 test Exec-1.1 {run make} {
     catch {destroy .exec}
     catch {delete object .exec}
-    ::tycho::Monitor .exec -command {make test_exec_msg} -dir [pwd] \
-            -autostart 1
-    #::tycho::Monitor .exec -command {ls -al} -dir [pwd] -autostart 1
-    .exec centerOnScreen
-    sleep [expr {$duration / 1000}]
-    #after $longDuration .exec invoke cancel
-    puts "about to do getHistory"
-    flush stdout
+    ::tycho::Exec .exec
+    .exec execProcess {make test_exec_msg} [file join $TYCHO kernel test]
+
+    # Wait for return
     set status [.exec getStatusWait]
     set history [.exec getHistory]
-    regsub -all "make\[^\n\]+\n" $history "" results
-    list $results
-} {{This message is used to test the Exec class
-
+    set results {}
+    regexp {>>([^<]+)<<} $history match results
+    list $status $results
+} {normal {
+This message is used to test the Exec class
 
 }}
+
+test Exec-1.2 {If we kill fast enough, then we'll get a result "Killed"} {
+    catch {destroy .exec}
+    catch {delete object .exec}
+    ::tycho::Exec .exec
+    .exec execProcess {ls -al} {}
+    .exec killProcess
+    set results [.exec getHistory]
+    regexp {(killed)} $results match results
+    list $results
+} {killed}
+
+
+test Exec-1.3 {Make sure that clear history really clears up everything} {
+    catch {destroy .exec}
+    catch {delete object .exec}
+    ::tycho::Exec .exec
+    .exec execProcess {ls -al} {}
+    .exec getStatusWait
+    .exec clearHistory
+    # This should be empty
+    set results [.exec getHistory]
+    list $results
+} {{}}
+
+
+
+
