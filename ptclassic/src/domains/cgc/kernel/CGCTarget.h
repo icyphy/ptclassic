@@ -131,6 +131,9 @@ protected:
 	// virtual function to initialize strings
 	virtual void initCodeStrings();
 
+	// Splice in stars.
+	/* virtual */ int modifyGalaxy();
+
 	// buffer size determination
 	int allocateMemory();
 
