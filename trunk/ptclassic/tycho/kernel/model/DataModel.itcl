@@ -734,7 +734,11 @@ body ::tycho::DataModel::reorder {type {context {}} {list {}}} {
 #### search ?mode? ?defaults? attribute pattern ?namepatt?
 #
 # Search for items with an attribute that matches an expression.
-# If _globpattern_ is provided, it is a glob pattern that is
+# The argument list looks like this:
+#
+# <b>search</b> ?_mode_? ?_defaults_? _attribute_ _pattern_ ?_namepatt_?
+#
+# If _namepatt_ is provided, it is a glob pattern that is
 # matched against the names of all data items to find the items
 # to search through. If _namepatt_ is not provided, all items
 # are searched. _mode_ is a flag that determines the type of
@@ -1305,3 +1309,5 @@ body ::tycho::DataModel::_verify {name} {
     	error "Unknown item \"$name\" in $modelname"
     }
 }
+
+# The argume
