@@ -6,6 +6,9 @@ Sends input values to a Tcl script.  Gets output values from a Tcl script.
 The star can communicate with Tcl either synchronously or asynchronously.
 	}
 	explanation {
+.EQ
+delim off
+.EN
 This star reads a file containing Tcl commands and communicates with Tcl
 via procedures defined in that file.  Those procedures can read the inputs
 to the star and set its outputs.
@@ -56,6 +59,9 @@ set up periodic calls to poll the inputs and set the outputs.
 .pp
 If the procedure "${uniqueSymbol}callTcl" is not defined in the given
 tcl_file, an error message results.
+.EQ
+delim $$
+.EN
 	}
 	version { $Id$ }
 	author { E. A. Lee and D. Niehaus }
