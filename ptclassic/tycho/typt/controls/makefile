@@ -4,7 +4,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1996 The Regents of the University of California.
+# @Copyright (c) 1996-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -40,7 +40,10 @@ VPATH =		$(ROOT)/typt/controls
 CONFIG =	$(ROOT)/mk/tycho.mk
 include $(CONFIG)
 
-ITCL_SRCS =     AudioIO.itcl
+ITCL_SRCS =     AudioIO.itcl \
+				GraphicEq.itcl \
+				ParametricEq.itcl \
+				ToneControl.itcl
 
 EXTRA_SRCS =	$(TCL_SRCS) $(ITCL_SRCS)
 
@@ -50,7 +53,7 @@ MISC_FILES =	tclIndex
 REALCLEAN_STUFF =	tclIndex
 
 # Title for the tydoc index page
-TYDOC_DESC =	Index of classes in tycho/typt/control
+TYDOC_DESC =	Index of classes in tycho/typt/controls
 
 DIRS =		
 
