@@ -64,6 +64,9 @@ public:
   // Return the source vertex of a backward edge
   int source(int v, int e) const { return bEdge[v][e]; }
 
+  // Return the star of a vertex
+  SRStar * star(int v) const { return stars[v]; }
+
   StringList displayGraph() const;
 
 private:
@@ -81,10 +84,6 @@ private:
   SRStar ** stars;
 
   // Array of pointers to the port of each vertex
-  //
-  // @Description These are the ports on the lowest-level stars.
-  // Calling undoAliases() on these gives the ports actually connected
-  // to the stars in stars.  Use doAliases() on those to get back.
   OutSRPort ** ports;
 
   // Number of forward edges on each vertex
