@@ -238,15 +238,17 @@ int DERCScheduler :: run () {
 	    DERCStar* pStar = (DERCStar*)(pEvent->src);
             pStar->arrivalTime = level;
             // interruptQ.putFreeLink(f);
-            pStar->resourcePointer->newEventFromInterruptQ(pEvent,currentTime); 
-	}
+            // this method will only return false if an error occurs
+            if (!(pStar->resourcePointer->newEventFromInterruptQ(pEvent, currentTime))) return FALSE;
+        }
         //A new event, never seen before
 	else if (((DEStar*)f->dest)->isRCStar) {
 	    DERCEvent* pEvent = (DERCEvent*)(f->e);
 	    DERCStar* pStar = (DERCStar*)(f->dest);
             pStar->arrivalTime = level;
  	    // eventQ.putFreeLink(f);
-             pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime);
+             // this method will only return false if star fails to run(error)
+             if (!(pStar->resourcePointer->newEventFromEventQ(pEvent, currentTime))) return FALSE;
          }
         else {
             // check if the normal event is fetched
