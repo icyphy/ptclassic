@@ -236,7 +236,7 @@ void XGraph :: terminate () {
         cmd += "( ";
 
         if (sf != NULL && *sf != 0) {
-            const char* saveFileName = savestring(expandPathName(sf));
+            const char* saveFileName = expandPathName(sf);
 
             // Easiest way to check to see whether the file can be
             // written is to call creat and then close the file.
