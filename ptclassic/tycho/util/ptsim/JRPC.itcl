@@ -31,9 +31,6 @@
 #######################################################################
 
 
-#######################################################################
-#### options
-#
 
 #######################################################################
 #### JRPC
@@ -55,11 +52,11 @@
 # <tcl><pre>
 #     ::tycho::JRPC .jrpc
 #     # See what packages are loaded.  java should be one of them. 
-#     .jrpc send package names
+#     .jrpc send {package names}
 #     # Create a Ptolemy II NamedObj.
-#     .jrpc send eval {set n [java::new pt.kernel.NamedObj "My NamedObj"]}
+#     .jrpc send {set n [java::new pt.kernel.NamedObj "My NamedObj"]}
 #     # Get the name of the object we just created.
-#     .jrpc send eval {$n getName}
+#     .jrpc send {$n getName}
 # </pre></tcl>
 #
 class ::tycho::JRPC {
@@ -79,7 +76,7 @@ class ::tycho::JRPC {
     ####                         public methods                    ####
 
     # Send a tcl command to the remote process
-    method send {args}
+    method send {script}
 
     ###################################################################
     ####                     protected  methods                    ####
@@ -130,7 +127,7 @@ body ::tycho::JRPC::constructor {args} {
     fconfigure $_clientSocket -blocking 0
 
     debug "Sending \"set env(TCL_CLASSPATH) $tycho/java\""
-    send set env(TCL_CLASSPATH) $tycho/java
+    send "set env(TCL_CLASSPATH) $tycho/java"
 }
 
 #######################################################################
@@ -152,8 +149,8 @@ body ::tycho::JRPC::destructor {} {
 #### send
 # Run a remote command on channel.  Wait for the results
 #
-body ::tycho::JRPC::send {args} {
-    puts $_clientSocket $args
+body ::tycho::JRPC::send {script} {
+    puts $_clientSocket $script
     puts $_clientSocket _JRPC_EndCommand_Cookie_
     flush $_clientSocket
 
