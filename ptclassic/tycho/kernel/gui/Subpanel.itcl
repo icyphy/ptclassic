@@ -56,6 +56,8 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # of the subpanel by using [cget -state].
 # NOTE: If both the childwidget and the opencallback options are
 #       are used then the one that is specified last will be used.
+#       The deletion of the embedded widget is left to the user of the
+#       subpanel.
 #       
 #
 # <p>
@@ -92,7 +94,7 @@ option add *Subpanel.labelMargin 2 widgetDefault
 # </pre></tcl>
 
 class ::tycho::Subpanel { 
-    inherit itk::Widget
+    inherit ::tycho::TychoWidget
 
     constructor {args} {}
     destructor {}
@@ -100,35 +102,28 @@ class ::tycho::Subpanel {
     ###################################################################
     ####                            options                        ####
 
-    #### -childwidget option
     # Specify the name of a widget to be packed into the subpanel
     itk_option define -childwidget childWidget ChildWidget ""
 
-    #### -closecallback option
     # Specify the name of the procedure to execute when closing subpanel
     itk_option define -closecallback closeCallback CloseCallback ""
 
-    #### -opencallback option
     # Specify the name of the procedure to execute when opening subpanel;
     # The procedure should return the name of a widget to pack into the panel
     itk_option define -opencallback openCallback OpenCallback ""
    
-    #### -state option
     # Specify the state of the subpanel, either open or closed
     itk_option define -state state State closed
 
-    #### -text option
     # Specify the text to be inserted in the subpanel label
     itk_option define -text subpanelTitle SubpanelTitle ""
 
     ###################################################################
     ####                        public methods                     ####
 
-    #### close
     # Close a subpanel
     method close {}
 
-    #### open
     # Open a subpanel
     method open {}
 
@@ -167,7 +162,7 @@ configbody ::tycho::Subpanel::childwidget {
     # Remember the widget for the next time...
     set previousChildwidget $itk_option(-childwidget)
 
-    # Override the opencallback command.  We need in case 
+    # Override the opencallback command.  We need this in case 
     # user wants to only embed a widget and not execute
     # a command upon opening
     set opencmd ""
@@ -195,7 +190,7 @@ configbody ::tycho::Subpanel::opencallback {
 #
 configbody ::tycho::Subpanel::state {
     # Need the following to use bitmaps
-    global TYCHO
+    global ::TYCHO
     
     # The meaning of open and closed here is a bit tricky.  When the 
     # Subpanel is in the closed state then pressing the button places
@@ -328,7 +323,7 @@ body ::tycho::Subpanel::close {} {
 
     pack forget $itk_component(panelFrame)
     pack forget $itk_component(spaceFrame)
-    $this configure -state closed
+    configure -state closed
 }
 
 #######################################################################
@@ -350,7 +345,7 @@ body ::tycho::Subpanel::open {} {
 	    # Because the childwidget option overrides the opencallback
 	    # option, we need to remember the command
 	    set temp $opencmd
-	    $this configure -childwidget $currentChildwidget
+	    configure -childwidget $currentChildwidget
 	    set opencmd $temp
 	} else {
 	    set opencmd ""
@@ -365,7 +360,7 @@ body ::tycho::Subpanel::open {} {
 	    -anchor nw \
 	    -after $itk_component(spaceFrame) 
 
-    $this configure -state open
+    configure -state open
 }
 
 
