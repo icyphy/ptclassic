@@ -331,17 +331,14 @@ int UniProcessor :: getStartTime() {
 StringList UniProcessor :: generateCode() {
 	// convert a processor schedule to a SDF schedule
 	// for child target.
+	targetPtr->setGalaxy(*subGal);
 	convertSchedule();
-
-	// Initialize the galaxy
-	subGal->initialize();
 
 	// simulate the schedule
 	simRunSchedule();
 
 	// now, call the child target routines to generate code
 	// as well as memory assignment
-	targetPtr->setGalaxy(*subGal);
 	return targetPtr->generateCode();
 }
 	
@@ -354,6 +351,7 @@ void UniProcessor :: convertSchedule() {
 		DataFlowStar* s = n->getCopyStar();
 		sched.append(*s);
 	}
+	targetPtr->scheduler()->setGalaxy(*subGal);
 	targetPtr->copySchedule(sched);
 }
 
@@ -367,9 +365,15 @@ void UniProcessor :: simRunSchedule() {
 		DataFlowStar* copyS = n->getCopyStar();
 
 		DFStarPortIter piter(*copyS);
-		DFPortHole* p;
-		while ((p = piter++) != 0) {
-			if (p->isItInput())
+		CGPortHole* p;
+		while ((p = (CGPortHole*) piter++) != 0) {
+			if (p->atBoundary()) continue;
+			// in case of embedding
+			if (p->embedded() || p->embedding()) continue;
+			CGPortHole* pFar = (CGPortHole*) p->far();
+			if (pFar->embedded() || pFar->embedding())
+				p->incCount(p->numXfer());
+			else if (p->isItInput())
 				p->decCount(p->numXfer());
 			else
 				p->incCount(p->numXfer());
