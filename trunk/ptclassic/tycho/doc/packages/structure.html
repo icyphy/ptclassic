@@ -1,0 +1,173 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>Package structure</title>
+
+<STYLE type="text/css">
+	P.expl {
+	font-size: small
+	}
+	P.file {
+	font-weight: bold;
+	font-size: small
+	}
+</STYLE>
+</head>
+<body bgcolor="#faf0e6">
+<h1>Package structure</a></h1>
+<p>
+
+The standard Tycho package structure is as follows.  The installation
+and configuration scripts assume this structure. A package called 
+<b>pakman</b> is being developed that will make construction of
+a new package with this structure automatic.
+
+<table valign=top cellpadding=4>
+<tr valign=top>
+<td><P class="file">
+<I>package</I>/
+
+<td><P class="file">
+makefile
+<br>
+<I>package</I>.tcl
+<br>
+pkgIndex.tcl
+<br>
+....tcl
+<br>
+....itcl
+
+<td>
+<td>
+ <P class="expl">Makefile, package index and load files, and Tcl and
+[incr Tcl] source files
+
+<tr valign=top>
+<td>
+<td><P class="file">
+bin/
+<td><P class="file">
+makefile
+<br>
+....
+
+<td>
+ <P class="expl">Shell scripts that start <B>tclsh</B>, <B>itclsh</B>,
+<B>wish</B>, or <B>itkwish</B>, load the package, and
+do something useful.
+
+<tr valign=top>
+<td>
+<td><P class="file">
+demo/
+
+<td><P class="file">
+makefile
+<br>
+all
+<br>
+....
+
+<td>
+
+ <P class="expl">Demo directory, consisting of a collection of scripts
+that each run a demo of the package.  <b>all</B> is a script that runs
+all demos.
+
+<tr valign=top>
+<td>
+<td><P class="file">
+dist/
+
+<td><P class="file">
+<I>package</I>.tar.gz
+<br>
+<I>package</I>.zip
+<br>
+<I>package</I>/
+<br>
+....
+
+<td>
+
+ <P class="expl">The distribution directory. The contents of this
+directory are automatically generated.
+
+<tr valign=top>
+<td>
+<td><P class="file">
+doc/
+<td><P class="file">
+makefile
+<br>
+index.html
+<br>
+....html
+
+<td>
+ <P class="expl">Package documentation. Documentation can be
+split into sub-directories.
+
+<tr>
+<td>
+<td>
+<td><P class="file">
+codeDoc/
+<td>
+ <P class="expl">Automatically-generated documentation.
+
+<tr>
+<td>
+<td>
+<td><P class="file">
+img/
+<td>
+ <P class="expl">Image files used in the documentation
+
+<tr valign=top>
+<td>
+<td><P class="file">
+img/
+<td><P class="file">
+....gif
+
+<td>
+ <P class="expl">Image files used by the package.
+
+<tr valign=top>
+<td>
+<td><P class="file">
+src/
+<td><P class="file">
+makefile
+<br>
+...
+
+<td>
+ <P class="expl">Source files used for building binary extensions.
+The structure of this directory hasn't been decided.
+
+<tr valign=top>
+<td>
+<td><P class="file">
+test/
+<td><P class="file">
+makefile
+<br>
+....tcl
+
+<td>
+ <P class="expl">Test scripts.
+
+</table>
+
+ <P>
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>

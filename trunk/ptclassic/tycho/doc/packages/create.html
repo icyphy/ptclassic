@@ -1,0 +1,127 @@
+<!-- $Id$ -->
+<html>
+<head>
+<title>How to create a new package</title>
+</head>
+<body bgcolor="#faf0e6">
+<h1>How to create a new package</a></h1>
+<p>
+
+The simplest way to create a new package is to use the
+<b>pakman</b> utility (currently under development).
+By default, <b>pakman</b> creates a very small package
+structure -- to make it create a package in the Tycho
+format, give it the <b>-style tycho</b> option.
+
+<p>To learn more about how to use <b>pakman</b>, go
+read his documentation. If you want to know more about
+why packages are created the way they or how to roll your own, read on!
+
+<h2>What a package contains</h2>
+
+Each package contains a file called <b>pkgIndex.tcl</b>
+that looks like this:
+
+<pre>
+  package ifneeded tycho.<i>package</i> 2.0 \
+      [list source [file join $dir <i>package</i>.tcl]]
+</pre>
+
+where <i>package</i> means the name of the package. What this
+says is that when a startup script or another package
+says something like:
+
+<pre>
+  package require tycho.<i>package</i>
+</pre>
+
+then the package load script named <b><i>package</i>.tcl</b> will be
+sourced.  When a package is required, the package load script is
+responsible for doing everything that is needed so that it can
+operate. Here is the minimum necessary in the package load file:
+
+<pre>
+  package provide <i>package</i> 2.0
+  global env
+  set env(<i>PACKAGE</i>_LIBRARY) [file dirname [info script]]
+  lappend auto_path $env(<i>PACKAGE</i>_LIBRARY)
+</pre>
+
+What this does is:
+<ol>
+<li>Tell Tcl which package it has just loaded
+<li>Make <b>env</b> global in case this script is sourced
+from a procedure.
+<li>Set an environment variable that points to the source directory
+of the package. This is a Tcl convention.
+<li>Append the package directory to the <b>auto_path</b> variable
+so that Tcl can load files automatically. (For this to work,
+the directory must contain a valid <b>tclIndex</b> file.)
+</ol>
+
+<p>
+The package load file can perform other actions.  Typical actions
+include: creating a namespace for its procedures; performing a
+<b>package require</b> for any packages that it depends upon; sourcing
+Tcl or [incr Tcl] files then and there, to avoid the overhead of
+auto-loading. Some people write Tcl packages in which the
+package load file contains their actual Tcl source code.
+We strongly recommend that this not be done: place Tcl and [incr 
+Tcl] source in separate files, not in the package load file.
+
+<h2>Making a meta-package</h2>
+
+"Meta-package" is our corny term for a directory that
+does nothing but contain a collection of real packages.
+In the standard Tycho installation, the directories
+<b>kernel</b>, <b>editors</b>, and <b>utils</b> are meta-packages.
+In fact, Tycho itself is a meta-package.
+
+<p>The purpose of a meta-package is simply to provide a way
+to group packages in order to manage growth. In Tycho, because
+we have quite a number of packages and developers that come
+and go developing their own packages, this is important.
+In your own development, you may not need meta-packages.
+
+<p>
+The only trick about meta-packages is that Tcl has to be told
+about the packages contained inside it. Provided that Tcl can find
+the meta-package (its directory or parent directory is in the
+<b>auto_path</b> -- see <a href="install.html">Installing packages</a>),
+the first <b>package require</b> will cause Tcl to source the
+meta-package's <b>pkgIndex.tcl</b>. In order to tell Tcl about
+the packages contained therein, just make the file contain this:
+
+<pre>
+catch {
+    foreach file [glob -nocomplain [file join $dir * pkgIndex.tcl]] {
+	set dir [file dirname $file]
+	if [catch {source $file} msg] {
+	    tclLog "error reading package index file $file: $msg"
+	}
+    }
+}
+</pre>
+
+Bingo! Your packages will be found and the one given as the argument
+to the <b>package require</b> will be loaded.  (By the way, this is
+also the reason we recommend that stand-alone command-line-driven
+packages not be in the Tycho meta-package: doing all that globbing and
+sourcing does increase start-up time.)
+
+<p>
+
+<HR>
+Copyright &#169 1998, The Regents of the University of California.
+All rights reserved.
+<br>
+Last updated: $Date$,
+comments to: <author>johnr@eecs.berkeley.edu</author>
+</body>
+</html>
+
+
+
+
+
+
