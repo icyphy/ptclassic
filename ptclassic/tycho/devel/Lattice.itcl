@@ -1,0 +1,294 @@
+##########################################################################
+# Version: $Id$
+# Author: John Reekie
+#
+# Copyright (c) 1997 The Regents of the University of California.
+# All rights reserved.
+# 
+# Permission is hereby granted, without written agreement and without
+# license or royalty fees, to use, copy, modify, and distribute this
+# software and its documentation for any purpose, provided that the above
+# copyright notice and the following two paragraphs appear in all copies
+# of this software.
+# 
+# IN NO EVENT SHALL THE UNIVERSITY OF CALIFORNIA BE LIABLE TO ANY PARTY
+# FOR DIRECT, INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL DAMAGES
+# ARISING OUT OF THE USE OF THIS SOFTWARE AND ITS DOCUMENTATION, EVEN IF
+# THE UNIVERSITY OF CALIFORNIA HAS BEEN ADVISED OF THE POSSIBILITY OF
+# SUCH DAMAGE.
+# 
+# THE UNIVERSITY OF CALIFORNIA SPECIFICALLY DISCLAIMS ANY WARRANTIES,
+# INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES OF
+# MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE. THE SOFTWARE
+# PROVIDED HEREUNDER IS ON AN "AS IS" BASIS, AND THE UNIVERSITY OF
+# CALIFORNIA HAS NO OBLIGATION TO PROVIDE MAINTENANCE, SUPPORT, UPDATES,
+# ENHANCEMENTS, OR MODIFICATIONS.
+#                                                         COPYRIGHTENDKEY
+##########################################################################
+
+
+##########################################################################
+#### Lattice
+#
+# The Lattice model is a model for arbitrary multi-dimensional lattices
+# (latti?). It is intended to support applications such as
+# Praveen Murthy's Generalized Multi-dimensional SDF (GMSSDF) and
+# Thomson-CSFs Array-oriented Language (AOL). There is a corresponding
+# view class for this model called EditLattice.
+#
+# The key attributes of this model are its dimensionality (default
+# two) and its lattice-genrating matrix. The format
+# of this matrix is a flat list, with the dimensionality
+# determining the boundaries in the matrix. For example, the
+# default lattice generator, which creates a simple two-dimensional
+# square grid, has the value *{1 1 1 1}*.
+#
+class ::tycho::Lattice {
+    inherit ::tycho::Model
+
+    constructor {args} {}
+    destructor {}
+    
+    #################################################################
+    ####                        options                          ####
+
+    # The dimensionality of this grid
+    public variable dimensionality 2
+
+    # The lattice generating matrix of this grid
+    public variable lattice {1 1 1 1}
+
+    #################################################################
+    ####                     public methods                      ####
+
+    # Get the raw display coordinates of a projection
+    public method getCoordinates {proj}
+
+    # Get the viewed lattice extent of a projection
+    public method getExtent {proj}
+
+    # Get the lattice of a projection
+    public method getLattice {proj}
+
+    # Get the coordinates of the lattice points
+    public method getLatticeCoords {proj}
+
+    # Read the pixel display dimensions of a projection
+    public method getPixels {proj}
+
+    # Make a projection in one, two, or three dimensions
+    public method projection {name dimensions}
+
+    # Delete a projection
+    public method projectiondelete {}
+
+    # Set the viewed lattice extent of a projection
+    public method setExtent {proj xlen {ylen {}} {zlen {}}}
+
+    # Set the pixel display dimensions of a projection
+    public method setPixels {proj xpix {ypix {}} {zpix {}}}
+
+    #################################################################
+    ####                  protected methods                      ####
+   
+    #################################################################
+    ####                 protected variables                     ####
+    
+    # The dimensions of each projection
+    protected variable pdimensions
+
+    # The pixel display size of each projection
+    protected variable ppixels
+
+    # The lattice extent of each projection
+    protected variable pextent
+
+    # The raw coordinates of each projection
+    protected variable pcoordinates
+
+    #################################################################
+    ####                   private methods                       ####
+
+    # Evaluate code in this object's context
+    private method evalInSpecificContext {args} {eval $args}
+}
+
+########################################################################
+#### constructor
+#
+body ::tycho::Layout::constructor {args} {	
+    # This model is not hierarchical
+    configure -separator ""
+
+    # Evaluate options
+    eval configure $args
+
+    # The projection entity has a value (its dimensionality) and some
+    # default attributes
+    defineEntityType projection \
+	    -valued 1 \
+	    -pixels {256 256} \
+	    -extent {2 2}
+}
+
+########################################################################
+#### getDisplay
+#
+# Get the pixel display dimensions of a projection.
+#
+body ::tycho::Lattice::getDisplay {proj} {
+    _verify projection $proj
+    _cget projection $proj -pixels
+}
+
+########################################################################
+#### getExtent
+#
+# Get the extent of a projection.
+#
+body ::tycho::Lattice::getExtent {proj} {
+    _verify projection $proj
+    _cget projection $proj -extent
+}
+
+########################################################################
+#### getLattice
+#
+# Get the lattice of a projection.
+#
+body ::tycho::Lattice::getLattice {proj} {
+    _verify projection $proj
+
+    ...
+}
+
+########################################################################
+#### projection
+#
+# Add a new projection to the model and return the inverse command. Its
+# value is a list of the dimensions on which it projects. Optional
+# arguments are attributes of the projection, which can be any of:
+# <ul>
+# <li><b>-pixels</b>: The size of the display in pixels. This
+# is a list which must have the same length as the projection's
+# dimensionality. The default is a 256-pixel display in the
+# right number of dimensions.
+#
+# <li><b>-extent</b>: The extent of the grid in this projection.
+# This is the amount of the grid that can be viewed, based on
+# the underlying dimension implied by the lattice-generating
+# matrix. The default is two unit grid elements in the appropriate
+# number of dimensions.
+# </ul>
+#
+# The dimensionality of a projection must be one, two, or three. It
+# must also be no greater than the dimensionality of this lattice;
+# an error is flagged if it is not.
+#
+body ::tycho::Lattice::projection {name dimensions args} {
+    _verifynot projection $name
+
+    # Check dimensionality
+    set ndim [llength $dimensions]
+    if { $ndim < 0 || $ndim > 3 } {
+	error "Projection dimensionality ($ndim) must be no greater than three"
+    }
+    foreach d $dimensions {
+	if { $d >= $dimensionality } {
+	    error "Dimension $d is too high"
+	}
+    }
+
+    # Make sure that the attributes are correct
+    switch $ndim {
+	1 {
+	    set temp(-pixels) 256
+	    set temp(-extent) 2
+	}
+	3 {
+	    set temp(-pixels) {256 256 256}
+	    set temp(-extent) {2 2 2}
+	}
+    }
+    array set temp $args
+
+    # Create the projection and remember the inverse command
+    set inverse [_entity projection {} $name \
+	    [concat [list $dimensions] [array get temp]]]
+}
+
+########################################################################
+#### projectiondelete
+#
+# Delete a projection.
+#
+body ::tycho::Lattice::projectiondelete {name} {
+    _verify projection $name
+    _delete projection $name
+}
+
+########################################################################
+#### setPixels
+#
+# Set the pixel display dimensions of a projection. An error
+# is flagged if the number of arguments does not match the
+# dimensionality of the projection.
+#
+body ::tycho::Lattice::setPixels {proj xpix {ypix {}} {zpix {}}} {
+    switch [llength [_get projection $proj]] {
+	1 {
+	    if { $xpix == "" || $ypix != "" } {
+		error "Dimensions \"$xpix $ypix $zpix\" do not match\
+			dimensionality 1"
+	    }
+	    _configure project $proj -pixels $xpix
+	}
+	2 {
+	    if { $xpix == "" || $ypix == "" || $zpix != "" } {
+		error "Dimensions \"$xpix $ypix $zpix\" do not match\
+			dimensionality 2"
+	    }
+	    _configure projection $proj -pixels [list $xpix $ypix]
+	}
+	3 {
+	    if { $xpix == "" || $ypix == "" || $zpix == "" } {
+		error "Dimensions \"$xpix $ypix $zpix\" do not match\
+			dimensionality 3"
+	    }
+	    _configure projection $proj -pixels [list $xpix $ypix $zpix]
+	}
+    }
+}
+
+########################################################################
+#### setExtent
+#
+# Set the extent of a projection. An error
+# is flagged if the number of arguments does not match the
+# dimensionality of the projection.
+#
+body ::tycho::Lattice::setExtent {proj xext {yext {}} {zext {}}} {
+    switch [llength [_get projection $proj]] {
+	1 {
+	    if { $xext == "" || $yext != "" } {
+		error "Extent \"$xext $yext $zext\" does not match\
+			dimensionality 1"
+	    }
+	    _configure project $proj -extent $xext
+	}
+	2 {
+	    if { $xext == "" || $yext == "" || $zext != "" } {
+		error "Extent \"$xext $yext $zext\" does not match\
+			dimensionality 2"
+	    }
+	    _configure projection $proj -extent [list $xext $yext]
+	}
+	3 {
+	    if { $xext == "" || $yext == "" || $zext == "" } {
+		error "Extent \"$xext $yext $zext\" does not match\
+			dimensionality 3"
+	    }
+	    _configure projection $proj -extent [list $xext $yext $zext]
+	}
+    }
+}
