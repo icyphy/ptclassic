@@ -28,6 +28,9 @@ $Id$
 */
 #ifdef __cplusplus
 #ifndef OCT_H
+/* Do the right thing for sol2 boolean defs.  oct.h must be included
+ * first so sys/types.h is included correctly.  See octtools/include/port.h
+ */
 #include "oct.h"
 #endif
 
@@ -45,6 +48,7 @@ extern boolean ViKillBuf(octObject *facetPtr);
 extern boolean ViGetErrWindows();
 extern void ViSetErrWindows(boolean state);
 #else
+
 extern void PrintCon();
 extern void PrintConLog();
 extern void PrintErr();
