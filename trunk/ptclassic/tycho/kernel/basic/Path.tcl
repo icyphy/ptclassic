@@ -669,8 +669,8 @@ proc ::tycho::rmIfNotWritable { file } {
 # <CODE>/users/ptolemy/tycho</CODE>, and this directory is actually
 # automounted at <CODE>/export/watson/watson2/ptolemy/tycho</CODE>, and
 # we pass simplifyPath the pathname
-# <CODE>/export/watson/watson2/ptolemy/tycho/README</CODE>, then we
-# should get back <CODE>$TYCHO/README</CODE>.
+# <CODE>/export/watson/watson2/ptolemy/tycho/README.txt</CODE>, then we
+# should get back <CODE>$TYCHO/README.txt</CODE>.
 #
 # If we cannot simplify the pathname, then we return the original pathname.
 #
@@ -682,10 +682,10 @@ proc ::tycho::rmIfNotWritable { file } {
 # we return the shortest string that results from subsituting environment
 # variables.
 #
-# The following example expands and then simplifies $TYCHO/README.files:
+# The following example expands and then simplifies $TYCHO/README.txt:
 # <tcl><pre>
 # ::tycho::simplifyPath [::tycho::expandPath &#92
-#    [file join &#92$TYCHO README.files]] &#92
+#    [file join &#92$TYCHO README.txt]] &#92
 #    [list TYCHO]]
 # </pre></tcl>
 # 
