@@ -49,6 +49,9 @@ static char SccsId[]="$Id$";
 #include "commands.h"
 #include "tap.h"
 #include "rpcServer.h"
+#include "serverNet.h"
+
+#include "vemRPC.h"
 
 #define MAXNAMELEN	255
 
@@ -109,7 +112,7 @@ STR keyStrs[];		        /* key bindings              */
  */
 {
     bdTable newTable;
-    int index, selectNum;
+    int index, selectNum = 0;
     char uidName[MAXNAMELEN], remoteName[MAXNAMELEN];
     char lastPane[MAXNAMELEN];
 
@@ -631,15 +634,15 @@ vemStatus rpcSignalCmd(spot, cmdList)
     } else {
 
 	if (app->user == NIL(char)) {
-	    (void) sprintf(remoteUser, "");
+	    remoteUser[0]='\0';
 	} else {
 	    (void) sprintf(remoteUser, "-l %s", app->user);
 	}
 
     
-	sprintf( command, "rsh %s %s kill -%d %d &",
+	sprintf( command, "rsh %s %s kill -%d %ld &",
 		app->host, remoteUser,
-		signal_number, app->pid );
+		signal_number, (long)app->pid );
     
 #if defined(hpux) || defined(SYSV)
 	sprintf(buf, "Signal %d to RPC app. (via rsh)...\n", signal_number);
@@ -718,7 +721,7 @@ octObject *fct;
 static char *_vem_dsp_name = (char *) 0;
 static int _vem_chrom = TAP_BW;
 
-vemInitDisplayType(name, chromatism)
+void vemInitDisplayType(name, chromatism)
 char *name;
 int chromatism;
 /*
@@ -776,7 +779,7 @@ rpcVerString()
 {
     static char dummy[1024];
 
-    (void) sprintf(dummy, "%d", RPC_VERSION);
+    (void) sprintf(dummy, "%ld", RPC_VERSION);
 
     return(dummy);
 }
