@@ -127,7 +127,6 @@ body ::tycho::PtDomainPanel::constructor {args} {
 # Get the current director
 #
 body ::tycho::PtDomainPanel::getDirector {} {
-    # puts !![$itk_component(main) get main.director]
     return [$itk_component(main) get main.director]
 }
 
@@ -137,7 +136,6 @@ body ::tycho::PtDomainPanel::getDirector {} {
 # Get the current domain
 #
 body ::tycho::PtDomainPanel::getDomain {} {
-    # puts !![$itk_component(main) get main.domain]
     return [$itk_component(main) get main.domain]
 }
 

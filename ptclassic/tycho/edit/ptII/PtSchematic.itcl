@@ -53,7 +53,7 @@ class ::tycho::PtSchematic {
 	    domainPanel vertexcontroller edgecontroller}
 
     # Contruct a composite actor for execution only
-    method constructComposite {simulation name composite}
+    method constructComposite {simulation name}
 
     # Get the text of the schematic
     method getText {}
@@ -159,13 +159,16 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
     set iterator [$director getAttributes]
     while { [$iterator hasMoreElements] } {
         set attr [$iterator nextElement]
-	set class [[[$attr getToken] getClass] getName]
-	set type [lindex [split $class "."] end]
-	set p [java::new ptolemy.schematic.SchematicParameter \
-		[join [$attr getName] ""] \
-		$type \
-		[[$attr getToken] stringValue]]
-	$_schematic addParameter $p
+        # FIXME FIXME FIXME
+        catch {
+            set class [[[$attr getToken] getClass] getName]
+            set type [lindex [split $class "."] end]
+            set p [java::new ptolemy.schematic.SchematicParameter \
+                    [join [$attr getName] ""] \
+                    $type \
+                    [[$attr getToken] stringValue]]
+            $_schematic addParameter $p
+        }
     }
 
     # The actors
@@ -186,13 +189,16 @@ body ::tycho::PtSchematic::load {simulation graph layout name} {
 	set iterator [$actor getAttributes]
 	while { [$iterator hasMoreElements] } {
 	    set attr [$iterator nextElement]
-	    set class [[[$attr getToken] getClass] getName]
-	    set type [lindex [split $class "."] end]
-	    set p [java::new ptolemy.schematic.SchematicParameter \
-		    [join [$attr getName] ""] \
-		    $type \
-		    [[$attr getToken] stringValue]]
-	    $xmlelt addParameter $p
+            # FIXME FIXME FIXME
+            catch {
+                set class [[[$attr getToken] getClass] getName]
+                set type [lindex [split $class "."] end]
+                set p [java::new ptolemy.schematic.SchematicParameter \
+                        [join [$attr getName] ""] \
+                        $type \
+                        [[$attr getToken] stringValue]]
+                $xmlelt addParameter $p
+            }
 	}
 	# Add it
 	$_schematic addEntity $xmlelt
@@ -336,7 +342,8 @@ body ::tycho::PtSchematic::parseURL {url} {
 #
 body ::tycho::PtSchematic::construct {simulation graph layout name \
 	domainPanel vertexcontroller edgecontroller} {
-    # puts "PtSimulation::construct $simulation $graph $layout $name"
+    puts "PtSimulation::construct $simulation $graph $layout $name"
+    puts "[$_schematic toString]"
 
     # Configure for top-level
     set isToplevel [$_schematic getChildElement parameter isToplevel]
@@ -373,10 +380,32 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 	set iconname [lindex [split $icon "."] 1]
 	set name [$xmlelt getAttribute "name"]
 	set coords [$xmlelt getAttribute "coords"]
+        set etype [$xmlelt getChildElement "entitytype"]
+	set type [$etype getAttribute "type"]
 
 	# Create the actor
 	$vertexcontroller add $iconlib $iconname $name $coords
-    } 
+
+	# Update its parameters
+	if { $type == "actor" } {
+	    set actor [$simulation getActor $name]
+	    set pit [$xmlelt childElements "parameter"]
+	    while { [$pit hasMoreElements] } {
+		set param [$pit nextElement]
+		set name [$param getAttribute name]
+		set value [$param getAttribute value]
+		set type [$param getAttribute type]
+                set aaa [$actor getAttribute $name]
+                if { $aaa != [java::null] } {
+                    if { $type == "StringToken" } {
+                        $aaa setExpression \"$value\"  ;#"
+                    } else {
+                        $aaa setExpression $value
+                    }
+		}
+	    }            
+	}
+    }
 
     # Create the relations
     set iterator [$_schematic relationNames]
@@ -400,7 +429,12 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 
 	    set a [lindex [split $port "."] 0]
 	    set p [lindex [split $port "."] 1]
-	    $simulation link $name $a $p
+	    #if { [regexp {(.*)-([0-9]*)} $p _ stem index] } {
+	#	puts "Linking $name $a $stem"
+	#	$simulation link $name $a $stem
+	#    } else {
+		$simulation link $name $a $p
+	#    }
 	}
 
 	# Process layout
@@ -475,6 +509,10 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 	    }
 	}
     }
+    # Desperation move
+    ###foreach a [$simulation actors] {
+    ###    puts [[$simulation getActor $a] description]
+    ###}
 }
 
 
@@ -483,8 +521,9 @@ body ::tycho::PtSchematic::construct {simulation graph layout name \
 #
 # Construct a new simulation for execution only
 #
-body ::tycho::PtSchematic::constructComposite {simulation name composite} {
+body ::tycho::PtSchematic::constructComposite {simulation name} {
     puts "PtSimulation::constructComposite $simulation $name"
+    update
 
     # Configure for top-level
     set isToplevel [$_schematic getChildElement parameter isToplevel]
@@ -512,6 +551,17 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 	}
     }
 
+    # Add the ports we already have first
+    ###puts [[$simulation getToplevelActor] description]
+    ###update
+    set iterator [[$simulation getToplevelActor] getPorts]
+    while { [$iterator hasMoreElements] } {
+	set p [$iterator nextElement]
+	set n [$p getName]
+	puts "ALREADY HAVE PORT $n ([$p toString])"
+	$simulation includePort $n $p
+    }
+
     # Create the entities
     set iterator [$_schematic entityNames]
     while { [$iterator hasMoreElements] } {
@@ -526,17 +576,39 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 	set type [$xmlelt getChildElement entitytype]
 	set realname [$type getAttribute "name"]
 	set etype [$type getAttribute "type"]
-	set uniqueName [::tycho::autoName $realname]
+	#set uniqueName [::tycho::autoName $realname]
+        set uniqueName [$xmlelt getAttribute "name"]
 
 	switch -exact $etype {
 	    "actor" {
 		$simulation addActor $realname $uniqueName
                 puts [[$simulation getActor $uniqueName] toString]
-	    }
+
+                # Update its parameters
+		set p_actor [$simulation getActor $uniqueName]
+		set pit [$xmlelt childElements "parameter"]
+		while { [$pit hasMoreElements] } {
+		    set param [$pit nextElement]
+		    set name [$param getAttribute name]
+		    set value [$param getAttribute value]
+		    set type [$param getAttribute type]
+
+                    set aaa [$p_actor getAttribute $name]
+		    if { $aaa != [java::null] } {
+			if { $type == "StringToken" } {
+			    $aaa setExpression \"$value\"  ;#"
+			} else {
+			    $aaa setExpression $value
+			}
+                    }
+		}
+            }
 	    "port" {
                 if ![$simulation hasPort $uniqueName] {
+		    puts "Creating ports $uniqueName"
                     $simulation addPort $realname $uniqueName
                 }
+		puts [[$simulation getPort $uniqueName] toString]
 	    }
 	    "composite" {
 		$simulation addCompositeActor $realname $uniqueName
@@ -551,11 +623,14 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 			    [$p getAttribute name]]
 		    
 		    if { [$p getAttribute input] == "false" } {
+			puts "Set port [$p getAttribute name] to output"
 			$port setOutput 1
+		    } else {
+			puts "Set port [$p getAttribute name] to input"
+			$port setInput 1
 		    }
 		}
             }
-            puts [[$simulation getActor $uniqueName] toString]
         }
    }
 
@@ -570,6 +645,7 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 	set name [$xmlelt getAttribute name]
 	
 	# Create the relation
+	puts "$simulation addRelation $name"
 	$simulation addRelation $name
 
 	# The links
@@ -582,6 +658,7 @@ body ::tycho::PtSchematic::constructComposite {simulation name composite} {
 
 	    set a [lindex [split $port "."] 0]
 	    set p [lindex [split $port "."] 1]
+	    puts "$simulation link $name $a $p"
 	    $simulation link $name $a $p
 	}
     }

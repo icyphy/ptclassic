@@ -119,12 +119,6 @@ body ::tycho::PtDomainLibrary::constructor {args} {
     set ptmlParser [java::new ptolemy.schematic.PTMLParser]
     set _domainLibrary [uplevel #0 "$ptmlParser parse $domainLibURL"]
     
-    global tcl_platform
-    if $tcl_platform(javaCastNeeded) {
-        set _domainLibrary [java::cast ptolemy.schematic.DomainLibrary \
-                $_domainLibrary]
-    }
-
     # Set as unique instance
     java::call ptolemy.schematic.DomainLibrary setInstance $_domainLibrary
 }

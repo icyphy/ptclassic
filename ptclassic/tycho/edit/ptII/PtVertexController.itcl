@@ -151,7 +151,7 @@ body ::tycho::PtVertexController::constructor {args} {
 #
 body ::tycho::PtVertexController::add {libname iconname \
 	{uniqueName {}} {coords {}}} {
-    # puts "PtVertexController::add $libname $iconname"
+    puts "PtVertexController::add $libname $iconname"
     set iconlib [::tycho::PtIconLibrary::getLibrary $libname]
 
     set icon [$iconlib getIcon $iconname]
@@ -167,7 +167,12 @@ body ::tycho::PtVertexController::add {libname iconname \
     }
     switch -exact $etype {
 	"actor" {
-	    $simulation addActor $realname $uniqueName
+	    set actor [$simulation addActor $realname $uniqueName]
+	    if { $actor == "" } {
+		::tycho::inform "Unable to create actor $realname \
+                        in domain [$simulation getDomain]."
+		return
+	    }
 	}
 	"port" {
 	    $simulation addPort $realname $uniqueName
@@ -175,18 +180,24 @@ body ::tycho::PtVertexController::add {libname iconname \
 	"composite" {
 	    $simulation addCompositeActor $realname $uniqueName
             set actor [$simulation getActor $uniqueName]
+	    puts "Create actor $uniqueName ([$actor toString])"
 
             # Create ports
+            puts [$icon toString]
 	    set iterator [$icon ports]
 	    while { [$iterator hasMoreElements] } {
 		set p [$iterator nextElement]
 		set port [java::new ptolemy.actor.TypedIOPort \
 			$actor \
 			[$p getAttribute name]]
-		# puts "Created port [$port toString]"
+		# puts "Created port $p ([$port toString])"
 
 		if { [$p getAttribute input] == "false" } {
+		    puts "Set [$p getAttribute name] to output"
 		    $port setOutput 1
+		} else {
+		    puts "Set [$p getAttribute name] to input"
+		    $port setInput 1
 		}
 	    }
 	}
@@ -199,10 +210,20 @@ body ::tycho::PtVertexController::add {libname iconname \
 	    -class $realname \
 	    -icon $libname.$iconname
 
-    if { $etype == "composite" } {
-	$graph attrset $uniqueName \
-		-composite 1 \
-		-url [$type getAttribute location]
+    switch -exact $etype {
+	"actor" {
+	    $graph attrset $uniqueName \
+		    -type actor
+	}
+	"port" {
+	    $graph attrset $uniqueName \
+		    -type port
+	}
+	"composite" {
+	    $graph attrset $uniqueName \
+		    -type composite \
+		    -url [$type getAttribute location]
+	}
     }
 
     # Place the icon

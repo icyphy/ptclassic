@@ -93,6 +93,9 @@ class ::tycho::PtSimulation {
     # Add a new port to the graph
     method addPort {name uniqueName}
 
+    # Add a reference to an existing port
+    method includePort {uniqueName port}
+
     # Add a new relation to the graph
     method addRelation {name}
 
@@ -202,9 +205,7 @@ class ::tycho::PtSimulation {
     }
 
     # Set the toplevel actor
-    method setToplevelActor {actor} {
-	set _toplevelActor $actor
-    }
+    method setToplevelActor {actor}
 
     # Start the simulation
     method start {}
@@ -297,15 +298,15 @@ class ::tycho::PtSimulation {
 configbody ::tycho::PtSimulation::isToplevel {
     if { $_toplevelActor != "" } {
 	if $isToplevel {
-	    if { $_manager == "" } {
-		set _manager [java::new ptolemy.actor.Manager]
-		$_toplevelActor setManager $_manager
-		debug "Manager: $_manager"
-	    }
+	    #if { $_manager == "" } {
+	#	set _manager [java::new ptolemy.actor.Manager]
+	#	$_toplevelActor setManager $_manager
+	#	puts "Manager: $_manager (isToplevel)"
+	#    }
 	} else {
 	    set _manager ""
 	    $_toplevelActor setManager [java::null]
-	    debug "Manager: null"
+	    puts "Manager: null"
 	}
     }
 }
@@ -322,7 +323,11 @@ body ::tycho::PtSimulation::constructor {args} {
     # puts "Ptolemy II version $ptversion"
 
     # Create the toplevel actor and manager
-    clear
+    #clear
+    set _toplevelActor [java::new ptolemy.actor.TypedCompositeActor]
+    $_toplevelActor setName [::tycho::autoName System]
+    puts "Toplevel actor: $_toplevelActor"
+    
 
      ### FIXME
     ###set _domain SDF
@@ -335,16 +340,20 @@ body ::tycho::PtSimulation::constructor {args} {
 ########################################################################
 #### addActor
 #
-# Add a new actor to the graph
+# Add a new actor to the graph. Return it if one is created,
+# else null.
 #
 body ::tycho::PtSimulation::addActor {name uniqueName} {
+    puts "Add actor: $name $uniqueName"
     # Get the actor
     set actor [$domainLibrary createActor $_domain $_toplevelActor \
 	    $name $uniqueName]
+    puts "Actor: $actor ([$actor toString])"
     if { $actor != "" } {
-	#puts "actor: $actor ([$actor toString])"
 	set _actors($uniqueName) $actor
+	return $actor
     }
+    return ""
 }
 
 ########################################################################
@@ -359,7 +368,7 @@ body ::tycho::PtSimulation::addCompositeActor {name uniqueName} {
 	    $uniqueName]
 
     # Remember it
-   puts "composite actor: $actor ([$actor toString])"
+    puts "Composite actor: $actor ([$actor toString])"
     set _actors($uniqueName) $actor
 }
 
@@ -387,17 +396,27 @@ body ::tycho::PtSimulation::addJunction {relation junctionname} {
 # Add a new port to the graph
 #
 body ::tycho::PtSimulation::addPort {name uniqueName} {
-    puts "addPort $name $uniqueName"
-
     # Get the port
     set port [java::new ptolemy.actor.TypedIOPort $_toplevelActor $uniqueName]
 
     # Mess around...
     if { $name == "Out" } {
+	puts "Set $uniqueName to output"
 	$port setOutput 1
-    }
-    
-    puts "port: $port ([$port toString])"
+    } else {
+	puts "Set $uniqueName to input"
+	$port setInput 1
+    }	
+    #puts "port: $port ([$port toString])"
+    set _ports($uniqueName) $port
+}
+
+########################################################################
+#### includePort
+#
+# Just add a reference to a port
+#
+body ::tycho::PtSimulation::includePort {uniqueName port} {
     set _ports($uniqueName) $port
 }
 
@@ -412,7 +431,7 @@ body ::tycho::PtSimulation::addRelation {name} {
 	    $_toplevelActor \
 	    $name]
 
-    puts "$relation: [$relation toString]"
+    puts "relation: $relation [$relation toString]"
     set _relations($name) $relation
     set _edges($name) {}
     set _links($name) {}
@@ -427,7 +446,9 @@ body ::tycho::PtSimulation::addRelation {name} {
 body ::tycho::PtSimulation::clear {} {
     catch {unset _actors}
     catch {unset _relations}
-    
+    catch {unset _links}
+    catch {unset _junctions}
+
     set _director ""
     set _javaDirector ""
     set _directorName ""
@@ -439,13 +460,13 @@ body ::tycho::PtSimulation::clear {} {
     }
     set _toplevelActor [java::new ptolemy.actor.TypedCompositeActor]
     $_toplevelActor setName $name
-    debug "Toplevel actor: $_toplevelActor"
+    # puts "Toplevel actor: $_toplevelActor"
     
-    set _manager [java::new ptolemy.actor.Manager]
-    $_toplevelActor setManager $_manager
-    debug "Manager: $_manager"
+    #set _manager [java::new ptolemy.actor.Manager]
+    #$_toplevelActor setManager $_manager
+    # puts "Manager: $_manager"
     
-    $_toplevelActor setManager $_manager
+    #$_toplevelActor setManager $_manager
 }
 
 ########################################################################
@@ -454,15 +475,12 @@ body ::tycho::PtSimulation::clear {} {
 # Connect one port to another
 #
 body ::tycho::PtSimulation::connect {edgename source out target in} {
-    puts "connect $edgename $source $out $target $in"
+    # puts "connect $edgename $source $out $target $in"
 
     set outPort [$_actors($source) getPort $out]
     set inPort [$_actors($target) getPort $in]
-    puts "[$outPort getFullName] ($outPort) -> [$inPort getFullName] ($inPort)"
-
     set _relations($edgename) \
             [$_toplevelActor connect $outPort $inPort $edgename]
-    puts "Got relation $_relations($edgename)"
 }
 
 ########################################################################
@@ -494,8 +512,7 @@ body ::tycho::PtSimulation::instantiateComposites {} {
 		set schematic [::tycho::PtSchematic #auto]
 		$schematic parseURL $schematicURL
 		$schematic constructComposite $subactor \
-			"MyName" \
-                        $_toplevelActor
+			"MyName"
 
 		# We have to remember the URL somewhere
 		$subactor configure -sourceURL $schematicURL
@@ -511,21 +528,30 @@ body ::tycho::PtSimulation::instantiateComposites {} {
 # Link a relation to a port
 #
 body ::tycho::PtSimulation::link {relation actor port} {
-
+    # puts "link $relation $actor $port"
     # If there's an actor, assume the port belongs to it
     if { [info exists _actors($actor)] } {
 	puts "$actor.$port link $relation"
-	set javaPort [$_actors($actor) getPort $port]
+
+	if { [regexp {(.*)-([0-9]*)} $port _ stem index] } {
+	    set javaPort [$_actors($actor) getPort $stem]
+	} else {
+	    set javaPort [$_actors($actor) getPort $port]
+	}
         $javaPort link $_relations($relation)
         lappend _links($relation) [list $actor $port]
+
     } elseif { [info exists _ports($actor)] }  {
         # It appears to be an I/O port
 	puts "$actor link $relation"
         set javaPort $_ports($actor)
         $javaPort link $_relations($relation)
         lappend _links($relation) $actor
+
     } else {
-        puts "Warning: unable to link $relation to $actor.$port"
+	###::tycho::inform "Warning: unable to link $relation to $actor.$port"
+        puts "Actors: [array names _actors]"
+	error "Warning: unable to link $relation to $actor.$port"
     }
 }
 
@@ -598,6 +624,24 @@ body ::tycho::PtSimulation::setDirector {director} {
 }
 
 #######################################################################
+#### setToplevelActor
+#
+# Set the toplevel actor
+#
+body ::tycho::PtSimulation::setToplevelActor {actor} {
+    set _toplevelActor $actor
+    puts "Set toplevel to $actor ([$actor description])"
+    if { $_manager != "" } {
+        puts "Setting manager of $actor to $_manager"
+        $actor setManager $_manager
+    }
+    if { $_director != "" } {
+        puts "Setting director of $actor to $_director"
+        $actor setDirector $_director
+    }
+}
+
+#######################################################################
 #### start
 #
 # Start the simulation.
@@ -605,7 +649,15 @@ body ::tycho::PtSimulation::setDirector {director} {
 body ::tycho::PtSimulation::start {} {
     debug "Start"
     instantiateComposites
+
+    set _manager [java::new ptolemy.actor.Manager]
+    $_toplevelActor setManager $_manager
+    # puts "Manager: $_manager"
+    
+    # FIXME FIXME This uses blocking call because of a threading
+    # bug in the Manager (we think...)
     $_manager startRun
+    #$_manager run
 }
 
 #######################################################################
@@ -624,7 +676,9 @@ body ::tycho::PtSimulation::startServer {} {
 #
 body ::tycho::PtSimulation::stop {} {
     debug "Stop"
-    $_manager finish
+    if { $_manager != "" } {
+        $_manager finish
+    }
 }
 
 

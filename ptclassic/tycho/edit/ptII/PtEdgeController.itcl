@@ -540,8 +540,16 @@ body ::tycho::PtEdgeController::release {args} {
 	# Create the link in the Ptolemy II simulation
 	set rname [$graph attrget $_edgename -relation]
 	set pname [itemname $_target]
+        set a [lindex $pname 0]
+        set p [lindex $pname 1]
         puts ###$pname
-	$simulation link $rname [lindex $pname 0] [lindex $pname 1]
+        #if { [regexp {(.*)-([0-9]*)} $p _ stem index] } {
+        #    puts "$simulation link $rname $a $stem"
+        #    $simulation link $rname $a $stem
+        #} else {
+            puts "$simulation link $rname $a $p"
+            $simulation link $rname $a $p
+        #}
 	#### $simulation addEdge $rname $_edgename
 
 	#set src [$graph attrget $_edgename -from]
