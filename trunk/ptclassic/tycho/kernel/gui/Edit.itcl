@@ -332,7 +332,7 @@ body ::tycho::Edit::getModified {} {
 #
 body ::tycho::Edit::help {} {
     global TYCHO
-    ::tycho::File::openContext $TYCHO/kernel/doc/EditHelp.html
+    ::tycho::File::openContext $TYCHO/kernel/doc/usersGuides/EditHelp.html
 }
 
 ###################################################################
