@@ -53,6 +53,14 @@ HDRS= IntArray.h
 
 SRCS= $(HDRS:.h=.cc)
 
+EXTRA_SRCS = \
+	wf4.h \
+	wf4api.h \
+	wf4errs.h \
+	wf4ulib.h \
+	wfoss.h \
+	wildforce.h
+
 OBJS= $(SRCS:.cc=.o)
 
 
