@@ -139,7 +139,7 @@ int MEMPort::init_pt(int seqlen)
       return(-1);
     }
   else
-    mem_timing=new IntArray(seqlen,UNKNOWN);
+    mem_timing=new ACSIntArray(seqlen,UNKNOWN);
 
   // Return happy condition
   return(1);
@@ -230,19 +230,19 @@ int MEMPort::assign_snkcore(ACSCGFPGACore* fpga_core,int act)
 Pin::Pin()
 {
   pin_count=0;
-  major_bit=new IntArray;
-  vector_length=new IntArray;
-  min_vlength=new IntArray;
-  max_vlength=new IntArray;
-  word_lock=new IntArray;
-  prec_lock=new IntArray;
-  netlist_ids=new IntArray;
+  major_bit=new ACSIntArray;
+  vector_length=new ACSIntArray;
+  min_vlength=new ACSIntArray;
+  max_vlength=new ACSIntArray;
+  word_lock=new ACSIntArray;
+  prec_lock=new ACSIntArray;
+  netlist_ids=new ACSIntArray;
 
-  data_type=new IntArray;
-  pin_type=new IntArray;
-  pin_assigned=new IntArray;
-  pin_limit=new IntArray;
-  pin_priority=new IntArray;
+  data_type=new ACSIntArray;
+  pin_type=new ACSIntArray;
+  pin_assigned=new ACSIntArray;
+  pin_limit=new ACSIntArray;
+  pin_priority=new ACSIntArray;
 
   connect=NULL;
   delays=NULL;
@@ -1283,7 +1283,7 @@ Constants::Constants(void)
 {
   count=0;
   storage=NULL;
-  types=new IntArray;
+  types=new ACSIntArray;
 }
 Constants::~Constants(void)
 {
