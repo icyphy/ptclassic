@@ -118,14 +118,14 @@ extern "C" {
 
 		// make sure that we can start up Matlab
 		StringList shellCommand = "matlab "; 
-		shellCommand << ((const char *) options);
+		shellCommand << ((char *) options);
 		if ( matlabEnginePtr != 0 ) {
 		  engClose( matlabEnginePtr );
 		}
 		matlabEnginePtr = engOpen( ((char *) shellCommand) );
 		if ( matlabEnginePtr == 0 ) {
 		  Error::abortRun( *this, "Could not start Matlab using ",
-				   (const char *) shellCommand );
+				   (char *) shellCommand );
 		}
 
 		// establish of number inputs & allocate Matlab matrices &
@@ -137,11 +137,11 @@ extern "C" {
 		  }
 		  matlabInputMatrices =
 		    (Matrix **) malloc( numInputs * sizeof(Matrix *) );
+
 		  char *inputBaseName = ((char *) MatlabInputVarName);
 		  if ( matlabInputNames != 0 ) {
 		    delete [] matlabInputNames;
 		  }
-
 		  matlabInputNames = new StringList[numInputs];
 		  for ( i = 0; i < numInputs; i++ ) {
 		    sprintf(numstr, "%d", i+1);
@@ -158,11 +158,11 @@ extern "C" {
 		  }
 		  matlabOutputMatrices =
 		    (Matrix **) malloc( numOutputs * sizeof(Matrix *) );
+
 		  char *outputBaseName = ((char *) MatlabOutputVarName);
 		  if ( matlabOutputNames != 0 ) {
 		    delete [] matlabOutputNames;
 		  }
-
 		  matlabOutputNames = new StringList[numOutputs];
 		  for ( i = 0; i < numOutputs; i++ ) {
 		    sprintf(numstr, "%d", i+1);
@@ -211,20 +211,15 @@ extern "C" {
 			     (char *) matlabInputNames[i]);
 
 		  // copy values in Ptolemy matrix to Matlab matrix
-		  double *realVector = mxGetPr(matlabInputMatrices[i]);
-		  double *imagVector = mxGetPi(matlabInputMatrices[i]);
-		  double *rp = realVector;
-		  double *ip = imagVector;
-		  Complex temp;
+		  double *rp = mxGetPr(matlabInputMatrices[i]);
+		  double *ip = mxGetPi(matlabInputMatrices[i]);
 		  for ( int irow = 0; irow < rows; irow++ ) {
 		    for ( int icol = 0; icol < cols; icol++ ) {
-		      temp = Amatrix[icol][icol];
+		      Complex temp = Amatrix[irow][icol];
 		      *rp++ = real(temp);
 		      *ip++ = imag(temp);
 		    }
 		  }
-		  mxSetPr(matlabInputMatrices[i], realVector);
-		  mxSetPi(matlabInputMatrices[i], imagVector);
 		}
 
 		// evaluate the Matlab command (non-zero means error)
