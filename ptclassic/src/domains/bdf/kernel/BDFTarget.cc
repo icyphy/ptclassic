@@ -31,7 +31,7 @@ Target("simulate-BDF","DataFlowStar",
 {
 	addState(logFile.setState("logFile",this,"",
 			"Log file to write to (none if empty)"));
-	addState(loopScheduler.setState("loopScheduler",this,"NO",
+	addState(loopScheduler.setState("loopScheduler",this,"YES",
 			"Specify whether to use loop scheduler."));
 	addState(schedulePeriod.setState("schedulePeriod",this,"10000.0",
 		"schedulePeriod for interface with a timed domain."));

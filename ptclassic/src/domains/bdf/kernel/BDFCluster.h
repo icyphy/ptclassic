@@ -230,9 +230,12 @@ public:
 	// generate the schedule (does nothing except for bags)
 	virtual int genSched() { return TRUE;}
 
-	// return true if condition is satisfied -- this is for
-	// simulation runs.
-	int condSatisfied();
+	// return true if condition is satisfied and cluster should
+	// continue executing -- this is for simulation runs.
+	// pre is TRUE if the call is before any execution.
+	// pre is FALSE if the call is after execution and we are
+	// seeing if where are in a do-while loop that should continue.
+	int condSatisfied(int pre);
 
 	// return the schedule
 	virtual StringList displaySchedule(int depth) = 0;
@@ -263,9 +266,10 @@ public:
 	// return my insides
 	DataFlowStar& real() { return pStar;}
 
-	// "pass-along" functions
-	int run();
-	void go() { run();}
+	// execute the cluster
+	void go();
+
+	// time reqd
 	int myExecTime();
 
 	// print me
@@ -343,10 +347,7 @@ public:
 
 	// run the cluster, the number of times indicated by the loop
 	// factor.
-	int run();
-
-	// a synonym
-	void go() { run();}
+	void go();
 
 	// do additional clustering on internal cluster (merge parallel
 	// loops, for example)
