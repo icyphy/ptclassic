@@ -58,6 +58,10 @@ public:
 	// constructor: args are name and domain
         InterpUniverse (const char* name, const char* dom);
 	~InterpUniverse();
+
+        // Return the name.
+        /*virtual*/ StringList fullName() const {return name();}
+
 	// change the target, by specifying new target name
         int newTarget(const char* newTargName = 0);
 	// return my target name

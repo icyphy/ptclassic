@@ -111,6 +111,9 @@ public:
 	// The following is redefined to invoke the begin methods.
 	void initTarget();
 
+        // Return the name.
+        /*virtual*/ StringList fullName() const {return name();}
+
 	// return my scheduler
 	Scheduler* scheduler() const;
 
