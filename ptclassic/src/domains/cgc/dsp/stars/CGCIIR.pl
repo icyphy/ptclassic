@@ -14,7 +14,7 @@ Note that the constant term of D is not omitted, as is common in
 other programs that assume that it has been normalized to unity.
     }
     version { $Id$ }
-    author { Kennard White }
+    author { Yu Kee Lim }
     copyright {
 Copyright (c) 1990-1995 The Regents of the University of California.
 All rights reserved.
@@ -78,40 +78,9 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	desc {State.}
 	attributes { A_NONCONSTANT|A_NONSETTABLE }
     }
-    defstate {
-      name {tmpNumState}
-      type {int}
-      default {0}
-      desc {temp variable to store numState}
-    }
-    defstate {
-      name {tmpStateEnd}
-      type {int}
-      default {0}
-      desc {temp variable to store stateEnd}
-    }
 
-//    defstate {
-//	name {decimation}
-//	type {int}
-//	default {1}
-//	desc {Decimation ratio.}
-//   }
-//    defstate {
-//	name {decimationPhase}
-//	type {int}
-//	default {0}
-//	desc {Downsampler phase.}
-//    }
-//    defstate {
-//	name {interpolation}
-//	type {int}
-//	default {1}
-//	desc {Interpolation ratio.}
-//    }
     protected {
 	int numState;
-	double* stateEnd;
     }
     ccinclude {
 	<minmax.h>	// for max()
@@ -150,33 +119,30 @@ Prentice-Hall: Englewood Cliffs, NJ, 1989.
 	    state[i*3+1] = i < numNumer ? scaleNumer * numerator[i] : 0;
 	    state[i*3+2] = i < numDenom ? scaleDenom * -denominator[i] : 0;
 	}
-	stateEnd = ((double*)state) + 3*numState;
-	tmpNumState = numState;
-	tmpStateEnd = (int) stateEnd;
     }
     codeblock(iir) {
 	double s0 = $ref(signalIn);
 
-	if ( $val(tmpNumState) == 1 ) {
+	if ( $size(state) == 3 ) {
 	    // actually, this means no state; just feed through
 	    $ref(signalOut) = $ref(state,1) * s0;
 	} else {
-	    double y, s;
-	    int length;
-	    int i = 0;
+	    register double *v = & $ref(state,3);
+	    register double y;
+	    double s;
+	    
+	    double * stateEnd = (double *) $ref(state) + $size(state);
 
-	    length = $size(state);
+	    s = *v++;
+	    y = s * *v++;
+	    s0 += s * *v++;
 
-	    s = $ref(state,i++);
-	    y = s * $ref(state,i++);
-	    s0 += s + $ref(state,i++);
-
-	    for (;i < length;) {
-	      double sTmp = $ref(state,i);
-	      $ref(state,i++) = s;
+	    for ( ; v < stateEnd; ) {
+	      double sTmp = *v;
+	      *v++ = s;
 	      s = sTmp;
-	      y += s * $ref(state,i++);
-	      s0 += s * $ref(state,i++);
+	      y += s * *v++;
+	      s0 += s * *v++;
 	    }
 	    $ref(state,3) = s0;
 	    y += s0 * $ref(state,1);
