@@ -38,6 +38,9 @@
 # Date of creation:	5 February 1992
 #
 
+# Temporary file name.
+set temp = tmp$$
+
 # Check for proper usage.
 if ($#argv < 1) then
 	echo Usage: mkdom domain
@@ -49,7 +52,7 @@ endif
 
 if ( ! $?PTOLEMY ) setenv PTOLEMY ~ptolemy
 if ( ! $?ARCH ) then
-    setenv ARCH `$PTOLEMY/bin/arch`
+    setenv ARCH `$PTOLEMY/bin/ptarch`
 endif
 
 set domain = $1
@@ -69,30 +72,36 @@ if ($cwd !~ */src/domains/$dom) then
 	exit
 endif
 
-cp -r $PTOLEMY/src/domains/xxx/* .
+set XXX = $PTOLEMY/src/domains/xxx
 
-sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < makefile > tmp
-rm -f makefile
-mv tmp makefile
-rm -f mkdom
-rm -f *~
+# Process the makefile.
+sccs -d $XXX get -k makefile
+sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < makefile > $temp
+mv $temp makefile
+sccs create makefile
+rm ,makefile
 
+# Process the subdirectories.
 foreach dir ( kernel stars )
-	cd $dir
+	mkdir $dir
+	pushd $dir
+
+	# Process the makefile.
+	sccs -d $XXX/$dir get -k make.template
+	sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < make.template > $temp
+	mv $temp make.template
+	sccs create make.template
+	rm ,make.template
+
 	# Process the source files.
-	foreach file ( `ls` )
-		set destfile=`echo $file | sed -e "s/XXX//"`
-		echo $DOM$destfile
-		sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $file > $DOM$destfile	
+	foreach file ( $XXX/$dir/XXX* )
+		set destfile=`echo $file:t | sed -e "s/XXX/$DOM/"`
+		echo $destfile
+		sccs -d $XXX/$dir get -k $file:t
+		sed -e "s/XXX/$DOM/g" -e "s/xxx/$dom/g" < $file:t > $destfile	
+		sccs create $destfile
+		rm $file:t ,$destfile
 	end
 
-	rm -f make.template makefile
-	mv ${DOM}makefile makefile
-	mv ${DOM}make.template make.template
-	
-	rm -f XXX* *~
-	
-	cd ..
+	popd
 end
-
-cd ..
