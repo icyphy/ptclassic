@@ -297,8 +297,8 @@ body ::tycho::RevControlSCCS::viewHistory {} {
 	# Parse the history
 	parseHistory $history [$itk_component(history) textWinName]
 
-	# Delay or the focus command is ignored.  Tk bug?
-	after 500 "focus [$itk_component(history) textWinName]"
+	# FIXME: Delay or the focus command is ignored.  Tk bug?
+	#after 500 "focus [$itk_component(history) textWinName]"
 
 	cd $olddir
     }
