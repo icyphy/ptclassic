@@ -117,10 +117,15 @@ itcldocs: $(ITCL_SRCS)
 		$(ROOT)/lib/tydoc/tydoc -d -t "$(TYDOC_DESC)" $(ITCL_SRCS); \
 	fi
 
+# We use a GNU make extension here
+HTMLS=$(filter %.html,  $(EXTRA_SRCS))
 # weblint finds problems with html pages
 # ftp://ftp.cre.canon.co.uk/pub/weblint/weblint.tar.gz
 weblint:
-	-weblint -x netscape -d heading-order *.html
+	@if [ "$(HTMLS)" != "" ]; then \
+		echo "Running weblint on $(HTMLS)"; \
+		weblint -x netscape -d heading-order $(HTMLS); \
+	fi
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
@@ -133,6 +138,16 @@ weblint:
 		done ; \
 	fi
 
+# Check html docs for problems
+# htmlchek is not shipped with tycho, see:
+# 	ftp://ftp.cs.buffalo.edu/pub/htmlchek/
+HTMLCHEK=/usr/tools/www/htmlchek
+HTMLCHEKOUT=htmlchekout
+htmlchek:
+	rm -f $(HTMLCHEKOUT)*
+	HTMLCHEK=$(HTMLCHEK); \
+	sh $(HTMLCHEK)/runachek.sh `pwd` $(HTMLCHEKOUT) `pwd` \
+		map=1 netscape=1 nowswarn=1 arena=1 strictpair=TCL,AUTHOR
 
 # You probably don't want to add $(SRCS) here, since really $(SRCS)
 # get compiled and have dependencies.  Instead, modify the makefile
@@ -170,7 +185,7 @@ clean:
 
 realclean:
 	rm -f $(CRUD) $(REALCLEAN_STUFF)
-	rm -rf doc/codeDoc/*
+	rm -rf doc/codeDoc/* $(HTMLCHEKOUT)*
 	@if [ "x$(DIRS)" != "x" ]; then \
 		set $(DIRS); \
 		for x do \
