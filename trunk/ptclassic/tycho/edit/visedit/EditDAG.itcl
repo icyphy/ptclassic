@@ -105,8 +105,7 @@ class ::tycho::EditDAG {
     ####                            options                        ####
 
     # Default font
-    itk_option define -defaultfont defaultFont Font \
-	    [eval ::tycho::font [::tycho::preference get fonts graphicsFont]]
+    itk_option define -defaultfont defaultFont Font {}
 
     # Specify the graph object to display and edit.
     itk_option define -graph graph Graph {}
@@ -378,6 +377,7 @@ body ::tycho::EditDAG::constructor {args} {
     # here is avoid unnecessary graph redraws. We really have to look
     # into this issue more and come up with a good solution.
     # FIXME: this whole thing is very broken.
+    configure -defaultfont [preference get graphicsFont 1]
     preference subscribe $this graphicsFont \
 	    "$this configure -defaultfont \
 	    \[::tycho::preference get fonts graphicsFont 1\]; $this reload"
