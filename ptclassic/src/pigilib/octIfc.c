@@ -267,7 +267,9 @@ octObject *facetPtr;
 	status = IsCursor(&inst) || IsUniv(&inst) || IsPal(&inst);
 	FreeOctMembers(&inst);
     }
+    FreeOctMembers(&inst);
     octFreeGenerator(&gen);
+
     return status;
 }
 
@@ -342,16 +344,22 @@ GetFormalParams(galFacetPtr, pListPtr)
 octObject *galFacetPtr;
 ParamListType *pListPtr;
 {
-    octObject prop = {OCT_UNDEFINED_OBJECT};
+    int retval = TRUE;
+    octObject prop = {OCT_PROP};
+
     prop.objectId = 0;		/* silence Purify */
     if (GetByPropName(galFacetPtr, &prop, "params") == OCT_NOT_FOUND) {
 	pListPtr->length = 0;
 	pListPtr->array = (ParamType *) calloc(1, sizeof(ParamType));
-    } else {
-	ERR_IF1(!PStrToPList(prop.contents.prop.value.string, pListPtr));
+    }
+    else {
+	if (!PStrToPList(prop.contents.prop.value.string, pListPtr)) {
+	    retval = FALSE;
+	}
 	FreeOctMembers(&prop);
     }
-    return(TRUE);
+
+    return(retval);
 }
 
 /* SetSogParams  1/31/89 4/18/88 4/16/88
@@ -502,6 +510,7 @@ ParamListType *pListPtr;
     prop.contents.prop.name = "params";
 
     /* If no parameters, return default list */
+    /* FIXME: Memory leak */
     if (octGetByName(instPtr, &prop) == OCT_NOT_FOUND) {
 	ERR_IF1(!SetSogParams(instPtr, pListPtr));
 	return(TRUE);
