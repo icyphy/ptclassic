@@ -29,13 +29,25 @@ The communication network itself is implemented in a wormhole
 It is a discrete event system consisting of a random router,
 and exponential delay, a merge, and a sampler.
 Events arrive from the SDF universe at intervals
-of 10,000/256 or roughly 39 time units.
-(Sorry, there is currently no way to change this;
-the default 
+of 10,240/256 or 40 time units.
+(We can change this by changing the
 .c schedulePeriod
-for the SDF universe is 10,000,
-and because of the FFT stars, the number of invocations of the reorder
+parameter of the SDF universe, whose default value is 10,000.
+Currently, it is set to be 10,240.
+Because of the FFT stars, the number of invocations of the reorder
 wormhole is 256).
+In the domain inside the
+.c Wormhole ,
+we may change the time scale by defining a parameter called
+.c timeScale .
+for the
+.c Galaxy .
+By default, no time scale is performed (
+.c timeScale
+is 1.0). 
+In this demo, we set the state at 2.0, which means
+one time unit in the SDF domain corresponds to two time units
+in the DE domain.
 The
 .c Router
 sends input events to one of two outputs
@@ -44,8 +56,8 @@ The lower output goes to an
 .c ExpDelay
 star, which delays input events a random amount, according
 to IID exponential random variables.
-The mean of the exponential is set to roughly equal the sampling
-period, 39.
+The mean of the exponential is set to equal the scaled sampling
+period, 40x2=80.
 The delayed and undelayed streams are merged and sampled.
 The
 .c Sampler
