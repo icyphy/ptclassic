@@ -4,7 +4,7 @@ defstar {
 	derivedFrom { WaveForm }
 	desc {
 Generates standard window functions:
-Rectangle, Bartlett, Hanning, Hamming, Blackman, and SteepBlackman.
+Rectangle, Bartlett, Hanning, Hamming, Kaiser, Blackman, and SteepBlackman.
 }
 	version { $Id$ }
 	author { Jose Luis Pino, based on CG56WaveForm by Kennard White}
@@ -15,6 +15,9 @@ See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
 	}
 	location { CG56 dsp library }
+
+	ccinclude { <string.h>, <math.h>, "cephes.h"}
+	
 	explanation {
 .lp
 This star produces on its output values that are samples of a standard
@@ -42,7 +45,7 @@ One period of samples are produced on every firing.
 		default { "Hanning" }
 		desc {
 Name of the window function to generate:
-Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
+Rectangle, Bartlett, Hanning, Hamming, Kaiser, Blackman, or SteepBlackman.
 		}
 	}
 
@@ -52,7 +55,19 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 		default { 256 }
 		desc { Length of the window function to produce. }
 		attributes { A_SETTABLE|A_CONSTANT }
-	} 
+	}
+	
+	state {
+		name { WindowParameters}
+		type { floatarray}
+		default { 0 }
+		desc { 
+An array of numeric parameters for the window.
+For the Kaiser window, the first entry in this state is taken as the
+beta parameter which is proportional to the stopband attenuation of
+the window.
+		} 
+	}
 
 	protected {
 		int winType;
@@ -63,12 +78,17 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 		double freq1;
 		double scale2;
 		double freq2;
+		double alpha;
+		double norm;
+		double beta;
+
+		// must be persistent data or there will be an error
+		// in value.setInitValue(window) because window will
+		// be destroyed if it were a local variable in setup
+		StringList window;
     	}
 
     	code {
-		extern "C" {
-		    extern int strcasecmp(const char*, const char*);
-		}
 #define SDFWinType_Null		(0)
 #define SDFWinType_Rectangle	(1)
 #define SDFWinType_Bartlett	(2)
@@ -76,6 +96,7 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 #define SDFWinType_Hamming	(4)
 #define SDFWinType_Blackman	(5)
 #define SDFWinType_SteepBlackman	(6)
+#define SDFWinType_Kaiser	(7)
 	}
 
 	constructor {
@@ -83,20 +104,22 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 	}
 
 	setup {
-	const char *wn = name;
+	const char* wn = name;
 
-	if ( strcasecmp( wn, "Rectangle")==0 ) {
+	if ( strcasecmp(wn, "Rectangle")==0 ) {
 	    winType = SDFWinType_Rectangle;
-	} else if ( strcasecmp( wn, "Bartlett")==0 ) {
+	} else if ( strcasecmp(wn, "Bartlett")==0 ) {
 	    winType = SDFWinType_Bartlett;
-	} else if ( strcasecmp( wn, "Hanning")==0 ) {
+	} else if ( strcasecmp(wn, "Hanning")==0 ) {
 	    winType = SDFWinType_Hanning;
-	} else if ( strcasecmp( wn, "Hamming")==0 ) {
+	} else if ( strcasecmp(wn, "Hamming")==0 ) {
 	    winType = SDFWinType_Hamming;
-	} else if ( strcasecmp( wn, "Blackman")==0 ) {
+	} else if ( strcasecmp(wn, "Blackman")==0 ) {
 	    winType = SDFWinType_Blackman;
-	} else if ( strcasecmp( wn, "SteepBlackman")==0 ) {
+	} else if ( strcasecmp(wn, "SteepBlackman")==0 ) {
 	    winType = SDFWinType_SteepBlackman;
+	} else if ( strcasecmp(wn, "Kaiser") == 0){
+	    winType = SDFWinType_Kaiser;
 	} else {
 	    Error::abortRun(*this, ": Unknown window name ", wn);
 	    return;
@@ -109,6 +132,8 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 			    " (should be greater than 3)");
 	    return;
 	}
+
+	beta = double(WindowParameters[0]);
 
 	double base_w = M_PI/(realLen-1);
 	double sin_base_w = sin(base_w);
@@ -147,24 +172,27 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 	    scale2 = -d/2;
 	    freq2 = 4*base_w;
 	    break;
+	case SDFWinType_Kaiser:
+	    alpha = double((realLen-1.0)/2.0);
+	    norm = fabs(i0(beta));
+	    break;
 	default:
 	    Error::abortRun(*this, ": Invalid window type");
 	    return;
 	}
 
 	value.resize(int(length));
-	StringList window;
+	window.initialize();		// initialize StringList to null string
 	int i;
-	double val;
 
 	switch ( winType ) {
 	  case SDFWinType_Bartlett:
-	    for ( i=0; i < (realLen - 1)/2; i++) {
-		val = scale1 * i;
+	    for (i = 0; i < (realLen - 1)/2; i++) {
+		double val = scale1 * i;
 		window << val << " ";
 	    }
 	    for ( ; i < realLen; i++) {
-		val = scale1 * (realLen-(i+1));
+		double val = scale1 * (realLen-(i+1));
 		// Outputs created at the time the star is compiled
 		// Handled as a special case by Waveform::go method.
 		output%(realPeriod-(i+1)) << val;
@@ -172,14 +200,23 @@ Rectangle, Bartlett, Hanning, Hamming, Blackman, or SteepBlackman.
 		if (i != realLen-1) window << " ";
 	    }
 	    break;
+	  case SDFWinType_Kaiser:
+	    for (i = 0; i < realLen; i++){
+		double squared = double(pow(((i - alpha)/alpha), 2));
+		double entry = beta*sqrt(1-squared);
+		double val = i0(entry)/norm;
+		window << val;
+		if (i != realLen-1) window << " ";
+	    }
+	    break;
 	  default:
-	    for ( i=0; i < realLen; i++) {
+	    for (i = 0; i < realLen; i++) {
 		if (i!=0) window << " ";
-		val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
+		double val = scale0 + scale1 * cos(freq1*i) + scale2 * cos(freq2*i);
 		window << val;
 	    }
 	}
-	value.setInitValue(hashstring(window));
+	value.setInitValue(window);
 	value.initialize();
 	CG56WaveForm::setup();
 }
