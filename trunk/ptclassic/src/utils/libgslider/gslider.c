@@ -29,6 +29,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #include <stdio.h>
 #include <malloc.h>
 #include <stdlib.h>		/* Define atof */
+#include <string.h>		/* strchr */
 #include "compat.h"
 #include "gslider.h"
 
