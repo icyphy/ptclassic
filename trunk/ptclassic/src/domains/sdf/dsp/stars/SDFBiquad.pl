@@ -26,7 +26,7 @@ This two-pole, two-zero IIR filter has a transfer function of
 .Id "filter, IIR"
 .Id "IIR filter"
 It is implemented in direct form II [1].
-The default coefficient give a Butterworth filter with a
+The default coefficients give a Butterworth filter with a
 cutoff of 0.1 times sampling frequency.
 .Ir "filter, Butterworth"
 .Ir "Butterworth filter"
