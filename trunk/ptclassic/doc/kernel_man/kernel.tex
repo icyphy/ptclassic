@@ -27,20 +27,21 @@ of unimplemented features or lack of stability of implementation.
 Instead, we focused on stability.  Accordingly, Ptolemy can be built with
 a number of different C++ compilers.
 
-This means, for one thing, that templates are not used.  In addition,
-some features that do not work that well yet under g++, such as
-nested classes, are also avoided.  Nested enumerations, however,
-are used in several places.
+This means, for one thing, that templates are not used (except in the
+experimental IPUS domain).
+In addition, some features that do not work that well yet under g++,
+such as nested classes, are also avoided.
+Nested enumerations, however, are used in several places.
 
 \node Iterators
 \section{Iterators}
 
 Iterators are a very basic and widely used concept in Ptolemy, and are
 used repeatedly in Ptolemy programming in almost any situation where a
-composite object contains other objects.  We have chosen to use a
-consistent interface for all iterator objects.  The typical iterator
-class has the following basic interface (some iterators provide additional
-functions as well):
+composite object contains other objects.
+We have chosen to use a consistent interface for all iterator objects.
+The typical iterator class has the following basic interface
+(some iterators provide additional functions as well):
 
 \begin{example}
 class MyIterator \{
@@ -85,7 +86,7 @@ been modified (user-written iterators should preserve this property).
 \section{Non-class utility functions}
 
 The kernel provides several useful ordinary (non-class) functions,
-primarily for manipulating strings and pathnames.  Some are defined
+primarily for manipulating strings and path names.  Some are defined
 in \file{miscFuncs.h}, others in \file{paths.h}.
 
 \begin{example}
@@ -93,9 +94,10 @@ char* savestring(const char* \var{text});
 \end{example}
 
 The \code{savestring} function creates a copy of the \var{text} argument
-with \code{new} and returns a pointer to it.  It is the caller's
-responsibility to assure that the string is eventually deleted.  The
-argument must not be a null pointer.
+with \code{new} and returns a pointer to it.
+It is the caller's responsibility to assure that the string is eventually
+deleted by using the \code{delete []} operator.
+The argument \var{text} must not be a null pointer.
 
 \begin{example}
 const char* hashstring(const char* \var{text});
@@ -110,7 +112,7 @@ values will be the same pointer.
 const char* expandPathName(const char* \var{fileName});
 \end{example}
 
-This function accepts a string and interprets it as a Unix pathname.
+This function accepts a string and interprets it as a Unix path name.
 If the string does not begin with a \code{~} or \code{$} character,
 the string itself is returned.  A leading ``\code{~/}'' is replaced
 by the user's home directory; a leading ``\code{~\var{user}/}'' is
@@ -289,7 +291,7 @@ that attaches the ListIter to a different SequentialList.
 \section{Doubly linked lists}
 
 Support for doubly linked lists is found in \file{DoubleLink.h}.  The class
-DoubleLink implements a baseclass for nodes in the list, class
+DoubleLink implements a base class for nodes in the list, class
 DoubleLinkList implements the list itself, and class DoubleLinkIter forms an
 iterator.
 
@@ -538,7 +540,7 @@ SequentialList functions.  The SequentialList functions \code{size} and
 \node class NamedObj
 \section{Class NamedObj}
 
-NamedObj is the baseclass for most of the common Ptolemy objects.  A
+NamedObj is the base class for most of the common Ptolemy objects.  A
 NamedObj is, simply put, a named object; in addition to a name, a
 NamedObj has a pointer to a parent object, which is always a Block (a
 type of NamedObj).  This pointer can be null.  A NamedObj also has a
@@ -640,7 +642,7 @@ virtual int isA(const char* \var{cname}) const;
 
 The isA method should be redefined for all classed derived from
 NamedObj.  Its function is to return TRUE if the argument is the name
-either of the class or of one of the baseclasses.  To make this easy to
+either of the class or of one of the base classes.  To make this easy to
 implement, a macro \code{ISA_FUNC} is provided; for example, in the
 file \code{Block.cc} we see the line
 
@@ -658,7 +660,7 @@ int Block::isA(const char* cname) const \{
 \}
 \end{example}
 
-Methods \code{isA} and \code{className} are overriden in derived
+Methods \code{isA} and \code{className} are overridden in derived
 classes; the redefinitions will not be described for each individual
 class.
 
@@ -1490,7 +1492,7 @@ Useful in parallel scheduling.
 virtual void go();
 \end{example}
 
-This is a method that is intended to be overriden to provide the
+This is a method that is intended to be overridden to provide the
 principal action of executing this block.  It is protected and is
 intended to be called from the \code{run()} member function.  The
 separation is so that actions common to a domain can be provided
@@ -1729,7 +1731,7 @@ does.
 int addStar(const char* \var{starname}, const char* \var{starclass});
 \end{example}
 
-Add a new star or galaxy with classname \var{starclass} to this
+Add a new star or galaxy with class name \var{starclass} to this
 InterpGalaxy, naming the new instance \var{starname}.  The known block
 list for the current domain is searched to find \var{starclass}.
 Returns 1 on success, 0 on failure.  On failures, an error message
@@ -1953,7 +1955,7 @@ null pointer if a match is not found.
 \node class Runnable
 \section{Class Runnable}
 
-The Runnable class is a sort of mixin class intended to be used with
+The Runnable class is a sort of ``mixin class'' intended to be used with
 multiple inheritance to create runnable universes and wormholes.  It
 is defined in the file \code{Universe.h}.
 
@@ -2004,7 +2006,7 @@ Target* target;
 Galaxy* galP;
 \end{example}
 
-As a rule, when used as one of the baseclasses for multiple inheritance,
+As a rule, when used as one of the base classes for multiple inheritance,
 the \code{galP} pointer will point to the galaxy provided by the other
 half of the object.
 
@@ -2204,12 +2206,13 @@ The ``type'' can be any type used in states.
 virtual StringList pragma (const char* \var{parentname}, const char* \var{blockname}) const;
 \end{example}
 
-To determine the value of all pragmas that have been
-specified for a particular block, call this method.
-In derived classes, it returns a list of ``name value''
-pairs, separated by spaces.  In the base class, it
-returns an empty string. The \var{parentname} is the name
-of the parent class (universe or galaxy master name).
+To determine the value of all pragmas that have been specified for a
+particular block, call this method.
+In derived classes, it returns a list of ``name value'' pairs, separated
+by spaces.
+In the base class, it returns an empty string.
+The \var{parentname} is the name of the parent class (universe or
+galaxy master name).
 
 \begin{example}
 virtual StringList pragma (const char* \var{parentname},
@@ -2460,7 +2463,7 @@ const char* writeDirectoryName(const char* \var{dirName} = 0);
 This method returns a directory name that is intended for
 use in writing files, particularly for code generation targets.
 If the directory does not exist, it attempts create it.
-Returns the fully expanded pathname (which is saved by
+Returns the fully expanded path name (which is saved by
 the target).
 
 \begin{example}
@@ -2758,14 +2761,14 @@ static void clearHalt ();
 
 This function clears the halt and error flags.
 
-\node pre- and postactions
-\subsection{Preactions and Postactions}
+\node pre- and post-actions
+\subsection{Pre-actions and Post-actions}
 
 SimControl can register a function that will be called before
 or after the execution of a particular star, or before or after
 the execution of all stars.  A function that is called before
 a star is a \emph{preaction}; on that is called after a star is
-a \emph{postaction}.
+a \emph{post-action}.
 
 The functions that can be registered have take two arguments: a
 pointer to a Star (possibly null), and a \code{const char*} pointer
@@ -2783,11 +2786,11 @@ static SimAction* registerAction(SimActionFunction action, int pre,
  const char* textArg = 0, Star* which = 0);
 \end{example}
 
-Register a preaction or postaction.  If "pre" is TRUE it is a preaction.
+Register a pre-action or post-action.  If "pre" is TRUE it is a preaction.
 If \var{textArg} is given, it is passed as an argument when the
 action function is called.  If \var{which} is 0, the function will
 be called unconditionally by \code{doPreActions} (if it is a preaction)
-or \code{doPostActions} (if it is a postaction; otherwise it will
+or \code{doPostActions} (if it is a post-action; otherwise it will
 only be called if the star being executed has the same address as
 \code{which}.
 
@@ -2882,7 +2885,7 @@ Like a Universe, a Wormhole can perform
 the scheduling actions on the component Galaxy. A Wormhole is different
 from a Universe in that it is not a stand-alone object.  Instead, it is
 triggered from the outer domain to initiate the scheduling.  Also, since
-Wormhole is an abstract baseclass, you cannot create an object of class
+Wormhole is an abstract base class, you cannot create an object of class
 Wormhole; only derived Wormholes can be created.
 
 Each domain has a derived Wormhole class.  For example, the SDF domain
@@ -2975,7 +2978,7 @@ This function deletes the event horizons and the inside galaxy.  It
 is intended to be called from XXXWormhole destructors.  It cannot be
 part of the Wormhole constructor due to an ordering problem (we want
 to assure that it is called before the destructor for either of
-XXXWormhole's two baseclasses is called).
+XXXWormhole's two base classes is called).
 
 \begin{example}
 virtual double getStopTime() = 0;
@@ -3002,7 +3005,7 @@ The member \code{gal} is a reference to the inner galaxy of the Wormhole.
 \node class EventHorizon
 \section{Class EventHorizon}
 
-Class EventHorizon is another example of a mixin class; EventHorizon has
+Class EventHorizon is another example of a ``mixin class''; EventHorizon has
 the same relationship to PortHoles as Wormhole has to Stars.  The name
 is chosen from cosmology, representing the point at which an object
 disappears from the outside universe and enters the interior of a black
@@ -3056,7 +3059,7 @@ This returns ``myself as a PortHole''.
 PortHole* ghostAsPort();
 \end{example}
 
-This returns a pointer to the ``matching eventhorizon'' as a porthole.
+This returns a pointer to the ``matching event horizon'' as a porthole.
 
 \begin{example}
 virtual void ghostConnect(EventHorizon& \var{to} );
@@ -3160,7 +3163,7 @@ EventHorizon.
 ToEventHorizon(PortHole* \var{p});
 \end{example}
 
-The constructor simply calls the baseclass constructor, passing along
+The constructor simply calls the base class constructor, passing along
 its argument.
 
 \begin{example}
@@ -3174,7 +3177,7 @@ void getData();
 \end{example}
 
 This protected member transfers data from the outside to the universal
-eventhorizon (myself).
+event horizon (myself).
 
 \begin{example}
 void transferData();
@@ -3372,7 +3375,7 @@ a new member PortHole.
 GenericPort& setPort(const char* \var{portName}, Block* \var{blk}, DataType \var{typ}=FLOAT);
 \end{example}
 
-Set the basic PortHole parameters: the name, parent, and datatype.
+Set the basic PortHole parameters: the name, parent, and data type.
 
 \begin{example}
 void inheritTypeFrom(GenericPort& \var{p});
@@ -3498,7 +3501,7 @@ an inter-domain connection); FALSE otherwise.
 virtual EventHorizon* asEH();
 \end{example}
 
-Return myself as an EventHorizon, if I am one.  The baseclass returns
+Return myself as an EventHorizon, if I am one.  The base class returns
 a null pointer.  EventHorizon objects (objects multiply inherited from
 EventHorizon and some type of PortHole) will redefine this
 appropriately.
@@ -3537,7 +3540,7 @@ zero if never called.
 DataType resolvedType () const;
 \end{example}
 
-Return the datatype computed by \code{PortHole::initialize} to resolve
+Return the data type computed by \code{PortHole::initialize} to resolve
 type conversions.  For example, if an INT output porthole is connected
 to a FLOAT input porthole, the resolved type (the type of the Particles
 that travel between the ports) will be FLOAT.  A null pointer will be
@@ -3925,7 +3928,7 @@ a template).
 \node class ParticleStack
 \section{Class ParticleStack}
 
-ParticleStack is an efficient baseclass for the implementation of
+ParticleStack is an efficient base class for the implementation of
 structures that organize Particles.  As Particles have a link field,
 ParticleStack is simply implemented as a linked list of Particles.
 
@@ -4013,7 +4016,7 @@ permanent geodesics are used for netlist connections.  In the latter
 case, the Geodesic has a name and is a member of a galaxy; hence,
 Geodesic is derived from NamedObj (\pxref{class NamedObj}).
 
-The baseclass Geodesic, which is temporary, suffices for most simulation
+The base class Geodesic, which is temporary, suffices for most simulation
 and code generation domains.  In fact, in a number of these domains it
 contains unused features, so it is perhaps too ``heavyweight'' an object.
 A Geodesic contains a ParticleStack member which is used as a queue for
@@ -4035,7 +4038,7 @@ virtual PortHole* setSourcePort (GenericPort &\var{src}, int \var{delay} = 0);
 Set the source port and the number of initial particles.  The actual
 source port is determined by calling \code{newConnection} on \var{src};
 thus if \var{src} is a MultiPortHole, the connection will be made to
-some port withing that MultiPortHole, and aliases will be resolved.
+some port within that MultiPortHole, and aliases will be resolved.
 The return value is the ``real porthole'' used.
 
 In the default implementation, if there is already a destination port,
@@ -4576,7 +4579,7 @@ many types on a given connection.  The tradeoff is that blocks that
 receive Message objects must, as a rule, type-check the received
 objects.
 
-The baseclass for all messages, named Message, contains no data, only
+The base class for all messages, named Message, contains no data, only
 a reference count (accordingly, all derived classes have a reference
 count and a standard interface).  The reference count counts how many
 Envelope objects refer to the same Message object.
@@ -4591,7 +4594,7 @@ two messages will share the same reference count.
 
 The destructor, which is virtual, deletes the reference count.
 
-The following Message functions must be overriden appropriately in any
+The following Message functions must be overridden appropriately in any
 derived class:
 
 \begin{example}
@@ -4620,7 +4623,7 @@ virtual int isA(const char*) const;
 \end{example}
 
 The \code{isA} function returns true if given the name of the class
-or the name of any baseclass.  Exception: the baseclass function returns
+or the name of any base class.  Exception: the base class function returns
 FALSE to everything (as it has no data at all).  A macro \code{ISA_FUNC}
 is defined to automate the generation of implementations of derived
 class \code{isA} functions; it is the same one as that used for the
@@ -4653,7 +4656,7 @@ a floating point value, and a complex number, respectively.  Usually
 such conversions do not make sense; accordingly, the default
 implementations generate an error message (using the protected member
 function \code{errorConvert}) and return a zero of the appropriate type.
-If a conversion does make sense, they may be overriden by a method that
+If a conversion does make sense, they may be overridden by a method that
 does the appropriate conversion.  These methods will be used by the
 MessageParticle class when an attempt is made to read a MessageParticle
 in a numeric context.
@@ -4996,7 +4999,7 @@ has no effect on the runtime loader.
 2) If the file name begins with ``./'', then the current directory is
 searched.  ``link ./foo.so'' should work, as will ``link ./mydir/foo.so''
 
-3) If the file name is an absolute pathname, then the shared object
+3) If the file name is an absolute path name, then the shared object
 will be loaded. ``link /tmp/foo.so'' should work.
 
 4) Dynamic programs can have a run path specified at link time.  The
@@ -5007,13 +5010,13 @@ If ptcl or pigiRpc has been compiled with a run path built in, and the
 shared object is in that path, then the shared object will be found.
 
 The Sun Linker Manual says:
-	To locate the shared object foo.so.1, the runtime linker will
+	``To locate the shared object foo.so.1, the runtime linker will
 	use any LD_LIBRARY_PATH definition presently in effect,
 	followed by any runpath specified during the link-edit of prog
 	and finally, the default location /usr/lib.  If the file name
 	had been specified ./foo.so.1, then the runtime linker would
 	have searched for the file only in the present working
-	directory.
+	directory.''
 
 	
 \node Porting the Dynamic Linker
@@ -5034,13 +5037,13 @@ cd $PTOLEMY/obj.$ARCH/kernel; rm -f Linker.o; make OPTIMIZER=-DDEBUG
 \end{example}
 
 The Linker class currently uses ``ld -A'' style dynamic linking on the
-Sun4(SPARC) running SunOS4.1 and \code{g++}, the Sun4(SPARC) running
+Sun4 (Sparc) running SunOS4.1 and \code{g++}, the Sun4 (Sparc) running
 SunOS4.1 and Sun's \code{cfront} port, DECStations running Ultrix,
 HP-PA running \code{g++} or HP's \code{cfront} port.
 
 The Linker class currently uses ``dlopen()'' style dynamic linking on the
-Sun4(SPARC) running Solaris2.3 and \code{g++}, the Sun4(SPARC) running
-Solaris2 and Sun's \code{cfront} port (Sun \code{CC-3.0}), the Sun4(SPARC)
+Sun4 (Sparc) running Solaris2.3 and \code{g++}, the Sun4 (Sparc) running
+Solaris2 and Sun's \code{cfront} port (Sun \code{CC-3.0}), the Sun4 (Sparc)
 running Solaris2 and Sun's native C++ compiler \code{CC-4.0}, and SGI
 Indigos running IRIX-5.2 and \code{g++}.
 
@@ -5120,17 +5123,17 @@ happen automatically.
 \node Parameters and States
 \chapter{Parameters and States}
 
-A State is a data-structure associated with a block, used to remember
+A State is a data structure associated with a block, used to remember
 data values from one invocation to the next.
-For example, the gain of an automatic gain control is a state.
+For example, the gain of an automatic gain controller is a state.
 A state need not be dynamic; for instance, the gain of fixed
-amplifier is a state.  A parameter is the initial value of a state.
+amplifier is a state.
+A parameter is the initial value of a state.
 
 A State actually has two values: the initial value, which is always
 a character string, and a current value, whose type is different for
 each derived class of State: integer for IntState, an array of real
 values for FloatArrayState, etc.
-
 In addition, states have attributes, which represent logical properties
 the state either has or does not have.
 
@@ -5139,14 +5142,16 @@ the state either has or does not have.
 
 Class State is derived from class NamedObj (\pxref{class NamedObj}).
 
-The State baseclass is an abstract class; you cannot create a plain
-State.  The baseclass contains the initial value, which is always
-a \code{const char*}; the derived classes are expected to provide
+The State base class is an abstract class; you cannot create a plain State.
+The base class contains the initial value, which is always a
+\code{const char*}; the derived classes are expected to provide
 current values of appropriate type.
 
 The constructor for class State sets the initial value to a null
 pointer, and sets the state's attributes to a value determined by
-the constant AB_DEFAULT.  The destructor does nothing extra.
+the constant AB_DEFAULT, which is defined in ``State.h'' to be the
+bitwise or of AB_CONST and AB_SETTABLE.
+The destructor does nothing extra.
 
 \node State public members
 \subsection{State public members}
@@ -5256,48 +5261,75 @@ bitWord clearAttributes(const Attribute& \var{attr});
 
 Set or clear attributes.
 
+\begin{example}
+InvoveInterp interp
+\end{example}
+
+An external interpreter for evaluating commands in a parameter
+definition preceded by the ! character and surrounded in quotes.
+By default, no interpreter is defined.
+If the interpreter were defined as the Tcl interpreter, then
+\code{! "expr abs(cos(1.0))"} would compute 0.540302.
+Other parameters can be referenced as usual by using curly braces, e.g.
+\code{! "expr abs(cos(\{gain\}))"}.
+
+
 \node The State parser
 \subsection{The State parser and protected members}
 
-Most of class State's protected interface consists of a simple
+Most of the protected interface in the State class consists of a simple
 recursive-descent parser for parsing integer and floating expressions
 that appear in the initial value string.
-
-class ParseToken represents tokens for this parser; it contains a
-token type (an integer code) and a token value, which is a
+The ParseToken class represents tokens for this parser.
+It contains a token type (an integer code) and a token value, which is a
 union that represents either a character value, a string value, an
 integer value, a double value, a Complex value, or a State value
-(for use when the initializer references another state).  Token
-types are equal to the ASCII character value for single-character
-tokens; other possible token values are:
-
-\code{T_EOF} for end of file, \code{T_ERROR} for error, \code{T_Float}
-for a floating value, \code{T_Int} for an integer value, \code{T_ID}
-for a reference to a state, and \code{T_STRING} for a string value.
+(for use when the initializer references another state).
+Token types are equal to the ASCII character value for single-character tokens.
+Other possible token values are:
+\begin{itemize}
+\item \code{T_EOF} for end of file,
+\item \code{T_ERROR} for error,
+\item \code{T_Float} for a floating value,
+\item \code{T_Int} for an integer value,
+\item \code{T_ID} for a reference to a state, and
+\item \code{T_STRING} for a string value.
+\end{itemize}
 For most of these, the token value holds the appropriate value.
 
 Most derived State classes use this parser to provide uniformity
 of syntax and error reporting; however, it is not a requirement to
 use it.
-
 Derived State classes are expected to associate a Tokenizer object
-with their initial value string; the functions provided here can
-then be used to parse expressions appearing in that string.
+with their initial value string.
+The functions provided here can then be used to parse expressions
+appearing in that string.
 
 \begin{example}
 ParseToken getParseToken(Tokenizer& \var{tok}, int \var{wantedType}= T_Float);
 \end{example}
 
 This function obtains the next token from the input stream associated
-with the Tokenizer.  If there is a pushback token, that token is
-returned instead.  If it receives a '<' token, it assumes that the
-next whitespace-delimited string is a file and uses Tokenizer's include
-file capability to cause it to read from that file.
+with the Tokenizer.
+If there is a pushback token, that token is returned instead.
+If it receives a '<' token, then it assumes that the next string delimited
+by white space is a file name.
+It substitutes references to other parameters in the filename and then
+uses the Tokenizer's include file capability to insert the contents of
+the file into the input stream.
+If it receives a '!' token, then it assumes that that the next string delimited 
+by white space is a command to be evaluated by an external interpreter.
+It substitutes references to other parameters in the command,
+sends the resulting string to the interpreter defined by interp member
+described above for evaluation, and inserts the result into the input stream.
+The information both read from an external file and returned from an external
+interpreter is also parsed by this function.
+Therefore, the external interpreter can perform both numeric and symbolic
+computations.
 
-It returns a T_EOF token on end of file.  The characters in \code{,[]+*-/()^}
-are considered special and the lexical value is equal to the character
-value.
-
+When the parser hits the end of the input stream, it returns T_EOF.
+The characters in the set \code{,[]+*-/()^} are considered to be special
+and the lexical value is equal to the character value.
 Integer and floating values are recognized and evaluated to produce
 either T_Int or T_Float tokens.  However, the decision is based on
 the value of \var{wantedType}; if it is T_Float, all numeric values
@@ -5489,10 +5521,10 @@ a ComplexState).
 \subsection{Class StringArrayState}
 
 As its name suggests, the current value for a StringArrayState is
-an array of strings.  Whitespace in the initial value string separates
-``words''; each word is assigned by \code{initialize()} into a
-separate array element.  Quotes can be use to permit ``words''
-to have whitespace.
+an array of strings.
+White space in the initial value string separates ``words'', and
+Each word is assigned by \code{initialize()} into a separate array element.
+Quotes can be use to permit ``words'' to have white space.
 
 Current values of galaxy states can be converted into single elements
 of the StringArrayState value by surrounding their names with curly
@@ -5793,7 +5825,7 @@ static KnownState entry(proto,"INT");
 \end{example}
 
 permits IntStates to be produced by cloning.  The \var{type} argument
-must be in uppercase, because of the way \code{find} works (see below).
+must be in upper case, because of the way \code{find} works (see below).
 
 The second type of constructor takes three arguments:
 
@@ -5815,7 +5847,7 @@ static const State* find (const char* \var{type});
 
 The \code{find} method returns a pointer the appropriate prototype
 state in the state type list.  The argument is always changed to
-uppercase.  A null pointer is returned if there is no match.
+upper case.  A null pointer is returned if there is no match.
 
 \begin{example}
 static const State* lookup (const char* \var{name});
@@ -5968,9 +6000,9 @@ Warning: if this function is called on a temporary StringList, it
 is possible that the compiler will delete the StringList object
 before the last use of the returned \code{const char *} pointer.
 The result is that the pointer may wind up pointing to garbage.
-The best workaround for such problems is to make sure that any
+The best way to work around such problems is to make sure that any
 StringList object ``has a name'' before this conversion is applied
-to it; e.g. assign the results of functions returning StringList
+to it; e.g., assign the results of functions returning StringList
 objects to local StringList variables or references before trying
 to convert them.
 
@@ -6125,7 +6157,7 @@ if this function is called on a temporary InfString, it
 is possible that the compiler will delete the InfString object
 before the last use of the returned \code{char *} pointer.
 The result is that the pointer may wind up pointing to garbage.
-The best workaround for such problems is to make sure that any
+The best work-around for such problems is to make sure that any
 InfString object ``has a name'' before this conversion is applied
 to it; e.g. assign the results of functions returning InfString
 objects to local InfString variables or references before trying
@@ -6172,15 +6204,15 @@ The Tokenizer class is designed to accept input for a string or file
 and break it up into tokens.  It is similar to the standard istream
 class in this regard, but it has some additional facilities.  It
 permits character classes to be defined to specify that certain
-characters are whitespace and others are ``special'' and should be
+characters are white space and others are ``special'' and should be
 returned as single-character tokens; it permits quoted strings to
 override this, and it has a file inclusion facility.  In short, it
 is a simple, reconfigurable lexical analyzer.
 
 
 Tokenizer has a public const data member named \code{defWhite}
-that contains the default whitespace characters: space, newline,
-and tab.  It is possible to change the definition of whitespace
+that contains the default white space characters: space, newline,
+and tab.  It is possible to change the definition of white space
 for a particular constructor.
 
 \node Initializing Tokenizers
@@ -6203,7 +6235,7 @@ Tokenizer(istream& \var{input},const char* \var{spec},
 
 This constructor creates a Tokenizer that reads from the stream named
 by \var{input}.  The other arguments specify the special characters
-and the whitespace characters.
+and the white space characters.
 
 \begin{example}
 Tokenizer(const char* \var{buffer},const char* \var{spec},
@@ -6216,7 +6248,7 @@ string in \var{buffer}.
 Tokenizer's destructor closes any include files associated with the
 constructor and deletes associated internal storage.
 
-The following operations change the definition of whitespace and of
+The following operations change the definition of white space and of
 special characters, respectively:
 
 \begin{example}
@@ -6277,7 +6309,7 @@ before making this test.
 void skipwhite();
 \end{example}
 
-Skip whitespace in the input.
+Skip white space in the input.
 
 \begin{example}
 void flush();
@@ -6666,7 +6698,7 @@ minus sign.  Here is one possible IntervalList specification:
 
 1-1003,1006,1008-1030,1050
 
-Whitespace is not permitted in this representation.
+White space is not permitted in this representation.
 
 IntervalList specifiers do not have to be in increasing order,
 but if they are not, they are changed to "canonical form", in which
