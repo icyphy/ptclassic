@@ -29,6 +29,7 @@ Version identification:
 $Id$
 */
 
+extern int RpcFindName(RPCSpot *spot, lsList cmdList, long userOptionWord);
 extern int EditParams();
 extern int EditAttributes();
 extern int EditFormalParams();
