@@ -82,8 +82,8 @@ class ::tycho::PreferenceDialog {
 #
 body ::tycho::PreferenceDialog::constructor {args} {
 
-    foreach tag [::preference info] {
-	set description [::preference cget $tag -description]
+    foreach tag [::tycho::preference info] {
+	set description [::tycho::preference cget $tag -description]
 	if { $description != "" } {
 	    itk_component add $tag {
 		button $itk_component(childsite).$tag -text $description \

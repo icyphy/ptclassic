@@ -2001,7 +2001,7 @@ body ::tycho::Edit::getTaggedText {tag} {
 # "edittext" preferences.
 #
 body ::tycho::Edit::preference {mode args} {
-    eval ::preference $mode "edittext" $args
+    eval ::tycho::preference $mode "edittext" $args
 }
 
 #####################################################################

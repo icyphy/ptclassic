@@ -386,7 +386,7 @@ body ::tycho::ToolBar::insert {tag str} {
 # it to subscribe to the "dialogs" preference set.
 #
 body ::tycho::ToolBar::preference {mode args} {
-    eval ::preference $mode "dialogs" $args
+    eval ::tycho::preference $mode "dialogs" $args
 }
 
 #######################################################################

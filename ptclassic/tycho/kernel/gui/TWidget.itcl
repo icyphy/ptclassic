@@ -367,5 +367,5 @@ body ::tycho::TWidget::safeEval {args} {
 # must indicate so by overriding this method.
 #
 body ::tycho::TWidget::preference {mode args} {
-    eval ::preference $mode "global" $args
+    eval ::tycho::preference $mode "global" $args
 }

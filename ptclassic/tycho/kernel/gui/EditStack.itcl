@@ -165,6 +165,6 @@ body ::tycho::EditStack::parseNow {start stop} {
 # "stacktrace" preferences.
 #
 body ::tycho::EditStack::preference {mode args} {
-    eval ::preference $mode "stacktrace" $args
+    eval ::tycho::preference $mode "stacktrace" $args
 }
 

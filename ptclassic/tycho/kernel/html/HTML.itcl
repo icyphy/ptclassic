@@ -846,7 +846,7 @@ body ::tycho::HTML::render {obj {html {}}} {
 # "viewhtml" preferences.
 #
 body ::tycho::HTML::preference {mode args} {
-    eval ::preference $mode "viewhtml" $args
+    eval ::tycho::preference $mode "viewhtml" $args
 }
 
 #####################################################################
@@ -1013,7 +1013,8 @@ proc HMextract_param {param key {val ""}} {
     }
     set ws "    \n\r"
     
-    # look for name=value combinations.  Either (') or (") are valid delimeters
+    # look for name=value combinations.  Either (') or (") are
+    # valid delimeters    (for emacs highlighting) ;#"
     if {[regsub -nocase [format {.*%s[%s]*=[%s]*"([^"]*).*} $key $ws $ws] \
             $param {\1} value] ||
     [regsub -nocase [format {.*%s[%s]*=[%s]*'([^']*).*} $key $ws $ws] \
@@ -1422,7 +1423,7 @@ proc HMtag_tcl {win param text} {
     set HTMLcommand [winfo command $HTML]
 
     # Set the color
-    set color [::preference get viewhtml tclColor]
+    set color [::tycho::preference get viewhtml tclColor]
     $win tag configure tcl -foreground $color
     $win tag bind tcl <Double-Button-1> \
 	    "uplevel #0 $HTMLcommand execTcl; break"
@@ -1536,7 +1537,7 @@ proc HMwent_to {win where {count 0} {color {}}} {
     }
 
     if {$color == {}} {
-        set color [::preference get viewhtml targetColor]
+        set color [::tycho::preference get viewhtml targetColor]
     }
 
     # Temporarily change the background color
