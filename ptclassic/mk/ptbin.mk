@@ -104,7 +104,7 @@ endif
 
 ifdef PTRIM
 	PIGI =		$(BASENAME).ptrim
-	VERSION_DESC =	'With SDF, DE, BDF and CGC'
+	VERSION_DESC =	'With SDF, DE, BDF, DDF and CGC'
 	BDF =		1
 	CGCFULL =	1
 	CGFULL =	1
