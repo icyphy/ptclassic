@@ -48,11 +48,11 @@ ENHANCEMENTS, OR MODIFICATIONS.
 void initFlattenLayers();
 
 static int		layer_id;
-static int		saveFlatLayer();
-static fa_box		*findFlatLayer();
+static int		saveFlatLayer ARGS((char *name, fa_geometry *geo));
+static fa_box		*findFlatLayer ARGS((char *name));
+static enum st_retval freeFlatLayer ARGS((char *key, char *value, char *arg));
 
-void
-flattenCell()
+void flattenCell()
 {
 	layer_id = 0;
 }
@@ -69,7 +69,6 @@ flattenSubcellLayer(facet, layer, flat_geos, subcell_geos)
 	octObject	inst;
 	octObject	box;
 	fa_box		*first_box, *fang_box;
-	static fa_box	*findFlatLayer();
 
 	++layer_id;
 
@@ -130,8 +129,6 @@ initFlattenLayers()
 void
 reinitFlattenLayers()
 {
-	static enum st_retval	freeFlatLayer();
-
 	if (flat_table) {
 		/* Free any existing symbol table entries. */
 		(void) st_foreach(flat_table, freeFlatLayer, NIL(char));
