@@ -5,7 +5,7 @@
 #
 # @Version: $Id$
 #
-# @Copyright (c) 1995-%Q% The Regents of the University of California.
+# @Copyright (c) 1995-1997 The Regents of the University of California.
 # All rights reserved.
 # 
 # Permission is hereby granted, without written agreement and without
@@ -87,12 +87,6 @@ class ::tycho::Edit {
 
     # Specify the text in the edit window.
     itk_option define -text text Text {}
-
-    # The color of selected text.
-    itk_option define -selectcolor selectColor SelectColor white {
-	$itk_component(text) tag configure sel \
-		-background $itk_option(-selectcolor)
-    }
 
     ##########################################################################
     ####                         public methods                           ####
@@ -443,7 +437,7 @@ body ::tycho::Edit::constructor {args} {
     } {
 	keep -background -highlightbackground \
 		-highlightcolor -selectforeground -cursor \
-		-insertbackground -relief
+		-insertbackground -relief -selectbackground
         rename -width -textwidth textWidth TextWidth
         rename -height -textheight textHeight TextHeight
 	rename -font -textfont textfont TextFont
@@ -682,15 +676,22 @@ body ::tycho::Edit::constructor {args} {
     # Initialize options and tell preferences manager to ignore them
     eval itk_initialize $args
 
-    # Subscribe to the preference set
+    # Subscribe to the preference set. Note that the foreground
+    # color of selected text is made the same as the unselected
+    # color.
     preference subscribeoptions $this \
-	    -basefont textFont \
-	    -textforeground textForeground \
-	    -textbackground textBackground \
-	    -relief textRelief \
+            -insertbackground insertBackground \
+            -basefont textFont \
+            -textforeground textForeground \
+            -textbackground textBackground \
+            -selectforeground textForeground \
+            -selectbackground selectColor \
+ 	    -relief textRelief \
 	    -textwidth textWidth \
-	    -textheight textHeight \
-	    -selectcolor selectColor
+	    -textheight textHeight
+
+    # Set this to zero because it's completely bogus
+    $itk_component(text) configure -selectborderwidth 0
 
     set maxLineLength \
             [preference get fillColumn]
@@ -1728,6 +1729,7 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 	raise $tl.search
 	$tl.search configure -nochange $nochange
 	$tl.search configure -backwards $backwards
+        $tl.search select pattern range 0 end
 
 	$tl.search focusin
     } {
@@ -1747,6 +1749,7 @@ body ::tycho::Edit::searchQuery {backwards nochange} {
 		    -geometry +0+0 \
 		    -title $tlname
 	    wm deiconify $tl.search
+            $tl.search select pattern range 0 end
 	"
     }
 }
