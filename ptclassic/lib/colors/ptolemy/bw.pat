@@ -173,6 +173,11 @@
       (width -2)
       (fillPattern 1 1 "1")
   )
+  (figureGroupDefault fixColor
+      (userData priority 5)
+      (width -2)
+      (fillPattern 1 1 "1")
+  )
   (figureGroupDefault iconShadow
       (userData priority 0)
       (width -2)
