@@ -631,6 +631,11 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Home> [code "%Q undoBoundary"]
     bind $itk_component(text) <Pause> [code "%Q undoBoundary"]
     
+    # font size control
+    bind $itk_component(text) <Control-equal> "$this upSize"
+    bind $itk_component(text) <Control-plus> "$this upSize"
+    bind $itk_component(text) <Control-minus> "$this downSize"
+    
     # We have gotten some reported problems about these keys
     # being undefined on some machines.  But they also seem
     # be needed for other machines.  Hence the catch.
@@ -2171,12 +2176,12 @@ body ::tycho::Edit::initializeMenubar {} {
 
     $myMenubar addSeparator Format
     
-    # Add size control
-    $myMenubar command {Increase Size} Format \
-            -command "$this upSize"
+    # Add font size control
+    $myMenubar command "Bigger Font" Format -underline 0\
+            -accelerator "C-+" -command "$this upSize"
 
-    $myMenubar command {Decrease Size} Format \
-            -command "$this downSize"
+    $myMenubar command "Smaller Font" Format -underline 0\
+            -accelerator "C--" -command "$this downSize"
 
 }
 
