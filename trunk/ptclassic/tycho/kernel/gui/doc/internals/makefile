@@ -50,12 +50,10 @@ EXTRA_SRCS =	\
 	FontManager.html \
 	base.html \
 	console.html \
-	contents.html \
 	dialogclasses.html \
 	dialogs.html \
 	dialogwindow.html \
 	dismiss.html \
-	documentation.html \
 	edit.html \
 	error.html \
 	file.html \
