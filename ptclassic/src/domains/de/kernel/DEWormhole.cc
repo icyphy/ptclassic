@@ -7,6 +7,7 @@ Version identification:
 
  Programmer: Soonhoi Ha 
  Date of creation: 6/15/90
+ Revision : set up the flag (delayType) depending on the scheduler in start().
 
 *******************************************************************/
 #include "DEWormhole.h"
@@ -17,6 +18,13 @@ Version identification:
 
 ********************************************************************/
 
+void DEWormhole :: start()
+{
+	Wormhole :: setup();
+	if (mySched()->amITimed())	delayType = TRUE;
+	else				delayType = FALSE;
+}
+	
 void DEWormhole :: go()
 {
 	run();
