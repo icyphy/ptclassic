@@ -36,28 +36,35 @@ PL_SRCS= \
  C50ASin.pl \
  C50Abs.pl \
  C50Add.pl \
+ C50AddInt.pl \
  C50Chop.pl \
  C50Commutator.pl \
  C50Const.pl \
+ C50ConstInt.pl \
  C50Cos.pl \
  C50Delay.pl \
  C50Distributor.pl \
  C50DownSample.pl \
  C50Fork.pl \
  C50Gain.pl \
+ C50GainInt.pl \
  C50IIDGaussian.pl \
  C50IIDUniform.pl \
  C50Impulse.pl \
  C50Intgrtr.pl \
  C50Limit.pl \
  C50LookupTbl.pl \
+ C50MaxMin.pl \
  C50Mpy.pl \
  C50MpyInt.pl \
  C50MpyShift.pl \
+ C50Mux.pl \
  C50Neg.pl \
- C50Nop.pl \
+ C50OrderTwoInt.pl \
  C50Pad.pl \
  C50QuantRange.pl \
+ C50Quant.pl \
+ C50QuantIdx.pl \
  C50Ramp.pl \
  C50ReadFile.pl \
  C50ReadFileInt.pl \
@@ -66,10 +73,14 @@ PL_SRCS= \
  C50Reverse.pl \
  C50Rotate.pl \
  C50Sgn.pl \
+ C50SgnInt.pl \
  C50Shifter.pl \
  C50Sin.pl \
  C50Sqr.pl \
  C50Sub.pl \
+ C50SubInt.pl \
+ C50Table.pl \
+ C50TableInt.pl \
  C50Tone.pl \
  C50UpSample.pl \
  C50VarDelay.pl \
