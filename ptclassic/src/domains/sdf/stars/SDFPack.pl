@@ -6,7 +6,7 @@ defstar {
 	version { $Id$}
 	author { R. P. Gunturi }
 	copyright {
-Copyright (c) 1999-%Q% The Regents of the University of California.
+Copyright (c) 1996-%Q% The Regents of the University of California.
 All rights reserved.
 See the file $PTOLEMY/copyright for copyright notice,
 limitation of liability, and disclaimer of warranty provisions.
