@@ -87,6 +87,9 @@ class ::tycho::Simulation {
     # Start the simulation
     method start {}
 
+    # Start the simulation server
+    method startServer {}
+
     # Stop the simulation
     method stop {}
 
@@ -171,9 +174,11 @@ body ::tycho::Simulation::constructor {args} {
     eval configure $args
 
     # Create the remote process and the object that talks to it
-    if !$disconnect {
-	set _socketTalker [::tycho::JRPC #auto -debug 1 -portnum $portnum]
-    }
+    #if !$disconnect {
+#	set _socketTalker [::tycho::JRPC #auto -debug 1 -portnum $portnum]
+#    }
+
+    puts "Simulation ready"
 }
 
 
@@ -243,6 +248,15 @@ body ::tycho::Simulation::resume {} {
 body ::tycho::Simulation::start {} {
     debug "Start"
    _send {$univ start}
+}
+
+#######################################################################
+#### startServer
+#
+# Start the simulation server.
+#
+body ::tycho::Simulation::startServer {} {
+    set _socketTalker [::tycho::JRPC #auto -debug $debug -portnum $portnum]
 }
 
 #######################################################################
