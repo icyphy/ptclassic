@@ -29,12 +29,13 @@ static char SccsId[]="$Id$";
 #include "oct.h"
 #include "tap.h"
 #include "st.h"
+#include "vov.h"
 #include "utility.h"
 
 #define OCT_TO_LAMBDA 20
 #define CONTACTS_DIR "special_contacts"
 
-static
+static int
   create_new_via(lay1, lay2, wid, height)
 char* lay1;
 char* lay2;
@@ -125,7 +126,6 @@ octTransformType *trans;
     char* name;
     char buf[1024];
     char via_name[1024];
-    octObject layer;
     char* l1name = lay1->contents.layer.name;
     char* l2name = lay2->contents.layer.name;
 
