@@ -157,6 +157,9 @@ class ::tycho::Edit {
     # Open a help window.
     method help {}
 
+    # Begin incremental search using the "minibuffer"
+    method incSearchMinibuffer {{backward 0}}
+
     # Indicate whether or not modifications are allowed in the displayed text.
     method indicateReadOnly {bool}
 
@@ -265,6 +268,9 @@ class ::tycho::Edit {
     # After a fill, this variable will indicate the index where the fill began.
     protected variable fillStart
 
+    # Array for incremental search static data: (to, from, fail)
+    protected variable incSearchArray
+
     # Specify how much parsing is done (how many lines of text) before
     # the rest is deferred. This number may need to be tuned to work well
     # on a wide range of platforms.  It determines the responsivity of the
@@ -292,6 +298,9 @@ class ::tycho::Edit {
     # the "current" mark sits.
     protected method getTaggedText {tag}
 
+    # Process an incremental search keystroke or special message
+    protected method incSearch {key}
+    
     # Initialize the menu/status/tool bars
     protected method initialize {{menubar {}} {statusbar {}} {toolbar {}}}
 
@@ -540,8 +549,10 @@ body ::tycho::Edit::constructor {args} {
     bind $itk_component(text) <Control-o> "%Q openLine; break"
     
     # Search commands
-    bind $itk_component(text) <Control-s> "%Q search; break"
-    bind $itk_component(text) <Control-r> "%Q searchQuery 1 0; break"
+    bind $itk_component(text) <Control-s> "%Q incSearchMinibuffer"
+    bind $itk_component(text) <Control-r> "%Q incSearchMinibuffer 1"
+    bind $itk_component(text) <Control-S> "%Q search; break"
+    bind $itk_component(text) <Control-R> "%Q searchQuery 1 0; break"
     bind $itk_component(text) <Find> "%Q searchQuery 1 0; break"
 
     if {$tcl_platform(platform) != "windows"} {
@@ -667,18 +678,18 @@ body ::tycho::Edit::constructor {args} {
 	bind $itk_component(text) <KP_Home> [code "%Q undoBoundary"]
     }
 
-    # Initialize options and tell preferences manager to ignore them
+    # Initialize options and tell stylesheet manager to ignore them
     eval itk_initialize $args
 
     # Subscribe to the style-sheets
     stylesheet subscribe \
-            -basefont         fonts textFont \
-            -insertbackground text insertBackground \
-            -textforeground   text foreground \
-            -textbackground   text background \
-            -selectforeground text selectForeground \
-            -selectbackground text selectBackground \
- 	    -relief           layout textRelief \
+	    -basefont         fonts textFont \
+	    -insertbackground text insertBackground \
+	    -textforeground   text foreground \
+	    -textbackground   text background \
+	    -selectforeground text selectForeground \
+	    -selectbackground text selectBackground \
+	    -relief           layout textRelief \
 	    -textwidth        layout textWidth \
 	    -textheight       layout textHeight
 
@@ -1407,6 +1418,97 @@ body ::tycho::Edit::help {} {
 }
 
 #####################################################################
+#### incSearchMinibuffer
+# Use the minibuffer to implement an incremental search. Callback is
+# ::tycho::Edit::incSearch. Sets up bindings and data when the search
+# is began. 
+#
+# The search itself is similar to Emacs but more akin to Borland C++. 
+#
+# Hitting keys (letters, symbols, backspace) works exactly as an 
+# incremental search should.
+#
+# Hitting <Control-s> (or <Control-r> for a reverse search) repeatedly resets
+# the point the search begins from, so that deleting deletes characters in 
+# the search buffer, but does not undo ala Emacs. 
+#
+# Hitting the arrow keys
+# <Control-s> initiates or repeats a forward search
+# <Control-r> initiates or repeats a reverse search
+# <Control-e> switches between an exact and regexp search. 
+# <Control-c> switches between case and nocase
+# 
+# Wrapping is currently disabled.
+#
+# There is currently no mapping between settings in the incremental search
+# and the EditSearch.
+#
+body ::tycho::Edit::incSearchMinibuffer {{backward 0}} {
+    # Because of Tcl's event model need to scope for callbacks
+    set incSearch "@scope ::tycho::EditProgram $this incSearch"
+
+    if { [statusbar] == "" } {
+        search
+    } else {
+        statusbar entry "i-search:"\
+                -default "" \
+                -command "$incSearch end" \
+                -keycommand "$incSearch %A"
+
+        # set point to start search
+        set incSearchArray(from) [$itk_component(text) index insert]
+
+        # set point to end search
+        if {$backward} {
+            set incSearchArray(to) 1.0
+        } else {
+            set incSearchArray(to) end
+        }
+
+        # set regexp/exact if unset
+        if {![info exists incSearchArray(regexp)]} { 
+            set incSearchArray(regexp) 1
+        }
+
+        # set case if unset
+        if {![info exists incSearchArray(nocase)]} { 
+            set incSearchArray(nocase) 0
+        }
+
+        # set failure status
+        set incSearchArray(fail) 0
+
+        set entryWidget [statusbar _entrywidget]
+
+        # Use cursor keys, escape (as well as return) to get out
+        bind $entryWidget <Left> "$incSearch end; break"
+        bind $entryWidget <Right> "$incSearch end; break"
+        bind $entryWidget <Up> "$incSearch end; break"
+        bind $entryWidget <Down> "$incSearch end; break"
+        bind $entryWidget <Escape> "$incSearch end; break"
+
+        # does nothing anyway, disable messages from it
+        bind $entryWidget <Delete> "break;"
+
+        # special "key" for BackSpace
+        bind $entryWidget <BackSpace> "$incSearch del"
+
+        # special "key" for <Control-c> (switch from nocase to case and vv)
+        bind $entryWidget <Control-c> "$incSearch switchCase"
+
+        # special "key" for <Control-e> (switch from regexp to exact and vv)
+        bind $entryWidget <Control-e> "$incSearch switchType"
+
+        # special "key" for <Control-s> (repeat or switch direction)
+        bind $entryWidget <Control-s> "$incSearch forward"
+
+        # special "key" for <Control-r> (repeat or switch direction)
+        bind $entryWidget <Control-r> "$incSearch backward"
+    }    
+}
+
+
+#####################################################################
 #### indicateReadOnly
 # Indicate in the status bar, in the menus, and by the mouse cursor,
 # whether modifications are allowed on the buffer.
@@ -1619,7 +1721,7 @@ body ::tycho::Edit::print {} {
 body ::tycho::Edit::queryFillColumn {} {
     set maxLineLength \
             [safeEval ::tycho::queryinfo "Right column for text fill:" \
-            [stylesheet get text fillColumn] \
+            [stylesheet get layout fillColumn] \
             15]
 }
 
@@ -2090,6 +2192,154 @@ body ::tycho::Edit::getTaggedText {tag} {
 	return {}
     }
 }
+
+#####################################################################
+#### incSearch
+# Callback for incremental searching. Called whenever the user presses
+# a key. Keys which are remapped before being passed are:
+# <ul>
+# <li>_BackSpace_ -> del
+# <li>_Control-s_ -> forward
+# <li>_Control-r_ -> backward   
+# <li>_Control-c_ -> switchCase (go from nocase to case sensitive)
+# <li>_Control-e_ -> switchType (go from regexp to exact type search)
+# <li>_(arrow keys)_ -> end
+# <li>_Delete_ -> (ignored: Tk entries do not respond to delete)
+# </ul>
+#
+body ::tycho::Edit::incSearch {key} {
+    set status {}
+
+    # Local variables 
+    set entryWidget [statusbar _entrywidget]
+    set searchText [$entryWidget get]
+    set textWidget $itk_component(text)
+
+    # End the search
+    if {$key == "end"} {
+        statusbar puts {}
+        focus $textWidget
+        return 
+    }
+
+    # Switch direction
+    if {$key == "forward"} {
+        # add one character to avoid "refinding" 
+        set incSearchArray(from) [$textWidget index insert]+1c
+        if {$incSearchArray(to) != "end"} {
+            # switch direction
+            set incSearchArray(to) end
+            set incSearchArray(fail) 0
+        } 
+    } elseif {$key == "backward"} {
+        set incSearchArray(from) [$textWidget index insert]
+        if {$incSearchArray(to) != "1.0"} {
+            # switch direction
+            set incSearchArray(to) 1.0
+            set incSearchArray(fail) 0
+        } 
+    }
+
+    # Switch type
+    if {$key == "switchType"} {
+        if {$incSearchArray(regexp)} {
+            set incSearchArray(regexp) 0
+            set status "exact"
+        } else {
+            set incSearchArray(regexp) 1
+            set status "regexp"
+        }
+    }
+
+    # Switch case
+    if {$key == "switchCase"} {
+        if {$incSearchArray(nocase)} {
+            set incSearchArray(nocase) 0
+            set status "case"
+        } else {
+            set incSearchArray(nocase) 1
+            set status "nocase"
+        }
+    }
+
+    # Check for valid ASCII text, append to searchText or remove from it
+    # if it's a backspace (the entry widget behaves strangely because of
+    # it's timing.)
+    if [regexp {^[ -~]$} $key] {
+        # It's a single ASCII text character (32-126)
+        append searchText $key
+    } elseif {$key == "del"} {
+        # It's a backspace
+        set searchText [string range $searchText 0 \
+                [expr [string length $searchText] - 2]]
+    }       
+
+    # Set forward/backward flag
+    if {$incSearchArray(to) == "1.0"} {
+        set dirflag "-backward" 
+    } else {
+        set dirflag "-forward"
+    }
+
+    # set regexp/exact flag
+    if {$incSearchArray(regexp)} {
+        set typeflag "-regexp"
+    } else {
+        set typeflag "-exact"
+    }
+
+    # set nocase flag
+    if {$incSearchArray(nocase)} {
+        set caseflag "-nocase"
+    } else {
+        set caseflag "--"
+    }
+    
+    set foundLength 0
+    # Search the text
+    set searchIndex [$textWidget search \
+            $dirflag $typeflag -count foundLength $caseflag \
+            $searchText $incSearchArray(from) $incSearchArray(to)]
+    
+    # Test for success
+    if {$searchIndex != {}} {
+        # Remove the selection
+        $textWidget tag remove sel 1.0 end
+    
+        # Add selection
+        set incSearchArray(fail) 0
+        $textWidget tag add sel $searchIndex \
+                "$searchIndex + $foundLength chars"
+
+        # Show selection
+        $textWidget see $searchIndex
+        $textWidget mark set insert $searchIndex
+    } else {
+        # Fix to keep from losing place
+        if [regexp {^.*[+]1c$} $incSearchArray(from)] {
+            set incSearchArray(from) \
+                    [string trimright $incSearchArray(from) +1c]
+        }
+        if {!$incSearchArray(fail)} {
+            # First time
+            set incSearchArray(fail) 1
+            bell
+        }
+        if {$status != {}} {
+            append status ", failing"
+        } else {
+            append status "failing"
+        }
+    }
+    
+    # Update statusbar
+    if {$status != {}} {
+        statusbar entry "i-search($status):"
+    } else {
+        statusbar entry "i-search:"
+    }
+}
+
 
 #####################################################################
 #### initialize
