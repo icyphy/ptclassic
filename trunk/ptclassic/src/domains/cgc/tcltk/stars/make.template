@@ -94,9 +94,6 @@ STAR_MK=cgctcltkstars
 EXTRA_SRCS= $(STAR_MK).c $(PL_SRCS) $(SCRIPTS) $(TCL_SRCS)
 LIB=libcgctcltk.$(LIBSUFFIX)
 
-# Where star doc files go
-STARDOCDIR = ../../doc/stars
-
 all:		makefile stars_all
 
 install:	stars_install
