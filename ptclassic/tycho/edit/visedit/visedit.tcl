@@ -50,7 +50,7 @@ if { [lsearch -exact $auto_path $env(VISEDIT_LIBRARY)] == -1 } {
 
 ### MODE MAPPINGS
 ::tycho::register extensions "dag" .dag
-::tycho::register extensions "dfg" .dfg
+::tycho::register extensions "forest" .fst
 ::tycho::register extensions "std" .std
 ::tycho::register extensions "indexbrowser" .idx
 
