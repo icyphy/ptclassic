@@ -38,6 +38,8 @@ Note: all print functions append \n to string before printing.
 #include "octMacros.h"
 #include "list.h"
 #include "rpcApp.h"
+#include "xfunctions.h"
+
 #define VemReady() (RPCSendStream != 0)
 
 /* Controls whether errors get printed out in windows */
