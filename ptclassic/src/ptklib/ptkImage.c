@@ -41,14 +41,15 @@ information about the usage and redistribution of Tk, see the
 the file "license.terms" under the Tk distribution in $PTOLEMY/tcltk.
  */
 
-#include "local.h"
-#include "ptk.h"
-#include "ptkImage.h"
 #include <math.h>
 #include <ctype.h>
 #include <string.h>
 #include <stdlib.h>
 #include "err.h"
+#include "local.h"
+
+/* We must include ptkImage.h last because it pulls in ptk.h.  See ptk.h. */
+#include "ptkImage.h"
 
 /* From Tk's generic/tkInt.h */
 /*
