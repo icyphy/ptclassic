@@ -70,6 +70,17 @@ end
 
 soelim $dirheader/shared $dirheader/domain \
 	init overall > /tmp/pt$$
+if ( -d targets ) then
+        if (-e targettitle) then
+                # set type for this section
+                echo '.ds TY "target' >> /tmp/pt$$
+                cat targettitle >> /tmp/pt$$
+        endif
+        cd targets
+        # print all targets
+        cat -s * >> /tmp/pt$$
+        cd ..
+endif
 if ( -d stars ) then
 	if (-e starstitle) then
 		# set type for this section
@@ -89,17 +100,6 @@ if ( -d demos ) then
 	endif
 	cd demos
 	# print all demos
-	cat -s * >> /tmp/pt$$
-	cd ..
-endif
-if ( -d targets ) then
-	if (-e targettitle) then
-		# set type for this section
-		echo '.ds TY "target' >> /tmp/pt$$
-		cat targettitle >> /tmp/pt$$
-	endif
-	cd targets
-	# print all targets
 	cat -s * >> /tmp/pt$$
 	cd ..
 endif
