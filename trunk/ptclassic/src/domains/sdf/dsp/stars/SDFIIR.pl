@@ -3,12 +3,12 @@ defstar {
     domain {SDF}
     desc {
 A Infinite Impulse Response (IIR) filter.
-Coefficients are in the "numerator" and "denominator", both start
-with z^0 terms and decrease in powers of z.
+Coefficients are in the "numerator" and "denominator", and both start
+with $z^0$ terms and decrease in powers of $z$.
     }
-    version {$Id$}
+    version { $Id$ }
     author { Kennard White }
-	copyright {
+    copyright {
 Copyright (c) 1990, 1991, 1992 The Regents of the University of California.
 All rights reserved.
 See the file ~ptolemy/copyright for copyright notice,
@@ -17,19 +17,21 @@ limitation of liability, and disclaimer of warranty provisions.
     location { SDF dsp library }
     explanation {
 .PP
-This star implements a infinite-impulse response filter of arbirary order.
-The parameters of the star specify H(z), the Z-transform of an
-impulse response h(n).  The output of the star is the convolution
-of the input with h(n).
+This star implements an infinite impulse response filter of arbitrary order.
+The parameters of the star specify $H(z)$, the $Z$-transform of an
+impulse response $h(n)$.  The output of the star is the convolution
+of the input with $h(n)$.
 .PP
-The transfer function implemented is of the form H(z)=G*N(1/z)/D(1/z),
-where N() and D() are polynomials.  The state "gain" specifies G, and
-the state arrays "numerator" and "denominator" specify N and D, respectively.
-Both arrays start with z^0 terms and decrease in powers of z (increase in
-powers of 1/z).  Note that the leading term of D is *not* ommitted.
+The transfer function implemented is of the form $H(z) ~=~ G*N(1/z)/D(1/z)$,
+where $N()$ and $D()$ are polynomials.  The state "gain" specifies $G$, and
+the state arrays "numerator" and "denominator" specify $N$ and $D$,
+respectively.
+Both arrays start with $z^0$ terms and decrease in powers of $z$ (increase in
+powers of $1/z$).  Note that the leading term of $D$ is *not* omitted.
 .PP
 Note that the numerical finite precision noise increases with the filter order.
-It is often desirable to expand the filter into a parallel or cascade form.
+To minimize this distortion, it is often desirable to expand the filter
+into a parallel or cascade form.
     }
     seealso { FIR, Biquad }
     input {
@@ -107,7 +109,7 @@ It is often desirable to expand the filter into a parallel or cascade form.
 	} else {
 	    if ( (b0 = denominator[0]) == 0.0 ) {
 		// XXX: should sanity-check b0 more thoroughly
-		// (e.g., shouldnt even be close to zero)
+		// (e.g., shouldn't even be close to zero)
 		Error::abortRun(*this, 
 		  "Must have non-zero leading denominator");
 		return;
