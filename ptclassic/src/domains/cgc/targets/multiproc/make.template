@@ -15,6 +15,7 @@ include $(CONFIG)
 
 SDFKERNEL = $(ROOT)/src/domains/sdf/kernel
 CGKERNEL = $(ROOT)/src/domains/cg/kernel
+CGDDFKERNEL = $(ROOT)/src/domains/cg-ddf/kernel
 CGCKERNEL = $(ROOT)/src/domains/cgc/kernel
 CGCSTARS = $(ROOT)/src/domains/cgc/stars
 EGKERNEL = $(ROOT)/src/domains/sdf/expgraph
@@ -22,7 +23,7 @@ PARDIR = $(ROOT)/src/domains/cg/parScheduler
 CGTARDIR = $(ROOT)/src/domains/cg/targets
 
 INCL=-I$(CGCKERNEL) -I$(CGKERNEL) -I$(SDFKERNEL) -I$(KERNDIR) -I$(EGKERNEL) \
-	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS)
+	-I$(PARDIR) -I$(CGTARDIR) -I$(CGCSTARS) -I$(CGDDFKERNEL)
 
 PL_SRCS = \
 	CGCUnixSend.pl \
@@ -30,8 +31,8 @@ PL_SRCS = \
 
 PLSRC = $(PL_SRCS:.pl=.cc)
 
-SRCS=CGCMultiTarget.cc $(PLSRC) 
-HDRS=CGCMultiTarget.h $(PLSRC:.cc=.h)
+SRCS=CGCMultiTarget.cc CGCDDFTarget.cc $(PLSRC) 
+HDRS=CGCMultiTarget.h CGCDDFTarget.h $(PLSRC:.cc=.h)
 
 OBJS = $(SRCS:.cc=.o)
 
