@@ -59,6 +59,12 @@ class ::tycho::EditForest {
     destructor {}
     
     ###################################################################
+    ####                            options                        ####
+
+    # Specify the forest object to display and edit.
+    itk_option define -forest forest Forest {}
+
+    ###################################################################
     ####                         public methods                    ####
 
     # Clear the display, discarding the current forest.
@@ -82,20 +88,36 @@ class ::tycho::EditForest {
 }
 
 #######################################################################
+#### -forest option configuration
+# If an non-empty string is given as the value to this argument, it is
+# taken to be the name of an instance of class Forest to display and
+# edit.  The instance must exist already and be accessible in the
+# current scope.
+#
+configbody ::tycho::EditForest::forest {
+    set fst $itk_option(-forest)
+    if {$fst != {}} {
+        $itk_component(graphics) configure -forest $fst
+    }
+}
+
+#######################################################################
 #### constructor
 #
 body ::tycho::EditForest::constructor {args} {
+    component graphics undoEnable 0
 
-    addMenuItem {Edit Node} Edit -underline 0 -accelerator "e" \
-	    -command "$this component graphics edit"
+    addMenuSeparator Edit
 
-    addMenuItem {New Root} Edit -underline 4 -accelerator "r" \
+    addMenuItem {New Root} Edit -underline 4 -accelerator "R" \
 	    -command "$this component graphics addRoot"
 
-    addMenuItem {New Child} Edit -underline 4 -accelerator "c" \
+    addMenuItem {New Child} Edit -underline 4 -accelerator "C" \
 	    -command "$this component graphics addChild"
 
     eval itk_initialize $args
+
+    component graphics undoEnable 1
 }
 
     ###################################################################
@@ -109,7 +131,7 @@ body ::tycho::EditForest::constructor {args} {
 body ::tycho::EditForest::clear {} {
     if [getReadOnly] {bell; return}
     [component graphics forest] clear
-    component graphics redraw
+    component graphics updateDisplay
 }
 
 #######################################################################
@@ -131,11 +153,9 @@ body ::tycho::EditForest::setReadOnly {bool} {
     ::tycho::Graphics::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
-            disableMenuItem {Edit Node} Edit
             disableMenuItem {New Root} Edit
             disableMenuItem {New Child} Edit
 	} {
-            enableMenuItem {Edit Node} Edit
             enableMenuItem {New Root} Edit
             enableMenuItem {New Child} Edit
 	}

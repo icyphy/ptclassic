@@ -69,9 +69,8 @@ class ::tycho::Graphics {
     # Insert the specified data into the canvas.
     method insertData {data}
 
-    # Reload the current file and redraw the canvas.
-    # FIXME:
-    # method reload {}
+    # Reload data from the current file.
+    method reload {}
 
     # Find the item identified by "name".
     # FIXME: Implement this.
@@ -100,35 +99,47 @@ body ::tycho::Graphics::constructor {args} {
                -top $this
     } {
         keep -readonly -scrolling -canvascolor -cursor 
-        # NOTE:  Cannot keep -canvasheight -canvaswidth.
+        # NOTE:  Cannot keep -canvasheight -canvaswidth, -title, -subtitle.
         # Overrides saved width and height with the defaults.
-        rename -title -canvastitle canvasTitle CanvasTitle
     }
 
     pack $itk_component(graphics) -expand yes -fill both
     
     addMenu Edit left Window -underline 0
 
-    addMenuItem {Undo/Redo} Edit -underline 0 -accelerator "C-x u" \
+    addMenuItem {Undo} Edit -underline 0 -accelerator "z" \
 	    -command "$this component graphics undo"
+
+    addMenuItem {Redo} Edit -underline 0 -accelerator "d" \
+	    -command "$this component graphics redo"
 
     addMenuSeparator Edit
 
-    addMenuItem Cut Edit -underline 0 -accelerator "C-w" \
+    addMenuItem Cut Edit -underline 0 -accelerator "x" \
 	    -command "$this component graphics cut"
     
-    addMenuItem Copy Edit -underline 1 -accelerator "M-w" \
+    addMenuItem Copy Edit -underline 1 -accelerator "c" \
 	    -command "$this component graphics copy"
     
-    addMenuItem Paste Edit -underline 0 -accelerator "C-y" \
+    addMenuItem Paste Edit -underline 0 -accelerator "v" \
 	    -command "$this component graphics paste"
     
     addMenuSeparator Edit
 
-    addMenuItem {Title...} Edit -underline 0 -accelerator "C-t" \
-            -command "$this component graphics titleEdit"
+    addMenuItem {Title...} Edit -underline 0 -accelerator "T" \
+            -command "$this component graphics titleEdit 0"
+
+    addMenuItem {Subtitle...} Edit -underline 2 -accelerator "t" \
+            -command "$this component graphics titleEdit 1"
+
+    addMenuItem {Edit Item} Edit -underline 0 -accelerator "e" \
+	    -command "$this component graphics edit"
 
     eval itk_initialize $args
+
+    # Undo and Redo menu start out disabled
+    disableMenuItem Undo Edit
+    disableMenuItem Redo Edit
 }
 
     ###################################################################
@@ -173,7 +184,6 @@ body ::tycho::Graphics::insertData {data} {
     foreach command $data {
         if [catch {
             eval $itk_component(graphics) $command
-puts "Graphics::insertData: $command"
         } msg] {
             global ::errorInfo
             set saveErr $errorInfo
@@ -184,14 +194,26 @@ puts "Graphics::insertData: $command"
 
 #######################################################################
 #### reload
-# Reload the current file.  This is redefined in order to call redraw
-# on the component widget.  FIXME:  This seems to be a very bad idea.
-# It screws up the size of the canvas, and draws everything twice on startup.
+# Reload the current file.  This is redefined in order to first clear
+# the display, then redraw it.
 #
-# body ::tycho::Graphics::reload {} {
-#     ::tycho::File::reload
-#     after idle "$this component graphics redraw"
-# }
+body ::tycho::Graphics::reload {} {
+    if {$file == "NoName" || $file == ""} {
+	return 
+    }
+    if {$modified} {
+	if {![::tycho::askuser \
+		"The data has been modified. Proceed anyway?"]} {
+	    return 
+	}
+    }
+    component graphics undoBoundary
+    clear
+    markUnmodified
+    ::tycho::File::reload
+    component graphics updateDisplay
+    markUnmodified
+}
 
 #####################################################################
 #### setReadOnly
@@ -204,9 +226,11 @@ body ::tycho::Graphics::setReadOnly {bool} {
     ::tycho::File::setReadOnly $bool
     if [winfo exists $prefix] {
 	if {$bool} {
+            disableMenuItem {Edit Item} Edit
             disableMenuItem {Cut} Edit
             disableMenuItem {Paste} Edit
 	} {
+            enableMenuItem {Edit Item} Edit
             enableMenuItem {Cut} Edit
             enableMenuItem {Paste} Edit
 	}
