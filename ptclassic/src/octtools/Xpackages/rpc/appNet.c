@@ -55,6 +55,12 @@ extern int errno;
 /* #include "message.h" */
 #include "rpcApp.h"
 #include "oh.h"
+#include "ansi.h"
+
+EXTERN rpcInternalStatus RPCReceiveFunctionToken
+  ARGS((long *value, STREAM stream));
+rpcStatus RPCApplicationFunctionComplete();
+
 
 /* see if the application is byte swapped relative to the server */
 void
@@ -79,6 +85,7 @@ int a, b, c, d, server;
 }
 
 
+int
 inet_conn(host, port, option)
 char *host;
 int port;
