@@ -98,16 +98,16 @@ proc ptkSetPragmas {facet instance attrdata} {
     # by the current target, but is stored in the facet.
     set facetdata [ptkGetStringProp $facet "Pragmas"]
     foreach attr $facetdata {
-	# If the attribute is not in attrdata, append it
-	set flag 0
-	foreach datum $attrdata {
-	    if {[lindex $datum 0] == [lindex $attr 0]} {
-		set flag 1
-	    }
-	}
-	if {$flag == 0} {
-	    lappend attrdata $attr
-	}
+        # If the attribute is not in attrdata, append it
+        set flag 0
+        foreach datum $attrdata {
+            if {[lindex $datum 0] == [lindex $attr 0]} {
+                set flag 1
+            }
+        }
+        if {$flag == 0} {
+            lappend attrdata $attr
+        }
     }
     ptkSetStringProp $instance "Pragmas" $attrdata
 }
@@ -130,26 +130,26 @@ proc ptkGetPragmas {facet instance} {
     set stored [ptkGetStringProp $instance "Pragmas"]
 
     foreach pragma [pragmaDefaults $target] {
-	set pragmaname [lindex $pragma 0]
-	set pragmatype [lindex $pragma 1]
-	set pragmavalue [lindex $pragma 2]
-	foreach st $stored {
-	    if {[lindex $st 0] == $pragmaname} {
-		set pragmavalue [lindex $st 2]
-	    }
-	}
-	lappend targetPragma [list $pragmaname $pragmatype $pragmavalue]
+        set pragmaname [lindex $pragma 0]
+        set pragmatype [lindex $pragma 1]
+        set pragmavalue [lindex $pragma 2]
+        foreach st $stored {
+            if {[lindex $st 0] == $pragmaname} {
+                set pragmavalue [lindex $st 2]
+            }
+        }
+        lappend targetPragma [list $pragmaname $pragmatype $pragmavalue]
     }
     if {![info exists targetPragma]} {
-	ptkImportantMessage .error "The target has no supported pragmas"
-	return ""
+        ptkImportantMessage .error "The target has no supported pragmas"
+        return ""
     }
     return $targetPragma
 }
 
 proc ptkProcessPragmas {facet parentname instance starname} {
     foreach pragma [ptkGetPragmas $facet $instance] {
-	pragma $parentname $starname [lindex $pragma 0] [lindex $pragma 2]
+        pragma $parentname $starname [lindex $pragma 0] [lindex $pragma 2]
     }
 }
 
@@ -323,10 +323,9 @@ proc ed_AddParamDialog {facet number} {
   pack append $ask $ask.m {top fillx} $ask.fname {top fillx} \
     $ask.ftype {top fillx} $ask.fvalue {top fillx} $ask.b {top fillx}
 
-  ptkRecursiveBind $ask <Return> \
-    "ed_AddParam $facet $number $ask"
-
-  ptkRecursiveBind $ask <M-Delete> "destroy $ask"
+  # "bind" replaces "ptkRecursiveBind" in Tk 4.0
+  bind $ask <Return> "ed_AddParam $facet $number $ask"
+  bind $ask <M-Delete> "destroy $ask"
 
   focus $ask.fname.entry
 }
@@ -402,14 +401,15 @@ proc ed_AddParam {facet number askwin} {
   #     destroy $f.par.f$name
   #     set overWriteParam 1
   # } else {
-  #	destroy $askwin
+  #     destroy $askwin
   #     return
   # }
   #}
 
   ed_MkEntryButton $f.par.f$count $name
-  ptkRecursiveBind $f.par.f$count <Return> \
-    "ed_Apply $facet $number; $top.b.close invoke"
+  bind $f.par.f$count <Return> \
+    "ed_Apply $facet $number
+     $top.b.close invoke"
   bind $f.par.f$count.entry <Tab> \
     "ed_NextEntry $count $f.par $facet $number"
   bind $f.par.f$count.entry <Control-n> \
@@ -640,6 +640,7 @@ proc ptkEditParams {facet number args} {
   frame $u -bd 5
   pack append $top.f $u {bottom fillx} $c {bottom expand fill}
 
+  # Build edit-parameters buttons: OK | Apply | Close | Cancel
   pack append $u \
        [frame $u.okfr -relief sunken -bd 2] \
        {left expand fillx} \
@@ -659,7 +660,7 @@ proc ptkEditParams {facet number args} {
                          $u.close invoke"] \
        {expand fill}
 
-# Joe Buck's fix <jbuck@Synopsys.com> 11/93
+  # Joe Buck's fix <jbuck@Synopsys.com> 11/93
 
   if {$number == "NIL" && $args == ""} {
     pack append $u \
@@ -686,6 +687,7 @@ proc ptkEditParams {facet number args} {
     return
   }
 
+  # Define parameter text entry windows and key bindings
   foreach param $paramList {
     set name [lindex $param 0]
     if [string match NIL $name] {
@@ -710,13 +712,16 @@ proc ptkEditParams {facet number args} {
 
     ed_MkEntryButton $f.par.f$count $name
 #   bind $f.par.f$count.entry <Any-Leave> \
-#     "ed_UpdateParam $facet $number [list $name] \[%W get\]"
-    bind $f.par.f$count.entry <Tab> "ed_NextEntry $count \
-        $f.par $facet $number"
-    bind $f.par.f$count.entry <Control-n> "ed_NextEntry $count \
-        $f.par $facet $number"
-    bind $f.par.f$count.entry <Control-p> "ed_PrevEntry $count \
-        $f.par $facet $number"
+#        "ed_UpdateParam $facet $number [list $name] \[%W get\]"
+    bind $f.par.f$count.entry <Tab> \
+        "ed_NextEntry $count $f.par $facet $number"
+    bind $f.par.f$count.entry <Control-n> \
+        "ed_NextEntry $count $f.par $facet $number"
+    bind $f.par.f$count.entry <Control-p> \
+        "ed_PrevEntry $count $f.par $facet $number"
+    bind $f.par.f$count.entry <Return> \
+        "ed_Apply $facet $number $args
+         destroy $top"
     $f.par.f$count.entry insert 0 "$value"
     pack append $f.par $f.par.f$count {top fillx expand pady 1m}
   }
@@ -724,21 +729,35 @@ proc ptkEditParams {facet number args} {
   $c create window 0 0 -anchor nw -window $f -tags frameWindow
   set mm [winfo fpixels $c 1m]
 
-  ptkRecursiveBind $top <M-Delete> \
-    "ed_RestoreParam $facet $number $args; $u.close invoke"
-  ptkRecursiveBind $top <Return> \
-    "ed_Apply $facet $number $args; $u.close invoke"
-
+  # Top-level window key bindings
+  #
+  # -- Bindings are automatically inherited in Tk 4.0, so "ptkRecursiveBind"
+  #    has been replaced by "bind"
+  #
+  # -- <Return> binding is now bound to each parameter entry text window
+  #    instead of top-level window because hitting Return when any of the
+  #    buttons were selected would invoke two commands:  one for the Return
+  #    (save current parametes and destory window) and one for the button
+  #    (e.g., the Cancel button restores old parameters and destroys window).
+  #
+  #    bind $top <Return> \
+  #      "ed_Apply $facet $number $args
+  #       destroy $top"
+  #
+  bind $top <M-Delete> \
+    "ed_RestoreParam $facet $number $args
+     destroy $top"
   if {$args == ""} {
     if {!([ptkIsBus $number] || [ptkIsDelay $number] || [ptkIsStar $number])} {
-      ptkRecursiveBind $top <M-a> "ed_AddParamDialog $facet $number"
-      ptkRecursiveBind $top <M-r> \
+      bind $top <M-a> "ed_AddParamDialog $facet $number"
+      bind $top <M-r> \
         "$u.remove config -relief sunken
          ed_RemoveParam $facet $number $top $u
          $u.remove config -relief raised"
     }
   }
 
+  # Finish up
   wm withdraw $top
   update
   ed_ConfigCanvas $top $facet $number
@@ -890,8 +909,8 @@ proc ed_ConfigCanvas {top facet number} {
   set scrollHeight [expr [winfo reqheight $f]+2*$mm]
   set canvWidth $scrollWidth
   set canvHeight $scrollHeight
-  set existh [winfo exist $top.f.hscroll]
-  set existv [winfo exist $top.f.vscroll]
+  set existh [winfo exists $top.f.hscroll]
+  set existv [winfo exists $top.f.vscroll]
 
   if { $scrollWidth > $maxWidth } {
     set scrollWidth 0
@@ -913,7 +932,7 @@ proc ed_ConfigCanvas {top facet number} {
   set buttonWidth [winfo reqwidth $top.b]
   set intWidth \
     [expr ($buttonWidth > $canvWidth) ? $buttonWidth : $canvWidth]
-  if [winfo exist $top.f.vscroll] {
+  if [winfo exists $top.f.vscroll] {
     set intWidth [expr $intWidth+[winfo reqwidth $top.f.vscroll]]
   }
   if {[string first . $intWidth] != -1} {
@@ -979,9 +998,10 @@ proc ptkChooseOne { optionList command {instruction "Choose one:"} } {
   pack $w.optFrame -side top -expand 1 -fill x
   pack $b -side top -expand 1 -fill x
 
-# FIXME? Restore old focus?
-  ptkRecursiveBind $w <Any-Enter> {focus %W}
-  ptkRecursiveBind $w <Return> "$b.f.ok invoke"
+  # "bind" replaces "ptkRecursiveBind" in Tk 4.0
+  # FIXME? Restore old focus?
+  bind $w <Any-Enter> {focus %W}
+  bind $w <Return> "$b.f.ok invoke"
 }
 
 # The following procedure executes format on its arguments
@@ -1098,11 +1118,11 @@ proc ptkEditStrings {instr cmd editList args} {
 
    pack $w.okcancel -side top -fill x
 
-# For the widget bindings to take effect, the focus must be within
-# FIXME? Restore old focus?
-
-   ptkRecursiveBind $w <Any-Enter> {focus %W}
-   ptkRecursiveBind $w <Return> "$w.okcancel.f.ok invoke"
+   # "bind" replaces "ptkRecursiveBind" in Tk 4.0
+   # For the widget bindings to take effect, the focus must be within
+   # FIXME? Restore old focus?
+   bind $w <Any-Enter> {focus %W}
+   bind $w <Return> "$w.okcancel.f.ok invoke"
 }
 
 # This procedure is used within ptkEditStrings for retrieving values
@@ -1180,11 +1200,11 @@ proc ptkEditValues {instr cmd args} {
     "destroy $w"
   pack $w.okcancel -side top -fill x
 
-# For the widget bindings to take effect, the focus must be within
-# FIXME? Restore old focus?
-
-  ptkRecursiveBind $w <Any-Enter> {focus %W}
-  ptkRecursiveBind $w <Return> "$w.okcancel.f.ok invoke"
+  # "bind" replaces "ptkRecursiveBind" in Tk 4.0
+  # For the widget bindings to take effect, the focus must be within
+  # FIXME? Restore old focus?
+  bind $w <Any-Enter> {focus %W}
+  bind $w <Return> "$w.okcancel.f.ok invoke"
 }
 
 # This procedure is used within ptkEditValues for retrieving values
@@ -1293,9 +1313,10 @@ proc ptkChooseMany { optionList command {instruction "Choose:"} } {
   pack $w.optFrame -side top -expand 1 -fill x
   pack $b -side top -expand 1 -fill x
 
-# FIXME? Restore old focus?
-  ptkRecursiveBind $w <Any-Enter> {focus %W}
-  ptkRecursiveBind $w <Return> "$b.f.ok invoke"
+  # "bind" replaces "ptkRecursiveBind" in Tk 4.0
+  # FIXME? Restore old focus?
+  bind $w <Any-Enter> {focus %W}
+  bind $w <Return> "$b.f.ok invoke"
 }
 
 proc ed_ChooseManyAll {w num} {
