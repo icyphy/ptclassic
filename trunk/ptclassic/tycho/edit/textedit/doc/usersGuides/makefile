@@ -46,8 +46,6 @@ VPATH =		$(ROOT)/tycho/editors/textedit/doc/userGuides
 CONFIG =	$(ROOT)/mk/config-$(PTARCH).mk
 include $(CONFIG)
 
-EXTRA_SRCS =
-
 MISC_FILES =
 
 # 'make realclean' should remove tclIndex
