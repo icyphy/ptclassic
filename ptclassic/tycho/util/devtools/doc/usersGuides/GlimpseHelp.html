@@ -10,13 +10,13 @@
 The Tycho Glimpse browser uses the <CODE>glimpse</CODE> program to search
 the sources for patterns.  <CODE>glimpse</CODE> is a binary that is <B>not</B>
 shipped with the Tycho sources, you can get <CODE>glimpse</CODE> sources from
-<A HREF="http://glimpse.cs.arizona.edu">http://glimpse.cs.arizona.edu</A>.
+<A HREF="http://glimpse.cs.arizona.edu"><CODE>http://glimpse.cs.arizona.edu</CODE></A>.
 <p>
 In Tycho, <a href="../../../makefile"><CODE>$TYCHO/makefile</CODE></a>
 contains a <code>glimpse</code> rule that will update
 <code>$TYCHO/.glimpse_index</code> if <code>glimpse</code> is
 installed.
-<p> Note that the Glimpse browser uses the tcl <CODE>exec</CODE>
+<p> Note that the Glimpse browser uses the Tcl <CODE>exec</CODE>
 command, which is unavailable on the Macintosh, so the Glimpse browser
 is not present on that platform.  Note further that we have not tested
 the Glimpse browser under Windows.
