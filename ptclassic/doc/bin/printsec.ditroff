@@ -36,6 +36,7 @@ while ($#argv)
 end
 
 soelim $dirheader/shared $files > /tmp/pt$$
+/bin/rm -f index
 $printcommand $printoptions /tmp/pt$$ >& index
 chmod g+w index
 $contentscmd index
