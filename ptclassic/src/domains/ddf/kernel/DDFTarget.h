@@ -31,7 +31,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
  Declaration for DDFTarget, the default target to be used in the DDF
  domain.  This used to be declared elsewhere.
 
- If restructure is 1, auto-wormholization is performed (default).
+ If restructure is 1, auto-wormholization is performed.
+ This is an experimental facility that automatically creates SDF wormholes
+ for subsystems that consist entirely of SDF stars.  It is disabled by
+ default.
 
 ***********************************************************************/
 #ifndef _DDFTarget_h
@@ -48,7 +51,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 class DDFTarget : public Target {
 protected:
-	IntState restructure;
 
 	// For the original DDF scheduler, it defines the number of
 	// execution cycles to be overlapped in execution.
@@ -62,6 +64,10 @@ protected:
 	// schedulePeriod for interface with a timed domain.
 	FloatState schedulePeriod;
 
+	// Specify whether or not to use the experimental automatic
+	// restructuring of DDF systems.  This facility identifies
+	// SDF subsystems and creates SDF wormholes for them.
+	IntState restructure;
 public:
 	DDFTarget();
 	Block* makeNew() const;
