@@ -635,7 +635,7 @@ int AcyLoopScheduler :: checkTopsort()
     // less than graphSize.
     DataFlowStar *nodei, *pn;
     DFPortHole *p, *q;
-    int flag;
+    int flag=0;
     for (int i=0; i<graphSize; i++) topInvSort[i] = -1;
     for (i = 0; i < graphSize; i++) {
 	if ( (topSort[i] >= 0) && (topSort[i] < graphSize) &&
