@@ -780,36 +780,20 @@ ostream& SDFClusterBag::printOn(ostream& o) {
 	return printPorts(o);
 }
 
-// FORCE is a special input that causes the cluster to simulate execution
-// even if it has already been executed "enough times"
-static const int FORCE = 2;
+// Routine to do a simulated execution of the underlying real stars.
+// This one does a recursion; SDFAtomCluster bottoms out the recursion.
 
-// simulate the execution of the bag cluster.  We do not generate its
-// internal schedule until it becomes runnable, so that the "real stars"
-// will be executed in the right order (since simRunStar is called to
-// generate the schedule).
-
-int SDFClusterBag::simRunStar(int deferFiring) {
-	// handle FORCE input
-	if (deferFiring == FORCE)
-		noTimes = 0;
-	int status = DataFlowStar::simRunStar(deferFiring);
-	if (status == 0) {
-		int nRun = loop();
-		if (sched == 0) {
-			genSched();
-			nRun -= 1;
-		}
-		if (nRun == 0) return status;
-		SDFSchedIter nextStar(*sched);
-		for (int i = 0; i < nRun; i++) {
-			nextStar.reset();
-			DataFlowStar* s;
-			while ((s = nextStar++) != 0)
-				s->simRunStar(FORCE);
+void SDFClusterBag::simRunRealStars() {
+	if (!sched) genSched();
+	SDFSchedIter nextStar(*sched);
+	int nRun = loop();
+	for (int i = 0; i < nRun; i++) {
+		nextStar.reset();
+		SDFCluster* c;
+		while ((c = (SDFCluster*)nextStar++) != 0) {
+			c->simRunRealStars();
 		}
 	}
-	return status;
 }
 
 int SDFClusterBag::genSched() {
@@ -982,17 +966,27 @@ int SDFAtomCluster::run() {
 
 // simulate the execution of the atomic cluster, for schedule generation.
 // We pass through the call of simRunStar to the real star.
-int SDFAtomCluster::simRunStar(int deferFiring) {
-	// handle FORCE input
-	if (deferFiring == FORCE) {
-		noTimes = 0;
-		deferFiring = FALSE;
+
+// Actually, rather than doing simRunStar we just do the incCounts and
+// decCounts on the portholes.  This should be done by providing a
+// faster DataFlowStar method that assumes we are ready to run and does
+// the same.
+
+void SDFAtomCluster::simRunRealStars() {
+	int nRun = loop();
+	DFStarPortIter nextp(pStar);
+	for (int i = 0; i < nRun; i++) {
+		nextp.reset();
+		DFPortHole* port;
+		while ((port = nextp++) != 0) {
+			// on wormhole bound, skip
+			if (port->atBoundary()) continue;
+			if (port->isItInput())
+				port->decCount(port->numXfer());
+			else
+				port->incCount(port->numXfer());
+		}
 	}
-	int status = DataFlowStar::simRunStar(deferFiring);
-	if (status == 0)
-		for (int i = 0; i < loop(); i++)
-			pStar.simRunStar(FALSE);
-	return status;
 }
 
 int SDFAtomCluster::myExecTime() {
@@ -1071,6 +1065,10 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 // generate schedule
 	if (SDFScheduler::computeSchedule(*cgal)) {
 		if (logstrm) {
+			*logstrm << "Doing simulated run to set geodesics\n";
+			simRunRealStars();
+		}
+		if (logstrm) {
 			*logstrm << "Schedule:\n" << displaySchedule();
 			LOG_DEL; delete logstrm;
 		}
@@ -1079,15 +1077,14 @@ int SDFClustSched::computeSchedule (Galaxy& g) {
 	else return FALSE;
 }
 
-// display the top-level schedule.
-StringList SDFClustSched::displaySchedule() {
-	StringList sch;
+// simulate execution of the real stars, so geodesics will be set
+// properly for code-generation.
+void SDFBagScheduler::simRunRealStars() {
 	SDFSchedIter next(mySchedule);
 	SDFCluster* c;
 	while ((c = (SDFCluster*)next++) != 0) {
-		sch += c->displaySchedule(0);
+		c->simRunRealStars();
 	}
-	return sch;
 }
 
 StringList SDFBagScheduler::displaySchedule(int depth) {
