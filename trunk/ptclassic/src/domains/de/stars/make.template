@@ -22,7 +22,7 @@ GNUINCLUDE = /usr/gnu/lib/g++-include
 
 .SUFFIXES: .o .cc .h .pl
 .cc.o:
-	$(GNU) $(GPPFLAGS) -I$(DEDIR) -I$(KERNDIR) -c  $<
+	$(GNU) $(GPPFLAGS) -I$(DEDIR) -I$(KERNDIR) -I$(VPATH) -c  $<
 
 .pl.cc:
 	cd $(VPATH); ptlang $<
