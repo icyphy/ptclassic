@@ -36,6 +36,10 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "Star.h"
 
+// The following include is not really required for this file,
+// but any star for this domain will need it, so we include it here.
+#include "XXXPortHole.h"
+
 class XXXStar : public Star
 {
 public:
