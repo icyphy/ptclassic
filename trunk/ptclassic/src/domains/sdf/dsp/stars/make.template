@@ -31,25 +31,25 @@ PL_SRCS= \
  SDFBlockLattice.pl \
  SDFBlockRLattice.pl \
  SDFBurg.pl \
- SDFFFTCx.pl \
- SDFFIRCx.pl \
- SDFMuLaw.pl \
  SDFConvolve.pl \
- SDFLMSCx.pl \
- SDFLMSPlotCx.pl \
- SDFRaisedCosCx.pl \
  SDFDTFT.pl \
+ SDFFFTCx.pl \
  SDFFIR.pl \
+ SDFFIRCx.pl \
  SDFHilbert.pl \
  SDFIIR.pl \
  SDFLMS.pl \
+ SDFLMSCx.pl \
  SDFLMSLeak.pl \
  SDFLMSPlot.pl \
+ SDFLMSPlotCx.pl \
  SDFLattice.pl \
  SDFLevDur.pl \
+ SDFMuLaw.pl \
  SDFPattMatch.pl \
  SDFRLattice.pl \
  SDFRaisedCos.pl \
+ SDFRaisedCosCx.pl \
  SDFUnwrap.pl \
  SDFWindow.pl
 
@@ -62,17 +62,14 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-all:		$(SRCS) makefile $(LIB)
-
-# install library for use by code generation domains
-install:	all $(LIBDIR)/$(LIB)
-		@echo Installation complete.
-
 STAR_MK=sdfdspstars
 DOMAIN=SDF_DSP
 DOMAIN_2=SDF
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
 
-EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
+all:		$(SRCS) stars_all
+
+install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/common.mk

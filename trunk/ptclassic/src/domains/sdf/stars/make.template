@@ -17,14 +17,14 @@ include $(CONFIG)
 
 # SDFDIR is the directory containing SDF domain support
 SDFDIR = $(ROOT)/src/domains/sdf/kernel
-IMAGE = $(ROOT)/src/domains/sdf/image/kernel
-INCL = -I$(SDFDIR) -I$(KERNDIR) -I$(IMAGE)
+INCL = -I$(SDFDIR) -I$(KERNDIR)
 
 # Library name
 LIB=libsdfstars.a
 
 # source files for all stars, using preprocessor
 PL_SRCS= \
+ SDFAdd.pl \
  SDFAddCx.pl \
  SDFAverage.pl \
  SDFAverageCx.pl \
@@ -34,48 +34,43 @@ PL_SRCS= \
  SDFCommutator.pl \
  SDFConst.pl \
  SDFConstCx.pl \
- SDFCxToRect.pl \
  SDFCos.pl \
  SDFCut.pl \
  SDFCutVarOffset.pl \
+ SDFCxToRect.pl \
  SDFDB.pl \
  SDFDeMux.pl \
  SDFDistributor.pl \
  SDFDownSample.pl \
  SDFExp.pl \
- SDFGain.pl \
- SDFGainCx.pl \
- SDFImpulse.pl \
- SDFMakeSeqATMCell.pl \
- SDFMpy.pl \
- SDFPad.pl \
- SDFRamp.pl \
- SDFRect.pl \
- SDFAdd.pl \
- SDFTable.pl \
- SDFThresh.pl \
  SDFFloor.pl \
  SDFFork.pl \
+ SDFGain.pl \
+ SDFGainCx.pl \
  SDFIIDGaussian.pl \
  SDFIIDUniform.pl \
- SDFRampInt.pl \
- SDFTableInt.pl \
+ SDFImpulse.pl \
  SDFIntToBits.pl \
  SDFIntegrator.pl \
  SDFLimit.pl \
+ SDFLinQuantIdx.pl \
  SDFLog.pl \
+ SDFMpy.pl \
  SDFMpyCx.pl \
  SDFMux.pl \
- SDFLinQuantIdx.pl \
  SDFNumToBus.pl \
+ SDFPad.pl \
  SDFPlay.pl \
  SDFPolarToRect.pl \
  SDFPrinter.pl \
  SDFQuant.pl \
+ SDFRamp.pl \
+ SDFRampInt.pl \
  SDFReadFile.pl \
  SDFReadPCM.pl \
- SDFRectToCx.pl \
  SDFReciprocal.pl \
+ SDFRect.pl \
+ SDFRectToCx.pl \
  SDFRectToPolar.pl \
  SDFRepeat.pl \
  SDFReverse.pl \
@@ -84,7 +79,10 @@ PL_SRCS= \
  SDFSqrt.pl \
  SDFSub.pl \
  SDFSubCx.pl \
+ SDFTable.pl \
  SDFTableCx.pl \
+ SDFTableInt.pl \
+ SDFThresh.pl \
  SDFTrainer.pl \
  SDFUpSample.pl \
  SDFWaterfall.pl \
@@ -105,16 +103,13 @@ OBJS= $(SRCS:.cc=.o)
 # header files for all stars
 HDRS= $(SRCS:.cc=.h)
 
-all:		$(SRCS) makefile $(LIB)
-
-# install library for use by code generation domains
-install:	all $(LIBDIR)/$(LIB)
-		@echo Installation complete.
-
 STAR_MK=sdfstars
 DOMAIN=SDF
+EXTRA_SRCS=$(STAR_MK).mk $(STAR_MK).c $(PL_SRCS)
 
-EXTRA_SRCS=$(STAR_MK).mk $(PL_SRCS)
+all:		makefile stars_all
+
+install:	stars_install
 
 # include common definitions, rules
 include $(ROOT)/common.mk
