@@ -34,7 +34,7 @@
 catch {delete class ::ptolemy::Universe}
 
 # Create the namespace if it doesn't exist
-namespace ::ptolemy {}
+namespaceEval ::ptolemy {}
 
 #######################################################################
 #### Universe
