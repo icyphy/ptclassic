@@ -37,29 +37,6 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 #include "CGCWormhole.h"
 #include "SDFScheduler.h"
-#include "StringList.h"
-#include "Error.h"
-
-/*******************************************************************
-
-	class CGCWormhole methods
-
-********************************************************************/
-
-CGWormBase* CGCWormhole :: myWormhole() { return this; }
-
-// Constructor
-CGCWormhole :: CGCWormhole(Galaxy& g, Target* t) : CGWormBase(*this,g,t)
-	{ buildEventHorizons(); }
-
-CGCWormhole :: ~CGCWormhole() {
-	freeContents();
-}
-
-// cloner -- clone the inside and make a new wormhole from that.
-Block* CGCWormhole :: clone() const {
-	LOG_NEW; return new CGCWormhole(gal.clone()->asGalaxy(), myTarget()->cloneTarget());
-}
 
 /**************************************************************************
 
