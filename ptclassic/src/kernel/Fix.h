@@ -91,10 +91,10 @@ typedef unsigned int uint32;
 typedef int int32;
 #else
 typedef unsigned long  uint32;
+typedef long int32;
 #endif // PTALPHA
 
 typedef unsigned char  uchar;
-typedef long int32;
 
 const int WORDS_PER_FIX = 4;
 const int FIX_BITS_PER_WORD = 16;
