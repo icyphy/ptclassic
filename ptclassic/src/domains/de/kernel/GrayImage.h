@@ -27,7 +27,7 @@ public:
 	GrayImage(const GrayImage&, int = 0);	// get params, maybe copy data
 	virtual ~GrayImage();
 
-	virtual BaseImage*	fragment(int, int);
+	virtual BaseImage*	fragment(int, int) const;
 	virtual void		assemble(const BaseImage*);
 	// retData gives a pointer you can write with
 	unsigned char*		retData();

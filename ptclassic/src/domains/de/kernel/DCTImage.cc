@@ -69,7 +69,7 @@ float* DCTImage::retData()
 } // end DCTImage::retData()
 
 
-BaseImage* DCTImage::fragment(int cellSz, int Num)
+BaseImage* DCTImage::fragment(int cellSz, int Num) const
 {
 	int arrSz = cellSz/4; // 4 == sizeof(float)
 
