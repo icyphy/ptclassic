@@ -1,8 +1,5 @@
 static const char file_id[] = "CGCostTarget.cc";
 /**********************************************************************
-Version identification:
-$Id$
-
 Copyright (c) %Q% The Regents of the University of California.
 All rights reserved.
 
@@ -28,10 +25,15 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						PT_COPYRIGHT_VERSION_2
 						COPYRIGHTENDKEY
 
- Programmer:  Raza Ahmed and Brian L. Evans
- Date of creation: 07/09/96
+Programmer:  Raza Ahmed and Brian L. Evans
+Created:     07/09/96
+Version:     $Id$
 
- Target for the generation of cost of individual stars in the galaxy.
+Target to generate the cost to implement individual stars in the
+galaxy.  The run method constructs a standalone universe for each
+star in the galaxy, runs the galaxy, and reports cost information.
+For the CG56SimTarget, data memory, program memory, and execution
+time estimates will be reported.
 
 ***********************************************************************/
 
@@ -55,6 +57,7 @@ ENHANCEMENTS, OR MODIFICATIONS.
 
 // Include files from Ptolemy domains
 #include "SDFScheduler.h"
+#include "SDFPTclTarget.h"
 
 #include "CGUtilities.h"
 #include "CGCostTarget.h"
@@ -63,9 +66,18 @@ ENHANCEMENTS, OR MODIFICATIONS.
 CGCostTarget::CGCostTarget(const char* nam, const char* startype,
 			   const char* desc, const char* assocDomain) :
 CGTarget(nam, startype, desc, assocDomain) {
+    addState(userTargetList.setState("targets?", this, "sim-CG56",
+	"List of targets to use to generate implementation cost information"));
     tempBlockList.initialize();
+    ptclTarget = 0;
 }
 
+CGCostTarget::~CGCostTarget() {
+    delete ptclTarget;
+}
+
+// For each target specified by the user, generate the implementation costs
+// for each star in the galaxy.
 int CGCostTarget::run() {
     // Call halt request to process pending events and check for halt
     // If the user hit the dismiss button in the run control panel,
@@ -76,47 +88,116 @@ int CGCostTarget::run() {
 	return FALSE;
     }
 
-    // The following code goes through all the non-atomic blocks in
-    // the galaxy. Any encountered non-atomic blocks are ignored
-    Galaxy* dummyGlobalGalaxy = galaxy();
-    GalAllBlockIter nextBlock(*dummyGlobalGalaxy);
-    const Block* origStarBlock;
-    while((origStarBlock = (Block*)nextBlock++) != 0) { 
-	// If the block is a star, then iterate through the portholes 
-	if (origStarBlock->isItAtomic()) {       
+    // Generate the Ptcl code for the current galaxy
+    convertGalaxyToPtcl(galaxy());
 
-	    // Declaring another dummy galaxy which consists of the stars form 
-	    // the dummyGlobalGalaxy which are then padded up
-	    Galaxy* dummyGalaxy = new Galaxy;
-	    Block* starBlock = origStarBlock->clone();
-	    addTempBlock(starBlock);
-	    dummyGalaxy->addBlock(*starBlock, "starBlock"); 
+    // Each star in the galaxy will be extracted to form a test universe,
+    // which will be used to generate implementation costs for that star
+    initializeStarPorts(*galaxy());
+    disconnectAllStars(*galaxy());
 
-	    // Following code handles any multiports
-	    MultiPortHole* starBlockMport;
-	    BlockMPHIter nextstarBlockMport(*starBlock);
-	    while((starBlockMport = nextstarBlockMport++) != 0) {
-		if (!selectConnectStarBlock(dummyGalaxy, starBlockMport)) {
-		    Error::warn("CGCostTarget cannot create a test universe ",
-				"for the star ", origStarBlock->name());
-		}
+    // Have each target (that the user specified) generate cost information
+    int numUserTargets = userTargetList.size();
+    for (int i = 0; i < numUserTargets; i++) {
+	const char* userTargetName = userTargetList[i];
+	CGTarget* userTarget = findCodeGenTarget(userTargetName);
+	if (!userTarget) {
+	    Error::warn("The target '", userTargetName,
+			 "' is not a valid code generation target");
+	}
+	else if (userTarget->canComputeMemoryUsage() ||
+		 userTarget->canComputeExecutionTime() ) {
+	    costInfoForOneTarget(userTarget);
+	}
+	else {
+	    Error::warn(userTargetName, " is a valid code generation target, ",
+		"but it cannot generate implementation cost information");
+	}
+    }
+
+    return TRUE;
+}
+
+// Initialize the ports in the parent galaxy
+void CGCostTarget::initializeStarPorts(Galaxy& parent) {
+    GalStarIter initparentnextStar(parent);
+    Star* initparentstar;
+    while ((initparentstar = initparentnextStar++) != 0) {
+	BlockPortIter initparentnextPort(*initparentstar);
+	PortHole* initparentport;
+	while((initparentport = initparentnextPort++) != 0){
+	    initparentport->initialize();
+	    initparentport->resolvedType();
+	}
+    }
+}
+
+// Iterate over all the blocks in the galaxy to disconnect the ports of the
+// stars if the connections exist. Otherwise just connect the appropriate
+// stars with the stars in the child galaxy and make child galaxies
+void CGCostTarget::disconnectAllStars(Galaxy& parent) {
+    GalStarIter parentnextStar(parent);
+    Star* parentstar;
+    while ((parentstar = parentnextStar++) != 0) {
+	BlockPortIter parentnextPort(*parentstar);
+	PortHole* parentport;
+	while((parentport = parentnextPort++) != 0) {
+	    PortHole* parentfarPort = parentport->far();
+	    // Disconnect connected ports
+	    if (parentfarPort) {
+		parentport->disconnect();
 	    }
+	}
+    }
+}
 
-	    // Following code handles single ports
-	    PortHole* starBlockport;
-	    BlockPortIter nextstarBlockport(*starBlock);
-	    while((starBlockport = nextstarBlockport++) != 0) {
-		if (!selectConnectStarBlock(dummyGalaxy,
-					    (MultiPortHole*)starBlockport)) {
-		    Error::warn("CGCostTarget cannot create a test universe ",
-				"for the star ", origStarBlock->name());
-		}
+// Generate implementation cost information for each star in the galaxy
+// Iterate over all blocks in the galaxy and ignore non-atomic blocks
+// FIXME: Should write the cost information to a file
+int CGCostTarget::costInfoForOneTarget(CGTarget* userTarget) {
+    // For each star in the original galaxy, create a child galaxy which
+    // consists of the star plus dummy inputs and outputs.  The child
+    // is run to generate implementation cost information
+    GalStarIter nextStar(*galaxy());
+    Star* star;
+    while ((star = nextStar++) != 0) { 
+	// Create a child galaxy
+	Galaxy* childGalaxy = new Galaxy;
+	childGalaxy->setName("Child");
+	int errorFlag = FALSE;
+
+	// Make a copy of the current star
+	Block* localChildBlock = star->clone();
+	addTempBlock(localChildBlock);
+	Star& localChildStar = localChildBlock->asStar();
+	childGalaxy->addBlock(localChildStar, star->name()); 
+
+        // Connect a dummy star to each input and output port of the star
+	BlockPortIter nextPort(localChildStar);
+	PortHole* port;
+	while ((port = nextPort++) != 0) {
+	    if (!selectConnectStarBlock(childGalaxy, port)) {
+		Error::warn("CGCostTarget cannot build a standalone ",
+			    "universe for the star ", star->name());
+		errorFlag = TRUE;
+		continue;
 	    }
+	}
 
-	    printGalaxy(dummyGalaxy);
-	    delete dummyGalaxy;
-	    deleteTempBlocks();
-	 }
+	// Initialize and run the galaxy, and report implementation costs
+	if (!errorFlag) {
+	    initializeStarPorts(*childGalaxy);
+	    userTarget->setGalaxy(*childGalaxy);
+	    userTarget->initialize();
+	    userTarget->begin();
+	    userTarget->run();
+	    userTarget->wrapup();
+	    reportCosts(userTarget);
+	    userTarget->clearGalaxy();
+	}
+
+	delete childGalaxy;
+	deleteTempBlocks();
     }
     return TRUE;
 }
@@ -124,48 +205,70 @@ int CGCostTarget::run() {
 // Find the right source or sink star to match the block port.
 // The matched star will be then added to the passed in galaxy
 // Then the two ports will be connected within the galaxy
-int CGCostTarget::selectConnectStarBlock(Galaxy* localGalaxy,
-		MultiPortHole* localHole) {
+int CGCostTarget::selectConnectStarBlock(
+		Galaxy* localGalaxy, PortHole* localHole) {
     // The matched star will be then added to the passed in galaxy 
     // Then the two ports will be connected within the galaxy
     if (localHole->isItInput()) {
-	StringList starName = "CGDummySrc";
+	// Find the star CGDummySrcXX where XX is the data type abbrevation
 	const char* abbreviation = dataTypeAbbreviation(localHole->type());
 	if (abbreviation == 0) return FALSE;
+	StringList starName = "DummySrc";
 	starName << abbreviation;
 	const Block* sourceStarPtr = KnownBlock::find(starName, "CG");
 	if (sourceStarPtr == 0) return FALSE;
+
+	// Add dummy source star to galaxy and connect it to porthole localHole
 	Block* starPointer = sourceStarPtr->clone();
 	addTempBlock(starPointer);
 	localGalaxy->addBlock(*starPointer, starName);
-	localHole->connect(*starPointer->portWithName("input"), 0, 0);
+	localHole->connect(*starPointer->portWithName("input"), 0, "");
     } 
     else {
-	const Block* sinkStarPtr = KnownBlock::find("CGBlackHole", "CG");
+	// Find the CGBlackHole star
+	const char* starName = "BlackHole";
+	const Block* sinkStarPtr = KnownBlock::find(starName, "CG");
 	if (sinkStarPtr == 0) return FALSE;
+
+	// Add black hole to galaxy and connect it to porthole localHole
 	Block* starPointer = sinkStarPtr->clone();
 	addTempBlock(starPointer);
-	localGalaxy->addBlock(*starPointer, "CGBlackHole");
-	localHole->connect(*starPointer->portWithName("output"), 0); 
+	localGalaxy->addBlock(*starPointer, starName);
+	localHole->connect(*starPointer->portWithName("output"), 0, ""); 
     }
     return TRUE;
 }  
 
-void CGCostTarget::printGalaxy(Galaxy* localGalaxy) {
+// Find the code generation target corresponding to a target name
+CGTarget* findCodeGenTarget(const char* userTargetName) {
+    // Check to make sure that the target exists and is a CG target
+    const Target* userTarget = KnownTarget::find(userTargetName);
+    if (userTarget && userTarget->isA("CGTarget")) {
+	return (CGTarget*) userTarget;
+    }
+    return (CGTarget*) 0;
+}
+
+// Write out the equivalent Ptcl code for the galaxy
+int CGCostTarget::convertGalaxyToPtcl(Galaxy* localGalaxy) {
+    if (ptclTarget == 0) {
+	ptclTarget = new SDFPTclTarget("SDFPTclTarget", "PTcl code generator");
+    }
+    ptclTarget->setGalaxy(*localGalaxy);
+    ptclTarget->initialize();
+    ptclTarget->begin();
+    ptclTarget->run();
+    ptclTarget->wrapup();
+    return TRUE;
+}
+
+// Reports the implementation costs of the galaxy
+// FIXME: The implemenation costs should be written to a file
+void CGCostTarget::reportCosts(CGTarget* userTarget) {
     // The following function will print the information about the
     // stars found in the galaxy
-    StringList ptclCode;
-    ptclCode << "reset\nnewuniverse " << localGalaxy->name();
-    GalStarIter nextStar(*localGalaxy);
-    Star* star;
-    while ((star = nextStar++) != 0) {
-	StringList starName;
-	starName << "\"" <<star->fullName() << "\" ";
-	StringList setState;
-	setState << "\tsetState" << starName;
-	ptclCode << "\n\tstar" << starName << "CGCMultiInOut\n"
-		 << setState << "name " << star->className() << "\n";
-    }
+    userTarget->computeImplementationCost();
+    cout << userTarget->describeImplementationCost() << "\n";
 }
 
 void CGCostTarget::wrapup() {

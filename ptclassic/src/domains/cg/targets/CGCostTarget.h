@@ -1,7 +1,4 @@
 /**********************************************************************
-Version identification:
- $Id$
-
 Copyright (c) %Q% The Regents of the University of California.
 All rights reserved.
 
@@ -28,9 +25,8 @@ ENHANCEMENTS, OR MODIFICATIONS.
 						COPYRIGHTENDKEY
 
  Programmer:  Raza Ahmed and Brian L. Evans
- Date of creation: 07/09/96
-
- Target for the generation of cost of individual stars in a galaxy.
+ Created:     07/09/96
+ Version:     $Id$
 
 ***********************************************************************/
 #ifndef _CGCostTarget_h
@@ -41,19 +37,23 @@ ENHANCEMENTS, OR MODIFICATIONS.
 #endif
 
 #include "StringList.h"
-#include "StringState.h"
-#include "IntState.h"
+#include "StringArrayState.h"
 
 #include "Block.h"
 #include "Galaxy.h"
 
 #include "CGTarget.h"
 
+class SDFPtclTarget;
+
 class CGCostTarget : public CGTarget {
 public:
 	// constructor
 	CGCostTarget(const char* nam, const char* startype, const char* desc,
 		     const char* assocDomain = CGdomainName);
+
+	// destructor
+	~CGCostTarget();
 
 	// Return a copy of itself
 	/*virtual*/ Block* makeNew() const;
@@ -63,13 +63,30 @@ public:
 
 	/*virtual*/ int isA(const char* cname) const;
 
-protected:
-	// Find the right source or sink star to match the block port
-	int selectConnectStarBlock(Galaxy* localGalaxy,
-		MultiPortHole* localHole);
+	// List of targets to use to generate implementation cost information
+	StringArrayState userTargetList;
 
-	// Print the information about the stars found in the galaxy
-	void printGalaxy(Galaxy* localGalaxy);
+protected:
+	// Initialize the input/output portholes of the stars in the galaxy
+	void initializeStarPorts(Galaxy& parent);
+
+	// Disconnect all stars
+	void disconnectAllStars(Galaxy& parent);
+
+	// Generate implementation costs for all stars for one target
+	int costInfoForOneTarget(CGTarget* userTarget);
+
+	// Find the right source or sink star to match the block port
+	int selectConnectStarBlock(Galaxy* localGalaxy, PortHole* localHole);
+
+	// Find the code generation target corresponding to a name
+	CGTarget* findCodeGenTarget(const char* userTargetName);
+
+	// Generate the Tcl code
+	int convertGalaxyToPtcl(Galaxy* localGalaxy);
+
+	// Report the cost estimates for the stars found in the galaxy
+	void reportCosts(CGTarget* userTarget);
 
 	// Add a newly created block
 	inline void addTempBlock(Block* block) { tempBlockList.put(block); };
@@ -83,6 +100,9 @@ private:
 
 	// List of dynamically allocated blocks
 	SequentialList tempBlockList;
+
+	// Instance of the target to generate ptcl code
+	SDFPTclTarget* ptclTarget;
 };
 
 #endif
