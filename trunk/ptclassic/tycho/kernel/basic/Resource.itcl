@@ -67,53 +67,53 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # which provides syntactic manipulation of URL-style names.) The options
 # are:
 # <dl>
-# <dt><b>cachefile</d> _path_
+# <dt><b>cachefile</b> _path_
 # <dd> Return the name of a cached copy of the file. This is provided
 # solely for the purpose of working around Tk's lack of support
 # for binary data, and should not be used unless absolutely necessary.
 # <i>Do not delete or write to the cache file.</i> An error will be
 # triggered if this is not a streamable resource.
-# <dt><b>contenttype</d> 
+# <dt><b>contenttype</b> 
 # <dd> Return the type of the content (binary, text/*, etc...)
-# <dt><b>chmod</d> _path_ _mode_
+# <dt><b>chmod</b> _path_ _mode_
 # <dd> Change access permissions of a resource. The exact values of
 # _mode_ has not yet been determined but is probably a subset of the
 # first argument to the UNIX *chmod* command.
-# <dt><b>delete</d> _path_
+# <dt><b>delete</b> _path_
 # <dd> Delete the given file. Will trigger an error if the file
 # does not exist or is not writable.
-# <dt><b>dirlist</d> _path_
+# <dt><b>dirlist</b> _path_
 # <dd> Get a listing of a directory. Sub-directories have names
 # ending in a slash; files do not.
-# <dt><b>executable</d> _path_
+# <dt><b>executable</b> _path_
 # <dd> Test if a resource is executable. <b>FIXME</b>: what does this
 # mean for directories -- should be adopt the bogus UNIX convention?
-# <dt><b>exists</d> _path_ ?_timeout_?
+# <dt><b>exists</b> _path_ ?_timeout_?
 # <dd> Test if a resource exists. If the _timeout_ argument is given
 # and the resource is remote, this procedure will return zero when that
 # time expires.
-# <dt><b>isdirectory</d> _path_
+# <dt><b>isdirectory</b> _path_
 # <dd> Test if a resource exists and is a directory.
-# <dt><b>isfile</d> _path_
+# <dt><b>isfile</b> _path_
 # <dd> Test if a resource exists and is a file.
-# <dt><b>isremote</d> _path_
+# <dt><b>isremote</b> _path_
 # <dd> Test if a resource is remote. (It may not exist.)
-# <dt><b>mkdir</d> _path_
+# <dt><b>mkdir</b> _path_
 # <dd> Create a new directory at the given path.
-# <dt><b>mtime</d> _path_
+# <dt><b>mtime</b> _path_
 # <dd> Get the last-modified time of the resource (what format?)
-# <dt><b>new</d> _path_ ?_option value_ ...?
+# <dt><b>new</b> _path_ ?_option value_ ...?
 # <dd> Create a new resource object, passing any options to its constructor.
 # The connect{} method will be called on the new object.
-# <dt><b>read</d> _path_ ?_timeout_?
+# <dt><b>read</b> _path_ ?_timeout_?
 # <dd> Return the contents of a resource. An error is signaled if the
 # resource is not streamable. An error is also signaled if the resource
 # is remote and access times out on the optional _timeout_ argument.
-# <dt><b>readable</d> _path_
+# <dt><b>readable</b> _path_
 # <dd> Test if a resource exists and is readable.
-# <dt><b>size</d> _path_
+# <dt><b>size</b> _path_
 # <dd> Get the size in bytes of a resource.
-# <dt><b>source</d> _path_ ?_timeout_?
+# <dt><b>source</b> _path_ ?_timeout_?
 # <dd> Source the contents of a resource as a Tcl script. An error is
 # signaled if the
 # resource is not streamable. An error is also signaled if the resource
@@ -121,9 +121,9 @@ proc ::tycho::resourceClass {path {procname {}} args} {
 # <dd> Get the status of a resource into the array _varName_. The
 # indexes of the array may vary, but <code>mtime</code> and <code>size</code>
 # are guaranteed.
-# <dt><b>writable</d> _path_
+# <dt><b>writable</b> _path_
 # <dd> Test if a resource exists and is writable.
-# <dt><b>write</d> _path_ _data_ ?_timeout_?
+# <dt><b>write</b> _path_ _data_ ?_timeout_?
 # <dd> Write data to a resource. An error is signaled if the
 # resource is not streamable. An error is also signaled if the resource
 # is remote and access times out on the optional _timeout_ argument.
@@ -317,7 +317,7 @@ ensemble ::tycho::resource {
 # $obj close
 # </tcl></pre>
 # <br><br>
-# <b>Tutorial on reading local objects
+# <b>Tutorial on reading local objects</b>
 # <tcl><pre>set obj [::tycho::resource new $filename]
 # $obj open "r"
 # set ret {}
